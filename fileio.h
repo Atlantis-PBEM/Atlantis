@@ -27,8 +27,16 @@
 
 #include "astring.h"
 
+#ifndef __BORLANDC__
+#include <iostream.h>
+#include <fstream.h>
 class ifstream;
 class ofstream;
+#else
+#include <fstream>
+#include <iostream>
+using namespace std;
+#endif
 
 class Ainfile {
 public:

@@ -234,7 +234,7 @@ AString *ShowSkill::Report(void)
 					*str += " Production can be increased by using picks.";
 				}
 			} else if(level == 3) {
-				if(!(ItemDefs[I_STONE].flags & ItemType::DISABLED)) {
+				if(!(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED)) {
 					found = 1;
 					*str += "A unit with this skill may use the PRODUCE "
 						   "order to produce rootstone, a rare stone found "
@@ -271,7 +271,7 @@ AString *ShowSkill::Report(void)
 					   "to produce furs in designated regions. Furs may be "
 					   "produced in many types of regions, generally in "
 					   "small quantities.";
-				if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
+				if(!(ItemDefs[I_SPEAR].flags & ItemType::DISABLED)) {
 					*str += " Production can be increased by using spears.";
 				}
 			} else if(level == 3) {
