@@ -375,23 +375,25 @@ void Battle::AddLine(const AString & s) {
   text.Add(temp);
 }
 
-void Game::GetDFacs(ARegion * r,Unit * t,AList & facs) {
-  forlist((&r->objects)) {
-    Object * obj = (Object *) elem;
-    forlist((&obj->units)) {
-      Unit * u = (Unit *) elem;
-      if (u->IsAlive()) {
-	if (u->faction == t->faction ||
-	    (u->guard != GUARD_AVOID && u->GetAttitude(r,t) == A_ALLY)) {
-	  if (!GetFaction2(&facs,u->faction->num)) {
-	    FactionPtr * p = new FactionPtr;
-	    p->ptr = u->faction;
-	    facs.Add(p);
-	  }
+void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
+{
+	forlist((&r->objects)) {
+		Object * obj = (Object *) elem;
+		forlist((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			if (u->IsAlive()) {
+				if (u->faction == t->faction ||
+					(u->guard != GUARD_AVOID &&
+					 u->GetAttitude(r,t) == A_ALLY)) {
+					if (!GetFaction2(&facs,u->faction->num)) {
+						FactionPtr * p = new FactionPtr;
+						p->ptr = u->faction;
+						facs.Add(p);
+					}
+				}
+			}
+		}
 	}
-      }
-    }
-  }
 }
 
 void Game::GetAFacs(ARegion * r,Unit * att,Unit * tar,
@@ -633,6 +635,10 @@ void Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
     FactionPtr * p;
 
     if (ass) {
+		if(attacker->GetAttitude(r,target) == A_ALLY) {
+            attacker->Error("ASSASSINATE: Can't assassinate an ally.");
+            return;
+		}
         /* Assassination attempt */
         p = new FactionPtr;
         p->ptr = attacker->faction;
@@ -651,6 +657,10 @@ void Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
             attacker->Error("ATTACK: No battles allowed in safe regions.");
             return;
         }
+		if(attacker->GetAttitude(r,target) == A_ALLY) {
+            attacker->Error("ATTACK: Can't attack an ally.");
+            return;
+		}
         GetDFacs(r,target,dfacs);
         if (GetFaction2(&dfacs,attacker->faction->num)) {
             attacker->Error("ATTACK: Can't attack an ally.");

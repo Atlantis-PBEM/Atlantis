@@ -131,6 +131,9 @@ Changes from 4.0.6 -> 4.0.7
       New players will be started in a random nexus hex.   This does hinder
       alliances somewhat as may be harder for them to get to the same place
       in order to move to the same starting city.
+   -- Fixed bug in combat where if all of the attackers unit in a hex were
+      set avoid, the attacker could (in contradiction to the rules) issue
+      an attack against an ally.
 
 TODO
 ----------------
@@ -152,3 +155,5 @@ TODO
    -- Find some way to allow multiple factions starting a build on the same
       turn to help.
    -- Consider some sorts of dangers for production
+   -- Consider having artifact spells require physical components rather than
+      merely money.
