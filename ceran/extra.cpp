@@ -223,5 +223,9 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainRaces(R_FOREST,I_WOODELF,I_VIKING,I_HIGHELF,-1,
 			I_SEAELF, I_WOODELF, -1);
 
+	EnableItem(I_RRAT);
+	EnableItem(I_NOOGLE);
+	EnableItem(I_MUTANT);
+
 	return;
 }

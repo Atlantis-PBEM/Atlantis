@@ -174,5 +174,14 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_PRESERVE);
 	EnableObject(O_SACGROVE);
 
+	EnableObject(O_ISLE);
+	EnableObject(O_DERELICT);
+	EnableObject(O_OCAVE);
+	EnableObject(O_WHIRL);
+	EnableItem(I_PIRATES);
+	EnableItem(I_KRAKEN);
+	EnableItem(I_MERFOLK);
+	EnableItem(I_ELEMENTAL);
+
 	return;
 }

@@ -1874,6 +1874,8 @@ Attempt to assassinate the specified unit, or one of the unit's people if the
 unit contains more than one person.  The order may only be issued by a one-man
 unit. <p>
 
+A unit may only attempt to assassinate a unit which is able to be seen.<p>
+
 Example: <p>
 Assassinate unit number 177. <p>
 <pre>
@@ -2231,6 +2233,10 @@ have in that region. <p>
 The first form of the GIVE order gives a quantity of an item to another unit.
 The second form the the GIVE order gives the entire unit to the specified
 unit's faction. <p>
+
+A unit may only give items, including silver, to a unit which it is able to
+see, unless the faction of the target unit has declared you Friendly or
+better. <p>
  
 If the target unit is not a member of your faction, then its faction must have
 declared you Friendly, with a couple of exceptions. First, silver may be given
@@ -2596,6 +2602,8 @@ Get some information about Iron. <p>
 
 Attempt to steal as much as possible of the specified item from the specified
 unit.  The order may only be issued by a one-man unit. <p>
+
+A unit may only attempt to steal from a unit which is able to be seen.<p>
 
 Example: <p>
 Steal silver from unit 123. <p>
