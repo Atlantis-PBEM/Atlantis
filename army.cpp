@@ -936,32 +936,46 @@ int Army::GetTargetNum(int special)
 		if (tars == 0) return -1;
 	}
 
-	/* For certain attacks, we need to do retries */
-	for (int retries = 0; retries < 10; retries++) {
-		int i = getrandom(tars);
-		if (i<canfront) {
-			if (CheckSpecialTarget(special,i)) return i;
-			continue;
+	if (SpecialDefs[special].targflags) {
+		int validtargs = 0;
+		int i, start = -1;
+
+		for (i = 0; i < canfront; i++) {
+			if (CheckSpecialTarget(special, i)) {
+				validtargs++;
+				// slight scan optimisation - skip empty initial sequences
+				if (start == -1)
+					start = i;
+			}
 		}
-		i += canbehind - canfront;
-		if (CheckSpecialTarget(special,i)) return i;
-		continue;
+		for (i = canbehind; i < notfront; i++) {
+			if (CheckSpecialTarget(special, i)) {
+				validtargs++;
+				// slight scan optimisation - skip empty initial sequences
+				if (start == -1)
+					start = i;
+			}
+		}
+		if (validtargs) {
+			int targ = getrandom(validtargs);
+			for (i = start; i < notfront; i++) {
+				if (i == canfront)
+					i = canbehind;
+				if (CheckSpecialTarget(special, i)) {
+					if (!targ--)
+						return i;
+				}
+			}
+		}
+	}
+	else {
+		int i = getrandom(tars);
+		if (i<canfront)
+			return i;
+		return i + canbehind - canfront;
 	}
 
 	return -1;
-}
-
-int Army::GetEffectNum( int effect )
-{
-	int tars = NumAlive();
-	int retries;
-	for( retries = 0; retries < 10; retries++ ) {
-		int i = getrandom( tars );
-		if( soldiers[ i ]->HasEffect( effect )) {
-			return( i );
-		}
-	}
-	return( -1 );
 }
 
 Soldier * Army::GetTarget(int i)
@@ -988,26 +1002,6 @@ int Hits(int a,int d)
 	}
 	if (getrandom(tohit+tomiss) < tohit) return 1;
 	return 0;
-}
-
-int Army::RemoveEffects( int num, int effect )
-{
-	int ret = 0;
-	for( int i = 0; i < num; i++ ) {
-		//
-		// Try to find a target unit.
-		//
-		int tarnum = GetEffectNum( effect );
-		if (tarnum == -1) continue;
-		Soldier *tar = GetTarget( tarnum );
-
-		//
-		// Remove the effect
-		//
-		tar->ClearEffect( effect );
-		ret++;
-	}
-	return( ret );
 }
 
 int Army::DoAnAttack( int special, int numAttacks, int attackType,
