@@ -1030,7 +1030,7 @@ void Game::RemoveEmptyObjects()
 		forlist(&r->objects) {
 			Object * o = (Object *) elem;
 			if (ObjectDefs[o->type].cost &&
-					o->incomplete == ObjectDefs[o->type].cost) {
+					o->incomplete >= ObjectDefs[o->type].cost) {
 				forlist(&o->units) {
 					Unit * u = (Unit *) elem;
 					u->MoveUnit( r->GetDummy() );
