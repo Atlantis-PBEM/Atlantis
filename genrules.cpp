@@ -1278,7 +1278,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(may_sail) {
 		f.PutStr("Sailing is handled differently; Atlantis cycles through "
 				"all of the ships in Atlantis, moving them one at a time. "
-				"When Atlantis sails a ship, it sails it through it's "
+				"When Atlantis sails a ship, it sails it through its "
 				"entire course, either to the end, or until the ship enters "
 				"a hex guarded against some unit on the ship, and then "
 				"moves onto the next ship.");
@@ -1448,7 +1448,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = AString("A unit with a teacher can learn up to twice as fast ") +
 		"as normal. The " + f.Link("#teach", "TEACH") + " order is used to ";
 	temp += "spend the month teaching one or more other units (your own or "
-		"another faction's).  The unit doing the teaching must have a skill "
+		"another factions).  The unit doing the teaching must have a skill "
 		"level greater than the units doing the studying.  (Note: for all "
 		"skill uses, it is skill level, not number of months of training, "
 		"that counts. Thus, a unit with 1 month of training is effectively "
@@ -1896,7 +1896,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"additional structure will be half of the the effect of the previous "
 		"one.  (Note that if you build enough of the same type of structure "
 		"in a region, the new structures may not add _any_ to the production "
-		"'level).";
+		"level).";
 	f.PutStr(temp);
 	f.PutStr("<P></P>");
 	f.PutStr(f.LinkRef("tabletradestructures"));
@@ -2066,7 +2066,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("H3", "Ships:");
 		temp = "Ships are constructed similarly to buildings, except they "
 			"tend to be constructed out of wood, not stone, and their "
-			"construction tends to depend on the Shipbuilding skill, not
+			"construction tends to depend on the Shipbuilding skill, not "
 			"the Building skill. ";
 		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 			temp += "Only faction with at least one faction point spent on "
@@ -2298,7 +2298,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "does not have high enough Observation skill to determine "
 			"its faction,";
 	} else {
-		temp += "it is not revealing its faction,"
+		temp += "it is not revealing its faction,";
 	}
 	temp += "it will treat the unit using the faction's default attitude, "
 		"even if the unit belongs to an Unfriendly or Hostile faction, "
@@ -2329,21 +2329,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#attack", "ATTACK") + " order. A unit that does not "
 		"have Avoid Combat set will automatically attack any Hostile units "
 		"it identifies as such.";
-	if(has_stea || !(SkillDefs[S_RIDING].flags & Skill::DISABLED)) {
+	if(has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
 		temp += " When a unit issues the ";
 		temp += f.Link("#attack", "ATTACK") + " order, or otherwise "
 			"decides to attack another unit, it must first be able to "
 			"attack the unit. ";
-		if(has_stea && !(SkillDefs[S_RIDING].flags & Skill::DISABLED))
-			temp += "There are two conditions for this; the first is that the"
+		if(has_stea && !(SkillDefs[S_RIDING].flags & SkillType::DISABLED))
+			temp += "There are two conditions for this; the first is that the";
 		else
 			temp += "The";
 		if(has_stea) {
 			temp += " attacking unit must be able to see the unit that it "
 				"wishes to attack.  More information is available on this "
-				"in the stealth section of the rules."
+				"in the stealth section of the rules.";
 		}
-		if(!SkillDefs[S_RIDING].flags & Skill::DISABLED) {
+		if(!SkillDefs[S_RIDING].flags & SkillType::DISABLED) {
 			if(has_stea) {
 				f.PutStr(temp);
 				f.PutStr("<P></P>");
