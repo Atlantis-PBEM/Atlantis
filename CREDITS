@@ -13,6 +13,8 @@ Stefan Morrell
     The patch for Apprentices/revamping Lacandon Conquest
 Karl Castle
 	Implementation of alternate army rout methods.
+	Patch for bug with losing items other than prepared items when in game
+	  with USE_PREPARED_COMMAND
 Jon Bagshaw
     Working with Stefan on Lacandon Conquest
 Tom Alsen (aka Tzarg)

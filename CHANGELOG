@@ -530,3 +530,6 @@ Changes from 4.0.9 -> 4.0.10
    -- Added a processed food item (FOOD), cooking skill and Create Food
       spell to go with the possibility of requiring food for upkeep.
       Made food buyable in all town markets.
+   -- Made it so that shield items didn't need to be PREPARED in a game with
+      USE_PREPARE_COMMAND set and verified that non-prepared items got
+	  returned.
