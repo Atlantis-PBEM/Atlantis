@@ -191,10 +191,14 @@ class Unit : public AListElem
 		int Hostile();
 		int Forbids(ARegion *,Unit *);
 		int Weight();
+	        int FlyingCapacity();
+	        int RidingCapacity();
+	        int SwimmingCapacity();
+	        int WalkingCapacity();
 		int CanFly(int);
-		int CanFly();
 		int CanRide(int);
 		int CanWalk(int);
+		int CanFly();
 		int CanSwim();
 		int CanReallySwim();
 		int MoveType();

@@ -51,6 +51,10 @@ Nick Hoggard
 	  well as cyclical orders.
 Peter Rayner
     Patch for 'EVICT' command.
+Vitauts Stochka
+    Various bugfixes from Latvian Atlantis.
+Ales Privetivy
+    Variou bugfixes and the unit weight/capacity info patch
 Jan Rietema
     Patch for improved world generation
 Joseph Traub

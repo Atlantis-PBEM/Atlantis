@@ -442,7 +442,18 @@ void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
 	}
 
 	temp += items.Report(obs,truesight,0);
-	if (obs == 2) {
+
+	if (obs == 2) {		
+		temp += ". Weight: ";
+		temp += AString(items.Weight());
+		temp += ". Capacity: ";
+		temp += AString(FlyingCapacity());
+		temp += "/";
+		temp += AString(RidingCapacity());
+		temp += "/";
+		temp += AString(WalkingCapacity());
+		temp += "/";
+		temp += AString(SwimmingCapacity());
 		temp += ". Skills: ";
 		temp += skills.Report(GetMen());
 	}
@@ -483,6 +494,16 @@ AString Unit::TemplateReport()
 	temp += SpoilsReport();
 
 	temp += items.Report(2,1,0);
+	temp += ". Weight: ";
+	temp += AString(items.Weight()); 
+	temp += ". Capacity: ";
+	temp += AString(FlyingCapacity());
+	temp += "/";
+	temp += AString(RidingCapacity());
+	temp += "/";
+	temp += AString(WalkingCapacity());
+	temp += "/";
+	temp += AString(SwimmingCapacity());
 	temp += ". Skills: ";
 	temp += skills.Report(GetMen());
 
@@ -1205,27 +1226,70 @@ int Unit::Weight()
 	return retval;
 }
 
+int Unit::FlyingCapacity()
+{
+    int cap = 0;
+    forlist(&items) {
+        Item * i = (Item *) elem;
+        cap += ItemDefs[i->type].fly * i->num;
+    }
+   
+    return cap;
+}
+
+int Unit::RidingCapacity()
+{
+    int cap = 0;
+    forlist(&items) {
+        Item * i = (Item *) elem;
+        cap += ItemDefs[i->type].ride * i->num;
+    }
+
+    return cap;
+}
+
+int Unit::SwimmingCapacity()
+{
+    int cap = 0;
+    forlist(&items) {
+        Item * i = (Item *) elem;
+        cap += ItemDefs[i->type].swim * i->num;
+    }
+
+    return cap;
+}
+
+int Unit::WalkingCapacity()
+{
+    int cap = 0;
+    forlist(&items) {
+        Item * i = (Item *) elem;
+        cap += ItemDefs[i->type].walk * i->num;
+        if(ItemDefs[i->type].hitchItem != -1) {
+            int hitch = ItemDefs[i->type].hitchItem;
+            if(!(ItemDefs[hitch].flags & ItemType::DISABLED)) {
+                int hitches = items.GetNum(hitch);
+                int hitched = i->num;
+                if(hitched > hitches ) hitched = hitches;
+                cap += hitched * ItemDefs[i->type].hitchwalk;
+            }
+        }
+    }
+
+    return cap;
+}
+
+
+
 int Unit::CanFly(int weight)
 {
-	int cap = 0;
-	forlist(&items) {
-		Item * i = (Item *) elem;
-		cap += ItemDefs[i->type].fly * i->num;
-	}
-
-	if (cap >= weight) return 1;
+	if (FlyingCapacity() >= weight) return 1;
 	return 0;
 }
 
 int Unit::CanReallySwim()
 {
-	int cap = 0;
-	forlist(&items) {
-		Item * i = (Item *) elem;
-		cap += ItemDefs[i->type].swim * i->num;
-	}
-
-	if (cap >= items.Weight()) return 1;
+	if (SwimmingCapacity() >= items.Weight()) return 1;
 	return 0;
 }
 
@@ -1246,34 +1310,13 @@ int Unit::CanFly()
 
 int Unit::CanRide(int weight)
 {
-	int cap = 0;
-	forlist(&items) {
-		Item * i = (Item *) elem;
-		cap += ItemDefs[i->type].ride * i->num;
-	}
-
-	if (cap >= weight) return 1;
+	if (RidingCapacity() >= weight) return 1;
 	return 0;
 }
 
 int Unit::CanWalk(int weight)
 {
-	int cap = 0;
-	forlist(&items) {
-		Item * i = (Item *) elem;
-		cap += ItemDefs[i->type].walk * i->num;
-		if(ItemDefs[i->type].hitchItem != -1) {
-			int hitch = ItemDefs[i->type].hitchItem;
-			if(!(ItemDefs[hitch].flags & ItemType::DISABLED)) {
-				int hitches = items.GetNum(hitch);
-				int hitched = i->num;
-				if(hitched > hitches ) hitched = hitches;
-				cap += hitched * ItemDefs[i->type].hitchwalk;
-			}
-		}
-	}
-
-	if (cap >= weight) return 1;
+	if (WalkingCapacity() >= weight) return 1;
 	return 0;
 }
 

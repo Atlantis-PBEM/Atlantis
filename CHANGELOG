@@ -538,3 +538,4 @@ Changes from 4.0.9 -> 4.0.10
    -- Fixed bug in magic studying in protected buildings under LIMITED_MAGES
       case as reported by Vitauts Stochka <vit@dau.lv>
    -- Fixed empty object bug reported by Vitauts Stochka <vit@dau.lv>
+   -- Added unit weight/capacity patch from Ales Privetivy <ales@ucw.cz>
