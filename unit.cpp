@@ -1024,16 +1024,29 @@ int Unit::Study(int sk,int days)
 
 int Unit::Practise(int sk)
 {
-	int days, bonus, men, curlev, reqsk, reqlev;
+	int days, bonus, men, curlev, reqsk, reqlev, max;
 	unsigned int i;
 
 	bonus = Globals->SKILL_PRACTISE_AMOUNT;
 	if (practised || (bonus < 1)) return 1;
 	days = skills.GetDays(sk);
 	men = GetMen();
-	if (men < 1 || days < 1 || days >= 450 * men) return 0;
 
+	// Fix the code checking for max level so that we actually compute it
+	// correctly for non-leader units :(
+	if (men < 1 || days < 1) return 0;
+
+	max = 1000;
+	forlist (&items) {
+		Item *i = (Item *)elem;
+		if (ItemDefs[i->type].type & IT_MAN) {
+			int m = SkillMax(sk, i->type);
+			if (m < max) max = m;
+		}
+	}
 	curlev = GetRealSkill(sk);
+	if (curlev >= max) return 0;
+
 	for(i = 0; i < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); i++) {
 		reqsk = SkillDefs[sk].depends[i].skill;
 		if (reqsk == -1) break;

@@ -597,3 +597,7 @@ Changes from 4.0.10d -> 4.0.10e
       disabled and the unit was submitted as part of an orderset but had
       blank orders (only when TAX_PILLAGE_MONTHLONG was set).
 
+Changes from 4.0.10e -> 4.0.10f
+--------------------------------------------------
+   -- Fixed bug in practice code where non-leader units would keep trying
+      to practice and generate errors even after they were at max level.
