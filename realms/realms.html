@@ -127,6 +127,7 @@ for putting together this table of contents. <p>
 <LI><a href="#name">name</a>
 <li><a href="#noaid">noaid</a>
 <li><a href="#nocross">nocross</a>
+<li><a href="#nospoils">nospoils</a>
 <LI><a href="#option">option</a>
 <LI><a href="#password">password</a>
 <LI><a href="#pillage">pillage</a>
@@ -2916,13 +2917,26 @@ unit otherwise could do so.  Units inside of a ship are not affected
 by this flag (IE, they are able to sail within the ship).   This flag
 is useful for games where the rules have been set so that water crossing
 is allowed, or items exist which give a unit swimming capacity, and has
-no effect in the 'standard' ruleset.
+no effect in the 'standard' ruleset.<p>
 
 Example:<p>
 Set a unit to not permit itself to cross water. <p>
 <pre>
   NOCROSS 1
 </pre> <p>
+
+<hr>
+<a name="nospoils"></a>
+<h4> NOSPOILS [flag] </h4>
+NOSPOILS 1 indeicates that a unit should not stop to collect spoils after a 
+battle.  The unit will not be given any spoils which have weight.<p>
+
+Example:<p>
+Set a unit to not recieve battle spoils.<p>
+<pre>
+   NOSPOILS 1
+</pre>
+<p>
 
 <hr>
 <a name="option"> </a>
@@ -3214,6 +3228,7 @@ Each turn, the following sequence of events occurs: <p>
 <a href="#name">NAME</a>,
 <a href="#noaid">NOAID</a>,
 <a href="#nocross">NOCROSS</a>,
+<a href="#nospoils">NOSPOILS</a>,
 <a href="#option">OPTION</a>,
 <a href="#password">PASSWORD</a>,
 <a href="#reveal">REVEAL</a>, and
@@ -3385,7 +3400,7 @@ contained the message:<br>
 
 <a name="resend"> </a>
 <hr>
-<h4>#Resend (faction num) "password"</h4>
+<h4>#Resend [faction] "password"</h4>
 The faction number and your current password (if you have one) are required.
 The most recent turn report (that can be found) will be sent.<br>
 <br>
@@ -3402,7 +3417,7 @@ keyboard and toasted your "original"):<br>
 
 <a name="times"> </a>
 <hr>
-<h4>#Times (faction number) "password"<br>
+<h4>#Times [faction] "password"<br>
 body of times<br>
 #end</h4>
 Everything between the #times and #end lines is included in your article.
@@ -3430,7 +3445,7 @@ Quack!<br>
 
 <a name="rumors"> </a>
 <hr>
-<h4>#Rumor (faction number) "password"</h4>
+<h4>#Rumor [faction] "password"</h4>
 Now, you may be wondering -- won't people know I submitted the item because
 it appears in faction-number order?  Nope -- because it's not done that way.
 The list of rumors is randomized a bit -- so there's no telling who
@@ -3449,7 +3464,7 @@ your faction name or number on it.<br>
 
 <a name="remind"> </a>
 <hr>
-<h4>#Remind (faction number) "password"</h4>
+<h4>#Remind [faction] "password"</h4>
 This special order will have the software find your last set of orders and mail
 them to you.  Note:  don't try to get someone else's orders -- you'll be
 surprised when the person sends you a nasty-gram about the activity.  All
@@ -3464,7 +3479,7 @@ And it would remind you of your last orders you sent in.<br>
 
 <a name="email"> </a>
 <hr>
-<h4>#Email (unit id)<br>
+<h4>#Email [unit]<br>
 [ text of email ]</h4>
 
 A diplomatic email command has been added to the software to help with

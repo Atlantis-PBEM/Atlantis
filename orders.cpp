@@ -59,6 +59,7 @@ char * od[] = {
   "name",
   "noaid",
   "nocross",
+  "nospoils",
   "option",
   "password",
   "pillage",

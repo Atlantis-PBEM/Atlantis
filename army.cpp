@@ -866,48 +866,80 @@ void Army::DoHealLevel( Battle *b, int type, int rate, int useItems )
     }
 }
 
-void Army::Win(Battle * b,ItemList * spoils) {
-  int wintype;
-  if (count - NumAlive()) {
-    wintype = WIN_DEAD;
-  } else {
-    wintype = WIN_NO_DEAD;
-  }
-  
-  DoHeal(b);
-  
-  WriteLosses(b);
-  int na = NumAlive();
-  forlist(spoils) {
-    Item * i = (Item *) elem;
-    int n = i->num / na;
-    if (n>=1) {
-      for(int x=0; x<na; x++) {
-	Unit * u = soldiers[x]->unit;
-	u->items.SetNum(i->type,u->items.GetNum(i->type) + n);
-      }
-    }
-    n = i->num % na;
-    for (int x=0; x<n; x++) {
-      Unit * u = soldiers[getrandom(na)]->unit;
-      u->items.SetNum(i->type,u->items.GetNum(i->type) + 1);
-    }
-  }
-  
-  for(int x=0; x<count; x++) {
-    Soldier * s = soldiers[x];
-    if (x<NumAlive()) {
-      s->Alive(wintype);
-    } else {
-      s->Dead();
-    }
-    delete s;
-  }
+void Army::Win(Battle * b,ItemList * spoils)
+{
+	int wintype;
+	if (count - NumAlive()) {
+		wintype = WIN_DEAD;
+	} else {
+		wintype = WIN_NO_DEAD;
+	}
+
+	DoHeal(b);
+
+	WriteLosses(b);
+	int na = NumAlive();
+	int ns = NumSpoilers();
+	forlist(spoils) {
+		Item * i = (Item *) elem;
+		int weight = ItemDefs[i->type].weight;
+		int t;
+
+		if(weight) {
+			if(ns) t = ns;
+			else t = 0;
+		} else if(!weight) {
+			t = na;
+		}
+
+		if(t) {
+			int n;
+			n = i->num / t;
+			if (n>=1) {
+				for(int x=0; x<na; x++) {
+					Unit * u = soldiers[x]->unit;
+					if(u->flags & FLAG_NOSPOILS) continue;
+					u->items.SetNum(i->type,u->items.GetNum(i->type) + n);
+				}
+			}
+			n = i->num % t;
+			for (int x=0; x<n; x++) {
+				t = getrandom(na);
+				Unit *u;
+				u = soldiers[t]->unit;
+				while (u->flags & FLAG_NOSPOILS) {
+					t = getrandom(na);
+					u = soldiers[t]->unit;
+				}
+				u->items.SetNum(i->type,u->items.GetNum(i->type) + 1);
+			}
+		}
+	}
+
+	for(int x=0; x<count; x++) {
+		Soldier * s = soldiers[x];
+		if (x<NumAlive()) {
+			s->Alive(wintype);
+		} else {
+			s->Dead();
+		}
+		delete s;
+	}
 }
 
 int Army::Broken() {
   if ((NumAlive() * 2 / count) >= 1) return 0;
   return 1;
+}
+
+int Army::NumSpoilers() {
+	int na = NumAlive();
+	int count = 0;
+	for(int x=0; x<na; x++) {
+		Unit * u = soldiers[x]->unit;
+		if(!(u->flags & FLAG_NOSPOILS)) count++;
+	}
+	return count;
 }
 
 int Army::NumAlive() {

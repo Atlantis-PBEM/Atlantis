@@ -86,6 +86,7 @@ enum {
   O_NAME,
   O_NOAID,
   O_NOCROSS,
+  O_NOSPOILS,
   O_OPTION,
   O_PASSWORD,
   O_PILLAGE,

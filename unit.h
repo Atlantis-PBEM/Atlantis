@@ -86,6 +86,7 @@ enum {
 #define FLAG_INVIS 0x20
 #define FLAG_CONSUMING_UNIT 0x40
 #define FLAG_CONSUMING_FACTION 0x80
+#define FLAG_NOSPOILS 0x100
 
 class UnitId : public AListElem {
 public:

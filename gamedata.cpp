@@ -415,7 +415,7 @@ ItemType id[] =
      60,1,-1,0,0,0,0,I_SPINNING,2},
     {"bag","bags","BAG",ItemType::DISABLED,
      S_HERBLORE,1,I_HERBS,1,1,IT_NORMAL,
-     60,1,-1,0,0,0,0,-1,2},
+     60,1,-1,0,0,0,0,I_SPINNING,2},
     {"spinning wheel","spinning wheels","SPIN",ItemType::DISABLED,
      S_CARPENTER,1,I_WOOD,1,1,IT_NORMAL,
      60,1,-1,0,0,0,0,I_AXE,1},

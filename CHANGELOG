@@ -61,3 +61,18 @@ Changes from 4.0.5 -> 4.0.6
       not build unlimited markets in the starting city, but will build regular
       markets instead (it has no effect on starting city markets after world
       generation).
+   -- Fixed bug in production of BAGS that was giving all bag producers a +2
+      skill level bonus.
+   -- Spinning wheels now correctly help bag production.
+   -- Implement NOSPOILS flag
+
+TODO
+----------------
+   -- GIVE ALL [ITEM]
+   -- GIVE ALL TRADE (to give away all trade goods) (other categories for
+      other obvious flags)
+   -- Improve the item/hex editor
+   -- Gamedef to handle various options around combat/weapons/bows for taxing
+   -- Gamedefs for various economy options. (far future)
+   -- multiple inputs for constructing an item.
+   -- Gamedef for alternate nexus layouts

@@ -285,12 +285,12 @@ AString *ShowSkill::Report(void)
 				if(ItemDefs[I_FISH].flags & ItemType::DISABLED) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
-					   "to produce fish in designated regions. Fish are "
-					   "only available in ocean regions.";
+					    "to produce fish in designated regions. Fish are "
+					    "only available in ocean regions.";
 				if(!(ItemDefs[I_NET].flags & ItemType::DISABLED)) {
 					*str += " A unit with this skill may also PRODUCE nets "
-						   "from herbs. Production can be increased by using "
-						   "nets.";
+						    "from herbs. Production can be increased by using "
+						    "spinning wheels.";
 				}
 			}
 			break;
@@ -299,19 +299,35 @@ AString *ShowSkill::Report(void)
 				if(ItemDefs[I_HERBS].flags & ItemType::DISABLED) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
-					   "to produce herbs in designated regions.  Herbs "
-					   "are found in many types of regions, but most "
-					   "frequently in jungles.";
+					    "to produce herbs in designated regions.  Herbs "
+					    "are found in many types of regions, but most "
+					    "frequently in jungles.";
 				if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED)) {
 					*str += " Herbs may be used by units with the healing "
-						   "skill to heal units killed in battle.";
+						    "skill to heal units killed in battle.";
 				}
 				if(!(ItemDefs[I_LASSO].flags & ItemType::DISABLED)) {
-					*str += " A unit with this skill may also PRODUCE lassos.";
+					*str += " A unit with this skill may also PRODUCE lassos. "
+						    "Production of lassos may be increased by using "
+							"spinning wheels";
 				}
 				if(!(ItemDefs[I_BAG].flags & ItemType::DISABLED)) {
 					*str += " A unit with this skill may also PRODUCE bags. "
-						   "Production can be increased by using bags.";
+						    "Production of bags can be increased by using "
+							"spinning wheels.";
+				}
+			} else if(level == 3) {
+				if(ItemDefs[I_MUSHROOM].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may use the PRODUCE order "
+					    "to produce mushrooms in designated areas.  Mushrooms "
+						"are found in the underworld.  (Note that an "
+						"Herblore skill of 3 is required to even determine "
+						"that mushrooms may be produced).";
+				/* XXX -- What are mushrooms used for!! */
+			   	if(!(ItemDefs[I_BAG].flags & ItemType::DISABLED)) {
+					*str += " Production of mushrooms may be increased "
+						    "by using bags.";
 				}
 			}
 			break;

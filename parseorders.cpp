@@ -603,6 +603,9 @@ void Game::ProcessOrder( int orderNum, Unit *unit, AString *o,
 	case O_NOCROSS:
 		ProcessNocrossOrder(unit, o, pCheck );
 		break;
+	case O_NOSPOILS:
+		ProcessNospoilsOrder(unit, o, pCheck);
+		break;
     case O_OPTION:
         ProcessOptionOrder( unit, o, pCheck );
         break;
@@ -2025,6 +2028,25 @@ void Game::ProcessNoaidOrder(Unit * u,AString * o, OrdersCheck *pCheck )
     }
 }
 
+void Game::ProcessNospoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+    /* Instant order */
+    AString * token = o->gettoken();
+    if (!token) {
+        ParseError( pCheck, u, 0, "NOSPOILS: Invalid value.");
+        return;
+    }
+    int val = ParseTF(token);
+    delete token;
+    if (val==-1) {
+        ParseError( pCheck, u, 0, "NOSPILS: Invalid value.");
+        return;
+    }
+    if( !pCheck ) {
+        u->SetFlag(FLAG_NOSPOILS,val);
+    }
+}
+
 void Game::ProcessNocrossOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
     /* Instant order */
@@ -2039,8 +2061,7 @@ void Game::ProcessNocrossOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "NOCROSS: Invalid value.");
         return;
     }
-    if( !pCheck )
-    {
+    if( !pCheck ) {
         u->SetFlag(FLAG_NOCROSS_WATER,val);
     }
 }
@@ -2060,8 +2081,7 @@ void Game::ProcessHoldOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "HOLD: Invalid value.");
         return;
     }
-    if( !pCheck )
-    {
+    if( !pCheck ) {
         u->SetFlag(FLAG_HOLDING,val);
     }
 }
@@ -2080,8 +2100,7 @@ void Game::ProcessAutoTaxOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "AUTOTAX: Invalid value.");
         return;
     }
-    if( !pCheck )
-    {
+    if( !pCheck ) {
         u->SetFlag(FLAG_AUTOTAX,val);
     }
 }	
@@ -2100,13 +2119,11 @@ void Game::ProcessAvoidOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "AVOID: Invalid value.");
         return;
     }
-    if( !pCheck )
-    {
+    if( !pCheck ) {
         if (val==1) {
             u->guard = GUARD_AVOID;
         } else {
-            if (u->guard == GUARD_AVOID)
-            {
+            if (u->guard == GUARD_AVOID) {
                 u->guard = GUARD_NONE;
             }
         }

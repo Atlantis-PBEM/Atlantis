@@ -306,6 +306,7 @@ void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
         if (GetFlag(FLAG_CONSUMING_FACTION)) 
             temp += ", consuming faction's food";
 		if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
+		if (GetFlag(FLAG_NOSPOILS)) temp += ", no battle spoils";
     }
   
     temp += items.Report(obs,truesight,0);

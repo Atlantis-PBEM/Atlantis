@@ -136,6 +136,7 @@ public:
 
     int Broken();
     int NumAlive();
+	int NumSpoilers();
     int CanAttack();
     int NumFront();
     Soldier *GetAttacker( int, int & );
