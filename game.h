@@ -193,8 +193,8 @@ private:
 	void ModifyItemMagicOutput(int it, int count);
 	void ModifyItemMagicInput(int it, int i, int input, int amount);
 
-	void ModifyRaceSkillLevels(int race, int special, int def);
-	void ModifyRaceSkills(int race, int i, int sk);
+	void ModifyRaceSkillLevels(char *race, int special, int def);
+	void ModifyRaceSkills(char *race, int i, int sk);
 
 	void ModifyMonsterAttackLevel(char *mon, int lev);
 	void ModifyMonsterDefense(char *mon, int defenseType, int level);

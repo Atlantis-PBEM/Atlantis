@@ -1511,9 +1511,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		} else {
 			temp = "A unit may learn as many skills as it requires. ";
 		}
-		temp += "Skills can be learned up to a maximum level of ";
-		temp += ManDefs[MAN_MAN].defaultlevel;
-		temp += ".";
+		ManType *mt = FindRace("MAN");
+		if (mt != NULL) {
+			temp += "Skills can be learned up to a maximum level of ";
+			temp += mt->defaultlevel;
+			temp += ".";
+		}
 		f.Paragraph(temp);
 	}
 
@@ -1544,7 +1547,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if(!(ItemDefs[i].type & IT_MAN)) continue;
 			f.Enclose(1, "tr");
-			int m = ItemDefs[i].index;
+			ManType *mt = FindRace(ItemDefs[i].abr);
 			f.Enclose(1, "td align=\"left\" nowrap");
 			f.PutStr(ItemDefs[i].names);
 			f.Enclose(0, "td");
@@ -1552,14 +1555,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 			int spec = 0;
 			comma = 0;
 			temp = "";
-			for(j = 0; j < (int)(sizeof(ManDefs->skills) /
-						 sizeof(ManDefs->skills[0])); j++) {
-				if(ManDefs[m].skills[j] < 0) continue;
-				if(SkillDefs[ManDefs[m].skills[j]].flags & SkillType::DISABLED)
+			for(j=0; j<(int)(sizeof(mt->skills)/sizeof(mt->skills[0])); j++) {
+				if(mt->skills[j] < 0) continue;
+				if(SkillDefs[mt->skills[j]].flags & SkillType::DISABLED)
 					continue;
 				spec = 1;
 				if(comma) temp += ", ";
-				temp += SkillDefs[ManDefs[m].skills[j]].name;
+				temp += SkillDefs[mt->skills[j]].name;
 				comma++;
 			}
 			if(!spec) temp = "None.";
@@ -1567,12 +1569,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"left\" nowrap");
 			if(spec)
-				f.PutStr(ManDefs[m].speciallevel);
+				f.PutStr(mt->speciallevel);
 			else
 				f.PutStr("--");
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"left\" nowrap");
-			f.PutStr(ManDefs[m].defaultlevel);
+			f.PutStr(mt->defaultlevel);
 			f.Enclose(0, "td");
 			f.Enclose(0, "tr");
 		}

@@ -200,23 +200,23 @@ void Game::ModifyItemMagicInput(int it, int i, int input, int amount)
 	ItemDefs[it].mInput[i].amt = amount;
 }
 
-void Game::ModifyRaceSkillLevels(int r, int spec, int def)
+void Game::ModifyRaceSkillLevels(char *r, int spec, int def)
 {
-	if(r < 0 || r > (NUMMAN-1)) return;
+	ManType *mt = FindRace(r);
+	if (mt == NULL) return;
 	if(spec < 0) spec = 0;
 	if(def < 0) def = 0;
-	ManDefs[r].speciallevel = spec;
-	ManDefs[r].defaultlevel = def;
+	mt->speciallevel = spec;
+	mt->defaultlevel = def;
 }
 
-void Game::ModifyRaceSkills(int r, int i, int sk)
+void Game::ModifyRaceSkills(char *r, int i, int sk)
 {
-	if(r < 0 || r > (NUMMAN-1)) return;
-	if(i < 0 || i >= (int)(sizeof(ManDefs[r].skills) /
-							sizeof(ManDefs[r].skills[0]))) return;
+	ManType *mt = FindRace(r);
+	if (mt == NULL) return;
+	if(i < 0 || i >= (int)(sizeof(mt->skills) / sizeof(mt->skills[0]))) return;
 	if(sk < -1 || sk > (NSKILLS-1)) sk = -1;
-
-	ManDefs[r].skills[i] = sk;
+	mt->skills[i] = sk;
 }
 
 void Game::ModifyMonsterAttackLevel(char *mon, int lev)

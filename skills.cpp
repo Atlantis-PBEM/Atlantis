@@ -64,22 +64,21 @@ int SkillCost(int skill)
 
 int SkillMax(int skill, int race)
 {
-	int mantype = ItemDefs[race].index;
+	ManType *mt = FindRace(ItemDefs[race].abr);
+
+	if (mt == NULL) return 0;
 
 	if(!Globals->MAGE_NONLEADERS) {
 		if(SkillDefs[skill].flags & SkillType::MAGIC) {
-			if(race != I_LEADERS) {
-				return(0);
-			}
+			if(race != I_LEADERS) return(0);
 		}
 	}
 
-	for(unsigned int c=0; c < sizeof(ManDefs[mantype].skills) /
-								sizeof(ManDefs[mantype].skills[0]); c++) {
-		if(ManDefs[mantype].skills[c] == skill)
-			return ManDefs[mantype].speciallevel;
+	for(unsigned int c=0; c < sizeof(mt->skills)/sizeof(mt->skills[0]); c++) {
+		if(mt->skills[c] == skill)
+			return mt->speciallevel;
 	}
-	return ManDefs[mantype].defaultlevel;
+	return mt->defaultlevel;
 }
 
 int GetLevelByDays(int dayspermen)

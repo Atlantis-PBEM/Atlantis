@@ -87,6 +87,17 @@ MonType *FindMonster(char *abbr, int illusion)
 	return NULL;
 }
 
+ManType *FindRace(char *abbr)
+{
+	if (abbr == NULL) return NULL;
+	for (int i = 0; i < NUMMAN; i++) {
+		if (ManDefs[i].abbr == NULL) continue;
+		if (AString(abbr) == ManDefs[i].abbr)
+			return &ManDefs[i];
+	}
+	return NULL;
+}
+
 static AString AttType(int atype)
 {
 	switch(atype) {
@@ -594,28 +605,26 @@ AString *ItemDescription(int item, int full)
 	*temp += ".";
 
 	if(ItemDefs[item].type & IT_MAN) {
-		int man = ItemDefs[item].index;
+		ManType *mt = FindRace(ItemDefs[item].abr);
 		int found = 0;
 		*temp += " This race may study ";
 		unsigned int c;
-		unsigned int len = sizeof(ManDefs[man].skills) /
-							sizeof(ManDefs[man].skills[0]);
+		unsigned int len = sizeof(mt->skills) / sizeof(mt->skills[0]);
 		for(c = 0; c < len; c++) {
-			int skill = ManDefs[man].skills[c];
+			int skill = mt->skills[c];
 			if(skill != -1) {
 				if(SkillDefs[skill].flags & SkillType::DISABLED) continue;
 				if(found) *temp += ", ";
 				if(found && c == len - 1) *temp += "and ";
 				found = 1;
-				*temp += SkillStrs(ManDefs[man].skills[c]);
+				*temp += SkillStrs(skill);
 			}
 		}
 		if(found) {
-			*temp += AString(" to level ") + ManDefs[man].speciallevel +
-				" and all others to level " + ManDefs[man].defaultlevel;
+			*temp += AString(" to level ") + mt->speciallevel +
+				" and all others to level " + mt->defaultlevel;
 		} else {
-			*temp += AString("all skills to level ") +
-				ManDefs[man].defaultlevel;
+			*temp += AString("all skills to level ") + mt->defaultlevel;
 		}
 	}
 	if(ItemDefs[item].type & IT_MONSTER) {

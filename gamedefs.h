@@ -62,6 +62,7 @@ extern int NUMARMORS;
 extern int NUMWEAPONS;
 extern int NUMMOUNTS;
 extern int NUMMONSTERS;
+extern int NUMMAN;
 
 class GameDefs {
 public:

@@ -104,7 +104,6 @@ class ItemType
 		int type;
 		int baseprice;
 		int combat;
-		int index;
 
 		int walk;
 		int ride;
@@ -123,6 +122,7 @@ extern ItemType *ItemDefs;
 class ManType
 {
 	public:
+		char *abbr;
 		int terrain;
 		int speciallevel;
 		int defaultlevel;
@@ -304,6 +304,7 @@ ArmorType *FindArmor(char *abbr);
 WeaponType *FindWeapon(char *abbr);
 MountType *FindMount(char *abbr);
 MonType *FindMonster(char *abbr, int illusion);
+ManType *FindRace(char *abbr);
 
 AString ItemString(int type, int num);
 AString *ItemDescription(int item, int full);
