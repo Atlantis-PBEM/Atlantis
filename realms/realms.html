@@ -1680,21 +1680,22 @@ set (using the <a href="#avoid"> AVOID </a> order)
 will attack any units of that faction wherever they
 find them. <p>
 
-If a unit can see another unit, but does not have high enough Observation skill
-to determine its faction, it will treat the unit using the faction's default
-attitude, even if the unit belongs to an Unfriendly or Hostile faction,
-because it does not know the unit's identity.  However, if your faction has
-declared an attitude of Friendly or Ally towards that unit's faction,
-the unit will be treated with the better
-attitude; it is assumed that the unit will produce proof of identity when
-relevant.  (See the section on stealth for more information on when units can
-see each other.) <p>
+If a unit can see another unit, but does not have high enough Observation
+skill to determine its faction, it will treat the unit using the faction's
+default attitude, even if the unit belongs to an Unfriendly or Hostile
+faction, because it does not know the unit's identity.  However, if your
+faction has declared an attitude of Friendly or Ally towards that unit's
+faction, the unit will be treated with the better attitude; it is assumed
+that the unit will produce proof of identity when relevant.  (See the section
+on stealth for more information on when units can see each other.) <p>
 
-If a faction declares Unfriendly or Hostile as default attitude (the latter is
-a good way to die fast), it will block or attack unidentified units, unless
-they belong to factions for which a more friendly attitude has been
-specifically declared.  Units which cannot be seen at all cannot be directly
-blocked or attacked, of course. <p>
+If a faction declares Unfriendly or Hostile as default attitude (the latter
+is a good way to die fast), it will block or attack all units, unless they
+belong to factions for which a more friendly attitude has been specifically
+declared and the unit's faction can be determined.  A unit whose faction is
+considered Friendly or Ally will be treated as such even if their faction
+cannot be seen as covered in the previous paragraph.  Units which cannot be
+seen at all cannot be directly blocked or attacked, of course. <p>
 
 <a name="com_attacking">
 <h3> Attacking: </h3>
