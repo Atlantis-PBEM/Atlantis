@@ -557,9 +557,16 @@ Changes from 4.0.10a -> 4.0.10b
    -- Fixed bug with extremely large worlds and more than 10000 units
    -- Fixed bug with small worlds/levels where a town was less than 9
       hexes from *both* poles AND LESS_ARTIC_TOWNS was enabled.  This
-	  caused very large negative/positive numbers for wages and such.
+      caused very large negative/positive numbers for wages and such.
    -- Fixed a bug in random number generation when getrandom was called
       on a negative number (found while fixing the one above)
    -- Fixed a potential crash when evicting someone who had already
       left the building.
    -- Fixed a couple of typos in the generated rules.
+
+Changes from 4.0.10b -> 4.0.10c
+--------------------------------------------------
+   -- Fixed probability of town generation bug from Jan's patch.
+   -- Fixed bug in movement costs when WEATHER_EXISTS was 0.
+   -- Added 'Spoils: none' line to indecisive battles to make ACB happier
+   -- Fixed segfault in skill starvation code.

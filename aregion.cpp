@@ -278,7 +278,7 @@ void ARegion::SetupPop()
 		int adjacent = 0;
 		int prob = Globals->TOWN_PROBABILITY;
 		if (prob < 1) prob = 100;
-		int townch = (int) 800 * (100 / prob);
+		int townch = (int) 80000 / prob;
 		if (Globals->TOWNS_NOT_ADJACENT) {
 			for (int d = 0; d < NDIRS; d++) {
 				ARegion *newregion = neighbors[d];
@@ -2142,7 +2142,7 @@ int ARegion::IsCoastalOrLakeside()
 
 int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir)
 {
-	int cost = -1;
+	int cost = 1;
 	if(Globals->WEATHER_EXISTS) {
 		cost = 2;
 		if (weather == W_BLIZZARD) return 10;

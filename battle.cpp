@@ -231,6 +231,7 @@ int Battle::Run( ARegion * region,
                   ARegionList *pRegs )
 {
     Army * armies[2];
+    AString temp;
     assassination = ASS_NONE;
     attacker = att->faction;
 
@@ -263,7 +264,6 @@ int Battle::Run( ARegion * region,
         ItemList *spoils = new ItemList;
         armies[0]->Lose(this, spoils);
         GetSpoils(atts, spoils, ass);
-        AString temp;
         if (spoils->Num()) {
             temp = AString("Spoils: ") + spoils->Report(2,0,1) + ".";
         } else {
@@ -298,7 +298,6 @@ int Battle::Run( ARegion * region,
         ItemList *spoils = new ItemList;
         armies[1]->Lose(this, spoils);
         GetSpoils(defs, spoils, ass);
-        AString temp;
         if (spoils->Num()) {
             temp = AString("Spoils: ") + spoils->Report(2,0,1) + ".";
         } else {
@@ -319,6 +318,9 @@ int Battle::Run( ARegion * region,
     AddLine("Total Casualties:");
     armies[0]->Tie(this);
     armies[1]->Tie(this);
+    temp = "Spoils: none.";
+    AddLine("");
+    AddLine(temp);
     AddLine("");
     delete armies[0];
     delete armies[1];

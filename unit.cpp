@@ -1904,7 +1904,7 @@ void Unit::SkillStarvation()
 		}
 	}
 	for(i = 0; i < NSKILLS; i++) {
-		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if (!can_forget[i]) continue;
 		Skill *si = GetSkillObject(i);
 		for(int j=0; j < NSKILLS; j++) {
 			if(SkillDefs[j].flags & SkillType::DISABLED) continue;
