@@ -722,8 +722,10 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 			pFac->password = pTemp;
 			pTemp = 0;
 		} else {
-			pFac->password = 0;
+			AString * pDefault = new AString("none");
+			pFac->password = pDefault;
 		}
+		
 	} else if(*pToken == "Template:") {
 		// LLS - looked like a good place to stick the Template test
 		pTemp = pLine->gettoken();
@@ -2071,7 +2073,9 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 		} else {
 			u->SetSkill(S_OBSERVATION,towntype + 1);
 		}
-		u->items.SetNum(weapon,men);
+		if(weapon!= -1) {
+			u->items.SetNum(weapon,men);
+		}
 	}
 }
 

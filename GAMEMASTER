@@ -26,14 +26,16 @@ Table of Contents
 3.1     Running a game of Atlantis by hand (the hard way)
 3.2     Running a game the easy way (with scripts)
 
-4.      Altering game rules
+4.      A GM's 'Code of Conduct'
 
-5.		World Creation Guide
-5.1		Basics: world size, land mass and levels
-5.2.	Land Mass Distribution
-5.3.	Terrain Distribution
-5.4.	Towns and Races
-5.5		Special: Fractal Generation
+5.      Altering game rules
+
+6.		World Creation Guide
+6.1		Basics: world size, land mass and levels
+6.2.	Land Mass Distribution
+6.3.	Terrain Distribution
+6.4.	Towns and Races
+6.5		Special: Fractal Generation
 
 
 1. Obtaining a copy of Atlantis
@@ -394,7 +396,105 @@ will do a better job of it too, so you should ask them if you are in any
 doubt.
 
 
-4. Altering game rules
+4. A GM's 'Code of Conduct'
+
+Here is a list of things you should consider before running a game:
+[thanks to Antony Briggs for posting this on atlantisdev]
+
+Backups
+The GM should keep backups of the game, preferably on a separate machine 
+or hard drive. Offsite backups are even better. Oh yeah, and they should 
+be automated if at all possible. If you don't know how to make backups, 
+or even what backups are, you shouldn't be running a game.
+
+Back up *everything* - source code, executables, log files and your 
+scripts, as well as the game files, turn reports, etc. If you do have a 
+mishap, you don't want to have to remember your changes and then 
+recompile all of your code.
+
+Automation
+While it is possible to run an Atlantis game manually, it is far better 
+to use an automated script to respond to order submissions, and running 
+turns in general. Humans are fallible - you *will* send the wrong orders 
+out at 1AM. Computers won't, unless you mistakenly tell them to.
+
+Email
+Every effort should be made to make the game as accessible as possible, 
+but the GM is *not* responsible for the vagaries of email. Not even 
+slightly. If you're trying to get your turn in 5 minutes before the 
+deadline, and its mysteriously delayed, I am not going to rerun the turn.
+
+Impartiality
+The GM should make an effort to appear impartial, particularly when 
+handling disuptes between players. Playing in your own game, while 
+possible to do fairly, is generally frowned upon, and it makes it much 
+harder to punish people who are rude to you or your friends.
+
+Communication
+Generally it's a good idea to keep players in the loop. Group mailing 
+lists such as yahoogroups (and others) are ideal for this. You can just 
+maintain a list of email addresses for people who are playing, but this 
+requires effort on your part, which is always to be avoided.
+
+You should always inform your players if:
+   you need to rerun the turn,
+   you need to delay the turn,
+   you need to change the day or time that it runs,
+   there is a change in the rules,
+   a bug is discovered that affects play, or
+   you need to ban someone.
+
+It's generally considered good manners to inform the other players when 
+someone is banned, so that they can avoid a similar fate. Plus it helps 
+to keep them on their toes...
+
+Finding bugs and bug reports
+Bugs are generally difficult to avoid, and crop up even in well tested 
+code. There's always some player who wants to do things differently, and 
+when they do, they'll usually tickle some bug or other. When they give 
+you a bug report, make sure that you verify that the bug exists as they 
+have reported it - don't just take their word for it!
+
+Fixing bugs
+Once you know that it's definitely a bug, take steps to fix it. In a 
+test game it's normally straightforward, but in a running game you 
+should make the *minimum* change necessary to fix the problem. Don't be 
+tempted to 'fix' anything else - you'll introduce more problems. Also 
+don't be tempted to rush in a quick fix to get the game going again. 
+You're just as likely to create two more bugs if you do that.
+
+Test your bug fixes
+Above all, once you think that you've fixed the bug, test your fix 
+thoroughly to make sure that it all works. This normally means rerunning 
+the turn locally and verifying it before you set the turns going, as 
+well as checking the other turns too.
+
+Don't just check the fix itself, either - check that you haven't broken 
+something else in the process of fixing the first bug. Nothing annoys 
+players more than having to rerun the turn three times because you 
+didn't test stuff - or worse, you fixed the bug but broke something 
+else, or fixed the wrong bug.
+
+A final point - any bug fix that affects game play should be reported to 
+the players, so that they don't get caught out.
+
+Rerunning turns
+A rerun takes a lot of effort, inconveniences players and uses up 
+valuable network bandwidth. It should only be done as a last resort when 
+all other options, such as replacing units or skills, or compensation 
+paid into a player's unclaimed silver, have been exhausted.
+
+A player messing up their orders, or not getting their turn in on time, 
+or misreading the rules is not grounds for a rerun.
+
+All of the players should be informed as soon as humanly possible of the 
+rerun, the reason for the rerun, and if necessary, the revised deadline 
+for turn submissions (a really good idea). When the turn is actually 
+rerun, the subject line of everything that you send out should clearly 
+state that it is a rerun, so that players don't get confused.
+
+
+5. Altering game rules
 
 There may come a time when you ask yourself "Why do War factions get so 
 much darned silver?" or "Why are Balrogs so darned powerful?" In this 
@@ -489,7 +589,7 @@ Adding the new gamedefs in will make you happy again ;)
 
 
 
-5. World Creation Guide
+6. World Creation Guide
 
 The following is not a technical guide but a description of the options
 involved in Atlantis world creation. None of the information here is
@@ -508,7 +608,7 @@ will be created as 'report.1' in the atlantis directory - it's an omniscient
 turn report.
 
 
-5.1. Basics: world size, land mass and levels
+6.1. Basics: world size, land mass and levels
 
 The most important consideration for any game is world size as this will
 determine the number of players that can comfortably join a game and the
@@ -546,7 +646,7 @@ there's more than one - that will be 1/2 size), and the Abyss is just
 a tiny area with a Black Keep for the Wyreth victory conditions.
 
 
-5.2. Land Mass Distribution
+6.2. Land Mass Distribution
 
 The distribution of land mass determines whether players will be able to
 expand on a large continental mass and how important ships and sailing
@@ -601,7 +701,7 @@ is emphasised. Especially if PREVENT_SAIL_THROUGH is enabled it is
 suggested that this gamedef is used as well.
 
 
-5.3. Terrain Distribution
+6.3. Terrain Distribution
 
 Terrain distribution is probably more a matter of style and flavor than
 the aspects discussed in previous chapters. It can become a matter of
@@ -675,7 +775,7 @@ The value of ODD_TERRAIN is the chance that this happens, per hex, in
 be the same as that of the surrounding hexes.
 
 
-5.4 Towns and Races
+6.4 Towns and Races
 
 Towns are always a focus of economic activities in Atlantis and are
 strategically important locations. The number and placement of towns
@@ -738,7 +838,7 @@ will spread over a wider area. Seafaring races can also spread across
 ocean hexes, so that nearby islands often have the same race type.
 
 
-5.5. Special: Fractal Generation
+6.5. Special: Fractal Generation
 
 This chapter addresses the code developments for an alternate world
 creation mechanism that is used by the Kingdoms gameset. The

@@ -888,6 +888,21 @@ Changes from 4.0.10 -> 5.0.0
       largely cosmetic until DYNAMIC_POPULATION is implemented - then there will be direct
       interaction between recruiting, disbanding and population.
    -- [NOTE:] still to do: effective PostTurn adjustment of development, habitat for long-term growth
+   
+   -- fixed the bug where illusionary items weren't identified as such.
+   -- fixed some potential problem with new city guards' weapons, and altered the give command so
+      NPC units cannot be targeted.
+   -- included a check for valid item type in ItemList.SetNum()
+   -- adjusted default weapon length according to soldier's maxhits, preventing creatures from getting
+      an automatic reduction of their combat strength due to weapon length.
+   -- fixed a bug in the spell description of ENGRAVE_RUNES_OF_WARDING.
+   -- fixed a bug with faction passwords in parsing and report handling with certain GM utilities.
+   -- added an observation variable to Farsight that is set at cast time to circumvent problems
+      of referencing units during report write-out that have been killed since casting.
+   -- fixed ShowSpecial() to correctly show the protection of shield items as personal, not
+      army-wide shields (taken from Bradley's Nylandor code).
+   -- added Ant's GM's code of conduct into the GAMEMASTER file.
+   -- fixed the bug where NOMOUNT type weapons (pikes) were never used.
       
    
    

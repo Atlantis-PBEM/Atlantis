@@ -1185,7 +1185,7 @@ AString *ShowSkill::Report(Faction *f)
 				}
 				*str += ".";
 			} else if (level == 3) {
-				if(OBJECT_DISABLED(O_CASTLE)) {
+				if(OBJECT_ENABLED(O_CASTLE)) {
 					*str += "At this level, the mage may engrave runes of "
 						"warding upon a Castle.";
 				}

@@ -130,7 +130,11 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 			if(!( pWep->flags & WeaponType::RANGED)) break;
 		}
 
-		int flags = WeaponType::SHORT;
+		int flags = 0;
+		// Adjust natural weapon length for soldier size:
+		if(a->maxhits < 3) flags = WeaponType::SHORT;
+		if(a->maxhits > 19) flags = WeaponType::LONG;
+		
 		int attackType = ATTACK_COMBAT;
 		int mountBonus = 0;
 		int attackClass = SLASHING;

@@ -638,7 +638,7 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 			count ++;
 		}
 	}
-
+	if (count == 0) return;
 	count = getrandom(count) + 1;
 
 	for (i=0; i<NITEMS; i++) {

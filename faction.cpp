@@ -386,7 +386,7 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		f->EndLine();
 	}
 
-	if(*password == "none") {
+	if(!password || (*password == "none")) {
 		f->PutStr("REMINDER: You have not set a password for your faction!");
 		f->EndLine();
 	}

@@ -1437,6 +1437,7 @@ int Game::RunFarsight(ARegion *r,Unit *u)
 	f->faction = u->faction;
 	f->level = u->GetSkill(S_FARSIGHT);
 	f->unit = u;
+	f->observation = u->GetAttribute("observation");
 	tar->farsees.Add(f);
 	AString temp = "Casts Farsight on ";
 	temp += tar->ShortPrint(&regions);

@@ -2524,6 +2524,10 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
 		return 0;
+	} else if(t->faction->IsNPC()) {
+		u->Error(AString("GIVE: Can't give to non-player unit (") + o->target->Print() +
+				").");
+		return 0;
 	}
 
 	if(u == t) {

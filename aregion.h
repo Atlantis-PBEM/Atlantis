@@ -124,6 +124,7 @@ class Farsight : public AListElem
 		Faction *faction;
 		Unit *unit;
 		int level;
+		int observation;
 		int exits_used[NDIRS];
 };
 

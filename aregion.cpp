@@ -51,6 +51,7 @@ Farsight::Farsight()
 	faction = 0;
 	unit = 0;
 	level = 0;
+	observation = 0;
 	for(int i = 0; i < NDIRS; i++)
 		exits_used[i] = 0;
 }
@@ -1563,7 +1564,7 @@ int ARegion::GetObservation(Faction *f, int usepassers)
 		forlist(&farsees) {
 			Farsight *farsight = (Farsight *)elem;
 			if(farsight && farsight->faction == f && farsight->unit) {
-				int o = farsight->unit->GetAttribute("observation");
+				int o = farsight->observation;
 				if(o > obs) obs = o;
 			}
 		}
@@ -1575,7 +1576,7 @@ int ARegion::GetObservation(Faction *f, int usepassers)
 		forlist(&passers) {
 			Farsight *farsight = (Farsight *)elem;
 			if(farsight && farsight->faction == f && farsight->unit) {
-				int o = farsight->unit->GetAttribute("observation");
+				int o = farsight->observation;
 				if(o > obs) obs = o;
 			}
 		}

@@ -121,7 +121,11 @@ static AString DefType(int atype)
 int LookupItem(AString *token)
 {
 	for(int i = 0; i < NITEMS; i++) {
+	    if (ItemDefs[i].type & IT_ILLUSION)  {
+	        if (*token == (AString("i") + ItemDefs[i].abr)) return i;
+        } else {
 			if (*token == ItemDefs[i].abr) return i;
+	    }
 	}
 	return -1;
 }
@@ -417,7 +421,8 @@ AString ShowSpecial(char *special, int level, int expandLevel, int fromItem)
 	}
 
 	if(spd->effectflags & SpecialType::FX_SHIELD) {
-		temp += " This ability provides a shield against all ";
+		if(!fromItem) temp += " This ability provides a shield against all ";
+		else temp += AString(" This spell provides the wielder with a defence bonus of ") + level + " against all ";
 		comma = 0;
 		last = -1;
 		for(i = 0; i < 4; i++) {
@@ -433,8 +438,11 @@ AString ShowSpecial(char *special, int level, int expandLevel, int fromItem)
 		if(comma) {
 			temp += "and ";
 		}
-		temp += DefType(spd->shield[last]) + " attacks against the entire" +
-			" army at a level equal to the skill level of the ability.";
+		if(fromItem) temp += DefType(spd->shield[last]) + " attacks.";
+		else {
+    		temp += DefType(spd->shield[last]) + " attacks against the entire" +
+    			" army at a level equal to the skill level of the ability.";
+        }
 	}
 	if(spd->effectflags & SpecialType::FX_DEFBONUS) {
 		temp += " This ability provides ";
@@ -1046,7 +1054,11 @@ AString Item::Report(int seeillusions)
 void Item::Writeout(Aoutfile *f)
 {
 	AString temp;
-	if (type != -1) temp = AString(num) + " " + ItemDefs[type].abr;
+	if (type != -1) {
+        temp = AString(num) + " ";
+        if(ItemDefs[type].type & IT_ILLUSION) temp += "i";
+        temp += ItemDefs[type].abr;
+	}
 	else temp = "-1 NO_ITEM";
 	f->PutStr(temp);
 }
@@ -1224,6 +1236,8 @@ AString ItemList::ReportByType(int type, int obs, int seeillusions,
 
 void ItemList::SetNum(int t,int n)
 {
+	// sanity check: does this item type exist?
+	if ((t<0) || (t>=(int)sizeof(ItemDefs))) return;
 	if (n) {
 		forlist(this) {
 			Item *i = (Item *) elem;
