@@ -883,7 +883,7 @@ static SkillType sd[] = {
 	// Extra spells for Ceran
 	{"weaponcraft","WCRA",10, SkillType::DISABLED,0,S_WEAPONSMITH,5,-1,0,-1,0},
 	{"armorcraft","ACRA",10, SkillType::DISABLED,0,S_ARMORER,5,-1,0,-1,0},
-	{"camel trainig","CAME",10,SkillType::DISABLED,0,-1,0,-1,0,-1,0},
+	{"camel training","CAME",10,SkillType::DISABLED,0,-1,0,-1,0,-1,0},
 };
 
 SkillType * SkillDefs = sd;
