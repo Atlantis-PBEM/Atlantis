@@ -1589,6 +1589,11 @@ void Game::ProcessBuyOrder( Unit *u, AString *o, OrdersCheck *pCheck )
 		return;
 	}
 	int it = ParseItem(token);
+	if(it == -1) {
+		if(*token == "peasant") {
+			it = u->object->region->race;
+		}
+	}
 	delete token;
 	if (it == -1) {
 		ParseError( pCheck, u, 0, "BUY: Can't buy that.");
@@ -1600,9 +1605,6 @@ void Game::ProcessBuyOrder( Unit *u, AString *o, OrdersCheck *pCheck )
 	}
 
 	if( !pCheck ) {
-		if (it == I_PEASANT) {
-			it = u->object->region->race;
-		}
 		BuyOrder * b = new BuyOrder;
 		b->item = it;
 		b->num = num;

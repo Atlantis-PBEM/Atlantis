@@ -997,7 +997,7 @@ ItemType id[] =
 	 -1,0,
 	 -1,0},
 	{"peasant","peasants","PEAS",
-	 0,
+	 ItemType::DISABLED,
 	 -1,0,0,0, {{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0}},
 	 10, IT_MAN, 50,1,0,
