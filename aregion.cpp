@@ -2991,10 +2991,10 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion*two)
 
 	if(two->zloc == ARegionArray::LEVEL_SURFACE) {
 		two_x = two->xloc;
-		two_y = two->xloc;
+		two_y = two->yloc;
 	} else {
 		two_x = two->xloc * 2;
-		two_y = two->xloc * 2;
+		two_y = two->yloc * 2;
 	}
     maxy = one_y - two_y;
 	if(maxy < 0) maxy=-maxy;
