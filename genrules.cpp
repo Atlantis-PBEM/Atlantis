@@ -43,12 +43,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 		return 0;
 	}
 
+	f.PutStr("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 "
+			"Transitional//EN\">");
 	f.Enclose(1, "HTML");
 	f.Enclose(1, "HEAD");
-	f.TagText("TITLE", AString(Globals->RULESET_NAME) + " " +
-			ATL_VER_STR(Globals->RULESET_VERSION) + " Rules");
+	f.PutStr("<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; "
+			"charset=utf-8\">");
 	f.PutStr(AString("<LINK TYPE=\"text/css\" REL=stylesheet HREF=\"")+
 			css + "\">");
+	f.TagText("TITLE", AString(Globals->RULESET_NAME) + " " +
+			ATL_VER_STR(Globals->RULESET_VERSION) + " Rules");
 	f.Enclose(0, "HEAD");
 	f.Enclose(1, "BODY");
 	f.Enclose(1, "CENTER");
@@ -341,121 +345,138 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"the beginning of each turn, so a faction can change and "
 				"adapt to the conditions around it.  Faction Points spent "
 				"on War determine the number of regions in which factions "
-				"can obtain income by taxing or pillaging.\n");
-   printf("  Faction Points spent on Trade determine the number of regions in which a\n");
-   printf("  faction may conduct trade activity.  Trade activity includes producing goods,\n");
-   printf("  building ships and buildings, and buying and selling trade items.  Faction\n");
-   printf("  Points spent on Magic determines the number of mages the faction may have.\n");
-   printf("  (More information on all of the faction activities is in further sections of\n");
-   printf("  the rules).  Here is a chart detailing the limits on factions by Faction\n");
-   printf("  Points. <p>\n");
- printf("\n");
-   printf("  <a name=\"tablefactionpoints\">\n");
-   printf("  <center>\n");
-   printf("  <table border>\n");
-    printf("   <tr>\n");
-     printf("    <th>\n");
-      printf("     Faction Points\n");
-     printf("    </th>\n");
-     printf("    <th>\n");
-      printf("     War (max taxable regions)\n");
-     printf("    </th>\n");
-     printf("    <th>\n");
-      printf("     Trade (max trade regions)\n");
-     printf("    </th>\n");
-     printf("    <th>\n");
-      printf("     Magic (max mages)\n");
-     printf("    </th>\n");
-    printf("   </tr>\n");
-  for (int i=1;i<=Globals->FACTION_POINTS;i++)
-   {
-   Game gm;
-   Faction pom;
-   pom.type[F_WAR]=i;
-   pom.type[F_TRADE]=i;
-   pom.type[F_MAGIC]=i;
-    printf("   <tr>\n");
-     printf("    <td align=center> %d </td>\n",i);
-     printf("    <td align=center> %d </td>\n",gm.AllowedTaxes(&pom));
-     printf("    <td align=center> %d </td>\n",gm.AllowedTrades(&pom));
-     printf("    <td align=center> %d </td>\n",gm.AllowedMages(&pom));
-    printf("   </tr>\n");
-   }
-   printf("  </table> </center> <p>\n");
- printf("\n");
-  {
-  int w,m,t;
-  m=Globals->FACTION_POINTS/3;
-  w=(Globals->FACTION_POINTS+1)/3;
-  t=(Globals->FACTION_POINTS+2)/3;
-  Game gm;
-  Faction pom;
-  pom.type[F_WAR]=w;
-  pom.type[F_TRADE]=t;
-  pom.type[F_MAGIC]=m;
-   printf("  For example, a well rounded faction might spent %d point%s on War, %d point%s on\n",w,w==1?"":"s",t,t==1?"":"s");
-   printf("  Trade, and %d point%s on Magic.  This faction's type would appear as \"War %d\n",m,m==1?"":"s",w);
-   printf("  Trade %d Magic %d\", and would be able to\n",t,m);
-   printf("  tax %d region%s,\n",gm.AllowedTaxes(&pom),gm.AllowedTaxes(&pom)==1?"":"s");
-   printf("  perform trade in %d region%s,\n",gm.AllowedTrades(&pom),gm.AllowedTrades(&pom)==1?"":"s");
-   printf("  and have %d mage%s. <p>\n",gm.AllowedMages(&pom),gm.AllowedMages(&pom)==1?"":"s");
-  }
-  {
-  Game gm;
-  Faction pom;
-  int w=Globals->FACTION_POINTS;
-  pom.type[F_WAR]=w;
-   printf("  As another example, a specialized faction might spend all %d points on War.\n",w);
-   printf("  This faction's type would appear as \"War %d\", and it would be able to \n",w);
-   printf("  tax %d region%s,\n",gm.AllowedTaxes(&pom),gm.AllowedTaxes(&pom)==1?"":"s");
-   printf("  but could not perform trade in any regions, nor could it possess any\n");
-   printf("  mages. <p>\n");
-  }
- printf("\n");
-  if (Globals->FACTION_POINTS>3)
-   {
-   int rem=Globals->FACTION_POINTS-3;
-    printf("   Note that it is possible to have a faction type with less than %d\n",Globals->FACTION_POINTS);
-    printf("   points spent.  In fact, a starting faction has one point spent on each\n");
-    printf("   of War, Trade, and Magic, leaving %d point%s unspent. <p>\n",rem,rem==1?"":"s");
-   }
- printf("\n");
-  }  /* FACTION_TYPES */
- printf("\n");
- printf("When a faction starts the game, it is given a one-man unit and\n");
- printf("%d %s in\n",Globals->START_MONEY-(Globals->LEADERS_EXIST?Globals->LEADER_COST:Globals->MAINTENANCE_COST),silver);
- printf("unclaimed money.  Unclaimed money is cash that your whole faction has access\n");
- printf("to, but cannot be taken away in battle (%s in a unit's possessions can be\n",silver);
- printf("taken in battle.)  This allows a faction to get started without presenting an\n");
- printf("enticing target for other factions.  Units in your faction may use the\n");
- printf("<a href=\"#claim\"> CLAIM </a>\n");
- printf("order to take this %s, and use it to buy goods or recruit men\n",silver);
- if (Globals->ALLOW_WITHDRAW)
- {
-  printf(" , or <a href=\"#withdraw\"> WITHDRAW <a> goods directly\n");
- }
- printf(".<p>\n");
- printf("\n");
- printf("An example faction is shown below, consisting of a starting character, Merlin\n");
- printf("the Magician, who has formed two more units, Merlin's Guards and Merlin's\n");
- printf("Workers.  Each unit is assigned a unit number by the computer (completely\n");
- printf("independent of the faction number); this is used for entering orders.  Here,\n");
- printf("the player has chosen to give his faction the same name (\"Merlin the Magician\")\n");
- printf("as his starting character.  Alternatively, you can call your faction something\n");
- printf("like \"The Great Northern Mining Company\" or whatever. <p>\n");
- printf("\n");
- printf("<pre>\n");
-   printf("  * Merlin the Magician (17), Merlin (27), \n");
-     printf("    leader [LEAD].  Skills: none.\n");
-   printf("  * Merlin's Guards (33), Merlin (27), 20\n");
-     printf("    vikings [VIKI], 20 swords [SWOR]. Skills: none.\n");
-   printf("  * Merlin's Workers (34), Merlin (27), 50\n");
-     printf("    vikings [VIKI].  Skills: none.\n");
- printf("</pre> <p>\n");
- printf("\n");
-#if 0
- printf("<a name=\"playing_units\">\n");
- printf("<h3> Units: </h3>\n");
+				"can obtain income by taxing or pillaging.");
+		f.PutStr("<BR><BR>");
+		f.PutStr(AString("Faction Points spent on Trade determine the "
+					"number of regions in which a faction may conduct "
+					"trade activity. Trade activity includes producing "
+					"goods, building ships and buildings, and buying and "
+					"selling trade items. Faction Points spent on Magic "
+					"determines the number of mages ") +
+				(Globals->APPRENTICES_EXIST ? "and appentices " : "") +
+				"the faction may have. (More information on all of "
+				"the faction activities is in further sections of the "
+				"rules).  Here is a chart detailing the limits on factions "
+				"by Faction Points.");
+		f.PutStr("<BR><BR>");
+		f.PutStr(f.LinkRef("tablefactionpoints"));
+		f.Enclose(1, "CENTER");
+		f.Enclose(1, "TABLE BORDER=1");
+		f.Enclose(1, "TR");
+		f.TagText("TH", "Faction Points");
+		f.TagText("TH", "War (max tax regions)");
+		f.TagText("TH", "Trade (max trade regions)");
+		if(Globals->APPRENTICES_EXIST)
+			f.TagText("TH", "Magic (max mages/apprentices)");
+		else
+			f.TagText("TH", "Magic (max mages)");
+		f.Enclose(0, "TR");
+		int i;
+		for(i = 1; i <= Globals->FACTION_POINTS; i++) {
+			fac.type[F_WAR]=i;
+			fac.type[F_TRADE]=i;
+			fac.type[F_MAGIC]=i;
+			f.Enclose(1, "TR ALIGN=CENTER");
+			f.TagText("TD", AString(i));
+			f.TagText("TD", AString(AllowedTaxes(&fac)));
+			f.TagText("TD", AString(AllowedTrades(&fac)));
+			if(Globals->APPRENTICES_EXIST)
+				f.TagText("TD", AString(AllowedMages(&fac)) + "/" +
+						AllowedApprentices(&fac));
+			else
+				f.TagText("TD", AString(AllowedMages(&fac)));
+			f.Enclose(0, "TR");
+		}
+		f.Enclose(0, "TABLE");
+		f.Enclose(0, "CENTER");
+		int m,w,t;
+		fac.type[F_WAR] = w = (Globals->FACTION_POINTS+1)/3;
+		fac.type[F_MAGIC] = m = Globals->FACTION_POINTS/3;
+		fac.type[F_TRADE] = t = (Globals->FACTION_POINTS+2)/3;
+		int nm, na, nw, nt;
+		nm = AllowedMages(&fac);
+		na = AllowedApprentices(&fac);
+		nt = AllowedTrades(&fac);
+		nw = AllowedTaxes(&fac);
+		f.PutStr(AString("For example, a well rounded faction might ")
+				"spend " + w + " point" + (w==1?"":"s") + " on War, " +
+				t + " point" + (t==1?"":"s") + " on Trade, and " + m +
+				" point" + (m==1?"":"s") + " on Magic.  This faction's "
+				"type would appear as \"War " + w + " Trade " + t +
+				" Magic " + m + "\", and would be able to tax " + nw +
+				" region" + (nw==1?"":"s") + ", perform trade in " + nt +
+				" region" + (nt==1?"":"s") + ", and have " + nm +
+				" mage" + (nm==1?"":"s") +
+				(Globals->APPRENTICES_EXIST ? AString(" as well as ") +
+				 na + " apprentice" + (na==1?"":"s") : "") + ".");
+		fac.type[F_WAR] = w = Globals->FACTION_POINTS;
+		fac.type[F_MAGIC] = m = 0;
+		fac.type[F_TRADE] = t = 0;
+		nw = AllowedTaxes(&fac);
+		nt = AllowedTrades(&fac);
+		nm = AllowedMages(&fac);
+		f.PutStr(AString("As another example, a specialized faction ") +
+				"might spend all " + w + " point" + (w==1?"":"s") +
+				" on War. This faction's type would appear as \"War " +
+				w + "\", and it would be able to tax " + nw + " region" +
+				(nw==1?"":"s") +
+				(nt==0?", but could not perform trade in any regions,":
+				 AString(", but could only perform trade in " + nt +
+					 " region"+(nt==1?",":"s,"))) +
+				(nm==0?" and could not possess any mages":
+				 AString(" and could possess only " + nm + " mage" +
+					 (nm==1?".":"s."))));
+		f.PutStr("<BR><BR>");
+		if (Globals->FACTION_POINTS>3) {
+			int rem=Globals->FACTION_POINTS-3;
+			f.PutStr(AString("Note that it is possible to have a faction ") +
+					"type with less than " + Globals->FACTION_POINTS +
+					"points spent. In fact, a starting faction has one "
+					"point spent on each of War, Trade, and Magic, leaving " +
+					rem + " point" + (rem==1?"":"s") + " unspent.");
+			f.PutStr("<BR><BR>");
+		}
+	}
+	f.PutStr(AString("When a faction starts the game, it is given a ")+
+			"one-man unit and " + (Globals->START_MONEY -
+				(Globals->LEADERS_EXIST ? Globals->LEADER_COST :
+				 Globals->MAINTENANCE_COST)) + ItemDefs[I_SILVER].name +
+			" unclaimed money.  Unclaimed money is cash that your whole " +
+			"faction has access to, but cannot be taken away in battle (" +
+			ItemDefs[I_SILVER].name + " in a unit's possessions can be " +
+			"taken in battle.  This allows a faction to get started "
+			"without presenting an enticing target for other factions. " +
+			"Units in your faction may use the " +
+			f.Link("#claim", "CLAIM") + " order to take this " +
+			ItemDefs[I_SILVER].name + ", and use it to buy goods or " +
+			"recruit men" +
+			(Globals->ALLOW_WITHDRAW ?
+			 AString(", or") + f.Link("#withdraw", "WITHDRAW") +
+			 " goods  directly." : "."));
+	f.PutStr("<BR><BR>");
+	f.PutStr("An exampel faction is shown below, consisting of a "
+			"starting character, Merlin the Magician, who has formed "
+			"two more units, Merlin's Guards and Merlin's Workers.  "
+			"Each unit is assigned a unit number by the computer "
+			"(completely independent of the faction number); this is used "
+			"for entering orders.  Here, the player has chosen to give "
+			"his faction the same name (\"Merlin the Magician\") as his "
+			"starting character.  Alternatively, you can call your "
+			"faction something like \"The Great Northern Mining Company\" "
+			"or whatever.");
+	f.PutStr("<BR><BR>");
+	f.Enclose(1, "<PRE>");
+	f.PutNoFormat("  * Merlin the Magician (17), Merlin (27), leader");
+	f.PutNoFormat("    [LEAD].  Skills: none.");
+	f.PutNoFormat("  * Merlin's Guards (33), Merlin (27), 20 vikings");
+	f.PutNoFormat("    [VIKI], 20 swords [SWOR]. Skills: none.");
+	f.PutNoFormat("  * Merlin's Workers (34), Merlin (27), 50 vikings");
+	f.PutNoFormat("    [VIKI].  Skills: none.");
+	f.Enclose(0, "<PRE>");
+	f.PutStr("<BR><BR>");
+	f.PutStr(f.LinkRef("playing_units"));
+	f.TagText("H3", "Units:");
+	/* FOO */
  printf("\n");
  printf("A unit is a grouping together of people, all loyal to the same faction.\n");
  printf("The people in a unit share skills and possessions, and execute the\n");
@@ -509,6 +530,7 @@ int Game::GenRules(const AString &rules, const AString &css,
    printf("  of the strengths of either race. <p>\n");
   }
  printf("\n");
+#if 0
  printf("<a name=\"playing_turns\">\n");
  printf("<h3> Turns: </h3>\n");
  printf("\n");
