@@ -135,6 +135,7 @@ static GameDefs g = {
 	0,  // NEXUS_IS_CITY
 	0,	// BATTLE_FACTION_INFO
 	1,	// ALLOW_WITHDRAW
+	0,	// CITY_RENAME_COST
 };
 
 GameDefs * Globals = &g;

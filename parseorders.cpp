@@ -1923,40 +1923,80 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
 			return;
 		}
 
-		if ( !pCheck )
-		{
-		   	if (unit->object->type == O_CITADEL ||
-				((unit->object->type == O_TOWER ||
-				  unit->object->type == O_FORT ||
-				  unit->object->type == O_CASTLE ||
-				  unit->object->type == O_MFORTRESS) &&
-				 unit->object->region->town->TownType() == TOWN_VILLAGE) ||
-				((unit->object->type == O_FORT ||
-				  unit->object->type == O_CASTLE ||
-				  unit->object->type == O_MFORTRESS) &&
-				 unit->object->region->town->TownType() == TOWN_TOWN) ||
-				((unit->object->type == O_CASTLE ||
-				  unit->object->type == O_MFORTRESS) &&
-				 unit->object->region->town->TownType() == TOWN_CITY))
-			{
-				if (unit != unit->object->GetOwner()) {
-					unit->Error( "NAME: Unit is not the owner of object." );
-					return;
-				}
-				AString * newname = token->getlegal();
-				if ( !newname ) {
-					unit->Error( "NAME: Illegal name." );
-					return;
-				}
-				unit->Event(AString("Renames ") +
-						*(unit->object->region->town->name) + " to " +
-						*newname + ".");
-				unit->object->region->NotifyCity(unit,
-						*(unit->object->region->town->name), *newname);
-				unit->object->region->town->name = newname;
-			} else {
-				unit->Error("NAME: Object is not large enough to rename city.");
+		if ( !pCheck ) {
+			if(!unit->object) {
+				unit->Error("NAME: Unit is not in a structure.");
+				return;
 			}
+			if(!unit->object->region->town) {
+				unit->Error("NAME: Unit is not in a village, town or city.");
+				return;
+			}
+			int cost = 0;
+			int towntype = unit->object->region->town->TownType();
+			AString tstring;
+			switch(towntype) {
+				case TOWN_VILLAGE:
+					tstring = "village";
+					break;
+				case TOWN_TOWN:
+					tstring = "town";
+					break;
+				case TOWN_CITY:
+					tstring = "city";
+					break;
+			}
+			if(Globals->CITY_RENAME_COST) {
+				cost = towntype+1* Globals->CITY_RENAME_COST;
+			}
+			int ok = 0;
+			switch(towntype) {
+				case TOWN_VILLAGE:
+					if(unit->object->type == O_TOWER) ok = 1;
+				case TOWN_TOWN:
+					if(unit->object->type == O_FORT) ok = 1;
+				case TOWN_CITY:
+					if(unit->object->type == O_CASTLE) ok = 1;
+					if(unit->object->type == O_CITADEL) ok = 1;
+					if(unit->object->type == O_MFORTRESS) ok = 1;
+			}
+			if(!ok) {
+				unit->Error(AString("NAME: Unit is not in a large ")+
+						    "enough structure to rename a "+tstring+".");
+				return;
+			}
+			if (unit != unit->object->GetOwner()) {
+				unit->Error(AString("NAME: Cannot name ")+tstring+
+							".  Unit is not the owner of object." );
+				return;
+			}
+			if (unit->object->incomplete) {
+				unit->Error(AString("NAME: Cannot name ")+tstring+
+							".  Object is not finished.");
+				return;
+			}
+
+			AString * newname = token->getlegal();
+			if ( !newname ) {
+				unit->Error( "NAME: Illegal name." );
+				return;
+			}
+			if(cost) {
+				int silver = unit->items.GetNum(I_SILVER);
+				if(silver < cost) {
+					unit->Error(AString("NAME: Unit doesn't have enough ")+
+								"silver to rename a "+tstring+".");
+					return;
+				}
+				unit->items.SetNum(I_SILVER, silver-cost);
+			}
+
+			unit->Event(AString("Renames ") +
+					*(unit->object->region->town->name) + " to " +
+					*newname + ".");
+			unit->object->region->NotifyCity(unit,
+					*(unit->object->region->town->name), *newname);
+			unit->object->region->town->name = newname;
 		}
 		return;
 	}

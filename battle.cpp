@@ -85,6 +85,10 @@ void Battle::DoAttack( int round,
     if (!def->NumAlive()) return;
     
     if (a->HasEffect(EFFECT_DAZZLE)) a->askill -= 2;
+	if (!behind && (a->riding == I_CAMEL))
+		def->DoAnAttack(0, 1, ATTACK_RIDING, 3, SPECIAL_FLAGS,
+				EFFECT_CAMEL_FEAR);
+	
 
     int numAttacks = a->attacks;
     if( a->attacks < 0 )

@@ -101,11 +101,10 @@ AString *ShowSkill::Report(void)
 						"order to produce mithril in designated regions "
 						"(Note that a Mining skill of 3 is required to "
 						"even determine that mithril may be produced). "
-						"Mithril is the strongest metal known.  One unit "
-						"of mithril weighs 10 weight units.";
+						"One unit of mithril weighs 10 weight units.";
 					if(!(SkillDefs[S_WEAPONSMITH].flags&SkillType::DISABLED)) {
 						*str += " High level Weaponsmiths may use mithril to "
-							"forge mithril swords.";
+							"forge mithril weapons.";
 					}
 					if(!(SkillDefs[S_ARMORER].flags & SkillType::DISABLED)) {
 						*str += " High level Armorers may use mithril to "
@@ -124,6 +123,26 @@ AString *ShowSkill::Report(void)
 				   !(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED)) {
 					*str += " A unit with this skill may use the BUILD order "
 						   "to build an Arcane Mine from mithril.";
+				}
+			} else if(level == 5) {
+				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may use the PRODUCE "
+						"order to produce admantium in designated regions "
+						"(Note that a Mining skill of 5 is required to "
+						"even determine that admantium may be produced). "
+						"Admantium is the strongest metal known.  One unit "
+						"of admantium weighs 10 weight units.";
+				if(!(SkillDefs[S_WEAPONCRAFT].flags&SkillType::DISABLED)) {
+					*str += " High level weapons crafters may use admantium "
+						    "to forge admantium weapons.";
+				}
+				if(!(SkillDefs[S_ARMORCRAFT].flags & SkillType::DISABLED)) {
+					*str += " High level armor crafters may use admantium to "
+						    "forge admantium armor.";
+				}
+				if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
+					*str += " Production can be increased by using picks.";
 				}
 			}
 			break;
@@ -187,7 +206,7 @@ AString *ShowSkill::Report(void)
 					   "most pliable wood known.  One unit of yew weighs 5 "
 					   "weight units.";
 				if(!(SkillDefs[S_WEAPONSMITH].flags & SkillType::DISABLED)) {
-					*str += " High level weaponsmiths may use use to "
+					*str += " High level weaponsmiths may use yew to "
 					       "produce powerful bows.";
 				}
 				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
@@ -390,17 +409,18 @@ AString *ShowSkill::Report(void)
 					}
 				}
 			} else if (level == 2) {
-				if(ItemDefs[I_LANCE].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_BAXE].flags & ItemType::DISABLED) break;
 				if(ItemDefs[I_WOOD].flags & ItemType::DISABLED) break;
-				if(SkillDefs[S_RIDING].flags & SkillType::DISABLED) break;
+				if(ItemDefs[I_IRON].flags & ItemType::DISABLED) break;
 				found = 1;
-				*str += "A unit with this skill may use the PRODUCE "
-						"order to produce lances from wood.  A lance "
-						"attacks as if the target has a defensive skill of "
-						"0, and requires riding skill to wield.  It takes "
-						"two units of wood to produce a lance, which "
-						"weighs two units.  A unit wielding a lance attacks"
-						"with a combat skill equal to their riding skill + 5.";
+				*str += "A unit with this skill may use the PRODUCE order "
+						"to produce battle axes from 1 unit each of iron and "
+						"wood.  Battle axes give units a +4 bonus in combat "
+						"but may only strike every other round due to their "
+						"mass.";
+				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+					*str += "  Production can be increased by using hammers.";
+				}
 			} else if (level == 3) {
 				if(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) break;
 				if(ItemDefs[I_MSWORD].flags & ItemType::DISABLED) break;
@@ -432,8 +452,8 @@ AString *ShowSkill::Report(void)
 					!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED))) {
 					found = 1;
 					*str += "A unit with this skill may use the PRODUCE "
-						"order to produce double bows, the ultimate "
-						"(natural) dealer of death on a battlefield. Double "
+						"order to produce double bows, one of the best "
+						"(natural) dealers of death on a battlefield. Double "
 						"bows may be used by units skilled in ";
 					if(!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
 						*str += "Crossbow";
@@ -452,20 +472,6 @@ AString *ShowSkill::Report(void)
 					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
 						*str += "  Production can be increased by using axes.";
 					}
-				}
-				if(!(ItemDefs[I_ICESPEAR].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_ICESPEAR].flags & ItemType::DISABLED) &&
-				   !(SkillDefs[S_COMBAT].flags & SkillType::DISABLED)) {
-					if(found) *str += " ";
-					found = 1;
-					*str += "A unit with this skill may use the PRODUCE "
-						"order to produce icespears from spears.  "
-				        "A icespear attacks as if the target has "
-						"a defensive skill of 0, and requires combat "
-					    "skill to wield.  It takes one spear to "
-						"produce a icespear, which weighs one unit.  "
-						"A icespear gives a +2 combat bonus when attacking "
-						"and allows its possessor three attacks per round.";
 				}
 			}
 			break;
@@ -492,17 +498,20 @@ AString *ShowSkill::Report(void)
 				if(!(ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED) &&
 				   !(ItemDefs[I_HERBS].flags & ItemType::DISABLED)) {
 					*str += "cloth armor from herbs (provides a 1/6 chance "
-						   "of surviving an attack in combat), ";
+						   "of surviving an attack from a normal weapon in "
+						   "combat and may be worn during assassination "
+						   "attacks), ";
 				}
 				if(!(ItemDefs[I_LEATHERARMOR].flags & ItemType::DISABLED) &&
 				   !(ItemDefs[I_FUR].flags & ItemType::DISABLED)) {
 					*str += "leather armor from furs (provides a 1/4 chance "
-						   " of surviving an attack in combat), ";
+						   " of surviving an attack from a normal weapon "
+						   "in combat), ";
 				}
 				if(!(ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED) &&
 				   !(ItemDefs[I_IRON].flags & ItemType::DISABLED)) {
 					*str += "chain armor from iron (provides a 1/3 chance of "
-						"surviving an attack in combat).";
+						"surviving an attack from a normal weapon in combat).";
 				}
 				if((!(ItemDefs[I_SPINNING].flags) & ItemType::DISABLED) &&
 				   (!(ItemDefs[I_LEATHERARMOR].flags & ItemType::DISABLED) ||
@@ -542,14 +551,9 @@ AString *ShowSkill::Report(void)
 				*str += "A unit with this skill may PRODUCE mithril armor "
 					   "from one unit of mithril. Mithril armor provides "
 					   "a 9/10 chance of surviving a successful attack in "
-					   "battle";
-				if(!(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED) ||
-				   !(ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED) ||
-				   !(ItemDefs[I_MCROSSBOW].flags & ItemType::DISABLED)) {
-					*str += ", and a 2/3 chance of surviving a crossbow "
-						   "attack";
-				}
-				*str += ". Mithril armor weighs but one unit.";
+					   "battle from a normal weapon and a 2/3 chance of "
+					   "surviving an attack from a good weapon.  Mithril "
+					   "armor weighs one unit.";
 				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
 					*str += " Production of mithril armor can be increased "
 						   "by using hammers.";
@@ -1721,21 +1725,6 @@ AString *ShowSkill::Report(void)
 					   "the item being created. A mage with knowledge of "
 					   "the Artifact Lore skill will detect the use of "
 					   "Artifact Lore by any other mage in the region.";
-			} else {
-				if(level == 2) {
-					if(ItemDefs[I_FIRESPEAR].flags & ItemType::DISABLED) break;
-					if(ItemDefs[I_SPEAR].flags & ItemType::DISABLED) break;
-					if(SkillDefs[S_COMBAT].flags & SkillType::DISABLED) break;
-					found = 1;
-					*str += "A unit with this skill may use the PRODUCE "
-						"order to produce firespears from spears.  "
-				        "A firespear attacks as if the target has "
-						"a defensive skill of 0, and requires combat "
-					    "skill to wield.  It takes one spear to "
-						"produce a firespear, which weighs one unit.  "
-						"A firespear gives a +3 combat bonus when attacking "
-						"and allows its possessor two attacks per round.";
-				}
 			}
 			break;
 		case S_CREATE_RING_OF_INVISIBILITY:
@@ -1947,15 +1936,10 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "A mage with the Enchant Armor skill may enchant "
 					   "normal plate armor into mithril armor, which give "
-					   "the wearer a 90 percent chance of surviving a "
-					   "normal attack";
-				if(!(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED) ||
-				   !(ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED) ||
-				   !(ItemDefs[I_MCROSSBOW].flags & ItemType::DISABLED)) {
-					*str += ", and a 2/3 chance of surviving a crossbow "
-						   "attack";
-				}
-				*str += ". A mage may enchant 5 times his skill level "
+					   "the wearer a 9/10 chance of surviving a successful "
+					   "attack in battle from a normal weapon and a 2/3 "
+					   "chance of surviving an attack from a good weapon. "
+					   "A mage may enchant 5 times his skill level "
 					   "plate armors per turn; the armor should be in "
 					   "the mage's inventory for him to enchant them. The "
 					   "mage should issue the order CAST Enchant_Armor "
@@ -1984,32 +1968,166 @@ AString *ShowSkill::Report(void)
 					   "further advantages.";
 			}
 			break;
-		case S_TAME_DRAGON:
-			if(level == 1) {
-				found = 1;
-				*str += "For Ceran!!! Georg needs to write this skill "
-					"description and the implementation!!!!!!";
-			} else if(level == 3) {
-				if(ObjectDefs[O_DCLIFFS].flags & ObjectType::DISABLED) break;
-				if(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED) break;
-				found = 1;
-				*str += " A unit with this skill may use the BUILD order "
-						   "to build a Dragon Cliffs from rootstone.  "
-						   "Dragon Cliffs will produce dragons over time.";
-			}
-			break;
 		case S_WEAPONCRAFT:
-			if(level == 1) {
+			if (level == 1) {
+				*str += "The weaponcraft skill is an advanced version of the "
+					    "weaponsmith skill.";
 				found = 1;
-				*str += "For Ceran!!! Georg needs to write this skill "
-					"description and the implementation!!!!!!";
+				if(!(ItemDefs[I_LANCE].flags & ItemType::DISABLED) &&
+				   !(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
+				   !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+					*str += " A unit with this skill may use the PRODUCE "
+						    "order to produce lances from wood.  A lance "
+							"attacks as if the target has a defensive skill "
+							"of 0, and requires riding skill to wield.  It "
+							"takes two units of wood to produce a lance, "
+							"which weighs two units.  A unit wielding a "
+							"lance attacks with a combat skill equal to "
+							"their riding skill + 5.";
+					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+						*str += " Production can be increased by using axes.";
+					}
+				}
+			} else if(level == 2) {
+				if(ItemDefs[I_MBAXE].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may use the PRODUCE order "
+						"to produce mithril battle axes from 1 unit each of "
+						"mithril and ironwood.  Mithril battle axes give "
+						"units a +6 bonus in combat but may only strike "
+						"every other round due to their mass.";
+				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+					*str += "  Production can be increased by using hammers.";
+				}
+			} else if (level == 3) {
+				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_ADSWORD].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may use the PRODUCE order "
+					   "to produce admantium swords from admantium.  "
+					   "Admantium swords give units a +6 bonus in combat "
+					   "rather than the usual +2, and cut more easily "
+					   "through armor due to their sharpness.";
+				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+					*str += "  Production can be increased by using hammers.";
+				}
+			} else if(level == 4) {
+				if(!(ItemDefs[I_YEW].flags & ItemType::DISABLED) &&
+				   !(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) &&
+				   !(ItemDefs[I_SUPERBOW].flags & ItemType::DISABLED) &&
+				   (!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED) ||
+					!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED))) {
+					found = 1;
+					*str += "A unit with this skill may use the PRODUCE "
+						"order to produce super bows, the ultimate "
+						"(natural) dealer of death on a battlefield.  Super"
+						"bows may be used by units skilled in ";
+					if(!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
+						*str += "Crossbow";
+					}
+					if(!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED)) {
+						if(!(SkillDefs[S_CROSSBOW].flags&SkillType::DISABLED)){
+							*str += " or ";
+						}
+						*str += "Longbow";
+					}
+					*str += ". A super bow fires as if the target has "
+						"a defensive skill of 0, and fires a number of "
+						"shots, per round, equal to the skill level of the "
+						"wielder.  Super bows add a +2 to the bow skill of "
+						"the unit.  It takes two units of yew and one unit "
+						"of mithril to produce a double bow, which weighs "
+						"one unit.";
+					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+						*str += "  Production can be increased by using axes.";
+					}
+				}
+			} else if(level == 5) {
+				if(ItemDefs[I_ADBAXE].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_YEW].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may use the PRODUCE order "
+						"to produce admantium battle axes from 1 unit each of "
+						"admantium and yew.  Admantium battle axes give "
+						"units a +8 bonus in combat but may only strike "
+						"every other round due to their mass, however they "
+						"do cut more easily through armor due to their "
+						"sharpness.";
+				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+					*str += "  Production can be increased by using hammers.";
+				}
 			}
 			break;
 		case S_ARMORCRAFT:
 			if(level == 1) {
+				*str += "The armorcraft skill is an advanced version of the "
+					    "armorsmith skill.";
 				found = 1;
-				*str += "For Ceran!!! Georg needs to write this skill "
-					"description and the implementation!!!!!!";
+				if(!(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) &&
+				   !(ItemDefs[I_MPLATE].flags & ItemType::DISABLED) &&
+				   !(ItemDefs[I_IMARM].flags & ItemType::DISABLED)) {
+					*str += "  A unit with this skill may PRODUCE improved "
+						    "mithril armor from one unit of mithril and an "
+							"existing suit of mithril armor.  Improved "
+							"mithril armor provides a 9/10 chance of "
+							"surviving a successful attack in battle from "
+							"a normal weapon, and a 3/4 chance of surviving "
+							"an attack from a good weapon. Improved mithril "
+							"armor weighs one unit.";
+					if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+						*str += " Production of improved mithril armor can be "
+							    "increased by using hammers.";
+					}
+				}
+			} else if(level == 3) {
+				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_ADRING].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may PRODUCE admantium "
+						"ring mail from one unit of admantium.  Admantium "
+						"ring mail provides a 9/10 chance of "
+						"surviving a successful attack in battle from "
+						"a normal weapon, and a 4/5 chance of surviving "
+						"an attack from a good weapon. Admantium ring mail "
+						"weighs one unit.";
+				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+					*str += " Production of admantium ring mail can be "
+							"increased by using hammers.";
+				}
+			} else if(level == 5) {
+				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_PLATEARMOR].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_ADPLATE].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may PRODUCE admantium "
+						"plate mail from three units of admantium and an "
+						"existing suit of plate mail.  Admantium plate mail "
+						"provides a 95/100 chance of surviving a successful "
+						"attack in battle from a normal weapon, and a 9/10 "
+						"chance of surviving an attack from a good "
+						"weapon. Admantium plate mail weighs one unit.";
+				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+					*str += " Production of admantium plate mail can be "
+							"increased by using hammers.";
+				}
+			}
+			break;
+		case S_CAMELTRAINING:
+			if(level == 1) {
+				if(ItemDefs[I_CAMEL].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may use the PRODUCE order "
+					    "to produce camels in designated regions.  Camels "
+						"can be found in desert regions.   Camels weigh "
+						"20 weight units and can carry 70 weight units at "
+						"walking or riding speeds.";
+				if(!(ItemDefs[I_LASSO].flags & ItemType::DISABLED)) {
+					*str += " Production of camels can be increased using "
+						    "lassos.";
+				}
 			}
 			break;
 	}

@@ -478,12 +478,30 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
     }
   
     int inputno = ItemDefs[o->item].number;
-    number /= inputno;
-    if (number * inputno > u->items.GetNum(input))
-        number = u->items.GetNum(input) / inputno;
-    u->items.SetNum(input,u->items.GetNum(input) - number * inputno);
-    u->items.SetNum(o->item,u->items.GetNum(o->item) + number);
-    u->Event(AString("Produces ") + ItemString(o->item,number) + " in " +
+	int maxproduced;
+
+	int input2 = ItemDefs[o->item].input2;
+	int inputno2 = ItemDefs[o->item].number2;
+	if(input2 != -1) {
+		maxproduced = number/(inputno + inputno2);
+	} else {
+		maxproduced = number/inputno;
+	}
+   
+    if (maxproduced * inputno > u->items.GetNum(input))
+        maxproduced = u->items.GetNum(input) / inputno;
+
+	if((input2 != -1) && (maxproduced * inputno > u->items.GetNum(input2))) {
+		int max2 = u->items.GetNum(input2)/inputno2;
+		if(max2 < maxproduced) maxproduced = max2;
+	}
+
+    u->items.SetNum(input,u->items.GetNum(input) - maxproduced * inputno);
+	if(input2 != -1) {
+		u->items.SetNum(input2, u->items.GetNum(input2)-maxproduced*inputno2);
+	}
+    u->items.SetNum(o->item,u->items.GetNum(o->item) + maxproduced);
+    u->Event(AString("Produces ") + ItemString(o->item,maxproduced) + " in " +
              r->ShortPrint( &regions ) + ".");
     delete u->monthorders;
     u->monthorders = 0;

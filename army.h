@@ -40,6 +40,7 @@ class Army;
 #define EFFECT_DAZZLE 1
 #define EFFECT_FEAR 2
 #define EFFECT_STORM 4
+#define EFFECT_CAMEL_FEAR 8
 
 #define SPECIAL_FLAGS ( WeaponType::NEVERMISS | WeaponType::GOODARMOR )
 
@@ -48,6 +49,7 @@ enum {
     ATTACK_ENERGY,
     ATTACK_SPIRIT,
     ATTACK_WEATHER,
+	ATTACK_RIDING,
     NUM_ATTACK_TYPES
 };
 

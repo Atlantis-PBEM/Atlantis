@@ -44,12 +44,23 @@ int Game::SetupFaction( Faction *pFac )
     temp2->Study(S_SPIRIT, 30);
     temp2->Study(S_GATE_LORE, 30);
 
-    if (TurnNumber() >= 25) {
+    if (TurnNumber() >= 12) {
+		temp2->Study(S_FORCE, 30);
+		temp2->Study(S_FIRE, 30);
+		temp2->Study(S_COMBAT, 30);
+    }
+	if(TurnNumber() >= 24) {
 		temp2->Study(S_PATTERN, 60);
 		temp2->Study(S_SPIRIT, 60);
 		temp2->Study(S_FORCE, 90);
-		temp2->Study(S_COMBAT, 30);
-    }
+		temp2->Study(S_EARTH_LORE, 30);
+		temp2->Study(S_STEALTH, 30);
+		temp2->Study(S_OBSERVATION, 30);
+	}
+	if(TurnNumber() >= 36) {
+		temp2->Study(S_TACTICS, 90);
+		temp2->Study(S_COMBAT, 60);
+	}
 
     temp2->MoveUnit( ((ARegion *) (regions.First()))->GetDummy() );
 
@@ -180,11 +191,8 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_HTOWER);
 
 	EnableItem(I_LANCE);
-	EnableItem(I_FIRESPEAR);
-	EnableItem(I_ICESPEAR);
 	EnableItem(I_MUSHROOM);
 
-	EnableSkill(S_TAME_DRAGON);
 	EnableSkill(S_WEAPONCRAFT);
 	EnableSkill(S_ARMORCRAFT);
 
@@ -207,5 +215,11 @@ void Game::ModifyTablesPerRuleset(void)
     ModifyTerrainItems(R_NEXUS, I_HERBS, 100, 20, I_ROOTSTONE, 100, 10,
 			I_MITHRIL, 100, 10, I_YEW, 100, 10, I_IRONWOOD, 100, 10);
 	ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
+
+	ModifyTerrainRaces(R_TUNDRA,I_ESKIMO,I_ICEDWARF,I_GNOLL,I_SEAELF,I_VIKING);
+	ModifyTerrainRaces(R_DESERT,I_NOMAD,I_DESERTDWARF,-1,I_BARBARIAN,I_VIKING);
+	ModifyTerrainRaces(R_FOREST,I_WOODELF,I_VIKING,I_HIGHELF,I_SEAELF,
+			I_WOODELF);
+
 	return;
 }

@@ -64,7 +64,18 @@ Changes from 4.0.5 -> 4.0.6
    -- Fixed bug in production of BAGS that was giving all bag producers a +2
       skill level bonus.
    -- Spinning wheels now correctly help bag production.
-   -- Implement NOSPOILS flag
+   -- Implemented NOSPOILS flag
+   -- Added some items that Tom Alsen (Tzarg) had added to a custom game.
+      Some of these items have been slightly modified.
+   -- Modified production code to allow an item to be built out of two items.
+      When an item has two inputs, it takes man-months equal to the sum of
+      the number of input units.  (For instance, if a battle axe takes 1
+      unit of wood and 1 unit of iron to manufacture, then it takes 2
+      man-months to produce each one)
+   -- Cleaned up the city/town/village renaming code a bit (Thanks to Tom
+      Alsen).  Also added a CITY_RENAME_COST, which if not zero is used as
+      a multiply against the city level (1 == village, 2==town, 3==city)
+      as a cost for renaming the city.
 
 TODO
 ----------------
@@ -75,5 +86,5 @@ TODO
    -- Improve the item/hex editor
    -- Gamedef to handle various options around combat/weapons/bows for taxing
    -- Gamedefs for various economy options. (far future)
-   -- multiple inputs for constructing an item.
    -- Gamedef for alternate nexus layouts
+   -- Give more information when SHOW <item> is done.

@@ -635,20 +635,22 @@ void ARegion::SetupProds()
     if( Globals->FOOD_ITEMS_EXIST )
     {
         if (typer->economy) {
-            if (getrandom(2)) {
+            if (getrandom(2)&&!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED)){
                 p = new Production(I_GRAIN,typer->economy);
                 products.Add(p);
             } else {
-                p = new Production(I_LIVESTOCK,typer->economy);
-                products.Add(p);
+                if(!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED)) {
+					p = new Production(I_LIVESTOCK,typer->economy);
+					products.Add(p);
+				}
             }
         }
     }
 
     if (typer->prod1 != -1)
     {
-        if (getrandom(100) < typer->chance1)
-        {
+		if(!(ItemDefs[typer->prod1].flags & ItemType::DISABLED) && 
+		   ((getrandom(100) < typer->chance1))) {
             p = new Production(typer->prod1,typer->amt1);
             products.Add(p);
         }
@@ -656,8 +658,8 @@ void ARegion::SetupProds()
 
     if (typer->prod2 != -1)
     {
-        if (getrandom(100) < typer->chance2)
-        {
+		if(!(ItemDefs[typer->prod2].flags & ItemType::DISABLED) && 
+		   ((getrandom(100) < typer->chance2))) {
             p = new Production(typer->prod2,typer->amt2);
             products.Add(p);
         }
@@ -665,8 +667,8 @@ void ARegion::SetupProds()
 
     if (typer->prod3 != -1)
     {
-        if (getrandom(100) < typer->chance3)
-        {
+		if(!(ItemDefs[typer->prod3].flags & ItemType::DISABLED) && 
+		   ((getrandom(100) < typer->chance3))) {
             p = new Production(typer->prod3,typer->amt3);
             products.Add(p);
         }
@@ -674,8 +676,8 @@ void ARegion::SetupProds()
 
     if (typer->prod4 != -1)
     {
-        if (getrandom(100) < typer->chance4)
-        {
+		if(!(ItemDefs[typer->prod4].flags & ItemType::DISABLED) && 
+		   ((getrandom(100) < typer->chance4))) {
             p = new Production(typer->prod4,typer->amt4);
             products.Add(p);
         }
@@ -683,8 +685,8 @@ void ARegion::SetupProds()
 
     if (typer->prod5 != -1)
     {
-        if (getrandom(100) < typer->chance5)
-        {
+		if(!(ItemDefs[typer->prod5].flags & ItemType::DISABLED) && 
+		   ((getrandom(100) < typer->chance5))) {
             p = new Production(typer->prod5,typer->amt5);
             products.Add(p);
         }

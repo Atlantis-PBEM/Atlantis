@@ -260,6 +260,10 @@ public:
 	// Is the withdraw order enabled
 	int ALLOW_WITHDRAW;
 
+	// Do cities have a cost to rename them?  If this value is set,
+	// the cost is the city size (1, 2, 3) * this value
+	int CITY_RENAME_COST;
+
 };
 
 extern GameDefs * Globals;

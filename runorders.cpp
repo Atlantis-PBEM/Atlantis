@@ -47,10 +47,6 @@ void Game::RunOrders()
     DoAutoAttacks();
     Awrite("Running STEAL/ASSASSINATE Orders...");
     RunStealOrders();
-	if(Globals->ALLOW_WITHDRAW) {
-		Awrite("Running WITHDRAW Orders...");
-		DoWithdrawOrders();
-	}
     Awrite("Running GIVE/PAY/TRANSFER Orders...");
     DoGiveOrders();
     Awrite("Running DESTROY Orders...");
@@ -75,6 +71,10 @@ void Game::RunOrders()
     Awrite("Removing Empty Units...");
     DeleteEmptyUnits();
     SinkShips();
+	if(Globals->ALLOW_WITHDRAW) {
+		Awrite("Running WITHDRAW Orders...");
+		DoWithdrawOrders();
+	}
     Awrite("Running Sail Orders...");
     RunSailOrders();
     Awrite("Running Move Orders...");

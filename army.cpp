@@ -62,6 +62,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
     dskill[ATTACK_ENERGY] = -2;
     dskill[ATTACK_SPIRIT] = -2;
     dskill[ATTACK_WEATHER] = -2;
+	dskill[ATTACK_RIDING] = -1;
     armor = -1;
     hits = 1;
     amuletofi = 0;
@@ -204,6 +205,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 
             askill += bonus;
             dskill[ ATTACK_COMBAT ] += bonus;
+			dskill[ ATTACK_RIDING ] = bonus;
             riding = item;
             break;
         }
@@ -262,6 +264,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
             if( pWep->flags & WeaponType::NEEDSKILL )
             {
                 askill = level1 + pWep->skillBonus;
+				if(!(pWep->flags & WeaponType::NODEFENSE))
+					dskill[ ATTACK_COMBAT ] += level1 + pWep->skillBonus;
             }
             else
             {
@@ -414,6 +418,11 @@ void Soldier::SetEffect(int eff)
         dskill[ATTACK_COMBAT] -= 2;
         askill -= 2;
     }
+	if (eff == EFFECT_CAMEL_FEAR) {
+		if(riding != I_HORSE) return;
+		askill -= 2;
+		dskill[ATTACK_COMBAT] -= 2;
+	}
     effects = effects | eff;
 }
 
@@ -432,6 +441,10 @@ void Soldier::ClearEffect(int eff)
             dskill[ATTACK_COMBAT] += 2;
             askill += 2;
         }
+		if (eff == EFFECT_CAMEL_FEAR) {
+			dskill[ATTACK_COMBAT] += 2;
+			askill += 2;
+		}
     }
 }
 
@@ -1073,7 +1086,7 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 
     /* 2. Attack shield */
     Shield * hi;
-    if( attackType == ATTACK_COMBAT)
+    if((attackType == ATTACK_COMBAT) || (attackType == ATTACK_RIDING))
     {
         hi = 0;
     } 

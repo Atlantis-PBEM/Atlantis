@@ -49,6 +49,7 @@ enum {
     IT_MOUNT = 0x100,
     IT_BATTLE = 0x200,
 	IT_SPECIAL = 0x400,
+	IT_TOOL = 0x800,
 };
 
 class ItemType
@@ -68,6 +69,8 @@ public:
     int level;
     int input;
     int number;
+	int input2;
+	int number2;
     int weight;
     int type;
     int baseprice;

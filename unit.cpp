@@ -191,36 +191,33 @@ void Unit::Readin( Ainfile *s, AList *facs, ATL_VER v )
 
 AString Unit::MageReport()
 {
-    AString temp;
-    
-    if (combat != -1)
-    {
-        temp = AString(". Combat spell: ") + SkillStrs(combat);
-    }
+	AString temp;
 
-    int j=0;
-    for (int i=0; i<NSKILLS; i++)
-    {
-        if(( SkillDefs[i].flags & SkillType::MAGIC ) &&
-           !( SkillDefs[i].flags & SkillType::FOUNDATION ))
-        {
-            if (CanStudy(i))
-            {
-                if (j)
-                {
-                    temp += ", ";
-                } 
-                else
-                {
-                    temp += ". Can Study: ";
-                    j=1;
-                }
-                temp += SkillStrs(i);
-            }
-        }
-    }
+	if (combat != -1) {
+		temp = AString(". Combat spell: ") + SkillStrs(combat);
+	}
+	return temp;
+}
 
-    return temp;
+AString Unit::StudyableSkills()
+{
+	AString temp;
+
+	int j=0;
+	for (int i=0; i<NSKILLS; i++) {
+		if(SkillDefs[i].depend1 != -1) {
+			if (CanStudy(i)) {
+				if (j) {
+					temp += ", ";
+				} else {
+					temp += ". Can Study: ";
+					j=1;
+				}
+				temp += SkillStrs(i);
+			}
+		}
+	}
+	return temp;
 }
 
 AString Unit::GetName(int obs)
@@ -318,6 +315,9 @@ void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
     if (obs == 2 && (type == U_MAGE || type == U_GUARDMAGE)) {
         temp += MageReport();
     }
+	if(obs == 2) {
+		temp += StudyableSkills();
+	}
   
     if (describe) {
         temp += AString("; ") + *describe;

@@ -2953,7 +2953,7 @@ unit otherwise could do so.  Units inside of a ship are not affected
 by this flag (IE, they are able to sail within the ship).   This flag
 is useful for games where the rules have been set so that water crossing
 is allowed, or items exist which give a unit swimming capacity, and has
-no effect in the 'standard' ruleset.<p>
+no effect in the 'standard' ruleset. NOCROSS 0 cancels this.<p>
 
 Example:<p>
 Set a unit to not permit itself to cross water. <p>
@@ -2965,7 +2965,8 @@ Set a unit to not permit itself to cross water. <p>
 <a name="nospoils"></a>
 <h4> NOSPOILS [flag] </h4>
 NOSPOILS 1 indeicates that a unit should not stop to collect spoils after a 
-battle.  The unit will not be given any spoils which have weight.<p>
+battle.  The unit will not be given any spoils which have weight. NOSPOILS 0
+cancels this.<p>
 
 Example:<p>
 Set a unit to not recieve battle spoils.<p>
@@ -3300,11 +3301,6 @@ orders are processed.
 <a href="#assassinate">ASSASSINATE</a> orders are processed.
 </ul>
 
-<li> Withdraw orders.
-<ul>
-<li> <a href="#withdraw">WITHDRAW</a> orders are processed.
-</ul>
-
 <li> Give orders.
 
 <ul>
@@ -3335,6 +3331,11 @@ orders are processed.
 <li> <a href="#quit">QUIT</a> and <a href="#restart">RESTART</a>
 orders are processed.
 <li> <a href="#forget">FORGET</a> orders are processed.
+</ul>
+
+<li> Withdraw orders.
+<ul>
+<li> <a href="#withdraw">WITHDRAW</a> orders are processed.
 </ul>
 
 <li> Movement orders.

@@ -122,6 +122,7 @@ public:
     void WriteReport(Areport *,int,int,int,int);
 	AString GetName(int);
     AString MageReport();
+	AString StudyableSkills();
     AString * BattleReport(int);
     AString TemplateReport();
   
