@@ -372,6 +372,9 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
                         former = 0;
                         ParseError( pCheck, 0, fac, "FORM: without END." );
                     }
+					if(unit && pCheck) {
+                        unit->ClearOrders();
+					}
                     unit = 0;
                     delete token;
 
@@ -1143,6 +1146,8 @@ void Game::ProcessRestartOrder(Unit *u,AString *o, OrdersCheck *pCheck )
             u->faction->quit = QUIT_AND_RESTART;
             Faction *pFac = AddFaction();
             pFac->SetAddress( *( u->faction->address ));
+			AString *pass = new AString(*(u->faction->password));
+			pFac->password = pass;
             AString *facstr = new AString( AString("Restarting ")
                                            + *( pFac->address ) + "." );
             newfactions.Add(facstr);
