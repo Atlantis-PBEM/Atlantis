@@ -270,10 +270,6 @@ static char *fill[] = {
  "      ",
  "      ",
 
- // volcano
- " /\\/\\ ",
- "/  \\ \\",
-
  // grotto
  "  . . ",
  " . .  ",
@@ -292,6 +288,10 @@ static char *fill[] = {
  // chasm1
  "      ",
  "      ",
+
+ // volcano
+ " /\\/\\ ",
+ "/  \\ \\",
 
 };
 
