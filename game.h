@@ -28,6 +28,7 @@
 // 2000/MAR/14 Larry Stanbery  Added a unit:faction list capability.
 // 2000/MAR/25 Larry Stanbery  Added support for ruleset changes.
 // 2001/Feb/18 Joseph Traub    Added support for Apprentices
+// 2001/Feb/19 Joseph Traub    Upped version to 4.0.5
 #ifndef GAME_CLASS
 #define GAME_CLASS
 
@@ -39,7 +40,7 @@ class Game;
 #include "production.h"
 #include "object.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 0, 4 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 0, 5 )
 
 class OrdersCheck
 {

@@ -36,6 +36,9 @@
 //                               mage support.
 // 2001/Feb/18 Joseph Traub      Added Apprentices idea from Lacandon Conquest
 // 2001/Feb/18 Joseph Traub      Added back in support for Conquest
+// 2001/Feb/19 Joseph Traub      Removed the ENGINE_VERSION from the gamedef
+//                               since it wasn't being used.
+//
 
 #ifndef GAME_DEFS
 #define GAME_DEFS
@@ -61,7 +64,6 @@ class GameDefs {
 public:
     char *RULESET_NAME;
     ATL_VER RULESET_VERSION;
-    ATL_VER ENGINE_VERSION;
 
     int FOOT_SPEED;
     int HORSE_SPEED;

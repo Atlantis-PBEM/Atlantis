@@ -41,7 +41,9 @@
 //                               mage support.
 // 2001/Feb/18 Joseph Traub      Added support for Apprentices if desired.
 // 2001/Feb/18 Joseph Traub      Recreated a conquest scenario
-
+// 2001/Feb/19 Joseph Traub      Removed the ENGINE_VERSION from the gamedef
+//                               since it wasn't being used.
+//
 #include "rules.h"
 #include "items.h"
 #include "skills.h"
@@ -56,7 +58,6 @@
 static GameDefs g = {
     "Atlantis Conquest",     // RULESET_NAME
     MAKE_ATL_VER( 1, 0, 0 ), // RULESET_VERSION
-    MAKE_ATL_VER( 4, 0, 5 ), // ENGINE_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */
