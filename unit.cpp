@@ -462,45 +462,44 @@ void Unit::PostTurn(ARegion *r)
     }
 }
 
-void Unit::SetName(AString *s) {
-  if (s) {
-    AString * newname = s->getlegal();
-    if (!newname) {
-      delete s;
-      return;
-    }
-    *newname += AString(" (") + num + ")";
-    delete s;
-    delete name;
-    name = newname;
-  }
+void Unit::SetName(AString *s)
+{
+	if (s) {
+		AString * newname = s->getlegal();
+		if (!newname) {
+			delete s;
+			return;
+		}
+		*newname += AString(" (") + num + ")";
+		delete s;
+		delete name;
+		name = newname;
+	}
 }
 
-void Unit::SetDescribe(AString * s) {
-  if (describe) delete describe;
-  if (s) {
-    AString * newname = s->getlegal();
-    delete s;
-    describe = newname;
-  } else
-    describe = 0;
+void Unit::SetDescribe(AString * s)
+{
+	if (describe) delete describe;
+	if (s) {
+		AString * newname = s->getlegal();
+		delete s;
+		describe = newname;
+	} else
+		describe = 0;
 }
 
 int Unit::IsAlive()
 {
-    if( type == U_MAGE || type == U_APPRENTICE )
-    {
-        return( GetMen() );
-    }
-    else
-    {
-        forlist(&items) {
-            Item * i = (Item *) elem;
-            if (IsSoldier(i->type) && i->num > 0)
-                return 1;
-        }
-    }
-    return 0;
+	if( type == U_MAGE || type == U_APPRENTICE ) {
+		return( GetMen() );
+	} else {
+		forlist(&items) {
+			Item * i = (Item *) elem;
+			if (IsSoldier(i->type) && i->num > 0)
+				return 1;
+		}
+	}
+	return 0;
 }
 
 void Unit::SetMen(int t,int n)

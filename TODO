@@ -57,4 +57,7 @@
    -- Handle speed increase from summon wind configurably.
    -- Add more items so that apprentices are actually useful.
    -- rethink some of the current spells.
-   -- consider having summoned creatures drop no loot.
+   -- consider having summoned creatures drop no loot. Possibly have
+      them regain (or gain) loot over time, so the longer a monster is free
+      the more money and stuff it has.
+   -- Consider Az's beastform spell

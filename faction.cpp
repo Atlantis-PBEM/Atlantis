@@ -212,63 +212,62 @@ void Faction::Readin( Ainfile *f, ATL_VER v )
 
 void Faction::View()
 {
-    AString temp;
-    temp = AString("Faction ") + num + AString(" : ") + *name;
-    Awrite(temp);
+	AString temp;
+	temp = AString("Faction ") + num + AString(" : ") + *name;
+	Awrite(temp);
 }
 
 void Faction::SetName(AString * s)
 {
-    if (s)
-    {
-        AString * newname = s->getlegal();
-        delete s;
-        if (!newname) return;
-        delete name;
-        *newname += AString(" (") + num + ")";
-        name = newname;
-    }
+	if (s)
+	{
+		AString * newname = s->getlegal();
+		delete s;
+		if (!newname) return;
+		delete name;
+		*newname += AString(" (") + num + ")";
+		name = newname;
+	}
 }
 
 void Faction::SetNameNoChange( AString *s )
 {
-    if( s )
-    {
-        delete name;
-        name = new AString( *s );
-    }
+    if( s ) {
+		delete name;
+		name = new AString( *s );
+	}
 }
 
 void Faction::SetAddress( AString &strNewAddress )
 {
-    delete address;
-    address = new AString( strNewAddress );
+	delete address;
+	address = new AString( strNewAddress );
 }
 
 AString Faction::FactionTypeStr()
 {
-    AString temp;
-    if (IsNPC()) return AString("NPC");
+	AString temp;
+	if (IsNPC()) return AString("NPC");
 
 	if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED) {
 		return (AString("Unlmiited"));
 	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
-        return( AString( "Normal" ));
-    } else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-        int comma = 0;
-        for (int i=0; i<NFACTYPES; i++) {
-            if (type[i]) {
-                if (comma) {
-                    temp += ", ";
+		return( AString( "Normal" ));
+	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		int comma = 0;
+		for (int i=0; i<NFACTYPES; i++) {
+			if (type[i]) {
+				if (comma) {
+					temp += ", ";
 				} else {
-                    comma = 1;
-                }
-                temp += AString(FactionStrs[i]) + " " + type[i];
-            }
-        }
-        if (!comma) return AString("none");
-    }
-    return temp;
+					comma = 1;
+				}
+				temp += AString(FactionStrs[i]) + " " + type[i];
+			}
+		}
+		if (!comma) return AString("none");
+	}
+	return temp;
 }
 
 void Faction::WriteReport( Areport *f, Game *pGame )

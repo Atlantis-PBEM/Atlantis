@@ -61,7 +61,6 @@ public:
     AString *Trunc(int);
     int value();
     AString *StripWhite();
-	char *getstr();
 
 private:
     

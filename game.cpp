@@ -308,177 +308,139 @@ int Game::NewGame()
 
 int Game::OpenGame()
 {
-    //
-    // The order here must match the order in SaveGame
-    //
-    Ainfile f;
-    if( f.OpenByName( "game.in" ) == -1 )
-    {
-        return( 0 );
-    }
-		
-    //
-    // Read in Globals
-    //
-    AString *s1 = f.GetStr();
-    if( !s1 )
-    {
-        return( 0 );
-    }
-    AString *s2 = s1->gettoken();
-    delete s1;
-    if( !s2 )
-    {
-        return( 0 );
-    }
-    if (! (*s2 == "atlantis_game"))
-    {
-        delete s2;
-        f.Close();
-        return( 0 );
-    }
-    delete s2;
-  
-    ATL_VER eVersion = f.GetInt();
-    Awrite( AString( "Saved Game Engine Version: " ) + 
-            ATL_VER_STRING( eVersion ) );
-    if( ATL_VER_MAJOR( eVersion ) != ATL_VER_MAJOR( CURRENT_ATL_VER ) ||
-        ATL_VER_MINOR( eVersion ) != ATL_VER_MINOR( CURRENT_ATL_VER ) )
-    {
-        Awrite( "Incompatible Engine versions!" );
-        return( 0 );
-    }
-    if( ATL_VER_PATCH( eVersion ) > ATL_VER_PATCH( CURRENT_ATL_VER ))
-    {
-        Awrite( "This game was created with a more recent Atlantis Engine!" );
-        return( 0 );
-    }
+	//
+	// The order here must match the order in SaveGame
+	//
+	Ainfile f;
+	if( f.OpenByName( "game.in" ) == -1 ) {
+		return( 0 );
+	}
 
-    AString *gameName = f.GetStr();
-    if( !gameName )
-    {
-        return( 0 );
-    }
-    if( !( *gameName == Globals->RULESET_NAME ))
-    {
-        Awrite( "Incompatible rule-set!" );
-        return( 0 );
-    }
+	//
+	// Read in Globals
+	//
+	AString *s1 = f.GetStr();
+	if( !s1 ) {
+		return( 0 );
+	}
+	AString *s2 = s1->gettoken();
+	delete s1;
+	if( !s2 ) {
+		return( 0 );
+	}
+	if (! (*s2 == "atlantis_game")) {
+		delete s2;
+		f.Close();
+		return( 0 );
+	}
+	delete s2;
 
-    ATL_VER gVersion = f.GetInt();
-    Awrite( AString( "Saved Rule-Set Version: " ) +
-            ATL_VER_STRING( gVersion ));
+	ATL_VER eVersion = f.GetInt();
+	Awrite(AString("Saved Game Engine Version: ") + ATL_VER_STRING(eVersion));
+	if(ATL_VER_MAJOR(eVersion) != ATL_VER_MAJOR(CURRENT_ATL_VER) ||
+			ATL_VER_MINOR(eVersion) != ATL_VER_MINOR(CURRENT_ATL_VER)) {
+		Awrite( "Incompatible Engine versions!" );
+		return( 0 );
+	}
+	if(ATL_VER_PATCH(eVersion) > ATL_VER_PATCH(CURRENT_ATL_VER)) {
+		Awrite( "This game was created with a more recent Atlantis Engine!" );
+		return( 0 );
+	}
 
-    // LLS
-    // Modified to support upgrade to newer ruleset
-    //if( ATL_VER_MAJOR( gVersion ) != 
-    //    ATL_VER_MAJOR( Globals->RULESET_VERSION ) ||
-    //    ATL_VER_MINOR( gVersion ) != 
-    //    ATL_VER_MINOR( Globals->RULESET_VERSION ))
-    //{
-    //    Awrite( "Incompatible Game versions!" );
-    //    return( 0 );
-    //}
-    //if( ATL_VER_PATCH( gVersion ) > ATL_VER_PATCH( Globals->RULESET_VERSION ))
-    //{
-    //    Awrite( "This game was created with a more recent version of the "
-    //            "rule-set!" );
-    //    return( 0 );
-    //}
-    if( ATL_VER_MAJOR( gVersion ) < ATL_VER_MAJOR( Globals->RULESET_VERSION ))
-    {
-        Awrite( AString( "Upgrading to " ) +
-            ATL_VER_STRING(
-                MAKE_ATL_VER(
-                    ATL_VER_MAJOR( Globals->RULESET_VERSION ), 0, 0 ) ) );
-        if ( ! UpgradeMajorVersion( gVersion ) )
-        {
-            Awrite( "Unable to upgrade!  Aborting!" );
-            return( 0 );
-        }
-        gVersion =
-            MAKE_ATL_VER( ATL_VER_MAJOR( Globals->RULESET_VERSION ), 0, 0 );
-    }
-    if( ATL_VER_MINOR( gVersion ) < ATL_VER_MINOR( Globals->RULESET_VERSION ))
-    {
-        Awrite( AString( "Upgrading to " ) +
-            ATL_VER_STRING(
-                MAKE_ATL_VER(
-                    ATL_VER_MAJOR( Globals->RULESET_VERSION ),
-                    ATL_VER_MINOR( Globals->RULESET_VERSION ), 0 ) ) );
-        if ( ! UpgradeMinorVersion( gVersion ) )
-        {
-            Awrite( "Unable to upgrade!  Aborting!" );
-            return( 0 );
-        }
-        gVersion = MAKE_ATL_VER( ATL_VER_MAJOR( gVersion ),
-            ATL_VER_MINOR( Globals->RULESET_VERSION ), 0);
-    }
-    if( ATL_VER_PATCH( gVersion ) < ATL_VER_PATCH( Globals->RULESET_VERSION ))
-    {
-        Awrite( AString( "Upgrading to " ) +
-            ATL_VER_STRING( Globals->RULESET_VERSION ) );
-        if ( ! UpgradePatchLevel( gVersion ) )
-        {
-            Awrite( "Unable to upgrade!  Aborting!" );
-            return( 0 );
-        }
-        gVersion = MAKE_ATL_VER( ATL_VER_MAJOR( gVersion ),
-            ATL_VER_MINOR( gVersion ),
-            ATL_VER_PATCH( Globals->RULESET_VERSION ) );
-    }
+	AString *gameName = f.GetStr();
+	if(!gameName) {
+		return(0);
+	}
+	if(!(*gameName == Globals->RULESET_NAME)) {
+		Awrite("Incompatible rule-set!");
+		return( 0 );
+	}
 
-    // LLS
-    // when we get the stuff above fixed, we'll remove this junk
-    // add a small hack to check to see whether we need to populate
-    // ocean lairs
-    doExtraInit = f.GetInt();
-    if (doExtraInit > 0)
-    {
-      year = doExtraInit;
-    } else {
-      year = f.GetInt();
-    }
+	ATL_VER gVersion = f.GetInt();
+	Awrite(AString( "Saved Rule-Set Version: ") + ATL_VER_STRING(gVersion));
 
-    month = f.GetInt();
-    seedrandom(f.GetInt());
-    factionseq = f.GetInt();
-    unitseq = f.GetInt();
-    shipseq = f.GetInt();
-    guardfaction = f.GetInt();
-    monfaction = f.GetInt();
+    if(ATL_VER_MAJOR(gVersion) < ATL_VER_MAJOR(Globals->RULESET_VERSION)) {
+		Awrite( AString( "Upgrading to " ) +
+				ATL_VER_STRING(MAKE_ATL_VER(
+						ATL_VER_MAJOR(Globals->RULESET_VERSION), 0, 0)));
+		if (!UpgradeMajorVersion(gVersion)) {
+			Awrite( "Unable to upgrade!  Aborting!" );
+			return( 0 );
+		}
+		gVersion = MAKE_ATL_VER(ATL_VER_MAJOR(Globals->RULESET_VERSION), 0, 0);
+	}
+	if( ATL_VER_MINOR(gVersion) < ATL_VER_MINOR(Globals->RULESET_VERSION)) {
+		Awrite( AString( "Upgrading to " ) +
+				ATL_VER_STRING(MAKE_ATL_VER(
+						ATL_VER_MAJOR(Globals->RULESET_VERSION),
+						ATL_VER_MINOR(Globals->RULESET_VERSION), 0)));
+		if ( ! UpgradeMinorVersion( gVersion ) ) {
+			Awrite( "Unable to upgrade!  Aborting!" );
+			return( 0 );
+		}
+		gVersion = MAKE_ATL_VER( ATL_VER_MAJOR( gVersion ),
+				ATL_VER_MINOR( Globals->RULESET_VERSION ), 0);
+	}
+	if( ATL_VER_PATCH(gVersion) < ATL_VER_PATCH(Globals->RULESET_VERSION)) {
+		Awrite( AString( "Upgrading to " ) +
+				ATL_VER_STRING(Globals->RULESET_VERSION));
+		if ( ! UpgradePatchLevel( gVersion ) ) {
+			Awrite( "Unable to upgrade!  Aborting!" );
+			return( 0 );
+		}
+		gVersion = MAKE_ATL_VER( ATL_VER_MAJOR( gVersion ),
+				ATL_VER_MINOR( gVersion ),
+				ATL_VER_PATCH( Globals->RULESET_VERSION ) );
+	}
 
-    //
-    // Read in the Factions
-    //
-    int i = f.GetInt();
-  
-    for (int j=0; j<i; j++)
-    {
-        Faction * temp = new Faction;
-        temp->Readin( &f, eVersion );
-        factions.Add(temp);
-    }
-  
-    //
-    // Read in the ARegions
-    //
-    i = regions.ReadRegions( &f, &factions, eVersion );
+	// LLS
+	// when we get the stuff above fixed, we'll remove this junk
+	// add a small hack to check to see whether we need to populate
+	// ocean lairs
+	doExtraInit = f.GetInt();
+	if (doExtraInit > 0) {
+		year = doExtraInit;
+	} else {
+		year = f.GetInt();
+	}
+
+	month = f.GetInt();
+	seedrandom(f.GetInt());
+	factionseq = f.GetInt();
+	unitseq = f.GetInt();
+	shipseq = f.GetInt();
+	guardfaction = f.GetInt();
+	monfaction = f.GetInt();
+
+	//
+	// Read in the Factions
+	//
+	int i = f.GetInt();
+
+	for (int j=0; j<i; j++) {
+		Faction * temp = new Faction;
+		temp->Readin( &f, eVersion );
+		factions.Add(temp);
+	}
+
+	//
+	// Read in the ARegions
+	//
+	i = regions.ReadRegions( &f, &factions, eVersion );
 	if(!i) {
 		return 0;
 	}
 
-    // here we add ocean lairs
-    if (doExtraInit > 0)
-    {
-        CreateOceanLairs();
-    }
-   
-    FixBoatNums();	
-    SetupUnitNums();
-    
-    f.Close();
-    return( 1 );
+	// here we add ocean lairs
+	if (doExtraInit > 0) {
+		CreateOceanLairs();
+	}
+
+	FixBoatNums();
+	SetupUnitNums();
+
+	f.Close();
+	return( 1 );
 }
 
 int Game::SaveGame()
@@ -578,274 +540,249 @@ int Game::WritePlayers()
 
 int Game::ReadPlayers()
 {
-    Aorders f;
-    if( f.OpenByName( "players.in" ) == -1 )
-    {
-        return( 0 );
-    }
+	Aorders f;
+	if( f.OpenByName( "players.in" ) == -1 ) {
+		return( 0 );
+	}
 
-    AString *pLine = 0;
-    AString *pToken = 0;
+	AString *pLine = 0;
+	AString *pToken = 0;
 
-    //
-    // Default: failure.
-    //
-    int rc = 0;
+	//
+	// Default: failure.
+	//
+	int rc = 0;
 
-    do
-    {
-        //
-        // The first line of the file should match.
-        //
-        pLine = f.GetLine();
-        if( !( *pLine == PLAYERS_FIRST_LINE ))
-        {
-            break;
-        }
-        SAFE_DELETE( pLine );
+	do {
+		//
+		// The first line of the file should match.
+		//
+		pLine = f.GetLine();
+		if( !( *pLine == PLAYERS_FIRST_LINE )) {
+			break;
+		}
+		SAFE_DELETE( pLine );
 
-        //
-        // Get the file version number.
-        //
-        pLine = f.GetLine();
-        pToken = pLine->gettoken();
-        if( !pToken || !( *pToken == "Version:" ))
-        {
-            break;
-        }
-        SAFE_DELETE( pToken );
+		//
+		// Get the file version number.
+		//
+		pLine = f.GetLine();
+		pToken = pLine->gettoken();
+		if( !pToken || !( *pToken == "Version:" )) {
+			break;
+		}
+		SAFE_DELETE( pToken );
 
-        pToken = pLine->gettoken();
-        if( !pToken )
-        {
-            break;
-        }
+		pToken = pLine->gettoken();
+		if( !pToken ) {
+			break;
+		}
 
-        int nVer = pToken->value();
-        if( ATL_VER_MAJOR( nVer ) != ATL_VER_MAJOR( CURRENT_ATL_VER ) ||
-            ATL_VER_MINOR( nVer ) != ATL_VER_MINOR( CURRENT_ATL_VER ) ||
-            ATL_VER_PATCH( nVer ) > ATL_VER_PATCH( CURRENT_ATL_VER ) )
-        {
-            Awrite( "The players.in file is not compatible with this "
-                    "version of Atlantis." );
-            break;
-        }
-        SAFE_DELETE( pToken );
-        SAFE_DELETE( pLine );
+		int nVer = pToken->value();
+		if(ATL_VER_MAJOR(nVer) != ATL_VER_MAJOR(CURRENT_ATL_VER) ||
+				ATL_VER_MINOR(nVer) != ATL_VER_MINOR(CURRENT_ATL_VER) ||
+				ATL_VER_PATCH(nVer) > ATL_VER_PATCH(CURRENT_ATL_VER)) {
+			Awrite("The players.in file is not compatible with this "
+					"version of Atlantis." );
+			break;
+		}
+		SAFE_DELETE( pToken );
+		SAFE_DELETE( pLine );
 
-        //
-        // Ignore the turn number line.
-        //
-        pLine = f.GetLine();
-        SAFE_DELETE( pLine );
+		//
+		// Ignore the turn number line.
+		//
+		pLine = f.GetLine();
+		SAFE_DELETE( pLine );
 
-        //
-        // Next, the game status.
-        //
-        pLine = f.GetLine();
-        pToken = pLine->gettoken();
-        if( !pToken || !( *pToken == "GameStatus:" ))
-        {
-            break;
-        }
-        SAFE_DELETE( pToken );
+		//
+		// Next, the game status.
+		//
+		pLine = f.GetLine();
+		pToken = pLine->gettoken();
+		if( !pToken || !( *pToken == "GameStatus:" )) {
+			break;
+		}
+		SAFE_DELETE( pToken );
 
-        pToken = pLine->gettoken();
-        if( !pToken )
-        {
-            break;
-        }
-        if( *pToken == "New" )
-        {
-            gameStatus = GAME_STATUS_NEW;
-        }
-        else if( *pToken == "Running" )
-        {
-            gameStatus = GAME_STATUS_RUNNING;
-        }
-        else if( *pToken == "Finished" )
-        {
-            gameStatus = GAME_STATUS_FINISHED;
-        }
-        else
-        {
-            //
-            // The status doesn't seem to be valid.
-            //
-            break;
-        }
+		pToken = pLine->gettoken();
+		if( !pToken ) {
+			break;
+		}
+		if( *pToken == "New" ) {
+			gameStatus = GAME_STATUS_NEW;
+		} else if( *pToken == "Running" ) {
+			gameStatus = GAME_STATUS_RUNNING;
+		} else if( *pToken == "Finished" ) {
+			gameStatus = GAME_STATUS_FINISHED;
+		} else {
+			//
+			// The status doesn't seem to be valid.
+			//
+			break;
+		}
+		SAFE_DELETE(pToken);
 
-        //
-        // Now, we should have a list of factions.
-        //
-        pLine = f.GetLine();
-        Faction *pFac = 0;
+		//
+		// Now, we should have a list of factions.
+		//
+		pLine = f.GetLine();
+		Faction *pFac = 0;
 
-        int lastWasNew = 0;
+		int lastWasNew = 0;
 
-        //
-        // OK, set our return code to success; we'll set it to fail below
-        // if necessary.
-        //
-        rc = 1;
+		//
+		// OK, set our return code to success; we'll set it to fail below
+		// if necessary.
+		//
+		rc = 1;
 
-        while( pLine )
-        {
-            pToken = pLine->gettoken();
-            if( !pToken )
-            {
-                SAFE_DELETE( pLine );
-                pLine = f.GetLine();
-                continue;
-            }
+		while( pLine ) {
+			pToken = pLine->gettoken();
+			if( !pToken ) {
+				SAFE_DELETE( pLine );
+				pLine = f.GetLine();
+				continue;
+			}
 
-            if( *pToken == "Faction:" )
-            {
-                //
-                // Get the new faction
-                //
-                SAFE_DELETE( pToken );
-                pToken = pLine->gettoken();
-                if( !pToken )
-                {
-                    rc = 0;
-                    break;
-                }
+			if( *pToken == "Faction:" ) {
+				//
+				// Get the new faction
+				//
+				SAFE_DELETE( pToken );
+				pToken = pLine->gettoken();
+				if( !pToken ) {
+					rc = 0;
+					break;
+				}
 
-                if( *pToken == "new" )
-                {
-                    pFac = AddFaction();
-                    if( !pFac )
-                    {
-                        Awrite( "Failed to add a new faction!" );
-                        rc = 0;
-                        break;
-                    }
+				if( *pToken == "new" ) {
+					pFac = AddFaction();
+					if( !pFac ) {
+						Awrite( "Failed to add a new faction!" );
+						rc = 0;
+						break;
+					}
 
-                    lastWasNew = 1;
-                }
-                else
-                {
-                    if( pFac && lastWasNew )
-                    {
-                        WriteNewFac( pFac );
-                    }
-                    int nFacNum = pToken->value();
-                    pFac = GetFaction( &factions, nFacNum );
-                    lastWasNew = 0;
-                }
-            }
-            else if( pFac )
-            {
-                if( !ReadPlayersLine( pToken, pLine, pFac, lastWasNew ))
-                {
-                    rc = 0;
-                    break;
-                }
-            }
+					lastWasNew = 1;
+				} else {
+					if( pFac && lastWasNew ) {
+						WriteNewFac( pFac );
+					}
+					int nFacNum = pToken->value();
+					pFac = GetFaction( &factions, nFacNum );
+					lastWasNew = 0;
+				}
+			} else if( pFac ) {
+				if( !ReadPlayersLine( pToken, pLine, pFac, lastWasNew )) {
+					rc = 0;
+					break;
+				}
+			}
 
-            SAFE_DELETE( pToken );
-            SAFE_DELETE( pLine );
-            pLine = f.GetLine();
-        }
+			SAFE_DELETE( pToken );
+			SAFE_DELETE( pLine );
+			pLine = f.GetLine();
+		}
+		if( pFac && lastWasNew ) {
+			WriteNewFac( pFac );
+		}
+	} while( 0 );
 
-        if( pFac && lastWasNew )
-        {
-            WriteNewFac( pFac );
-        }
-    }
-    while( 0 );
+	SAFE_DELETE(pLine);
+	SAFE_DELETE(pToken);
+	f.Close();
 
-    delete pLine;
-    delete pToken;
-    f.Close();
-
-    return( rc );
+	return( rc );
 }
 
-int Game::ReadPlayersLine( AString *pToken, AString *pLine, Faction *pFac,
-                           int newPlayer )
+int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
+		int newPlayer)
 {
-    AString *pTemp = 0;
+	AString *pTemp = 0;
 
-    if( *pToken == "Name:" )
-    {
-        pTemp = pLine->StripWhite();
-        if( pTemp )
-        {
-            if( newPlayer )
-            {
-                *pTemp += AString(" (") + (pFac->num) + ")";
-            }
-            pFac->SetNameNoChange( pTemp );
-        }
-    }
-    else if( *pToken == "RewardTimes" )
-    {
-        pFac->TimesReward();
-    }
-    else if( *pToken == "Email:" )
-    {
-        pTemp = pLine->gettoken();
-        if( pTemp )
-        {
-            delete pFac->address;
-            pFac->address = pTemp;
-            pTemp = 0;
-        }
-    }
-    else if( *pToken == "Password:" )
-    {
-        pTemp = pLine->StripWhite();
-        delete pFac->password;
-        if( pTemp )
-        {
-            pFac->password = pTemp;
-            pTemp = 0;
-        }
-        else
-        {
-            pFac->password = 0;
-        }
-    }
-    else if( *pToken == "Reward:" )
-    {
-        pTemp = pLine->gettoken();
-        int nAmt = pTemp->value();
-        pFac->Event( AString( "Reward of " ) + nAmt + " silver." );
-        pFac->unclaimed += nAmt;
-    }
-    else if( *pToken == "Order:" )
-    {
-        pTemp = pLine->gettoken();
-        if( *pTemp == "quit" )
-        {
-            pFac->quit = QUIT_BY_GM;
-        }
-    }
-    else if( *pToken == "SendTimes:" )
-    {
-        // get the token, but otherwise ignore it
-        pTemp = pLine->gettoken();
-        pFac->times = pTemp->value();
-    }
-	else if (*pToken == "LastOrders:" )
-	{
+	if( *pToken == "Name:" ) {
+		pTemp = pLine->StripWhite();
+		if( pTemp ) {
+			if( newPlayer ) {
+				*pTemp += AString(" (") + (pFac->num) + ")";
+			}
+			pFac->SetNameNoChange( pTemp );
+		}
+	} else if( *pToken == "RewardTimes" ) {
+		pFac->TimesReward();
+	} else if( *pToken == "Email:" ) {
+		pTemp = pLine->gettoken();
+		if( pTemp ) {
+			delete pFac->address;
+			pFac->address = pTemp;
+			pTemp = 0;
+		}
+	} else if( *pToken == "Password:" ) {
+		pTemp = pLine->StripWhite();
+		delete pFac->password;
+		if( pTemp ) {
+			pFac->password = pTemp;
+			pTemp = 0;
+		} else {
+			pFac->password = 0;
+		}
+	} else if( *pToken == "Reward:" ) {
+		pTemp = pLine->gettoken();
+		int nAmt = pTemp->value();
+		pFac->Event( AString( "Reward of " ) + nAmt + " silver." );
+		pFac->unclaimed += nAmt;
+    } else if( *pToken == "SendTimes:" ) {
+		// get the token, but otherwise ignore it
+		pTemp = pLine->gettoken();
+		pFac->times = pTemp->value();
+	} else if (*pToken == "LastOrders:" ) {
 		// Read this line and correctly set the lastorders for this
 		// faction if the game itself isn't maintaining them.
 		pTemp = pLine->gettoken();
 		if(Globals->LASTORDERS_MAINTAINED_BY_SCRIPTS)
 			pFac->lastorders = pTemp->value();
+	} else if(*pToken == "Loc:") {
+		int x, y, z;
+		pTemp = pLine->gettoken();
+		if(pTemp) {
+			x = pTemp->value();
+			delete pTemp;
+			pTemp = pLine->gettoken();
+			if(pTemp) {
+				y = pTemp->value();
+				delete pTemp;
+				pTemp = pLine->gettoken();
+				if(pTemp) {
+					z = pTemp->value();
+					ARegion *pReg = regions.GetRegion( x, y, z );
+					if(pReg) {
+						pFac->pReg = pReg;
+					} else {
+						Awrite(AString("Invalid region ")+x+","+y+","+z+
+								" Faction: " + pFac->num);
+						pFac->pReg = NULL;
+					}
+				}
+			}
+		}
+	} else if(*pToken == "NewUnit") {
+	} else if(*pToken == "Item:") {
+	} else if(*pToken == "Skill:") {
+	} else if( *pToken == "Order:" ) {
+		if( *pLine == "quit" ) {
+			pFac->quit = QUIT_BY_GM;
+		} else {
+			// handle this as a unit order
+		}
+	} else {
+		pTemp = new AString( *pToken + *pLine );
+		pFac->extraPlayers.Add( pTemp );
+		pTemp = 0;
 	}
-    else
-    {
-        pTemp = new AString( *pToken + *pLine );
-        pFac->extraPlayers.Add( pTemp );
-        pTemp = 0;
-    }
 
-    delete pTemp;
-    return( 1 );
+	if(pTemp) delete pTemp;
+	return( 1 );
 }
 
 void Game::WriteNewFac( Faction *pFac )
@@ -986,58 +923,50 @@ int Game::EditGame( int *pSaveGame )
 
 ARegion *Game::EditGameFindRegion()
 {
-    ARegion *ret = 0;
-    int x, y, z;
-    AString *pStr = 0, *pToken = 0;
-    Awrite( "Region coords (x y z):" );
-    do
-    {
-        pStr = AGetString();
+	ARegion *ret = 0;
+	int x, y, z;
+	AString *pStr = 0, *pToken = 0;
+	Awrite( "Region coords (x y z):" );
+	do {
+		pStr = AGetString();
 
-        pToken = pStr->gettoken();
-        if( !pToken )
-        {
-            Awrite( "No such region." );
-            break;
-        }
-        x = pToken->value();
-        SAFE_DELETE( pToken );
+		pToken = pStr->gettoken();
+		if( !pToken ) {
+			Awrite( "No such region." );
+			break;
+		}
+		x = pToken->value();
+		SAFE_DELETE( pToken );
 
-        pToken = pStr->gettoken();
-        if( !pToken )
-        {
-            Awrite( "No such region." );
-            break;
-        }
-        y = pToken->value();
-        SAFE_DELETE( pToken );
+		pToken = pStr->gettoken();
+		if( !pToken ) {
+			Awrite( "No such region." );
+			break;
+		}
+		y = pToken->value();
+		SAFE_DELETE( pToken );
 
-        pToken = pStr->gettoken();
-        if( pToken )
-        {
-            z = pToken->value();
-            SAFE_DELETE( pToken );
-        }
-        else
-        {
-            z = 0;
-        }
-        
-        ARegion *pReg = regions.GetRegion( x, y, z );
-        if( !pReg )
-        {
-            Awrite( "No such region." );
-            break;
-        }
+		pToken = pStr->gettoken();
+		if( pToken ) {
+			z = pToken->value();
+			SAFE_DELETE( pToken );
+		} else {
+			z = 0;
+		}
 
-        ret = pReg;
-    }
-    while( 0 );
+		ARegion *pReg = regions.GetRegion( x, y, z );
+		if( !pReg ) {
+			Awrite( "No such region." );
+			break;
+		}
 
-    delete pStr;
-    delete pToken;
+		ret = pReg;
+	} while( 0 );
 
-    return( ret );
+	if(pStr) delete pStr;
+	if(pToken) delete pToken;
+
+	return( ret );
 }
 
 void Game::EditGameFindUnit()
@@ -1108,61 +1037,48 @@ void Game::EditGameUnit( Unit *pUnit )
 
 void Game::EditGameUnitItems( Unit *pUnit )
 {
-    do
-    {
-        int exit = 0;
-        Awrite( AString( "Unit items: " ) + pUnit->items.Report( 2, 1, 1 ));
-        Awrite( "  [item] [number] to update an item." );
-        Awrite( "  q) Stop editing the items." );
-        AString *pStr = AGetString();
-        if( *pStr == "q" )
-        {
-            exit = 1;
-        }
-        else
-        {
-            AString *pToken = 0;
-            do
-            {
-                pToken = pStr->gettoken();
-                if( !pToken )
-                {
-                    Awrite( "Try again." );
-                    break;
-                }
+	do {
+		int exit = 0;
+		Awrite( AString( "Unit items: " ) + pUnit->items.Report( 2, 1, 1 ));
+		Awrite( "  [item] [number] to update an item." );
+		Awrite( "  q) Stop editing the items." );
+		AString *pStr = AGetString();
+		if( *pStr == "q" ) {
+			exit = 1;
+		} else {
+			AString *pToken = 0;
+			do {
+				pToken = pStr->gettoken();
+				if( !pToken ) {
+					Awrite( "Try again." );
+					break;
+				}
 
-                int itemNum = ParseItem( pToken );
-                if( itemNum == -1 )
-                {
-                    Awrite( "No such item." );
-                    break;
-                }
-                SAFE_DELETE( pToken );
+				int itemNum = ParseItem( pToken );
+				if( itemNum == -1 ) {
+					Awrite( "No such item." );
+					break;
+				}
+				SAFE_DELETE( pToken );
 
-                int num;
-                pToken = pStr->gettoken();
-                if( !pToken )
-                {
-                    num = 0;
-                }
-                else
-                {
-                    num = pToken->value();
-                }
+				int num;
+				pToken = pStr->gettoken();
+				if( !pToken ) {
+					num = 0;
+				} else {
+					num = pToken->value();
+				}
 
-                pUnit->items.SetNum( itemNum, num );
-            }
-            while( 0 );
-            delete pToken;
-        }
-        delete pStr;
+				pUnit->items.SetNum( itemNum, num );
+			} while( 0 );
+			if(pToken) delete pToken;
+		}
+        if(pStr) delete pStr;
 
-        if( exit )
-        {
-            break;
-        }
-    }
-    while( 1 );
+        if( exit ) {
+			break;
+		}
+	} while( 1 );
 }
 
 void Game::EditGameUnitSkills( Unit *pUnit )

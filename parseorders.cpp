@@ -2066,6 +2066,7 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
 					*newname + ".");
 			unit->object->region->NotifyCity(unit,
 					*(unit->object->region->town->name), *newname);
+			delete unit->object->region->town->name;
 			unit->object->region->town->name = newname;
 		}
 		return;

@@ -1041,7 +1041,7 @@ void Game::RunBirdLore(ARegion *r,Unit *u)
 		AString error = "CAST: Bird Lore may only be cast on the surface of ";
 		error += Globals->WORLD_NAME;
 		error += ".";
-		u->Error(error.getstr());
+		u->Error(error.Str());
 		return;
 	}
 
@@ -1270,7 +1270,7 @@ void Game::RunFarsight(ARegion *r,Unit *u)
 			AString error = "CAST: Farsight only works on the surface of ";
 			error += Globals->WORLD_NAME;
 			error += ".";
-			u->Error(error.getstr());
+			u->Error(error.Str());
 			return;
 		}
 	}

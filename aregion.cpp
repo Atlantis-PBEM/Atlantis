@@ -2399,7 +2399,7 @@ void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 		for(x = 0; x < xSize; x++) {
 			ARegion *reg = pRegionArrays[ level ]->GetRegion( x, y );
 			if(reg) {
-				reg->SetName(nex_name.getstr());
+				reg->SetName(nex_name.Str());
 				reg->type = R_NEXUS;
 			}
 		}
@@ -2919,7 +2919,7 @@ void ARegionList::FinalSetup( ARegionArray *pArr )
                 } else {
 					AString ocean_name = Globals->WORLD_NAME;
 					ocean_name += " Ocean";
-                    reg->SetName(ocean_name.getstr());
+                    reg->SetName(ocean_name.Str());
                 }
             } 
             else

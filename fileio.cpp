@@ -255,23 +255,23 @@ void Areport::ClearTab() {
   tabs = 0;
 }
 
-void Areport::PutStr(const AString & s,int comment)
+void Areport::PutStr(const AString &s,int comment)
 {
-    AString temp;
-    for (int i=0; i<tabs; i++) temp += "  ";
-    temp += s;
-    AString * temp2 = temp.Trunc(70);
-    if (comment) *file << ";";
-    *file << temp << F_ENDLINE;
-    while (temp2) {
-        temp = "  ";
-        for (int i=0; i<tabs; i++) temp += "  ";
-        temp += *temp2;
-        delete temp2;
-        temp2 = temp.Trunc(70);
-        if (comment) *file << ";";
-        *file << temp << F_ENDLINE;
-    }
+	AString temp;
+	for (int i=0; i<tabs; i++) temp += "  ";
+	temp += s;
+	AString *temp2 = temp.Trunc(70);
+	if (comment) *file << ";";
+	*file << temp << F_ENDLINE;
+	while (temp2) {
+		temp = "  ";
+		for (int i=0; i<tabs; i++) temp += "  ";
+		temp += *temp2;
+		delete temp2;
+		temp2 = temp.Trunc(70);
+		if (comment) *file << ";";
+		*file << temp << F_ENDLINE;
+	}
 }
 
 void Areport::PutNoFormat(const AString & s) {

@@ -195,6 +195,10 @@ public:
     AList shows;
     AList itemshows;
 	AList objectshows;
+
+	// These are used for 'granting' units to a faction via the players.in
+	// file
+	ARegion *pReg;
 };
 
 Faction * GetFaction(AList *,int);
