@@ -364,6 +364,12 @@ Changes from 4.0.8 -> 4.0.9
       formed and given during the same turn.
    -- Fixed the swim code to give a Swims message and work with flight
       over water.  Changed item giving of dying units to not cause other
-	  units to drown.
+      units to drown.
+   -- Fixed niggle in the swim/move code so that when a unit attempts to
+      move over water when not in a structure, the ability to move is
+      calculated based on swim capacity, not walking capacity.   This is
+      a change asked for by Pete Christie.   It also makes sense, and is
+      one step closer to having swimming be an actual movement mode in
+      its own right.
    -- Fixed a bug where spoils calculation could wrap causing spoils
       earned to be a negative value of an object.
