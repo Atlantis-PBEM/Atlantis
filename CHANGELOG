@@ -11,7 +11,7 @@ Changes from 4.0.4 -> 4.0.5
 
 Changes from 4.0.5 -> 4.0.6
 --------------------------------------------------
-   -- Added FIND ALL command supplied by Tzarg (Tom)
+   -- Added FIND ALL command supplied by Tzarg (Tom Alsen)
    -- Reworked enabling/disabling of items to better preserve old feel.
    -- Various small bugfixes.
    -- Added worldname to the gamedefs structure (used for creating the
@@ -23,3 +23,8 @@ Changes from 4.0.5 -> 4.0.6
       limited items available) if the city guards are taken out when
       SAFE_START_CITIES is false.   Once this occurs the unlimited goods
       are gone for good.
+   -- Added MORE_PROFITABLE_TRADE_GOODS option to gamedefs.   If this is
+      enabled the selling price for a trade good in a city ranges from 60-114
+      and the price a city will pay ranges from 150-210.   If it is not
+      enabled, the price ranges from 60-90 for selling and from 90-120 for
+      buying.  This option is not on by default.

@@ -32,6 +32,8 @@
 // 2001/Feb/16 Joseph Traub      Semi-fixed a bug which allowed multiple
 //                               disconnected regions in the underworld.
 // 2001/Apr/08 Joseph Traub      Added ability to define the world name.
+// 2001/Apr/28 Joseph Traub      Added option to allow trade goods a larger
+//                               profit margin
 //
 
 #include "game.h"
@@ -580,8 +582,11 @@ void ARegion::SetupCityMarket()
                 if( Globals->RANDOM_ECONOMY )
                 {
                     amt += getrandom( amt );
-                    price = (ItemDefs[i].baseprice * (150 + getrandom(50))) /
-                        100;
+					if(Globals->MORE_PROFITABLE_TRADE_GOODS) {
+						price=(ItemDefs[i].baseprice*(250+getrandom(100)))/100;
+					} else {
+						price=(ItemDefs[i].baseprice*(150+getrandom(50)))/100;
+					}
                 }
                 else
                 {
@@ -608,8 +613,11 @@ void ARegion::SetupCityMarket()
                 if( Globals->RANDOM_ECONOMY )
                 {
                     amt += getrandom( amt );
-                    price = (ItemDefs[i].baseprice * (100 + getrandom(50))) /
-                        100;
+					if(Globals->MORE_PROFITABLE_TRADE_GOODS) {
+						price=(ItemDefs[i].baseprice*(100+getrandom(90)))/100;
+					} else {
+						price=(ItemDefs[i].baseprice*(100+getrandom(50)))/100;
+					}
                 }
                 else
                 {

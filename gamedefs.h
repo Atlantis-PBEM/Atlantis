@@ -40,6 +40,7 @@
 //                               since it wasn't being used.
 // 2001/Feb/21 Joseph Traub      Added a FACLIM_UNLIMITED option
 // 2001/Apr/08 Joseph Traub      Added WORLD_NAME option
+// 2001/Apr/28 Joseph Traub      Added MORE_PROFITABLE_TRADE_GOODS option
 //
 
 #ifndef GAME_DEFS
@@ -169,6 +170,8 @@ public:
     int CITY_MARKET_NORMAL_AMT;
     int CITY_MARKET_ADVANCED_AMT;
     int CITY_MARKET_TRADE_AMT;
+	// JLT -- Allow higher margins on trade goods.
+	int MORE_PROFITABLE_TRADE_GOODS;
 
     // JLT -- Allow races to have differing base costs
     int BASE_MAN_COST;
