@@ -982,7 +982,7 @@ int Unit::Study(int sk, int days)
 		}
 	}
 	int max = GetSkillMax(sk);
-	if (GetRealSkill(sk) >= max && max >= 0) {
+	if (GetRealSkill(sk) >= max) {
 		Error("STUDY: Maximum level for skill reached.");
 		return 0;
 	}
@@ -1010,16 +1010,12 @@ int Unit::GetSkillMax(int sk)
 
 	if (SkillDefs[sk].flags & SkillType::DISABLED) return 0;
 
-	forlist(&skills) {
-		Skill *s = (Skill *) elem;
-		if (s->type != sk) continue;
-		forlist (&items) {
-			Item *i = (Item *)elem;
-			if (ItemDefs[i->type].flags & ItemType::DISABLED) continue;
-			if (!(ItemDefs[i->type].type & IT_MAN)) continue;
-			int m = SkillMax(s->type, i->type);
-			if ((max == 0 && m > max) || (m < max)) max = m;
-		}
+	forlist (&items) {
+		Item *i = (Item *)elem;
+		if (ItemDefs[i->type].flags & ItemType::DISABLED) continue;
+		if (!(ItemDefs[i->type].type & IT_MAN)) continue;
+		int m = SkillMax(sk, i->type);
+		if ((max == 0 && m > max) || (m < max)) max = m;
 	}
 	return max;
 }
@@ -1031,12 +1027,15 @@ int Unit::Practice(int sk)
 
 	bonus = Globals->SKILL_PRACTICE_AMOUNT;
 	if (practiced || (bonus < 1)) return 1;
+	days = skills.GetDays(sk);
+	men = GetMen();
+
+	if (men < 1 || days < 1) return 0;
 
 	/*
 	 * Let's do this check for max level correctly.. Non-leader units
 	 * won't ever be able to get to 450 days like the original code checked
-	 * for.  GetSkillMax will make sure that there are men in the unit and
-	 * that the unit knows the skill.
+	 * for.
 	 */
 	int max = GetSkillMax(sk);
 	curlev = GetRealSkill(sk);
@@ -1057,7 +1056,6 @@ int Unit::Practice(int sk)
 	}
 
 	if (bonus) {
-		men = GetMen();
 		Study(sk, men * bonus);
 		practiced = 1;
 	}
