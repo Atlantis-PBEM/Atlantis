@@ -522,3 +522,5 @@ Changes from 4.0.9 -> 4.0.10
       unit isn't valid in the orders checker.
    -- Applied patch from Jan Rietema <ravanrooke@yahoo.de> providing a large
       amount more configurability in the world generation process.
+   -- Changed template generation to understand the terrain types again
+      after the previous fix.
