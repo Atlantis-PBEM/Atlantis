@@ -454,6 +454,19 @@ void Game::ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages)
 	ObjectDefs[ob].maxMages = mages;
 }
 
+void Game::ModifyObjectDefence(int ob, int co, int en, int sp, int we, int ri, int ra)
+{
+	if(ob < 0 || ob > (NOBJECTS-1)) return;
+	//if(val < 0) return;	// we could conceivably have a negative value 
+								// associated with a structure
+	ObjectDefs[ob].defenceArray[0] = co;
+	ObjectDefs[ob].defenceArray[1] = en;
+	ObjectDefs[ob].defenceArray[2] = sp;
+	ObjectDefs[ob].defenceArray[3] = we;
+	ObjectDefs[ob].defenceArray[4] = ri;
+	ObjectDefs[ob].defenceArray[5] = ra;
+}
+
 void Game::ClearTerrainRaces(int t)
 {
 	if(t < 0 || t > R_NUM-1) return;

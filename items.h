@@ -325,6 +325,7 @@ extern WeaponType *FindWeapon(char *abbr);
 extern MountType *FindMount(char *abbr);
 extern MonType *FindMonster(char *abbr, int illusion);
 extern ManType *FindRace(char *abbr);
+extern AString AttType(int atype);
 
 enum {
 	FULLNUM = 0x01,

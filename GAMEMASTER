@@ -384,9 +384,9 @@ the end of the ModifyTablesPerRuleset function in extra.cpp:
 
 	DisableItem(I_BALROG);
 
-This will disable Balrogs in your game. Of course, none of the mages in 
-your game will be very amused by your little joke when they finally reach 
-SUBA, so we'd better do something a little more sensible. How about:
+This will disable Balrogs. Of course, none of the mages in your game
+will be very amused by your little joke when they finally reach SUBA,
+so we'd better do something a little more sensible. How about:
 
 	ModifyMonsterAttacksAndHits(MONSTER_BALROG, 100, 100, 0);
 

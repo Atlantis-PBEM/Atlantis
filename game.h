@@ -225,6 +225,7 @@ private:
 	void ModifyObjectMonster(int ob, int monster);
 	void ModifyObjectConstruction(int ob, int it, int num, char *sk, int lev);
 	void ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages);
+	void ModifyObjectDefence(int ob, int co, int en, int sp, int we, int ri, int ra);
 
 	void ClearTerrainRaces(int t);
 	void ModifyTerrainRace(int t, int i, int r);

@@ -71,12 +71,13 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	/* Building bonus */
 	if (o->capacity) {
 		building = o->type;
+		//should the runes spell be a base or a bonus?
 		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
-			dskill[i] += 2;
+			dskill[i] += ObjectDefs[o->type].defenceArray[i];
 		}
 		if (o->runes) {
-			dskill[ATTACK_ENERGY] = o->runes;
-			dskill[ATTACK_SPIRIT] = o->runes;
+			dskill[ATTACK_ENERGY] = max(dskill[ATTACK_ENERGY], o->runes);
+			dskill[ATTACK_SPIRIT] = max(dskill[ATTACK_SPIRIT], o->runes);
 		}
 		o->capacity--;
 	}

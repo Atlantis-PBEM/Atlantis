@@ -384,6 +384,30 @@ AString *ObjectDescription(int obj)
 	if(o->protect) {
 		*temp += AString(" This structure provides defense to the first ") +
 			o->protect + " men inside it.";
+		// Now do the defences. First, figure out how many to do.
+		int totaldef = 0; 
+		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
+			totaldef += (o->defenceArray[i] != 0);
+		}
+	// Now add the description to temp
+		*temp += AString(" This structure gives a defensive bonus of ");
+		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
+			if (o->defenceArray[i]) {
+				totaldef--;
+				*temp += AString(o->defenceArray[i]) + " against " +
+					AttType(i) + AString(" attacks");
+				
+				if (totaldef >= 2) {
+					*temp += AString(", ");
+				} else {
+					if (totaldef == 1) {	// penultimate bonus
+						*temp += AString(" and ");
+					} else {	// last bonus
+						*temp += AString(".");
+					}
+				} // end if 
+			}
+		} // end for
 	}
 
 	/*

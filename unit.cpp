@@ -1101,7 +1101,7 @@ void Unit::Short(int needed, int hunger)
 			return;
 	}
 
-	for (int i = 0; i<= NITEMS; i++) {
+	for (i = 0; i<= NITEMS; i++) {
 		if(!(ItemDefs[ i ].type & IT_MAN)) {
 			// Only men need sustenance.
 			continue;

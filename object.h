@@ -32,6 +32,7 @@ class Object;
 #include "fileio.h"
 #include "gamedefs.h"
 #include "faction.h"
+#include "items.h"
 
 #define I_WOOD_OR_STONE -2
 
@@ -65,6 +66,7 @@ class ObjectType {
 		int monster;
 
 		int productionAided;
+		int defenceArray[NUM_ATTACK_TYPES];
 };
 
 extern ObjectType *ObjectDefs;

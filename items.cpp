@@ -98,7 +98,7 @@ ManType *FindRace(char *abbr)
 	return NULL;
 }
 
-static AString AttType(int atype)
+AString AttType(int atype)
 {
 	switch(atype) {
 		case ATTACK_COMBAT: return AString("melee");
