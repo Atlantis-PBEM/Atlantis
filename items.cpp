@@ -215,7 +215,7 @@ AString ItemList::BattleReport()
             {
                 MonType & mondef = MonDefs[ItemDefs[i->type].index];
                 temp += AString(" (Combat ") + mondef.skill + ", Hits " +
-                    mondef.hits + ")";
+                    mondef.hits + ", Tactics " + mondef.tactics + ")";
             }
         }
     }
