@@ -241,3 +241,4 @@ Changes from 4.0.7 -> 4.0.8
       no the 'traditional' starting unit is created to the players.in file.
    -- Added more objects and stuff for Ceran
    -- Fixed bug which allowed two guard units to spring up in a city.
+   -- Fixed problems with fileio.cpp on win32
