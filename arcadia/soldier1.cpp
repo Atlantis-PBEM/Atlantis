@@ -22,6 +22,15 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+
+#ifndef DEBUG
+//#define DEBUG
+#endif
+
+#ifndef DEBUG2
+//#define DEBUG2
+#endif
+
 #include "army1.h"
 #include "formation1.h"
 #include "gameio.h"
@@ -85,7 +94,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	int terrainflags = TerrainDefs[regtype].flags;
  	
  	
- 	
+#ifdef DEBUG2
+cout << "@";
+#endif
 	/* BS 030825 Multiple Hit Men */
     if (ItemDefs[r].type & IT_MAN) {
         ManType *mt = FindRace(ItemDefs[r].abr);    
@@ -175,7 +186,10 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	SetupHealing(); //in specials.cpp
 	SetupSpell();
 	SetupCombatItems();
-
+ 	
+#ifdef DEBUG2
+cout << "#";
+#endif
 	// Set up armor
 	AString abbr;
 	int i, item, armorType;
@@ -203,11 +217,11 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	
 	//need to check if this works properly!
 	ArmorType *pa = FindArmor(ItemDefs[armor].abr);
-	if(pa->flags & ArmorType::ONLYONEHIT) {
+	if(pa && pa->flags & ArmorType::ONLYONEHIT) {
 	    hits = 1;
 	    maxhits = 1;
     }
-	
+
 	//
 	// Check if this unit is mounted
 	//
@@ -246,7 +260,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 
     if(u->GetFlag(FLAG_BEHIND)) formtype += 1;
     defaultform = formtype;
-    
+
 	//
 	// Find the correct weapon for this soldier.
 	//
@@ -266,6 +280,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 			break;
 		}
 	}
+
 	if(weapon == -1) {
 		for(weaponType = 1; weaponType < NUMWEAPONS; weaponType++) {
 			abbr = WeaponDefs[weaponType].abbr;
@@ -277,6 +292,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 			}
 		}
 	}
+#ifdef DEBUG2
+cout << "$";
+#endif
 	// If we did not get a weapon, set attack and defense bonuses to
 	// combat skill (and riding bonus if applicable).
 	if(weapon == -1) {

@@ -156,6 +156,9 @@ Implemented ! handling for CAST, PROMOTE
 Allowed PROMOTE to work in open
 Added FDOL
 
+050228:
+Fixed crash bugs in CLOA-1hp check and ethnic morale penalty
+
 Todo:
 Allow transfer from leader to non-leader if errors are suppressed
 Rewrite rules magic section for heros, and normal->leader->hero progression

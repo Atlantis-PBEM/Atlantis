@@ -32,6 +32,9 @@
 #ifndef DEBUG
 //#define DEBUG
 #endif
+#ifndef DEBUG2
+//#define DEBUG2
+#endif
 
 void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
 {
@@ -226,11 +229,11 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 						if (!(i != -1 && noaidd)) {
 							if (u->type == U_GUARD) {
 								/* The unit is a city guardsman */
-								if (i == -1 && adv == 0)
+								if (i == -1/* && adv == 0*/)
 									add = ADD_DEFENSE;
 							} else if(u->type == U_GUARDMAGE) {
 								/* the unit is a city guard support mage */
-								if(i == -1 && adv == 0)
+								if(i == -1/* && adv == 0*/)
 									add = ADD_DEFENSE;
 							} else {
 								/*
@@ -364,7 +367,6 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 		}
 		GetAFacs(r,attacker,target,dfacs,afacs,atts);
 	}
-
 	GetSides(r,afacs,dfacs,atts,defs,attacker,target,ass,adv);
 
 	if(atts.Num() <= 0) {
@@ -456,11 +458,22 @@ Awrite("battles 2");
 #endif
 
     armies[1] = new Army(tar,defs,region->type,ass);
-
+#ifdef DEBUG2		
+Awrite("battles 2.1");
+#endif
     if(!ass) {
         WriteTerrainMessage(region->type);
+#ifdef DEBUG2		
+Awrite("battles 2.2");
+#endif
         WriteAggressionMessage(armies[0],armies[1]);
+#ifdef DEBUG2		
+Awrite("battles 2.3");
+#endif
         armies[0]->DoEthnicMoraleEffects(this);
+#ifdef DEBUG2		
+Awrite("battles 2.4");
+#endif
         armies[1]->DoEthnicMoraleEffects(this);
     }
 

@@ -25,6 +25,9 @@
 
 #ifndef DEBUG
 //#define DEBUG
+#endif
+
+#ifndef DEBUG2
 //#define DEBUG2
 #endif
 
@@ -35,6 +38,9 @@
 
 Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 {
+#ifdef DEBUG 
+Awrite("Making an army");
+#endif
 	Unit * tactician = ldr;
 
 	round = 0;
@@ -98,10 +104,16 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 	        engagements[i][j] = ENGAGED_NONE;
         }
     }
+#ifdef DEBUG 
+Awrite("Adding soldiers");
+#endif
 	int x = 0;
 	forlist(locs) {
 		Unit * u = ((Location *) elem)->unit;
 		Object * obj = ((Location *) elem)->obj;
+#ifdef DEBUG2
+cout << *u->name << endl;
+#endif
 		if (ass) {
 			forlist(&u->items) {
 				Item * it = (Item *) elem;
@@ -122,9 +134,18 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			Item *it = (Item *) u->items.First();
 			do {
 				if(IsSoldier(it->type)) {
+#ifdef DEBUG2
+cout << ItemDefs[it->type].abr;
+#endif
 					for(int i = 0; i < it->num; i++) {
+#ifdef DEBUG2
+cout << ".";
+#endif
 						Soldier *temp = new Soldier(u, obj, regtype,
 								it->type);
+#ifdef DEBUG2
+cout << "|";
+#endif
 						formations[0].AddSoldier(temp);
 						if(!temp->illusion) hitstotal += temp->hits;    //used only for rout conditions, hence does not include illusions
 						temp = 0;
@@ -2443,11 +2464,14 @@ void Army::DoEthnicMoraleEffects(Battle *b)
     
     for(int i=0; i<count; i++) {
         Soldier *s = GetSoldier(i);
-        if(s->special == "UNIY") unity += s->slevel*s->slevel;
+        if(s->special == SkillDefs[S_UNITY].special) unity += s->slevel*s->slevel;
         ManType *mt = FindRace(ItemDefs[s->race].abr);
-        racecount[mt->ethnicity]++;
+        if(mt) racecount[mt->ethnicity]++;
+        else racecount[RA_OTHER]++;
     }
-
+#ifdef DEBUG2
+cout << " !";
+#endif
     unity *= 50; //unity 'heals' 50 men * lvl * lvl.
 
     float racepenalty[RA_NA];
@@ -2457,11 +2481,16 @@ void Army::DoEthnicMoraleEffects(Battle *b)
     for(int i=0; i<RA_NA; i++) racecount[i] = 0;
     
     int max = unity;
-    
+#ifdef DEBUG2
+cout << "@";
+#endif
     for(int i=0; i<count; i++) {
         Soldier *s = GetSoldier(i);
         ManType *mt = FindRace(ItemDefs[s->race].abr);
-        int penalty = RoundRandom(racepenalty[mt->ethnicity]);
+        int ethnic;
+        if(mt) ethnic = mt->ethnicity;
+        else ethnic = RA_OTHER;
+        int penalty = RoundRandom(racepenalty[ethnic]);
         if(penalty && unity > 0) {
             unity--;
             if(getrandom(2)) {
@@ -2469,13 +2498,15 @@ void Army::DoEthnicMoraleEffects(Battle *b)
                 penalty = 0;
             }
         }
-        if(penalty) racecount[mt->ethnicity]++;
+        if(penalty) racecount[ethnic]++;
         s->askill -= penalty;
         s->dskill[ATTACK_COMBAT] -= penalty;
     }
     int total = 0;
     for(int i=0; i<RA_NA; i++) total += racecount[i];
-
+#ifdef DEBUG2
+cout << "#";
+#endif
 
     AString temp = AString("Unity calms ") + unityhelps + " of " + *pLeader->name + "'s soldiers.";
     if(unityhelps) b->AddLine(temp);
@@ -2483,7 +2514,7 @@ void Army::DoEthnicMoraleEffects(Battle *b)
     if(max > unity) {
         for(int i=0; i<count; i++) {
             Soldier *s = GetSoldier(i);
-            if(s->special == "UNIY") s->unit->Experience(S_UNITY,(10*(max-unity)+max/2)/max,0);
+            if(s->special == SkillDefs[S_UNITY].special) s->unit->Experience(S_UNITY,(10*(max-unity)+max/2)/max,0);
         }
     }       
     
