@@ -1022,7 +1022,7 @@ int Unit::GetSkillMax(int sk)
 
 int Unit::Practice(int sk)
 {
-	int bonus, men, curlev, reqsk, reqlev;
+	int bonus, men, curlev, reqsk, reqlev, days;
 	unsigned int i;
 
 	bonus = Globals->SKILL_PRACTICE_AMOUNT;
