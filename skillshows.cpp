@@ -1230,7 +1230,7 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 		case S_MONSTERTRAINING:
 			if(level > 1) break;
-			*str += "This skill deals with all aspects of traking monster "
+			*str += "This skill deals with all aspects of training monster "
 				"mounts.";
 			break;
 		case S_COOKING:
