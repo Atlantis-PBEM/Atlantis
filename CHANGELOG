@@ -486,3 +486,6 @@ Changes from 4.0.9 -> 4.0.10
       crash.
    -- Added EVICT order as submitted by Peter Rayner
       <wacky_wizard001@hotmail.com> with slight modifications.
+   -- Fixed bugs in combat where riding skill was being counted twice in
+      defence, and ranged weaponswere using COMB skill for attack strength.
+   -- Fixed bug in EVICT code that caused a segmentation fault
