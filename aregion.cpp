@@ -2694,6 +2694,7 @@ void ARegionList::RandomTerrain( ARegionArray *pArr )
 void ARegionList::MakeUWMaze( ARegionArray *pArr )
 {
     int x, y;
+
     for( x = 0; x < pArr->x; x++ )
     {
         for( y = 0; y < pArr->y; y++ )
@@ -2706,16 +2707,26 @@ void ARegionList::MakeUWMaze( ARegionArray *pArr )
 
             for (int i=D_SOUTHEAST; i<= D_SOUTHWEST; i++)
             {
+				int count = 0;
+				for(int j=D_NORTH; j< NDIRS; j++)
+					if(reg->neighbors[j]) count++;
+				if(count <= 1) break;
+
                 ARegion *n = reg->neighbors[i];
                 if (n)
                 {
                     if( !CheckRegionExit( i, reg, n ))
                     {
+						count = 0;
+						for(int k = D_NORTH; k<NDIRS; k++) {
+							if(n->neighbors[k]) count++;
+						}
+						if(count <= 1) break;
                         reg->neighbors[i] = 0;
                         n->neighbors[(i+3) % NDIRS] = 0;
                     }
                 }
-            }
+			}
         }
     }
 }
