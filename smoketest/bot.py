@@ -33,6 +33,18 @@ def generateturn(report, template):
     # Here we parse the report and template lists to get out relevant info.
     # First, set up some regexps to get out relevant info.
     
+    coordpattern = re.compile(r'''\(
+(\d+),          # x coord
+(\d+)           # y coord
+(?:,\d\s<       # number of the level & opening <, within a pretend '(?:' group
+(\w+)           # name of the level
+>){0,1}         # closing > and close pretend group, recognise it 0 or 1 times
+\)''',re.VERBOSE)
+    
+    terrainpattern = re.compile(r'''(\w+)''')
+    
+    regionpattern = re.compile(r'''in\s+(.*?)'''
+    
     regionpattern = re.compile(r'''(\w+)  # initial region
 \s+                     # then a space
 \((\d+),(\d+)\)         # x,y coords
@@ -94,6 +106,11 @@ def generateturn(report, template):
             #the current line must be the start of a region
             print "Found a region:",report[lineindex]
             
+            wibble = regionpattern.search(report[lineindex][:-1])
+            if wibble != None:
+                print line
+                print "Found a co-ordinate in this line!"
+
             wibble = regionpattern.search(report[lineindex][:-1])
             if wibble != None:
                 #print line

@@ -1476,7 +1476,12 @@ void Game::ProcessPromoteOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 void Game::ProcessLeaveOrder(Unit *u, OrdersCheck *pCheck)
 {
 	if(!pCheck) {
+		// if the unit is building, it can't leave the building
+		// XXX - this should generate an error if it's a plain 'ol build
 		if (u->monthorders && u->monthorders->type == O_BUILD) return;
+		
+		// if the unit isn't already trying to enter a building,
+		// then set it to leave.
 		if (u->enter == 0) u->enter = -1;
 	}
 }
@@ -1503,6 +1508,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 	if (token) {
+		// either a 'build help XXX' or 'build XXX'
 		if(*token == "help") {
 			UnitId *targ = 0;
 			delete token;
@@ -1517,6 +1523,8 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 					return;
 				}
 			}
+			// XXX - This seems to be a duplicate of the code above
+			// Check that the unit isn't doing anything else important!
 			BuildOrder *order = new BuildOrder;
 			order->target = targ;
 			if (unit->monthorders ||
@@ -1570,7 +1578,9 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			unit->object->region->objects.Add(obj);
 		}
 	}
-
+	
+	// XXX - This seems to be a duplicate of the code above
+	// Check that the unit isn't doing anything else important!
 	BuildOrder *order = new BuildOrder;
 	order->target = NULL;
 	if (unit->monthorders ||
@@ -1582,9 +1592,13 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		err += "month-long order.";
 		ParseError(pCheck, unit, 0, err);
 	}
+	// Stop taxing if taxation is a month long order
 	if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 	unit->monthorders = order;
-	if (unit->enter == -1) unit->enter = 0;
+	
+	// If the unit has only issued a 'build' order, it can't leave
+	// XXX - this should instead generate an error!
+	if (unit->enter == -1 && !token) unit->enter = 0;
 }
 
 void Game::ProcessAttackOrder(Unit *u, AString *o, OrdersCheck *pCheck)

@@ -2045,6 +2045,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"producing unit. The required skills and raw materials required "
 		"to produce one output item are in the table above.";
 	f.Paragraph(temp);
+	
 	temp = "If an item requires raw materials, then the specified "
 		"amount of each material is consumed for each item produced. ";
 	temp += "The higher the skill of the unit, the more productive each "
@@ -2058,18 +2059,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"was raised to two, then they could produce four of them in a month. "
 		"At level three, they could then produce 6 per month.";
 	f.Paragraph(temp);
-	temp += "Some items may allow each man to produce multiple output "
+	
+	temp = "Some items may allow each man to produce multiple output "
 		"items per raw material or have other differences from these basic "
 		"rules.  Those items will explain their differences in the "
 		"description of the item.";
 	f.Paragraph(temp);
 
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		temp += " Only Trade factions can issue ";
+		temp = " Only Trade factions can issue ";
 		temp += f.Link("#produce", "PRODUCE") + " orders however, regardless "
 			"of skill levels.";
 	}
 	f.Paragraph(temp);
+	
 	temp = "Items which increase production may increase production of "
 		"advanced items in addition to the basic items listed.  Some of "
 		"them also increase production of other tools.  Read the skill "
@@ -3180,7 +3183,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"clubs, pitchforks, torches, etc. ";
 	f.Paragraph(temp);
 
-	temp += " Possession of a mount, and the appropriate skill to use that "
+	temp = " Possession of a mount, and the appropriate skill to use that "
 		"mount will also confer a bonus to the effective Combat skill. The "
 		"amount of the bonus will depend on the level of the appropriate "
 		"skill and the mount in question.  Some mounts are better than "
@@ -3189,11 +3192,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"allow mounts to give a combat advantage.";
 	f.Paragraph(temp);
 
-	temp += "Certain weapons may provide different attack and defense "
+	temp = "Certain weapons may provide different attack and defense "
 		"bonuses, or have additional attack bonuses against mounted "
 		"opponents or other special characteristics. These bonuses will "
 		"be listed in the item descriptions in the turn reports.";
 	f.Paragraph(temp);
+	
 	temp = "Some melee weapons may be defined as Long or Short (this is "
 		"relative to a normal weapon, e.g. the sword).  A soldier wielding "
 		"a longer weapon than his opponent gets a +1 bonus to his attack "
