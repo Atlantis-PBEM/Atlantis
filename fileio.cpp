@@ -390,6 +390,12 @@ void Arules::TagText(const AString &tag, const AString &text)
 	PutStr(AString("<")+tag+">"+ text + "</" + tag + ">");
 }
 
+void Arules::ClassTagText(const AString &tag, const AString &cls,
+		const AString &text)
+{
+	PutStr(AString("<")+tag+" CLASS=\""+cls+"\">"+ text + "</" + tag + ">");
+}
+
 void Arules::Example(const AString &header, const AString &examp)
 {
 	PutStr(header);

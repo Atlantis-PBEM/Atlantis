@@ -124,6 +124,8 @@ class Arules {
 
 		void Enclose(int flag, const AString &tag);
 		void TagText(const AString &tag, const AString &text);
+		void ClassTagText(const AString &tag, const AString &cls,
+				const AString &text);
 		void Example(const AString &header, const AString &examp);
 		AString Link(const AString &href, const AString &text);
 		AString LinkRef(const AString &name);

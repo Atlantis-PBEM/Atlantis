@@ -65,14 +65,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	strftime(buf, 500, "%B %d, %Y", ltval);
 	f.TagText("H3", AString("Last Change: ")+buf);
 	f.Enclose(0, "CENTER");
-	f.PutStr("<HR>");
+	f.ClassTagText("DIV", "rule", "");
 	f.PutStr("Note: This document is subject to change, as errors are found");
 	f.PutStr("and corrected, and rules sometimes change. Be sure you have");
 	f.PutStr("the latest available copy.");
 	f.PutStr("<BR>");
 	f.PutStr("<BR>");
 	f.PutStr(f.LinkRef("table_of_contents"));
-	f.PutStr("<HR>");
+	f.ClassTagText("DIV", "rule", "");
  	f.TagText("H2", "Table of Contents");
 	f.PutStr(AString("Thanks to ") +
 			f.Link("mailto:ken@satori.gso.uri.edu","Kenneth Casey"));
@@ -272,60 +272,76 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "UL");
 	f.PutStr("<BR>");
 	f.PutStr(f.LinkRef("intro"));
-	f.PutStr("<HR>");
+	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Introduction");
 	AString *in;
 	while((in = introf.GetStr()) != NULL) {
 		f.PutStr(*in);
 		delete in;
 	}
-#if 0
- printf("<a name=\"playing\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Playing Atlantis </h2>\n");
- printf("\n");
- printf("Atlantis (as you undoubtedly already know) is a play by email game.  When\n");
- printf("you sign up for Atlantis, you will be sent a turn report (via email).  Your\n");
- printf("report completely details your position in the game.  After going over this\n");
- printf("report, and possibly communicating with other players in the game, you\n");
- printf("determine your course of action, and create a file of \"orders\", which you then\n");
- printf("send back to the Atlantis server.  Then, at a regular interval (often one\n");
- printf("week), Atlantis collects all the orders, runs another turn (covering one month\n");
- printf("in game time), and sends all the players another report. <p>\n");
- printf("\n");
- printf("<a name=\"playing_factions\">\n");
- printf("<h3> Factions: </h3>\n");
- printf("\n");
- printf("A player's position is called a \"faction\".  Each faction has a name and a\n");
- printf("number (the number is assigned by the computer, and used for entering orders).\n");
- printf("Each player is allowed to play one and ONLY one faction at any given time.\n");
- printf("Each faction is composed of a number of \"units\", each unit being a group of one\n");
- printf("or more people loyal to the faction.  You start the game with a single unit\n");
- printf("consisting of one character, plus a sum of money.  More people can be hired\n");
- printf("during the course of the game, and formed into more units.  (In these rules,\n");
- printf("the word \"character\" generally refers either to a unit consisting of only one\n");
- printf("person, or to a person within a larger unit.) <p>\n");
- printf("\n");
- printf("A faction is considered destroyed, and the player knocked out of the game, if\n");
- printf("ever all its people are killed or disbanded (i.e. the faction has no units\n");
- printf("left).  The program does not consider your starting character to be special; if\n");
- printf("your starting character gets killed, you will probably have been thinking of\n");
- printf("that character as the leader of your faction, so some other character can be\n");
- printf("regarded as having taken the dead leader's place (assuming of course that you\n");
- printf("have at least one surviving unit!).  As far as the computer is concerned, as\n");
- printf("long as any unit of the faction survives, the faction is not wiped out.  (If\n");
- printf("your faction is wiped out, you can rejoin the game with a new starting\n");
- printf("character.) <p>\n");
- printf("\n");
- if (Globals->FACTION_LIMIT_TYPE==GameDefs::FACLIM_FACTION_TYPES)
-  {
- printf("\n");
-   printf("  Each faction has a type; this is decided by the player, and determines\n");
-   printf("  what the faction may do.  The faction has %d Faction Points, which may be spent\n",Globals->FACTION_POINTS);
-   printf("  on any of the 3 Faction Areas, War, Trade, and Magic.  The faction type may\n");
-   printf("  be changed at the beginning of each turn, so a faction can change and adapt to\n");
-   printf("  the conditions around it.  Faction Points spent on War determine the number of\n");
-   printf("  regions in which factions can obtain income by taxing or pillaging.\n");
+	f.PutStr(f.LinkRef("playing"));
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Playing Atlantis");
+	f.PutStr("<BR><BR>");
+	f.PutStr("Atlantis (as you undoubtedly already know) is a play by email "
+			"game.  When you sign up for Atlantis, you will be sent a turn "
+			"report (via email).  Your report completely details your "
+			"position in the game.  After going over this report, and "
+			"possibly communicating with other players in the game, you "
+			"determine your course of action, and create a file of "
+			"\"orders\", which you then send back to the Atlantis server. "
+			"Then, at a regular interval (often one week), Atlantis collects "
+			"all the orders, runs another turn (covering one month in game "
+			"time), and sends all the players another report.");
+	f.PutStr("<BR>");
+	f.PutStr(f.LinkRef("playing_factions"));
+	f.TagText("H3", "Factions:");
+	f.PutStr("<BR><BR>");
+	f.PutStr("A player's position is called a \"faction\".  Each faction has "
+			"a name and a number (the number is assigned by the computer, "
+			"and used for entering orders). Each player is allowed to play "
+			"one and ONLY one faction at any given time. Each faction is "
+			"composed of a number of \"units\", each unit being a group of "
+			"one or more people loyal to the faction.  You start the game "
+			"with a single unit consisting of one character, plus a sum of "
+			"money.  More people can be hired during the course of the game, "
+			"and formed into more units.  (In these rules, the word "
+			"\"character\" generally refers either to a unit consisting of "
+			"only one person, or to a person within a larger unit.)");
+	f.PutStr("<BR><BR>");
+	f.PutStr("A faction is considered destroyed, and the player knocked out "
+			"of the game, if ever all its people are killed or disbanded "
+			"(i.e. the faction has no units left).  The program does not "
+			"consider your starting character to be special; if your "
+			"starting character gets killed, you will probably have been "
+			"thinking of that character as the leader of your faction, so "
+			"some other character can be regarded as having taken the dead "
+			"leader's place (assuming of course that you have at least one "
+			"surviving unit!).  As far as the computer is concerned, as "
+			"long as any unit of the faction survives, the faction is not "
+			"wiped out.  (If your faction is wiped out, you can rejoin the "
+			"game with a new starting character.)");
+	f.PutStr("<BR><BR>");
+	Faction fac;
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
+		f.PutStr(AString("A faction has one pre-set limit; it may not ") +
+				"contain more than " + AllowedMages(&fac) + " mages and " +
+				AllowedApprentices(&fac) " apprentices.  Magic is a rare "
+				"art, and only a few in the world can master it. Aside from "
+				"that, there  is no limit to the number of units a faction "
+				"may contain, nor to how many items can be produced or "
+				"regions taxed.");
+		f.PutStr("<BR><BR>");
+	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		f.PutStr(AString("Each faction has a type; this is decided by the "
+					"player, and determines what the faction may do.  The "
+					"faction has ") + Globals->FACTION_POINTS + "Faction "
+				"Points, which may be spent on any of the 3 Faction Areas, "
+				"War, Trade, and Magic.  The faction type may be changed at "
+				"the beginning of each turn, so a faction can change and "
+				"adapt to the conditions around it.  Faction Points spent "
+				"on War determine the number of regions in which factions "
+				"can obtain income by taxing or pillaging.\n");
    printf("  Faction Points spent on Trade determine the number of regions in which a\n");
    printf("  faction may conduct trade activity.  Trade activity includes producing goods,\n");
    printf("  building ships and buildings, and buying and selling trade items.  Faction\n");
@@ -437,6 +453,7 @@ int Game::GenRules(const AString &rules, const AString &css,
      printf("    vikings [VIKI].  Skills: none.\n");
  printf("</pre> <p>\n");
  printf("\n");
+#if 0
  printf("<a name=\"playing_units\">\n");
  printf("<h3> Units: </h3>\n");
  printf("\n");
