@@ -391,7 +391,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 		}
 	}
 	// Hack to fix bogus ship numbers
-	if(ObjectisShip(obj->type) && obj->num < 100) {
+	if(ObjectIsShip(obj->type) && obj->num < 100) {
 		obj->num = shipseq++;
 		obj->SetName(new AString("Ship"));
 	}
