@@ -59,4 +59,5 @@ Changes from 4.0.5 -> 4.0.6
       This order is not enabled by default (enable via ALLOW_WITHDRAW in
       gamedefs.h).   If this option is enabled, the world building code will
       not build unlimited markets in the starting city, but will build regular
-      markets instead.
+      markets instead (it has no effect on starting city markets after world
+      generation).
