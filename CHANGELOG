@@ -153,3 +153,14 @@ Changes from 4.0.6 -> 4.0.7
    -- Fixed bug with CanStudy which showed disabled skills.
    -- Fixed bug with DBOWs taking down force shields.  Only *spells* take
       down shields.
+   -- Updated skillshows with the patch provided by Andrew Zhilenko which
+   -- Patched ADVANCE battle bugs reported by Andrew Zhilenko
+      <andrew@nextra.cz>
+      makes the logic in there cleaner.
+   -- Added Georg Gottschalks 'volcano' terrain.  It's a bit odd in that
+      it requires flying to get into (move cost of 6) BUT mounts within it
+      only get a max of riding mounts bonus. (IE, a WING gets a max 3 riding
+      bonus in it due to trecherous terrain)
+   -- Tweaked the quantities of Admantium by default.
+   -- Added Javelin weapon designed by Terho T. Uotila
+      <ttuotila@cc.helsinki.fi>, who wanted a cheap ranged weapon.

@@ -217,7 +217,7 @@ void Battle::GetSpoils(AList * losers, ItemList *spoils)
 	}
 }
 
-void Battle::Run( ARegion * region,
+int Battle::Run( ARegion * region,
                   Unit * att,
                   AList * atts,
                   Unit * tar,
@@ -247,9 +247,13 @@ void Battle::Run( ARegion * region,
     if ((armies[0]->Broken() && !armies[1]->Broken()) ||
         (!armies[0]->NumAlive() && armies[1]->NumAlive())) {
         if (ass) assassination = ASS_FAIL;
-        AddLine(*(armies[0]->leader->name) + " is routed!");
-        if (armies[0]->NumAlive())
-            FreeRound(armies[1],armies[0]);
+
+		if (armies[0]->NumAlive()) {
+		  AddLine(*(armies[0]->leader->name) + " is routed!");
+		  FreeRound(armies[1],armies[0]);
+		} else {
+		  AddLine(*(armies[0]->leader->name) + " is destroyed!");
+		}
         AddLine("Total Casualties:");
         ItemList *spoils = new ItemList;
         armies[0]->Lose(this,spoils);
@@ -267,7 +271,7 @@ void Battle::Run( ARegion * region,
         delete spoils;
         delete armies[0];
         delete armies[1];
-        return;
+        return BATTLE_LOST;
     }
 
     if ((armies[1]->Broken() && !armies[0]->Broken()) ||
@@ -279,9 +283,12 @@ void Battle::Run( ARegion * region,
                                   region->ShortPrint( pRegs ) +
                                   "!");
         }
-        AddLine(*(armies[1]->leader->name) + " is routed!");
-        if (armies[1]->NumAlive())
+        if (armies[1]->NumAlive()) {
+		  AddLine(*(armies[1]->leader->name) + " is routed!");
             FreeRound(armies[0],armies[1]);
+		} else {
+		  AddLine(*(armies[1]->leader->name) + " is destroyed!");
+		}
         AddLine("Total Casualties:");
         ItemList *spoils = new ItemList;
         armies[1]->Lose(this,spoils);
@@ -299,7 +306,7 @@ void Battle::Run( ARegion * region,
         delete spoils;
         delete armies[0];
         delete armies[1];
-        return;
+        return BATTLE_WON;
     }
   
     AddLine("The battle ends indecisively.");
@@ -310,7 +317,7 @@ void Battle::Run( ARegion * region,
     AddLine("");
     delete armies[0];
     delete armies[1];
-    return;
+    return BATTLE_DRAW;
 }
 
 void Battle::WriteSides(ARegion * r,
@@ -630,17 +637,18 @@ void Game::KillDead(Location * l)
     }
 }
 
-void Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
+int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
                      int adv)
 {
     AList afacs,dfacs;
     AList atts,defs;
     FactionPtr * p;
+	int result;
 
     if (ass) {
 		if(attacker->GetAttitude(r,target) == A_ALLY) {
             attacker->Error("ASSASSINATE: Can't assassinate an ally.");
-            return;
+            return BATTLE_IMPOSSIBLE;
 		}
         /* Assassination attempt */
         p = new FactionPtr;
@@ -658,22 +666,33 @@ void Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
         if( r->IsSafeRegion() )
         {
             attacker->Error("ATTACK: No battles allowed in safe regions.");
-            return;
+            return BATTLE_IMPOSSIBLE;
         }
 		if(attacker->GetAttitude(r,target) == A_ALLY) {
             attacker->Error("ATTACK: Can't attack an ally.");
-            return;
+            return BATTLE_IMPOSSIBLE;
 		}
         GetDFacs(r,target,dfacs);
         if (GetFaction2(&dfacs,attacker->faction->num)) {
             attacker->Error("ATTACK: Can't attack an ally.");
-            return;
+            return BATTLE_IMPOSSIBLE;
         }
       
         GetAFacs(r,attacker,target,dfacs,afacs,atts);
     }
 
     GetSides(r,afacs,dfacs,atts,defs,attacker,target,ass,adv);
+
+	if(atts.Num() == 0) {
+		// This shouldn't happen, but just in case
+		Awrite(AString("Cannot find any attackers!"));
+		return BATTLE_IMPOSSIBLE;
+	}
+	if(defs.Num() == 0) {
+		// This shouldn't happen, but just in case
+		Awrite(AString("Cannot find any defenders!"));
+		return BATTLE_IMPOSSIBLE;
+	}
   
     Battle * b = new Battle;
     b->WriteSides(r,attacker,target,&atts,&defs,ass, &regions );
@@ -688,7 +707,7 @@ void Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
             f->battles.Add(p);
         }
     }
-    b->Run(r,attacker,&atts,target,&defs,ass, &regions );
+    result = b->Run(r,attacker,&atts,target,&defs,ass, &regions );
   
   /* Remove all dead units */
     {
@@ -701,8 +720,5 @@ void Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
             KillDead((Location *) elem);
         }
     }
+	return result;
 }
-	
-	
-	
-

@@ -33,6 +33,13 @@
 #include "gamedata.h"
 #include "astring.h"
 
+#define ITEM_ENABLED(X) (!(ItemDefs[(X)].flags & ItemType::DISABLED))
+#define ITEM_DISABLED(X) (ItemDefs[(X)].flags & ItemType::DISABLED)
+#define SKILL_ENABLED(X) (!(SkillDefs[(X)].flags & SkillType::DISABLED))
+#define SKILL_DISABLED(X) (SkillDefs[(X)].flags & SkillType::DISABLED)
+#define OBJECT_ENABLED(X) (!(ObjectDefs[(X)].flags & ObjectType::DISABLED))
+#define OBJECT_DISABLED(X) (ObjectDefs[(X)].flags & ObjectType::DISABLED)
+
 
 AString *ShowSkill::Report(void)
 {
@@ -45,15 +52,15 @@ AString *ShowSkill::Report(void)
 	switch (skill) {
 		case S_FARMING:
 			if(level == 1) {
-				if(ItemDefs[I_GRAIN].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_GRAIN)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 				        "to produce grain in designated regions.";
-				if(!(ItemDefs[I_BAG].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_BAG)) {
 					*str += " Production can be increased by using bags.";
 				}
 			} else if(level == 3) {
-				if(!(ObjectDefs[O_FARM].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_FARM)) {
 					found = 1;
 					*str += "A unit with this skill may use the BUILD order "
 						   "to build a Farm from any combination of wood or "
@@ -63,15 +70,15 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_RANCHING:
 			if(level == 1) {
-				if(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_LIVESTOCK)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					   "to produce livestock in designated regions.";
-				if(!(ItemDefs[I_LASSO].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_LASSO)) {
 					*str += " Production can be increased by using lassos.";
 				}
 			} else if(level == 3) {
-				if(!(ObjectDefs[O_RANCH].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_RANCH)) {
 					found = 1;
 					*str += "A unit with this skill may use the BUILD order "
 						   "to build a Ranch from any combination of wood or "
@@ -81,51 +88,50 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_MINING:
 			if(level == 1) {
-				if(ItemDefs[I_IRON].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_IRON)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					   "to produce iron in designated regions. Iron is "
 					   "found primarily in mountain regions, but may "
 					   "also be found in other regions.";
-				if(!(SkillDefs[S_WEAPONSMITH].flags & SkillType::DISABLED)) {
+				if(SKILL_ENABLED(S_WEAPONSMITH)) {
 					*str += " The Weaponsmith skill is used to forge iron "
 						   "into weapons.";
 				}
-				if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_PICK)) {
 					*str += " Production can be increased by using picks.";
 				}
 			} else if(level == 3) {
-				if(!(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_MITHRIL)) {
 					found = 1;
 					*str += "A unit with this skill may use the PRODUCE "
 						"order to produce mithril in designated regions "
 						"(Note that a Mining skill of 3 is required to "
 						"even determine that mithril may be produced). "
 						"One unit of mithril weighs 10 weight units.";
-					if(!(SkillDefs[S_WEAPONSMITH].flags&SkillType::DISABLED)) {
+					if(SKILL_ENABLED(S_WEAPONSMITH)) {
 						*str += " High level Weaponsmiths may use mithril to "
 							"forge mithril weapons.";
 					}
-					if(!(SkillDefs[S_ARMORER].flags & SkillType::DISABLED)) {
+					if(SKILL_ENABLED(S_ARMORER)) {
 						*str += " High level Armorers may use mithril to "
 							"forge mithril armor.";
 					}
-					if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_PICK)) {
 						*str += " Production can be increased by using picks.";
 					}
 				}
-				if(!(ObjectDefs[O_MINE].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_MINE)) {
 					*str += " A unit with this skill may use the BUILD order "
 						   "to build a Mine from any combination of wood or "
 						   "stone.";
 				}
-				if(!(ObjectDefs[O_AMINE].flags & ObjectType::DISABLED) &&
-				   !(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED)) {
+				if(OBJECT_ENABLED(O_AMINE) && ITEM_ENABLED(I_MITHRIL)) {
 					*str += " A unit with this skill may use the BUILD order "
 						   "to build an Arcane Mine from mithril.";
 				}
 			} else if(level == 5) {
-				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_ADMANTIUM)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE "
 						"order to produce admantium in designated regions "
@@ -133,43 +139,43 @@ AString *ShowSkill::Report(void)
 						"even determine that admantium may be produced). "
 						"Admantium is the strongest metal known.  One unit "
 						"of admantium weighs 10 weight units.";
-				if(!(SkillDefs[S_WEAPONCRAFT].flags&SkillType::DISABLED)) {
+				if(SKILL_ENABLED(S_WEAPONCRAFT)) {
 					*str += " High level weapons crafters may use admantium "
 						    "to forge admantium weapons.";
 				}
-				if(!(SkillDefs[S_ARMORCRAFT].flags & SkillType::DISABLED)) {
+				if(SKILL_ENABLED(S_ARMORCRAFT)) {
 					*str += " High level armor crafters may use admantium to "
 						    "forge admantium armor.";
 				}
-				if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_PICK)) {
 					*str += " Production can be increased by using picks.";
 				}
 			}
 			break;
 		case S_LUMBERJACK:
 			if(level == 1) {
-				if(ItemDefs[I_WOOD].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_WOOD)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order to "
 					   "produce wood in designated regions. Forest regions "
 					   "are generally the best producers of wood, though "
 					   "other regions may also produce wood.";
-				if(!(SkillDefs[S_WEAPONSMITH].flags & SkillType::DISABLED)) {
+				if(SKILL_ENABLED(S_WEAPONSMITH)) {
 					*str += " Wood may be made into weapons by weaponsmiths.";
 				}
-				if(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED)) {
+				if(SKILL_ENABLED(S_SHIPBUILDING)) {
 					*str += " Wood may be used to construct ships, using the "
 						   "Shipbuilding skill.";
 				}
-				if(!(SkillDefs[S_WEAPONSMITH].flags & SkillType::DISABLED)) {
+				if(SKILL_ENABLED(S_WEAPONSMITH)) {
 					*str += " Wood may be used to contstruct longbows and "
 						   "crossbows, using the Weaponsmith skill.";
 				}
-				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_AXE)) {
 					*str += " Production can be increased by using axes.";
 				}
 			} else if (level == 3) {
-				if(!(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_IRONWOOD)) {
 					found = 1;
 					*str += "A unit with this skill may use the PRODUCE "
 						   "order to produce ironwood in designated regions "
@@ -178,26 +184,25 @@ AString *ShowSkill::Report(void)
 						   "produced). Ironwood is the strongest wood "
 						   "known. One unit of ironwood weighs 10 weight "
 						   "units.";
-					if(!(SkillDefs[S_SHIPBUILDING].flags&SkillType::DISABLED)){
+					if(SKILL_ENABLED(S_SHIPBUILDING)){
 						*str += " Ironwood may be used by high level "
 							"Shipbuilders to construct armored ships.";
 					}
-					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_AXE)) {
 						*str += " Production can be increased by using axes.";
 					}
 				}
-				if(!(ObjectDefs[O_TIMBERYARD].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_TIMBERYARD)) {
 					*str += " A unit with this skill may use the BUILD order "
 						   "to build a Timber Yard from any combination of "
 						   "wood or stone.";
 				}
-				if(!(ObjectDefs[O_PRESERVE].flags & ObjectType::DISABLED) &&
-				   !(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED)) {
+				if(OBJECT_ENABLED(O_PRESERVE) && ITEM_ENABLED(I_IRONWOOD)) {
 					*str += " A unit with this skill may use the BUILD order "
 						   "to build an Preserve from ironwood.";
 				}
 			} else if (level == 5) {
-				if(ItemDefs[I_YEW].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_YEW)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order to "
 					   "produce yew in designated regions (Note that a "
@@ -205,14 +210,14 @@ AString *ShowSkill::Report(void)
 					   "that yew may be produced). Yew is the lightest, "
 					   "most pliable wood known.  One unit of yew weighs 5 "
 					   "weight units.";
-				if(!(SkillDefs[S_WEAPONSMITH].flags & SkillType::DISABLED)) {
+				if(SKILL_ENABLED(S_WEAPONSMITH)) {
 					*str += " High level weaponsmiths may use yew to "
 					       "produce powerful bows.";
 				}
-				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_AXE)) {
 					*str += " Production can be increased by using axes.";
 				}
-				if(!(ObjectDefs[O_SACGROVE].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_SACGROVE)) {
 					*str += " A unit with this skill may use the BUILD order "
 						   "to build a Sacred Grove from yew.";
 				}
@@ -220,21 +225,21 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_QUARRYING:
 			if(level == 1) {
-				if(ItemDefs[I_STONE].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_STONE)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					   "to produce stone in designated regions. Mountains "
 					   "are the main producers of stone, though other "
 					   "regions may also produce stone.";
-				if(!(SkillDefs[S_BUILDING].flags & SkillType::DISABLED)) {
+				if(SKILL_ENABLED(S_BUILDING)) {
 					*str += " Stone may be used to construct buildings, "
 						   "using the Building skill.";
 				}
-				if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_PICK)) {
 					*str += " Production can be increased by using picks.";
 				}
 			} else if(level == 3) {
-				if(!(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_ROOTSTONE)) {
 					found = 1;
 					*str += "A unit with this skill may use the PRODUCE "
 						   "order to produce rootstone, a rare stone found "
@@ -242,22 +247,20 @@ AString *ShowSkill::Report(void)
 						   "skill of 3 is required to even determine that "
 						   "rootstone may be produced.)  A unit of "
 						   "rootstone weighs 50 weight units.";
-					if(!(SkillDefs[S_BUILDING].flags&SkillType::DISABLED) &&
-					   !(ObjectDefs[O_MFORTRESS].flags&ObjectType::DISABLED)){
+					if(SKILL_ENABLED(S_BUILDING)&&OBJECT_ENABLED(O_MFORTRESS)){
 						*str += " High level builders may use rootstone to "
 							   "build magical fortresses.";
 					}
-					if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_PICK)) {
 						*str += " Production can be increased by using picks.";
 					}
 				}
-				if(!(ObjectDefs[O_QUARRY].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_QUARRY)) {
 					*str += " A unit with this skill may use the BUILD order "
 						   "to build a Quarry from any combination of "
 						   "wood or stone.";
 				}
-				if(!(ObjectDefs[O_MQUARRY].flags & ObjectType::DISABLED) &&
-				   !(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED)) {
+				if(OBJECT_ENABLED(O_MQUARRY) && ITEM_ENABLED(I_ROOTSTONE)) {
 					*str += " A unit with this skill may use the BUILD order "
 						   "to build a Mystic Quarry from rootstone.";
 				}
@@ -265,17 +268,17 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_HUNTING:
 			if(level == 1) {
-				if(ItemDefs[I_FUR].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_FUR)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					   "to produce furs in designated regions. Furs may be "
 					   "produced in many types of regions, generally in "
 					   "small quantities.";
-				if(!(ItemDefs[I_SPEAR].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_SPEAR)) {
 					*str += " Production can be increased by using spears.";
 				}
 			} else if(level == 3) {
-				if(ItemDefs[I_FLOATER].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_FLOATER)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order to "
 					   "produce floater hide by hunting floaters, a rare "
@@ -284,16 +287,15 @@ AString *ShowSkill::Report(void)
 					   "that floater hides may be produced).  Floaters "
 					   "actually weigh less than air, since much of their "
 					   "body is made up of gaseous sacs.";
-				if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_PICK)) {
 					*str += " Production can be increased by using spears.";
 				}
-				if(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED)){
+				if(SKILL_ENABLED(S_SHIPBUILDING)){
 					*str += " Floater hide is prized by high level "
 						   "shipbuilders who use the hide to make hot air "
 						   "balloons.";
 				}
-				if(!(SkillDefs[S_CARPENTER].flags & SkillType::DISABLED) &&
-				   !(ItemDefs[I_GLIDER].flags & ItemType::DISABLED)) {
+				if(SKILL_ENABLED(S_CARPENTER) && ITEM_ENABLED(I_GLIDER)) {
 					*str += " Floater hide is prized by high level "
 						   "carpenters who use the hide in making gliders.";
 				}
@@ -301,12 +303,12 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_FISHING:
 			if(level == 1) {
-				if(ItemDefs[I_FISH].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_FISH)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					    "to produce fish in designated regions. Fish are "
 					    "only available in ocean regions.";
-				if(!(ItemDefs[I_NET].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_NET)) {
 					*str += " A unit with this skill may also PRODUCE nets "
 						    "from herbs. Production can be increased by using "
 						    "spinning wheels.";
@@ -315,43 +317,42 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_HERBLORE:
 			if(level == 1) {
-				if(ItemDefs[I_HERBS].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_HERBS)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					    "to produce herbs in designated regions.  Herbs "
 					    "are found in many types of regions, but most "
 					    "frequently in jungles.";
-				if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED)) {
+				if(SKILL_ENABLED(S_HEALING)) {
 					*str += " Herbs may be used by units with the healing "
 						    "skill to heal units killed in battle.";
 				}
-				if(!(ItemDefs[I_LASSO].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_LASSO)) {
 					*str += " A unit with this skill may also PRODUCE lassos. "
 						    "Production of lassos may be increased by using "
 							"spinning wheels";
 				}
-				if(!(ItemDefs[I_BAG].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_BAG)) {
 					*str += " A unit with this skill may also PRODUCE bags. "
 						    "Production of bags can be increased by using "
 							"spinning wheels.";
 				}
 			} else if(level == 3) {
-				if(ItemDefs[I_MUSHROOM].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_MUSHROOM)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					    "to produce mushrooms in designated areas.  Mushrooms "
 						"are found in the underworld.  (Note that an "
 						"Herblore skill of 3 is required to even determine "
 						"that mushrooms may be produced).";
-				if(!(ItemDefs[I_HEALPOTION].flags & ItemType::DISABLED) &&
-				   !(SkillDefs[S_HEALING].flags & SkillType::DISABLED)) {
+				if(ITEM_ENABLED(I_HEALPOTION) && SKILL_ENABLED(S_HEALING)) {
 					*str += "  Mushrooms may be used by skilled healers to "
 						    "create healing potions.  Healing potions may be "
 						    "used even by units without a healing skill and "
 						    "each potion can heal up to 10 men with the same"
 						    "effects as if a healer with herbs treated them.";
 				}
-			   	if(!(ItemDefs[I_BAG].flags & ItemType::DISABLED)) {
+			   	if(ITEM_ENABLED(I_BAG)) {
 					*str += " Production of mushrooms may be increased "
 						    "by using bags.";
 				}
@@ -359,16 +360,16 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_HORSETRAINING:
 			if(level == 1) {
-				if(ItemDefs[I_HORSE].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_HORSE)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					   "to produce horses in designated regions. Horses are "
 					   "found in plains regions.";
-				if(!(ItemDefs[I_LASSO].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_LASSO)) {
 					*str += " Production can by increased by using lassos.";
 				}
 			} else if(level == 5) {
-				if(ItemDefs[I_WHORSE].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_WHORSE)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order to "
 					   "produce winged horses. (Note that a Horse Training "
@@ -376,7 +377,7 @@ AString *ShowSkill::Report(void)
 					   "winged horses exist in a region.) Winged horses "
 					   "weigh 50 weight units, and can carry 20 weight "
 					   "units in flight.";
-				if(!(ItemDefs[I_LASSO].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_LASSO)) {
 					*str += " Production can by increased by using lassos.";
 				}
 			}
@@ -386,66 +387,69 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "A unit with this skill may construct weapons via "
 					   "the PRODUCE order.";
-				if(!(ItemDefs[I_IRON].flags & ItemType::DISABLED)) {
-					if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_IRON)) {
+					if(ITEM_ENABLED(I_SWORD)) {
 						*str += " Swords may be produced from iron.";
 					}
-					if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_PICK)) {
 						*str += " Picks may be produced from iron.";
 					}
-					if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_HAMMER)) {
 						*str += " Hammers may be produced from iron. "
 							   " Production of iron-based weapons can be "
 							   "increased by using hammers.";
 					}
 				}
-				if(!(ItemDefs[I_WOOD].flags & ItemType::DISABLED)) {
-					if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_WOOD)) {
+					if(ITEM_ENABLED(I_LONGBOW)) {
 						*str += " Longbows may be produced from wood.";
 					}
-					if(!(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_CROSSBOW)) {
 						*str += " Crossbows may be produced from wood.";
 					}
-					if(!(ItemDefs[I_SPEAR].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_SPEAR)) {
 						*str += " Spears may be produced from wood.";
 					}
-					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_JAVELIN)) {
+						*str += " Javelins may be produced from wood.";
+					}
+					if(ITEM_ENABLED(I_AXE)) {
 						*str += " Axes may be produced from wood."
 							   " Production of wood-based weapons can be "
 							   "increased by using axes.";
 					}
 				}
 			} else if (level == 2) {
-				if(ItemDefs[I_BAXE].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_WOOD].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_IRON].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_BAXE)) break;
+				if(ITEM_DISABLED(I_WOOD)) break;
+				if(ITEM_DISABLED(I_IRON)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 						"to produce battle axes from 1 unit each of iron and "
 						"wood.  Battle axes give units a +4 bonus in combat "
 						"but may only strike every other round due to their "
 						"mass.";
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HAMMER)) {
 					*str += "  Production can be increased by using hammers.";
 				}
 			} else if (level == 3) {
-				if(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_MSWORD].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_MITHRIL)) break;
+				if(ITEM_DISABLED(I_MSWORD)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					   "to produce mithril swords from mithril. Mithril "
 					   "swords give units a +4 bonus in combat rather than "
 					   "the usual +2.";
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HAMMER)) {
 					*str += "  Production can be increased by using hammers.";
 				}
 			} else if(level == 4) {
-				if(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_MCROSSBOW].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_IRONWOOD)) break;
+				if(ITEM_DISABLED(I_MCROSSBOW)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE "
 					"order to produce magic crossbows from ironwood.";
-				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_AXE)) {
 					*str += "Production can be increased by using axes.";
 				}
 				*str += ". A magic crossbow fires as if the target has "
@@ -453,20 +457,20 @@ AString *ShowSkill::Report(void)
 					   "per round.  It takes one unit of ironwood to "
 					   "produce a magic crossbow, which weighs one unit.";
 			} else if(level == 5) {
-				if(!(ItemDefs[I_YEW].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED) &&
-				   (!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED) ||
-					!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED))) {
+				if(ITEM_ENABLED(I_YEW) &&
+				   ITEM_ENABLED(I_DOUBLEBOW) &&
+				   (SKILL_ENABLED(S_CROSSBOW) ||
+					SKILL_ENABLED(S_LONGBOW))) {
 					found = 1;
 					*str += "A unit with this skill may use the PRODUCE "
 						"order to produce double bows, one of the best "
 						"(natural) dealers of death on a battlefield. Double "
 						"bows may be used by units skilled in ";
-					if(!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
+					if(SKILL_ENABLED(S_CROSSBOW)) {
 						*str += "Crossbow";
 					}
-					if(!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED)) {
-						if(!(SkillDefs[S_CROSSBOW].flags&SkillType::DISABLED)){
+					if(SKILL_ENABLED(S_LONGBOW)) {
+						if(SKILL_ENABLED(S_CROSSBOW)){
 							*str += " or ";
 						}
 						*str += "Longbow";
@@ -476,7 +480,7 @@ AString *ShowSkill::Report(void)
 						"shots, per round, equal to the skill level of the "
 						"wielder. It takes one unit of yew to produce a "
 						"double bow, which weighs one unit.";
-					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_AXE)) {
 						*str += "  Production can be increased by using axes.";
 					}
 				}
@@ -485,81 +489,79 @@ AString *ShowSkill::Report(void)
 		case S_ARMORER:
 			if(level == 1) {
 				int needand = 0;
-				if((ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED) &&
-			       (ItemDefs[I_LEATHERARMOR].flags & ItemType::DISABLED) &&
-				   (ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED))
+				if((ITEM_DISABLED(I_CLOTHARMOR)) &&
+			       (ITEM_DISABLED(I_LEATHERARMOR)) &&
+				   (ITEM_DISABLED(I_CHAINARMOR)))
 					break;
-				if((ItemDefs[I_FUR].flags & ItemType::DISABLED) &&
-			       (ItemDefs[I_HERBS].flags & ItemType::DISABLED) &&
-				   (ItemDefs[I_IRON].flags & ItemType::DISABLED))
+				if((ITEM_DISABLED(I_FUR)) &&
+			       (ITEM_DISABLED(I_HERBS)) &&
+				   (ITEM_DISABLED(I_IRON)))
 					break;
-				if((!(ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED) &&
-					!(ItemDefs[I_HERBS].flags & ItemType::DISABLED)) ||
-				   (!(ItemDefs[I_LEATHERARMOR].flags & ItemType::DISABLED) &&
-					!(ItemDefs[I_FUR].flags & ItemType::DISABLED)) ||
-				   (!(ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED) &&
-					!(ItemDefs[I_IRON].flags & ItemType::DISABLED))) {
+				if((ITEM_ENABLED(I_CLOTHARMOR) &&
+					ITEM_ENABLED(I_HERBS)) ||
+				   (ITEM_ENABLED(I_LEATHERARMOR) &&
+					ITEM_ENABLED(I_FUR)) ||
+				   (ITEM_ENABLED(I_CHAINARMOR) &&
+					ITEM_ENABLED(I_IRON))) {
 					found = 1;
 					*str += "A unit with this skill may PRODUCE ";
-					if(!(ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED) &&
-					   !(ItemDefs[I_HERBS].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_CLOTHARMOR) &&
+					   ITEM_ENABLED(I_HERBS)) {
 						*str += "cloth armor from herbs (provides a 1/6 "
 							    "chance of surviving an attack from a normal "
 								"weapon in combat and may be worn during "
 								"assassination attacks), ";
 						needand = 1;
 					}
-					if(!(ItemDefs[I_LEATHERARMOR].flags&ItemType::DISABLED) &&
-					   !(ItemDefs[I_FUR].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_LEATHERARMOR) &&
+					   ITEM_ENABLED(I_FUR)) {
 						*str += "leather armor from furs (provides a 1/4 "
 							    "chance of surviving an attack from a normal "
 								"weapon in combat), ";
 						needand = 1;
 					}
-					if(!(ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED) &&
-						!(ItemDefs[I_IRON].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_CHAINARMOR) &&
+						ITEM_ENABLED(I_IRON)) {
 						if (needand) *str += "and ";
 						*str += "chain armor from iron (provides a 1/3 "
 							    "chance of surviving an attack from a normal "
 								"weapon in combat).";
 					}
-					if((!(ItemDefs[I_SPINNING].flags&ItemType::DISABLED) &&
-					   (!(ItemDefs[I_LEATHERARMOR].flags&ItemType::DISABLED)||
-						!(ItemDefs[I_CLOTHARMOR].flags&ItemType::DISABLED)))) {
+					if((ITEM_ENABLED(I_SPINNING) &&
+					   (ITEM_ENABLED(I_LEATHERARMOR)||
+						ITEM_ENABLED(I_CLOTHARMOR)))) {
 						needand = 0;
 						*str += " Production of ";
-						if(!(ItemDefs[I_CLOTHARMOR].flags&ItemType::DISABLED)){
+						if(ITEM_ENABLED(I_CLOTHARMOR)){
 							*str += "cloth ";
 							needand = 1;
 						}
-						if(!(ItemDefs[I_LEATHERARMOR].flags&
-									ItemType::DISABLED)){
+						if(ITEM_ENABLED(I_LEATHERARMOR)) {
 							if(needand) *str += "and ";
 							*str += "leather ";
 						}
 						*str += "armor can be increased by using spinning "
 							    "wheels.";
 					}
-					if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED) &&
-					   !(ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_HAMMER) && ITEM_ENABLED(I_CHAINARMOR)) {
 						*str += " Production of chain armor can be increased "
 							   "by using hammers.";
 					}
 				}
 			} else if (level == 3) {
-				if(ItemDefs[I_IRON].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_PLATEARMOR].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_IRON)) break;
+				if(ITEM_DISABLED(I_PLATEARMOR)) break;
 				found = 1;
 				*str += "A unit with this skill may PRODUCE plate armor from "
 					   "3 units of iron. Plate armor provides a 2/3 chance "
 					   "of surviving a successful attack in battle.";
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HAMMER)) {
 					*str += " Production of plate armor can be increased "
 						   "by using hammers.";
 				}
 			} else if (level == 5) {
-				if(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_MPLATE].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_MITHRIL)) break;
+				if(ITEM_DISABLED(I_MPLATE)) break;
 				found = 1;
 				*str += "A unit with this skill may PRODUCE mithril armor "
 					   "from one unit of mithril. Mithril armor provides "
@@ -567,7 +569,7 @@ AString *ShowSkill::Report(void)
 					   "battle from a normal weapon and a 2/3 chance of "
 					   "surviving an attack from a good weapon.  Mithril "
 					   "armor weighs one unit.";
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HAMMER)) {
 					*str += " Production of mithril armor can be increased "
 						   "by using hammers.";
 				}
@@ -575,105 +577,102 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_CARPENTER:
 			if(level == 1) {
-				if(ItemDefs[I_WOOD].flags & ItemType::DISABLED) break;
-				if((ItemDefs[I_WAGON].flags & ItemType::DISABLED) &&
-				   (ItemDefs[I_SPINNING].flags & ItemType::DISABLED))
+				int needor = 0;
+				if(ITEM_DISABLED(I_WOOD)) break;
+				if((ITEM_DISABLED(I_WAGON)) && (ITEM_DISABLED(I_SPINNING)))
 					break;
 				found = 1;
 				*str += "A unit with this skill may PRODUCE ";
-				if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_WAGON)) {
 					*str += "wagons";
+					needor = 1;
 				}
-				if(!(ItemDefs[I_SPINNING].flags & ItemType::DISABLED)) {
-					if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED)) {
-						*str += " or ";
-					}
+				if(ITEM_ENABLED(I_SPINNING)) {
+					if(needor) *str += " or ";
 					*str += "spinning wheels";
 				}
 				*str += " from wood.";
-				if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_WAGON) && ITEM_ENABLED(I_HORSE)) {
 					*str += " A wagon, used with a horse, can carry up to "
 						   "200 units of weight.";
 				}
-				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_AXE)) {
 					*str += " Production can be increased by using axes.";
 				}
 			} else if (level == 3) {
-				if(ItemDefs[I_MWAGON].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_MWAGON)) break;
+				if(ITEM_DISABLED(I_IRONWOOD)) break;
 				found = 1;
 				*str += "A unit with this skill may PRODUCE magic wagons "
 					   "from ironwood. A magic wagon ";
-				if(!(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HORSE)) {
 					*str += "requires no horse for movement, ";
 				}
 				*str += "weighs 50 units, and may carry 250 units of "
 					   "weight.";
-				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_AXE)) {
 					*str += " Production can be increased by using axes.";
 				}
 			} else if (level == 5) {
-				if(ItemDefs[I_FLOATER].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_GLIDER].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_FLOATER)) break;
+				if(ITEM_DISABLED(I_GLIDER)) break;
 				found = 1;
 				*str += "A unit with this skill may PRODUCE gliders from "
 				       "floater hides. A glider weighs 5 units, and may "
 					   "carry 15 units of weight while flying.";
-				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_AXE)) {
 					*str += " Production can be increased by using axes.";
 				}
 			}
 			break;
 		case S_BUILDING:
 			if (level == 1) {
-				if(!(ItemDefs[I_STONE].flags & ItemType::DISABLED) &&
-				   (!(ObjectDefs[O_TOWER].flags & ObjectType::DISABLED) ||
-				    !(ObjectDefs[O_FORT].flags & ObjectType::DISABLED) ||
-					!(ObjectDefs[O_CASTLE].flags & ObjectType::DISABLED) ||
-				    !(ObjectDefs[O_CITADEL].flags & ObjectType::DISABLED) ||
-				    !(ObjectDefs[O_STOCKADE].flags & ObjectType::DISABLED))) {
+				if(ITEM_ENABLED(I_STONE) &&
+				   (OBJECT_ENABLED(O_TOWER) ||
+				    OBJECT_ENABLED(O_FORT) ||
+					OBJECT_ENABLED(O_CASTLE) ||
+				    OBJECT_ENABLED(O_CITADEL) ||
+				    OBJECT_ENABLED(O_STOCKADE))) {
 					found = 1;
 					*str += "A unit with this skill may use the BUILD order "
 						"to construct buildings from stone.  At this level, "
 						"the buildings that are able to be built are the ";
 					int comma = 0;
-					if(!(ObjectDefs[O_TOWER].flags & ObjectType::DISABLED)) {
+					if(OBJECT_ENABLED(O_TOWER)) {
 						*str += "Tower";
 						comma = 1;
 					}
-					if(!(ObjectDefs[O_FORT].flags & ObjectType::DISABLED)) {
+					if(OBJECT_ENABLED(O_FORT)) {
 						if(comma) *str += ", ";
 						*str += "Fort";
 						comma = 1;
 					}
-					if(!(ObjectDefs[O_CASTLE].flags & ObjectType::DISABLED)) {
+					if(OBJECT_ENABLED(O_CASTLE)) {
 						if(comma) *str += ", ";
 						*str += "Castle";
 						comma = 1;
 					}
-					if(!(ObjectDefs[O_CITADEL].flags & ObjectType::DISABLED)) {
+					if(OBJECT_ENABLED(O_CITADEL)) {
 						if(comma) *str += ", and ";
 						*str += "Citadel";
 					}
 					*str += ".";
 				}
-				if(!(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
-				   (!(ObjectDefs[O_STOCKADE].flags & ObjectType::DISABLED))) {
+				if(ITEM_ENABLED(I_WOOD) &&
+				   (OBJECT_ENABLED(O_STOCKADE))) {
 					if(found) *str += " ";
 					found = 1;
 					*str += "  A unit with this skill may use the BUILD order "
 						"to construct Stockades from wood.";
 				}
 			} else if(level == 2) {
-				if(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED) break;
-				if(ObjectDefs[O_MTOWER].flags & ObjectType::DISABLED) break;
+				if(ITEM_DISABLED(I_ROOTSTONE)) break;
+				if(OBJECT_DISABLED(O_MTOWER)) break;
 				found = 1;
 				*str += "A unit with this skill may use the BUILD order to "
 					"construct a Magical Tower from rootstone.";
 			} else if(level == 3) {
-				if(!(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED) &&
-				   !(ObjectDefs[O_MFORTRESS].flags & ObjectType::DISABLED)) {
+				if(ITEM_ENABLED(I_ROOTSTONE) && OBJECT_ENABLED(O_MFORTRESS)) {
 					found = 1;
 					*str += "A unit with this skill may use the BUILD order "
 						   "to construct magical fortresses from rootstone. "
@@ -681,50 +680,48 @@ AString *ShowSkill::Report(void)
 						   "rootstone and can protect 250 men. However, "
 						   "magical fortresses may be used as the target of "
 						   "powerful magical spells";
-					if(!(SkillDefs[S_EARTHQUAKE].flags&SkillType::DISABLED)) {
+					if(SKILL_ENABLED(S_EARTHQUAKE)) {
 						*str += ", and are not harmed by magical Earthquakes";
 					}
 					*str += ".";
 				}
-				if((!(ItemDefs[I_STONE].flags & ItemType::DISABLED) ||
-				    !(ItemDefs[I_WOOD].flags & ItemType::DISABLED)) &&
-				   !ObjectDefs[O_INN].flags & ObjectType::DISABLED) {
+				if((ITEM_ENABLED(I_STONE) || ITEM_ENABLED(I_WOOD)) &&
+				   !OBJECT_DISABLED(O_INN)) {
 					if(found) *str += " ";
 					found = 1;
 					*str += "A unit with this skill may use the BUILD order "
 					       "to produce an Inn from ";
-					if(!(ItemDefs[I_STONE].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_STONE)) {
 						*str += "stone";
 					}
-					if(!(ItemDefs[I_WOOD].flags & ItemType::DISABLED)) {
-						if(!(ItemDefs[I_STONE].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_WOOD)) {
+						if(ITEM_ENABLED(I_STONE)) {
 							*str += " or ";
 						}
 						*str += "wood";
 					}
 					*str += ".";
 				}
-				if(!(ItemDefs[I_STONE].flags & ItemType::DISABLED)) {
-					if(!(ObjectDefs[O_TEMPLE].flags&ObjectType::DISABLED)){
+				if(ITEM_ENABLED(I_STONE)) {
+					if(OBJECT_ENABLED(O_TEMPLE)){
 						if(found) *str += " ";
 						found = 1;
 						*str += "A unit with this skill may use the BUILD "
 							"order to produce a Temple from stone.";
 					}
-					if(!(ObjectDefs[O_ROADN].flags&ObjectType::DISABLED)||
-					   !(ObjectDefs[O_ROADNW].flags&ObjectType::DISABLED)||
-					   !(ObjectDefs[O_ROADNE].flags&ObjectType::DISABLED)||
-					   !(ObjectDefs[O_ROADS].flags&ObjectType::DISABLED)||
-					   !(ObjectDefs[O_ROADSW].flags&ObjectType::DISABLED)||
-					   !(ObjectDefs[O_ROADSE].flags&ObjectType::DISABLED)){
+					if(OBJECT_ENABLED(O_ROADN)||
+					   OBJECT_ENABLED(O_ROADNW)||
+					   OBJECT_ENABLED(O_ROADNE)||
+					   OBJECT_ENABLED(O_ROADS)||
+					   OBJECT_ENABLED(O_ROADSW)||
+					   OBJECT_ENABLED(O_ROADSE)){
 						if(found) *str += " ";
 						found = 1;
 						*str += "A unit with this skill may use the BUILD "
 							"order to produce Roads from stone.";
 					}
 				}
-				if(!(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED) &&
-				   !(ObjectDefs[O_HUT].flags & ObjectType::DISABLED)) {
+				if(ITEM_ENABLED(I_IRONWOOD) && OBJECT_ENABLED(O_HUT)) {
 					if(found) *str += " ";
 					found = 1;
 					*str += "A unit with this skill may use the BUILD order "
@@ -734,34 +731,34 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_SHIPBUILDING:
 			if(level == 1) {
-				if(ItemDefs[I_WOOD].flags & ItemType::DISABLED) break;
-				if((ObjectDefs[O_LONGBOAT].flags & ObjectType::DISABLED) &&
-				   (ObjectDefs[O_CLIPPER].flags & ObjectType::DISABLED) &&
-				   (ObjectDefs[O_GALLEON].flags & ObjectType::DISABLED))
+				if(ITEM_DISABLED(I_WOOD)) break;
+				if((OBJECT_DISABLED(O_LONGBOAT)) &&
+				   (OBJECT_DISABLED(O_CLIPPER)) &&
+				   (OBJECT_DISABLED(O_GALLEON)))
 					break;
 				found = 1;
 				*str += "A unit with this skill may use the BUILD order to "
 				       "construct different types of ships from wood.  At "
 					   "this level, the ships that may be built are ";
 				int comma = 0;
-				if(!(ObjectDefs[O_LONGBOAT].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_LONGBOAT)) {
 					comma = 1;
 					*str += "Longboats";
 				}
-				if(!(ObjectDefs[O_CLIPPER].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_CLIPPER)) {
 					if(comma) *str += ", ";
 					comma = 1;
 					*str += "Clippers";
 				}
-				if(!(ObjectDefs[O_GALLEON].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_GALLEON)) {
 					if(comma) *str += ", and ";
 					comma = 1;
 					*str += "Galleons";
 				}
 				*str += ".";
 			} else if (level == 3) {
-				if(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED) break;
-				if(ObjectDefs[O_AGALLEON].flags & ObjectType::DISABLED) break;
+				if(ITEM_DISABLED(I_IRONWOOD)) break;
+				if(OBJECT_DISABLED(O_AGALLEON)) break;
 				found = 1;
 				*str += "A unit with this skill may use the BUILD order to "
 					   "construct armored galleons from 75 units of "
@@ -769,8 +766,7 @@ AString *ShowSkill::Report(void)
 					   "units, as well as offer protection (in the same "
 					   "manner as a building) to the first 200 men within.";
 			} else if (level == 5) {
-				if(!(ItemDefs[I_FLOATER].flags & ItemType::DISABLED) &&
-				   !(ObjectDefs[O_BALLOON].flags & ObjectType::DISABLED)) {
+				if(ITEM_ENABLED(I_FLOATER) && OBJECT_ENABLED(O_BALLOON)) {
 					found = 1;
 					*str += "A unit with this skill may use the BUILD order "
 						"to construct balloons, using 50 units of floater "
@@ -780,8 +776,7 @@ AString *ShowSkill::Report(void)
 						"land. A balloon requires 10 sailors to sail, and "
 						"has a capacity of 800 weight units.";
 				}
-				if(!(ItemDefs[I_YEW].flags & ItemType::DISABLED) &&
-				   !(ObjectDefs[O_WGALLEON].flags & ObjectType::DISABLED)) {
+				if(ITEM_ENABLED(I_YEW) && OBJECT_ENABLED(O_WGALLEON)) {
 					if(found) *str += " ";
 					found = 1;
 					*str += "A unit with this skill may use the BUILD order "
@@ -823,14 +818,14 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_RIDING:
 			if(level == 1) {
-				if(ItemDefs[I_HORSE].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_HORSE)) break;
 				found = 1;
 				*str += "A unit with this skill, if possessing a horse, "
 					   "gains a bonus in combat if the battle is in a "
 					   "plain, desert, or tundra. This bonus is equal to "
 					   "the skill level, up to a maximum of 3.";
 			} else if(level == 3) {
-				if(ItemDefs[I_WHORSE].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_WHORSE)) break;
 				found = 1;
 				*str += "A unit with Riding 3 or above, if possessing a "
 					   "winged horse, gains a bonus in combat, equal to "
@@ -839,23 +834,27 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_CROSSBOW:
 			if(level == 1) {
-				if(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED &&
-				   ItemDefs[I_MCROSSBOW].flags & ItemType::DISABLED &&
-				   ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED)
+				if(ITEM_DISABLED(I_CROSSBOW) &&
+				   ITEM_DISABLED(I_MCROSSBOW) &&
+				   ITEM_DISABLED(I_DOUBLEBOW) &&
+				   ITEM_DISABLED(I_SUPERBOW))
 					break;
 				found = 1;
-				*str += "A unit with this skill may use a crossbow, either "
-					   "in battle, or to TAX or PILLAGE a region.";
+				*str += "A unit with this skill may use a crossbow or "
+						"other bow derived from one, either in battle, "
+						"or to TAX or PILLAGE a region.";
 			}
 			break;
 		case S_LONGBOW:
 			if(level == 1) {
-				if(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED &&
-				   ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED)
+				if(ITEM_DISABLED(I_LONGBOW) &&
+				   ITEM_DISABLED(I_DOUBLEBOW) &&
+				   ITEM_DISABLED(I_SUPERBOW))
 					break;
 				found = 1;
-				*str += "A unit with this skill may use a longbow, either "
-					   "in battle, or to TAX or PILLAGE a region.";
+				*str += "A unit with this skill may use a longbow or "
+						"other bow derived from one, either in battle, or "
+						"to TAX or PILLAGE a region.";
 			}
 			break;
 		case S_STEALTH:
@@ -884,9 +883,9 @@ AString *ShowSkill::Report(void)
 				*str += "A unit with this skill can use herbs to heal "
 					   "units after a battle has been won.";
 			} else if(level == 3) {
-				if(ItemDefs[I_MUSHROOM].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_HERBS].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_HEALPOTION].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_MUSHROOM)) break;
+				if(ITEM_DISABLED(I_HERBS)) break;
+				if(ITEM_DISABLED(I_HEALPOTION)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					    "to produce healing potions.  Healing potions may be "
@@ -974,10 +973,12 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "A mage with this skill may cast a Force Shield in "
 					   "combat.";
-				if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) ||
-				   !(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED) ||
-				   !(ItemDefs[I_MCROSSBOW].flags & ItemType::DISABLED) ||
-				   !(ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_LONGBOW) ||
+				   ITEM_ENABLED(I_CROSSBOW) ||
+				   ITEM_ENABLED(I_MCROSSBOW) ||
+				   ITEM_ENABLED(I_DOUBLEBOW) ||
+				   ITEM_ENABLED(I_SUPERBOW) ||
+				   ITEM_ENABLED(I_JAVELIN)) {
 					*str += " This shield will be effective against all "
 						   "ranged attacks against the mage's army, at a "
 						   "level equal to the mage's skill level.";
@@ -1014,14 +1015,14 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "A mage with this skill may heal casualties "
 					   "after battle";
-				if(!(ItemDefs[I_HERBS].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HERBS)) {
 					*str += " without the aid of herbs.";
-					if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED)) {
+					if(SKILL_ENABLED(S_HEALING)) {
 						*str += " Other than not needing herbs, this healing "
 							   "works the same as normal healing.";
 					}
 				} else {
-					if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED)) {
+					if(SKILL_ENABLED(S_HEALING)) {
 						*str += " This healing works the same as normal "
 							   "healing.";
 					}
@@ -1099,7 +1100,7 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_PORTAL_LORE:
 			if(level == 1) {
-				if(ItemDefs[I_PORTAL].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_PORTAL)) break;
 				found = 1;
 				*str += "A mage with the Portal Lore skill may, with the "
 					   "aid of another mage, make a temporary Gate between "
@@ -1239,14 +1240,14 @@ AString *ShowSkill::Report(void)
 				*str += "A mage with knowledge of Summon Wind can summon "
 					   "up the powers of the wind to aid him in sea or "
 					   "air travel. Usage of this spell is automatic.";
-				if(!(ObjectDefs[O_LONGBOAT].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_LONGBOAT)) {
 					*str += " At level 1, if the mage is in a Longboat, that "
 						   "ship will get 2 extra movement points.";
 				}
 				*str += " If the mage is flying, he will receive 2 extra "
 					   "movement points.";
 			} else if (level == 2) {
-				if(ObjectDefs[O_CLIPPER].flags & ObjectType::DISABLED) break;
+				if(OBJECT_DISABLED(O_CLIPPER)) break;
 				found = 1;
 				*str += "With level 2 Summon Wind, any ship of Clipper size "
 					   "or smaller that the mage is inside will receive a "
@@ -1890,7 +1891,7 @@ AString *ShowSkill::Report(void)
 					   "should CAST Engrave_Runes_of_Warding, and be "
 					   "within the building he wishes to engrave runes "
 					   "upon; also, this spell costs 600 silver to cast.";
-				if(!(ObjectDefs[O_TOWER].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_TOWER)) {
 					*str += " At level 1, the mage may engrave runes of "
 						   "warding upon a Tower.";
 				}
@@ -1898,7 +1899,7 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "At level 2, the mage has a 40 percent chance of "
 					   "success each time he casts this spell.";
-				if(!(ObjectDefs[O_FORT].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_FORT)) {
 					*str += " At this level, the mage may engrave runes of "
 						   "warding upon a Fort.";
 				}
@@ -1906,7 +1907,7 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "At level 3, the mage has a 60 percent chance of "
 					   "success each time he casts this spell.";
-				if(!(ObjectDefs[O_CASTLE].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_CASTLE)) {
 					*str += " At this level, the mage may engrave runes of "
 						   "warding upon a Castle.";
 				}
@@ -1914,7 +1915,7 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "At level 4, the mage has a 80 percent chance of "
 					   "success each time he casts this spell.";
-				if(!(ObjectDefs[O_CITADEL].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_CITADEL)) {
 					*str += " At this level, the mage may engrave runes of "
 						   "warding upon a Citadel.";
 				}
@@ -1922,7 +1923,7 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "At level 5, the mage has a 100 percent chance of "
 					   "success each time he casts this spell.";
-				if(!(ObjectDefs[O_MFORTRESS].flags & ObjectType::DISABLED)) {
+				if(OBJECT_ENABLED(O_MFORTRESS)) {
 					*str += " At this level, the mage may engrave runes of "
 						   "warding upon a Magical Fortress, which grants "
 						   "the inhabitants an Energy Shield and Spirit "
@@ -1942,8 +1943,8 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_ENCHANT_SWORDS:
 			if(level == 1) {
-				if(ItemDefs[I_MSWORD].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_SWORD].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_MSWORD)) break;
+				if(ITEM_DISABLED(I_SWORD)) break;
 				found = 1;
 				*str += "A mage with the Enchant Swords skill may "
 					   "enchant normal swords into mithril swords, "
@@ -1957,8 +1958,8 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_ENCHANT_ARMOR:
 			if(level == 1) {
-				if(ItemDefs[I_MPLATE].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_PLATEARMOR].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_MPLATE)) break;
+				if(ITEM_DISABLED(I_PLATEARMOR)) break;
 				found = 1;
 				*str += "A mage with the Enchant Armor skill may enchant "
 					   "normal plate armor into mithril armor, which give "
@@ -1974,7 +1975,7 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_CONSTRUCT_PORTAL:
 			if(level == 1) {
-				if(ItemDefs[I_PORTAL].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_PORTAL)) break;
 				found = 1;
 				*str += "A mage with the Construct Portal skill may "
 					   "construct a Portal, for use with the Portal "
@@ -1999,9 +2000,9 @@ AString *ShowSkill::Report(void)
 				*str += "The weaponcraft skill is an advanced version of the "
 					    "weaponsmith skill.";
 				found = 1;
-				if(!(ItemDefs[I_LANCE].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
-				   !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+				if(ITEM_ENABLED(I_LANCE) &&
+				   ITEM_ENABLED(I_WOOD) &&
+				   SKILL_ENABLED(S_RIDING)) {
 					*str += " A unit with this skill may use the PRODUCE "
 						    "order to produce lances from wood.  A lance "
 							"attacks as if the target has a defensive skill "
@@ -2012,51 +2013,51 @@ AString *ShowSkill::Report(void)
 							"to produce a lance, which weighs two units.  "
 							"A unit wielding a lance attacks with a combat "
 							"skill equal to their mount bonus + 5.";
-					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_AXE)) {
 						*str += " Production can be increased by using axes.";
 					}
 				}
 			} else if(level == 2) {
-				if(ItemDefs[I_MBAXE].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_MBAXE)) break;
+				if(ITEM_DISABLED(I_MITHRIL)) break;
+				if(ITEM_DISABLED(I_IRONWOOD)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 						"to produce mithril battle axes from 1 unit each of "
 						"mithril and ironwood.  Mithril battle axes give "
 						"units a +6 bonus in combat but may only strike "
 						"every other round due to their mass.";
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HAMMER)) {
 					*str += "  Production can be increased by using hammers.";
 				}
 			} else if (level == 3) {
-				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_ADSWORD].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_ADMANTIUM)) break;
+				if(ITEM_DISABLED(I_ADSWORD)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					   "to produce admantium swords from admantium.  "
 					   "Admantium swords give units a +6 bonus in combat "
 					   "rather than the usual +2, and cut more easily "
 					   "through armor due to their sharpness.";
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HAMMER)) {
 					*str += "  Production can be increased by using hammers.";
 				}
 			} else if(level == 4) {
-				if(!(ItemDefs[I_YEW].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_SUPERBOW].flags & ItemType::DISABLED) &&
-				   (!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED) ||
-					!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED))) {
+				if(ITEM_ENABLED(I_YEW) &&
+				   ITEM_ENABLED(I_MITHRIL) &&
+				   ITEM_ENABLED(I_SUPERBOW) &&
+				   (SKILL_ENABLED(S_CROSSBOW) ||
+					SKILL_ENABLED(S_LONGBOW))) {
 					found = 1;
 					*str += "A unit with this skill may use the PRODUCE "
 						"order to produce super bows, the ultimate "
 						"(natural) dealer of death on a battlefield.  Super"
 						"bows may be used by units skilled in ";
-					if(!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
+					if(SKILL_ENABLED(S_CROSSBOW)) {
 						*str += "Crossbow";
 					}
-					if(!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED)) {
-						if(!(SkillDefs[S_CROSSBOW].flags&SkillType::DISABLED)){
+					if(SKILL_ENABLED(S_LONGBOW)) {
+						if(SKILL_ENABLED(S_CROSSBOW)){
 							*str += " or ";
 						}
 						*str += "Longbow";
@@ -2068,14 +2069,14 @@ AString *ShowSkill::Report(void)
 						"the unit.  It takes two units of yew and one unit "
 						"of mithril to produce a super bow, which weighs "
 						"one unit.";
-					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_AXE)) {
 						*str += "  Production can be increased by using axes.";
 					}
 				}
 			} else if(level == 5) {
-				if(ItemDefs[I_ADBAXE].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_YEW].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_ADBAXE)) break;
+				if(ITEM_DISABLED(I_ADMANTIUM)) break;
+				if(ITEM_DISABLED(I_YEW)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 						"to produce admantium battle axes from 1 unit each of "
@@ -2084,7 +2085,7 @@ AString *ShowSkill::Report(void)
 						"every other round due to their mass, however they "
 						"do cut more easily through armor due to their "
 						"sharpness.";
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HAMMER)) {
 					*str += "  Production can be increased by using hammers.";
 				}
 			}
@@ -2094,9 +2095,9 @@ AString *ShowSkill::Report(void)
 				*str += "The armorcraft skill is an advanced version of the "
 					    "armorsmith skill.";
 				found = 1;
-				if(!(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_MPLATE].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_IMARM].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_MITHRIL) &&
+				   ITEM_ENABLED(I_MPLATE) &&
+				   ITEM_ENABLED(I_IMARM)) {
 					*str += "  A unit with this skill may PRODUCE improved "
 						    "mithril armor from one unit of mithril and an "
 							"existing suit of mithril armor.  Improved "
@@ -2105,14 +2106,14 @@ AString *ShowSkill::Report(void)
 							"a normal weapon, and a 3/4 chance of surviving "
 							"an attack from a good weapon. Improved mithril "
 							"armor weighs one unit.";
-					if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+					if(ITEM_ENABLED(I_HAMMER)) {
 						*str += " Production of improved mithril armor can be "
 							    "increased by using hammers.";
 					}
 				}
 			} else if(level == 3) {
-				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_ADRING].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_ADMANTIUM)) break;
+				if(ITEM_DISABLED(I_ADRING)) break;
 				found = 1;
 				*str += "A unit with this skill may PRODUCE admantium "
 						"ring mail from one unit of admantium.  Admantium "
@@ -2121,14 +2122,14 @@ AString *ShowSkill::Report(void)
 						"a normal weapon, and a 4/5 chance of surviving "
 						"an attack from a good weapon. Admantium ring mail "
 						"weighs one unit.";
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HAMMER)) {
 					*str += " Production of admantium ring mail can be "
 							"increased by using hammers.";
 				}
 			} else if(level == 5) {
-				if(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_PLATEARMOR].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_ADPLATE].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_ADMANTIUM)) break;
+				if(ITEM_DISABLED(I_PLATEARMOR)) break;
+				if(ITEM_DISABLED(I_ADPLATE)) break;
 				found = 1;
 				*str += "A unit with this skill may PRODUCE admantium "
 						"plate mail from three units of admantium and an "
@@ -2137,7 +2138,7 @@ AString *ShowSkill::Report(void)
 						"attack in battle from a normal weapon, and a 9/10 "
 						"chance of surviving an attack from a good "
 						"weapon. Admantium plate mail weighs one unit.";
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_HAMMER)) {
 					*str += " Production of admantium plate mail can be "
 							"increased by using hammers.";
 				}
@@ -2145,14 +2146,14 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_CAMELTRAINING:
 			if(level == 1) {
-				if(ItemDefs[I_CAMEL].flags & ItemType::DISABLED) break;
+				if(ITEM_DISABLED(I_CAMEL)) break;
 				found = 1;
 				*str += "A unit with this skill may use the PRODUCE order "
 					    "to produce camels in designated regions.  Camels "
 						"can be found in desert regions.   Camels weigh "
 						"20 weight units and can carry 70 weight units at "
 						"walking or riding speeds.";
-				if(!(ItemDefs[I_LASSO].flags & ItemType::DISABLED)) {
+				if(ITEM_ENABLED(I_LASSO)) {
 					*str += " Production of camels can be increased using "
 						    "lassos.";
 				}

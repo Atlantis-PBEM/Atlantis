@@ -869,13 +869,25 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
                 continue;
             }
 
+			if (forbid && !(unit->IsAlive() && unit->canattack)) {
+				unit->Error(AString("ENTER: Unable to attack ") +
+						*(forbid->name));
+				continue;
+			}
+
             int done = 0;
             while (forbid)
             {
-                RunBattle(region, unit, forbid, 0, 0);
+                int result = RunBattle(region, unit, forbid, 0, 0);
+				if(result == BATTLE_IMPOSSIBLE) {
+					unit->Error(AString("ENTER: Unable to attack ")+
+							*(forbid->name));
+					done = 1;
+					break;
+				}
                 if (!unit->IsAlive() || !unit->canattack) {
-                    done = 1;
-                    break;
+				  done = 1;
+				  break;
                 }
                 forbid = to->ForbiddenBy(region, unit);
             }

@@ -39,6 +39,13 @@ enum {
   ASS_FAIL
 };
 
+enum {
+ BATTLE_IMPOSSIBLE,
+ BATTLE_LOST,
+ BATTLE_WON,
+ BATTLE_DRAW
+};
+
 class BattlePtr : public AListElem {
 public:
   Battle * ptr;
@@ -53,7 +60,7 @@ public:
     void Report(Areport *,Faction *);
     void AddLine(const AString &);
 	
-    void Run( ARegion *,
+    int Run( ARegion *,
               Unit *,
               AList *,
               Unit *,

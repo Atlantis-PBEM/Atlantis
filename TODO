@@ -8,7 +8,11 @@
    -- Add option to allow towers/forts/etc to allow training only a certain
       number of mages.
    -- Consider more complicated GIVE processing of 'GIVE ALL EXCEPT .....'
-   -- Consider requiring both food and pay for upkeep.
+   -- Consider requiring both food and pay for upkeep (make upkeep more
+      flexible in general).  Someone supplied a patch to allow a leader to
+      only eat 1 (grain/livestock/fish) instead of 1 per 10 SILV upkeep.
+      That would be a nice option to support as well, but to do so (as well)
+      as allow old behaviour requires flexibility.
    -- Merchent skill (limited number of merchents)/Limited number
       of tacticians/generals?
    -- Make errors for overwriting orders ONLY be an error if overwriting a
