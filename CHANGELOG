@@ -346,9 +346,9 @@ Changes from 4.0.8 -> 4.0.9
       The reason for this is to prevent unauthorized entry into a building.
    -- Added message distinguishing move failure due to overburdened from 
       move failure due to no more movement points.
-   -- Redid ParseItem a bit (made it three functions different functions)
-      to allow specific features to GM and push some of the error checking
-      down into the function.  This hopefully fixes a bug in Ceran II where
+   -- Redid ParseItem a bit (made it three different functions) to allow
+      specific features to GM and push some of the error checking down
+      into the function.  This hopefully fixes a bug in Ceran II where
       someone was trying to buy goblins (which are a race there as well as
       a monster) and failing because it was finding the monster before the
       race in the item list.  ParseGiveableItem is now used by BUY, SELL,
