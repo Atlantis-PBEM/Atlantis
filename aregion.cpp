@@ -961,26 +961,47 @@ void ARegion::CheckTownIncrease()
 	town->pop = town->basepop * 2 / 3;
 }
 
-int ARegion::GetNearestMapValue(int dir, int range, int type, int getrange)
+int ARegion::GetSlope()
 {
-	ARegion *nr = neighbors[dir];
-	if(!nr) return -1;
-	int retval = -1;
-	switch(type) {
-		case 0: retval = nr->elevation;
-			break;
-		case 1: retval = nr->humidity;
-			break;
-		case 2: retval = nr->temperature;
-			break;
-		case 3: retval = nr->culture;
+	int retval = 0;
+	for (int i=0; i<NDIRS; i++) {
+		ARegion *n = neighbors[i];
+		if(!n) continue;
+		int d = abs(n->elevation - elevation);
+		if (d > retval) retval = d;
 	}
-	if (retval < 1) {
-		if (range == 1) return -1;
-		return nr->GetNearestMapValue(dir, range--, type, getrange);
-	}
-	if (getrange) return range;
-	retval *= range;
+	return retval;
+}
+
+int ARegion::TerrainProbability(int terrain)
+{
+	int retval = 100;
+	switch(terrain) {
+		case R_PLAIN:
+			retval = 500 - (elevation*abs(humidity-50)/2) - (GetSlope()*GetSlope())/2;
+			break;
+		case R_FOREST:
+			retval = 400 - (abs(3*humidity - 120)*abs(temperature - 40))/2;
+			if (temperature > 60) retval -= (temperature - 60) * (temperature - 60);
+			break;
+		case R_MOUNTAIN:
+			retval = 400 - ((105 - elevation) * abs(100 - elevation)) + GetSlope()*GetSlope();
+			break;
+		case R_SWAMP:
+			retval = 400 - ((90 - humidity)*abs(100 - humidity));
+			retval += (abs(elevation-50) * (50-elevation));
+			break;
+		case R_JUNGLE:
+			retval = 100 + 4*temperature - ((100 - humidity)*abs(100 - temperature));
+			break;
+		case R_DESERT:
+			retval = 2*(100-humidity) + 3*temperature
+				- ((humidity-15)*abs(100-temperature));
+			break;
+		default: // R_TUNDRA
+			retval = 400 - (temperature * temperature) 
+				- ((elevation-40)*abs(humidity-50))/2;
+		}
 	return retval;
 }
 
@@ -2533,11 +2554,15 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			f->PutStr(temp);
 		}
 		
-		/*
+		
 		f->PutStr("");
 		temp = "Elevation is ";
 		f->PutStr(temp + elevation);
-		*/
+		temp = "Humidity is ";
+		f->PutStr(temp + humidity);
+		temp = "Temperature is ";
+		f->PutStr(temp + temperature);
+		
 
 		if (type == R_NEXUS) {
 			int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
@@ -3337,8 +3362,8 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 	int sea = Globals->OCEAN;
-	if(Globals->LAKES_EXIST || Globals->ARCHIPELAGO)
-		sea = sea * (100 + 12 * (100 - Globals->ARCHIPELAGO) / 100) / 100;
+	if(Globals->SEA_LIMIT)
+		sea = sea * (100 + 2 * Globals->SEA_LIMIT) / 100;
 	
 	if (Globals->FRACTAL_MAP) InitGeographicMap(pRegionArrays[level]);
 		
@@ -3346,9 +3371,16 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name
 
 	CleanUpWater(pRegionArrays[level]);
 
-	SetupAnchors(pRegionArrays[level]);
+	if(Globals->FRACTAL_MAP) {
+	
+		GrowFractalTerrain(pRegionArrays[level]);	
+	
+	} else {
+	
+		SetupAnchors(pRegionArrays[level]);
 
-	GrowTerrain(pRegionArrays[level], 0);
+		GrowTerrain(pRegionArrays[level], 0);
+	}
 
 	AssignTypes(pRegionArrays[level]);
 
@@ -3480,10 +3512,10 @@ void ARegionList::SetupNeighbors(ARegionArray *pRegs)
 
 void ARegionList::InitGeographicMap(ARegionArray *pRegs)
 {
-	Awrite("Initialising the Geographic Map");
 	GeoMap geo = GeoMap(pRegs->x, pRegs->y);
 	geo.Generate(Globals->FRACTAL_SCATTER,Globals->FRACTAL_SMOOTHING);
 	geo.ApplyGeography(pRegs);
+	Awrite("");
 }
 
 void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
@@ -3795,6 +3827,7 @@ void ARegionList::MakeOneIsland(ARegionArray *pRegs, int xx, int yy)
 void ARegionList::CleanUpWater(ARegionArray *pRegs)
 {
 	Awrite("Converting Scattered Water");
+	int dotter = 0;
 	for (int ctr = 0; ctr < Globals->SEA_LIMIT+1; ctr++) {
 		for(int i = 0; i < pRegs->x; i++) {
 			for(int j = 0; j < pRegs->y; j++) {
@@ -3804,12 +3837,12 @@ void ARegionList::CleanUpWater(ARegionArray *pRegs)
 				for (int d = 0; d < NDIRS; d++) {
 					remainocean += reg->CheckSea(d, Globals->SEA_LIMIT, remainocean);
 				}
+				if(dotter++%2000 == 0) Adot();
 				if (remainocean > 0) continue;
 				reg->wages = 0;
 				if (getrandom(100) < Globals->LAKES_EXIST) {
 					reg->type = R_LAKE;
 				} else reg->type = R_NUM;
-				Adot();
 			}
 		}
 	}
@@ -3915,6 +3948,189 @@ void ARegionList::SetRegTypes(ARegionArray *pRegs, int newType)
 	}
 }
 
+int ARegionList::GetFractalTerrain(ARegion *reg)
+{
+	if(reg->zloc != 1) return GetRegType(reg);
+	int terrain = R_OCEAN;
+	int total = 0;
+	int tchance[7];
+	int ttype[7];
+	for(int t=R_PLAIN; t < (R_TUNDRA+1); t++) {
+		int chance = reg->TerrainProbability(t);
+		switch(t) {
+			case R_PLAIN: ttype[0] = R_PLAIN;
+				// chance = (chance * (100 - abs(reg->humidity - 40))/100);
+				// chance = (chance * (200 - abs(reg->temperature - 50))/200);
+				chance = Globals->PLAINS * chance / 100;
+				tchance[0] = chance;
+				total += chance;
+				break;
+			case R_FOREST: ttype[1] = R_FOREST;
+				// chance = (chance * (120 - abs(reg->temperature - 40))/120);
+				// chance = (chance * (800 - reg->elevation)/800);
+				chance = Globals->FORESTS * chance / 100;
+				tchance[1] = chance+total;
+				total += chance;
+				break;
+			case R_MOUNTAIN: ttype[2] = R_MOUNTAIN;
+				chance = Globals->MOUNTAINS * chance / 100;
+				tchance[2] = chance+total;
+				total += chance;
+				break;
+			case R_SWAMP: ttype[3] = R_SWAMP;
+				chance = Globals->SWAMPS * chance / 100;
+				// tm = abs(reg->temperature - 50) - 25;
+				// if (tm < 0) tm = 0;
+				// if (chance < 0) chance = 0;
+				// chance = (chance * (50 - tm)/50);
+				// chance = (chance * (150 - reg->elevation)/150);
+				tchance[3] = chance+total;
+				total += chance;
+				break;
+			case R_JUNGLE: ttype[4] = R_JUNGLE;
+				chance = Globals->JUNGLES * chance / 100;
+				// chance = (chance * (80 - abs(reg->temperature - 75))/80);
+				// chance = (chance * (200 - abs(reg->elevation - 50))/200);
+				tchance[4] = chance+total;
+				total += chance;
+				break;
+			case R_DESERT: ttype[5] = R_DESERT;
+				chance = Globals->DESERTS * chance / 100;
+				tchance[5] = chance+total;
+				total += chance;
+				break;
+			default: ttype[6] = R_TUNDRA;
+				chance = Globals->TUNDRAS * chance / 100;
+				// chance = (chance * (200 - abs(reg->humidity - 40))/200);
+				// chance = (chance * (400 - abs(reg->elevation - 50))/400);
+				tchance[6] = chance+total;
+				total += chance;
+		}
+	}
+	int roll = getrandom(total);
+	for(int t = 0; t < 7; t++) {
+		if(roll < tchance[t]) {
+			terrain = ttype[t];
+			break;
+		}
+	}
+	return terrain;
+}
+
+
+void ARegionList::GrowFractalTerrain(ARegionArray *pArr)
+{
+	// First count total land hexes
+	int land = 0;
+	for(int x = 0; x < pArr->x; x++) {
+		for(int y = 0; y < pArr->y; y++) {
+			ARegion *reg = pArr->GetRegion(x, y);
+			if(!reg) continue;
+			if(reg->type == R_NUM) land++;
+		}
+	}
+	Awrite(AString("Generating fractal terrain for ") + land + " land hexes.");
+	int thex[8];
+	int sum = Globals->PLAINS + Globals->FORESTS + Globals->MOUNTAINS
+		+ Globals->SWAMPS + Globals->JUNGLES + Globals->DESERTS
+		+ Globals->TUNDRAS;
+	int halfstep = land/200 + 1;
+	for (int i = R_PLAIN; i < (R_TUNDRA+1); i++) thex[i] = 0;
+	thex[R_TUNDRA] = Globals->TUNDRAS/3 * land / sum;
+	thex[R_DESERT] = Globals->DESERTS*2/3 * land / sum;
+	for (int i = R_TUNDRA; i > R_DESERT; i--) {
+		if(thex[R_DESERT] == thex[i]) thex[R_DESERT] += halfstep;
+	}
+	thex[R_JUNGLE] = Globals->JUNGLES*2/3 * land / sum;
+	for (int i = R_TUNDRA; i > R_JUNGLE; i--) {
+		if(thex[R_JUNGLE] == thex[i]) thex[R_JUNGLE] += halfstep;
+	}
+	thex[R_SWAMP] = Globals->SWAMPS*2/3 * land / sum;
+	for (int i = R_TUNDRA; i > R_SWAMP; i--) {
+		if(thex[R_SWAMP] == thex[i]) thex[R_SWAMP] += halfstep;
+	}
+	thex[R_MOUNTAIN] = Globals->MOUNTAINS * land / sum;
+	for (int i = R_TUNDRA; i > R_MOUNTAIN; i--) {
+		if(thex[R_MOUNTAIN] == thex[i]) thex[R_MOUNTAIN] += halfstep;
+	}
+	thex[R_FOREST] = Globals->FORESTS*2/3 * land / sum;
+	for (int i = R_TUNDRA; i > R_FOREST; i--) {
+		if(thex[R_FOREST] == thex[i]) thex[R_FOREST] += halfstep;
+	}
+	thex[R_PLAIN] = Globals->PLAINS * land / sum;
+	for (int i = R_TUNDRA; i > R_PLAIN; i--) {
+		if(thex[R_PLAIN] == thex[i]) thex[R_PLAIN] += halfstep;
+	}
+	int count = 1;
+	int tcount[8];
+	for (int i = R_PLAIN; i < (R_TUNDRA+1); i++) tcount[i] = 0;
+	int step = land / 100 + 1;
+	for (int i = 1; i < land; i += step) {
+		for (int t = R_TUNDRA; t > (R_PLAIN-1); t--) {
+			if((thex[t] < i) && (tcount[t] < 1)) {
+				AllocateFractalTerrain(t, thex[t]/2, 0, pArr);
+				thex[t] = thex[t]/2 + thex[t]%2;
+				tcount[t]++;
+				count++;
+			}
+		}
+	}
+	count = 1;
+	for (int i = 1; i < land; i += step) {
+		for (int t = R_TUNDRA; t > (R_PLAIN-1); t--) {
+			if(thex[t] < i) {
+				AllocateFractalTerrain(t, thex[t], (count > 6), pArr);
+				thex[t] = land+1;
+				count++;
+			}
+		}
+	}
+}
+
+void ARegionList::AllocateFractalTerrain(int type, int num, int last, ARegionArray *pArr)
+{
+	AString temp = AString("-> allocating ");
+	int total = num;
+	int plus = 0;
+	switch(type) {
+		case R_PLAIN: plus = Globals->PLAINS/2;
+			temp += "plain terrain:";
+			break;
+		case R_FOREST: plus = Globals->FORESTS/2;
+			temp += "forest terrain:";
+			break;
+		case R_MOUNTAIN: plus = Globals->MOUNTAINS/2;
+			temp += "mountain terrain:";
+			break;
+		case R_SWAMP: plus = Globals->SWAMPS/2;
+			temp += "swamp terrain:";
+			break;
+		case R_JUNGLE: plus = Globals->JUNGLES/2;
+			temp += "jungle terrain:";
+			break;
+		case R_DESERT: plus = Globals->DESERTS/2;
+			temp += "desert terrain:";
+			break;
+		case R_TUNDRA: plus = Globals->TUNDRAS/2;
+			temp += "tundra terrain:";
+	}
+	Awrite(temp);
+	int level = 400 + plus;
+	while(( (last) || (num > 0)) && (level > 0)) {
+		for(int x = 0; x < pArr->x; x++) {
+			for(int y = 0; y < pArr->y; y++) {
+				ARegion *reg = pArr->GetRegion(x, y);
+				if((!reg) || (reg->type != R_NUM)) continue;
+				if(reg->TerrainProbability(type) + plus < level) continue;
+				reg->type = type;
+				num--;
+			}
+		}
+		level--;
+	}
+	Awrite(AString(" ") + (total-num) + " of " + total + " hexes allocated.");
+}
+
 void ARegionList::SetupAnchors(ARegionArray *ta)
 {
 	// Now, setup the anchors
@@ -3930,6 +4146,7 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 		}
 		skip = 100 * ((skip+3) * f + 2) / (skip + f - 2);
 	}
+	int dotter = 0;
 	for (int x=0; x<(ta->x)/f; x++) {
 		for (int y=0; y<(ta->y)/(f*2); y++) {
 			if(getrandom(1000) > skip) continue;
@@ -3939,14 +4156,16 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 				int tempy = y * f * 2 + getrandom(f)*2 + tempx%2;
 				reg = ta->GetRegion(tempx, tempy);
 				if (reg->type == R_NUM) {
-					reg->type = GetRegType(reg);
+					if (Globals->FRACTAL_MAP) {
+						reg->type = GetFractalTerrain(reg);
+					} else reg->type = GetRegType(reg);
 					reg->population = 1;
 					if (TerrainDefs[reg->type].similar_type != R_OCEAN)
 						reg->wages = AGetName(0);
 					break;
 				}
 			}
-			Adot();
+			if(dotter++%30 == 0) Adot();
 		}
 	}
 
@@ -3982,6 +4201,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 						ARegion *t = reg->neighbors[(i+init) % NDIRS];
 						if (t) {
 							if ((j==0) && (t->population < 1)) continue;
+							if (getrandom(100) > reg->TerrainProbability(t->type)) continue;
 							if (j==0) t->population--;
 							if(t->type != R_NUM &&
 								(TerrainDefs[t->type].similar_type!=R_OCEAN ||
@@ -4548,16 +4768,16 @@ void GeoMap::Generate(int spread, int smoothness)
 	for (int i=0; i < spread; i++) {
 		if (step > 16) step = step / 2;
 	}		
-	Awrite(AString("First fractal step = ") + step);
+	Awrite(AString("Generating GeoMap - first fractal step = ") + step);
 	Awrite(AString("Size: ") +size + ", xscale: " +xscale + ", yscale: "+yscale);
 	for (int x = 0; x <= size; x += step) {
 		for (int y = 0; y <= size; y += step) {
 			Geography g;
 			int tval = (size/2 - abs(size/2 - y)) * 25 / (size/2);
 			g.elevation = getrandom(5)+getrandom(5)+45;
-			g.humidity = getrandom(5)+getrandom(5)+45;
+			g.humidity = getrandom(20)+getrandom(20)+30;
 			g.temperature = getrandom(tval/2)+getrandom(tval/2)+tval;
-			g.culture = getrandom(10)+getrandom(5)+tval;
+			g.culture = getrandom(20)+getrandom(20)+tval;
 			long int coords = (size+1) * x + y;
 			if (x >= size) {
 				g.elevation = GetElevation((x-size), y);
@@ -4569,12 +4789,11 @@ void GeoMap::Generate(int spread, int smoothness)
 			geomap.insert(make_pair(coords, g));
 		}
 	}
-	int frac = 50;
+	int frac = 25;
 	int count = 0;
 	while (step > 1) {
 		count++;
 		int nextstep = step/2 + step%2;
-		Awrite(AString("Step #") + count + " with step value of " + step);
 		int showfirst = 1;
 		for (int x = 0; x <= size; x += step) {
 			for (int y = 0; y <= size; y += step) {
@@ -4603,10 +4822,10 @@ void GeoMap::Generate(int spread, int smoothness)
 							av_cul += gc;
 							nb++;
 						} else {
-							av_ele += getrandom(25)+1;
-							av_hum += getrandom(25)+1;
-							av_tem += getrandom(25)+1;
-							av_cul += getrandom(25)+1;
+							av_ele += getrandom(50)+1;
+							av_hum += getrandom(50)+1;
+							av_tem += getrandom(5)+1;
+							av_cul += getrandom(15)+1;
 							nb++;
 						}
 					}
@@ -4614,23 +4833,26 @@ void GeoMap::Generate(int spread, int smoothness)
 				Geography g;
 				int r1 = getrandom(2*frac) - frac;
 				int r2 = getrandom(2*frac) - frac;
-				int r3 = getrandom(2*frac) - frac;
+				int r3 = (getrandom(frac) - frac)/2;
 				int r4 = getrandom(2*frac) - frac;
 				g.elevation = av_ele/nb + av_ele%nb + r1;
 				g.humidity = av_hum/nb + av_hum%nb + r2;
-				g.temperature = av_tem/nb + av_tem%nb + r3;
+				int tmean = (size/2 - abs(size/2 - ycoor)) * 100 / (size/2);
+				g.temperature = (tmean + av_tem/nb + av_tem%nb + r3)/2;
 				g.culture = av_cul/nb + av_cul%nb + r4;
 				if (g.elevation < 1) g.elevation = 1;
 				if (g.humidity < 1) g.humidity = 1;
 				if (g.temperature < 1) g.temperature = 1;
 				if (g.culture < 1) g.culture = 1;
-				if (g.elevation > 200) g.elevation = 200;
+				if (g.elevation > 100) g.elevation = 100 - getrandom(4);
+				if (g.humidity > 100) g.humidity = 100 - getrandom(4);
 				long int coords = (size+1) * xcoor + ycoor;
 				geomap.erase(coords);
 				geomap.insert(make_pair(coords, g));
 				
 			}
 		}
+		Adot();
 		showfirst = 1;
 		for (int x = 0; x <= size; x += step) {
 			for (int y = 0; y <= size; y += step) {
@@ -4664,10 +4886,10 @@ void GeoMap::Generate(int spread, int smoothness)
 							av_cul += gc;
 							nb++;
 						} else {
-							av_ele += getrandom(25)+1;
-							av_hum += getrandom(25)+1;
-							av_tem += getrandom(25)+1;
-							av_cul += getrandom(25)+1;
+							av_ele += getrandom(50)+1;
+							av_hum += getrandom(50)+1;
+							av_tem += getrandom(5)+1;
+							av_cul += getrandom(15)+1;
 							nb++;
 						}
 					}
@@ -4684,10 +4906,10 @@ void GeoMap::Generate(int spread, int smoothness)
 							av_cul += gc;
 							nb++;
 						} else {
-							av_ele += getrandom(25)+1;
-							av_hum += getrandom(25)+1;
-							av_tem += getrandom(25)+1;
-							av_cul += getrandom(25)+1;
+							av_ele += getrandom(50)+1;
+							av_hum += getrandom(50)+1;
+							av_tem += getrandom(5)+1;
+							av_cul += getrandom(15)+1;
 							nb++;
 						}
 					}
@@ -4695,17 +4917,19 @@ void GeoMap::Generate(int spread, int smoothness)
 					Geography g;
 					int r1 = getrandom(2*frac) - frac;
 					int r2 = getrandom(2*frac) - frac;
-					int r3 = getrandom(2*frac) - frac;
+					int r3 = (getrandom(frac) - frac)/2;
 					int r4 = getrandom(2*frac) - frac;
 					g.elevation = av_ele/nb + av_ele%nb + r1;
 					g.humidity = av_hum/nb + av_hum%nb + r2;
-					g.temperature = av_tem/nb + av_hum%nb + r3;
+					int tmean = (size/2 - abs(size/2 - dy)) * 100 / (size/2);
+					g.temperature = (tmean + av_tem/nb + av_tem%nb + r3)/2;
 					g.culture = av_cul/nb + av_cul%nb + r4;
 					if (g.elevation < 1) g.elevation = 1;
 					if (g.humidity < 1) g.humidity = 1;
 					if (g.temperature < 1) g. temperature = 1;
 					if (g.culture < 1) g.culture = 1;
-					if (g.elevation > 200) g.elevation = 200;
+					if (g.elevation > 100) g.elevation = 100 - getrandom(4);
+					if (g.humidity > 100) g.humidity = 100 - getrandom(4);
 					long int coords = (size+1) * dx + dy;
 					geomap.erase(coords);
 					geomap.insert(make_pair(coords, g));
@@ -4716,6 +4940,7 @@ void GeoMap::Generate(int spread, int smoothness)
 		frac = (frac * (200-smoothness)/200);
 		step = nextstep;
 	}
+	Awrite("");
 }
 
 int GeoMap::GetElevation(int x, int y)
@@ -4770,8 +4995,11 @@ void GeoMap::ApplyGeography(ARegionArray *pArr)
 			ARegion *reg = pArr->GetRegion(x, y);
 			if(!reg) continue;
 			int cx = (x * xscale); // x+xoff;
-			int cy = ((y/2) * yscale); // + yoff;
+			int cy = ((y/2 + x%2) * yscale); // + yoff;
 			reg->elevation = GetElevation(cx, cy);
+			reg->humidity = GetHumidity(cx, cy);
+			reg->temperature = GetTemperature(cx, cy);
+			reg->culture = GetCulture(cx, cy);
 		}
 	}
 }

@@ -362,6 +362,27 @@ public:
 	// A value of 1 means maximum variability,
 	// higher values = more regular terrain spread
 	int TERRAIN_GRANULARITY;
+	
+	// Relative frequency of PLAIN terrain
+	int PLAINS;
+	
+	// Relative frequency of FOREST terrain
+	int FORESTS;
+	
+	// Relative frequency of MOUNTAIN terrain
+	int MOUNTAINS;
+	
+	// Relative frequency of SWAMP terrain
+	int SWAMPS;
+	
+	// Relative frequency of JUNGLE terrain
+	int JUNGLES;
+	
+	// Relative frequency of DESERT terrain
+	int DESERTS;
+	
+	// Relative frequency of TUNDRA terrain
+	int TUNDRAS;
 
 	// Enable Archipelago Creation
 	// = chance of creating archipelagos vs continents

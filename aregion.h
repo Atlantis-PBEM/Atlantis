@@ -257,8 +257,9 @@ class ARegion : public AListElem
 		int Development();
 		int TownDevelopment();
 		int CheckSea(int, int, int);
-		int GetNearestMapValue(int, int, int, int);
-
+		int GetSlope();
+		int TerrainProbability(int);
+		
 		int CountWMons();
 		int IsGuarded();
 
@@ -433,6 +434,9 @@ class ARegionList : public AList
 		void CleanUpWater(ARegionArray *pRegs);
 		void RemoveCoastalLakes(ARegionArray *pRegs);
 		void SeverLandBridges(ARegionArray *pRegs);
+		int GetFractalTerrain(ARegion *reg);
+		void GrowFractalTerrain(ARegionArray *pArr);
+		void AllocateFractalTerrain(int type, int num, int last, ARegionArray *pArr);
 		void UnsetRace(ARegionArray *pRegs);
 		void RaceAnchors(ARegionArray *pRegs);
 		void GrowRaces(ARegionArray *pRegs);
