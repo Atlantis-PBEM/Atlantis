@@ -189,7 +189,8 @@ def generateturn(report, template):
             units[dictstring]=[]
         
         # Now for the units...
-        if line.startswith('* ') or line.startswith('- ') or line.startswith('= '):
+        unitstarts = ['= ', ': ', '- ', '% ', '! ']
+        if  line[:2] in unitstarts:                
             unit = {}
             unit['skills']=[]
             unit['items']=[]
@@ -288,7 +289,7 @@ def generateturn(report, template):
             if firstunit == 'no':
                 orders += "option template map\n"
                 orders += "option notimes\n"
-                #orders += "option allyequals\n"
+                orders += "option showattitudes\n"
 
                 #declare towards a random faction
                 decfaction = int(random.random()*maxfactionfound)
@@ -301,6 +302,11 @@ def generateturn(report, template):
                 #orders += "declare 1 neutral\n"
                 #orders += "declare 2 neutral\n"
                 firstunit = 'found'
+            
+            #set units to avoid and behind -- hopefully that way 
+            # they'll stay alive long enough for me to check that
+            # the '!' is prepended to hostile units ;)
+            orders += "avoid 1\nbehind 1\n"
             
             # for a test, we'll move around randomly
             if random.random() >= 0.5:

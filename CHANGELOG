@@ -718,3 +718,5 @@ Changes from 4.0.10 -> 5.0.0
    -- Added TERRAIN_GRANULARITY gamedef that controls variability in terrain
       distribution.
    -- Added another variant: Fracas!
+   -- Added in an option to put varying bullet points in front of units 
+      (was one of the TODO items)

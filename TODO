@@ -107,9 +107,6 @@
       not transferrable to all units).]
    -- Unit grouping.
    -- Add option for entertain being an instant order.
-   -- Consider having allied units tagged as a '=' instead of a '-'. (extend
-      to all different stances). Possibly make that unit tagging a player
-      option if it can be done with minimal hassle for client authors.
    -- Add a 'MAINTAINONLY' flag to buildings so that a building can decay and
       be kept up, but cannot be constructed. (requested for Ceran)
    -- Add ability to set stances versus specific units, not just factions

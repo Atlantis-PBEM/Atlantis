@@ -656,17 +656,19 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	if (*token == "allyequals") {
+	if (*token == "showattitudes") {
 		delete token;
-		u->faction->Event("Allies will now have an equals sign in front.");
-		u->faction->allyequals = 1;
+		u->faction->Event("Units will now have a leading sign to show your " 
+									"attitude to them.");
+		u->faction->showunitattitudes = 1;
 		return;
 	}
 
-	if (*token == "noallyequals") {
+	if (*token == "dontshowattitudes") {
 		delete token;
-		u->faction->Event("Allies will now have a minus sign in front.");
-		u->faction->allyequals = 0;
+		u->faction->Event("Units will now have a leading minus sign regardless"
+									" of your attitude to them.");
+		u->faction->showunitattitudes = 0;
 		return;
 	}
 

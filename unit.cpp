@@ -351,7 +351,7 @@ AString Unit::SpoilsReport() {
 }
 
 void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
-			   int autosee, int isally)
+			   int autosee, int attitude)
 {
 	int stealth = GetAttribute("stealth");
 	if (obs==-1) {
@@ -402,8 +402,24 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 	if (obs == 2) {
 		temp += AString("* ") + *name;
 	} else {
-		if (faction->allyequals && isally) {
-			temp += AString("= ") +*name;
+		if (faction->showunitattitudes) {
+			switch (attitude) {
+			case A_ALLY: 
+				temp += AString("= ") +*name;
+				break;
+			case A_FRIENDLY: 
+				temp += AString(": ") +*name;
+				break;
+			case A_NEUTRAL: 
+				temp += AString("- ") +*name;
+				break;
+			case A_UNFRIENDLY: 
+				temp += AString("% ") +*name;
+				break;
+			case A_HOSTILE: 
+				temp += AString("! ") +*name;
+				break;
+			}
 		} else {
 			temp += AString("- ") + *name;
 		}
