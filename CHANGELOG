@@ -651,3 +651,11 @@ Changes from 4.0.10h -> 4.0.10i
    -- Fixed bug in @ENDTURN.
    -- Fixed bug with skill-based maintanence costs.
    -- Cleaned up includes to compile without warnings under gcc 3.2
+   
+   -- Fixed a bug with the sail-through code.
+   -- Fixed bug with simultaneous BUILD and DESTROY orders.
+   -- Modified TOWN_SPREAD and TOWN_PROBABILITY code to work as they should.
+   -- Fixed bug where wages were set up rigidly no matter what value was set
+      for MAINTENANCE_COST.
+   -- Added a World Creation Guide to the GAMEMASTER file that covers the
+      version 4.0.10 options.

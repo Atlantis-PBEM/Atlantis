@@ -237,6 +237,10 @@ void ARegion::SetupPop()
 
 	int pop = typer->pop;
 	int mw = typer->wages;
+	
+	// Fix wages for changed maintenance cost
+	mw += Globals->MAINTENANCE_COST - 10;
+	if (mw < 0) mw = 0;
 
 	if (pop == 0) {
 		population = 0;
@@ -295,10 +299,12 @@ void ARegion::SetupPop()
 				townch = townch + 25 * (9 - dsouth) *
 					(9 - dsouth) * Globals->LESS_ARCTIC_TOWNS;
 		}
-		int townprob = TerrainDefs[type].economy * 4 /
-			(Globals->TOWN_SPREAD+1) + 50 * Globals->TOWN_SPREAD;
-		if (adjacent == 0)
-			if (getrandom(townch) < townprob) AddTown();
+		int spread = Globals->TOWN_SPREAD;
+		if(spread > 100) spread = 100;
+		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
+			100 * spread) / 100;
+		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
+		if (getrandom(townch) < townprob) AddTown();
 	}
 
 	Production * p = new Production;
