@@ -1918,7 +1918,6 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 					TurnOrder *tOrder;
 					forlist(&u->turnorders) {
 						tOrder = (TurnOrder *)elem;
-						Awrite("loop");
 						if (first) {
 							forlist(&tOrder->turnOrders) {
 								f->PutStr(*((AString *) elem));
