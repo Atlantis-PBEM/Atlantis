@@ -269,6 +269,8 @@ void Soldier::SetupSpell()
 void Soldier::SetupCombatItems()
 {
 	int battleType;
+	int exclusive = 0;
+
 	for(battleType = 1; battleType < NUMBATTLEITEMS; battleType++) {
 		BattleItemType *pBat = &BattleItemDefs[battleType];
 
@@ -299,6 +301,16 @@ void Soldier::SetupCombatItems()
 				continue;
 			}
 
+			if(pBat->flags & BattleItemType::EXCLUSIVE) {
+				if (exclusive) {
+					// Can only use one exclusive item, and we already
+					// have one, so give the extras back.
+					unit->items.SetNum(item, unit->items.GetNum(item)+1);
+					continue;
+				}
+				exclusive = 1;
+			}
+
 			/* Make sure amulets of invulnerability are marked */
 			if(item == I_AMULETOFI) {
 				amuletofi = 1;
@@ -313,10 +325,6 @@ void Soldier::SetupCombatItems()
 
 			if(pBat->flags & BattleItemType::SHIELD) {
 				SpecialType *sp = FindSpecial(pBat->special);
-				/* we have a shield item with no shield FX */
-				if(!(sp->effectflags & SpecialType::FX_SHIELD)) {
-					continue;
-				}
 				for(int i = 0; i < 4; i++) {
 					if(sp->shield[i] == NUM_ATTACK_TYPES) {
 						for(int j = 0; j < NUM_ATTACK_TYPES; j++) {

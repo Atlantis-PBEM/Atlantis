@@ -483,7 +483,7 @@ AString ShowSpecial(char *special, int level, int expandLevel, int fromItem)
 		}
 		temp += AString(" versus ") + DefType(spd->defs[last].type) +
 			" attacks";
-		temp += " to the casting mage.";
+		temp += " to the user.";
 	}
 
 	/* Now the damages */
@@ -1039,8 +1039,11 @@ AString *ItemDescription(int item, int full)
 				}
 				*temp += ".";
 			}
-			*temp += AString(" ") + "Item can cast " +
-				ShowSpecial(bt->special, bt->skillLevel, 1, 1);
+			if (bt->flags & BattleItemType::SHIELD)
+				*temp += AString(" ") + "This item provides ";
+			else
+				*temp += AString(" ") + "This item can cast ";
+			*temp += ShowSpecial(bt->special, bt->skillLevel, 1, 1);
 		}
 	}
 	if((ItemDefs[item].flags & ItemType::CANTGIVE) && full) {

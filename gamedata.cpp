@@ -36,7 +36,7 @@
 // flags,
 // pSkill, pLevel, pMonths, pOutput, pInput array
 // mSkill, mLevel, mOutput, mInput array
-// weight, type, baseprice, combat, index
+// weight, type, baseprice, combat,
 // walk, ride, fly, swim,
 // hitchItem, hitchwalk
 // mult_item, mult_val, max_inventory
@@ -2116,7 +2116,37 @@ ItemType id[] =
 	 -1,0,
 	 -1,0, 0,
 	 0, NULL, 0,
-	 "", { "", "", "", "" }, 0, 0}
+	 "", { "", "", "", "" }, 0, 0},
+	{"mithril shield","mithril shields","MSHD",
+	 ItemType::DISABLED,
+	 "ARMO",5,1,1, {{I_MITHRIL,1},{-1,0},{-1,0},{-1,0}},
+	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 1, IT_ADVANCED | IT_BATTLE, 160,1,
+	 0,0,0,0,
+	 -1,0,
+	 -1,0, 0,
+	 0, NULL, 0,
+	 "", { "", "", "", "" }, 0, 0},
+	{"iron shield","iron shields","ISHD",
+	 ItemType::DISABLED,
+	 "ARMO",3,1,1, {{I_IRON,1},{-1,0},{-1,0},{-1,0}},
+	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 1, IT_NORMAL | IT_BATTLE, 80,1,
+	 0,0,0,0,
+	 -1,0,
+	 -1,0, 0,
+	 0, NULL, 0,
+	 "", { "", "", "", "" }, 0, 0},
+	{"wooden shield","wooden shields","WSHD",
+	 ItemType::DISABLED,
+	 "ARMO",1,1,1, {{I_WOOD,1},{-1,0},{-1,0},{-1,0}},
+	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 1, IT_NORMAL | IT_BATTLE, 40,1,
+	 0,0,0,0,
+	 -1,0,
+	 -1,0, 0,
+	 0, NULL, 0,
+	 "", { "", "", "", "" }, 0, 0},
 };
 ItemType *ItemDefs = id;
 
@@ -2820,6 +2850,12 @@ BattleItemType bitd[] = {
 	// BATTLE_SHIELDSTONE
 	{"SHST", BattleItemType::SHIELD,
 	 "energy_shield", 3 },
+	{"MSHD", BattleItemType::EXCLUSIVE | BattleItemType::SHIELD,
+	 "physical_shield", 6 },
+	{"ISHD", BattleItemType::EXCLUSIVE | BattleItemType::SHIELD,
+	 "physical_shield", 4 },
+	{"WSHD", BattleItemType::EXCLUSIVE | BattleItemType::SHIELD,
+	 "physical_shield", 2 },
 };
 
 BattleItemType *BattleItemDefs = bitd;
@@ -4598,6 +4634,21 @@ static SpecialType spd[] = {
 	 {NUM_ATTACK_TYPES, -1, -1, -1},
 	 {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
 	 "invulnerability",
+	 {{-1, 0, 0, 0, 0, 0},
+	  {-1, 0, 0, 0, 0, 0},
+	  {-1, 0, 0, 0, 0, 0},
+	  {-1, 0, 0, 0, 0, 0}},
+	 "casts something that is not a spell", "annoying ", ""},
+	// Actual physical shields
+	{"physical_shield", "a physical shield",
+	 0,
+	 {-1, -1, -1},
+	 {-1, -1, -1, -1, -1, -1, -1},
+	 {NULL, NULL, NULL},
+	 SpecialType::FX_USE_LEV|SpecialType::FX_DEFBONUS,
+	 { ATTACK_COMBAT, ATTACK_RANGED, ATTACK_RIDING, -1},
+	 {{-1, 1}, {-1, 1}, {-1, 1}, {-1, 0}},
+	 "Physical Shield",
 	 {{-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0},

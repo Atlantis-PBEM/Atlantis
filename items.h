@@ -312,6 +312,7 @@ class BattleItemType
 			MAGEONLY = 0x1,
 			SPECIAL = 0x2,
 			SHIELD = 0x4,
+			EXCLUSIVE = 0x8,
 		};
 
 		int flags;

@@ -241,6 +241,10 @@ enum {
 	I_HARP,
 	// Generic processed food
 	I_FOOD,
+	// Shields
+	I_WSHIELD,
+	I_ISHIELD,
+	I_MSHIELD,
 	NITEMS
 };
 
