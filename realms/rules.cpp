@@ -38,7 +38,7 @@
 // the html file containing the rules to correctly reflect the changes!
 //
 static GameDefs g = {
-    "Standard Atlantis",     // RULESET_NAME
+    "Realms of the Arcane",     // RULESET_NAME
     MAKE_ATL_VER( 4, 0, 5 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
