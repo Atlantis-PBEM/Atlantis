@@ -1275,11 +1275,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += AString(" movement point") + (Globals->SHIP_SPEED==1?"":"s");
 		temp += " per turn.  A ship can move from an ocean region to "
 			"another ocean region, or from a coastal region to an ocean "
-			"region, or from an ocean region to a coastal region. Ships "
-			"can only be constructed in coastal regions.  For a ship to "
-			"enter any region only costs one movement point; the cost of "
-			"two movement points for entering, say, a forest coastal "
-			"region, does not apply.";
+			"region, or from an ocean region to a coastal region.";
+		if (Globals->PREVENT_SAIL_THROUGH) {
+			temp += " Ships may not sail through single hex land masses "
+				"and must leave via the same side they entered or a side "
+				"adjacent to that one.";
+			if (Globals->ALLOW_TRIVIAL_PORTAGE) {
+				temp += " Ships ending their movement in a land hex may "
+					"sail out along any side connecting to water.";
+			}
+		}
+		temp += " Ships can only be constructed in coastal regions. For a "
+			"ship to enter any region only costs one movement point; the "
+			"cost of two movement points for entering, say, a forest "
+			"coastal region, does not apply.";
 		if(Globals->WEATHER_EXISTS) {
 			temp += " Ships do, however, only get half movement points "
 				"during the winter months (or monsoon months in the "
