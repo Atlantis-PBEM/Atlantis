@@ -2420,6 +2420,7 @@ void Game::ImportMapFile(AString *filename, int level)
             else if (*type == "p") regiontype = R_PLAIN;
             else if (*type == "s") regiontype = R_SWAMP;
             else if (*type == "t") regiontype = R_TUNDRA;
+            else if (*type == "a") regiontype = R_PARADISE;
             
             char *str = type->Str();
             if(*str >= 'A' && *str <= 'Z') iscity = 1;
@@ -2468,6 +2469,7 @@ void Game::ImportMapFile(AString *filename, int level)
     CreateCityMons();
     Awrite("Done.");
 }
+
 
 void ARegion::SetEthnicity(int ethnicity, ARegionList *pRegs)
 {
@@ -2613,6 +2615,27 @@ Awrite(EthnicityString(ethnicity));
                 else if(chance < 80) race = I_HIGHELF;
                 else race = I_SEAELF;
                 if(IsCoastal() && !getrandom(2)) race = I_SEAELF;
+                
+            } else {
+                race = I_ORC;
+            }
+            break;
+        case R_PARADISE:
+            if(ethnicity == RA_HUMAN) {
+                if(chance < 60) race = I_TRIBESMAN;
+                else race = I_ESKIMO;
+                if(IsCoastal() && !getrandom(4)) race = I_VIKING;
+            
+            } else if(ethnicity == RA_DWARF) {
+                if(chance < 60) race = I_UNDERDWARF;
+                else if(chance < 90) race = I_ICEDWARF;
+                else race = I_PLAINSMAN;
+                            
+            } else if(ethnicity == RA_ELF) {
+                if(chance < 50) race = I_WOODELF;
+                else if(chance < 90) race = I_DARKMAN;
+                else race = I_TRIBALELF;
+                if(IsCoastal() && !getrandom(6)) race = I_SEAELF;
                 
             } else {
                 race = I_ORC;

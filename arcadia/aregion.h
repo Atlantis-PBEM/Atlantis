@@ -293,6 +293,7 @@ class ARegion : public AListElem
 		void SinkRegion(ARegionList *pRegs);
 		void OceanToLand();
 		void SetEthnicity(int ethnicity, ARegionList *pRegs);
+		int GetEthnicity();
 		void RedoAs(int tertype, int town, ARegionList *pRegs);
 		void Event(const AString &);
 		AList events;

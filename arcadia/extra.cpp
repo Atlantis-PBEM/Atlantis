@@ -40,7 +40,8 @@ int Game::SetupFaction( Faction *pFac )
 	//
 	int race = -1;
 	Unit *temp2 = GetNewUnit( pFac );
-	pFac->ethnicity = getrandom(RA_OTHER);
+	if(pFac->pStartLoc) pFac->ethnicity = pFac->pStartLoc->GetEthnicity();
+	else pFac->ethnicity = getrandom(RA_OTHER);
 	switch(pFac->ethnicity) {
 	    case RA_HUMAN:
 	    race = I_BARBARIAN;
@@ -879,14 +880,14 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainWMons(R_PLAIN, 2, I_LION, I_EAGLE, I_CENTAUR);
 
 	ClearTerrainItems(R_PARADISE);	
-	ModifyTerrainItems(R_PARADISE, 0, I_HORSE, 100, 10);
-	ModifyTerrainItems(R_PARADISE, 1, I_WOOD, 100, 20);
-	ModifyTerrainItems(R_PARADISE, 2, I_IRON, 100, 20);
-	ModifyTerrainItems(R_PARADISE, 3, I_HERBS, 100, 10);
-	ModifyTerrainItems(R_PARADISE, 4, I_FUR, 100, 10);
-	ModifyTerrainItems(R_PARADISE, 5, I_STONE, 100, 20);
-	ModifyTerrainItems(R_PARADISE, 6, I_IRONWOOD, 100, 5);
-	ModifyTerrainEconomy(R_PARADISE, 800, 16, 40, 1);
+	ModifyTerrainItems(R_PARADISE, 0, I_WOOD, 100, 20);
+	ModifyTerrainItems(R_PARADISE, 1, I_IRON, 100, 20);
+	ModifyTerrainItems(R_PARADISE, 2, I_HERBS, 100, 10);
+	ModifyTerrainItems(R_PARADISE, 3, I_FUR, 100, 10);
+	ModifyTerrainItems(R_PARADISE, 4, I_STONE, 100, 20);
+	ModifyTerrainItems(R_PARADISE, 5, I_IRONWOOD, 100, 5);
+	ModifyTerrainItems(R_PARADISE, 6, I_FLOATER, 100, 10);
+	ModifyTerrainEconomy(R_PARADISE, 1000, 16, 40, 1);
 /*
 	ClearTerrainItems(R_CAVERN);	
 	ModifyTerrainItems(R_CAVERN, 0, I_IRON, 100, 20);

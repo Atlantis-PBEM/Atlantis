@@ -960,7 +960,7 @@ void ARegion::UpdateEditRegion()
 {
     // redo markets and entertainment/tax income for extra people.
 
-	money = (Wages() - Globals->MAINTENANCE_COST) * Population() / Globals->POP_LEVEL;
+	money = Population() * (Wages() - (Globals->MAINTENANCE_COST/2)) / (2*Globals->POP_LEVEL);  //BS Edit
 	if (money < 0) money = 0;
 	// Setup working
 	Production *p = products.GetProd(I_SILVER, -1);
@@ -1142,7 +1142,7 @@ void ARegion::SetupEditRegion(int canmakecity)
 
 	Production *p = new Production;
 	p->itemtype = I_SILVER;
-	money = Population() * (Wages() - Globals->MAINTENANCE_COST) / Globals->POP_LEVEL;
+	money = Population() * (Wages() - (Globals->MAINTENANCE_COST/2)) / (2*Globals->POP_LEVEL);  //BS Edit
 
 	if(Globals->PLAYER_ECONOMY) {
 		WagesFromDevelopment();
@@ -1739,7 +1739,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		//
 		// Set money
 		//
-		money = (Wages() - Globals->MAINTENANCE_COST) * Population() / Globals->POP_LEVEL;
+		money = Population() * (Wages() - (Globals->MAINTENANCE_COST/2)) / (2*Globals->POP_LEVEL);  //BS Edit
 		if (money < 0) money = 0;
 
 		//

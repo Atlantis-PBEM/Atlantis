@@ -1360,11 +1360,19 @@ void ARegion::WriteExits(Areport *f, ARegionList *pRegs, int *exits_seen)
 	f->DropTab();
 	f->EndLine();
 }
-
+/*
 #define AC_STRING "%s Nexus is a magical place; the entryway " \
 "to the world of %s. Enjoy your stay, the city guards should " \
 "keep you safe as long as you should choose to stay. However, rumour " \
 "has it that once you have left the Nexus, you can never return."
+*/
+
+
+#define AC_STRING "%s Nexus is a magical place; the purgatory " \
+"of the world of %s. If you have ended up here, it is because " \
+"something has gone wrong. Most likely, too many factions have " \
+"already joined the world, and there was no space for your own."
+
 
 void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		ARegionList *pRegions)
@@ -2779,4 +2787,12 @@ AString *TerrainDescription(int type)
     }
     *temp += ".";
 	return temp;
+}
+
+int ARegion::GetEthnicity()
+{
+    if(race < 0) return RA_NA;
+    ManType *mt = FindRace(ItemDefs[race].abr);
+    if(!mt) return RA_NA;
+    return mt->ethnicity;
 }

@@ -626,7 +626,7 @@ int Game::ReadPlayers()
 					if (pToken) {
 						x = pToken->value();
 						y = -1;
-						z = -1;
+						z = 1;
 						SAFE_DELETE(pToken);
 						pToken = pLine->gettoken();
 						if (pToken) {
@@ -635,11 +635,21 @@ int Game::ReadPlayers()
 							pToken = pLine->gettoken();
 							if (pToken) {
 								z = pToken->value();
-								pReg = regions.GetRegion(x, y, z);
 							}
+							pReg = regions.GetRegion(x, y, z);
 						}
 						if (pReg == NULL)
 							Awrite(AString("Bad faction line: ")+save);
+					} else {
+					    int numfound = 0;
+					    forlist(&regions) {
+					        ARegion *reg = (ARegion *) elem;
+					        if(reg->flagpole) {
+					            numfound++;
+					            if(!getrandom(numfound)) pReg = reg;
+					        }
+					    }
+					    if(pReg) pReg->flagpole = 0;
 					}
 
 					pFac = AddFaction(noleader, pReg);
@@ -722,7 +732,64 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 			pFac->SetNameNoChange(pTemp);
 		}
 	} else if(*pToken == "RewardTimes") {
-//		pFac->TimesReward();                          //Arcadia reward always on
+		pFac->TimesReward();
+	} else if(*pToken == "Village:") {
+		pTemp = pLine->StripWhite();
+		if(pTemp) {
+    		if(pFac->pStartLoc) {
+    		    if(pFac->pStartLoc->town) {
+    		        AString *newname = pTemp->getlegal();
+    		        delete pFac->pStartLoc->town->name;
+			        pFac->pStartLoc->town->name = newname;
+    		    }
+    		}
+		}
+	} else if(*pToken == "Hero:") {
+		pTemp = pLine->StripWhite();
+		if(pTemp && pFac->pStartLoc) {
+		    forlist(&pFac->pStartLoc->objects) {
+		        Object *o = (Object *) elem;
+		        forlist(&o->units) {
+		            Unit *u = (Unit *) elem;
+		            if(u->faction == pFac && u->type == U_MAGE && pTemp) {
+                        u->SetName(pTemp);
+                        pTemp = 0;
+                    }
+		        }
+		    }
+		}
+	} else if(*pToken == "Race:") {
+		pTemp = pLine->gettoken();
+		if(pTemp && pFac->pStartLoc) {
+		    forlist(&pFac->pStartLoc->objects) {
+		        Object *o = (Object *) elem;
+		        forlist(&o->units) {
+		            Unit *u = (Unit *) elem;
+		            int starter = 1;
+		            if(u->faction == pFac && u->type == U_MAGE) {
+		                while(pTemp && starter) {
+                            int item = ParseEnabledItem(pTemp);
+                            ManType *mt = 0;
+                            if(item > -1) mt = FindRace(ItemDefs[item].abr);
+                		    if(mt && mt->ethnicity == u->GetEthnicity()) {
+                            	pFac->pStartLoc->race = item;
+                		        int firstman = 1;
+                            	forlist(&u->items) {
+                            		Item *i = (Item *) elem;
+                            		if (ItemDefs[i->type].type & IT_MAN) {
+                            			if(firstman) i->type = item;
+                            			else i->num = 0;
+                            			firstman = 0;
+                            		}
+                            	}
+                		    }
+                		    pTemp = pLine->gettoken();
+		                }
+		                starter = 0;
+		            }
+		        }
+		    }
+		}
 	} else if(*pToken == "Email:") {
 		pTemp = pLine->gettoken();
 		if(pTemp) {
@@ -2251,7 +2318,10 @@ void Game::CreateNPCFactions()
     }
 }
 
-void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
+void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
+#define GUARDFRONT 1
+#define GUARDBEHIND 2
+#define GUARDMAGE 4
 {
 //The world is set up by now
 //However, some regions (eg nexus) do not have a race assigned. If leaders are disabled that can cause this to crash. So:
@@ -2302,8 +2372,8 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	}
 
 	Faction *pFac = GetFaction(&factions, fac);
-	Unit *u = GetNewUnit(pFac);
-	Unit *u2;
+	Unit *u = 0;
+	Unit *u2 = 0;
 	AString *s = new AString("City Guard");
 
 	/*	
@@ -2316,6 +2386,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	
 	if((Globals->LEADERS_EXIST)) {
 		/* standard Leader-type guards */
+		u = GetNewUnit(pFac);
 		u->SetMen(I_LEADERS,num);
 		u->items.SetNum(I_SWORD,num);
 		if (IV) u->items.SetNum(I_AMULETOFI,num);
@@ -2329,33 +2400,38 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		int n = 3 * num / 4;
 		int plate = 0;
 		if((AC) && (Globals->START_CITY_GUARDS_PLATE)) plate = 1;
-		u = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
-			plate, 0);
-		if (IV) u->items.SetNum(I_AMULETOFI,num);
-		u->SetMoney(num * Globals->GUARD_MONEY / 2);
-		u->SetName(s);
-		u->type = U_GUARD;
-		u->guard = GUARD_GUARD;
-		u2 = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
-			plate, 1);
-		if (IV) u2->items.SetNum(I_AMULETOFI,num);
-		u2->SetMoney(num * Globals->GUARD_MONEY / 2);
-		AString *un = new AString("City Guard");
-		u2->SetName(un);
-		u2->type = U_GUARD;
-		u2->guard = GUARD_GUARD;
-	}			
-	u->SetSkill(S_OBSERVATION, skilllevel);
-
-	u->SetFlag(FLAG_HOLDING,1);
-	u->reveal = REVEAL_FACTION;
-	u->MoveUnit(pReg->GetDummy());
-	if(!Globals->LEADERS_EXIST) {
+		if(needguard%(2*GUARDFRONT)/GUARDFRONT) {
+    		u = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
+    			plate, 0);
+    		if (IV) u->items.SetNum(I_AMULETOFI,num);
+    		u->SetMoney(num * Globals->GUARD_MONEY / 2);
+    		u->SetName(s);
+    		u->type = U_GUARD;
+    		u->guard = GUARD_GUARD;
+		}
+		if(needguard%(2*GUARDBEHIND)/GUARDBEHIND) {
+    		u2 = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
+    			plate, 1);
+    		if (IV) u2->items.SetNum(I_AMULETOFI,num);
+    		u2->SetMoney(num * Globals->GUARD_MONEY / 2);
+    		AString *un = new AString("City Guard");
+    		u2->SetName(un);
+    		u2->type = U_GUARD;
+    		u2->guard = GUARD_GUARD;
+		}
+	}
+    if(u) {
+    	u->SetSkill(S_OBSERVATION, skilllevel);
+    	u->SetFlag(FLAG_HOLDING,1);
+    	u->reveal = REVEAL_FACTION;
+    	u->MoveUnit(pReg->GetDummy());
+	}
+	if(u2) {
 		u2->SetFlag(FLAG_HOLDING,1);
 		u2->reveal = REVEAL_FACTION;
 		u2->MoveUnit(pReg->GetDummy());
 	}
-	if((pReg->type == R_NEXUS || pReg->town->TownType() == TOWN_CITY) && needmage) {
+	if((pReg->type == R_NEXUS || pReg->town->TownType() == TOWN_CITY) && (needguard%(2*GUARDMAGE)/GUARDMAGE)) {
 		u = GetNewUnit(pFac);
 		s = new AString("City Mage");
 		u->SetName(s);
@@ -2391,8 +2467,10 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 
 void Game::AdjustCityMons(ARegion *r)
 {
-	int needguard = 1;
-	int needmage = 1;
+/*#define GUARDFRONT 1
+#define GUARDBEHIND 2
+#define GUARDMAGE 4*/
+	int needguard = GUARDFRONT + GUARDBEHIND + GUARDMAGE;
 	forlist(&r->objects) {
 		Object *o = (Object *) elem;
 		forlist(&o->units) {
@@ -2400,16 +2478,16 @@ void Game::AdjustCityMons(ARegion *r)
 			if (u->type == U_GUARD || u->type == U_GUARDMAGE) {
 				AdjustCityMon(r, u);
 				/* Don't create new city guards if we have some */
-				needguard = 0;
-				if(u->type == U_GUARDMAGE)
-					needmage = 0;
+				if(u->type == U_GUARDMAGE) needguard -= GUARDMAGE;
+				else if(u->GetFlag(FLAG_BEHIND)) needguard -= GUARDBEHIND;
+				else needguard -= GUARDFRONT;
 			}
-			if(u->guard == GUARD_GUARD) needguard = 0;
+			if(u->guard == GUARD_GUARD) needguard = 0; //ie if someone else is guarding, no guards needed.
 		}
 	}
 
 	if (needguard && (getrandom(100) < Globals->GUARD_REGEN) && r->untaxed > getrandom(r->money)) {  //less chance if being taxed.
-		if(!Globals->GUARD_DEPENDS_ON_TAX || r->untaxed >= 20*Globals->GUARD_MONEY) CreateCityMon(r, 10, needmage);
+		if(!Globals->GUARD_DEPENDS_ON_TAX || r->untaxed >= 20*Globals->GUARD_MONEY) CreateCityMon(r, 10, needguard);
 	}
 }
 
@@ -2453,8 +2531,8 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 	if(u->type == U_GUARDMAGE) {
 		men = 1;
 	} else {
-	
-		maxmen = Globals->CITY_GUARD * (towntype+1);
+		if(!Globals->GUARD_DEPENDS_ON_TAX) maxmen = Globals->CITY_GUARD * (towntype+1);
+		else maxmen = r->money * Globals->CITY_GUARD / 5000;
 		if(!Globals->LEADERS_EXIST) maxmen = 3 * maxmen / 4;
 		if(!Globals->GUARD_DEPENDS_ON_TAX) men = u->GetMen() + (maxmen/10);
 		else men = u->GetMen() + r->untaxed / (40 * Globals->GUARD_MONEY);  //one-quarter the Nylandor rate per unit!
