@@ -39,10 +39,6 @@
       [Found in an old suggestion on the dejanews.comm.atlantisproject
       newsgroup]
 
-** Error messages
-   -- It would be nice to have 'overwriting' errors only occur when the
-      order being overridden was non repeating.
-
 ** Items
    -- Consider adding the ability to produce trade goods.
    -- Consider Duergar's war horses [See atlantisdev post #1119]
@@ -77,6 +73,11 @@
    -- Consider a modification to PRODUCE to allow automatic distribution
       of produced items to some unit (or units) in some proportion.
       [Suggested in atlantisdev article #57]
+   -- It would be nice to have 'overwriting' errors only occur when the
+      order being overridden was non repeating.
+   -- Possibly modify the orders processor to replace 'NEW XX' for the
+      faction which owns the unit in question (or which the unit in question
+      considers ally?) with the actual unit number in templated orders.
 
 ** Orders, Conditional
    -- Consider having 'conditional orders' specifically 'AT x,y,z'. 
