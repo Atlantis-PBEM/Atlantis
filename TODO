@@ -65,3 +65,4 @@
 TODO for 5.0.0
 ----------------------------------------------
    -- Ben Lloyd's class system should go in (probably wait on 5.0.0)
+   -- Move String and List over to using a STL implementation
