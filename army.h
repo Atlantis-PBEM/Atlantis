@@ -25,6 +25,10 @@
 #ifndef ARMY_CLASS
 #define ARMY_CLASS
 
+#include <functional>
+#include <map>
+using namespace std;
+
 class Soldier;
 class Army;
 
@@ -34,8 +38,6 @@ class Army;
 #include "object.h"
 #include "shields.h"
 #include "helper.h"
-
-#define SPECIAL_NONE 0
 
 class Soldier {
 	public:
@@ -49,9 +51,9 @@ class Soldier {
 		//
 		void SetupHealing();
 
-		int HasEffect(int);
-		void SetEffect(int);
-		void ClearEffect(int);
+		int HasEffect(char *);
+		void SetEffect(char *);
+		void ClearEffect(char *);
 		void ClearOneTimeEffects(void);
 		int ArmorProtect(int weaponClass );
 
@@ -78,7 +80,7 @@ class Soldier {
 		int attacktype;
 		int askill;
 		int attacks;
-		int special;
+		char *special;
 		int slevel;
 
 		/* Defense info */
@@ -92,7 +94,7 @@ class Soldier {
 		int amuletofi;
 
 		/* Effects */
-		int effects;
+		map< char *, int > effects;
 };
 
 typedef Soldier * SoldierPtr;
@@ -120,12 +122,12 @@ class Army
 		int CanAttack();
 		int NumFront();
 		Soldier *GetAttacker( int, int & );
-		int GetEffectNum(int effect);
-		int GetTargetNum( int = SPECIAL_NONE );
+		int GetEffectNum(char *effect);
+		int GetTargetNum(char *special = NULL);
 		Soldier *GetTarget( int );
-		int RemoveEffects(int num, int effect);
-		int DoAnAttack( int special, int numAttacks, int attackType,
-				int attackLevel, int flags, int weaponClass, int effect,
+		int RemoveEffects(int num, char *effect);
+		int DoAnAttack(char *special, int numAttacks, int attackType,
+				int attackLevel, int flags, int weaponClass, char *effect,
 				int mountBonus);
 		void Kill(int);
 		void Reset();
@@ -133,7 +135,7 @@ class Army
 		//
 		// These funcs are in specials.cpp
 		//
-		int CheckSpecialTarget(int,int);
+		int CheckSpecialTarget(char *,int);
 
 		SoldierPtr * soldiers;
 		Unit * leader;

@@ -84,10 +84,10 @@ class SkillType
 		//
 		// special for combat spells only
 		//
-		int special;
+		char *special;
 
 		// range class for ranged skills (-1 for all others)
-		int rangeIndex;
+		char *range;
 
 		SkillDepend depends[3];
 };
@@ -156,7 +156,7 @@ class DamageType {
 		int value;
 		int flags;
 		int dclass;
-		int effect;
+		char *effect;
 };
 
 class ShieldType {
@@ -173,6 +173,7 @@ class DefenseMod {
 
 class SpecialType {
 	public:
+		char *key;
 		char *specialname;
 
 		enum {
@@ -191,7 +192,7 @@ class SpecialType {
 
 		int buildings[3];
 		int targets[7];
-		int effects[3];
+		char *effects[3];
 
 		enum {
 			FX_SHIELD	=	0x01,
@@ -213,13 +214,16 @@ class SpecialType {
 		char *spelltarget;
 };
 extern SpecialType *SpecialDefs;
+extern int NUMSPECIALS;
+
+extern SpecialType *FindSpecial(char *key);
 
 class EffectType {
 	public:
 		char *name;
 		int attackVal;
 		DefenseMod defMods[4];
-		int cancelEffect;
+		char *cancelEffect;
 
 		enum {
 			EFF_ONESHOT	= 0x001,
@@ -228,9 +232,13 @@ class EffectType {
 		int flags;
 };
 extern EffectType *EffectDefs;
+extern int NUMEFFECTS;
+
+extern EffectType *FindEffect(char *effect);
 
 class RangeType {
 	public:
+		char *key;
 		enum {
 			RNG_NEXUS_TARGET = 0x0001,	// Can cast *to* Nexus
 			RNG_NEXUS_SOURCE = 0x0002,	// Can cast *from* Nexus
@@ -253,5 +261,8 @@ class RangeType {
 		int crossLevelPenalty;	// How much extra distance to cross levels?
 };
 extern RangeType *RangeDefs;
+extern int NUMRANGES;
+
+extern RangeType *FindRange(char *range);
 
 #endif

@@ -26,6 +26,39 @@
 #include "items.h"
 #include "gamedata.h"
 
+RangeType *FindRange(char *range)
+{
+    if (range == NULL) return NULL;
+    for (int i = 0; i < NUMRANGES; i++) {
+	        if (RangeDefs[i].key == NULL) continue;
+	        if (AString(range) == RangeDefs[i].key)
+	            return &RangeDefs[i];
+	    }
+    return NULL;
+}
+
+SpecialType *FindSpecial(char *key)
+{
+    if (key == NULL) return NULL;
+    for (int i = 0; i < NUMSPECIALS; i++) {
+	        if (SpecialDefs[i].key == NULL) continue;
+	        if (AString(key) == SpecialDefs[i].key)
+	            return &SpecialDefs[i];
+	    }
+    return NULL;
+}
+
+EffectType *FindEffect(char *effect)
+{
+    if (effect == NULL) return NULL;
+    for (int i = 0; i < NUMEFFECTS; i++) {
+	        if (EffectDefs[i].name == NULL) continue;
+	        if (AString(effect) == EffectDefs[i].name)
+	            return &EffectDefs[i];
+	    }
+    return NULL;
+}
+
 int LookupSkill(AString *token)
 {
 	for (int i=0; i<NSKILLS; i++) {

@@ -83,9 +83,9 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 
 	if (!behind && (a->riding != -1)) {
 		MountType *pMt = FindMount(ItemDefs[a->riding].abr);
-		if(pMt->mountSpecial != -1) {
+		if(pMt->mountSpecial != NULL) {
 			int i, num, tot = -1;
-			SpecialType *spd = &SpecialDefs[pMt->mountSpecial];
+			SpecialType *spd = FindSpecial(pMt->mountSpecial);
 			for(i = 0; i < 4; i++) {
 				int times = spd->damage[i].value;
 				if(spd->effectflags & SpecialType::FX_USE_LEV)
@@ -140,8 +140,8 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 			mountBonus = pWep->mountBonus;
 			attackClass = pWep->weapClass;
 		}
-		def->DoAnAttack( 0, 1, attackType, a->askill, flags, attackClass,
-				0, mountBonus);
+		def->DoAnAttack(NULL, 1, attackType, a->askill, flags, attackClass,
+				NULL, mountBonus);
 		if (!def->NumAlive()) break;
 	}
 

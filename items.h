@@ -145,7 +145,7 @@ class MonType
 		int stealth;
 		int obs;
 
-		int special;
+		char *special;
 		int specialLevel;
 
 		int silver;
@@ -269,7 +269,7 @@ class MountType
 
 		// If the mount has a special effect it generates when ridden in
 		// combat
-		int mountSpecial;
+		char *mountSpecial;
 		int specialLev;
 };
 
@@ -287,29 +287,29 @@ class BattleItemType
 		};
 
 		int flags;
-		int index;
+		char *special;
 		int skillLevel;
 };
 
 extern BattleItemType *BattleItemDefs;
 
-int ParseGiveableItem(AString *);
-int ParseAllItems(AString *);
-int ParseEnabledItem(AString *);
-int ParseTransportableItem(AString *);
-int LookupItem(AString *);
+extern int ParseGiveableItem(AString *);
+extern int ParseAllItems(AString *);
+extern int ParseEnabledItem(AString *);
+extern int ParseTransportableItem(AString *);
+extern int LookupItem(AString *);
 
-BattleItemType *FindBattleItem(char *abbr);
-ArmorType *FindArmor(char *abbr);
-WeaponType *FindWeapon(char *abbr);
-MountType *FindMount(char *abbr);
-MonType *FindMonster(char *abbr, int illusion);
-ManType *FindRace(char *abbr);
+extern BattleItemType *FindBattleItem(char *abbr);
+extern ArmorType *FindArmor(char *abbr);
+extern WeaponType *FindWeapon(char *abbr);
+extern MountType *FindMount(char *abbr);
+extern MonType *FindMonster(char *abbr, int illusion);
+extern ManType *FindRace(char *abbr);
 
-AString ItemString(int type, int num);
-AString *ItemDescription(int item, int full);
+extern AString ItemString(int type, int num);
+extern AString *ItemDescription(int item, int full);
 
-int IsSoldier(int);
+extern int IsSoldier(int);
 
 class Item : public AListElem
 {
@@ -344,7 +344,7 @@ class ItemList : public AList
 		void Selling(int, int); /* type, number */
 };
 
-extern AString ShowSpecial(int special, int level, int expandLevel,
+extern AString ShowSpecial(char *special, int level, int expandLevel,
 		int fromItem);
 
 #endif

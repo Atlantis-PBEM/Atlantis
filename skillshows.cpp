@@ -46,7 +46,6 @@ AString *ShowSkill::Report(Faction *f)
 	if(SkillDefs[skill].flags & SkillType::DISABLED) return NULL;
 
 	AString *str = new AString;
-	int val;
 	RangeType *range = NULL;
 
 	// Here we pick apart the skill
@@ -358,8 +357,7 @@ AString *ShowSkill::Report(Faction *f)
 				"Portals, and the caster must be trained in Portal Lore. The "
 				"caster may teleport units weighing up to 50 weight units "
 				"times his skill level, to the target mage's region. ";
-			val = SkillDefs[skill].rangeIndex;
-			if(val != -1) range = &RangeDefs[val];
+			range = FindRange(SkillDefs[skill].range);
 			if(range) {
 				*str += " The target region must be within ";
 				*str += range->rangeMult;
@@ -390,8 +388,7 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "A mage with this skill may obtain region reports on "
 				"distant regions. The report will be as if the mage was in "
 				"the distant region himself.";
-			val = SkillDefs[skill].rangeIndex;
-			if(val != -1) range = &RangeDefs[val];
+			range = FindRange(SkillDefs[skill].range);
 			if(range) {
 				if(range->flags & RangeType::RNG_SURFACE_ONLY) {
 					*str += " This skill only works on the surface of the "
@@ -474,8 +471,7 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "A mage with this skill may teleport himself across"
 				"great distances, even without the use of a gate. The mage "
 				"may teleport up to 15 weight units per skill level.";
-			val = SkillDefs[skill].rangeIndex;
-			if(val != -1) range = &RangeDefs[val];
+			range = FindRange(SkillDefs[skill].range);
 			if(range) {
 				if(range->flags & RangeType::RNG_SURFACE_ONLY) {
 					*str += " This skill only works on the surface of the "
@@ -535,8 +531,7 @@ AString *ShowSkill::Report(Faction *f)
 				"areas of magic. The weather may be predicted for 3 months "
 				"at level 1, 6 months at level 3 and a full year at level "
 				"5.";
-			val = SkillDefs[skill].rangeIndex;
-			if(val != -1) range = &RangeDefs[val];
+			range = FindRange(SkillDefs[skill].range);
 			if(range) {
 				if(range->flags & RangeType::RNG_SURFACE_ONLY) {
 					*str += " This skill only works on the surface of the "
@@ -633,8 +628,7 @@ AString *ShowSkill::Report(Faction *f)
 					"for a month (this improvement of the economy will "
 					"actually take effect during the turn after the spell "
 					"is cast).";
-				val = SkillDefs[skill].rangeIndex;
-				if(val != -1) range = &RangeDefs[val];
+				range = FindRange(SkillDefs[skill].range);
 				if(range) {
 					if(range->flags & RangeType::RNG_SURFACE_ONLY) {
 						*str += " This skill only works on the surface of "

@@ -250,24 +250,26 @@ AString ItemString(int type, int num)
 	return temp;
 }
 
-static AString EffectStr(int effect)
+static AString EffectStr(char *effect)
 {
 	AString temp, temp2;
 	int comma = 0;
 	int i;
 
-	temp += EffectDefs[effect].name;
+	EffectType *ep = FindEffect(effect);
 
-	if(EffectDefs[effect].attackVal) {
-		temp2 += AString(EffectDefs[effect].attackVal) + " to attack";
+	temp += ep->name;
+
+	if(ep->attackVal) {
+		temp2 += AString(ep->attackVal) + " to attack";
 		comma = 1;
 	}
 
 	for(i = 0; i < 4; i++) {
-		if(EffectDefs[effect].defMods[i].type == -1) continue;
+		if(ep->defMods[i].type == -1) continue;
 		if(comma) temp2 += ", ";
-		temp2 += AString(EffectDefs[effect].defMods[i].val) + " versus " +
-			DefType(EffectDefs[effect].defMods[i].type) + " attacks";
+		temp2 += AString(ep->defMods[i].val) + " versus " +
+			DefType(ep->defMods[i].type) + " attacks";
 		comma = 1;
 	}
 
@@ -276,7 +278,7 @@ static AString EffectStr(int effect)
 	}
 
 	if(comma) {
-		if(EffectDefs[effect].flags & EffectType::EFF_ONESHOT) {
+		if(ep->flags & EffectType::EFF_ONESHOT) {
 			temp += " for their next attack";
 		} else {
 			temp += " for the rest of the battle";
@@ -284,15 +286,16 @@ static AString EffectStr(int effect)
 	}
 	temp += ".";
 
-	if(EffectDefs[effect].cancelEffect != -1) {
+	if(ep->cancelEffect != NULL) {
 		if(comma) temp += " ";
+		EffectType *up = FindEffect(ep->cancelEffect);
 		temp += AString("This effect cancels out the effects of ") +
-			EffectDefs[EffectDefs[effect].cancelEffect].name + ".";
+			up->name + ".";
 	}
 	return temp;
 }
 
-AString ShowSpecial(int special, int level, int expandLevel, int fromItem)
+AString ShowSpecial(char *special, int level, int expandLevel, int fromItem)
 {
 	AString temp;
 	int comma = 0;
@@ -300,8 +303,7 @@ AString ShowSpecial(int special, int level, int expandLevel, int fromItem)
 	int last = -1;
 	int val;
 
-	if(special < 0 || special > (NUMSPECIALS-1)) special = 0;
-	SpecialType *spd = &SpecialDefs[special];
+	SpecialType *spd = FindSpecial(special);
 	temp += spd->specialname;
 	temp += AString(" in battle");
 	if(expandLevel)
@@ -382,20 +384,23 @@ AString ShowSpecial(int special, int level, int expandLevel, int fromItem)
 			temp += "only ";
 		}
 		temp += "target creatures which are currently affected by ";
+		EffectType *ep;
 		for(i = 0; i < 3; i++) {
-			if(spd->effects[i] == -1) continue;
+			if(spd->effects[i] == NULL) continue;
 			if(last == -1) {
 				last = i;
 				continue;
 			}
-			temp += AString(EffectDefs[spd->effects[last]].name) + ", ";
+			ep = FindEffect(spd->effects[last]);
+			temp += AString(ep->name) + ", ";
 			last = i;
 			comma++;
 		}
 		if(comma) {
 			temp += "or ";
 		}
-		temp += AString(EffectDefs[spd->effects[last]].name) + ".";
+		ep = FindEffect(spd->effects[last]);
+		temp += AString(ep->name) + ".";
 	}
 	if(spd->targflags & SpecialType::HIT_ILLUSION) {
 		temp += " This ability will only target illusions.";
@@ -636,7 +641,7 @@ AString *ItemDescription(int item, int full)
 		for(int c = 0; c < NUM_ATTACK_TYPES; c++) {
 			*temp += AString(" ") + MonResist(c,mp->defense[c], full);
 		}
-		if(mp->special && mp->special != -1) {
+		if(mp->special && mp->special != NULL) {
 			*temp += AString(" ") +
 				"Monster can cast " +
 				ShowSpecial(mp->special, mp->specialLevel, 1, 0);
@@ -892,7 +897,7 @@ AString *ItemDescription(int item, int full)
 					"terrain which allows ridden mounts but not flying "+
 					"mounts.";
 			}
-			if(pM->mountSpecial != -1) {
+			if(pM->mountSpecial != NULL) {
 				*temp += AString(" When ridden, this mount causes ") +
 					ShowSpecial(pM->mountSpecial, pM->specialLev, 1, 0);
 			}
@@ -987,7 +992,7 @@ AString *ItemDescription(int item, int full)
 				*temp += ".";
 			}
 			*temp += AString(" ") + "Item can cast " +
-				ShowSpecial(bt->index, bt->skillLevel, 1, 1);
+				ShowSpecial(bt->special, bt->skillLevel, 1, 1);
 		}
 	}
 	if((ItemDefs[item].flags & ItemType::CANTGIVE) && full) {

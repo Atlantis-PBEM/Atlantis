@@ -2125,9 +2125,12 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		f->AddTab();
 		if(Globals->WEATHER_EXISTS) {
 			temp = "It was ";
-			if(weather == W_BLIZZARD) temp = "There was an unnatural ";
-			else if(weather == W_NORMAL) temp = "The weather was ";
-			temp += SeasonNames[weather];
+			if (clearskies) temp = "unnaturally clear ";
+			else {
+				if(weather == W_BLIZZARD) temp = "There was an unnatural ";
+				else if(weather == W_NORMAL) temp = "The weather was ";
+				temp += SeasonNames[weather];
+			}
 			temp += " last month; ";
 			int nxtweather = pRegions->GetWeather(this, (month + 1) % 12);
 			temp += "it will be ";

@@ -27,7 +27,6 @@
 
 void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
-	int val;
     AString * token = o->gettoken();
     if (!token) {
         ParseError( pCheck, u, 0, "CAST: No skill given.");
@@ -50,6 +49,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         return;
     }
 
+	RangeType *rt = NULL;
     if( !pCheck ) {
         //
         // XXX -- should be error checking spells
@@ -85,11 +85,11 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
-				val = SkillDefs[S_CLEAR_SKIES].rangeIndex;
-				if(val != -1)
-					ProcessRegionSpell(u, o, sk, pCheck);
-				else
+				rt = FindRange(SkillDefs[sk].range);
+				if (rt == NULL)
 					ProcessGenericSpell(u, sk, pCheck);
+				else
+					ProcessRegionSpell(u, o, sk, pCheck);
 				break;
 			case S_FARSIGHT:
 			case S_TELEPORTATION:
@@ -371,9 +371,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 	int x = -1;
 	int y = -1;
 	int z = -1;
-	int val = SkillDefs[spell].rangeIndex;
-	RangeType *range = NULL;
-	if(val != -1) range = &RangeDefs[val];
+	RangeType *range = FindRange(SkillDefs[spell].range);
 
 	if(token) {
 		if(*token == "region") {
@@ -712,13 +710,11 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 		return 0;
 	}
 
-	int val = SkillDefs[spell].rangeIndex;
-	if(val == -1) {
+	RangeType *range = FindRange(SkillDefs[spell].range);
+	if (range == NULL) {
 		u->Error("CAST: Spell is not castable at range.");
 		return 0;
 	}
-
-	RangeType *range = &RangeDefs[val];
 
 	int rtype = regions.GetRegionArray(r->zloc)->levelType;
 	if((rtype == ARegionArray::LEVEL_NEXUS) &&
@@ -1366,8 +1362,8 @@ void Game::RunClearSkies(ARegion *r, Unit *u)
 
 	CastRegionOrder *order = (CastRegionOrder *)u->castorders;
 
-	val = SkillDefs[S_CLEAR_SKIES].rangeIndex;
-	if(val != -1) {
+	RangeType *range = FindRange(SkillDefs[S_CLEAR_SKIES].range);
+	if(range != NULL) {
 		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 		val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES);
 		if(!val) return;

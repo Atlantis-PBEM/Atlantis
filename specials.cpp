@@ -54,9 +54,9 @@ void Soldier::SetupHealing()
     }
 }
 
-int Army::CheckSpecialTarget(int special,int tar)
+int Army::CheckSpecialTarget(char *special,int tar)
 {
-	SpecialType *spd = &SpecialDefs[special];
+	SpecialType *spd = FindSpecial(special);
 	int i;
 	int match = 0;
 
@@ -155,8 +155,8 @@ void Battle::UpdateShields(Army *a)
 		int shtype = -1;
 		SpecialType *spd;
 
-		if(a->soldiers[i]->special == -1) continue;
-		spd = &SpecialDefs[a->soldiers[i]->special];
+		if(a->soldiers[i]->special == NULL) continue;
+		spd = FindSpecial(a->soldiers[i]->special);
 
 		if(!(spd->effectflags & SpecialType::FX_SHIELD) &&
 				!(spd->effectflags & SpecialType::FX_DEFBONUS)) continue;
@@ -194,8 +194,8 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 	AString results[4];
 	int dam = 0;
 
-	if(a->special == -1) return;
-	spd = &SpecialDefs[a->special];
+	if(a->special == NULL) return;
+	spd = FindSpecial(a->special);
 
 	if(!(spd->effectflags & SpecialType::FX_DAMAGE)) return;
 
@@ -211,7 +211,7 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 				spd->damage[i].flags, spd->damage[i].dclass,
 				spd->damage[i].effect, 0);
 		if(spd->effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {
-			if(spd->damage[i].effect == -1) {
+			if(spd->damage[i].effect == NULL) {
 				results[dam] = AString("killing ") + num;
 				dam++;
 			} else {

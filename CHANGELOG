@@ -653,9 +653,9 @@ Changes from 4.0.10 -> 5.0.0
       the population while give 0 orders increase it (no check for races
       yet). This is not yet reflected in the rules.
    -- Started work on getting rid of the hardcoded enums.  Battle Items,
-      Weapons, Armors, Mounts and Men are now done.  They are now completely
-      looked up based on the abbreviation of the item which has that
-      property.
+      Weapons, Armors, Mounts and Men are now done, as are Effects, Specials,
+      and Ranges.  They are now completely looked up based on a unique text
+	  key to find the one desired.
    -- Fixed a small goof in the grow races code (a race (I_VIKING for example)
       was being used as an index into the ManDefs array.  This worked fine for
       the 'base' races, but would have failed on any of the extended ones.

@@ -22,14 +22,6 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date			Person			Change
-// ----			------			------
-// 2000/MAR/16	Larry Stanbery	Corrected bug in Soldier constructor.
-//								Fixed "assassination bug" reported on
-//								DejaNews.
-// 2001/Feb/18	Joseph Traub	Added Apprentices concept from Lacondon
-//								Conquest
 #include "army.h"
 #include "gameio.h"
 #include "gamedata.h"
@@ -59,7 +51,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	attacks = 1;
 	attacktype = ATTACK_COMBAT;
 
-	special = -1;
+	special = NULL;
 	slevel = 0;
 
 	askill = 0;
@@ -75,8 +67,6 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	maxhits = 1;
 	amuletofi = 0;
 	battleItems = 0;
-
-	effects = 0;
 
 	/* Building bonus */
 	if (o->capacity) {
@@ -226,9 +216,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		// Weapons (like Runeswords) which are both weapons and battle
 		// items will be skipped in the battle items setup and handled
 		// here.
-		if ((ItemDefs[weapon].type & IT_BATTLE) && special == -1) {
+		if ((ItemDefs[weapon].type & IT_BATTLE) && special == NULL) {
 			BattleItemType *pBat = FindBattleItem(ItemDefs[weapon].abr);
-			special = pBat->index;
+			special = pBat->special;
 			slevel = pBat->skillLevel;
 		}
 	}
@@ -258,7 +248,7 @@ void Soldier::SetupSpell()
 			return;
 		}
 
-		SkillType *pST = &SkillDefs[ unit->combat ];
+		SkillType *pST = &SkillDefs[unit->combat];
 		if(!(pST->flags & SkillType::COMBAT)) {
 			//
 			// This isn't a combat spell!
@@ -288,7 +278,7 @@ void Soldier::SetupCombatItems()
 		if(!Globals->USE_PREPARE_COMMAND ||
 				(item == unit->readyItem) ||
 				(pBat->flags & BattleItemType::SHIELD)) {
-			if((pBat->flags & BattleItemType::SPECIAL) && special != -1) {
+			if((pBat->flags & BattleItemType::SPECIAL) && special != NULL) {
 				// This unit already has a special attack so give the item
 				// back to the unit as they aren't going to use it.
 				unit->items.SetNum(item, unit->items.GetNum(item)+1);
@@ -311,12 +301,12 @@ void Soldier::SetupCombatItems()
 			SET_BIT(battleItems, battleType);
 
 			if(pBat->flags & BattleItemType::SPECIAL) {
-				special = pBat->index;
+				special = pBat->special;
 				slevel = pBat->skillLevel;
 			}
 
 			if(pBat->flags & BattleItemType::SHIELD) {
-				SpecialType *sp = &SpecialDefs[pBat->index];
+				SpecialType *sp = FindSpecial(pBat->special);
 				/* we have a shield item with no shield FX */
 				if(!(sp->effectflags & SpecialType::FX_SHIELD)) {
 					continue;
@@ -343,61 +333,57 @@ void Soldier::SetupCombatItems()
 	}
 }
 
-int Soldier::HasEffect(int eff)
+int Soldier::HasEffect(char *eff)
 {
-	if(eff < 0) return 0;
-	int n = 1 << eff;
-	return (effects & n);
+	if(eff == NULL) return 0;
+
+	return effects[eff];
 }
 
-void Soldier::SetEffect(int eff)
+void Soldier::SetEffect(char *eff)
 {
-	if(eff < 0) return;
-	int n = 1 << eff;
+	if(eff == NULL) return;
 	int i;
 
-	EffectType *e = &EffectDefs[eff];
+	EffectType *e = FindEffect(eff);
+	if (e == NULL) return;
 
 	askill += e->attackVal;
 
 	for(i = 0; i < 4; i++) {
-		if(e->defMods[i].type != -1) {
+		if(e->defMods[i].type != -1)
 			dskill[e->defMods[i].type] += e->defMods[i].val;
-		}
 	}
 
-	if(e->cancelEffect != -1) {
-		ClearEffect(e->cancelEffect);
-	}
+	if(e->cancelEffect != NULL) ClearEffect(e->cancelEffect);
 
-	if(!(e->flags & EffectType::EFF_NOSET)) {
-		effects = effects | n;
-	}
+	if(!(e->flags & EffectType::EFF_NOSET)) effects[eff] = 1;
 }
 
-void Soldier::ClearEffect(int eff)
+void Soldier::ClearEffect(char *eff)
 {
-	if(eff < 0) return;
-	int n = 1 << eff;
+	if(eff == NULL) return;
 	int i;
 
-	EffectType *e = &EffectDefs[eff];
+	EffectType *e = FindEffect(eff);
+	if (e == NULL) return;
 
 	askill -= e->attackVal;
 
 	for(i = 0; i < 4; i++) {
-		if(e->defMods[i].type != -1) {
+		if(e->defMods[i].type != -1)
 			dskill[e->defMods[i].type] -= e->defMods[i].val;
-		}
 	}
-	effects &= ~n;
+
+	effects[eff] = 0;
 }
 
 void Soldier::ClearOneTimeEffects(void)
 {
 	for(int i = 0; i < NUMEFFECTS; i++) {
-		if(HasEffect(i) && (EffectDefs[i].flags & EffectType::EFF_ONESHOT))
-			ClearEffect(i);
+		if(HasEffect(EffectDefs[i].name) &&
+				(EffectDefs[i].flags & EffectType::EFF_ONESHOT))
+			ClearEffect(EffectDefs[i].name);
 	}
 }
 
@@ -915,7 +901,7 @@ Soldier * Army::GetAttacker(int i,int &behind)
 	return retval;
 }
 
-int Army::GetTargetNum(int special)
+int Army::GetTargetNum(char *special)
 {
 	int tars = NumFront();
 	if (tars == 0) {
@@ -925,7 +911,9 @@ int Army::GetTargetNum(int special)
 		if (tars == 0) return -1;
 	}
 
-	if (SpecialDefs[special].targflags) {
+	SpecialType *sp = FindSpecial(special);
+
+	if (sp->targflags) {
 		int validtargs = 0;
 		int i, start = -1;
 
@@ -961,7 +949,7 @@ int Army::GetTargetNum(int special)
 	return -1;
 }
 
-int Army::GetEffectNum(int effect)
+int Army::GetEffectNum(char *effect)
 {
 	int validtargs = 0;
 	int i, start = -1;
@@ -1018,7 +1006,7 @@ int Hits(int a,int d)
 	return 0;
 }
 
-int Army::RemoveEffects(int num, int effect)
+int Army::RemoveEffects(int num, char *effect)
 {
 	int ret = 0;
 	for(int i = 0; i < num; i++) {
@@ -1038,8 +1026,8 @@ int Army::RemoveEffects(int num, int effect)
 	return(ret);
 }
 
-int Army::DoAnAttack(int special, int numAttacks, int attackType,
-		int attackLevel, int flags, int weaponClass, int effect,
+int Army::DoAnAttack(char *special, int numAttacks, int attackType,
+		int attackLevel, int flags, int weaponClass, char *effect,
 		int mountBonus)
 {
 	/* 1. Check against Global effects (not sure how yet) */
@@ -1072,7 +1060,7 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 				return -1;
 			}
 
-			if(!effect && !combat) {
+			if(effect != NULL && !combat) {
 				/* We got through shield... if killing spell, destroy shield */
 				shields.Remove(hi);
 				delete hi;
@@ -1099,11 +1087,10 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 		int tlev = 0;
 		if(attackType != NUM_ATTACK_TYPES)
 			tlev = tar->dskill[ attackType ];
-		if(special > 0) {
-			if((SpecialDefs[special].effectflags&SpecialType::FX_NOBUILDING) &&
-					tar->building) {
+		if(special != NULL) {
+			SpecialType *sp = FindSpecial(special);
+			if((sp->effectflags & SpecialType::FX_NOBUILDING) && tar->building)
 				tlev -= 2;
-			}
 		}
 
 		/* 4.1 Check whether defense is allowed against this weapon */
@@ -1138,7 +1125,7 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 		}
 
 		/* 6. If attack got through, apply effect, or kill */
-		if (!effect) {
+		if (effect != NULL) {
 			/* 7. Last chance... Check armor */
 			if (tar->ArmorProtect(weaponClass)) {
 				continue;

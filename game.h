@@ -174,8 +174,8 @@ private:
 	void ModifySkillDependancy(int sk, int i, int dep, int lev);
 	void ModifySkillFlags(int sk, int flags);
 	void ModifySkillCost(int sk, int cost);
-	void ModifySkillSpecial(int sk, int special);
-	void ModifySkillRange(int sk, int range);
+	void ModifySkillSpecial(int sk, char *special);
+	void ModifySkillRange(int sk, char *range);
 
 	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
@@ -200,7 +200,7 @@ private:
 	void ModifyMonsterDefense(char *mon, int defenseType, int level);
 	void ModifyMonsterAttacksAndHits(char *mon, int num, int hits, int regen);
 	void ModifyMonsterSkills(char *mon, int tact, int stealth, int obs);
-	void ModifyMonsterSpecial(char *mon, int special, int lev);
+	void ModifyMonsterSpecial(char *mon, char *special, int lev);
 	void ModifyMonsterSpoils(char *mon, int silver, int spoilType);
 	void ModifyMonsterThreat(char *mon, int num, int hostileChance);
 
@@ -215,7 +215,7 @@ private:
 
 	void ModifyMountSkill(char *mount, int skill);
 	void ModifyMountBonuses(char *mount, int min, int max, int hampered);
-	void ModifyMountSpecial(char *mount, int special, int level);
+	void ModifyMountSpecial(char *mount, char *special, int level);
 
 	void EnableObject(int ob); // Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built
@@ -237,27 +237,27 @@ private:
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
 
 	void ModifyBattleItemFlags(char *item, int flags);
-	void ModifyBattleItemSpecial(char *item, int special, int level);
+	void ModifyBattleItemSpecial(char *item, char *special, int level);
 
-	void ModifySpecialTargetFlags(int special, int targetflags);
-	void ModifySpecialTargetObjects(int special, int index, int obj);
-	void ModifySpecialTargetItems(int special, int index, int item);
-	void ModifySpecialTargetEffects(int special, int index, int effect);
-	void ModifySpecialEffectFlags(int special, int effectflags);
-	void ModifySpecialShields(int special, int index, int type);
-	void ModifySpecialDefenseMods(int special, int index, int type, int val);
-	void ModifySpecialDamage(int special, int index, int type, int min,
-			int val, int flags, int cls, int effect);
+	void ModifySpecialTargetFlags(char *special, int targetflags);
+	void ModifySpecialTargetObjects(char *special, int index, int obj);
+	void ModifySpecialTargetItems(char *special, int index, int item);
+	void ModifySpecialTargetEffects(char *special, int index, char *effect);
+	void ModifySpecialEffectFlags(char *special, int effectflags);
+	void ModifySpecialShields(char *special, int index, int type);
+	void ModifySpecialDefenseMods(char *special, int index, int type, int val);
+	void ModifySpecialDamage(char *special, int index, int type, int min,
+			int val, int flags, int cls, char *effect);
 
-	void ModifyEffectFlags(int effect, int flags);
-	void ModifyEffectAttackMod(int effect, int val);
-	void ModifyEffectDefenseMod(int effect, int index, int type, int val);
-	void ModifyEffectCancelEffect(int effect, int uneffect);
+	void ModifyEffectFlags(char *effect, int flags);
+	void ModifyEffectAttackMod(char *effect, int val);
+	void ModifyEffectDefenseMod(char *effect, int index, int type, int val);
+	void ModifyEffectCancelEffect(char *effect, char *uneffect);
 
-	void ModifyRangeFlags(int range, int flags);
-	void ModifyRangeClass(int range, int rclass);
-	void ModifyRangeMultiplier(int range, int mult);
-	void ModifyRangeLevelPenalty(int range, int pen);
+	void ModifyRangeFlags(char *range, int flags);
+	void ModifyRangeClass(char *range, int rclass);
+	void ModifyRangeMultiplier(char *range, int mult);
+	void ModifyRangeLevelPenalty(char *range, int pen);
 
 	AList factions;
 	AList newfactions; /* List of strings */
