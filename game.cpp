@@ -825,21 +825,22 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 		if(!pFac->pReg) {
 			Awrite(AString("NewUnit is not valid without a Loc: ") +
 					"for faction "+ pFac->num);
-		}
-		pTemp = pLine->gettoken();
-		if(!pTemp) {
-			Awrite(AString("NewUnit: must be followed by an alias ") +
-					"in faction "+pFac->num);
 		} else {
-			int val = pTemp->value();
-			if(!val) {
+			pTemp = pLine->gettoken();
+			if(!pTemp) {
 				Awrite(AString("NewUnit: must be followed by an alias ") +
 						"in faction "+pFac->num);
 			} else {
-				Unit *u = GetNewUnit(pFac);
-				u->gm_alias = val;
-				u->MoveUnit(pFac->pReg->GetDummy());
-				u->Event("Is given to your faction.");
+				int val = pTemp->value();
+				if(!val) {
+					Awrite(AString("NewUnit: must be followed by an alias ") +
+							"in faction "+pFac->num);
+				} else {
+					Unit *u = GetNewUnit(pFac);
+					u->gm_alias = val;
+					u->MoveUnit(pFac->pReg->GetDummy());
+					u->Event("Is given to your faction.");
+				}
 			}
 		}
 	} else if(*pToken == "Item:") {
