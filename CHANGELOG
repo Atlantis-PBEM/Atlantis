@@ -376,3 +376,13 @@ Changes from 4.0.8 -> 4.0.9
       earned to be a negative value of an object.
    -- Fixed a bug where a disabled skill would be shown in the information
       about a race which had that skill as a specialty.
+   -- Did a bit of grubbing around in the old atlantisproject dejanews
+      archives and added a few ideas from there to the TODO list.
+   -- Started looking at some of the older atlantisdev postings [pre my
+      joining the list] and found a couple of good ideas there too.  The
+      big problem is how long it would take me to completely go through
+      that archive.  Anyone want to take that on and summarize for me
+      ideas/extensions that have been proposed so they can be added to the
+      todo list to at least consider? [This would probably also help to
+      attach atlantisdev post articles to various todo list items, which
+      has been requested].

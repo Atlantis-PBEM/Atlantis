@@ -21,13 +21,23 @@
       be good items to include.
    -- Consider a gamedef which has monsters only give silver as loot,
       never items (maybe up the amount of silver given slightly under this
-	  option)
+      option)
    -- Consider having specific types of wandering monsters carrying
       specific types of armor/weapons (such as pirates or skeleton or
-	  kobolds).  Possibly make those monsters not give normal loot, but
-	  only the stuff they carried.
+      kobolds).  Possibly make those monsters not give normal loot, but
+      only the stuff they carried.
    -- Add a gamedef to have rout based on total number of hits on a side
       rather than on total number of creatures (men/monsters) on a side?
+   -- Consider Tactics alternative -- High tactics side gets a combat bonus
+      of +X to all attacks (decreasing by one per round down to 0) where X
+      is the difference in tactical advantage. [Found in an old suggestion
+      on the dejanews.comm.atlantisproject newsgroup]
+   -- Consider Terrain bonuses for native -- three possible options
+      1) creatures in their native territory get a +1 attacking bonus
+      2) creatures in their native territory get a +2 attacking bonus
+      3) creatures in their native territory add +1 to their sides tactics
+      [Found in an old suggestion on the dejanews.comm.atlantisproject
+      newsgroup]
 
 ** Error messages
    -- It would be nice to have 'overwriting' errors only occur when the
@@ -35,10 +45,17 @@
 
 ** Items
    -- Consider adding the ability to produce trade goods.
-   -- Consider Duergar's war horses
+   -- Consider Duergar's war horses [See atlantisdev post #1119]
    -- Consider having use'd items [i.e., items which are utilised by a USE
       order; may be part of an expanded magic system].
    -- Consider possible tools for increasing building (and ship) production.
+   -- Consider multi-race hexes [See atlantisdev post #7] It is potentially
+      unbalancing (since it now requires some resource management to get
+      good specialists to the right places, but might be nice when combined
+      with a larger number of races (such as Ceran))
+   -- Consider a smaller boat than a longboat which can be used for quick
+      scouts/easy ocean screens but can only hold a few men. [see
+      atlantisdev post #79]
 
 
 ** Orders
@@ -47,7 +64,19 @@
       submits me a patch, I'll consider it.]
    -- Add an 'EJECT' order to allow a building owner to move a unit out
       of a structure it owns. [Make sure it cannot be used to drown a unit
-	  at sea]
+      at sea]
+   -- consider ADVERTISE/PURCHASE orders (ADVERTISE run end of month,
+      PURCHASE run at beginning) to allow player run markets in a hex for
+      the succeeding month.  [Perennial suggestion.  Reason for using
+      different commands than BUY/SELL is a) to have them resolve at a
+      specific time in the order processing (different than buy/sell) AND
+      to easily allow different syntax (you could advertise teaching in
+      addition to items -- If you advertised teaching would have to *FORCE*
+      unit to teach the next turn even if noone bought the studying, that's
+      the price of doing business in skills)]
+   -- Consider a modification to PRODUCE to allow automatic distribution
+      of produced items to some unit (or units) in some proportion.
+      [Suggested in atlantisdev article #57]
 
 ** Orders, Conditional
    -- Consider having 'conditional orders' specifically 'AT x,y,z'. 
@@ -60,52 +89,49 @@
 ** Rules
    -- Gamedef to handle various options around combat/weapons/bows for taxing
       [This would allow the GM to say that combat skill is required for 
-	  taxing/pillaging, or that a weapon (+needed skill if any) is required,
-	  or that the current situation of either a weapon (+needed skill if
-	  any) or combat skill
-   -- Gamedefs for various economy options. (far future) [No longer even
-      sure what the discussion was which sparked this TODO list item.  Anyone
-      want to search the list archives and refresh my memory?]
+      taxing/pillaging, or that a weapon (+needed skill if any) is required,
+      or that the current situation of either a weapon (+needed skill if
+      any) or combat skill
    -- Consider some sorts of dangers for production
    -- Consider building specific skills. [Meaning here that there are skills
       which could only be learned in that specific location.  Requested for
-	  Ceran]
+      Ceran]
    -- Consider non-teachable skills. [Again, requested by Ceran as a way of
       having skills which are only learnable through specific game actions
-	  or events (ie, GM intervention or the buildings in the last bullet and
-	  not transferrable to all units).]
+      or events (ie, GM intervention or the buildings in the last bullet and
+      not transferrable to all units).]
    -- Consider skill improvement through use. [This has gone around a couple
       of times.. I think it would be very very hard to do 'right' and causes
-	  more problems than it solves.  Probably not something I'll do, but it
-	  is something for people to consider if they want. (and if they want it
-	  to code it and submit it to me under a gamedef)]
+      more problems than it solves.  Probably not something I'll do, but it
+      is something for people to consider if they want. (and if they want it
+      to code it and submit it to me under a gamedef)]
    -- Unit grouping.
    -- Add option for entertain being an instant order.
    -- Consider having allied units tagged as a '=' instead of a '-'. (extend
       to all different stances). Possibly make that unit tagging a player
-	  option if it can be done with minimal hassle for client authors.
+      option if it can be done with minimal hassle for client authors.
    -- Add a 'MAINTAINONLY' flag to buildings so that a building can decay and
       be kept up, but cannot be constructed. (requested for Ceran)
    -- Add ability to set stances versus specific units, not just factions
       [This would allow you to be unfriendly to a faction but still allow
-	  specific unit ambassadors to travel through your lands, or trade with
-	  you, or what not.   Right now, it's all or nothing against a faction
-	  and this would push the granularity down a level.]
+      specific unit ambassadors to travel through your lands, or trade with
+      you, or what not.   Right now, it's all or nothing against a faction
+      and this would push the granularity down a level.]
    -- Consider having buildings which require specific items/skills to enter.
       [Suggested/requested by Ben Lloyd (I think).  Basically, gives a way to
-	  add some role-playing elements to the game in the forms of quests --
-	  especially if combined with the early suggestion about non-teachable
-	  skills.]
+      add some role-playing elements to the game in the forms of quests --
+      especially if combined with the early suggestion about non-teachable
+      skills.]
    -- Make monster movement only choose among viable exits [Perhaps with
       a bias against moving back where you came from.  Also make sure to
-	  leave a percentage chance for staying put]
+      leave a percentage chance for staying put]
    -- Figure out how an autoclaim option for studying could be made to work
       [Tom Alsen suggested a 'POOL' command which allows you to pool money
-	  in a hex for things like studying, upkeep, purchases, etc]
+      in a hex for things like studying, upkeep, purchases, etc]
    -- Consider allowing FP maximums per category (configurable by gamedef)
       as well as making the game more easily handle higher FP total maximums.
-	  (currently the total max number of Faction points is variable, but in
-	  order for it to actually 'work' you need to change game-specific stuff)
+      (currently the total max number of Faction points is variable, but in
+      order for it to actually 'work' you need to change game-specific stuff)
 
 ** Rules, food
    -- Consider requiring both food and pay for upkeep (make upkeep more
@@ -118,44 +144,44 @@
       at least think on it.
    -- Consider having a second stage of food production that takes 'raw'
       food (such as livestock/grain/fish) and produces a processed food
-	  via a skill.  This makes food items actually useful for more than
-	  selling/growing cities, especially if a raw item produces multiple
-	  processed foods (more efficient per raw food with higher skill?)
-	  Perhaps go the Lorenai route and have buildings/skills combinations
-	  which enable this (baking grain into food only works for units with
-	  the BAKE skill in a bakery structure)
+      via a skill.  This makes food items actually useful for more than
+      selling/growing cities, especially if a raw item produces multiple
+      processed foods (more efficient per raw food with higher skill?)
+      Perhaps go the Lorenai route and have buildings/skills combinations
+      which enable this (baking grain into food only works for units with
+      the BAKE skill in a bakery structure)
 
 ** Skills
    -- Merchant skill (limited number of merchents)/Limited number
       of tacticians/generals? [The thought on the Merchant skill is that
-	  a unit with the merchant skill could buy/sell items at a profit of
-	  (for example) 10% of the listed price times his skill level, so a
-	  level 5 merchant would be able to buy items from a city at 50% of
-	  the listed value and sell them for 150% of the listed value.  Having
-	  that unlimited seemed unbalancing, so I figured limiting it (much as
-	  total number of mages are limited to mage factiosn) based on number
-	  of trade points.  The General/tactician option is a possible way to
-	  impose a small limit on war factions, which are pretty powerful as
-	  well.  It would limit the number of units you could have which knew
-	  tactics based on the number of war points.  As always, these would
-	  be gamedef options as to whether they would be enabled and the
-	  actual numbers of merchants or tacticians would be tweakable in the
-	  same way the number of mages is tweakeable now (by editing the function
-	  in extra.cpp)]
+      a unit with the merchant skill could buy/sell items at a profit of
+      (for example) 10% of the listed price times his skill level, so a
+      level 5 merchant would be able to buy items from a city at 50% of
+      the listed value and sell them for 150% of the listed value.  Having
+      that unlimited seemed unbalancing, so I figured limiting it (much as
+      total number of mages are limited to mage factiosn) based on number
+      of trade points.  The General/tactician option is a possible way to
+      impose a small limit on war factions, which are pretty powerful as
+      well.  It would limit the number of units you could have which knew
+      tactics based on the number of war points.  As always, these would
+      be gamedef options as to whether they would be enabled and the
+      actual numbers of merchants or tacticians would be tweakable in the
+      same way the number of mages is tweakeable now (by editing the function
+      in extra.cpp)]
    -- Consider the use of buildings as skill boosters for some skills.
       [Craig had initially suggested  a shipyard which gave the first 20
-	  men in it a +1 boost to SHIP, but realized that this wouldn't work
-	  as when they started construction of the ship they'd leave the
-	  building and enter the new ship, but it might be useful in other
-	  contexts -- such as horsemen in a stable or farmers in a farm]
-	  [This would probably be new buildings rather than the existing ones
-	  since total produce boosters are useful as well]
+      men in it a +1 boost to SHIP, but realized that this wouldn't work
+      as when they started construction of the ship they'd leave the
+      building and enter the new ship, but it might be useful in other
+      contexts -- such as horsemen in a stable or farmers in a farm]
+      [This would probably be new buildings rather than the existing ones
+      since total produce boosters are useful as well]
 
 ** Spells/Magic
    -- Add more items so that apprentices are actually useful. [Tom suggested
       that another way of making apprentices more useful would be to allow
-	  them to learn magic skills, but none above level 2.. This would take
-	  a bit more work, but is a valid option]
+      them to learn magic skills, but none above level 2.. This would take
+      a bit more work, but is a valid option]
    -- rethink some of the current spells. [Az's beastform spell]
    -- consider having summoned creatures drop no loot. Possibly have
       them regain (or gain) loot over time, so the longer a monster is free
@@ -164,7 +190,7 @@
       Object creation spells, summoning spells and 'other' spells still
       need some sort of parameterization and genericization so that they
       can be tweaked on a game basis if desired. [This includes the handling
-	  of things like the speed increase from Summon Wind]
+      of things like the speed increase from Summon Wind]
    -- Merge Lacandon spells -- SOME work has been done on this already
       but a LOT more needs to be done before this is really doable without
       a lot of heartache and pain.
