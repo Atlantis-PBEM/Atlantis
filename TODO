@@ -133,22 +133,9 @@
    -- Show faction of ally in refusal to attack or assassinate.
 
 ** Rules, food
-   -- Consider requiring both food and pay for upkeep (make upkeep more
-      flexible in general).  Someone supplied a patch to allow a leader to
-      only eat 1 (grain/livestock/fish) instead of 1 per 10 SILV upkeep.
-      That would be a nice option to support as well, but to do so (as well)
-      as allow old behaviour requires flexibility.
    -- Consider allowing luxury food items (chocolate, vodka, cavier) to be
       able to be eaten.  Again, don't think this is a good idea, but will
       at least think on it.
-   -- Consider having a second stage of food production that takes 'raw'
-      food (such as livestock/grain/fish) and produces a processed food
-      via a skill.  This makes food items actually useful for more than
-      selling/growing cities, especially if a raw item produces multiple
-      processed foods (more efficient per raw food with higher skill?)
-      Perhaps go the Lorenai route and have buildings/skills combinations
-      which enable this (baking grain into food only works for units with
-      the BAKE skill in a bakery structure)
 
 ** Skills
    -- Merchant skill (limited number of merchents)/Limited number
