@@ -2359,3 +2359,15 @@ void Game::AdjustCityMon( ARegion *r, Unit *u )
 		u->items.SetNum(I_SWORD,men);
 	}
 }
+
+void Game::BankInterest()
+{
+	int interest;
+
+	forlist(&factions) {
+		Faction * fac = (Faction *) elem;
+		interest = (fac->bankaccount/100)*fac->type[F_TRADE];
+		fac->bankaccount += interest;
+		fac->interest = interest;
+	}
+}

@@ -183,6 +183,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		f.TagText("li", f.Link("#economy_entertainment", "Entertainment"));
 	f.TagText("li", f.Link("#economy_taxingpillaging", "Taxing/Pillaging"));
+	if(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED)
+		f.TagText("li", f.Link("#economy_banking", "Banking"));
 	f.Enclose(0, "ul");
 	f.Enclose(0, "li");
 	f.Enclose(1, "li");
@@ -257,6 +259,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#attack", "attack"));
 	f.TagText("li", f.Link("#autotax", "autotax"));
 	f.TagText("li", f.Link("#avoid", "avoid"));
+	if(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED)
+		f.TagText("LI", f.Link("#bank", "bank"));
 	f.TagText("li", f.Link("#behind", "behind"));
 	f.TagText("li", f.Link("#build", "build"));
 	f.TagText("li", f.Link("#buy", "buy"));
@@ -2506,6 +2510,60 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Paragraph(temp);
 	}
+	if(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
+		f.LinkRef("economy_banking");
+		f.TagText("H3","Banking:");
+		temp = "Each faction has access to a bank account where silver can be "
+			"deposited and withdrawn.  Initially the bank account is empty "
+			"and can be operated using the ";
+		temp += f.Link("#bank","BANK") + " order. ";
+		if (!(ObjectDefs[O_OBANK].flags & ObjectType::DISABLED)
+				|| (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)
+				|| (Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD)) {
+			temp += "A unit issuing the ";
+			temp += f.Link("#bank","BANK") + " order ";
+			if (!(ObjectDefs[O_OBANK].flags & ObjectType::DISABLED)) { // do we have banks ?
+				temp += "must be inside a bank";
+				if (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)
+					temp += ", which ";
+			}
+			if(Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT) {
+				temp += "must be located in a region ";
+				temp += "with a settlement of any size";
+			}
+			if(Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD)
+				temp += " which cannot be guarded by a faction with an attitude less than Friendly";
+			temp += ".";
+		}
+		//temp += " away from the Nexus. ";
+		if (!(SkillDefs[S_BANKING].flags & SkillType::DISABLED)) { // do we have banking skill ?
+			temp += " To be able to use the ";
+			temp += f.Link("#bank","BANK") + " order, a unit must possess the BANKING skill. ";
+			temp += "Each level of this skill enables the unit to withdraw or deposit ";
+			temp += Globals->BANK_MAXSKILLPERLEVEL;
+			temp += " silver.";
+		} else {
+			temp += " Each unit is limited to withdrawing or depositing ";
+			temp += Globals->BANK_MAXUNSKILLED;
+			temp += " silver.";
+		}
+		if (Globals->ALLOW_BANK & GameDefs::BANK_FEES) {
+			temp += " Every operation (be it depositing or withdrawing) will incur in a fee of ";
+			temp += Globals->BANK_FEE;
+			temp += "% the amount.  The full amount will be deducted from the bank account (for ";
+			temp += "a withdrawal) and from the unit (for a deposit), though only the amount after";
+			temp += " the fees will be transferred.  For example, a unit trying to deposit 5000";
+			temp += " silver, would see 5000 silver taken from its pockets, but only ";
+			temp += (5000 - (5000 * Globals->BANK_FEE)/100);
+			temp += " silver would be credited in the bank account.";
+		}
+		if (Globals->ALLOW_BANK & GameDefs::BANK_TRADEINTEREST) {
+			temp += " Each faction will receive an interest in the deposit equal to the number ";
+			temp += "of its trade points in percentage (a trade 5 faction would get 5%). ";
+		}
+		temp += "FIXME: mention \"Globals->ALLOW_BANK & GameDefs::BANK_SKILLTOBUILD\" here";
+		f.Paragraph(temp);
+	}
 	f.LinkRef("economy_taxingpillaging");
 	f.TagText("h3", "Taxing/Pillaging:");
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
@@ -3912,6 +3970,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "AVOID 1";
 	f.CommandExample(temp, temp2);
 
+	if(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("bank");
+		f.TagText("H4", "BANK DEPOSIT amount");
+		f.TagText("H4", "BANK WITHDRAW amount");
+		temp = "The BANK order is used to deposit or withdraw silver from the bank.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Deposit 2500 silver in the bank.";
+		temp2 = "BANK DEPOSIT 2500";
+		f.CommandExample(temp, temp2);
+	}
 	f.ClassTagText("div", "rule", "");
 	f.LinkRef("behind");
 	f.TagText("h4", "BEHIND [flag]");
@@ -4989,6 +5059,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "Clear the preferred weapon list.";
 		temp2 = "WEAPON";
 		f.CommandExample(temp, temp2);
+	}
+	if (Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
+		f.Enclose(1, "LI");
+		f.PutStr("Bank orders.");
+		f.Enclose(1, "UL");
+		f.TagText("LI" , "Interest is calculated.");
+		temp = f.Link("#bank","BANK") + " DEPOSIT orders are processed.";
+		f.TagText("LI", temp);
+		temp = f.Link("#bank","BANK") + " WITHDRAW orders are processed.";
+		f.TagText("LI", temp);
+		f.Enclose(0, "UL");
+		f.Enclose(0, "LI");
 	}
 
 	if(Globals->ALLOW_WITHDRAW) {

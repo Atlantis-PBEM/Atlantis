@@ -171,6 +171,8 @@ public:
     int lastchange;
     int lastorders;
     int unclaimed;
+	int bankaccount;
+	int interest; // not written to game.out
     AString * name;
     AString * address;
     AString * password;

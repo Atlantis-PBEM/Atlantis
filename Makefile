@@ -6,11 +6,11 @@
 # ----        ------       --------
 # 2000/MAR/14 Davis Kulis  Added the template code.
 
-GAME ?= standard
+GAME ?= Grelth
 
-CPLUS = g++
-CC = gcc
-CFLAGS = -g -I. -I.. -Wall
+CPLUS = g++-3.2
+CC = gcc-3.2
+CFLAGS = -g3 -march=pentium3 -mfpmath=sse,387 -msse -I. -I.. -Wall -Wno-deprecated
 
 RULESET_OBJECTS = extra.o monsters.o rules.o world.o
 
@@ -27,7 +27,7 @@ OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: conquest ceran realms standard wyreth
+all: conquest ceran realms standard wyreth Grelth
 
 conquest: FORCE
 	$(MAKE) GAME=conquest
@@ -44,10 +44,13 @@ standard: FORCE
 wyreth: FORCE
 	$(MAKE) GAME=wyreth
 
+Grelth: FORCE
+        $(MAKE) GAME=Grelth
+
 $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
 
-all-clean: conquest-clean ceran-clean realms-clean standard-clean wyreth-clean
+all-clean: conquest-clean ceran-clean realms-clean standard-clean wyreth-clean Grelth-clean
 
 conquest-clean:
 	$(MAKE) GAME=conquest clean
@@ -64,13 +67,16 @@ standard-clean:
 wyreth-clean:
 	$(MAKE) GAME=wyreth clean
 
+Grelth-clean:
+        $(MAKE) GAME=Grelth clean
+
 clean:
 	rm -f $(OBJECTS)
 	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
 
-all-rules: conquest-rules ceran-rules realms-rules standard-rules wyreth-rules
+all-rules: conquest-rules ceran-rules realms-rules standard-rules wyreth-rules Grelth-rules
 
 conquest-rules:
 	$(MAKE) GAME=conquest rules
@@ -86,6 +92,9 @@ standard-rules:
 
 wyreth-rules:
 	$(MAKE) GAME=wyreth rules
+
+Grelth-rules:
+        $(MAKE) GAME=Grelth rules
 
 rules: $(GAME)/$(GAME)
 	(cd $(GAME); \

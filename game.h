@@ -411,6 +411,13 @@ private:
     //
     int DoWithdrawOrder(ARegion *,Unit *,WithdrawOrder *);
 
+    // Bank functions
+    void ProcessBankOrder(Unit *,AString *,OrdersCheck *);
+    void DoBankDepositOrders();
+    void DoBankWithdrawOrders();
+    void BankInterest();
+    void DoBankOrder(ARegion *,Unit *,BankOrder *);
+    
     //
     // These are game specific, and can be found in extra.cpp
     //

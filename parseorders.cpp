@@ -466,6 +466,9 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_AVOID:
 			ProcessAvoidOrder(unit, o, pCheck);
 			break;
+		case O_BANK:
+			ProcessBankOrder(unit, o, pCheck);
+			break;
 		case O_BEHIND:
 			ProcessBehindOrder(unit, o, pCheck);
 			break;
@@ -1294,6 +1297,58 @@ void Game::ProcessConsumeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			u->SetFlag(FLAG_CONSUMING_FACTION, 0);
 		}
 	}
+}
+
+void Game::ProcessBankOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	int amt;
+	int what;
+//	int inbank;
+//	int lvl;
+//	int max = Globals->BANK_MAXSKILLPERLEVEL * 5; // value if banks & skills disabled
+
+	if (!(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED)) {
+		ParseError(pCheck, u, 0, "There are no banks in this game.");
+		return;
+	}
+	AString *token = o->gettoken();
+	if (token) {
+		if (*token == "deposit")
+			what = 2;
+		if (*token == "withdraw")
+			what = 1;
+		delete token;
+		if (what == 2) {
+			token = o->gettoken();
+			if (!token) {
+				ParseError(pCheck, u, 0, "BANK: No amount to deposit given.");
+				return;
+			}
+			amt = token->value();
+			delete token;
+		} else if (what == 1) {	// withdrawal
+			token = o->gettoken();
+			if (!token) {
+				ParseError(pCheck, u, 0, "BANK: No amount to withdraw given.");
+				return;
+			}
+			amt = token->value();
+			delete token;
+		} else {
+			ParseError(pCheck, u, 0, "BANK: No WITHDRAW or DEPOSIT given.");
+			return;
+		}
+	} else {
+		ParseError(pCheck, u, 0, "BANK: No action given.");
+		return;
+	}
+	if(!pCheck) {
+		BankOrder * order = new BankOrder;
+		order->what = what;
+		order->amount = amt;
+		u->bankorders.Add(order);
+	}
+	return;
 }
 
 void Game::ProcessRevealOrder(Unit * u,AString * o, OrdersCheck *pCheck)

@@ -73,6 +73,11 @@ AString *ShowSkill::Report(Faction *f)
 			    "production. Woods are more often found in forests, but "
 				"may also be found elsewhere.";
 			break;
+		case S_BANKING:
+			if(level > 1) break;
+			*str += "This skill deals with all aspects of depositing and "
+				"withdrawing funds from banks.";
+			break;
 		case S_QUARRYING:
 			if(level > 1) break;
 			*str += "This skill deals with all aspects of various stone "

@@ -76,6 +76,13 @@ void Game::RunOrders()
 	DeleteEmptyUnits();
 	SinkUncrewedShips();
 	DrownUnits();
+	if (Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
+		Awrite("Running BANK orders...");
+		if (Globals->ALLOW_BANK & GameDefs::BANK_TRADEINTEREST)
+			BankInterest();
+		DoBankDepositOrders();
+		DoBankWithdrawOrders();
+	}
 	if(Globals->ALLOW_WITHDRAW) {
 		Awrite("Running WITHDRAW Orders...");
 		DoWithdrawOrders();
@@ -2054,6 +2061,171 @@ int Game::DoWithdrawOrder(ARegion * r,Unit * u, WithdrawOrder * o)
 	return 0;
 }
 
+
+void Game::DoBankDepositOrders()
+{
+	forlist((&regions)) {
+		ARegion *r = (ARegion *)elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *)elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *) elem;
+				forlist((&u->bankorders)) {
+					BankOrder *o = (BankOrder *)elem;
+					if (o->what == 2) // deposit
+						DoBankOrder(r, u, o);
+				}
+			}
+		}
+	}
+}
+
+void Game::DoBankWithdrawOrders()
+{
+	forlist((&regions)) {
+		ARegion *r = (ARegion *)elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *)elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *) elem;
+				forlist((&u->bankorders)) {
+					BankOrder *o = (BankOrder *)elem;
+					DoBankOrder(r, u, o);
+				}
+				u->bankorders.DeleteAll();
+			}
+		}
+	}
+}
+
+void Game::DoBankOrder(ARegion * r,Unit * u, BankOrder * o)
+{
+	int what = o->what;
+	int amt = o->amount;
+	int max;// = o->max;
+	int lvl;// = o->level;
+	int inbank;// = o->inbank;
+	int fee;
+
+	if(r->type == R_NEXUS) {
+		u->Error("BANK: does not work in the Nexus.");
+		u->bankorders.Remove(o);
+		return;
+	}
+	if (!(SkillDefs[S_BANKING].flags & SkillType::DISABLED)) { // banking skill ?
+		lvl = u->GetSkill(S_BANKING);
+	} else { // skill disabled - pretend level 5
+		lvl = 5;
+	}
+	if (!(ObjectDefs[O_OBANK].flags & ObjectType::DISABLED)) { // banks enabled ?
+		if (u->object->type != O_OBANK) // Are they in Bank ?
+			inbank = 0; // No they are not
+		else { // Yes they are in bank
+			if (u->object->incomplete > 0) // Is it completed ?
+				inbank = 0; // Not completed
+			else
+				inbank = 1; // Completed
+		}
+		if (inbank)
+			max = Globals->BANK_MAXSKILLPERLEVEL * lvl * inbank;
+		else
+			max = Globals->BANK_MAXUNSKILLED;
+	} else { // banks disabled - pretend they are in a bank
+		inbank = 1;
+		max = Globals->BANK_MAXSKILLPERLEVEL * lvl;
+	}
+	
+	if (!r->CanTax(u) && (Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD)) {
+		if (ObjectDefs[O_OBANK].flags & ObjectType::DISABLED) { // if banks are disabled, inbank will be 1, so ignore it
+			u->Error("BANK1: A unit is on guard - banking is not allowed."); //FIXME
+			u->bankorders.Remove(o);
+			return;
+		} else { // pay attention to inbank
+			if (!inbank) { // if a unit is in a bank, then allow nevertheless
+				u->Error("BANK2: A unit is on guard - banking is not allowed."); //FIXME
+				u->bankorders.Remove(o);
+				return;
+			}
+		}
+	}
+
+	if(!u->object->region->town && (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)) {
+		if (ObjectDefs[O_OBANK].flags & ObjectType::DISABLED) { // if banks are disabled, inbank will be 1, so ignore it
+			u->Error("BANK: Unit is not in a village, town or city.");
+			u->bankorders.Remove(o);
+			return;
+		} else { // pay attention to inbank
+			if (!inbank) { // if a unit is in a bank, then allow nevertheless
+				u->Error("BANK: Unit is not in a village, town or city.");
+				u->bankorders.Remove(o);
+				return;
+			}
+		}
+	}
+
+	if ((amt > u->faction->bankaccount) && (what == 1)) {
+		u->Error(AString("BANK: Too little silver in the bank to withdraw."));
+		u->bankorders.Remove(o);
+		return;
+	}
+	if (what == 1) { // withdraw
+		if (amt > max) {
+			AString temp = "BANK: Withdrawal limited to ";
+			temp += max;
+			temp += " silver.";
+			u->Error(temp);
+			amt = max;
+		}
+	} else { // deposit
+		if (u->items.GetNum(I_SILVER) == 0) {
+			u->Error(AString("BANK: No silver available."));
+			u->bankorders.Remove(o);
+			return;
+		} else {
+			if (amt > max) {
+				AString temp = "BANK: Deposit limited to ";
+				temp += max;
+				temp += " silver.";
+				u->Error(temp);
+				amt = max;
+			}
+			if (u->items.GetNum(I_SILVER) < amt)
+				amt = u->items.GetNum(I_SILVER);
+		}
+	}
+	if (Globals->ALLOW_BANK & GameDefs::BANK_FEES)
+		fee = (amt * Globals->BANK_FEE)/100;
+	else
+		fee = 0;
+	AString temp;
+	if (what == 2)
+		temp += "Deposits ";
+	else
+		temp += "Withdraws ";
+	temp += amt - fee;
+	if (what == 2)
+		temp += " in";
+	else
+		temp += " from";
+	temp += " the bank";
+	if (Globals->ALLOW_BANK & GameDefs::BANK_FEES) {
+		temp += " (fees ";
+		temp += fee;
+		temp += ")";
+	}
+	temp += ".";
+	u->Event(temp);
+	if (what == 2) {// deposit
+		u->faction->bankaccount += amt - fee;
+		u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) - amt);
+	} else { // withdrawal
+		u->faction->bankaccount -= amt;
+		u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) + amt - fee);
+	}
+
+	u->bankorders.Remove(o);
+	return;
+}
 
 void Game::DoGiveOrders()
 {

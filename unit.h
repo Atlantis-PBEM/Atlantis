@@ -259,6 +259,7 @@ class Unit : public AListElem
 		AList findorders;
 		AList giveorders;
 		AList withdraworders;
+		AList bankorders;
 		AList buyorders;
 		AList sellorders;
 		AList forgetorders;

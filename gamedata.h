@@ -538,6 +538,7 @@ enum {
 	// Food related skills
 	S_COOKING,
 	S_CREATE_FOOD,
+	S_BANKING,
 	NSKILLS
 };
 
@@ -645,6 +646,7 @@ enum {
 	O_OASIS,
 	O_GEMAPPRAISER,
 	O_HPTOWER,
+	O_OBANK,
 	NOBJECTS
 };
 
