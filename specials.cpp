@@ -110,6 +110,22 @@ int Army::CheckSpecialTarget(int special,int tar)
 		if(match) return 0;
 	}
 
+	if(spd->targflags & SpecialType::HIT_MOUNTIF) {
+		match = 0;
+		for(i = 0; i < 7; i++) {
+			if(soldiers[tar]->riding == spd->targets[i]) match = 1;
+		}
+		if(!match) return 0;
+	}
+
+	if(spd->targflags & SpecialType::HIT_MOUNTEXCEPT) {
+		match = 0;
+		for(i = 0; i < 7; i++) {
+			if(soldiers[tar]->riding == spd->targets[i]) match = 1;
+		}
+		if(match) return 0;
+	}
+
 	if(spd->targflags & SpecialType::HIT_ILLUSION) {
 		// All illusions are of type monster, so lets make sure we get it
 		// right.  If we ever have other types of illusions, we can change

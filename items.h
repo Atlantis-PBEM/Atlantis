@@ -239,6 +239,11 @@ class MountType
 		// This is the max bonus a mount will grant if it can normally fly
 		// but the region doesn't allow flying mounts
 		int maxHamperedBonus;
+
+		// If the mount has a special effect it generates when ridden in
+		// combat
+		int mountSpecial;
+		int specialLev;
 };
 
 extern MountType *MountDefs;

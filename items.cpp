@@ -462,6 +462,7 @@ AString *ItemDescription(int item, int full)
 					"terrain which allows ridden mounts but not flying "+
 					"mounts.";
 			}
+			/* XXX -- handle mount special */
 		}
 	}
 

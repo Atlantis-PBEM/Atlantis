@@ -364,53 +364,60 @@ void Soldier::SetupCombatItems()
 
 int Soldier::HasEffect(int eff)
 {
-    return (effects & eff);
+	if(eff < 0) return 0;
+	int n = 1 << eff;
+	return (effects & n);
 }
 
 void Soldier::SetEffect(int eff) 
 {
-    if (eff == EFFECT_STORM)
-    {
-        dskill[ATTACK_COMBAT] -= 2;
-        askill -= 2;
-    }
-    if (eff == EFFECT_FEAR)
-    {
-        dskill[ATTACK_COMBAT] -= 2;
-		dskill[ATTACK_RIDING] -= 2;
-        askill -= 2;
-    }
-	if (eff == EFFECT_CAMEL_FEAR) {
-		if(riding != I_HORSE) return;
-		askill -= 2;
-		dskill[ATTACK_COMBAT] -= 2;
-		dskill[ATTACK_RIDING] -= 2;
+	if(eff < 0) return;
+	int n = 1 << eff;
+	int i;
+
+	EffectType *e = &EffectDefs[eff];
+
+	askill += e->attackVal;
+
+	for(i = 0; i < 4; i++) {
+		if(e->defMods[i].type != -1) {
+			dskill[e->defMods[i].type] += e->defMods[i].val;
+		}
 	}
-    effects = effects | eff;
+
+	if(e->cancelEffect != -1) {
+		ClearEffect(e->cancelEffect);
+	}
+
+	if(!(e->flags & EffectType::EFF_NOFLAG)) {
+		effects = effects | n;
+	}
 }
 
 void Soldier::ClearEffect(int eff)
 {
-    if (effects & eff) 
-    {
-        effects &= ~eff;
-        if (eff == EFFECT_STORM)
-        {
-            dskill[ATTACK_COMBAT] += 2;
-            askill += 2;
-        }
-        if (eff == EFFECT_FEAR)
-        {
-            dskill[ATTACK_COMBAT] += 2;
-			dskill[ATTACK_RIDING] += 2;
-            askill += 2;
-        }
-		if (eff == EFFECT_CAMEL_FEAR) {
-			dskill[ATTACK_COMBAT] += 2;
-			dskill[ATTACK_RIDING] += 2;
-			askill += 2;
+	if(eff < 0) return;
+	int n = 1 << eff;
+	int i;
+
+	EffectType *e = &EffectDefs[eff];
+
+	askill -= e->attackVal;
+
+	for(i = 0; i < 4; i++) {
+		if(e->defMods[i].type != -1) {
+			dskill[e->defMods[i].type] -= e->defMods[i].val;
 		}
-    }
+	}
+	effects &= ~n;
+}
+
+void Soldier::ClearOneTimeEffects(void)
+{
+	for(int i = 0; i < NUMEFFECTS; i++) {
+		if(HasEffect(i) && (EffectDefs[i].flags & EffectType::EFF_ONESHOT))
+			ClearEffect(i);
+	}
 }
 
 int Soldier::ArmorProtect(int weaponClass)
@@ -1072,8 +1079,8 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 		int tlev = 0;
 		if(attackType != NUM_ATTACK_TYPES)
 			tlev = tar->dskill[ attackType ];
-		if (special == SPECIAL_EARTHQUAKE) {
-			tlev -= 2;
+		if(special > 0) {
+			tlev += SpecialDefs[special].targetLevAdj;
 		}
 
 		/* 4.1 Check whether defense is allowed against this weapon */

@@ -37,14 +37,6 @@ class Army;
 
 #define SPECIAL_NONE 0
 
-#define EFFECT_DAZZLE 1
-#define EFFECT_FEAR 2
-#define EFFECT_STORM 4
-#define EFFECT_CAMEL_FEAR 8
-
-#define SPECIAL_FLAGS ( WeaponType::ALWAYSREADY )
-#define SPECIAL_CLASS ( ARMORPIERCING )
-
 class Soldier {
 	public:
 		Soldier(Unit *unit, Object *object, int regType, int race, int ass=0);
@@ -60,6 +52,7 @@ class Soldier {
 		int HasEffect(int);
 		void SetEffect(int);
 		void ClearEffect(int);
+		void ClearOneTimeEffects(void);
 		int ArmorProtect(int weaponClass );
 
 		void RestoreItems();

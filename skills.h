@@ -170,8 +170,10 @@ class SpecialType {
 			HIT_SOLDIEREXCEPT	= 0x008,	/* mutually exclusive (2) */
 			HIT_EFFECTIF		= 0x010,	/* mutually exclusive (3) */
 			HIT_EFFECTEXCEPT	= 0x020,	/* mutually exclusive (3) */
-			HIT_ILLUSION		= 0x040,
-			HIT_NOMONSTER		= 0x080,
+			HIT_MOUNTIF			= 0x040,	/* mutually exclusive (4) */
+			HIT_MOUNTEXCEPT		= 0x080,	/* mutually exclusive (4) */
+			HIT_ILLUSION		= 0x100,
+			HIT_NOMONSTER		= 0x200,
 		};
 		int targflags;
 
@@ -194,7 +196,29 @@ class SpecialType {
 		char *spelldesc;
 		char *spelldesc2;
 		char *spelltarget;
+
+		int targetLevAdj;
 };
 extern SpecialType *SpecialDefs;
+
+class DefenseMod {
+	public:
+		int type;
+		int val;
+};
+
+class EffectType {
+	public:
+		int attackVal;
+		DefenseMod defMods[4];
+		int cancelEffect;
+
+		enum {
+			EFF_ONESHOT	= 0x001,
+			EFF_NOFLAG	= 0x002,
+		};
+		int flags;
+};
+extern EffectType *EffectDefs;
 
 #endif

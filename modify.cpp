@@ -69,7 +69,6 @@ void Game::ModifySkillCost(int sk, int cost)
 void Game::ModifySkillSpecial(int sk, int special)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
-	if(special < 0 || special > (NUMSPECIALS-1)) return;
 	SkillDefs[sk].special = special;
 }
 

@@ -85,10 +85,33 @@ void Battle::DoAttack( int round,
     if (!def->NumAlive()) return;
     
     if (a->HasEffect(EFFECT_DAZZLE)) a->askill -= 2;
-	if (!behind && (a->riding == I_CAMEL))
-		def->DoAnAttack(0, 1, ATTACK_RIDING, 3, SPECIAL_FLAGS, SPECIAL_CLASS,
-				EFFECT_CAMEL_FEAR, 0);
-	
+	if (!behind && (a->riding != -1)) {
+		MountType *pMt = &MountDefs[ItemDefs[a->riding].index];
+		if(pMt->mountSpecial != -1) {
+			int i, num, tot = -1;
+			SpecialType *spd = &SpecialDefs[pMt->mountSpecial];
+			for(i = 0; i < 4; i++) {
+				int times = spd->damage[i].value;
+				if(spd->effectflags & SpecialType::FX_USE_LEV)
+					times *= pMt->specialLev;
+				int realtimes = spd->damage[i].minnum + getrandom(times) +
+					getrandom(times);
+				num  = def->DoAnAttack(pMt->mountSpecial, realtimes,
+						spd->damage[i].type, pMt->specialLev,
+						spd->damage[i].flags, spd->damage[i].dclass,
+						spd->damage[i].effect, 0);
+				if(num != -1) {
+					if(tot == -1) tot = num;
+					else tot += num;
+				}
+			}
+			if(tot != -1) {
+				AddLine(a->name + " " + spd->spelldesc + ", " +
+						spd->spelldesc2 + tot + spd->spelltarget + ".");
+			}
+		}
+	}
+	if(!def->NumAlive()) return;
 
     int numAttacks = a->attacks;
     if( a->attacks < 0 )
