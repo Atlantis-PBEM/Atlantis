@@ -401,3 +401,4 @@ Changes from 4.0.9 -> 4.0.10
    -- Fixed a bug where battle items which were not usable (due to having
       a combat spell set, or due to not being a mage and having a mage-only
       item) being checked for use caused the items to be lost to the unit.
+   -- Fixed bug where weapon length affected damage spells as well.
