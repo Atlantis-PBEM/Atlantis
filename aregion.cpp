@@ -1040,7 +1040,7 @@ int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range)
 			if(!HasExitRoad(d)) continue;
 			ARegion *r = neighbors[d];
 			if(!r) continue;
-			if(d == r->GetRealDirComp(dir)) continue;
+			if(dir == r->GetRealDirComp(d)) continue;
 			if(r->HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1);
 		}
 	}
@@ -1337,12 +1337,12 @@ void ARegion::Migrate()
 			int cv = 100;
 			if(nbor->race != race) cv = 50;
 			// Roads?
-			if(HasExitRoad(i) && nbor->HasConnectingRoad(i)) {
+			if(HasExitRoad(i) && HasConnectingRoad(i)) {
 				cv += 25;
 				for(int d=0; d<NDIRS; d++) {
-					if((d == GetRealDirComp(i)) || (!nbor->HasExitRoad(d))) continue;
+					if((i == GetRealDirComp(d)) || (!nbor->HasExitRoad(d))) continue;
 					ARegion *ntwo = nbor->neighbors[d];
-					if((nbor) && (ntwo->HasConnectingRoad(d))) {
+					if((nbor) && (nbor->HasConnectingRoad(d))) {
 						int c2 = 100;
 						if(ntwo->race != race) c2 = 50;
 						population += ntwo->migration * c2 / 100;
@@ -1872,7 +1872,7 @@ int ARegion::CountConnectingRoads()
 	int connections = 0;
 	for (int i = 0; i < NDIRS; i++) {
 		if (HasExitRoad(i) && neighbors[i] &&
-				neighbors[i]->HasConnectingRoad(i))
+				HasConnectingRoad(i))
 			connections ++;
 	}
 	return connections;
@@ -1881,11 +1881,12 @@ int ARegion::CountConnectingRoads()
 // AS
 int ARegion::HasConnectingRoad(int realDirection)
 {
-	for (int i = D_NORTH; i < NDIRS; i++)
-		if (neighbors[i]
-				&& neighbors[i]->GetRealDirComp(i) == realDirection
-				&& HasExitRoad(i))
-			return 1;
+	int opposite = GetRealDirComp(realDirection);
+
+	if (neighbors[realDirection]
+			&& neighbors[realDirection]->HasExitRoad(opposite))
+		return 1;
+
 	return 0;
 }
 
@@ -2899,7 +2900,7 @@ int ARegion::IsCoastalOrLakeside()
 	return seacount;
 }
 
-int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir)
+int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 {
 	int cost = 1;
 	if(Globals->WEATHER_EXISTS) {
@@ -2909,8 +2910,11 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir)
 	}
 	if (movetype == M_WALK || movetype == M_RIDE) {
 		cost = (TerrainDefs[type].movepoints * cost);
-		if((cost>1) && fromRegion->HasExitRoad(dir) && HasConnectingRoad(dir))
+		if(fromRegion->HasExitRoad(dir) && fromRegion->HasConnectingRoad(dir)) {
 			cost -= cost/2;
+			if (road)
+				*road = "on a road ";
+		}
 	}
 	if(cost < 1) cost = 1;
 	return cost;
@@ -4008,11 +4012,11 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 							growit = getrandom(20);
 							tries = 0;
 							int newdir = getrandom(NDIRS);
-							while (newdir == reg->GetRealDirComp(direc))
+							while (direc == reg->GetRealDirComp(newdir))
 								newdir = getrandom(NDIRS);
 							newreg = reg->neighbors[newdir];
 							while ((!newreg) && (tries < 36)) {
-								while (newdir == reg->GetRealDirComp(direc))
+								while (direc == reg->GetRealDirComp(newdir))
 									newdir = getrandom(NDIRS);
 								newreg = reg->neighbors[newdir];
 								tries++;
@@ -4641,7 +4645,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 						reg->race = TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
 					} else {
 						int dir = getrandom(NDIRS);
-						if(dir == nreg->GetRealDirComp(d)) continue;
+						if(d == nreg->GetRealDirComp(dir)) continue;
 						if(!(nreg->neighbors[dir])) continue;
 						nreg = nreg->neighbors[dir];
 					}

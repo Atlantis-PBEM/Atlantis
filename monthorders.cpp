@@ -178,10 +178,10 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 				if (Globals->PREVENT_SAIL_THROUGH &&
 						(ship->type != O_BALLOON) &&
 						(ship->prevdir != -1) &&
-						(ship->prevdir != reg->GetRealDirComp(i))) {
+						(ship->prevdir != i)) {
 					int blocked1 = 0;
 					int blocked2 = 0;
-					int d1 = reg->GetRealDirComp(ship->prevdir);
+					int d1 = ship->prevdir;
 					int d2 = i;
 					if (d1 > d2) {
 						int tmp = d1;
@@ -231,7 +231,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 
 				movepoints -= cost;
 				ship->MoveObject(newreg);
-				ship->SetPrevDir(i);
+				ship->SetPrevDir(reg->GetRealDirComp(i));
 				forlist(&facs) {
 					Faction * f = ((FactionPtr *) elem)->ptr;
 					f->Event(*ship->name + AString(" sails from ") +
@@ -256,7 +256,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 						f->faction = unit->faction;
 						f->level = 0;
 						f->unit = unit;
-						f->exits_used[newreg->GetRealDirComp(i)] = 1;
+						f->exits_used[reg->GetRealDirComp(i)] = 1;
 						newreg->passers.Add(f);
 					}
 				}
@@ -1204,6 +1204,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 	Location * loc = new Location;
 	MoveOrder * o = (MoveOrder *) unit->monthorders;
 	int movetype = unit->MoveType();
+	AString road;
 
 	if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
 	if (o->advancing) unit->guard = GUARD_ADVANCE;
@@ -1242,7 +1243,8 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 			goto done_moving;
 		}
 
-		int cost = newreg->MoveCost(movetype, region, i);
+		road = "";
+		int cost = newreg->MoveCost(movetype, region, i, &road);
 
 		if (region->type != R_NEXUS &&
 				unit->CalcMovePoints() - unit->movepoints < cost) {
@@ -1317,12 +1319,12 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 		AString temp;
 		switch (movetype) {
 		case M_WALK:
-			temp = "Walks ";
+			temp = AString("Walks ") + road;
 			if(TerrainDefs[newreg->type].similar_type == R_OCEAN)
 				temp = "Swims ";
 			break;
 		case M_RIDE:
-			temp = "Rides ";
+			temp = AString("Rides ") + road;
 			break;
 		case M_FLY:
 			temp = "Flies ";
@@ -1352,7 +1354,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 			f->level = 0;
 			f->unit = unit;
 			if(i < MOVE_IN) {
-				f->exits_used[newreg->GetRealDirComp(i)] = 1;
+				f->exits_used[region->GetRealDirComp(i)] = 1;
 			}
 			newreg->passers.Add(f);
 		}

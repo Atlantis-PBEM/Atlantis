@@ -205,7 +205,7 @@ class ARegion : public AListElem
 		Object *GetObject(int);
 		Object *GetDummy();
 
-		int MoveCost(int, ARegion *, int);
+		int MoveCost(int, ARegion *, int, AString *road);
 		Unit *Forbidden(Unit *); /* Returns unit that is forbidding */
 		Unit *ForbiddenByAlly(Unit *); /* Returns unit that is forbidding */
 		int CanTax(Unit *);
