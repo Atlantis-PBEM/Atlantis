@@ -2293,7 +2293,7 @@ MountType mountd[] = {
 	// MOUNT_HORSE
 	{ "HORS", S_RIDING, 1, 3, 3, NULL, 0},
 	// MOUNT_CAMEL
-	{ "CAME", S_RIDING, 1, 2, 2, "spook_horse", 3},
+	{ "CAME", S_RIDING, 1, 2, 2, "spook_horses", 3},
 	// MOUNT_MWOLF
 	{ "MWOL", S_RIDING, 1, 3, 3, NULL, 0},
 	// MOUNT_MSPIDER
