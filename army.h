@@ -42,7 +42,7 @@ class Army;
 #define EFFECT_STORM 4
 #define EFFECT_CAMEL_FEAR 8
 
-#define SPECIAL_FLAGS ( WeaponType::NEVERMISS | WeaponType::GOODARMOR )
+#define SPECIAL_FLAGS ( WeaponType::NEVERMISS | WeaponType::ARMORPIERCING )
 
 enum {
     ATTACK_COMBAT,
@@ -52,13 +52,6 @@ enum {
     ATTACK_RIDING,
     ATTACK_RANGED,
     NUM_ATTACK_TYPES
-};
-
-enum {
-    HEAL_NONE,
-    HEAL_THREE,
-    HEAL_TWO,
-    HEAL_ONE
 };
 
 class Soldier {
@@ -133,7 +126,7 @@ public:
     void Tie(Battle *);
     int CanBeHealed();
     void DoHeal(Battle *);
-    void DoHealLevel(Battle *,int,int, int useItems );
+    void DoHealLevel(Battle *,int,int useItems );
 	
     void GetMonSpoils(ItemList *,int);
 
@@ -148,7 +141,7 @@ public:
     Soldier *GetTarget( int );
     int RemoveEffects( int num, int effect );
     int DoAnAttack( int special, int numAttacks, int attackType,
-                    int attackLevel, int flags, int effect );
+                    int attackLevel, int flags, int effect, int mountBonus = 0 );
     void Kill(int);
     void Reset();
 

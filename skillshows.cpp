@@ -2012,23 +2012,41 @@ AString *ShowSkill::Report(void)
 				*str += "The weaponcraft skill is an advanced version of the "
 					    "weaponsmith skill.";
 				found = 1;
+				int items = 0;
+				if(ITEM_ENABLED(I_PIKE) && ITEM_ENABLED(I_WOOD) &&
+					ITEM_ENABLED(I_IRON)) {
+					*str += " A unit with this skill may use the PRODUCE "
+						    "order to produce pikes from wood and iron.  "
+							"A pike adds + 5 to the wielder's combat skill "
+							"against skilled mounted opponents, or + 2 "
+							"against any other weapons. The wielder of a "
+							"pike gets an additional + 1 bonus against "
+							"shorter weapons.  It takes one unit of wood "
+							"and one unit of iron to produce a pike, "
+							"which weighs two units.";
+					++items;
+				}
 				if(ITEM_ENABLED(I_LANCE) &&
 				   ITEM_ENABLED(I_WOOD) &&
 				   SKILL_ENABLED(S_RIDING)) {
-					*str += " A unit with this skill may use the PRODUCE "
-						    "order to produce lances from wood.  A lance "
-							"attacks as if the target has a defensive skill "
-							"of their riding skill (as modified by mount "
-							"and terrain) if they are mounted, or 0 if they "
-							"are not mounted.   A lance requires riding "
-							"skill to wield.  It takes two units of wood "
+					if (items) *str += "  A unit with this skill may also";
+					else *str += " A unit with this skill may";
+					*str += " use the PRODUCE order to produce lances from "
+					        "wood.  A lance attacks as if the target has a "
+							"defensive skill of their riding skill (as "
+							"modified by mount and terrain) if they are "
+							"mounted, or 0 if they are not mounted.   A "
+							"lance requires riding skill and a suitable "
+							"mount to wield.  It takes two units of wood "
 							"to produce a lance, which weighs two units.  "
 							"A unit wielding a lance attacks with a combat "
 							"skill equal to their mount bonus + 5.";
-					if(ITEM_ENABLED(I_AXE)) {
-						*str += " Production can be increased by using axes.";
+					++items;
 					}
+				if(items && ITEM_ENABLED(I_AXE)) {
+					*str += "  Production can be increased by using axes.";
 				}
+
 			} else if(level == 2) {
 				if(ITEM_DISABLED(I_MBAXE)) break;
 				if(ITEM_DISABLED(I_MITHRIL)) break;

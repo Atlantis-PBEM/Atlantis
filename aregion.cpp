@@ -2491,8 +2491,9 @@ void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 	AString nex_name = Globals->WORLD_NAME;
 	nex_name += " Nexus";
 
-	for(int y = 0; y < ySize; y++) {
-		for(int x = 0; x < xSize; x++) {
+	int x, y;
+	for(y = 0; y < ySize; y++) {
+		for(x = 0; x < xSize; x++) {
 			ARegion *reg = pRegionArrays[ level ]->GetRegion( x, y );
 			if(reg) {
 				reg->SetName(nex_name.getstr());
@@ -2503,7 +2504,7 @@ void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 
     FinalSetup( pRegionArrays[ level ] );
 
-	for(int y = 0; y < ySize; y++) {
+	for(y = 0; y < ySize; y++) {
 		for(int x = 0; x < xSize; x++) {
 			ARegion *reg = pRegionArrays[ level ]->GetRegion( x, y );
 			if(reg && Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {

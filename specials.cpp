@@ -27,41 +27,25 @@
 
 void Soldier::SetupHealing()
 {
-    if (unit->type == U_MAGE)
-    {
-        int maglvl = unit->GetSkill(S_MAGICAL_HEALING);
-        if (maglvl > 4)
-        {
-            healtype = HEAL_THREE;
-            healing = 100;
-            healitem = -1;
-            return;
-        }
-        if (maglvl > 2)
-        {
-            healtype = HEAL_TWO;
-            healing = 25;
-            healitem = -1;
-            return;
-        }
-        if (maglvl > 0)
-        {
-            healtype = HEAL_ONE;
-            healing = 10;
+    if (unit->type == U_MAGE) {
+        healtype = unit->GetSkill(S_MAGICAL_HEALING);
+		if (healtype > 5) healtype = 5;
+		if (healtype > 0) {
+			healing = HealDefs[healtype].num;
             healitem = -1;
             return;
         }
     }
 
 	if(unit->items.GetNum(I_HEALPOTION)) {
-		healtype = HEAL_ONE;
+		healtype = 1;
 		unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
 		healing = 10;
 		healitem = I_HEALPOTION;
 	} else {
 		healing = unit->GetSkill(S_HEALING) * Globals->HEALS_PER_MAN;
 		if (healing) {
-			healtype = HEAL_ONE;
+			healtype = 1;
 			int herbs = unit->items.GetNum(I_HERBS);
 			if (herbs < healing) healing = herbs;
 			unit->items.SetNum(I_HERBS,herbs - healing);

@@ -138,4 +138,13 @@ public:
   void Writeout(Aoutfile *);
 };
 
+class HealType
+{	
+public:
+	int num;
+	int rate;
+};
+
+extern HealType * HealDefs;
+
 #endif

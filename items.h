@@ -103,10 +103,17 @@ extern ManType * ManDefs;
 class MonType
 {
 public:
-    int skill;
+    int attackLevel;
+	int combatDefense;
+	int ridingDefense;
+	int energyDefense;
+	int spiritDefense;
+	int weatherDefense;
+	int numAttacks;
     int hits;
     int tactics;
     int special;
+	int specialLevel;
     int stealth;
     int obs;
     int silver;
@@ -122,26 +129,37 @@ class WeaponType
 {
 public:
     enum {
-        NEEDSKILL = 0x1,
-		NEEDMOUNT = 0x2,
-        RANGED = 0x4,
-        NODEFENSE = 0x8,
-        GOODARMOR = 0x10,
-        NEVERMISS = 0x20,
-		NOATTACKERDEFENSE = 0x40,
+        NEEDSKILL   = 0x1, // No bonus or use unless skilled
+        NEVERMISS   = 0x2, // Ignore the 50% chance to attack
+		NODEFENSE   = 0x4, // No combat defense against this weapon
+		NOFOOT      = 0x8, // Weapon cannot be used on foot (e.g. lance)
+		NOMOUNT    = 0x10, // Weapon cannot be used mounted (e.g. pike)
+		SHORT      = 0x20, // Short melee weapon (e.g. shortsword, hatchet)
+		LONG       = 0x40, // Long melee weapon (e.g. lance, pike)
+		RANGED     = 0x80, // Missile weapon
+		SLASHING  = 0x100, // e.g. sword attack (This is default)
+		PIERCING  = 0x200, // e.g. spear or arrow attack
+		CRUSHING  = 0x400, // e.g. mace attack
+		CLEAVING  = 0x800, // e.g. axe attack
+		ARMORPIERCING = 0x1000, // Armour piercing attack, e.g. crossbow, magic
     };
         
-    int skill1;
-    int skill2;
+    int baseSkill;
+	int orSkill;
     int flags;
-    int skillBonus;
+    int attackBonus;
+	int defenseBonus;
+	int attackType;
+
+	int mountBonus;
 
     //
     // For numAttacks:
     // - A positive number is the number of attacks per round.
     // - A negative number is the number of rounds per attack.
     // - NUM_ATTACKS_SKILL indicates the the weapon gives as many attacks
-    //   as the skill of the user.
+    //   as the skill of the user. NUM_ATTACKS_SKILL+1 indicates the the
+    //   weapon gives as many attacks as the skill of the user + 1.
     //
     enum {
         NUM_ATTACKS_SKILL = 100,
@@ -156,23 +174,21 @@ class ArmorType
 {
 public:
     enum {
-        USEINASS = 0x1,
+        USEINASSASSINATE = 0x1,
     };
 
     int flags;
+    //
+    // Against attacks, the chance of the armor protecting the wearer
+    // is: <type>Chance / from
+    //
+	int from;
+	int slashChance;
+	int pierceChance;
+	int crushChance;
+	int cleaveChance;
+    int armorpiercingChance;
 
-    //
-    // Against normal attacks, the chance of the armor protecting the wearer
-    // is: normalChance / normalFrom
-    //
-    int normalChance;
-    int normalFrom;
-
-    //
-    // Same thing, but against "good" attacks.
-    //
-    int goodChance;
-    int goodFrom;
 };
 
 extern ArmorType *ArmorDefs;

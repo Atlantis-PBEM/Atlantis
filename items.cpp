@@ -202,8 +202,10 @@ AString ItemList::BattleReport()
             if (ItemDefs[i->type].type & IT_MONSTER)
             {
                 MonType & mondef = MonDefs[ItemDefs[i->type].index];
-                temp += AString(" (Combat ") + mondef.skill + ", Hits " +
-                    mondef.hits + ", Tactics " + mondef.tactics + ")";
+                temp += AString(" (Combat ") + mondef.attackLevel + 
+					"/" + mondef.combatDefense + ", Attacks " +
+					mondef.numAttacks + ", Hits " + mondef.hits +
+					", Tactics " + mondef.tactics + ")";
             }
         }
     }

@@ -87,7 +87,7 @@ void Battle::DoAttack( int round,
     if (a->HasEffect(EFFECT_DAZZLE)) a->askill -= 2;
 	if (!behind && (a->riding == I_CAMEL))
 		def->DoAnAttack(0, 1, ATTACK_RIDING, 3, SPECIAL_FLAGS,
-				EFFECT_CAMEL_FEAR);
+				EFFECT_CAMEL_FEAR, 0);
 	
 
     int numAttacks = a->attacks;
@@ -105,7 +105,6 @@ void Battle::DoAttack( int round,
 
     for (int i = 0; i < numAttacks; i++ )
     {
-		int type = ATTACK_COMBAT;
         WeaponType *pWep = 0;
         if( a->weapon != -1 )
         {
@@ -126,19 +125,17 @@ void Battle::DoAttack( int round,
         }
 
         int flags = 0;
+		int attackType = ATTACK_COMBAT;
+		int mountBonus = 0;
         if( pWep )
-        {
-            flags = pWep->flags;
-        }
-
-		if(flags & WeaponType::NEEDMOUNT) {
-			type = ATTACK_RIDING;
+		{
+			flags = pWep->flags;
+			attackType = pWep->attackType;
+			mountBonus = pWep->mountBonus;
 		}
-		if(flags & WeaponType::RANGED) {
-			type = ATTACK_RANGED;
-		}
-        def->DoAnAttack( 0, 1, type, a->askill, flags, 0 );
+		def->DoAnAttack( 0, 1, attackType, a->askill, flags, 0, mountBonus );
         if (!def->NumAlive()) break;
+
     }
     
     if (a->HasEffect(EFFECT_DAZZLE)) {

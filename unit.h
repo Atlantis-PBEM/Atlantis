@@ -196,7 +196,8 @@ public:
     void SetFlag(int,int);
     void CopyFlags(Unit *);
 	int GetBattleItem( int batType, int index );
-
+	int CanUseWeapon(WeaponType *pWep, int riding);
+	int CanUseWeapon(WeaponType *pWep);
     int Taxers();
     
     void MoveUnit( Object *newobj );

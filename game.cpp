@@ -39,8 +39,6 @@
 #include "astring.h"
 #include "gamedata.h"
 
-
-
 Game::Game()
 {
     gameStatus = GAME_STATUS_UNINIT;

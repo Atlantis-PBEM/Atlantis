@@ -1224,112 +1224,103 @@ int Unit::Forbids(ARegion * r,Unit * u) {
 
 int Unit::Taxers()
 {
-    int totalMen = GetMen();
+	int totalMen = GetMen();
 
-    if( !totalMen )
-    {
-        return( 0 );
-    }
+	if( !totalMen ) {
+		return( 0 );
+	}
 
-    if (GetSkill(S_COMBAT))
-    {
-        return( totalMen );
-    }
+	if (GetSkill(S_COMBAT)) {
+		return( totalMen );
+	}
 
-    int numNoWeapons = totalMen;
-    int weaponType;
-    for( weaponType = 1; weaponType < NUMWEAPONS; weaponType++ )
-    {
-        WeaponType *pWep = &( WeaponDefs[ weaponType ]);
+	int numNoWeapons = totalMen;
+	int numNoFootWeapons = totalMen;
+	int numMounts = 0;
+	int numMountedWeapons = 0;
+	int numUsableMounted = 0;
+	int weaponType;
+	for( weaponType = 1; weaponType < NUMWEAPONS; weaponType++ ) {
+		WeaponType *pWep = &( WeaponDefs[ weaponType ]);
 
-        //
-        // Here's a weapon to look for
-        //
-        forlist( &items ) {
-            Item *pItem = (Item *) elem;
-            if( !pItem->num )
-            {
-                continue;
-            }
+		//
+		// Here's a weapon to look for
+		//
+		forlist( &items ) {
+			Item *pItem = (Item *) elem;
+			if( !pItem->num ) {
+				continue;
+			}
 
-            if( !( ItemDefs[ pItem->type ].type & IT_WEAPON ))
-            {
-                continue;
-            }
+			if( ItemDefs[ pItem->type ].type & IT_MOUNT ) {
+				// don't bother checking skill, that's done later
+				numMounts += pItem->num;
+				numUsableMounted = numMountedWeapons;
+				if (numUsableMounted > numMounts) numUsableMounted = numMounts;
+				numNoWeapons = numNoFootWeapons - numUsableMounted;
+				continue;
+			}
 
-            if( ItemDefs[ pItem->type ].index != weaponType )
-            {
-                continue;
-            }
+			if( !( ItemDefs[ pItem->type ].type & IT_WEAPON )) {
+				continue;
+			}
 
-            if( !( pWep->flags & WeaponType::NEEDSKILL ))
-            {
-                //
-                // This weapon doesn't need any skill
-                //
-                numNoWeapons -= pItem->num;
-                if( numNoWeapons <= 0 )
-                {
-                    return( totalMen );
-                }
-                continue;
-            }
+			if( ItemDefs[ pItem->type ].index != weaponType ) {
+				continue;
+			}
 
-            //
-            // Check skills
-            //
-            if( pWep->skill1 == -1 )
-            {
-                continue;
-            }
+			if (!CanUseWeapon(pWep)) continue;
+			//
+			// OK, the unit has the skill to use this weapon,
+			// or no skill is required
+			//
 
-            if( !GetSkill( pWep->skill1 ))
-            {
-                if( pWep->skill2 == -1 )
-                {
-                    continue;
-                }
+			if (pWep->flags & WeaponType::NOFOOT) {
+				// Check for mounted only weapons
+				numMountedWeapons += pItem->num;
+				numUsableMounted = numMountedWeapons;
+				if (numUsableMounted > numMounts) numUsableMounted = numMounts;
+				numNoWeapons = numNoFootWeapons - numUsableMounted;
+				if( numNoWeapons <= 0) {
+					return( totalMen );
+				}
+				continue;
+			}
 
-                if( !GetSkill( pWep->skill2 ))
-                {
-                    continue;
-                }
-            }
-            
-            //
-            // OK, the unit has the skill to use this weapon
-            //
-            numNoWeapons -= pItem->num;
-            if( numNoWeapons <= 0 )
-            {
-                return( totalMen );
-            }
-        }
-    }
+			numNoFootWeapons -= pItem->num;
+			numNoWeapons = numNoFootWeapons - numUsableMounted;
+			if( numNoWeapons <= 0 ) {
+				return( totalMen );
+			}
+		}
+	}
 
-    return( totalMen - numNoWeapons );
+	return( totalMen - numNoWeapons );
 }
 
-int Unit::GetFlag(int x) {
-  return (flags & x);
+int Unit::GetFlag(int x)
+{
+	return (flags & x);
 }
 
-void Unit::SetFlag(int x,int val) {
-  if (val) {
-    flags = flags | x;
-  } else {
-    if (flags & x) flags -= x;
-  }
+void Unit::SetFlag(int x,int val)
+{
+	if (val) {
+		flags = flags | x;
+	} else {
+		if (flags & x) flags -= x;
+	}
 }
 
-void Unit::CopyFlags(Unit * x) {
-  flags = x->flags;
-  if (x->guard != GUARD_SET && x->guard != GUARD_ADVANCE) {
-    guard = x->guard;
-  } else {
-    guard = GUARD_NONE;
-  }
-  reveal = x->reveal;
+void Unit::CopyFlags(Unit * x)
+{
+	flags = x->flags;
+	if (x->guard != GUARD_SET && x->guard != GUARD_ADVANCE) {
+		guard = x->guard;
+	} else {
+		guard = GUARD_NONE;
+	}
+	reveal = x->reveal;
 }
 
 int Unit::GetBattleItem( int batType, int index )
@@ -1350,13 +1341,6 @@ int Unit::GetBattleItem( int batType, int index )
             int retval = pItem->type;
             // Let's do this the "right" way
             items.SetNum(retval, pItem->num-1);
-//            pItem->num--;
-//            if( !pItem->num )
-//            {
-//                items.Remove( pItem );
-//                pItem->next = NULL;
-//                delete pItem;
-//            }
             return( retval );
         }
     }
@@ -1366,25 +1350,25 @@ int Unit::GetBattleItem( int batType, int index )
 
 void Unit::MoveUnit( Object *toobj )
 {
-    if( object )
-    {
-        object->units.Remove( this );
+	if( object ) {
+		object->units.Remove( this );
     }
     object = toobj;
-    if( object )
-    {
+    if( object ) {
         object->units.Add( this );
     }
 }
 
-void Unit::Event(const AString & s) {
-  AString temp = *name + ": " + s;
-  faction->Event(temp);
+void Unit::Event(const AString & s)
+{
+	AString temp = *name + ": " + s;
+	faction->Event(temp);
 }
 
-void Unit::Error(const AString & s) {
-  AString temp = *name + ": " + s;
-  faction->Error(temp);
+void Unit::Error(const AString & s)
+{
+	AString temp = *name + ": " + s;
+	faction->Error(temp);
 }
 
 int Unit::GetSkillBonus( int sk )
@@ -1524,4 +1508,36 @@ void Unit::SkillStarvation()
 		}
 	}
 	return;
+}
+
+int Unit::CanUseWeapon(WeaponType *pWep, int riding)
+{
+	if (riding == -1) {
+		if( pWep->flags & WeaponType::NOFOOT) return 0;
+	} else {
+		if( pWep->flags & WeaponType::NOMOUNT) return 0;
+	}
+	return CanUseWeapon(pWep);
+}
+
+int Unit::CanUseWeapon(WeaponType *pWep)
+{
+	if ( !(pWep->flags & WeaponType::NEEDSKILL) ) return 1; // just in case
+	int baseSkillLevel = 0;
+	int tempSkillLevel = 0;
+	if( pWep->baseSkill != -1 ) {
+		baseSkillLevel = GetSkill( pWep->baseSkill );
+	}
+
+	if( pWep->orSkill != -1 ) {
+		tempSkillLevel = GetSkill( pWep->orSkill );
+	}
+
+	if( tempSkillLevel > baseSkillLevel ) {
+		baseSkillLevel = tempSkillLevel;
+	}
+
+	if( pWep->flags & WeaponType::NEEDSKILL && !baseSkillLevel ) return 0;
+
+	return baseSkillLevel;
 }

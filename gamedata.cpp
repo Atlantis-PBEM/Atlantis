@@ -46,6 +46,8 @@
 //                               and objects.
 // 2001/Feb/22 Joseph Traub      Moved out of the individual rules files
 //
+// 2001/July/5 Thomas Alsen      Changed the combat system and monsters significantly
+//
 #include "gamedata.h"
 #include "items.h"
 #include "skills.h"
@@ -501,6 +503,9 @@ ItemType id[] =
 	{"gem", "gems", "GEM", ItemType::DISABLED, S_GEMCUTTING,1,
 	 I_ROUGHGEM, 1, -1, 0, 1, IT_TRADE,
 	 120, 0, 0, 0,0,0,0, -1, 0},
+	{"pike","pikes","PIKE",ItemType::DISABLED,
+	 S_WEAPONCRAFT,1,I_WOOD,1,I_IRON,1,2,IT_NORMAL | IT_WEAPON,
+	 100,1,WEAPON_PIKE,0,0,0,0,I_AXE,1},
 };
 
 ItemType * ItemDefs = id;
@@ -556,68 +561,66 @@ ManType * ManDefs = mt;
 // Table of monsters.
 //
 MonType md[] = {
-	//
-	// skill,hits,tactics,special,stealth,obs,
-	// silver,spoiltype,hostile,number,name
-	//
-  {0,0,0,-1,0,0, 0,-1,0,0,"None"}, /* none */
-  {3,2,3,0,2,2, 100,-1,10,3,"Pride of Lions"},
-  {2,1,0,0,0,0, 40,-1,10,10,"Wolf Pack"},
-  {2,6,0,0,0,2, 250,-1,10,3,"Grizzly Bears"},
-  {3,1,1,0,1,1, 50,-1,10,6,"Crocodiles"},
-  {3,1,2,0,2,0, 50,-1,10,5,"Anacondas"},
-  {2,2,2,0,3,0, 80,-1,10,8,"Giant Scorpions"},
-  {2,6,0,0,0,2, 250,-1,10,3,"Polar Bears"},
-  {1,1,0,0,2,0, 20,-1,10,30,"Pack of Rats"},
-  {4,2,0,0,2,2, 200,-1,10,4,"Giant Spiders"},
-  {3,5,0,0,0,0, 400,-1,25,3,"Giant Lizards"},
-  {2,10,2,0,3,1, 500,IT_ADVANCED,25,7,"Living Trees"},
-  {4,15,4,0,2,4, 1500,IT_ADVANCED,25,2,"Giant Birds"},
-  {4,20,3,0,1,3, 2000,IT_ADVANCED,25,2,"Swamp Creatures"},
-  {4,25,0,0,2,2, 2500,IT_ADVANCED,25,2,"Great Apes"},
-  {4,50,0,0,0,4, 5000,IT_ADVANCED,25,1,"Sphinx"},
-  {3,6,2,0,4,1, 500,IT_ADVANCED,25,8,"Ice Wurms"},
-  {6,50,4,SPECIAL_FIREBREATH,0,3, 10000,IT_MAGIC,50,1,"Dragon"},
-  {4,2,0,0,1,1, 150,IT_NORMAL,10,8,"Tribe of Centaurs"},
-  {2,1,0,0,1,0, 40,IT_NORMAL,10,20,"Kobold Pack"},
-  {3,10,0,0,0,0, 600,IT_NORMAL,10,2,"Family of Ogres"},
-  {3,1,0,0,0,1, 50,IT_NORMAL,10,10,"Lizard Men"},
-  {3,1,0,0,2,0, 50,IT_NORMAL,10,10,"Clan of Wild Men"},
-  {3,1,1,0,2,1, 50,IT_NORMAL,10,10,"Sandlings"},
-  {4,2,0,0,3,1, 150,IT_NORMAL,10,5,"Yeti"},
-  {2,1,0,0,0,0, 40,IT_NORMAL,10,40,"Goblin Horde"},
-  {3,4,1,0,0,2, 250,IT_NORMAL,10,8,"Troll Pack"},
-  {2,32,2,0,0,0, 1200,IT_NORMAL,10,2,"Ettins"},
-  {2,1,0,0,0,0, 40,IT_NORMAL,10,100,"Skeletons"},
-  {3,6,0,0,0,0, 400,IT_ADVANCED,25,10,"Undead"},
-  {4,40,3,SPECIAL_CAUSEFEAR,0,3, 4000,IT_MAGIC,50,1,"Lich"},
-  {3,1,0,0,3,0, 50,IT_NORMAL,10,50,"Imp"},
-  {4,10,0,0,0,0, 1000,IT_ADVANCED,25,10,"Demon"},
-  {6,200,5,SPECIAL_HELLFIRE,5,5, 50000,IT_MAGIC,100,1,"Balrog"},
-  {2,1,2,0,3,3, 20,-1,10,1,"Eagle"},
-  {3,1,1,0,1,1, 400,IT_NORMAL,50,20,"Pirates"},
-  {5,50,1,SPECIAL_CAUSEFEAR,1,2, 1000,IT_MAGIC,50,1,"Kraken"},
-  {2,1,2,0,2,3, 1000,IT_ADVANCED,10,100,"Merfolk"},
-  {2,10,2,0,3,1, 500,IT_ADVANCED,25,7,"Living Water"},
-  {-5,0,0,0,5,0, 0,-1,0,0,"Illusion"},
-  // Ceran new monsters
-  {2,2,1,0,2,0, 20,-1,20,30,"Rad Rats"},
-  {5,50,6,SPECIAL_FIREBALL,3,2, 2000,IT_MAGIC,100,2,"Noogle"},
-  {3,3,1,0,2,1, 100,IT_NORMAL,10,10,"Mutants"},
-  // Tzargs new monsters
-  {3,1,1,0,3,2, 70,IT_NORMAL,50,100,"Drow Warriors"},
-  {2,50,1,SPECIAL_FIREBREATH,0,1, 7500,IT_MAGIC,50,1,"Hydra"},
-  {6,50,4,SPECIAL_SUMMON_STORM,0,4, 10000,IT_MAGIC,50,1,"Storm Giant"},
-  {5,40,4,SPECIAL_LSTRIKE,0,4, 15000,IT_MAGIC,50,1,"Cloud Giant"},
-  {0,10,5,SPECIAL_MINDBLAST,0,5, 10000,IT_MAGIC,50,1,"Illyrthid"},
-  {1,1,3,SPECIAL_FIREBALL,0,3, 200,IT_ADVANCED,50,5,"Evil Sorcerers"},
-  {1,1,3,SPECIAL_LSTRIKE,0,3, 200,IT_ADVANCED,50,2,"Evil Magicians"},
-  {1,1,5,SPECIAL_BLACK_WIND,0,3, 1000,IT_MAGIC,50,1,"Dark Mage"},
-  {3,1,0,0,0,0, 50,IT_NORMAL,50,20,"Evil Warriors"},
-  {4,50,2,SPECIAL_ICEBREATH,0,3, 8000,IT_MAGIC,50,1,"Ice Dragon"},
+	// attackLevel, combatDefense, ridingDefense, energyDefense,
+	//     spiritDefense, weatherDefense,
+	// numAttacks, hits, tactics, special, specialLevel, stealth, obs,
+	// silver spoiltype, hostile, number, name
 
-/* skill,hits,tactics,special,stealth,obs,
-   silver,spoiltype,hostile,number,name */
+  {0,0,0,0,0,0, 0,0,0,-1,0,0,0, 0,-1,0,0,"None"}, /* none */
+  {3,3,2,0,0,0, 2,2,3,-1,0,2,2, 100,-1,10,3,"Pride of Lions"},
+  {2,2,3,0,0,0, 1,1,0,-1,0,0,0, 40,-1,10,10,"Wolf Pack"},
+  {2,2,0,0,0,0, 6,6,0,-1,0,0,2, 250,-1,10,3,"Grizzly Bears"},
+  {3,3,0,3,3,3, 1,1,1,-1,0,1,1, 50,-1,10,6,"Crocodiles"},
+  {3,3,2,3,3,3, 1,1,2,-1,0,2,0, 50,-1,10,5,"Anacondas"},
+  {2,2,2,2,2,2, 2,2,2,-1,0,3,0, 80,-1,10,8,"Giant Scorpions"},
+  {2,2,0,2,0,2, 6,6,0,-1,0,0,2, 250,-1,10,3,"Polar Bears"},
+  {1,1,1,1,1,1, 1,1,0,-1,0,2,0, 20,-1,10,30,"Pack of Rats"},
+  {4,4,2,2,0,2, 2,2,0,-1,0,2,2, 200,-1,10,4,"Giant Spiders"},
+  {3,3,1,3,0,3, 5,5,0,-1,0,0,0, 400,-1,25,3,"Giant Lizards"},
+  {2,2,0,3,3,3, 10,10,2,-1,0,3,1, 500,IT_ADVANCED,25,7,"Living Trees"},
+  {4,4,4,3,0,3, 15,15,4,-1,0,2,4, 1500,IT_ADVANCED,25,2,"Giant Birds"},
+  {4,4,0,3,0,3, 20,20,3,-1,0,1,3, 2000,IT_ADVANCED,25,2,"Swamp Creatures"},
+  {4,4,1,3,0,3, 25,25,0,-1,0,2,2, 2500,IT_ADVANCED,25,2,"Great Apes"},
+  {4,4,3,4,4,4, 50,50,0,-1,0,0,4, 5000,IT_ADVANCED,25,1,"Sphinx"},
+  {3,3,3,3,3,3, 6,6,2,-1,0,4,1, 500,IT_ADVANCED,25,8,"Ice Wurms"},
+  {6,6,5,6,6,6, 50,50,4,SPECIAL_FIREBREATH,6,0,3, 10000,IT_MAGIC,50,1,"Dragon"},
+  {4,4,3,0,0,0, 2,2,0,-1,0,1,1, 150,IT_NORMAL,10,8,"Tribe of Centaurs"},
+  {2,2,0,0,0,0, 1,1,0,-1,0,1,0, 40,IT_NORMAL,10,20,"Kobold Pack"},
+  {3,3,0,2,0,2, 10,10,0,-1,0,0,0, 600,IT_NORMAL,10,2,"Family of Ogres"},
+  {3,3,0,3,0,3, 1,1,0,-1,0,0,1, 50,IT_NORMAL,10,10,"Lizard Men"},
+  {3,3,0,0,0,0, 1,1,0,-1,0,2,0, 50,IT_NORMAL,10,10,"Clan of Wild Men"},
+  {3,3,2,3,0,3, 1,1,1,-1,0,2,1, 50,IT_NORMAL,10,10,"Sandlings"},
+  {4,4,3,3,0,3, 2,2,0,-1,0,3,1, 150,IT_NORMAL,10,5,"Yeti"},
+  {2,2,0,0,0,0, 1,1,0,-1,0,0,0, 40,IT_NORMAL,10,40,"Goblin Horde"},
+  {3,3,0,3,0,3, 4,4,1,-1,0,0,2, 250,IT_NORMAL,10,8,"Troll Pack"},
+  {2,2,0,2,0,2, 32,32,2,-1,0,0,0, 1200,IT_NORMAL,10,2,"Ettins"},
+  {2,2,0,5,5,3, 1,1,0,-1,0,0,0, 50,IT_NORMAL,10,100,"Skeletons"},
+  {3,3,0,2,3,2, 6,6,0,-1,0,0,0, 400,IT_ADVANCED,25,10,"Undead"},
+  {4,4,0,4,4,4, 40,40,3,SPECIAL_CAUSEFEAR,4,0,3, 4000,IT_MAGIC,50,1,"Lich"},
+  {3,3,0,3,3,3, 1,1,0,-1,0,3,0, 50,IT_NORMAL,10,50,"Imp"},
+  {4,4,3,4,4,4, 10,10,0,-1,0,0,0, 1000,IT_ADVANCED,25,10,"Demon"},
+  {6,6,5,6,6,6, 200,200,5,SPECIAL_HELLFIRE,6,5,5, 50000,IT_MAGIC,100,1,"Balrog"},
+  {2,2,5,0,3,2, 1,1,2,-1,0,3,3, 20,-1,10,1,"Eagle"},
+  {3,3,0,0,0,0, 1,1,1,-1,0,1,1, 400,IT_NORMAL,50,20,"Pirates"},
+  {5,5,3,5,5,5, 50,50,1,SPECIAL_CAUSEFEAR,5,1,2, 1000,IT_MAGIC,50,1,"Kraken"},
+  {2,2,0,0,0,2, 1,1,2,-1,0,2,3, 1000,IT_ADVANCED,10,100,"Merfolk"},
+  {2,2,2,3,3,3, 10,10,2,-1,0,3,1, 500,IT_ADVANCED,25,7,"Living Water"},
+  {-5,-5,-5,0,0,0, 0,0,0,-1,0,5,0, 0,-1,0,0,"Illusion"},
+  // Ceran new monsters
+  {2,2,2,2,0,0, 2,2,1,-1,0,2,0, 20,-1,20,30,"Rad Rats"},
+  {5,5,5,5,5,5, 50,50,6,SPECIAL_FIREBALL,5,3,2, 2000,IT_MAGIC,100,2,"Noogle"},
+  {3,3,0,3,3,3, 3,3,1,-1,0,2,1, 100,IT_NORMAL,10,10,"Mutants"},
+  // Tzargs new monsters
+  {3,3,0,3,3,3, 1,1,1,-1,0,3,2, 70,IT_NORMAL,50,100,"Drow Warriors"},
+  {2,5,0,3,0,0, 30,60,1,SPECIAL_FIREBREATH,3,0,1, 7500,IT_MAGIC,50,1,"Hydra"},
+  {6,6,0,6,6,6, 50,50,4,SPECIAL_SUMMON_STORM,6,0,4, 10000,IT_MAGIC,50,1,"Storm Giant"},
+  {5,5,0,5,5,5, 30,50,4,SPECIAL_LSTRIKE,5,0,4, 15000,IT_MAGIC,50,1,"Cloud Giant"},
+  {0,0,0,5,5,5, 1,20,5,SPECIAL_MINDBLAST,5,0,5, 10000,IT_MAGIC,50,1,"Illyrthid"},
+  {1,1,0,0,0,0, 1,1,3,SPECIAL_FIREBALL,3,0,3, 200,IT_ADVANCED,50,5,"Evil Sorcerers"},
+  {1,1,0,0,0,0, 1,1,3,SPECIAL_LSTRIKE,3,0,3, 200,IT_ADVANCED,50,2,"Evil Magicians"},
+  {1,1,0,0,0,0, 1,1,5,SPECIAL_BLACK_WIND,3,0,3, 1000,IT_MAGIC,50,1,"Dark Mage"},
+  {3,3,0,0,0,0, 1,1,0,-1,0,0,0, 50,IT_NORMAL,50,20,"Evil Warriors"},
+  {4,4,3,4,4,4, 50,50,2,SPECIAL_ICEBREATH,4,0,3, 8000,IT_MAGIC,50,1,"Ice Dragon"},
 };
 
 MonType * MonDefs = md;
@@ -625,66 +628,64 @@ MonType * MonDefs = md;
 //
 // Table of weapons.
 //
+//
+//  baseSkill, orSkill, flags, attackBonus, defenseBonus, attackType, mountBonus, numAttacks
+//
 WeaponType wepd[] = {
 	// WEAPON_NONE
-	{ -1, -1, 0, 0, 0 },
+	{ -1, -1, 0, 0, 0, 0, 0, 0 },
 	// LLS
 	// Rearranged priority, to make Runesword more important.
 	// Added new items.
 	// WEAPON_RUNESWORD
-	{ -1, -1, 0, 4, 1 },
+	{ -1, -1, WeaponType::SLASHING, 4, 4, ATTACK_COMBAT, 0, 1 },
 	// WEAPON_SUPERBOW
 	{ S_LONGBOW, S_CROSSBOW,
-	  WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
-	  WeaponType::NOATTACKERDEFENSE | WeaponType::GOODARMOR,
-	  2, WeaponType::NUM_ATTACKS_SKILL },
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING, 
+      2, 0, ATTACK_RANGED, 0, WeaponType::NUM_ATTACKS_SKILL },
 	// WEAPON_DOUBLEBOW
 	{ S_LONGBOW, S_CROSSBOW,
-	  WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
-	  WeaponType::NOATTACKERDEFENSE | WeaponType::GOODARMOR, 
-	  0, WeaponType::NUM_ATTACKS_SKILL },
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING, 
+      0, 0, ATTACK_RANGED, 0, WeaponType::NUM_ATTACKS_SKILL },
 	// WEAPON_MCROSSBOW
 	{ S_CROSSBOW, -1,
-	  WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
-	  WeaponType::NOATTACKERDEFENSE | WeaponType::GOODARMOR,
-	  0, 1 },
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING,
+      0, 0, ATTACK_RANGED, 0, 1 },
 	// WEAPON_LONGBOW
 	{ S_LONGBOW, -1,
-	  WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
-	  WeaponType::NOATTACKERDEFENSE,
-	  -2, 1 },
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::PIERCING,
+	  -2, 0, ATTACK_RANGED, 0, 1 },
 	// WEAPON_CROSSBOW
 	{ S_CROSSBOW, -1,
-	  WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
-	  WeaponType::NOATTACKERDEFENSE | WeaponType::GOODARMOR,
-	  0, -2 },
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING,
+      0, 0, ATTACK_RANGED, 0, -2 },
 	// WEAPON_JAVELIN
-	{ -1, -1, WeaponType::RANGED | WeaponType::NODEFENSE, -1, -2 },
+    { -1, -1, WeaponType::RANGED | WeaponType::PIERCING, -1, 0, ATTACK_RANGED, 0, -2 },
 	// WEAPON_LANCE
-	{ S_RIDING, -1,
-	  WeaponType::NEEDSKILL | WeaponType::NOATTACKERDEFENSE |
-	  WeaponType::NEEDMOUNT,
-	  5, 1},
+	{ S_RIDING, -1, WeaponType::NEEDSKILL | WeaponType::PIERCING | WeaponType::NOFOOT |
+	  WeaponType::LONG, 4, 0, ATTACK_RIDING, 0, 1 },
 	// WEAPON_ABAX
-	{ -1, -1, WeaponType::GOODARMOR, 8, -2},
+	{ -1, -1, WeaponType::ARMORPIERCING, 8, 8, ATTACK_COMBAT, 0, -2 },
 	// WEAPON_ASWR
-	{ -1, -1, WeaponType::GOODARMOR, 6, 1 },
+	{ -1, -1, WeaponType::ARMORPIERCING, 6, 6, ATTACK_COMBAT, 0, 1 },
 	// WEAPON_MBAXE
-	{ -1, -1, 0, 6, -2 },
+	{ -1, -1, WeaponType::CLEAVING, 6, 6, ATTACK_COMBAT, 0, -2 },
 	// WEAPON_MSWORD
-	{ -1, -1, 0, 4, 1 },
+	{ -1, -1, WeaponType::SLASHING, 4, 4, ATTACK_COMBAT, 0, 1 },
+	// WEAPON_PIKE
+	{ -1, -1, WeaponType::PIERCING | WeaponType::NOMOUNT | WeaponType::LONG, 2, 2, ATTACK_COMBAT, 3, 1 },
 	// WEAPON_BAXE
-	{ -1, -1, 0, 4, -2 },
+	{ -1, -1, WeaponType::CLEAVING, 4, 4, ATTACK_COMBAT, 0, -2 },
 	// WEAPON_SWORD
-	{ -1, -1, 0, 2, 1 },
+	{ -1, -1, WeaponType::SLASHING, 2, 2, ATTACK_COMBAT, 0, 1 },
 	// WEAPON_PICK
-	{ -1, -1, 0, 1, 1 },
+	{ -1, -1, WeaponType::PIERCING, 1, 1, ATTACK_COMBAT, 0, 1 },
 	// WEAPON_SPEAR
-	{ -1, -1, 0, 1, 1 },
+	{ -1, -1, WeaponType::PIERCING, 1, 1, ATTACK_COMBAT, 0, 1 },
 	// WEAPON_AXE
-	{ -1, -1, 0, 1, 1 },
+	{ -1, -1, WeaponType::CLEAVING, 1, 1, ATTACK_COMBAT, 0, 1 },
 	// WEAPON_HAMMER
-	{ -1, -1, 0, 1, 1 },
+	{ -1, -1, WeaponType::CRUSHING, 1, 1, ATTACK_COMBAT, 0, 1 },
 };
 
 WeaponType *WeaponDefs = wepd;
@@ -692,29 +693,29 @@ WeaponType *WeaponDefs = wepd;
 //
 // Table of armors.
 //
-// LLS
-// Added new items.
+// flags, from, slashChance, pierceChance, crushChance, cleaveChance, armorpiercingChance;
+//
 ArmorType armd[] = {
 	// ARMOR_NONE
-	{ 0, 0, 0, 0, 0 },
+	{ 0, 100, 0, 0, 0, 0, 0 },
 	// ARMOR_CLOAKOFI
-	{ 0, 99, 100, 99, 100 },
+    { 0, 100, 99, 99, 99, 99, 99 },
 	// ARMOR_ADPLATE
-	{ 0, 95, 100, 9, 10},
+    { 0, 100, 95, 95, 95, 95, 90 },
 	// ARMOR_ADRING
-	{ 0, 9, 10, 4, 5},
+    { 0, 100, 90, 90, 90, 90, 80 },
 	// ARMOR_IMITHRIL
-	{ 0, 9, 10, 3, 4 },
+    { 0, 100, 90, 90, 90, 90, 75 },
 	// ARMOR_MARMOR
-	{ 0, 9, 10, 2, 3 },
+    { 0, 300, 270, 270, 270, 270, 200 }, // 90%/66.67%
 	// ARMOR_PLATEARMOR
-	{ 0, 2, 3, 0, 1 },
+    { 0, 300, 200, 200, 200, 200, 0 },
 	// ARMOR_CHAINARMOR
-	{ 0, 1, 3, 0, 1 },
+	{ 0, 300, 100, 100, 100, 100, 0 },
 	// ARMOR_LEATHERARMOR
-	{ 0, 1, 4, 0, 1 },
+	{ 0, 100, 25, 25, 25, 25, 0 },
 	// ARMOR_CLOTHARMOR
-	{ ArmorType::USEINASS, 1, 6, 0, 1 },
+	{ ArmorType::USEINASSASSINATE, 6, 1, 1, 1, 1, 0 },
 };
 
 ArmorType *ArmorDefs = armd;
@@ -1526,4 +1527,15 @@ static TerrainType td[] = {
 };
 
 TerrainType * TerrainDefs = td;
+
+static HealType hd[] = {
+	{0, 0},
+	{10, 50},
+	{10, 50}, // {15, 60},
+	{25, 75},
+	{25, 75}, // {60, 80},
+	{100, 90}
+};
+
+HealType * HealDefs = hd;
 
