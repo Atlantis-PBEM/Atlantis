@@ -601,3 +601,10 @@ Changes from 4.0.10e -> 4.0.10f
 --------------------------------------------------
    -- Fixed bug in practice code where non-leader units would keep trying
       to practice and generate errors even after they were at max level.
+
+Changes from 4.0.10f -> 4.0.10g
+--------------------------------------------------
+   -- Changed USE_PREPARE slightly.  There is now a 'strict' and a 'normal'
+      setting for USE_PREPARE.  Under strict, the READY command MUST be
+      used or the unit will not use any battle items.  Under normal, the
+      unit will fall back on the battle items list.

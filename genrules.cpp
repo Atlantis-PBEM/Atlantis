@@ -4635,14 +4635,22 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.ClassTagText("DIV", "rule", "");
 		f.LinkRef("prepare");
 		f.TagText("H4", "PREPARE [item]");
-		temp = "This command allows a mage or apprentice to prepare a "
-			"battle item (e.g. a Staff of Fire) for use in battle.  This "
-			"allows the mage to override the usual selection of battle "
-			"items, and also cancesl any spells set via the ";
+        temp = "This command allows a mage or apprentice to prepare a "
+			"battle item (e.g. a Staff of Fire) for use in battle. ";
+		if (Globals->USE_PREPARE_COMMAND == GameDefs::PREPARE_STRICT) {
+			temp += " This selects the battle item which will be used, ";
+		} else {
+			temp += "This allows the mage to override the usual selection "
+				"of battle items, ";
+		}
+		temp += "and also cancels any spells set via the ";
 		temp += f.Link("#combat", "COMBAT") + " order.";
 		f.Paragraph(temp);
 		f.Paragraph("Example:");
-		temp = "Use a staff of fire in preference to any other battle item.";
+		temp = "Select a staff of fire as the ";
+		if (!(Globals->USE_PREPARE_COMMAND == GameDefs::PREPARE_STRICT))
+			temp += "preferred ";
+		temp += "battle item.";
 		temp2 = "PREPARE STAF";
 		f.CommandExample(temp, temp2);
 	}
