@@ -929,6 +929,6 @@ Changes from 4.0.10 -> 5.0.0
    -- fixed bug where clear skies didn't affect sailing cost.
    -- added REQUIRED_EXPERIENCE. Units have their study rate (in normal games always 30 days per
       month no matter what) adjusted when they have significantly less or much more experience
-      than days of study.
+      than days of study. (Currently still using the old Practice mechanism to gain experience)
    	  ToDo: armored galleon bonus...?
    

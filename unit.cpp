@@ -1014,6 +1014,7 @@ int Unit::Practice(int sk)
 	unsigned int i;
 
 	bonus = Globals->SKILL_PRACTICE_AMOUNT;
+	if (bonus == 0) bonus = Globals->REQUIRED_EXPERIENCE / 8;
 	if (practiced || (bonus < 1)) return 1;
 	days = skills.GetDays(sk);
 	men = GetMen();
@@ -1053,9 +1054,9 @@ int Unit::Practice(int sk)
 			// check if it's a nonleader and this is not it's
 			// only skill
 			if(Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
-				if (skills.Num()) {
-					s = (Skill *) skills.First();
-					if (s->type != sk) {
+				forlist(&skills) {
+					s = (Skill *) elem;
+					if ((s->days > 0) && (s->type != sk)) {
 						return 0;
 					}
 				}
