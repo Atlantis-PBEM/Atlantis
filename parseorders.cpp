@@ -2032,7 +2032,10 @@ void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
 	if (amt != -1) {
 		token = o->gettoken();
 		if(token) {
-			item = ParseGiveableItem(token);
+			if (t->unitnum == -1)
+				item = ParseEnabledItem(token);
+			else
+				item = ParseGiveableItem(token);
 			if(amt == -2) {
 				int found = 0;
 				if(*token == "normal") {
