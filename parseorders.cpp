@@ -1545,25 +1545,35 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 					unit->Error("BUILD: Can't build in an ocean.");
 					return;
 				}
-				if (ObjectIsShip(ot) && ot != O_BALLOON) {
-					if (!reg->IsCoastalOrLakeside()) {
+				
+				if (ObjectIsShip(ot)) {
+				    if (!reg->IsCoastalOrLakeside() && ot != O_BALLOON) {
 						unit->Error("BUILD: Can't build ship in "
 								"non-coastal or lakeside region.");
 						return;
 					}
+					
+					Object * obj = new Object(reg);
+					obj->type = ot;
+					obj->incomplete = ObjectDefs[obj->type].cost;
+					obj->num = shipseq++;
+					obj->SetName(new AString("Ship"));
+					unit->build = obj;
+					unit->object->region->objects.Add(obj);
+				} else {
+					if (reg->buildingseq > 99) {
+						unit->Error("BUILD: The region is full.");
+						return;
+					}
+					Object * obj = new Object(reg);
+					obj->type = ot;
+					obj->incomplete = ObjectDefs[obj->type].cost;
+					obj->num = unit->object->region->buildingseq++;
+					obj->SetName(new AString("Building"));
+					unit->build = obj;
+					unit->object->region->objects.Add(obj);
 				}
-				if (reg->buildingseq > 99) {
-					unit->Error("BUILD: The region is full.");
-					return;
-				}
-	
-				// Create the new object!
-				Object * obj = new Object(reg);
-				obj->type = ot;
-				obj->incomplete = ObjectDefs[obj->type].cost;
-				unit->build = obj;
-				unit->object->region->objects.Add(obj);
-			}			
+			}
 			order->target = NULL; // Not helping anyone...
 		}
 	} else { 

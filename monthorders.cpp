@@ -500,6 +500,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 
 	int num = u->GetMen() * usk;
 
+	/* patched out by Sergey (AB)
 	// JLT
 	if(obj->incomplete == ObjectDefs[type].cost) {
 		if(ObjectIsShip(type)) {
@@ -510,6 +511,8 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 			obj->SetName(new AString("Building"));
 		}
 	}
+	*/
+	
 	// Hack to fix bogus ship numbers
 	if(ObjectIsShip(type) && obj->num < 100) {
 		obj->num = shipseq++;
