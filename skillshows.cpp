@@ -1503,6 +1503,21 @@ AString *ShowSkill::Report(Faction *f)
 		}
 	}
 
+	// Tell whether this skill can be taught, studied, or gained through exp
+	if(SkillDefs[skill].flags & SkillType::NOSTUDY) {
+		if(!(*str == "")) *str += " ";
+		*str += "This skill cannot be studied via normal means.";
+	}
+	if(SkillDefs[skill].flags & SkillType::NOTEACH) {
+		if(!(*str == "")) *str += " ";
+		*str += "This skill cannot be taught to other units.";
+	}
+	if((Globals->SKILL_PRACTICE_AMOUNT > 0) && 
+			(SkillDefs[skill].flags & SkillType::NOEXP)) {
+		if(!(*str == "")) *str += " ";
+		*str += "This skill cannot be increased through experience.";
+	}
+
 	temp1 = SkillStrs(skill) + " " + level + ": ";
 	if(*str == "") {
 		*str = temp1 + "No skill report.";

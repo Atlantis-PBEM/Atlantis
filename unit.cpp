@@ -976,6 +976,7 @@ int Unit::Practice(int sk)
 		reqsk = LookupSkill(&skname);
 		if (reqsk == -1) break;
 		if (SkillDefs[reqsk].flags & SkillType::DISABLED) continue;
+		if (SkillDefs[reqsk].flags & SkillType::NOEXP) continue;
 		reqlev = GetRealSkill(reqsk);
 		if (reqlev <= curlev) {
 			if (Practice(reqsk))

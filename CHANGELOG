@@ -720,3 +720,7 @@ Changes from 4.0.10 -> 5.0.0
    -- Added another variant: Fracas!
    -- Added in an option to put varying bullet points in front of units 
       (was one of the TODO items)
+   -- Added in flags to individually turn off the ability to study, teach 
+      or gain experience in a skill (another one of the TODO items, requested 
+	  for Ceran)
+	  

@@ -330,6 +330,12 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 	forlist(&order->targets) {
 		UnitId * id = (UnitId *) elem;
 		Unit * target = reg->GetUnitId(id,unit->faction->num);
+		int sk = ((StudyOrder *) target->monthorders)->skill;
+		// Check whether it's a valid skill to teach
+		if (SkillDefs[sk].flags & SkillType::NOTEACH) {
+			unit->Error(AString("TEACH: ") + AString(SkillDefs[sk].name) + " cannot be taught.");
+			return;
+		}
 		if (!target) {
 			order->targets.Remove(id);
 			unit->Error("TEACH: No such unit.");
@@ -348,7 +354,6 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 					order->targets.Remove(id);
 					delete id;
 				} else {
-					int sk = ((StudyOrder *) target->monthorders)->skill;
 					if (unit->GetRealSkill(sk) <= target->GetRealSkill(sk)) {
 						unit->Error(AString("TEACH: ") +
 									*(target->name) + " is not studying "
@@ -925,6 +930,12 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		return;
 	}
 
+	// Check that the skill can be studied
+	if (SkillDefs[sk].flags & SkillType::NOSTUDY) {
+		u->Error( AString("STUDY: ") + AString(SkillDefs[sk].name) + " cannot be studied.");
+		return;
+	}
+	
 	// Small patch for Ceran Mercs
 	if(u->GetMen(I_MERC)) {
 		u->Error("STUDY: Mercenaries are not allowed to study.");

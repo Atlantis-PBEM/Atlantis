@@ -82,7 +82,10 @@ class SkillType
 			NOTIFY = 0x100,
 			DAMAGE = 0x200,
 			FEAR = 0x400,
-			MAGEOTHER=0x800
+			MAGEOTHER=0x800,
+			NOSTUDY=0x1000,
+			NOTEACH=0x2000,
+			NOEXP=0x4000,
 		};
 		int flags;
 

@@ -97,35 +97,36 @@
       in the 4.0 series of Atlantis.]
 
 ** Rules
-   -- Consider some sorts of dangers for production
-   -- Consider building specific skills. [Meaning here that there are skills
+   -- Consider "building specific" skills. [Meaning here that there are skills
       which could only be learned in that specific location.  Requested for
       Ceran]
-   -- Consider non-teachable skills. [Again, requested by Ceran as a way of
-      having skills which are only learnable through specific game actions
-      or events (ie, GM intervention or the buildings in the last bullet and
-      not transferrable to all units).]
-   -- Unit grouping.
-   -- Add option for entertain being an instant order.
-   -- Add a 'MAINTAINONLY' flag to buildings so that a building can decay and
-      be kept up, but cannot be constructed. (requested for Ceran)
-   -- Add ability to set stances versus specific units, not just factions
-      [This would allow you to be unfriendly to a faction but still allow
-      specific unit ambassadors to travel through your lands, or trade with
-      you, or what not.   Right now, it's all or nothing against a faction
-      and this would push the granularity down a level.]
    -- Consider having buildings which require specific items/skills to enter.
       [Suggested/requested by Ben Lloyd (I think).  Basically, gives a way to
       add some role-playing elements to the game in the forms of quests --
       especially if combined with the early suggestion about non-teachable
       skills.]
-   -- Make monster movement only choose among viable exits [Perhaps with
-      a bias against moving back where you came from.  Also make sure to
-      leave a percentage chance for staying put]
+   -- Add a 'MAINTAINONLY' flag to buildings so that a building can decay and
+      be kept up, but cannot be constructed. (requested for Ceran)
+	  
+   -- Unit grouping (eg. Armies or Schools).
+   
+   -- Show faction of ally in refusal to attack or assassinate.
+
+   -- Add ability to set stances versus specific units, not just factions
+      [This would allow you to be unfriendly to a faction but still allow
+      specific unit ambassadors to travel through your lands, or trade with
+      you, or what not.   Right now, it's all or nothing against a faction
+      and this would push the granularity down a level.]
+
    -- Figure out how an autoclaim option for studying could be made to work
       [Tom Alsen suggested a 'POOL' command which allows you to pool money
       in a hex for things like studying, upkeep, purchases, etc]
-   -- Show faction of ally in refusal to attack or assassinate.
+
+   -- Add option for entertain being an instant order.
+   -- Make monster movement only choose among viable exits [Perhaps with
+      a bias against moving back where you came from.  Also make sure to
+      leave a percentage chance for staying put]
+   -- Consider some sorts of dangers for production
 
 ** Rules, food
    -- Consider allowing luxury food items (chocolate, vodka, cavier) to be

@@ -70,6 +70,7 @@ Anthony Briggs
 	Added a patch to limit tact-5 leaders based on points spent in war.
 	The Fracas variant
 	Different bullets for units based on your attitude to them
+	The NOSTUDY, NOTEACH and NOEXP flags for skills.
 Joseph Traub
     Changes, updates, and merging a few disparate branches
     Maintaining and extending the 4.0.X code.
