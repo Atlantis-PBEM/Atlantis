@@ -91,6 +91,9 @@ rules: $(GAME)/$(GAME)
 	(cd $(GAME); \
 	 ./$(GAME) genrules $(GAME)_intro.html $(GAME).css html/$(GAME).html \
 	)
+	(cd $(GAME)/html; lynx -dump -nolist $(GAME).html > new.txt )
+	(cd $(GAME)/html; lynx -dump -nolist ../$(GAME).html > old.txt )
+	(cd $(GAME)/html; diff -uiwdbB old.txt new.txt > text.diff; echo "")
 
 FORCE:
 

@@ -1,0 +1,16 @@
+BODY {
+  font-family: arial, sans-serif;
+  background: white;
+  color: #400000;
+
+}
+
+DIV.rule {
+   border-top: double grey;
+}
+
+TD.fixed { font-family: monospace; }
+
+A:visited { color: #800000; }
+A:active { color: #800000; }
+A:link { color: #800000; }

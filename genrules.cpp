@@ -65,7 +65,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	Arules f;
 	AString temp, temp2;
 	int cap;
-	int i, j, k;
+	int i, j, k, l;
 	int last = -1;
 
 	if(f.OpenByName(rules) == -1) {
@@ -931,7 +931,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(!Globals->MULTI_HEX_NEXUS)
 			temp += "six ";
 		temp += "starting cities offer much to a starting faction; ";
-		if(START_CITIES_START_UNLIMITED) {
+		if(Globals->START_CITIES_START_UNLIMITED) {
 			if (!Globals->SAFE_START_CITIES && Globals->CITY_MONSTERS_EXIST)
 				temp += "until someone conquers the guardsmen, ";
 			temp += "there are unlimited amounts of many materials and men "
@@ -1091,6 +1091,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 	for(i = 0; i < NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
+		last = ItemDefs[i].pSkill;
+		if(last != -1 && (SkillDefs[last].flags & SkillType::DISABLED))
+			continue;
+		last = 0;
+		for(j = 0; j < 2; j++) {
+			k = ItemDefs[i].pInput[j].item;
+			if(k != -1 && (ItemDefs[k].flags & ItemType::DISABLED))
+				last = 1;
+			if(k != -1 && !(ItemDefs[k].type & IT_NORMAL)) last = 1;
+		}
+		if(last == 1) continue;
 		f.Enclose(1, "TR");
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		f.PutStr(ItemDefs[i].name);
@@ -1711,12 +1722,24 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
 		j = ItemDefs[i].pSkill;
 		if(j != -1 && (SkillDefs[j].flags & SkillType::DISABLED)) continue;
+		last = ItemDefs[i].pSkill;
+		if(last != -1 && (SkillDefs[last].flags & SkillType::DISABLED))
+			continue;
+		last = 0;
+		for(j = 0; j < 2; j++) {
+			k = ItemDefs[i].pInput[j].item;
+			if(k != -1 &&
+					!(ItemDefs[k].flags & ItemType::DISABLED) &&
+					!(ItemDefs[k].type & IT_NORMAL))
+				last = 1;
+		}
+		if(last == 1) continue;
 		f.Enclose(1, "TR");
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		f.PutStr(ItemDefs[i].name);
 		f.Enclose(0, "TD");
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-		if(j != -1) {
+		if(ItemDefs[i].pSkill != -1) {
 			temp = SkillDefs[ItemDefs[i].pSkill].name;
 			temp += AString(" (") + ItemDefs[i].pLevel + ")";
 			f.PutStr(temp);
@@ -1726,16 +1749,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		comma = 0;
 		temp = "";
 		for(j = 0; j < 2; j++) {
-			if(ItemDefs[i].pInput[j].item < 0 ||
-			   (ItemDefs[ItemDefs[i].pInput[j].item].flags&ItemType::DISABLED))
+			k = ItemDefs[i].pInput[j].item;
+			if(k < 0 || (ItemDefs[k].flags&ItemType::DISABLED))
 				continue;
 			if(comma) temp += ", ";
 			temp += ItemDefs[i].pInput[j].amt;
 			temp += " ";
 			if(ItemDefs[i].pInput[j].amt > 1)
-				temp += ItemDefs[ItemDefs[i].pInput[j].item].names;
+				temp += ItemDefs[k].names;
 			else
-				temp += ItemDefs[ItemDefs[i].pInput[j].item].name;
+				temp += ItemDefs[k].name;
+			comma = 1;
 		}
 		f.PutStr(temp);
 		f.Enclose(0, "TD");
@@ -1768,23 +1792,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "";
 		if(ItemDefs[i].type & IT_WEAPON) {
 			WeaponType *wp = &WeaponDefs[ItemDefs[i].index];
-			if(wp->attackBonus || wp->defenseBonus) {
+			if(wp->attackBonus || wp->defenseBonus ||
+					(wp->flags & WeaponType::RANGED) ||
+					(wp->flags & WeaponType::NEEDSKILL)) {
 				if(wp->flags & WeaponType::RANGED)
 					temp += "Ranged weapon";
 				else
 					temp += "Weapon";
 				temp += " which gives ";
-				if(wp->attackBonus) {
-					if(wp->attackBonus > 0) temp += "+";
-					temp += wp->attackBonus;
-					temp += " on attack";
-				}
-				if(wp->defenseBonus) {
-					if(wp->attackBonus) temp += " and ";
-					if(wp->defenseBonus > 0) temp += "+";
-					temp += wp->defenseBonus;
-					temp += " on defense";
-				}
+				if(wp->attackBonus > -1) temp += "+";
+				temp += wp->attackBonus;
+				temp += " on attack";
+				temp += " and ";
+				if(wp->defenseBonus > -1) temp += "+";
+				temp += wp->defenseBonus;
+				temp += " on defense";
 			    if(wp->flags & WeaponType::NEEDSKILL &&
 						!(SkillDefs[wp->baseSkill].flags&SkillType::DISABLED)){
 					temp += " (needs ";
@@ -1824,6 +1846,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
 				if(ItemDefs[j].mult_item != i) continue;
 				if(!(ItemDefs[j].type & IT_NORMAL)) continue;
+				k = ItemDefs[j].pSkill;
+				if(k != -1 && (SkillDefs[k].flags & SkillType::DISABLED))
+					continue;
+				last = 0;
+				for(k = 0; k < 2; k++) {
+					l = ItemDefs[j].pInput[k].item;
+					if(l != -1 &&
+							!(ItemDefs[l].flags & ItemType::DISABLED) &&
+							!(ItemDefs[l].type & IT_NORMAL))
+						last = 1;
+				}
+				if(last == 1) continue;
 				temp += AString("+") + ItemDefs[j].mult_val +
 					" bonus when producing " + ItemDefs[j].names + ".<BR>";
 			}
@@ -2349,8 +2383,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"a last resort to be used if one is running out of money. The "
 		"current wages are shown in the region description for each region. "
 		"All units may ";
-	temp += f.Link("#work", "WORK") + ", regardless of skills or faction "
-		"type.";
+	temp += f.Link("#work", "WORK") + ", regardless of skills";
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+		temp += "or faction type";
+	temp += ".";
 	f.Paragraph(temp);
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
 		f.LinkRef("economy_entertainment");
@@ -3300,13 +3336,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 					if(Globals->SAFE_START_CITIES) temp += "and ";
 					temp += "plate armor ";
 				}
-				temp += "in addtion to being more numerous and ";
+				temp += "in addition to being more numerous and ";
 				if(Globals->SAFE_START_CITIES)
 					temp += "may not be defeated.";
 				else
 					temp += "are therefore harder to kill.";
 			}
-				
+
 			if(Globals->START_CITY_MAGES) {
 				if(Globals->AMT_START_CITY_GUARDS)
 					temp += " Additionally, in ";
@@ -4882,7 +4918,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	temp = "Development of the code is open and there is a egroup devoted to "
 		"it located at ";
-	temp += f.Link("http://groups.yahoo.com/group/atlantisdev", 
+	temp += f.Link("http://groups.yahoo.com/group/atlantisdev",
 			"The YahooGroups AtlantisDev egroup");
 	temp += ". Please join this egroup if you work on the code and share your "
 		"changes back into the codebase as a whole";

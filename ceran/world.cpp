@@ -2051,7 +2051,7 @@ void SetupNames()
 {
     nnames = sizeof regionnames / sizeof (char *);
     nameused = new int[nnames];
-    
+
     for (int i=0; i<nnames; i++) nameused[i] = 0;
 	ntowns = 0;
 	nregions = 0;
@@ -2112,7 +2112,7 @@ void Game::CreateWorld()
 	} else {
 		nx = 1;
 	}
-	
+
     int xx = 0;
     while (xx <= 0) {
         Awrite("How wide should the map be? ");
@@ -2158,7 +2158,7 @@ void Game::CreateWorld()
 				regions.CreateUnderworldLevel(i, xx/2, yy/2, "underworld");
 			}
 		}
-		
+
         // Underdeep levels
 		for(i=Globals->UNDERWORLD_LEVELS+2;
 				i<(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2);
@@ -2172,12 +2172,12 @@ void Game::CreateWorld()
 			}
 		}
 	}
-		
+
 	if(Globals->ABYSS_LEVEL) {
 		regions.CreateAbyssLevel(Globals->UNDERWORLD_LEVELS +
 				Globals->UNDERDEEP_LEVELS + 2, "abyss");
 	}
-		
+
 	CountNames();
 
     if(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS == 1) {
@@ -2223,7 +2223,7 @@ void Game::CreateWorld()
 			}
 		}
 	}
-		
+
     regions.SetACNeighbors( 0, 1, xx, yy );
 
     regions.InitSetupGates( 1 );
@@ -2243,7 +2243,7 @@ int ARegionList::GetRegType( ARegion *pReg )
     // Figure out the distance from the equator, from 0 to 3.
     //
     int lat = ( pReg->yloc * 8 ) / ( pRegionArrays[ pReg->zloc ]->y );
-    if (lat > 3) 
+    if (lat > 3)
     {
         lat = (7 - lat);
     }
@@ -2474,7 +2474,7 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
 	{
 		return( W_NORMAL );
 	}
-  
+
     int ysize = pRegionArrays[ 1 ]->y;
 
     if ((3*( pReg->yloc+1))/ysize == 0)
@@ -2483,31 +2483,31 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
         if (month > 9 || month < 2)
         {
             return W_WINTER;
-        } 
+        }
         else
         {
             return W_NORMAL;
         }
     }
-  
+
     if ((3*( pReg->yloc+1))/ysize == 1)
     {
         /* Middle third of the world */
         if (month == 11 || month == 0 || month == 5 || month == 6)
         {
             return W_MONSOON;
-        } 
+        }
         else
         {
             return W_NORMAL;
         }
     }
-  
+
     if (month > 3 && month < 8)
     {
         /* Southern third of the world */
         return W_WINTER;
-    } 
+    }
     else
     {
         return W_NORMAL;
@@ -2523,7 +2523,7 @@ int ARegion::CanBeStartingCity(ARegionArray *pRA)
     int regs = 0;
     AList inlist;
     AList donelist;
-  
+
     ARegionPtr * temp = new ARegionPtr;
     temp->ptr = this;
     inlist.Add(temp);
@@ -2550,8 +2550,11 @@ int ARegion::CanBeStartingCity(ARegionArray *pRA)
     return 0;
 }
 
-void ARegion::MakeStartingCity() 
+void ARegion::MakeStartingCity()
 {
+	Market *m;
+	float ratio;
+
 	if(!Globals->TOWNS_EXIST) return;
 
 	if(Globals->GATES_EXIST) gate = -1;
@@ -2586,14 +2589,14 @@ void ARegion::MakeStartingCity()
 		}
 	} else {
 		SetupCityMarket();
-		float ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
+		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
 		/* Setup Recruiting */
-		Market *m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
+		m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
 				Population()/5, 0, 10000, 0, 2000 );
 		markets.Add(m);
 		if( Globals->LEADERS_EXIST ) {
 			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
-			Market *m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
+			m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
 					Population()/25, 0, 10000, 0, 400 );
 			markets.Add(m);
 		}
@@ -2632,7 +2635,7 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
         int y = 2 * getrandom( maxY / 2 ) + x % 2;
 
         reg = pArr->GetRegion( x, y);
-        
+
         if( !reg->CanBeStartingCity( pArr )) {
             reg = 0;
 			tries++;

@@ -2460,7 +2460,7 @@ void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 				reg->SetName(nex_name.Str());
 				reg->type = R_NEXUS;
 			}
-		:
+		}
 	}
 
     FinalSetup( pRegionArrays[ level ] );
