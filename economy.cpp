@@ -566,31 +566,6 @@ void ARegion::SetupCityMarket()
 		}
 	}
 	
-	/* TEST */
-	if((town->pop > 2000) && (zloc == 1)) {
-		Awrite(AString("Market test in ") + " (" + xloc +"," + yloc + ")");
-		Awrite(AString("population: ") + ItemDefs[race].name);
-		Awrite(AString("CanProduce: "));
-		for(unsigned int i=0; i < NITEMS; i++) {
-			if(locals->CanProduce(i))
-				Awrite(ItemDefs[i].names);
-		}
-		Awrite(AString("CanUse: "));
-		for(unsigned int i=0; i < NITEMS; i++) {
-			if(locals->CanUse(i))
-				Awrite(ItemDefs[i].names);
-		}
-		Awrite(AString("Possibly on demand here:"));
-		for(unsigned int i=0; i < NITEMS; i++)
-			if(demand[i] > 0)
-				Awrite(ItemDefs[i].names);
-		Awrite(AString("Possibly on offer here:"));
-		for(unsigned int i=0; i < NITEMS; i++)
-			if(supply[i] > 0)
-				Awrite(ItemDefs[i].names);
-	}	
-	
-	
 	/* Add demand (normal) items */
 	int num = 4;
 	int sum = 1;
@@ -1093,7 +1068,7 @@ void ARegion::UpdateTown()
 		int tot = 0;
 		forlist(&markets) {
 			Market *m = (Market *) elem;
-			if (town->pop > m->minpop) {
+			if (Population() > m->minpop) {
 				if (ItemDefs[m->item].type & IT_TRADE) {
 					if (m->type == M_BUY) {
 						amt += 5 * m->activity;
@@ -1101,12 +1076,20 @@ void ARegion::UpdateTown()
 					}
 				} else {
 					if (m->type == M_SELL) {
-						amt += m->activity;
-						tot += m->maxamt;
+						// Only food items except fish are mandatory
+						// for town growth - other items can
+						// be used in replacement
+						if (ItemDefs[m->item].type & IT_FOOD) {
+							amt += 2 * m->activity;
+						} else amt += m->activity;
+						if ((ItemDefs[m->item].type & IT_FOOD)
+							&& (m->item != I_FISH))	tot += 2 * m->maxamt;
 					}
 				}
 			}
 		}
+		
+		if (amt > tot) amt = tot;
 
 		int tarpop;
 		if (tot) {

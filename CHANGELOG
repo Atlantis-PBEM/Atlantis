@@ -840,3 +840,15 @@ Changes from 4.0.10 -> 5.0.0
       from aregion.cpp to map.cpp to allow for game specific setup routines
    -- removed FRACTAL_... gamedefs - these things are now handled by game
       specific code in map.cpp
+   -- created economy.cpp in the main directory and moved economy-related code
+      from aregion.cpp into economy.cpp.
+   -- tidied up market setup: markets now have a fixed number of normal-type
+      buy/sell items. The items are now related to the racial skills and
+      the produceable resources in the region. This removes a lot of the
+      weapons and tools on sale in the game.
+   -- changed the way market activity figures in town growth. Only grain and
+      livestock as well as trade items are needed for town growth - all other
+      items can be traded for extra gain as a replacement for untraded grain
+      or livestock.
+   -- added code to create City Guards from normal men if LEADER_EXIST isn't
+      set.
