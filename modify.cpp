@@ -718,3 +718,18 @@ void Game::ModifyRangeLevelPenalty(char *range, int pen)
 	if(pen < 0) return;
 	rp->crossLevelPenalty = pen;
 }
+
+void Game::ModifyAttribMod(char *mod, int index, int flags, char *ident,
+		int type, int val)
+{
+	AttribModType *mp = FindAttrib(mod);
+	if (mp == NULL) return;
+	if (index < 0 || index > 3) return;
+	if (!ident) return;
+	if (type < 0 || type > AttribModItem::NUMMODTYPE-1) return;
+
+	mp->mods[index].flags = flags;
+	mp->mods[index].ident = ident;
+	mp->mods[index].modtype = type;
+	mp->mods[index].val = val;
+}

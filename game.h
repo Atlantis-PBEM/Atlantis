@@ -259,6 +259,9 @@ private:
 	void ModifyRangeMultiplier(char *range, int mult);
 	void ModifyRangeLevelPenalty(char *range, int pen);
 
+	void ModifyAttribMod(char *mod, int index, int flags, char *ident,
+			int type, int val);
+
 	AList factions;
 	AList newfactions; /* List of strings */
 	AList battles;

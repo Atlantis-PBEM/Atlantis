@@ -207,7 +207,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	// If we did not get a weapon, set attack and defense bonuses to
 	// combat skill (and riding bonus if applicable).
 	if(weapon == -1) {
-		attackBonus = unit->GetSkill(S_COMBAT) + ridingBonus;
+		attackBonus = unit->GetAttribute("combat") + ridingBonus;
 		defenseBonus = attackBonus;
 		numAttacks = 1;
 	} else {
@@ -468,7 +468,7 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 
 	leader = ldr;
 	round = 0;
-	tac = ldr->GetSkill(S_TACTICS);
+	tac = ldr->GetTactics();
 	count = 0;
 	hitstotal = 0;
 
@@ -480,7 +480,7 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			Unit * u = ((Location *) elem)->unit;
 			count += u->GetSoldiers();
 			u->losses = 0;
-			int temp = u->GetSkill(S_TACTICS);
+			int temp = u->GetTactics();
 			if (temp > tac) {
 				tac = temp;
 				tactitian = u;

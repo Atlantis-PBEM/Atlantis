@@ -685,10 +685,8 @@ AString *ItemDescription(int item, int full)
 			if(pW->orSkill != -1)
 				*temp += AString(" or ") + SkillStrs(pW->orSkill);
 			*temp += " is needed to wield this weapon.";
-		} else {
-			if(pW->baseSkill == -1 && pW->orSkill == -1)
-				*temp += " No skill is needed to wield this weapon.";
-		}
+		} else
+			*temp += " No skill is needed to wield this weapon.";
 
 		int flag = 0;
 		if(pW->attackBonus != 0) {
@@ -1107,11 +1105,10 @@ void ItemList::Selling(int t, int n)
 AString ItemList::Report(int obs,int seeillusions,int nofirstcomma)
 {
 	AString temp;
-	for (int s = 0; s < 7; s++) 
-	{
+	for (int s = 0; s < 7; s++) {
 	    temp += ReportByType(s, obs, seeillusions, nofirstcomma);
 	    if (temp.Len()) nofirstcomma = 0;
-	}	
+	}
 	return temp;
 }
 
@@ -1136,54 +1133,74 @@ AString ItemList::BattleReport()
 	return temp;
 }
 
-AString ItemList::ReportByType(int type,int obs,int seeillusions,int nofirstcomma)
+AString ItemList::ReportByType(int type, int obs, int seeillusions,
+		int nofirstcomma)
 {
     AString temp;
     forlist(this) {
-	int report = 0;
-	Item *i = (Item *) elem;
-	switch (type) {
-	    case 0: if (ItemDefs[i->type].type & IT_MAN) report = 1;
-		break;
-	    case 1: if (ItemDefs[i->type].type & IT_MONSTER) report = 1;
-		break;
-	    case 2: if ((ItemDefs[i->type].type & IT_WEAPON) || (ItemDefs[i->type].type & IT_BATTLE) || (ItemDefs[i->type].type & IT_ARMOR) || (ItemDefs[i->type].type & IT_MAGIC))  report = 1;
-		break;
-	    case 3: if (ItemDefs[i->type].type & IT_MOUNT) report = 1;
-		break;
-	    case 4: if ((i->type == I_WAGON) || (i->type == I_MWAGON)) report = 1;
-		break;
-	    case 5: report = 1;
-		if (ItemDefs[i->type].type & IT_MAN) report = 0;
-		if (ItemDefs[i->type].type & IT_MONSTER) report = 0;
-		if (i->type == I_SILVER) report = 0;
-		if ((ItemDefs[i->type].type & IT_WEAPON) || (ItemDefs[i->type].type & IT_BATTLE) || (ItemDefs[i->type].type & IT_ARMOR) || (ItemDefs[i->type].type & IT_MAGIC))  report = 0;
-		if (ItemDefs[i->type].type & IT_MOUNT) report = 0;
-		if ((i->type == I_WAGON) || (i->type == I_MWAGON)) report = 0;
-		break;
-	    case 6: if (i->type == I_SILVER) report = 1;
-	}
-	if (report)
-	{
-	    if (obs == 2) {
-		if (nofirstcomma) {
-		    nofirstcomma = 0;
-		} else {
-		    temp += ", ";
+		int report = 0;
+		Item *i = (Item *) elem;
+		switch (type) {
+			case 0:
+				if (ItemDefs[i->type].type & IT_MAN)
+					report = 1;
+				break;
+			case 1:
+				if (ItemDefs[i->type].type & IT_MONSTER)
+					report = 1;
+				break;
+			case 2:
+				if ((ItemDefs[i->type].type & IT_WEAPON) ||
+						(ItemDefs[i->type].type & IT_BATTLE) ||
+						(ItemDefs[i->type].type & IT_ARMOR) ||
+						(ItemDefs[i->type].type & IT_MAGIC))
+					report = 1;
+				break;
+			case 3:
+				if (ItemDefs[i->type].type & IT_MOUNT)
+					report = 1;
+				break;
+			case 4:
+				if ((i->type == I_WAGON) || (i->type == I_MWAGON))
+					report = 1;
+				break;
+			case 5:
+				report = 1;
+				if (ItemDefs[i->type].type & IT_MAN)
+					report = 0;
+				if (ItemDefs[i->type].type & IT_MONSTER)
+					report = 0;
+				if (i->type == I_SILVER)
+					report = 0;
+				if ((ItemDefs[i->type].type & IT_WEAPON) ||
+						(ItemDefs[i->type].type & IT_BATTLE) ||
+						(ItemDefs[i->type].type & IT_ARMOR) ||
+						(ItemDefs[i->type].type & IT_MAGIC))
+					report = 0;
+				if (ItemDefs[i->type].type & IT_MOUNT)
+					report = 0;
+				if ((i->type == I_WAGON) ||
+						(i->type == I_MWAGON))
+					report = 0;
+				break;
+			case 6:
+				if (i->type == I_SILVER)
+					report = 1;
 		}
-		temp += i->Report(seeillusions);
-	    } else {
-		if (ItemDefs[i->type].weight) {
-		    if (nofirstcomma) {
-			nofirstcomma = 0;
-		    } else {
-			temp += ", ";
-		    }
-		    temp += i->Report(seeillusions);
+		if (report) {
+			if (obs == 2) {
+				if (nofirstcomma) nofirstcomma = 0;
+				else temp += ", ";
+				temp += i->Report(seeillusions);
+			} else {
+				if (ItemDefs[i->type].weight) {
+					if (nofirstcomma) nofirstcomma = 0;
+					else temp += ", ";
+					temp += i->Report(seeillusions);
+				}
+			}
 		}
-	    }
 	}
-    }
     return temp;
 }
 

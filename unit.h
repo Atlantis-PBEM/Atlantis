@@ -169,7 +169,7 @@ class Unit : public AListElem
 		// These are rule-set specific, in extra.cpp.
 		//
 		// LLS
-		int GetSkillBonus(int);
+		int GetAttribute(char *ident);
 		int GetProductionBonus(int);
 
 		int GetSkill(int);

@@ -78,6 +78,7 @@ class SkillType
 			APPRENTICE = 0x10,
 			DISABLED = 0x20,
 			SLOWSTUDY = 0x40,
+			BATTLEREP = 0x80,
 		};
 		int flags;
 
@@ -264,5 +265,41 @@ extern RangeType *RangeDefs;
 extern int NUMRANGES;
 
 extern RangeType *FindRange(char *range);
+
+class AttribModItem {
+	public:
+		enum {
+			SKILL = 0x0001,
+			ITEM = 0x0002,
+			FLAGGED = 0x0004,
+			NOT = 0x0100,
+			CUMULATIVE = 0x0200,
+			PERMAN = 0x400
+		};
+		int flags;
+
+		char *ident;
+
+		enum {
+			CONSTANT,
+			UNIT_LEVEL,
+			UNIT_LEVEL_HALF,
+			NUMMODTYPE,
+		};
+		int modtype;
+
+		int val;
+};
+
+class AttribModType {
+	public:
+		char *key;
+		AttribModItem mods[4];
+};
+
+extern AttribModType *AttribDefs;
+extern int NUMATTRIBMODS;
+
+extern AttribModType *FindAttrib(char *attrib);
 
 #endif

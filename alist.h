@@ -67,6 +67,13 @@ class AList {
 			elem = _elem2, \
 			_elem2 = (_elem2 ? ((l)->Next(_elem2)) : 0))
 
+#define forlist_reuse(l) \
+	for (elem=(l)->First(), \
+			_elem2 = (elem ? (l)->Next(elem) : 0); \
+			elem; \
+			elem = _elem2, \
+			_elem2 = (_elem2 ? ((l)->Next(_elem2)) : 0))
+
 #define forlist_safe(l) \
 	int size = (l)->Num(); \
 	AListElem **copy = new AListElem*[size]; \

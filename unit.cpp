@@ -316,7 +316,7 @@ AString Unit::StudyableSkills()
 AString Unit::GetName(int obs)
 {
 	AString ret = *name;
-	int stealth = GetSkill(S_STEALTH);
+	int stealth = GetAttribute("stealth");
 	if(reveal == REVEAL_FACTION || obs > stealth) {
 		ret += ", ";
 		ret += *faction->name;
@@ -353,7 +353,7 @@ AString Unit::SpoilsReport() {
 void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 			   int autosee)
 {
-	int stealth = GetSkill(S_STEALTH);
+	int stealth = GetAttribute("stealth");
 	if (obs==-1) {
 		/* The unit belongs to the Faction writing the report */
 		obs = 2;
@@ -516,45 +516,17 @@ AString *Unit::BattleReport(int obs)
 
   *temp += items.BattleReport();
 
-  int lvl;
-  lvl = GetRealSkill(S_TACTICS);
-  if (lvl) {
-	*temp += ", ";
-	*temp += SkillDefs[S_TACTICS].name;
-	*temp += " ";
-	*temp += lvl;
-  }
-
-  lvl = GetRealSkill(S_COMBAT);
-  if (lvl) {
-	*temp += ", ";
-	*temp += SkillDefs[S_COMBAT].name;
-	*temp += " ";
-	*temp += lvl;
-  }
-
-  lvl = GetRealSkill(S_LONGBOW);
-  if (lvl) {
-	*temp += ", ";
-	*temp += SkillDefs[S_LONGBOW].name;
-	*temp += " ";
-	*temp += lvl;
-  }
-
-  lvl = GetRealSkill(S_CROSSBOW);
-  if (lvl) {
-	*temp += ", ";
-	*temp += SkillDefs[S_CROSSBOW].name;
-	*temp += " ";
-	*temp += lvl;
-  }
-
-  lvl = GetRealSkill(S_RIDING);
-  if (lvl) {
-	*temp += ", ";
-	*temp += SkillDefs[S_RIDING].name;
-	*temp += " ";
-	*temp += lvl;
+  forlist (&skills) {
+	  Skill *s = (Skill *)elem;
+	  if (SkillDefs[s->type].flags & SkillType::BATTLEREP) {
+		  int lvl = GetRealSkill(s->type);
+		  if (lvl) {
+			  *temp += ", ";
+			  *temp += SkillDefs[s->type].name;
+			  *temp += " ";
+			  *temp += lvl;
+		  }
+	  }
   }
 
   if (describe) {
@@ -766,7 +738,7 @@ int Unit::GetMoney()
 
 int Unit::GetTactics()
 {
-	int retval = GetRealSkill(S_TACTICS);
+	int retval = GetAttribute("tactics");
 
 	forlist(&items) {
 		Item *i = (Item *) elem;
@@ -783,11 +755,7 @@ int Unit::GetTactics()
 
 int Unit::GetObservation()
 {
-	int retval = GetRealSkill(S_OBSERVATION);
-	// LLS
-	int bonus = GetSkillBonus(S_OBSERVATION);
-	retval += bonus;
-
+	int retval = GetAttribute("observation");
 	forlist(&items) {
 		Item *i = (Item *) elem;
 		if (ItemDefs[i->type].type & IT_MONSTER) {
@@ -818,15 +786,18 @@ int Unit::GetAttackRiding()
 	} else {
 		riding = GetSkill(S_RIDING);
 		int lowriding = 0;
+		int minweight = 10000;
 		forlist(&items) {
-			Item *i = (Item *) elem;
-			/* XXX -- Fix this -- not all men weigh the same */
-			/* XXX --			 Use the least weight man in the unit */
-			if (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= 10) {
+			Item *i = (Item *)elem;
+			if (ItemDefs[i->type].type & IT_MAN)
+				if (ItemDefs[i->type].weight < minweight)
+					minweight = ItemDefs[i->type].weight;
+		}
+		forlist_reuse (&items) {
+			Item *i = (Item *)elem;
+			if (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= minweight)
 				return riding;
-			}
-			/* XXX -- Fix this -- Should also be able to carry the man */
-			if (ItemDefs[i->type].ride - ItemDefs[i->type].weight >= 10) {
+			if (ItemDefs[i->type].ride-ItemDefs[i->type].weight >= minweight) {
 				if (riding <= 3) return riding;
 				lowriding = 3;
 			}
@@ -842,11 +813,8 @@ int Unit::GetDefenseRiding()
 	int riding = 0;
 	int weight = Weight();
 
-	if (CanFly(weight)) {
-		riding = 5;
-	} else {
-		if (CanRide(weight)) riding = 3;
-	}
+	if (CanFly(weight)) riding = 5;
+	else if (CanRide(weight)) riding = 3;
 
 	if (GetMen()) {
 		int manriding = GetSkill(S_RIDING);
@@ -859,7 +827,7 @@ int Unit::GetDefenseRiding()
 int Unit::GetStealth()
 {
 	int monstealth = 100;
-	int manstealth = 100;
+	int manstealth = GetAttribute("stealth");
 
 	if (guard == GUARD_GUARD) return 0;
 
@@ -870,17 +838,9 @@ int Unit::GetStealth()
 					(ItemDefs[i->type].type & IT_ILLUSION));
 			int temp = mp->stealth;
 			if (temp < monstealth) monstealth = temp;
-		} else {
-			if (ItemDefs[i->type].type & IT_MAN) {
-				if (manstealth == 100) {
-					manstealth = GetRealSkill(S_STEALTH);
-				}
-			}
 		}
 	}
 
-	// LLS
-	manstealth += GetSkillBonus(S_STEALTH);
 	/* XXX -- hack to adjust for invisible monsters */
 	/* XXX -- This bonus should not be hard coded */
 	if (GetFlag(FLAG_INVIS)) monstealth += 3;
@@ -889,19 +849,12 @@ int Unit::GetStealth()
 	return manstealth;
 }
 
-int Unit::GetEntertainment()
-{
-	int level = GetRealSkill(S_ENTERTAINMENT);
-	int level2 = 5 * GetRealSkill(S_PHANTASMAL_ENTERTAINMENT);
-	return (level > level2 ? level : level2);
-}
-
 int Unit::GetSkill(int sk)
 {
 	if (sk == S_TACTICS) return GetTactics();
 	if (sk == S_STEALTH) return GetStealth();
 	if (sk == S_OBSERVATION) return GetObservation();
-	if (sk == S_ENTERTAINMENT) return GetEntertainment();
+	if (sk == S_ENTERTAINMENT) return GetAttribute("entertainment");
 	int retval = GetRealSkill(sk);
 	return retval;
 }
@@ -1363,8 +1316,7 @@ int Unit::CalcMovePoints()
 		case M_RIDE:
 			return Globals->HORSE_SPEED;
 		case M_FLY:
-			if (GetSkill(S_SUMMON_WIND)) return Globals->FLY_SPEED + 2;
-			return Globals->FLY_SPEED;
+			return Globals->FLY_SPEED + GetAttribute("flying");
 	}
 	return 0;
 }
@@ -1770,7 +1722,6 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 	attackBonus = 0;
 	defenseBonus = 0;
 	attacks = 1;
-	int combatSkill = GetSkill(S_COMBAT);
 
 	// Found a weapon, check flags and skills
 	int baseSkillLevel = CanUseWeapon(pWep, riding);
@@ -1778,7 +1729,6 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 	if(baseSkillLevel == -1) return -1;
 
 	// Attack and defense skill
-	if(!(pWep->flags & WeaponType::NEEDSKILL)) baseSkillLevel = combatSkill;
 	attackBonus = baseSkillLevel + pWep->attackBonus;
 	if(pWep->flags & WeaponType::NOATTACKERSKILL)
 		defenseBonus = pWep->defenseBonus;
@@ -1822,37 +1772,52 @@ void Unit::Error(const AString & s)
 	faction->Error(temp);
 }
 
-int Unit::GetSkillBonus(int sk)
+int Unit::GetAttribute(char *attrib)
 {
+	AttribModType *ap = FindAttrib(attrib);
+	AString temp;
+	if(ap == NULL) return 0;
+	int base = 0;
 	int bonus = 0;
-	int men = GetMen();
-	/* XXX -- skill bonuses should be part of the skill structure!! */
-	switch(sk) {
-		case S_OBSERVATION:
-			if(!men) break;
-			if(Globals->FULL_TRUESEEING_BONUS) {
-				bonus = GetSkill(S_TRUE_SEEING);
+
+	for(int index = 0; index < 4; index++) {
+		int val = 0;
+		if (ap->mods[index].flags & AttribModItem::SKILL) {
+			temp = ap->mods[index].ident;
+			int sk = LookupSkill(&temp);
+			val = GetRealSkill(sk);
+			if (ap->mods[index].modtype == AttribModItem::UNIT_LEVEL_HALF) {
+				val = ((val + 1)/2) * ap->mods[index].val;
+			} else if (ap->mods[index].modtype == AttribModItem::CONSTANT) {
+				val = ap->mods[index].val;
 			} else {
-				bonus = (GetSkill(S_TRUE_SEEING)+1)/2;
+				val *= ap->mods[index].val;
 			}
-			if ((bonus < (2 + Globals->IMPROVED_AMTS)) &&
-					items.GetNum(I_AMULETOFTS)) {
-				bonus = 2 + Globals->IMPROVED_AMTS;
+		} else if (ap->mods[index].flags & AttribModItem::ITEM) {
+			val = 0;
+			if (ap->mods[index].flags & AttribModItem::PERMAN) {
+				temp = ap->mods[index].ident;
+				int item = LookupItem(&temp);
+				if (item != -1) {
+					int men = GetMen();
+					if (men <= items.GetNum(item))
+						val = ap->mods[index].val;
+				}
+			} else {
+				val = ap->mods[index].val;
 			}
-			break;
-		case S_STEALTH:
-			if(men == 1 && Globals->FULL_INVIS_ON_SELF) {
-				bonus = GetSkill(S_INVISIBILITY);
-			}
-			if((bonus < 3) &&
-					(GetFlag(FLAG_INVIS) || men <= items.GetNum(I_RINGOFI))) {
-				bonus = 3;
-			}
-			break;
-		default:
-			break;
+		} else if (ap->mods[index].flags & AttribModItem::FLAGGED) {
+			if (ap->mods[index].ident == "invis")
+				val = (GetFlag(FLAG_INVIS) ? ap->mods[index].val : 0);
+		}
+		if (ap->mods[index].flags & AttribModItem::NOT)
+			val = ((val == 0) ? ap->mods[index].val : 0);
+		if (ap->mods[index].flags & AttribModItem::CUMULATIVE)
+			base += val;
+		else if (val > bonus) bonus = val;
 	}
-	return bonus;
+
+	return base+bonus;
 }
 
 int Unit::GetProductionBonus(int item)

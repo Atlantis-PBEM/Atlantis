@@ -59,6 +59,17 @@ EffectType *FindEffect(char *effect)
     return NULL;
 }
 
+AttribModType *FindAttrib(char *attrib)
+{
+    if (attrib == NULL) return NULL;
+    for (int i = 0; i < NUMATTRIBMODS; i++) {
+	        if (AttribDefs[i].key == NULL) continue;
+	        if (AString(attrib) == AttribDefs[i].key)
+	            return &AttribDefs[i];
+	    }
+    return NULL;
+}
+
 int LookupSkill(AString *token)
 {
 	for (int i=0; i<NSKILLS; i++) {
@@ -71,9 +82,8 @@ int ParseSkill(AString *token)
 {
 	int r = -1;
 	for (int i=0; i<NSKILLS; i++) {
-		if ((*token == SkillDefs[i].name) ||
-			(*token == SkillDefs[i].abbr)) {
-		   	r = i;
+		if ((*token == SkillDefs[i].name) || (*token == SkillDefs[i].abbr)) {
+			r = i;
 			break;
 		}
 	}

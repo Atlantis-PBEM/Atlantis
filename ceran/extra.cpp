@@ -124,7 +124,7 @@ Faction *Game::CheckVictory()
 void Game::ModifyTablesPerRuleset(void)
 {
 	if(Globals->APPRENTICES_EXIST)
-	   	EnableSkill(S_MANIPULATE);
+		EnableSkill(S_MANIPULATE);
 
 	if((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
 		EnableItem(I_MUSHROOM);
@@ -140,6 +140,19 @@ void Game::ModifyTablesPerRuleset(void)
 
 	if(!Globals->GATES_EXIST)
 		DisableSkill(S_GATE_LORE);
+
+	if (Globals->FULL_TRUESEEING_BONUS) {
+		ModifyAttribMod("observation", 1, AttribModItem::SKILL,
+				"TRUE", AttribModItem::UNIT_LEVEL, 1);
+	}
+	if (Globals->IMPROVED_AMTS) {
+		ModifyAttribMod("observation", 2, AttribModItem::ITEM,
+				"AMTS", AttribModItem::CONSTANT, 3);
+	}
+	if (Globals->FULL_INVIS_ON_SELF) {
+		ModifyAttribMod("stealth", 3, AttribModItem::SKILL,
+				"INVI", AttribModItem::UNIT_LEVEL, 1);
+	}
 
 	if(Globals->NEXUS_IS_CITY) {
 		ClearTerrainRaces(R_NEXUS);
