@@ -870,47 +870,49 @@ void Game::Do1PromoteOrder(Object * obj,Unit * u) {
   obj->units.Insert(tar);
 }
 
-void Game::RunEnterOrders() {
-  forlist(&regions) {
-    ARegion * r = (ARegion *) elem;
-    forlist(&r->objects) {
-      Object * o = (Object *) elem;
-      forlist(&o->units) {
-	Unit * u = (Unit *) elem;
-	if (u->enter)
-	  Do1EnterOrder(r,o,u);
-      }
-    }
-  }
+void Game::RunEnterOrders()
+{
+	forlist(&regions) {
+		ARegion * r = (ARegion *) elem;
+		forlist(&r->objects) {
+			Object * o = (Object *) elem;
+			forlist(&o->units) {
+				Unit * u = (Unit *) elem;
+				if (u->enter)
+					Do1EnterOrder(r,o,u);
+			}
+		}
+	}
 }
 
-void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u) {
-  Object * to;
-  if (u->enter == -1) {
-    to = r->GetDummy();
-    u->enter = 0;
-   	if(r->type==R_OCEAN && (!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER)))
-	{
-      u->Error("LEAVE: Can't leave a ship in the ocean.");
-      return;
-    }
-  } else {
-    to = r->GetObject(u->enter);
-    u->enter = 0;
-    if (!to) {
-      u->Error("ENTER: Can't enter that.");
-      return;
-    }
-    if (!to->CanEnter(r,u)) {
-      u->Error("ENTER: Can't enter that.");
-      return;
-    }
-    if (to->ForbiddenBy(r, u)) {
-      u->Error("ENTER: Is refused entry.");
-      return;
-    }
-  }
-  u->MoveUnit( to );
+void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u)
+{
+	Object * to;
+	if (u->enter == -1) {
+		to = r->GetDummy();
+		u->enter = 0;
+		if(r->type==R_OCEAN &&
+				(!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER))) {
+			u->Error("LEAVE: Can't leave a ship in the ocean.");
+			return;
+		}
+	} else {
+		to = r->GetObject(u->enter);
+		u->enter = 0;
+		if (!to) {
+			u->Error("ENTER: Can't enter that.");
+			return;
+		}
+		if (!to->CanEnter(r,u)) {
+			u->Error("ENTER: Can't enter that.");
+			return;
+		}
+		if (to->ForbiddenBy(r, u)) {
+			u->Error("ENTER: Is refused entry.");
+			return;
+		}
+	}
+	u->MoveUnit( to );
 }
 
 void Game::RemoveEmptyObjects()
@@ -1229,88 +1231,93 @@ void Game::AttemptAttack(ARegion * r,Unit * u,Unit * t,int silent,int adv)
     return;
 }
 
-void Game::RunSellOrders() {
-  forlist((&regions)) {
-    ARegion * r = (ARegion *) elem;
-    {
-      forlist((&r->markets)) {
-	Market * m = (Market *) elem;
-	if (m->type == M_SELL)
-	  DoSell(r,m);
-      }
-    }
-    {
-      forlist((&r->objects)) {
-	Object * obj = (Object *) elem;
-	forlist((&obj->units)) {
-	  Unit * u = (Unit *) elem;
-	  forlist((&u->sellorders)) {
-	    u->Error("SELL: Can't sell that.");
-	  }
-	  u->sellorders.DeleteAll();
+void Game::RunSellOrders()
+{
+	forlist((&regions)) {
+		ARegion * r = (ARegion *) elem;
+		forlist((&r->markets)) {
+			Market * m = (Market *) elem;
+			if (m->type == M_SELL)
+				DoSell(r,m);
+		}
+		{
+			forlist((&r->objects)) {
+				Object * obj = (Object *) elem;
+				forlist((&obj->units)) {
+					Unit * u = (Unit *) elem;
+					forlist((&u->sellorders)) {
+						u->Error("SELL: Can't sell that.");
+					}
+					u->sellorders.DeleteAll();
+				}
+			}
+		}
 	}
-      }
-    }
-  }
 }
 
-int Game::GetSellAmount(ARegion * r,Market * m) {
-  int num = 0;
-  forlist((&r->objects)) {
-    Object * obj = (Object *) elem;
-    forlist((&obj->units)) {
-      Unit * u = (Unit *) elem;
-      forlist ((&u->sellorders)) {
-	SellOrder * o = (SellOrder *) elem;
-	if (o->item == m->item) {
-	  if (o->num > u->items.GetNum(o->item)) {
-	    o->num = u->items.GetNum(o->item);
-	    u->Error("SELL: Unit attempted to sell more than it had.");
-	  }
-	  if (o->num < 0) o->num = 0;
-	  num += o->num;
+int Game::GetSellAmount(ARegion * r,Market * m)
+{
+	int num = 0;
+	forlist((&r->objects)) {
+		Object * obj = (Object *) elem;
+		forlist((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			forlist ((&u->sellorders)) {
+				SellOrder * o = (SellOrder *) elem;
+				if (o->item == m->item) {
+					if(o->num == -1) {
+						o->num = u->items.GetNum(o->item);
+					}
+					if (o->num > u->items.GetNum(o->item)) {
+						o->num = u->items.GetNum(o->item);
+						u->Error("SELL: Unit attempted to sell more than "
+								"it had.");
+					}
+					if (o->num < 0) o->num = 0;
+					num += o->num;
+				}
+			}
+		}
 	}
-      }
-    }
-  }
-  return num;
+	return num;
 }
 
-void Game::DoSell(ARegion * r,Market * m) {
-  /* First, find the number of items being sold */
-  int attempted = GetSellAmount(r,m);
-  
-  if (attempted < m->amount) attempted = m->amount;
-  m->activity = 0;
-  int oldamount = m->amount;
-  forlist((&r->objects)) {
-    Object * obj = (Object *) elem;
-    forlist((&obj->units)) {
-      Unit * u = (Unit *) elem;
-      forlist((&u->sellorders)) {
-	SellOrder * o = (SellOrder *) elem;
-	if (o->item == m->item) {
-	  int temp = 0;
-	  if (attempted) {
-	    temp = (m->amount * o->num + getrandom(attempted))
-	      / attempted;
-	    if (temp<0) temp = 0;
-	  }
-	  attempted -= o->num;
-	  m->amount -= temp;
-	  m->activity += temp;
-	  u->items.SetNum(o->item,u->items.GetNum(o->item) - temp);
-	  u->SetMoney(u->GetMoney() + temp * m->price);
-	  u->sellorders.Remove(o);
-	  u->Event(AString("Sells ") + ItemString(o->item,temp)
-		   + " at $" + m->price + " each.");
-	  delete o;
-	  break;
+void Game::DoSell(ARegion * r,Market * m)
+{
+	/* First, find the number of items being sold */
+	int attempted = GetSellAmount(r,m);
+
+	if (attempted < m->amount) attempted = m->amount;
+	m->activity = 0;
+	int oldamount = m->amount;
+	forlist((&r->objects)) {
+		Object * obj = (Object *) elem;
+		forlist((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			forlist((&u->sellorders)) {
+				SellOrder * o = (SellOrder *) elem;
+				if (o->item == m->item) {
+					int temp = 0;
+					if (attempted) {
+						temp = (m->amount * o->num + getrandom(attempted))
+							/ attempted;
+						if (temp<0) temp = 0;
+					}
+					attempted -= o->num;
+					m->amount -= temp;
+					m->activity += temp;
+					u->items.SetNum(o->item,u->items.GetNum(o->item) - temp);
+					u->SetMoney(u->GetMoney() + temp * m->price);
+					u->sellorders.Remove(o);
+					u->Event(AString("Sells ") + ItemString(o->item,temp)
+							+ " at $" + m->price + " each.");
+					delete o;
+					break;
+				}
+			}
+		}
 	}
-      }
-    }
-  }
-  m->amount = oldamount;
+	m->amount = oldamount;
 }
 
 void Game::RunBuyOrders()
@@ -1339,52 +1346,55 @@ void Game::RunBuyOrders()
 
 int Game::GetBuyAmount(ARegion * r,Market * m)
 {
-    int num = 0;
-    forlist((&r->objects)) {
-        Object * obj = (Object *) elem;
-        forlist((&obj->units)) {
-            Unit * u = (Unit *) elem;
-            forlist ((&u->buyorders)) {
-                BuyOrder * o = (BuyOrder *) elem;
-                if (o->item == m->item) {
-                    if (ItemDefs[o->item].type & IT_MAN) {
-                        if (u->type == U_MAGE) {
-                            u->Error("BUY: Mages can't recruit more men.");
-                            o->num = 0;
-                        }
-						if(u->type == U_APPRENTICE) {
-							u->Error("BUY: Apprentices can't recruit more men.");
+	int num = 0;
+	forlist((&r->objects)) {
+		Object * obj = (Object *) elem;
+		forlist((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			forlist ((&u->buyorders)) {
+				BuyOrder * o = (BuyOrder *) elem;
+				if (o->item == m->item) {
+					if (ItemDefs[o->item].type & IT_MAN) {
+						if (u->type == U_MAGE) {
+							u->Error("BUY: Mages can't recruit more men.");
 							o->num = 0;
 						}
-                        if ((o->item == I_LEADERS && u->IsNormal()) ||
-                            (o->item != I_LEADERS && u->IsLeader())) {
-                            u->Error("BUY: Can't mix leaders and normal men.");
-                            o->num = 0;
-                        }
-                    }
-                    if (ItemDefs[o->item].type & IT_TRADE) {
-                        if( !TradeCheck( r, u->faction )) {
-                            u->Error( "BUY: Can't buy trade items in that "
-                                      "many regions.");
-                            o->num = 0;
-                        }
-                    }
+						if(u->type == U_APPRENTICE) {
+							u->Error("BUY: Apprentices can't recruit more "
+									"men.");
+							o->num = 0;
+						}
+						if ((o->item == I_LEADERS && u->IsNormal()) ||
+								(o->item != I_LEADERS && u->IsLeader())) {
+							u->Error("BUY: Can't mix leaders and normal men.");
+							o->num = 0;
+						}
+					}
+					if (ItemDefs[o->item].type & IT_TRADE) {
+						if( !TradeCheck( r, u->faction )) {
+							u->Error( "BUY: Can't buy trade items in that "
+									"many regions.");
+							o->num = 0;
+						}
+					}
+					if (o->num == -1) {
+						o->num = u->GetMoney()/m->price;
+					}
                     if (o->num * m->price > u->GetMoney()) {
-                        o->num = u->GetMoney() / m->price;
-                        u->Error( "BUY: Unit attempted to buy more than it "
-                                  "could afford.");
-                    }
-                    num += o->num;
-                }
-                if (o->num < 1) {
-                    u->buyorders.Remove(o);
-                    delete o;
-                }
-            }
-        }
-    }
-    
-    return num;
+						o->num = u->GetMoney() / m->price;
+						u->Error( "BUY: Unit attempted to buy more than it "
+								"could afford.");
+					}
+					num += o->num;
+				}
+				if (o->num < 1 && o->num != -1) {
+					u->buyorders.Remove(o);
+					delete o;
+				}
+			}
+		}
+	}
+	return num;
 }
 
 void Game::DoBuy(ARegion * r,Market * m)

@@ -450,12 +450,47 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
     u->monthorders = 0;
 }
 
-void Game::RunMonthOrders() {
-  forlist(&regions) {
-    ARegion * r = (ARegion *) elem;
-    RunStudyOrders(r);
-    RunProduceOrders(r);
-  }
+void Game::RunBuildHelpers(ARegion *r)
+{
+	forlist((&r->objects)) {
+		Object * obj = (Object *) elem;
+		forlist ((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			if (u->monthorders) {
+				if (u->monthorders->type == O_BUILD) {
+					BuildOrder *o = (BuildOrder *)u->monthorders;
+					if(o->target) {
+						Unit *target = r->GetUnitId(o->target,u->faction->num);
+						if(!target) {
+							u->Error("BUILD: No such unit to help.");
+							delete u->monthorders;
+							u->monthorders = 0;
+							continue;
+						}
+						// Make sure that unit is building
+						if (target->monthorders->type != O_BUILD) {
+							u->Error("BUILD: Unit isn't building.");
+							delete u->monthorders;
+							u->monthorders = 0;
+							continue;
+						}
+						u->MoveUnit(target->object);
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void Game::RunMonthOrders()
+{
+	forlist(&regions) {
+		ARegion * r = (ARegion *) elem;
+		RunStudyOrders(r);
+		RunBuildHelpers(r);
+		RunProduceOrders(r);
+	}
 }
 
 void Game::RunUnitProduce(ARegion * r,Unit * u)
@@ -529,27 +564,29 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
     u->monthorders = 0;
 }
 
-void Game::RunProduceOrders(ARegion * r) {
-  {
-    forlist ((&r->products))
-      RunAProduction(r,(Production *) elem);
-  }
-  {
-    forlist((&r->objects)) {
-      Object * obj = (Object *) elem;
-      forlist ((&obj->units)) {
-	Unit * u = (Unit *) elem;
-	if (u->monthorders) {
-	  if (u->monthorders->type == O_PRODUCE) {
-	    RunUnitProduce(r,u);
-	  } else
-	    if (u->monthorders->type == O_BUILD) {
-	      Run1BuildOrder(r,obj,u);
-	    }	
+void Game::RunProduceOrders(ARegion * r)
+{
+	{
+		forlist ((&r->products))
+			RunAProduction(r,(Production *) elem);
 	}
-      }
-    }
-  }
+	{
+		forlist((&r->objects)) {
+			Object * obj = (Object *) elem;
+			forlist ((&obj->units)) {
+				Unit * u = (Unit *) elem;
+				if (u->monthorders) {
+					if (u->monthorders->type == O_PRODUCE) {
+						RunUnitProduce(r,u);
+					} else {
+						if (u->monthorders->type == O_BUILD) {
+							Run1BuildOrder(r,obj,u);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 int Game::ValidProd(Unit * u,ARegion * r,Production * p)

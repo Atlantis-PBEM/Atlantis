@@ -38,7 +38,7 @@
 // the html file containing the rules to correctly reflect the changes!
 static GameDefs g = {
     "Atlantis Conquest",     // RULESET_NAME
-    MAKE_ATL_VER( 1, 0, 2 ), // RULESET_VERSION
+    MAKE_ATL_VER( 1, 0, 3 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */

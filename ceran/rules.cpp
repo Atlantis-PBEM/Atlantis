@@ -39,7 +39,7 @@
 //
 static GameDefs g = {
     "Ceran",                // RULESET_NAME
-    MAKE_ATL_VER( 2, 0, 1 ), // RULESET_VERSION
+    MAKE_ATL_VER( 2, 0, 2 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */

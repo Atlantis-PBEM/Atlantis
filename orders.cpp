@@ -170,6 +170,7 @@ BuildOrder::BuildOrder() {
 }
 
 BuildOrder::~BuildOrder() {
+	if(target) delete target;
 }
 
 SailOrder::SailOrder() {

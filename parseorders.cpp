@@ -1334,83 +1334,115 @@ void Game::ProcessEnterOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 
 void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 {
-    AString * token = o->gettoken();
-    if (token) {
-        int ot = ParseObject(token);
-        delete token;
-        if (ot==-1) {
-            ParseError( pCheck, unit, 0, "BUILD: Not a valid object name.");
-            return;
-        }
-		if(ObjectDefs[ot].flags & ObjectType::DISABLED) {
-            ParseError( pCheck, unit, 0, "BUILD: Not a valid object name.");
-            return;
+	AString * token = o->gettoken();
+	if (token) {
+		if(*token == "help") {
+			delete token;
+			if( pCheck ) {
+				if (unit->monthorders ||
+						(Globals->TAX_PILLAGE_MONTH_LONG &&
+						 ((unit->taxing == TAX_TAX) ||
+						  (unit->taxing == TAX_PILLAGE)))) {
+					pCheck->Error("BUILD: Overwriting previous month-long "
+							"order.");
+				}
+				if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
+				unit->monthorders = &( pCheck->dummyOrder );
+				unit->monthorders->type = O_BUILD;
+				return;
+			}
+			UnitId *targ = ParseUnit(o);
+			if(!targ) {
+				unit->Error("BUILD: Non-existant unit to help.");
+			}
+			if(targ->unitnum == -1) {
+				unit->Error("BUILD: Non-existant unit to help.");
+			}
+			BuildOrder * order = new BuildOrder;
+			order->target = targ;
+			if (unit->monthorders ||
+					(Globals->TAX_PILLAGE_MONTH_LONG &&
+					 ((unit->taxing == TAX_TAX) ||
+					  (unit->taxing == TAX_PILLAGE)))) {
+				delete unit->monthorders;
+				unit->Error("BUILD: Overwriting previous month-long order.");
+			}
+			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
+			unit->monthorders = order;
+			if (unit->enter == -1) unit->enter = 0;
+			return;
 		}
-        if( pCheck )
-        {
-			if (unit->monthorders ||
-				(Globals->TAX_PILLAGE_MONTH_LONG &&
-				 ((unit->taxing == TAX_TAX) ||
-				  (unit->taxing == TAX_PILLAGE)))) {
-                pCheck->Error("BUILD: Overwriting previous month-long order.");
-            }
-			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
-            unit->monthorders = &( pCheck->dummyOrder );
-            unit->monthorders->type = O_BUILD;
-            return;
-        }
-        else
-        {
-            if ( unit->object->region->type == R_OCEAN) {
-                unit->Error("BUILD: Can't build in an ocean.");
-                return;
-            }
-        
-            if (ObjectIsShip(ot) && ot != O_BALLOON) {
-                if (!unit->object->region->IsCoastal()) {
-                    unit->Error("BUILD: Can't build ship in "
-                                "non-coastal region.");
-                    return;
-                }
-            }
-            if ( unit->object->region->buildingseq > 99) {
-                unit->Error("BUILD: The region is full.");
-                return;
-            }
-            Object * obj = new Object( unit->object->region );
-            obj->type = ot;
-            obj->incomplete = ObjectDefs[obj->type].cost;
-            unit->MoveUnit( obj );
-            unit->object->region->objects.Add(obj);
-        }
-    }
-    else
-    {
-        if( pCheck )
-        {
-			if (unit->monthorders ||
-				(Globals->TAX_PILLAGE_MONTH_LONG &&
-				 ((unit->taxing == TAX_TAX) ||
-				  (unit->taxing == TAX_PILLAGE)))) {
-                pCheck->Error("BUILD: Overwriting previous month-long order.");
-            }
-			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
-            unit->monthorders = &( pCheck->dummyOrder );
-            unit->monthorders->type = O_BUILD;
-            return;
-        }
-    }
 
-    BuildOrder * order = new BuildOrder;
+		int ot = ParseObject(token);
+		delete token;
+		if (ot==-1) {
+			ParseError( pCheck, unit, 0, "BUILD: Not a valid object name.");
+			return;
+		}
+		if(ObjectDefs[ot].flags & ObjectType::DISABLED) {
+			ParseError( pCheck, unit, 0, "BUILD: Not a valid object name.");
+			return;
+		}
+		if( pCheck ) {
+			if (unit->monthorders ||
+					(Globals->TAX_PILLAGE_MONTH_LONG &&
+					 ((unit->taxing == TAX_TAX) ||
+					  (unit->taxing == TAX_PILLAGE)))) {
+				pCheck->Error("BUILD: Overwriting previous month-long order.");
+			}
+			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
+			unit->monthorders = &( pCheck->dummyOrder );
+			unit->monthorders->type = O_BUILD;
+			return;
+		} else {
+			if ( unit->object->region->type == R_OCEAN) {
+				unit->Error("BUILD: Can't build in an ocean.");
+				return;
+			}
+
+			if (ObjectIsShip(ot) && ot != O_BALLOON) {
+				if (!unit->object->region->IsCoastal()) {
+					unit->Error("BUILD: Can't build ship in "
+							"non-coastal region.");
+					return;
+				}
+			}
+			if ( unit->object->region->buildingseq > 99) {
+				unit->Error("BUILD: The region is full.");
+				return;
+			}
+			Object * obj = new Object( unit->object->region );
+			obj->type = ot;
+			obj->incomplete = ObjectDefs[obj->type].cost;
+			unit->MoveUnit( obj );
+			unit->object->region->objects.Add(obj);
+		}
+	} else {
+		if( pCheck ) {
+			if (unit->monthorders ||
+					(Globals->TAX_PILLAGE_MONTH_LONG &&
+					 ((unit->taxing == TAX_TAX) ||
+					  (unit->taxing == TAX_PILLAGE)))) {
+				pCheck->Error("BUILD: Overwriting previous month-long order.");
+			}
+			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
+			unit->monthorders = &( pCheck->dummyOrder );
+			unit->monthorders->type = O_BUILD;
+			return;
+		}
+	}
+
+	BuildOrder *order = new BuildOrder;
+	order->target = NULL;
 	if (unit->monthorders ||
-		(Globals->TAX_PILLAGE_MONTH_LONG &&
-		 ((unit->taxing == TAX_TAX) || (unit->taxing == TAX_PILLAGE)))) {
-        delete unit->monthorders;
-        unit->Error("BUILD: Overwriting previous month-long order.");
-    }
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((unit->taxing == TAX_TAX) || (unit->taxing == TAX_PILLAGE)))) {
+		delete unit->monthorders;
+		unit->Error("BUILD: Overwriting previous month-long order.");
+	}
 	if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
-    unit->monthorders = order;
-    if (unit->enter == -1) unit->enter = 0;
+	unit->monthorders = order;
+	if (unit->enter == -1) unit->enter = 0;
 }
 
 void Game::ProcessAttackOrder(Unit * u,AString * o, OrdersCheck *pCheck ) 
@@ -1428,85 +1460,88 @@ void Game::ProcessAttackOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 
 void Game::ProcessSellOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
-    AString * token = o->gettoken();
-    if (!token) {
-        ParseError( pCheck, u, 0, "SELL: Number to sell not given.");
-        return;
-    }
-    int num = token->value();
-    delete token;
-    if (!num) {
-        ParseError( pCheck, u, 0, "SELL: Number to sell not given.");
-        return;
-    }
-    token = o->gettoken();
-    if (!token) {
-        ParseError( pCheck, u, 0, "SELL: Item not given.");
-        return;
-    }
-    int it = ParseItem(token);
-    delete token;
-    if (it == -1) {
-        ParseError( pCheck, u, 0, "SELL: Can't sell that.");
-        return;
-    }
-	if(ItemDefs[it].flags & ItemType::DISABLED) {
-        ParseError( pCheck, u, 0, "SELL: Can't sell that.");
-        return;
+	AString * token = o->gettoken();
+	if (!token) {
+		ParseError( pCheck, u, 0, "SELL: Number to sell not given.");
+		return;
 	}
-    if( !pCheck )
-    {
-        SellOrder * s = new SellOrder;
-        s->item = it;
-        s->num = num;
-        u->sellorders.Add(s);
-    }
+    int num = 0;
+	if(*token == "ALL") {
+		num = -1;
+	} else {
+		num = token->value();
+	}
+	delete token;
+	if (!num) {
+		ParseError( pCheck, u, 0, "SELL: Number to sell not given.");
+		return;
+	}
+	token = o->gettoken();
+	if (!token) {
+		ParseError( pCheck, u, 0, "SELL: Item not given.");
+		return;
+	}
+	int it = ParseItem(token);
+	delete token;
+	if (it == -1) {
+		ParseError( pCheck, u, 0, "SELL: Can't sell that.");
+		return;
+	}
+	if(ItemDefs[it].flags & ItemType::DISABLED) {
+		ParseError( pCheck, u, 0, "SELL: Can't sell that.");
+		return;
+	}
+	if( !pCheck ) {
+		SellOrder * s = new SellOrder;
+		s->item = it;
+		s->num = num;
+		u->sellorders.Add(s);
+	}
 }
 
 void Game::ProcessBuyOrder( Unit *u, AString *o, OrdersCheck *pCheck )
 {
-    AString * token = o->gettoken();
-    if (!token)
-    {
-        ParseError( pCheck, u, 0, "BUY: Number to buy not given.");
-        return;
-    }
-    int num = token->value();
-    delete token;
-    if (!num)
-    {
-        ParseError( pCheck, u, 0, "BUY: Number to buy not given.");
-        return;
-    }
-    token = o->gettoken();
-    if (!token)
-    {
-        ParseError( pCheck, u, 0, "BUY: Item not given.");
-        return;
-    }
-    int it = ParseItem(token);
-    delete token;
-    if (it == -1)
-    {
-        ParseError( pCheck, u, 0, "BUY: Can't buy that.");
-        return;
-    }
+	AString * token = o->gettoken();
+	if (!token) {
+		ParseError( pCheck, u, 0, "BUY: Number to buy not given.");
+		return;
+	}
+	int num = 0;
+	if(*token == "ALL") {
+		num = -1;
+	} else {
+		num = token->value();
+	}
+	delete token;
+	if (!num) {
+		ParseError( pCheck, u, 0, "BUY: Number to buy not given.");
+		return;
+	}
+	token = o->gettoken();
+	if (!token) {
+		ParseError( pCheck, u, 0, "BUY: Item not given.");
+		return;
+	}
+	int it = ParseItem(token);
+	delete token;
+	if (it == -1) {
+		ParseError( pCheck, u, 0, "BUY: Can't buy that.");
+		return;
+	}
 	if(ItemDefs[it].flags & ItemType::DISABLED) {
-        ParseError( pCheck, u, 0, "BUY: Can't buy that.");
-        return;
+		ParseError( pCheck, u, 0, "BUY: Can't buy that.");
+		return;
 	}
 
-    if( !pCheck )
-    {
-        if (it == I_PEASANT)
-        {
-            it = u->object->region->race; 
-        }
-        BuyOrder * b = new BuyOrder;
-        b->item = it;
-        b->num = num;
-        u->buyorders.Add(b);
-    }
+	if( !pCheck ) {
+		if (it == I_PEASANT) {
+			it = u->object->region->race;
+		}
+		BuyOrder * b = new BuyOrder;
+		b->item = it;
+		b->num = num;
+		u->buyorders.Add(b);
+	}
 }
 
 void Game::ProcessProduceOrder(Unit * u,AString * o, OrdersCheck *pCheck )

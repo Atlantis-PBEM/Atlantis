@@ -225,6 +225,8 @@ class BuildOrder : public Order {
 	public:
 		BuildOrder();
 		~BuildOrder();
+
+		UnitId * target;
 };
 
 class SailOrder : public Order {

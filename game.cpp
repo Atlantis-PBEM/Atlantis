@@ -864,6 +864,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 												ItemString(it, v) +
 												" by the gods.");
 									}
+									u->faction->DiscoverItem(it, 0, 1);
 								}
 							}
 						}

@@ -1,14 +1,14 @@
 <html>
 <head>
-<title>Standard Atlantis 4.0.7 Rules</title>
+<title>Standard Atlantis 4.0.8 Rules</title>
 </head>
 <body>
 <center>
-<h1> Rules for Atlantis v4.0.7</h1>
+<h1> Rules for Atlantis v4.0.8</h1>
 <h2> Copyright 1996 by Geoff Dunbar </h2>
 <h2> Based on Russell Wallace's Draft Rules </h2>
 <h2> Copyright 1993 by Russell Wallace </h2>
-<h3> Last Change: July 11, 2001</h3>
+<h3> Last Change: July 24, 2001</h3>
 </center> <p>
 Note: This document is subject to change, as errors are found and
 corrected, and rules sometimes change. Be sure you have the latest
@@ -2281,22 +2281,29 @@ Set the unit to be in front in combat. <p>
 <a name="build"> </a>
 <h4> BUILD </h4>
 <h4> BUILD [object type] </h4>
+<h4> BUILD HELP [unit] </h4>
 
 BUILD given with no parameters causes the unit to perform work on the object
-that it is currently inside.  BUILD given with an [object type]
-(such as "Tower"
-or "Galleon") instructs the unit to begin work on a new object of the type
-given. <p>
+that it is currently inside.  BUILD given with an [object type] (such as
+"Tower" or "Galleon") instructs the unit to begin work on a new object of
+the type given. The final form instructs a unit to assist the given unit
+in building whatever structure it is working on, even if that structure
+was started the same turn.<p>
 
 Example: <p>
 To build a new tower. <p>
 <pre>
   BUILD Tower
 </pre> <p>
+To help unit 1234 build a mine.<p>
+<pre>
+  BUILD HELP 1234
+</pre> <p>
 
 <hr>
 <a name="buy"> </a>
 <h4> BUY [quantity] [item] </h4>
+<h4> BUY ALL [item] </h4>
 
 Attempt to buy a number of the given item from a city or town
 marketplace, or to buy new people in any region where people are
@@ -2305,7 +2312,8 @@ it will attempt to buy as many as it can.  If the demand for the item
 (from all units in the region) is greater than the number available, the
 available items will be split among the buyers in proportion to the amount
 each buyer attempted to buy.  When buying people, specify the race of
-the people as the [item]. <p>
+the people as the [item]. If the second form is specified, the unit will
+attempt to buy as many as it can afford.<p>
 
 Examples: <p>
 Buy one plate armor from the city market. <p>
@@ -2962,12 +2970,14 @@ or: <p>
 <hr>
 <a name="sell"> </a>
 <h4> SELL [quantity] [item] </h4>
+<h4> SELL ALL [item] </h4>
 
 Attempt to sell the amount given of the item given.  If the unit does not have
 as many of the item as it is trying to sell, it will attempt to sell all that
 it has.  If more of the item are on sale (by all the units in the region) than
 are wanted by the region, the number sold per unit will be split up in
-proportion to the number each unit tried to sell. <p>
+proportion to the number each unit tried to sell. If the second form is used,
+the unit will attempt to sell as many of the item as it has.<p>
 
 Example: <p>
 Sell 10 furs to the market. <p>

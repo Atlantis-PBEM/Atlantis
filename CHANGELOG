@@ -216,3 +216,13 @@ Changes from 4.0.6 -> 4.0.7
       other items made from wood rather than being the exception.
    -- Added (disabled) resource enhancing buildings for all resources that
       didn't yet have one.
+
+Changes from 4.0.7 -> 4.0.8
+--------------------------------------------------
+   -- Added the BUILD HELP <unit> syntax to allow two units to collaborate
+      on creating an object even during the first turn it is being built.
+   -- Added BUY ALL and SELL ALL commands.  SELL ALL will attempt to sell
+      all of an item that you can.  BUY ALL will attempt to buy as many of
+      an item as you can.
+   -- Modified the 'Item:' players.in command to give the unit information
+      about the new item they own if they haven't already seen it.

@@ -16,8 +16,6 @@
       of tacticians/generals?
    -- Make errors for overwriting orders ONLY be an error if overwriting a
       NON-@ order.
-   -- Find some way to allow multiple factions starting a build on the same
-      turn to help.
    -- Consider some sorts of dangers for production
    -- Consider a gamedef which keeps tactics skill (and combat skills?)
       hidden from combatants.  (I personally think this a bad idea, but it

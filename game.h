@@ -40,7 +40,7 @@ class Game;
 #include "production.h"
 #include "object.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 0, 7 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 0, 8 )
 
 class OrdersCheck
 {
@@ -456,6 +456,7 @@ private:
     void RunAProduction(ARegion *,Production *);
     void RunUnitProduce(ARegion *,Unit *);
     void Run1BuildOrder(ARegion *,Object *,Unit *);
+	void RunBuildHelpers(ARegion *);
     void RunSailOrders();
     ARegion * Do1SailOrder(ARegion *,Object *,Unit *);
     void ClearCastEffects();
