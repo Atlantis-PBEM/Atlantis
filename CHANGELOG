@@ -147,3 +147,8 @@ TODO
    -- Consider requiring both food and pay for upkeep.
    -- Merchent skill (limited number of merchents)/Limited number
       of tacticians/generals?
+   -- Make errors for overwriting orders ONLY be an error if overwriting a
+      NON-@ order.
+   -- Find some way to allow multiple factions starting a build on the same
+      turn to help.
+   -- Consider some sorts of dangers for production
