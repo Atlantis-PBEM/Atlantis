@@ -564,3 +564,4 @@ Changes from 4.0.10 -> 5.0.0
       turn).
    -- Fixed bug in generation of extremely large and extremely small worlds
       and levels.  Second bug was introduced by artic towns patch.
+   -- Fixed bug in movement costs when WEATHER_EXISTS was 0
