@@ -450,6 +450,12 @@ private:
 	void MidProcessTurn();
 	void PostProcessUnitExtra(ARegion *, Unit *);
 	void PostProcessTurn();
+	
+	// Migration effects for alternate player-driven economy
+	void ProcessMigration();
+	
+	// Run equilibration turns (econ-only) at start
+	void Equilibrate();
 
 	// Handle escaped monster check
 	void MonsterCheck(ARegion *r, Unit *u);

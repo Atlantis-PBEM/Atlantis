@@ -125,6 +125,7 @@ ARegion::ARegion()
 	habitat = 800;
 	mortality = 0;
 	growth = 0;
+	migration = 0;
 	clearskies = 0;
 	earthlore = 0;
 	for (int i=0; i<NDIRS; i++)
@@ -296,23 +297,25 @@ void ARegion::SetupPop()
 	}
 
 	if(Globals->PLAYER_ECONOMY) {
+		if(Globals->RANDOM_ECONOMY)	habitat = habitat * 2/3 + getrandom(habitat/3);
+		basepopulation = habitat;
 		ManType *mt = FindRace(ItemDefs[race].abr);
 		if (mt->terrain == typer->similar_type) {
 			habitat = (habitat * 9)/8;
 		}
-		if (IsNativeRace(race)) {
-			habitat = (habitat * 9)/8;
+		if (!IsNativeRace(race)) {
+			habitat = (habitat * 4)/5;
 		}
 		// hmm... somewhere not too far off equilibrium pop
 		population = habitat * 66 / 100;
-	} else
+	} else {
+		basepopulation = population;
 		if(Globals->RANDOM_ECONOMY) {
 			population = (pop + getrandom(pop)) / 2;
 		} else {
 			population = pop;
 		}
-
-	basepopulation = population;
+	}
 
 	// Setup wages
 	if(Globals->PLAYER_ECONOMY) {
@@ -994,6 +997,18 @@ void ARegion::UpdateTown()
 	}
 }
 
+void ARegion::Migrate()
+{
+	for(int i=0; i<NDIRS; i++) {
+		ARegion *nbor = neighbors[i];
+		if((nbor) && (nbor->migration > 0)) {
+			int cv = 100;
+			if(nbor->race != race) cv = 50;
+			population += migration * cv / 100;
+		}
+	}
+}
+
 void ARegion::PostTurn(ARegionList *pRegs)
 {
 	// Rules for PLAYER-RUN ECONOMY
@@ -1066,7 +1081,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 					(fooddemand - foodavailable)) /
 				(fooddemand * habitat * 4);
 		// mortality based on crowding:
-		int crowd = (population - (habitat * 7/10));
+		int crowd = (population - (habitat * 66/100));
 		if (crowd < 0) crowd = 0;
 		crowd = (crowd * crowd) / (habitat / 25);
 		if (crowd > 0) {
@@ -1077,6 +1092,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		mortality += curm + crowd + starve;
 		mortality = mortality / delay;
 		if ((mortality < 0) || (population < 1)) mortality = 0;
+		migration = (crowd + starve) / 18;
 
 		// Update population
 		population += growth - mortality;
@@ -1825,6 +1841,7 @@ void ARegion::Writeout(Aoutfile *f)
 	else f->PutStr("NO_RACE");
 	f->PutInt(population);
 	f->PutInt(basepopulation);
+	f->PutInt(migration);
 	f->PutInt(wages);
 	f->PutInt(maxwages);
 	f->PutInt(money);
@@ -1880,6 +1897,7 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 
 	population = f->GetInt();
 	basepopulation = f->GetInt();
+	migration = f->GetInt();
 	wages = f->GetInt();
 	maxwages = f->GetInt();
 	money = f->GetInt();
@@ -2954,7 +2972,10 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name
 
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
-	MakeLand(pRegionArrays[level], Globals->OCEAN, Globals->CONTINENT_SIZE);
+	int sea = Globals->OCEAN;
+	if(Globals->LAKES_EXIST || Globals->ARCHIPELAGO)
+		sea = sea * (100 + 12 * (100 - Globals->ARCHIPELAGO) / 100) / 100;
+	MakeLand(pRegionArrays[level], sea, Globals->CONTINENT_SIZE);
 
 	if (Globals->LAKES_EXIST) CleanUpWater(pRegionArrays[level]);
 

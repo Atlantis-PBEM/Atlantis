@@ -683,4 +683,5 @@ Changes from 4.0.10 -> 5.0.0
       setting for USE_PREPARE.  Under strict, the READY command MUST be
       used or the unit will not use any battle items.  Under normal, the
       unit will fall back on the battle items list.
+   -- gamedefs OCEAN and CONTINENT_SIZE now determine surface level parameters.
 

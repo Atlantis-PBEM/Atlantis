@@ -280,6 +280,9 @@ int Game::NewGame()
 
 	if(Globals->LAIR_MONSTERS_EXIST)
 		CreateVMons();
+		
+	if(Globals->PLAYER_ECONOMY)
+		Equilibrate();
 
 	return(1);
 }
@@ -2155,4 +2158,26 @@ void Game::BankInterest()
 		fac->bankaccount += interest;
 		fac->interest = interest;
 	}
+}
+
+void Game::ProcessMigration()
+{
+	forlist(&regions) {
+		ARegion *r = (ARegion *) elem;
+		r->Migrate();
+	}
+}
+
+void Game::Equilibrate()
+{
+	Awrite("Initialising the economy");
+	for(int a=0; a<25; a++) {
+		Adot();
+		ProcessMigration();
+		forlist(&regions) {
+			ARegion *r = (ARegion *) elem;
+			r->PostTurn(&regions);
+		}
+	}
+	Awrite("");
 }

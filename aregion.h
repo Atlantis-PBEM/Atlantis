@@ -243,6 +243,7 @@ class ARegion : public AListElem
 		void DisbandInRegion(int, int);
 		void Recruit(int);
 		int IsNativeRace(int);
+		void Migrate();
 
 		int CountWMons();
 		int IsGuarded();
@@ -264,6 +265,7 @@ class ARegion : public AListElem
 		int race;
 		int population;
 		int basepopulation;
+		int migration;
 		int wages;
 		int maxwages;
 		int money;
