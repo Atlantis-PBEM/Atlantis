@@ -624,9 +624,10 @@ AString *ShowSkill::Report(Faction *f)
 				"but may only control one balrog at a time. As with other "
 				"demons, the balrog has a chance of breaking free of the "
 				"mage's control at the end of each turn. This chance is equal "
-				"to 1 over 4 times the mage's skill level squared (or, from "
-				"1 over 4 at level 1, to 1 over 100 at level 5). To use this "
-				"spell, the mage should issue the order CAST Summon_Balrog.";
+				"to 1 over 4 times the mage's skill level to the fourth "
+				"power (or, from 1 over 4 at level 1, to 1 over 250 at "
+				"level 5). To use this spell, the mage should issue the "
+				"order CAST Summon_Balrog.";
 			break;
 		case S_BANISH_DEMONS:
 			if(level > 1) break;

@@ -157,7 +157,7 @@ void Battle::DoAttack( int round,
         if (!def->NumAlive()) break;
 
     }
-   
+
 	a->ClearOneTimeEffects();
 }
 

@@ -74,7 +74,7 @@ void Game::DefaultWorkOrder()
 					   Globals->TAX_PILLAGE_MONTH_LONG && u->Taxers()) {
 						u->taxing = TAX_AUTO;
 					} else {
-					   	ProcessWorkOrder(u, 0);
+						ProcessWorkOrder(u, 0);
 					}
 				}
 			}
@@ -155,25 +155,25 @@ void Game::WriteUnderworldMap( Aoutfile *f, ARegionArray *pArr, int type )
             for (x=0; x< pArr->x; x+=2) {
                 reg = pArr->GetRegion(x+xx*32,y+yy*16 );
                 reg2 = pArr->GetRegion(x+xx*32+1,y+yy*16+1 );
-                    
+
                 temp += AString(GetRChar(reg));
                 temp += GetXtraMap(reg,type);
-                    
+
                 if(reg2->neighbors[D_NORTH])
-                    temp += "|"; 
+                    temp += "|";
                 else
                     temp += " ";
 
                 temp += " ";
-                    
-                if (reg->neighbors[D_SOUTHWEST]) 
-                    temp2 += "/"; 
+
+                if (reg->neighbors[D_SOUTHWEST])
+                    temp2 += "/";
                 else
                     temp2 += " ";
 
                 temp2 += " ";
                 if (reg->neighbors[D_SOUTHEAST])
-                    temp2 += "\\"; 
+                    temp2 += "\\";
                 else
                     temp2 += " ";
 
@@ -181,30 +181,30 @@ void Game::WriteUnderworldMap( Aoutfile *f, ARegionArray *pArr, int type )
             }
             f->PutStr(temp);
             f->PutStr(temp2);
-                
+
             temp = " ";
             temp2 = "  ";
             for (x=1; x< pArr->x; x+=2) {
                 reg = pArr->GetRegion(x+xx*32,y+yy*16+1 );
                 reg2 = pArr->GetRegion(x+xx*32-1,y+yy*16 );
-                    
-                if (reg2->neighbors[D_SOUTH]) 
-                    temp += "|"; 
+
+                if (reg2->neighbors[D_SOUTH])
+                    temp += "|";
                 else
                     temp += " ";
 
                 temp += AString(" ");
                 temp += AString(GetRChar(reg));
                 temp += GetXtraMap(reg,type);
-                    
-                if (reg->neighbors[D_SOUTHWEST]) 
-                    temp2 += "/"; 
+
+                if (reg->neighbors[D_SOUTHWEST])
+                    temp2 += "/";
                 else
                     temp2 += " ";
 
                 temp2 += " ";
-                if (reg->neighbors[D_SOUTHEAST]) 
-                    temp2 += "\\"; 
+                if (reg->neighbors[D_SOUTHEAST])
+                    temp2 += "\\";
                 else
                     temp2 += " ";
 
@@ -223,13 +223,13 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
     if (AString(typestr) == "wmon") type = 1;
     if (AString(typestr) == "lair") type = 2;
     if (AString(typestr) == "gate") type = 3;
-    
+
     Aoutfile f;
     if( f.OpenByName(mapfile) == -1 )
     {
         return( 0 );
     }
-    
+
     switch (type) {
     case 0:
         f.PutStr("Geographical Map");
@@ -269,7 +269,7 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 			break;
         }
     }
-    
+
     f.Close();
 
     return( 1 );
