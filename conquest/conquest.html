@@ -124,6 +124,7 @@ for putting together this table of contents. <p>
 <LI><a href="#move">move</a>
 <LI><a href="#name">name</a>
 <li><a href="#noaid">noaid</a>
+<li><a href="#nocross">nocross</a>
 <LI><a href="#option">option</a>
 <LI><a href="#password">password</a>
 <LI><a href="#pillage">pillage</a>
@@ -2786,6 +2787,24 @@ Set a unit to receive no aid in battle. <p>
 </pre> <p>
 
 <hr>
+<a name="nocross"> </a>
+<h4> NOCROSS [flag] </h4>
+
+NOCROSS 1 indicates that if a unit attempts to cross a body of water
+then that unit should instead not cross it, regardless of whether the
+unit otherwise could do so.  Units inside of a ship are not affected
+by this flag (IE, they are able to sail within the ship).   This flag
+is useful for games where the rules have been set so that water crossing
+is allowed, or items exist which give a unit swimming capacity, and has
+no effect in the 'standard' ruleset.
+
+Example:<p>
+Set a unit to not permit itself to cross water. <p>
+<pre>
+  NOCROSS 1
+</pre> <p>
+
+<hr>
 <a name="option"> </a>
 <h4> OPTION TIMES </h4>
 <h4> OPTION NOTIMES </h4>
@@ -3074,6 +3093,7 @@ Each turn, the following sequence of events occurs: <p>
 <a href="#hold">HOLD</a>,
 <a href="#name">NAME</a>,
 <a href="#noaid">NOAID</a>,
+<a href="#nocross">NOCROSS</a>,
 <a href="#option">OPTION</a>,
 <a href="#password">PASSWORD</a>,
 <a href="#reveal">REVEAL</a>, and
