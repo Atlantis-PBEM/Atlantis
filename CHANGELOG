@@ -574,3 +574,13 @@ Changes from 4.0.10 -> 5.0.0
 	  create a leaderless faction (with the location if specified).  And
 	  you can then use the newUnit/Item/Skill commands to customize that
 	  unit exactly as you want.
+   -- Fixed bug where nexus was an odd number of regions in multi-hex nexus.
+      (courtesy of Ben Lloyd)
+   -- Fixed a divide by zero bug in calculating population.  (courtesy of
+	  Ben Lloyd)
+   -- Fixed bug where monfaction and guardfaction were not being initialized
+      correctly and another where monfaction was being called as faction 2
+	  hardcoded (courtesy of Ben Lloyd)
+   -- Fixed RunPortalLore to actually use GetTargetInRange() rather than
+      calling GetDist() directly.
+   -- Added "number of days taught" to output from study.

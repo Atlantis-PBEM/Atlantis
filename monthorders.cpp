@@ -957,7 +957,16 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 
 	if (u->Study(sk,days)) {
 		u->SetMoney(u->GetMoney() - cost);
-		u->Event(AString("Studies ") + SkillDefs[sk].name + ".");
+		AString str("Studies ");
+		str += SkillDefs[sk].name;
+		int taughtdays = o->days/u->GetMen();
+		if (taughtdays) {
+			str += " and was taught for ";
+			str += taughtdays;
+			str += " days";
+		}
+		str += ".";
+		u->Event(str);
 	} else {
 		// if we just tried to become a mage or apprentice, but
 		// were unable to study, reset unit to whatever it was before.

@@ -2206,7 +2206,8 @@ void Game::CreateNPCFactions()
 		f->SetNPC();
 		f->lastorders = 0;
 		factions.Add(f);
-	}
+	} else
+		guardfaction = 0;
 	// Only create the monster faction if wandering monsters or lair
 	// monsters exist.
 	if(Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
@@ -2217,7 +2218,8 @@ void Game::CreateNPCFactions()
 		f->SetNPC();
 		f->lastorders = 0;
 		factions.Add(f);
-	}
+	} else
+		monfaction = 0;
 }
 
 void Game::CreateCityMon( ARegion *pReg, int percent, int needmage )

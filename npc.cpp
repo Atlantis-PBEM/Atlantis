@@ -172,7 +172,7 @@ int Game::MakeWMon( ARegion *pReg )
 		return 0;
 
 	int mondef = ItemDefs[montype].index;
-	Faction *monfac = GetFaction( &factions, 2 );
+	Faction *monfac = GetFaction( &factions, monfaction );
 	Unit *u = GetNewUnit( monfac, 0 );
 	u->MakeWMon( MonDefs[mondef].name, montype,
 			(MonDefs[mondef].number+getrandom(MonDefs[mondef].number)+1)/2);
@@ -197,7 +197,7 @@ void Game::MakeLMon( Object *pObj )
 		return;
 
 	int mondef = ItemDefs[montype].index;
-	Faction *monfac = GetFaction( &factions, 2 );
+	Faction *monfac = GetFaction( &factions, monfaction );
 	Unit *u = GetNewUnit( monfac, 0 );
 	switch(montype) {
 		case I_IMP:

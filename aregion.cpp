@@ -872,8 +872,8 @@ void ARegion::PostTurn(ARegionList *pRegs)
 				amount += p->amount;
 			}
 		}
-		int tarpop = basepopulation + (basepopulation * activity) /
-			(2 * amount);
+		int tarpop = basepopulation;
+		if (amount) tarpop += (basepopulation * activity) / (2 * amount);
 		int diff = tarpop - population;
 
 		if(Globals->VARIABLE_ECONOMY) {

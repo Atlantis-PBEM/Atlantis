@@ -1651,7 +1651,6 @@ void Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	}
 
 	int maxweight = 50 * level;
-	int maxdist = 2 * level * level;
 	int weight = 0;
 	forlist (&(order->units)) {
 		Unit *taru = r->GetUnitId((UnitId *) elem,u->faction->num);
@@ -1685,10 +1684,7 @@ void Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		return;
 	}
 
-	if (regions.GetDistance(r,tar->region) > maxdist) {
-		u->Error("CAST: Can't Portal Jump that far.");
-		return;
-	}
+	if (!GetRegionInRange(r, tar->region, u, S_PORTAL_LORE)) return;
 
 	u->Event("Casts Portal Jump.");
 	u->Practise(S_PORTAL_LORE);

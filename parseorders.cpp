@@ -2261,7 +2261,7 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck)
 					break;
 			}
 			if(Globals->CITY_RENAME_COST) {
-				cost = towntype+1* Globals->CITY_RENAME_COST;
+				cost = (towntype+1)* Globals->CITY_RENAME_COST;
 			}
 			int ok = 0;
 			switch(towntype) {

@@ -2108,6 +2108,11 @@ void Game::CreateWorld()
 		while(nx <= 0) {
 			Awrite("How many hexes should the nexus region be?");
 			nx = Agetint();
+			if (nx == 1) ny = 1;
+			else if (nx % 2) {
+				nx = 0;
+				Awrite("The width must be a multiple of 2.");
+			}
 		}
 	} else {
 		nx = 1;
