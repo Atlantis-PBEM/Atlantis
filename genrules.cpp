@@ -1387,12 +1387,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "center");
 		f.Enclose(1, "table border=\"1\"");
 		f.Enclose(1, "tr");
-		f.TagText("td", "&nbsp;");
+		f.TagText("td", "Class");
 		f.TagText("th", "Capacity");
 		f.TagText("th", "Cost");
 		f.TagText("th", "Sailors");
 		f.TagText("th", "Skill");
-		f.TagText("th", "Fleet?");
 		f.Enclose(0, "tr");
 		for(i = 0; i < NITEMS; i++) {
 			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
@@ -1420,13 +1419,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.PutStr(ItemDefs[i].pMonths);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\"");
-			f.PutStr(ItemDefs[i].pMonths/5);
+			f.PutStr(ItemDefs[i].weight/50);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(slevel);
-			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"center\"");
-			f.PutStr(AString("yes"));
 			f.Enclose(0, "td");
 			f.Enclose(0, "tr");
 		}					
@@ -1453,9 +1449,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(AString("")+1);
-			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"center\"");
-			f.PutStr(AString("no"));
 			f.Enclose(0, "td");
 			f.Enclose(0, "tr");
 		}
@@ -2627,12 +2620,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "center");
 		f.Enclose(1, "table border=\"1\"");
 		f.Enclose(1, "tr");
-		f.TagText("td", "&nbsp;");
+		f.TagText("td", "Class");
 		f.TagText("th", "Capacity");
 		f.TagText("th", "Cost");
 		f.TagText("th", "Sailors");
 		f.TagText("th", "Skill");
-		f.TagText("th", "Fleet?");
 		f.Enclose(0, "tr");
 		for(i = 0; i < NITEMS; i++) {
 			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
@@ -2660,13 +2652,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.PutStr(ItemDefs[i].pMonths);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\"");
-			f.PutStr(ItemDefs[i].pMonths/5);
+			f.PutStr(ItemDefs[i].weight/50);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(slevel);
-			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"center\"");
-			f.PutStr(AString("yes"));
 			f.Enclose(0, "td");
 			f.Enclose(0, "tr");
 		}					

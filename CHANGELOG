@@ -937,5 +937,8 @@ Changes from 4.0.10 -> 5.0.0
    -- fixed the bug with BUILD orders without an object given
    -- added Christopher Allen's changes to the GAMEMASTER file regarding Dev-C++
    -- applied Max Shariy's patch for replacing i_rand.c with i_rand.cpp
-   	  ToDo: armored galleon bonus...?
+   -- fixed the flying flag for fleets to enable flying movement.
+   -- modified the ship type items and replaced clippers and galleons with more suitable
+      alternatives. They are not balanced or all included yet for compatibility with currently
+      running test games.
    

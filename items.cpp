@@ -120,6 +120,9 @@ static AString DefType(int atype)
 
 int LookupItem(AString *token)
 {
+	// hack... compatibility for obsolete ship types:
+	if (*token=="CLIP") *token = "KNARR";
+	if (*token=="GLON") *token = "COG";
 	for(int i = 0; i < NITEMS; i++) {
 	    if (ItemDefs[i].type & IT_ILLUSION)  {
 	        if (*token == (AString("i") + ItemDefs[i].abr)) return i;
@@ -133,6 +136,11 @@ int LookupItem(AString *token)
 int ParseAllItems(AString *token)
 {
 	int r = -1;
+	// hack... compatibility for obsolete ship types:
+	if ((*token=="CLIP") || (*token=="Clipper") || (*token=="Clippers"))
+		*token = "KNARR";
+	if ((*token=="GLON") || (*token=="Galleon") || (*token=="Galleons"))
+		*token = "COG";
 	for(int i = 0; i < NITEMS; i++) {
 		if (ItemDefs[i].type & IT_ILLUSION)  {
 			if ((*token == (AString("i") + ItemDefs[i].name)) ||
@@ -156,6 +164,11 @@ int ParseAllItems(AString *token)
 int ParseEnabledItem(AString *token)
 {
 	int r = -1;
+	// hack... compatibility for obsolete ship types:
+	if ((*token=="CLIP") || (*token=="Clipper") || (*token=="Clippers"))
+		*token = "KNARR";
+	if ((*token=="GLON") || (*token=="Galleon") || (*token=="Galleons"))
+		*token = "COG";
 	for (int i=0; i<NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if (ItemDefs[i].type & IT_ILLUSION) {

@@ -614,7 +614,7 @@ AString *ShowSkill::Report(Faction *f)
 						if(pub == 0) continue;
 						int slevel = ItemDefs[item].pLevel;
 						if(slevel > 3) continue;
-						int mass = ItemDefs[item].pMonths;
+						int mass = ItemDefs[item].weight / 10;
 						if((wind1 >= mass*3) && (wind0 < mass*3)) {
 							if(mass >= max3) {
 								max3 = mass;
@@ -669,7 +669,7 @@ AString *ShowSkill::Report(Faction *f)
 					*str += ", for instance. ";
 				}
 			}
-			*str += "The effects of all such mages in a fleet are cummulative. ";	
+			*str += "The effects of all such mages in a fleet are cumulative. ";	
 			break;
 		case S_SUMMON_STORM:
 			if(level > 1) break;

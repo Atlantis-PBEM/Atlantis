@@ -1852,7 +1852,7 @@ int ARegion::CountWMons()
 void ARegion::AddFleet(Object * fleet)
 {
 	objects.Add(fleet);
-	Awrite(AString("Setting up fleet alias #") + fleetalias + ": " + fleet->num);
+	//Awrite(AString("Setting up fleet alias #") + fleetalias + ": " + fleet->num);
 	newfleets.insert(make_pair(fleetalias++, fleet->num));
 	
 }
@@ -1861,7 +1861,7 @@ int ARegion::ResolveFleetAlias(int alias)
 {
 	map<int, int>::iterator f;
 	f = newfleets.find(alias);
-	Awrite(AString("Resolving Fleet Alias #") + alias + ": " + f->second);
+	//Awrite(AString("Resolving Fleet Alias #") + alias + ": " + f->second);
 	if(f == newfleets.end()) return -1;
 	return f->second;
 }

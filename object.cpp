@@ -540,6 +540,7 @@ int Object::FleetCapacity()
 		// "ships" are never built or given
 		// into the same fleet! (i.e. the build
 		// and give code checks for that)
+		if(num < 1) continue;
 		if (ItemDefs[item].fly > 0) {
 			capacity += num * ItemDefs[item].fly;
 			flying = 1;
@@ -598,7 +599,7 @@ int Object::GetFleetSize()
 	int inertia = 0;
 	for(int item=0; item<NITEMS; item++) {
 		int num = GetNumShips(item);
-		if (num > 0) inertia += num * ItemDefs[item].pMonths;
+		if (num > 0) inertia += num * ItemDefs[item].weight / 10;
 	}
 	return (inertia / 5);
 }
@@ -616,19 +617,28 @@ int Object::GetFleetSpeed(int report)
 	int tskill = FleetSailingSkill(report);
 	int speed = Globals->SHIP_SPEED;
 	int inertia = 0;
+	int capacity = 0;
 	int skillreq = 0;
+	int minskill = 0;
 	for(int item=0; item<NITEMS; item++) {
 		int num = GetNumShips(item);
 		if (num > 0) {
-			int diff = num * ItemDefs[item].pMonths;
-			skillreq += diff * ItemDefs[item].pLevel;
-			inertia += diff;
+			if(ItemDefs[item].pLevel > minskill) minskill = ItemDefs[item].pLevel;
+			skillreq += num * ItemDefs[item].pLevel;
+			inertia += num * ItemDefs[item].weight;
+			if (ItemDefs[item].fly > 0) {
+				capacity += num * ItemDefs[item].fly;
+			} else {
+				capacity += num * ItemDefs[item].swim;
+			}
 		}
 	}
+	// no ships no speed
 	if (inertia < 1) return 0;
-	if(inertia > 0) skillreq = skillreq / inertia;
+	
 	// check for sufficient sailing skill!
-	if(tskill < (inertia / 5)) return 0;
+	if(tskill < (inertia / 50)) return 0;
+	
 	// check for wind mages & sailor bonus
 	int windbonus = 0;
 	int sailexp = 0;
@@ -643,18 +653,33 @@ int Object::GetFleetSpeed(int report)
 			sailexp += unit->GetMen() * sb;
 		}
 	}
-	sailexp = sailexp / sailors;
+	// sailexp = sailexp / sailors;
 	// up to 50% speed gain through wind:
-	speed += (Globals->SHIP_SPEED / 2) * windbonus / inertia;
-	// less than required skill: speed = 0!
-	int minskill = skillreq-2;
-	if(minskill < 1) minskill = 1;
-	if (sailexp < minskill) return 0;
-	int boost = 125 * (skillreq - 1);
-	int bonus1 = 1000 + boost * (sailexp-1);
-	int bonus2 = 1000 * tskill / (inertia / 5) + boost * 2;
+	speed += (Globals->SHIP_SPEED / 2) * windbonus / (inertia / 10);
+	/* less than required skill: speed = 0!
+	//minskill = minskill-2;
+	if(minskill < 1) minskill = 1; 
+	if (sailexp < minskill) return 0; */
+	//Awrite(AString("FLEET SPEED: speed: ") + speed + ", sailexp: " + sailexp + ", min: " + minskill + ".");
+	// speed bonus due to skill level and more sailors
+	int boost = 125; // * capacity / inertia;
+	int skillbonus = 100 * sailexp / (inertia / 50);
+	//if (skillbonus > minskill) skillbonus = minskill;
+	int bonus1 = 1000;
+	if(skillbonus > 100) bonus1 += boost * sailexp / (inertia / 50);
+	int bonus2 = 1000 * tskill / ((inertia / 50) + 1) + boost * 2;
+	//Awrite(AString("Speed bonus1: ") + bonus1 + ", bonus2: " + bonus2);
 	if (bonus2 < bonus1) bonus1 = bonus2;
-	speed += (Globals->SHIP_SPEED / 4) * bonus1 / 1000;	
+	// speed bonus due to low load
+    int loadfactor = (capacity / FleetLoad()) - 1;
+	if(loadfactor >= 1) bonus1 += boost * loadfactor;
+	if(bonus1 > 1000) {
+		bonus1 -= 1000;
+		speed += (Globals->SHIP_SPEED / 4) * bonus1 / 1000;
+	}
+	if(speed > Globals->MAX_SPEED) speed = Globals->MAX_SPEED;
+	//Awrite(AString("FLEET skillreq: ") + skillreq + ", inertia/50: " + inertia/50 + ", boost: " + boost);
+	//Awrite(AString("FLEET BOOST: speed: ") + speed + ", loadfactor: " + loadfactor + ", final bonus: " + bonus1);	
 	return speed;
 }
 
