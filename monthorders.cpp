@@ -182,7 +182,12 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
                              newreg->ShortPrint( &regions ) + AString("."));
                 }
                 reg = newreg;
-                if (newreg->ForbiddenShip(ship)) break;
+                if (newreg->ForbiddenShip(ship)) {
+					f->Event(*ship->name +
+							AString(" is stopped by guards in ") +
+							newreg->ShortPrint(&regions) + AString("."));
+					break;
+				}
             }
         }
     }

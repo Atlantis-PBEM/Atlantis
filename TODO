@@ -34,7 +34,6 @@
    -- Consider allowing luxury food items (chocolate, vodka, cavier) to be
       able to be eaten.  Again, don't think this is a good idea, but will
       at least think on it.
-   -- Add underdeep changes from Georg (make underdeep specific terrain as well)
    -- Consider adding the ability to produce trade goods.
    -- Consider Duergar's war horses
    -- Consider building specific skills.
@@ -45,3 +44,20 @@
    -- Consider tools for increasing building (and ship) production.
    -- Consider resource increasers for horses/WING/admantium/other resources
    -- Consider skill improvement through use.
+   -- There are some things hard-coded in the source; summon wind in
+      monthorders.cpp, build items in monthorders.cpp, and some stuff in
+      unit.cpp. In general, things should be done with some set of flags
+      etc in gamedefs.cpp, or at worst custom code in the rule-set
+      directory.
+   -- I'd like to add some code that will do a bit of validation on a
+      rule-set, and make sure it isn't broken.
+   -- FindDeadFactions is possibly inefficient.
+   -- Add more info to battle reports.
+   -- Unit grouping.
+   -- Issue orders for turns in the future (extension of the @ system).
+      My thoughts here are to introduce a 'turn' order, that means
+      everything after the turn order should be delayed for a turn (by
+      just putting it into next turn's template, instead of executing
+      it). Multiple 'turn' orders can be used to give orders arbitrarily
+      into the future. 'turn' can be combined with @ to creating loops.
+      (Dunno if this or Tzargs way is the 'correct' way to handle this)
