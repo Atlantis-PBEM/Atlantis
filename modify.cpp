@@ -426,7 +426,7 @@ void Game::ClearTerrainRaces(int t)
 		TerrainDefs[t].races[c] = -1;
 	}
 	for(c = 0; c < sizeof(TerrainDefs[t].coastal_races)/sizeof(int); c++) {
-		TerrainDefs[t].races[c] = -1;
+		TerrainDefs[t].coastal_races[c] = -1;
 	}
 }
 
