@@ -474,7 +474,8 @@ void Game::RunBuildHelpers(ARegion *r)
 							u->monthorders = 0;
 							continue;
 						}
-						u->MoveUnit(target->object);
+						if(u->object != target->object)
+							u->MoveUnit(target->object);
 					}
 				}
 			}
