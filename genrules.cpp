@@ -34,6 +34,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 {
 	Ainfile introf;
 	Arules f;
+	AString temp, temp2;
 
 	if(f.OpenByName(rules) == -1) {
 		return 0;
@@ -51,13 +52,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"charset=utf-8\">");
 	f.PutStr(AString("<LINK TYPE=\"text/css\" REL=stylesheet HREF=\"")+
 			css + "\">");
-	f.TagText("TITLE", AString(Globals->RULESET_NAME) + " " +
-			ATL_VER_STR(Globals->RULESET_VERSION) + " Rules");
+	temp = AString(Globals->RULESET_NAME) + " " +
+		ATL_VER_STR(Globals->RULESET_VERSION);
+	temp2 = temp + " Rules";
+	f.TagText("TITLE", temp2);
 	f.Enclose(0, "HEAD");
 	f.Enclose(1, "BODY");
 	f.Enclose(1, "CENTER");
-	f.TagText("H1", AString("Rules for ") + Globals->RULESET_NAME + " " +
-			ATL_VER_STR(Globals->RULESET_VERSION));
+	f.TagText("H1", temp);
 	f.TagText("H1", AString("Based on Atlantis v") +
 			ATL_VER_STR(CURRENT_ATL_VER));
 	f.TagText("H2", AString("Copyright 1996 by Geoff Dunbar"));
@@ -144,10 +146,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int has_stea = !(SkillDefs[S_STEALTH].flags & SkillType::DISABLED);
 	int has_obse = !(SkillDefs[S_OBSERVATION].flags & SkillType::DISABLED);
 	if(has_stea || has_obse) {
-		f.TagText("LI", f.Link("#sealthobs",
-					AString(has_stea ? "Stealth" : "") +
-					((has_stea && has_obse) ? " and " : "") +
-					(has_obse ? "Observation" : "")));
+		if(has_stea) temp = "Stealth";
+		else temp = "";
+		if(has_obse) {
+			if(has_stea) temp += " and ";
+			temp += "Observation";
+		}
+		f.TagText("LI", f.Link("#stealthobs", temp));
 		if(has_stea) {
 			f.Enclose(1, "UL");
 			f.TagText("LI", f.Link("#stealthobs_stealing", "Stealing"));
@@ -328,36 +333,38 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("<BR><BR>");
 	Faction fac;
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
-		f.PutStr(AString("A faction has one pre-set limit; it may not ") +
-				"contain more than " + AllowedMages(&fac) + " mages and " +
-				AllowedApprentices(&fac) + " apprentices.  Magic is a rare "
-				"art, and only a few in the world can master it. Aside from "
-				"that, there  is no limit to the number of units a faction "
-				"may contain, nor to how many items can be produced or "
-				"regions taxed.");
+		temp = "A faction has one pre-set limit; it may not contain more than ";
+		temp += AString(AllowedMages(&fac)) + "mages";
+		if(Globals->APPRENTICES_EXIST) {
+			temp += AString("and ") + AllowedApprentices(&fac) + " apprentices";
+		}
+		temp += ". Magic is a rare art, and only a few in the world can "
+			"master it. Aside from that, there  is no limit to the number "
+			"of units a faction may contain, nor to how many items can be "
+			"produced or regions taxed.";
+		f.PutStr(temp);
 		f.PutStr("<BR><BR>");
 	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		f.PutStr(AString("Each faction has a type; this is decided by the "
-					"player, and determines what the faction may do.  The "
-					"faction has ") + Globals->FACTION_POINTS + "Faction "
-				"Points, which may be spent on any of the 3 Faction Areas, "
-				"War, Trade, and Magic.  The faction type may be changed at "
-				"the beginning of each turn, so a faction can change and "
-				"adapt to the conditions around it.  Faction Points spent "
-				"on War determine the number of regions in which factions "
-				"can obtain income by taxing or pillaging.");
-		f.PutStr("<BR><BR>");
-		f.PutStr(AString("Faction Points spent on Trade determine the "
-					"number of regions in which a faction may conduct "
-					"trade activity. Trade activity includes producing "
-					"goods, building ships and buildings, and buying and "
-					"selling trade items. Faction Points spent on Magic "
-					"determines the number of mages ") +
-				(Globals->APPRENTICES_EXIST ? "and appentices " : "") +
-				"the faction may have. (More information on all of "
-				"the faction activities is in further sections of the "
-				"rules).  Here is a chart detailing the limits on factions "
-				"by Faction Points.");
+		temp = "Each faction has a type; this is decided by the player, "
+			"and determines what the faction may do.  The faction has ";
+		temp +=  Globals->FACTION_POINTS;
+		temp += " Faction Points, which may be spent on any of the 3 "
+			"Faction Areas, War, Trade, and Magic.  The faction type may "
+			"be changed at the beginning of each turn, so a faction can "
+			"change and adapt to the conditions around it.  Faction Points "
+			"spent on War determine the number of regions in which factions "
+			"can obtain income by taxing or pillaging. Faction Points spent "
+			"on Trade determine the number of regions in which a faction "
+			"may conduct trade activity. Trade activity includes producing "
+			"goods, building ships and buildings, and buying and selling "
+			"trade items. Faction Points spent on Magic determines the "
+			"number of mages ";
+		if(Globals->APPRENTICES_EXIST)
+			temp += "and apprentices ";
+		temp += "the faction may have. (More information on all of the "
+			"faction activities is in further sections of the rules).  Here "
+			"is a chart detailing the limits on factions by Faction Points.";
+		f.PutStr(temp);
 		f.PutStr("<BR><BR>");
 		f.PutStr(f.LinkRef("tablefactionpoints"));
 		f.Enclose(1, "CENTER");
@@ -366,10 +373,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("TH", "Faction Points");
 		f.TagText("TH", "War (max tax regions)");
 		f.TagText("TH", "Trade (max trade regions)");
+		temp = "Magic (max mages";
 		if(Globals->APPRENTICES_EXIST)
-			f.TagText("TH", "Magic (max mages/apprentices)");
-		else
-			f.TagText("TH", "Magic (max mages)");
+			temp += "/apprentices";
+		temp += ")";
+		f.TagText("TH", temp);
 		f.Enclose(0, "TR");
 		int i;
 		for(i = 1; i <= Globals->FACTION_POINTS; i++) {
@@ -380,11 +388,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.TagText("TD", AString(i));
 			f.TagText("TD", AString(AllowedTaxes(&fac)));
 			f.TagText("TD", AString(AllowedTrades(&fac)));
+			temp = AllowedMages(&fac);
 			if(Globals->APPRENTICES_EXIST)
-				f.TagText("TD", AString(AllowedMages(&fac)) + "/" +
-						AllowedApprentices(&fac));
-			else
-				f.TagText("TD", AString(AllowedMages(&fac)));
+				temp += AString("/") + AllowedApprentices(&fac);
+			f.TagText("TD", temp);
 			f.Enclose(0, "TR");
 		}
 		f.Enclose(0, "TABLE");
@@ -398,34 +405,60 @@ int Game::GenRules(const AString &rules, const AString &css,
 		na = AllowedApprentices(&fac);
 		nt = AllowedTrades(&fac);
 		nw = AllowedTaxes(&fac);
-		f.PutStr(AString("For example, a well rounded faction might ") +
-				"spend " + w + " point" + (w==1?"":"s") + " on War, " +
-				t + " point" + (t==1?"":"s") + " on Trade, and " + m +
-				" point" + (m==1?"":"s") + " on Magic.  This faction's "
-				"type would appear as \"War " + w + " Trade " + t +
-				" Magic " + m + "\", and would be able to tax " + nw +
-				" region" + (nw==1?"":"s") + ", perform trade in " + nt +
-				" region" + (nt==1?"":"s") + ", and have " + nm +
-				" mage" + (nm==1?"":"s") +
-				(Globals->APPRENTICES_EXIST ? AString(" as well as ") +
-				 na + " apprentice" + (na==1?"":"s") : "") + ".");
+		temp = "For example, a well rounded faction might spend ";
+		temp += AString(w) + " point" + (w==1?"":"s") + " on War, ";
+		temp += AString(t) + " point" + (t==1?"":"s") + " on Trade, and ";
+		temp += AString(m) + " point" + (m==1?"":"s") + " on Magic.  ";
+		temp += "This faction's type would appear as \"War ";
+		temp += AString(w) + " Trade " + t + " Magic " + m;
+		temp += "\", and would be able to tax ";
+		temp += AString(nw) + " region" + (nw==1?"":"s") + ", ";
+		temp += "perform trade in ";
+		temp += AString(nt) + " region" + (nt==1?"":"s") + ", and have ";
+		temp += AString(nm) + " mage" + (nm==1?"":"s");
+		if(Globals->APPRENTICES_EXIST) {
+			temp += " as well as ";
+			temp += AString(na) + " apprentice" + (na==1?"":"s");
+		}
+		temp += ".";
+		f.PutStr(temp);
+		f.PutStr("<BR><BR>");
+
 		fac.type[F_WAR] = w = Globals->FACTION_POINTS;
 		fac.type[F_MAGIC] = m = 0;
 		fac.type[F_TRADE] = t = 0;
 		nw = AllowedTaxes(&fac);
 		nt = AllowedTrades(&fac);
 		nm = AllowedMages(&fac);
-		f.PutStr(AString("As another example, a specialized faction ") +
-				"might spend all " + w + " point" + (w==1?"":"s") +
-				" on War. This faction's type would appear as \"War " +
-				w + "\", and it would be able to tax " + nw + " region" +
-				(nw==1?"":"s") +
-				(nt==0?", but could not perform trade in any regions,":
-				 AString(", but could only perform trade in ") + nt +
-					 " region"+(nt==1?",":"s,")) +
-				(nm==0?" and could not possess any mages":
-				 AString(" and could possess only ") + nm + " mage" +
-					 (nm==1?".":"s.")));
+		na = AllowedApprentices(&fac);
+		temp = "As another example, a specialized faction might spend all ";
+		temp += AString(w) + " point" + (w==1?"":"s") + " on War. ";
+		temp += "This faction's type would appear as \"War ";
+		temp += AString(w) + "\", and it would be able to tax " + nw;
+		temp += AString(" region") + (nw==1?"":"s") + ", but could ";
+		if(nt == 0)
+			temp += "not perform trade in any regions";
+		else 
+			temp += AString("only perform trade in ") + nt + " region" +
+				(nt == 1?"":"s");
+		temp += ", ";
+		if(!Globals->APPRENTICES_EXIST)
+			temp += "and ";
+		if(nm == 0)
+			temp += "could not possess any mages";
+		else
+			temp += AString("could only possess ") + nm + " mage" +
+				(nm == 1?"":"s");
+		if(Globals->APPRENTICES_EXIST) {
+			temp += ", and ";
+			if(na == 0)
+				temp += "could not possess any apprentices";
+			else
+				temp += AString("could only possess ") + na + " apprentice" +
+					(na == 1?"":"s");
+		}
+		temp += ".";
+		f.PutStr(temp);
 		f.PutStr("<BR><BR>");
 		if (Globals->FACTION_POINTS>3) {
 			int rem=Globals->FACTION_POINTS-3;
@@ -437,24 +470,26 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.PutStr("<BR><BR>");
 		}
 	}
-	f.PutStr(AString("When a faction starts the game, it is given a ")+
-			"one-man unit and " + (Globals->START_MONEY -
-				(Globals->LEADERS_EXIST ? Globals->LEADER_COST :
-				 Globals->MAINTENANCE_COST)) + ItemDefs[I_SILVER].name +
-			" unclaimed money.  Unclaimed money is cash that your whole " +
-			"faction has access to, but cannot be taken away in battle (" +
-			ItemDefs[I_SILVER].name + " in a unit's possessions can be " +
-			"taken in battle.  This allows a faction to get started "
-			"without presenting an enticing target for other factions. " +
-			"Units in your faction may use the " +
-			f.Link("#claim", "CLAIM") + " order to take this " +
-			ItemDefs[I_SILVER].name + ", and use it to buy goods or " +
-			"recruit men" +
-			(Globals->ALLOW_WITHDRAW ?
-			 AString(", or") + f.Link("#withdraw", "WITHDRAW") +
-			 " goods  directly." : "."));
+	temp = "When a faction starts the game, it is given a one-man unit and ";
+	temp += (Globals->START_MONEY -
+			(Globals->LEADERS_EXIST ?
+			 Globals->LEADER_COST : Globals->MAINTENANCE_COST));
+	temp += " silver unclaimed money.  Unclaimed money is cash that your "
+		"whole faction has access to, but cannot be taken away in battle ("
+		"silver in a unit's possessions can be taken in battle.  This allows "
+		"a faction to get started without presenting an enticing target for "
+		"other factions. Units in your faction may use the ";
+	temp += f.Link("#claim", "CLAIM") + " order to take this silver, and use "
+		"it to buy goods or recruit men";
+	if(Globals->ALLOW_WITHDRAW) {
+		temp += ", or use the ";
+		temp += f.Link("#withdraw", "WITHDRAW");
+		temp += "order to withdraw goods directly";
+	}
+	temp += ".";
+	f.PutStr(temp);		
 	f.PutStr("<BR><BR>");
-	f.PutStr("An exampel faction is shown below, consisting of a "
+	f.PutStr("An example faction is shown below, consisting of a "
 			"starting character, Merlin the Magician, who has formed "
 			"two more units, Merlin's Guards and Merlin's Workers.  "
 			"Each unit is assigned a unit number by the computer "
@@ -476,221 +511,275 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("<BR><BR>");
 	f.PutStr(f.LinkRef("playing_units"));
 	f.TagText("H3", "Units:");
+	f.PutStr("A unit is a grouping together of people, all loyal to the "
+			"same faction. The people in a unit share skills and "
+			"possessions, and execute the same orders each month. The "
+			"reason for having units of many people, rather than keeping "
+			"track of individuals, is to simplify the game play.  The "
+			"computer does not keep track of individual names, possessions, "
+			"or skills for people in the same unit, and all the people in a "
+			"particular unit must be in the same place at all times.  If "
+			"you want to send people in the same unit to different places, "
+			"you must split up the unit.  Apart from this, there is no "
+			"difference between having one unit of 50 people, or 50 units of "
+			"one person each, except that the former is very much easier "
+			"to handle.");
+	f.PutStr("<BR><BR>");
+	temp = "";
+	if(Globals->RACES_EXIST) {
+		temp = AString("There are different races that make up the "
+				"population of ") + Globals->WORLD_NAME + ". (See the "
+				"section on skills for a list of these.)";
+		if(Globals->LEADERS_EXIST) {
+			temp += " In addition, there are \"leaders\" who are presumed "
+				"to be of one of the other races, but are all the same "
+				"in game terms.";
+		}
+	} else {
+		temp = "Units are made of of ordinary people";
+		if(Globals->LEADERS_EXIST) {
+			temp += "as well as leaders";
+		}
+		temp += ".";
+	}
+	if (Globals->LEADERS_EXIST&&Globals->SKILL_LIMIT_NONLEADERS) {
+		temp += " Units made up of normal people may only know one skill, "
+			"and cannot teach other units.  Units made up of leaders "
+			"may know as many skills as desired, and may teach other "
+			"units to speed the learning process.";
+	}
+	if (Globals->LEADERS_EXIST) {
+		temp += " Leaders and normal people may not be mixed in the same "
+			"unit. However, leaders are more expensive to recruit and "
+			"maintain. (More information is in the section on skills.)";
+	}
+	if (Globals->RACES_EXIST) {
+		temp += " A unit is treated as the least common denominator of "
+			"the people within it, so a unit made up of two races with "
+			"different strengths and weaknesses will have all the "
+			"weaknesses, and none of the strengths of either race.";
+	}
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	f.PutStr(f.LinkRef("playing_turns"));
+	f.TagText("H3", "Turns:");
+	f.PutStr("<BR><BR>");
+	f.PutStr("Each turn, the Atlantis server takes the orders file that "
+			"you mailed to it, and assigns the orders to the respective "
+			"units.  All units in your faction are completely loyal to you, "
+			"and will execute the orders to the best of their ability.  If "
+			"the unit does something unintended, it is generally because of"
+			"incorrect orders; a unit will not purposefully betray you.");
+	f.PutStr("<BR><BR>");
+	f.PutStr("A turn is equal to one game month.  A unit can do many "
+			"actions at the start of the month, that only take a matter of "
+			"hours, such as buying and selling commodities, or fighting an "
+			"opposing faction.  Each unit can also do exactly one action "
+			"that takes up the entire month, such as harvesting resources or "
+			"moving from one region to another.  The orders which take an "
+			"entire month are");
+	f.PutStr(f.Link("#advance", "ADVANCE") + ", ");
+	f.PutStr(f.Link("#build", "BUILD") + ", ");
+	if (SKILL_ENABLED(S_ENTERTAINMENT))
+		f.PutStr(f.Link("#entertain", "ENTERTAIN") + ", ");
+	f.PutStr(f.Link("#move", "MOVE") + ", ");
+	if (Globals->TAX_PILLAGE_MONTH_LONG)
+		f.PutStr(f.Link("#pillage", "PILLAGE") + ", ");
+	f.PutStr(f.Link("#produce", "PRODUCE") + ", ");
+	if (SKILL_ENABLED(S_SAILING))
+		f.PutStr(f.Link("#sail", "SAIL") + ", ");
+	f.PutStr(f.Link("#study", "STUDY") + ", ");
+	if (Globals->TAX_PILLAGE_MONTH_LONG)
+		f.PutStr(f.Link("#tax", "TAX") + ", ");
+	f.PutStr(f.Link("#teach", "TEACH") + " and");
+	f.PutStr(f.Link("#work", "WORK") + ".");
+	f.PutStr("<BR><BR>");
+	f.PutStr(f.LinkRef("world"));
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "The World");
+	temp = "The Atlantis world is divided for game purposes into "
+		"hexagonal regions.  Each region has a name, and one of the "
+		"following terrain types:  Ocean, Plain, Forest, Mountain, ";
+	if(Globals->CONQUEST_GAME)
+		temp += "or ";
+	temp += "Swamp";
+	if(!Globals->CONQUEST_GAME)
+		temp += ", Jungle, Desert or Tundra";
+	temp += ". (There may be other types of terrain to be discovered as the "
+		"game progresses.)  Regions can contain units belonging to players; "
+		"they can also contain structures such as buildings";
+	if(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED))
+		temp += " and ships";
+	temp += ". Two units in the same region can normally interact, unless "
+		"one of them is concealed in some way.  Two units in different "
+		"regions cannot normally interact.  NOTE: Combat is an exception "
+		"to this.";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	f.PutStr(f.LinkRef("world_regions"));
+	f.TagText("H3", "Regions:");
+	f.PutStr("Here is a sample region, as it might appear on your turn "
+			"report:");
+	f.PutStr("<BR><BR>");
+	f.Enclose(1, "PRE");
+	temp = "plain (172,110) in Turia, 500 peasants";
+	if(Globals->RACES_EXIST)
+		temp += " (nomads)";
+	int money = (500 * (15 - Globals->MAINTENANCE_COST));
+	temp += AString(", $") + money + ".";
+	f.PutNoFormat(temp);
+ 	f.PutNoFormat("------------------------------------------------------");
+	if (Globals->WEATHER_EXISTS)
+		f.PutNoFormat("  The weather was clear last month; it will be "
+				"clear next month.");
+	temp = AString("  Wages: $15 (Max: $") + (money/Globals->WORK_FRACTION) +
+			").";
+	f.PutNoFormat(temp);
+	f.PutNoFormat("  Wanted: none.");
+	temp = "  For Sale: 50 ";
+	if(Globals->RACES_EXIST)
+		temp += "nomads [NOMA]";
+	else
+		temp += "men [MAN]";
+	temp += "at $";
+	float ratio = ItemDefs[(Globals->RACES_EXIST?I_NOMAD:I_MAN)].baseprice/
+		(float)Globals->BASE_MAN_COST;
+	temp += (int)(60*ratio);
+	if(Globals->LEADERS_EXIST) {
+		ratio = ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
+		temp += ", 10 leaders [LEAD] at $";
+		temp += (int)(60*ratio);
+	}
+	temp += ".";
+	f.PutNoFormat(temp);
+	temp = AString("  Entertainment available: $") +
+		(money/Globals->ENTERTAINMENT_FRACTION) + ").";
+	f.PutNoFormat(temp);
+	temp = "  Products: ";
+	if(Globals->FOOD_ITEMS_EXIST)
+		temp += "23 grain [GRAI], ";
+	temp += "37 horses [HORS].";
+	f.PutNoFormat(temp);
+	f.PutNoFormat("");
+	f.PutNoFormat("Exits:");
+	f.PutNoFormat("  North : ocean (172,108) in Atlantis Ocean.");
+	f.PutNoFormat("  Northeast : ocean (173,109) in Atlantis Ocean.");
+	f.PutNoFormat("  Southeast : ocean (173,111) in Atlantis Ocean.");
+	f.PutNoFormat("  South : plain (172,112) in Turia.");
+	f.PutNoFormat("  Southwest : plain (171,111) in Turia.\n");
+	f.PutNoFormat("  Northwest : plain (171,109) in Turia.\n");
+	f.PutNoFormat("");
+	f.PutNoFormat("* Hans Shadowspawn (15), Merry Pranksters (14), ");
+	temp = "  ";
+	if(Globals->LEADERS_EXIST)
+		temp2 = "leader [LEAD]";
+	else if(Globals->RACES_EXIST)
+		temp2 = "nomad [NOMA]";
+	else
+		temp2 = "man [MAN]";
+	temp += temp2 + ", 500 silver [SILV]. Skills: none.";
+	f.PutNoFormat(temp);
+	temp = AString("- Vox Populi (13), ") + temp2 + ".";
+	f.PutNoFormat(temp);
+	f.Enclose(0, "PRE");
+	f.PutStr("<BR><BR>");
+	temp = "This report gives all of the available information on this "
+		"region.  The region type is plain, the name of the surrounding area "
+		"is Turia, and the coordinates of this region are (172,110).  The "
+		"population of this region are 500 ";
+	if(Globals->RACES_EXIST)
+		temp += "nomads";
+	else
+		temp += "peasants";
+	temp += AString(", and there is $") + money + "of taxable income ";
+	temp += "current in this region.  Then under the dashed line, are "
+		"various details about items for sale, wages, etc.  Finally, "
+		"there is a list of all visible units.  Units that belong to your "
+		"faction will be so denoted by a '*', whereas other faction's "
+		"units are preceded by a '-'.";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	f.PutStr("Since Atlantis is made up of hexagonal regions, the coordinate "
+			"system is not always exactly intuitive.  Here is the layout of "
+			"Atlantis regions:");
+	f.PutStr("<BR><BR>");
+	f.Enclose(1, "PRE");
+	f.PutNoFormat("   ____        ____");
+	f.PutNoFormat("  /    \\      /    \\");
+	f.PutNoFormat(" /(0,0) \\____/(2,0) \\____/");
+	f.PutNoFormat(" \\      /    \\      /    \\     N");
+	f.PutNoFormat("  \\____/(1,1) \\____/(3,1) \\_   |");
+	f.PutNoFormat("  /    \\      /    \\      /    |");
+	f.PutNoFormat(" /(0,2) \\____/(2,2) \\____/     |");
+	f.PutNoFormat(" \\      /    \\      /    \\   W-O-E");
+	f.PutNoFormat("  \\____/(1,3) \\____/(3,3) \\_   |");
+	f.PutNoFormat("  /    \\      /    \\      /    S");
+	f.PutNoFormat(" /(0,4) \\____/(2,4) \\____/");
+	f.PutNoFormat(" \\      /    \\      /    \\");
+	f.PutNoFormat("  \\____/      \\____/");
+	f.PutNoFormat("  /    \\      /    \\");
+	f.Enclose(0, "PRE");
+	f.PutStr("<BR><BR>");
+	f.PutStr("Note that the are \"holes\" in the coordinate system; there "
+			"is no region (1,2), for instance.  This is due to the "
+			"hexagonal system of regions.");
+	f.PutStr("<BR><BR>");
+	temp = "Most regions are similar to the region shown above, but the "
+		"are certain exceptions.  Oceans, not surprisingly, have no "
+		"population.";
+	if (Globals->TOWNS_EXIST)
+		temp += "Some regions will contain villages, towns, and cities. "
+			"More information on these is available in the section on the "
+			"ecomony.";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	f.PutStr(f.LinkRef("world_structures"));
+	f.TagText("H3", "Structures:");
+	temp = "Regions may also contain structures, such as buildings";
+	if(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED))
+		temp += "or ships";
+	temp += ". These will appear directly below the list of units.  Here is "
+		"a sample structure:";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	f.Enclose(1, "PRE");
+	f.PutNoFormat("+ Temple of Agrik [3] : Tower.");
+	temp = "  - High Priest Chafin (9), ";
+	temp += temp2 + ", sword [SWOR]";
+	f.PutNoFormat(temp);
+	temp = "  - Rowing Doom (188), ";
+	if(Globals->RACES_EXIST)
+		temp += "10 nomads [NOMA]";
+	else if(Globals->LEADERS_EXIST)
+		temp += "10 leaders [LEAD]";
+	else
+		temp += "10 men [MAN]";
+	temp += ", 10 swords [SWOR].";
+	f.PutNoFormat(temp);
+	f.Enclose(0, "PRE");
+	f.PutStr("<BR><BR>");
+	temp = "The structure lists the name, the number, and what type of "
+		"structure it is.  (More information of the types of structures "
+		"can be found in the section on the economy.)  Following this "
+		"is a list of units inside the structure.";
+	if (have_stea)
+		temp += " Units within a structure are always visible, even if "
+			"they would otherwise not be seen.";
+   f.PutStr(temp);
+   f.PutStr("<BR><BR>");
+   f.PutStr("Units inside structures are still considered to be in the "
+		   "region, and other units can interact with them; however, they "
+		   "may gain benefits, such as defensive bonuses in combat from "
+		   "being inside a building.  The first unit to enter an object is "
+		   "considered to be the owner; only this unit can do things such "
+		   "as renaming the object, or permitting other units to enter. "
+		   "The owner of an object can be identified on the turn report, as "
+		   "it is the first unit listed under the object.  Only units with "
+		   "men in them can be structure owners, so newly created units "
+		   "cannot own a structure until they contain men.");
+   f.PutStr("<BR><BR>");
 #if 0
-	/* FOO */
- printf("\n");
- printf("A unit is a grouping together of people, all loyal to the same faction.\n");
- printf("The people in a unit share skills and possessions, and execute the\n");
- printf("same orders each month.\n");
- printf("The reason for having units of many people, rather than keeping track of\n");
- printf("individuals, is to simplify the game play.  The computer does not keep track of\n");
- printf("individual names, possessions, or skills for people in the same unit, and all\n");
- printf("the people in a particular unit must be in the same place at all times.  If you\n");
- printf("want to send people in the same unit to different places, you must split up the\n");
- printf("unit.  Apart from this, there is no difference between having one unit of 50\n");
- printf("people, or 50 units of one person each, except that the former is very much\n");
- printf("easier to handle. <p>\n");
- printf("\n");
- if (Globals->RACES_EXIST)
-  {
-   printf("  There are different races that make up the population of Atlantis. (See the\n");
-   printf("  section on skills for a list of these.)\n");
-  }
- else
-  {
-   printf("  Units are mostly made of ordinary people.\n");
-  }
- if (Globals->LEADERS_EXIST)
-  {
-   printf("  %shere are \"leaders\"\n",Globals->RACES_EXIST?"In addition, t":"T");
-  if (Globals->RACES_EXIST)
-   {
-    printf("   , who are presumed to be of one of the other races, but are\n");
-    printf("   all the same in game terms\n");
-   }
-   printf("  .\n");
-  }
- if (Globals->LEADERS_EXIST&&Globals->SKILL_LIMIT_NONLEADERS)
-  {
-   printf("  Units made up of normal people may only know one skill,\n");
-   printf("  and cannot teach other units.  Units made up of leaders may know\n");
-   printf("  as many skills as desired, and may teach other units to speed the learning\n");
-   printf("  process.\n");
-  }
- if (Globals->LEADERS_EXIST)
-  {
-   printf("  Leaders and normal people may not be mixed in the same unit.  \n");
-   printf("  However, leaders are more expensive to recruit and maintain.  (More\n");
-   printf("  information is in the section on skills.)\n");
-  }
- if (Globals->RACES_EXIST)
-  {
-   printf("  A unit is treated as the least\n");
-   printf("  common denominator of the people within it, so a unit made up of two races\n");
-   printf("  with different strengths and weaknesses will have all the weaknesses, and none\n");
-   printf("  of the strengths of either race. <p>\n");
-  }
- printf("\n");
- printf("<a name=\"playing_turns\">\n");
- printf("<h3> Turns: </h3>\n");
- printf("\n");
- printf("Each turn, the Atlantis server takes the orders file that you mailed to it, and\n");
- printf("assigns the orders to the respective units.  All units in your faction are\n");
- printf("completely loyal to you, and will execute the orders to the best of their\n");
- printf("ability.  If the unit does something unintended, it is generally because of\n");
- printf("incorrect orders; a unit will not purposefully betray you. <p>\n");
- printf("\n");
- printf("A turn is equal to one game month.  A unit can do many actions at the start of\n");
- printf("the month, that only take a matter of hours, such as buying and selling\n");
- printf("commodities, or fighting an opposing faction.  Each unit can also do exactly\n");
- printf("one action that takes up the entire month, such as harvesting timber or moving\n");
- printf("from one region to another.  The orders which take an entire month are \n");
- printf("<a href=\"#advance\"> ADVANCE</a>,\n");
- printf("<a href=\"#build\"> BUILD</a>,\n");
- if (SKILL_ENABLED(S_ENTERTAINMENT))
-  {
-   printf("  <a href=\"#entertain\"> ENTERTAIN</a>,\n");
-  }
- printf("<a href=\"#move\"> MOVE</a>,\n");
- if (Globals->TAX_PILLAGE_MONTH_LONG)
-  {
-   printf("  <a href=\"#pillage\"> PILLAGE</a>,\n");
-  }
- printf("<a href=\"#produce\"> PRODUCE</a>,\n");
- if (SKILL_ENABLED(S_SAILING))
-  {
-   printf("  <a href=\"#sail\"> SAIL</a>,\n");
-  }
- printf("<a href=\"#study\"> STUDY</a>,\n");
- if (Globals->TAX_PILLAGE_MONTH_LONG)
-  {
-   printf("  <a href=\"#tax\"> TAX</a>,\n");
-  }
- printf("<a href=\"#teach\"> TEACH</a> and\n");
- printf("<a href=\"#work\"> WORK</a>.\n");
- printf("<p>\n");
- printf("\n");
- printf("<a name=\"world\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> The World </h2>\n");
- printf("\n");
- printf("The Atlantis world is divided for game purposes into hexagonal regions.  Each\n");
- printf("region has a name, and one of the following terrain types:  Ocean, Plain,\n");
- printf("Forest, Mountain, Swamp, Jungle, Desert, or Tundra.  (There may be other types\n");
- printf("of terrain to be discovered as the game progresses.)  Regions can contain\n");
- printf("units belonging to players; they can also contain structures such as buildings\n");
- printf("and ships.  Two units in the same region can normally interact, unless one of\n");
- printf("them is concealed in some way.  Two units in different regions cannot normally\n");
- printf("interact.  NOTE: Combat is an exception to this. <p>\n");
- printf("\n");
- printf("<a name=\"world_regions\">\n");
- printf("<h3> Regions: </h3>\n");
- printf("\n");
- printf("Here is a sample region, as it might appear on your turn report: <p>\n");
- printf("\n");
- printf("<pre>\n");
- printf("plain (172,110) in Turia, 500 peasants (nomads), $2500.\n");
- printf("------------------------------------------------------\n");
- if (Globals->WEATHER_EXISTS)
- {
-   printf("  The weather was clear last month; it will be clear next month.\n");
- }
-   printf("  Wages: $15 (Max: $%d).\n",500*15/Globals->WORK_FRACTION);
-   printf("  Wanted: none.\n");
-   printf("  For Sale: 50 nomads [NOMA] at $60, 10 leaders [LEAD] at $120.\n");
-   printf("  Entertainment available: $%d.\n",500*(15-Globals->MAINTENANCE_COST)/Globals->ENTERTAIN_FRACTION);
-   printf("  Products: 37 horses [HORS].\n");
- printf("\n");
- printf("Exits:\n");
-   printf("  North : ocean (172,108) in Atlantis Ocean.\n");
-   printf("  Northeast : ocean (173,109) in Atlantis Ocean.\n");
-   printf("  Southeast : ocean (173,111) in Atlantis Ocean.\n");
-   printf("  South : plain (172,112) in Turia.\n");
-   printf("  Southwest : plain (171,111) in Turia.\n");
-   printf("  Northwest : plain (171,109) in Turia.\n");
- printf("\n");
- printf("* Hans Shadowspawn (15), Merry Pranksters (14),\n");
-   printf("  leader [LEAD], 500 %s [SILV]. Skills:\n",silver);
-   printf("  none.\n");
- printf("- Vox Populi (13), leader [LEAD].\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("This report gives all of the available information on this region.  The region\n");
- printf("type is plain, the name of the surrounding area is Turia, and the coordinates\n");
- printf("of this region are (172,110).  The population of this region are 500 nomads, and\n");
- printf("there is $2500 of taxable income currently in this region.  Then, under the\n");
- printf("dashed line, are various details about items for sale, wages, etc.  Finally,\n");
- printf("there is a list of all visible units.  Units that belong to your faction will\n");
- printf("be so denoted by a '*', whereas other faction's units are preceded by a '-'.\n");
- printf("<p>\n");
- printf("\n");
- printf("Since Atlantis is made up of hexagonal regions, the coordinate system is not\n");
- printf("always exactly intuitive.  Here is the layout of Atlantis regions:\n");
- printf("<p>\n");
- printf("\n");
- printf("<pre>\n");
-    printf("   ____        ____    \n");
-   printf("  /    \\      /    \\   \n");
-  printf(" /(0,0) \\____/(2,0) \\____/\n");
-  printf(" \\      /    \\      /    \\     N\n");
-   printf("  \\____/(1,1) \\____/(3,1) \\_   |\n");
-   printf("  /    \\      /    \\      /    |\n");
-  printf(" /(0,2) \\____/(2,2) \\____/     |\n");
-  printf(" \\      /    \\      /    \\   W-O-E\n");
-   printf("  \\____/(1,3) \\____/(3,3) \\_   |\n");
-   printf("  /    \\      /    \\      /    S\n");
-  printf(" /(0,4) \\____/(2,4) \\____/\n");
-  printf(" \\      /    \\      /    \\\n");
-   printf("  \\____/      \\____/\n");
-   printf("  /    \\      /    \\\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("Note that the are \"holes\" in the coordinate system; there is no region (1,2),\n");
- printf("for instance.  This is due to the hexagonal system of regions. <p>\n");
- printf("\n");
- printf("Most regions are similar to the region shown above, but the are certain\n");
- printf("exceptions.  Oceans, not surprisingly, have no population.\n");
- if (Globals->TOWNS_EXIST)
-  {
-   printf("  Some regions will\n");
-   printf("  contain villages, towns, and cities.  More information on these is available\n");
-   printf("  in the section on the ecomony.\n");
-  }
- printf("<p>\n");
- printf("\n");
- printf("<a name=\"world_structures\">\n");
- printf("<h3> Structures: </h3>\n");
- printf("\n");
- printf("Regions may also contain structures, such as buildings or ships.  These will\n");
- printf("appear directly above the list of units.  Here is a sample structure: <p>\n");
- printf("\n");
- printf("<pre>\n");
- printf("+ Temple of Agrik [3] : Tower.\n");
-   printf("  - High Priest Chafin (9), leader\n");
-     printf("    [LEAD], sword [SWOR].\n");
-   printf("  - Rowing Doom (188), 10 ice dwarves\n");
-     printf("    [IDWA], 10 swords [SWOR].\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("The structure lists the name, the number, and what type of structure it is.\n");
- printf("(More information of the types of structures can be found in the section on the\n");
- printf("economy.)  Following this is a list of units inside the structure.\n");
- if (st_ena)
-  {
-   printf("  Units within a structure are always visible, even if they would otherwise not be\n");
-   printf("  seen.\n");
-  }
- printf("<p>\n");
- printf("\n");
- printf("Units inside structures are still considered to be in the region, and other\n");
- printf("units can interact with them; however, they may gain benefits, such as\n");
- printf("defensive bonuses in combat from being inside a building.  The first unit to\n");
- printf("enter an object is considered to be the owner; only this unit can do things\n");
- printf("such as renaming the object, or permitting other units to enter.  The owner of\n");
- printf("an object can be identified on the turn report, as it is the first unit listed\n");
- printf("under the object.  Only units with men in them can be structure owners, so\n");
- printf("newly created units cannot own a structure until they contain men.<p>\n");
- printf("\n");
+ if(Globals->NEXUS_EXISTS) {
  printf("<a name=\"world_nexus\">\n");
  printf("<h3> Atlantis Nexus: </h3>\n");
  printf("\n");
@@ -754,6 +843,7 @@ int Game::GenRules(const AString &rules, const AString &css,
    printf("  transportation from the Nexus to the starting city being magical in\n");
    printf("  nature.<p>\n");
   }
+ }
  printf("\n");
  {
  int masa=SKILL_ENABLED(S_SAILING)&&SKILL_ENABLED(S_SHIPBUILDING);
@@ -784,6 +874,21 @@ int Game::GenRules(const AString &rules, const AString &css,
   }
  printf("<p>\n");
  printf("\n");
+#endif
+	if(Globals->CONQUEST_GAME) {
+		f.PutStr(f.LinkRef("world_conquest"));
+		f.TagText("H3", "The World of Atlantis Conquest");
+		f.PutStr("In a game of Atlantis Conquest, each player begins the "
+				"game on a small island of 8 regions, seperated by ocean "
+				"from the rest of the players.  The starting islands are "
+				"located around the perimeter of a larger central island. "
+				"Sailing from the starting islands towards the center of "
+				"the map should lead to the central island within a few "
+				"regions.");
+		f.PutStr("<BR><BR>");
+	}
+
+#if 0
  printf("<a name=\"movement\">\n");
  printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
  printf("<h2> Movement </h2>\n");
