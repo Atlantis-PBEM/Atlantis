@@ -1685,7 +1685,8 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		ParseError(pCheck, u, 0, "PRODUCE: Can't produce that.");
 		return;
 	}
-	if(ItemDefs[it].flags & ItemType::DISABLED) {
+	if((ItemDefs[it].flags & ItemType::DISABLED)
+		|| (ItemDefs[it].type & IT_SHIP)) {
 		ParseError(pCheck, u, 0, "PRODUCE: Can't produce that.");
 		return;
 	}
