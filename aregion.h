@@ -210,7 +210,7 @@ class ARegion : public AListElem
 
 		void DefaultOrders();
 		void UpdateTown();
-		void PostTurn();
+		void PostTurn(ARegionList *pRegs);
 		void UpdateProducts();
 		void SetWeather(int newWeather);
 		int IsCoastal();
@@ -227,9 +227,9 @@ class ARegion : public AListElem
 		int HasConnectingRoad(int realDirection);
 		int GetRoadDirection(int realDirection);
 		int GetRealDirComp(int realDirection);
-		void DoDecayCheck();
-		void DoDecayClicks(Object *o);
-		void RunDecayEvent(Object *o);
+		void DoDecayCheck(ARegionList *pRegs);
+		void DoDecayClicks(Object *o, ARegionList *pRegs);
+		void RunDecayEvent(Object *o, ARegionList *pRegs);
 		AString GetDecayFlavor();
 		int GetMaxClicks();
 		int PillageCheck();

@@ -29,37 +29,54 @@ class AListElem;
 class AList;
 
 class AListElem {
-public:
-  virtual ~AListElem();
-  
-  AListElem * next;
+	public:
+		virtual ~AListElem();
+
+		AListElem * next;
 };
 
 class AList {
-public:
-  AList();
-  ~AList();
-  void DeleteAll();
-  void Empty(); /* Clears the list without deleting members */
-  
-  AListElem * Get(AListElem *);
-  char Remove(AListElem *);
-  void Insert(AListElem *); /* into the front */
-  void Add(AListElem *); /* to the back */
-  AListElem * Next(AListElem *);
-  AListElem * First();
-  int Num();
-private:
-  AListElem *list;
-  AListElem *lastelem;
-  int num;
+	public:
+		AList();
+		~AList();
+
+		void DeleteAll();
+		void Empty(); /* Clears the list without deleting members */
+		AListElem * Get(AListElem *);
+		char Remove(AListElem *);
+		void Insert(AListElem *); /* into the front */
+		void Add(AListElem *); /* to the back */
+		AListElem * Next(AListElem *);
+		AListElem * First();
+		int Num();
+
+		/* Helper function for forlist_safe */
+		int NextLive(AListElem **copy, int size, int pos);
+
+	private:
+		AListElem *list;
+		AListElem *lastelem;
+		int num;
 };
 
-#define forlist(l)	AListElem * elem, * _elem2; \
-      for ( elem=(l)->First(), \
-      _elem2 = (elem ? (l)->Next(elem) : 0); \
-      elem; \
-      elem = _elem2, \
-      _elem2 = (_elem2 ? ((l)->Next(_elem2)) : 0))
+#define forlist(l) \
+	AListElem * elem, * _elem2; \
+	for (elem=(l)->First(), \
+			_elem2 = (elem ? (l)->Next(elem) : 0); \
+			elem; \
+			elem = _elem2, \
+			_elem2 = (_elem2 ? ((l)->Next(_elem2)) : 0))
+
+#define forlist_safe(l) \
+	int size = (l)->Num(); \
+	AListElem **copy = new AListElem*[size]; \
+	AListElem *elem; \
+	int pos; \
+	for (pos = 0, elem = (l)->First(); elem; elem = elem->next, pos++) { \
+		copy[pos] = elem; \
+	} \
+	for (pos = 0; \
+			pos < size ? (elem = copy[pos], 1) : (delete [] copy, 0); \
+			pos = (l)->NextLive(copy, size, pos))
 
 #endif

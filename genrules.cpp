@@ -1258,9 +1258,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"region is defined as a non-ocean region with at least one "
 			"adjacent ocean region.)";
 		f.Paragraph(temp);
-		temp = AString("Note that a unit on board a sailing ship may not ") +
-			f.Link("#move", "MOVE") + " later in the turn, even if he " +
-			"doesn't issue the " + f.Link("#sail", "SAIL");
+		temp = AString("Note that a unit on board a ship while it is ") +
+			"sailing may not " + f.Link("#move", "MOVE") +
+			" later in the turn, even if he doesn't issue the " +
+			f.Link("#sail", "SAIL");
 		temp += " order; sailing is considered to take the whole month. "
 			"Also, units may not remain on guard while on board a sailing "
 			"ship; they will have to reissue the ";
@@ -2873,6 +2874,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"more than 50% losses, the battle is a draw, and neither side gets "
 		"a free round.";
 	f.Paragraph(temp);
+	/* XXX -- Here is where to put the ROUT information */
 	if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED) &&
 			!(ItemDefs[I_HERBS].flags & SkillType::DISABLED)) {
 		temp = "Units with the Healing skill have a chance of being able "
@@ -3011,9 +3013,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 			}
 			temp += "fight will take place between the assassin and the "
 				"target character.  The assassin automatically gets a "
-				"free round of attacks; after that, the battle is handled "
-				"like a normal fight, with the exception that neither "
-				"assassin nor victim can use any armor";
+				"free round of attacks";
+			if(Globals->MAX_ASSASSIN_FREE_ATTACKS) {
+				temp += ", except he is limited to ";
+				temp += Globals->MAX_ASSASSIN_FREE_ATTACKS;
+				temp += " total during the free round";
+			}
+			temp += "; after that, the battle is handled like a normal "
+				"fight, with the exception that neither assassin nor "
+				"victim can use any armor";
 			temp2 = "";
 			last = -1;
 			comma = 0;
@@ -3392,6 +3400,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"has the behind flag set. Whether or not you are allowed to give a "
 		"monster to other units depends on the type of monster; some may be "
 		"given freely, while others must remain with the controlling unit.";
+	if(Globals->RELEASE_MONSTERS) {
+		temp += " All monsters may be released completely by using the ";
+		temp += f.Link("#give", "GIVE") + " order targetting unit 0.  When "
+			"this is done, the monster will become a wandering monster.";
+	}
 	f.Paragraph(temp);
 	f.LinkRef("orders");
 	f.ClassTagText("DIV", "rule", "");
@@ -4049,7 +4062,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "or flying ";
 		temp += "then this order is usable to leave a boat while at sea.";
 	} else
-		temp += " The order cannot be used at sea."
+		temp += " The order cannot be used at sea.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Leave the current object";

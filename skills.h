@@ -198,6 +198,7 @@ class SpecialType {
 			FX_USE_LEV	=	0x04,
 			FX_DEFBONUS	=	0x08,
 			FX_NOBUILDING =	0x10,
+			FX_DONT_COMBINE=0x20,
 		};
 		int effectflags;
 

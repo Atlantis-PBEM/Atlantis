@@ -510,6 +510,12 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 		unit->ClearOrders();
 		unit = 0;
 	}
+
+	/* Clean up if we had a form order that was bogus and no endform or #end */
+	if(former && pCheck) {
+		former->ClearOrders();
+		former = 0;
+	}
 }
 
 void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
@@ -1302,7 +1308,7 @@ void Game::ProcessRestartOrder(Unit *u,AString *o, OrdersCheck *pCheck )
 
 		if (u->faction->quit != QUIT_AND_RESTART) {
 			u->faction->quit = QUIT_AND_RESTART;
-			Faction *pFac = AddFaction();
+			Faction *pFac = AddFaction(1);
 			pFac->SetAddress( *( u->faction->address ));
 			AString *pass = new AString(*(u->faction->password));
 			pFac->password = pass;
@@ -2913,7 +2919,8 @@ void Game::ProcessSailOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			u->monthorders = &( pCheck->dummyOrder );
 			u->monthorders->type = O_SAIL;
 		} else {
-			if ((u->orderDelayMonthOrders && u->monthorders->type != O_SAIL) ||
+			if ((u->orderDelayMonthOrders &&
+						u->orderDelayMonthOrders->type != O_SAIL) ||
 					(Globals->TAX_PILLAGE_MONTH_LONG &&
 					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
 				pCheck->Error("SAIL: Overwriting previous DELAYED month-long "

@@ -660,13 +660,21 @@ int Game::ReadPlayers()
 				}
 
 				if( *pToken == "new" ) {
-					pFac = AddFaction();
+					pFac = AddFaction(1);
 					if( !pFac ) {
 						Awrite( "Failed to add a new faction!" );
 						rc = 0;
 						break;
 					}
 
+					lastWasNew = 1;
+				} else if (*pToken == "newNoLeader") {
+					pFac = AddFaction(0);
+					if(!pFac) {
+						Awrite("Failed to add a new faction!");
+						rc = 0;
+						break;
+					}
 					lastWasNew = 1;
 				} else {
 					if( pFac && lastWasNew ) {
@@ -1566,28 +1574,24 @@ void Game::DeleteDeadFactions()
     }
 }
 
-Faction *Game::AddFaction()
+Faction *Game::AddFaction(int setup)
 {
-    //
-    // set up faction
-    //
-    Faction *temp = new Faction( factionseq );
-    AString x( "NoAddress" );
-    temp->SetAddress( x );
-    temp->lastorders = TurnNumber();
+	//
+	// set up faction
+	//
+	Faction *temp = new Faction(factionseq);
+	AString x("NoAddress");
+	temp->SetAddress(x);
+	temp->lastorders = TurnNumber();
 
-    if( SetupFaction( temp ))
-    {
-        factions.Add(temp);
-        factionseq++;
-
-        return( temp );
-    }
-    else
-    {
-        delete temp;
-        return( 0 );
-    }
+	if(setup && SetupFaction(temp)) {
+		factions.Add(temp);
+		factionseq++;
+		return(temp);
+	} else {
+		delete temp;
+		return(0);
+	}
 }
 
 void Game::ViewFactions()
@@ -1616,6 +1620,7 @@ void Game::FixGateNums()
 {
 	for(int i=1; i <= regions.numberofgates; i++) {
 		ARegion *tar = regions.FindGate(i);
+		if(tar) continue; // This gate exists, continue
 		int done = 0;
 		while(!done) {
 			// We have a missing gate, add it

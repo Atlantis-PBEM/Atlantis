@@ -283,6 +283,12 @@ void Soldier::SetupCombatItems()
 				special = pBat->index;
 				slevel = pBat->skillLevel;
 			}
+		} else {
+			// We are using prepared items and this item is NOT the one
+			// we have prepared, so give it back to the unit as they won't
+			// use it.
+			unit->items.SetNum(item, unit->items.GetNum(item)+1);
+			continue;
 		}
 
 		if( pBat->flags & BattleItemType::SHIELD ) {

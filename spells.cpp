@@ -398,12 +398,12 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 				if(token) {
 					z = token->value();
 					delete token;
-				}
-				if(z < 0 || (z > Globals->UNDERWORLD_LEVELS +
-							Globals->UNDERDEEP_LEVELS +
-							Globals->ABYSS_LEVEL + 2)) {
-					u->Error("CAST: Invalid Z coordinate specified.");
-					return;
+					if(z < 0 || (z > Globals->UNDERWORLD_LEVELS +
+								Globals->UNDERDEEP_LEVELS +
+								Globals->ABYSS_LEVEL + 2)) {
+						u->Error("CAST: Invalid Z coordinate specified.");
+						return;
+					}
 				}
 			}
 		} else {

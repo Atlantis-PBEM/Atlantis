@@ -24,105 +24,116 @@
 // END A3HEADER
 #include "alist.h"
 
-AListElem::~AListElem() {
+AListElem::~AListElem()
+{
 }
 
-AList::AList() {
-  list = 0;
-  lastelem = 0;
-  num = 0;
+AList::AList()
+{
+	list = 0;
+	lastelem = 0;
+	num = 0;
 }
 
-AList::~AList() {
-  DeleteAll();
+AList::~AList()
+{
+	DeleteAll();
 }
 
-void AList::DeleteAll() {
-  AListElem * temp;
-  while (list) {
-    temp = list->next;
-    delete list;
-    list = temp;
-  }
-  lastelem = 0;
-  num = 0;
+void AList::DeleteAll()
+{
+	AListElem * temp;
+	while (list) {
+		temp = list->next;
+		delete list;
+		list = temp;
+	}
+	lastelem = 0;
+	num = 0;
 }
 
-void AList::Empty() {
-  AListElem * temp;
-  while (list) {
-    temp = list->next;
-    list->next = 0;
-    list = temp;
-  }
-  lastelem = 0;
-  num = 0;
+void AList::Empty()
+{
+	AListElem * temp;
+	while (list) {
+		temp = list->next;
+		list->next = 0;
+		list = temp;
+	}
+	lastelem = 0;
+	num = 0;
 }
 
-void AList::Insert(AListElem * e) {
-  num ++;
-  e->next = list;
-  list = e;
-  if (!lastelem) lastelem = list;
+void AList::Insert(AListElem * e)
+{
+	num ++;
+	e->next = list;
+	list = e;
+	if (!lastelem) lastelem = list;
 }
 
-void AList::Add(AListElem * e) {
-  num ++;
-  if (list) {
-    lastelem->next = e;
-    e->next = 0;
-    lastelem = e;
-  } else {
-    list = e;
-    e->next = 0;
-    lastelem = list;
-  }
+void AList::Add(AListElem * e)
+{
+	num ++;
+	if (list) {
+		lastelem->next = e;
+		e->next = 0;
+		lastelem = e;
+	} else {
+		list = e;
+		e->next = 0;
+		lastelem = list;
+	}
 }
 
-AListElem * AList::Next(AListElem * e) {
-  if (!e) return 0;
-  return e->next;
+AListElem * AList::Next(AListElem * e)
+{
+	if (!e) return 0;
+	return e->next;
 }
 
-AListElem * AList::First() {
-  return list;
+AListElem * AList::First()
+{
+	return list;
 }
 
-AListElem * AList::Get(AListElem * e) {
-  AListElem * temp = list;
-  while (temp) {
-    if (temp == e) return temp;
-    temp = temp->next;
-  }
-  return 0;
+AListElem * AList::Get(AListElem * e)
+{
+	AListElem * temp = list;
+	while (temp) {
+		if (temp == e) return temp;
+		temp = temp->next;
+	}
+	return 0;
 }
 
-char AList::Remove(AListElem * e) {
-  AListElem * temp = list;
-  if (!e) return 0;
-  if (!list) return 0;
-  if (list==e) {
-    list=list->next;
-    num--;
-    if (lastelem == e) lastelem = 0;
-    return 1;
-  }
-  
-  AListElem * p = list;
-  temp = list->next;
-  while (temp) {
-    if (temp==e) {
-      p->next = temp->next;
-      num--;
-      if (p->next == 0) lastelem = p;
-      return 1;
-    }
-    p=temp;
-    temp=temp->next;
-  }
-  return 0;
+char AList::Remove(AListElem * e)
+{
+	if (!e) return 0;
+	if (!e->next) lastelem = 0;
+
+	for (AListElem **pp = &list; *pp; pp = &((*pp)->next)) {
+		if (*pp == e) {
+			*pp = e->next;
+			num--;
+			return 1;
+		}
+		if (!e->next) lastelem = *pp;
+	}
+	return 0;
 }
-		
-int AList::Num() {
-  return num;
+
+int AList::Num()
+{
+	return num;
+}
+
+int AList::NextLive(AListElem **copy, int size, int pos)
+{
+	while (++pos < size) {
+		for (AListElem *elem = First(); elem; elem = elem->next) {
+			if (elem == copy[pos]) return pos;
+		}
+	}
+	return pos;
 }

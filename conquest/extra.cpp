@@ -179,31 +179,41 @@ void Game::ModifyTablesPerRuleset(void)
     if(Globals->APPRENTICES_EXIST)
 		EnableSkill(S_MANIPULATE);
 
-	/* Enable the man type */
-	EnableItem(I_MAN);
+	if(!Globals->RACES_EXIST) {
+		/* Enable the man type */
+		EnableItem(I_MAN);
 
-	/* All men are created equal */
-	ClearTerrainRaces(R_PLAIN);
-	ModifyTerrainRace(R_PLAIN, 0, I_MAN);
-	ClearTerrainRaces(R_FOREST);
-	ModifyTerrainRace(R_FOREST, 0, I_MAN);
-	ClearTerrainRaces(R_MOUNTAIN);
-	ModifyTerrainRace(R_MOUNTAIN, 0, I_MAN);
-	ClearTerrainRaces(R_SWAMP);
-	ModifyTerrainRace(R_SWAMP, 0, I_MAN);
-	ClearTerrainRaces(R_ISLAND_PLAIN);
-	ModifyTerrainRace(R_ISLAND_PLAIN, 0, I_MAN);
-	ClearTerrainRaces(R_ISLAND_MOUNTAIN);
-	ModifyTerrainRace(R_ISLAND_MOUNTAIN, 0, I_MAN);
-	ClearTerrainRaces(R_ISLAND_SWAMP);
-	ModifyTerrainRace(R_ISLAND_SWAMP, 0, I_MAN);
+		/* All men are created equal */
+		ClearTerrainRaces(R_PLAIN);
+		ModifyTerrainRace(R_PLAIN, 0, I_MAN);
+		ClearTerrainRaces(R_FOREST);
+		ModifyTerrainRace(R_FOREST, 0, I_MAN);
+		ClearTerrainRaces(R_MOUNTAIN);
+		ModifyTerrainRace(R_MOUNTAIN, 0, I_MAN);
+		ClearTerrainRaces(R_SWAMP);
+		ModifyTerrainRace(R_SWAMP, 0, I_MAN);
+		ClearTerrainRaces(R_ISLAND_PLAIN);
+		ModifyTerrainRace(R_ISLAND_PLAIN, 0, I_MAN);
+		ClearTerrainRaces(R_ISLAND_MOUNTAIN);
+		ModifyTerrainRace(R_ISLAND_MOUNTAIN, 0, I_MAN);
+		ClearTerrainRaces(R_ISLAND_SWAMP);
+		ModifyTerrainRace(R_ISLAND_SWAMP, 0, I_MAN);
+	}
 
-	if(!Globals->GATES_EXIST)
+	if(!Globals->GATES_EXIST) {
 		DisableSkill(S_GATE_LORE);
+		DisableSkill(S_CONSTRUCT_GATE);
+	}
 
 	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
 		ClearTerrainRaces(R_NEXUS);
-		ModifyTerrainRace(R_NEXUS, 0, I_MAN);
+		if(Globals->RACES_EXIST) {
+			ModifyTerrainRace(R_NEXUS, 0, I_HIGHELF);
+			ModifyTerrainRace(R_NEXUS, 1, I_VIKING);
+			ModifyTerrainRace(R_NEXUS, 2, I_PLAINSMAN);
+		} else {
+			ModifyTerrainRace(R_NEXUS, 0, I_MAN);
+		}
 		ClearTerrainItems(R_NEXUS);
 		ModifyTerrainItems(R_NEXUS, 0, I_IRON, 100, 10);
 		ModifyTerrainItems(R_NEXUS, 1, I_WOOD, 100, 10);
@@ -212,9 +222,7 @@ void Game::ModifyTablesPerRuleset(void)
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
-	/* Limit the resources on the islands and remove fish */
-	ClearTerrainItems(R_OCEAN);
-
+	/* Limit the resources on the islands */
 	ClearTerrainItems(R_ISLAND_PLAIN);
 	ModifyTerrainItems(R_ISLAND_PLAIN, 0, I_HORSE, 100, 20);
 
@@ -230,15 +238,14 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_IRONWOOD);
 	DisableItem(I_WHORSE);
 	DisableItem(I_YEW);
-	DisableItem(I_MSWORD);
-	DisableItem(I_MPLATE);
 	DisableItem(I_DOUBLEBOW);
 	DisableItem(I_FLOATER);
 	DisableItem(I_ROOTSTONE);
 	DisableItem(I_MCARPET);
 	DisableItem(I_CLOAKOFI);
-	DisableItem(I_AMULETOFP);
-
+	DisableSkill(S_CREATE_CLOAK_OF_INVULNERABILITY);
+	DisableSkill(S_CREATE_MAGIC_CARPET);
 	DisableSkill(S_CARPENTER);
+
 	return;
 }

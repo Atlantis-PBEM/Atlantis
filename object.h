@@ -96,8 +96,6 @@ class Object : public AListElem
 
 		// AS
 		int IsRoad();
-		AString DoDecayWarning();
-		AString DoMaintenanceWarning();
 
 		int IsBoat();
 		int IsBuilding();

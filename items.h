@@ -316,6 +316,7 @@ class ItemList : public AList
 		void SetNum(int,int); /* type, number */
 };
 
-extern AString ShowSpecial(int special, int level, int expandlev);
+extern AString ShowSpecial(int special, int level, int expandLevel,
+		int fromItem);
 
 #endif

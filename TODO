@@ -42,6 +42,9 @@
       row troops to hit the rear row of defenders.
    -- Consider Tim Martel's suggestion of 'low magic'/'no magic' areas.
    -- Consider 'overall' morale score which could affect routing.
+   -- Consider Geoff Dunbars more complicated (left/middle/right,
+      behind,command) combat system as he proposed it [in atlantisdev message
+      #2703].
 
 ** Items
    -- Consider adding the ability to produce trade goods.
@@ -201,6 +204,10 @@
    -- Merge Lacandon spells -- SOME work has been done on this already
       but a LOT more needs to be done before this is really doable without
       a lot of heartache and pain.
+
+** World Creation
+   -- Prompt for things like ocean percent and other values used only at
+      world creation time.
 
 ** Atlantis 5.0.0
    -- Ben Lloyd's class system should go in (probably wait on 5.0.0)

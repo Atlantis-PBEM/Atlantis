@@ -187,6 +187,8 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 {
 	SpecialType *spd;
 	int i, num, tot = -1;
+	AString results[4];
+	int dam = 0;
 
 	if(a->special == -1) return;
 	spd = &SpecialDefs[a->special];
@@ -204,6 +206,14 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 				spd->damage[i].type, a->slevel,
 				spd->damage[i].flags, spd->damage[i].dclass,
 				spd->damage[i].effect, 0);
+		if(spd->effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {
+			if(spd->damage[i].effect == -1) {
+				results[dam] = AString("killing ") + num;
+				dam++;
+			} else {
+				results[dam] = AString(spd->spelldesc2) + num;
+			}
+		}
 		if(num != -1) {
 			if(tot == -1) tot = num;
 			else tot += num;
@@ -212,8 +222,19 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 	if(tot == -1) {
 		AddLine(a->name + " " + spd->spelldesc + ", but it is deflected.");
 	} else {
-		AddLine(a->name + " " + spd->spelldesc + ", " + spd->spelldesc2 +
-				tot + spd->spelltarget + ".");
+		if(spd->effectflags & SpecialType::FX_DONT_COMBINE) {
+			AString temp = a->name + " " + spd->spelldesc;
+			for(i = 0; i < dam; i++) {
+				if(i) temp += ", ";
+				if(i == dam-1) temp += " and ";
+				temp += results[dam];
+			}
+			temp += AString(spd->spelltarget) + ".";
+			AddLine(temp);
+		} else {
+			AddLine(a->name + " " + spd->spelldesc + ", " + spd->spelldesc2 +
+					tot + spd->spelltarget + ".");
+		}
 	}
 }
 

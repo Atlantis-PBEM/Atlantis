@@ -131,8 +131,6 @@ public:
 
     int FACTION_POINTS;
 
-    int TURN_COST;
-
     int TIMES_REWARD;
 
     int TOWNS_EXIST;
@@ -423,6 +421,21 @@ public:
 	};
 
 	int ARMY_ROUT;
+
+	// If this is set to 0 then a mage gets his TRUE_SEEING skill/2
+	// rounded up as a bonus to observation.  Lacandon (and perhaps others)
+	// should set this to 1.
+	int FULL_TRUESEEING_BONUS;
+
+	// If this is set to 1 then an AMTS will give 3 bonus to OBSE rather
+	// than 2. This was added for Lacandon
+	int IMPROVED_AMTS;
+
+	// If this is set to 1 then a mage automatically gets his INVISIBILITY
+	// skill added to his stealth.  I only recommend setting this if you
+	// also set the FULL_TRUESEEING_BONUS above.  This was added for
+	// Lacandon.
+	int FULL_INVIS_ON_SELF;
 };
 
 extern GameDefs * Globals;

@@ -325,7 +325,7 @@ int AString::value()
 {
 	int place = 0;
 	int ret = 0;
-	while ((str[place] >= '0') && (str[place] <= '9') && place < 7) {
+	while ((str[place] >= '0') && (str[place] <= '9')) {
 		ret *= 10;
 		ret += (str[place++] - '0');
 	}

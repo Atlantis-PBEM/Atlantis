@@ -74,8 +74,6 @@ static GameDefs g = {
 
     5, /* FACTION_POINTS */
 
-    100, /* TURN_COST */
-
     50, /* TIMES_REWARD */
 
     0, // TOWNS_EXIST
@@ -106,10 +104,6 @@ static GameDefs g = {
 	0, // LASTORDERS_MAINTAINED_BY_SCRIPTS
 	10, // MAX_INACTIVE_TURNS
 
-	// *NOTE* If this is set to 1, you need to make sure the correct
-	// section in skillshows.cpp is defined to describe the X,Y,Z
-	// coordinates.  If you set it to zero, make sure the original
-	// skill description is enabled instead
 	0, // EASIER_UNDERWORLD
 
 	0, // DEFAULT_WORK_ORDER
@@ -158,6 +152,9 @@ static GameDefs g = {
     0,  // CHECK_MONSTER_CONTROL_MID_TURN
     0,  // DETECT_GATE_NUMBERS
 	GameDefs::ARMY_ROUT_FIGURES,  // ARMY_ROUT
+	0,	// FULL_TRUESEEING_BONUS
+	0,	// IMPROVED_AMTS
+	0,	// FULL_INVIS_ON_SELF
 };
 
 GameDefs * Globals = &g;

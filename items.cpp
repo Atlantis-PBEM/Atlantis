@@ -197,7 +197,7 @@ static AString EffectStr(int effect)
 	return temp;
 }
 
-AString ShowSpecial(int special, int level, int expandlev)
+AString ShowSpecial(int special, int level, int expandLevel, int fromItem)
 {
 	AString temp;
 	int comma = 0;
@@ -209,10 +209,12 @@ AString ShowSpecial(int special, int level, int expandlev)
 	SpecialType *spd = &SpecialDefs[special];
 	temp += spd->specialname;
 	temp += AString(" in battle");
-	if(expandlev) {
+	if(expandLevel)
 		temp += AString(" at a skill level of ") + level;
-	}
 	temp += ".";
+	if (fromItem)
+		temp += " This ability only affects the possessor of the item.";
+
 	if((spd->targflags & SpecialType::HIT_BUILDINGIF) ||
 			(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
 		temp += " This ability will ";
@@ -342,13 +344,13 @@ AString ShowSpecial(int special, int level, int expandlev)
 				continue;
 			}
 			val = spd->defs[last].val;
-			if(expandlev) {
+			if(expandLevel) {
 				if(spd->effectflags & SpecialType::FX_USE_LEV)
 					val *= level;
 			}
 
 			temp += AString("a defensive bonus of ") + val;
-			if(!expandlev) {
+			if(!expandLevel) {
 				temp += " per skill level";
 			}
 			temp += AString(" versus ") + DefType(spd->defs[last].type) +
@@ -360,12 +362,12 @@ AString ShowSpecial(int special, int level, int expandlev)
 			temp += "and ";
 		}
 		val = spd->defs[last].val;
-		if(expandlev) {
+		if(expandLevel) {
 			if(spd->effectflags & SpecialType::FX_USE_LEV)
 				val *= level;
 		}
 		temp += AString("a defensive bonus of ") + val;
-		if(!expandlev) {
+		if(!expandLevel) {
 			temp += " per skill level";
 		}
 		temp += AString(" versus ") + DefType(spd->defs[last].type) +
@@ -379,12 +381,12 @@ AString ShowSpecial(int special, int level, int expandlev)
 		temp += AString(" This ability does between ") +
 			spd->damage[i].minnum + " and ";
 		val = spd->damage[i].value * 2;
-		if(expandlev) {
+		if(expandLevel) {
 			if(spd->effectflags & SpecialType::FX_USE_LEV)
 				val *= level;
 		}
 		temp += AString(val);
-		if(!expandlev) {
+		if(!expandLevel) {
 			temp += " times the skill level of the mage";
 		}
 		temp += AString(" ") + AttType(spd->damage[i].type) + " attacks.";
@@ -543,7 +545,8 @@ AString *ItemDescription(int item, int full)
 		if(MonDefs[mon].special && MonDefs[mon].special != -1) {
 			*temp += AString(" ") +
 				"Monster can cast " +
-				ShowSpecial(MonDefs[mon].special, MonDefs[mon].specialLevel, 1);
+				ShowSpecial(MonDefs[mon].special, MonDefs[mon].specialLevel,
+						1, 0);
 		}
 		if(full) {
 			int hits = MonDefs[mon].hits;
@@ -797,7 +800,7 @@ AString *ItemDescription(int item, int full)
 			}
 			if(pM->mountSpecial != -1) {
 				*temp += AString(" When ridden, this mount causes ") +
-					ShowSpecial(pM->mountSpecial, pM->specialLev, 1);
+					ShowSpecial(pM->mountSpecial, pM->specialLev, 1, 0);
 			}
 		}
 	}
@@ -885,7 +888,7 @@ AString *ItemDescription(int item, int full)
 				}
 				*temp += AString(" ") + "Item can cast " +
 					ShowSpecial(BattleItemDefs[i].index,
-							BattleItemDefs[i].skillLevel, 1);
+							BattleItemDefs[i].skillLevel, 1, 1);
 			}
 		}
 	}

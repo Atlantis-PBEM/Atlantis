@@ -577,65 +577,69 @@ AString *ShowSkill::Report(Faction *f)
 		case S_CLEAR_SKIES:
 			/* XXX -- this range stuff needs cleaning up */
 			if(level > 1) break;
-			*str += "When cast using the CAST order, it causes the region to "
-				"have good weather for the entire month; movement is at the "
-				"normal rate (even if it is winter) and the economic "
-				"production of the region is improved for a month (this "
-				"improvement of the economy will actually take effect during "
-				"the turn after the spell is cast).";
-			val = SkillDefs[skill].rangeIndex;
-			if(val != -1) range = &RangeDefs[val];
-			if(range) {
-				if(range->flags & RangeType::RNG_SURFACE_ONLY) {
-					*str += " This skill only works on the surface of the "
-						"world.";
-				}
-				*str += " The target region must be within ";
-				*str += range->rangeMult;
-				switch(range->rangeClass) {
-					case RangeType::RNG_LEVEL:
-						*str += " times the caster's skill level ";
-						break;
-					case RangeType::RNG_LEVEL2:
-						*str += " times the caster's skill level squared ";
-						break;
-					case RangeType::RNG_LEVEL3:
-						*str += " times the caster's skill level cubed ";
-						break;
-					default:
-					case RangeType::RNG_ABSOLUTE:
-						break;
-				}
-				*str += "regions of the caster. ";
-				if(range->flags & RangeType::RNG_CROSS_LEVELS) {
-					*str += "Coordinates of locations not on the surface are "
-						"scaled to the surface coordinates for this "
-						"calculation. Attempting to view across different "
-						"levels increases the distance by ";
-					*str += range->crossLevelPenalty;
-					*str += ". ";
-					*str += "To use this skill, CAST Clear_Skies REGION "
-						"<x> <y> <z> where <x>, <y>, and <z> are the "
-						"coordinates of the region where you wish to "
-						"improve the weather. If you omit the <z> "
-						"coordinate, the <z> coordinate of the caster's "
-						"current region will be used.";
-					if(Globals->UNDERWORLD_LEVELS +
-							Globals->UNDERDEEP_LEVELS == 1) {
-						*str += " The <z> coordinate for the surface is '1' "
-							"and the <z>-coordinate for the underworld is "
-							"'2'.";
+			if(SkillDefs[skill].flags & SkillType::CAST) {
+				*str += "When cast using the CAST order, it causes the "
+					"region to have good weather for the entire month; "
+					"movement is at the normal rate (even if it is winter) "
+					"and the economic production of the region is improved "
+					"for a month (this improvement of the economy will "
+					"actually take effect during the turn after the spell "
+					"is cast).";
+				val = SkillDefs[skill].rangeIndex;
+				if(val != -1) range = &RangeDefs[val];
+				if(range) {
+					if(range->flags & RangeType::RNG_SURFACE_ONLY) {
+						*str += " This skill only works on the surface of "
+							"the world.";
 					}
-					*str += " Note that Clear Skies cannot be used either "
-						"into or out of the Nexus.";
+					*str += " The target region must be within ";
+					*str += range->rangeMult;
+					switch(range->rangeClass) {
+						case RangeType::RNG_LEVEL:
+							*str += " times the caster's skill level ";
+							break;
+						case RangeType::RNG_LEVEL2:
+							*str += " times the caster's skill level squared ";
+							break;
+						case RangeType::RNG_LEVEL3:
+							*str += " times the caster's skill level cubed ";
+							break;
+						default:
+						case RangeType::RNG_ABSOLUTE:
+							break;
+					}
+					*str += "regions of the caster. ";
+					if(range->flags & RangeType::RNG_CROSS_LEVELS) {
+						*str += "Coordinates of locations not on the surface "
+							"are scaled to the surface coordinates for this "
+							"calculation. Attempting to view across "
+							"different levels increases the distance by ";
+						*str += range->crossLevelPenalty;
+						*str += ". ";
+						*str += "To use this skill, CAST Clear_Skies REGION "
+							"<x> <y> <z> where <x>, <y>, and <z> are the "
+							"coordinates of the region where you wish to "
+							"improve the weather. If you omit the <z> "
+							"coordinate, the <z> coordinate of the caster's "
+							"current region will be used.";
+						if(Globals->UNDERWORLD_LEVELS +
+								Globals->UNDERDEEP_LEVELS == 1) {
+							*str += " The <z> coordinate for the surface is "
+								"'1' and the <z>-coordinate for the "
+								"underworld is '2'.";
+						}
+						*str += " Note that Clear Skies cannot be used "
+							"either into or out of the Nexus.";
+					} else {
+						*str += "To use this skill, CAST Clear_Skies REGION "
+							"<x> <y>, where <x> and <y> are the coordinates "
+							"of the region where you wish to improve the "
+							"weather.";
+					}
 				} else {
-					*str += "To use this skill, CAST Clear_Skies REGION "
-						"<x> <y>, where <x> and <y> are the coordinates of "
-						"the region where you wish to improve the weather.";
+					*str += " To use the spell in this fashion, CAST "
+						"Clear_Skies; no arguments are necessary.";
 				}
-			} else {
-				*str += " To use the spell in this fashion, CAST "
-					"Clear_Skies; no arguments are necessary.";
 			}
 			break;
 		case S_EARTH_LORE:
@@ -801,13 +805,13 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "A mage with the Summon Balrog skill may summon a balrog "
 				"into his inventory, to aid him in combat. A mage has a 20 "
 				"percent times his skill level chance of summoning a balrog, "
-				"but may only control one balrog at a time. As with other "
-				"demons, the balrog has a chance of breaking free of the "
-				"mage's control at the end of each turn. This chance is equal "
-				"to 1 over 4 times the mage's skill level to the fourth "
-				"power (or, from 1 over 4 at level 1, to 1 over 250 at "
-				"level 5). To use this spell, the mage should issue the "
-				"order CAST Summon_Balrog.";
+				"but may only summon a balrog if one is not already under "
+				"his control. As with other demons, the balrog has a chance "
+				"of breaking free of the mage's control at the end of each "
+				"turn. This chance is equal to 1 over 4 times the mage's "
+				"skill level to the fourth power (or, from 1 over 4 at "
+				"level 1, to 1 over 2500 at level 5). To use this spell, "
+				"the mage should issue the order CAST Summon_Balrog.";
 			break;
 		case S_BANISH_DEMONS:
 			if(level > 1) break;
@@ -1246,7 +1250,7 @@ AString *ShowSkill::Report(Faction *f)
 	// If this is a combat spell, note it.
 	if(level == 1 && (SkillDefs[skill].flags & SkillType::COMBAT)) {
 		*str += AString(" A mage with this skill can cast ") +
-			ShowSpecial(SkillDefs[skill].special, level, 0);
+			ShowSpecial(SkillDefs[skill].special, level, 0, 0);
 		*str += " In order to use this spell in combat, the mage should use "
 			"the COMBAT order to set it as his combat spell.";
 	}

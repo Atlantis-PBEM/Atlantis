@@ -1253,7 +1253,7 @@ ItemType id[] =
 	 15,0,0,0,
 	 -1,0,
 	 -1,0},
-	{"highlander","highlander","HILA",
+	{"highlander","highlanders","HILA",
 	 ItemType::DISABLED,
 	 -1,0,0,0, {{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0}},
@@ -1349,7 +1349,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 -1,0,
 	 I_HAMMER,1},
-	{"improved mithril armor","improved mithril armors","IMTH",
+	{"improved mithril armor","improved mithril armor","IMTH",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORCRAFT,1,1,1, {{I_MPLATE,1},{I_MITHRIL,1}},
 	 -1,0,0, {{-1,0},{-1,0}},
@@ -1629,7 +1629,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 -1,0,
 	 I_AXE,1},
-	{"shortbow","shortbows","SBOW",
+	{"shortbow","shortbows","SHBO",
 	 ItemType::DISABLED,
 	 S_WEAPONSMITH,1,1,1, {{I_WOOD,1},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0}},
@@ -2157,7 +2157,7 @@ WeaponType wepd[] = {
 WeaponType *WeaponDefs = wepd;
 
 //
-// Table of armors.
+// Table of armor.
 //
 // flags, from, slashChance, pierceChance, crushChance, cleaveChance,
 // armorpiercingChance, energyChance, spiritChance, weatherChance;
@@ -2617,7 +2617,7 @@ static SkillType sd[] = {
 	{"create flaming sword","CFSW",100,
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
 	 0, -1,
-	 {{S_ARTIFACT_LORE,2},{S_FIRE,1},{-1,0}}},
+	 {{S_ARTIFACT_LORE,2},{S_FIRE,3},{-1,0}}},
 };
 
 SkillType * SkillDefs = sd;
@@ -3888,21 +3888,15 @@ static EffectType efd[] = {
 	// EFFECT_DAZZLE
 	{"dazzle", -2,
 	 {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
-	 -1,
-	 EffectType::EFF_ONESHOT
-	},
+	 -1, EffectType::EFF_ONESHOT},
 	// EFFECT_FEAR
 	{"fear", -2,
 	 {{ATTACK_COMBAT, -2}, {ATTACK_RIDING, -2}, {-1, 0}, {-1, 0}},
-	 -1,
-	 0
-	},
-	//EFFECT_STORM
+	 -1, 0},
+	// EFFECT_STORM
 	{"storm", -2,
 	 {{ATTACK_COMBAT, -2}, {-1, 0}, {-1, 0}, {-1, 0}},
-	 -1,
-	 0
-	},
+	 -1, 0},
 };
 
 EffectType *EffectDefs = efd;

@@ -428,12 +428,13 @@ void Game::GetAFacs(ARegion *r, Unit *att, Unit *tar, AList &dfacs,
 						if (u->attackorders) {
 							forlist(&(u->attackorders->targets)) {
 								UnitId * id = (UnitId *) elem;
-								if (r->GetUnitId(id,u->faction->num) == tar) {
+								Unit *t = r->GetUnitId(id, u->faction->num);
+								if (!t) continue;
+								if (t == tar) {
 									u->attackorders->targets.Remove(id);
 									delete id;
-									add = 1;
-									break;
 								}
+								if(t->faction == tar->faction) add = 1;
 							}
 						}
 					}

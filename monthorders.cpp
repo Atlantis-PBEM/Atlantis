@@ -469,7 +469,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
     }
 
     // AS
-    u->Event(AString("Performs") + job + "on " + *(obj->name));
+    u->Event(AString("Performs") + job + "on " + *(obj->name) + ".");
 
     delete u->monthorders;
     u->monthorders = 0;

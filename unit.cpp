@@ -548,6 +548,7 @@ void Unit::ClearOrders()
 	canattack = 1;
 	nomove = 0;
 	enter = 0;
+	leftShip = 0;
 	destroy = 0;
 	attackorders = 0;
 	stealorders = 0;
@@ -787,7 +788,7 @@ int Unit::GetAttackRiding()
 				return riding;
 			}
 			/* XXX -- Fix this -- Should also be able to carry the man */
-			if (ItemDefs[i->type].ride - ItemDefs[i->type].weight) {
+			if (ItemDefs[i->type].ride - ItemDefs[i->type].weight >= 10) {
 				if (riding <= 3) return riding;
 				lowriding = 3;
 			}
@@ -1569,21 +1570,33 @@ void Unit::Error(const AString & s)
 	faction->Error(temp);
 }
 
-int Unit::GetSkillBonus( int sk )
+int Unit::GetSkillBonus(int sk)
 {
 	int bonus = 0;
-	switch( sk ) {
+	int men = GetMen();
+	switch(sk) {
 		case S_OBSERVATION:
-			if (GetMen()) bonus = (GetSkill(S_TRUE_SEEING) + 1) / 2;
-			if ((bonus != 3) && GetMen() && items.GetNum(I_AMULETOFTS))
-				bonus = 2;
+			if(!men) break;
+			if(Globals->FULL_TRUESEEING_BONUS) {
+				bonus = GetSkill(S_TRUE_SEEING);
+			} else {
+				bonus = (GetSkill(S_TRUE_SEEING)+1)/2;
+			}
+			if ((bonus < (2 + Globals->IMPROVED_AMTS)) &&
+					items.GetNum(I_AMULETOFTS)) {
+				bonus = 2 + Globals->IMPROVED_AMTS;
+			}
 			break;
 		case S_STEALTH:
-			if (GetFlag(FLAG_INVIS) || GetMen() <= items.GetNum(I_RINGOFI))
+			if(men == 1 && Globals->FULL_INVIS_ON_SELF) {
+				bonus = GetSkill(S_INVISIBILITY);
+			}
+			if((bonus < 3) &&
+					(GetFlag(FLAG_INVIS) || men <= items.GetNum(I_RINGOFI))) {
 				bonus = 3;
+			}
 			break;
 		default:
-			bonus = 0;
 			break;
 	}
 	return bonus;

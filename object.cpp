@@ -265,9 +265,9 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 		} else if(Globals->DECAY &&
 				!(ob->flags & ObjectType::NEVERDECAY) && incomplete < 1) {
 			if(incomplete > (0 - ob->maxMonthlyDecay)) {
-				temp += DoDecayWarning();
+				temp += ", about to decay";
 			} else if(incomplete > (0 - ob->maxMaintenance/2)) {
-				temp += DoMaintenanceWarning();
+				temp += ", needs maintenance";
 			}
 		}
 		if (inner != -1) {
@@ -327,16 +327,6 @@ int Object::IsRoad()
 {
 	if (type >= O_ROADN && type <= O_ROADS) return 1;
 	return 0;
-}
-
-AString Object::DoDecayWarning()
-{
-	return AString(". This object is about to decay.");
-}
-
-AString Object::DoMaintenanceWarning()
-{
-	return AString(". This object needs maintenance.");
 }
 
 AString *ObjectDescription(int obj)

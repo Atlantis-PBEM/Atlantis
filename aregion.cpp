@@ -766,7 +766,7 @@ void ARegion::UpdateTown()
     }
 }
 
-void ARegion::PostTurn()
+void ARegion::PostTurn(ARegionList *pRegs)
 {
     //
     // First update population based on production
@@ -803,7 +803,7 @@ void ARegion::PostTurn()
 
         // AS
 		if(Globals->DECAY) {
-			DoDecayCheck();
+			DoDecayCheck(pRegs);
 		}
 
         //
@@ -862,18 +862,18 @@ void ARegion::PostTurn()
 }
 
 // AS
-void ARegion::DoDecayCheck()
+void ARegion::DoDecayCheck(ARegionList *pRegs)
 {
 	forlist (&objects) {
 		Object *o = (Object *) elem;
 		if(!(ObjectDefs[o->type].flags & ObjectType::NEVERDECAY)) {
-			DoDecayClicks(o);
+			DoDecayClicks(o, pRegs);
 		}
 	}
 }
 
 // AS
-void ARegion::DoDecayClicks(Object *o)
+void ARegion::DoDecayClicks(Object *o, ARegionList *pRegs)
 {
 	if(ObjectDefs[o->type].flags & ObjectType::NEVERDECAY) return;
 
@@ -887,12 +887,12 @@ void ARegion::DoDecayClicks(Object *o)
 
 	if(o->incomplete > 0) {
 		// trigger decay event
-		RunDecayEvent(o);
+		RunDecayEvent(o, pRegs);
 	}
 }
 
 // AS
-void ARegion::RunDecayEvent(Object *o)
+void ARegion::RunDecayEvent(Object *o, ARegionList *pRegs)
 {
 	AList * pFactions;
 	pFactions = PresentFactions();
@@ -900,8 +900,7 @@ void ARegion::RunDecayEvent(Object *o)
 		Faction * f = ((FactionPtr *) elem)->ptr;
 		f->Event(GetDecayFlavor() + *o->name + " " +
 				ObjectDefs[o->type].name + " in " +
-				(AString) TerrainDefs[type].name + " (" + xloc + "," +
-				yloc + ") in " + *name + ".");
+				ShortPrint(pRegs));
 	}
 }
 
@@ -1130,7 +1129,8 @@ int ARegion::CountConnectingRoads()
 {
 	int connections = 0;
 	for (int i = 0; i < NDIRS; i++) {
-		if (HasExitRoad(i) && neighbors[i]->HasConnectingRoad(i))
+		if (HasExitRoad(i) && neighbors[i] &&
+				neighbors[i]->HasConnectingRoad(i))
 			connections ++;
 	}
 	return connections;
