@@ -502,7 +502,9 @@ AString *ItemDescription(int item, int full)
 		unsigned int c;
 		unsigned int len = sizeof(ManDefs[man].skills)/sizeof(int);
 		for(c = 0; c < len; c++) {
-			if(ManDefs[man].skills[c] != -1) {
+			int skill = ManDefs[man].skills[c];
+			if(skill != -1) {
+				if(SkillDefs[skill].flags & SkillType::DISABLED) continue;
 				if(found) *temp += ", ";
 				if(found && c == len - 1) *temp += "and ";
 				found = 1;
@@ -511,7 +513,7 @@ AString *ItemDescription(int item, int full)
 		}
 		if(found) {
 			*temp += AString(" to level ") + ManDefs[man].speciallevel +
-			   	" and all others to level " + ManDefs[man].defaultlevel;
+				" and all others to level " + ManDefs[man].defaultlevel;
 		} else {
 			*temp += AString("all skills to level ") +
 				ManDefs[man].defaultlevel;

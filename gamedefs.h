@@ -370,8 +370,9 @@ public:
 
 	// If this is enabled, then when a unit has more men than Amulets of
 	// True Seeing, and it is targetted by an assassin, then there is a
-	// chance that the target picked will not be one of the men carrying
-	// the amulet.
+	// chance that the target picked will be one of the men carrying
+	// the amulet and the attempt will be foiled.  If not enabled, the
+	// attempt always succeeds.
 	int PROPORTIONAL_AMTS_USAGE;
 
 	// If this is enabled, then the ARMOR and WEAPON commands for selecting

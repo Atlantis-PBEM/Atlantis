@@ -316,13 +316,14 @@ Changes from 4.0.8 -> 4.0.9
       Alsen <tzarg@yahoo.com>
    -- Added PROPORTIONAL_AMTS_USAGE flag. When set, if an assassin targets
       a unit with more men than amulets of true seeing, there is a chance
-      that he picks a man without an AMTS, and the attempt proceeds.  Patch
+      that he picks a man with an AMTS, and the attempt is foiled.  When
+      this gamedef is unset, the attempt will always succeed.  Patch
       submitted by Tom Alsen <tzarg@yahoo.com>.
    -- New rule: Assassins with RINGs of invisibility cannot get amulets of
       true seeing in spoils (otherwise the assassination would have been
-      prevented) [This is needed to work with PROPORTIONAL_AMTS_USAGE
-      gamedef. If that gamedef is set, this new rule has no effect]. Patch
-      submitted by Tom Alsen <tzarg@yahoo.com>.
+      prevented) [This is needed for the PROPORTIONAL_AMTS_USAGE to work,
+      but also applies when that gamedef is clear.] Patch submitted by
+      Tom Alsen <tzarg@yahoo.com>.
    -- Fixed a hang when attempting to write report files which already exist.
       It now just silently doesn't write them.
    -- Added 'EXCHANGE' order which allows two units to trade items
@@ -373,3 +374,5 @@ Changes from 4.0.8 -> 4.0.9
       its own right.
    -- Fixed a bug where spoils calculation could wrap causing spoils
       earned to be a negative value of an object.
+   -- Fixed a bug where a disabled skill would be shown in the information
+      about a race which had that skill as a specialty.
