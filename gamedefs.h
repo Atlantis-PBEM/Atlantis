@@ -286,6 +286,10 @@ public:
 	// Do we allow objects to decay according to the parameters in the object
 	// definition table
 	int DECAY;
+
+	// Do we limit the number of mages which can study inside of certain
+	// buildings.
+	int LIMITED_MAGES_PER_BUILDING;
 };
 
 extern GameDefs * Globals;

@@ -405,15 +405,17 @@ void Game::ModifyObjectConstruction(int ob, int it, int num, int sk, int lev)
 	ObjectDefs[ob].level = lev;
 }
 
-void Game::ModifyObjectManpower(int ob, int protect, int capacity, int sailors)
+void Game::ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages)
 {
 	if(ob < 0 || ob > (NOBJECTS-1)) return;
-	if(protect < 0) return;
-	if(capacity < 0) return;
-	if(sailors < 0) return;
-	ObjectDefs[ob].protect = protect;
-	ObjectDefs[ob].capacity = capacity;
-	ObjectDefs[ob].sailors = sailors;
+	if(prot < 0) return;
+	if(cap < 0) return;
+	if(sail < 0) return;
+	if(mages < 0) return;
+	ObjectDefs[ob].protect = prot;
+	ObjectDefs[ob].capacity = cap;
+	ObjectDefs[ob].sailors = sail;
+	ObjectDefs[ob].maxMages = mages;
 }
 
 void Game::ClearTerrainRaces(int t)

@@ -23,5 +23,8 @@ Andrew Zhilenko
     Small bug fixes and code cleanup
 Terho T Uotila
     A couple of ideas and items
+Paul Mehrer
+	Submitted patch to allow limiting the number of mages which can study
+	  in any give building type.
 Joseph Traub
     Changes, updates, and merging a few disparate branches

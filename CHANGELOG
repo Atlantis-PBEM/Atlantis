@@ -245,3 +245,5 @@ Changes from 4.0.7 -> 4.0.8
    -- RE-FIXED bug with city guards
    -- Fixed a bug where a disabled item/skill/object was still be accepted
       by the checker.
+   -- Applied modified version of maximum mages per building patch submitted
+      by Paul Mehrer <paul.mehrer@web.de>

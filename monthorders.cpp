@@ -810,11 +810,24 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 
 	int days = 30 * u->GetMen() + o->days;
 
-	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetSkill(sk) >= 2 &&
-			(!ObjectDefs[obj->type].protect || (obj->incomplete > 0))) {
-		u->Error("Warning: Magic study rate outside of a tower cut in half "
-				"above level 2.");
-		days /= 2;
+	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetSkill(sk) >= 2) {
+		if(Globals->LIMITED_MAGES_PER_BUILDING) {
+		   	if (obj->incomplete < 1 || obj->type == O_DUMMY) {
+				u->Error("Warning: Magic study rate outside of a building "
+						"cut in half above level 2.");
+				days /= 2;
+			} else if(obj->mages == 0) {
+				u->Error("Warning: Magic rate cut in half above level 2 due "
+						"to number of mages studying in structure.");
+				days /= 2;
+			} else {
+				obj->mages--;
+			}
+		} else if(!(ObjectDefs[obj->type].protect) || (obj->incomplete > 0)) {
+			u->Error("Warning: Magic study rate outside of a building cut in "
+					"half above level 2.");
+			days /= 2;
+		}
 	}
 
 	if(SkillDefs[sk].flags & SkillType::SLOWSTUDY) {

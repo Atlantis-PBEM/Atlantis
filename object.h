@@ -53,6 +53,7 @@ class ObjectType {
 		int protect;
 		int capacity;
 		int sailors;
+		int maxMages;
 
 		int item;
 		int cost;
@@ -116,6 +117,7 @@ class Object : public AListElem
 		int incomplete;
 		int capacity;
 		int runes;
+		int mages;
 		AList units;
 };
 

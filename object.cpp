@@ -61,6 +61,7 @@ Object::Object( ARegion *reg )
 	incomplete = 0;
 	describe = 0;
 	capacity = 0;
+	mages = 0;
 	inner = -1;
 	runes = 0;
 	region = reg;
@@ -112,6 +113,7 @@ void Object::Readin(Ainfile * f,AList * facs,ATL_VER v)
 		temp->Readin(f,facs,v);
 		temp->MoveUnit( this );
 	}
+	mages = ObjectDefs[type].maxMages;
 }
 
 void Object::SetName(AString * s)
@@ -332,6 +334,10 @@ AString *ObjectDescription(int obj)
 	if(o->sailors) {
 		*temp += AString(" This ship requires ") + o->sailors +
 			" total levels of sailing skill to sail.";
+	}
+	if(o->maxMages && Globals->LIMITED_MAGES_PER_BUILDING) {
+		*temp += AString(" This structure will allow up to ") + o->maxMages +
+			" mages to study above level 2.";
 	}
 	int buildable = 1;
 	if(o->item == -1 || o->skill == -1) buildable = 0;

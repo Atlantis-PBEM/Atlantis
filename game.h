@@ -228,7 +228,7 @@ private:
 	void ModifyObjectProduction(int ob, int it);
 	void ModifyObjectMonster(int ob, int monster);
 	void ModifyObjectConstruction(int ob, int it, int num, int sk, int lev);
-	void ModifyObjectManpower(int ob, int protect, int capacity, int sailors);
+	void ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages);
 	
 
 	void ClearTerrainRaces(int t);

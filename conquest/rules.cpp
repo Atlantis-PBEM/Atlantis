@@ -141,6 +141,7 @@ static GameDefs g = {
 	0,	// IMPORVED_FARSIGHT
 	0,	// GM_REPORT
 	0,	// DECAY
+	0,	// LIMITED_MAGES_PER_BUILDING
 };
 
 GameDefs * Globals = &g;
