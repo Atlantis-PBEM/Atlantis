@@ -1429,44 +1429,42 @@ Unit * ARegion::GetUnit(int num)
 
 Location * ARegion::GetLocation(UnitId * id,int faction)
 {
-    Unit * retval = 0;
-    forlist(&objects) {
-        Object * o = (Object *) elem;
-        retval = o->GetUnitId(id,faction);
-        if (retval)
-        {
-            Location * l = new Location;
-            l->region = this;
-            l->obj = o;
-            l->unit = retval;
-            return l;
-        }
-    }
-    return 0;
+	Unit * retval = 0;
+	forlist(&objects) {
+		Object * o = (Object *) elem;
+		retval = o->GetUnitId(id,faction);
+		if (retval) {
+			Location * l = new Location;
+			l->region = this;
+			l->obj = o;
+			l->unit = retval;
+			return l;
+		}
+	}
+	return 0;
 }
 
-Unit * ARegion::GetUnitAlias(int alias,int faction)
+Unit *ARegion::GetUnitAlias(int alias,int faction)
 {
-    forlist((&objects)) {
-        Object * obj = (Object *) elem;
-        Unit *u = obj->GetUnitAlias( alias, faction );
-        if( u )
-        {
-            return( u );
-        }
-    }
-    return 0;
+	forlist((&objects)) {
+		Object * obj = (Object *) elem;
+		Unit *u = obj->GetUnitAlias( alias, faction );
+		if( u ) {
+			return( u );
+		}
+	}
+	return 0;
 }
 
-Unit * ARegion::GetUnitId(UnitId * id,int faction)
+Unit *ARegion::GetUnitId(UnitId * id,int faction)
 {
-    Unit * retval = 0;
-    forlist(&objects) {
-        Object * o = (Object *) elem;
-        retval = o->GetUnitId(id,faction);
-        if (retval) return retval;
-    }
-    return retval;
+	Unit * retval = 0;
+	forlist(&objects) {
+		Object * o = (Object *) elem;
+		retval = o->GetUnitId(id,faction);
+		if (retval) return retval;
+	}
+	return retval;
 }
 
 int ARegion::Present(Faction * f)
@@ -2282,56 +2280,52 @@ ARegion * ARegionList::GetRegion(int n)
 
 ARegion *ARegionList::GetRegion( int x, int y, int z )
 {
-    ARegionArray *arr = pRegionArrays[ z ];
+	ARegionArray *arr = pRegionArrays[ z ];
+	x = ( x + arr->x ) % arr->x;
+	y = ( y + arr->y ) % arr->y;
 
-    x = ( x + arr->x ) % arr->x;
-    y = ( y + arr->y ) % arr->y;
-
-    return( arr->GetRegion( x, y ));
+	return( arr->GetRegion( x, y ));
 }
 
-Location * ARegionList::FindUnit(int i) {
-  forlist(this) {
-    ARegion * reg = (ARegion *) elem;
-    forlist((&reg->objects)) {
-      Object * obj = (Object *) elem;
-      forlist((&obj->units)) {
-	Unit * u = (Unit *) elem;
-	if (u->num == i) {
-	  Location * retval = new Location;
-	  retval->unit = u;
-	  retval->region = reg;
-	  retval->obj = obj;
-	  return retval;
+Location * ARegionList::FindUnit(int i)
+{
+	forlist(this) {
+		ARegion * reg = (ARegion *) elem;
+		forlist((&reg->objects)) {
+			Object * obj = (Object *) elem;
+			forlist((&obj->units)) {
+				Unit * u = (Unit *) elem;
+				if (u->num == i) {
+					Location * retval = new Location;
+					retval->unit = u;
+					retval->region = reg;
+					retval->obj = obj;
+					return retval;
+				}
+			}
+		}
 	}
-      }
-    }
-  }
-  return 0;
+	return 0;
 }
 
 void ARegionList::NeighSetup(ARegion * r,ARegionArray * ar)
 {
-    r->ZeroNeighbors();
+	r->ZeroNeighbors();
 
-    if (r->yloc != 0 && r->yloc != 1)
-    {
-        r->neighbors[D_NORTH] = ar->GetRegion(r->xloc,r->yloc - 2);
-    }
-    if (r->yloc != 0)
-    {
-        r->neighbors[D_NORTHEAST] = ar->GetRegion(r->xloc + 1,r->yloc - 1);
-        r->neighbors[D_NORTHWEST] = ar->GetRegion(r->xloc - 1,r->yloc - 1);
-    }
-    if (r->yloc != ar->y - 1)
-    {
-        r->neighbors[D_SOUTHEAST] = ar->GetRegion(r->xloc + 1,r->yloc + 1);
-        r->neighbors[D_SOUTHWEST] = ar->GetRegion(r->xloc - 1,r->yloc + 1);
-    }
-    if (r->yloc != ar->y - 1 && r->yloc != ar->y - 2)
-    {
-        r->neighbors[D_SOUTH] = ar->GetRegion(r->xloc,r->yloc + 2);
-    }
+	if (r->yloc != 0 && r->yloc != 1) {
+		r->neighbors[D_NORTH] = ar->GetRegion(r->xloc,r->yloc - 2);
+	}
+	if (r->yloc != 0) {
+		r->neighbors[D_NORTHEAST] = ar->GetRegion(r->xloc + 1,r->yloc - 1);
+		r->neighbors[D_NORTHWEST] = ar->GetRegion(r->xloc - 1,r->yloc - 1);
+	}
+	if (r->yloc != ar->y - 1) {
+		r->neighbors[D_SOUTHEAST] = ar->GetRegion(r->xloc + 1,r->yloc + 1);
+		r->neighbors[D_SOUTHWEST] = ar->GetRegion(r->xloc - 1,r->yloc + 1);
+	}
+	if (r->yloc != ar->y - 1 && r->yloc != ar->y - 2) {
+		r->neighbors[D_SOUTH] = ar->GetRegion(r->xloc,r->yloc + 2);
+	}
 }
 
 void ARegionList::CreateAbyssLevel( int level, char *name )
@@ -3153,7 +3147,7 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion*two)
 	int maxx = one_x - two_x;
 	if(maxx < 0) maxx = -maxx;
 
-	int max2 = one_x - pArr->x - two_x;
+	int max2 = one_x + pArr->x - two_x;
 	if(max2 < 0) max2 = -max2;
 	if(max2 < maxx) maxx = max2;
 

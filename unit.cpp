@@ -141,18 +141,20 @@ void Unit::Writeout( Aoutfile *s )
 
 void Unit::Readin( Ainfile *s, AList *facs, ATL_VER v )
 {
-    name = s->GetStr();
-    describe = s->GetStr();
-    if (*describe == "none") {
-        delete describe;
-        describe = 0;
-    }
-    num = s->GetInt();
-    type = s->GetInt();
-    int i = s->GetInt();
-    faction = GetFaction(facs,i);
-    guard = s->GetInt();
-    reveal = s->GetInt();
+	name = s->GetStr();
+	describe = s->GetStr();
+	if (*describe == "none") {
+		delete describe;
+		describe = 0;
+	}
+	num = s->GetInt();
+	type = s->GetInt();
+	int i = s->GetInt();
+	faction = GetFaction(facs,i);
+	guard = s->GetInt();
+	if(guard == GUARD_ADVANCE) guard = GUARD_NONE;
+	if(guard == GUARD_SET) guard = GUARD_GUARD;
+	reveal = s->GetInt();
     flags = s->GetInt();
     items.Readin(s);
     skills.Readin(s);

@@ -1053,13 +1053,17 @@ void Game::DoAutoAttacksRegion(ARegion * r)
     }
 }
 
-void Game::DoAdvanceAttacks(AList * locs) {
+void Game::DoAdvanceAttacks(AList * locs)
+{
 	forlist(locs) {
 		Location * l = (Location *) elem;
 		Unit * u = l->unit;
 		ARegion * r = l->region;
 		if (u->IsAlive() && u->canattack) {
 			DoAutoAttack(r,u);
+			if(!u->IsAlive() || !u->canattack) {
+				u->guard = GUARD_NONE;
+			}
 		}
 		if (u->IsAlive() && u->canattack && u->guard == GUARD_ADVANCE) {
 			DoAdvanceAttack(r,u);
@@ -1067,6 +1071,9 @@ void Game::DoAdvanceAttacks(AList * locs) {
 		}
 		if (u->IsAlive()) {
 			DoAutoAttackOn(r,u);
+			if(!u->IsAlive() || !u->canattack) {
+				u->guard = GUARD_NONE;
+			}
 		}
 	}
 }

@@ -195,3 +195,11 @@ Changes from 4.0.6 -> 4.0.7
    -- Added skillflag SLOWSTUDY.  If you modify a skill to have this flag,
       a month of study will only produce 15 days of learning in the skill.
       This is cumulative with non-tower penalty for magic skills over level 2.
+   -- Fixed a bug which could potentially result in GUARD_ADVANCE being left
+      set on a unit across turns.
+   -- Fixed a bug in calculating planar distances around the east/west
+      boundary.
+   -- Added some 'commands' allowable in the Players.in file which allow the
+      GM to give a faction custom-made units, or to give existing units of
+      that faction various skills or items (or to take them away).  It also
+      allows the GM to force some orders to be executed by specific units.

@@ -162,7 +162,7 @@ AString *ItemDescription(int item, int full)
 			*temp += ", can walk";
 		}
 	}
-	if(ItemDefs[item].hitchItem &&
+	if((ItemDefs[item].hitchItem != -1 )&&
 			!(ItemDefs[ItemDefs[item].hitchItem].flags & ItemType::DISABLED)) {
 		int cap = ItemDefs[item].walk - ItemDefs[item].weight +
 			ItemDefs[item].hitchwalk;
@@ -197,11 +197,13 @@ AString *ItemDescription(int item, int full)
 		}
 	}
 
-	if(ItemDefs[item].type & IT_NORMAL && item != I_SILVER) {
-		*temp += AString(", costs ") + (ItemDefs[item].baseprice*5/2) +
-		   	" silver to withdraw";
+	if(Globals->ALLOW_WITHDRAW) {
+		if(ItemDefs[item].type & IT_NORMAL && item != I_SILVER) {
+			*temp += AString(", costs ") + (ItemDefs[item].baseprice*5/2) +
+				" silver to withdraw";
+		}
+		*temp += ".";
 	}
-	*temp += ".";
 
 	if(ItemDefs[item].type & IT_MAN) {
 		int man = ItemDefs[item].index;
@@ -429,7 +431,7 @@ AString *ItemDescription(int item, int full)
 			*temp += " This mount is unridable.";
 		} else {
 			*temp += AString(" This mount requires ") + SkillStrs(pM->skill) +
-				" of at least level " + pM->minBonus + " to ride.";
+				" of at least level " + pM->minBonus + " to ride in combat.";
 		}
 		*temp += AString(" This mount gives a minimum bonus of +") +
 			pM->minBonus + " when ridden into combat.";

@@ -211,6 +211,7 @@ public:
     int num;
     int type;
     int alias;
+	int gm_alias;	/* used for gm manual creation of new units */
     int guard;	/* Also, avoid- see enum above */
     int reveal;
     int flags;

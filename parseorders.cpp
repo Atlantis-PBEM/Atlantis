@@ -91,112 +91,97 @@ int ParseTF(AString * token)
 
 UnitId *Game::ParseUnit(AString * s)
 {
-    AString * token = s->gettoken();
-    if (!token)
-    {
-        return 0;
-    }
-  
-    if (*token == "0")
-    {
-        delete token;
-        UnitId * id = new UnitId;
-        id->unitnum = -1;
-        id->alias = 0;
-        id->faction = 0;
-        return id;
-    }
-	
-    if (*token == "faction")
-    {
-        delete token;
-        /* Get faction number */
-        token = s->gettoken();
-        if (!token)
-        {
-            return 0;
-        }
+	AString * token = s->gettoken();
+	if (!token) {
+		return 0;
+	}
 
-        int fn = token->value();
-        delete token;
-        if (!fn)
-        {
-            return 0;
-        }
+	if (*token == "0") {
+		delete token;
+		UnitId * id = new UnitId;
+		id->unitnum = -1;
+		id->alias = 0;
+		id->faction = 0;
+		return id;
+	}
 
-        /* Next token should be "new" */
-        token = s->gettoken();
-        if (!token)
-        {
-            return 0;
-        }
+	if (*token == "faction") {
+		delete token;
+		/* Get faction number */
+		token = s->gettoken();
+		if (!token) {
+			return 0;
+		}
 
-        if (!(*token == "new"))
-        {
-            delete token;
-            return 0;
-        }
-        delete token;
+		int fn = token->value();
+		delete token;
+		if (!fn) {
+			return 0;
+		}
 
-        /* Get alias number */
-        token = s->gettoken();
-        if (!token)
-        {
-            return 0;
-        }
+		/* Next token should be "new" */
+		token = s->gettoken();
+		if (!token) {
+			return 0;
+		}
 
-        int un = token->value();
-        delete token;
-        if (!un)
-        {
-            return 0;
-        }
+		if (!(*token == "new")) {
+			delete token;
+			return 0;
+		}
+		delete token;
 
-        /* Return UnitId */
-        UnitId * id = new UnitId;
-        id->unitnum = 0;
-        id->alias = un;
-        id->faction = fn;
-        return id;
-    }
-  
-    if (*token == "new")
-    {
-        delete token;
-        token = s->gettoken();
-        if (!token)
-        {
-            return 0;
-        }
+		/* Get alias number */
+		token = s->gettoken();
+		if (!token) {
+			return 0;
+		}
 
-        int un = token->value();
-        delete token;
-        if (!un)
-        {
-            return 0;
-        }
+		int un = token->value();
+		delete token;
+		if (!un) {
+			return 0;
+		}
 
-        UnitId * id = new UnitId;
-        id->unitnum = 0;
-        id->alias = un;
-        id->faction = 0;
-        return id;
-    } 
-    else
-    {
-        int un = token->value();
-        delete token;
-        if (!un)
-        {
-            return 0;
-        }
+		/* Return UnitId */
+		UnitId * id = new UnitId;
+		id->unitnum = 0;
+		id->alias = un;
+		id->faction = fn;
+		return id;
+	}
 
-        UnitId * id = new UnitId;
-        id->unitnum = un;
-        id->alias = 0;
-        id->faction = 0;
-        return id;
-    }
+	if (*token == "new") {
+		delete token;
+		token = s->gettoken();
+		if (!token) {
+			return 0;
+		}
+
+		int un = token->value();
+		delete token;
+		if (!un) {
+			return 0;
+		}
+
+		UnitId * id = new UnitId;
+		id->unitnum = 0;
+		id->alias = un;
+		id->faction = 0;
+		return id;
+	} else {
+		int un = token->value();
+		delete token;
+		if (!un) {
+			return 0;
+		}
+
+		UnitId * id = new UnitId;
+		id->unitnum = un;
+		id->alias = 0;
+		id->faction = 0;
+		return id;
+	}
 }
 
 int ParseFactionType(AString * o,int * type)
@@ -1816,40 +1801,40 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
 {
-    UnitId * t = ParseUnit(o);
-    if (!t) {
-        ParseError( pCheck, unit, 0, "GIVE: Invalid target.");
-        return;
-    }
-    AString * token = o->gettoken();
-    if (!token) {
-        ParseError( pCheck, unit, 0, "GIVE: No amount given.");
-        return;
-    }
-    int amt;
-    if (*token == "unit") {
-        amt = -1;
+	UnitId * t = ParseUnit(o);
+	if (!t) {
+		ParseError( pCheck, unit, 0, "GIVE: Invalid target.");
+		return;
+	}
+	AString * token = o->gettoken();
+	if (!token) {
+		ParseError( pCheck, unit, 0, "GIVE: No amount given.");
+		return;
+	}
+	int amt;
+	if (*token == "unit") {
+		amt = -1;
 	} else if(*token == "all") {
 		amt = -2;
-    } else {
-        amt = token->value();
-    }
-    delete token;
-    int item = I_LEADERS;
-    if (amt != -1) {
-        token = o->gettoken();
-        if (!token) {
-            ParseError( pCheck, unit, 0, "GIVE: No item given.");
-            return;
-        }
-        item = ParseItem(token);
-        delete token;
-    }
-    
-    if (item == -1) {
-        ParseError( pCheck, unit, 0, "GIVE: Invalid item.");
-        return;
-    }
+	} else {
+		amt = token->value();
+	}
+	delete token;
+	int item = I_LEADERS;
+	if (amt != -1) {
+		token = o->gettoken();
+		if (!token) {
+			ParseError( pCheck, unit, 0, "GIVE: No item given.");
+			return;
+		}
+		item = ParseItem(token);
+		delete token;
+	}
+
+	if (item == -1) {
+		ParseError( pCheck, unit, 0, "GIVE: Invalid item.");
+		return;
+	}
 
 	token = o->gettoken();
 	int excpt = 0;
@@ -1873,16 +1858,15 @@ void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
 		delete token;
 	}
 
-    if( !pCheck )
-    {
-        GiveOrder * order = new GiveOrder;
-        order->item = item;
-        order->target = t;
-        order->amount = amt;
+	if( !pCheck ) {
+		GiveOrder * order = new GiveOrder;
+		order->item = item;
+		order->target = t;
+		order->amount = amt;
 		order->except = excpt;
-        unit->giveorders.Add(order);
-    }
-    return;
+		unit->giveorders.Add(order);
+	}
+	return;
 }
 
 void Game::ProcessDescribeOrder( Unit *unit, AString *o, OrdersCheck *pCheck )

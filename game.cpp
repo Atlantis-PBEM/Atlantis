@@ -696,6 +696,34 @@ int Game::ReadPlayers()
 	return( rc );
 }
 
+Unit *Game::ParseGMUnit(AString *tag, Faction *pFac)
+{
+	char *str = tag->Str();
+	if(*str == 'g' && *(str+1) == 'm') {
+		AString p = AString(str+2);
+		int gma = p.value();
+		forlist(&regions) {
+			ARegion *reg = (ARegion *)elem;
+			forlist(&reg->objects) {
+				Object *obj = (Object *)elem;
+				forlist(&obj->units) {
+					Unit *u = (Unit *)elem;
+					if(u->faction->num == pFac->num && u->gm_alias == gma) {
+						return u;
+					}
+				}
+			}
+		}
+	} else {
+		int v = tag->value();
+		if((unsigned int)v >= maxppunits) {
+			return NULL;
+		}
+		return GetUnit(v);
+	}
+	return NULL;
+}
+
 int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 		int newPlayer)
 {
@@ -759,21 +787,182 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 					if(pReg) {
 						pFac->pReg = pReg;
 					} else {
-						Awrite(AString("Invalid region ")+x+","+y+","+z+
-								" Faction: " + pFac->num);
+						Awrite(AString("Invalid Loc:")+x+","+y+","+z+
+								" in faction " + pFac->num);
 						pFac->pReg = NULL;
 					}
 				}
 			}
 		}
-	} else if(*pToken == "NewUnit") {
+	} else if(*pToken == "NewUnit:") {
+		// Creates a new unit in the location specified by a Loc: line
+		// with a gm_alias of whatever is after the NewUnit: tag.
+		if(!pFac->pReg) {
+			Awrite(AString("NewUnit is not valid without a Loc: ") +
+					"for faction "+ pFac->num);
+		}
+		pTemp = pLine->gettoken();
+		if(!pTemp) {
+			Awrite(AString("NewUnit: must be followed by an alias ") +
+					"in faction "+pFac->num);
+		} else {
+			int val = pTemp->value();
+			if(!val) {
+				Awrite(AString("NewUnit: must be followed by an alias ") +
+						"in faction "+pFac->num);
+			} else {
+				Unit *u = GetNewUnit(pFac);
+				u->gm_alias = val;
+				u->MoveUnit(pFac->pReg->GetDummy());
+			}
+		}
 	} else if(*pToken == "Item:") {
+		pTemp = pLine->gettoken();
+		if(!pTemp) {
+			Awrite(AString("Item: needs to specify a unit in faction ") +
+					pFac->num);
+		} else {
+			Unit *u = ParseGMUnit(pTemp, pFac);
+			if(!u) {
+				Awrite(AString("Item: needs to specify a unit in faction ") +
+						pFac->num);
+			} else {
+				if(u->faction->num != pFac->num) {
+					Awrite(AString("Item: unit ")+ u->num +
+							" doesn't belong to " + "faction " + pFac->num);
+				} else {
+					delete pTemp;
+					pTemp = pLine->gettoken();
+					if(!pTemp) {
+						Awrite(AString("Must specify a number of items to ") +
+								"give for Item: in faction " + pFac->num);
+					} else {
+						int v = pTemp->value();
+						if(!v) {
+							Awrite(AString("Must specify a number of ") +
+										"items to give for Item: in " +
+										"faction " + pFac->num);
+						} else {
+							delete pTemp;
+							pTemp = pLine->gettoken();
+							if(!pTemp) {
+								Awrite(AString("Must specify a valid item ") +
+										"to give for Item: in faction " +
+										pFac->num);
+							} else {
+								int it = ParseItem(pTemp);
+								if(it == -1) {
+									Awrite(AString("Must specify a valid ") +
+											"item to give for Item: in " +
+											"faction " + pFac->num);
+								} else {
+									int has = u->items.GetNum(it);
+									u->items.SetNum(it, has + v);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	} else if(*pToken == "Skill:") {
+		pTemp = pLine->gettoken();
+		if(!pTemp) {
+			Awrite(AString("Skill: needs to specify a unit in faction ") +
+					pFac->num);
+		} else {
+			Unit *u = ParseGMUnit(pTemp, pFac);
+			if(!u) {
+				Awrite(AString("Skill: needs to specify a unit in faction ") +
+						pFac->num);
+			} else {
+				if(u->faction->num != pFac->num) {
+					Awrite(AString("Skill: unit ")+ u->num +
+							" doesn't belong to " + "faction " + pFac->num);
+				} else {
+					delete pTemp;
+					pTemp = pLine->gettoken();
+					if(!pTemp) {
+						Awrite(AString("Must specify a valid skill for ") +
+								"Skill: in faction " + pFac->num);
+					} else {
+						int sk = ParseSkill(pTemp);
+						if(sk == -1) {
+							Awrite(AString("Must specify a valid skill for ")+
+									"Skill: in faction " + pFac->num);
+						} else {
+							delete pTemp;
+							pTemp = pLine->gettoken();
+							if(!pTemp) {
+								Awrite(AString("Must specify a days for ") +
+										"Skill: in faction " + pFac->num);
+							} else {
+								int days = pTemp->value();
+								if(!days) {
+									Awrite(AString("Must specify a days for ")+
+											"Skill: in faction " + pFac->num);
+								} else {
+									int odays = u->skills.GetDays(sk);
+									u->skills.SetDays(sk, odays + days);
+									u->AdjustSkills();
+									int lvl = u->GetRealSkill(sk);
+									if(lvl > pFac->skills.GetDays(sk)) {
+										pFac->skills.SetDays(sk, lvl);
+										pFac->shows.Add(new ShowSkill(sk,lvl));
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	} else if( *pToken == "Order:" ) {
-		if( *pLine == "quit" ) {
+		pTemp = pLine->StripWhite();
+		if( *pTemp == "quit" ) {
 			pFac->quit = QUIT_BY_GM;
 		} else {
 			// handle this as a unit order
+			delete pTemp;
+			pTemp = pLine->gettoken();
+			if(!pTemp) {
+				Awrite(AString("Order: needs to specify a unit in faction ") +
+						pFac->num);
+			} else {
+				Unit *u = ParseGMUnit(pTemp, pFac);
+				if(!u) {
+					Awrite(AString("Order: needs to specify a unit in ")+
+							"faction " + pFac->num);
+				} else {
+					if(u->faction->num != pFac->num) {
+						Awrite(AString("Order: unit ")+ u->num +
+								" doesn't belong to " + "faction " +
+								pFac->num);
+					} else {
+						delete pTemp;
+						AString saveorder = *pLine;
+						int getatsign = pLine->getat();
+						pTemp = pLine->gettoken();
+						if(!pTemp) {
+							Awrite(AString("Order: must provide unit order ")+
+									"for faction "+pFac->num);
+						} else {
+							int o = Parse1Order(pTemp);
+							if(o == -1 || o == O_ATLANTIS || o == O_END ||
+									o == O_UNIT || o == O_FORM ||
+									o == O_ENDFORM) {
+								Awrite(AString("Order: invalid order given ")+
+										"for faction "+pFac->num);
+							} else {
+								if(getatsign) {
+									u->oldorders.Add(new AString(saveorder));
+								}
+								ProcessOrder(o, u, pLine, NULL);
+							}
+						}
+					}
+				}
+			}
 		}
 	} else {
 		pTemp = new AString( *pToken + *pLine );

@@ -112,6 +112,9 @@ public:
     //
     Unit *GetUnit( int num );
 
+	// Handle special gm unit modification functions
+	Unit *ParseGMUnit(AString *tag, Faction *pFac);
+
     int TurnNumber();
 
 	// JLT
