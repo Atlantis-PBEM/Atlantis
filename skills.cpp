@@ -71,23 +71,6 @@ int SkillMax(int skill,int race)
     }
 }
 
-AString * ShowASkill(int skill,int level) {
-  AString * str = new AString;
-  *str = SkillStrs(skill) + " " + level + ": ";
-  int i = 0;
-  ShowType * temp = &(ShowDefs[i]);
-  while (temp->skill != -1) {
-    if (temp->skill == skill && temp->level == level) {
-      *str += temp->desc;
-      return str;
-    }
-    i++;
-    temp = &ShowDefs[i];
-  }
-  *str += "No skill report.";
-  return str;
-}
-
 int GetLevelByDays(int dayspermen) {
   int z = 30;
   int i = 0;
@@ -112,10 +95,6 @@ int GetDaysByLevel(int level) {
 ShowSkill::ShowSkill(int s,int l) {
   skill = s;
   level = l;
-}
-
-AString * ShowSkill::Report() {
-  return ShowASkill(skill,level);
 }
 
 void Skill::Readin(Ainfile * f) {
