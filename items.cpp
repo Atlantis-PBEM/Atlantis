@@ -28,19 +28,29 @@
 
 int ParseItem(AString * token)
 {
+	int r = -1;
 	for (int i=0; i<NITEMS; i++) {
 		if ((ItemDefs[i].type & IT_MONSTER) &&
 				ItemDefs[i].index == MONSTER_ILLUSION) {
-			if (*token == AString("i") + ItemDefs[i].name) return i;
-			if (*token == AString("i") + ItemDefs[i].names) return i;
-			if (*token == AString("i") + ItemDefs[i].abr) return i;
+			if ((*token == (AString("i") + ItemDefs[i].name)) ||
+				(*token == (AString("i") + ItemDefs[i].names)) ||
+				(*token == (AString("i") + ItemDefs[i].abr))) {
+				r = i;
+				break;
+			}
 		} else {
-			if (*token == ItemDefs[i].name) return i;
-			if (*token == ItemDefs[i].names) return i;
-			if (*token == ItemDefs[i].abr) return i;
+			if ((*token == ItemDefs[i].name) ||
+				(*token == ItemDefs[i].names) ||
+				(*token == ItemDefs[i].abr)) {
+				r = i;
+				break;
+			}
 		}
 	}
-	return -1;
+	if(r != -1) {
+		if(ItemDefs[r].flags & ItemType::DISABLED) r = -1;
+	}
+	return r;
 }
 
 AString ItemString(int type, int num)

@@ -28,11 +28,18 @@
 
 int ParseSkill(AString * token)
 {
+	int r = -1;
 	for (int i=0; i<NSKILLS; i++) {
-		if (*token == SkillDefs[i].name) return i;
-		if (*token == SkillDefs[i].abbr) return i;
+		if ((*token == SkillDefs[i].name) ||
+			(*token == SkillDefs[i].abbr)) {
+		   	r = i;
+			break;
+		}
 	}
-	return -1;
+	if (r != -1) {
+		if(SkillDefs[r].flags & SkillType::DISABLED) r = -1;
+	}
+	return r;
 }
 
 AString SkillStrs(int i)

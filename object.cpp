@@ -34,10 +34,17 @@
 
 int ParseObject(AString * token)
 {
+	int r = -1;
 	for (int i=O_DUMMY+1; i<NOBJECTS; i++) {
-		if (*token == ObjectDefs[i].name) return i;
+		if (*token == ObjectDefs[i].name) {
+			r = i;
+			break;
+		}
 	}
-	return -1;
+	if(r != -1) {
+		if(ObjectDefs[r].flags & ObjectType::DISABLED) r = -1;
+	}
+	return r;
 }
 
 int ObjectIsShip(int ot)

@@ -37,25 +37,25 @@
 #include "gamedata.h"
 #include "game.h"
 
-char * as[] = {
-  "Hostile",
-  "Unfriendly",
-  "Neutral",
-  "Friendly",
-  "Ally"
+char *as[] = {
+	"Hostile",
+	"Unfriendly",
+	"Neutral",
+	"Friendly",
+	"Ally"
 };
 
-char ** AttitudeStrs = as;
+char **AttitudeStrs = as;
 
-char * fs[] = {
-  "War",
-  "Trade",
-  "Magic"
+char *fs[] = {
+	"War",
+	"Trade",
+	"Magic"
 };
 
-char ** FactionStrs = fs;
+char **FactionStrs = fs;
 
-int ParseAttitude(AString * token)
+int ParseAttitude(AString *token)
 {
 	for (int i=0; i<NATTITUDES; i++)
 		if (*token == AttitudeStrs[i]) return i;
@@ -153,58 +153,58 @@ Faction::Faction(int n)
 
 Faction::~Faction()
 {
-    if (name) delete name;
-    if (address) delete address;
-    if (password) delete password;
-    attitudes.DeleteAll();
+	if (name) delete name;
+	if (address) delete address;
+	if (password) delete password;
+	attitudes.DeleteAll();
 }
 
 void Faction::Writeout( Aoutfile *f )
 {
-    f->PutInt(num);
+	f->PutInt(num);
 
-    for (int i=0; i<NFACTYPES; i++) {
+	for (int i=0; i<NFACTYPES; i++) {
 		f->PutInt(type[i]);
 	}
 
-    f->PutInt(lastchange);
-    f->PutInt(lastorders);
-    f->PutInt(unclaimed);
-    f->PutStr(*name);
-    f->PutStr(*address);
-    f->PutStr(*password);
-    f->PutInt(times);
-    f->PutInt(temformat);
-    
-    skills.Writeout(f);
+	f->PutInt(lastchange);
+	f->PutInt(lastorders);
+	f->PutInt(unclaimed);
+	f->PutStr(*name);
+	f->PutStr(*address);
+	f->PutStr(*password);
+	f->PutInt(times);
+	f->PutInt(temformat);
+
+	skills.Writeout(f);
 	f->PutInt(-1);
 	items.Writeout(f);
-    f->PutInt(defaultattitude);
-    f->PutInt(attitudes.Num());
-    forlist((&attitudes))
-        ((Attitude *) elem)->Writeout( f );
+	f->PutInt(defaultattitude);
+	f->PutInt(attitudes.Num());
+	forlist((&attitudes))
+		((Attitude *) elem)->Writeout( f );
 }
 
 void Faction::Readin( Ainfile *f, ATL_VER v )
 {
-    num = f->GetInt();
-    int i;
+	num = f->GetInt();
+	int i;
 
-    for (i=0; i<NFACTYPES; i++) {
+	for (i=0; i<NFACTYPES; i++) {
 		type[i] = f->GetInt();
-    }
+	} 
 
-    lastchange = f->GetInt();
-    lastorders = f->GetInt();
-    unclaimed = f->GetInt();
-    name = f->GetStr();
-    address = f->GetStr();
-    password = f->GetStr();
-    times = f->GetInt();
-    temformat = f->GetInt();
-    
-    skills.Readin(f);
-    defaultattitude = f->GetInt();
+	lastchange = f->GetInt();
+	lastorders = f->GetInt();
+	unclaimed = f->GetInt();
+	name = f->GetStr();
+	address = f->GetStr();
+	password = f->GetStr();
+	times = f->GetInt();
+	temformat = f->GetInt();
+
+	skills.Readin(f);
+	defaultattitude = f->GetInt();
 
 	// Is this a new version of the game file
 	if(defaultattitude == -1) {
@@ -212,16 +212,16 @@ void Faction::Readin( Ainfile *f, ATL_VER v )
 		defaultattitude = f->GetInt();
 	}
 
-    int n = f->GetInt();
-    for (i=0; i<n; i++) {
-        Attitude * a = new Attitude;
-        a->Readin(f,v);
-        if (a->factionnum == num) {
-            delete a;
-        } else {
-            attitudes.Add(a);
-        }
-    }
+	int n = f->GetInt();
+	for (i=0; i<n; i++) {
+		Attitude * a = new Attitude;
+		a->Readin(f,v);
+		if (a->factionnum == num) {
+			delete a;
+		} else {
+			attitudes.Add(a);
+		}
+	}
 }
 
 void Faction::View()
@@ -233,8 +233,7 @@ void Faction::View()
 
 void Faction::SetName(AString * s)
 {
-	if (s)
-	{
+	if (s) {
 		AString * newname = s->getlegal();
 		delete s;
 		if (!newname) return;
@@ -246,7 +245,7 @@ void Faction::SetName(AString * s)
 
 void Faction::SetNameNoChange( AString *s )
 {
-    if( s ) {
+	if( s ) {
 		delete name;
 		name = new AString( *s );
 	}
@@ -287,8 +286,7 @@ AString Faction::FactionTypeStr()
 void Faction::WriteReport( Areport *f, Game *pGame )
 {
 	if (IsNPC() && num == 1) {
-		if(Globals->GM_REPORT ||
-				(pGame->month == 0 && pGame->year == 1)) {
+		if(Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
 			int i, j;
 			// Put all skills, items and objects in the GM report
 			shows.DeleteAll();
@@ -580,176 +578,186 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 
 void Faction::WriteFacInfo( Aoutfile *file )
 {
-    file->PutStr( AString( "Faction: " ) + num );
-    file->PutStr( AString( "Name: " ) + *name );
-    file->PutStr( AString( "Email: " ) + *address );
-    file->PutStr( AString( "Password: " ) + *password );
+	file->PutStr( AString( "Faction: " ) + num );
+	file->PutStr( AString( "Name: " ) + *name );
+	file->PutStr( AString( "Email: " ) + *address );
+	file->PutStr( AString( "Password: " ) + *password );
 	file->PutStr( AString( "LastOrders: " ) + lastorders );
-    file->PutStr( AString( "SendTimes: " ) + times );
+	file->PutStr( AString( "SendTimes: " ) + times );
 
-    forlist( &extraPlayers ) {
-        AString *pStr = (AString *) elem;
-        file->PutStr( *pStr );
-    }
+	forlist( &extraPlayers ) {
+		AString *pStr = (AString *) elem;
+		file->PutStr( *pStr );
+	}
 
-    extraPlayers.DeleteAll();
+	extraPlayers.DeleteAll();
 }
 
 void Faction::CheckExist(ARegionList * regs)
 {
     if (IsNPC()) return;
-    exists = 0;
-    forlist(regs) {
-        ARegion * reg = (ARegion *) elem;
-        if (reg->Present(this))
-        {
-            exists = 1;
-            return;
-        }
-    }
-}
-
-void Faction::Error(const AString & s) {
-  if (IsNPC()) return;
-  if (errors.Num() > 1000) {
-    if (errors.Num() == 1001) {
-      errors.Add(new AString("Too many errors!"));
-    }
-    return;
-  }
-
-  AString * temp = new AString(s);
-  errors.Add(temp);
-}
-
-void Faction::Event(const AString & s) {
-  if (IsNPC()) return;
-  AString * temp = new AString(s);
-  events.Add(temp);
-}
-
-void Faction::RemoveAttitude(int f) {
-  forlist((&attitudes)) {
-    Attitude * a = (Attitude *) elem;
-    if (a->factionnum == f) {
-      attitudes.Remove(a);
-      delete a;
-      return;
-    }
-  }
-}
-
-int Faction::GetAttitude(int n) {
-  if (n == num) return A_ALLY;
-  forlist((&attitudes)) {
-    Attitude * a = (Attitude *) elem;
-    if (a->factionnum == n)
-      return a->attitude;
-  }
-  return defaultattitude;
-}
-
-void Faction::SetAttitude(int num,int att) {
-  forlist((&attitudes)) {
-    Attitude * a = (Attitude *) elem;
-    if (a->factionnum == num) {
-      if (att == -1) {
-	attitudes.Remove(a);
-	delete a;
-	return;
-      } else {
-	a->attitude = att;
-	return;
-      }
-    }
-  }
-  if (att!=-1) {
-    Attitude * a = new Attitude;
-    a->factionnum = num;
-    a->attitude = att;
-    attitudes.Add(a);
-  }
-}
-
-int Faction::CanCatch(ARegion *r, Unit *t) {
-  if (r->type == R_OCEAN) return 1;
-
-  int def = t->GetDefenseRiding();
-
-  forlist(&r->objects) {
-    Object *o = (Object *) elem;
-    forlist(&o->units) {
-      Unit *u = (Unit *) elem;
-      if (u == t && o->type != O_DUMMY) return 1;
-      if (u->faction == this && u->GetAttackRiding() >= def) return 1;
-    }
-  }
-  return 0;
-}
-
-int Faction::CanSee(ARegion * r,Unit * u) {
-  int detfac = 0;
-  if (u->faction == this) return 2;
-  if (u->reveal == REVEAL_FACTION) return 2;
-  int retval = 0;
-  if (u->reveal == REVEAL_UNIT) retval = 1;
-  forlist((&r->objects)) {
-    Object * obj = (Object *) elem;
-    int dummy = 0;
-    if (obj->type == O_DUMMY) dummy = 1;
-    forlist((&obj->units)) {
-      Unit * temp = (Unit *) elem;
-      if (u == temp && dummy == 0) retval = 1;
-      if (temp->faction == this) {
-	if (temp->GetSkill(S_OBSERVATION) >
-	    u->GetSkill(S_STEALTH)) {
-	  return 2;
-	} else {
-	  if (temp->GetSkill(S_OBSERVATION) ==
-	      u->GetSkill(S_STEALTH))
-	    retval = 1;
+	exists = 0;
+	forlist(regs) {
+		ARegion * reg = (ARegion *) elem;
+		if (reg->Present(this)) {
+			exists = 1;
+			return;
+		}
 	}
-      }
-    }
-  }
-  if (retval == 1 && detfac) return 2;
-  return retval;
 }
 
-void Faction::DefaultOrders() {
-  war_regions.DeleteAll();
-  trade_regions.DeleteAll();
-  numshows = 0;
+void Faction::Error(const AString &s)
+{
+	if (IsNPC()) return;
+	if (errors.Num() > 1000) {
+		if (errors.Num() == 1001) {
+			errors.Add(new AString("Too many errors!"));
+		}
+		return;
+	}
+
+	AString *temp = new AString(s);
+	errors.Add(temp);
 }
 
-void Faction::TimesReward() {
-  if (Globals->TIMES_REWARD) {
-    Event(AString("Times reward of ") + Globals->TIMES_REWARD + " silver.");
-    unclaimed += Globals->TIMES_REWARD;
-  }
+void Faction::Event(const AString &s)
+{
+	if (IsNPC()) return;
+	AString *temp = new AString(s);
+	events.Add(temp);
 }
 
-void Faction::SetNPC() {
-  for (int i=0; i<NFACTYPES; i++) type[i] = -1;
+void Faction::RemoveAttitude(int f)
+{
+	forlist((&attitudes)) {
+		Attitude *a = (Attitude *) elem;
+		if (a->factionnum == f) {
+			attitudes.Remove(a);
+			delete a;
+			return;
+		}
+	}
 }
 
-int Faction::IsNPC() {
-  if (type[F_WAR] == -1) return 1;
-  return 0;
+int Faction::GetAttitude(int n)
+{
+	if (n == num) return A_ALLY;
+	forlist((&attitudes)) {
+		Attitude *a = (Attitude *) elem;
+		if (a->factionnum == n)
+			return a->attitude;
+	}
+	return defaultattitude;
 }
 
-Faction * GetFaction(AList * facs,int n) {
-  forlist(facs)
-    if (((Faction *) elem)->num == n)
-      return (Faction *) elem;
-  return 0;
+void Faction::SetAttitude(int num,int att)
+{
+	forlist((&attitudes)) {
+		Attitude *a = (Attitude *) elem;
+		if (a->factionnum == num) {
+			if (att == -1) {
+				attitudes.Remove(a);
+				delete a;
+				return;
+			} else {
+				a->attitude = att;
+				return;
+			}
+		}
+	}
+	if (att != -1) {
+		Attitude *a = new Attitude;
+		a->factionnum = num;
+		a->attitude = att;
+		attitudes.Add(a);
+	}
 }
 
-Faction * GetFaction2(AList * facs,int n) {
-  forlist(facs)
-    if (((FactionPtr *) elem)->ptr->num == n)
-      return ((FactionPtr *) elem)->ptr;
-  return 0;
+int Faction::CanCatch(ARegion *r, Unit *t)
+{
+	if (r->type == R_OCEAN) return 1;
+
+	int def = t->GetDefenseRiding();
+
+	forlist(&r->objects) {
+		Object *o = (Object *) elem;
+		forlist(&o->units) {
+			Unit *u = (Unit *) elem;
+			if (u == t && o->type != O_DUMMY) return 1;
+			if (u->faction == this && u->GetAttackRiding() >= def) return 1;
+		}
+	}
+	return 0;
+}
+
+int Faction::CanSee(ARegion * r,Unit * u)
+{
+	int detfac = 0;
+	if (u->faction == this) return 2;
+	if (u->reveal == REVEAL_FACTION) return 2;
+	int retval = 0;
+	if (u->reveal == REVEAL_UNIT) retval = 1;
+	forlist((&r->objects)) {
+		Object * obj = (Object *) elem;
+		int dummy = 0;
+		if (obj->type == O_DUMMY) dummy = 1;
+		forlist((&obj->units)) {
+			Unit * temp = (Unit *) elem;
+			if (u == temp && dummy == 0) retval = 1;
+			if (temp->faction == this) {
+				if (temp->GetSkill(S_OBSERVATION) > u->GetSkill(S_STEALTH)) {
+					return 2;
+				} else {
+					if (temp->GetSkill(S_OBSERVATION)==u->GetSkill(S_STEALTH))
+						retval = 1;
+				}
+			}
+		}
+	}
+	if (retval == 1 && detfac) return 2;
+	return retval;
+}
+
+void Faction::DefaultOrders()
+{
+	war_regions.DeleteAll();
+	trade_regions.DeleteAll();
+	numshows = 0;
+}
+
+void Faction::TimesReward()
+{
+	if (Globals->TIMES_REWARD) {
+		Event(AString("Times reward of ") + Globals->TIMES_REWARD + " silver.");
+		unclaimed += Globals->TIMES_REWARD;
+	}
+}
+
+void Faction::SetNPC()
+{
+	for (int i=0; i<NFACTYPES; i++) type[i] = -1;
+}
+
+int Faction::IsNPC()
+{
+	if (type[F_WAR] == -1) return 1;
+	return 0;
+}
+
+Faction *GetFaction(AList *facs, int n)
+{
+	forlist(facs)
+		if (((Faction *) elem)->num == n)
+			return (Faction *) elem;
+	return 0;
+}
+
+Faction *GetFaction2(AList *facs, int n)
+{
+	forlist(facs)
+		if (((FactionPtr *) elem)->ptr->num == n)
+			return ((FactionPtr *) elem)->ptr;
+	return 0;
 }
 
 void Faction::DiscoverItem(int item, int force, int full)
