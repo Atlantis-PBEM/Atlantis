@@ -161,7 +161,7 @@ static char *fill[] = {
  // forest3
  "  ^ ^ ",
  " ^ ^  ",
- 
+
  // mystforest
  "  ` ` ",
  " ` `  ",
@@ -171,7 +171,7 @@ static char *fill[] = {
  // mystforest2
  "  ` ` ",
  " ` `  ",
- 
+
  // mountain1
  " /\\/\\ ",
  "/  \\ \\",
@@ -191,7 +191,7 @@ static char *fill[] = {
  // hill2
  "  * * ",
  " * *  ",
- 
+
  // swamp1
  "  v v ",
  " v v  ",
@@ -201,7 +201,7 @@ static char *fill[] = {
  // swamp3
  "  v v ",
  " v v  ",
- 
+
  // jungle1
  "  @ @ ",
  " @ @  ",
@@ -211,7 +211,7 @@ static char *fill[] = {
  // jungle3
  "  @ @ ",
  " @ @  ",
- 
+
  // desert1
  "  . . ",
  " . .  ",
@@ -221,18 +221,18 @@ static char *fill[] = {
  // desert3
  "  . . ",
  " . .  ",
- 
+
  // wasteland
  "  ; ; ",
  " ; ;  ",
  // wasteland1
  "  ; ; ",
  " ; ;  ",
- 
+
  // lake
  "  ~ ~ ",
  " ~ ~  ",
- 
+
  // tundra1
  "  ' ' ",
  " ' '  ",
@@ -242,7 +242,7 @@ static char *fill[] = {
  // tundra2
  "  ' ' ",
  " ' '  ",
- 
+
  // cavern1
  "  . . ",
  " . .  ",
@@ -252,7 +252,7 @@ static char *fill[] = {
  // cavern3
  "  . . ",
  " . .  ",
- 
+
  // underforest1
  "  ^ ^ ",
  " ^ ^  ",
@@ -262,7 +262,7 @@ static char *fill[] = {
  // underforest3
  "  ^ ^ ",
  " ^ ^  ",
- 
+
  // tunnels1
  "      ",
  "      ",

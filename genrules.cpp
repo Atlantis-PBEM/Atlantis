@@ -266,7 +266,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#enter", "enter"));
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		f.TagText("LI", f.Link("#entertain", "entertain"));
-	f.TagText("LI", f.Link("#faction", "faction"));
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+		f.TagText("LI", f.Link("#faction", "faction"));
 	f.TagText("LI", f.Link("#find", "find"));
 	f.TagText("LI", f.Link("#forget", "forget"));
 	f.TagText("LI", f.Link("#form", "form"));
@@ -277,8 +278,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#move", "move"));
 	f.TagText("LI", f.Link("#name", "name"));
 	f.TagText("LI", f.Link("#noaid", "noaid"));
-	if (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
-		f.TagText("LI", f.Link("#nocross", "nocross"));
+	f.TagText("LI", f.Link("#nocross", "nocross"));
 	f.TagText("LI", f.Link("#option", "option"));
 	f.TagText("LI", f.Link("#password", "password"));
 	f.TagText("LI", f.Link("#pillage", "pillage"));
@@ -1309,24 +1309,35 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"available: ";
 	int comma = 0;
 	int found = 0;
+	last = -1;
 	for(i = 0; i < NSKILLS; i++) {
 		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
 		if(SkillDefs[i].flags & SkillType::APPRENTICE) continue;
 		if(SkillDefs[i].flags & SkillType::MAGIC) continue;
 		found = 0;
 		for(j = 0; j < 3; j++) {
-			last = SkillDefs[i].depends[j].skill;
-			if(last != -1 && !(SkillDefs[last].flags & SkillType::DISABLED)) {
+			k = SkillDefs[i].depends[j].skill;
+			if(k != -1 && !(SkillDefs[k].flags & SkillType::DISABLED)) {
 				found = 1;
 				break;
 			}
 		}
 		if(found) continue;
+		if(last == -1) {
+			last = i;
+			continue;
+		}
 
-		if(comma) temp += ", ";
-		temp += SkillDefs[i].name;
-		comma = 1;
+		temp += SkillDefs[last].name;
+		temp += ", ";
+		last = i;
+		comma++;
 	}
+	if(last != -1) {
+		if(comma) temp += "and ";
+		temp += SkillDefs[last].name;
+	}
+
 	temp += ". When a unit possesses a skill, he also has a skill level "
 		"to go with it.  Generally, the effectiveness of a skill is "
 		"directly proportional to the skill level involved, so a unit with "
@@ -3531,10 +3542,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("H4", "DESCRIBE UNIT [new description]");
 	f.TagText("H4", "DESCRIBE SHIP [new description]");
 	f.TagText("H4", "DESCRIBE BUILDING [new description]");
+	f.TagText("H4", "DESCRIBE OBJECT [new description]");
+	f.TagText("H4", "DESCRIBE STRUCTURE [new description]");
 	temp = "Change the description of the unit, or of the object the unit "
 		"is in (of which the unit must be the owner). Descriptions can be "
 		"of any length, up to the line length your mailer can handle. If "
-		"no description is given, the description will be cleared out.";
+		"no description is given, the description will be cleared out. The "
+		"last four are completely identical and serve to modify the "
+		"description of the object you are currently in.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Set the unit,s description to read \"Merlin's helper\".";
@@ -3552,448 +3567,502 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "DESTROY";
 	f.CommandExample(temp, temp2);
 
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("enter");
+	f.TagText("H4", "ENTER [object]");
+	temp = "Attempt to enter the specified object.  If issued from inside "
+		"another object, the unit will first leave the object it is "
+		"currently in.  The order will only work if the target object is "
+		"unoccupied, or is owned by a unit in your faction, or is owned by "
+		"a unit which has declared you Friendly.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Enter ship number 114.";
+	temp2 = "ENTER 114";
+	f.CommandExample(temp, temp2);
+
+	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("entertain");
+		f.TagText("H4", "ENTERTAIN");
+		temp = "Spend the month entertaining the populace to earn money.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Entertain for money.";
+		temp2 = "ENTERTAIN";
+		f.CommandExample(temp, temp2);
+	}
+
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("faction");
+		f.TagText("H4", "FACTION [type] [points] ...");
+		temp = "Attempt to change your faction's type.  In the order, you "
+			"can specify up to three faction types (WAR, TRADE, and MAGIC) "
+			"and the number of faction points to assign to each type; if "
+			"you are assigning points to only one or two types, you may "
+			"omit the types that will not have any points.";
+		f.Paragraph(temp);
+		temp = "Changing the number of faction points assigned to MAGIC may "
+			"be tricky. Increasing the MAGIC points will always succeed, but "
+			"if you decrease the number of points assigned to MAGIC, you "
+			"must make sure that you have only the number of magic-skilled "
+			"leaders allowed by the new number of MAGIC points BEFORE you "
+			"change your point distribution. For example, if you have 3 "
+			"mages (3 points assigned to MAGIC), but want to use one of "
+			"those points for WAR or TRADE (change to MAGIC 2), you must "
+			"first get rid of one of your mages by either giving it to "
+			"another faction or ordering it to ";
+		temp += f.Link("#forget", "FORGET") + " all its magic skills. ";
+		temp += "If you have too many mages for the number of points you "
+			"try to assign to MAGIC, the FACTION order will fail.";
+		f.Paragraph(temp);
+		f.Paragraph("Examples:");
+		temp = "Assign 2 faction points to WAR, 2 to TRADE, and 1 to MAGIC.";
+		temp2 = "FACTION WAR 2 TRADE 2 MAGIC 1";
+		f.CommandExample(temp, temp2);
+		temp = "Become a pure magic faction (assign all points to magic).";
+		temp2 = "FACTION MAGIC ";
+		temp2 += Globals->FACTION_POINTS;
+		f.CommandExample(temp, temp2);
+	}
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("find");
+	f.TagText("H4", "FIND [faction]");
+	f.TagText("H4", "FIND ALL");
+	temp = "Find the email address of the specified faction or of all "
+		"factions.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Find the email address of faction 4.";
+	temp2 = "FIND 4";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("forget");
+	f.TagText("H4", "FORGET [skill]");
+	temp = "Forget the given skill. This order is useful for normal units "
+		"who wish to learn a new skill, but already know a different skill.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Forget knowledge of Mining.";
+	temp2 = "FORGET Mining";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("form");
+	f.TagText("H4", "FORM [alias]");
+	temp = "Form a new unit.  The newly created unit will be in your "
+		"faction, in the same region as the unit which formed it, and in "
+		"the same structure if any.  It will start off, however, with no "
+		"people or items; you should, in the same month, issue orders to "
+		"transfer people into the new unit, or have it recruit members. The "
+		"new unit will inherit its flags from the unit that forms it, such "
+		"as avoiding, behind, and autotax.";
+	f.Paragraph(temp);
+	temp = "The FORM order is followed by a list of orders for the newly "
+		"created unit.  This list is terminated by the END keyword, after "
+		"which orders for the original unit resume.";
+	f.Paragraph(temp);
+	temp = "The purpose of the \"alias\" parameter is so that you can refer "
+		"to the new unit. You will not know the new unit's number until "
+		"you receive the next turn report.  To refer to the new unit in "
+		"this set of orders, pick an alias number (the only restriction on "
+		"this is that it must be at least 1, and you should not create two "
+		"units in the same region in the same month, with the same alias "
+		"numbers).  The new unit can then be referred to as NEW <alias> in "
+		"place of the regular unit number.";
+	f.Paragraph(temp);
+	temp = "You can refer to newly created units belonging to other "
+		"factions, if you know what alias number they are, e.g. FACTION 15 "
+		"NEW 2 will refer to faction 15's newly created unit with alias 2.";
+	f.Paragraph(temp);
+	temp = "Note: If a unit moves out of the region in which it was formed "
+		"(by the ";
+	temp += f.Link("#move", "MOVE") + " order, or otherwise), the alias "
+		"will no longer work. This is to prevent conflicts with other units "
+		"that may have the same alias in other regions.";
+	f.Paragraph(temp);
+	temp = "If the demand for recruits in that region that month is much "
+		"higher than the supply, it may happen that the new unit does not "
+		"gain all the recruits you ordered it to buy, or it may not gain "
+		"any recruits at all.  If the new units gains at least one recruit, "
+		"the unit will form possessing any unused silver and all the other "
+		"items it was given.  If no recruits are gained at all, the empty "
+		"unit will be dissolved, and the silver and any other items it was "
+		"given will revert to the first unit you have in that region.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "This set of orders for unit 17 would create two new units with "
+		"alias numbers 1 and 2, name them Merlin's Guards and Merlin's "
+		"Workers, set the description for Merlin's Workers, have both units "
+		"recruit men, and have Merlin's Guards study combat.  Merlin's "
+		"Workers will have the default order ";
+	temp += f.Link("#work", "WORK") + ", as all newly created units do. The "
+		"unit that created these two then pays them enough money (using the "
+		"NEW keyword to refer to them by alias numbers) to cover the costs "
+		"of recruitment and the month's maintenance.";
+	temp2 = "UNIT 17\n";
+	temp2 += "FORM 1\n";
+	temp2 += "    NAME UNIT \"Merlin's Guards\"\n";
+	temp2 += "    BUY 5 Plainsmen\n";
+	temp2 += "    STUDY COMBAT\n";
+	temp2 += "END\n";
+	temp2 += "FORM 2\n";
+	temp2 += "    NAME UNIT \"Merlin's Workers\"\n";
+	temp2 += "    DESCRIBE UNIT \"wearing dirty overalls\"\n";
+	temp2 += "    BUY 15 Plainsmen\n";
+	temp2 += "END\n";
+	temp2 += "CLAIM 2500\n";
+	temp2 += "GIVE NEW 1 1000 silver\n";
+	temp2 += "GIVE NEW 2 2000 silver\n";
+	f.CommandExample(temp,temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("give");
+	f.TagText("H4", "GIVE [unit] [quantity] [item]");
+	f.TagText("H4", "GIVE [unit] ALL [item]");
+	f.TagText("H4", "GIVE [unit] ALL [item] EXCEPT [quantity]");
+	f.TagText("H4", "GIVE [unit] UNIT");
+	temp = "The first form of the GIVE order gives a quantity of an item to "
+		"another unit. The second form of the GIVE order will give all of "
+		"a given item to another unit.  The third form will give all of an "
+		"item except for a specific quantity to another unit.  The fourth "
+		"and final form the the GIVE order gives the entire unit to the "
+		"specified unit's faction.";
+	f.Paragraph(temp);
+	temp = "A unit may only give items, including silver, to a unit which "
+		"it is able to see, unless the faction of the target unit has "
+		"declared you Friendly or better.  If the target unit is not a "
+		"member of your faction, then its faction must have declared you "
+		"Friendly, with a couple of exceptions. First, silver may be given "
+		"to any unit, regardless of factional affiliation. Secondly, men "
+		"may not be given to units in other factions (you must give the "
+		"entire unit); the reason for this is to prevent highly skilled "
+		"units from being sabotaged with a ";
+	temp += f.Link("#give", "GIVE") + " order.";
+	f.Paragraph(temp);
+	temp = "There are also a few restrictions on orders given by units who "
+		"been given to another faction. If the receiving faction is not "
+		"allied to the giving faction, the unit may not issue the ";
+	temp += f.Link("#advance", "ADVANCE") + " order, or issue any more ";
+	temp += f.Link("#give", "GIVE") + " orders.  Both of these rules are to "
+		"prevent unfair sabotage tactics.";
+	f.Paragraph(temp);
+	temp = "If 0 is specified as the unit number, then the items are "
+		"discarded.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "Give 10 swords to unit 4573.";
+	temp2 = "GIVE 4573 10 swords";
+	f.CommandExample(temp, temp2);
+	temp = "Give 5 chain armor to the new unit, alias 2, belonging to "
+		"faction 14.";
+	temp2 = "GIVE FACTION 14 NEW 2 5 \"Chain armor\"";
+	f.CommandExample(temp, temp2);
+	temp = "Give control of this unit to the faction owning unit 75.";
+	temp2 = "GIVE 75 UNIT";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("guard");
+	f.TagText("H4", "GUARD [flag]");
+	temp = "GUARD 1 sets the unit issuing the order to prevent non-Friendly "
+		"units from collecting taxes in the region, and to prevent any "
+		"units not your own from pillaging the region.  Guarding units "
+		"will also attempt to prevent Unfriendly units from entering the "
+		"region.  GUARD 0 cancels Guard status.";
+	f.Paragraph(temp);
+	temp = "The Guard and Avoid Combat flags are mutually exclusive; "
+		"setting one automatically cancels the other.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Instruct the current unit to be on guard.";
+	temp2 = "GUARD 1";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("hold");
+	f.TagText("H4", "HOLD [flag]");
+	temp = "HOLD 1 instructs the issuing unit to never join a battle in "
+		"regions the unit is not in.  This can be useful if the unit is in "
+		"a building, and doesn't want to leave the building to join combat. "
+		"HOLD 0 cancels holding status.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Instruct the unit to avoid combat in other regions.";
+	temp2 = "HOLD 1";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("leave");
+	f.TagText("H4", "LEAVE");
+	temp = "Leave the object you are currently in.  The order cannot be "
+		"used at sea.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Leave the current object";
+	temp2 = "LEAVE";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("move");
+	f.TagText("H4", "MOVE [dir] ...");
+	temp = "Attempt to move in the direction(s) specified.  If more than "
+		"one direction is given, the unit will move multiple times, in "
+		"the order specified by the MOVE order, until no more directions "
+		"are given, or until one of the moves fails.  A move can fail "
+		"because the units runs out of movement points, because the unit "
+		"attempts to move into the ocean, or because the units attempts "
+		"to enter a structure, and is rejected.";
+	f.Paragraph(temp);
+	temp = "Valid directions are:";
+	f.Paragraph(temp);
+	temp = "1) The compass directions North, Northwest, Southwest, South, "
+		"Southeast, and Northeast.  These can be abbreviated N, NW, SW, S, "
+		"SE, NE.";
+	f.Paragraph(temp);
+	temp = "2) A structure number.";
+	f.Paragraph(temp);
+	temp = "3) OUT, which will leave the structure that the unit is in.";
+	f.Paragraph(temp);
+	temp = "4) IN, which will move through an inner passage in the "
+		"structure that the unit is currently in.";
+	f.Paragraph(temp);
+	temp = "Multiple MOVE orders given by one unit will chain together.";
+	f.Paragraph(temp);
+	temp = "Note that MOVE orders can lead to combat, due to hostile units "
+		"meeting, or due to an advancing unit being forbidden access to a "
+		"region.  In this case, combat occurs each time all movement out "
+		"of a single region occurs.";
+	f.Paragraph(temp);
+	temp = "Example 1: Units 1 and 2 are in Region A, and unit 3 is in "
+		"Region B.  Units 1 and 2 are hostile to unit 3.  Both unit 1 and "
+		"2 move into region B, and attack unit 3.  Since both units moved "
+		"out of the same region, they attack unit 3 at the same time, and "
+		"the battle is between units 1 and 2, and unit 3.";
+	f.Paragraph(temp);
+	temp = "Example 2: Same as example 1, except unit 2 is in Region C, "
+		"instead of region A.  Both units move into Region B, and attack "
+		"unit 3.  Since unit 1 and unit 2 moved out of different regions, "
+		"their battles occur at different times.  Thus, unit 1 attacks unit "
+		"3 first, and then unit 2 attacks unit 3 (assuming unit 3 survives "
+		"the first attack).  Note that the order of battles could have "
+		"happened either way.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "Move N, NE and In";
+	temp2 = "MOVE N\nMOVE NE IN";
+	f.CommandExample(temp, temp2);
+	temp = "or:";
+	temp2 = "MOVE N NE IN";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("name");
+	f.TagText("H4", "NAME UNIT [new name]");
+	f.TagText("H4", "NAME FACTION [new name]");
+	f.TagText("H4", "NAME OBJECT [new name]");
+	if (Globals->TOWNS_EXIST)
+		f.TagText("H4", "NAME CITY [new name]");
+	temp = "Change the name of the unit, or of your faction, or of "
+		"the object the unit is in (of which the unit must be the owner). "
+		"Names can be of any length, up to the line length your mailer "
+		"can handle.  Names may not contain parentheses (square brackets "
+		"can be used instead if necessary), or any control characters.";
+	f.Paragraph(temp);
+	if (Globals->TOWNS_EXIST) {
+		temp = "In order to rename a settlement (city, town or village), "
+			"the unit attempting to rename it must be the owner of a large "
+			"enough structure located in the city. It requires a tower or "
+			"better to rename a village, a fort or better to rename a town "
+			"and a castle or mystic fortress to rename a city. ";
+		if (Globals->CITY_RENAME_COST) {
+			int c=Globals->CITY_RENAME_COST;
+			temp += AString("It also costs $") + c + " to rename a village, ";
+			temp += AString(2*c) + " to rename a town, and ";
+			temp += AString(3*c) + " to rename a city.";
+		}
+		f.Paragraph(temp);
+	}
+	f.Paragraph("Example:");
+	temp = "Name your faction \"The Merry Pranksters\".";
+	temp2 = "NAME FACTION \"The Merry Pranksters\"";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("noaid");
+	f.TagText("H4", "NOAID [flag]");
+	temp = "NOAID 1 indicates that if the unit attacks, or is attacked, it "
+		"is not to be aided by units in other hexes. NOAID status is very "
+		"useful for scouts or probing units, who do not wish to drag "
+		"their nearby armies into battle if they are caught. NOAID 0 "
+		"cancels this.";
+	f.Paragraph(temp);
+	temp = "If multiple units are on one side in a battle, they must all "
+		"have the NOAID flag on, or they will receive aid from other hexes.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Set a unit to receive no aid in battle.";
+	temp2 = "NOAID 1";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("nocross");
+	f.TagText("H4", "NOCROSS [flag]");
+	temp = "NOCROSS 1 indicates that if a unit attempts to cross a "
+		"body of water then that unit should instead not cross it, "
+		"regardless of whether the unit otherwise could do so. ";
+	if(may_sail) {
+		temp += "Units inside of a ship are not affected by this flag "
+			"(IE, they are able to sail within the ship). ";
+	}
+	temp += "This flag is useful for games where the rules have been "
+		"set so that water crossing is allowed, or items exist which "
+		"give a unit swimming capacity, and has no effect in the "
+		"'standard' ruleset. NOCROSS 0 cancels this.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Set a unit to not permit itself to cross water.";
+	temp2 = "NOCROSS 1";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("option");
+	f.TagText("H4", "OPTION TIMES");
+	f.TagText("H4", "OPTION NOTIMES");
+	f.TagText("H4", "OPTION TEMPLATE OFF");
+	f.TagText("H4", "OPTION TEMPLATE SHORT");
+	f.TagText("H4", "OPTION TEMPLATE LONG");
+	f.TagText("H4", "OPTION TEMPLATE MAP");
+	temp = "The OPTION order is used to toggle various settings that "
+		"affect your reports, and other email details. OPTION TIMES sets it "
+		"so that your faction receives the times each week (this is the "
+		"default); OPTION NOTIMES sets it so that your faction is not sent "
+		"the times.";
+	f.Paragraph(temp);
+	temp = "The OPTION TEMPLATE order toggles the length of the Orders "
+		"Template that appears at the bottom of a turn report.  The OFF "
+		"setting eliminates the Template altogether, and the SHORT, LONG "
+		"and MAP settings control how much detail the Template contains. "
+		"The MAP setting will produce an ascii map of the region and "
+		"surrounding regions in addition other details.";
+	f.Paragraph(temp);
+	temp = "For the MAP template, the region identifiers are (there might "
+		"be additional symbols for unusual/special terrain):";
+	f.Paragraph(temp);
+	f.Enclose(1, "TABLE");
+	f.Enclose(1, "TR");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+	f.PutStr("####");
+	f.Enclose(0, "TD");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+	f.PutStr("BLOCKED HEX (Underworld)");
+	f.Enclose(0, "TD");
+	f.Enclose(0, "TR");
+	f.Enclose(1, "TR");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+	f.PutStr("~~~~");
+	f.Enclose(0, "TD");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+	f.PutStr("OCEAN HEX");
+	f.Enclose(0, "TD");
+	f.Enclose(0, "TR");
+	f.Enclose(1, "TR");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+	f.PutStr("    ");
+	f.Enclose(0, "TD");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+	f.PutStr("PLAINS/TUNNELS HEX");
+	f.Enclose(0, "TD");
+	f.Enclose(0, "TR");
+	f.Enclose(1, "TR");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+	f.PutStr("^^^^");
+	f.Enclose(0, "TD");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+	f.PutStr("FOREST/UNDERFOREST HEX");
+	f.Enclose(0, "TD");
+	f.Enclose(0, "TR");
+	f.Enclose(1, "TR");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+	f.PutStr("/\\/\\");
+	f.Enclose(0, "TD");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+	f.PutStr("MOUNTAIN HEX");
+	f.Enclose(0, "TD");
+	f.Enclose(0, "TR");
+	f.Enclose(1, "TR");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+	f.PutStr("vvvv");
+	f.Enclose(0, "TD");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+	f.PutStr("SWAMP HEX");
+	f.Enclose(0, "TD");
+	f.Enclose(0, "TR");
+	f.Enclose(1, "TR");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+	f.PutStr("@@@@");
+	f.Enclose(0, "TD");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+	f.PutStr("JUNGLE HEX");
+	f.Enclose(0, "TD");
+	f.Enclose(0, "TR");
+	f.Enclose(1, "TR");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+	f.PutStr("....");
+	f.Enclose(0, "TD");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+	f.PutStr("DESERT/CAVERN HEX");
+	f.Enclose(0, "TD");
+	f.Enclose(0, "TR");
+	f.Enclose(1, "TR");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+	f.PutStr(",,,,");
+	f.Enclose(0, "TD");
+	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+	f.PutStr("TUNDRA HEX");
+	f.Enclose(0, "TD");
+	f.Enclose(0, "TR");
+	if(Globals->NEXUS_EXISTS) {
+		f.Enclose(1, "TR");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+		f.PutStr("!!!!");
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr("THE NEXUS");
+		f.Enclose(0, "TD");
+		f.Enclose(0, "TR");
+	}
+	f.Enclose(0, "TABLE");
+	f.Paragraph("Example:");
+	temp = "Set your faction to recieve the map format order template";
+	temp2 = "OPTION TEMPLATE MAP";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("password");
+	f.TagText("H4", "PASSWORD [password]");
+	f.TagText("H4", "PASSWORD");
+	temp = "The PASSWORD order is used to set your faction's password. If "
+		"you have a password set, you must specify it on your #ATLANTIS "
+		"line for the game to accept your orders.  This protects you orders "
+		"from being overwritten, either by accident or intentionally by "
+		"other players.  PASSWORD with no password given clears out your "
+		"faction's password.";
+	f.Paragraph(temp);
+	temp = "IMPORTANT: The PASSWORD order does not take effect until the "
+		"turn is actually run.  So if you set your password, and then want "
+		"to re-submit orders, you should use the old password until the "
+		"turn has been run.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Set the password to \"xyzzy\".";
+	temp2 = "PASSWORD xyzzy";
+	f.CommandExample(temp, temp2);
+
 #if 0
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"enter\"> </a>\n");
- printf("<h4> ENTER [object] </h4>\n");
- printf("\n");
- printf("Attempt to enter the specified object.  If issued from inside another object,\n");
- printf("the unit will first leave the object it is currently in.  The order will only\n");
- printf("work if the target object is unoccupied, or is owned by a unit in your faction,\n");
- printf("or is owned by a unit which has declared you Friendly. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Enter ship number 114. <p>\n");
- printf("<pre>\n");
-   printf("  ENTER 114\n");
- printf("</pre> <p>\n");
- printf("\n");
- if (SKILL_ENABLED(S_ENTERTAINMENT))
-  {
-   printf("  <center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
-   printf("  <a name=\"entertain\"> </a>\n");
-   printf("  <h4> ENTERTAIN </h4>\n");
- printf("\n");
-   printf("  Spend the month entertaining the populace to earn money. <p>\n");
- printf("\n");
-   printf("  Example: <p>\n");
-   printf("  <pre>\n");
-   printf("  ENTERTAIN\n");
-   printf("  </pre> <p>\n");
-  }
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"faction\"> </a>\n");
- printf("<h4> FACTION [type] [points]... </h4>\n");
- printf("\n");
- printf("Attempt to change your faction's type.  In the order, you can specify\n");
- printf("up to three faction types (WAR, TRADE, and MAGIC) and the number of\n");
- printf("faction points to assign to each type; if you are assigning points\n");
- printf("to only one or two types, you may omit the types that will not have\n");
- printf("any points. <p>\n");
- printf("\n");
- printf("Changing the number of faction points assigned to MAGIC may be tricky.\n");
- printf("Increasing the MAGIC points will always succeed, but if you decrease\n");
- printf("the number of points assigned to MAGIC, you must make sure that you\n");
- printf("have only the number of magic-skilled leaders allowed by the new\n");
- printf("number of MAGIC points BEFORE you change your point distribution.\n");
- printf("For example, if you have 3 mages (3 points assigned to MAGIC), but\n");
- printf("want to use one of those points for WAR or TRADE (change to MAGIC 2),\n");
- printf("you must first get rid of one of your mages by either giving it to\n");
- printf("another faction or ordering it to\n");
- printf("<a href=\"#forget\"> FORGET </a> all its magic skills.\n");
- printf("If you have too many mages for the number of points you try to assign\n");
- printf("to MAGIC, the FACTION order will fail. <p>\n");
- printf("\n");
- printf("Examples: <p>\n");
- printf("Assign 2 faction points to WAR, 2 to TRADE, and 1 to MAGIC. <p>\n");
- printf("<pre>\n");
-   printf("  FACTION WAR 2 TRADE 2 MAGIC 1\n");
- printf("</pre> <p>\n");
- printf("Become a pure magic faction (assign all points to magic). <p>\n");
- printf("<pre>\n");
-   printf("  FACTION MAGIC 5\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"find\"> </a>\n");
- printf("<h4> FIND [faction] </h4>\n");
- printf("<h4> FIND ALL </h4>\n");
- printf("\n");
- printf("Find the email address of the specified faction or of all factions. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Find the email address of faction 4. <p>\n");
- printf("<pre>\n");
-   printf("  FIND 4\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"forget\"> </a>\n");
- printf("<h4> FORGET [skill] </h4>\n");
- printf("\n");
- printf("Forget the given skill. This order is useful for normal\n");
- printf("units who wish to learn a new skill, but already know a different skill.\n");
- printf("<p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Forget knowledge of Mining. <p>\n");
- printf("<pre>\n");
-   printf("  FORGET Mining\n");
- printf("</pre> <p>\n");
-   printf("  \n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>  \n");
- printf("<a name=\"form\"> </a>\n");
- printf("<h4> FORM [alias] </h4>\n");
- printf("\n");
- printf("Form a new unit.  The newly created unit will be in your faction, in the same\n");
- printf("region as the unit which formed it, and in the same structure if any.  It will\n");
- printf("start off, however, with no people or items; you should, in the same month,\n");
- printf("issue orders to transfer people into the new unit, or have it recruit members.\n");
- printf("The new unit will inherit its flags from the unit that forms it,\n");
- printf("such as avoiding, behind, and autotax.\n");
- printf("<p>\n");
- printf("\n");
- printf("The FORM order is followed by a list of orders for the newly created unit. \n");
- printf("This list is terminated by the END keyword, after which orders for the original\n");
- printf("unit resume. <p>\n");
- printf("\n");
- printf("The purpose of the \"alias\" parameter is so that you can refer to the new unit. \n");
- printf("You will not know the new unit's number until you receive the next turn\n");
- printf("report.  To refer to the new unit in this set of orders, pick an alias\n");
- printf("number (the only restriction on this is that it\n");
- printf("must be at least 1, and you should not create two units in the same region in\n");
- printf("the same month, with the same alias numbers).  The new unit can then be\n");
- printf("referred to as NEW <alias> in place of the regular unit number, e.g. <p>\n");
- printf("<pre>\n");
-   printf("  UNIT 17\n");
-   printf("  FORM 1\n");
-     printf("    NAME UNIT \"Merlin's Guards\"\n");
-     printf("    BUY 5 Plainsmen\n");
-     printf("    STUDY COMBAT\n");
-   printf("  END\n");
-   printf("  FORM 2\n");
-     printf("    NAME UNIT \"Merlin's Workers\"\n");
-     printf("    DESCRIBE UNIT \"wearing dirty overalls\"\n");
-     printf("    BUY 15 Plainsmen\n");
-   printf("  END\n");
-   printf("  CLAIM 2500\n");
-   printf("  GIVE NEW 1 1000 %s\n",silver);
-   printf("  GIVE NEW 2 2000 %s\n",silver);
- printf("</pre> <p>\n");
- printf("This set of orders for unit 17 would create two new units with alias numbers 1\n");
- printf("and 2, name them Merlin's Guards and Merlin's Workers, set the description for\n");
- printf("Merlin's Workers, have both units recruit men, and have Merlin's Guards study\n");
- printf("combat.  Merlin's Workers will have the default order\n");
- printf("<a href=\"#work\"> WORK</a>, as all newly\n");
- printf("created units do.  The unit that created these two then pays them enough money\n");
- printf("(using the NEW keyword to refer to them by alias numbers) to cover the costs of\n");
- printf("recruitment and the month's maintenance. <p>\n");
- printf("\n");
- printf("You can refer to newly created units belonging to other factions, if you know\n");
- printf("what alias number they are, e.g. FACTION 15 NEW 2 will refer to faction 15's\n");
- printf("newly created unit with alias 2. <p>\n");
- printf("\n");
- printf("Note: If a unit moves out of the region in which it was formed\n");
- printf("(by the <a href=\"#move\">MOVE</a> order, or otherwise), the alias\n");
- printf("will no longer work. This is to prevent conflicts with other units\n");
- printf("that may have the same alias in other regions. <p>\n");
- printf("\n");
- printf("If the demand for recruits in that region that month is much higher than the\n");
- printf("supply, it may happen that the new unit does not gain all the recruits\n");
- printf("you ordered it to buy, or it may not gain any recruits at all.  If the\n");
- printf("new units gains at least one recruit, the unit will form possessing\n");
- printf("any unused %s and all the other items it was given.  If no recruits\n",silver);
- printf("are gained at all, the empty unit will be dissolved, and the %s and\n",silver);
- printf("any other items it was given will revert to the lowest numbered unit you\n");
- printf("have in that region. <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"give\"> </a>\n");
- printf("<h4> GIVE [unit] [quantity] [item] </h4>\n");
- printf("<h4> GIVE [unit] ALL [item] </h4>\n");
- printf("<h4> GIVE [unit] ALL [item] EXCEPT [quantity] </h4>\n");
- printf("<h4> GIVE [unit] UNIT </h4>\n");
- printf("\n");
- printf("The first form of the GIVE order gives a quantity of an item to another unit.\n");
- printf("The second form of the GIVE order will give all of a given item to another\n");
- printf("unit.  The third form will give all of an item except for a specific quantity\n");
- printf("to another unit.  The fourth and final form the the GIVE order gives the\n");
- printf("entire unit to the specified unit's faction. <p>\n");
- printf("\n");
- printf("A unit may only give items, including %s, to a unit which it is able to\n",silver);
- printf("see, unless the faction of the target unit has declared you Friendly or better.\n");
-  printf(" \n");
- printf("If the target unit is not a member of your faction, then its faction must have\n");
- printf("declared you Friendly, with a couple of exceptions. First, %s may be given\n",silver);
- printf("to any unit, regardless of factional affiliation. Secondly, men may not \n");
- printf("be given to units in other factions (you must give the entire unit);\n");
- printf("the reason for this is to prevent highly skilled units from being\n");
- printf("sabotaged with a <a href=\"#give\">GIVE</a> order. <p>\n");
- printf("\n");
- printf("There are also a few restrictions on orders given by units who been\n");
- printf("given to another faction. If the receiving faction is not allied to\n");
- printf("the giving faction, the unit may not issue the \n");
- printf("<a href=\"#advance\">ADVANCE</a> order, or issue any more \n");
- printf("<a href=\"#give\">GIVE</a> orders. Both of these rules are to prevent\n");
- printf("unfair sabotage tactics. <p>\n");
- printf("\n");
- printf("If 0 is specified as the unit number, then the items\n");
- printf("are discarded. <p>\n");
- printf("\n");
- printf("Examples: <p>\n");
- printf("Give 10 swords to unit 4573. <p>\n");
- printf("<pre>\n");
-   printf("  GIVE 4573 10 swords\n");
- printf("</pre> <p>\n");
- printf("Give 5 chain armor to the new unit, alias 2, belonging to faction 14. <p>\n");
- printf("<pre>\n");
-   printf("  GIVE FACTION 14 NEW 2 5 \"Chain armor\"\n");
- printf("</pre> <p>\n");
- printf("Give control of this unit to the faction owning unit 75. <p>\n");
- printf("<pre>\n");
-   printf("  GIVE 75 UNIT\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"guard\"> </a>\n");
- printf("<h4> GUARD [flag] </h4>\n");
- printf("\n");
- printf("GUARD 1 sets the unit issuing the order to prevent non-Friendly units from\n");
- printf("collecting taxes in the region, and to prevent any units not your own from\n");
- printf("pillaging the region.  Guarding units will also attempt to prevent Unfriendly\n");
- printf("units from entering the region.  GUARD 0 cancels Guard status. <p>\n");
- printf("\n");
- printf("The Guard and Avoid Combat flags are mutually exclusive; setting one\n");
- printf("automatically cancels the other. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Instruct the current unit to be on guard. <p>\n");
- printf("<pre>\n");
-   printf("  GUARD 1\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"hold\"> </a>\n");
- printf("<h4> HOLD [flag] </h4>\n");
- printf("\n");
- printf("HOLD 1 instructs the issuing unit to never join a battle in regions the unit is\n");
- printf("not it.  This can be useful if the unit is in a building, and doesn't want to\n");
- printf("leave the building to join combat.  HOLD 0 cancels holding status. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Instruct the unit to avoid combat in other regions. <p>\n");
- printf("<pre>\n");
-   printf("  HOLD 1\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"leave\"> </a>\n");
- printf("<h4> LEAVE </h4>\n");
- printf("\n");
- printf("Leave the object you are currently in.  The order cannot be used at sea.\n");
- printf("<p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("<pre>\n");
- printf("LEAVE\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"move\"> </a>\n");
- printf("<h4> MOVE [dir] ... </h4>\n");
- printf("\n");
- printf("Attempt to move in the direction(s) specified.  If more than one direction is\n");
- printf("given, the unit will move multiple times, in the order specified by the MOVE\n");
- printf("order, until no more directions are given, or until one of the moves fails.  A\n");
- printf("move can fail because the units runs out of movement points, because the unit\n");
- printf("attempts to move into the ocean, or because the units attempts to enter a\n");
- printf("structure, and is rejected. <p>\n");
- printf("\n");
- printf("Valid directions are: <p>\n");
- printf("1) The compass directions North, Northwest, Southwest, South, Southeast, and\n");
- printf("Northeast.  These can be abbreviated N, NW, SW, S, SE, NE. <p>\n");
- printf("2) A structure number. <p>\n");
- printf("3) OUT, which will leave the structure that the unit is in. <p>\n");
- printf("4) IN, which will move through an inner passage in the structure that the unit\n");
- printf("is currently in. <p>\n");
- printf("\n");
- printf("Multiple MOVE orders given by one unit will chain together, so: <p>\n");
- printf("<pre>\n");
-   printf("  MOVE N\n");
-   printf("  MOVE NE IN \n");
- printf("</pre> <p>\n");
- printf("is equivalent to: <p>\n");
- printf("<pre>\n");
-   printf("  MOVE N NE IN\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("Note that MOVE orders can lead to combat, due to hostile units meeting, or due\n");
- printf("to an advancing unit being forbidden access to a region.  In this case, combat\n");
- printf("occurs each time all movement out of a single region occurs. <p>\n");
- printf("\n");
- printf("Example 1: Units 1 and 2 are in Region A, and unit 3 is in Region B.  Units 1\n");
- printf("and 2 are hostile to unit 3.  Both unit 1 and 2 move into region B, and attack\n");
- printf("unit 3.  Since both units moved out of the same region, they attack unit 3 at\n");
- printf("the same time, and the battle is between units 1 and 2, and unit 3. <p>\n");
- printf("\n");
- printf("Example 2: Same as example 1, except unit 2 is in Region C, instead of region\n");
- printf("A.  Both units move into Region B, and attack unit 3.  Since unit 1 and unit 2\n");
- printf("moved out of different regions, their battles occur at different times.  Thus,\n");
- printf("unit 1 attacks unit 3 first, and then unit 2 attacks unit 3 (assuming unit 3\n");
- printf("survives the first attack).  Note that the order of battles could have happened\n");
- printf("either way. <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"name\"> </a>\n");
- printf("<h4> NAME UNIT [new name] </h4>\n");
- printf("<h4> NAME FACTION [new name] </h4>\n");
- printf("<h4> NAME OBJECT [new name] </h4>\n");
- if (Globals->TOWNS_EXIST)
-  {
- printf("<h4> NAME CITY [new name] </h4>\n");
-  }
- printf("\n");
- printf("Change the name of the unit, or of your faction, or of the object the unit is\n");
- printf("in (of which the unit must be the owner).  Names can be of any length, up to\n");
- printf("the line length your mailer can handle.  Names may not contain parentheses\n");
- printf("(square brackets can be used instead if necessary), or any control characters.\n");
- printf("<p>\n");
- if (Globals->TOWNS_EXIST)
-  {
-   printf("  In order to rename a settlement (city, town or village), the unit attempting\n");
-   printf("  to rename it must be the owner of a large enough structure located in the\n");
-   printf("  city.   It requires a tower or better to rename a village, a fort or better\n");
-   printf("  to rename a town and a castle or mystic fortress to rename a city.\n");
-  if (Globals->CITY_RENAME_COST)
-   {
-   int c=Globals->CITY_RENAME_COST;
-    printf("   It also costs $%d to rename village,\n",c);
-    printf("   $%d to rename town and\n",2*c);
-    printf("   $%d to rename city.\n",3*c);
-   }
- printf("<p>\n");
-  }
- printf("\n");
- printf("Example: <p>\n");
- printf("Name your faction \"The Merry Pranksters\". <p>\n");
- printf("<pre>\n");
-   printf("  NAME FACTION \"The Merry Pranksters\"\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"noaid\"> </a>\n");
- printf("<h4> NOAID [flag] </h4>\n");
- printf("\n");
- printf("NOAID 1 indicates that if the unit attacks, or is attacked, \n");
- printf("it is not to be aided\n");
- printf("by units in other hexes. NOAID status is very useful for scouts or\n");
- printf("probing units, who do not wish to drag their nearby armies into battle\n");
- printf("if they are caught. NOAID 0 cancels this. <p>\n");
- printf("\n");
- printf("If multiple units are on one side in a battle, they must all have the\n");
- printf("NOAID flag on, or they will receive aid from other hexes. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Set a unit to receive no aid in battle. <p>\n");
- printf("<pre>\n");
-   printf("  NOAID 1\n");
- printf("</pre> <p>\n");
- printf("\n");
- if (Globals->FLIGHT_OVER_WATER!=GameDefs::WFLIGHT_NONE)
-  {
-   printf("  <center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
-   printf("  <a name=\"nocross\"> </a>\n");
-   printf("  <h4> NOCROSS [flag] </h4>\n");
- printf("\n");
-   printf("  NOCROSS 1 indicates that if a unit attempts to cross a body of water\n");
-   printf("  then that unit should instead not cross it, regardless of whether the\n");
-   printf("  unit otherwise could do so. \n");
-  if (SKILL_ENABLED(S_SAILING))
-   {
-    printf("   Units inside of a ship are not affected\n");
-    printf("   by this flag (IE, they are able to sail within the ship).   \n");
-   }
-   printf("  NOCROSS 0 cancels this.<p>\n");
- printf("\n");
-   printf("  Example:<p>\n");
-   printf("  Set a unit to not permit itself to cross water. <p>\n");
-   printf("  <pre>\n");
-   printf("  NOCROSS 1\n");
-   printf("  </pre> <p>\n");
-  }
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"nospoils\"></a>\n");
- printf("<h4> NOSPOILS [flag] </h4>\n");
- printf("NOSPOILS 1 indeicates that a unit should not stop to collect spoils after a \n");
- printf("battle.  The unit will not be given any spoils which have weight. NOSPOILS 0\n");
- printf("cancels this.<p>\n");
- printf("\n");
- printf("Example:<p>\n");
- printf("Set a unit to not recieve battle spoils.<p>\n");
- printf("<pre>\n");
-    printf("   NOSPOILS 1\n");
- printf("</pre>\n");
- printf("<p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"option\"> </a>\n");
- printf("<h4> OPTION TIMES </h4>\n");
- printf("<h4> OPTION NOTIMES </h4>\n");
- printf("<h4> OPTION TEMPLATE OFF </h4>\n");
- printf("<h4> OPTION TEMPLATE SHORT </h4>\n");
- printf("<h4> OPTION TEMPLATE LONG </h4>\n");
- printf("<h4> OPTION TEMPLATE MAP </h4>\n");
- printf("\n");
- printf("The OPTION order is used to toggle various settings that affect your\n");
- printf("reports, and other email details.\n");
- printf("OPTION TIMES sets it so that your faction receives the times\n");
- printf("each week (this is the default); OPTION NOTIMES sets it so that your faction\n");
- printf("is not sent the times. <p>\n");
- printf("\n");
- printf("The OPTION TEMPLATE order toggles the length of the Orders Template\n");
- printf("that appears at the bottom of a turn report.  The OFF setting eliminates\n");
- printf("the Template altogether, and the SHORT, LONG and MAP settings control how\n");
- printf("much detail the Template contains.  The MAP setting will produce an ascii\n");
- printf("map of the region and surrounding regions in addition other details.<p>\n");
- printf("\n");
- printf("For the MAP template, the region identifiers are: (use a fixed width font)<p>\n");
- printf("<table>\n");
-   printf("  <tr><td align=left>####</td><td>BLOCKED HEX (Underworld)</td></tr>\n");
-   printf("  <tr><td align=left>~~~~</td><td>OCEAN HEX</td></tr>\n");
-   printf("  <tr><td align=left>    </td><td>PLAINS/TUNNELS HEX</td></tr>\n");
-   printf("  <tr><td align=left>^^^^</td><td>FOREST/UNDERFOREST HEX</td></tr>\n");
-   printf("  <tr><td align=left>/\\/\\</td><td>MOUNTAIN HEX</td></tr>\n");
-   printf("  <tr><td align=left>vvvv</td><td>SWAMP HEX</td></tr>\n");
-   printf("  <tr><td align=left>@@@@</td><td>JUNGLE HEX</td></tr>\n");
-   printf("  <tr><td align=left>....</td><td>DESERT/CAVERN HEX</td></tr>\n");
-   printf("  <tr><td align=left>,,,,</td><td>TUNDRA HEX</td></tr>\n");
-   printf("  <tr><td align=left>!!!!</td><td>THE NEXUS</td></tr>\n");
- printf("</table>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"password\"> </a>\n");
- printf("<h4> PASSWORD [password] </h4>\n");
- printf("<h4> PASSWORD </h4>\n");
- printf("\n");
- printf("The PASSWORD order is used to set your faction's password.  If you have a\n");
- printf("password set, you must specify it on your #ATLANTIS line for the game to\n");
- printf("accept your orders.  This protects you orders from being overwritten, either\n");
- printf("by accident or intentionally by other players.  PASSWORD with no password\n");
- printf("given clears out your faction's password. <p>\n");
- printf("\n");
- printf("IMPORTANT: The PASSWORD order does not take effect until the turn is actually\n");
- printf("run.  So if you set your password, and then want to re-submit orders, you\n");
- printf("should use the old password until the turn has been run. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Set the password to \"xyzzy\". <p>\n");
- printf("<pre>\n");
-   printf("  PASSWORD xyzzy\n");
- printf("</pre> <p>\n");
- printf("\n");
  printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
  printf("<a name=\"pillage\"> </a>\n");
  printf("<h4> PILLAGE </h4>\n");
@@ -4264,7 +4333,8 @@ int Game::GenRules(const AString &rules, const AString &css,
   }
  printf("<a href=\"#declare\">DECLARE</a>,\n");
  printf("<a href=\"#describe\">DESCRIBE</a>,\n");
- printf("<a href=\"#faction\">FACTION</a>,\n");
+ if(Globals-.FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	 printf("<a href=\"#faction\">FACTION</a>,\n");
  printf("<a href=\"#guard\">GUARD</a> 0,\n");
  printf("<a href=\"#hold\">HOLD</a>,\n");
  printf("<a href=\"#name\">NAME</a>,\n");

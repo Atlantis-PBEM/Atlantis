@@ -24,7 +24,7 @@
 // END A3HEADER
 // MODIFICATIONS
 // Date        Person          Comments
-// ----        ------          -------- 
+// ----        ------          --------
 // 2000/MAR/14 Larry Stanbery  Fixed SHOW bug.
 // 2000/MAR/14 Davis Kulis     Added a new reporting Template.
 // 2001/Feb/18 Joseph Traub    Added support for Apprentices
@@ -188,16 +188,16 @@ int ParseFactionType(AString * o,int * type)
 {
     int i;
     for (i=0; i<NFACTYPES; i++) type[i] = 0;
-    
+
     AString * token = o->gettoken();
     if (!token) return -1;
-    
+
     if (*token == "generic") {
         delete token;
         for (i=0; i<NFACTYPES; i++) type[i] = 1;
         return 0;
     }
-    
+
     while(token) {
         int foundone = 0;
         for (i=0; i<NFACTYPES; i++) {
@@ -227,7 +227,7 @@ int ParseFactionType(AString * o,int * type)
     if (tot > Globals->FACTION_POINTS) {
         return -1;
     }
-    
+
     return 0;
 }
 
@@ -253,14 +253,14 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
     Faction *fac = 0;
     Unit *unit = 0;
     Unit *former = 0;
-  
+
     AString *order = f->GetLine();
     while (order)
     {
         AString saveorder = *order;
         int getatsign = order->getat();
         AString * token = order->gettoken();
-        
+
         if (token)
         {
             int i = Parse1Order(token);
@@ -279,7 +279,7 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
                 token = order->gettoken();
                 if( !token )
                 {
-                    ParseError( pCheck, 0, 0, 
+                    ParseError( pCheck, 0, 0,
                                 "No faction number given on #atlantis line." );
                     fac = 0;
                     break;
@@ -299,7 +299,7 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
 
                 delete token;
                 token = order->gettoken();
-                
+
                 if( pCheck )
                 {
                     if( !token )
@@ -371,7 +371,7 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
                         unit = 0;
                         break;
                     }
-                    
+
                     if( pCheck )
                     {
                         if (!token->value())
@@ -423,7 +423,7 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
                     {
                         ParseError( pCheck, 0, fac,
                                     "Order given without a unit selected." );
-                    }	
+                    }
                 }
                 break;
             case O_ENDFORM:
@@ -437,7 +437,7 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
                             unit->monthorders = 0;
                         }
                         former = 0;
-                    } 
+                    }
                     else
                     {
                         ParseError( pCheck, 0, fac,
@@ -461,7 +461,7 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
                     {
                         ParseError( pCheck, 0, fac,
                                     "Order given without a unit selected." );
-                    }	
+                    }
                 }
             }
             SAFE_DELETE( token );
@@ -476,7 +476,7 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
                 }
             }
         }
-        
+
         delete order;
         if( pCheck )
         {
@@ -685,7 +685,7 @@ void Game::ProcessOptionOrder(Unit * u,AString *o, OrdersCheck *pCheck )
         }
         return;
     }
-    
+
     if (*token == "notimes")
     {
       delete token;
@@ -741,7 +741,7 @@ void Game::ProcessOptionOrder(Unit * u,AString *o, OrdersCheck *pCheck )
 
     ParseError( pCheck, u, 0, "OPTION: Invalid option." );
 }
-  
+
 void Game::ProcessReshowOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
 	AString * token = o->gettoken();
@@ -793,13 +793,13 @@ void Game::ProcessReshowOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 		}
 		int lvl = token->value();
 		delete token;
-    
+
 		if( !pCheck ) {
 			if (lvl > u->faction->skills.GetDays(sk)) {
 				u->Error("SHOW: Faction doesn't have that skill.");
 				return;
 			}
-    
+
 			u->faction->shows.Add(new ShowSkill(sk,lvl));
 		}
 		return;
@@ -861,15 +861,15 @@ void Game::ProcessForgetOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "FORGET: No skill given.");
         return;
     }
-	
+
     int sk = ParseSkill(token);
     delete token;
-  
+
     if (sk==-1) {
         ParseError( pCheck, u, 0, "FORGET: Invalid skill.");
         return;
     }
-  
+
     if( !pCheck )
     {
         ForgetOrder *ord = new ForgetOrder;
@@ -904,7 +904,7 @@ void Game::ProcessEntertainOrder(Unit * unit, OrdersCheck *pCheck )
         unit->monthorders = o;
     }
 }
-      
+
 void Game::ProcessCombatOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
     AString * token = o->gettoken();
@@ -931,7 +931,7 @@ void Game::ProcessCombatOrder(Unit * u,AString * o, OrdersCheck *pCheck )
     }
     if( !( SkillDefs[sk].flags & SkillType::COMBAT ))
     {
-        ParseError( pCheck, u, 0, 
+        ParseError( pCheck, u, 0,
                     "COMBAT: That skill cannot be used in combat.");
         return;
     }
@@ -946,7 +946,7 @@ void Game::ProcessCombatOrder(Unit * u,AString * o, OrdersCheck *pCheck )
             u->Error("COMBAT: Unit does not possess that skill.");
             return;
         }
-        
+
         u->combat = sk;
 		AString temp = AString("Combat spell set to ") + SkillDefs[sk].name;
 		if(Globals->USE_PREPARE_COMMAND) {
@@ -1018,7 +1018,7 @@ void Game::ProcessClaimOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "CLAIM: No amount given.");
         return;
     }
-	
+
     int value = token->value();
     delete token;
     if (!value) {
@@ -1064,11 +1064,11 @@ void Game::ProcessFactionOrder( Unit *u, AString *o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "FACTION: Bad faction type.");
         return;
     }
-  
+
     if( !pCheck )
     {
         int m = CountMages(u->faction);
-  
+
         for( i = 0; i < NFACTYPES; i++ )
         {
             u->faction->type[i] = factype[i];
@@ -1154,16 +1154,16 @@ void Game::ProcessQuitOrder(Unit *u,AString *o, OrdersCheck *pCheck )
                 u->faction->Error("QUIT: Must give the correct password.");
                 return;
             }
-            
+
             if (!(*token == *(u->faction->password))) {
                 delete token;
                 u->faction->Error("QUIT: Must give the correct password.");
                 return;
             }
-            
+
             delete token;
         }
-        
+
         if (u->faction->quit != QUIT_AND_RESTART) {
             u->faction->quit = QUIT_BY_ORDER;
         }
@@ -1182,14 +1182,14 @@ void Game::ProcessRestartOrder(Unit *u,AString *o, OrdersCheck *pCheck )
                 u->faction->Error("RESTART: Must give the correct password.");
                 return;
             }
-            
+
             if (!(*token == *(u->faction->password)))
             {
                 delete token;
                 u->faction->Error("RESTART: Must give the correct password.");
                 return;
             }
-            
+
             delete token;
         }
 
@@ -1281,7 +1281,7 @@ void Game::ProcessConsumeOrder(Unit *u, AString *o, OrdersCheck *pCheck )
         }
     }
 }
-	
+
 void Game::ProcessRevealOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 {
     if( !pCheck )
@@ -1511,7 +1511,7 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 	if (unit->enter == -1) unit->enter = 0;
 }
 
-void Game::ProcessAttackOrder(Unit * u,AString * o, OrdersCheck *pCheck ) 
+void Game::ProcessAttackOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
     UnitId * id = ParseUnit(o);
     while (id && id->unitnum != -1) {
@@ -1805,12 +1805,12 @@ void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck )
         fac = token->value();
     }
     delete token;
-	
+
     if( !pCheck )
     {
         Faction * target;
         if (fac != -1) {
-            target = GetFaction(&factions,fac);	
+            target = GetFaction(&factions,fac);
             if (!target) {
                 f->Error(AString("DECLARE: Non-existent faction ") + fac
                          + ".");
@@ -1823,7 +1823,7 @@ void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck )
             }
         }
     }
-	
+
     token = o->gettoken();
     if (!token) {
         if (fac != -1) {
@@ -1834,7 +1834,7 @@ void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck )
         }
         return;
     }
-	
+
     int att = ParseAttitude(token);
     delete token;
     if (att == -1) {
@@ -2033,7 +2033,7 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
         }
         return;
     }
-    
+
     if (*token == "unit") {
         delete token;
         token = o->gettoken();
@@ -2047,7 +2047,7 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
         }
         return;
     }
-	
+
     if (*token == "building" || *token == "ship" || *token == "object" ||
         *token == "structure") {
         delete token;
@@ -2079,7 +2079,7 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
 		token = o->gettoken();
 
 		if ( !token ) {
-			ParseError( pCheck, unit, 0, "NAME: No name given.");            
+			ParseError( pCheck, unit, 0, "NAME: No name given.");
 			return;
 		}
 
@@ -2287,6 +2287,13 @@ void Game::ProcessNospoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessNocrossOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
+	/*
+	if(!(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)) {
+		ParseError(pCheck, unit, 0, "NOCROSS is not a valid order.");
+		return;
+	}
+	*/
+
     /* Instant order */
     AString * token = o->gettoken();
     if (!token) {
@@ -2341,7 +2348,7 @@ void Game::ProcessAutoTaxOrder(Unit * u,AString * o, OrdersCheck *pCheck )
     if( !pCheck ) {
         u->SetFlag(FLAG_AUTOTAX,val);
     }
-}	
+}
 
 void Game::ProcessAvoidOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
@@ -2376,7 +2383,7 @@ Unit *Game::ProcessFormOrder( Unit *former, AString *o, OrdersCheck *pCheck )
         ParseError( pCheck, former, 0, "Must give alias in FORM order.");
         return 0;
     }
-  
+
     int an = t->value();
     delete t;
     if (!an)

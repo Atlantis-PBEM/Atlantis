@@ -73,7 +73,7 @@ public:
     int SHIP_SPEED;
     int FLY_SPEED;
     int MAX_SPEED;
-	
+
     int STUDENTS_PER_TEACHER;
 
     int MAINTENANCE_COST;
@@ -114,19 +114,19 @@ public:
     int WORK_FRACTION;
     int ENTERTAIN_FRACTION;
     int ENTERTAIN_INCOME;
-  
+
     int TAX_INCOME;
 
     int HEALS_PER_MAN;
-  
+
     int GUARD_REGEN; /* percent */
     int CITY_GUARD;
     int GUARD_MONEY;
     int CITY_POP;
-  
+
     int WMON_FREQUENCY;
     int LAIR_FREQUENCY;
-  
+
     int FACTION_POINTS;
 
     int TURN_COST;
