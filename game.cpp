@@ -923,6 +923,20 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 												SkillStrs(sk) +
 												" by the gods.");
 									}
+									/*
+									 * This is NOT quite the same, but the gods
+									 * are more powerful than mere mortals
+									 */
+									int mage = (SkillDefs[sk].flags &
+											SkillType::MAGIC);
+									int app = (SkillDefs[sk].flags & 
+											SkillType::APPRENTICE);
+									if(mage) {
+										u->type = U_MAGE;
+									}
+									if(app && u->type == U_NORMAL) {
+										u->type = U_APPRENTICE;
+									}
 								}
 							}
 						}
@@ -1261,6 +1275,10 @@ void Game::EditGameUnitItems( Unit *pUnit )
 					Awrite( "No such item." );
 					break;
 				}
+				if(ItemDefs[itemNum].flags & ItemType::DISABLED) {
+					Awrite("No such item.");
+					break;
+				}
 				SAFE_DELETE( pToken );
 
 				int num;
@@ -1272,6 +1290,8 @@ void Game::EditGameUnitItems( Unit *pUnit )
 				}
 
 				pUnit->items.SetNum( itemNum, num );
+				/* Mark it as known about for 'shows' */
+				pUnit->faction->items.SetNum(itemNum, 1);
 			} while( 0 );
 			if(pToken) delete pToken;
 		}
@@ -1315,6 +1335,10 @@ void Game::EditGameUnitSkills( Unit *pUnit )
                     Awrite( "No such skill." );
                     break;
                 }
+				if(SkillDefs[skillNum].flags & SkillType::DISABLED) {
+					Awrite("No such skill.");
+					break;
+				}
                 SAFE_DELETE( pToken );
 
                 int days;
@@ -1331,6 +1355,10 @@ void Game::EditGameUnitSkills( Unit *pUnit )
 				if((SkillDefs[skillNum].flags & SkillType::MAGIC) &&
 						(pUnit->type != U_MAGE)) {
 					pUnit->type = U_MAGE;
+				}
+				if((SkillDefs[skillNum].flags & SkillType::APPRENTICE) &&
+						(pUnit->type == U_NORMAL)) {
+					pUnit->type = U_APPRENTICE;
 				}
                 pUnit->skills.SetDays( skillNum, days * pUnit->GetMen() );
 				int lvl = pUnit->GetRealSkill(skillNum);

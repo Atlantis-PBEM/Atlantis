@@ -226,3 +226,7 @@ Changes from 4.0.7 -> 4.0.8
       an item as you can.
    -- Modified the 'Item:' players.in command to give the unit information
       about the new item they own if they haven't already seen it.
+   -- Fixed a bug in setting a unit as MAGE when given skills via the GM
+      option.
+   -- Fixed a bug where the game editor could give out disabled items.
+   -- Fixed a bug in the game editor to mark a unit as having owned an item.
