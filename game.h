@@ -258,7 +258,7 @@ private:
 	void ModifyEffectFlags(int effect, int flags);
 	void ModifyEffectAttackMod(int effect, int val);
 	void ModifyEffectDefenseMod(int effect, int index, int type, int val);
-	void ModifyEffectCancelEffect(int effect, int effect);
+	void ModifyEffectCancelEffect(int effect, int uneffect);
 
     AList factions;
     AList newfactions; /* List of strings */

@@ -382,6 +382,8 @@ static AString WeapClass(int wclass)
 
 AString *ItemDescription(int item, int full)
 {
+	int i;
+
 	if(ItemDefs[item].flags & ItemType::DISABLED)
 		return NULL;
 
@@ -586,7 +588,7 @@ AString *ItemDescription(int item, int full)
 		int arm = ItemDefs[item].index;
 		ArmorType *pA = &ArmorDefs[arm];
 		*temp += " This armor will protect its wearer ";
-		for(int i = 0; i < NUM_WEAPON_CLASSES; i++) {
+		for(i = 0; i < NUM_WEAPON_CLASSES; i++) {
 			if(i == NUM_WEAPON_CLASSES - 1) {
 				*temp += ", and ";
 			} else if(i > 0) {
@@ -608,14 +610,14 @@ AString *ItemDescription(int item, int full)
 		int last = -1;
 		*temp += " This is a tool.";
 		*temp += " This item increases the production of ";
-		for(int i = NITEMS - 1; i > 0; i--) {
+		for(i = NITEMS - 1; i > 0; i--) {
 			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if(ItemDefs[i].mult_item == item) {
 				last = i;
 				break;
 			}
 		}
-		for(int i = 0; i < NITEMS; i++) {
+		for(i = 0; i < NITEMS; i++) {
 		   if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		   if(ItemDefs[i].mult_item == item) {
 			   if(comma) {
@@ -767,7 +769,7 @@ AString *ItemDescription(int item, int full)
 
 	if((ItemDefs[item].type & IT_BATTLE) && full) {
 		*temp += " This item is a miscellaneous combat item.";
-		for(int i = 0; i < NUMBATTLEITEMS; i++) {
+		for(i = 0; i < NUMBATTLEITEMS; i++) {
 			if(BattleItemDefs[i].itemNum == item) {
 				if(BattleItemDefs[i].flags & BattleItemType::MAGEONLY) {
 					*temp += " This item may only be used by a mage";
