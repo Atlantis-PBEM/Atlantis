@@ -1933,8 +1933,7 @@ void Game::DoGuard1Orders() {
 	    u->guard == GUARD_GUARD) {
 	  if (!u->Taxers()) {
 	    u->guard = GUARD_NONE;
-	    u->Error("Must be combat "
-		     "ready to be on guard.");
+	    u->Error("Must be combat ready to be on guard.");
 	    continue;
 	  }
 	  if (u->type != U_GUARD && r->HasCityGuard()) {

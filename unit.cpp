@@ -23,80 +23,81 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date        Person          Comments
-// ----        ------          --------
-// 2000/MAR/14 Larry Stanbery  Corrected logical flaw in creation of mages.
-//                             Replaced specific skill bonus functions with
-//                             generic function.
-// 2001/Feb/18 Joseph Traub    Added support for Apprentices
-// 2001/Feb/25 Joseph Traub    Added a flag preventing units from crossing
-//                             water.
-//
+// Date			Person			Comments
+// ----			------			--------
+// 2000/MAR/14	Larry Stanbery	Corrected logical flaw in creation of mages.
+//								Replaced specific skill bonus functions with
+//								generic function.
+// 2001/Feb/18	Joseph Traub	Added support for Apprentices
+// 2001/Feb/25	Joseph Traub	Added a flag preventing units from crossing
+//								water.
 
 #include "unit.h"
 #include "gamedata.h"
 
-UnitId::UnitId() {
+UnitId::UnitId()
+{
 }
 
-UnitId::~UnitId() {
+UnitId::~UnitId()
+{
 }
 
 AString UnitId::Print()
 {
-    if (unitnum) {
-        return AString(unitnum);
-    } else {
-        if (faction) {
-            return AString("faction ") + AString(faction) + " new " +
-                AString(alias);
-        } else {
-            return AString("new ") + AString(alias);
-        }
-    }
+	if (unitnum) {
+		return AString(unitnum);
+	} else {
+		if (faction) {
+			return AString("faction ") + AString(faction) + " new " +
+				AString(alias);
+		} else {
+			return AString("new ") + AString(alias);
+		}
+	}
 }
 
 UnitPtr *GetUnitList(AList *list, Unit *u) {
   forlist (list) {
-    UnitPtr *p = (UnitPtr *) elem;
-    if (p->ptr == u) return p;
+	UnitPtr *p = (UnitPtr *) elem;
+	if (p->ptr == u) return p;
   }
   return 0;
 }
 
 Unit::Unit()
 {
-    name = 0;
-    describe = 0;
-    num = 0;
-    type = U_NORMAL;
-    faction = 0;
-    ClearOrders();
-    alias = 0;
-    guard = GUARD_NONE;
-    reveal = REVEAL_NONE;
-    flags = 0;
-    combat = -1;
+	name = 0;
+	describe = 0;
+	num = 0;
+	type = U_NORMAL;
+	faction = 0;
+	ClearOrders();
+	alias = 0;
+	guard = GUARD_NONE;
+	reveal = REVEAL_NONE;
+	flags = 0;
+	combat = -1;
 	readyItem = -1;
-    object = 0;
+	object = 0;
 }
 
 Unit::Unit(int seq,Faction * f,int a)
 {
-    num = seq;
-    type = U_NORMAL;
-    name = new AString;
-    describe = 0;
-    *name = AString("Unit (") + num + ")";
-    faction = f;
-    alias = a;
-    guard = 0;
-    reveal = REVEAL_NONE;
-    flags = 0;
-    combat = -1;
+	num = seq;
+	type = U_NORMAL;
+	name = new AString;
+	describe = 0;
+	*name = AString("Unit (") + num + ")";
+	faction = f;
+	alias = a;
+	guard = 0;
+	reveal = REVEAL_NONE;
+	flags = 0;
+	combat = -1;
 	readyItem = -1;
-    ClearOrders();
-    object = 0;
+	ClearOrders();
+	object = 0;
 }
 
 Unit::~Unit() {
@@ -114,33 +115,33 @@ void Unit::SetMonFlags() {
 
 void Unit::MakeWMon(char * monname,int mon,int num)
 {
-    AString * temp = new AString(monname);
-    SetName(temp);
-    
-    type = U_WMON;
-    items.SetNum(mon,num);
-    SetMonFlags();
+	AString * temp = new AString(monname);
+	SetName(temp);
+
+	type = U_WMON;
+	items.SetNum(mon,num);
+	SetMonFlags();
 }
 
 void Unit::Writeout( Aoutfile *s )
 {
-    s->PutStr(*name);
-    if (describe) {
-        s->PutStr(*describe);
-    } else {
-        s->PutStr("none");
-    }
-    s->PutInt(num);
-    s->PutInt(type);
-    s->PutInt(faction->num);
-    s->PutInt(guard);
-    s->PutInt(reveal);
+	s->PutStr(*name);
+	if (describe) {
+		s->PutStr(*describe);
+	} else {
+		s->PutStr("none");
+	}
+	s->PutInt(num);
+	s->PutInt(type);
+	s->PutInt(faction->num);
+	s->PutInt(guard);
+	s->PutInt(reveal);
 	s->PutInt(-1);
 	s->PutInt(readyItem);
-    s->PutInt(flags);
-    items.Writeout(s);
-    skills.Writeout(s);
-    s->PutInt(combat);
+	s->PutInt(flags);
+	items.Writeout(s);
+	skills.Writeout(s);
+	s->PutInt(combat);
 }
 
 void Unit::Readin( Ainfile *s, AList *facs, ATL_VER v )
@@ -170,8 +171,8 @@ void Unit::Readin( Ainfile *s, AList *facs, ATL_VER v )
 		readyItem = -1;
 	}
 
-    items.Readin(s);
-    skills.Readin(s);
+	items.Readin(s);
+	skills.Readin(s);
 	combat = s->GetInt();
 }
 
@@ -223,7 +224,7 @@ AString Unit::GetName(int obs)
 		ret += ", ";
 		ret += *faction->name;
 	}
-    return ret;
+	return ret;
 }
 
 int Unit::CanGetSpoil(Item *i)
@@ -253,9 +254,9 @@ AString Unit::SpoilsReport() {
 }
 
 void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
-		       int autosee)
+			   int autosee)
 {
-    int stealth = GetSkill(S_STEALTH);
+	int stealth = GetSkill(S_STEALTH);
 	if (obs==-1) {
 		/* The unit belongs to the Faction writing the report */
 		obs = 2;
@@ -279,74 +280,74 @@ void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
 				} else {
 					obs = 0;
 				}
-			} else { 
+			} else {
 				/* Can see unit and Faction */
 				obs = 1;
 			}
 		}
 	}
 
-    /* Setup True Sight */
-    if (obs == 2) {
-        truesight = 1;
-    } else {
-        if (GetSkill(S_ILLUSION) > truesight) {
-            truesight = 0;
-        } else {
-            truesight = 1;
-        }
-    }
+	/* Setup True Sight */
+	if (obs == 2) {
+		truesight = 1;
+	} else {
+		if (GetSkill(S_ILLUSION) > truesight) {
+			truesight = 0;
+		} else {
+			truesight = 1;
+		}
+	}
 
-    if (detfac && obs != 2) obs = 1;
-  
+	if (detfac && obs != 2) obs = 1;
+
   /* Write the report */
-    AString temp;
-    if (obs == 2) {
-        temp += AString("* ") + *name;
-    } else {
-        temp += AString("- ") + *name;
-    }
-  
-    if (guard == GUARD_GUARD) temp += ", on guard";
-    if (obs > 0) {
-        temp += AString(", ") + *faction->name;
-        if (guard == GUARD_AVOID) temp += ", avoiding";
-        if (GetFlag(FLAG_BEHIND)) temp += ", behind";
-    }
-  
-    if (obs == 2) {
-        if (reveal == REVEAL_UNIT) temp += ", revealing unit";
-        if (reveal == REVEAL_FACTION) temp += ", revealing faction";
-        if (GetFlag(FLAG_HOLDING)) temp += ", holding";
-        if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
-        if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
-        if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
-        if (GetFlag(FLAG_CONSUMING_FACTION)) 
-            temp += ", consuming faction's food";
+	AString temp;
+	if (obs == 2) {
+		temp += AString("* ") + *name;
+	} else {
+		temp += AString("- ") + *name;
+	}
+
+	if (guard == GUARD_GUARD) temp += ", on guard";
+	if (obs > 0) {
+		temp += AString(", ") + *faction->name;
+		if (guard == GUARD_AVOID) temp += ", avoiding";
+		if (GetFlag(FLAG_BEHIND)) temp += ", behind";
+	}
+
+	if (obs == 2) {
+		if (reveal == REVEAL_UNIT) temp += ", revealing unit";
+		if (reveal == REVEAL_FACTION) temp += ", revealing faction";
+		if (GetFlag(FLAG_HOLDING)) temp += ", holding";
+		if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
+		if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
+		if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
+		if (GetFlag(FLAG_CONSUMING_FACTION))
+			temp += ", consuming faction's food";
 		if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
 		temp += SpoilsReport();
-    }
-  
-    temp += items.Report(obs,truesight,0);
-    if (obs == 2) {
-        temp += ". Skills: ";
-        temp += skills.Report(GetMen());
-    }
-  
-    if (obs == 2 && (type == U_MAGE || type == U_GUARDMAGE)) {
-        temp += MageReport();
-    }
+	}
+
+	temp += items.Report(obs,truesight,0);
+	if (obs == 2) {
+		temp += ". Skills: ";
+		temp += skills.Report(GetMen());
+	}
+
+	if (obs == 2 && (type == U_MAGE || type == U_GUARDMAGE)) {
+		temp += MageReport();
+	}
 
 	if(obs == 2) {
 		temp += ReadyItem();
 		temp += StudyableSkills();
 	}
-  
-    if (describe) {
-        temp += AString("; ") + *describe;
-    }
-    temp += ".";
-    f->PutStr(temp);
+
+	if (describe) {
+		temp += AString("; ") + *describe;
+	}
+	temp += ".";
+	f->PutStr(temp);
 }
 
 AString Unit::TemplateReport()
@@ -394,55 +395,55 @@ AString * Unit::BattleReport(int obs)
 	  *temp += *name;
 
   if (GetFlag(FLAG_BEHIND)) *temp += ", behind";
-  
+
   *temp += items.BattleReport();
-  
+
   int lvl;
   lvl = GetRealSkill(S_TACTICS);
   if (lvl) {
-    *temp += ", ";
-    *temp += SkillDefs[S_TACTICS].name;
-    *temp += " ";
-    *temp += lvl;
+	*temp += ", ";
+	*temp += SkillDefs[S_TACTICS].name;
+	*temp += " ";
+	*temp += lvl;
   }
-	
+
   lvl = GetRealSkill(S_COMBAT);
   if (lvl) {
-    *temp += ", ";
-    *temp += SkillDefs[S_COMBAT].name;
-    *temp += " ";
-    *temp += lvl;
+	*temp += ", ";
+	*temp += SkillDefs[S_COMBAT].name;
+	*temp += " ";
+	*temp += lvl;
   }
-	
+
   lvl = GetRealSkill(S_LONGBOW);
   if (lvl) {
-    *temp += ", ";
-    *temp += SkillDefs[S_LONGBOW].name;
-    *temp += " ";
-    *temp += lvl;
+	*temp += ", ";
+	*temp += SkillDefs[S_LONGBOW].name;
+	*temp += " ";
+	*temp += lvl;
   }
-	
+
   lvl = GetRealSkill(S_CROSSBOW);
   if (lvl) {
-    *temp += ", ";
-    *temp += SkillDefs[S_CROSSBOW].name;
-    *temp += " ";
-    *temp += lvl;
+	*temp += ", ";
+	*temp += SkillDefs[S_CROSSBOW].name;
+	*temp += " ";
+	*temp += lvl;
   }
-	
+
   lvl = GetRealSkill(S_RIDING);
   if (lvl) {
-    *temp += ", ";
-    *temp += SkillDefs[S_RIDING].name;
-    *temp += " ";
-    *temp += lvl;
+	*temp += ", ";
+	*temp += SkillDefs[S_RIDING].name;
+	*temp += " ";
+	*temp += lvl;
   }
-  
+
   if (describe) {
-    *temp += "; ";
-    *temp += *describe;
+	*temp += "; ";
+	*temp += *describe;
   }
-	
+
   *temp += ".";
   return temp;
 }
@@ -513,17 +514,17 @@ void Unit::DefaultOrders(Object * obj)
 
 void Unit::PostTurn(ARegion *r)
 {
-    if (type == U_WMON)
-    {
-        forlist(&items) {
-            Item *i = (Item *) elem;
-            if( !( ItemDefs[i->type].type & IT_MONSTER ))
-            {
-                items.Remove(i);
-                delete i;
-            }
-        }
-    }
+	if (type == U_WMON)
+	{
+		forlist(&items) {
+			Item *i = (Item *) elem;
+			if( !( ItemDefs[i->type].type & IT_MONSTER ))
+			{
+				items.Remove(i);
+				delete i;
+			}
+		}
+	}
 }
 
 void Unit::SetName(AString *s)
@@ -695,7 +696,7 @@ int Unit::GetAttackRiding()
 	}
 }
 
-int Unit::GetDefenseRiding() 
+int Unit::GetDefenseRiding()
 {
 	if (guard == GUARD_GUARD) return 0;
 
@@ -931,14 +932,14 @@ void Unit::AdjustSkills()
 
 int Unit::MaintCost()
 {
-    int retval = 0;
+	int retval = 0;
 	int levels = 0;
-    if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
+	if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
 
 	int leaders = GetMen(I_LEADERS);
 	if(leaders < 0) leaders = 0;
-    int nonleaders = GetMen() - leaders;
-    if (nonleaders < 0) nonleaders = 0;
+	int nonleaders = GetMen() - leaders;
+	if (nonleaders < 0) nonleaders = 0;
 
 	switch(Globals->MULTIPLIER_USE) {
 		case GameDefs::MULT_NONE:
@@ -971,13 +972,13 @@ int Unit::MaintCost()
 				retval += Globals->MAINTENANCE_COST * nonleaders;
 			}
 	}
-  
-    return retval;
+
+	return retval;
 }
 
 void Unit::Short(int needed)
 {
-    int n = 0;
+	int n = 0;
 
 	switch(Globals->SKILL_STARVATION) {
 		case GameDefs::STARVE_MAGES:
@@ -994,61 +995,61 @@ void Unit::Short(int needed)
 	}
 
 	if(!needed) return;
-	
-    for (int i = 0; i<= NITEMS; i++)
-    {
-        if( !( ItemDefs[ i ].type & IT_MAN ))
-        {
-            //
-            // Only men need sustenance.
-            //
-            continue;
-        }
 
-        if( i == I_LEADERS )
-        {
-            //
-            // Don't starve leaders just yet.
-            //
-            continue;
-        }
+	for (int i = 0; i<= NITEMS; i++)
+	{
+		if( !( ItemDefs[ i ].type & IT_MAN ))
+		{
+			//
+			// Only men need sustenance.
+			//
+			continue;
+		}
 
-        while (GetMen(i))
-        {
-            if (getrandom(100) < Globals->STARVE_PERCENT)
-            {
-                SetMen(i,GetMen(i) - 1);
-                n++;
-            }
-            needed -= Globals->MAINTENANCE_COST;
-            if (needed <= 0)
-            {
-                if (n)
-                {
-                    Error(AString(n) + " starve to death.");
-                }
-                return;
-            }
-        }
-    }
-	
-    while (GetMen(I_LEADERS))
-    {
-        if (getrandom(100) < Globals->STARVE_PERCENT)
-        {
-            SetMen(I_LEADERS,GetMen(I_LEADERS) - 1);
-            n++;
-        }
-        needed -= Globals->LEADER_COST;
-        if (needed <= 0)
-        {
-            if (n)
-            {
-                Error(AString(n) + " starve to death.");
-            }
-            return;
-        }
-    }
+		if( i == I_LEADERS )
+		{
+			//
+			// Don't starve leaders just yet.
+			//
+			continue;
+		}
+
+		while (GetMen(i))
+		{
+			if (getrandom(100) < Globals->STARVE_PERCENT)
+			{
+				SetMen(i,GetMen(i) - 1);
+				n++;
+			}
+			needed -= Globals->MAINTENANCE_COST;
+			if (needed <= 0)
+			{
+				if (n)
+				{
+					Error(AString(n) + " starve to death.");
+				}
+				return;
+			}
+		}
+	}
+
+	while (GetMen(I_LEADERS))
+	{
+		if (getrandom(100) < Globals->STARVE_PERCENT)
+		{
+			SetMen(I_LEADERS,GetMen(I_LEADERS) - 1);
+			n++;
+		}
+		needed -= Globals->LEADER_COST;
+		if (needed <= 0)
+		{
+			if (n)
+			{
+				Error(AString(n) + " starve to death.");
+			}
+			return;
+		}
+	}
 }
 
 int Unit::Weight() {
@@ -1058,25 +1059,25 @@ int Unit::Weight() {
 
 int Unit::CanFly(int weight)
 {
-    int cap = 0;
-    forlist(&items) {
-        Item * i = (Item *) elem;
-        if (i->type == I_LEADERS) {
-        }
-        cap += ItemDefs[i->type].fly * i->num;
-    }
-    
-    if (cap >= weight) return 1;
-    return 0;
+	int cap = 0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		if (i->type == I_LEADERS) {
+		}
+		cap += ItemDefs[i->type].fly * i->num;
+	}
+
+	if (cap >= weight) return 1;
+	return 0;
 }
 
 int Unit::CanReallySwim() {
   int cap = 0;
   forlist(&items) {
-    Item * i = (Item *) elem;
-    cap += ItemDefs[i->type].swim * i->num;
+	Item * i = (Item *) elem;
+	cap += ItemDefs[i->type].swim * i->num;
   }
-	
+
   if (cap >= items.Weight()) return 1;
   return 0;
 }
@@ -1098,20 +1099,20 @@ int Unit::CanFly() {
 int Unit::CanRide(int weight) {
   int cap = 0;
   forlist(&items) {
-    Item * i = (Item *) elem;
-    cap += ItemDefs[i->type].ride * i->num;
+	Item * i = (Item *) elem;
+	cap += ItemDefs[i->type].ride * i->num;
   }
-  
+
   if (cap >= weight) return 1;
   return 0;
 }
 
 int Unit::CanWalk(int weight)
 {
-    int cap = 0;
-    forlist(&items) {
-        Item * i = (Item *) elem;
-        cap += ItemDefs[i->type].walk * i->num;
+	int cap = 0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		cap += ItemDefs[i->type].walk * i->num;
 		if(ItemDefs[i->type].hitchItem != -1) {
 			int hitch = ItemDefs[i->type].hitchItem;
 			if(!(ItemDefs[hitch].flags & ItemType::DISABLED)) {
@@ -1121,12 +1122,12 @@ int Unit::CanWalk(int weight)
 				cap += hitches * ItemDefs[i->type].hitchwalk;
 			}
 		}
-    }
-	
-    if (cap >= weight) return 1;
-    return 0;
+	}
+
+	if (cap >= weight) return 1;
+	return 0;
 }
-	
+
 int Unit::MoveType() {
   int weight = items.Weight();
   if (CanFly(weight)) return M_FLY;
@@ -1153,33 +1154,33 @@ int Unit::CalcMovePoints()
 
 int Unit::CanMoveTo(ARegion * r1,ARegion * r2)
 {
-    if (r1 == r2) return 1;
+	if (r1 == r2) return 1;
 
-    int exit = 0;	
-    int i;
-    for ( i=0; i<NDIRS; i++) {
-        if (r1->neighbors[i] == r2) {
-            exit = 1;
-            break;
-        }
-    }
-    if (!exit) return 0;
-    exit = 0;
-    for (i=0; i<NDIRS; i++) {
-        if (r2->neighbors[i] == r1) {
-            exit = 1;
-            break;
-        }
-    }
-    if (!exit) return 0;
-    
-    int mt = MoveType();
-    if ((r1->type == R_OCEAN || r2->type == R_OCEAN) &&
+	int exit = 0;
+	int i;
+	for ( i=0; i<NDIRS; i++) {
+		if (r1->neighbors[i] == r2) {
+			exit = 1;
+			break;
+		}
+	}
+	if (!exit) return 0;
+	exit = 0;
+	for (i=0; i<NDIRS; i++) {
+		if (r2->neighbors[i] == r1) {
+			exit = 1;
+			break;
+		}
+	}
+	if (!exit) return 0;
+
+	int mt = MoveType();
+	if ((r1->type == R_OCEAN || r2->type == R_OCEAN) &&
 		(!CanSwim() || GetFlag(FLAG_NOCROSS_WATER)))
-        return 0;
-    int mp = CalcMovePoints() - movepoints;
-    if (mp < (r2->MoveCost(mt))) return 0;
-    return 1;
+		return 0;
+	int mp = CalcMovePoints() - movepoints;
+	if (mp < (r2->MoveCost(mt))) return 0;
+	return 1;
 }
 
 int Unit::CanCatch(ARegion *r,Unit *u) {
@@ -1194,11 +1195,11 @@ int Unit::GetAttitude(ARegion * r,Unit * u) {
   if (faction == u->faction) return A_ALLY;
   int att = faction->GetAttitude(u->faction->num);
   if (att >= A_FRIENDLY && att >= faction->defaultattitude) return att;
-  
+
   if (CanSee(r,u) == 2) {
-    return att;
+	return att;
   } else {
-    return faction->defaultattitude;
+	return faction->defaultattitude;
   }
 }
 
@@ -1328,37 +1329,37 @@ void Unit::CopyFlags(Unit * x)
 
 int Unit::GetBattleItem( int batType, int index )
 {
-    forlist( &items ) {
-        Item *pItem = (Item *) elem;
-        if( !pItem->num )
-        {
-            continue;
-        }
+	forlist( &items ) {
+		Item *pItem = (Item *) elem;
+		if( !pItem->num )
+		{
+			continue;
+		}
 
-        if( ItemDefs[ pItem->type ].type & batType
-            && ItemDefs[ pItem->type ].index == index ) {
-            //
-            // We found it
-            //
-            int retval = pItem->type;
-            // Let's do this the "right" way
-            items.SetNum(retval, pItem->num-1);
-            return( retval );
-        }
-    }
+		if( ItemDefs[ pItem->type ].type & batType
+			&& ItemDefs[ pItem->type ].index == index ) {
+			//
+			// We found it
+			//
+			int retval = pItem->type;
+			// Let's do this the "right" way
+			items.SetNum(retval, pItem->num-1);
+			return( retval );
+		}
+	}
 
-    return( -1 );
+	return( -1 );
 }
 
 void Unit::MoveUnit( Object *toobj )
 {
 	if( object ) {
 		object->units.Remove( this );
-    }
-    object = toobj;
-    if( object ) {
-        object->units.Add( this );
-    }
+	}
+	object = toobj;
+	if( object ) {
+		object->units.Add( this );
+	}
 }
 
 void Unit::Event(const AString & s)
@@ -1384,7 +1385,7 @@ int Unit::GetSkillBonus( int sk )
 			if ((bonus != 3) && GetMen() && items.GetNum(I_AMULETOFTS)) {
 				bonus = 2;
 			}
-		   	break;
+			break;
 		case S_STEALTH:
 			if (GetFlag(FLAG_INVIS) || GetMen() <= items.GetNum(I_RINGOFI)) {
 				bonus = 3;

@@ -20,7 +20,7 @@
 //
 // See the Atlantis Project web page for details:
 // http://www.prankster.com/project
-// 
+//
 // END A3HEADER
 
 #include <time.h>
@@ -80,7 +80,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("<P></P>");
 	f.PutStr(f.LinkRef("table_of_contents"));
 	f.ClassTagText("DIV", "rule", "");
- 	f.TagText("H2", "Table of Contents");
+	f.TagText("H2", "Table of Contents");
 	f.PutStr(AString("Thanks to ") +
 			f.Link("mailto:ken@satori.gso.uri.edu","Kenneth Casey"));
 	f.PutStr("for putting together this table of contents.");
@@ -467,7 +467,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += AString(" region") + (nw==1?"":"s") + ", but could ";
 		if(nt == 0)
 			temp += "not perform trade in any regions";
-		else 
+		else
 			temp += AString("only perform trade in ") + nt + " region" +
 				(nt == 1?"":"s");
 		temp += ", ";
@@ -516,7 +516,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " order to withdraw goods directly";
 	}
 	temp += ".";
-	f.PutStr(temp);		
+	f.PutStr(temp);
 	f.PutStr("<P></P>");
 	f.PutStr("An example faction is shown below, consisting of a "
 			"starting character, Merlin the Magician, who has formed "
@@ -671,7 +671,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int money = (500 * (15 - Globals->MAINTENANCE_COST));
 	temp += AString(", $") + money + ".";
 	f.WrapStr(temp);
- 	f.WrapStr("------------------------------------------------------");
+	f.WrapStr("------------------------------------------------------");
 	f.AddWrapTab();
 	if (Globals->WEATHER_EXISTS)
 		f.WrapStr("The weather was clear last month; it will be clear next "
@@ -1395,389 +1395,410 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"divided as evenly as possible among the people in the unit; "
 			"but no months are ever lost.");
 	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("skills_studying"));
+	f.TagText("H3", "Studying");
+	temp = "For a unit to gain level 1 of a skill, they must gain one "
+		"months worth of training in that skill.  To raise this skill level "
+		"to 2, the unit must add an additional two months worth of "
+		"training.  Then, to raise this to skill level 3 requires another "
+		"three months worth of training, and so forth.  A month of "
+		"training is gained when a unit uses the ";
+	temp += f.Link("#study", "STUDY") + " order.  Note that study months "
+		"do not need to be consecutive; for a unit to go from level 1 to "
+		"level 2, he can study for a month, do something else for a month, "
+		"and then go back and complete his second month of study.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	// XXX -- This is not as nice as it could be and could cause problems
+	// if the skills are given disparate costs.   This should probably be
+	// a table of all skills/costs.
+	temp = "Most skills cost $";
+	temp += SkillDefs[S_COMBAT].cost;
+	temp += " per person per month to study (in addition to normal "
+		"maintenance costs).  The exceptions are ";
+	if(has_stea || has_obse) {
+		if(has_stea) temp += "Stealth";
+		if(has_obse) {
+			if(has_stea) temp += " and ";
+			temp += "Observation";
+		}
+		temp += " (";
+		if(has_stea && has_obse)
+			temp += "both of ";
+		temp += "which cost $";
+		temp += SkillDefs[S_STEALTH].cost;
+		temp += "), ";
+	}
+	temp += "Magic skills (which cost $";
+	temp += SkillDefs[S_FORCE].cost;
+	temp += ")";
+	if(!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
+		temp += ", and Tactics (which costs $";
+		temp += SkillDefs[S_TACTICS].cost;
+		temp += ")";
+	}
+	temp += ".";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("skills_teaching"));
+	f.TagText("H3", "Teaching:");
+	temp = AString("A unit with a teacher can learn up to twice as fast ") +
+		"as normal. The " + f.Link("#teach", "TEACH") + " order is used to ";
+	temp += "spend the month teaching one or more other units (your own or "
+		"another faction's).  The unit doing the teaching must have a skill "
+		"level greater than the units doing the studying.  (Note: for all "
+		"skill uses, it is skill level, not number of months of training, "
+		"that counts. Thus, a unit with 1 month of training is effectively "
+		"the same as a unit with 2 months of training, since both have a "
+		"skill level of 1.)  The units being taught simply issue the ";
+	temp += f.Link("#study", "STUDY") + " order normally (also, his faction "
+		"must be declared Friendly by the teaching faction).  Each person "
+		"can only teach up to " + Globals->STUDENTS_PER_TEACHER +
+		"student" + (Globals->STUDENTS_PER_TEACHER == 1?"":"s") + " in a ";
+	temp += "month; additional students dilute the training.  Thus, if 1 "
+		"teacher teaches ";
+	temp += 2*Globals->STUDENTS_PER_TEACHER + " men, each man will gain 1 "
+		"1/2 months of training, not 2 months.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Note that it is quite possible for a single unit to teach two "
+		"or more other units different skills in the same month, provided "
+		"that the teacher has a higher skill level than each student in "
+		"the skill that that student is studying, and that there are no "
+		"more than ";
+	temp += Globals->STUDENTS_PER_TEACHER + "student";
+	temp += (Globals->STUDENTS_PER_TEACHER == 1 ? "" : "s");
+	temp += " per teacher.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	if(Globals->LEADERS_EXIST) {
+		temp = "Note: Only leader may use the ";
+		temp += f.Link("#teach", "TEACH") + "order.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+	}
+	f.PutStr(f.LinkRef("skills_skillreports"));
+	f.TagText("H3", "Skill Reports:");
+	temp = "When a faction learns a new skill level for this first time, it "
+		"will be given a report on special abilities that a unit with this "
+		"skill level has. This report can be shown again at any time (once "
+		"a faction knows the skill), using the ";
+	temp += f.Link("#show", "SHOW") + " order. For example, when a faction ";
+	temp += "learned the skill Shoemaking level 3 for the first time, it "
+		"might receive the following (obviously farsical) report:";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.Enclose(1, "PRE");
+	f.ClearWrapTab();
+	f.WrapStr("Shoemaking [SHOE] 3: A unit with this skill may PRODUCE "
+			"Sooper Dooper Air Max Winged Sandals.");
+	f.Enclose(0, "PRE");
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("economy"));
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "The Economy");
+	f.PutStr("The unit of currency in Atlantis is the silver piece. Silver "
+			"is a normal item, with zero weight, appearing in your unit's "
+			"reports. Silver is used for such things as buying items, and "
+			"unit's maintenance.");
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("economy_maintenance"));
+	f.TagText("H3", "Maintenance Costs:");
+	temp = "IMPORTANT:  Each and every character in Atlantis requires a "
+		"maintenance fee each month. Anyone who ends the month without "
+		"this maintenance cost has a ";
+	temp += Globals->STARVE_PERCENT;
+	temp += "percent chance of ";
+	if(Globals->SKILL_STARVATION != GameDefs::STARVE_NONE) {
+		temp += "starving, leading to the following effects:";
+		f.PutStr(temp);
+		f.Enclose(1, "UL");
+		f.Enclose(1, "LI");
+		if(Globals->SKILL_STARVATION == GameDefs::STARVE_MAGES)
+			temp = "If the unit is a mage, it";
+		else if(Globals->SKILL_STARVATION == GameDefs::STARVE_LEADERS)
+			temp = "If the unit is a leader, it";
+		else
+			temp = "A unit";
+		temp += " will loose a skill level in some of its skills.";
+		f.PutStr(temp);
+		f.Enclose(0, "LI");
+		if(Globals->SKILL_STARVATION != GameDefs::STARVE_ALL) {
+			f.Enclose(1, "LI");
+			f.PutStr("Otherwise, it will starve to death.");
+			f.Enclose(0, "LI");
+		}
+		f.Enclose(1, "LI");
+		f.PutStr("If a unit should forget a skill level and it knows none, "
+				"it will starve to death.");
+		f.Enclose(0, "LI");
+		f.Enclose(0, "UL");
+		temp = "";
+	} else {
+		temp += " starving to death.  ";
+	}
+	temp += "It is up to you to make sure that your people have enough money "
+		"available . Money will be shared automatically between your units "
+		"in the same region, if one is starving and another has more than "
+		"enough; but this will not happen between units in different "
+		"regions (this sharing of money applies only for maintenance costs, "
+		"and does not occur for other purposes). If you have silver in your "
+		"unclaimed fund, then that silver will be automatically claimed by "
+		"units that would otherwise starve. Lastly, if a faction is allied "
+		"to yours, their units will provide surplus cash to your units for"
+		"maintenance, as a last resort.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = AString("This fee is generally ") + Globals->MAINTENANCE_COST +
+		" silver for a normal character";
+	if (Globals->LEADERS_EXIST) {
+		temp += AString(", and ") + Globals->LEADER_COST +
+			" silver for a leader";
+	}
+	temp += ".";
+	if (Globals->FOOD_ITEMS_EXIST) {
+		temp += " If this is not available, units may substitute one unit "
+			"of grain, livestock, or fish for this maintenance";
+		if(Globals->LEADERS_EXIST)
+			temp += " (two units for a leader)";
+		temp += ". A unit may use the ";
+		temp += f.Link("#consume", "CONSUME") + " order to specify that it "
+			" wishes to use food items in preference to silver.  Note that ";
+		temp += "these items are worth more when sold in towns, so selling "
+			"them and using the money is more economical than using them for "
+			"maintenance.";
+	};
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("economy_recruiting"));
+	f.TagText("H3", "Recruiting");
+	temp = "People may be recruited in a region.  The total amount of "
+		"recruits available per month in a region, and the amount that must "
+		"be paid per person recruited, are shown in the region description. "
+		"The ";
+	temp += f.Link("#buy", "BUY") + " order is used to recruit new people. ";
+	temp += "New recruits will not have any skills or items.  Note that the "
+		"process of recruiting a new unit is somewhat counterintuitive; it "
+		"is necessary to ";
+	temp += f.Link("#form", "FORM")+" an empty unit, ";
+	temp += f.Link("#give", "GIVE")+" the empty unit some money, and have it ";
+	temp += f.Link("#buy", "BUY") + " people; see the description of the ";
+	temp += f.Link("#form", "FORM")+ " order for further details.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("economy_items"));
+	f.TagText("H3", "Items:");
+	f.PutStr("A unit may have a number of possessions, referred to as "
+			"\"items\".  Some details were given above in the section on "
+			"Movement, but many things were left out. Here is a table giving "
+			"some information about common items in Atlantis:");
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("tableiteminfo"));
+	f.Enclose(1, "CENTER");
+	f.Enclose(1, "TABLE BORDER=1");
+	f.Enclose(1, "TR");
+	f.TagText("TD", "&nbsp;");
+	f.TagText("TH", "Skill");
+	f.TagText("TH", "Material");
+	f.TagText("TH", "Production time");
+	f.TagText("TH", "Weight (capacity)");
+	f.TagText("TH", "Extra Information");
+	f.Enclose(0, "TR");
+	for(i = 0; i < NITEMS; i++) {
+		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if(SkillDefs[ItemDefs[i].pSkill].flags & SkillType::DISABLED) continue;
+		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
+		f.Enclose(1, "TR");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr(ItemDefs[i].name);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=CENTER NOWRAP");
+		temp = SkillDefs[ItemDefs[i].pSkill].name;
+		if(ItemDefs[i].pLevel > 1)
+			temp += AString("(") + ItemDefs[i].pLevel + ")";
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=CENTER NOWRAP");
+		comma = 0;
+		temp = "";
+		for(j = 0; j < 2; j++) {
+			if(ItemDefs[i].pInput[j].item < 0 ||
+			   (ItemDefs[ItemDefs[i].pInput[j].item].flags&ItemType::DISABLED))
+				continue;
+			if(comma) temp += ", ";
+			if(ItemDefs[i].pInput[j].amt > 1)
+				temp += ItemDefs[ItemDefs[i].pInput[j].item].names;
+			else
+				temp += ItemDefs[ItemDefs[i].pInput[j].item].name;
+		}
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=CENTER NOWRAP");
+		temp = ItemDefs[i].pMonths;
+		temp += AString(" month") + (ItemDefs[i].pMonths == 1 ? "" : "s");
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=CENTER NOWRAP");
+		temp = ItemDefs[i].weight;
+		if(ItemDefs[i].walk) {
+			temp += AString("(") + (ItemDefs[i].walk - ItemDefs[i].weight) +
+					")";
+		}
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT");
+		temp = "";
+		if(ItemDefs[i].type & IT_WEAPON) {
+			WeaponType *wp = &WeaponDefs[ItemDefs[i].index];
+			temp += "This is a ";
+			if(wp->flags & WeaponType::RANGED)
+				temp += "ranged ";
+			temp += "weapon";
+			if(wp->flags & WeaponType::NEEDSKILL &&
+					!(SkillDefs[wp->baseSkill].flags && SkillType::DISABLED)) {
+				temp += "(needs ";
+				temp += SkillDefs[wp->baseSkill].name;
+				temp += " skill)";
+			}
+			temp += ".<BR>";
+			if(wp->attackBonus || wp->defenseBonus) {
+				temp += "It gives ";
+				if(wp->attackBonus) {
+					if(wp->attackBonus > 0) temp += "+";
+					temp += wp->attackBonus;
+					temp += " on attack";
+				}
+				if(wp->defenseBonus) {
+					if(wp->attackBonus) temp += " and ";
+					if(wp->defenseBonus > 0) temp += "+";
+					temp += wp->defenseBonus;
+					temp += " on defense";
+				}
+				temp += ".<BR>";
+			}
+			if(wp->numAttacks < 0) {
+				temp += "It gives 1 attack every ";
+				temp += -(wp->numAttacks);
+				temp += " rounds.<BR>";
+			}
+		}
+		if(ItemDefs[i].type & IT_MOUNT) {
+			MountType *mp = &MountDefs[ItemDefs[i].index];
+			if(mp->skill > 0 &&
+					!(SkillDefs[mp->skill].flags & SkillType::DISABLED)) {
+				temp += "It gives a riding bonus with the ";
+				temp += SkillDefs[mp->skill].name;
+				temp += "skill.<BR>";
+			}
+		}
+		if(ItemDefs[i].type & IT_ARMOR) {
+			ArmorType *at = &ArmorDefs[ItemDefs[i].index];
+			temp += "It gives a ";
+			temp += at->saves[SLASHING];
+			temp += " in ";
+			temp += at->from;
+			temp += " chance to survive a normal hit.<BR>";
+			if((at->flags & ArmorType::USEINASSASSINATE) && has_stea) {
+				temp += "It may be used during assassinations.<BR>";
+			}
+		}
+		if(ItemDefs[i].type & IT_TOOL) {
+			for(j = 0; j < NITEMS; j++) {
+				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
+				if(ItemDefs[j].mult_item != i) continue;
+				if(!(ItemDefs[j].type & IT_NORMAL)) continue;
+				temp += AString("+") + ItemDefs[j].mult_val +
+					" bonus when producing " + ItemDefs[j].names + ".<BR>";
+			}
+		}
+		if(ItemDefs[i].hitchItem &&
+				!(ItemDefs[ItemDefs[i].hitchItem].flags & ItemType::DISABLED)) {
+			temp += "Gives ";
+			temp += ItemDefs[i].hitchwalk;
+			temp += " additional walking capacity when hitched to a ";
+			temp += ItemDefs[ItemDefs[i].hitchItem].name;
+			temp += ".<BR>";
+		}
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(0, "TR");
+	}
+	f.Enclose(0, "TABLE");
+	f.Enclose(0, "CENTER");
+	f.PutStr("<P></P>");
+	temp = "All items except silver and trade goods are produced with the ";
+	temp += f.Link("#produce", "PRODUCE") + " order.  Example: PRODUCE "
+		"SWORDS will produce as many swords as possible during the month, "
+		"provide that the unit has an adequate supply of the raw materials "
+		"and the required skill.  Required skills and materials are in the "
+		"table above.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "If an item requires raw materials, then the specified amount "
+		"of material is consumed for each item produced.  The higher one's "
+		"skill, the more productive each man-month of work.";
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		temp += "Only Trade factions can issue ";
+		temp += f.Link("#produce", "PRODUCE") + " orders however, regardless "
+			"of skill levels.";
+	}
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Items which increase production may increase production of "
+		"advanced items in addition to the basic items listed.    Some of "
+		"them also increase production of other tools.   Read the skill "
+		"descriptions for details on which tools aid which production when "
+		"not noted above.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "If an item does not list a raw material it may be produced "
+		"directly from the land. Each region generally has at least one item "
+		"that can be produced there.  Shown on the description of a region "
+		"is a list of the items that can be produced, and the amount of "
+		"each that can be produced per month.  This amount depends on the "
+		"region type. ";
+	if(Globals->RANDOM_ECONOMY) {
+		temp += "It also varies from region to region of the same type. ";
+	}
+	temp += "If the units in a region attempt to produce more of a commodity "
+		"than can be produced that month, then the amount available is "
+		"distributed among the producers";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	if(Globals->TOWNS_EXIST) {
+		f.PutStr(f.LinkRef("economy_towns"));
+		f.TagText("H3", "Villages, Towns, and Cities:");
+		temp = "Some regions in Atlantis contain villages, towns, and "
+			"cities.  Villages add to the wages, population, and tax income "
+			"of the region they are in. ";
+		if(Globals->FOOD_ITEMS_EXIST) {
+			temp += "Also, villages will have an additional market for "
+				"grain, livestock, and fish. ";
+		}
+		temp += "As the village's demand for goods is met, the population "
+			"will increase. When the population reaches a certain theshold, "
+			"the village will turn into a town.  A town will have some "
+			"additional products that it demands, in addition to what it "
+			"previously wanted.  Also a town will sell some new items as "
+			"well. A town whose demands are being met will grow, and above "
+			"another threshold it will become a full-blown city.  A city "
+			"will have additional markets above the town including markets "
+			"for more expensive trade items.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		temp = "Trade items are bought and sold only by cities, and have "
+			"no other practical uses.  However, the profit margins on "
+			"these items are usually quite high. ";
+		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+			temp += "Buying and selling of these items in a region counts "
+				"against a Trade faction's quota of regions in which it "
+				"may undertake trade activity (note that buying and selling "
+				"normal items does not).";
+		}
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+	}
 #if 0
- printf("<a name=\"skills_studying\">\n");
- printf("<h3> Studying: </h3>\n");
- printf("\n");
- printf("For a unit to gain level 1 of a skill, they must gain one months worth of\n");
- printf("training in that skill.  To raise this skill level to 2, the unit must add an\n");
- printf("additional two months worth of training.  Then, to raise this to skill level 3\n");
- printf("requires another three months worth of training, and so forth.  A month of\n");
- printf("training is gained when a unit uses the <a href=\"#study\"> STUDY </a>\n");
- printf("order.  Note that study months\n");
- printf("do not need to be consecutive; for a unit to go from level 1 to level 2, he\n");
- printf("can study for a month, do something else for a month, and then go back and\n");
- printf("complete his second month of study. <p>\n");
- printf("\n");
- printf("Most skills cost $%d per person per month to study (in addition to normal\n",SkillDefs[S_COMBAT].cost);
- printf("maintenance costs).  The exceptions are\n");
- if (st_ena||ob_ena)
-  {
-  if (st_ena)
-   {
-    printf("   Stealth\n");
-   }
-  if (so_ena)
-   {
-    printf("   and\n");
-   }
-  if (ob_ena)
-   {
-    printf("   Observation\n");
-   }
-   printf("  (%swhich cost $%d),\n",so_ena?"both of ":"",SkillDefs[S_STEALTH].cost);
-  }
- printf("Magic skills (which cost $%d)\n",SkillDefs[S_FORCE].cost);
- if (SKILL_ENABLED(S_TACTICS))
-  {
-   printf("  ,and Tactics (which costs $%d).\n",SkillDefs[S_TACTICS].cost);
-  }
- printf("<p>\n");
- printf("\n");
- printf("<a name=\"skills_teaching\">\n");
- printf("<h3> Teaching: </h3>\n");
- printf("\n");
- printf("A unit with a teacher can learn up to twice as fast as normal.  The\n");
- printf("<a href=\"#teach\"> TEACH </a>\n");
- printf("order is used to spend the month teaching one or more other units (your own or\n");
- printf("another faction's).  The unit doing the teaching must have a skill level\n");
- printf("greater than the units doing the studying.  (Note:  for all skill uses, it is\n");
- printf("skill level, not number of months of training, that counts.  Thus, a unit with\n");
- printf("1 month of training is effectively the same as a unit with 2 months of\n");
- printf("training, since both have a skill level of 1.)  The units being taught\n");
- printf("simply issue the <a href=\"#study\"> STUDY </a> order normally (also, his\n");
- printf("faction must be declared Friendly to the teaching faction).\n");
- printf("Each person can only teach up to %d student%s in a month; additional students\n",Globals->STUDENTS_PER_TEACHER,Globals->STUDENTS_PER_TEACHER==1?"":"s");
- printf("dilute the training.  Thus, if 1 teacher teaches %d men, each man\n",2*Globals->STUDENTS_PER_TEACHER);
- printf("being taught will gain 1 1/2 months of training, not 2 months. <p>\n");
- printf("\n");
- printf("Note that it is quite possible for a single unit to teach two or more other\n");
- printf("units different skills in the same month, provided that the teacher has a\n");
- printf("higher skill level than each student in the skill that that student is\n");
- printf("studying, and that there are no more than %d students per teacher. <p>\n",Globals->STUDENTS_PER_TEACHER);
- printf("\n");
- printf("Note: Only leaders may use the <a href=\"#teach\"> TEACH </a>\n");
- printf("order. <p>\n");
- printf("\n");
- printf("<a name=\"skills_skillreports\">\n");
- printf("<h3> Skill Reports: </h3>\n");
- printf("\n");
- printf("When a faction learns a new skill level for this first time, it may be given\n");
- printf("a report on special abilities that a unit with this skill level has.  This\n");
- printf("report can be shown again at any time (once a faction knows the skill), using\n");
- printf("the <a href=\"#show\"> SHOW </a>\n");
- printf("command.  For example, when a faction learned the skill Shoemaking\n");
- printf("level 3 for the first time, it might receive the following (obviously\n");
- printf("farsical) report: <p>\n");
- printf("\n");
- printf("<pre>\n");
-   printf("  Shoemaking 3:  A unit possessing this skill may produce\n");
-     printf("    Sooper Dooper Air Max Winged Sandals.  Use PRODUCE\n");
-     printf("    Winged Sandals to produce this item.\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<a name=\"economy\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> The Economy </h2>\n");
- printf("\n");
- printf("The unit of currency in Atlantis is the %s piece.\n",silver);
- printf("Silver is a normal item, with zero weight, appearing in your\n");
- printf("unit's reports. Silver is used for such things as buying items,\n");
- printf("and unit's maintenance. <p>\n");
- printf("\n");
- printf("<a name=\"economy_maintenance\">\n");
- printf("<h3> Maintenance Costs: </h3>\n");
- printf("\n");
- printf("IMPORTANT:  Each and every character in Atlantis requires a maintenance fee\n");
- printf("each month. Anyone who ends the month without\n");
- printf("this maintenance cost has a %d%% chance of\n",Globals->STARVE_PERCENT);
- if (Globals->SKILL_STARVATION!=GameDefs::STARVE_NONE)
-  {
-   printf("  starving, leading to following effects:\n");
-   printf("  <ul>\n");
-    printf("   <li>\n");
-   switch (Globals->SKILL_STARVATION)
-    {
-    case GameDefs::STARVE_ALL:
-      printf("     A unit\n");
-    break;
-    case GameDefs::STARVE_MAGES:
-      printf("     If unit is a mage, it\n");
-    break;
-    case GameDefs::STARVE_LEADERS:
-      printf("     If unit is a leader, it\n");
-     break;
-    }
-    printf("   will loose a skill level in some of its skills.\n");
-   if (Globals->SKILL_STARVATION!=GameDefs::STARVE_ALL)
-    {
-     printf("    <li> Otherwise, it will starve to death.\n");
-    }
-    printf("   <li> If unit should forget a skill and it doesn't know any, it will\n");
-         printf("        starve to death\n");
-   if (Globals->SKILL_STARVATION!=GameDefs::STARVE_ALL)
-    {
-     printf("    too\n");
-    }
-    printf("   .\n");
-   printf("  </ul>\n");
-  }
- else
-  {
-   printf("  starving to death.\n");
-  }
- printf("It is up to you to make sure that your people have enough available.\n");
- printf("Money will be shared automatically between your units in the same region, if\n");
- printf("one is starving and another has more than enough; but this will not happen\n");
- printf("between units in different regions (this sharing of money applies only for\n");
- printf("maintenance costs, and does not occur for other purposes). If you have\n");
- printf("%s in your unclaimed fund, then that %s will be automatically\n",silver,silver);
- printf("claimed by units that would otherwise starve. Lastly, if a faction is\n");
- printf("allied to yours, their units will provide surplus cash to your units for\n");
- printf("maintenance, as a last resort. <p>\n");
- printf("\n");
- printf("This fee is generally %d %s for a normal character\n",Globals->MAINTENANCE_COST,silver);
- if (Globals->LEADERS_EXIST)
-  {
-   printf("  , and %d %s for a leader.\n",Globals->LEADER_COST,silver);
-  }
- if (Globals->FOOD_ITEMS_EXIST)
-  {
-   printf("  If this is not available, units may\n");
-   printf("  substitute one unit of grain, livestock, or fish for this maintenance\n");
-  if (Globals->LEADERS_EXIST)
-   {
-    printf("   (two units for a leader)\n");
-   }
-   printf("  . A unit may use the \n");
-   printf("  <a href=\"#consume\">CONSUME</a> order to specify that it wishes to\n");
-   printf("  use food items in preference to %s.\n",silver);
-   printf("  Note that these items are worth more when sold in towns, so selling\n");
-   printf("  them and using the money is more economical than using them for\n");
-   printf("  maintenance.\n");
-  }
- printf("<p>\n");
- printf("\n");
- printf("\n");
- printf("<a name=\"economy_recruiting\">\n");
- printf("<h3> Recruiting: </h3>\n");
- printf("\n");
- printf("People may be recruited in a region.  The total amount of recruits available\n");
- printf("per month in a region, and the amount that must be paid per person recruited,\n");
- printf("are shown in the region description.  The\n");
- printf("<a href=\"#buy\"> BUY </a> order is used to recruit new people.  New\n");
- printf("recruits will not have any skills or items.  Note that the process of\n");
- printf("recruiting a new unit is somewhat counterintuitive; it is necessary to\n");
- printf("<a href=\"#form\"> FORM </a> an\n");
- printf("empty unit, <a href=\"#give\"> GIVE </a> the empty unit some money,\n");
- printf("and have it <a href=\"#buy\"> BUY </a> people; see the\n");
- printf("description of the <a href=\"#form\"> FORM </a> order for further details. <p>\n");
- printf("\n");
- printf("<a name=\"economy_items\">\n");
- printf("<h3> Items: </h3>\n");
- printf("\n");
- printf("A unit may have a number of possessions, referred to as \"items\".  Some details\n");
- printf("were given above in the section on Movement, but many things were left out.\n");
- printf("Here is a table giving some information about common items in Atlantis: <p>\n");
- printf("\n");
- {
- int rawrs=0;
- printf("\n");
- printf("<a name=\"tableiteminfo\">\n");
- printf("<center>\n");
- printf("<table border>\n");
-  printf(" <tr>\n");
-   printf("  <td> </td>\n");
-   printf("  <th>Skill</th>\n");
-   printf("  <th>Material</th>\n");
-   printf("  <th>Weight (Capacity)</th>\n");
-   printf("  <th>Extra information</th>\n");
-  printf(" </tr>\n");
- {
- int its[]={I_SILVER,I_GRAIN,I_LIVESTOCK,I_IRON,I_WOOD,I_STONE,I_FUR,I_FISH,
-            I_HERBS,I_HORSE,I_SWORD,I_CROSSBOW,I_LONGBOW,I_CHAINARMOR,
-            I_PLATEARMOR,I_WAGON,I_PICK,I_SPEAR,I_AXE,I_HAMMER,I_NET,
-            I_LASSO,I_BAG,I_SPINNING,I_LEATHERARMOR,I_CLOTHARMOR,I_BAXE};
- int nits=sizeof(its)/sizeof(int);
- char *remarks[NITEMS];
- for (int i=0;i<NITEMS;i++)
-  remarks[i]=NULL;
-  remarks[I_PICK]="+1 production for iron/stone.";
-  remarks[I_SPEAR]="+1 production for furs.";
-  remarks[I_AXE]="+1 production for wood.";
-  remarks[I_HAMMER]="+1 production for iron weapons/armors.";
-  remarks[I_NET]="+2 production for fish.";
-  remarks[I_LASSO]="+1 production for livestock/horses.";
-  remarks[I_BAG]="+2 production for grain/herbs.";
-  remarks[I_SPINNING]="+2 production for nets/lassos.";
-  remarks[I_BAXE]="Only attacks every other round.";
-  remarks[I_CROSSBOW]="Only attacks every other round.";
-  remarks[I_WAGON]="Gives 200 riding capacity when pulled by horse.";
- for (int i=0;i<nits;i++)
-  {
-  if (ITEM_ENABLED(its[i]))
-   {
-   ItemType *ai=ItemDefs+its[i];
-    printf("   <tr>\n");
-     printf("    <td align=center>%s</td>\n",ai->name);
-    if (ai->pSkill>=0&&SKILL_ENABLED(ai->pSkill))
-     {
-      printf("     <td>%s\n",SkillDefs[ai->pSkill].name);
-     if (ai->pLevel>1)
-      {
-       printf("      (%d)\n",ai->pLevel);
-      }
-     if (ai->pMonths>1)
-      {
-       printf("      , %d months\n",ai->pMonths);
-      }
-      printf("     </td>\n");
-      printf("     <td>\n");
-     int fob=1;
-     for (int j=0;j<2;j++)
-      {
-      if (ai->pInput[j].item>=0&&ITEM_ENABLED(ai->pInput[j].item))
-       {
-       if (!fob)
-        {
-         printf("        , \n");
-        }
-       fob=0;
-       if (ai->pInput[j].amt>1)
-        {
-         printf("        %d %s\n",ai->pInput[j].amt,ItemDefs[ai->pInput[j].item].names);
-        }
-       else
-        {
-         printf("        %s\n",ItemDefs[ai->pInput[j].item].name);
-        }
-       }
-      }
-     rawrs+=fob;
-      printf("     &nbsp;</td>\n");
-     }
-    else
-     {
-      printf("     <td>&nbsp;</td>\n");
-      printf("     <td>&nbsp;</td>\n");
-     if (its[i]!=I_SILVER) rawrs++;
-     }
-     printf("    <td align=center>\n");
-     printf("    %d\n",ai->weight);
-    if (ai->walk)
-     {
-      printf("     (%d)\n",ai->walk-ai->weight);
-     }
-     printf("    </td>\n");
-     printf("    <td>\n");
-    if (ai->type&IT_WEAPON)
-     {
-     WeaponType *wp=WeaponDefs+ai->index;
-      printf("     This is a %s weapon\n",wp->flags&WeaponType::RANGED?"ranged":"");
-     if (wp->flags&WeaponType::NEEDSKILL)
-      {
-       printf("      (with %s skill)\n",SkillDefs[wp->baseSkill].name);
-      }
-      printf("     . It gives %+d to attack\n",wp->attackBonus);
-     if (!(wp->flags&WeaponType::RANGED))
-      {
-       printf("      and %+d to defense\n",wp->defenseBonus);
-      }
-     if (wp->mountBonus)
-      {
-       printf("      (%+d if mounted)\n",wp->mountBonus);
-      }
-      printf("     .\n");
-     }
-    if (ai->type&IT_MOUNT)
-     {
-      printf("     It gives riding bonus with %s skill.\n",SkillDefs[MountDefs[ai->index].skill].name);
-     }
-    if (ai->type&IT_ARMOR)
-     {
-     ArmorType *at=ArmorDefs+ai->index;
-      printf("     %d in %d chance to survive a hit.\n",at->saves[SLASHING],at->from);
-     if ((at->flags&ArmorType::USEINASSASSINATE)&&st_ena) 
-      {
-       printf("      Even assassins may use it.\n");
-      }
-     }
-    if (remarks[its[i]])
-     {
-      printf("     %s\n",remarks[its[i]]);
-     }
-     printf("    </td>\n");
-     printf("    </tr>\n");
-   }
-  }
- }
- printf("</table> </center> <p>\n");
- printf("\n");
- printf("All items except %s are produced with the\n",silver);
- printf("<a href=\"#produce\"> PRODUCE </a> order.  Example: \n");
- printf("PRODUCE SWORDS will produce as many swords as possible during the month,\n");
- printf("provided that the unit has adequate supplies of iron and has the Weaponsmith\n");
- printf("skill.  Required skills and raw materials are in the table above. <p>\n");
- printf("\n");
- printf("If an item requires raw material, then the specified amount of material is consumed for\n");
- printf("each item produced.  Thus, to produce 5 longbows (a supply of arrows is assumed\n");
- printf("to be included with the bow), 5 units of wood are required.  The higher one's\n");
- printf("skill, the more productive each man-month of work; thus, 5 longbows could be\n");
- printf("produced by a 5-man unit of skill 1, or a 1-man unit of skill 5.\n");
- printf("Only Trade factions can issue <a href=\"#produce\"> PRODUCE </a> orders\n");
- printf("however, regardless of skill levels. <p>\n");
- printf("\n");
- printf("Items which increase production may increase production of advanced items\n");
- printf("in addition to the basic items listed.    Some of them also increase\n");
- printf("production of other tools.   Read the skill descriptions for details on\n");
- printf("which tools aid which production when not noted above.    As noted above,\n");
- printf("all combat capable tools add 1 to production while all non-combat capable\n");
- printf("tools add 2\n");
- if (ITEM_ENABLED(I_LASSO))
-  {
-   printf("  , with the exception of lasso's which only add 1\n");
-  }
- printf(".<p>\n");
- printf("\n");
- printf("The first %d items on the list do not require raw material; they are produced\n",rawrs);
- printf("directly from the land.  Each region generally has at least one item that can\n");
- printf("be produced there.  Shown on the\n");
- printf("description of a region is a list of the items that can be produced, and the\n");
- printf("amount of each that can be produced per month.  This depends on the region\n");
- printf("type; thus, mountains are the best places to quarry stone, and herbs are most\n");
- printf("commonly found in forests and jungles.  It also varies from region to region of\n");
- printf("the same type.  If the units in a region attempt to\n");
- printf("produce more of a commodity than can be produced that month, then the\n");
- printf("amount available is distributed among the workers. <p>\n");
- printf("\n");
- }
- printf("\n");
- if (Globals->TOWNS_EXIST)
-  {
-   printf("  <a name=\"economy_towns\">\n");
-   printf("  <h3> Village, Towns, and Cities: </h3>\n");
- printf("\n");
-   printf("  Some regions in Atlantis contain villages, towns, and cities.  Villages add to\n");
-   printf("  the wages, population, and tax income of the region they are in.  Also,\n");
-   printf("  villages will have an additional market for grain, livestock, and fish.  As\n");
-   printf("  the village's demand for these goods is met, the population will increase.\n");
-   printf("  When the population reaches a certain theshold, the village will turn into a\n");
-   printf("  town.  A town will have some additional products that it demands, in\n");
-   printf("  addition to the\n");
-   printf("  other common items.  Also, a town will sell some common items as well. A\n");
-   printf("  town whose demands are being met will grow, and above another threshold it\n");
-   printf("  will become a full-blown city.  A city will have additional markets for common\n");
-   printf("  items, and will also have markets for less common, more expensive trade items.\n");
-   printf("  <p>\n");
- printf("\n");
-   printf("  Trade items are bought and sold only by cities, and have no other practical\n");
-   printf("  uses.  However, the profit margins on these items are usually quite high.\n");
-   printf("  Buying and selling of these items in a region counts against a Trade faction's\n");
-   printf("  quota of regions in which it may undertake trade activity (note that buying\n");
-   printf("  and selling normal items does not). <p>\n");
- printf("\n");
-  }
-  printf(" \n");
  printf("<a name=\"economy_buildings\">\n");
  printf("<h3> Buildings and Trade Structures: </h3>\n");
  printf("\n");
