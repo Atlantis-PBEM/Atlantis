@@ -95,7 +95,7 @@ static GameDefs g = {
 	20, /* GUARD_REGEN */ /* percent */
 	40, /* CITY_GUARD */
 	50, /* GUARD_MONEY */
-	4000, /* CITY_POP */
+	20000, /* CITY_POP */
 
 	10, /* WMON_FREQUENCY */
 	10, /* LAIR_FREQUENCY */

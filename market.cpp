@@ -63,9 +63,9 @@ void Market::PostTurn(int population, int wages)
 		// hack: included new wage factor of ten in float assignment above
 		price = (int)((float) wages * 4 * ratio);
 		if (ItemDefs[item].type & IT_LEADER)
-			amount = population / 25;
+			amount = population / 125;
 		else
-			amount = population / 5;
+			amount = population / 25;
 		return;
 	}
 

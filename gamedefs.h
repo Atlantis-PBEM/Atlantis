@@ -174,7 +174,7 @@ public:
 	int GUARD_REGEN; /* percent */
 	int CITY_GUARD;
 	int GUARD_MONEY;
-	int CITY_POP;
+	int CITY_POP; /* standard Atlantis is 20000 */
 
 	int WMON_FREQUENCY;
 	int LAIR_FREQUENCY;
