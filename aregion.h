@@ -148,6 +148,10 @@ class TownInfo
 		int pop;
 		int basepop;
 		int activity;
+		
+		// Player-Econ stuff
+		int growth;
+		int mortality;
 };
 
 class ARegion : public AListElem
@@ -243,11 +247,13 @@ class ARegion : public AListElem
 		void DisbandInRegion(int, int);
 		void Recruit(int);
 		int IsNativeRace(int);
+		void AdjustPop(int);
 		void Migrate();
 		int TraceConnectedRoad(int, int, AList *, int);
 		int CountRoadConnectedTowns(int);
 		int TownHabitat();
 		int Development();
+		int TownDevelopment();
 
 		int CountWMons();
 		int IsGuarded();
