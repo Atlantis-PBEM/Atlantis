@@ -290,6 +290,8 @@ int Game::NewGame()
 		Equilibrate();
 	}
 	*/
+	
+	
 
 	return(1);
 }

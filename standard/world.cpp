@@ -2059,7 +2059,6 @@ void SetupNames()
 
 void CountNames()
 {
-	Awrite(AString("Towns ") + ntowns);
 	Awrite(AString("Regions ") + nregions);
 }
 
@@ -2223,6 +2222,8 @@ void Game::CreateWorld()
     regions.FinalSetupGates();
 
     regions.CalcDensities();
+    
+    regions.TownStatistics();
 }
 
 int ARegionList::GetRegType( ARegion *pReg )

@@ -743,7 +743,6 @@ void ARegion::AddTown(int size, AString * name)
 // Used at start to set initial town's size
 int ARegion::DetermineTownSize()
 {
-	if(!town) return -1;
 	// is it a city?
 	if(getrandom(300) < Globals->TOWN_DEVELOPMENT) {
 		return TOWN_CITY;
@@ -769,7 +768,7 @@ void ARegion::SetTownType(int level)
 	if((level < TOWN_VILLAGE) || (level > TOWN_CITY)) return;
 	
 	// increment values
-	int poptown = getrandom((level -1) * (level -1) * 250) + level * level * 250;
+	int poptown = getrandom((level -1) * (level -1) * Globals->CITY_POP/12) + level * level * Globals->CITY_POP/12;
 	town->hab += poptown;
 	town->pop = town->hab * 2 / 3;
 	development += level * 6 + 2;
@@ -780,7 +779,7 @@ void ARegion::SetTownType(int level)
 		// Increase?
 		if(level > town->TownType()) {
 			development += getrandom(Globals->TOWN_DEVELOPMENT / 10 + 5);
-			int poplus = getrandom(1400) + getrandom(1400);
+			int poplus = getrandom(Globals->CITY_POP/3) + getrandom(Globals->CITY_POP/3);
 			// don't overgrow!
 			while (town->pop + poplus > Globals->CITY_POP) {
 				poplus = poplus / 2;
@@ -792,7 +791,7 @@ void ARegion::SetTownType(int level)
 			// or decrease...
 		else {
 			development -= getrandom(20 - Globals->TOWN_DEVELOPMENT / 10);
-			int popdecr = getrandom(1000) + getrandom(1000);
+			int popdecr = getrandom(Globals->CITY_POP/3) + getrandom(Globals->CITY_POP/3);
 			// don't depopulate
 			while ((town->pop < popdecr) || (town->hab < popdecr)) {
 				popdecr = popdecr / 2;	

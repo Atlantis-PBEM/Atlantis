@@ -468,6 +468,8 @@ class ARegionList : public AList
 		void UnsetRace(ARegionArray *pRegs);
 		void RaceAnchors(ARegionArray *pRegs);
 		void GrowRaces(ARegionArray *pRegs);
+		
+		void TownStatistics();
 
 		void CalcDensities();
 		int GetLevelXScale(int level);

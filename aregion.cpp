@@ -2077,6 +2077,37 @@ void ARegionList::CalcDensities()
 	Awrite("");
 }
 
+void ARegionList::TownStatistics()
+{
+	int villages = 0;
+	int towns = 0;
+	int cities = 0;
+	forlist(this) {
+		ARegion *reg = ((ARegion *) elem);
+		if(reg->town) {
+			switch(reg->town->TownType()) {
+				case TOWN_VILLAGE:
+					villages++;
+					break;
+				case TOWN_TOWN:
+					towns++;
+					break;
+				case TOWN_CITY:
+					cities++;
+			}	
+		}
+	}
+	int tot = villages + towns + cities;
+	int perv = villages * 100 / tot;
+	int pert = towns * 100 / tot;
+	int perc = cities * 100 / tot;
+	Awrite(AString("Settlements: ") + tot);
+	Awrite(AString("Villages: ") + villages + " (" + perv + "%)");
+	Awrite(AString("Towns   : ") + towns + " (" + pert + "%)");
+	Awrite(AString("Cities  : ") + cities + " (" + perc + "%)");
+	Awrite("");
+}
+
 ARegion *ARegionList::FindGate(int x)
 {
 	if (!x) return 0;

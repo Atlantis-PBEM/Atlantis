@@ -2061,7 +2061,6 @@ void SetupNames()
 
 void CountNames()
 {
-	Awrite(AString("Towns ") + ntowns);
 	Awrite(AString("Regions ") + nregions);
 }
 

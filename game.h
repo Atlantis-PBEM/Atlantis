@@ -298,7 +298,7 @@ private:
 	int guardfaction;
 	int monfaction;
 	int doExtraInit;
-
+	
 	//
 	// Parsing functions
 	//
