@@ -50,7 +50,7 @@ public:
 	void Error(const AString &error);
 };
 
-class WorldEvent
+class WorldEvent : public AListElem
 {
 public:
     WorldEvent();
@@ -67,6 +67,10 @@ public:
 	};
 
     int type;
+    int reportdelay;
+    int age;
+    int fact1;
+    int fact2;
     Location *place;
     
     AString *Text();
@@ -465,7 +469,6 @@ private:
 	int CountQuarterMasters(Faction *);
 	int CountTacticians(Faction *);
 	
-   	int WriteStatistics( Aoutfile *f, Ainfile *g, int infile );
    	void WritePowers();
 	
 	void FindDeadFactions();
@@ -676,6 +679,13 @@ private:
 	void GetDFacs(ARegion *, Unit *, AList &);
 	
 	void CountUnits(); //testing
+	
+	//Times Reports
+   	int WriteStatistics( Aoutfile *f, Ainfile *g, int infile );
+   	void WriteRumour(int &rumournum, AString rumour);
+    void CreateTimesReports();
+   	void CreateBattleEvents();
+   	
 };
 
 #endif

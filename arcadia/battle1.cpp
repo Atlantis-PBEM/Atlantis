@@ -36,6 +36,11 @@
 //#define DEBUG2
 #endif
 
+BattlePtr::BattlePtr()
+{
+    ptr = 0;
+}
+
 void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
 {
     int AlliesIncluded = 0;
@@ -380,7 +385,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 		return BATTLE_IMPOSSIBLE;
 	}
 
-	Battle * b = new Battle;
+	Battle * b = new Battle(r);
 	b->WriteSides(r,attacker,target,&atts,&defs,ass, &regions );
 
 	battles.Add(b);
@@ -409,9 +414,11 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 	return result;
 }
 
-Battle::Battle()
+Battle::Battle(ARegion *r)
 {
     asstext = 0;
+    region = r;
+    casualties = 0;
 }
 
 Battle::~Battle()

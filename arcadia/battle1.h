@@ -49,13 +49,14 @@ enum {
 class BattlePtr : public AListElem
 {
 	public:
+	    BattlePtr();
 		Battle * ptr;
 };
 
 class Battle : public AListElem
 {
 	public:
-		Battle();
+		Battle(ARegion *);
 		~Battle();
 
 		int Run(ARegion *, Unit *, AList *, Unit *, AList *, int ass,
@@ -92,6 +93,11 @@ class Battle : public AListElem
 		Faction * attacker; /* Only matters in the case of an assassination */
 		AString * asstext;
 		AList text;
+		
+		//Used for statistics / times reports
+		ARegion *region;
+		int casualties;
+		
 };
 
 #endif

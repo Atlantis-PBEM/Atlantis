@@ -1120,6 +1120,9 @@ int Game::RunGame()
 
 	Awrite("Running the Turn...");
 	RunOrders();
+	
+	Awrite("Writing times articles...");
+	CreateTimesReports();
 
 	Awrite("Writing the Report File...");
 	WriteReports();

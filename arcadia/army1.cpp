@@ -696,6 +696,7 @@ void Army::AddLine(const AString & s)
 
 void Army::WriteLosses(Battle * b) {
 	b->AddLine(*(pLeader->name) + " loses " + (count - NumAlive()) + ".");
+	b->casualties += count - NumAlive();
 
 	if (NumAlive() != count) {
 		AList units;
