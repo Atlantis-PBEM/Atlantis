@@ -1824,7 +1824,7 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 			}
 			if(sawgate) {
 				f->PutStr(AString("There is a Gate here (Gate ") + gate +
-						" of " + (pRegions->numberofgates - 1) + ").");
+						" of " + (pRegions->numberofgates) + ").");
 				f->PutStr("");
 			}
 		}
@@ -3083,7 +3083,7 @@ void ARegionList::FinalSetupGates()
                 index++;
                 index = index % numberofgates;
             }
-            r->gate = index;
+            r->gate = index+1;
             used[index] = 1;
         }
     }

@@ -392,3 +392,9 @@ Changes from 4.0.8 -> 4.0.9
       in one fell swoop!
    -- Fixed a bug where roads weren't used to calculate move to allow armies
       to help adjacent hexes.
+
+Changes from 4.0.9 -> 4.0.10
+--------------------------------------------------
+   -- Fixed a bug where weapon length affected ranged weapons.
+   -- Fixed a bug where at world generation time, one too few gates was
+      generated, possibly resulting in a starting city with no gate.
