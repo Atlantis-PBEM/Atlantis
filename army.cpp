@@ -711,7 +711,9 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem)
     int i;
     for (i=0; i<NITEMS; i++)
     {
-        if ((ItemDefs[i].type & thespoil) && !(ItemDefs[i].type & IT_SPECIAL))
+        if ((ItemDefs[i].type & thespoil) &&
+			!(ItemDefs[i].type & IT_SPECIAL) &&
+			!(ItemDefs[i].flags & ItemType::DISABLED))
         {
             count ++;
         }
@@ -720,7 +722,9 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem)
     count = getrandom(count) + 1;
     
     for (i=0; i<NITEMS; i++) {
-        if ((ItemDefs[i].type & thespoil) && (ItemDefs[i].type & IT_SPECIAL))
+        if ((ItemDefs[i].type & thespoil) &&
+			!(ItemDefs[i].type & IT_SPECIAL) &&
+			!(ItemDefs[i].flags & ItemType::DISABLED))
         {
             count--;
             if (count == 0)
