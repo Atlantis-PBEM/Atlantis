@@ -39,7 +39,7 @@
 //
 static GameDefs g = {
     "Standard Atlantis",     // RULESET_NAME
-    MAKE_ATL_VER( 4, 0, 5 ), // RULESET_VERSION
+    MAKE_ATL_VER( 4, 0, 6 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */
@@ -130,6 +130,8 @@ static GameDefs g = {
 	0,   // APPRENTICES_EXIST
 
 	"Atlantis", // WORLD_NAME
+
+	0,  // NEXUS_GATE
 };
 
 GameDefs * Globals = &g;

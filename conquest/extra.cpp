@@ -161,27 +161,17 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableSkill(S_FISHING);
 	DisableSkill(S_FARMING);
 	DisableSkill(S_RANCHING);
-    if(!Globals->APPRENTICES_EXIST)
-		DisableSkill(S_MANIPULATE);
 
-	/* Disable high-end production enhancer buildings */
+	/* Enable apprentices if we should */
+    if(Globals->APPRENTICES_EXIST)
+		EnableSkill(S_MANIPULATE);
+
+	/* Enable the man type */
+	EnableItem(I_MAN);
+
+	/* Disable production enhancer buildings */
 	DisableObject(O_RANCH);
 	DisableObject(O_FARM);
-	DisableObject(O_TEMPLE);
-	DisableObject(O_MQUARRY);
-	DisableObject(O_AMINE);
-	DisableObject(O_PRESERVE);
-	DisableObject(O_SACGROVE);
-
-	/* Disable items which enhance production */
-	DisableItem(I_PICK);
-	DisableItem(I_SPEAR);
-	DisableItem(I_AXE);
-	DisableItem(I_HAMMER);
-	DisableItem(I_NET);
-	DisableItem(I_LASSO);
-	DisableItem(I_BAG);
-	DisableItem(I_SPINNING);
 
 	/* All men are created equal */
 	ModifyTerrainRaces(R_PLAIN,I_MAN,-1,-1,-1,-1);

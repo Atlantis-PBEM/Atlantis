@@ -170,9 +170,13 @@ private:
 
 	// JLT
 	// Functions to allow enabling/disabling parts of the data tables
+	void EnableSkill(int sk); // Enabled a disabled skill
 	void DisableSkill(int sk);  // Prevents skill being studied or used
+	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
+	void EnableObject(int ob); // Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built
+
 	void ModifyTerrainRaces(int t, int r1, int r2, int r3, int cr1, int cr2);
 	void ModifyTerrainItems(int t, int prod1, int chance1, int amt1,
 			                       int prod2, int chance2, int amt2,

@@ -243,6 +243,9 @@ public:
 	// What is the name of the world?
 	char *WORLD_NAME;
 
+	// Does the nexus allow gating out of it
+	int NEXUS_GATE;
+
 };
 
 extern GameDefs * Globals;

@@ -39,7 +39,7 @@
 //
 static GameDefs g = {
     "Wyreth",                // RULESET_NAME
-    MAKE_ATL_VER( 1, 0, 0 ), // RULESET_VERSION
+    MAKE_ATL_VER( 1, 0, 1 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */
@@ -129,6 +129,8 @@ static GameDefs g = {
 	0,   // APPRENTICES_EXIST
 
 	"Wyreth", // WORLD_NAME
+
+	1,  // NEXUS_GATE
 };
 
 GameDefs * Globals = &g;

@@ -816,6 +816,25 @@ void ARegion::UpdateTown()
         return;
     }
 
+	//
+	// Check if we were a starting city and got taken over
+	//
+	if(IsStartingCity() && !HasCityGuard() && !Globals->SAFE_START_CITIES) {
+		// Make sure we haven't already been modified.
+		int done = 1;
+		forlist(&markets) {
+			Market *m = (Market *)elem;
+			if(m->minamt == -1) {
+				done = 0;
+				break;
+			}
+		}
+		if(!done) {
+			markets.DeleteAll();
+			SetupCityMarket();
+		}
+	}
+
     //
     // Don't do pop stuff for AC Exit.
     //

@@ -38,7 +38,7 @@
 // the html file containing the rules to correctly reflect the changes!
 static GameDefs g = {
     "Atlantis Conquest",     // RULESET_NAME
-    MAKE_ATL_VER( 1, 0, 0 ), // RULESET_VERSION
+    MAKE_ATL_VER( 1, 0, 1 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */
@@ -128,6 +128,8 @@ static GameDefs g = {
 	1,   // APPRENTICES_EXIST
 
 	"Atlantis", // WORLD_NAME
+
+	0,   // NEXUS_GATE
 };
 
 GameDefs * Globals = &g;

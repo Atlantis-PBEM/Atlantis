@@ -136,7 +136,35 @@ int Game::AllowedTrades( Faction *pFac )
 
 void Game::ModifyTablesPerRuleset(void)
 {
-	if(!Globals->APPRENTICES_EXIST)
-	   	DisableSkill(S_MANIPULATE);
+	if(Globals->APPRENTICES_EXIST)
+	   	EnableSkill(S_MANIPULATE);
+
+	EnableItem(I_PICK);
+	EnableItem(I_SPEAR);
+	EnableItem(I_AXE);
+	EnableItem(I_HAMMER);
+	EnableItem(I_MCROSSBOW);
+	EnableItem(I_MWAGON);
+	EnableItem(I_GLIDER);
+	EnableItem(I_NET);
+	EnableItem(I_LASSO);
+	EnableItem(I_BAG);
+	EnableItem(I_SPINNING);
+	EnableItem(I_LEATHERARMOR);
+	EnableItem(I_CLOTHARMOR);
+	EnableItem(I_BOOTS);
+
+	EnableObject(O_ROADN);
+	EnableObject(O_ROADNE);
+	EnableObject(O_ROADNW);
+	EnableObject(O_ROADS);
+	EnableObject(O_ROADSE);
+	EnableObject(O_ROADSW);
+	EnableObject(O_TEMPLE);
+	EnableObject(O_MQUARRY);
+	EnableObject(O_AMINE);
+	EnableObject(O_PRESERVE);
+	EnableObject(O_SACGROVE);
+
 	return;
 }

@@ -1172,7 +1172,7 @@ void Game::ProcessFindOrder(Unit * u,AString * o, OrdersCheck *pCheck )
     }
     int n = token->value();
     delete token;
-    if (n==0) {
+    if (n==0 && !(*token == "all")) {
         ParseError( pCheck, u, 0, "FIND: No faction number given.");
         return;
     }

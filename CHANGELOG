@@ -1,0 +1,25 @@
+Changes from 4.0.4 -> 4.0.5
+-------------------------------------------------
+   -- Merged 4.0.4c and Realms of Arcane Codebases
+   -- Merged in some parts of Lacandon conquest
+   -- Fairly extensive reorganization of the source code.
+   -- Small fix to make discontinuities in the UW maze less.
+   -- Added ability to disable items.
+   -- Some changes for Wyreth
+   -- Changes for greater flexibility
+   -- Many new options in gamedefs structure.
+
+Changes from 4.0.5 -> 4.0.6
+--------------------------------------------------
+   -- Added FIND ALL command supplied by Tzarg (Tom)
+   -- Reworked enabling/disabling of items to better preserve old feel.
+   -- Various small bugfixes.
+   -- Added worldname to the gamedefs structure (used for creating the
+      names for the nexus and oceans as well as some spell texts)
+   -- Added NEXUS_GATE gamedef to allow a one-way gate directly out of the
+      nexus via gate lore.   There is no actual gate so people cannot in
+      fact return to the nexus once leaving.
+   -- Added code to make a starting city into just a rich city (with
+      limited items available) if the city guards are taken out when
+      SAFE_START_CITIES is false.   Once this occurs the unlimited goods
+      are gone for good.

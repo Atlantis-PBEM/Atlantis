@@ -1990,16 +1990,34 @@ void Game::AdjustCityMon( ARegion *r, Unit *u )
 	}
 }
 
+void Game::EnableSkill(int sk)
+{
+	if(sk < 0 || sk > (NSKILLS-1)) return;
+	SkillDefs[sk].flags &= ~SkillType::DISABLED;
+}
+
 void Game::DisableSkill(int sk)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
 	SkillDefs[sk].flags |= SkillType::DISABLED;
 }
 
+void Game::EnableItem(int item)
+{
+	if(item < 0 || item > (NITEMS-1)) return;
+	ItemDefs[item].flags &= ~ItemType::DISABLED;
+}
+
 void Game::DisableItem(int item)
 {
 	if(item < 0 || item > (NITEMS-1)) return;
 	ItemDefs[item].flags |= ItemType::DISABLED;
+}
+
+void Game::EnableObject(int obj)
+{
+	if(obj < 0 || obj > (NOBJECTS-1)) return;
+	ObjectDefs[obj].flags &= ~ObjectType::DISABLED;
 }
 
 void Game::DisableObject(int obj)

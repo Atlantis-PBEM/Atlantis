@@ -593,32 +593,47 @@ void Game::Do1Destroy(ARegion * r,Object * o,Unit * u) {
   }
 }
 		
-void Game::RunFindOrders() {
-  forlist(&regions) {
-    ARegion * r = (ARegion *) elem;
-    forlist(&r->objects) {
-      Object * o = (Object *) elem;
-      forlist(&o->units) {
-	Unit * u = (Unit *) elem;
-	RunFindUnit(u);
-      }
-    }
-  }
+void Game::RunFindOrders()
+{
+	forlist(&regions) {
+		ARegion * r = (ARegion *) elem;
+		forlist(&r->objects) {
+			Object * o = (Object *) elem;
+			forlist(&o->units) {
+				Unit * u = (Unit *) elem;
+				RunFindUnit(u);
+			}
+		}
+	}
 }
 
-void Game::RunFindUnit(Unit * u) {
-  forlist(&u->findorders) {
-    FindOrder * f = (FindOrder *) elem;
-    Faction * fac = GetFaction(&factions,f->find);
-    if (fac) {
-      u->faction->Event(AString("The address of ") + *(fac->name) +
-			" is " + *(fac->address) + ".");
-    } else {
-      u->Error(AString("FIND: ") + f->find + " is not a valid "
-	       "faction number.");
-    }
-  }
-  u->findorders.DeleteAll();
+void Game::RunFindUnit(Unit * u)
+{
+	int all = 0;
+	Faction *fac;
+	forlist(&u->findorders) {
+		FindOrder * f = (FindOrder *) elem;
+		if(f->find == 0) all = 1;
+		if(!all) {
+			fac = GetFaction(&factions,f->find);
+			if (fac) {
+				u->faction->Event(AString("The address of ") + *(fac->name) +
+						" is " + *(fac->address) + ".");
+			} else {
+				u->Error(AString("FIND: ") + f->find + " is not a valid "
+						"faction number.");
+			}
+		} else {
+			forlist(&factions) {
+				fac = (Faction *)elem;
+				if(fac) {
+					u->faction->Event(AString("The address of ") +
+							*(fac->name) + " is " + *(fac->address) + ".");
+				}
+			}
+		}
+	}
+	u->findorders.DeleteAll();
 }
 
 void Game::RunTaxOrders() {

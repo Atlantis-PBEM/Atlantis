@@ -1306,6 +1306,7 @@ void Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 {
     int level = u->GetSkill(S_GATE_LORE);
+	int nexgate = 0;
     if( !level )
     {
         u->Error( "CAST: Unit doesn't have that skill." );
@@ -1320,7 +1321,8 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
         return;
     }
 
-    if (!r->gate)
+	nexgate = Globals->NEXUS_GATE && (r->type == R_NEXUS);
+    if (!r->gate && !nexgate)
     {
         u->Error("CAST: There is no gate in that region.");
         return;
@@ -1360,13 +1362,21 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
     ARegion *tar;
     if (order->gate == -1)
     {
+		int good = 0;
         int gatenum = getrandom(regions.numberofgates);
         tar = regions.FindGate(gatenum);
 
-        while( !tar || tar->zloc != r->zloc )
+		if(tar && tar->zloc == r->zloc) good = 1;
+		if(tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
+			good = 1;
+
+        while( !good )
         {
             gatenum = getrandom(regions.numberofgates);
             tar = regions.FindGate(gatenum);
+		    if(tar && tar->zloc == r->zloc) good = 1;
+	    	if(tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
+	    		good = 1;
         }
 
         u->Event("Casts Random Gate Jump.");
