@@ -9,11 +9,11 @@
 #OPTIONS
 #
 # Define this if you have EASIER_UNDERWORLD set to 1 in the gamedefs struct
-EASY_UNDER = -DEASY_UNDERWORLD
+#EASY_UNDER = -DEASY_UNDERWORLD
 #
 # Define this if you want the additional structures for increasing
 # production
-EXTRA_STRUCTS = -DEXTRA_STRUCTURES
+#EXTRA_STRUCTS = -DEXTRA_STRUCTURES
 
 CFLAGS = -g -I. -I.. ${EASY_UNDER} ${EXTRA_STRUCTS}
 

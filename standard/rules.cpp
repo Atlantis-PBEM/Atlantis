@@ -50,7 +50,7 @@
 // Define the various globals for this game.
 //
 static GameDefs g = {
-    "Standard Atlantis", // RULESET_VERSION
+    "Standard Atlantis",     // RULESET_NAME
     MAKE_ATL_VER( 4, 0, 4 ), // RULESET_VERSION
     MAKE_ATL_VER( 4, 0, 4 ), // ENGINE_VERSION
 
@@ -103,7 +103,7 @@ static GameDefs g = {
     1, // WANDERING_MONSTERS_EXIST
     1, // LAIR_MONSTERS_EXIST
     1, // WEATHER_EXISTS
-    0, // OPEN_ENDED
+    1, // OPEN_ENDED
 
     1, // RANDOM_ECONOMY
     1, // VARIABLE_ECONOMY
@@ -119,16 +119,16 @@ static GameDefs g = {
 	// section in skillshows.cpp is defined to describe the X,Y,Z
 	// coordinates.  If you set it to zero, make sure the original
 	// skill description is enabled instead
-	1, // EASIER_UNDERWORLD
+	0, // EASIER_UNDERWORLD
 
     GameDefs::FACLIM_FACTION_TYPES, // FACTION_LIMIT_TYPE
 
-	GameDefs::WFLIGHT_MUST_LAND,	// FLIGHT_OVER_WATER
+	GameDefs::WFLIGHT_NONE,	// FLIGHT_OVER_WATER
 
-	0,   // SAFE_START_CITIES
-	500, // AMT_START_CITY_GUARDS
-	1,   // START_CITY_GUARDS_PLATE
-	1,   // START_CITY_MAGES
+	1,   // SAFE_START_CITIES
+	120, // AMT_START_CITY_GUARDS
+	0,   // START_CITY_GUARDS_PLATE
+	0,   // START_CITY_MAGES
 };
 
 GameDefs * Globals = &g;
