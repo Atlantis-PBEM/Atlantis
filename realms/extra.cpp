@@ -132,6 +132,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_MBAXE);
 	EnableItem(I_IMARM);
 	EnableItem(I_SUPERBOW);
+	EnableItem(I_LANCE);
 
 	EnableSkill(S_ARMORCRAFT);
 	EnableSkill(S_WEAPONCRAFT);
