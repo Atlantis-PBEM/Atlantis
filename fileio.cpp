@@ -40,219 +40,229 @@ extern long _ftype,_fcreator;
 
 static char buf[1024];
 
-Aoutfile::Aoutfile() {
-	file = new ofstream;
-}
-
-Aoutfile::~Aoutfile() {
-	delete file;
-}
-
-Ainfile::Ainfile() {
-	file = new ifstream;
-}
-
-Ainfile::~Ainfile() {
-	delete file;
-}
-
-Aorders::Aorders() {
-	file = new ifstream;
-}
-
-Aorders::~Aorders() {
-	delete file;
-}
-
-Areport::Areport() {
-	file = new ofstream;
-}
-
-Areport::~Areport() {
-	delete file;
-}
-
-void Aoutfile::Open(const AString & s)
+Aoutfile::Aoutfile()
 {
-	AString * name = getfilename(s);
-	ifstream tfile;
-	tfile.open(name->Str(),ios::in);
-	if(tfile.rdbuf()->is_open()) {
-		delete name;
-		tfile.close();
-	}
-	tfile.close();
+	file = new ofstream;
+}
 
-	while (! (file->rdbuf()->is_open())) {
-		file->open(name->Str(),/*ios::noreplace |*/ ios::out);
+Aoutfile::~Aoutfile()
+{
+	delete file;
+}
+
+Ainfile::Ainfile()
+{
+	file = new ifstream;
+}
+
+Ainfile::~Ainfile()
+{
+	delete file;
+}
+
+Aorders::Aorders()
+{
+	file = new ifstream;
+}
+
+Aorders::~Aorders()
+{
+	delete file;
+}
+
+Areport::Areport()
+{
+	file = new ofstream;
+}
+
+Areport::~Areport()
+{
+	delete file;
+}
+
+void Aoutfile::Open(const AString &s)
+{
+	while(!(file->rdbuf()->is_open())) {
+		AString *name = getfilename(s);
+		file->open(name->Str(), ios::out|ios::ate);
 		delete name;
+		// Handle a broke ios::ate implementation on some boxes
+		file->seekp(0, ios::end);
+		if(file->tellp()!= 0) file->close();
 	}
 }
 
-int Aoutfile::OpenByName(const AString & s)
+int Aoutfile::OpenByName(const AString &s)
 {
 	AString temp = s;
-	ifstream tfile;
-	tfile.open(temp.Str(), ios::in);
-	if(tfile.rdbuf()->is_open()) {
-		tfile.close();
+	file->open(temp.Str(), ios::out|ios::ate);
+	if(!file->rdbuf()->is_open()) return -1;
+	// Handle a broke ios::ate implementation on some boxes
+	file->seekp(0, ios::end);
+	if(file->tellp() != 0) {
+		file->close();
 		return -1;
 	}
-	tfile.close();
-	file->open(temp.Str(),/*ios::noreplace |*/ ios::out);
-	if (!file->rdbuf()->is_open()) return -1;
 	return 0;
 }
 
-void Ainfile::Open(const AString & s) {
-  while (! (file->rdbuf()->is_open())) {
-    AString * name = getfilename(s);
-    file->open(name->Str(),ios::in /*| ios::nocreate*/);
-    delete name;
-  }
-}
-
-int Ainfile::OpenByName(const AString & s) {
-  AString temp = s;
-  file->open(temp.Str(),ios::in /*| ios::nocreate*/);
-  if (! (file->rdbuf()->is_open())) return -1;
-  return 0;
-}
-
-void Aoutfile::Close() {
-	file->close();
-}
-
-void Ainfile::Close() {
-	file->close();
-}
-
-void Aorders::Close() {
-	file->close();
-}
-
-void Areport::Close() {
-	file->close();
-}
-
-void skipwhite(ifstream * f) {
-  if (f->eof()) return;
-  int ch = f->peek();
-  while(((ch == ' ') || (ch == '\n') || (ch == '\t')
-	 || (ch == '\r') || (ch == '\0'))) {
-    f->get();
-    if (f->eof()) return;
-    ch = f->peek();
-  }
-}
-
-AString * Ainfile::GetStr() {
-  skipwhite(file);
-  if (file->peek() == -1 || file->eof()) return 0;
-  file->getline(buf,1023,F_ENDLINE);
-  AString * s = new AString((char *) &(buf[0]));
-  return s;
-}
-
-AString * Ainfile::GetStrNoSkip() {
-  if (file->peek() == -1 || file->eof()) return 0;
-  file->getline(buf,1023,F_ENDLINE);
-  AString * s = new AString((char *) &(buf[0]));
-  return s;
-}
-
-int Ainfile::GetInt() {
-  int x;
-  *file >> x;
-  return x;
-}
-
-void Aoutfile::PutInt(int x) {
-  *file << x;
-  *file << F_ENDLINE;
-}
-
-void Aoutfile::PutStr(char * s) {
-  *file << s << F_ENDLINE;
-}
-
-void Aoutfile::PutStr(const AString & s) {
-  *file << s << F_ENDLINE;
-}
-
-void Aorders::Open(const AString & s)
+void Ainfile::Open(const AString &s)
 {
-    while (! (file->rdbuf()->is_open()))
-    {
-        AString * name = getfilename(s);
-        file->open(name->Str(),ios::in /*| ios::nocreate*/);
-        delete name;
-    }
-}
-
-int Aorders::OpenByName(const AString & s)
-{
-    AString temp = s;
-    file->open(temp.Str(),ios::in /*| ios::nocreate*/);
-    if (! (file->rdbuf()->is_open())) return -1;
-    return 0;
-}
-
-AString * Aorders::GetLine() {
-  skipwhite(file);
-  if (file->eof()) return 0;
-  if (file->peek() == -1) return 0;
-  file->getline(buf,1023,F_ENDLINE);
-  AString * s = new AString((char *) &(buf[0]));
-  return s;
-}
-
-void Areport::Open(const AString & s)
-{
-    AString * name = getfilename(s);
-	ifstream tfile;
-	tfile.open(name->Str(), ios::in);
-	if(tfile.rdbuf()->is_open()) {
+	while (!(file->rdbuf()->is_open())) {
+		AString *name = getfilename(s);
+		file->open(name->Str(),ios::in);
 		delete name;
-		tfile.close();
-		return;
 	}
-	tfile.close();
+}
 
-    while (! (file->rdbuf()->is_open()))
-    {
-        file->open(name->Str(),/*ios::noreplace |*/ ios::out);
+int Ainfile::OpenByName(const AString &s)
+{
+	AString temp = s;
+	file->open(temp.Str(),ios::in);
+	if (!(file->rdbuf()->is_open())) return -1;
+	return 0;
+}
+
+void Aoutfile::Close()
+{
+	file->close();
+}
+
+void Ainfile::Close()
+{
+	file->close();
+}
+
+void Aorders::Close()
+{
+	file->close();
+}
+
+void Areport::Close()
+{
+	file->close();
+}
+
+void skipwhite(ifstream *f)
+{
+	if (f->eof()) return;
+	int ch = f->peek();
+	while((ch == ' ') || (ch == '\n') || (ch == '\t') ||
+			(ch == '\r') || (ch == '\0')) {
+		f->get();
+		if (f->eof()) return;
+		ch = f->peek();
+	}
+}
+
+AString * Ainfile::GetStr()
+{
+	skipwhite(file);
+	if (file->peek() == -1 || file->eof()) return 0;
+	file->getline(buf,1023,F_ENDLINE);
+	AString * s = new AString((char *) &(buf[0]));
+	return s;
+}
+
+AString * Ainfile::GetStrNoSkip()
+{
+	if (file->peek() == -1 || file->eof()) return 0;
+	file->getline(buf,1023,F_ENDLINE);
+	AString * s = new AString((char *) &(buf[0]));
+	return s;
+}
+
+int Ainfile::GetInt()
+{
+	int x;
+	*file >> x;
+	return x;
+}
+
+void Aoutfile::PutInt(int x)
+{
+	*file << x;
+	*file << F_ENDLINE;
+}
+
+void Aoutfile::PutStr(char *s)
+{
+	*file << s << F_ENDLINE;
+}
+
+void Aoutfile::PutStr(const AString &s)
+{
+	*file << s << F_ENDLINE;
+}
+
+void Aorders::Open(const AString &s)
+{
+	while (!(file->rdbuf()->is_open())) {
+		AString *name = getfilename(s);
+		file->open(name->Str(),ios::in);
+		delete name;
+	}
+}
+
+int Aorders::OpenByName(const AString &s)
+{
+	AString temp = s;
+	file->open(temp.Str(),ios::in);
+	if (!(file->rdbuf()->is_open())) return -1;
+	return 0;
+}
+
+AString * Aorders::GetLine()
+{
+	skipwhite(file);
+	if (file->eof()) return 0;
+	if (file->peek() == -1) return 0;
+	file->getline(buf,1023,F_ENDLINE);
+	AString *s = new AString((char *) &(buf[0]));
+	return s;
+}
+
+void Areport::Open(const AString &s)
+{
+	while(!(file->rdbuf()->is_open())) {
+		AString *name = getfilename(s);
+		file->open(name->Str(),ios::out|ios::ate);
         delete name;
+		// Handle a broke ios::ate implementation on some boxes
+		file->seekp(0, ios::end);
+		if(file->tellp()!=0) file->close();
     }
     tabs = 0;
 }
 
-int Areport::OpenByName(const AString & s)
+int Areport::OpenByName(const AString &s)
 {
-    AString temp = s;
-	ifstream tfile;
-	tfile.open(temp.Str(), ios::in);
-	if(tfile.rdbuf()->is_open()) {
-		tfile.close();
+	AString temp = s;
+	file->open(temp.Str(), ios::out|ios::ate);
+    if (!file->rdbuf()->is_open()) return -1;
+	// Handle a broke ios::ate implementation on some boxes
+	file->seekp(0, ios::end);
+	if(file->tellp() != 0) {
+		file->close();
 		return -1;
 	}
-	tfile.close();
-    file->open(temp.Str(),/*ios::noreplace |*/ ios::out);
     tabs = 0;
-    if (!file->rdbuf()->is_open()) return -1;
     return 0;
 }
 
-void Areport::AddTab() {
-  tabs++;
+void Areport::AddTab()
+{
+	tabs++;
 }
 
-void Areport::DropTab() {
-  if (tabs > 0) tabs--;
+void Areport::DropTab()
+{
+	if (tabs > 0) tabs--;
 }
 
-void Areport::ClearTab() {
-  tabs = 0;
+void Areport::ClearTab()
+{
+	tabs = 0;
 }
 
 void Areport::PutStr(const AString &s,int comment)
@@ -274,14 +284,12 @@ void Areport::PutStr(const AString &s,int comment)
 	}
 }
 
-void Areport::PutNoFormat(const AString & s) {
-  *file << s << F_ENDLINE;
+void Areport::PutNoFormat(const AString &s)
+{
+	*file << s << F_ENDLINE;
 }
 
-void Areport::EndLine() {
-  *file << F_ENDLINE;
+void Areport::EndLine()
+{
+	*file << F_ENDLINE;
 }
-
-
-
-
