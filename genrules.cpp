@@ -4591,7 +4591,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Study combat, this month, move north next month, and then in two "
 		"months, pillaging and advane north.";
 	temp2 = "STUDY COMB\n";
-	temp2 = "TURN\n";
+	temp2 += "TURN\n";
 	temp2 += "    MOVE N\n";
 	temp2 += "ENDTURN\n";
 	temp2 += "TURN\n";
@@ -4620,15 +4620,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.CommandExample(temp, temp2);
 	temp = "After the turn, the orders for that unit would look as "
 		"follows in the orders template:";
-	temp2 += "GIVE 13523 1000 SILV\n";
+	temp2 = "GIVE 13523 1000 SILV\n";
 	temp2 += "MOVE S\n";
 	temp2 += "@TURN\n";
 	temp2 += "    MOVE N\n";
-	temp2 += "ENDTURN";
+	temp2 += "ENDTURN\n";
 	temp2 += "@TURN\n";
 	temp2 += "    GIVE 13523 1000 SILV\n";
 	temp2 += "    MOVE S\n";
-	temp2 += "ENDTURN\n";
+	temp2 += "ENDTURN";
 	f.CommandExample(temp, temp2);
 
 	if(Globals->USE_WEAPON_ARMOR_COMMAND) {
