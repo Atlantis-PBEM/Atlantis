@@ -25,14 +25,8 @@
 #include "fileio.h"
 #include "gameio.h"
 
-#ifndef __BORLANDC__
-#include <iostream.h>
-#include <fstream.h>
-#else
 #include <fstream>
 #include <iostream>
-using namespace std;
-#endif
 
 #define F_ENDLINE '\n'
 

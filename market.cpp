@@ -93,7 +93,8 @@ void Market::PostTurn(int population,int wages)
 
     if (population <= minpop)
     {
-        amount = minamt;
+    	if(ItemDefs[item].type & IT_FOOD) amount =  minamt;
+    	else amount = 0;
     } 
     else
     {
@@ -106,6 +107,11 @@ void Market::PostTurn(int population,int wages)
             amount = minamt +
                 ((maxamt - minamt) * (population - minpop)) /
                 (maxpop - minpop);
+            // Check minimum amount if item is economically relevant
+            if(((ItemDefs[item].type & IT_TRADE) && (type == M_BUY))
+            	|| (!(ItemDefs[item].type & IT_TRADE) && (type == M_SELL))) {
+            	if(amount < maxamt/6) amount = (maxamt/6);
+            }
         }
     }
 }

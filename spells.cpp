@@ -605,7 +605,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			RunEnchantSwords(r,u);
 			break;
 		case S_CONSTRUCT_GATE:
-			RunConstructGate(r,u);
+			RunConstructGate(r,u,sk);
 			break;
 		case S_ENGRAVE_RUNES_OF_WARDING:
 			RunEngraveRunes(r,o,u);
@@ -946,7 +946,7 @@ void Game::RunCreateFood(ARegion *r,Unit *u)
 	r->NotifySpell(u,S_EARTH_LORE, &regions );
 }
 
-void Game::RunConstructGate(ARegion *r,Unit *u)
+void Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 {
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 		u->Error("Gates may not be constructed at sea.");
@@ -962,10 +962,17 @@ void Game::RunConstructGate(ARegion *r,Unit *u)
 		u->Error("Can't afford to construct a Gate.");
 		return;
 	}
+	u->SetMoney(u->GetMoney() - 1000);
+
+	int level = u->GetSkill(spell);
+	int chance = level * 20;
+	if (getrandom(100) >= chance) {
+		u->Event("Attempts to construct a gate, but fails.");
+		return;
+	}
 
 	u->Event(AString("Constructs a Gate in ")+r->ShortPrint( &regions )+".");
 	u->Practise(S_CONSTRUCT_GATE);
-	u->SetMoney(u->GetMoney() - 1000);
 	regions.numberofgates++;
 	r->gate = regions.numberofgates;
 	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );

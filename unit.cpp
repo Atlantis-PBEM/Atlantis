@@ -587,6 +587,7 @@ void Unit::ClearOrders()
 	canattack = 1;
 	nomove = 0;
 	enter = 0;
+	build = NULL;
 	leftShip = 0;
 	destroy = 0;
 	if (attackorders) delete attackorders;
@@ -1891,7 +1892,7 @@ int Unit::SkillLevels()
 	int levels = 0;
 	forlist(&skills) {
 		Skill *s = (Skill *)elem;
-		levels += GetLevelByDays(s->days);
+		levels += GetLevelByDays(s->days/GetMen());
 	}
 	return levels;
 }

@@ -79,7 +79,7 @@ void RunSummonDemon(ARegion *,Unit *);
 void RunSummonBalrog(ARegion *,Unit *);
 void RunCreateArtifact(ARegion *,Unit *,int,int);
 void RunEngraveRunes(ARegion *,Object *,Unit *);
-void RunConstructGate(ARegion *,Unit *);
+void RunConstructGate(ARegion *,Unit *,int);
 void RunEnchantSwords(ARegion *,Unit *);
 void RunEnchantArmor(ARegion *,Unit *);
 void RunMindReading(ARegion *,Unit *);

@@ -25,7 +25,9 @@
 #ifndef ASTRING_CLASS
 #define ASTRING_CLASS
 
-#include <iostream.h>
+#include <iostream>
+using namespace std;
+
 #include "alist.h"
 
 class AString : public AListElem {

@@ -1478,6 +1478,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			obj->type = ot;
 			obj->incomplete = ObjectDefs[obj->type].cost;
 			unit->MoveUnit(obj);
+			unit->build = obj;
 			unit->object->region->objects.Add(obj);
 		}
 	}
@@ -1857,6 +1858,8 @@ AString *Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
 	int turnDepth = 1;
 	int turnLast = 1;
 	int formDepth = 0;
+	int atsign;
+
 	TurnOrder *tOrder = new TurnOrder;
 	tOrder->repeating = repeat;
 
@@ -1871,6 +1874,7 @@ AString *Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
 		}
 		AString	saveorder = *order;
 		token = order->gettoken();
+		atsign = order->getat();
 
 		if (token) {
 			int i = Parse1Order(token);
@@ -1899,7 +1903,8 @@ AString *Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
 							ParseError(pCheck, unit, 0, "END: without FORM.");
 							break;
 						} else {
-							ParseError(pCheck, unit, 0, "TURN: without ENDTURN.");
+							ParseError(pCheck, unit, 0,
+									"TURN: without ENDTURN.");
 							if (!--turnDepth) {
 								unit->turnorders.Add(tOrder);
 								return new AString(saveorder);
@@ -1926,7 +1931,7 @@ AString *Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
 					if (!turnLast) {
 						ParseError(pCheck, unit, 0, "ENDTURN: without TURN.");
 					} else {
-						if (--turnDepth) 
+						if (--turnDepth)
 							tOrder->turnOrders.Add(new AString(saveorder));
 						turnLast = 0;
 					}

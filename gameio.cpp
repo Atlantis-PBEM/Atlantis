@@ -26,9 +26,11 @@
 #include "gamedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
 #include <time.h>
+
+#include <iostream>
+#include <fstream>
+using namespace std;
 
 extern "C" {
 #include "i_rand.h"

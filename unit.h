@@ -254,6 +254,7 @@ class Unit : public AListElem
 		/* Orders */
 		int destroy;
 		int enter;
+		Object *build;
 		int leftShip;
 		UnitId *promote;
 		AList findorders;

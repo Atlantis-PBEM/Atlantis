@@ -119,8 +119,8 @@ void TownInfo::Writeout(Aoutfile *f)
 
 int TownInfo::TownType()
 {
-	if (pop < 1000) return TOWN_VILLAGE;
-	if (pop < 2000) return TOWN_TOWN;
+	if (pop < Globals->CITY_POP/4) return TOWN_VILLAGE;
+	if (pop < Globals->CITY_POP/2) return TOWN_TOWN;
 	return TOWN_CITY;
 }
 
@@ -374,12 +374,19 @@ int ARegion::GetNearestProd(int item)
 void ARegion::SetupCityMarket()
 {
 	int numtrade = 0;
+	int normalbuy = 0;
+	int normalsell = 0;
+	int advanced = 0;
+	int magic = 0;
+	int citymax = Globals->CITY_POP;
 	int i;
 	for (i=0; i<NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(ItemDefs[i].flags & ItemType::NOMARKET) continue;
 
 		int j;
+		int cap;
+		int offset = 0;
 		if(ItemDefs[ i ].type & IT_NORMAL) {
 			if (i==I_SILVER) continue;
 			if (i==I_GRAIN || i==I_LIVESTOCK || i==I_FISH) {
@@ -396,8 +403,10 @@ void ARegion::SetupCityMarket()
 					price = ItemDefs[ i ].baseprice;
 				}
 
+				cap = (citymax * 3/4) - 1000;
+				if(cap < 0) cap = citymax/2;
 				Market * m = new Market (M_SELL, i, price, amt, population,
-						population+2000, amt, amt*2);
+						population+cap, amt, amt*2);
 				markets.Add(m);
 			} else if (i == I_FOOD) {
 				int amt = Globals->CITY_MARKET_NORMAL_AMT;
@@ -411,8 +420,10 @@ void ARegion::SetupCityMarket()
 					price = ItemDefs[ i ].baseprice;
 				}
 
-				Market * m = new Market (M_BUY, i, price, amt, population+500,
-						population+3000, amt, amt*5);
+				cap = (citymax / 8);
+				if(cap < citymax) cap = (citymax * 3/4);
+				Market * m = new Market (M_BUY, i, price, amt, population+cap,
+						population+6*cap, amt, amt*5);
 				markets.Add(m);
 			} else {
 				if (ItemDefs[i].pInput[0].item == -1) {
@@ -442,9 +453,12 @@ void ARegion::SetupCityMarket()
 							} else {
 								price = ItemDefs[ i ].baseprice;
 							}
-
+							
+							cap = (citymax/4);
+							offset = (normalbuy++ * citymax * 3 / 40);
+							// raw goods have a basic offset of 0							
 							Market * m = new Market (M_BUY, i, price, 0,
-									1000+population, 4000+population,
+									population+cap+offset, population+citymax,
 									0, amt);
 							markets.Add(m);
 						}
@@ -464,9 +478,11 @@ void ARegion::SetupCityMarket()
 							} else {
 								price = ItemDefs[ i ].baseprice;
 							}
-
-							Market * m = new Market (M_SELL, i, price, 0,
-									1000+population, 4000+population, 0, amt);
+							
+							cap = (citymax/4);
+							offset = - (citymax/20) + (normalsell++ * citymax * 3/40);
+							Market * m = new Market (M_SELL, i, price, amt/6,
+									population+cap+offset, population+citymax, 0, amt);
 							markets.Add(m);
 						}
 					}
@@ -482,8 +498,10 @@ void ARegion::SetupCityMarket()
 							price = ItemDefs[ i ].baseprice;
 						}
 
-						Market * m = new Market (M_SELL, i, price, 0,
-								1000+population, 4000+population, 0, amt);
+						cap = (citymax/4);
+						offset = - (citymax/20) + (normalsell++ * citymax * 3/40);
+						Market * m = new Market (M_SELL, i, price, amt/6,
+								population+cap+offset, population+citymax, 0, amt);
 						markets.Add(m);
 					} else {
 						if (!getrandom(6)) {
@@ -498,8 +516,13 @@ void ARegion::SetupCityMarket()
 								price = ItemDefs[ i ].baseprice;
 							}
 
+							cap = (citymax/4);
+							offset = (citymax/20) + (normalbuy++ * citymax * 3/40);
+							// finished goods have a higher offset than raw goods
 							Market * m = new Market (M_BUY, i, price, 0,
-									1000+population, 4000+population, 0, amt);
+									population+cap+offset, population+citymax+offset, 0, amt);
+							// Offset added to maxamt too to reflect lesser production capacity
+							// the more items are on sale.
 							markets.Add(m);
 						}
 					}
@@ -519,9 +542,14 @@ void ARegion::SetupCityMarket()
 					price = ItemDefs[ i ].baseprice;
 				}
 
-				Market * m = new Market (M_SELL, i, price, 0, 2000+population,
-						4000+population, 0, amt);
-				markets.Add(m);
+				cap = (citymax *3/4) - 1000;
+				if(cap < citymax/2) cap = citymax / 2;
+				offset = ((citymax / 8) * advanced++);
+				if (cap+offset < citymax) {
+					Market * m = new Market (M_SELL, i, price, amt/6, population+cap+offset,
+						population+citymax, 0, amt);
+					markets.Add(m);
+				}
 			}
 		} else if(ItemDefs[ i ].type & IT_MAGIC) {
 			j = getrandom(8);
@@ -537,8 +565,11 @@ void ARegion::SetupCityMarket()
 					price = ItemDefs[ i ].baseprice;
 				}
 
-				Market * m = new Market (M_SELL, i, price, 0, 2000+population,
-						4000+population, 0, amt);
+				cap = (citymax *3/4) - 1000;
+				if(cap < citymax/2) cap = citymax / 2;
+				offset = (citymax/20) + ((citymax/5) * (magic++ +1));
+				Market * m = new Market (M_SELL, i, price, amt/6, population+cap,
+						population+citymax, 0, amt);
 				markets.Add(m);
 			}
 		} else if(ItemDefs[ i ].type & IT_TRADE) {
@@ -551,6 +582,10 @@ void ARegion::SetupCityMarket()
 	int buy2 = getrandom(numtrade);
 	int sell1 = getrandom(numtrade);
 	int sell2 = getrandom(numtrade);
+	int tradebuy = 0;
+	int tradesell = 0;
+	int offset = 0;
+	int cap = 0;
 
 	buy1 = getrandom(numtrade);
 	while (buy1 == buy2) buy2 = getrandom(numtrade);
@@ -592,10 +627,14 @@ void ARegion::SetupCityMarket()
 				} else {
 					price = ItemDefs[ i ].baseprice;
 				}
-
-				Market * m = new Market (M_SELL, i, price, 0, 2000+population,
-						4000+population, 0, amt);
-				markets.Add(m);
+				
+				cap = (citymax/2);
+				offset = - (citymax/20) + tradesell++ * (tradesell * tradesell * citymax/40);
+				if(cap + offset < citymax) {
+					Market * m = new Market (M_SELL, i, price, amt/5, cap+population+offset,
+						citymax+population, 0, amt);
+					markets.Add(m);
+				}
 			}
 
 			if(addsell) {
@@ -613,9 +652,13 @@ void ARegion::SetupCityMarket()
 					price = ItemDefs[ i ].baseprice;
 				}
 
-				Market * m = new Market (M_BUY, i, price, 0, 2000+population,
-						4000+population, 0, amt);
-				markets.Add(m);
+				cap = (citymax/2);
+				offset = tradebuy++ * (citymax/6);
+				if(cap+offset < citymax) {
+					Market * m = new Market (M_BUY, i, price, amt/6, cap+population+offset,
+						citymax+population, 0, amt);
+					markets.Add(m);
+				}
 			}
 		}
 	}
@@ -661,7 +704,7 @@ void ARegion::AddTown()
 	town->name = new AString(AGetNameString(AGetName(1)));
 
 	if(Globals->RANDOM_ECONOMY) {
-		int popch = 2500;
+		int popch = (Globals->CITY_POP * 16/10);
 		if(Globals->LESS_ARCTIC_TOWNS) {
 			int dnorth = GetPoleDistance(D_NORTH);
 			int dsouth = GetPoleDistance(D_SOUTH);
@@ -676,9 +719,9 @@ void ARegion::AddTown()
 			if (dist < 9)
 				popch = popch - (9 - dist) * ((9 - dist) + 10) * 15;
 		}
-		town->pop = 500+getrandom(popch);
+		town->pop = (Globals->CITY_POP/8)+getrandom(popch);
 	} else {
-		town->pop = 500;
+		town->pop = (Globals->CITY_POP/8);
 	}
 
 	town->basepop = town->pop;
@@ -820,7 +863,7 @@ void ARegion::UpdateTown()
 		int tot = 0;
 		forlist(&markets) {
 			Market * m = (Market *) elem;
-			if (town->pop > m->minpop) {
+			if (Population() > m->minpop) {
 				if (ItemDefs[m->item].type & IT_TRADE) {
 					if (m->type == M_BUY) {
 						amt += 5 * m->activity;

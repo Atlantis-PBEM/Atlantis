@@ -625,3 +625,29 @@ Changes from 4.0.10g -> 4.0.10h
       to something more reasonable than 10/20 if they are using the skill
       based upkeep unless they JUST want to penalize higher skilled leaders.
 
+Changes from 4.0.10h -> 4.0.10i
+--------------------------------------------------
+   -- Fix bug where completed buildings weren't adding protection in battle.
+   -- Made a small change to battle output requested by the author of
+      atlaclient.
+   -- Fixed a bug in building where using an enter order on the same turn as
+      a build caused you to be in the wrong building to build and thus not
+      actually build.
+   -- Fixed a bug in construct gate which made it successful 100% of the time
+      at level 1, instead of 20% at level 1 up to 100% at level 5.
+   -- made all town pop functions use CITY_POP instead of local constants
+   -- fixed a bug where the 'rural' hex population was taken into account
+      when markets were set up, but not when market items were considered
+      for their activity and effect on town growth.
+   -- Markets: all except food set their amount to zero below the minimum
+      pop, and the minimum amount (1/6th of total amount for trade items and
+      normal items on demand) is used as soon as an item becomes available.
+   -- the minimum amount of economically relevant items is set to at least
+      1/6th the total (this affects games in progress).
+   -- added 'staggered' markets: for more than one items of a type, an
+      increasing offset is added to the minimum population of that item's
+      market (so item 1 will appear at 1000+, item 2 at 1300+, item 3 at
+      1600+ for instance).
+   -- Fixed bug in @ENDTURN.
+   -- Fixed bug with skill-based maintanence costs.
+   -- Cleaned up includes to compile without warnings under gcc 3.2

@@ -517,7 +517,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 			forlist(&r2->objects) {
 				Object * o = (Object *) elem;
 				/* Set building capacity */
-				if (o->incomplete > 1 && o->IsBuilding()) {
+				if (o->incomplete < 1 && o->IsBuilding()) {
 					o->capacity = ObjectDefs[o->type].protect;
 				}
 			}

@@ -95,7 +95,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	if (ItemDefs[r].type & IT_MONSTER) {
 		int mon = ItemDefs[r].index;
 		if(u->type == U_WMON)
-			name = AString(MonDefs[mon].name);
+			name = AString(MonDefs[mon].name) + " in " + *(unit->name);
 		else
 			name = AString(MonDefs[mon].name) +
 				AString(" controlled by ") + *(unit->name);
@@ -669,12 +669,7 @@ void Army::Regenerate(Battle *b)
 		if (i<notbehind) {
 			int diff = s->maxhits - s->hits;
 			if (diff > 0) {
-				AString aName = AString(ItemDefs[s->race].name);
-				if (s->unit->type == U_WMON)
-					aName += AString(" in ");
-				else
-					aName += AString(" controlled by ");
-				aName += *s->unit->name;
+				AString aName = s->name;
 
 				if (s->damage != 0) {
 					b->AddLine(aName + " takes " + s->damage +
