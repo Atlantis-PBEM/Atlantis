@@ -307,8 +307,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 					"Table of Road Structures"));
 	if(may_sail)
 		f.TagText("LI", f.Link("#tableshipinfo", "Table of Ship Information"));
-	f.TagText("LI", f.Link("#tablebuildcapacity",
-				"Table of Building Capacity"));
 	f.Enclose(0, "UL");
 	f.PutStr("<BR>");
 	f.PutStr(f.LinkRef("intro"));
@@ -2478,181 +2476,227 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "so the soldiers can join the fight.";
 	f.PutStr(temp);
 	f.PutStr("<P></P>");
-
-	// RESUME
+	temp = "It is important to note that the units in nearby regions do not "
+		"actually move to the region where the fighting happens; the "
+		"computer only checks that they could move there.  (In game world "
+		"terms, presumably they did move there to join the fight, and then "
+		"moved back where they started.)  The computer checks for weight "
+		"allowances and terrain types when determining whether a unit could "
+		"reach the scene of the battle. Note that the use of ships is not "
+		"allowed in this virtual movement.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "If you order an attack on an ally (either with the ";
+	temp += f.Link("#attack", "ATTACK") + " order, or if your ally has "
+		"declared you Unfriendly, by attempting to ";
+	temp += f.Link("#advance", "ADVANCE") +" into a region which he is "
+		"guarding), then your commander will decide that a mistake has "
+		"occurred somewhere, and withdraw your troops from the fighting "
+		"altogether.  Thus, your units will not attack that faction in "
+		"that region. Note that you will always defend an ally against "
+		"attack, even if it means that you fight against other factions "
+		"that you are allied with.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("com_thebattle"));
+	f.TagText("H3", "The Battle:");
+	temp = "The troops having lined up, the fight begins.";
+	if(!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
+		temp += " The computer selects the best tactician from each side; "
+			"that unit is regarded as the leader of its side.  If two or "
+			"more units on one side have the same Tactics skill, then the "
+			"one with the lower unit number is regarded as the leader of "
+			"that side.  If one side's leader has a better Tactics skill "
+			"than the other side's, then that side gets a free round of "
+			"attacks.";
+	}
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "In each combat round, the combatants each get to attack once, in "
+		"a random order. ";
+	if(!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
+		temp += "(In a free round of attacks, only one side's forces get to "
+			"attack.) ";
+	}
+	temp += "Each combatant will attempt to hit a randomly selected enemy. "
+		"If he hits, and the target has no armor, then the target is "
+		"automatically killed.  Armor may provide extra defense against "
+		"otherwise successful attacks.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "The basic skill used in battle is the Combat skill; this is "
+		"used for hand to hand fighting.  If one soldier tries to hit "
+		"another using most weapons, there is a 50 percent chance that the "
+		"attacker will get an opportunity for a lethal blow.  If the "
+		"attacker does get that opportunity, then there is a contest "
+		"between his combat skill (modified by weapon attack bonus) and "
+		"the defender's combat skill (modified by weapon defense bonus). "
+		"Some weapons may not allow combat skill to affect defense (e.g. "
+		"bows), and others may allow different skills to be used on "
+		"defense (or offense).";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "If the skills are equal, then there is a 1:1 (i.e. 50 percent) "
+		"chance that the attack will succeed.  If the attacker's skill is 1 "
+		"higher then there is a 2:1 (i.e. 66 percent) chance, if the "
+		"attacker's skill is 2 higher then there is a 4:1 (i.e. 80 percent) "
+		"chance, 3 higher means an 8:1 (i.e. 88 percent) chance, and so on. "
+		"Similarly if the defender's skill is 1 higher, then there is only "
+		"a 1:2 (i.e. 33 percent) chance, etc.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "";
+	if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
+		temp += "Possession of a sword confers a ";
+		if(WeaponDefs[WEAPON_SWORD].attackBonus > -1) temp += "+";
+		temp += WeaponDefs[WEAPON_SWORD].attackBonus;
+		temp += " bonus to Combat skill for attack and a ";
+		if(WeaponDefs[WEAPON_SWORD].defenseBonus > -1) temp += "+";
+		temp += WeaponDefs[WEAPON_SWORD].defenseBonus;
+		temp += " bonus for defense. ";
+	}
+	temp += "Troops which are fighting hand-to-hand without specific weapons "
+		"are assumed to be irregularly armed with makeshift weapons such as "
+		"clubs, pitchforks, torches, etc. ";
+	if(!(SkillDefs[S_RIDING].flags & SkillType::DISABLED) &&
+			!(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
+		temp += "Possession of a horse, and Riding skill, also confers a "
+			"bonus to effective Combat skill equal to the Riding skill "
+			"level (up to a maximum of ";
+		temp += MountDefs[MOUNT_HORSE].maxBonus;
+		temp += ") provided that the terrain allows horses to be used.";
+		if(!(ItemDefs[I_WHORSE].flags & ItemType::DISABLED)) {
+			temp += " Winged horse are better yet, but require more basic "
+				"Riding skill to gain any advantage. ";
+		}
+	}
+	temp += "Certain weapons may provide different attack and defense "
+		"bonuses, or have additional attack bonuses against mounted "
+		"opponents or other special characteristics. These bonuses will "
+		"be listed in the item descriptions in the turn reports.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp += "Some melee weapons may be defined as Long or Short (this is "
+		"relative to a normal weapon, e.g. the sword).  A soldier wielding "
+		"a longer weapon than his opponent gets a +1 bonus to his attack "
+		"skill.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Ranged weapons are slightly different from melee weapons.  The "
+		"target will generally not get any sort of combat bonus to defense "
+		"against a ranged attack. ";
+	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) &&
+			!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED)) {
+		temp += "The skill check to hit with a long bow is made against an "
+			"effective defense of ";
+		temp += -(WeaponDefs[WEAPON_LONGBOW].attackBonus);
+		temp += "; i.e., a longbowman with a skill 1, having made the 50 "
+			"percent change of getting an effective attack, has a 1:2 "
+			"chance of hitting a target. ";
+	}
+	if(!(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED) &&
+			!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
+		temp += "A crossbow is an easier weapon to use, so the chance to hit "
+			"is calculated against a defense of ";
+		temp += -(WeaponDefs[WEAPON_CROSSBOW].attackBonus);
+		if(WeaponDefs[WEAPON_CROSSBOW].numAttacks < 0) {
+			temp += "; on the other hand, a crossbow can only fire once "
+				"every ";
+			temp += -(WeaponDefs[WEAPON_CROSSBOW].numAttacks);
+			temp += "rounds, including the free round of attacks if one's"
+				"side has one";
+		}
+		temp += ".";
+	}
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Weapons may have one of several different attack types: "
+		"Slashing, Piercing, Crushing, Cleaving and Armor Piercing.  "
+		"Different types of armor may give different survival chances "
+		"against a sucessful attack of different types.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "A soldier attacking with a ranged weapon will generally be "
+		"treated as if they have a Combat skill of 0, even if they have an "
+		"actual Combat skill.  This is the trade off for being able to hit "
+		"from the back line of fighting.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Being inside a building confers a +2 bonus to defense.  This "
+		"bonus is effective against ranged as well as melee weapons.  The "
+		"number of men that a building can protect is equal to its size. "
+		"The size of the various common buildings was listed in the ";
+	temp += f.Link("#tablebuildings", "Table of Buildings") + " earlier. ";
+	temp += "If there are too many units in a building to all gain "
+		"protection from it, then those units who have been in the building "
+		"longest will gain protection.  (Note that these units appear first "
+		"on the turn report.)";
+	if(!(ObjectDefs[O_FORT].flags & ObjectType::DISABLED)) {
+		temp += " If a unit of 200 men is inside a Fort (capacity ";
+		temp += ObjectDefs[O_FORT].protect;
+		temp += ") then the first ";
+		temp += ObjectDefs[O_FORT].protect;
+		temp += " men in the unit will gain the full +2 bonus and the other ";
+		temp += (200 - ObjectDefs[O_FORT].protect);
+		temp += " will gain no protection.";
+	}
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Units which have the Behind flag set are at the rear and "
+		"cannot be attacked by any means until all non-Behind units have "
+		"been wiped out.  On the other hand, neither can they attack with "
+		"melee weapons, but only with ranged weapons or magic.  Once all "
+		"front-line units have been wiped out, then the Behind flag no "
+		"longer has any effect.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("com_victory"));
+	f.TagText("H3", "Victory!");
+	temp = "Combat rounds continue until one side has accrued 50 percent "
+		"losses (or more). The victorious side is then awarded one free "
+		"round of attacks, after which the battle is over.  If both sides "
+		"have more than 50 percent losses, the battle is a draw, and neither "
+		"side gets a free round.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED) &&
+			!(ItemDefs[I_HERBS].flags & SkillType::DISABLED)) {
+		temp = "Units with the Healing skill have a chance of being able "
+			"to heal casualties of the winning side, so that they recover "
+			"rather than dying.  Each character with this skill can attempt "
+			"to heal ";
+		temp += Globals->HEALS_PER_MAN;
+		temp += " casualties per skill level. Each attempt however "
+			"requires one unit of Herbs, which is thereby used up. Each "
+			"attempt has a 50 percent chance of healing one casualty; only "
+			"one attempt at Healing may be made per casualty. Healing "
+			"occurs automatically, after the battle is over, by any living "
+			"healers on the winning side.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+	}
+	temp = "Any items owned by dead combatants on the losing side have a "
+		"50 percent chance of being found and collected by the winning "
+		"side.  Each item which is recovered is picked up by one of the "
+		"survivors able to carry it (see the ";
+	temp += f.Link("#spoils", "SPOILS") + " command) at random, so the "
+		"winners generally collect loot in proportion to their number of "
+		"surviving men.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp += "If you are expecting to fight an enemy who is carrying so "
+		"much equipment that you would not be able to move after picking "
+		"it up, and you want to move to another region later that month, it "
+		"may be worth issuing some orders to drop items (with the ";
+	temp += f.Link("#give", "GIVE") + " 0 order) or to prevent yourself "
+		"picking up certain types of spoils (with the ";
+	temp += f.Link("#spoils", "SPOILS") + " order) in case you win the "
+		"battle! Also, note that if the winning side took any losses in "
+		"the battle, any units on this side will not be allowed to move, "
+		"or attack again for the rest of the turn.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
 #if 0
- printf("It is important to note that the units in nearby regions do not actually move\n");
- printf("to the region where the fighting happens; the computer only checks that they\n");
- printf("could move there.  (In game world terms, presumably they did move\n");
- printf("there to join the fight, and then moved back where they started.)  The computer\n");
- printf("checks for weight allowances and terrain types when determining whether a unit\n");
- printf("could reach the scene of the battle.\n");
- printf("Note that the use of ships is not allowed in this virtual movement. <p>\n");
- printf("\n");
- printf("If you order an attack on an ally (either with the\n");
- printf("<a href=\"#attack\"> ATTACK </a> order, or if your\n");
- printf("ally has declared you Unfriendly, by attempting to\n");
- printf("<a href=\"#advance\"> ADVANCE </a> into a region which\n");
- printf("he is guarding), then your commander will decide that a mistake has occurred\n");
- printf("somewhere, and withdraw your troops from the fighting altogether.  Thus, your\n");
- printf("units will not attack that faction in that region. Note that you will\n");
- printf("always defend an ally against attack, even if it means that you fight\n");
- printf("against other factions that you are allied with. <p>\n");
- printf("\n");
- 
- printf("<a name=\"com_thebattle\">\n");
- printf("<h3> The Battle: </h3>\n");
- printf("\n");
- printf("The troops having lined up, the fight begins.\n");
- if (SKILL_ENABLED(S_TACTICS))
-  {
-   printf("  The computer selects the best\n");
-   printf("  tactician from each side; that unit is regarded as the leader of its side.  If\n");
-   printf("  two or more units on one side have the same Tactics skill, then the one with\n");
-   printf("  the lower unit number is regarded as the leader of that side.  If one side's\n");
-   printf("  leader has a better Tactics skill than the other side's, then that side gets a\n");
-   printf("  free round of attacks.\n");
-  }
- printf("<p>\n");
- printf("\n");
- printf("In each combat round, the combatants each get to attack once, in a random\n");
- printf("order. \n");
- if (SKILL_ENABLED(S_TACTICS))
-  {
-   printf("  (In a free round of attacks, only one side's forces get to attack.)\n");
-  }
- printf("Each combatant will attempt to hit a randomly selected enemy.  If he hits, and\n");
- printf("the target has no armor, then the target is automatically killed.  Armor may\n");
- printf("provide extra defense against otherwise successful attacks.<p>\n");
- printf("\n");
- printf("The basic skill used in battle is the Combat skill; this is used for hand to\n");
- printf("hand fighting.  If one soldier tries to hit another using melee weapons, there\n");
- printf("is a 50%% chance that the attacker will get an opportunity for a lethal blow.\n");
- printf("If the attacker does get that opportunity, then there is a contest between\n");
- printf("his combat skill (modified by weapon attack bonus) and the defender's combat\n");
- printf("skill (modified by weapon defense bonus).   Some weapons may not allow combat\n");
- printf("skill to affect defense (e.g. bows), and others may allow different skills\n");
- printf("to be used on defense.<p>\n");
- printf("\n");
- printf("If the skills are equal, then there is a 1:1 (i.e. 50%%) chance that the attack\n");
- printf("will succeed.  If the attacker's skill is 1 higher then there is a 2:1 (i.e.\n");
- printf("66%%) chance, if the attacker's skill is 2 higher then there is a 4:1 (i.e.\n");
- printf("80%%) chance, 3 higher means an 8:1 (i.e. 88%%) chance, and so on.  Similarly\n");
- printf("if the defender's skill is 1 higher, then there is only a 1:2 (i.e. 33%%)\n");
- printf("chance, etc. <p>\n");
- printf("\n");
- printf("Possession of a sword confers a +2 bonus to Combat skill for both attack\n");
- printf("and defense.  (Troops fighting hand-to-hand without specific weapons are \n");
- printf("assumed to be irregularly equipped with knives, clubs etc.)\n");
- if (SKILL_ENABLED(S_RIDING))
-  {
-   printf("  Possession of\n");
-   printf("  a horse, and Riding skill, also confers a bonus to effective Combat skill\n");
-   printf("  equal to the Riding skill level (up to a maximum of 3) provided that the\n");
-   printf("  terrain allows horses to be used.  Winged horse are better yet, but require\n");
-   printf("  more basic Riding skill to gain any advantage.\n");
-  }
- printf("Certain weapons may provide different attack and defense bonuses, or have additional attack bonuses\n");
- printf("against mounted opponents.<p>\n");
- printf("\n");
- printf("Some melee weapons may be defined as Long or Short (this is relative to a\n");
- printf("normal weapon, e.g. the sword).  A soldier wielding a longer weapon than\n");
- printf("his opponent gets a +1 bonus to his attack skill.<p>\n");
- printf("\n");
- printf("Missile weapons are slightly different from melee weapons.  A soldier who\n");
- printf("has a longbow and is skilled in its use will use it; otherwise, he will use\n");
- printf("a crossbow if he has one, and skill in its use; otherwise, he will fight hand\n");
- printf("to hand.  The skill check to hit with a longbow is made against an effective\n");
- printf("defense of 2; i.e., a longbowman with skill 1, having made the 50%% chance of\n");
- printf("getting an effective attack, has a 1:2 chance of hitting a target.  A\n");
- printf("crossbow is an easier weapon to use, so the chance to hit is calculated\n");
- printf("against a defense of 0; on the other hand, a crossbow can only fire every\n");
- printf("other round (the first, third, fifth, etc., rounds, including the free\n");
- printf("round of attacks if one's side has one).  Note that the target unit's actual\n");
- printf("skills are irrelevant for bow attacks. <p>\n");
- printf("\n");
- printf("Weapons may have one of several different attack types: Slashing, Piercing,\n");
- printf("Crushing, Cleaving and Armor Piercing.  Different types of armor may give\n");
- printf("different survival chances against a sucessful attack of different types.<p>\n");
- printf("\n");
- printf("A soldier with a melee weapon attacking a bowman makes his attack just as if\n");
- printf("the bowman had a Combat skill of 0, even if the bowman is a leader who also\n");
- printf("has Combat skill. <p>\n");
- printf("\n");
- printf("Being inside a building confers a +2 bonus to defense.  This bonus is effective\n");
- printf("against bows as well as melee weapons.  The number of men that a building can\n");
- printf("protect is equal to its size.  The sizes of the different types of buildings\n");
- printf("are as follows: <p>\n");
- printf("\n");
- printf("<a name=\"tablebuildcapacity\">\n");
- printf("<center>\n");
- printf("<table border>\n");
-  printf(" <tr>\n");
-   printf("  <td> </td>\n");
-   printf("  <th>Size</th>\n");
-  printf(" </tr>\n");
- {
- int lbs[]={O_TOWER,O_FORT,O_CASTLE,O_CITADEL};
- int nlbs=sizeof(lbs)/sizeof(int);
- for (int i=0;i<nlbs;i++)
-  {
-  if (OBJECT_ENABLED(lbs[i]))
-   {
-   ObjectType *ot=ObjectDefs+lbs[i];
-    printf("   <tr>\n");
-     printf("    <td align=\"center\">%s</td>\n",ot->name);
-     printf("    <td align=\"center\">%d</td>\n",ot->protect);
-    printf("   </tr>\n");
-   }
-  }
- }
- printf("</table> </center> <p>\n");
- printf("\n");
- printf("If there are too many units in a building to all gain protection from it, then\n");
- printf("those units who have been in the building longest will gain protection.  (Note\n");
- printf("that these units appear first on the turn report.)  If a unit of 200 men is\n");
- printf("inside a Fort (capacity 50), then the first 50 men in the unit will gain the\n");
- printf("full +2 bonus, and the other 150 will gain no protection. <p>\n");
- printf("\n");
- printf("Units which have the Behind flag set are at the rear and cannot be attacked by\n");
- printf("any means until all non-Behind units have been wiped out.  On the other hand,\n");
- printf("neither can they attack with melee weapons, but only with bows or magic.  Once\n");
- printf("all front-line units have been wiped out, then the Behind flag no longer has\n");
- printf("any effect. <p>\n");
- printf("\n");
- printf("<a name=\"com_victory\">\n");
- printf("<h3> Victory! </h3>\n");
- printf("\n");
- printf("Combat rounds continue until one side has accrued 50%% losses (or more). The\n");
- printf("victorious side is then awarded one free round of attacks, after which the\n");
- printf("battle is over.  If both sides have more than 50%% losses, the battle is a draw,\n");
- printf("and neither side gets a free round. <p>\n");
- printf("\n");
- if (SKILL_ENABLED(S_HEALING))
-  {
-   printf("  Units with the Healing skill have a chance of being able to heal casualties of\n");
-   printf("  the winning side, so that they recover rather than dying.  Each character with\n");
-   printf("  this skill can attempt to heal %d casualties per skill level.\n",Globals->HEALS_PER_MAN);
-   printf("  Each attempt however requires\n");
-   printf("  one unit of Herbs, which is thereby used up.  Each attempt has a 50%% chance of\n");
-   printf("  healing one casualty; only one attempt at Healing may be made per casualty.  \n");
-   printf("  Healing occurs automatically, after the battle is over, by any living healers\n");
-   printf("  on the winning side. <p>\n");
-  }
- printf("\n");
- printf("Any items owned by dead combatants on the losing side have a 50%% chance of\n");
- printf("being found and collected by the winning side.  Each item which is recovered is\n");
- printf("picked up by one of the survivors at random, so the winners generally collect\n");
- printf("loot in proportion to their number of surviving men. <p>\n");
- printf("\n");
- printf("If you are expecting to fight an enemy who is carrying so much equipment that\n");
- printf("you would not be able to move after picking it up, and you want to move to\n");
- printf("another region later that month, it may be worth issuing some orders to drop\n");
- printf("items (with the <a href=\"#give\"> GIVE </a>\n");
- printf("0 order) in case you win the battle! Also, note that if\n");
- printf("the winning side took any losses in the battle, any units on this side will not\n");
- printf("be allowed to move, or attack again for the rest of the turn. <p>\n");
- printf("\n");
  if (st_ena||ob_ena)
   {
    printf("  <a name=\"stealthobs\">\n");
