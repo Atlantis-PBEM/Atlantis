@@ -141,7 +141,7 @@ static GameDefs g = {
 	1,	// ABYSS_LEVEL
 	0,	// IMPROVED_FARSIGHT
 	0,	// GM_REPORT
-	1,	// DECAY
+	0,	// DECAY
 };
 
 GameDefs * Globals = &g;
