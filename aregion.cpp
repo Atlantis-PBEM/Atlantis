@@ -1244,7 +1244,7 @@ AString ARegion::ShortPrint( ARegionList *pRegs )
 				temp += "deep ";
 			} else if((zloc > Globals->UNDERWORLD_LEVELS+2) &&
 					  (zloc < Globals->UNDERWORLD_LEVELS +
-					   		  Globals->UNDERDEEP_LEVELS + 2)) {
+					   Globals->UNDERDEEP_LEVELS + 2)) {
 				for(int i = zloc; i > Globals->UNDERWORLD_LEVELS + 3; i--) {
 					temp += "very ";
 				}
@@ -2478,10 +2478,10 @@ void ARegionList::CreateAbyssLevel( int level, char *name )
 
 void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 {
-    MakeRegions( level, xSize, ySize );
+	MakeRegions(level, xSize, ySize);
 
-    pRegionArrays[ level ]->SetName( name );
-    pRegionArrays[ level ]->levelType = ARegionArray::LEVEL_NEXUS;
+	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_NEXUS;
 
 	AString nex_name = Globals->WORLD_NAME;
 	nex_name += " Nexus";
@@ -2489,7 +2489,7 @@ void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 	int x, y;
 	for(y = 0; y < ySize; y++) {
 		for(x = 0; x < xSize; x++) {
-			ARegion *reg = pRegionArrays[ level ]->GetRegion( x, y );
+			ARegion *reg = pRegionArrays[level]->GetRegion(x, y);
 			if(reg) {
 				reg->SetName(nex_name.Str());
 				reg->type = R_NEXUS;
@@ -2497,11 +2497,11 @@ void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 		}
 	}
 
-    FinalSetup( pRegionArrays[ level ] );
+	FinalSetup(pRegionArrays[level]);
 
 	for(y = 0; y < ySize; y++) {
 		for(int x = 0; x < xSize; x++) {
-			ARegion *reg = pRegionArrays[ level ]->GetRegion( x, y );
+			ARegion *reg = pRegionArrays[level]->GetRegion(x, y);
 			if(reg && Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
 				reg->MakeStartingCity();
 				if(Globals->GATES_EXIST) {
@@ -2512,132 +2512,119 @@ void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 	}
 }
 
-void ARegionList::CreateSurfaceLevel( int level,
-                                      int xSize,
-                                      int ySize,
-                                      int percentOcean,
-                                      int continentSize,
-                                      char *name )
+void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize,
+		int percentOcean, int continentSize, char *name)
 {
-    MakeRegions( level, xSize, ySize );
+	MakeRegions(level, xSize, ySize);
 
-    pRegionArrays[ level ]->SetName( name );
-    pRegionArrays[ level ]->levelType = ARegionArray::LEVEL_SURFACE;
-    MakeLand( pRegionArrays[ level ], percentOcean, continentSize );
+	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
+	MakeLand(pRegionArrays[level], percentOcean, continentSize);
 
-    SetupAnchors( pRegionArrays[ level ] );
+	SetupAnchors(pRegionArrays[level]);
 
-    GrowTerrain( pRegionArrays[ level ], 0 );
+	GrowTerrain(pRegionArrays[level], 0);
 
-    AssignTypes( pRegionArrays[ level ] );
+	AssignTypes(pRegionArrays[level]);
 
-    FinalSetup( pRegionArrays[ level ] );
+	FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateIslandLevel( int level,
-                                     int nPlayers,
-                                     char *name )
+void ARegionList::CreateIslandLevel(int level, int nPlayers, char *name)
 {
-    int xSize, ySize;
-    xSize = 20 + ( nPlayers + 3 ) / 4 * 6 - 2;
+	int xSize, ySize;
+	xSize = 20 + (nPlayers + 3) / 4 * 6 - 2;
     ySize = xSize;
 
-    MakeRegions( level, xSize, ySize );
+    MakeRegions(level, xSize, ySize);
 
-    pRegionArrays[ level ]->SetName( name );
-    pRegionArrays[ level ]->levelType = ARegionArray::LEVEL_SURFACE;
+	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
-    MakeCentralLand( pRegionArrays[ level ] );
-    MakeIslands( pRegionArrays[ level ], nPlayers );
-    RandomTerrain( pRegionArrays[ level ] );
+	MakeCentralLand(pRegionArrays[level]);
+	MakeIslands(pRegionArrays[level], nPlayers);
+	RandomTerrain(pRegionArrays[level]);
 
-    FinalSetup( pRegionArrays[ level ] );
+	FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateUnderworldLevel( int level,
-                                         int xSize,
-                                         int ySize,
-                                         char *name )
+void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
+		char *name)
 {
-    MakeRegions( level, xSize, ySize );
+	MakeRegions(level, xSize, ySize);
 
-    pRegionArrays[ level ]->SetName( name );
-    pRegionArrays[ level ]->levelType = ARegionArray::LEVEL_UNDERWORLD;
+	pRegionArrays[level]->SetName( name );
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERWORLD;
 
-    SetRegTypes( pRegionArrays[ level ], R_NUM );
+	SetRegTypes(pRegionArrays[level], R_NUM);
 
-    SetupAnchors( pRegionArrays[ level ] );
+	SetupAnchors(pRegionArrays[level]);
 
-    GrowTerrain( pRegionArrays[ level ], 1 );
+	GrowTerrain(pRegionArrays[level], 1);
 
-    AssignTypes( pRegionArrays[ level ] );
+	AssignTypes(pRegionArrays[level]);
 
-    MakeUWMaze( pRegionArrays[ level ] );
+	MakeUWMaze(pRegionArrays[level]);
 
-    FinalSetup( pRegionArrays[ level ] );
+	FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateUnderdeepLevel( int level,
-                                        int xSize,
-                                        int ySize,
-                                        char *name )
+void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
+		char *name)
 {
-    MakeRegions( level, xSize, ySize );
+	MakeRegions(level, xSize, ySize);
 
-    pRegionArrays[ level ]->SetName( name );
-    pRegionArrays[ level ]->levelType = ARegionArray::LEVEL_UNDERDEEP;
+	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERDEEP;
 
-    SetRegTypes( pRegionArrays[ level ], R_NUM );
+	SetRegTypes(pRegionArrays[level], R_NUM);
 
-    SetupAnchors( pRegionArrays[ level ] );
+	SetupAnchors(pRegionArrays[level]);
 
-    GrowTerrain( pRegionArrays[ level ], 1 );
+	GrowTerrain(pRegionArrays[level], 1);
 
-    AssignTypes( pRegionArrays[ level ] );
+	AssignTypes(pRegionArrays[level]);
 
-    MakeUWMaze( pRegionArrays[ level ] );
+	MakeUWMaze(pRegionArrays[level]);
 
-    FinalSetup( pRegionArrays[ level ] );
+	FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::MakeRegions( int level, int xSize, int ySize )
+void ARegionList::MakeRegions(int level, int xSize, int ySize)
 {
-    Awrite( "Making a level..." );
+	Awrite( "Making a level..." );
 
-    ARegionArray *arr = new ARegionArray( xSize, ySize );
-    pRegionArrays[ level ] = arr;
+	ARegionArray *arr = new ARegionArray(xSize, ySize);
+	pRegionArrays[level] = arr;
 
-    //
-    // Make the regions themselves
-    //
-    int x, y;
-    for( y = 0; y < ySize; y++ )
-    {
-        for( x = 0; x < xSize; x++ )
-        {
-            if( !(( x + y ) % 2 ))
-            {
-                ARegion *reg = new ARegion;
-                reg->SetLoc( x, y, level );
-                reg->num = Num();
+	//
+	// Make the regions themselves
+	//
+	int x, y;
+	for(y = 0; y < ySize; y++) {
+		for(x = 0; x < xSize; x++) {
+			if(!((x + y) % 2)) {
+				ARegion *reg = new ARegion;
+				reg->SetLoc(x, y, level);
+				reg->num = Num();
 
-                //
-                // Some initial values; these will get reset
-                //
-                reg->type = -1;
-                reg->race = -1;
-                reg->wages = -1;
-                reg->maxwages = -1;
+				//
+				// Some initial values; these will get reset
+				//
+				reg->type = -1;
+				reg->race = -1;
+				reg->wages = -1;
+				reg->maxwages = -1;
 
-                Add( reg );
-                arr->SetRegion( x, y, reg );
-            }
-        }
-    }
+				Add(reg);
+				arr->SetRegion(x, y, reg);
+			}
+		}
+	}
 
-    SetupNeighbors( arr );
+	SetupNeighbors( arr );
 
-    Awrite("");
+	Awrite("");
 }
 
 void ARegionList::SetupNeighbors(ARegionArray *pRegs)
@@ -3093,7 +3080,7 @@ ARegion *ARegionList::FindGate(int x) {
   return 0;
 }
 
-int ARegionList::GetPlanarDistance(ARegion *one, ARegion*two)
+int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty)
 {
 	if(one->zloc == ARegionArray::LEVEL_NEXUS ||
 			two->zloc == ARegionArray::LEVEL_NEXUS) {
@@ -3104,21 +3091,12 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion*two)
 	int maxy;
     ARegionArray *pArr=pRegionArrays[ARegionArray::LEVEL_SURFACE];
 
-	if(one->zloc == ARegionArray::LEVEL_SURFACE) {
-		one_x = one->xloc;
-		one_y = one->yloc;
-	} else {
-		one_x = one->xloc * 2;
-		one_y = one->yloc * 2;
-	}
+	one_x = one->xloc * GetLevelXScale(one->zloc);
+	one_y = one->yloc * GetLevelYScale(one->zloc);
 
-	if(two->zloc == ARegionArray::LEVEL_SURFACE) {
-		two_x = two->xloc;
-		two_y = two->yloc;
-	} else {
-		two_x = two->xloc * 2;
-		two_y = two->yloc * 2;
-	}
+	two_x = two->xloc * GetLevelXScale(two->zloc);
+	two_y = two->yloc * GetLevelYScale(two->zloc);
+
     maxy = one_y - two_y;
 	if(maxy < 0) maxy=-maxy;
 
@@ -3137,7 +3115,7 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion*two)
 		maxx = (maxx+maxy)/2;
 
 	if(one->zloc != two->zloc)
-		maxx += 4;
+		maxx += penalty;
 
 	return maxx;
 }
@@ -3183,16 +3161,13 @@ void ARegionList::CreateLevels( int n )
 
 ARegionArray::ARegionArray(int xx,int yy)
 {
-    x = xx;
-    y = yy;
-    regions = new ARegion *[ x * y / 2 + 1];
-    strName = 0;
+	x = xx;
+	y = yy;
+	regions = new ARegion *[x * y / 2 + 1];
+	strName = 0;
 
-    int i;
-    for( i = 0; i < x * y / 2; i++ )
-    {
-        regions[ i ] = 0;
-    }
+	int i;
+	for(i = 0; i < x * y / 2; i++) regions[i] = 0;
 }
 
 ARegionArray::~ARegionArray()

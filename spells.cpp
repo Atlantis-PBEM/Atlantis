@@ -27,6 +27,7 @@
 
 void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
+	int val;
     AString * token = o->gettoken();
     if (!token) {
         ParseError( pCheck, u, 0, "CAST: No skill given.");
@@ -83,7 +84,8 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
-				if(Globals->CLEAR_SKIES_REGION)
+				val = SkillDefs[S_CLEAR_SKIES].rangeIndex;
+				if(val != -1)
 					ProcessRegionSpell(u, o, sk, pCheck);
 				else
 					ProcessGenericSpell(u, sk, pCheck);
@@ -368,6 +370,10 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 	int x = -1;
 	int y = -1;
 	int z = -1;
+	int val = SkillDefs[spell].rangeIndex;
+	RangeType *range = NULL;
+	if(val != -1) range = &RangeDefs[val];
+
 	if(token) {
 		if(*token == "region") {
 			delete token;
@@ -387,7 +393,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 			y = token->value();
 			delete token;
 
-			if(Globals->EASIER_UNDERWORLD) {
+			if(range && (range->flags & RangeType::RNG_CROSS_LEVELS)) {
 				token = o->gettoken();
 				if(token) {
 					z = token->value();
@@ -395,7 +401,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 				}
 				if(z < 0 || (z > Globals->UNDERWORLD_LEVELS +
 							Globals->UNDERDEEP_LEVELS +
-							Globals->ABYSS_LEVEL + 1)) {
+							Globals->ABYSS_LEVEL + 2)) {
 					u->Error("CAST: Invalid Z coordinate specified.");
 					return;
 				}
@@ -693,8 +699,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 	}
 }
 
-int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell,
-		int rangemult, int rangeclass, int nexus, int surface, int underworld)
+int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 {
 	int level = u->GetSkill(spell);
 	if(!level) {
@@ -702,36 +707,19 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell,
 		return 0;
 	}
 
-	switch(regions.GetRegionArray(r->zloc)->levelType) {
-		case ARegionArray::LEVEL_NEXUS:
-			if(!nexus) {
-				u->Error("CAST Spell does not work from the Nexus.");
-				return 0;
-			}
-			break;
-		case ARegionArray::LEVEL_SURFACE:
-			if(!surface) {
-				AString error = "CAST: Spell does not work on the surface of ";
-				error += Globals->WORLD_NAME;
-				error += ".";
-				u->Error(error);
-				return 0;
-			}
-			break;
-		case ARegionArray::LEVEL_UNDERWORLD:
-		case ARegionArray::LEVEL_UNDERDEEP:
-			if(!underworld) {
-				AString error = "CAST: Spell does not work under the "
-					"surface of ";
-				error += Globals->WORLD_NAME;
-				error += ".";
-				u->Error(error);
-				return 0;
-			}
-			break;
-		default:
-			u->Error("CAST: Spell does not work on this level.");
-			return 0;
+	int val = SkillDefs[spell].rangeIndex;
+	if(val == -1) {
+		u->Error("CAST: Spell is not castable at range.");
+		return 0;
+	}
+
+	RangeType *range = &RangeDefs[val];
+
+	int rtype = regions.GetRegionArray(r->zloc)->levelType;
+	if((rtype == ARegionArray::LEVEL_NEXUS) &&
+			!(range->flags & RangeType::RNG_NEXUS_SOURCE)) {
+		u->Error("CAST: Spell does not work from the Nexus.");
+		return 0;
 	}
 
 	if(!tar) {
@@ -739,62 +727,47 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell,
 		return 0;
 	}
 
-	switch(regions.GetRegionArray(tar->zloc)->levelType) {
-		case ARegionArray::LEVEL_NEXUS:
-			if(!nexus) {
-				u->Error("CAST: Spell does not work to the Nexus.");
-				return 0;
-			}
-			break;
-		case ARegionArray::LEVEL_SURFACE:
-			if(!surface) {
-				AString error = "CAST: Spell does not work to the surface of ";
-				error += Globals->WORLD_NAME;
-				error += ".";
-				u->Error(error);
-				return 0;
-			}
-			break;
-		case ARegionArray::LEVEL_UNDERWORLD:
-		case ARegionArray::LEVEL_UNDERDEEP:
-			if(!underworld) {
-				AString error = "CAST: Spell does not work to under the "
-					"surface of ";
-				error += Globals->WORLD_NAME;
-				error += ".";
-				u->Error(error);
-				return 0;
-			}
-			break;
-		default:
-			u->Error("CAST: Spell does not work to that level.");
-			return 0;
+	rtype = regions.GetRegionArray(tar->zloc)->levelType;
+	if((rtype == ARegionArray::LEVEL_NEXUS) &&
+			!(range->flags & RangeType::RNG_NEXUS_TARGET)) {
+		u->Error("CAST: Spell does not work to the Nexus.");
+		return 0;
 	}
 
-	int range;
-	switch(rangeclass) {
+	if((rtype != ARegionArray::LEVEL_SURFACE) &&
+			(range->flags & RangeType::RNG_SURFACE_ONLY)) {
+		u->Error("CAST: Spell can only target regions on the surface.");
+		return 0;
+	}
+	if(!(range->flags&RangeType::RNG_CROSS_LEVELS) && (r->zloc != tar->zloc)) {
+		u->Error("CAST: Spell is not able to work across levels.");
+		return 0;
+	}
+
+	int maxdist;
+	switch(range->rangeClass) {
 		default:
-		case RANGE_ABSOLUTE:
-			range = 1;
+		case RangeType::RNG_ABSOLUTE:
+			maxdist = 1;
 			break;
-		case RANGE_LEVEL:
-			range = level;
+		case RangeType::RNG_LEVEL:
+			maxdist = level;
 			break;
-		case RANGE_LEVEL2:
-			range = level * level;
+		case RangeType::RNG_LEVEL2:
+			maxdist = level * level;
 			break;
-		case RANGE_LEVEL3:
-			range = level * level * level;
+		case RangeType::RNG_LEVEL3:
+			maxdist = level * level * level;
 			break;
 	}
-	range *= rangemult;
+	maxdist *= range->rangeMult;
 
 	int dist;
-	if(Globals->EASIER_UNDERWORLD)
-		dist = regions.GetPlanarDistance(tar, r);
+	if(range->flags & RangeType::RNG_CROSS_LEVELS)
+		dist = regions.GetPlanarDistance(tar, r, range->crossLevelPenalty);
 	else
 		dist = regions.GetDistance(tar, r);
-	if(dist > range) {
+	if(dist > maxdist) {
 		u->Error("CAST: Target region out of range.");
 		return 0;
 	}
@@ -1320,10 +1293,10 @@ void Game::RunClearSkies(ARegion *r, Unit *u)
 
 	CastRegionOrder *order = (CastRegionOrder *)u->castorders;
 
-	if(Globals->CLEAR_SKIES_REGION) {
+	val = SkillDefs[S_CLEAR_SKIES].rangeIndex;
+	if(val != -1) {
 		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-		val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES, 2, RANGE_LEVEL2,
-				0, 1, 0);
+		val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES);
 		if(!val) return;
 		temp += " on ";
 		temp += tar->ShortPrint(&regions);
@@ -1343,8 +1316,7 @@ void Game::RunWeatherLore(ARegion *r, Unit *u)
 	CastRegionOrder *order = (CastRegionOrder *)u->castorders;
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_WEATHER_LORE, 4, RANGE_LEVEL2, 0, 1,
-			Globals->EASIER_UNDERWORLD);
+	val = GetRegionInRange(r, tar, u, S_WEATHER_LORE);
 	if(!val) return;
 
 	int level = u->GetSkill(S_WEATHER_LORE);
@@ -1381,8 +1353,7 @@ void Game::RunFarsight(ARegion *r,Unit *u)
 	CastRegionOrder *order = (CastRegionOrder *)u->castorders;
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_FARSIGHT, 4, RANGE_LEVEL2, 0, 1,
-			Globals->EASIER_UNDERWORLD);
+	val = GetRegionInRange(r, tar, u, S_FARSIGHT);
 	if(!val) return;
 
 	Farsight *f = new Farsight;
@@ -1433,8 +1404,7 @@ void Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	CastRegionOrder *order = (CastRegionOrder *)u->teleportorders;
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_TELEPORTATION, 2, RANGE_LEVEL2, 0, 1,
-			Globals->EASIER_UNDERWORLD);
+	val = GetRegionInRange(r, tar, u, S_TELEPORTATION);
 	if(!val) return;
 
 	int level = u->GetSkill(S_TELEPORTATION);

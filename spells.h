@@ -28,15 +28,6 @@
 // class in game.h
 //
 
-
-// Range classes
-enum {
-	RANGE_ABSOLUTE = 0,	// Range not based on skill
-	RANGE_LEVEL,		// Range based on skill
-	RANGE_LEVEL2,		// Range based on level squared
-	RANGE_LEVEL3,		// Range based on level cubed
-};
-
 //
 // Spell parsing - generic
 //
@@ -54,12 +45,12 @@ void ProcessPhanDemons(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessInvisibility(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessBirdLore(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessMindReading(Unit *,AString *, OrdersCheck *pCheck );
+void ProcessLacandonTeleport(Unit *, AString *, OrdersCheck *pCheck);
 
 //
 // Spell helpers
 //
-int GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell,
-		int rangemult, int rangeclass, int nexus, int surface, int underworld);
+int GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell);
 
 //
 // Spell running
@@ -68,6 +59,7 @@ void RunDetectGates(ARegion *,Object *,Unit *);
 void RunFarsight(ARegion *,Unit *);
 void RunGateJump(ARegion *,Object *,Unit *);
 void RunTeleport(ARegion *,Object *,Unit *);
+void RunLacandonTeleport(ARegion *, Object *, Unit *);
 void RunPortalLore(ARegion *,Object *,Unit *);
 void RunEarthLore(ARegion *,Unit *);
 void RunWeatherLore(ARegion *, Unit *);

@@ -46,6 +46,8 @@ AString *ShowSkill::Report(Faction *f)
 	if(SkillDefs[skill].flags & SkillType::DISABLED) return NULL;
 
 	AString *str = new AString;
+	int val;
+	RangeType *range = NULL;
 
 	// Here we pick apart the skill
 	switch (skill) {
@@ -307,48 +309,91 @@ AString *ShowSkill::Report(Faction *f)
 				"both mages (the caster, and the target mage) must have "
 				"Portals, and the caster must be trained in Portal Lore. The "
 				"caster may teleport units weighing up to 50 weight units "
-				"times his skill level, to the target mage's region, provided "
-				"the target region is no farther than 2 times the caster's "
-				"skill level squared regions away. To use this skill, CAST "
-				"Portal_Lore <target> UNITS <unit> ..., where <target> is the "
-				"unit number of the target mage, and <unit> is a list of "
-				"units to be teleported (the casting mage may teleport "
-				"himself, if he so desires).";
+				"times his skill level, to the target mage's region. ";
+			val = SkillDefs[skill].rangeIndex;
+			if(val != -1) range = &RangeDefs[val];
+			if(range) {
+				*str += " The target region must be within ";
+				*str += range->rangeMult;
+				switch(range->rangeClass) {
+					case RangeType::RNG_LEVEL:
+						*str += " times the caster's skill level ";
+						break;
+					case RangeType::RNG_LEVEL2:
+						*str += " times the caster's skill level squared ";
+						break;
+					case RangeType::RNG_LEVEL3:
+						*str += " times the caster's skill level cubed ";
+						break;
+					default:
+					case RangeType::RNG_ABSOLUTE:
+						break;
+				}
+				*str += "regions of the caster. ";
+			}
+			*str += "To use this skill, CAST Portal_Lore <target> UNITS "
+				"<unit> ..., where <target> is the unit number of the "
+				"target mage, and <unit> is a list of units to be "
+				"teleported (the casting mage may teleport himself, if "
+				"he so desires).";
 			break;
 		case S_FARSIGHT:
 			if(level > 1) break;
-			/* XXX -- This should be cleaner somehow. */
 			*str += "A mage with this skill may obtain region reports on "
 				"distant regions. The report will be as if the mage was in "
 				"the distant region himself.";
-			if(!Globals->EASIER_UNDERWORLD) {
-				*str += " This skill only works on the surface of the world.";
-			}
-			*str += " The mage may view regions that are within the mage's "
-				"skill level squared times 4 regions of the mage's current "
-				"location.";
-			if(Globals->EASIER_UNDERWORLD) {
-				*str += " Coordinates of locations not on the surface are "
-					"doubled for this calculation. Attempting to view across "
-					"different levels increases the distance by 4.";
-				*str += " To use this skill, CAST Farsight REGION <x> <y> <z> "
-					"where <x>, <y>, and <z> are the coordinates of the "
-					"region that you wish to view. If you omit the <z> "
-					"coordinate, the <z> coordinate of the caster's current "
-					"region will be used.";
-				if(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS == 1) {
-					*str += " The <z> coordinate for the surface is '1' and "
-						"the <z>-coordinate for the underworld is '2'.";
+			val = SkillDefs[skill].rangeIndex;
+			if(val != -1) range = &RangeDefs[val];
+			if(range) {
+				if(range->flags & RangeType::RNG_SURFACE_ONLY) {
+					*str += " This skill only works on the surface of the "
+						"world.";
 				}
-				*str += " Note that Farsight cannot be used either into or "
-					"out of the Nexus.";
-			} else {
-				*str += " To use this skill, CAST Farsight REGION <x> <y>, "
-					"where <x> and <y> are the coordinates of the region "
-					"that you wish to view.";
+				*str += " The target region must be within ";
+				*str += range->rangeMult;
+				switch(range->rangeClass) {
+					case RangeType::RNG_LEVEL:
+						*str += " times the caster's skill level ";
+						break;
+					case RangeType::RNG_LEVEL2:
+						*str += " times the caster's skill level squared ";
+						break;
+					case RangeType::RNG_LEVEL3:
+						*str += " times the caster's skill level cubed ";
+						break;
+					default:
+					case RangeType::RNG_ABSOLUTE:
+						break;
+				}
+				*str += "regions of the caster. ";
+				if(range->flags & RangeType::RNG_CROSS_LEVELS) {
+					*str += "Coordinates of locations not on the surface are "
+						"scaled to the surface coordinates for this "
+						"calculation. Attempting to view across different "
+						"levels increases the distance by ";
+					*str += range->crossLevelPenalty;
+					*str += ". ";
+					*str += "To use this skill, CAST Farsight REGION <x> <y> "
+						"<z> where <x>, <y>, and <z> are the coordinates of "
+						"the region that you wish to view. If you omit the "
+						"<z> coordinate, the <z> coordinate of the caster's "
+						"current region will be used.";
+					if(Globals->UNDERWORLD_LEVELS +
+							Globals->UNDERDEEP_LEVELS == 1) {
+						*str += " The <z> coordinate for the surface is '1' "
+							"and the <z>-coordinate for the underworld is "
+							"'2'.";
+					}
+					*str += " Note that Farsight cannot be used either into "
+						"or out of the Nexus.";
+				} else {
+					*str += "To use this skill, CAST Farsight REGION <x> "
+						"<y>, where <x> and <y> are the coordinates of the "
+						"region that you wish to view.";
+				}
 			}
 			if(Globals->IMPROVED_FARSIGHT) {
-				*str += " An other skills which the mage has which give "
+				*str += " Any other skills which the mage has which give "
 					"region information will be used when farsight is used.";
 			} else {
 				*str += " Note that Farsight does not work in conjunction "
@@ -379,32 +424,58 @@ AString *ShowSkill::Report(Faction *f)
 			if(level > 1) break;
 			/* XXX -- This should be cleaner somehow. */
 			*str += "A mage with this skill may teleport himself across"
-				"great distances, even without the use of a gate.";
-			if(!Globals->EASIER_UNDERWORLD) {
-				*str += " This skill may only be used on the surface.";
-			}
-			*str += " The mage may teleport up to 15 weight units per skill "
-				"level to any region that is within the mage's skill level "
-				"squared times 2 regions of the mage's current location.";
-			if(Globals->EASIER_UNDERWORLD) {
-				*str += " Coordinates in the underworld are doubled for this "
-					"calculation. Attempting to teleport across different "
-					"levels	increases the distance by 4.";
-				*str += " To use this skill, CAST Teleportation REGION <x> "
-					"<y> <z>, where <x>, <y> and <z> are the coordinates of "
-					"the region that you wish to teleport to. If you omit "
-					"the <z> coordinate the <z> coordinate of the caster's "
-					"current region will be used.";
-			   if(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS==1) {
-				   *str += " The <z> coordinate for the surface is '1' and "
-					   "the <z>-coordinate for the underworld is '2'.";
-			   }
-			   *str += "Note that the Teleportation skill will not work in "
-				   "or out of the Nexus.";
-			} else {
-				*str += " The syntax to use this skill is CAST Teleportation "
-					"REGION <x> <y>. <x> and <y> are the coordinates of the "
-					"region to teleport to.";
+				"great distances, even without the use of a gate. The mage "
+				"may teleport up to 15 weight units per skill level.";
+			val = SkillDefs[skill].rangeIndex;
+			if(val != -1) range = &RangeDefs[val];
+			if(range) {
+				if(range->flags & RangeType::RNG_SURFACE_ONLY) {
+					*str += " This skill only works on the surface of the "
+						"world.";
+				}
+				*str += " The target region must be within ";
+				*str += range->rangeMult;
+				switch(range->rangeClass) {
+					case RangeType::RNG_LEVEL:
+						*str += " times the caster's skill level ";
+						break;
+					case RangeType::RNG_LEVEL2:
+						*str += " times the caster's skill level squared ";
+						break;
+					case RangeType::RNG_LEVEL3:
+						*str += " times the caster's skill level cubed ";
+						break;
+					default:
+					case RangeType::RNG_ABSOLUTE:
+						break;
+				}
+				*str += "regions of the caster. ";
+				if(range->flags & RangeType::RNG_CROSS_LEVELS) {
+					*str += "Coordinates of locations not on the surface are "
+						"scaled to the surface coordinates for this "
+						"calculation. Attempting to view across different "
+						"levels increases the distance by ";
+					*str += range->crossLevelPenalty;
+					*str += ". ";
+					*str += "To use this skill, CAST Teleportation REGION "
+						"<x> <y> <z> where <x>, <y>, and <z> are the "
+						"coordinates of the region that you wish to "
+						"teleport to. If you omit the <z> coordinate, the "
+						"<z> coordinate of the caster's current region will "
+						"be used.";
+					if(Globals->UNDERWORLD_LEVELS +
+							Globals->UNDERDEEP_LEVELS == 1) {
+						*str += " The <z> coordinate for the surface is '1' "
+							"and the <z>-coordinate for the underworld is "
+							"'2'.";
+					}
+					*str += " Note that Teleportation cannot be used either "
+						"into or out of the Nexus.";
+				} else {
+					*str += "To use this skill, CAST Teleportation REGION "
+						"<x> <y>, where <x> and <y> are the coordinates of "
+						"the region that you wish to teleport to.";
+				}
 			}
 			break;
 		case S_WEATHER_LORE:
@@ -413,37 +484,61 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "Weather Lore is the magic of the weather; a mage with "
 				"this skill can predict the weather in nearby regions. "
 				"Weather Lore also allows further study into more powerful "
-				"areas of magic. ";
-			if(!Globals->EASIER_UNDERWORLD)
-				*str += "This skill only works on the surface of the world. ";
-			*str += "The mage may predice the weather in regions that are "
-				"within the mage's skill level squared time 4 regions of "
-				"mage's current location. The weather may be predicted for "
-				"3 month at level 1, 6 months at level 3, and a full year "
-				"at level 5.";
-			if(Globals->EASIER_UNDERWORLD) {
-				*str += "Coordinates of locations not on the surface are "
-					"doubled for this calculation. Attempting to view across "
-					"different levels increases the distance by 4.";
-				*str += " To use this skill, CAST Weather_Lore REGION <x> "
-					"<y> <z> where <x>, <y>, and <z> are the coordinates of "
-					"the region that you wish to view. If you omit the <z> "
-					"coordinate, the <z> coordinate of the caster's current "
-					"region will be used. If you omit the REGION entirely, "
-					"then the caster's current position is used.";
-				if(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS == 1) {
-					*str += " The <z> coordinate for the surface is '1' and "
-						"the <z>-coordinate for the underworld is '2'.";
+				"areas of magic. The weather may be predicted for 3 months "
+				"at level 1, 6 months at level 3 and a full year at level "
+				"5.";
+			val = SkillDefs[skill].rangeIndex;
+			if(val != -1) range = &RangeDefs[val];
+			if(range) {
+				if(range->flags & RangeType::RNG_SURFACE_ONLY) {
+					*str += " This skill only works on the surface of the "
+						"world.";
 				}
-				*str += " Note that Weather Lore cannot be used either into "
-					"or out of the Nexus.";
-			} else {
-				*str += " To use this skill, CAST Weather_Lore REGION <x> "
-					"<y>, where <x> and <y> are the coordinates of the "
-					"region that you wish to view. If you omit the REGION "
-					"entirely, then the caster's current position is used.";
+				*str += " The target region must be within ";
+				*str += range->rangeMult;
+				switch(range->rangeClass) {
+					case RangeType::RNG_LEVEL:
+						*str += " times the caster's skill level ";
+						break;
+					case RangeType::RNG_LEVEL2:
+						*str += " times the caster's skill level squared ";
+						break;
+					case RangeType::RNG_LEVEL3:
+						*str += " times the caster's skill level cubed ";
+						break;
+					default:
+					case RangeType::RNG_ABSOLUTE:
+						break;
+				}
+				*str += "regions of the caster. ";
+				if(range->flags & RangeType::RNG_CROSS_LEVELS) {
+					*str += "Coordinates of locations not on the surface are "
+						"scaled to the surface coordinates for this "
+						"calculation. Attempting to view across different "
+						"levels increases the distance by ";
+					*str += range->crossLevelPenalty;
+					*str += ". ";
+					*str += "To use this skill, CAST Weather_Lore REGION "
+						"<x> <y> <z> where <x>, <y>, and <z> are the "
+						"coordinates of the region where you wish to "
+						"predict the weather. If you omit the <z> "
+						"coordinate, the <z> coordinate of the caster's "
+						"current region will be used.";
+					if(Globals->UNDERWORLD_LEVELS +
+							Globals->UNDERDEEP_LEVELS == 1) {
+						*str += " The <z> coordinate for the surface is '1' "
+							"and the <z>-coordinate for the underworld is "
+							"'2'.";
+					}
+					*str += " Note that Weather Lore cannot be used either "
+						"into or out of the Nexus.";
+				} else {
+					*str += "To use this skill, CAST Weather_Lore REGION "
+						"<x> <y>, where <x> and <y> are the coordinates of "
+						"the region where you wish to predict the weather.";
+				}
 			}
-			*str += "A mage with Weather Lore skill will perceive the use "
+			*str += " A mage with Weather Lore skill will perceive the use "
 				"of Weather Lore by any other mage in the same region.";
 			break;
 		case S_SUMMON_WIND:
@@ -488,13 +583,58 @@ AString *ShowSkill::Report(Faction *f)
 				"production of the region is improved for a month (this "
 				"improvement of the economy will actually take effect during "
 				"the turn after the spell is cast).";
-			if(Globals->CLEAR_SKIES_REGION) {
-				*str += " Clear Skies has a range of twice the mage's skill "
-					"level squared.  To use the spell in this fashion, CAST "
-					"Clear_Skies REGION <x> <y>.  If the REGION is omitted, "
-					"then the caster's current position is used.";
+			val = SkillDefs[skill].rangeIndex;
+			if(val != -1) range = &RangeDefs[val];
+			if(range) {
+				if(range->flags & RangeType::RNG_SURFACE_ONLY) {
+					*str += " This skill only works on the surface of the "
+						"world.";
+				}
+				*str += " The target region must be within ";
+				*str += range->rangeMult;
+				switch(range->rangeClass) {
+					case RangeType::RNG_LEVEL:
+						*str += " times the caster's skill level ";
+						break;
+					case RangeType::RNG_LEVEL2:
+						*str += " times the caster's skill level squared ";
+						break;
+					case RangeType::RNG_LEVEL3:
+						*str += " times the caster's skill level cubed ";
+						break;
+					default:
+					case RangeType::RNG_ABSOLUTE:
+						break;
+				}
+				*str += "regions of the caster. ";
+				if(range->flags & RangeType::RNG_CROSS_LEVELS) {
+					*str += "Coordinates of locations not on the surface are "
+						"scaled to the surface coordinates for this "
+						"calculation. Attempting to view across different "
+						"levels increases the distance by ";
+					*str += range->crossLevelPenalty;
+					*str += ". ";
+					*str += "To use this skill, CAST Clear_Skies REGION "
+						"<x> <y> <z> where <x>, <y>, and <z> are the "
+						"coordinates of the region where you wish to "
+						"improve the weather. If you omit the <z> "
+						"coordinate, the <z> coordinate of the caster's "
+						"current region will be used.";
+					if(Globals->UNDERWORLD_LEVELS +
+							Globals->UNDERDEEP_LEVELS == 1) {
+						*str += " The <z> coordinate for the surface is '1' "
+							"and the <z>-coordinate for the underworld is "
+							"'2'.";
+					}
+					*str += " Note that Clear Skies cannot be used either "
+						"into or out of the Nexus.";
+				} else {
+					*str += "To use this skill, CAST Clear_Skies REGION "
+						"<x> <y>, where <x> and <y> are the coordinates of "
+						"the region where you wish to improve the weather.";
+				}
 			} else {
-				*str += " To use the spell in tihs fashion, CAST "
+				*str += " To use the spell in this fashion, CAST "
 					"Clear_Skies; no arguments are necessary.";
 			}
 			break;

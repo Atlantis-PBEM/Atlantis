@@ -407,9 +407,6 @@ public:
 	// Set to 1 if CAST GATE DETECT shows the actual gate numbers.
 	int DETECT_GATE_NUMBERS;
 
-	// Set to 1 if Clear Skies can be cast at range.
-	int CLEAR_SKIES_REGION;
-
 	// Should army routes be basd on the number of hits lost rather than the
 	// number of figures lost.
 	enum {

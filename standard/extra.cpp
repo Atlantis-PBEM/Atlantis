@@ -150,5 +150,13 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_GEMCUTTING);
 	}
 
+    // Modify the various spells which are allowed to cross levels
+	if(Globals->EASIER_UNDERWORLD) {
+		ModifyRangeFlags(RANGE_TELEPORT, RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags(RANGE_FARSIGHT, RangeType::RNG_CROSS_LEVELS);
+        ModifyRangeFlags(RANGE_CLEAR_SKIES, RangeType::RNG_CROSS_LEVELS);
+        ModifyRangeFlags(RANGE_WEATHER_LORE, RangeType::RNG_CROSS_LEVELS);
+	}
+
 	return;
 }

@@ -184,6 +184,7 @@ private:
 	void ModifySkillFlags(int sk, int flags);
 	void ModifySkillCost(int sk, int cost);
 	void ModifySkillSpecial(int sk, int special);
+	void ModifySkillRange(int sk, int range);
 
 	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
@@ -261,6 +262,11 @@ private:
 	void ModifyEffectAttackMod(int effect, int val);
 	void ModifyEffectDefenseMod(int effect, int index, int type, int val);
 	void ModifyEffectCancelEffect(int effect, int uneffect);
+
+	void ModifyRangeFlags(int range, int flags);
+	void ModifyRangeClass(int range, int rclass);
+	void ModifyRangeMultiplier(int range, int mult);
+	void ModifyRangeLevelPenalty(int range, int pen);
 
     AList factions;
     AList newfactions; /* List of strings */

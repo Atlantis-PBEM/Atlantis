@@ -336,7 +336,7 @@ class ARegionList : public AList
 
 		ARegion *FindGate(int);
 		int GetDistance(ARegion *,ARegion *);
-		int GetPlanarDistance(ARegion *,ARegion *);
+		int GetPlanarDistance(ARegion *,ARegion *, int penalty);
 		int GetWeather(ARegion *pReg, int month);
 
 		ARegionArray *GetRegionArray(int level);
@@ -351,19 +351,21 @@ class ARegionList : public AList
 		//
 		void CreateLevels(int numLevels);
 		void CreateAbyssLevel(int level, char *name);
-    void CreateNexusLevel(int level, int xSize, int ySize, char *name);
-	void CreateSurfaceLevel(int level, int xSize, int ySize, int percentOcean,
-			int continentSize, char *name);
-	void CreateIslandLevel(int level, int nPlayers, char *name);
-	void CreateUnderworldLevel(int level, int xSize, int ySize, char *name);
-    void CreateUnderdeepLevel(int level, int xSize, int ySize, char *name);
+		void CreateNexusLevel(int level, int xSize, int ySize, char *name);
+		void CreateSurfaceLevel(int level, int xSize, int ySize,
+				int percentOcean, int continentSize, char *name);
+		void CreateIslandLevel(int level, int nPlayers, char *name);
+		void CreateUnderworldLevel(int level, int xSize, int ySize, char *name);
+		void CreateUnderdeepLevel(int level, int xSize, int ySize, char *name);
 
-	void MakeShaftLinks(int levelFrom, int levelTo, int odds);
-	void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);
-	void InitSetupGates(int level);
-	void FinalSetupGates();
+		void MakeShaftLinks(int levelFrom, int levelTo, int odds);
+		void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);
+		void InitSetupGates(int level);
+		void FinalSetupGates();
 
-	void CalcDensities();
+		void CalcDensities();
+		int GetLevelXScale(int level);
+		int GetLevelYScale(int level);
 
 	private:
 		//
@@ -394,5 +396,6 @@ class ARegionList : public AList
 		//
 		int GetRegType(ARegion *pReg);
 		int CheckRegionExit(ARegion *pFrom, ARegion *pTo);
+
 };
 #endif

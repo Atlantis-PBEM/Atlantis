@@ -72,6 +72,11 @@ void Game::ModifySkillSpecial(int sk, int special)
 	SkillDefs[sk].special = special;
 }
 
+void Game::ModifySkillRange(int sk, int range)
+{
+	if(sk < 0 || sk > (NSKILLS-1)) return;
+	SkillDefs[sk].rangeIndex = range;
+}
 
 void Game::EnableItem(int item)
 {
@@ -468,7 +473,6 @@ void Game::ClearTerrainItems(int terrain)
 		TerrainDefs[terrain].prods[c].chance = 0;
 		TerrainDefs[terrain].prods[c].amount = 0;
 	}
-		
 }
 
 void Game::ModifyTerrainItems(int terrain, int i, int p, int c, int a)
@@ -620,7 +624,6 @@ void Game::ModifyEffectAttackMod(int effect, int val)
 {
 	if(effect < 0 || effect > (NUMEFFECTS-1)) return;
 	EffectDefs[effect].attackVal = val;
-	
 }
 
 void Game::ModifyEffectDefenseMod(int effect, int index, int type, int val)
@@ -637,4 +640,31 @@ void Game::ModifyEffectCancelEffect(int effect, int uneffect)
 	if(effect < 0 || effect > (NUMEFFECTS-1)) return;
 	if(uneffect < 0 || uneffect > (NUMEFFECTS-1)) return;
 	EffectDefs[effect].cancelEffect = uneffect;
+}
+
+void Game::ModifyRangeFlags(int range, int flags)
+{
+	if(range < 0 || range > (NUMRANGES-1)) return;
+	RangeDefs[range].flags = flags;
+}
+
+void Game::ModifyRangeClass(int range, int rclass)
+{
+	if(range < 0 || range > (NUMRANGES-1)) return;
+	if(rclass < 0 || rclass > (RangeType::NUMRANGECLASSES-1)) return;
+	RangeDefs[range].rangeClass = rclass;
+}
+
+void Game::ModifyRangeMultiplier(int range, int mult)
+{
+	if(range < 0 || range > (NUMRANGES-1)) return;
+	if(mult < 1) return;
+	RangeDefs[range].rangeMult = mult;
+}
+
+void Game::ModifyRangeLevelPenalty(int range, int pen)
+{
+	if(range < 0 || range > (NUMRANGES-1)) return;
+	if(pen < 0) return;
+	RangeDefs[range].crossLevelPenalty = pen;
 }

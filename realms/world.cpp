@@ -2051,7 +2051,7 @@ void SetupNames()
 {
     nnames = sizeof regionnames / sizeof (char *);
     nameused = new int[nnames];
-    
+
     for (int i=0; i<nnames; i++) nameused[i] = 0;
 	ntowns = 0;
 	nregions = 0;
@@ -2111,7 +2111,7 @@ void Game::CreateWorld()
 		}
 	} else {
 		nx = 1;
-	} 
+	}
 
     int xx = 0;
     while (xx <= 0) {
@@ -2140,36 +2140,19 @@ void Game::CreateWorld()
     regions.CreateNexusLevel( 0, nx, ny, "nexus" );
     regions.CreateSurfaceLevel( 1, xx, yy, 60, 16, 0 );
 
-	if(Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS==0) {
-		// Make the defaults act traditionally.
-		regions.CreateUnderworldLevel( 2, xx / 2, yy / 2, "underworld" );
-	} else {
-		int i;
-		// Underworld levels
-		for(i = 2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
-			if(i == 2) {
-				// Topmost level is larger
-				regions.CreateUnderworldLevel(i, xx, yy/2, "underworld");
-			} else if(i == Globals->UNDERWORLD_LEVELS+1) {
-				// Lowest level is smaller
-				regions.CreateUnderworldLevel(i, xx/2, yy/4, "underworld");
-			} else {
-				// Rest are standard size
-				regions.CreateUnderworldLevel(i, xx/2, yy/2, "underworld");
-			}
-		}
-		// Underdeep levels
-		for(i=Globals->UNDERWORLD_LEVELS+2;
-				i<(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2);
-				i++) {
-			if(i == Globals->UNDERWORLD_LEVELS+2) {
-				// Topmost one is no larger than bottom underworld
-				regions.CreateUnderdeepLevel(i, xx/2, yy/4, "underdeep");
-			} else {
-				// Rest are smaller
-				regions.CreateUnderdeepLevel(i, xx/4, yy/4, "underdeep");
-			}
-		}
+    // Create underworld levels
+	int i;
+	for(i = 2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+		int xs = regions.GetLevelXScale(i);
+		int ys = regions.GetLevelYScale(i);
+		regions.CreateUnderworldLevel(i, xx/xs, yy/ys, "underworld");
+	}
+	// Underdeep levels
+	for(i=Globals->UNDERWORLD_LEVELS+2;
+			i<(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2); i++) {
+		int xs = regions.GetLevelXScale(i);
+		int ys = regions.GetLevelYScale(i);
+		regions.CreateUnderdeepLevel(i, xx/xs, yy/ys, "underdeep");
 	}
 
 	if(Globals->ABYSS_LEVEL) {
@@ -2242,7 +2225,7 @@ int ARegionList::GetRegType( ARegion *pReg )
     // Figure out the distance from the equator, from 0 to 3.
     //
     int lat = ( pReg->yloc * 8 ) / ( pRegionArrays[ pReg->zloc ]->y );
-    if (lat > 3) 
+    if (lat > 3)
     {
         lat = (7 - lat);
     }
@@ -2329,6 +2312,61 @@ int ARegionList::GetRegType( ARegion *pReg )
     return( R_OCEAN );
 }
 
+int ARegionList::GetLevelXScale(int level)
+{
+	// Surface and nexus are unscaled
+	if(level < 2) return 1;
+
+	// If we only have one underworld level it's 1/2 size
+	if(Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
+		return 2;
+
+	// We have multiple underworld levels
+	if(level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
+		// Topmost underworld level is full size in x direction
+		if(level == 2) return 1;
+		// All other levels are 1/2 size in the x direction
+		return 2;
+	}
+
+	if(level >= Globals->UNDERWORLD_LEVELS+2 &&
+			level < (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2)){
+		// Topmost underdeep level is 1/2 size in the x direction
+		if(level == Globals->UNDERWORLD_LEVELS+2) return 2;
+		// All others are 1/4 size in the x direction
+		return 4;
+	}
+	// We couldn't figure it out, assume not scaled.
+	return 1;
+}
+
+int ARegionList::GetLevelYScale(int level)
+{
+	// Surface and nexus are unscaled
+	if(level < 2) return 1;
+
+	// If we only have one underworld level it's 1/2 size
+	if(Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
+		return 2;
+
+	// We have multiple underworld levels
+	if(level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
+		// Topmost level is 1/2 size in the y direction
+		if(level == 2) return 2;
+		// Bottommost is 1/4 size in the y direction
+		if(level == Globals->UNDERWORLD_LEVELS+1) return 4;
+		// All others are 1/2 size in the y direction
+		return 2;
+	}
+	if(level >= Globals->UNDERWORLD_LEVELS+2 &&
+			level < (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2)){
+		// All underdeep levels are 1/4 size in the y direction.
+		return 4;
+	}
+	// We couldn't figure it out, assume not scaled.
+	return 1;
+}
+
 int ARegionList::CheckRegionExit(ARegion *pFrom, ARegion *pTo )
 {
     if((pFrom->zloc==1) ||
@@ -2376,7 +2414,7 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
 	{
 		return (W_NORMAL);
 	}
-  
+
     int ysize = pRegionArrays[ 1 ]->y;
 
     if ((3*( pReg->yloc+1))/ysize == 0)
@@ -2385,31 +2423,31 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
         if (month > 9 || month < 2)
         {
             return W_WINTER;
-        } 
+        }
         else
         {
             return W_NORMAL;
         }
     }
-  
+
     if ((3*( pReg->yloc+1))/ysize == 1)
     {
         /* Middle third of the world */
         if (month == 11 || month == 0 || month == 5 || month == 6)
         {
             return W_MONSOON;
-        } 
+        }
         else
         {
             return W_NORMAL;
         }
     }
-  
+
     if (month > 3 && month < 8)
     {
         /* Southern third of the world */
         return W_WINTER;
-    } 
+    }
     else
     {
         return W_NORMAL;
@@ -2425,7 +2463,7 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
     int regs = 0;
     AList inlist;
     AList donelist;
-  
+
     ARegionPtr * temp = new ARegionPtr;
     temp->ptr = this;
     inlist.Add(temp);
@@ -2452,7 +2490,7 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
     return 0;
 }
 
-void ARegion::MakeStartingCity() 
+void ARegion::MakeStartingCity()
 {
 	if(!Globals->TOWNS_EXIST) return;
 
@@ -2536,7 +2574,7 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
         int y = 2 * getrandom( maxY / 2 ) + x % 2;
 
         reg = pArr->GetRegion( x, y );
-        
+
         if( !reg->CanBeStartingCity( pArr )) {
             reg = 0;
 			tries++;

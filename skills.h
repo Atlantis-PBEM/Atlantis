@@ -86,6 +86,9 @@ class SkillType
 		//
 		int special;
 
+		// range class for ranged skills (-1 for all others)
+		int rangeIndex;
+
 		SkillDepend depends[3];
 };
 extern SkillType * SkillDefs;
@@ -223,5 +226,30 @@ class EffectType {
 		int flags;
 };
 extern EffectType *EffectDefs;
+
+class RangeType {
+	public:
+		enum {
+			RNG_NEXUS_TARGET = 0x0001,	// Can cast *to* Nexus
+			RNG_NEXUS_SOURCE = 0x0002,	// Can cast *from* Nexus
+			RNG_CROSS_LEVELS = 0x0004,	// Spell can cross levels
+			RNG_SURFACE_ONLY = 0x0008,	// Target region must be on surface
+		};
+		int flags;
+
+		enum {
+			RNG_ABSOLUTE = 0,	// Range is not based on skill
+			RNG_LEVEL,			// Range is based on skill
+			RNG_LEVEL2,			// Range is based on skill level squared
+			RNG_LEVEL3,			// Range is based on skill level cubed
+			NUMRANGECLASSES
+		};
+		int rangeClass;
+
+		int rangeMult;
+
+		int crossLevelPenalty;	// How much extra distance to cross levels?
+};
+extern RangeType *RangeDefs;
 
 #endif

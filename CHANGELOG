@@ -456,3 +456,10 @@ Changes from 4.0.9 -> 4.0.10
       from the total when the figure actually is killed, so in the example
       of 1 mage and 1 dragon, the battle would continue until the dragon
       was dead, regardless of when (or if) the mage was killed.
+   -- Added RangeType setup to make ranges customizable. This should make
+      the Lacandon spells fully implementable.
+   -- The CLEAR_SKIES castable at range stuff is now doable by setting the
+      rangeIndex on S_CLEAR_SKIES to RANGE_CLEAR_SKIES and then modifying
+	  the values for RANGE_CLEAR_SKIES.
+   -- Fixed planar scaling so that all levels were scaled to what they should
+      be, not always *2 for levels other than surface.

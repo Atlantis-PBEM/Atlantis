@@ -2051,7 +2051,7 @@ void SetupNames()
 {
     nnames = sizeof regionnames / sizeof (char *);
     nameused = new int[nnames];
-    
+
     for (int i=0; i<nnames; i++) nameused[i] = 0;
 	ntowns = 0;
 	nregions = 0;
@@ -2178,6 +2178,18 @@ int ARegionList::GetRegType( ARegion *pReg )
 	return( R_OCEAN );
 }
 
+int ARegionList::GetLevelXScale(int level)
+{
+	// All levels are unscaled.
+	return 1;
+}
+
+int ARegionList::GetLevelYScale(int level)
+{
+	// All levels are unscaled.
+	return 1;
+}
+
 int ARegionList::CheckRegionExit(ARegion *pFrom, ARegion *pTo )
 {
 	return( 1 );
@@ -2197,7 +2209,7 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
 	if( xloc >= 8 && yloc >= 8 && xloc < pRA->x - 8 && yloc < pRA->y - 8 ) {
 		return( 0 );
 	}
-	
+
 	//
 	// If the region is not a plain, it cannot be a starting region.
 	//
@@ -2208,7 +2220,7 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
 	return (1);
 }
 
-void ARegion::MakeStartingCity() 
+void ARegion::MakeStartingCity()
 {
 	return;
 }

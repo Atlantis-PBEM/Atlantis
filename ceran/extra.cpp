@@ -696,5 +696,14 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyArmorSaveValue(ARMOR_ADPLATE,CRUSHING,285);
 	ModifyArmorSaveValue(ARMOR_ADPLATE,CLEAVING,240);
 	ModifyArmorSaveValue(ARMOR_ADPLATE,ARMORPIERCING,270);
+
+	// Modify the various spells which are allowed to cross levels
+	if(Globals->EASIER_UNDERWORLD) {
+		ModifyRangeFlags(RANGE_TELEPORT, RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags(RANGE_FARSIGHT, RangeType::RNG_CROSS_LEVELS);
+        ModifyRangeFlags(RANGE_CLEAR_SKIES, RangeType::RNG_CROSS_LEVELS);
+        ModifyRangeFlags(RANGE_WEATHER_LORE, RangeType::RNG_CROSS_LEVELS);
+	}
+
 	return;
 }
