@@ -98,7 +98,7 @@ void Aoutfile::Open(const AString &s)
 		delete name;
 		// Handle a broke ios::ate implementation on some boxes
 		file->seekp(0, ios::end);
-		if(file->tellp()!= 0) file->close();
+		if((int)file->tellp()!= 0) file->close();
 	}
 }
 
@@ -109,7 +109,7 @@ int Aoutfile::OpenByName(const AString &s)
 	if(!file->rdbuf()->is_open()) return -1;
 	// Handle a broke ios::ate implementation on some boxes
 	file->seekp(0, ios::end);
-	if(file->tellp() != 0) {
+	if((int)file->tellp() != 0) {
 		file->close();
 		return -1;
 	}
@@ -240,7 +240,7 @@ void Areport::Open(const AString &s)
         delete name;
 		// Handle a broke ios::ate implementation on some boxes
 		file->seekp(0, ios::end);
-		if(file->tellp()!=0) file->close();
+		if((int)file->tellp()!=0) file->close();
     }
     tabs = 0;
 }
@@ -252,7 +252,7 @@ int Areport::OpenByName(const AString &s)
     if (!file->rdbuf()->is_open()) return -1;
 	// Handle a broke ios::ate implementation on some boxes
 	file->seekp(0, ios::end);
-	if(file->tellp() != 0) {
+	if((int)file->tellp() != 0) {
 		file->close();
 		return -1;
 	}
@@ -312,7 +312,7 @@ void Arules::Open(const AString &s)
         delete name;
 		// Handle a broke ios::ate implementation on some boxes
 		file->seekp(0, ios::end);
-		if(file->tellp()!=0) file->close();
+		if((int)file->tellp()!=0) file->close();
     }
     tabs = 0;
 	wraptab = 0;
@@ -325,7 +325,7 @@ int Arules::OpenByName(const AString &s)
     if (!file->rdbuf()->is_open()) return -1;
 	// Handle a broke ios::ate implementation on some boxes
 	file->seekp(0, ios::end);
-	if(file->tellp() != 0) {
+	if((int)file->tellp() != 0) {
 		file->close();
 		return -1;
 	}
