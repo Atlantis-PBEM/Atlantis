@@ -375,6 +375,7 @@ int Game::UpgradePatchLevel(int savedVersion)
 void Game::CreateVMons()
 {
 	if(Globals->OPEN_ENDED) return;
+	if(Globals->CONQUEST) return;
 
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;

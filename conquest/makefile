@@ -25,7 +25,7 @@ OBJECTS = $(patsubst %.o,obj/%.o,$(RULESET_OBJECTS)) \
   $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) \
   obj/i_rand.o
 
-conquest: $(OBJECTS)
+all: $(OBJECTS)
 	g++ $(CFLAGS) -o conquest $(OBJECTS)
 
 clean:

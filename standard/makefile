@@ -26,7 +26,7 @@ OBJECTS = $(patsubst %.o,obj/%.o,$(RULESET_OBJECTS)) \
   $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) \
   obj/i_rand.o
 
-game31: $(OBJECTS)
+all: $(OBJECTS)
 	g++ $(CFLAGS) -o standard $(OBJECTS)
 
 clean:
