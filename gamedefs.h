@@ -409,6 +409,23 @@ public:
 
 	// Set to 1 if Clear Skies can be cast at range.
 	int CLEAR_SKIES_REGION;
+
+	// Should army routes be basd on the number of hits lost rather than the
+	// number of figures lost.
+	enum {
+		// Default -- rout if half of the total figures die.  All figures are
+		// treated equally.
+		ARMY_ROUT_FIGURES = 0,
+		// Rout if half the total hits die, all hits are counted independantly
+		// This means you could rout even if none of your men are dead but
+		// you have just taken a lot of hits and are getting clobbered
+		ARMY_ROUT_HITS_INDIVIDUAL,
+		// Rout if half of the total hits die, but figures hits only stop
+		// counting toward the total when the figure is fully dead.
+		ARMY_ROUT_HITS_FIGURE,
+	};
+
+	int ARMY_ROUT;
 };
 
 extern GameDefs * Globals;

@@ -141,6 +141,9 @@ class Army
 		int notfront;
 		int notbehind;
 		int count;
+
+		int hitsalive; // current number of "living hits"
+		int hitstotal; // Number of hits at start of battle.
 };
 
 #endif

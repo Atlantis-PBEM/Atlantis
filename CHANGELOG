@@ -409,35 +409,50 @@ Changes from 4.0.9 -> 4.0.10
       RIDINGBONUS and RIDINGBONUSDEFENSE [Implemented by Tom Alsen]
    -- Implemented no spoils from summoned monsters which are released for
       some number of turns.  Added gamedefs of MONSTER_NO_SPOILS (how many
-	  turns a summoned monster has no spoils, -1 for infinity) and
-	  MONSTER_SPOILS_RECOVERY (how many turns after the NO_SPOILS turns
-	  until it is equivalent to a non-summoned monster).  [Implemented
-	  by Tom Alsen, who recommends values of 3 and 9 respectively]
+      turns a summoned monster has no spoils, -1 for infinity) and
+      MONSTER_SPOILS_RECOVERY (how many turns after the NO_SPOILS turns
+      until it is equivalent to a non-summoned monster).  [Implemented
+      by Tom Alsen, who recommends values of 3 and 9 respectively]
    -- Added NUM_ATTACKS_HALF_SKILL.  [Implemented by Tom Alsen, who
       recommends using this for DBOW and RUNE, and NUM_ATTACKS_HALF_SKILL+1
-	  for SBOW].
+      for SBOW].
    -- Added gamedef MAX_ASSASSIN_FREE_ATTACKS. [Implemented by Tom Alsen
       who recommends a value of 2].  If set, this will limit the number of
-	  attacks in the free round off assassination to that value.
+      attacks in the free round off assassination to that value.
    -- Added gamedef RELEASE_MONSTERS. If set, enables 'GIVE 0 <num>
       <monster>' for any monster and will create wandering monsters from
-	  the ones released or ones that are lost control of (this makes dragons
-	  eagles and wolves similar to demons and such if this gamedef is
-	  enabled).  [Implemented by Tom Alsen]
+      the ones released or ones that are lost control of (this makes dragons
+      eagles and wolves similar to demons and such if this gamedef is
+      enabled).  [Implemented by Tom Alsen]
    -- Added gamedef CHECK_MONSTER_CONTROL_MID_TURN to check for demons
       breaking free and zombie decay in mid-turn (before move) rather than
-	  at the end of move.  [Implemented by Tom Alsen].  This makes it
-	  harder to have mages sending in directed balrog missiles [for
-	  instance] if it is set.
+      at the end of move.  [Implemented by Tom Alsen].  This makes it
+      harder to have mages sending in directed balrog missiles [for
+      instance] if it is set.
    -- Added WEATHER_LORE as a castable spell. Use CAST Weather_Lore 
       [REGION <x> <y>] to predict the weather for 3,6 and 12 months at
-	  levels 1,3 and 5 respectively. Range is same as Farsight -
-	  4*level*level. [Implemented by Tom Alsen]
+      levels 1,3 and 5 respectively. Range is same as Farsight -
+      4*level*level. [Implemented by Tom Alsen]
    -- Made spell range checking more generic.  There are now methods for
       pre- and post-processing spell ranges.  Teleport, Farsight and
-	  Weather Lore now use this mechanism [Implemented by Tom Alsen]
+      Weather Lore now use this mechanism [Implemented by Tom Alsen]
    -- Added CLEAR_SKIES_REGION gamedef to allow Clear Skies to be cast as
       a ranged spell at range 2*level*level.  [Implemented by Tom Alsen].
    -- Boats which have only monster/creatures on board will now sink.
       [no more leaving skeleton crews around [pun intended]]
    -- Unit with no physical weapons are assumed to have 'SHORT' weapons.
+   -- Added alternative rout types as suggested and implemented by Karl
+      Castle <kcastle@webzone.net.au>.  The new gamedef which controls
+      this is called ARMY_ROUT.  Default is ARMY_ROUT_FIGURES which behaves
+      identically to what we have now.  Other options are
+      ARMY_ROUT_HITS_INDIVIDUAL and ARMY_ROUT_HITS_FIGURE.  These two are
+      very similar in that they are both based on total hits in a unit.
+      The difference is that ARMY_ROUT_HITS_INDIVIDUAL tracks each hitpoint
+      individually and the army routs if the total damage done is more
+      than 1/2 the total number of hits.  This means (say you have a dragon
+      and a mage (for a total of 51 hits)) that the army will rout if the
+      dragon takes 26 hits even though neither unit might actually have
+      died.  The other option, ARMY_ROUT_HITS_FIGURE only subtracts the hits
+      from the total when the figure actually is killed, so in the example
+      of 1 mage and 1 dragon, the battle would continue until the dragon
+      was dead, regardless of when (or if) the mage was killed.

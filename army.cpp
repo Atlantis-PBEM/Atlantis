@@ -455,101 +455,84 @@ void Soldier::Dead()
 
 Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 {
-    leader = ldr;
-    round = 0;
-    tac = 0;
-    count = 0;
+	leader = ldr;
+	round = 0;
+	tac = 0;
+	count = 0;
+	hitstotal = 0;
 
-    if (ass)
-    {
-        count = 1;
-        ldr->losses = 0;
-    }
-    else
-    {
-        forlist(locs) {
-            Unit * u = ((Location *) elem)->unit;
-            count += u->GetSoldiers();
-            u->losses = 0;
-        }
-    }
+	if (ass) {
+		count = 1;
+		ldr->losses = 0;
+	} else {
+		forlist(locs) {
+			Unit * u = ((Location *) elem)->unit;
+			count += u->GetSoldiers();
+			u->losses = 0;
+		}
+	}
 
-    soldiers = new SoldierPtr[count];
-    int x = 0;
-    int y = count;
-    int tacspell = 0;
+	soldiers = new SoldierPtr[count];
+	int x = 0;
+	int y = count;
+	int tacspell = 0;
 
-    {
-        forlist(locs) {
-            Unit * u = ((Location *) elem)->unit;
-            Object * obj = ((Location *) elem)->obj;
-            int temp = u->GetSkill(S_TACTICS);
-            if (temp > tac) tac = temp;
-            if (ass)
-            {
-                forlist(&u->items) {
-                    Item * it = (Item *) elem;
-                    if (it)
-                    {
-                        if( ItemDefs[ it->type ].type & IT_MAN )
-                        {
-                            soldiers[x++] = new Soldier( u,
-                                                         obj,
-                                                         regtype,
-                                                         it->type,
-                                                         ass );
-                            goto finished_army;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                Item *it = (Item *) u->items.First();
-                do
-                {
-                    if( IsSoldier( it->type ) )
-                    {
-                        for( int i = 0; i < it->num; i++ )
-                        {
-                            if( ItemDefs[ it->type ].type & IT_MAN &&
-                                u->GetFlag( FLAG_BEHIND ) )
-                            {
-                                soldiers[--y] = new Soldier( u,
-                                                             obj,
-                                                             regtype,
-                                                             it->type );
-                            }
-                            else
-                            {
-                                soldiers[x++] = new Soldier( u,
-                                                             obj,
-                                                             regtype,
-                                                             it->type);
-                            }
-                        }
-                    }
-
-                    it = (Item *) u->items.Next( it );
-                }
-                while( it );
-            }
-        }
-    }
+	forlist(locs) {
+		Unit * u = ((Location *) elem)->unit;
+		Object * obj = ((Location *) elem)->obj;
+		int temp = u->GetSkill(S_TACTICS);
+		if (temp > tac) tac = temp;
+		if (ass) {
+			forlist(&u->items) {
+				Item * it = (Item *) elem;
+				if (it) {
+					if(ItemDefs[ it->type ].type & IT_MAN) {
+                            soldiers[x] = new Soldier(u, obj, regtype,
+									it->type, ass);
+							hitstotal = soldiers[x]->hits;
+							++x;
+							goto finished_army;
+					}
+				}
+			}
+		} else {
+			Item *it = (Item *) u->items.First();
+			do {
+				if(IsSoldier(it->type)) {
+					for(int i = 0; i < it->num; i++) {
+						if((ItemDefs[ it->type ].type & IT_MAN) &&
+								u->GetFlag(FLAG_BEHIND)) {
+							--y;
+							soldiers[y] = new Soldier(u, obj, regtype,
+									it->type);
+							hitstotal += soldiers[y]->hits;
+						} else {
+							soldiers[x] = new Soldier(u, obj, regtype,
+									it->type);
+							hitstotal += soldiers[x]->hits;
+							++x;
+						}
+					}
+				}
+				it = (Item *) u->items.Next( it );
+			} while( it );
+		}
+	}
 
 finished_army:
-    tac = tac + tacspell;
+	tac = tac + tacspell;
 
-    canfront = x;
-    canbehind = count;
-    notfront = count;
-    notbehind = count;
+	canfront = x;
+	canbehind = count;
+	notfront = count;
+	notbehind = count;
 
-    if (!NumFront())
-    {
-        canfront = canbehind;
-        notfront = notbehind;
-    }
+	hitsalive = hitstotal;
+
+	if (!NumFront()) {
+		canfront = canbehind;
+		notfront = notbehind;
+	}
 }
 
 Army::~Army()
@@ -836,8 +819,12 @@ void Army::Win(Battle * b,ItemList * spoils)
 
 int Army::Broken()
 {
-	if ((NumAlive() * 2 / count) >= 1) return 0;
-	return 1;
+	if(Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_FIGURES) {
+		if((NumAlive() << 1) < count) return 1;
+	} else {
+		if((hitsalive << 1) < hitstotal) return 1;
+	}
+	return 0;
 }
 
 int Army::NumSpoilers()
@@ -1092,39 +1079,47 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 
 void Army::Kill(int killed)
 {
-    Soldier * temp = soldiers[killed];
+	Soldier *temp = soldiers[killed];
 
-    if (temp->amuletofi) return;
+	if (temp->amuletofi) return;
 
-    temp->hits--;
-    if (temp->hits) return;
-    temp->unit->losses++;
+	if(Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_INDIVIDUAL)
+		hitsalive--;
+	temp->hits--;
+	if(temp->hits > 0) return;
+	temp->unit->losses++;
+	if(Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_FIGURE) {
+		if(ItemDefs[temp->race].type & IT_MONSTER) {
+			hitsalive -= MonDefs[ItemDefs[temp->race].index].hits;
+		} else {
+			// Assume everything that is a solder and isn't a monster is a
+			// man.
+			hitsalive--;
+		}
+	}
 
-    if (killed < canfront)
-    {
-        soldiers[killed] = soldiers[canfront-1];
-        soldiers[canfront-1] = temp;
-        killed = canfront - 1;
-        canfront--;
-    }
+	if (killed < canfront) {
+		soldiers[killed] = soldiers[canfront-1];
+		soldiers[canfront-1] = temp;
+		killed = canfront - 1;
+		canfront--;
+	}
 
-    if (killed < canbehind)
-    {
-        soldiers[killed] = soldiers[canbehind-1];
-        soldiers[canbehind-1] = temp;
-        killed = canbehind-1;
-        canbehind--;
-    }
+	if (killed < canbehind) {
+		soldiers[killed] = soldiers[canbehind-1];
+		soldiers[canbehind-1] = temp;
+		killed = canbehind-1;
+		canbehind--;
+	}
 
-    if (killed < notfront)
-    {
-        soldiers[killed] = soldiers[notfront-1];
-        soldiers[notfront-1] = temp;
-        killed = notfront-1;
-        notfront--;
-    }
+	if (killed < notfront) {
+		soldiers[killed] = soldiers[notfront-1];
+		soldiers[notfront-1] = temp;
+		killed = notfront-1;
+		notfront--;
+	}
 
-    soldiers[killed] = soldiers[notbehind-1];
-    soldiers[notbehind-1] = temp;
-    notbehind--;
+	soldiers[killed] = soldiers[notbehind-1];
+	soldiers[notbehind-1] = temp;
+	notbehind--;
 }

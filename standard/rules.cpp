@@ -160,6 +160,7 @@ static GameDefs g = {
     0,  // CHECK_MONSTER_CONTROL_MID_TURN
     0,  // DETECT_GATE_NUMBERS
     0,  // CLEAR_SKIES_REGION
+	GameDefs::ARMY_ROUT_FIGURES,  // ARMY_ROUT
 };
 
 GameDefs * Globals = &g;
