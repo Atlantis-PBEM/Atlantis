@@ -59,10 +59,18 @@ void doneIO()
 
 int getrandom(int range)
 {
+	int neg = (range < 0) ? 1 : 0;
+	int ret = 0;
+
     if (!range) return 0;
+	if (neg) range = -range;
+
     unsigned long i = isaac_rand( &isaac_ctx );
     i = i % range;
-    return (int) i;
+
+	if (neg) ret = (int)(i * -1);
+	else ret = (int)i;
+    return ret;
 }
 
 void seedrandom(int num)

@@ -956,24 +956,24 @@ void Game::Do1PromoteOrder(Object *obj, Unit *u)
 void Game::Do1EvictOrder(Object *obj, Unit *u)
 {
 	EvictOrder *ord = u->evictorders;
+	Object *to = obj->region->GetDummy();
 
 	while (ord && ord->targets.Num()) {
 		UnitId *id = (UnitId *)ord->targets.First();
 		ord->targets.Remove(id);
 		Unit *tar = obj->GetUnitId(id, u->faction->num);
 		delete id;
+		if (!tar) continue;
+
 		if(obj->IsBoat() &&
-			(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
-			(!tar->CanReallySwim() || tar->GetFlag(FLAG_NOCROSS_WATER))) {
+				(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
+				(!tar->CanReallySwim() || tar->GetFlag(FLAG_NOCROSS_WATER))) {
 			u->Error("EVICT: Cannot forcibly evict units over ocean.");
 			continue;
 		}
-		Object *to = obj->region->GetDummy();
 		tar->MoveUnit(to);
-		tar->Event(AString("Evicted from ") + *obj->name + " by " +
-				*u->name);
-		u->Event(AString("Evicted ") + *tar->name + " from " +
-				*obj->name);
+		tar->Event(AString("Evicted from ") + *obj->name + " by " + *u->name);
+		u->Event(AString("Evicted ") + *tar->name + " from " + *obj->name);
 	}
 }
 
