@@ -38,8 +38,8 @@ int Game::SetupFaction( Faction *pFac )
 
 	// Lets see if there is an available regions for this unit
 	ARegion *pReg = 0;
-	if(pFac->pStartingLoc) {
-		pReg = pFac->pStartingLoc;
+	if(pFac->pStartLoc) {
+		pReg = pFac->pStartLoc;
 	} else {
 		forlist(&regions) {
 			pReg = (ARegion *)elem;
