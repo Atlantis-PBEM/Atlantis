@@ -136,6 +136,7 @@ ARegion::~ARegion()
 {
 	if (name) delete name;
 	if (town) delete town;
+	delete roadsto;
 }
 
 void ARegion::ZeroNeighbors()
@@ -167,14 +168,15 @@ void ARegion::WagesFromDevelopment()
 	if (Population() == 0) return;
 	int level = 1;
 	int last = 0;
-	while (development >= level) {
+	int dv = Development();
+	while (dv >= level) {
 		wages++;
 		last = level;
 		level += wages+1;
 	}
 	wages *= 10;
-	if (development > last)
-		wages += 10 * (development - last) / (level - last);
+	if (dv > last)
+		wages += 10 * (dv - last) / (level - last);
 }
 
 int ARegion::Wages()
@@ -182,20 +184,29 @@ int ARegion::Wages()
 	int retval;
 	if (Globals->PLAYER_ECONOMY) {
 		retval = (int) wages/10;
-	} else retval = wages;
-	if (town) {
-		// hack, assumes that TownType + 1 = town wages
-		retval = retval + town->TownType() + 1;
+	} else {
+		retval = wages;
+		if (town) {
+			// hack, assumes that TownType + 1 = town wages
+			retval = retval + town->TownType() + 1;
+		}
+		// AS
+		if (CountConnectingRoads() > 1) retval++;
+		
+		// Check Lake Wage Effect
+		if(LakeEffect()) retval++;
 	}
+	
 	if (earthlore) retval++;
 	if (clearskies) retval++;
-	// AS
-	if (CountConnectingRoads() > 1) retval++;
+	return retval;
+}
 
-	// Check Lake Wage Effect
+int ARegion::LakeEffect()
+{
+	int raise = 0;
 	if (Globals->LAKE_WAGE_EFFECT != GameDefs::NO_EFFECT) {
 		int adjlake = 0;
-		int raise = 0;
 		for (int d = 0; d < NDIRS; d++) {
 			ARegion *check = neighbors[d];
 			if(!check) continue;
@@ -205,11 +216,10 @@ int ARegion::Wages()
 			// If lakes affect everything around them
 			if (Globals->LAKE_WAGE_EFFECT & GameDefs::ALL)
 				raise = 1;
-
 			if (TerrainDefs[type].similar_type != R_PLAIN) {
 				// If lakes affect towns, but only in non-plains
 				if ((Globals->LAKE_WAGE_EFFECT &
-							GameDefs::NONPLAINS_TOWNS_ONLY) && town)
+						GameDefs::NONPLAINS_TOWNS_ONLY) && town)
 					raise = 1;
 				// If lakes affect all towns
 				if ((Globals->LAKE_WAGE_EFFECT & GameDefs::TOWNS) && town)
@@ -226,11 +236,9 @@ int ARegion::Wages()
 				if ((Globals->LAKE_WAGE_EFFECT & GameDefs::TOWNS) && town)
 					raise = 1;
 			}
-			// A lake affected us for at least one reason, raise the wages
-			if (raise) retval++;
 		}
-	}
-	return retval;
+	}	
+	return raise;
 }
 
 AString ARegion::WagesForReport()
@@ -786,10 +794,8 @@ void ARegion::AddTown()
 	// basepop is the town's habitat
 	// set pop to a base level at first
 	if(Globals->PLAYER_ECONOMY) {
-		town->basepop = (3000 + getrandom(habitat) + getrandom(habitat)) / 4;
-		if((!IsNativeRace(race)) || (town->basepop < habitat))
-			town->basepop = (town->basepop + habitat) / 2;
-		town->pop = getrandom(100) + getrandom(100);
+		town->basepop = TownHabitat();
+		town->pop = town->basepop * 2 / 3;
 		town->activity = 0;
 		SetupCityMarket();
 		return;
@@ -811,13 +817,6 @@ void ARegion::AddTown()
 		town->pop = 500+getrandom(popch);
 	} else {
 		town->pop = 500;
-	}
-
-	// this is still very crude...
-	if (Globals->PLAYER_ECONOMY) {
-		habitat += town->pop/2;
-		population += town->pop/2;
-		development += getrandom(town->pop/80);
 	}
 
 	town->basepop = town->pop;
@@ -909,6 +908,135 @@ void ARegion::Setup()
 		LairCheck();
 }
 
+int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range)
+{
+	ARegionPtr *rn = new ARegionPtr();
+	rn->ptr = this;
+	int isnew = 1;
+	forlist(con) {
+		ARegionPtr *reg = (ARegionPtr *) elem;
+		if ((reg) && (reg->ptr)) if(reg->ptr == this) isnew = 0;
+	}
+	if(isnew == 0) return sum;
+	con->Add(rn);
+#if 0
+	Awrite(AString(" -> ") + *name + "(" + xloc + ", " + yloc + ")");
+	Awrite(AString("   +") + (town->TownType()+1));
+#endif
+	if(town) sum += town->TownType() + 1;
+	if(range > 0) {
+		for(int d=0; d<NDIRS; d++) {
+			if(!HasExitRoad(d)) continue;
+			if(d == GetRealDirComp(dir)) continue;
+			ARegion *r = neighbors[d];
+			if(!r) continue;
+			if(r->HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1);
+		}
+	}
+	return sum;
+}
+
+int ARegion::CountRoadConnectedTowns(int range)
+{
+	int townsum = 0;
+	AList *con = new AList();
+	ARegionPtr *rp = new ARegionPtr();
+	rp->ptr = this;
+	con->Add(rp);
+	for(int d=0; d<NDIRS; d++) {
+		if(!HasExitRoad(d)) continue;
+		ARegion *r = neighbors[d];
+		if(!r) continue;
+		if(r->HasConnectingRoad(d)) townsum = r->TraceConnectedRoad(d, townsum, con, range-1);
+	}
+	return townsum;	
+}
+
+int ARegion::TownHabitat()
+{
+	// Effect of existing buildings
+	int farm = 0;
+	int inn = 0;
+	int bank = 0;
+	int temple = 0;
+	int caravan = 0;
+	int fort = 0;
+	forlist(&objects) {
+		Object *obj = (Object *) elem;
+		if(ObjectDefs[obj->type].protect > fort) fort = ObjectDefs[obj->type].protect;
+		if(ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_FOOD) farm++;
+		if(ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
+		if(ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
+		if(ObjectDefs[obj->type].name == "Bank") bank++;
+		if((ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
+			&& (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_MOUNT)) caravan++;
+	}
+	int hab = 2;
+	int step = 0;
+	for(int i=0; i<5; i++) {
+		if(fort > step) hab++;
+		step *= 5;
+		if(step == 0) step = 10;
+	}
+	int build = 0;
+	if(farm) build++;
+	if(inn) build++;
+	if(temple) build++;
+	if(bank) build++;
+	if(caravan) build++;
+	if(build > 2) build = 2;
+	
+	hab = (build++ * build + 1) * hab * hab + basepopulation / 4 + 50;
+	
+	// Lake Effect
+	if(LakeEffect()) hab += 100;
+	
+	// Effect of Development:
+	int devfactor = Development() - TerrainDefs[type].economy;
+	if(devfactor < 0) devfactor = 0;
+	devfactor = devfactor * 100 / (TerrainDefs[type].economy + 60);
+	hab += devfactor / 100 * (basepopulation + 2800 + hab);
+	
+	return hab;
+}
+
+int ARegion::Development()
+{
+	int dv = development;
+	
+	// Road bonus
+	int roads = 0;
+	for(int i=0; i<NDIRS; i++) if(HasExitRoad(i)) roads++;
+	int dbonus = 0;
+	if(roads > 0) {
+#if 0
+		Awrite("_____________________________________________________");
+		Awrite("Checking Roads... for region:");
+		Awrite(AString(" ") + *name + "(" + xloc + ", " + yloc + ")");
+#endif
+		dbonus = CountRoadConnectedTowns(8);
+	}
+	// Maximum bonus of 29 to development for roads
+	int bonus = 5;
+	int step = 1;
+	int same = 3;
+	while((bonus > 0) && (dbonus > 0)) {
+		dbonus--;
+		dv += bonus;
+		step++;
+		if(step > same) {
+			bonus = bonus--;
+			step = 1;
+			same--;
+		}
+	}
+	
+	// Lake bonus
+	if(LakeEffect()) dv += 5;
+	
+	return dv;
+}
+
 void ARegion::UpdateTown()
 {
 	if(!(Globals->VARIABLE_ECONOMY)) {
@@ -917,7 +1045,7 @@ void ARegion::UpdateTown()
 		//
 		return;
 	}
-
+	
 	//
 	// Check if we were a starting city and got taken over
 	//
@@ -950,6 +1078,15 @@ void ARegion::UpdateTown()
 		}
 	}
 
+	if(Globals->PLAYER_ECONOMY) {
+		int df = development - TerrainDefs[type].economy;
+		if(df > 0) town->basepop = 100 + basepopulation * (4 + df / 15);
+		if(town->basepop > Globals->CITY_POP) town->basepop = Globals->CITY_POP;
+	
+		return;
+	}
+	
+	
 	//
 	// Don't do pop stuff for AC Exit.
 	//
@@ -1004,7 +1141,20 @@ void ARegion::Migrate()
 		if((nbor) && (nbor->migration > 0)) {
 			int cv = 100;
 			if(nbor->race != race) cv = 50;
-			population += migration * cv / 100;
+			// Roads?
+			if(HasExitRoad(i) && nbor->HasConnectingRoad(i)) {
+				cv += 25;
+				for(int d=0; d<NDIRS; d++) {
+					if((d == GetRealDirComp(i)) || (!nbor->HasExitRoad(d))) continue;
+					ARegion *ntwo = nbor->neighbors[d];
+					if((nbor) && (ntwo->HasConnectingRoad(d))) {
+						int c2 = 100;
+						if(ntwo->race != race) c2 = 50;
+						population += ntwo->migration * c2 / 100;
+					}
+				}
+			}
+			population += nbor->migration * cv / 100;
 		}
 	}
 }
@@ -1013,6 +1163,9 @@ void ARegion::PostTurn(ARegionList *pRegs)
 {
 	// Rules for PLAYER-RUN ECONOMY
 	if (Globals->PLAYER_ECONOMY) {
+		
+		TownHabitat();
+	
 		// Decay desolate areas
 		if (Population() < (habitat / 100))
 			if (development > 0) development--;

@@ -244,11 +244,16 @@ class ARegion : public AListElem
 		void Recruit(int);
 		int IsNativeRace(int);
 		void Migrate();
+		int TraceConnectedRoad(int, int, AList *, int);
+		int CountRoadConnectedTowns(int);
+		int TownHabitat();
+		int Development();
 
 		int CountWMons();
 		int IsGuarded();
 
 		int Wages();
+		int LakeEffect();
 		AString WagesForReport();
 		int Population();
 
@@ -275,6 +280,7 @@ class ARegion : public AListElem
 		int development;
 		int growth;
 		int mortality;
+		AList *roadsto;
 
 		/* Potential bonuses to economy */
 		int clearskies;
