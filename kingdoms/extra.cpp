@@ -140,7 +140,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_LANCE);
 	EnableItem(I_JAVELIN);
 	EnableItem(I_PIKE);
-
+	
 	EnableSkill(S_ARMORCRAFT);
 	EnableSkill(S_WEAPONCRAFT);
 

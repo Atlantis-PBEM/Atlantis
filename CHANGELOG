@@ -930,5 +930,9 @@ Changes from 4.0.10 -> 5.0.0
    -- added REQUIRED_EXPERIENCE. Units have their study rate (in normal games always 30 days per
       month no matter what) adjusted when they have significantly less or much more experience
       than days of study. (Currently still using the old Practice mechanism to gain experience)
+   -- fixed a number of issues: a bug where products and markets weren't updated, the gold 
+      amount for earth lore was adjusted to the new wagesystem, item reporting now prevents double
+      posting of items, and CountTaxers includes a fix that prevents bugs when an IT_MAN item is
+      a mount, weapon or other, tax-relevant item at the same time (centaurs in fracas game).
    	  ToDo: armored galleon bonus...?
    

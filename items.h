@@ -358,6 +358,7 @@ class Item : public AListElem
 		int type;
 		int num;
 		int selling;
+		int checked; // flag whether item has been reported, counted etc.
 };
 
 class ItemList : public AList
@@ -375,6 +376,7 @@ class ItemList : public AList
 		void SetNum(int, int); /* type, number */
 		int CanSell(int);
 		void Selling(int, int); /* type, number */
+		void UncheckAll(); // re-set checked flag for all
 };
 
 extern AString ShowSpecial(char *special, int level, int expandLevel,

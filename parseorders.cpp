@@ -1449,7 +1449,6 @@ void Game::ProcessEnterOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if(newfleet == 1) {
 		int old = i;
 		i = -(i+1);
-		Awrite(AString("---> ENTER NEW ") + old + ": fleet alias " + i + ".");
 	}
 	delete token;
 	if (i) {

@@ -1066,6 +1066,7 @@ int IsSoldier(int item)
 Item::Item()
 {
 	selling = 0;
+	checked = 0;
 }
 
 Item::~Item()
@@ -1170,8 +1171,17 @@ void ItemList::Selling(int t, int n)
 	}
 }
 
+void ItemList::UncheckAll()
+{
+	forlist(this) {
+		Item *i = (Item *)elem;
+		i->checked = 0;
+	}
+}
+
 AString ItemList::Report(int obs,int seeillusions,int nofirstcomma)
 {
+	UncheckAll();
 	AString temp;
 	for (int s = 0; s < 7; s++) {
 	    temp += ReportByType(s, obs, seeillusions, nofirstcomma);
@@ -1208,6 +1218,7 @@ AString ItemList::ReportByType(int type, int obs, int seeillusions,
     forlist(this) {
 		int report = 0;
 		Item *i = (Item *) elem;
+		if(i->checked) continue;
 		switch (type) {
 			case 0:
 				if (ItemDefs[i->type].type & IT_MAN)
@@ -1267,6 +1278,7 @@ AString ItemList::ReportByType(int type, int obs, int seeillusions,
 					temp += i->Report(seeillusions);
 				}
 			}
+			i->checked = 1;
 		}
 	}
     return temp;
