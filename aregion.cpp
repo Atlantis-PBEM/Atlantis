@@ -1874,8 +1874,8 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 }
 
 // DK
-void ARegion::WriteTemplate( Areport *f, Faction *fac, ARegionList *pRegs,
-		int month )
+void ARegion::WriteTemplate(Areport *f, Faction *fac,
+		ARegionList *pRegs, int month)
 {
 	int header = 0;
 
@@ -1906,6 +1906,32 @@ void ARegion::WriteTemplate( Areport *f, Faction *fac, ARegionList *pRegs,
 					f->PutStr(*((AString *) elem));
 				}
 				u->oldorders.DeleteAll();
+
+				if (u->turnorders.First()) {
+					int first = 1;
+					forlist(&u->turnorders) {
+						TurnOrder *tOrder = new TurnOrder;
+						tOrder = (TurnOrder *)elem;
+						if (first) {
+							forlist(&tOrder->turnOrders) {
+								f->PutStr(*((AString *) elem));
+							}
+							first = 0;
+							if (tOrder->repeating) u->turnorders.Add(tOrder);
+						} else {
+							if (tOrder->repeating)
+								f->PutStr(AString("@TURN"));
+							else
+								f->PutStr(AString("TURN"));
+
+							forlist(&tOrder->turnOrders) {
+								f->PutStr(*((AString *) elem));
+							}
+							f->PutStr(AString("ENDTURN"));
+						}
+					}
+				}
+				u->turnorders.DeleteAll();
 			}
 		}
 	}

@@ -249,6 +249,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "UL");
 	f.TagText("LI", f.Link("#address", "address"));
 	f.TagText("LI", f.Link("#advance", "advance"));
+	if(Globals->USE_WEAPON_ARMOR_COMMAND)
+		f.TagText("LI", f.Link("#armor", "armor"));
 	if(has_stea)
 		f.TagText("LI", f.Link("#assassinate", "assassinate"));
 	f.TagText("LI", f.Link("#attack", "attack"));
@@ -268,6 +270,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#enter", "enter"));
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		f.TagText("LI", f.Link("#entertain", "entertain"));
+	f.TagText("LI", f.Link("#exchange", "exchange"));
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		f.TagText("LI", f.Link("#faction", "faction"));
 	f.TagText("LI", f.Link("#find", "find"));
@@ -281,9 +284,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#name", "name"));
 	f.TagText("LI", f.Link("#noaid", "noaid"));
 	int move_over_water = 0;
-	if((Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) ||
-			(!(ItemDefs[I_BOOTS].flags & ItemType::DISABLED)))
-		move_over_water =1;
+	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
+		move_over_water = 1;
+	if(!move_over_water) {
+		for(i = 0; i < NITEMS; i++) {
+			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if(ItemDefs[i].swim > 0) move_over_water = 1;
+		}
+	}
 	if(move_over_water)
 		f.TagText("LI", f.Link("#nocross", "nocross"));
 	f.TagText("LI", f.Link("#option", "option"));
@@ -307,6 +315,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#study", "study"));
 	f.TagText("LI", f.Link("#tax", "tax"));
 	f.TagText("LI", f.Link("#teach", "teach"));
+	f.TagText("LI", f.Link("#turn", "turn"));
+	if(Globals->USE_WEAPON_ARMOR_COMMAND)
+		f.TagText("LI", f.Link("#weapon", "weapon"));
 	if (Globals->ALLOW_WITHDRAW)
 		f.TagText("LI", f.Link("#withdraw", "withdraw"));
 	f.TagText("LI", f.Link("#work", "work"));
@@ -3510,6 +3521,26 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "ADVANCE N 1 IN SE";
 	f.CommandExample(temp, temp2);
 
+	if(Globals->USE_WEAPON_ARMOR_COMMAND) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("armor");
+		f.TagText("H4", "ARMOR [item1] [item2] [item3] [item4]");
+		f.TagText("H4", "ARMOR");
+		temp = "This command allows you to set a list of preferred armor "
+			"for a unit.  After searching for armor on the preferred "
+			"list, the standard armor precedence takes effect if an armor "
+			"hasn't been set.  The second form clears the preferred armor "
+			"list.";
+		f.Paragraph(temp);
+		f.Paragraph("Examples");
+		temp = "Set the unit to select chain armor before plate armor.";
+		temp2 = "WEAPON CARM PARM";
+		f.CommandExample(temp, temp2);
+		temp = "Clear the preferred armor list.";
+		temp2 = "ARMOR";
+		f.CommandExample(temp, temp2);
+	}
+
 	if(has_stea) {
 		f.ClassTagText("DIV", "rule", "");
 		f.LinkRef("assassinate");
@@ -3591,7 +3622,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"to begin work on a new object of the type given. The final form "
 		"instructs the unit to enter the same building as [unit] and to "
 		"assist in building that structure, even if it is a structure which "
-		"was begun that same turn.";
+		"was begun that same turn.  This help will be rejected if the unit "
+		"you are helping does not consider you to be friendly.";
 	f.Paragraph(temp);
 	f.Paragraph("Examples:");
 	temp = "To build a new tower.";
@@ -3772,6 +3804,25 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.CommandExample(temp, temp2);
 	}
 
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("exchange");
+	f.TagText("H4", "EXCHANGE [unit] [quantity given] [item given] "
+			"[quantity expected] [item expected]");
+	temp = "This order allows any two units that can see each other, to "
+		"trade items regardless of faction stances.  The orders given by "
+		"the two units must be complementary.  If either unit involved does "
+		"not have the items it is offering, or if the exchange orders given "
+		"are not complementary, the exchange is aborted.  Men may not be "
+		"exchanged.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Exchange 10 LBOW for 10 SWOR with unit 1310";
+	temp2 = "EXCHANGE 1310 10 LBOW 10 SWOR";
+	f.CommandExample(temp, temp2);
+	temp = "Unit 1310 would issue (assuming the other unit is 3453)";
+	temp2 = "EXCHANGE 3453 10 SWOR 10 LBOW";
+	f.CommandExample(temp, temp2);
+
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		f.ClassTagText("DIV", "rule", "");
 		f.LinkRef("faction");
@@ -3909,13 +3960,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("H4", "GIVE [unit] [quantity] [item]");
 	f.TagText("H4", "GIVE [unit] ALL [item]");
 	f.TagText("H4", "GIVE [unit] ALL [item] EXCEPT [quantity]");
+	f.TagText("H4", "GIVE [unit] ALL [item class]");
 	f.TagText("H4", "GIVE [unit] UNIT");
 	temp = "The first form of the GIVE order gives a quantity of an item to "
 		"another unit. The second form of the GIVE order will give all of "
 		"a given item to another unit.  The third form will give all of an "
 		"item except for a specific quantity to another unit.  The fourth "
-		"and final form the the GIVE order gives the entire unit to the "
+		"form will give all items of a specific type to another unit.  The "
+		"final form of the GIVE order gives the entire unit to the "
 		"specified unit's faction.";
+	f.Paragraph(temp);
+	temp = "The classes of items which are exceptable for the fourth form of "
+		"this order are, NORMAL, ADVANCED, TRADE, MAN or MEN, MONSTER or "
+		"MONSTERS, MAGIC, WEAPON OR WEAPONS, ARMOR, MOUNT or MOUNTS, BATTLE, "
+		"SPECIAL, TOOL or TOOLS, and FOOD.";
 	f.Paragraph(temp);
 	temp = "A unit may only give items, including silver, to a unit which "
 		"it is able to see, unless the faction of the target unit has "
@@ -4279,9 +4337,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.CommandExample(temp, temp2);
 
 	if(Globals->USE_PREPARE_COMMAND) {
-		/* XXX -- Info about the prepare command */
 		f.ClassTagText("DIV", "rule", "");
 		f.LinkRef("prepare");
+		f.TagText("H4", "PREPARE [item]");
+		temp = "This command allows a mage or apprentice to prepare a "
+			"battle item (e.g. a Staff of Fire) for use in battle.  This "
+			"allows the mage to override the usual selection of battle "
+			"items, and also cancesl any spells set via the ";
+		temp += f.Link("#combat", "COMBAT") + " order.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Use a staff of fire in preference to any other battle item.";
+		temp2 = "PREPARE STAF";
+		f.CommandExample(temp, temp2);
 	}
 
 	f.ClassTagText("DIV", "rule", "");
@@ -4509,6 +4577,81 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "TEACH NEW 2\nTEACH 510";
 	f.CommandExample(temp, temp2);
 
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("turn");
+	f.TagText("H4", "TURN");
+	temp = "The TURN order may be used to delay orders by one (or more) "
+		"turns. By making the TURN order repeating (via '@'), orders inside "
+		"the TURN/ENDTURN construct will repeat.  Multiple TURN orders in a "
+		"row will execute on successive turns, and if they all repeat, they "
+		"will form a loop of orders.  Each TURN section must be ended by an "
+		"ENDTURN line.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "Study combat, this month, move north next month, and then in two "
+		"months, pillaging and advane north.";
+	temp2 = "STUDY COMB\n";
+	temp2 = "TURN\n";
+	temp2 += "    MOVE N\n";
+	temp2 += "ENDTURN\n";
+	temp2 += "TURN\n";
+	temp2 += "    PILLAGE\n";
+	temp2 += "    ADVANCE N\n";
+	temp2 += "ENDTURN";
+	f.CommandExample(temp, temp2);
+	temp = "After the turn, the orders for that unit would look as "
+		"follows in the orders template:";
+	temp2 = "MOVE N\n";
+	temp2 += "TURN\n";
+	temp2 += "    PILLAGE\n";
+	temp2 += "    ADVANCE N\n";
+	temp2 += "ENDTURN";
+	f.CommandExample(temp, temp2);
+	temp = "Set up a simple cash caravan (It's assumed here that someone is "
+		"funnelling cash into this unit.";
+	temp2 = "MOVE N\n";
+	temp2 += "@TURN\n";
+	temp2 += "    GIVE 13523 1000 SILV\n";
+	temp2 += "    MOVE S\n";
+	temp2 += "ENDTURN\n";
+	temp2 += "@TURN\n";
+	temp2 += "    MOVE N\n";
+	temp2 += "ENDTURN";
+	f.CommandExample(temp, temp2);
+	temp = "After the turn, the orders for that unit would look as "
+		"follows in the orders template:";
+	temp2 += "GIVE 13523 1000 SILV\n";
+	temp2 += "MOVE S\n";
+	temp2 += "@TURN\n";
+	temp2 += "    MOVE N\n";
+	temp2 += "ENDTURN";
+	temp2 += "@TURN\n";
+	temp2 += "    GIVE 13523 1000 SILV\n";
+	temp2 += "    MOVE S\n";
+	temp2 += "ENDTURN\n";
+	f.CommandExample(temp, temp2);
+
+	if(Globals->USE_WEAPON_ARMOR_COMMAND) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("weapon");
+		f.TagText("H4", "WEAPON [item] ...");
+		f.TagText("H4", "WEAPON");
+		temp = "This command allows you to set a list of preferred weapons "
+			"for a unit.  After searching for weapons on the preferred "
+			"list, the standard weapon precedence takes effect if a weapon "
+			"hasn't been set.  The second form clears the preferred weapon "
+			"list.";
+		f.Paragraph(temp);
+		f.Paragraph("Examples");
+		temp = "Set the unit to select double bows, then longbows then "
+			"crossbows";
+		temp2 = "WEAPON DBOW LBOW XBOW";
+		f.CommandExample(temp, temp2);
+		temp = "Clear the preferred weapon list.";
+		temp2 = "WEAPON";
+		f.CommandExample(temp, temp2);
+	}
+
 	if(Globals->ALLOW_WITHDRAW) {
 		f.ClassTagText("DIV", "rule", "");
 		f.LinkRef("withdraw");
@@ -4549,9 +4692,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "LI");
 	f.PutStr("Instant orders.");
 	f.Enclose(1, "UL");
+	temp = f.Link("#turn", "TURN") + " orders are processed.";
+	f.TagText("LI", temp);
 	temp = f.Link("#form", "FORM") + " orders are processed.";
 	f.TagText("LI", temp);
 	temp = f.Link("#address", "ADDRESS") + ", ";
+	if(Globals->USE_WEAPON_ARMOR_COMMAND)
+		temp += f.Link("#armor", "ARMOR") + ", ";
 	temp += f.Link("#autotax", "AUTOTAX") + ", ";
 	temp += f.Link("#avoid", "AVOID") + ", ";
 	temp += f.Link("#behind", "BEHIND") + ", ";
@@ -4574,8 +4721,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(Globals->USE_PREPARE_COMMAND)
 		temp += f.Link("#prepare", "PREPARE") + ", ";
 	temp += f.Link("#reveal", "REVEAL") + ", ";
-	temp += f.Link("#show", "SHOW") + ", and ";
-	temp += f.Link("#spoils", "SPOILS") + " orders are processed.";
+	temp += f.Link("#show", "SHOW") + ", ";
+	if(!Globals->USE_WEAPON_ARMOR_COMMAND)
+		temp += "and ";
+	temp += f.Link("#spoils", "SPOILS");
+	if(Globals->USE_WEAPON_ARMOR_COMMAND) {
+		temp += ", and ";
+		temp += f.Link("#weapon", "WEAPON");
+	}
+	temp += " orders are processed.";
 	f.TagText("LI", temp);
 	temp = f.Link("#find", "FIND") + " orders are processed.";
 	f.TagText("LI", temp);
@@ -4604,6 +4758,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "UL");
 	temp = f.Link("#destroy", "DESTROY") + " and ";
 	temp += f.Link("#give", "GIVE") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#exchange", "EXCHANGE") + "orders are processed.";
 	f.TagText("LI", temp);
 	f.Enclose(0, "UL");
 	f.Enclose(0, "LI");

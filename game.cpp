@@ -452,7 +452,7 @@ int Game::SaveGame()
     {
         return( 0 );
     }
-	
+
     //
     // Write out Globals
     //
@@ -463,7 +463,7 @@ int Game::SaveGame()
 
     // mark the fact that we created ocean lairs
     f.PutInt(-1);
-	
+
     f.PutInt(year);
     f.PutInt(month);
     f.PutInt(getrandom(10000));
@@ -477,7 +477,7 @@ int Game::SaveGame()
     // Write out the Factions
     //
     f.PutInt(factions.Num());
-	
+
     forlist(&factions) {
         ((Faction *) elem)->Writeout( &f );
     }
@@ -486,7 +486,7 @@ int Game::SaveGame()
     // Write out the ARegions
     //
     regions.WriteRegions( &f );
-  
+
     f.Close();
     return( 1 );
 }
@@ -879,7 +879,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 										"to give for Item: in faction " +
 										pFac->num);
 							} else {
-								int it = ParseItem(pTemp);
+								int it = ParseAllItems(pTemp);
 								if(it == -1) {
 									Awrite(AString("Must specify a valid ") +
 											"item to give for Item: in " +
@@ -957,7 +957,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 									 */
 									int mage = (SkillDefs[sk].flags &
 											SkillType::MAGIC);
-									int app = (SkillDefs[sk].flags & 
+									int app = (SkillDefs[sk].flags &
 											SkillType::APPRENTICE);
 									if(mage) {
 										u->type = U_MAGE;
@@ -1033,7 +1033,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 
 void Game::WriteNewFac( Faction *pFac )
 {
-    AString *strFac = new AString( AString( "Adding " ) + 
+    AString *strFac = new AString( AString( "Adding " ) +
                                    *( pFac->address ) + "." );
     newfactions.Add( strFac );
 }
@@ -1069,13 +1069,13 @@ int Game::RunGame()
 {
     Awrite("Setting Up Turn...");
     PreProcessTurn();
-  
+
     Awrite("Reading the Gamemaster File...");
     if( !ReadPlayers() )
     {
         return( 0 );
     }
-	
+
     if( gameStatus == GAME_STATUS_FINISHED )
     {
         Awrite( "This game is finished!" );
@@ -1090,15 +1090,15 @@ int Game::RunGame()
 		Awrite("QUITting Inactive Factions...");
 		RemoveInactiveFactions();
 	}
-  
+
     Awrite("Running the Turn...");
     RunOrders();
-  
+
     Awrite("Writing the Report File...");
     WriteReport();
 	Awrite("");
     battles.DeleteAll();
-  
+
     Awrite("Writing Playerinfo File...");
     WritePlayers();
 
@@ -1242,7 +1242,7 @@ void Game::EditGameUnit( Unit *pUnit )
     do
     {
         Awrite( AString( "Unit: " ) + *( pUnit->name ));
-        Awrite( AString( "  in " ) + 
+        Awrite( AString( "  in " ) +
                 pUnit->object->region->ShortPrint( &regions ));
         Awrite( "  1) Edit items..." );
         Awrite( "  2) Edit skills..." );
@@ -1300,7 +1300,7 @@ void Game::EditGameUnitItems( Unit *pUnit )
 					break;
 				}
 
-				int itemNum = ParseItem( pToken );
+				int itemNum = ParseAllItems( pToken );
 				if( itemNum == -1 ) {
 					Awrite( "No such item." );
 					break;
@@ -1338,7 +1338,7 @@ void Game::EditGameUnitSkills( Unit *pUnit )
     do
     {
         int exit = 0;
-        Awrite( AString( "Unit skills: " ) + 
+        Awrite( AString( "Unit skills: " ) +
                 pUnit->skills.Report( pUnit->GetMen()));
         Awrite( "  [skill] [days] to update a skill." );
         Awrite( "  q) Stop editing the skills." );
@@ -1513,7 +1513,7 @@ void Game::MakeFactionReportLists()
 				}
 			}
 		}
-        
+
 		for (int i=0; i<vector.vectorsize; i++) {
 			if (vector.GetFaction(i)) {
 				ARegionPtr *ptr = new ARegionPtr;
@@ -1527,7 +1527,7 @@ void Game::MakeFactionReportLists()
 void Game::WriteReport()
 {
     Areport f;
-    
+
     MakeFactionReportLists();
     CountAllMages();
 	if(Globals->APPRENTICES_EXIST)
@@ -1541,10 +1541,12 @@ void Game::WriteReport()
 		if(!fac->IsNPC() ||
 		   ((((month == 0) && (year == 1)) || Globals->GM_REPORT) &&
 			(fac->num == 1))) {
-			f.OpenByName( str );
-			fac->WriteReport( &f, this );
-			f.Close();
-		}	
+			int i = f.OpenByName( str );
+			if(i != -1) {
+				fac->WriteReport( &f, this );
+				f.Close();
+			}
+		}
         Adot();
     }
 }
@@ -1632,7 +1634,7 @@ void Game::SetupUnitNums()
 	maxppunits = unitseq+10000;
 
     ppUnits = new Unit *[ maxppunits ];
-    
+
     unsigned int i;
     for( i = 0; i < maxppunits ; i++ ) ppUnits[ i ] = 0;
 
@@ -1809,12 +1811,12 @@ int Game::UpgradeMajorVersion(int savedVersion)
 {
 	return 1;
 }
-            
+
 int Game::UpgradeMinorVersion(int savedVersion)
 {
 	return 1;
-}               
-                
+}
+
 int Game::UpgradePatchLevel(int savedVersion)
 {
 	return 1;

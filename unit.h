@@ -79,6 +79,8 @@ enum {
 	NUNITTYPES
 };
 
+#define MAX_READY 4 // maximum number of ready weapons or armors
+
 #define FLAG_BEHIND				0x0001
 #define FLAG_NOCROSS_WATER		0x0002
 #define FLAG_AUTOTAX			0x0004
@@ -182,6 +184,7 @@ class Unit : public AListElem
 		int CanSee(ARegion *,Unit *); /* Return 1 if can see, 2 if can see
 										 faction */
 		int CanCatch(ARegion *,Unit *);
+		int AmtsPreventCrime(Unit *);
 		int GetAttitude(ARegion *,Unit *); /* Get this unit's attitude toward
 											  the Unit parameter */
 		int Hostile();
@@ -199,7 +202,11 @@ class Unit : public AListElem
 		int GetFlag(int);
 		void SetFlag(int,int);
 		void CopyFlags(Unit *);
-		int GetBattleItem( int batType, int index );
+		int GetBattleItem(int index);
+		int GetArmor(int index, int ass);
+		int GetMount(int index, int canFly, int canRide, int &bonus);
+		int GetWeapon(int index, int riding, int &attackBonus,
+				int &defenseBonus, int &attacks);
 		int CanUseWeapon(WeaponType *pWep, int riding);
 		int CanUseWeapon(WeaponType *pWep);
 		int Taxers();
@@ -210,6 +217,7 @@ class Unit : public AListElem
 		void Error(const AString &);
 
 		Faction *faction;
+		Faction *formfaction;
 		Object *object;
 		AString *name;
 		AString *describe;
@@ -228,6 +236,8 @@ class Unit : public AListElem
 		ItemList items;
 		int combat;
 		int readyItem;
+		int readyWeapon[MAX_READY];
+		int readyArmor[MAX_READY];
 		AList oldorders;
 		int needed; /* For assessing maintenance */
 		int losses;
@@ -248,6 +258,11 @@ class Unit : public AListElem
 		Order *monthorders;
 		AttackOrder *attackorders;
 		ARegion *advancefrom;
+
+		AList exchangeorders;
+		AList turnorders;
+		int orderIsTurnDelayed;
+		Order *orderDelayMonthOrders;
 };
 
 #endif

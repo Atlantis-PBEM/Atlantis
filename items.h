@@ -48,18 +48,19 @@ enum {
 };
 
 enum {
-    IT_NORMAL = 0x01,
-    IT_ADVANCED = 0x02,
-    IT_TRADE = 0x04,
-    IT_MAN = 0x08,
-    IT_MONSTER = 0x10,
-    IT_MAGIC = 0x20,
-    IT_WEAPON = 0x40,
-    IT_ARMOR = 0x80,
-    IT_MOUNT = 0x100,
-    IT_BATTLE = 0x200,
-	IT_SPECIAL = 0x400,
-	IT_TOOL = 0x800,
+	IT_NORMAL = 0x0001,
+	IT_ADVANCED = 0x0002,
+	IT_TRADE = 0x0004,
+	IT_MAN = 0x0008,
+	IT_MONSTER = 0x0010,
+	IT_MAGIC = 0x0020,
+	IT_WEAPON = 0x0040,
+	IT_ARMOR = 0x0080,
+	IT_MOUNT = 0x0100,
+	IT_BATTLE = 0x0200,
+	IT_SPECIAL = 0x0400,
+	IT_TOOL = 0x0800,
+	IT_FOOD = 0x1000
 };
 
 struct Materials
@@ -149,11 +150,14 @@ class MonType
 extern MonType * MonDefs;
 
 enum {
-	SLASHING, // e.g. sword attack (This is default)
-	PIERCING, // e.g. spear or arrow attack
-	CRUSHING, // e.g. mace attack
-	CLEAVING, // e.g. axe attack
-	ARMORPIERCING, // Armour piercing attack (crossbow, magic)
+	SLASHING,		// e.g. sword attack (This is default)
+	PIERCING,		// e.g. spear or arrow attack
+	CRUSHING,		// e.g. mace attack
+	CLEAVING,		// e.g. axe attack
+	ARMORPIERCING,	// e.g. crossbow double bow
+	MAGIC_ENERGY,	// e.g. fire, dragon breath
+	MAGIC_SPIRIT,	// e.g. black wind
+	MAGIC_WEATHER,	// e.g. tornado
 	NUM_WEAPON_CLASSES
 };
 
@@ -265,7 +269,9 @@ class BattleItemType
 
 extern BattleItemType *BattleItemDefs;
 
-int ParseItem(AString *);
+int ParseGiveableItem(AString *);
+int ParseAllItems(AString *);
+int ParseEnabledItem(AString *);
 int ParseBattleItem(int);
 
 AString ItemString(int type,int num);

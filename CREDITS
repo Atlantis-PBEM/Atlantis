@@ -20,6 +20,8 @@ Tom Alsen (aka Tzarg)
     Implementation of the FIND ALL order, and a new combat system
 	Implementation of the SPOILS code which allows saner battle spoils
 	selection.
+	Implmented a GIVE ALL <category> option.
+	Multiple other code enhancements.
 Ben Lloyd
     Bugfixes and suggestions, and code to implement some of them.
 Georg Gottschalk
@@ -34,5 +36,10 @@ Paul Mehrer
 Stephen Baillie
     Submitted a patch to allow units passing through a region (but not
       stopping) to generate a partial, slightly innacurate hex report.
+Nick Hoggard
+    Implementation of the EXCHANGE order.
+	Implementation of the TURN order which allows pre-doing turn orders as
+	well as cyclical orders.
 Joseph Traub
     Changes, updates, and merging a few disparate branches
+	Maintaining and extending the 4.0.X code.

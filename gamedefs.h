@@ -367,6 +367,19 @@ public:
 	// Should starting cities begin with unlimited markets at world
 	// generation time.
 	int START_CITIES_START_UNLIMITED;
+
+	// If this is enabled, then when a unit has more men than Amulets of
+	// True Seeing, and it is targetted by an assassin, then there is a
+	// chance that the target picked will not be one of the men carrying
+	// the amulet.
+	int PROPORTIONAL_AMTS_USAGE;
+
+	// If this is enabled, then the ARMOR and WEAPON commands for selecting
+	// armor/weapon priorities for a unit are enabled. If a preferred weapon
+	// or armor isn't available, then the code will fall back to the internal
+	// list.
+	int USE_WEAPON_ARMOR_COMMAND;
+
 };
 
 extern GameDefs * Globals;

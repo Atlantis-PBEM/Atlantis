@@ -47,10 +47,64 @@ static AString DefType(int atype)
 	return AttType(atype);
 }
 
-int ParseItem(AString * token)
+int ParseAllItems(AString *token)
+{
+	int r = -1;
+	for(int i = 0; i < NITEMS; i++) {
+		if ((ItemDefs[i].type & IT_MONSTER) &&
+				ItemDefs[i].index == MONSTER_ILLUSION) {
+			if ((*token == (AString("i") + ItemDefs[i].name)) ||
+				(*token == (AString("i") + ItemDefs[i].names)) ||
+				(*token == (AString("i") + ItemDefs[i].abr))) {
+				r = i;
+				break;
+			}
+		} else {
+			if ((*token == ItemDefs[i].name) ||
+				(*token == ItemDefs[i].names) ||
+				(*token == ItemDefs[i].abr)) {
+				r = i;
+				break;
+			}
+		}
+	}
+	return r;
+}
+
+int ParseEnabledItem(AString * token)
 {
 	int r = -1;
 	for (int i=0; i<NITEMS; i++) {
+		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if ((ItemDefs[i].type & IT_MONSTER) &&
+				ItemDefs[i].index == MONSTER_ILLUSION) {
+			if ((*token == (AString("i") + ItemDefs[i].name)) ||
+				(*token == (AString("i") + ItemDefs[i].names)) ||
+				(*token == (AString("i") + ItemDefs[i].abr))) {
+				r = i;
+				break;
+			}
+		} else {
+			if ((*token == ItemDefs[i].name) ||
+				(*token == ItemDefs[i].names) ||
+				(*token == ItemDefs[i].abr)) {
+				r = i;
+				break;
+			}
+		}
+	}
+	if(r != -1) {
+		if(ItemDefs[r].flags & ItemType::DISABLED) r = -1;
+	}
+	return r;
+}
+
+int ParseGiveableItem(AString * token)
+{
+	int r = -1;
+	for (int i=0; i<NITEMS; i++) {
+		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if(ItemDefs[i].flags & ItemType::CANTGIVE) continue;
 		if ((ItemDefs[i].type & IT_MONSTER) &&
 				ItemDefs[i].index == MONSTER_ILLUSION) {
 			if ((*token == (AString("i") + ItemDefs[i].name)) ||
@@ -355,15 +409,7 @@ static AString MonResist(int type, int val, int full)
 		else temp += "very resistant";
 	}
 	temp += " to ";
-	switch(type) {
-		case ATTACK_COMBAT: temp += "physical"; break;
-		case ATTACK_ENERGY: temp += "energy"; break;
-		case ATTACK_SPIRIT: temp += "spiritual"; break;
-		case ATTACK_WEATHER: temp += "weather-based"; break;
-		case ATTACK_RIDING: temp += "riding"; break;
-		case ATTACK_RANGED: temp += "ranged"; break;
-		default: temp += "unknown";
-	}
+	temp += AttType(type);
 	temp += " attacks.";
     return temp;
 }
@@ -375,7 +421,10 @@ static AString WeapClass(int wclass)
 		case PIERCING: return AString("piercing");
 		case CRUSHING: return AString("crushing");
 		case CLEAVING: return AString("cleaving");
-		case ARMORPIERCING: return AString("armorpiercing");
+		case ARMORPIERCING: return AString("armor-piercing");
+		case MAGIC_ENERGY: return AString("energy");
+		case MAGIC_SPIRIT: return AString("spirit");
+		case MAGIC_WEATHER: return AString("weather");
 		default: return AString("unknown");
 	}
 }
@@ -494,7 +543,7 @@ AString *ItemDescription(int item, int full)
 				MonDefs[mon].stealth + ", and an observation score of " +
 				MonDefs[mon].obs + ".";
 		}
-		*temp += " This monster drops ";
+		*temp += " This monster can have ";
 		if(MonDefs[mon].spoiltype != -1) {
 			if(MonDefs[mon].spoiltype & IT_MAGIC) {
 				*temp += "magic items and ";
@@ -594,13 +643,16 @@ AString *ItemDescription(int item, int full)
 			} else if(i > 0) {
 				*temp += ", ";
 			}
-			*temp += AString(pA->saves[i]) + "/" + pA->from +
-				" of the time versus " + WeapClass(i) + " attacks";
+			int percent = (int)(((float)pA->saves[i]*100.0) /
+					(float)pA->from+0.5);
+			*temp += AString(percent) + "% of the time versus " +
+				WeapClass(i) + " attacks";
 		}
 		*temp += ".";
 		if(full) {
 			if(pA->flags & ArmorType::USEINASSASSINATE) {
-				*temp += " This armor may be worn by assassins.";
+				*temp += " This armor may be worn during assassination "
+					"attempts.";
 			}
 		}
 	}

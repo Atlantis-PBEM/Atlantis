@@ -38,14 +38,14 @@
 // the html file containing the rules to correctly reflect the changes!
 static GameDefs g = {
     "Atlantis Conquest",     // RULESET_NAME
-    MAKE_ATL_VER( 1, 0, 3 ), // RULESET_VERSION
+    MAKE_ATL_VER( 1, 0, 4 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */
     4, /* SHIP_SPEED */
     6, /* FLY_SPEED */
     8, /* MAX_SPEED */
-		   
+
     10, /* STUDENTS_PER_TEACHER */
     10, /* MAINTENANCE_COST */
     10, /* LEADER_COST */
@@ -61,7 +61,7 @@ static GameDefs g = {
     20, /* ENTERTAIN_INCOME */
 
     50, /* TAX_INCOME */
-	
+
     5, /* HEALS_PER_MAN */
 
     20, /* GUARD_REGEN */ /* percent */
@@ -71,7 +71,7 @@ static GameDefs g = {
 
     10, /* WMON_FREQUENCY */
     10, /* LAIR_FREQUENCY */
-	
+
     5, /* FACTION_POINTS */
 
     100, /* TURN_COST */
@@ -149,6 +149,8 @@ static GameDefs g = {
 	0,	// MONSTER_ADVANCE_HOSTILE_PERCENT
 	0,	// HAVE_EMAIL_SPECIAL_COMMANDS
 	0,	// START_CITIES_START_UNLIMITED
+	0,	// PROPORTIONAL_AMTS_USAGE
+	0,  // USE_WEAPON_ARMOR_COMMAND
 };
 
 GameDefs * Globals = &g;

@@ -305,3 +305,60 @@ Changes from 4.0.8 -> 4.0.9
       generation and more GM options.
    -- Added automatic generation of rules files from the gamedefs and
       internal tables.
+   -- Split armor-piercing attacks into armor-piercing, energy, spirit and
+      weather. Armor can now protect differently against these. I'm not sure
+      the original new combat system is mentioned in this change log, but the
+      split is an addition to that. Patch submitted by Tom Alsen
+      <tzarg@yahoo.com>
+   -- Added WEAPON [itemlist] and ARMOR [itemlist] commands, which allow
+      a unit to set a preferred weapon and armor list. This is enabled
+      by the USE_WEAPON_ARMOR_COMMAND gamedef. Patch submitted by Tom
+      Alsen <tzarg@yahoo.com>
+   -- Added PROPORTIONAL_AMTS_USAGE flag. When set, if an assassin targets
+      a unit with more men than amulets of true seeing, there is a chance
+      that he picks a man without an AMTS, and the attempt proceeds.  Patch
+      submitted by Tom Alsen <tzarg@yahoo.com>.
+   -- New rule: Assassins with RINGs of invisibility cannot get amulets of
+      true seeing in spoils (otherwise the assassination would have been
+      prevented) [This is needed to work with PROPORTIONAL_AMTS_USAGE
+      gamedef. If that gamedef is set, this new rule has no effect]. Patch
+      submitted by Tom Alsen <tzarg@yahoo.com>.
+   -- Fixed a hang when attempting to write report files which already exist.
+      It now just silently doesn't write them.
+   -- Added 'EXCHANGE' order which allows two units to trade items
+      regardless of faction stances.  This is safe (unlike GIVE) since both
+      units must enter complimentary items.  For example, if unit 12221 and
+      15333 wanted to trade 10 LBOW for 1000 SILV, unit 15333 would enter
+      'EXCHANGE 12221 1000 SILV 10 LBOW' and unit 12221 would enter
+      'EXCHANGE 15333 10 LBOW 1000 SILV'.  Since the quantity and the items
+      must match or the trade doesn't occur, this is safe even for neutral
+      or unfriendly stanced factions.  This patch was submitted by Nick
+      Hoggard <nickhoggard@clear.net.nz>.
+   -- Added a patch by Nick Hoggard <nickhoggarg@clear.net.nz> implementing
+      the 'TURN' order.  This order allows pre-specification of orders for
+      turns in the future as well as constructing loops of orders based on
+      turns.  See the rules for details.
+   -- Added the implementation of 'GIVE ALL <item class>'.  The original
+      implementation was done by Tom Alsen <tzarg@yahoo.com> for Blitzgame
+      and was merged over.
+   -- Fixed BUILD HELP so that the unit you are helping must consider you
+      at least friendly before it will allow you to help build the structure.
+      The reason for this is to prevent unauthorized entry into a building.
+   -- Added message distinguishing move failure due to overburdened from 
+      move failure due to no more movement points.
+   -- Redid ParseItem a bit (made it three functions different functions)
+      to allow specific features to GM and push some of the error checking
+      down into the function.  This hopefully fixes a bug in Ceran II where
+      someone was trying to buy goblins (which are a race there as well as
+      a monster) and failing because it was finding the monster before the
+      race in the item list.  ParseGiveableItem is now used by BUY, SELL,
+      GIVE, and EXCHANGE.  ParseEnabledItem is used by the rest of the orders
+      processing routines, and ParseAllItems is used by the GM 'player.in'
+      file routines which give items to players. ParseEnabled and ParseAll
+      can still get confused by items with the same name, though in most
+      of the cases where that currently could be a problem it won't be (as
+      both of the conflicting items would be invalid in that spot anyway).
+   -- When a unit is formed, it is now tagged with the forming faction and
+      that is a valid alias for the rest of the turn.   This is to prevent
+      the ambiguity which could crop up when dealing with units which were
+      formed and given during the same turn.

@@ -61,15 +61,15 @@ class Battle : public AListElem
 		void Report(Areport *,Faction *);
 		void AddLine(const AString &);
 
-		int Run( ARegion *, Unit *, AList *, Unit *, AList *, int ass,
-				ARegionList *pRegs );
+		int Run(ARegion *, Unit *, AList *, Unit *, AList *, int ass,
+				ARegionList *pRegs);
 		void FreeRound(Army *,Army *);
 		void NormalRound(int,Army *,Army *);
-		void DoAttack( int round, Soldier *a, Army *attackers, Army *def,
-				int behind );
+		void DoAttack(int round, Soldier *a, Army *attackers, Army *def,
+				int behind);
 
-		void DoAttack(int,Soldier *,Army *,int);
-		void GetSpoils(AList *,ItemList *);
+		void DoAttack(int, Soldier *, Army *, int);
+		void GetSpoils(AList *,ItemList *, int);
 
 		//
 		// These functions should be implemented in specials.cpp

@@ -160,7 +160,7 @@ int Object::IsBuilding()
 int Object::CanModify()
 {
 	return (ObjectDefs[type].flags & ObjectType::CANMODIFY);
-} 
+}
 
 Unit * Object::GetUnit(int num)
 {
@@ -172,10 +172,20 @@ Unit * Object::GetUnit(int num)
 
 Unit * Object::GetUnitAlias(int alias,int faction)
 {
-	forlist((&units))
-		if (((Unit *) elem)->alias == alias &&
-				((Unit *) elem)->faction->num == faction)
-			return ((Unit *) elem);
+	// First search for units with the 'formfaction'
+	forlist((&units)) {
+		if(((Unit *)elem)->alias == alias &&
+				((Unit *)elem)->formfaction->num == faction)
+			return ((Unit *)elem);
+	}
+	// Now search against their current faction
+	{
+		forlist((&units)) {
+			if (((Unit *) elem)->alias == alias &&
+					((Unit *) elem)->faction->num == faction)
+				return ((Unit *) elem);
+		}
+	}
 	return 0;
 }
 
@@ -412,7 +422,7 @@ AString *ObjectDescription(int obj)
 		*temp += " to build.";
 	}
 
-	if(o->productionAided != -1 && 
+	if(o->productionAided != -1 &&
 			!(ItemDefs[o->productionAided].flags & ItemType::DISABLED)) {
 		*temp += " This trade structure increases the amount of ";
 		if(o->productionAided == I_SILVER) {

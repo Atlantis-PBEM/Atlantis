@@ -117,7 +117,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck )
 {
     UnitId *id = ParseUnit(o);
-    
+
     if (!id) {
         u->Error("CAST: No unit specified.");
         return;
@@ -127,7 +127,7 @@ void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck )
     order->id = id;
     order->spell = S_MIND_READING;
     order->level = 1;
-    
+
     u->ClearCastOrders();
     u->castorders = order;
 }
@@ -135,12 +135,12 @@ void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck )
 void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck )
 {
     AString *token = o->gettoken();
-    
+
     if (!token) {
         u->Error("CAST: Missing arguments.");
         return;
     }
-    
+
     if (*token == "eagle") {
         CastIntOrder *order = new CastIntOrder;
         order->spell = S_BIRD_LORE;
@@ -149,33 +149,33 @@ void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck )
         u->castorders = order;
         return;
     }
-    
+
     if (*token == "direction") {
         delete token;
         token = o->gettoken();
-        
+
         if (!token) {
             u->Error("CAST: Missing arguments.");
             return;
         }
-        
+
         int dir = ParseDir(token);
         delete token;
         if (dir == -1 || dir > NDIRS) {
             u->Error("CAST: Invalid direction.");
             return;
         }
-    
+
         CastIntOrder *order = new CastIntOrder;
         order->spell = S_BIRD_LORE;
         order->level = 1;
         order->target = dir;
         u->ClearCastOrders();
         u->castorders = order;
-        
+
         return;
     }
-    
+
     u->Error("CAST: Invalid arguments.");
     delete token;
 }
@@ -183,7 +183,7 @@ void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck )
 void Game::ProcessInvisibility(Unit *u,AString *o, OrdersCheck *pCheck )
 {
     AString *token = o->gettoken();
-    
+
     if (!token || !(*token == "units")) {
         u->Error("CAST: Must specify units to render invisible.");
         return;
@@ -202,7 +202,7 @@ void Game::ProcessInvisibility(Unit *u,AString *o, OrdersCheck *pCheck )
         u->ClearCastOrders();
         u->castorders = order;
     }
-    
+
     UnitId *id = ParseUnit(o);
     while (id) {
         order->units.Add(id);
@@ -216,44 +216,44 @@ void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
     order->spell = S_CREATE_PHANTASMAL_DEMONS;
     order->level = 0;
     order->target = 1;
-    
+
     AString *token = o->gettoken();
-    
+
     if (!token) {
         u->Error("CAST: Illusion to summon must be given.");
         delete order;
         return;
     }
-    
+
     if (*token == "imp" || *token == "imps") {
         order->level = 1;
     }
-    
+
     if (*token == "demon" || *token == "demons") {
         order->level = 3;
     }
-    
+
     if (*token == "balrog" || *token == "balrogs") {
         order->level = 5;
     }
-    
+
     delete token;
-    
+
     if (!order->level) {
         u->Error("CAST: Can't summon that illusion.");
         delete order;
         return;
     }
-    
+
     token = o->gettoken();
-    
+
     if (!token) {
         order->target = 1;
     } else {
         order->target = token->value();
         delete token;
     }
-    
+
     u->ClearCastOrders();
     u->castorders = order;
 }
@@ -609,7 +609,7 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 
 	delete token;
 	u->Error("CAST: Invalid argument.");
-}  
+}
 
 void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 {
@@ -1038,12 +1038,12 @@ void Game::RunDragonLore(ARegion *r, Unit *u)
 	}
 	r->NotifySpell(u,S_EARTH_LORE, &regions );
 }
-  
+
 void Game::RunBirdLore(ARegion *r,Unit *u)
 {
 	CastIntOrder *order = (CastIntOrder *) u->castorders;
 	int type = regions.GetRegionArray(r->zloc)->levelType;
-    
+
 	if(type != ARegionArray::LEVEL_SURFACE) {
 		AString error = "CAST: Bird Lore may only be cast on the surface of ";
 		error += Globals->WORLD_NAME;
@@ -1059,12 +1059,12 @@ void Game::RunBirdLore(ARegion *r,Unit *u)
 			u->Error("CAST: No such region.");
 			return;
 		}
-        
+
 		Farsight *f = new Farsight;
 		f->faction = u->faction;
 		f->level = u->GetSkill(S_BIRD_LORE);
 		tar->farsees.Add(f);
-		u->Event(AString("Sends birds to spy on ") + 
+		u->Event(AString("Sends birds to spy on ") +
 				tar->Print( &regions ) + ".");
 		r->NotifySpell(u,S_EARTH_LORE, &regions );
 		return;
@@ -1072,7 +1072,7 @@ void Game::RunBirdLore(ARegion *r,Unit *u)
 
 	int level = u->GetSkill(S_BIRD_LORE);
 	int max = (level - 2) * (level - 2);
-    
+
 	if (u->items.GetNum(I_EAGLE) >= max) {
 		u->Error("CAST: Mage can't summon more eagles.");
 		return;
@@ -1082,7 +1082,7 @@ void Game::RunBirdLore(ARegion *r,Unit *u)
 	u->Event("Summons an eagle.");
 	r->NotifySpell(u,S_EARTH_LORE, &regions );
 }
-      
+
 void Game::RunWolfLore(ARegion *r,Unit *u)
 {
 	if (TerrainDefs[r->type].similar_type != R_MOUNTAIN &&
@@ -1139,7 +1139,7 @@ void Game::RunInvisibility(ARegion *r,Unit *u)
 					*(u->name) + ".");
 		}
 	}
-  
+
 	r->NotifySpell(u,S_ILLUSION, &regions );
 	u->Event("Casts invisibility.");
 }
@@ -1307,7 +1307,7 @@ void Game::RunFarsight(ARegion *r,Unit *u)
 	tar->farsees.Add(f);
 	u->Event("Casts Farsight.");
 }
-    
+
 void Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 {
 	int level = u->GetSkill(S_GATE_LORE);

@@ -49,7 +49,9 @@ void Game::RunOrders()
     RunStealOrders();
     Awrite("Running GIVE/PAY/TRANSFER Orders...");
     DoGiveOrders();
-    Awrite("Running DESTROY Orders...");
+	Awrite("Running EXCHANGE Orders...");
+	DoExchangeOrders();
+	Awrite("Running DESTROY Orders...");
     RunDestroyOrders();
     Awrite("Running PILLAGE Orders...");
     RunPillageOrders();
@@ -257,7 +259,7 @@ void Game::RunStealOrders()
 						Do1Steal(r,o,u);
 					} else if (u->stealorders->type == O_ASSASSINATE) {
 						Do1Assassinate(r,o,u);
-				   	}
+					}
 					delete u->stealorders;
 					u->stealorders = 0;
 				}
@@ -340,20 +342,20 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
         }
         return;
     }
-	// LLS
-    //
-    // New rule; if a target has an amulet of true seeing they can't be
-    // assassinated by someone with a ring of invisibility
-    //
-    if (u->items.GetNum( I_RINGOFI ) &&
-        tar->items.GetNum( I_AMULETOFTS ) >= tar->GetMen()) {
-        tar->Event( "Assassination prevented by amulet of true seeing." );
-        u->Event( AString( "Attempts to assassinate " ) + *(tar->name) +
-				", but is prevented by amulet of true seeing." );
-        return;
-    }
 
-    RunBattle(r,u,tar,1);
+	int ass = 1;
+	if(u->items.GetNum(I_RINGOFI)) {
+		ass = 2; // Check if assassin has a ring.
+		// New rule: if a target has an amulet of true seeing they
+		// cannot be assassinated by someone with a ring of invisibility
+		if(tar->AmtsPreventCrime(u)) {
+			tar->Event( "Assassination prevented by amulet of true seeing." );
+			u->Event( AString( "Attempts to assassinate " ) + *(tar->name) +
+					", but is prevented by amulet of true seeing." );
+			return;
+		}
+    }
+    RunBattle(r,u,tar,ass);
 }
 
 void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
@@ -418,8 +420,7 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
     // New rule; if a target has an amulet of true seeing they can't be
     // stolen from by someone with a ring of invisibility
     //
-    if (u->items.GetNum( I_RINGOFI ) &&
-        tar->items.GetNum( I_AMULETOFTS ) >= tar->GetMen()) {
+	if(tar->AmtsPreventCrime(u)) {
         tar->Event( "Theft prevented by amulet of true seeing." );
         u->Event( AString( "Attempts to steal from " ) + *(tar->name) + ", but "
                   "is prevented by amulet of true seeing." );
@@ -1742,8 +1743,28 @@ void Game::DoGiveOrders()
 			forlist((&obj->units)) {
 				Unit * u = (Unit *) elem;
 				forlist((&u->giveorders)) {
-					Order * o = (Order *) elem;
-					if (DoGiveOrder(r,u,(GiveOrder *) o)) break;
+					GiveOrder *o = (GiveOrder *)elem;
+					if(o->item < 0) {
+						if(o->amount != -2) {
+							u->Error("GIVE: Invalid item.");
+						} else {
+							forlist((&u->items)) {
+								Item *item = (Item *)elem;
+								if(ItemDefs[item->type].type & (-o->item)) {
+									GiveOrder go;
+									go.amount = item->num;
+									go.except = 0;
+									go.item = item->type;
+									go.target = o->target;
+									go.type = o->type;
+									DoGiveOrder(r, u, &go);
+									go.target = NULL;
+								}
+							}
+						}
+					} else if (DoGiveOrder(r, u, o)) {
+						break;
+					}
 				}
 				u->giveorders.DeleteAll();
 			}
@@ -1751,8 +1772,169 @@ void Game::DoGiveOrders()
 	}
 }
 
+void Game::DoExchangeOrders()
+{
+	forlist((&regions)) {
+		ARegion * r = (ARegion *) elem;
+		forlist((&r->objects)) {
+			Object * obj = (Object *) elem;
+			forlist((&obj->units)) {
+				Unit * u = (Unit *) elem;
+				forlist((&u->exchangeorders)) {
+					Order * o = (Order *) elem;
+					DoExchangeOrder(r,u,(ExchangeOrder *) o);
+				}
+			}
+		}
+	}
+}
+
+void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
+{
+	// Check if the destination unit exists
+	Unit *t = r->GetUnitId(o->target,u->faction->num);
+	if (!t) {
+		u->Error(AString("EXCHANGE: Nonexistant target (") +
+				o->target->Print() + ").");
+		u->exchangeorders.Remove(o);
+		return;
+	}
+
+	// Check each Item can be given
+	if( ItemDefs[ o->giveItem].flags & ItemType::CANTGIVE ) {
+		u->Error(AString("EXCHANGE: Can't trade ") +
+				ItemDefs[o->giveItem].names + ".");
+		u->exchangeorders.Remove(o);
+		return;
+	}
+
+	if( ItemDefs[ o->expectItem].flags & ItemType::CANTGIVE ) {
+		u->Error(AString("EXCHANGE: Can't trade ") +
+				ItemDefs[o->expectItem].names + ".");
+		u->exchangeorders.Remove(o);
+		return;
+	}
+
+	if (ItemDefs[o->giveItem].type & IT_MAN) {
+		u->Error("EXCHANGE: Exchange aborted.  Men may not be traded.");
+		u->exchangeorders.Remove(o);
+		return;
+	}
+
+	if (ItemDefs[o->expectItem].type & IT_MAN) {
+		u->Error("EXCHANGE: Exchange aborted. Men may not be traded.");
+		u->exchangeorders.Remove(o);
+		return;
+	}
+
+	// New RULE -- Must be able to see unit to give something to them!
+	if(!u->CanSee(r, t)) {
+		u->Error(AString("EXCHANGE: Nonexistant target (") +
+				o->target->Print() + ").");
+		return;
+	}
+	// Check other unit has enough to give
+	int amtRecieve = o->expectAmount;
+	if (amtRecieve > t->items.GetNum(o->expectItem)) {
+		t->Error(AString("EXCHANGE: Not giving enough. Expecting ") +
+				ItemString(o->expectItem, o->expectAmount) + ".");
+		u->Error(AString("EXCHANGE: Exchange aborted.  Not enough ") +
+				"recieved. Expecting " +
+			ItemString(o->expectItem,o->expectAmount) + ".");
+		o->exchangeStatus = 0;
+		return;
+	}
+
+	int exchangeOrderFound = 0;
+	// Check if other unit has a reciprocal exchange order
+	forlist ((&t->exchangeorders)) {
+		ExchangeOrder * tOrder = (ExchangeOrder *) elem;
+		Unit * ptrUnitTemp = r->GetUnitId(tOrder->target, t->faction->num);
+		if (ptrUnitTemp == u) {
+			if (tOrder->expectItem == o->giveItem) {
+				if (tOrder->giveItem == o->expectItem) {
+					exchangeOrderFound = 1;
+					if (tOrder->giveAmount < o->expectAmount) {
+						t->Error(AString("EXCHANGE: Not giving enough. ") +
+								"Expecting " +
+								ItemString(o->expectItem,o->expectAmount) +
+								".");
+						u->Error(AString("EXCHANGE: Exchange aborted. ") +
+								"Not enough recieved. Expecting " +
+								ItemString(o->expectItem,o->expectAmount) +
+								".");
+						tOrder->exchangeStatus = 0;
+						o->exchangeStatus = 0;
+						return;
+					} else if (tOrder->giveAmount > o->expectAmount) {
+						t->Error(AString("EXCHANGE: Exchange aborted. Too ") +
+								"much given. Expecting " +
+								ItemString(o->expectItem,o->expectAmount) +
+								".");
+						u->Error(AString("EXCHANGE: Exchange aborted. Too ") +
+								"much offered. Expecting " +
+								ItemString(o->expectItem,o->expectAmount) +
+								".");
+						tOrder->exchangeStatus = 0;
+						o->exchangeStatus = 0;
+					} else if (tOrder->giveAmount == o->expectAmount)
+						o->exchangeStatus = 1;
+
+					if ((o->exchangeStatus == 1) &&
+							(tOrder->exchangeStatus == 1)) {
+						u->Event(AString("Exchanges ") +
+								ItemString(o->giveItem, o->giveAmount) +
+								" with " + *t->name + " for " +
+								ItemString(tOrder->giveItem,
+									tOrder->giveAmount) +
+								".");
+						t->Event(AString("Exchanges ") +
+								ItemString(tOrder->giveItem,
+									tOrder->giveAmount) + " with " +
+								*u->name + " for " +
+								ItemString(o->giveItem,o->giveAmount) + ".");
+						u->items.SetNum(o->giveItem,
+								u->items.GetNum(o->giveItem) - o->giveAmount);
+						t->items.SetNum(o->giveItem,
+								t->items.GetNum(o->giveItem) + o->giveAmount);
+						t->items.SetNum(tOrder->giveItem,
+								t->items.GetNum(tOrder->giveItem) -
+								tOrder->giveAmount);
+						u->items.SetNum(tOrder->giveItem,
+								u->items.GetNum(tOrder->giveItem) +
+								tOrder->giveAmount);
+						u->faction->DiscoverItem(tOrder->giveItem, 0, 1);
+						t->faction->DiscoverItem(o->giveItem, 0, 1);
+						u->exchangeorders.Remove(o);
+						t->exchangeorders.Remove(tOrder);
+						return;
+					} else if ((o->exchangeStatus >= 0) &&
+							(tOrder->exchangeStatus >= 0)) {
+						u->exchangeorders.Remove(o);
+						t->exchangeorders.Remove(tOrder);
+					}
+				}
+			}
+		}
+	}
+	if (!exchangeOrderFound) {
+		if(!u->CanSee(r, t)) {
+			u->Error(AString("EXCHANGE: Nonexistant target (") +
+					o->target->Print() + ").");
+			u->exchangeorders.Remove(o);
+			return;
+		} else {
+			u->Error("EXCHANGE: target unit did not issue a matching "
+					"exchange order.");
+			u->exchangeorders.Remove(o);
+			return;
+		}
+	}
+}
+
 int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 {
+	// Check there is enough to give
 	int amt = o->amount;
 	if (amt != -2 && amt > u->items.GetNum(o->item)) {
 		u->Error("GIVE: Not enough.");
@@ -1922,56 +2104,57 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 	return 0;
 }
 
-void Game::DoGuard1Orders() {
-  forlist((&regions)) {
-    ARegion * r = (ARegion *) elem;
-    forlist((&r->objects)) {
-      Object * obj = (Object *) elem;
-      forlist((&obj->units)) {
-	Unit * u = (Unit *) elem;
-	if (u->guard == GUARD_SET ||
-	    u->guard == GUARD_GUARD) {
-	  if (!u->Taxers()) {
-	    u->guard = GUARD_NONE;
-	    u->Error("Must be combat ready to be on guard.");
-	    continue;
-	  }
-	  if (u->type != U_GUARD && r->HasCityGuard()) {
-	    u->guard = GUARD_NONE;
-	    u->Error("Is prevented from guarding by the Guardsmen.");
-	    continue;
-	  }
-	  u->guard = GUARD_GUARD;
+void Game::DoGuard1Orders()
+{
+	forlist((&regions)) {
+		ARegion * r = (ARegion *) elem;
+		forlist((&r->objects)) {
+			Object * obj = (Object *) elem;
+			forlist((&obj->units)) {
+				Unit * u = (Unit *) elem;
+				if (u->guard == GUARD_SET || u->guard == GUARD_GUARD) {
+					if (!u->Taxers()) {
+						u->guard = GUARD_NONE;
+						u->Error("Must be combat ready to be on guard.");
+						continue;
+					}
+					if (u->type != U_GUARD && r->HasCityGuard()) {
+						u->guard = GUARD_NONE;
+						u->Error("Is prevented from guarding by the "
+								"Guardsmen.");
+						continue;
+					}
+					u->guard = GUARD_GUARD;
+				}
+			}
+		}
 	}
-      }
-    }
-  }
 }
 
-void Game::FindDeadFactions() {
-  forlist((&factions)) {
-    ((Faction *) elem)->CheckExist(&regions);
-  }
+void Game::FindDeadFactions()
+{
+	forlist((&factions)) {
+		((Faction *) elem)->CheckExist(&regions);
+	}
 }
 
-void Game::DeleteEmptyUnits() {
-  forlist((&regions)) {
-    ARegion * region = (ARegion *) elem;
-    DeleteEmptyInRegion(region);
-  }
+void Game::DeleteEmptyUnits()
+{
+	forlist((&regions)) {
+		ARegion * region = (ARegion *) elem;
+		DeleteEmptyInRegion(region);
+	}
 }
 
-void Game::DeleteEmptyInRegion(ARegion * region) {
-  forlist(&region->objects) {
-    Object * obj = (Object *) elem;
-    forlist (&obj->units) {
-      Unit * unit = (Unit *) elem;
-      if (unit->IsAlive() == 0) {
-	region->Kill(unit);
-      }
-    }
-  }
+void Game::DeleteEmptyInRegion(ARegion * region)
+{
+	forlist(&region->objects) {
+		Object * obj = (Object *) elem;
+		forlist (&obj->units) {
+			Unit * unit = (Unit *) elem;
+			if (unit->IsAlive() == 0) {
+				region->Kill(unit);
+			}
+		}
+	}
 }
-
-
-

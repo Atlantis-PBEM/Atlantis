@@ -57,6 +57,7 @@ enum {
 	O_UNIT,
 	O_ADDRESS,
 	O_ADVANCE,
+	O_ARMOR,
 	O_ASSASSINATE,
 	O_ATTACK,
 	O_AUTOTAX,
@@ -72,8 +73,10 @@ enum {
 	O_DESCRIBE,
 	O_DESTROY,
 	O_ENDFORM,
+	O_ENDTURN,
 	O_ENTER,
 	O_ENTERTAIN,
+	O_EXCHANGE,
 	O_FACTION,
 	O_FIND,
 	O_FORGET,
@@ -104,6 +107,8 @@ enum {
 	O_STUDY,
 	O_TAX,
 	O_TEACH,
+	O_TURN,
+	O_WEAPON,
 	O_WITHDRAW,
 	O_WORK,
 	NORDERS
@@ -252,7 +257,7 @@ class StealOrder : public Order {
 		StealOrder();
 		~StealOrder();
 
-		UnitId * target;
+		UnitId *target;
 		int item;
 };
 
@@ -261,7 +266,7 @@ class AssassinateOrder : public Order {
 		AssassinateOrder();
 		~AssassinateOrder();
 
-		UnitId * target;
+		UnitId *target;
 };
 
 class ForgetOrder : public Order {
@@ -270,6 +275,30 @@ class ForgetOrder : public Order {
 		~ForgetOrder();
 
 		int skill;
+};
+
+// Add class for exchange
+class ExchangeOrder : public Order {
+	public:
+		ExchangeOrder();
+		~ExchangeOrder();
+
+		int giveItem;
+		int giveAmount;
+		int expectItem;
+		int expectAmount;
+
+		int exchangeStatus;
+
+		UnitId *target;
+};
+
+class TurnOrder : public Order {
+	public:
+		TurnOrder();
+		~TurnOrder();
+		int repeating;
+		AList turnOrders;
 };
 
 class CastOrder : public Order {
@@ -306,7 +335,7 @@ class CastRegionOrder : public CastOrder {
 		CastRegionOrder();
 		~CastRegionOrder();
 
-		int xloc,yloc,zloc;
+		int xloc, yloc, zloc;
 };
 
 class CastIntOrder : public CastOrder {

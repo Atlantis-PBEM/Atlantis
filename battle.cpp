@@ -212,7 +212,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
     b->Reset();
 }
 
-void Battle::GetSpoils(AList * losers, ItemList *spoils)
+void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
 {
 	forlist(losers) {
 		Unit * u = ((Location *) elem)->unit;
@@ -220,13 +220,16 @@ void Battle::GetSpoils(AList * losers, ItemList *spoils)
 		int numdead = u->losses;
 		forlist(&u->items) {
 			Item * i = (Item *) elem;
-			if (!IsSoldier(i->type)) {
-				int num = (i->num * numdead + getrandom(numalive + numdead)) /
-					(numalive + numdead);
-				int num2 = (num + getrandom(2))/2;
-				spoils->SetNum(i->type,spoils->GetNum(i->type) + num2);
-				u->items.SetNum(i->type,i->num - num);
-			}
+			if(IsSoldier(i->type)) continue;
+			// New rule:  Assassins with RINGS cannot get AMTS in spoils
+			// This rule is only meaningful with Proportional AMTS usage
+			// is enabled, otherwise it has no effect.
+			if((ass == 2) && (i->type == I_AMULETOFTS)) continue;
+			int num = (i->num * numdead + getrandom(numalive + numdead)) /
+				(numalive + numdead);
+			int num2 = (num + getrandom(2))/2;
+			spoils->SetNum(i->type, spoils->GetNum(i->type) + num2);
+			u->items.SetNum(i->type, i->num - num);
 		}
 	}
 }
@@ -270,15 +273,15 @@ int Battle::Run( ARegion * region,
 		}
         AddLine("Total Casualties:");
         ItemList *spoils = new ItemList;
-        armies[0]->Lose(this,spoils);
-        GetSpoils(atts, spoils);
+        armies[0]->Lose(this, spoils);
+        GetSpoils(atts, spoils, ass);
         AString temp;
         if (spoils->Num()) {
             temp = AString("Spoils: ") + spoils->Report(2,0,1) + ".";
         } else {
             temp = "Spoils: none.";
         }
-        armies[1]->Win(this,spoils);
+        armies[1]->Win(this, spoils);
         AddLine("");
         AddLine(temp);
         AddLine("");
@@ -305,15 +308,15 @@ int Battle::Run( ARegion * region,
 		}
         AddLine("Total Casualties:");
         ItemList *spoils = new ItemList;
-        armies[1]->Lose(this,spoils);
-        GetSpoils(defs,spoils);
+        armies[1]->Lose(this, spoils);
+        GetSpoils(defs, spoils, ass);
         AString temp;
         if (spoils->Num()) {
             temp = AString("Spoils: ") + spoils->Report(2,0,1) + ".";
         } else {
             temp = "Spoils: none.";
         }
-        armies[0]->Win(this,spoils);
+        armies[0]->Win(this, spoils);
         AddLine("");
         AddLine(temp);
         AddLine("");
@@ -693,12 +696,12 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 
 	GetSides(r,afacs,dfacs,atts,defs,attacker,target,ass,adv);
 
-	if(atts.Num() == 0) {
+	if(atts.Num() <= 0) {
 		// This shouldn't happen, but just in case
 		Awrite(AString("Cannot find any attackers!"));
 		return BATTLE_IMPOSSIBLE;
 	}
-	if(defs.Num() == 0) {
+	if(defs.Num() <= 0) {
 		// This shouldn't happen, but just in case
 		Awrite(AString("Cannot find any defenders!"));
 		return BATTLE_IMPOSSIBLE;

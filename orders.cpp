@@ -25,222 +25,291 @@
 #include "orders.h"
 
 char * od[] = {
-  "#atlantis",
-  "#end",
-  "unit",
-  "address",
-  "advance",
-  "assassinate",
-  "attack",
-  "autotax",
-  "avoid",
-  "behind",
-  "build",
-  "buy",
-  "cast",
-  "claim",
-  "combat",
-  "consume",
-  "declare",
-  "describe",
-  "destroy",
-  "end",
-  "enter",
-  "entertain",
-  "faction",
-  "find",
-  "forget",
-  "form",
-  "give",
-  "guard",
-  "hold",
-  "leave",
-  "move",
-  "name",
-  "noaid",
-  "nocross",
-  "nospoils",
-  "option",
-  "password",
-  "pillage",
-  "prepare",
-  "produce",
-  "promote",
-  "quit",
-  "restart",
-  "reveal",
-  "sail",
-  "sell",
-  "show",
-  "spoils",
-  "steal",
-  "study",
-  "tax",
-  "teach",
-  "withdraw",
-  "work",
+	"#atlantis",
+	"#end",
+	"unit",
+	"address",
+	"advance",
+	"armor",
+	"assassinate",
+	"attack",
+	"autotax",
+	"avoid",
+	"behind",
+	"build",
+	"buy",
+	"cast",
+	"claim",
+	"combat",
+	"consume",
+	"declare",
+	"describe",
+	"destroy",
+	"end",
+	"endturn",
+	"enter",
+	"entertain",
+	"exchange",
+	"faction",
+	"find",
+	"forget",
+	"form",
+	"give",
+	"guard",
+	"hold",
+	"leave",
+	"move",
+	"name",
+	"noaid",
+	"nocross",
+	"nospoils",
+	"option",
+	"password",
+	"pillage",
+	"prepare",
+	"produce",
+	"promote",
+	"quit",
+	"restart",
+	"reveal",
+	"sail",
+	"sell",
+	"show",
+	"spoils",
+	"steal",
+	"study",
+	"tax",
+	"teach",
+	"turn",
+	"weapon",
+	"withdraw",
+	"work",
 };
 
 char ** OrderStrs = od;
 
-int Parse1Order(AString * token) {
-  for (int i=0; i<NORDERS; i++)
-    if (*token == OrderStrs[i]) return i;
-  return -1;
+int Parse1Order(AString * token)
+{
+	for (int i=0; i<NORDERS; i++)
+		if (*token == OrderStrs[i]) return i;
+	return -1;
 }
 
-Order::Order() {
-  type = NORDERS;
+Order::Order()
+{
+	type = NORDERS;
 }
 
 Order::~Order() {
 }
 
-MoveOrder::MoveOrder() {
-  type = O_MOVE;
+ExchangeOrder::ExchangeOrder()
+{
+	type = O_EXCHANGE;
+	exchangeStatus = -1;
 }
 
-MoveOrder::~MoveOrder() {
-}
-
-ForgetOrder::ForgetOrder() {
-  type = O_FORGET;
-}
-
-ForgetOrder::~ForgetOrder() {
-}
-
-WithdrawOrder::WithdrawOrder() {
-	type = O_WITHDRAW;
-}
-
-WithdrawOrder::~WithdrawOrder() {
-}
-
-GiveOrder::GiveOrder() {
-  type = O_GIVE;
-}
-
-GiveOrder::~GiveOrder() {
-  delete target;
-}
-
-StudyOrder::StudyOrder() {
-  type = O_STUDY;
-}
-
-StudyOrder::~StudyOrder() {
-}
-
-TeachOrder::TeachOrder() {
-  type = O_TEACH;
-}
-
-TeachOrder::~TeachOrder() {
-}
-
-ProduceOrder::ProduceOrder() {
-  type = O_PRODUCE;
-}
-
-ProduceOrder::~ProduceOrder() {
-}
-
-BuyOrder::BuyOrder() {
-  type = O_BUY;
-}
-
-BuyOrder::~BuyOrder() {
-}
-
-SellOrder::SellOrder() {
-  type = O_SELL;
-}
-
-SellOrder::~SellOrder() {
-}
-
-AttackOrder::AttackOrder() {
-  type = O_ATTACK;
-}
-
-AttackOrder::~AttackOrder() {
-}
-
-BuildOrder::BuildOrder() {
-  type = O_BUILD;
-}
-
-BuildOrder::~BuildOrder() {
+ExchangeOrder::~ExchangeOrder()
+{
 	if(target) delete target;
 }
 
-SailOrder::SailOrder() {
-  type = O_SAIL;
+TurnOrder::TurnOrder()
+{
+	type = O_TURN;
+	repeating = 0;
 }
 
-SailOrder::~SailOrder() {
+TurnOrder::~TurnOrder()
+{
 }
 
-FindOrder::FindOrder() {
-  type = O_FIND;
+MoveOrder::MoveOrder()
+{
+	type = O_MOVE;
 }
 
-FindOrder::~FindOrder() {
+MoveOrder::~MoveOrder()
+{
 }
 
-StealOrder::StealOrder() {
-  type = O_STEAL;
+ForgetOrder::ForgetOrder()
+{
+	type = O_FORGET;
 }
 
-StealOrder::~StealOrder() {
-  if (target) delete target;
+ForgetOrder::~ForgetOrder()
+{
 }
 
-AssassinateOrder::AssassinateOrder() {
-  type = O_ASSASSINATE;
+WithdrawOrder::WithdrawOrder()
+{
+	type = O_WITHDRAW;
 }
 
-AssassinateOrder::~AssassinateOrder() {
-  if (target) delete target;
+WithdrawOrder::~WithdrawOrder()
+{
 }
 
-CastOrder::CastOrder() {
-  type = O_CAST;
+GiveOrder::GiveOrder()
+{
+	type = O_GIVE;
 }
 
-CastOrder::~CastOrder() {
+GiveOrder::~GiveOrder()
+{
+	if(target) delete target;
 }
 
-CastMindOrder::CastMindOrder() {
-  id = 0;
+StudyOrder::StudyOrder()
+{
+	type = O_STUDY;
 }
 
-CastMindOrder::~CastMindOrder() {
-  delete id;
+StudyOrder::~StudyOrder()
+{
 }
 
-TeleportOrder::TeleportOrder() {
+TeachOrder::TeachOrder()
+{
+	type = O_TEACH;
 }
 
-TeleportOrder::~TeleportOrder() {
+TeachOrder::~TeachOrder()
+{
 }
 
-CastRegionOrder::CastRegionOrder() {
+ProduceOrder::ProduceOrder()
+{
+	type = O_PRODUCE;
 }
 
-CastRegionOrder::~CastRegionOrder() {
+ProduceOrder::~ProduceOrder()
+{
 }
 
-CastIntOrder::CastIntOrder() {
+BuyOrder::BuyOrder()
+{
+	type = O_BUY;
 }
 
-CastIntOrder::~CastIntOrder() {
+BuyOrder::~BuyOrder()
+{
 }
 
-CastUnitsOrder::CastUnitsOrder() {
+SellOrder::SellOrder()
+{
+	type = O_SELL;
 }
 
-CastUnitsOrder::~CastUnitsOrder() {
+SellOrder::~SellOrder()
+{
 }
 
+AttackOrder::AttackOrder()
+{
+	type = O_ATTACK;
+}
+
+AttackOrder::~AttackOrder()
+{
+}
+
+BuildOrder::BuildOrder()
+{
+	type = O_BUILD;
+}
+
+BuildOrder::~BuildOrder()
+{
+	if(target) delete target;
+}
+
+SailOrder::SailOrder()
+{
+	type = O_SAIL;
+}
+
+SailOrder::~SailOrder()
+{
+}
+
+FindOrder::FindOrder()
+{
+	type = O_FIND;
+}
+
+FindOrder::~FindOrder()
+{
+}
+
+StealOrder::StealOrder()
+{
+	type = O_STEAL;
+}
+
+StealOrder::~StealOrder()
+{
+	if (target) delete target;
+}
+
+AssassinateOrder::AssassinateOrder()
+{
+	type = O_ASSASSINATE;
+}
+
+AssassinateOrder::~AssassinateOrder()
+{
+	if (target) delete target;
+}
+
+CastOrder::CastOrder()
+{
+	type = O_CAST;
+}
+
+CastOrder::~CastOrder()
+{
+}
+
+CastMindOrder::CastMindOrder()
+{
+	id = 0;
+}
+
+CastMindOrder::~CastMindOrder()
+{
+	delete id;
+}
+
+TeleportOrder::TeleportOrder()
+{
+}
+
+TeleportOrder::~TeleportOrder()
+{
+}
+
+CastRegionOrder::CastRegionOrder()
+{
+}
+
+CastRegionOrder::~CastRegionOrder()
+{
+}
+
+CastIntOrder::CastIntOrder()
+{
+}
+
+CastIntOrder::~CastIntOrder()
+{
+}
+
+CastUnitsOrder::CastUnitsOrder()
+{
+}
+
+CastUnitsOrder::~CastUnitsOrder()
+{
+}

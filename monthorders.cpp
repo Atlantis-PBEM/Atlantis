@@ -500,6 +500,15 @@ void Game::RunBuildHelpers(ARegion *r)
 							u->monthorders = 0;
 							continue;
 						}
+						// Make sure that unit considers you friendly!
+						if(target->faction->GetAttitude(u->faction->num) <
+								A_FRIENDLY) {
+							u->Error("BUILD: Unit you are helping rejects "
+									"your help.");
+							delete u->monthorders;
+							u->monthorders = 0;
+							continue;
+						}
 						if(u->object != target->object)
 							u->MoveUnit(target->object);
 					}
@@ -1046,9 +1055,12 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
             cost /= 2;
         }
         if (region->type != R_NEXUS &&
-            unit->CalcMovePoints() - unit->movepoints < cost)
-        {
-            unit->Error(AString("MOVE: Unit does not have enough movement points."));
+				unit->CalcMovePoints() - unit->movepoints < cost) {
+			if(unit->MoveType() == M_NONE) {
+				unit->Error("MOVE: Unit is overloaded and cannot move.");
+			} else {
+				unit->Error("MOVE: Unit has insufficient movement points.");
+			}
             goto done_moving;
         }
 

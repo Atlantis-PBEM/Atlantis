@@ -40,7 +40,7 @@ class Game;
 #include "production.h"
 #include "object.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 0, 8 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 0, 9 )
 
 class OrdersCheck
 {
@@ -62,8 +62,8 @@ class Game
 public:
     Game();
     ~Game();
-  
-    int NewGame();	
+
+    int NewGame();
     int OpenGame();
     void DummyGame();
 
@@ -93,7 +93,7 @@ public:
     int SetupFaction( Faction *pFac );
 
     void ViewFactions();
-  
+
     //
     // Get a new unit, with its number assigned.
     //
@@ -107,7 +107,7 @@ public:
 
 	// Fix broken boat numbers
 	void FixBoatNums();
-  
+
     //
     // Get a unit by its number.
     //
@@ -145,7 +145,7 @@ private:
 	void CountAllApprentices();
     void WriteReport();
     void DeleteDeadFactions();
-    
+
     //
     // Standard creation functions.
     //
@@ -231,7 +231,7 @@ private:
 	void ModifyObjectMonster(int ob, int monster);
 	void ModifyObjectConstruction(int ob, int it, int num, int sk, int lev);
 	void ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages);
-	
+
 	void ClearTerrainRaces(int t);
 	void ModifyTerrainRace(int t, int i, int r);
 	void ModifyTerrainCoastRace(int t, int i, int r);
@@ -284,7 +284,7 @@ private:
     int monfaction;
     int doExtraInit;
 
-    //  
+    //
     // Parsing functions
     //
     void ParseError( OrdersCheck *pCheck, Unit *pUnit, Faction *pFac,
@@ -335,6 +335,8 @@ private:
     void ProcessClaimOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessCombatOrder(Unit *,AString *, OrdersCheck *pCheck );
 	void ProcessPrepareOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ProcessWeaponOrder(Unit *u, AString *o, OrdersCheck *pCheck);
+	void ProcessArmorOrder(Unit *u, AString *o, OrdersCheck *pCheck);
     void ProcessCastOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessEntertainOrder(Unit *, OrdersCheck *pCheck );
     void ProcessForgetOrder(Unit *,AString *, OrdersCheck *pCheck );
@@ -346,7 +348,9 @@ private:
 	void ProcessSpoilsOrder(Unit *, AString *, OrdersCheck *pCheck);
     void ProcessAutoTaxOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessOptionOrder(Unit *,AString *, OrdersCheck *pCheck );
-    void ProcessPasswordOrder(Unit *,AString *, OrdersCheck *pCheck );
+    void ProcessPasswordOrder(Unit *, AString *, OrdersCheck *pCheck );
+	void ProcessExchangeOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int repeat);
 
 	void RemoveInactiveFactions();
 
@@ -366,6 +370,9 @@ private:
     void DoGuard1Orders();
     void DoGiveOrders();
 	void DoWithdrawOrders();
+
+	void DoExchangeOrders();
+	void DoExchangeOrder(ARegion *,Unit *,ExchangeOrder *);
 
     //
     // Faction limit functions.
@@ -465,7 +472,7 @@ private:
     void Do1Assassinate(ARegion *,Object *,Unit *);
     void AdjustCityMons( ARegion *pReg );
     void AdjustCityMon( ARegion *pReg, Unit *u );
-	
+
     //
     // Month long orders
     //

@@ -39,14 +39,14 @@
 //
 static GameDefs g = {
     "Standard Atlantis",     // RULESET_NAME
-    MAKE_ATL_VER( 4, 0, 8 ), // RULESET_VERSION
+    MAKE_ATL_VER( 4, 0, 9 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */
     4, /* SHIP_SPEED */
     6, /* FLY_SPEED */
     8, /* MAX_SPEED */
-		   
+
     10, /* STUDENTS_PER_TEACHER */
     10, /* MAINTENANCE_COST */
     20, /* LEADER_COST */
@@ -63,7 +63,7 @@ static GameDefs g = {
     20, /* ENTERTAIN_INCOME */
 
     50, /* TAX_INCOME */
-	
+
     5, /* HEALS_PER_MAN */
 
     20, /* GUARD_REGEN */ /* percent */
@@ -73,7 +73,7 @@ static GameDefs g = {
 
     10, /* WMON_FREQUENCY */
     10, /* LAIR_FREQUENCY */
-	
+
     5, /* FACTION_POINTS */
 
     100, /* TURN_COST */
@@ -151,6 +151,8 @@ static GameDefs g = {
 	0,	// MONSTER_ADVANCE_HOSTILE_PERCENT
 	1,	// HAVE_EMAIL_SPECIAL_COMMANDS
 	1,	// START_CITIES_START_UNLIMITED
+	0,	// PROPORTIONAL_AMTS_USAGE
+	0,  // USE_WEAPON_ARMOR_COMMAND
 };
 
 GameDefs * Globals = &g;
