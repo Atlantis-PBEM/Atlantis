@@ -41,7 +41,7 @@ void Game::CreateVMons()
 			if(obj->type != O_BKEEP) continue;
 			Faction *monfac = GetFaction( &factions, 2 );
 			Unit *u = GetNewUnit( monfac, 0 );
-			u->MakeWMon( "Elder Demons", I_BALROG, 200);
+			u->MakeWMon( "Arch Dragons", I_DRAGON, 6);
 			u->MoveUnit(obj);
 		}
 	}
@@ -58,9 +58,10 @@ void Game::GrowVMons()
 			if(obj->type != O_BKEEP) continue;
 			forlist(&obj->units) {
 				Unit *u = (Unit *)elem;
-				int men = u->GetMen(I_BALROG) + 2;
-				if(men > 200) men = 200;
-				u->items.SetNum(I_BALROG, men);
+				int men = u->GetMen(I_DRAGON);
+				if(men > 0) men += 2;
+				if(men > 4) men = 4;
+				u->items.SetNum(I_DRAGON, men);
 			}
 		}
 	}

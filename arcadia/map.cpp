@@ -28,6 +28,10 @@
 #include "game.h"
 #include "gamedata.h"
 
+#ifndef DEBUG
+//#define DEBUG
+#endif
+
 int ARegion::CheckSea(int dir, int range, int remainocean)
 {
 	if (type != R_OCEAN) return 0;
@@ -59,6 +63,8 @@ void ARegionList::CreateAbyssLevel(int level, char *name)
 			reg->wages = -2;
 		}
 	}
+
+	AddHexsides(pRegionArrays[level]);
 
 	int tempx, tempy;
 	if(Globals->GATES_EXIST) {
@@ -96,7 +102,8 @@ void ARegionList::CreateAbyssLevel(int level, char *name)
 void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char *name)
 {
 	MakeRegions(level, xSize, ySize);
-
+	AddHexsides(pRegionArrays[level]);
+	
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_NEXUS;
 
@@ -156,6 +163,14 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
+
+	AddHexsides(pRegionArrays[level]);
+
+	if (Globals->HEXSIDE_TERRAIN) {
+        AddBeaches(pRegionArrays[level]);
+        if(!(HexsideDefs[H_RIVER].flags & HexsideType::DISABLED) ) AddRivers(pRegionArrays[level]);     // Need to put in a check in case rivers are not enabled   
+    }
+    
 }
 
 void ARegionList::CreateIslandLevel(int level, int nPlayers, char *name)
@@ -175,6 +190,9 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char *name)
 
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
+	AddHexsides(pRegionArrays[level]);
+
+	if (Globals->HEXSIDE_TERRAIN) AddBeaches(pRegionArrays[level]);
 	FinalSetup(pRegionArrays[level]);
 }
 
@@ -198,7 +216,32 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
-	FinalSetup(pRegionArrays[level]);
+	AddHexsides(pRegionArrays[level]);
+
+	if (Globals->HEXSIDE_TERRAIN) AddBeaches(pRegionArrays[level]);
+
+	Awrite("7");
+	CheckHexsides(pRegionArrays[level]);	
+ 
+    FinalSetup(pRegionArrays[level]);    
+	
+}
+
+void ARegionList::CheckHexsides(ARegionArray *pRegs)
+{
+	int x, y;
+	for(x = 0; x < pRegs->x; x++) {
+		for(y = 0; y < pRegs->y; y++) {
+			ARegion *reg = pRegs->GetRegion(x, y);
+			if(!reg) continue;
+			for(int i=0; i<6; i++) {
+			    if(!reg->hexside[i]) {
+                    Awrite("bugger!");
+			        system("pause");
+                } 
+            }
+		}
+	}
 }
 
 void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
@@ -221,6 +264,9 @@ void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
 
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
+	AddHexsides(pRegionArrays[level]);
+
+	if (Globals->HEXSIDE_TERRAIN) AddBeaches(pRegionArrays[level]);
 	FinalSetup(pRegionArrays[level]);
 }
 
@@ -268,6 +314,38 @@ void ARegionList::SetupNeighbors(ARegionArray *pRegs)
 			ARegion *reg = pRegs->GetRegion(x, y);
 			if(!reg) continue;
 			NeighSetup(reg, pRegs);
+		}
+	}
+}
+
+void ARegionList::AddHexsides(ARegionArray *pRegs)
+{
+Awrite("Adding Hexsides");
+
+	int x, y;
+	for(x = 0; x < pRegs->x; x++) {
+		for(y = 0; y < pRegs->y; y++) {
+			ARegion *reg = pRegs->GetRegion(x, y);
+			if(!reg) continue;
+/*			
+			for(int i=0; i<3; i++) {
+			    if(reg->neighbors[i] && reg->neighbors[i]->hexside[i+3]) 
+			        reg->hexside[i] = reg->neighbors[i]->hexside[i+3];
+			    else reg->hexside[i] = new Hexside;
+			}
+			for(int i=3; i<6; i++) {
+			    if(reg->neighbors[i] && reg->neighbors[i]->hexside[i-3]) 
+			        reg->hexside[i] = reg->neighbors[i]->hexside[i-3];
+			    else reg->hexside[i] = new Hexside;
+			}*/
+			for(int i=0; i<6; i++) {
+			    if(reg->hexside[i]) continue;
+			    Hexside *temp = new Hexside;
+			    reg->hexside[i] = temp;
+			    if(i<3 && reg->neighbors[i]) reg->neighbors[i]->hexside[i+3] = temp;
+			    if(i>2 && reg->neighbors[i]) reg->neighbors[i]->hexside[i-3] = temp;
+            }
+			
 		}
 	}
 }
@@ -847,6 +925,297 @@ void ARegionList::SeverLandBridges(ARegionArray *pRegs)
 	Awrite("");
 }
 
+void ARegionList::AddBeaches(ARegionArray *pRegs)
+{
+/* Hex Patch Dec '03 */
+	Awrite("Adding Beaches");
+	//
+	for(int i = 0; i < pRegs->x; i++) {
+		for(int j = 0; j < pRegs->y; j++) {
+			ARegion *reg = pRegs->GetRegion(i, j);
+			if (!reg) continue;
+			if (!(reg->IsCoastal())) continue;
+			if (TerrainDefs[reg->type].similar_type==R_OCEAN) continue;
+			for(int k = 0; k<6; k++) {
+			    if(reg->neighbors[k]) {
+    			    if(TerrainDefs[reg->neighbors[k]->type].similar_type==R_OCEAN) {
+            			int coasttype = H_DUMMY;
+            			if(!(HexsideDefs[H_BEACH].flags & HexsideType::DISABLED)) coasttype = H_BEACH;
+            			if(!(HexsideDefs[H_HARBOUR].flags & HexsideType::DISABLED)) {
+                            if(coasttype == H_DUMMY || getrandom(100) < 10) coasttype = H_HARBOUR;
+                        }
+                        if(!(HexsideDefs[H_ROCKS].flags & HexsideType::DISABLED)) {
+                            if(coasttype == H_DUMMY || getrandom(100) < 10) coasttype = H_ROCKS;
+                        }
+    		            reg->hexside[k]->type = coasttype;
+                	}
+    			}
+			}
+		}
+	}
+}
+
+
+void ARegionList::AddRivers(ARegionArray *pRegs)
+{
+	Awrite("Adding Rivers...");
+	// This routine seeds river generation, calling int AddRiverSegment(reg,hexside, rivernum, 0)
+	// This routine relies on beaches, rocks and/or harbours being present to halt river creation.
+  	
+    		int chance = 0;
+    		int numrivers = 0;
+    		int numattempts = 0;
+    		int hexside = -1;
+
+//southern half
+	for(int i = 0; i < pRegs->x; i++) {
+		for(int j = pRegs->y /2; j < pRegs->y; j++) {
+			ARegion *reg = pRegs->GetRegion(i, j);
+            if (!reg) continue;  // 50% eliminated here
+    		if (reg->IsCoastal() ) continue;  // > 50% eliminated here
+    		if (reg->type == R_LAKE) continue;
+      		
+      		chance = WaterDistance(reg);
+      		chance = chance*chance;  //1,4,9,16
+    		hexside = getrandom(6);
+
+    		if(TerrainDefs[reg->type].similar_type == R_PLAIN ) chance = chance / 2;
+    		if(TerrainDefs[reg->type].similar_type == R_MOUNTAIN ) chance = chance * 2;
+    		if(TerrainDefs[reg->type].similar_type == R_DESERT ) chance = chance / 4;  
+
+            if( getrandom(15) < chance) {
+                numattempts++;
+#ifdef DEBUG
+cout << "attempt " << numattempts << endl;
+#endif
+                numrivers += AddRiverSegment(reg,hexside,numattempts,0);
+                cout << endl; //used with "." in code to mark river length during generation.
+#ifdef DEBUG
+cout << "done" << endl;
+#endif
+            }
+        }
+    }
+#ifdef DEBUG
+cout << "northern" << endl;
+#endif
+//northern half
+	for(int i = 0; i < pRegs->x; i++) {
+		for(int j = pRegs->y /2 - 1; j > -1; j--) {
+			ARegion *reg = pRegs->GetRegion(i, j);
+            if (!reg) continue;  // 50% eliminated here
+    		if (reg->IsCoastal() ) continue;  // > 50% eliminated here
+    		if (reg->type==R_LAKE) continue;
+      		
+      		chance = WaterDistance(reg);
+      		chance = chance*chance;  //1,4,9,16
+    		hexside = getrandom(6);
+
+    		if(TerrainDefs[reg->type].similar_type == R_PLAIN ) chance = chance / 2;
+    		if(TerrainDefs[reg->type].similar_type == R_MOUNTAIN ) chance = chance * 2;
+    		if(TerrainDefs[reg->type].similar_type == R_DESERT ) chance = chance / 4;  
+    		
+            if( getrandom(24) < chance) {
+                numattempts++;
+#ifdef DEBUG
+cout << "attempt " << numattempts << endl;
+#endif
+                numrivers += AddRiverSegment(reg,hexside,numattempts,0);
+                cout << endl; //used with "." in code to mark river length during generation.
+#ifdef DEBUG
+cout << "done" << endl;
+#endif
+            }
+        }
+    }
+#ifdef DEBUG
+cout << "clearing nums" << endl;
+#endif
+    ClearRiverNums(pRegs);
+	Awrite(AString (numrivers) + " rivers added");
+}
+
+int ARegionList::WaterDistance(ARegion *reg)
+{
+    if( reg->IsCoastal() ) return 0;
+	for(int i=0; i<6; i++) {
+	    if(reg->hexside[i]->type == H_RIVER) return 0;
+	}
+    
+	for(int k = 0; k<6; k++) {
+	    if(reg->neighbors[k]) {
+		    for(int i=0; i<6; i++) {
+		        if(reg->hexside[i]->type == H_RIVER) return 0;
+		    }
+        }
+    }
+	for(int k = 0; k<6; k++) {
+	    if(reg->neighbors[k]) {
+		    if(reg->neighbors[k]->IsCoastal() ) return 1;
+        }
+    }
+    
+	for(int k = 0; k<6; k++) {
+	    if(reg->neighbors[k]) {
+	        if (reg->neighbors[k]->neighbors[k]) {
+                if(reg->neighbors[k]->neighbors[k]->IsCoastal() ) return 2;
+		        for(int i=0; i<6; i++) {
+		            if(reg->hexside[i]->type == H_RIVER) return 2;
+		        }
+            }
+        }
+    }
+	for(int k = 0; k<6; k++) {
+	    if(reg->neighbors[k] && reg->neighbors[k]->neighbors[k]) {
+	        if (reg->neighbors[k]->neighbors[k]->neighbors[k]) {
+                if(reg->neighbors[k]->neighbors[k]->neighbors[k]->IsCoastal() ) return 3;
+		        for(int i=0; i<6; i++) {
+		            if(reg->neighbors[k]->neighbors[k]->neighbors[k]->hexside[i]->type == H_RIVER) return 3;
+		        }
+            }
+            if(k<5 && reg->neighbors[k]->neighbors[k]->neighbors[k+1]) {
+                if(reg->neighbors[k]->neighbors[k]->neighbors[k+1]->IsCoastal() ) return 3;
+		        for(int i=0; i<6; i++) {
+		            if(reg->neighbors[k]->neighbors[k]->neighbors[k+1]->hexside[i]->type == H_RIVER) return 3;
+		        }
+            }
+            if(k>0 && reg->neighbors[k]->neighbors[k]->neighbors[k-1]) {
+                if(reg->neighbors[k]->neighbors[k]->neighbors[k-1]->IsCoastal() ) return 3;
+		        for(int i=0; i<6; i++) {
+		            if(reg->neighbors[k]->neighbors[k]->neighbors[k-1]->hexside[i]->type == H_RIVER) return 3;
+		        }
+            }
+            if(k==0 && reg->neighbors[k]->neighbors[k]->neighbors[k+5]) {
+                if(reg->neighbors[k]->neighbors[k]->neighbors[k+5]->IsCoastal() ) return 3;
+		        for(int i=0; i<6; i++) {
+		            if(reg->neighbors[k]->neighbors[k]->neighbors[k+5]->hexside[i]->type == H_RIVER) return 3;
+		        }
+            }
+            if(k==5 && reg->neighbors[k]->neighbors[k]->neighbors[k-5]) {
+                if(reg->neighbors[k]->neighbors[k]->neighbors[k-5]->IsCoastal() ) return 3;
+		        for(int i=0; i<6; i++) {
+		            if(reg->neighbors[k]->neighbors[k]->neighbors[k-5]->hexside[i]->type == H_RIVER) return 3;
+		        }
+            }
+        }
+    }
+    
+    return 4;
+}
+
+void ARegionList::ClearRiverNums(ARegionArray *pRegs)
+{
+	for(int i = 0; i < pRegs->x; i++) {
+		for(int j = 0; j < pRegs->y; j++) {
+			ARegion *reg = pRegs->GetRegion(i, j);
+			if (!reg) continue;
+			for(int i=0; i<6; i++) {
+			    if(reg->hexside[i]->type == H_RIVER) reg->hexside[i]->bridge = 0;			
+			}
+	    }
+	}
+}
+
+int ARegionList::AddRiverSegment(ARegion *reg,int hexside,int rivernum, int tries)
+{
+    cout << ".";
+    //make hexside a value from 0 to 5
+    hexside %= 6;
+    if(hexside < 0) hexside += 6;
+    //if coastal/lake edge, return 1
+    if(reg->hexside[hexside]->type == H_BEACH || reg->hexside[hexside]->type == H_ROCKS || reg->hexside[hexside]->type == H_HARBOUR) return 1;
+    //if river present, return 0 if same river, or 1 if different river.
+    if(reg->hexside[hexside]->type == H_RIVER) {
+        if(reg->hexside[hexside]->bridge == rivernum) return 0;
+        else return 1;
+    }
+
+    // if tries > 100 return 0 - that is, this river is 100 segments long. Note that potentially, because of the way the code is
+    //recursed, this could take up to 2^100 operations to resolve :(. This occurs especially on small maps with no ocean to end the river,
+    //but could also be a problem on very big continents.
+    if(tries>100) return 0;
+
+    //if either of the continuing options is this river, return. Else we can get rings at the start of rivers.
+    //only need to do this check for the sixth segment, ie tries == 5, but doing it always prevents multi-hex rings.
+    //Note, by not checking for other rivers this occasionally allows rivers to "split in two" - if it were changed to
+    //(add a river & return 1) if there is a different river, this would be eliminated.
+#ifdef DEBUG
+if(!reg->hexside[(hexside+1)%6]) cout << "no local";
+#endif
+    if(reg->hexside[(hexside+1)%6]->bridge == rivernum) return 0;
+#ifdef DEBUG
+if(reg->neighbors[(hexside+1)%6] && !reg->neighbors[(hexside+1)%6]->hexside[(hexside+5)%6] ) cout << "no neighbour hexside " << hexside << " " << (hexside-1)%6;
+#endif
+    if(reg->neighbors[(hexside+1)%6] && reg->neighbors[(hexside+1)%6]->hexside[(hexside+5)%6]->bridge == rivernum) return 0;
+
+    //otherwise, make a river segment here
+    CreateRiverSegment(reg,hexside,rivernum);
+    
+    int coin = getrandom(2);
+    if(coin) {
+        //go right
+#ifdef DEBUG
+cout << "heads" << endl;
+#endif
+        if( AddRiverSegment(reg,(hexside+1)%6,rivernum,tries+1) == 1 ) return 1;
+        
+        //go left
+        else if (reg->neighbors[(hexside+1)%6] &&
+            AddRiverSegment(reg->neighbors[(hexside+1)%6],(hexside+5)%6,rivernum,tries+1) == 1 ) return 1;
+        
+        // cannot proceed in either direction. Delete the river segment and continue
+        else {
+            DeleteRiverSegment(reg,hexside);
+            return 0;
+        }
+    }
+
+    else {
+#ifdef DEBUG
+cout << "tails" << endl;
+#endif
+        //go left
+        if (reg->neighbors[(hexside+1)%6] && AddRiverSegment(reg->neighbors[(hexside+1)%6],(hexside+5)%6,rivernum,tries+1) == 1 ) return 1;
+        //go right
+        else if( AddRiverSegment(reg,(hexside+1)%6,rivernum,tries+1) == 1 ) return 1;
+
+        // cannot proceed in either direction. Delete the river segment and continue
+        else {
+            DeleteRiverSegment(reg,hexside);   
+            return 0;
+        }
+    }
+#ifdef DEBUG
+cout << "bugs!" << endl;
+#endif
+    //should never be called
+    DeleteRiverSegment(reg,hexside);
+    return 0; 
+}
+
+void ARegionList::CreateRiverSegment(ARegion *reg, int hexside, int rivernum)
+{
+    // create a river segment
+    //make hexside a value from 0 to 5
+    hexside %= 6;
+    if(hexside < 0) hexside += 6;
+    
+    reg->hexside[hexside]->type = H_RIVER;
+    reg->hexside[hexside]->bridge = rivernum;
+}
+
+void ARegionList::DeleteRiverSegment(ARegion *reg, int hexside)
+{
+    // delete a river segment
+    //make hexside a value from 0 to 5
+    hexside %=6;
+    if(hexside < 0) hexside += 6;
+    
+    reg->hexside[hexside]->type = H_DUMMY;
+    reg->hexside[hexside]->bridge = 0;
+}
+
+
 void ARegionList::SetRegTypes(ARegionArray *pRegs, int newType)
 {
 	for(int i = 0; i < pRegs->x; i++) {
@@ -1051,10 +1420,8 @@ void ARegionList::UnsetRace(ARegionArray *pArr)
 
 void ARegionList::RaceAnchors(ARegionArray *pArr)
 {
-	Awrite("Setting Race Anchors");
 	UnsetRace(pArr);
 	int x, y;
-	int wigout = 0;
 	for(x = 0; x < pArr->x; x++) {
 		for(y = 0; y < pArr->y; y++) {
 			// Anchor distribution: depends on GROW_RACES value
@@ -1063,14 +1430,12 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			int xoff = x + 2 - getrandom(3) - getrandom(3);
 			ARegion *reg = pArr->GetRegion(xoff, y);
 			if(!reg) continue;
-			
+
 			if((reg->type == R_LAKE) && (!Globals->LAKESIDE_IS_COASTAL))
 				continue;
-			if (TerrainDefs[reg->type].flags & TerrainType::BARREN) continue;
-			
+
 			reg->race = -1;
-			wigout = 0; // reset sanity
-			
+
 			if(TerrainDefs[reg->type].similar_type == R_OCEAN) {
 				// setup near coastal race here
 				int d = getrandom(NDIRS);
@@ -1082,13 +1447,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 						int rnum =
 							sizeof(TerrainDefs[nreg->type].coastal_races) /
 							sizeof(int);
-						
-						while ( reg->race == -1 || 
-								(ItemDefs[reg->race].flags & ItemType::DISABLED)) {
-							reg->race = 
-								TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
-							if (++wigout > 100) break;
-						}
+						reg->race = TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
 					} else {
 						int dir = getrandom(NDIRS);
 						if(d == nreg->GetRealDirComp(dir)) continue;
@@ -1099,27 +1458,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			} else {
 				// setup noncoastal race here
 				int rnum = sizeof(TerrainDefs[reg->type].races)/sizeof(int);
-				
-				while ( reg->race == -1 || 
-				        (ItemDefs[reg->race].flags & ItemType::DISABLED)) {
-					reg->race = TerrainDefs[reg->type].races[getrandom(rnum)];
-					if (++wigout > 100) break;
-				}
-			}
-			
-			/* leave out this sort of check for the moment
-			if (wigout > 100) {
-				// do something!
-				Awrite("There is a problem with the races in the ");
-				Awrite(TerrainDefs[reg->type].name);
-				Awrite(" region type");
-			}
-			*/
-			
-			if (reg->race == -1) {
-				cout << "Hey! No race anchor got assigned to the " 
-				     << TerrainDefs[reg->type].name 
-					 << " at " << x << "," << y << "\n";
+				reg->race = TerrainDefs[reg->type].races[getrandom(rnum)];
 			}
 		}
 	}
@@ -1127,7 +1466,6 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 
 void ARegionList::GrowRaces(ARegionArray *pArr)
 {
-	Awrite("Growing Races");
 	RaceAnchors(pArr);
 	int a, x, y;
 	for(a = 0; a < 25; a++) {
@@ -1233,7 +1571,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 	o->inner = temp->num;
 	reg->objects.Add(o);
 
-	o = new Object(reg);
+	o = new Object(temp); //was reg - fixed by BS.
 	o->num = temp->buildingseq++;
 	o->name = new AString(AString("Shaft [") + o->num + "]");
 	o->type = O_SHAFT;

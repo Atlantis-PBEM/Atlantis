@@ -2059,6 +2059,7 @@ void SetupNames()
 
 void CountNames()
 {
+	Awrite(AString("Towns ") + ntowns);
 	Awrite(AString("Regions ") + nregions);
 }
 
@@ -2322,6 +2323,9 @@ int ARegionList::GetLevelXScale(int level)
 	// Surface and nexus are unscaled
 	if(level < 2) return 1;
 
+//ArcadiaIII specific world creation
+    return 1;
+
 	// If we only have one underworld level it's 1/2 size
 	if(Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
 		return 2;
@@ -2348,6 +2352,9 @@ int ARegionList::GetLevelYScale(int level)
 {
 	// Surface and nexus are unscaled
 	if(level < 2) return 1;
+
+//ArcadiaIII specific world creation
+    return 1;
 
 	// If we only have one underworld level it's 1/2 size
 	if(Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
@@ -2492,53 +2499,46 @@ void ARegion::MakeStartingCity()
 	if(!Globals->TOWNS_EXIST) return;
 
 	if(Globals->GATES_EXIST) gate = -1;
-	
-	if(town) delete town;
-    
-    AddTown(TOWN_CITY);
+    if( !town )
+    {
+        AddTown();
+    }
 
-	if(!Globals->START_CITIES_EXIST) return;
-
-	town->hab = 125 * Globals->CITY_POP / 100;
-    while (town->pop < town->hab) town->pop += getrandom(200)+200;
-    town->dev = TownDevelopment();
+    town->pop = 5000;
+    town->basepop = 5000;
 
 	float ratio;
 	Market *m;
     markets.DeleteAll();
 	if(Globals->START_CITIES_START_UNLIMITED) {
 		for (int i=0; i<NITEMS; i++) {
-			if( ItemDefs[i].flags & ItemType::DISABLED ) continue;
+			if( ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if( ItemDefs[ i ].type & IT_NORMAL ) {
 				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
 					continue;
-				m = new Market(M_BUY,i,(ItemDefs[i].baseprice*5/2),-1,
+				m = new Market(M_BUY,i,(ItemDefs[i].baseprice * 5 / 2),-1,
 						5000,5000,-1,-1);
 				markets.Add(m);
 			}
 		}
-		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
-		// hack: include wage factor of 10 in float calculation above
-		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1, 5000,5000,-1,-1);
+		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
+		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1,5000,5000,-1,-1);
 		markets.Add(m);
 		if(Globals->LEADERS_EXIST) {
-			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
-			// hack: include wage factor of 10 in float calculation above
-			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),
-					-1,5000,5000,-1,-1);
+			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
+			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),-1,
+					5000,5000,-1,-1);
 			markets.Add(m);
 		}
 	} else {
 		SetupCityMarket();
-		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
-		// hack: include wage factor of 10 in float calculation above
+		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
 		/* Setup Recruiting */
 		m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
 				Population()/5, 0, 10000, 0, 2000 );
 		markets.Add(m);
 		if( Globals->LEADERS_EXIST ) {
-			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
-			// hack: include wage factor of 10 in float calculation above
+			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
 			m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
 					Population()/25, 0, 10000, 0, 400 );
 			markets.Add(m);
@@ -2546,8 +2546,8 @@ void ARegion::MakeStartingCity()
 	}
 }
 
-int ARegion::IsStartingCity() {
-    if (town && town->pop >= (Globals->CITY_POP * 120 / 100)) return 1;
+int ARegion::IsStartingCity() {                //This doesn't work in Arcadia
+    if (town && town->pop == 5000) return 1;
     return 0;
 }
 
