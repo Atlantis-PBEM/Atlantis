@@ -36,7 +36,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	Arules f;
 	AString temp, temp2;
 	int cap;
-	int i;
+	int i, j;
 
 	if(f.OpenByName(rules) == -1) {
 		return 0;
