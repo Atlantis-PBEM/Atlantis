@@ -60,7 +60,12 @@
    -- Consider Az's beastform spell
    -- 'This item can be found in....' information.
    -- Add option for entertain being an instant order.
-   -- Consider having allied units tagged as a '+' instead of a '-'.
+   -- Consider having allied units tagged as a '+' instead of a '-'. (extend
+      to all different stances).
+   -- Make that unit tagging a player option.
+   -- Add a 'MAINTAINONLY' flag to buildings so that a building can decay and
+      be kept up, but cannot be constructed. (requested for Ceran)
+   -- Consider multiple levels of guard
 
 TODO for 5.0.0
 ----------------------------------------------

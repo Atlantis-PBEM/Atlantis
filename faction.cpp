@@ -165,6 +165,8 @@ void Faction::Writeout( Aoutfile *f )
     f->PutInt(temformat);
     
     skills.Writeout(f);
+	f->PutInt(-1);
+	items.Writeout(f);
     f->PutInt(defaultattitude);
     f->PutInt(attitudes.Num());
     forlist((&attitudes))
