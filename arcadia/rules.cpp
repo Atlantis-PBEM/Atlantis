@@ -237,6 +237,7 @@ static GameDefs g = {
 	1, // WISHSKILLS_ENABLED
 	20, // POP_LEVEL
 	1, // FORM_TEMPLATES
+	GameDefs::SHOW_AS_EVENTS, // SUPPRESS_ERRORS
 };
 
 GameDefs *Globals = &g;

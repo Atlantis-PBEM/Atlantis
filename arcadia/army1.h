@@ -63,7 +63,8 @@ class Army
         int IsSpecialTarget(char *special) const;
         int GetTarget(Army *attackers, int formation, int attackType, int *targetform, char* special, Battle *b);                                      
 		int DoAnAttack(char *special, int numAttacks, int race, int attackType, int attackLevel, 
-                  int flags, int weaponClass, char *effect, int mountBonus, Army *attackers, int formation, Battle *b);
+                  int flags, int weaponClass, char *effect, int mountBonus, Army *attackers, int formation, Battle *b,
+                  int strength = 1);
 
         AList armytext;
 		void AddLine(const AString &);

@@ -272,7 +272,7 @@ cout << "> ";
 		}
 		int spread = Globals->TOWN_SPREAD;
 		if(spread > 100) spread = 100;
-		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
+		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +        
 			100 * spread) / 100;
 		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
 		if (getrandom(townch) < townprob) AddTown();
@@ -280,7 +280,7 @@ cout << "> ";
 
 	Production *p = new Production;
 	p->itemtype = I_SILVER;
-	money = Population() * (Wages() - Globals->MAINTENANCE_COST) / Globals->POP_LEVEL;
+	money = Population() * (Wages() - (Globals->MAINTENANCE_COST/2)) / (2*Globals->POP_LEVEL);  //BS Edit
 
 	if(Globals->PLAYER_ECONOMY) {
 		WagesFromDevelopment();
@@ -807,11 +807,11 @@ int ARegion::GetArcadianTrade(int numtrade, int producing)
     if(producing) {
         switch(mt->ethnicity) {
             case RA_HUMAN:
-                return getrandom(4);
+                return getrandom(4); //wine, wool, orchids, caviar
             case RA_ELF:
-                return 4+getrandom(4);
+                return 4+getrandom(4); //silk, perfume, chocolate, cashmere
             case RA_DWARF:
-                return 8+getrandom(4);
+                return 8+getrandom(4); //jewelry, figurines, dye, truffles
             default:
                 return getrandom(numtrade);
         }

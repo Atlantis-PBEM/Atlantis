@@ -606,6 +606,9 @@ void Battle::NormalRound(int round,Army * armya,Army * armyb, int regtype, int b
     int aatt = armya->CanAttack();
     int batt = armyb->CanAttack();
     /* Run attacks until done */
+#ifdef DEBUG
+Awrite("Doing attacks");
+#endif
     while (aalive && balive && (aatt || batt))
     {
         int num = getrandom(aatt + batt);
@@ -637,8 +640,13 @@ void Battle::NormalRound(int round,Army * armya,Army * armyb, int regtype, int b
 
 void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def, int ass) //'attackers' is the army the soldier is from.
 { //ass no longer used here
-
+#ifdef DEBUG2
+cout << a->unit->num;
+#endif
 	DoSpecialAttack(round, a, attackers, def);
+#ifdef DEBUG2
+cout << ".";
+#endif
 	if (!def->NumAlive()) return;
 
 	if (a->riding != -1) {
@@ -695,8 +703,17 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def, int ass
 			mountBonus = pWep->mountBonus;
 			attackClass = pWep->weapClass;
 		}
+		int strength = a->unit->GetSkill(S_FRENZY);
+		if(strength > 0) { //upgrade attack type by 1.
+		    if(attackClass != ARMORPIERCING) attackClass = ARMORPIERCING;
+		    else attackClass = NUM_WEAPON_CLASSES;
+        } else strength = 1; //minimum 1 attack per hit!
+        
 		def->DoAnAttack(NULL, 1, a->race, attackType, a->askill, flags, attackClass,
-				NULL, mountBonus, attackers, a->inform, this);
+				NULL, mountBonus, attackers, a->inform, this, strength);
+#ifdef DEBUG2
+cout << ".";
+#endif
 		if (!def->NumAlive()) break;
 	}
 }
@@ -743,7 +760,9 @@ void Battle::FormationsPhase(Army * armya, Army * armyb, int regtype, int bias, 
 //be caught.
 
 
-
+#ifdef DEBUG
+Awrite("Updating Shields");
+#endif
     // Update both army's shields
    	armya->shields.DeleteAll();
     armyb->shields.DeleteAll();
@@ -754,6 +773,9 @@ void Battle::FormationsPhase(Army * armya, Army * armyb, int regtype, int bias, 
     armya->ResetEngagements();
     armyb->ResetEngagements();
 
+#ifdef DEBUG
+Awrite("Updating Round Spells");
+#endif
     //Darkness, Fog and Concealment
     UpdateRoundSpells(armya,armyb);
     
@@ -765,7 +787,10 @@ void Battle::FormationsPhase(Army * armya, Army * armyb, int regtype, int bias, 
     //bias is the army which is penalised.
     if(bias == 1) armya->PenaltyToHit(1);
     if(bias == 2) armyb->PenaltyToHit(1);
-    
+
+#ifdef DEBUG
+Awrite("Sorting Armies");
+#endif
     //Sort armies if in first round
     if(armya->round == 1) armya->SortFormations(this, regtype);
     if(armyb->round == 1+ambush) armyb->SortFormations(this, regtype);
@@ -775,7 +800,9 @@ void Battle::FormationsPhase(Army * armya, Army * armyb, int regtype, int bias, 
     //mirror any engagements that occured last round
     armya->MirrorEngagements(armyb);
     armyb->MirrorEngagements(armya);
-    
+#ifdef DEBUG
+Awrite("Flanking");
+#endif
     //If formation is engaged,return.
     //If flank 1, move everyone to flank 2.
     armya->FlankFlankers(this, armyb);
@@ -786,6 +813,9 @@ void Battle::FormationsPhase(Army * armya, Army * armyb, int regtype, int bias, 
     armya->AssignFrontTargets(this, armyb);
     armyb->AssignFrontTargets(this, armya);
 
+#ifdef DEBUG
+Awrite("Overwhelming");
+#endif
     //split overwhelming flank 0 formations. if concealed, go straight to flank 2
     if(!(TerrainDefs[regtype].flags & TerrainType::RESTRICTEDFOOT) ) {
         armya->SplitOverwhelmingFrontFormations(this,armyb);
@@ -801,7 +831,10 @@ void Battle::FormationsPhase(Army * armya, Army * armyb, int regtype, int bias, 
 
     armya->RidingReservesMayFlank(this, armyb);
     armyb->RidingReservesMayFlank(this, armya);
-    
+
+#ifdef DEBUG
+Awrite("Setting CanAttack");
+#endif
     //canattack lists
     armya->SetCanAttack(armyb);
     armyb->SetCanAttack(armyb);
@@ -828,6 +861,10 @@ void Battle::FormationsPhase(Army * armya, Army * armyb, int regtype, int bias, 
     //assign ranged tryattack lists (can call getmidroundrangedtarget)
     armya->AssignRangedTargets(armyb);
     armyb->AssignRangedTargets(armya);
+
+#ifdef DEBUG
+Awrite("Clearing Empty Engagements");
+#endif
     //Clear engagement table for empty formations - if people move during battle, they'll inherit the old specifics.
     armya->ClearEmptyEngagements();
     armyb->ClearEmptyEngagements();

@@ -742,6 +742,12 @@ public:
 	int POP_LEVEL;
 	
 	int FORM_TEMPLATES;
+	enum {
+		DONT_SUPPRES,
+		SUPPRESS_ALL,
+		SHOW_AS_EVENTS,
+	};
+	int SUPPRESS_ERRORS;
 };
 
 extern GameDefs *Globals;

@@ -78,6 +78,7 @@ char *od[] = {
 	"option",
 	"password",
 	"pillage",
+	"pool",
 	"prepare",
 	"produce",
 	"promote",
@@ -151,6 +152,15 @@ MoveOrder::MoveOrder()
 }
 
 MoveOrder::~MoveOrder()
+{
+}
+
+PoolOrder::PoolOrder()
+{
+	type = O_POOL;
+}
+
+PoolOrder::~PoolOrder()
 {
 }
 

@@ -53,6 +53,7 @@ int Game::SetupFaction( Faction *pFac )
 	    break;
     }
 	temp2->SetMen( race, 1 );
+	temp2->items.SetNum( I_STAFFOFY, 1 );
 	temp2->reveal = REVEAL_FACTION;
 	temp2->SetFlag(FLAG_COMMANDER,1);
    	temp2->type = U_MAGE;
@@ -239,8 +240,10 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_FOG, 0, "WKEY", 3);
 	    ModifySkillDependancy(S_FOG, 1, NULL, 0);
 	    ModifySkillFlags(S_FOG, SkillType::MAGIC | SkillType::COMBAT | SkillType::CAST | SkillType::MAGEOTHER);
+	    ModifyBaseSkills(S_BASE_WINDKEY, S_FIRE, S_FORCE_SHIELD, S_FARSIGHT,S_BLIZZARD, S_CLEAR_SKIES);
+	    ModifyBaseSkills(S_BASE_WINDKEY, S_SUMMON_WIND, S_SUMMON_STORM, S_SUMMON_TORNADO,S_CALL_LIGHTNING, S_FOG);
 	    
-	    ModifySkillDependancy(S_GATE_LORE, 0, "MYST", 1);
+	    ModifySkillDependancy(S_GATE_LORE, 0, "PTTN", 1);
 	    ModifySkillDependancy(S_GATE_LORE, 1, NULL, 0);
 	    ModifySkillDependancy(S_TELEPORTATION, 0, "GATE", 3);
 	    ModifySkillDependancy(S_TELEPORTATION, 1, NULL, 0);
@@ -251,9 +254,12 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_MAGICAL_HEALING, 0, "PTTN", 1);
 	    ModifySkillDependancy(S_RESURRECTION, 0, "NECR", 3);
 //	    ModifySkillDependancy(S_RESURRECTION, 1, "MHEA", 3);
-//	    ModifySkillDependancy(S_SUMMON_SPIRIT_OF_DEAD, 0, "RESU", 3);
+//	    ModifySkillDependancy(S_SPIRIT_OF_DEAD, 0, "RESU", 3);
 //	    ModifySkillDependancy(S_MODIFICATION, 0, "EART", 4);
 //	    ModifySkillDependancy(S_DIVERSION, 0, "EART", 4);
+	    ModifyBaseSkills(S_BASE_PATTERNING, S_GATE_LORE, S_TELEPORTATION, S_CONSTRUCT_GATE, S_CREATE_PORTAL);
+	    ModifyBaseSkills(S_BASE_PATTERNING, S_EARTH_LORE, S_DIVERSION, S_MODIFICATION);
+	    ModifyBaseSkills(S_BASE_PATTERNING, S_MAGICAL_HEALING, S_RESURRECTION, S_SPIRIT_OF_DEAD);
 	    
 	    ModifySkillDependancy(S_CONCEALMENT, 0, "MYST", 2);
 	    ModifySkillDependancy(S_INVISIBILITY, 0, "CONC", 5);
@@ -265,6 +271,9 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_HYPNOSIS, 0, "MYST", 1);
 	    ModifySkillDependancy(S_BINDING, 0, "HYPN", 3);
 	    ModifySkillDependancy(S_DRAGON_TALK, 0, "BIND", 3);
+	    ModifyBaseSkills(S_BASE_MYSTICISM, S_CONCEALMENT, S_INVISIBILITY, S_TRUE_SEEING);
+	    ModifyBaseSkills(S_BASE_MYSTICISM, S_TRANSMUTATION, S_ENCHANT_SWORDS, S_ENCHANT_ARMOR, S_ENERGY_SHIELD);
+	    ModifyBaseSkills(S_BASE_MYSTICISM, S_HYPNOSIS, S_BINDING, S_DRAGON_TALK);
 	    
 	    ModifySkillDependancy(S_SPIRIT_SHIELD, 0, "SUMM", 1);
 	    ModifySkillDependancy(S_SPIRIT_SHIELD, 1, NULL, 0);
@@ -284,6 +293,9 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_SUMMON_DEMON, 0, "DEMO", 3);
 	    ModifySkillDependancy(S_SUMMON_BALROG, 0, "SUDE", 4);
 	    ModifySkillDependancy(S_BANISH_DEMONS, 0, "DEMO", 1);
+	    ModifyBaseSkills(S_BASE_SUMMONING, S_SPIRIT_SHIELD, S_LIGHT, S_DARKNESS, S_SUMMON_MEN);
+	    ModifyBaseSkills(S_BASE_SUMMONING, S_NECROMANCY, S_RAISE_UNDEAD, S_SUMMON_LICH, S_BANISH_UNDEAD);
+	    ModifyBaseSkills(S_BASE_SUMMONING, S_SUMMON_IMPS, S_SUMMON_DEMON, S_SUMMON_BALROG, S_BANISH_DEMONS);
 	    
 	    ModifySkillFlags(S_BASE_ARTIFACTLORE, SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST | SkillType::FOUNDATION);
 	    ModifyItemMagicSkill(I_SHIELDSTONE, "ARTL", 3);
@@ -306,6 +318,9 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 0, "ARTL", 1);
 	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 1, "ESHI", 1);
 	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 2, NULL, 0);
+	    ModifyBaseSkills(S_BASE_ARTIFACTLORE, S_CREATE_RING_OF_INVISIBILITY, S_CREATE_AMULET_OF_TRUE_SEEING, S_CREATE_CLOAK_OF_INVULNERABILITY);
+	    ModifyBaseSkills(S_BASE_ARTIFACTLORE, S_CREATE_STAFF_OF_FIRE, S_CREATE_STAFF_OF_LIGHTNING, S_CREATE_RUNESWORD);
+	    ModifyBaseSkills(S_BASE_ARTIFACTLORE, S_CREATE_MAGIC_CARPET, S_ENGRAVE_RUNES_OF_WARDING);
 	    
 	    ModifySkillDependancy(S_INNER_STRENGTH, 0, "BATT", 3);
 	    ModifySkillDependancy(S_PHANTASMAL_ENTERTAINMENT, 0, "BATT", 1);
@@ -316,6 +331,8 @@ void Game::ModifyTablesPerRuleset(void)
 	    //toughness (3)
 	    //unity (2,1)
 	    //frenzy (1)
+	    ModifyBaseSkills(S_BASE_BATTLETRAINING, S_INNER_STRENGTH, S_PHANTASMAL_ENTERTAINMENT, S_CREATE_AURA_OF_FEAR, S_INSTILL_COURAGE);
+	    ModifyBaseSkills(S_BASE_BATTLETRAINING, S_SWIFTNESS, S_TOUGHNESS, S_UNITY, S_FRENZY);
 	    
 	    
 	    ModifySkillDependancy(S_WOLF_LORE, 0, "CHAR", 1);
@@ -325,6 +342,8 @@ void Game::ModifyTablesPerRuleset(void)
 	    //trading (1)
 	    //merchantry (3)
 	    //quartermastery (4)
+	    ModifyBaseSkills(S_BASE_CHARISMA, S_WOLF_LORE, S_BIRD_LORE, S_GRYFFIN_LORE, S_UNITY);
+	    ModifyBaseSkills(S_BASE_CHARISMA, S_TRADING, S_MERCHANTRY, S_ARCADIA_QUARTERMASTERY);
 	    
 
 	    ModifyItemMagicInput(I_AMULETOFTS, 0, I_IRON, 8);
@@ -723,6 +742,7 @@ void Game::ModifyTablesPerRuleset(void)
     //changed roses to orchids
     //changed velvet to goatcheese
     //changed order of items for island placement
+   	ModifyItemBasePrice(I_MCARPET,100);
 
 
 //	ModifyItemBasePrice(I_WAGON,60);
@@ -818,29 +838,31 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainItems(R_JUNGLE, 2, I_FUR, 100, 10);
 	ModifyTerrainItems(R_JUNGLE, 3, I_YEW, 25, 5);
 	ModifyTerrainItems(R_JUNGLE, 4, I_MUSHROOM, 10, 5);
-	ModifyTerrainEconomy(R_JUNGLE, 200, 11, 20, 2);
+	ModifyTerrainEconomy(R_JUNGLE, 300, 11, 20, 2);
 	
 	ClearTerrainItems(R_SWAMP);	
 	ModifyTerrainItems(R_SWAMP, 0, I_WOOD, 100, 10);
 	ModifyTerrainItems(R_SWAMP, 1, I_HERBS, 100, 10);
-	ModifyTerrainItems(R_SWAMP, 2, I_IRONWOOD, 25, 5);
-	ModifyTerrainItems(R_SWAMP, 3, I_FLOATER, 33, 10);
-	ModifyTerrainItems(R_SWAMP, 4, I_MUSHROOM, 10, 5);
-	ModifyTerrainEconomy(R_SWAMP, 300, 12, 20, 2);
+	ModifyTerrainItems(R_SWAMP, 2, I_IRON, 100, 10);
+	ModifyTerrainItems(R_SWAMP, 3, I_IRONWOOD, 25, 5);
+	ModifyTerrainItems(R_SWAMP, 4, I_FLOATER, 33, 10);
+	ModifyTerrainItems(R_SWAMP, 5, I_MUSHROOM, 25, 5);
+	ModifyTerrainEconomy(R_SWAMP, 400, 12, 20, 2);
 	
 	ClearTerrainItems(R_DESERT);	
-	ModifyTerrainItems(R_DESERT, 0, I_STONE, 100, 20);
+	ModifyTerrainItems(R_DESERT, 0, I_STONE, 100, 30);
 	ModifyTerrainItems(R_DESERT, 1, I_IRON, 100, 10);
 	ModifyTerrainItems(R_DESERT, 2, I_HORSE, 100, 10);
 	ModifyTerrainItems(R_DESERT, 3, I_ROOTSTONE, 25, 10);
 	ModifyTerrainItems(R_DESERT, 4, I_MITHRIL, 25, 5);	
-	ModifyTerrainEconomy(R_DESERT, 200, 12, 10, 1);
+	ModifyTerrainEconomy(R_DESERT, 200, 13, 10, 1);
 	
 	ClearTerrainItems(R_TUNDRA);	
 	ModifyTerrainItems(R_TUNDRA, 0, I_HERBS, 100, 20);
 	ModifyTerrainItems(R_TUNDRA, 1, I_FUR, 100, 20);
-	ModifyTerrainItems(R_TUNDRA, 2, I_WOOD, 75, 5);
-	ModifyTerrainItems(R_TUNDRA, 3, I_WHORSE, 25, 5);
+	ModifyTerrainItems(R_TUNDRA, 2, I_WOOD, 80, 5);
+	ModifyTerrainItems(R_TUNDRA, 3, I_IRON, 80, 5);
+	ModifyTerrainItems(R_TUNDRA, 4, I_WHORSE, 25, 5);
 	ModifyTerrainEconomy(R_TUNDRA, 400, 11, 10, 2);
 
 	ClearTerrainItems(R_MOUNTAIN);	
@@ -848,7 +870,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainItems(R_MOUNTAIN, 1, I_STONE, 100, 10);
 	ModifyTerrainItems(R_MOUNTAIN, 2, I_MITHRIL, 25, 5);
 	ModifyTerrainItems(R_MOUNTAIN, 3, I_ROOTSTONE, 25, 5);
-	ModifyTerrainEconomy(R_MOUNTAIN, 400, 13, 10, 2);
+	ModifyTerrainEconomy(R_MOUNTAIN, 600, 13, 10, 2);
 
 	ClearTerrainItems(R_PLAIN);	
 	ModifyTerrainItems(R_PLAIN, 0, I_HORSE, 100, 20);
@@ -856,6 +878,16 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainEconomy(R_PLAIN, 800, 14, 40, 1);
 	ModifyTerrainWMons(R_PLAIN, 2, I_LION, I_EAGLE, I_CENTAUR);
 
+	ClearTerrainItems(R_PARADISE);	
+	ModifyTerrainItems(R_PARADISE, 0, I_HORSE, 100, 10);
+	ModifyTerrainItems(R_PARADISE, 1, I_WOOD, 100, 20);
+	ModifyTerrainItems(R_PARADISE, 2, I_IRON, 100, 20);
+	ModifyTerrainItems(R_PARADISE, 3, I_HERBS, 100, 10);
+	ModifyTerrainItems(R_PARADISE, 4, I_FUR, 100, 10);
+	ModifyTerrainItems(R_PARADISE, 5, I_STONE, 100, 20);
+	ModifyTerrainItems(R_PARADISE, 6, I_IRONWOOD, 100, 5);
+	ModifyTerrainEconomy(R_PARADISE, 800, 16, 40, 1);
+/*
 	ClearTerrainItems(R_CAVERN);	
 	ModifyTerrainItems(R_CAVERN, 0, I_IRON, 100, 20);
 	ModifyTerrainItems(R_CAVERN, 1, I_STONE, 100, 20);
@@ -905,7 +937,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainItems(R_DFOREST, 3, I_MUSHROOM, 40, 8);
 	ModifyTerrainItems(R_DFOREST, 4, I_IRONWOOD, 30, 7);
 	ModifyTerrainEconomy(R_DFOREST, 0, 11, 2, 3);            //0 economy for Nylandor only
-	
+	*/
 	ClearTerrainItems(R_OCEAN);	
 	ModifyTerrainItems(R_OCEAN, 0, I_FISH, 100, 40);
 	ModifyTerrainItems(R_OCEAN, 1, I_DOLPHIN, 50, 10);

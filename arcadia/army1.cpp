@@ -268,6 +268,7 @@ Soldier * Army::GetAttacker(int attackernum)
 }
 
 int Army::GetTarget(Army *attackers, int attackerform, int attackType, int *targetform, char* special, Battle *b)
+//this sequence gets an enemy soldier to attack.
 //"this" is the army of the defending unit.
 {
     int tarnum = -1;
@@ -505,7 +506,7 @@ int Hits(int a,int d)
 }
 
 int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, int attackLevel, 
-                  int flags, int weaponClass, char *effect, int mountBonus, Army *attackers, int attackerform, Battle *b)
+                  int flags, int weaponClass, char *effect, int mountBonus, Army *attackers, int attackerform, Battle *b, int strength)
 		/* The army in question is the army DEFENDING!
 		   */
 
@@ -668,6 +669,10 @@ int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, in
 			if (tar->ArmorProtect(weaponClass)) {
 				continue;
 			}
+
+			if(attackType != ATTACK_COMBAT && attackType != ATTACK_RIDING && getrandom(tar->unit->GetSkill(S_TOUGHNESS)+1) ) {
+                continue;
+            }
 
 			/* 8. Seeya! */
 			formations[formhit].Kill(tarnum, this);

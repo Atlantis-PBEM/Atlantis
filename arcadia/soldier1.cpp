@@ -343,12 +343,9 @@ cout << "$";
 	
     if(unit->GetSkill(S_FRENZY)) {
         int level = unit->GetSkill(S_FRENZY);
-        int gain = 0;
-        while(level > 0) {                      //+1,3,6,10,15,21
-            gain += level--;
-        }
-        if(attacks < 0 && attacks+gain > -2) gain += 2;
-        attacks += gain;
+        int gain = 2*level*level; //+1,4,9,16,25,36
+        if(attacks < 0) attacks = 1 - gain/attacks;  //ie bonus/rounds + 1.
+        else attacks += gain;
     }
 }
 
@@ -642,7 +639,7 @@ int Soldier::DoSpellCost(int round, Battle *b)
     if(!Globals->ARCADIA_MAGIC) return 1;
     
     //staff of yew coding
-    if ((ItemDefs[weapon].type & IT_BATTLE)) {
+    if (weapon != -1 && (ItemDefs[weapon].type & IT_BATTLE)) {
 		BattleItemType *pBat = FindBattleItem(ItemDefs[weapon].abr);
 		if(pBat->flags & BattleItemType::ENERGY) {
         //can cast, energy cost of zero.

@@ -165,7 +165,7 @@ int ParseFactionType(AString *o, int *type)
 	while(token) {
 		int foundone = 0;
 		for (i=0; i<NFACTYPES; i++) {
-			if (*token == FactionStrs[i]) {
+			if (*token == FactionStrs[i] || (i == 2 && *token == "MAGIC")) {
 				delete token;
 				token = o->gettoken();
 				if (!token) return -1;
@@ -279,14 +279,14 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 						ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
 					if (unit->former)
 						ParseError(pCheck, unit, fac, "FORM: without END.");
-					if(unit->label) DoLabelOrders(pCheck, unit, fac, faction);
+					if(pCheck) DoLabelOrders(pCheck, unit, fac, faction); //if not pCheck, this is done at the end of orders so that template/all orders included later in the report can be processed
 					if(unit && pCheck) unit->ClearOrders();
 					if (pCheck && former) delete unit;
 					unit = former;
 				}
 
 				unit = 0;
-				fac = 0;
+//				fac = 0;
 				break;
 
 			case O_UNIT:
@@ -297,7 +297,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 							ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
 						if (unit->former)
 							ParseError(pCheck, unit, fac, "FORM: without END.");
-					    if(unit->label) DoLabelOrders(pCheck, unit, fac, faction);
+					    if(pCheck) DoLabelOrders(pCheck, unit, fac, faction);
 						if (unit && pCheck) unit->ClearOrders();
 						if (pCheck && former) delete unit;
 						unit = former;
@@ -355,7 +355,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						if (unit->inTurnBlock)
 							ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
-					    if(unit->label) DoLabelOrders(pCheck, unit, fac, faction);
+					    if(pCheck) DoLabelOrders(pCheck, unit, fac, faction);
 						if (pCheck && former) delete unit;
 						unit = former;
 					} else {
@@ -372,7 +372,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
     						ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
     					if (unit->former)
     						ParseError(pCheck, unit, fac, "FORM: without END.");
-				        if(unit->label) DoLabelOrders(pCheck, unit, fac, faction);
+				        if(pCheck) DoLabelOrders(pCheck, unit, fac, faction);
     					if (unit && pCheck) unit->ClearOrders();
     					if (pCheck && former) delete unit;
     					unit = former;
@@ -404,7 +404,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
     						ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
     					if (unit->former)
     						ParseError(pCheck, unit, fac, "FORM: without END.");
-				        if(unit->label) DoLabelOrders(pCheck, unit, fac, faction);
+				        if(pCheck) DoLabelOrders(pCheck, unit, fac, faction);
     					if (unit && pCheck) unit->ClearOrders();
     					if (pCheck && former) delete unit;
     					unit = former;
@@ -423,7 +423,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
         						ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
         					if (unit->former)
         						ParseError(pCheck, unit, fac, "FORM: without END.");
-					        if(unit->label) DoLabelOrders(pCheck, unit, fac, faction);
+					        if(pCheck) DoLabelOrders(pCheck, unit, fac, faction);
         					if (unit && pCheck) unit->ClearOrders();
         					if (pCheck && former) delete unit;
         					unit = former;
@@ -440,16 +440,6 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
     				}
 				}
 				break;
-			case O_TYPE:
-				// faction is 0 if checking syntax only, not running turn.
-				if (fac && faction != 0) {
-                    delete token;
-                    token = order->gettoken();
-                    if(!token) token = new AString("default");
-                    // faction is 0 if checking syntax only, not running turn.
-    				DoLabelOrders(pCheck, unit, fac, faction, token);
-                }
-                break; 
 			case O_TURN:
 				if (unit && unit->inTurnBlock) {
 					ParseError(pCheck, unit, fac, "TURN: cannot nest");
@@ -459,7 +449,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					// faction is 0 if checking syntax only, not running turn.
 					if (faction != 0) {
 						AString *retval;
-						retval = ProcessTurnOrder(unit, f, pCheck, getatsign); //no need to carry quiet sign - produce errors for incorrect TURN
+						int dummy = 0;
+						retval = ProcessTurnOrder(unit, f, pCheck, getatsign, dummy); //no need to carry quiet sign - produce errors for incorrect TURN
 						if (retval) {
 							delete order;
 							order = retval;
@@ -521,24 +512,51 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			ParseError(pCheck, 0, fac, "TURN: without ENDTURN");
 		if (unit->former)
 			ParseError(pCheck, 0, fac, "FORM: without END.");
-		if(unit->label) DoLabelOrders(pCheck, unit, fac, faction);
 		if(unit && pCheck) unit->ClearOrders();
 		if (pCheck && former) delete unit;
 		unit = former;
 	}
 
 	if(unit && pCheck) {
+		DoLabelOrders(pCheck, unit, fac, faction); //the ALL and LABEL might not have been put in, but at least this gives us some chance of processing ALL/LABEL orders
 		unit->ClearOrders();
 		unit = 0;
 	}
+	
+	//process type/template and label/all orders
+	if(!pCheck) {
+	    forlist(&regions) {
+    		ARegion *r = (ARegion *)elem;
+    		forlist(&r->objects) {
+    			Object *o = (Object *)elem;
+    			forlist(&o->units) {
+    				Unit *u = (Unit *)elem;
+    				if(u->faction == fac) DoLabelOrders(0, u, fac, faction);
+   				}
+ 			}
+ 		}	
+	}
 }
 
-void Game::DoLabelOrders(OrdersCheck *pCheck, Unit *unit, Faction *fac, int faction, AString *unittype) //label = 0 for label orders
+void Game::DoLabelOrders(OrdersCheck *pCheck, Unit *unit, Faction *fac, int faction)
+{
+    if(unit->label) DoLabelOrder(pCheck, unit, fac, faction, 0);
+	if(unit->typeorders.Num()) {
+	    forlist(&unit->typeorders) {
+	        AString *name = (AString *) elem;
+	        if(name) DoLabelOrder(pCheck, unit, fac, faction, name);
+        }
+		unit->typeorders.DeleteAll();
+	}
+}
+
+
+void Game::DoLabelOrder(OrdersCheck *pCheck, Unit *unit, Faction *fac, int faction, AString *unittype) //label = 0 for label orders
 {
     if(!fac) return;
     if(!unit) return;
     
-    FormTemplate *formtem;
+    FormTemplate *formtem = 0;
     if(!unittype) {
         forlist(&fac->labeltemplates) {
             FormTemplate *ftem = (FormTemplate *) elem;
@@ -551,16 +569,20 @@ void Game::DoLabelOrders(OrdersCheck *pCheck, Unit *unit, Faction *fac, int fact
             if(*ftem->name == *unittype) formtem = ftem;
         }
     	if(!formtem) {
-            ParseError(pCheck, unit, fac, AString("TYPE: Could not find template ") + *unittype);
+            if(!pCheck) ParseError(pCheck, unit, fac, AString("TYPE: Could not find template ") + *unittype); //no error for pCheck as it may refer to a saved template
+            return;
         }
     }
     
     AString *order;
     int linenum = 0;
+    int upto = 1;
     
     forlist(&formtem->orders) {
         order = new AString(*((AString *) elem));  //this gets the temp'th order
         linenum++; //1 for first line, etc. Used in turn orders, where passing a 1 will access the second line.
+        if(linenum < upto) continue;
+        else upto = linenum;
 
 		AString saveorder = *order;
 		int getatsign = order->getat();
@@ -580,7 +602,8 @@ void Game::DoLabelOrders(OrdersCheck *pCheck, Unit *unit, Faction *fac, int fact
 					// faction is 0 if checking syntax only, not running turn.
 					if (faction != 0) {
 						AString *retval;
-						retval = ProcessTurnOrder(unit, 0, pCheck, getatsign, formtem, linenum); //no need to carry quiet sign - produce errors for incorrect TURN
+						retval = ProcessTurnOrder(unit, 0, pCheck, getatsign, upto, formtem); //no need to carry quiet sign - produce errors for incorrect TURN
+						upto++; //upto gets returned at the ENDTURN line (assuming it exists)
 						if (retval) {
 							delete order;
 							order = retval;
@@ -815,6 +838,9 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_TEACH:
 			ProcessTeachOrder(unit, o, pCheck, isquiet);
 			break;
+		case O_TYPE:
+			ProcessTypeOrder(unit, o, pCheck);
+			break;
 		case O_WORK:
 			ProcessWorkOrder(unit, pCheck, isquiet);
 			break;
@@ -971,18 +997,22 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		}
 
 		token = o->gettoken();
+		int lvl;
 		if (!token) {
-			ParseError(pCheck, u, 0, "SHOW: No skill level given.");
-			return;
+			ParseError(pCheck, u, 0, "SHOW: No skill level given. Showing level 1");
+			lvl = 1;
 		}
-		int lvl = token->value();
-		delete token;
+		else {
+            lvl = token->value();
+		    delete token;
+        }
 
 		if(!pCheck) {
+/*		//Disabled for Arcadia - you can see any skill you want to!
 			if (lvl > u->faction->skills.GetDays(sk)) {
 				u->Error("SHOW: Faction doesn't have that skill.");
 				return;
-			}
+			}*/
 
 			u->faction->shows.Add(new ShowSkill(sk, lvl));
 		}
@@ -2160,14 +2190,14 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isqui
 	    if(u->herostudyorders) {
 	        delete u->herostudyorders;
             AString err = "STUDY: Overwriting previous ";
-    		if (u->inTurnBlock) err += "DELAYED ";
     		err += "study order.";
-    		ParseError(pCheck, u, 0, err);
+    		if(!u->inTurnBlock) ParseError(pCheck, u, 0, err); //if in turn block, don't worry about the error for now. Saves making new variables for unit.
 	    }
         u->herostudyorders = ord;
         return;
     }
 	
+	//not a pCheck or a mage
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&
 		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
@@ -2439,7 +2469,7 @@ void Game::ProcessWishskillOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 }
 
 AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
-		int repeat, FormTemplate *formtem, int formline)
+		int repeat, int &formline, FormTemplate *formtem)
 {
 	int turnDepth = 1;
 	int turnLast = 1;
@@ -2454,7 +2484,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 		// get the next line
 		if(f) order = f->GetLine();
 		else {
-            order = formtem->GetLine(formline); //todo!!!!
+            order = formtem->GetLine(formline++); //todo!!!!
             if(!order) {
                 ParseError(pCheck, unit, 0, "TURN: without ENDTURN.");
                 return 0;
@@ -3403,6 +3433,24 @@ void Game::ProcessSpoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		if(flag) {
 			u->SetFlag(flag, val);
 		}
+	}
+}
+
+void Game::ProcessTypeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	/* Instant order */
+	AString *token = o->gettoken();
+	if(!token) token = new AString("default");
+	
+	if(!pCheck) {
+	    forlist(&u->typeorders) {
+	        AString *name = (AString *) elem;
+	        if(*name == *token) {
+	            delete token;
+                return;
+            }
+	    }
+	    u->typeorders.Add(token);
 	}
 }
 

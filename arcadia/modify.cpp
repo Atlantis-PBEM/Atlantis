@@ -77,6 +77,17 @@ void Game::ModifySkillDependancy(int sk, int i, char *dep, int lev)
 	SkillDefs[sk].depends[i].level = lev;
 }
 
+void Game::ModifyBaseSkills(int base, int sk1, int sk2, int sk3, int sk4, int sk5)
+{
+	if(base < 0 || base > (NSKILLS-1)) return;
+	if(SkillDefs[base].baseskill != base) return;
+    if(sk1 > -1 && sk1 < NSKILLS) SkillDefs[sk1].baseskill = base;
+    if(sk2 > -1 && sk2 < NSKILLS) SkillDefs[sk2].baseskill = base;
+    if(sk3 > -1 && sk3 < NSKILLS) SkillDefs[sk3].baseskill = base;
+    if(sk4 > -1 && sk4 < NSKILLS) SkillDefs[sk4].baseskill = base;
+    if(sk5 > -1 && sk5 < NSKILLS) SkillDefs[sk5].baseskill = base;
+}
+
 /// Modify the flags for a skill.
 /** Alters some flags on a skill. Some of the flags that can be set are: 
 SkillType::BATTLEREP, SkillType::MAGIC, SkillType::FOUNDATION.

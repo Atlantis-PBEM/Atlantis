@@ -261,7 +261,7 @@ int Formation::MoveSoldiers(Formation *pToForm, int sizetomove, int condition)
     return nummoved;
 }
 
-void Formation::Kill(int soldiernum, Army * itsarmy)
+void Formation::Kill(int soldiernum, Army * itsarmy, int numhits)
 //This adjusts nummen and canattack, so can be called during
 //a combat round.
 {
@@ -271,10 +271,23 @@ void Formation::Kill(int soldiernum, Army * itsarmy)
     }
 
     if (pSoldiers[soldiernum]->amuletofi) return;
-
-    pSoldiers[soldiernum]->damage++;
-    pSoldiers[soldiernum]->hits--;
-    if(pSoldiers[soldiernum]->hits) return;
+    
+    if(numhits == 1 || pSoldiers[soldiernum]->hits == 1) {
+        pSoldiers[soldiernum]->damage++;
+        pSoldiers[soldiernum]->hits--;
+        //return if soldier is alive
+        if(pSoldiers[soldiernum]->hits) return; //return if still alive
+    } else {
+        //doing more than one hit
+        if(numhits >= pSoldiers[soldiernum]->hits) {
+            pSoldiers[soldiernum]->damage += pSoldiers[soldiernum]->hits;
+            pSoldiers[soldiernum]->hits = 0;
+        } else {
+            pSoldiers[soldiernum]->damage += numhits;
+            pSoldiers[soldiernum]->hits -= numhits;
+            return; //still alive
+        }
+    }
 
     //soldier is dead!
     pSoldiers[soldiernum]->isdead = 1;

@@ -114,6 +114,7 @@ enum {
 	O_OPTION,
 	O_PASSWORD,
 	O_PILLAGE,
+	O_POOL,
 	O_PREPARE,
 	O_PRODUCE,
 	O_PROMOTE,
@@ -181,6 +182,14 @@ class MoveOrder : public Order {
 
 		int advancing;
 		AList dirs;
+};
+
+class PoolOrder : public Order {
+	public:
+		PoolOrder();
+		~PoolOrder();
+
+		int item;
 };
 
 class WithdrawOrder : public Order {

@@ -100,7 +100,7 @@ class Formation
 	    void TransferSoldier(int, Formation * pToForm);
 	    void MoveSoldiers(Formation * pToForm);
 	    int MoveSoldiers(Formation * pToForm, int sizetomove, int condition=0);
-	    void Kill(int soldiernum, Army *itsarmy);
+	    void Kill(int soldiernum, Army *itsarmy, int numhits = 1);
 
 		void Reset();
 		void ResetHeal() const;

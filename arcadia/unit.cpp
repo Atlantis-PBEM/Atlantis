@@ -158,7 +158,9 @@ Unit::~Unit()
 	if (name) delete name;
 	if (describe) delete describe;
 	if (label) delete label;
-//Awrite("Deleting Unit");
+#ifdef DEBUG
+Awrite("Deleting Unit");
+#endif
 }
 
 void Unit::SetMonFlags()
@@ -686,12 +688,15 @@ void Unit::ClearOrders()
 	movepoints = 0;
 	if (monthorders) delete monthorders;
 	monthorders = 0;
+	if (herostudyorders) delete herostudyorders;
+	herostudyorders = 0;
 	inTurnBlock = 0;
 	presentTaxing = 0;
 	if (presentMonthOrders) delete presentMonthOrders;
 	presentMonthOrders = 0;
 	if (teleportorders) delete teleportorders;
 	teleportorders = 0;
+	typeorders.DeleteAll();
 	giveorders.DeleteAll();
 	sendorders.DeleteAll();
 	withdraworders.DeleteAll();
@@ -1148,23 +1153,33 @@ void Unit::ForgetSkill(int sk)
 		Event("Combat spell set to none.");
 	}
 	
-	if (type == U_MAGE) {
-		forlist(&skills) {
-			Skill *s = (Skill *) elem;
-			if(SkillDefs[s->type].flags & SkillType::MAGIC) {
-				return;
-			}
-		}
-		type = U_NORMAL;
-	}
-	if(type == U_APPRENTICE) {
-		forlist(&skills) {
-			Skill *s = (Skill *) elem;
-			if(SkillDefs[s->type].flags & SkillType::APPRENTICE) {
-				return;
-			}
-		}
-		type = U_NORMAL;
+	if(!Globals->ARCADIA_MAGIC) {
+    	if (type == U_MAGE) {
+    		forlist(&skills) {
+    			Skill *s = (Skill *) elem;
+    			if(SkillDefs[s->type].flags & SkillType::MAGIC) {
+    				return;
+    			}
+    		}
+    		type = U_NORMAL;
+    	}
+    	if(type == U_APPRENTICE) {
+    		forlist(&skills) {
+    			Skill *s = (Skill *) elem;
+    			if(SkillDefs[s->type].flags & SkillType::APPRENTICE) {
+    				return;
+    			}
+    		}
+    		type = U_NORMAL;
+    	}
+	} else {
+	    if (sk == S_HEROSHIP && type == U_MAGE) {
+            type = U_LEADER;
+            AdjustSkills(0);
+        } else if(sk == S_LEADERSHIP && type == U_LEADER) {
+            type = U_NORMAL;
+            AdjustSkills(0);
+        }
 	}
 }
 
@@ -1332,7 +1347,7 @@ int Unit::GetSkillKnowledgeMax(int sk)
 {
     if((SkillDefs[sk].flags & SkillType::MAGIC) && !IsMage()) return 0;
 
-	int max = -1;
+	int max = -2;
 
 	if (SkillDefs[sk].flags & SkillType::DISABLED) return 0;
 
@@ -1341,7 +1356,7 @@ int Unit::GetSkillKnowledgeMax(int sk)
 		if (ItemDefs[i->type].flags & ItemType::DISABLED) continue;
 		if (!(ItemDefs[i->type].type & IT_MAN)) continue;
 		int m = SkillMax(SkillDefs[sk].abbr, i->type);
-		if ((max == -1 && m > max) || (m < max)) max = m;
+		if ((max == -2 && m > max) || (m < max)) max = m;    //need this to return 0 or 1 for hero skills, as this gets added up to 2 or 3 below.
 	}
 	
 	if(max < 0) max = 0;
@@ -1349,16 +1364,16 @@ int Unit::GetSkillKnowledgeMax(int sk)
 	switch(type) {
 	    case U_NORMAL:
 	    case U_GUARD:
-	        return max;
+	        return max;           //2 or 1
         case U_SPECIALIST:
         case U_LEADER:
         case U_APPRENTICE:
-            return (max+1);
+            return (max+1);         //3 or 2
         case U_MAGE:
         case U_GUARDMAGE:
-            return (max+2);
+            return (max+2);            //4 or 3
         default:
-            return max;	
+            return max;
 	}
 }
 
@@ -1367,7 +1382,7 @@ int Unit::GetSkillExperMax(int sk)
 //returns maximum experience level of a skill
 {
     int max = GetSkillKnowledgeMax(sk);    //set experience and knowledge maxes equal.
-    //add in level of appropriate glamour spell
+    //add in level of appropriate glamour spell - doesn't exist yet
     return max;
 /*
 	int max = -1;
@@ -1485,7 +1500,7 @@ void Unit::AdjustSkills(int overflow)
 			        if (SkillDefs[theskill->type].flags & SkillType::MAGIC) {
 			            if(IsASpeciality(SkillDefs[theskill->type].baseskill)) theskill->experience += extra / 3;
 			            else theskill->experience += extra / 6; //halved for non-specials.
-			        } else theskill->experience += extra / 3;
+			        } else theskill->experience += extra / 3; //full roll over whether speciality or not?
 			    }
 				theskill->days = GetDaysByLevel(max) * GetMen();
 			}
@@ -2325,7 +2340,11 @@ void Unit::CopyFlags(Unit *x)
 	flags = x->flags;
 	if(x->guard == GUARD_AVOID) guard = GUARD_AVOID; //Arcadia mod; guard and autotax do not get carried over.
 	else guard = GUARD_NONE;
-	SetFlag(FLAG_AUTOTAX, 0);   
+	SetFlag(FLAG_AUTOTAX, 0);
+	//BS mod:
+	SetFlag(FLAG_VISIB, 0);
+	SetFlag(FLAG_INVIS, 0);
+	SetFlag(FLAG_COMMANDER, 0);
 /*	if (x->Taxers(1)) {
 		if (x->guard != GUARD_SET && x->guard != GUARD_ADVANCE)
 			guard = x->guard;
@@ -2486,8 +2505,10 @@ void Unit::Event(const AString & s)
 void Unit::Error(const AString & s, int quiet)
 {
     if(quiet) {
-        Event(s);
-        return;
+        if(Globals->SUPPRESS_ERRORS == GameDefs::SHOW_AS_EVENTS) {
+            Event(s);
+            return;
+        } else if(Globals->SUPPRESS_ERRORS == GameDefs::SUPPRESS_ALL) return;
     }
 	AString temp = *name + ": " + s;
 	faction->Error(temp);
@@ -2842,11 +2863,11 @@ int Unit::ConsumeShared(int item, int n)
 					continue;
 				if (u->items.GetNum(item) >= n) {
 					u->items.SetNum(item, u->items.GetNum(item) - n);
-					u->Event(*(u->name) + " shares " + ItemString(item, n) +
+					u->Event(AString("Shares ") + ItemString(item, n) +
 							" with " + *name + ".");
 					return 1;
 				}
-				u->Event(*(u->name) + " shares " +
+				u->Event(AString("Shares ") +
 						ItemString(item, u->items.GetNum(item)) +
 						" with " + *name + ".");
 				n -= u->items.GetNum(item);

@@ -25,6 +25,10 @@
 #include "battle1.h"
 #include "gamedata.h"
 
+#ifndef DEBUG
+//#define DEBUG
+#endif
+
 void Soldier::SetupHealing()
 {
     if (unit->type == U_MAGE) {
@@ -551,7 +555,9 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers, Army *def)
 
 	if(a->special == NULL) return;
 	spd = FindSpecial(a->special);
-
+#ifdef DEBUG
+cout << spd->key;
+#endif
 	if(!(spd->effectflags & SpecialType::FX_DAMAGE)) return;
 
 	int hitself = 0;
@@ -565,12 +571,18 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers, Army *def)
         return; //no targets to hit.
     }
 
+#ifdef DEBUG
+cout << "-";
+#endif
 	//energy cost for mages using their combat spell only (ie not for monsters, battle items etc)
 	int cancast = a->DoSpellCost(round, this); //this also includes fizzle chance.
 	if(!cancast) return;
 	if(cancast == 2) {
 	    hitself = (hitself+1)%2; //swop army to hit.
 	}
+#ifdef DEBUG
+cout << "-";
+#endif
 
 	for(i = 0; i < 4; i++) {
 		if(spd->damage[i].type == -1) continue;

@@ -149,6 +149,7 @@ int IsSpeciality(char *skill, int race)
 }
 
 int SkillMax(char *skill, int race)
+//there seems to be a lot of overlap between use of this to find unit's max skill level, and use of IsASpeciality(). Maybe combine them sometime
 {
 	ManType *mt = FindRace(ItemDefs[race].abr);
 
@@ -161,12 +162,24 @@ int SkillMax(char *skill, int race)
 		}
 	}
 
-	AString skname = pS->abbr;
-	for(unsigned int c=0; c < sizeof(mt->skills)/sizeof(mt->skills[0]); c++) {
-		if(skname == mt->skills[c])
-			return mt->speciallevel;
+	if(pS->flags & SkillType::MAGIC) {
+	    pS = FindSkill(SkillDefs[pS->baseskill].abbr);
+	    AString skname = pS->abbr;
+    	for(unsigned int c=0; c < sizeof(mt->mage_skills)/sizeof(mt->mage_skills[0]); c++) {
+    		if(skname == mt->mage_skills[c])
+    			return mt->speciallevel-1;
+    	}
+    	return mt->defaultlevel-1;
+	
+	
+	} else {
+    	AString skname = pS->abbr;
+    	for(unsigned int c=0; c < sizeof(mt->skills)/sizeof(mt->skills[0]); c++) {
+    		if(skname == mt->skills[c])
+    			return mt->speciallevel;
+    	}
+    	return mt->defaultlevel;
 	}
-	return mt->defaultlevel;
 }
 
 int SkillExperMax(char *skill, int race)

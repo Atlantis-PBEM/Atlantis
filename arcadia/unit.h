@@ -330,6 +330,7 @@ class Unit : public AListElem
 		int leftShip;
 		UnitId *promote;
 		int promotequiet;
+		AList typeorders; //list of pointers to AStrings. Rest are lists of orders
 		AList findorders;
 		AList giveorders;
 		AList sendorders;

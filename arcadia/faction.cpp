@@ -347,6 +347,15 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 {
 	if (IsNPC() && num == 1) {
 		if(Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
+			f->PutStr("Atlantis Report For:");
+        	if((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
+        			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED)) {
+        		f->PutStr(*name);
+        	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+        		f->PutStr(*name + " (" + FactionTypeStr() + ")");
+        	}
+        	f->PutStr(AString(MonthNames[ pGame->month ]) + ", Year " + pGame->year);
+		
 			int i, j;
 			// Put all skills, items and objects in the GM report
 			shows.DeleteAll();

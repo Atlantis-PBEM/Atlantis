@@ -3024,6 +3024,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		return notallied;  //if it returns 1, it does no further give orders.
 	}
 
+	int newtype = -1;
+
 	/* If the item to be given is a man, combine skills */
 	if (ItemDefs[o->item].type & IT_MAN) {
 		if (u->type == U_MAGE || u->type == U_APPRENTICE ||
@@ -3032,9 +3034,13 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			return 0;
 		}
 		if (u->type != t->type) {
-		    //changed for new leader handling
-			u->Error("GIVE: Can't mix leaders and normal men.", o->quiet);
-			return 0;
+		    if(t->GetMen()) {
+    		    //changed for new leader handling
+    		    u->Error("GIVE: Can't mix leaders and normal men.", o->quiet);
+        		return 0;
+    		} else {
+    		    newtype = u->type;
+    		}
 		}
 		
 		// Small hack for Ceran
@@ -3080,6 +3086,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	t->faction->DiscoverItem(o->item, 0, 1);
 
 	if (ItemDefs[o->item].type & IT_MAN) {
+	    if(newtype != -1) t->type = newtype;
 		t->AdjustSkills();      //no overflow when acquiring new men into a unit
 	}
 	return 0;

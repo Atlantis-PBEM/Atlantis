@@ -2457,7 +2457,7 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 		maxmen = Globals->CITY_GUARD * (towntype+1);
 		if(!Globals->LEADERS_EXIST) maxmen = 3 * maxmen / 4;
 		if(!Globals->GUARD_DEPENDS_ON_TAX) men = u->GetMen() + (maxmen/10);
-		else men = u->GetMen() + r->untaxed / (20 * Globals->GUARD_MONEY);  //half the Nylandor rate!
+		else men = u->GetMen() + r->untaxed / (40 * Globals->GUARD_MONEY);  //one-quarter the Nylandor rate per unit!
 		if(men > maxmen) men = maxmen;
 	}
 

@@ -2995,22 +2995,33 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 			break;		
 		case S_BASE_CHARISMA: //Earthsea
-			if(level > 1) break;
+			if(level == 1) {
 			*str += "Charisma is a powerful tool, and subsequent skills allow heroes to charm or "
                 "persuade others into aiding the hero. Charisma itself gives a hero "
                 "the chance to learn from locals of advanced resources in a region, "
-                "even if the hero would not normally be able to detect them. The "
-                "chance of NOT detecting each advanced resource present is 1 in "
-                "2 to the power of the hero's charisma skill level. This skill "
+                "even if the hero would not normally be able to detect them. At skill "
+                "level 1 the hero has a 50% chance of detecting any advanced resource "
+                "each month. This skill "
                 "is used automatically in the region where the hero ends the month, "
                 "providing there are local peasants.";
+            }
+            else {
+            int cycles = level;
+            int chance = 1000;
+            while(cycles--) chance /= 2;
+            chance = 100 - (chance+5)/10;
+			*str += AString("At level ") + level + " a hero has a " + chance + "% chance "
+			    "of detecting local advanced resources per month.";
+            }
 			break;		
 		case S_TOUGHNESS: //Earthsea
 			if(level > 1) break;
 			*str += "A hero with toughness learns to survive the most powerful blows. "
                 "For each level gained in toughness, the hero will be able to survive "
                 "an extra (level) hits in battle. That is, 1 extra hit at level 1, 3 "
-                "at level 2, 6 at level 3, etc.";
+                "at level 2, 6 at level 3, etc. In addition, the hero will be less "
+                "susceptible to attacks from a distance, gaining a (level):1 chance "
+                "to avoid ranged or magic attacks that would otherwise be successful.";
 			break;
 		case S_UNITY: //Earthsea
 			if(level > 1) break;
@@ -3020,13 +3031,29 @@ AString *ShowSkill::Report(Faction *f)
                 "level squared, times fifty, morale affected soldiers.";
 			break;
 		case S_FRENZY: //Earthsea
-			if(level > 1) break;
-			*str += "A hero with frenzy can perform amaxing feats in battle. "
-                "For each level gained in frenzy, the hero will be able to make "
-                "an extra (level) attacks in battle. That is, 1 extra attack at level 1, 3 "
-                "at level 2, 6 at level 3, etc. However, if the weapon the hero is using "
-                "allows only one attack every n rounds, then the initial (n-1) new attacks "
-                "will have lesser effect.";
+			if(level == 1) {
+    			*str += "A hero with frenzy can perform amaxing feats in battle. "
+                    "At level 1, a hero with frenzy will be more effective against "
+                    "armoured opponents. That is, if the hero's attack is not "
+                    "normally armour-piercing, it will become so, and if it is "
+                    "armour-piercing (due to use of a crossbow or similar) then "
+                    "it will ignore the target's armour altogether. In addition, "
+                    "the hero will gain two extra physical attacks per round; or if using a weapon "
+                    "that only attacks once every 2 rounds, then will make "
+                    "two attacks total per round. Note that this bonus is "
+                    "an addition, not multiplication - if a weapon would usually "
+                    "grant 3 attacks per battle round, then the hero will get "
+                    "3+2 = 5 attacks per round.";
+            } else {
+                *str += AString("At level ") + level + " frenzy, a hero gains a bonus "
+                    + 2*level*level + " physical attacks per battle round.";
+                if(level == 2) *str += " However, if using a weapon that only attacks once "
+                    "every n rounds, then the hero will only get this bonus, divided by n, "
+                    "plus 1 attacks per round.";
+                *str += AString(" In addition, if the hero scores a hit against a creature "
+                    "with multiple hitpoints, that creature will lose ") + level +
+                    " hitpoints, instead of just 1.";
+            }
 			break;		
 		case S_SECSIGHT: //Earthsea
 			if(level > 1) break;

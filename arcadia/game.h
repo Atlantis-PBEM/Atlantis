@@ -210,6 +210,7 @@ private:
 	void EnableSkill(int sk); // Enabled a disabled skill
 	void DisableSkill(int sk);  // Prevents skill being studied or used
 	void ModifySkillDependancy(int sk, int i, char *dep, int lev);
+	void ModifyBaseSkills(int base, int, int = -1, int = -1, int = -1, int = -1);
 	void ModifySkillFlags(int sk, int flags);
 	void ModifySkillCost(int sk, int cost);
 	void ModifySkillSpecial(int sk, char *special);
@@ -407,6 +408,7 @@ private:
 	void ProcessNoaidOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessDisableOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessNocrossOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ProcessTypeOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessNospoilsOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessSpoilsOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessAutoTaxOrder(Unit *, AString *, OrdersCheck *pCheck);
@@ -417,10 +419,11 @@ private:
 	void ProcessTransportOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessDistributeOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
-	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int, FormTemplate *ft = 0, int fl = -1);
+	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int, int &fl, FormTemplate *ft = 0);
 	AString *ProcessTemplateOrder(Aorders *, OrdersCheck *pCheck, AString *, Faction *fac);
 	AString *ProcessAllOrder(Aorders *, OrdersCheck *pCheck, AString *, Faction *fac);
-    void DoLabelOrders(OrdersCheck *pCheck, Unit *u, Faction *fac, int faction, AString *unittype = 0);
+    void DoLabelOrders(OrdersCheck *pCheck, Unit *u, Faction *fac, int faction);
+    void DoLabelOrder(OrdersCheck *pCheck, Unit *u, Faction *fac, int faction, AString *unittype);
 
 	void RemoveInactiveFactions();
 

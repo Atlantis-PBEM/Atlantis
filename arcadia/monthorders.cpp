@@ -670,6 +670,8 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 			students -= umen;
 
 			StudyOrder * o = (StudyOrder *) u->monthorders;
+			if(Globals->ARCADIA_MAGIC && u->herostudyorders) o = (StudyOrder *) u->herostudyorders;
+			
 			o->days += tempdays;
 			if (o->days > 30 * umen) // this bit returns any spare days to the teacher
 			{
@@ -1147,7 +1149,8 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	ProduceOrder * o = (ProduceOrder *) u->monthorders;
 
 	if (o->item == I_SILVER) {
-		u->Error("Can't do that in this region.", o->quiet);
+//		u->Error("Can't do that in this region.", o->quiet);
+u->Error(AString("Can't do that in this region. Error Code: ") + o->skill + " " + o->productivity, o->quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;

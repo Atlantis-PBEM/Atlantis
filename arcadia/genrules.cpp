@@ -407,6 +407,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#appendixd", "Appendix D: Weapons"));
 	f.TagText("li", f.Link("#appendixe", "Appendix E: Armour"));
 	f.TagText("li", f.Link("#appendixf", "Appendix F: Terrain"));
+	f.TagText("li", f.Link("#appendixg", "Appendix G: Guards"));
+	f.TagText("li", f.Link("#appendixh", "Appendix H: Skills"));
+	f.TagText("li", f.Link("#appendixi", "Appendix I: Combat Spells"));
 	f.Enclose(0, "ul");
 	f.Paragraph("Index of Tables");
 	f.Paragraph("");
@@ -422,6 +425,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 					"Table of Ship Capacities"));
 	if(Globals->RACES_EXIST)
 		f.TagText("li", f.Link("#tableraces", "Table of Races"));
+	f.TagText("li", f.Link("#tableunittypes", "Table of Unit Types"));
 	f.TagText("li", f.Link("#tableiteminfo", "Table of Item Information"));
 	f.TagText("li", f.Link("#tablebuildings", "Table of Buildings"));
 	f.TagText("li", f.Link("#tabletradestructures",
@@ -446,6 +450,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#tablehexsideterrain", "Table of Terrain Features"));	
 	f.TagText("li", f.Link("#tableshipcapacities", "Table of Ship Capacities"));
 	f.TagText("li", f.Link("#tableraces", "Table of Races"));
+	f.TagText("li", f.Link("#tableunittypes", "Table of Unit Types"));
 	f.TagText("li", f.Link("#tableiteminfo", "Table of Item Information"));
 	f.TagText("li", f.Link("#tablebuildings", "Table of Buildings"));
 	f.TagText("li", f.Link("#tabletradestructures",	"Table of Trade Structures"));
@@ -2249,7 +2254,7 @@ int Game::GenRules(const AString &rules, const AString &css,
     	f.Paragraph(temp);
     	
     	
-    			f.LinkRef("tableraces");
+    	f.LinkRef("tableunittypes");
 		f.Enclose(1, "center");
 		f.Enclose(1, "table border=\"1\"");
 		f.Enclose(1, "tr");
@@ -2259,97 +2264,84 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", "Specialist knowledge");
 		f.TagText("th", "Non-specialist knowledge");
 		f.TagText("th", "Specialist hero skills");
+		f.TagText("th", "Non-specialist hero skills");
 		f.Enclose(0, "tr");
-		for(i = 0; i < NITEMS; i++) {
-			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-			if(!(ItemDefs[i].type & IT_MAN)) continue;
+		for(i = 0; i < 3; i++) {
 			f.Enclose(1, "tr");
-			ManType *mt = FindRace(ItemDefs[i].abr);
 			f.Enclose(1, "td align=\"left\" nowrap");
-			f.PutStr(ItemDefs[i].names);
-			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"left\" nowrap");
-			switch(mt->ethnicity) {
-			    case RA_HUMAN:
-			        f.PutStr("Human");
-			        break;
-			    case RA_DWARF:
-			        f.PutStr("Dwarf");
-			        break;
-			    case RA_ELF:
-			        f.PutStr("Elf");
-			        break;
-			    case RA_OTHER:
-			        f.PutStr("Other");
-			        break;
-			    default:
-			        f.PutStr("N/A");
-			        break;			
+			switch(i) {
+			    case 0: f.PutStr("Normal");
+			    break;
+			    case 1: f.PutStr("Leader");
+			    break;
+			    case 2: f.PutStr("Hero");
+			    break;
 			}
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"left\" nowrap");
-			int spec = 0;
-			comma = 0;
-			temp = "";
-			for(j=0; j<(int)(sizeof(mt->skills)/sizeof(mt->skills[0])); j++) {
-				pS = FindSkill(mt->skills[j]);
-				if (!pS || (pS->flags & SkillType::DISABLED)) continue;
-				spec = 1;
-				if(comma) temp += ", ";
-				temp += pS->name;
-				comma++;
+			switch(i) {
+			    case 0: f.PutStr("&nbsp;");
+			    break;
+			    case 1: f.PutStr("Leadership");
+			    break;
+			    case 2: f.PutStr("Heroship");
+			    break;
 			}
-			if(!spec) temp = "None.";
-			f.PutStr(temp);
 			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"left\" nowrap");
-			spec = 0;
-			comma = 0;
-			temp = "";
-			for(j=0; j<(int)(sizeof(mt->mage_skills)/sizeof(mt->mage_skills[0])); j++) {
-				pS = FindSkill(mt->mage_skills[j]);
-				if (!pS || (pS->flags & SkillType::DISABLED)) continue;
-				spec = 1;
-				if(comma) temp += ", ";
-				temp += pS->name;
-				comma++;
+			f.Enclose(1, "td align=\"center\" nowrap");
+			switch(i) {
+			    case 0: f.PutStr("10 / 20");
+			    break;
+			    case 1: f.PutStr("20 / 40");
+			    break;
+			    case 2: f.PutStr("100 / 200");
+			    break;
 			}
-			if(!spec) temp = "None.";
-			f.PutStr(temp);
 			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"left\" nowrap");
-			if(spec) {
-				temp = AString(mt->speciallevel);
-				if(Globals->REAL_EXPERIENCE) {
-				    temp += ", ";
-				    temp += AString(mt->specialexperlevel);
-				}
+			f.Enclose(1, "td align=\"center\" nowrap");
+			f.PutStr(AString(2+i)+"*");
+			f.Enclose(0, "td");
+			f.Enclose(1, "td align=\"center\" nowrap");
+			f.PutStr(AString(1+i)+"**");
+			f.Enclose(0, "td");
+			f.Enclose(1, "td align=\"center\" nowrap");
+			switch(i) {
+			    case 0: f.PutStr("&nbsp;");
+			    break;
+			    case 1: f.PutStr("&nbsp;");
+			    break;
+			    case 2: f.PutStr(3);
+			    break;
 			}
-			else
-				temp = "--";
-			f.PutStr(temp);
 			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"left\" nowrap");
-			temp = AString(mt->defaultlevel);
-			if(Globals->REAL_EXPERIENCE) {
-			    temp += ", ";
-			    temp += AString(mt->defaultexperlevel);
-			}			
-			f.PutStr(temp);
+			f.Enclose(1, "td align=\"center\" nowrap");
+			switch(i) {
+			    case 0: f.PutStr("&nbsp;");
+			    break;
+			    case 1: f.PutStr("&nbsp;");
+			    break;
+			    case 2: f.PutStr(2);
+			    break;
+			}
 			f.Enclose(0, "td");
 			f.Enclose(0, "tr");
 		}
 		f.Enclose(0, "table");
 		f.Enclose(0, "center");
     	
-    	
-    	
-    	
+
+    	temp = "* Add 1 to this value for orcs. Note that units can also gain experience equal "
+               "to their maximum allowed knowledge, so the maximum skill level achievable is double that listed here.";
+    	f.Paragraph(temp);
+    
+    	temp = "** Subtract 1 from this value for orcs. Note that units can also gain experience equal "
+               "to their maximum allowed knowledge, so the maximum skill level achievable is double that listed here.";
+    	f.Paragraph(temp);
     	
     
     	f.LinkRef("skills_overflow");
     	f.TagText("h3", "Overflow:");
-    	temp = "If a unit reaches their knowledge level, "
+    	temp = "If a unit reaches their maximum knowledge level, "
             "then they cannot gain any more days worth of knowledge. "
             "However, further study is not wasted; each extra month's "
             "study will gain the same experience as if the unit had "
@@ -5568,36 +5560,35 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("faction");
 		f.TagText("h4", "FACTION [type] [points] ...");
-		temp = "Attempt to change your faction's type.  In the order, you "
-			"can specify up to three faction types (WAR, TRADE, and MAGIC) "
-			"and the number of faction points to assign to each type; if "
+		temp = AString("Attempt to change your faction's type.  In the order, you "
+			"can specify up to three faction types (") + FactionStrs[0] + ", "  + FactionStrs[1] + ", and " + FactionStrs[2] +
+			") and the number of faction points to assign to each type; if "
 			"you are assigning points to only one or two types, you may "
 			"omit the types that will not have any points.";
 		f.Paragraph(temp);
-		temp = "Changing the number of faction points assigned to MAGIC may "
-			"be tricky. Increasing the MAGIC points will always succeed, but "
-			"if you decrease the number of points assigned to MAGIC, you "
-			"must make sure that you have only the number of magic-skilled "
-			"leaders allowed by the new number of MAGIC points BEFORE you "
-			"change your point distribution. For example, if you have 3 "
-			"mages (3 points assigned to MAGIC), but want to use one of "
-			"those points for WAR or TRADE (change to MAGIC 2), you must "
-			"first get rid of one of your mages by either giving it to "
-			"another faction or ordering it to ";
-		temp += f.Link("#forget", "FORGET") + " all its magic skills. ";
-		temp += "If you have too many mages for the number of points you "
-			"try to assign to MAGIC, the FACTION order will fail.";
+		temp = "Changing the number of faction points assigned to HEROES may "
+			"be tricky. Increasing the HEROES points will always succeed, but "
+			"if you decrease the number of points assigned to HEROES, you "
+			"must make sure that you have only the number of heroes "
+			"allowed by the new number of HEROES points BEFORE you "
+			"change your point distribution. For example, if you have 4 "
+			"heroes (3 points assigned to HEROES), but want to use one of "
+			"those points for WAR or TRADE (change to HEROES 2), you must "
+			"first get rid of one of your heroes by either giving it to "
+			"another faction or disbanding the unit. ";
+		temp += "If you have too many heroes for the number of points you "
+			"try to assign to HEROES, the FACTION order will fail.";
 		if (qm_exist) {
 			temp += " Similar problems could occur with TRADE points and "
 				"the number of quartermasters controlled by the faction.";
 		}
 		f.Paragraph(temp);
 		f.Paragraph("Examples:");
-		temp = "Assign 2 faction points to WAR, 2 to TRADE, and 1 to MAGIC.";
-		temp2 = "FACTION WAR 2 TRADE 2 MAGIC 1";
+		temp = "Assign 2 faction points to WAR, 2 to TRADE, and 1 to HEROES.";
+		temp2 = "FACTION WAR 2 TRADE 2 HEROES 1";
 		f.CommandExample(temp, temp2);
-		temp = "Become a pure magic faction (assign all points to magic).";
-		temp2 = "FACTION MAGIC ";
+		temp = "Become a pure hero faction (assign all points to heroes).";
+		temp2 = "FACTION HEROES ";
 		temp2 += Globals->FACTION_POINTS;
 		f.CommandExample(temp, temp2);
 	}
@@ -6767,7 +6758,7 @@ int Game::GenRules(const AString &rules, const AString &css,
     		temp2 = "WISHDRAW 5 stone";
     		f.CommandExample(temp, temp2);
     		temp = "Wishdraw 1 mithril sword.";
-    		temp2 = "WITHDRAW mithril_sword";
+    		temp2 = "WISHDRAW mithril_sword";
     		f.CommandExample(temp, temp2);
     		
     		f.ClassTagText("div", "rule", "");
@@ -7970,10 +7961,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 	    "of a region will increase if a settlement (village, town or city) "
         "is present. The population of the region and of the settlement are "
         "calculated separately, but you will only ever see the combined population "
-        "on your report. A settlement with less than 1000 people is called a "
-        "village and increases wages by 1; a settlement with 1000-1999 people "
+        "on your report. A settlement with less than 20,000 people is called a "
+        "village and increases wages by 1; a settlement with 20,000-39,999 people "
         "is called a town and increases wages by 2, and a settlement with "
-        "2000+ people is called a city and increases wages by 3. The population "
+        "40,000+ people is called a city and increases wages by 3. The population "
         "of a region may be increased by up to 50% of its initial value due to "
         "production in the region; the population of a settlement may be "
         "increased through trading goods in the market.";
@@ -7987,6 +7978,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("th", "Move Cost*");
 	f.TagText("th", "Population");
 	f.TagText("th", "Wages");
+	f.TagText("th", "Tax Income");
 	f.TagText("th", "Grain/Livestock");
 	f.TagText("th", "Normal Resources**");
 	f.TagText("th", "Advanced Resources**");
@@ -8005,12 +7997,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(TerrainDefs[i].movepoints);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		temp = AString(TerrainDefs[i].pop*Globals->POP_LEVEL/2) + "-" + (TerrainDefs[i].pop*Globals->POP_LEVEL-1);
+		temp = AString(TerrainDefs[i].pop*Globals->POP_LEVEL/2) + "-" + (TerrainDefs[i].pop*Globals->POP_LEVEL);
 		if(TerrainDefs[i].pop == 0) temp = AString('-');
 		f.PutStr(temp);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
 		temp = AString(TerrainDefs[i].wages) + "-" + (TerrainDefs[i].wages+2);
+		f.PutStr(temp);
+		f.Enclose(0, "td");
+		f.Enclose(1, "td align=\"left\" nowrap");
+		temp = AString((TerrainDefs[i].wages-5)*TerrainDefs[i].pop/4) + "-" + (TerrainDefs[i].wages-3)*TerrainDefs[i].pop/2;
 		f.PutStr(temp);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
@@ -8228,8 +8224,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("th", "Skill");
 	f.TagText("th", "Combat Cost");
 	f.TagText("th", "Type");
-	f.TagText("th", "Attack");
-	f.TagText("th", "Damage");
+	f.TagText("th", "Attack Type");
+	f.TagText("th", "Attacks per level");
 	f.TagText("th", "Effect");
 
 
@@ -8280,9 +8276,34 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(0, "td");
 		f.Enclose(0, "tr");
 	}
+	//add frenzy in specially
+		f.Enclose(1, "tr");
+		f.Enclose(1, "td align=\"left\" nowrap");
+		f.PutStr(SkillDefs[S_FRENZY].name);
+		f.Enclose(0, "td");
+		f.Enclose(1, "td align=\"left\" nowrap");
+		f.PutStr("passive");
+		f.Enclose(0, "td");
+		f.Enclose(1, "td align=\"left\" nowrap");
+		f.PutStr("&nbsp;");
+		f.Enclose(0, "td");
+		f.Enclose(1, "td align=\"left\" nowrap");
+		f.PutStr("improved");
+		f.Enclose(0, "td");
+		f.Enclose(1, "td align=\"left\" nowrap");
+		f.PutStr("2-12*");
+		f.Enclose(0, "td");
+		f.Enclose(1, "td align=\"left\" nowrap");
+        f.PutStr("&nbsp;");
+		f.Enclose(0, "td");
+		f.Enclose(0, "tr");
+	
 	f.Enclose(0, "table");
 	f.Enclose(0, "center");
-
+	
+	temp = "*   Dependent on skill level, not random (ie exactly 2 at level 1, "
+        "up to exactly 12 per level (or 72 total) at level 6).";
+	f.Paragraph(temp);
 
 
     f.Paragraph("");

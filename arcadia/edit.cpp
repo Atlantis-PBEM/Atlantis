@@ -1875,9 +1875,11 @@ void Game::EditGameGlobalEffects()
         Awrite( " [products] to provide a production summary ");
         Awrite( " [buildings] to provide a buildings summary ");
         Awrite( " [rename] [terrain] [level] [name] to rename all of a terrain type on a level. ");
-        Awrite( " [importmap] [level] [filename] to set the terrain of a level according to a text file.");
-        Awrite( " [importeth] [level] [filename] to set the ethnicities of a level according to a text file.");
-        Awrite( " [importriv] [level] [filename] to set the rivers of a level according to a text file.");
+        Awrite( " [importmap] [level] [filename] to set the terrain/cities of a level according to a text file.");
+        Awrite( " [importeth] [level] [filename] to set the ethnicities/flagpoles of a level according to a text file.");
+        Awrite( " [importriv] [level] [filename] to set the rivers/bridges of a level according to a text file.");
+        Awrite( " [resetgates] [level] [frequency] to reset gates on specified level.");
+        Awrite( " [makexan] to make Xanaxor.");
         Awrite( " q) Return to previous menu." );
 
         int exit = 0; 
@@ -2139,6 +2141,107 @@ void Game::EditGameGlobalEffects()
                     pToken = pStr->gettoken();
                     if(pToken) ImportRivFile(pToken, level);
                     SAFE_DELETE( pToken );
+    			} else if (*pToken == "makexan") {
+    			    SAFE_DELETE( pToken );
+
+                    ImportMapFile(new AString("xanaxor.txt"), 1);
+                    ImportEthFile(new AString("xanaxoreth.txt"), 1);
+                    ImportRivFile(new AString("xanaxorriv.txt"), 1);
+                    
+                    int frequency = 10;
+                    
+    			    forlist(&regions) {
+    			        ARegion *r = (ARegion *) elem;
+    			        int needsgate = 0;
+    			        if(TerrainDefs[r->type].similar_type != R_OCEAN) needsgate = !getrandom(frequency);
+                        if(r->gate > 0 && !needsgate) {
+                            //remove gate
+                            int numgates = regions.numberofgates;
+                            int found = 0;
+                            forlist(&regions) {
+                                ARegion *reg = (ARegion *) elem;
+                                if (reg->gate == numgates) {
+                                    reg->gate = r->gate;
+                                    r->gate = 0;
+                                    regions.numberofgates--;
+                                    found = 1;
+                                    break;
+                                }
+                            }
+                            if(!found) Awrite("Error: Could not find last gate");
+                        } else if(r->gate == 0 && needsgate) {
+                            //add gate                        
+                            regions.numberofgates++;                
+                            int gatenum = getrandom(regions.numberofgates) + 1;
+                            if(gatenum != regions.numberofgates) {
+                                forlist(&regions) {
+                                    ARegion *reg = (ARegion *) elem;
+                                    if(reg->gate == gatenum) reg->gate = regions.numberofgates;
+                                }
+                            }
+                            r->gate = gatenum;
+                            r->gatemonth = getrandom(12);
+                        }
+                    }                    
+                } else if (*pToken == "resetgates") {
+    			    SAFE_DELETE( pToken );
+
+                    pToken = pStr->gettoken(); 
+                    if( !pToken ) { 
+                        Awrite( "Try again." ); 
+                        break; 
+                    }
+                    int level = pToken->value();
+                    if(level == -1) { 
+                        Awrite( "Invalid level." ); 
+                        break; 
+                    } 
+                    SAFE_DELETE( pToken );
+                    pToken = pStr->gettoken();
+                    if( !pToken ) { 
+                        Awrite( "Invalid frequency." ); 
+                        break; 
+                    }
+                    int frequency = pToken->value();
+                    SAFE_DELETE( pToken );
+                    if( frequency < 1 ) { 
+                        Awrite( "Invalid frequency." ); 
+                        break; 
+                    }
+                    
+    			    forlist(&regions) {
+    			        ARegion *r = (ARegion *) elem;
+    			        int needsgate = 0;
+    			        if(TerrainDefs[r->type].similar_type != R_OCEAN) needsgate = !getrandom(frequency);
+                        if(r->gate > 0 && !needsgate) {
+                            //remove gate
+                            int numgates = regions.numberofgates;
+                            int found = 0;
+                            forlist(&regions) {
+                                ARegion *reg = (ARegion *) elem;
+                                if (reg->gate == numgates) {
+                                    reg->gate = r->gate;
+                                    r->gate = 0;
+                                    regions.numberofgates--;
+                                    found = 1;
+                                    break;
+                                }
+                            }
+                            if(!found) Awrite("Error: Could not find last gate");
+                        } else if(r->gate == 0 && needsgate) {
+                            //add gate                        
+                            regions.numberofgates++;                
+                            int gatenum = getrandom(regions.numberofgates) + 1;
+                            if(gatenum != regions.numberofgates) {
+                                forlist(&regions) {
+                                    ARegion *reg = (ARegion *) elem;
+                                    if(reg->gate == gatenum) reg->gate = regions.numberofgates;
+                                }
+                            }
+                            r->gate = gatenum;
+                            r->gatemonth = getrandom(12);
+                        }
+                    }
     			} else if (*pToken == "buildingseq") {
     			    SAFE_DELETE( pToken );
     			    
@@ -2246,9 +2349,20 @@ void Game::ImportEthFile(AString *filename, int level)
             else if (*type == "o") ethnicity = RA_OTHER;
             else if (*type == "r") ethnicity = getrandom(RA_NA);
             
-            if(ethnicity != -1) {
-                ARegion *pReg = regions.GetRegion(xx,yy,level);
-                if(pReg) pReg->SetEthnicity(ethnicity, &regions);
+            ARegion *pReg = regions.GetRegion(xx,yy,level);
+            if(pReg) {
+                if(ethnicity != -1) pReg->SetEthnicity(ethnicity, &regions);
+                //extra feature flagpoling:
+                char *str = type->Str();
+                if(*str >= 'A' && *str <= 'Z') {
+                    pReg->flagpole = 1;
+//temp startup cities get named "Starter"
+if(pReg->town) {
+    AString *newname = new AString(EthnicityString(ethnicity) + " Start");
+    delete pReg->town->name;
+    pReg->town->name = newname;
+}
+                } else pReg->flagpole = 0;
             }
             xx += 2;
             delete type;
