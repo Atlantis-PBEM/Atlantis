@@ -5017,7 +5017,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = f.Link("#destroy", "DESTROY") + " and ";
 	temp += f.Link("#give", "GIVE") + " orders are processed.";
 	f.TagText("LI", temp);
-	temp = f.Link("#exchange", "EXCHANGE") + "orders are processed.";
+	temp = f.Link("#exchange", "EXCHANGE") + " orders are processed.";
 	f.TagText("LI", temp);
 	f.Enclose(0, "UL");
 	f.Enclose(0, "LI");
