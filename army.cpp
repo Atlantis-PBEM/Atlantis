@@ -245,7 +245,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 			//
 			// Attack and defense skill
 			//
-			askill = baseSkillLevel + pWep->attackBonus;
+			askill += (baseSkillLevel + pWep->attackBonus);
 			if(pWep->flags & WeaponType::NOATTACKERSKILL) {
 				dskill[ATTACK_COMBAT] += pWep->defenseBonus;
 			} else {
