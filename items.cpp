@@ -269,7 +269,7 @@ AString *ItemDescription(int item, int full)
 		int wep = ItemDefs[item].index;
 		WeaponType *pW = &WeaponDefs[wep];
 		if(pW->flags & WeaponType::NEEDSKILL) {
-			*temp += AString("Knowledge of ") + SkillStrs(pW->baseSkill);
+			*temp += AString(" Knowledge of ") + SkillStrs(pW->baseSkill);
 			if(pW->orSkill != -1) {
 				*temp += AString(" or ") + SkillStrs(pW->orSkill);
 			}
@@ -301,7 +301,7 @@ AString *ItemDescription(int item, int full)
 				"effective combat skill of 0.";
 		}
 		if(pW->flags & WeaponType::NOATTACKERSKILL) {
-			*temp += " Attackers do not get skill bonus on attack.";
+			*temp += " Attackers do not get skill bonus on defense.";
 		}
 		if(pW->flags & WeaponType::ALWAYSREADY) {
 			*temp += " Wielders of this weapon never miss a round to ready "

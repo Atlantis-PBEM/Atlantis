@@ -2198,6 +2198,7 @@ ARegion * ARegionList::GetRegion(int n)
 ARegion *ARegionList::GetRegion( int x, int y, int z )
 {
 	ARegionArray *arr = pRegionArrays[ z ];
+
 	x = ( x + arr->x ) % arr->x;
 	y = ( y + arr->y ) % arr->y;
 
