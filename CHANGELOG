@@ -148,3 +148,5 @@ Changes from 4.0.6 -> 4.0.7
       forgot any skill which made them an apprentice (only MANIPULATION
       currently) they didn't get unmarked as an apprentice.  (Thanks to
       Ben Lloyd for pointing that out)
+   -- Fixed a bug in GIVE ALL EXCEPT which caused a wierdness when you
+      tried to give more than you had.

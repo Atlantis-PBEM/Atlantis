@@ -1752,9 +1752,10 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 			if(o->except > amt) {
 				amt = 0;
 				u->Error("GIVE: EXCEPT value greater than amount on hand.");
+			} else {
+				amt = amt - o->except;
 			}
 		}
-		amt = amt - o->except;
 	}
 
 
