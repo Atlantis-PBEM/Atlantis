@@ -3422,6 +3422,14 @@ static ObjectType ot[] =
 	 15, 3, 3,
 	 -1, -1,
 	 {0,0,0,0,0,0}},
+	{"Coracle",
+	ObjectType::DISABLED | ObjectType::NEVERDECAY |
+	ObjectType::CANENTER | ObjectType::CANMODIFY,
+	0,20,3,0,
+	I_FUR,3,"SHIP",1,
+	0,0,0,
+	-1,-1,
+	{0,0,0,0,0,0}},
 };
 
 ObjectType *ObjectDefs = ot;

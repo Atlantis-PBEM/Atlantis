@@ -65,9 +65,6 @@
       unbalancing (since it now requires some resource management to get
       good specialists to the right places, but might be nice when combined
       with a larger number of races (such as Ceran))
-   -- Consider a smaller boat than a longboat which can be used for quick
-      scouts/easy ocean screens but can only hold a few men. [see
-      atlantisdev post #79]
    -- Consider Tim Martel's idea of a total limit on production of a
       resource in a hex with a chance of regeneration.
 
@@ -139,22 +136,15 @@
       at least think on it.
 
 ** Skills
-   -- Merchant skill (limited number of merchents)/Limited number
-      of tacticians/generals? [The thought on the Merchant skill is that
+   -- Merchant skill (limited number of merchants)
+      [The thought on the Merchant skill is that
       a unit with the merchant skill could buy/sell items at a profit of
       (for example) 10% of the listed price times his skill level, so a
       level 5 merchant would be able to buy items from a city at 50% of
       the listed value and sell them for 150% of the listed value.  Having
       that unlimited seemed unbalancing, so I figured limiting it (much as
-      total number of mages are limited to mage factiosn) based on number
-      of trade points.  The General/tactician option is a possible way to
-      impose a small limit on war factions, which are pretty powerful as
-      well.  It would limit the number of units you could have which knew
-      tactics based on the number of war points.  As always, these would
-      be gamedef options as to whether they would be enabled and the
-      actual numbers of merchants or tacticians would be tweakable in the
-      same way the number of mages is tweakeable now (by editing the function
-      in extra.cpp)]
+      total number of mages are limited to mage factions) based on number
+      of trade points.
    -- Consider the use of buildings as skill boosters for some skills.
       [Craig had initially suggested  a shipyard which gave the first 20
       men in it a +1 boost to SHIP, but realized that this wouldn't work

@@ -709,3 +709,6 @@ Changes from 4.0.10 -> 5.0.0
       surface level creation. Also added some variability in terrain growth
       and some code to prevent land from squeezing onto the north and south
       map edges.
+   -- Added an option to limit tact-5 leaders based on the number of points
+      spent on war.
+   -- Added coracles.

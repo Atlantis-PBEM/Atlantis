@@ -54,7 +54,7 @@ Peter Rayner
 Vitauts Stochka
     Various bugfixes from Latvian Atlantis.
 Ales Privetivy
-    Variou bugfixes and the unit weight/capacity info patch
+    Various bugfixes and the unit weight/capacity info patch
 Jan Rietema
     Patch for improved world generation
     Patch to prevent sailing through single hex land masses.
@@ -67,7 +67,10 @@ Anthony Briggs
     Coastal fish patch
     New Gamemaster guide
     Smoke testing script
+	Added a patch to limit tact-5 leaders based on points spent in war.
 Joseph Traub
     Changes, updates, and merging a few disparate branches
     Maintaining and extending the 4.0.X code.
-
+	Implemented quartermasters and TRANSPORT/DISTRIBUTE
+Peter Christie
+	Added coracles (a boat smaller than a longboat)
