@@ -8,6 +8,8 @@
 
 GAME ?= standard
 
+CPLUS = g++
+CC = gcc
 CFLAGS = -g -I. -I.. -Wall
 
 RULESET_OBJECTS = extra.o monsters.o rules.o world.o
@@ -23,7 +25,7 @@ OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
   $(GAME)/obj/i_rand.o
 
 $(GAME)-m: $(OBJECTS)
-	g++ $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
+	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
 
 all: conquest ceran realms standard wyreth
@@ -67,10 +69,10 @@ clean:
 FORCE:
 
 $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
-	g++ $(CFLAGS) -c -o $@ $<
+	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
 $(patsubst %.o,$(GAME)/obj/%.o,$(ENGINE_OBJECTS)): $(GAME)/obj/%.o: %.cpp
-	g++ $(CFLAGS) -c -o $@ $<
+	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
 $(GAME)/obj/i_rand.o: i_rand.c
-	gcc $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
