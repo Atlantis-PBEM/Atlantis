@@ -62,6 +62,7 @@ int Army::CheckSpecialTarget(int special,int tar)
 
 	if(spd->targflags & SpecialType::HIT_BUILDINGIF) {
 		match = 0;
+		if(!soldiers[tar]->building) return 0;
 		for(i = 0; i < 3; i++) {
 			if (soldiers[tar]->building &&
 					(spd->buildings[i] == soldiers[tar]->building)) match = 1;
@@ -71,6 +72,7 @@ int Army::CheckSpecialTarget(int special,int tar)
 
 	if(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
 		match = 0;
+		if(!soldiers[tar]->building) return 0;
 		for(i = 0; i < 3; i++) {
 			if (soldiers[tar]->building &&
 					(spd->buildings[i] == soldiers[tar]->building)) match = 1;

@@ -3648,7 +3648,7 @@ static SpecialType spd[] = {
 	 {-1, -1, -1, -1},
 	 {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
 	 "a non-shield spell",
-	 {{ATTACK_WEATHER,2,125,WeaponType::ALWAYSREADY,ARMORPIERCING, 0},
+	 {{ATTACK_WEATHER,2,25,WeaponType::ALWAYSREADY,ARMORPIERCING, 0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0}},
