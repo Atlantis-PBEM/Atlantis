@@ -1354,9 +1354,11 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 			UnitId *targ = ParseUnit(o);
 			if(!targ) {
 				unit->Error("BUILD: Non-existant unit to help.");
+				return;
 			}
 			if(targ->unitnum == -1) {
 				unit->Error("BUILD: Non-existant unit to help.");
+				return;
 			}
 			BuildOrder * order = new BuildOrder;
 			order->target = targ;

@@ -266,7 +266,7 @@ void Game::ModifyMonsterSpoils(int mon, int silver, int spoilType)
 	MonDefs[mon].spoiltype = spoilType;
 }
 
-void Game::ModifyMonsterThread(int mon, int num, int hostileChance)
+void Game::ModifyMonsterThreat(int mon, int num, int hostileChance)
 {
 	if(mon < 0 || mon > (NUMMONSTERS - 1)) return;
 	if(num < 0) return;

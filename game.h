@@ -207,7 +207,7 @@ private:
 	void ModifyMonsterSkills(int mon, int tact, int stealth, int obs);
 	void ModifyMonsterSpecial(int mon, int special, int lev);
 	void ModifyMonsterSpoils(int mon, int silver, int spoilType);
-	void ModifyMonsterThread(int mon, int num, int hostileChance);
+	void ModifyMonsterThreat(int mon, int num, int hostileChance);
 
 	void ModifyWeaponSkills(int weap, int baseSkill, int orSkill);
 	void ModifyWeaponFlags(int weap, int flags);

@@ -339,6 +339,21 @@ public:
 	// What sort of information should be shown to a unit just passing
 	// through a hex?
 	int TRANSIT_REPORT;
+
+	// Monsters have the option of advancing occasionally instead of just
+	// using move.
+	// There are two values which control this.
+	// MONSTER_ADVANCE_MIN_PERCENT is the minimum amount which monsters
+	// should advance.
+	// MONSTER_ADVANCE_HOSTILE_PERCENT is the percent of their hostile
+	// rating which should be used to determine if they advance.
+	// If you don't want monsters to EVER advance, use 0 for both.
+	// If you want a flat percent, use MIN_PERCENT and set HOSTILE_PERCENT
+	// to 0.  If you only want it based on the HOSTILE value, set MIN_PERCENT
+	// to 0 and HOSTILE_PERCENT to what you want.
+	int MONSTER_ADVANCE_MIN_PERCENT;
+	int MONSTER_ADVANCE_HOSTILE_PERCENT;
+	
 };
 
 extern GameDefs * Globals;

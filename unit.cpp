@@ -424,6 +424,16 @@ void Unit::DefaultOrders(Object * obj)
 	if (type == U_WMON) {
 		if (ObjectDefs[obj->type].monster == -1) {
 			MoveOrder * o = new MoveOrder;
+			o->advancing = 0;
+			int aper = Hostile();
+			aper *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
+			aper /= 100;
+
+			if(aper < Globals->MONSTER_ADVANCE_MIN_PERCENT)
+				aper = Globals->MONSTER_ADVANCE_MIN_PERCENT;
+
+			int n = getrandom(100);
+			if(n < aper) o->advancing = 1;
 			MoveDir * d = new MoveDir;
 			d->dir = getrandom(NDIRS);
 			o->dirs.Add(d);
