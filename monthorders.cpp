@@ -829,6 +829,7 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
         MoveDir * x = (MoveDir *) o->dirs.First();
         o->dirs.Remove(x);
         int i = x->dir;
+		int startmove = 0;
         delete x;
         
         /* Setup region to move to */
@@ -847,6 +848,9 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
             unit->Error(AString("MOVE: Can't move that direction."));
             goto done_moving;
         }
+
+		if(region->type == R_NEXUS && newreg->IsStartingCity())
+			startmove = 1;
         
         if( region->type == R_OCEAN && !unit->CanSwim() )
         {
@@ -882,7 +886,7 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
         
         if (unit->guard == GUARD_ADVANCE) {
             Unit *ally = newreg->ForbiddenByAlly(unit);
-            if (ally) {
+            if (ally && !startmove) {
                 unit->Event(AString("Can't ADVANCE: ") + *(newreg->name) +
                             " is guarded by " + *(ally->name) + ", an ally.");
                 goto done_moving;
@@ -890,7 +894,7 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
         }
         
         Unit * forbid = newreg->Forbidden(unit);
-        if (forbid && unit->guard != GUARD_ADVANCE) {
+        if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
             unit->Event(AString("Is forbidden entry to ") +
                         newreg->ShortPrint( &regions ) + " by " +
                         *(forbid->name) + ".");

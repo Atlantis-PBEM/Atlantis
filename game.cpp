@@ -53,6 +53,7 @@ void Game::DefaultWorkOrder()
 {
 	forlist( &regions ) {
 		ARegion * r = (ARegion *) elem;
+		if(r->type == R_NEXUS) continue;
 		forlist(&r->objects) {
 			Object * o = (Object *) elem;
 			forlist(&o->units) {
