@@ -1194,6 +1194,10 @@ int Unit::MoveType()
 	int weight = items.Weight();
 	if (CanFly(weight)) return M_FLY;
 	if (CanRide(weight)) return M_RIDE;
+	/* Check if we should be able to 'swim' */
+	/* This should become it's own M_TYPE sometime */
+	if(TerrainDefs[object->region->type].similar_type == R_OCEAN)
+		if(CanSwim()) return M_WALK;
 	if (CanWalk(weight)) return M_WALK;
 	return M_NONE;
 }
