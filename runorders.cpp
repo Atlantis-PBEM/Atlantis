@@ -34,7 +34,7 @@ void Game::RunOrders()
 	Awrite("Running FIND Orders...");
 	RunFindOrders();
 	Awrite("Running ENTER/LEAVE Orders...");
-	RunEnterOrders();
+	RunEnterOrders(0);
 	Awrite("Running PROMOTE/EVICT Orders...");
 	RunPromoteOrders();
 	Awrite("Running Combat...");
@@ -44,6 +44,8 @@ void Game::RunOrders()
 	RunStealOrders();
 	Awrite("Running GIVE/PAY/TRANSFER Orders...");
 	DoGiveOrders();
+	Awrite("Running ENTER NEW Orders...");
+	RunEnterOrders(1);
 	Awrite("Running EXCHANGE Orders...");
 	DoExchangeOrders();
 	Awrite("Running DESTROY Orders...");
@@ -959,7 +961,11 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 	}
 }
 
-void Game::RunEnterOrders()
+/* RunEnterOrders is performed in TWO phases: one in the
+ * instant orders phase for existing objects and one after
+ * give orders for entering new objects (fleets).
+ */
+void Game::RunEnterOrders(int phase)
 {
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
@@ -967,8 +973,10 @@ void Game::RunEnterOrders()
 			Object *o = (Object *) elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
-				if (u->enter)
-					Do1EnterOrder(r, o, u);
+				// normal enter phase or NEW enter phase?
+				if ((((u->enter > 0) || (u->enter == -1)) && (phase == 0)) 
+					|| ((u->enter <= -2) && (phase == 1)))
+						Do1EnterOrder(r, o, u);
 			}
 		}
 	}
@@ -987,7 +995,16 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 		}
 		if (in->IsFleet() && u->CanSwim()) u->leftShip = 1;
 	} else {
-		to = r->GetObject(u->enter);
+		int on = u->enter;
+		// alias?
+		if(on < 0) {
+			on = r->ResolveFleetAlias(-(on+1));
+			if(on < 1) {
+				u->Error("ENTER: NEW fleet doesn't exist.");
+				return;
+			}
+		}
+		to = r->GetObject(on);
 		u->enter = 0;
 		if (!to) {
 			u->Error("ENTER: Can't enter that.");
@@ -2313,14 +2330,6 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				").");
 			return 0;
 		}
-		/*
-		if(t->object->type != O_DUMMY) {
-			if (!(t->object->IsFleet()) || (!t->num == t->object->GetOwner()->num)) {
-				u->Error("GIVE: ships may only be given to fleet owner.");
-				return 0;
-			}
-		}
-		*/
 		if(u == t) {
 			u->Error(AString("GIVE: Attempt to give ")+ItemDefs[o->item].names+
 				" to self.");
@@ -2332,8 +2341,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 					").");
 				return 0;
 		}
-		if (o->item != I_SILVER &&
-			t->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
+		if (t->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
 				u->Error("GIVE: Target is not a member of a friendly faction.");
 				return 0;
 		}
@@ -2361,7 +2369,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		int newfleet = 0;
 		// target is not in fleet or not fleet owner
 		if (!(t->object->IsFleet()) ||
-			(!t->num == t->object->GetOwner()->num)) newfleet = 1;
+			(t->num != t->object->GetOwner()->num)) newfleet = 1;
 		// or target fleet is not of compatible type
 		else {
 			int flying = u->object->flying;
@@ -2374,7 +2382,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			fleet->type = O_FLEET;
 			fleet->num = shipseq++;
 			fleet->name = new AString(AString("Fleet [") + fleet->num + "]");
-			t->object->region->objects.Add(fleet);
+			t->object->region->AddFleet(fleet);
 			t->MoveUnit(fleet);
 		}
 		if (ItemDefs[o->item].max_inventory) {

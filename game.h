@@ -495,7 +495,7 @@ private:
 	void DoAdvanceAttacks(AList *);
 	void DoAutoAttackOn(ARegion *, Unit *);
 	void RemoveEmptyObjects();
-	void RunEnterOrders();
+	void RunEnterOrders(int);
 	void Do1EnterOrder(ARegion *, Object *, Unit *);
 	void RunPromoteOrders();
 	void Do1PromoteOrder(Object *, Unit *);

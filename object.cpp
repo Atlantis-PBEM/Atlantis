@@ -462,7 +462,6 @@ void Object::SetNumShips(int type, int num)
 			forlist(&ships) {
 				Item *ship = (Item *) elem;
 				if(ship->type == type) {
-					Awrite(AString("Setting ") + ItemDefs[type].names + " to " + num + ".");
 					ship->num = num;
 					return;
 				}
@@ -471,7 +470,6 @@ void Object::SetNumShips(int type, int num)
 			ship->type = type;
 			ship->num = num;
 			ships.Add(ship);
-			Awrite(AString("Setting ") + ItemDefs[type].names + " to " + num + ".");
 		} else {
 			forlist(&ships) {
 				Item *ship = (Item *) elem;

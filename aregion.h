@@ -268,6 +268,8 @@ class ARegion : public AListElem
 		int Winds();
 		int TerrainFactor(int, int);
 		int TerrainProbability(int);
+		void AddFleet(Object *);
+		int ResolveFleetAlias(int);
 		
 		int CountWMons();
 		int IsGuarded();
@@ -316,6 +318,8 @@ class ARegion : public AListElem
 
 		ARegion *neighbors[NDIRS];
 		AList objects;
+		map<int,int> newfleets;
+		int fleetalias;
 		AList hell; /* Where dead units go */
 		AList farsees;
 		// List of units which passed through the region

@@ -915,6 +915,8 @@ Changes from 4.0.10 -> 5.0.0
    -- modified GIVEing of ships so that new fleets get created dynamically, added code for
       build helpers in shipbuilding, and cleaned up a bug in the removal of empty fleets
    -- changed fleet reports so that single-ship fleets show the ship type as <object type>
-      rather than "Fleet". Also no ship list is displayed for them.	  
+      rather than "Fleet". Also no ship list is displayed for them.
+   -- implemented ENTER NEW <alias>. New fleets created during GIVE orders are now given aliases that
+      may be specified in an Enter order.	  
    	  ToDo: armored galleon bonus...?
    

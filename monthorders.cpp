@@ -538,7 +538,7 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 			Object * fleet = new Object(r);
 			fleet->type = O_FLEET;
 			fleet->num = shipseq++;
-			fleet->name = new AString(AString("Fleet [") + fleet->num + "]");
+			fleet->name = new AString(AString("Ship [") + fleet->num + "]");
 			fleet->AddShip(ship);
 			u->object->region->objects.Add(fleet);
 			u->MoveUnit(fleet);

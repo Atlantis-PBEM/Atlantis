@@ -4211,11 +4211,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"another object, the unit will first leave the object it is "
 		"currently in.  The order will only work if the target object is "
 		"unoccupied, or is owned by a unit in your faction, or is owned by "
-		"a unit which has declared you Friendly.";
+		"a unit which has declared you Friendly. "
+		"Specifying NEW and an alias number will attempt to enter a new fleet "
+		"that is split off using the GIVE command. ";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
-	temp = "Enter ship number 114.";
+	temp = "Enter fleet number 114.";
 	temp2 = "ENTER 114";
+	f.CommandExample(temp, temp2);
+	temp = "Enter the first split-off fleet.";
+	temp2 = "ENTER NEW 1";
 	f.CommandExample(temp, temp2);
 
 	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
