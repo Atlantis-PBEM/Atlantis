@@ -110,3 +110,4 @@ def setplayerinfo(factionnumber, attribute, value):
             return 'ok'
 
     #won't get here...
+

@@ -26,6 +26,50 @@
 
 import os, sys, time, random
 from checkpassword import setplayerinfo
+from bot import generateturn
+
+def generateturn(report, template):
+    """Given a report and a template, return a set of orders as a string."""
+    firstunit = 'no'
+    orders = ''
+    # Read each line of the template.
+    for line in template:
+        if line.startswith('#end'):  #end of file, or end of orders
+            orders += "; Found the end!\n"
+        
+        orders += line  # we'll always want to include the template line
+        
+        # When it gets to a unit, that unit will either
+        if line.startswith("unit"):
+            orders += "; Found a unit!\n"
+            
+            if firstunit == 'no':
+                orders += "option template map\n"
+                orders += "option notimes\n"
+                #orders += "declare default hostile\n"
+                #orders += "declare 1 neutral\n"
+                #orders += "declare 2 neutral\n"
+                firstunit = 'found'
+            
+            # for a test, we'll move around randomly
+            temp = int(random.random()*len(directions))
+            temp2 = int(random.random()*len(directions))
+            orders += "move "+directions[temp]+" "+directions[temp2]+"\n"
+            
+            # 1. do nothing (ie work/tax if not enough silver)
+            #orders += "@work\n"
+            # 2. study combat/buy men (if it has enough)
+            # 3. form a new unit (if it has more than 10 men?)
+            # 50% chance of new unit
+            if random.random() >= 0.5:
+                unitnum = int(random.random()*1000)+1
+                #orders += "give new "+str(unitnum)+" 100 silv"
+                formstring = "form "+str(unitnum)+"\n"
+                formstring += '  name unit "Captain Random"\n  claim 100\n  buy 1 peas\n'
+                formstring += 'end\n\n'
+                orders += formstring
+    return orders
+
 
 # First, get our arguments. they'll tell us what parts we want to run
 
@@ -44,28 +88,38 @@ if len(args) == 1 or "--help" in args:
     print "  --all            A combination of the cvs, make and test options"
     sys.exit(0)
 
-# Get the game name if there is one
+# Get the game name, number of turns and number of players if they exist
 gamename = None
+numturns = None
+numplayers = None
+
 for item in args:
     if item.startswith('--game='):
         gamename = item[7:]
-        #print "Found a game name:",gamename
+    if item.startswith('--turns='):
+        numturns = int(item[8:])
+        print numturns
+    if item.startswith('--players='):
+        numplayers = int(item[10:])
+        print numplayers
 
 if gamename == None:
     print "Game name defaulted to standard"
     gamename = 'standard'
+if numturns == None:
+    print "Number of turns defaulted to 10"
+    numturns = 10
+if numplayers == None:
+    print "Number of players defaulted to 10"
+    numplayers = 10
 
+
+# Now start running stuff...
 if "--cvs" in args or "--all" in args:
-    # Use the shell to get the source
+    # Use the shell to update the source
     os.chdir("..")
     os.system('cvs -z3 update')
     os.chdir("smoketest")
-    #os.system('cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs login')
-    #os.system('cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs checkout atlantis')
-    #if os.access('atlantis', os.F_OK) != 1:
-    #    print "There was some problem with CVS!"
-    #    sys.exit(1)
-    pass
 
 if "--make" in args or "--all" in args:
     # we can do a make to redo the code
@@ -81,7 +135,6 @@ if "--make" in args or "--all" in args:
     if os.access(gamename+'/html/'+gamename+'.html', os.F_OK) != 1:
         print "There was some problem with building the game rules into HTML"
     os.chdir("smoketest")
-
 
 if not ("--test" in args or "--all" in args):
     print "Skipping testing ... like a real man"
@@ -110,7 +163,7 @@ if os.access('game.out', os.F_OK) != 1:
     print "There was some problem with writing the game.out file"
     sys.exit(3)
 if os.access('players.out', os.F_OK) != 1:
-    print "There was some problem with writing the game.out file"
+    print "There was some problem with writing the players.out file"
     sys.exit(3)
 
 print "See? I told you everything was ok!"
@@ -121,26 +174,18 @@ os.rename('players.out','players.in')
 
 # 7. add players into the players.in file
 
-# We'll just run one or two players for the moment, but try to expand it to n ASAP
-numplayers = 12
 players = []
-
 for index in range(numplayers):
     players.append('Player '+str(index+1))
 
-print players
-
 playersfile = open('players.in','a+')
-
 for player in players:
     entry = "Faction: new\nName: "+player+"\nEmail: nobody@example.com\nPassword: "
-    entry +=player+"\nLastorders: 0\n"
+    entry += player + "\nLastorders: 0\n"
     playersfile.write(entry)
-
 playersfile.close()
 
 # Now we can start looping and running turns.
-numturns = 50
 thisturn = 0
 
 directions = ['n','s','se','sw','ne','nw']
@@ -170,59 +215,29 @@ while thisturn <= numturns:
     
     for index in range(numplayers):
         print "Writing orders for player",index+1
+        
+        if os.access('game.out', os.F_OK) != 1:
+            print "The player has been eliminated!"
+            continue
+
         # 8b. update the players.in file so that the players don't time out.
         #     ie, Set the LastOrders field
         setplayerinfo(index+3, 'lastorders', str(thisturn))
         
         print "opening template for player",index+1,": template."+str(index+3)
         templatefile = open('template.'+str(index+3), 'r') # readonly
-        print "opening orders for player",index+1,": orders."+str(index+3)
-        orderfile = open('orders.'+str(index+3), 'w+') # overwrite
+        template = templatefile.readlines()
         
-        firstunit = 'no'
-        # First, read in the template. 
-        while 1:
-            line = templatefile.readline()
-            if line == '':
-                break
-            if line.startswith('#end'):  #end of file, or end of orders
-                orderfile.write("; Found the end!\n")
-            
-            orderfile.write(line) # we'll always want to include the template line
-            
-            # When it gets to a unit, that unit will either
-            if line.startswith("unit"):
-                orderfile.write("; Found a unit!\n")
-                
-                if firstunit == 'no':
-                    orderfile.write("option template map\n")
-                    orderfile.write("option notimes\n")
-                    #orderfile.write("declare default hostile\n")
-                    #orderfile.write("declare 1 neutral\n")
-                    #orderfile.write("declare 2 neutral\n")
-                    firstunit = 'found'
-                
-                # for a test, we'll move around randomly
-                temp = int(random.random()*len(directions))
-                temp2 = int(random.random()*len(directions))
-                orderfile.write("move "+directions[temp]+" "+directions[temp2]+"\n")
-                
-                # 1. do nothing (ie work/tax if not enough silver)
-                #orderfile.write("@work\n")
-                # 2. study combat/buy men (if it has enough)
-                # 3. form a new unit (if it has more than 10 men?)
-                # 50% chance of new unit
-                if random.random() >= 0.5:
-                    unitnum = int(random.random()*1000)+1
-                    #orderfile.write("give new "+str(unitnum)+" 100 silv")
-                    formstring = "form "+str(unitnum)+"\n"
-                    formstring += '  name unit "Captain Random"\n  claim 100\n  buy 1 peas\n'
-                    formstring += 'end\n\n'
-                    orderfile.write(formstring)
-        # 12. save orders
+        print "opening report for player",index+1,": report."+str(index+3)
+        reportfile = open('report.'+str(index+3), 'r') # readonly
+        report = reportfile.readlines()
+        
+        orders = generateturn(report, template)
+        
+        print "writing orders for player",index+1,": orders."+str(index+3)
+        orderfile = open('orders.'+str(index+3), 'w+') # overwrite
+        orderfile.write(orders)
         orderfile.close()
-
-
     
     # 13. move old reports
     
@@ -236,4 +251,4 @@ while thisturn <= numturns:
     # os.system('mv times.* check.* '+str(thisturn))
     
     # 14. unless we've run enough turns, jump back to step 8
-    
+
