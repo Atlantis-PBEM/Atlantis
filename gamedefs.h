@@ -332,7 +332,8 @@ public:
 		ALL = 0x01,
 		TOWNS = 0x02,
 		NONPLAINS = 0x04,
-		DESERT_ONLY = 0x08,
+		NONPLAINS_TOWNS_ONLY=0x08,
+		DESERT_ONLY = 0x10,
 	};
 
 	// LAKE_WAGE_EFFECT: effect on surrounding wages

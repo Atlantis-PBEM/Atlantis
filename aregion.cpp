@@ -38,7 +38,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 #include "game.h"
 #include "gamedata.h"
 
@@ -191,20 +190,31 @@ int ARegion::Wages()
 			if(check->type == R_LAKE) adjlake++;
 		}
 		if (adjlake > 0) {
+			/* If lakes affect everything around them */
 			if (Globals->LAKE_WAGE_EFFECT & GameDefs::ALL)
 				raise = 1;
+
 			if (TerrainDefs[type].similar_type != R_PLAIN) {
+				/* If lakes affect towns, but only in non-plains */
+				if ((Globals->LAKE_WAGE_EFFECT &
+							GameDefs::NONPLAINS_TOWNS_ONLY) && town)
+					raise = 1;
+				/* If lakes affect all towns */
 				if ((Globals->LAKE_WAGE_EFFECT & GameDefs::TOWNS) && town)
 					raise = 1;
+				/* If lakes affect any non plains terrain */
 				if (Globals->LAKE_WAGE_EFFECT & GameDefs::NONPLAINS)
 					raise = 1;
+				/* If lakes affect only desert */
 				if((Globals->LAKE_WAGE_EFFECT & GameDefs::DESERT_ONLY) &&
 					(TerrainDefs[type].similar_type == R_DESERT))
 					raise = 1;
 			} else {
+				/* If lakes affect any town, even those in plains */
 				if ((Globals->LAKE_WAGE_EFFECT & GameDefs::TOWNS) && town)
 					raise = 1;
 			}
+			/* A lake affected us for at least one reason, raise the wages */
 			if (raise) retval++;
 		}
 	}
@@ -2581,7 +2591,8 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize,
 
 	AssignTypes(pRegionArrays[level]);
 
-	if (Globals->ARCHIPELAGO || Globals->LAKES_EXIST) SeverLandBridges(pRegionArrays[level]);
+	if (Globals->ARCHIPELAGO || Globals->LAKES_EXIST)
+		SeverLandBridges(pRegionArrays[level]);
 
 	if (Globals->LAKES_EXIST) RemoveCoastalLakes(pRegionArrays[level]);
 
@@ -3063,7 +3074,8 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 				if(!reg) continue;
 				if (reg->type == R_NUM) {
 					// Check for Lakes
-					if (getrandom(100) < sqrt(Globals->LAKES_EXIST)) {
+					if (Globals->LAKES_EXIST &&
+							(getrandom(100) < (Globals->LAKES_EXIST/10 + 1))) {
 						reg->type = R_LAKE;
 						break;
 					}
