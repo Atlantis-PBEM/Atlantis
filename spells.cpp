@@ -868,8 +868,8 @@ void Game::RunConstructGate(ARegion *r,Unit *u)
 
 	u->Event(AString("Constructs a Gate in ")+r->ShortPrint( &regions )+".");
 	u->SetMoney(u->GetMoney() - 1000);
-	r->gate = regions.numberofgates;
 	regions.numberofgates++;
+	r->gate = regions.numberofgates;
 	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
 }
 
