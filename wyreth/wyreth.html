@@ -1,21 +1,22 @@
 <html>
 <head>
-<title>Atlantis 4.0.4 +PLUS+ Rules</title>
+<title>Wyreth 1.0.0 Rules</title>
 </head>
-<body>
+<body bgcolor="black">
 <center>
-<h1> Rules for Atlantis v4.0.4 +PLUS+</h1>
+<h1> Rules for Wyreth 1.0.0</h1>
+<h1> Based on Atlantis v4.0.4 +PLUS+</h1>
 <h2> Copyright 1996 by Geoff Dunbar </h2>
 <h2> Based on Russell Wallace's Draft Rules </h2>
 <h2> Copyright 1993 by Russell Wallace </h2>
-<h3> Last Change: Feb 11, 2001</h3>
+<h3> Last Change: Feb 16, 2001</h3>
 </center> <p>
 Note: This document is subject to change, as errors are found and
 corrected, and rules sometimes change. Be sure you have the latest
 available copy. <p>
 
 <a name="table_of_contents">
-<hr>
+<center><img src="images/bar.jpg" WIDTH=347 HEIGHT=23></center>
 <h2>Table of Contents</h2>
 
 Thanks to <b><a href="mailto:ken@satori.gso.uri.edu">Kenneth Casey</a></b>
@@ -171,7 +172,7 @@ Index of Tables. <p>
 </ul>
 
 <a name="intro">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Introduction </h2>
 
 In the beginning were the Two Hundred Elder Gods.   They ruled the cosmos
@@ -221,7 +222,7 @@ or ignore the struggle to contain the Elder Gods.  Players may (of course)
 join at any time.<p>
 
 <a name="playing">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Playing Atlantis </h2>
 
 Atlantis (as you undoubtedly already know) is a play by email game.  When
@@ -279,13 +280,13 @@ Points. <p>
    Faction Points
   </th>
   <th>
-   War (Maximum number of taxable regions)
+   War (max taxable regions)
   </th>
   <th>
-   Trade (Maximum number of regions in which trade activity is allowed)
+   Trade (max trade regions)
   </th>
   <th>
-   Magic (Maximum number of magicians)
+   Magic (max mages)
   </th>
  </tr>
  <tr>
@@ -351,12 +352,12 @@ as his starting character.  Alternatively, you can call your faction something
 like "The Great Northern Mining Company" or whatever. <p>
 
 <pre>
-  * Merlin the Magician (17), faction Merlin the Magician (27), has: leader.
-    Skills: none.
-  * Merlin's Guards (33), faction Merlin the Magician (27), has: 20 vikings,
-    20 swords. Skills: none.
-  * Merlin's Workers (34), faction Merlin the Magician (27), has: 50 vikings.
-    Skills: none.
+  * Merlin the Magician (17), faction Merlin (27), has:
+    leader [LEAD].  Skills: none.
+  * Merlin's Guards (33), faction Merlin (27), has: 20
+    vikings [VIKI], 20 swords [SWOR]. Skills: none.
+  * Merlin's Workers (34), faction Merlin (27), has: 50
+    vikings [VIKI].  Skills: none.
 </pre> <p>
 
 <a name="playing_units">
@@ -413,7 +414,7 @@ from one region to another.  The orders which take an entire month are
 <p>
 
 <a name="world">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> The World </h2>
 
 The Atlantis world is divided for game purposes into hexagonal regions.  Each
@@ -431,17 +432,18 @@ interact.  NOTE: Combat is an exception to this. <p>
 Here is a sample region, as it might appear on your turn report: <p>
 
 <pre>
-plain in Turia (11,15), 500 peasants (wood elves), $2500.
--------------------------------------------------------------
+plain in Turia (11,15), 500 peasants (nomads), $2500.
+------------------------------------------------------
 Wages: $15.
 Entertainment available: $125.
-For Sale: 50 wood elves at $60, 10 leaders at $120.
+For Sale: 50 nomads [NOMA] at $60, 10 leaders [LEAD]
+  at $120.
 Wanted: none.
 Products: 37 horses.
 
-* Hans Shadowspawn (15), faction Hans and his Merry Pranksters (14), has: 1
-  leader, $500. Skills: none.
-- Vox Populi (13), has: 1 leader.
+* Hans Shadowspawn (15), faction Merry Pranksters (14),
+  has: 1 leader [LEAD], $500. Skills: none.
+- Vox Populi (13), has: 1 leader [LEAD].
 </pre> <p>
 
 This report gives all of the available information on this region.  The region
@@ -490,8 +492,10 @@ appear directly above the list of units.  Here is a sample structure: <p>
 
 <pre>
 + Temple of Agrik [3], tower.
-  - High Priest Chafin (9), has: leader, sword.
-  - Rowing Doom (188), has: 10 ice dwarves, 10 swords.
+  - High Priest Chafin (9), has: leader
+    [LEAD], sword [SWOR].
+  - Rowing Doom (188), has: 10 ice dwarves
+    [IDWA], 10 swords [SWOR].
 </pre> <p>
 
 The structure lists the name, the number, and what type of structure it is.
@@ -553,7 +557,7 @@ to travel far from the starting cities, taking only a few men with
 them, might wish to pursue this method. <p>
 
 <a name="movement">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Movement </h2>
 
 There are two main methods of movements in Atlantis.  The first is done using
@@ -846,7 +850,7 @@ order every time, but it is up to the wiles of the player to determine
 within a region is the order that they appear on a turn report. <p>
 
 <a name="skills">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Skills </h2>
 
 The most important thing distinguishing one character from another in Atlantis
@@ -1012,12 +1016,13 @@ level 3 for the first time, it might receive the following (obviously
 farsical) report: <p>
 
 <pre>
-  Shoemaking 3:  A unit possessing this skill may produce Sooper Dooper Air
-    Max Winged Sandals.  Use PRODUCE Winged Sandals to produce this item.
+  Shoemaking 3:  A unit possessing this skill may produce
+    Sooper Dooper Air Max Winged Sandals.  Use PRODUCE
+    Winged Sandals to produce this item.
 </pre> <p>
 
 <a name="economy">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> The Economy </h2>
 
 The unit of currency in Atlantis is the silver piece.
@@ -1094,8 +1099,8 @@ Here is a table giving some information about common items in Atlantis: <p>
   <td align=center>Grain</td>
   <td align=center>Farming</td>
   <td> </td>
-  <td> </td>
   <td align=center>5</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Livestock</td>
@@ -1480,15 +1485,17 @@ skill and do not protect units, nor aid in the production of resources, but
 do aid movement, and can improve the economy of a hex.<p>
 
 Roads are directional and are only considered to reach from one hexside to
-the center of the hex.  To gain a movement bonux, there must be two
+the center of the hex.  To gain a movement bonus, there must be two
 connecting roads, one in each adjacent hex.  Only one road may be built in
-each direction.<p>
+each direction.  If a road in the given direction is connected, units
+gain move a double speed along that road.<p>
 
 For example: If a unit is moving northwest, then hex it is in must have a
 northwest road, and the hex it is morving into must have a southeast road.<p>
 
 To gain an economy bonus, a hex must have roads that connect to roads in
-two adjoining hexes.<p>
+two adjoining hexes.  The economy bonus for the connected roads raises
+the wages in the region by 1 point.<p>
 
 There are six different road structures, one for each direction. They each
 require 75 stone to build.<p>
@@ -1679,7 +1686,7 @@ description.
 <p>
 
 <a name="com">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Combat </h2>
 
 Combat occurs when one unit attacks another.  The computer then gathers
@@ -1985,7 +1992,7 @@ the winning side took any losses in the battle, any units on this side will not
 be allowed to move, or attack again for the rest of the turn. <p>
 
 <a name="stealthobs">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Stealth and Observation </h2>
 
 The Stealth skill is used to hide units, while the Observation skill
@@ -2060,7 +2067,7 @@ other activities, but a unit can only issue one
 order in a month. <p>
 
 <a name="magic">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Magic </h2>
 
 A character enters the world of magic in Atlantis by beginning study on one
@@ -2195,7 +2202,7 @@ destroy a layer of the spell when they are successful. <p>
 
 
 <a name="nonplayers">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Non-Player Units </h2>
 
 There are a number of units that are not controlled by players that may be
@@ -2241,7 +2248,7 @@ a monster to other units depends on the type of monster; some may be
 given freely, while others must remain with the controlling unit. <p>
 
 <a name="orders">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Orders </h2>
 
 To enter orders for Atlantis, you should send a mail message to the Atlantis
@@ -2312,7 +2319,7 @@ be followed by the abbreviation.  Please be careful using these, as they
 can easily be confused. <p>
 
 <a name="ordersummary">
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Order Summary </h2>
 
 To specify a [unit], use the unit number.  If specifying a unit that will be
@@ -2331,7 +2338,7 @@ IMPORTANT: Remember that names containing spaces (e.g., "Plate Armor"), must be
 surrounded by double quotes, or the space must be replaced with an underscore
 "_" (e.g., Plate_Armor). <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="address"> </a>
 <h4> ADDRESS [new address] </h4>
 
@@ -2343,7 +2350,7 @@ Change your faction's email address to atlantis@rahul.net. <p>
   ADDRESS atlantis@rahul.net
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="advance"> </a>
 <h4> ADVANCE [dir] ... </h4>
 
@@ -2365,7 +2372,7 @@ any of these locations. <p>
   ADVANCE N 1 IN SE
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="assassinate"> </a>
 <h4> ASSASSINATE [unit] </h4>
 
@@ -2379,7 +2386,7 @@ Assassinate unit number 177. <p>
   ASSASSINATE 177
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="attack"> </a>
 <h4> ATTACK [unit] .. </h4>
 
@@ -2397,7 +2404,7 @@ or: <p>
   ATTACK 17 431 985
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="autotax"> </a>
 <h4> AUTOTAX [flag] </h4>
 
@@ -2410,7 +2417,7 @@ To cause the unit to attempt to tax every turn. <p>
   AUTOTAX 1
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="avoid"> </a>
 <h4> AVOID [flag] </h4>
 
@@ -2427,7 +2434,7 @@ Set the unit to avoid combat when possible. <p>
   AVOID 1
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="behind"> </a>
 <h4> BEHIND [flag] </h4>
 
@@ -2440,7 +2447,7 @@ Set the unit to be in front in combat. <p>
   BEHIND 0
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="build"> </a>
 <h4> BUILD </h4>
 <h4> BUILD [object type] </h4>
@@ -2457,7 +2464,7 @@ To build a new tower. <p>
   BUILD Tower
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="buy"> </a>
 <h4> BUY [quantity] [item] </h4>
 
@@ -2481,7 +2488,7 @@ the unit has.) <p>
   BUY 5 barbarians
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="cast"> </a>
 <h4> CAST [skill] [arguments] </h4>
 
@@ -2500,7 +2507,7 @@ Cast the fourth-level spell in the "Super Magic" skill. <p>
   CAST "Super Magic" 4
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="claim"> </a>
 <h4> CLAIM [amount] </h4>
 
@@ -2514,7 +2521,7 @@ Claim 100 silver. <p>
   CLAIM 100
 </pre> <p>
   
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="combat"> </a>
 <h4> COMBAT [spell] </h4>
 
@@ -2528,7 +2535,7 @@ a battle. <p>
   COMBAT "Super Spell"
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="consume"></a>
 <h4>CONSUME UNIT</h4>
 <h4>CONSUME FACTION</h4>
@@ -2548,7 +2555,7 @@ costs. <p>
   CONSUME UNIT
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="declare"> </a>
 <h4> DECLARE [faction] [attitude] </h4>
 <h4> DECLARE [faction] </h4>
@@ -2573,7 +2580,7 @@ Set your faction's default attitude to friendly. <p>
   DECLARE DEFAULT friendly
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="describe"> </a>
 <h4> DESCRIBE UNIT [new description] </h4>
 <h4> DESCRIBE SHIP [new description] </h4>
@@ -2590,7 +2597,7 @@ Set the unit,s description to read "Merlin's helper". <p>
   DESCRIBE UNIT "Merlin's helper"
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="destroy"> </a>
 <h4> DESTROY </h4>
 
@@ -2603,7 +2610,7 @@ Destroy the ship or building the unit is in. <p>
   DESTROY
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="enter"> </a>
 <h4> ENTER [object] </h4>
 
@@ -2618,7 +2625,7 @@ Enter ship number 114. <p>
   ENTER 114
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="entertain"> </a>
 <h4> ENTERTAIN </h4>
 
@@ -2629,7 +2636,7 @@ Example: <p>
   ENTERTAIN
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="faction"> </a>
 <h4> FACTION [type] [points]... </h4>
 
@@ -2663,7 +2670,7 @@ Become a pure magic faction (assign all points to magic). <p>
 </pre> <p>
 
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="find"> </a>
 <h4> FIND [faction] </h4>
 
@@ -2675,7 +2682,7 @@ Find the email address of faction 4. <p>
   FIND 4
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="forget"> </a>
 <h4> FORGET [skill] </h4>
 
@@ -2689,7 +2696,7 @@ Forget knowledge of Mining. <p>
   FORGET Mining
 </pre> <p>
   
-<hr>  
+<center><img src="images/bar.jpg" width=347 height=23></center>  
 <a name="form"> </a>
 <h4> FORM [alias] </h4>
 
@@ -2713,20 +2720,20 @@ must be at least 1, and you should not create two units in the same region in
 the same month, with the same alias numbers).  The new unit can then be
 referred to as NEW <alias> in place of the regular unit number, e.g. <p>
 <pre>
-    UNIT 17
-    FORM 1
-        NAME UNIT "Merlin's Guards"
-        BUY 5 Plainsmen
-        STUDY COMBAT
-    END
-    FORM 2
-        NAME UNIT "Merlin's Workers"
-        DESCRIBE UNIT "wearing dirty overalls and carrying shovels"
-        BUY 15 Plainsmen
-    END
-    CLAIM 2500
-    GIVE NEW 1 1000 silver
-    GIVE NEW 2 2000 silver
+  UNIT 17
+  FORM 1
+    NAME UNIT "Merlin's Guards"
+    BUY 5 Plainsmen
+    STUDY COMBAT
+  END
+  FORM 2
+    NAME UNIT "Merlin's Workers"
+    DESCRIBE UNIT "wearing dirty overalls"
+    BUY 15 Plainsmen
+  END
+  CLAIM 2500
+  GIVE NEW 1 1000 silver
+  GIVE NEW 2 2000 silver
 </pre> <p>
 This set of orders for unit 17 would create two new units with alias numbers 1
 and 2, name them Merlin's Guards and Merlin's Workers, set the description for
@@ -2755,7 +2762,7 @@ are gained at all, the empty unit will be dissolved, and the silver and
 any other items it was given will revert to the lowest numbered unit you
 have in that region. <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="give"> </a>
 <h4> GIVE [unit] [quantity] [item] </h4>
 <h4> GIVE [unit] UNIT </h4>
@@ -2795,7 +2802,7 @@ Give control of this unit to the faction owning unit 75. <p>
   GIVE 75 UNIT
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="guard"> </a>
 <h4> GUARD [flag] </h4>
 
@@ -2813,7 +2820,7 @@ Instruct the current unit to be on guard. <p>
   GUARD 1
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="hold"> </a>
 <h4> HOLD [flag] </h4>
 
@@ -2827,7 +2834,7 @@ Instruct the unit to avoid combat in other regions. <p>
   HOLD 1
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="leave"> </a>
 <h4> LEAVE </h4>
 
@@ -2839,7 +2846,7 @@ Example: <p>
 LEAVE
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="move"> </a>
 <h4> MOVE [dir] ... </h4>
 
@@ -2884,7 +2891,7 @@ unit 1 attacks unit 3 first, and then unit 2 attacks unit 3 (assuming unit 3
 survives the first attack).  Note that the order of battles could have happened
 either way. <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="name"> </a>
 <h4> NAME UNIT [new name] </h4>
 <h4> NAME FACTION [new name] </h4>
@@ -2908,7 +2915,7 @@ Name your faction "The Merry Pranksters". <p>
   NAME FACTION "The Merry Pranksters"
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="noaid"> </a>
 <h4> NOAID [flag] </h4>
 
@@ -2927,7 +2934,7 @@ Set a unit to receive no aid in battle. <p>
   NOAID 1
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="option"> </a>
 <h4> OPTION TIMES </h4>
 <h4> OPTION NOTIMES </h4>
@@ -2962,7 +2969,7 @@ For the MAP template, the region identifiers are: (use a fixed width font)<p>
   <tr><td align=left>!!!!</td><td>THE NEXUS</td></tr>
 </table>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="password"> </a>
 <h4> PASSWORD [password] </h4>
 <h4> PASSWORD </h4>
@@ -2983,7 +2990,7 @@ Set the password to "xyzzy". <p>
   PASSWORD xyzzy
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="pillage"> </a>
 <h4> PILLAGE </h4>
 
@@ -2991,7 +2998,7 @@ Use force to extort as much money as possible from the region. Note that
 the <a href="#tax">TAX</a> order and PILLAGE order are mutually
 exclusive; a unit may only attempt to do one in a turn.<p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="produce"> </a>
 <h4> PRODUCE [item] </h4>
 
@@ -3003,7 +3010,7 @@ Produce as many crossbows as possible. <p>
   PRODUCE crossbows
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="promote"> </a>
 <h4> PROMOTE [unit] </h4>
 
@@ -3016,7 +3023,7 @@ Promote unit 415 to be the owner of the object that this unit owns. <p>
   PROMOTE 415
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="quit"> </a>
 <h4> QUIT [password] </h4>
 
@@ -3025,7 +3032,7 @@ permanently destroyed. Note that you must give your password for the quit
 order to work; this is to provide some safety against accidentally issuing
 this order. <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="restart"></a>
 <h4> RESTART [password] </h4>
 
@@ -3035,7 +3042,7 @@ faction for you (you will get a separate turn report for the new
 faction). Note that you must give your password for this order to work,
 to provide some protection against accidentally issuing this order. <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="reveal"> </a>
 <h4> REVEAL </h4>
 <h4> REVEAL UNIT </h4>
@@ -3060,7 +3067,7 @@ Cancels revealling. <p>
   REVEAL
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="sail"> </a>
 <h4> SAIL [dir] ... </h4>
 <h4> SAIL </h4>
@@ -3081,7 +3088,7 @@ or: <p>
   SAIL NW
 </pre> <p>
   
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="sell"> </a>
 <h4> SELL [quantity] [item] </h4>
 
@@ -3097,7 +3104,7 @@ Sell 10 furs to the market. <p>
   SELL 10 furs
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="show"> </a>
 <h4> SHOW SKILL [skill] [level] </h4>
 <h4> SHOW ITEM [item] </h4>
@@ -3117,7 +3124,7 @@ Get some information about Iron. <p>
   SHOW ITEM Iron
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="steal"> </a>
 <h4> STEAL [unit] [item] </h4>
 
@@ -3134,7 +3141,7 @@ Steal wood from unit 321. <p>
   STEAL 321 wood
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="study"> </a>
 <h4> STUDY [skill] </h4>
 
@@ -3146,7 +3153,7 @@ Study horse training. <p>
   STUDY "Horse Training"
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="tax"> </a>
 <h4> TAX </h4>
 
@@ -3162,7 +3169,7 @@ Attempt to collect taxes. <p>
   TAX
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="teach"> </a>
 <h4> TEACH [unit] ... </h4>
 
@@ -3185,14 +3192,14 @@ Teach new unit 2 and unit 5 whatever they are studying. <p>
   TEACH NEW 2 5
 </pre> <p>
 
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <a name="work"> </a>
 <h4> WORK </h4>
 
 Spend the month performing manual work for wages. <p>
 
 <a name="sequenceofevents"> </a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Sequence of Events </h2>
 
 Each turn, the following sequence of events occurs: <p>
@@ -3301,7 +3308,7 @@ processed within a phase, units that appear higher on the report get
 precedence. <p>
 
 <a name="reportformat"></a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Report Format </h2>
 
 The most important sections of the turn report are the "Events During Turn"
@@ -3332,7 +3339,7 @@ You can precede orders with an '@' sign in your orders, in which case
 they will appear in your template on the next turn's report. <p>
 
 <a name="hintsfornew"></a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Hints for New Players </h2>
 
 Make sure to use the correct #ATLANTIS and UNIT lines in your orders.
@@ -3359,7 +3366,7 @@ orders at the last minute, send a preliminary set earlier in the week so that
 at worst your faction will not be left with no orders at all. <p>
 
 <a name="specialcommands"></a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h2> Special Commands </h2>
 These special commands have been added via the scripts processing the email
 to help you interact with the game and submit times and rumors.   Please
@@ -3370,7 +3377,7 @@ it will be tracked down.
 <p>
 
 <a name="create"></a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h4>#Create "faction name" "password"</h4>
 This will create a new faction (add it to players.in), with the desired name
 and password, and it will use the player's "from" address as the email
@@ -3386,7 +3393,7 @@ contained the message:<br>
 <br>
 
 <a name="resend"> </a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h4>#Resend (faction num) "password"</h4>
 The faction number and your current password (if you have one) are required.
 The most recent turn report (that can be found) will be sent.<br>
@@ -3403,7 +3410,7 @@ keyboard and toasted your "original"):<br>
 <br>
 
 <a name="times"> </a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h4>#Times (faction number) "password"<br>
 body of times<br>
 #end</h4>
@@ -3431,7 +3438,7 @@ Quack!<br>
 <br>
 
 <a name="rumors"> </a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h4>#Rumor (faction number) "password"</h4>
 Now, you may be wondering -- won't people know I submitted the item because
 it appears in faction-number order?  Nope -- because it's not done that way.
@@ -3450,7 +3457,7 @@ your faction name or number on it.<br>
 <br>
 
 <a name="remind"> </a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h4>#Remind (faction number) "password"</h4>
 This special order will have the software find your last set of orders and mail
 them to you.  Note:  don't try to get someone else's orders -- you'll be
@@ -3465,7 +3472,7 @@ And it would remind you of your last orders you sent in.<br>
 <br>
 
 <a name="email"> </a>
-<hr>
+<center><img src="images/bar.jpg" width=347 height=23></center>
 <h4>#Email (unit id)<br>
 [ text of email ]</h4>
 
@@ -3498,5 +3505,7 @@ Greetings.  You've entered the Kingdom of Foo.  Please contact us.
 Lord Foo
 foo@bar.com
 
+<!--
 </body>
 </html>
+-->
