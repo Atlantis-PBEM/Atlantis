@@ -913,7 +913,7 @@ int Army::GetTargetNum(char *special)
 
 	SpecialType *sp = FindSpecial(special);
 
-	if (sp->targflags) {
+	if (sp && sp->targflags) {
 		int validtargs = 0;
 		int i, start = -1;
 
