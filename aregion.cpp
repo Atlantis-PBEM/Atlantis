@@ -118,6 +118,7 @@ ARegion::ARegion()
 	habitat = 0;
 	immigrants = 0;
 	emigrants = 0;
+	improvement = 0;
 	clearskies = 0;
 	earthlore = 0;
 	for (int i=0; i<NDIRS; i++)
@@ -1209,6 +1210,8 @@ void ARegion::WriteEconomy(Areport *f, Faction *fac, int present)
 	} else {
 		f->PutStr(AString("Wages: $0."));
 	}
+
+	f->PutStr(AString("basepop:" ) + basepopulation + ", development: " + development + ", habitat: " + habitat);
 
 	WriteMarkets(f, fac, present);
 

@@ -305,6 +305,8 @@ class ARegion : public AListElem
 		int migdev;
 		int immigrants;
 		int emigrants;
+		// economic improvement
+		int improvement;
 		
 
 		/* Potential bonuses to economy */

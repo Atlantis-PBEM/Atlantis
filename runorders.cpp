@@ -872,8 +872,12 @@ void Game::RunPillageRegion(ARegion *reg)
 
 	/* Destroy economy */
 	reg->wealth = 0;
-	reg->wages -= 6;
-	if (reg->wages < 6) reg->wages = 6;
+	int damage = reg->development / 3;
+	reg->development -= damage;
+	int popdensity = Globals->CITY_POP / 2000;
+	reg->AdjustPop(- damage * getrandom(popdensity) - getrandom(5 * popdensity));
+	/* Stabilise at minimal development levels */
+	while (reg->Wages() < Globals->MAINTENANCE_COST / 2) reg->development += getrandom(5);
 }
 
 void Game::RunPromoteOrders()
@@ -1090,6 +1094,8 @@ void Game::MidProcessTurn()
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
 		// r->MidTurn(); // Not yet implemented
+		/* regional population dynamics */
+		if(Globals->DYNAMIC_POPULATION) r->Grow();
 		forlist(&r->objects) {
 			Object *o = (Object *)elem;
 			forlist(&o->units) {
@@ -1104,13 +1110,13 @@ void Game::MidProcessTurn()
  * is set. */
 void Game::ProcessMigration()
 {
+	return;
 	/* process two "phases" of migration
 	 * allowing a region to spread it's migration
 	 * between different destinations. */
 	for(int phase = 1; phase <=2; phase++) {
 		forlist(&regions) {
 			ARegion *r = (ARegion *) elem;
-			Adot();
 			r->FindMigrationDestination(phase);
 		}
 		/* should always be true, but we need a

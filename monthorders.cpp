@@ -561,6 +561,9 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	} else {
 		u->items.SetNum(it,itn - num);
 	}
+	
+	/* Regional economic improvement */
+	r->improvement += num;
 
 	// AS
 	u->Event(AString("Performs") + job + "on " + *(obj->name) + ".");
@@ -686,6 +689,9 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 		if (maxproduced > count)
 			maxproduced = count;
 		count = maxproduced;
+		
+		/* regional economic improvement */
+		r->improvement += count;
 
 		// Deduct the items spent
 		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
@@ -715,7 +721,10 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 				}
 			}
 		}
-
+		
+		/* regional economic improvement */
+		r->improvement += maxproduced;
+		
 		// Deduct the items spent
 		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[o->item].pInput[c].item;

@@ -883,7 +883,7 @@ void ARegion::SetupEditRegion()
 	if (!IsNativeRace(race)) {
 		habitat = (habitat * 4)/5;
 	}
-	basepopulation = habitat;
+	basepopulation = habitat / 3;
 	// hmm... somewhere not too far off equilibrium pop
 	population = habitat * (60 + getrandom(6) + getrandom(6)) / 100;
 	
@@ -1072,6 +1072,8 @@ int ARegion::TownGrowth()
 					if (m->type == M_BUY) {
 						amt += 5 * m->activity;
 						tot += 5 * m->maxamt;
+						/* regional economic improvement */
+						improvement += 3 * amt;
 					}
 				} else {
 					if (m->type == M_SELL) {
@@ -1083,6 +1085,10 @@ int ARegion::TownGrowth()
 						} else amt += m->activity;
 						if ((ItemDefs[m->item].type & IT_FOOD)
 							&& (m->item != I_FISH))	tot += 2 * m->maxamt;
+						if (ItemDefs[m->item].type & IT_TRADE) {
+							/* regional economic improvement */
+							improvement += 3 * amt;
+						}
 					}
 				}
 			}
@@ -1104,11 +1110,17 @@ int ARegion::TownGrowth()
  * migration parameters */
 void ARegion::Grow()
 {
+	/* do we need to do anything? */
+	if(basepopulation == 0) return;
+	
 	// Init overall population growth	
 	int growpop = 0;
 	// Init migration parameters
 	immigrants = habitat - basepopulation;
 	emigrants = population - basepopulation;
+	
+	// basic development activity
+	int basedev = 0;
 	
 	/* First, check regional population growth */
 	// Check resource production activity
@@ -1120,6 +1132,7 @@ void ARegion::Grow()
 			if (ItemDefs[p->itemtype].type & IT_NORMAL &&
 				p->itemtype != I_SILVER) {
 				activity += p->activity;
+				basedev += activity;
 				// base on baseamount - for maximum
 				// benefit of trade structures!
 				amount += p->baseamount;
@@ -1128,16 +1141,37 @@ void ARegion::Grow()
 		int tarpop = habitat - population + basepopulation;
 		if (amount) tarpop += ((habitat - basepopulation) * 2 * activity) / (3 * amount);
 		int diff = tarpop - population;
-		/* Adjust basepop? */
+		int adiff = diff;
+		if(adiff < 0) adiff = adiff * (- 1);
+		/* Adjust basepop? 
 		// raise basepop depending on production
-		if (diff > habitat / 20) basepopulation += getrandom(diff/20) + diff / 20;
+		// absolute basepop increase
+		if(diff > (basepopulation / 20)) {
+			int gpop = getrandom(Globals->CITY_POP / 600);
+			if(gpop > diff / 20) gpop = diff / 20;
+			// relative basepop increase
+			int relativeg = basepopulation * gpop / 1000;
+			if (diff > habitat / 20) basepopulation += gpop + relativeg;
+		}
 		// lower basepop for extremely low levels of population
 		if (population < basepopulation) {
 			int depop = (basepopulation - population) / 4;
 			basepopulation -= depop + getrandom(depop);			
 		}
+		*/
 		// Limit excessive growth at low pop / hab ratios
-		growpop += (int) ((float) (diff * habitat / (5 * (habitat + 3 * diff))));
+		// and avoid overflowing
+		long int grow2 = 5 * ((long int) habitat + 3 * (long int) adiff);
+		long int dgrow = ((long int) diff / grow2) * ((long int) habitat / grow2);
+		// long int dgrow = ((long int) diff) * ((long int) habitat)
+		//	/ (5 * (long int) ((long int) habitat + 3 * (long int) abs(diff)));
+		growpop += (int) dgrow;
+		/*
+			Awrite(AString("growpop = ") + growpop);
+			Awrite(AString("grow2 = ") + (unsigned int) grow2);
+			Awrite(AString("adiff = ") + adiff);
+			Awrite(AString("diff = ") + diff);
+		*/
 		// update emigrants - only if region has a decent population level
 		if (emigrants > 0) emigrants += diff;
 	}
@@ -1157,6 +1191,11 @@ void ARegion::Grow()
 	
 	// Update population
 	AdjustPop(growpop);
+	
+	/* Check economic growth due to basic activity */
+	if(basedev > development) {
+		if(getrandom(development) > (basedev - development)) development++;	
+	}
 	
 	/* Initialise the migration variables */
 	migdev = 0;
@@ -1292,7 +1331,7 @@ void ARegion::Migrate()
 			+ ": " + migrants + " migrants.";
 		Awrite(wout);
 		// set the region's mid-way migration development
-		r->migdev = development - 8 * range;
+		r->migdev = (development - 8 * (range-1) + r->development) / 2;
 		if(r->development > migdev) r->migdev = r->development;
 	}
 	// reduce possible immigrants
@@ -1307,6 +1346,19 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	/* Check decay */
 	if(Globals->DECAY) {
 		DoDecayCheck(pRegs);
+	}
+	
+	/* Check if development level improves
+	 * due to advanced producing and building */
+	// scale improvement
+	float imp1 = improvement / 25;
+	int imp2 = (improvement * 2 + 15) / 3;
+	improvement = (int) (imp1 * imp2);
+	// development increase possible?
+	if(improvement > development) {
+		int diff = improvement - development;
+		/* Let road development increase chance of improvement */
+		if(getrandom(development - RoadDevelopment()) < diff) development++;	
 	}
 
 	/* Check if we were a starting city and got taken over */
