@@ -1614,6 +1614,8 @@ int Unit::GetBattleItem(int index)
 		if(!pItem->num) continue;
 		int item = pItem->type;
 		if((ItemDefs[item].type&IT_BATTLE) && (ItemDefs[item].index==index)) {
+			// Exclude weapons.  They will be handled later.
+			if (ItemDefs[item].type & IT_WEAPON) continue;
 			items.SetNum(item, pItem->num - 1);
 			return item;
 		}
