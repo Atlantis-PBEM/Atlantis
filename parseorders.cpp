@@ -1812,6 +1812,8 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if(token) {
     	order->level = token->value();
     	delete token;
+    	int skmax = u->GetSkillMax(sk);
+    	if (skmax == 0) skmax = 5; // hack to allow newly formed units to use this
     	if(u->GetSkillMax(sk) < order->level) {
     		order->level = u->GetSkillMax(sk);
     		if(u->GetRealSkill(sk) >= order->level) {
@@ -2295,7 +2297,6 @@ void Game::ProcessNameOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	
-	Awrite(AString("Parsing NAME order from unit ") + unit->num + ".");
 	if (*token == "faction") {
 		delete token;
 		token = o->gettoken();
