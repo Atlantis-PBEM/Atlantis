@@ -267,6 +267,9 @@ public:
 	// Are taxing and pillaging month-long actions?
 	int TAX_PILLAGE_MONTH_LONG;
 
+	// Are we allowing a multi-hex nexus
+	int MULTI_HEX_NEXUS;
+
 };
 
 extern GameDefs * Globals;

@@ -360,7 +360,7 @@ public:
     void CreateLevels( int numLevels );
 
 	void CreateAbyssLevel( int level, char *name );
-    void CreateNexusLevel( int level, char *name );
+    void CreateNexusLevel( int level, int xSize, int ySize, char *name );
     void CreateSurfaceLevel( int level, 
                              int xSize, 
                              int ySize,

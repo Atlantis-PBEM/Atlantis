@@ -2295,7 +2295,7 @@ void ARegionList::ReadRegions(Ainfile * f,AList * factions, ATL_VER v )
             for( i = 0; i < NDIRS; i++ )
             {
                 int j = f->GetInt();
-                if (j != 0 && j != -1)
+                if (j != -1)
                 {
                     reg->neighbors[i] = fa.GetRegion(j);
                 } 
@@ -2420,26 +2420,37 @@ void ARegionList::CreateAbyssLevel( int level, char *name )
 }
 
 
-void ARegionList::CreateNexusLevel( int level, char *name )
+void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 {
-    MakeRegions( level, 1, 1 );
+    MakeRegions( level, xSize, ySize );
 
     pRegionArrays[ level ]->SetName( name );
     pRegionArrays[ level ]->levelType = ARegionArray::LEVEL_NEXUS;
-    ARegion *reg = pRegionArrays[ level ]->GetRegion( 0, 0 );
 
 	AString nex_name = Globals->WORLD_NAME;
 	nex_name += " Nexus";
 
-    reg->SetName(nex_name.getstr());
-    reg->type = R_NEXUS;
+	for(int y = 0; y < ySize; y++) {
+		for(int x = 0; x < xSize; x++) {
+			ARegion *reg = pRegionArrays[ level ]->GetRegion( x, y );
+			if(reg) {
+				reg->SetName(nex_name.getstr());
+				reg->type = R_NEXUS;
+			}
+		}
+	}
 
     FinalSetup( pRegionArrays[ level ] );
 
-	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
-		reg->MakeStartingCity();
-		if(Globals->GATES_EXIST) {
-			numberofgates++;
+	for(int y = 0; y < ySize; y++) {
+		for(int x = 0; x < xSize; x++) {
+			ARegion *reg = pRegionArrays[ level ]->GetRegion( x, y );
+			if(reg && Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
+				reg->MakeStartingCity();
+				if(Globals->GATES_EXIST) {
+					numberofgates++;
+				}
+			}
 		}
 	}
 }
@@ -3042,16 +3053,24 @@ void ARegionList::SetACNeighbors( int levelSrc,
                                   int maxX, 
                                   int maxY )
 {
-    ARegion *AC = GetRegion( 0, 0, levelSrc );
-    for (int i=0; i<NDIRS; i++)
-    {
-        ARegion *pReg = GetStartingCity( AC, i, levelTo, maxX, maxY );
-        AC->neighbors[i] = pReg;
-        pReg->MakeStartingCity();
-		if(Globals->GATES_EXIST) {
-			numberofgates++;
+	ARegionArray *ar = GetRegionArray(levelSrc);
+
+	for(int x = 0; x < ar->x; x++) {
+		for(int y = 0; y < ar->y; y++) {
+			ARegion *AC = ar->GetRegion(x, y);
+			if(!AC) continue;
+			for (int i=0; i<NDIRS; i++) {
+				if(AC->neighbors[i]) continue;
+				ARegion *pReg = GetStartingCity(AC,i,levelTo,maxX,maxY);
+				if(!pReg) continue;
+				AC->neighbors[i] = pReg;
+				pReg->MakeStartingCity();
+				if(Globals->GATES_EXIST) {
+					numberofgates++;
+				}
+			}
 		}
-    }
+	}
 }
 
 void ARegionList::InitSetupGates( int level )

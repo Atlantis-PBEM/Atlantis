@@ -46,7 +46,16 @@ int Game::SetupFaction( Faction *pFac )
         temp2->Study(S_GATE_LORE, 30);
     }
 
-    temp2->MoveUnit( ((ARegion *) (regions.First()))->GetDummy() );
+    ARegion *reg = NULL;
+	if(!Globals->MULTI_HEX_NEXUS) {
+		reg = (ARegion *)(regions.First());
+	} else {
+		ARegionArray * pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
+		while(!reg) {
+			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
+		}
+	}
+	temp2->MoveUnit( reg->GetDummy() );
 
     return( 1 );
 }

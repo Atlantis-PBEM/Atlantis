@@ -120,6 +120,17 @@ Changes from 4.0.6 -> 4.0.7
       a stack smash.  Stupid bug.
    -- Fixed another bug where regions got trashed when you managed (say
       during world creation) to create more than 10000 units in a turn.
+   -- Balanced lances a bit.
+   -- Now handles ultra-small worlds gracefully (either by failing to
+      create the exit, or promoting some location). World creation down to
+      8x8 now works.
+   -- Added gamedef 'MULTI_HEX_NEXUS'.  If this is set, then on world creation
+      you will be asked how many nexus hexes there should be.  The nexus
+      will then be a connected strip of x hexes wide and 1 deep.   Each nexus
+      hex will connect to 4 cities and to the two adjacent nexus hexes.
+      New players will be started in a random nexus hex.   This does hinder
+      alliances somewhat as may be harder for them to get to the same place
+      in order to move to the same starting city.
 
 TODO
 ----------------
@@ -129,7 +140,6 @@ TODO
    -- Improve the item/hex editor
    -- Gamedef to handle various options around combat/weapons/bows for taxing
    -- Gamedefs for various economy options. (far future)
-   -- Gamedef for alternate nexus layouts
    -- Give more information when SHOW <item> is done.
    -- Add option to allow towers/forts/etc to allow training only a certain
       number of mages.
