@@ -546,7 +546,7 @@ AString *Unit::BattleReport(int obs)
   forlist (&skills) {
 	  Skill *s = (Skill *)elem;
 	  if (SkillDefs[s->type].flags & SkillType::BATTLEREP) {
-		  int lvl = GetRealSkill(s->type);
+		  int lvl = GetAvailSkill(s->type);
 		  if (lvl) {
 			  *temp += ", ";
 			  *temp += SkillDefs[s->type].name;
@@ -837,13 +837,61 @@ int Unit::GetSkill(int sk)
 	if (sk == S_STEALTH) return GetAttribute("stealth");
 	if (sk == S_OBSERVATION) return GetAttribute("observation");
 	if (sk == S_ENTERTAINMENT) return GetAttribute("entertainment");
-	int retval = GetRealSkill(sk);
+	int retval = GetAvailSkill(sk);
 	return retval;
 }
 
 void Unit::SetSkill(int sk, int level)
 {
 	skills.SetDays(sk, GetDaysByLevel(level) * GetMen());
+}
+
+int Unit::GetAvailSkill(int sk)
+{
+	AString str;
+	int retval = GetRealSkill(sk);
+
+	forlist (&items) {
+		Item *i = (Item *)elem;
+		if (ItemDefs[i->type].flags & ItemType::DISABLED) continue;
+		if ((SkillDefs[sk].flags & SkillType::MAGIC)
+				&& !(type != U_MAGE && type != U_APPRENTICE))
+			continue;
+		if (i->num < GetMen())
+			continue;
+		str = ItemDefs[i->type].grantSkill;
+		if (ItemDefs[i->type].grantSkill && LookupSkill(&str) == sk) {
+			int grant = 0;
+			for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills)
+								 / sizeof(ItemDefs[0].fromSkills[0]); j++) {
+				if (ItemDefs[i->type].fromSkills[j]) {
+					int fromSkill;
+
+					str = ItemDefs[i->type].fromSkills[j];
+
+					fromSkill = LookupSkill(&str);
+					if (fromSkill != -1) {
+						/*
+							Should this use GetRealSkill or GetAvailSkill?
+							GetAvailSkill could cause unbounded recursion,
+							but only if the GM sets up items stupidly...
+						*/
+						if (grant < GetRealSkill(fromSkill))
+							grant = GetRealSkill(fromSkill);
+					}
+				}
+			}
+			if (grant < ItemDefs[i->type].minGrant)
+				grant = ItemDefs[i->type].minGrant;
+			if (grant > ItemDefs[i->type].maxGrant)
+				grant = ItemDefs[i->type].maxGrant;
+			
+			if (grant > retval)
+				retval = grant;
+		}
+	}
+
+	return retval;
 }
 
 int Unit::GetRealSkill(int sk)
@@ -1928,7 +1976,7 @@ int Unit::GetAttribute(char *attrib)
 		if (ap->mods[index].flags & AttribModItem::SKILL) {
 			temp = ap->mods[index].ident;
 			int sk = LookupSkill(&temp);
-			val = GetRealSkill(sk);
+			val = GetAvailSkill(sk);
 			if (ap->mods[index].modtype == AttribModItem::UNIT_LEVEL_HALF) {
 				val = ((val + 1)/2) * ap->mods[index].val;
 			} else if (ap->mods[index].modtype == AttribModItem::CONSTANT) {

@@ -173,6 +173,7 @@ class Unit : public AListElem
 		int GetSkill(int);
 		void SetSkill(int,int);
 		int GetSkillMax(int);
+		int GetAvailSkill(int);
 		int GetRealSkill(int);
 		void ForgetSkill(int);
 		int CheckDepend(int,SkillDepend &s);

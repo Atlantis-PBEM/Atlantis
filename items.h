@@ -136,6 +136,10 @@ class ItemType
 		int escape;
 		char *esc_skill;
 		int esc_val; // level for has_skill, constant for all others
+
+		char *grantSkill;
+		char *fromSkills[4];
+		int minGrant, maxGrant;
 };
 
 extern ItemType *ItemDefs;
