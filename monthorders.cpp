@@ -646,7 +646,10 @@ void Game::RunBuildHelpers(ARegion *r)
 							u->MoveUnit(tarobj);
 					} else {
 						Object *buildobj = r->GetDummy();
+						// don't move if finishing a building
+						if ((u->object->type != O_DUMMY) && (u->object->type == u->build)) return;
 						if (u->build > 0) buildobj = r->GetObject(u->build);
+						if (!buildobj) return; // don't move into nonexistent objects
 						if (buildobj != r->GetDummy() && buildobj != u->object)
 						{
 							u->MoveUnit(buildobj);
@@ -1013,7 +1016,7 @@ int Game::FindAttemptedProd(ARegion * r,Production * p)
 		Object * obj = (Object *) elem;
 		forlist((&obj->units)) {
 			Unit * u = (Unit *) elem;
-			if (u->monthorders) {
+			if ((u->monthorders) && (u->monthorders->type == O_PRODUCE)) {
 				attempted += ValidProd(u,r,p);
 			}
 		}

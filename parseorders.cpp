@@ -1468,6 +1468,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	BuildOrder * order = new BuildOrder;
 	// 'incomplete' for ships:
 	int maxbuild = 0;
+	unit->build = 0;
 	
 	if (token) {
 		if(*token == "help") { 
