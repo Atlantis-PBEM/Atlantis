@@ -228,7 +228,7 @@ AString ShowSpecial(int special, int level, int expandlev)
 		} else {
 			temp += "only ";
 		}
-		temp += "target units which are effected by ";
+		temp += "target creatures which are currently affected by ";
 		for(i = 0; i < 3; i++) {
 			if(spd->effects[i] == -1) continue;
 			if(last == -1) {
@@ -368,7 +368,7 @@ static AString MonResist(int type, int val, int full)
     return temp;
 }
 
-static AString WeapClass(int wclass) 
+static AString WeapClass(int wclass)
 {
 	switch(wclass) {
 		case SLASHING: return AString("slashing");
@@ -521,7 +521,7 @@ AString *ItemDescription(int item, int full)
 				*temp += " No skill is needed to wield this weapon.";
 			}
 		}
-		*temp += AString(" This is a ") + WeapClass(pW->weapClass) + 
+		*temp += AString(" This is a ") + WeapClass(pW->weapClass) +
 			" weapon.";
 		if(pW->flags & WeaponType::LONG) {
 			*temp += " This weapon has a long reach.";
