@@ -1506,93 +1506,85 @@ void Game::ProcessEnterOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	AString *token = o->gettoken();
+	AString * token = o->gettoken();
+	BuildOrder * order = new BuildOrder;
+	
 	if (token) {
-		// either a 'build help XXX' or 'build XXX'
-		if(*token == "help") {
+		if(*token == "help") { 
+			// "build help unitnum"
 			UnitId *targ = 0;
 			delete token;
 			if(!pCheck) {
 				targ = ParseUnit(o);
 				if(!targ) {
-					unit->Error("BUILD: Non-existant unit to help.");
+					unit->Error("BUILD: Non-existent unit to help.");
 					return;
 				}
 				if(targ->unitnum == -1) {
-					unit->Error("BUILD: Non-existant unit to help.");
+					unit->Error("BUILD: Non-existent unit to help.");
 					return;
 				}
 			}
-			// XXX - This seems to be a duplicate of the code above
-			// Check that the unit isn't doing anything else important!
-			BuildOrder *order = new BuildOrder;
-			order->target = targ;
-			if (unit->monthorders ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((unit->taxing == TAX_TAX) ||
-					  (unit->taxing == TAX_PILLAGE)))) {
-				if (unit->monthorders) delete unit->monthorders;
-				AString err = "BUILD: Overwriting previous ";
-				if (unit->inTurnBlock) err += "DELAYED ";
-				err += "month-long order.";
-				ParseError(pCheck, unit, 0, err);
-			}
-			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
-			unit->monthorders = order;
-			if (unit->enter == -1) unit->enter = 0;
-			return;
-		}
-
-		int ot = ParseObject(token);
-		delete token;
-		if (ot==-1) {
-			ParseError(pCheck, unit, 0, "BUILD: Not a valid object name.");
-			return;
-		}
-		if(ObjectDefs[ot].flags & ObjectType::DISABLED) {
-			ParseError(pCheck, unit, 0, "BUILD: Not a valid object name.");
-			return;
-		}
-		if (!pCheck) {
-			ARegion *reg = unit->object->region;
-			if (TerrainDefs[reg->type].similar_type == R_OCEAN){
-				unit->Error("BUILD: Can't build in an ocean.");
+			order->target = targ;	// set the order's target to the unit number helped
+		} else {
+			// token exists and != "help": must be something like 'build longboat'
+			int ot = ParseObject(token);
+			delete token;
+			if (ot==-1) {
+				ParseError(pCheck, unit, 0, "BUILD: Not a valid object name.");
 				return;
 			}
-
-			if (ObjectIsShip(ot) && ot != O_BALLOON) {
-				if (!reg->IsCoastalOrLakeside()) {
-					unit->Error("BUILD: Can't build ship in "
-							"non-coastal or lakeside region.");
+			if(ObjectDefs[ot].flags & ObjectType::DISABLED) {
+				ParseError(pCheck, unit, 0, "BUILD: Not a valid object name.");
+				return;
+			}
+			
+			if (!pCheck) {
+				ARegion *reg = unit->object->region;
+				if (TerrainDefs[reg->type].similar_type == R_OCEAN){
+					unit->Error("BUILD: Can't build in an ocean.");
 					return;
 				}
-			}
-			if (reg->buildingseq > 99) {
-				unit->Error("BUILD: The region is full.");
-				return;
-			}
-			Object *obj = new Object(reg);
-			obj->type = ot;
-			obj->incomplete = ObjectDefs[obj->type].cost;
-			unit->build = obj;
-			unit->object->region->objects.Add(obj);
+				if (ObjectIsShip(ot) && ot != O_BALLOON) {
+					if (!reg->IsCoastalOrLakeside()) {
+						unit->Error("BUILD: Can't build ship in "
+								"non-coastal or lakeside region.");
+						return;
+					}
+				}
+				if (reg->buildingseq > 99) {
+					unit->Error("BUILD: The region is full.");
+					return;
+				}
+	
+				// Create the new object!
+				Object * obj = new Object(reg);
+				obj->type = ot;
+				obj->incomplete = ObjectDefs[obj->type].cost;
+				unit->build = obj;
+				unit->object->region->objects.Add(obj);
+			}			
+			order->target = NULL; // Not helping anyone...
 		}
+	} else { 
+		// just a 'build' order
+		order->target = NULL;
 	}
 	
-	// XXX - This seems to be a duplicate of the code above
-	// Check that the unit isn't doing anything else important!
-	BuildOrder *order = new BuildOrder;
-	order->target = NULL;
+	// Now do all of the generic bits...
+	// Check that the unit isn't doing anything else important
 	if (unit->monthorders ||
 			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((unit->taxing == TAX_TAX) || (unit->taxing == TAX_PILLAGE)))) {
+			 ((unit->taxing == TAX_TAX) || 
+			  (unit->taxing == TAX_PILLAGE)))) {
 		if (unit->monthorders) delete unit->monthorders;
 		AString err = "BUILD: Overwriting previous ";
 		if (unit->inTurnBlock) err += "DELAYED ";
 		err += "month-long order.";
 		ParseError(pCheck, unit, 0, err);
 	}
-	// Stop taxing if taxation is a month long order
+	
+	// reset their taxation status if taxing is a month-long order
 	if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 	unit->monthorders = order;
 	
