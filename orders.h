@@ -244,6 +244,7 @@ class BuildOrder : public Order {
 		~BuildOrder();
 
 		UnitId * target;
+		int needtocomplete;
 };
 
 class SailOrder : public Order {

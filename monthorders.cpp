@@ -506,13 +506,20 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 {
 	int ship = abs(u->build);
-	int output = ShipConstruction(r, u, ship);
+	// get needed to complete
+	int maxbuild = 0;
+	if((u->monthorders) && 
+		(u->monthorders->type == O_BUILD)) {
+			BuildOrder *border = (BuildOrder *) u->monthorders;
+			maxbuild = border->needtocomplete;
+	}
+	int output = ShipConstruction(r, u, maxbuild, ship);
 	
 	// are there unfinished ship items of the given type?
 	int unfinished = u->items.GetNum(ship);
 	
 	// set up unfinished items
-	if(unfinished == 0) {
+	if((unfinished == 0) && (maxbuild > 0)) {
 		unfinished = ItemDefs[ship].pMonths;
 		u->items.SetNum(ship, unfinished);	
 	}
@@ -524,27 +531,7 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 	if(unfinished == 0) {
 		u->Event(AString("Finishes building a ") + ItemDefs[ship].name + " in " +
 			r->ShortPrint(&regions) + ".");
-		// Do we need to create a new fleet?
-		int newfleet = 1;
-		if(u->object->type == O_FLEET) {
-			newfleet = 0;
-			int flying = obj->flying;
-			// are the fleets compatible?
-			if((flying > 0) && (ItemDefs[ship].fly < 1)) newfleet = 1;
-			if((flying < 1) && (ItemDefs[ship].fly > 0)) newfleet = 1;
-		}
-		if(newfleet != 0) {
-			// create a new fleet
-			Object * fleet = new Object(r);
-			fleet->type = O_FLEET;
-			fleet->num = shipseq++;
-			fleet->name = new AString(AString("Ship [") + fleet->num + "]");
-			fleet->AddShip(ship);
-			u->object->region->objects.Add(fleet);
-			u->MoveUnit(fleet);
-		} else {
-			obj->AddShip(ship);
-		}
+		CreateShip(r, u, ship);
 	} else {
 		int percent = 100 * output / ItemDefs[ship].pMonths;
 		u->Event(AString("Performs construction work on a ") + 
@@ -594,7 +581,13 @@ void Game::RunBuildHelpers(ARegion *r)
 						else {
 							// help build ships
 							int ship = abs(target->build);
-							int output = ShipConstruction(r, u, ship);
+							int needed = 0;
+							if((target->monthorders) && 
+									(target->monthorders->type == O_BUILD)) {
+										BuildOrder *border = (BuildOrder *) target->monthorders;
+										needed = border->needtocomplete;
+							}
+							int output = ShipConstruction(r, u, needed, ship);
 							if(output < 1) return;
 							
 							int unfinished = target->items.GetNum(ship);
@@ -604,6 +597,23 @@ void Game::RunBuildHelpers(ARegion *r)
 								target->items.SetNum(ship, unfinished);	
 							}
 							unfinished -= output;
+							if(unfinished > 0) {
+								target->items.SetNum(ship, unfinished);
+								if((target->monthorders) && 
+									(target->monthorders->type == O_BUILD)) {
+										BuildOrder *border = (BuildOrder *) target->monthorders;
+										border->needtocomplete -= output;
+										target->monthorders = border;
+								}
+							} else {
+								CreateShip(r, target, ship);
+								if((target->monthorders) && 
+									(target->monthorders->type == O_BUILD)) {
+										BuildOrder *border = (BuildOrder *) target->monthorders;
+										border->needtocomplete = 0;
+										target->monthorders = border;
+								}
+							} 
 							// hack: avoid that target starts
 							// building anew
 							if(unfinished == 0) unfinished = -1;
@@ -632,11 +642,42 @@ void Game::RunBuildHelpers(ARegion *r)
 	}
 }
 
+/* Creates a new ship - either by adding it to a 
+ * compatible fleet object or creating a new fleet
+ * object with Unit u as owner consisting of exactly
+ * ONE ship of the given type.
+ */
+void Game::CreateShip(ARegion *r, Unit * u, int ship)
+{
+	Object * obj = u->object;
+	// Do we need to create a new fleet?
+	int newfleet = 1;
+	if(u->object->type == O_FLEET) {
+		newfleet = 0;
+		int flying = obj->flying;
+		// are the fleets compatible?
+		if((flying > 0) && (ItemDefs[ship].fly < 1)) newfleet = 1;
+		if((flying < 1) && (ItemDefs[ship].fly > 0)) newfleet = 1;
+	}
+	if(newfleet != 0) {
+		// create a new fleet
+		Object * fleet = new Object(r);
+		fleet->type = O_FLEET;
+		fleet->num = shipseq++;
+		fleet->name = new AString(AString("Ship [") + fleet->num + "]");
+		fleet->AddShip(ship);
+		u->object->region->objects.Add(fleet);
+		u->MoveUnit(fleet);
+	} else {
+		obj->AddShip(ship);
+	}
+}
+
 /* Checks and returns the amount of ship construction,
  * handles material use and practice for both the main
  * shipbuilders and the helpers.
  */
-int Game::ShipConstruction(ARegion * r, Unit * u, int ship)
+int Game::ShipConstruction(ARegion * r, Unit * u, int needed, int ship)
 {
 	if (!TradeCheck(r, u->faction)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
@@ -668,6 +709,9 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int ship)
 		// don't adjust for pMonths
 		// - pMonths represents total requirement
 		maxproduced = number;
+	
+	// adjust maxproduced for items needed until completion
+	if(needed < maxproduced) maxproduced = needed;
 	
 	// adjust maxproduced for unfinished ships
 	if((unfinished > 0) && (maxproduced > unfinished))

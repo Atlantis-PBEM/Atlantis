@@ -1465,6 +1465,8 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
 	AString * token = o->gettoken();
 	BuildOrder * order = new BuildOrder;
+	// 'incomplete' for ships:
+	int maxbuild = 0;
 	
 	if (token) {
 		if(*token == "help") { 
@@ -1484,14 +1486,14 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			}
 			order->target = targ;	// set the order's target to the unit number helped
 		} else {
-			// token exists and != "help": must be something like 'build longboat'
+			// token exists and != "help": must be something like 'build tower'
 			int ot = ParseObject(token, 1);
 			delete token;
 			if (ot==-1) {
 				ParseError(pCheck, unit, 0, "BUILD: Not a valid object name.");
 				return;
 			}
-		
+			
 			if (!pCheck) {
 				ARegion *reg = unit->object->region;
 				if (TerrainDefs[reg->type].similar_type == R_OCEAN){
@@ -1513,6 +1515,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 						return;
 					}
 					unit->build = -st;
+					maxbuild = ItemDefs[st].pMonths - unit->items.GetNum(st);
 					// Don't create a fleet yet	
 				} else {
 					/* build standard OBJECT */
@@ -1539,6 +1542,9 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		// just a 'build' order
 		order->target = NULL;
 	}
+	// set neededtocomplete
+	if(maxbuild != 0) order->needtocomplete = maxbuild;
+	
 	
 	// Now do all of the generic bits...
 	// Check that the unit isn't doing anything else important
