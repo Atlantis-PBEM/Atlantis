@@ -39,7 +39,6 @@
    -- Need a tool which given template files and globals structures can
       build an accurate rules set.
    -- Consider tools for increasing building (and ship) production.
-   -- Need resource increasers for horses/WING/admantium/other resources
    -- Consider skill improvement through use.
    -- I'd like to add some code that will do a bit of validation on a
       rule-set, and make sure it isn't broken.

@@ -214,3 +214,5 @@ Changes from 4.0.6 -> 4.0.7
    -- Modified Axes from having Hammers boost their production to having
       Axes boost their production by default.  This makes them consistant with
       other items made from wood rather than being the exception.
+   -- Added (disabled) resource enhancing buildings for all resources that
+      didn't yet have one.
