@@ -515,3 +515,5 @@ Changes from 4.0.9 -> 4.0.10
    -- Moved the correlation between faction points and what they give
       you from being hardcoded in extra.cpp to an array in rules.cpp.
    -- Small fix so that all items (even non-give) can actually be discarded.
+   -- Added check that there is actually an active unit when parsing TURN
+      and ENDTURN orders.  Fixes segfault.
