@@ -1269,7 +1269,7 @@ int Unit::AmtsPreventCrime(Unit *u)
 	int amulets = items.GetNum(I_AMULETOFTS);
 	if((u->items.GetNum(I_RINGOFI) < 1) || (amulets < 1)) return 0;
 	int men = GetMen();
-	if(men < amulets) return 1;
+	if(men <= amulets) return 1;
 	if(!Globals->PROPORTIONAL_AMTS_USAGE) return 0;
 	if(getrandom(men) < amulets) return 1;
 	return 0;

@@ -402,3 +402,5 @@ Changes from 4.0.9 -> 4.0.10
       a combat spell set, or due to not being a mage and having a mage-only
       item) being checked for use caused the items to be lost to the unit.
    -- Fixed bug where weapon length affected damage spells as well.
+   -- Fixed bug which caused AMTS protection vs RING to fail when the # of
+      AMTS was identical to the number of men in the unit.
