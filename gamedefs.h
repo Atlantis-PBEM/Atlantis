@@ -113,10 +113,10 @@ public:
 	// is unable to will die, period.
 	int SKILL_STARVATION;
 
-	int START_MONEY;
-	int WORK_FRACTION;
-	int ENTERTAIN_FRACTION;
-	int ENTERTAIN_INCOME;
+	int START_MONEY; // standard is 5020
+	int WORK_FRACTION; // standard is 3
+	int ENTERTAIN_FRACTION; // standard is 20
+	int ENTERTAIN_INCOME; // standard is 20
 
 	// base tax income for ANY eligible taxer
 	// AND for pillaging

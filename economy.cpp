@@ -183,35 +183,57 @@ void ARegion::SetupPop()
 		}
 	}
 
-	// Setup wages and entertainment
-	Production * p = new Production;
-	p->itemtype = I_SILVER;
+	/* Setup basic economy */
 	maxwages = Wages();
 
 	/* taxable region wealth */
 	wealth = (int) ((float) (Population()
 		* (Wages() - 10 * Globals->MAINTENANCE_COST) / 50));
 
+	// wage-relevant population (/10 wages /5 popfactor)
+	int pp = Population();
+	// adjustment for rural areas
+	if(pp < 3000) {
+		float wpfactor = (float) (120 / (61 - pp / 50));
+		pp += (int) ((float) ((wpfactor * pp + 3000)/(wpfactor + 1)));
+	}
+	int wagelimit = (int) ((float) (pp * (Wages() - 10 * Globals->MAINTENANCE_COST) /50)); 
+	if (wealth < 0) wealth = 0;
+	Production * w = new Production;
+	w->itemtype = I_SILVER;
+	w->amount = wagelimit / Globals->WORK_FRACTION;
+	w->baseamount = wagelimit / Globals->WORK_FRACTION;
+	w->skill = -1;
+	w->productivity = wages;
+
+	/* Entertainment - setup or adjust */
+	int ep = Population();
+	// adjustment for rural areas
+	if(ep < 3000) {
+		int epf = (ep / 10 + 300) / 6;
+		ep = ep * epf / 100;
+	}
+	int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 1) /50));
+	Production * e = new Production;
+	e->itemtype = I_SILVER;
+	e->skill = S_ENTERTAINMENT;
+	e->amount = maxent / Globals->ENTERTAIN_FRACTION;
+	e->baseamount = maxent / Globals->ENTERTAIN_FRACTION;
+	// raise entertainment income by productivity factor 10
+	e->productivity = Globals->ENTERTAIN_INCOME * 10;
+	
 	// note: wage factor 10, population factor 5 - included as "/ 50"
 	/* More wealth in safe Starting Cities */
 	if((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
-		wealth += (Population() / 5) * Globals->MAINTENANCE_COST;
+		int wbonus = (Population() / 5) * Globals->MAINTENANCE_COST;
+		wealth += wbonus;
+		w->amount += wbonus / Globals->WORK_FRACTION;
+		w->baseamount += wbonus / Globals->WORK_FRACTION;
+		e->amount += wbonus / Globals->ENTERTAIN_FRACTION;
+		e->baseamount += wbonus / Globals->ENTERTAIN_FRACTION;
 	}
-	if (wealth < 0) wealth = 0;
-	p->amount = wealth / Globals->WORK_FRACTION;;
-	p->skill = -1;
-	p->productivity = wages;
-	products.Add(p);
-
-	/* Entertainment */
-	p = new Production;
-	p->itemtype = I_SILVER;
-	p->amount = wealth / Globals->ENTERTAIN_FRACTION;
-	p->baseamount = wealth / Globals->ENTERTAIN_FRACTION;
-	p->skill = S_ENTERTAINMENT;
-	// raise entertainment income by productivity factor 10
-	p->productivity = Globals->ENTERTAIN_INCOME * 10;
-	products.Add(p);
+	products.Add(w);
+	products.Add(e);
 
 	float ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 	// hack: include wage factor of 10 in float assignment above
@@ -235,33 +257,56 @@ void ARegion::SetIncome()
 {
 	/* do nothing in unpopulated regions */
 	if(basepopulation == 0) return;
-	/* total wage income - setup or adjust */
-	Production * w = products.GetProd(I_SILVER,-1);
-	w->itemtype = I_SILVER;
+
 	maxwages = Wages();
 	
 	/* taxable region wealth */
 	wealth = (int) ((float) (Population()
 		* (Wages() - 10 * Globals->MAINTENANCE_COST) / 50));
-
-	// note: wage factor 10, population factor 5 - included as "/ 50"
-	/* More wealth in safe Starting Cities */
-	if((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
-		wealth += (Population() / 5) * Globals->MAINTENANCE_COST;
-	}
 	if (wealth < 0) wealth = 0;
-	w->amount = wealth / Globals->WORK_FRACTION;
+	
+	/* Wages */
+	// wage-relevant population (/10 wages /5 popfactor)
+	int pp = Population();
+	// adjustment for rural areas
+	if(pp < 3000) {
+		float wpfactor = (float) (120 / (61 - pp / 50));
+		pp += (int) ((float) ((wpfactor * pp + 3000)/(wpfactor + 1)));
+	}
+	int maxwages = (int) ((float) (pp * (Wages() - 10 * Globals->MAINTENANCE_COST) /50)); 
+	Production * w = products.GetProd(I_SILVER,-1);
+	w->itemtype = I_SILVER;
+	w->amount = maxwages / Globals->WORK_FRACTION;
+	w->baseamount = maxwages / Globals->WORK_FRACTION;
 	w->skill = -1;
 	w->productivity = wages;
 
 	/* Entertainment - setup or adjust */
+	int ep = Population();
+	// adjustment for rural areas
+	if(ep < 3000) {
+		int epf = (ep / 10 + 300) / 6;
+		ep = ep * epf / 100;
+	}
+	int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 10) /50));
 	Production * e = products.GetProd(I_SILVER,S_ENTERTAINMENT);
 	e->itemtype = I_SILVER;
-	e->amount = wealth / Globals->ENTERTAIN_FRACTION;
-	e->baseamount = wealth / Globals->ENTERTAIN_FRACTION;
+	e->amount = maxent / Globals->ENTERTAIN_FRACTION;
+	e->baseamount = maxent / Globals->ENTERTAIN_FRACTION;
 	e->skill = S_ENTERTAINMENT;
 	// raise entertainment income by productivity factor 10
-	e->productivity = Globals->ENTERTAIN_INCOME * 10;	
+	e->productivity = Globals->ENTERTAIN_INCOME * 10;
+	
+	// note: wage factor 10, population factor 5 - included as "/ 50"
+	/* More wealth in safe Starting Cities */
+	if((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
+		int wbonus = (Population() / 5) * Globals->MAINTENANCE_COST;
+		wealth += wbonus;
+		w->amount += wbonus / Globals->WORK_FRACTION;
+		w->baseamount += wbonus / Globals->WORK_FRACTION;
+		e->amount += wbonus / Globals->ENTERTAIN_FRACTION;
+		e->baseamount += wbonus / Globals->ENTERTAIN_FRACTION;
+	}	
 }
 
 void ARegion::DisbandInRegion(int item, int amt)
