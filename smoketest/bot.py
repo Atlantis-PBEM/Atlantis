@@ -124,6 +124,8 @@ def generateturn(report, template):
                     thisregion['race']=wibble.groups()[7]
                     thisregion['maxtax']=wibble.groups()[8]
             
+            if wibble == None:
+                continue
             #Weather
             #print report[lineindex+2][:-1].split(';', 1)
             weather = report[lineindex+2][:-1].split(';', 1)

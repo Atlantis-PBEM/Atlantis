@@ -147,7 +147,7 @@ while thisturn <= numturns:
     os.system('mv template.* '+str(thisturn))
     
     # run a turn
-    os.system('./'+gamename+' run > /dev/null')
+    os.system('./'+gamename+' run') # > /dev/null')
     
     # 9. move the old order files into a directory
     os.system('mv orders.* '+str(thisturn))
