@@ -64,6 +64,7 @@ Object::~Object()
 {
     if (name) delete name;
     if (describe) delete describe;
+	region = (ARegion *)0xdeadbeef;
 }
 
 void Object::Writeout( Aoutfile *f )

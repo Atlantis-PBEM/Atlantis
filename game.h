@@ -200,6 +200,7 @@ private:
     int factionseq;
     unsigned int unitseq;
     Unit **ppUnits;
+	unsigned int maxppunits;
     int shipseq;
     int year;
     int month;

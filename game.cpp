@@ -38,10 +38,13 @@ Game::Game()
 {
     gameStatus = GAME_STATUS_UNINIT;
     ppUnits = 0;
+	maxppunits = 0;
 }
 
 Game::~Game() {
     delete ppUnits;
+	ppUnits = 0;
+	maxppunits = 0;
 }
 
 int Game::TurnNumber() {
@@ -1564,7 +1567,7 @@ void Game::SetupUnitNums()
 
 	SetupUnitSeq();
 
-	unsigned int maxppunits = unitseq+10000;
+	maxppunits = unitseq+10000;
 
     ppUnits = new Unit *[ maxppunits ];
     
@@ -1578,7 +1581,7 @@ void Game::SetupUnitNums()
             forlist(&o->units) {
                 Unit *u = (Unit *) elem;
 				i = u->num;
-				if((i > 0) && (i < unitseq+1000)) {
+				if((i > 0) && (i < maxppunits)) {
 					if(!ppUnits[i])
 						ppUnits[ u->num ] = u;
 					else {
@@ -1618,6 +1621,13 @@ Unit *Game::GetNewUnit( Faction *fac, int an )
     Unit *pUnit = new Unit( unitseq, fac, an );
     ppUnits[ unitseq ] = pUnit;
     unitseq++;
+	if(unitseq >= maxppunits) {
+		Unit **temp = new Unit*[maxppunits+10000];
+		memcpy(temp, ppUnits, maxppunits);
+		maxppunits += 10000;
+		delete ppUnits;
+		ppUnits = temp;
+	}
 
     return( pUnit );
 }
