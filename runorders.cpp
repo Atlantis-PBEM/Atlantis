@@ -2418,8 +2418,9 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			if(Globals->WANDERING_MONSTERS_EXIST) {
 				Faction *mfac = GetFaction(&factions, monfaction);
 				Unit *mon = GetNewUnit(mfac, 0);
-				int mondef = ItemDefs[o->item].index;
-				mon->MakeWMon(MonDefs[mondef].name, o->item, amt);
+				MonType *mp = FindMonster(ItemDefs[o->item].abr,
+						(ItemDefs[o->item].type & IT_ILLUSION));
+				mon->MakeWMon(mp->name, o->item, amt);
 				mon->MoveUnit(r->GetDummy());
 				// This will result in 0 unless MONSTER_NO_SPOILS or
 				// MONSTER_SPOILS_RECOVERY are set.

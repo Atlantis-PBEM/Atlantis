@@ -771,7 +771,9 @@ int Unit::GetTactics()
 	forlist(&items) {
 		Item *i = (Item *) elem;
 		if (ItemDefs[i->type].type & IT_MONSTER) {
-			int temp = MonDefs[(ItemDefs[i->type].index)].tactics;
+			MonType *mp = FindMonster(ItemDefs[i->type].abr,
+					(ItemDefs[i->type].type & IT_ILLUSION));
+			int temp = mp->tactics;
 			if (temp > retval) retval = temp;
 		}
 	}
@@ -789,7 +791,9 @@ int Unit::GetObservation()
 	forlist(&items) {
 		Item *i = (Item *) elem;
 		if (ItemDefs[i->type].type & IT_MONSTER) {
-			int temp = MonDefs[ItemDefs[i->type].index].obs;
+			MonType *mp = FindMonster(ItemDefs[i->type].abr,
+					(ItemDefs[i->type].type & IT_ILLUSION));
+			int temp = mp->obs;
 			if (temp > retval) retval = temp;
 		}
 	}
@@ -862,7 +866,9 @@ int Unit::GetStealth()
 	forlist(&items) {
 		Item *i = (Item *) elem;
 		if (ItemDefs[i->type].type & IT_MONSTER) {
-			int temp = MonDefs[ItemDefs[i->type].index].stealth;
+			MonType *mp = FindMonster(ItemDefs[i->type].abr,
+					(ItemDefs[i->type].type & IT_ILLUSION));
+			int temp = mp->stealth;
 			if (temp < monstealth) monstealth = temp;
 		} else {
 			if (ItemDefs[i->type].type & IT_MAN) {
@@ -1434,7 +1440,9 @@ int Unit::Hostile()
 	forlist(&items) {
 		Item *i = (Item *) elem;
 		if (ItemDefs[i->type].type & IT_MONSTER) {
-			int hos = MonDefs[ItemDefs[i->type].index].hostile;
+			MonType *mp = FindMonster(ItemDefs[i->type].abr,
+					(ItemDefs[i->type].type & IT_ILLUSION));
+			int hos = mp->hostile;
 			if (hos > retval) retval = hos;
 		}
 	}
@@ -1529,7 +1537,7 @@ int Unit::Taxers()
 			}
 
 			if (ItemDefs[pItem->type].type & IT_MONSTER) {
-				if (ItemDefs[pItem->type].index == MONSTER_ILLUSION)
+				if (ItemDefs[pItem->type].type & IT_ILLUSION)
 					illusions += pItem->num;
 				else
 					creatures += pItem->num;

@@ -73,6 +73,20 @@ MountType *FindMount(char *abbr)
 	return NULL;
 }
 
+MonType *FindMonster(char *abbr, int illusion)
+{
+	if (abbr == NULL) return NULL;
+	AString tag = (illusion ? "i" : "");
+	tag += abbr;
+
+	for (int i = 0; i < NUMMONSTERS; i++) {
+		if (MonDefs[i].abbr == NULL) continue;
+		if (tag == MonDefs[i].abbr)
+			return &MonDefs[i];
+	}
+	return NULL;
+}
+
 static AString AttType(int atype)
 {
 	switch(atype) {
@@ -105,8 +119,7 @@ int ParseAllItems(AString *token)
 {
 	int r = -1;
 	for(int i = 0; i < NITEMS; i++) {
-		if ((ItemDefs[i].type & IT_MONSTER) &&
-				ItemDefs[i].index == MONSTER_ILLUSION) {
+		if (ItemDefs[i].type & IT_ILLUSION)  {
 			if ((*token == (AString("i") + ItemDefs[i].name)) ||
 				(*token == (AString("i") + ItemDefs[i].names)) ||
 				(*token == (AString("i") + ItemDefs[i].abr))) {
@@ -130,8 +143,7 @@ int ParseEnabledItem(AString *token)
 	int r = -1;
 	for (int i=0; i<NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if ((ItemDefs[i].type & IT_MONSTER) &&
-				ItemDefs[i].index == MONSTER_ILLUSION) {
+		if (ItemDefs[i].type & IT_ILLUSION) {
 			if ((*token == (AString("i") + ItemDefs[i].name)) ||
 				(*token == (AString("i") + ItemDefs[i].names)) ||
 				(*token == (AString("i") + ItemDefs[i].abr))) {
@@ -159,8 +171,7 @@ int ParseGiveableItem(AString *token)
 	for (int i=0; i<NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(ItemDefs[i].flags & ItemType::CANTGIVE) continue;
-		if ((ItemDefs[i].type & IT_MONSTER) &&
-				ItemDefs[i].index == MONSTER_ILLUSION) {
+		if (ItemDefs[i].type & IT_ILLUSION) {
 			if ((*token == (AString("i") + ItemDefs[i].name)) ||
 				(*token == (AString("i") + ItemDefs[i].names)) ||
 				(*token == (AString("i") + ItemDefs[i].abr))) {
@@ -189,8 +200,7 @@ int ParseTransportableItem(AString *token)
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(ItemDefs[i].flags & ItemType::NOTRANSPORT) continue;
 		if(ItemDefs[i].flags & ItemType::CANTGIVE) continue;
-		if ((ItemDefs[i].type & IT_MONSTER) &&
-				ItemDefs[i].index == MONSTER_ILLUSION) {
+		if (ItemDefs[i].type & IT_ILLUSION) {
 			if ((*token == (AString("i") + ItemDefs[i].name)) ||
 				(*token == (AString("i") + ItemDefs[i].names)) ||
 				(*token == (AString("i") + ItemDefs[i].abr))) {
@@ -526,8 +536,7 @@ AString *ItemDescription(int item, int full)
 		return NULL;
 
 	AString *temp = new AString;
-	int illusion = ((ItemDefs[item].type & IT_MONSTER) &&
-			(ItemDefs[item].index == MONSTER_ILLUSION));
+	int illusion = (ItemDefs[item].type & IT_ILLUSION);
 
 	*temp += AString(illusion?"illusory ":"")+ ItemDefs[item].name + " [" +
 		(illusion?"I":"") + ItemDefs[item].abr + "], weight " +
@@ -611,22 +620,22 @@ AString *ItemDescription(int item, int full)
 	}
 	if(ItemDefs[item].type & IT_MONSTER) {
 		*temp += " This is a monster.";
-		int mon = ItemDefs[item].index;
+		MonType *mp = FindMonster(ItemDefs[item].abr,
+				(ItemDefs[item].type & IT_ILLUSION));
 		*temp += AString(" This monster attacks with a combat skill of ") +
-			MonDefs[mon].attackLevel + ".";
+			mp->attackLevel + ".";
 		for(int c = 0; c < NUM_ATTACK_TYPES; c++) {
-			*temp += AString(" ") + MonResist(c,MonDefs[mon].defense[c], full);
+			*temp += AString(" ") + MonResist(c,mp->defense[c], full);
 		}
-		if(MonDefs[mon].special && MonDefs[mon].special != -1) {
+		if(mp->special && mp->special != -1) {
 			*temp += AString(" ") +
 				"Monster can cast " +
-				ShowSpecial(MonDefs[mon].special, MonDefs[mon].specialLevel,
-						1, 0);
+				ShowSpecial(mp->special, mp->specialLevel, 1, 0);
 		}
 		if(full) {
-			int hits = MonDefs[mon].hits;
-			int atts = MonDefs[mon].numAttacks;
-			int regen = MonDefs[mon].regen;
+			int hits = mp->hits;
+			int atts = mp->numAttacks;
+			int regen = mp->regen;
 			if(!hits) hits = 1;
 			if(!atts) atts = 1;
 			*temp += AString(" This monster has ") + atts + " melee " +
@@ -637,17 +646,16 @@ AString *ItemDescription(int item, int full)
 					" hits per round of battle.";
 			}
 			*temp += AString(" This monster has a tactics score of ") +
-				MonDefs[mon].tactics + ", a stealth score of " +
-				MonDefs[mon].stealth + ", and an observation score of " +
-				MonDefs[mon].obs + ".";
+				mp->tactics + ", a stealth score of " + mp->stealth +
+				", and an observation score of " + mp->obs + ".";
 		}
 		*temp += " This monster might have ";
-		if(MonDefs[mon].spoiltype != -1) {
-			if(MonDefs[mon].spoiltype & IT_MAGIC) {
+		if(mp->spoiltype != -1) {
+			if(mp->spoiltype & IT_MAGIC) {
 				*temp += "magic items and ";
-			} else if(MonDefs[mon].spoiltype & IT_ADVANCED) {
+			} else if(mp->spoiltype & IT_ADVANCED) {
 				*temp += "advanced items and ";
-			} else if(MonDefs[mon].spoiltype & IT_NORMAL) {
+			} else if(mp->spoiltype & IT_NORMAL) {
 				*temp += "normal or trade items and ";
 			}
 		}
@@ -999,8 +1007,7 @@ Item::~Item()
 AString Item::Report(int seeillusions)
 {
 	AString ret = ItemString(type,num);
-	if (seeillusions && ItemDefs[type].type & IT_MONSTER &&
-			ItemDefs[type].index == MONSTER_ILLUSION) {
+	if (seeillusions && (ItemDefs[type].type & IT_ILLUSION)) {
 		ret = ret + " (illusion)";
 	}
 	return ret;
@@ -1103,11 +1110,12 @@ AString ItemList::BattleReport()
 			temp += ", ";
 			temp += i->Report(0);
 			if (ItemDefs[i->type].type & IT_MONSTER) {
-				MonType & mondef = MonDefs[ItemDefs[i->type].index];
-				temp += AString(" (Combat ") + mondef.attackLevel +
-					"/" + mondef.defense[ATTACK_COMBAT] + ", Attacks " +
-					mondef.numAttacks + ", Hits " + mondef.hits +
-					", Tactics " + mondef.tactics + ")";
+				MonType *mp = FindMonster(ItemDefs[i->type].abr,
+						(ItemDefs[i->type].type & IT_ILLUSION));
+				temp += AString(" (Combat ") + mp->attackLevel +
+					"/" + mp->defense[ATTACK_COMBAT] + ", Attacks " +
+					mp->numAttacks + ", Hits " + mp->hits +
+					", Tactics " + mp->tactics + ")";
 			}
 		}
 	}

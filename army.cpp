@@ -93,35 +93,35 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 
 	/* Is this a monster? */
 	if (ItemDefs[r].type & IT_MONSTER) {
-		int mon = ItemDefs[r].index;
+		MonType *mp = FindMonster(ItemDefs[r].abr,
+				(ItemDefs[r].type & IT_ILLUSION));
 		if(u->type == U_WMON)
-			name = AString(MonDefs[mon].name);
+			name = AString(mp->name);
 		else
-			name = AString(MonDefs[mon].name) +
-				AString(" controlled by ") + *(unit->name);
-		askill = MonDefs[mon].attackLevel;
-		dskill[ATTACK_COMBAT] += MonDefs[mon].defense[ATTACK_COMBAT];
-		if (MonDefs[mon].defense[ATTACK_ENERGY] > dskill[ATTACK_ENERGY]) {
-			dskill[ATTACK_ENERGY] = MonDefs[mon].defense[ATTACK_ENERGY];
+			name = AString(mp->name) + " controlled by " + *(unit->name);
+		askill = mp->attackLevel;
+		dskill[ATTACK_COMBAT] += mp->defense[ATTACK_COMBAT];
+		if (mp->defense[ATTACK_ENERGY] > dskill[ATTACK_ENERGY]) {
+			dskill[ATTACK_ENERGY] = mp->defense[ATTACK_ENERGY];
 		}
-		if (MonDefs[mon].defense[ATTACK_SPIRIT] > dskill[ATTACK_SPIRIT]) {
-			dskill[ATTACK_SPIRIT] = MonDefs[mon].defense[ATTACK_SPIRIT];
+		if (mp->defense[ATTACK_SPIRIT] > dskill[ATTACK_SPIRIT]) {
+			dskill[ATTACK_SPIRIT] = mp->defense[ATTACK_SPIRIT];
 		}
-		if(MonDefs[mon].defense[ATTACK_WEATHER] > dskill[ATTACK_WEATHER]) {
-			dskill[ATTACK_WEATHER] = MonDefs[mon].defense[ATTACK_WEATHER];
+		if(mp->defense[ATTACK_WEATHER] > dskill[ATTACK_WEATHER]) {
+			dskill[ATTACK_WEATHER] = mp->defense[ATTACK_WEATHER];
 		}
-		dskill[ATTACK_RIDING] += MonDefs[mon].defense[ATTACK_RIDING];
-		dskill[ATTACK_RANGED] += MonDefs[mon].defense[ATTACK_RANGED];
+		dskill[ATTACK_RIDING] += mp->defense[ATTACK_RIDING];
+		dskill[ATTACK_RANGED] += mp->defense[ATTACK_RANGED];
 		damage = 0;
-		hits = MonDefs[mon].hits;
+		hits = mp->hits;
 		if (hits < 1) hits = 1;
 		maxhits = hits;
-		attacks = MonDefs[mon].numAttacks;
+		attacks = mp->numAttacks;
 		if(!attacks) attacks = 1;
-		special = MonDefs[mon].special;
-		slevel = MonDefs[mon].specialLevel;
+		special = mp->special;
+		slevel = mp->specialLevel;
 		if (Globals->MONSTER_BATTLE_REGEN) {
-			regen = MonDefs[mon].regen;
+			regen = mp->regen;
 			if (regen < 0) regen = 0;
 		}
 		return;
@@ -613,7 +613,9 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 	}
 
 	/* First, silver */
-	int silv = MonDefs[ItemDefs[monitem].index].silver;
+	MonType *mp = FindMonster(ItemDefs[monitem].abr,
+			(ItemDefs[monitem].type & IT_ILLUSION));
+	int silv = mp->silver;
 	if((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
 		// Adjust the spoils for length of freedom.
 		silv *= (Globals->MONSTER_SPOILS_RECOVERY-free);
@@ -621,7 +623,7 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 	}
 	spoils->SetNum(I_SILVER,spoils->GetNum(I_SILVER) + getrandom(silv));
 
-	int thespoil = MonDefs[ItemDefs[monitem].index].spoiltype;
+	int thespoil = mp->spoiltype;
 
 	if (thespoil == -1) return;
 	if (thespoil == IT_NORMAL && getrandom(2)) thespoil = IT_TRADE;
@@ -650,7 +652,7 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 		}
 	}
 
-	int val = getrandom(MonDefs[ItemDefs[monitem].index].silver * 2);
+	int val = getrandom(mp->silver * 2);
 	if((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
 		// Adjust for length of monster freedom.
 		val *= (Globals->MONSTER_SPOILS_RECOVERY-free);
@@ -1170,7 +1172,9 @@ void Army::Kill(int killed)
 	temp->unit->losses++;
 	if(Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_FIGURE) {
 		if(ItemDefs[temp->race].type & IT_MONSTER) {
-			hitsalive -= MonDefs[ItemDefs[temp->race].index].hits;
+			MonType *mp = FindMonster(ItemDefs[temp->race].abr,
+					(ItemDefs[temp->race].type & IT_ILLUSION));
+			hitsalive -= mp->hits;
 		} else {
 			// Assume everything that is a solder and isn't a monster is a
 			// man.

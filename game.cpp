@@ -1805,6 +1805,8 @@ void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
 
 void Game::MonsterCheck(ARegion *r, Unit *u)
 {
+	MonType *monP;
+
 	if (u->type != U_WMON) {
 		int escape = 0;
 		int totlosses = 0;
@@ -1853,8 +1855,9 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 							Globals->RELEASE_MONSTERS) {
 						Faction *mfac = GetFaction(&factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
-						int mondef = ItemDefs[i->type].index;
-						mon->MakeWMon(MonDefs[mondef].name, i->type, i->num);
+						MonType *mp = FindMonster(ItemDefs[i->type].abr,
+								(ItemDefs[i->type].type & IT_ILLUSION));
+						mon->MakeWMon(mp->name, i->type, i->num);
 						mon->MoveUnit(r->GetDummy());
 						// This will be zero unless these are set. (0 means
 						// full spoils)
@@ -1882,8 +1885,9 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				Faction *mfac = GetFaction(&factions,monfaction);
 				if (u->items.GetNum(I_IMP)) {
 					Unit *mon = GetNewUnit(mfac, 0);
-					mon->MakeWMon(MonDefs[MONSTER_IMP].name,I_IMP,
-							u->items.GetNum(I_IMP));
+					monP = FindMonster(ItemDefs[I_IMP].abr,
+							(ItemDefs[I_IMP].type & IT_ILLUSION));
+					mon->MakeWMon(monP->name, I_IMP, u->items.GetNum(I_IMP));
 					mon->MoveUnit(r->GetDummy());
 					u->items.SetNum(I_IMP,0);
 					// This will be zero unless these are set. (0 means
@@ -1893,8 +1897,9 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				}
 				if (u->items.GetNum(I_DEMON)) {
 					Unit *mon = GetNewUnit(mfac, 0);
-					mon->MakeWMon(MonDefs[MONSTER_DEMON].name,I_DEMON,
-							u->items.GetNum(I_DEMON));
+					monP = FindMonster(ItemDefs[I_DEMON].abr,
+							(ItemDefs[I_DEMON].type & IT_ILLUSION));
+					mon->MakeWMon(monP->name,I_DEMON,u->items.GetNum(I_DEMON));
 					mon->MoveUnit(r->GetDummy());
 					u->items.SetNum(I_DEMON,0);
 					// This will be zero unless these are set. (0 means
@@ -1904,7 +1909,9 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				}
 				if (u->items.GetNum(I_BALROG)) {
 					Unit *mon = GetNewUnit(mfac, 0);
-					mon->MakeWMon(MonDefs[MONSTER_BALROG].name,I_BALROG,
+					monP = FindMonster(ItemDefs[I_BALROG].abr,
+							(ItemDefs[I_BALROG].type & IT_ILLUSION));
+					mon->MakeWMon(monP->name,I_BALROG,
 							u->items.GetNum(I_BALROG));
 					mon->MoveUnit(r->GetDummy());
 					u->items.SetNum(I_BALROG,0);

@@ -56,7 +56,8 @@ enum {
 	IT_BATTLE = 0x0200,
 	IT_SPECIAL = 0x0400,
 	IT_TOOL = 0x0800,
-	IT_FOOD = 0x1000
+	IT_FOOD = 0x1000,
+	IT_ILLUSION = 0x2000
 };
 
 struct Materials
@@ -152,6 +153,7 @@ class MonType
 		int hostile; /* Percent */
 		int number;
 		char *name;
+		char *abbr;
 };
 
 extern MonType *MonDefs;
@@ -297,10 +299,11 @@ int ParseEnabledItem(AString *);
 int ParseTransportableItem(AString *);
 int LookupItem(AString *);
 
-BattleItemType *FindBattleItem(char *);
-ArmorType *FindArmor(char *);
-WeaponType *FindWeapon(char *);
-MountType *FindMount(char *);
+BattleItemType *FindBattleItem(char *abbr);
+ArmorType *FindArmor(char *abbr);
+WeaponType *FindWeapon(char *abbr);
+MountType *FindMount(char *abbr);
+MonType *FindMonster(char *abbr, int illusion);
 
 AString ItemString(int type, int num);
 AString *ItemDescription(int item, int full);

@@ -1360,8 +1360,7 @@ AString *ShowSkill::Report(Faction *f)
 	}
 	for(i = 0; i < NITEMS; i++) {
 		if(ITEM_DISABLED(i)) continue;
-		int illusion = ((ItemDefs[i].type & IT_MONSTER) &&
-				(ItemDefs[i].index == MONSTER_ILLUSION));
+		int illusion = (ItemDefs[i].type & IT_ILLUSION);
 		if(ItemDefs[i].mSkill == skill && ItemDefs[i].mLevel == level) {
 			int canmagic = 1;
 			for(c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {

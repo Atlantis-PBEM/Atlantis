@@ -138,7 +138,7 @@ int Army::CheckSpecialTarget(int special,int tar)
 		// this.
 		if(!(ItemDefs[soldiers[tar]->race].type & IT_MONSTER))
 			return 0;
-		if(ItemDefs[soldiers[tar]->race].index != MONSTER_ILLUSION)
+		if(!(ItemDefs[soldiers[tar]->race].type & IT_ILLUSION))
 			return 0;
 	}
 

@@ -219,68 +219,74 @@ void Game::ModifyRaceSkills(int r, int i, int sk)
 	ManDefs[r].skills[i] = sk;
 }
 
-void Game::ModifyMonsterAttackLevel(int mon, int lev)
+void Game::ModifyMonsterAttackLevel(char *mon, int lev)
 {
-	if(mon < 0 || mon > (NUMMONSTERS - 1)) return;
+	MonType *pM = FindMonster(mon, 0);
+	if (pM == NULL) return;
 	if(lev < 0) return;
-	MonDefs[mon].attackLevel = lev;
+	pM->attackLevel = lev;
 }
 
-void Game::ModifyMonsterDefense(int mon, int defenseType, int level)
+void Game::ModifyMonsterDefense(char *mon, int defenseType, int level)
 {
-	if(mon < 0 || mon > (NUMMONSTERS - 1)) return;
+	MonType *pM = FindMonster(mon, 0);
+	if (pM == NULL) return;
 	if(defenseType < 0 || defenseType > (NUM_ATTACK_TYPES -1)) return;
-	MonDefs[mon].defense[defenseType] = level;
+	pM->defense[defenseType] = level;
 }
 
-void Game::ModifyMonsterAttacksAndHits(int mon, int numattacks, int hits,
-		int regen)
+void Game::ModifyMonsterAttacksAndHits(char *mon, int num, int hits, int regen)
 {
-	if(mon < 0 || mon > (NUMMONSTERS - 1)) return;
-	if(numattacks < 0) return;
+	MonType *pM = FindMonster(mon, 0);
+	if (pM == NULL) return;
+	if(num < 0) return;
 	if(hits < 0) return;
 	if(regen < 0) return;
-	MonDefs[mon].numAttacks = numattacks;
-	MonDefs[mon].hits = hits;
-	MonDefs[mon].regen = regen;
+	pM->numAttacks = num;
+	pM->hits = hits;
+	pM->regen = regen;
 }
 
-void Game::ModifyMonsterSkills(int mon, int tact, int stealth, int obs)
+void Game::ModifyMonsterSkills(char *mon, int tact, int stealth, int obs)
 {
-	if(mon < 0 || mon > (NUMMONSTERS - 1)) return;
+	MonType *pM = FindMonster(mon, 0);
+	if (pM == NULL) return;
 	if(tact < 0) return;
 	if(stealth < 0) return;
 	if(obs < 0) return;
-	MonDefs[mon].tactics = tact;
-	MonDefs[mon].stealth = stealth;
-	MonDefs[mon].obs = obs;
+	pM->tactics = tact;
+	pM->stealth = stealth;
+	pM->obs = obs;
 }
 
-void Game::ModifyMonsterSpecial(int mon, int special, int lev)
+void Game::ModifyMonsterSpecial(char *mon, int special, int lev)
 {
-	if(mon < 0 || mon > (NUMMONSTERS - 1)) return;
+	MonType *pM = FindMonster(mon, 0);
+	if (pM == NULL) return;
 	if(special < -1 || special > (NUMSPECIALS -1)) return;
 	if(lev < 0) return;
-	MonDefs[mon].special = special;
-	MonDefs[mon].specialLevel = lev;
+	pM->special = special;
+	pM->specialLevel = lev;
 }
 
-void Game::ModifyMonsterSpoils(int mon, int silver, int spoilType)
+void Game::ModifyMonsterSpoils(char *mon, int silver, int spoilType)
 {
-	if(mon < 0 || mon > (NUMMONSTERS - 1)) return;
+	MonType *pM = FindMonster(mon, 0);
+	if (pM == NULL) return;
 	if(spoilType < -1) return;
 	if(silver < 0) return;
-	MonDefs[mon].silver = silver;
-	MonDefs[mon].spoiltype = spoilType;
+	pM->silver = silver;
+	pM->spoiltype = spoilType;
 }
 
-void Game::ModifyMonsterThreat(int mon, int num, int hostileChance)
+void Game::ModifyMonsterThreat(char *mon, int num, int hostileChance)
 {
-	if(mon < 0 || mon > (NUMMONSTERS - 1)) return;
+	MonType *pM = FindMonster(mon, 0);
+	if (pM == NULL) return;
 	if(num < 0) return;
 	if(hostileChance < 0 || hostileChance > 100) return;
-	MonDefs[mon].hostile = hostileChance;
-	MonDefs[mon].number = num;
+	pM->hostile = hostileChance;
+	pM->number = num;
 }
 
 void Game::ModifyWeaponSkills(char *weap, int baseSkill, int orSkill)

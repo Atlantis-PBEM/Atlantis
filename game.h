@@ -196,14 +196,13 @@ private:
 	void ModifyRaceSkillLevels(int race, int special, int def);
 	void ModifyRaceSkills(int race, int i, int sk);
 
-	void ModifyMonsterAttackLevel(int mon, int lev);
-	void ModifyMonsterDefense(int mon, int defenseType, int level);
-	void ModifyMonsterAttacksAndHits(int mon, int numattacks, int hits,
-			int regen);
-	void ModifyMonsterSkills(int mon, int tact, int stealth, int obs);
-	void ModifyMonsterSpecial(int mon, int special, int lev);
-	void ModifyMonsterSpoils(int mon, int silver, int spoilType);
-	void ModifyMonsterThreat(int mon, int num, int hostileChance);
+	void ModifyMonsterAttackLevel(char *mon, int lev);
+	void ModifyMonsterDefense(char *mon, int defenseType, int level);
+	void ModifyMonsterAttacksAndHits(char *mon, int num, int hits, int regen);
+	void ModifyMonsterSkills(char *mon, int tact, int stealth, int obs);
+	void ModifyMonsterSpecial(char *mon, int special, int lev);
+	void ModifyMonsterSpoils(char *mon, int silver, int spoilType);
+	void ModifyMonsterThreat(char *mon, int num, int hostileChance);
 
 	void ModifyWeaponSkills(char *weap, int baseSkill, int orSkill);
 	void ModifyWeaponFlags(char *weap, int flags);
