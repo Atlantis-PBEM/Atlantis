@@ -1772,21 +1772,23 @@ void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck )
 
 void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
+	if(!(Globals->ALLOW_WITHDRAW)) return;
+
 	AString *token = o->gettoken();
 	if(!token) {
 		ParseError (pCheck, unit, 0, "WITHDRAW: No amount given.");
 		return;
 	}
 	int amt = token->value();
-	delete token;
 	if(amt < 1) {
-		ParseError(pCheck, unit, 0, "WITHDRAW: Invalid amount given.");
-		return;
-	}
-	token = o->gettoken();
-	if(!token) {
-		ParseError( pCheck, unit, 0, "WITHDRAW: No item given.");
-		return;
+		amt = 1;
+	} else {
+		delete token;
+		token = o->gettoken();
+		if(!token) {
+			ParseError( pCheck, unit, 0, "WITHDRAW: No item given.");
+			return;
+		}
 	}
 	int item = ParseItem(token);
 	delete token;
@@ -1802,6 +1804,10 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	if (!(ItemDefs[item].type & IT_NORMAL)) {
         ParseError( pCheck, unit, 0, "WITHDRAW: Invalid item.");
         return;
+	}
+	if(item == I_SILVER) {
+		ParseError(pCheck, unit, 0, "WITHDRAW: Invalid item.");
+		return;
 	}
 
     if( !pCheck )

@@ -164,3 +164,6 @@ Changes from 4.0.6 -> 4.0.7
    -- Tweaked the quantities of Admantium by default.
    -- Added Javelin weapon designed by Terho T. Uotila
       <ttuotila@cc.helsinki.fi>, who wanted a cheap ranged weapon.
+   -- Various small fixes provided by Ben Lloyd
+   -- Fixed WITHDRAW <item> to be the same as WITHDRAW 1 <item>
+   -- Some other small fixes from Ben Lloyd. <Ben.Lloyd.1@uni.massey.ac.nz>
