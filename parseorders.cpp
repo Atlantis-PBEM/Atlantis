@@ -1216,7 +1216,7 @@ void Game::ProcessRestartOrder(Unit *u,AString *o, OrdersCheck *pCheck)
 
 		if (u->faction->quit != QUIT_AND_RESTART) {
 			u->faction->quit = QUIT_AND_RESTART;
-			Faction *pFac = AddFaction(1);
+			Faction *pFac = AddFaction(0, NULL);
 			pFac->SetAddress(*(u->faction->address));
 			AString *pass = new AString(*(u->faction->password));
 			pFac->password = pass;

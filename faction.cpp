@@ -557,7 +557,6 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	//f->PutStr("#end");
 	f->EndLine();
 
-	present_regions.DeleteAll();
 }
 
 // LLS - write order template
@@ -577,7 +576,7 @@ void Faction::WriteTemplate( Areport *f, Game *pGame )
 			case TEMPLATE_LONG:
 				f->PutStr("Orders Template (Long Format):");
 				break;
-				// DK
+			// DK
 			case TEMPLATE_MAP:
 				f->PutStr("Orders Template (Map Format):");
 				break;

@@ -84,7 +84,7 @@ public:
 	int GenRules(const AString &, const AString &, const AString &);
 	int DoOrdersCheck( const AString &strOrders, const AString &strCheck );
 
-    Faction *AddFaction(int setup=1);
+    Faction *AddFaction(int noleader=0, ARegion *pStart = NULL);
 
     //
     // Give this particular game a chance to set up the faction. This is in

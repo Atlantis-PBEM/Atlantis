@@ -660,21 +660,47 @@ int Game::ReadPlayers()
 				}
 
 				if( *pToken == "new" ) {
-					pFac = AddFaction(1);
+					AString save = *pLine;
+					int noleader = 0;
+					int x, y, z;
+					ARegion *pReg = NULL;
+
+					/* Check for the noleader flag */
+					SAFE_DELETE(pToken);
+					pToken = pLine->gettoken();
+					if (pToken && *pToken == "noleader") {
+						noleader = 1;
+						SAFE_DELETE(pToken);
+						pToken = pLine->gettoken();
+						/* Initialize pReg to something useful */
+						pReg = regions.GetRegion(0, 0, 0);
+					}
+					if (pToken) {
+						x = pToken->value();
+						y = -1;
+						z = -1;
+						SAFE_DELETE(pToken);
+						pToken = pLine->gettoken();
+						if (pToken) {
+							y = pToken->value();
+							SAFE_DELETE(pToken);
+							pToken = pLine->gettoken();
+							if (pToken) {
+								z = pToken->value();
+								pReg = regions.GetRegion(x, y, z);
+							}
+						}
+						if (pReg == NULL)
+							Awrite(AString("Bad faction line: ")+save);
+					}
+
+					pFac = AddFaction(noleader, pReg);
 					if( !pFac ) {
 						Awrite( "Failed to add a new faction!" );
 						rc = 0;
 						break;
 					}
 
-					lastWasNew = 1;
-				} else if (*pToken == "newNoLeader") {
-					pFac = AddFaction(0);
-					if(!pFac) {
-						Awrite("Failed to add a new faction!");
-						rc = 0;
-						break;
-					}
 					lastWasNew = 1;
 				} else {
 					if( pFac && lastWasNew ) {
@@ -808,31 +834,6 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 						Awrite(AString("Invalid Loc:")+x+","+y+","+z+
 								" in faction " + pFac->num);
 						pFac->pReg = NULL;
-					}
-				}
-			}
-		}
-	} else if(*pToken == "StartLoc:") {
-		int x, y, z;
-		pTemp = pLine->gettoken();
-		if(pTemp) {
-			x = pTemp->value();
-			delete pTemp;
-			pTemp = pLine->gettoken();
-			if(pTemp) {
-				y = pTemp->value();
-				delete pTemp;
-				pTemp = pLine->gettoken();
-				if(pTemp) {
-					z = pTemp->value();
-					ARegion *pReg = regions.GetRegion( x, y, z );
-					if(pReg) {
-						pFac->pStartLoc = pReg;
-						if(!pFac->pReg) pFac->pReg = pReg;
-					} else {
-						Awrite(AString("Invalid StartLoc:")+x+","+y+","+z+
-								" in faction " + pFac->num);
-						pFac->pStartLoc = NULL;
 					}
 				}
 			}
@@ -988,8 +989,6 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 				}
 			}
 		}
-	} else if( *pToken == "NoStartLeader" ) {
-		pFac->noStartLeader = 1;
 	} else if( *pToken == "Order:" ) {
 		pTemp = pLine->StripWhite();
 		if( *pTemp == "quit" ) {
@@ -1587,6 +1586,7 @@ void Game::WriteTemplates()
                 fac->WriteTemplate( &f, this );
                 f.Close();
             }
+			fac->present_regions.DeleteAll();
         }
         Adot();
     }
@@ -1607,7 +1607,7 @@ void Game::DeleteDeadFactions()
     }
 }
 
-Faction *Game::AddFaction(int setup)
+Faction *Game::AddFaction(int noleader, ARegion *pStart)
 {
 	//
 	// set up faction
@@ -1616,15 +1616,17 @@ Faction *Game::AddFaction(int setup)
 	AString x("NoAddress");
 	temp->SetAddress(x);
 	temp->lastorders = TurnNumber();
+	temp->pStartLoc = pStart;
+	temp->pReg = pStart;
+	temp->noStartLeader = noleader;
 
-	if(setup && SetupFaction(temp)) {
-		factions.Add(temp);
-		factionseq++;
-		return(temp);
-	} else {
+	if (!SetupFaction(temp)) {
 		delete temp;
-		return(0);
+		return 0;
 	}
+	factions.Add(temp);
+	factionseq++;
+	return temp;
 }
 
 void Game::ViewFactions()
