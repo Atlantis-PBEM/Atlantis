@@ -304,7 +304,7 @@ void Soldier::SetupSpell()
 void Soldier::SetupCombatItems()
 {
     int battleType;
-    for(battletype = 1; battletype < NUMBATTLEITEMS; battletype++) {
+    for(battleType = 1; battleType < NUMBATTLEITEMS; battleType++) {
         BattleItemType *pBat = &BattleItemDefs[ battleType ];
 
 		/*
@@ -331,6 +331,12 @@ void Soldier::SetupCombatItems()
 			if( item == -1 ) {
 				continue;
 			}
+
+			/* Make sure amulets of invulnerability are marked */
+			if( item == I_AMULETOFI ) {
+				amuletofi = 1;
+			}
+
 			SET_BIT( battleItems, battleType );
 
 			if( pBat->flags & BattleItemType::SPECIAL ) {
@@ -353,11 +359,6 @@ void Soldier::SetupCombatItems()
 				}
 			}
 		}
-
-		if( item == I_AMULETOFI ) {
-			amuletofi = 1;
-		}
-
 	}
 }
 

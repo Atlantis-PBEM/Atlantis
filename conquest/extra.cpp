@@ -228,13 +228,13 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_WHORSE);
 	DisableItem(I_YEW);
 	DisableItem(I_MSWORD);
-	DisableItem(I_MARMOR);
+	DisableItem(I_MPLATE);
 	DisableItem(I_DOUBLEBOW);
 	DisableItem(I_FLOATER);
 	DisableItem(I_ROOTSTONE);
-	DisableItem(I_MAGICCARPET);
-	DisableItem(I_CLOAK_OF_INVULNERABILITY);
-	DisableItem(I_AMULET_OF_PROTECTION);
+	DisableItem(I_MCARPET);
+	DisableItem(I_CLOAKOFI);
+	DisableItem(I_AMULETOFP);
 
 	DisableSkill(S_CARPENTER);
 	return;

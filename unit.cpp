@@ -135,11 +135,11 @@ void Unit::Writeout( Aoutfile *s )
     s->PutInt(faction->num);
     s->PutInt(guard);
     s->PutInt(reveal);
+	s->PutInt(-1);
+	s->PutInt(readyItem);
     s->PutInt(flags);
     items.Writeout(s);
     skills.Writeout(s);
-	s->PutInt(-1);
-	s->PutInt(readyItem);
     s->PutInt(combat);
 }
 
@@ -159,18 +159,20 @@ void Unit::Readin( Ainfile *s, AList *facs, ATL_VER v )
 	if(guard == GUARD_ADVANCE) guard = GUARD_NONE;
 	if(guard == GUARD_SET) guard = GUARD_GUARD;
 	reveal = s->GetInt();
-    flags = s->GetInt();
-    items.Readin(s);
-    skills.Readin(s);
 
+	/* Handle the new 'ready item' */
 	readyItem = s->GetInt();
 	if(readyItem == -1) {
 		readyItem = s->GetInt();
-		combat = s->GetInt();
+		flags = s->GetInt();
 	} else {
-		combat = readyItem;
+		flags = readyItem;
 		readyItem = -1;
 	}
+
+    items.Readin(s);
+    skills.Readin(s);
+	combat = s->GetInt();
 }
 
 AString Unit::MageReport()

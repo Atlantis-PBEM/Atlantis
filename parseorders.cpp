@@ -960,7 +960,7 @@ void Game::ProcessCombatOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	if(!(Globals->USE_PREPARE_COMMAND)) {
-		ParseError(pCheck, unit, 0, "PREPARE is not a valid order.");
+		ParseError(pCheck, u, 0, "PREPARE is not a valid order.");
 		return;
 	}
 
