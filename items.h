@@ -104,6 +104,7 @@ class ItemType
 		int baseprice;
 		int combat;
 		int index;
+		int battleindex;
 
 		int walk;
 		int ride;

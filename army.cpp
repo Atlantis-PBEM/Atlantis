@@ -221,8 +221,10 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		// items will be skipped in the battle items setup and handled
 		// here.
 		if ((ItemDefs[weapon].type & IT_BATTLE) && special == -1) {
-			special = BattleItemDefs[ItemDefs[weapon].index].index;
-			slevel = BattleItemDefs[ItemDefs[weapon].index].skillLevel;
+			special =
+			    BattleItemDefs[ItemDefs[weapon].battleindex].index;
+			slevel =
+			    BattleItemDefs[ItemDefs[weapon].battleindex].skillLevel;
 		}
 	}
 

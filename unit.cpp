@@ -23,14 +23,14 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date			Person			Comments
-// ----			------			--------
+// Date		Person		Comments
+// ----		------		--------
 // 2000/MAR/14	Larry Stanbery	Corrected logical flaw in creation of mages.
-//								Replaced specific skill bonus functions with
-//								generic function.
+//				Replaced specific skill bonus functions with
+//				generic function.
 // 2001/Feb/18	Joseph Traub	Added support for Apprentices
 // 2001/Feb/25	Joseph Traub	Added a flag preventing units from crossing
-//								water.
+//				water.
 
 #include "unit.h"
 #include "gamedata.h"
@@ -160,7 +160,7 @@ void Unit::MakeWMon(char * monname,int mon,int num)
 	SetMonFlags();
 }
 
-void Unit::Writeout( Aoutfile *s )
+void Unit::Writeout(Aoutfile *s)
 {
 	s->PutStr(*name);
 	if (describe) {
@@ -186,7 +186,7 @@ void Unit::Writeout( Aoutfile *s )
 	s->PutInt(combat);
 }
 
-void Unit::Readin( Ainfile *s, AList *facs, ATL_VER v )
+void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
 {
 	name = s->GetStr();
 	describe = s->GetStr();
@@ -665,7 +665,7 @@ void Unit::PostTurn(ARegion *r)
 	if (type == U_WMON) {
 		forlist(&items) {
 			Item *i = (Item *) elem;
-			if( !( ItemDefs[i->type].type & IT_MONSTER )) {
+			if(!(ItemDefs[i->type].type & IT_MONSTER)) {
 				items.Remove(i);
 				delete i;
 			}
@@ -702,8 +702,8 @@ void Unit::SetDescribe(AString * s)
 
 int Unit::IsAlive()
 {
-	if( type == U_MAGE || type == U_APPRENTICE ) {
-		return( GetMen() );
+	if(type == U_MAGE || type == U_APPRENTICE) {
+		return(GetMen());
 	} else {
 		forlist(&items) {
 			Item * i = (Item *) elem;
@@ -832,7 +832,7 @@ int Unit::GetAttackRiding()
 		forlist(&items) {
 			Item *i = (Item *) elem;
 			/* XXX -- Fix this -- not all men weigh the same */
-			/* XXX --             Use the least weight man in the unit */
+			/* XXX --			 Use the least weight man in the unit */
 			if (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= 10) {
 				return riding;
 			}
@@ -932,7 +932,7 @@ void Unit::ForgetSkill(int sk)
 	if (type == U_MAGE) {
 		forlist(&skills) {
 			Skill * s = (Skill *) elem;
-			if( SkillDefs[s->type].flags & SkillType::MAGIC ) {
+			if(SkillDefs[s->type].flags & SkillType::MAGIC) {
 				return;
 			}
 		}
@@ -941,7 +941,7 @@ void Unit::ForgetSkill(int sk)
 	if(type == U_APPRENTICE) {
 		forlist(&skills) {
 			Skill * s = (Skill *) elem;
-			if( SkillDefs[s->type].flags & SkillType::APPRENTICE) {
+			if(SkillDefs[s->type].flags & SkillType::APPRENTICE) {
 				return;
 			}
 		}
@@ -966,7 +966,8 @@ int Unit::CanStudy(int sk)
 	unsigned int c;
 	for(c = 0; c < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); c++) {
 		if(SkillDefs[sk].depends[c].skill == -1) return 1;
-		if(SkillDefs[SkillDefs[sk].depends[c].skill].flags&SkillType::DISABLED)
+		if(SkillDefs[SkillDefs[sk].depends[c].skill].flags &
+		    SkillType::DISABLED)
 			continue;
 		if(!CheckDepend(curlev, SkillDefs[sk].depends[c])) return 0;
 	}
@@ -975,17 +976,36 @@ int Unit::CanStudy(int sk)
 
 int Unit::Study(int sk,int days)
 {
-	if( Globals->SKILL_LIMIT_NONLEADERS && !IsLeader() ) {
+	Skill *s;
+
+	if(Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
 		if (skills.Num()) {
-			Skill * s = (Skill *) skills.First();
+			s = (Skill *) skills.First();
 			if (s->type != sk) {
-				Error("Can know only 1 skill.");
+				Error("STUDY: Can know only 1 skill.");
 				return 0;
 			}
 		}
 	}
+	forlist(&skills) {
+		s = (Skill *)elem;
+		if (s->type != sk) continue;
+		int max = 1000;
+		forlist (&items) {
+			Item *i = (Item *)elem;
+			if (ItemDefs[i->type].type & IT_MAN) {
+				int m = SkillMax(s->type, i->type);
+				if (m < max) max = m;
+			}
+		}
+		if (GetRealSkill(s->type) >= max) {
+			Error("STUDY: Maximum level for skill reached.");
+			return 0;
+		}
+	}
+
 	if (!CanStudy(sk)) {
-		Error("Doesn't have the pre-requisite skills to study that.");
+		Error("STUDY: Doesn't have the pre-requisite skills to study that.");
 		return 0;
 	}
 
@@ -1052,7 +1072,7 @@ void Unit::AdjustSkills()
 	//
 	// First, is the unit a leader?
 	//
-	if( IsLeader() ) {
+	if(IsLeader()) {
 		//
 		// Unit is all leaders: Make sure no skills are > max
 		//
@@ -1064,7 +1084,7 @@ void Unit::AdjustSkills()
 			}
 		}
 	} else {
-		if( Globals->SKILL_LIMIT_NONLEADERS ) {
+		if(Globals->SKILL_LIMIT_NONLEADERS) {
 			//
 			// Not a leader, can only know 1 skill
 			//
@@ -1096,7 +1116,7 @@ void Unit::AdjustSkills()
 		//
 		// Limit remaining skills to max
 		//
-		forlist( &skills ) {
+		forlist(&skills) {
 			Skill *theskill = (Skill *) elem;
 			int max = 100;
 			forlist(&items) {
@@ -1182,12 +1202,12 @@ void Unit::Short(int needed, int hunger)
 	if (needed < 1 && hunger < 1) return;
 
 	for (int i = 0; i<= NITEMS; i++) {
-		if( !( ItemDefs[ i ].type & IT_MAN )) {
+		if(!(ItemDefs[ i ].type & IT_MAN)) {
 			// Only men need sustenance.
 			continue;
 		}
 
-		if( i == I_LEADERS ) {
+		if(i == I_LEADERS) {
 			// Don't starve leaders just yet.
 			continue;
 		}
@@ -1228,55 +1248,55 @@ int Unit::Weight()
 
 int Unit::FlyingCapacity()
 {
-    int cap = 0;
-    forlist(&items) {
-        Item * i = (Item *) elem;
-        cap += ItemDefs[i->type].fly * i->num;
-    }
+	int cap = 0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		cap += ItemDefs[i->type].fly * i->num;
+	}
    
-    return cap;
+	return cap;
 }
 
 int Unit::RidingCapacity()
 {
-    int cap = 0;
-    forlist(&items) {
-        Item * i = (Item *) elem;
-        cap += ItemDefs[i->type].ride * i->num;
-    }
+	int cap = 0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		cap += ItemDefs[i->type].ride * i->num;
+	}
 
-    return cap;
+	return cap;
 }
 
 int Unit::SwimmingCapacity()
 {
-    int cap = 0;
-    forlist(&items) {
-        Item * i = (Item *) elem;
-        cap += ItemDefs[i->type].swim * i->num;
-    }
+	int cap = 0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		cap += ItemDefs[i->type].swim * i->num;
+	}
 
-    return cap;
+	return cap;
 }
 
 int Unit::WalkingCapacity()
 {
-    int cap = 0;
-    forlist(&items) {
-        Item * i = (Item *) elem;
-        cap += ItemDefs[i->type].walk * i->num;
-        if(ItemDefs[i->type].hitchItem != -1) {
-            int hitch = ItemDefs[i->type].hitchItem;
-            if(!(ItemDefs[hitch].flags & ItemType::DISABLED)) {
-                int hitches = items.GetNum(hitch);
-                int hitched = i->num;
-                if(hitched > hitches ) hitched = hitches;
-                cap += hitched * ItemDefs[i->type].hitchwalk;
-            }
-        }
-    }
+	int cap = 0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		cap += ItemDefs[i->type].walk * i->num;
+		if(ItemDefs[i->type].hitchItem != -1) {
+			int hitch = ItemDefs[i->type].hitchItem;
+			if(!(ItemDefs[hitch].flags & ItemType::DISABLED)) {
+				int hitches = items.GetNum(hitch);
+				int hitched = i->num;
+				if(hitched > hitches) hitched = hitches;
+				cap += hitched * ItemDefs[i->type].hitchwalk;
+			}
+		}
+	}
 
-    return cap;
+	return cap;
 }
 
 
@@ -1477,11 +1497,11 @@ int Unit::Taxers()
 			Item *pItem = (Item *) elem;
 
 			if ((ItemDefs[pItem->type].type & IT_BATTLE) &&
-				(ItemDefs[pItem->type].index <= BATTLE_FSWORD)) {
+				(BattleItemDefs[ItemDefs[pItem->type].battleindex].flags & BattleItemType::SPECIAL)) {
 				// Only consider offensive items
 				if ((Globals->WHO_CAN_TAX &
 							GameDefs::TAX_USABLE_BATTLE_ITEM) &&
-					(!(BattleItemDefs[ItemDefs[pItem->type].index].flags &
+					(!(BattleItemDefs[ItemDefs[pItem->type].battleindex].flags &
 					   BattleItemType::MAGEONLY) ||
 					 type == U_MAGE || type == U_APPRENTICE)) {
 					numUsableBattle += pItem->num;
@@ -1661,7 +1681,7 @@ int Unit::GetBattleItem(int index)
 		Item *pItem = (Item *) elem;
 		if(!pItem->num) continue;
 		int item = pItem->type;
-		if((ItemDefs[item].type&IT_BATTLE) && (ItemDefs[item].index==index)) {
+		if((ItemDefs[item].type&IT_BATTLE) && (ItemDefs[item].battleindex==index)) {
 			// Exclude weapons.  They will be handled later.
 			if (ItemDefs[item].type & IT_WEAPON) continue;
 			items.SetNum(item, pItem->num - 1);
@@ -1784,11 +1804,11 @@ int Unit::GetWeapon(int index, int riding, int ridingBonus, int &attackBonus,
 	return -1;
 }
 
-void Unit::MoveUnit( Object *toobj )
+void Unit::MoveUnit(Object *toobj)
 {
-	if( object ) object->units.Remove( this );
+	if(object) object->units.Remove(this);
 	object = toobj;
-	if( object ) object->units.Add( this );
+	if(object) object->units.Add(this);
 }
 
 void Unit::Event(const AString & s)
@@ -1835,7 +1855,7 @@ int Unit::GetSkillBonus(int sk)
 	return bonus;
 }
 
-int Unit::GetProductionBonus( int item )
+int Unit::GetProductionBonus(int item)
 {
 	int bonus = 0;
 	if (ItemDefs[item].mult_item != -1)
@@ -1953,33 +1973,33 @@ void Unit::SkillStarvation()
 int Unit::CanUseWeapon(WeaponType *pWep, int riding)
 {
 	if (riding == -1)
-		if( pWep->flags & WeaponType::NOFOOT) return -1;
+		if(pWep->flags & WeaponType::NOFOOT) return -1;
 	else
-		if( pWep->flags & WeaponType::NOMOUNT) return -1;
+		if(pWep->flags & WeaponType::NOMOUNT) return -1;
 	return CanUseWeapon(pWep);
 }
 
 int Unit::CanUseWeapon(WeaponType *pWep)
 {
 	// we don't care in this case, their combat skill will be used.
-	if ( !(pWep->flags & WeaponType::NEEDSKILL) ) {
+	if (!(pWep->flags & WeaponType::NEEDSKILL)) {
 		Practise(S_COMBAT);
 		return 0;
 	}
 
 	int baseSkillLevel = 0;
 	int tempSkillLevel = 0;
-	if( pWep->baseSkill != -1 ) baseSkillLevel = GetSkill( pWep->baseSkill );
+	if(pWep->baseSkill != -1) baseSkillLevel = GetSkill(pWep->baseSkill);
 
-	if( pWep->orSkill != -1 ) tempSkillLevel = GetSkill( pWep->orSkill );
+	if(pWep->orSkill != -1) tempSkillLevel = GetSkill(pWep->orSkill);
 
-	if( tempSkillLevel > baseSkillLevel ) {
+	if(tempSkillLevel > baseSkillLevel) {
 		baseSkillLevel = tempSkillLevel;
 		Practise(pWep->orSkill);
 	} else
 		Practise(pWep->baseSkill);
 
-	if( pWep->flags & WeaponType::NEEDSKILL && !baseSkillLevel ) return -1;
+	if(pWep->flags & WeaponType::NEEDSKILL && !baseSkillLevel) return -1;
 
 	return baseSkillLevel;
 }
