@@ -137,6 +137,7 @@ static GameDefs g = {
 	1,	// ALLOW_WITHDRAW
 	0,	// CITY_RENAME_COST
 	0,	// TAX_PILLAGE_MONTH_LONG
+	0,	// MULTI_HEX_NEXUS
 };
 
 GameDefs * Globals = &g;

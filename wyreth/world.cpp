@@ -2101,6 +2101,18 @@ char *AGetNameString( int name )
 
 void Game::CreateWorld()
 {
+	int nx = 0;
+	int ny = 1;
+	if(Globals->MULTI_HEX_NEXUS) {
+		ny = 2;
+		while(nx <= 0) {
+			Awrite("How many hexes should the nexus region be?");
+			nx = Agetint();
+		}
+	} else {
+		nx = 1;
+	}
+
     int xx = 0;
     while (xx <= 0) {
         Awrite("How wide should the map be? ");
@@ -2124,7 +2136,7 @@ void Game::CreateWorld()
 
     SetupNames();
 
-    regions.CreateNexusLevel( 0, "nexus" );
+    regions.CreateNexusLevel( 0, nx, ny, "nexus" );
     regions.CreateSurfaceLevel( 1, xx, yy, 60, 16, 0 );
     regions.CreateUnderworldLevel( 2, xx / 2, yy / 2, "underworld" );
 	regions.CreateAbyssLevel(3, "abyss");
@@ -2299,9 +2311,9 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
 
 int ARegion::CanBeStartingCity( ARegionArray *pRA )
 {
-    if (!town) return 0;
+	if(type == R_OCEAN) return 0;
     if (!IsCoastal()) return 0;
-    if (town->pop == 5000) return 0;
+    if (town && town->pop == 5000) return 0;
 
     int regs = 0;
     AList inlist;
@@ -2311,11 +2323,9 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
     temp->ptr = this;
     inlist.Add(temp);
 
-    while(inlist.Num())
-    {
+    while(inlist.Num()) {
         ARegionPtr * reg = (ARegionPtr *) inlist.First();
-        for (int i=0; i<NDIRS; i++)
-        {
+        for (int i=0; i<NDIRS; i++) {
             ARegion * r2 = reg->ptr->neighbors[i];
             if (!r2) continue;
             if (r2->type == R_OCEAN) continue;
@@ -2406,40 +2416,63 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
     ARegionArray *pArr = pRegionArrays[ level ];
     ARegion * reg = 0;
 
-    if( pArr->x < maxX )
-    {
-        maxX = pArr->x;
-    }
-    if( pArr->y < maxY )
-    {
-        maxY = pArr->y;
-    }
+    if( pArr->x < maxX ) maxX = pArr->x;
+    if( pArr->y < maxY ) maxY = pArr->y;
 
-    while (!reg)
-    {
+	int tries = 0;
+    while (!reg && tries < 10000) {
         //
         // We'll just let AC exits be all over the map.
         //
         int x = getrandom( maxX );
         int y = 2 * getrandom( maxY / 2 ) + x % 2;
 
-        reg = GetRegion( x, y, level );
+        reg = pArr->GetRegion( x, y);
         
-        if( !reg->CanBeStartingCity( pArr ))
-        {
+        if(!reg->CanBeStartingCity( pArr )) {
             reg = 0;
+			tries++;
             continue;
         }
 
-        for (int j=0; j<i; j++)
-        {
-            if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 )
-            {
-                reg = 0;
-                break;
+        for (int j=0; j<i; j++) {
+			if(!AC->neighbors[j]) continue;
+			if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {
+				reg = 0;
+				tries++;
+				break;
             }
         }
     }
+
+	// Okay, we failed to find something that normally would work
+	// we'll just take anything that's of the right distance
+	tries = 0;
+	while (!reg && tries < 10000) {
+		//
+		// We couldn't find a normal starting city, let's just go for ANY
+		// city
+		//
+		int x = getrandom( maxX );
+		int y = 2 * getrandom( maxY / 2 ) + x % 2;
+		reg = pArr->GetRegion( x, y);
+		if(reg->type == R_OCEAN) {
+			tries++;
+			reg = 0;
+			continue;
+		}
+
+        for (int j=0; j<i; j++) {
+			if(!AC->neighbors[j]) continue;
+			if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {
+				reg = 0;
+				tries++;
+				break;
+            }
+        }
+    }
+
+	// Okay, if we still don't have anything, we're done.
     return reg;
 }
 
