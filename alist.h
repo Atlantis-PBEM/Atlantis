@@ -28,13 +28,19 @@
 class AListElem;
 class AList;
 
+/// This represents an element of a list.
+/** 
+AListElem is a virtual class, which will be set to whatever the right type is.
+It has a 'next' variable, and all the rest of the usual list stuff.
+*/
 class AListElem {
 	public:
 		virtual ~AListElem();
 
-		AListElem * next;
+		AListElem * next;	///< The next element in the list
 };
 
+/// A standard list
 class AList {
 	public:
 		AList();
@@ -54,11 +60,12 @@ class AList {
 		int NextLive(AListElem **copy, int size, int pos);
 
 	private:
-		AListElem *list;
-		AListElem *lastelem;
+		AListElem *list;		///< The first element of the list
+		AListElem *lastelem;	///< The last element of the list
 		int num;
 };
 
+/// Iterate over a list
 #define forlist(l) \
 	AListElem * elem, * _elem2; \
 	for (elem=(l)->First(), \
@@ -67,6 +74,7 @@ class AList {
 			elem = _elem2, \
 			_elem2 = (_elem2 ? ((l)->Next(_elem2)) : 0))
 
+/// Iterate over a list, if we've already done so.
 #define forlist_reuse(l) \
 	for (elem=(l)->First(), \
 			_elem2 = (elem ? (l)->Next(elem) : 0); \
@@ -74,6 +82,7 @@ class AList {
 			elem = _elem2, \
 			_elem2 = (_elem2 ? ((l)->Next(_elem2)) : 0))
 
+/// Iterate over a list (without messing it up?)
 #define forlist_safe(l) \
 	int size = (l)->Num(); \
 	AListElem **copy = new AListElem*[size]; \

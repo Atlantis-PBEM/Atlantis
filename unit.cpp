@@ -1083,7 +1083,7 @@ int Unit::MaintCost()
 
 void Unit::Short(int needed, int hunger)
 {
-	int n = 0, levels;
+	int i, n = 0, levels;
 
 	if (faction->IsNPC())
 		return; // Don't starve monsters and the city guard!
