@@ -827,11 +827,16 @@ void Army::Win(Battle * b,ItemList * spoils)
 		Item *i = (Item *) elem;
 		if(i && na) {
 			Unit *u;
+			UnitPtr *up;
 
 			// Make a list of units who can get this type of spoil
 			for(int x = 0; x < na; x++) {
 				u = soldiers[x]->unit;
-				if(u->CanGetSpoil(i)) units.Add(u);
+				if(u->CanGetSpoil(i)) {
+					up = new UnitPtr;
+					up->ptr = u;
+					units.Add(up);
+				}
 			}
 
 			int ns = units.Num();
@@ -839,31 +844,33 @@ void Army::Win(Battle * b,ItemList * spoils)
 				int n = i->num/ns; // Divide spoils equally
 				if(n >= 1) {
 					forlist(&units) {
-						u = (Unit *)elem;
-						u->items.SetNum(i->type, u->items.GetNum(i->type)+n);
-						u->faction->DiscoverItem(i->type, 0, 1);
+						up = (UnitPtr *)elem;
+						up->ptr->items.SetNum(i->type,
+								up->ptr->items.GetNum(i->type)+n);
+						up->ptr->faction->DiscoverItem(i->type, 0, 1);
 					}
 				}
 				n = i->num % ns; // allocate the remainder
 				if(n) {
 					for(int x = 0; x < n; x++) {
 						int t = getrandom(ns);
-						Unit *u = (Unit *)units.First();
-						if(u) {
-							Unit *p;
+						up = (UnitPtr *)units.First();
+						if(up) {
+							UnitPtr *p;
 							while(t > 0) {
-								p = (Unit *)units.Next(u);
-								if(p) u = p;
+								p = (UnitPtr *)units.Next(up);
+								if(p) up = p;
 								else break;
 								--t;
 							}
-							u->items.SetNum(i->type,u->items.GetNum(i->type)+1);
-							u->faction->DiscoverItem(i->type, 0, 1);
+							up->ptr->items.SetNum(i->type,
+									up->ptr->items.GetNum(i->type)+1);
+							up->ptr->faction->DiscoverItem(i->type, 0, 1);
 						}
 					}
 				}
-				units.Empty();
 			}
+			units.DeleteAll();
 		}
 	}
 
