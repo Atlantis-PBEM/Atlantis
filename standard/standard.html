@@ -1,0 +1,3234 @@
+<html>
+<head>
+<title>Atlantis 4.0.4 +PLUS+ Rules</title>
+</head>
+<body>
+<center>
+<h1> Rules for Atlantis v4.0.4 +PLUS+</h1>
+<h2> Copyright 1996 by Geoff Dunbar </h2>
+<h2> Based on Russell Wallace's Draft Rules </h2>
+<h2> Copyright 1993 by Russell Wallace </h2>
+<h3> Last Change: July 26, 2000</h3>
+</center> <p>
+Note: This document is subject to change, as errors are found and
+corrected, and rules sometimes change. Be sure you have the latest
+available copy. <p>
+
+<a name="table_of_contents">
+<hr>
+<h2>Table of Contents</h2>
+
+Thanks to <b><a href="mailto:ken@satori.gso.uri.edu">Kenneth Casey</a></b>
+for putting together this table of contents. <p>
+
+<UL>
+<LI><a href="#intro">Introduction</a> 
+<LI><a href="#playing">Playing Atlantis</a>
+<UL>
+<LI><a href="#playing_factions">Factions</a>
+<LI><a href="#playing_units">Units</a>
+<LI><a href="#playing_turns">Turns</a>
+</UL>
+<LI><a href="#world">The World</a>
+<UL>
+<LI><a href="#world_regions">Regions</a>
+<LI><a href="#world_structures">Structures</a>
+<LI><a href="#world_nexus">Atlantis Nexus</a>
+</UL>
+<LI><a href="#movement">Movement</a>
+<UL>
+<LI><a href="#movement_normal">Normal Movement</a>
+<LI><a href="#movement_sailing">Sailing</a>
+<LI><a href="#movement_order">Order of Movement</a>
+</UL>
+<LI><a href="#skills">Skills</a>
+<UL>
+<LI><a href="#skills_limitations">Limitations</a>
+<LI><a href="#skills_studying">Studying</a>
+<LI><a href="#skills_teaching">Teaching</a>
+<LI><a href="#skills_skillreports">Skill Reports</a>
+</UL>
+<LI><a href="#economy">The Economy</a>
+<UL>
+<LI><a href="#economy_maintenance">Maintenance Costs</a>
+<LI><a href="#economy_recruiting">Recruiting</a>
+<LI><a href="#economy_items">Items</a>
+<LI><a href="#economy_towns">Villages, Towns, Cities</a>
+<LI><a href="#economy_buildings">Buildings and Trade Structures</a>
+<LI><a href="#economy_ships">Ships</a>
+<LI><a href="#economy_advanceditems">Advanced Items</a>
+<LI><a href="#economy_income">Income</a>
+<LI><a href="#economy_entertainment">Entertainment</a>
+<LI><a href="#economy_taxingpillaging">Taxing/Pillaging</a>
+</UL>
+<LI><a href="#com">Combat</a>
+<UL>
+<LI><a href="#com_attitudes">Attitudes</a>
+<LI><a href="#com_attacking">Attacking</a>
+<LI><a href="#com_muster">The Muster</a>
+<LI><a href="#com_thebattle">The Battle</a>
+<LI><a href="#com_victory">Victory!</a>
+</UL>
+<LI><a href="#stealthobs">Stealth and Observation</a>
+<UL>
+<LI><a href="#stealthobs_stealing">Stealing</a>
+<LI><a href="#stealthobs_assassination">Assasination</a>
+</UL>
+<LI><a href="#magic">Magic</a>
+<UL>
+<LI><a href="#magic_skills">Magic Skills</a>
+<LI><a href="#magic_foundations">Foundations</a>
+<LI><a href="#magic_furtherstudy">Further Magic Study</a>
+<LI><a href="#magic_usingmagic">Using Magic</a>
+<LI><a href="#magic_incombat">Mages In Combat</a>
+</UL>
+<LI><a href="#nonplayers">Non-Player Units</a>
+<UL>
+<LI><a href="#nonplayers_guards">City and Town Guardsmen</a>
+<LI><a href="#nonplayers_monsters">Wandering Monsters</a>
+<LI><a href="#nonplayers_controlled">Controlled Monsters</a>
+</UL>
+<LI><a href="#orders">Orders</a>
+<UL>
+<LI><a href="#orders_abbreviations">Abbreviations</a>
+</UL>
+<LI><a href="#ordersummary">Order Summary</a>
+<UL>
+<LI><a href="#address">address</a>
+<LI><a href="#advance">advance</a>
+<LI><a href="#assassinate">assassinate</a>
+<LI><a href="#attack">attack</a>
+<LI><a href="#autotax">autotax</a>
+<LI><a href="#avoid">avoid</a>
+<LI><a href="#behind">behind</a>
+<LI><a href="#build">build</a>
+<LI><a href="#buy">buy</a>
+<LI><a href="#cast">cast</a>
+<LI><a href="#claim">claim</a>
+<LI><a href="#combat">combat</a>
+<li><a href="#consume">consume</a>
+<LI><a href="#declare">declare</a>
+<LI><a href="#describe">describe</a>
+<LI><a href="#destroy">destroy</a>
+<LI><a href="#enter">enter</a>
+<LI><a href="#entertain">entertain</a>
+<LI><a href="#faction">faction</a>
+<LI><a href="#find">find</a>
+<LI><a href="#forget">forget</a>
+<LI><a href="#form">form</a>
+<LI><a href="#give">give</a>
+<LI><a href="#guard">guard</a>
+<LI><a href="#hold">hold</a>
+<LI><a href="#leave">leave</a>
+<LI><a href="#move">move</a>
+<LI><a href="#name">name</a>
+<li><a href="#noaid">noaid</a>
+<LI><a href="#option">option</a>
+<LI><a href="#password">password</a>
+<LI><a href="#pillage">pillage</a>
+<LI><a href="#produce">produce</a>
+<LI><a href="#promote">promote</a>
+<LI><a href="#quit">quit</a>
+<li><a href="#restart">restart</a>
+<LI><a href="#reveal">reveal</a>
+<LI><a href="#sail">sail</a>
+<LI><a href="#sell">sell</a>
+<LI><a href="#show">show</a>
+<LI><a href="#steal">steal</a>
+<LI><a href="#study">study</a>
+<LI><a href="#tax">tax</a>
+<LI><a href="#teach">teach</a>
+<LI><a href="#work">work</a>
+</UL>
+<LI><a href="#sequenceofevents">Sequence of Events</a>
+<LI><a href="#reportformat">Report Format</a>
+<LI><a href="#hintsfornew">Hints for New Players</a>
+</UL>
+
+Index of Tables. <p>
+
+<ul>
+<li><a href="#tablefactionpoints">Table of Faction Points</a></li>
+<li><a href="#tableitemweights">Table of Item Weights</a></li>
+<li><a href="#tableshipcapacities">Table of Ship Capacities</a></li>
+<li><a href="#tableraces">Table of Races</a></li>
+<li><a href="#tableiteminfo">Table of Item Information</a></li>
+<li><a href="#tablebuildings">Table of Buildings</a></li>
+<li><a href="#tableroadstructures">Table of Road Structures</a></li>
+<li><a href="#tabletradestructures">Table of Trade Structures</a></li>
+<li><a href="#tableshipinfo">Table of Ship Information</a></li>
+<li><a href="#tablebuildingcapacities">Table of Building Capacities</a></li>
+</ul>
+
+<a name="intro">
+<hr>
+<h2> Introduction </h2>
+
+Atlantis is an open-ended computer moderated fantasy game for any number of
+players.  Players may attempt to carve out huge empires, become master
+magicians, intrepid explorers, rich traders or any other career that comes to
+mind.  There is no declared winner of the game; players set their own
+objectives, and one can join at any time. <p>
+
+<a name="playing">
+<hr>
+<h2> Playing Atlantis </h2>
+
+Atlantis (as you undoubtedly already know) is a play by email game.  When
+you sign up for Atlantis, you will be sent a turn report (via email).  Your
+report completely details your position in the game.  After going over this
+report, and possibly communicating with other players in the game, you
+determine your course of action, and create a file of "orders", which you then
+send back to the Atlantis server.  Then, at a regular interval (often one
+week), Atlantis collects all the orders, runs another turn (covering one month
+in game time), and sends all the players another report. <p>
+
+<a name="playing_factions">
+<h3> Factions: </h3>
+
+A player's position is called a "faction".  Each faction has a name and a
+number (the number is assigned by the computer, and used for entering orders).
+Each faction is composed of a number of "units", each unit being a group of one
+or more people loyal to the faction.  You start the game with a single unit
+consisting of one character, plus a sum of money.  More people can be hired
+during the course of the game, and formed into more units.  (In these rules,
+the word "character" generally refers either to a unit consisting of only one
+person, or to a person within a larger unit.) <p>
+
+A faction is considered destroyed, and the player knocked out of the game, if
+ever all its people are killed or disbanded (i.e. the faction has no units
+left).  The program does not consider your starting character to be special; if
+your starting character gets killed, you will probably have been thinking of
+that character as the leader of your faction, so some other character can be
+regarded as having taken the dead leader's place (assuming of course that you
+have at least one surviving unit!).  As far as the computer is concerned, as
+long as any unit of the faction survives, the faction is not wiped out.  (If
+your faction is wiped out, you can rejoin the game with a new starting
+character.) <p>
+
+Each faction has a type; this is decided by the player, and determines
+what the faction may do.  The faction has 5 Faction Points, which may be spent
+on any of the 3 Faction Areas, War, Trade, and Magic.  The faction type may
+be changed at the beginning of each turn, so a faction can change and adapt to
+the conditions around it.  Faction Points spent on War determine the number of
+regions in which factions can obtain income by taxing or pillaging.
+Faction Points spent on Trade determine the number of regions in which a
+faction may conduct trade activity.  Trade activity includes producing goods,
+building ships and buildings, and buying and selling trade items.  Faction
+Points spent on Magic determines the number of mages the faction may have.
+(More information on all of the faction activities is in further sections of
+the rules).  Here is a chart detailing the limits on factions by Faction
+Points. <p>
+
+<a name="tablefactionpoints">
+<center>
+<table border>
+ <tr>
+  <th>
+   Faction Points
+  </th>
+  <th>
+   War (Maximum number of taxable regions)
+  </th>
+  <th>
+   Trade (Maximum number of regions in which trade activity is allowed)
+  </th>
+  <th>
+   Magic (Maximum number of magicians)
+  </th>
+ </tr>
+ <tr>
+  <td align=center> 1 </td>
+  <td align=center> 10 </td>
+  <td align=center> 10 </td>
+  <td align=center> 1 </td>
+ </tr>
+ <tr>
+  <td align=center> 2 </td>
+  <td align=center> 24 </td>
+  <td align=center> 24 </td>
+  <td align=center> 2 </td>
+ </tr>
+ <tr>
+  <td align=center> 3 </td>
+  <td align=center> 40 </td>
+  <td align=center> 40 </td>
+  <td align=center> 3 </td>
+ </tr>
+ <tr>
+  <td align=center> 4 </td>
+  <td align=center> 60 </td>
+  <td align=center> 60 </td>
+  <td align=center> 5 </td>
+ </tr>
+ <tr>
+  <td align=center> 5 </td> 
+  <td align=center> 100 </td> 
+  <td align=center> 100 </td>
+  <td align=center> 7 </td>
+ </tr>
+</table> </center> <p>
+
+For example, a well rounded faction might spent 2 points on War, 1 point on
+Trade, and 2 points on Magic.  This faction's type would appear as "War 2
+Trade 1 Magic 2", and would be able to tax 24 regions, perform trade in 10
+regions, and have 2 mages. <p>
+
+As another example, a specialized faction might spend all 5 points on War.
+This faction's type would appear as "War 5", and it would be able to tax 100
+regions, but could not perform trade in any regions, nor could it possess any
+mages. <p>
+
+Note that it is possible to have a faction type with less than 5
+points spent.  In fact, a starting faction has one point spent on each
+of War, Trade, and Magic, leaving 2 points unspent. <p>
+
+When a faction starts the game, it is given a one-man unit and 5000 silver in
+unclaimed money.  Unclaimed money is cash that your whole faction has access
+to, but cannot be taken away in battle (silver in a unit's possessions can be
+taken in battle.)  This allows a faction to get started without presenting an
+enticing target for other factions.  Units in your faction may use the
+<a href="#claim"> CLAIM </a>
+order to take this silver, and use it to buy goods or recruit men. <p>
+
+An example faction is shown below, consisting of a starting character, Merlin
+the Magician, who has formed two more units, Merlin's Guards and Merlin's
+Workers.  Each unit is assigned a unit number by the computer (completely
+independent of the faction number); this is used for entering orders.  Here,
+the player has chosen to give his faction the same name ("Merlin the Magician")
+as his starting character.  Alternatively, you can call your faction something
+like "The Great Northern Mining Company" or whatever. <p>
+
+<pre>
+  * Merlin the Magician (17), faction Merlin the Magician (27), has: leader.
+    Skills: none.
+  * Merlin's Guards (33), faction Merlin the Magician (27), has: 20 vikings,
+    20 swords. Skills: none.
+  * Merlin's Workers (34), faction Merlin the Magician (27), has: 50 vikings.
+    Skills: none.
+</pre> <p>
+
+<a name="playing_units">
+<h3> Units: </h3>
+
+A unit is a grouping together of people, all loyal to the same faction.
+The people in a unit share skills and possessions, and execute the
+same orders each month.
+The reason for having units of many people, rather than keeping track of
+individuals, is to simplify the game play.  The computer does not keep track of
+individual names, possessions, or skills for people in the same unit, and all
+the people in a particular unit must be in the same place at all times.  If you
+want to send people in the same unit to different places, you must split up the
+unit.  Apart from this, there is no difference between having one unit of 50
+people, or 50 units of one person each, except that the former is very much
+easier to handle. <p>
+
+There are different races that make up the population of Atlantis. (See the
+section on skills for a list of these.)  In addition, there are "leaders", who
+are presumed to be of one of the other races, but are all the same in game
+terms.  Units made up of normal people may only know one skill,
+and cannot teach other units.  Units made up of leaders may know
+as many skills as desired, and may teach other units to speed the learning
+process.  Leaders and normal people may not be mixed in the same unit.  
+However, leaders are more expensive to recruit and maintain.  (More
+information is in the section on skills.)  A unit is treated as the least
+common denominator of the people within it, so a unit made up of two races
+with different strengths and weaknesses will have all the weaknesses, and none
+of the strengths of either race. <p>
+
+<a name="playing_turns">
+<h3> Turns: </h3>
+
+Each turn, the Atlantis server takes the orders file that you mailed to it, and
+assigns the orders to the respective units.  All units in your faction are
+completely loyal to you, and will execute the orders to the best of their
+ability.  If the unit does something unintended, it is generally because of
+incorrect orders; a unit will not purposefully betray you. <p>
+
+A turn is equal to one game month.  A unit can do many actions at the start of
+the month, that only take a matter of hours, such as buying and selling
+commodities, or fighting an opposing faction.  Each unit can also do exactly
+one action that takes up the entire month, such as harvesting timber or moving
+from one region to another.  The orders which take an entire month are 
+<a href="#advance"> ADVANCE</a>,
+<a href="#build"> BUILD</a>,
+<a href="#entertain"> ENTERTAIN</a>,
+<a href="#move"> MOVE</a>,
+<a href="#produce"> PRODUCE</a>,
+<a href="#sail"> SAIL</a>,
+<a href="#study"> STUDY</a>,
+<a href="#teach"> TEACH</a> and
+<a href="#work"> WORK</a>.
+<p>
+
+<a name="world">
+<hr>
+<h2> The World </h2>
+
+The Atlantis world is divided for game purposes into hexagonal regions.  Each
+region has a name, and one of the following terrain types:  Ocean, Plain,
+Forest, Mountain, Swamp, Jungle, Desert, or Tundra.  (There may be other types
+of terrain to be discovered as the game progresses.)  Regions can contain
+units belonging to players; they can also contain structures such as buildings
+and ships.  Two units in the same region can normally interact, unless one of
+them is concealed in some way.  Two units in different regions cannot normally
+interact.  NOTE: Combat is an exception to this. <p>
+
+<a name="world_regions">
+<h3> Regions: </h3>
+
+Here is a sample region, as it might appear on your turn report: <p>
+
+<pre>
+plain in Turia (11,15), 500 peasants (wood elves), $2500.
+-------------------------------------------------------------
+Wages: $15.
+Entertainment available: $125.
+For Sale: 50 wood elves at $60, 10 leaders at $120.
+Wanted: none.
+Products: 37 horses.
+
+* Hans Shadowspawn (15), faction Hans and his Merry Pranksters (14), has: 1
+  leader, $500. Skills: none.
+- Vox Populi (13), has: 1 leader.
+</pre> <p>
+
+This report gives all of the available information on this region.  The region
+type is plain, the name of the surrounding area is Turia, and the coordinates
+of this region are (11,14).  The population of this region is 500 elves, and
+there is $2500 of taxable income currently in this region.  Then, under the
+dashed line, are various details about items for sale, wages, etc.  Finally,
+there is a list of all visible units.  Units that belong to your faction will
+be so denoted by a '*', whereas other faction's units are preceded by a '-'.
+<p>
+
+Since Atlantis is made up of hexagonal regions, the coordinate system is not
+always exactly intuitive.  Here is the layout of Atlantis regions:
+<p>
+
+<pre>
+   ____        ____    
+  /    \      /    \   
+ /(0,0) \____/(2,0) \____/
+ \      /    \      /    \     N
+  \____/(1,1) \____/(3,1) \_   |
+  /    \      /    \      /    |
+ /(0,2) \____/(2,2) \____/     |
+ \      /    \      /    \   W-O-E
+  \____/(1,3) \____/(3,3) \_   |
+  /    \      /    \      /    S
+ /(0,4) \____/(2,4) \____/
+ \      /    \      /    \
+  \____/      \____/
+  /    \      /    \
+</pre> <p>
+
+Note that the are "holes" in the coordinate system; there is no region (1,2),
+for instance.  This is due to the hexagonal system of regions. <p>
+
+Most regions are similar to the region shown above, but the are certain
+exceptions.  Oceans, not surprisingly, have no population.  Some regions will
+contain villages, towns, and cities.  More information on these is available
+in the section on the ecomony. <p>
+
+<a name="world_structures">
+<h3> Structures: </h3>
+
+Regions may also contain structures, such as buildings or ships.  These will
+appear directly above the list of units.  Here is a sample structure: <p>
+
+<pre>
++ Temple of Agrik [3], tower.
+  - High Priest Chafin (9), has: leader, sword.
+  - Rowing Doom (188), has: 10 ice dwarves, 10 swords.
+</pre> <p>
+
+The structure lists the name, the number, and what type of structure it is.
+(More information of the types of structures can be found in the section on the
+economy.)  Following this is a list of units inside the structure.  Units
+within a structure are always visible, even if they would otherwise not be
+seen. <p>
+
+Units inside structures are still considered to be in the region, and other
+units can interact with them; however, they may gain benefits, such as
+defensive bonuses in combat from being inside a building.  The first unit to
+enter an object is considered to be the owner; only this unit can do things
+such as renaming the object, or permitting other units to enter.  The owner of
+an object can be identified on the turn report, as it is the first unit listed
+under the object. <p>
+
+<a name="world_nexus">
+<h3> Atlantis Nexus: </h3>
+
+Note: the following section contains some details that you may wish
+to skip over until you have had a chance to read the rest of the
+rules, and understand the mechanics of Atlantis.  However, be sure
+to read this section before playing, as it will affect your early
+plans in Atlantis. <p>
+
+When a faction first starts in Atlantis, it begins with one unit,
+in a special region called the Atlantis Nexus.  This region exists
+outside of the normal world of Atlantis, and as such has no products
+or marketplaces; it merely serves as the magical entry into
+Atlantis. <p>
+
+From the Atlantis Nexus, there are six exits into the starting
+cities of Atlantis.  Units may move through these exits as normal,
+but once through an exit, there is no return path to the Nexus.
+The six starting cities offer much to a starting faction; there
+are unlimited amounts of many materials and men (though the
+prices are often quite high).  In addition, the starting cities
+are guarded by invincible guardsmen, keeping any units within
+the city safe from attack (See the section on Non-Player Units
+for more information on city guardsmen).
+As a drawback, these cities tend to be
+extremely crowded, and most factions will wish to leave the starting
+cities when possible. <p>
+
+There are three methods of departing the starting cities.  The first
+is by land, but keep in mind that the lands immediately surrounding
+the starting cities will tend to be highly populated, and possibly
+quite dangerous to travel.  The second is by sea; all of the starting
+cities lie against an ocean, and a faction may easily purchase wood
+and construct a ship to <a href="#sail"> SAIL </a> away.  Be wary
+of pirates seeking to prey on new factions, however!  And last,
+rumors of a magical Gate Lore suggest yet another way to travel
+from the starting cities.  The rumors are vague, but factions wishing
+to travel far from the starting cities, taking only a few men with
+them, might wish to pursue this method. <p>
+
+<a name="movement">
+<hr>
+<h2> Movement </h2>
+
+There are two main methods of movements in Atlantis.  The first is done using
+the <a href="#move"> MOVE </a>
+order (or the <a href="#advance"> ADVANCE </a>
+order), and moves units individually from one
+region to another.  The other method is done using the
+<a href="#sail"> SAIL </a> order, which can
+sail a ship, including all of it's occupants, from one regions to another.
+Certain powerful mages may also teleport themselves, or even other
+units, but knowledge of the workings of this magic is carefully
+guarded.
+<p>
+
+<a name="movement_normal">
+<h3> Normal Movement: </h3>
+
+In one month, a unit can issue a single
+<a href="#move"> MOVE </a> order, using one or more of its
+movement points.  There are three modes of travel, walking, riding and flying. 
+Walking units have two movement points, riding units have four, and flying
+units have six.  A unit will automatically use the fastest mode of travel it
+has available.  (The <a href="#advance"> ADVANCE </a>
+order is the same as <a href="#move"> MOVE</a>,
+except that it implies
+attacks on units which try to forbid access; see the section on combat for
+details.) <p>
+
+Flying units are not initially available to starting players.  A unit can ride
+provided that the carrying capacity of its horses is at least as great as the
+weight of its people and all other items.  A unit can walk provided that the
+carrying capacity of its people, horses and wagons is at least as great as the
+weight of all its other items, and provided that it has at least as many horses
+as wagons (otherwise the excess wagons count as weight, not capacity).
+Otherwise the unit cannot issue a
+<a href="#move"> MOVE </a> order.  People weigh 10 units and have a
+capacity of 5 units; data for items is as follows: <p>
+
+A unit which can fly is capable of travelling over water.   However, if the
+unit ends it's turn over a water hex, that unit will drown unless it has
+the ability to naturally travel over water (IE, it's carrying a boat along
+with it).<p>
+
+<a name="tableitemweights">
+<center>
+<table border>
+ <tr>
+  <td> </td>
+  <th>Weight</th>
+  <th>Capacity</th>
+ </tr>
+ <tr>
+  <td align=center>Silver</td>
+  <td align=center>0</td>
+ </tr>
+ <tr>
+  <td align=center>Grain</td>
+  <td align=center>5</td>
+ </tr>
+ <tr>
+  <td align=center>Livestock</td>
+  <td align=center>50</td>
+  <td align=center>0</td>
+ </tr>
+ <tr>
+  <td align=center>Iron</td>
+  <td align=center>5</td>
+ </tr>
+ <tr>
+  <td align=center>Wood</td>
+  <td align=center>5</td>
+ </tr>
+ <tr>
+  <td align=center>Stone</td>
+  <td align=center>50</td>
+ </tr>
+ <tr>
+  <td align=center>Fur</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Fish</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Herbs</td>
+  <td align=center>0</td>
+ </tr>
+ <tr>
+  <td align=center>Horse</td>
+  <td align=center>50</td>
+  <td align=center>20</td>
+ </tr>
+ <tr>
+  <td align=center>Sword</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Crossbow</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Longbow</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Chain Mail</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Plate Armor</td>
+  <td align=center>3</td>
+ </tr>
+ <tr>
+  <td align=center>Wagon</td>
+  <td align=center>50</td>
+  <td align=center>200</td>
+ </tr>
+ <tr>
+  <td align=center>Pick</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Spear</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Axe</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Hammer</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Net</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Lasso</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Bag</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Spinning Wheel</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Leather Armor</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Cloth Armor</td>
+  <td align=center>1</td>
+ </tr>
+</table> </center> <p>
+
+Since regions are hexagonal, each region has six neighbouring regions to the
+north, northeast, southeast, south, southwest and northwest.  Moving from one
+region to another normally takes one movement point, except that the following
+terrain types take two movement points for riding or walking units to enter:
+Forest, Mountain, Swamp, Jungle and Tundra.  Also, during certain seasons
+(depending on the latitude of the region), all units (including flying ones)
+only have half their normal movement points, as freezing weather makes travel
+difficult (in the tropics, seasonal hurricane winds and torrential
+rains have a similar effect).  Units may not move through ocean regions without
+using the <a href="#sail"> SAIL </a> order. <p>
+
+Units may also enter or exit structures while moving.  Moving into or out of a
+structure does not use any movement points at all.  Note that a unit can also
+use the <a href="#enter"> ENTER </a> and <a href="#leave"> LEAVE </a>
+orders to move in and out of structures, without
+issuing a <a href="#move"> MOVE </a> order. <p>
+
+Finally, certain structures contain interior passages to other regions.  The
+<a href="#move"> MOVE </a> IN order can be used to go
+through these passages; the movement point cost
+is equal to the normal cost to enter the destination region. <p>
+
+Example: One man with a horse, sword, and chain mail wants to move north, then
+northeast.  The capacity of the horse is 20 and the weight of the man and other
+items is 12, so he can ride.  The month is April so he has four movement
+points.  He issues the order MOVE NORTH NORTHEAST.  First he moves north, into
+a plain region.  This uses one movement point.  Then he moves northeast, into a
+forest region.  This uses two movement points, so the movement is completed
+with one to spare. <p>
+
+<a name="movement_sailing">
+<h3> Sailing: </h3>
+
+Movement by sea is in some ways similar.  It does not use the
+<a href="#move">MOVE</a> order
+however.  Instead, the owner of a ship must issue the
+<a href="#sail">SAIL</a> order, and other
+units wishing to help sail the ship must also issue the
+<a href="#sail">SAIL</a> order.  The ship
+will then, if possible, make the indicated movement, carrying all units on the
+ship with it.  Units on board the ship, but not aiding in the sailing of the
+ship, may execute other orders while the ship is sailing.  A unit which does
+not wish to travel with the ship should leave the ship in a coastal region,
+before the <a href="#sail">SAIL</a>
+order is processed.  (A coastal region is defined as a non-
+ocean region with at least one adjacent ocean region.) <p>
+ 
+Note that a unit on board a sailing ship may not <a href="#move">MOVE</a>
+later in the turn, even if he doesn't issue the <a href="#sail">SAIL</a>
+order; sailing is considered to take the whole month. Also, units
+may not remain on guard while on board a sailing ship; they will have
+to reissue the <a href="#guard">GUARD 1</a> order to guard a region
+after sailing. <p>
+
+Ships get four movement points per turn.  A ship can move from an ocean region
+to another ocean region, or from a coastal region to an ocean region, or from
+an ocean region to a coastal region.  Ships can only be constructed in coastal
+regions.  For a ship to enter any region only costs one movement point; the
+cost of two movement points for entering, say, a forest coastal region, does
+not apply.  Ships do, however, only get half movement points during the winter
+months (or monsoon months in the tropical latitudes). <p>
+
+A ship can only move if the total weight of everything aboard does not exceed
+the ship's capacity.  (The rules do not prevent an overloaded ship from staying
+afloat, only from moving.)  Also, there must be enough sailors aboard (using
+the <a href="#sail"> SAIL </a>
+order), to sail the ship, or it will not go anywhere.  Note that
+the sailing skill increases the usefulness of a unit proportionally; thus, a
+1 man unit with level 5 sailing skill can sail a longboat alone.  (See the
+section on skills for further details on skills.)  The capacities (and costs in
+labor units) of the various ship types are as follows: <p>
+
+<a name="tableshipcapacities">
+<center>
+<table border>
+ <tr>
+  <td> </td>
+  <th>Capacity</th>
+  <th>Cost</th>
+  <th>Sailors</th>
+ </tr>
+ <tr>
+  <td align=center>Longboat</td>
+  <td align=center>200</td>
+  <td align=center>25</td>
+  <td align=center>5</td>
+ </tr>
+ <tr>
+  <td align=center>Clipper</td>
+  <td align=center>800</td>
+  <td align=center>50</td>
+  <td align=center>10</td>
+ </tr>
+ <tr>
+  <td align=center>Galleon</td>
+  <td align=center>1800</td>
+  <td align=center>75</td>
+  <td align=center>15</td>
+ </tr>
+</table> </center> <p>
+
+<a name="movement_order">
+<h3> Order of Movement: </h3>
+
+This section is probably un-important to beginning players, but it can
+be helpful for more experienced players. <p>
+
+Normal movement in Atlantis, meaning <a href="#advance"> ADVANCE </a>
+and <a href="#move"> MOVE</a> orders,
+is processed one hex of movement at a time, region by region. So,
+Atlantis cycles through all of the regions; for each region, it finds
+any units that wish to move, and moves them (if they can move) one
+hex (and only one hex). After processing one such region, it initiates
+any battles that take place due to these movements, and then moves on
+to the next region. After it has gone through all of the regions, you
+will note that units have only moved one hex, so it goes back and does
+the whole process again, except this time moving units their second
+hex (if they have enough movement points left). This continues until
+no units can move anymore. <p>
+
+Sailing is handled differently; Atlantis cycles through all of the
+ships in Atlantis, moving them one at a time. When Atlantis sails
+a ship, it sails it through it's entire course, and then moves onto
+the next ship. <p>
+
+Note that in either case, the order in which the regions are processed
+is undefined by the rules. The computer generally does them in the same
+order every time, but it is up to the wiles of the player to determine
+(or not) these patterns. The order in which units or ships are moved
+within a region is the order that they appear on a turn report. <p>
+
+<a name="skills">
+<hr>
+<h2> Skills </h2>
+
+The most important thing distinguishing one character from another in Atlantis
+is skills.  The following skills are available:  Farming, Ranching, Mining,
+Lumberjack, Quarrying, Hunting, Fishing, Herb Lore, Horse Training,
+Weaponsmith, Armorer, Carpenter, Building, Shipbuilding, Entertainment,
+Tactics, Combat, Riding, Crossbow, Longbow, Stealth, Observation, Healing, and
+Sailing.  When a unit possesses a skill, he also has a skill level to go with
+it.  Generally, the effectiveness of a skill is directly proportional to the
+skill level involved, so a level 2 horse trainer is twice as good as a level 1
+horse trainer. <p>
+
+<a name="skills_limitations"
+<h3> Limitations: </h3>
+
+A unit made up of leaders may know one or more skills; for the rest of this
+section, the word "leader" will refer to such a unit.  Other units, those which
+contain non-leaders, will be refered to as normal units. A normal unit may only
+know one skill. <p>
+
+Skills may be learned up to a maximum depending on the race of the studying
+unit (remembering that for units containing more than one race,
+the maximum is determined by the least common
+denominator).  The normal maximum skill level is 2, but every race has a list
+of skills that they specialize in, and can learn up to level 3.  Leaders can
+learn every skill up to a maximum level of 5.  Here is a list of the races and
+the skills they specialize in: <p>
+
+<a name="tableraces">
+<center>
+<table border>
+ <tr>
+  <td> </td>
+  <th>Specialized Skills</th>
+ </tr>
+ <tr>
+  <td>Vikings</td>
+  <td>Lumberjack, Shipbuilding, Combat, Sailing</td>
+ </tr>
+ <tr>
+  <td>Barbarians</td>
+  <td>Mining, Hunting, Weaponsmith, Combat</td>
+ </tr>
+ <tr>
+  <td>Plainsmen</td>
+  <td>Horse Training, Carpenter, Entertainment, Farming</td>
+ </tr>
+ <tr>
+  <td>Eskimos</td>
+  <td>Hunting, Fishing, Herb Lore, Healing</td>
+ </tr>
+ <tr>
+  <td>Nomads</td>
+  <td>Horse Training, Crossbow, Ranching</td>
+ </tr>
+ <tr>
+  <td>Tribesmen</td>
+  <td>Lumberjack, Herb Lore, Healing, Farming</td>
+ </tr>
+ <tr>
+  <td>Darkmen</td>
+  <td>Mining, Quarrying, Armorer, Building</td>
+ </tr>
+ <tr>
+  <td>Wood Elves</td>
+  <td>Lumberjack, Carpenter, Entertainment, Longbow</td>
+ </tr>
+ <tr>
+  <td>Sea Elves</td>
+  <td>Fishing, Shipbuilding, Longbow, Sailing</td>
+ </tr>
+ <tr>
+  <td>High Elves</td>
+  <td>Horse Training, Entertainment, Healing, Farming</td>
+ </tr>
+ <tr>
+  <td>Tribal Elves</td>
+  <td>Herb Lore, Longbow, Healing, Ranching</td>
+ </tr>
+ <tr>
+  <td>Ice Dwarves</td>
+  <td>Fishing, Building, Shipbuilding, Crossbow</td>
+ </tr>
+ <tr>
+  <td>Hill Dwarves</td>
+  <td>Mining, Weaponsmith, Armorer, Combat</td>
+ </tr>
+ <tr>
+  <td>Under Dwarves</td>
+  <td>Mining, Quarrying, Armorer, Crossbow</td>
+ </tr>
+ <tr>
+  <td>Desert Dwarves</td>
+  <td>Quarrying, Armorer, Building, Crossbow</td>
+ </tr>
+ <tr>
+  <td>Orcs</td>
+  <td>Combat (4)</td>
+ </tr>
+</table> </center> <p>
+
+Orcs are something of an exception; they can reach level 4 in combat, but have
+a maximum level of 1 in all other skills. <p>
+
+If units are merged together, their skills are averaged out.  No rounding off
+is done; rather, the computer keeps track for each unit of how many total
+months of training that unit has in each skill.  When units are split up, these
+months are divided as evenly as possible among the people in the unit; but no
+months are ever lost. <p>
+
+<a name="skills_studying">
+<h3> Studying: </h3>
+
+For a unit to gain level 1 of a skill, they must gain one months worth of
+training in that skill.  To raise this skill level to 2, the unit must add an
+additional two months worth of training.  Then, to raise this to skill level 3
+requires another three months worth of training, and so forth.  A month of
+training is gained when a unit uses the <a href="#study"> STUDY </a>
+order.  Note that study months
+do not need to be consecutive; for a unit to go from level 1 to level 2, he
+can study for a month, do something else for a month, and then go back and
+complete his second month of study. <p>
+
+Most skills cost $10 per person per month to study (in addition to normal
+maintenance costs).  The exceptions are Stealth and Observation (both of which
+cost $50), Magic skills (which cost $100), and Tactics (which costs $200).
+<p>
+
+<a name="skills_teaching">
+<h3> Teaching: </h3>
+
+A unit with a teacher can learn up to twice as fast as normal.  The
+<a href="#teach"> TEACH </a>
+order is used to spend the month teaching one or more other units (your own or
+another faction's).  The unit doing the teaching must have a skill level
+greater than the units doing the studying.  (Note:  for all skill uses, it is
+skill level, not number of months of training, that counts.  Thus, a unit with
+1 month of training is effectively the same as a unit with 2 months of
+training, since both have a skill level of 1.)  The units being taught
+simply issue the <a href="#study"> STUDY </a> order normally (also, his
+faction must be declared Friendly to the teaching faction).
+Each person can only teach up to 10 students in a month; addition students
+dilute the training.  Thus, if 1 teacher teaches a units of 20 men, each man
+being taught will gain 1 1/2 months of training, not 2 months. <p>
+
+Note that it is quite possible for a single unit to teach two or more other
+units different skills in the same month, provided that the teacher has a
+higher skill level than each student in the skill that that student is
+studying, and that there are no more than 10 students per teacher. <p>
+
+Note: Only leaders may use the <a href="#teach"> TEACH </a>
+order. <p>
+
+<a name="skills_skillreports">
+<h3> Skill Reports: </h3>
+
+When a faction learns a new skill level for this first time, it may be given
+a report on special abilities that a unit with this skill level has.  This
+report can be shown again at any time (once a faction knows the skill), using
+the <a href="#show"> SHOW </a>
+command.  For example, when a faction learned the skill Shoemaking
+level 3 for the first time, it might receive the following (obviously
+farsical) report: <p>
+
+<pre>
+  Shoemaking 3:  A unit possessing this skill may produce Sooper Dooper Air
+    Max Winged Sandals.  Use PRODUCE Winged Sandals to produce this item.
+</pre> <p>
+
+<a name="economy">
+<hr>
+<h2> The Economy </h2>
+
+The unit of currency in Atlantis is the silver piece.
+Silver is a normal item, with zero weight, appearing in your
+unit's reports. Silver is used for such things as buying items,
+and unit's maintenance. <p>
+
+<a name="economy_maintenance">
+<h3> Maintenance Costs: </h3>
+
+IMPORTANT:  Each and every character in Atlantis requires a maintenance fee
+each month. Anyone who ends the month without
+this maintenance cost has a one third chance of starving
+to death.  It is up to you to make sure that your people have enough available.
+Money will be shared automatically between your units in the same region, if
+one is starving and another has more than enough; but this will not happen
+between units in different regions (this sharing of money applies only for
+maintenance costs, and does not occur for other purposes). If you have
+silver in your unclaimed fund, then that silver will be automatically
+claimed by units that would otherwise starve. Lastly, if a faction is
+allied to yours, their units will provide surplus cash to your units for
+maintenance, as a last resort. <p>
+
+This fee is generally 10 silver for a normal character, and
+20 silver for a leader. If this is not available, units may
+substitute one unit of grain, livestock, or fish for this maintenance
+(two units for a leader). A unit may use the 
+<a href="#consume">CONSUME</a> order to specify that it wishes to
+use food items in preference to silver.
+Note that these items are worth more when sold in towns, so selling
+them and using the money is more economical than using them for
+maintenance. <p>
+
+
+<a name="economy_recruiting">
+<h3> Recruiting: </h3>
+
+People may be recruited in a region.  The total amount of recruits available
+per month in a region, and the amount that must be paid per person recruited,
+are shown in the region description.  The
+<a href="#buy"> BUY </a> order is used to recruit new people.  New
+recruits will not have any skills or items.  Note that the process of
+recruiting a new unit is somewhat counterintuitive; it is necessary to
+<a href="#form"> FORM </a> an
+empty unit, <a href="#give"> GIVE </a> the empty unit some money,
+and have it <a href="#buy"> BUY </a> people; see the
+description of the <a href="#form"> FORM </a> order for further details. <p>
+
+<a name="economy_items">
+<h3> Items: </h3>
+
+A unit may have a number of possessions, referred to as "items".  Some details
+were given above in the section on Movement, but many things were left out.
+Here is a table giving some information about common items in Atlantis: <p>
+
+<a name="tableiteminfo">
+<center>
+<table border>
+ <tr>
+  <td> </td>
+  <th>Skill</th>
+  <th>Material</th>
+  <th>Weight (Capacity)</th>
+ </tr>
+ <tr>
+  <td align=center>Silver</td>
+  <td> </td>
+  <td> </td>
+  <td align=center>0</td>
+ </tr>
+ <tr>
+  <td align=center>Grain</td>
+  <td align=center>Farming</td>
+  <td> </td>
+  <td align=center>5</td>
+ </tr>
+ <tr>
+  <td align=center>Livestock</td>
+  <td align=center>Ranching</td>
+  <td> </td>
+  <td align=center>50 (0)</td>
+ </tr>
+ <tr>
+  <td align=center>Iron</td>
+  <td align=center>Mining</td>
+  <td> </td>
+  <td align=center>5</td>
+ </tr>
+ <tr>
+  <td align=center>Wood</td>
+  <td align=center>Lumberjack</td>
+  <td> </td>
+  <td align=center>5</td>
+ </tr>
+ <tr>
+  <td align=center>Stone</td>
+  <td align=center>Quarrying</td>
+  <td> </td>
+  <td align=center>50</td>
+ </tr>
+ <tr>
+  <td align=center>Fur</td>
+  <td align=center>Hunting</td>
+  <td> </td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Fish</td>
+  <td align=center>Fishing</td>
+  <td> </td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Herbs</td>
+  <td align=center>Herb Lore</td>
+  <td> </td>
+  <td align=center>0</td>
+ </tr>
+ <tr>
+  <td align=center>Horse</td>
+  <td align=center>Horse Training</td>
+  <td> </td>
+  <td align=center>50 (20)</td>
+ </tr>
+ <tr>
+  <td align=center>Sword</td>
+  <td align=center>Weaponsmith</td>
+  <td align=center>Iron</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Crossbow</td>
+  <td align=center>Weaponsmith</td>
+  <td align=center>Wood</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Longbow</td>
+  <td align=center>Weaponsmith</td>
+  <td align=center>Wood</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Chain Armor</td>
+  <td align=center>Armorer</td>
+  <td align=center>Iron</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Plate Armor</td>
+  <td align=center>Armorer</td>
+  <td align=center>Iron</td>
+  <td align=center>3</td>
+ </tr>
+ <tr>
+  <td align=center>Wagon</td>
+  <td align=center>Carpenter</td>
+  <td align=center>Wood</td>
+  <td align=center>50 (200)</td>
+ </tr>
+ <tr>
+  <td align=center>Pick</td>
+  <td align=center>Weaponsmith</td>
+  <td align=center>Iron</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Spear</td>
+  <td align=center>Weaponsmith</td>
+  <td align=center>Wood</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Axe</td>
+  <td align=center>Weaponsmith</td>
+  <td align=center>Wood</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Hammer</td>
+  <td align=center>Weaponsmith</td>
+  <td align=center>Iron</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Net</td>
+  <td align=center>Fishing</td>
+  <td align=center>Herbs</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Lasso</td>
+  <td align=center>Herblore</td>
+  <td align=center>Herbs</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Bag</td>
+  <td align=center>Herblore</td>
+  <td align=center>Herbs</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Spinning Wheel</td>
+  <td align=center>Carpenter</td>
+  <td align=center>Wood</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Leather Armor</td>
+  <td align=center>Armorer</td>
+  <td align=center>Furs</td>
+  <td align=center>1</td>
+ </tr>
+ <tr>
+  <td align=center>Cloth Armor</td>
+  <td align=center>Armorer</td>
+  <td align=center>Herbs</td>
+  <td align=center>1</td>
+ </tr>
+</table> </center> <p>
+
+All items except silver are produced with the
+<a href="#produce"> PRODUCE </a> order.  Example: 
+PRODUCE SWORDS will produce as many swords as possible during the month,
+provided that the unit has adequate supplies of iron and has the Weaponsmith
+skill.  Required skills and raw materials are in the table above. <p>
+
+If an item requires raw material, then one unit of material is consumed for
+each item produced.  Thus, to produce 5 longbows (a supply of arrows is assumed
+to be included with the bow), 5 units of wood are required.  The higher one's
+skill, the more productive each man-month of work; thus, 5 longbows could be
+produced by a 5-man unit of skill 1, or a 1-man unit of skill 5.  (Plate armor
+is an exception; a unit must have skill 3 to be able to produce it at all, and
+each man can only produce 1 plate armor per month.  Plate armor also takes 3
+units of iron to produce.)  Only Trade factions can issue
+<a href="#produce"> PRODUCE </a> orders
+however, regardless of skill levels. <p>
+
+The first 9 items on the list do not require raw material; they are produced
+directly from the land.  Each region generally has at least one item that can
+be produced there.  Shown on the
+description of a region is a list of the items that can be produced, and the
+amount of each that can be produced per month.  This depends on the region
+type; thus, mountains are the best places to quarry stone, and herbs are most
+commonly found in forests and jungles.  It also varies from region to region of
+the same type.  If the units in a region attempt to
+produce more of a commodity than can be produced that month, then the
+amount available is distributed among the workers. <p>
+
+<a name="economy_towns">
+<h3> Village, Towns, and Cities: </h3>
+
+Some regions in Atlantis contain villages, towns, and cities.  Villages add to
+the wages, population, and tax income of the region they are in.  Also,
+villages will have an additional market for grain, livestock, and fish.  As
+the village's demand for these goods is met, the population will increase.
+When the population reaches a certain theshold, the village will turn into a
+town.  A town will have some additional products that it demands, in
+addition to the
+other common items.  Also, a town will sell some common items as well. A
+town whose demands are being met will grow, and above another threshold it
+will become a full-blown city.  A city will have additional markets for common
+items, and will also have markets for less common, more expensive trade items.
+<p>
+
+Trade items are bought and sold only by cities, and have no other practical
+uses.  However, the profit margins on these items are usually quite high.
+Buying and selling of these items in a region counts against a Trade faction's
+quota of regions in which it may undertake trade activity (note that buying
+and selling normal items does not). <p>
+
+<a name="economy_buildings">
+<h3> Buildings and Trade Structures: </h3>
+
+Construction of buildings and ships goes as follows: each unit of work on a
+building requires a unit of stone and a man-month of work by a character with
+Building skill at least 1; higher skill levels allow work to proceed faster
+(still using one unit of stone per unit of work done).
+Again, only Trade factions can issue
+<a href="#build"> BUILD </a>
+orders.  Here is a table of the various building types: <p>
+
+<a name="tablebuildings">
+<center>
+<table border>
+ <tr>
+  <td> </td>
+  <th>Size</th>
+  <th>Cost</th>
+  <th>Material</th>
+ </tr>
+ <tr>
+  <td>Tower</td>
+  <td>10</td>
+  <td>10</td>
+  <td>stone</td>
+ </tr>
+ <tr>
+  <td>Fort</td>
+  <td>50</td>
+  <td>40</td>
+  <td>stone</td>
+ </tr>
+ <tr>
+  <td>Castle</td>
+  <td>250</td>
+  <td>160</td>
+  <td>stone</td>
+ </tr>
+ <tr>
+  <td>Citadel</td>
+  <td>1250</td>
+  <td>640</td>
+  <td>stone</td>
+ </tr>
+</table> </center> <p>
+
+Size is the number of people that the building can shelter. Cost is
+the number of person-months of labor and the number of units of stone
+required to complete the building.  The material for all buildings
+is stone. <p>
+
+There is a second type of structure which serves to increase movement, called
+roads.  Only one road may be built in each given direction.  Additionally, for
+the movement bonus to be gained, there must be a matching road in the region
+which is connected to.  (IE, a Road_N in one region must have a Road_S in
+the region to the north for the movement bonus to be gained). <p>
+
+<a name="tableroadstructures">
+<center>
+<table border> 
+ <tr>
+  <td> </td>
+  <th>Cost</th>
+  <th>Material</th>
+  <th>Skill</th>
+ </tr>
+ <tr>
+  <td align=center>Road N</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road NW</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road NE</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road S</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road SW</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road SE</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+</table>
+</center>
+
+There are other structures that increase the maximum production of certain
+items in regions; for example, a Mine will increase the amount of iron that is
+available to be mined in a region.  To construct these structures
+requires a high skill level in the production skill related to the
+item that the structure will help produce.  (Inns are an exception
+to this rule, requiring the Building skill, not the Entertainment
+skill.) This bonus in production is available to any unit in the
+region; there is no need to be inside the structure. <p>
+
+The first structure built in a region will increase
+the maximum production of the related product by 25%; the amount added
+by each additional structure will be half of the the effect of the
+previous one.  (Note that if you build enough of the same type of
+structure in a region, the new structures may not add _any_ to the
+production level). <p>
+
+<a name="tabletradestructures">
+<center>
+<table border> 
+ <tr>
+  <td> </td>
+  <th>Cost</th>
+  <th>Material</th>
+  <th>Skill</th>
+  <th>Production Aided</th>
+ </tr> <tr>
+  <td align=center>Mine</td>
+  <td align=center>10</td>
+  <td align=center>wood or stone
+  <td align=center>Mining 3</td>
+  <td align=center>iron</td>
+ </tr> <tr>
+  <td align=center>Farm</td>
+  <td align=center>10</td>
+  <td align=center>wood or stone</td>
+  <td align=center>Farming 3</td>
+  <td align=center>grain</td>
+ </tr> <tr>
+  <td align=center>Ranch</td>
+  <td align=center>10</td>
+  <td align=center>wood or stone</td>
+  <td align=center>Ranching 3</td>
+  <td align=center>livestock</td>
+ </tr> <tr>
+  <td align=center>Timber Yard</td>
+  <td align=center>10</td>
+  <td align=center>wood or stone</td>
+  <td align=center>Lumberjack 3</td>
+  <td align=center>wood</td>
+ </tr> <tr>
+  <td align=center>Inn</td>
+  <td align=center>10</td>
+  <td align=center>wood or stone</td>
+  <td align=center>Building 3</td>
+  <td align=center>Entertainment</td>
+ </tr> <tr>
+  <td align=center>Quarry</td>
+  <td align=center>10</td>
+  <td align=center>wood or stone</td>
+  <td align=center>Quarrying 3</td>
+  <td align=center>stone</td>
+ </tr> <tr>
+  <td align=center>Temple</td>
+  <td align=center>10</td>
+  <td align=center>stone</td>
+  <td align=center>Building 3</td>
+  <td align=center>herbs</td>
+ </tr> <tr>
+  <td align=center>Mystic Quarry</td>
+  <td align=center>20</td>
+  <td align=center>rootstone</td>
+  <td align=center>Quarrying 3</td>
+  <td align=center>rootstone</td>
+ </tr> <tr>
+  <td align=center>Arcane Mine</td>
+  <td align=center>20</td>
+  <td align=center>mithril</td>
+  <td align=center>Mining 3</td>
+  <td align=center>mithril</td>
+ </tr> <tr>
+  <td align=center>Forest Preserve</td>
+  <td align=center>20</td>
+  <td align=center>ironwood</td>
+  <td align=center>Lumberjack 3</td>
+  <td align=center>ironwood</td>
+ </tr> <tr>
+  <td align=center>Sacred Grove</td>
+  <td align=center>30</td>
+  <td align=center>yew</td>
+  <td align=center>Lumberjack 5</td>
+  <td align=center>yew</td>
+ </tr>
+</table> </center> <p>
+
+Note that structures will not increase the availability of an
+item in a region that does not already have the item available.
+Also, Trade structures do not offer defensive bonuses
+(which is why they do not have a
+size associated with them).  As for regular buildings, the Cost
+is the number of person-months of labor and also the number of
+units of raw material required to complete a trade structure.
+You can use two different materials (wood or stone) to construct most trade
+structures.<p>
+
+<a name="economy_ships">
+<h3> Ships: </h3>
+
+Ships are constructed similarly to buildings, except that they
+are constructed of wood, not stone; and their construction requires
+the Shipbuilding skill, not the Building skill. Only factions with
+at least one faction point spent on trade can issue
+<a href="#build"> BUILD </a> orders. Here is a table on the various
+ship types: <p>
+
+<a name="tableshipinfo">
+<center>
+<table border>
+ <tr>
+  <td> </td>
+  <th>Capacity</th>
+  <th>Cost</th>
+  <th>Material</th>
+  <th>Sailors</th>
+ </tr> <tr>
+  <td align=center>Longboat</td>
+  <td align=center>200</td>
+  <td align=center>25</td>
+  <td align=center>wood</td>
+  <td align=center>5</td>
+ </tr> <tr>
+  <td align=center>Clipper</td>
+  <td align=center>800</td>
+  <td align=center>50</td>
+  <td align=center>wood</td>
+  <td align=center>10</td>
+ </tr> <tr>
+  <td align=center>Galleon</td>
+  <td align=center>1800</td>
+  <td align=center>75</td>
+  <td align=center>wood</td>
+  <td align=center>15</td>
+ </tr>
+</table> </center> <p>
+
+The capacity of a ship is the maximum weight that the ship may have
+aboard and still move. The cost is both the person-months of labor
+and the number of units of wood required to complete the ship. The
+sailors are the number of skill levels of the Sailing skill that
+must be aboard the ship (and issuing the
+<a href="#sail"> SAIL </a> order in order for the ship to sail). <p>
+
+<a name="economy_advanceditems">
+<h3> Advanced Items: </h3>
+
+There are also certain advanced items that highly skilled units can produce.
+These are not available to starting players, but can be discovered through
+study.  When a unit is skilled enough to produce one of these items, he will
+generally receive a skill report describing the production of this item.
+Production of advanced items is generally done in a manner similar to
+the normal items. <p>
+
+<a name="economy_income">
+<h3> Income: </h3>
+
+Units can earn money with the <a href="#work"> WORK </a>
+order.  This means that the unit spends the
+month performing manual work for wages.  The amount to be earned from this is
+usually not very high, so it is generally a last resort to be used if one is
+running out of money.  The current wages are shown in the region description
+for each region.  All units may <a href="#work"> WORK</a>,
+regardless of skills or faction type.
+<p>
+
+<a name="economy_entertainment">
+<h3> Entertainment: </h3>
+
+Units with the Entertainment skill can use it to earn money.  A unit with
+Entertainment level 1 will earn 20 silver per man by issuing the 
+<a href="#entertain"> ENTERTAIN </a>
+order.  The total amount of money that can be earned this way is shown in the
+region descriptions.  Higher levels of Entertainment skill can earn more, so
+a character with Entertainment skill 2 can earn twice as much money as one with
+skill 1 (and uses twice as much of the demand for entertainment in the region).
+Note that entertainment income is much less, per region, than the income
+available through working or taxing.  All factions may have entertainers,
+regardless of faction type. <p>
+
+<a name="economy_taxingpillaging">
+<h3> Taxing/Pillaging: </h3>
+
+War factions may collect taxes in a region.  This is done using the
+<a href="#tax"> TAX </a> order
+(which is not a full month order).  The amount of tax money that can be
+collected each month in a region is shown in the region description.  Only
+combat ready units may <a href="#tax"> TAX</a>;
+a unit is combat ready if it either: has Combat
+skill of at least 1,
+or has Longbow or Crossbow skill of at least 1 and also
+has the appropriate bow in his possession. Each taxing character can collect
+$50, though if the number of taxers would tax more than the available tax
+income, the tax income is split evenly. Note that possession of a sword,
+while giving a man an effective Combat skill of 2, does not confer the
+ability to tax if the unit does not also have a Combat skill of at least
+one. <p>
+
+War factions may also pillage a region.  To do this requires the faction to
+have enough combat trained men in the region to tax half of the available
+money in the region.  The total amount of money that can be pillaged will then
+be shared out between every combat trained unit that issues the
+<a href="#pillage"> PILLAGE </a> order.
+The amount of money collected is equal to twice the available tax money.
+However, the economy of the region will be seriously damaged by pillaging, and
+will only slowly recover over time.  Note that
+<a href="#pillage"> PILLAGE </a> comes before
+<a href="#tax"> TAX</a>, so
+<a href="#tax"> TAX </a> will collect no money in that region that month. <p>
+
+It is possible to safeguard one's tax income in regions one controls.  Units
+which have the Guard flag set (using the
+<a href="#guard"> GUARD </a> order) will block
+<a href="#tax"> TAX </a> orders
+issued by other factions in the same region, unless you have declared the
+faction in question Friendly.  Units on guard will also block
+<a href="#pillage"> PILLAGE </a> orders
+issued by other factions in the same region, regardless of your attitude
+towards the faction in question, and they will attempt to prevent Unfriendly
+units from entering the region.  Only units with Combat skill of at least 1,
+or units with Crossbow or Longbow skill of at least 1, plus the appropriate
+bow, may be on guard.  Units on guard are always visible regardless of
+Stealth skill, and will be marked as being "on guard" in the region
+description.
+<p>
+
+<a name="com">
+<hr>
+<h2> Combat </h2>
+
+Combat occurs when one unit attacks another.  The computer then gathers
+together all the units on the attacking side, and all the units on the
+defending side, and the two sides fight until an outcome is reached. <p>
+
+<a name="com_attitudes">
+<h3> Attitudes: </h3>
+
+Which side a faction's units will fight on depends on declared attitudes.  A
+faction can have one of the following attitudes towards another faction:  Ally,
+Friendly, Neutral, Unfriendly or Hostile.  Each faction has a general attitude,
+called the "Default Attitude", that it normally takes towards other factions;
+this is initially Neutral, but can be changed.  It is also possible to declare
+attitudes to specific factions, e.g.
+<a href="#declare"> DECLARE </a> 27 ALLY will declare the Ally
+attitude to faction 27.  (Note that this does not necessarily mean that
+faction 27 is allied to you.) <p>
+
+Ally means that you will fight to defend units of that faction whenever they
+come under attack, if you have non-avoiding units in the region where the
+attack occurs.  You will also prevent stealing and assassination attempts
+against units of the faction, if you are capable of seeing the unit
+attempting the crime.  It also has the implications of the Friendly
+attitude.
+<p>
+
+Friendly means that you will accept gifts from units of that faction.  This
+includes the giving of items, units of people, 
+and the teaching of skills.  You will also admit units of that
+faction into
+buildings or ships owned by one of your units, and you will permit units of
+that faction to collect taxes (but not pillage) in regions where you have units
+on guard. <p>
+
+Unfriendly means that you will not admit units of that faction into any region
+where you have units on guard.  You will not, however, automatically attack
+unfriendly units which are already present. <p>
+
+Hostile means that any of your units which do not have the Avoid Combat flag
+set (using the <a href="#avoid"> AVOID </a> order)
+will attack any units of that faction wherever they
+find them. <p>
+
+If a unit can see another unit, but does not have high enough Observation skill
+to determine its faction, it will treat the unit using the faction's default
+attitude, even if the unit belongs to an Unfriendly or Hostile faction,
+because it does not know the unit's identity.  However, if your faction has
+declared an attitude of Friendly or Ally towards that unit's faction,
+the unit will be treated with the better
+attitude; it is assumed that the unit will produce proof of identity when
+relevant.  (See the section on stealth for more information on when units can
+see each other.) <p>
+
+If a faction declares Unfriendly or Hostile as default attitude (the latter is
+a good way to die fast), it will block or attack unidentified units, unless
+they belong to factions for which a more friendly attitude has been
+specifically declared.  Units which cannot be seen at all cannot be directly
+blocked or attacked, of course. <p>
+
+<a name="com_attacking">
+<h3> Attacking: </h3>
+
+A unit can attack another by issuing an
+<a href="#attack">ATTACK</a> order.  A unit that does not
+have Avoid Combat set will automatically attack any Hostile units it identifies
+as such.  
+When a unit issues the <a href="#attack"> ATTACK </a> order, or
+otherwise decides to attack another unit, it must first be able
+to attack the unit.  There are two conditions for this; the first
+is that the attacking unit must be able to see the unit that it
+wishes to attack.  More information is available on this in the
+stealth section of the rules. <p>
+
+Secondly, the attacking unit must be able to catch the unit it
+wishes to attack.  A unit may only catch a unit if its effective
+Riding skill is greater than or equal to the target unit's effective
+Riding skill; otherwise, the target unit just rides away from the
+attacking unit.  Effective Riding is the unit's Riding skill, but with
+a potential maximum; if the unit can not ride, the effective Riding
+skill is 0; if the unit can ride, the maximum effective Riding is
+3; if the unit can fly, the maximum effective Riding is 5. Note that
+the effective Riding also depends on whether the unit is attempting
+to attack or defend;
+for attack purposes, only one man in the unit needs to be able to
+ride or fly (generally, this means one of the men must possess a
+horse, or other form of transportation),
+ whereas for defense purposes the entire unit needs to
+be able to ride or fly (usually meaning that every man in the unit must 
+possess a horse or other form of speedier transportation).
+Also, note that for a unit to be able to
+use its defensive Riding ability to avoid attack, the unit cannot
+be in a building, ship, or structure of any type. <p>
+
+A unit which is on guard, and is Unfriendly towards a unit, will
+deny access to units using the <a href="#move">MOVE</a> order to
+enter its region. Note that to deny access to a unit, the guarding unit
+must satisfy the two above requirements; namely, it must be able to
+see the unit, and also be able to catch the unit.
+A unit using <a href="#advance">ADVANCE</a>
+instead of <a href="#move">MOVE</a> to enter a region, will attack
+any units that identify it as Unfriendly and attempt to deny it access.  If
+the advancing unit loses the battle, it will be forced to retreat to the
+previous region it moved through.  If the unit wins the battle
+and its army doesn't lose any men, it is allowed to continue to
+move, provided that it has enough movement points. <p>
+
+Note that neither of these restrictions apply for sea combat, as
+units within a ship are always visible, and Riding does not play
+a part in combat on board ships. <p>
+
+<a name="com_muster">
+<h3> The Muster: </h3>
+
+Once the attack has been made, the sides are gathered.  Although the
+<a href="#attack"> ATTACK </a>
+order takes a unit rather than a faction as its parameter (mainly so that
+unidentified units can be attacked), an attack is basically considered to be by
+an entire faction, against an entire faction and its allies. <p>
+
+On the attacking side are all units of the attacking faction in the region
+where the fight is taking place, except those with Avoid Combat set.  A unit
+which has explicitly issued an
+<a href="#attack"> ATTACK </a> order will join the fight anyway,
+regardless of Avoid Combat. <p>
+
+Also on the attacking side are all units of other factions that attacked the
+target faction in the region where the fight is taking place.  In other words,
+if several factions attack one, then all their armies join together to attack
+at the same time (even if they are enemies and will later fight each other).
+<p>
+
+On the defending side are all identifiable units belonging to the defending
+faction.  If a unit has Avoid Combat set, and its faction cannot be identified
+by the attacking faction, it will not be involved in the battle.  A unit which
+was explicitly attacked will be involved anyway, regardless of Avoid Combat.
+(This means that Avoid Combat is mostly useful for high stealth scouts.)  Also,
+all non-avoiding units in factions allied with the defending unit will join in
+on the defending side. <p>
+
+Units in adjacent regions can also become involved.  This is the exception to
+the general rule that you cannot interact with units in a different region.
+<p>
+
+If a faction has at least one unit involved in the initial region, then any
+units in adjacent regions will join the fight, if they could reach the region
+and do not have Avoid Combat set.  There are a few flags that units may
+set to affect this; a unit with the Hold flag
+(set using the <a href="#hold"> HOLD </a> order)
+will not join battles in adjacent regions.  
+This flag applies to both attacking and defending factions.  A unit with
+the Noaid flag (set using the <a href="#noaid"> NOAID </a> order) will
+receive no aid from adjacent hexes when attacked, or when it issues an
+attack. <p>
+
+Example:  A fight starts in region A, in the initial combat phase (before any
+movement has occurred).  The defender has a unit of soldiers in adjacent region
+B.  They have 2 movement points at this stage.  They will buy horses later in
+the turn, so that when they execute their
+<a href="#move"> MOVE </a> order they will have 4 movement
+points, but right now they have 2.  Region A is forest but fortunately it is
+summer so the soldiers can join the fight.
+<p>
+
+It is important to note that the units in nearby regions do not actually move
+to the region where the fighting happens; the computer only checks that they
+could move there.  (In game world terms, presumably they did move
+there to join the fight, and then moved back where they started.)  The computer
+checks for weight allowances and terrain types when determining whether a unit
+could reach the scene of the battle.
+Note that the use of ships is not allowed in this virtual movement. <p>
+
+If you order an attack on an ally (either with the
+<a href="#attack"> ATTACK </a> order, or if your
+ally has declared you Unfriendly, by attempting to
+<a href="#advance"> ADVANCE </a> into a region which
+he is guarding), then your commander will decide that a mistake has occurred
+somewhere, and withdraw your troops from the fighting altogether.  Thus, your
+units will not attack that faction in that region. Note that you will
+always defend an ally against attack, even if it means that you fight
+against other factions that you are allied with. <p>
+
+<a name="com_thebattle">
+<h3> The Battle: </h3>
+
+The troops having lined up, the fight begins.  The computer selects the best
+tactician from each side; that unit is regarded as the leader of its side.  If
+two or more units on one side have the same Tactics skill, then the one with
+the lower unit number is regarded as the leader of that side.  If one side's
+leader has a better Tactics skill than the other side's, then that side gets a
+free round of attacks. <p>
+
+In each combat round, the combatants each get to attack once, in a random
+order.  (In a free round of attacks, only one side's forces get to attack.)
+Each combatant will attempt to hit a randomly selected enemy.  If he hits, and
+the target has no armor, then the target is automatically killed.  Chain armor
+gives a 1/3 chance of surviving a hit, and plate armor gives a 2/3 chance.
+Hits inflicted by a crossbow cannot be deflected by armor; the target is
+automatically killed, regardless of armor. <p>
+
+The basic skill used in battle is the Combat skill; this is used for hand to
+hand fighting.  If one soldier tries to hit another using melee weapons, there
+is a 50% chance that the attacker will get an opportunity for a lethal blow.
+If the attacker does get that opportunity, then there is a contest between his
+skill and the defender's. <p>
+
+If the skills are equal, then there is a 1:1 (i.e. 50%) chance that the attack
+will succeed.  If the attacker's skill is 1 higher then there is a 2:1 (i.e.
+66%) chance, if the attacker's skill is 2 higher then there is a 4:1 (i.e.
+80%) chance, 3 higher means an 8:1 (i.e. 88%) chance, and so on.  Similarly
+if the defender's skill is 1 higher, then there is only a 1:2 (i.e. 33%)
+chance, etc. <p>
+
+Possession of a sword confers a +2 bonus to Combat skill.  (Troops fighting
+hand-to-hand without swords are assumed to be irregularly equipped with knives,
+clubs etc.)  Possession of a horse, and Riding skill, also confers a bonus to
+effective Combat skill equal to the Riding skill level (up to a maximum of 2)
+provided that the terrain is one of Plain, Desert or Tundra.
+<p>
+
+Missile weapons are slightly different.  A soldier who has a longbow and is
+skilled in its use will use it; otherwise, he will use a crossbow if he has
+one, and skill in its use; otherwise, he will fight hand to hand.  The skill
+check to hit with a longbow is made against an effective defense of 2; i.e., a
+longbowman with skill 1, having made the 50% chance of getting an effective
+attack, has a 1:2 chance of hitting a target.  A crossbow is an easier weapon
+to use, so the chance to hit is calculated against a defense of 0; on the other
+hand, a crossbow can only fire every other round (the first, third, fifth,
+etc.,
+rounds, including the free round of attacks if one's side has one).  Note that
+the target unit's actual skills are irrelevant for bow attacks. <p>
+
+A soldier with a melee weapon attacking a bowman makes his attack just as if
+the bowman had a Combat skill of 0, even if the bowman is a leader who also
+has Combat skill. <p>
+
+Being inside a building confers a +2 bonus to defense.  This bonus is effective
+against bows as well as melee weapons.  The number of men that a building can
+protect is equal to its size.  The sizes of the different types of buildings
+are as follows: <p>
+
+<a name="tablebuildingcapacities">
+<center>
+<table border>
+ <tr>
+  <td> </td>
+  <th>Size</th>
+ </tr> <tr>
+  <td align=center>Tower</td>
+  <td align=center>10</td>
+ </tr> <tr>
+  <td align=center>Fort</td>
+  <td align=center>50</td>
+ </tr> <tr>
+  <td align=center>Castle</td>
+  <td align=center>250</td>
+ </tr> <tr>
+  <td align=center>Citadel</td>
+  <td align=center>1250</td>
+ </tr>
+</table> </center> <p>
+
+If there are too many units in a building to all gain protection from it, then
+those units who have been in the building longest will gain protection.  (Note
+that these units appear first on the turn report.)  If a unit of 200 men is
+inside a Fort (capacity 50), then the first 50 men in the unit will gain the
+full +2 bonus, and the other 150 will gain no protection. <p>
+
+Units which have the Behind flag set are at the rear and cannot be attacked by
+any means until all non-Behind units have been wiped out.  On the other hand,
+neither can they attack with melee weapons, but only with bows or magic.  Once
+all front-line units have been wiped out, then the Behind flag no longer has
+any effect. <p>
+
+<a name="com_victory">
+<h3> Victory! </h3>
+
+Combat rounds continue until one side has accrued 50% losses (or more). The
+victorious side is then awarded one free round of attacks, after which the
+battle is over.  If both sides have more than 50% losses, the battle is a draw,
+and neither side gets a free round. <p>
+
+Units with the Healing skill have a chance of being able to heal casualties of
+the winning side, so that they recover rather than dying.  Each character with
+this skill can attempt to heal 5 casualties per skill level.
+Each attempt however requires
+one unit of Herbs, which is thereby used up.  Each attempt has a 50% chance of
+healing one casualty; only one attempt at Healing may be made per casualty.  
+Healing occurs automatically, after the battle is over, by any living healers
+on the winning side. <p>
+
+Any items owned by dead combatants on the losing side have a 50% chance of
+being found and collected by the winning side.  Each item which is recovered is
+picked up by one of the survivors at random, so the winners generally collect
+loot in proportion to their number of surviving men. <p>
+
+If you are expecting to fight an enemy who is carrying so much equipment that
+you would not be able to move after picking it up, and you want to move to
+another region later that month, it may be worth issuing some orders to drop
+items (with the <a href="#give"> GIVE </a>
+0 order) in case you win the battle! Also, note that if
+the winning side took any losses in the battle, any units on this side will not
+be allowed to move, or attack again for the rest of the turn. <p>
+
+<a name="stealthobs">
+<hr>
+<h2> Stealth and Observation </h2>
+
+The Stealth skill is used to hide units, while the Observation skill
+is used to see units that would otherwise be hidden. A unit can be
+seen only if you have at least one unit in the same region, with an
+Observation skill at least as high as that unit's Stealth skill.
+If your Observation skill is equal to the unit's Stealth skill, you
+will see the unit, but not the name of the owning faction. If your
+Observation skill is higher than the unit's Stealth skill, you will
+also see the name of the faction that owns the unit. <p>
+
+Regardless of Stealth skill, units are always visible when participating
+in combat; when guarding a region with the Guard flag; or when in a
+building or aboard a ship. However, in order to see the faction that
+owns the unit, you will still need a higher Observation skill than
+the unit's Stealth skill. <p>
+
+<a name="stealthobs_stealing">
+<h3> Stealing: </h3>
+
+The <a href="#steal"> STEAL </a>
+order is a way to steal items from other factions without a battle. 
+The order can only be issued by a one-man unit.  The order specifies a target
+unit; the thief will then attempt to steal the specified item from the target
+unit. <p>
+
+If the thief has higher Stealth than any of the target faction's units have
+Observation (i.e. the thief cannot be seen by the target faction), the theft
+will succeed.  The target faction will be told what was stolen, but not by
+whom.  If the specified item is silver, then $200 or half the total available,
+whichever is less, will be stolen.  If it is any other item, then only one will
+be stolen (if available). <p>
+
+Any unit with high enough Observation to see the thief will see the attempt to
+steal, whether the attempt is successful or not.  Allies of the target unit
+will prevent the theft, if they have high enough Observation to see the unit
+trying to steal. <p>
+
+<a name="stealthobs_assassination">
+<h3> Assassination: </h3>
+
+The <a href="#assassinate"> ASSASSINATE </a>
+order is a way to kill another person without attacking and going
+through an entire battle. This order can only be issued by a one-man unit,
+and specifies a target unit.  If the target unit contains more than one person,
+then one will be singled out. <p>
+
+Success for assassination is determined as for theft, i.e. the assassin will
+fail if any of the target faction's units can see him.  In this case, the
+assassin will flee, and the target faction will be informed which unit made the
+attempt.  As with theft, allies of the target unit will prevent the
+assassination from succeeding, if their Observation level is high enough. <p>
+
+If the assassin has higher Stealth than any of the target faction's units have
+Observation, then a one-on-one fight will take place between the assassin and
+the target character.  The assassin automatically gets a free round of attacks;
+after that, the battle is handled like a normal fight,
+ with the exception that neither
+assassin nor victim can use chain mail or plate armor (the assassin because he
+cannot sneak around wearing metal armor, the victim because he was caught by
+surprise with his armor off).  If the assassin wins, the target faction is told
+merely that the victim was assassinated, but not by whom.  If the victim wins,
+then the target faction learns which unit made the attempt.  (Of course, this
+does not necessarily mean that the assassin's faction is known.)  The winner of
+the fight gets 50% of the loser's property as usual. <p>
+
+<a href="#steal"> STEAL </a> and <a href="#assassinate"> ASSASSINATE </a>
+are not full month orders, and do not interfere with
+other activities, but a unit can only issue one
+<a href="#steal"> STEAL </a> order or one
+<a href="#assassinate"> ASSASSINATE </a>
+order in a month. <p>
+
+<a name="magic">
+<hr>
+<h2> Magic </h2>
+
+A character enters the world of magic in Atlantis by beginning study on one
+of the Foundation magic skills.  Only one man units, with the man being a
+leader, are permitted to study these skills.  The number of these units (known
+as "magicians" or "mages") that a faction may own is determined by the
+faction's type.  Any attempt to gain more, either through study, or by
+transfer from another faction, will fail.  In addition, mages may not 
+<a href="#give">GIVE</a> men
+at all; once a unit becomes a mage (by studying one of the Foundations), the
+unit number is fixed. (The mage may be given to another faction using
+the <a href="#give">GIVE UNIT</a> order.) <p>
+
+<a name="magic_skills">
+<h3> Magic Skills: </h3>
+
+Magic skills are the same as normal skills, with a few differences.  The basic
+magic skills, called Foundations, are Force, Pattern, and Spirit.  To become
+a mage, a unit undertakes study in one of these Foundations.  As a unit
+studies the Foundations, he will be able to study deeper into the magical arts;
+the additional skills that he may study will be indicated on your turn report.
+<p>
+
+There are two major differences between Magic skills and normal skills. The
+first is that the ability to study Magic skills sometimes depends on lower 
+level Magic skills.  The Magic skills that a mage may study are listed on
+his turn report, so he knows which areas he may pursue.  Studying higher
+in the Foundation skills, and certain other Magic skills, will make other
+skills available to the mage.
+Also, study into a magic skill above level 2 requires that the mage
+be located in some sort of protected building (a tower, fortress, castle or
+citadel; mines, quarries, etc, do not count).  If the mage is not in such a
+structure, his study rate is cut in half, as he does not have the proper
+environment and equipment for research. <p>
+
+<a name="magic_foundations">
+<h3> Foundations: </h3>
+
+The three Foundation skills are called Force, Pattern, and Spirit.  Force
+indicates the quantity of magical energy that a mage is able to channel (a
+Force rating of 0 does not mean that the mage can channel no magical energy at
+all, but only a minimal amount).  Pattern indicates ability to handle complex
+patterns, and is important for things like healing and nature spells.  Spirit
+deals with meta-effects that lie outside the scope of the physical world.
+<p>
+
+<a name="magic_furtherstudy">
+<h3> Further Magic Study: </h3>
+
+Once a mage has begun study of one or more Foundations, more skills that he may
+study will begin to show up on his report.  These skills are the skills that
+give a mage his power.  As with normal skills, when a mage achieves a new level
+of a magic skill, he will be given a skill report, describing the new powers
+(if any) that the new skill confers.  The 
+<a href="#show"> SHOW </a> order may be used to show this
+information on future reports. <p>
+
+<a name="magic_usingmagic">
+<h3> Using Magic: </h3>
+
+A mage may use his magical power in three different ways, depending
+on the type of spell he wants to use.  Some spells,
+once learned, take effect automatically and are considered always to
+be in use; these spells do not require any order to take effect. <p>
+
+Secondly, some spells are for use in combat. A mage may specify that
+he wishes to use a spell in combat by issuing the
+<a href="#combat"> COMBAT </a> order.  A combat spell specified in this
+way will only be used if the mage finds himself taking part in a battle. <p\>
+
+The third type of spell use is for spells that take an entire month
+to cast.  These spells are cast by the mage issuing the
+<a href="#cast"> CAST </a> order.  Because
+<a href="#cast"> CAST </a> takes an entire
+month, a mage may use only one of this type of spell each turn. Note,
+however, that a <a href="#cast"> CAST </a> order is not a full
+month order; a mage may still <a href="#move"> MOVE </a>,
+<a href="#study"> STUDY </a>, or any other month long order. The
+justification for this (as well as being for game balance) is that
+a spell drains a mage of his magic power for the
+month, but does not actually take the entire month to cast. <p>
+
+The description that a mage receives when he first learns a spell
+specifies the manner in which the spell is used (automatic, in combat,
+or by casting). <p>
+
+<a name="magic_incombat">
+<h3> Magic in Combat: </h3>
+
+NOTE: This section is rather vague, and quite advanced.  You may want to wait
+until you have figured out other parts of Atlantis before trying to understand
+exactly all of the rules in this section. <p>
+
+Although the magic skills and spells are unspecified in these rules, left for
+the players to discover, the rules for combat spells' interaction are spelled
+out here.  There are five major types of attacks, and defenses:
+Combat, Bow, Energy, Weather, and Spirit.  Every attack and defense has
+a type, and only the appropriate defense is effective against an attack. <p>
+
+Defensive spells are cast at the beginning of each round
+of combat, and will have a type of attack they deflect, and skill level
+(Defensive spells are generally called Shields).  Every time an attack
+is launched against an army, it must first attack the highest level Shield
+of the same type as the attack, before it may attack a soldier
+directly. Note that an attack only has to attack the highest Shield,
+any other Shields of the same type are ignored for that attack. <p>
+
+An attack spell (and any other type of attack) also has an attack type, and
+attack level, and a number of blows it deals.  When the attack spell is cast,
+it is matched up against the most powerful defensive spell of the appropriate
+type that the other army has cast.  If the other army has not cast any
+applicable defensive spells, the spell goes through unmolested.  Otherwise, the
+skill level of the attack spell, and the skill level of the defensive spell are
+matched against each other.  The formula for determining the victor between a
+defensive and offensive spell is the same as for a contest of soldiers; if the
+levels are equal, there is a 1:1 chance of success, and so on.  If the
+offensive spell is victorious, 
+the offensive spell deals its blows to the defending army, and the
+Shield in question is destroyed (thus, it can be useful to have more than
+one of the same type of Shield in effect, as the other Shield will take
+the place of the destroyed one). 
+Otherwise, the attack spell disperses, and the defending spell remains in
+place. <p>
+
+Some spells do not actually kill enemies, but rather have some negative
+effect on them. These spells are treated the same as normal spells; if
+there is a Shield of the same type as them, they must attack the Shield
+before attacking the army.
+Physical attacks that go through a defensive spell also must match their skill
+level against that of the defensive spell in question.  However, they do not
+destroy a layer of the spell when they are successful. <p>
+
+
+<a name="nonplayers">
+<hr>
+<h2> Non-Player Units </h2>
+
+There are a number of units that are not controlled by players that may be
+encountered in Atlantis.  Most information about these units must be
+discovered in the course of the game, but a few basics are below. <p>
+
+<a name="nonplayers_guards">
+<h3> City and Town Guardsmen: </h3>
+
+All cities and towns begin with guardsmen in them.  These units will defend any
+units that are attacked in the city or town, and will also prevent theft and
+assassination attempts, if their Observation level is high enough.  They are on
+guard, and will prevent other units from taxing or pillaging.  The guards may
+be killed by players, although they will form again if the city is left
+unguarded. <p>
+
+Note that the city guardsmen in the starting cities of Atlantis possess
+Amulets of Invincibility, and may not be defeated. <p>
+
+<a name="nonplayers_monsters">
+<h3> Wandering Monsters: </h3> 
+
+There are a number of monsters who wander free through Atlantis.  They will
+occasionally attack player units, so be careful when wandering through the
+wilderness. <p>
+
+<a name="nonplayers_controlled">
+<h3> Controlled Monsters: </h3>
+
+Through various magical methods, you may gain control of certain
+types of monsters. These monsters are just another item in a unit's
+inventory, with a few special rules. Monsters will be able to carry
+things at their speed of movement; use the <a href="#show">SHOW ITEM</a>
+order to determine the carrying capacity and movement speed of a
+monster. Monsters will also fight for the controlling unit in combat;
+their strength can only be determined in battle. Also, note that a
+monster will always fight from the front rank, even if the controlling
+unit has the behind flag set. Whether or not you are allowed to give
+a monster to other units depends on the type of monster; some may be
+given freely, while others must remain with the controlling unit. <p>
+
+<a name="orders">
+<hr>
+<h2> Orders </h2>
+
+To enter orders for Atlantis, you should send a mail message to the Atlantis
+server, containing the following: <p>
+
+<pre>
+#ATLANTIS faction-no <password>
+
+UNIT unit-no
+...orders...
+
+UNIT unit-no
+...orders...
+
+#END
+</pre> <p>
+
+For example, if your faction number (shown at the top of your report) is 27,
+and you have two units numbered 5 and 17: <p>
+
+<pre>
+#ATLANTIS 27
+
+UNIT 5
+...orders...
+
+UNIT 17
+...orders...
+
+#END
+</pre> <p>
+
+Thus, orders for each unit are given separately, and indicated with the UNIT
+keyword.  (In the case of an order, such as the command to rename your faction,
+that is not really for any particular unit, it does not matter which unit
+issues the command; but some particular unit must still issue it.) <p>
+
+IMPORTANT: You MUST use the correct #ATLANTIS line or else your orders will be
+silently ignored. <p>
+
+If you have a password set, you must specify it on you #atlantis line, or
+the game will reject your orders.  See the
+<a href="#password"> PASSWORD </a> order for more details.
+<p>
+
+Each type of order is designated by giving a keyword as the first non-blank
+item on a line.  Parameters are given after this, separated by spaces or tabs.
+Blank lines are permitted, as are comments; anything after a semicolon is
+treated as a comment (provided the semicolon is not in the middle of a word).
+<p>
+
+The parser is not case sensitive, so all commands may be given in upper case,
+low case or a mixture of the two.  However, when supplying names containing
+spaces, the name must be surrounded by double quotes, or else underscore
+characters must be used in place of spaces in the name.  (These things apply to
+the #ATLANTIS and #END lines as well as to order lines.) <p>
+
+You may precede orders with the at sign (@), in which case they will
+appear in the Template at the bottom of your report.  This is useful
+for orders which your units repeat for several months in a row. <p>
+
+<a name="orders_abbreviations">
+<h3> Abbreviations: </h3>
+
+All common items and skills have abbreviations that can be used when giving
+orders, for brevity.  Any time you see the item on your report, it will
+be followed by the abbreviation.  Please be careful using these, as they
+can easily be confused. <p>
+
+<a name="ordersummary">
+<hr>
+<h2> Order Summary </h2>
+
+To specify a [unit], use the unit number.  If specifying a unit that will be
+created this turn, use the form "NEW #" if the unit belongs to your faction, or
+"FACTION # NEW #" if the unit belongs to a different faction.  See the
+<a href="#form"> FORM </a>
+order for a more complete description.  [faction] means that a faction number
+is required; [object] means that an object number (generally the number of a
+building or ship) is required.  [item] means an item (like wood or
+longbow) that a unit can have in its possession. [flag] is an argument
+taken by several orders, that sets or unsets a flag for a unit. A [flag]
+value must be either 1 (set the flag) or 0 (unset the flag).  Other
+parameters are generally numbers or names. <p>
+
+IMPORTANT: Remember that names containing spaces (e.g., "Plate Armor"), must be
+surrounded by double quotes, or the space must be replaced with an underscore
+"_" (e.g., Plate_Armor). <p>
+
+<hr>
+<a name="address"> </a>
+<h4> ADDRESS [new address] </h4>
+
+Change the email address to which your reports are sent. <p>
+
+Example: <p>
+Change your faction's email address to atlantis@rahul.net. <p>
+<pre>
+  ADDRESS atlantis@rahul.net
+</pre> <p>
+
+<hr>
+<a name="advance"> </a>
+<h4> ADVANCE [dir] ... </h4>
+
+This is the same as the <a href="#move"> MOVE </a>
+order, except that it implies attacks on units
+which attempt to forbid access.  See the
+<a href="#move"> MOVE </a> order for details. <p>
+
+Examples: <p>
+Move north, then northwest, attacking any units that forbid access to the
+regions. <p>
+<pre>
+  ADVANCE N NW
+</pre> <p>
+In order, move north, then enter structure number 1, move through an inner
+route, and finally move southeast. Will attack any units that forbid access to
+any of these locations. <p>
+<pre>
+  ADVANCE N 1 IN SE
+</pre> <p>
+
+<hr>
+<a name="assassinate"> </a>
+<h4> ASSASSINATE [unit] </h4>
+
+Attempt to assassinate the specified unit, or one of the unit's people if the
+unit contains more than one person.  The order may only be issued by a one-man
+unit. <p>
+
+Example: <p>
+Assassinate unit number 177. <p>
+<pre>
+  ASSASSINATE 177
+</pre> <p>
+
+<hr>
+<a name="attack"> </a>
+<h4> ATTACK [unit] .. </h4>
+
+Attack a target unit.  If multiple ATTACK orders are given, all of the targets
+will be attacked. <p>
+
+Example: <p>
+To attacks units 17, 431, and 985: <p>
+<pre>
+  ATTACK 17
+  ATTACK 431 985
+</pre> <p>
+or: <p>
+<pre>
+  ATTACK 17 431 985
+</pre> <p>
+
+<hr>
+<a name="autotax"> </a>
+<h4> AUTOTAX [flag] </h4>
+
+AUTOTAX 1 causes the unit to attempt to tax every turn (without requiring
+the TAX order) until the flag is unset. AUTOTAX 0 unsets the flag. <p>
+
+Example: <p>
+To cause the unit to attempt to tax every turn. <p>
+<pre>
+  AUTOTAX 1
+</pre> <p>
+
+<hr>
+<a name="avoid"> </a>
+<h4> AVOID [flag] </h4>
+
+AVOID 1 instructs the unit to avoid combat wherever possible.  The unit will
+not enter combat unless it issues an ATTACK order, or the unit's faction
+is attacked in the unit's hex. AVOID 0 cancels this. <p>
+
+The Guard and Avoid Combat flags are mutually exclusive; setting one
+automatically cancels the other. <p>
+
+Example: <p>
+Set the unit to avoid combat when possible. <p>
+<pre>
+  AVOID 1
+</pre> <p>
+
+<hr>
+<a name="behind"> </a>
+<h4> BEHIND [flag] </h4>
+
+BEHIND 1 sets the unit to be behind other units in combat.  BEHIND 0 cancels
+this. <p>
+
+Example: <p>
+Set the unit to be in front in combat. <p>
+<pre>
+  BEHIND 0
+</pre> <p>
+
+<hr>
+<a name="build"> </a>
+<h4> BUILD </h4>
+<h4> BUILD [object type] </h4>
+
+BUILD given with no parameters causes the unit to perform work on the object
+that it is currently inside.  BUILD given with an [object type]
+(such as "Tower"
+or "Galleon") instructs the unit to begin work on a new object of the type
+given. <p>
+
+Example: <p>
+To build a new tower. <p>
+<pre>
+  BUILD Tower
+</pre> <p>
+
+<hr>
+<a name="buy"> </a>
+<h4> BUY [quantity] [item] </h4>
+
+Attempt to buy a number of the given item from a city or town
+marketplace, or to buy new people in any region where people are
+available for recruiting.  If the unit can't afford as many as [quantity],
+it will attempt to buy as many as it can.  If the demand for the item
+(from all units in the region) is greater than the number available, the
+available items will be split among the buyers in proportion to the amount
+each buyer attempted to buy.  When buying people, specify the race of
+the people as the [item]. <p>
+
+Examples: <p>
+Buy one plate armor from the city market. <p>
+<pre>
+  BUY 1 "Plate Armor"
+</pre> <p>
+Recruit 5 barbarians into the current unit. (This will dilute the skills that
+the unit has.) <p>
+<pre>
+  BUY 5 barbarians
+</pre> <p>
+
+<hr>
+<a name="cast"> </a>
+<h4> CAST [skill] [arguments] </h4>
+
+Cast the given spell.  Note that most spell names contain
+spaces; be sure to enclose the name in quotes!  [arguments] depend
+on which spell you are casting; when you are able to cast a spell,
+the skill description will tell you the syntax. <p>
+
+Examples: <p>
+Cast the spell called "Super Spell". <p>
+<pre>
+  CAST "Super Spell"
+</pre> <p>
+Cast the fourth-level spell in the "Super Magic" skill. <p>
+<pre>
+  CAST "Super Magic" 4
+</pre> <p>
+
+<hr>
+<a name="claim"> </a>
+<h4> CLAIM [amount] </h4>
+
+Claim an amount of the faction's unclaimed silver, and give it to the unit
+issuing the order.  The claiming unit may then spend the silver or give
+it to another unit. <p>
+
+Example: <p>
+Claim 100 silver. <p>
+<pre>
+  CLAIM 100
+</pre> <p>
+  
+<hr>
+<a name="combat"> </a>
+<h4> COMBAT [spell] </h4>
+
+Set the given spell as the spell that the unit will cast in combat.  This 
+order may only be given if the unit can cast the spell in question. <p>
+
+Example: <p>
+Instruct the unit to use the spell "Super Spell", when the unit is involved in
+a battle. <p>
+<pre>
+  COMBAT "Super Spell"
+</pre> <p>
+
+<hr>
+<a name="consume"></a>
+<h4>CONSUME UNIT</h4>
+<h4>CONSUME FACTION</h4>
+<h4>CONSUME</h4>
+
+The CONSUME order instructs the unit to use food items in preference
+to silver for maintenance costs. CONSUME UNIT tells the unit to use
+food items that are in that unit's possession before using silver.
+CONSUME FACTION tells the unit to use any food items that the faction
+owns (in the same region as the unit) before using silver. CONSUME
+tells the unit to use silver before food items (this is the default). <p>
+
+Example: <p>
+Tell a unit to use food items in the unit's possession for maintenance
+costs. <p>
+<pre>
+  CONSUME UNIT
+</pre> <p>
+
+<hr>
+<a name="declare"> </a>
+<h4> DECLARE [faction] [attitude] </h4>
+<h4> DECLARE [faction] </h4>
+<h4> DECLARE DEFAULT [attitude] </h4>
+
+The first form of the DECLARE order sets the attitude of your faction towards
+the given faction.  The second form cancels any attitude towards the given
+faction (so your faction's attitude towards that faction will be its default
+attitude).  The third form sets your faction's default attitude. <p>
+
+Examples: <p>
+Declare your faction to be hostile to faction 15. <p>
+<pre>
+  DECLARE 15 hostile
+</pre> <p>
+Set your faction's attitude to faction 15 to its default attitude. <p>
+<pre>
+  DECLARE 15
+</pre> <p>
+Set your faction's default attitude to friendly. <p>
+<pre>
+  DECLARE DEFAULT friendly
+</pre> <p>
+
+<hr>
+<a name="describe"> </a>
+<h4> DESCRIBE UNIT [new description] </h4>
+<h4> DESCRIBE SHIP [new description] </h4>
+<h4> DESCRIBE BUILDING [new description] </h4>
+
+Change the description of the unit, or of the object the unit is in (of which
+the unit must be the owner).  Descriptions can be of any length, up to the line
+length your mailer can handle.  If no description is given, the description
+will be cleared out. <p>
+
+Example: <p>
+Set the unit,s description to read "Merlin's helper". <p>
+<pre>
+  DESCRIBE UNIT "Merlin's helper"
+</pre> <p>
+
+<hr>
+<a name="destroy"> </a>
+<h4> DESTROY </h4>
+
+Destroy the object you are in (of which you must be the owner).  The order
+cannot be used at sea. <p>
+
+Example: <p>
+Destroy the ship or building the unit is in. <p>
+<pre>
+  DESTROY
+</pre> <p>
+
+<hr>
+<a name="enter"> </a>
+<h4> ENTER [object] </h4>
+
+Attempt to enter the specified object.  If issued from inside another object,
+the unit will first leave the object it is currently in.  The order will only
+work if the target object is unoccupied, or is owned by a unit in your faction,
+or is owned by a unit which has declared you Friendly. <p>
+
+Example: <p>
+Enter ship number 114. <p>
+<pre>
+  ENTER 114
+</pre> <p>
+
+<hr>
+<a name="entertain"> </a>
+<h4> ENTERTAIN </h4>
+
+Spend the month entertaining the populace to earn money. <p>
+
+Example: <p>
+<pre>
+  ENTERTAIN
+</pre> <p>
+
+<hr>
+<a name="faction"> </a>
+<h4> FACTION [type] [points]... </h4>
+
+Attempt to change your faction's type.  In the order, you can specify
+up to three faction types (WAR, TRADE, and MAGIC) and the number of
+faction points to assign to each type; if you are assigning points
+to only one or two types, you may omit the types that will not have
+any points. <p>
+
+Changing the number of faction points assigned to MAGIC may be tricky.
+Increasing the MAGIC points will always succeed, but if you decrease
+the number of points assigned to MAGIC, you must make sure that you
+have only the number of magic-skilled leaders allowed by the new
+number of MAGIC points BEFORE you change your point distribution.
+For example, if you have 3 mages (3 points assigned to MAGIC), but
+want to use one of those points for WAR or TRADE (change to MAGIC 2),
+you must first get rid of one of your mages by either giving it to
+another faction or ordering it to
+<a href="#forget"> FORGET </a> all its magic skills.
+If you have too many mages for the number of points you try to assign
+to MAGIC, the FACTION order will fail. <p>
+
+Examples: <p>
+Assign 2 faction points to WAR, 2 to TRADE, and 1 to MAGIC. <p>
+<pre>
+  FACTION WAR 2 TRADE 2 MAGIC 1
+</pre> <p>
+Become a pure magic faction (assign all points to magic). <p>
+<pre>
+  FACTION MAGIC 5
+</pre> <p>
+
+
+<hr>
+<a name="find"> </a>
+<h4> FIND [faction] </h4>
+
+Find the email address of the specified faction. <p>
+
+Example: <p>
+Find the email address of faction 4. <p>
+<pre>
+  FIND 4
+</pre> <p>
+
+<hr>
+<a name="forget"> </a>
+<h4> FORGET [skill] </h4>
+
+Forget the given skill. This order is useful for normal
+units who wish to learn a new skill, but already know a different skill.
+<p>
+
+Example: <p>
+Forget knowledge of Mining. <p>
+<pre>
+  FORGET Mining
+</pre> <p>
+  
+<hr>  
+<a name="form"> </a>
+<h4> FORM [alias] </h4>
+
+Form a new unit.  The newly created unit will be in your faction, in the same
+region as the unit which formed it, and in the same structure if any.  It will
+start off, however, with no people or items; you should, in the same month,
+issue orders to transfer people into the new unit, or have it recruit members.
+The new unit will inherit its flags from the unit that forms it,
+such as avoiding, behind, and autotax.
+<p>
+
+The FORM order is followed by a list of orders for the newly created unit. 
+This list is terminated by the END keyword, after which orders for the original
+unit resume. <p>
+
+The purpose of the "alias" parameter is so that you can refer to the new unit. 
+You will not know the new unit's number until you receive the next turn
+report.  To refer to the new unit in this set of orders, pick an alias
+number (the only restriction on this is that it
+must be at least 1, and you should not create two units in the same region in
+the same month, with the same alias numbers).  The new unit can then be
+referred to as NEW <alias> in place of the regular unit number, e.g. <p>
+<pre>
+    UNIT 17
+    FORM 1
+        NAME UNIT "Merlin's Guards"
+        BUY 5 Plainsmen
+        STUDY COMBAT
+    END
+    FORM 2
+        NAME UNIT "Merlin's Workers"
+        DESCRIBE UNIT "wearing dirty overalls and carrying shovels"
+        BUY 15 Plainsmen
+    END
+    CLAIM 2500
+    GIVE NEW 1 1000 silver
+    GIVE NEW 2 2000 silver
+</pre> <p>
+This set of orders for unit 17 would create two new units with alias numbers 1
+and 2, name them Merlin's Guards and Merlin's Workers, set the description for
+Merlin's Workers, have both units recruit men, and have Merlin's Guards study
+combat.  Merlin's Workers will have the default order
+<a href="#work"> WORK</a>, as all newly
+created units do.  The unit that created these two then pays them enough money
+(using the NEW keyword to refer to them by alias numbers) to cover the costs of
+recruitment and the month's maintenance. <p>
+
+You can refer to newly created units belonging to other factions, if you know
+what alias number they are, e.g. FACTION 15 NEW 2 will refer to faction 15's
+newly created unit with alias 2. <p>
+
+Note: If a unit moves out of the region in which it was formed
+(by the <a href="#move">MOVE</a> order, or otherwise), the alias
+will no longer work. This is to prevent conflicts with other units
+that may have the same alias in other regions. <p>
+
+If the demand for recruits in that region that month is much higher than the
+supply, it may happen that the new unit does not gain all the recruits
+you ordered it to buy, or it may not gain any recruits at all.  If the
+new units gains at least one recruit, the unit will form possessing
+any unused silver and all the other items it was given.  If no recruits
+are gained at all, the empty unit will be dissolved, and the silver and
+any other items it was given will revert to the lowest numbered unit you
+have in that region. <p>
+
+<hr>
+<a name="give"> </a>
+<h4> GIVE [unit] [quantity] [item] </h4>
+<h4> GIVE [unit] UNIT </h4>
+
+The first form of the GIVE order gives a quantity of an item to another unit.
+The second form the the GIVE order gives the entire unit to the specified
+unit's faction. <p>
+ 
+If the target unit is not a member of your faction, then its faction must have
+declared you Friendly, with a couple of exceptions. First, silver may be given
+to any unit, regardless of factional affiliation. Secondly, men may not 
+be given to units in other factions (you must give the entire unit);
+the reason for this is to prevent highly skilled units from being
+sabotaged with a <a href="#give">GIVE</a> order. <p>
+
+There are also a few restrictions on orders given by units who been
+given to another faction. If the receiving faction is not allied to
+the giving faction, the unit may not issue the 
+<a href="#advance">ADVANCE</a> order, or issue any more 
+<a href="#give">GIVE</a> orders. Both of these rules are to prevent
+unfair sabotage tactics. <p>
+
+If 0 is specified as the unit number, then the items
+are discarded. <p>
+
+Examples: <p>
+Give 10 swords to unit 4573. <p>
+<pre>
+  GIVE 4573 10 swords
+</pre> <p>
+Give 5 chain armor to the new unit, alias 2, belonging to faction 14. <p>
+<pre>
+  GIVE FACTION 14 NEW 2 5 "Chain armor"
+</pre> <p>
+Give control of this unit to the faction owning unit 75. <p>
+<pre>
+  GIVE 75 UNIT
+</pre> <p>
+
+<hr>
+<a name="guard"> </a>
+<h4> GUARD [flag] </h4>
+
+GUARD 1 sets the unit issuing the order to prevent non-Friendly units from
+collecting taxes in the region, and to prevent any units not your own from
+pillaging the region.  Guarding units will also attempt to prevent Unfriendly
+units from entering the region.  GUARD 0 cancels Guard status. <p>
+
+The Guard and Avoid Combat flags are mutually exclusive; setting one
+automatically cancels the other. <p>
+
+Example: <p>
+Instruct the current unit to be on guard. <p>
+<pre>
+  GUARD 1
+</pre> <p>
+
+<hr>
+<a name="hold"> </a>
+<h4> HOLD [flag] </h4>
+
+HOLD 1 instructs the issuing unit to never join a battle in regions the unit is
+not it.  This can be useful if the unit is in a building, and doesn't want to
+leave the building to join combat.  HOLD 0 cancels holding status. <p>
+
+Example: <p>
+Instruct the unit to avoid combat in other regions. <p>
+<pre>
+  HOLD 1
+</pre> <p>
+
+<hr>
+<a name="leave"> </a>
+<h4> LEAVE </h4>
+
+Leave the object you are currently in.  The order cannot be used at sea.
+<p>
+
+Example: <p>
+<pre>
+LEAVE
+</pre> <p>
+
+<hr>
+<a name="move"> </a>
+<h4> MOVE [dir] ... </h4>
+
+Attempt to move in the direction(s) specified.  If more than one direction is
+given, the unit will move multiple times, in the order specified by the MOVE
+order, until no more directions are given, or until one of the moves fails.  A
+move can fail because the units runs out of movement points, because the unit
+attempts to move into the ocean, or because the units attempts to enter a
+structure, and is rejected. <p>
+
+Valid directions are: <p>
+1) The compass directions North, Northwest, Southwest, South, Southeast, and
+Northeast.  These can be abbreviated N, NW, SW, S, SE, NE. <p>
+2) A structure number. <p>
+3) OUT, which will leave the structure that the unit is in. <p>
+4) IN, which will move through an inner passage in the structure that the unit
+is currently in. <p>
+
+Multiple MOVE orders given by one unit will chain together, so: <p>
+<pre>
+  MOVE N
+  MOVE NE IN 
+</pre> <p>
+is equivalent to: <p>
+<pre>
+  MOVE N NE IN
+</pre> <p>
+
+Note that MOVE orders can lead to combat, due to hostile units meeting, or due
+to an advancing unit being forbidden access to a region.  In this case, combat
+occurs each time all movement out of a single region occurs. <p>
+
+Example 1: Units 1 and 2 are in Region A, and unit 3 is in Region B.  Units 1
+and 2 are hostile to unit 3.  Both unit 1 and 2 move into region B, and attack
+unit 3.  Since both units moved out of the same region, they attack unit 3 at
+the same time, and the battle is between units 1 and 2, and unit 3. <p>
+
+Example 2: Same as example 1, except unit 2 is in Region C, instead of region
+A.  Both units move into Region B, and attack unit 3.  Since unit 1 and unit 2
+moved out of different regions, their battles occur at different times.  Thus,
+unit 1 attacks unit 3 first, and then unit 2 attacks unit 3 (assuming unit 3
+survives the first attack).  Note that the order of battles could have happened
+either way. <p>
+
+<hr>
+<a name="name"> </a>
+<h4> NAME UNIT [new name] </h4>
+<h4> NAME FACTION [new name] </h4>
+<h4> NAME OBJECT [new name] </h4>
+
+Change the name of the unit, or of your faction, or of the object the unit is
+in (of which the unit must be the owner).  Names can be of any length, up to
+the line length your mailer can handle.  Names may not contain parentheses
+(square brackets can be used instead if necessary), or any control characters.
+<p>
+
+Example: <p>
+Name your faction "The Merry Pranksters". <p>
+<pre>
+  NAME FACTION "The Merry Pranksters"
+</pre> <p>
+
+<hr>
+<a name="noaid"> </a>
+<h4> NOAID [flag] </h4>
+
+NOAID 1 indicates that if the unit attacks, or is attacked, 
+it is not to be aided
+by units in other hexes. NOAID status is very useful for scouts or
+probing units, who do not wish to drag their nearby armies into battle
+if they are caught. NOAID 0 cancels this. <p>
+
+If multiple units are on one side in a battle, they must all have the
+NOAID flag on, or they will receive aid from other hexes. <p>
+
+Example: <p>
+Set a unit to receive no aid in battle. <p>
+<pre>
+  NOAID 1
+</pre> <p>
+
+<hr>
+<a name="option"> </a>
+<h4> OPTION TIMES </h4>
+<h4> OPTION NOTIMES </h4>
+<h4> OPTION TEMPLATE OFF </h4>
+<h4> OPTION TEMPLATE SHORT </h4>
+<h4> OPTION TEMPLATE LONG </h4>
+<h4> OPTION TEMPLATE MAP </h4>
+
+The OPTION order is used to toggle various settings that affect your
+reports, and other email details.
+OPTION TIMES sets it so that your faction receives the times
+each week (this is the default); OPTION NOTIMES sets it so that your faction
+is not sent the times. <p>
+
+The OPTION TEMPLATE order toggles the length of the Orders Template
+that appears at the bottom of a turn report.  The OFF setting eliminates
+the Template altogether, and the SHORT, LONG and MAP settings control how
+much detail the Template contains.  The MAP setting will produce an ascii
+map of the region and surrounding regions in addition other details.<p>
+
+<hr>
+<a name="password"> </a>
+<h4> PASSWORD [password] </h4>
+<h4> PASSWORD </h4>
+
+The PASSWORD order is used to set your faction's password.  If you have a
+password set, you must specify it on your #ATLANTIS line for the game to
+accept your orders.  This protects you orders from being overwritten, either
+by accident or intentionally by other players.  PASSWORD with no password
+given clears out your faction's password. <p>
+
+IMPORTANT: The PASSWORD order does not take effect until the turn is actually
+run.  So if you set your password, and then want to re-submit orders, you
+should use the old password until the turn has been run. <p>
+
+Example: <p>
+Set the password to "xyzzy". <p>
+<pre>
+  PASSWORD xyzzy
+</pre> <p>
+
+<hr>
+<a name="pillage"> </a>
+<h4> PILLAGE </h4>
+
+Use force to extort as much money as possible from the region. Note that
+the <a href="#tax">TAX</a> order and PILLAGE order are mutually
+exclusive; a unit may only attempt to do one in a turn.<p>
+
+<hr>
+<a name="produce"> </a>
+<h4> PRODUCE [item] </h4>
+
+Spend the month producing as much as possible of the specified item. <p>
+
+Example: <p>
+Produce as many crossbows as possible. <p>
+<pre>
+  PRODUCE crossbows
+</pre> <p>
+
+<hr>
+<a name="promote"> </a>
+<h4> PROMOTE [unit] </h4>
+
+Promote the specified unit to owner of the object of which you are currently
+the owner.  The target unit must have declared you Friendly. <p>
+
+Example: <p>
+Promote unit 415 to be the owner of the object that this unit owns. <p>
+<pre>
+  PROMOTE 415
+</pre> <p>
+
+<hr>
+<a name="quit"> </a>
+<h4> QUIT [password] </h4>
+
+Quit the game.  On issuing this order, your faction will be completely and
+permanently destroyed. Note that you must give your password for the quit
+order to work; this is to provide some safety against accidentally issuing
+this order. <p>
+
+<hr>
+<a name="restart"></a>
+<h4> RESTART [password] </h4>
+
+Similar to the <a href="#quit">QUIT</a> order, this order will completely
+and permanently destroy your faction. However, it will begin a brand new
+faction for you (you will get a separate turn report for the new
+faction). Note that you must give your password for this order to work,
+to provide some protection against accidentally issuing this order. <p>
+
+<hr>
+<a name="reveal"> </a>
+<h4> REVEAL </h4>
+<h4> REVEAL UNIT </h4>
+<h4> REVEAL FACTION </h4>
+
+Cause the unit to either show itself (REVEAL UNIT), or show itself and its
+faction affiliation (REVEAL FACTION), in the turn report, to all other factions
+in the region.  Used to reveal high stealth scouts, should there be some reason
+to.  REVEAL is used to cancel this. <p>
+
+Examples: <p>
+Show the unit to all factions. <p>
+<pre>
+  REVEAL UNIT 
+</pre> <p>
+Show the unit and it's affiliation to all factions. <p>
+<pre>
+  REVEAL FACTION
+</pre> <p>
+Cancels revealling. <p>
+<pre>
+  REVEAL
+</pre> <p>
+
+<hr>
+<a name="sail"> </a>
+<h4> SAIL [dir] ... </h4>
+<h4> SAIL </h4>
+
+The first form will sail the ship, which the unit must be the owner of, in the
+directions given.  The second form will cause the unit to aid in the sailing
+of the ship, using the Sailing skill.  See the section on movement for more
+information on the mechanics of sailing. <p>
+
+Example: <p>
+Sail north, then northwest. <p>
+<pre>
+  SAIL N NW
+</pre> <p>
+or: <p>
+<pre>
+  SAIL N
+  SAIL NW
+</pre> <p>
+  
+<hr>
+<a name="sell"> </a>
+<h4> SELL [quantity] [item] </h4>
+
+Attempt to sell the amount given of the item given.  If the unit does not have
+as many of the item as it is trying to sell, it will attempt to sell all that
+it has.  If more of the item are on sale (by all the units in the region) than
+are wanted by the region, the number sold per unit will be split up in
+proportion to the number each unit tried to sell. <p>
+
+Example: <p>
+Sell 10 furs to the market. <p>
+<pre>
+  SELL 10 furs
+</pre> <p>
+
+<hr>
+<a name="show"> </a>
+<h4> SHOW SKILL [skill] [level] </h4>
+<h4> SHOW ITEM [item] </h4>
+
+The first form of the order shows the skill description for a skill
+that your faction already possesses. The second form returns some
+information about an item that is not otherwise apparent on a
+report, such as the weight. <p>
+
+Example: <p>
+Show the skill report for Mining 3 again. <p>
+<pre>
+  SHOW SKILL Mining 3
+</pre> <p>
+Get some information about Iron. <p>
+<pre>
+  SHOW ITEM Iron
+</pre> <p>
+
+<hr>
+<a name="steal"> </a>
+<h4> STEAL [unit] [item] </h4>
+
+Attempt to steal as much as possible of the specified item from the specified
+unit.  The order may only be issued by a one-man unit. <p>
+
+Example: <p>
+Steal silver from unit 123. <p>
+<pre>
+  STEAL 123 SILVER
+</pre> <p>
+Steal wood from unit 321. <p>
+<pre>
+  STEAL 321 wood
+</pre> <p>
+
+<hr>
+<a name="study"> </a>
+<h4> STUDY [skill] </h4>
+
+Spend the month studying the specified skill. <p>
+
+Example: <p>
+Study horse training. <p>
+<pre>
+  STUDY "Horse Training"
+</pre> <p>
+
+<hr>
+<a name="tax"> </a>
+<h4> TAX </h4>
+
+Attempt to collect taxes from the region.  Only War factions may collect taxes,
+and then only if there are no non-Friendly units on guard. Only
+combat-ready units may issue this order. Note that the TAX order and the
+<a href="#pillage">PILLAGE</a> order are mutually exclusive; a unit
+may only attempt to do one in a turn.<p>
+
+Example: <p>
+Attempt to collect taxes. <p>
+<pre>
+  TAX
+</pre> <p>
+
+<hr>
+<a name="teach"> </a>
+<h4> TEACH [unit] ... </h4>
+
+Attempt to teach the specified units whatever skill they are studying that
+month.  A list of several units may be specified.  All units to be taught must
+have declared you Friendly.  Subsequent TEACH orders can be used to add units
+to be taught.  Thus: <p>
+<pre>
+  TEACH 1
+  TEACH 2
+</pre> <p>
+is equivalent to <p>
+<pre>
+  TEACH 1 2
+</pre> <p>
+
+Example: <p>
+Teach new unit 2 and unit 5 whatever they are studying. <p>
+<pre>
+  TEACH NEW 2 5
+</pre> <p>
+
+<hr>
+<a name="work"> </a>
+<h4> WORK </h4>
+
+Spend the month performing manual work for wages. <p>
+
+<a name="sequenceofevents">
+<hr>
+<h2> Sequence of Events </h2>
+
+Each turn, the following sequence of events occurs: <p>
+
+<ol>
+<li> Instant orders.
+
+<ul>
+<li> <a href="#form">FORM</a> orders are processed.
+<li> <a href="#address">ADDRESS</a>,
+<a href="#autotax">AUTOTAX</a>,
+<a href="#avoid">AVOID</a>,
+<a href="#behind">BEHIND</a>,
+<a href="#claim">CLAIM</a>,
+<a href="#combat">COMBAT</a>,
+<a href="#consume">CONSUME</a>,
+<a href="#declare">DECLARE</a>,
+<a href="#describe">DESCRIBE</a>,
+<a href="#faction">FACTION</a>,
+<a href="#guard">GUARD</a> 0,
+<a href="#hold">HOLD</a>,
+<a href="#name">NAME</a>,
+<a href="#noaid">NOAID</a>,
+<a href="#option">OPTION</a>,
+<a href="#password">PASSWORD</a>,
+<a href="#reveal">REVEAL</a>, and
+<a href="#show">SHOW</a>
+orders are processed.
+<li> <a href="#find">FIND</a> orders are processed.
+<li> <a href="#leave">LEAVE</a> orders are processed.
+<li> <a href="#enter">ENTER</a> orders are processed.
+<li> <a href="#promote">PROMOTE</a> orders are processed.
+</ul>
+
+<li> Combat is processed.
+
+<li> Steal orders.
+
+<ul>
+<li> <a href="#steal">STEAL</a> and
+<a href="#assassinate">ASSASSINATE</a> orders are processed.
+</ul>
+
+<li> Give orders.
+
+<ul>
+<li> <a href="#destroy">DESTROY</a> and
+<a href="#give">GIVE</a> orders are processed.
+</ul>
+
+<li> Tax orders.
+
+<ul>
+<li> <a href="#pillage">PILLAGE</a> orders are processed.
+<li> <a href="#tax">TAX</a> orders are processed.
+</ul>
+
+<li> Instant Magic
+
+<ul>
+<li> Old spells are cancelled.
+<li> Spells are <a href="#cast">CAST</a> (except for Teleportation spells).
+</ul>
+
+<li> Market orders.
+
+<ul>
+<li> <a href="#guard">GUARD</a> 1 orders are processed.
+<li> <a href="#sell">SELL</a> orders are processed.
+<li> <a href="#buy">BUY</a> orders are processed.
+<li> <a href="#quit">QUIT</a> and <a href="#restart">RESTART</a>
+orders are processed.
+<li> <a href="#forget">FORGET</a> orders are processed.
+</ul>
+
+<li> Movement orders.
+
+<ul>
+<li> <a href="#sail">SAIL</a> orders are processed.  
+<li> <a href="#advance">ADVANCE</a>
+and <a href="#move">MOVE</a>
+orders are processed (including any combat resulting from
+these orders).
+</ul>
+
+<li> Month long orders.
+
+<ul>
+<li> <a href="#build">BUILD</a>,
+<a href="#entertain">ENTERTAIN</a>,
+<a href="#produce">PRODUCE</a>,
+<a href="#study">STUDY</a>,
+<a href="#teach">TEACH</a> and
+<a href="#work">WORK</a> orders are processed.
+<li> Teleportation spells are <a href="#cast">CAST</a>.
+<li>
+Costs associated with these orders (such as study fees) are collected.
+</ul>
+
+<li> Maintenance costs are assessed.
+
+</ol>
+
+Where there is no other basis for deciding in which order units will be
+processed within a phase, units that appear higher on the report get
+precedence. <p>
+
+<a name="reportformat">
+<hr>
+<h2> Report Format </h2>
+
+The most important sections of the turn report are the "Events During Turn"
+section which lists what happened last month, and the "Current Status" section
+which gives the description of each region in which you have units.
+<p>
+
+Your units in the Current Status section are flagged with a "*" character. 
+Units belonging to other factions are flagged with a "-" character.  You may be
+informed which faction they belong to, if you have high enough Observation
+skill. <p>
+
+Objects are flagged with a "+" character.  The units listed under an object (if
+any) are inside the object.  The first unit listed under an object is its
+owner. <p>
+
+If you can see a unit, you can see any large items it is carrying.  This means
+all items other than silver, herbs, and other small items (which are of zero
+size units, and are small enough to be easily concealed).  Items carried by
+your own units of course will always be listed. <p>
+
+At the bottom of your turn report is an Orders Template.  This template
+gives you a formatted orders form, with all of your units listed.  You
+may use this to fill in your orders, or write them on your own. The
+<a href="#option">OPTION</a> order gives you the option of giving
+more or less information in this template, or turning it of altogether.
+You can precede orders with an '@' sign in your orders, in which case
+they will appear in your template on the next turn's report. <p>
+
+<a name="hintsfornew">
+<hr>
+<h2> Hints for New Players </h2>
+
+Make sure to use the correct #ATLANTIS and UNIT lines in your orders.
+<p>
+
+Always have a month's supply of spare cash in every region in which you have
+units, so that even if they are deprived of income for a month (due to a
+mistake in your orders, for example), they will not starve to death.  It is
+very frustrating to have half your faction wiped out because you neglected to
+provide enough money for them to live on. <p>
+
+Be conservative with your money.  Leaders especially are very hard to maintain,
+as they cannot usually earn enough by <a href="#work"> WORK</a>ing
+to pay their maintenance fee.  Even once
+you have recruited men, notice that it is expensive for them to
+<a href="#study"> STUDY </a> (and
+become productive units), so be sure to save money to that end. <p>
+
+Don't leave it until the last minute to send orders.  If there is a delay in
+the mailer, your orders will not arrive on time, and turns will NOT be rerun,
+nor will it be possible to change the data file for the benefit of players
+whose orders weren't there by the deadline.  If you are going to send your
+orders at the last minute, send a preliminary set earlier in the week so that
+at worst your faction will not be left with no orders at all. <p>
+
+</body>
+</html>
