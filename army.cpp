@@ -776,13 +776,16 @@ void Army::DoHealLevel(Battle *b, int type, int useItems)
 void Army::Win(Battle * b,ItemList * spoils)
 {
 	int wintype;
-	if (count - NumAlive()) wintype = WIN_DEAD;
-	else wintype = WIN_NO_DEAD;
 
 	DoHeal(b);
 
 	WriteLosses(b);
+
 	int na = NumAlive();
+
+	if (count - na) wintype = WIN_DEAD;
+	else wintype = WIN_NO_DEAD;
+
 	AList units;
 
 	forlist(spoils) {

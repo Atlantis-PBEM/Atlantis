@@ -684,4 +684,9 @@ Changes from 4.0.10 -> 5.0.0
       used or the unit will not use any battle items.  Under normal, the
       unit will fall back on the battle items list.
    -- gamedefs OCEAN and CONTINENT_SIZE now determine surface level parameters.
-
+   -- Fixed a bug which caused the first mage casting Earth Lore in a
+      region to recieve 2*level less silver than he should.
+   -- Fixed a bug where an army where all casualties were healed were
+      prevented from further moves or attacks.  Full healing should mean
+      no penalties.
+   -- Fixed a bug in output of rules dealing with skill-based maintenance.

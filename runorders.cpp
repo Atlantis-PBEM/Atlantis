@@ -2885,7 +2885,7 @@ void Game::RunTransportOrders()
 					ordertype = (t->type == O_TRANSPORT) ?
 						"Transports " : "Distributes ";
 					u->Event(ordertype + ItemString(t->item, amt) + " to " +
-							*tar->unit->name + " for $" + AString(cost) + ".");
+							*tar->unit->name + " for $" + cost + ".");
 					if (u->faction != tar->unit->faction) {
 						tar->unit->Event(AString("Recieves ") +
 								ItemString(t->item, amt) + " from " +
