@@ -427,7 +427,7 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 
 	temp += items.Report(obs, truesight, 0);
 
-	if (obs == 2) {		
+	if (obs == 2) {
 		temp += ". Weight: ";
 		temp += AString(items.Weight());
 		temp += ". Capacity: ";
@@ -479,7 +479,7 @@ AString Unit::TemplateReport()
 
 	temp += items.Report(2, 1, 0);
 	temp += ". Weight: ";
-	temp += AString(items.Weight()); 
+	temp += AString(items.Weight());
 	temp += ". Capacity: ";
 	temp += AString(FlyingCapacity());
 	temp += "/";

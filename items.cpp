@@ -1051,7 +1051,7 @@ int ItemList::Weight()
 		if (ItemDefs[i->type].weight == 0) frac += i->num;
 		else wt += ItemDefs[i->type].weight * i->num;
 	}
-	if (Globals->FRACTIONAL_WEIGHT > 0)
+	if (Globals->FRACTIONAL_WEIGHT > 0 && frac != 0)
 		wt += ((frac/Globals->FRACTIONAL_WEIGHT) + 1);
 	return wt;
 }
