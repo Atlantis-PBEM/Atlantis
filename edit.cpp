@@ -493,7 +493,8 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 
 
         Awrite( " [t] [terrain type] to modify terrain type" ); 
-        Awrite( " [r] [race] to modify local race" );         
+        Awrite( " [r] [race] to modify local race" );
+        Awrite( "     (use none, None or 0 to unset)" );
         Awrite( " [w] [maxwages] to modify local wages" );
         Awrite( " [p] to regenerate products according to terrain type" ); 
         Awrite( " [g] to regenerate all according to terrain type" );
@@ -547,12 +548,17 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
                     break; 
                 } 
 
-                int prace = ParseAllItems(pToken);
+                int prace = 0;
+                prace = ParseAllItems(pToken);
                 if(!(ItemDefs[prace].type & IT_MAN) || (ItemDefs[prace].flags & ItemType::DISABLED) ) {
-                    Awrite( "No such race." ); 
-                    break;
+					if (!(*pToken == "none" || *pToken == "None" || *pToken == "0")) {
+						Awrite( "No such race." ); 
+						break;
+					} else {
+						prace = -1;
+					}
                 }
-                if(prace>0) pReg->race = prace;
+                if(prace != 0) pReg->race = prace;
                 pReg->UpdateEditRegion();
                 SAFE_DELETE( pToken );
             }
