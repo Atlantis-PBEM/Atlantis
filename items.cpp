@@ -212,8 +212,8 @@ AString *ItemDescription(int item, int full)
 			*temp += AString(", costs ") + (ItemDefs[item].baseprice*5/2) +
 				" silver to withdraw";
 		}
-		*temp += ".";
 	}
+	*temp += ".";
 
 	if(ItemDefs[item].type & IT_MAN) {
 		int man = ItemDefs[item].index;
