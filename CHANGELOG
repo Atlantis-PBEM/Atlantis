@@ -107,6 +107,8 @@ Changes from 4.0.6 -> 4.0.7
       with this flag will tax if a) no other orders have been given for
       the unit and b) it is capable of taxing.  (IE, the autotax flag
       makes the units default order TAX instead of WORK)
+   -- Fixed bug that caused monster generation to hang if unable to generate
+      monsters because all of them were disabled.
 
 TODO
 ----------------

@@ -87,7 +87,27 @@ void Game::GrowWMons(int rate)
                         if (!reg->IsGuarded())
                         {
                             mons += reg->CountWMons();
-                            wanted += TerrainDefs[reg->type].wmonfreq;
+							/*
+							 * Make sure there is at least one monster type
+							 * enabled for this region
+							 */
+							int avail = 0;
+							int mon = TerrainDefs[reg->type].smallmon;
+							if(!((mon == -1) ||
+							     (ItemDefs[mon].flags & ItemType::DISABLED)))
+								avail = 1;
+							mon = TerrainDefs[reg->type].bigmon;
+							if(!((mon == -1) ||
+							     (ItemDefs[mon].flags & ItemType::DISABLED)))
+								avail = 1;
+							mon = TerrainDefs[reg->type].humanoid;
+							if(!((mon == -1) ||
+							     (ItemDefs[mon].flags & ItemType::DISABLED)))
+								avail = 1;
+
+							if(avail)
+								wanted += TerrainDefs[reg->type].wmonfreq;
+							
                         }
                     }
                 }
