@@ -76,6 +76,7 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "This skill deals with all aspects of various stone "
 				"production. Mountains are the main producers of stone, but "
 				"it may be found in other regions as well.";
+			break;
 		case S_HUNTING:
 			if(level > 1) break;
 			*str += "This skill deals with all aspects of animal hide "
