@@ -128,6 +128,13 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_CLOTHARMOR);
 	EnableItem(I_BOOTS);
 
+    EnableItem(I_BAXE);
+	EnableItem(I_MBAXE);
+	EnableItem(I_IMARM);
+	EnableItem(I_SUPERBOW);
+
+	EnableSkill(S_ARMORCRAFT);
+	EnableSkill(S_WEAPONCRAFT);
 
 	EnableObject(O_ROADN);
 	EnableObject(O_ROADNE);
