@@ -127,6 +127,8 @@ static GameDefs g = {
 	4,   // START_CITY_MAGES
 	4,   // START_CITY_TACTICS
 	0,   // APPRENTICES_EXIST
+
+	"Wyreth", // WORLD_NAME
 };
 
 GameDefs * Globals = &g;

@@ -957,8 +957,10 @@ void Game::RunBirdLore(ARegion *r,Unit *u)
     if( regions.GetRegionArray( r->zloc )->levelType != 
         ARegionArray::LEVEL_SURFACE )
     {
-        u->Error("CAST: Bird Lore may only be cast on the surface of "
-                 "Atlantis.");
+		AString error = "CAST: Bird Lore may only be cast on the surface of ";
+		error += Globals->WORLD_NAME;
+		error += ".";
+        u->Error(error.getstr());
         return;
     }
 
@@ -1178,7 +1180,10 @@ void Game::RunFarsight(ARegion *r,Unit *u)
 		if( regions.GetRegionArray( r->zloc )->levelType != 
 				ARegionArray::LEVEL_SURFACE)
 		{
-			u->Error("CAST: Farsight only works on the surface of Atlantis.");
+			AString error = "CAST: Farsight only works on the surface of ";
+			error += Globals->WORLD_NAME;
+			error += ".";
+			u->Error(error.getstr());
 			return;
 		}
 	}

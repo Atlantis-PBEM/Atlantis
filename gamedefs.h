@@ -39,6 +39,7 @@
 // 2001/Feb/19 Joseph Traub      Removed the ENGINE_VERSION from the gamedef
 //                               since it wasn't being used.
 // 2001/Feb/21 Joseph Traub      Added a FACLIM_UNLIMITED option
+// 2001/Apr/08 Joseph Traub      Added WORLD_NAME option
 //
 
 #ifndef GAME_DEFS
@@ -238,6 +239,9 @@ public:
 	// Are we allowing apprentices?
 	//
 	int APPRENTICES_EXIST;
+
+	// What is the name of the world?
+	char *WORLD_NAME;
 
 };
 

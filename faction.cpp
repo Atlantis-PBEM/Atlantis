@@ -313,7 +313,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
     f->EndLine();
 
     if (!times) {
-        f->PutStr("Note: The Atlantis Times is not being sent to you.");
+        f->PutStr("Note: The Times is not being sent to you.");
         f->EndLine();
     }
 

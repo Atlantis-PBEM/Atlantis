@@ -128,6 +128,8 @@ static GameDefs g = {
 	0,   // START_CITY_TACTICS
 
 	0,   // APPRENTICES_EXIST
+
+	"Atlantis", // WORLD_NAME
 };
 
 GameDefs * Globals = &g;

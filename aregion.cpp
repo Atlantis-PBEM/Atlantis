@@ -31,10 +31,12 @@
 //                               different base costs
 // 2001/Feb/16 Joseph Traub      Semi-fixed a bug which allowed multiple
 //                               disconnected regions in the underworld.
+// 2001/Apr/08 Joseph Traub      Added ability to define the world name.
 //
 
 #include "game.h"
 #include "gamedata.h"
+#include "stdio.h"
 
 Location * GetUnit(AList * list,int n)
 {
@@ -1653,8 +1655,8 @@ void ARegion::WriteExits( Areport *f, ARegionList *pRegs )
     f->EndLine();
 }
 
-#define AC_STRING "Atlantis Nexus is a magical place; the entryway " \
-"to the world of Atlantis. Enjoy your stay, the city guards should " \
+#define AC_STRING "%s Nexus is a magical place; the entryway " \
+"to the world of %s. Enjoy your stay, the city guards should " \
 "keep you safe as long as you should choose to stay. However, rumor " \
 "has it that once you have left the Nexus, you can never return."
 
@@ -1700,9 +1702,14 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
         }
 
         if (num == 0) {
+			int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
+			char *nexus_desc = new char[len];
+			sprintf(nexus_desc, AC_STRING, Globals->WORLD_NAME,
+					Globals->WORLD_NAME);
             f->PutStr("");
-            f->PutStr(AC_STRING);
+            f->PutStr(nexus_desc);
             f->PutStr("");
+			delete [] nexus_desc;
         }
         
         f->DropTab();
@@ -2298,7 +2305,10 @@ void ARegionList::CreateNexusLevel( int level, char *name )
     pRegionArrays[ level ]->levelType = ARegionArray::LEVEL_NEXUS;
     ARegion *reg = pRegionArrays[ level ]->GetRegion( 0, 0 );
 
-    reg->SetName("Atlantis Nexus");
+	AString nex_name = Globals->WORLD_NAME;
+	nex_name += " Nexus";
+
+    reg->SetName(nex_name.getstr());
     reg->type = R_NEXUS;
 
     FinalSetup( pRegionArrays[ level ] );
@@ -2782,7 +2792,9 @@ void ARegionList::FinalSetup( ARegionArray *pArr )
                 } 
                 else
                 {
-                    reg->SetName("Atlantis Ocean");
+					AString ocean_name = Globals->WORLD_NAME;
+					ocean_name += " Ocean";
+                    reg->SetName(ocean_name.getstr());
                 }
             } 
             else

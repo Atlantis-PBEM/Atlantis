@@ -317,3 +317,8 @@ istream & operator >>(istream & is,AString & s) {
   delete buf;
   return is;
 }
+
+char * AString::getstr()
+{
+	return str;
+}
