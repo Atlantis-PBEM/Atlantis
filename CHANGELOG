@@ -705,3 +705,7 @@ Changes from 4.0.10 -> 5.0.0
       at level 1, instead of 20% at level 1 up to 100% at level 5.
    -- Fixed bug where @endturn failed to work.
    -- Fixed another bug in skill based maintenance.
+   -- Calls to CleanUpWater() and SeverLandBridges() now part of the default
+      surface level creation. Also added some variability in terrain growth
+      and some code to prevent land from squeezing onto the north and south
+      map edges.

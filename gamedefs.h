@@ -344,15 +344,13 @@ public:
 	// (note that archipelagos are smaller so that
 	//  the overall contribution of archipelagos to
 	//  land mass will be much lower than this percentage)
-	// Setting ARCHIPELAGO means that smaller inland seas will be
-	// converted into continent mass.
 	// suggested value: 10, 25, 50+ it's really a matter of taste
 	int ARCHIPELAGO;
 
 	// Chance for Lake Creation
-	// Setting LAKES_EXIST means that smaller inland seas will be
-	// converted into continent mass - this is the chance that
-	// such regions will end up as lakes.
+	// Setting LAKES_EXIST is the chance that
+	// such regions will end up as lakes. The chance
+	// for lakes otherwise is 1/10 this value.
 	// suggested value: around 12.
 	int LAKES_EXIST;
 
