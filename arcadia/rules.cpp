@@ -217,7 +217,7 @@ static GameDefs g = {
 	9,  // GATES_NOT_PERENNIAL
 	0,  // START_GATES_OPEN
 	1,  // SHOW_CLOSED_GATES
-	GameDefs::ALLOW_TRANSPORT,	// TRANSPORT
+	0,	// TRANSPORT               - zero with Arcadia
 	1,	// LOCAL_TRANSPORT
 	3,	// NONLOCAL_TRANSPORT
 	5,	// SHIPPING_COST

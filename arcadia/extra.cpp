@@ -168,7 +168,6 @@ void Game::ModifyTablesPerRuleset(void)
 	
 	    //Fundamental Skills
 	    EnableSkill(S_BASE_WINDKEY);
-	    EnableSkill(S_BASE_ILLUSION);
 	    EnableSkill(S_BASE_SUMMONING);
 	    EnableSkill(S_BASE_PATTERNING);
 	    EnableSkill(S_BASE_MYSTICISM);
@@ -180,15 +179,18 @@ void Game::ModifyTablesPerRuleset(void)
 	    EnableSkill(S_BLIZZARD);
 	    EnableSkill(S_FOG);
 	    EnableSkill(S_CONCEALMENT);
-	    EnableSkill(S_ILLUSORY_CREATURES);
-	    EnableSkill(S_ILLUSORY_WOUNDS);
+//	    EnableSkill(S_ILLUSORY_CREATURES);
+//	    EnableSkill(S_ILLUSORY_WOUNDS);
 	    EnableSkill(S_INSTILL_COURAGE);
 	    EnableSkill(S_SUMMON_MEN);
 	    EnableSkill(S_RESURRECTION);
 	    EnableSkill(S_SPIRIT_OF_DEAD);
 	    EnableSkill(S_INNER_STRENGTH);
 	    EnableSkill(S_TRANSMUTATION);
+//	    EnableSkill(S_TRANSFIGURATION);
 	    EnableSkill(S_MODIFICATION);
+//	    EnableSkill(S_REJUVENATION);
+//	    EnableSkill(S_SEAWARD);
 	    EnableSkill(S_DIVERSION);
 	    EnableSkill(S_GRYFFIN_LORE);
 	    EnableSkill(S_HYPNOSIS);
@@ -197,6 +199,15 @@ void Game::ModifyTablesPerRuleset(void)
 	    EnableSkill(S_LIGHT);
 	    EnableSkill(S_DARKNESS);
 	    EnableSkill(S_DRAGON_TALK);
+	    EnableSkill(S_TOUGHNESS);
+	    EnableSkill(S_UNITY);
+	    EnableSkill(S_FRENZY);
+	    EnableSkill(S_SECSIGHT);
+	    EnableSkill(S_SWIFTNESS);
+	    EnableSkill(S_TRADING);
+	    EnableSkill(S_MERCHANTRY);
+	    EnableSkill(S_ARCADIA_QUARTERMASTERY);
+	    
 
 	    DisableSkill(S_FORCE);
 	    DisableSkill(S_PATTERN);
@@ -209,88 +220,117 @@ void Game::ModifyTablesPerRuleset(void)
 	    DisableSkill(S_CREATE_PHANTASMAL_BEASTS);
 	    DisableSkill(S_CREATE_PHANTASMAL_UNDEAD);
 	    DisableSkill(S_CREATE_PHANTASMAL_DEMONS);
+	    DisableSkill(S_DISPEL_ILLUSIONS);
 	    DisableSkill(S_CREATE_AMULET_OF_PROTECTION);
 	    DisableSkill(S_CREATE_SHIELDSTONE);
 	    DisableSkill(S_CONSTRUCT_PORTAL);
 	    DisableSkill(S_DRAGON_LORE);
 	    DisableSkill(S_ARTIFACT_LORE);
+	    DisableSkill(S_EARTHQUAKE);
 	    DisableSkill(S_TACTICS);
+	    DisableSkill(S_MIND_READING);
+	    DisableSkill(S_SUMMON_BLACK_WIND);
 
-        ModifySkillName(S_DEMON_LORE,"blankb","ZZZB");
-        ModifySkillName(S_SUMMON_IMPS,"demon lore","DEMO");
-        ModifySkillName(S_FIRE,"fireball","FIRE");
-        ModifyItemMagicSkill(I_IMP, "DEMO", 1);
+
 
         //Skilltree stuff
-	    ModifySkillDependancy(S_FIRE, 0, "ALTE", 1);
-	    ModifySkillDependancy(S_EARTHQUAKE, 0, "EART", 1);
-	    ModifySkillDependancy(S_EARTHQUAKE, 1, NULL, 0);
+        ModifySkillName(S_FIRE,"fireball","FIRE");
+	    ModifySkillDependancy(S_FIRE, 0, "WKEY", 1);
 	    ModifySkillDependancy(S_FORCE_SHIELD, 0, "FIRE", 3);
-	    ModifySkillDependancy(S_ENERGY_SHIELD, 0, "INNE", 1);
-	    ModifySkillDependancy(S_SPIRIT_SHIELD, 0, "NECR", 1);
-	    ModifySkillDependancy(S_SPIRIT_SHIELD, 1, NULL, 0);
-	    ModifySkillDependancy(S_MAGICAL_HEALING, 0, "PTTN", 1);
-	    ModifySkillDependancy(S_GATE_LORE, 0, "MYST", 1);
-	    ModifySkillDependancy(S_GATE_LORE, 1, NULL, 0);
-	    ModifySkillDependancy(S_FARSIGHT, 0, "PTTN", 1);
+	    ModifySkillDependancy(S_FARSIGHT, 0, "WKEY", 1);
 	    ModifySkillDependancy(S_FARSIGHT, 1, NULL, 0);
-	    ModifySkillDependancy(S_TELEPORTATION, 0, "GATE", 3);
-	    ModifySkillDependancy(S_TELEPORTATION, 1, NULL, 0);
-	    ModifySkillDependancy(S_MIND_READING, 0, "ILLN", 1);
-	    ModifySkillDependancy(S_MIND_READING, 1, NULL, 0);
 	    ModifySkillDependancy(S_SUMMON_WIND, 0, "WKEY", 1);
 	    ModifySkillDependancy(S_SUMMON_STORM, 0, "SWIN", 1);
 	    ModifySkillDependancy(S_SUMMON_TORNADO, 0, "SWIN", 4);
 	    ModifySkillDependancy(S_CALL_LIGHTNING, 0, "SWIN", 6);
 	    ModifySkillDependancy(S_CLEAR_SKIES, 0, "WKEY", 1);
 	    ModifySkillRange(S_CLEAR_SKIES, "rng_linear");
+//	    ModifySkillDependancy(S_BLIZZARD, 0, "WKEY", 4);
+//	    ModifySkillDependancy(S_FOG, 0, "WKEY", 1);
+	    ModifySkillDependancy(S_FOG, 1, NULL, 0);
+	    ModifySkillFlags(S_FOG, SkillType::MAGIC | SkillType::COMBAT | SkillType::CAST | SkillType::MAGEOTHER);
+	    
+	    ModifySkillDependancy(S_ENERGY_SHIELD, 0, "PTTN", 1);
 	    ModifySkillDependancy(S_EARTH_LORE, 0, "PTTN", 1);
-	    ModifySkillDependancy(S_WOLF_LORE, 0, "PTTN", 1);
-	    ModifySkillDependancy(S_BIRD_LORE, 0, "PTTN", 1);
+	    ModifySkillDependancy(S_MAGICAL_HEALING, 0, "PTTN", 1);
+	    ModifySkillDependancy(S_TRANSMUTATION, 0, "PTTN", 1);
+	    ModifySkillDependancy(S_RESURRECTION, 0, "NECR", 3);
+//	    ModifySkillDependancy(S_RESURRECTION, 1, "MHEA", 3);
+//	    ModifySkillDependancy(S_SUMMON_SPIRIT_OF_DEAD, 1, "RESU", 3);
+	    ModifySkillDependancy(S_ENCHANT_SWORDS, 0, "TRAM", 1);
+	    ModifySkillDependancy(S_ENCHANT_ARMOR, 0, "TRAM", 1);
+//	    ModifySkillDependancy(S_MODIFICATION, 0, "EART", 4);
+//	    ModifySkillDependancy(S_DIVERSION, 0, "EART", 4);
+	    
+	    ModifySkillDependancy(S_GATE_LORE, 0, "MYST", 1);
+	    ModifySkillDependancy(S_GATE_LORE, 1, NULL, 0);
+	    ModifySkillDependancy(S_TELEPORTATION, 0, "GATE", 3);
+	    ModifySkillDependancy(S_TELEPORTATION, 1, NULL, 0);
+	    ModifySkillDependancy(S_CONSTRUCT_GATE, 0, "GATE", 4);
+	    ModifySkillDependancy(S_CONSTRUCT_GATE, 1, NULL, 0);
+//	    ModifySkillDependancy(S_CREATE_PORTAL, 0, "TELE", 4);
+	    ModifySkillDependancy(S_CONCEALMENT, 0, "MYST", 2);
+	    ModifySkillDependancy(S_INVISIBILITY, 0, "CONC", 5);
+	    ModifySkillDependancy(S_TRUE_SEEING, 0, "CONC", 4);
+	    //hypnosis,binding,dragonlore
+	    
+	    ModifySkillDependancy(S_SPIRIT_SHIELD, 0, "SUMM", 1);
+	    ModifySkillDependancy(S_SPIRIT_SHIELD, 1, NULL, 0);
 	    ModifySkillDependancy(S_NECROMANCY, 0, "SUMM", 2);
 	    ModifySkillDependancy(S_NECROMANCY, 1, NULL, 0);
 	    ModifySkillDependancy(S_RAISE_UNDEAD, 0, "NECR", 3);
 	    ModifySkillDependancy(S_SUMMON_LICH, 0, "RAIS", 4);
-	    ModifySkillDependancy(S_CREATE_AURA_OF_FEAR, 0, "NECR", 1);
-	    ModifySkillDependancy(S_SUMMON_BLACK_WIND, 0, "SUMM", 6);
-	    ModifySkillDependancy(S_SUMMON_BLACK_WIND, 1, "MYST", 5);
 	    ModifySkillDependancy(S_BANISH_UNDEAD, 0, "NECR", 1);
+	    ModifySkillDependancy(S_LIGHT, 0, "SUMM", 1);
+	    ModifySkillDependancy(S_DARKNESS, 0, "LIGT", 3);
+	    ModifySkillDependancy(S_SUMMON_MEN, 0, "SUMM", 1);
+        ModifySkillName(S_DEMON_LORE,"blankb","ZZZB");
+        ModifySkillName(S_SUMMON_IMPS,"demon lore","DEMO");
+        ModifyItemMagicSkill(I_IMP, "DEMO", 1);
 	    ModifySkillDependancy(S_SUMMON_IMPS, 0, "SUMM", 1);
 	    ModifySkillFlags(S_SUMMON_IMPS, SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST);
 	    ModifySkillDependancy(S_SUMMON_DEMON, 0, "DEMO", 3);
 	    ModifySkillDependancy(S_SUMMON_BALROG, 0, "SUDE", 4);
 	    ModifySkillDependancy(S_BANISH_DEMONS, 0, "DEMO", 1);
-	    ModifySkillDependancy(S_PHANTASMAL_ENTERTAINMENT, 0, "ILLN", 1);
-	    ModifySkillFlags(S_PHANTASMAL_ENTERTAINMENT, SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST);
-	    ModifySkillDependancy(S_CREATE_PHANTASMAL_BEASTS, 0, "ILLN", 1);
-	    ModifySkillDependancy(S_INVISIBILITY, 0, "CONC", 5);
-	    ModifySkillDependancy(S_TRUE_SEEING, 0, "CONC", 4);
-	    ModifySkillDependancy(S_DISPEL_ILLUSIONS, 0, "ILLN", 1);
-	    ModifySkillFlags(S_ARTIFACT_LORE,SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST);
+	    
+	    ModifySkillFlags(S_BASE_ARTIFACTLORE, SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST | SkillType::FOUNDATION);
 	    ModifyItemMagicSkill(I_SHIELDSTONE, "ARTL", 3);
 	    ModifyItemMagicSkill(I_AMULETOFP, "ARTL", 1);
 	    ModifySkillDependancy(S_CREATE_RING_OF_INVISIBILITY, 0, "INVI", 5);
 	    ModifySkillDependancy(S_CREATE_RING_OF_INVISIBILITY, 1, "ARTL", 4);
 	    ModifySkillDependancy(S_CREATE_AMULET_OF_TRUE_SEEING, 0, "TRUE", 4);
-	    ModifySkillDependancy(S_CREATE_AMULET_OF_TRUE_SEEING, 1, "ARTI", 4);
+	    ModifySkillDependancy(S_CREATE_AMULET_OF_TRUE_SEEING, 1, "ARTL", 4);
 	    ModifySkillDependancy(S_CREATE_CLOAK_OF_INVULNERABILITY, 0, "SSHI", 3);
 	    ModifySkillDependancy(S_CREATE_CLOAK_OF_INVULNERABILITY, 1, "FSHI", 3);
 	    ModifySkillDependancy(S_CREATE_CLOAK_OF_INVULNERABILITY, 2, "ARTL", 4);
 	    ModifySkillDependancy(S_CREATE_STAFF_OF_FIRE, 0, "FIRE", 3);
-	    ModifySkillDependancy(S_CREATE_STAFF_OF_FIRE, 1, "ARTL", 3);
+	    ModifySkillDependancy(S_CREATE_STAFF_OF_FIRE, 1, "ARTL", 1);
 	    ModifySkillDependancy(S_CREATE_STAFF_OF_LIGHTNING, 0, "CALL", 3);
 	    ModifySkillDependancy(S_CREATE_STAFF_OF_LIGHTNING, 1, "ARTL", 5);
 	    ModifySkillDependancy(S_CREATE_RUNESWORD, 0, "FEAR", 2);
 	    ModifySkillDependancy(S_CREATE_RUNESWORD, 1, "ARTL", 4);
 	    ModifySkillDependancy(S_CREATE_MAGIC_CARPET, 1, "ARTL", 2);
 	    ModifySkillDependancy(S_CREATE_MAGIC_CARPET, 1, "SWIN", 3);
-	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 0, "ESHI", 2);
-	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 1, "SSHI", 2);
-	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 2, NULL, 0);
-	    ModifySkillDependancy(S_CONSTRUCT_GATE, 0, "GATE", 5);
-	    ModifySkillDependancy(S_CONSTRUCT_GATE, 1, NULL, 0);
-	    ModifySkillDependancy(S_ENCHANT_SWORDS, 0, "TRAM", 1);
-	    ModifySkillDependancy(S_ENCHANT_ARMOR, 0, "TRAM", 1);
+	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 0, "ARTL", 1);
+	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 1, "SSHI", 1);
+	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 2, "ESHI", 1);
+	    
+	    ModifySkillDependancy(S_INNER_STRENGTH, 0, "BATT", 2);
+	    ModifySkillDependancy(S_PHANTASMAL_ENTERTAINMENT, 0, "BATT", 1);
+        ModifySkillName(S_PHANTASMAL_ENTERTAINMENT,"gladiator","GLAD");
+	    ModifySkillDependancy(S_CREATE_AURA_OF_FEAR, 0, "FREN", 1);
+	    ModifySkillDependancy(S_INSTILL_COURAGE, 0, "FREN", 1);
+	    
+	    
+	    
+	    ModifySkillDependancy(S_WOLF_LORE, 0, "CHAR", 1);
+	    ModifySkillDependancy(S_BIRD_LORE, 0, "CHAR", 1);
+	    //gryffin lore
+	    //unity
+	    //trading
+	    //merchantry
+	    //quartermaster
+	    
 
 	    ModifyItemMagicInput(I_AMULETOFTS, 0, I_IRON, 8);
 	    ModifyItemMagicInput(I_RINGOFI, 0, I_MITHRIL, 4);
@@ -306,7 +346,16 @@ void Game::ModifyTablesPerRuleset(void)
 
 	    //Illusory Creatures Stuff
    	    EnableItem(I_IGRYFFIN);
-   	    ModifyItemMagicSkill(I_IWOLF, "ILCR", 1);
+   	    DisableItem(I_IWOLF);
+   	    DisableItem(I_IIMP);
+   	    DisableItem(I_ISKELETON);
+   	    DisableItem(I_IEAGLE);
+   	    DisableItem(I_IDEMON);
+   	    DisableItem(I_IUNDEAD);
+   	    DisableItem(I_ILICH);
+   	    DisableItem(I_IBALROG);
+   	    DisableItem(I_IDRAGON);
+/*   	    ModifyItemMagicSkill(I_IWOLF, "ILCR", 1);
    	    ModifyItemMagicSkill(I_IIMP, "ILCR", 1);
    	    ModifyItemMagicSkill(I_ISKELETON, "ILCR", 1);
    	    ModifyItemMagicSkill(I_IEAGLE, "ILCR", 2);
@@ -314,7 +363,7 @@ void Game::ModifyTablesPerRuleset(void)
    	    ModifyItemMagicSkill(I_IUNDEAD, "ILCR", 2);
    	    ModifyItemMagicSkill(I_ILICH, "ILCR", 3);
    	    ModifyItemMagicSkill(I_IBALROG, "ILCR", 3);
-   	    ModifyItemMagicSkill(I_IDRAGON, "ILCR", 4);
+   	    ModifyItemMagicSkill(I_IDRAGON, "ILCR", 4);*/
    	    
    	    //new Create Portal stuff
    	    ModifyRangeClass("rng_teleport", RangeType::RNG_LEVEL);
@@ -540,7 +589,7 @@ void Game::ModifyTablesPerRuleset(void)
     Introduction of pearls & PPAR
     Armour table changes
     */
-
+/*
     ModifyMonsterAttackLevel("iWOLF", -10);    
     ModifyMonsterDefense("iWOLF", ATTACK_COMBAT, -10);
     ModifyMonsterDefense("iWOLF", ATTACK_RIDING, -10);
@@ -591,6 +640,8 @@ void Game::ModifyTablesPerRuleset(void)
     ModifyMonsterDefense("iLICH", ATTACK_RIDING, -10);
     ModifyMonsterDefense("iLICH", ATTACK_RANGED, -10);
     ModifyMonsterSkills("iLICH", 0, 10, 0);
+    */
+    
     
     ModifyMonsterAttacksAndHits("TROL", 4, 4, 2);
     
@@ -877,7 +928,6 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_QUARTERMASTER);
 		EnableObject(O_CARAVANSERAI);
 	}
-	// XXX -- This is just here to preserve existing behavior
-	ModifyItemProductionBooster(I_AXE, I_HAMMER, 1);
+
 	return;
 }
