@@ -55,6 +55,7 @@ for putting together this table of contents. <p>
 <LI><a href="#economy_items">Items</a>
 <LI><a href="#economy_towns">Villages, Towns, Cities</a>
 <LI><a href="#economy_buildings">Buildings and Trade Structures</a>
+<LI><a href="#economy_roads">Roads</a>
 <LI><a href="#economy_ships">Ships</a>
 <LI><a href="#economy_advanceditems">Advanced Items</a>
 <LI><a href="#economy_income">Income</a>
@@ -143,6 +144,15 @@ for putting together this table of contents. <p>
 <LI><a href="#sequenceofevents">Sequence of Events</a>
 <LI><a href="#reportformat">Report Format</a>
 <LI><a href="#hintsfornew">Hints for New Players</a>
+<LI><a href="#specialcommands">Special Commands</a>
+<UL>
+<LI><a href="#create">#Create</a>
+<LI><a href="#resend">#Resend</a>
+<LI><a href="#times">#Times</a>
+<LI><a href="#rumors">#Rumors</a>
+<LI><a href="#remind">#Remind</a>
+<LI><a href="#email">#Email</a>
+</UL>
 </UL>
 
 Index of Tables. <p>
@@ -154,8 +164,8 @@ Index of Tables. <p>
 <li><a href="#tableraces">Table of Races</a></li>
 <li><a href="#tableiteminfo">Table of Item Information</a></li>
 <li><a href="#tablebuildings">Table of Buildings</a></li>
-<li><a href="#tableroadstructures">Table of Road Structures</a></li>
 <li><a href="#tabletradestructures">Table of Trade Structures</a></li>
+<li><a href="#tableroadstructures">Table of Road Structures</a></li>
 <li><a href="#tableshipinfo">Table of Ship Information</a></li>
 <li><a href="#tablebuildingcapacities">Table of Building Capacities</a></li>
 </ul>
@@ -478,8 +488,8 @@ but once through an exit, there is no return path to the Nexus.
 The six starting cities offer much to a starting faction; there
 are unlimited amounts of many materials and men (though the
 prices are often quite high).  In addition, the starting cities
-are guarded by invincible guardsmen, keeping any units within
-the city safe from attack (See the section on Non-Player Units
+are guarded by strong guardsmen, keeping any units within
+the city much safer from attack (See the section on Non-Player Units
 for more information on city guardsmen).
 As a drawback, these cities tend to be
 extremely crowded, and most factions will wish to leave the starting
@@ -1286,60 +1296,6 @@ the number of person-months of labor and the number of units of stone
 required to complete the building.  The material for all buildings
 is stone. <p>
 
-There is a second type of structure which serves to increase movement, called
-roads.  Only one road may be built in each given direction.  Additionally, for
-the movement bonus to be gained, there must be a matching road in the region
-which is connected to.  (IE, a Road_N in one region must have a Road_S in
-the region to the north for the movement bonus to be gained). <p>
-
-<a name="tableroadstructures">
-<center>
-<table border> 
- <tr>
-  <td> </td>
-  <th>Cost</th>
-  <th>Material</th>
-  <th>Skill</th>
- </tr>
- <tr>
-  <td align=center>Road N</td>
-  <td align=center>75</td>
-  <td align=center>stone
-  <td align=center>Building 3</td>
- </tr>
- <tr>
-  <td align=center>Road NW</td>
-  <td align=center>75</td>
-  <td align=center>stone
-  <td align=center>Building 3</td>
- </tr>
- <tr>
-  <td align=center>Road NE</td>
-  <td align=center>75</td>
-  <td align=center>stone
-  <td align=center>Building 3</td>
- </tr>
- <tr>
-  <td align=center>Road S</td>
-  <td align=center>75</td>
-  <td align=center>stone
-  <td align=center>Building 3</td>
- </tr>
- <tr>
-  <td align=center>Road SW</td>
-  <td align=center>75</td>
-  <td align=center>stone
-  <td align=center>Building 3</td>
- </tr>
- <tr>
-  <td align=center>Road SE</td>
-  <td align=center>75</td>
-  <td align=center>stone
-  <td align=center>Building 3</td>
- </tr>
-</table>
-</center>
-
 There are other structures that increase the maximum production of certain
 items in regions; for example, a Mine will increase the amount of iron that is
 available to be mined in a region.  To construct these structures
@@ -1443,6 +1399,86 @@ is the number of person-months of labor and also the number of
 units of raw material required to complete a trade structure.
 You can use two different materials (wood or stone) to construct most trade
 structures.<p>
+
+<a name="economy_roads"></a>
+<h3> Roads: </h3>
+
+There is a another type of structure called roads.  They require the building
+skill and do not protect units, nor aid in the production of resources, but 
+do aid movement, and can improve the economy of a hex.<p>
+
+Roads are directional and are only considered to reach from one hexside to
+the center of the hex.  To gain a movement bonux, there must be two
+connecting roads, one in each adjacent hex.  Only one road may be built in
+each direction.<p>
+
+For example: If a unit is moving northwest, then hex it is in must have a
+northwest road, and the hex it is morving into must have a southeast road.<p>
+
+To gain an economy bonus, a hex must have roads that connect to roads in
+two adjoining hexes.<p>
+
+There are six different road structures, one for each direction. They each
+require 75 stone to build.<p>
+
+Unlike other structures, roads will decay over time if they are not
+maintained. Difficult terrain and bad weather will speed this decay.
+Maintnenance involves having units with the appropriate level of building
+skill expend a small amount of stone and labor on a fairly regular basis in
+the exactly same manner as they would finish building it if it was not
+completed. In other words, enter the structure and issue the BUILD command
+with no parameters.<p>
+
+Once a road decays, it will give no bonuses until it is repaired. <p>
+
+<a name="tableroadstructures">
+<center>
+<table border> 
+ <tr>
+  <td> </td>
+  <th>Cost</th>
+  <th>Material</th>
+  <th>Skill</th>
+  <th></th>
+ </tr>
+ <tr>
+  <td align=center>Road N</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road NW</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road NE</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road S</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road SW</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+ <tr>
+  <td align=center>Road SE</td>
+  <td align=center>75</td>
+  <td align=center>stone
+  <td align=center>Building 3</td>
+ </tr>
+</table>
+</center>
 
 <a name="economy_ships">
 <h3> Ships: </h3>
@@ -2108,7 +2144,10 @@ be killed by players, although they will form again if the city is left
 unguarded. <p>
 
 Note that the city guardsmen in the starting cities of Atlantis possess
-Amulets of Invincibility, and may not be defeated. <p>
+plate armor in addition to being more numerous and are harder therefore
+to kill.   Additionally, in the starting cities, Mage Guards will be found.
+These mages are adept at the fire spell making any attempt to control
+a starting city a much harder proposition.<p>
 
 <a name="nonplayers_monsters">
 <h3> Wandering Monsters: </h3> 
@@ -2834,6 +2873,20 @@ the Template altogether, and the SHORT, LONG and MAP settings control how
 much detail the Template contains.  The MAP setting will produce an ascii
 map of the region and surrounding regions in addition other details.<p>
 
+For the MAP template, the region identifiers are: (use a fixed width font)<p>
+<table>
+  <tr><td align=left>####</td><td>BLOCKED HEX (Underworld)</td></tr>
+  <tr><td align=left>~~~~</td><td>OCEAN HEX</td></tr>
+  <tr><td align=left>    </td><td>PLAINS/TUNNELS HEX</td></tr>
+  <tr><td align=left>^^^^</td><td>FOREST/UNDERFOREST HEX</td></tr>
+  <tr><td align=left>/\/\</td><td>MOUNTAIN HEX</td></tr>
+  <tr><td align=left>vvvv</td><td>SWAMP HEX</td></tr>
+  <tr><td align=left>@@@@</td><td>JUNGLE HEX</td></tr>
+  <tr><td align=left>....</td><td>DESERT/CAVERN HEX</td></tr>
+  <tr><td align=left>,,,,</td><td>TUNDRA HEX</td></tr>
+  <tr><td align=left>!!!!</td><td>THE NEXUS</td></tr>
+</table>
+
 <hr>
 <a name="password"> </a>
 <h4> PASSWORD [password] </h4>
@@ -3063,7 +3116,7 @@ Teach new unit 2 and unit 5 whatever they are studying. <p>
 
 Spend the month performing manual work for wages. <p>
 
-<a name="sequenceofevents">
+<a name="sequenceofevents"> </a>
 <hr>
 <h2> Sequence of Events </h2>
 
@@ -3172,7 +3225,7 @@ Where there is no other basis for deciding in which order units will be
 processed within a phase, units that appear higher on the report get
 precedence. <p>
 
-<a name="reportformat">
+<a name="reportformat"></a>
 <hr>
 <h2> Report Format </h2>
 
@@ -3203,7 +3256,7 @@ more or less information in this template, or turning it of altogether.
 You can precede orders with an '@' sign in your orders, in which case
 they will appear in your template on the next turn's report. <p>
 
-<a name="hintsfornew">
+<a name="hintsfornew"></a>
 <hr>
 <h2> Hints for New Players </h2>
 
@@ -3229,6 +3282,146 @@ nor will it be possible to change the data file for the benefit of players
 whose orders weren't there by the deadline.  If you are going to send your
 orders at the last minute, send a preliminary set earlier in the week so that
 at worst your faction will not be left with no orders at all. <p>
+
+<a name="specialcommands"></a>
+<hr>
+<h2> Special Commands </h2>
+These special commands have been added via the scripts processing the email
+to help you interact with the game and submit times and rumors.   Please
+read over these new commands and their uses.   Also note that all commands
+sent to the server are logged, including orders submissions, so if you have
+a problem, or if you attempt to abuse the system, it will get noticed and
+it will be tracked down.
+<p>
+
+<a name="create"></a>
+<hr>
+<h4>#Create "faction name" "password"</h4>
+This will create a new faction (add it to players.in), with the desired name
+and password, and it will use the player's "from" address as the email
+address of record (this, of course, can be changed in the game).<br>
+<br>
+The "" characters are required.  If they miss some, it'll do interesting
+things to your registration.<br>
+<br>
+So, if you wanted to join the game, you would send an email which only
+contained the message:<br>
+<br>
+#create "Mighty Ducks" "quack!"
+<br>
+
+<a name="resend"> </a>
+<hr>
+<h4>#Resend (faction num) "password"</h4>
+The faction number and your current password (if you have one) are required.
+The most recent turn report (that can be found) will be sent.<br>
+<br>
+Please note:  Due to space limitations, only a certain number of turns of
+reports may be kept available.  Thus, the command is limited to the most
+recently run turn.  If the report is available, it'll be sent to your email
+address of record (whatever was set for the most recent turn).<br>
+<br>
+So, if you want a copy of last turn's report (because the cat danced on the
+keyboard and toasted your "original"):<br>
+<br>
+#resend 999 "quack!"<br>
+<br>
+
+<a name="times"> </a>
+<hr>
+<h4>#Times (faction number) "password"<br>
+body of times<br>
+#end</h4>
+Everything between the #times and #end lines is included in your article.
+Your article is prefaced with the name and number of your faction, so you
+needn't worry about adding that.  And, assuming that the GM has turned on
+the rewards for Times, you'll get a small bonus for making your submission.<br>
+<br>
+So, if you wanted to make a proclaimation, you might submit:<br>
+<br>
+#times 999 "quack!"<br>
+The Mighty Ducks declare war on the world!<br>
+Quack!<br>
+#end<br>
+<br>
+And it would appear something like:<br>
+<br>
+---------------------------------<br>
+Mighty Ducks (999) writes:<br>
+<br>
+The Might Ducks declare war on the world!<br>
+Quack!<br>
+<br>
+---------------------------------<br>
+<br>
+
+<a name="rumors"> </a>
+<hr>
+<h4>#Rumor (faction number) "password"</h4>
+Now, you may be wondering -- won't people know I submitted the item because
+it appears in faction-number order?  Nope -- because it's not done that way.
+The list of rumors is randomized a bit -- so there's no telling who
+submitted which item, in what order.  Just don't depend on specific
+placement of your rumors. =) <br>
+<br>
+So, if you were malicious, you might do:<br>
+<br>
+#rumor 999 "quack!" <br>
+Oleg is a fink!<br>
+#end<br>
+<br>
+And it would appear somewhere in the Rumors section of the Times, without
+your faction name or number on it.<br>
+<br>
+
+<a name="remind"> </a>
+<hr>
+<h4>#Remind (faction number) "password"</h4>
+This special order will have the software find your last set of orders and mail
+them to you.  Note:  don't try to get someone else's orders -- you'll be
+surprised when the person sends you a nasty-gram about the activity.  All
+bad password attempts are forwarded to the faction owner, so beware.<br>
+<br>
+Example:<br>
+<br>
+#Remind 999 "quack!" <br>
+<br>
+And it would remind you of your last orders you sent in.<br>
+<br>
+
+<a name="email"> </a>
+<hr>
+<h4>#Email (unit id)<br>
+[ text of email ]</h4>
+
+A diplomatic email command has been added to the software to help with
+contacting units which have you have no way of contacting otherwise.
+The software will not tell you who the unit belongs to, but will forward
+your email to the owner of the unit specified.
+
+There is no need for a "#end" line -- the entire email message you send will
+be forwarded to the unit's master.  Yes, this does mean that your email
+address will be forwarded along with the note.   If you are contacting them
+then you lose your ability to be private to that person.
+
+So, if you sent:
+
+#email 9999
+Greetings.  You've entered the Kingdom of Foo.  Please contact us.
+
+Lord Foo
+foo@bar.com
+
+Faction X, owner of 9999, would receive:
+
+From: Foo &lt;foo@bar.com&gt;
+Subject:  Greetings!
+
+#email 9999
+Greetings.  You've entered the Kingdom of Foo.  Please contact us.
+
+Lord Foo
+foo@bar.com
 
 </body>
 </html>
