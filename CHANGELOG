@@ -482,3 +482,5 @@ Changes from 4.0.9 -> 4.0.10
       allowed to tax.  Patch submitted by Stephen Baillie.
    -- Fixed a bug in BUY/SELL where two buys or sells of the same item would
       cause the second to fail with an error.
+   -- Fixed another instance of the missing ENDFORM order which caused a
+      crash.

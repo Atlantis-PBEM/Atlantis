@@ -303,6 +303,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				}
 
 				if(unit && pCheck) unit->ClearOrders();
+				if(former && pCheck) former->ClearOrders();
 
 				former = 0;
 				unit = 0;
@@ -312,6 +313,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			case O_UNIT:
 				if (fac) {
 					if (former) {
+						if (pCheck) former->ClearOrders();
 						former = 0;
 						ParseError( pCheck, 0, fac, "FORM: without END." );
 						formerOnTurnDelay = 0;
@@ -372,7 +374,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						unit = ProcessFormOrder( unit, order, pCheck );
 						if(!pCheck) {
-							if(unit ) unit->ClearOrders();
+							if(unit) unit->ClearOrders();
 						}
 					} else {
 						ParseError(pCheck, 0, fac,
