@@ -55,4 +55,6 @@
       (Dunno if this or Tzargs way is the 'correct' way to handle this)
    -- Handle spell damages generically.
    -- Handle speed increase from summon wind configurably.
-
+   -- Add more items so that apprentices are actually useful.
+   -- rethink some of the current spells.
+   -- consider having summoned creatures drop no loot.

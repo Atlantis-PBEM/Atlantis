@@ -783,6 +783,10 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		days /= 2;
 	}
 
+	if(SkillDefs[sk].flags & SkillType::SLOWSTUDY) {
+		days /= 2;
+	}
+
 	if (u->Study(sk,days)) {
 		u->SetMoney(u->GetMoney() - cost);
 		u->Event(AString("Studies ") + SkillDefs[sk].name + ".");

@@ -2516,7 +2516,6 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
 
 int ARegion::CanBeStartingCity(ARegionArray *pRA)
 {
-	void *dummy = pRA;
     if (type == R_OCEAN) return 0;
     if (!IsCoastal()) return 0;
     if (town && town->pop == 5000) return 0;

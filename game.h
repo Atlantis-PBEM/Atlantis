@@ -187,6 +187,7 @@ private:
 	void ModifyItemBasePrice(int it, int price);
 	void ModifyItemCapacities(int it, int walk, int ride, int fly, int swim);
 	void ModifyItemProductionBooster(int it, int item, int bonus);
+	void ModifyItemHitch(int it, int item, int bonus);
 	void ModifyItemProductionSkill(int it, int sk, int lev);
 	void ModifyItemProductionOutput(int it, int months, int count);
 	void ModifyItemProductionInput(int it, int i, int input, int amount);

@@ -252,5 +252,13 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_GEMCUTTING);
 	}
 
+	// Make GateLore, ConstructGate and PortalLore take twice as long to study.
+	ModifySkillFlags(S_GATE_LORE,
+			SkillType::MAGIC | SkillType::CAST | SkillType::SLOWSTUDY);
+	ModifySkillFlags(S_CONSTRUCT_GATE,
+			SkillType::MAGIC | SkillType::CAST | SkillType::SLOWSTUDY);
+	ModifySkillFlags(S_PORTAL_LORE,
+			SkillType::MAGIC | SkillType::CAST | SkillType::SLOWSTUDY);
+
 	return;
 }

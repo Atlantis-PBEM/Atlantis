@@ -77,6 +77,7 @@ public:
         FOUNDATION = 0x8,
 		APPRENTICE = 0x10,
 		DISABLED = 0x20,
+		SLOWSTUDY = 0x40,
     };
     int flags;
 

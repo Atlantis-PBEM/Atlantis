@@ -1308,6 +1308,18 @@ AString *ShowSkill::Report(Faction *f)
 		if(comma) *str += temp + " to study.";
 	}
 
+	if(level == 1) {
+		if(SkillDefs[skill].cost) {
+			if(!(*str == "")) *str += " ";
+			*str += AString("This skill costs ") + SkillDefs[skill].cost +
+				" silver to study.";
+		}
+		if(SkillDefs[skill].flags & SkillType::SLOWSTUDY) {
+			if(!(*str == "")) *str += " ";
+			*str += "This skill is studied at one half the normal speed.";
+		}
+	}
+
 	temp1 = SkillStrs(skill) + " " + level + ": ";
 	if(*str == "") {
 		*str = temp1 + "No skill report.";
