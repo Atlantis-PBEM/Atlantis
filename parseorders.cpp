@@ -2783,12 +2783,12 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *tar = ParseUnit(o);
 	if (!tar) {
-		ParseError(pCheck, unit, 0, "TRANSPORT: Invalid target.");
+		ParseError(pCheck, u, 0, "TRANSPORT: Invalid target.");
 		return;
 	}
 	AString *token = o->gettoken();
 	if (!token) {
-		ParseError(pCheck, unit, 0, "TRANSPORT: No amount given.");
+		ParseError(pCheck, u, 0, "TRANSPORT: No amount given.");
 		return;
 	}
 
@@ -2800,13 +2800,13 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	delete token;
 	token = o->gettoken();
 	if (!token) {
-		ParseError(pCheck, unit, 0, "TRANSPORT: No item given.");
+		ParseError(pCheck, u, 0, "TRANSPORT: No item given.");
 		return;
 	}
 	int item = ParseTransportableItem(token);
 	delete token;
 	if (item == -1) {
-		ParseError(pCheck, unit, 0, "TRANSPORT: Invalid item.");
+		ParseError(pCheck, u, 0, "TRANSPORT: Invalid item.");
 		return;
 	}
 
@@ -2816,13 +2816,13 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		delete token;
 		token = o->gettoken();
 		if (!token) {
-			ParseError(pCheck, unit, 0, "TRANSPORT: EXCEPT requires a value.");
+			ParseError(pCheck, u, 0, "TRANSPORT: EXCEPT requires a value.");
 			return;
 		}
 		except = token->value();
 		delete token;
 		if (except <= 0) {
-			ParseError(pCheck, unit, 0, "TRANSPORT: Invalid except value.");
+			ParseError(pCheck, u, 0, "TRANSPORT: Invalid except value.");
 			return;
 		}
 	}
@@ -2833,7 +2833,7 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		order->target = tar;
 		order->amount = amt;
 		order->except = except;
-		unit->transportorders.Add(order);
+		u->transportorders.Add(order);
 	}
 	return;
 }
@@ -2842,12 +2842,12 @@ void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *tar = ParseUnit(o);
 	if (!tar) {
-		ParseError(pCheck, unit, 0, "DISTRIBUTE: Invalid target.");
+		ParseError(pCheck, u, 0, "DISTRIBUTE: Invalid target.");
 		return;
 	}
 	AString *token = o->gettoken();
 	if (!token) {
-		ParseError(pCheck, unit, 0, "DISTRIBUTE: No amount given.");
+		ParseError(pCheck, u, 0, "DISTRIBUTE: No amount given.");
 		return;
 	}
 
@@ -2859,13 +2859,13 @@ void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	delete token;
 	token = o->gettoken();
 	if (!token) {
-		ParseError(pCheck, unit, 0, "DISTRIBUTE: No item given.");
+		ParseError(pCheck, u, 0, "DISTRIBUTE: No item given.");
 		return;
 	}
 	int item = ParseTransportableItem(token);
 	delete token;
 	if (item == -1) {
-		ParseError(pCheck, unit, 0, "DISTRIBUTE: Invalid item.");
+		ParseError(pCheck, u, 0, "DISTRIBUTE: Invalid item.");
 		return;
 	}
 
@@ -2875,13 +2875,13 @@ void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		delete token;
 		token = o->gettoken();
 		if (!token) {
-			ParseError(pCheck, unit, 0, "DISTRIBUTE: EXCEPT requires a value.");
+			ParseError(pCheck, u, 0, "DISTRIBUTE: EXCEPT requires a value.");
 			return;
 		}
 		except = token->value();
 		delete token;
 		if (except <= 0) {
-			ParseError(pCheck, unit, 0, "DISTRIBUTE: Invalid except value.");
+			ParseError(pCheck, u, 0, "DISTRIBUTE: Invalid except value.");
 			return;
 		}
 	}
@@ -2893,7 +2893,7 @@ void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		order->target = tar;
 		order->amount = amt;
 		order->except = except;
-		unit->transportorders.Add(order);
+		u->transportorders.Add(order);
 	}
 	return;
 }

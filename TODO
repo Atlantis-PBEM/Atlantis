@@ -1,3 +1,8 @@
+** IN_PROGRESS
+   -- Warehouses -- need to introduce number of quartermaster limits.
+                 -- need to implement actual transport/distribute orders
+                 -- need to implement rules information.
+
 ** Architecture
    -- Improve the item/hex editor [low priority]
    -- I'd like to add some code that will do a bit of validation on a

@@ -61,7 +61,7 @@ struct Product
 class TerrainType
 {
 	public:
-		char * name;
+		char *name;
 		int similar_type;
 
 		enum {
@@ -94,12 +94,12 @@ extern TerrainType *TerrainDefs;
 class Location : public AListElem
 {
 	public:
-		Unit * unit;
-		Object * obj;
-		ARegion * region;
+		Unit *unit;
+		Object *obj;
+		ARegion *region;
 };
 
-Location *GetUnit(AList *,int);
+Location *GetUnit(AList *, int);
 
 int AGetName(int town);
 char *AGetNameString(int name);
@@ -107,10 +107,10 @@ char *AGetNameString(int name);
 class ARegionPtr : public AListElem
 {
 	public:
-		ARegion * ptr;
+		ARegion *ptr;
 };
 
-ARegionPtr *GetRegion(AList *,int);
+ARegionPtr *GetRegion(AList *, int);
 
 class Farsight : public AListElem
 {
@@ -123,7 +123,7 @@ class Farsight : public AListElem
 		int exits_used[NDIRS];
 };
 
-Farsight *GetFarsight(AList *,Faction *);
+Farsight *GetFarsight(AList *, Faction *);
 
 enum {
 	TOWN_VILLAGE,
@@ -142,7 +142,7 @@ class TownInfo
 		void Writeout(Aoutfile *);
 		int TownType();
 
-		AString * name;
+		AString *name;
 		int pop;
 		int basepop;
 		int activity;
@@ -155,7 +155,7 @@ class ARegion : public AListElem
 
 	public:
 		ARegion();
-		ARegion(int,int);
+		ARegion(int, int);
 		~ARegion();
 		void Setup();
 
@@ -163,18 +163,18 @@ class ARegion : public AListElem
 		void SetName(char *);
 
 		void Writeout(Aoutfile *);
-		void Readin(Ainfile *,AList *, ATL_VER v);
+		void Readin(Ainfile *, AList *, ATL_VER v);
 
-		int CanMakeAdv(Faction *,int);
-		int HasItem(Faction *,int);
+		int CanMakeAdv(Faction *, int);
+		int HasItem(Faction *, int);
 		void WriteProducts(Areport *, Faction *, int);
 		void WriteMarkets(Areport *, Faction *, int);
-		void WriteEconomy(Areport *,Faction *, int);
+		void WriteEconomy(Areport *, Faction *, int);
 		void WriteExits(Areport *, ARegionList *pRegs, int *exits_seen);
 		void WriteReport(Areport *f, Faction *fac, int month,
 				ARegionList *pRegions);
 		// DK
-		void WriteTemplate(Areport *,Faction *, ARegionList *, int);
+		void WriteTemplate(Areport *, Faction *, ARegionList *, int);
 		void WriteTemplateHeader(Areport *, Faction *, ARegionList *, int);
 		void GetMapLine(char *, int, ARegionList *);
 
@@ -184,28 +184,28 @@ class ARegion : public AListElem
 		void Kill(Unit *);
 		void ClearHell();
 
-		Unit * GetUnit(int);
-		Unit * GetUnitAlias(int,int); /* alias, faction number */
-		Unit * GetUnitId(UnitId *,int);
-		Location * GetLocation(UnitId *,int);
+		Unit *GetUnit(int);
+		Unit *GetUnitAlias(int, int); /* alias, faction number */
+		Unit *GetUnitId(UnitId *, int);
+		Location *GetLocation(UnitId *, int);
 
-		void SetLoc(int,int,int);
+		void SetLoc(int, int, int);
 		int Present(Faction *);
-		AList * PresentFactions();
+		AList *PresentFactions();
 		int GetObservation(Faction *, int);
 		int GetTrueSight(Faction *, int);
 
-		Object * GetObject(int);
-		Object * GetDummy();
+		Object *GetObject(int);
+		Object *GetDummy();
 
 		int MoveCost(int, ARegion *, int);
-		Unit * Forbidden(Unit *); /* Returns unit that is forbidding */
-		Unit * ForbiddenByAlly(Unit *); /* Returns unit that is forbidding */
+		Unit *Forbidden(Unit *); /* Returns unit that is forbidding */
+		Unit *ForbiddenByAlly(Unit *); /* Returns unit that is forbidding */
 		int CanTax(Unit *);
 		int CanPillage(Unit *);
 		int ForbiddenShip(Object *);
 		int HasCityGuard();
-		void NotifySpell(Unit *,int, ARegionList *pRegs);
+		void NotifySpell(Unit *, int, ARegionList *pRegs);
 		void NotifyCity(Unit *, AString& oldname, AString& newname);
 
 		void DefaultOrders();
@@ -246,7 +246,7 @@ class ARegion : public AListElem
 		AString WagesForReport();
 		int Population();
 
-		AString * name;
+		AString *name;
 		int num;
 		int type;
 		int buildingseq;
@@ -255,7 +255,7 @@ class ARegion : public AListElem
 		int gatemonth;
 		int gateopen;
 
-		TownInfo * town;
+		TownInfo *town;
 		int race;
 		int population;
 		int basepopulation;
@@ -267,7 +267,7 @@ class ARegion : public AListElem
 		int clearskies;
 		int earthlore;
 
-		ARegion * neighbors[NDIRS];
+		ARegion *neighbors[NDIRS];
 		AList objects;
 		AList hell; /* Where dead units go */
 		AList farsees;
@@ -275,7 +275,7 @@ class ARegion : public AListElem
 		AList passers;
 		ProductionList products;
 		MarketList markets;
-		int xloc,yloc,zloc;
+		int xloc, yloc, zloc;
 
 	private:
 		/* Private Setup Functions */
@@ -291,16 +291,16 @@ class ARegion : public AListElem
 class ARegionArray
 {
 	public:
-		ARegionArray(int,int);
+		ARegionArray(int, int);
 		~ARegionArray();
 
-		void SetRegion(int,int,ARegion *);
-		ARegion * GetRegion(int,int);
+		void SetRegion(int, int, ARegion *);
+		ARegion *GetRegion(int, int);
 		void SetName(char *name);
 
 		int x;
 		int y;
-		ARegion ** regions;
+		ARegion **regions;
 		AString *strName;
 
 		enum {
@@ -318,11 +318,11 @@ class ARegionFlatArray
 		ARegionFlatArray(int);
 		~ARegionFlatArray();
 
-		void SetRegion(int,ARegion *);
-		ARegion * GetRegion(int);
+		void SetRegion(int, ARegion *);
+		ARegion *GetRegion(int);
 
 		int size;
-		ARegion ** regions;
+		ARegion **regions;
 };
 
 class ARegionList : public AList
@@ -331,19 +331,20 @@ class ARegionList : public AList
 		ARegionList();
 		~ARegionList();
 
-		ARegion * GetRegion(int);
-		ARegion * GetRegion(int,int,int);
+		ARegion *GetRegion(int);
+		ARegion *GetRegion(int, int, int);
 		int ReadRegions(Ainfile *f, AList *, ATL_VER v);
 		void WriteRegions(Aoutfile *f);
-		Location * FindUnit(int);
+		Location *FindUnit(int);
+		Location *GetUnitId(UnitId *id, int faction, ARegion *cur);
 
-		void ChangeStartingCity(ARegion *,int);
+		void ChangeStartingCity(ARegion *, int);
 		ARegion *GetStartingCity(ARegion *AC, int num, int level, int maxX,
 				int maxY);
 
 		ARegion *FindGate(int);
-		int GetDistance(ARegion *,ARegion *);
-		int GetPlanarDistance(ARegion *,ARegion *, int penalty);
+		int GetDistance(ARegion *, ARegion *);
+		int GetPlanarDistance(ARegion *, ARegion *, int penalty);
 		int GetWeather(ARegion *pReg, int month);
 
 		ARegionArray *GetRegionArray(int level);
@@ -388,7 +389,7 @@ class ARegionList : public AList
 		void NeighSetup(ARegion *r, ARegionArray *ar);
 
 		void SetRegTypes(ARegionArray *pRegs, int newType);
-		void MakeLand(ARegionArray *pRegs,int percentOcean,int continentSize);
+		void MakeLand(ARegionArray *pRegs, int percentOcean, int continentSize);
 		void MakeCentralLand(ARegionArray *pRegs);
 
 		void SetupAnchors(ARegionArray *pArr);

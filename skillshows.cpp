@@ -87,7 +87,7 @@ AString *ShowSkill::Report(Faction *f)
 				"and transport structures.";
 			if ((Globals->TRANSPORT & GameDefs::QM_AFFECT_COST) &&
 			    (Globals->SHIPPING_COST > 0)) {
-				*str += " The cost of shipping one weight "
+				*str += AString(" The cost of shipping one weight ") +
 					"unit from one transport structure "
 					"to another transport structure is "
 					"4-((level+1)/2) * " +
@@ -96,7 +96,7 @@ AString *ShowSkill::Report(Faction *f)
 			if (Globals->NONLOCAL_TRANSPORT > 0) {
 				if (Globals->TRANSPORT &
 						GameDefs::QM_AFFECT_DIST) {
-					*str += " Items may be shipped "
+					*str += AString(" Items may be shipped ") +
 						"between two transport "
 						"structures which are up to " +
 						Globals->NONLOCAL_TRANSPORT +
@@ -104,7 +104,7 @@ AString *ShowSkill::Report(Faction *f)
 						" hexes distant from each "
 						"other.";
 				} else {
-					*str += " Items may be shipped "
+					*str += AString(" Items may be shipped ") +
 						"between two transport "
 						"structures which are up to " +
 						Globals->NONLOCAL_TRANSPORT +
@@ -117,17 +117,15 @@ AString *ShowSkill::Report(Faction *f)
 					"structures.";
 			}
 			if (Globals->LOCAL_TRANSPORT > 0) {
-				*str += " Items may be distributed from a "
+				*str += AString(" Items may be distributed from a ") +
 					"transport structure to any unit or "
 					"transported to a transport structure "
 					"by any unit located within " +
 					Globals->LOCAL_TRANSPORT +
-					" hexes of the transport structure."
+					" hexes of the transport structure.";
 			}
-			if (Globals->FRACTIONAL_WEIGHT &&
-			    (Globals->TRANSPORT &
-			     GameDefs::TRANSPORT_FRAC_WEIGHT)) {
-				*str += " Items with a normal weight of 0 "
+			if (Globals->FRACTIONAL_WEIGHT) {
+				*str += AString(" Items with a normal weight of 0 ") +
 					"are treated as if " +
 					Globals->FRACTIONAL_WEIGHT +
 					" of the item in question weigh "

@@ -351,6 +351,8 @@ private:
 	void ProcessPasswordOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessExchangeOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessIdleOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ProcessTransportOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ProcessDistributeOrder(Unit *, AString *, OrdersCheck *pCheck);
 	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int);
 
 	void RemoveInactiveFactions();
@@ -494,6 +496,8 @@ private:
 	void SinkUncrewedShips();
 	void DrownUnits();
 	void RunStealOrders();
+	void RunTransportOrders();
+	void CheckTransportOrders();
 	AList *CanSeeSteal(ARegion *, Unit *);
 	void Do1Steal(ARegion *, Object *, Unit *);
 	void Do1Assassinate(ARegion *, Object *, Unit *);

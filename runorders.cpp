@@ -2624,7 +2624,7 @@ void Game::DeleteEmptyInRegion(ARegion *region)
 
 void Game::CheckTransportOrders()
 {
-	if (!(Globals->TRANSPORT & ALLOW_TRANSPORT))
+	if (!(Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT))
 		return;
 
 	forlist ((&regions)) {
@@ -2645,8 +2645,8 @@ void Game::CheckTransportOrders()
 						continue;
 					}
 
-					Location *tar = regions->GetUnitId(o->target, u->faction,
-							u->region);
+					Location *tar = regions.GetUnitId(o->target,
+							u->faction->num, r);
 					if (!tar) {
 						u->Error(ordertype + ": Target does not exist.");
 						o->type = NORDERS;
@@ -2657,7 +2657,8 @@ void Game::CheckTransportOrders()
 					// transport
 					if (o->type == O_TRANSPORT) {
 						if ((tar->obj->GetOwner() != tar->unit) ||
-								!(ObjectDefs[tar->obj->type].flag & ObjectType::TRANSPORT)) {
+								!(ObjectDefs[tar->obj->type].flags &
+									ObjectType::TRANSPORT)) {
 							u->Error(ordertype + ": Target does not own "
 									"transport structure.");
 							o->type = NORDERS;
@@ -2667,14 +2668,14 @@ void Game::CheckTransportOrders()
 
 					// make sure target is in range.
 					int maxdist;
-					int dist = regions->GetDistance(u->region, tar->region);
+					int dist = regions.GetDistance(r, tar->region);
 					if ((o->type == O_TRANSPORT) &&
 						(u == obj->GetOwner()) &&
 						(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)) {
 						int maxdist = Globals->NONLOCAL_TRANSPORT;
 						if (maxdist >= 0 &&
-							Globals->TRANSPORT & QM_AFFECT_DIST) {
-							int level = GetSkill(S_QUARTERMASTER);
+							Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
+							int level = u->GetSkill(S_QUARTERMASTER);
 							maxdist += ((level + 1)/3);
 						} else if (maxdist == 0)
 							maxdist = 10000000;
@@ -2709,7 +2710,7 @@ void Game::CheckTransportOrders()
 
 void Game::RunTransportOrders()
 {
-	if (!(Globals->TRANSPORT & ALLOW_TRANSPORT))
+	if (!(Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT))
 		return;
 	forlist ((&regions)) {
 		ARegion *r = (ARegion *)elem;
