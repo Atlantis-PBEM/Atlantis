@@ -1017,6 +1017,7 @@ int Game::RunGame()
   
     Awrite("Writing the Report File...");
     WriteReport();
+	Awrite("");
     battles.DeleteAll();
   
     Awrite("Writing Playerinfo File...");
