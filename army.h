@@ -42,124 +42,112 @@ class Army;
 #define EFFECT_STORM 4
 #define EFFECT_CAMEL_FEAR 8
 
-#define SPECIAL_FLAGS ( WeaponType::NEVERMISS | WeaponType::ARMORPIERCING )
-
-enum {
-    ATTACK_COMBAT,
-    ATTACK_ENERGY,
-    ATTACK_SPIRIT,
-    ATTACK_WEATHER,
-    ATTACK_RIDING,
-    ATTACK_RANGED,
-    NUM_ATTACK_TYPES
-};
+#define SPECIAL_FLAGS ( WeaponType::ALWAYSREADY )
+#define SPECIAL_CLASS ( ARMORPIERCING )
 
 class Soldier {
-public:
-    Soldier( Unit *unit, 
-             Object *object,
-             int regType,
-             int race,
-             int ass = 0 );
+	public:
+		Soldier(Unit *unit, Object *object, int regType, int race, int ass=0);
 
-    void SetupSpell();
-    void SetupCombatItems();
+		void SetupSpell();
+		void SetupCombatItems();
 
-    //
-    // SetupHealing is actually game-specific, and appears in specials.cpp
-    //
-    void SetupHealing();
-  
-    int HasEffect(int);
-    void SetEffect(int);
-    void ClearEffect(int);	
-    int ArmorProtect( int weaponFlags );
+		//
+		// SetupHealing is actually game-specific, and appears in specials.cpp
+		//
+		void SetupHealing();
 
-    void RestoreItems();
-    void Alive(int);
-    void Dead();
+		int HasEffect(int);
+		void SetEffect(int);
+		void ClearEffect(int);
+		int ArmorProtect(int weaponClass );
 
-    /* Unit info */
-	AString name;
-    Unit * unit;
-    int race;
-    int riding;
-    int building;
-    
-    /* Healing information */
-    int healing;
-    int healtype;
-    int healitem;
-    int canbehealed;
+		void RestoreItems();
+		void Alive(int);
+		void Dead();
 
-    /* Attack info */
-    int weapon;
-    int attacktype;
-    int askill;
-    int attacks;
-    int special;
-    int slevel;
+		/* Unit info */
+		AString name;
+		Unit * unit;
+		int race;
+		int riding;
+		int building;
 
-    /* Defense info */
-    int dskill[NUM_ATTACK_TYPES];
-    int armor;
-    int hits;
+		/* Healing information */
+		int healing;
+		int healtype;
+		int healitem;
+		int canbehealed;
 
-    BITFIELD battleItems;
-    int amuletofi;
-    
-    /* Effects */
-    int effects;
+		/* Attack info */
+		int weapon;
+		int attacktype;
+		int askill;
+		int attacks;
+		int special;
+		int slevel;
+
+		/* Defense info */
+		int dskill[NUM_ATTACK_TYPES];
+		int armor;
+		int hits;
+
+		BITFIELD battleItems;
+		int amuletofi;
+
+		/* Effects */
+		int effects;
 };
 
 typedef Soldier * SoldierPtr;
 
 class Army
 {
-public:
-    Army(Unit *,AList *,int,int = 0);
-	~Army();
-  
-    void WriteLosses(Battle *);
-    void Lose(Battle *,ItemList *);
-    void Win(Battle *,ItemList *);
-    void Tie(Battle *);
-    int CanBeHealed();
-    void DoHeal(Battle *);
-    void DoHealLevel(Battle *,int,int useItems );
-	
-    void GetMonSpoils(ItemList *,int);
+	public:
+		Army(Unit *,AList *,int,int = 0);
+		~Army();
 
-    int Broken();
-    int NumAlive();
-	int NumSpoilers();
-    int CanAttack();
-    int NumFront();
-    Soldier *GetAttacker( int, int & );
-    int GetEffectNum( int effect );
-    int GetTargetNum( int = SPECIAL_NONE );
-    Soldier *GetTarget( int );
-    int RemoveEffects( int num, int effect );
-    int DoAnAttack( int special, int numAttacks, int attackType,
-                    int attackLevel, int flags, int effect, int mountBonus = 0 );
-    void Kill(int);
-    void Reset();
+		void WriteLosses(Battle *);
+		void Lose(Battle *,ItemList *);
+		void Win(Battle *,ItemList *);
+		void Tie(Battle *);
+		int CanBeHealed();
+		void DoHeal(Battle *);
+		void DoHealLevel(Battle *,int,int useItems );
 
-    //
-    // These funcs are rules specific, and are in specials.cpp
-    //
-    int CheckSpecialTarget(int,int);
+		void GetMonSpoils(ItemList *,int);
 
-    SoldierPtr * soldiers;
-    Unit * leader;
-    ShieldList shields;
-    int round;
-    int tac;
-    int canfront;
-    int canbehind;
-    int notfront;
-    int notbehind;
-    int count;
+		int Broken();
+		int NumAlive();
+		int NumSpoilers();
+		int CanAttack();
+		int NumFront();
+		Soldier *GetAttacker( int, int & );
+		int GetEffectNum( int effect );
+		int GetTargetNum( int = SPECIAL_NONE );
+		Soldier *GetTarget( int );
+		int RemoveEffects( int num, int effect );
+		int DoAnAttack( int special, int numAttacks, int attackType,
+				int attackLevel, int flags, int weaponClass, int effect,
+				int mountBonus);
+		void Kill(int);
+		void Reset();
+
+		//
+		// These funcs are in specials.cpp
+		//
+		int CheckSpecialTarget(int,int);
+
+		SoldierPtr * soldiers;
+		Unit * leader;
+		ShieldList shields;
+		int round;
+		int tac;
+		int canfront;
+		int canbehind;
+		int notfront;
+		int notbehind;
+		int count;
 };
 
 #endif

@@ -503,262 +503,219 @@ int Unit::IsAlive()
     return 0;
 }
 
-void Unit::SetMen(int t,int n) {
-  if (ItemDefs[t].type & IT_MAN) {
-    int oldmen = GetMen();
-    items.SetNum(t,n);
-    int newmen = GetMen();
-    if (newmen < oldmen) {
-      delete skills.Split(oldmen, oldmen - newmen);
-    }
-  } else {
-    /* This is probably a monster in this case */
-    items.SetNum(t,n);
-  }
+void Unit::SetMen(int t,int n)
+{
+	if (ItemDefs[t].type & IT_MAN) {
+		int oldmen = GetMen();
+		items.SetNum(t,n);
+		int newmen = GetMen();
+		if (newmen < oldmen) {
+			delete skills.Split(oldmen, oldmen - newmen);
+		}
+	} else {
+		/* This is probably a monster in this case */
+		items.SetNum(t,n);
+	}
 }
 
-int Unit::GetMen(int t) {
-  return items.GetNum(t);
+int Unit::GetMen(int t)
+{
+	return items.GetNum(t);
 }
 
-int Unit::GetMons() {
-  int n=0;
-  forlist(&items) {
-    Item * i = (Item *) elem;
-    if (ItemDefs[i->type].type & IT_MONSTER) {
-      n += i->num;
-    }
-  }
-  return n;
+int Unit::GetMons()
+{
+	int n=0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		if (ItemDefs[i->type].type & IT_MONSTER) {
+			n += i->num;
+		}
+	}
+	return n;
 }
 
-int Unit::GetMen() {
-  int n = 0;
-  forlist(&items) {
-    Item * i = (Item *) elem;
-    if (ItemDefs[i->type].type & IT_MAN) {
-      n += i->num;
-    }
-  }
-  return n;
+int Unit::GetMen()
+{
+	int n = 0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		if (ItemDefs[i->type].type & IT_MAN) {
+			n += i->num;
+		}
+	}
+	return n;
 }
 
-int Unit::GetSoldiers() {
-  int n = 0;
-  forlist(&items) {
-    Item * i = (Item *) elem;
-    if (IsSoldier(i->type)) n+=i->num;
-  }
-	
-  return n;
+int Unit::GetSoldiers()
+{
+	int n = 0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		if (IsSoldier(i->type)) n+=i->num;
+	}
+
+	return n;
 }
 
-void Unit::SetMoney(int n) {
-  items.SetNum(I_SILVER,n);
+void Unit::SetMoney(int n)
+{
+	items.SetNum(I_SILVER,n);
 }
 
-int Unit::GetMoney() {
-  return items.GetNum(I_SILVER);
+int Unit::GetMoney()
+{
+	return items.GetNum(I_SILVER);
 }
 
-int Unit::GetTactics() {
-  int retval = GetRealSkill(S_TACTICS);
-  
-  forlist(&items) {
-    Item * i = (Item *) elem;
-    if (ItemDefs[i->type].type & IT_MONSTER) {
-      int temp = MonDefs[(ItemDefs[i->type].index)].tactics;
-      if (temp > retval) retval = temp;
-    }
-  }
-  
-  return retval;
+int Unit::GetTactics()
+{
+	int retval = GetRealSkill(S_TACTICS);
+
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		if (ItemDefs[i->type].type & IT_MONSTER) {
+			int temp = MonDefs[(ItemDefs[i->type].index)].tactics;
+			if (temp > retval) retval = temp;
+		}
+	}
+
+	return retval;
 }
 
 int Unit::GetObservation()
 {
-    int retval = GetRealSkill(S_OBSERVATION);
-    // LLS
-    int bonus = GetSkillBonus(S_OBSERVATION);
-    retval += bonus;
-    
-    forlist(&items) {
-        Item * i = (Item *) elem;
-        if (ItemDefs[i->type].type & IT_MONSTER)
-        {
-            int temp = MonDefs[ItemDefs[i->type].index].obs;
-            if (temp > retval) retval = temp;
-        }
-    }
+	int retval = GetRealSkill(S_OBSERVATION);
+	// LLS
+	int bonus = GetSkillBonus(S_OBSERVATION);
+	retval += bonus;
 
-    return retval;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		if (ItemDefs[i->type].type & IT_MONSTER) {
+			int temp = MonDefs[ItemDefs[i->type].index].obs;
+			if (temp > retval) retval = temp;
+		}
+	}
+
+	return retval;
 }
 
 int Unit::GetAttackRiding()
 {
-    int riding = 0;
-    if (type == U_WMON)
-    {
-        forlist(&items) {
-            Item *i = (Item *) elem;
-            if (ItemDefs[i->type].type & IT_MONSTER)
-            {
-                if (ItemDefs[i->type].fly)
-                {
-                    return 5;
-                }
-                if (ItemDefs[i->type].ride) riding = 3;
-            }
-        }
-        return riding;
-    } 
-    else
-    {
-        riding = GetSkill(S_RIDING);
-        int lowriding = 0;
-        forlist(&items) {
-            Item *i = (Item *) elem;
-            if (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= 10)
-            {
-                return riding;
-            }
-            if (ItemDefs[i->type].ride - ItemDefs[i->type].weight) 
-            {
-                if (riding <= 3) return riding;
-                lowriding = 3;
-            }
-        }
-        return lowriding;
-    }
+	int riding = 0;
+	if (type == U_WMON) {
+		forlist(&items) {
+			Item *i = (Item *) elem;
+			if (ItemDefs[i->type].type & IT_MONSTER) {
+				if (ItemDefs[i->type].fly) {
+					return 5;
+				}
+				if (ItemDefs[i->type].ride) riding = 3;
+			}
+		}
+		return riding;
+	} else {
+		riding = GetSkill(S_RIDING);
+		int lowriding = 0;
+		forlist(&items) {
+			Item *i = (Item *) elem;
+			if (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= 10) {
+				return riding;
+			}
+			if (ItemDefs[i->type].ride - ItemDefs[i->type].weight) {
+				if (riding <= 3) return riding;
+				lowriding = 3;
+			}
+		}
+		return lowriding;
+	}
 }
 
 int Unit::GetDefenseRiding() 
 {
-    if (guard == GUARD_GUARD) return 0;
+	if (guard == GUARD_GUARD) return 0;
 
-    int riding = 0;
-    int weight = Weight();
+	int riding = 0;
+	int weight = Weight();
 
-    if (CanFly(weight)) 
-    {
-        riding = 5;
-    } 
-    else
-    {
-        if (CanRide(weight)) riding = 3;
-    }
-    
-    if (GetMen()) 
-    {
-        int manriding = GetSkill(S_RIDING);
-        if (manriding < riding) return manriding;
-    }
-    
-    return riding;
+	if (CanFly(weight)) {
+		riding = 5;
+	} else {
+		if (CanRide(weight)) riding = 3;
+	}
+
+	if (GetMen()) {
+		int manriding = GetSkill(S_RIDING);
+		if (manriding < riding) return manriding;
+	}
+
+	return riding;
 }
 
 int Unit::GetStealth()
 {
-    int monstealth = 100;
-    int manstealth = 100;
-  
-    if (guard == GUARD_GUARD) return 0;
-    
-    forlist(&items) {
-        Item * i = (Item *) elem;
-        if (ItemDefs[i->type].type & IT_MONSTER)
-        {
-            int temp = MonDefs[ItemDefs[i->type].index].stealth;
-            if (temp < monstealth) monstealth = temp;
-        }
-        else
-        {
-            if (ItemDefs[i->type].type & IT_MAN)
-            {
-                if (manstealth == 100)
-                {
-                    manstealth = GetRealSkill(S_STEALTH);
-                }
-            }
-        }
-    }
+	int monstealth = 100;
+	int manstealth = 100;
 
-    // LLS
-    manstealth += GetSkillBonus(S_STEALTH);
+	if (guard == GUARD_GUARD) return 0;
 
-    if (monstealth < manstealth) return monstealth;
-    return manstealth;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		if (ItemDefs[i->type].type & IT_MONSTER) {
+			int temp = MonDefs[ItemDefs[i->type].index].stealth;
+			if (temp < monstealth) monstealth = temp;
+		} else {
+			if (ItemDefs[i->type].type & IT_MAN) {
+				if (manstealth == 100) {
+					manstealth = GetRealSkill(S_STEALTH);
+				}
+			}
+		}
+	}
+
+	// LLS
+	manstealth += GetSkillBonus(S_STEALTH);
+
+	if (monstealth < manstealth) return monstealth;
+	return manstealth;
 }
 
 int Unit::GetEntertainment()
 {
-    int level = GetRealSkill(S_ENTERTAINMENT);
-    int level2 = 5 * GetRealSkill(S_PHANTASMAL_ENTERTAINMENT);
-    return (level > level2 ? level : level2);
+	int level = GetRealSkill(S_ENTERTAINMENT);
+	int level2 = 5 * GetRealSkill(S_PHANTASMAL_ENTERTAINMENT);
+	return (level > level2 ? level : level2);
 }
 
-int Unit::GetSkill(int sk) {
-  if (sk == S_TACTICS) return GetTactics();
-  if (sk == S_STEALTH) return GetStealth();
-  if (sk == S_OBSERVATION) return GetObservation();
-  if (sk == S_ENTERTAINMENT) return GetEntertainment();
-  
-  int retval = GetRealSkill(sk);
-  
-  return retval;
+int Unit::GetSkill(int sk)
+{
+	if (sk == S_TACTICS) return GetTactics();
+	if (sk == S_STEALTH) return GetStealth();
+	if (sk == S_OBSERVATION) return GetObservation();
+	if (sk == S_ENTERTAINMENT) return GetEntertainment();
+	int retval = GetRealSkill(sk);
+	return retval;
 }
 
 void Unit::SetSkill(int sk,int level)
 {
-    skills.SetDays(sk,GetDaysByLevel(level) * GetMen());
+	skills.SetDays(sk,GetDaysByLevel(level) * GetMen());
 }
 
-void Unit::SetSkillDays(int sk,int days)
+int Unit::GetRealSkill(int sk)
 {
-    if (days) {
-        skills.SetDays(sk,days * GetMen());
-        if (days) {
-            if( ( SkillDefs[sk].flags & SkillType::MAGIC )) {
-                if( Globals->MAGE_NONLEADERS ) {
-                    if( GetMen() == 1 ) {
-                        // LLS
-                        type = U_MAGE;
-                    }
-                } else {
-                    if( GetMen(I_LEADERS) == 1) {
-                        type = U_MAGE;
-                    }
-                }
-            }
-			if ((SkillDefs[sk].flags & SkillType::APPRENTICE)) {
-				if(Globals->MAGE_NONLEADERS) {
-					if(GetMen() == 1) {
-						type = U_APPRENTICE;
-					}
-				} else {
-					if(GetMen(I_LEADERS) == 1) {
-						type = U_APPRENTICE;
-					}
-				}
-			}
-        }
-    } else {
-        ForgetSkill(sk);
-    }
-}
-
-int Unit::GetRealSkill(int sk) {
-  if (GetMen()) {
-    return GetLevelByDays(skills.GetDays(sk)/GetMen());
-  } else {
-    return 0;
-  }
+	if (GetMen()) {
+		return GetLevelByDays(skills.GetDays(sk)/GetMen());
+	} else {
+		return 0;
+	}
 }
 
 void Unit::ForgetSkill(int sk)
 {
-    skills.SetDays(sk,0);
-    if (type == U_MAGE) {
+	skills.SetDays(sk,0);
+	if (type == U_MAGE) {
 		forlist(&skills) {
 			Skill * s = (Skill *) elem;
 			if( SkillDefs[s->type].flags & SkillType::MAGIC ) {
@@ -766,7 +723,7 @@ void Unit::ForgetSkill(int sk)
 			}
 		}
 		type = U_NORMAL;
-    }
+	}
 	if(type == U_APPRENTICE) {
 		forlist(&skills) {
 			Skill * s = (Skill *) elem;
@@ -795,6 +752,8 @@ int Unit::CanStudy(int sk)
 	unsigned int c;
 	for(c = 0; c < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); c++) {
 		if(SkillDefs[sk].depends[c].skill == -1) return 1;
+		if(SkillDefs[SkillDefs[sk].depends[c].skill].flags&SkillType::DISABLED)
+			continue;
 		if(!CheckDepend(curlev, SkillDefs[sk].depends[c])) return 0;
 	}
 	return 1;
@@ -802,127 +761,109 @@ int Unit::CanStudy(int sk)
 
 int Unit::Study(int sk,int days)
 {
-    if( Globals->SKILL_LIMIT_NONLEADERS && !IsLeader() )
-    {
-        if (skills.Num())
-        {
-            Skill * s = (Skill *) skills.First();
-            if (s->type != sk)
-            {
-                Error("Can know only 1 skill.");
-                return 0;
-            }
-        }
-    }
+	if( Globals->SKILL_LIMIT_NONLEADERS && !IsLeader() ) {
+		if (skills.Num()) {
+			Skill * s = (Skill *) skills.First();
+			if (s->type != sk) {
+				Error("Can know only 1 skill.");
+				return 0;
+			}
+		}
+	}
+	if (!CanStudy(sk)) {
+		Error("Doesn't have the pre-requisite skills to study that.");
+		return 0;
+	}
 
-    if (!CanStudy(sk))
-    {
-        Error("Doesn't have the pre-requisite skills to study that.");
-        return 0;
-    }
-    
-    skills.SetDays(sk,skills.GetDays(sk) + days);
-    AdjustSkills();
-    
-    /* Check to see if we need to show a skill report */
-    int lvl = GetRealSkill(sk);
-    if (lvl > faction->skills.GetDays(sk))
-    {
-        faction->skills.SetDays(sk,lvl);
-        faction->shows.Add(new ShowSkill(sk,lvl));
-    }
-    return 1;
+	skills.SetDays(sk,skills.GetDays(sk) + days);
+	AdjustSkills();
+
+	/* Check to see if we need to show a skill report */
+	int lvl = GetRealSkill(sk);
+	if (lvl > faction->skills.GetDays(sk)) {
+		faction->skills.SetDays(sk,lvl);
+		faction->shows.Add(new ShowSkill(sk,lvl));
+	}
+	return 1;
 }
 
-int Unit::IsLeader() {
-  if (GetMen(I_LEADERS)) return 1;
-  return 0;
+int Unit::IsLeader()
+{
+	if (GetMen(I_LEADERS)) return 1;
+	return 0;
 }
 
-int Unit::IsNormal() {
-  if (GetMen() && !IsLeader()) return 1;
-  return 0;
+int Unit::IsNormal()
+{
+	if (GetMen() && !IsLeader()) return 1;
+	return 0;
 }
 
 void Unit::AdjustSkills()
 {
-    //
-    // First, is the unit a leader?
-    //
-    if( IsLeader() )
-    {
-        //
-        // Unit is all leaders: Make sure no skills are > max
-        //
-        forlist(&skills) {
-            Skill * s = (Skill *) elem;
-            if (GetRealSkill(s->type) >= SkillMax(s->type,I_LEADERS))
-            {
-                s->days = GetDaysByLevel(SkillMax(s->type,I_LEADERS)) *
-                    GetMen();
-            }
-        }
-    } 
-    else
-    {
-        if( Globals->SKILL_LIMIT_NONLEADERS )
-        {
-            //
-            // Not a leader, can only know 1 skill
-            //
-            if (skills.Num() > 1)
-            {
-                //
-                // Find highest skill, eliminate others
-                //
-                unsigned int max = 0;
-                Skill * maxskill = 0;
-                {
-                    forlist(&skills) {
-                        Skill * s = (Skill *) elem;
-                        if (s->days > max)
-                        {
-                            max = s->days;
-                            maxskill = s;
-                        }
-                    }
-                }
-                {
-                    forlist(&skills) {
-                        Skill * s = (Skill *) elem;
-                        if (s != maxskill)
-                        {
-                            skills.Remove(s);
-                            delete s;
-                        }
-                    }
-                }
-            }
-        }
-        
-        //
-        // Limit remaining skills to max
-        //
-        forlist( &skills ) {
-            Skill *theskill = (Skill *) elem;
-            int max = 100;
-            forlist(&items) {
-                Item * i = (Item *) elem;
-                if (ItemDefs[i->type].type & IT_MAN)
-                {
-                    if (SkillMax(theskill->type,i->type) < max)
-                    {
-                        max = SkillMax(theskill->type,i->type);
-                    }
-                }
-            }
+	//
+	// First, is the unit a leader?
+	//
+	if( IsLeader() ) {
+		//
+		// Unit is all leaders: Make sure no skills are > max
+		//
+		forlist(&skills) {
+			Skill * s = (Skill *) elem;
+			if (GetRealSkill(s->type) >= SkillMax(s->type,I_LEADERS)) {
+				s->days = GetDaysByLevel(SkillMax(s->type,I_LEADERS)) *
+					GetMen();
+			}
+		}
+	} else {
+		if( Globals->SKILL_LIMIT_NONLEADERS ) {
+			//
+			// Not a leader, can only know 1 skill
+			//
+			if (skills.Num() > 1) {
+				//
+				// Find highest skill, eliminate others
+				//
+				unsigned int max = 0;
+				Skill * maxskill = 0;
+				forlist(&skills) {
+					Skill * s = (Skill *) elem;
+					if (s->days > max) {
+						max = s->days;
+						maxskill = s;
+					}
+				}
+				{
+					forlist(&skills) {
+						Skill * s = (Skill *) elem;
+						if (s != maxskill) {
+							skills.Remove(s);
+							delete s;
+						}
+					}
+				}
+			}
+		}
 
-            if (GetRealSkill(theskill->type) >= max)
-            {
-                theskill->days = GetDaysByLevel(max) * GetMen();
-            }
-        }
-    }
+		//
+		// Limit remaining skills to max
+		//
+		forlist( &skills ) {
+			Skill *theskill = (Skill *) elem;
+			int max = 100;
+			forlist(&items) {
+				Item * i = (Item *) elem;
+				if (ItemDefs[i->type].type & IT_MAN) {
+					if (SkillMax(theskill->type,i->type) < max) {
+						max = SkillMax(theskill->type,i->type);
+					}
+				}
+			}
+			if (GetRealSkill(theskill->type) >= max) {
+				theskill->days = GetDaysByLevel(max) * GetMen();
+			}
+		}
+	}
 }
 
 int Unit::MaintCost()
@@ -1108,13 +1049,17 @@ int Unit::CanWalk(int weight)
     forlist(&items) {
         Item * i = (Item *) elem;
         cap += ItemDefs[i->type].walk * i->num;
+		if(ItemDefs[i->type].hitchItem != -1) {
+			int hitch = ItemDefs[i->type].hitchItem;
+			if(!(ItemDefs[hitch].flags & ItemType::DISABLED)) {
+				int hitches = items.GetNum(hitch);
+				int hitched = i->num;
+				if(i->num > hitches ) hitched = hitches;
+				cap += hitches * ItemDefs[i->type].hitchwalk;
+			}
+		}
     }
 	
-    int wagons = items.GetNum(I_WAGON);
-    int horses = items.GetNum(I_HORSE);
-    if (wagons > horses) wagons = horses;
-    cap += wagons * Globals->WAGON_CAPACITY;
-    
     if (cap >= weight) return 1;
     return 0;
 }

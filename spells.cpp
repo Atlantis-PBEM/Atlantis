@@ -868,12 +868,12 @@ void Game::RunConstructGate(ARegion *r,Unit *u)
 
 void Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 {
-	if (!o->IsBuilding() || o->type == O_AGALLEON) {
+	if (!o->IsBuilding()) {
 		u->Error("Runes of Warding may only be engraved on a building.");
 		return;
 	}
 
-	if (o->incomplete) {
+	if (o->incomplete > 0) {
 		u->Error( "Runes of Warding may only be engraved on a completed "
 				"building.");
 		return;
@@ -1055,6 +1055,7 @@ void Game::RunBirdLore(ARegion *r,Unit *u)
         
 		Farsight *f = new Farsight;
 		f->faction = u->faction;
+		f->level = u->GetSkill(S_BIRD_LORE);
 		tar->farsees.Add(f);
 		u->Event(AString("Sends birds to spy on ") + 
 				tar->Print( &regions ) + ".");
@@ -1294,6 +1295,8 @@ void Game::RunFarsight(ARegion *r,Unit *u)
 
 	Farsight *f = new Farsight;
 	f->faction = u->faction;
+	f->level = level;
+	f->unit = u;
 	tar->farsees.Add(f);
 	u->Event("Casts Farsight.");
 }

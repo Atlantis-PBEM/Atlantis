@@ -167,7 +167,6 @@ public:
 
     int GetSkill(int);
     void SetSkill(int,int);
-    void SetSkillDays(int,int);
     int GetRealSkill(int);
     void ForgetSkill(int);
     int CheckDepend(int,SkillDepend &s);
@@ -199,7 +198,7 @@ public:
 	int CanUseWeapon(WeaponType *pWep, int riding);
 	int CanUseWeapon(WeaponType *pWep);
     int Taxers();
-    
+
     void MoveUnit( Object *newobj );
 
     void Event(const AString &);

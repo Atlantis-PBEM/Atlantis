@@ -39,26 +39,38 @@ class Object;
 #define I_WOOD_OR_STONE -2
 
 class ObjectType {
-public:
-  char * name;
-  int protect;
-  int capacity;
-  int item;
-  int cost;
-  int level;
-  int skill;
-  int sailors;
-  int canenter;
-  int monster;
-  int production;
-  enum {
-	  DISABLED = 0x1,
-	  NO_MON_GROWTH = 0x2,
-  };
-  int flags;
+	public:
+		char *name;
+		enum {
+			DISABLED = 0x1,
+			NOMONSTERGROWTH = 0x2,
+			NEVERDECAY = 0x4,
+			CANENTER = 0x8,
+			NOEARTHQUAKE = 0x10,
+		};
+		int flags;
+
+		int protect;
+		int capacity;
+		int sailors;
+
+		int item;
+		int cost;
+		int skill;
+		int level;
+
+		int maxMaintenance;
+		int maxMonthlyDecay;
+		int maintFactor;
+
+		int monster;
+
+		int productionAided;
 };
 
 extern ObjectType * ObjectDefs;
+
+AString *ObjectDescription(int obj);
 
 int ParseObject(AString *);
 
@@ -66,47 +78,45 @@ int ObjectIsShip(int);
 
 class Object : public AListElem
 {
-public:
-    Object( ARegion *region );
-    ~Object();
-  
-    void Readin( Ainfile *f, AList *, ATL_VER v );
-    void Writeout( Aoutfile *f );
-    void Report(Areport *,Faction *,int,int,int);
-  
-    void SetName(AString *);
-    void SetDescribe(AString *);
-  
-    Unit *GetUnit(int);
-    Unit *GetUnitAlias(int,int); /* alias, faction number */
-    Unit *GetUnitId(UnitId *,int);
+	public:
+		Object( ARegion *region );
+		~Object();
 
-    // AS
-    int IsRoad();
-    int IsRoadUsable();
-    int IsRoadDecaying();
-    AString DoDecayWarning();
-    AString DoMaintenanceWarning();
+		void Readin( Ainfile *f, AList *, ATL_VER v );
+		void Writeout( Aoutfile *f );
+		void Report(Areport *,Faction *,int,int,int);
 
-    int IsBoat();
-    int IsBuilding();
-    int CanModify();
-    int CanEnter(ARegion *,Unit *);
-    Unit *ForbiddenBy(ARegion *, Unit *);
-    Unit *GetOwner();
+		void SetName(AString *);
+		void SetDescribe(AString *);
 
-    void MoveObject( ARegion *toreg );
+		Unit *GetUnit(int);
+		Unit *GetUnitAlias(int,int); /* alias, faction number */
+		Unit *GetUnitId(UnitId *,int);
 
-    AString * name;
-    AString * describe;
-    ARegion *region;
-    int inner;
-    int num;
-    int type;
-    int incomplete;
-    int capacity;
-    int runes;
-    AList units;
+		// AS
+		int IsRoad();
+		AString DoDecayWarning();
+		AString DoMaintenanceWarning();
+
+		int IsBoat();
+		int IsBuilding();
+		int CanModify();
+		int CanEnter(ARegion *,Unit *);
+		Unit *ForbiddenBy(ARegion *, Unit *);
+		Unit *GetOwner();
+
+		void MoveObject( ARegion *toreg );
+
+		AString *name;
+		AString *describe;
+		ARegion *region;
+		int inner;
+		int num;
+		int type;
+		int incomplete;
+		int capacity;
+		int runes;
+		AList units;
 };
 
 #endif

@@ -74,8 +74,6 @@ public:
     int FLY_SPEED;
     int MAX_SPEED;
 	
-    int WAGON_CAPACITY;
-  
     int STUDENTS_PER_TEACHER;
 
 
@@ -278,6 +276,16 @@ public:
 
 	// Is there an abyss level?
 	int ABYSS_LEVEL;
+
+	// Does farsight make use of a mages other skills
+	int IMPROVED_FARSIGHT;
+
+	// Should the GM get a full world report every turn
+	int GM_REPORT;
+
+	// Do we allow objects to decay according to the parameters in the object
+	// definition table
+	int DECAY;
 };
 
 extern GameDefs * Globals;

@@ -879,10 +879,9 @@ void ARegion::PostTurn()
         }
 
         // AS
-        if (HasRoad())
-        {
-            DoDecayCheck();
-        }
+		if(Globals->DECAY) {
+			DoDecayCheck();
+		}
         
         //
         // Now, reset population based stuff.
@@ -942,112 +941,103 @@ void ARegion::PostTurn()
 // AS
 void ARegion::DoDecayCheck()
 {
-    forlist (&objects)
-    {
-        Object *o = (Object *) elem;
-        if (o->IsRoadUsable())
-        {
-            DoDecayClicks(o);
-        }
-    }
+	forlist (&objects) {
+		Object *o = (Object *) elem;
+		if(!(ObjectDefs[o->type].flags & ObjectType::NEVERDECAY)) {
+			DoDecayClicks(o);
+		}
+	}
 }
-
-// AS
-// value to add when road has reached decay level
-#define DECAY_ADD 15
 
 // AS
 void ARegion::DoDecayClicks(Object *o)
 {
-    int clicks = getrandom(GetMaxClicks());
-    clicks += PillageCheck();
-    o->incomplete += clicks;
-    if (!o->IsRoadUsable())
-    {
-        o->incomplete += DECAY_ADD;
-        // trigger decay event
-        RunDecayEvent(o);
-    }
+	if(ObjectDefs[o->type].flags & ObjectType::NEVERDECAY) return;
+
+	int clicks = getrandom(GetMaxClicks());
+	clicks += PillageCheck();
+
+	if(clicks > ObjectDefs[o->type].maxMonthlyDecay)
+		clicks = ObjectDefs[o->type].maxMonthlyDecay;
+
+	o->incomplete += clicks;
+
+	if(o->incomplete > 0) {
+		// trigger decay event
+		RunDecayEvent(o);
+	}
 }
 
 // AS
 void ARegion::RunDecayEvent(Object *o)
 {
-    AList * pFactions;
-    pFactions = PresentFactions();
-    forlist (pFactions)
-    {
-        Faction * f = ((FactionPtr *) elem)->ptr;
-        f->Event(GetDecayFlavor() + *o->name + " " +
-            ObjectDefs[o->type].name + " in " +
-            (AString) TerrainDefs[type].name + " (" + xloc + "," +
-            yloc + ") in " + *name + ".");
-    }
+	AList * pFactions;
+	pFactions = PresentFactions();
+	forlist (pFactions) {
+		Faction * f = ((FactionPtr *) elem)->ptr;
+		f->Event(GetDecayFlavor() + *o->name + " " +
+				ObjectDefs[o->type].name + " in " +
+				(AString) TerrainDefs[type].name + " (" + xloc + "," +
+				yloc + ") in " + *name + ".");
+	}
 }
 
 // AS
 AString ARegion::GetDecayFlavor()
 {
-    AString flavor;
-    int badWeather = 0;
-    if (weather != W_NORMAL && !clearskies) badWeather = 1;
-    if (!Globals->WEATHER_EXISTS) badWeather = 0;
-    switch (type)
-    {
-        case R_PLAIN:
+	AString flavor;
+	int badWeather = 0;
+	if (weather != W_NORMAL && !clearskies) badWeather = 1;
+	if (!Globals->WEATHER_EXISTS) badWeather = 0;
+	switch (type) {
+		case R_PLAIN:
 		case R_ISLAND_PLAIN:
 		case R_CERAN_PLAIN1:
 		case R_CERAN_PLAIN2:
 		case R_CERAN_PLAIN3:
 		case R_CERAN_LAKE:
-            flavor = AString("Floods have damaged ");
-            break;
-        case R_DESERT:
+			flavor = AString("Floods have damaged ");
+			break;
+		case R_DESERT:
 		case R_CERAN_DESERT1:
 		case R_CERAN_DESERT2:
 		case R_CERAN_DESERT3:
-            flavor = AString("Flashfloods have damaged ");
-            break;
+			flavor = AString("Flashfloods have damaged ");
+			break;
 		case R_CERAN_WASTELAND:
 		case R_CERAN_WASTELAND1:
 			flavor = AString("Magical radiation has damaged ");
 			break;
-        case R_TUNDRA:
+		case R_TUNDRA:
 		case R_CERAN_TUNDRA1:
 		case R_CERAN_TUNDRA2:
 		case R_CERAN_TUNDRA3:
-            if (badWeather)
-            {
-                flavor = AString("Ground freezing has damaged ");
-            }
-            else
-            {
-                flavor = AString("Ground thaw has damaged ");
-            }
-            break;
-        case R_MOUNTAIN:
+			if (badWeather) {
+				flavor = AString("Ground freezing has damaged ");
+			} else {
+				flavor = AString("Ground thaw has damaged ");
+			}
+			break;
+		case R_MOUNTAIN:
 		case R_ISLAND_MOUNTAIN:
 		case R_CERAN_MOUNTAIN1:
 		case R_CERAN_MOUNTAIN2:
 		case R_CERAN_MOUNTAIN3:
-            if (badWeather)
-            {
-                flavor = AString("Avalanches have damaged ");
-            }
-            else
-            {
-                flavor = AString("Rockslides have damaged ");
-            }
-            break;
+			if (badWeather) {
+				flavor = AString("Avalanches have damaged ");
+			} else {
+				flavor = AString("Rockslides have damaged ");
+			}
+			break;
 		case R_CERAN_HILL:
 		case R_CERAN_HILL1:
 		case R_CERAN_HILL2:
 			flavor = AString("Quakes have damaged ");
 			break;
-        case R_FOREST:
-        case R_SWAMP:
+		case R_FOREST:
+		case R_SWAMP:
 		case R_ISLAND_SWAMP:
-        case R_JUNGLE:
+		case R_JUNGLE:
 		case R_CERAN_FOREST1:
 		case R_CERAN_FOREST2:
 		case R_CERAN_FOREST3:
@@ -1060,11 +1050,11 @@ AString ARegion::GetDecayFlavor()
 		case R_CERAN_JUNGLE1:
 		case R_CERAN_JUNGLE2:
 		case R_CERAN_JUNGLE3:
-            flavor = AString("Encroaching vegetation has damaged ");
-            break;
-        case R_CAVERN:
-        case R_UFOREST:
-        case R_TUNNELS:
+			flavor = AString("Encroaching vegetation has damaged ");
+			break;
+		case R_CAVERN:
+		case R_UFOREST:
+		case R_TUNNELS:
 		case R_CERAN_CAVERN1:
 		case R_CERAN_CAVERN2:
 		case R_CERAN_CAVERN3:
@@ -1079,37 +1069,33 @@ AString ARegion::GetDecayFlavor()
 		case R_CERAN_GROTTO1:
 		case R_DFOREST:
 		case R_CERAN_DFOREST1:
-            if (badWeather)
-            {
-                flavor = AString("Lava flows have damaged ");
-            }
-            else
-            {
-                flavor = AString("Quakes have damaged ");
-            }
+			if (badWeather) {
+				flavor = AString("Lava flows have damaged ");
+			} else {
+				flavor = AString("Quakes have damaged ");
+			}
             break;
-        default:
-            flavor = AString("Unexplained phenomena have damaged ");
-            break;
-    }
-    return flavor;
+		default:
+			flavor = AString("Unexplained phenomena have damaged ");
+			break;
+	}
+	return flavor;
 }
 
 // AS
 int ARegion::GetMaxClicks()
 {
-    int terrainAdd = 0;
-    int terrainMult = 1;
-    int weatherAdd = 0;
-    int badWeather = 0;
-    int maxClicks;
-    if (weather != W_NORMAL && !clearskies) badWeather = 1;
-    if (!Globals->WEATHER_EXISTS) badWeather = 0;
-    switch (type)
-    {
-        case R_PLAIN:
+	int terrainAdd = 0;
+	int terrainMult = 1;
+	int weatherAdd = 0;
+	int badWeather = 0;
+	int maxClicks;
+	if (weather != W_NORMAL && !clearskies) badWeather = 1;
+	if (!Globals->WEATHER_EXISTS) badWeather = 0;
+	switch (type) {
+		case R_PLAIN:
 		case R_ISLAND_PLAIN:
-        case R_TUNDRA:
+		case R_TUNDRA:
 		case R_CERAN_PLAIN1:
 		case R_CERAN_PLAIN2:
 		case R_CERAN_PLAIN3:
@@ -1117,10 +1103,10 @@ int ARegion::GetMaxClicks()
 		case R_CERAN_TUNDRA1:
 		case R_CERAN_TUNDRA2:
 		case R_CERAN_TUNDRA3:
-            terrainAdd = -1;
-            if (badWeather) weatherAdd = 4;
-            break;
-        case R_MOUNTAIN:
+			terrainAdd = -1;
+			if (badWeather) weatherAdd = 4;
+			break;
+		case R_MOUNTAIN:
 		case R_ISLAND_MOUNTAIN:
 		case R_CERAN_MOUNTAIN1:
 		case R_CERAN_MOUNTAIN2:
@@ -1128,13 +1114,13 @@ int ARegion::GetMaxClicks()
 		case R_CERAN_HILL:
 		case R_CERAN_HILL1:
 		case R_CERAN_HILL2:
-            terrainMult = 2;
-            if (badWeather) weatherAdd = 4;
-            break;
-        case R_FOREST:
-        case R_SWAMP:
+			terrainMult = 2;
+			if (badWeather) weatherAdd = 4;
+			break;
+		case R_FOREST:
+		case R_SWAMP:
 		case R_ISLAND_SWAMP:
-        case R_JUNGLE:
+		case R_JUNGLE:
 		case R_CERAN_FOREST1:
 		case R_CERAN_FOREST2:
 		case R_CERAN_FOREST3:
@@ -1147,19 +1133,19 @@ int ARegion::GetMaxClicks()
 		case R_CERAN_JUNGLE1:
 		case R_CERAN_JUNGLE2:
 		case R_CERAN_JUNGLE3:
-            terrainAdd = -1;
-            terrainMult = 2;
-            if (badWeather) weatherAdd = 1;
-            break;
-        case R_DESERT:
+			terrainAdd = -1;
+			terrainMult = 2;
+			if (badWeather) weatherAdd = 1;
+			break;
+		case R_DESERT:
 		case R_CERAN_DESERT1:
 		case R_CERAN_DESERT2:
 		case R_CERAN_DESERT3:
-            terrainAdd = -1;
-            if (badWeather) weatherAdd = 5;
-        case R_CAVERN:
-        case R_UFOREST:
-        case R_TUNNELS:
+			terrainAdd = -1;
+			if (badWeather) weatherAdd = 5;
+		case R_CAVERN:
+		case R_UFOREST:
+		case R_TUNNELS:
 		case R_CERAN_CAVERN1:
 		case R_CERAN_CAVERN2:
 		case R_CERAN_CAVERN3:
@@ -1174,154 +1160,148 @@ int ARegion::GetMaxClicks()
 		case R_CERAN_GROTTO1:
 		case R_DFOREST:
 		case R_CERAN_DFOREST1:
-            terrainAdd = 1;
-            terrainMult = 2;
-            if (badWeather) weatherAdd = 6;
-            break;
-        default:
-            if (badWeather) weatherAdd = 4;
-            break;
-    }
-    maxClicks = terrainMult * (terrainAdd + 2) + (weatherAdd + 1);
-    return maxClicks;
+			terrainAdd = 1;
+			terrainMult = 2;
+			if (badWeather) weatherAdd = 6;
+			break;
+		default:
+			if (badWeather) weatherAdd = 4;
+			break;
+	}
+	maxClicks = terrainMult * (terrainAdd + 2) + (weatherAdd + 1);
+	return maxClicks;
 }
 
 // AS
 int ARegion::PillageCheck()
 {
-    int pillageAdd = maxwages - wages;
-    if (pillageAdd > 0) return pillageAdd;
-    return 0;
+	int pillageAdd = maxwages - wages;
+	if (pillageAdd > 0) return pillageAdd;
+	return 0;
 }
 
 // AS
 int ARegion::HasRoad()
 {
-    forlist (&objects)
-    {
-        Object * o = (Object *) elem;
-        if (o->IsRoadUsable()) return 1;
-    }
-    return 0;
+	forlist (&objects) {
+		Object * o = (Object *) elem;
+		if(o->IsRoad() && o->incomplete < 1) return 1;
+	}
+	return 0;
 }
 
 // AS
 int ARegion::HasExitRoad(int realDirection)
 {
-    forlist (&objects)
-    {
-        Object * o = (Object *) elem;
-        if (o->IsRoadUsable())
-        {
-            if (o->type == GetRoadDirection(realDirection)) return 1;
-        }
-    }
-    return 0;
+	forlist (&objects) {
+		Object * o = (Object *) elem;
+		if (o->IsRoad() && o->incomplete < 1) {
+			if (o->type == GetRoadDirection(realDirection)) return 1;
+		}
+	}
+	return 0;
 }
 
 // AS
 int ARegion::CountConnectingRoads()
 {
-    int connections = 0;
-    for (int i = 0; i < NDIRS; i++)
-    {
-        if (HasExitRoad(i) && neighbors[i]->HasConnectingRoad(i))
-            connections ++;
-    }
-    return connections;
+	int connections = 0;
+	for (int i = 0; i < NDIRS; i++) {
+		if (HasExitRoad(i) && neighbors[i]->HasConnectingRoad(i))
+			connections ++;
+	}
+	return connections;
 }
 
 // AS
 int ARegion::HasConnectingRoad(int realDirection)
 {
-    if (HasExitRoad(GetRealDirComp(realDirection))) return 1;
-    return 0;
+	if (HasExitRoad(GetRealDirComp(realDirection))) return 1;
+	return 0;
 }
 
 // AS
 int ARegion::GetRoadDirection(int realDirection)
 {
-    int roadDirection = 0;
-    switch (realDirection)
-    {
-        case D_NORTH:
-            roadDirection = O_ROADN;
-            break;
-        case D_NORTHEAST:
-            roadDirection = O_ROADNE;
-            break;
-        case D_NORTHWEST:
-            roadDirection = O_ROADNW;
-            break;
-        case D_SOUTH:
-            roadDirection = O_ROADS;
-            break;
-        case D_SOUTHEAST:
-            roadDirection = O_ROADSE;
-            break;
-        case D_SOUTHWEST:
-            roadDirection = O_ROADSW;
-            break;
-    }
-    return roadDirection;
+	int roadDirection = 0;
+	switch (realDirection) {
+		case D_NORTH:
+			roadDirection = O_ROADN;
+			break;
+		case D_NORTHEAST:
+			roadDirection = O_ROADNE;
+			break;
+		case D_NORTHWEST:
+			roadDirection = O_ROADNW;
+			break;
+		case D_SOUTH:
+			roadDirection = O_ROADS;
+			break;
+		case D_SOUTHEAST:
+			roadDirection = O_ROADSE;
+			break;
+		case D_SOUTHWEST:
+			roadDirection = O_ROADSW;
+			break;
+	}
+	return roadDirection;
 }
 
 // AS
 int ARegion::GetRealDirComp(int realDirection)
 {
-    int complementDirection = 0;
-    switch (realDirection)
-    {
-        case D_NORTH:
-            complementDirection = D_SOUTH;
-            break;
-        case D_NORTHEAST:
-            complementDirection = D_SOUTHWEST;
-            break;
-        case D_NORTHWEST:
-            complementDirection = D_SOUTHEAST;
-            break;
-        case D_SOUTH:
-            complementDirection = D_NORTH;
-            break;
-        case D_SOUTHEAST:
-            complementDirection = D_NORTHWEST;
-            break;
-        case D_SOUTHWEST:
-            complementDirection = D_NORTHEAST;
-            break;
-    }
-    return complementDirection;
+	int complementDirection = 0;
+	switch (realDirection) {
+		case D_NORTH:
+			complementDirection = D_SOUTH;
+			break;
+		case D_NORTHEAST:
+			complementDirection = D_SOUTHWEST;
+			break;
+		case D_NORTHWEST:
+			complementDirection = D_SOUTHEAST;
+			break;
+		case D_SOUTH:
+			complementDirection = D_NORTH;
+			break;
+		case D_SOUTHEAST:
+			complementDirection = D_NORTHWEST;
+			break;
+		case D_SOUTHWEST:
+			complementDirection = D_NORTHEAST;
+			break;
+	}
+	return complementDirection;
 }
 
 void ARegion::UpdateProducts()
 {
-    forlist (&products) {
-        Production *prod = (Production *) elem;
-        int lastbonus = prod->baseamount / 2;
-        int bonus = 0;
+	forlist (&products) {
+		Production *prod = (Production *) elem;
+		int lastbonus = prod->baseamount / 2;
+		int bonus = 0;
 
-        if (prod->itemtype == I_SILVER && prod->skill == -1) continue;
+		if (prod->itemtype == I_SILVER && prod->skill == -1) continue;
 
-        forlist (&objects) {
-            Object *o = (Object *) elem;
-            if (o->incomplete == 0 &&
-                ObjectDefs[o->type].production == prod->itemtype) {
-                lastbonus /= 2;
-                bonus += lastbonus;
-            }
-        }
-        prod->amount = prod->baseamount + bonus;
+		forlist (&objects) {
+			Object *o = (Object *) elem;
+			if (o->incomplete < 1 &&
+					ObjectDefs[o->type].productionAided == prod->itemtype) {
+				lastbonus /= 2;
+				bonus += lastbonus;
+			}
+		}
+		prod->amount = prod->baseamount + bonus;
 
-        if (prod->itemtype == I_GRAIN || prod->itemtype == I_LIVESTOCK) {
-            prod->amount += ((earthlore + clearskies) * 40) / prod->baseamount;
-        }
-    }
+		if (prod->itemtype == I_GRAIN || prod->itemtype == I_LIVESTOCK) {
+			prod->amount += ((earthlore + clearskies) * 40) / prod->baseamount;
+		}
+	}
 }
 
 AString ARegion::ShortPrint( ARegionList *pRegs )
 {
-    AString temp = (AString) TerrainDefs[type].name;
+    AString temp = TerrainDefs[type].name;
 
     temp += AString(" (") + xloc + "," + yloc;
     
@@ -1589,18 +1569,30 @@ void ARegion::Readin( Ainfile * f,AList * facs, ATL_VER v )
 
 int ARegion::CanMakeAdv(Faction * fac,int item)
 {
-    forlist(&objects) {
-        Object * o = (Object *) elem;
-        forlist(&o->units) {
-            Unit * u = (Unit *) elem;
-            if (u->faction == fac) {
-                if (u->GetSkill(ItemDefs[item].pSkill)>=ItemDefs[item].pLevel) {
-                    return 1;
-                }
-            }
-        }
-    }
-    return 0;
+
+	if(Globals->IMPROVED_FARSIGHT) {
+		Farsight *farsight = GetFarsight(&farsees, fac);
+		if(farsight && farsight->unit) {
+			if(farsight->unit->GetSkill(ItemDefs[item].pSkill) >=
+					ItemDefs[item].pLevel) {
+				return 1;
+			}
+		}
+	}
+
+	forlist(&objects) {
+		Object * o = (Object *) elem;
+		forlist(&o->units) {
+			Unit * u = (Unit *) elem;
+			if (u->faction == fac) {
+				if (u->GetSkill(ItemDefs[item].pSkill) >=
+						ItemDefs[item].pLevel) {
+					return 1;
+				}
+			}
+		}
+	}
+	return 0;
 }
 
 void ARegion::WriteProducts(Areport * f,Faction * fac)
@@ -1739,202 +1731,201 @@ void ARegion::WriteExits( Areport *f, ARegionList *pRegs )
 "has it that once you have left the Nexus, you can never return."
 
 void ARegion::WriteReport(Areport * f,Faction * fac,int month,
-                          ARegionList *pRegions )
+		ARegionList *pRegions )
 {
-    Farsight *farsight = GetFarsight(&farsees,fac);
+	Farsight *farsight = GetFarsight(&farsees,fac);
 
-    if (farsight || Present(fac) || fac->IsNPC())  {
-        AString temp = Print( pRegions );
-        if (Population()) {
-            temp += AString(", ") + Population() + " peasants";
-            if( Globals->RACES_EXIST )
-            {
-                temp += AString(" (") + ItemDefs[race].names + ")";
-            }
-            temp += AString( ", $" ) + money;
-        }
-        temp += ".";
-        f->PutStr(temp);
-        f->PutStr("-------------------------------------------------"
-                  "-----------");
-        
-        f->AddTab();
-        if( Globals->WEATHER_EXISTS )
-        {
-            if (weather == W_BLIZZARD)
-                temp = "There was an unnatural blizzard last month; ";
-            if (weather == W_WINTER) 
-                temp = "It was winter last month; ";
-            if (weather == W_MONSOON)
-                temp = "It was monsoon season last month; ";
-            if (weather == W_NORMAL)
-                temp = "The weather was clear last month; ";
-            int nxtweather = pRegions->GetWeather( this, (month + 1) % 12 );
-            if (nxtweather == W_WINTER)
-                temp += "it will be winter next month.";
-            if (nxtweather == W_MONSOON)
-                temp += "it will be monsoon season next month.";
-            if (nxtweather == W_NORMAL)
-                temp += "it will be clear next month.";
-            f->PutStr(temp);
-        }
+	if (farsight || Present(fac) || fac->IsNPC())  {
+		AString temp = Print( pRegions );
+		if (Population()) {
+			temp += AString(", ") + Population() + " peasants";
+			if( Globals->RACES_EXIST ) {
+				temp += AString(" (") + ItemDefs[race].names + ")";
+			}
+			temp += AString( ", $" ) + money;
+		}
+		temp += ".";
+		f->PutStr(temp);
+		f->PutStr("-------------------------------------------------"
+				"-----------");
 
-        if (type == R_NEXUS) {
+		f->AddTab();
+		if( Globals->WEATHER_EXISTS ) {
+			if (weather == W_BLIZZARD)
+				temp = "There was an unnatural blizzard last month; ";
+			if (weather == W_WINTER)
+				temp = "It was winter last month; ";
+			if (weather == W_MONSOON)
+				temp = "It was monsoon season last month; ";
+			if (weather == W_NORMAL)
+				temp = "The weather was clear last month; ";
+			int nxtweather = pRegions->GetWeather( this, (month + 1) % 12 );
+			if (nxtweather == W_WINTER)
+				temp += "it will be winter next month.";
+			if (nxtweather == W_MONSOON)
+				temp += "it will be monsoon season next month.";
+			if (nxtweather == W_NORMAL)
+				temp += "it will be clear next month.";
+			f->PutStr(temp);
+		}
+
+		if (type == R_NEXUS) {
 			int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
 			char *nexus_desc = new char[len];
 			sprintf(nexus_desc, AC_STRING, Globals->WORLD_NAME,
 					Globals->WORLD_NAME);
-            f->PutStr("");
-            f->PutStr(nexus_desc);
-            f->PutStr("");
+			f->PutStr("");
+			f->PutStr(nexus_desc);
+			f->PutStr("");
 			delete [] nexus_desc;
-        }
-        
-        f->DropTab();
-        
-        WriteEconomy(f,fac);
-        
-        WriteExits( f, pRegions );
-        
-        if( Globals->GATES_EXIST && gate && gate != -1)
-        {
-            int sawgate = 0;
-            forlist(&objects) {
-                Object *o = (Object *) elem;
-				if(!o->units.Num()) {
-					if(!sawgate && fac->IsNPC())
-					{
-                        f->PutStr(AString("There is a Gate here (Gate ") +
-                                  gate + " of " +
-                                  (pRegions->numberofgates - 1) + ").");
-                        f->PutStr("");
-                        sawgate = 1;
+		}
+
+		f->DropTab();
+
+		WriteEconomy(f,fac);
+
+		WriteExits( f, pRegions );
+
+		if( Globals->GATES_EXIST && gate && gate != -1) {
+			int sawgate = 0;
+			if(fac->IsNPC())
+				sawgate = 1;
+			if(Globals->IMPROVED_FARSIGHT && farsight && farsight->unit) {
+				if(farsight->unit->GetSkill(S_GATE_LORE)) {
+					sawgate = 1;
+				}
+			}
+			forlist(&objects) {
+				Object *o = (Object *) elem;
+				forlist(&o->units) {
+					Unit *u = (Unit *) elem;
+					if (!sawgate &&
+							((u->faction == fac) &&
+							 u->GetSkill(S_GATE_LORE))) {
+						sawgate = 1;
 					}
 				}
-                forlist(&o->units) {
-                    Unit *u = (Unit *) elem;
-                    if (!sawgate &&
-						((u->faction == fac && u->GetSkill(S_GATE_LORE)) ||
-						fac->IsNPC()))
-                    {
-                        f->PutStr(AString("There is a Gate here (Gate ") +
-                                  gate + " of " +
-                                  (pRegions->numberofgates - 1) + ").");
-                        f->PutStr("");
-                        sawgate = 1;
-                    }
-                }
-            }
-        }
-        
-        int obs = GetObservation(fac);
-        int truesight = GetTrueSight(fac);
-        int detfac = 0;
+			}
+			if(sawgate) {
+				f->PutStr(AString("There is a Gate here (Gate ") + gate + 
+						" of " + (pRegions->numberofgates - 1) + ").");
+				f->PutStr("");
+			}
+		}
+
+		int obs = GetObservation(fac);
+		int truesight = GetTrueSight(fac);
+		int detfac = 0;
 
 		if(fac->IsNPC()) obs=10;
 
-        if( S_MIND_READING != -1 )
-        {
-            forlist (&objects) {
-                Object * o = (Object *) elem;
-                forlist(&o->units) {
-                    Unit * u = (Unit *) elem;
-                    if (u->faction == fac && u->GetSkill(S_MIND_READING) > 2)
-                    {
-                        detfac = 1;
-                    }
-                }
-            }
-        }
-        
-        {
-            forlist (&objects) {
-                ((Object *) elem)->Report(f,fac,obs,truesight,detfac);
-            }
-            f->EndLine();
-        }
-    }
+		forlist (&objects) {
+			Object * o = (Object *) elem;
+			forlist(&o->units) {
+				Unit * u = (Unit *) elem;
+				if (u->faction == fac && u->GetSkill(S_MIND_READING) > 2) {
+					detfac = 1;
+				}
+			}
+		}
+		if(Globals->IMPROVED_FARSIGHT && farsight && farsight->unit &&
+				farsight->unit->GetSkill(S_MIND_READING) > 2) {
+			detfac = 1;
+		}
+
+		{
+			forlist (&objects) {
+				((Object *) elem)->Report(f,fac,obs,truesight,detfac);
+			}
+			f->EndLine();
+		}
+	}
 }
 
 // DK
-void ARegion::WriteTemplate( Areport *f, 
-                             Faction *fac,
-                             ARegionList *pRegs,
-                             int month )
+void ARegion::WriteTemplate( Areport *f, Faction *fac, ARegionList *pRegs,
+		int month )
 {
-    int header = 0;
-    
-    forlist (&objects) {
-        Object * o = (Object *) elem;
-        forlist(&o->units) {
-            Unit * u = (Unit *) elem;
-            if (u->faction == fac)
-            {
-                if (!header)
-                {
-                    // DK
-                    if (fac->temformat == TEMPLATE_MAP)
-                    {
-                        WriteTemplateHeader(f, fac, pRegs, month);
-                    }
-                    else
-                    {
-                        f->PutStr("");
-                        f->PutStr(AString("*** ") + Print( pRegs ) + " ***",1);
-                    }
-                    header = 1;
-                }
-                
-                f->PutStr("");
-                f->PutStr(AString("unit ") + u->num);
-                // DK
-                if (fac->temformat == TEMPLATE_LONG ||
-                    fac->temformat == TEMPLATE_MAP)
-                {
-                    f->PutStr(u->TemplateReport(),1);
-                }
-                forlist(&(u->oldorders)) {
-                    f->PutStr(*((AString *) elem));
-                }
-                u->oldorders.DeleteAll();
-            }
-        }
-    }
+	int header = 0;
+
+	forlist (&objects) {
+		Object * o = (Object *) elem;
+		forlist(&o->units) {
+			Unit * u = (Unit *) elem;
+			if (u->faction == fac) {
+				if (!header) {
+					// DK
+					if (fac->temformat == TEMPLATE_MAP) {
+						WriteTemplateHeader(f, fac, pRegs, month);
+					} else {
+						f->PutStr("");
+						f->PutStr(AString("*** ") + Print( pRegs ) + " ***",1);
+					}
+					header = 1;
+				}
+
+				f->PutStr("");
+				f->PutStr(AString("unit ") + u->num);
+				// DK
+				if (fac->temformat == TEMPLATE_LONG ||
+						fac->temformat == TEMPLATE_MAP) {
+					f->PutStr(u->TemplateReport(),1);
+				}
+				forlist(&(u->oldorders)) {
+					f->PutStr(*((AString *) elem));
+				}
+				u->oldorders.DeleteAll();
+			}
+		}
+	}
 }
 
 int ARegion::GetTrueSight(Faction *f)
 {
-    int truesight = 0;
-    if( S_TRUE_SEEING != -1 )
-    {
-        forlist ((&objects)) {
-            Object * obj = (Object *) elem;
-            forlist ((&obj->units)) {
-                Unit * u = (Unit *) elem;
-                if (u->faction == f) {
-                    int temp = u->GetSkill(S_TRUE_SEEING);
-                    if (temp>truesight) truesight = temp;
-                }
-            }
-        }
-    }
-    return truesight;
+	int truesight = 0;
+
+	if(Globals->IMPROVED_FARSIGHT) {
+		Farsight *farsight = GetFarsight(&farsees, f);
+		if(farsight && farsight->unit) {
+			truesight = farsight->unit->GetSkill(S_TRUE_SEEING);
+		}
+	}
+
+	forlist ((&objects)) {
+		Object * obj = (Object *) elem;
+		forlist ((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			if (u->faction == f) {
+				int temp = u->GetSkill(S_TRUE_SEEING);
+				if (temp>truesight) truesight = temp;
+			}
+		}
+	}
+	return truesight;
 }
 
 int ARegion::GetObservation(Faction * f) 
 {
-    int obs = 0;
-    forlist ((&objects)) {
-        Object * obj = (Object *) elem;
-        forlist ((&obj->units)) {
-            Unit * u = (Unit *) elem;
-            if (u->faction == f) {
-                int temp = u->GetSkill(S_OBSERVATION);
-                if (temp>obs) obs = temp;
-            }
-        }
-    }
-    return obs;
+	int obs = 0;
+
+	if(Globals->IMPROVED_FARSIGHT) {
+		Farsight *farsight = GetFarsight(&farsees, f);
+		if(farsight && farsight->unit) {
+			obs = farsight->unit->GetSkill(S_OBSERVATION);
+		}
+	}
+
+	forlist ((&objects)) {
+		Object * obj = (Object *) elem;
+		forlist ((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			if (u->faction == f) {
+				int temp = u->GetSkill(S_OBSERVATION);
+				if (temp>obs) obs = temp;
+			}
+		}
+	}
+	return obs;
 }
 
 void ARegion::SetWeather( int newWeather)
@@ -2068,17 +2059,31 @@ void ARegion::NotifyCity( Unit *caster, AString& oldname, AString& newname )
 
 int ARegion::CanTax(Unit * u)
 {
-    forlist((&objects)) {
-        Object * obj = (Object *) elem;
-        forlist ((&obj->units)) {
-            Unit * u2 = (Unit *) elem;
-            if (u2->guard == GUARD_GUARD && u2->IsAlive())
-                if (u2->GetAttitude(this,u) <= A_NEUTRAL)
-                    return 0;
-        }
-    }
+	forlist((&objects)) {
+		Object * obj = (Object *) elem;
+		forlist ((&obj->units)) {
+			Unit * u2 = (Unit *) elem;
+			if (u2->guard == GUARD_GUARD && u2->IsAlive())
+				if (u2->GetAttitude(this,u) <= A_NEUTRAL)
+					return 0;
+		}
+	}
 	return 1;
 }
+
+int ARegion::CanPillage(Unit *u)
+{
+	forlist(&objects) {
+		Object *obj = (Object *)elem;
+		forlist (&obj->units) {
+			Unit *u2 = (Unit *)elem;
+			if(u2->guard == GUARD_GUARD && u2->IsAlive() &&
+					u2->faction != u->faction)
+				return 0;
+		}
+	}
+	return 1;
+}	
 
 int ARegion::ForbiddenShip(Object * ship)
 {

@@ -116,6 +116,8 @@ class Farsight : public AListElem
 {
 public:
     Faction *faction;
+	Unit *unit;
+	int level;
 };
 
 Farsight *GetFarsight(AList *,Faction *);
@@ -197,6 +199,7 @@ public:
     Unit * Forbidden(Unit *); /* Returns the unit that is forbidding */
     Unit * ForbiddenByAlly(Unit *); /* Returns the unit that is forbidding */
     int CanTax(Unit *);
+    int CanPillage(Unit *);
     int ForbiddenShip(Object *);
     int HasCityGuard();
     void NotifySpell(Unit *,int, ARegionList *pRegs );

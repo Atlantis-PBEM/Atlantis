@@ -31,6 +31,7 @@
 #ifndef SKILL_CLASS
 #define SKILL_CLASS
 
+class Faction;
 class Skill;
 class SkillList;
 
@@ -112,7 +113,7 @@ class ShowSkill : public AListElem {
 public:
   ShowSkill(int,int);
   
-  AString * Report();
+  AString * Report(Faction *);
   
   int skill;
   int level;

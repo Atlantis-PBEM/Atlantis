@@ -46,7 +46,7 @@ void Game::RunSailOrders()
             if (u && u->monthorders && u->monthorders->type == O_SAIL &&
                 o->IsBoat())
             {
-				if(o->incomplete == 0) {
+				if(o->incomplete < 1) {
 					ARegionPtr * p = new ARegionPtr;
 					p->ptr = Do1SailOrder(r,o,u);
 					regs.Add(p);
@@ -330,69 +330,68 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 
 void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 {
-    if (!TradeCheck( r, u->faction ))
-    {
-        u->Error("BUILD: Faction can't produce in that many regions.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
-  
-    int sk = ObjectDefs[obj->type].skill;
-    if (sk == -1)
-    {
-        u->Error("BUILD: Can't build that.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
-    
-    int usk = u->GetSkill(sk);
-    if (usk < ObjectDefs[obj->type].level) {
-        u->Error("BUILD: Can't build that.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
-    
-    int needed = obj->incomplete;
-    // AS
-    if (needed == 0 && !obj->IsRoad()) {
-        u->Error("BUILD: Object is finished.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
+	if (!TradeCheck( r, u->faction )) {
+		u->Error("BUILD: Faction can't produce in that many regions.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
+	}
 
-    // AS
-    if (needed <= MAX_ROAD_STATE && obj->IsRoad())
-    {
-        u->Error("BUILD: Road does not yet require maintenance.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
-    
-    int it = ObjectDefs[obj->type].item;
-    int itn;
-    if (it == I_WOOD_OR_STONE) {
-        itn = u->items.GetNum(I_WOOD) + u->items.GetNum(I_STONE);
-    } else {
-        itn = u->items.GetNum(it);
-    }
-  
-    if (itn == 0) {
-        u->Error("BUILD: Don't have the required item.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
+	int sk = ObjectDefs[obj->type].skill;
+	if (sk == -1) {
+		u->Error("BUILD: Can't build that.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
+	}
 
-    int num = u->GetMen() * usk;
+	int usk = u->GetSkill(sk);
+	if (usk < ObjectDefs[obj->type].level) {
+		u->Error("BUILD: Can't build that.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
+	}
+
+	int needed = obj->incomplete;
+	int type = obj->type;
+	// AS
+	if(((ObjectDefs[type].flags&ObjectType::NEVERDECAY) || !Globals->DECAY) &&
+			needed < 1) {
+		u->Error("BUILD: Object is finished.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
+	}
+
+	// AS
+	if(needed <= -(ObjectDefs[type].maxMaintenance)) {
+		u->Error("BUILD: Object does not yet require maintenance.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
+	}
+
+	int it = ObjectDefs[type].item;
+	int itn;
+	if (it == I_WOOD_OR_STONE) {
+		itn = u->items.GetNum(I_WOOD) + u->items.GetNum(I_STONE);
+	} else {
+		itn = u->items.GetNum(it);
+	}
+
+	if (itn == 0) {
+		u->Error("BUILD: Don't have the required item.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
+	}
+
+	int num = u->GetMen() * usk;
 
 	// JLT
-	if(obj->incomplete == ObjectDefs[obj->type].cost) {
-		if(ObjectIsShip(obj->type)) {
+	if(obj->incomplete == ObjectDefs[type].cost) {
+		if(ObjectIsShip(type)) {
 			obj->num = shipseq++;
 			obj->SetName(new AString("Ship"));
 		} else {
@@ -401,32 +400,35 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 		}
 	}
 	// Hack to fix bogus ship numbers
-	if(ObjectIsShip(obj->type) && obj->num < 100) {
+	if(ObjectIsShip(type) && obj->num < 100) {
 		obj->num = shipseq++;
 		obj->SetName(new AString("Ship"));
 	}
 
-    // AS
-    AString job;
-    if (obj->IsRoadUsable())
-    {
-        int maintenanceMax = (-MAX_ROAD_STATE + 3 + obj->incomplete) / 4;
-        if (num > maintenanceMax) num = maintenanceMax;
+	// AS
+	AString job;
+	if (needed < 1) {
+		// This looks wrong, but isn't.  
+		// If a building has a maxMaintainence of 75 and the road is at
+		// -70 (ie, 5 from max) then we want the value of maintMax to be
+		// 5 here.  Then we divide by maintFactor (some things are easier
+		// to refix than others) to get how many items we need to fix it.
+		// Then we fix it by that many items * maintFactor
+		int maintMax = ObjectDefs[type].maxMaintenance + needed;
+		maintMax /= ObjectDefs[type].maintFactor;
+        if (num > maintMax) num = maintMax;
         if (itn < num) num = itn;
         job = " maintenance ";
-        obj->incomplete -= (num * 4);
-        if (obj->incomplete < MAX_ROAD_STATE)
-            obj->incomplete = MAX_ROAD_STATE;
-    }
-    if (!obj->IsRoad() || obj->IsRoadDecaying())
-    {
-        if (num > needed) num = needed;
-        if (itn < num) num = itn;
-        job = " construction ";
-        obj->incomplete -= num;
-        if (obj->IsRoad() && obj->incomplete == 0)
-        {
-            obj->incomplete = MAX_ROAD_STATE;
+        obj->incomplete -= (num * ObjectDefs[type].maintFactor);
+        if (obj->incomplete < -(ObjectDefs[type].maxMaintenance))
+			obj->incomplete = -(ObjectDefs[type].maxMaintenance);
+	} else if(needed > 0) {
+		if (num > needed) num = needed;
+		if (itn < num) num = itn;
+		job = " construction ";
+		obj->incomplete -= num;
+		if (obj->incomplete == 0) {
+            obj->incomplete = -(ObjectDefs[type].maxMaintenance);
         }
     }
 
@@ -705,15 +707,14 @@ void Game::RunStudyOrders(ARegion * r)
 
 void Game::Do1StudyOrder(Unit *u,Object *obj)
 {
-    StudyOrder * o = (StudyOrder *) u->monthorders;
-    int sk = o->skill;
-    int cost = SkillCost(sk) * u->GetMen();
+	StudyOrder * o = (StudyOrder *) u->monthorders;
+	int sk = o->skill;
+	int cost = SkillCost(sk) * u->GetMen();
 	int reset_man = -1;
-    if (cost > u->GetMoney())
-    {
-        u->Error("STUDY: Not enough funds.");
-        return;
-    }
+	if (cost > u->GetMoney()) {
+		u->Error("STUDY: Not enough funds.");
+		return;
+	}
 
 	// Small patch for Ceran Mercs
 	if(u->GetMen(I_MERC)) {
@@ -721,8 +722,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		return;
 	}
 	
-    if( ( SkillDefs[sk].flags & SkillType::MAGIC ) && u->type != U_MAGE)
-    {
+	if( ( SkillDefs[sk].flags & SkillType::MAGIC ) && u->type != U_MAGE) {
 		if(u->type == U_APPRENTICE) {
 			u->Error("STUDY: An apprentice cannot be made into an mage.");
 			return;
@@ -733,24 +733,22 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 				return;
 			}
 		}
-        if (u->GetMen() != 1)
-        {
-            u->Error("STUDY: Only 1-man units can be magicians.");
-            return;
-        }
-        if( !( Globals->MAGE_NONLEADERS ))
-        {
-            if (u->GetMen(I_LEADERS) != 1)
-            {
-                u->Error("STUDY: Only leaders may study magic.");
-                return;
-            }
-        }
+		if (u->GetMen() != 1) {
+			u->Error("STUDY: Only 1-man units can be magicians.");
+			return;
+		}
+		if( !( Globals->MAGE_NONLEADERS )) {
+			if (u->GetMen(I_LEADERS) != 1) {
+				u->Error("STUDY: Only leaders may study magic.");
+				return;
+			}
+		}
 		reset_man = u->type;
-        u->type = U_MAGE;
-    }
+		u->type = U_MAGE;
+	}
 
-	if((SkillDefs[sk].flags&SkillType::APPRENTICE) && u->type != U_APPRENTICE){
+	if((SkillDefs[sk].flags&SkillType::APPRENTICE) &&
+			u->type != U_APPRENTICE) {
 		if(u->type == U_MAGE) {
 			u->Error("STUDY: A mage cannot be made into an apprentice.");
 			return;
@@ -775,24 +773,20 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		reset_man = u->type;
 		u->type = U_APPRENTICE;
 	}
-  
-    int days = 30 * u->GetMen() + o->days;
-    
-    if( ( SkillDefs[sk].flags & SkillType::MAGIC ) && u->GetSkill(sk) >= 2 &&
-        (!ObjectDefs[obj->type].protect || obj->incomplete) )
-    {
-        u->Error("Warning: Magic study rate outside of a tower cut in half "
-                 "above level 2.");
-        days /= 2;
-    }
 
-    if (u->Study(sk,days))
-    {
-        u->SetMoney(u->GetMoney() - cost);
-        u->Event(AString("Studies ") + SkillDefs[sk].name + ".");
-    }
-	else
-	{
+	int days = 30 * u->GetMen() + o->days;
+
+	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetSkill(sk) >= 2 &&
+			(!ObjectDefs[obj->type].protect || (obj->incomplete > 0))) {
+		u->Error("Warning: Magic study rate outside of a tower cut in half "
+				"above level 2.");
+		days /= 2;
+	}
+
+	if (u->Study(sk,days)) {
+		u->SetMoney(u->GetMoney() - cost);
+		u->Event(AString("Studies ") + SkillDefs[sk].name + ".");
+	} else {
 		// if we just tried to become a mage or apprentice, but
 		// were unable to study, reset unit to whatever it was before.
 		if(reset_man != -1)

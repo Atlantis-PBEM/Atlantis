@@ -753,120 +753,114 @@ void Game::ProcessOptionOrder(Unit * u,AString *o, OrdersCheck *pCheck )
   
 void Game::ProcessReshowOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
-    AString * token = o->gettoken();
-    if (!token) {
-        // LLS
-        ParseError( pCheck, u, 0, "SHOW: Show what?" );
-        return;
-    }
+	AString * token = o->gettoken();
+	if (!token) {
+		// LLS
+		ParseError( pCheck, u, 0, "SHOW: Show what?" );
+		return;
+	}
 
-    if( pCheck )
-    {
-        if( pCheck->numshows++ > 100 )
-        {
-            if( pCheck->numshows == 102 )
-            {
-                pCheck->Error( "Too many SHOW orders." );
-            }
-            return;
-        }
-    }
-    else
-    {
-        if (u->faction->numshows++ > 100)
-        {
-            if (u->faction->numshows == 102)
-            {
-                u->Error("Too many SHOW orders.");
-            }
-            return;
-        }
-    }
+	if( pCheck ) {
+		if( pCheck->numshows++ > 100 ) {
+			if( pCheck->numshows == 102 ) {
+				pCheck->Error( "Too many SHOW orders." );
+			}
+			return;
+		}
+	} else {
+		if (u->faction->numshows++ > 100) {
+			if (u->faction->numshows == 102) {
+				u->Error("Too many SHOW orders.");
+			}
+			return;
+		}
+	}
 
-    if (*token == "skill")
-    {
+	if (*token == "skill") {
 		delete token;
 
-        token = o->gettoken();
-		if (!token)
-		{
+		token = o->gettoken();
+		if (!token) {
 			ParseError( pCheck, u, 0, "SHOW: Show what skill?" );
 			return;
 		}
 		int sk = ParseSkill(token);
 		delete token;
 
-		// ALT, 25-Jul-2000
-		// Fix to prevent segfault if skill doesn't exist.
-		if(sk == -1) {
-			ParseError(pCheck, u, 0, "SHOW: No such skill.");
-			return;
-		}
-
-		if((SkillDefs[sk].flags & SkillType::DISABLED)) {
-			ParseError(pCheck, u, 0, "SHOW: No such skill.");
-			return;
-		}
-		if((SkillDefs[sk].flags & SkillType::APPRENTICE) &&
-				!Globals->APPRENTICES_EXIST) {
+		if(sk == -1 ||
+				(SkillDefs[sk].flags & SkillType::DISABLED) ||
+				((SkillDefs[sk].flags & SkillType::APPRENTICE) &&
+				 !Globals->APPRENTICES_EXIST)) {
 			ParseError(pCheck, u, 0, "SHOW: No such skill.");
 			return;
 		}
 
 		token = o->gettoken();
-		if (!token)
-		{
+		if (!token) {
 			ParseError( pCheck, u, 0, "SHOW: No skill level given.");
 			return;
 		}
 		int lvl = token->value();
 		delete token;
     
-        if( !pCheck )
-        {
-            if (lvl > u->faction->skills.GetDays(sk))
-            {
-                u->Error("SHOW: Faction doesn't have that skill.");
-                return;
-            }
+		if( !pCheck ) {
+			if (lvl > u->faction->skills.GetDays(sk)) {
+				u->Error("SHOW: Faction doesn't have that skill.");
+				return;
+			}
     
-            u->faction->shows.Add(new ShowSkill(sk,lvl));
-        }
-    
-        return;
-    }
-  
-    if (*token == "item")
-    {
-        delete token;
-        token = o->gettoken();
+			u->faction->shows.Add(new ShowSkill(sk,lvl));
+		}
+		return;
+	}
 
-        if (!token) {
-            ParseError( pCheck, u, 0, "SHOW: Show which item?");
-            return;
-        }
+	if (*token == "item") {
+		delete token;
+		token = o->gettoken();
 
-        int item = ParseItem(token);
-        delete token;
-
-        if (item == -1) {
-            // LLS
-            ParseError( pCheck, u, 0, "SHOW: No such item." );
-            return;
-        }
-		if(ItemDefs[item].flags & ItemType::DISABLED) {
-            ParseError( pCheck, u, 0, "SHOW: No such item." );
-            return;
+		if (!token) {
+			ParseError( pCheck, u, 0, "SHOW: Show which item?");
+			return;
 		}
 
-        if( !pCheck )
-        {
-            u->faction->itemshows.Add(new AString(ItemDescription(item)));
-        }
-        return;
-    }
+		int item = ParseItem(token);
+		delete token;
 
-    ParseError( pCheck, u, 0, "SHOW: Show what?");
+		if(item == -1 || (ItemDefs[item].flags & ItemType::DISABLED)) {
+			ParseError( pCheck, u, 0, "SHOW: No such item." );
+			return;
+		}
+
+		if(!pCheck) {
+			u->faction->DiscoverItem(item, 1, 0);
+		}
+		return;
+	}
+
+	if (*token == "object") {
+		delete token;
+		token = o->gettoken();
+
+		if(!token) {
+			ParseError(pCheck, u, 0, "SHOW: Show which object?");
+			return;
+		}
+
+		int obj = ParseObject(token);
+		delete token;
+
+		if(obj == -1 || (ObjectDefs[obj].flags & ObjectType::DISABLED)) {
+			ParseError(pCheck, u, 0, "SHOW: No such object.");
+			return;
+		}
+
+		if(!pCheck) {
+			u->faction->objectshows.Add(ObjectDescription(obj));
+		}
+		return;
+	}
+
+	ParseError( pCheck, u, 0, "SHOW: Show what?");
 }
 
 void Game::ProcessForgetOrder(Unit * u,AString * o, OrdersCheck *pCheck )
@@ -2046,7 +2040,7 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
 							".  Unit is not the owner of object." );
 				return;
 			}
-			if (unit->object->incomplete) {
+			if (unit->object->incomplete > 0) {
 				unit->Error(AString("NAME: Cannot name ")+tstring+
 							".  Object is not finished.");
 				return;

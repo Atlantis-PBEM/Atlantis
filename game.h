@@ -133,8 +133,6 @@ private:
     void CreateOceanLairs();
 
     void PreProcessTurn();
-    void Do1Move(AString *);
-    void Do1Set(AString *);
     void ReadOrders();
     void RunOrders();
     void ClearOrders(Faction *);
@@ -198,6 +196,26 @@ private:
 
 	void ModifyRaceSkillLevels(int race, int special, int def);
 	void ModifyRaceSkills(int race, int i, int sk);
+
+	void ModifyMonsterAttackLevel(int mon, int lev);
+	void ModifyMonsterDefense(int mon, int defenseType, int level);
+	void ModifyMonsterAttacksAndHits(int mon, int numattacks, int hits);
+	void ModifyMonsterSkills(int mon, int tact, int stealth, int obs);
+	void ModifyMonsterSpecial(int mon, int special, int lev);
+	void ModifyMonsterSpoils(int mon, int silver, int spoilType);
+	void ModifyMonsterThread(int mon, int num, int hostileChance);
+
+	void ModifyWeaponSkills(int weap, int baseSkill, int orSkill);
+	void ModifyWeaponFlags(int weap, int flags);
+	void ModifyWeaponAttack(int weap, int wclass, int attackType, int numAtt);
+	void ModifyWeaponBonuses(int weap, int attack, int defense, int vsMount);
+
+	void ModifyArmorFlags(int armor, int flags);
+	void ModifyArmorSaveFrom(int armor, int from);
+	void ModifyArmorSaveValue(int armor, int wclass, int val);
+
+	void ModifyMountSkill(int mount, int skill);
+	void ModifyMountBonuses(int mount, int min, int max, int hampered);
 
 	void EnableObject(int ob); // Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built

@@ -178,5 +178,17 @@ Changes from 4.0.6 -> 4.0.7
    -- Reorganized as many of the rest of the datastructures as I could get
       my hands on to do similar stuff to what I did to the terrain data
       structs.
-   -- Added some fields (unpopulated as yet) in the item structures to handle
-      crafting items by magic.  Down with special cases.
+   -- Added some fields in the item structures to handle crafting items by
+      magic.  Down with special cases.  Some work still needs to be done
+      here.
+   -- Made road decay into more generic building decay and extended the
+      building definition structure to handle it.
+   -- Fixed a long standing bug.  The rules state that a guarding unit will
+      prevent ALL units of any faction other than the owner from pillaging.
+      The code up until now had been implementing it as any unit of a
+      nuetral or worse stance faction.  This has been fixed.
+   -- Added item and object descriptions.  Redid skill descriptions.
+   -- Made horse/wagon generic rather than hardcoded. 
+   -- Removed the special case of earthquakes not affecting MFORTRESS.  This
+      is now handled by a NOEARTHQUAKE flags on the object in the ObjectDefs
+      structure.

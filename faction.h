@@ -39,6 +39,7 @@ class Game;
 #include "unit.h"
 #include "battle.h"
 #include "skills.h"
+#include "items.h"
 #include "alist.h"
 #include "astring.h"
 
@@ -148,7 +149,9 @@ public:
     
     void SetNPC();
     int IsNPC();
-    
+
+	void DiscoverItem(int item, int force, int full);
+
     int num;
 
     //
@@ -180,6 +183,7 @@ public:
     int defaultattitude;
     AList attitudes;
     SkillList skills;
+	ItemList items;
 	
     //
     // Both are lists of AStrings
@@ -190,6 +194,7 @@ public:
     AList battles;
     AList shows;
     AList itemshows;
+	AList objectshows;
 };
 
 Faction * GetFaction(AList *,int);

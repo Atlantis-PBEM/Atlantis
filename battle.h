@@ -34,66 +34,57 @@ class Battle;
 #include "items.h"
 
 enum {
-  ASS_NONE,
-  ASS_SUCC,
-  ASS_FAIL
+	ASS_NONE,
+	ASS_SUCC,
+	ASS_FAIL
 };
 
 enum {
- BATTLE_IMPOSSIBLE,
- BATTLE_LOST,
- BATTLE_WON,
- BATTLE_DRAW
+	BATTLE_IMPOSSIBLE,
+	BATTLE_LOST,
+	BATTLE_WON,
+	BATTLE_DRAW
 };
 
-class BattlePtr : public AListElem {
-public:
-  Battle * ptr;
+class BattlePtr : public AListElem
+{
+	public:
+		Battle * ptr;
 };
 
 class Battle : public AListElem
 {
-public:
-    Battle();
-    ~Battle();
-    
-    void Report(Areport *,Faction *);
-    void AddLine(const AString &);
-	
-    int Run( ARegion *,
-              Unit *,
-              AList *,
-              Unit *,
-              AList *,
-              int ass,
-              ARegionList *pRegs );
-    void FreeRound(Army *,Army *);
-    void NormalRound(int,Army *,Army *);
-    void DoAttack( int round, 
-                   Soldier *a,
-                   Army *attackers,
-                   Army *def, 
-                   int behind );
+	public:
+		Battle();
+		~Battle();
 
-    void DoAttack(int,Soldier *,Army *,int);
-    void GetSpoils(AList *,ItemList *);
+		void Report(Areport *,Faction *);
+		void AddLine(const AString &);
 
-    //
-    // These functions should be implemented in specials.cpp
-    //
-    void UpdateShields(Army *);
-    void DoSpecialAttack( int round,
-                          Soldier *a,
-                          Army *attackers,
-                          Army *def, 
-                          int behind );
+		int Run( ARegion *, Unit *, AList *, Unit *, AList *, int ass,
+				ARegionList *pRegs );
+		void FreeRound(Army *,Army *);
+		void NormalRound(int,Army *,Army *);
+		void DoAttack( int round, Soldier *a, Army *attackers, Army *def,
+				int behind );
 
-    void WriteSides(ARegion *,Unit *,Unit *,AList *,AList *,int,
-                    ARegionList *pRegs );
-    int assassination;
-    Faction * attacker; /* Only matters in the case of an assassination */
-    AString * asstext;
-    AList text;
+		void DoAttack(int,Soldier *,Army *,int);
+		void GetSpoils(AList *,ItemList *);
+
+		//
+		// These functions should be implemented in specials.cpp
+		//
+		void UpdateShields(Army *);
+		void DoSpecialAttack( int round, Soldier *a, Army *attackers,
+				Army *def, int behind );
+
+		void WriteSides(ARegion *,Unit *,Unit *,AList *,AList *,int,
+				ARegionList *pRegs );
+
+		int assassination;
+		Faction * attacker; /* Only matters in the case of an assassination */
+		AString * asstext;
+		AList text;
 };
 
 #endif

@@ -93,7 +93,7 @@ AString Game::GetXtraMap(ARegion * reg,int type)
     case 2:
         forlist(&reg->objects) {
             Object * o = (Object *) elem;
-            if (!ObjectDefs[o->type].canenter) {
+            if (!(ObjectDefs[o->type].flags & ObjectType::CANENTER)) {
                 if (o->units.First()) {
                     return "*";
                 } else {
@@ -853,130 +853,6 @@ void Game::WriteNewFac( Faction *pFac )
     AString *strFac = new AString( AString( "Adding " ) + 
                                    *( pFac->address ) + "." );
     newfactions.Add( strFac );
-}
-
-void Game::Do1Move(AString * str)
-{
-    AString * token = str->gettoken();
-    if (!token) {
-        delete str;
-        return;
-    }
-    int unitno = token->value();
-    delete token;
-    
-    token = str->gettoken();
-    if (!token) {
-        delete str;
-        return;
-    }
-    int x = token->value();
-    delete token;
-    
-    token = str->gettoken();
-    if (!token) {
-        delete str;
-        return;
-    }
-    int y = token->value();
-    delete token;
-    
-    token = str->gettoken();
-    if (!token) {
-        delete str;
-        return;
-    }
-    int z = token->value();
-    delete token;
-    delete str;
-    
-    Location * loc = regions.FindUnit(unitno);
-    if (!loc) return;
-    
-    ARegion * newreg = regions.GetRegion(x,y,z);
-    if (!newreg) return;
-    
-    loc->unit->MoveUnit( newreg->GetDummy() );
-    delete loc;
-}
-
-void Game::Do1Set(AString * str) {
-  AString * token = str->gettoken();
-  if (!token) {
-    delete str;
-    return;
-  }
-
-  if (*token == "skill") {
-    delete token;
-    token = str->gettoken();
-    if (!token) {
-      delete str;
-      return;
-    }
-    int unit = token->value();
-    delete token;
-
-    token = str->gettoken();
-    if (!token) {
-      delete str;
-      return;
-    }
-    int skill = ParseSkill(token);
-    delete token;
-
-    token = str->gettoken();
-    if (!token) {
-      delete str;
-      return;
-    }
-    int value = token->value();
-    delete token;
-    delete str;
-
-    Location * loc = regions.FindUnit(unit);
-    if (!loc) return;
-
-    loc->unit->SetSkillDays(skill,value);
-    return;
-  }
-
-  if (*token == "item") {
-    delete token;
-    token = str->gettoken();
-    if (!token) {
-      delete str;
-      return;
-    }
-    int unit = token->value();
-    delete token;
-
-    token = str->gettoken();
-    if (!token) {
-      delete str;
-      return;
-    }
-    int item = ParseItem(token);
-    delete token;
-
-    token = str->gettoken();
-    if (!token) {
-      delete str;
-      return;
-    }
-    int value = token->value();
-    delete token;
-    delete str;
-
-    Location * loc = regions.FindUnit(unit);
-    if (!loc) return;
-
-    loc->unit->items.SetNum(item,value);
-    return;
-  }
-
-  delete token;
-  delete str;
 }
 
 int Game::DoOrdersCheck( const AString &strOrders, const AString &strCheck )

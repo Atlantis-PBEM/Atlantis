@@ -41,136 +41,129 @@ enum {
 
 Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 {
-    race = r;
-    unit = u;
-    riding = -1;
-    building = 0;
-    
-    healing = 0;
-    healtype = 0;
-    healitem = -1;
-    canbehealed = 1;
-    
-    weapon = -1;
-    attacktype = ATTACK_COMBAT;
-    askill = 0;
-    attacks = 1;
-    special = -1;
-    slevel = 0;
-    
-    dskill[ATTACK_COMBAT] = 0;
-    dskill[ATTACK_ENERGY] = -2;
-    dskill[ATTACK_SPIRIT] = -2;
-    dskill[ATTACK_WEATHER] = -2;
+	race = r;
+	unit = u;
+	riding = -1;
+	building = 0;
+
+	healing = 0;
+	healtype = 0;
+	healitem = -1;
+	canbehealed = 1;
+
+	weapon = -1;
+	attacktype = ATTACK_COMBAT;
+	askill = 0;
+	attacks = 1;
+	special = -1;
+	slevel = 0;
+
+	dskill[ATTACK_COMBAT] = 0;
+	dskill[ATTACK_ENERGY] = -2;
+	dskill[ATTACK_SPIRIT] = -2;
+	dskill[ATTACK_WEATHER] = -2;
 	dskill[ATTACK_RIDING] = 0;
 	dskill[ATTACK_RANGED] = 0;
-    armor = -1;
-    hits = 1;
-    amuletofi = 0;
-    battleItems = 0;
+	armor = -1;
+	hits = 1;
+	amuletofi = 0;
+	battleItems = 0;
 
-    effects = 0;
+	effects = 0;
 
-    /* Building bonus */
-    if (o->capacity)
-    {
-        building = o->type;
-        for (int i=0; i<NUM_ATTACK_TYPES; i++)
-        {
-            dskill[i] += 2;
-        }
-        if (o->runes)
-        {
-            dskill[ATTACK_ENERGY] = o->runes;
-            dskill[ATTACK_SPIRIT] = o->runes;
-        }
-        o->capacity--;
-    }
+	/* Building bonus */
+	if (o->capacity) {
+		building = o->type;
+		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
+			dskill[i] += 2;
+		}
+		if (o->runes) {
+			dskill[ATTACK_ENERGY] = o->runes;
+			dskill[ATTACK_SPIRIT] = o->runes;
+		}
+		o->capacity--;
+	}
 
-    /* Is this a monster? */
-    if (ItemDefs[r].type & IT_MONSTER) {
-        int mon = ItemDefs[r].index;
+	/* Is this a monster? */
+	if (ItemDefs[r].type & IT_MONSTER) {
+		int mon = ItemDefs[r].index;
 		if(u->type == U_WMON)
 			name = AString(MonDefs[mon].name);
 		else
 			name = AString(MonDefs[mon].name) +
 				AString(" controlled by ") + *(unit->name);
-        askill = MonDefs[mon].attackLevel;
-        dskill[ATTACK_COMBAT] += MonDefs[mon].combatDefense;
-		dskill[ATTACK_RIDING] += MonDefs[mon].ridingDefense;
-        if (MonDefs[mon].energyDefense > dskill[ATTACK_ENERGY]) {
-            dskill[ATTACK_ENERGY] = MonDefs[mon].energyDefense;
-        }
-        if (MonDefs[mon].spiritDefense > dskill[ATTACK_SPIRIT])
-        {
-            dskill[ATTACK_SPIRIT] = MonDefs[mon].spiritDefense;
-        }
-		if(MonDefs[mon].weatherDefense > dskill[ATTACK_WEATHER])
-		{
-			dskill[ATTACK_WEATHER] = MonDefs[mon].weatherDefense;
+		askill = MonDefs[mon].attackLevel;
+		dskill[ATTACK_COMBAT] += MonDefs[mon].defense[ATTACK_COMBAT];
+		if (MonDefs[mon].defense[ATTACK_ENERGY] > dskill[ATTACK_ENERGY]) {
+			dskill[ATTACK_ENERGY] = MonDefs[mon].defense[ATTACK_ENERGY];
 		}
-        hits = MonDefs[mon].hits;
-        if (!hits) hits = 1;
-        attacks = MonDefs[mon].numAttacks;
+		if (MonDefs[mon].defense[ATTACK_SPIRIT] > dskill[ATTACK_SPIRIT]) {
+			dskill[ATTACK_SPIRIT] = MonDefs[mon].defense[ATTACK_SPIRIT];
+		}
+		if(MonDefs[mon].defense[ATTACK_WEATHER] > dskill[ATTACK_WEATHER]) {
+			dskill[ATTACK_WEATHER] = MonDefs[mon].defense[ATTACK_WEATHER];
+		}
+		dskill[ATTACK_RIDING] += MonDefs[mon].defense[ATTACK_RIDING];
+		dskill[ATTACK_RANGED] += MonDefs[mon].defense[ATTACK_RANGED];
+		hits = MonDefs[mon].hits;
+		if (!hits) hits = 1;
+		attacks = MonDefs[mon].numAttacks;
 		if(!attacks) attacks = 1;
-        special = MonDefs[mon].special;
-        slevel = MonDefs[mon].specialLevel;
-        return;
-    }
+		special = MonDefs[mon].special;
+		slevel = MonDefs[mon].specialLevel;
+		return;
+	}
+
 	name = *(unit->name);
-	
-    SetupHealing();
-    
-    SetupSpell();
-    SetupCombatItems();
 
-    //
-    // Setup armor
-    //
-    int armorType;
-    for( armorType = 1; armorType < NUMARMORS; armorType++ )
-    {
-        ArmorType *pArm = &ArmorDefs[ armorType ];
-        if( ass )
-        {
-            if( !( pArm->flags & ArmorType::USEINASSASSINATE ))
-            {
-                //
-                // Can't use this armor in an assassination
-                //
-                continue;
-            }
-        }
+	SetupHealing();
 
-        int item = unit->GetBattleItem( IT_ARMOR, armorType );
-        if( item != -1 )
-        {
-            armor = item;
-            break;
-        }
-    }
+	SetupSpell();
+	SetupCombatItems();
 
-    //
-    // Check if this unit is mounted
-    //
-    TerrainType *pTer = &TerrainDefs[ regtype ];
-    if((pTer->flags & TerrainType::FLYINGMOUNTS) ||
-	   (pTer->flags & TerrainType::RIDINGMOUNTS)) {
-        //
-        // Mounts of some type _are_ allowed in this region
-        //
-        int mountType;
-        for(mountType = 1; mountType < NUMMOUNTS; mountType++ ) {
+	//
+	// Setup armor
+	//
+	int armorType;
+	for( armorType = 1; armorType < NUMARMORS; armorType++ ) {
+		ArmorType *pArm = &ArmorDefs[ armorType ];
+		if( ass ) {
+			if( !( pArm->flags & ArmorType::USEINASSASSINATE )) {
+				//
+				// Can't use this armor in an assassination
+				//
+				continue;
+			}
+		}
+
+		int item = unit->GetBattleItem( IT_ARMOR, armorType );
+		if( item != -1 ) {
+			armor = item;
+			break;
+		}
+	}
+
+	//
+	// Check if this unit is mounted
+	//
+	TerrainType *pTer = &TerrainDefs[ regtype ];
+	if((pTer->flags & TerrainType::FLYINGMOUNTS) ||
+			(pTer->flags & TerrainType::RIDINGMOUNTS)) {
+		//
+		// Mounts of some type _are_ allowed in this region
+		//
+		int mountType;
+		for(mountType = 1; mountType < NUMMOUNTS; mountType++ ) {
 			MountType *pMnt = &MountDefs[ mountType ];
-            
-            int item = unit->GetBattleItem( IT_MOUNT, mountType );
-            if( item == -1 ) {
-                continue;
-            }
 
-            //
-            // check if this mount works in this region
-            //
+			int item = unit->GetBattleItem( IT_MOUNT, mountType );
+			if( item == -1 ) {
+				continue;
+			}
+
+			//
+			// check if this mount works in this region
+			//
 			if(pTer->flags & TerrainType::FLYINGMOUNTS) {
 				if(!ItemDefs[item].fly) {
 					// The mount cannot fly, see if the region
@@ -189,57 +182,52 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 				}
 			}
 
+			int bonus = unit->GetSkill( pMnt->skill );
+			if( bonus < pMnt->minBonus ) {
+				//
+				// Unit isn't skilled enough for this mount
+				//
+				unit->items.SetNum( item, unit->items.GetNum( item ) + 1 );
+				continue;
+			}
 
-            int bonus = unit->GetSkill( pMnt->skill );
-            if( bonus < pMnt->minBonus )
-            {
-                //
-                // Unit isn't skilled enough for this mount
-                //
-                unit->items.SetNum( item, unit->items.GetNum( item ) + 1 );
-                continue;
-            }
-
-            if( bonus > pMnt->maxBonus )
-            {
-                bonus = pMnt->maxBonus;
-            }
+			if( bonus > pMnt->maxBonus ) {
+				bonus = pMnt->maxBonus;
+			}
 
 			// The mount can fly, but the terrain doesn't allow flying mounts
 			// so, limit the bonus the mount can give.
 			if(ItemDefs[item].fly &&
-			   !(pTer->flags & TerrainType::FLYINGMOUNTS)) {
+					!(pTer->flags & TerrainType::FLYINGMOUNTS)) {
 				if(bonus > pMnt->maxHamperedBonus)
 					bonus = pMnt->maxHamperedBonus;
 			}
 
-            askill += bonus;
-            dskill[ ATTACK_COMBAT ] += bonus;
-			dskill[ ATTACK_RIDING ] = bonus;
-            riding = item;
-            break;
-        }
-    }
+			askill += bonus;
+			dskill[ ATTACK_COMBAT ] += bonus;
+			dskill[ ATTACK_RIDING ] += bonus;
+			riding = item;
+			break;
+		}
+	}
 
-    //
-    // Find the correct weapon for this unit.
-    //
-    int weaponType;
-    int combatSkill = unit->GetSkill( S_COMBAT );
+	//
+	// Find the correct weapon for this unit.
+	//
+	int weaponType;
+	int combatSkill = unit->GetSkill( S_COMBAT );
 
-    for( weaponType = 1; weaponType < NUMWEAPONS; weaponType++ )
-    {
-        WeaponType *pWep = &( WeaponDefs[ weaponType ]);
+	for( weaponType = 1; weaponType < NUMWEAPONS; weaponType++ ) {
+		WeaponType *pWep = &( WeaponDefs[ weaponType ]);
 
-        //
-        // Here's a weapon to look for
-        //
-        int item = unit->GetBattleItem( IT_WEAPON, weaponType );
-        if( item != -1 )
-        {
-            //
-            // We found a weapon; check flags and skills
-            //
+		//
+		// Here's a weapon to look for
+		//
+		int item = unit->GetBattleItem( IT_WEAPON, weaponType );
+		if( item != -1 ) {
+			//
+			// We found a weapon; check flags and skills
+			//
 			int baseSkillLevel = unit->CanUseWeapon(pWep, riding);
 			// returns -1 if weapon cannot be used, else the usable skill
 			// level.
@@ -249,40 +237,38 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 				continue;
 			}
 
-            weapon = item;
+			weapon = item;
 			if(!(pWep->flags & WeaponType::NEEDSKILL)) {
 				baseSkillLevel = combatSkill;
 			}
 
-            //
-            // Attack and defense skill
-            //
+			//
+			// Attack and defense skill
+			//
 			askill = baseSkillLevel + pWep->attackBonus;
 			if(pWep->flags & WeaponType::NOATTACKERSKILL) {
 				dskill[ATTACK_COMBAT] += pWep->defenseBonus;
 			} else {
 				dskill[ATTACK_COMBAT] += baseSkillLevel+pWep->defenseBonus;
-            }
+			}
 
-            //
-            // Number of attacks.
-            //
-            attacks = pWep->numAttacks;
-            if( attacks >= WeaponType::NUM_ATTACKS_SKILL )
-            {
-                attacks += baseSkillLevel - WeaponType::NUM_ATTACKS_SKILL;
-            }
-            
-            break;
-        }
-    }
-    // 2000/MAR/16 LLS
-    // Did we get a weapon?  If not, at least we get our COMBAT skill.
-    if( weapon == -1 )
-    {
-        askill += combatSkill;
-        dskill[ ATTACK_COMBAT ] += combatSkill;
-    }
+			//
+			// Number of attacks.
+			//
+			attacks = pWep->numAttacks;
+			if( attacks >= WeaponType::NUM_ATTACKS_SKILL ) {
+				attacks += baseSkillLevel - WeaponType::NUM_ATTACKS_SKILL;
+			}
+
+			break;
+		}
+	}
+	// 2000/MAR/16 LLS
+	// Did we get a weapon?  If not, at least we get our COMBAT skill.
+	if( weapon == -1 ) {
+		askill += combatSkill;
+		dskill[ ATTACK_COMBAT ] += combatSkill;
+	}
 }
 
 void Soldier::SetupSpell()
@@ -427,7 +413,7 @@ void Soldier::ClearEffect(int eff)
     }
 }
 
-int Soldier::ArmorProtect( int weaponFlags )
+int Soldier::ArmorProtect(int weaponClass)
 {
     //
     // Return 1 if the armor is successful
@@ -438,17 +424,7 @@ int Soldier::ArmorProtect( int weaponFlags )
 	if(armorType < ARMOR_NONE || armorType >= NUMARMORS)
 		armorType = ARMOR_NONE;
 	pArm = &ArmorDefs[armorType];
-	int chance;
-	if(weaponFlags & WeaponType::ARMORPIERCING)
-		chance = pArm->armorpiercingChance;
-	else if(weaponFlags & WeaponType::PIERCING)
-		chance = pArm->pierceChance;
-	else if(weaponFlags & WeaponType::CRUSHING)
-		chance = pArm->crushChance;
-	else if(weaponFlags & WeaponType::CLEAVING)
-		chance = pArm->cleaveChance;
-	else
-		chance = pArm->slashChance;
+	int chance = pArm->saves[weaponClass];
 
 	if(chance <= 0) return 0;
 	if(chance > getrandom(pArm->from)) return 1;
@@ -717,38 +693,33 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem)
 
 void Army::Lose(Battle *b,ItemList *spoils)
 {
-    WriteLosses(b);
-    for (int i=0; i<count; i++)
-    {
-        Soldier * s = soldiers[i];
-        if (i<notbehind)
-        {
-            s->Alive(LOSS);
-        } 
-        else
-        {
-            if (s->unit->type == U_WMON
-                && ItemDefs[s->race].type & IT_MONSTER)
-            {
-                GetMonSpoils(spoils,s->race);
-            }
-            s->Dead();
-        }
-        delete s;
-    }
+	WriteLosses(b);
+	for (int i=0; i<count; i++) {
+		Soldier * s = soldiers[i];
+		if (i<notbehind) {
+			s->Alive(LOSS);
+		} else {
+			if (s->unit->type==U_WMON && (ItemDefs[s->race].type&IT_MONSTER)) {
+				GetMonSpoils(spoils,s->race);
+			}
+			s->Dead();
+		}
+		delete s;
+	}
 }
 
-void Army::Tie(Battle * b) {
-  WriteLosses(b);
-  for(int x=0; x<count; x++) {
-    Soldier * s = soldiers[x];
-    if (x<NumAlive()) {
-      s->Alive(WIN_DEAD);
-    } else {
-      s->Dead();
-    }
-    delete s;
-  }
+void Army::Tie(Battle * b)
+{
+	WriteLosses(b);
+	for(int x=0; x<count; x++) {
+		Soldier * s = soldiers[x];
+		if (x<NumAlive()) {
+			s->Alive(WIN_DEAD);
+		} else {
+			s->Dead();
+		}
+		delete s;
+	}
 }
 
 int Army::CanBeHealed()
@@ -867,6 +838,7 @@ void Army::Win(Battle * b,ItemList * spoils)
 					Unit * u = soldiers[x]->unit;
 					if(u->flags & FLAG_NOSPOILS) continue;
 					u->items.SetNum(i->type,u->items.GetNum(i->type) + n);
+					u->faction->DiscoverItem(i->type, 0, 1);
 				}
 			}
 			n = i->num % t;
@@ -879,6 +851,7 @@ void Army::Win(Battle * b,ItemList * spoils)
 					u = soldiers[t]->unit;
 				}
 				u->items.SetNum(i->type,u->items.GetNum(i->type) + 1);
+				u->faction->DiscoverItem(i->type, 0, 1);
 			}
 		}
 	}
@@ -894,12 +867,14 @@ void Army::Win(Battle * b,ItemList * spoils)
 	}
 }
 
-int Army::Broken() {
-  if ((NumAlive() * 2 / count) >= 1) return 0;
-  return 1;
+int Army::Broken()
+{
+	if ((NumAlive() * 2 / count) >= 1) return 0;
+	return 1;
 }
 
-int Army::NumSpoilers() {
+int Army::NumSpoilers()
+{
 	int na = NumAlive();
 	int count = 0;
 	for(int x=0; x<na; x++) {
@@ -909,141 +884,136 @@ int Army::NumSpoilers() {
 	return count;
 }
 
-int Army::NumAlive() {
-  return notbehind;
+int Army::NumAlive()
+{
+	return notbehind;
 }
 
-int Army::CanAttack() {
-  return canbehind;
+int Army::CanAttack()
+{
+	return canbehind;
 }
 
-int Army::NumFront() {
-  return (canfront + notfront - canbehind);
+int Army::NumFront()
+{
+	return (canfront + notfront - canbehind);
 }
 
-Soldier * Army::GetAttacker(int i,int &behind) {
-  Soldier * retval = soldiers[i];
-  if (i<canfront) {
-    soldiers[i] = soldiers[canfront-1];
-    soldiers[canfront-1] = soldiers[canbehind-1];
-    soldiers[canbehind-1] = retval;
-    canfront--;
-    canbehind--;
-    behind = 0;
-    return retval;
-  }
-  soldiers[i] = soldiers[canbehind-1];
-  soldiers[canbehind-1] = soldiers[notfront-1];
-  soldiers[notfront-1] = retval;
-  canbehind--;
-  notfront--;
-  behind = 1;
-  return retval;
+Soldier * Army::GetAttacker(int i,int &behind)
+{
+	Soldier * retval = soldiers[i];
+	if (i<canfront) {
+		soldiers[i] = soldiers[canfront-1];
+		soldiers[canfront-1] = soldiers[canbehind-1];
+		soldiers[canbehind-1] = retval;
+		canfront--;
+		canbehind--;
+		behind = 0;
+		return retval;
+	}
+	soldiers[i] = soldiers[canbehind-1];
+	soldiers[canbehind-1] = soldiers[notfront-1];
+	soldiers[notfront-1] = retval;
+	canbehind--;
+	notfront--;
+	behind = 1;
+	return retval;
 }
 
 int Army::GetTargetNum(int special)
 {
-    int tars = NumFront();
-    if (tars == 0)
-    {
-        canfront = canbehind;
-        notfront = notbehind;
-        tars = NumFront();
-        if (tars == 0) return -1;
-    }
+	int tars = NumFront();
+	if (tars == 0) {
+		canfront = canbehind;
+		notfront = notbehind;
+		tars = NumFront();
+		if (tars == 0) return -1;
+	}
 
-    /* For certain attacks, we need to do retries */
-    for (int retries = 0; retries < 10; retries++) {
-        int i = getrandom(tars);
-        if (i<canfront) {
-            if (CheckSpecialTarget(special,i)) return i;
-            continue;
-        }
-        i += canbehind - canfront;
-        if (CheckSpecialTarget(special,i)) return i;
-        continue;
-    }
+	/* For certain attacks, we need to do retries */
+	for (int retries = 0; retries < 10; retries++) {
+		int i = getrandom(tars);
+		if (i<canfront) {
+			if (CheckSpecialTarget(special,i)) return i;
+			continue;
+		}
+		i += canbehind - canfront;
+		if (CheckSpecialTarget(special,i)) return i;
+		continue;
+	}
 
-    return -1;
+	return -1;
 }
 
 int Army::GetEffectNum( int effect )
 {
-    int tars = NumAlive();
-    int retries;
-    for( retries = 0; retries < 10; retries++ )
-    {
-        int i = getrandom( tars );
-        if( soldiers[ i ]->HasEffect( effect ))
-        {
-            return( i );
-        }
-    }
-    return( -1 );
+	int tars = NumAlive();
+	int retries;
+	for( retries = 0; retries < 10; retries++ ) {
+		int i = getrandom( tars );
+		if( soldiers[ i ]->HasEffect( effect )) {
+			return( i );
+		}
+	}
+	return( -1 );
 }
 
 Soldier * Army::GetTarget(int i) 
 {
-    return soldiers[i];
+	return soldiers[i];
 }
 
 int pow(int b,int p) 
 {
-    int b2 = b;
-    for(int i=1; i<p; i++)
-    {
-        b2 *= b;
-    }
-    return b2;
+	int b2 = b;
+	for(int i=1; i<p; i++) {
+		b2 *= b;
+	}
+	return b2;
 }
 
 int Hits(int a,int d)
 {
-    int tohit = 1,tomiss = 1;
-    if (a>d)
-    {
-        tohit = pow(2,a-d);
-    } 
-    else if (d>a) 
-    {
-        tomiss = pow(2,d-a);
-    }
-    if (getrandom(tohit+tomiss) < tohit) return 1;
-    return 0;
+	int tohit = 1,tomiss = 1;
+	if (a>d) {
+		tohit = pow(2,a-d);
+	} else if (d>a) {
+		tomiss = pow(2,d-a);
+	}
+	if (getrandom(tohit+tomiss) < tohit) return 1;
+	return 0;
 }
 
 int Army::RemoveEffects( int num, int effect )
 {
-    int ret = 0;
-    for( int i = 0; i < num; i++ )
-    {
-        //
-        // Try to find a target unit.
-        //
-        int tarnum = GetEffectNum( effect );
-        if (tarnum == -1) continue;
-        Soldier *tar = GetTarget( tarnum );
+	int ret = 0;
+	for( int i = 0; i < num; i++ ) {
+		//
+		// Try to find a target unit.
+		//
+		int tarnum = GetEffectNum( effect );
+		if (tarnum == -1) continue;
+		Soldier *tar = GetTarget( tarnum );
 
-        //
-        // Remove the effect
-        //
-        tar->ClearEffect( effect );
-        ret++;
-    }
-    return( ret );
+		//
+		// Remove the effect
+		//
+		tar->ClearEffect( effect );
+		ret++;
+	}
+	return( ret );
 }
 
 int Army::DoAnAttack( int special, int numAttacks, int attackType,
-                      int attackLevel, int flags, int effect, int mountBonus )
+		int attackLevel, int flags, int weaponClass, int effect,
+		int mountBonus )
 {
-    /* 1. Check against Global effects (not sure how yet) */
-
-    /* 2. Attack shield */
-    Shield *hi;
+	/* 1. Check against Global effects (not sure how yet) */
+	/* 2. Attack shield */
+	Shield *hi;
 	int combat = 0;
 	int canShield = 0;
-	switch(attackType)
-	{
+	switch(attackType) {
 		case ATTACK_RANGED:
 			canShield = 1;
 			// fall through
@@ -1056,7 +1026,7 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 		case ATTACK_SPIRIT:
 			canShield = 1;
 			break;
-    }
+	}
 
 	if(canShield) {
 		hi = shields.GetHighShield(attackType);
@@ -1074,26 +1044,25 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 		}
 	}
 
-    //
-    // Now, loop through and do attacks
-    //
-    int ret = 0;
-    for( int i = 0; i < numAttacks; i++ )
-    {
-        /* 3. Get the target */
-        int tarnum = GetTargetNum(special);
-        if (tarnum == -1) continue;
-        Soldier * tar = GetTarget(tarnum);
+	//
+	// Now, loop through and do attacks
+	//
+	int ret = 0;
+	for( int i = 0; i < numAttacks; i++ ) {
+		/* 3. Get the target */
+		int tarnum = GetTargetNum(special);
+		if (tarnum == -1) continue;
+		Soldier * tar = GetTarget(tarnum);
 		int tarFlags = 0;
 		if(tar->weapon != -1) {
 			tarFlags = WeaponDefs[ItemDefs[tar->weapon].index].flags;
 		}
 
-        /* 4. Add in any effects, if applicable */
-        int tlev = tar->dskill[ attackType ];
-        if (special == SPECIAL_EARTHQUAKE) {
-            tlev -= 2;
-        }
+		/* 4. Add in any effects, if applicable */
+		int tlev = tar->dskill[ attackType ];
+		if (special == SPECIAL_EARTHQUAKE) {
+			tlev -= 2;
+		}
 
 		/* 4.1 Check whether defense is allowed against this weapon */
 		if((flags & WeaponType::NODEFENSE) && (tlev > 0)) tlev = 0;
@@ -1111,47 +1080,38 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 		/* 4.3 Add bonuses versus mounted */
 		if(tar->riding != -1) attackLevel += mountBonus;
 
-        /* 5. Attack soldier */
-        if ( attackType != NUM_ATTACK_TYPES)
-        {
-            if( !( flags & WeaponType::NEVERMISS ))
-            {
-                if( getrandom( 2 ))
-                {
-                    continue;
-                }
+		/* 5. Attack soldier */
+		if ( attackType != NUM_ATTACK_TYPES) {
+			if( !( flags & WeaponType::ALWAYSREADY)) {
+				if( getrandom( 2 )) {
+					continue;
+				}
             }
 
-            if (!Hits( attackLevel,tlev)) 
-            {
-                continue;
-            }
-        }
+			if (!Hits( attackLevel,tlev)) {
+				continue;
+			}
+		}
 
-        /* 6. If attack got through, apply effect, or kill */
-        if (!effect)
-        {
-            /* 7. Last chance... Check armor */
-            if (tar->ArmorProtect( flags )) 
-            {
-                continue;
-            }
+		/* 6. If attack got through, apply effect, or kill */
+		if (!effect) {
+			/* 7. Last chance... Check armor */
+			if (tar->ArmorProtect(weaponClass)) {
+				continue;
+			}
 
-            /* 8. Seeya! */
-            Kill(tarnum);
-            ret++;
-        } 
-        else
-        {
-            if (tar->HasEffect(effect))
-            {
-                continue;
-            }
-            tar->SetEffect(effect);
-            ret++;
-        }
-    }
-    return ret;
+			/* 8. Seeya! */
+			Kill(tarnum);
+			ret++;
+		} else {
+			if (tar->HasEffect(effect)) {
+				continue;
+			}
+			tar->SetEffect(effect);
+			ret++;
+		}
+	}
+	return ret;
 }
 
 void Army::Kill(int killed)

@@ -9,7 +9,7 @@
 <h2> Copyright 1996 by Geoff Dunbar </h2>
 <h2> Based on Russell Wallace's Draft Rules </h2>
 <h2> Copyright 1993 by Russell Wallace </h2>
-<h3> Last Change: May 30, 2001</h3>
+<h3> Last Change: July 11, 2001</h3>
 </center> <p>
 Note: This document is subject to change, as errors are found and
 corrected, and rules sometimes change. Be sure you have the latest
@@ -1904,16 +1904,17 @@ free round of attacks. <p>
 In each combat round, the combatants each get to attack once, in a random
 order.  (In a free round of attacks, only one side's forces get to attack.)
 Each combatant will attempt to hit a randomly selected enemy.  If he hits, and
-the target has no armor, then the target is automatically killed.  Chain armor
-gives a 1/3 chance of surviving a hit, and plate armor gives a 2/3 chance.
-Hits inflicted by a crossbow cannot be deflected by armor; the target is
-automatically killed, regardless of armor. <p>
+the target has no armor, then the target is automatically killed.  Armor may
+provide extra defense against otherwise successful attacks.<p>
 
 The basic skill used in battle is the Combat skill; this is used for hand to
 hand fighting.  If one soldier tries to hit another using melee weapons, there
 is a 50% chance that the attacker will get an opportunity for a lethal blow.
-If the attacker does get that opportunity, then there is a contest between his
-skill and the defender's. <p>
+If the attacker does get that opportunity, then there is a contest between
+his combat skill (modified by weapon attack bonus) and the defender's combat
+skill (modified by weapon defense bonus).   Some weapons may not allow combat
+skill to affect defense (e.g. bows), and others may allow different skills
+to be used on defense.<p>
 
 If the skills are equal, then there is a 1:1 (i.e. 50%) chance that the attack
 will succeed.  If the attacker's skill is 1 higher then there is a 2:1 (i.e.
@@ -1922,25 +1923,35 @@ will succeed.  If the attacker's skill is 1 higher then there is a 2:1 (i.e.
 if the defender's skill is 1 higher, then there is only a 1:2 (i.e. 33%)
 chance, etc. <p>
 
-Possession of a sword confers a +2 bonus to Combat skill.  (Troops fighting
-hand-to-hand without swords are assumed to be irregularly equipped with knives,
-clubs etc.)  Possession of a horse, and Riding skill, also confers a bonus to
-effective Combat skill equal to the Riding skill level (up to a maximum of 3)
-provided that the terrain is one of Plain, Desert or Tundra.  Winged horse
-are better yet, but require more basic Riding skill to gain any advantage.
-<p>
+Possession of a sword confers a +2 bonus to Combat skill for both attack
+and defense.  (Troops fighting hand-to-hand without specific weapons are 
+assumed to be irregularly equipped with knives, clubs etc.)  Possession of
+a horse, and Riding skill, also confers a bonus to effective Combat skill
+equal to the Riding skill level (up to a maximum of 3) provided that the
+terrain allows horses to be used.  Winged horse are better yet, but require
+more basic Riding skill to gain any advantage.  Certain weapons may provide
+different attack and defense bonuses, or have additional attack bonuses
+against mounted opponents.<p>
 
-Missile weapons are slightly different.  A soldier who has a longbow and is
-skilled in its use will use it; otherwise, he will use a crossbow if he has
-one, and skill in its use; otherwise, he will fight hand to hand.  The skill
-check to hit with a longbow is made against an effective defense of 2; i.e., a
-longbowman with skill 1, having made the 50% chance of getting an effective
-attack, has a 1:2 chance of hitting a target.  A crossbow is an easier weapon
-to use, so the chance to hit is calculated against a defense of 0; on the other
-hand, a crossbow can only fire every other round (the first, third, fifth,
-etc.,
-rounds, including the free round of attacks if one's side has one).  Note that
-the target unit's actual skills are irrelevant for bow attacks. <p>
+Some melee weapons may be defined as Long or Short (this is relative to a
+normal weapon, e.g. the sword).  A soldier wielding a longer weapon than
+his opponent gets a +1 bonus to his attack skill.<p>
+
+Missile weapons are slightly different from melee weapons.  A soldier who
+has a longbow and is skilled in its use will use it; otherwise, he will use
+a crossbow if he has one, and skill in its use; otherwise, he will fight hand
+to hand.  The skill check to hit with a longbow is made against an effective
+defense of 2; i.e., a longbowman with skill 1, having made the 50% chance of
+getting an effective attack, has a 1:2 chance of hitting a target.  A
+crossbow is an easier weapon to use, so the chance to hit is calculated
+against a defense of 0; on the other hand, a crossbow can only fire every
+other round (the first, third, fifth, etc., rounds, including the free
+round of attacks if one's side has one).  Note that the target unit's actual
+skills are irrelevant for bow attacks. <p>
+
+Weapons may have one of several different attack types: Slashing, Piercing,
+Crushing, Cleaving and Armor Piercing.  Different types of armor may give
+different survival chances against a sucessful attack of different types.<p>
 
 A soldier with a melee weapon attacking a bowman makes his attack just as if
 the bowman had a Combat skill of 0, even if the bowman is a leader who also
@@ -2202,23 +2213,20 @@ An attack spell (and any other type of attack) also has an attack type, and
 attack level, and a number of blows it deals.  When the attack spell is cast,
 it is matched up against the most powerful defensive spell of the appropriate
 type that the other army has cast.  If the other army has not cast any
-applicable defensive spells, the spell goes through unmolested.
-Unlike normal combat however, men are at a disadvantage to defending against
-spells.   Men which are in the open (not protected by a building) have an
-effective skill of -2 unless they have a shield or some other defensive magic.
-Some monsters have bonuses to resisting some attacks but are more susceptible
-to others.
+applicable defensive spells, the spell goes through unmolested.  Unlike normal
+combat however, men are at a disadvantage to defending against spells.   Men
+which are in the open (not protected by a building) have an effective skill
+of -2 unless they have a shield or some other defensive magic.  Some monsters
+have bonuses to resisting some attacks but are more susceptible to others.
 The skill level of the attack spell and the effective skill for defense are
 matched against each other.  The formula for determining the victor between a
 defensive and offensive spell is the same as for a contest of soldiers; if the
 levels are equal, there is a 1:1 chance of success, and so on.  If the
-offensive spell is victorious, 
-the offensive spell deals its blows to the defending army, and the
-Shield in question is destroyed (thus, it can be useful to have more than
-one of the same type of Shield in effect, as the other Shield will take
-the place of the destroyed one). 
-Otherwise, the attack spell disperses, and the defending spell remains in
-place. <p>
+offensive spell is victorious, the offensive spell deals its blows to the
+defending army, and the Shield in question is destroyed (thus, it can be
+useful to have more than one of the same type of Shield in effect, as the
+other Shield will take the place of the destroyed one).  Otherwise, the
+attack spell disperses, and the defending spell remains in place. <p>
 
 Some spells do not actually kill enemies, but rather have some negative
 effect on them. These spells are treated the same as normal spells; if

@@ -6,7 +6,7 @@
 # ----        ------       --------
 # 2000/MAR/14 Davis Kulis  Added the template code.
 
-CFLAGS = -g -I. -I.. -Wall
+CFLAGS = -g -I. -I.. -Wall -W
 
 RULESET_OBJECTS = extra.o monsters.o rules.o world.o
 

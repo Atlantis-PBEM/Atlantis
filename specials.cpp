@@ -170,8 +170,8 @@ void Battle::DoSpecialAttack( int round,
                                + getrandom(a->slevel * 25) + 2,
                                ATTACK_WEATHER,
                                a->slevel,
-                               SPECIAL_FLAGS,
-                               0);
+                               SPECIAL_FLAGS, SPECIAL_CLASS,
+                               0, 0);
         if (num == -1) {
             AddLine(a->name + " summons a wild tornado, but it is "
                     "deflected.");
@@ -187,8 +187,8 @@ void Battle::DoSpecialAttack( int round,
                               + getrandom(25 * a->slevel) + 2,
                               ATTACK_WEATHER,
                               a->slevel,
-                              SPECIAL_FLAGS,
-                              EFFECT_STORM);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              EFFECT_STORM, 0);
         if (num == -1) {
             AddLine(a->name + " summons a terrible storm, "
                     "but it is deflected.");
@@ -204,8 +204,8 @@ void Battle::DoSpecialAttack( int round,
                               + getrandom(50 * a->slevel) + 2,
                               NUM_ATTACK_TYPES,
                               a->slevel,
-                              SPECIAL_FLAGS,
-                              0);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              0, 0);
         AddLine(a->name + " casts Dispel Illusions, dispelling " +
                 num + " illusions.");
         break;
@@ -216,8 +216,8 @@ void Battle::DoSpecialAttack( int round,
                               + getrandom(25 * a->slevel) + 2,
                               NUM_ATTACK_TYPES,
                               a->slevel,
-                              SPECIAL_FLAGS,
-                              0);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              0, 0);
         AddLine(a->name + " casts Banish Undead, banishing " +
                 num + " undead.");
         break;
@@ -228,8 +228,8 @@ void Battle::DoSpecialAttack( int round,
                               + getrandom(25 * a->slevel) + 2,
                               NUM_ATTACK_TYPES,
                               a->slevel,
-                              SPECIAL_FLAGS,
-                              0);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              0, 0);
         AddLine(a->name + " casts Banish Demons, banishing " +
                 num + " demons.");
         break;
@@ -240,8 +240,8 @@ void Battle::DoSpecialAttack( int round,
                               getrandom(50 * a->slevel) + 2,
                               ATTACK_COMBAT,
                               a->slevel,
-                              SPECIAL_FLAGS,
-                              0);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              0, 0);
         if (num == -1) {
             AddLine(a->name + " invokes a mighty Earthquake, "
                     "but it is deflected.");
@@ -257,15 +257,15 @@ void Battle::DoSpecialAttack( int round,
                               + getrandom(30 * a->slevel) + 2,
                               ATTACK_WEATHER,
                               a->slevel,
-                              SPECIAL_FLAGS,
-                              0);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              0, 0);
         num2 = def->DoAnAttack(a->special,
                                getrandom(30 * a->slevel)
                                + getrandom(30 * a->slevel) + 2,
                                ATTACK_ENERGY,
                                a->slevel,
-                               SPECIAL_FLAGS,
-                               0);
+                               SPECIAL_FLAGS, SPECIAL_CLASS,
+                               0, 0);
         if (num == -1 && num2 == -1) {
             AddLine(a->name + " unleashes a mighty lightning "
                     "strike, but it is deflected.");
@@ -285,8 +285,8 @@ void Battle::DoSpecialAttack( int round,
                               getrandom(a->slevel * 5) + 2,
                               ATTACK_ENERGY,
                               a->slevel,
-                              SPECIAL_FLAGS, 
-                              0);
+                              SPECIAL_FLAGS,  SPECIAL_CLASS,
+                              0, 0);
         if (num == -1) {
             AddLine(a->name + " shoots a Fireball, but it is "
                     "deflected.");
@@ -298,7 +298,8 @@ void Battle::DoSpecialAttack( int round,
 	case SPECIAL_FIREBREATH:
 		num = def->DoAnAttack(a->special,
 				getrandom(a->slevel * 5) + getrandom(a->slevel * 5) + 2,
-				ATTACK_ENERGY, a->slevel, SPECIAL_FLAGS, 0 );
+				ATTACK_ENERGY, a->slevel, SPECIAL_FLAGS, SPECIAL_CLASS,
+				0, 0);
 		if (num == -1) {
 			AddLine(a->name + " breathes Fire, but it is deflected.");
 		} else {
@@ -308,7 +309,8 @@ void Battle::DoSpecialAttack( int round,
 	case SPECIAL_ICEBREATH:
 		num = def->DoAnAttack(a->special,
 				getrandom(a->slevel * 5) + getrandom(a->slevel * 5) + 2,
-				ATTACK_ENERGY, a->slevel, SPECIAL_FLAGS, 0 );
+				ATTACK_ENERGY, a->slevel, SPECIAL_FLAGS, SPECIAL_CLASS,
+				0, 0);
 		if (num == -1) {
 			AddLine(a->name + " breathes Ice, but it is deflected.");
 		} else {
@@ -321,8 +323,8 @@ void Battle::DoSpecialAttack( int round,
                               getrandom(a->slevel * 25) + 2,
                               ATTACK_ENERGY,
                               a->slevel,
-                              SPECIAL_FLAGS,
-                              0);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              0, 0);
         if (num == -1) {
             AddLine(a->name + " blasts the enemy with Hellfire, but it is "
                     "deflected.");
@@ -338,8 +340,8 @@ void Battle::DoSpecialAttack( int round,
                               + getrandom(a->slevel * 10) + 2,
                               ATTACK_SPIRIT,
                               a->slevel,
-                              SPECIAL_FLAGS,
-                              EFFECT_FEAR);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              EFFECT_FEAR, 0);
         if (num == -1) {
             AddLine(a->name + " attempts to strike fear into the "
                     "enemy, but the spell is deflected.");
@@ -355,8 +357,8 @@ void Battle::DoSpecialAttack( int round,
                               getrandom(a->slevel * 100) + 2,
                               ATTACK_SPIRIT,
                               a->slevel,
-                              SPECIAL_FLAGS, 
-                              0);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              0, 0);
         if (num == -1) {
             AddLine(a->name + " attempts to summon the black wind, "
                     "but the spell is deflected.");
@@ -371,8 +373,8 @@ void Battle::DoSpecialAttack( int round,
                               getrandom(125) + getrandom(125) + 2,
                               ATTACK_SPIRIT,
                               a->slevel,
-                              SPECIAL_FLAGS,
-                              0);
+                              SPECIAL_FLAGS, SPECIAL_CLASS,
+                              0, 0);
         if (num == -1) {
             AddLine(a->name + " attempts to blast the minds of the "
                     "enemy, but the spell is deflected.");

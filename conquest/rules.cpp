@@ -46,8 +46,6 @@ static GameDefs g = {
     6, /* FLY_SPEED */
     8, /* MAX_SPEED */
 		   
-    250, /* WAGON_CAPACITY */
-
     10, /* STUDENTS_PER_TEACHER */
     10, /* MAINTENANCE_COST */
     10, /* LEADER_COST */
@@ -140,6 +138,9 @@ static GameDefs g = {
 	0,	// UNDERWORLD_LEVELS
 	0,	// UNDERDEEP_LEVELS
 	0,	// ABYSS_LEVEL
+	0,	// IMPORVED_FARSIGHT
+	0,	// GM_REPORT
+	0,	// DECAY
 };
 
 GameDefs * Globals = &g;
