@@ -2,7 +2,8 @@
 <head>
 <title>Atlantis 4.0.4 +PLUS+ Rules</title>
 </head>
-<body>
+<body BGCOLOR="white" TEXT="#400000" LINK="#800000" VLINK="#800000"
+      ALINK="#800000">
 <center>
 <h1> Rules for Atlantis v4.0.4 +PLUS+</h1>
 <h2> Copyright 1996 by Geoff Dunbar </h2>
@@ -351,11 +352,14 @@ as his starting character.  Alternatively, you can call your faction something
 like "The Great Northern Mining Company" or whatever. <p>
 
 <pre>
-  * Merlin the Magician (17), faction Merlin the Magician (27), has: leader.
-    Skills: none.
-  * Merlin's Guards (33), faction Merlin the Magician (27), has: 20 vikings,
-    20 swords. Skills: none.
-  * Merlin's Workers (34), faction Merlin the Magician (27), has: 50 vikings.
+  * Merlin the Magician (17), faction Merlin the
+    Magician (27), has: leader [LEAD].  Skills:
+    none.
+  * Merlin's Guards (33), faction Merlin the
+    Magician (27), has: 20 vikings [VIKI], 20
+    swords [SWOR]. Skills: none.
+  * Merlin's Workers (34), faction Merlin the
+    Magician (27), has: 50 vikings [VIKI].
     Skills: none.
 </pre> <p>
 
@@ -431,16 +435,18 @@ interact.  NOTE: Combat is an exception to this. <p>
 Here is a sample region, as it might appear on your turn report: <p>
 
 <pre>
-plain in Turia (11,15), 500 peasants (wood elves), $2500.
--------------------------------------------------------------
+plain in Turia (11,15), 500 peasants (nomads), $2500.
+-----------------------------------------------------
 Wages: $15.
 Entertainment available: $125.
-For Sale: 50 wood elves at $60, 10 leaders at $120.
+For Sale: 50 nomads [NOMA] at $60, 10 leaders [LEAD] at
+   $120.
 Wanted: none.
-Products: 37 horses.
+Products: 37 horses [HORS].
 
-* Hans Shadowspawn (15), faction Hans and his Merry Pranksters (14), has: 1
-  leader, $500. Skills: none.
+* Hans Shadowspawn (15), faction Hans and his Merry
+  Pranksters (14), has: 1 leader [LEAD], 500 silver
+  [SILV]. Skills: none.
 - Vox Populi (13), has: 1 leader.
 </pre> <p>
 
@@ -490,8 +496,10 @@ appear directly above the list of units.  Here is a sample structure: <p>
 
 <pre>
 + Temple of Agrik [3], tower.
-  - High Priest Chafin (9), has: leader, sword.
-  - Rowing Doom (188), has: 10 ice dwarves, 10 swords.
+  - High Priest Chafin (9), has: leader [LEAD],
+    sword [SWOR].
+  - Rowing Doom (188), has: 10 ice dwarves [IDWA],
+    10 swords [SWOR].
 </pre> <p>
 
 The structure lists the name, the number, and what type of structure it is.
@@ -1003,8 +1011,9 @@ level 3 for the first time, it might receive the following (obviously
 farsical) report: <p>
 
 <pre>
-  Shoemaking 3:  A unit possessing this skill may produce Sooper Dooper Air
-    Max Winged Sandals.  Use PRODUCE Winged Sandals to produce this item.
+  Shoemaking 3:  A unit possessing this skill may
+    produce Sooper Dooper Air Max Winged Sandals.
+    Use PRODUCE Winged Sandals to produce this item.
 </pre> <p>
 
 <a name="economy">
@@ -1085,8 +1094,8 @@ Here is a table giving some information about common items in Atlantis: <p>
   <td align=center>Grain</td>
   <td align=center>Farming</td>
   <td> </td>
-  <td> </td>
   <td align=center>5</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Livestock</td>
@@ -1394,7 +1403,7 @@ production level). <p>
  </tr> <tr>
   <td align=center>Mine</td>
   <td align=center>10</td>
-  <td align=center>wood or stone
+  <td align=center>wood or stone</td>
   <td align=center>Mining 3</td>
   <td align=center>iron</td>
  </tr> <tr>
@@ -1486,37 +1495,37 @@ Once a road decays, it will give no bonuses until it is repaired. <p>
  <tr>
   <td align=center>Road N</td>
   <td align=center>75</td>
-  <td align=center>stone
+  <td align=center>stone</td>
   <td align=center>Building 3</td>
  </tr>
  <tr>
   <td align=center>Road NW</td>
   <td align=center>75</td>
-  <td align=center>stone
+  <td align=center>stone</td>
   <td align=center>Building 3</td>
  </tr>
  <tr>
   <td align=center>Road NE</td>
   <td align=center>75</td>
-  <td align=center>stone
+  <td align=center>stone</td>
   <td align=center>Building 3</td>
  </tr>
  <tr>
   <td align=center>Road S</td>
   <td align=center>75</td>
-  <td align=center>stone
+  <td align=center>stone</td>
   <td align=center>Building 3</td>
  </tr>
  <tr>
   <td align=center>Road SW</td>
   <td align=center>75</td>
-  <td align=center>stone
+  <td align=center>stone</td>
   <td align=center>Building 3</td>
  </tr>
  <tr>
   <td align=center>Road SE</td>
   <td align=center>75</td>
-  <td align=center>stone
+  <td align=center>stone</td>
   <td align=center>Building 3</td>
  </tr>
 </table>
@@ -2681,20 +2690,20 @@ must be at least 1, and you should not create two units in the same region in
 the same month, with the same alias numbers).  The new unit can then be
 referred to as NEW <alias> in place of the regular unit number, e.g. <p>
 <pre>
-    UNIT 17
-    FORM 1
-        NAME UNIT "Merlin's Guards"
-        BUY 5 Plainsmen
-        STUDY COMBAT
-    END
-    FORM 2
-        NAME UNIT "Merlin's Workers"
-        DESCRIBE UNIT "wearing dirty overalls and carrying shovels"
-        BUY 15 Plainsmen
-    END
-    CLAIM 2500
-    GIVE NEW 1 1000 silver
-    GIVE NEW 2 2000 silver
+UNIT 17
+FORM 1
+  NAME UNIT "Merlin's Guards"
+  BUY 5 Plainsmen
+  STUDY COMBAT
+END
+FORM 2
+  NAME UNIT "Merlin's Workers"
+  DESCRIBE UNIT "wearing dirty overalls"
+  BUY 15 Plainsmen
+END
+CLAIM 2500
+GIVE NEW 1 1000 silver
+GIVE NEW 2 2000 silver
 </pre> <p>
 This set of orders for unit 17 would create two new units with alias numbers 1
 and 2, name them Merlin's Guards and Merlin's Workers, set the description for
@@ -3456,15 +3465,16 @@ Lord Foo
 foo@bar.com
 
 Faction X, owner of 9999, would receive:
-
+<pre>
 From: Foo &lt;foo@bar.com&gt;
 Subject:  Greetings!
 
 #email 9999
-Greetings.  You've entered the Kingdom of Foo.  Please contact us.
+Greetings.  You've entered the Kingdom of Foo.  Please
+contact us.
 
 Lord Foo
 foo@bar.com
-
+</pre>
 </body>
 </html>
