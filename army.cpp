@@ -219,7 +219,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		// Weapons (like Runeswords) which are both weapons and battle
 		// items will be skipped in the battle items setup and handled
 		// here.
-		if ((ItemDefs[weapon].type & IT_BATTLE) && special != -1) {
+		if ((ItemDefs[weapon].type & IT_BATTLE) && special == -1) {
 			special = BattleItemDefs[ItemDefs[weapon].index].index;
 			slevel = BattleItemDefs[ItemDefs[weapon].index].skillLevel;
 		}
