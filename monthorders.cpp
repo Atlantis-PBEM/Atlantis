@@ -417,7 +417,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 		u->monthorders = 0;
 		return;
 	}
-	if (Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
+	if ((Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) && (obj->type == O_OBANK)) { // trying to build a bank ?
 		if ((Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD) && !(r->CanTax(u))) {
 			u->Error("BUILD: Cannot build banks if there are guarding units.");
 			delete u->monthorders;
@@ -430,13 +430,20 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 			u->monthorders = 0;
 			return;
 		}
-		if ((Globals->ALLOW_BANK & GameDefs::BANK_SKILLTOBUILD) && (!u->GetSkill(S_BANKING))) {
-			u->Error("BUILD: Banking skill is required.");
+		if ((Globals->ALLOW_BANK & GameDefs::BANK_SKILLTOBUILD) && (SkillDefs[S_BANKING].flags & SkillType::DISABLED)) {
+			// GM error - requested banking skill to build but skill is disabled
+			u->Error("BUILD: Impossible to build banks due to missing skill.");
 			delete u->monthorders;
 			u->monthorders = 0;
 			return;
 		}
-	} else { // This is only if a dumb GM enables banks but not the gamedef
+		if ((Globals->ALLOW_BANK & GameDefs::BANK_SKILLTOBUILD) && (!u->GetSkill(S_BANKING))) {
+			u->Error("BUILD: Can't build that.");
+			delete u->monthorders;
+			u->monthorders = 0;
+			return;
+		}
+	} else if (obj->type == O_OBANK) { // This is only if a dumb GM enables banks but not the gamedef
 		u->Error("BUILD: Bank ? What is that ?"); // maybe give same error "Can't build that." ?
 		delete u->monthorders;
 		u->monthorders = 0;

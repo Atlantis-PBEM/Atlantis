@@ -61,3 +61,6 @@ Jan Rietema
 Joseph Traub
     Changes, updates, and merging a few disparate branches
 	Maintaining and extending the 4.0.X code.
+Michael Scalet
+	Implemented BANKs, Banking skill and BANK order.
+
