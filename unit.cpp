@@ -818,6 +818,8 @@ int Unit::CheckDepend(int lev,int dep,int deplev) {
 int Unit::CanStudy(int sk) {
   int curlev = GetRealSkill(sk);
 
+  if(SkillDefs[sk].flags & SkillType::DISABLED) return 0;
+
   if (SkillDefs[sk].depend1 != -1) {
     if (!CheckDepend(curlev,SkillDefs[sk].depend1,SkillDefs[sk].level1))
       return 0;
