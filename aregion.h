@@ -257,7 +257,11 @@ class ARegion : public AListElem
 		int Development();
 		int TownDevelopment();
 		int CheckSea(int, int, int);
-		int GetSlope();
+		int Slope();
+		int SurfaceWater();
+		int Soil();
+		int Winds();
+		int TerrainFactor(int, int);
 		int TerrainProbability(int);
 		
 		int CountWMons();
@@ -294,6 +298,7 @@ class ARegion : public AListElem
 		int elevation;
 		int humidity;
 		int temperature;
+		int vegetation;
 		int culture;
 
 		/* Potential bonuses to economy */
@@ -365,6 +370,7 @@ struct Geography
 	int elevation;
 	int humidity;
 	int temperature;
+	int vegetation;
 	int culture;
 };
 
@@ -376,6 +382,7 @@ class GeoMap
 		int GetElevation(int, int);
 		int GetHumidity(int, int);
 		int GetTemperature(int, int);
+		int GetVegetation(int, int);
 		int GetCulture(int, int);
 		void ApplyGeography(ARegionArray *pArr);
 		
@@ -434,9 +441,8 @@ class ARegionList : public AList
 		void CleanUpWater(ARegionArray *pRegs);
 		void RemoveCoastalLakes(ARegionArray *pRegs);
 		void SeverLandBridges(ARegionArray *pRegs);
-		int GetFractalTerrain(ARegion *reg);
-		void GrowFractalTerrain(ARegionArray *pArr);
-		void AllocateFractalTerrain(int type, int num, int last, ARegionArray *pArr);
+		void RescaleFractalParameters(ARegionArray *pArr);
+		void SetFractalTerrain(ARegionArray *pArr);
 		void UnsetRace(ARegionArray *pRegs);
 		void RaceAnchors(ARegionArray *pRegs);
 		void GrowRaces(ARegionArray *pRegs);
