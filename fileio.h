@@ -118,7 +118,12 @@ class Arules {
 		void DropTab();
 		void ClearTab();
 
+		void AddWrapTab();
+		void DropWrapTab();
+		void ClearWrapTab();
+
 		void PutStr(const AString &);
+		void WrapStr(const AString &);
 		void PutNoFormat(const AString &);
 		void EndLine();
 
@@ -126,11 +131,12 @@ class Arules {
 		void TagText(const AString &tag, const AString &text);
 		void ClassTagText(const AString &tag, const AString &cls,
 				const AString &text);
-		void Example(const AString &header, const AString &examp);
+		void CommandExample(const AString &header, const AString &examp);
 		AString Link(const AString &href, const AString &text);
 		AString LinkRef(const AString &name);
 
 		ofstream * file;
 		int tabs;
+		int wraptab;
 };
 #endif

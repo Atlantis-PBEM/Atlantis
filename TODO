@@ -75,6 +75,9 @@
       but a LOT more needs to be done before this is really doable without
 	  a lot of heartache and pain.
    -- Make monster movement only choose among viable exits
+   -- Change BUILD HELP to require friendly stance on part of person being
+      helped toward helper
+   -- Add an 'EJECT' order (make sure it can only be issued on land)
 
 TODO for 5.0.0
 ----------------------------------------------

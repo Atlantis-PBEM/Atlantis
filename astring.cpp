@@ -306,11 +306,11 @@ int AString::CheckPrefix(const AString &s)
 	return AString(x) == s;
 }
 
-AString *AString::Trunc(int val)
+AString *AString::Trunc(int val, int back)
 {
 	int l=Len();
 	if (l <= val) return 0;
-	for (int i=val; i>(val-15); i--) {
+	for (int i=val; i>(val-back); i--) {
 		if (str[i] == ' ') {
 			str[i] = '\0';
 			return new AString(&(str[i+1]));

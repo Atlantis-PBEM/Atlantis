@@ -315,6 +315,7 @@ void Arules::Open(const AString &s)
 		if(file->tellp()!=0) file->close();
     }
     tabs = 0;
+	wraptab = 0;
 }
 
 int Arules::OpenByName(const AString &s)
@@ -329,6 +330,7 @@ int Arules::OpenByName(const AString &s)
 		return -1;
 	}
     tabs = 0;
+	wraptab = 0;
     return 0;
 }
 
@@ -347,19 +349,51 @@ void Arules::ClearTab()
 	tabs = 0;
 }
 
+void Arules::AddWrapTab()
+{
+	wraptab++;
+}
+
+void Arules::DropWrapTab()
+{
+	if(wraptab > 0) wraptab--;
+}
+
+void Arules::ClearWrapTab()
+{
+	wraptab = 0;
+}
+
 void Arules::PutStr(const AString &s)
 {
 	AString temp;
 	for (int i=0; i<tabs; i++) temp += "  ";
 	temp += s;
-	AString *temp2 = temp.Trunc(78);
+	AString *temp2 = temp.Trunc(78, 30);
 	*file << temp << F_ENDLINE;
 	while (temp2) {
 		temp = "";
 		for (int i=0; i<tabs; i++) temp += "  ";
 		temp += *temp2;
 		delete temp2;
-		temp2 = temp.Trunc(78);
+		temp2 = temp.Trunc(78, 30);
+		*file << temp << F_ENDLINE;
+	}
+}
+
+void Arules::WrapStr(const AString &s)
+{
+	AString temp;
+	for (int i=0; i<wraptab; i++) temp += "  ";
+	temp += s;
+	AString *temp2 = temp.Trunc(70);
+	*file << temp << F_ENDLINE;
+	while (temp2) {
+		temp = "  ";
+		for (int i=0; i<wraptab; i++) temp += "  ";
+		temp += *temp2;
+		delete temp2;
+		temp2 = temp.Trunc(70);
 		*file << temp << F_ENDLINE;
 	}
 }
@@ -387,16 +421,27 @@ void Arules::Enclose(int flag, const AString &tag)
 
 void Arules::TagText(const AString &tag, const AString &text)
 {
-	PutStr(AString("<")+tag+">"+ text + "</" + tag + ">");
+	Enclose(1, tag);
+	PutStr(text);
+	Enclose(0, tag);
 }
 
 void Arules::ClassTagText(const AString &tag, const AString &cls,
 		const AString &text)
 {
+	AString temp = tag;
+	temp +=  " CLASS=\"";
+	temp += cls;
+	temp += "\"";
+	Enclose(1, temp);
+	PutStr(text);
+	Enclose(0, tag);
+	/*
 	PutStr(AString("<")+tag+" CLASS=\""+cls+"\">"+ text + "</" + tag + ">");
+	*/
 }
 
-void Arules::Example(const AString &header, const AString &examp)
+void Arules::CommandExample(const AString &header, const AString &examp)
 {
 	PutStr(header);
 	PutStr("<BR>");
