@@ -195,7 +195,7 @@ void ARegion::SetupPop()
 	// note: wage factor 10, population factor 5 - included as "/ 50"
 	/* More wealth in safe Starting Cities */
 	if((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
-		wealth = (int) ((double) (Population() * Wages() / 50));
+		wealth += (Population() / 5) * Globals->MAINTENANCE_COST;
 	}
 	if (wealth < 0) wealth = 0;
 	p->amount = wealth / Globals->WORK_FRACTION;;
@@ -207,6 +207,7 @@ void ARegion::SetupPop()
 	p = new Production;
 	p->itemtype = I_SILVER;
 	p->amount = wealth / Globals->ENTERTAIN_FRACTION;
+	p->baseamount = wealth / Globals->ENTERTAIN_FRACTION;
 	p->skill = S_ENTERTAINMENT;
 	// raise entertainment income by productivity factor 10
 	p->productivity = Globals->ENTERTAIN_INCOME * 10;
@@ -235,8 +236,8 @@ void ARegion::SetIncome()
 	/* do nothing in unpopulated regions */
 	if(basepopulation == 0) return;
 	/* total wage income - setup or adjust */
-	Production * p = products.GetProd(I_SILVER,-1);
-	p->itemtype = I_SILVER;
+	Production * w = products.GetProd(I_SILVER,-1);
+	w->itemtype = I_SILVER;
 	maxwages = Wages();
 	
 	/* taxable region wealth */
@@ -246,20 +247,21 @@ void ARegion::SetIncome()
 	// note: wage factor 10, population factor 5 - included as "/ 50"
 	/* More wealth in safe Starting Cities */
 	if((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
-		wealth = (int) ((double) (Population() * Wages() / 50));
+		wealth += (Population() / 5) * Globals->MAINTENANCE_COST;
 	}
 	if (wealth < 0) wealth = 0;
-	p->amount = wealth / Globals->WORK_FRACTION;
-	p->skill = -1;
-	p->productivity = wages;
+	w->amount = wealth / Globals->WORK_FRACTION;
+	w->skill = -1;
+	w->productivity = wages;
 
 	/* Entertainment - setup or adjust */
-	p = products.GetProd(I_SILVER,S_ENTERTAINMENT);
-	p->itemtype = I_SILVER;
-	p->amount = wealth / Globals->ENTERTAIN_FRACTION;
-	p->skill = S_ENTERTAINMENT;
+	Production * e = products.GetProd(I_SILVER,S_ENTERTAINMENT);
+	e->itemtype = I_SILVER;
+	e->amount = wealth / Globals->ENTERTAIN_FRACTION;
+	e->baseamount = wealth / Globals->ENTERTAIN_FRACTION;
+	e->skill = S_ENTERTAINMENT;
 	// raise entertainment income by productivity factor 10
-	p->productivity = Globals->ENTERTAIN_INCOME * 10;	
+	e->productivity = Globals->ENTERTAIN_INCOME * 10;	
 }
 
 void ARegion::DisbandInRegion(int item, int amt)
@@ -959,6 +961,31 @@ void ARegion::SetupEditRegion()
 		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
 						Population()/125, 0, 10000, 0, 400);
 		markets.Add(m);
+	}
+}
+
+void ARegion::UpdateProducts()
+{
+	forlist (&products) {
+		Production *prod = (Production *) elem;
+		int lastbonus = prod->baseamount / 2;
+		int bonus = 0;
+
+		if (prod->itemtype == I_SILVER && prod->skill == -1) continue;
+
+		forlist (&objects) {
+			Object *o = (Object *) elem;
+			if (o->incomplete < 1 &&
+					ObjectDefs[o->type].productionAided == prod->itemtype) {
+				lastbonus /= 2;
+				bonus += lastbonus;
+			}
+		}
+		prod->amount = prod->baseamount + bonus;
+
+		if (prod->itemtype == I_GRAIN || prod->itemtype == I_LIVESTOCK) {
+			prod->amount += ((earthlore + clearskies) * 40) / prod->baseamount;
+		}
 	}
 }
 

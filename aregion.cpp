@@ -678,31 +678,6 @@ int ARegion::GetRealDirComp(int realDirection)
 	return complementDirection;
 }
 
-void ARegion::UpdateProducts()
-{
-	forlist (&products) {
-		Production *prod = (Production *) elem;
-		int lastbonus = prod->baseamount / 2;
-		int bonus = 0;
-
-		if (prod->itemtype == I_SILVER && prod->skill == -1) continue;
-
-		forlist (&objects) {
-			Object *o = (Object *) elem;
-			if (o->incomplete < 1 &&
-					ObjectDefs[o->type].productionAided == prod->itemtype) {
-				lastbonus /= 2;
-				bonus += lastbonus;
-			}
-		}
-		prod->amount = prod->baseamount + bonus;
-
-		if (prod->itemtype == I_GRAIN || prod->itemtype == I_LIVESTOCK) {
-			prod->amount += ((earthlore + clearskies) * 40) / prod->baseamount;
-		}
-	}
-}
-
 AString ARegion::ShortPrint(ARegionList *pRegs)
 {
 	AString temp = TerrainDefs[type].name;
@@ -1241,6 +1216,8 @@ void ARegion::WriteEconomy(Areport *f, Faction *fac, int present)
 	} else {
 		f->PutStr(AString("Wages: $0."));
 	}
+	
+	f->PutStr(AString("Regional Wealth: $") + wealth + ".");
 	
 	/*
 	f->PutStr(AString("basepop:" ) + basepopulation + ", development: " + development + ", habitat: " + habitat);		
