@@ -84,6 +84,11 @@ Changes from 4.0.5 -> 4.0.6
    -- Added room for one additional coastal and one additional non-coastal
       race in each of the terrain type definitions.
    -- Fixed bug with a reversed sign in road building.
+   -- Patch from Tom Alsen (Tzarg) to catch if unit sequence numbers got
+      foobar'd and to at least attempt to repair it.   Side effect of this
+      is that any orders for the repaired unit get lost, but that is
+      unavoidable.  It also warns the GM so that he can look into it and
+      hopefully fix it.
 
 TODO
 ----------------
