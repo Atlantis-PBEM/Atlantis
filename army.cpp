@@ -211,7 +211,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	// combat skill (and riding bonus if applicable).
 	if( weapon == -1 ) {
 		attackBonus = unit->GetSkill(S_COMBAT) + ridingBonus;
-		defenseBonus = attackBonus + ridingBonus;
+		defenseBonus = attackBonus;
 		numAttacks = 1;
 	}
 
