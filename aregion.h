@@ -23,9 +23,9 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2000/MAR/16 Davis Kulis       Added a new reporting Template.
+// Date		Person			Comments
+// ----		------			--------
+// 2000/MAR/16 Davis Kulis	   Added a new reporting Template.
 // 2000/MAR/21 Azthar Septragen  Added roads.
 #ifndef REGION_CLASS
 #define REGION_CLASS
@@ -214,6 +214,7 @@ class ARegion : public AListElem
 		void UpdateProducts();
 		void SetWeather(int newWeather);
 		int IsCoastal();
+		int IsCoastalOrLakeside();
 		void MakeStartingCity();
 		int IsStartingCity();
 		int IsSafeRegion();
@@ -233,6 +234,9 @@ class ARegion : public AListElem
 		AString GetDecayFlavor();
 		int GetMaxClicks();
 		int PillageCheck();
+
+		// JR
+		int GetPoleDistance(int dir);
 
 		int CountWMons();
 		int IsGuarded();
@@ -362,6 +366,11 @@ class ARegionList : public AList
 		void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);
 		void InitSetupGates(int level);
 		void FinalSetupGates();
+
+		// JR
+		void CleanUpWater(ARegionArray *pRegs);
+		void RemoveCoastalLakes(ARegionArray *pRegs);
+		void SeverLandBridges(ARegionArray *pRegs);
 
 		void CalcDensities();
 		int GetLevelXScale(int level);

@@ -49,6 +49,8 @@ Nick Hoggard
 	  well as cyclical orders.
 Peter Rayner
     Patch for 'EVICT' command.
+Jan Rietema
+    Patch for improved world generation
 Joseph Traub
     Changes, updates, and merging a few disparate branches
 	Maintaining and extending the 4.0.X code.

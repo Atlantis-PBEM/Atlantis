@@ -23,11 +23,11 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2000/MAR/16 Larry Stanbery    Added new items for Realms of the Arcane.
-//                               Corrected Runesword bug.
-// 2000/MAR/21 Azthar Septragen  Added roads.
+// Date			Person				Comments
+// ----			------				--------
+// 2000/MAR/16	Larry Stanbery		Added new items for Realms of the Arcane.
+//									Corrected Runesword bug.
+// 2000/MAR/21	Azthar Septragen	Added roads.
 #ifndef RULES_H
 #define RULES_H
 
@@ -649,6 +649,7 @@ enum {
 /* ARegion Types */
 enum {
 	R_OCEAN,
+	R_LAKE,
 	R_PLAIN,
 	R_FOREST,
 	R_MOUNTAIN,

@@ -520,3 +520,5 @@ Changes from 4.0.9 -> 4.0.10
    -- Fixed bugs in orders checker where it was trying to do a
       unit->Error() where it should have been doing ParseError() since
       unit isn't valid in the orders checker.
+   -- Applied patch from Jan Rietema <ravanrooke@yahoo.de> providing a large
+      amount more configurability in the world generation process.

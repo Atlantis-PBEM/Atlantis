@@ -23,30 +23,30 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2000/MAR/16 Larry Stanbery    Revised description for runesword, to give
-//                               it FEAR 3 special ability.
-//                               Added new items for Realms of the Arcane.
-// 2000/MAR/21 Azthar Septragen  Added roads.
-// 2000/MAR/25 Larry Stanbery    Corrected a few comments
-// 2000/SEP/06 Joseph Traub      Added base man cost to allow races to have
-//                               different base costs
-// 2001/FEB/01 Joseph Traub      Added options for flying over water and
-//                               easier underworld viewing and farseeing
-// 2001/FEB/07 Joseph Traub      Added option to make starting cities safe
-//                               or not and to control the guard numbers
-//                               and to make them slightly tougher.
-//                               Added option to give starting city guards
-//                               mage support.
-// 2001/Feb/18 Joseph Traub      Added support for Apprentices if desired.
-// 2001/Feb/19 Joseph Traub      Removed the ENGINE_VERSION from the gamedef
-//                               since it wasn't being used.
-// 2001/Feb/21 Joseph Traub      Added the ability to disable items, skills
-//                               and objects.
-// 2001/Feb/22 Joseph Traub      Moved out of the individual rules files
-// 2001/July/5 Thomas Alsen      Changed the combat system and monsters
-//                               significantly
+// Date			Person				Comments
+// ----			------				--------
+// 2000/MAR/16	Larry Stanbery		Revised description for runesword, to give
+//									it FEAR 3 special ability.
+//									Added new items for Realms of the Arcane.
+// 2000/MAR/21	Azthar Septragen	Added roads.
+// 2000/MAR/25	Larry Stanbery		Corrected a few comments
+// 2000/SEP/06	Joseph Traub		Added base man cost to allow races to have
+//									different base costs
+// 2001/FEB/01	Joseph Traub		Added options for flying over water and
+//									easier underworld viewing and farseeing
+// 2001/FEB/07	Joseph Traub		Added option to make starting cities safe
+//									or not and to control the guard numbers
+//									and to make them slightly tougher.
+//									Added option to give starting city guards
+//									mage support.
+// 2001/Feb/18	Joseph Traub		Added support for Apprentices if desired.
+// 2001/Feb/19	Joseph Traub		Removed the ENGINE_VERSION from the gamedef
+//									since it wasn't being used.
+// 2001/Feb/21	Joseph Traub		Added the ability to disable items, skills
+//									and objects.
+// 2001/Feb/22	Joseph Traub		Moved out of the individual rules files
+// 2001/July/5	Thomas Alsen		Changed the combat system and monsters
+//									significantly
 //
 #include "gamedata.h"
 #include "items.h"
@@ -2015,7 +2015,7 @@ WeaponType wepd[] = {
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
 	 S_LONGBOW, S_CROSSBOW,
 	 ARMORPIERCING, ATTACK_RANGED, WeaponType::NUM_ATTACKS_SKILL,
-     0, 0, 0},
+	 0, 0, 0},
 	// WEAPON_MCROSSBOW
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
 	 S_CROSSBOW, -1,
@@ -2047,7 +2047,7 @@ WeaponType wepd[] = {
 	 ARMORPIERCING, ATTACK_RANGED, -2,
 	 0, 0, 0},
 	// WEAPON_JAVELIN
-    {WeaponType::RANGED|WeaponType::RIDINGBONUSDEFENSE,
+	{WeaponType::RANGED|WeaponType::RIDINGBONUSDEFENSE,
 	 -1, -1,
 	 PIERCING, ATTACK_RANGED, -2,
 	 -1, 0, 0},
@@ -2166,19 +2166,19 @@ ArmorType armd[] = {
 	// ARMOR_NONE
 	{ 0, 100, {0, 0, 0, 0, 0, 0, 0, 0}},
 	// ARMOR_CLOAKOFI
-    { 0, 100, {99, 99, 99, 99, 99, 99, 99, 99}},
+	{ 0, 100, {99, 99, 99, 99, 99, 99, 99, 99}},
 	// ARMOR_ADPLATE
-    { 0, 100, {95, 95, 95, 95, 90, 90, 90, 90}},
+	{ 0, 100, {95, 95, 95, 95, 90, 90, 90, 90}},
 	// ARMOR_ADRING
-    { 0, 100, {90, 90, 90, 90, 80, 80, 80, 80}},
+	{ 0, 100, {90, 90, 90, 90, 80, 80, 80, 80}},
 	// ARMOR_IMITHRIL
-    { 0, 100, {90, 90, 90, 90, 75, 75, 75, 75}},
+	{ 0, 100, {90, 90, 90, 90, 75, 75, 75, 75}},
 	// ARMOR_MARMOR
-    { 0, 300, {270, 270, 270, 270, 200, 200, 200, 200}}, // 90%/66.67%
+	{ 0, 300, {270, 270, 270, 270, 200, 200, 200, 200}}, // 90%/66.67%
 	// ARMOR_MCHAIN
 	{ 0, 300, {225, 200, 150, 225, 150, 150, 150, 150}},
 	// ARMOR_PLATEARMOR
-    { 0, 300, {200, 200, 200, 200, 0, 0, 0, 0}},
+	{ 0, 300, {200, 200, 200, 200, 0, 0, 0, 0}},
 	// ARMOR_BPLATE
 	{ 0, 300, {100, 270, 200, 75, 100, 100, 100, 100}},
 	// ARMOR_CHAINARMOR
@@ -3059,6 +3059,14 @@ static TerrainType td[] = {
 	 {-1,-1,-1},
 	 1,I_PIRATES,I_KRAKEN,I_MERFOLK,
 	 5,{O_ISLE,O_DERELICT,O_OCAVE,O_WHIRL,-1,-1}},
+	{"lake", R_OCEAN, 0,
+	 0,0,0,1,
+	 {{I_FISH,100,20},{-1,0,0},{-1,0,0},{-1,0,0},
+	  {-1,0,0},{-1,0,0},{-1,0,0}},
+	 {-1,-1,-1,-1},
+	 {-1,-1,-1},
+	 1,I_PIRATES,-1,-1,
+	 5,{O_ISLE,-1,O_OCAVE,-1,-1,-1}},
 	{"plain", R_PLAIN, TerrainType::RIDINGMOUNTS | TerrainType::FLYINGMOUNTS,
 	 800,14,40,1,
 	 {{I_HORSE,100,20},{I_WHORSE,25,5},{-1,0,0},{-1,0,0},

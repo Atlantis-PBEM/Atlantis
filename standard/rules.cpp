@@ -23,10 +23,10 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2001/Feb/21 Joseph Traub      Move the item and such defintions out into
-//                               gamedata.cpp
+// Date		Person			Comments
+// ----		------			--------
+// 2001/Feb/21 Joseph Traub	  Move the item and such defintions out into
+//							   gamedata.cpp
 //
 #include "gamedata.h"
 #include "gamedefs.h"
@@ -55,68 +55,68 @@ int *allowedTrades = at;
 int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
-    "Standard Atlantis",     // RULESET_NAME
-    MAKE_ATL_VER( 4, 0, 10 ), // RULESET_VERSION
+	"Standard Atlantis",	 // RULESET_NAME
+	MAKE_ATL_VER( 4, 0, 10 ), // RULESET_VERSION
 
-    2, /* FOOT_SPEED */
-    4, /* HORSE_SPEED */
-    4, /* SHIP_SPEED */
-    6, /* FLY_SPEED */
-    8, /* MAX_SPEED */
+	2, /* FOOT_SPEED */
+	4, /* HORSE_SPEED */
+	4, /* SHIP_SPEED */
+	6, /* FLY_SPEED */
+	8, /* MAX_SPEED */
 
-    10, /* STUDENTS_PER_TEACHER */
-    10, /* MAINTENANCE_COST */
-    20, /* LEADER_COST */
+	10, /* STUDENTS_PER_TEACHER */
+	10, /* MAINTENANCE_COST */
+	20, /* LEADER_COST */
 
 	0,  /* MAINTAINENCE_MULTIPLIER */
 	GameDefs::MULT_NONE, /* MULTIPLIER_USE */
 
-    33, /* STARVE_PERCENT */
-    GameDefs::STARVE_NONE, /* SKILL_STARVATION */
+	33, /* STARVE_PERCENT */
+	GameDefs::STARVE_NONE, /* SKILL_STARVATION */
 
 	5020, /* START_MONEY */
-    5, /* WORK_FRACTION */
-    20, /* ENTERTAIN_FRACTION */
-    20, /* ENTERTAIN_INCOME */
+	5, /* WORK_FRACTION */
+	20, /* ENTERTAIN_FRACTION */
+	20, /* ENTERTAIN_INCOME */
 
-    50, /* TAX_INCOME */
+	50, /* TAX_INCOME */
 
-    5, /* HEALS_PER_MAN */
+	5, /* HEALS_PER_MAN */
 
-    20, /* GUARD_REGEN */ /* percent */
-    40, /* CITY_GUARD */
-    50, /* GUARD_MONEY */
-    4000, /* CITY_POP */
+	20, /* GUARD_REGEN */ /* percent */
+	40, /* CITY_GUARD */
+	50, /* GUARD_MONEY */
+	4000, /* CITY_POP */
 
-    10, /* WMON_FREQUENCY */
-    10, /* LAIR_FREQUENCY */
+	10, /* WMON_FREQUENCY */
+	10, /* LAIR_FREQUENCY */
 
-    5, /* FACTION_POINTS */
+	5, /* FACTION_POINTS */
 
-    50, /* TIMES_REWARD */
+	50, /* TIMES_REWARD */
 
-    1, // TOWNS_EXIST
-    1, // LEADERS_EXIST
-    1, // SKILL_LIMIT_NONLEADERS
-    0, // MAGE_NONLEADERS
-    1, // RACES_EXIST
-    1, // GATES_EXIST
-    1, // FOOD_ITEMS_EXIST
-    1, // CITY_MONSTERS_EXIST
-    1, // WANDERING_MONSTERS_EXIST
-    1, // LAIR_MONSTERS_EXIST
-    1, // WEATHER_EXISTS
-    1, // OPEN_ENDED
+	1, // TOWNS_EXIST
+	1, // LEADERS_EXIST
+	1, // SKILL_LIMIT_NONLEADERS
+	0, // MAGE_NONLEADERS
+	1, // RACES_EXIST
+	1, // GATES_EXIST
+	1, // FOOD_ITEMS_EXIST
+	1, // CITY_MONSTERS_EXIST
+	1, // WANDERING_MONSTERS_EXIST
+	1, // LAIR_MONSTERS_EXIST
+	1, // WEATHER_EXISTS
+	1, // OPEN_ENDED
 	1, // NEXUS_EXISTS
 	0, // CONQUEST_GAME
 
-    1, // RANDOM_ECONOMY
-    1, // VARIABLE_ECONOMY
+	1, // RANDOM_ECONOMY
+	1, // VARIABLE_ECONOMY
 
-    50, // CITY_MARKET_NORMAL_AMT
-    20, // CITY_MARKET_ADVANCED_AMT
-    50, // CITY_MARKET_TRADE_AMT
-    20, // CITY_MARKET_MAGIC_AMT
+	50, // CITY_MARKET_NORMAL_AMT
+	20, // CITY_MARKET_ADVANCED_AMT
+	50, // CITY_MARKET_TRADE_AMT
+	20, // CITY_MARKET_MAGIC_AMT
 	0,  // MORE_PROFITABLE_TRADE_GOODS
 
 	50,	// BASE_MAN_COST
@@ -127,7 +127,7 @@ static GameDefs g = {
 
 	0, // DEFAULT_WORK_ORDER
 
-    GameDefs::FACLIM_FACTION_TYPES, // FACTION_LIMIT_TYPE
+	GameDefs::FACLIM_FACTION_TYPES, // FACTION_LIMIT_TYPE
 
 	GameDefs::WFLIGHT_NONE,	// FLIGHT_OVER_WATER
 
@@ -151,6 +151,15 @@ static GameDefs g = {
 	1,	// UNDERWORLD_LEVELS
 	0,	// UNDERDEEP_LEVELS
 	0,	// ABYSS_LEVEL
+	100,	// TOWN_PROBABILITY
+	0,	// TOWN_SPREAD
+	0,	// TOWNS_NOT_ADJACENT
+	0,	// LESS_ARCTIC_TOWNS
+	0,	// ARCHIPELAGO
+	0,	// LAKES_EXIST
+	GameDefs::NO_EFFECT, // LAKE_WAGE_EFFECT
+	0,	// LAKESIDE_IS_COASTAL
+	0,	// ODD_TERRAIN
 	0,	// IMPROVED_FARSIGHT
 	0,	// GM_REPORT
 	0,	// DECAY
@@ -164,12 +173,12 @@ static GameDefs g = {
 	1,	// START_CITIES_START_UNLIMITED
 	0,	// PROPORTIONAL_AMTS_USAGE
 	0,  // USE_WEAPON_ARMOR_COMMAND
-    0,  // MONSTER_NO_SPOILS
-    0,  // MONSTER_SPOILS_RECOVERY
-    0,  // MAX_ASSASSIN_FREE_ATTACKS
-    0,  // RELEASE_MONSTERS
-    0,  // CHECK_MONSTER_CONTROL_MID_TURN
-    0,  // DETECT_GATE_NUMBERS
+	0,  // MONSTER_NO_SPOILS
+	0,  // MONSTER_SPOILS_RECOVERY
+	0,  // MAX_ASSASSIN_FREE_ATTACKS
+	0,  // RELEASE_MONSTERS
+	0,  // CHECK_MONSTER_CONTROL_MID_TURN
+	0,  // DETECT_GATE_NUMBERS
 	GameDefs::ARMY_ROUT_FIGURES,  // ARMY_ROUT
 	0,	// FULL_TRUESEEING_BONUS
 	0,	// IMPROVED_AMTS

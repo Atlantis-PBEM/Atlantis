@@ -23,24 +23,24 @@
 //
 // END A3HEADER
 // MODIFICATONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2000/SEP/06 Joseph Traub      Added base man cost to allow races to have
-//                               different base costs
-// 2001/FEB/01 Joseph Traub      Added options for flying over water and
-//                               easier underworld viewing and farseeing
-// 2001/FEB/07 Joseph Traub      Added option to make starting cities safe
-//                               or not and to control the guard numbers
-//                               and to make them slightly tougher.
-//                               Added option to give starting city guards
-//                               mage support.
-// 2001/Feb/18 Joseph Traub      Added Apprentices idea from Lacandon Conquest
-// 2001/Feb/18 Joseph Traub      Added back in support for Conquest
-// 2001/Feb/19 Joseph Traub      Removed the ENGINE_VERSION from the gamedef
-//                               since it wasn't being used.
-// 2001/Feb/21 Joseph Traub      Added a FACLIM_UNLIMITED option
-// 2001/Apr/08 Joseph Traub      Added WORLD_NAME option
-// 2001/Apr/28 Joseph Traub      Added MORE_PROFITABLE_TRADE_GOODS option
+// Date	    Person            Comments
+// ----	    ------            --------
+// 2000/SEP/06 Joseph Traub	  Added base man cost to allow races to have
+//	                           different base costs
+// 2001/FEB/01 Joseph Traub	  Added options for flying over water and
+//	                           easier underworld viewing and farseeing
+// 2001/FEB/07 Joseph Traub	  Added option to make starting cities safe
+//	                           or not and to control the guard numbers
+//	                           and to make them slightly tougher.
+//	                           Added option to give starting city guards
+//	                           mage support.
+// 2001/Feb/18 Joseph Traub	  Added Apprentices idea from Lacandon Conquest
+// 2001/Feb/18 Joseph Traub	  Added back in support for Conquest
+// 2001/Feb/19 Joseph Traub	  Removed the ENGINE_VERSION from the gamedef
+//	                           since it wasn't being used.
+// 2001/Feb/21 Joseph Traub	  Added a FACLIM_UNLIMITED option
+// 2001/Apr/08 Joseph Traub	  Added WORLD_NAME option
+// 2001/Apr/28 Joseph Traub	  Added MORE_PROFITABLE_TRADE_GOODS option
 //
 
 #ifndef GAME_DEFS
@@ -50,13 +50,13 @@
 
 /* Directions */
 enum {
-    D_NORTH,
-    D_NORTHEAST,
-    D_SOUTHEAST,
-    D_SOUTH,
-    D_SOUTHWEST,
-    D_NORTHWEST,
-    NDIRS
+	D_NORTH,
+	D_NORTHEAST,
+	D_SOUTHEAST,
+	D_SOUTH,
+	D_SOUTHWEST,
+	D_NORTHWEST,
+	NDIRS
 };
 
 extern char **DirectionStrs;
@@ -77,19 +77,19 @@ extern int allowedTradesSize;
 
 class GameDefs {
 public:
-    char *RULESET_NAME;
-    ATL_VER RULESET_VERSION;
+	char *RULESET_NAME;
+	ATL_VER RULESET_VERSION;
 
-    int FOOT_SPEED;
-    int HORSE_SPEED;
-    int SHIP_SPEED;
-    int FLY_SPEED;
-    int MAX_SPEED;
+	int FOOT_SPEED;
+	int HORSE_SPEED;
+	int SHIP_SPEED;
+	int FLY_SPEED;
+	int MAX_SPEED;
 
-    int STUDENTS_PER_TEACHER;
+	int STUDENTS_PER_TEACHER;
 
-    int MAINTENANCE_COST;
-    int LEADER_COST;
+	int MAINTENANCE_COST;
+	int LEADER_COST;
 
 	// If we use skill level multiplier then no units, all units, leaders,
 	// or just mages pay X per level of skill they have per man.   The
@@ -108,7 +108,7 @@ public:
 	};
 	int MULTIPLIER_USE;
 
-    int STARVE_PERCENT;
+	int STARVE_PERCENT;
 
 	enum {
 		STARVE_NONE,
@@ -122,74 +122,74 @@ public:
 	// is unable to will die, period.
 	int SKILL_STARVATION;
 
-    int START_MONEY;
-    int WORK_FRACTION;
-    int ENTERTAIN_FRACTION;
-    int ENTERTAIN_INCOME;
+	int START_MONEY;
+	int WORK_FRACTION;
+	int ENTERTAIN_FRACTION;
+	int ENTERTAIN_INCOME;
 
-    int TAX_INCOME;
+	int TAX_INCOME;
 
-    int HEALS_PER_MAN;
+	int HEALS_PER_MAN;
 
-    int GUARD_REGEN; /* percent */
-    int CITY_GUARD;
-    int GUARD_MONEY;
-    int CITY_POP;
+	int GUARD_REGEN; /* percent */
+	int CITY_GUARD;
+	int GUARD_MONEY;
+	int CITY_POP;
 
-    int WMON_FREQUENCY;
-    int LAIR_FREQUENCY;
+	int WMON_FREQUENCY;
+	int LAIR_FREQUENCY;
 
-    int FACTION_POINTS;
+	int FACTION_POINTS;
 
-    int TIMES_REWARD;
+	int TIMES_REWARD;
 
-    int TOWNS_EXIST;
-    int LEADERS_EXIST;
-    int SKILL_LIMIT_NONLEADERS;
-    int MAGE_NONLEADERS;
-    int RACES_EXIST;
-    int GATES_EXIST;
-    int FOOD_ITEMS_EXIST;
-    int CITY_MONSTERS_EXIST;
-    int WANDERING_MONSTERS_EXIST;
-    int LAIR_MONSTERS_EXIST;
-    int WEATHER_EXISTS;
-    int OPEN_ENDED;
+	int TOWNS_EXIST;
+	int LEADERS_EXIST;
+	int SKILL_LIMIT_NONLEADERS;
+	int MAGE_NONLEADERS;
+	int RACES_EXIST;
+	int GATES_EXIST;
+	int FOOD_ITEMS_EXIST;
+	int CITY_MONSTERS_EXIST;
+	int WANDERING_MONSTERS_EXIST;
+	int LAIR_MONSTERS_EXIST;
+	int WEATHER_EXISTS;
+	int OPEN_ENDED;
 	int NEXUS_EXISTS;
 	int CONQUEST_GAME;
 
-    //
-    // RANDOM_ECONOMY determines whether the economy for different regions
-    // is randomized, or is always the same.
-    //
-    int RANDOM_ECONOMY;
+	//
+	// RANDOM_ECONOMY determines whether the economy for different regions
+	// is randomized, or is always the same.
+	//
+	int RANDOM_ECONOMY;
 
-    //
-    // If VARIABLE_ECONOMY is set, the economy of a region is altered after
-    // each turn.
-    //
-    int VARIABLE_ECONOMY;
+	//
+	// If VARIABLE_ECONOMY is set, the economy of a region is altered after
+	// each turn.
+	//
+	int VARIABLE_ECONOMY;
 
-    //
-    // Some economy figures.
-    //
-    int CITY_MARKET_NORMAL_AMT;
-    int CITY_MARKET_ADVANCED_AMT;
-    int CITY_MARKET_TRADE_AMT;
+	//
+	// Some economy figures.
+	//
+	int CITY_MARKET_NORMAL_AMT;
+	int CITY_MARKET_ADVANCED_AMT;
+	int CITY_MARKET_TRADE_AMT;
 	// If any magic items are not set NOMARKET, how many are allowed?
 	int CITY_MARKET_MAGIC_AMT;
 	// JLT -- Allow higher margins on trade goods.
 	int MORE_PROFITABLE_TRADE_GOODS;
 
-    // JLT -- Allow races to have differing base costs
-    int BASE_MAN_COST;
+	// JLT -- Allow races to have differing base costs
+	int BASE_MAN_COST;
 
 	// Are the lastorders values maintained by external scripts?
 	int LASTORDERS_MAINTAINED_BY_SCRIPTS;
 
-    // How many turns to allow a faction to be inactive.
+	// How many turns to allow a faction to be inactive.
 	// Set to -1 if you don't want this check performed.
-    int MAX_INACTIVE_TURNS;
+	int MAX_INACTIVE_TURNS;
 
 	// Is it easier to deal with the underworld (allows teleport and
 	// farsight into the underworld)
@@ -198,15 +198,15 @@ public:
 	// Should units with no orders perform a default 'work' order
 	int DEFAULT_WORK_ORDER;
 
-    //
-    // The type of faction limits that are in effect in this game.
-    //
-    enum {
-        FACLIM_MAGE_COUNT,
-        FACLIM_FACTION_TYPES,
+	//
+	// The type of faction limits that are in effect in this game.
+	//
+	enum {
+	    FACLIM_MAGE_COUNT,
+	    FACLIM_FACTION_TYPES,
 		FACLIM_UNLIMITED,
-    };
-    int FACTION_LIMIT_TYPE;
+	};
+	int FACTION_LIMIT_TYPE;
 
 	//
 	// The type of flight over water that is available.
@@ -286,6 +286,65 @@ public:
 
 	// Is there an abyss level?
 	int ABYSS_LEVEL;
+
+	// Town probability; 100 = default
+	int TOWN_PROBABILITY;
+
+	// Raising this value will lessen the effects
+	// of a region type's economy on the chance
+	// for creating towns (overall probability
+	// will also vary a bit).
+	// Default = 0. For high values the town probability
+	// will need to be adjusted downwards to get
+	// comparable number of towns.
+	int TOWN_SPREAD;
+
+	// Flag for disallowing settlements in adjacent regions
+	// (except near starting cities)
+	int TOWNS_NOT_ADJACENT;
+
+	// Make settlements near the arctic less likely and smaller
+	// Higher values decrease likeliness of settlements
+	// suggested: 0-5
+	int LESS_ARCTIC_TOWNS;
+
+	// Enable Archipelago Creation
+	// = chance of creating archipelagos vs continents
+	// (note that archipelagos are smaller so that
+	//  the overall contribution of archipelagos to
+	//  land mass will be much lower than this percentage)
+	// Setting ARCHIPELAGO means that smaller inland seas will be
+	// converted into continent mass.
+	// suggested value: 10, 25, 50+ it's really a matter of taste
+	int ARCHIPELAGO;
+
+	// Chance for Lake Creation
+	// Setting LAKES_EXIST means that smaller inland seas will be
+	// converted into continent mass - this is the chance that
+	// such regions will end up as lakes.
+	// suggested value: around 12.
+	int LAKES_EXIST;
+
+	// Lake Effect on Wages Options
+	// Lakes will add one to adjacent regions wages if set
+	enum {
+		NO_EFFECT = 0x00,
+		ALL = 0x01,
+		TOWNS = 0x02,
+		NONPLAINS = 0x04,
+		DESERT_ONLY = 0x08,
+	};
+
+	// LAKE_WAGE_EFFECT: effect on surrounding wages
+	int LAKE_WAGE_EFFECT;
+
+	// LAKESIDE_IS_COASTAL: lakeside regions count as
+	// coastal for all purposes - races and such
+	int LAKESIDE_IS_COASTAL;
+
+	// ODD_TERRAIN: chance (x 0.1%) for single-hex terrain oddities
+	// suggested: between 5 and 40
+	int ODD_TERRAIN;
 
 	// Does farsight make use of a mages other skills
 	int IMPROVED_FARSIGHT;
