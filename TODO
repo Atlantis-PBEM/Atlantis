@@ -58,4 +58,10 @@
       them regain (or gain) loot over time, so the longer a monster is free
       the more money and stuff it has.
    -- Consider Az's beastform spell
+   -- 'This item can be found in....' information.
+   -- Add option for entertain being an instant order.
+   -- Consider having allied units tagged as a '+' instead of a '-'.
+
+TODO for 5.0.0
+----------------------------------------------
    -- Ben Lloyd's class system should go in (probably wait on 5.0.0)
