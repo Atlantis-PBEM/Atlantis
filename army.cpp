@@ -247,14 +247,20 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
                 level1 = level2;
             }
             
-            if( pWep->flags & WeaponType::NEEDSKILL && !level1 )
-            {
+            if((pWep->flags & WeaponType::NEEDSKILL) && !level1 ) {
                 //
                 // No skill for this item
                 //
                 unit->items.SetNum( item, unit->items.GetNum( item ) + 1 );
                 continue;
             }
+			if((pWep->flags & WeaponType::NEEDMOUNT) && (riding != -1)) {
+				//
+				// This weapon needs a mount to be used.
+				//
+				unit->items.SetNum(item, unit->items.GetNum(item)+1);
+				continue;
+			}
 
             weapon = item;
 

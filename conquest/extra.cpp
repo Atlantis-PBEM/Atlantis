@@ -174,13 +174,13 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableObject(O_FARM);
 
 	/* All men are created equal */
-	ModifyTerrainRaces(R_PLAIN,I_MAN,-1,-1,-1,-1);
-	ModifyTerrainRaces(R_FOREST,I_MAN,-1,-1,-1,-1);
-	ModifyTerrainRaces(R_MOUNTAIN,I_MAN,-1,-1,-1,-1);
-	ModifyTerrainRaces(R_SWAMP,I_MAN,-1,-1,-1,-1);
-	ModifyTerrainRaces(R_ISLAND_PLAIN,I_MAN,-1,-1,-1,-1);
-	ModifyTerrainRaces(R_ISLAND_MOUNTAIN,I_MAN,-1,-1,-1,-1);
-	ModifyTerrainRaces(R_ISLAND_SWAMP,I_MAN,-1,-1,-1,-1);
+	ModifyTerrainRaces(R_PLAIN,I_MAN,-1,-1,-1,-1, -1, -1);
+	ModifyTerrainRaces(R_FOREST,I_MAN,-1,-1,-1,-1, -1, -1);
+	ModifyTerrainRaces(R_MOUNTAIN,I_MAN,-1,-1,-1,-1, -1, -1);
+	ModifyTerrainRaces(R_SWAMP,I_MAN,-1,-1,-1,-1, -1, -1);
+	ModifyTerrainRaces(R_ISLAND_PLAIN,I_MAN,-1,-1,-1,-1, -1, -1);
+	ModifyTerrainRaces(R_ISLAND_MOUNTAIN,I_MAN,-1,-1,-1,-1, -1, -1);
+	ModifyTerrainRaces(R_ISLAND_SWAMP,I_MAN,-1,-1,-1,-1, -1, -1);
 
 	/* Limit the resources on the islands and remove fish */
 	ModifyTerrainItems(R_OCEAN, -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0);

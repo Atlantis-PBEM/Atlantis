@@ -191,8 +191,8 @@ void ARegion::SetupPop()
     }
 
     race = -1;
-    while (race == -1) {
-        switch (getrandom(IsCoastal() ? 5 : 3)) {
+    while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
+        switch (getrandom(IsCoastal() ? 7 : 4)) {
         case 0:
             race = typer->race1;
             break;
@@ -202,12 +202,17 @@ void ARegion::SetupPop()
         case 2:
             race = typer->race3;
             break;
-        case 3:
+		case 3:
+			race = typer->race4;
+        case 4:
             race = typer->coastalrace1;
             break;
-        case 4:
+        case 5:
             race = typer->coastalrace2;
             break;
+		case 6:
+			race = typer->coastalrace3;
+			break;
         }
     }
 
@@ -723,10 +728,7 @@ void ARegion::LairCheck()
 
     TerrainType *tt = &TerrainDefs[ type ];
 
-    if( tt->lair1 == -1 )
-    {
-        return;
-    }
+    if( tt->lair1 == -1 ) return;
 
 	if(!(ObjectDefs[tt->lair1].flags & ObjectType::DISABLED)) {
 		if( check < tt->lairChance ) {
@@ -736,10 +738,7 @@ void ARegion::LairCheck()
 		check -= tt->lairChance;
 	}
 
-    if( tt->lair2 == -1 )
-    {
-        return;
-    }
+    if( tt->lair2 == -1 ) return;
 
 	if(!(ObjectDefs[tt->lair2].flags & ObjectType::DISABLED)) {
 		if( check < tt->lairChance ) {
@@ -749,10 +748,7 @@ void ARegion::LairCheck()
 		check -= tt->lairChance;
 	}
 
-    if( tt->lair3 == -1 )
-    {
-        return;
-    }
+    if( tt->lair3 == -1 ) return;
 
 	if(!(ObjectDefs[tt->lair3].flags & ObjectType::DISABLED)) {
 		if( check < tt->lairChance ) {
@@ -762,14 +758,29 @@ void ARegion::LairCheck()
 		check -= tt->lairChance;
 	}
 
-    if( tt->lair4 == -1 )
-    {
-        return;
-    }
+    if( tt->lair4 == -1 ) return;
 
 	if(!(ObjectDefs[tt->lair4].flags & ObjectType::DISABLED)) {
 		if( check < tt->lairChance ) {
 			MakeLair( tt->lair4 );
+			return;
+		}
+	}
+
+    if( tt->lair5 == -1 ) return;
+
+	if(!(ObjectDefs[tt->lair5].flags & ObjectType::DISABLED)) {
+		if( check < tt->lairChance ) {
+			MakeLair( tt->lair5 );
+			return;
+		}
+	}
+
+    if( tt->lair6 == -1 ) return;
+
+	if(!(ObjectDefs[tt->lair6].flags & ObjectType::DISABLED)) {
+		if( check < tt->lairChance ) {
+			MakeLair( tt->lair6 );
 			return;
 		}
 	}

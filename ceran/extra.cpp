@@ -202,7 +202,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_GOBLINMAN);
 	EnableItem(I_HOBBIT);
 	EnableItem(I_GNOLL);
-	EnableItem(I_DROW);
+	EnableItem(I_DROWMAN);
 	EnableItem(I_MERC);
 	EnableItem(I_TITAN);
 	EnableItem(I_AMAZON);
@@ -211,15 +211,17 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_HIGHLANDER);
 	EnableItem(I_MINOTAUR);
 
-	ModifyTerrainRaces(R_NEXUS, I_FAIRY, -1, -1, -1, -1);
+	ModifyTerrainRaces(R_NEXUS, I_FAIRY, -1, -1, -1, -1, -1, -1);
     ModifyTerrainItems(R_NEXUS, I_HERBS, 100, 20, I_ROOTSTONE, 100, 10,
 			I_MITHRIL, 100, 10, I_YEW, 100, 10, I_IRONWOOD, 100, 10);
 	ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 
-	ModifyTerrainRaces(R_TUNDRA,I_ESKIMO,I_ICEDWARF,I_GNOLL,I_SEAELF,I_VIKING);
-	ModifyTerrainRaces(R_DESERT,I_NOMAD,I_DESERTDWARF,-1,I_BARBARIAN,I_VIKING);
-	ModifyTerrainRaces(R_FOREST,I_WOODELF,I_VIKING,I_HIGHELF,I_SEAELF,
-			I_WOODELF);
+	ModifyTerrainRaces(R_TUNDRA,I_ESKIMO,I_ICEDWARF,I_GNOLL,-1,
+			I_SEAELF,I_VIKING, -1);
+	ModifyTerrainRaces(R_DESERT,I_NOMAD,I_DESERTDWARF,-1, -1,
+			I_BARBARIAN,I_VIKING, -1);
+	ModifyTerrainRaces(R_FOREST,I_WOODELF,I_VIKING,I_HIGHELF,-1,
+			I_SEAELF, I_WOODELF, -1);
 
 	return;
 }

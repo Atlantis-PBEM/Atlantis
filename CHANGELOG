@@ -76,6 +76,14 @@ Changes from 4.0.5 -> 4.0.6
       Alsen).  Also added a CITY_RENAME_COST, which if not zero is used as
       a multiply against the city level (1 == village, 2==town, 3==city)
       as a cost for renaming the city.
+   -- Added more room for monster lairs (each terrain can now host up to
+      1 of 6 instead of 1 of 4 different types of lairs).
+   -- NEW RULE: A unit cannot steal from or assassinate a unit which it
+      it unable to see.  A unit may not GIVE items to a unit it cannot see
+      unless that unit's faction sees the giver as friendly.
+   -- Added room for one additional coastal and one additional non-coastal
+      race in each of the terrain type definitions.
+   -- Fixed bug with a reversed sign in road building.
 
 TODO
 ----------------

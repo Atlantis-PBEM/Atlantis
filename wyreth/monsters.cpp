@@ -34,16 +34,16 @@ int Game::MakeWMon( ARegion *pReg )
 {
 	if(!Globals->WANDERING_MONSTERS_EXIST) return 0;
 
-	if (TerrainDefs[pReg->type].wmonfreq == 0) {
-        return 0;
-    }
+	if (TerrainDefs[pReg->type].wmonfreq == 0) return 0;
 
 	int montype = TerrainDefs[ pReg->type ].smallmon;
-	if (getrandom(2))
+	if (getrandom(2) && (TerrainDefs[pReg->type].humanoid != -1))
 		montype = TerrainDefs[ pReg->type ].humanoid;
 	if (TerrainDefs[ pReg->type ].bigmon != -1 && !getrandom(8)) {
 		montype = TerrainDefs[ pReg->type ].bigmon;
 	}
+	if((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
+		return 0;
 
 	int mondef = ItemDefs[montype].index;
 
@@ -73,7 +73,13 @@ void Game::MakeLMon( Object *pObj )
 	if (montype == I_CENTAUR) {
 		montype = TerrainDefs[ pObj->region->type ].humanoid;
 	}
+
+	if((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
+	   return;	
+
 	int mondef = ItemDefs[montype].index;
+
+
 	Faction *monfac = GetFaction( &factions, 2 );
 	Unit *u = GetNewUnit( monfac, 0 );
 	if (montype == I_IMP) {

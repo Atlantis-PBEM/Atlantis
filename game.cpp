@@ -1317,7 +1317,15 @@ void Game::EditGameUnitSkills( Unit *pUnit )
                 //
                 // xxxxx - what about magic???
                 //
+				if((SkillDefs[skillNum].flags & SkillType::MAGIC) &&
+						(pUnit->type != U_MAGE)) {
+					pUnit->type = U_MAGE;
+				}
                 pUnit->skills.SetDays( skillNum, days * pUnit->GetMen() );
+				int lvl = pUnit->GetRealSkill(skillNum);
+				if(lvl > pUnit->faction->skills.GetDays(skillNum)) {
+					pUnit->faction->skills.SetDays(skillNum, lvl);
+				}
             }
             while( 0 );
             delete pToken;
@@ -1515,16 +1523,34 @@ void Game::ViewFactions()
         ((Faction *) elem)->View();
 }
 
+void Game::SetupUnitSeq()
+{
+	int max = 0;
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *)elem;
+				if(u && u->num > max) max = u->num;
+			}
+		}
+	}
+	unitseq = max+1;
+}
+
 void Game::SetupUnitNums()
 {
-    delete ppUnits;
-    ppUnits = new Unit *[ unitseq + 10000 ];
+    if(ppUnits) delete ppUnits;
+
+	SetupUnitSeq();
+
+	unsigned int maxppunits = unitseq+10000;
+
+    ppUnits = new Unit *[ maxppunits ];
     
-    int i;
-    for( i = 0; i < unitseq + 10000; i++ )
-    {
-        ppUnits[ i ] = 0;
-    }
+    unsigned int i;
+    for( i = 0; i < maxppunits ; i++ ) ppUnits[ i ] = 0;
 
     forlist(&regions) {
         ARegion * r = (ARegion *) elem;
@@ -1532,15 +1558,34 @@ void Game::SetupUnitNums()
             Object * o = (Object *) elem;
             forlist(&o->units) {
                 Unit *u = (Unit *) elem;
-                ppUnits[ u->num ] = u;
-            }
-        }
-    }
+				i = u->num;
+				if((i > 0) && (i < unitseq+1000)) {
+					if(!ppUnits[i])
+						ppUnits[ u->num ] = u;
+					else {
+						Awrite(AString("Error: Unit number ") + i +
+								" multiply defined.");
+						if((unitseq > 0) && (unitseq < maxppunits)) {
+							u->num = unitseq;
+							ppUnits[unitseq++] = u;
+						}
+					}
+				} else {
+					Awrite(AString("Error: Unit number ")+i+
+							" out of range.");
+					if((unitseq > 0) && (unitseq < maxppunits)) {
+						u->num = unitseq;
+						ppUnits[unitseq++] = u;
+					}
+				}
+			}
+		}
+	}
 }
 
 Unit *Game::GetNewUnit( Faction *fac, int an )
 {
-    int i;
+    unsigned int i;
     for( i = 1; i < unitseq; i++ )
     {
         if( !ppUnits[ i ] )
@@ -1587,7 +1632,7 @@ void Game::CountAllMages()
 void Game::UnitFactionMap()
 {
     Aoutfile f;
-    int i;
+    unsigned int i;
     Unit *u;
 
     Awrite("Opening units.txt");
@@ -2064,19 +2109,24 @@ void Game::DisableObject(int obj)
 	ObjectDefs[obj].flags |= ObjectType::DISABLED;
 }
 
-void Game::ModifyTerrainRaces(int t, int r1, int r2, int r3, int cr1, int cr2)
+void Game::ModifyTerrainRaces(int t, int r1, int r2, int r3, int r4,
+		int cr1, int cr2, int cr3)
 {
 	if(t < 0 || t > (R_NUM -1)) return;
 	if(r1 > NITEMS-1) r1 = -1;
 	if(r2 > NITEMS-1) r2 = -1;
 	if(r3 > NITEMS-1) r3 = -1;
+	if(r4 > NITEMS-1) r4 = -1;
 	if(cr1 > NITEMS-1) cr1 = -1;
 	if(cr2 > NITEMS-1) cr2 = -1;
+	if(cr3 > NITEMS-1) cr3 = -1;
 	TerrainDefs[t].race1 = r1;
 	TerrainDefs[t].race2 = r2;
 	TerrainDefs[t].race3 = r3;
+	TerrainDefs[t].race4 = r4;
 	TerrainDefs[t].coastalrace1 = cr1;
 	TerrainDefs[t].coastalrace2 = cr2;
+	TerrainDefs[t].coastalrace3 = cr3;
 }
 
 void Game::ModifyTerrainItems(int t, int p1, int c1, int a1,
@@ -2131,7 +2181,8 @@ void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum)
 	TerrainDefs[t].humanoid = hum;
 }
 
-void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4)
+void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4,
+						int l5, int l6)
 {
 	if(t < 0 || t > (R_NUM -1)) return;
 	if(chance < 0 || chance > 100) chance = 0;
@@ -2144,6 +2195,8 @@ void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4)
 	TerrainDefs[t].lair2 = l2;
 	TerrainDefs[t].lair3 = l3;
 	TerrainDefs[t].lair4 = l4;
+	TerrainDefs[t].lair5 = l5;
+	TerrainDefs[t].lair6 = l6;
 }
 
 void Game::ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move)

@@ -123,6 +123,7 @@ class WeaponType
 public:
     enum {
         NEEDSKILL = 0x1,
+		NEEDMOUNT = 0x2,
         RANGED = 0x4,
         NODEFENSE = 0x8,
         GOODARMOR = 0x10,

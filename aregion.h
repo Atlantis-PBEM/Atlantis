@@ -84,8 +84,10 @@ public:
     int race1;
     int race2;
     int race3;
-    int coastalrace1;
-    int coastalrace2;
+	int race4;
+	int coastalrace1;
+	int coastalrace2;
+	int coastalrace3;
     int wmonfreq;
     int smallmon;
     int bigmon;
@@ -95,6 +97,8 @@ public:
     int lair2;
     int lair3;
     int lair4;
+	int lair5;
+	int lair6;
 };
 
 extern TerrainType * TerrainDefs;

@@ -390,7 +390,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
     AString job;
     if (obj->IsRoadUsable())
     {
-        int maintenanceMax = (MAX_ROAD_STATE + 3 + obj->incomplete) / 4;
+        int maintenanceMax = -((MAX_ROAD_STATE + 3 + obj->incomplete) / 4);
         if (num > maintenanceMax) num = maintenanceMax;
         if (itn < num) num = itn;
         job = " maintenance ";
@@ -663,20 +663,21 @@ void Game::RunAProduction(ARegion * r,Production * p)
     }
 }
 
-void Game::RunStudyOrders(ARegion * r) {
-  forlist((&r->objects)) {
-    Object * obj = (Object *) elem;
-    forlist((&obj->units)) {
-      Unit * u = (Unit *) elem;
-      if (u->monthorders) {
-	if (u->monthorders->type == O_STUDY) {
-	  Do1StudyOrder(u,obj);
-	  delete u->monthorders;
-	  u->monthorders = 0;
+void Game::RunStudyOrders(ARegion * r)
+{
+	forlist((&r->objects)) {
+		Object * obj = (Object *) elem;
+		forlist((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			if (u->monthorders) {
+				if (u->monthorders->type == O_STUDY) {
+					Do1StudyOrder(u,obj);
+					delete u->monthorders;
+					u->monthorders = 0;
+				}
+			}
+		}
 	}
-      }
-    }
-  }
 }
 
 void Game::Do1StudyOrder(Unit *u,Object *obj)
