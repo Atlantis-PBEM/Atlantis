@@ -1155,8 +1155,8 @@ void ARegion::Grow()
 	
 	// diff is the amount we can grow?
 	int diff = tarpop - population;
-	int adiff = diff;
-	if(adiff < 0) adiff = adiff * (- 1);
+	int adiff = abs(diff);
+	//if(adiff < 0) adiff = adiff * (- 1);
 	
 	/* Adjust basepop? 
 	// raise basepop depending on production
@@ -1176,27 +1176,28 @@ void ARegion::Grow()
 	*/
 	
 	// debug strings
-	Awrite(AString("immigrants = ") + immigrants);
-	Awrite(AString("emigrants = ") + emigrants);
-	Awrite(AString("adiff = ") + adiff);
-	Awrite(AString("diff = ") + diff);
-	Awrite(AString("habitat = ") + habitat);
+	//Awrite(AString("immigrants = ") + immigrants);
+	//Awrite(AString("emigrants = ") + emigrants);
+	//Awrite(AString("adiff = ") + adiff);
+	//Awrite(AString("diff = ") + diff);
+	//Awrite(AString("habitat = ") + habitat);
 	
 	// Limit excessive growth at low pop / hab ratios
 	// and avoid overflowing
 	// What are grow2 and grow representing? Maybe these formulae
 	// could be broken up a bit more and commented?
 	long int grow2 = 5 * ((long int) habitat + (3 * (long int) adiff));
-	Awrite(AString("grow2 = ") + (unsigned int) grow2); // debug string
+	//Awrite(AString("grow2 = ") + (unsigned int) grow2); // debug string
 	
 	// Ant: In the following formula, dgrow is almost always 0!
-	long int dgrow = 	((long int) diff / grow2) * 
-						((long int) habitat / grow2);
-	Awrite(AString("dgrow = ") + (unsigned int) dgrow); // debug string
+	long int dgrow = ((long int) adiff * (long int) habitat ) / grow2;
+	//if(diff < 0) dgrow = dgrow * (- 1);
+	//Awrite(AString("dgrow = ") + (unsigned int) dgrow); // debug string
 	
 	// long int dgrow = ((long int) diff) * ((long int) habitat)
 	//	/ (5 * (long int) ((long int) habitat + 3 * (long int) abs(diff)));
-	growpop += (int) dgrow;
+	if (diff < 0) growpop -= (int) dgrow;
+	if (diff > 0) growpop += (int) dgrow;
 	/*
 		Awrite(AString("growpop = ") + growpop);
 		Awrite(AString("grow2 = ") + (unsigned int) grow2);

@@ -40,6 +40,7 @@ if len(args) == 1 or "--help" in args:
     print "  --cvs            Download up-to-date sources from the CVS"
     print "  --make           Make a new version of the code"
     print "  --test           Test the code"
+    print "  --continue       Continue from a previous run"
     print "  --game=<name>    Make a particular version of the game"
     print "                   (Standard is the default)"
     print "  --all            A combination of the cvs, make and test options"
@@ -93,57 +94,70 @@ if "--make" in args or "--all" in args:
         print "There was some problem with building the game rules into HTML"
     os.chdir("smoketest")
 
-if not ("--test" in args or "--all" in args):
+if not ("--test" in args or "--continue" in args or "--all" in args):
     print "Skipping testing ... like a real man"
     sys.exit(0)
 
 # Now, we test
-# start by preparing the testing directory
-os.system('rm -r testing')
-os.mkdir("testing")
-os.chdir("testing")
+if "--continue" not in args:
+    # start by preparing the testing directory
+    os.system('rm -r testing')
+    os.mkdir("testing")
+    os.chdir("testing")
+    
+    # now copy the game binary and html file
+    os.system('cp ../../'+gamename+'/'+gamename+' .')
+    os.system('cp ../../'+gamename+'/html/'+gamename+'.html .')
+    
+    # now run some tests...
+    print "You'll need to feed in the values for the size of the game map"
+    os.system('./'+gamename+' new')
+    
+    if os.access('game.out', os.F_OK) != 1:
+        print "There was some problem with writing the game.out file"
+        sys.exit(3)
+    if os.access('players.out', os.F_OK) != 1:
+        print "There was some problem with writing the players.out file"
+        sys.exit(3)
 
-# now copy the game binary and html file
-os.system('cp ../../'+gamename+'/'+gamename+' .')
-os.system('cp ../../'+gamename+'/html/'+gamename+'.html .')
+    os.rename('game.out','game.in')
+    os.rename('players.out','players.in')
 
-# now run some tests...
-print "You'll need to feed in the values for the size of the game map"
-os.system('./'+gamename+' new')
 
-if os.access('game.out', os.F_OK) != 1:
-    print "There was some problem with writing the game.out file"
-    sys.exit(3)
-if os.access('players.out', os.F_OK) != 1:
-    print "There was some problem with writing the players.out file"
-    sys.exit(3)
-
-print "Running "+str(numturns)+" turns.."
-
-os.rename('game.out','game.in')
-os.rename('players.out','players.in')
-
-# 7. add players into the players.in file
-players = []
-for index in range(numplayers):
-    players.append('Player '+str(index+1))
-
-playersfile = open('players.in','a+')
-for player in players:
-    entry = "Faction: new\nName: "+player+"\nEmail: nobody@example.com\nPassword: "
-    entry += player + "\nLastorders: 0\n"
-    playersfile.write(entry)
-playersfile.close()
+    # 7. add players into the players.in file
+    players = []
+    for index in range(numplayers):
+        players.append('Player '+str(index+1))
+    
+    playersfile = open('players.in','a+')
+    for player in players:
+        entry = "Faction: new\nName: "+player+"\nEmail: nobody@example.com\nPassword: "
+        entry += player + "\nLastorders: 0\n"
+        playersfile.write(entry)
+    playersfile.close()
+else:
+    os.chdir("testing")
 
 # Now we can start looping and running turns.
-thisturn = 0
+print "Running "+str(numturns)+" turns.."
+
+if "--continue" in args:
+    # get the current turn from players.in
+    tempfile = open( 'players.in', 'r')
+    ignored = tempfile.readline()
+    ignored = tempfile.readline()
+    thisturn = int( tempfile.readline()[12:] )
+    tempfile.close()
+    numturns = thisturn + numturns
+else:
+	thisturn = 0
 
 while thisturn <= numturns:
     print "Turn",thisturn,"of",numturns
     
     # Move turn reports and templates
     if os.access(str(thisturn), os.F_OK) == 1:
-        os.system('rm -r '+str(thisturn))    
+        os.system('rm -r '+str(thisturn))
     os.system('mkdir '+str(thisturn))
     os.system('mv report.* '+str(thisturn))
     os.system('mv template.* '+str(thisturn))

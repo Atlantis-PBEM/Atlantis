@@ -8,15 +8,18 @@ directiondict = {'North':'n', 'Northeast':'ne', 'Northwest':'nw',
 attitudes = ['hostile', 'unfriendly', 'neutral', 'friendly', 'ally',]
                 
 def generateturn(report, template):
-    """Given a report and a template, return a set of orders as a string."""
+    """Given a report and a template, return a set of orders 
+	   as a string."""
     orders = ''
     maxfactionfound = 0
     
-    # Need to concatenate lines in the report if they don't have a . on the end!
+    # Need to concatenate lines in the report if they don't 
+    # have a . on the end!
     tempreport = []
     temp = ''
     for line in report:
-        if len(line) > 2 and (line[-2] == '.' or line[-2] == '-' or line[-2] == ':'): # -2 since we'll have \n's at the end
+        if len(line) > 2 and line[-2] in ['.','-',':']: 
+        	# -2 since we'll have \n's at the end
             withoutspaces = re.sub('\s+',' ',temp+line)
             tempreport.append(withoutspaces)
             temp=''
@@ -200,7 +203,7 @@ def generateturn(report, template):
                 try:
                     temp,rest = report[counter].split(' : ', 1)
                     temp = temp.strip()
-                    print ">"+temp+"<   >"+rest+"<"
+                    #print ">"+temp+"<   >"+rest+"<"
                     if temp in directiondict.keys():
                         #print "Found an exit!", temp
                         # NB: this assumes that terrain is one word...
@@ -370,20 +373,20 @@ def generateturn(report, template):
                 orders += "move "+directions[temp]+" "+directions[temp2]+"\n"
             #elif random.random() >= 0.6:
             #    orders += "work\n"
-                print "Moving..."
+                #print "Moving..."
             else:
-                print unitbynum[unitnumber]['items']
-                print unitbynum[unitnumber]['skills']
+                #print unitbynum[unitnumber]['items']
+                #print unitbynum[unitnumber]['skills']
                 combat = -1
                 for item in unitbynum[unitnumber]['skills']:
                     if item.strip().startswith('combat'):
-                        print "Found combat skill..."
+                        #print "Found combat skill..."
                         combskill = re.search(r'\((\d+)\)', item)
                         if combskill != None:
-                            print "Found combat skill: ",combskill.group(0)[1:-1]
+                            #print "Found combat skill: ",combskill.group(0)[1:-1]
                             combat = int(combskill.group(0)[1:-1])
-                            print "Found combat skill: ",combat
-                print "Combat skill is ", combat
+                            #print "Found combat skill: ",combat
+                #print "Combat skill is ", combat
                 if combat == -1:
                     orders += ";I don't have a combat skill!\n"
                 else:
