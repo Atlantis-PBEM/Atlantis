@@ -346,7 +346,18 @@ public:
 	//  land mass will be much lower than this percentage)
 	// suggested value: 10, 25, 50+ it's really a matter of taste
 	int ARCHIPELAGO;
+	
+	// Reduce/Sever Land Bridges: this is the base chance
+	// that thin strips of land will be 'cut'. This chance is
+	// doubled when a region has exactly four adjacent sea
+	// areas. (default is 30, 0 means no removal)
+	int SEVER_LAND_BRIDGES;
 
+	// Maximum Size of inland seas to fill in. WARNING: game
+	// creation time will rise exponentially with this value.
+	// Recommended: 8-12
+	int SEA_LIMIT;
+	
 	// Chance for Lake Creation
 	// Setting LAKES_EXIST is the chance that
 	// such regions will end up as lakes. The chance

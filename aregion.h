@@ -255,6 +255,7 @@ class ARegion : public AListElem
 		int TownHabitat();
 		int Development();
 		int TownDevelopment();
+		int CheckSea(int, int, int);
 
 		int CountWMons();
 		int IsGuarded();

@@ -962,6 +962,22 @@ void ARegion::CheckTownIncrease()
 	town->pop = town->basepop * 2 / 3;
 }
 
+int ARegion::CheckSea(int dir, int range, int remainocean)
+{
+	if (type != R_OCEAN) return 0;
+	if (range-- < 1) return 1;
+	for (int d2 = -1; d2< 2; d2++) {
+		int direc = dir + d2;
+		if (direc < 0) direc = NDIRS - direc;
+		if (direc >= NDIRS) direc = direc - NDIRS;
+		ARegion *newregion = neighbors[direc];
+		if (!newregion) continue;
+		remainocean += newregion->CheckSea(dir, range, remainocean);
+		if (remainocean) break;
+	}
+	return remainocean;
+}
+
 int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range)
 {
 	ARegionPtr *rn = new ARegionPtr();
@@ -3598,60 +3614,17 @@ void ARegionList::MakeOneIsland(ARegionArray *pRegs, int xx, int yy)
 
 void ARegionList::CleanUpWater(ARegionArray *pRegs)
 {
-	// check all ocean regions for inland sea status... repeat six times!
-	// it's an ugly set of loops, but it works!
 	Awrite("Converting Scattered Water");
-	for (int ctr = 0; ctr < 6; ctr++) {
+	for (int ctr = 0; ctr < Globals->SEA_LIMIT+1; ctr++) {
 		for(int i = 0; i < pRegs->x; i++) {
 			for(int j = 0; j < pRegs->y; j++) {
 				ARegion *reg = pRegs->GetRegion(i, j);
 				int remainocean = 0;
 				if((!reg) || (reg->type != R_OCEAN)) continue;
 				for (int d = 0; d < NDIRS; d++) {
-					int direc = d;
-					ARegion *newregion1 = reg->neighbors[d];
-					if ((!newregion1) || (newregion1->type != R_OCEAN))
-						continue;
-					for (int d1 = -1; d1 < 2; d1++) {
-						direc = d + d1;
-						if (direc < 0) direc = NDIRS - direc;
-						if (direc >= NDIRS) direc = direc - NDIRS;
-						ARegion *newregion2 = newregion1->neighbors[direc];
-						if ((!newregion2) || (newregion2->type != R_OCEAN))
-							continue;
-						for (int d2 = -1; d2< 2; d2++) {
-							direc = d + d2;
-							if (direc < 0) direc = NDIRS - direc;
-							if (direc >= NDIRS) direc = direc - NDIRS;
-							ARegion *newregion3 = newregion2->neighbors[direc];
-							if ((!newregion3) ||
-									(newregion3->type != R_OCEAN))
-								continue;
-							for (int d3 = -1; d3< 2; d3++) {
-								direc = d + d3;
-								if (direc < 0) direc = NDIRS - direc;
-								if (direc >= NDIRS) direc = direc - NDIRS;
-								ARegion *newregion4 =
-									newregion3->neighbors[direc];
-								if ((!newregion4) ||
-										(newregion4->type != R_OCEAN))
-									continue;
-								for (int d4 = -1; d4< 2; d4++) {
-									direc = d + d4;
-									if (direc < 0) direc = NDIRS - direc;
-									if (direc >= NDIRS) direc = direc - NDIRS;
-									ARegion *newregion5 =
-										newregion4->neighbors[direc];
-									if ((!newregion5) ||
-											(newregion5->type != R_OCEAN))
-										continue;
-									remainocean = 1;
-								}
-							}
-						}
-					}
+					remainocean += reg->CheckSea(d, Globals->SEA_LIMIT, remainocean);
 				}
-				if (remainocean) continue;
+				if (remainocean > 0) continue;
 				reg->wages = 0;
 				if (getrandom(100) < Globals->LAKES_EXIST) {
 					reg->type = R_LAKE;
@@ -3727,7 +3700,7 @@ void ARegionList::SeverLandBridges(ARegionArray *pRegs)
 			if ((!reg) || (TerrainDefs[reg->type].similar_type == R_OCEAN))
 				continue;
 			if (reg->IsCoastal() != 4) continue;
-			int tidych = 30;
+			int tidych = Globals->SEVER_LAND_BRIDGES;
 			for (int d = 0; d < NDIRS; d++) {
 				ARegion *newregion = reg->neighbors[d];
 				if ((!newregion) ||
