@@ -22,12 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date
-// ----
-// 2000/MAR/16 Davis Kulis	Added a new reporting Template.
-//							Added this file.
-// 2001/Feb/18 Joseph Traub   Added support for Conquest map types
+
 #include "game.h"
 #include "gamedata.h"
 #include <stdio.h>
@@ -36,41 +31,41 @@
 #endif
 #include <string.h>
 
-#define LINE_WIDTH		 70
-#define MAP_WIDTH		  23
-#define TMPL_MAP_WIDTH	 20
-#define TMPL_MAP_OFS		1
-#define FILL_SIZE		   6
+#define LINE_WIDTH 70
+#define MAP_WIDTH 23
+#define TMPL_MAP_WIDTH 20
+#define TMPL_MAP_OFS 1
+#define FILL_SIZE 6
 #define TEMPLATE_MAX_LINES 13
 
 static void TrimWrite(Areport *f, char *buffer);
 
 static char *TemplateMap[] = {
  //12345678901234567890
-  "		____		",   // 1
-  "nw	 /	\\	 ne",  // 2
-  "  ____/	  \\____  ",  // 3
-  " /	\\	  /	\\ ", // 4
-  "/	  \\____/	  \\", // 5
-  "\\	  /	\\	  /", // 6
-  " \\____/	  \\____/ ", // 7
-  " /	\\	  /	\\ ", // 8
-  "/	  \\____/	  \\", // 9
-  "\\	  /	\\	  /", // 10
-  " \\____/	  \\____/ ", // 11
-  "	  \\	  /	  ",  // 12
-  "sw	 \\____/	 se"   // 13
+  "        ____        ",   // 1
+  "nw     /    \\     ne",  // 2
+  "  ____/      \\____  ",  // 3
+  " /    \\      /    \\ ", // 4
+  "/      \\____/      \\", // 5
+  "\\      /    \\      /", // 6
+  " \\____/      \\____/ ", // 7
+  " /    \\      /    \\ ", // 8
+  "/      \\____/      \\", // 9
+  "\\      /    \\      /", // 10
+  " \\____/      \\____/ ", // 11
+  "      \\      /      ",  // 12
+  "sw     \\____/     se"   // 13
 };
 
 static int dircrd[] = {
- // X	Y
-   8-1,  7-1,   // center
-   8-1,  3-1,   // N
-  14-1,  5-1,   // NE
-  14-1,  9-1,   // SE
-   8-1, 11-1,   // S
-   2-1,  9-1,   // SW
-   2-1,  5-1	// NW
+ // X    Y
+   8-1,  7-1, // center
+   8-1,  3-1, // N
+  14-1,  5-1, // NE
+  14-1,  9-1, // SE
+   8-1, 11-1, // S
+   2-1,  9-1, // SW
+   2-1,  5-1  // NW
 };
 
 
@@ -84,8 +79,8 @@ static char *ter_fill[] = {
  " ~ ~  ",
 
  // plain
- "	  ",
- "	  ",
+ "      ",
+ "      ",
 
  // forest
  "  ^ ^ ",
@@ -120,8 +115,8 @@ static char *ter_fill[] = {
  " ^ ^  ",
 
  // tunnels
- "	  ",
- "	  ",
+ "      ",
+ "      ",
 
  // nexus
  " !!!! ",
@@ -129,8 +124,8 @@ static char *ter_fill[] = {
 
  // For conquest
  // Island Plain
- "	  ",
- "	  ",
+ "      ",
+ "      ",
 
  // Island swamp
  "  v v ",
@@ -143,14 +138,14 @@ static char *ter_fill[] = {
  // For Ceran terrains
 
  // plain1
- "	  ",
- "	  ",
+ "      ",
+ "      ",
  // plain2
- "	  ",
- "	  ",
+ "      ",
+ "      ",
  // plain3
- "	  ",
- "	  ",
+ "      ",
+ "      ",
 
  // forest1
  "  ^ ^ ",
@@ -264,11 +259,11 @@ static char *ter_fill[] = {
  " ^ ^  ",
 
  // tunnels1
- "	  ",
- "	  ",
+ "      ",
+ "      ",
  // tunnels2
- "	  ",
- "	  ",
+ "      ",
+ "      ",
 
  // grotto
  "  . . ",
@@ -277,8 +272,8 @@ static char *ter_fill[] = {
  "  ^ ^ ",
  " ^ ^  ",
  // chasm
- "	  ",
- "	  ",
+ "      ",
+ "      ",
  // grotto1
  "  . . ",
  " . .  ",
@@ -286,8 +281,8 @@ static char *ter_fill[] = {
  "  ^ ^ ",
  " ^ ^  ",
  // chasm1
- "	  ",
- "	  ",
+ "      ",
+ "      ",
 
  // volcano
  " /\\/\\ ",
@@ -302,10 +297,8 @@ static char *ter_fill[] = {
 // NEW FUNCTION DK 2000.03.07,
 // converted WriteReport
 //
-void ARegion::WriteTemplateHeader(Areport *f,
-								   Faction *fac,
-								   ARegionList *pRegs,
-								   int month)
+void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
+		ARegionList *pRegs, int month)
 {
 
 	f->PutStr("");
@@ -395,12 +388,12 @@ void ARegion::WriteTemplateHeader(Areport *f,
 
 				if (m->amount == -1) {
 					sprintf(data, "%s unlim %4s @ %3i",
-						(any ? "	" : "Want"),
+						(any ? "    " : "Want"),
 						ItemDefs[m->item].abr,
 						m->price);
 				} else {
 					sprintf(data, "%s %5i %4s @ %3i",
-						(any ? "	" : "Want"),
+						(any ? "    " : "Want"),
 						m->amount,
 						ItemDefs[m->item].abr,
 						m->price);
@@ -431,12 +424,12 @@ void ARegion::WriteTemplateHeader(Areport *f,
 
 				if (m->amount == -1) {
 					sprintf(data, "%s unlim %4s @ %3i",
-						(any ? "	" : "Sell"),
+						(any ? "    " : "Sell"),
 						ItemDefs[m->item].abr,
 						m->price);
 				} else {
 					sprintf(data, "%s %5i %4s @ %3i",
-						(any ? "	" : "Sell"),
+						(any ? "    " : "Sell"),
 						m->amount,
 						ItemDefs[m->item].abr,
 						m->price);
@@ -474,11 +467,11 @@ void ARegion::WriteTemplateHeader(Areport *f,
 
 		   if (p->amount == -1) {
 			   sprintf(data, "%s unlim %4s",
-				   (any ? "	" : "Prod"),
+				   (any ? "    " : "Prod"),
 				   ItemDefs[p->itemtype].abr);
 		   } else {
 			   sprintf(data, "%s %5i %4s",
-				   (any ? "	" : "Prod"),
+				   (any ? "    " : "Prod"),
 				   p->amount,
 				   ItemDefs[p->itemtype].abr);
 		   }
