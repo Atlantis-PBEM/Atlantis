@@ -203,3 +203,14 @@ Changes from 4.0.6 -> 4.0.7
       GM to give a faction custom-made units, or to give existing units of
       that faction various skills or items (or to take them away).  It also
       allows the GM to force some orders to be executed by specific units.
+   -- Added a new itemflag NOMARKET, which prevents an item from ever showing
+      up in a city market (either wanted or for sale).
+   -- Added code to allow magic items into the markets on world creation.  All
+      magic items currently are NOMARKET, so there will by default be no
+      change.
+   -- Moved some items from NORMAL to ADVANCED (lance and pike) and moved
+      some items from MAGIC to ADVANCED (and added NOMARKET) (admantium items,
+      improved mithril armor, super bows).
+   -- Modified Axes from having Hammers boost their production to having
+      Axes boost their production by default.  This makes them consistant with
+      other items made from wood rather than being the exception.

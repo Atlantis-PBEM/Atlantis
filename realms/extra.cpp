@@ -188,5 +188,7 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_GEMCUTTING);
 	}
 
+	// XXX -- This is just here to preserve existing behavior
+	ModifyItemProductionBooster(I_AXE, I_HAMMER, 1);
 	return;
 }

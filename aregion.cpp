@@ -296,49 +296,34 @@ int ARegion::GetNearestProd(int item)
 
 void ARegion::SetupCityMarket()
 {
-    int numtrade = 0;
-    int i;
-    for (i=0; i<NITEMS; i++)
-    {
+	int numtrade = 0;
+	int i;
+	for (i=0; i<NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if(ItemDefs[i].flags & ItemType::NOMARKET) continue;
 
-        int j;
-        if( ItemDefs[ i ].type & IT_NORMAL )
-        {
+		int j;
+		if( ItemDefs[ i ].type & IT_NORMAL ) {
+			if (i==I_SILVER) continue;
+			if (i==I_GRAIN || i==I_LIVESTOCK || i==I_FISH) {
+				if (i==I_FISH && !IsCoastal()) continue;
 
-            if (i==I_SILVER) continue;
-            if (i==I_GRAIN || i==I_LIVESTOCK || i==I_FISH)
-            {
-                if (i==I_FISH && !IsCoastal()) continue;
+				int amt = Globals->CITY_MARKET_NORMAL_AMT;
+				int price;
 
-                int amt = Globals->CITY_MARKET_NORMAL_AMT;
-                int price;
+				if( Globals->RANDOM_ECONOMY ) {
+					amt += getrandom( amt );
+					price = (ItemDefs[i].baseprice * (100 + getrandom(50))) /
+						100;
+				} else {
+					price = ItemDefs[ i ].baseprice;
+				}
 
-                if( Globals->RANDOM_ECONOMY )
-                {
-                    amt += getrandom( amt );
-                    price = (ItemDefs[i].baseprice * (100 + getrandom(50))) /
-                        100;
-                }
-                else
-                {
-                    price = ItemDefs[ i ].baseprice;
-                }
-
-                Market * m = new Market
-                    (M_SELL,
-                     i,
-                     price,
-                     amt,
-                     population,
-                     population+2000,
-                     amt,
-                     amt*2);
-                markets.Add(m);
-            } 
-            else
-            {
-                if (ItemDefs[i].pInput[0].item == -1) {
+				Market * m = new Market (M_SELL, i, price, amt, population,
+						population+2000, amt, amt*2);
+				markets.Add(m);
+			} else {
+				if (ItemDefs[i].pInput[0].item == -1) {
 					// Check if the product can be produced in the region
 					int canProduce = 0;
 					for(unsigned int c = 0;
@@ -350,269 +335,201 @@ void ARegion::SetupCityMarket()
 						}
 					}
 					if(canProduce) {
-                        //
-                        // This item can be produced in this region, so it
-                        // can possibly be bought here.
-                        //
-                        if (getrandom(2))
-                        {
-                            int amt = Globals->CITY_MARKET_NORMAL_AMT;
-                            int price;
+						//
+						// This item can be produced in this region, so it
+						// can possibly be bought here.
+						//
+						if (getrandom(2)) {
+							int amt = Globals->CITY_MARKET_NORMAL_AMT;
+							int price;
 
-                            if( Globals->RANDOM_ECONOMY )
-                            {
-                                amt += getrandom( amt );
-                                price = (ItemDefs[i].baseprice *
-                                   (150 + getrandom(50))) / 100;
-                            }
-                            else
-                            {
-                                price = ItemDefs[ i ].baseprice;
-                            }
+							if( Globals->RANDOM_ECONOMY ) {
+								amt += getrandom( amt );
+								price = (ItemDefs[i].baseprice *
+										(150 + getrandom(50))) / 100;
+							} else {
+								price = ItemDefs[ i ].baseprice;
+							}
 
-                            Market * m = new Market
-                                ( M_BUY,
-                                  i,
-                                  price,
-                                  0,
-                                  1000+population,
-                                  4000+population,
-                                  0,
-                                  50 + getrandom(50));
-                            markets.Add(m);
-                        }
-                    }
-                    else
-                    {
-                        //
-                        // This item cannot be produced in this region;
-                        // perhaps it is in demand here?
-                        //
-                        if( !getrandom( 6 ))
-                        {
-                            int amt = Globals->CITY_MARKET_NORMAL_AMT;
-                            int price;
+							Market * m = new Market ( M_BUY, i, price, 0,
+									1000+population, 4000+population, 0,
+									50 + getrandom(50));
+							markets.Add(m);
+						}
+					} else {
+						//
+						// This item cannot be produced in this region;
+						// perhaps it is in demand here?
+						//
+						if( !getrandom( 6 )) {
+							int amt = Globals->CITY_MARKET_NORMAL_AMT;
+							int price;
 
-                            if( Globals->RANDOM_ECONOMY )
-                            {
-                                amt += getrandom( amt );
-                                price = (ItemDefs[i].baseprice *
-                                   (100 + getrandom(50))) / 100;
-                            }
-                            else
-                            {
-                                price = ItemDefs[ i ].baseprice;
-                            }
+							if( Globals->RANDOM_ECONOMY ) {
+								amt += getrandom( amt );
+								price = (ItemDefs[i].baseprice *
+										(100 + getrandom(50))) / 100;
+							} else {
+								price = ItemDefs[ i ].baseprice;
+							}
 
-                            Market * m = new Market
-                                ( M_SELL,
-                                  i,
-                                  price,
-                                  0,
-                                  1000+population,
-                                  4000+population,
-                                  0,
-                                  amt );
-                            markets.Add(m);
-                        }
-                    }
-                } 
-                else
-                {
-                    if (!getrandom(3))
-                    {
-                        int amt = Globals->CITY_MARKET_NORMAL_AMT;
-                        int price;
-                        if( Globals->RANDOM_ECONOMY )
-                        {
-                            amt += getrandom( amt );
-                            price = (ItemDefs[i].baseprice *
-                              (100 + getrandom(50))) / 100;
-                        }
-                        else
-                        {
-                            price = ItemDefs[ i ].baseprice;
-                        }
+							Market * m = new Market ( M_SELL, i, price, 0,
+									1000+population, 4000+population, 0, amt );
+							markets.Add(m);
+						}
+					}
+				} else {
+					if (!getrandom(3)) {
+						int amt = Globals->CITY_MARKET_NORMAL_AMT;
+						int price;
+						if( Globals->RANDOM_ECONOMY ) {
+							amt += getrandom( amt );
+							price = (ItemDefs[i].baseprice *
+									(100 + getrandom(50))) / 100;
+						} else {
+							price = ItemDefs[ i ].baseprice;
+						}
 
-                        Market * m = new Market
-                            (M_SELL,
-                             i,
-                             price,
-                             0,
-                             1000+population,
-                             4000+population,
-                             0,
-                             amt );
-                        markets.Add(m);
-                    } 
-                    else
-                    {
-                        if (!getrandom(6))
-                        {
-                            int amt = Globals->CITY_MARKET_NORMAL_AMT;
-                            int price;
+						Market * m = new Market (M_SELL, i, price, 0,
+								1000+population, 4000+population, 0, amt );
+						markets.Add(m);
+					} else {
+						if (!getrandom(6)) {
+							int amt = Globals->CITY_MARKET_NORMAL_AMT;
+							int price;
 
-                            if( Globals->RANDOM_ECONOMY )
-                            {
-                                amt += getrandom( amt );
-                                price = (ItemDefs[i].baseprice *
-                                  (150 + getrandom(50))) / 100;
-                            }
-                            else
-                            {
-                                price = ItemDefs[ i ].baseprice;
-                            }
+							if( Globals->RANDOM_ECONOMY ) {
+								amt += getrandom( amt );
+								price = (ItemDefs[i].baseprice *
+										(150 + getrandom(50))) / 100;
+							} else {
+								price = ItemDefs[ i ].baseprice;
+							}
 
-                            Market * m = new Market
-                                (M_BUY,
-                                 i,
-                                 price,
-                                 0,
-                                 1000+population,
-                                 4000+population,
-                                 0,
-                                 amt );
-                            markets.Add(m);
-                        }
-                    }
-                }
-            }
-        }
-        else if( ItemDefs[ i ].type & IT_ADVANCED )
-        {
-            j = getrandom(4);
-            if (j==2)
-            {
-                int amt = Globals->CITY_MARKET_ADVANCED_AMT;
-                int price;
+							Market * m = new Market (M_BUY, i, price, 0,
+									1000+population, 4000+population, 0, amt );
+							markets.Add(m);
+						}
+					}
+				}
+			}
+		} else if( ItemDefs[ i ].type & IT_ADVANCED ) {
+			j = getrandom(4);
+			if (j==2) {
+				int amt = Globals->CITY_MARKET_ADVANCED_AMT;
+				int price;
 
-                if( Globals->RANDOM_ECONOMY )
-                {
-                    amt += getrandom( amt );
-                    price = (ItemDefs[i].baseprice * (100 + getrandom(50))) /
-                        100;
-                }
-                else
-                {
-                    price = ItemDefs[ i ].baseprice;
-                }
+				if( Globals->RANDOM_ECONOMY ) {
+					amt += getrandom( amt );
+					price = (ItemDefs[i].baseprice * (100 + getrandom(50))) /
+						100;
+				} else {
+					price = ItemDefs[ i ].baseprice;
+				}
 
-                Market * m = new Market
-                    (M_SELL,
-                     i,
-                     price,
-                     0,
-                     2000+population,
-                     4000+population,
-                     0,
-                     amt );
-                markets.Add(m);
-            }
-        }
-        else if( ItemDefs[ i ].type & IT_TRADE )
-        {
-            numtrade++;
-        }
-    }
-    
-    /* Set up the trade items */
-    int buy1 = getrandom(numtrade);
-    int buy2 = getrandom(numtrade);
-    int sell1 = getrandom(numtrade);
-    int sell2 = getrandom(numtrade);
-    
-    buy1 = getrandom(numtrade);
-    while (buy1 == buy2) buy2 = getrandom(numtrade);
-    while (sell1 == buy1 || sell1 == buy2) sell1 = getrandom(numtrade);
-    while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
-        sell2 = getrandom(numtrade);
-    
-    for (i=0; i<NITEMS; i++)
-    {
+				Market * m = new Market (M_SELL, i, price, 0, 2000+population,
+						4000+population, 0, amt );
+				markets.Add(m);
+			}
+		} else if( ItemDefs[ i ].type & IT_MAGIC ) {
+			j = getrandom(8);
+			if (j==2) {
+				// XXX --
+				// For now, just use the amounts found for advanced items
+				// for any magical items which are allowed onto the markets
+				int amt = Globals->CITY_MARKET_ADVANCED_AMT;
+				int price;
+
+				if( Globals->RANDOM_ECONOMY ) {
+					amt += getrandom( amt );
+					price = (ItemDefs[i].baseprice * (100 + getrandom(50))) /
+						100;
+				} else {
+					price = ItemDefs[ i ].baseprice;
+				}
+
+				Market * m = new Market (M_SELL, i, price, 0, 2000+population,
+						4000+population, 0, amt );
+				markets.Add(m);
+			}
+		} else if( ItemDefs[ i ].type & IT_TRADE ) {
+			numtrade++;
+		}
+	}
+
+	/* Set up the trade items */
+	int buy1 = getrandom(numtrade);
+	int buy2 = getrandom(numtrade);
+	int sell1 = getrandom(numtrade);
+	int sell2 = getrandom(numtrade);
+
+	buy1 = getrandom(numtrade);
+	while (buy1 == buy2) buy2 = getrandom(numtrade);
+	while (sell1 == buy1 || sell1 == buy2) sell1 = getrandom(numtrade);
+	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
+		sell2 = getrandom(numtrade);
+
+	for (i=0; i<NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if(ItemDefs[i].flags & ItemType::NOMARKET) continue;
 
-        if( ItemDefs[ i ].type & IT_TRADE )
-        {
-            int addbuy = 0;
-            int addsell = 0;
+		if( ItemDefs[ i ].type & IT_TRADE ) {
+			int addbuy = 0;
+			int addsell = 0;
 
-            if (buy1 == 0 || buy2 == 0)
-            {
-                addbuy = 1;
-            }
-            buy1--;
-            buy2--;
+			if (buy1 == 0 || buy2 == 0) {
+				addbuy = 1;
+			}
+			buy1--;
+			buy2--;
 
-            if( sell1 == 0 || sell2 == 0 )
-            {
-                addsell = 1;
-            }
-            sell1--;
-            sell2--;
+			if( sell1 == 0 || sell2 == 0 ) {
+				addsell = 1;
+			}
+			sell1--;
+			sell2--;
 
-            if( addbuy )
-            {
-                int amt = Globals->CITY_MARKET_TRADE_AMT;
-                int price;
+			if( addbuy ) {
+				int amt = Globals->CITY_MARKET_TRADE_AMT;
+				int price;
 
-                if( Globals->RANDOM_ECONOMY )
-                {
-                    amt += getrandom( amt );
+				if( Globals->RANDOM_ECONOMY ) {
+					amt += getrandom( amt );
 					if(Globals->MORE_PROFITABLE_TRADE_GOODS) {
 						price=(ItemDefs[i].baseprice*(250+getrandom(100)))/100;
 					} else {
 						price=(ItemDefs[i].baseprice*(150+getrandom(50)))/100;
 					}
-                }
-                else
-                {
-                    price = ItemDefs[ i ].baseprice;
-                }
+				} else {
+					price = ItemDefs[ i ].baseprice;
+				}
 
-                Market * m = new Market
-                    (M_SELL,
-                     i,
-                     price,
-                     0,
-                     2000+population,
-                     4000+population,
-                     0,
-                     amt );
-                markets.Add(m);
-            }
-            
-            if( addsell )
-            {
-                int amt = Globals->CITY_MARKET_TRADE_AMT;
-                int price;
+				Market * m = new Market (M_SELL, i, price, 0, 2000+population,
+						4000+population, 0, amt );
+				markets.Add(m);
+			}
 
-                if( Globals->RANDOM_ECONOMY )
-                {
-                    amt += getrandom( amt );
+			if( addsell ) {
+				int amt = Globals->CITY_MARKET_TRADE_AMT;
+				int price;
+
+				if( Globals->RANDOM_ECONOMY ) {
+					amt += getrandom( amt );
 					if(Globals->MORE_PROFITABLE_TRADE_GOODS) {
 						price=(ItemDefs[i].baseprice*(100+getrandom(90)))/100;
 					} else {
 						price=(ItemDefs[i].baseprice*(100+getrandom(50)))/100;
 					}
-                }
-                else
-                {
-                    price = ItemDefs[ i ].baseprice;
-                }
+				} else {
+					price = ItemDefs[ i ].baseprice;
+				}
 
-                Market * m = new Market
-                    (M_BUY,
-                     i,
-                     price,
-                     0,
-                     2000+population,
-                     4000+population,
-                     0,
-                     amt );
-                markets.Add(m);
-            }
-        }
-    }
+				Market * m = new Market (M_BUY, i, price, 0, 2000+population,
+						4000+population, 0, amt );
+				markets.Add(m);
+			}
+		}
+	}
 }
 
 void ARegion::SetupProds()

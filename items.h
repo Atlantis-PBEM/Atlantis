@@ -78,6 +78,7 @@ class ItemType
 		enum {
 			CANTGIVE = 0x1,
 			DISABLED = 0x2,
+			NOMARKET = 0x4,
 		};
 		int flags;
 
