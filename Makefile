@@ -24,9 +24,8 @@ OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
   $(patsubst %.o,$(GAME)/obj/%.o,$(ENGINE_OBJECTS)) \
   $(GAME)/obj/i_rand.o
 
-$(GAME)-m: $(OBJECTS)
+$(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
-
 
 all: conquest ceran realms standard wyreth
 
@@ -65,8 +64,13 @@ wyreth-clean:
 clean:
 	rm -f $(OBJECTS)
 	rm -f $(GAME)/$(GAME)
+	rmdir $(GAME)/obj
 
 FORCE:
+
+objdir:
+	if [ ! -d $(GAME)/obj ]; then mkdir $(GAME)/obj; fi
+
 
 $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
 	$(CPLUS) $(CFLAGS) -c -o $@ $<

@@ -330,7 +330,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		f.PutStr(AString("A faction has one pre-set limit; it may not ") +
 				"contain more than " + AllowedMages(&fac) + " mages and " +
-				AllowedApprentices(&fac) " apprentices.  Magic is a rare "
+				AllowedApprentices(&fac) + " apprentices.  Magic is a rare "
 				"art, and only a few in the world can master it. Aside from "
 				"that, there  is no limit to the number of units a faction "
 				"may contain, nor to how many items can be produced or "
@@ -398,7 +398,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		na = AllowedApprentices(&fac);
 		nt = AllowedTrades(&fac);
 		nw = AllowedTaxes(&fac);
-		f.PutStr(AString("For example, a well rounded faction might ")
+		f.PutStr(AString("For example, a well rounded faction might ") +
 				"spend " + w + " point" + (w==1?"":"s") + " on War, " +
 				t + " point" + (t==1?"":"s") + " on Trade, and " + m +
 				" point" + (m==1?"":"s") + " on Magic.  This faction's "
@@ -421,11 +421,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 				w + "\", and it would be able to tax " + nw + " region" +
 				(nw==1?"":"s") +
 				(nt==0?", but could not perform trade in any regions,":
-				 AString(", but could only perform trade in " + nt +
-					 " region"+(nt==1?",":"s,"))) +
+				 AString(", but could only perform trade in ") + nt +
+					 " region"+(nt==1?",":"s,")) +
 				(nm==0?" and could not possess any mages":
-				 AString(" and could possess only " + nm + " mage" +
-					 (nm==1?".":"s."))));
+				 AString(" and could possess only ") + nm + " mage" +
+					 (nm==1?".":"s.")));
 		f.PutStr("<BR><BR>");
 		if (Globals->FACTION_POINTS>3) {
 			int rem=Globals->FACTION_POINTS-3;
@@ -476,6 +476,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("<BR><BR>");
 	f.PutStr(f.LinkRef("playing_units"));
 	f.TagText("H3", "Units:");
+#if 0
 	/* FOO */
  printf("\n");
  printf("A unit is a grouping together of people, all loyal to the same faction.\n");
@@ -530,7 +531,6 @@ int Game::GenRules(const AString &rules, const AString &css,
    printf("  of the strengths of either race. <p>\n");
   }
  printf("\n");
-#if 0
  printf("<a name=\"playing_turns\">\n");
  printf("<h3> Turns: </h3>\n");
  printf("\n");
