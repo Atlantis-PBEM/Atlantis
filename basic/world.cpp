@@ -2517,18 +2517,18 @@ void ARegion::MakeStartingCity()
 			if( ItemDefs[ i ].type & IT_NORMAL ) {
 				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
 					continue;
-				m = new Market(M_BUY,i,(ItemDefs[i].baseprice*5/2),-1,
+				m = new Market(M_BUY,i,(ItemDefs[i].baseprice * 5 / 2),-1,
 						5000,5000,-1,-1);
 				markets.Add(m);
 			}
 		}
 		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
-		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1, 5000,5000,-1,-1);
+		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1,5000,5000,-1,-1);
 		markets.Add(m);
 		if(Globals->LEADERS_EXIST) {
 			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
-			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),
-					-1,5000,5000,-1,-1);
+			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),-1,
+					5000,5000,-1,-1);
 			markets.Add(m);
 		}
 	} else {
@@ -2571,7 +2571,8 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
     if( pArr->y < maxY ) maxY = pArr->y;
 
 	int tries = 0;
-    while (!reg && tries < 10000) {
+    while (!reg && tries < 10000)
+    {
         //
         // We'll just let AC exits be all over the map.
         //
@@ -2612,6 +2613,7 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 			reg = 0;
 			continue;
 		}
+
 		for (int j=0; j<i; j++) {
 			if(!AC->neighbors[j]) continue;
 			if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {

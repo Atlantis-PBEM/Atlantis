@@ -25,20 +25,9 @@
 //
 // This file contains extra game-specific functions
 //
-
-/** \file
- * Extra parts added to the game for a particular version.
- * extra.cpp contains all of the version-specific functions necessary 
- * to alter a game's data structures to suit the GM.
- */
-
 #include "game.h"
 #include "gamedata.h"
 
-/// Run the initial setup for a faction
-/** This includes setting initial silver, creating your first leader, 
-adding any starting skills (eg. gate) and sticking him in the world.
-*/
 int Game::SetupFaction( Faction *pFac )
 {
 	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
@@ -53,11 +42,16 @@ int Game::SetupFaction( Faction *pFac )
 	temp2->SetMen( I_LEADERS, 1 );
 	temp2->reveal = REVEAL_FACTION;
 
-	if (TurnNumber() >= 12) {
-		temp2->type = U_MAGE;
-		temp2->Study(S_PATTERN, 30);
-		temp2->Study(S_SPIRIT, 30);
-		temp2->Study(S_GATE_LORE, 30);
+	temp2->type = U_MAGE;
+	temp2->Study(S_PATTERN, 30);
+	temp2->Study(S_SPIRIT, 30);
+	temp2->Study(S_GATE_LORE, 30);
+
+	if (TurnNumber() >= 25) {
+		temp2->Study(S_PATTERN, 60);
+		temp2->Study(S_SPIRIT, 60);
+		temp2->Study(S_FORCE, 90);
+		temp2->Study(S_COMBAT, 30);
 	}
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
@@ -89,23 +83,32 @@ int Game::SetupFaction( Faction *pFac )
 	return( 1 );
 }
 
-/// Check to see whether a player has won the game.
-/** This is left null in standard, since it's an open ended game.
-See wyreth if you're after an example of close-ended conditions.
-*/
 Faction *Game::CheckVictory()
 {
+	ARegion *reg;
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		forlist(&r->objects) {
+			Object *obj = (Object *)elem;
+			if(obj->type != O_BKEEP) continue;
+			if(obj->units.Num()) return NULL;
+			reg = r;
+			break;
+		}
+	}
+	{
+		// Now see find the first faction guarding the region
+		forlist(&reg->objects) {
+			Object *o = reg->GetDummy();
+			forlist(&o->units) {
+				Unit *u = (Unit *)elem;
+				if(u->guard == GUARD_GUARD) return u->faction;
+			}
+		}
+	}
 	return NULL;
 }
 
-/// Modify certain starting statistics of the world's data structures.
-/** There are two types of changes in here, those caused by altering
-values in rules.cpp, and those added by the GM to change the default
-settings of the world. See the modify.cpp file if you want to make changes
-to your own game.
-Please don't alter standard -- copy it and alter that copy as detailed
-in the GAMEMASTER file.
-*/
 void Game::ModifyTablesPerRuleset(void)
 {
 	if(Globals->APPRENTICES_EXIST)
@@ -139,6 +142,52 @@ void Game::ModifyTablesPerRuleset(void)
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
+	EnableItem(I_PICK);
+	EnableItem(I_SPEAR);
+	EnableItem(I_AXE);
+	EnableItem(I_HAMMER);
+	EnableItem(I_MCROSSBOW);
+	EnableItem(I_MWAGON);
+	EnableItem(I_GLIDER);
+	EnableItem(I_NET);
+	EnableItem(I_LASSO);
+	EnableItem(I_BAG);
+	EnableItem(I_SPINNING);
+	EnableItem(I_LEATHERARMOR);
+	EnableItem(I_CLOTHARMOR);
+	EnableItem(I_BOOTS);
+	EnableItem(I_BAXE);
+	EnableItem(I_MBAXE);
+	EnableItem(I_IMARM);
+	EnableItem(I_SUPERBOW);
+	EnableItem(I_LANCE);
+	EnableItem(I_JAVELIN);
+	EnableItem(I_PIKE);
+
+	EnableSkill(S_ARMORCRAFT);
+	EnableSkill(S_WEAPONCRAFT);
+
+	EnableObject(O_ROADN);
+	EnableObject(O_ROADNE);
+	EnableObject(O_ROADNW);
+	EnableObject(O_ROADS);
+	EnableObject(O_ROADSE);
+	EnableObject(O_ROADSW);
+	EnableObject(O_TEMPLE);
+	EnableObject(O_MQUARRY);
+	EnableObject(O_AMINE);
+	EnableObject(O_PRESERVE);
+	EnableObject(O_SACGROVE);
+
+	EnableObject(O_ISLE);
+	EnableObject(O_DERELICT);
+	EnableObject(O_OCAVE);
+	EnableObject(O_WHIRL);
+	EnableItem(I_PIRATES);
+	EnableItem(I_KRAKEN);
+	EnableItem(I_MERFOLK);
+	EnableItem(I_ELEMENTAL);
+
 	if((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
 		EnableItem(I_MUSHROOM);
 		EnableItem(I_HEALPOTION);
@@ -159,6 +208,7 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_QUARTERMASTER);
 		EnableObject(O_CARAVANSERAI);
 	}
-
+	// XXX -- This is just here to preserve existing behavior
+	ModifyItemProductionBooster(I_AXE, I_HAMMER, 1);
 	return;
 }

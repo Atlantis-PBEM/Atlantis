@@ -33,25 +33,25 @@
 // the html file containing the rules to correctly reflect the changes!
 //
 
-static int am[] = { 1, 2, 3, 4, 6, 8, 12 };
+static int am[] = { 0, 1, 2, 3, 5, 7 };
 int *allowedMages = am;
 int allowedMagesSize = sizeof(am) / sizeof(am[0]);
 
-static int aa[] = { 1, 3, 5, 7, 11, 15, 20 };
+static int aa[] = { 0, 2, 4, 6, 10, 14 };
 int *allowedApprentices = aa;
 int allowedApprenticesSize = sizeof(aa) / sizeof(aa[0]);
 
-static int aw[] = { 1, 10, 24, 40, 60, 100 };
+static int aw[] = { 0, 10, 24, 40, 60, 100 };
 int *allowedTaxes = aw;
 int allowedTaxesSize = sizeof(aw) / sizeof(aw[0]);
 
-static int at[] = { 1, 10, 24, 40, 60, 100 };
+static int at[] = { 0, 10, 24, 40, 60, 100 };
 int *allowedTrades = at;
 int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
-static int aq[] = { 2, 3, 4, 5, 8, 12, 20 };
+static int aq[] = { 0, 2, 4, 8, 12, 20 };
 int *allowedQuartermasters = aq;
-int allowedQuartermastersSize = sizeof(aq)/ sizeof(aq[0]);
+int allowedQuartermastersSize = sizeof(aq) / sizeof(aq[0]);
 
 // at is already taken up for allowedtaxes, so I'll use ag (allowedgenghises) ;)
 static int ag[] = { 0, 1, 2, 4, 6, 10 };
@@ -59,8 +59,8 @@ int *allowedTacticians = ag;
 int allowedTacticiansSize = sizeof(ag) / sizeof(ag[0]);
 
 static GameDefs g = {
-	"Ceran",				// RULESET_NAME
-	MAKE_ATL_VER( 3, 0, 0 ), // RULESET_VERSION
+	"Standard Atlantis",	 // RULESET_NAME
+	MAKE_ATL_VER( 5, 0, 0 ), // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
@@ -97,12 +97,12 @@ static GameDefs g = {
 	50, /* GUARD_MONEY */
 	4000, /* CITY_POP */
 
-	25, /* WMON_FREQUENCY */
-	25, /* LAIR_FREQUENCY */
+	10, /* WMON_FREQUENCY */
+	10, /* LAIR_FREQUENCY */
 
 	5, /* FACTION_POINTS */
 
-	60, /* TIMES_REWARD */
+	50, /* TIMES_REWARD */
 
 	1, // TOWNS_EXIST
 	1, // LEADERS_EXIST
@@ -130,65 +130,66 @@ static GameDefs g = {
 	0,  // MORE_PROFITABLE_TRADE_GOODS
 
 	50,	// BASE_MAN_COST
-	0, // LASTORDERS_MAINTAINED_BY_SCRIPTS
+	1, // LASTORDERS_MAINTAINED_BY_SCRIPTS
 	10, // MAX_INACTIVE_TURNS
 
 	0, // EASIER_UNDERWORLD
 
-	1, // DEFAULT_WORK_ORDER
+	0, // DEFAULT_WORK_ORDER
 
 	GameDefs::FACLIM_FACTION_TYPES, // FACTION_LIMIT_TYPE
 
-	GameDefs::WFLIGHT_MUST_LAND,	// FLIGHT_OVER_WATER
+	GameDefs::WFLIGHT_NONE,	// FLIGHT_OVER_WATER
 
 	1,   // START_CITIES_EXIST
-	0,   // SAFE_START_CITIES
-	600, // AMT_START_CITY_GUARDS
-	1,   // START_CITY_GUARDS_PLATE
-	5,   // START_CITY_MAGES
-	3,   // START_CITY_TACTICS
+	1,   // SAFE_START_CITIES
+	120, // AMT_START_CITY_GUARDS
+	0,   // START_CITY_GUARDS_PLATE
+	0,   // START_CITY_MAGES
+	0,   // START_CITY_TACTICS
+
 	0,   // APPRENTICES_EXIST
 
-	"Edledhron", // WORLD_NAME
+	"Atlantis", // WORLD_NAME
 
-	1,  // NEXUS_GATE_OUT
-	1,  // NEXUS_IS_CITY
-	1,	// BATTLE_FACTION_INFO
-	1,	// ALLOW_WITHDRAW
+	0,  // NEXUS_GATE_OUT
+	0,  // NEXUS_IS_CITY
+	0,	// BATTLE_FACTION_INFO
+	0,	// ALLOW_WITHDRAW
 	0,	// ALLOW_BANK
 	0,	// BANK_FEE
 	0,	// BANK_MAXUNSKILLED
 	0,	// BANK_MAXSKILLPERLEVEL
-	1000,	// CITY_RENAME_COST
+	0,	// CITY_RENAME_COST
 	0,	// MULTI_HEX_NEXUS
-	3,	// UNDERWORLD_LEVELS
-	2,	// UNDERDEEP_LEVELS
-	1,	// ABYSS_LEVEL
+	1,	// UNDERWORLD_LEVELS
+	0,	// UNDERDEEP_LEVELS
+	0,	// ABYSS_LEVEL
 	100,	// TOWN_PROBABILITY
 	0,	// TOWN_SPREAD
 	0,	// TOWNS_NOT_ADJACENT
 	0,	// LESS_ARCTIC_TOWNS
 	60, // OCEAN
 	16, // CONTINENT_SIZE
-	 0, // TERRAIN_GRANULARITY
-	 0, // LAKES
-	10,	// ARCHIPELAGO
-	30, // SEVER_LAND_BRIDGES
-	10, // SEA_LIMIT
+	0,  // TERRAIN_GRANULARITY
+	0,  // LAKES
+	0,	// ARCHIPELAGO
+	0,  // SEVER_LAND_BRIDGES
+	0,  // SEA_LIMIT
 	GameDefs::NO_EFFECT, // LAKE_WAGE_EFFECT
 	0,	// LAKESIDE_IS_COASTAL
 	0,	// ODD_TERRAIN
 	0,	// IMPROVED_FARSIGHT
-	1,	// GM_REPORT
-	1,	// DECAY
+	0,	// GM_REPORT
+	0,	// DECAY
 	0,	// LIMITED_MAGES_PER_BUILDING
 	GameDefs::REPORT_NOTHING, // TRANSIT_REPORT
 	0,  // MARKETS_SHOW_ADVANCED_ITEMS
 	GameDefs::PREPARE_NONE,	// USE_PREPARE_COMMAND
 	15,	// MONSTER_ADVANCE_MIN_PERCENT
 	0,	// MONSTER_ADVANCE_HOSTILE_PERCENT
-	0,	// HAVE_EMAIL_SPECIAL_COMMANDS
-	0,	// START_CITIES_START_UNLIMITED
+	1,	// HAVE_EMAIL_SPECIAL_COMMANDS
+	1,	// START_CITIES_START_UNLIMITED
 	0,	// PROPORTIONAL_AMTS_USAGE
 	0,  // USE_WEAPON_ARMOR_COMMAND
 	0,  // MONSTER_NO_SPOILS
