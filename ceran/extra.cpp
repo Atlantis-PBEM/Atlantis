@@ -280,6 +280,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_SHORTBOW);
 	EnableItem(I_BOW);
 	EnableItem(I_HEAVYCROSSBOW);
+	EnableItem(I_HARP);
 
 	EnableSkill(S_WEAPONCRAFT);
 	EnableSkill(S_ARMORCRAFT);

@@ -220,6 +220,7 @@ private:
 
 	void ModifyMountSkill(int mount, int skill);
 	void ModifyMountBonuses(int mount, int min, int max, int hampered);
+	void ModifyMountSpecial(int mount, int special, int level);
 
 	void EnableObject(int ob); // Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built
@@ -230,7 +231,6 @@ private:
 	void ModifyObjectConstruction(int ob, int it, int num, int sk, int lev);
 	void ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages);
 	
-
 	void ClearTerrainRaces(int t);
 	void ModifyTerrainRace(int t, int i, int r);
 	void ModifyTerrainCoastRace(int t, int i, int r);
@@ -241,6 +241,22 @@ private:
 	void ModifyTerrainLair(int t, int i, int lair);
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
 
+	void ModifyBattleItemFlags(int item, int flags);
+	void ModifyBattleItemSpecial(int item, int special, int level);
+
+	void ModifySpecialTargetFlags(int special, int targetflags);
+	void ModifySpecialTargetObjects(int special, int index, int obj);
+	void ModifySpecialTargetItems(int special, int index, int item);
+	void ModifySpecialTargetEffects(int special, int index, int effect);
+	void ModifySpecialEffectFlags(int special, int effectflags);
+	void ModifySpecialShieldData(int special, int index, int type, int val);
+	void ModifySpecialDamage(int special, int index, int type, int min,
+			int val, int flags, int cls, int effect);
+
+	void ModifyEffectFlags(int effect, int flags);
+	void ModifyEffectAttackMod(int effect, int val);
+	void ModifyEffectDefenseMod(int effect, int index, int type, int val);
+	void ModifyEffectCancelEffect(int effect, int effect);
 
     AList factions;
     AList newfactions; /* List of strings */

@@ -346,6 +346,15 @@ void Game::ModifyMountBonuses(int mount, int min, int max, int hampered)
 	MountDefs[mount].maxHamperedBonus = hampered;
 }
 
+void Game::ModifyMountSpecial(int mount, int special, int level)
+{
+	if(mount < 0 || mount > (NUMMOUNTS - 1)) return;
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	if(level < 0) return;
+	MountDefs[mount].mountSpecial = special;
+	MountDefs[mount].specialLev = level;
+}
+
 void Game::EnableObject(int obj)
 {
 	if(obj < 0 || obj > (NOBJECTS-1)) return;
@@ -517,3 +526,114 @@ void Game::ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move)
 	TerrainDefs[t].movepoints = move;
 }
 
+void Game::ModifyBattleItemFlags(int item, int flags)
+{
+	if(item < 0 || item > (NUMBATTLEITEMS-1)) return;
+	BattleItemDefs[item].flags = flags;
+}
+
+void Game::ModifyBattleItemSpecial(int item, int index, int level)
+{
+	if(item < 0 || item > (NUMBATTLEITEMS-1)) return;
+	if(level < 0) return;
+
+	BattleItemDefs[item].index = index;
+	BattleItemDefs[item].skillLevel = level;
+}
+
+void Game::ModifySpecialTargetFlags(int special, int targetflags)
+{
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	SpecialDefs[special].targflags = targetflags;
+}
+
+void Game::ModifySpecialTargetObjects(int special, int index, int obj)
+{
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	if(index < 0 || index > 3) return;
+	if((obj != -1 && obj < 1) || (obj > (NOBJECTS-1))) return;
+	SpecialDefs[special].buldings[index] = obj;
+}
+
+void Game::ModifySpecialTargetItems(int special, int index, int item)
+{
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	if(index < 0 || index > 7) return;
+	if(item < -1 || item > (NITEMS-1)) return;
+	SpecialDefs[special].targets[index] = item;
+}
+
+void Game::ModifySpecialTargetEffects(int special, int index, int effect)
+{
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	if(index < 0 || index > 3) return;
+	if(effect < -1 || effect > (NUMEFFECTS-1)) return;
+	SpecialDefs[special].effects[index] = effect;
+}
+
+void Game::ModifySpecialEffectFlags(int special, int effectflags)
+{
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	SpecialDefs[special].effectflags = effectflags;
+}
+
+void Game::ModifySpecialShieldData(int special, int index, int type, int val)
+{
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	if(index < 0 || index > 4) return;
+	if(type < -1 || type > (NUM_ATTACK_TYPES)) return;
+	SpecialDefs[special].shield[index].type = type;
+	SpecialDefs[special].shield[index].value = val;
+}
+
+void Game::ModifySpecialDamage(int special, int index, int type, int min,
+		int val, int flags, int cls, int effect)
+{
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	if(index < 0 || index > 4) return;
+	if(effect < 0 || effect > (NUMEFFECTS-1)) return;
+	if(type < -1 || type > NUM_ATTACK_TYPES) return;
+	if(cls < -1 || cls > (NUM_WEAPON_CLASSES-1)) return;
+	if(min < 0) return;
+	SpecialDefs[special].damage[index].type = type;
+	SpecialDefs[special].damage[index].minnum = min;
+	SpecialDefs[special].damage[index].value = val;
+	SpecialDefs[special].damage[index].flags = flags;
+	SpecialDefs[special].damage[index].dclass = cls;
+	SpecialDefs[special].damage[index].effect = effect;
+}
+
+void Game::ModifySpecialTargetLevelAdj(int special, int lev)
+{
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	SpecialDefs[special].targetLevAdj = lev;
+}
+
+void Game::ModifyEffectFlags(int effect, int flags)
+{
+	if(effect < 0 || effect > (NUMEFFECTS-1)) return;
+	EffectDefs[effect].flags = flags;
+}
+
+void Game::ModifyEffectAttackMod(int effect, int val)
+{
+	if(effect < 0 || effect > (NUMEFFECTS-1)) return;
+	EffectDefs[effect].attackVal = val;
+	
+}
+
+void Game::ModifyEffectDefenseMod(int effect, int index, int type, int val)
+{
+	if(effect < 0 || effect > (NUMEFFECTS-1)) return;
+	if(type < 0 || type > NUM_ATTACK_TYPES) return;
+	if(index < 0 || index > 4) return;
+	EffectDefs[effect].defMods[index].type = type;
+	EffectDefs[effect].defMods[index].val = val;
+}
+
+void Game::ModifyEffectCancelEffect(int effect, int uneffect)
+{
+	if(effect < 0 || effect > (NUMEFFECTS-1)) return;
+	if(uneffect < 0 || uneffect > (NUMEFFECTS-1)) return;
+	EffectDefs[effect].cancelEffect = uneffect;
+}

@@ -304,7 +304,7 @@ void Soldier::SetupSpell()
 void Soldier::SetupCombatItems()
 {
     int battleType;
-    for(battleType = 1; battleType < NUMBATTLEITEMS; battleType++) {
+    for(battleType = NUMBATTLEITEMS-1; battleType > 0; battleType--) {
         BattleItemType *pBat = &BattleItemDefs[ battleType ];
 
 		/*

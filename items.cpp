@@ -103,6 +103,7 @@ static AString ItemSpecial(int special, int level)
 		default: temp += "an unknown attack"; break;
 	}
 	temp += AString(" in battle at level ") + level + ".";
+	// XXX -- Handle the effect data.
 	return temp;
 }
 

@@ -275,3 +275,6 @@ Changes from 4.0.7 -> 4.0.8
       has NONE of that type of information (ie, wages 0, or Products: none).
       So, be careful when turning this on as it COULD give your players a
       false sense of having accurate data when they do not!
+   -- Added the 'harp' item created by Ceran II
+   -- Did a lot of work to handle spell damages and effects in a
+      customizable manner.

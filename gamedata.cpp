@@ -2196,19 +2196,19 @@ ArmorType *ArmorDefs = armd;
 //
 MountType mountd[] = {
 	// MOUNT_NONE
-	{-1, 0, 0, 0, 0, 0},
+	{-1, 0, 0, 0, -1, 0},
 	// MOUNT_WHORSE
-	{S_RIDING, 3, 5, 3, 0, 0},
+	{S_RIDING, 3, 5, 3, -1, 0},
 	// MOUNT_HORSE
-	{S_RIDING, 1, 3, 3, 0, 0},
+	{S_RIDING, 1, 3, 3, -1, 0},
 	// MOUNT_CAMEL
 	{S_RIDING, 1, 2, 2, SPECIAL_CAMEL_FEAR, 3},
 	// MOUNT_MWOLF
-	{S_RIDING, 1, 3, 3, 0, 0},
+	{S_RIDING, 1, 3, 3, -1, 0},
 	// MOUNT_SPIDER
-	{S_RIDING, 2, 3, 3, 0, 0},
+	{S_RIDING, 2, 3, 3, -1, 0},
 	// MOUNT_MOLE
-	{S_RIDING, 2, 3, 3, 0, 0},
+	{S_RIDING, 2, 3, 3, -1, 0},
 };
 
 MountType *MountDefs = mountd;
@@ -3455,7 +3455,8 @@ HealType * HealDefs = hd;
 
 static SpecialType spd[] = {
 	// NONE
-	{0,
+	{"a dummy special",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3465,10 +3466,11 @@ static SpecialType spd[] = {
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0}},
-	 "casts something that is not a spell", "annoying", "",
+	 "casts something that is not a spell", "annoying ", "",
 	 0},
 	// SPECIAL_FIREBALL
-	{0,
+	{"a fireball",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3481,7 +3483,8 @@ static SpecialType spd[] = {
 	 "shoots a Fireball", "killing ", "",
 	 0},
 	// SPECIAL_HELLFIRE
-	{0,
+	{"hellfire",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3494,7 +3497,8 @@ static SpecialType spd[] = {
 	 "blasts the enemy with Hellfire", "killing ", "",
 	 0},
 	// SPECIAL_CAUSEFEAR
-	{SpecialType::HIT_EFFECTEXCEPT|SpecialType::HIT_NOMONSTER,
+	{"cause fear",
+	 SpecialType::HIT_EFFECTEXCEPT|SpecialType::HIT_NOMONSTER,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {EFFECT_FEAR, -1, -1},
@@ -3507,7 +3511,8 @@ static SpecialType spd[] = {
 	 "strikes fear into the enemy", "causing ", " men to cower in terror",
 	 0},
 	// SPECIAL_LSTRIKE
-	{0,
+	{"a lightning strike",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3520,7 +3525,8 @@ static SpecialType spd[] = {
 	 "unleashes a mighty lightning strike", "killing ", "",
 	 0},
 	// SPECIAL_MINDBLAST
-	{0,
+	{"a mindblast",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3533,7 +3539,8 @@ static SpecialType spd[] = {
 	 "blasts the minds of the enemy", "killing ", " troops",
 	 0},
 	// SPECIAL_EARTHQUAKE
-	{SpecialType::HIT_BUILDINGEXCEPT,
+	{"an earthquake",
+	 SpecialType::HIT_BUILDINGEXCEPT,
 	 {O_MFORTRESS, O_MTOWER, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3546,7 +3553,8 @@ static SpecialType spd[] = {
 	 "invokes a mighty Earthquake", "killing ", "",
 	 -2},
 	// SPECIAL_FORCE_SHIELD
-	{0,
+	{"a force shield",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3556,10 +3564,11 @@ static SpecialType spd[] = {
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0}},
-	 "casts something that is not a spell", "annoying", "",
+	 "casts something that is not a spell", "annoying ", "",
 	 0},
 	// SPECIAL_ENERGY_SHIELD
-	{0,
+	{"an energy shield",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3569,10 +3578,11 @@ static SpecialType spd[] = {
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0}},
-	 "casts something that is not a spell", "annoying", "",
+	 "casts something that is not a spell", "annoying ", "",
 	 0},
 	// SPECIAL_SPIRIT_SHIELD
-	{0,
+	{"a spirit shield",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3582,10 +3592,11 @@ static SpecialType spd[] = {
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0}},
-	 "casts something that is not a spell", "annoying", "",
+	 "casts something that is not a spell", "annoying ", "",
 	 0},
 	// SPECIAL_DISPEL_ILLUSIONS
-	{SpecialType::HIT_ILLUSION,
+	{"dispel illusion",
+	 SpecialType::HIT_ILLUSION,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3598,7 +3609,8 @@ static SpecialType spd[] = {
 	 "casts Dispel Illusions", "dispelling ", " illusions",
 	 0},
 	// SPECIAL_SUMMON_STORM
-	{SpecialType::HIT_EFFECTEXCEPT,
+	{"a summoned storm",
+	 SpecialType::HIT_EFFECTEXCEPT,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {EFFECT_STORM, -1, -1},
@@ -3611,7 +3623,8 @@ static SpecialType spd[] = {
 	 "summons a terrible storm", "reducing the effectiveness of ", " troops",
 	 0},
 	// SPECIAL_TORNADO
-	{0,
+	{"a tornado",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3624,7 +3637,8 @@ static SpecialType spd[] = {
 	 "summons a wild tornado", "killing ", "",
 	 0},
 	// SPECIAL_CLEAR_SKIES
-	{0,
+	{"clear skies",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3634,10 +3648,11 @@ static SpecialType spd[] = {
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0}},
-	 "casts something that is not a spell", "annoying", "",
+	 "casts something that is not a spell", "annoying ", "",
 	 0},
 	// SPECIAL_BLACK_WIND,
-	{SpecialType::HIT_SOLDIEREXCEPT,
+	{"a black wind",
+	 SpecialType::HIT_SOLDIEREXCEPT,
 	 {-1, -1, -1},
 	 {I_SKELETON, I_UNDEAD, I_LICH, I_IMP, I_DEMON, I_BALROG, -1},
 	 {-1, -1, -1},
@@ -3650,7 +3665,8 @@ static SpecialType spd[] = {
 	 "summons the black wind", "killing ", "",
 	 0},
 	// SPECIAL_BANISH_UNDEAD,
-	{SpecialType::HIT_SOLDIERIF,
+	{"banish undead",
+	 SpecialType::HIT_SOLDIERIF,
 	 {-1, -1, -1},
 	 {I_SKELETON, I_UNDEAD, I_LICH, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3663,7 +3679,8 @@ static SpecialType spd[] = {
 	 "casts Banish Undead", "banishing ", " undead",
 	 0},
 	// SPECIAL_BANISH_DEMONS,
-	{SpecialType::HIT_SOLDIERIF,
+	{"banish demons",
+	 SpecialType::HIT_SOLDIERIF,
 	 {-1, -1, -1},
 	 {I_IMP, I_DEMON, I_BALROG, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3676,7 +3693,8 @@ static SpecialType spd[] = {
 	 "casts Banish Demons", "banishing ", " demons",
 	 0},
 	// SPECIAL_FIREBREATH,
-	{0,
+	{"fiery breath",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3689,7 +3707,8 @@ static SpecialType spd[] = {
 	 "breathes Fire", "killing ", "",
 	 0},
 	// SPECIAL_ICEBREATH,
-	{0,
+	{"icy breath",
+	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
@@ -3702,7 +3721,8 @@ static SpecialType spd[] = {
 	 "breathes Ice", "killing ", "",
 	 0},
 	// SPECIAL_CAMEL_FEAR
-	{SpecialType::HIT_EFFECTEXCEPT|SpecialType::HIT_MOUNTIF,
+	{"terrify horses",
+	 SpecialType::HIT_EFFECTEXCEPT|SpecialType::HIT_MOUNTIF,
 	 {-1, -1, -1},
 	 {I_HORSE, -1, -1, -1, -1, -1, -1},
 	 {EFFECT_FEAR, -1, -1},

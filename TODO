@@ -71,6 +71,7 @@
    -- Improve handling of NOSPOILS
    -- Clean up spell system.
    -- Merge Lacandom spells.
+   -- Make monster movement only choose among viable exits
 
 TODO for 5.0.0
 ----------------------------------------------
