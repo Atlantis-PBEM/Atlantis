@@ -128,12 +128,30 @@ void Game::WriteRumour(int &rumournum, AString rumour)
     f.Close();
 }
 
+void Game::WriteTimes(int timesnum, AString times)
+{
+    Aoutfile f;
+    AString str;
+    
+    str = AString("times.") + timesnum;
+    int i = f.OpenByName( str );
+    if(i == -1) {
+        Awrite("Could not write times");
+        return;
+    }
+    f.PutStr(times);
+
+    f.Close();
+}
+
 void Game::CreateTimesReports()
 {
     CreateBattleEvents();
 
     int rumournum = 1;
     AString rumour;
+    AString times;
+    Faction *pFac;
     
     forlist(&worldevents) {
         WorldEvent *event = (WorldEvent *) elem;
@@ -152,6 +170,31 @@ void Game::CreateTimesReports()
                     rumour += " deaths.";
                 }
                 WriteRumour(rumournum, rumour);
+                break;
+            case WorldEvent::CONVERSION:
+                pFac = GetFaction(&factions, event->fact1);
+                if(!pFac) break;
+                if(pFac->ethnicity != event->fact2) break;
+                times = AString(*pFac->name) + " has converted to the ";
+        		switch(pFac->ethnicity) {
+        		    case RA_HUMAN:
+        		        times += "human";
+        		        break;
+        		    case RA_ELF:
+        		        times += "elven";
+        		        break;
+        		    case RA_DWARF:
+        		        times += "dwarven";
+        		        break;
+        		    case RA_OTHER:
+        		        times += "independent";
+        		        break;
+        		    default:
+        		        times += "!@#$ please alert your GM !@#$";
+        		        break;    		
+        		}
+                times += " cause!";
+                WriteTimes(1, times);
                 break;
             default:
                 break;

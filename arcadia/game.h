@@ -683,6 +683,7 @@ private:
 	//Times Reports
    	int WriteStatistics( Aoutfile *f, Ainfile *g, int infile );
    	void WriteRumour(int &rumournum, AString rumour);
+   	void WriteTimes(int timesnum, AString times);
     void CreateTimesReports();
    	void CreateBattleEvents();
    	

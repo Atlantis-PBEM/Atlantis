@@ -2446,7 +2446,6 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
 	} else {
 	    num = num * percent / 100;
 	}
-
 	int fac = guardfaction;
 	if(Globals->ARCADIA_MAGIC) {
     	ManType *mt = FindRace(ItemDefs[pReg->race].abr);
@@ -2465,7 +2464,6 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
     	        break;
     	}
 	}
-
 	Faction *pFac = GetFaction(&factions, fac);
 	Unit *u = 0;
 	Unit *u2 = 0;
@@ -2526,7 +2524,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
 		u2->reveal = REVEAL_FACTION;
 		u2->MoveUnit(pReg->GetDummy());
 	}
-	if((pReg->type == R_NEXUS || (Globals->START_CITY_MAGES + pReg->town->TownType() - 2) > 0) && (needguard%(2*GUARDMAGE)/GUARDMAGE)) {
+	if((pReg->type == R_NEXUS || (Globals->START_CITY_MAGES + skilllevel - 3) > 0) && (needguard%(2*GUARDMAGE)/GUARDMAGE)) {
 		u = GetNewUnit(pFac);
 		s = new AString("City Mage");
 		u->SetName(s);
@@ -2536,8 +2534,8 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
     		if(IV) u->items.SetNum(I_AMULETOFI,1);
     		u->SetMoney(Globals->GUARD_MONEY);
     		if(!Globals->ARCADIA_MAGIC) u->SetSkill(S_FORCE,Globals->START_CITY_MAGES);
-    		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES+pReg->town->TownType()-2);
-    		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES+pReg->town->TownType()-2);
+    		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES+skilllevel-3);
+    		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES+skilllevel-3);
     		if(Globals->START_CITY_TACTICS && !(SkillDefs[S_TACTICS].flags & SkillType::DISABLED))
     			u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
     		u->combat = S_FIRE;
@@ -2549,8 +2547,8 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
     	    u->SetMen(pReg->race,1);
     		u->SetMoney(Globals->GUARD_MONEY);
     		if(!Globals->ARCADIA_MAGIC) u->SetSkill(S_FORCE,Globals->START_CITY_MAGES);
-    		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES+pReg->town->TownType()-2);
-    		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES+pReg->town->TownType()-2);
+    		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES+skilllevel-3);
+    		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES+skilllevel-3);
     		u->combat = S_FIRE;
     		u->SetFlag(FLAG_BEHIND, 1);
     		u->SetFlag(FLAG_HOLDING, 1);

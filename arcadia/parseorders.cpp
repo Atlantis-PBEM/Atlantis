@@ -1186,30 +1186,12 @@ void Game::ProcessCommandOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		
 		if(u->GetEthnicity() != u->faction->ethnicity) {
 		    u->faction->ethnicity = u->GetEthnicity();
-		    
-    		AString message = AString(*u->faction->name) + " converts to the ";
-    		switch(u->faction->ethnicity) {
-    		    case RA_HUMAN:
-    		        message += "human";
-    		        break;
-    		    case RA_ELF:
-    		        message += "elvish";
-    		        break;
-    		    case RA_DWARF:
-    		        message += "dwarven";
-    		        break;
-    		    case RA_OTHER:
-    		        message += "independent";
-    		        break;
-    		    default:
-    		        message += "!@#$ please alert your GM !@#$";
-    		        break;    		
-    		}
-    		message += " cause!";
-    		forlist(&factions) {
-                Faction *rfac = (Faction *) elem;
-                rfac->Message(message);
-            }
+		    WorldEvent *event = new WorldEvent;
+            event->type = WorldEvent::CONVERSION;
+            event->fact1 = u->faction->num;
+            event->fact2 = u->faction->ethnicity;
+            event->reportdelay = 0;
+            worldevents.Add(event);
         }
 	}
 }
