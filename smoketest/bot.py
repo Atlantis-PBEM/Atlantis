@@ -2,6 +2,9 @@ import random, re
 
 directions = ['n','s','se','sw','ne','nw']
 
+directiondict = {'North':'n', 'Northeast':'ne', 'Northwest':'nw',
+                 'South':'s', 'Southeast':'se', 'Southwest':'sw' }
+
 def generateturn(report, template):
     """Given a report and a template, return a set of orders as a string."""
     firstunit = 'no'
@@ -11,7 +14,7 @@ def generateturn(report, template):
     tempreport = []
     temp = ''
     for line in report:
-        if len(line) > 2 and line[-2] == '.': # -2 since we'll have \n's at the end
+        if len(line) > 2 and (line[-2] == '.' or line[-2] == '-' or line[-2] == ':'): # -2 since we'll have \n's at the end
             withoutspaces = re.sub('\s+',' ',temp+line)
             tempreport.append(withoutspaces)
             temp=''
@@ -19,13 +22,18 @@ def generateturn(report, template):
             temp += line[:-1] + ' '*(temp!='')
     report = tempreport
     
+    #print
+    #for line in report:
+    #    print line
+    #print
+    
     # Here we parse the report and template lists to get out relevant info.
     # First, set up some regexps to get out relevant info.
     
     regionpattern = re.compile(r'''(\w+)  # initial region
 \s+                     # then a space
 \((\d+),(\d+)\)         # x,y coords
-\s+in\s+(\w+)           # region name
+\s+in\s+(.*?)           # region name
 ,\s+(\d+)\s+peasants\s+ # number of peasants
 \((.*)\),\s+            # racial type
 \$(\d+)\.               # max tax
@@ -34,13 +42,42 @@ def generateturn(report, template):
     citypattern = re.compile(r'''(\w+)  # initial region
 \s+                     # then a space
 \((\d+),(\d+)\)         # x,y coords
-\s+in\s+(\w+)           # region name
+\s+in\s+(.*?)           # region name
 ,\s+contains\s+(.*)\s+\[(\w+)\]  # city details
 ,\s+(\d+)\s+peasants\s+ # number of peasants
 \((.*)\),\s+            # racial type
 \$(\d+)\.               # max tax
 ''', re.VERBOSE)
 
+    dirpattern = re.compile(r'''\s+   # initial tab
+(\w+)                   # Direction
+\s+\:\s+
+(\w+)                   # Terrain
+\s+\(
+(\d+,\d+)               # x,y loc
+\)\s+in\s+
+(\w+)\.                 # province
+''', re.VERBOSE)
+
+    dircitypattern = re.compile(r'''\s+   # initial tab
+(\w+)                   # Direction
+\s+\:\s+
+(\w+)                   # Terrain
+\s+\(
+(\d+,\d+)               # x,y loc
+\)\s+in\s+
+(\w+)                   # province
+,\s+contains\s+
+(\w+)
+''', re.VERBOSE)
+
+# Exits:
+#  North : jungle (29,81) in Chedaru.
+#  Northeast : jungle (30,82) in Chedaru.
+#  Southeast : jungle (30,84) in Chedaru, contains Vesler [town].
+#  South : jungle (29,85) in Chedaru.
+#  Southwest : jungle (28,84) in Chedaru.
+#  Northwest : jungle (28,82) in Chedaru.
 
     # Now, go through each region and pull out info
     # Might be easier to do with split/string stuff, too
@@ -48,49 +85,102 @@ def generateturn(report, template):
     units={}
     dictstring=None
     for line in report:
-        if line.startswith('--'):
-            #the previous line must be the start of a region
-            lineindex = report.index(line)
-            print "Found a region:",report[lineindex-1]
+        lineindex = report.index(line)
+        if lineindex+1 < len(report) and report[lineindex+1].startswith('---'):
+            #the current line must be the start of a region
+            print "Found a region:",report[lineindex]
             
-        wibble = regionpattern.search(line[:-1])
-        if wibble != None:
-            #print line
-            #print "***MATCH***: ",wibble.groups()
+            wibble = regionpattern.search(report[lineindex][:-1])
+            if wibble != None:
+                #print line
+                #print "***MATCH***: ",wibble.groups()
+                
+                thisregion = {}
+                thisregion['type']=wibble.groups()[0]
+                thisregion['x']=wibble.groups()[1]
+                thisregion['y']=wibble.groups()[2]
+                thisregion['province']=wibble.groups()[3]
+                thisregion['settlename']=None
+                thisregion['settletype']=None
+                thisregion['pop']=wibble.groups()[4]
+                thisregion['race']=wibble.groups()[5]
+                thisregion['maxtax']=wibble.groups()[6]
+                
+                
+            if wibble == None:
+                wibble = citypattern.search(report[lineindex][:-1])
+                if wibble != None:
+                    #print line
+                    #print "***MATCH***: ",wibble2.groups()
+                    
+                    thisregion = {}
+                    thisregion['type']=wibble.groups()[0]
+                    thisregion['x']=wibble.groups()[1]
+                    thisregion['y']=wibble.groups()[2]
+                    thisregion['province']=wibble.groups()[3]
+                    thisregion['settlename']=wibble.groups()[4]
+                    thisregion['settletype']=wibble.groups()[5]
+                    thisregion['pop']=wibble.groups()[6]
+                    thisregion['race']=wibble.groups()[7]
+                    thisregion['maxtax']=wibble.groups()[8]
             
-            thisregion = {}
-            thisregion['type']=wibble.groups()[0]
-            thisregion['x']=wibble.groups()[1]
-            thisregion['y']=wibble.groups()[2]
-            thisregion['province']=wibble.groups()[3]
-            thisregion['settlename']=None
-            thisregion['settletype']=None
-            thisregion['pop']=wibble.groups()[4]
-            thisregion['race']=wibble.groups()[5]
-            thisregion['maxtax']=wibble.groups()[6]
+            #Weather
+            #print report[lineindex+2][:-1].split(';', 1)
+            weather = report[lineindex+2][:-1].split(';', 1)
+            if weather[0] == '  The weather was clear last month':
+                thisregion['lastweather'] = 'clear'
+                #print "Clear last month!"
+            else:
+                thisregion['lastweather'] = 'not clear'
+                #print "Not clear last month!"
+            if weather[1] == ' it will be clear next month.':
+                thisregion['weather'] = 'clear'
+                #print "Clear this month!"
+            else:
+                thisregion['weather'] = 'not clear'
+                #print "Not clear this month!"
             
+            #Wages
+            if report[lineindex+3][:-1] != ' Wages: $0.':
+                wages = re.search('\$(\d+).*?\$(\d+)', report[lineindex+3])
+                if wages != None:
+                    thisregion['wages'] = int(wages.groups()[0])
+                    thisregion['wagesmax'] = int(wages.groups()[1])
+                    #print "Wages are $"+str(thisregion['wages'])
+                    #print "Wage max is $"+str(thisregion['wagesmax'])
+            else:
+                #print "No Wages!"
+                thisregion['wages'] = 0
+                thisregion['wagesmax'] = 0
+                
+            #Wanted and For Sale
+            thisregion['wanted'] = report[lineindex+4]
+            thisregion['forsale'] = report[lineindex+5]
+            
+            #Entertainment
+            ente = re.search('\$(\d+)\.', report[lineindex+6])
+            if ente != None:
+                thisregion['entertain'] = int(ente.groups()[0])
+                print "Entertainment: ", thisregion['entertain']
+            #thisregion['entertain'] = report[lineindex+6]
+            
+            #Products
+            thisregion['products'] = report[lineindex+7]
+            
+            #Exits
+            counter = lineindex+9
+            while 1:
+                #print report[counter]
+                
+                counter += 1
+                if report[counter].startswith('*'):
+                    break
+            
+            #Now that we have all the info, commit it to 'memory'
             dictstring = wibble.groups()[1]+','+wibble.groups()[2]
             region[dictstring]=thisregion
-            units[dictstring]=[]
             
-        wibble2 = citypattern.search(line[:-1])
-        if wibble2 != None:
-            #print line
-            #print "***MATCH***: ",wibble2.groups()
-            
-            thisregion = {}
-            thisregion['type']=wibble2.groups()[0]
-            thisregion['x']=wibble2.groups()[1]
-            thisregion['y']=wibble2.groups()[2]
-            thisregion['province']=wibble2.groups()[3]
-            thisregion['settlename']=wibble2.groups()[4]
-            thisregion['settletype']=wibble2.groups()[5]
-            thisregion['pop']=wibble2.groups()[6]
-            thisregion['race']=wibble2.groups()[7]
-            thisregion['maxtax']=wibble2.groups()[8]
-            
-            dictstring = wibble2.groups()[1]+','+wibble2.groups()[2]
-            region[dictstring]=thisregion
+            # and initialise the list of units
             units[dictstring]=[]
         
         # Now for the units...

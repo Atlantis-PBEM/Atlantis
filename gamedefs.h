@@ -208,6 +208,9 @@ public:
 	};
 	int FLIGHT_OVER_WATER;
 
+	// Do starting cities exist?
+	int START_CITIES_EXIST;
+
 	//
 	// Are starting cities safe regions?  Also controls if guards in
 	// the starting cities get amulets of invulnerability.
