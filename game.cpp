@@ -2123,7 +2123,7 @@ void Game::CreateCityMon( ARegion *pReg, int percent, int needmage )
 
 void Game::AdjustCityMons( ARegion *r )
 {
-	int guard = 0;
+	int needguard = 1;
 	int needmage = 1;
 	forlist(&r->objects) {
 		Object * o = (Object *) elem;
@@ -2131,14 +2131,16 @@ void Game::AdjustCityMons( ARegion *r )
 			Unit * u = (Unit *) elem;
 			if (u->type == U_GUARD || u->type == U_GUARDMAGE) {
 				AdjustCityMon( r, u );
-				guard = 1;
+				/* Don't create new city guards if we have some */
+				needguard = 0;
 				if(u->type == U_GUARDMAGE)
 					needmage = 0;
 			}
+			if(u->guard == GUARD_GUARD) needguard = 0;
 		}
 	}
 
-    if (!guard && (getrandom(100) < Globals->GUARD_REGEN)) {
+    if (needguard && (getrandom(100) < Globals->GUARD_REGEN)) {
 		CreateCityMon( r, 10, needmage );
 	}
 }

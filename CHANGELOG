@@ -242,3 +242,4 @@ Changes from 4.0.7 -> 4.0.8
    -- Added more objects and stuff for Ceran
    -- Fixed bug which allowed two guard units to spring up in a city.
    -- Fixed problems with fileio.cpp on win32
+   -- RE-FIXED bug with city guards
