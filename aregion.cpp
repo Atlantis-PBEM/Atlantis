@@ -193,13 +193,16 @@ int ARegion::Wages()
 		if (adjlake > 0) {
 			if (Globals->LAKE_WAGE_EFFECT & GameDefs::ALL)
 				raise = 1;
-			if ((Globals->LAKE_WAGE_EFFECT & GameDefs::TOWNS) && town)
-				raise = 1;
 			if (TerrainDefs[type].similar_type != R_PLAIN) {
+				if ((Globals->LAKE_WAGE_EFFECT & GameDefs::TOWNS) && town)
+					raise = 1;
 				if (Globals->LAKE_WAGE_EFFECT & GameDefs::NONPLAINS)
 					raise = 1;
 				if((Globals->LAKE_WAGE_EFFECT & GameDefs::DESERT_ONLY) &&
 					(TerrainDefs[type].similar_type == R_DESERT))
+					raise = 1;
+			} else {
+				if ((Globals->LAKE_WAGE_EFFECT & GameDefs::TOWNS) && town)
 					raise = 1;
 			}
 			if (raise) retval++;
