@@ -633,9 +633,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 	}
 	temp = "When a faction starts the game, it is given a one-man unit and ";
-	temp += (Globals->START_MONEY -
-			(Globals->LEADERS_EXIST ?
-			 Globals->LEADER_COST : Globals->MAINTENANCE_COST));
+	temp += Globals->START_MONEY;
 	temp += " silver in unclaimed money.  Unclaimed money is cash that your "
 		"whole faction has access to, but cannot be taken away in battle ("
 		"silver in a unit's possessions can be taken in battle).  This allows "
@@ -1798,8 +1796,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "All units ";
 		}
 		temp += "pay a fee based on the number of skill levels the character "
-			"has.  This fee is $";
+			"has.  This fee is the maximum of $";
 		temp += AString(Globals->MAINTENANCE_MULTIPLIER) + " per skill level";
+		temp += " and a cost of $";
+		temp += AString(Globals->MAINTENANCE_COST) + " for normal characters";
+		temp += AString(" or $") + Globals->LEADER_COST + " for leaders";
 		if(Globals->MULTIPLIER_USE != GameDefs::MULT_ALL) {
 			temp += ". All other characters pay a fee of ";
 			temp += Globals->MAINTENANCE_COST;

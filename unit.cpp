@@ -1048,6 +1048,7 @@ int Unit::MaintCost()
 {
 	int retval = 0;
 	int levels = 0;
+	int i;
 	if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
 
 	int leaders = GetLeaders();
@@ -1055,44 +1056,34 @@ int Unit::MaintCost()
 	int nonleaders = GetMen() - leaders;
 	if (nonleaders < 0) nonleaders = 0;
 
-	switch(Globals->MULTIPLIER_USE) {
-		case GameDefs::MULT_NONE:
-			retval += Globals->MAINTENANCE_COST * nonleaders;
-			retval += Globals->LEADER_COST * leaders;
-			break;
-		case GameDefs::MULT_MAGES:
-			if(type == U_MAGE) {
-				retval += SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
-			} else {
-				retval += Globals->MAINTENANCE_COST * nonleaders;
-				retval += Globals->LEADER_COST * leaders;
-			}
-			break;
-		case GameDefs::MULT_LEADERS:
-			levels = SkillLevels();
-			if(levels)
-				retval += levels * Globals->MAINTENANCE_MULTIPLIER * leaders;
-			else
-				retval += Globals->LEADER_COST * leaders;
-			retval += Globals->MAINTENANCE_COST * nonleaders;
-			break;
-		case GameDefs::MULT_ALL:
-			levels = SkillLevels();
-			if(levels) {
-				retval += levels*Globals->MAINTENANCE_MULTIPLIER*leaders;
-				retval += levels*Globals->MAINTENANCE_MULTIPLIER*nonleaders;
-			} else {
-				retval += Globals->LEADER_COST * leaders;
-				retval += Globals->MAINTENANCE_COST * nonleaders;
-			}
-	}
+	// Handle leaders
+	// Leaders are counted at maintenance_multiplier * skills in all except
+	// the case where it's not being used (mages, leaders, all)
+	if (Globals->MULTIPLIER_USE != GameDefs::MULT_NONE) {
+		i = leaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
+		if (i < (leaders * Globals->LEADER_COST))
+			i = leaders * Globals->LEADER_COST;
+	} else
+		i = leaders * Globals->LEADER_COST;
+	retval += i;
+
+	// Handle non-leaders
+	// Non leaders are counted at maintenance_multiplier * skills only if
+	// all characters pay that way.
+	if (Globals->MULTIPLIER_USE == GameDefs::MULT_ALL) {
+		i = nonleaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
+		if (i < (nonleaders * Globals->MAINTENANCE_COST))
+			i = nonleaders * Globals->Globals->MAINTENANCE_COST;
+	} else
+		i = nonleaders * Globals->Globals->MAINTENANCE_COST;
+	retval += i;
 
 	return retval;
 }
 
 void Unit::Short(int needed, int hunger)
 {
-	int n = 0;
+	int n = 0, i, levels;
 
 	if (faction->IsNPC())
 		return; // Don't starve monsters and the city guard!
@@ -1127,7 +1118,14 @@ void Unit::Short(int needed, int hunger)
 				SetMen(i, GetMen(i) - 1);
 				n++;
 			}
-			needed -= Globals->MAINTENANCE_COST;
+			if (Globals->MULTIPLIER_USE == GameDefs::MULT_ALL) {
+				levels = SkillLevels();
+				i = levels * Globals->MAINTENANCE_MULTIPLIER;
+				if (i < Globals->MAINTENANCE_COST)
+					i = Globals->MAINTENANCE_COST;
+				needed -= i;
+			} else
+				needed -= Globals->MAINTENANCE_COST;
 			hunger -= Globals->UPKEEP_MINIMUM_FOOD;
 			if (needed < 1 && hunger < 1) {
 				if (n) Error(AString(n) + " starve to death.");
@@ -1153,7 +1151,14 @@ void Unit::Short(int needed, int hunger)
 				SetMen(i, GetMen(i) - 1);
 				n++;
 			}
-			needed -= Globals->LEADER_COST;
+			if (Globals->MULTIPLIER_USE != GameDefs::MULT_NONE) {
+				levels = SkillLevels();
+				i = levels * Globals->MAINTENANCE_MULTIPLIER;
+				if (i < Globals->LEADER_COST)
+					i = Globals->LEADER_COST;
+				needed -= i;
+			} else
+				needed -= Globals->LEADER_COST;
 			hunger -= Globals->UPKEEP_MINIMUM_FOOD;
 			if (needed < 1 && hunger < 1) {
 				if (n) Error(AString(n) + " starve to death.");
@@ -1176,7 +1181,7 @@ int Unit::FlyingCapacity()
 		Item *i = (Item *) elem;
 		cap += ItemDefs[i->type].fly * i->num;
 	}
-   
+
 	return cap;
 }
 

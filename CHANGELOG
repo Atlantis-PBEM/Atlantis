@@ -690,3 +690,9 @@ Changes from 4.0.10 -> 5.0.0
       prevented from further moves or attacks.  Full healing should mean
       no penalties.
    -- Fixed a bug in output of rules dealing with skill-based maintenance.
+   -- Fixed a bug dealing with the cost of non-skilled units versus skilled
+      units when in a maintenance mode which requires skill based upkeep.
+      Units will now pay the maximum of the skill based upkeep or the normal
+      upkeep.  This means that GM's should probably *lower* the normal upkeep
+      to something more reasonable than 10/20 if they are using the skill
+      based upkeep unless they JUST want to penalize higher skilled leaders.
