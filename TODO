@@ -4,8 +4,6 @@
    -- Improve the item/hex editor
    -- Gamedef to handle various options around combat/weapons/bows for taxing
    -- Gamedefs for various economy options. (far future)
-   -- Add option to allow towers/forts/etc to allow training only a certain
-      number of mages.
    -- Consider more complicated GIVE processing of 'GIVE ALL EXCEPT .....'
    -- Consider requiring both food and pay for upkeep (make upkeep more
       flexible in general).  Someone supplied a patch to allow a leader to
