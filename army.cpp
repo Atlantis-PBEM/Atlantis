@@ -150,43 +150,41 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
     // Check if this unit is mounted
     //
     TerrainType *pTer = &TerrainDefs[ regtype ];
-    if( pTer->flags & TerrainType::FLYINGMOUNTS )
-    {
+    if((pTer->flags & TerrainType::FLYINGMOUNTS) ||
+	   (pTer->flags & TerrainType::RIDINGMOUNTS)) {
         //
-        // Mounts _are_ allowed in this region
+        // Mounts of some type _are_ allowed in this region
         //
         int mountType;
-        for( mountType = 1; mountType < NUMMOUNTS; mountType++ )
-        {
-            MountType *pMnt = &MountDefs[ mountType ];
+        for(mountType = 1; mountType < NUMMOUNTS; mountType++ ) {
+			MountType *pMnt = &MountDefs[ mountType ];
             
             int item = unit->GetBattleItem( IT_MOUNT, mountType );
-            if( item == -1 )
-            {
+            if( item == -1 ) {
                 continue;
             }
-            
+
             //
             // check if this mount works in this region
             //
-            if( ItemDefs[ item ].fly )
-            {
-                //
-                // If the mount can fly, we're OK
-                //
-            }
-            else
-            {
-                if( !( pTer->flags & TerrainType::RIDINGMOUNTS ))
-                {
-                    //
-                    // The mount can't fly, and can't be used in this
-                    // region.
-                    //
-                    unit->items.SetNum( item, unit->items.GetNum( item ) + 1 );
-                    continue;
-                }
-            }
+			if(pTer->flags & TerrainType::FLYINGMOUNTS) {
+				if(!ItemDefs[item].fly) {
+					// The mount cannot fly, see if the region
+					// allows riding mounts.
+					if(!(pTer->flags & TerrainType::RIDINGMOUNTS)) {
+						unit->items.SetNum(item,unit->items.GetNum(item)+1);
+						continue;
+					}
+				}
+			} else {
+				// This region allows riding mounts, so if the mount
+				// can ONLY fly or swim but not ride, put it back
+				if(!ItemDefs[item].ride) {
+					unit->items.SetNum(item, unit->items.GetNum(item)+1);
+					continue;
+				}
+			}
+
 
             int bonus = unit->GetSkill( pMnt->skill );
             if( bonus < pMnt->minBonus )
@@ -202,6 +200,14 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
             {
                 bonus = pMnt->maxBonus;
             }
+
+			// The mount can fly, but the terrain doesn't allow flying mounts
+			// so, limit the bonus the mount can give.
+			if(ItemDefs[item].fly &&
+			   !(pTer->flags & TerrainType::FLYINGMOUNTS)) {
+				if(bonus > pMnt->maxRiding)
+					bonus = pMnt->maxRiding;
+			}
 
             askill += bonus;
             dskill[ ATTACK_COMBAT ] += bonus;

@@ -195,6 +195,10 @@ public:
     //
     int maxBonus;
 
+	//
+	// This is the max bonus a mount will grant if it can normally fly
+	// but the region doesn't allow flying mounts
+	int maxRiding;
 };
 
 extern MountType *MountDefs;

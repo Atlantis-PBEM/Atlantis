@@ -684,13 +684,13 @@ ArmorType *ArmorDefs = armd;
 //
 MountType mountd[] = {
     // MOUNT_NONE
-    { 0, 0, 0 },
+    { 0, 0, 0, 0 },
     // MOUNT_WHORSE
-    { S_RIDING, 3, 5 },
+    { S_RIDING, 3, 5, 3 },
     // MOUNT_HORSE
-    { S_RIDING, 1, 3 },
+    { S_RIDING, 1, 3, 3 },
 	// MOUNT_CAMEL
-	{ S_RIDING, 1, 2 },
+	{ S_RIDING, 1, 2, 2 },
 };
 
 MountType *MountDefs = mountd;

@@ -138,3 +138,9 @@ Changes from 4.0.6 -> 4.0.7
       Force shield changed to protect against all ranged weapon attacks.
    -- Fixed bug which caused GCC v3.0 to not compile atlantis
    -- Moved TODO list to it's own file
+   -- Modified the mount selection code so that if you had a region that
+      only allows riding mounts and you have a mount that has ride but not
+      fly it still gets correctly selected.
+   -- If a region only allows riding but not flying mounts (non currently)
+      then a flying mount used in that region will be restricted to the
+      maxRiding bonus defined in the MountType structure.
