@@ -539,6 +539,15 @@ public:
 	};
 
 	int ARMY_ROUT;
+	
+	// How are fortification bonuses handled?
+	// Setting this flag will enable fort bonuses to be treated as a
+	// modifier to the attack chance rather than a flat bonus to the
+	// defence skill. This will make forts much better, especially
+	// against skilled/well-equipped attackers.
+	// Chance will depend on the fort protection level:
+	// 1 : 25%, 2: 25%, 3: 20%, 4: 20%, 5: 16% and so on.
+	int ADVANCED_FORTS;
 
 	// If this is set to 0 then a mage gets his TRUE_SEEING skill/2
 	// rounded up as a bonus to observation.  Lacandon (and perhaps others)

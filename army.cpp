@@ -62,6 +62,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	dskill[ATTACK_WEATHER] = -2;
 	dskill[ATTACK_RIDING] = 0;
 	dskill[ATTACK_RANGED] = 0;
+	for(int i=0; i<NUM_ATTACK_TYPES; i++)
+		protection[i] = 0;
 	damage = 0;
 	hits = 1;
 	maxhits = 1;
@@ -73,7 +75,10 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		building = o->type;
 		//should the runes spell be a base or a bonus?
 		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
-			dskill[i] += ObjectDefs[o->type].defenceArray[i];
+			if(Globals->ADVANCED_FORTS) {
+				protection[i] += ObjectDefs[o->type].defenceArray[i];
+			} else
+				dskill[i] += ObjectDefs[o->type].defenceArray[i];
 		}
 		if (o->runes) {
 			dskill[ATTACK_ENERGY] = max(dskill[ATTACK_ENERGY], o->runes);
@@ -1122,7 +1127,11 @@ int Army::DoAnAttack(char *special, int numAttacks, int attackType,
 		/* 5. Attack soldier */
 		if (attackType != NUM_ATTACK_TYPES) {
 			if(!(flags & WeaponType::ALWAYSREADY)) {
-				if(getrandom(2)) {
+				int failchance = 2;
+				if(Globals->ADVANCED_FORTS) {
+					failchance += (tar->protection[attackType]+1)/2;
+				}
+				if(getrandom(failchance)) {
 					continue;
 				}
 			}

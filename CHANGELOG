@@ -836,24 +836,27 @@ Changes from 4.0.10 -> 5.0.0
       levels.  Cleaned up some direction handling and some assumptions
       about there always being a region where you expected one to be.
    -- Fixed bug in CheckSea() where left of D_NORTH gave you D_NORTHEAST.
-   -- created map.cpp in the gameset directory and moved world creation code
+   -- Created map.cpp in the gameset directory and moved world creation code
       from aregion.cpp to map.cpp to allow for game specific setup routines
-   -- removed FRACTAL_... gamedefs - these things are now handled by game
+   -- Removed FRACTAL_... gamedefs - these things are now handled by game
       specific code in map.cpp
-   -- created economy.cpp in the main directory and moved economy-related code
+   -- Created economy.cpp in the main directory and moved economy-related code
       from aregion.cpp into economy.cpp.
-   -- tidied up market setup: markets now have a fixed number of normal-type
+   -- Tidied up market setup: markets now have a fixed number of normal-type
       buy/sell items. The items are now related to the racial skills and
       the produceable resources in the region. This removes a lot of the
       weapons and tools on sale in the game.
-   -- changed the way market activity figures in town growth. Only grain and
+   -- Changed the way market activity figures in town growth. Only grain and
       livestock as well as trade items are needed for town growth - all other
       items can be traded for extra gain as a replacement for untraded grain
       or livestock.
-   -- added code to create City Guards from normal men if LEADER_EXIST isn't
+   -- Added code to create City Guards from normal men if LEADER_EXIST isn't
       set.
-   -- the MakeManUnit(..) function in npc.cpp now helps with setting up
+   -- MakeManUnit(..) function in npc.cpp now helps with setting up
       npc units consisting of normal men, their weapons and armor (if any).
       The idea is that the same code can be used to easily create roaming
       npc units later on...
-   -- fixed NameRegions() in the fractal set-up (in the kingdoms game).
+   -- Fixed NameRegions() in the fractal set-up (in the kingdoms game).
+   -- Added a gamedef ADVANCED_FORTS which implements the fort modification
+      to attack chance idea. See gamdefs.h for details. Nothing done about
+      routing or any other suggestions connected to forts yet.

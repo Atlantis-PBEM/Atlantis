@@ -85,6 +85,7 @@ class Soldier {
 
 		/* Defense info */
 		int dskill[NUM_ATTACK_TYPES];
+		int protection[NUM_ATTACK_TYPES];
 		int armor;
 		int hits;
 		int maxhits;
