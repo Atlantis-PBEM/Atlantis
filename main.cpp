@@ -30,7 +30,7 @@
 #include "game.h"
 #include "items.h"
 #include "skills.h"
-#include "rules.h"
+#include "gamedata.h"
 
 void usage()
 {
@@ -106,6 +106,8 @@ int main(int argc, char *argv[])
         doneIO();
         return 0;
     }
+
+	game.ModifyTablesPerRuleset();
 
     do
     {

@@ -24,7 +24,7 @@
 // END A3HEADER
 #include "skills.h"
 #include "items.h"
-#include "rules.h"
+#include "gamedata.h"
 
 int ParseSkill(AString * token) {
   for (int i=0; i<NSKILLS; i++) {

@@ -25,7 +25,7 @@
 #include "production.h"
 #include "gameio.h"
 #include "items.h"
-#include "rules.h"
+#include "gamedata.h"
 
 Production::Production()
 {

@@ -29,7 +29,7 @@
 // 2001/Feb/21 Joseph Traub    Added FACLIM_UNLIMITED
 //
 #include "game.h"
-#include "rules.h"
+#include "gamedata.h"
 
 void Game::RunOrders()
 {
@@ -1121,41 +1121,41 @@ void Game::CheckWMonAttack(ARegion * r,Unit * u) {
   if (t) AttemptAttack(r,u,t,1);
 }
 
-void Game::DoAttackOrders() {
-  forlist(&regions) {
-    ARegion * r = (ARegion *) elem;
-    forlist(&r->objects) {
-      Object * o = (Object *) elem;
-      forlist(&o->units) {
-	Unit * u = (Unit *) elem;
-	if (u->type == U_WMON) {
-	  if (u->canattack && u->IsAlive()) {
-	    CheckWMonAttack(r,u);
-	  }
-	} else {
-	  if (u->IsAlive() && u->attackorders) {
-	    AttackOrder * ord = u->attackorders;
-	    while (ord->targets.Num()) {
-	      UnitId * id =
-		(UnitId *) ord->targets.First();
-	      ord->targets.Remove(id);
-	      Unit * t = r->GetUnitId(id,u->faction->num);
-	      delete id;
-	      if (u->canattack && u->IsAlive()) {
-		if (t) {
-		  AttemptAttack(r,u,t,0);
-		} else {
-		  u->Error("ATTACK: Non-existent unit.");
+void Game::DoAttackOrders()
+{
+	forlist(&regions) {
+		ARegion * r = (ARegion *) elem;
+		forlist(&r->objects) {
+			Object * o = (Object *) elem;
+			forlist(&o->units) {
+				Unit * u = (Unit *) elem;
+				if (u->type == U_WMON) {
+					if (u->canattack && u->IsAlive()) {
+						CheckWMonAttack(r,u);
+					}
+				} else {
+					if (u->IsAlive() && u->attackorders) {
+						AttackOrder * ord = u->attackorders;
+						while (ord->targets.Num()) {
+							UnitId * id = (UnitId *) ord->targets.First();
+							ord->targets.Remove(id);
+							Unit * t = r->GetUnitId(id,u->faction->num);
+							delete id;
+							if (u->canattack && u->IsAlive()) {
+								if (t) {
+									AttemptAttack(r,u,t,0);
+								} else {
+									u->Error("ATTACK: Non-existent unit.");
+								}
+							}
+						}
+						delete ord;
+						u->attackorders = 0;
+					}
+				}
+			}
 		}
-	      }
-	    }
-	    delete ord;
-	    u->attackorders = 0;
-	  }
 	}
-      }
-    }
-  }
 }
 
 /*

@@ -24,7 +24,7 @@
 // END A3HEADER
 #include "items.h"
 #include "skills.h"
-#include "rules.h"
+#include "gamedata.h"
 
 int ParseItem(AString * token)
 {

@@ -29,7 +29,7 @@
 //                            Added this file.
 // 2001/Feb/18 Joseph Traub   Added support for Conquest map types
 #include "game.h"
-#include "rules.h"
+#include "gamedata.h"
 #include <stdio.h>
 
 #define LINE_WIDTH         70

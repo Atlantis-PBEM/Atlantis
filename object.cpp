@@ -29,7 +29,7 @@
 #include "object.h"
 #include "items.h"
 #include "skills.h"
-#include "rules.h"
+#include "gamedata.h"
 #include "unit.h"
 
 int ParseObject(AString * token)

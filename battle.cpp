@@ -26,7 +26,7 @@
 #include "battle.h"
 #include "army.h"
 #include "gamedefs.h"
-#include "rules.h"
+#include "gamedata.h"
 
 Battle::Battle()
 {

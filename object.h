@@ -53,6 +53,7 @@ public:
   int production;
   enum {
 	  DISABLED = 0x1,
+	  NO_MON_GROWTH = 0x2,
   };
   int flags;
 };

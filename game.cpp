@@ -32,7 +32,7 @@
 #include "unit.h"
 #include "fileio.h"
 #include "astring.h"
-#include "rules.h"
+#include "gamedata.h"
 
 Game::Game()
 {
@@ -260,6 +260,8 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 int Game::NewGame()
 {
     factionseq = 1;
+	guardfaction = 0;
+	monfaction = 0;
     unitseq = 1;
     SetupUnitNums();
     shipseq = 100;
@@ -273,9 +275,7 @@ int Game::NewGame()
     seedrandomrandom();
 
     CreateWorld();
-	if(Globals->CITY_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST ||
-			Globals->LAIR_MONSTERS_EXIST)
-		CreateNPCFactions();
+	CreateNPCFactions();
 
 	if(Globals->CITY_MONSTERS_EXIST)
 		CreateCityMons();
@@ -1844,6 +1844,7 @@ void Game::CreateNPCFactions()
 		temp = new AString("The Guardsmen");
 		f->SetName(temp);
 		f->SetNPC();
+		f->lastorders = 0;
 		factions.Add(f);
 	}
 	// Always create a monsters faction since even in conquest, demons
@@ -1853,6 +1854,7 @@ void Game::CreateNPCFactions()
 	temp = new AString("Creatures");
 	f->SetName(temp);
 	f->SetNPC();
+	f->lastorders = 0;
 	factions.Add(f);
 }
 
@@ -2008,7 +2010,12 @@ int Game::MakeWMon( ARegion *pReg )
 
 void Game::MakeLMon( Object *pObj )
 {
+
+	if(ObjectDefs[pObj->type].flags & ObjectType::NO_MON_GROWTH)
+		return;
+
 	int montype = ObjectDefs[ pObj->type ].monster;
+
 	if (montype == I_TRENT) {
 		montype = TerrainDefs[ pObj->region->type].bigmon;
 	}
@@ -2039,4 +2046,104 @@ void Game::MakeLMon( Object *pObj )
 	}
 
 	u->MoveUnit( pObj );
+}
+
+void Game::DisableSkill(int sk)
+{
+	if(sk < 0 || sk > (NSKILLS-1)) return;
+	SkillDefs[sk].flags |= SkillType::DISABLED;
+}
+
+void Game::DisableItem(int item)
+{
+	if(item < 0 || item > (NITEMS-1)) return;
+	ItemDefs[item].flags |= ItemType::DISABLED;
+}
+
+void Game::DisableObject(int obj)
+{
+	if(obj < 0 || obj > (NOBJECTS-1)) return;
+	ObjectDefs[obj].flags |= ObjectType::DISABLED;
+}
+
+void Game::ModifyTerrainRaces(int t, int r1, int r2, int r3, int cr1, int cr2)
+{
+	if(t < 0 || t > (R_NUM -1)) return;
+	if(r1 > NITEMS-1) r1 = -1;
+	if(r2 > NITEMS-1) r2 = -1;
+	if(r3 > NITEMS-1) r3 = -1;
+	if(cr1 > NITEMS-1) cr1 = -1;
+	if(cr2 > NITEMS-1) cr2 = -1;
+	TerrainDefs[t].race1 = r1;
+	TerrainDefs[t].race2 = r2;
+	TerrainDefs[t].race3 = r3;
+	TerrainDefs[t].coastalrace1 = cr1;
+	TerrainDefs[t].coastalrace2 = cr2;
+}
+
+void Game::ModifyTerrainItems(int t, int p1, int c1, int a1,
+		                             int p2, int c2, int a2,
+		                             int p3, int c3, int a3,
+		                             int p4, int c4, int a4,
+		                             int p5, int c5, int a5)
+{
+	if(t < 0 || t > (R_NUM -1)) return;
+	if(p1 > NITEMS-1) p1 = -1;
+	if(p2 > NITEMS-1) p2 = -1;
+	if(p3 > NITEMS-1) p3 = -1;
+	if(p4 > NITEMS-1) p4 = -1;
+	if(p5 > NITEMS-1) p5 = -1;
+	if(c1 < 0 || c1 > 100) c1 = 0;
+	if(c2 < 0 || c2 > 100) c2 = 0;
+	if(c3 < 0 || c3 > 100) c3 = 0;
+	if(c4 < 0 || c4 > 100) c4 = 0;
+	if(c5 < 0 || c5 > 100) c5 = 0;
+	if(a1 < 0) a1 = 0;
+	if(a2 < 0) a2 = 0;
+	if(a3 < 0) a3 = 0;
+	if(a4 < 0) a4 = 0;
+	if(a5 < 0) a5 = 0;
+	TerrainDefs[t].prod1 = p1;
+	TerrainDefs[t].chance1 = c1;
+	TerrainDefs[t].amt1 = a1;
+	TerrainDefs[t].prod2 = p2;
+	TerrainDefs[t].chance2 = c2;
+	TerrainDefs[t].amt2 = a2;
+	TerrainDefs[t].prod3 = p3;
+	TerrainDefs[t].chance3 = c3;
+	TerrainDefs[t].amt3 = a3;
+	TerrainDefs[t].prod4 = p4;
+	TerrainDefs[t].chance4 = c4;
+	TerrainDefs[t].amt4 = a4;
+	TerrainDefs[t].prod5 = p5;
+	TerrainDefs[t].chance5 = c5;
+	TerrainDefs[t].amt5 = a5;
+}
+
+void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum)
+{
+	if(t < 0 || t > (R_NUM -1)) return;
+	if(freq < 0) freq = 0;
+	if(smon > NITEMS-1) smon = -1;
+	if(bigmon > NITEMS-1) bigmon = -1;
+	if(hum > NITEMS-1) hum = -1;
+	TerrainDefs[t].wmonfreq = freq;
+	TerrainDefs[t].smallmon = smon;
+	TerrainDefs[t].bigmon = bigmon;
+	TerrainDefs[t].humanoid = hum;
+}
+
+void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4)
+{
+	if(t < 0 || t > (R_NUM -1)) return;
+	if(chance < 0 || chance > 100) chance = 0;
+	if(l1 > NOBJECTS-1) l1 = -1;
+	if(l2 > NOBJECTS-1) l2 = -1;
+	if(l3 > NOBJECTS-1) l3 = -1;
+	if(l4 > NOBJECTS-1) l4 = -1;
+	TerrainDefs[t].lairChance = chance;
+	TerrainDefs[t].lair1 = l1;
+	TerrainDefs[t].lair2 = l2;
+	TerrainDefs[t].lair3 = l3;
+	TerrainDefs[t].lair4 = l4;
 }

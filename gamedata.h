@@ -476,6 +476,7 @@ enum {
 	// JT
 	// Abyss Lair
 	O_BKEEP,
+	O_PALACE,
     NOBJECTS
 };
 

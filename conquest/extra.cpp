@@ -26,7 +26,7 @@
 // This file contains extra game-specific functions
 //
 #include "game.h"
-#include "rules.h"
+#include "gamedata.h"
 
 int Game::SetupFaction( Faction *pFac )
 {
@@ -65,8 +65,8 @@ int Game::SetupFaction( Faction *pFac )
 	// Make a citadel for this faction
 	Object *obj = new Object(pReg);
 	obj->num = pReg->buildingseq++;
-	obj->name = new AString(AString("Citadel [")+obj->num+"]");
-	obj->type = O_CITADEL;
+	obj->name = new AString(AString("Palace [")+obj->num+"]");
+	obj->type = O_PALACE;
 	obj->incomplete = 0;
 	obj->inner = -1;
 	pReg->objects.Add(obj);
@@ -89,6 +89,7 @@ Faction *Game::CheckVictory()
 	// First, if there is only one living faction, it is the winner.
 	forlist(&factions) {
 		Faction *pFac = (Faction *)elem;
+		if (pFac->IsNPC()) continue;
 		if(pFac->exists) {
 			if(pVictor) {
 				// This is the second faction we've found.  No winner.
@@ -109,7 +110,7 @@ Faction *Game::CheckVictory()
 			if(pReg->IsStartingCity()) {
 				forlist(&(pReg->objects)) {
 					Object *pObj = (Object *)elem;
-					if(pObj->type != O_CITADEL) {
+					if(pObj->type != O_PALACE) {
 						continue;
 					}
 					Unit *u = pObj->GetOwner();
@@ -152,4 +153,48 @@ int Game::AllowedTaxes( Faction *pFac )
 int Game::AllowedTrades( Faction *pFac )
 {
     return -1;
+}
+
+void Game::ModifyTablesPerRuleset(void)
+{
+	/* There are no foodstuffs in conquest */
+	DisableSkill(S_FISHING);
+	DisableSkill(S_FARMING);
+	DisableSkill(S_RANCHING);
+
+	/* Disable high-end production enhancer buildings */
+	DisableObject(O_TEMPLE);
+	DisableObject(O_MQUARRY);
+	DisableObject(O_AMINE);
+	DisableObject(O_PRESERVE);
+	DisableObject(O_SACGROVE);
+
+	/* Disable items which enhance production */
+	DisableItem(I_PICK);
+	DisableItem(I_SPEAR);
+	DisableItem(I_AXE);
+	DisableItem(I_HAMMER);
+	DisableItem(I_NET);
+	DisableItem(I_LASSO);
+	DisableItem(I_BAG);
+	DisableItem(I_SPINNING);
+
+	/* All men are created equal */
+	ModifyTerrainRaces(R_PLAIN,I_MAN,-1,-1,-1,-1);
+	ModifyTerrainRaces(R_FOREST,I_MAN,-1,-1,-1,-1);
+	ModifyTerrainRaces(R_MOUNTAIN,I_MAN,-1,-1,-1,-1);
+	ModifyTerrainRaces(R_SWAMP,I_MAN,-1,-1,-1,-1);
+	ModifyTerrainRaces(R_ISLAND_PLAIN,I_MAN,-1,-1,-1,-1);
+	ModifyTerrainRaces(R_ISLAND_MOUNTAIN,I_MAN,-1,-1,-1,-1);
+	ModifyTerrainRaces(R_ISLAND_SWAMP,I_MAN,-1,-1,-1,-1);
+
+	/* Limit the resources on the islands and remove fish */
+	ModifyTerrainItems(R_OCEAN, -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0);
+	ModifyTerrainItems(R_ISLAND_PLAIN, I_HORSE,100,20, -1,0,0, -1,0,0,
+			-1,0,0, -1,0,0);
+	ModifyTerrainItems(R_ISLAND_SWAMP, I_WOOD,100,10, -1,0,0, -1,0,0,
+			-1,0,0, -1,0,0);
+	ModifyTerrainItems(R_ISLAND_MOUNTAIN, I_IRON,100,20, I_STONE,100,10,
+			-1,0,0, -1,0,0, -1,0,0);
+	return;
 }

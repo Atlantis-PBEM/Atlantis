@@ -23,7 +23,7 @@
 //
 // END A3HEADER
 #include "skills.h"
-#include "rules.h"
+#include "gamedata.h"
 
 static ShowType sd[] = {
 /* skill, level, desc */

@@ -23,7 +23,7 @@
 //
 // END A3HEADER
 #include "game.h"
-#include "rules.h"
+#include "gamedata.h"
 
 void Game::CreateCityMons()
 {
@@ -147,10 +147,9 @@ void Game::GrowLMons( int rate )
             Object * obj = (Object *) elem;
             if (obj->units.Num()) continue;
             int montype = ObjectDefs[obj->type].monster;
-            if (montype != -1)
-            {
-                if (getrandom(100) < rate)
-                {
+			int grow = !(ObjectDefs[obj->type].flags & ObjectType::NO_MON_GROWTH);
+            if ((montype != -1) && grow) {
+                if (getrandom(100) < rate) {
                     MakeLMon( obj );
                 }
             }

@@ -34,7 +34,7 @@
 #include "gameio.h"
 #include "orders.h"
 #include "skills.h"
-#include "rules.h"
+#include "gamedata.h"
 
 char * DirectionAbrs[] = {
   "N",

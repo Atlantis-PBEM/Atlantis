@@ -31,7 +31,7 @@
 // 2001/Feb/18 Joseph Traub    Added Apprentices concept from Lacondon Conquest
 #include "army.h"
 #include "gameio.h"
-#include "rules.h"
+#include "gamedata.h"
 
 enum {
   WIN_NO_DEAD,

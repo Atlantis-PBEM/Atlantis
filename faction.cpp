@@ -29,7 +29,12 @@
 // 2000/MAR/14 Davis Kulis     Added a new reporting Template.
 // 2001/Feb/18 Joseph Traub    Added Apprentices concept from Lacandon Conquest
 // 2001/Feb/21 Joseph Traub    Added a FACLIM_UNLIMITED option
-#include "rules.h"
+// 2001/Feb/22 Joseph Traub    Modified to always save out faction type values
+//                             even in scenarios where they aren't used or
+//                             else your city guard and monster facs lose
+//                             their NPC status in UNLIMITED
+//
+#include "gamedata.h"
 #include "game.h"
 
 char * as[] = {
@@ -146,13 +151,9 @@ void Faction::Writeout( Aoutfile *f )
 {
     f->PutInt(num);
 
-    if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES )
-    {
-        for (int i=0; i<NFACTYPES; i++)
-        {
-            f->PutInt(type[i]);
-        }
-    }
+    for (int i=0; i<NFACTYPES; i++) {
+		f->PutInt(type[i]);
+	}
 
     f->PutInt(lastchange);
     f->PutInt(lastorders);
@@ -175,11 +176,8 @@ void Faction::Readin( Ainfile *f, ATL_VER v )
     num = f->GetInt();
     int i;
 
-    if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES )
-    {
-        for (i=0; i<NFACTYPES; i++) {
-            type[i] = f->GetInt();
-        }
+    for (i=0; i<NFACTYPES; i++) {
+		type[i] = f->GetInt();
     }
 
     lastchange = f->GetInt();

@@ -30,7 +30,7 @@
 #include "market.h"
 #include "items.h"
 #include "gameio.h"
-#include "rules.h"
+#include "gamedata.h"
 
 Market::Market() {
   activity = 0;

@@ -32,7 +32,7 @@
 //
 
 #include "unit.h"
-#include "rules.h"
+#include "gamedata.h"
 
 UnitId::UnitId() {
 }

@@ -26,7 +26,7 @@
 // This file contains extra game-specific functions
 //
 #include "game.h"
-#include "rules.h"
+#include "gamedata.h"
 
 int Game::SetupFaction( Faction *pFac )
 {
@@ -126,4 +126,10 @@ int Game::AllowedTrades( Faction *pFac )
 		case 5: return 100;
 	}
     return 0;
+}
+
+void Game::ModifyTablesPerRuleset(void)
+{
+	// No changes to make
+	return;
 }

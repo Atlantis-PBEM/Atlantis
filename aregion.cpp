@@ -34,7 +34,7 @@
 //
 
 #include "game.h"
-#include "rules.h"
+#include "gamedata.h"
 
 Location * GetUnit(AList * list,int n)
 {
@@ -800,7 +800,8 @@ void ARegion::Setup()
     Object * obj = new Object( this );
     objects.Add(obj);
 
-    LairCheck();
+	if(Globals->LAIR_MONSTERS_EXIST)
+		LairCheck();
 }
 
 void ARegion::UpdateTown()

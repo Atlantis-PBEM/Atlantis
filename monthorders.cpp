@@ -29,7 +29,7 @@
 // 2000/MAR/21 Azthar Septragen  Added roads.
 // 2001/Feb/21 Joseph Traub      Added FACLIM_UNLIMITED
 #include "game.h"
-#include "rules.h"
+#include "gamedata.h"
 
 void Game::RunSailOrders()
 {

@@ -28,7 +28,7 @@
 // 2000/SEP/06 Joseph Traub      Added base man cost to allow races to have
 //                               different base costs
 #include "game.h"
-#include "rules.h"
+#include "gamedata.h"
 
 // Make sure this is correct.   The default is 1000 towns and 1000 regions.
 #define NUMBER_OF_TOWNS 1000

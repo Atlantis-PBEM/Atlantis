@@ -23,7 +23,7 @@
 //
 // END A3HEADER
 #include "game.h"
-#include "rules.h"
+#include "gamedata.h"
 
 void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {

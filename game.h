@@ -110,6 +110,10 @@ public:
 
     int TurnNumber();
 
+	// JLT
+	// Functions to allow enabling/disabling parts of the data tables
+	void ModifyTablesPerRuleset(void);
+
 private:
     //
     // Game editing functions.
@@ -163,6 +167,21 @@ private:
     int UpgradeMajorVersion(int savedVersion);
     int UpgradeMinorVersion(int savedVersion);
     int UpgradePatchLevel(int savedVersion);
+
+	// JLT
+	// Functions to allow enabling/disabling parts of the data tables
+	void DisableSkill(int sk);  // Prevents skill being studied or used
+	void DisableItem(int it); // Prevents item being generated/produced
+	void DisableObject(int ob); // Prevents object being built
+	void ModifyTerrainRaces(int t, int r1, int r2, int r3, int cr1, int cr2);
+	void ModifyTerrainItems(int t, int prod1, int chance1, int amt1,
+			                       int prod2, int chance2, int amt2,
+			                       int prod3, int chance3, int amt3,
+			                       int prod4, int chance4, int amt4,
+			                       int prod5, int chance5, int amt5);
+	void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum);
+	void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4);
+
 
     AList factions;
     AList newfactions; /* List of strings */
