@@ -92,6 +92,12 @@ void Game::ModifySkillFlags(int sk, int flags)
 	SkillDefs[sk].flags = flags;
 }
 
+/// Modify the cost (in silver) to study a skill for a month.
+/**
+\arg \c sk One of the values from the NSKILLS enum in gamedata.h
+\arg \c cost An amount of silver
+
+*/
 void Game::ModifySkillCost(int sk, int cost)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
@@ -99,6 +105,13 @@ void Game::ModifySkillCost(int sk, int cost)
 	SkillDefs[sk].cost = cost;
 }
 
+/// Modify the special effects associated with skills.
+/** Mostly associated with spells, eg. fireball, banish_demon, etc.
+
+\arg \c sk One of the values from the NSKILLS enum in gamedata.h
+\arg \c special A special string, eg. "lightning", "clear_skies"
+
+*/
 void Game::ModifySkillSpecial(int sk, char *special)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
@@ -106,6 +119,13 @@ void Game::ModifySkillSpecial(int sk, char *special)
 	SkillDefs[sk].special = special;
 }
 
+/// Modify the range of a skill.
+/** This refers to the physical range within the game world.
+See skills.h for the full list.
+\arg \c sk One of the values from the NSKILLS enum in gamedata.h
+\arg \c cost An amount of silver
+
+*/
 void Game::ModifySkillRange(int sk, char *range)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
