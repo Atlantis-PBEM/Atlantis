@@ -715,3 +715,5 @@ Changes from 4.0.10 -> 5.0.0
    -- CleanUpWater() now uses recursive calls to CheckSea() and is configurable
       via SEA_LIMIT. Added SEVER_LAND_BRIDGES gamedef to control severing
       behaviour.
+   -- Added TERRAIN_GRANULARITY gamedef that controls variability in terrain
+      distribution.

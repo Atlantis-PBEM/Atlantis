@@ -3411,6 +3411,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				reg->race = -1;
 				reg->wages = -1;
 				reg->maxwages = -1;
+				reg->population = -1;
 
 				Add(reg);
 				arr->SetRegion(x, y, reg);
@@ -3739,15 +3740,28 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 {
 	// Now, setup the anchors
 	Awrite("Setting up the anchors");
-	for (int x=0; x<(ta->x)/4; x++) {
-		for (int y=0; y<(ta->y)/8; y++) {
+	int skip = 250;
+	int f = 2;
+	if(Globals->TERRAIN_GRANULARITY) {
+		skip = Globals->TERRAIN_GRANULARITY;
+		while (skip > 5) {
+			f++;
+			skip -= 5;  // yes, that's intended!
+			if (skip < 1) skip = 1;
+		}
+		skip = 100 * ((skip+3) * f + 2) / (skip + f - 2);
+	}
+	for (int x=0; x<(ta->x)/f; x++) {
+		for (int y=0; y<(ta->y)/(f*2); y++) {
+			if(getrandom(1000) > skip) continue;
 			ARegion *reg = 0;
 			for (int i=0; i<4; i++) {
-				int tempx = x * 4 + getrandom(4);
-				int tempy = y * 8 + getrandom(4)*2 + tempx%2;
+				int tempx = x * f + getrandom(f);
+				int tempy = y * f * 2 + getrandom(f)*2 + tempx%2;
 				reg = ta->GetRegion(tempx, tempy);
 				if (reg->type == R_NUM) {
 					reg->type = GetRegType(reg);
+					reg->population = 1;
 					if (TerrainDefs[reg->type].similar_type != R_OCEAN)
 						reg->wages = AGetName(0);
 					break;
@@ -3788,6 +3802,8 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 					for (int i=0; i<NDIRS; i++) {
 						ARegion *t = reg->neighbors[(i+init) % NDIRS];
 						if (t) {
+							if ((j==0) && (t->population < 1)) continue;
+							if (j==0) t->population--;
 							if(t->type != R_NUM &&
 								(TerrainDefs[t->type].similar_type!=R_OCEAN ||
 								 (growOcean && (t->type != R_LAKE)))) {

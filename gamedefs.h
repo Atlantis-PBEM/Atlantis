@@ -338,6 +338,11 @@ public:
 	
 	// Size factor for continent creation.
 	int CONTINENT_SIZE;
+	
+	// Granularity of terrain - default setting is 0.
+	// A value of 1 means maximum variability,
+	// higher values = more regular terrain spread
+	int TERRAIN_GRANULARITY;
 
 	// Enable Archipelago Creation
 	// = chance of creating archipelagos vs continents
