@@ -175,3 +175,8 @@ Changes from 4.0.6 -> 4.0.7
       of resources, lairs, races easier.
    -- Changed lair percent to be percent of terrain type which has lair
       rather than percent chance for each type of lair.
+   -- Reorganized as many of the rest of the datastructures as I could get
+      my hands on to do similar stuff to what I did to the terrain data
+      structs.
+   -- Added some fields (unpopulated as yet) in the item structures to handle
+      crafting items by magic.  Down with special cases.
