@@ -717,3 +717,4 @@ Changes from 4.0.10 -> 5.0.0
       behaviour.
    -- Added TERRAIN_GRANULARITY gamedef that controls variability in terrain
       distribution.
+   -- Added another variant: Fracas!

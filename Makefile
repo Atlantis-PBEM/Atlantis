@@ -27,7 +27,7 @@ OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: conquest ceran realms standard wyreth
+all: conquest ceran realms standard wyreth fracas
 
 conquest: FORCE
 	$(MAKE) GAME=conquest
@@ -44,10 +44,14 @@ standard: FORCE
 wyreth: FORCE
 	$(MAKE) GAME=wyreth
 
+fracas: FORCE
+	$(MAKE) GAME=fracas
+
 $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
 
-all-clean: conquest-clean ceran-clean realms-clean standard-clean wyreth-clean
+all-clean: conquest-clean ceran-clean realms-clean standard-clean wyreth-clean \
+  fracas-clean
 
 conquest-clean:
 	$(MAKE) GAME=conquest clean
@@ -64,6 +68,9 @@ standard-clean:
 wyreth-clean:
 	$(MAKE) GAME=wyreth clean
 
+fracas-clean:
+	$(MAKE) GAME=fracas clean
+
 clean:
 	rm -f $(OBJECTS)
 	if [ -d obj ]; then rmdir obj; fi
@@ -71,7 +78,8 @@ clean:
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
 
-all-rules: conquest-rules ceran-rules realms-rules standard-rules wyreth-rules
+all-rules: conquest-rules ceran-rules realms-rules standard-rules wyreth-rules \
+  fracas-rules
 
 conquest-rules:
 	$(MAKE) GAME=conquest rules
@@ -87,6 +95,9 @@ standard-rules:
 
 wyreth-rules:
 	$(MAKE) GAME=wyreth rules
+
+fracas-rules:
+	$(MAKE) GAME=fracas rules
 
 rules: $(GAME)/$(GAME)
 	(cd $(GAME); \
