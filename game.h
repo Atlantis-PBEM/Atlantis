@@ -261,6 +261,7 @@ private:
     void ProcessReshowOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessHoldOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessNoaidOrder(Unit *,AString *, OrdersCheck *pCheck );
+	void ProcessNocrossOrder(Unit *, AString *, OrdersCheck *pCheck);
     void ProcessAutoTaxOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessOptionOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessPasswordOrder(Unit *,AString *, OrdersCheck *pCheck );

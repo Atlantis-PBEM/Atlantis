@@ -594,6 +594,9 @@ void Game::ProcessOrder( int orderNum, Unit *unit, AString *o,
     case O_NOAID:
         ProcessNoaidOrder( unit, o, pCheck );
         break;
+	case O_NOCROSS:
+		ProcessNocrossOrder(unit, o, pCheck );
+		break;
     case O_OPTION:
         ProcessOptionOrder( unit, o, pCheck );
         break;
@@ -1972,6 +1975,27 @@ void Game::ProcessNoaidOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         u->SetFlag(FLAG_NOAID,val);
     }
 }
+
+void Game::ProcessNocrossOrder(Unit * u,AString * o, OrdersCheck *pCheck )
+{
+    /* Instant order */
+    AString * token = o->gettoken();
+    if (!token) {
+        ParseError( pCheck, u, 0, "NOCROSS: Invalid value.");
+        return;
+    }
+    int val = ParseTF(token);
+    delete token;
+    if (val==-1) {
+        ParseError( pCheck, u, 0, "NOCROSS: Invalid value.");
+        return;
+    }
+    if( !pCheck )
+    {
+        u->SetFlag(FLAG_NOCROSS_WATER,val);
+    }
+}
+
 
 void Game::ProcessHoldOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {

@@ -84,6 +84,7 @@ enum {
   O_MOVE,
   O_NAME,
   O_NOAID,
+  O_NOCROSS,
   O_OPTION,
   O_PASSWORD,
   O_PILLAGE,

@@ -30,6 +30,8 @@
 //                             Added function to compute production bonus.
 // 2001/FEB/07 Joseph Traub    Changes to allow mage support for city guards.
 // 2001/Feb/18 Joseph Traub    Added support for Apprentices.
+// 2001/Feb/25 Joseph Traub    Added a flag preventing units from crossing
+//                             water.
 
 #ifndef UNIT_CLASS
 #define UNIT_CLASS
@@ -76,13 +78,14 @@ enum {
   NUNITTYPES
 };
 
-#define FLAG_BEHIND 1
-#define FLAG_AUTOTAX 4
-#define FLAG_HOLDING 8
-#define FLAG_NOAID 16
-#define FLAG_INVIS 32
-#define FLAG_CONSUMING_UNIT 64
-#define FLAG_CONSUMING_FACTION 128
+#define FLAG_BEHIND 0x1
+#define FLAG_AUTOTAX 0x2
+#define FLAG_HOLDING 0x4
+#define FLAG_NOAID 0x8
+#define FLAG_INVIS 0x10
+#define FLAG_CONSUMING_UNIT 0x20
+#define FLAG_CONSUMING_FACTION 0x40
+#define FLAG_NOCROSS_WATER 0x80
 
 class UnitId : public AListElem {
 public:

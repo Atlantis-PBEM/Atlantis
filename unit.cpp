@@ -29,6 +29,8 @@
 //                             Replaced specific skill bonus functions with
 //                             generic function.
 // 2001/Feb/18 Joseph Traub    Added support for Apprentices
+// 2001/Feb/25 Joseph Traub    Added a flag preventing units from crossing
+//                             water.
 //
 
 #include "unit.h"
@@ -289,6 +291,7 @@ void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
         if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
         if (GetFlag(FLAG_CONSUMING_FACTION)) 
             temp += ", consuming faction's food";
+		if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
     }
   
     temp += items.Report(obs,truesight,0);
@@ -1111,7 +1114,8 @@ int Unit::CanMoveTo(ARegion * r1,ARegion * r2)
     if (!exit) return 0;
     
     int mt = MoveType();
-    if ((r1->type == R_OCEAN || r2->type == R_OCEAN) && !CanSwim())
+    if ((r1->type == R_OCEAN || r2->type == R_OCEAN) &&
+		(!CanSwim() || GetFlag(FLAG_NOCROSS_WATER)))
         return 0;
     int mp = CalcMovePoints() - movepoints;
     if (mp < (r2->MoveCost(mt))) return 0;

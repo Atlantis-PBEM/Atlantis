@@ -820,7 +820,10 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
             *obj = to;
         } else {
             if (i == MOVE_OUT) {
-                if (region->type == R_OCEAN && !unit->CanSwim()) {
+				if( region->type == R_OCEAN &&
+						(!unit->CanSwim() ||
+						 unit->GetFlag(FLAG_NOCROSS_WATER)) )
+				{
                     unit->Error("MOVE: Can't leave ship.");
                     continue;
                 }
@@ -870,7 +873,8 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
 		if(region->type == R_NEXUS && newreg->IsStartingCity())
 			startmove = 1;
         
-        if( region->type == R_OCEAN && !unit->CanSwim() )
+        if( region->type == R_OCEAN &&
+		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)) )
         {
             unit->Error( AString("MOVE: Can't move while in the ocean.") );
             goto done_moving;
@@ -890,7 +894,8 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
             goto done_moving;
         }
         
-        if (newreg->type == R_OCEAN && !unit->CanSwim()) {
+        if(newreg->type == R_OCEAN &&
+		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)) ) {
             unit->Event(AString("Discovers that ") + 
                         newreg->ShortPrint( &regions ) +
                         AString(" is ocean."));

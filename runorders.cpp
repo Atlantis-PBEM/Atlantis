@@ -856,7 +856,8 @@ void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u) {
   if (u->enter == -1) {
     to = r->GetDummy();
     u->enter = 0;
-    if (r->type == R_OCEAN && !u->CanSwim()) {
+   	if(r->type==R_OCEAN && (!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER)))
+	{
       u->Error("LEAVE: Can't leave a ship in the ocean.");
       return;
     }
