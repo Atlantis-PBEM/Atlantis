@@ -603,3 +603,4 @@ Changes from 4.0.10 -> 5.0.0
       will lead to all others (through targetted jumps anyway) - the opening
       period of both gates need to overlap to make a targetted jump possible.
    -- Fixed a bug where gluttony became a sin (under skill starvation).
+   -- Added BANKs, Banking skill and BANK WITHDRAW & DEPOSIT.
