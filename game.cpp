@@ -1806,12 +1806,14 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
 	if (u->type != U_WMON) {
 		int escape = 0;
 		int totlosses = 0;
+		int losecontrol = 0;
+		int level;
 		forlist (&u->items) {
 			Item *i = (Item *) elem;
 			if (i->type == I_IMP) {
 				int top = i->num * i->num;
 				if (top) {
-					int level = u->GetSkill(S_SUMMON_IMPS);
+					level = u->GetSkill(S_SUMMON_IMPS);
 					if (!level) {
 						escape = 10000;
 					} else {
@@ -1825,7 +1827,7 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
 			if (i->type == I_DEMON) {
 				int top = i->num * i->num;
 				if (top) {
-					int level = u->GetSkill(S_SUMMON_DEMON);
+					level = u->GetSkill(S_SUMMON_DEMON);
 					if (!level) {
 						escape = 10000;
 					} else {
@@ -1839,7 +1841,7 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
 			if (i->type == I_BALROG) {
 				int top = i->num * i->num;
 				if (top) {
-					int level = u->GetSkill(S_SUMMON_BALROG);
+					level = u->GetSkill(S_SUMMON_BALROG);
 					if (!level) {
 						escape = 10000;
 					} else {
@@ -1857,8 +1859,33 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
 				u->items.SetNum(i->type,i->num - losses);
 				totlosses += losses;
 			}
+
+			if (i->type == I_WOLF) {
+				level = u->GetSkill(S_WOLF_LORE);
+				if(!level) {
+					losecontrol += i->num;
+					u->items.SetNum(i->type, 0);
+				}
+			}
+			if (i->type == I_DRAGON) {
+				level = u->GetSkill(S_DRAGON_LORE);
+				if(!level) {
+					losecontrol += i->num;
+					u->items.SetNum(i->type, 0);
+				}
+			}
+			if (i->type == I_EAGLE) {
+				level = u->GetSkill(S_BIRD_LORE);
+				if(!level) {
+					losecontrol += i->num;
+					u->items.SetNum(i->type, 0);
+				}
+			}
 		}
 
+		if(losecontrol) {
+			u->Event(AString(losecontrol) + " summoned creatures leave.");
+		}
 		if (totlosses) {
 			u->Event(AString(totlosses) + " undead decay into nothingness.");
 		}

@@ -232,3 +232,8 @@ Changes from 4.0.7 -> 4.0.8
    -- Fixed a bug in the game editor to mark a unit as having owned an item.
    -- Fixed a bug in the save code which caused items to be shown every turn
       instead of just the first turn
+   -- Fixed where FORCE_SHIELD versus ranged attacks got broken in the
+      rewrite of the combat system.
+   -- Fixed bug.  A unit with wolves/eagles/dragons which LOST the
+      ability to control them (either via having the mage assassinated or
+      via the mage FORGETing the skill) now loses the creatures.

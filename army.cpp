@@ -1029,7 +1029,11 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 	}
 
 	if(canShield) {
-		hi = shields.GetHighShield(attackType);
+		int shieldType = attackType;
+		if(attackType == ATTACK_RANGED)
+			shieldType = ATTACK_COMBAT;
+
+		hi = shields.GetHighShield(shieldType);
 		if (hi) {
 			/* Check if we get through shield */
 			if( !Hits( attackLevel, hi->shieldskill )) {
