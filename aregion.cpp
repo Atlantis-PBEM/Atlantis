@@ -3392,9 +3392,10 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name
 	} else {
 	
 		SetupAnchors(pRegionArrays[level]);
-
-		GrowTerrain(pRegionArrays[level], 0);
+		
 	}
+
+	GrowTerrain(pRegionArrays[level], 0);
 
 	AssignTypes(pRegionArrays[level]);
 
@@ -4501,7 +4502,8 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 						ARegion *t = reg->neighbors[(i+init) % NDIRS];
 						if (t) {
 							if ((j==0) && (t->population < 1)) continue;
-							if (getrandom(100) > reg->TerrainProbability(t->type)) continue;
+							if ((Globals->FRACTAL_MAP) &&
+								(getrandom(100) > reg->TerrainProbability(t->type))) continue;
 							if (j==0) t->population--;
 							if(t->type != R_NUM &&
 								(TerrainDefs[t->type].similar_type!=R_OCEAN ||
