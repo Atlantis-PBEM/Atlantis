@@ -2536,6 +2536,11 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
     {
         return( W_NORMAL );
     }
+
+	if (!Globals->OPEN_ENDED && pReg->zloc == 3)
+	{
+		return( W_NORMAL );
+	}
   
     int ysize = pRegionArrays[ 1 ]->y;
 
