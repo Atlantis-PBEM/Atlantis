@@ -352,6 +352,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 					order->targets.Remove(id);
 					delete id;
 				} else {
+					int sk = ((StudyOrder *) target->monthorders)->skill;
 					if (unit->GetRealSkill(sk) <= target->GetRealSkill(sk)) {
 						unit->Error(AString("TEACH: ") +
 									*(target->name) + " is not studying "
@@ -360,7 +361,6 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 						delete id;
 					} else {
 						// Check whether it's a valid skill to teach
-						int sk = ((StudyOrder *) target->monthorders)->skill;
 						if (SkillDefs[sk].flags & SkillType::NOTEACH) {
 							unit->Error(AString("TEACH: ") + 
 									AString(SkillDefs[sk].name) + 
