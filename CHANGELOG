@@ -546,6 +546,110 @@ Changes from 4.0.9 -> 4.0.10
    -- Fixed a bug in teleport and such which allowed entry into and out of
       the Abyss (and viewing it via farsight and such).  Bad JT, no biscuit.
       Thanks AZ for pointing it out.
+      
+Changes from 4.0.10 -> 4.0.10a
+--------------------------------------------------
+   -- Fixed bug in conquest map generation caused by terrain change patch
+   -- Fixed potential namespace collision on 'fill' in template.cpp
+
+Changes from 4.0.10a -> 4.0.10b
+--------------------------------------------------
+   -- Fixed bug with extremely large worlds and more than 10000 units
+   -- Fixed bug with small worlds/levels where a town was less than 9
+      hexes from *both* poles AND LESS_ARTIC_TOWNS was enabled.  This
+      caused very large negative/positive numbers for wages and such.
+   -- Fixed a bug in random number generation when getrandom was called
+      on a negative number (found while fixing the one above)
+   -- Fixed a potential crash when evicting someone who had already
+      left the building.
+   -- Fixed a couple of typos in the generated rules.
+
+Changes from 4.0.10b -> 4.0.10c
+--------------------------------------------------
+   -- Fixed probability of town generation bug from Jan's patch.
+   -- Fixed bug in movement costs when WEATHER_EXISTS was 0.
+   -- Added 'Spoils: none' line to indecisive battles to make ACB happier
+   -- Fixed segfault in skill starvation code.
+
+Changes from 4.0.10c -> 4.0.10d
+--------------------------------------------------
+   -- Fixed a coredump when a region affecting spell was used on a z level
+      that was out of range.  Bad range-check.. bad!
+   -- Fixed misleading damage messages on monsters.
+   -- Fixed a bug where gluttony became a sin (under skill starvation).
+   -- Fixed rounding error in pillaging 
+
+Changes from 4.0.10d -> 4.0.10e
+--------------------------------------------------
+   -- Fixed missing parenthesis in calculating rename cost of cities.
+   -- Fixed setup error in city markets (wasn't obeying the directive
+      CITY_MARKET_NORMAL_AMT in one case)
+   -- Fixed bug in AString::value() where an excessively large number
+      could be used to overflow an integer into a negative and thus
+      cause some very wierd effects (such as creating items out of
+      nothing)
+   -- Fixed a bug where a faction could get more apprentices than they
+      should be allowed.
+   -- Fixed bug in tax being a month-long order and issuing the 'tax'
+      command giving an error about work overwriting and then the unit
+      working instead of taxing.
+   -- Fixed bug where autotax didn't work if DEFAULT_WORK_ORDER was
+      disabled and the unit was submitted as part of an orderset but had
+      blank orders (only when TAX_PILLAGE_MONTHLONG was set).
+
+Changes from 4.0.10e -> 4.0.10f
+--------------------------------------------------
+   -- Fixed bug in practice code where non-leader units would keep trying
+      to practice and generate errors even after they were at max level.
+
+Changes from 4.0.10f -> 4.0.10g
+--------------------------------------------------
+   -- Changed USE_PREPARE slightly.  There is now a 'strict' and a 'normal'
+      setting for USE_PREPARE.  Under strict, the READY command MUST be
+      used or the unit will not use any battle items.  Under normal, the
+      unit will fall back on the battle items list.
+
+Changes from 4.0.10g -> 4.0.10h
+--------------------------------------------------
+   -- Fixed a bug which caused the first mage casting Earth Lore in a
+      region to recieve 2*level less silver than he should.
+   -- Fixed a bug where an army where all casualties were healed were
+      prevented from further moves or attacks.  Full healing should mean
+      no penalties.
+   -- Fixed a bug in output of rules when dealing with skill-based
+      maintainence.
+   -- Fixed a bug dealing with the cost of non-skilled units versus skilled
+      units when in a maintenance mode which requires skill based upkeep.
+      Units will now pay the maximum of the skill based upkeep or the normal
+      upkeep.  This means that GM's should probably *lower* the normal upkeep
+      to something more reasonable than 10/20 if they are using the skill
+      based upkeep unless they JUST want to penalize higher skilled leaders.
+
+Changes from 4.0.10h -> 4.0.10i
+--------------------------------------------------
+   -- Fix bug where completed buildings weren't adding protection in battle.
+   -- Made a small change to battle output requested by the author of
+      atlaclient.
+   -- Fixed a bug in building where using an enter order on the same turn as
+      a build caused you to be in the wrong building to build and thus not
+      actually build.
+   -- Fixed a bug in construct gate which made it successful 100% of the time
+      at level 1, instead of 20% at level 1 up to 100% at level 5.
+   -- made all town pop functions use CITY_POP instead of local constants
+   -- fixed a bug where the 'rural' hex population was taken into account
+      when markets were set up, but not when market items were considered
+      for their activity and effect on town growth.
+   -- Markets: all except food set their amount to zero below the minimum
+      pop, and the minimum amount (1/6th of total amount for trade items and
+      normal items on demand) is used as soon as an item becomes available.
+   -- the minimum amount of economically relevant items is set to at least
+      1/6th the total (this affects games in progress).
+   -- added 'staggered' markets: for more than one items of a type, an
+      increasing offset is added to the minimum population of that item's
+      market (so item 1 will appear at 1000+, item 2 at 1300+, item 3 at
+      1600+ for instance).
+   -- Fixed bug in @ENDTURN.
+   -- Fixed bug with skill-based maintanence costs.
 
 Changes from 4.0.10 -> 5.0.0
 --------------------------------------------------

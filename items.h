@@ -147,6 +147,9 @@ class ManType
 		int speciallevel;
 		int defaultlevel;
 		char *skills[6];
+		
+		int CanProduce(int);
+		int CanUse(int);
 };
 
 extern ManType *ManDefs;
@@ -344,7 +347,7 @@ class Item : public AListElem
 
 		void Readin(Ainfile *);
 		void Writeout(Aoutfile *);
-
+		
 		AString Report(int);
 
 		int type;

@@ -1024,6 +1024,7 @@ int IsSoldier(int item)
 	return 0;
 }
 
+
 Item::Item()
 {
 	selling = 0;
