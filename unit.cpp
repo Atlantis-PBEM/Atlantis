@@ -440,10 +440,12 @@ void Unit::DefaultOrders(Object * obj) {
 	} else if(type == U_GUARDMAGE) {
 		combat = S_FIRE;
 	} else{
-		ProduceOrder * order = new ProduceOrder;
-		order->skill = -1;
-		order->item = I_SILVER;
-		monthorders = order;
+		if(object->region->type != R_NEXUS) {
+			ProduceOrder * order = new ProduceOrder;
+			order->skill = -1;
+			order->item = I_SILVER;
+			monthorders = order;
+		}
 	}
 }
 

@@ -1890,6 +1890,8 @@ void Game::CreateCityMon( ARegion *pReg, int percent )
 		if(Globals->START_CITY_GUARDS_PLATE)
 			u->items.SetNum(I_PLATEARMOR, num);
 		u->SetSkill(S_OBSERVATION,10);
+		if(Globals->START_CITY_TACTICS)
+			u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
 	} else {
 		u->SetSkill(S_OBSERVATION,skilllevel);
 	}
@@ -1904,8 +1906,10 @@ void Game::CreateCityMon( ARegion *pReg, int percent )
 		u->SetMen(I_LEADERS,1);
 		if(IV) u->items.SetNum(I_AMULETOFI,1);
 		u->SetMoney(Globals->GUARD_MONEY);
-		u->SetSkill(S_FORCE,4);
-		u->SetSkill(S_FIRE,4);
+		u->SetSkill(S_FORCE,Globals->START_CITY_MAGES);
+		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES);
+		if(Globals->START_CITY_TACTICS)
+			u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
 		u->combat = S_FIRE;
 		u->SetFlag(FLAG_BEHIND, 1);
 		u->SetFlag(FLAG_HOLDING, 1);
@@ -1922,7 +1926,6 @@ void Game::AdjustCityMons( ARegion *r )
 			Unit * u = (Unit *) elem;
 			if (u->type == U_GUARD || u->type == U_GUARDMAGE) {
 				AdjustCityMon( r, u );
-				return;
 			}
 			if (u->guard == GUARD_GUARD) {
 				guard = 1;
@@ -1964,8 +1967,10 @@ void Game::AdjustCityMon( ARegion *r, Unit *u )
 	if (IV) u->items.SetNum(I_AMULETOFI,men);
 
 	if(u->type == U_GUARDMAGE) {
-		u->SetSkill(S_FORCE, 4);
-		u->SetSkill(S_FIRE, 4);
+		if(Globals->START_CITY_TACTICS)
+			u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
+		u->SetSkill(S_FORCE, Globals->START_CITY_MAGES);
+		u->SetSkill(S_FIRE, Globals->START_CITY_MAGES);
 		u->combat = S_FIRE;
 		u->SetFlag(FLAG_BEHIND, 1);
 		u->SetMoney(Globals->GUARD_MONEY);
@@ -1974,6 +1979,8 @@ void Game::AdjustCityMon( ARegion *r, Unit *u )
 		u->SetSkill(S_COMBAT,towntype + 1);
 		if (AC) {
 			u->SetSkill(S_OBSERVATION,10);
+			if(Globals->START_CITY_TACTICS)
+				u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
 			if(Globals->START_CITY_GUARDS_PLATE)
 				u->items.SetNum(I_PLATEARMOR,men);
 		} else {

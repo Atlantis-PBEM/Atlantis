@@ -192,9 +192,15 @@ public:
 	int START_CITY_GUARDS_PLATE;
 
 	//
-	// Do starting cities have a fire mage (fire 2 if present)
+	// Do starting cities have a fire mages.  (0 for no mages, otherwise
+	// this is the level of their fire skill)
+	// 
 	//
 	int START_CITY_MAGES;
+
+	// Do the starting city guards also have tactician skill (0 for
+	// no tactician, otherwise this is their level of tactician)
+	int START_CITY_TACTICS;
 
 	//
 	// Are we allowing apprentices?
