@@ -934,5 +934,8 @@ Changes from 4.0.10 -> 5.0.0
       amount for earth lore was adjusted to the new wagesystem, item reporting now prevents double
       posting of items, and CountTaxers includes a fix that prevents bugs when an IT_MAN item is
       a mount, weapon or other, tax-relevant item at the same time (centaurs in fracas game).
+   -- fixed the bug with BUILD orders without an object given
+   -- added Christopher Allen's changes to the GAMEMASTER file regarding Dev-C++
+   -- applied Max Shariy's patch for replacing i_rand.c with i_rand.cpp
    	  ToDo: armored galleon bonus...?
    

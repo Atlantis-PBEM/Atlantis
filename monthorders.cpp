@@ -712,7 +712,7 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int needed, int ship)
 	
 	// adjust maxproduced for items needed until completion
 	if(needed < maxproduced) maxproduced = needed;
-	
+		
 	// adjust maxproduced for unfinished ships
 	if((unfinished > 0) && (maxproduced > unfinished))
 		maxproduced = unfinished;

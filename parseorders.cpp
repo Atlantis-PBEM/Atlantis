@@ -1542,6 +1542,30 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	} else { 
 		// just a 'build' order
 		order->target = NULL;
+		Object * obj = unit->object;
+		int ot = obj->type;
+		int st = O_DUMMY;
+		if((ot == O_DUMMY) || (ObjectDefs[ot].flags & ObjectType::GROUP)) {
+			// look for an incomplete ship type in inventory
+			forlist(&unit->items) {
+				Item * it = (Item *) elem;
+				if((ItemDefs[it->type].type & IT_SHIP)
+					&& (!(ItemDefs[it->type].flags & ItemType::DISABLED))) {
+						st = -(it->type);
+						break;
+				}
+			}
+		}
+		if((st == O_DUMMY) && (ot == O_DUMMY)) {
+			ParseError(pCheck, unit, 0, "BUILD: Nothing to build.");
+			return;			
+		}
+		if(st == O_DUMMY) {
+			unit->build = ot;
+		} else {
+			unit->build = st;
+			maxbuild = ItemDefs[st].pMonths - unit->items.GetNum(st);
+		}
 	}
 	// set neededtocomplete
 	if(maxbuild != 0) order->needtocomplete = maxbuild;

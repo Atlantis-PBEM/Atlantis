@@ -16,14 +16,13 @@ CFLAGS = -g -I. -I.. -Wall
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
 ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o edit.o faction.o \
-  fileio.o game.o gamedata.o gamedefs.o gameio.o genrules.o items.o main.o \
+  fileio.o game.o gamedata.o gamedefs.o gameio.o genrules.o i_rand.o items.o main.o \
   market.o modify.o monthorders.o npc.o object.o orders.o parseorders.o \
   production.o runorders.o shields.o skills.o skillshows.o specials.o \
   spells.o template.o unit.o
 
 OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
-  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) \
-  obj/i_rand.o
+  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 
 
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
@@ -109,5 +108,3 @@ $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.c
 $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
 	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
-obj/i_rand.o: i_rand.c
-	$(CC) $(CFLAGS) -c -o $@ $<

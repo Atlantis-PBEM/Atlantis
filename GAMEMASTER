@@ -150,37 +150,55 @@ However, it is very easy to make a VC project to compile Atlantis:
 
 2.2.1 Compiling Atlantis with Dev-C++ on Windows 
       (Submitted by malakh@subdimension.com)
+      (Added to by gmfangs@asmrb.org)
+      
+First you should have have downloaded the Atlantis source code and 
+decompressed it (remembering to preserve the files as unix files), and 
+have Dev-C++ version 5 installed (from 
+http://www.bloodshed.net/dev/devcpp.html, this howto tested with "Dev-
+C++ 5.0 beta 9 (4.9.9.1) (7.6 MB) with Mingw/GCC 
+3.3.1"). Copy the atlantis folder inside C:\Dev-Cpp\
 
-Assuming you have Dev-C++ installed (from http://www.bloodshed.net/)
-and you have downloaded the Atlantis source code, the first thing you 
-will need to do is copy all the files from c:\dev-cpp\include\c++\
-mingw32\bits into c:\dev-cpp\include\c++\bits .
+Next you must change some compiler options. Open Dev-C++, and select the 
+menu Tools -> Compiler Options, and then click on the Directories tab. 
+Make sure that there is a path to your binaries at C:\Dev-Cpp\bin (they 
+should be set there by default, but we've run into cases where the Dev-
+C++ beta installer leaves this empty).
 
-Now open Dev-C++ and start a Static Library C project. Make sure you 
-select C as the language or it will not work. Then save the project as 
-i_rand.dev and name the project i_rand . Now go to Project -> Add to 
-Project. And add i_rand.c . Now go to Execute -> Compile. It should 
-compile and may tell you this is not executable. This is fine. Make 
-sure that you now have an i_rand.a in the same directory as the 
-Atlantis sources. If you do, close the i_rand project and move on.
+Next click on the C++ Includes tab, and add the path C:\Dev-
+Cpp\include\c++\3.3.1\mingw32\bits and close the compiler options.
 
-Start a new C++ console project. Save the *.dev in the same directory 
-as the *.cpp source files for Atlantis if you are using anything prior 
-to WinXP. This is to help from running into a limitation on the length 
-of commands in DOS that may prevent the linker from working. Close the 
-generated main.cpp without saving it. Now go to Project -> Add to 
-Project and add all the *.cpp sources including those in the sub 
-directory for the rules set you plan to use.
+Next, select File -> Project and start a Static Library C project. Make 
+sure you select C as the language or it will not work. Then name the 
+project i_rand and save the project in a new folder C:\Dev-Cpp\i_rand 
+with the name i_rand.dev.
+
+Now go to Project -> Add to Project. And add i_rand.c from your atlantis 
+sources. Now go to Execute -> Compile. It should compile and may tell 
+you this is not executable. This is fine.
+
+Next, start a new C++ console project. Save the *.dev in the same 
+directory as the *.cpp source files for Atlantis if you are using 
+anything prior to WinXP, this is to help from running into a limitation 
+on the length of commands in DOS that may prevent the linker from 
+working. Otherwise, you can create a folder anywhere, for example 
+C:\Dev-Cpp\standard
+
+Close the pre-generated main.cpp without saving it. Now go to Project -> 
+Add to Project and add all the *.cpp sources including those in the sub 
+directory for the rules set you plan to use, for example:
+C:\Dev-Cpp\atlantis\standard
 
 Now go to Project -> Project Options, in here at the bottom where it 
 says 'Linker Options/Optional Libs or Object files:' click the Add 
-Library or Object button and find i_rand.a . Then in the same window 
-go to the Files/Directories tab then the Include Directories tab and 
-add in the paths for your atlantis sources and also a path to your 
-rules set subdirectory. Then click OK.
+Library or Object button and find i_rand.a. Then in the same window go 
+to the Files/Directories tab then the Include Directories tab and add in 
+the paths for your atlantis sources (i.e. C:\Dev-Cpp\atlantis) and also 
+a path to your rules set subdirectory (i.e. C:\Dev-
+Cpp\atlantis\standard). Then click OK.
 
-Now go to Execute -> Compile. Be patient, this will take some time 
-to complete. You will know it is done compiling when the Compile Log 
+Now go to Execute -> Compile. Be patient, this will take some time to 
+complete. You will know it is done compiling when the Compile Log 
 minimizes.
 
 You should now have an .exe of your project.
