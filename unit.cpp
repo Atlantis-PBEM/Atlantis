@@ -1154,19 +1154,20 @@ int Unit::MoveType() {
   return M_NONE;
 }
 
-int Unit::CalcMovePoints() {
-  switch (MoveType()) {
-  case M_NONE:
-    return 0;
-  case M_WALK:
-    return Globals->FOOT_SPEED;
-  case M_RIDE:
-    return Globals->HORSE_SPEED;
-  case M_FLY:
-    if (GetSkill(S_SUMMON_WIND)) return Globals->FLY_SPEED + 2;
-    return Globals->FLY_SPEED;
-  }
-  return 0;
+int Unit::CalcMovePoints()
+{
+	switch (MoveType()) {
+		case M_NONE:
+			return 0;
+		case M_WALK:
+			return Globals->FOOT_SPEED;
+		case M_RIDE:
+			return Globals->HORSE_SPEED;
+		case M_FLY:
+			if (GetSkill(S_SUMMON_WIND)) return Globals->FLY_SPEED + 2;
+			return Globals->FLY_SPEED;
+	}
+	return 0;
 }
 
 int Unit::CanMoveTo(ARegion * r1,ARegion * r2)

@@ -1,0 +1,188 @@
+
+                        Atlantis Gamemaster's Guide
+                                      
+   This document describes how to compile, setup, and run a game of
+   Atlantis.
+   
+Compiling Atlantis
+
+   Atlantis is a standard C++ program, with no UI or other
+   platform-specific features. As such, simply putting all of the source
+   files into a project or makefile and compiling it as a command-line
+   application is about all there is to it. Note that there are source
+   files in two directories; the basic Atlantis engine files live in the
+   main directory, and the rule-set specific files are in a
+   sub-directory. You need to include both sets of source files in the
+   makefile. The sample Atlantis rule-set is called Atlantis Conquest,
+   and is in the sub-directory conquest.
+   
+Unix
+
+   A makefile is included for compilation on Unix, using the GNU gcc
+   compiler. This has only been tested on Linux, but should probably work
+   on any Unix system. Just switch into the rule-set sub-directory and
+   type 'make'. You can get more information about the GNU compiler at
+   http://www.gnu.org.
+   
+Windows
+
+   I am now using the GNU gcc compiler on Windows as well. This has the
+   advantage that I can use it on both Unix and Windows, and as an added
+   bonus the compiler is freely available. As above, just switch into the
+   rule-set subdirectory and type 'make'. The Win32 port of gcc can be
+   found at http://sourceware.cygnus.com/cygwin/.
+   
+   I'm no longer using Visual C++, so I don't include a Visual C++
+   makefile. If someone wants to create a makefile for others to use,
+   I'll be happy to put it on the download page.
+   
+   However, it is very easy to make a VC project to compile Atlantis:
+    1. Choose a rule-set that you want to compile. For instance, the
+       Atlantis Conquest rule-set is in the subdirectory conquest.
+    2. Create a 'Console Application' Workspace in the rule-set
+       directory.
+    3. Add all of the Atlantis engine source files to the project. These
+       are all of the .cpp files located in the main directory.
+    4. Add all of the rule-set specific source files; these are all of
+       the .cpp files in the rule-set directory.
+    5. Update the include path to include both the main directory and the
+       rule-set directory.
+    6. That's it; you should be able to compile Atlantis at this point.
+       You'll probably want to compile the 'Checked' version in case you
+       want to debug.
+       
+Running a Game of Atlantis
+
+   The Atlantis program is actually very simple in terms of input and
+   output. It takes a set of files as input, runs the turn, and writes
+   out a set of files to the same directory. The Atlantis program does
+   not do anything in terms of scanning for email, sending email, or
+   anything of that nature. It is up to the gamemaster to either make
+   sure the files are in the right place, and the right emails get sent
+   out, or he must find or write a program to do that.
+   
+   Explanation: Atlantis is designed to be a very generic program, that
+   will run on many computer systems, and in different ways. Different
+   computer systems handle email in different ways; making Atlantis work
+   on all of these different systems would be quite a task, and in my
+   opinion one that is best separated from the actual game-running
+   program. Further, nothing about Atlantis requires that it be an email
+   game at all; the engine could be used in many different ways (a
+   web-based version, for instance, wouldn't be too hard to do).
+   
+   The rest of this section assumes that the gamemaster is moving the
+   files around by hand; if he is using a program to automate the
+   process, he should follow the instructions with that program.
+   
+Setting Up the Game
+
+   Generally, I find it best to make a directory to run a game of
+   Atlantis, and then store each turn as a sub-directory. To start the
+   game, make the directory game, and the subdirectory game/turn.0.
+   Change the current directory to be game/turn.0 (Atlantis uses the
+   current directory to find any files it is looking for), and run the
+   program atlantis new (note that the actually program name may well be
+   something different, depending on how you compiled it). This will
+   output the files game.out and players.out; these are the initial game
+   database and game status file. At this point, you are ready to prepare
+   for the first turn; follow the instructions below for how to prepare
+   and run a turn.
+   
+Running a Turn
+
+   To set-up a turn, first make the directory for the turn (i.e.
+   game/turn.1), and copy the previous turn's game.out and players.out
+   into place as the new game.in and players.in. At this point, you can
+   edit the players.in file to add or remove players from the game.
+   
+   The players.in file will be in the following format:
+   
+AtlantisPlayerStatus
+Version: 262144
+TurnNumber: 1
+GameStatus: Running
+
+Faction: 1
+Name: Merry Pranksters (1)
+Email: gdunbar@prankster.com
+Password: none
+Faction: 2
+Name: Evil Faction (2)
+Email: evil@prankster.com
+Password: none
+
+   This file will be your primary method of communicating with the
+   Atlantis program. The first 2 lines tell Atlantis that this is a game
+   status file, and what version of the Atlantis engine was used to write
+   this file. The next line indicates the last turn that was run, and the
+   GameStatus: line indicates the current status of the game (the 3
+   settings of GameStatus: are "New", "Running", and "Finished"). None of
+   the first four lines should be modified by the gamemaster.
+   
+   Next in the file comes a list of the factions in the game, and some
+   information about the faction. You can perform the following actions
+   on a faction using this file:
+    1. You can change the name, email address, or password for the
+       faction. Note that there are in-game methods for doing this as
+       well (the ADDRESS order, for instance), but it is preferable to
+       change things in the players.in file. This is because the in-game
+       methods do not take effect until the next turn is run; whereas
+       editing the file is immediate.
+    2. You can remove a faction from the game. Do this by adding the line
+       "Order: Quit" to the faction's section of the players.in file.
+    3. You can add silver to a faction's unclaimed fund by adding the
+       line "Reward: [amount]" to the faction's section of the players.in
+       file.
+    4. Any other lines within a faction's section will be kept in the
+       players.out file when a turn is run, so you can store extra
+       information about a faction in this file. For instance, if you
+       wish to implement an Atlantis Times newsletter feature, you can
+       add a line "Times: on" or "Times: off" to each faction's section
+       indicating whether they wish to receive the Times or not.
+    5. You can add a faction to the game by making a new faction section,
+       leading with the line "Faction: New". It isn't required that you
+       fill in the email address and password, but it's probably always a
+       good idea. After the turn is run, the faction will be assigned a
+       faction number, and will be present in the players.out file.
+       
+   Also before running a turn, players will probably want to issue orders
+   for their faction. Orders should be put into the turn directory
+   (game/turn.1, in our example), with the filename orders.[num], where
+   [num] is the faction number. This file should be a proper Atlantis
+   order file, with the #atlantis line at the beginning of the orders and
+   #end at the end. Note that new factions cannot issue orders for their
+   faction.
+   
+   Once the players.in file has been updated, and any orders are in place
+   for the turn, you are ready to run the Atlantis program. Do this by
+   changing into the turn directory (recall that Atlantis only looks for
+   files in the current directory), and issue the command atlantis run.
+   (Again, note that the actual executable name depends on how you
+   compiled the program). This will run the turn, generating the files
+   game.out, players.out, and report.[num] for each faction in the game.
+   Each report file can then be sent to its owner, and you are ready to
+   set-up for the next turn.
+   
+Syntax Checker
+
+   The Atlantis program can also act as a syntax checker for a set of
+   orders. Run the program atlantis check [orders] [check], where the
+   actual program name is the program that you compiled. [orders] should
+   be the filename of the orders file, and [check] will be the filename
+   that is created, containing the results of the syntax check. If you
+   have a program that automatically handles email, players often
+   appreciate getting a copy of the syntax check results whenever they
+   send in orders.
+   
+Game Editing
+
+   The Atlantis program can also be used to edit the game database. To
+   use the game editor, change the current directory to be the turn
+   directory (like game/turn.1), and run the command atlantis edit. This
+   will present a rudimentary text interface to change some parts of the
+   game, such as unit possessions. When done editing, you can either quit
+   without saving changes, or save and exit. If you choose the save
+   changes, a new game database file game.out will be created; to use
+   this file as the new game database file, move the file to game.in,
+   replacing the old game.in file.
+     _________________________________________________________________

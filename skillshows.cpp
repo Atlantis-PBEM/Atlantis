@@ -484,7 +484,7 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_ARMORER:
 			if(level == 1) {
-				if(found) *str += " ";
+				int needand = 0;
 				if((ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED) &&
 			       (ItemDefs[I_LEATHERARMOR].flags & ItemType::DISABLED) &&
 				   (ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED))
@@ -498,47 +498,53 @@ AString *ShowSkill::Report(void)
 				   (!(ItemDefs[I_LEATHERARMOR].flags & ItemType::DISABLED) &&
 					!(ItemDefs[I_FUR].flags & ItemType::DISABLED)) ||
 				   (!(ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED) &&
-					!(ItemDefs[I_IRON].flags & ItemType::DISABLED)))
-					break;
-				found = 1;
-				*str += "A unit with this skill may PRODUCE ";
-				if(!(ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_HERBS].flags & ItemType::DISABLED)) {
-					*str += "cloth armor from herbs (provides a 1/6 chance "
-						   "of surviving an attack from a normal weapon in "
-						   "combat and may be worn during assassination "
-						   "attacks), ";
-				}
-				if(!(ItemDefs[I_LEATHERARMOR].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_FUR].flags & ItemType::DISABLED)) {
-					*str += "leather armor from furs (provides a 1/4 chance "
-						   " of surviving an attack from a normal weapon "
-						   "in combat), ";
-				}
-				if(!(ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_IRON].flags & ItemType::DISABLED)) {
-					*str += "chain armor from iron (provides a 1/3 chance of "
-						"surviving an attack from a normal weapon in combat).";
-				}
-				if((!(ItemDefs[I_SPINNING].flags) & ItemType::DISABLED) &&
-				   (!(ItemDefs[I_LEATHERARMOR].flags & ItemType::DISABLED) ||
-					!(ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED))) {
-					*str += " Production of ";
-					if(!(ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED)) {
-						*str += "cloth ";
+					!(ItemDefs[I_IRON].flags & ItemType::DISABLED))) {
+					found = 1;
+					*str += "A unit with this skill may PRODUCE ";
+					if(!(ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED) &&
+					   !(ItemDefs[I_HERBS].flags & ItemType::DISABLED)) {
+						*str += "cloth armor from herbs (provides a 1/6 "
+							    "chance of surviving an attack from a normal "
+								"weapon in combat and may be worn during "
+								"assassination attacks), ";
+						needand = 1;
 					}
-					if(!(ItemDefs[I_LEATHERARMOR].flags&ItemType::DISABLED)){
+					if(!(ItemDefs[I_LEATHERARMOR].flags&ItemType::DISABLED) &&
+					   !(ItemDefs[I_FUR].flags & ItemType::DISABLED)) {
+						*str += "leather armor from furs (provides a 1/4 "
+							    "chance of surviving an attack from a normal "
+								"weapon in combat), ";
+						needand = 1;
+					}
+					if(!(ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED) &&
+						!(ItemDefs[I_IRON].flags & ItemType::DISABLED)) {
+						if (needand) *str += "and ";
+						*str += "chain armor from iron (provides a 1/3 "
+							    "chance of surviving an attack from a normal "
+								"weapon in combat).";
+					}
+					if((!(ItemDefs[I_SPINNING].flags&ItemType::DISABLED) &&
+					   (!(ItemDefs[I_LEATHERARMOR].flags&ItemType::DISABLED)||
+						!(ItemDefs[I_CLOTHARMOR].flags&ItemType::DISABLED)))) {
+						needand = 0;
+						*str += " Production of ";
 						if(!(ItemDefs[I_CLOTHARMOR].flags&ItemType::DISABLED)){
-							*str += "and ";
+							*str += "cloth ";
+							needand = 1;
 						}
-						*str += "leather ";
+						if(!(ItemDefs[I_LEATHERARMOR].flags&
+									ItemType::DISABLED)){
+							if(needand) *str += "and ";
+							*str += "leather ";
+						}
+						*str += "armor can be increased by using spinning "
+							    "wheels.";
 					}
-					*str += "armor can be increased by using spinning wheels.";
-				}
-				if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED) &&
-				   !(ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED)) {
-					*str += " Production of chain armor can be increased "
-						   "by using hammers.";
+					if(!(ItemDefs[I_HAMMER].flags & ItemType::DISABLED) &&
+					   !(ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED)) {
+						*str += " Production of chain armor can be increased "
+							   "by using hammers.";
+					}
 				}
 			} else if (level == 3) {
 				if(ItemDefs[I_IRON].flags & ItemType::DISABLED) break;
