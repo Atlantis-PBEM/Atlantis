@@ -44,4 +44,6 @@
    -- Consider having use'd items.
    -- Need a tool which given template files and globals structures can
       build an accurate rules set.
-   -- Consider tools for increasing building production.
+   -- Consider tools for increasing building (and ship) production.
+   -- Consider resource increasers for horses/WING/admantium/other resources
+   -- Consider skill improvement through use.
