@@ -489,3 +489,13 @@ Changes from 4.0.9 -> 4.0.10
    -- Fixed bugs in combat where riding skill was being counted twice in
       defence, and ranged weaponswere using COMB skill for attack strength.
    -- Fixed bug in EVICT code that caused a segmentation fault
+   -- Added SKILL_PRACTISE_AMOUNT and associated code all over the place
+      to allow skills to improve with practice.  A unit may improve at
+      most one skill per month, and will only improve skills they already
+      have.  Using a skill counts as practising its prerequisites if they
+      need to be impoved before the skill can advance further.  The only
+      skill which cannot be improved through practice is OBSE, as if it
+      can be improved it tended to be improved in preference to all other
+      skills, as it is used in the automatic attack phase.  I suggest a
+      value of 5 for SKILL_PRACTISE_AMOUNT.
+   -- Fixed a bug where CanSee was not taking account of MIND skill.

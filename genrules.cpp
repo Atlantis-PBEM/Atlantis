@@ -1517,6 +1517,25 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"do not need to be consecutive; for a unit to go from level 1 to "
 		"level 2, he can study for a month, do something else for a month, "
 		"and then go back and complete his second month of study.";
+	if (Globals->SKILL_PRACTISE_AMOUNT > 0) {
+		temp += "  A unit can also increase its level of training by "
+			"using a skill.  This progress is ";
+		if (Globals->SKILL_PRACTISE_AMOUNT < 11)
+			temp += "much slower than";
+		else if (Globals->SKILL_PRACTISE_AMOUNT < 30)
+			temp += "slower than";
+		else if (Globals->SKILL_PRACTISE_AMOUNT == 30)
+			temp += "the same as";
+		else if (Globals->SKILL_PRACTISE_AMOUNT < 61)
+			temp += "faster than";
+		else
+			temp += "much faster than";
+		temp += " studying.  Only one skill can be improved through "
+			"practice in any month; if multiple skills are used, only the "
+			"first will be improved.  A skill will only improve with "
+			"practice if the unit has first studied the rudiments of the "
+			"skill.";
+	}
 	f.Paragraph(temp);
 	// XXX -- This is not as nice as it could be and could cause problems
 	// if the skills are given disparate costs.   This should probably be
@@ -1533,8 +1552,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		temp += " (";
 		if(has_stea && has_obse)
-			temp += "both of ";
-		temp += "which cost $";
+			temp += "both of which cost $";
+		else
+			temp += "which costs $";
 		temp += SkillDefs[S_STEALTH].cost;
 		temp += "), ";
 	}

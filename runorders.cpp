@@ -344,6 +344,8 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
 			Faction * f = ((FactionPtr *) elem)->ptr;
 			f->Event(temp);
 		}
+		// One learns from one's mistakes.  Surviving them is another matter!
+		u->Practise(S_STEALTH);
 		return;
 	}
 
@@ -359,6 +361,7 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
 			return;
 		}
 	}
+	u->Practise(S_STEALTH);
 	RunBattle(r,u,tar,ass);
 }
 
@@ -417,6 +420,8 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 			Faction * f = ((FactionPtr *) elem)->ptr;
 			f->Event(temp);
 		}
+		// One learns from one's mistakes.  Surviving them is another matter!
+		u->Practise(S_STEALTH);
 		return;
 	}
 
@@ -458,6 +463,7 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 	}
 
 	tar->Event(AString("Has ") + ItemString(so->item,amt) + " stolen.");
+	u->Practise(S_STEALTH);
 	return;
 }
 

@@ -89,6 +89,7 @@ Unit::Unit()
 	orderIsTurnDelayed = 0;
 	orderDelayMonthOrders = NULL;
 	free = 0;
+	practised = 0;
 }
 
 Unit::Unit(int seq, Faction * f, int a)
@@ -951,6 +952,40 @@ int Unit::Study(int sk,int days)
 		faction->shows.Add(new ShowSkill(sk,lvl));
 	}
 	return 1;
+}
+
+int Unit::Practise(int sk)
+{
+	int days, bonus, men, curlev, reqsk, reqlev;
+	unsigned int i;
+
+	bonus = Globals->SKILL_PRACTISE_AMOUNT;
+	if (practised || (bonus < 1)) return 1;
+	days = skills.GetDays(sk);
+	men = GetMen();
+	if (men < 1 || days < 1 || days >= 450 * men) return 0;
+
+	curlev = GetRealSkill(sk);
+	for(i = 0; i < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); i++) {
+		reqsk = SkillDefs[sk].depends[i].skill;
+		if (reqsk == -1) break;
+		if (SkillDefs[reqsk].flags & SkillType::DISABLED) continue;
+		reqlev = GetRealSkill(reqsk);
+		if (reqlev <= curlev) {
+			if (Practise(reqsk))
+				return 1;
+			// We don't meet the reqs, and can't practise that req, but
+			// we still need to check the other reqs.
+			bonus = 0;
+		}
+	}
+
+	if (bonus) {
+		Study(sk, men * bonus);
+		practised = 1;
+	}
+
+	return bonus;
 }
 
 int Unit::IsLeader()
@@ -1851,7 +1886,10 @@ int Unit::CanUseWeapon(WeaponType *pWep, int riding)
 int Unit::CanUseWeapon(WeaponType *pWep)
 {
 	// we don't care in this case, their combat skill will be used.
-	if ( !(pWep->flags & WeaponType::NEEDSKILL) ) return 0;
+	if ( !(pWep->flags & WeaponType::NEEDSKILL) ) {
+		Practise(S_COMBAT);
+		return 0;
+	}
 
 	int baseSkillLevel = 0;
 	int tempSkillLevel = 0;
@@ -1859,7 +1897,11 @@ int Unit::CanUseWeapon(WeaponType *pWep)
 
 	if( pWep->orSkill != -1 ) tempSkillLevel = GetSkill( pWep->orSkill );
 
-	if( tempSkillLevel > baseSkillLevel ) baseSkillLevel = tempSkillLevel;
+	if( tempSkillLevel > baseSkillLevel ) {
+		baseSkillLevel = tempSkillLevel;
+		Practise(pWep->orSkill);
+	} else
+		Practise(pWep->baseSkill);
 
 	if( pWep->flags & WeaponType::NEEDSKILL && !baseSkillLevel ) return -1;
 

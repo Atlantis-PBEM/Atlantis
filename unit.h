@@ -179,6 +179,7 @@ class Unit : public AListElem
 		int CheckDepend(int,SkillDepend &s);
 		int CanStudy(int);
 		int Study(int,int); /* Returns 1 if it succeeds */
+		int Practise(int);
 		void AdjustSkills();
 
 		int CanSee(ARegion *,Unit *); /* Return 1 if can see, 2 if can see
@@ -242,6 +243,7 @@ class Unit : public AListElem
 		int needed; /* For assessing maintenance */
 		int losses;
 		int free;
+		int practised; // Has this unit practised a skill this turn
 
 		/* Orders */
 		int destroy;

@@ -214,6 +214,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		defenseBonus = attackBonus;
 		numAttacks = 1;
 	}
+	unit->Practise(S_COMBAT);
+	if (ridingBonus)
+		unit->Practise(S_RIDING);
 
 	// Set the attack and defense skills
 	// These will include the riding bonus if they should be included.
@@ -249,6 +252,7 @@ void Soldier::SetupSpell()
         }
 
         special = pST->special;
+		unit->Practise(unit->combat);
     }
 }
 
@@ -468,9 +472,12 @@ void Soldier::Dead()
 
 Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 {
+	int tacspell = 0;
+	Unit * tactitian = ldr;
+
 	leader = ldr;
 	round = 0;
-	tac = 0;
+	tac = ldr->GetSkill(S_TACTICS);
 	count = 0;
 	hitstotal = 0;
 
@@ -482,19 +489,22 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			Unit * u = ((Location *) elem)->unit;
 			count += u->GetSoldiers();
 			u->losses = 0;
+			int temp = u->GetSkill(S_TACTICS);
+			if (temp > tac) {
+				tac = temp;
+				tactitian = u;
+			}
 		}
 	}
+	tactitian->Practise(S_TACTICS);
 
 	soldiers = new SoldierPtr[count];
 	int x = 0;
 	int y = count;
-	int tacspell = 0;
 
 	forlist(locs) {
 		Unit * u = ((Location *) elem)->unit;
 		Object * obj = ((Location *) elem)->obj;
-		int temp = u->GetSkill(S_TACTICS);
-		if (temp > tac) tac = temp;
 		if (ass) {
 			forlist(&u->items) {
 				Item * it = (Item *) elem;
@@ -749,6 +759,10 @@ void Army::DoHealLevel( Battle *b, int type, int useItems )
             {
                 continue;
             }
+			if (s->healitem != I_HEALPOTION) 
+			{
+				s->unit->Practise(S_HEALING);
+			}
         }
         else
         {
@@ -756,6 +770,7 @@ void Army::DoHealLevel( Battle *b, int type, int useItems )
             {
                 continue;
             }
+			s->unit->Practise(S_MAGICAL_HEALING);
         }
 
         while (s->healing)

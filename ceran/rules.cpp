@@ -158,6 +158,7 @@ static GameDefs g = {
 	0,	// FULL_INVIS_ON_SELF
 	0,	// MONSTER_BATTLE_REGEN
 	GameDefs::TAX_NORMAL, // WHO_CAN_TAX
+	0,	// SKILL_PRACTISE_AMOUNT
 };
 
 GameDefs * Globals = &g;

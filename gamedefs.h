@@ -478,6 +478,9 @@ public:
 		TAX_NORMAL = TAX_COMBAT_SKILL | TAX_USABLE_WEAPON,
 	};
 	int WHO_CAN_TAX;
+
+	// Amount of skill improvement when a skill is used
+	int SKILL_PRACTISE_AMOUNT;
 };
 
 extern GameDefs * Globals;
