@@ -257,7 +257,8 @@ AString Unit::ReadyItem()
 		item = 0;
 
 	if(weapon || armor || item) {
-		if(weapon) temp += AString(". ") + weaponstr;
+		temp += AString(". ");
+		if(weapon) temp += weaponstr;
 		if(armor) {
 			if(weapon) temp += ". ";
 			temp += armorstr;

@@ -3534,7 +3534,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Paragraph(temp);
 		f.Paragraph("Examples");
 		temp = "Set the unit to select chain armor before plate armor.";
-		temp2 = "WEAPON CARM PARM";
+		temp2 = "ARMOR CARM PARM";
 		f.CommandExample(temp, temp2);
 		temp = "Clear the preferred armor list.";
 		temp2 = "ARMOR";
