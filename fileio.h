@@ -131,9 +131,10 @@ class Arules {
 		void TagText(const AString &tag, const AString &text);
 		void ClassTagText(const AString &tag, const AString &cls,
 				const AString &text);
+		void Paragraph(const AString &text);
 		void CommandExample(const AString &header, const AString &examp);
 		AString Link(const AString &href, const AString &text);
-		AString LinkRef(const AString &name);
+		void LinkRef(const AString &name);
 
 		ofstream * file;
 		int tabs;

@@ -65,7 +65,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	Arules f;
 	AString temp, temp2;
 	int cap;
-	int i, j;
+	int i, j, k;
 	int last = -1;
 
 	if(f.OpenByName(rules) == -1) {
@@ -104,17 +104,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("H3", AString("Last Change: ")+buf);
 	f.Enclose(0, "CENTER");
 	f.ClassTagText("DIV", "rule", "");
-	f.PutStr("Note: This document is subject to change, as errors are found");
-	f.PutStr("and corrected, and rules sometimes change. Be sure you have");
-	f.PutStr("the latest available copy.");
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("table_of_contents"));
+	temp = "Note: This document is subject to change, as errors are found "
+		"and corrected, and rules sometimes change. Be sure you have the "
+		"latest available copy.";
+	f.Paragraph(temp);
+	f.LinkRef("table_of_contents");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Table of Contents");
-	f.PutStr(AString("Thanks to ") +
-			f.Link("mailto:ken@satori.gso.uri.edu","Kenneth Casey"));
-	f.PutStr("for putting together this table of contents.");
-	f.PutStr("<P></P>");
+	temp = AString("Thanks to ") +
+		f.Link("mailto:ken@satori.gso.uri.edu","Kenneth Casey")+
+		" for putting together this table of contents.";
+	f.Paragraph(temp);
+	f.Paragraph("");
 	f.Enclose(1, "UL");
 	f.TagText("LI", f.Link("#intro", "Introduction"));
 	f.Enclose(1, "LI");
@@ -278,7 +279,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#noaid", "noaid"));
 	if (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
 		f.TagText("LI", f.Link("#nocross", "nocross"));
-	f.TagText("LI", f.Link("#nospoils", "nospoils"));
 	f.TagText("LI", f.Link("#option", "option"));
 	f.TagText("LI", f.Link("#password", "password"));
 	f.TagText("LI", f.Link("#pillage", "pillage"));
@@ -291,6 +291,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("LI", f.Link("#sail", "sail"));
 	f.TagText("LI", f.Link("#sell", "sell"));
 	f.TagText("LI", f.Link("#show", "show"));
+	f.TagText("LI", f.Link("#spoils", "spoils"));
 	if(has_stea)
 		f.TagText("LI", f.Link("#steal", "steal"));
 	f.TagText("LI", f.Link("#study", "study"));
@@ -317,9 +318,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "LI");
 	f.TagText("LI", f.Link("#credits", "Credits"));
 	f.Enclose(0, "UL");
-	f.PutStr("<BR>");
-	f.PutStr("Index of Tables");
-	f.PutStr("<P></P>");
+	f.Paragraph("Index of Tables");
+	f.Paragraph("");
 	f.Enclose(1, "UL");
 	if (Globals->FACTION_LIMIT_TYPE==GameDefs::FACLIM_FACTION_TYPES)
 		f.TagText("LI", f.Link("#tablefactionpoints",
@@ -340,8 +340,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(may_sail)
 		f.TagText("LI", f.Link("#tableshipinfo", "Table of Ship Information"));
 	f.Enclose(0, "UL");
-	f.PutStr("<BR>");
-	f.PutStr(f.LinkRef("intro"));
+	f.LinkRef("intro");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Introduction");
 	AString *in;
@@ -349,49 +348,47 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(*in);
 		delete in;
 	}
-	f.PutStr(f.LinkRef("playing"));
+	f.LinkRef("playing");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Playing Atlantis");
-	f.PutStr("<P></P>");
-	f.PutStr("Atlantis (as you undoubtedly already know) is a play by email "
-			"game.  When you sign up for Atlantis, you will be sent a turn "
-			"report (via email).  Your report completely details your "
-			"position in the game.  After going over this report, and "
-			"possibly communicating with other players in the game, you "
-			"determine your course of action, and create a file of "
-			"\"orders\", which you then send back to the Atlantis server. "
-			"Then, at a regular interval (often one week), Atlantis collects "
-			"all the orders, runs another turn (covering one month in game "
-			"time), and sends all the players another report.");
-	f.PutStr("<BR>");
-	f.PutStr(f.LinkRef("playing_factions"));
+	temp = "Atlantis (as you undoubtedly already know) is a play by email "
+		"game.  When you sign up for Atlantis, you will be sent a turn "
+		"report (via email).  Your report completely details your position "
+		"in the game.  After going over this report, and possibly "
+		"communicating with other players in the game, you determine your "
+		"course of action, and create a file of \"orders\", which you then "
+		"send back to the Atlantis server. Then, at a regular interval "
+		"(often one week), Atlantis collects all the orders, runs another "
+		"turn (covering one month in game time), and sends all the players "
+		"another report.";
+	f.Paragraph(temp);
+	f.LinkRef("playing_factions");
 	f.TagText("H3", "Factions:");
-	f.PutStr("<P></P>");
-	f.PutStr("A player's position is called a \"faction\".  Each faction has "
-			"a name and a number (the number is assigned by the computer, "
-			"and used for entering orders). Each player is allowed to play "
-			"one and ONLY one faction at any given time. Each faction is "
-			"composed of a number of \"units\", each unit being a group of "
-			"one or more people loyal to the faction.  You start the game "
-			"with a single unit consisting of one character, plus a sum of "
-			"money.  More people can be hired during the course of the game, "
-			"and formed into more units.  (In these rules, the word "
-			"\"character\" generally refers either to a unit consisting of "
-			"only one person, or to a person within a larger unit.)");
-	f.PutStr("<P></P>");
-	f.PutStr("A faction is considered destroyed, and the player knocked out "
-			"of the game, if ever all its people are killed or disbanded "
-			"(i.e. the faction has no units left).  The program does not "
-			"consider your starting character to be special; if your "
-			"starting character gets killed, you will probably have been "
-			"thinking of that character as the leader of your faction, so "
-			"some other character can be regarded as having taken the dead "
-			"leader's place (assuming of course that you have at least one "
-			"surviving unit!).  As far as the computer is concerned, as "
-			"long as any unit of the faction survives, the faction is not "
-			"wiped out.  (If your faction is wiped out, you can rejoin the "
-			"game with a new starting character.)");
-	f.PutStr("<P></P>");
+	temp = "A player's position is called a \"faction\".  Each faction has "
+		"a name and a number (the number is assigned by the computer, and "
+		"used for entering orders). Each player is allowed to play one and "
+		"ONLY one faction at any given time. Each faction is composed of a "
+		"number of \"units\", each unit being a group of one or more people "
+		"loyal to the faction.  You start the game with a single unit "
+		"consisting of one character, plus a sum of money.  More people can "
+		"be hired during the course of the game, and formed into more "
+		"units.  (In these rules, the word \"character\" generally refers "
+		"either to a unit consisting of only one person, or to a person "
+		"within a larger unit.)";
+	f.Paragraph(temp);
+	temp = "A faction is considered destroyed, and the player knocked out "
+		"of the game, if ever all its people are killed or disbanded (i.e. "
+		"the faction has no units left).  The program does not consider "
+		"your starting character to be special; if your starting character "
+		"gets killed, you will probably have been thinking of that character "
+		"as the leader of your faction, so some other character can be "
+		"regarded as having taken the dead leader's place (assuming of "
+		"course that you have at least one surviving unit!).  As far as the "
+		"computer is concerned, as long as any unit of the faction "
+		"survives, the faction is not wiped out.  (If your faction is "
+		"wiped out, you can rejoin the game with a new starting "
+		"character.)";
+	f.Paragraph(temp);
 	Faction fac;
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		temp = "A faction has one pre-set limit; it may not contain more than ";
@@ -403,8 +400,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"master it. Aside from that, there  is no limit to the number "
 			"of units a faction may contain, nor to how many items can be "
 			"produced or regions taxed.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp = "Each faction has a type; this is decided by the player, "
 			"and determines what the faction may do.  The faction has ";
@@ -425,9 +421,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "the faction may have. (More information on all of the "
 			"faction activities is in further sections of the rules).  Here "
 			"is a chart detailing the limits on factions by Faction Points.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
-		f.PutStr(f.LinkRef("tablefactionpoints"));
+		f.Paragraph(temp);
+		f.LinkRef("tablefactionpoints");
 		f.Enclose(1, "CENTER");
 		f.Enclose(1, "TABLE BORDER=1");
 		f.Enclose(1, "TR");
@@ -491,8 +486,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += AString(na) + " apprentice" + (na==1?"":"s");
 		}
 		temp += ".";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 
 		fac.type[F_WAR] = w = Globals->FACTION_POINTS;
 		fac.type[F_MAGIC] = m = 0;
@@ -528,16 +522,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 					(na == 1?"":"s");
 		}
 		temp += ".";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		if (Globals->FACTION_POINTS>3) {
 			int rem=Globals->FACTION_POINTS-3;
-			f.PutStr(AString("Note that it is possible to have a faction ") +
-					"type with less than " + Globals->FACTION_POINTS +
-					" points spent. In fact, a starting faction has one "
-					"point spent on each of War, Trade, and Magic, leaving " +
-					rem + " point" + (rem==1?"":"s") + " unspent.");
-			f.PutStr("<P></P>");
+			temp = "Note that it is possible to have a faction type with "
+				"less than ";
+			temp += Globals->FACTION_POINTS;
+			temp += " points spent. In fact, a starting faction has one "
+				"point spent on each of War, Trade, and Magic, leaving ";
+			temp += AString(rem) + " point" + (rem==1?"":"s") + " unspent.";
+			f.Paragraph(temp);
 		}
 	}
 	temp = "When a faction starts the game, it is given a one-man unit and ";
@@ -557,19 +551,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " order to withdraw goods directly";
 	}
 	temp += ".";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr("An example faction is shown below, consisting of a "
-			"starting character, Merlin the Magician, who has formed "
-			"two more units, Merlin's Guards and Merlin's Workers.  "
-			"Each unit is assigned a unit number by the computer "
-			"(completely independent of the faction number); this is used "
-			"for entering orders.  Here, the player has chosen to give "
-			"his faction the same name (\"Merlin the Magician\") as his "
-			"starting character.  Alternatively, you can call your "
-			"faction something like \"The Great Northern Mining Company\" "
-			"or whatever.");
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	temp = "An example faction is shown below, consisting of a starting "
+		"character, Merlin the Magician, who has formed two more units, "
+		"Merlin's Guards and Merlin's Workers. Each unit is assigned a "
+		"unit number by the computer (completely independent of the "
+		"faction number); this is used for entering orders. Here, the "
+		"player has chosen to give his faction the same name (\"Merlin "
+		"the Magician\") as his starting character. Alternatively, you "
+		"can call your faction something like \"The Great Northern "
+		"Mining Company\" or whatever.";
+	f.Paragraph(temp);
+	f.Paragraph("");
 	f.Enclose(1, "PRE");
 	f.ClearWrapTab();
 	if(Globals->LEADERS_EXIST) {
@@ -591,24 +584,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"Skills: none.");
 	}
 	f.Enclose(0, "PRE");
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("playing_units"));
+	f.LinkRef("playing_units");
 	f.TagText("H3", "Units:");
-	f.PutStr("A unit is a grouping together of people, all loyal to the "
-			"same faction. The people in a unit share skills and "
-			"possessions, and execute the same orders each month. The "
-			"reason for having units of many people, rather than keeping "
-			"track of individuals, is to simplify the game play.  The "
-			"computer does not keep track of individual names, possessions, "
-			"or skills for people in the same unit, and all the people in a "
-			"particular unit must be in the same place at all times.  If "
-			"you want to send people in the same unit to different places, "
-			"you must split up the unit.  Apart from this, there is no "
-			"difference between having one unit of 50 people, or 50 units of "
-			"one person each, except that the former is very much easier "
-			"to handle.");
-	f.PutStr("<P></P>");
-	temp = "";
+	temp = "A unit is a grouping together of people, all loyal to the "
+		"same faction. The people in a unit share skills and possessions, "
+		"and execute the same orders each month. The reason for having "
+		"units of many people, rather than keeping track of individuals, "
+		"is to simplify the game play.  The computer does not keep track of "
+		"individual names, possessions, or skills for people in the same "
+		"unit, and all the people in a particular unit must be in the same "
+		"place at all times.  If you want to send people in the same unit "
+		"to different places, you must split up the unit.  Apart from "
+		"this, there is no difference between having one unit of 50 people, "
+		"or 50 units of one person each, except that the former is very "
+		"much easier to handle.";
+	f.Paragraph(temp);
 	if(Globals->RACES_EXIST) {
 		temp = "There are different races that make up the population of "
 			"Atlantis. (See the section on skills for a list of these.)";
@@ -641,42 +631,39 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"different strengths and weaknesses will have all the "
 			"weaknesses, and none of the strengths of either race.";
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("playing_turns"));
+	f.Paragraph(temp);
+	f.LinkRef("playing_turns");
 	f.TagText("H3", "Turns:");
-	f.PutStr("<P></P>");
-	f.PutStr("Each turn, the Atlantis server takes the orders file that "
-			"you mailed to it, and assigns the orders to the respective "
-			"units.  All units in your faction are completely loyal to you, "
-			"and will execute the orders to the best of their ability.  If "
-			"the unit does something unintended, it is generally because of "
-			"incorrect orders; a unit will not purposefully betray you.");
-	f.PutStr("<P></P>");
-	f.PutStr("A turn is equal to one game month.  A unit can do many "
-			"actions at the start of the month, that only take a matter of "
-			"hours, such as buying and selling commodities, or fighting an "
-			"opposing faction.  Each unit can also do exactly one action "
-			"that takes up the entire month, such as harvesting resources or "
-			"moving from one region to another.  The orders which take an "
-			"entire month are");
-	f.PutStr(f.Link("#advance", "ADVANCE") + ", ");
-	f.PutStr(f.Link("#build", "BUILD") + ", ");
+	temp = "Each turn, the Atlantis server takes the orders file that "
+		"you mailed to it, and assigns the orders to the respective units. "
+		"All units in your faction are completely loyal to you, and will "
+		"execute the orders to the best of their ability. If the unit does "
+		"something unintended, it is generally because of incorrect orders; "
+		"a unit will not purposefully betray you.";
+	f.Paragraph(temp);
+	temp = "A turn is equal to one game month.  A unit can do many actions "
+		"at the start of the month, that only take a matter of hours, such "
+		"as buying and selling commodities, or fighting an opposing "
+		"faction.  Each unit can also do exactly one action that takes up "
+		"the entire month, such as harvesting resources or moving from one "
+		"region to another.  The orders which take an entire month are ";
+	temp += f.Link("#advance", "ADVANCE") + ", ";
+	temp += f.Link("#build", "BUILD") + ", ";
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
-		f.PutStr(f.Link("#entertain", "ENTERTAIN") + ", ");
-	f.PutStr(f.Link("#move", "MOVE") + ", ");
+		temp += f.Link("#entertain", "ENTERTAIN") + ", ";
+	temp += f.Link("#move", "MOVE") + ", ";
 	if (Globals->TAX_PILLAGE_MONTH_LONG)
-		f.PutStr(f.Link("#pillage", "PILLAGE") + ", ");
-	f.PutStr(f.Link("#produce", "PRODUCE") + ", ");
+		temp += f.Link("#pillage", "PILLAGE") + ", ";
+	temp += f.Link("#produce", "PRODUCE") + ", ";
 	if(!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
-		f.PutStr(f.Link("#sail", "SAIL") + ", ");
-	f.PutStr(f.Link("#study", "STUDY") + ", ");
+		temp += f.Link("#sail", "SAIL") + ", ";
+	temp += f.Link("#study", "STUDY") + ", ";
 	if (Globals->TAX_PILLAGE_MONTH_LONG)
-		f.PutStr(f.Link("#tax", "TAX") + ", ");
-	f.PutStr(f.Link("#teach", "TEACH") + " and");
-	f.PutStr(f.Link("#work", "WORK") + ".");
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("world"));
+		temp += f.Link("#tax", "TAX") + ", ";
+	temp += f.Link("#teach", "TEACH") + " and ";
+	temp += f.Link("#work", "WORK") + ".";
+	f.Paragraph(temp);
+	f.LinkRef("world");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "The World");
 	temp = "The Atlantis world is divided for game purposes into "
@@ -696,13 +683,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"one of them is concealed in some way.  Two units in different "
 		"regions cannot normally interact.  NOTE: Combat is an exception "
 		"to this.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("world_regions"));
+	f.Paragraph(temp);
+	f.LinkRef("world_regions");
 	f.TagText("H3", "Regions:");
-	f.PutStr("Here is a sample region, as it might appear on your turn "
-			"report:");
-	f.PutStr("<P></P>");
+	temp = "Here is a sample region, as it might appear on your turn report:";
+	f.Paragraph(temp);
+	f.Paragraph("");
 	f.Enclose(1, "PRE");
 	f.ClearWrapTab();
 	temp = "plain (172,110) in Turia, 500 peasants";
@@ -766,7 +752,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = AString("- Vox Populi (13), ") + temp2 + ".";
 	f.WrapStr(temp);
 	f.Enclose(0, "PRE");
-	f.PutStr("<P></P>");
 	temp = "This report gives all of the available information on this "
 		"region.  The region type is plain, the name of the surrounding area "
 		"is Turia, and the coordinates of this region are (172,110).  The "
@@ -781,12 +766,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"there is a list of all visible units.  Units that belong to your "
 		"faction will be so denoted by a '*', whereas other faction's "
 		"units are preceded by a '-'.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr("Since Atlantis is made up of hexagonal regions, the coordinate "
-			"system is not always exactly intuitive.  Here is the layout of "
-			"Atlantis regions:");
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	temp = "Since Atlantis is made up of hexagonal regions, the coordinate "
+		"system is not always exactly intuitive.  Here is the layout of "
+		"Atlantis regions:";
+	f.Paragraph(temp);
+	f.Paragraph("");
 	f.Enclose(1, "PRE");
 	f.PutNoFormat("   ____        ____");
 	f.PutNoFormat("  /    \\      /    \\");
@@ -803,10 +788,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutNoFormat("  \\____/      \\____/");
 	f.PutNoFormat("  /    \\      /    \\");
 	f.Enclose(0, "PRE");
-	f.PutStr("Note that the are \"holes\" in the coordinate system; there "
-			"is no region (1,2), for instance.  This is due to the "
-			"hexagonal system of regions.");
-	f.PutStr("<P></P>");
+	temp = "Note that the are \"holes\" in the coordinate system; there "
+		"is no region (1,2), for instance.  This is due to the hexagonal "
+		"system of regions.";
+	f.Paragraph(temp);
 	temp = "Most regions are similar to the region shown above, but the "
 		"are certain exceptions.  Oceans, not surprisingly, have no "
 		"population.";
@@ -814,17 +799,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " Some regions will contain villages, towns, and cities. "
 			"More information on these is available in the section on the "
 			"ecomony.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("world_structures"));
+	f.Paragraph(temp);
+	f.LinkRef("world_structures");
 	f.TagText("H3", "Structures:");
 	temp = "Regions may also contain structures, such as buildings";
 	if(may_sail)
 		temp += " or ships";
 	temp += ". These will appear directly below the list of units.  Here is "
 		"a sample structure:";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	f.Paragraph("");
 	f.Enclose(1, "PRE");
 	f.ClearWrapTab();
 	f.WrapStr("+ Temple of Agrik [3] : Tower.");
@@ -842,7 +826,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += ", 10 swords [SWOR].";
 	f.WrapStr(temp);
 	f.Enclose(0, "PRE");
-	f.PutStr("<P></P>");
 	temp = "The structure lists the name, the number, and what type of "
 		"structure it is.  (More information of the types of structures "
 		"can be found in the section on the economy.)  Following this "
@@ -850,29 +833,28 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if (has_stea)
 		temp += " Units within a structure are always visible, even if "
 			"they would otherwise not be seen.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr("Units inside structures are still considered to be in the "
-			"region, and other units can interact with them; however, they "
-			"may gain benefits, such as defensive bonuses in combat from "
-			"being inside a building.  The first unit to enter an object is "
-			"considered to be the owner; only this unit can do things such "
-			"as renaming the object, or permitting other units to enter. "
-			"The owner of an object can be identified on the turn report, as "
-			"it is the first unit listed under the object.  Only units with "
-			"men in them can be structure owners, so newly created units "
-			"cannot own a structure until they contain men.");
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	temp = "Units inside structures are still considered to be in the "
+		"region, and other units can interact with them; however, they "
+		"may gain benefits, such as defensive bonuses in combat from being "
+		"inside a building.  The first unit to enter an object is "
+		"considered to be the owner; only this unit can do things such as "
+		"renaming the object, or permitting other units to enter. The owner "
+		"of an object can be identified on the turn report, as it is the "
+		"first unit listed under the object.  Only units with men in them "
+		"can be structure owners, so newly created units cannot own a "
+		"structure until they contain men.";
+	f.Paragraph(temp);
 	if(Globals->NEXUS_EXISTS) {
-		f.PutStr(f.LinkRef("world_nexus"));
+		f.LinkRef("world_nexus");
 		temp = "Atlantis Nexus:";
 		f.TagText("H3", temp);
-		f.PutStr("Note: the following section contains some details that "
-				"you may wish to skip over until you have had a chance to "
-				"read the rest of the rules, and understand the mechanics "
-				"of Atlantis.  However, be sure to read this section before "
-				"playing, as it will affect your early plans in Atlantis.");
-		f.PutStr("<P></P>");
+		temp = "Note: the following section contains some details that "
+			"you may wish to skip over until you have had a chance to "
+			"read the rest of the rules, and understand the mechanics "
+			"of Atlantis.  However, be sure to read this section before "
+			"playing, as it will affect your early plans in Atlantis.";
+		f.Paragraph(temp);
 		temp = "When a faction first starts in Atlantis, it begins with "
 			"one unit, in a special region called the Atlantis Nexus.";
 		if(Globals->MULTI_HEX_NEXUS)
@@ -909,8 +891,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += Globals->WORLD_NAME;
 			temp += ".";
 		}
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		if(Globals->MULTI_HEX_NEXUS) {
 			temp = "From the Nexus hexes, there are exits either to other "
 				"Nexus hexes, or to starting cities in Atlantis.  Units may "
@@ -949,8 +930,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " As a drawback, these cities tend to be extremely crowded, "
 			"and most factions will wish to leave the starting cities when "
 			"possible.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		temp = "It is always possible to enter any starting city from the "
 			"nexus";
 		if(!Globals->SAFE_START_CITIES)
@@ -961,8 +941,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(!Globals->SAFE_START_CITIES)
 			temp += " Once in the starting city however, no gaurentee of "
 				"safety is given.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		int num_methods = 1 + (Globals->GATES_EXIST?1:0) + (may_sail?1:0);
 		char *methods[] = {"You must go ", "The first is ", "The second is "};
 		int method = 1;
@@ -990,23 +969,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"starting cities, taking only a few men with them, might "
 				"wish to pursue this method.";
 		}
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
 	if(Globals->CONQUEST_GAME) {
-		f.PutStr(f.LinkRef("world_conquest"));
+		f.LinkRef("world_conquest");
 		f.TagText("H3", "The World of Atlantis Conquest");
-		f.PutStr("In a game of Atlantis Conquest, each player begins the "
-				"game on a small island of 8 regions, seperated by ocean "
-				"from the rest of the players.  The starting islands are "
-				"located around the perimeter of a larger central island. "
-				"Sailing from the starting islands towards the center of "
-				"the map should lead to the central island within a few "
-				"regions.");
-		f.PutStr("<P></P>");
+		temp = "In a game of Atlantis Conquest, each player begins the "
+			"game on a small island of 8 regions, seperated by ocean from "
+			"the rest of the players.  The starting islands are located "
+			"around the perimeter of a larger central island. Sailing from "
+			"the starting islands towards the center of the map should "
+			"lead to the central island within a few regions.";
+		f.Paragraph(temp);
 	}
 
-	f.PutStr(f.LinkRef("movement"));
+	f.LinkRef("movement");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Movement");
 	if(may_sail)
@@ -1028,10 +1005,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "Certain powerful mages may also teleport themselves, or even "
 		"other units, but the knowledge of the workings of this magic is "
 		"carefully guarded.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 
-	f.PutStr(f.LinkRef("movement_normal"));
+	f.LinkRef("movement_normal");
 	f.TagText("H3", "Normal Movement:");
 	temp = "In one month, a unit can issue a single ";
 	temp += f.Link("#move", "MOVE") + " order, using one or more of its "
@@ -1044,11 +1020,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "A unit will automatically use the fastest mode of travel "
 		"it has available. The ";
 	temp += f.Link("#advance", "ADVANCE") + " order is the same as " +
-		f.Link("#move", "MOVE") + " except that it implies attacks on " +
+		f.Link("#move", "MOVE") + ", except that it implies attacks on " +
 		"units which try to forbid access; see the section on combat for " +
 		"details.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 
 	temp = "Flying units are not initially available to starting players. "
 		"A unit can ride provided that the carrying capacity of its "
@@ -1062,9 +1037,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#move", "MOVE") + " order.";
 	temp += " Most people weigh 10 units and have a capacity of 5 units; "
 		"data for items is as follows:";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("tableitemweights"));
+	f.Paragraph(temp);
+	f.LinkRef("tableitemweights");
 	f.Enclose(1, "CENTER");
 	f.Enclose(1, "TABLE BORDER=1");
 	f.Enclose(1, "TR");
@@ -1102,14 +1076,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Enclose(0, "TABLE");
 	f.Enclose(0, "CENTER");
-	f.PutStr("<P></P>");
 	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
 		temp = "A unit which can fly, is capable of travelling over water.";
 		if(Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_MUST_LAND)
 			temp += " However, if the unit ends its turn over a water hex "
 				"that unit will drown.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
 
 	temp = "Since regions are hexagonal, each region has six neighbouring "
@@ -1145,8 +1117,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 	}
 	temp += ".";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Units may also enter or exit structures while moving.  Moving "
 		"into or out of a structure does not use any movement points at "
 		"all.  Note that a unit can also use the ";
@@ -1155,21 +1126,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#move", "MOVE") + " order.";
 	temp += " The unit can also use the ";
 	temp += f.Link("#move", "MOVE") + " order to enter or leave a structure.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Finally, certain structures contain interior passages to other "
 		"regions.  The ";
 	temp += f.Link("#move", "MOVE") + " IN order can be used to go through ";
 	temp += "these passages; the movement point cost is equal to the normal "
 		"cost to enter the destination region.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Example: One man with a horse, sword, and chain mail wants to "
 		"move north, then northeast.  The capacity of the horse is ";
 	cap = ItemDefs[I_HORSE].ride - ItemDefs[I_HORSE].weight;
 	temp += cap;
 	temp += " and the weight of the man and other items is ";
-	int weight = ItemDefs[I_MAN].weight + ItemDefs[I_SWORD].weight + 
+	int weight = ItemDefs[I_MAN].weight + ItemDefs[I_SWORD].weight +
 			ItemDefs[I_CHAINARMOR].weight;
 	temp += weight;
 	if(cap > weight)
@@ -1180,7 +1149,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += NumToWord(Globals->HORSE_SPEED);
 	int travel = Globals->HORSE_SPEED;
 	temp += " movement point";
-	temp += (Globals->HORSE_SPEED == 1 ? "" : "s") + ". ";
+	temp += AString((Globals->HORSE_SPEED == 1) ? "" : "s") + ". ";
 	temp += "He issues the order MOVE NORTH NORTHEAST. First he moves north, "
 		"into a plain region.  This uses ";
 	int cost = TerrainDefs[R_PLAIN].movepoints;
@@ -1200,15 +1169,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " needed to move into the forest region to the northeast, "
 			"so the movement is halted at this point.";
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 
 	if(may_sail) {
-		f.PutStr(f.LinkRef("movement_sailing"));
+		f.LinkRef("movement_sailing");
 		f.TagText("H3", "Sailing:");
 		temp = "Movement by sea is in some ways similar. It does not use the ";
-		temp += f.Link("#move", "MOVE") + " order however.  Instead the " +
-			"owner of the ship must issue the " + f.Link("#sail", "SAIL") +
+		temp += f.Link("#move", "MOVE") + " order however.  Instead, the " +
+			"owner of a ship must issue the " + f.Link("#sail", "SAIL") +
 			" order, and other units wishing to help sail the ship must " +
 			"also issue the " + f.Link("#sail", "SAIL") + " order. ";
 		temp += "The ship will then, if possible, make the indicated "
@@ -1220,8 +1188,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += f.Link("#sail", "SAIL") + " order is processed.  (A coastal " +
 			"region is defined as a non-ocean region with at least one "
 			"adjacent ocean region.)";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		temp = AString("Note that a unit on board a sailing ship may not ") +
 			f.Link("#move", "MOVE") + " later in the turn, even if he " +
 			"doesn't issue the " + f.Link("#sail", "SAIL");
@@ -1230,8 +1197,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"ship; they will have to reissue the ";
 		temp += f.Link("#guard", "GUARD") +  " 1 order to guard a " +
 			"region after sailing.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		temp = AString("Ships get ") + NumToWord(Globals->SHIP_SPEED);
 		temp += AString(" movement point") + (Globals->SHIP_SPEED==1?"":"s");
 		temp += " per turn.  A ship can move from an ocean region to "
@@ -1246,8 +1212,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"during the winter months (or monsoon months in the "
 				"tropical latitudes).";
 		}
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		temp = "A ship can only move if the total weight of everything "
 			"aboard does not exceed the ship's capacity.  (The rules do "
 			"not prevent an overloaded ship from staying afloat, only "
@@ -1260,9 +1225,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"alone.  (See the section on skills for further details on "
 			"skills.)  The capacities (and costs in labor units) of the "
 			"various basic ship types are as follows:";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
-		f.PutStr(f.LinkRef("tableshipcapacities"));
+		f.Paragraph(temp);
+		f.LinkRef("tableshipcapacities");
 		f.Enclose(1, "CENTER");
 		f.Enclose(1, "TABLE BORDER=1");
 		f.Enclose(1, "TR");
@@ -1296,13 +1260,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Enclose(0, "TABLE");
 		f.Enclose(0, "CENTER");
-		f.PutStr("<P></P>");
 	}
-	f.PutStr(f.LinkRef("movement_order"));
+	f.LinkRef("movement_order");
 	f.TagText("H3", "Order of Movement:");
-	f.PutStr("This section is probably unimportant to beginning players, "
-			"but it can be helpful for more experienced players.");
-	f.PutStr("<P></P>");
+	temp = "This section is probably unimportant to beginning players, but "
+		"it can be helpful for more experienced players.";
+	f.Paragraph(temp);
 	temp = "Normal movement in Atlantis, meaning ";
 	temp += f.Link("#advance", "ADVANCE") + " and " + f.Link("#move", "MOVE");
 	temp += " orders, is processed one hex of movement at a time, region "
@@ -1316,20 +1279,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"does the whole process again, except this time moving units "
 		"their second hex (if they have enough movement points left). This "
 		"continues until no units can move anymore.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	if(may_sail) {
-		f.PutStr("Sailing is handled differently; Atlantis cycles through "
-				"all of the ships in Atlantis, moving them one at a time. "
-				"When Atlantis sails a ship, it sails it through its "
-				"entire course, either to the end, or until the ship enters "
-				"a hex guarded against some unit on the ship, and then "
-				"moves onto the next ship.");
-		f.PutStr("<P></P>");
+		temp = "Sailing is handled differently; Atlantis cycles through all "
+			"of the ships in Atlantis, moving them one at a time. When "
+			"Atlantis sails a ship, it sails it through its entire course, "
+			"either to the end, or until the ship enters a hex guarded "
+			"against some unit on the ship, and then moves onto the next "
+			"ship.";
+		f.Paragraph(temp);
 	}
 	temp = "Note that";
 	if(may_sail) {
-		temp += ", in either case,";
+		temp += " in either case,";
 	}
 	temp += " the order in which the regions are processed is undefined "
 		"by the rules. The computer generally does them in the same "
@@ -1337,9 +1299,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"determine (or not) these patterns. The order in which units or "
 		"ships are moved within a region is the order that they appear "
 		"on a turn report.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("skills"));
+	f.Paragraph(temp);
+	f.LinkRef("skills");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Skills");
 
@@ -1355,7 +1316,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		found = 0;
 		for(j = 0; j < 3; j++) {
 			last = SkillDefs[i].depends[j].skill;
-			if(last != -1 && !(SkillDefs[last].flags & SkillType::DISABLED))
+			if(last != -1 && !(SkillDefs[last].flags & SkillType::DISABLED)) {
 				found = 1;
 				break;
 			}
@@ -1371,9 +1332,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"directly proportional to the skill level involved, so a unit with "
 		"level 2 in a skill is twice as good as a unit with level 1 in the "
 		"same skill.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("skills_limitations"));
+	f.Paragraph(temp);
+	f.LinkRef("skills_limitations");
 	f.TagText("H3", "Limitations:");
 	if (Globals->LEADERS_EXIST&&Globals->SKILL_LIMIT_NONLEADERS) {
 		temp = "A unit made up of leaders may know one or more skills; "
@@ -1381,8 +1341,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"to such a unit.  Other units, those which contain "
 			"non-leaders, will be refered to as normal units. A normal "
 			"unit may only know one skill.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
 	if (Globals->RACES_EXIST) {
 		temp = "Skills may be learned up to a maximum level depending on "
@@ -1397,9 +1356,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		temp += "Here is a list of the races (including leaders) and the "
 			"information on normal skill levels and specialized skills.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
-		f.PutStr(f.LinkRef("tableraces"));
+		f.Paragraph(temp);
+		f.LinkRef("tableraces");
 		f.Enclose(1, "CENTER");
 		f.Enclose(1, "TABLE BORDER=1");
 		f.Enclose(1, "TR");
@@ -1445,16 +1403,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Enclose(0, "TABLE");
 		f.Enclose(0, "CENTER");
-		f.PutStr("<P></P>");
 	}
-	f.PutStr("If units are merged together, their skills are averaged out. "
-			"No rounding off is done; rather, the computer keeps track for "
-			"each unit of how many total months of training that unit has "
-			"in each skill.  When units are split up, these months are "
-			"divided as evenly as possible among the people in the unit; "
-			"but no months are ever lost.");
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("skills_studying"));
+	temp = "If units are merged together, their skills are averaged out. "
+		"No rounding off is done; rather, the computer keeps track for each "
+		"unit of how many total months of training that unit has in each "
+		"skill. When units are split up, these months are divided as evenly "
+		"as possible among the people in the unit; but no months are ever "
+		"lost.";
+	f.Paragraph(temp);
+	f.LinkRef("skills_studying");
 	f.TagText("H3", "Studying:");
 	temp = "For a unit to gain level 1 of a skill, they must gain one "
 		"months worth of training in that skill.  To raise this skill level "
@@ -1466,8 +1423,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"do not need to be consecutive; for a unit to go from level 1 to "
 		"level 2, he can study for a month, do something else for a month, "
 		"and then go back and complete his second month of study.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	// XXX -- This is not as nice as it could be and could cause problems
 	// if the skills are given disparate costs.   This should probably be
 	// a table of all skills/costs.
@@ -1497,9 +1453,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ")";
 	}
 	temp += ".";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("skills_teaching"));
+	f.Paragraph(temp);
+	f.LinkRef("skills_teaching");
 	f.TagText("H3", "Teaching:");
 	temp = AString("A unit with a teacher can learn up to twice as fast ") +
 		"as normal. The " + f.Link("#teach", "TEACH") + " order is used to ";
@@ -1519,8 +1474,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += AString(2*Globals->STUDENTS_PER_TEACHER) +
 		" men, each man being taught will gain 1 1/2 months of training, "
 		"not 2 months.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Note that it is quite possible for a single unit to teach two "
 		"or more other units different skills in the same month, provided "
 		"that the teacher has a higher skill level than each student in "
@@ -1529,15 +1483,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += AString(Globals->STUDENTS_PER_TEACHER) + " student";
 	temp += (Globals->STUDENTS_PER_TEACHER == 1 ? "" : "s");
 	temp += " per teacher.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	if(Globals->LEADERS_EXIST) {
 		temp = "Note: Only leaders may use the ";
 		temp += f.Link("#teach", "TEACH") + " order.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
-	f.PutStr(f.LinkRef("skills_skillreports"));
+	f.LinkRef("skills_skillreports");
 	f.TagText("H3", "Skill Reports:");
 	temp = "When a faction learns a new skill level for this first time, it "
 		"will be given a report on special abilities that a unit with this "
@@ -1546,23 +1498,22 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#show", "SHOW") + " order. For example, when a faction ";
 	temp += "learned the skill Shoemaking level 3 for the first time, it "
 		"might receive the following (obviously farsical) report:";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	f.Paragraph("");
 	f.Enclose(1, "PRE");
 	f.ClearWrapTab();
 	f.WrapStr("Shoemaking [SHOE] 3: A unit with this skill may PRODUCE "
 			"Sooper Dooper Air Max Winged Sandals.");
 	f.Enclose(0, "PRE");
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("economy"));
+	f.LinkRef("economy");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "The Economy");
-	f.PutStr("The unit of currency in Atlantis is the silver piece. Silver "
-			"is a normal item, with zero weight, appearing in your unit's "
-			"reports. Silver is used for such things as buying items, and "
-			"unit's maintenance.");
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("economy_maintenance"));
+	temp = "The unit of currency in Atlantis is the silver piece. Silver "
+		"is a normal item, with zero weight, appearing in your unit's "
+		"reports. Silver is used for such things as buying items, and "
+		"unit's maintenance.";
+	f.Paragraph(temp);
+	f.LinkRef("economy_maintenance");
 	f.TagText("H3", "Maintenance Costs:");
 	temp = "IMPORTANT:  Each and every character in Atlantis requires a "
 		"maintenance fee each month. Anyone who ends the month without "
@@ -1571,7 +1522,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += " percent chance of ";
 	if(Globals->SKILL_STARVATION != GameDefs::STARVE_NONE) {
 		temp += "starving, leading to the following effects:";
-		f.PutStr(temp);
+		f.Paragraph(temp);
 		f.Enclose(1, "UL");
 		f.Enclose(1, "LI");
 		if(Globals->SKILL_STARVATION == GameDefs::STARVE_MAGES)
@@ -1595,7 +1546,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(0, "UL");
 		temp = "";
 	} else {
-		temp += " starving to death.  ";
+		temp += " starving to death. ";
 	}
 	temp += "It is up to you to make sure that your people have enough money "
 		"available . Money will be shared automatically between your units "
@@ -1607,8 +1558,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"units that would otherwise starve. Lastly, if a faction is allied "
 		"to yours, their units will provide surplus cash to your units for "
 		"maintenance, as a last resort.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = AString("This fee is generally ") + Globals->MAINTENANCE_COST +
 		" silver for a normal character";
 	if (Globals->LEADERS_EXIST) {
@@ -1628,9 +1578,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"them and using the money is more economical than using them for "
 			"maintenance.";
 	};
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("economy_recruiting"));
+	f.Paragraph(temp);
+	f.LinkRef("economy_recruiting");
 	f.TagText("H3", "Recruiting:");
 	temp = "People may be recruited in a region.  The total amount of "
 		"recruits available per month in a region, and the amount that must "
@@ -1644,16 +1593,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#give", "GIVE")+" the empty unit some money, and have it ";
 	temp += f.Link("#buy", "BUY") + " people; see the description of the ";
 	temp += f.Link("#form", "FORM")+ " order for further details.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("economy_items"));
+	f.Paragraph(temp);
+	f.LinkRef("economy_items");
 	f.TagText("H3", "Items:");
-	f.PutStr("A unit may have a number of possessions, referred to as "
-			"\"items\".  Some details were given above in the section on "
-			"Movement, but many things were left out. Here is a table giving "
-			"some information about common items in Atlantis:");
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("tableiteminfo"));
+	temp = "A unit may have a number of possessions, referred to as "
+		"\"items\".  Some details were given above in the section on "
+		"Movement, but many things were left out. Here is a table giving "
+		"some information about common items in Atlantis:";
+	f.Paragraph(temp);
+	f.LinkRef("tableiteminfo");
 	f.Enclose(1, "CENTER");
 	f.Enclose(1, "TABLE BORDER=1");
 	f.Enclose(1, "TR");
@@ -1708,6 +1656,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(0, "TD");
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		temp = ItemDefs[i].weight;
+		cap = ItemDefs[i].walk - ItemDefs[i].weight;
 		if(ItemDefs[i].walk || (ItemDefs[i].hitchItem != -1)) {
 			temp += " (";
 			if(ItemDefs[i].hitchItem == -1)
@@ -1791,32 +1740,133 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Enclose(0, "TABLE");
 	f.Enclose(0, "CENTER");
-	f.PutStr("<P></P>");
 	temp = "All items except silver and trade goods are produced with the ";
-	temp += f.Link("#produce", "PRODUCE") + " order.  Example: PRODUCE "
-		"SWORDS will produce as many swords as possible during the month, "
-		"provided that the unit has an adequate supply of the raw materials "
-		"and the required skill.  Required skills and materials are in the "
-		"table above.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	temp += f.Link("#produce", "PRODUCE") + " order.";
+	if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
+		last = -1;
+		temp2 = "";
+		for(i = 0; i < 2; i++) {
+			j = ItemDefs[I_SWORD].pInput[i].item;
+			if(j == -1) continue;
+			if(ItemDefs[j].flags & ItemType::DISABLED) continue;
+			if(last == -1) {
+				last = j;
+				continue;
+			}
+			temp2 += ItemDefs[last].names;
+			temp2 += " and ";
+			last = j;
+		}
+		if(last != -1) temp2 += ItemDefs[last].names;
+		j = ItemDefs[I_SWORD].pSkill;
+		if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
+			temp += " Example: PRODUCE SWORDS will produce as many swords "
+				"as possible during the month, provided that the unit has "
+				"adequate supplies of ";
+			temp += temp2;
+			temp += " and has the ";
+			temp += SkillDefs[j].name;
+			temp += " skill. Required skills and raw materials are in the "
+				"table above.";
+		}
+	}
+	f.Paragraph(temp);
 	temp = "If an item requires raw materials, then the specified amount "
-		"of material is consumed for each item produced.  The higher ones "
-		"skill, the more productive each man-month of work.";
+		"of each material is consumed for each item produced. ";
+	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED)) {
+		last = -1;
+		temp2 = "";
+		k = 0;
+		for(i = 0; i < 2; i++) {
+			j = ItemDefs[I_LONGBOW].pInput[i].item;
+			if(j == -1) continue;
+			if(ItemDefs[j].flags & ItemType::DISABLED) continue;
+			if(last == -1) {
+				k = ItemDefs[I_LONGBOW].pInput[i].amt;
+				last = j;
+				continue;
+			}
+			temp2 += AString(5*k);
+			temp2 += " units of ";
+			temp2 += ItemDefs[last].names;
+			temp2 += " and ";
+			last = j;
+			k = ItemDefs[I_LONGBOW].pInput[i].amt;
+		}
+		if(last != -1) {
+			temp2 += AString(5*k);
+			temp2 += " units of ";
+			temp2 += ItemDefs[last].names;
+		}
+		j = ItemDefs[I_LONGBOW].pSkill;
+		if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
+			temp += "Thus to produce 5 longbows (a supply of arrows is "
+				"assumed to be included with the bow), ";
+			temp += temp2;
+			temp += " are required. ";
+		}
+	}
+	temp += "The higher ones skill, the more productive each man-month "
+		"of work";
+	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) &&
+			(ItemDefs[I_LONGBOW].pMonths == 1) &&
+			(ItemDefs[I_LONGBOW].pOut == 1)) {
+		temp += "; thus, 5 longbows could be produced by a 5-man unit of "
+			"skill 1, or a 1-man unit of skill 5.";
+		if(!(ItemDefs[I_PLATEARMOR].flags & ItemType::DISABLED) &&
+			(ItemDefs[I_PLATEARMOR].pMonths==ItemDefs[I_PLATEARMOR].pLevel)) {
+			temp += " (Plate armor is an exception; a unit must have skill ";
+			temp += ItemDefs[I_PLATEARMOR].pLevel;
+			temp += " to be able to produce it at all, and each man can only "
+				"produce 1 plate armor per month.";
+			last = -1;
+			temp2 = "";
+			k = 0;
+			for(i = 0; i < 2; i++) {
+				j = ItemDefs[I_PLATEARMOR].pInput[i].item;
+				if(j == -1) continue;
+				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
+				if(last == -1) {
+					last = j;
+					k = ItemDefs[I_PLATEARMOR].pInput[i].amt;
+					continue;
+				}
+				temp2 += AString(k);
+				temp2 += " units of ";
+				temp2 += ItemDefs[last].names;
+				temp2 += " and ";
+				last = j;
+				k = ItemDefs[I_PLATEARMOR].pInput[i].amt;
+			}
+			if(last != -1) {
+				temp2 += AString(k);
+				temp2 += " units of ";
+				temp2 += ItemDefs[last].names;
+			}
+			j = ItemDefs[I_PLATEARMOR].pSkill;
+			if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
+				temp += " Plate armor also takes ";
+				temp += temp2;
+				temp += " to produce.";
+			}
+			temp += ")";
+		}
+	} else {
+		temp += ".";
+	}
+
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp += " Only Trade factions can issue ";
 		temp += f.Link("#produce", "PRODUCE") + " orders however, regardless "
 			"of skill levels.";
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Items which increase production may increase production of "
 		"advanced items in addition to the basic items listed.    Some of "
 		"them also increase production of other tools.   Read the skill "
 		"descriptions for details on which tools aid which production when "
 		"not noted above.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "If an item does not list a raw material it may be produced "
 		"directly from the land. Each region generally has at least one item "
 		"that can be produced there.  Shown on the description of a region "
@@ -1829,10 +1879,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "If the units in a region attempt to produce more of a commodity "
 		"than can be produced that month, then the amount available is "
 		"distributed among the producers";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	if(Globals->TOWNS_EXIST) {
-		f.PutStr(f.LinkRef("economy_towns"));
+		f.LinkRef("economy_towns");
 		f.TagText("H3", "Villages, Towns, and Cities:");
 		temp = "Some regions in Atlantis contain villages, towns, and "
 			"cities.  Villages add to the wages, population, and tax income "
@@ -1841,17 +1890,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "Also, villages will have an additional market for "
 				"grain, livestock, and fish. ";
 		}
-		temp += "As the village's demand for goods is met, the population "
-			"will increase. When the population reaches a certain theshold, "
-			"the village will turn into a town.  A town will have some "
-			"additional products that it demands, in addition to what it "
-			"previously wanted.  Also a town will sell some new items as "
-			"well. A town whose demands are being met will grow, and above "
-			"another threshold it will become a full-blown city.  A city "
-			"will have additional markets above the town including markets "
-			"for more expensive trade items.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		temp += "As the village's demand for these goods is met, the "
+			"population will increase. When the population reaches a "
+			"certain theshold, the village will turn into a town.  A "
+			"town will have some additional products that it demands, "
+			"in addition to what it previously wanted.  Also a town "
+			"will sell some new items as well. A town whose demands are "
+			"being met will grow, and above another threshold it will "
+			"become a full-blown city.  A city will have additional "
+			"markets for common items, and will also have markets for "
+			"less common, more expensive trade items.";
+		f.Paragraph(temp);
 		temp = "Trade items are bought and sold only by cities, and have "
 			"no other practical uses.  However, the profit margins on "
 			"these items are usually quite high. ";
@@ -1861,10 +1910,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"may undertake trade activity (note that buying and selling "
 				"normal items does not).";
 		}
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
-	f.PutStr(f.LinkRef("economy_buildings"));
+	f.LinkRef("economy_buildings");
 	f.TagText("H3", "Buildings and Trade Structures:");
 	temp = "Construction of buildings ";
 	if(may_sail) temp += "and ships ";
@@ -1878,9 +1926,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += f.Link("#build", "BUILD") + " orders. ";
 	}
 	temp += "Here is a table of the various building types:";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("tablebuildings"));
+	f.Paragraph(temp);
+	f.LinkRef("tablebuildings");
 	f.Enclose(1, "CENTER");
 	f.Enclose(1, "TABLE BORDER=1");
 	f.Enclose(1, "TR");
@@ -1935,10 +1982,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"other buildings which can be built that require more advanced "
 		"resources, or odd skills to construct.   The description of a skill "
 		"will include any buildings which it allows to be built.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "There are other structures that increase the maximum production "
-		"of certain resources in regions";
+		"of certain items in regions";
 	if(!(ObjectDefs[O_MINE].flags & ObjectType::DISABLED))
 		temp += "; for example, a Mine will increase the amount of iron "
 			"that is available to be mined in a region";
@@ -1951,17 +1997,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	temp += "This bonus in production is available to any unit in the "
 		"region; there is no need to be inside the structure.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "The first structure built in a region will increase the maximum "
 		"production of the related product by 25%; the amount added by each "
 		"additional structure will be half of the the effect of the previous "
 		"one.  (Note that if you build enough of the same type of structure "
 		"in a region, the new structures may not add _any_ to the production "
 		"level).";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("tabletradestructures"));
+	f.Paragraph(temp);
+	f.LinkRef("tabletradestructures");
 	f.Enclose(1, "CENTER");
 	f.Enclose(1, "TABLE BORDER=1");
 	f.Enclose(1, "TR");
@@ -2018,48 +2062,48 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Enclose(0, "TABLE");
 	f.Enclose(0, "CENTER");
-	f.PutStr("<P></P>");
 	temp = "Note that these structures will not increase the availability "
 		"of an item in a region which does not already have that item "
-		"available. Also Trade structures do not offer defensive bonuses "
+		"available. Also, Trade structures do not offer defensive bonuses "
 		"(which is why they do not have a size associated with them).  As "
 		"with regular buildings, the Cost is the number of man-months of "
 		"labor and also the number of units of raw material required to "
-		"complete the structure.  It is possible that there are structures "
-		"not listed above which require either advanced resources to build "
-		"or which increase the production of advanced resources.  The skill "
+		"complete the structure. ";
+	if(!(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
+			!(ItemDefs[I_STONE].flags & ItemType::DISABLED)) {
+		temp += "You can use two different materials (wood or stone) to "
+			"construct most trade structures. ";
+	}
+	temp += "It is possible that there are structures not listed above "
+		"which require either advanced resources to build or which "
+		"increase the production of advanced resources.  The skill "
 		"description for a skill will always note if new structures may "
 		"be built based on knowing that skill.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	if(!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED)) {
-		f.PutStr(f.LinkRef("economy_roads"));
+		f.LinkRef("economy_roads");
 		f.TagText("H3", "Roads:");
 		temp = "There is a another type of structure called roads.  They do "
 			"not protect units, nor aid in the production of resources, but "
 			"do aid movement, and can improve the economy of a hex.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		temp = "Roads are directional and are only considered to reach from "
 			"one hexside to the center of the hex.  To gain a movement "
-			"bonus, there must be two matching roads, one in each adjacent "
-			"hex.  Only one road may be built in each direction.  If a road "
-			"in the given direction is connected, units move along that "
-			"road at half cost to a minimum of 1 movement point.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+			"bonus, there must be two connecting roads, one in each "
+			"adjacent hex.  Only one road may be built in each direction. "
+			"If a road in the given direction is connected, units move "
+			"along that road at half cost to a minimum of 1 movement point.";
+		f.Paragraph(temp);
 		temp = "For example: If a unit is moving northwest, then hex it is "
 			"in must have a northwest road, and the hex it is moving into "
 			"must have a southeast road.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		temp = "To gain an economy bonus, a hex must have roads that connect "
 			"to roads in at least two adjoining hexes.  The economy bonus "
 			"for the connected roads raises the wages in the region by 1 "
 			"point.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
-		f.PutStr(f.LinkRef("tableroadstructures"));
+		f.Paragraph(temp);
+		f.LinkRef("tableroadstructures");
 		f.Enclose(1, "CENTER");
 		f.Enclose(1, "TABLE BORDER=1");
 		f.Enclose(1, "TR");
@@ -2105,10 +2149,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Enclose(0, "TABLE");
 		f.Enclose(0, "CENTER");
-		f.PutStr("<P></P>");
 	}
 	if (Globals->DECAY) {
-		f.PutStr(f.LinkRef("economy_builddecay"));
+		f.LinkRef("economy_builddecay");
 		f.TagText("H3", "Building Decay:");
 		temp = "Some structures will decay over time if they are not "
 			"maintained. Difficult terrain and bad weather will speed up "
@@ -2122,11 +2165,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"related in the object information given about the structure. "
 			"If a structure is allowed to decay, it will not give any of "
 			"its bonuses until it is repaired.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
 	if(may_sail) {
-		f.PutStr(f.LinkRef("economy_ships"));
+		f.LinkRef("economy_ships");
 		f.TagText("H3", "Ships:");
 		temp = "Ships are constructed similarly to buildings, except they "
 			"tend to be constructed out of wood, not stone, and their "
@@ -2138,9 +2180,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += f.Link("#build", "BUILD") + " orders. ";
 		}
 		temp += "Here is a table on the various ship types:";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
-		f.PutStr(f.LinkRef("tableshipinfo"));
+		f.Paragraph(temp);
+		f.LinkRef("tableshipinfo");
 		f.Enclose(1, "CENTER");
 		f.Enclose(1, "TABLE BORDER=1");
 		f.Enclose(1, "TR");
@@ -2186,7 +2227,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Enclose(0, "TABLE");
 		f.Enclose(0, "CENTER");
-		f.PutStr("<P></P>");
 		temp = "The capacity of a ship is the maximum weight that the ship "
 			"may have aboard and still move. The cost is both the "
 			"man-months of labor and the number of units of material "
@@ -2195,10 +2235,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"ship (and issuing the ";
 		temp += f.Link("#sail", "SAIL") + " order in order for the ship "
 			"to sail).";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
-	f.PutStr(f.LinkRef("economy_advanceditems"));
+	f.LinkRef("economy_advanceditems");
 	f.TagText("H3", "Advanced Items:");
 	temp = "There are also certain advanced items that highly skilled units "
 		"can produce. These are not available to starting players, but can "
@@ -2206,9 +2245,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"produce one of these items, he will receive a skill report "
 		"describing the production of this item. Production of advanced "
 		"items is generally done in a manner similar to the normal items.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("economy_income"));
+	f.Paragraph(temp);
+	f.LinkRef("economy_income");
 	f.TagText("H3", "Income:");
 	temp = "Units can earn money with the ";
 	temp += f.Link("#work", "WORK") + " order.  This means that the unit "
@@ -2219,10 +2257,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"All units may ";
 	temp += f.Link("#work", "WORK") + ", regardless of skills or faction "
 		"type.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
-		f.PutStr(f.LinkRef("economy_entertainment"));
+		f.LinkRef("economy_entertainment");
 		f.TagText("H3", "Entertainment:");
 		temp = "Units with the Entertainment skill can use it to earn "
 			"money.  A unit with Entertainment level 1 will earn ";
@@ -2240,10 +2277,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += " All factions may have entertainers, regardless of "
 				"faction type.";
 		}
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
-	f.PutStr(f.LinkRef("economy_taxingpillaging"));
+	f.LinkRef("economy_taxingpillaging");
 	f.TagText("H3", "Taxing/Pillaging:");
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		temp = "War factions ";
@@ -2262,8 +2298,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += AString(Globals->TAX_INCOME) + ", though if the number of "
 		"taxers would tax more than the available tax income, the tax "
 		"income is split evenly among all taxers.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		temp = "War factions ";
 	else
@@ -2281,12 +2316,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Link("#tax", "TAX") + ", so a unit performing " +
 		f.Link("#tax", "TAX") + " will collect no money in that region that "
 		"month.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "It is possible to safeguard one's tax income in regions one "
 		"controls.  Units which have the Guard flag set (using the ";
 	temp += f.Link("#guard", "GUARD") + " order) will block " +
-		f.Link("#tax", "TAX") + "orders issued by other factions in the same "
+		f.Link("#tax", "TAX") + " orders issued by other factions in the same "
 		"region, unless you have declared the faction in question Friendly. "
 		"Units on guard will also block ";
 	temp += f.Link("#pillage", "PILLAGE") + " orders issued by other "
@@ -2297,18 +2331,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(has_stea)
 		temp += " are always visible regardless of Stealth skill, and ";
 	temp += "will be marked as being \"on guard\" in the region description.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("com"));
+	f.Paragraph(temp);
+	f.LinkRef("com");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Combat");
 	temp = "Combat occurs when one unit attacks another.  The computer then "
 		"gathers together all the units on the attacking side, and all the "
 		"units on the defending side, and the two sides fight until an "
 		"outcome is reached.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("com_attitudes"));
+	f.Paragraph(temp);
+	f.LinkRef("com_attitudes");
 	f.TagText("H3", "Attitudes:");
 	temp = "Which side a faction's units will fight on depends on declared "
 		"attitudes.  A faction can have one of the following attitudes "
@@ -2321,13 +2353,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#declare", "DECLARE") + " 27 ALLY will declare the "
 		"Ally attitude to faction 27.  (Note that this does not necessarily "
 		"mean that faction 27 has decided to treat you as an ally.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Ally means that you will fight to defend units of that faction "
 		"whenever they come under attack, if you have non-avoiding units in "
 		"the region where the attack occurs. ";
 	if(has_stea) {
-		temp += " You will also attempt to prevent any theft of "
+		temp += " You will also attempt to prevent any theft or "
 			"assassination attempts against units of the faction";
 		if(has_obse) {
 			temp += ", if you are capable of seeing the unit which is "
@@ -2336,28 +2367,24 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ". ";
 	}
 	temp += "It also has the implications of the Friendly attitude.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Friendly means that you will accept gifts from units of that "
 		"faction.  This includes the giving of items, units of people, and "
 		"the teaching of skills.  You will also admit units of that faction "
 		"into buildings or ships owned by one of your units, and you will "
 		"permit units of that faction to collect taxes (but not pillage) "
 		"in regions where you have units on guard.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Unfriendly means that you will not admit units of that faction "
 		"into any region where you have units on guard.  You will not, "
 		"however, automatically attack unfriendly units which are already "
 		"present.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Hostile means that any of your units which do not have the "
 		"Avoid Combat flag set (using the ";
-	temp += f.Link("#avoid", "AVOID") + " order ) will attack any units of "
+	temp += f.Link("#avoid", "AVOID") + " order) will attack any units of "
 		"that faction wherever they find them.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "If a unit can see another unit, but ";
 	if(has_obse) {
 		temp += "does not have high enough Observation skill to determine "
@@ -2365,7 +2392,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	} else {
 		temp += "it is not revealing its faction,";
 	}
-	temp += "it will treat the unit using the faction's default attitude, "
+	temp += " it will treat the unit using the faction's default attitude, "
 		"even if the unit belongs to an Unfriendly or Hostile faction, "
 		"because it does not know the unit's identity.  However, if your "
 		"faction has declared an attitude of Friendly or Ally towards that "
@@ -2376,20 +2403,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " (See the section on stealth for more information on when "
 			"units can see each other.)";
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "If a faction declares Unfriendly or Hostile as default attitude "
 		"(the latter is a good way to die fast), it will block or attack "
-		"unidentified units, unless they belong to factions for which a "
+		"all unidentified units, unless they belong to factions for which a "
 		"Friendly or Ally attitude has been specifically declared.";
 	if(has_stea) {
 		temp += " Units which cannot be seen at all cannot be directly "
 			"blocked or attacked, of course.";
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("com_attacking"));
-	f.TagText("H3", "Attacking");
+	f.Paragraph(temp);
+	f.LinkRef("com_attacking");
+	f.TagText("H3", "Attacking:");
 	temp = "A unit can attack another by issuing an ";
 	temp += f.Link("#attack", "ATTACK") + " order. A unit that does not "
 		"have Avoid Combat set will automatically attack any Hostile units "
@@ -2408,11 +2433,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"wishes to attack.  More information is available on this "
 				"in the stealth section of the rules.";
 		}
-		if(!SkillDefs[S_RIDING].flags & SkillType::DISABLED) {
+		if(!(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
 			if(has_stea) {
-				f.PutStr(temp);
-				f.PutStr("<P></P>");
-				temp += "Secondly, the";
+				f.Paragraph(temp);
+				temp = "Secondly, the";
 			}
 			temp += " attacking unit must be able to catch the unit it "
 				"wishes to attack.  A unit may only catch a unit if its "
@@ -2437,8 +2461,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"structure of any type.";
 		}
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "A unit which is on guard, and is Unfriendly towards a unit, "
 		"will deny access to units using the ";
 	temp += f.Link("#move", "MOVE") + " order to enter its region. ";
@@ -2455,8 +2478,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"moved through.  If the unit wins the battle and its army doesn't "
 		"lose any men, it is allowed to continue to move, provided that it "
 		"has enough movement points.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	if(has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
 		temp = "Note that ";
 		if(has_stea && !(SkillDefs[S_RIDING].flags & SkillType::DISABLED))
@@ -2471,10 +2493,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += " Riding does not play a part in combat on board ships";
 		}
 		temp += ".";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
-	f.PutStr(f.LinkRef("#com_muster"));
+	f.LinkRef("com_muster");
 	f.TagText("H3", "The Muster:");
 	temp = "Once the attack has been made, the sides are gathered.  Although "
 		"the ";
@@ -2482,39 +2503,39 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"a faction as its parameter (mainly so that unidentified units can "
 		"be attacked), an attack is basically considered to be by an entire "
 		"faction, against an entire faction and its allies.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "On the attacking side are all units of the attacking faction in "
 		"the region where the fight is taking place, except those with Avoid "
 		"Combat set.  A unit which has explicitly (or implicitly via ";
 	temp += f.Link("#advance", "ADVANCE") + ") issued an " +
 		f.Link("#attack", "ATTACK") + " order will join the fight anyway, "
 		"regardless of whether Avoid Combat is set.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Also on the attacking side are all units of other factions that "
 		"attacked the target faction (implicitly or explicitly) in the "
 		"region where the fight is taking place.  In other words, if several "
 		"factions attack one, then all their armies join together to attack "
 		"at the same time (even if they are enemies and will later fight "
 		"each other).";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "On the defending side are all identifiable units belonging to "
 		"the defending faction.  If a unit has Avoid Combat set and it "
 		"belongs to the target faction, it will be uninvolved only if its "
 		"faction cannot be identified by the attacking faction.  A unit "
 		"which was explicitly attacked will be involved anyway, regardless "
-		"of Avoid Combat. Also, all non-avoiding units located in the target "
-		"region belonging to factions allied with the defending unit will "
-		"join in on the defending side.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+		"of Avoid Combat. ";
+	if(has_stea) {
+		temp += "(This means that Avoid Combat is mostly useful for high "
+			"stealth scouts.) ";
+	}
+	temp += "Also, all non-avoiding units located in the target region "
+		"belonging to factions allied with the defending unit will join "
+		"in on the defending side.";
+	f.Paragraph(temp);
 	temp = "Units in adjacent regions can also become involved.  This is "
 		"the exception to the general rule that you cannot interact with "
 		"units in a different region.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "If a faction has at least one unit involved in the initial "
 		"region, then any units in adjacent regions will join the fight, "
 		"if they could reach the region and do not have Avoid Combat set. "
@@ -2525,8 +2546,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"defending factions.  A unit with the Noaid flag (set using the ";
 	temp += f.Link("#noaid", "NOAID") + " order) will receive no aid from "
 		"adjacent hexes when attacked, or when it issues an attack.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Example:  A fight starts in region A, in the initial combat "
 		"phase (before any movement has occurred).  The defender has a unit "
 		"of soldiers in adjacent region B.  They have 2 movement points at "
@@ -2541,8 +2561,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "Fortunately, region A is plains, ";
 	}
 	temp += "so the soldiers can join the fight.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "It is important to note that the units in nearby regions do not "
 		"actually move to the region where the fighting happens; the "
 		"computer only checks that they could move there.  (In game world "
@@ -2551,8 +2570,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"allowances and terrain types when determining whether a unit could "
 		"reach the scene of the battle. Note that the use of ships is not "
 		"allowed in this virtual movement.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "If you order an attack on an ally (either with the ";
 	temp += f.Link("#attack", "ATTACK") + " order, or if your ally has "
 		"declared you Unfriendly, by attempting to ";
@@ -2563,9 +2581,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"that region. Note that you will always defend an ally against "
 		"attack, even if it means that you fight against other factions "
 		"that you are allied with.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("com_thebattle"));
+	f.Paragraph(temp);
+	f.LinkRef("com_thebattle");
 	f.TagText("H3", "The Battle:");
 	temp = "The troops having lined up, the fight begins.";
 	if(!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
@@ -2577,8 +2594,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"than the other side's, then that side gets a free round of "
 			"attacks.";
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "In each combat round, the combatants each get to attack once, in "
 		"a random order. ";
 	if(!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
@@ -2589,11 +2605,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"If he hits, and the target has no armor, then the target is "
 		"automatically killed.  Armor may provide extra defense against "
 		"otherwise successful attacks.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "The basic skill used in battle is the Combat skill; this is "
 		"used for hand to hand fighting.  If one soldier tries to hit "
-		"another using most weapons, there is a 50 percent chance that the "
+		"another using most weapons, there is a 50% chance that the "
 		"attacker will get an opportunity for a lethal blow.  If the "
 		"attacker does get that opportunity, then there is a contest "
 		"between his combat skill (modified by weapon attack bonus) and "
@@ -2601,17 +2616,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"Some weapons may not allow combat skill to affect defense (e.g. "
 		"bows), and others may allow different skills to be used on "
 		"defense (or offense).";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	temp = "If the skills are equal, then there is a 1:1 (i.e. 50 percent) "
+	f.Paragraph(temp);
+	temp = "If the skills are equal, then there is a 1:1 (i.e. 50%) "
 		"chance that the attack will succeed.  If the attacker's skill is 1 "
-		"higher then there is a 2:1 (i.e. 66 percent) chance, if the "
-		"attacker's skill is 2 higher then there is a 4:1 (i.e. 80 percent) "
-		"chance, 3 higher means an 8:1 (i.e. 88 percent) chance, and so on. "
-		"Similarly if the defender's skill is 1 higher, then there is only "
-		"a 1:2 (i.e. 33 percent) chance, etc.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+		"higher then there is a 2:1 (i.e. 66%) chance, if the attacker's "
+		"skill is 2 higher then there is a 4:1 (i.e. 80%) chance, 3 higher "
+		"means an 8:1 (i.e. 88%) chance, and so on. Similarly if the "
+		"defender's skill is 1 higher, then there is only a 1:2 (i.e. 33%) "
+		"chance, etc.";
+	f.Paragraph(temp);
 	temp = "";
 	if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
 		temp += "Possession of a sword confers a ";
@@ -2641,14 +2654,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"bonuses, or have additional attack bonuses against mounted "
 		"opponents or other special characteristics. These bonuses will "
 		"be listed in the item descriptions in the turn reports.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	temp += "Some melee weapons may be defined as Long or Short (this is "
+	f.Paragraph(temp);
+	temp = "Some melee weapons may be defined as Long or Short (this is "
 		"relative to a normal weapon, e.g. the sword).  A soldier wielding "
 		"a longer weapon than his opponent gets a +1 bonus to his attack "
 		"skill.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Ranged weapons are slightly different from melee weapons.  The "
 		"target will generally not get any sort of combat bonus to defense "
 		"against a ranged attack. ";
@@ -2657,9 +2668,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "The skill check to hit with a long bow is made against an "
 			"effective defense of ";
 		temp += -(WeaponDefs[WEAPON_LONGBOW].attackBonus);
-		temp += "; i.e., a longbowman with a skill 1, having made the 50 "
-			"percent change of getting an effective attack, has a 1:2 "
-			"chance of hitting a target. ";
+		temp += "; i.e., a longbowman with a skill 1, having made the 50% "
+			"chance of getting an effective attack, has a 1:2 chance of "
+			"hitting a target. ";
 	}
 	if(!(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED) &&
 			!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
@@ -2670,62 +2681,57 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "; on the other hand, a crossbow can only fire once "
 				"every ";
 			temp += -(WeaponDefs[WEAPON_CROSSBOW].numAttacks);
-			temp += "rounds, including the free round of attacks if one's"
+			temp += " rounds, including the free round of attacks if ones "
 				"side has one";
 		}
 		temp += ".";
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Weapons may have one of several different attack types: "
 		"Slashing, Piercing, Crushing, Cleaving and Armor Piercing.  "
 		"Different types of armor may give different survival chances "
 		"against a sucessful attack of different types.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "A soldier attacking with a ranged weapon will generally be "
 		"treated as if they have a Combat skill of 0, even if they have an "
 		"actual Combat skill.  This is the trade off for being able to hit "
 		"from the back line of fighting.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Being inside a building confers a +2 bonus to defense.  This "
 		"bonus is effective against ranged as well as melee weapons.  The "
 		"number of men that a building can protect is equal to its size. "
 		"The size of the various common buildings was listed in the ";
 	temp += f.Link("#tablebuildings", "Table of Buildings") + " earlier. ";
-	temp += "If there are too many units in a building to all gain "
+	f.Paragraph(temp);
+	temp = "If there are too many units in a building to all gain "
 		"protection from it, then those units who have been in the building "
 		"longest will gain protection.  (Note that these units appear first "
 		"on the turn report.)";
 	if(!(ObjectDefs[O_FORT].flags & ObjectType::DISABLED)) {
 		temp += " If a unit of 200 men is inside a Fort (capacity ";
 		temp += ObjectDefs[O_FORT].protect;
-		temp += ") then the first ";
+		temp += "), then the first ";
 		temp += ObjectDefs[O_FORT].protect;
-		temp += " men in the unit will gain the full +2 bonus and the other ";
+		temp += " men in the unit will gain the full +2 bonus, and the other ";
 		temp += (200 - ObjectDefs[O_FORT].protect);
 		temp += " will gain no protection.";
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Units which have the Behind flag set are at the rear and "
 		"cannot be attacked by any means until all non-Behind units have "
 		"been wiped out.  On the other hand, neither can they attack with "
 		"melee weapons, but only with ranged weapons or magic.  Once all "
 		"front-line units have been wiped out, then the Behind flag no "
 		"longer has any effect.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("com_victory"));
+	f.Paragraph(temp);
+	f.LinkRef("com_victory");
 	f.TagText("H3", "Victory!");
-	temp = "Combat rounds continue until one side has accrued 50 percent "
-		"losses (or more). The victorious side is then awarded one free "
-		"round of attacks, after which the battle is over.  If both sides "
-		"have more than 50 percent losses, the battle is a draw, and neither "
-		"side gets a free round.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	temp = "Combat rounds continue until one side has accrued 50% losses "
+		"(or more). The victorious side is then awarded one free round of "
+		"attacks, after which the battle is over.  If both sides have "
+		"more than 50% losses, the battle is a draw, and neither side gets "
+		"a free round.";
+	f.Paragraph(temp);
 	if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED) &&
 			!(ItemDefs[I_HERBS].flags & SkillType::DISABLED)) {
 		temp = "Units with the Healing skill have a chance of being able "
@@ -2735,23 +2741,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += Globals->HEALS_PER_MAN;
 		temp += " casualties per skill level. Each attempt however "
 			"requires one unit of Herbs, which is thereby used up. Each "
-			"attempt has a 50 percent chance of healing one casualty; only "
-			"one attempt at Healing may be made per casualty. Healing "
-			"occurs automatically, after the battle is over, by any living "
+			"attempt has a 50% chance of healing one casualty; only one "
+			"attempt at Healing may be made per casualty. Healing occurs "
+			"automatically, after the battle is over, by any living "
 			"healers on the winning side.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
 	temp = "Any items owned by dead combatants on the losing side have a "
-		"50 percent chance of being found and collected by the winning "
-		"side.  Each item which is recovered is picked up by one of the "
+		"50% chance of being found and collected by the winning side. "
+		"Each item which is recovered is picked up by one of the "
 		"survivors able to carry it (see the ";
 	temp += f.Link("#spoils", "SPOILS") + " command) at random, so the "
 		"winners generally collect loot in proportion to their number of "
 		"surviving men.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	temp += "If you are expecting to fight an enemy who is carrying so "
+	f.Paragraph(temp);
+	temp = "If you are expecting to fight an enemy who is carrying so "
 		"much equipment that you would not be able to move after picking "
 		"it up, and you want to move to another region later that month, it "
 		"may be worth issuing some orders to drop items (with the ";
@@ -2761,10 +2765,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"battle! Also, note that if the winning side took any losses in "
 		"the battle, any units on this side will not be allowed to move, "
 		"or attack again for the rest of the turn.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	if(has_stea || has_obse) {
-		f.PutStr(f.LinkRef("stealthobs"));
+		f.LinkRef("stealthobs");
 		f.ClassTagText("DIV", "rule", "");
 		temp = (has_stea ? "Stealth" : "");
 		if(has_obse) {
@@ -2793,8 +2796,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"the Observation skill, it will see the name of the faction "
 				"that owns any unit in the same region.";
 		}
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		if(has_stea) {
 			temp = "Regardless of Stealth skill, units are always visible "
 				"when participating in combat; when guarding a region with "
@@ -2804,17 +2806,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 					"the unit, you will still need a higher Observation "
 					"skill than the unit's Stealth skill.";
 			}
-			f.PutStr(temp);
-			f.PutStr("<P></P>");
-			f.PutStr(f.LinkRef("stealthobs_stealing"));
+			f.Paragraph(temp);
+			f.LinkRef("stealthobs_stealing");
 			f.TagText("H3", "Stealing:");
 			temp = AString("The ") + f.Link("#steal", "STEAL") +
 				" order is a way to steal items from other factions without "
 				"a battle.  The order can only be issued by a one-man unit. "
 				"The order specifies a target unit; the thief will then "
 				"attempt to steal the specified item from the target unit.";
-			f.PutStr(temp);
-			f.PutStr("<P></P>");
+			f.Paragraph(temp);
 			if(has_obse) {
 				temp = "If the thief has higher Stealth than any of the "
 					"target faction's units have Observation (i.e. the "
@@ -2823,32 +2823,29 @@ int Game::GenRules(const AString &rules, const AString &css,
 			} else {
 				temp = "The thief must know Stealth to attempt theft.";
 			}
-			temp += "The target faction will be told what was stolen, but "
+			temp += " The target faction will be told what was stolen, but "
 				"not by whom.  If the specified item is silver, then $200 "
 				"or half the total available, whichever is less, will be "
 				"stolen.  If it is any other item, then only one will be "
 				"stolen (if available).";
-			f.PutStr(temp);
-			f.PutStr("<P></P>");
+			f.Paragraph(temp);
 			if(has_obse) {
 				temp = "Any unit with high enough Observation to see the "
 					"thief will see the attempt to steal, whether the "
 					"attempt is successful or not.  Allies of the target "
 					"unit will prevent the theft, if they have high enough "
 					"Observation to see the unit trying to steal.";
-				f.PutStr(temp);
-				f.PutStr("<P></P>");
+				f.Paragraph(temp);
 			}
-			f.PutStr(f.LinkRef("stealthobs_assassination"));
+			f.LinkRef("stealthobs_assassination");
 			f.TagText("H3", "Assassination:");
 			temp = AString("The ") + f.Link("#assassinate", "ASSASSINATE") +
-				"order is a way to kill another person without attacking "
+				" order is a way to kill another person without attacking "
 				"and going through an entire battle. This order can only be "
 				"issued by a one-man unit, and specifies a target unit.  If "
 				"the target unit contains more than one person, then one "
 				"will be singled out at random.";
-			f.PutStr(temp);
-			f.PutStr("<P></P>");
+			f.Paragraph(temp);
 			if(has_obse) {
 				temp = "Success for assassination is determined as for "
 					"theft, i.e. the assassin will fail if any of the "
@@ -2858,8 +2855,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 					"theft, allies of the target unit will prevent the "
 					"assassination from succeeding, if their Observation "
 					"level is high enough.";
-				f.PutStr(temp);
-				f.PutStr("<P></P>");
+				f.Paragraph(temp);
 				temp = "";
 			} else {
 				temp = "The assasin must know Stealh to attempt "
@@ -2867,7 +2863,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			}
 			if(has_obse) {
 				temp += "If the assassin has higher stealth than any of the "
-					"target faction's units have Observations, then a "
+					"target faction's units have Observation, then a "
 					"one-on-one ";
 			} else {
 				temp += " A one-on-one ";
@@ -2884,6 +2880,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 				if(!(ItemDefs[i].type & IT_ARMOR)) continue;
 				if(!(ItemDefs[i].type & IT_NORMAL)) continue;
 				if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+				j = ItemDefs[i].index;
+				if(!(ArmorDefs[j].flags & ArmorType::USEINASSASSINATE))
+					continue;
 				if(last == -1) {
 					last = i;
 					continue;
@@ -2912,20 +2911,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"victim wins, then the target faction learns which unit "
 				"made the attempt.  (Of course, this does not necessarily "
 				"mean that the assassin's faction is known.)  The winner of "
-				"the fight gets 50 percent of the loser's property as usual.";
-			f.PutStr(temp);
-			f.PutStr("<P></P>");
+				"the fight gets 50% of the loser's property as usual.";
+			f.Paragraph(temp);
 			temp = f.Link("#steal", "STEAL") + " and " +
 				f.Link("#assassinate", "ASSASSINATE") +
-				"are not full month orders, and do not interfere with other "
+				" are not full month orders, and do not interfere with other "
 				"activities, but a unit can only issue one " +
 				f.Link("#steal", "STEAL") + " order or one " +
 				f.Link("#assassinate", "ASSASSINATE") + " order in a month.";
-			f.PutStr(temp);
-			f.PutStr("<P></P>");
+			f.Paragraph(temp);
 		}
 	}
-	f.PutStr(f.LinkRef("magic"));
+	f.LinkRef("magic");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Magic");
 	temp = "A character enters the world of magic in Atlantis by beginning "
@@ -2934,7 +2931,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ", with the man being a leader,";
 	temp += " are permitted to study these skills. ";
 	if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
-		temp += "The number of these units (know as \"magicians\" or "
+		temp += "The number of these units (known as \"magicians\" or "
 			"\"mages\") that a faction may own is ";
 		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
 			temp += "limited.";
@@ -2949,10 +2946,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#give", "GIVE") + " men at all; once a unit becomes a "
 		"mage (by studying one of the Foundations), the unit number is "
 		"fixed. (The mage may be given to another faction using the ";
-	temp += f.Link("#give", "GIVE") + " UNIT order.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("magic_skills"));
+	temp += f.Link("#give", "GIVE") + " UNIT order.)";
+	f.Paragraph(temp);
+	f.LinkRef("magic_skills");
 	f.TagText("H3", "Magic Skills:");
 	temp = "Magic skills are the same as normal skills, with a few "
 		"differences.  The basic magic skills, called Foundations, are ";
@@ -2978,8 +2974,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"Foundations.  As a unit studies the Foundations, he will be able "
 		"to study deeper into the magical arts; the additional skills that "
 		"he may study will be indicated on your turn report.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "There are two major differences between Magic skills and most "
 		"normal skills. The first is that the ability to study Magic skills "
 		"sometimes depends on lower level Magic skills.  The Magic skills "
@@ -2992,13 +2987,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"count. If the mage is not in such a structure, his study rate "
 		"is cut in half, as he does not have the proper environment and "
 		"equipment for research.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("magic_foundations"));
+	f.Paragraph(temp);
+	f.LinkRef("magic_foundations");
 	f.TagText("H3", "Foundations:");
 	temp = "The ";
-	temp += j;
-	temp += "Foundation skills are called ";
+	temp += NumToWord(j);
+	temp += " Foundation skills are called ";
 	last = -1;
 	comma = 0;
 	for(i = 0; i < NSKILLS; i++) {
@@ -3032,9 +3026,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " Spirit deals with meta-effects that lie outside the scope "
 			"of the physical world.";
 	}
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("magic_furtherstudy"));
+	f.Paragraph(temp);
+	f.LinkRef("magic_furtherstudy");
 	f.TagText("H3", "Further Magic Study:");
 	temp = "Once a mage has begun study of one or more Foundations, more "
 		"skills that he may study will begin to show up on his report. "
@@ -3044,24 +3037,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"any) that the new skill confers.  The ";
 	temp += f.Link("#show", "SHOW") + " order may be used to show this "
 		"information on future reports.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("magic_usingmagic"));
+	f.Paragraph(temp);
+	f.LinkRef("magic_usingmagic");
 	f.TagText("H3", "Using Magic:");
 	temp = "A mage may use his magical power in three different ways, "
 		"depending on the type of spell he wants to use.  Some spells, "
 		"once learned, take effect automatically and are considered "
 		"always to be in use; these spells do not require any order to "
 		"take effect.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Secondly, some spells are for use in combat. A mage may specify "
-		"that he wishes to use a sell in combat by issuing the ";
+		"that he wishes to use a spell in combat by issuing the ";
 	temp += f.Link("#combat", "COMBAT") + " order.  A combat spell "
 		"specified in this way will only be used if the mage finds "
 		"himself taking part in a battle.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "The third type of spell use is for spells that take an entire "
 		"month to cast.  These spells are cast by the mage issuing the ";
 	temp += f.Link("#cast", "CAST") + " order. Because " +
@@ -3074,29 +3064,25 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "The justification for this (as well as being for game balance) "
 		"is that a spell drains a mage of his magic power for the month, "
 		"but does not actually take the entire month to cast.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "The description that a mage receives when he first learns a "
 		"spell specifies the manner in which the spell is used (automatic, "
 		"in combat, or by casting).";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("magic_incombat"));
+	f.Paragraph(temp);
+	f.LinkRef("magic_incombat");
 	f.TagText("H3", "Magic in Combat:");
 	temp = "NOTE: This section is rather vague, and quite advanced.  You "
 		"may want to wait until you have figured out other parts of "
 		"Atlantis before trying to understand exactly all of the rules in "
 		"this section.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Although the magic skills and spells are unspecified in these "
 		"rules, left for the players to discover, the rules for combat "
 		"spells' interaction are spelled out here.  There are five major "
 		"types of attacks, and defenses: Combat, Ranged, Energy, Weather, "
 		"and Spirit.  Every attack and defense has a type, and only the "
 		"appropriate defense is effective against an attack.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Defensive spells are cast at the beginning of each round of "
 		"combat, and will have a type of attack they deflect, and skill "
 		"level (Defensive spells are generally called Shields).  Every "
@@ -3105,8 +3091,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"it may attack a soldier directly. Note that an attack only has "
 		"to attack the highest Shield, any other Shields of the same "
 		"type are ignored for that attack.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "An attack spell (and any other type of attack) also has an "
 		"attack type, and attack level, and a number of blows it deals. "
 		"When the attack spell is cast, it is matched up against the most "
@@ -3129,8 +3114,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"of Shield in effect, as the other Shield will take the place of "
 		"the destroyed one).  Otherwise, the attack spell disperses, and "
 		"the defending spell remains in place.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Some spells do not actually kill enemies, but rather have some "
 		"negative effect on them. These spells are treated the same as "
 		"normal spells; if there is a Shield of the same type as them, "
@@ -3139,19 +3123,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"match their skill level against that of the defensive spell in "
 		"question.  However, they do not destroy the defensive spell when "
 		"they are successful.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("nonplayers"));
+	f.Paragraph(temp);
+	f.LinkRef("nonplayers");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Non-Player Units");
 	temp = "There are a number of units that are not controlled by players "
 		"that may be encountered in Atlantis.  Most information about "
 		"these units must be discovered in the course of the game, but a "
 		"few basics are below.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	if(Globals->TOWNS_EXIST && Globals->CITY_MONSTERS_EXIST) {
-		f.PutStr(f.LinkRef("nonplayers_guards"));
+		f.LinkRef("nonplayers_guards");
 		f.TagText("H3", "City and Town Guardsmen:");
 		temp = "All cities and towns begin with guardsmen in them.  These "
 			"units will defend any units that are attacked in the city or "
@@ -3168,8 +3150,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "The ";
 		temp += "guards may be killed by players, although they will form "
 			"again if the city is left unguarded.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		if (Globals->START_CITY_GUARDS_PLATE || Globals->START_CITY_MAGES) {
 			if(Globals->START_CITY_GUARDS_PLATE) {
 				temp = "Note that the city guardsmen in the starting cities "
@@ -3189,20 +3170,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 				}
 				temp += ".";
 			}
-			f.PutStr(temp);
-			f.PutStr("<P></P>");
+			f.Paragraph(temp);
 		}
 	}
 	if (Globals->WANDERING_MONSTERS_EXIST) {
-		f.PutStr(f.LinkRef("nonplayers_monsters"));
+		f.LinkRef("nonplayers_monsters");
 		f.TagText("H3", "Wandering Monsters:");
 		temp = "There are a number of monsters who wander free throughout "
 			"Atlantis.  They will occasionally attack player units, so be "
 			"careful when wandering through the wilderness.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 	}
-	f.PutStr(f.LinkRef("nonplayers_controlled"));
+	f.LinkRef("nonplayers_controlled");
 	f.TagText("H3", "Controlled Monsters:");
 	temp = "Through various magical methods, you may gain control of "
 		"certain types of monsters. These monsters are just another item "
@@ -3216,15 +3195,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"has the behind flag set. Whether or not you are allowed to give a "
 		"monster to other units depends on the type of monster; some may be "
 		"given freely, while others must remain with the controlling unit.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("orders"));
+	f.Paragraph(temp);
+	f.LinkRef("orders");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Orders");
 	temp = "To enter orders for Atlantis, you should send a mail message "
 		"to the Atlantis server, containing the following:";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	f.Paragraph("");
 	f.Enclose(1, "PRE");
 	f.ClearWrapTab();
 	f.WrapStr("#ATLANTIS faction-no <password>");
@@ -3237,12 +3215,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutNoFormat("");
 	f.WrapStr("#END");
 	f.Enclose(0, "PRE");
-	f.PutStr("<P></P>");
 	temp = "For example, if your faction number (shown at the top of your "
 		"report) is 27, your password if \"foobar\", and you have two "
 		"units numbered 5 and 17:";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	f.Paragraph("");
 	f.Enclose(1, "PRE");
 	f.WrapStr("#ATLANTIS 27 \"foobar\"");
 	f.PutNoFormat("");
@@ -3254,53 +3231,45 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutNoFormat("");
 	f.WrapStr("#END");
 	f.Enclose(0, "PRE");
-	f.PutStr("<P></P>");
 	temp = "Thus, orders for each unit are given separately, and indicated "
 		"with the UNIT keyword.  (In the case of an order, such as the "
 		"command to rename your faction, that is not really for any "
 		"particular unit, it does not matter which unit issues the command; "
 		"but some particular unit must still issue it.)";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "IMPORTANT: You MUST use the correct #ATLANTIS line or else your "
 		"orders will be ignored.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "If you have a password set, you must specify it on you "
 		"#atlantis line, or the game will reject your orders.  See the ";
 	temp += f.Link("#password", "PASSWORD") + " order for more details.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "Each type of order is designated by giving a keyword as the "
 		"first non-blank item on a line.  Parameters are given after this, "
 		"separated by spaces or tabs. Blank lines are permitted, as are "
 		"comments; anything after a semicolon is treated as a comment "
 		"(provided the semicolon is not in the middle of a word).";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "The parser is not case sensitive, so all commands may be given "
 		"in upper case, lower case or a mixture of the two.  However, when "
 		"supplying names containing spaces, the name must be surrounded "
 		"by double quotes, or else underscore characters must be used in "
 		"place of spaces in the name.  (These things apply to the #ATLANTIS "
 		"and #END lines as well as to order lines.)";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "You may precede orders with the at sign (@), in which case they "
 		"will appear in the Template at the bottom of your report.  This is "
 		"useful for orders which your units repeat for several months in a "
 		"row.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("orders_abbreviations"));
+	f.Paragraph(temp);
+	f.LinkRef("orders_abbreviations");
 	f.TagText("H3", "Abbreviations:");
 	temp = "All common items and skills have abbreviations that can be used "
 		"when giving orders, for brevity.  Any time you see the item on your "
 		"report, it will be followed by the abbreviation.  Please be careful "
 		"using these, as they can easily be confused.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr(f.LinkRef("ordersummary"));
+	f.Paragraph(temp);
+	f.LinkRef("ordersummary");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Order Summary");
 	temp = "To specify a [unit], use the unit number.  If specifying a "
@@ -3308,7 +3277,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"the unit belongs to your faction, or \"FACTION # NEW #\" if the "
 		"unit belongs to a different faction.  See the ";
 	temp += f.Link("#form", "FORM");
-	temp += "order for a more complete description.  [faction] means that "
+	temp += " order for a more complete description.  [faction] means that "
 		"a faction number is required; [object] means that an object "
 		"number (generally the number of a building or ship) is required. "
 		"[item] means an item (like wood or longbow) that a unit can have "
@@ -3316,35 +3285,31 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"that sets or unsets a flag for a unit. A [flag] value must be "
 		"either 1 (set the flag) or 0 (unset the flag).  Other parameters "
 		"are generally numbers or names.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "IMPORTANT: Remember that names containing spaces (e.g., "
 		"\"Plate Armor\"), must be surrounded by double quotes, or the "
 		"spaces must be replaced with underscores \"_\" (e.g., Plate_Armor).";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+
 	f.ClassTagText("DIV", "rule", "");
-	f.PutStr(f.LinkRef("address"));
+	f.LinkRef("address");
 	f.TagText("H4", "ADDRESS [new address]");
-	f.PutStr("Change the email address to which your reports are sent.");
-	f.PutStr("<P></P>");
-	f.PutStr("Example:");
-	f.PutStr("<P></P>");
+	f.Paragraph("Change the email address to which your reports are sent.");
+	f.Paragraph("Example:");
 	temp = "Change your faction's email address to atlantis@rahul.net.";
 	temp2 = "ADDRESS atlantis@rahul.net";
 	f.CommandExample(temp, temp2);
+
 	f.ClassTagText("DIV", "rule", "");
-	f.PutStr(f.LinkRef("advance"));
+	f.LinkRef("advance");
 	f.TagText("H4", "ADVANCE [dir] ...");
 	temp = "This is the same as the ";
 	temp += f.Link("#move", "MOVE");
-	temp += "order, except that it implies attacks on units which attempt "
+	temp += " order, except that it implies attacks on units which attempt "
 		"to forbid access.  See the ";
 	temp += f.Link("#move", "MOVE") + " order for details.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr("Examples:");
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
 	temp = "Move north, then northwest, attacking any units that forbid "
 		"access to the regions.";
 	temp2 = "ADVANCE N NW";
@@ -3354,268 +3319,240 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"any units that forbid access to any of these locations.";
 	temp2 = "ADVANCE N 1 IN SE";
 	f.CommandExample(temp, temp2);
+
 	if(has_stea) {
 		f.ClassTagText("DIV", "rule", "");
-		f.PutStr(f.LinkRef("assassinate"));
+		f.LinkRef("assassinate");
 		f.TagText("H4", "ASSASSINATE [unit]");
 		temp = "Attempt to assassinate the specified unit, or one of the "
 			"unit's people if the unit contains more than one person.  The "
 			"order may only be issued by a one-man unit.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
 		temp = "A unit may only attempt to assassinate a unit which is able "
 			"to be seen.";
-		f.PutStr(temp);
-		f.PutStr("<P></P>");
-		f.PutStr("Example:");
-		f.PutStr("<P></P>");
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
 		temp = "Assassinate unit number 177.";
 		temp2 = "ASSASSINATE 177";
 		f.CommandExample(temp, temp2);
 	}
+
 	f.ClassTagText("DIV", "rule", "");
-	f.PutStr(f.LinkRef("attack"));
-	f.TagText("H4", "ATTACK [unit]");
+	f.LinkRef("attack");
+	f.TagText("H4", "ATTACK [unit] ... ");
 	temp = "Attack a target unit.  If multiple ATTACK orders are given, "
 		"all of the targets will be attacked.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr("Example:");
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
 	temp = "To attacks units 17, 431, and 985:";
 	temp2 = "ATTACK 17\nATTACK 431 985";
 	f.CommandExample(temp, temp2);
 	temp = "or:";
 	temp2 = "ATTACK 17 431 985";
 	f.CommandExample(temp, temp2);
+
 	f.ClassTagText("DIV", "rule", "");
-	f.PutStr(f.LinkRef("autotax"));
+	f.LinkRef("autotax");
 	f.TagText("H4", "AUTOTAX [flag]");
 	temp = "AUTOTAX 1 causes the unit to attempt to tax every turn "
 		"(without requiring the TAX order) until the flag is unset. "
 		"AUTOTAX 0 unsets the flag.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr("Example:");
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
 	temp = "To cause the unit to attempt to tax every turn.";
 	temp2 = "AUTOTAX 1";
 	f.CommandExample(temp, temp2);
+
 	f.ClassTagText("DIV", "rule", "");
-	f.PutStr(f.LinkRef("avoid"));
+	f.LinkRef("avoid");
 	f.TagText("H4", "AVOID [flag]");
 	temp = "AVOID 1 instructs the unit to avoid combat wherever possible. "
 		"The unit will not enter combat unless it issues an ATTACK order, "
 		"or the unit's faction is attacked in the unit's hex. AVOID 0 "
 		"cancels this.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
 	temp = "The Guard and Avoid Combat flags are mutually exclusive; "
 		"setting one automatically cancels the other.";
-	f.PutStr(temp);
-	f.PutStr("<P></P>");
-	f.PutStr("Example:");
-	f.PutStr("<P></P>");
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
 	temp = "Set the unit to avoid combat when possible.";
-	temp = "AVOID 1";
+	temp2 = "AVOID 1";
 	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("behind");
+	f.TagText("H4", "BEHIND [flag]");
+	temp = "BEHIND 1 sets the unit to be behind other units in combat.  "
+		"BEHIND 0 cancels this.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Set the unit to be in front in combat.";
+	temp2 = "BEHIND 0";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("build");
+	f.TagText("H4", "BUILD");
+	f.TagText("H4", "BUILD [object type]");
+	f.TagText("H4", "BUILD HELP [unit]");
+	temp = "BUILD given with no parameters causes the unit to perform work "
+		"on the object that it is currently inside.  BUILD given with an "
+		"[object type] (such as \"Tower\" or \"Galleon\") instructs the unit "
+		"to begin work on a new object of the type given. The final form "
+		"instructs the unit to enter the same building as [unit] and to "
+		"assist in building that structure, even if it is a structure which "
+		"was begun that same turn.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "To build a new tower.";
+	temp2 = "BUILD Tower";
+	f.CommandExample(temp, temp2);
+	temp = "To help unit 5789 build a structure.";
+	temp2 = "BUILD HELP 5789";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("buy");
+	f.TagText("H4", "BUY [quantity] [item]");
+	f.TagText("H4", "BUY ALL [item]");
+	temp = "Attempt to buy a number of the given item from a city or town "
+		"marketplace, or to buy new people in any region where people are "
+		"available for recruiting.  If the unit can't afford as many as "
+		"[quantity], it will attempt to buy as many as it can. If the "
+		"demand for the item (from all units in the region) is greater "
+		"than the number available, the available items will be split "
+		"among the buyers in proportion to the amount each buyer attempted "
+		"to buy. ";
+	if (Globals->RACES_EXIST) {
+		temp += "When buying people, specify the race of the people as the "
+			"[item]. ";
+	}
+	temp += "If the second form is specified, the unit will attempt to buy "
+		"as many as it can afford.";
+	f.Paragraph(temp);
+	f.Paragraph(AString("Example") + (Globals->RACES_EXIST?"s":"") + ":");
+	temp = "Buy one plate armor from the city market.";
+	temp2 = "BUY 1 \"Plate Armor\"";
+	f.CommandExample(temp, temp2);
+	if (Globals->RACES_EXIST) {
+		temp = "Recruit 5 barbarians into the current unit. (This will "
+			"dilute the skills that the unit has.)";
+		temp2 = "BUY 5 barbarians";
+		f.CommandExample(temp, temp2);
+	}
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("cast");
+	f.TagText("H4", "CAST [skill] [arguments]");
+	temp = "Cast the given spell.  Note that most spell names contain "
+		"spaces; be sure to enclose the name in quotes!  [arguments] "
+		"depends on which spell you are casting; when you are able to cast "
+		"a spell, the skill description will tell you the syntax.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "Cast the spell called \"Super Spell\".";
+	temp2 = "CAST \"Super Spell\"";
+	f.CommandExample(temp, temp2);
+	temp = "Cast the fourth-level spell in the \"Super Magic\" skill.";
+	temp2 = "CAST Super_Magic 4";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("claim");
+	f.TagText("H4", "CLAIM [amount]");
+	temp = "Claim an amount of the faction's unclaimed silver, and give it "
+		"to the unit issuing the order.  The claiming unit may then spend "
+		"the silver or give it to another unit.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Claim 100 silver.";
+	temp2 = "CLAIM 100";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("combat");
+	f.TagText("H4", "COMBAT [spell]");
+	temp = "Set the given spell as the spell that the unit will cast in "
+		"combat.  This order may only be given if the unit can cast the "
+		"spell in question.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Instruct the unit to use the spell \"Super Spell\", when the "
+		"unit is involved in a battle.";
+	temp2 = "COMBAT \"Super Spell\"";
+	f.CommandExample(temp, temp2);
+
+	if (Globals->FOOD_ITEMS_EXIST) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("consume");
+		f.TagText("H4", "CONSUME UNIT");
+		f.TagText("H4", "CONSUME FACTION");
+		f.TagText("H4", "CONSUME");
+		temp = "The CONSUME order instructs the unit to use food items in "
+			"preference to silver for maintenance costs. CONSUME UNIT tells "
+			"the unit to use food items that are in that unit's possession "
+			"before using silver. CONSUME FACTION tells the unit to use any "
+			"food items that the faction owns (in the same region as the "
+			"unit) before using silver. CONSUME tells the unit to use "
+			"silver before food items (this is the default).";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Tell a unit to use food items in the unit's possession for "
+			"maintenance costs.";
+		temp2 = "CONSUME UNIT";
+		f.CommandExample(temp, temp2);
+	}
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("declare");
+	f.TagText("H4", "DECLARE [faction] [attitude]");
+	f.TagText("H4", "DECLARE [faction]");
+	f.TagText("H4", "DECLARE DEFAULT [attitude]");
+	temp = "The first form of the DECLARE order sets the attitude of your "
+		"faction towards the given faction.  The second form cancels any "
+		"attitude towards the given faction (so your faction's attitude "
+		"towards that faction will be its default attitude).  The third "
+		"form sets your faction's default attitude.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "Declare your faction to be hostile to faction 15.";
+	temp2 = "DECLARE 15 hostile";
+	f.CommandExample(temp, temp2);
+	temp = "Set your faction's attitude to faction 15 to its default "
+		"attitude.";
+	temp2 = "DECLARE 15";
+	f.CommandExample(temp, temp2);
+	temp = "Set your faction's default attitude to friendly.";
+	temp2 = "DECLARE DEFAULT friendly";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("describe");
+	f.TagText("H4", "DESCRIBE UNIT [new description]");
+	f.TagText("H4", "DESCRIBE SHIP [new description]");
+	f.TagText("H4", "DESCRIBE BUILDING [new description]");
+	temp = "Change the description of the unit, or of the object the unit "
+		"is in (of which the unit must be the owner). Descriptions can be "
+		"of any length, up to the line length your mailer can handle. If "
+		"no description is given, the description will be cleared out.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Set the unit,s description to read \"Merlin's helper\".";
+	temp2 = "DESCRIBE UNIT \"Merlin's helper\"";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("destroy");
+	f.TagText("H4", "DESTROY");
+	temp = "Destroy the object you are in (of which you must be the owner). "
+		"The order cannot be used at sea.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Destroy the current object";
+	temp2 = "DESTROY";
+	f.CommandExample(temp, temp2);
+
 #if 0
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"behind\"> </a>\n");
- printf("<h4> BEHIND [flag] </h4>\n");
- printf("\n");
- printf("BEHIND 1 sets the unit to be behind other units in combat.  BEHIND 0 cancels\n");
- printf("this. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Set the unit to be in front in combat. <p>\n");
- printf("<pre>\n");
-   printf("  BEHIND 0\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"build\"> </a>\n");
- printf("<h4> BUILD </h4>\n");
- printf("<h4> BUILD [object type] </h4>\n");
- printf("\n");
- printf("BUILD given with no parameters causes the unit to perform work on the object\n");
- printf("that it is currently inside.  BUILD given with an [object type]\n");
- printf("(such as \"Tower\"\n");
- printf("or \"Galleon\") instructs the unit to begin work on a new object of the type\n");
- printf("given. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("To build a new tower. <p>\n");
- printf("<pre>\n");
-   printf("  BUILD Tower\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"buy\"> </a>\n");
- printf("<h4> BUY [quantity] [item] </h4>\n");
- printf("\n");
- printf("Attempt to buy a number of the given item from a city or town\n");
- printf("marketplace, or to buy new people in any region where people are\n");
- printf("available for recruiting.  If the unit can't afford as many as [quantity],\n");
- printf("it will attempt to buy as many as it can.  If the demand for the item\n");
- printf("(from all units in the region) is greater than the number available, the\n");
- printf("available items will be split among the buyers in proportion to the amount\n");
- printf("each buyer attempted to buy.\n");
- if (Globals->RACES_EXIST)
-  {
-   printf("  When buying people, specify the race of the people as the [item]. \n");
-  }
- else
-  {
-  /* TODO else what? */
-  }
- printf("\n");
- printf("<p>\n");
- printf("\n");
- printf("Examples: <p>\n");
- printf("Buy one plate armor from the city market. <p>\n");
- printf("<pre>\n");
-   printf("  BUY 1 \"Plate Armor\"\n");
- printf("</pre> <p>\n");
- if (Globals->RACES_EXIST)
-  {
-   printf("  Recruit 5 barbarians into the current unit. (This will dilute the skills that\n");
-   printf("  the unit has.) <p>\n");
-   printf("  <pre>\n");
-   printf("  BUY 5 barbarians\n");
-   printf("  </pre> <p>\n");
-  }
- else
-  {
-  /* TODO else what? */
-  }
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"cast\"> </a>\n");
- printf("<h4> CAST [skill] [arguments] </h4>\n");
- printf("\n");
- printf("Cast the given spell.  Note that most spell names contain\n");
- printf("spaces; be sure to enclose the name in quotes!  [arguments] depend\n");
- printf("on which spell you are casting; when you are able to cast a spell,\n");
- printf("the skill description will tell you the syntax. <p>\n");
- printf("\n");
- printf("Examples: <p>\n");
- printf("Cast the spell called \"Super Spell\". <p>\n");
- printf("<pre>\n");
-   printf("  CAST \"Super Spell\"\n");
- printf("</pre> <p>\n");
- printf("Cast the fourth-level spell in the \"Super Magic\" skill. <p>\n");
- printf("<pre>\n");
-   printf("  CAST \"Super Magic\" 4\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"claim\"> </a>\n");
- printf("<h4> CLAIM [amount] </h4>\n");
- printf("\n");
- printf("Claim an amount of the faction's unclaimed %s, and give it to the unit\n",silver);
- printf("issuing the order.  The claiming unit may then spend the %s or give\n",silver);
- printf("it to another unit. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Claim 100 %s. <p>\n",silver);
- printf("<pre>\n");
-   printf("  CLAIM 100\n");
- printf("</pre> <p>\n");
-   printf("  \n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"combat\"> </a>\n");
- printf("<h4> COMBAT [spell] </h4>\n");
- printf("\n");
- printf("Set the given spell as the spell that the unit will cast in combat.  This \n");
- printf("order may only be given if the unit can cast the spell in question. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Instruct the unit to use the spell \"Super Spell\", when the unit is involved in\n");
- printf("a battle. <p>\n");
- printf("<pre>\n");
-   printf("  COMBAT \"Super Spell\"\n");
- printf("</pre> <p>\n");
- printf("\n");
- if (Globals->FOOD_ITEMS_EXIST)
-  {
-   printf("  <center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
-   printf("  <a name=\"consume\"></a>\n");
-   printf("  <h4>CONSUME UNIT</h4>\n");
-   printf("  <h4>CONSUME FACTION</h4>\n");
-   printf("  <h4>CONSUME</h4>\n");
- printf("\n");
-   printf("  The CONSUME order instructs the unit to use food items in preference\n");
-   printf("  to %s for maintenance costs. CONSUME UNIT tells the unit to use\n",silver);
-   printf("  food items that are in that unit's possession before using %s.\n",silver);
-   printf("  CONSUME FACTION tells the unit to use any food items that the faction\n");
-   printf("  owns (in the same region as the unit) before using %s. CONSUME\n",silver);
-   printf("  tells the unit to use %s before food items (this is the default). <p>\n",silver);
- printf("\n");
-   printf("  Example: <p>\n");
-   printf("  Tell a unit to use food items in the unit's possession for maintenance\n");
-   printf("  costs. <p>\n");
-   printf("  <pre>\n");
-   printf("  CONSUME UNIT\n");
-   printf("  </pre>\n");
-  }
- printf("<p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"declare\"> </a>\n");
- printf("<h4> DECLARE [faction] [attitude] </h4>\n");
- printf("<h4> DECLARE [faction] </h4>\n");
- printf("<h4> DECLARE DEFAULT [attitude] </h4>\n");
- printf("\n");
- printf("The first form of the DECLARE order sets the attitude of your faction towards\n");
- printf("the given faction.  The second form cancels any attitude towards the given\n");
- printf("faction (so your faction's attitude towards that faction will be its default\n");
- printf("attitude).  The third form sets your faction's default attitude. <p>\n");
- printf("\n");
- printf("Examples: <p>\n");
- printf("Declare your faction to be hostile to faction 15. <p>\n");
- printf("<pre>\n");
-   printf("  DECLARE 15 hostile\n");
- printf("</pre> <p>\n");
- printf("Set your faction's attitude to faction 15 to its default attitude. <p>\n");
- printf("<pre>\n");
-   printf("  DECLARE 15\n");
- printf("</pre> <p>\n");
- printf("Set your faction's default attitude to friendly. <p>\n");
- printf("<pre>\n");
-   printf("  DECLARE DEFAULT friendly\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"describe\"> </a>\n");
- printf("<h4> DESCRIBE UNIT [new description] </h4>\n");
- printf("<h4> DESCRIBE SHIP [new description] </h4>\n");
- printf("<h4> DESCRIBE BUILDING [new description] </h4>\n");
- printf("\n");
- printf("Change the description of the unit, or of the object the unit is in (of which\n");
- printf("the unit must be the owner).  Descriptions can be of any length, up to the line\n");
- printf("length your mailer can handle.  If no description is given, the description\n");
- printf("will be cleared out. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Set the unit,s description to read \"Merlin's helper\". <p>\n");
- printf("<pre>\n");
-   printf("  DESCRIBE UNIT \"Merlin's helper\"\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"destroy\"> </a>\n");
- printf("<h4> DESTROY </h4>\n");
- printf("\n");
- printf("Destroy the object you are in (of which you must be the owner).  The order\n");
- printf("cannot be used at sea. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Destroy the ship or building the unit is in. <p>\n");
- printf("<pre>\n");
-   printf("  DESTROY\n");
- printf("</pre> <p>\n");
- printf("\n");
  printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
  printf("<a name=\"enter\"> </a>\n");
  printf("<h4> ENTER [object] </h4>\n");

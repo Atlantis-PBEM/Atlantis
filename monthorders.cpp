@@ -493,7 +493,8 @@ void Game::RunBuildHelpers(ARegion *r)
 							continue;
 						}
 						// Make sure that unit is building
-						if (target->monthorders->type != O_BUILD) {
+						if (target->monthorders &&
+								target->monthorders->type != O_BUILD) {
 							u->Error("BUILD: Unit isn't building.");
 							delete u->monthorders;
 							u->monthorders = 0;

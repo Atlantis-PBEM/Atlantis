@@ -438,14 +438,20 @@ void Arules::ClassTagText(const AString &tag, const AString &cls,
 	Enclose(0, tag);
 }
 
+void Arules::Paragraph(const AString &text)
+{
+	Enclose(1, "P");
+	PutStr(text);
+	Enclose(0, "P");
+}
+
 void Arules::CommandExample(const AString &header, const AString &examp)
 {
-	PutStr(header);
-	PutStr("<P></P>");
+	Paragraph(header);
+	Paragraph("");
 	Enclose(1, "PRE");
 	PutNoFormat(examp);
 	Enclose(0, "PRE");
-	PutStr("<P></P>");
 }
 
 AString Arules::Link(const AString &href, const AString &text)
@@ -453,7 +459,7 @@ AString Arules::Link(const AString &href, const AString &text)
 	return (AString("<A HREF=\"")+href+"\">"+text+"</A>");
 }
 
-AString Arules::LinkRef(const AString &name)
+void Arules::LinkRef(const AString &name)
 {
-	return (AString("<A NAME=\"")+name+"\"></A>");
+	PutStr(AString("<A NAME=\"")+name+"\"></A>");
 }
