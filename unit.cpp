@@ -1237,8 +1237,9 @@ int Unit::CanMoveTo(ARegion * r1,ARegion * r2)
 	if (!exit) return 0;
 
 	int mt = MoveType();
-	if ((r1->type == R_OCEAN || r2->type == R_OCEAN) &&
-		(!CanSwim() || GetFlag(FLAG_NOCROSS_WATER)))
+	if (((TerrainDefs[r1->type].similar_type == R_OCEAN) ||
+				(TerrainDefs[r2->type].similar_type == R_OCEAN)) &&
+			(!CanSwim() || GetFlag(FLAG_NOCROSS_WATER)))
 		return 0;
 	int mp = CalcMovePoints() - movepoints;
 	if (mp < (r2->MoveCost(mt))) return 0;

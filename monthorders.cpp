@@ -165,8 +165,8 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 				}
 
 				if ((ship->type != O_BALLOON) &&
-					(reg->type != R_OCEAN) &&
-					newreg->type != R_OCEAN) {
+					(TerrainDefs[reg->type].similar_type != R_OCEAN) &&
+					(TerrainDefs[newreg->type].similar_type != R_OCEAN)) {
 					cap->Error("SAIL: Can't sail inland.");
 					break;
 				}
@@ -987,7 +987,7 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
             *obj = to;
         } else {
             if (i == MOVE_OUT) {
-				if( region->type == R_OCEAN &&
+				if(TerrainDefs[region->type].similar_type == R_OCEAN &&
 						(!unit->CanSwim() ||
 						 unit->GetFlag(FLAG_NOCROSS_WATER)) )
 				{
@@ -1040,7 +1040,7 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
 		if(region->type == R_NEXUS && newreg->IsStartingCity())
 			startmove = 1;
 
-        if( region->type == R_OCEAN &&
+        if((TerrainDefs[region->type].similar_type == R_OCEAN) &&
 		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)) )
         {
             unit->Error( AString("MOVE: Can't move while in the ocean.") );
@@ -1064,11 +1064,11 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
             goto done_moving;
         }
 
-        if(newreg->type == R_OCEAN &&
+        if((TerrainDefs[newreg->type].similar_type == R_OCEAN) &&
 		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)) ) {
             unit->Event(AString("Discovers that ") +
-                        newreg->ShortPrint( &regions ) +
-                        AString(" is ocean."));
+                        newreg->ShortPrint( &regions ) + " is " +
+						TerrainDefs[newreg->type].name + ".");
             goto done_moving;
         }
 
@@ -1108,7 +1108,9 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
         switch (movetype) {
         case M_WALK:
             temp = "Walks ";
-            break;
+			if(TerrainDefs[newreg->type].similar_type == R_OCEAN)
+				temp = "Swims ";
+			break;
         case M_RIDE:
             temp = "Rides ";
             break;

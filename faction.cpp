@@ -675,7 +675,7 @@ void Faction::SetAttitude(int num,int att)
 
 int Faction::CanCatch(ARegion *r, Unit *t)
 {
-	if (r->type == R_OCEAN) return 1;
+	if (TerrainDefs[r->type].similar_type == R_OCEAN) return 1;
 
 	int def = t->GetDefenseRiding();
 

@@ -1588,23 +1588,24 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 			}
 			return;
 		} else {
-			if ( unit->object->region->type == R_OCEAN) {
+			ARegion *reg = unit->object->region;
+			if (TerrainDefs[reg->type].similar_type == R_OCEAN){
 				unit->Error("BUILD: Can't build in an ocean.");
 				return;
 			}
 
 			if (ObjectIsShip(ot) && ot != O_BALLOON) {
-				if (!unit->object->region->IsCoastal()) {
+				if (!reg->IsCoastal()) {
 					unit->Error("BUILD: Can't build ship in "
 							"non-coastal region.");
 					return;
 				}
 			}
-			if ( unit->object->region->buildingseq > 99) {
+			if (reg->buildingseq > 99) {
 				unit->Error("BUILD: The region is full.");
 				return;
 			}
-			Object * obj = new Object( unit->object->region );
+			Object * obj = new Object(reg);
 			obj->type = ot;
 			obj->incomplete = ObjectDefs[obj->type].cost;
 			unit->MoveUnit( obj );

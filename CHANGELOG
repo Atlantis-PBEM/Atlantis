@@ -362,3 +362,6 @@ Changes from 4.0.8 -> 4.0.9
       that is a valid alias for the rest of the turn.   This is to prevent
       the ambiguity which could crop up when dealing with units which were
       formed and given during the same turn.
+   -- Fixed the swim code to give a Swims message and work with flight
+      over water.  Changed item giving of dying units to not cause other
+	  units to drown.

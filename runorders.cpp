@@ -459,63 +459,59 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 
 void Game::SinkShips()
 {
-    forlist(&regions) {
-        ARegion * r = (ARegion *) elem;
-        if (r->type == R_OCEAN)
-        {
-            forlist(&r->objects) {
-                Object * o = (Object *) elem;
-                if (o->IsBoat() && o->units.Num() == 0)
-                {
-                    r->objects.Remove(o);
-                    delete o;
-                }
-                if (o->type == O_DUMMY)
-                {
-                    forlist(&o->units) {
-                        Unit * u = (Unit *) elem;
+	forlist(&regions) {
+		ARegion * r = (ARegion *) elem;
+		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
+			forlist(&r->objects) {
+				Object * o = (Object *) elem;
+				if (o->IsBoat() && o->units.Num() == 0) {
+					r->objects.Remove(o);
+					delete o;
+				}
+				if (o->type == O_DUMMY) {
+					forlist(&o->units) {
+						Unit * u = (Unit *) elem;
 						int drown;
 						switch(Globals->FLIGHT_OVER_WATER) {
-							case GameDefs::WFLIGHT_MUST_LAND:
-								drown = !(u->CanReallySwim());
-								break;
 							case GameDefs::WFLIGHT_UNLIMITED:
 								drown = !(u->CanSwim());
 								break;
+							case GameDefs::WFLIGHT_MUST_LAND:
 							case GameDefs::WFLIGHT_NONE:
+								drown = !(u->CanReallySwim());
+								break;
 							default: // Should never happen
 								drown = 1;
 								break;
 						}
-                        if (drown)
-                        {
-                            r->Kill(u);
-                            u->Event("Drowns in the ocean.");
-                        }
-                    }
-                }
-            }
-        }
-    }
+						if (drown) {
+							r->Kill(u);
+							u->Event("Drowns in the ocean.");
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void Game::RunForgetOrders()
 {
-    forlist(&regions) {
-        ARegion *r = (ARegion *) elem;
-        forlist(&r->objects) {
-            Object *o = (Object *) elem;
-            forlist(&o->units) {
-                Unit *u = (Unit *) elem;
-                forlist(&u->forgetorders) {
-                    ForgetOrder *fo = (ForgetOrder *) elem;
-                    u->ForgetSkill(fo->skill);
-                    u->Event(AString("Forgets ") + SkillStrs(fo->skill) + ".");
-                }
-                u->forgetorders.DeleteAll();
-            }
-        }
-    }
+	forlist(&regions) {
+		ARegion *r = (ARegion *) elem;
+		forlist(&r->objects) {
+			Object *o = (Object *) elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *) elem;
+				forlist(&u->forgetorders) {
+					ForgetOrder *fo = (ForgetOrder *) elem;
+					u->ForgetSkill(fo->skill);
+					u->Event(AString("Forgets ") + SkillStrs(fo->skill) + ".");
+				}
+				u->forgetorders.DeleteAll();
+			}
+		}
+	}
 }
 
 void Game::RunQuitOrders()
@@ -573,38 +569,38 @@ void Game::RunDestroyOrders()
 }
 
 void Game::Do1Destroy(ARegion * r,Object * o,Unit * u) {
-  if (r->type == R_OCEAN) {
-    u->Error("DESTROY: Can't destroy a ship while at sea.");
-    forlist(&o->units) {
-      ((Unit *) elem)->destroy = 0;
-    }
-    return;
-  }
+	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
+		u->Error("DESTROY: Can't destroy a ship while at sea.");
+		forlist(&o->units) {
+			((Unit *) elem)->destroy = 0;
+		}
+		return;
+	}
 
-  if (!u->GetMen()) {
-      u->Error("DESTROY: Empty units cannot destroy structures.");
-      forlist(&o->units) {
-          ((Unit *) elem)->destroy = 0;
-      }
-      return;
-  }
+	if (!u->GetMen()) {
+		u->Error("DESTROY: Empty units cannot destroy structures.");
+		forlist(&o->units) {
+			((Unit *) elem)->destroy = 0;
+		}
+		return;
+	}
 
-  if (o->CanModify()) {
-    u->Event(AString("Destroys ") + *(o->name) + ".");
-    Object * dest = r->GetDummy();
-    forlist(&o->units) {
-      Unit * u = (Unit *) elem;
-      u->destroy = 0;
-      u->MoveUnit( dest );
-    }
-    r->objects.Remove(o);
-    delete o;
-  } else {
-    u->Error("DESTROY: Can't destroy that.");
-    forlist(&o->units) {
-      ((Unit *) elem)->destroy = 0;
-    }
-  }
+	if (o->CanModify()) {
+		u->Event(AString("Destroys ") + *(o->name) + ".");
+		Object * dest = r->GetDummy();
+		forlist(&o->units) {
+			Unit * u = (Unit *) elem;
+			u->destroy = 0;
+			u->MoveUnit( dest );
+		}
+		r->objects.Remove(o);
+		delete o;
+	} else {
+		u->Error("DESTROY: Can't destroy that.");
+		forlist(&o->units) {
+			((Unit *) elem)->destroy = 0;
+		}
+	}
 }
 
 void Game::RunFindOrders()
@@ -775,7 +771,7 @@ void Game::ClearPillagers(ARegion * reg)
 
 void Game::RunPillageRegion(ARegion * reg)
 {
-	if (reg->type == R_OCEAN) return;
+	if (TerrainDefs[reg->type].similar_type == R_OCEAN) return;
 	if (reg->money < 1) return;
 	if (reg->Wages() < 11) return;
 
@@ -892,7 +888,7 @@ void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u)
 	if (u->enter == -1) {
 		to = r->GetDummy();
 		u->enter = 0;
-		if(r->type==R_OCEAN &&
+		if((TerrainDefs[r->type].similar_type == R_OCEAN) &&
 				(!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER))) {
 			u->Error("LEAVE: Can't leave a ship in the ocean.");
 			return;

@@ -1826,10 +1826,10 @@ int Game::UpgradePatchLevel(int savedVersion)
 // didn't have ocean lairs
 void Game::CreateOceanLairs()
 {
-    // here's where we add the creation.
+	// here's where we add the creation.
 	forlist (&regions) {
 		ARegion * r = (ARegion *) elem;
-		if (r->type == R_OCEAN) {
+		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 			r->LairCheck();
 		}
 	}

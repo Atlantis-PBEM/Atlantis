@@ -1305,7 +1305,19 @@ void ARegion::Kill(Unit * u)
             if (!IsSoldier(i->type)) {
                 first->items.SetNum(i->type,first->items.GetNum(i->type) +
                                     i->num);
-            }
+				// If we're in ocean and not in a structure, make sure that
+				// the first unit can actually hold the stuff and not drown
+				// If the item would cause them to drown then they won't
+				// pick it up.
+				if(TerrainDefs[type].similar_type == R_OCEAN) {
+					if(first->object->type == O_DUMMY) {
+						if(!first->CanReallySwim()) {
+							first->items.SetNum(i->type,
+									first->items.GetNum(i->type) - i->num);
+						}
+					}
+				}
+			}
             u->items.SetNum(i->type,0);
         }
     }
@@ -2022,9 +2034,11 @@ void ARegion::SetWeather( int newWeather)
 
 int ARegion::IsCoastal()
 {
-    if (type == R_OCEAN) return 1;
+    if (TerrainDefs[type].similar_type == R_OCEAN) return 1;
     for (int i=0; i<NDIRS; i++) {
-        if (neighbors[i] && neighbors[i]->type == R_OCEAN) return 1;
+        if (neighbors[i] &&
+				(TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN))
+				return 1;
     }
     return 0;
 }
@@ -2632,283 +2646,181 @@ void ARegionList::MakeRegions( int level, int xSize, int ySize )
     Awrite("");
 }
 
-void ARegionList::SetupNeighbors( ARegionArray *pRegs )
+void ARegionList::SetupNeighbors(ARegionArray *pRegs)
 {
-    int x, y;
-    for( x = 0; x < pRegs->x; x++ )
-    {
-        for( y = 0; y < pRegs->y; y++ )
-        {
-            ARegion *reg = pRegs->GetRegion( x, y );
-            if( !reg )
-            {
-                continue;
-            }
-
+	int x, y;
+	for( x = 0; x < pRegs->x; x++ ) {
+		for( y = 0; y < pRegs->y; y++ ) {
+			ARegion *reg = pRegs->GetRegion( x, y );
+			if( !reg ) continue;
             NeighSetup( reg, pRegs );
-        }
-    }
+		}
+	}
 }
 
-void ARegionList::MakeLand( ARegionArray *pRegs,
-                            int percentOcean,
-                            int continentSize )
+void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
+		int continentSize)
 {
-    int total = pRegs->x * pRegs->y / 2;
-    int ocean = total;
+	int total = pRegs->x * pRegs->y / 2;
+	int ocean = total;
 
-    Awrite("Making land");
-    while (ocean > ( total * percentOcean ) / 100)
-    {
-        int sz = getrandom( continentSize );
-        sz = sz * sz;
+	Awrite("Making land");
+	while (ocean > ( total * percentOcean ) / 100) {
+		int sz = getrandom( continentSize );
+		sz = sz * sz;
 
-        int tempx = getrandom( pRegs->x );
-        int tempy = getrandom( pRegs->y / 2 ) * 2 + tempx % 2;
+		int tempx = getrandom( pRegs->x );
+		int tempy = getrandom( pRegs->y / 2 ) * 2 + tempx % 2;
 
-        ARegion *reg = pRegs->GetRegion(tempx,tempy);
+		ARegion *reg = pRegs->GetRegion(tempx,tempy);
 
-        if (reg->type == -1)
-        {
-            reg->type = R_NUM;
-            ocean--;
-        }
+		if (reg->type == -1) {
+			reg->type = R_NUM;
+			ocean--;
+		}
 
-        int i;
-        for (i=0; i<sz; i++)
-        {
-            ARegion *newreg = reg->neighbors[getrandom(NDIRS)];
-            while (!newreg) newreg = reg->neighbors[getrandom(NDIRS)];
-            reg = newreg;
-            if (reg->type == -1)
-            {
-                reg->type = R_NUM;
-                ocean--;
-            }
-        }
-    }
+		for (int i=0; i<sz; i++) {
+			ARegion *newreg = reg->neighbors[getrandom(NDIRS)];
+			while (!newreg) newreg = reg->neighbors[getrandom(NDIRS)];
+			reg = newreg;
+			if (reg->type == -1) {
+				reg->type = R_NUM;
+				ocean--;
+			}
+		}
+	}
 
-    //
     // At this point, go back through and set all the rest to ocean
-    //
-    SetRegTypes( pRegs, R_OCEAN );
-
-    Awrite("");
+	SetRegTypes( pRegs, R_OCEAN );
+	Awrite("");
 }
 
-void ARegionList::MakeCentralLand( ARegionArray *pRegs )
+void ARegionList::MakeCentralLand(ARegionArray *pRegs)
 {
-    int i, j;
-    for( i = 0; i < pRegs->x; i++ )
-    {
-        for( j = 0; j < pRegs->y; j++ )
-        {
-            ARegion *reg = pRegs->GetRegion( i, j );
-            if( !reg )
-            {
-                continue;
-            }
-
-            //
+	for(int i = 0; i < pRegs->x; i++) {
+		for(int j = 0; j < pRegs->y; j++) {
+			ARegion *reg = pRegs->GetRegion(i, j);
+			if( !reg ) continue;
             // Initialize region to ocean.
-            //
             reg->type = R_OCEAN;
-
-            //
             // If the region is close to the edges, it stays ocean
-            //
-            if( i < 8 || i >= pRegs->x - 8 ||
-                j < 8 || j >= pRegs->y - 8 )
-            {
-                continue;
-            }
-
-            //
+            if(i < 8 || i >= pRegs->x - 8 || j < 8 || j >= pRegs->y - 8)
+				continue;
             // If the region is within 10 of the edges, it has a 50%
             // chance of staying ocean.
-            //
-            if( i < 10 || i >= pRegs->x - 10 ||
-                j < 10 || j >= pRegs->y - 10 )
-            {
-                if( getrandom( 100 ) > 50 )
-                {
-                    continue;
-                }
+            if(i < 10 || i >= pRegs->x - 10 || j < 10 || j >= pRegs->y - 10) {
+                if(getrandom(100) > 50) continue;
             }
 
-            //
-            // Otherwise, set the region to land.
-            //
-            reg->type = R_NUM;
-        }
-    }
+			// Otherwise, set the region to land.
+			reg->type = R_NUM;
+		}
+	}
 }
 
-void ARegionList::MakeIslands( ARegionArray *pArr, int nPlayers )
+void ARegionList::MakeIslands(ARegionArray *pArr, int nPlayers)
 {
-    //
-    // First, make the islands along the top.
-    //
-    int nRow = ( nPlayers + 3 ) / 4;
-    int i;
-    for( i = 0; i < nRow; i++ )
-    {
-        MakeOneIsland( pArr, 10 + i * 6, 2 );
-    }
-
-    //
-    // Next, along the left.
-    //
-    nRow = ( nPlayers + 2 ) / 4;
-    for( i = 0; i < nRow; i++ )
-    {
-        MakeOneIsland( pArr, 2, 10 + i * 6 );
-    }
-
-    //
-    // The islands along the bottom.
-    //
-    nRow = ( nPlayers + 1 ) / 4;
-    for( i = 0; i < nRow; i++ )
-    {
-        MakeOneIsland( pArr, 10 + i * 6, pArr->y - 6 );
-    }
-
-    //
-    // And the islands on the right.
-    //
-    nRow = nPlayers / 4;
-    for( i = 0; i < nRow; i++ )
-    {
-        MakeOneIsland( pArr, pArr->x - 6, 10 + i * 6 );
-    }
+	// First, make the islands along the top.
+	int i;
+	int nRow = ( nPlayers + 3 ) / 4;
+	for(i = 0; i < nRow; i++)
+		MakeOneIsland( pArr, 10 + i * 6, 2 );
+	// Next, along the left.
+	nRow = (nPlayers + 2) / 4;
+	for(i = 0; i < nRow; i++)
+		MakeOneIsland( pArr, 2, 10 + i * 6 );
+	// The islands along the bottom.
+	nRow = (nPlayers + 1) / 4;
+	for(i = 0; i < nRow; i++)
+		MakeOneIsland( pArr, 10 + i * 6, pArr->y - 6 );
+	// And the islands on the right.
+	nRow = nPlayers / 4;
+	for(i = 0; i < nRow; i++)
+		MakeOneIsland( pArr, pArr->x - 6, 10 + i * 6 );
 }
 
-void ARegionList::MakeOneIsland( ARegionArray *pRegs, int xx, int yy )
+void ARegionList::MakeOneIsland(ARegionArray *pRegs, int xx, int yy)
 {
-    int i, j;
-    for( i = 0; i < 4; i++ )
-    {
-        for( j = 0; j < 4; j++ )
-        {
-            ARegion *pReg = pRegs->GetRegion( i + xx, j + yy );
-            if( !pReg )
-            {
-                continue;
-            }
-
+	for(int i = 0; i < 4; i++) {
+		for(int j = 0; j < 4; j++ ) {
+			ARegion *pReg = pRegs->GetRegion(i + xx, j + yy);
+			if(!pReg) continue;
             pReg->type = R_NUM;
-        }
-    }
+		}
+	}
 }
 
-void ARegionList::SetRegTypes( ARegionArray *pRegs, int newType )
+void ARegionList::SetRegTypes(ARegionArray *pRegs, int newType)
 {
-    int i, j;
-    for( i = 0; i < pRegs->x; i++ )
-    {
-        for( j = 0; j < pRegs->y; j++ )
-        {
-            ARegion *reg = pRegs->GetRegion( i, j );
-            if( !reg )
-            {
-                continue;
-            }
-
-            if( reg->type == -1 )
-            {
-                reg->type = newType;
-            }
-        }
-    }
+	for(int i = 0; i < pRegs->x; i++) {
+		for(int j = 0; j < pRegs->y; j++) {
+			ARegion *reg = pRegs->GetRegion(i, j);
+			if(!reg) continue;
+			if(reg->type == -1) reg->type = newType;
+		}
+	}
 }
 
 void ARegionList::SetupAnchors(ARegionArray * ta)
 {
-    /* Now, setup the anchors */
-    Awrite("Setting up the anchors");
-    for (int x=0; x<(ta->x)/4; x++)
-    {
-        for (int y=0; y<(ta->y)/8; y++)
-        {
-            ARegion * reg = 0;
-            for (int i=0; i<4; i++)
-            {
-                int tempx = x * 4 + getrandom(4);
-                int tempy = y * 8 + getrandom(4)*2 + tempx%2;
-                reg = ta->GetRegion(tempx,tempy);
-                if (reg->type == R_NUM)
-                {
-                    reg->type = GetRegType( reg );
+	/* Now, setup the anchors */
+	Awrite("Setting up the anchors");
+	for (int x=0; x<(ta->x)/4; x++) {
+		for (int y=0; y<(ta->y)/8; y++) {
+			ARegion * reg = 0;
+			for (int i=0; i<4; i++) {
+				int tempx = x * 4 + getrandom(4);
+				int tempy = y * 8 + getrandom(4)*2 + tempx%2;
+				reg = ta->GetRegion(tempx,tempy);
+				if (reg->type == R_NUM) {
+					reg->type = GetRegType( reg );
+					if (TerrainDefs[reg->type].similar_type != R_OCEAN)
+						reg->wages = AGetName(0);
+					break;
+				}
+			}
+			Adot();
+		}
+	}
 
-                    if (reg->type != R_OCEAN)
-                    {
-                        reg->wages = AGetName(0 );
-                    }
-
-                    break;
-                }
-            }
-            Adot();
-        }
-    }
-
-    Awrite("");
+	Awrite("");
 }
 
-void ARegionList::GrowTerrain( ARegionArray *pArr, int growOcean )
+void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 {
-    for (int j=0; j<10; j++)
-    {
-        int x, y;
-        for( x = 0; x < pArr->x; x++ )
-        {
-            for( y = 0; y < pArr->y; y++ )
-            {
-                ARegion *reg = pArr->GetRegion( x, y );
-                if( !reg )
-                {
-                    continue;
-                }
+	for (int j=0; j<10; j++) {
+		int x, y;
+		for(x = 0; x < pArr->x; x++) {
+			for(y = 0; y < pArr->y; y++) {
+				ARegion *reg = pArr->GetRegion(x, y);
+				if( !reg ) continue;
+				if (reg->type == R_NUM) {
+					int init = getrandom(6);
+					for (int i=0; i<NDIRS; i++) {
+						ARegion *t = reg->neighbors[(i+init) % NDIRS];
+						if (t) {
+							if(t->type != R_NUM &&
+								(TerrainDefs[t->type].similar_type!=R_OCEAN ||
+								 growOcean)) {
+								reg->race = t->type;
+								reg->wages = t->wages;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
 
-                if (reg->type == R_NUM)
-                {
-                    int init = getrandom(6);
-                    for (int i=0; i<NDIRS; i++)
-                    {
-                        ARegion * t = reg->neighbors[(i+init) % NDIRS];
-                        if (t)
-                        {
-                            if( t->type != R_NUM &&
-                                ( t->type != R_OCEAN || growOcean ))
-                            {
-                                reg->race = t->type;
-                                reg->wages = t->wages;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        for( x = 0; x < pArr->x; x++ )
-        {
-            for( y = 0; y < pArr->y; y++ )
-            {
-                ARegion *reg = pArr->GetRegion( x, y );
-                if( !reg )
-                {
-                    continue;
-                }
-
+		for(x = 0; x < pArr->x; x++) {
+			for(y = 0; y < pArr->y; y++) {
+				ARegion *reg = pArr->GetRegion( x, y );
+				if( !reg ) continue;
                 if( reg->type == R_NUM && reg->race != -1 )
-                {
-                    reg->type = reg->race;
-                }
-            }
-        }
-    }
+					reg->type = reg->race;
+			}
+		}
+	}
 }
 
 void ARegionList::RandomTerrain( ARegionArray *pArr )
@@ -2973,12 +2885,10 @@ void ARegionList::MakeUWMaze( ARegionArray *pArr )
     }
 }
 
-void ARegionList::AssignTypes( ARegionArray *pArr )
+void ARegionList::AssignTypes(ARegionArray *pArr)
 {
-    //
-    // RandomTerrain() will set all of the un-set region types and names.
-    //
-    RandomTerrain( pArr );
+	// RandomTerrain() will set all of the un-set region types and names.
+	RandomTerrain( pArr );
 }
 
 void ARegionList::FinalSetup( ARegionArray *pArr )
@@ -2989,51 +2899,38 @@ void ARegionList::FinalSetup( ARegionArray *pArr )
         for( y = 0; y < pArr->y; y++ )
         {
             ARegion *reg = pArr->GetRegion( x, y );
-            if( !reg )
+            if(!reg)
             {
                 continue;
             }
 
-            if (reg->type == R_OCEAN)
-            {
-                if( pArr->levelType == ARegionArray::LEVEL_UNDERWORLD ) {
-                    reg->SetName("The Undersea");
-				} else if(pArr->levelType == ARegionArray::LEVEL_UNDERDEEP ) {
-					reg->SetName("The Deep Undersea");
-                } else {
-					AString ocean_name = Globals->WORLD_NAME;
-					ocean_name += " Ocean";
-                    reg->SetName(ocean_name.Str());
-                }
-            }
-            else
-            {
-                if (reg->wages == -1)
-                {
-                    reg->SetName("Unnamed");
-                }
-                else if(reg->wages != -2)
-                {
-                    reg->SetName( AGetNameString( reg->wages ));
-                }
-				else
-				{
-					reg->wages = -1;
+				if (TerrainDefs[reg->type].similar_type == R_OCEAN) {
+					if(pArr->levelType == ARegionArray::LEVEL_UNDERWORLD)
+						reg->SetName("The Undersea");
+					else if(pArr->levelType == ARegionArray::LEVEL_UNDERDEEP)
+						reg->SetName("The Deep Undersea");
+					else {
+						AString ocean_name = Globals->WORLD_NAME;
+						ocean_name += " Ocean";
+						reg->SetName(ocean_name.Str());
+					}
+				} else {
+					if (reg->wages == -1) reg->SetName("Unnamed");
+					else if(reg->wages != -2)
+						reg->SetName( AGetNameString( reg->wages ));
+					else
+						reg->wages = -1;
 				}
-            }
 
-            reg->Setup();
-        }
-    }
-}
+				reg->Setup();
+			}
+		}
+	}
 
-void ARegionList::MakeShaft( ARegion *reg, ARegionArray *pFrom,
-                             ARegionArray *pTo )
-{
-    if( reg->type == R_OCEAN )
-    {
-        return;
-    }
+	void ARegionList::MakeShaft( ARegion *reg, ARegionArray *pFrom,
+								 ARegionArray *pTo )
+	{
+		if(TerrainDefs[reg->type].similar_type == R_OCEAN) return;
 
     int tempx = reg->xloc * pTo->x / pFrom->x +
         getrandom( pTo->x / pFrom->x );
@@ -3045,10 +2942,7 @@ void ARegionList::MakeShaft( ARegion *reg, ARegionArray *pFrom,
     tempy += ( tempx + tempy ) % 2;
 
     ARegion *temp = pTo->GetRegion( tempx, tempy );
-    if( temp->type == R_OCEAN )
-    {
-        return;
-    }
+    if(TerrainDefs[temp->type].similar_type == R_OCEAN) return;
 
 	Object * o = new Object( reg );
 	o->num = reg->buildingseq++;
@@ -3158,8 +3052,8 @@ void ARegionList::InitSetupGates( int level )
                 int tempx = i*8 + getrandom(8);
                 int tempy = j*16 + getrandom(8)*2 + tempx%2;
                 ARegion *temp = pArr->GetRegion(tempx,tempy);
-                if (temp->type != R_OCEAN && temp->gate != -1)
-                {
+                if (TerrainDefs[temp->type].similar_type != R_OCEAN &&
+						temp->gate != -1) {
                     numberofgates++;
                     temp->gate = -1;
                     break;
