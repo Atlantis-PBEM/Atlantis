@@ -247,3 +247,5 @@ Changes from 4.0.7 -> 4.0.8
       by the checker.
    -- Applied modified version of maximum mages per building patch submitted
       by Paul Mehrer <paul.mehrer@web.de>
+   -- Fixed a bug in the EASIER_UNDERWORLD code pointed out by
+      Steve (argentrune@yahoo.co.uk)

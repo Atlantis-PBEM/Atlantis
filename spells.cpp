@@ -394,7 +394,9 @@ void Game::ProcessTeleportation(Unit *u,AString *o, OrdersCheck *pCheck )
 			z = token->value();
 			delete token;
 		}
-		if(z < 0 || z > 2) {
+		if(z < 0 || (z > Globals->UNDERWORLD_LEVELS +
+				   	Globals->UNDERDEEP_LEVELS +
+				   	Globals->ABYSS_LEVEL + 1)) {
 			u->Error("CAST: Invalid Z coordinate specified");
 			return;
 		}
@@ -448,7 +450,9 @@ void Game::ProcessFarsight(Unit *u,AString *o, OrdersCheck *pCheck )
 			z = token->value();
 			delete token;
 		}
-		if(z < 0 || z > 2) {
+		if(z < 0 || (z > Globals->UNDERWORLD_LEVELS +
+					Globals->UNDERDEEP_LEVELS +
+					Globals->ABYSS_LEVEL + 1)) {
 			u->Error("CAST: Invalid Z coordinate specified");
 			return;
 		}
