@@ -108,7 +108,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
             slr += unit->GetSkill(S_SAILING) * unit->GetMen();
         }
 
-        // xxxxx - sheesh... gotta do something about this.        
+        // XXX - sheesh... gotta do something about this.        
         int windlevel = unit->GetSkill(S_SUMMON_WIND);
         if (windlevel) {
             switch (ship->type) {

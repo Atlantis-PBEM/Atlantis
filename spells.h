@@ -67,7 +67,7 @@ void RunSummonLich(ARegion *,Unit *);
 void RunSummonImps(ARegion *,Unit *);
 void RunSummonDemon(ARegion *,Unit *);
 void RunSummonBalrog(ARegion *,Unit *);
-void RunCreateArtifact(ARegion *,Unit *,int,int,int,int);
+void RunCreateArtifact(ARegion *,Unit *,int,int);
 void RunEngraveRunes(ARegion *,Object *,Unit *);
 void RunConstructGate(ARegion *,Unit *);
 void RunEnchantSwords(ARegion *,Unit *);

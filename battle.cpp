@@ -652,9 +652,6 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
     } 
     else
     {
-        //
-        // xxxxx
-        //
         if( r->IsSafeRegion() )
         {
             attacker->Error("ATTACK: No battles allowed in safe regions.");

@@ -357,9 +357,6 @@ void Soldier::SetupCombatItems()
             if( pBat->index == NUM_ATTACK_TYPES ) {
                 int i;
                 for( i = 0; i < NUM_ATTACK_TYPES; i++ ) {
-                    //
-                    // xxxxx - hmm... how should this work?
-                    //
                     if( dskill[ i ] < pBat->skillLevel ) {
                         dskill[ i ] = pBat->skillLevel;
                     }
@@ -367,18 +364,12 @@ void Soldier::SetupCombatItems()
             }
             else
             {
-                //
-                // xxxxx - hmm... how should this work?
-                //
                 if( dskill[ pBat->index ] < pBat->skillLevel ) {
                     dskill[ pBat->index ] = pBat->skillLevel;
                 }
             }
         }
 
-        //
-        // xxxxx - Hard-coded amulet of invulnerability.
-        //
         if( item == I_AMULETOFI ) {
             amuletofi = 1;
         }
@@ -512,8 +503,7 @@ void Soldier::Alive(int state)
         unit->canattack = 0;
         /* Guards with amuletofi will not go off guard */
         if (!amuletofi && 
-            (unit->guard == GUARD_GUARD || unit->guard == GUARD_SET))
-        {
+            (unit->guard == GUARD_GUARD || unit->guard == GUARD_SET)) {
             unit->guard = GUARD_NONE;
         }
     } 

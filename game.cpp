@@ -1182,7 +1182,7 @@ void Game::EditGameFindUnit()
 
 void Game::EditGameRegion( ARegion *pReg )
 {
-    // xxxxx
+    // XXX -- Implemented region editor
     Awrite( "Not implemented yet." );
 }
 
@@ -1334,9 +1334,6 @@ void Game::EditGameUnitSkills( Unit *pUnit )
                     days = pToken->value();
                 }
 
-                //
-                // xxxxx - what about magic???
-                //
 				if((SkillDefs[skillNum].flags & SkillType::MAGIC) &&
 						(pUnit->type != U_MAGE)) {
 					pUnit->type = U_MAGE;

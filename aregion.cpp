@@ -2912,9 +2912,6 @@ void ARegionList::FinalSetup( ARegionArray *pArr )
 
             if (reg->type == R_OCEAN)
             {
-                //
-                // xxxxx
-                //
                 if( pArr->levelType == ARegionArray::LEVEL_UNDERWORLD ) {
                     reg->SetName("The Undersea");
 				} else if(pArr->levelType == ARegionArray::LEVEL_UNDERDEEP ) {
