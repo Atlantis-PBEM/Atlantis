@@ -2704,9 +2704,10 @@ void Game::CheckTransportOrders()
 						}
 						if ((tar->obj->GetOwner() != tar->unit) ||
 								!(ObjectDefs[tar->obj->type].flags &
-									ObjectType::TRANSPORT)) {
+									ObjectType::TRANSPORT) ||
+								(tar->obj->incomplete > 0)) {
 							u->Error(ordertype + ": Target does not own "
-									"transport structure.");
+									"a transport structure.");
 							o->type = NORDERS;
 							continue;
 						}
@@ -2745,7 +2746,9 @@ void Game::CheckTransportOrders()
 							continue;
 						}
 						if ((u != obj->GetOwner()) ||
-							!(ObjectDefs[obj->type].flags&ObjectType::TRANSPORT)) {
+							!(ObjectDefs[obj->type].flags &
+								ObjectType::TRANSPORT) ||
+							(obj->incomplete > 0)) {
 						u->Error(ordertype +
 								": Unit does not own transport structure.");
 						o->type = NORDERS;
@@ -2762,7 +2765,8 @@ void Game::CheckTransportOrders()
 
 					// Check if we have a trade hex
 					if (!TradeCheck(r, u->faction)) {
-						u->Error(ordertype + ": Faction cannot transport or distribute in that many hexes.");
+						u->Error(ordertype + ": Faction cannot transport or "
+								"distribute in that many hexes.");
 						o->type = NORDERS;
 						continue;
 					}

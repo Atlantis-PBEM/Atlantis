@@ -659,4 +659,5 @@ Changes from 4.0.10 -> 5.0.0
    -- Fixed a small goof in the grow races code (a race (I_VIKING for example)
       was being used as an index into the ManDefs array.  This worked fine for
       the 'base' races, but would have failed on any of the extended ones.
-
+   -- Fixed bug in transport which didn't prevent the use of incomplete
+      transport structures.
