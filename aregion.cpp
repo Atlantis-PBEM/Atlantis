@@ -2202,7 +2202,7 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 		if(fromRegion->HasExitRoad(dir) && HasConnectingRoad(dir)) {
 			cost -= cost/2;
 			if (road)
-				*road = " on a road";
+				*road = "on a road ";
 		}
 	}
 	if(cost < 1) cost = 1;
