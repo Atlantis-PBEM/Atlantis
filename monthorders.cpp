@@ -390,7 +390,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
     AString job;
     if (obj->IsRoadUsable())
     {
-        int maintenanceMax = -((MAX_ROAD_STATE + 3 + obj->incomplete) / 4);
+        int maintenanceMax = (-MAX_ROAD_STATE + 3 + obj->incomplete) / 4;
         if (num > maintenanceMax) num = maintenanceMax;
         if (itn < num) num = itn;
         job = " maintenance ";
