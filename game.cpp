@@ -1696,6 +1696,7 @@ Unit *Game::GetNewUnit( Faction *fac, int an )
 
 Unit *Game::GetUnit( int num )
 {
+	if(num < 0 || num >= maxppunits) return NULL;
     return( ppUnits[ num ] );
 }
 
