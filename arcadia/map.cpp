@@ -103,13 +103,12 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char *name)
 {
 	MakeRegions(level, xSize, ySize);
 	AddHexsides(pRegionArrays[level]);
-	
+
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_NEXUS;
-
+	
 	AString nex_name = Globals->WORLD_NAME;
 	nex_name += " Nexus";
-
 	int x, y;
 	for(y = 0; y < ySize; y++) {
 		for(x = 0; x < xSize; x++) {
@@ -120,9 +119,8 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char *name)
 			}
 		}
 	}
-
+	
 	FinalSetup(pRegionArrays[level]);
-
 	for(y = 0; y < ySize; y++) {
 		for(int x = 0; x < xSize; x++) {
 			ARegion *reg = pRegionArrays[level]->GetRegion(x, y);

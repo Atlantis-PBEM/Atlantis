@@ -1035,31 +1035,29 @@ AString *ShowSkill::Report(Faction *f)
     				"summon wolves, the mage should issue the order CAST "
     				"Wolf_Lore.";
 			} else {
-    			*str += AString("A mage with the Wolf Lore skill may summon wolves, "
-    				"who will fight for him in combat. A mage may control "
-    				"up to his skill level squared times 8 wolves. Note, however, that wolves "
-    				"may only be summoned in mountain and forest regions. "
-    				"For every ten wolves summoned, this spell ") + EnergyString(skill,1,6,1) +
-                    " To use this spell, "
-    				"the mage should issue the order CAST Wolf_Lore <num>, "
-                    "where <num> is the number of wolves the mage wishes to "
-                    "summon. If no number is specified, then the mage will "
-                    "summon as many wolves as he is able.";
+    			*str += "A hero with the Wolf Lore skill may tame wolves, who will "
+    				"fight for him in combat. A hero may tame a number of "
+    				"wolves each month equal to his skill level, and control a total number "
+    				"of his skill level squared times 4 wolves; the wolves will "
+    				"be placed in the mages inventory. Note, however, that wolves "
+    				"may only be summoned in mountain and forest regions. To "
+    				"summon wolves, the mage should issue the order CAST "
+    				"Wolf_Lore.";
 			}	
 			break;
 		case S_BIRD_LORE:
 			/* XXX -- This should be cleaner somehow. */
 			if(level == 1) {
-				*str += AString("A mage with Bird Lore may control the birds of the "
-					"sky. At skill level 1, the mage can control small "
-					"birds, sending them to an adjacent region to obtain a "
-					"report on that region. (This skill only works on the "
+				*str += "A hero with Bird Lore learns to control the birds of the "
+					"sky. At skill level 1, the hero can tame small "
+					"birds, sending them to nearby regions to obtain "
+					"reports on those regions. (This skill only works on the "
 					"surface of the world, as there are no birds elsewhere). "
-					"This skill ")
-                    + EnergyString(skill,1,6,1) + 
-					" To use this skill, CAST Bird_Lore DIRECTION <dir>, "
-					"where <dir> is the direction the mage wishes the birds "
-					"to report on.";
+					"To use this skill, CAST Bird_Lore DIRECTION <dir>, "
+					"where <dir> is the direction the hero wishes the birds "
+					"to report on. The hero will recieve reports on the "
+                    "the first n regions in that direction, where n is the "
+                    "hero's bird lore skill level.";
 			} else if (level == 3) {
 				if(ITEM_DISABLED(I_EAGLE)) break;
 				if(!Globals->ARCADIA_MAGIC) {
@@ -1070,26 +1068,22 @@ AString *ShowSkill::Report(Faction *f)
     					"will appear in his inventory. To summon an eagle, issue "
     					"the order CAST Bird_Lore EAGLE.";
     			} else {
-        			*str += AString("A mage with Bird Lore 3 can summon eagles "
-        				"to join him, who will aid him in combat, and provide "
-                        "for flying transportation. A mage may control a total "
-                        "number of eagles equal to his skill level minus 1, squared. "
-        				"For every ten eagles summoned, this spell ")
-                        + EnergyString(skill,3,6,10) + 
-                        " To use this spell, "
-        				"the mage should issue the order CAST Bird_Lore EAGLE <num>, "
-                        "where <num> is the number of eagles the mage wishes to "
-                        "summon. If no number is specified, then the mage will "
-                        "summon as many eagles as he is able.";
+        			*str += "A hero with Bird Lore 3 can tame eagles "
+        				"to join him or her, which will aid in combat and provide "
+                        "flying transportation. A hero may tame a total "
+                        "number of eagles equal to their skill level minus 2, squared. "
+                        " To use this skill, "
+        				"the hero should issue the order CAST Bird_Lore EAGLE, "
+                        "and the hero will tame an extra eagle in the coming month.";
     			}	
-			} else if (level == 4) {
+			}/* else if (level == 4) {
 				if(Globals->ARCADIA_MAGIC) {
     				*str += AString("A mage with Bird Lore 4 can send small birds to spy "
     					"on all neighbouring regions at once. This skill ")
                          + EnergyString(skill,4,6,4) +
                         " To use this skill in this fashion, CAST Bird_Lore LARGE.";
     			}
-			}
+			}*/
 			break;
 		case S_DRAGON_LORE:
 			/* XXX -- This should be cleaner somehow. */
@@ -1121,12 +1115,13 @@ AString *ShowSkill::Report(Faction *f)
                     "enables the mage to create skeletons from units which have "
                     "died in battle. This spell will be used automatically by "
                     "a mage on the winning side of a battle, and will attempt to "
-                    "turn up to 40 times the mage's skill level corpses into "
+                    "turn the battle corpses into "
                     "skeletons, with a base success rate of 30%, plus 10% times "
                     "the mage's skill level.";
                if(SkillDefs[skill].combat_cost > 0) *str += AString(" For every ") + 120/SkillDefs[skill].combat_cost + 
                     " corpses which this spell is cast on, a mage will "
-                    "lose 1 energy.";
+                    "lose 1 energy. Note that skeletons, and all other undead, "
+                    " have a 6.7% chance of decaying each month.";
                *str + " A mage with knowledge of Necromancy will also detect the use of "
     				"necromancy skills by any other mage in the same region.";
 			}
@@ -1161,7 +1156,7 @@ AString *ShowSkill::Report(Faction *f)
     			*str += AString("A mage with the Raise Undead skill may summon undead "
     				"into his inventory, to aid him in combat. Undead may be given "
     				"to other units, as they follow instructions "
-    				"mindlessly; however, they have a 10 percent chance of "
+    				"mindlessly; however, they have a 6.7% chance of "
     				"decaying each turn. "
     				"For every ten undead summoned, this spell ")
                     + EnergyString(skill,1,6,1) + 
@@ -1187,14 +1182,9 @@ AString *ShowSkill::Report(Faction *f)
 			} else {
     			*str += AString("A mage with the Summon Lich skill may summon liches "
     				"into his inventory, to aid him in battle. A mage may summon "
-                    "one lich per month, and have up to his skill level divided "
-                    "by 2, rounded up, liches in his inventory at once. Each lich "
-                    "has a 10 percent chance of decaying each month. "
+                    "one lich per month. Each lich "
+                    "has a 6.7% chance of decaying each month. "
                     " This spell ") + EnergyString(skill,1,6,1) + 
-                    " If the mage already has a lich "
-                    "under his control, then the mage's skill level will be reduced by "
-                    "2 per lich in energy calculations (thus, summoning a second lich "
-                    "at level 3 costs the same as the first lich at level 1). "
                     "To use this spell, the mage should issue the order CAST Summon_Lich.";
 			}
 			break;
@@ -2357,8 +2347,8 @@ AString *ShowSkill::Report(Faction *f)
                         "more than one material to manufacture, such as Plate Armour, cannot be "
                         "produced with this spell.";
                 break;
-            } else if(level == 4) {    
-    			*str += "At level 4, a mage with this skill may magically transmute any three "
+            } else if(level == 5) {
+    			*str += "At level 5, a mage with this skill may magically transmute any three "
                     "normal primary items into one advanced item of similar type, if one exists. "
                     "The possible conversions which may be made are:";
                 if(!(ItemDefs[I_IRON].flags & ItemType::DISABLED) && !(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) )
@@ -2394,9 +2384,9 @@ AString *ShowSkill::Report(Faction *f)
                     "around him. At level 1, a mage may increase the base amount "
                     "of any normal resource that is already present in a "
                     "region, at the cost of reducing the amount of another normal "
-                    "resource. For every (2+skill) for which the sought "
+                    "resource. For every (4+skill) for which the sought "
                     "resource is increased, the other resource will be "
-                    "decreased by 3, resulting in a net increase in "
+                    "decreased by 5, resulting in a net increase in "
                     "production at level 2 or higher. "
                     "The amount of the sought resource "
                     "will be increased by 6 times the mage's skill level, "
@@ -2720,21 +2710,15 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 		case S_GRYFFIN_LORE: //Earthsea
 			if(level > 1) break;
-			*str += AString("A mage with the Gryffin Lore skill can summon gryffins to "
+			*str += "A hero with the Gryffin Lore skill can tame gryffins to "
 				"join him, to aid in battle and provide flying "
-				"transportation. A mage may summon "
-                "one gryffin per month, and have up to his skill level divided "
-                "by 2, rounded up, gryffins in his inventory at once. This spell ")
-                + EnergyString(skill,1,6,1) + ". If the mage already has a gryffin "
-                "under his control, then the mage's skill level will be reduced by "
-                "2 per gryffin in energy calculations (thus, summoning a second gryffin "
-                "at level 3 costs the same as the first gryffin at level 1). In addition, "
-                "the mage will spend energy every turn maintaining control "
-                "over the gryffins in his possession. This maintenance "
-                "cost is three energy per gryffin at level 1 for a mage, and "
-                "decreases with increasing skill level. "
-                "To use this spell, "
-				"the mage should issue the order CAST Gryffin_Lore.";
+				"transportation. A hero may have up to his skill level divided "
+                "by 2, rounded up, gryffins in his inventory at once. When "
+                "cast, a hero has a 10% chance, times their effective skill level, "
+                "of taming a new gryffin each month. A hero's effective skill level "
+                "is equal to their gryffin lore skill, less two times the number "
+                "of gryffins they already control. To use this spell, "
+				"the hero should issue the order CAST Gryffin_Lore.";
 			break;
 		case S_HYPNOSIS: //Earthsea
 			if(level == 1) {

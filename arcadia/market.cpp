@@ -62,9 +62,9 @@ void Market::PostTurn(int population, int wages)
 			(float)Globals->BASE_MAN_COST;
 		price = (int)(wages * 4 * ratio);
 		if (ItemDefs[item].type & IT_LEADER)
-			amount = population / 25;
+			amount = population / (25*Globals->POP_LEVEL);
 		else
-			amount = population / 5;
+			amount = population / (5*Globals->POP_LEVEL);
 		return;
 	}
 

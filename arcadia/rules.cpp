@@ -235,6 +235,8 @@ static GameDefs g = {
 	1, // EARTHSEA_VICTORY
 	1, // REAL_EXPERIENCE
 	0, // WISHSKILLS_ENABLED
+	20, // POP_LEVEL
+	1, // FORM_TEMPLATES
 };
 
 GameDefs *Globals = &g;

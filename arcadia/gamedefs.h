@@ -739,6 +739,9 @@ public:
 	
 	int WISHSKILLS_ENABLED;
 	
+	int POP_LEVEL;
+	
+	int FORM_TEMPLATES;
 };
 
 extern GameDefs *Globals;

@@ -1488,7 +1488,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 
 //TO CHECK:
 	if ((Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) &&
-			(sk == S_QUARTERMASTER) && (u->GetSkill(S_QUARTERMASTER) == 0) &&
+			(sk == S_QUARTERMASTER) && (u->GetRealSkill(S_QUARTERMASTER) == 0) &&
 			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)) {
 			if (CountQuarterMasters(u->faction) >=
 					AllowedQuarterMasters(u->faction)) {
@@ -1504,7 +1504,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	// If TACTICS_NEEDS_WAR is enabled, and the unit is trying to study to tact-5,
 	// check that there's still space...
 	if (Globals->TACTICS_NEEDS_WAR && sk == S_TACTICS && 
-			u->GetSkill(sk) == 4 && u->skills.GetDays(sk)/u->GetMen() >= 390) {
+			u->GetRealSkill(sk) == 4 && u->skills.GetDays(sk)/u->GetMen() >= 390) {
 		
 		if (CountTacticians(u->faction) >=
 				AllowedTacticians(u->faction)) {
@@ -1522,7 +1522,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	int days = 30 * u->GetMen();
 	int taughtdays = o->days;
 
-	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetSkill(sk) >= 2 && !Globals->ARCADIA_MAGIC) {
+	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetRealSkill(sk) >= 2 && !Globals->ARCADIA_MAGIC) {
 		if(Globals->LIMITED_MAGES_PER_BUILDING) {
 			if (obj->incomplete > 0 || obj->type == O_DUMMY) {
 				u->Error("Warning: Magic study rate outside of a building "
@@ -1566,7 +1566,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		u->Event(str);
 	} else return; //return if could not study.
 	
-	if(o->level && u->GetSkill(sk) < o->level) { //STUDY order mod
+	if(o->level && u->GetRealSkill(sk) < o->level) { //STUDY order mod
     	TurnOrder *tOrder = new TurnOrder;
     	AString order;
     	tOrder->repeating = 0;

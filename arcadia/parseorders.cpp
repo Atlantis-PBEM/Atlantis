@@ -205,17 +205,21 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 	Unit *unit = 0;
 
 	AString *order = f->GetLine();
+	FormTemplate * formtem = 0;
+	int formtemline = 0;
+	
 	while (order) {
 		AString saveorder = *order;
 		int getatsign = order->getat();
 		int getquietsign = order->getexclamation();
 		AString *token = order->gettoken();
+		
 
 		if (token) {
 			int i = Parse1Order(token);
 			switch (i) {
 			case -1:
-				ParseError(pCheck, unit, fac, *token+" is not a valid order.");
+				ParseError(pCheck, unit, fac, *token + " is not a valid order.");
 				break;
 			case O_ATLANTIS:
 				if(fac)
@@ -357,6 +361,55 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					}
 				}
 				break;
+			case O_TEMPLATE:
+				// faction is 0 if checking syntax only, not running turn.
+				if (faction != 0) {
+                    //want to unselect unit here!
+    				while (unit) {
+    					Unit *former = unit->former;
+    					if (unit->inTurnBlock)
+    						ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
+    					if (unit->former)
+    						ParseError(pCheck, unit, fac, "FORM: without END.");
+    					if (unit && pCheck) unit->ClearOrders();
+    					if (pCheck && former) delete unit;
+    					unit = former;
+    				}
+    				unit = 0;
+				
+					AString *retval;
+					retval = ProcessTemplateOrder(f, pCheck, order, fac); //no need to carry quiet sign - produce errors for incorrect TURN
+					if (retval) {
+						delete order;
+						order = retval;
+						continue;
+					}
+				} else { //if we are parsing, don't unselect unit; else template orders produce errors.
+                    //clear unit monthorders so that TEMPLATE doesn't produce 2-month order errors.
+					delete unit->monthorders;
+					unit->monthorders = 0;
+					unit->taxing = 0;
+				}
+				break;
+			case O_TYPE:
+				// faction is 0 if checking syntax only, not running turn.
+				if (faction != 0) {
+                     delete token;
+                     token = order->gettoken();
+                     if(!token) token = new AString("default");
+                    // faction is 0 if checking syntax only, not running turn.
+    				if (faction != 0) {
+                        forlist(&fac->formtemplates) {
+                            FormTemplate *ftem = (FormTemplate *) elem;
+                            if(*ftem->name == *token) formtem = ftem;
+                        }
+                        formtemline = 1;
+    				}
+    				if(!formtem) {
+                        ParseError(pCheck, unit, fac, AString("TYPE: Could not find template ") + *token);
+                    }
+                }
+                break; 
 			case O_TURN:
 				if (unit && unit->inTurnBlock) {
 					ParseError(pCheck, unit, fac, "TURN: cannot nest");
@@ -414,13 +467,24 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 		}
 
 		delete order;
+		order = 0;
+		
 		if(pCheck) {
 //			pCheck->pCheckFile->PutStr(saveorder);  //initial orders removed from checkfile
 		}
-
-		order = f->GetLine();
+        
+        if(formtem) {
+            int temp = formtemline++;
+            forlist(&formtem->orders) {
+                if(!--temp) order = new AString(*((AString *) elem));  //this gets the temp'th order
+            }
+            if(temp>0) formtem = 0;
+//            order = new AString("");
+        }
+        
+        if(!order) order = f->GetLine();
 	}
-
+	
 	while (unit) {
 		Unit *former = unit->former;
 		if (unit->inTurnBlock)
@@ -500,6 +564,9 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_DESTROY:
 			ProcessDestroyOrder(unit, pCheck, isquiet);
 		    break;
+		case O_DISABLE:
+			ProcessDisableOrder(unit, o, pCheck, isquiet);
+			break;
 		case O_ENTER:
 			ProcessEnterOrder(unit, o, pCheck, isquiet);
 			break;
@@ -2310,6 +2377,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 					break;
 				case O_UNIT:
 				case O_END:
+                case O_TEMPLATE:
 					if (!turnLast)
 						ParseError(pCheck, unit, 0, "FORM: without END.");
 					while (--turnDepth) {
@@ -2339,6 +2407,59 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 	}
 
 	unit->turnorders.Add(tOrder);
+
+	return NULL;
+}
+
+AString *Game::ProcessTemplateOrder(Aorders *f, OrdersCheck *pCheck, AString *name, Faction *fac)
+{
+	FormTemplate *unittype = 0; 
+	AString *temname = name->gettoken();
+	if(!temname) {
+        temname = new AString("default");
+    }
+    
+    forlist(&fac->formtemplates) {
+        FormTemplate *formtem = (FormTemplate *) elem;
+        if(*formtem->name == *temname) {
+            unittype = formtem;
+            unittype->orders.DeleteAll();
+        }
+    }
+    
+    if(!unittype) {
+        unittype = new FormTemplate;
+        unittype->name = temname;
+        fac->formtemplates.Add(unittype);
+    } else delete temname;
+    
+	AString *order, *token;
+
+	while (1) {
+		// get the next line
+		order = f->GetLine();
+		if (!order) {
+			// Fake end of commands to invoke appropriate processing
+			order = new AString("#end");
+		}
+		AString	saveorder = *order;
+		token = order->gettoken();
+
+		if (token) {
+			int i = Parse1Order(token);
+			switch (i) {
+				case O_UNIT:
+				case O_END:
+					return new AString(saveorder);
+					break;
+				default:
+					unittype->orders.Add(new AString(saveorder));
+					break;
+			}
+			delete token;
+		}
+		delete order;
+	}
 
 	return NULL;
 }
@@ -2992,7 +3113,7 @@ void Game::ProcessTacticsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessNoaidOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	/* Instant order */
+	// Instant order 
 	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "NOAID: Invalid value.");
@@ -3009,6 +3130,50 @@ void Game::ProcessNoaidOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
+void Game::ProcessDisableOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet)
+{
+     
+	AString *token = o->gettoken();
+	if (!token) {
+		ParseError(pCheck, u, 0, "DISABLE: No skill given.");
+		return;
+	}
+	int sk = ParseSkill(token);
+	delete token;
+	if (sk==-1) {
+		ParseError(pCheck, u, 0, "DISABLE: Invalid skill.");
+		return;
+	}
+
+	if(SkillDefs[sk].flags & SkillType::DISABLED) {
+		ParseError(pCheck, u, 0, "DISABLE: Invalid skill.");
+		return;
+	}
+
+	// Instant order 
+	token = o->gettoken();
+	int val = 1;
+	
+	if (token) {
+	    int val = ParseTF(token);
+	    delete token;
+	}
+	
+	if (val==-1) {
+		ParseError(pCheck, u, 0, "DISABLE: Invalid value.");
+		return;
+	}
+	if(!pCheck) {
+		if(!u->skills.SetDisabled(sk, val) && !isquiet) {  //val of 1 means skill is disabled.
+            u->Error("DISABLE: Does not know that skill");
+        }
+        if(u->combat == sk) {
+			u->combat = -1;
+			u->Event("Combat spell set to none.");
+		}
+	}
+}
+
 void Game::ProcessSpoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	/* Instant order */
@@ -3020,6 +3185,8 @@ void Game::ProcessSpoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		else if(*token == "walk") flag = FLAG_WALKSPOILS;
 		else if(*token == "ride") flag = FLAG_RIDESPOILS;
 		else if(*token == "fly") flag = FLAG_FLYSPOILS;
+		else if(*token == "swim") flag = FLAG_SWIMSPOILS;
+		else if(*token == "sail") flag = FLAG_SAILSPOILS;
 		else if(*token == "all") val = 0;
 		else ParseError(pCheck, u, 0, "SPOILS: Bad argument.");
 		delete token;
@@ -3031,6 +3198,8 @@ void Game::ProcessSpoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		u->SetFlag(FLAG_WALKSPOILS, 0);
 		u->SetFlag(FLAG_RIDESPOILS, 0);
 		u->SetFlag(FLAG_FLYSPOILS, 0);
+		u->SetFlag(FLAG_SWIMSPOILS, 0);
+		u->SetFlag(FLAG_SAILSPOILS, 0);
 
 		/* Set the flag we're trying to set */
 		if(flag) {
@@ -3053,13 +3222,15 @@ void Game::ProcessNospoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int val = ParseTF(token);
 	delete token;
 	if (val==-1) {
-		ParseError(pCheck, u, 0, "NOSPILS: Invalid value.");
+		ParseError(pCheck, u, 0, "NOSPOILS: Invalid value.");
 		return;
 	}
 	if(!pCheck) {
 		u->SetFlag(FLAG_FLYSPOILS, 0);
 		u->SetFlag(FLAG_RIDESPOILS, 0);
 		u->SetFlag(FLAG_WALKSPOILS, 0);
+		u->SetFlag(FLAG_SWIMSPOILS, 0);
+		u->SetFlag(FLAG_SAILSPOILS, 0);
 		u->SetFlag(FLAG_NOSPOILS, val);
 	}
 }
@@ -3170,16 +3341,16 @@ Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck, int 
 	AString *t = o->gettoken();
 	int an = 0;
 	int error = 0;
-	if (!t) {
-		ParseError(pCheck, former, 0, "Must give alias in FORM order.");
-		if(pCheck) return 0;
-		error = 1;
-	} else an = t->value();
-	delete t;
+	if(t) {
+        an = t->value();
+	    delete t;
+    }
 	
 	if (!an) {
-		if(!error) ParseError(pCheck, former, 0, "Must give alias in FORM order.");
-		if(pCheck) return 0;
+		if(pCheck) {
+            ParseError(pCheck, former, 0, "Warning: No alias in FORM order.");
+		    return 0;
+        }
 	}
 	if(pCheck) {
 		Unit *retval = new Unit;
@@ -3188,7 +3359,7 @@ Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck, int 
 	} else {
 		if(an && former->object->region->GetUnitAlias(an, former->faction->num)) {
 			if(!isquiet) former->Error("Alias multiply defined.");
-//			return 0;
+			an = 0;
 		}
 		Unit *temp = GetNewUnit(former->faction, an);
 		temp->CopyFlags(former);

@@ -156,6 +156,7 @@ class Object : public AListElem
 		int CanModify();
 		int CanEnter(ARegion *, Unit *);
 		int GetPopulation();
+		int Weight();
 		Unit *ForbiddenBy(ARegion *, Unit *);
 		Unit *GetOwner();
 

@@ -274,9 +274,12 @@ int Game::NewGame()
 	seedrandomrandom();
 
 	CreateWorld();
+	Awrite("Creating Factions");
 	CreateNPCFactions();
+	Awrite("Creating City Guards");
 	if(Globals->CITY_MONSTERS_EXIST)
 		CreateCityMons();
+	Awrite("Creating Monsters");
 	if(Globals->WANDERING_MONSTERS_EXIST)
 		CreateWMons();
 	if(Globals->LAIR_MONSTERS_EXIST)
@@ -383,6 +386,9 @@ int Game::OpenGame()
 	shipseq = f.GetInt();
 	guardfaction = f.GetInt();
 	monfaction = f.GetInt();
+    elfguardfaction = f.GetInt();
+    dwarfguardfaction = f.GetInt();
+    independentguardfaction = f.GetInt();
 	ghostfaction = f.GetInt();
 	peasantfaction = f.GetInt();
 
@@ -431,6 +437,9 @@ int Game::SaveGame()
 	f.PutInt(shipseq);
 	f.PutInt(guardfaction);
 	f.PutInt(monfaction);
+	f.PutInt(elfguardfaction);
+	f.PutInt(dwarfguardfaction);
+	f.PutInt(independentguardfaction);
 	f.PutInt(ghostfaction);
 	f.PutInt(peasantfaction);
 
@@ -1036,6 +1045,10 @@ int Game::RunGame()
 	if(Globals->MAX_INACTIVE_TURNS != -1) {
 		Awrite("QUITting Inactive Factions...");
 		RemoveInactiveFactions();
+	}
+	
+	if(Globals->ARCADIA_MAGIC) {
+	    SetupGuardsmenAttitudes();
 	}
 
 	Awrite("Running the Turn...");
@@ -1724,7 +1737,7 @@ void Game::CountAllQuarterMasters()
 				Object *o = (Object *) elem;
 				forlist(&o->units) {
 					Unit *u = (Unit *) elem;
-					if (u->GetSkill(S_QUARTERMASTER))
+					if (u->GetRealSkill(S_QUARTERMASTER))
 						u->faction->numqms++;
 				}
 			}
@@ -1747,7 +1760,7 @@ void Game::CountAllTacticians()
 				Object *o = (Object *) elem;
 				forlist(&o->units) {
 					Unit *u = (Unit *) elem;
-					if (u->GetSkill(S_TACTICS) == 5)
+					if (u->GetRealSkill(S_TACTICS) == 5)
 						u->faction->numtacts++;
 				}
 			}
@@ -1828,7 +1841,7 @@ int Game::CountQuarterMasters(Faction *pFac)
 			Object *o = (Object *)elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *)elem;
-				if(u->faction == pFac && u->GetSkill(S_QUARTERMASTER)) i++;
+				if(u->faction == pFac && u->GetRealSkill(S_QUARTERMASTER)) i++;
 			}
 		}
 	}
@@ -1844,7 +1857,7 @@ int Game::CountTacticians(Faction *pFac)
 			Object *o = (Object *)elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *)elem;
-				if(u->faction == pFac && u->GetSkill(S_TACTICS) == 5) i++;
+				if(u->faction == pFac && u->GetRealSkill(S_TACTICS) == 5) i++;
 			}
 		}
 	}
@@ -1955,7 +1968,7 @@ void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
 	if(!Globals->CHECK_MONSTER_CONTROL_MID_TURN) MonsterCheck(r, u);
 	//passive skills
 	if(Globals->REAL_EXPERIENCE) {
-    	int level = u->GetSkill(S_STEALTH);
+    	int level = u->GetRealSkill(S_STEALTH);
     	if(level) u->Experience(S_STEALTH,level);  //can otherwise only be gained by assassinating or study
     	level = u->GetSkill(S_OBSERVATION);
     	if(level) u->Experience(S_OBSERVATION,level); //can otherwise only be gained by killing would-be-assassins or study
@@ -1993,7 +2006,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 			} else if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
 				tmp = ItemDefs[i->type].esc_skill;
 				skill = LookupSkill(&tmp);
-				if (u->GetSkill(skill) < ItemDefs[i->type].esc_val) {
+				if (u->GetRealSkill(skill) < ItemDefs[i->type].esc_val) {    //real skill so that units can't disable their skill
 					if(Globals->WANDERING_MONSTERS_EXIST) {
 						Faction *mfac = GetFaction(&factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
@@ -2014,7 +2027,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				// ESC_LEV_SQUARED or ESC_LEV_QUAD
 				tmp = ItemDefs[i->type].esc_skill;
 				skill = LookupSkill(&tmp);
-				int level = u->GetSkill(skill);
+				int level = u->GetRealSkill(skill);
 				int chance;
 
 				if (!level) level = 1; //BS mod to make controlled releases for farming or missiles harder.
@@ -2158,12 +2171,50 @@ void Game::CreateNPCFactions()
 		f = new Faction(factionseq++);
 		guardfaction = f->num;
 		temp = new AString("The Guardsmen");
+		if(Globals->ARCADIA_MAGIC) {
+            *temp = "Human Guardsmen";
+            f->ethnicity = RA_HUMAN;
+        }
 		f->SetName(temp);
 		f->SetNPC();
 		f->lastorders = 0;
 		factions.Add(f);
-	} else
+		if(Globals->ARCADIA_MAGIC) {
+    		f = new Faction(factionseq++);
+    		elfguardfaction = f->num;
+    		temp = new AString("Elvish Guardsmen");
+    		f->SetName(temp);
+            f->ethnicity = RA_ELF;
+    		f->SetNPC();
+    		f->lastorders = 0;
+    		factions.Add(f);
+    		f = new Faction(factionseq++);
+    		dwarfguardfaction = f->num;
+    		temp = new AString("Dwarven Guardsmen");
+            f->ethnicity = RA_DWARF;
+    		f->SetName(temp);
+    		f->SetNPC();
+    		f->lastorders = 0;
+    		factions.Add(f);
+    		f = new Faction(factionseq++);
+    		independentguardfaction = f->num;
+    		temp = new AString("City Guardsmen");
+            f->ethnicity = RA_OTHER;
+    		f->SetName(temp);
+    		f->SetNPC();
+    		f->lastorders = 0;
+    		factions.Add(f);
+		} else {
+		    elfguardfaction = 0;
+		    dwarfguardfaction = 0;
+		    independentguardfaction = 0;		
+		}
+	} else {
 		guardfaction = 0;
+	    elfguardfaction = 0;
+	    dwarfguardfaction = 0;
+	    independentguardfaction = 0;
+    }
 	// Only create the monster faction if wandering monsters or lair
 	// monsters exist.
 	if(Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
@@ -2200,6 +2251,15 @@ void Game::CreateNPCFactions()
 
 void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 {
+//The world is set up by now
+//However, some regions (eg nexus) do not have a race assigned. If leaders are disabled that can cause this to crash. So:
+    int i=0;
+    while(pReg->race < 0) { //we're desperate, take the first enabled race ;)
+        if((ItemDefs[i].type & IT_MAN) && !(ItemDefs[i].flags & ItemType::DISABLED)) {
+            pReg->race = i;
+        }
+        i++;
+    }
 	int skilllevel;
 	int AC = 0;
 	int IV = 0;
@@ -2219,11 +2279,31 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	} else {
 	    num = num * percent / 100;
 	}
-	Faction *pFac = GetFaction(&factions, guardfaction);
+	
+	int fac = guardfaction;
+	if(Globals->ARCADIA_MAGIC) {
+    	ManType *mt = FindRace(ItemDefs[pReg->race].abr);
+    	switch(mt->ethnicity) {
+    	    case RA_ELF: 
+    	        fac = elfguardfaction;
+    	        break;
+    	    case RA_DWARF: 
+    	        fac = dwarfguardfaction;
+    	        break;
+    	    case RA_OTHER: 
+    	        fac = independentguardfaction;
+    	        break;
+    	    default: 
+    	        fac = guardfaction;
+    	        break;
+    	}
+	}
+
+	Faction *pFac = GetFaction(&factions, fac);
 	Unit *u = GetNewUnit(pFac);
 	Unit *u2;
 	AString *s = new AString("City Guard");
-	
+
 	/*	
 	AString temp = TerrainDefs[pReg->type].name;
 	temp += AString(" (") + pReg->xloc + "," + pReg->yloc;
@@ -2333,7 +2413,9 @@ void Game::AdjustCityMons(ARegion *r)
 
 void Game::AdjustCityMon(ARegion *r, Unit *u)
 {
-	int towntype = r->town->TownType();
+	int towntype;
+    if(r->town) towntype = r->town->TownType();
+    else towntype = TOWN_CITY;                 //nexus
 	int AC = 0;
 	int men;
 //	int IV = 0;

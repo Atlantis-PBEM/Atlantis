@@ -372,7 +372,8 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 			succ = 0;
 			break;
 		}
-		if (f->num == guardfaction) {
+		if (f->num == guardfaction || f->num == elfguardfaction ||                         //TODO: Don't stop other races getting assassinated
+                f->num == dwarfguardfaction || f->num == independentguardfaction) {
 			succ = 0;
 			break;
 		}
@@ -533,32 +534,7 @@ void Game::DrownUnits()
 				if(o->type != O_DUMMY) continue;
 				forlist(&o->units) {
 					Unit *u = (Unit *)elem;
-					int drown = 0;
-					if(u->type == U_WMON) {
-						 // Make sure flying monsters only drown if we
-						 // are in WFLIGHT_NONE mode
-						if(Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_NONE)
-							drown = !(u->CanReallySwim());
-						else
-							drown = !(u->CanSwim());
-					} else {
-						switch(Globals->FLIGHT_OVER_WATER) {
-							case GameDefs::WFLIGHT_UNLIMITED:
-								drown = !(u->CanSwim());
-								break;
-							case GameDefs::WFLIGHT_MUST_LAND:
-								drown = !(u->CanReallySwim() || u->leftShip);
-								u->leftShip = 0;
-								break;
-							case GameDefs::WFLIGHT_NONE:
-								drown = !(u->CanReallySwim());
-								break;
-							default: // Should never happen
-								drown = 1;
-								break;
-						}
-					}
-					if (drown) {
+					if (!u->TryToSwim()) {
 						r->Kill(u);
 						u->Event("Drowns in the ocean.");
 					}
@@ -1222,17 +1198,16 @@ void Game::PostProcessTurn()
 {
 	// process migration before adjusting economy
 	if(Globals->PLAYER_ECONOMY) ProcessMigration();
-	
+
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
 		r->PostTurn(&regions);
 
 		if(Globals->CITY_MONSTERS_EXIST && (r->town || r->type == R_NEXUS))
 			AdjustCityMons(r);
-
+			
         if(Globals->ARCADIA_MAGIC) {
             SpecialErrors(r);
-            UpdateFactionAffiliations();
         }
 
 		forlist (&r->objects) {
@@ -1243,15 +1218,16 @@ void Game::PostProcessTurn()
 			}
 		}
 	}
+	
+    if(Globals->ARCADIA_MAGIC) UpdateFactionAffiliations();
 
 	if(Globals->WANDERING_MONSTERS_EXIST) GrowWMons(Globals->WMON_FREQUENCY);
-
 	
 	if(Globals->LAIR_MONSTERS_EXIST) {
         if(year == 1 && month < 2) GrowLMons(100);
         else GrowLMons(Globals->LAIR_FREQUENCY);
     }
-    
+
 	if(Globals->LAIR_MONSTERS_EXIST) GrowVMons();
 
 	//
@@ -1274,7 +1250,8 @@ void Game::PostProcessTurn()
 		delete vicline;
 	} else if(!(Globals->OPEN_ENDED)) {
 	    AString *vicline = new AString("");
-		Faction *pVictor = CheckVictory(vicline);
+		Faction *pVictor = CheckVictory(vicline);          
+
 		if(pVictor)
 			EndGame(pVictor, vicline);
 		delete vicline;
@@ -1630,12 +1607,12 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 							o->num = 0;
 						}
 						// XXX: there has to be a better way
-						if (u->GetSkill(S_QUARTERMASTER)) {
+						if (u->GetRealSkill(S_QUARTERMASTER)) {
 							u->Error("BUY: Quartermasters can't recruit more "
 									"men.");
 							o->num = 0;
 						}
-						if (Globals->TACTICS_NEEDS_WAR && u->GetSkill(S_TACTICS) == 5) {
+						if (Globals->TACTICS_NEEDS_WAR && u->GetRealSkill(S_TACTICS) == 5) {
 							u->Error("BUY: Tacticians can't recruit more "
 									"men.");       //Why not? They wouldn't be a TACT 5 unit anymore if they did!
 							o->num = 0;
@@ -2329,7 +2306,7 @@ int Game::DoWishskillOrder(ARegion *r, Unit *u, WishskillOrder *o)
 		u->type = U_APPRENTICE;
 	}
 	if ((Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) &&
-			(sk == S_QUARTERMASTER) && (u->GetSkill(S_QUARTERMASTER) == 0) &&
+			(sk == S_QUARTERMASTER) && (u->GetRealSkill(S_QUARTERMASTER) == 0) &&
 			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)) {
 			if (CountQuarterMasters(u->faction) >=
 					AllowedQuarterMasters(u->faction)) {
@@ -2835,7 +2812,6 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
     		u->guard = GUARD_AVOID;
     		u->reveal = REVEAL_FACTION;
             AString *temp = new AString("Peasantfolk");
-    		if(u->type == U_MAGE) *temp = "Wandering Mage";
     		u->SetName(temp);
     		u->ClearOrders();
     		return 1; //returning 1 means it does no further give orders.
@@ -2923,7 +2899,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			}
 		}
 
-		if (u->GetSkill(S_QUARTERMASTER)) {
+		if (u->GetRealSkill(S_QUARTERMASTER)) {
 			if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 				if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
 					if (CountQuarterMasters(t->faction) >=
@@ -2935,7 +2911,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			}
 		}
 
-		if (u->GetSkill(S_TACTICS) == 5) {
+		if (u->GetRealSkill(S_TACTICS) == 5) {
 			if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 				if (Globals->TACTICS_NEEDS_WAR) {
 					if (CountTacticians(t->faction) >=

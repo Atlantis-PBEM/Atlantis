@@ -250,18 +250,6 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_FOG, 1, NULL, 0);
 	    ModifySkillFlags(S_FOG, SkillType::MAGIC | SkillType::COMBAT | SkillType::CAST | SkillType::MAGEOTHER);
 	    
-	    ModifySkillDependancy(S_ENERGY_SHIELD, 0, "PTTN", 1);
-	    ModifySkillDependancy(S_EARTH_LORE, 0, "PTTN", 1);
-	    ModifySkillDependancy(S_MAGICAL_HEALING, 0, "PTTN", 1);
-	    ModifySkillDependancy(S_TRANSMUTATION, 0, "PTTN", 1);
-	    ModifySkillDependancy(S_RESURRECTION, 0, "NECR", 3);
-//	    ModifySkillDependancy(S_RESURRECTION, 1, "MHEA", 3);
-//	    ModifySkillDependancy(S_SUMMON_SPIRIT_OF_DEAD, 1, "RESU", 3);
-	    ModifySkillDependancy(S_ENCHANT_SWORDS, 0, "TRAM", 1);
-	    ModifySkillDependancy(S_ENCHANT_ARMOR, 0, "TRAM", 1);
-//	    ModifySkillDependancy(S_MODIFICATION, 0, "EART", 4);
-//	    ModifySkillDependancy(S_DIVERSION, 0, "EART", 4);
-	    
 	    ModifySkillDependancy(S_GATE_LORE, 0, "MYST", 1);
 	    ModifySkillDependancy(S_GATE_LORE, 1, NULL, 0);
 	    ModifySkillDependancy(S_TELEPORTATION, 0, "GATE", 3);
@@ -269,10 +257,24 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_CONSTRUCT_GATE, 0, "GATE", 4);
 	    ModifySkillDependancy(S_CONSTRUCT_GATE, 1, NULL, 0);
 //	    ModifySkillDependancy(S_CREATE_PORTAL, 0, "TELE", 4);
+	    ModifySkillDependancy(S_EARTH_LORE, 0, "PTTN", 1);
+	    ModifySkillDependancy(S_MAGICAL_HEALING, 0, "PTTN", 1);
+	    ModifySkillDependancy(S_RESURRECTION, 0, "NECR", 3);
+//	    ModifySkillDependancy(S_RESURRECTION, 1, "MHEA", 3);
+//	    ModifySkillDependancy(S_SUMMON_SPIRIT_OF_DEAD, 1, "RESU", 3);
+//	    ModifySkillDependancy(S_MODIFICATION, 0, "EART", 4);
+//	    ModifySkillDependancy(S_DIVERSION, 0, "EART", 4);
+	    
 	    ModifySkillDependancy(S_CONCEALMENT, 0, "MYST", 2);
 	    ModifySkillDependancy(S_INVISIBILITY, 0, "CONC", 5);
 	    ModifySkillDependancy(S_TRUE_SEEING, 0, "CONC", 4);
-	    //hypnosis,binding,dragonlore
+	    ModifySkillDependancy(S_TRANSMUTATION, 0, "MYST", 1);
+	    ModifySkillDependancy(S_ENCHANT_SWORDS, 0, "TRAM", 1);
+	    ModifySkillDependancy(S_ENCHANT_ARMOR, 0, "TRAM", 1);
+	    ModifySkillDependancy(S_ENERGY_SHIELD, 0, "MYST", 1);
+	    //hypnosis
+        //binding
+        //dragonlore
 	    
 	    ModifySkillDependancy(S_SPIRIT_SHIELD, 0, "SUMM", 1);
 	    ModifySkillDependancy(S_SPIRIT_SHIELD, 1, NULL, 0);
@@ -288,7 +290,7 @@ void Game::ModifyTablesPerRuleset(void)
         ModifySkillName(S_SUMMON_IMPS,"demon lore","DEMO");
         ModifyItemMagicSkill(I_IMP, "DEMO", 1);
 	    ModifySkillDependancy(S_SUMMON_IMPS, 0, "SUMM", 1);
-	    ModifySkillFlags(S_SUMMON_IMPS, SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST);
+	    ModifySkillFlags(S_SUMMON_IMPS, SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST | SkillType::COSTVARIES);
 	    ModifySkillDependancy(S_SUMMON_DEMON, 0, "DEMO", 3);
 	    ModifySkillDependancy(S_SUMMON_BALROG, 0, "SUDE", 4);
 	    ModifySkillDependancy(S_BANISH_DEMONS, 0, "DEMO", 1);
@@ -367,7 +369,7 @@ void Game::ModifyTablesPerRuleset(void)
    	    
    	    //new Create Portal stuff
    	    ModifyRangeClass("rng_teleport", RangeType::RNG_LEVEL);
-   	    ModifyRangeClass("rng_teleport", RangeType::RNG_SURFACE_ONLY); //to prevent teleportation in the labryinth
+   	    ModifyRangeFlags("rng_teleport", RangeType::RNG_SURFACE_ONLY); //to prevent teleportation in the labryinth
    	    ModifyRangeMultiplier("rng_teleport", 4);
    	    EnableObject(O_ESEAPORTAL);
    	    
@@ -430,16 +432,16 @@ void Game::ModifyTablesPerRuleset(void)
         ModifyMonsterDefense("LICH", ATTACK_RIDING, 5);
         ModifyMonsterThreat("LICH", 3, 50);
         
-   	    //gryffin 40 energy to summon, 2 to maintain
+   	    //gryffin free to summon, free to maintain
    	    EnableItem(I_GRYFFIN);
-   	    ModifyMonsterAttacksAndHits("GRYF", 40, 40, 0);
+   	    ModifyMonsterAttacksAndHits("GRYF", 33, 33, 0);
         ModifyMonsterSkills("GRYF", 4, 2, 5);
-        ModifyMonsterAttackLevel("GRYF", 6);
-        ModifyMonsterDefense("GRYF", ATTACK_COMBAT, 6);
-        ModifyMonsterDefense("GRYF", ATTACK_ENERGY, 4);
-        ModifyMonsterDefense("GRYF", ATTACK_SPIRIT, 4);
-        ModifyMonsterDefense("GRYF", ATTACK_WEATHER, 6);
-        ModifyMonsterDefense("GRYF", ATTACK_RIDING, 5);
+        ModifyMonsterAttackLevel("GRYF", 7);
+        ModifyMonsterDefense("GRYF", ATTACK_COMBAT, 7);
+        ModifyMonsterDefense("GRYF", ATTACK_ENERGY, 5);
+        ModifyMonsterDefense("GRYF", ATTACK_SPIRIT, 5);
+        ModifyMonsterDefense("GRYF", ATTACK_WEATHER, 7);
+        ModifyMonsterDefense("GRYF", ATTACK_RIDING, 6);
         ModifyMonsterThreat("GRYF", 2, 25);
 
         ModifyItemCapacities(I_EAGLE, 30, 30, 30, 0);
@@ -520,29 +522,27 @@ void Game::ModifyTablesPerRuleset(void)
 	    
 	    ModifyRaceSkills("MERM", "STEA","FISH","GCUT","DOLP");
 	    ModifyRaceSkills("ORC", "COMB");
-	    
-	    
 	}
 	
 	if(Globals->REAL_EXPERIENCE) {
-	    ModifyRaceSkillLevels("LEAD",3,3);
-	    ModifyRaceSkillLevels("VIKI",2,1);
+//	    ModifyRaceSkillLevels("LEAD",3,3);
+	    ModifyRaceSkillLevels("RAID",2,1);
 	    ModifyRaceSkillLevels("BARB",2,1);
-	    ModifyRaceSkillLevels("PLAI",2,1);
 	    ModifyRaceSkillLevels("ESKI",2,1);
 	    ModifyRaceSkillLevels("NOMA",2,1);
 	    ModifyRaceSkillLevels("TMAN",2,1);
-	    ModifyRaceSkillLevels("DMAN",2,1);
+	    ModifyRaceSkillLevels("AELF",2,1);
 	    ModifyRaceSkillLevels("WELF",2,1);
 	    ModifyRaceSkillLevels("SELF",2,1);
 	    ModifyRaceSkillLevels("HELF",2,1);
 	    ModifyRaceSkillLevels("TELF",2,1);
+	    ModifyRaceSkillLevels("PDWA",2,1);
 	    ModifyRaceSkillLevels("IDWA",2,1);
 	    ModifyRaceSkillLevels("HDWA",2,1);
 	    ModifyRaceSkillLevels("UDWA",2,1);
 	    ModifyRaceSkillLevels("DDWA",2,1);
 	    ModifyRaceSkillLevels("ORC",3,0);
-	    ModifyRaceSkillLevels("MAN",3,3);
+/*	    ModifyRaceSkillLevels("MAN",3,3);
 	    ModifyRaceSkillLevels("FAIR",3,1);
 	    ModifyRaceSkillLevels("LIZA",2,1);
 	    ModifyRaceSkillLevels("URUK",3,1);
@@ -559,7 +559,7 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifyRaceSkillLevels("HILA",2,1);
 	    ModifyRaceSkillLevels("MINO",3,1);
 	    ModifyRaceSkillLevels("GELF",2,1);
-	    
+*/
 	    
 	    ModifyItemProductionSkill(I_YEW, "LUMB", 6);
 	    ModifyItemProductionSkill(I_IRONWOOD, "LUMB", 4);
@@ -574,7 +574,7 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifyItemProductionSkill(I_WHORSE, "HORS", 6);
      	ModifyItemProductionSkill(I_MUSHROOM, "HERB", 4);
      	ModifyItemProductionSkill(I_HEALPOTION, "HEAL", 4);
-     	ModifyMountBonuses("WING", 4, 6, 3);
+     	ModifyMountBonuses("WING", 4, 8, 3);
      	ModifyItemType(I_MCARPET, IT_MAGIC|IT_MOUNT);
 	    
 	    ModifyObjectConstruction(O_BALLOON, I_FLOATER, 50, "SHIP", 5);

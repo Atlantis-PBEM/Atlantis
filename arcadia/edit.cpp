@@ -1875,6 +1875,7 @@ void Game::EditGameGlobalEffects()
         Awrite( " [products] to provide a production summary ");
         Awrite( " [buildings] to provide a buildings summary ");
         Awrite( " [rename] [terrain] [level] [name] to rename all of a terrain type on a level. ");
+        Awrite( " [import] [filename] [level] to reset the terrain of a level according to a text file. [not implemented] ");
         Awrite( " q) Return to previous menu." );
 
         int exit = 0; 

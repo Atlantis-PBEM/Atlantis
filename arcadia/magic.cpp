@@ -144,9 +144,9 @@ int Unit::EnergyMaintenance(int maxallowed)
     int experience = (int) (2*energycost+0.99);
     if(energycost>0) Experience(S_ILLUSORY_CREATURES, experience);
 
-    // 7 per balrog.
+    // 5 per balrog.
     int monsters = items.GetNum(I_BALROG);
-    float monstercost = (float) 7 * monsters;
+    float monstercost = (float) 5 * monsters;
     monstercost *= (float) (11 - GetSkill(S_SUMMON_BALROG))/10;
     experience = (int) (monstercost + 0.99);
     if(monstercost + energycost > maxmaintenance) {
@@ -499,7 +499,7 @@ void Unit::WanderingExperience(int message)
     for(int i=0; i<NSKILLS; i++) {
         if(!(SkillDefs[i].flags & SkillType::MAGIC)) continue;
         if((SkillDefs[i].flags & SkillType::DISABLED)) continue;
-        if(GetSkill(i) || CanStudy(i) ) {
+        if(GetRealSkill(i) || CanStudy(i) ) {
             if(GetExperSkill(i) == 3) continue; //assumes 3 is the max skill level.
             //we can experience this skill
             if(!getrandom(++options)) skill = i;
@@ -549,7 +549,28 @@ void Game::UpdateFactionAffiliations()
             }
         }
     }
-    
-
-
 }
+
+void Game::SetupGuardsmenAttitudes()
+{
+    for(int i=0; i<4; i++) {
+        Faction *Guardfac;
+        switch(i) {
+            case 0: Guardfac = GetFaction(&factions, guardfaction);
+            break;
+            case 1: Guardfac = GetFaction(&factions, elfguardfaction);
+            break;
+            case 2: Guardfac = GetFaction(&factions, dwarfguardfaction);
+            break;
+            case 3: Guardfac = GetFaction(&factions, independentguardfaction);
+            break;
+        }
+        
+        forlist(&factions) {
+            Faction *f = (Faction *) elem;
+            if(f->ethnicity != Guardfac->ethnicity) Guardfac->SetAttitude(f->num,A_UNFRIENDLY);
+        }
+    }
+}
+
+

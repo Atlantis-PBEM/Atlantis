@@ -125,6 +125,18 @@ public:
     int maxvalue;
 };
 
+class FormTemplate : public AListElem
+{
+    public:
+        FormTemplate();
+        ~FormTemplate();
+        void Writeout(Aoutfile * );
+        void Readin( Ainfile * );
+        
+        AString * name;
+        AList orders;
+};
+
 class FactionPtr : public AListElem {
 public:
   Faction * ptr;
@@ -154,6 +166,7 @@ public:
     void WriteReport( Areport *f, Game *pGame );
     // LLS - write order template
     void WriteTemplate(Areport *f, Game *pGame);
+    void WriteFormTemplates(Areport *f);
     void WriteFacInfo(Aoutfile *);
     
     void SetAttitude(int,int); /* faction num, attitude */
@@ -220,6 +233,8 @@ public:
     AList attitudes;
     SkillList skills;
 	ItemList items;
+	//List of templates
+	AList formtemplates; //FORM_TEMPLATES
 	
     //
     // Both are lists of AStrings

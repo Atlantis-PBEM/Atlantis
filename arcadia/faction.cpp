@@ -115,6 +115,20 @@ void Attitude::Readin(Ainfile *f, ATL_VER v)
 	attitude = f->GetInt();
 }
 
+void FormTemplate::Writeout(Aoutfile *f)
+{
+	f->PutStr(*name);
+	f->PutInt(orders.Num());
+	forlist(&orders) f->PutStr(*((AString *) elem));
+}
+
+void FormTemplate::Readin(Ainfile *f)
+{
+    name = f->GetStr();
+    int n = f->GetInt();
+	for(int i=0; i<n; i++) orders.Add(f->GetStr());
+}
+
 Statistic::Statistic()
 {
     value = 0;
@@ -126,6 +140,18 @@ Statistic::~Statistic()
 {
 }
 
+
+FormTemplate::FormTemplate()
+{
+    name = 0;
+}
+
+FormTemplate::~FormTemplate()
+{
+    if(name) delete name;
+}
+
+    
 Faction::Faction()
 {
 	exists = 1;
@@ -207,6 +233,8 @@ void Faction::Writeout(Aoutfile *f)
 	f->PutInt(defaultattitude);
 	f->PutInt(attitudes.Num());
 	forlist((&attitudes)) ((Attitude *) elem)->Writeout(f);
+	f->PutInt(formtemplates.Num());
+	forlist_reuse(&formtemplates) ((FormTemplate *) elem)->Writeout(f);
 }
 
 void Faction::Readin(Ainfile *f, ATL_VER v)
@@ -240,6 +268,12 @@ void Faction::Readin(Ainfile *f, ATL_VER v)
 		a->Readin(f, v);
 		if (a->factionnum == num) delete a;
 		else attitudes.Add(a);
+	}
+	n = f->GetInt();
+	for (i=0; i<n; i++) {
+		FormTemplate* ftem = new FormTemplate;
+		ftem->Readin(f);
+		formtemplates.Add(ftem);
 	}
 }
 
@@ -617,9 +651,25 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 	} 
 		// LLS - maybe we don't want this -- I'll assume not, for now 
 	//f->PutStr("#end");
+	if(Globals->FORM_TEMPLATES) WriteFormTemplates(f);
 	if(!Globals->SEPERATE_TEMPLATES) WriteTemplate(f,pGame);
 	else f->EndLine();
 
+}
+
+//export the unit templates
+void Faction::WriteFormTemplates(Areport *f)
+{
+    if(!formtemplates.Num()) return; 
+     f->PutStr("Stored Unit Types:");
+     forlist(&formtemplates) {
+         FormTemplate *formtem = (FormTemplate *) elem;
+         f->PutStr("");
+         f->PutStr(*formtem->name);
+         forlist(&formtem->orders) {
+             f->PutStr(*((AString *) elem));
+         }
+     }
 }
 
 // LLS - write order template

@@ -172,7 +172,7 @@ int SkillMax(char *skill, int race)
 int SkillExperMax(char *skill, int race)
 /* REAL_EXPERIENCE Patch */
 {
-    int max = SkillMax(skill,race);    //set experience and knowledge maxes equal.
+    int max = SkillMax(skill,race);    //set experience and knowledge maxes equal. Only for Arc IV
     return max;
 /*
 	ManType *mt = FindRace(ItemDefs[race].abr);
@@ -232,6 +232,18 @@ ShowSkill::ShowSkill(int s, int l)
 	level = l;
 }
 
+Skill::Skill()
+{
+    days = 0;
+    experience = 0;
+    type = -1;
+    disabled = 0;
+}
+
+Skill::~Skill()
+{
+}
+
 void Skill::Readin(Ainfile *f)
 {
 	AString *temp, *token;
@@ -249,6 +261,12 @@ void Skill::Readin(Ainfile *f)
     	experience = token->value();
     	delete token;
 	}
+	token = temp->gettoken();
+	if(token) disabled = token->value();     //enables version changes
+	else disabled = 0;
+	
+	delete token;
+	
 	delete temp;
 }
 
@@ -263,6 +281,7 @@ void Skill::Writeout(Aoutfile *f)
 		temp = AString("NO_SKILL 0");
 		if(Globals->REAL_EXPERIENCE) temp += AString(" 0");
 	}
+	temp += AString(" ") + disabled;
 	f->PutStr(temp);
 }
 
@@ -275,6 +294,29 @@ Skill *Skill::Split(int total, int leave)
 	temp->experience = (experience * leave) / total; /* REAL_EXPERIENCE Patch*/
 	experience = experience - temp->experience;
 	return temp;
+}
+
+int SkillList::IsDisabled(int skill)
+{
+	forlist(this) {
+		Skill *s = (Skill *) elem;
+		if (s->type == skill) {
+			return s->disabled;
+		}
+	}
+	return 1;
+}
+
+int SkillList::SetDisabled(int skill, int off)
+{
+	forlist(this) {
+		Skill *s = (Skill *) elem;
+		if (s->type == skill) {
+			s->disabled = off;
+			return 1;
+		}
+	}
+	return 0;
 }
 
 int SkillList::GetDays(int skill)
@@ -414,6 +456,7 @@ AString SkillList::Report(int nummen)
 			AString(" (") + AString(s->days/nummen);
         if(Globals->REAL_EXPERIENCE) temp += AString("/") + AString(s->experience/nummen);
         temp += AString(")");
+        if(s->disabled) temp += AString(" [DISABLED]");
 	}
 	return temp;
 }

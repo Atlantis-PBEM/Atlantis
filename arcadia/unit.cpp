@@ -369,22 +369,51 @@ AString Unit::GetName(int obs)
 
 int Unit::CanGetSpoil(Item *i)
 {
+    //if can carry unlimited items, we return (i->num+1) as this always exceeds what is available ...
 	if(!i) return 0;
-	int weight = ItemDefs[i->type].weight;
-	if(!weight) return 1; // any unit can carry 0 weight spoils
+	int itemweight = ItemDefs[i->type].weight;
+	if(!itemweight) return (i->num+1); // any unit can carry 0 weight spoils
 
-	int fly = ItemDefs[i->type].fly;
-	int ride = ItemDefs[i->type].ride;
-	int walk = ItemDefs[i->type].walk;
+    int num;
 
-	if(flags & FLAG_NOSPOILS) return 0;
-	if((flags & FLAG_FLYSPOILS) && fly < weight) return 0; // only flying
-	if((flags & FLAG_WALKSPOILS) && walk < weight) return 0; // only walking
-	if((flags & FLAG_RIDESPOILS) && ride < weight) return 0; // only riding
-	return 1; // all spoils
-
-
-
+	if(flags & FLAG_NOSPOILS) return 0; //no spoils!
+	if(flags & FLAG_FLYSPOILS) {
+        itemweight -= ItemDefs[i->type].fly;
+        if(itemweight < 1) return (i->num+1);
+        num = (FlyingCapacity() - Weight())/itemweight; //we know itemweight is not zero
+        if(num < 1) return 0;
+        else return num;
+    }
+	if(flags & FLAG_RIDESPOILS) {
+        itemweight -= ItemDefs[i->type].ride;
+        if(itemweight < 1) return (i->num+1);
+        num = (RidingCapacity() - Weight())/itemweight; //we know itemweight is not zero
+        if(num < 1) return 0;
+        else return num;
+    }
+	if(flags & FLAG_WALKSPOILS) {
+        itemweight -= ItemDefs[i->type].walk;
+        if(itemweight < 1) return (i->num+1);
+        num = (WalkingCapacity() - Weight())/itemweight; //we know itemweight is not zero
+        if(num < 1) return 0;
+        else return num;
+    }
+	if(flags & FLAG_SWIMSPOILS) {
+        itemweight -= ItemDefs[i->type].swim;
+        if(itemweight < 1) return (i->num+1);
+        num = (SwimmingCapacity() - Weight())/itemweight; //we know itemweight is not zero
+        if(num < 1) return 0;
+        else return num;
+    }
+	if(flags & FLAG_SAILSPOILS) {
+        if(itemweight < 1) return (i->num+1); //this should not be needed, but hey, why not!
+        if(!object->IsBoat()) return (i->num+1); //if we're not on a boat, consider this to be spoils all
+        //we need num to be (spare sailing capacity) divided by itemweight
+        num = (ObjectDefs[object->type].capacity - object->Weight())/itemweight; //we know itemweight is not zero
+        if(num < 1) return 0;
+        else return num;
+    }
+	return (i->num+1); // all spoils
 }
 
 AString Unit::SpoilsReport() {
@@ -393,6 +422,8 @@ AString Unit::SpoilsReport() {
 	else if(GetFlag(FLAG_FLYSPOILS)) temp = ", flying battle spoils";
 	else if(GetFlag(FLAG_WALKSPOILS)) temp = ", walking battle spoils";
 	else if(GetFlag(FLAG_RIDESPOILS)) temp = ", riding battle spoils";
+	else if(GetFlag(FLAG_SWIMSPOILS)) temp = ", swimming battle spoils";
+	else if(GetFlag(FLAG_SAILSPOILS)) temp = ", sailing battle spoils";
 	return temp;
 }
 
@@ -478,12 +509,13 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 
 	if (guard == GUARD_GUARD) temp += ", on guard";
 	if (obs > 0) {
-		temp += AString(", ") + *faction->name;
+		temp += AString(", ") + *faction->name + " [" + EthnicityString(faction->ethnicity) + "]";
 		if (guard == GUARD_AVOID) temp += ", avoiding";
 		if (GetFlag(FLAG_BEHIND)) temp += ", behind";
 	}
 
 	if (obs == 2) {
+		if (GetFlag(FLAG_COMMANDER)) temp += ", commanding faction";
 		if (reveal == REVEAL_UNIT) temp += ", revealing unit";
 		if (reveal == REVEAL_FACTION) temp += ", revealing faction";
 		if (GetFlag(FLAG_HOLDING)) temp += ", holding";
@@ -540,6 +572,7 @@ AString Unit::TemplateReport()
 	AString temp;
 	temp = *name;
 
+	if (GetFlag(FLAG_COMMANDER)) temp += ", commanding faction";
 	if (guard == GUARD_GUARD) temp += ", on guard";
 	if (guard == GUARD_AVOID) temp += ", avoiding";
 	if (GetFlag(FLAG_BEHIND)) temp += ", behind";
@@ -598,7 +631,7 @@ AString *Unit::BattleReport(int obs)
   forlist (&skills) {
 	  Skill *s = (Skill *)elem;
 	  if (SkillDefs[s->type].flags & SkillType::BATTLEREP) {
-		  int lvl = GetRealSkill(s->type);
+		  int lvl = GetSkill(s->type);
 		  if (lvl) {
 			  *temp += ", ";
 			  *temp += SkillDefs[s->type].name;
@@ -766,7 +799,7 @@ void Unit::DefaultOrders(Object *obj, int peasantfac)
 			guard = GUARD_SET;
 	} else if(type == U_GUARDMAGE) {
 //		combat = S_FIRE;  combat skill stored and set.
-//wandering peasants:
+//wandering peasants:   // maybe have some chance of them settling in the region ...
     } else if(faction->num == peasantfac) {
         reveal = REVEAL_FACTION;
         if(type == U_NORMAL && getrandom(2)) {
@@ -1035,6 +1068,7 @@ int Unit::GetSkill(int sk)
 	if (sk == S_STEALTH) return GetAttribute("stealth");
 	if (sk == S_OBSERVATION) return GetAttribute("observation");
 	if (sk == S_ENTERTAINMENT) return GetAttribute("entertainment");
+    if(skills.IsDisabled(sk)) return 0;    //either don't have the skill, or it's been disabled.
 	int retval = GetRealSkill(sk);
 	return retval;
 }
@@ -1081,6 +1115,12 @@ int Unit::GetExperSkill(int sk)
 void Unit::ForgetSkill(int sk)
 {
 	skills.SetDays(sk, 0, 0); //REAL_EXPERIENCE Patch
+		
+    if(combat == sk) {
+		combat = -1;
+		Event("Combat spell set to none.");
+	}
+	
 	if (type == U_MAGE) {
 		forlist(&skills) {
 			Skill *s = (Skill *) elem;
@@ -1746,6 +1786,70 @@ int Unit::CanRide(int weight)
 int Unit::CanWalk(int weight)
 {
 	if (WalkingCapacity() >= weight) return 1;
+	return 0;
+}
+
+int Unit::TryToSwim()
+//returns 1 if can swim, return 0 otherwise
+{
+    //In progress!
+
+	switch(Globals->FLIGHT_OVER_WATER) {
+		case GameDefs::WFLIGHT_UNLIMITED:
+			if(CanSwim()) return 1;
+		    //this is old behaviour, someone else can code new!
+			break;
+			
+		case GameDefs::WFLIGHT_MUST_LAND:
+            if(type == U_WMON && CanSwim()) return 1; //monsters that fly don't drown
+			if(leftShip) {
+			    leftShip = 0;  //no idea what this does
+                return 1;
+            }
+            //fall thru!
+		case GameDefs::WFLIGHT_NONE:
+			if(CanReallySwim()) return 1;
+			//we can't swim yet ...
+			if(SwimmingCapacity()) {
+			    //but maybe we will be able to!
+			    int tries = items.Num();
+			    while(tries-- > 0) {
+				    int maxweight = 0;
+				    int type = -1;
+				    //pick the heaviest item to discard first
+				    forlist(&items) {
+		                Item *i = (Item *) elem;
+		                if((ItemDefs[i->type].weight - ItemDefs[i->type].swim) > maxweight) {
+                            maxweight = ItemDefs[i->type].weight - ItemDefs[i->type].swim;
+                            type = i->type;
+                        }
+	                }
+	                if(type < 0) break;
+				    int tolose = (items.Weight() - SwimmingCapacity() + maxweight - 1)/maxweight; //this is the number of our heaviest item we need to discard (need to round up).
+				    //careful ... what if this is a man?
+				    //Warning: if there are no swimming men in the unit this code might leave items but no men. Perhaps should discard all items before any men ... hmm.
+				    if((ItemDefs[type].type & IT_MAN)) {
+                        if(items.GetNum(type) <= tolose) {
+                            tolose = items.GetNum(type);
+                            SetMen(type,0);
+                        } else SetMen(type, items.GetNum(type) - tolose);
+                        Event(AString("Disbands ") + ItemString(type, tolose) + ".");
+                    } else {
+                        if(items.GetNum(type) <= tolose) {
+                            tolose = items.GetNum(type);
+                            items.SetNum(type,0);
+                        } else items.SetNum(type, items.GetNum(type) - tolose);
+                        Event(AString("Discards ") + ItemString(type, tolose) + ".");
+                    }
+
+				    if(CanReallySwim()) return 1;
+                }
+            }
+            if(CanReallySwim()) return 1; //this shouldn't be needed; just being overly thorough
+			break;
+		default: // Should never happen
+			break;
+	}
 	return 0;
 }
 

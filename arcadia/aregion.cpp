@@ -130,6 +130,7 @@ ARegion::ARegion()
 	clearskies = 0;
 	earthlore = 0;
 	fog = 0;
+	flagpole = 0;
 	for (int i=0; i<NDIRS; i++)
 		neighbors[i] = 0;
 	for (int i=0; i<NDIRS; i++)
@@ -285,7 +286,7 @@ void ARegion::Setup()
 	SetupProds();
 
 	SetupPop();
-
+	
 	//
 	// Make the dummy object
 	//

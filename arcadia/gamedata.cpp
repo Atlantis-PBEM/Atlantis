@@ -907,7 +907,7 @@ ItemType id[] =
 	 15,0,0,0,
 	 -1,0,
 	 -1,0, 0,
-	 ItemType::LOSS_CHANCE, NULL, 10},
+	 ItemType::LOSS_CHANCE, NULL, 15},
 	{"undead","undead","UNDE",
 	 ItemType::NOTRANSPORT,
 	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
@@ -916,7 +916,7 @@ ItemType id[] =
 	 15,0,0,0,
 	 -1,0,
 	 -1,0, 0,
-	 ItemType::LOSS_CHANCE, NULL, 10},
+	 ItemType::LOSS_CHANCE, NULL, 15},
 	{"lich","liches","LICH",
 	 ItemType::NOTRANSPORT,
 	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
@@ -925,7 +925,7 @@ ItemType id[] =
 	 15,0,0,0,
 	 -1,0,
 	 -1,0, 0,
-	 ItemType::LOSS_CHANCE, NULL, 10},
+	 ItemType::LOSS_CHANCE, NULL, 15},
 	{"imp","imps","IMP",
 	 ItemType::NOTRANSPORT,
 	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
@@ -1916,13 +1916,13 @@ ManType mt[] = {
 	{"LEAD", R_NEXUS,RA_NA,1,
 	 5,5,3,3,{NULL, NULL, NULL, NULL, NULL, NULL},
              {NULL, NULL, NULL, NULL, NULL, NULL}},
-	{"VIKI", R_FOREST,RA_HUMAN,1,
+	{"VIKI", R_FOREST,RA_HUMAN,1,                                   //RAID
 	 3,2,2,1,{"SHIP", "SAIL", "LUMB", "COMB", "CONS", NULL},
              {NULL, NULL, NULL, NULL, NULL, NULL}},
-	{"PLAI", R_PLAIN,RA_HUMAN,1,
+	{"PLAI", R_PLAIN,RA_HUMAN,1,                                    //PDWA
 	 3,2,2,1,{"HORS", "FARM", "CARP", "ENTE", "COOK", "RIDI"},
              {NULL, NULL, NULL, NULL, NULL, NULL}},
-	{"DMAN", R_CAVERN,RA_HUMAN,1,
+	{"DMAN", R_CAVERN,RA_HUMAN,1,                                   //AELF
 	 3,2,2,1,{"QUAR", "BUIL", "MINI", "ARMO", NULL, NULL},
              {NULL, NULL, NULL, NULL, NULL, NULL}},
 	{"BARB", R_MOUNTAIN,RA_HUMAN,1,                                         //HUMAN 1
@@ -2927,12 +2927,12 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::CAST | SkillType::COSTVARIES,
 	 NULL, NULL, S_BASE_PATTERNING,
 	 {{"EART",1},{NULL,0},{NULL,0}},
-	 10, 0, 0},                            // cost per 10 wolves summoned
+	 0, 0, 0},                            // cost per 10 wolves summoned - ArcIV free!
 	{"bird lore","BIRD",100,
 	 SkillType::MAGIC | SkillType::CAST | SkillType::COSTVARIES,
 	 NULL, NULL, S_BASE_PATTERNING,
 	 {{"EART",1},{NULL,0},{NULL,0}},
-	 4, 0, 0},                            // cost per bird summoned or double neighbour sight
+	 0, 0, 0},                            // cost per bird summoned or double neighbour sight - ArcIV free!
 	{"dragon lore","DRAG",100,
 	 SkillType::MAGIC | SkillType::CAST,
 	 NULL, NULL, -1,
@@ -2952,7 +2952,7 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::CAST | SkillType::COSTVARIES,
 	 NULL, NULL, S_BASE_SUMMONING,
 	 {{"NECR",3},{NULL,0},{NULL,0}},
-	 60, 0, 0},                            // cost per 10 undead
+	 50, 0, 0},                            // cost per 10 undead
 	{"summon lich","SULI",100,
 	 SkillType::MAGIC | SkillType::CAST | SkillType::COSTVARIES,
 	 NULL, NULL, S_BASE_SUMMONING,
@@ -3226,7 +3226,7 @@ static SkillType sd[] = {
 	 2, 0, 0},                            //cost per change of 8 items (or 2 advanced)
 	{"modification","MODI",100,
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
-	 NULL, "rng_linear", S_BASE_PATTERNING,
+	 NULL, "rng_halflinear", S_BASE_PATTERNING,
 	 {{"EART",4},{NULL,0},{NULL,0}},
 	 2, 0, 0},                            //cost per change of resource (*4 for advanced)
 	{"rejuvenation","REJU",100,
@@ -3241,14 +3241,14 @@ static SkillType sd[] = {
 	 10, 0, 0},                            //cost for normal casting, *3 for large.
 	{"diversion","DIVE",100,
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED | SkillType::COSTVARIES,
-	 NULL, "rng_linear", S_BASE_PATTERNING,
+	 NULL, "rng_halflinear", S_BASE_PATTERNING,
 	 {{"EART",4},{NULL,0},{NULL,0}},
 	 25, 0, 0},                            //
 	{"gryffin lore","GRYF",100,
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED | SkillType::COSTVARIES,
 	 NULL, NULL, S_BASE_PATTERNING,
 	 {{"BIRD",4},{"WOLF",4},{NULL,0}},
-	 80, 0, 0},                            // cost of summoning. maintenance 3.
+	 0, 0, 0},                            // cost of summoning. maintenance 3.
 	{"hypnosis","HYPN",100,
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
 	 NULL, NULL, S_BASE_MYSTICISM,
@@ -5216,8 +5216,9 @@ static RangeType rtd[] = {
 	{"rng_weather", 0, RangeType::RNG_LEVEL2, 4, 4},
 	{"rng_clearsky", 0, RangeType::RNG_LEVEL2, 2, 4},
 	{"rng_one", 0, RangeType::RNG_ABSOLUTE, 1, 4},
+	{"rng_halflinear", 0, RangeType::RNG_LEVEL, 1, 4},
 	{"rng_linear", 0, RangeType::RNG_LEVEL, 2, 4},
-	{"rng_linear_surface", 0, RangeType::RNG_LEVEL, 2, 8},
+	{"rng_linear_surface", RangeType::RNG_SURFACE_ONLY, RangeType::RNG_LEVEL, 2, 8},
 	{"rng_square", 0, RangeType::RNG_LEVEL2, 1, 4},
 };
 

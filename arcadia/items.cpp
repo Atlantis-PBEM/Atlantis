@@ -106,7 +106,7 @@ AString EthnicityString(int type)
 {
     switch(type) {
         case RA_HUMAN: return AString("Human");
-        case RA_ELF: return AString("Elven");
+        case RA_ELF: return AString("Elvish");
         case RA_DWARF: return AString("Dwarven");
         case RA_OTHER: return AString("Independent");
         case RA_NA: return AString("Chaotic");

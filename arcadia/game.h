@@ -179,7 +179,8 @@ private:
 	void ModifyLabryinth(ARegion *r);
 	void RemoveMages(ARegion *r);
 	void SpecialErrors(ARegion *r);
-	void SpecialError(ARegion *r, AString message, Faction *dontshowtothisfac = NULL); 
+	void SpecialError(ARegion *r, AString message, Faction *dontshowtothisfac = NULL);
+	void SetupGuardsmenAttitudes();
 
 	//
 	// Game-specific creation functions (see world.cpp).
@@ -324,6 +325,9 @@ private:
 	int gameStatus;
 
 	int guardfaction;
+	int elfguardfaction;
+	int dwarfguardfaction;
+	int independentguardfaction;
 	int monfaction;
 	int ghostfaction;
 	int peasantfaction;
@@ -397,6 +401,7 @@ private:
 	void ProcessReshowOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessHoldOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessNoaidOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ProcessDisableOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessNocrossOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessNospoilsOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessSpoilsOrder(Unit *, AString *, OrdersCheck *pCheck);
@@ -409,6 +414,7 @@ private:
 	void ProcessDistributeOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
 	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int);
+	AString *ProcessTemplateOrder(Aorders *, OrdersCheck *pCheck, AString *, Faction *fac);
 
 	void RemoveInactiveFactions();
 

@@ -2504,8 +2504,8 @@ void ARegion::MakeStartingCity()
         AddTown();
     }
 
-    town->pop = 5000;
-    town->basepop = 5000;
+    town->pop = 5000*Globals->POP_LEVEL;
+    town->basepop = 5000*Globals->POP_LEVEL;
 
 	float ratio;
 	Market *m;
@@ -2517,17 +2517,17 @@ void ARegion::MakeStartingCity()
 				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
 					continue;
 				m = new Market(M_BUY,i,(ItemDefs[i].baseprice * 5 / 2),-1,
-						5000,5000,-1,-1);
+						5000*Globals->POP_LEVEL,5000*Globals->POP_LEVEL,-1,-1);
 				markets.Add(m);
 			}
 		}
 		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
-		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1,5000,5000,-1,-1);
+		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1,5000*Globals->POP_LEVEL,5000*Globals->POP_LEVEL,-1,-1);
 		markets.Add(m);
 		if(Globals->LEADERS_EXIST) {
 			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
 			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),-1,
-					5000,5000,-1,-1);
+					5000*Globals->POP_LEVEL,5000*Globals->POP_LEVEL,-1,-1);
 			markets.Add(m);
 		}
 	} else {
@@ -2535,12 +2535,12 @@ void ARegion::MakeStartingCity()
 		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
 		/* Setup Recruiting */
 		m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
-				Population()/5, 0, 10000, 0, 2000 );
+				Population()/(5*Globals->POP_LEVEL), 0, 10000*Globals->POP_LEVEL, 0, 2000 );
 		markets.Add(m);
 		if( Globals->LEADERS_EXIST ) {
 			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
 			m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
-					Population()/25, 0, 10000, 0, 400 );
+					Population()/(25*Globals->POP_LEVEL), 0, 10000, 0, 400 );
 			markets.Add(m);
 		}
 	}

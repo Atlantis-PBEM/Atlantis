@@ -760,59 +760,77 @@ void Army::Win(Battle * b,ItemList * spoils, int enemydead)
     }
 #endif
 
-    na = NumAlive();
 
+    //Distribute the Spoils
+    na = NumAlive();
 	AList units;
 	forlist(spoils) {
 		Item *i = (Item *) elem;
 		if(i && na) {
 			Unit *u;
 			UnitPtr *up;
+			
+            //reset marker for every new spoil
+			for(int x = 0; x < na; x++) {
+				GetSoldier(x)->unit->marker = 0;
+			}
+
+            int numsol = 0;
 
 			// Make a list of units who can get this type of spoil
 			for(int x = 0; x < na; x++) {
 				u = GetSoldier(x)->unit;
 				if(u->CanGetSpoil(i)) {
-					up = new UnitPtr;
-					up->ptr = u;
-					units.Add(up);
+                    numsol++;                  //total number of soldiers collecting this spoil
+                    if(!u->marker) { //this is the first time we've visited this unit; add it to the list
+    					up = new UnitPtr;
+    					up->ptr = u;
+    					units.Add(up);
+                    }
 				}
+                u->marker++;          //marks number of spoil-claiming soldiers in the unit.
 			}
-
-			int ns = units.Num();
-			if(ns > 0) {
-				int n = i->num/ns; // Divide spoils equally
-				if(n >= 1) {
-					forlist(&units) {
-						up = (UnitPtr *)elem;
-						up->ptr->items.SetNum(i->type,
-								up->ptr->items.GetNum(i->type)+n);
-						up->ptr->faction->DiscoverItem(i->type, 0, 1);
-					}
+            //first pass through, we are as fair as possible
+            
+			int numunits = units.Num();
+			if(numunits > 0) {              //we have some units claiming spoils
+			    int initialnum = i->num;    //initial number of spoils
+			    
+				forlist(&units) {
+					up = (UnitPtr *)elem;
+					int num = up->ptr->marker * initialnum / numsol;     //soldiers in unit * num items / total soldiers. Rounded down
+					int num2 = up->ptr->CanGetSpoil(i);      //total number of spoil unit is allowed to take
+					if(num2 < num) num = num2;
+					up->ptr->items.SetNum(i->type,
+							up->ptr->items.GetNum(i->type) + num);
+					i->num -= num;
+					up->ptr->faction->DiscoverItem(i->type, 0, 1);
 				}
-				n = i->num % ns; // allocate the remainder
-				if(n) {
-					for(int x = 0; x < n; x++) {
-						int t = getrandom(ns);
-						up = (UnitPtr *)units.First();
-						if(up) {
-							UnitPtr *p;
-							while(t > 0) {
-								p = (UnitPtr *)units.Next(up);
-								if(p) up = p;
-								else break;
-								--t;
-							}
-							up->ptr->items.SetNum(i->type,
-									up->ptr->items.GetNum(i->type)+1);
-							up->ptr->faction->DiscoverItem(i->type, 0, 1);
-						}
+                #ifdef DEBUG
+                if(i->num < 0) Awrite("Item distribution is whacked!");
+                #endif
+                //i->num spoils remain to be divided. Some of the units may no longer be able to accept spoils
+				while((i->num > 0) && units.Num()) {
+                    //We are no longer caring about being fair, just give the items away ok!
+                    int luckyunit = getrandom(units.Num());                       
+					up = (UnitPtr *)units.First();
+					while(luckyunit > 0) {
+						up = (UnitPtr *)units.Next(up);
+						luckyunit--;
 					}
+					int num = up->ptr->CanGetSpoil(i);      //total number of spoil unit is allowed to take
+                    if(num > i->num) num = i->num;
+					up->ptr->items.SetNum(i->type, up->ptr->items.GetNum(i->type)+num);
+					i->num -= num;
+					up->ptr->faction->DiscoverItem(i->type, 0, 1);
+                    units.Remove(up);  //we have given up all it can take, so remove it from the list
 				}
+				//we have given away all we can :)
 			}
 			units.DeleteAll();
 		}
 	}
+
 	for(int x = 0; x < count; x++) {
 		Soldier * s = GetSoldier(x);
 		if (!s->isdead) s->Alive(wintype);
@@ -1064,9 +1082,7 @@ void Army::DoNecromancy(Battle *b, int enemydead)
     	        continue;
     		}
     		
-    		max = 40 * max; // ave. 16/40 at level 1, 216/240 at level 6
-    		int max2 = ( 120 * s->unit->GetEnergy() )/ s->unit->GetCombatCost(S_NECROMANCY, 1);   //cost of 120 corpses.
-    		if(max2 < max) max = max2; //max is smaller of two limits.
+    		max = ( 120 * s->unit->GetEnergy() )/ s->unit->GetCombatCost(S_NECROMANCY, 1);   //cost of 120 corpses.
     		s->unit->Practice(S_NECROMANCY);
     		int raised = 0;
     		int failed = 0;

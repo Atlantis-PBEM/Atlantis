@@ -301,7 +301,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 {
 	Unit *u = GetNewUnit(fac);
 	ManType *men = FindRace(ItemDefs[mantype].abr);
-	if(!men) men = FindRace("VIKI");
+	if(!men) men = FindRace("HELF");
 
 /*   BS:
     This method was going into infernal loops with races that allowed weaponlevel to start as 3. Rather than try to fix

@@ -89,12 +89,58 @@ Can Claim items from others during: STUDY, BUILD | 050215: PRODUCE, CAST, SEND, 
 Enchant Armour/Swords code modified for can-claim.
 Exchange item-check modified for can-claim
 SEND cost adjusted to sqrt(weight-cap)
+Can Claim code adjusted to be compatible with CVS version of same. BUY, SELL not yet implemented as CVS version is bugged, also Arcadia build and produce are significantly improved compared to CVS version.
+Created new races and set race skills
 
+050216:
+Added basics for: TOUG,UNIY,FREN,SSIG,SWIF,TRAD,MERC [BATT,CHAR,DOLP already added]
+Removed: EQUA, DILL, ILCR, ILWO, ILLN, MIND [TRAF, SWAR, REJU, ALTE already removed]
+TOUG,FREN,BATT,SSIG,SWIF,TRAD,MERC fully implemented
+Done parsing for quartermastery
 
+050217:
+Removed parsing for quartermastery; implemented it using different method ;).
+CLOA reduces maxhits to 1 in battle.
+Implemented COMMAND order and end-of-round command check
+Implemented double maintenance cost for non-ethnic men
+Implemented morale penalty in combat for mixed races
+Implemented UNIY
+Faction alignment added to report and save file
+Some dragon stats cleared
+ENHANCEDRANGED flag added for ocean, desert
+Elves immune to range penalties
+Combat seniority code
+Foundation skillshows rewritten
+specialist descriptions removed from skillshows
+CLEA increases fish production
 
+050218:
+Various spell updates
+Guard faction split into 4, and sets other alignments unfriendly
+Population multiplier included
+Begun coding "TryToSwim"
+---
+Finished & enabled "TryToSwim"
+class Template and Faction::AList formtemplates added
+TEMPLATE order added
+TYPE order added
+
+050219:
+TYPE bug fixed
+Writeout / Readin of templates enabled
+SPOILS code redone, SPOILS SWIM and SPOILS SAIL flags added
+
+050220:
+skill disable code written. Should be saved with skill level
+skill disable parse code written
+Disabling or forgetting a hero's combat spell sets their combat spell to 'none'.
+Disabled skills marked in reports
+Faction ethnicity marked in reports
 
 Todo:
 Allow transfer from leader to non-leader if errors are suppressed
 Rewrite rules magic section for heros, and normal->leader->hero progression
-
 Note for buying: multiple buyers - don't count silver twice if possible.
+
+ToCheck:
+Disabling a combat skill may be nasty

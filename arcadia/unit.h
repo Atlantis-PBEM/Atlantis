@@ -101,11 +101,13 @@ enum {
 #define FLAG_FLYSPOILS			0x0200
 #define FLAG_WALKSPOILS			0x0400
 #define FLAG_RIDESPOILS			0x0800
-#define FLAG_FIGHTASFOOT		0x1000
-#define FLAG_FIGHTASRIDE		0x2000
-#define FLAG_VISIB              0x4000
-#define FLAG_SHARING			0x8000
-#define FLAG_COMMANDER			0x10000
+#define FLAG_SWIMSPOILS         0x1000
+#define FLAG_SAILSPOILS         0x2000
+#define FLAG_FIGHTASFOOT		0x4000
+#define FLAG_FIGHTASRIDE		0x8000
+#define FLAG_VISIB              0x10000
+#define FLAG_SHARING			0x20000
+#define FLAG_COMMANDER			0x40000
 
 
 class UnitId : public AListElem {
@@ -198,6 +200,7 @@ class Unit : public AListElem
   Do experience learning
   */
 
+        int GetActiveSkill(int);         //checks if a skill has been player-disabled.
 		int GetSkill(int);
 		void SetSkill(int,int);
 		void SetSkill(int,int,int); /* REAL_EXPERIENCE Patch */
@@ -234,6 +237,7 @@ class Unit : public AListElem
 		int CanFly();
 		int CanSwim();
 		int CanReallySwim();
+		int TryToSwim();
 		int MoveType();
 		int CalcMovePoints();
 		int CanMoveTo(ARegion *,ARegion *);

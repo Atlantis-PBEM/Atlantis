@@ -396,6 +396,13 @@ int Object::IsRoad()
 	return 0;
 }
 
+int Object::Weight()
+{
+    int weight = 0;
+    forlist(&units) weight += ((Unit *) elem)->Weight();
+    return weight;
+}
+
 AString *ObjectDescription(int obj)
 {
 	if(ObjectDefs[obj].flags & ObjectType::DISABLED)

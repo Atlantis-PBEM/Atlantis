@@ -1370,7 +1370,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u, CastOrder *order)
 			val = RunBirdLore(r,u);
 			break;
 		case S_WOLF_LORE:
-		    if(Globals->ARCADIA_MAGIC) val = RunSummonCreatures(r,u,sk,I_WOLF,8);
+		    if(Globals->ARCADIA_MAGIC && SkillDefs[sk].cast_cost > 0) val = RunSummonCreatures(r,u,sk,I_WOLF,8);
 			else val = RunWolfLore(r,u);
 			break;
 		case S_INVISIBILITY:
@@ -1583,7 +1583,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
         Faction *falsefaction = 0;
         forlist(&factions) {
             Faction *f = (Faction *) elem;
-            if(f->IsNPC()) continue; //don't want the Guardsmen winning on day 1.
+            if(f->IsNPC()) continue;
             if(f == u->faction) continue; //don't want it appearing as the mage's faction.
             if(num && f == tar->faction) continue; //don't want the real faction if there's an alternative
             if( getrandom(++num) ) continue; //random faction selection
@@ -2254,6 +2254,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 		    return 0;
 		} else u->energy -= cost;
 		
+		int level = u->GetSkill(S_BIRD_LORE);
 		u->Experience(S_BIRD_LORE,10);
 
 		#ifdef FIZZLES
@@ -2279,20 +2280,28 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 
 
 		int dir = order->target;
-		ARegion *tar = r->neighbors[dir];
-		if (!tar) {
-			u->Error("CAST: No such region.");
-			return 0;
+		int count = 0;
+		ARegion *tempReg = r;
+		
+		while(level > 0) {
+    		level--;
+    		ARegion *tar = tempReg->neighbors[dir];
+    		if (!tar) {
+    			if(!count) u->Error("CAST: No such region.");
+    			return 0;
+    		}
+    		count++;
+    		tempReg = tar;
+    		
+    		Farsight *f = new Farsight;
+    		f->faction = u->faction;
+    		f->level = u->GetSkill(S_BIRD_LORE);
+    		tar->farsees.Add(f);
+    		u->Event(AString("Sends birds to spy on ") +
+    				tar->Print( &regions ) + ".");
 		}
-
-		Farsight *f = new Farsight;
-		f->faction = u->faction;
-		f->level = u->GetSkill(S_BIRD_LORE);
-		tar->farsees.Add(f);
-		u->Event(AString("Sends birds to spy on ") +
-				tar->Print( &regions ) + ".");
 		return 1;
-	} else if(order->level == 4) {
+	}/* else if(order->level == 4) {
 	
 	    int cost = u->GetCastCost(S_BIRD_LORE,order->extracost,4); //4 times normal cost
 		if(cost > u->energy) {
@@ -2304,7 +2313,6 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 
 		#ifdef FIZZLES
         int mevent = u->MysticEvent();
-//        int newdir;
         switch(mevent) {
             case 4:
             case 3:
@@ -2327,18 +2335,22 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 	    }
    		u->Event("Sends birds to spy on all neighbouring regions.");
    		return 1;
-	}
+	}*/
 
     int level = u->GetSkill(S_BIRD_LORE);
     int currentnum = u->items.GetNum(I_EAGLE);
     
+
  	int cost = u->GetCastCost(S_BIRD_LORE,order->extracost,10); //cost of 10 creatures !
- 	int num = (10*u->energy) / cost;
- 	if(num < 1) {
- 	    u->Error("CAST: Not enough energy to cast that spell.");
- 	    return 0;
+ 	int num = 1;
+ 	if(cost > 0) {
+ 	num = (10*u->energy) / cost;
+     	if(num < 1) {
+     	    u->Error("CAST: Not enough energy to cast that spell.");
+     	    return 0;
+        }
     }
- 	if( (num + currentnum) > (level-1)*(level-1) ) num = (level-1)*(level-1) - currentnum;
+ 	if( (num + currentnum) > (level-2)*(level-2) ) num = (level-2)*(level-2) - currentnum;
  	if(num < 1) {
  	    u->Error("CAST: Already have the maximum number of eagles.");
  	    return 0;
@@ -2373,12 +2385,12 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 	#endif
 
 	u->items.SetNum(I_EAGLE,currentnum + num);
-	u->Event(AString("Summons ") + num + " " + ItemDefs[I_EAGLE].names);
+	u->Event(AString("Summons ") + ItemString(I_EAGLE,num));
 	return 1;
 }
 
 int Game::RunWolfLore(ARegion *r,Unit *u)
-{ //in Earthsea, SummonCreatures is called instead.
+{ //in Arcadia, SummonCreatures is called instead unless there is no energy cost.
 	if (TerrainDefs[r->type].similar_type != R_MOUNTAIN &&
 		TerrainDefs[r->type].similar_type != R_FOREST) {
 		u->Error("CAST: Can only summon wolves in mountain and "
@@ -3995,8 +4007,9 @@ int Game::RunSummonHigherCreature(ARegion *r, Unit *u, int skill, int item)
 	int maxnum = (level+1)/2;
 
 	int num = u->items.GetNum(item);
+	if(item == I_LICH) num = 0; //special case, no limit for liches
 	if (num >= maxnum) {
-		u->Error(AString("Mage may not summon more ") + ItemDefs[item].names + ".");
+		u->Error(AString("Mage may not control more ") + ItemDefs[item].names + ".");
 		return 0;
 	}
 
@@ -4005,9 +4018,18 @@ int Game::RunSummonHigherCreature(ARegion *r, Unit *u, int skill, int item)
         u->Error("CAST: Not enough energy to cast that spell.");
         return 0;
 	}
-	u->energy -= cost;
-
-	u->Experience(skill,25); //this skill would usually only be cast 3 times, and is energy intensive.
+	
+	if(!cost) {
+	    //free spell to cast; eg gryffin lore in Arc IV. Let's make a 10% summon chance, since it's free.
+        u->Experience(skill,4);
+	    if(getrandom(100) >= 10*(level - 2*num)) {
+            u->Event("Attempts to summon a gryffin, but fails.");
+	        return 1;
+        }
+    } else {
+        u->energy -= cost;
+    	u->Experience(skill,25); //this skill would usually only be cast 3 times, and is energy intensive.
+	}
 	
 	#ifdef FIZZLES
     int mevent = u->MysticEvent();
@@ -4038,7 +4060,7 @@ int Game::RunSummonHigherCreature(ARegion *r, Unit *u, int skill, int item)
     }
 	#endif
 
-	u->items.SetNum(item,num + 1);
+	u->items.SetNum(item,u->items.GetNum(item) + 1); //can't use (num+1) because of lich special case.
 	u->Event(AString("Summons a ") + ItemDefs[item].name);
 
 	return 1;
@@ -4230,7 +4252,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	CastChangeOrder *order = (CastChangeOrder *) u->activecastorder;
 	int fromitem = order->fromitem;
 	int toitem = order->toitem;
-   	if(level<4 && fromitem<0) {
+   	if(level<5 && fromitem<0) {
 	    u->Error("CAST: Must specify item to transmute.");
 	    return 0;
 	}
@@ -4252,7 +4274,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	
 	int ratio = 1;
 	if(!(ItemDefs[toitem].type & IT_NORMAL) ) {
-	    if(level<4) {
+	    if(level<5) {
 	        u->Error("CAST: Can only create normal items.");
 	        return 0;
 	    }
@@ -4521,7 +4543,7 @@ int Game::RunModification(ARegion *r, Unit *u)
         }
         if(change*cost > u->energy) change = u->energy / cost;
         
-		decrease = (change * 3 + level + 1 ) / (level + 2); //ie change*3/(l+2) rounded up
+		decrease = (change * 5 + level + 1 ) / (level + 4); //ie change*5/(l+4) rounded up
 		if(decrease >= fromprod->baseamount) {
 		    decrease = fromprod->baseamount - 1;
 		    change = decrease*(level+2) / 3;

@@ -143,6 +143,8 @@ class ShowSkill : public AListElem {
 
 class Skill : public AListElem {
 	public:
+        Skill(); //added constructor/destructor for 'disabled' flag
+        ~Skill();
 		void Readin(Ainfile *);
 		void Writeout(Aoutfile *);
 
@@ -151,15 +153,19 @@ class Skill : public AListElem {
 		int type;
 		unsigned int days;
 		unsigned int experience; /* REAL_EXPERIENCE Patch */
+		int disabled;
 };
 
 class SkillList : public AList {
 	public:
-		int GetDays(int); /* Skill */
-		int GetExper(int); /* Skill */
-		void SetDays(int,int); /* Skill, days */
-		void SetDays(int,int,int); /* Skill, days, exper */		
-		void SetExper(int,int); /* Skill, exper */		
+		int GetDays(int sk);
+		int GetExper(int sk);
+		int IsDisabled(int sk);
+		
+		int SetDisabled(int sk,int off);
+		void SetDays(int sk,int days);
+		void SetDays(int sk,int days,int exper);	
+		void SetExper(int sk,int exper);
 		void Combine(SkillList *);
 		SkillList * Split(int,int); /* total men, num to split */
 		AString Report(int); /* Number of men */
