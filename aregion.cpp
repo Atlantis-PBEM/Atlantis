@@ -366,7 +366,9 @@ void ARegion::SetupCityMarket()
                         TerrainDefs[type].prod2 == i ||
                         TerrainDefs[type].prod3 == i ||
                         TerrainDefs[type].prod4 == i ||
-                        TerrainDefs[type].prod5 == i)
+                        TerrainDefs[type].prod5 == i ||
+						TerrainDefs[type].prod6 == i ||
+						TerrainDefs[type].prod7 == i)
                     {
                         //
                         // This item can be produced in this region, so it
@@ -697,6 +699,24 @@ void ARegion::SetupProds()
             products.Add(p);
         }
     }
+
+	if(typer->prod6 != -1)
+	{
+		if(!(ItemDefs[typer->prod6].flags & ItemType::DISABLED) && 
+		   ((getrandom(100) < typer->chance6))) {
+            p = new Production(typer->prod6,typer->amt6);
+            products.Add(p);
+        }
+	}
+
+	if(typer->prod7 != -1)
+	{
+		if(!(ItemDefs[typer->prod7].flags & ItemType::DISABLED) && 
+		   ((getrandom(100) < typer->chance7))) {
+            p = new Production(typer->prod7,typer->amt7);
+            products.Add(p);
+        }
+	}
 }
 
 void ARegion::AddTown()

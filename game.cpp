@@ -28,11 +28,18 @@
 // 2000/MAR/14 Larry Stanbery  Added a unit:faction map capability.
 // 2000/MAR/25 Larry Stanbery  Added support routines for upgrading ruleset.
 // 2001/Feb/18 Joseph Traub    Added apprentice support from Lacandon Conquest
+//
+#ifdef WIN32
+#include <memory.h>  // Needed for memcpy on windows
+#endif
+
 #include "game.h"
 #include "unit.h"
 #include "fileio.h"
 #include "astring.h"
 #include "gamedata.h"
+
+
 
 Game::Game()
 {
