@@ -105,7 +105,7 @@ void ARegion::SetupPop()
 		basepopulation = 0;
 		wages = 0;
 		maxwages = 0;
-		money = 0;
+		wealth = 0;
 		return;
 	}
 
@@ -134,7 +134,7 @@ void ARegion::SetupPop()
 	if (!IsNativeRace(race)) {
 		habitat = (habitat * 4)/5;
 	}
-	basepopulation = habitat;
+	basepopulation = habitat / 3;
 	// hmm... somewhere not too far off equilibrium pop
 	population = habitat * (60 + getrandom(6) + getrandom(6)) / 100;
 	
@@ -158,11 +158,11 @@ void ARegion::SetupPop()
 		if (prob < 1) prob = 100;
 		int townch = (int) 80000 / prob;
 		if (Globals->TOWNS_NOT_ADJACENT) {
-			for (int d = 0; d < NDIRS; d++) {
-				ARegion *newregion = neighbors[d];
-				if ((newregion) &&  (newregion->town)) adjacent++;
+				for (int d = 0; d < NDIRS; d++) {
+					ARegion *newregion = neighbors[d];
+					if ((newregion) &&  (newregion->town)) adjacent++;
+				}
 			}
-		}
 		if(Globals->LESS_ARCTIC_TOWNS) {
 			int dnorth = GetPoleDistance(D_NORTH);
 			int dsouth = GetPoleDistance(D_SOUTH);
@@ -183,24 +183,30 @@ void ARegion::SetupPop()
 		}
 	}
 
-	Production *p = new Production;
+	// Setup wages and entertainment
+	Production * p = new Production;
 	p->itemtype = I_SILVER;
 	maxwages = Wages();
-	money = (int) (Population() * ((float) (wages - 10 * Globals->MAINTENANCE_COST) / 50));
+
+	/* taxable region wealth */
+	wealth = (int) ((float) (Population()
+		* (Wages() - 10 * Globals->MAINTENANCE_COST) / 50));
+
 	// note: wage factor 10, population factor 5 - included as "/ 50"
-		
-	if (money < 0) money = 0;
-	p->amount = money / Globals->WORK_FRACTION;
+	/* More wealth in safe Starting Cities */
+	if((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
+		wealth = (int) ((double) (Population() * Wages() / 50));
+	}
+	if (wealth < 0) wealth = 0;
+	p->amount = wealth / Globals->WORK_FRACTION;;
 	p->skill = -1;
 	p->productivity = wages;
 	products.Add(p);
 
-	//
-	// Setup entertainment
-	//
+	/* Entertainment */
 	p = new Production;
 	p->itemtype = I_SILVER;
-	p->amount = money / Globals->ENTERTAIN_FRACTION;
+	p->amount = wealth / Globals->ENTERTAIN_FRACTION;
 	p->skill = S_ENTERTAINMENT;
 	// raise entertainment income by productivity factor 10
 	p->productivity = Globals->ENTERTAIN_INCOME * 10;
@@ -220,6 +226,40 @@ void ARegion::SetupPop()
 						Population()/125, 0, 10000, 0, 400);
 		markets.Add(m);
 	}
+}
+
+/* ONE function where the wage and entertainment income
+ * is set (previously this has been all over the place!) */
+void ARegion::SetIncome()
+{
+	/* do nothing in unpopulated regions */
+	if(basepopulation == 0) return;
+	/* total wage income - setup or adjust */
+	Production * p = products.GetProd(I_SILVER,-1);
+	p->itemtype = I_SILVER;
+	maxwages = Wages();
+	
+	/* taxable region wealth */
+	wealth = (int) ((float) (Population()
+		* (Wages() - 10 * Globals->MAINTENANCE_COST) / 50));
+
+	// note: wage factor 10, population factor 5 - included as "/ 50"
+	/* More wealth in safe Starting Cities */
+	if((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
+		wealth = (int) ((double) (Population() * Wages() / 50));
+	}
+	if (wealth < 0) wealth = 0;
+	p->amount = wealth / Globals->WORK_FRACTION;
+	p->skill = -1;
+	p->productivity = wages;
+
+	/* Entertainment - setup or adjust */
+	p = products.GetProd(I_SILVER,S_ENTERTAINMENT);
+	p->itemtype = I_SILVER;
+	p->amount = wealth / Globals->ENTERTAIN_FRACTION;
+	p->skill = S_ENTERTAINMENT;
+	// raise entertainment income by productivity factor 10
+	p->productivity = Globals->ENTERTAIN_INCOME * 10;	
 }
 
 void ARegion::DisbandInRegion(int item, int amt)
@@ -719,27 +759,22 @@ int ARegion::DetermineTownSize()
 void ARegion::SetTownType(int level)
 {
 	if(!town) return;
+	// set some basics
+	town->hab = TownHabitat();
+	town->pop = town->hab * 2 / 3;
+	town->dev = TownDevelopment();
 	
-	if((level < TOWN_VILLAGE) || (level > TOWN_CITY)) {
-		// set some basic settings regardless
-		if(!IsStartingCity()) {
-		town->hab = TownHabitat();
-		town->pop = town->hab * 2 / 3;
-		town->dev = TownDevelopment();
-		}
-		return;
-	}
-	// some basic settings:
-	if(!IsStartingCity()) {
-		town->hab = TownHabitat();
-		town->pop = town->hab * 2 / 3;
-		int poptown = getrandom((level -1) * (level -1) * 250) + level * level * 250;
-		town->hab += poptown;
-		town->pop = town->hab * 2 / 3;
-		development += level * level * 3;
-		town->dev = TownDevelopment();
-	}
-	// now check and increment
+	// Sanity check
+	if((level < TOWN_VILLAGE) || (level > TOWN_CITY)) return;
+	
+	// increment values
+	int poptown = getrandom((level -1) * (level -1) * 250) + level * level * 250;
+	town->hab += poptown;
+	town->pop = town->hab * 2 / 3;
+	development += level * level * 3;
+	town->dev = TownDevelopment();
+
+	// now increment until we reach the right size
 	while(town->TownType() != level) {
 		// Increase?
 		if(level > town->TownType()) {
@@ -754,44 +789,24 @@ void ARegion::SetTownType(int level)
 			town->dev = TownDevelopment();
 		}
 			// or decrease...
-			else {
-				development -= getrandom(20 - Globals->TOWN_DEVELOPMENT / 10);
-				int popdecr = getrandom(1000) + getrandom(1000);
-				// don't depopulate
-				while ((town->pop < popdecr) || (town->hab < popdecr)) {
-					popdecr = popdecr / 2;	
-				}
-				town->hab -= popdecr;
-				town->pop = town->hab * 2 / 3;
-				town->dev = TownDevelopment();
+		else {
+			development -= getrandom(20 - Globals->TOWN_DEVELOPMENT / 10);
+			int popdecr = getrandom(1000) + getrandom(1000);
+			// don't depopulate
+			while ((town->pop < popdecr) || (town->hab < popdecr)) {
+				popdecr = popdecr / 2;	
 			}
+			town->hab -= popdecr;
+			town->pop = town->hab * 2 / 3;
+			town->dev = TownDevelopment();
+		}
 	}
 }
 
 void ARegion::UpdateEditRegion()
 {
     // redo markets and entertainment/tax income for extra people.
-	
-	// include wage factor of 10 and population factor of 5 in money calculation
-	money = ((Wages() - Globals->MAINTENANCE_COST) * Population() / 50);
-	if (money < 0) money = 0;
-	// Setup working
-	Production *p = products.GetProd(I_SILVER, -1);
-	if(p) {
-    	if (IsStartingCity()) {
-    		// Higher wages in the entry cities.
-    		p->amount = (Wages() * Population() / 50);
-    	} else {
-    		p->amount = (Wages() * Population()) / (50 * Globals->WORK_FRACTION);
-    	}
-    	p->productivity = Wages();
-	}
-	// Entertainment.
-	p = products.GetProd(I_SILVER, S_ENTERTAINMENT);
-	if(p) {
-    	p->baseamount = money / Globals->ENTERTAIN_FRACTION;
-    	p->amount = p->baseamount;
-	}
+	SetIncome();
 	markets.PostTurn(Population(), Wages());
 	
 	//Replace man selling
@@ -839,7 +854,7 @@ void ARegion::SetupEditRegion()
 		basepopulation = 0;
 		wages = 0;
 		maxwages = 0;
-		money = 0;
+		wealth = 0;
 		return;
 	}
 
@@ -918,28 +933,8 @@ void ARegion::SetupEditRegion()
 		}
 	}
 
-	Production *p = new Production;
-	p->itemtype = I_SILVER;
-	maxwages = Wages();
-	// include wage factor 10 and population factor 5 in money calculation
-	money = (int) (Population() * ((float) (wages - 10 * Globals->MAINTENANCE_COST) / 50));
-	
-	if (money < 0) money = 0;
-	p->amount = money / Globals->WORK_FRACTION;
-	p->skill = -1;
-	p->productivity = wages;
-	products.Add(p);
-
-	//
-	// Setup entertainment
-	//
-	p = new Production;
-	p->itemtype = I_SILVER;
-	p->amount = money / Globals->ENTERTAIN_FRACTION;
-	p->skill = S_ENTERTAINMENT;
-	// raise entertainment income by productivity factor 10
-	p->productivity = Globals->ENTERTAIN_INCOME * 10;
-	products.Add(p);
+	// set up work and entertainment income
+	SetIncome();
 
 	float ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 	// hack: include wage factor of 10 in float assignment above
@@ -991,10 +986,10 @@ int ARegion::TownHabitat()
 	if(caravan) build++;
 	if(build > 2) build = 2;
 	
-	hab = (build++ * build + 1) * hab * hab + basepopulation / 4 + 50;
+	hab = (build++ * build + 1) * hab * hab + habitat / 4 + 50;
 	
 	// Effect of town development on habitat:
-	int totalhab = hab + (TownDevelopment() * (basepopulation + 800 + hab
+	int totalhab = hab + (TownDevelopment() * (habitat + 800 + hab
 		+ Globals->CITY_POP / 2)) / 100;
 	
 	return totalhab;
@@ -1058,11 +1053,263 @@ int ARegion::TownDevelopment()
 	return df;
 } 
 
-void ARegion::UpdateTown()
+// Checks the growth potential of towns
+// and cancels unlimited markets for Starting Cities
+// that have been taken over
+int ARegion::TownGrowth()
 {
-	//
-	// Check if we were a starting city and got taken over
-	//
+	int tarpop = town->pop;
+
+	// Don't update population in Starting Cities
+	if (!IsStartingCity()) {
+		// Calculate target population from market activity
+		int amt = 0;
+		int tot = 0;
+		forlist(&markets) {
+			Market *m = (Market *) elem;
+			if (Population() > m->minpop) {
+				if (ItemDefs[m->item].type & IT_TRADE) {
+					if (m->type == M_BUY) {
+						amt += 5 * m->activity;
+						tot += 5 * m->maxamt;
+					}
+				} else {
+					if (m->type == M_SELL) {
+						// Only food items except fish are mandatory
+						// for town growth - other items can
+						// be used in replacement
+						if (ItemDefs[m->item].type & IT_FOOD) {
+							amt += 2 * m->activity;
+						} else amt += m->activity;
+						if ((ItemDefs[m->item].type & IT_FOOD)
+							&& (m->item != I_FISH))	tot += 2 * m->maxamt;
+					}
+				}
+			}
+		}
+		
+		if (amt > tot) amt = tot;
+
+		if (tot) {
+			tarpop = (Globals->CITY_POP * amt) / tot;
+		} 
+		// Let's bump tarpop up
+		tarpop = (tarpop * 5) / 4;
+		if (tarpop > Globals->CITY_POP) tarpop = Globals->CITY_POP;
+	}
+	return tarpop;
+}
+
+/* Grow region and town population and set basic
+ * migration parameters */
+void ARegion::Grow()
+{
+	// Init overall population growth	
+	int growpop = 0;
+	// Init migration parameters
+	immigrants = habitat - basepopulation;
+	emigrants = population - basepopulation;
+	
+	/* First, check regional population growth */
+	// Check resource production activity
+	if (basepopulation) {
+		int activity = 0;
+		int amount = 0;
+		forlist(&products) {
+			Production *p = (Production *) elem;
+			if (ItemDefs[p->itemtype].type & IT_NORMAL &&
+				p->itemtype != I_SILVER) {
+				activity += p->activity;
+				// base on baseamount - for maximum
+				// benefit of trade structures!
+				amount += p->baseamount;
+			}
+		}
+		int tarpop = habitat - population + basepopulation;
+		if (amount) tarpop += ((habitat - basepopulation) * 2 * activity) / (3 * amount);
+		int diff = tarpop - population;
+		/* Adjust basepop? */
+		// raise basepop depending on production
+		if (diff > habitat / 20) basepopulation += getrandom(diff/20) + diff / 20;
+		// lower basepop for extremely low levels of population
+		if (population < basepopulation) {
+			int depop = (basepopulation - population) / 4;
+			basepopulation -= depop + getrandom(depop);			
+		}
+		// Limit excessive growth at low pop / hab ratios
+		growpop += (int) ((float) (diff * habitat / (5 * (habitat + 3 * diff))));
+		// update emigrants - only if region has a decent population level
+		if (emigrants > 0) emigrants += diff;
+	}
+	
+	/* Now check town population growth */
+	if(town) {
+		int maxpop = TownGrowth();
+		int tgrowth = maxpop - town->pop;
+		immigrants += tgrowth;
+		// less growth of towns in DYNAMIC_POPULATION
+		// to balance town creation and population dynamics
+		// through migration
+		if(Globals->DYNAMIC_POPULATION) tgrowth = tgrowth / 4;
+		// Dampen growth curve at high population levels
+		growpop += (int) ((float) (tgrowth * (2 * town->hab - town->pop) / (10 * town->hab)));
+	}
+	
+	// Update population
+	AdjustPop(growpop);
+	
+	/* Initialise the migration variables */
+	migdev = 0;
+	migfrom.DeleteAll();
+}
+
+
+/* Performs a search for each round of Migration for
+ * the most attractive valid target region within
+ * 2 hexes distance. */
+void ARegion::FindMigrationDestination(int round)
+{
+	// is emigration possible?
+	if(emigrants < 0) return;
+	
+	int maxattract = 0;
+	ARegion *target = this;
+	// Check all hexes within 2 hexes
+	// range one neighbours
+	for(int d=0; d < NDIRS; d++) {
+		ARegion *nb = neighbors[d];
+		if(!nb) continue;
+		if (TerrainDefs[nb->type].similar_type == R_OCEAN) continue;
+		int ma = nb->MigrationAttractiveness(development, 1, round);
+		// check that we didn't migrate there in previous round
+		if ((ma > maxattract) &&
+			(!((nb->xloc == target->xloc) && (nb->yloc == target->yloc)))) {
+			// set migration target
+			target = nb;
+			maxattract = ma;
+		}
+		// range two neighbours
+		for(int d2=0; d2 < NDIRS; d2++) {
+			ARegion *nb2 = nb->neighbors[d2];
+			if(!nb2) continue;
+			if(TerrainDefs[nb2->type].similar_type == R_OCEAN) continue;
+			ma = nb2->MigrationAttractiveness(development, 2, round);
+			// check that we didn't migrate there the previous round
+			if ((ma > maxattract)  &&
+				(!((nb2->xloc == target->xloc) && (nb2->yloc == target->yloc)))) {
+				// set migration target
+				target = nb2;
+				maxattract = ma;
+			}
+		}	
+	}
+	// do we have a target?
+	if(target == this) return;
+	
+	// then add this region to the target's migfrom list
+	ARegion *self = this;
+	target->migfrom.Add(self);
+}
+
+/* Attractiveness of the region as a destination for migrants */
+int ARegion::MigrationAttractiveness(int homedev, int range, int round)
+{
+	int attractiveness = 0;
+	int mdev = development;
+	/* Is there enough immigration capacity? */
+	if (immigrants < 100) return 0;	
+	/* on the second round, consider as a mid-way target */
+	if (round > 1) mdev = migdev;
+	/* minimum development difference 8 x range */
+	mdev -= 8 * range;
+	if (mdev  <= homedev) return 0;
+	/* available entertainment */
+	Production *p = products.GetProd(I_SILVER, S_ENTERTAINMENT);
+	int entertain = p->activity / 20;
+	/* available space */
+	float space = 1 / 2;
+	int offset = Globals->CITY_POP / 100;
+	if(town) {
+		space += ((habitat - population) + (town->hab - town->pop) + offset)
+			/ (habitat + town->hab + offset);
+	} else {
+		space += (habitat - population + offset) / (habitat + offset);
+	}
+	/* attractiveness due to development */
+	attractiveness += (int) (space * ((float) 100 * (mdev - homedev) / homedev + entertain));
+	
+	return attractiveness;	
+}
+
+/* Performs migration for each region with a migration
+ * route pointing to the region (i.e. element of migfrom AList),
+ *  adjusting population for hex of origin and itself */
+void ARegion::Migrate()
+{
+	// calculate total potential migrants
+	int totalmig = 0;
+	if(migfrom.First()) {
+		forlist(&migfrom) {
+			ARegion *r = (ARegion *) elem;
+			if(!r) continue;
+			totalmig += r->emigrants;
+		}
+	}
+	
+	// is there any migration to perform?
+	if (totalmig == 0) return;
+	
+	// do each migration
+	int totalimm = 0;
+	forlist(&migfrom) {
+		ARegion *r = (ARegion *) elem;
+		if(!r) continue;
+		
+		// figure range
+		int xdist = r->xloc - xloc;
+		if(xdist < 0) xdist = - xdist;
+		int ydist = r->yloc - yloc;
+		if(ydist < 0) ydist = - ydist;
+		ydist = (ydist - xdist) / 2;
+		int range = xdist + ydist;
+		
+		// sanity check - huh?
+		if (range < 1) continue;
+		int migrants = (int) (immigrants * ((float) (r->emigrants / totalmig)));
+		int mdiff = development - 7 - r->development;
+		mdiff -= 8 * (range - 1);
+		if(mdiff < 0) continue;
+		int mmult = 1;
+		for(int x=1; x*x < mdiff; x++) mmult = x;
+		// adjust migrants according to development difference
+		migrants = (int) (migrants * (float) (((mdiff + 100) * mmult) / 500));
+		AdjustPop(migrants);
+		r->AdjustPop(-migrants);
+		r->emigrants -= migrants;
+		totalimm += migrants;
+		AString  wout = AString("Migrating from ") /* + (r->name) + " in " */ + r->xloc
+			+ "," + (r->yloc) + " to " /* + name + " in " */ + (xloc) + "," + yloc 
+			+ ": " + migrants + " migrants.";
+		Awrite(wout);
+		// set the region's mid-way migration development
+		r->migdev = development - 8 * range;
+		if(r->development > migdev) r->migdev = r->development;
+	}
+	// reduce possible immigrants
+	immigrants -= totalimm;
+	// clear migfrom
+	migfrom.DeleteAll();
+}
+
+void ARegion::PostTurn(ARegionList *pRegs)
+{
+
+	/* Check decay */
+	if(Globals->DECAY) {
+		DoDecayCheck(pRegs);
+	}
+
+	/* Check if we were a starting city and got taken over */
 	if(IsStartingCity() && !HasCityGuard() && !Globals->SAFE_START_CITIES) {
 		// Make sure we haven't already been modified.
 		int done = 1;
@@ -1092,401 +1339,19 @@ void ARegion::UpdateTown()
 		}
 	}
 
-	/*
-	if(Globals-> PLAYER_ECONOMY) {
+	/* Set wage income and entertainment */
+	if (type != R_NEXUS) {
+		SetIncome();
+	}
 	
-		town->hab = TownHabitat();
-		
-		// *Town Pop Growth*
-		int delay = Globals->DELAY_GROWTH;
-		if (delay < 2) delay = 2;
-		int lastgrowth = growth;
-		if (delay > 2)
-			for (int i=1; i<delay-1; i++) growth += lastgrowth;
-		// growth based on available space
-		int space = town->hab - town->pop;
-		if(space < 0) space = 0;
-		int sgrow = 0;
-		if((3 * space/(town->hab+1)) < 2) sgrow = space / 10; 
-			else sgrow = (space / (town->hab + 1) * 15) * space;
-		// growth based on population and wages
-		int curg = ((Globals->POP_GROWTH / 100) * (Wages()-5) *
-			 (((town->hab * (1+Wages()/8)) - 2 * town->pop) / (40 * delay)));
-		if (sgrow > 0) sgrow = 0;
-		if (curg > 0) curg = 0;
-		growth += sgrow + curg;
-		growth = growth / delay;
-		if (town->pop < 1) growth = 0;
-		
-		// *Town Pop Mortality*
-		delay = Globals->DELAY_MORTALITY;
-		if (delay < 2) delay = 2;
-		int lastmort = growth;
-		int curm = 0;
-		int starve = 0;
-		if (delay > 2)
-			for (int i=1; i<delay-1; i++) curm += lastmort;
-		
-		// mortality based on starvation:
-		
-		// mortality based on crowding:
-		int crowd = 3 * town->pop - 2 * town->hab;
-		if ((3 * crowd / town->hab) < 2) crowd = 0;
-		if (crowd > 0) {
-			float cfactor = 2 / (crowd + 1);
-			cfactor = cfactor * cfactor / 4;
-			crowd = (int) ((town->pop / 10) * (1 - cfactor));
-		}
+	/* update markets */
+	markets.PostTurn(Population(),Wages());
+	return;
 
-		if(crowd > 0) growth -= crowd;
-		if(starve > 0) growth -= starve;
-		growth = growth / delay;
-		if ((growth != 0) || (Population() < 1)) growth = 0;
-		
-		AdjustPop(growth);
-		
-		// if(crowd > 0) migration += crowd / 36;
-		// if(starve > 0) migration += starve / 36;
-		
-#if 0
-		if((development > 190) && (!IsStartingCity())) {
-		Awrite(AString("===== Town(") + town->TownType() + ") in " + *name 
-			+ " in (" + xloc + ", " + yloc + ") =====");
-		Awrite(AString(" growth:      ") + growth);
-		Awrite(AString(" town pop:    ") + town->pop);
-		Awrite(AString(" town hab:    ") + town->hab);
-		Awrite(AString(" development: ") + development);
-		int td = TownDevelopment();
-		Awrite(AString(" towndevel.:  ") + td);
-		Awrite(AString(" migration:   ") + migration);
-		Awrite("");
-		}
-#endif
-		return;
-	}
-	*/
-	
-	
-	//
-	// Don't do pop stuff for AC Exit.
-	//
-	if (town->pop != 5000) {
-		// First, get the target population
-		int amt = 0;
-		int tot = 0;
-		forlist(&markets) {
-			Market *m = (Market *) elem;
-			if (Population() > m->minpop) {
-				if (ItemDefs[m->item].type & IT_TRADE) {
-					if (m->type == M_BUY) {
-						amt += 5 * m->activity;
-						tot += 5 * m->maxamt;
-					}
-				} else {
-					if (m->type == M_SELL) {
-						// Only food items except fish are mandatory
-						// for town growth - other items can
-						// be used in replacement
-						if (ItemDefs[m->item].type & IT_FOOD) {
-							amt += 2 * m->activity;
-						} else amt += m->activity;
-						if ((ItemDefs[m->item].type & IT_FOOD)
-							&& (m->item != I_FISH))	tot += 2 * m->maxamt;
-					}
-				}
-			}
-		}
-		
-		if (amt > tot) amt = tot;
-
-		int tarpop;
-		if (tot) {
-			tarpop = (Globals->CITY_POP * amt) / tot;
-		} else {
-			tarpop = 0;
-		}
-
-		// Let's bump tarpop up
-		tarpop = (tarpop * 3) / 2;
-		if (tarpop > Globals->CITY_POP) tarpop = Globals->CITY_POP;
-
-		town->pop = town->pop + (tarpop - town->pop) / 5;
-
-		// Check base population
-		if (town->pop < town->hab) {
-			town->pop = town->hab;
-		}
-		if ((town->pop * 2) / 3 > town->hab) {
-			town->hab = (town->pop * 2) / 3;
-		}
-	}
-}
-
-void ARegion::Migrate()
-{
-	/*
-	for(int i=0; i<NDIRS; i++) {
-		ARegion *nbor = neighbors[i];
-		if((nbor) && (nbor->migration > 0)) {
-			int cv = 100;
-			if(nbor->race != race) cv = 50;
-			// Roads?
-			if(HasExitRoad(i) && HasConnectingRoad(i)) {
-				cv += 25;
-				for(int d=0; d<NDIRS; d++) {
-					if((i == GetRealDirComp(d)) || (!nbor->HasExitRoad(d))) continue;
-					ARegion *ntwo = nbor->neighbors[d];
-					if((nbor) && (nbor->HasConnectingRoad(d))) {
-						int c2 = 100;
-						if(ntwo->race != race) c2 = 50;
-						population += ntwo->migration * c2 / 100;
-					}
-				}
-			}
-			population += nbor->migration * cv / 100;
-		}
-	}
-	*/
-}
-
-void ARegion::PostTurn(ARegionList *pRegs)
-{
-	/* Rules for PLAYER-RUN ECONOMY
-	if (Globals-> PLAYER_ECONOMY) {
-	
-		// Decay desolate areas
-		if (Population() < (habitat / 100))
-			if (development > 0) development--;
-		// Check for Development increase
-		int fooddemand = 1;
-		int foodavailable = 1;
-		forlist(&markets) {
-			Market *m = (Market *) elem;
-			if (m->amount < 1) continue;
-			int npcprod = 0;
-			forlist(&products) {
-				Production *re = (Production *) elem;
-				if (re->itemtype == m->item)
-					npcprod = re->amount - re->activity;
-			}
-			if (ItemDefs[m->item].type & IT_MAN) {
-				// reduce population
-				population -= m->activity;
-			} else if (m->type == M_SELL) {
-				if (ItemDefs[m->item].type & IT_FOOD) {
-					fooddemand += m->amount;
-					foodavailable += m->activity + npcprod;
-				}
-				int supply = npcprod + m->activity;
-				if ((m->amount <= supply * 4) &&
-						(getrandom(m->amount) < supply)) {
-					development++;
-				}
-			} else if (m->type == M_BUY) {
-				int supply = m->activity;
-				if ((m->amount <= supply * 3) &&
-						(getrandom(3 * m->amount) < (supply * 2))) {
-					development++;
-				}
-			}
-			// TODO: a function to update markets (incl. npcprod)
-		}
-
-		wages = Wages();
-
-		// *Population Growth*
-		int delay = Globals->DELAY_GROWTH;
-		if (delay < 2) delay = 2;
-		int lastgrowth = growth;
-		if (delay > 2)
-			for (int i=1; i<delay-1; i++) growth += lastgrowth;
-		// growth based on available space
-		int space = habitat - population;
-		if(space < 0) space = 0;
-		int sgrow = 0;
-		if((3*space/(habitat+1)) < 2) sgrow = space / 10; 
-			else sgrow = (space / (habitat + 1) * 15) * space;			
-		// growth based on wages
-		int curg = ((Globals->POP_GROWTH / 100) * (Wages()-5) *
-			 (habitat - 2 * population) / 200);
-		if(curg < 0) curg = 0;
-		curg = curg * (2 * habitat - 3 * population) / (habitat + 1);
-		// growth based on existing population
-		int pgrow = population;
-		if(pgrow > habitat) pgrow = habitat;
-		pgrow *= Globals->POP_GROWTH / 20000;
-		if(sgrow < 0) sgrow = 0;
-		if(curg < 0) curg = 0;
-		if(population > 0) growth += curg + sgrow + pgrow;
-		growth = growth / delay;
-
-		// *Mortality*
-		delay = Globals->DELAY_MORTALITY;
-		if (delay < 2) delay = 2;
-		int lastmort = growth;
-		int curm = 0;
-		int starve = 0;
-		if (delay > 2)
-			for (int i=1; i<delay-1; i++) curm += lastmort;
-		// mortality based on starvation:
-		int totalhab = habitat;
-		if(town) totalhab += town->hab;
-		
-		//if ((habitat > 0) && (fooddemand > 0))
-		//	starve = (population * population *
-		//			(fooddemand - foodavailable)) /
-		//		(fooddemand * habitat * 4);
-		
-				
-		// mortality based on crowding:
-		int crowd = 3 * population - 2 * habitat;
-		if ((3 * crowd / habitat) < 2) crowd = 0;
-		if (crowd > 0) {
-			float cfactor = 2 / (crowd + 1);
-			cfactor = cfactor * cfactor / 4;
-			crowd = (int) ((population / 10) * (1 - cfactor));
-		}
-		if(population > 0) growth -= crowd + starve;
-		growth = growth / delay;
-		migration = (crowd + starve) / 18;
-
-		// Update population
-		AdjustPop(growth);
-		
-		// Update town
-		if(town) UpdateTown();
-
-		// Check decay
-		if(Globals->DECAY) {
-			DoDecayCheck(pRegs);
-		}
-
-		// Set tax base
-		money = (wages - 100) * Population() / 10;
-		if (money < 0) money = 0;
-
-		if (type != R_NEXUS) {
-			// Setup working
-			Production * p = products.GetProd(I_SILVER,-1);
-			int hack = 0;
-			if (IsStartingCity()) {
-				// Higher wages in the entry cities.
-				hack = wages * Population() / 10;
-			} else {
-				// (Globals->WORK_FRACTION);
-				hack = (wages * Population()) / 50;
-			}
-			// TODO: Silver available for work and entertainment
-			// still causes a segmentation fault!!!
-			if (p) {
-				p->amount = hack;
-				p->productivity = wages;
-			}
-
-			// Entertainment.
-			p = products.GetProd(I_SILVER,S_ENTERTAINMENT);
-			if (p) p->baseamount = money / Globals->ENTERTAIN_FRACTION;
-#if 0
-			//uncomment for economy info output used for debugging
-			Awrite(AString("===== ") +
-				TerrainDefs[type].name + " in " + *name
-				+ " (" + xloc + ", " + yloc + ") =====");
-			Awrite(AString("population:  ") + population + " " +
-					ItemDefs[race].names);
-			Awrite(AString("wages:	   ") +
-					(wages/10) + "  (tax base: "+ money + ")");
-			Awrite(AString("development: ") + development);
-			Awrite(AString("habitat:	 ") +
-					(habitat - population) + " / " + habitat);
-			Awrite(AString("growth:	  ") + growth +
-					"  (this month: " + curg + ")");
-			Awrite(AString("food:		") + (foodavailable-1) + " / " +
-					(fooddemand-1));
-			Awrite("");
-#endif
-
-			markets.PostTurn(Population(),Wages());
-		}
-		return;
-	}
-	*/
-
-
-	// Standard economy
-	//
-	// First update population based on production
-	//
-	int activity = 0;
-	int amount = 0;
-	if (basepopulation) {
-		forlist(&products) {
-			Production *p = (Production *) elem;
-			if (ItemDefs[p->itemtype].type & IT_NORMAL &&
-				p->itemtype != I_SILVER) {
-				activity += p->activity;
-				amount += p->amount;
-			}
-		}
-		int tarpop = basepopulation;
-		if (amount) tarpop += (basepopulation * activity) / (2 * amount);
-		int diff = tarpop - population;
-
-		if(Globals->VARIABLE_ECONOMY) {
-			population = population + diff / 5;
-		}
-
-		//
-		// Now, if there is a town, update its population.
-		//
-		if (town) {
-			UpdateTown();
-		}
-
-		// AS
-		if(Globals->DECAY) {
-			DoDecayCheck(pRegs);
-		}
-
-		//
-		// Now, reset population based stuff.
-		// Recover Wages.
-		//
-		if (wages < maxwages) wages++;
-
-		//
-		// Set money
-		//
-		money = (Wages() - 10 * Globals->MAINTENANCE_COST) * Population() / 50;
-		if (money < 0) money = 0;
-
-		//
-		// Setup working
-		//
-		Production *p = products.GetProd(I_SILVER, -1);
-		if (IsStartingCity()) {
-			//
-			// Higher wages in the entry cities.
-			//
-			p->amount = Wages() * Population() / 50;
-		} else {
-			p->amount = (Wages() * Population()) / (50 * Globals->WORK_FRACTION);
-		}
-		p->productivity = Wages();
-
-		//
-		// Entertainment.
-		//
-		p = products.GetProd(I_SILVER, S_ENTERTAINMENT);
-		p->baseamount = money / Globals->ENTERTAIN_FRACTION;
-
-		markets.PostTurn(Population(), Wages());
-	}
-
+	/* update resources */
 	UpdateProducts();
 
-	//
 	// Set these guys to 0.
-	//
 	earthlore = 0;
 	clearskies = 0;
 

@@ -383,7 +383,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 			}
 		}
 	}
-
+	
 	SetupNeighbors(arr);
 
 	Awrite("");

@@ -116,8 +116,8 @@ ARegion::ARegion()
 	town = 0;
 	development = 0;
 	habitat = 0;
-	growth = 0;
-	migration = 0;
+	immigrants = 0;
+	emigrants = 0;
 	clearskies = 0;
 	earthlore = 0;
 	for (int i=0; i<NDIRS; i++)
@@ -142,7 +142,6 @@ void ARegion::SetName(char *c)
 	if(name) delete name;
 	name = new AString(c);
 }
-
 
 
 int ARegion::IsNativeRace(int item)
@@ -946,10 +945,9 @@ void ARegion::Writeout(Aoutfile *f)
 	else f->PutStr("NO_RACE");
 	f->PutInt(population);
 	f->PutInt(basepopulation);
-	f->PutInt(migration);
 	f->PutInt(wages);
 	f->PutInt(maxwages);
-	f->PutInt(money);
+	f->PutInt(wealth);
 
 	f->PutInt(elevation);
 	f->PutInt(humidity);
@@ -959,7 +957,6 @@ void ARegion::Writeout(Aoutfile *f)
 
 	f->PutInt(habitat);
 	f->PutInt(development);
-	f->PutInt(growth);
 
 	if (town) {
 		f->PutInt(1);
@@ -1007,10 +1004,9 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 
 	population = f->GetInt();
 	basepopulation = f->GetInt();
-	migration = f->GetInt();
 	wages = f->GetInt();
 	maxwages = f->GetInt();
-	money = f->GetInt();
+	wealth = f->GetInt();
 	
 	elevation = f->GetInt();
 	humidity = f->GetInt();
@@ -1020,7 +1016,6 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 
 	habitat = f->GetInt();
 	development = f->GetInt();
-	growth = f->GetInt();
 
 	if (f->GetInt()) {
 		town = new TownInfo;
@@ -1215,10 +1210,6 @@ void ARegion::WriteEconomy(Areport *f, Faction *fac, int present)
 		f->PutStr(AString("Wages: $0."));
 	}
 
-	if(town) {
-		f->PutStr(AString("Habitat: ") + TownHabitat());
-	}
-
 	WriteMarkets(f, fac, present);
 
 	WriteProducts(f, fac, present);
@@ -1268,7 +1259,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			}
 			if(present || farsight ||
 			   Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY) {
-				temp += AString(", $") + money;
+				temp += AString(", $") + wealth;
 			} else {
 				temp += AString(", $0");
 			}

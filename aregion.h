@@ -216,7 +216,7 @@ class ARegion : public AListElem
 		void NotifyCity(Unit *, AString& oldname, AString& newname);
 
 		void DefaultOrders();
-		void UpdateTown();
+		int TownGrowth();
 		void PostTurn(ARegionList *pRegs);
 		void UpdateProducts();
 		void SetWeather(int newWeather);
@@ -249,6 +249,8 @@ class ARegion : public AListElem
 		void Recruit(int);
 		int IsNativeRace(int);
 		void AdjustPop(int);
+		void FindMigrationDestination(int round);
+		int MigrationAttractiveness(int, int, int);
 		void Migrate();
 		void SetTownType(int);
 		int DetermineTownSize();
@@ -285,20 +287,25 @@ class ARegion : public AListElem
 		int race;
 		int population;
 		int basepopulation;
-		int migration;
 		int wages;
 		int maxwages;
-		int money;
+		int wealth;
 		
-		/* Player-run economy */
+		/* Economy */
 		int habitat;
 		int development;
-		int growth;
 		int elevation;
 		int humidity;
 		int temperature;
 		int vegetation;
 		int culture;
+		// migration origins
+		AList migfrom;
+		// mid-way migration development
+		int migdev;
+		int immigrants;
+		int emigrants;
+		
 
 		/* Potential bonuses to economy */
 		int clearskies;
@@ -322,6 +329,8 @@ class ARegion : public AListElem
 		/* Private Setup Functions */
 		void SetupPop();
 		void SetupProds();
+		void SetIncome();
+		void Grow();
 		int GetNearestProd(int);
 		void SetupCityMarket();
 		void AddTown();

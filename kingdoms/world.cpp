@@ -2500,15 +2500,15 @@ void ARegion::MakeStartingCity()
 	if(!Globals->TOWNS_EXIST) return;
 
 	if(Globals->GATES_EXIST) gate = -1;
-    if( !town )
-    {
-        AddTown(TOWN_CITY);
-    }
+	
+	if(town) delete town;
+    
+    AddTown(TOWN_CITY);
 
 	if(!Globals->START_CITIES_EXIST) return;
 
 	town->hab = 125 * Globals->CITY_POP / 100;
-    town->pop = town->hab;
+    while (town->pop < town->hab) town->pop += getrandom(200)+200;
     town->dev = TownDevelopment();
 
 	float ratio;

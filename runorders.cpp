@@ -101,6 +101,10 @@ void Game::RunOrders()
 	}
 	Awrite("Assessing Maintenance costs...");
 	AssessMaintenance();
+	if(Globals->DYNAMIC_POPULATION) {
+		Awrite("Processing Migration...");
+		ProcessMigration();
+	}
 	Awrite("Post-Turn Processing...");
 	PostProcessTurn();
 	DeleteEmptyUnits();
@@ -749,7 +753,7 @@ int Game::CountTaxes(ARegion *reg)
 void Game::RunTaxRegion(ARegion *reg)
 {
 	int desired = CountTaxes(reg);
-	if (desired < reg->money) desired = reg->money;
+	if (desired < reg->wealth) desired = reg->wealth;
 
 	forlist(&reg->objects) {
 		Object *o = (Object *) elem;
@@ -759,9 +763,9 @@ void Game::RunTaxRegion(ARegion *reg)
 				int t = u->Taxers(0);
 				t += FortTaxBonus(o, u);
 				double fAmt = ((double) t) *
-					((double) reg->money) / ((double) desired);
+					((double) reg->wealth) / ((double) desired);
 				int amt = (int) fAmt;
-				reg->money -= amt;
+				reg->wealth -= amt;
 				desired -= t;
 				u->SetMoney(u->GetMoney() + amt);
 				u->Event(AString("Collects $") + amt + " in taxes in " +
@@ -828,19 +832,19 @@ void Game::ClearPillagers(ARegion *reg)
 void Game::RunPillageRegion(ARegion *reg)
 {
 	if (TerrainDefs[reg->type].similar_type == R_OCEAN) return;
-	if (reg->money < 1) return;
+	if (reg->wealth < 1) return;
 	if (reg->Wages() < 11) return;
 
 	/* First, count up pillagers */
 	int pillagers = CountPillagers(reg);
 
-	if (pillagers * 2 * Globals->TAX_BASE_INCOME < reg->money) {
+	if (pillagers * 2 * Globals->TAX_BASE_INCOME < reg->wealth) {
 		ClearPillagers(reg);
 		return;
 	}
 
 	AList *facs = reg->PresentFactions();
-	int amt = reg->money * 2;
+	int amt = reg->wealth * 2;
 	forlist(&reg->objects) {
 		Object *o = (Object *) elem;
 		forlist(&o->units) {
@@ -867,7 +871,7 @@ void Game::RunPillageRegion(ARegion *reg)
 	delete facs;
 
 	/* Destroy economy */
-	reg->money = 0;
+	reg->wealth = 0;
 	reg->wages -= 6;
 	if (reg->wages < 6) reg->wages = 6;
 }
@@ -1096,11 +1100,32 @@ void Game::MidProcessTurn()
 	}
 }
 
+/* Process Migration if DYNAMIC_POPULATION
+ * is set. */
+void Game::ProcessMigration()
+{
+	/* process two "phases" of migration
+	 * allowing a region to spread it's migration
+	 * between different destinations. */
+	for(int phase = 1; phase <=2; phase++) {
+		forlist(&regions) {
+			ARegion *r = (ARegion *) elem;
+			Adot();
+			r->FindMigrationDestination(phase);
+		}
+		/* should always be true, but we need a
+		 * different scope for AList handling, anyway */
+		if(Globals->DYNAMIC_POPULATION) {
+			forlist(&regions) {
+				ARegion *r = (ARegion *) elem;
+				r->Migrate();
+			}
+		}
+	}
+}
+
 void Game::PostProcessTurn()
 {
-	// process migration before adjusting economy
-	//if(Globals->DYNAMIC_POPULATION) ProcessMigration();
-	
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
 		r->PostTurn(&regions);

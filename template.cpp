@@ -342,7 +342,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 
 	// ----------------------------------------------------------------
 	GetMapLine(buffer, line, pRegs);
-	sprintf(data, "Tax  %5i", money);
+	sprintf(data, "Tax  %5i", wealth);
 	TrimWrite(f, buffer);
 	line++;
 

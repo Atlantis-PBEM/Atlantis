@@ -2087,14 +2087,6 @@ void Game::BankInterest()
 	}
 }
 
-void Game::ProcessMigration()
-{
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
-		r->Migrate();
-	}
-}
-
 void Game::Equilibrate()
 {
 	Awrite("Initialising the economy");
