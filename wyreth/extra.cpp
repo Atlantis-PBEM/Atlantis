@@ -210,5 +210,6 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableItem(I_GEMS);
 		EnableSkill(S_GEMCUTTING);
 	}
+
 	return;
 }
