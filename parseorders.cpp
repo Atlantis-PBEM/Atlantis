@@ -210,12 +210,6 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 {
 	Faction *fac = 0;
 	Unit *unit = 0;
-	Unit *former = 0;
-
-	int formerOnTurnDelay = 0;
-	Order *formerTurnDelayOrders = 0;
-	Order *formerMonthOrders = 0;
-	int savetype = -1;
 
 	AString *order = f->GetLine();
 	while (order) {
@@ -279,43 +273,35 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				}
 
 				unit = 0;
-				former = 0;
 				break;
 
 			case O_END:
-				if (former) {
-					ParseError( pCheck, 0, fac, "FORM: without END." );
-					formerOnTurnDelay = 0;
-				}
-				if (unit && unit->orderIsTurnDelayed) {
-					ParseError( pCheck, 0, fac,"TURN: without ENDTURN" );
-					unit->orderIsTurnDelayed = 0;
-					unit->orderDelayMonthOrders = NULL;
+				while (unit) {
+					Unit *former = unit->former;
+					if (unit->inTurnBlock)
+						ParseError(pCheck, unit, fac,"TURN: without ENDTURN");
+					if (unit->former)
+						ParseError(pCheck, unit, fac, "FORM: without END.");
+					if(unit && pCheck) unit->ClearOrders();
+					if (pCheck && former) delete unit;
+					unit = former;
 				}
 
-				if(unit && pCheck) unit->ClearOrders();
-				if(former && pCheck) former->ClearOrders();
-
-				former = 0;
 				unit = 0;
 				fac = 0;
 				break;
 
 			case O_UNIT:
 				if (fac) {
-					if (former) {
-						if (pCheck) former->ClearOrders();
-						former = 0;
-						ParseError( pCheck, 0, fac, "FORM: without END." );
-						formerOnTurnDelay = 0;
-					}
-					if (unit && unit->orderIsTurnDelayed) {
-						ParseError( pCheck, 0, fac,"TURN: without ENDTURN" );
-						unit->orderIsTurnDelayed = 0;
-						unit->orderDelayMonthOrders = NULL;
-					}
-					if(unit && pCheck) {
-						unit->ClearOrders();
+					while (unit) {
+						Unit *former = unit->former;
+						if (unit->inTurnBlock)
+							ParseError(pCheck, unit, fac,"TURN: without ENDTURN");
+						if (unit->former)
+							ParseError(pCheck, unit, fac, "FORM: without END.");
+						if (unit && pCheck) unit->ClearOrders();
+						if (pCheck && former) delete unit;
+						unit = former;
 					}
 					unit = 0;
 					delete token;
@@ -348,24 +334,14 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			case O_FORM:
 				if (fac) {
 					if(unit) {
-						if (former) {
-							ParseError(pCheck, 0, fac, "FORM: without END.");
+						if (unit->former && !unit->inTurnBlock) {
+							ParseError(pCheck, unit, fac, "FORM: cannot nest.");
 						}
-						former = unit;
-						if (former->orderIsTurnDelayed) {
-							formerOnTurnDelay = 1;
-							formerTurnDelayOrders =
-								former->orderDelayMonthOrders;
-							unit->orderDelayMonthOrders = 0;
-						}
-						if (former->monthorders) {
-							formerMonthOrders = former->monthorders;
-							savetype = former->monthorders->type;
-						}
-
-						unit = ProcessFormOrder( unit, order, pCheck );
-						if(!pCheck) {
-							if(unit) unit->ClearOrders();
+						else {
+							unit = ProcessFormOrder( unit, order, pCheck );
+							if(!pCheck) {
+								if(unit) unit->ClearOrders();
+							}
 						}
 					} else {
 						ParseError(pCheck, 0, fac,
@@ -375,100 +351,51 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				break;
 			case O_ENDFORM:
 				if (fac) {
-					if (former) {
-						unit = former;
-						if (formerOnTurnDelay) {
-							unit->orderIsTurnDelayed = 1;
-							unit->orderDelayMonthOrders=formerTurnDelayOrders;
-							formerOnTurnDelay = 0;
-							formerTurnDelayOrders = 0;
-						} else {
-							unit->orderIsTurnDelayed = 0;
-							unit->orderDelayMonthOrders = 0;
-						}
+					if (unit && unit->former) {
+						Unit *former = unit->former;
 
-						if(pCheck) {
-							if (formerMonthOrders) {
-								unit->monthorders = &( pCheck->dummyOrder );
-								unit->monthorders->type = savetype;
-								formerMonthOrders = 0;
-							} else
-								unit->monthorders = 0;
-						}
-						former = 0;
+						if (unit->inTurnBlock)
+							ParseError(pCheck, unit, fac,"TURN: without ENDTURN");
+						if (pCheck && former) delete unit;
+						unit = former;
 					} else {
-						ParseError(pCheck, 0, fac, "END: without FORM.");
+						ParseError(pCheck, unit, fac, "END: without FORM.");
 					}
 				}
 				break;
 			case O_TURN:
-				if (unit && unit->orderIsTurnDelayed) {
-					// if a form was started in the turn and not finished
-					if (former) {
-						ParseError( pCheck, 0, fac, "FORM: without END." );
-						unit = former;
-						if (formerOnTurnDelay) {
-							unit->orderIsTurnDelayed = 1;
-							unit->orderDelayMonthOrders=formerTurnDelayOrders;
-							formerOnTurnDelay = 0;
-							formerTurnDelayOrders = 0;
-						} else {
-							unit->orderIsTurnDelayed = 0;
-							unit->orderDelayMonthOrders = 0;
-						}
-
-						if(pCheck) {
-							if (formerMonthOrders) {
-								unit->monthorders = &( pCheck->dummyOrder );
-								unit->monthorders->type = savetype;
-								formerMonthOrders = 0;
-							} else
-								unit->monthorders = 0;
-						}
-						former = 0;
-					}
-					ParseError(pCheck, 0, fac,"TURN: without ENDTURN" );
-					unit->orderIsTurnDelayed = 0;
-					unit->orderDelayMonthOrders = NULL;
+				if (unit && unit->inTurnBlock) {
+					ParseError(pCheck, unit, fac,"TURN: cannot nest" );
 				}
-				// faction is 0 if checking syntax only, not running turn.
-				if (faction != 0)
-					ProcessTurnOrder(unit, f, pCheck, getatsign);
-				else
-					unit->orderIsTurnDelayed = 1;
+				else {
+					// faction is 0 if checking syntax only, not running turn.
+					if (faction != 0) {
+						AString *retval;
+						retval = ProcessTurnOrder(unit, f, pCheck, getatsign);
+						if (retval) {
+							delete order;
+							order = retval;
+							continue;
+						}
+					} else {
+						unit->inTurnBlock = 1;
+						unit->presentMonthOrders = unit->monthorders;
+						unit->monthorders = 0;
+						unit->presentTaxing = unit->taxing;
+						unit->taxing = 0;
+					}
+				}
 				break;
 			case O_ENDTURN:
-				if (unit->orderIsTurnDelayed) {
-					// if a form was started in the turn and not finished
-					if (former) {
-						ParseError( pCheck, 0, fac, "FORM: without END.");
-						unit = former;
-						if (formerOnTurnDelay) {
-							unit->orderIsTurnDelayed = 1;
-							unit->orderDelayMonthOrders=formerTurnDelayOrders;
-							formerOnTurnDelay = 0;
-							formerTurnDelayOrders = 0;
-						} else {
-							unit->orderIsTurnDelayed = 0;
-							unit->orderDelayMonthOrders = 0;
-						}
-
-						if(pCheck) {
-							if (formerMonthOrders) {
-								unit->monthorders = &( pCheck->dummyOrder );
-								unit->monthorders->type = savetype;
-								formerMonthOrders = 0;
-							} else
-								unit->monthorders = 0;
-						}
-						former = 0;
-					}
-					if (unit->orderDelayMonthOrders)
-						unit->orderDelayMonthOrders = NULL;
-
-					unit->orderIsTurnDelayed = 0;
+				if (unit->inTurnBlock) {
+					if (unit->monthorders) delete unit->monthorders;
+					unit->monthorders = unit->presentMonthOrders;
+					unit->presentMonthOrders = 0;
+					unit->taxing = unit->presentTaxing;
+					unit->presentTaxing = 0;
+					unit->inTurnBlock = 0;
 				} else
-					ParseError(pCheck, 0, fac, "ENDTURN: without TURN.");
+					ParseError(pCheck, unit, fac, "ENDTURN: without TURN.");
 				break;
 			default:
 				if (fac) {
@@ -499,15 +426,20 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 		order = f->GetLine();
 	}
 
+	while (unit) {
+		Unit *former = unit->former;
+		if (unit->inTurnBlock)
+			ParseError(pCheck, 0, fac,"TURN: without ENDTURN");
+		if (unit->former)
+			ParseError(pCheck, 0, fac, "FORM: without END.");
+		if(unit && pCheck) unit->ClearOrders();
+		if (pCheck && former) delete unit;
+		unit = former;
+	}
+
 	if(unit && pCheck) {
 		unit->ClearOrders();
 		unit = 0;
-	}
-
-	/* Clean up if we had a form order that was bogus and no endform or #end */
-	if(former && pCheck) {
-		former->ClearOrders();
-		former = 0;
 	}
 }
 
@@ -897,41 +829,20 @@ void Game::ProcessForgetOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 
 void Game::ProcessEntertainOrder(Unit * unit, OrdersCheck *pCheck )
 {
-	if( pCheck ) {
-		if (!(unit->orderIsTurnDelayed)) {
-			if (unit->monthorders ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((unit->taxing == TAX_TAX) ||
-					  (unit->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("ENTERTAIN: Overwriting previous "
-						"month-long order.");
-			}
-			unit->monthorders = &( pCheck->dummyOrder );
-			unit->monthorders->type = O_ENTERTAIN;
-		} else {
-			if (unit->orderDelayMonthOrders ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((unit->taxing == TAX_TAX) ||
-					  (unit->taxing == TAX_PILLAGE)))){
-				pCheck->Error("ENTERTAIN: Overwriting previous DELAYED "
-						"month-long order.");
-			}
-			unit->orderDelayMonthOrders = &( pCheck->dummyOrder );
-			unit->orderDelayMonthOrders->type = O_ENTERTAIN;
-		}
-	} else {
-		if (unit->monthorders ||
-				(Globals->TAX_PILLAGE_MONTH_LONG &&
-				 ((unit->taxing == TAX_TAX) ||
-				  (unit->taxing == TAX_PILLAGE)))) {
-			unit->Error("ENTERTAIN: Overwriting previous month-long order.");
-			delete unit->monthorders;
-		}
-		ProduceOrder * o = new ProduceOrder;
-		o->item = I_SILVER;
-		o->skill = S_ENTERTAINMENT;
-		unit->monthorders = o;
+	if (unit->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((unit->taxing == TAX_TAX) ||
+			  (unit->taxing == TAX_PILLAGE)))) {
+		AString err = "ENTERTAIN: Overwriting previous ";
+		if (unit->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, unit, 0, err);
+		if (unit->monthorders) delete unit->monthorders;
 	}
+	ProduceOrder * o = new ProduceOrder;
+	o->item = I_SILVER;
+	o->skill = S_ENTERTAINMENT;
+	unit->monthorders = o;
 }
 
 void Game::ProcessCombatOrder(Unit * u,AString * o, OrdersCheck *pCheck )
@@ -1412,63 +1323,38 @@ void Game::ProcessRevealOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 
 void Game::ProcessTaxOrder(Unit * u, OrdersCheck *pCheck )
 {
-	if( !pCheck ) {
-		if (u->taxing == TAX_PILLAGE) {
-			u->Error("TAX: The unit is already pillaging.");
-			return;
-		}
-		if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
-			delete u->monthorders;
-			u->monthorders = NULL;
-			u->Error("TAX: Overwriting previous month-long order.");
-		}
-	} else {
-		if (!(u->orderIsTurnDelayed)) {
-			if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
-				pCheck->Error("TAX: Overwriting previous month-long order.");
-				u->monthorders = NULL;
-			}
-		} else {
-			if (Globals->TAX_PILLAGE_MONTH_LONG && u->orderDelayMonthOrders) {
-				pCheck->Error("TAX: Overwriting previous DELAYED "
-						"month-long order.");
-				u->orderDelayMonthOrders = NULL;
-			}
-		}
+	if (u->taxing == TAX_PILLAGE) {
+		u->Error("TAX: The unit is already pillaging.");
+		return;
 	}
-	if (!(u->orderIsTurnDelayed))
-		u->taxing = TAX_TAX;
+	if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
+		delete u->monthorders;
+		u->monthorders = NULL;
+		AString err = "TAX: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, u, 0, err);
+	}
+
+	u->taxing = TAX_TAX;
 }
 
 void Game::ProcessPillageOrder(Unit * u, OrdersCheck *pCheck )
 {
-	if( !pCheck ) {
-		if (u->taxing == TAX_TAX) {
-			u->Error("PILLAGE: The unit is already taxing.");
-			return;
-		}
-		if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
-			delete u->monthorders;
-			u->monthorders = NULL;
-			u->Error("PILLAGE: Overwriting previous month-long order.");
-		}
-	} else {
-		if (!(u->orderIsTurnDelayed)) {
-			if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
-				pCheck->Error("PILLAGE: Overwriting previous month-long "
-						"order.");
-				u->monthorders = NULL;
-			}
-		} else {
-			if (Globals->TAX_PILLAGE_MONTH_LONG && u->orderDelayMonthOrders) {
-				pCheck->Error("PILLAGE: Overwriting previous DELAYED "
-						"month-long order.");
-				u->orderDelayMonthOrders = NULL;
-			}
-		}
+	if (u->taxing == TAX_TAX) {
+		u->Error("PILLAGE: The unit is already taxing.");
+		return;
 	}
-	if (!(u->orderIsTurnDelayed))
-		u->taxing = TAX_PILLAGE;
+	if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
+		delete u->monthorders;
+		u->monthorders = NULL;
+		AString err = "PILLAGE: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, u, 0, err);
+	}
+
+	u->taxing = TAX_PILLAGE;
 }
 
 void Game::ProcessPromoteOrder(Unit * u,AString * o, OrdersCheck *pCheck )
@@ -1517,41 +1403,18 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 	AString * token = o->gettoken();
 	if (token) {
 		if(*token == "help") {
+			UnitId *targ = 0;
 			delete token;
-			if( pCheck ) {
-				if (!(unit->orderIsTurnDelayed)) {
-					if (unit->monthorders ||
-							(Globals->TAX_PILLAGE_MONTH_LONG &&
-							 ((unit->taxing == TAX_TAX) ||
-							  (unit->taxing == TAX_PILLAGE)))) {
-						pCheck->Error("BUILD: Overwriting previous "
-								"month-long order.");
-					}
-					if(Globals->TAX_PILLAGE_MONTH_LONG)
-						unit->taxing = TAX_NONE;
-					unit->monthorders = &( pCheck->dummyOrder );
-					unit->monthorders->type = O_BUILD;
-				} else {
-					if (unit->orderDelayMonthOrders ||
-							(Globals->TAX_PILLAGE_MONTH_LONG &&
-							 ((unit->taxing == TAX_TAX) ||
-							  (unit->taxing == TAX_PILLAGE)))) {
-						pCheck->Error("BUILD: Overwriting previous DELAYED "
-								"month-long order.");
-					}
-					unit->orderDelayMonthOrders = &( pCheck->dummyOrder );
-					unit->orderDelayMonthOrders->type = O_BUILD;
+			if( !pCheck ) {
+				targ = ParseUnit(o);
+				if(!targ) {
+					unit->Error("BUILD: Non-existant unit to help.");
+					return;
 				}
-				return;
-			}
-			UnitId *targ = ParseUnit(o);
-			if(!targ) {
-				unit->Error("BUILD: Non-existant unit to help.");
-				return;
-			}
-			if(targ->unitnum == -1) {
-				unit->Error("BUILD: Non-existant unit to help.");
-				return;
+				if(targ->unitnum == -1) {
+					unit->Error("BUILD: Non-existant unit to help.");
+					return;
+				}
 			}
 			BuildOrder * order = new BuildOrder;
 			order->target = targ;
@@ -1559,8 +1422,11 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 					(Globals->TAX_PILLAGE_MONTH_LONG &&
 					 ((unit->taxing == TAX_TAX) ||
 					  (unit->taxing == TAX_PILLAGE)))) {
-				delete unit->monthorders;
-				unit->Error("BUILD: Overwriting previous month-long order.");
+				if (unit->monthorders) delete unit->monthorders;
+				AString err = "BUILD: Overwriting previous ";
+				if (unit->inTurnBlock) err += "DELAYED ";
+				err += "month-long order.";
+				ParseError(pCheck, unit, 0, err);
 			}
 			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 			unit->monthorders = order;
@@ -1578,31 +1444,7 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 			ParseError( pCheck, unit, 0, "BUILD: Not a valid object name.");
 			return;
 		}
-		if( pCheck ) {
-			if (!(unit->orderIsTurnDelayed)) {
-				if (unit->monthorders ||
-						(Globals->TAX_PILLAGE_MONTH_LONG &&
-						 ((unit->taxing == TAX_TAX) ||
-						  (unit->taxing == TAX_PILLAGE)))) {
-					pCheck->Error("BUILD: Overwriting previous month-long "
-							"order.");
-				}
-				if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
-				unit->monthorders = &( pCheck->dummyOrder );
-				unit->monthorders->type = O_BUILD;
-			} else {
-				if (unit->orderDelayMonthOrders ||
-						(Globals->TAX_PILLAGE_MONTH_LONG &&
-						 ((unit->taxing == TAX_TAX) ||
-						  (unit->taxing == TAX_PILLAGE)))) {
-					pCheck->Error("BUILD: Overwriting previous DELAYED "
-							"month-long order.");
-				}
-				unit->orderDelayMonthOrders = &( pCheck->dummyOrder );
-				unit->orderDelayMonthOrders->type = O_BUILD;
-			}
-			return;
-		} else {
+		if (!pCheck) {
 			ARegion *reg = unit->object->region;
 			if (TerrainDefs[reg->type].similar_type == R_OCEAN){
 				unit->Error("BUILD: Can't build in an ocean.");
@@ -1626,32 +1468,6 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 			unit->MoveUnit( obj );
 			unit->object->region->objects.Add(obj);
 		}
-	} else {
-		if( pCheck ) {
-			if (!(unit->orderIsTurnDelayed)) {
-				if (unit->monthorders ||
-						(Globals->TAX_PILLAGE_MONTH_LONG &&
-						 ((unit->taxing == TAX_TAX) ||
-						  (unit->taxing == TAX_PILLAGE)))) {
-					pCheck->Error("BUILD: Overwriting previous month-long "
-							"order.");
-				}
-				if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
-				unit->monthorders = &( pCheck->dummyOrder );
-				unit->monthorders->type = O_BUILD;
-			} else {
-				if (unit->orderDelayMonthOrders ||
-						(Globals->TAX_PILLAGE_MONTH_LONG &&
-						 ((unit->taxing == TAX_TAX) ||
-						  (unit->taxing == TAX_PILLAGE)))) {
-					pCheck->Error("BUILD: Overwriting previous DELAYED "
-							"month-long order.");
-				}
-				unit->orderDelayMonthOrders = &( pCheck->dummyOrder );
-				unit->orderDelayMonthOrders->type = O_BUILD;
-			}
-			return;
-		}
 	}
 
 	BuildOrder *order = new BuildOrder;
@@ -1659,8 +1475,11 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 	if (unit->monthorders ||
 			(Globals->TAX_PILLAGE_MONTH_LONG &&
 			 ((unit->taxing == TAX_TAX) || (unit->taxing == TAX_PILLAGE)))) {
-		delete unit->monthorders;
-		unit->Error("BUILD: Overwriting previous month-long order.");
+		if (unit->monthorders) delete unit->monthorders;
+		AString err = "BUILD: Overwriting previous ";
+		if (unit->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, unit, 0, err);
 	}
 	if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 	unit->monthorders = order;
@@ -1798,110 +1617,48 @@ void Game::ProcessProduceOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 		return;
 	}
 
-	if( pCheck ) {
-		if (!(u->orderIsTurnDelayed)) {
-			if (u->monthorders ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("PRODUCE: Overwriting previous month-long "
-						"order.");
-			}
-			if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-			u->monthorders = &( pCheck->dummyOrder );
-			u->monthorders->type = O_PRODUCE;
-		} else {
-			if (u->orderDelayMonthOrders ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))){
-				pCheck->Error("PRODUCE: Overwriting previous DELAYED "
-						"month-long order.");
-			}
-			u->orderDelayMonthOrders = &( pCheck->dummyOrder );
-			u->orderDelayMonthOrders->type = O_PRODUCE;
-		}
-	} else {
-		ProduceOrder * p = new ProduceOrder;
-		p->item = it;
-		p->skill = ItemDefs[it].pSkill;
-		if (u->monthorders ||
-			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-			delete u->monthorders;
-			u->Error("PRODUCE: Overwriting previous month-long order.");
-		}
-		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-		u->monthorders = p;
+	ProduceOrder * p = new ProduceOrder;
+	p->item = it;
+	p->skill = ItemDefs[it].pSkill;
+	if (u->monthorders ||
+		(Globals->TAX_PILLAGE_MONTH_LONG &&
+		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+		if (u->monthorders) delete u->monthorders;
+		AString err = "PRODUCE: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, u, 0, err);
 	}
+	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
+	u->monthorders = p;
 }
 
 void Game::ProcessWorkOrder(Unit * u, OrdersCheck *pCheck )
 {
-	if( pCheck ) {
-		if (!(u->orderIsTurnDelayed)) {
-			if (u->monthorders ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("WORK: Overwriting previous month-long order.");
-			}
-			if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-			u->monthorders = &( pCheck->dummyOrder );
-			u->monthorders->type = O_WORK;
-		} else {
-			if (u->orderDelayMonthOrders ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))){
-				pCheck->Error("WORK: Overwriting previous DELAYED "
-						"month-long order.");
-			}
-			u->orderDelayMonthOrders = &( pCheck->dummyOrder );
-			u->orderDelayMonthOrders->type = O_WORK;
-		}
-	} else {
-		ProduceOrder * order = new ProduceOrder;
-		order->skill = -1;
-		order->item = I_SILVER;
-		if (u->monthorders ||
-			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-			delete u->monthorders;
-			u->Error("WORK: Overwriting previous month-long order.");
-		}
-		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-		u->monthorders = order;
+	ProduceOrder * order = new ProduceOrder;
+	order->skill = -1;
+	order->item = I_SILVER;
+	if (u->monthorders ||
+		(Globals->TAX_PILLAGE_MONTH_LONG &&
+		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+		if (u->monthorders) delete u->monthorders;
+		AString err = "WORK: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, u, 0, err);
 	}
+	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
+	u->monthorders = order;
 }
 
 void Game::ProcessTeachOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
 	TeachOrder * order = 0;
 
-	if( pCheck ) {
-		if (!(u->orderIsTurnDelayed)) {
-			if ((u->monthorders && u->monthorders->type != O_TEACH) ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("TEACH: Overwriting previous month-long order.");
-			}
-			if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-			u->monthorders = &( pCheck->dummyOrder );
-			u->monthorders->type = O_TEACH;
-		} else {
-			if ((u->orderDelayMonthOrders &&
-						u->monthorders->type != O_TEACH) ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("TEACH: Overwriting previous DELAYED "
-						"month-long order.");
-			}
-			u->orderDelayMonthOrders = &( pCheck->dummyOrder );
-			u->orderDelayMonthOrders->type = O_TEACH;
-		}
+	if (u->monthorders && u->monthorders->type == O_TEACH) {
+		order = (TeachOrder *) u->monthorders;
 	} else {
-		if (u->monthorders && u->monthorders->type == O_TEACH) {
-			order = (TeachOrder *) u->monthorders;
-		} else {
-			order = new TeachOrder;
-		}
+		order = new TeachOrder;
 	}
 
 	int students = 0;
@@ -1919,16 +1676,17 @@ void Game::ProcessTeachOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 		return;
 	}
 
-	if( !pCheck ) {
-		if ((u->monthorders && u->monthorders->type != O_TEACH) ||
-			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-			delete u->monthorders;
-			u->Error("TEACH: Overwriting previous month-long order.");
-		}
-		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-		u->monthorders = order;
+	if ((u->monthorders && u->monthorders->type != O_TEACH) ||
+		(Globals->TAX_PILLAGE_MONTH_LONG &&
+		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+		if (u->monthorders) delete u->monthorders;
+		AString err = "TEACH: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, u, 0, err);
 	}
+	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
+	u->monthorders = order;
 }
 
 void Game::ProcessStudyOrder(Unit * u,AString * o, OrdersCheck *pCheck )
@@ -1956,39 +1714,20 @@ void Game::ProcessStudyOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 		return;
 	}
 
-	if( pCheck ) {
-		if (!(u->orderIsTurnDelayed)) {
-			if (u->monthorders ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("STUDY: Overwriting previous month-long order.");
-			}
-			if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-			u->monthorders = &( pCheck->dummyOrder );
-			u->monthorders->type = O_STUDY;
-		} else {
-			if (u->orderDelayMonthOrders ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))){
-				pCheck->Error("STUDY: Overwriting previous DELAYED "
-						"month-long order.");
-			}
-			u->orderDelayMonthOrders = &( pCheck->dummyOrder );
-			u->orderDelayMonthOrders->type = O_STUDY;
-		}
-	} else {
-		StudyOrder * order = new StudyOrder;
-		order->skill = sk;
-		order->days = 0;
-		if (u->monthorders ||
-			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-			delete u->monthorders;
-			u->Error("STUDY: Overwriting previous month-long order.");
-		}
-		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-		u->monthorders = order;
+	StudyOrder * order = new StudyOrder;
+	order->skill = sk;
+	order->days = 0;
+	if (u->monthorders ||
+		(Globals->TAX_PILLAGE_MONTH_LONG &&
+		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+		if (u->monthorders) delete u->monthorders;
+		AString err = "STUDY: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, u, 0, err);
 	}
+	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
+	u->monthorders = order;
 }
 
 void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck )
@@ -2100,18 +1839,24 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	return;
 }
 
-void Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
+AString *Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
 		int repeat)
 {
-	int turnOrderProcessing = 1;
+	int turnDepth = 1;
+	int turnLast = 1;
+	int formDepth = 0;
 	TurnOrder *tOrder = new TurnOrder;
 	tOrder->repeating = repeat;
 
 	AString *order, *token;
 
-	while (turnOrderProcessing) {
+	while (turnDepth) {
 		// get the next line
 		order = f->GetLine();
+		if (!order) {
+			// Fake end of commands to invoke appropriate processing
+			order = new AString("#end");
+		}
 		AString	saveorder = *order;
 		token = order->gettoken();
 
@@ -2119,26 +1864,73 @@ void Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
 			int i = Parse1Order(token);
 			switch (i) {
 				case O_TURN:
+					if (turnLast) {
+						ParseError(pCheck, unit, 0, "TURN: cannot nest.");
+						break;
+					}
+					turnDepth++;
+					tOrder->turnOrders.Add(new AString(saveorder));
+					turnLast = 1;
+					break;
+				case O_FORM:
+					if (!turnLast) {
+						ParseError(pCheck, unit, 0, "FORM: cannot nest.");
+						break;
+					}
+					turnLast = 0;
+					formDepth++;
+					tOrder->turnOrders.Add(new AString(saveorder));
+					break;
+				case O_ENDFORM:
+					if (turnLast) {
+						if (!(formDepth + (unit->former != 0))) {
+							ParseError(pCheck, unit, 0, "END: without FORM.");
+							break;
+						} else {
+							ParseError(pCheck, unit, 0, "TURN: without ENDTURN.");
+							if (!--turnDepth) {
+								unit->turnorders.Add(tOrder);
+								return new AString(saveorder);
+							}
+						}
+					}
+					formDepth--;
+					tOrder->turnOrders.Add(new AString(saveorder));
+					turnLast = 1;
+					break;
 				case O_UNIT:
 				case O_END:
-					ParseError( pCheck, unit, 0, "TURN:  No ENDTURN found.");
-					return;
+					if (!turnLast)
+						ParseError( pCheck, unit, 0, "FORM: without END.");
+					while (--turnDepth) {
+						ParseError( pCheck, unit, 0, "TURN: without ENDTURN.");
+						ParseError( pCheck, unit, 0, "FORM: without END.");
+					}
+					ParseError( pCheck, unit, 0, "TURN: without ENDTURN.");
+					unit->turnorders.Add(tOrder);
+					return new AString(saveorder);
 					break;
 				case O_ENDTURN:
-					turnOrderProcessing = 0;
+					if (!turnLast) {
+						ParseError(pCheck, unit, 0, "ENDTURN: without TURN.");
+					} else {
+						if (--turnDepth) 
+							tOrder->turnOrders.Add(new AString(saveorder));
+						turnLast = 0;
+					}
 					break;
 				default:
 					tOrder->turnOrders.Add(new AString(saveorder));
 					break;
 			}
+			delete token;
 		}
+		delete order;
 	}
-	if (!pCheck)
-		unit->turnorders.Add(tOrder);
-	else
-		delete tOrder;
 
-	return;
+	unit->turnorders.Add(tOrder);
+
+	return NULL;
 }
 
 void Game::ProcessExchangeOrder(Unit * unit, AString * o, OrdersCheck *pCheck)
@@ -2754,8 +2546,8 @@ Unit *Game::ProcessFormOrder( Unit *former, AString *o, OrdersCheck *pCheck )
 		return 0;
 	}
 	if( pCheck ) {
-		Unit *retval = &( pCheck->dummyUnit );
-		retval->monthorders = 0;
+		Unit *retval = new Unit;
+		retval->former = former;
 		return retval;
 	} else {
 		if( former->object->region->GetUnitAlias(an, former->faction->num)) {
@@ -2766,6 +2558,7 @@ Unit *Game::ProcessFormOrder( Unit *former, AString *o, OrdersCheck *pCheck )
 		temp->CopyFlags( former );
 		temp->DefaultOrders( former->object );
 		temp->MoveUnit( former->object );
+		temp->former = former;
 		return temp;
 	}
 }
@@ -2786,44 +2579,24 @@ void Game::ProcessAddressOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 void Game::ProcessAdvanceOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
 	MoveOrder *m = 0;
-	if( pCheck ) {
-		if (!(u->orderIsTurnDelayed)) {
-			if ((u->monthorders && u->monthorders->type != O_ADVANCE) ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("ADVANCE: Overwriting previous month-long "
-						"order.");
-			}
-			if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-			u->monthorders = &( pCheck->dummyOrder );
-			u->monthorders->type = O_ADVANCE;
-		} else {
-			if ((u->orderDelayMonthOrders &&
-						u->monthorders->type != O_ADVANCE) ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("ADVANCE: Overwriting previous DELAYED "
-						"month-long order.");
-			}
-			u->orderDelayMonthOrders = &( pCheck->dummyOrder );
-			u->orderDelayMonthOrders->type = O_ADVANCE;
-		}
-	} else {
-		if ((u->monthorders && u->monthorders->type != O_ADVANCE) ||
-			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-			u->Error("ADVANCE: Overwriting previous month-long orders.");
-			delete u->monthorders;
-			u->monthorders = 0;
-		}
-		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-		if (!u->monthorders) {
-			u->monthorders = new MoveOrder;
-			u->monthorders->type = O_ADVANCE;
-		}
-		m = (MoveOrder *) u->monthorders;
-		m->advancing = 1;
+
+	if ((u->monthorders && u->monthorders->type != O_ADVANCE) ||
+		(Globals->TAX_PILLAGE_MONTH_LONG &&
+		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+		AString err = "ADVANCE: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long orders";
+		ParseError(pCheck, u, 0, err);
+		if (u->monthorders) delete u->monthorders;
+		u->monthorders = 0;
 	}
+	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
+	if (!u->monthorders) {
+		u->monthorders = new MoveOrder;
+		u->monthorders->type = O_ADVANCE;
+	}
+	m = (MoveOrder *) u->monthorders;
+	m->advancing = 1;
 
 	for (;;) {
 		AString * t = o->gettoken();
@@ -2846,42 +2619,23 @@ void Game::ProcessAdvanceOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 void Game::ProcessMoveOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
 	MoveOrder *m = 0;
-	if( pCheck ) {
-		if (!(u->orderIsTurnDelayed)) {
-			if ((u->monthorders && u->monthorders->type != O_MOVE) ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("MOVE: Overwriting previous month-long order.");
-			}
-			if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-			u->monthorders = &( pCheck->dummyOrder );
-			u->monthorders->type = O_MOVE;
-		} else {
-			if ((u->orderDelayMonthOrders &&
-						u->monthorders->type != O_MOVE) ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("MOVE: Overwriting previous DELAYED month-long "
-						"order.");
-			}
-			u->orderDelayMonthOrders = &( pCheck->dummyOrder );
-			u->orderDelayMonthOrders->type = O_MOVE;
-		}
-	} else {
-		if ((u->monthorders && u->monthorders->type != O_MOVE) ||
-			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-			u->Error("MOVE: Overwriting previous month-long order.");
-			delete u->monthorders;
-			u->monthorders = 0;
-		}
-		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-		if (!u->monthorders) {
-			u->monthorders = new MoveOrder;
-		}
-		m = (MoveOrder *) u->monthorders;
-		m->advancing = 0;
+
+	if ((u->monthorders && u->monthorders->type != O_MOVE) ||
+		(Globals->TAX_PILLAGE_MONTH_LONG &&
+		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+		AString err = "MOVE: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, u, 0, err);
+		if (u->monthorders) delete u->monthorders;
+		u->monthorders = 0;
 	}
+	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
+	if (!u->monthorders) {
+		u->monthorders = new MoveOrder;
+	}
+	m = (MoveOrder *) u->monthorders;
+	m->advancing = 0;
 
 	for (;;) {
 		AString * t = o->gettoken();
@@ -2904,41 +2658,22 @@ void Game::ProcessMoveOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 void Game::ProcessSailOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
 	SailOrder *m = 0;
-	if( pCheck ) {
-		if (!(u->orderIsTurnDelayed)) {
-			if ((u->monthorders && u->monthorders->type != O_SAIL) ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("SAIL: Overwriting previous month-long order.");
-			}
-			if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-			u->monthorders = &( pCheck->dummyOrder );
-			u->monthorders->type = O_SAIL;
-		} else {
-			if ((u->orderDelayMonthOrders &&
-						u->orderDelayMonthOrders->type != O_SAIL) ||
-					(Globals->TAX_PILLAGE_MONTH_LONG &&
-					 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-				pCheck->Error("SAIL: Overwriting previous DELAYED month-long "
-						"order.");
-			}
-			u->orderDelayMonthOrders = &( pCheck->dummyOrder );
-			u->orderDelayMonthOrders->type = O_SAIL;
-		}
-	} else {
-		if ((u->monthorders && u->monthorders->type != O_SAIL) ||
-			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-			u->Error("SAIL: Overwriting previous month-long order.");
-			delete u->monthorders;
-			u->monthorders = 0;
-		}
-		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-		if (!u->monthorders) {
-			u->monthorders = new SailOrder;
-		}
-		m = (SailOrder *) u->monthorders;
+
+	if ((u->monthorders && u->monthorders->type != O_SAIL) ||
+		(Globals->TAX_PILLAGE_MONTH_LONG &&
+		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+		AString err = "SAIL: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, u, 0, err);
+		if (u->monthorders) delete u->monthorders;
+		u->monthorders = 0;
 	}
+	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
+	if (!u->monthorders) {
+		u->monthorders = new SailOrder;
+	}
+	m = (SailOrder *) u->monthorders;
 
 	for (;;) {
 		AString * t = o->gettoken();

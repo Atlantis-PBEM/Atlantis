@@ -74,7 +74,6 @@ Unit::Unit()
 	type = U_NORMAL;
 	faction = 0;
 	formfaction = 0;
-	ClearOrders();
 	alias = 0;
 	guard = GUARD_NONE;
 	reveal = REVEAL_NONE;
@@ -86,10 +85,19 @@ Unit::Unit()
 	}
 	readyItem = -1;
 	object = 0;
-	orderIsTurnDelayed = 0;
-	orderDelayMonthOrders = NULL;
+	attackorders = NULL;
+	evictorders = NULL;
+	stealorders = NULL;
+	monthorders = NULL;
+	castorders = NULL;
+	teleportorders = NULL;
+	inTurnBlock = 0;
+	presentTaxing = 0;
+	presentMonthOrders = NULL;
+	former = NULL;
 	free = 0;
 	practised = 0;
+	ClearOrders();
 }
 
 Unit::Unit(int seq, Faction * f, int a)
@@ -111,16 +119,25 @@ Unit::Unit(int seq, Faction * f, int a)
 		readyArmor[i] = -1;
 	}
 	readyItem = -1;
-	ClearOrders();
 	object = 0;
-	orderIsTurnDelayed = 0;
-	orderDelayMonthOrders = NULL;
+	attackorders = NULL;
+	evictorders = NULL;
+	stealorders = NULL;
+	monthorders = NULL;
+	castorders = NULL;
+	teleportorders = NULL;
+	inTurnBlock = 0;
+	presentTaxing = 0;
+	presentMonthOrders = NULL;
+	former = NULL;
 	free = 0;
+	ClearOrders();
 }
 
 Unit::~Unit()
 {
 	if (monthorders) delete monthorders;
+	if (presentMonthOrders) delete presentMonthOrders;
 	if (attackorders) delete attackorders;
 	if (stealorders) delete stealorders;
 	if (name) delete name;
@@ -551,16 +568,25 @@ void Unit::ClearOrders()
 	enter = 0;
 	leftShip = 0;
 	destroy = 0;
+	if (attackorders) delete attackorders;
 	attackorders = 0;
+	if (evictorders) delete evictorders;
 	evictorders = 0;
+	if (stealorders) delete stealorders;
 	stealorders = 0;
 	promote = 0;
 	taxing = TAX_NONE;
 	advancefrom = 0;
 	movepoints = 0;
+	if (monthorders) delete monthorders;
 	monthorders = 0;
-	orderDelayMonthOrders = 0;
+	inTurnBlock = 0;
+	presentTaxing = 0;
+	if (presentMonthOrders) delete presentMonthOrders;
+	presentMonthOrders = 0;
+	if (castorders) delete castorders;
 	castorders = 0;
+	if (teleportorders) delete teleportorders;
 	teleportorders = 0;
 }
 

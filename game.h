@@ -360,7 +360,7 @@ private:
     void ProcessOptionOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessPasswordOrder(Unit *, AString *, OrdersCheck *pCheck );
 	void ProcessExchangeOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int repeat);
+	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int);
 
 	void RemoveInactiveFactions();
 

@@ -266,8 +266,10 @@ class Unit : public AListElem
 
 		AList exchangeorders;
 		AList turnorders;
-		int orderIsTurnDelayed;
-		Order *orderDelayMonthOrders;
+		int inTurnBlock;
+		Order *presentMonthOrders;
+		int presentTaxing;
+		Unit *former;
 };
 
 #endif
