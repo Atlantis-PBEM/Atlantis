@@ -69,6 +69,8 @@
    -- Consider having 'conditional orders' specificall 'AT x,y,z'
    -- Add an 'autoclaim' flag
    -- Improve the handling of nospoils
+   -- Clean up spell system.
+   -- Merge Lacandom spells.
 
 TODO for 5.0.0
 ----------------------------------------------
