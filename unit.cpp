@@ -789,7 +789,8 @@ int Unit::GetSharedNum(int item)
 		Object *obj = (Object *) elem;
 		forlist((&obj->units)) {
 			Unit *u = (Unit *) elem;
-			if (u->faction == faction && u->GetFlag(FLAG_SHARING))
+			if ((u->num == num) || 
+			(u->faction == faction && u->GetFlag(FLAG_SHARING)))
 				count += u->items.GetNum(item);
 		}
 	}
