@@ -176,6 +176,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 				// Check to see if sailing THROUGH land!
 				// always allow retracing steps
 				if (Globals->PREVENT_SAIL_THROUGH &&
+						(TerrainDefs[reg->type].similar_type != R_OCEAN) &&
 						(ship->type != O_BALLOON) &&
 						(ship->prevdir != -1) &&
 						(ship->prevdir != reg->GetRealDirComp(i))) {
@@ -190,13 +191,16 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 					}
 					for (int k = d1+1; k < d2; k++) {
 						ARegion *land1 = reg->neighbors[k];
-						int l = k + 3;
-						if (l >= NDIRS) l = l - NDIRS;
-						ARegion *land2 = reg->neighbors[l];
 						if ((!land1) ||
 								(TerrainDefs[land1->type].similar_type !=
 								 R_OCEAN))
 							blocked1 = 1;
+					}
+					int sides = NDIRS - 2 - (d2 - d1 - 1);
+					for (int l = d2+1; l <= d2 + sides; l++) {
+						int dl = l;
+						if (dl >= NDIRS) dl -= NDIRS;
+						ARegion *land2 = reg->neighbors[dl];
 						if ((!land2) ||
 								(TerrainDefs[land2->type].similar_type !=
 								 R_OCEAN))
