@@ -1,12 +1,108 @@
 Recent Ideas/Suggestions:
 
 ** Economy
+   -- allow markets to be switched on or off when disabling/enabling items
+      (so that a GM can correct item choices made at world creation time).
    -- add a selection gamedef to allow for enabling individual item types
       (basic resources, mounts, tools, weapons, armor) for markets.
+   -- finish hex development/wages/growth stuff.
+   -- add a way to create new settlements during the game.
+   -- DEVELOPMENT gamedef to control settlement size at start of the game.
+   -- trade item prices depend on development (allowing more profit to be
+      made the more developed your cities are).
+   -- make trade items produceable.
+   -- option to have trade structures increase the resource by 50% but
+      decrease all others by 33%.
+   -- player economy: give each town a trade allotment. Trade factions can
+      "withdraw" items from local silver up to the trade allotment per turn.
+      This only works if the item can basically be produced in that region
+      (from local resources).
+      Items withdrawn like this get added to next turn's demand! (thus the
+      players make the markets). Silver surplus from these markets is paid
+      directly into a development fund (boosts town development).
+   -- incremental tax returns: x silver with skill, +y with weapon,
+      +z with armor, +a if inside a fort...
+   -- let taxation act as a dampener on economic activity, such as lowering
+      positive effects on development and wages, which is offset by trading
+      non-food items.
 
 ** Order Parser
    -- when parsing unit lists, check for multiple unit entries and disregard
       them.
+      
+** NPCs
+   -- add an arm% to MakeManUnit to allow for less than 100% armed units.
+   -- add a way of adding game-specific npc factions and a turn phase where
+      the npc ai gives orders.
+      
+** Battle
+   -- do that thing with 50% attack modifier on units in fortifications.
+   -- modify chance of attack in free rounds according to tactics (first
+      round) and speed (rout).
+   -- item loss for winners' casualties too.
+   -- item loss in battle due to usage.
+   -- mounts: chance for killing mount for each hit on the rider.
+   -- need to do something about the 10 men in front protection 1000 archers
+      behind situation (such as a 1% chance to hit the rear rank per
+      10x ratio back-to-front).
+   -- change CLOA protection to 97% (was 99%).
+   
+** Spoils
+   -- no mounts as spoils! Consequently change the way the spoil flags
+      work.
+   -- no NORMAL weapons if the unit did't have them.
+   -- better spoils distribution: units who need an item will get it
+      before others do.
+   -- Item spoils only from monster lairs (see below).
+   -- less item recovery in battle for: armies on the move, huge battles.
+   -- chance of weapon destruction if a soldier is killed by a magic
+      attack (fire attacks destroy all wooden weapons etc).
+      
+** Lairs
+   -- can house multiple units, only the first one is visible to the
+      outside world and can interact with it.
+   -- entering a lair (requiring an OBSE leader or so) causes a fight
+      with ALL monsters in the lair. Only these fights give full spoils.
+   
+** Stealth/Observation:
+   -- SEARCH command: a month-long order giving a possible OBSE bonus
+      for seeing non-moving units in the region. 0.1% for +1 bonus per man,
+      0.1% for additional +1 per 10 men and for a third +1 0.1% chance per
+      100 men in the unit.
+   -- Add a chance where a stealth unit loses one point of stealth after
+      performing a theft or assassination.
+      
+** Movement:
+   -- keep a record of unused MP and move direction from turn to turn.
+   -- make terrain MP cost more configurable.
+   -- introduce an option to double all unit's MP and add together MP cost
+      for leaving a hex and entering a hex per move.
+   -- implement "AT x y (z)" commands. The unit would stop when reaching
+      an AT hex and would add the orders bracketed by AT to the template
+      for next turn.
+      
+** Units:
+   -- Unit grouping: implement objects such as "Camp" and "Caravan" that
+      allow all units in them to move together. Camp units also fight
+      together and caravan units also share weight between them.
+   -- Racial leaders.
+   -- XP system. XP's are needed for leader skills (OBSE,TACT,STEA,WCRA,
+      ACRA, and all magic). They are gained through exploration, battle,
+      entering lairs, trading a new trade item in a city, etc.
+      
+** Faction Point System:
+   -- introduce a Faction Efficiency System as suggested on atlantisdev.
+   -- some kind of mana system.
+
+** Spells:
+   -- modify the way banishing works: A BDEM mage would get 1 to [skill
+      level] attacks. Each attack has a certain chance of banishing the
+      demon instantly, as per normal contest spell level vs. magic
+      defense. (as per Ben Lloyd's suggestion).
+   -- change necromancy by creating a raise undead spell that creates
+      undead in the aftermath of a battle.
+   -- do something about illusions (make them impervious to all attacks
+      except melee?).
 
 ---------------------------------------------------------------------------
 Pre-Version 5 TODO:
