@@ -115,7 +115,8 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 			numAttacks = 1;
 		else
 			numAttacks = 0;
-	} else if(ass && (numAttacks > Globals->MAX_ASSASSIN_FREE_ATTACKS)) {
+	} else if(ass && (Globals->MAX_ASSASSIN_FREE_ATTACKS > 0) &&
+			(numAttacks > Globals->MAX_ASSASSIN_FREE_ATTACKS)) {
 		numAttacks = Globals->MAX_ASSASSIN_FREE_ATTACKS;
 	}
 
