@@ -66,6 +66,15 @@ extern char **MonthNames;
 
 extern char **SeasonNames;
 
+extern int *allowedMages;
+extern int allowedMagesSize;
+extern int *allowedApprentices;
+extern int allowedApprenticesSize;
+extern int *allowedTaxes;
+extern int allowedTaxesSize;
+extern int *allowedTrades;
+extern int allowedTradesSize;
+
 class GameDefs {
 public:
     char *RULESET_NAME;

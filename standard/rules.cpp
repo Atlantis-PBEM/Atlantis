@@ -37,6 +37,23 @@
 // If you change any of these, it is incumbent on you, the GM to change
 // the html file containing the rules to correctly reflect the changes!
 //
+
+static int am[] = { 0, 1, 2, 3, 5, 7 };
+int *allowedMages = am;
+int allowedMagesSize = sizeof(am) / sizeof(am[0]);
+
+static int aa[] = { 0, 2, 4, 6, 10, 14 };
+int *allowedApprentices = aa;
+int allowedApprenticesSize = sizeof(aa) / sizeof(aa[0]);
+
+static int aw[] = { 0, 10, 24, 40, 60, 100 };
+int *allowedTaxes = aw;
+int allowedTaxesSize = sizeof(aw) / sizeof(aw[0]);
+
+static int at[] = { 0, 10, 24, 40, 60, 100 };
+int *allowedTrades = at;
+int allowedTradesSize = sizeof(at) / sizeof(at[0]);
+
 static GameDefs g = {
     "Standard Atlantis",     // RULESET_NAME
     MAKE_ATL_VER( 4, 0, 10 ), // RULESET_VERSION

@@ -98,54 +98,43 @@ Faction *Game::CheckVictory()
 
 int Game::AllowedMages( Faction *pFac )
 {
-	switch( pFac->type[ F_MAGIC ]) {
-		case 0: return 0;
-		case 1: return 1;
-		case 2: return 2;
-		case 3: return 3;
-		case 4: return 5;
-		case 5: return 7;
-    }
-    return 0;
+	int points = pFac->type[F_MAGIC];
+
+	if (points < 0) points = 0;
+	if (points > allowedMagesSize - 1) points = allowedMagesSize - 1;
+
+    return allowedMages[points];
 }
 
 int Game::AllowedApprentices( Faction *pFac )
 {
-	switch( pFac->type[ F_MAGIC ]) {
-		case 0: return 0;
-		case 1: return 2;
-		case 2: return 4;
-		case 3: return 6;
-		case 4: return 10;
-		case 5: return 14;
-	}
-	return 0;
+	int points = pFac->type[F_MAGIC];
+
+	if (points < 0) points = 0;
+	if (points > allowedApprenticesSize - 1)
+		points = allowedApprenticesSize - 1;
+
+    return allowedApprentices[points];
 }
 
 int Game::AllowedTaxes( Faction *pFac )
 {
-	switch( pFac->type[ F_WAR ]) {
-		case 0: return 0;
-		case 1: return 10;
-		case 2: return 24;
-		case 3: return 40;
-		case 4: return 60;
-		case 5: return 100;
-	}
-    return 0;
+	int points = pFac->type[F_WAR];
+
+	if (points < 0) points = 0;
+	if (points > allowedTaxesSize - 1) points = allowedTaxesSize - 1;
+
+    return allowedTaxes[points];
 }
 
 int Game::AllowedTrades( Faction *pFac )
 {
-	switch( pFac->type[ F_TRADE ]) {
-		case 0: return 0;
-		case 1: return 10;
-		case 2: return 24;
-		case 3: return 40;
-		case 4: return 60;
-		case 5: return 100;
-	}
-    return 0;
+	int points = pFac->type[F_TRADE];
+
+	if (points < 0) points = 0;
+	if (points > allowedTradesSize - 1) points = allowedTradesSize - 1;
+
+    return allowedTrades[points];
 }
 
 void Game::ModifyTablesPerRuleset(void)

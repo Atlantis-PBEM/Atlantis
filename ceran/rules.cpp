@@ -37,6 +37,23 @@
 // If you change any of these, it is incumbent on you, the GM to change
 // the html file containing the rules to correctly reflect the changes!
 //
+
+static int am[] = { 1, 2, 3, 4, 6, 8, 12 };
+int *allowedMages = am;
+int allowedMagesSize = sizeof(am) / sizeof(am[0]);
+
+static int aa[] = { 1, 3, 5, 7, 11, 15, 20 };
+int *allowedApprentices = aa;
+int allowedApprenticesSize = sizeof(aa) / sizeof(aa[0]);
+
+static int aw[] = { 1, 10, 24, 40, 60, 100 };
+int *allowedTaxes = aw;
+int allowedTaxesSize = sizeof(aw) / sizeof(aw[0]);
+
+static int at[] = { 1, 10, 24, 40, 60, 100 };
+int *allowedTrades = at;
+int allowedTradesSize = sizeof(at) / sizeof(at[0]);
+
 static GameDefs g = {
     "Ceran",                // RULESET_NAME
     MAKE_ATL_VER( 2, 0, 4 ), // RULESET_VERSION

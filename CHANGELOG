@@ -512,3 +512,5 @@ Changes from 4.0.9 -> 4.0.10
       @TURN command would be lost because of a pointer being reused.
    -- Modified TURN/ENDTURN processing to cope with arbitrarily deep
       TURN and FORM nesting, and cleaned up the error handling.
+   -- Moved the correlation between faction points and what they give
+      you from being hardcoded in extra.cpp to an array in rules.cpp.

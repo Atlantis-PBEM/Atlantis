@@ -36,6 +36,23 @@
 //
 // If you change any of these, it is incumbent on you, the GM to change
 // the html file containing the rules to correctly reflect the changes!
+
+static int am[] = { 5 };
+int *allowedMages = am;
+int allowedMagesSize = sizeof(am) / sizeof(am[0]);
+
+static int aa[] = { 10 };
+int *allowedApprentices = aa;
+int allowedApprenticesSize = sizeof(aa) / sizeof(aa[0]);
+
+static int aw[] = { -1 };
+int *allowedTaxes = aw;
+int allowedTaxesSize = sizeof(aw) / sizeof(aw[0]);
+
+static int at[] = { -1 };
+int *allowedTrades = at;
+int allowedTradesSize = sizeof(at) / sizeof(at[0]);
+
 static GameDefs g = {
     "Atlantis Conquest",     // RULESET_NAME
     MAKE_ATL_VER( 1, 0, 5 ), // RULESET_VERSION
