@@ -119,6 +119,7 @@ int SkillCost(int);
 int SkillMax(char *,int); /* skill, race */
 int GetLevelByDays(int);
 int GetDaysByLevel(int);
+int StudyRateAdjustment(int, int); /* days, exp */
 
 class ShowSkill : public AListElem {
 	public:
@@ -139,13 +140,17 @@ class Skill : public AListElem {
 
 		int type;
 		unsigned int days;
+		unsigned int exp;
 };
 
 class SkillList : public AList {
 	public:
 		int GetDays(int); /* Skill */
+		int GetExp(int); /* Skill */
 		void SetDays(int,int); /* Skill, days */
+		void SetExp(int,int); /* Skill, exp */
 		void Combine(SkillList *);
+		int GetStudyRate(int, int); /* Skill, num of men */
 		SkillList * Split(int,int); /* total men, num to split */
 		AString Report(int); /* Number of men */
 		void Readin(Ainfile *);

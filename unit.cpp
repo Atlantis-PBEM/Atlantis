@@ -844,6 +844,7 @@ int Unit::GetSkill(int sk)
 void Unit::SetSkill(int sk, int level)
 {
 	skills.SetDays(sk, GetDaysByLevel(level) * GetMen());
+	skills.SetExp(sk, 0);
 }
 
 int Unit::GetAvailSkill(int sk)
@@ -939,6 +940,8 @@ int Unit::CheckDepend(int lev, SkillDepend &dep)
 
 int Unit::CanStudy(int sk)
 {
+	if(skills.GetStudyRate(sk, GetMen()) < 0) return 0;
+	
 	int curlev = GetRealSkill(sk);
 
 	if(SkillDefs[sk].flags & SkillType::DISABLED) return 0;
@@ -960,7 +963,7 @@ int Unit::Study(int sk, int days)
 	if(Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
 		if (skills.Num()) {
 			s = (Skill *) skills.First();
-			if (s->type != sk) {
+			if ((s->type != sk) && (s->days > 0)) {
 				Error("STUDY: Can know only 1 skill.");
 				return 0;
 			}
@@ -1015,7 +1018,7 @@ int Unit::Practice(int sk)
 	days = skills.GetDays(sk);
 	men = GetMen();
 
-	if (men < 1 || days < 1) return 0;
+	if (men < 1 || ((days < 1) && (!Globals->REQUIRED_EXPERIENCE))) return 0;
 
 	/*
 	 * Let's do this check for max level correctly.. Non-leader units
@@ -1043,7 +1046,28 @@ int Unit::Practice(int sk)
 	}
 
 	if (bonus) {
-		Study(sk, men * bonus);
+		if(!Globals->REQUIRED_EXPERIENCE) {
+			Study(sk, men * bonus);
+		} else {
+			Skill *s;
+			// check if it's a nonleader and this is not it's
+			// only skill
+			if(Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
+				if (skills.Num()) {
+					s = (Skill *) skills.First();
+					if (s->type != sk) {
+						return 0;
+					}
+				}
+			}
+			// don't raise exp above the maximum days for
+			// that unit
+			int max = men * GetDaysByLevel(GetSkillMax(sk));
+			int exp = skills.GetExp(sk);
+			exp += men * bonus;
+			if(exp > max) exp = max;
+			skills.SetExp(sk, exp);
+		}
 		practiced = 1;
 	}
 
@@ -1100,6 +1124,7 @@ void Unit::AdjustSkills()
 					forlist(&skills) {
 						Skill *s = (Skill *) elem;
 						if (s != maxskill) {
+							if((Globals->REQUIRED_EXPERIENCE) && (s->exp > 0)) continue;
 							skills.Remove(s);
 							delete s;
 						}

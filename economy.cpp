@@ -738,6 +738,16 @@ void ARegion::AddTown(int size, AString * name)
 	town->name = name;
 	SetTownType(size);
 	SetupCityMarket();
+	/* remove all lairs */
+	forlist(&objects) {
+		Object *obj = (Object *) elem;
+		if(obj->type == O_DUMMY) continue;
+		if((ObjectDefs[obj->type].monster != -1)
+			&& (!(ObjectDefs[obj->type].flags & ObjectType::CANENTER))) {
+				obj->units.Empty();
+				objects.Remove(obj);
+		}
+	}
 }
 
 // Used at start to set initial town's size

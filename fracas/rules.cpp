@@ -203,6 +203,7 @@ static GameDefs g = {
 	0,	// FULL_INVIS_ON_SELF
 	1,	// MONSTER_BATTLE_REGEN
 	5,	// SKILL_PRACTICE_AMOUNT
+	0, // REQUIRED_EXPERIENCE
 	// Don't enable food in fracas - I've disabled it in the start up :>
 	0,	// UPKEEP_MINIMUM_FOOD
 	-1,	// UPKEEP_MAXIMUM_FOOD

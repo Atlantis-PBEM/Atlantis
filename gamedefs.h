@@ -585,6 +585,12 @@ public:
 
 	// Amount of skill improvement when a skill is used
 	int SKILL_PRACTICE_AMOUNT;
+	
+	// Experience mandatory: use lower rates of study per
+	// this amount of experience less than current days of
+	// study. Zero disables experience system. (50 is a
+	// recommended value for enabling this feature)
+	int REQUIRED_EXPERIENCE;
 
 	// Options on using food for upkeep
 	// Note that all these values are in silver equivalents!

@@ -1574,6 +1574,22 @@ void Game::DoBuy(ARegion *r, Market *m)
 						SkillList *sl = new SkillList;
 						u->AdjustSkills();
 						delete sl;
+						/* Setup specialized skill experience */
+						if(Globals->REQUIRED_EXPERIENCE) {
+							ManType *mt = FindRace(ItemDefs[o->item].abr);
+							int exp = mt->speciallevel - mt->defaultlevel;
+							if(exp > 0) {
+								exp = exp * temp * GetDaysByLevel(1);
+								for(int ms = 0; ms < ((int) sizeof(mt->skills))/((int) sizeof(int)); ms++)
+								{
+									AString sname = mt->skills[ms];
+									int skill = LookupSkill(&sname);
+									if(skill == -1) continue;
+									int curxp = u->skills.GetExp(skill);
+									u->skills.SetExp(skill,exp+curxp);
+								} 
+							}	
+						}
 						/* region economy effects */
 						r->Recruit(temp);
 					}

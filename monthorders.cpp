@@ -1230,8 +1230,11 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		}
 		
 	} // end tactics check
+	
+	// adjust teaching for study rate
+	int taughtdays = ((long int) o->days * u->skills.GetStudyRate(sk, u->GetMen()) / 30);
 
-	int days = 30 * u->GetMen() + o->days;
+	int days = u->skills.GetStudyRate(sk, u->GetMen()) * u->GetMen() + taughtdays;
 
 	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetSkill(sk) >= 2) {
 		if(Globals->LIMITED_MAGES_PER_BUILDING) {
@@ -1261,7 +1264,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		u->SetMoney(u->GetMoney() - cost);
 		AString str("Studies ");
 		str += SkillDefs[sk].name;
-		int taughtdays = o->days/u->GetMen();
+		taughtdays = taughtdays/u->GetMen();
 		if (taughtdays) {
 			str += " and was taught for ";
 			str += taughtdays;

@@ -22,6 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+#include "game.h"
 #include "skills.h"
 #include "items.h"
 #include "gamedata.h"
@@ -166,6 +167,53 @@ int GetDaysByLevel(int level)
 	return days;
 }
 
+/* Returns the adjusted study rate,
+ */
+int StudyRateAdjustment(int days, int exp)
+{
+	int rate = 30;
+	if(!Globals->REQUIRED_EXPERIENCE) return rate;
+	int slope = 62;
+	int inc = Globals->REQUIRED_EXPERIENCE * 10;
+	long int cdays = inc;
+	int prevd = 0;
+	int diff = days - exp;
+	if(diff <= 0) {
+		rate += abs(diff) / 3;
+	} else 	{
+		int level = 0;
+		long int ctr = 0;
+		while((((cdays + ctr) / slope + prevd) <= diff)
+			&& (rate > 0)) {
+			rate -= 1;
+			if(rate <= 5) {
+				prevd += cdays / slope;
+				ctr += cdays;
+				cdays = 0;
+				slope = (slope * 2)/3;
+			}
+			cdays += inc;
+			int clevel = GetLevelByDays(cdays/slope);
+			if((clevel > level)	&& (rate > 5)) {
+				level = clevel;
+				switch(level) {
+					case 1: slope = 80;	
+						prevd += cdays /slope;
+						ctr += cdays;
+						cdays = 0;
+						break;
+					case 2: slope = 125;
+						prevd += cdays / slope;
+						ctr += cdays;
+						cdays = 0;
+						break;
+				}	
+			}
+		}
+	}
+	return rate;
+}
+
 ShowSkill::ShowSkill(int s, int l)
 {
 	skill = s;
@@ -184,6 +232,14 @@ void Skill::Readin(Ainfile *f)
 	token = temp->gettoken();
 	days = token->value();
 	delete token;
+	
+	exp = 0;
+	if(Globals->REQUIRED_EXPERIENCE) {
+		token = temp->gettoken();
+		exp = token->value();
+		delete token;
+	}
+	
 	delete temp;
 }
 
@@ -192,9 +248,18 @@ void Skill::Writeout(Aoutfile *f)
 	AString temp;
 
 	if (type != -1) {
-		temp = AString(SkillDefs[type].abbr) + " " + days;
-	} else
-		temp = AString("NO_SKILL 0");
+		if(Globals->REQUIRED_EXPERIENCE) {
+			temp = AString(SkillDefs[type].abbr) + " " + days + " " + exp;
+		} else {
+			temp = AString(SkillDefs[type].abbr) + " " + days;
+		}
+	} else {
+		if(Globals->REQUIRED_EXPERIENCE) {
+			temp = AString("NO_SKILL 0 0");
+		} else {
+			temp = AString("NO_SKILL 0");
+		}
+	}
 	f->PutStr(temp);
 }
 
@@ -204,6 +269,8 @@ Skill *Skill::Split(int total, int leave)
 	temp->type = type;
 	temp->days = (days * leave) / total;
 	days = days - temp->days;
+	temp->exp = (exp * leave) / total;
+	exp = exp - temp->exp;
 	return temp;
 }
 
@@ -223,7 +290,7 @@ void SkillList::SetDays(int skill, int days)
 	forlist(this) {
 		Skill *s = (Skill *) elem;
 		if (s->type == skill) {
-			if (days == 0) {
+			if ((days == 0) && (s->exp <= 0)) {
 				Remove(s);
 				delete s;
 				return;
@@ -237,6 +304,35 @@ void SkillList::SetDays(int skill, int days)
 	Skill *s = new Skill;
 	s->type = skill;
 	s->days = days;
+	s->exp = 0;
+	Add(s);
+}
+
+int SkillList::GetExp(int skill)
+{
+	forlist(this) {
+		Skill *s = (Skill *) elem;
+		if (s->type == skill) {
+			return s->exp;
+		}
+	}
+	return 0;
+}
+
+void SkillList::SetExp(int skill, int exp)
+{
+	forlist(this) {
+		Skill *s = (Skill *) elem;
+		if (s->type == skill) {
+			s->exp = exp;
+			return;
+		}
+	}
+	if (exp == 0) return;
+	Skill *s = new Skill;
+	s->type = skill;
+	s->days = 0;
+	s->exp = exp;
 	Add(s);
 }
 
@@ -246,7 +342,7 @@ SkillList *SkillList::Split(int total, int leave)
 	forlist (this) {
 		Skill *s = (Skill *) elem;
 		Skill *n = s->Split(total, leave);
-		if (s->days == 0) {
+		if ((s->days == 0) && (s->exp == 0)) {
 			Remove(s);
 			delete s;
 		}
@@ -260,7 +356,40 @@ void SkillList::Combine(SkillList *b)
 	forlist(b) {
 		Skill *s = (Skill *) elem;
 		SetDays(s->type, GetDays(s->type) + s->days);
+		SetExp(s->type, GetExp(s->type) + s->exp);
 	}
+}
+
+/* Returns the rate of study (days/month and man)
+ * for studying a skill
+ */
+int SkillList::GetStudyRate(int skill, int nummen)
+{
+	int days = 0;
+	int exp = 0;
+	if (nummen < 1) return 0;
+	forlist(this) {
+		Skill *s = (Skill *) elem;
+		if (s->type == skill) {
+			days = s->days / nummen;
+			if(Globals->REQUIRED_EXPERIENCE)
+				exp = s->exp / nummen;
+		}
+	}
+	
+	int rate = StudyRateAdjustment(days, exp);
+	
+	/*
+	 * if(nummen == 10) {
+		AString temp = "Studying ";
+		temp += SkillDefs[skill].abbr;
+		temp += " with ";
+		temp += exp + "XP at a rate of ";
+		temp += rate + ".";
+		Awrite(temp);
+	}
+	*/
+	return rate;
 }
 
 AString SkillList::Report(int nummen)
@@ -271,8 +400,11 @@ AString SkillList::Report(int nummen)
 		return temp;
 	}
 	int i = 0;
+	int displayed = 0;
 	forlist (this) {
 		Skill *s = (Skill *) elem;
+		if(s->days == 0) continue;
+		displayed++;
 		if (i) {
 			temp += ", ";
 		} else {
@@ -280,8 +412,13 @@ AString SkillList::Report(int nummen)
 		}
 		temp += SkillStrs(s->type);
 		temp += AString(" ") + GetLevelByDays(s->days/nummen) +
-			AString(" (") + AString(s->days/nummen) + AString(")");
+			AString(" (") + AString(s->days/nummen);
+		if(Globals->REQUIRED_EXPERIENCE) {
+			temp += AString("+") + AString(GetStudyRate(s->type, nummen));
+		}
+		temp += AString(")");
 	}
+	if(!displayed) temp += "none";
 	return temp;
 }
 
@@ -291,7 +428,7 @@ void SkillList::Readin(Ainfile *f)
 	for (int i=0; i<n; i++) {
 		Skill *s = new Skill;
 		s->Readin(f);
-		if (s->days == 0) delete s;
+		if ((s->days == 0) && (s->exp==0)) delete s;
 		else Add(s);
 	}
 }

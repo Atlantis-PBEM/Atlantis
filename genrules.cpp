@@ -58,6 +58,16 @@ AString NumToWord(int n)
 	return AString("error");
 }
 
+int StudyRate(int days, int exp)
+{
+	SkillList *sl = new SkillList;
+	sl->SetDays(1,days);
+	sl->SetExp(1,exp);
+	int rate = sl->GetStudyRate(1, 1);
+	delete sl;
+	return rate;
+}
+
 // LLS - converted HTML tags to lowercase
 int Game::GenRules(const AString &rules, const AString &css,
 		const AString &intro)
@@ -156,10 +166,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(Globals->NEXUS_EXISTS) {
 		temp = "Atlantis Nexus";
 		f.TagText("li", f.Link("#world_nexus", temp));
-	}
-	if(Globals->CONQUEST_GAME) {
-		temp = "The World of Atlantis Conquest";
-		f.TagText("li", f.Link("#world_conquest", temp));
 	}
 	f.Enclose(0, "ul");
 	f.Enclose(0, "li");
@@ -382,6 +388,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 					"Table of Ship Capacities"));
 	if(Globals->RACES_EXIST)
 		f.TagText("li", f.Link("#tableraces", "Table of Races"));
+	if(Globals->REQUIRED_EXPERIENCE)
+		f.TagText("li", f.Link("#studyprogress", "Table of Study Progress"));
 	f.TagText("li", f.Link("#tableiteminfo", "Table of Item Information"));
 	f.TagText("li", f.Link("#tablebuildings", "Table of Buildings"));
 	f.TagText("li", f.Link("#tabletradestructures",
@@ -773,11 +781,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "The Atlantis world is divided for game purposes into "
 		"hexagonal regions.  Each region has a name, and one of the "
 		"following terrain types:  Ocean, Plain, Forest, Mountain, ";
-	if(Globals->CONQUEST_GAME)
-		temp += "or ";
-	temp += "Swamp";
-	if(!Globals->CONQUEST_GAME)
-		temp += ", Jungle, Desert, or Tundra";
+	temp += "Swamp, Jungle, Desert, or Tundra";
 	temp += ". (There may be other types of terrain to be discovered as the "
 		"game progresses.)  Regions can contain units belonging to players; "
 		"they can also contain structures such as buildings";
@@ -1099,17 +1103,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Paragraph(temp);
 	}
-	if(Globals->CONQUEST_GAME) {
-		f.LinkRef("world_conquest");
-		f.TagText("h3", "The World of Atlantis Conquest");
-		temp = "In a game of Atlantis Conquest, each player begins the "
-			"game on a small island of 8 regions, seperated by ocean from "
-			"the rest of the players.  The starting islands are located "
-			"around the perimeter of a larger central island. Sailing from "
-			"the starting islands towards the center of the map should "
-			"lead to the central island within a few regions.";
-		f.Paragraph(temp);
-	}
 
 	f.LinkRef("movement");
 	f.ClassTagText("div", "rule", "");
@@ -1241,13 +1234,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"northwest.  Moving from one region to another normally takes one "
 		"movement point, except that the following terrain types take two "
 		"movement points for riding or walking units to enter:";
-	temp += " Forest, Mountain, ";
-	if(Globals->CONQUEST_GAME)
-		temp += "and ";
-	temp += "Swamp";
-	if(!Globals->CONQUEST_GAME)
-		temp += ", Jungle, and Tundra";
-	temp += ".";
+	temp += " Forest, Mountain, Swamp, Jungle, and Tundra.";
 	if (Globals->WEATHER_EXISTS) {
 		temp += " Also, during certain seasons (depending on the latitude "
 			"of the region), all units (including flying ones) have a "
@@ -1658,15 +1645,211 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("skills_studying");
 	f.TagText("h3", "Studying:");
 	temp = "For a unit to gain level 1 of a skill, they must gain one "
-		"months worth of training in that skill.  To raise this skill level "
-		"to 2, the unit must add an additional two months worth of "
-		"training.  Then, to raise this to skill level 3 requires another "
-		"three months worth of training, and so forth.  A month of "
-		"training is gained when a unit uses the ";
+		"months worth of training in that skill by issuing the ";
+	temp += f.Link("#study", "STUDY") + " order. ";
+	if(Globals->REQUIRED_EXPERIENCE) {
+		temp += "Initially, a unit will gain a full months worth of training "
+			"(30 day equivalents). However, high levels of "
+			"skill also require experience, which is gained by performing "
+			"actions making use of the skill. Any such experience "
+			"is unknown even to a unit's owner, but will allow the unit to study "
+			"at a much faster rate to higher skill levels. A unit continuing study but not "
+			"acquiring experience will find it's study rate reduced as it progresses. ";
+		f.Paragraph(temp);
+		int months2 = 0;
+		int months3 = 0;
+		int months5 = 0;
+		int mlevel = 0;
+		int tries5 = 60;
+		int days = 0;
+		int dneeded = GetDaysByLevel(2);
+		while(days < dneeded) {
+			days += StudyRate(days, 0);
+			months2++;
+			months3++;
+			months5++;
+		}
+		dneeded = GetDaysByLevel(3);
+		int tries = 60;
+		while((days < dneeded) && (tries > 0)) {
+			tries--;
+			days += StudyRate(days, 0);
+			months3++;
+			months5++;
+		}
+		dneeded = GetDaysByLevel(5);
+		int rate = StudyRate(days, 0);
+		while((days < dneeded) && (rate > 0) && (tries5 >0)) {
+			tries5--;
+			rate = StudyRate(days, 0);
+			days += rate;
+			months5++;
+		}		
+		mlevel = GetLevelByDays(days);	
+		temp = "To illustrate this, a unit would have to spend ";
+		temp += NumToWord(months2);
+		temp +=	" months studying to gain level 2 in a skill without any experience. ";
+		if(tries > 0) {
+			temp += "In order to reach level 3 only by studying, a total of ";
+			temp += NumToWord(months3);
+			temp += " months must be spent. ";
+		} else {
+			temp += "Said unit would for all practical purposes be unable to reach "
+				"skill level 3 by studying without experience. ";
+		}
+		temp += "The maximum skill level that is possible through "
+			"continuous study only (i.e. no experience involved) is ";
+		temp += NumToWord(mlevel) + ", ";
+		if(months5 > 36) {
+			temp += "although it is hardly feasible without any experience at all, ";
+		}
+		temp += "taking ";
+		temp += NumToWord(months5) + " months of studying to achieve. "
+			"Note that this assumes that the unit type is allowed to "
+			"achieve this level at all ";
+		temp += f.Link("#skills_limitations", "(see skill limitations)") + ". ";
+		/* Example with 30 experience */
+		months2 = 0;
+		months3 = 0;
+		days = 0;
+		dneeded = GetDaysByLevel(2);
+		while(days < dneeded) {
+			days += StudyRate(days, 30);
+			months2++;
+			months3++;
+		}
+		dneeded = GetDaysByLevel(3);
+		tries = 60;
+		while((days < dneeded) && (tries > 0)) {
+			tries--;
+			days += StudyRate(days, 30);
+			months3++;
+		}
+		temp += "A unit will start with 30 experience in it's race's specialized "
+			"skills. In comparison, units with this amount of experience will reach level 2 in "
+			"just ";
+		temp += NumToWord(months2);
+		temp += " months of study, ";
+		if(tries > 0) {
+			temp += " and in order to reach level 3 only by studying, a total of ";
+			temp += NumToWord(months3);
+			temp += " months must be spent by a unit starting with 30 experience. ";
+		} else {
+			temp += "but even such a unit would be unable to reach skill level 3 merely "
+				"through study, but will have to gain some experience along the way. ";
+		}	
+		temp += "The study progress is shown in the following table:";
+		f.Paragraph(temp);
+		f.LinkRef("studyprogress");
+		f.Enclose(1, "center");
+		f.Enclose(1, "table border=\"1\"");
+		f.Enclose(1, "tr");
+		f.TagText("th", "Unit type");
+		f.TagText("th", "starts with");
+		f.TagText("th", "1 month");
+		f.TagText("th", "2 months");
+		f.TagText("th", "3 months");
+		f.TagText("th", "4 months");
+		f.TagText("th", "5 months");
+		f.TagText("th", "6 months");
+		f.TagText("th", "7 months");
+		f.TagText("th", "8 months");
+		f.TagText("th", "9 months");
+		f.Enclose(0, "tr");
+		f.Enclose(1, "tr");
+		f.TagText("td", "non-specialized");
+		days = 0;
+		int level = 0;
+		int plevel = 0;
+		int next = StudyRate(days, 0);
+		temp = "&nbsp;";
+		temp += level;
+		temp += "&nbsp;<font size='-1'>(";
+		temp += days;
+		temp += "+";
+		temp += next;
+		temp += ")</font>";
+		f.TagText("td", temp);
+		for(int m = 0; m < 9; m++) {
+			days += StudyRate(days, 0);
+			next = StudyRate(days, 0);
+			level = GetLevelByDays(days);
+			temp = "&nbsp;";
+			if(level > plevel) temp += "<b>";
+			temp += level;
+			if(level > plevel) {
+				plevel = level;
+				temp += "</b>";
+			}
+			temp += "&nbsp;<font size='-1'>(";
+			temp += days;
+			temp += "+";
+			temp += next;
+			temp += ")</font>";
+			f.TagText("td", temp);
+		}
+		f.Enclose(0, "tr");
+		f.Enclose(1, "tr");
+		f.TagText("td", "specialized");
+		days = 0;
+		level = 0;
+		plevel = 0;
+		next = StudyRate(days, 30);
+		temp = "&nbsp;";
+		temp += level;
+		temp += "&nbsp;<font size='-1'>(";
+		temp += days;
+		temp += "+";
+		temp += next;
+		temp += ")</font>";
+		f.TagText("td", temp);
+		for(int m = 0; m < 9; m++) {
+			days += StudyRate(days, 30);
+			next = StudyRate(days, 30);
+			level = GetLevelByDays(days);
+			temp = "&nbsp;";
+			if(level > plevel) temp += "<b>";
+			temp += level;
+			if(level > plevel) {
+				plevel = level;
+				temp += "</b>";
+			}
+			temp += "&nbsp;<font size='-1'>(";
+			temp += days;
+			temp += "+";
+			temp += next;
+			temp += ")</font>";
+			f.TagText("td", temp);
+		}
+		f.Enclose(0, "tr");
+		f.Enclose(0, "table");
+		f.Enclose(0, "center");
+		temp = "";
+		temp += "Each skill is listed with it's skill level, followed "
+			"(in parentheses) by first the number of day equivalents "
+			"already achieved, a plus sign, and the number of "
+			"day equivalents expected to be gained with the next "
+			"study order. This last amount will vary with experience "
+			"and with progress in skill training (more training in the "
+			"skill requiring considerably more experience in order to "
+			"continue studying). This information is also listed for each "
+			"unit in the report. As can be seen for the specialized units "
+			"above, surplus experience will garner a considerable bonus to "
+			"the study rate. ";
+		f.Paragraph(temp);
+		temp = "";
+		
+	} else {
+		temp += "To raise this skill level "
+			"to 2, the unit must add an additional two months worth of "
+			"training.  Then, to raise this to skill level 3 requires another "
+			"three months worth of training, and so forth. ";
+	}
+	temp += "A month of training is gained when a unit uses the ";
 	temp += f.Link("#study", "STUDY") + " order.  Note that study months "
 		"do not need to be consecutive; for a unit to go from level 1 to "
 		"level 2, he can study for a month, do something else for a month, "
-		"and then go back and complete his second month of study.";
+		"and then go back and complete the rest of his studies.";
 	if (Globals->SKILL_PRACTICE_AMOUNT > 0) {
 		temp += "  A unit can also increase its level of training by "
 			"using a skill.  This progress is ";
@@ -4744,36 +4927,34 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("SWAMP HEX");
 	f.Enclose(0, "td");
 	f.Enclose(0, "tr");
-	if(!Globals->CONQUEST_GAME) {
-		f.Enclose(1, "tr");
-		f.Enclose(1, "td align=\"left\" nowrap class=\"fixed\"");
-		f.PutStr("@@@@");
-		f.Enclose(0, "td");
-		f.Enclose(1, "td align=\"left\" nowrap");
-		f.PutStr("JUNGLE HEX");
-		f.Enclose(0, "td");
-		f.Enclose(0, "tr");
-		f.Enclose(1, "tr");
-		f.Enclose(1, "td align=\"left\" nowrap class=\"fixed\"");
-		f.PutStr("....");
-		f.Enclose(0, "td");
-		f.Enclose(1, "td align=\"left\" nowrap");
-		temp = "DESERT";
-		if(Globals->UNDERWORLD_LEVELS)
-			temp += "/CAVERN";
-		temp += " HEX";
-		f.PutStr(temp);
-		f.Enclose(0, "td");
-		f.Enclose(0, "tr");
-		f.Enclose(1, "tr");
-		f.Enclose(1, "td align=\"left\" nowrap class=\"fixed\"");
-		f.PutStr(",,,,");
-		f.Enclose(0, "td");
-		f.Enclose(1, "td align=\"left\" nowrap");
-		f.PutStr("TUNDRA HEX");
-		f.Enclose(0, "td");
-		f.Enclose(0, "tr");
-	}
+	f.Enclose(1, "tr");
+	f.Enclose(1, "td align=\"left\" nowrap class=\"fixed\"");
+	f.PutStr("@@@@");
+	f.Enclose(0, "td");
+	f.Enclose(1, "td align=\"left\" nowrap");
+	f.PutStr("JUNGLE HEX");
+	f.Enclose(0, "td");
+	f.Enclose(0, "tr");
+	f.Enclose(1, "tr");
+	f.Enclose(1, "td align=\"left\" nowrap class=\"fixed\"");
+	f.PutStr("....");
+	f.Enclose(0, "td");
+	f.Enclose(1, "td align=\"left\" nowrap");
+	temp = "DESERT";
+	if(Globals->UNDERWORLD_LEVELS)
+		temp += "/CAVERN";
+	temp += " HEX";
+	f.PutStr(temp);
+	f.Enclose(0, "td");
+	f.Enclose(0, "tr");
+	f.Enclose(1, "tr");
+	f.Enclose(1, "td align=\"left\" nowrap class=\"fixed\"");
+	f.PutStr(",,,,");
+	f.Enclose(0, "td");
+	f.Enclose(1, "td align=\"left\" nowrap");
+	f.PutStr("TUNDRA HEX");
+	f.Enclose(0, "td");
+	f.Enclose(0, "tr");
 	if(Globals->NEXUS_EXISTS) {
 		f.Enclose(1, "tr");
 		f.Enclose(1, "td align=\"left\" nowrap class=\"fixed\"");
