@@ -471,7 +471,7 @@ void Game::DrownUnits()
 {
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;
-		if (Terra4inDefs[r->type].similar_type == R_OCEAN) {
+		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 			forlist(&r->objects) {
 				Object * o = (Object *) elem;
 				if(o->type != O_DUMMY) continue;
