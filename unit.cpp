@@ -1830,16 +1830,17 @@ int Unit::GetAttribute(char *attrib)
 			}
 		} else if (ap->mods[index].flags & AttribModItem::ITEM) {
 			val = 0;
-			if (ap->mods[index].flags & AttribModItem::PERMAN) {
-				temp = ap->mods[index].ident;
-				int item = LookupItem(&temp);
-				if (item != -1) {
+			temp = ap->mods[index].ident;
+			int item = LookupItem(&temp);
+			if (item != -1) {
+				if (ap->mods[index].flags & AttribModItem::PERMAN) {
 					int men = GetMen();
 					if (men <= items.GetNum(item))
 						val = ap->mods[index].val;
+				} else {
+					if (items.GetNum(item) > 0)
+						val = ap->mods[index].val;
 				}
-			} else {
-				val = ap->mods[index].val;
 			}
 		} else if (ap->mods[index].flags & AttribModItem::FLAGGED) {
 			temp = ap->mods[index].ident;
@@ -1870,7 +1871,7 @@ int Unit::GetAttribute(char *attrib)
 			base = (monbase < base) ? monbase : base;
 		else
 			base = (monbase > base) ? monbase : base;
-	}
+	}	
 	return base;
 }
 
