@@ -788,17 +788,24 @@ int Unit::GetRealSkill(int sk) {
 void Unit::ForgetSkill(int sk)
 {
     skills.SetDays(sk,0);
-    if (type == U_MAGE)
-    {
-        forlist(&skills) {
-            Skill * s = (Skill *) elem;
-            if( SkillDefs[s->type].flags & SkillType::MAGIC )
-            {
-                return;
-            }
-        }
-        type = U_NORMAL;
+    if (type == U_MAGE) {
+		forlist(&skills) {
+			Skill * s = (Skill *) elem;
+			if( SkillDefs[s->type].flags & SkillType::MAGIC ) {
+				return;
+			}
+		}
+		type = U_NORMAL;
     }
+	if(type == U_APPRENTICE) {
+		forlist(&skills) {
+			Skill * s = (Skill *) elem;
+			if( SkillDefs[s->type].flags & SkillType::APPRENTICE) {
+				return;
+			}
+		}
+		type = U_NORMAL;
+	}
 }
 
 int Unit::CheckDepend(int lev,int dep,int deplev) {

@@ -144,3 +144,7 @@ Changes from 4.0.6 -> 4.0.7
    -- If a region only allows riding but not flying mounts (non currently)
       then a flying mount used in that region will be restricted to the
       maxRiding bonus defined in the MountType structure.
+   -- Fixed bug in ForgetSkill where a unit which was an Apprentice and
+      forgot any skill which made them an apprentice (only MANIPULATION
+      currently) they didn't get unmarked as an apprentice.  (Thanks to
+      Ben Lloyd for pointing that out)
