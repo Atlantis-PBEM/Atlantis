@@ -711,6 +711,7 @@ int Faction::CanSee(ARegion * r,Unit * u)
 					if (temp->GetSkill(S_OBSERVATION)==u->GetSkill(S_STEALTH))
 						retval = 1;
 				}
+				if (temp->GetSkill(S_MIND_READING) > 2) detfac = 1;
 			}
 		}
 	}
