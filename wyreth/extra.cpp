@@ -135,6 +135,7 @@ int Game::AllowedTrades( Faction *pFac )
 
 void Game::ModifyTablesPerRuleset(void)
 {
-	// No changes to make
+	if(!Globals->APPRENTICES_EXIST)
+	   	DisableSkill(S_MANIPULATE);
 	return;
 }

@@ -116,7 +116,6 @@ public:
     int LAIR_MONSTERS_EXIST;
     int WEATHER_EXISTS;
     int OPEN_ENDED;
-	int CONQUEST;
 
     //
     // RANDOM_ECONOMY determines whether the economy for different regions

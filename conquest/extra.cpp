@@ -161,6 +161,8 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableSkill(S_FISHING);
 	DisableSkill(S_FARMING);
 	DisableSkill(S_RANCHING);
+    if(!Globals->APPRENTICES_EXIST)
+		DisableSkill(S_MANIPULATE);
 
 	/* Disable high-end production enhancer buildings */
 	DisableObject(O_RANCH);

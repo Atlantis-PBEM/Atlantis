@@ -284,8 +284,7 @@ int Game::NewGame()
 	if(Globals->LAIR_MONSTERS_EXIST)
 		CreateLMons();
 
-	if(!Globals->CONQUEST && !Globals->OPEN_ENDED &&
-			Globals->LAIR_MONSTERS_EXIST)
+	if( Globals->LAIR_MONSTERS_EXIST)
 		CreateVMons();
 
     return( 1 );
@@ -1988,71 +1987,6 @@ void Game::AdjustCityMon( ARegion *r, Unit *u )
 		}
 		u->items.SetNum(I_SWORD,men);
 	}
-}
-
-int Game::MakeWMon( ARegion *pReg )
-{
-	if (TerrainDefs[pReg->type].wmonfreq == 0) {
-        return 0;
-    }
-
-	int montype = TerrainDefs[ pReg->type ].smallmon;
-	if (getrandom(2))
-		montype = TerrainDefs[ pReg->type ].humanoid;
-	if (TerrainDefs[ pReg->type ].bigmon != -1 && !getrandom(8)) {
-		montype = TerrainDefs[ pReg->type ].bigmon;
-	}
-
-	int mondef = ItemDefs[montype].index;
-
-	Faction *monfac = GetFaction( &factions, 2 );
-
-	Unit *u = GetNewUnit( monfac, 0 );
-	u->MakeWMon( MonDefs[mondef].name, montype,
-			(MonDefs[mondef].number +
-			 getrandom(MonDefs[mondef].number) + 1) / 2);
-	u->MoveUnit( pReg->GetDummy() );
-	return( 1 );
-}
-
-void Game::MakeLMon( Object *pObj )
-{
-
-	if(ObjectDefs[pObj->type].flags & ObjectType::NO_MON_GROWTH)
-		return;
-
-	int montype = ObjectDefs[ pObj->type ].monster;
-
-	if (montype == I_TRENT) {
-		montype = TerrainDefs[ pObj->region->type].bigmon;
-	}
-	if (montype == I_CENTAUR) {
-		montype = TerrainDefs[ pObj->region->type ].humanoid;
-	}
-	int mondef = ItemDefs[montype].index;
-	Faction *monfac = GetFaction( &factions, 2 );
-	Unit *u = GetNewUnit( monfac, 0 );
-	if (montype == I_IMP) {
-		u->MakeWMon( "Demons", I_IMP,
-				getrandom( MonDefs[MONSTER_IMP].number + 1 ));
-		u->items.SetNum( I_DEMON,
-				getrandom( MonDefs[MONSTER_DEMON].number + 1 ));
-		u->items.SetNum( I_BALROG,
-				getrandom( MonDefs[MONSTER_BALROG].number + 1 ));
-	} else if (montype == I_SKELETON) {
-		u->MakeWMon( "Undead", I_SKELETON,
-				getrandom( MonDefs[MONSTER_SKELETON].number + 1 ));
-		u->items.SetNum( I_UNDEAD,
-				getrandom( MonDefs[MONSTER_UNDEAD].number + 1 ));
-		u->items.SetNum( I_LICH,
-				getrandom( MonDefs[MONSTER_LICH].number + 1 ));
-	} else {
-		u->MakeWMon( MonDefs[mondef].name, montype,
-				(MonDefs[mondef].number +
-				 getrandom( MonDefs[mondef].number ) + 1) / 2);
-	}
-
-	u->MoveUnit( pObj );
 }
 
 void Game::DisableSkill(int sk)

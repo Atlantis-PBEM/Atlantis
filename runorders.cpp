@@ -964,8 +964,7 @@ void Game::PostProcessTurn()
     if( Globals->LAIR_MONSTERS_EXIST ) {
         GrowLMons(Globals->LAIR_FREQUENCY);
     }
-	if( !Globals->OPEN_ENDED && !Globals->CONQUEST &&
-			Globals->LAIR_MONSTERS_EXIST ) {
+	if(Globals->LAIR_MONSTERS_EXIST) {
 		GrowVMons();
 	}
 

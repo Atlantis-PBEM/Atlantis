@@ -90,7 +90,6 @@ static GameDefs g = {
     0, // LAIR_MONSTERS_EXIST
     0, // WEATHER_EXISTS
     0, // OPEN_ENDED
-	1, // CONQUEST
 
     0, // RANDOM_ECONOMY
     0, // VARIABLE_ECONOMY

@@ -8,7 +8,7 @@
 
 CFLAGS = -g -I. -I..
 
-RULESET_OBJECTS = extra.o rules.o world.o
+RULESET_OBJECTS = extra.o monsters.o rules.o world.o
 
 ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o faction.o \
   fileio.o game.o gamedata.o gamedefs.o gameio.o items.o main.o market.o \
