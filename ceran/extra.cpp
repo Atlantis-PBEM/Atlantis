@@ -224,19 +224,22 @@ void Game::ModifyTablesPerRuleset(void)
 		DisableSkill(S_GATE_LORE);
 
 	if(Globals->NEXUS_IS_CITY) {
-		ModifyTerrainRaces(R_NEXUS, I_FAIRY, -1, -1, -1, -1, -1, -1);
-		ModifyTerrainItems(R_NEXUS, I_HERBS, 100, 20, I_ROOTSTONE, 100, 10,
-				I_MITHRIL, 100, 10, I_YEW, 100, 10, I_IRONWOOD, 100, 10,
-				-1, 0, 0, -1, 0, 0);
+		ClearTerrainRaces(R_NEXUS);
+		ModifyTerrainRace(R_NEXUS, 0, I_FAIRY);
+
+		ClearTerrainItems(R_NEXUS);
+		ModifyTerrainItems(R_NEXUS, 0, I_HERBS, 100, 20);
+		ModifyTerrainItems(R_NEXUS, 1, I_ROOTSTONE, 100, 10);
+		ModifyTerrainItems(R_NEXUS, 2, I_MITHRIL, 100, 10);
+		ModifyTerrainItems(R_NEXUS, 3, I_YEW, 100, 10);
+		ModifyTerrainItems(R_NEXUS, 4, I_IRONWOOD, 100, 10);
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
-	ModifyTerrainRaces(R_TUNDRA,I_ESKIMO,I_ICEDWARF,I_GNOLL,-1,
-			I_SEAELF,I_VIKING, -1);
-	ModifyTerrainRaces(R_DESERT,I_NOMAD,I_DESERTDWARF,-1, -1,
-			I_BARBARIAN,I_VIKING, -1);
-	ModifyTerrainRaces(R_FOREST,I_WOODELF,I_VIKING,I_HIGHELF,-1,
-			I_SEAELF, I_WOODELF, -1);
+	ModifyTerrainRace(R_TUNDRA, 2, I_GNOLL);
+	ModifyTerrainCoastRace(R_DESERT, 0, I_BARBARIAN);
+	ModifyTerrainRace(R_FOREST, 2, I_HIGHELF);
+	ModifyTerrainCoastRace(R_FOREST, 1, I_WOODELF);
 
 	EnableItem(I_RRAT);
 	EnableItem(I_NOOGLE);

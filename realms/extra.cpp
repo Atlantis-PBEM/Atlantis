@@ -126,10 +126,15 @@ void Game::ModifyTablesPerRuleset(void)
 		DisableSkill(S_GATE_LORE);
 
 	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
-		ModifyTerrainRaces(R_NEXUS, I_HIGHELF, I_VIKING, I_PLAINSMAN,
-				-1, -1, -1, -1);
-		ModifyTerrainItems(R_NEXUS, I_IRON, 100, 10, I_WOOD, 100, 10,
-				I_STONE, 100, 10, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0);
+		ClearTerrainRaces(R_NEXUS);
+		ModifyTerrainRace(R_NEXUS, 0, I_HIGHELF);
+		ModifyTerrainRace(R_NEXUS, 1, I_VIKING);
+		ModifyTerrainRace(R_NEXUS, 2, I_PLAINSMAN);
+		ClearTerrainItems(R_NEXUS);
+		ModifyTerrainItems(R_NEXUS, 0, I_IRON, 100, 10);
+		ModifyTerrainItems(R_NEXUS, 1, I_WOOD, 100, 10);
+		ModifyTerrainItems(R_NEXUS, 2, I_STONE, 100, 10);
+
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 

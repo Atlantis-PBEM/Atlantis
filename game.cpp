@@ -2157,77 +2157,62 @@ void Game::DisableObject(int obj)
 	ObjectDefs[obj].flags |= ObjectType::DISABLED;
 }
 
-void Game::ModifyTerrainRaces(int t, int r1, int r2, int r3, int r4,
-		int cr1, int cr2, int cr3)
+void Game::ClearTerrainItems(int terrain)
 {
-	if(t < 0 || t > (R_NUM -1)) return;
-	if(r1 > NITEMS-1) r1 = -1;
-	if(r2 > NITEMS-1) r2 = -1;
-	if(r3 > NITEMS-1) r3 = -1;
-	if(r4 > NITEMS-1) r4 = -1;
-	if(cr1 > NITEMS-1) cr1 = -1;
-	if(cr2 > NITEMS-1) cr2 = -1;
-	if(cr3 > NITEMS-1) cr3 = -1;
-	TerrainDefs[t].race1 = r1;
-	TerrainDefs[t].race2 = r2;
-	TerrainDefs[t].race3 = r3;
-	TerrainDefs[t].race4 = r4;
-	TerrainDefs[t].coastalrace1 = cr1;
-	TerrainDefs[t].coastalrace2 = cr2;
-	TerrainDefs[t].coastalrace3 = cr3;
+	if(terrain < 0 || terrain > R_NUM-1) return;
+
+	for(unsigned int c = 0;
+			c < sizeof(TerrainDefs[terrain].prods)/sizeof(Product);
+			c++) {
+		TerrainDefs[terrain].prods[c].product = -1;
+		TerrainDefs[terrain].prods[c].chance = 0;
+		TerrainDefs[terrain].prods[c].amount = 0;
+	}
+		
 }
 
-void Game::ModifyTerrainItems(int t, int p1, int c1, int a1,
-		                             int p2, int c2, int a2,
-		                             int p3, int c3, int a3,
-		                             int p4, int c4, int a4,
-		                             int p5, int c5, int a5,
-									 int p6, int c6, int a6,
-									 int p7, int c7, int a7)
+void Game::ClearTerrainRaces(int t)
+{
+	if(t < 0 || t > R_NUM-1) return;
+	unsigned int c;
+	for(c = 0; c < sizeof(TerrainDefs[t].races)/sizeof(int); c++) {
+		TerrainDefs[t].races[c] = -1;
+	}
+	for(c = 0; c < sizeof(TerrainDefs[t].coastal_races)/sizeof(int); c++) {
+		TerrainDefs[t].races[c] = -1;
+	}
+}
+
+void Game::ModifyTerrainRace(int t, int i, int r)
 {
 	if(t < 0 || t > (R_NUM -1)) return;
-	if(p1 > NITEMS-1) p1 = -1;
-	if(p2 > NITEMS-1) p2 = -1;
-	if(p3 > NITEMS-1) p3 = -1;
-	if(p4 > NITEMS-1) p4 = -1;
-	if(p5 > NITEMS-1) p5 = -1;
-	if(p6 > NITEMS-1) p6 = -1;
-	if(p7 > NITEMS-1) p7 = -1;
-	if(c1 < 0 || c1 > 100) c1 = 0;
-	if(c2 < 0 || c2 > 100) c2 = 0;
-	if(c3 < 0 || c3 > 100) c3 = 0;
-	if(c4 < 0 || c4 > 100) c4 = 0;
-	if(c5 < 0 || c5 > 100) c5 = 0;
-	if(c6 < 0 || c6 > 100) c6 = 0;
-	if(c7 < 0 || c7 > 100) c7 = 0;
-	if(a1 < 0) a1 = 0;
-	if(a2 < 0) a2 = 0;
-	if(a3 < 0) a3 = 0;
-	if(a4 < 0) a4 = 0;
-	if(a5 < 0) a5 = 0;
-	if(a6 < 0) a6 = 0;
-	if(a7 < 0) a7 = 0;
-	TerrainDefs[t].prod1 = p1;
-	TerrainDefs[t].chance1 = c1;
-	TerrainDefs[t].amt1 = a1;
-	TerrainDefs[t].prod2 = p2;
-	TerrainDefs[t].chance2 = c2;
-	TerrainDefs[t].amt2 = a2;
-	TerrainDefs[t].prod3 = p3;
-	TerrainDefs[t].chance3 = c3;
-	TerrainDefs[t].amt3 = a3;
-	TerrainDefs[t].prod4 = p4;
-	TerrainDefs[t].chance4 = c4;
-	TerrainDefs[t].amt4 = a4;
-	TerrainDefs[t].prod5 = p5;
-	TerrainDefs[t].chance5 = c5;
-	TerrainDefs[t].amt5 = a5;
-	TerrainDefs[t].prod6 = p6;
-	TerrainDefs[t].chance6 = c6;
-	TerrainDefs[t].amt6 = a6;
-	TerrainDefs[t].prod7 = p7;
-	TerrainDefs[t].chance7 = c7;
-	TerrainDefs[t].amt7 = a7;
+	if(i < 0 || i > (int)(sizeof(TerrainDefs[t].races)/sizeof(int))) return;
+	if(r > NITEMS-1) r = -1;
+	if(r != -1 && !(ItemDefs[r].type & IT_MAN)) r = -1;
+	TerrainDefs[t].races[i] = r;
+}
+
+void Game::ModifyTerrainCoastRace(int t, int i, int r)
+{
+	if(t < 0 || t > (R_NUM -1)) return;
+	if(i < 0 || i > (int)(sizeof(TerrainDefs[t].coastal_races)/sizeof(int)))
+		return;
+	if(r > NITEMS-1) r = -1;
+	if(r != -1 && !(ItemDefs[r].type & IT_MAN)) r = -1;
+	TerrainDefs[t].coastal_races[i] = r;
+}
+
+void Game::ModifyTerrainItems(int terrain, int i, int p, int c, int a)
+{
+	if(terrain < 0 || terrain > (R_NUM -1)) return;
+	if(i < 0 || i > (int)(sizeof(TerrainDefs[terrain].prods)/sizeof(Product)))
+		return;
+	if(p > NITEMS-1) p = -1;
+	if(c < 0 || c > 100) c = 0;
+	if(a < 0) a = 0;
+	TerrainDefs[terrain].prods[i].product = p;
+	TerrainDefs[terrain].prods[i].chance = c;
+	TerrainDefs[terrain].prods[i].amount = a;
 }
 
 void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum)
@@ -2243,22 +2228,20 @@ void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum)
 	TerrainDefs[t].humanoid = hum;
 }
 
-void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4,
-						int l5, int l6)
+void ModifyTerrainLairChance(int t, int chance)
 {
 	if(t < 0 || t > (R_NUM -1)) return;
 	if(chance < 0 || chance > 100) chance = 0;
-	if(l1 > NOBJECTS-1) l1 = -1;
-	if(l2 > NOBJECTS-1) l2 = -1;
-	if(l3 > NOBJECTS-1) l3 = -1;
-	if(l4 > NOBJECTS-1) l4 = -1;
+	// Chance is percent out of 100 that should have some lair
 	TerrainDefs[t].lairChance = chance;
-	TerrainDefs[t].lair1 = l1;
-	TerrainDefs[t].lair2 = l2;
-	TerrainDefs[t].lair3 = l3;
-	TerrainDefs[t].lair4 = l4;
-	TerrainDefs[t].lair5 = l5;
-	TerrainDefs[t].lair6 = l6;
+}
+
+void ModifyTerrainLair(int t, int i, int l)
+{
+	if(t < 0 || t > (R_NUM -1)) return;
+	if(i < 0 || i > (int)(sizeof(TerrainDefs[t].lairs)/sizeof(int))) return;
+	if(l > NOBJECTS-1) l = -1;
+	TerrainDefs[t].lairs[i] = l;
 }
 
 void Game::ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move)

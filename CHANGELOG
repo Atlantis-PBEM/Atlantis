@@ -171,3 +171,7 @@ Changes from 4.0.6 -> 4.0.7
    -- Added Georg Gottschalks underdeep and multi-level underworld and gems.
    -- Removed a whole bunch of unused ifdefs from the code
    -- Added new combat system from Tom Alsen
+   -- Reorganized terrain data structures to make future extension of number
+      of resources, lairs, races easier.
+   -- Changed lair percent to be percent of terrain type which has lair
+      rather than percent chance for each type of lair.

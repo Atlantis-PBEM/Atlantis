@@ -174,32 +174,45 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableObject(O_FARM);
 
 	/* All men are created equal */
-	ModifyTerrainRaces(R_PLAIN,I_MAN,-1,-1,-1,-1, -1, -1);
-	ModifyTerrainRaces(R_FOREST,I_MAN,-1,-1,-1,-1, -1, -1);
-	ModifyTerrainRaces(R_MOUNTAIN,I_MAN,-1,-1,-1,-1, -1, -1);
-	ModifyTerrainRaces(R_SWAMP,I_MAN,-1,-1,-1,-1, -1, -1);
-	ModifyTerrainRaces(R_ISLAND_PLAIN,I_MAN,-1,-1,-1,-1, -1, -1);
-	ModifyTerrainRaces(R_ISLAND_MOUNTAIN,I_MAN,-1,-1,-1,-1, -1, -1);
-	ModifyTerrainRaces(R_ISLAND_SWAMP,I_MAN,-1,-1,-1,-1, -1, -1);
+	ClearTerrainRaces(R_PLAIN);
+	ModifyTerrainRace(R_PLAIN, 0, I_MAN);
+	ClearTerrainRaces(R_FOREST);
+	ModifyTerrainRace(R_FOREST, 0, I_MAN);
+	ClearTerrainRaces(R_MOUNTAIN);
+	ModifyTerrainRace(R_MOUNTAIN, 0, I_MAN);
+	ClearTerrainRaces(R_SWAMP);
+	ModifyTerrainRace(R_SWAMP, 0, I_MAN);
+	ClearTerrainRaces(R_ISLAND_PLAIN);
+	ModifyTerrainRace(R_ISLAND_PLAIN, 0, I_MAN);
+	ClearTerrainRaces(R_ISLAND_MOUNTAIN);
+	ModifyTerrainRace(R_ISLAND_MOUNTAIN, 0, I_MAN);
+	ClearTerrainRaces(R_ISLAND_SWAMP);
+	ModifyTerrainRace(R_ISLAND_SWAMP, 0, I_MAN);
 
 	if(!Globals->GATES_EXIST)
 		DisableSkill(S_GATE_LORE);
 
 	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
-		ModifyTerrainRaces(R_NEXUS, I_MAN, -1, -1, -1, -1, -1, -1);
-		ModifyTerrainItems(R_NEXUS, I_IRON, 100, 10, I_WOOD, 100, 10,
-				I_STONE, 100, 10, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0);
+		ClearTerrainRaces(R_NEXUS);
+		ModifyTerrainRace(R_NEXUS, 0, I_MAN);
+		ClearTerrainItems(R_NEXUS);
+		ModifyTerrainItems(R_NEXUS, 0, I_IRON, 100, 10);
+		ModifyTerrainItems(R_NEXUS, 1, I_WOOD, 100, 10);
+		ModifyTerrainItems(R_NEXUS, 2, I_STONE, 100, 10);
+
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
 	/* Limit the resources on the islands and remove fish */
-	ModifyTerrainItems(R_OCEAN, -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0,
-			-1, 0, 0, -1, 0, 0);
-	ModifyTerrainItems(R_ISLAND_PLAIN, I_HORSE,100,20, -1,0,0, -1,0,0,
-			-1,0,0, -1,0,0, -1, 0, 0, -1, 0, 0);
-	ModifyTerrainItems(R_ISLAND_SWAMP, I_WOOD,100,10, -1,0,0, -1,0,0,
-			-1,0,0, -1,0,0, -1, 0, 0, -1, 0, 0);
-	ModifyTerrainItems(R_ISLAND_MOUNTAIN, I_IRON,100,20, I_STONE,100,10,
-			-1,0,0, -1,0,0, -1,0,0, -1, 0, 0, -1, 0, 0);
+	ClearTerrainItems(R_OCEAN);
+
+	ClearTerrainItems(R_ISLAND_PLAIN);
+	ModifyTerrainItems(R_ISLAND_PLAIN, 0, I_HORSE, 100, 20);
+
+	ClearTerrainItems(R_ISLAND_SWAMP);
+	ModifyTerrainItems(R_ISLAND_PLAIN, 0, I_WOOD, 100, 10);
+
+	ClearTerrainItems(R_ISLAND_MOUNTAIN);
+	ModifyTerrainItems(R_ISLAND_PLAIN, 0, I_IRON, 100, 20);
 	return;
 }

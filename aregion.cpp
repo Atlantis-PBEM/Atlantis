@@ -190,46 +190,27 @@ void ARegion::SetupPop()
         money = 0;
         return;
     }
+	int noncoastalraces = sizeof(typer->races)/sizeof(int);
+	int allraces = noncoastalraces + sizeof(typer->coastal_races)/sizeof(int);
 
     race = -1;
     while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
-        switch (getrandom(IsCoastal() ? 7 : 4)) {
-        case 0:
-            race = typer->race1;
-            break;
-        case 1:
-            race = typer->race2;
-            break;
-        case 2:
-            race = typer->race3;
-            break;
-		case 3:
-			race = typer->race4;
-        case 4:
-            race = typer->coastalrace1;
-            break;
-        case 5:
-            race = typer->coastalrace2;
-            break;
-		case 6:
-			race = typer->coastalrace3;
-			break;
-        }
-    }
+		int n = getrandom(IsCoastal() ? allraces : noncoastalraces);
+		if(n > noncoastalraces-1) {
+			race = typer->coastal_races[n-noncoastalraces-1];
+		} else
+			race = typer->races[n];
+	}
 
-    if( Globals->RANDOM_ECONOMY )
-    {
+    if( Globals->RANDOM_ECONOMY ) {
         population = (pop + getrandom(pop)) / 2;
-    }
-    else
-    {
+    } else {
         population = pop;
     }
 
     basepopulation = population;
 
-	if( Globals->RANDOM_ECONOMY )
-    {
+	if( Globals->RANDOM_ECONOMY ) {
         mw += getrandom(3);
     }
 
@@ -237,10 +218,8 @@ void ARegion::SetupPop()
     wages = mw;
     maxwages = mw;
 
-    if( Globals->TOWNS_EXIST )
-    {
-        if (getrandom(200) < TerrainDefs[type].economy)
-        {
+    if( Globals->TOWNS_EXIST ) {
+        if (getrandom(200) < TerrainDefs[type].economy) {
             AddTown();
         }
     }
@@ -271,8 +250,7 @@ void ARegion::SetupPop()
                             Population()/5, 0, 10000, 0, 2000 );
     markets.Add(m);
 
-    if( Globals->LEADERS_EXIST )
-    {
+    if( Globals->LEADERS_EXIST ) {
 		ratio = ItemDefs[I_LEADERS].baseprice / (float)Globals->BASE_MAN_COST;
         m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
                         Population()/25, 0, 10000, 0, 400 );
@@ -360,16 +338,18 @@ void ARegion::SetupCityMarket()
             } 
             else
             {
-                if (ItemDefs[i].input == -1)
-                {
-                    if (TerrainDefs[type].prod1 == i ||
-                        TerrainDefs[type].prod2 == i ||
-                        TerrainDefs[type].prod3 == i ||
-                        TerrainDefs[type].prod4 == i ||
-                        TerrainDefs[type].prod5 == i ||
-						TerrainDefs[type].prod6 == i ||
-						TerrainDefs[type].prod7 == i)
-                    {
+                if (ItemDefs[i].input == -1) {
+					// Check if the product can be produced in the region
+					int canProduce = 0;
+					for(unsigned int c = 0;
+							c<(sizeof(TerrainDefs[type].prods)/sizeof(Product));
+							c++) {
+						if(i == TerrainDefs[type].prods[c].product) {
+							canProduce = 1;
+							break;
+						}
+					}
+					if(canProduce) {
                         //
                         // This item can be produced in this region, so it
                         // can possibly be bought here.
@@ -655,67 +635,17 @@ void ARegion::SetupProds()
         }
     }
 
-    if (typer->prod1 != -1)
-    {
-		if(!(ItemDefs[typer->prod1].flags & ItemType::DISABLED) && 
-		   ((getrandom(100) < typer->chance1))) {
-            p = new Production(typer->prod1,typer->amt1);
-            products.Add(p);
-        }
-    }
-
-    if (typer->prod2 != -1)
-    {
-		if(!(ItemDefs[typer->prod2].flags & ItemType::DISABLED) && 
-		   ((getrandom(100) < typer->chance2))) {
-            p = new Production(typer->prod2,typer->amt2);
-            products.Add(p);
-        }
-    }
-
-    if (typer->prod3 != -1)
-    {
-		if(!(ItemDefs[typer->prod3].flags & ItemType::DISABLED) && 
-		   ((getrandom(100) < typer->chance3))) {
-            p = new Production(typer->prod3,typer->amt3);
-            products.Add(p);
-        }
-    }
-
-    if (typer->prod4 != -1)
-    {
-		if(!(ItemDefs[typer->prod4].flags & ItemType::DISABLED) && 
-		   ((getrandom(100) < typer->chance4))) {
-            p = new Production(typer->prod4,typer->amt4);
-            products.Add(p);
-        }
-    }
-
-    if (typer->prod5 != -1)
-    {
-		if(!(ItemDefs[typer->prod5].flags & ItemType::DISABLED) && 
-		   ((getrandom(100) < typer->chance5))) {
-            p = new Production(typer->prod5,typer->amt5);
-            products.Add(p);
-        }
-    }
-
-	if(typer->prod6 != -1)
-	{
-		if(!(ItemDefs[typer->prod6].flags & ItemType::DISABLED) && 
-		   ((getrandom(100) < typer->chance6))) {
-            p = new Production(typer->prod6,typer->amt6);
-            products.Add(p);
-        }
-	}
-
-	if(typer->prod7 != -1)
-	{
-		if(!(ItemDefs[typer->prod7].flags & ItemType::DISABLED) && 
-		   ((getrandom(100) < typer->chance7))) {
-            p = new Production(typer->prod7,typer->amt7);
-            products.Add(p);
-        }
+	for(unsigned int c= 0; c < (sizeof(typer->prods)/sizeof(Product)); c++) {
+		int item = typer->prods[c].product;
+		int chance = typer->prods[c].chance;
+		int amt = typer->prods[c].amount;
+		if(item != -1) {
+			if(!(ItemDefs[item].flags & ItemType::DISABLED) &&
+					(getrandom(100) < chance)) {
+				p = new Production(item,amt);
+				products.Add(p);
+			}
+		}
 	}
 }
 
@@ -745,65 +675,41 @@ void ARegion::LairCheck()
     /* No lair if town in region */
     if (town) return;
     
-    int check = getrandom(100);
 
     TerrainType *tt = &TerrainDefs[ type ];
 
-    if( tt->lair1 == -1 ) return;
+	if(!tt->lairChance) return;
 
-	if(!(ObjectDefs[tt->lair1].flags & ObjectType::DISABLED)) {
-		if( check < tt->lairChance ) {
-			MakeLair( tt->lair1 );
-			return;
+    int check = getrandom(100);
+	if(check >= tt->lairChance) return;
+
+	int count = 0;
+	unsigned int c;
+	for(c = 0; c < sizeof(tt->lairs)/sizeof(int); c++) {
+		if(tt->lairs[c] != -1) {
+			if(!(ObjectDefs[tt->lairs[c]].flags & ObjectType::DISABLED)) {
+				count++;
+			}
 		}
-		check -= tt->lairChance;
 	}
+	count = getrandom(count);
 
-    if( tt->lair2 == -1 ) return;
-
-	if(!(ObjectDefs[tt->lair2].flags & ObjectType::DISABLED)) {
-		if( check < tt->lairChance ) {
-			MakeLair( tt->lair2 );
-			return;
-		}
-		check -= tt->lairChance;
-	}
-
-    if( tt->lair3 == -1 ) return;
-
-	if(!(ObjectDefs[tt->lair3].flags & ObjectType::DISABLED)) {
-		if( check < tt->lairChance ) {
-			MakeLair( tt->lair3 );
-			return;
-		}
-		check -= tt->lairChance;
-	}
-
-    if( tt->lair4 == -1 ) return;
-
-	if(!(ObjectDefs[tt->lair4].flags & ObjectType::DISABLED)) {
-		if( check < tt->lairChance ) {
-			MakeLair( tt->lair4 );
-			return;
+	int lair = -1;
+	for(c = 0; c < sizeof(tt->lairs)/sizeof(int); c++) {
+		if(tt->lairs[c] != -1) {
+			if(!(ObjectDefs[tt->lairs[c]].flags & ObjectType::DISABLED)) {
+				if(!count) {
+					lair = tt->lairs[c];
+					break;
+				}
+				count--;
+			}
 		}
 	}
 
-    if( tt->lair5 == -1 ) return;
-
-	if(!(ObjectDefs[tt->lair5].flags & ObjectType::DISABLED)) {
-		if( check < tt->lairChance ) {
-			MakeLair( tt->lair5 );
-			return;
-		}
-	}
-
-    if( tt->lair6 == -1 ) return;
-
-	if(!(ObjectDefs[tt->lair6].flags & ObjectType::DISABLED)) {
-		if( check < tt->lairChance ) {
-			MakeLair( tt->lair6 );
-			return;
-		}
+	if(lair != -1) {
+		MakeLair(lair);
+		return;
 	}
 }
 

@@ -51,6 +51,13 @@ enum {
     W_BLIZZARD
 };
 
+struct Product
+{
+	int product;
+	int chance;
+	int amount;
+};
+
 class TerrainType
 {
 public:
@@ -67,45 +74,19 @@ public:
     int wages;
     int economy;
     int movepoints;
-    int prod1;
-    int chance1;
-    int amt1;
-    int prod2;
-    int chance2;
-    int amt2;
-    int prod3;
-    int chance3;
-    int amt3;
-    int prod4;
-    int chance4;
-    int amt4;
-    int prod5;
-    int chance5;
-    int amt5;
-	int prod6;
-	int chance6;
-	int amt6;
-	int prod7;
-	int chance7;
-	int amt7;
-    int race1;
-    int race2;
-    int race3;
-	int race4;
-	int coastalrace1;
-	int coastalrace2;
-	int coastalrace3;
+	Product prods[7];
+	// Race information
+	// A hex near water will have either one of the normal races or one
+	// of the coastal races in it.   Non-coastal hexes will only have one
+	// of the normal races.
+	int races[4];
+	int coastal_races[3];
     int wmonfreq;
     int smallmon;
     int bigmon;
     int humanoid;
     int lairChance;
-    int lair1;
-    int lair2;
-    int lair3;
-    int lair4;
-	int lair5;
-	int lair6;
+	int lairs[6];
 };
 
 extern TerrainType * TerrainDefs;

@@ -181,17 +181,18 @@ private:
 	void EnableObject(int ob); // Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built
 
-	void ModifyTerrainRaces(int t, int r1, int r2, int r3, int r4,
-			int cr1, int cr2, int cr3);
-	void ModifyTerrainItems(int t, int prod1, int chance1, int amt1,
-			int prod2, int chance2, int amt2,
-			int prod3, int chance3, int amt3,
-			int prod4, int chance4, int amt4,
-			int prod5, int chance5, int amt5,
-			int prod6, int chance6, int amt6,
-			int prod7, int chance7, int amt7);
+	void ClearTerrainRaces(int t);
+	void ModifyTerrainRace(int t, int i, int r);
+	void ModifyTerrainCoastRace(int t, int i, int r);
+
+	void ClearTerrainItems(int t);
+	void ModifyTerrainItems(int t, int i, int p, int c, int a);
+
 	void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum);
-	void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4);
+
+	void ModifyTerrainLairChance(int t, int chance);
+	void ModifyTerrainLair(int t, int i, int lair);
+
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
 
 
