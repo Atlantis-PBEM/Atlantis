@@ -109,34 +109,22 @@ AString Item::Report(int seeillusions)
 }
 
 void Item::Writeout(Aoutfile * f) {
-#ifdef DEBUG_GAME
-  f->PutStr("Item");
-#endif
   f->PutInt(type);
   f->PutInt(num);
 }
 
 void Item::Readin(Ainfile * f) {
-#ifdef DEBUG_GAME
-  delete f->GetStr();
-#endif
   type = f->GetInt();
   num = f->GetInt();
 }
 
 void ItemList::Writeout(Aoutfile * f) {
-#ifdef DEBUG_GAME
-  f->PutStr("Number of Items");
-#endif
   f->PutInt(Num());
   forlist (this)
     ((Item *) elem)->Writeout(f);
 }
 
 void ItemList::Readin(Ainfile * f) {
-#ifdef DEBUG_GAME
-  delete f->GetStr();
-#endif
   int i = f->GetInt();
   for (int j=0; j<i; j++) {
     Item * temp = new Item;

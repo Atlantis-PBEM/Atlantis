@@ -98,17 +98,11 @@ ShowSkill::ShowSkill(int s,int l) {
 }
 
 void Skill::Readin(Ainfile * f) {
-#ifdef DEBUG_GAME
-	delete f->GetStr();
-#endif
 	type = f->GetInt();
 	days = f->GetInt();
 }
 
 void Skill::Writeout(Aoutfile * f) {
-#ifdef DEBUG_GAME
-	f->PutStr("Skill");
-#endif
 	f->PutInt(type);
 	f->PutInt(days);
 }
@@ -166,23 +160,12 @@ SkillList * SkillList::Split(int total,int leave) {
   return ret;
 }
 
-void SkillList::Combine(SkillList * b) {
-  {
-    forlist(b) {
-      Skill * s = (Skill *) elem;
-      SetDays(s->type,GetDays(s->type) + s->days);
-#ifdef NEVER
-      Skill * s2 = 0;
-      forlist(this) {
-	s2 = (Skill *) elem;
-	if (s2->type == s->type) {
-	  s2->days += s->days;
-	  break;
+void SkillList::Combine(SkillList * b)
+{
+	forlist(b) {
+		Skill * s = (Skill *) elem;
+		SetDays(s->type,GetDays(s->type) + s->days);
 	}
-      }
-#endif
-    }
-  }
 }
 
 AString SkillList::Report(int nummen) {
@@ -207,9 +190,6 @@ AString SkillList::Report(int nummen) {
 }
 
 void SkillList::Readin(Ainfile * f) {
-#ifdef DEBUG_GAME
-  delete f->GetStr();
-#endif
   int n = f->GetInt();
   for (int i=0; i<n; i++) {
     Skill * s = new Skill;
@@ -223,9 +203,6 @@ void SkillList::Readin(Ainfile * f) {
 }
 
 void SkillList::Writeout(Aoutfile * f) {
-#ifdef DEBUG_GAME
-  f->PutStr("Number of Skills");
-#endif
   f->PutInt(Num());
   forlist(this) {
     ((Skill *) elem)->Writeout(f);

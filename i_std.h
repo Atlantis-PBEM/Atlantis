@@ -37,12 +37,7 @@ Standard definitions and types, Bob Jenkins
 #  include <stddef.h>
 #  define STDDEF
 # endif
-#ifdef NOTUSED
-typedef  unsigned long long  ub8;
-#define UB8MAXVAL 0xffffffffffffffffLL
-typedef    signed long long  sb8;
-#define SB8MAXVAL 0x7fffffffffffffffLL
-#endif
+
 typedef  unsigned long  int  ub4;   /* unsigned 4-byte quantities */
 #define UB4MAXVAL 0xffffffff
 typedef    signed long  int  sb4;

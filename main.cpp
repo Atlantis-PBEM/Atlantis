@@ -44,44 +44,6 @@ void usage()
 	Awrite("atlantis check <orderfile> <checkfile>");
 }
 
-void CheckOneAbbr(char * abr) {
-  int i;
-  int c = 0;
-  AString temp;
-
-  for (i=0; i<NITEMS; i++) {
-    if (AString(abr) == AString(ItemDefs[i].abr)) {
-      c ++;
-      temp += AString(abr) + " : item  ";
-    }
-  }
-
-  for (i=0; i<NSKILLS; i++) {
-    if (AString(abr) == AString(SkillDefs[i].abbr)) {
-      c ++;
-      temp += AString(abr) + " : skill  ";
-    }
-  }
-
-  if (c>1) {
-    Awrite(temp);
-  }
-}
-
-void CheckAbbrs()
-{
-    Awrite("Checking Abbreviations:");
-    
-    int i;
-    for (i=0; i<NITEMS; i++) {
-        CheckOneAbbr(ItemDefs[i].abr);
-    }
-    
-    for (i=0; i<NSKILLS; i++) {
-        CheckOneAbbr(SkillDefs[i].abbr);
-    }
-}
-
 int main(int argc, char *argv[])
 {
     Game game;
@@ -94,11 +56,6 @@ int main(int argc, char *argv[])
             ATL_VER_STRING( Globals->RULESET_VERSION ));
     Awrite( "" );
 
-
-#ifdef NEVER
-    CheckAbbrs();
-#endif
-    
     if (argc == 1)
     {
         usage();

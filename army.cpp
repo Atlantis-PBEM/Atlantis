@@ -647,25 +647,6 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
                     it = (Item *) u->items.Next( it );
                 }
                 while( it );
-#ifdef NEVER
-                forlist(&u->items) {
-                    Item * it = (Item *) elem;
-                    if (IsSoldier(it->type))
-                    {
-                        for (int i=0; i<it->num; i++)
-                        {
-                            if (ItemDefs[it->type].type & IT_MAN && 
-                                u->GetFlag(FLAG_BEHIND)) {
-                                soldiers[--y] = new Soldier(u,obj,regtype,it->type);
-                            } 
-                            else
-                            {
-                                soldiers[x++] = new Soldier(u,obj,regtype,it->type);
-                            }
-                        }
-                    }
-                }
-#endif
             }
         }
     }

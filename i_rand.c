@@ -143,25 +143,3 @@ word     flag;
    isaac(ctx);            /* fill in the first set of results */
    ctx->randcnt=RANDSIZ;  /* prepare to use the first set of results */
 }
-
-
-#ifdef NEVER
-int main()
-{
-  ub4 i,j;
-  randctx ctx;
-  ctx.randa=ctx.randb=ctx.randc=(ub4)0;
-  for (i=0; i<256; ++i) ctx.randrsl[i]=(ub4)0;
-  randinit(&ctx, TRUE);
-  for (i=0; i<2; ++i)
-  {
-    isaac(&ctx);
-    for (j=0; j<256; ++j)
-    {
-      printf("%.8lx",ctx.randrsl[j]);
-      if ((j&7)==7) printf("\n");
-    }
-  }
-}
-#endif
-

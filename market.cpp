@@ -111,9 +111,6 @@ void Market::PostTurn(int population,int wages)
 }
 
 void Market::Writeout(Aoutfile * f) {
-#ifdef DEBUG_GAME
-  f->PutStr("Market");
-#endif
   f->PutInt(type);
   f->PutInt(item);
   f->PutInt(price);
@@ -126,9 +123,6 @@ void Market::Writeout(Aoutfile * f) {
 }
 
 void Market::Readin(Ainfile * f) {
-#ifdef DEBUG_GAME
-  delete f->GetStr();
-#endif
   type = f->GetInt();
   item = f->GetInt();
   price = f->GetInt();
@@ -138,14 +132,6 @@ void Market::Readin(Ainfile * f) {
   minamt = f->GetInt();
   maxamt = f->GetInt();
   baseprice = f->GetInt();
-/* XXXXX - Take this out!!! */
-#ifdef NEVER
-  if (ItemDefs[item].type & IT_TRADE && amount >= 0) {
-    minamt *= 10;
-    maxamt *= 10;
-    amount *= 10;
-  }
-#endif
 }
 
 AString Market::Report() {
@@ -161,18 +147,12 @@ void MarketList::PostTurn(int population,int wages) {
 }
 
 void MarketList::Writeout(Aoutfile * f) {
-#ifdef DEBUG_GAME
-  f->PutStr("MarketList");
-#endif
   f->PutInt(Num());
   forlist (this)
     ((Market *) elem)->Writeout(f);
 }
 
 void MarketList::Readin(Ainfile * f) {
-#ifdef DEBUG_GAME
-  delete f->GetStr();
-#endif
   int n = f->GetInt();
   for (int i=0; i<n; i++) {
     Market * m = new Market;

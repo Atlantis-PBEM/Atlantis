@@ -122,69 +122,39 @@ void Unit::MakeWMon(char * monname,int mon,int num)
 
 void Unit::Writeout( Aoutfile *s )
 {
-#ifdef DEBUG_GAME
-    s->PutStr("Unit");
-#endif
     s->PutStr(*name);
     if (describe) {
         s->PutStr(*describe);
     } else {
         s->PutStr("none");
     }
-#ifdef DEBUG_GAME
-    s->PutStr("Number");
-#endif
     s->PutInt(num);
     s->PutInt(type);
-#ifdef DEBUG_GAME
-    s->PutStr("Faction Number");
-#endif
     s->PutInt(faction->num);
-#ifdef DEBUG_GAME
-    s->PutStr("Flags: guard, behind");
-#endif
     s->PutInt(guard);
     s->PutInt(reveal);
     s->PutInt(flags);
     items.Writeout(s);
-#ifdef DEBUG_GAME
-    s->PutStr("Skills");
-#endif
     skills.Writeout(s);
     s->PutInt(combat);
 }
 
 void Unit::Readin( Ainfile *s, AList *facs, ATL_VER v )
 {
-#ifdef DEBUG_GAME
-    delete s->GetStr();
-#endif
     name = s->GetStr();
     describe = s->GetStr();
     if (*describe == "none") {
         delete describe;
         describe = 0;
     }
-#ifdef DEBUG_GAME
-    delete s->GetStr();
-#endif
     num = s->GetInt();
     type = s->GetInt();
-#ifdef DEBUG_GAME
-    delete s->GetStr();
-#endif
     int i = s->GetInt();
     faction = GetFaction(facs,i);
-#ifdef DEBUG_GAME
-    delete s->GetStr();
-#endif
     guard = s->GetInt();
     reveal = s->GetInt();
     flags = s->GetInt();
     items.Readin(s);
-#ifdef DEBUG_GAME
-    delete s->GetStr();
-#endif
     skills.Readin(s);
     combat = s->GetInt();
 }

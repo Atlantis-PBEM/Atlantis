@@ -69,9 +69,6 @@ Object::~Object()
 
 void Object::Writeout( Aoutfile *f )
 {
-#ifdef DEBUG_GAME
-    f->PutStr("Object");
-#endif
     f->PutInt(num);
     f->PutInt(type);
     f->PutInt(incomplete);
@@ -83,9 +80,6 @@ void Object::Writeout( Aoutfile *f )
     }
     f->PutInt(inner);
     f->PutInt(runes);
-#ifdef DEBUG_GAME
-    f->PutStr("Num of Units");
-#endif
     f->PutInt(units.Num());
     forlist ((&units))
         ((Unit *) elem)->Writeout( f );
@@ -93,9 +87,6 @@ void Object::Writeout( Aoutfile *f )
 
 void Object::Readin(Ainfile * f,AList * facs,ATL_VER v)
 {
-#ifdef DEBUG_GAME
-    delete f->GetStr();
-#endif
     num = f->GetInt();
     type = f->GetInt();
     incomplete = f->GetInt();
@@ -109,9 +100,6 @@ void Object::Readin(Ainfile * f,AList * facs,ATL_VER v)
     }
     inner = f->GetInt();
     runes = f->GetInt();
-#ifdef DEBUG_GAME
-    delete f->GetStr();
-#endif
     int i = f->GetInt();
     for (int j=0; j<i; j++) {
         Unit * temp = new Unit;

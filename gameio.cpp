@@ -30,15 +30,11 @@
 #include <fstream.h>
 #include <time.h>
 
-#define ISAAC_RAND
-
-#ifdef ISAAC_RAND
 extern "C" {
 #include "i_rand.h"
 }
 
 static randctx isaac_ctx;
-#endif
 
 #define ENDLINE '\n'
 char buf[256];
@@ -64,18 +60,13 @@ void doneIO()
 int getrandom(int range)
 {
     if (!range) return 0;
-#ifdef ISAAC_RAND
     unsigned long i = isaac_rand( &isaac_ctx );
-#else
-    long i = (long) rand();
-#endif
     i = i % range;
     return (int) i;
 }
 
 void seedrandom(int num)
 {
-#ifdef ISAAC_RAND
     ub4 i;
     isaac_ctx.randa = isaac_ctx.randb = isaac_ctx.randc = (ub4)0;
     for (i=0; i<256; ++i)
@@ -83,9 +74,6 @@ void seedrandom(int num)
         isaac_ctx.randrsl[i]=(ub4)num+i;
     }
     randinit( &isaac_ctx, TRUE );
-#else
-    srand(num);
-#endif
 }
 
 void seedrandomrandom()

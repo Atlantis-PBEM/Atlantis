@@ -340,8 +340,7 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
         }
         return;
     }
-// LLS
-//#ifdef xxxxx
+	// LLS
     //
     // New rule; if a target has an amulet of true seeing they can't be
     // assassinated by someone with a ring of invisibility
@@ -349,11 +348,10 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
     if (u->items.GetNum( I_RINGOFI ) &&
         tar->items.GetNum( I_AMULETOFTS ) >= tar->GetMen()) {
         tar->Event( "Assassination prevented by amulet of true seeing." );
-        u->Event( AString( "Attempts to assassinate " ) + *(tar->name) + ", but "
-                  "is prevented by amulet of true seeing." );
+        u->Event( AString( "Attempts to assassinate " ) + *(tar->name) +
+				", but is prevented by amulet of true seeing." );
         return;
     }
-//#endif
 
     RunBattle(r,u,tar,1);
 }
@@ -416,7 +414,6 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
         return;
     }
 
-//#ifdef xxxxx
     //
     // New rule; if a target has an amulet of true seeing they can't be
     // stolen from by someone with a ring of invisibility
@@ -428,7 +425,6 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
                   "is prevented by amulet of true seeing." );
         return;
     }
-//#endif
 
     int amt = 1;
     if (so->item == I_SILVER) {
