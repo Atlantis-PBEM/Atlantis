@@ -727,43 +727,44 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
     }
 }
 
-void Game::RunMoveOrders() {
-  for (int phase = 0; phase < Globals->MAX_SPEED; phase++) {
-    {
-      forlist((&regions)) {
-	ARegion * region = (ARegion *) elem;
-	forlist((&region->objects)) {
-	  Object * obj = (Object *) elem;
-	  forlist(&obj->units) {
-	    Unit * unit = (Unit *) elem;
-	    Object *tempobj = obj;
-	    DoMoveEnter(unit,region,&tempobj);
-	  }
-	}
-      }
-    }
+void Game::RunMoveOrders()
+{
+	for (int phase = 0; phase < Globals->MAX_SPEED; phase++) {
+		{
+			forlist((&regions)) {
+				ARegion * region = (ARegion *) elem;
+				forlist((&region->objects)) {
+					Object * obj = (Object *) elem;
+					forlist(&obj->units) {
+						Unit * unit = (Unit *) elem;
+						Object *tempobj = obj;
+						DoMoveEnter(unit,region,&tempobj);
+					}
+				}
+			}
+		}
 
-    AList * locs = new AList;
-    forlist((&regions)) {
-      ARegion * region = (ARegion *) elem;
-      forlist((&region->objects)) {
-	Object * obj = (Object *) elem;
-	forlist(&obj->units) {
-	  Unit * unit = (Unit *) elem;
-	  if (phase == unit->movepoints && unit->monthorders && 
-	      unit->monthorders->type == O_MOVE && !unit->nomove) {
-	    locs->Add(DoAMoveOrder(unit,region,obj));
-	  }
-	}
-      }
+		AList * locs = new AList;
+		forlist((&regions)) {
+			ARegion * region = (ARegion *) elem;
+			forlist((&region->objects)) {
+				Object * obj = (Object *) elem;
+				forlist(&obj->units) {
+					Unit * unit = (Unit *) elem;
+					if (phase == unit->movepoints && unit->monthorders &&
+						unit->monthorders->type == O_MOVE && !unit->nomove) {
+						locs->Add(DoAMoveOrder(unit,region,obj));
+					}
+				}
+			}
 /*
       DoAdvanceAttacks(locs);
       locs->DeleteAll();
 */
-    }
-    DoAdvanceAttacks(locs);
-    locs->DeleteAll();
-  }
+		}
+		DoAdvanceAttacks(locs);
+		locs->DeleteAll();
+	}
 }
 
 void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)

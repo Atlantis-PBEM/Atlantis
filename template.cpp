@@ -31,6 +31,7 @@
 #include "game.h"
 #include "gamedata.h"
 #include <stdio.h>
+#include <string.h>
 
 #define LINE_WIDTH         70
 #define MAP_WIDTH          23

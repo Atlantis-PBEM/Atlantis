@@ -1020,21 +1020,21 @@ void Game::DoAutoAttacksRegion(ARegion * r)
 }
 
 void Game::DoAdvanceAttacks(AList * locs) {
-  forlist(locs) {
-    Location * l = (Location *) elem;
-    Unit * u = l->unit;
-    ARegion * r = l->region;
-    if (u->IsAlive() && u->canattack) {
-      DoAutoAttack(r,u);
-    }
-    if (u->IsAlive() && u->canattack && u->guard == GUARD_ADVANCE) {
-      DoAdvanceAttack(r,u);
-      u->guard = GUARD_NONE;
-    }
-    if (u->IsAlive()) {
-      DoAutoAttackOn(r,u);
-    }
-  }
+	forlist(locs) {
+		Location * l = (Location *) elem;
+		Unit * u = l->unit;
+		ARegion * r = l->region;
+		if (u->IsAlive() && u->canattack) {
+			DoAutoAttack(r,u);
+		}
+		if (u->IsAlive() && u->canattack && u->guard == GUARD_ADVANCE) {
+			DoAdvanceAttack(r,u);
+			u->guard = GUARD_NONE;
+		}
+		if (u->IsAlive()) {
+			DoAutoAttackOn(r,u);
+		}
+	}
 }
 
 void Game::DoAutoAttackOn(ARegion * r,Unit * t) {
@@ -1053,11 +1053,11 @@ void Game::DoAutoAttackOn(ARegion * r,Unit * t) {
 }
 
 void Game::DoAdvanceAttack(ARegion * r,Unit * u) {
-  Unit * t = r->Forbidden(u);
-  while (t && u->IsAlive() && u->canattack) {
-    AttemptAttack(r,u,t,1,1);
-    t = r->Forbidden(u);
-  }
+	Unit * t = r->Forbidden(u);
+	while (t && u->IsAlive() && u->canattack) {
+		AttemptAttack(r,u,t,1,1);
+		t = r->Forbidden(u);
+	}
 }
 
 void Game::DoAutoAttack(ARegion * r,Unit * u) {

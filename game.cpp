@@ -1665,6 +1665,7 @@ int Game::CountApprentices(Faction *pFac)
 			}
 		}
 	}
+	return i;
 }
 
 int Game::UpgradeMajorVersion(int savedVersion)
