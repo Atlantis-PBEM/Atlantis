@@ -420,7 +420,7 @@ void Game::GetAFacs(ARegion *r, Unit *att, Unit *tar, AList &dfacs,
 		Object * obj = (Object *) elem;
 		forlist((&obj->units)) {
 			Unit * u = (Unit *) elem;
-			if (u->IsAlive() && u->canattack) {
+			if (u->canattack && u->IsAlive()) {
 				int add = 0;
 				if ((u->faction == att->faction ||
 							u->GetAttitude(r,tar) == A_HOSTILE) &&
@@ -531,7 +531,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 #define ADD_ATTACK 1
 #define ADD_DEFENSE 2
 				/* First, can the unit be involved in the battle at all? */
-				if (u->IsAlive() && (i==-1 || u->GetFlag(FLAG_HOLDING) == 0)) {
+				if ((i==-1 || u->GetFlag(FLAG_HOLDING) == 0) && u->IsAlive()) {
 					if (GetFaction2(&afacs,u->faction->num)) {
 						/*
 						 * The unit is on the attacking side, check if the

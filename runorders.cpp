@@ -22,12 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date        Person          Comment
-// ----        ------          -------
-// 2001/Feb/18 Joseph Traub    Added apprentice support from Lacandon Conquest
-// 2001/Feb/21 Joseph Traub    Added FACLIM_UNLIMITED
-//
+
 #include "game.h"
 #include "gamedata.h"
 
@@ -99,6 +94,8 @@ void Game::RunOrders()
 	Awrite("Running Month-long Orders...");
 	RunMonthOrders();
 	RunTeleportOrders();
+	Awrite("Running Transport Orders...");
+	RunTransportOrders();
 	Awrite("Assessing Maintenance costs...");
 	AssessMaintenance();
 	Awrite("Post-Turn Processing...");
@@ -111,11 +108,11 @@ void Game::RunOrders()
 void Game::ClearCastEffects()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+			Object *o = (Object *) elem;
 			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				u->SetFlag(FLAG_INVIS,0);
 			}
 		}
@@ -125,13 +122,12 @@ void Game::ClearCastEffects()
 void Game::RunCastOrders()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+			Object *o = (Object *) elem;
 			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
-				if (u->castorders)
-				{
+				Unit *u = (Unit *) elem;
+				if (u->castorders) {
 					RunACastOrder(r,o,u);
 					delete u->castorders;
 					u->castorders = 0;
@@ -141,38 +137,35 @@ void Game::RunCastOrders()
   }
 }
 
-int Game::CountMages( Faction *pFac )
+int Game::CountMages(Faction *pFac)
 {
 	int i = 0;
-	forlist( &regions ) {
-		ARegion * r = (ARegion *) elem;
-		forlist( &r->objects ) {
-			Object * o = (Object *) elem;
+	forlist(&regions) {
+		ARegion *r = (ARegion *) elem;
+		forlist(&r->objects) {
+			Object *o = (Object *) elem;
 			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->faction == pFac && u->type == U_MAGE) i++;
 			}
 		}
 	}
-	return( i );
+	return(i);
 }
 
-int Game::TaxCheck( ARegion *pReg, Faction *pFac )
+int Game::TaxCheck(ARegion *pReg, Faction *pFac)
 {
-	if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES )
-	{
-		if( AllowedTaxes( pFac ) == -1 )
-		{
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if(AllowedTaxes(pFac) == -1) {
 			//
 			// No limit.
 			//
-			return( 1 );
+			return(1);
 		}
 
-		forlist( &( pFac->war_regions )) {
+		forlist(&(pFac->war_regions)) {
 			ARegion *x = ((ARegionPtr *) elem)->ptr;
-			if( x == pReg )
-			{
+			if(x == pReg) {
 				//
 				// This faction already performed a tax action in this
 				// region.
@@ -180,15 +173,12 @@ int Game::TaxCheck( ARegion *pReg, Faction *pFac )
 				return 1;
 			}
 		}
-		if( pFac->war_regions.Num() >= AllowedTaxes( pFac ))
-		{
+		if(pFac->war_regions.Num() >= AllowedTaxes(pFac)) {
 			//
 			// Can't tax here.
 			//
 			return 0;
-		}
-		else
-		{
+		} else {
 			//
 			// Add this region to the faction's tax list.
 			//
@@ -197,32 +187,27 @@ int Game::TaxCheck( ARegion *pReg, Faction *pFac )
 			pFac->war_regions.Add(y);
 			return 1;
 		}
-	}
-	else
-	{
+	} else {
 		//
 		// No limit on taxing regions in this game.
 		//
-		return( 1 );
+		return(1);
 	}
 }
 
-int Game::TradeCheck( ARegion *pReg, Faction *pFac )
+int Game::TradeCheck(ARegion *pReg, Faction *pFac)
 {
-	if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES )
-	{
-		if( AllowedTrades( pFac ) == -1 )
-		{
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if(AllowedTrades(pFac) == -1) {
 			//
 			// No limit on trading on this faction.
 			//
-			return( 1 );
+			return(1);
 		}
 
-		forlist( &( pFac->trade_regions )) {
-			ARegion * x = ((ARegionPtr *) elem)->ptr;
-			if (x == pReg )
-			{
+		forlist(&(pFac->trade_regions)) {
+			ARegion *x = ((ARegionPtr *) elem)->ptr;
+			if (x == pReg) {
 				//
 				// This faction has already performed a trade action in this
 				// region.
@@ -230,41 +215,36 @@ int Game::TradeCheck( ARegion *pReg, Faction *pFac )
 				return 1;
 			}
 		}
-		if ( pFac->trade_regions.Num() >= AllowedTrades( pFac ))
-		{
+		if (pFac->trade_regions.Num() >= AllowedTrades(pFac)) {
 			//
 			// This faction is over its trade limit.
 			//
 			return 0;
-		}
-		else
-		{
+		} else {
 			//
 			// Add this region to the faction's trade list, and return 1.
 			//
-			ARegionPtr * y = new ARegionPtr;
+			ARegionPtr *y = new ARegionPtr;
 			y->ptr = pReg;
 			pFac->trade_regions.Add(y);
 			return 1;
 		}
-	}
-	else
-	{
+	} else {
 		//
 		// No limit on trade in this game.
 		//
-		return( 1 );
+		return(1);
 	}
 }
 
 void Game::RunStealOrders()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+			Object *o = (Object *) elem;
 			forlist_safe(&o->units) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->stealorders) {
 					if (u->stealorders->type == O_STEAL) {
 						Do1Steal(r,o,u);
@@ -279,14 +259,14 @@ void Game::RunStealOrders()
 	}
 }
 
-AList * Game::CanSeeSteal(ARegion * r,Unit * u)
+AList *Game::CanSeeSteal(ARegion *r,Unit *u)
 {
-	AList * retval = new AList;
+	AList *retval = new AList;
 	forlist(&factions) {
-		Faction * f = (Faction *) elem;
+		Faction *f = (Faction *) elem;
 		if (r->Present(f)) {
-			if (f->CanSee(r,u, Globals->SKILL_PRACTISE_AMOUNT > 0)) {
-				FactionPtr * p = new FactionPtr;
+			if (f->CanSee(r,u, Globals->SKILL_PRACTICE_AMOUNT > 0)) {
+				FactionPtr *p = new FactionPtr;
 				p->ptr = f;
 				retval->Add(p);
 			}
@@ -295,10 +275,10 @@ AList * Game::CanSeeSteal(ARegion * r,Unit * u)
 	return retval;
 }
 
-void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
+void Game::Do1Assassinate(ARegion *r,Object *o,Unit *u)
 {
-	AssassinateOrder * so = (AssassinateOrder *) u->stealorders;
-	Unit * tar = r->GetUnitId(so->target,u->faction->num);
+	AssassinateOrder *so = (AssassinateOrder *) u->stealorders;
+	Unit *tar = r->GetUnitId(so->target,u->faction->num);
 
 	if (!tar) {
 		u->Error("ASSASSINATE: Invalid unit given.");
@@ -327,10 +307,10 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
 		return;
 	}
 
-	AList * seers = CanSeeSteal(r,u);
+	AList *seers = CanSeeSteal(r,u);
 	int succ = 1;
 	forlist(seers) {
-		Faction * f = ((FactionPtr *) elem)->ptr;
+		Faction *f = ((FactionPtr *) elem)->ptr;
 		if (f == tar->faction) {
 			succ = 0;
 			break;
@@ -348,11 +328,11 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
 		AString temp = *(u->name) + " is caught attempting to assassinate " +
 			*(tar->name) + " in " + *(r->name) + ".";
 		forlist(seers) {
-			Faction * f = ((FactionPtr *) elem)->ptr;
+			Faction *f = ((FactionPtr *) elem)->ptr;
 			f->Event(temp);
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
-		u->Practise(S_STEALTH);
+		u->Practice(S_STEALTH);
 		return;
 	}
 
@@ -362,20 +342,20 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
 		// New rule: if a target has an amulet of true seeing they
 		// cannot be assassinated by someone with a ring of invisibility
 		if(tar->AmtsPreventCrime(u)) {
-			tar->Event( "Assassination prevented by amulet of true seeing." );
-			u->Event( AString( "Attempts to assassinate " ) + *(tar->name) +
-					", but is prevented by amulet of true seeing." );
+			tar->Event("Assassination prevented by amulet of true seeing.");
+			u->Event(AString("Attempts to assassinate ") + *(tar->name) +
+					", but is prevented by amulet of true seeing.");
 			return;
 		}
 	}
-	u->Practise(S_STEALTH);
+	u->Practice(S_STEALTH);
 	RunBattle(r,u,tar,ass);
 }
 
-void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
+void Game::Do1Steal(ARegion *r,Object *o,Unit *u)
 {
-	StealOrder * so = (StealOrder *) u->stealorders;
-	Unit * tar = r->GetUnitId(so->target,u->faction->num);
+	StealOrder *so = (StealOrder *) u->stealorders;
+	Unit *tar = r->GetUnitId(so->target,u->faction->num);
 
 	if (!tar) {
 		u->Error("STEAL: Invalid unit given.");
@@ -400,23 +380,21 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 		return;
 	}
 
-	AList * seers = CanSeeSteal(r,u);
+	AList *seers = CanSeeSteal(r,u);
 	int succ = 1;
-	{
-		forlist(seers) {
-			Faction * f = ((FactionPtr *) elem)->ptr;
-			if (f == tar->faction) {
-				succ = 0;
-				break;
-			}
-			if (f->GetAttitude(tar->faction->num) == A_ALLY) {
-				succ = 0;
-				break;
-			}
-			if (f->num == guardfaction) {
-				succ = 0;
-				break;
-			}
+	forlist(seers) {
+		Faction *f = ((FactionPtr *) elem)->ptr;
+		if (f == tar->faction) {
+			succ = 0;
+			break;
+		}
+		if (f->GetAttitude(tar->faction->num) == A_ALLY) {
+			succ = 0;
+			break;
+		}
+		if (f->num == guardfaction) {
+			succ = 0;
+			break;
 		}
 	}
 
@@ -424,11 +402,11 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 		AString temp = *(u->name) + " is caught attempting to steal from " +
 			*(tar->name) + " in " + *(r->name) + ".";
 		forlist(seers) {
-			Faction * f = ((FactionPtr *) elem)->ptr;
+			Faction *f = ((FactionPtr *) elem)->ptr;
 			f->Event(temp);
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
-		u->Practise(S_STEALTH);
+		u->Practice(S_STEALTH);
 		return;
 	}
 
@@ -437,9 +415,9 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 	// stolen from by someone with a ring of invisibility
 	//
 	if(tar->AmtsPreventCrime(u)) {
-		tar->Event( "Theft prevented by amulet of true seeing." );
-		u->Event( AString( "Attempts to steal from " ) + *(tar->name) + ", but "
-				"is prevented by amulet of true seeing." );
+		tar->Event("Theft prevented by amulet of true seeing.");
+		u->Event(AString("Attempts to steal from ") + *(tar->name) + ", but "
+				"is prevented by amulet of true seeing.");
 		return;
 	}
 
@@ -464,23 +442,23 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 		AString temp = *(u->name) + " steals " +
 			ItemString(so->item,amt) + " from " + *(tar->name) + ".";
 		forlist(seers) {
-			Faction * f = ((FactionPtr *) elem)->ptr;
+			Faction *f = ((FactionPtr *) elem)->ptr;
 			f->Event(temp);
 		}
 	}
 
 	tar->Event(AString("Has ") + ItemString(so->item,amt) + " stolen.");
-	u->Practise(S_STEALTH);
+	u->Practice(S_STEALTH);
 	return;
 }
 
 void Game::DrownUnits()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 			forlist(&r->objects) {
-				Object * o = (Object *) elem;
+				Object *o = (Object *) elem;
 				if(o->type != O_DUMMY) continue;
 				forlist(&o->units) {
 					Unit *u = (Unit *)elem;
@@ -525,10 +503,10 @@ void Game::SinkUncrewedShips()
 {
 	Unit *u;
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 			forlist(&r->objects) {
-				Object * o = (Object *) elem;
+				Object *o = (Object *) elem;
 				if(!o->IsBoat()) continue;
 
 				int men = 0;
@@ -574,22 +552,21 @@ void Game::RunForgetOrders()
 void Game::RunQuitOrders()
 {
 	forlist(&factions) {
-		Faction * f = (Faction *) elem;
+		Faction *f = (Faction *) elem;
 		if (f->quit)
 			Do1Quit(f);
 	}
 }
 
-void Game::Do1Quit(Faction * f)
+void Game::Do1Quit(Faction *f)
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+			Object *o = (Object *) elem;
 			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
-				if (u->faction == f)
-				{
+				Unit *u = (Unit *) elem;
+				if (u->faction == f) {
 					o->units.Remove(u);
 					delete u;
 				}
@@ -601,19 +578,15 @@ void Game::Do1Quit(Faction * f)
 void Game::RunDestroyOrders()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
-			Unit * u = o->GetOwner();
-			if (u)
-			{
-				if (u->destroy)
-				{
+			Object *o = (Object *) elem;
+			Unit *u = o->GetOwner();
+			if (u) {
+				if (u->destroy) {
 					Do1Destroy(r,o,u);
 					continue;
-				}
-				else
-				{
+				} else {
 					forlist(&o->units)
 						((Unit *) elem)->destroy = 0;
 				}
@@ -622,7 +595,7 @@ void Game::RunDestroyOrders()
 	}
 }
 
-void Game::Do1Destroy(ARegion * r,Object * o,Unit * u) {
+void Game::Do1Destroy(ARegion *r,Object *o,Unit *u) {
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 		u->Error("DESTROY: Can't destroy a ship while at sea.");
 		forlist(&o->units) {
@@ -641,11 +614,11 @@ void Game::Do1Destroy(ARegion * r,Object * o,Unit * u) {
 
 	if (o->CanModify()) {
 		u->Event(AString("Destroys ") + *(o->name) + ".");
-		Object * dest = r->GetDummy();
+		Object *dest = r->GetDummy();
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			u->destroy = 0;
-			u->MoveUnit( dest );
+			u->MoveUnit(dest);
 		}
 		r->objects.Remove(o);
 		delete o;
@@ -660,23 +633,23 @@ void Game::Do1Destroy(ARegion * r,Object * o,Unit * u) {
 void Game::RunFindOrders()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+			Object *o = (Object *) elem;
 			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				RunFindUnit(u);
 			}
 		}
 	}
 }
 
-void Game::RunFindUnit(Unit * u)
+void Game::RunFindUnit(Unit *u)
 {
 	int all = 0;
 	Faction *fac;
 	forlist(&u->findorders) {
-		FindOrder * f = (FindOrder *) elem;
+		FindOrder *f = (FindOrder *) elem;
 		if(f->find == 0) all = 1;
 		if(!all) {
 			fac = GetFaction(&factions,f->find);
@@ -707,13 +680,13 @@ void Game::RunTaxOrders()
 	}
 }
 
-int Game::CountTaxers(ARegion * reg)
+int Game::CountTaxers(ARegion *reg)
 {
 	int t = 0;
 	forlist(&reg->objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object *) elem;
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			if (u->GetFlag(FLAG_AUTOTAX) && !Globals->TAX_PILLAGE_MONTH_LONG)
 				u->taxing = TAX_TAX;
 			if(u->taxing == TAX_AUTO) u->taxing = TAX_TAX;
@@ -725,8 +698,8 @@ int Game::CountTaxers(ARegion * reg)
 				} else {
 					int men = u->Taxers();
 					if (men) {
-						if( !TaxCheck(reg, u->faction )) {
-							u->Error( "TAX: Faction can't tax that many "
+						if(!TaxCheck(reg, u->faction)) {
+							u->Error("TAX: Faction can't tax that many "
 									"regions.");
 							u->taxing = TAX_NONE;
 						} else {
@@ -744,26 +717,26 @@ int Game::CountTaxers(ARegion * reg)
 	return t;
 }
 
-void Game::RunTaxRegion(ARegion * reg)
+void Game::RunTaxRegion(ARegion *reg)
 {
 	int taxers = CountTaxers(reg);
-	int desired = taxers * Globals->TAX_INCOME;
+	int desired = taxers *Globals->TAX_INCOME;
 	if (desired < reg->money) desired = reg->money;
 
 	forlist(&reg->objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object *) elem;
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			if (u->taxing == TAX_TAX) {
 				int t = u->Taxers();
-				double fAmt = ((double) t) * ((double) Globals->TAX_INCOME ) *
-					((double) reg->money ) / ((double) desired );
+				double fAmt = ((double) t) * ((double) Globals->TAX_INCOME) *
+					((double) reg->money) / ((double) desired);
 				int amt = (int) fAmt;
 				reg->money -= amt;
-				desired -= t * Globals->TAX_INCOME;
+				desired -= t *Globals->TAX_INCOME;
 				u->SetMoney(u->GetMoney() + amt);
 				u->Event(AString("Collects $") + amt + " in taxes in " +
-						reg->ShortPrint( &regions ) + ".");
+						reg->ShortPrint(&regions) + ".");
 				u->taxing = TAX_NONE;
 			}
 		}
@@ -777,13 +750,13 @@ void Game::RunPillageOrders()
 	}
 }
 
-int Game::CountPillagers(ARegion * reg)
+int Game::CountPillagers(ARegion *reg)
 {
 	int p = 0;
 	forlist(&reg->objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object *) elem;
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			if (u->taxing == TAX_PILLAGE) {
 				if (!reg->CanPillage(u)) {
 					u->Error("PILLAGE: A unit is on guard.");
@@ -809,12 +782,12 @@ int Game::CountPillagers(ARegion * reg)
 	return p;
 }
 
-void Game::ClearPillagers(ARegion * reg)
+void Game::ClearPillagers(ARegion *reg)
 {
 	forlist(&reg->objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object *) elem;
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			if (u->taxing == TAX_PILLAGE) {
 				u->Error("PILLAGE: Not enough men to pillage.");
 				u->taxing = TAX_NONE;
@@ -823,7 +796,7 @@ void Game::ClearPillagers(ARegion * reg)
 	}
 }
 
-void Game::RunPillageRegion(ARegion * reg)
+void Game::RunPillageRegion(ARegion *reg)
 {
 	if (TerrainDefs[reg->type].similar_type == R_OCEAN) return;
 	if (reg->money < 1) return;
@@ -832,17 +805,17 @@ void Game::RunPillageRegion(ARegion * reg)
 	/* First, count up pillagers */
 	int pillagers = CountPillagers(reg);
 
-	if (pillagers * 2 < reg->money / Globals->TAX_INCOME) {
+	if (pillagers * 2 * Globals->TAX_INCOME < reg->money) {
 		ClearPillagers(reg);
 		return;
 	}
 
-	AList * facs = reg->PresentFactions();
+	AList *facs = reg->PresentFactions();
 	int amt = reg->money * 2;
 	forlist(&reg->objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object *) elem;
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			if (u->taxing == TAX_PILLAGE) {
 				u->taxing = TAX_NONE;
 				int num = u->Taxers();
@@ -851,9 +824,9 @@ void Game::RunPillageRegion(ARegion * reg)
 				pillagers -= num;
 				u->SetMoney(u->GetMoney() + temp);
 				u->Event(AString("Pillages $") + temp + " from " +
-						reg->ShortPrint( &regions ) + ".");
+						reg->ShortPrint(&regions) + ".");
 				forlist(facs) {
-					Faction * fp = ((FactionPtr *) elem)->ptr;
+					Faction *fp = ((FactionPtr *) elem)->ptr;
 					if (fp != u->faction) {
 						fp->Event(*(u->name) + " pillages " +
 								*(reg->name) + ".");
@@ -922,9 +895,7 @@ void Game::RunPromoteOrders()
 							u->Error("PROMOTE: Must be owner");
 							delete u->promote;
 							u->promote = 0;
-						}
-						else
-						{
+						} else {
 							u->Error("PROMOTE: Can only promote inside structures.");
 							delete u->promote;
 							u->promote = 0;
@@ -935,9 +906,7 @@ void Game::RunPromoteOrders()
 							u->Error("EVICT: Must be owner");
 							delete u->evictorders;
 							u->evictorders = 0;
-						}
-						else
-						{
+						} else {
 							u->Error("EVICT: Can only evict inside structures.");
 							delete u->evictorders;
 							u->evictorders = 0;
@@ -986,11 +955,11 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 void Game::RunEnterOrders()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+			Object *o = (Object *) elem;
 			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->enter)
 					Do1EnterOrder(r,o,u);
 			}
@@ -998,9 +967,9 @@ void Game::RunEnterOrders()
 	}
 }
 
-void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u)
+void Game::Do1EnterOrder(ARegion *r,Object *in,Unit *u)
 {
-	Object * to;
+	Object *to;
 	if (u->enter == -1) {
 		to = r->GetDummy();
 		u->enter = 0;
@@ -1026,20 +995,20 @@ void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u)
 			return;
 		}
 	}
-	u->MoveUnit( to );
+	u->MoveUnit(to);
 }
 
 void Game::RemoveEmptyObjects()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+			Object *o = (Object *) elem;
 			if (ObjectDefs[o->type].cost &&
 					o->incomplete >= ObjectDefs[o->type].cost) {
 				forlist(&o->units) {
-					Unit * u = (Unit *) elem;
-					u->MoveUnit( r->GetDummy() );
+					Unit *u = (Unit *) elem;
+					u->MoveUnit(r->GetDummy());
 				}
 				r->objects.Remove(o);
 				delete o;
@@ -1066,7 +1035,7 @@ void Game::PostProcessUnit(ARegion *r,Unit *u)
 
 void Game::EndGame(Faction *pVictor)
 {
-	forlist( &factions ) {
+	forlist(&factions) {
 		Faction *pFac = (Faction *) elem;
 		pFac->exists = 0;
 		if(pFac == pVictor)
@@ -1075,9 +1044,9 @@ void Game::EndGame(Faction *pVictor)
 			pFac->quit = QUIT_GAME_OVER;
 
 		if(pVictor)
-			pFac->Event( *( pVictor->name ) + " has won the game!" );
+			pFac->Event(*(pVictor->name) + " has won the game!");
 		else
-			pFac->Event( "The game has ended with no winner." );
+			pFac->Event("The game has ended with no winner.");
 	}
 
 	gameStatus = GAME_STATUS_FINISHED;
@@ -1101,11 +1070,11 @@ void Game::MidProcessTurn()
 void Game::PostProcessTurn()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		r->PostTurn(&regions);
 
 		if(Globals->CITY_MONSTERS_EXIST && (r->town || r->type == R_NEXUS))
-			AdjustCityMons( r );
+			AdjustCityMons(r);
 
 		forlist (&r->objects) {
 			Object *o = (Object *) elem;
@@ -1141,60 +1110,60 @@ void Game::PostProcessTurn()
 	else if(!(Globals->OPEN_ENDED)) {
 		Faction *pVictor = CheckVictory();
 		if(pVictor)
-			EndGame( pVictor );
+			EndGame(pVictor);
 	}
 }
 
 void Game::DoAutoAttacks()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		DoAutoAttacksRegion(r);
 	}
 }
 
-void Game::DoAutoAttacksRegion(ARegion * r)
+void Game::DoAutoAttacksRegion(ARegion *r)
 {
 	forlist(&r->objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object *) elem;
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
-			if (u->IsAlive() && u->canattack) DoAutoAttack(r,u);
+			Unit *u = (Unit *) elem;
+			if (u->canattack && u->IsAlive()) DoAutoAttack(r,u);
 		}
 	}
 }
 
-void Game::DoAdvanceAttacks(AList * locs)
+void Game::DoAdvanceAttacks(AList *locs)
 {
 	forlist(locs) {
-		Location * l = (Location *) elem;
-		Unit * u = l->unit;
-		ARegion * r = l->region;
-		if (u->IsAlive() && u->canattack) {
+		Location *l = (Location *) elem;
+		Unit *u = l->unit;
+		ARegion *r = l->region;
+		if (u->canattack && u->IsAlive()) {
 			DoAutoAttack(r,u);
-			if(!u->IsAlive() || !u->canattack) {
+			if(!u->canattack || !u->IsAlive()) {
 				u->guard = GUARD_NONE;
 			}
 		}
-		if (u->IsAlive() && u->canattack && u->guard == GUARD_ADVANCE) {
+		if (u->canattack && u->guard == GUARD_ADVANCE && u->IsAlive()) {
 			DoAdvanceAttack(r,u);
 			u->guard = GUARD_NONE;
 		}
 		if (u->IsAlive()) {
 			DoAutoAttackOn(r,u);
-			if(!u->IsAlive() || !u->canattack) {
+			if(!u->canattack || !u->IsAlive()) {
 				u->guard = GUARD_NONE;
 			}
 		}
 	}
 }
 
-void Game::DoAutoAttackOn(ARegion * r,Unit * t)
+void Game::DoAutoAttackOn(ARegion *r,Unit *t)
 {
 	forlist(&r->objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object *) elem;
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			if (u->guard != GUARD_AVOID &&
 					(u->GetAttitude(r,t) == A_HOSTILE) && u->IsAlive() &&
 					u->canattack)
@@ -1204,34 +1173,34 @@ void Game::DoAutoAttackOn(ARegion * r,Unit * t)
 	}
 }
 
-void Game::DoAdvanceAttack(ARegion * r,Unit * u) {
-	Unit * t = r->Forbidden(u);
-	while (t && u->IsAlive() && u->canattack) {
+void Game::DoAdvanceAttack(ARegion *r,Unit *u) {
+	Unit *t = r->Forbidden(u);
+	while (t && u->canattack && u->IsAlive()) {
 		AttemptAttack(r,u,t,1,1);
 		t = r->Forbidden(u);
 	}
 }
 
-void Game::DoAutoAttack(ARegion * r,Unit * u) {
+void Game::DoAutoAttack(ARegion *r,Unit *u) {
   forlist(&r->objects) {
-	Object * o = (Object *) elem;
+	Object *o = (Object *) elem;
 	forlist(&o->units) {
-	  Unit * t = (Unit *) elem;
+	  Unit *t = (Unit *) elem;
 	  if (u->guard != GUARD_AVOID && (u->GetAttitude(r,t) == A_HOSTILE)) {
 	AttemptAttack(r,u,t,1);
 	  }
-	  if (u->IsAlive() == 0 || u->canattack == 0)
+	  if (u->canattack == 0 || u->IsAlive() == 0)
 	return;
 	}
   }
 }
 
-int Game::CountWMonTars(ARegion * r,Unit * mon) {
+int Game::CountWMonTars(ARegion *r,Unit *mon) {
 	int retval = 0;
 	forlist(&r->objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object *) elem;
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			if (u->type == U_NORMAL || u->type == U_MAGE ||
 					u->type == U_APPRENTICE) {
 				if (mon->CanSee(r,u) && mon->CanCatch(r,u)) {
@@ -1243,11 +1212,11 @@ int Game::CountWMonTars(ARegion * r,Unit * mon) {
 	return retval;
 }
 
-Unit * Game::GetWMonTar(ARegion * r,int tarnum,Unit * mon) {
+Unit *Game::GetWMonTar(ARegion *r,int tarnum,Unit *mon) {
 	forlist(&r->objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object *) elem;
 		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			if (u->type == U_NORMAL || u->type == U_MAGE ||
 					u->type == U_APPRENTICE) {
 				if (mon->CanSee(r,u) && mon->CanCatch(r,u)) {
@@ -1261,7 +1230,7 @@ Unit * Game::GetWMonTar(ARegion * r,int tarnum,Unit * mon) {
 	return 0;
 }
 
-void Game::CheckWMonAttack(ARegion * r,Unit * u) {
+void Game::CheckWMonAttack(ARegion *r,Unit *u) {
   int tars = CountWMonTars(r,u);
   if (!tars) return;
 
@@ -1269,29 +1238,29 @@ void Game::CheckWMonAttack(ARegion * r,Unit * u) {
   if (rand < 100) rand = 100;
   if (getrandom(rand) >= u->Hostile()) return;
 
-  Unit * t = GetWMonTar(r,getrandom(tars),u);
+  Unit *t = GetWMonTar(r,getrandom(tars),u);
   if (t) AttemptAttack(r,u,t,1);
 }
 
 void Game::DoAttackOrders()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+			Object *o = (Object *) elem;
 			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->type == U_WMON) {
 					if (u->canattack && u->IsAlive()) {
 						CheckWMonAttack(r,u);
 					}
 				} else {
-					if (u->IsAlive() && u->attackorders) {
-						AttackOrder * ord = u->attackorders;
+					if (u->attackorders && u->IsAlive()) {
+						AttackOrder *ord = u->attackorders;
 						while (ord->targets.Num()) {
-							UnitId * id = (UnitId *) ord->targets.First();
+							UnitId *id = (UnitId *) ord->targets.First();
 							ord->targets.Remove(id);
-							Unit * t = r->GetUnitId(id,u->faction->num);
+							Unit *t = r->GetUnitId(id,u->faction->num);
 							delete id;
 							if (u->canattack && u->IsAlive()) {
 								if (t) {
@@ -1320,18 +1289,16 @@ void Game::DoAttackOrders()
  * 2 if u can't see t
  * 3 if u lacks the riding to catch t
  */
-void Game::AttemptAttack(ARegion * r,Unit * u,Unit * t,int silent,int adv)
+void Game::AttemptAttack(ARegion *r,Unit *u,Unit *t,int silent,int adv)
 {
 	if (!t->IsAlive()) return;
 
-	if (!u->CanSee(r,t))
-	{
+	if (!u->CanSee(r,t)) {
 		if (!silent) u->Error("ATTACK: Non-existent unit.");
 		return;
 	}
 
-	if (!u->CanCatch(r,t))
-	{
+	if (!u->CanCatch(r,t)) {
 		if (!silent) u->Error("ATTACK: Can't catch that unit.");
 		return;
 	}
@@ -1343,17 +1310,17 @@ void Game::AttemptAttack(ARegion * r,Unit * u,Unit * t,int silent,int adv)
 void Game::RunSellOrders()
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->markets)) {
-			Market * m = (Market *) elem;
+			Market *m = (Market *) elem;
 			if (m->type == M_SELL)
 				DoSell(r,m);
 		}
 		{
 			forlist((&r->objects)) {
-				Object * obj = (Object *) elem;
+				Object *obj = (Object *) elem;
 				forlist((&obj->units)) {
-					Unit * u = (Unit *) elem;
+					Unit *u = (Unit *) elem;
 					forlist((&u->sellorders)) {
 						u->Error("SELL: Can't sell that.");
 					}
@@ -1364,15 +1331,15 @@ void Game::RunSellOrders()
 	}
 }
 
-int Game::GetSellAmount(ARegion * r,Market * m)
+int Game::GetSellAmount(ARegion *r,Market *m)
 {
 	int num = 0;
 	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
+		Object *obj = (Object *) elem;
 		forlist((&obj->units)) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			forlist ((&u->sellorders)) {
-				SellOrder * o = (SellOrder *) elem;
+				SellOrder *o = (SellOrder *) elem;
 				if (o->item == m->item) {
 					if(o->num == -1) {
 						o->num = u->items.CanSell(o->item);
@@ -1392,7 +1359,7 @@ int Game::GetSellAmount(ARegion * r,Market * m)
 	return num;
 }
 
-void Game::DoSell(ARegion * r,Market * m)
+void Game::DoSell(ARegion *r,Market *m)
 {
 	/* First, find the number of items being sold */
 	int attempted = GetSellAmount(r,m);
@@ -1401,15 +1368,15 @@ void Game::DoSell(ARegion * r,Market * m)
 	m->activity = 0;
 	int oldamount = m->amount;
 	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
+		Object *obj = (Object *) elem;
 		forlist((&obj->units)) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			forlist((&u->sellorders)) {
-				SellOrder * o = (SellOrder *) elem;
+				SellOrder *o = (SellOrder *) elem;
 				if (o->item == m->item) {
 					int temp = 0;
 					if (attempted) {
-						temp = (m->amount * o->num + getrandom(attempted))
+						temp = (m->amount *o->num + getrandom(attempted))
 							/ attempted;
 						if (temp<0) temp = 0;
 					}
@@ -1432,17 +1399,17 @@ void Game::DoSell(ARegion * r,Market * m)
 void Game::RunBuyOrders()
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->markets)) {
-			Market * m = (Market *) elem;
+			Market *m = (Market *) elem;
 			if (m->type == M_BUY)
 				DoBuy(r,m);
 		}
 		{
 			forlist((&r->objects)) {
-				Object * obj = (Object *) elem;
+				Object *obj = (Object *) elem;
 				forlist((&obj->units)) {
-					Unit * u = (Unit *) elem;
+					Unit *u = (Unit *) elem;
 					forlist((&u->buyorders)) {
 						u->Error("BUY: Can't buy that.");
 					}
@@ -1453,15 +1420,15 @@ void Game::RunBuyOrders()
 	}
 }
 
-int Game::GetBuyAmount(ARegion * r,Market * m)
+int Game::GetBuyAmount(ARegion *r,Market *m)
 {
 	int num = 0;
 	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
+		Object *obj = (Object *) elem;
 		forlist((&obj->units)) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			forlist ((&u->buyorders)) {
-				BuyOrder * o = (BuyOrder *) elem;
+				BuyOrder *o = (BuyOrder *) elem;
 				if (o->item == m->item) {
 					if (ItemDefs[o->item].type & IT_MAN) {
 						if (u->type == U_MAGE) {
@@ -1480,8 +1447,8 @@ int Game::GetBuyAmount(ARegion * r,Market * m)
 						}
 					}
 					if (ItemDefs[o->item].type & IT_TRADE) {
-						if( !TradeCheck( r, u->faction )) {
-							u->Error( "BUY: Can't buy trade items in that "
+						if(!TradeCheck(r, u->faction)) {
+							u->Error("BUY: Can't buy trade items in that "
 									"many regions.");
 							o->num = 0;
 						}
@@ -1491,7 +1458,7 @@ int Game::GetBuyAmount(ARegion * r,Market * m)
 					}
 					if (o->num * m->price > u->GetMoney()) {
 						o->num = u->GetMoney() / m->price;
-						u->Error( "BUY: Unit attempted to buy more than it "
+						u->Error("BUY: Unit attempted to buy more than it "
 								"could afford.");
 					}
 					num += o->num;
@@ -1506,7 +1473,7 @@ int Game::GetBuyAmount(ARegion * r,Market * m)
 	return num;
 }
 
-void Game::DoBuy(ARegion * r,Market * m)
+void Game::DoBuy(ARegion *r,Market *m)
 {
 	/* First, find the number of items being purchased */
 	int attempted = GetBuyAmount(r,m);
@@ -1517,11 +1484,11 @@ void Game::DoBuy(ARegion * r,Market * m)
 	m->activity = 0;
 	int oldamount = m->amount;
 	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
+		Object *obj = (Object *) elem;
 		forlist((&obj->units)) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			forlist((&u->buyorders)) {
-				BuyOrder * o = (BuyOrder *) elem;
+				BuyOrder *o = (BuyOrder *) elem;
 				if (o->item == m->item) {
 					int temp = 0;
 					if (m->amount == -1) {
@@ -1539,7 +1506,7 @@ void Game::DoBuy(ARegion * r,Market * m)
 					}
 					if (ItemDefs[o->item].type & IT_MAN) {
 						/* recruiting; must dilute skills */
-						SkillList * sl = new SkillList;
+						SkillList *sl = new SkillList;
 						u->AdjustSkills();
 						delete sl;
 					}
@@ -1561,11 +1528,11 @@ void Game::DoBuy(ARegion * r,Market * m)
 void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
+			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->needed > 0 && ((!consume) ||
 								  (u->GetFlag(FLAG_CONSUMING_UNIT) ||
 								   u->GetFlag(FLAG_CONSUMING_FACTION)))) {
@@ -1574,11 +1541,9 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 						int eat = (u->needed + value - 1) / value;
 						if (eat > amount)
 							eat = amount;
-						if (ItemDefs[item].type & IT_FOOD)
-						{
+						if (ItemDefs[item].type & IT_FOOD) {
 							if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-								eat * value > u->stomach_space)
-							{
+								eat * value > u->stomach_space) {
 								eat = (u->stomach_space + value - 1) / value;
 								if (eat < 0)
 									eat = 0;
@@ -1586,8 +1551,7 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 							u->hunger -= eat * value;
 							u->stomach_space -= eat * value;
 							if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-								u->stomach_space < 0)
-							{
+								u->stomach_space < 0) {
 								u->needed -= u->stomach_space;
 								u->stomach_space = 0;
 							}
@@ -1604,18 +1568,18 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
+			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->needed > 0 && ((!consume) ||
 								  u->GetFlag(FLAG_CONSUMING_FACTION))) {
 					/* Go through all units again */
 					forlist((&r->objects)) {
-						Object * obj2 = (Object *) elem;
+						Object *obj2 = (Object *) elem;
 						forlist((&obj2->units)) {
-							Unit * u2 = (Unit *) elem;
+							Unit *u2 = (Unit *) elem;
 
 							if (u->faction == u2->faction && u != u2) {
 								int amount = u2->items.GetNum(item);
@@ -1623,11 +1587,9 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 									int eat = (u->needed + value - 1) / value;
 									if (eat > amount)
 										eat = amount;
-									if (ItemDefs[item].type & IT_FOOD)
-									{
+									if (ItemDefs[item].type & IT_FOOD) {
 										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-											eat * value > u->stomach_space)
-										{
+											eat * value > u->stomach_space) {
 											eat = (u->stomach_space + value - 1) / value;
 											if (eat < 0)
 												eat = 0;
@@ -1635,8 +1597,7 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 										u->hunger -= eat * value;
 										u->stomach_space -= eat * value;
 										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-											u->stomach_space < 0)
-										{
+											u->stomach_space < 0) {
 											u->needed -= u->stomach_space;
 											u->stomach_space = 0;
 										}
@@ -1658,17 +1619,17 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 void Game::CheckAllyMaintenanceItem(int item, int value)
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
+			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->needed > 0) {
 					/* Go through all units again */
 					forlist((&r->objects)) {
-						Object * obj2 = (Object *) elem;
+						Object *obj2 = (Object *) elem;
 						forlist((&obj2->units)) {
-							Unit * u2 = (Unit *) elem;
+							Unit *u2 = (Unit *) elem;
 							if (u->faction != u2->faction &&
 								u2->GetAttitude(r,u) == A_ALLY) {
 								int amount = u2->items.GetNum(item);
@@ -1676,11 +1637,9 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 									int eat = (u->needed + value - 1) / value;
 									if (eat > amount)
 										eat = amount;
-									if (ItemDefs[item].type & IT_FOOD)
-									{
+									if (ItemDefs[item].type & IT_FOOD) {
 										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-											eat * value > u->stomach_space)
-										{
+											eat * value > u->stomach_space) {
 											eat = (u->stomach_space + value - 1) / value;
 											if (eat < 0)
 												eat = 0;
@@ -1688,8 +1647,7 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 										u->hunger -= eat * value;
 										u->stomach_space -= eat * value;
 										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-											u->stomach_space < 0)
-										{
+											u->stomach_space < 0) {
 											u->needed -= u->stomach_space;
 											u->stomach_space = 0;
 										}
@@ -1721,11 +1679,11 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 void Game::CheckUnitHungerItem(int item, int value)
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
+			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->hunger > 0) {
 					int amount = u->items.GetNum(item);
 					if (amount) {
@@ -1736,8 +1694,7 @@ void Game::CheckUnitHungerItem(int item, int value)
 						u->stomach_space -= eat * value;
 						u->needed -= eat * value;
 						if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-							u->stomach_space < 0)
-						{
+							u->stomach_space < 0) {
 							u->needed -= u->stomach_space;
 							u->stomach_space = 0;
 						}
@@ -1752,17 +1709,17 @@ void Game::CheckUnitHungerItem(int item, int value)
 void Game::CheckFactionHungerItem(int item, int value)
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
+			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->hunger > 0) {
 					/* Go through all units again */
 					forlist((&r->objects)) {
-						Object * obj2 = (Object *) elem;
+						Object *obj2 = (Object *) elem;
 						forlist((&obj2->units)) {
-							Unit * u2 = (Unit *) elem;
+							Unit *u2 = (Unit *) elem;
 
 							if (u->faction == u2->faction && u != u2) {
 								int amount = u2->items.GetNum(item);
@@ -1774,8 +1731,7 @@ void Game::CheckFactionHungerItem(int item, int value)
 									u->stomach_space -= eat * value;
 									u->needed -= eat * value;
 									if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-										u->stomach_space < 0)
-									{
+										u->stomach_space < 0) {
 										u->needed -= u->stomach_space;
 										u->stomach_space = 0;
 									}
@@ -1795,17 +1751,17 @@ void Game::CheckFactionHungerItem(int item, int value)
 void Game::CheckAllyHungerItem(int item, int value)
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
+			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->hunger > 0) {
 					/* Go through all units again */
 					forlist((&r->objects)) {
-						Object * obj2 = (Object *) elem;
+						Object *obj2 = (Object *) elem;
 						forlist((&obj2->units)) {
-							Unit * u2 = (Unit *) elem;
+							Unit *u2 = (Unit *) elem;
 							if (u->faction != u2->faction &&
 								u2->GetAttitude(r,u) == A_ALLY) {
 								int amount = u2->items.GetNum(item);
@@ -1817,20 +1773,19 @@ void Game::CheckAllyHungerItem(int item, int value)
 									u->stomach_space -= eat * value;
 									u->needed -= eat * value;
 									if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-										u->stomach_space < 0)
-									{
+										u->stomach_space < 0) {
 										u->needed -= u->stomach_space;
 										u->stomach_space = 0;
 									}
 									u2->items.SetNum(item, amount - eat);
-									    u2->Event(*(u->name) + " borrows " +
-									              ItemString(item, eat) +
-									              " to fend off starvation.");
-									    u->Event(AString("Borrows ") +
-									             ItemString(item, eat) +
-									             " from " + *(u2->name) +
-									             " to fend off starvation.");
-									    u2->items.SetNum(item, amount - eat);
+										u2->Event(*(u->name) + " borrows " +
+												  ItemString(item, eat) +
+												  " to fend off starvation.");
+										u->Event(AString("Borrows ") +
+												 ItemString(item, eat) +
+												 " from " + *(u2->name) +
+												 " to fend off starvation.");
+										u2->items.SetNum(item, amount - eat);
 								}
 							}
 						}
@@ -1846,21 +1801,19 @@ void Game::CheckAllyHungerItem(int item, int value)
 void Game::AssessMaintenance()
 {
 	/* First pass: set needed */
-	{
-		forlist((&regions)) {
-			ARegion * r = (ARegion *) elem;
-			forlist((&r->objects)) {
-				Object * obj = (Object *) elem;
-				forlist((&obj->units)) {
-					Unit * u = (Unit *) elem;
-					u->needed = u->MaintCost();
-					u->hunger = u->GetMen() * Globals->UPKEEP_MINIMUM_FOOD;
-					if (Globals->UPKEEP_MAXIMUM_FOOD < 0)
-						u->stomach_space = -1;
-					else
-						u->stomach_space = u->GetMen() *
-											Globals->UPKEEP_MAXIMUM_FOOD;
-				}
+	forlist((&regions)) {
+		ARegion *r = (ARegion *) elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *) elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *) elem;
+				u->needed = u->MaintCost();
+				u->hunger = u->GetMen() * Globals->UPKEEP_MINIMUM_FOOD;
+				if (Globals->UPKEEP_MAXIMUM_FOOD < 0)
+					u->stomach_space = -1;
+				else
+					u->stomach_space = u->GetMen() *
+										Globals->UPKEEP_MAXIMUM_FOOD;
 			}
 		}
 	}
@@ -1869,8 +1822,7 @@ void Game::AssessMaintenance()
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0) {
 		CheckUnitHunger();
 		CheckFactionHunger();
-		if (Globals->ALLOW_WITHDRAW)
-		{
+		if (Globals->ALLOW_WITHDRAW) {
 			// Can claim food for maintenance, so find the cheapest food
 			int i = -1, cost = -1;
 			for (int j = 0; j < NITEMS; j++) {
@@ -1884,18 +1836,16 @@ void Game::AssessMaintenance()
 			if (i > 0) {
 				cost = ItemDefs[i].baseprice * 5 / 2;
 				forlist((&regions)) {
-					ARegion * r = (ARegion *) elem;
+					ARegion *r = (ARegion *) elem;
 					forlist((&r->objects)) {
-						Object * obj = (Object *) elem;
+						Object *obj = (Object *) elem;
 						forlist((&obj->units)) {
-							Unit * u = (Unit *) elem;
-							if (u->hunger > 0 && u->faction->unclaimed > cost)
-							{
+							Unit *u = (Unit *) elem;
+							if (u->hunger > 0 && u->faction->unclaimed > cost) {
 								int value = Globals->UPKEEP_FOOD_VALUE;
 								int eat = (u->hunger + value - 1) / value;
 								/* Now see if faction has money */
-								if (u->faction->unclaimed >= eat * cost)
-								{
+								if (u->faction->unclaimed >= eat * cost) {
 									u->Event(AString("Withdraws ") +
 											ItemString(i, eat) +
 											" for maintenance.");
@@ -1903,9 +1853,7 @@ void Game::AssessMaintenance()
 									u->hunger -= eat * value;
 									u->stomach_space -= eat * value;
 									u->needed -= eat * value;
-								}
-								else
-								{
+								} else {
 									int amount = u->faction->unclaimed / cost;
 									u->Event(AString("Withdraws ") +
 											ItemString(i, amount) +
@@ -1927,33 +1875,31 @@ void Game::AssessMaintenance()
 	//
 	// Check for CONSUMEing units.
 	//
-	if( Globals->FOOD_ITEMS_EXIST )
-	{
-		CheckUnitMaintenance( 1 );
-		CheckFactionMaintenance( 1 );
+	if(Globals->FOOD_ITEMS_EXIST) {
+		CheckUnitMaintenance(1);
+		CheckFactionMaintenance(1);
 	}
 
 	//
 	// Check the unit for money.
 	//
-	CheckUnitMaintenanceItem(I_SILVER, 1, 0 );
+	CheckUnitMaintenanceItem(I_SILVER, 1, 0);
 
 	//
 	// Check other units in same faction for money
 	//
-	CheckFactionMaintenanceItem(I_SILVER, 1, 0 );
+	CheckFactionMaintenanceItem(I_SILVER, 1, 0);
 
-	if( Globals->FOOD_ITEMS_EXIST )
-	{
+	if(Globals->FOOD_ITEMS_EXIST) {
 		//
 		// Check unit for possible food items.
 		//
-		CheckUnitMaintenance( 0 );
+		CheckUnitMaintenance(0);
 
 		//
 		// Fourth pass; check other units in same faction for food items
 		//
-		CheckFactionMaintenance( 0 );
+		CheckFactionMaintenance(0);
 	}
 
 	//
@@ -1961,23 +1907,19 @@ void Game::AssessMaintenance()
 	//
 	{
 		forlist((&regions)) {
-			ARegion * r = (ARegion *) elem;
+			ARegion *r = (ARegion *) elem;
 			forlist((&r->objects)) {
-				Object * obj = (Object *) elem;
+				Object *obj = (Object *) elem;
 				forlist((&obj->units)) {
-					Unit * u = (Unit *) elem;
-					if (u->needed > 0 && u->faction->unclaimed)
-					{
+					Unit *u = (Unit *) elem;
+					if (u->needed > 0 && u->faction->unclaimed) {
 						/* Now see if faction has money */
-						if (u->faction->unclaimed >= u->needed)
-						{
+						if (u->faction->unclaimed >= u->needed) {
 							u->Event(AString("Claims ") + u->needed +
 									 " silver for maintenance.");
 							u->faction->unclaimed -= u->needed;
 							u->needed = 0;
-						}
-						else
-						{
+						} else {
 							u->Event(AString("Claims ") +
 									u->faction->unclaimed +
 									" silver for maintenance.");
@@ -1993,10 +1935,9 @@ void Game::AssessMaintenance()
 	//
 	// Check other allied factions for $$$.
 	//
-	CheckAllyMaintenanceItem( I_SILVER, 1 );
+	CheckAllyMaintenanceItem(I_SILVER, 1);
 
-	if( Globals->FOOD_ITEMS_EXIST )
-	{
+	if(Globals->FOOD_ITEMS_EXIST) {
 		//
 		// Check other factions for food items.
 		//
@@ -2008,11 +1949,11 @@ void Game::AssessMaintenance()
 	//
 	{
 		forlist((&regions)) {
-			ARegion * r = (ARegion *) elem;
+			ARegion *r = (ARegion *) elem;
 			forlist((&r->objects)) {
-				Object * obj = (Object *) elem;
+				Object *obj = (Object *) elem;
 				forlist((&obj->units)) {
-					Unit * u = (Unit *) elem;
+					Unit *u = (Unit *) elem;
 					if (u->needed > 0 || u->hunger > 0)
 						u->Short(u->needed, u->hunger);
 				}
@@ -2039,7 +1980,7 @@ void Game::DoWithdrawOrders()
 	}
 }
 
-int Game::DoWithdrawOrder(ARegion * r,Unit * u, WithdrawOrder * o)
+int Game::DoWithdrawOrder(ARegion *r,Unit *u, WithdrawOrder *o)
 {
 	int itm = o->item;
 	int amt = o->amount;
@@ -2098,7 +2039,7 @@ void Game::DoBankWithdrawOrders()
 	}
 }
 
-void Game::DoBankOrder(ARegion * r,Unit * u, BankOrder * o)
+void Game::DoBankOrder(ARegion *r,Unit *u, BankOrder *o)
 {
 	int what = o->what;
 	int amt = o->amount;
@@ -2230,11 +2171,11 @@ void Game::DoBankOrder(ARegion * r,Unit * u, BankOrder * o)
 void Game::DoGiveOrders()
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
+			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				forlist((&u->giveorders)) {
 					GiveOrder *o = (GiveOrder *)elem;
 					if(o->item < 0) {
@@ -2269,13 +2210,13 @@ void Game::DoGiveOrders()
 void Game::DoExchangeOrders()
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
+			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				forlist((&u->exchangeorders)) {
-					Order * o = (Order *) elem;
+					Order *o = (Order *) elem;
 					DoExchangeOrder(r,u,(ExchangeOrder *) o);
 				}
 			}
@@ -2283,7 +2224,7 @@ void Game::DoExchangeOrders()
 	}
 }
 
-void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
+void Game::DoExchangeOrder(ARegion *r,Unit *u,ExchangeOrder *o)
 {
 	// Check if the destination unit exists
 	Unit *t = r->GetUnitId(o->target,u->faction->num);
@@ -2295,14 +2236,14 @@ void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
 	}
 
 	// Check each Item can be given
-	if( ItemDefs[ o->giveItem].flags & ItemType::CANTGIVE ) {
+	if(ItemDefs[o->giveItem].flags & ItemType::CANTGIVE) {
 		u->Error(AString("EXCHANGE: Can't trade ") +
 				ItemDefs[o->giveItem].names + ".");
 		u->exchangeorders.Remove(o);
 		return;
 	}
 
-	if( ItemDefs[ o->expectItem].flags & ItemType::CANTGIVE ) {
+	if(ItemDefs[o->expectItem].flags & ItemType::CANTGIVE) {
 		u->Error(AString("EXCHANGE: Can't trade ") +
 				ItemDefs[o->expectItem].names + ".");
 		u->exchangeorders.Remove(o);
@@ -2342,8 +2283,8 @@ void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
 	int exchangeOrderFound = 0;
 	// Check if other unit has a reciprocal exchange order
 	forlist ((&t->exchangeorders)) {
-		ExchangeOrder * tOrder = (ExchangeOrder *) elem;
-		Unit * ptrUnitTemp = r->GetUnitId(tOrder->target, t->faction->num);
+		ExchangeOrder *tOrder = (ExchangeOrder *) elem;
+		Unit *ptrUnitTemp = r->GetUnitId(tOrder->target, t->faction->num);
 		if (ptrUnitTemp == u) {
 			if (tOrder->expectItem == o->giveItem) {
 				if (tOrder->giveItem == o->expectItem) {
@@ -2426,7 +2367,7 @@ void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
 	}
 }
 
-int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
+int Game::DoGiveOrder(ARegion *r,Unit *u,GiveOrder *o)
 {
 	// Check there is enough to give
 	int amt = o->amount;
@@ -2449,6 +2390,11 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 		/* Give 0 */
 		if (amt == -1) {
 			u->Error("Can't discard a whole unit.");
+			return 0;
+		}
+
+		if (amt < 0) {
+			u->Error("Cannot give a negative number of items.");
 			return 0;
 		}
 
@@ -2478,7 +2424,7 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 		return 0;
 	}
 
-	Unit * t = r->GetUnitId(o->target,u->faction->num);
+	Unit *t = r->GetUnitId(o->target,u->faction->num);
 	if (!t) {
 		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
@@ -2509,7 +2455,7 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 		/* Give unit */
 		if (u->type == U_MAGE) {
 			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
-				if (CountMages(t->faction) >= AllowedMages( t->faction )) {
+				if (CountMages(t->faction) >= AllowedMages(t->faction)) {
 					u->Error("GIVE: Faction has too many mages.");
 					return 0;
 				}
@@ -2543,7 +2489,7 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 
 		/* Check if any new skill reports have to be shown */
 		forlist(&(u->skills)) {
-			Skill * skill = (Skill *) elem;
+			Skill *skill = (Skill *) elem;
 			int newlvl = u->GetRealSkill(skill->type);
 			int oldlvl = u->faction->skills.GetDays(skill->type);
 			if (newlvl > oldlvl) {
@@ -2595,12 +2541,12 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 
 		if (u->nomove) t->nomove = 1;
 
-		SkillList * temp = u->skills.Split(u->GetMen(),amt);
+		SkillList *temp = u->skills.Split(u->GetMen(),amt);
 		t->skills.Combine(temp);
 		delete temp;
 	}
 
-	if( ItemDefs[ o->item ].flags & ItemType::CANTGIVE ) {
+	if(ItemDefs[o->item].flags & ItemType::CANTGIVE) {
 		u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".");
 		return 0;
 	}
@@ -2624,11 +2570,11 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 void Game::DoGuard1Orders()
 {
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
+			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit *) elem;
 				if (u->guard == GUARD_SET || u->guard == GUARD_GUARD) {
 					if (!u->Taxers()) {
 						u->guard = GUARD_NONE;
@@ -2658,19 +2604,121 @@ void Game::FindDeadFactions()
 void Game::DeleteEmptyUnits()
 {
 	forlist((&regions)) {
-		ARegion * region = (ARegion *) elem;
+		ARegion *region = (ARegion *) elem;
 		DeleteEmptyInRegion(region);
 	}
 }
 
-void Game::DeleteEmptyInRegion(ARegion * region)
+void Game::DeleteEmptyInRegion(ARegion *region)
 {
 	forlist(&region->objects) {
-		Object * obj = (Object *) elem;
+		Object *obj = (Object *) elem;
 		forlist (&obj->units) {
-			Unit * unit = (Unit *) elem;
+			Unit *unit = (Unit *) elem;
 			if (unit->IsAlive() == 0) {
 				region->Kill(unit);
+			}
+		}
+	}
+}
+
+void Game::CheckTransportOrders()
+{
+	if (!(Globals->TRANSPORT & ALLOW_TRANSPORT))
+		return;
+
+	forlist ((&regions)) {
+		ARegion *r = (ARegion *)elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *)elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *)elem;
+				forlist ((&u->transportorders)) {
+					// make sure target exists
+					TransportOrder *o = (TransportOrder *)elem;
+					AString ordertype =
+						(o->type == O_DISTRIBUTE) ? "DISTRIBUTE" :
+						"TRANSPORT";
+					if (!o->target || o->target->unitnum == -1) {
+						u->Error(ordertype + ": Target does not exist.");
+						o->type = NORDERS;
+						continue;
+					}
+
+					Location *tar = regions->GetUnitId(o->target, u->faction,
+							u->region);
+					if (!tar) {
+						u->Error(ordertype + ": Target does not exist.");
+						o->type = NORDERS;
+						continue;
+					}
+
+					// make sure target owns structure if it is target of
+					// transport
+					if (o->type == O_TRANSPORT) {
+						if ((tar->obj->GetOwner() != tar->unit) ||
+								!(ObjectDefs[tar->obj->type].flag & ObjectType::TRANSPORT)) {
+							u->Error(ordertype + ": Target does not own "
+									"transport structure.");
+							o->type = NORDERS;
+							continue;
+						}
+					}
+
+					// make sure target is in range.
+					int maxdist;
+					int dist = regions->GetDistance(u->region, tar->region);
+					if ((o->type == O_TRANSPORT) &&
+						(u == obj->GetOwner()) &&
+						(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)) {
+						int maxdist = Globals->NONLOCAL_TRANSPORT;
+						if (maxdist >= 0 &&
+							Globals->TRANSPORT & QM_AFFECT_DIST) {
+							int level = GetSkill(S_QUARTERMASTER);
+							maxdist += ((level + 1)/3);
+						} else if (maxdist == 0)
+							maxdist = 10000000;
+					} else
+						maxdist = Globals->LOCAL_TRANSPORT;
+					if (dist > maxdist) {
+						u->Error(ordertype + ": Recipient is too far away.");
+						o->type = NORDERS;
+						continue;
+					}
+
+					// make sure issuer is owner of structure on distribute
+					// or long range transport
+					if ((o->type == O_DISTRIBUTE) &&
+						((u != obj->GetOwner()) ||
+						 (!(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)))) {
+						u->Error(ordertype + ": Unit does not own transport structure.");
+						o->type = NORDERS;
+						continue;
+					}
+
+					// make sure amount is availble (all handled later)
+					if (o->amount > 0 && o->amount > u->items.GetNum(o->item)) {
+						u->Error(ordertype + ": Insufficient amount of item.");
+						o->type = NORDERS;
+					}
+				}
+			}
+		}
+	}
+}
+
+void Game::RunTransportOrders()
+{
+	if (!(Globals->TRANSPORT & ALLOW_TRANSPORT))
+		return;
+	forlist ((&regions)) {
+		ARegion *r = (ARegion *)elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *)elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *)elem;
+				forlist ((&u->transportorders)) {
+				}
 			}
 		}
 	}

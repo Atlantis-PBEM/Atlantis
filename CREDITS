@@ -40,7 +40,7 @@ Stephen Baillie
     Pointed out bugs in the easier underworld code, the improved
       farsight code and other places.
 	Implemented multiple taxation options controlling who could tax.
-	Implemented skill improvement through practise code.
+	Implemented skill improvement through practice code.
 	Changed MOVE and SAIL to queue moves that failed because of lack
 	  of movement points, so that @TURN caravans can cope with weather.
 	Cleaned up TURN processing significantly.

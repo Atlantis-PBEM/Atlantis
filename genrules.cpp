@@ -78,7 +78,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 
 	f.PutStr("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 "
-			"Transitional//EN\">");
+			"Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">");
 	f.Enclose(1, "html");
 	f.Enclose(1, "head");
 	f.PutStr("<meta http-equiv=\"Content-Type\" content=\"text/html; "
@@ -1548,16 +1548,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"do not need to be consecutive; for a unit to go from level 1 to "
 		"level 2, he can study for a month, do something else for a month, "
 		"and then go back and complete his second month of study.";
-	if (Globals->SKILL_PRACTISE_AMOUNT > 0) {
+	if (Globals->SKILL_PRACTICE_AMOUNT > 0) {
 		temp += "  A unit can also increase its level of training by "
 			"using a skill.  This progress is ";
-		if (Globals->SKILL_PRACTISE_AMOUNT < 11)
+		if (Globals->SKILL_PRACTICE_AMOUNT < 11)
 			temp += "much slower than";
-		else if (Globals->SKILL_PRACTISE_AMOUNT < 30)
+		else if (Globals->SKILL_PRACTICE_AMOUNT < 30)
 			temp += "slower than";
-		else if (Globals->SKILL_PRACTISE_AMOUNT == 30)
+		else if (Globals->SKILL_PRACTICE_AMOUNT == 30)
 			temp += "the same as";
-		else if (Globals->SKILL_PRACTISE_AMOUNT < 61)
+		else if (Globals->SKILL_PRACTICE_AMOUNT < 61)
 			temp += "faster than";
 		else
 			temp += "much faster than";

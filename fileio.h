@@ -27,16 +27,9 @@
 
 #include "astring.h"
 
-#ifndef __BORLANDC__
-#include <iostream.h>
-#include <fstream.h>
-class ifstream;
-class ofstream;
-#else
-#include <fstream>
 #include <iostream>
+#include <fstream>
 using namespace std;
-#endif
 
 class Ainfile {
 	public:
@@ -47,11 +40,11 @@ class Ainfile {
 		int OpenByName(const AString &);
 		void Close();
 
-		AString * GetStr();
-		AString * GetStrNoSkip();
+		AString *GetStr();
+		AString *GetStrNoSkip();
 		int GetInt();
 
-		ifstream * file;
+		ifstream *file;
 };
 
 class Aoutfile {
@@ -67,7 +60,7 @@ class Aoutfile {
 		void PutStr(const AString &);
 		void PutInt(int);
 
-		ofstream * file;
+		ofstream *file;
 };
 
 class Aorders {
@@ -79,9 +72,9 @@ class Aorders {
 		int OpenByName(const AString &);
 		void Close();
 
-		AString * GetLine();
+		AString *GetLine();
 
-		ifstream * file;
+		ifstream *file;
 };
 
 class Areport {
@@ -101,7 +94,7 @@ class Areport {
 		void PutNoFormat(const AString &);
 		void EndLine();
 
-		ofstream * file;
+		ofstream *file;
 		int tabs;
 };
 
@@ -136,7 +129,7 @@ class Arules {
 		AString Link(const AString &href, const AString &text);
 		void LinkRef(const AString &name);
 
-		ofstream * file;
+		ofstream *file;
 		int tabs;
 		int wraptab;
 };

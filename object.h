@@ -22,10 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date			Person				Comments
-// ----			------				--------
-// 2000/MAR/21	Azthar Septragen	Added roads.
+
 #ifndef OBJECT_CLASS
 #define OBJECT_CLASS
 
@@ -42,11 +39,12 @@ class ObjectType {
 	public:
 		char *name;
 		enum {
-			DISABLED		= 0x001,
+			DISABLED	= 0x001,
 			NOMONSTERGROWTH	= 0x002,
-			NEVERDECAY		= 0x004,
-			CANENTER		= 0x008,
-			CANMODIFY		= 0x020,
+			NEVERDECAY	= 0x004,
+			CANENTER	= 0x008,
+			CANMODIFY	= 0x020,
+			TRANSPORT	= 0x040
 		};
 		int flags;
 
@@ -69,7 +67,7 @@ class ObjectType {
 		int productionAided;
 };
 
-extern ObjectType * ObjectDefs;
+extern ObjectType *ObjectDefs;
 
 AString *ObjectDescription(int obj);
 
@@ -80,19 +78,19 @@ int ObjectIsShip(int);
 class Object : public AListElem
 {
 	public:
-		Object( ARegion *region );
+		Object(ARegion *region);
 		~Object();
 
-		void Readin( Ainfile *f, AList *, ATL_VER v );
-		void Writeout( Aoutfile *f );
-		void Report(Areport *,Faction *,int,int,int, int,int,int, int);
+		void Readin(Ainfile *f, AList *, ATL_VER v);
+		void Writeout(Aoutfile *f);
+		void Report(Areport *, Faction *, int, int, int, int, int, int, int);
 
 		void SetName(AString *);
 		void SetDescribe(AString *);
 
 		Unit *GetUnit(int);
-		Unit *GetUnitAlias(int,int); /* alias, faction number */
-		Unit *GetUnitId(UnitId *,int);
+		Unit *GetUnitAlias(int, int); /* alias, faction number */
+		Unit *GetUnitId(UnitId *, int);
 
 		// AS
 		int IsRoad();
@@ -100,12 +98,12 @@ class Object : public AListElem
 		int IsBoat();
 		int IsBuilding();
 		int CanModify();
-		int CanEnter(ARegion *,Unit *);
+		int CanEnter(ARegion *, Unit *);
 		Unit *ForbiddenBy(ARegion *, Unit *);
 		Unit *GetOwner();
 
 		void SetPrevDir(int);
-		void MoveObject( ARegion *toreg );
+		void MoveObject(ARegion *toreg);
 
 		AString *name;
 		AString *describe;

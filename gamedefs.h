@@ -22,26 +22,6 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATONS
-// Date	    Person            Comments
-// ----	    ------            --------
-// 2000/SEP/06 Joseph Traub	  Added base man cost to allow races to have
-//	                           different base costs
-// 2001/FEB/01 Joseph Traub	  Added options for flying over water and
-//	                           easier underworld viewing and farseeing
-// 2001/FEB/07 Joseph Traub	  Added option to make starting cities safe
-//	                           or not and to control the guard numbers
-//	                           and to make them slightly tougher.
-//	                           Added option to give starting city guards
-//	                           mage support.
-// 2001/Feb/18 Joseph Traub	  Added Apprentices idea from Lacandon Conquest
-// 2001/Feb/18 Joseph Traub	  Added back in support for Conquest
-// 2001/Feb/19 Joseph Traub	  Removed the ENGINE_VERSION from the gamedef
-//	                           since it wasn't being used.
-// 2001/Feb/21 Joseph Traub	  Added a FACLIM_UNLIMITED option
-// 2001/Apr/08 Joseph Traub	  Added WORLD_NAME option
-// 2001/Apr/28 Joseph Traub	  Added MORE_PROFITABLE_TRADE_GOODS option
-//
 
 #ifndef GAME_DEFS
 #define GAME_DEFS
@@ -202,8 +182,8 @@ public:
 	// The type of faction limits that are in effect in this game.
 	//
 	enum {
-	    FACLIM_MAGE_COUNT,
-	    FACLIM_FACTION_TYPES,
+		FACLIM_MAGE_COUNT,
+		FACLIM_FACTION_TYPES,
 		FACLIM_UNLIMITED,
 	};
 	int FACTION_LIMIT_TYPE;
@@ -270,16 +250,24 @@ public:
 
 	// Is the BANK order enabled ?
 	enum {
-		BANK_ENABLED      = 0x01, // Do we allow banking in this game ?
-		BANK_NOTONGUARD   = 0x02, // if Banks are enabled, can the bank be built if units are on guard ?
-					  //                       units can use the bank anyhow if it's there already
-					  // if Banks are disabled, can units BANK if region is guarded ?
-		BANK_INSETTLEMENT = 0x04, // if Banks are enabled, can the bank be built in settlements only ?
-					  //			   units can use the bank anyhow if it's there already
-					  // if Banks are disabled, can units BANK in settlements only ?
-		BANK_TRADEINTEREST= 0x08, // Do Trade factions get interest in deposits ?
-		BANK_SKILLTOBUILD = 0x10, // If banks are enabled, is BANKING 1 required in addition to BUILDING ? // FIXME: ignored
-		BANK_FEES	  = 0x20, // Do operations require money ? (only if banks are enabled)
+		// Do we allow banking in this game ?
+		BANK_ENABLED = 0x01,
+		// if Banks are enabled, can the bank be built if units are
+		// on guard? units can use the bank anyhow if it's there
+		// already if Banks are disabled, can units BANK if region
+		// is guarded?
+		BANK_NOTONGUARD = 0x02,
+		// if Banks are enabled, can the bank be built in settlements
+		// only?  units can use the bank anyhow if it's there already
+		// if Banks are disabled, can units BANK in settlements only?
+		BANK_INSETTLEMENT = 0x04,
+		// Do Trade factions get interest in deposits ?
+		BANK_TRADEINTEREST = 0x08,
+		// If banks are enabled, is BANKING 1 required in addition to
+		// BUILDING ? FIXME: ignored
+		BANK_SKILLTOBUILD = 0x10,
+		// Do operations require money ? (only if banks are enabled)
+		BANK_FEES = 0x20,
 	};
 	int ALLOW_BANK;
 	int BANK_FEE; // percentage if enabled.
@@ -572,7 +560,7 @@ public:
 	int WHO_CAN_TAX;
 
 	// Amount of skill improvement when a skill is used
-	int SKILL_PRACTISE_AMOUNT;
+	int SKILL_PRACTICE_AMOUNT;
 
 	// Options on using food for upkeep
 	// Note that all these values are in silver equivalents!
@@ -610,8 +598,35 @@ public:
 	// a that is closed would normally be detected (this might affect some
 	// clients with unflexible parsers badly...)
 	int SHOW_CLOSED_GATES;
+
+	// Transport and related settings
+	enum {
+		ALLOW_TRANSPORT = 0x01, // Do we allow transport/distribute?
+		QM_AFFECT_COST = 0x02, // QM level affect shipping cost?
+		QM_AFFECT_DIST = 0x04, // QM level affect longrange dist?
+	};
+	int TRANSPORT;
+
+	// Base hexes for local transport and distribute (0 to disable)
+	int LOCAL_TRANSPORT;
+
+	// Base hexes for long range transport and distribute (-1 to disable)
+	// (0 to allow instant transport between structures anywhere in world)
+	int NONLOCAL_TRANSPORT;
+
+	// Base cost per weight unit to ship items.  (QM skill can affect
+	// this as a multiplier at lower skill levels.
+	// Function is 4-(level+1)/2), which means that the cost will be from
+	// 1 (at level 5) to 3 (at level 1) times this value per weight unit.
+	int SHIPPING_COST;
+
+	// Will 0 weight items have a fractional weight so that large
+	// quantities actually have some heft?
+	// Leave 0 for no fractional weight.  Otherwise, X items weigh 1.
+	int FRACTIONAL_WEIGHT;
+	
 };
 
-extern GameDefs * Globals;
+extern GameDefs *Globals;
 
 #endif

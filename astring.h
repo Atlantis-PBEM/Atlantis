@@ -25,8 +25,10 @@
 #ifndef ASTRING_CLASS
 #define ASTRING_CLASS
 
-#include <iostream.h>
+#include <iostream>
 #include "alist.h"
+
+using namespace std;
 
 class AString : public AListElem {
     friend ostream & operator <<(ostream &os, const AString &);

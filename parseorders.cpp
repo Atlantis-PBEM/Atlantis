@@ -22,14 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date			Person			Comments
-// ----			------			--------
-// 2000/MAR/14	Larry Stanbery	Fixed SHOW bug.
-// 2000/MAR/14	Davis Kulis		Added a new reporting Template.
-// 2001/Feb/18	Joseph Traub	Added support for Apprentices
-// 2001/Feb/21	Joseph Traub	Added the ablity to disable items/skills/objects
-// 2001/Feb/21	Joseph Traub	Added FACLIM_UNLIMITED
+
 #include "game.h"
 #include "gameio.h"
 #include "orders.h"
@@ -160,7 +153,7 @@ int ParseFactionType(AString *o, int *type)
 	int i;
 	for (i=0; i<NFACTYPES; i++) type[i] = 0;
 
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) return -1;
 
 	if (*token == "generic") {
@@ -215,7 +208,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 	while (order) {
 		AString saveorder = *order;
 		int getatsign = order->getat();
-		AString * token = order->gettoken();
+		AString *token = order->gettoken();
 
 		if (token) {
 			int i = Parse1Order(token);
@@ -238,7 +231,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					fac = &(pCheck->dummyFaction);
 					pCheck->numshows = 0;
 				} else {
-					fac = GetFaction(&factions,token->value());
+					fac = GetFaction(&factions, token->value());
 				}
 
 				if (!fac) break;
@@ -279,7 +272,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				while (unit) {
 					Unit *former = unit->former;
 					if (unit->inTurnBlock)
-						ParseError(pCheck, unit, fac,"TURN: without ENDTURN");
+						ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
 					if (unit->former)
 						ParseError(pCheck, unit, fac, "FORM: without END.");
 					if(unit && pCheck) unit->ClearOrders();
@@ -296,7 +289,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					while (unit) {
 						Unit *former = unit->former;
 						if (unit->inTurnBlock)
-							ParseError(pCheck, unit, fac,"TURN: without ENDTURN");
+							ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
 						if (unit->former)
 							ParseError(pCheck, unit, fac, "FORM: without END.");
 						if (unit && pCheck) unit->ClearOrders();
@@ -308,7 +301,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 					token = order->gettoken();
 					if (!token) {
-						ParseError(pCheck,0,fac,"UNIT without unit number.");
+						ParseError(pCheck, 0, fac, "UNIT without unit number.");
 						unit = 0;
 						break;
 					}
@@ -355,7 +348,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 						Unit *former = unit->former;
 
 						if (unit->inTurnBlock)
-							ParseError(pCheck, unit, fac,"TURN: without ENDTURN");
+							ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
 						if (pCheck && former) delete unit;
 						unit = former;
 					} else {
@@ -365,7 +358,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				break;
 			case O_TURN:
 				if (unit && unit->inTurnBlock) {
-					ParseError(pCheck, unit, fac,"TURN: cannot nest");
+					ParseError(pCheck, unit, fac, "TURN: cannot nest");
 				} else if (!unit)
 					ParseError(pCheck, 0, fac, "Order given without a unit selected.");
 				else {
@@ -430,7 +423,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 	while (unit) {
 		Unit *former = unit->former;
 		if (unit->inTurnBlock)
-			ParseError(pCheck, 0, fac,"TURN: without ENDTURN");
+			ParseError(pCheck, 0, fac, "TURN: without ENDTURN");
 		if (unit->former)
 			ParseError(pCheck, 0, fac, "FORM: without END.");
 		if(unit && pCheck) unit->ClearOrders();
@@ -468,6 +461,9 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			break;
 		case O_BANK:
 			ProcessBankOrder(unit, o, pCheck);
+			break;
+		case O_IDLE:
+			ProcessIdleOrder(unit, o, pCheck);
 			break;
 		case O_BEHIND:
 			ProcessBehindOrder(unit, o, pCheck);
@@ -613,11 +609,11 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 	}
 }
 
-void Game::ProcessPasswordOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessPasswordOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	if(pCheck) return;
 
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (u->faction->password) delete u->faction->password;
 	if (token) {
 		u->faction->password = token;
@@ -628,9 +624,9 @@ void Game::ProcessPasswordOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessOptionOrder(Unit * u,AString *o, OrdersCheck *pCheck)
+void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "OPTION: What option?");
 		return;
@@ -696,9 +692,9 @@ void Game::ProcessOptionOrder(Unit * u,AString *o, OrdersCheck *pCheck)
 	ParseError(pCheck, u, 0, "OPTION: Invalid option.");
 }
 
-void Game::ProcessReshowOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		// LLS
 		ParseError(pCheck, u, 0, "SHOW: Show what?");
@@ -754,7 +750,7 @@ void Game::ProcessReshowOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 				return;
 			}
 
-			u->faction->shows.Add(new ShowSkill(sk,lvl));
+			u->faction->shows.Add(new ShowSkill(sk, lvl));
 		}
 		return;
 	}
@@ -808,9 +804,9 @@ void Game::ProcessReshowOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	ParseError(pCheck, u, 0, "SHOW: Show what?");
 }
 
-void Game::ProcessForgetOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessForgetOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "FORGET: No skill given.");
 		return;
@@ -831,7 +827,7 @@ void Game::ProcessForgetOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessEntertainOrder(Unit * unit, OrdersCheck *pCheck)
+void Game::ProcessEntertainOrder(Unit *unit, OrdersCheck *pCheck)
 {
 	if (unit->monthorders ||
 			(Globals->TAX_PILLAGE_MONTH_LONG &&
@@ -843,15 +839,15 @@ void Game::ProcessEntertainOrder(Unit * unit, OrdersCheck *pCheck)
 		ParseError(pCheck, unit, 0, err);
 		if (unit->monthorders) delete unit->monthorders;
 	}
-	ProduceOrder * o = new ProduceOrder;
+	ProduceOrder *o = new ProduceOrder;
 	o->item = I_SILVER;
 	o->skill = S_ENTERTAINMENT;
 	unit->monthorders = o;
 }
 
-void Game::ProcessCombatOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessCombatOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		if(!pCheck) {
 			u->combat = -1;
@@ -1050,9 +1046,9 @@ void Game::ProcessArmorOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	u->Event(temp);
 }
 
-void Game::ProcessClaimOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessClaimOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "CLAIM: No amount given.");
 		return;
@@ -1094,7 +1090,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		}
 	}
 
-	int retval = ParseFactionType(o,factype);
+	int retval = ParseFactionType(o, factype);
 	if (retval == -1) {
 		ParseError(pCheck, u, 0, "FACTION: Bad faction type.");
 		return;
@@ -1123,29 +1119,29 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessAssassinateOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessAssassinateOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId * id = ParseUnit(o);
+	UnitId *id = ParseUnit(o);
 	if (!id || id->unitnum == -1) {
 		ParseError(pCheck, u, 0, "ASSASSINATE: No target given.");
 		return;
 	}
 	if(!pCheck) {
 		if (u->stealorders) delete u->stealorders;
-		AssassinateOrder * ord = new AssassinateOrder;
+		AssassinateOrder *ord = new AssassinateOrder;
 		ord->target = id;
 		u->stealorders = ord;
 	}
 }
 
-void Game::ProcessStealOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessStealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId * id = ParseUnit(o);
+	UnitId *id = ParseUnit(o);
 	if (!id || id->unitnum == -1) {
 		ParseError(pCheck, u, 0, "STEAL: No target given.");
 		return;
 	}
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "STEAL: No item given.");
 		delete id;
@@ -1165,7 +1161,7 @@ void Game::ProcessStealOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 	if(!pCheck) {
-		StealOrder * ord = new StealOrder;
+		StealOrder *ord = new StealOrder;
 		ord->target = id;
 		ord->item = i;
 		if (u->stealorders) delete u->stealorders;
@@ -1173,7 +1169,7 @@ void Game::ProcessStealOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessQuitOrder(Unit *u,AString *o, OrdersCheck *pCheck)
+void Game::ProcessQuitOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	if(!pCheck) {
 		if (u->faction->password && !(*(u->faction->password) == "none")) {
@@ -1198,7 +1194,7 @@ void Game::ProcessQuitOrder(Unit *u,AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessRestartOrder(Unit *u,AString *o, OrdersCheck *pCheck)
+void Game::ProcessRestartOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	if(!pCheck) {
 		if (u->faction->password && !(*(u->faction->password) == "none")) {
@@ -1230,16 +1226,16 @@ void Game::ProcessRestartOrder(Unit *u,AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessDestroyOrder(Unit * u, OrdersCheck *pCheck)
+void Game::ProcessDestroyOrder(Unit *u, OrdersCheck *pCheck)
 {
 	if(!pCheck) {
 		u->destroy = 1;
 	}
 }
 
-void Game::ProcessFindOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessFindOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "FIND: No faction number given.");
 		return;
@@ -1252,7 +1248,7 @@ void Game::ProcessFindOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 	if(!pCheck) {
-		FindOrder * f = new FindOrder;
+		FindOrder *f = new FindOrder;
 		f->find = n;
 		u->findorders.Add(f);
 	}
@@ -1305,7 +1301,7 @@ void Game::ProcessBankOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int what;
 //	int inbank;
 //	int lvl;
-//	int max = Globals->BANK_MAXSKILLPERLEVEL * 5; // value if banks & skills disabled
+//	int max = Globals->BANK_MAXSKILLPERLEVEL *5; // value if banks & skills disabled
 
 	if (!(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED)) {
 		ParseError(pCheck, u, 0, "There are no banks in this game.");
@@ -1343,7 +1339,7 @@ void Game::ProcessBankOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	if(!pCheck) {
-		BankOrder * order = new BankOrder;
+		BankOrder *order = new BankOrder;
 		order->what = what;
 		order->amount = amt;
 		u->bankorders.Add(order);
@@ -1351,10 +1347,10 @@ void Game::ProcessBankOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	return;
 }
 
-void Game::ProcessRevealOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessRevealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	if(!pCheck) {
-		AString * token = o->gettoken();
+		AString *token = o->gettoken();
 		if (token) {
 			if (*token == "unit") {
 				u->reveal = REVEAL_UNIT;
@@ -1377,7 +1373,7 @@ void Game::ProcessRevealOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessTaxOrder(Unit * u, OrdersCheck *pCheck)
+void Game::ProcessTaxOrder(Unit *u, OrdersCheck *pCheck)
 {
 	if (u->taxing == TAX_PILLAGE) {
 		ParseError(pCheck, u, 0, "TAX: The unit is already pillaging.");
@@ -1395,7 +1391,7 @@ void Game::ProcessTaxOrder(Unit * u, OrdersCheck *pCheck)
 	u->taxing = TAX_TAX;
 }
 
-void Game::ProcessPillageOrder(Unit * u, OrdersCheck *pCheck)
+void Game::ProcessPillageOrder(Unit *u, OrdersCheck *pCheck)
 {
 	if (u->taxing == TAX_TAX) {
 		ParseError(pCheck, u, 0, "PILLAGE: The unit is already taxing.");
@@ -1413,9 +1409,9 @@ void Game::ProcessPillageOrder(Unit * u, OrdersCheck *pCheck)
 	u->taxing = TAX_PILLAGE;
 }
 
-void Game::ProcessPromoteOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessPromoteOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId * id = ParseUnit(o);
+	UnitId *id = ParseUnit(o);
 	if (!id || id->unitnum == -1) {
 		ParseError(pCheck, u, 0, "PROMOTE: No target given.");
 		return;
@@ -1428,7 +1424,7 @@ void Game::ProcessPromoteOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessLeaveOrder(Unit * u, OrdersCheck *pCheck)
+void Game::ProcessLeaveOrder(Unit *u, OrdersCheck *pCheck)
 {
 	if(!pCheck) {
 		if (u->monthorders && u->monthorders->type == O_BUILD) return;
@@ -1436,9 +1432,9 @@ void Game::ProcessLeaveOrder(Unit * u, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessEnterOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessEnterOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "ENTER: No object specified.");
 		return;
@@ -1456,7 +1452,7 @@ void Game::ProcessEnterOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 
 void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (token) {
 		if(*token == "help") {
 			UnitId *targ = 0;
@@ -1472,7 +1468,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 					return;
 				}
 			}
-			BuildOrder * order = new BuildOrder;
+			BuildOrder *order = new BuildOrder;
 			order->target = targ;
 			if (unit->monthorders ||
 					(Globals->TAX_PILLAGE_MONTH_LONG &&
@@ -1518,7 +1514,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 				unit->Error("BUILD: The region is full.");
 				return;
 			}
-			Object * obj = new Object(reg);
+			Object *obj = new Object(reg);
 			obj->type = ot;
 			obj->incomplete = ObjectDefs[obj->type].cost;
 			unit->MoveUnit(obj);
@@ -1542,9 +1538,9 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	if (unit->enter == -1) unit->enter = 0;
 }
 
-void Game::ProcessAttackOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessAttackOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId * id = ParseUnit(o);
+	UnitId *id = ParseUnit(o);
 	while (id && id->unitnum != -1) {
 		if(!pCheck) {
 			if (!u->attackorders) u->attackorders = new AttackOrder;
@@ -1554,9 +1550,9 @@ void Game::ProcessAttackOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessSellOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessSellOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "SELL: Number to sell not given.");
 		return;
@@ -1588,7 +1584,7 @@ void Game::ProcessSellOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 	if(!pCheck) {
-		SellOrder * s = new SellOrder;
+		SellOrder *s = new SellOrder;
 		s->item = it;
 		s->num = num;
 		u->sellorders.Add(s);
@@ -1597,7 +1593,7 @@ void Game::ProcessSellOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 
 void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "BUY: Number to buy not given.");
 		return;
@@ -1647,16 +1643,16 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 
 	if(!pCheck) {
-		BuyOrder * b = new BuyOrder;
+		BuyOrder *b = new BuyOrder;
 		b->item = it;
 		b->num = num;
 		u->buyorders.Add(b);
 	}
 }
 
-void Game::ProcessProduceOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "PRODUCE: No item given.");
 		return;
@@ -1673,7 +1669,7 @@ void Game::ProcessProduceOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 
-	ProduceOrder * p = new ProduceOrder;
+	ProduceOrder *p = new ProduceOrder;
 	p->item = it;
 	p->skill = ItemDefs[it].pSkill;
 	if (u->monthorders ||
@@ -1689,9 +1685,9 @@ void Game::ProcessProduceOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	u->monthorders = p;
 }
 
-void Game::ProcessWorkOrder(Unit * u, OrdersCheck *pCheck)
+void Game::ProcessWorkOrder(Unit *u, OrdersCheck *pCheck)
 {
-	ProduceOrder * order = new ProduceOrder;
+	ProduceOrder *order = new ProduceOrder;
 	order->skill = -1;
 	order->item = I_SILVER;
 	if (u->monthorders ||
@@ -1707,9 +1703,9 @@ void Game::ProcessWorkOrder(Unit * u, OrdersCheck *pCheck)
 	u->monthorders = order;
 }
 
-void Game::ProcessTeachOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	TeachOrder * order = 0;
+	TeachOrder *order = 0;
 
 	if (u->monthorders && u->monthorders->type == O_TEACH) {
 		order = (TeachOrder *) u->monthorders;
@@ -1718,7 +1714,7 @@ void Game::ProcessTeachOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 
 	int students = 0;
-	UnitId * id = ParseUnit(o);
+	UnitId *id = ParseUnit(o);
 	while (id && id->unitnum != -1) {
 		students++;
 		if(order) {
@@ -1745,9 +1741,9 @@ void Game::ProcessTeachOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	u->monthorders = order;
 }
 
-void Game::ProcessStudyOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "STUDY: No skill given.");
 		return;
@@ -1770,7 +1766,7 @@ void Game::ProcessStudyOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 
-	StudyOrder * order = new StudyOrder;
+	StudyOrder *order = new StudyOrder;
 	order->skill = sk;
 	order->days = 0;
 	if (u->monthorders ||
@@ -1786,9 +1782,9 @@ void Game::ProcessStudyOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	u->monthorders = order;
 }
 
-void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck)
+void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, 0, f, "DECLARE: No faction given.");
 		return;
@@ -1802,9 +1798,9 @@ void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck)
 	delete token;
 
 	if(!pCheck) {
-		Faction * target;
+		Faction *target;
 		if (fac != -1) {
-			target = GetFaction(&factions,fac);
+			target = GetFaction(&factions, fac);
 			if (!target) {
 				f->Error(AString("DECLARE: Non-existent faction ")+fac+".");
 				return;
@@ -1821,7 +1817,7 @@ void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck)
 	if (!token) {
 		if (fac != -1) {
 			if(!pCheck) {
-				f->SetAttitude(fac,-1);
+				f->SetAttitude(fac, -1);
 			}
 		}
 		return;
@@ -1838,7 +1834,7 @@ void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck)
 		if (fac == -1) {
 			f->defaultattitude = att;
 		} else {
-			f->SetAttitude(fac,att);
+			f->SetAttitude(fac, att);
 		}
 	}
 }
@@ -1895,7 +1891,7 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	return;
 }
 
-AString *Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
+AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 		int repeat)
 {
 	int turnDepth = 1;
@@ -1989,14 +1985,14 @@ AString *Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
 	return NULL;
 }
 
-void Game::ProcessExchangeOrder(Unit * unit, AString * o, OrdersCheck *pCheck)
+void Game::ProcessExchangeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	UnitId * t = ParseUnit(o);
+	UnitId *t = ParseUnit(o);
 	if (!t) {
 		ParseError(pCheck, unit, 0, "EXCHANGE: Invalid target.");
 		return;
 	}
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, unit, 0, "EXCHANGE: No amount given.");
 		return;
@@ -2053,7 +2049,7 @@ void Game::ProcessExchangeOrder(Unit * unit, AString * o, OrdersCheck *pCheck)
 	}
 
 	if(!pCheck) {
-		ExchangeOrder * order = new ExchangeOrder;
+		ExchangeOrder *order = new ExchangeOrder;
 		order->giveItem = itemGive;
 		order->giveAmount = amtGive;
 		order->expectAmount = amtExpected;
@@ -2063,14 +2059,14 @@ void Game::ProcessExchangeOrder(Unit * unit, AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck)
+void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	UnitId * t = ParseUnit(o);
+	UnitId *t = ParseUnit(o);
 	if (!t) {
 		ParseError(pCheck, unit, 0, "GIVE: Invalid target.");
 		return;
 	}
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, unit, 0, "GIVE: No amount given.");
 		return;
@@ -2183,7 +2179,7 @@ void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck)
 	}
 
 	if(!pCheck) {
-		GiveOrder * order = new GiveOrder;
+		GiveOrder *order = new GiveOrder;
 		order->item = item;
 		order->target = t;
 		order->amount = amt;
@@ -2195,7 +2191,7 @@ void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck)
 
 void Game::ProcessDescribeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, unit, 0, "DESCRIBE: No argument.");
 		return;
@@ -2226,9 +2222,9 @@ void Game::ProcessDescribeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	ParseError(pCheck, unit, 0, "DESCRIBE: Can't describe that.");
 }
 
-void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck)
+void Game::ProcessNameOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, unit, 0, "NAME: No argument.");
 		return;
@@ -2345,7 +2341,7 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck)
 				return;
 			}
 
-			AString * newname = token->getlegal();
+			AString *newname = token->getlegal();
 			if (!newname) {
 				unit->Error("NAME: Illegal name.");
 				return;
@@ -2375,10 +2371,10 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck)
 	ParseError(pCheck, unit, 0, "NAME: Can't name that.");
 }
 
-void Game::ProcessGuardOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessGuardOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	/* This is an instant order */
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "GUARD: Invalid value.");
 		return;
@@ -2399,10 +2395,10 @@ void Game::ProcessGuardOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessBehindOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessBehindOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	/* This is an instant order */
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "BEHIND: Invalid value.");
 		return;
@@ -2413,14 +2409,14 @@ void Game::ProcessBehindOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 	if(!pCheck) {
-		u->SetFlag(FLAG_BEHIND,val);
+		u->SetFlag(FLAG_BEHIND, val);
 	}
 }
 
-void Game::ProcessNoaidOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessNoaidOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	/* Instant order */
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "NOAID: Invalid value.");
 		return;
@@ -2432,7 +2428,7 @@ void Game::ProcessNoaidOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 	if(!pCheck) {
-		u->SetFlag(FLAG_NOAID,val);
+		u->SetFlag(FLAG_NOAID, val);
 	}
 }
 
@@ -2472,7 +2468,7 @@ void Game::ProcessNospoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			"Use the 'SPOILS' command instead");
 
 	/* Instant order */
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "NOSPOILS: Invalid value.");
 		return;
@@ -2487,11 +2483,11 @@ void Game::ProcessNospoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		u->SetFlag(FLAG_FLYSPOILS, 0);
 		u->SetFlag(FLAG_RIDESPOILS, 0);
 		u->SetFlag(FLAG_WALKSPOILS, 0);
-		u->SetFlag(FLAG_NOSPOILS,val);
+		u->SetFlag(FLAG_NOSPOILS, val);
 	}
 }
 
-void Game::ProcessNocrossOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessNocrossOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	int move_over_water = 0;
 
@@ -2510,7 +2506,7 @@ void Game::ProcessNocrossOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 
 	/* Instant order */
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "NOCROSS: Invalid value.");
 		return;
@@ -2522,15 +2518,15 @@ void Game::ProcessNocrossOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 	if(!pCheck) {
-		u->SetFlag(FLAG_NOCROSS_WATER,val);
+		u->SetFlag(FLAG_NOCROSS_WATER, val);
 	}
 }
 
 
-void Game::ProcessHoldOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessHoldOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	/* Instant order */
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "HOLD: Invalid value.");
 		return;
@@ -2542,14 +2538,14 @@ void Game::ProcessHoldOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 	if(!pCheck) {
-		u->SetFlag(FLAG_HOLDING,val);
+		u->SetFlag(FLAG_HOLDING, val);
 	}
 }
 
-void Game::ProcessAutoTaxOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessAutoTaxOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	/* Instant order */
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "AUTOTAX: Invalid value.");
 		return;
@@ -2561,14 +2557,14 @@ void Game::ProcessAutoTaxOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		return;
 	}
 	if(!pCheck) {
-		u->SetFlag(FLAG_AUTOTAX,val);
+		u->SetFlag(FLAG_AUTOTAX, val);
 	}
 }
 
-void Game::ProcessAvoidOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessAvoidOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	/* This is an instant order */
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, u, 0, "AVOID: Invalid value.");
 		return;
@@ -2622,10 +2618,10 @@ Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessAddressOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessAddressOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	/* This is an instant order */
-	AString * token = o->gettoken();
+	AString *token = o->gettoken();
 	if (token) {
 		if(!pCheck) {
 			u->faction->address = token;
@@ -2635,7 +2631,7 @@ void Game::ProcessAddressOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessAdvanceOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessAdvanceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	MoveOrder *m = 0;
 
@@ -2658,13 +2654,13 @@ void Game::ProcessAdvanceOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	m->advancing = 1;
 
 	for (;;) {
-		AString * t = o->gettoken();
+		AString *t = o->gettoken();
 		if (!t) return;
 		int d = ParseDir(t);
 		delete t;
 		if (d!=-1) {
 			if(!pCheck) {
-				MoveDir * x = new MoveDir;
+				MoveDir *x = new MoveDir;
 				x->dir = d;
 				m->dirs.Add(x);
 			}
@@ -2675,7 +2671,7 @@ void Game::ProcessAdvanceOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessMoveOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessMoveOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	MoveOrder *m = 0;
 
@@ -2697,13 +2693,13 @@ void Game::ProcessMoveOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	m->advancing = 0;
 
 	for (;;) {
-		AString * t = o->gettoken();
+		AString *t = o->gettoken();
 		if (!t) return;
 		int d = ParseDir(t);
 		delete t;
 		if (d!=-1) {
 			if(!pCheck) {
-				MoveDir * x = new MoveDir;
+				MoveDir *x = new MoveDir;
 				x->dir = d;
 				m->dirs.Add(x);
 			}
@@ -2714,7 +2710,7 @@ void Game::ProcessMoveOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessSailOrder(Unit * u,AString * o, OrdersCheck *pCheck)
+void Game::ProcessSailOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	SailOrder *m = 0;
 
@@ -2735,7 +2731,7 @@ void Game::ProcessSailOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	m = (SailOrder *) u->monthorders;
 
 	for (;;) {
-		AString * t = o->gettoken();
+		AString *t = o->gettoken();
 		if (!t) return;
 		int d = ParseDir(t);
 		delete t;
@@ -2745,7 +2741,7 @@ void Game::ProcessSailOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 		} else {
 			if (d < NDIRS) {
 				if(!pCheck) {
-					MoveDir * x = new MoveDir;
+					MoveDir *x = new MoveDir;
 					x->dir = d;
 					m->dirs.Add(x);
 				}
@@ -2758,7 +2754,7 @@ void Game::ProcessSailOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 
 void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId * id = ParseUnit(o);
+	UnitId *id = ParseUnit(o);
 	while (id && id->unitnum != -1) {
 		if(!pCheck) {
 			if (!u->evictorders) u->evictorders = new EvictOrder;
@@ -2766,4 +2762,138 @@ void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		}
 		id = ParseUnit(o);
 	}
+}
+
+void Game::ProcessIdleOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	if (u->monthorders || (Globals->TAX_PILLAGE_MONTH_LONG &&
+		((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+		if (u->monthorders) delete u->monthorders;
+		AString err = "IDLE: Overwriting previous ";
+		if (u->inTurnBlock) err += "DELAYED ";
+		err += "month-long order.";
+		ParseError(pCheck, u, 0, err);
+	}
+	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
+	IdleOrder *i = new IdleOrder;
+	u->monthorders = i;
+}
+
+void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	UnitId *tar = ParseUnit(o);
+	if (!tar) {
+		ParseError(pCheck, unit, 0, "TRANSPORT: Invalid target.");
+		return;
+	}
+	AString *token = o->gettoken();
+	if (!token) {
+		ParseError(pCheck, unit, 0, "TRANSPORT: No amount given.");
+		return;
+	}
+
+	int amt;
+	if (*token == "all")
+		amt = -1;
+	else
+		amt = token->value();
+	delete token;
+	token = o->gettoken();
+	if (!token) {
+		ParseError(pCheck, unit, 0, "TRANSPORT: No item given.");
+		return;
+	}
+	int item = ParseTransportableItem(token);
+	delete token;
+	if (item == -1) {
+		ParseError(pCheck, unit, 0, "TRANSPORT: Invalid item.");
+		return;
+	}
+
+	int except = 0;
+	token = o->gettoken();
+	if (token && *token == "except") {
+		delete token;
+		token = o->gettoken();
+		if (!token) {
+			ParseError(pCheck, unit, 0, "TRANSPORT: EXCEPT requires a value.");
+			return;
+		}
+		except = token->value();
+		delete token;
+		if (except <= 0) {
+			ParseError(pCheck, unit, 0, "TRANSPORT: Invalid except value.");
+			return;
+		}
+	}
+
+	if (!pCheck) {
+		TransportOrder *order = new TransportOrder;
+		order->item = item;
+		order->target = tar;
+		order->amount = amt;
+		order->except = except;
+		unit->transportorders.Add(order);
+	}
+	return;
+}
+
+void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	UnitId *tar = ParseUnit(o);
+	if (!tar) {
+		ParseError(pCheck, unit, 0, "DISTRIBUTE: Invalid target.");
+		return;
+	}
+	AString *token = o->gettoken();
+	if (!token) {
+		ParseError(pCheck, unit, 0, "DISTRIBUTE: No amount given.");
+		return;
+	}
+
+	int amt;
+	if (*token == "all")
+		amt = -1;
+	else
+		amt = token->value();
+	delete token;
+	token = o->gettoken();
+	if (!token) {
+		ParseError(pCheck, unit, 0, "DISTRIBUTE: No item given.");
+		return;
+	}
+	int item = ParseTransportableItem(token);
+	delete token;
+	if (item == -1) {
+		ParseError(pCheck, unit, 0, "DISTRIBUTE: Invalid item.");
+		return;
+	}
+
+	int except = 0;
+	token = o->gettoken();
+	if (token && *token == "except") {
+		delete token;
+		token = o->gettoken();
+		if (!token) {
+			ParseError(pCheck, unit, 0, "DISTRIBUTE: EXCEPT requires a value.");
+			return;
+		}
+		except = token->value();
+		delete token;
+		if (except <= 0) {
+			ParseError(pCheck, unit, 0, "DISTRIBUTE: Invalid except value.");
+			return;
+		}
+	}
+
+	if (!pCheck) {
+		TransportOrder *order = new TransportOrder;
+		order->type = O_DISTRIBUTE;
+		order->item = item;
+		order->target = tar;
+		order->amount = amt;
+		order->except = except;
+		unit->transportorders.Add(order);
+	}
+	return;
 }

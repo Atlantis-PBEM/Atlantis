@@ -93,6 +93,7 @@ class SkillType
 };
 extern SkillType * SkillDefs;
 
+int LookupSkill(AString *);
 int ParseSkill(AString *);
 AString SkillStrs(int);
 

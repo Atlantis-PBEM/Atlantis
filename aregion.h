@@ -410,4 +410,6 @@ class ARegionList : public AList
 		int CheckRegionExit(ARegion *pFrom, ARegion *pTo);
 
 };
+
+int LookupRegionType(AString *);
 #endif

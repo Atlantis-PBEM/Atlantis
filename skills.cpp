@@ -26,7 +26,15 @@
 #include "items.h"
 #include "gamedata.h"
 
-int ParseSkill(AString * token)
+int LookupSkill(AString *token)
+{
+	for (int i=0; i<NSKILLS; i++) {
+		if (*token == SkillDefs[i].abbr) return i;
+	}
+	return -1;
+}
+
+int ParseSkill(AString *token)
 {
 	int r = -1;
 	for (int i=0; i<NSKILLS; i++) {
@@ -54,14 +62,14 @@ int SkillCost(int skill)
 	return SkillDefs[skill].cost;
 }
 
-int SkillMax(int skill,int race)
+int SkillMax(int skill, int race)
 {
 	int mantype = ItemDefs[race].index;
 
-	if( !Globals->MAGE_NONLEADERS ) {
-		if( SkillDefs[skill].flags & SkillType::MAGIC ) {
-			if( race != I_LEADERS ) {
-				return( 0 );
+	if(!Globals->MAGE_NONLEADERS) {
+		if(SkillDefs[skill].flags & SkillType::MAGIC) {
+			if(race != I_LEADERS) {
+				return(0);
 			}
 		}
 	}
@@ -97,27 +105,41 @@ int GetDaysByLevel(int level)
 	return days;
 }
 
-ShowSkill::ShowSkill(int s,int l)
+ShowSkill::ShowSkill(int s, int l)
 {
 	skill = s;
 	level = l;
 }
 
-void Skill::Readin(Ainfile * f)
+void Skill::Readin(Ainfile *f)
 {
-	type = f->GetInt();
-	days = f->GetInt();
+	AString *temp, *token;
+
+	temp = f->GetStr();
+	token = temp->gettoken();
+	type = LookupSkill(token);
+	delete token;
+
+	token = temp->gettoken();
+	days = token->value();
+	delete token;
+	delete temp;
 }
 
-void Skill::Writeout(Aoutfile * f)
+void Skill::Writeout(Aoutfile *f)
 {
-	f->PutInt(type);
-	f->PutInt(days);
+	AString temp;
+
+	if (type != -1) {
+		temp = AString(SkillDefs[type].abbr) + " " + days;
+	} else
+		temp = AString("NO_SKILL 0");
+	f->PutStr(temp);
 }
 
-Skill * Skill::Split(int total, int leave)
+Skill *Skill::Split(int total, int leave)
 {
-	Skill * temp = new Skill;
+	Skill *temp = new Skill;
 	temp->type = type;
 	temp->days = (days * leave) / total;
 	days = days - temp->days;
@@ -127,7 +149,7 @@ Skill * Skill::Split(int total, int leave)
 int SkillList::GetDays(int skill)
 {
 	forlist(this) {
-		Skill * s = (Skill *) elem;
+		Skill *s = (Skill *) elem;
 		if (s->type == skill) {
 			return s->days;
 		}
@@ -135,10 +157,10 @@ int SkillList::GetDays(int skill)
 	return 0;
 }
 
-void SkillList::SetDays(int skill,int days)
+void SkillList::SetDays(int skill, int days)
 {
 	forlist(this) {
-		Skill * s = (Skill *) elem;
+		Skill *s = (Skill *) elem;
 		if (s->type == skill) {
 			if (days == 0) {
 				Remove(s);
@@ -151,18 +173,18 @@ void SkillList::SetDays(int skill,int days)
 		}
 	}
 	if (days == 0) return;
-	Skill * s = new Skill;
+	Skill *s = new Skill;
 	s->type = skill;
 	s->days = days;
 	Add(s);
 }
 
-SkillList * SkillList::Split(int total,int leave)
+SkillList *SkillList::Split(int total, int leave)
 {
-	SkillList * ret = new SkillList;
+	SkillList *ret = new SkillList;
 	forlist (this) {
-		Skill * s = (Skill *) elem;
-		Skill * n = s->Split(total,leave);
+		Skill *s = (Skill *) elem;
+		Skill *n = s->Split(total, leave);
 		if (s->days == 0) {
 			Remove(s);
 			delete s;
@@ -172,11 +194,11 @@ SkillList * SkillList::Split(int total,int leave)
 	return ret;
 }
 
-void SkillList::Combine(SkillList * b)
+void SkillList::Combine(SkillList *b)
 {
 	forlist(b) {
-		Skill * s = (Skill *) elem;
-		SetDays(s->type,GetDays(s->type) + s->days);
+		Skill *s = (Skill *) elem;
+		SetDays(s->type, GetDays(s->type) + s->days);
 	}
 }
 
@@ -189,7 +211,7 @@ AString SkillList::Report(int nummen)
 	}
 	int i = 0;
 	forlist (this) {
-		Skill * s = (Skill *) elem;
+		Skill *s = (Skill *) elem;
 		if (i) {
 			temp += ", ";
 		} else {
@@ -202,24 +224,19 @@ AString SkillList::Report(int nummen)
 	return temp;
 }
 
-void SkillList::Readin(Ainfile * f)
+void SkillList::Readin(Ainfile *f)
 {
 	int n = f->GetInt();
 	for (int i=0; i<n; i++) {
-		Skill * s = new Skill;
+		Skill *s = new Skill;
 		s->Readin(f);
-		if (s->days == 0) {
-			delete s;
-		} else {
-			Add(s);
-		}
+		if (s->days == 0) delete s;
+		else Add(s);
 	}
 }
 
-void SkillList::Writeout(Aoutfile * f)
+void SkillList::Writeout(Aoutfile *f)
 {
 	f->PutInt(Num());
-	forlist(this) {
-		((Skill *) elem)->Writeout(f);
-	}
+	forlist(this) ((Skill *) elem)->Writeout(f);
 }

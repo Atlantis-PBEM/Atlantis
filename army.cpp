@@ -230,9 +230,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		}
 	}
 
-	unit->Practise(S_COMBAT);
+	unit->Practice(S_COMBAT);
 	if (ridingBonus)
-		unit->Practise(S_RIDING);
+		unit->Practice(S_RIDING);
 
 	// Set the attack and defense skills
 	// These will include the riding bonus if they should be included.
@@ -265,7 +265,7 @@ void Soldier::SetupSpell()
 		}
 
 		special = pST->special;
-		unit->Practise(unit->combat);
+		unit->Practice(unit->combat);
 	}
 }
 
@@ -499,7 +499,7 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			}
 		}
 	}
-	tactitian->Practise(S_TACTICS);
+	tactitian->Practice(S_TACTICS);
 
 	soldiers = new SoldierPtr[count];
 	int x = 0;
@@ -758,10 +758,10 @@ void Army::DoHealLevel(Battle *b, int type, int useItems)
 		if(!s->healing) continue;
 		if(useItems) {
 			if(s->healitem == -1) continue;
-			if (s->healitem != I_HEALPOTION) s->unit->Practise(S_HEALING);
+			if (s->healitem != I_HEALPOTION) s->unit->Practice(S_HEALING);
 		} else {
 			if(s->healitem != -1) continue;
-			s->unit->Practise(S_MAGICAL_HEALING);
+			s->unit->Practice(S_MAGICAL_HEALING);
 		}
 
 		while (s->healing) {

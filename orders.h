@@ -47,6 +47,8 @@ class TeleportOrder;
 class ForgetOrder;
 class EvictOrder;
 class BankOrder;
+class IdleOrder;
+class TransportOrder;
 
 #include "unit.h"
 #include "gamedefs.h"
@@ -75,6 +77,7 @@ enum {
 	O_DECLARE,
 	O_DESCRIBE,
 	O_DESTROY,
+	O_DISTRIBUTE,
 	O_ENDFORM,
 	O_ENDTURN,
 	O_ENTER,
@@ -88,6 +91,7 @@ enum {
 	O_GIVE,
 	O_GUARD,
 	O_HOLD,
+	O_IDLE,
 	O_LEAVE,
 	O_MOVE,
 	O_NAME,
@@ -111,6 +115,7 @@ enum {
 	O_STUDY,
 	O_TAX,
 	O_TEACH,
+	O_TRANSPORT,
 	O_TURN,
 	O_WEAPON,
 	O_WITHDRAW,
@@ -141,6 +146,7 @@ class Order : public AListElem {
 		virtual ~Order();
 
 		int type;
+		int quiet;
 };
 
 class MoveDir : public AListElem {
@@ -371,6 +377,25 @@ class BankOrder : public Order {
 
 		int what; // 1 == withdraw; 2 == deposit
 		int amount;
+};
+
+class IdleOrder : public Order {
+	public:
+		IdleOrder();
+		~IdleOrder();
+};
+
+class TransportOrder : public Order {
+	public:
+		TransportOrder();
+		~TransportOrder();
+
+		int item;
+		// amount == -1 means all available at transport time
+		int amount;
+		int except;
+
+		UnitId *target;
 };
 
 #endif

@@ -22,12 +22,15 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
 #include "gameio.h"
 #include "gamedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
 #include <time.h>
 
 extern "C" {

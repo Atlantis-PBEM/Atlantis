@@ -104,7 +104,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 		wgt += unit->Weight();
 		if (unit->monthorders && unit->monthorders->type == O_SAIL) {
 			slr += unit->GetSkill(S_SAILING) * unit->GetMen();
-			unit->Practise(S_SAILING);
+			unit->Practice(S_SAILING);
 		}
 
 		// XXX - sheesh... gotta do something about this.
@@ -115,7 +115,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 					movepoints = Globals->SHIP_SPEED + 2;
 					unit->Event("Casts Summon Wind to aid the ship's "
 								"progress.");
-					unit->Practise(S_SUMMON_WIND);
+					unit->Practice(S_SUMMON_WIND);
 					break;
 				case O_CLIPPER:
 				case O_BALLOON:
@@ -123,7 +123,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 						movepoints = Globals->SHIP_SPEED + 2;
 						unit->Event("Casts Summon Wind to aid the ship's "
 									"progress.");
-						unit->Practise(S_SUMMON_WIND);
+						unit->Practice(S_SUMMON_WIND);
 					}
 					break;
 				default:
@@ -131,7 +131,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 						movepoints = Globals->SHIP_SPEED + 2;
 						unit->Event("Casts Summon Wind to aid the ship's "
 									"progress.");
-						unit->Practise(S_SUMMON_WIND);
+						unit->Practice(S_SUMMON_WIND);
 					}
 					break;
 			}
@@ -388,7 +388,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 			unit->Event(AString("Teaches ") + SkillDefs[o->skill].name +
 						" to " + *u->name + ".");
 			// The TEACHER may learn something in this process!
-			unit->Practise(o->skill);
+			unit->Practice(o->skill);
 		}
 	}
 }
@@ -546,7 +546,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 
 	// AS
 	u->Event(AString("Performs") + job + "on " + *(obj->name) + ".");
-	u->Practise(sk);
+	u->Practice(sk);
 
 	delete u->monthorders;
 	u->monthorders = 0;
@@ -600,6 +600,7 @@ void Game::RunMonthOrders()
 {
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;
+		RunIdleOrders(r);
 		RunStudyOrders(r);
 		RunBuildHelpers(r);
 		RunProduceOrders(r);
@@ -710,17 +711,15 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	u->items.SetNum(o->item,u->items.GetNum(o->item) + output);
 	u->Event(AString("Produces ") + ItemString(o->item,output) + " in " +
 			r->ShortPrint(&regions) + ".");
-	u->Practise(o->skill);
+	u->Practice(o->skill);
 	delete u->monthorders;
 	u->monthorders = 0;
 }
 
 void Game::RunProduceOrders(ARegion * r)
 {
-	{
-		forlist ((&r->products))
-			RunAProduction(r,(Production *) elem);
-	}
+	forlist ((&r->products))
+		RunAProduction(r,(Production *) elem);
 	{
 		forlist((&r->objects)) {
 			Object * obj = (Object *) elem;
@@ -740,7 +739,7 @@ void Game::RunProduceOrders(ARegion * r)
 	}
 }
 
-int Game::ValidProd(Unit * u,ARegion * r,Production * p)
+int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 {
 	if (u->monthorders->type != O_PRODUCE) return 0;
 
@@ -779,18 +778,19 @@ int Game::ValidProd(Unit * u,ARegion * r,Production * p)
 	return 0;
 }
 
-int Game::FindAttemptedProd(ARegion * r,Production * p) {
-  int attempted = 0;
-  forlist((&r->objects)) {
-	Object * obj = (Object *) elem;
-	forlist((&obj->units)) {
-	  Unit * u = (Unit *) elem;
-	  if (u->monthorders) {
-	attempted += ValidProd(u,r,p);
-	  }
+int Game::FindAttemptedProd(ARegion * r,Production * p)
+{
+	int attempted = 0;
+	forlist((&r->objects)) {
+		Object * obj = (Object *) elem;
+		forlist((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			if (u->monthorders) {
+				attempted += ValidProd(u,r,p);
+			}
+		}
 	}
-  }
-  return attempted;
+	return attempted;
 }
 
 void Game::RunAProduction(ARegion * r,Production * p)
@@ -859,8 +859,8 @@ void Game::RunAProduction(ARegion * r,Production * p)
 							 r->ShortPrint(&regions)
 							 + ".");
 					// If they don't have PHEN, then this will fail safely
-					u->Practise(S_PHANTASMAL_ENTERTAINMENT);
-					u->Practise(S_ENTERTAINMENT);
+					u->Practice(S_PHANTASMAL_ENTERTAINMENT);
+					u->Practice(S_ENTERTAINMENT);
 				}
 			}
 			else
@@ -868,7 +868,7 @@ void Game::RunAProduction(ARegion * r,Production * p)
 				/* Everything else */
 				u->Event(AString("Produces ") + ItemString(po->item,ubucks) +
 						 " in " + r->ShortPrint(&regions) + ".");
-				u->Practise(po->skill);
+				u->Practice(po->skill);
 			}
 			delete u->monthorders;
 			u->monthorders = 0;
@@ -888,6 +888,21 @@ void Game::RunStudyOrders(ARegion * r)
 					delete u->monthorders;
 					u->monthorders = 0;
 				}
+			}
+		}
+	}
+}
+
+void Game::RunIdleOrders(ARegion *r)
+{
+	forlist((&r->objects)) {
+		Object *obj = (Object *)elem;
+		forlist((&obj->units)) {
+			Unit *u = (Unit *)elem;
+			if (u->monthorders && u->monthorders->type == O_IDLE) {
+				u->Event("Sits idle.");
+				delete u->monthorders;
+				u->monthorders = 0;
 			}
 		}
 	}
@@ -1090,7 +1105,7 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 				continue;
 			}
 
-			if (forbid && !(unit->IsAlive() && unit->canattack)) {
+			if (forbid && !(unit->canattack && unit->IsAlive())) {
 				unit->Error(AString("ENTER: Unable to attack ") +
 						*(forbid->name));
 				continue;
@@ -1106,7 +1121,7 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 					done = 1;
 					break;
 				}
-				if (!unit->IsAlive() || !unit->canattack) {
+				if (!unit->canattack || !unit->IsAlive()) {
 				  done = 1;
 				  break;
 				}

@@ -22,17 +22,22 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATONS
-// Date			Person				Comments
-// ----			------				--------
-// 2000/MAR/21	Azthar Septragen	Added roads.
+
 #include "object.h"
 #include "items.h"
 #include "skills.h"
 #include "gamedata.h"
 #include "unit.h"
 
-int ParseObject(AString * token)
+int LookupObject(AString *token)
+{
+	for (int i = 0; i < NOBJECTS; i++) {
+		if (*token == ObjectDefs[i].name) return i;
+	}
+	return -1;
+}
+
+int ParseObject(AString *token)
 {
 	int r = -1;
 	for (int i=O_DUMMY+1; i<NOBJECTS; i++) {
@@ -78,7 +83,8 @@ Object::~Object()
 void Object::Writeout(Aoutfile *f)
 {
 	f->PutInt(num);
-	f->PutInt(type);
+	if (type != -1) f->PutStr(ObjectDefs[type].name);
+	else f->PutStr("NO_OBJECT");
 	f->PutInt(incomplete);
 	f->PutStr(*name);
 	if (describe) {
@@ -87,7 +93,6 @@ void Object::Writeout(Aoutfile *f)
 		f->PutStr("none");
 	}
 	f->PutInt(inner);
-	f->PutInt(-1);
 	if (Globals->PREVENT_SAIL_THROUGH && !Globals->ALLOW_TRIVIAL_PORTAGE)
 		f->PutInt(prevdir);
 	else
@@ -98,10 +103,16 @@ void Object::Writeout(Aoutfile *f)
 		((Unit *) elem)->Writeout(f);
 }
 
-void Object::Readin(Ainfile * f,AList * facs,ATL_VER v)
+void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
 {
+	AString *temp;
+
 	num = f->GetInt();
-	type = f->GetInt();
+
+	temp = f->GetStr();
+	type = LookupObject(temp);
+	delete temp;
+
 	incomplete = f->GetInt();
 
 	if (name) delete name;
@@ -112,28 +123,25 @@ void Object::Readin(Ainfile * f,AList * facs,ATL_VER v)
 		describe = 0;
 	}
 	inner = f->GetInt();
-	int dummy = f->GetInt();
-	if (dummy == -1) {
-		prevdir = f->GetInt();
-		runes = f->GetInt();
-	} else
-		runes = dummy;
+	prevdir = f->GetInt();
+	runes = f->GetInt();
+
 	// Now, fix up a save file if ALLOW_TRIVIAL_PORTAGE is allowed, just
 	// in case it wasn't when the save file was made.
 	if (Globals->ALLOW_TRIVIAL_PORTAGE) prevdir = -1;
 	int i = f->GetInt();
 	for (int j=0; j<i; j++) {
-		Unit * temp = new Unit;
-		temp->Readin(f,facs,v);
+		Unit *temp = new Unit;
+		temp->Readin(f, facs, v);
 		temp->MoveUnit(this);
 	}
 	mages = ObjectDefs[type].maxMages;
 }
 
-void Object::SetName(AString * s)
+void Object::SetName(AString *s)
 {
 	if (s && (CanModify())) {
-		AString * newname = s->getlegal();
+		AString *newname = s->getlegal();
 		if(!newname) {
 			delete s;
 			return;
@@ -145,12 +153,12 @@ void Object::SetName(AString * s)
 	}
 }
 
-void Object::SetDescribe(AString * s)
+void Object::SetDescribe(AString *s)
 {
 	if (CanModify()) {
 		if (describe) delete describe;
 		if (s) {
-			AString * newname = s->getlegal();
+			AString *newname = s->getlegal();
 			delete s;
 			describe = newname;
 		} else describe = 0;
@@ -176,7 +184,7 @@ int Object::CanModify()
 	return (ObjectDefs[type].flags & ObjectType::CANMODIFY);
 }
 
-Unit * Object::GetUnit(int num)
+Unit *Object::GetUnit(int num)
 {
 	forlist((&units))
 		if (((Unit *) elem)->num == num)
@@ -184,7 +192,7 @@ Unit * Object::GetUnit(int num)
 	return 0;
 }
 
-Unit * Object::GetUnitAlias(int alias,int faction)
+Unit *Object::GetUnitAlias(int alias, int faction)
 {
 	// First search for units with the 'formfaction'
 	forlist((&units)) {
@@ -203,21 +211,21 @@ Unit * Object::GetUnitAlias(int alias,int faction)
 	return 0;
 }
 
-Unit * Object::GetUnitId(UnitId * id,int faction)
+Unit *Object::GetUnitId(UnitId *id, int faction)
 {
 	if (id == 0) return 0;
 	if (id->unitnum) {
 		return GetUnit(id->unitnum);
 	} else {
 		if (id->faction) {
-			return GetUnitAlias(id->alias,id->faction);
+			return GetUnitAlias(id->alias, id->faction);
 		} else {
-			return GetUnitAlias(id->alias,faction);
+			return GetUnitAlias(id->alias, faction);
 		}
 	}
 }
 
-int Object::CanEnter(ARegion * reg,Unit * u)
+int Object::CanEnter(ARegion *reg, Unit *u)
 {
 	if(!(ObjectDefs[type].flags & ObjectType::CANENTER) &&
 			(u->type == U_MAGE || u->type == U_NORMAL ||
@@ -302,12 +310,12 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 	}
 
 	forlist ((&units)) {
-		Unit * u = (Unit *) elem;
+		Unit *u = (Unit *) elem;
 		if (u->faction == fac) {
-			u->WriteReport(f,-1,1,1,1);
+			u->WriteReport(f, -1, 1, 1, 1);
 		} else {
 			if(present) {
-				u->WriteReport(f,obs,truesight,detfac,type != O_DUMMY);
+				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY);
 			} else {
 				if(((type == O_DUMMY) &&
 					(Globals->TRANSIT_REPORT &

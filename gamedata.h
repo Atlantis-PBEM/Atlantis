@@ -22,12 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date			Person				Comments
-// ----			------				--------
-// 2000/MAR/16	Larry Stanbery		Added new items for Realms of the Arcane.
-//									Corrected Runesword bug.
-// 2000/MAR/21	Azthar Septragen	Added roads.
+
 #ifndef RULES_H
 #define RULES_H
 
@@ -52,6 +47,7 @@ enum {
 	I_UNDERDWARF,
 	I_DESERTDWARF,
 	I_ORC,
+	I_GNOME,
 	I_SILVER,
 	I_GRAIN,
 	I_LIVESTOCK,
@@ -184,7 +180,6 @@ enum {
 	I_TITAN,
 	I_AMAZON,
 	I_OGREMAN,
-	I_GNOME,
 	I_HIGHLANDER,
 	I_MINOTAUR,
 	I_LANCE,
@@ -539,6 +534,7 @@ enum {
 	S_COOKING,
 	S_CREATE_FOOD,
 	S_BANKING,
+	S_QUARTERMASTER,
 	NSKILLS
 };
 
@@ -647,6 +643,7 @@ enum {
 	O_GEMAPPRAISER,
 	O_HPTOWER,
 	O_OBANK,
+	O_CARAVANSERAI,
 	NOBJECTS
 };
 

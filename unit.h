@@ -179,11 +179,11 @@ class Unit : public AListElem
 		int CheckDepend(int,SkillDepend &s);
 		int CanStudy(int);
 		int Study(int,int); /* Returns 1 if it succeeds */
-		int Practise(int);
+		int Practice(int);
 		void AdjustSkills();
 
 		/* Return 1 if can see, 2 if can see faction */
-		int CanSee(ARegion *,Unit *, int practise = 0);
+		int CanSee(ARegion *,Unit *, int practice = 0);
 		int CanCatch(ARegion *,Unit *);
 		int AmtsPreventCrime(Unit *);
 		int GetAttitude(ARegion *,Unit *); /* Get this unit's attitude toward
@@ -249,7 +249,7 @@ class Unit : public AListElem
 		int stomach_space;
 		int losses;
 		int free;
-		int practised; // Has this unit practised a skill this turn
+		int practiced; // Has this unit practiced a skill this turn
 
 		/* Orders */
 		int destroy;
@@ -276,6 +276,7 @@ class Unit : public AListElem
 		int inTurnBlock;
 		Order *presentMonthOrders;
 		int presentTaxing;
+		AList transportorders;
 		Unit *former;
 };
 

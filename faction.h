@@ -150,7 +150,7 @@ public:
     
     int CanCatch(ARegion *,Unit *);
 	/* Return 1 if can see, 2 if can see faction */
-    int CanSee(ARegion *,Unit *, int practise = 0);
+    int CanSee(ARegion *,Unit *, int practice = 0);
     
     void DefaultOrders();
     void TimesReward();

@@ -4,7 +4,10 @@
       rule-set, and make sure it isn't broken.
    -- Rework data storage so game files refer to items, etc. by abbreviation,
       rather than array index. Remove all array indices from game files.
+      (partially done)
    -- Move all ruleset static data to human readable (and editable) files
+   -- Get rid of indices totally, use item abbreviation or some other
+      tag to lookup in various tables.
    -- Localise all strings, to allow for internationalisation 
    -- Exit with an error code on errors
 
@@ -79,9 +82,6 @@
       addition to items -- If you advertised teaching would have to *FORCE*
       unit to teach the next turn even if noone bought the studying, that's
       the price of doing business in skills)]
-   -- Consider a modification to PRODUCE to allow automatic distribution
-      of produced items to some unit (or units) in some proportion.
-      [Suggested in atlantisdev article #57]
    -- It would be nice to have 'overwriting' errors only occur when the
       order being overridden was non repeating.
    -- It might be nice to have "no such unit" errors only occur in
@@ -89,6 +89,7 @@
    -- Possibly modify the orders processor to replace 'NEW XX' for the
       faction which owns the unit in question (or which the unit in question
       considers ally?) with the actual unit number in templated orders.
+   -- Transport/deliver orders (in progress)
 
 ** Orders, Conditional
    -- Consider having 'conditional orders' specifically 'AT x,y,z'. 

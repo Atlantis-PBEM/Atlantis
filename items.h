@@ -22,10 +22,6 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date        Person          Comments
-// ----        ------          --------
-// 2000/MAR/14 Larry Stanbery  Added enhanced production capability.
 #ifndef ITEMS_CLASS
 #define ITEMS_CLASS
 
@@ -80,11 +76,15 @@ class ItemType
 			CANTGIVE = 0x1,
 			DISABLED = 0x2,
 			NOMARKET = 0x4,
-			// This item requires ANY of its inputs, not ALL of them
+			// This item requires ANY of its inputs, not ALL
+			// of them
 			ORINPUTS = 0x8,
-			// A number of items are produced equal to the producer's
-			// skill, based on a fixed number of inputs
+			// A number of items are produced equal to the
+			// producer's skill, based on a fixed number of
+			// inputs
 			SKILLOUT = 0x10,
+			// This item cannot be transported.
+			NOTRANSPORT = 0x20
 		};
 		int flags;
 
@@ -118,7 +118,7 @@ class ItemType
 		int mult_val;
 };
 
-extern ItemType * ItemDefs;
+extern ItemType *ItemDefs;
 
 class ManType
 {
@@ -128,7 +128,7 @@ class ManType
 		int skills[6];
 };
 
-extern ManType * ManDefs;
+extern ManType *ManDefs;
 
 class MonType
 {
@@ -154,17 +154,17 @@ class MonType
 		char *name;
 };
 
-extern MonType * MonDefs;
+extern MonType *MonDefs;
 
 enum {
 	SLASHING,		// e.g. sword attack (This is default)
 	PIERCING,		// e.g. spear or arrow attack
 	CRUSHING,		// e.g. mace attack
 	CLEAVING,		// e.g. axe attack
-	ARMORPIERCING,	// e.g. crossbow double bow
-	MAGIC_ENERGY,	// e.g. fire, dragon breath
-	MAGIC_SPIRIT,	// e.g. black wind
-	MAGIC_WEATHER,	// e.g. tornado
+	ARMORPIERCING,		// e.g. crossbow double bow
+	MAGIC_ENERGY,		// e.g. fire, dragon breath
+	MAGIC_SPIRIT,		// e.g. black wind
+	MAGIC_WEATHER,		// e.g. tornado
 	NUM_WEAPON_CLASSES
 };
 
@@ -287,9 +287,11 @@ extern BattleItemType *BattleItemDefs;
 int ParseGiveableItem(AString *);
 int ParseAllItems(AString *);
 int ParseEnabledItem(AString *);
+int ParseTransportableItem(AString *);
 int ParseBattleItem(int);
+int LookupItem(AString *);
 
-AString ItemString(int type,int num);
+AString ItemString(int type, int num);
 AString *ItemDescription(int item, int full);
 
 int IsSoldier(int);
@@ -316,13 +318,13 @@ class ItemList : public AList
 		void Readin(Ainfile *);
 		void Writeout(Aoutfile *);
 
-		AString Report(int,int,int);
+		AString Report(int, int, int);
 		AString BattleReport();
-		AString ReportByType(int,int,int,int);
+		AString ReportByType(int, int, int, int);
 
 		int Weight();
 		int GetNum(int);
-		void SetNum(int,int); /* type, number */
+		void SetNum(int, int); /* type, number */
 		int CanSell(int);
 		void Selling(int, int); /* type, number */
 };

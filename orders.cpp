@@ -24,7 +24,7 @@
 // END A3HEADER
 #include "orders.h"
 
-char * od[] = {
+char *od[] = {
 	"#atlantis",
 	"#end",
 	"unit",
@@ -46,6 +46,7 @@ char * od[] = {
 	"declare",
 	"describe",
 	"destroy",
+	"distribute",
 	"end",
 	"endturn",
 	"enter",
@@ -59,6 +60,7 @@ char * od[] = {
 	"give",
 	"guard",
 	"hold",
+	"idle",
 	"leave",
 	"move",
 	"name",
@@ -82,15 +84,16 @@ char * od[] = {
 	"study",
 	"tax",
 	"teach",
+	"transport",
 	"turn",
 	"weapon",
 	"withdraw",
 	"work",
 };
 
-char ** OrderStrs = od;
+char **OrderStrs = od;
 
-int Parse1Order(AString * token)
+int Parse1Order(AString *token)
 {
 	for (int i=0; i<NORDERS; i++)
 		if (*token == OrderStrs[i]) return i;
@@ -100,6 +103,7 @@ int Parse1Order(AString * token)
 Order::Order()
 {
 	type = NORDERS;
+	quiet = 0;
 }
 
 Order::~Order() {
@@ -324,10 +328,35 @@ EvictOrder::EvictOrder()
 EvictOrder::~EvictOrder()
 {
 }
+
 BankOrder::BankOrder()
 {
        type = O_BANK;
 }
+
 BankOrder::~BankOrder()
 {
+}
+
+IdleOrder::IdleOrder()
+{
+	type = O_IDLE;
+}
+
+IdleOrder::~IdleOrder()
+{
+}
+
+TransportOrder::TransportOrder()
+{
+	type = O_TRANSPORT;
+	item = -1;
+	amount = 0;
+	except = 0;
+	target = NULL;
+}
+
+TransportOrder::~TransportOrder()
+{
+	if(target) delete target;
 }

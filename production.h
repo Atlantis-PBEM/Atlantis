@@ -45,7 +45,6 @@ public:
   int baseamount;
   int amount;
   int skill;
-  int level;
   int productivity;
   int activity;
 };

@@ -49,6 +49,14 @@ static AString DefType(int atype)
 	return AttType(atype);
 }
 
+int LookupItem(AString *token)
+{
+	for(int i = 0; i < NITEMS; i++) {
+			if (*token == ItemDefs[i].abr) return i;
+	}
+	return -1;
+}
+
 int ParseAllItems(AString *token)
 {
 	int r = -1;
@@ -73,7 +81,7 @@ int ParseAllItems(AString *token)
 	return r;
 }
 
-int ParseEnabledItem(AString * token)
+int ParseEnabledItem(AString *token)
 {
 	int r = -1;
 	for (int i=0; i<NITEMS; i++) {
@@ -101,12 +109,41 @@ int ParseEnabledItem(AString * token)
 	return r;
 }
 
-int ParseGiveableItem(AString * token)
+int ParseGiveableItem(AString *token)
 {
 	int r = -1;
 	for (int i=0; i<NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(ItemDefs[i].flags & ItemType::CANTGIVE) continue;
+		if ((ItemDefs[i].type & IT_MONSTER) &&
+				ItemDefs[i].index == MONSTER_ILLUSION) {
+			if ((*token == (AString("i") + ItemDefs[i].name)) ||
+				(*token == (AString("i") + ItemDefs[i].names)) ||
+				(*token == (AString("i") + ItemDefs[i].abr))) {
+				r = i;
+				break;
+			}
+		} else {
+			if ((*token == ItemDefs[i].name) ||
+				(*token == ItemDefs[i].names) ||
+				(*token == ItemDefs[i].abr)) {
+				r = i;
+				break;
+			}
+		}
+	}
+	if(r != -1) {
+		if(ItemDefs[r].flags & ItemType::DISABLED) r = -1;
+	}
+	return r;
+}
+
+int ParseTransportableItem(AString *token)
+{
+	int r = -1;
+	for (int i=0; i<NITEMS; i++) {
+		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if(ItemDefs[i].flags & ItemType::NOTRANSPORT) continue;
 		if ((ItemDefs[i].type & IT_MONSTER) &&
 				ItemDefs[i].index == MONSTER_ILLUSION) {
 			if ((*token == (AString("i") + ItemDefs[i].name)) ||
@@ -937,43 +974,47 @@ AString Item::Report(int seeillusions)
 	return ret;
 }
 
-void Item::Writeout(Aoutfile * f)
+void Item::Writeout(Aoutfile *f)
 {
-	f->PutInt(type);
-	f->PutInt(num);
+	AString temp;
+	if (type != -1) temp = AString(num) + " " + ItemDefs[type].abr;
+	else temp = "-1 NO_ITEM";
+	f->PutStr(temp);
 }
 
-void Item::Readin(Ainfile * f)
+void Item::Readin(Ainfile *f)
 {
-	type = f->GetInt();
-	num = f->GetInt();
+	AString *temp = f->GetStr();
+	AString *token = temp->gettoken();
+	num = token->value();
+	delete token;
+	token = temp->gettoken();
+	type = LookupItem(token);
+	delete token;
+	delete temp;
 }
 
-void ItemList::Writeout(Aoutfile * f)
+void ItemList::Writeout(Aoutfile *f)
 {
 	f->PutInt(Num());
-	forlist (this)
-		((Item *) elem)->Writeout(f);
+	forlist (this) ((Item *) elem)->Writeout(f);
 }
 
-void ItemList::Readin(Ainfile * f)
+void ItemList::Readin(Ainfile *f)
 {
 	int i = f->GetInt();
 	for (int j=0; j<i; j++) {
-		Item * temp = new Item;
+		Item *temp = new Item;
 		temp->Readin(f);
-		if (temp->num < 1) {
-			delete temp;
-		} else {
-			Add(temp);
-		}
+		if (temp->num < 1) delete temp;
+		else Add(temp);
 	}
 }
 
 int ItemList::GetNum(int t)
 {
 	forlist(this) {
-		Item * i = (Item *) elem;
+		Item *i = (Item *) elem;
 		if (i->type == t) return i->num;
 	}
 	return 0;
@@ -982,9 +1023,16 @@ int ItemList::GetNum(int t)
 int ItemList::Weight()
 {
 	int wt = 0;
+	int frac = 0;
 	forlist(this) {
-		Item * i = (Item *) elem;
-		wt += ItemDefs[i->type].weight * i->num;
+		Item *i = (Item *) elem;
+		if (ItemDefs[i->type].weight == 0) frac += i->num;
+		else wt += ItemDefs[i->type].weight * i->num;
+	}
+	if (Globals->FRACTIONAL_WEIGHT > 0) {
+		int temp = frac/FRACTIONAL_WEIGT;
+		if (temp) wt += temp;
+		else if (frac) wt++;
 	}
 	return wt;
 }
@@ -1021,7 +1069,7 @@ AString ItemList::BattleReport()
 {
 	AString temp;
 	forlist(this) {
-		Item * i = (Item *) elem;
+		Item *i = (Item *) elem;
 		if (ItemDefs[i->type].combat) {
 			temp += ", ";
 			temp += i->Report(0);
@@ -1042,7 +1090,7 @@ AString ItemList::ReportByType(int type,int obs,int seeillusions,int nofirstcomm
     AString temp;
     forlist(this) {
 	int report = 0;
-	Item * i = (Item *) elem;
+	Item *i = (Item *) elem;
 	switch (type) {
 	    case 0: if (ItemDefs[i->type].type & IT_MAN) report = 1;
 		break;
@@ -1092,19 +1140,19 @@ void ItemList::SetNum(int t,int n)
 {
 	if (n) {
 		forlist(this) {
-			Item * i = (Item *) elem;
+			Item *i = (Item *) elem;
 			if (i->type == t) {
 				i->num = n;
 				return;
 			}
 		}
-		Item * i = new Item;
+		Item *i = new Item;
 		i->type = t;
 		i->num = n;
 		Add(i);
 	} else {
 		forlist(this) {
-			Item * i = (Item *) elem;
+			Item *i = (Item *) elem;
 			if (i->type == t) {
 				Remove(i);
 				delete i;
