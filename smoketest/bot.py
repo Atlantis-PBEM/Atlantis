@@ -20,22 +20,27 @@ def generateturn(report, template):
             if firstunit == 'no':
                 orders += "option template map\n"
                 orders += "option notimes\n"
-                orders += "declare default hostile\n"
-                orders += "declare 1 neutral\n"
-                orders += "declare 2 neutral\n"
+                #orders += "declare default hostile\n"
+                #orders += "declare 1 neutral\n"
+                #orders += "declare 2 neutral\n"
                 firstunit = 'found'
             
             # for a test, we'll move around randomly
-            temp = int(random.random()*len(directions))
-            temp2 = int(random.random()*len(directions))
-            orders += "move "+directions[temp]+" "+directions[temp2]+"\n"
-            
+            if random.random() >= 0.8:
+                temp = int(random.random()*len(directions))
+                temp2 = int(random.random()*len(directions))
+                orders += "move "+directions[temp]+" "+directions[temp2]+"\n"
+            elif random.random() >= 0.1:
+                orders += "work\n"
+            else:
+                orders += "study combat\n"
             # 1. do nothing (ie work/tax if not enough silver)
             #orders += "@work\n"
             # 2. study combat/buy men (if it has enough)
             # 3. form a new unit (if it has more than 10 men?)
             # 50% chance of new unit
-            if random.random() >= 0.5:
+            orders += "tax\n"
+            if random.random() >= 0.8:
                 unitnum = int(random.random()*1000)+1
                 #orders += "give new "+str(unitnum)+" 100 silv"
                 formstring = "form "+str(unitnum)+"\n"
