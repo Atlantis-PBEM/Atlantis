@@ -2374,6 +2374,7 @@ int ARegion::IsStartingCity() {
 
 int ARegion::IsSafeRegion()
 {
+	if(type == R_NEXUS) return 1;
     return( Globals->SAFE_START_CITIES && IsStartingCity() );
 }
 
