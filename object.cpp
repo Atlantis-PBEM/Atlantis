@@ -311,7 +311,10 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 
 	forlist ((&units)) {
 		Unit *u = (Unit *) elem;
-		int isally = fac->GetAttitude(u->faction->num);
+		int isally = 0;
+		if (!(u->faction->IsNPC())) {
+			isally= fac->GetAttitude(u->faction->num) == A_ALLY;
+		}
 		if (u->faction == fac) {
 			u->WriteReport(f, -1, 1, 1, 1, isally);
 		} else {

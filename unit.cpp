@@ -402,7 +402,7 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 	if (obs == 2) {
 		temp += AString("* ") + *name;
 	} else {
-		if (faction->allyequals == 1 && isally) {
+		if (faction->allyequals && isally) {
 			temp += AString("= ") +*name;
 		} else {
 			temp += AString("- ") + *name;

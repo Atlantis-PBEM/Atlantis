@@ -5,10 +5,13 @@ directions = ['n','s','se','sw','ne','nw']
 directiondict = {'North':'n', 'Northeast':'ne', 'Northwest':'nw',
                  'South':'s', 'Southeast':'se', 'Southwest':'sw' }
 
+attitudes = ['hostile', 'unfriendly', 'neutral', 'friendly', 'ally',]
+                
 def generateturn(report, template):
     """Given a report and a template, return a set of orders as a string."""
     firstunit = 'no'
     orders = ''
+    maxfactionfound = 0
     
     # Need to concatenate lines in the report if they don't have a . on the end!
     tempreport = []
@@ -186,7 +189,7 @@ def generateturn(report, template):
             units[dictstring]=[]
         
         # Now for the units...
-        if line.startswith('* ') or line.startswith('- '):
+        if line.startswith('* ') or line.startswith('- ') or line.startswith('= '):
             unit = {}
             unit['skills']=[]
             unit['items']=[]
@@ -225,7 +228,23 @@ def generateturn(report, template):
             else:
                 #print "Found a wacky unit:",line
                 continue
-                
+            
+            #Grab the unit number and faction number
+            wibble = re.search('.*\((\d+)\).*\((\d+)\)', unit['main'])
+            if wibble != None and len(wibble.groups()) == 2:
+                unit['faction'] = int(wibble.groups()[1])
+                unit['unitnum'] = int(wibble.groups()[0])
+                print "Found numbers: FN ==",unit['faction'],"and UN ==",unit['unitnum']
+                if unit['faction'] > maxfactionfound:
+                    maxfactionfound = unit['faction']
+            else:
+                wibble = re.search('\((\d+)\)', unit['main'])
+                if wibble != None and len(wibble.groups()) == 1:
+                    unit['unitnum'] = int(wibble.groups()[0])
+                    unit['faction'] = 0
+                    print "Found non-revealing unit: UN ==",unit['unitnum']
+            
+            
             itemlist=unit['main'].split(',')
             #print itemlist
             for thingo in itemlist:
@@ -269,6 +288,15 @@ def generateturn(report, template):
             if firstunit == 'no':
                 orders += "option template map\n"
                 orders += "option notimes\n"
+                #orders += "option allyequals\n"
+
+                #declare towards a random faction
+                decfaction = int(random.random()*maxfactionfound)
+                orders += "declare "+str(decfaction)+" "
+                
+                decattitude = int(random.random()*len(attitudes))
+                orders += attitudes[decattitude] + "\n"
+                
                 #orders += "declare default hostile\n"
                 #orders += "declare 1 neutral\n"
                 #orders += "declare 2 neutral\n"
