@@ -1027,15 +1027,17 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 		/* 4.1 Check whether defense is allowed against this weapon */
 		if((flags & WeaponType::NODEFENSE) && (tlev > 0)) tlev = 0;
 
-		/* 4.2 Check relative weapon length */
-		int attLen = 1;
-		int defLen = 1;
-		if(flags & WeaponType::LONG) attLen = 2;
-		else if(flags & WeaponType::SHORT) attLen = 0;
-		if(tarFlags & WeaponType::LONG) defLen = 2;
-		else if(tarFlags & WeaponType::SHORT) defLen = 0;
-		if(attLen > defLen) attackLevel++;
-		else if(defLen > attLen) tlev++;
+		if(!(flags & WeaponType::RANGED)) {
+			/* 4.2 Check relative weapon length */
+			int attLen = 1;
+			int defLen = 1;
+			if(flags & WeaponType::LONG) attLen = 2;
+			else if(flags & WeaponType::SHORT) attLen = 0;
+			if(tarFlags & WeaponType::LONG) defLen = 2;
+			else if(tarFlags & WeaponType::SHORT) defLen = 0;
+			if(attLen > defLen) attackLevel++;
+			else if(defLen > attLen) tlev++;
+		}
 
 		/* 4.3 Add bonuses versus mounted */
 		if(tar->riding != -1) attackLevel += mountBonus;
