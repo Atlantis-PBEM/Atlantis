@@ -556,12 +556,13 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 void Game::RunBuildHelpers(ARegion *r)
 {
 	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
+		Object *obj = (Object *) elem;
 		forlist ((&obj->units)) {
-			Unit * u = (Unit *) elem;
+			Unit *u = (Unit *) elem;
 			if (u->monthorders) {
 				if (u->monthorders->type == O_BUILD) {
 					BuildOrder *o = (BuildOrder *)u->monthorders;
+					Object *tarobj = NULL;
 					if(o->target) {
 						Unit *target = r->GetUnitId(o->target,u->faction->num);
 						if(!target) {
@@ -587,8 +588,12 @@ void Game::RunBuildHelpers(ARegion *r)
 							u->monthorders = 0;
 							continue;
 						}
-						if(u->object != target->object)
-							u->MoveUnit(target->object);
+						tarobj = target->build;
+						if (tarobj == NULL) tarobj = target->object;
+						if(u->object != tarobj)
+							u->MoveUnit(tarobj);
+					} else if (u->build != NULL && u->build != u->object) {
+						u->MoveUnit(u->build);
 					}
 				}
 			}

@@ -1551,6 +1551,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			obj->type = ot;
 			obj->incomplete = ObjectDefs[obj->type].cost;
 			unit->MoveUnit(obj);
+			unit->build = obj;
 			unit->object->region->objects.Add(obj);
 		}
 	}

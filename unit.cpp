@@ -543,6 +543,7 @@ void Unit::ClearOrders()
 	canattack = 1;
 	nomove = 0;
 	enter = 0;
+	build = NULL;
 	leftShip = 0;
 	destroy = 0;
 	if (attackorders) delete attackorders;
@@ -1082,7 +1083,7 @@ int Unit::MaintCost()
 
 void Unit::Short(int needed, int hunger)
 {
-	int n = 0, i, levels;
+	int n = 0, levels;
 
 	if (faction->IsNPC())
 		return; // Don't starve monsters and the city guard!
@@ -1883,7 +1884,7 @@ int Unit::SkillLevels()
 	int levels = 0;
 	forlist(&skills) {
 		Skill *s = (Skill *)elem;
-		levels += GetLevelByDays(s->days);
+		levels += GetLevelByDays(s->days/GetMen());
 	}
 	return levels;
 }

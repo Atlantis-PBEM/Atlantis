@@ -699,3 +699,9 @@ Changes from 4.0.10 -> 5.0.0
    -- Fixed bug where completed buildings weren't providing combat protection.
    -- Add some additional information to battle reports to help out the
       author of atlaclient.
+   -- Fixed a bug where issuing a build order and an enter order on the same
+      turn caused you to be in the wrong building and thus fail to build.
+   -- Fixed bug in construct gate which made it successful 100% of the time
+      at level 1, instead of 20% at level 1 up to 100% at level 5.
+   -- Fixed bug where @endturn failed to work.
+   -- Fixed another bug in skill based maintenance.
