@@ -436,18 +436,16 @@ void Arules::ClassTagText(const AString &tag, const AString &cls,
 	Enclose(1, temp);
 	PutStr(text);
 	Enclose(0, tag);
-	/*
-	PutStr(AString("<")+tag+" CLASS=\""+cls+"\">"+ text + "</" + tag + ">");
-	*/
 }
 
 void Arules::CommandExample(const AString &header, const AString &examp)
 {
 	PutStr(header);
-	PutStr("<BR>");
+	PutStr("<P></P>");
 	Enclose(1, "PRE");
-	PutStr(examp);
+	PutNoFormat(examp);
 	Enclose(0, "PRE");
+	PutStr("<P></P>");
 }
 
 AString Arules::Link(const AString &href, const AString &text)

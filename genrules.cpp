@@ -37,6 +37,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	AString temp, temp2;
 	int cap;
 	int i, j;
+	int last = -1;
 
 	if(f.OpenByName(rules) == -1) {
 		return 0;
@@ -2696,560 +2697,645 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"or attack again for the rest of the turn.";
 	f.PutStr(temp);
 	f.PutStr("<P></P>");
+	if(has_stea || has_obse) {
+		f.PutStr(f.LinkRef("stealthobs"));
+		f.ClassTagText("DIV", "rule", "");
+		temp = (has_stea ? "Stealth" : "");
+		if(has_obse) {
+			if(has_stea) temp += " and ";
+			temp += "Observation";
+		}
+		f.TagText("H2", temp);
+		if(has_stea && has_obse) {
+			temp = "The Stealth skill is used to hide units, while the "
+				"Observation skill is used to see units that would otherwise "
+				"be hidden. A unit can be seen only if you have at least "
+				"one unit in the same region, with an Observation skill at "
+				"least as high as that unit's Stealth skill. If your "
+				"Observation skill is equal to the unit's Stealth skill, "
+				"you will see the unit, but not the name of the owning "
+				"faction. If your Observation skill is higher than the "
+				"unit's Stealth skill, you will also see the name of the "
+				"faction that owns the unit.";
+		} else if(has_stea) {
+			temp = "The Stealth skill is used to hide units. A unit can be "
+				"seen only if it doesn't know the Stealth skill and if you "
+				"have at least one unit in the same region.";
+		} else if(has_obse) {
+			temp = "The Observation skill is used to see information about "
+				"units that would otherwise be hidden.  If your unit knows "
+				"the Observation skill, it will see the name of the faction "
+				"that owns any unit in the same region.";
+		}
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		if(has_stea) {
+			temp = "Regardless of Stealth skill, units are always visible "
+				"when participating in combat; when guarding a region with "
+				"the Guard flag; or when in a building or aboard a ship.";
+			if(has_obse) {
+				temp += " However, in order to see the faction that owns "
+					"the unit, you will still need a higher Observation "
+					"skill than the unit's Stealth skill.";
+			}
+			f.PutStr(temp);
+			f.PutStr("<P></P>");
+			f.PutStr(f.LinkRef("stealthobs_stealing"));
+			f.TagText("H3", "Stealing:");
+			temp = AString("The ") + f.Link("#steal", "STEAL") +
+				" order is a way to steal items from other factions without "
+				"a battle.  The order can only be issued by a one-man unit. "
+				"The order specifies a target unit; the thief will then "
+				"attempt to steal the specified item from the target unit.";
+			f.PutStr(temp);
+			f.PutStr("<P></P>");
+			if(has_obse) {
+				temp = "If the thief has higher Stealth than any of the "
+					"target faction's units have Observation (i.e. the "
+					"thief cannot be seen by the target faction), the theft "
+					"will succeed.";
+			} else {
+				temp = "The thief must know Stealth to attempt theft.";
+			}
+			temp += "The target faction will be told what was stolen, but "
+				"not by whom.  If the specified item is silver, then $200 "
+				"or half the total available, whichever is less, will be "
+				"stolen.  If it is any other item, then only one will be "
+				"stolen (if available).";
+			f.PutStr(temp);
+			f.PutStr("<P></P>");
+			if(has_obse) {
+				temp = "Any unit with high enough Observation to see the "
+					"thief will see the attempt to steal, whether the "
+					"attempt is successful or not.  Allies of the target "
+					"unit will prevent the theft, if they have high enough "
+					"Observation to see the unit trying to steal.";
+				f.PutStr(temp);
+				f.PutStr("<P></P>");
+			}
+			f.PutStr(f.LinkRef("stealthobs_assassination"));
+			f.TagText("H3", "Assassination:");
+			temp = AString("The ") + f.Link("#assassinate", "ASSASSINATE") +
+				"order is a way to kill another person without attacking "
+				"and going through an entire battle. This order can only be "
+				"issued by a one-man unit, and specifies a target unit.  If "
+				"the target unit contains more than one person, then one "
+				"will be singled out at random.";
+			f.PutStr(temp);
+			f.PutStr("<P></P>");
+			if(has_obse) {
+				temp = "Success for assassination is determined as for "
+					"theft, i.e. the assassin will fail if any of the "
+					"target faction's units can see him.  In this case, "
+					"the assassin will flee, and the target faction will "
+					"be informed which unit made the attempt.  As with "
+					"theft, allies of the target unit will prevent the "
+					"assassination from succeeding, if their Observation "
+					"level is high enough.";
+				f.PutStr(temp);
+				f.PutStr("<P></P>");
+				temp = "";
+			} else {
+				temp = "The assasin must know Stealh to attempt "
+					"assassination.";
+			}
+			if(has_obse) {
+				temp += "If the assassin has higher stealth than any of the "
+					"target faction's units have Observations, then a "
+					"one-on-one ";
+			} else {
+				temp += " A one-on-one ";
+			}
+			temp += "fight will take place between the assassin and the "
+				"target character.  The assassin automatically gets a "
+				"free round of attacks; after that, the battle is handled "
+				"like a normal fight, with the exception that neither "
+				"assassin nor victim can use any armor";
+			temp2 = "";
+			last = -1;
+			comma = 0;
+			for(i = 0; i < NITEMS; i++) {
+				if(!(ItemDefs[i].type & IT_ARMOR)) continue;
+				if(!(ItemDefs[i].type & IT_NORMAL)) continue;
+				if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+				if(last == -1) {
+					last = i;
+					continue;
+				}
+				temp2 += ItemDefs[last].name;
+				temp2 += ", ";
+				last = i;
+				comma++;
+			}
+			if(comma) temp2 += "or ";
+			if(last != -1) {
+				temp2 += ItemDefs[last].name;
+				temp += " except ";
+				temp += temp2;
+			}
+			temp += ".";
+			if(last == -1)
+				temp += " Armor ";
+			else
+				temp += " Most armor ";
+			temp += "is forbidden for the assassin because it would "
+				"make it too hard to sneak around, and for the victim "
+				"because he was caught by surprise with his armor off. If "
+				"the assassin wins, the target faction is told merely that "
+				"the victim was assassinated, but not by whom.  If the "
+				"victim wins, then the target faction learns which unit "
+				"made the attempt.  (Of course, this does not necessarily "
+				"mean that the assassin's faction is known.)  The winner of "
+				"the fight gets 50 percent of the loser's property as usual.";
+			f.PutStr(temp);
+			f.PutStr("<P></P>");
+			temp = f.Link("#steal", "STEAL") + " and " +
+				f.Link("#assassinate", "ASSASSINATE") +
+				"are not full month orders, and do not interfere with other "
+				"activities, but a unit can only issue one " +
+				f.Link("#steal", "STEAL") + " order or one " +
+				f.Link("#assassinate", "ASSASSINATE") + " order in a month.";
+			f.PutStr(temp);
+			f.PutStr("<P></P>");
+		}
+	}
+	f.PutStr(f.LinkRef("magic"));
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Magic");
+	temp = "A character enters the world of magic in Atlantis by beginning "
+		"study on one of the Foundation magic skills.  Only one man units";
+	if(!Globals->MAGE_NONLEADERS && Globals->LEADERS_EXIST)
+		temp += ", with the man being a leader,";
+	temp += " are permitted to study these skills. ";
+	if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
+		temp += "The number of these units (know as \"magicians\" or "
+			"\"mages\") that a faction may own is ";
+		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
+			temp += "limited.";
+		else
+			temp += "determined by the faction's type.";
+		temp += " Any attempt to gain more, either through study, or by "
+			"transfer from another faction, will fail.  In addition, mages ";
+	} else {
+		temp += "Mages ";
+	}
+	temp += "may not ";
+	temp += f.Link("#give", "GIVE") + " men at all; once a unit becomes a "
+		"mage (by studying one of the Foundations), the unit number is "
+		"fixed. (The mage may be given to another faction using the ";
+	temp += f.Link("#give", "GIVE") + " UNIT order.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("magic_skills"));
+	f.TagText("H3", "Magic Skills:");
+	temp = "Magic skills are the same as normal skills, with a few "
+		"differences.  The basic magic skills, called Foundations, are ";
+	last = -1;
+	comma = 0;
+	j = 0;
+	for(i = 0; i < NSKILLS; i++) {
+		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if(!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
+		j++;
+		if(last == -1) {
+			last = i;
+			continue;
+		}
+		temp += SkillDefs[last].name;
+		temp += ", ";
+		comma++;
+		last = i;
+	}
+	if(comma) temp += "and ";
+	temp += SkillDefs[last].name;
+	temp += ". To become a mage, a unit undertakes study in one of these "
+		"Foundations.  As a unit studies the Foundations, he will be able "
+		"to study deeper into the magical arts; the additional skills that "
+		"he may study will be indicated on your turn report.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "There are two major differences between Magic skills and most "
+		"normal skills. The first is that the ability to study Magic skills "
+		"sometimes depends on lower level Magic skills.  The Magic skills "
+		"that a mage may study are listed on his turn report, so he knows "
+		"which areas he may pursue.  Studying higher in the Foundation "
+		"skills, and certain other Magic skills, will make other skills "
+		"available to the mage. Also, study into a magic skill above "
+		"level 2 requires that the mage be located in some sort of "
+		"building which can offer protection.  Trade structures do not "
+		"count. If the mage is not in such a structure, his study rate "
+		"is cut in half, as he does not have the proper environment and "
+		"equipment for research.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("magic_foundations"));
+	f.TagText("H3", "Foundations:");
+	temp = "The ";
+	temp += j;
+	temp += "Foundation skills are called ";
+	last = -1;
+	comma = 0;
+	for(i = 0; i < NSKILLS; i++) {
+		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if(!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
+		if(last == -1) {
+			last = i;
+			continue;
+		}
+		temp += SkillDefs[last].name;
+		temp += ", ";
+		comma++;
+		last = i;
+	}
+	if(comma) temp += "and ";
+	temp += SkillDefs[last].name;
+	temp += ".";
+	/* XXX -- This needs better handling! */
+	/* Add each foundation here if it exists */
+	if(!(SkillDefs[S_FORCE].flags & SkillType::DISABLED)) {
+		temp += " Force indicates the quantity of magical energy that a "
+			"mage is able to channel (a Force rating of 0 does not mean "
+			"that the mage can channel no magical energy at all, but only "
+			"a minimal amount).";
+	}
+	if(!(SkillDefs[S_PATTERN].flags & SkillType::DISABLED)) {
+		temp += " Pattern indicates ability to handle complex patterns, and "
+			"is important for things like healing and nature spells. ";
+	}
+	if(!(SkillDefs[S_SPIRIT].flags & SkillType::DISABLED)) {
+		temp += " Spirit deals with meta-effects that lie outside the scope "
+			"of the physical world.";
+	}
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("magic_furtherstudy"));
+	f.TagText("H3", "Further Magic Study:");
+	temp = "Once a mage has begun study of one or more Foundations, more "
+		"skills that he may study will begin to show up on his report. "
+		"These skills are the skills that give a mage his power.  As with "
+		"normal skills, when a mage achieves a new level of a magic skill, "
+		"he will be given a skill report, describing the new powers (if "
+		"any) that the new skill confers.  The ";
+	temp += f.Link("#show", "SHOW") + " order may be used to show this "
+		"information on future reports.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("magic_usingmagic"));
+	f.TagText("H3", "Using Magic:");
+	temp = "A mage may use his magical power in three different ways, "
+		"depending on the type of spell he wants to use.  Some spells, "
+		"once learned, take effect automatically and are considered "
+		"always to be in use; these spells do not require any order to "
+		"take effect.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Secondly, some spells are for use in combat. A mage may specify "
+		"that he wishes to use a sell in combat by issuing the ";
+	temp += f.Link("#combat", "COMBAT") + " order.  A combat spell "
+		"specified in this way will only be used if the mage finds "
+		"himself taking part in a battle.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "The third type of spell use is for spells that take an entire "
+		"month to cast.  These spells are cast by the mage issuing the ";
+	temp += f.Link("#cast", "CAST") + " order. Because " +
+		f.Link("#cast", "CAST") + " takes an entire month, a mage may use "
+		"only one of this type of spell each turn. Note, however, that a ";
+	temp += f.Link("#cast", "CAST") + " order is not a full month order; "
+		"a mage may still ";
+	temp += f.Link("#move", "MOVE") + ", ";
+	temp += f.Link("#study", "STUDY") + ", or use any other moth long order. ";
+	temp += "The justification for this (as well as being for game balance) "
+		"is that a spell drains a mage of his magic power for the month, "
+		"but does not actually take the entire month to cast.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "The description that a mage receives when he first learns a "
+		"spell specifies the manner in which the spell is used (automatic, "
+		"in combat, or by casting).";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("magic_incombat"));
+	f.TagText("H3", "Magic in Combat:");
+	temp = "NOTE: This section is rather vague, and quite advanced.  You "
+		"may want to wait until you have figured out other parts of "
+		"Atlantis before trying to understand exactly all of the rules in "
+		"this section.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Although the magic skills and spells are unspecified in these "
+		"rules, left for the players to discover, the rules for combat "
+		"spells' interaction are spelled out here.  There are five major "
+		"types of attacks, and defenses: Combat, Ranged, Energy, Weather, "
+		"and Spirit.  Every attack and defense has a type, and only the "
+		"appropriate defense is effective against an attack.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Defensive spells are cast at the beginning of each round of "
+		"combat, and will have a type of attack they deflect, and skill "
+		"level (Defensive spells are generally called Shields).  Every "
+		"time an attack is launched against an army, it must first attack "
+		"the highest level Shield of the same type as the attack, before "
+		"it may attack a soldier directly. Note that an attack only has "
+		"to attack the highest Shield, any other Shields of the same "
+		"type are ignored for that attack.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "An attack spell (and any other type of attack) also has an "
+		"attack type, and attack level, and a number of blows it deals. "
+		"When the attack spell is cast, it is matched up against the most "
+		"powerful defensive spell of the appropriate type that the other "
+		"army has cast.  If the other army has not cast any applicable "
+		"defensive spells, the attack goes through unmolested.  Unlike "
+		"normal combat however, men are at a disadvantage to defending "
+		"against spells.   Men which are in the open (not protected by "
+		"a building) have an effective skill of -2 unless they have a "
+		"shield or some other defensive magic.  Some monsters "
+		"have bonuses to resisting some attacks but are more susceptible "
+		"to others. The skill level of the attack spell and the effective "
+		"skill for defense are matched against each other.  The formula "
+		"for determining the victor between a defensive and offensive "
+		"spell is the same as for a contest of soldiers; if the levels "
+		"are equal, there is a 1:1 chance of success, and so on.  If the "
+		"offensive spell is victorious, the offensive spell deals its blows "
+		"to the defending army, and the Shield in question is destroyed "
+		"(thus, it can be useful to have more than one of the same type "
+		"of Shield in effect, as the other Shield will take the place of "
+		"the destroyed one).  Otherwise, the attack spell disperses, and "
+		"the defending spell remains in place.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Some spells do not actually kill enemies, but rather have some "
+		"negative effect on them. These spells are treated the same as "
+		"normal spells; if there is a Shield of the same type as them, "
+		"they must attack the Shield before attacking the army. "
+		"Physical attacks that go through a defensive spell also must "
+		"match their skill level against that of the defensive spell in "
+		"question.  However, they do not destroy the defensive spell when "
+		"they are successful.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("nonplayers"));
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Non-Player Units");
+	temp = "There are a number of units that are not controlled by players "
+		"that may be encountered in Atlantis.  Most information about "
+		"these units must be discovered in the course of the game, but a "
+		"few basics are below.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	if(Globals->TOWNS_EXIST && Globals->CITY_MONSTERS_EXIST) {
+		f.PutStr(f.LinkRef("nonplayers_guards"));
+		f.TagText("H3", "City and Town Guardsmen:");
+		temp = "All cities and towns begin with guardsmen in them.  These "
+			"units will defend any units that are attacked in the city or "
+			"town, and will also prevent theft and assassination attempts, ";
+		if(has_obse)
+			temp += "if their Observation level is high enough. ";
+		else
+			temp += "if they can see the criminal. ";
+		temp += "They are on guard, and will prevent other units from "
+			"taxing or pillaging. ";
+		if(Globals->SAFE_START_CITIES)
+			temp += "Except in the starting cities, the ";
+		else
+			temp += "The ";
+		temp += "guards may be killed by players, although they will form "
+			"again if the city is left unguarded.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		if (Globals->START_CITY_GUARDS_PLATE || Globals->START_CITY_MAGES) {
+			if(Globals->START_CITY_GUARDS_PLATE) {
+				temp = "Note that the city guardsmen in the starting cities "
+					"of Atlantis possess plate armor in addition to being "
+					"more numerous and are harder therefore to kill.";
+			}
+			if(Globals->START_CITY_MAGES) {
+				if(Globals->START_CITY_GUARDS_PLATE)
+					temp += " Additionally, in ";
+				else
+					temp += "In ";
+				temp += "the starting cities, Mage Guards will be found. "
+					"These mages are adept at the fire spell";
+				if(!Globals->SAFE_START_CITIES) {
+					temp += " making any attempt to control a starting "
+						"city a much harder proposition";
+				}
+				temp += ".";
+			}
+			f.PutStr(temp);
+			f.PutStr("<P></P>");
+		}
+	}
+	if (Globals->WANDERING_MONSTERS_EXIST) {
+		f.PutStr(f.LinkRef("nonplayers_monsters"));
+		f.TagText("H3", "Wandering Monsters:");
+		temp = "There are a number of monsters who wander free throughout "
+			"Atlantis.  They will occasionally attack player units, so be "
+			"careful when wandering through the wilderness.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+	}
+	f.PutStr(f.LinkRef("nonplayers_controlled"));
+	f.TagText("H3", "Controlled Monsters:");
+	temp = "Through various magical methods, you may gain control of "
+		"certain types of monsters. These monsters are just another item "
+		"in a unit's inventory, with a few special rules. Monsters will "
+		"be able to carry things at their speed of movement; use the ";
+	temp += f.Link("#show", "SHOW") + " ITEM order to determine the "
+		"carrying capacity and movement speed of a monster. Monsters will "
+		"also fight for the controlling unit in combat; their strength "
+		"can only be determined in battle. Also, note that a monster will "
+		"always fight from the front rank, even if the controlling unit "
+		"has the behind flag set. Whether or not you are allowed to give a "
+		"monster to other units depends on the type of monster; some may be "
+		"given freely, while others must remain with the controlling unit.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("orders"));
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Orders");
+	temp = "To enter orders for Atlantis, you should send a mail message "
+		"to the Atlantis server, containing the following:";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.Enclose(1, "PRE");
+	f.ClearWrapTab();
+	f.WrapStr("#ATLANTIS faction-no <password>");
+	f.PutNoFormat("");
+	f.WrapStr("UNIT unit-no");
+	f.WrapStr("...orders...");
+	f.PutNoFormat("");
+	f.WrapStr("UNIT unit-no");
+	f.WrapStr("...orders...");
+	f.PutNoFormat("");
+	f.WrapStr("#END");
+	f.Enclose(0, "PRE");
+	f.PutStr("<P></P>");
+	temp = "For example, if your faction number (shown at the top of your "
+		"report) is 27, your password if \"foobar\", and you have two "
+		"units numbered 5 and 17:";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.Enclose(1, "PRE");
+	f.WrapStr("#ATLANTIS 27 \"foobar\"");
+	f.PutNoFormat("");
+	f.WrapStr("UNIT 5");
+	f.WrapStr("...orders...");
+	f.PutNoFormat("");
+	f.WrapStr("UNIT 17");
+	f.WrapStr("...orders...");
+	f.PutNoFormat("");
+	f.WrapStr("#END");
+	f.Enclose(0, "PRE");
+	f.PutStr("<P></P>");
+	temp = "Thus, orders for each unit are given separately, and indicated "
+		"with the UNIT keyword.  (In the case of an order, such as the "
+		"command to rename your faction, that is not really for any "
+		"particular unit, it does not matter which unit issues the command; "
+		"but some particular unit must still issue it.)";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "IMPORTANT: You MUST use the correct #ATLANTIS line or else your "
+		"orders will be ignored.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "If you have a password set, you must specify it on you "
+		"#atlantis line, or the game will reject your orders.  See the ";
+	temp += f.Link("#password", "PASSWORD") + " order for more details.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Each type of order is designated by giving a keyword as the "
+		"first non-blank item on a line.  Parameters are given after this, "
+		"separated by spaces or tabs. Blank lines are permitted, as are "
+		"comments; anything after a semicolon is treated as a comment "
+		"(provided the semicolon is not in the middle of a word).";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "The parser is not case sensitive, so all commands may be given "
+		"in upper case, lower case or a mixture of the two.  However, when "
+		"supplying names containing spaces, the name must be surrounded "
+		"by double quotes, or else underscore characters must be used in "
+		"place of spaces in the name.  (These things apply to the #ATLANTIS "
+		"and #END lines as well as to order lines.)";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "You may precede orders with the at sign (@), in which case they "
+		"will appear in the Template at the bottom of your report.  This is "
+		"useful for orders which your units repeat for several months in a "
+		"row.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("orders_abbreviations"));
+	f.TagText("H3", "Abbreviations:");
+	temp = "All common items and skills have abbreviations that can be used "
+		"when giving orders, for brevity.  Any time you see the item on your "
+		"report, it will be followed by the abbreviation.  Please be careful "
+		"using these, as they can easily be confused.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("ordersummary"));
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Order Summary");
+	temp = "To specify a [unit], use the unit number.  If specifying a "
+		"unit that will be created this turn, use the form \"NEW #\" if "
+		"the unit belongs to your faction, or \"FACTION # NEW #\" if the "
+		"unit belongs to a different faction.  See the ";
+	temp += f.Link("#form", "FORM");
+	temp += "order for a more complete description.  [faction] means that "
+		"a faction number is required; [object] means that an object "
+		"number (generally the number of a building or ship) is required. "
+		"[item] means an item (like wood or longbow) that a unit can have "
+		"in its possession. [flag] is an argument taken by several orders, "
+		"that sets or unsets a flag for a unit. A [flag] value must be "
+		"either 1 (set the flag) or 0 (unset the flag).  Other parameters "
+		"are generally numbers or names.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "IMPORTANT: Remember that names containing spaces (e.g., "
+		"\"Plate Armor\"), must be surrounded by double quotes, or the "
+		"spaces must be replaced with underscores \"_\" (e.g., Plate_Armor).";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.ClassTagText("DIV", "rule", "");
+	f.PutStr(f.LinkRef("address"));
+	f.TagText("H4", "ADDRESS [new address]");
+	f.PutStr("Change the email address to which your reports are sent.");
+	f.PutStr("<P></P>");
+	f.PutStr("Example:");
+	f.PutStr("<P></P>");
+	temp = "Change your faction's email address to atlantis@rahul.net.";
+	temp2 = "ADDRESS atlantis@rahul.net";
+	f.CommandExample(temp, temp2);
+	f.ClassTagText("DIV", "rule", "");
+	f.PutStr(f.LinkRef("advance"));
+	f.TagText("H4", "ADVANCE [dir] ...");
+	temp = "This is the same as the ";
+	temp += f.Link("#move", "MOVE");
+	temp += "order, except that it implies attacks on units which attempt "
+		"to forbid access.  See the ";
+	temp += f.Link("#move", "MOVE") + " order for details.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr("Examples:");
+	f.PutStr("<P></P>");
+	temp = "Move north, then northwest, attacking any units that forbid "
+		"access to the regions.";
+	temp2 = "ADVANCE N NW";
+	f.CommandExample(temp, temp2);
+	temp = "In order, move north, then enter structure number 1, move "
+		"through an inner route, and finally move southeast. Will attack "
+		"any units that forbid access to any of these locations.";
+	temp2 = "ADVANCE N 1 IN SE";
+	f.CommandExample(temp, temp2);
+	if(has_stea) {
+		f.ClassTagText("DIV", "rule", "");
+		f.PutStr(f.LinkRef("assassinate"));
+		f.TagText("H4", "ASSASSINATE [unit]");
+		temp = "Attempt to assassinate the specified unit, or one of the "
+			"unit's people if the unit contains more than one person.  The "
+			"order may only be issued by a one-man unit.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		temp = "A unit may only attempt to assassinate a unit which is able "
+			"to be seen.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		f.PutStr("Example:");
+		f.PutStr("<P></P>");
+		temp = "Assassinate unit number 177.";
+		temp2 = "ASSASSINATE 177";
+		f.CommandExample(temp, temp2);
+	}
+	f.ClassTagText("DIV", "rule", "");
+	f.PutStr(f.LinkRef("attack"));
+	f.TagText("H4", "ATTACK [unit]");
+	temp = "Attack a target unit.  If multiple ATTACK orders are given, "
+		"all of the targets will be attacked.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr("Example:");
+	f.PutStr("<P></P>");
+	temp = "To attacks units 17, 431, and 985:";
+	temp2 = "ATTACK 17\nATTACK 431 985";
+	f.CommandExample(temp, temp2);
+	temp = "or:";
+	temp2 = "ATTACK 17 431 985";
+	f.CommandExample(temp, temp2);
+	f.ClassTagText("DIV", "rule", "");
+	f.PutStr(f.LinkRef("autotax"));
+	f.TagText("H4", "AUTOTAX [flag]");
+	temp = "AUTOTAX 1 causes the unit to attempt to tax every turn "
+		"(without requiring the TAX order) until the flag is unset. "
+		"AUTOTAX 0 unsets the flag.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr("Example:");
+	f.PutStr("<P></P>");
+	temp = "To cause the unit to attempt to tax every turn.";
+	temp2 = "AUTOTAX 1";
+	f.CommandExample(temp, temp2);
 #if 0
- if (st_ena||ob_ena)
-  {
-   printf("  <a name=\"stealthobs\">\n");
-   printf("  <center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
-   printf("  <h2> %s%s%s</h2>\n",st_ena?"Stealth":"",so_ena?" and ":"",ob_ena?"Observation":"");
- printf("\n");
-  if (so_ena)
-   {
-    printf("   The Stealth skill is used to hide units, while the Observation skill\n");
-    printf("   is used to see units that would otherwise be hidden. A unit can be\n");
-    printf("   seen only if you have at least one unit in the same region, with an\n");
-    printf("   Observation skill at least as high as that unit's Stealth skill.\n");
-    printf("   If your Observation skill is equal to the unit's Stealth skill, you\n");
-    printf("   will see the unit, but not the name of the owning faction. If your\n");
-    printf("   Observation skill is higher than the unit's Stealth skill, you will\n");
-    printf("   also see the name of the faction that owns the unit. <p>\n");
-   } else
-  if (st_ena)
-   {
-    printf("   The Stealth skill is used to hide units\n");
-    printf("   A unit can be seen only \n");
-    printf("   if it doesn't know Stealth skill and\n");
-    printf("   if you have at least one unit in the same region, \n");
-    printf("   <p>\n");
-   }
-  if (ob_ena)
-   {
-    printf("   Observation skill\n");
-    printf("   is used to see information about units that would otherwise be hidden. \n");
-    printf("   If your unit knows Observation skill, it will\n");
-    printf("   see the name of the faction that owns any unit in the same region. <p>\n");
-   }
- printf("\n");
-  if (st_ena)
-   {
-    printf("   Regardless of Stealth skill, units are always visible when participating\n");
-    printf("   in combat; when guarding a region with the Guard flag; or when in a\n");
-    printf("   building or aboard a ship. \n");
-   if (ob_ena)
-    {
-     printf("    However, in order to see the faction that\n");
-     printf("    owns the unit, you will still need a higher Observation skill than\n");
-     printf("    the unit's Stealth skill.\n");
-    }
-     printf("    <p>\n");
-   }
- printf("\n");
-  if (st_ena)
-   {
-    printf("   <a name=\"stealthobs_stealing\">\n");
-    printf("   <h3> Stealing: </h3>\n");
- printf("\n");
-    printf("   The <a href=\"#steal\"> STEAL </a>\n");
-    printf("   order is a way to steal items from other factions without a battle. \n");
-    printf("   The order can only be issued by a one-man unit.  The order specifies a target\n");
-    printf("   unit; the thief will then attempt to steal the specified item from the target\n");
-    printf("   unit. <p>\n");
-   printf("  \n");
-   if (ob_ena)
-    {
-     printf("    If the thief has higher Stealth than any of the target faction's units have\n");
-     printf("    Observation (i.e. the thief cannot be seen by the target faction), the theft\n");
-     printf("    will succeed.\n");
-    }
-   else
-    {
-     printf("    The thief must know Stealh to attempt theft.\n");
-    }
-    printf("   The target faction will be told what was stolen, but not by\n");
-    printf("   whom.  If the specified item is %s, then $200 or half the total available,\n",silver);
-    printf("   whichever is less, will be stolen.  If it is any other item, then only one will\n");
-    printf("   be stolen (if available). <p>\n");
- printf("\n");
-   if (ob_ena)
-    {
-     printf("    Any unit with high enough Observation to see the thief will see the attempt to\n");
-     printf("    steal, whether the attempt is successful or not.  Allies of the target unit\n");
-     printf("    will prevent the theft, if they have high enough Observation to see the unit\n");
-     printf("    trying to steal. <p>\n");
-    }
- printf("\n");
-    printf("   <a name=\"stealthobs_assassination\">\n");
-    printf("   <h3> Assassination: </h3>\n");
- printf("\n");
-    printf("   The <a href=\"#assassinate\"> ASSASSINATE </a>\n");
-    printf("   order is a way to kill another person without attacking and going\n");
-    printf("   through an entire battle. This order can only be issued by a one-man unit,\n");
-    printf("   and specifies a target unit.  If the target unit contains more than one person,\n");
-    printf("   then one will be singled out. <p>\n");
- printf("\n");
-   if (ob_ena)
-    {
-     printf("    Success for assassination is determined as for theft, i.e. the assassin will\n");
-     printf("    fail if any of the target faction's units can see him.  In this case, the\n");
-     printf("    assassin will flee, and the target faction will be informed which unit made the\n");
-     printf("    attempt.  As with theft, allies of the target unit will prevent the\n");
-     printf("    assassination from succeeding, if their Observation level is high enough. <p>\n");
-    }
-   else
-    {
-     printf("    The assasin must know Stealh to attempt assassination.\n");
-    }
- printf("\n");
-   if (ob_ena)
-    {
-     printf("    If the assassin has higher Stealth than any of the target faction's units have\n");
-     printf("    Observation, then a one-on-one \n");
-    }
-   else
-    {
-     printf("    One-on-one\n");
-    }
-    printf("   fight will take place between the assassin and\n");
-    printf("   the target character.  The assassin automatically gets a free round of attacks;\n");
-    printf("   after that, the battle is handled like a normal fight, with the exception that neither\n");
-    printf("   assassin nor victim can use \n");
-   {
-   int disar[]={I_CHAINARMOR,I_PLATEARMOR,I_LEATHERARMOR};
-   int ndisar=sizeof(disar)/sizeof(int);
-   int aen=0;
-   for (int i=0;i<ndisar;i++)
-    {
-    aen+=!!ITEM_ENABLED(disar[i]);
-    }
-   if (aen)
-    {
-    int fst=1;
-    for (int i=0;i<ndisar;i++)
-     {
-     if (ITEM_ENABLED(disar[i]))
-      {
-       printf("      %s%s\n",fst?"":" or ",ItemDefs[disar[i]].name);
-      fst=0;
-      }
-     }
-    }
-   else
-    {
-     printf("    any metal armor\n");
-    }
-   }
-    printf("   (the assassin because he\n");
-    printf("   cannot sneak around wearing metal armor, the victim because he was caught by\n");
-    printf("   surprise with his armor off).  If the assassin wins, the target faction is told\n");
-    printf("   merely that the victim was assassinated, but not by whom.  If the victim wins,\n");
-    printf("   then the target faction learns which unit made the attempt.  (Of course, this\n");
-    printf("   does not necessarily mean that the assassin's faction is known.)  The winner of\n");
-    printf("   the fight gets 50%% of the loser's property as usual. <p>\n");
- printf("\n");
-    printf("   <a href=\"#steal\"> STEAL </a> and <a href=\"#assassinate\"> ASSASSINATE </a>\n");
-    printf("   are not full month orders, and do not interfere with\n");
-    printf("   other activities, but a unit can only issue one\n");
-    printf("   <a href=\"#steal\"> STEAL </a> order or one\n");
-    printf("   <a href=\"#assassinate\"> ASSASSINATE </a>\n");
-    printf("   order in a month. <p>\n");
- printf("\n");
-   } /* Steal&assasinate */
-  } /* stealth&observation */
- printf("\n");
- printf("<a name=\"magic\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Magic </h2>\n");
- printf("\n");
- printf("A character enters the world of magic in Atlantis by beginning study on one\n");
- printf("of the Foundation magic skills.  Only one man units\n");
- if (!Globals->MAGE_NONLEADERS)
-  {
-   printf("  , with the man being a leader , \n");
-  }
- printf("are permitted to study these skills.  \n");
- printf("\n");
- if (Globals->FACTION_LIMIT_TYPE!=GameDefs::FACLIM_UNLIMITED)
-  {
-   printf("  The number of these units (known\n");
-   printf("  as \"magicians\" or \"mages\") that a faction may own is determined by the\n");
-   printf("  faction's type.  Any attempt to gain more, either through study, or by\n");
-   printf("  transfer from another faction, will fail.  In addition, mages \n");
-  }
-  else
-  {
-   printf("  Mages\n");
-  }
- printf("may not <a href=\"#give\">GIVE</a> men\n");
- printf("at all; once a unit becomes a mage (by studying one of the Foundations), the\n");
- printf("unit number is fixed. (The mage may be given to another faction using\n");
- printf("the <a href=\"#give\">GIVE UNIT</a> order.) <p>\n");
- printf("\n");
- printf("<a name=\"magic_skills\">\n");
- printf("<h3> Magic Skills: </h3>\n");
- printf("\n");
- printf("Magic skills are the same as normal skills, with a few differences.  The basic\n");
- printf("magic skills, called Foundations, are Force, Pattern, and Spirit.  To become\n");
- printf("a mage, a unit undertakes study in one of these Foundations.  As a unit\n");
- printf("studies the Foundations, he will be able to study deeper into the magical arts;\n");
- printf("the additional skills that he may study will be indicated on your turn report.\n");
- printf("<p>\n");
- printf("\n");
- printf("There are two major differences between Magic skills and normal skills. The\n");
- printf("first is that the ability to study Magic skills sometimes depends on lower \n");
- printf("level Magic skills.  The Magic skills that a mage may study are listed on\n");
- printf("his turn report, so he knows which areas he may pursue.  Studying higher\n");
- printf("in the Foundation skills, and certain other Magic skills, will make other\n");
- printf("skills available to the mage.\n");
- printf("Also, study into a magic skill above level 2 requires that the mage\n");
- printf("be located in some sort of protected building (a tower, fortress, castle or\n");
- printf("citadel; mines, quarries, etc, do not count).  If the mage is not in such a\n");
- printf("structure, his study rate is cut in half, as he does not have the proper\n");
- printf("environment and equipment for research. <p>\n");
- printf("\n");
- printf("<a name=\"magic_foundations\">\n");
- printf("<h3> Foundations: </h3>\n");
- printf("\n");
- printf("The three Foundation skills are called Force, Pattern, and Spirit.  Force\n");
- printf("indicates the quantity of magical energy that a mage is able to channel (a\n");
- printf("Force rating of 0 does not mean that the mage can channel no magical energy at\n");
- printf("all, but only a minimal amount).  Pattern indicates ability to handle complex\n");
- printf("patterns, and is important for things like healing and nature spells.  Spirit\n");
- printf("deals with meta-effects that lie outside the scope of the physical world.\n");
- printf("<p>\n");
- printf("\n");
- printf("<a name=\"magic_furtherstudy\">\n");
- printf("<h3> Further Magic Study: </h3>\n");
- printf("\n");
- printf("Once a mage has begun study of one or more Foundations, more skills that he may\n");
- printf("study will begin to show up on his report.  These skills are the skills that\n");
- printf("give a mage his power.  As with normal skills, when a mage achieves a new level\n");
- printf("of a magic skill, he will be given a skill report, describing the new powers\n");
- printf("(if any) that the new skill confers.  The \n");
- printf("<a href=\"#show\"> SHOW </a> order may be used to show this\n");
- printf("information on future reports. <p>\n");
- printf("\n");
- printf("<a name=\"magic_usingmagic\">\n");
- printf("<h3> Using Magic: </h3>\n");
- printf("\n");
- printf("A mage may use his magical power in three different ways, depending\n");
- printf("on the type of spell he wants to use.  Some spells,\n");
- printf("once learned, take effect automatically and are considered always to\n");
- printf("be in use; these spells do not require any order to take effect. <p>\n");
- printf("\n");
- printf("Secondly, some spells are for use in combat. A mage may specify that\n");
- printf("he wishes to use a spell in combat by issuing the\n");
- printf("<a href=\"#combat\"> COMBAT </a> order.  A combat spell specified in this\n");
- printf("way will only be used if the mage finds himself taking part in a battle. <p\\>\n");
- printf("\n");
- printf("The third type of spell use is for spells that take an entire month\n");
- printf("to cast.  These spells are cast by the mage issuing the\n");
- printf("<a href=\"#cast\"> CAST </a> order.  Because\n");
- printf("<a href=\"#cast\"> CAST </a> takes an entire\n");
- printf("month, a mage may use only one of this type of spell each turn. Note,\n");
- printf("however, that a <a href=\"#cast\"> CAST </a> order is not a full\n");
- printf("month order; a mage may still <a href=\"#move\"> MOVE </a>,\n");
- printf("<a href=\"#study\"> STUDY </a>, or any other month long order. The\n");
- printf("justification for this (as well as being for game balance) is that\n");
- printf("a spell drains a mage of his magic power for the\n");
- printf("month, but does not actually take the entire month to cast. <p>\n");
- printf("\n");
- printf("The description that a mage receives when he first learns a spell\n");
- printf("specifies the manner in which the spell is used (automatic, in combat,\n");
- printf("or by casting). <p>\n");
- printf("\n");
- printf("<a name=\"magic_incombat\">\n");
- printf("<h3> Magic in Combat: </h3>\n");
- printf("\n");
- printf("NOTE: This section is rather vague, and quite advanced.  You may want to wait\n");
- printf("until you have figured out other parts of Atlantis before trying to understand\n");
- printf("exactly all of the rules in this section. <p>\n");
- printf("\n");
- printf("Although the magic skills and spells are unspecified in these rules, left for\n");
- printf("the players to discover, the rules for combat spells' interaction are spelled\n");
- printf("out here.  There are five major types of attacks, and defenses:\n");
- printf("Combat, Bow, Energy, Weather, and Spirit.  Every attack and defense has\n");
- printf("a type, and only the appropriate defense is effective against an attack. <p>\n");
- printf("\n");
- printf("Defensive spells are cast at the beginning of each round\n");
- printf("of combat, and will have a type of attack they deflect, and skill level\n");
- printf("(Defensive spells are generally called Shields).  Every time an attack\n");
- printf("is launched against an army, it must first attack the highest level Shield\n");
- printf("of the same type as the attack, before it may attack a soldier\n");
- printf("directly. Note that an attack only has to attack the highest Shield,\n");
- printf("any other Shields of the same type are ignored for that attack. <p>\n");
- printf("\n");
- printf("An attack spell (and any other type of attack) also has an attack type, and\n");
- printf("attack level, and a number of blows it deals.  When the attack spell is cast,\n");
- printf("it is matched up against the most powerful defensive spell of the appropriate\n");
- printf("type that the other army has cast.  If the other army has not cast any\n");
- printf("applicable defensive spells, the spell goes through unmolested.  Unlike normal\n");
- printf("combat however, men are at a disadvantage to defending against spells.   Men\n");
- printf("which are in the open (not protected by a building) have an effective skill\n");
- printf("of -2 unless they have a shield or some other defensive magic.  Some monsters\n");
- printf("have bonuses to resisting some attacks but are more susceptible to others.\n");
- printf("The skill level of the attack spell and the effective skill for defense are\n");
- printf("matched against each other.  The formula for determining the victor between a\n");
- printf("defensive and offensive spell is the same as for a contest of soldiers; if the\n");
- printf("levels are equal, there is a 1:1 chance of success, and so on.  If the\n");
- printf("offensive spell is victorious, the offensive spell deals its blows to the\n");
- printf("defending army, and the Shield in question is destroyed (thus, it can be\n");
- printf("useful to have more than one of the same type of Shield in effect, as the\n");
- printf("other Shield will take the place of the destroyed one).  Otherwise, the\n");
- printf("attack spell disperses, and the defending spell remains in place. <p>\n");
- printf("\n");
- printf("Some spells do not actually kill enemies, but rather have some negative\n");
- printf("effect on them. These spells are treated the same as normal spells; if\n");
- printf("there is a Shield of the same type as them, they must attack the Shield\n");
- printf("before attacking the army.\n");
- printf("Physical attacks that go through a defensive spell also must match their skill\n");
- printf("level against that of the defensive spell in question.  However, they do not\n");
- printf("destroy a layer of the spell when they are successful. <p>\n");
- printf("\n");
- printf("<a name=\"nonplayers\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Non-Player Units </h2>\n");
- printf("\n");
- printf("There are a number of units that are not controlled by players that may be\n");
- printf("encountered in Atlantis.  Most information about these units must be\n");
- printf("discovered in the course of the game, but a few basics are below. <p>\n");
- printf("\n");
- if (Globals->TOWNS_EXIST&&Globals->CITY_MONSTERS_EXIST)
-  {
- printf("\n");
-   printf("  <a name=\"nonplayers_guards\">\n");
-   printf("  <h3> City and Town Guardsmen: </h3>\n");
- printf("\n");
-   printf("  All cities and towns begin with guardsmen in them.  These units will defend any\n");
-   printf("  units that are attacked in the city or town, and will also prevent theft and\n");
-   printf("  assassination attempts, if their Observation level is high enough.  They are on\n");
-   printf("  guard, and will prevent other units from taxing or pillaging.  The guards may\n");
-   printf("  be killed by players, although they will form again if the city is left\n");
-   printf("  unguarded. <p>\n");
- printf("\n");
-  if (Globals->START_CITY_GUARDS_PLATE)
-   {
-    printf("   Note that the city guardsmen in the starting cities of Atlantis possess\n");
-    printf("   plate armor in addition to being more numerous and are harder therefore\n");
-    printf("   to kill. \n");
-    printf("   if (Globals->START_CITY_MAGES)\n");
-    {
-     printf("    Additionally, in \n");
-    }
-   } else
-  if (Globals->START_CITY_MAGES)
-   {
-    printf("   In\n");
-   }
-  if (Globals->START_CITY_MAGES)
-   {
-    printf("   the starting cities, Mage Guards will be found.\n");
-    printf("   These mages are adept at the fire spell making any attempt to control\n");
-    printf("   a starting city a much harder proposition.\n");
-   }
-   printf("  <p>\n");
- printf("\n");
-  }
- printf("\n");
- if (Globals->WANDERING_MONSTERS_EXIST)
-  {
-   printf("  <a name=\"nonplayers_monsters\">\n");
-   printf("  <h3> Wandering Monsters: </h3> \n");
- printf("\n");
-   printf("  There are a number of monsters who wander free through Atlantis.  They will\n");
-   printf("  occasionally attack player units, so be careful when wandering through the\n");
-   printf("  wilderness. <p>\n");
-  }
- printf("\n");
- printf("<a name=\"nonplayers_controlled\">\n");
- printf("<h3> Controlled Monsters: </h3>\n");
- printf("\n");
- printf("Through various magical methods, you may gain control of certain\n");
- printf("types of monsters. These monsters are just another item in a unit's\n");
- printf("inventory, with a few special rules. Monsters will be able to carry\n");
- printf("things at their speed of movement; use the <a href=\"#show\">SHOW ITEM</a>\n");
- printf("order to determine the carrying capacity and movement speed of a\n");
- printf("monster. Monsters will also fight for the controlling unit in combat;\n");
- printf("their strength can only be determined in battle. Also, note that a\n");
- printf("monster will always fight from the front rank, even if the controlling\n");
- printf("unit has the behind flag set. Whether or not you are allowed to give\n");
- printf("a monster to other units depends on the type of monster; some may be\n");
- printf("given freely, while others must remain with the controlling unit. <p>\n");
- printf("\n");
- printf("<a name=\"orders\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Orders </h2>\n");
- printf("\n");
- printf("To enter orders for Atlantis, you should send a mail message to the Atlantis\n");
- printf("server, containing the following: <p>\n");
- printf("\n");
- printf("<pre>\n");
- printf("#ATLANTIS faction-no <password>\n");
- printf("\n");
- printf("UNIT unit-no\n");
- printf("...orders...\n");
- printf("\n");
- printf("UNIT unit-no\n");
- printf("...orders...\n");
- printf("\n");
- printf("#END\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("For example, if your faction number (shown at the top of your report) is 27,\n");
- printf("and you have two units numbered 5 and 17: <p>\n");
- printf("\n");
- printf("<pre>\n");
- printf("#ATLANTIS 27\n");
- printf("\n");
- printf("UNIT 5\n");
- printf("...orders...\n");
- printf("\n");
- printf("UNIT 17\n");
- printf("...orders...\n");
- printf("\n");
- printf("#END\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("Thus, orders for each unit are given separately, and indicated with the UNIT\n");
- printf("keyword.  (In the case of an order, such as the command to rename your faction,\n");
- printf("that is not really for any particular unit, it does not matter which unit\n");
- printf("issues the command; but some particular unit must still issue it.) <p>\n");
- printf("\n");
- printf("IMPORTANT: You MUST use the correct #ATLANTIS line or else your orders will be\n");
- printf("silently ignored. <p>\n");
- printf("\n");
- printf("If you have a password set, you must specify it on you #atlantis line, or\n");
- printf("the game will reject your orders.  See the\n");
- printf("<a href=\"#password\"> PASSWORD </a> order for more details.\n");
- printf("<p>\n");
- printf("\n");
- printf("Each type of order is designated by giving a keyword as the first non-blank\n");
- printf("item on a line.  Parameters are given after this, separated by spaces or tabs.\n");
- printf("Blank lines are permitted, as are comments; anything after a semicolon is\n");
- printf("treated as a comment (provided the semicolon is not in the middle of a word).\n");
- printf("<p>\n");
- printf("\n");
- printf("The parser is not case sensitive, so all commands may be given in upper case,\n");
- printf("low case or a mixture of the two.  However, when supplying names containing\n");
- printf("spaces, the name must be surrounded by double quotes, or else underscore\n");
- printf("characters must be used in place of spaces in the name.  (These things apply to\n");
- printf("the #ATLANTIS and #END lines as well as to order lines.) <p>\n");
- printf("\n");
- printf("You may precede orders with the at sign (@), in which case they will\n");
- printf("appear in the Template at the bottom of your report.  This is useful\n");
- printf("for orders which your units repeat for several months in a row. <p>\n");
- printf("\n");
- printf("<a name=\"orders_abbreviations\">\n");
- printf("<h3> Abbreviations: </h3>\n");
- printf("\n");
- printf("All common items and skills have abbreviations that can be used when giving\n");
- printf("orders, for brevity.  Any time you see the item on your report, it will\n");
- printf("be followed by the abbreviation.  Please be careful using these, as they\n");
- printf("can easily be confused. <p>\n");
- printf("\n");
- printf("<a name=\"ordersummary\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Order Summary </h2>\n");
- printf("\n");
- printf("To specify a [unit], use the unit number.  If specifying a unit that will be\n");
- printf("created this turn, use the form \"NEW #\" if the unit belongs to your faction, or\n");
- printf("\"FACTION # NEW #\" if the unit belongs to a different faction.  See the\n");
- printf("<a href=\"#form\"> FORM </a>\n");
- printf("order for a more complete description.  [faction] means that a faction number\n");
- printf("is required; [object] means that an object number (generally the number of a\n");
- printf("building or ship) is required.  [item] means an item (like wood or\n");
- printf("longbow) that a unit can have in its possession. [flag] is an argument\n");
- printf("taken by several orders, that sets or unsets a flag for a unit. A [flag]\n");
- printf("value must be either 1 (set the flag) or 0 (unset the flag).  Other\n");
- printf("parameters are generally numbers or names. <p>\n");
- printf("\n");
- printf("IMPORTANT: Remember that names containing spaces (e.g., \"Plate Armor\"), must be\n");
- printf("surrounded by double quotes, or the space must be replaced with an underscore\n");
- printf("\"_\" (e.g., Plate_Armor). <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"address\"> </a>\n");
- printf("<h4> ADDRESS [new address] </h4>\n");
- printf("\n");
- printf("Change the email address to which your reports are sent. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Change your faction's email address to atlantis@rahul.net. <p>\n");
- printf("<pre>\n");
-   printf("  ADDRESS atlantis@rahul.net\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"advance\"> </a>\n");
- printf("<h4> ADVANCE [dir] ... </h4>\n");
- printf("\n");
- printf("This is the same as the <a href=\"#move\"> MOVE </a>\n");
- printf("order, except that it implies attacks on units\n");
- printf("which attempt to forbid access.  See the\n");
- printf("<a href=\"#move\"> MOVE </a> order for details. <p>\n");
- printf("\n");
- printf("Examples: <p>\n");
- printf("Move north, then northwest, attacking any units that forbid access to the\n");
- printf("regions. <p>\n");
- printf("<pre>\n");
-   printf("  ADVANCE N NW\n");
- printf("</pre> <p>\n");
- printf("In order, move north, then enter structure number 1, move through an inner\n");
- printf("route, and finally move southeast. Will attack any units that forbid access to\n");
- printf("any of these locations. <p>\n");
- printf("<pre>\n");
-   printf("  ADVANCE N 1 IN SE\n");
- printf("</pre> <p>\n");
- printf("\n");
- if (st_ena)
-  {
-   printf("  <center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
-   printf("  <a name=\"assassinate\"> </a>\n");
-   printf("  <h4> ASSASSINATE [unit] </h4>\n");
- printf("\n");
-   printf("  Attempt to assassinate the specified unit, or one of the unit's people if the\n");
-   printf("  unit contains more than one person.  The order may only be issued by a one-man\n");
-   printf("  unit. <p>\n");
- printf("\n");
-   printf("  A unit may only attempt to assassinate a unit which is able to be seen.<p>\n");
- printf("\n");
-   printf("  Example: <p>\n");
-   printf("  Assassinate unit number 177. <p>\n");
-   printf("  <pre>\n");
-   printf("  ASSASSINATE 177\n");
-   printf("  </pre> <p>\n");
-  }
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"attack\"> </a>\n");
- printf("<h4> ATTACK [unit] .. </h4>\n");
- printf("\n");
- printf("Attack a target unit.  If multiple ATTACK orders are given, all of the targets\n");
- printf("will be attacked. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("To attacks units 17, 431, and 985: <p>\n");
- printf("<pre>\n");
-   printf("  ATTACK 17\n");
-   printf("  ATTACK 431 985\n");
- printf("</pre> <p>\n");
- printf("or: <p>\n");
- printf("<pre>\n");
-   printf("  ATTACK 17 431 985\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"autotax\"> </a>\n");
- printf("<h4> AUTOTAX [flag] </h4>\n");
- printf("\n");
- printf("AUTOTAX 1 causes the unit to attempt to tax every turn (without requiring\n");
- printf("the TAX order) until the flag is unset. AUTOTAX 0 unsets the flag. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("To cause the unit to attempt to tax every turn. <p>\n");
- printf("<pre>\n");
-   printf("  AUTOTAX 1\n");
- printf("</pre> <p>\n");
- printf("\n");
  printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
  printf("<a name=\"avoid\"> </a>\n");
  printf("<h4> AVOID [flag] </h4>\n");
