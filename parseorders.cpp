@@ -1387,7 +1387,6 @@ void Game::ProcessPromoteOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 void Game::ProcessLeaveOrder(Unit * u, OrdersCheck *pCheck)
 {
 	if(!pCheck) {
-		if (u->monthorders && u->monthorders->type == O_BUILD) return;
 		if (u->enter == 0) u->enter = -1;
 	}
 }
@@ -1442,7 +1441,6 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			}
 			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 			unit->monthorders = order;
-			if (unit->enter == -1) unit->enter = 0;
 			return;
 		}
 
@@ -1495,7 +1493,6 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	}
 	if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 	unit->monthorders = order;
-	if (unit->enter == -1) unit->enter = 0;
 }
 
 void Game::ProcessAttackOrder(Unit * u,AString * o, OrdersCheck *pCheck)
