@@ -607,13 +607,13 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyWeaponFlags("MXBO",
 			WeaponType::NEEDSKILL | WeaponType::RANGED |
 			WeaponType::NOATTACKERSKILL);
-	ModifyWeaponSkills("MXBO",S_CROSSBOW,-1);
+	ModifyWeaponSkills("MXBO", "XBOW", NULL);
 	ModifyWeaponAttack("MXBO",ARMORPIERCING,ATTACK_RANGED,1);
 	ModifyWeaponBonuses("MXBO",4,0,0);
 	ModifyWeaponFlags("LBOW",
 			WeaponType::NEEDSKILL | WeaponType::RANGED |
 			WeaponType::NOATTACKERSKILL);
-	ModifyWeaponSkills("LBOW",S_LONGBOW,-1);
+	ModifyWeaponSkills("LBOW", "LBOW", NULL);
 	ModifyWeaponAttack("LBOW",ARMORPIERCING,ATTACK_RANGED,
 			WeaponType::NUM_ATTACKS_SKILL);
 	ModifyWeaponBonuses("LBOW",0,0,0);

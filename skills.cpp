@@ -62,12 +62,23 @@ EffectType *FindEffect(char *effect)
 AttribModType *FindAttrib(char *attrib)
 {
     if (attrib == NULL) return NULL;
-    for (int i = 0; i < NUMATTRIBMODS; i++) {
-	        if (AttribDefs[i].key == NULL) continue;
-	        if (AString(attrib) == AttribDefs[i].key)
-	            return &AttribDefs[i];
-	    }
-    return NULL;
+	for (int i = 0; i < NUMATTRIBMODS; i++) {
+		if (AttribDefs[i].key == NULL) continue;
+		if (AString(attrib) == AttribDefs[i].key)
+			return &AttribDefs[i];
+	}
+	return NULL;
+}
+
+SkillType *FindSkill(char *skname)
+{
+	if (skname == NULL) return NULL;
+	for (int i = 0; i < NSKILLS; i++) {
+		if (SkillDefs[i].abbr == NULL) continue;
+		if (AString(skname) == SkillDefs[i].abbr)
+			return &SkillDefs[i];
+	}
+	return NULL;
 }
 
 int LookupSkill(AString *token)
@@ -93,6 +104,12 @@ int ParseSkill(AString *token)
 	return r;
 }
 
+AString SkillStrs(SkillType *pS)
+{
+	AString temp = AString(pS->name) + " [" + pS->abbr + "]";
+	return temp;
+}
+
 AString SkillStrs(int i)
 {
 	AString temp = AString(SkillDefs[i].name) + " [" +
@@ -111,14 +128,14 @@ int SkillMax(char *skill, int race)
 
 	if (mt == NULL) return 0;
 
-	AString skname = skill;
+	SkillType *pS = FindSkill(skill);
 	if(!Globals->MAGE_NONLEADERS) {
-		int sk = LookupSkill(&skname);
-		if(SkillDefs[sk].flags & SkillType::MAGIC) {
+		if (pS && (pS->flags & SkillType::MAGIC)) {
 			if(!(ItemDefs[race].type & IT_LEADER)) return(0);
 		}
 	}
 
+	AString skname = pS->abbr;
 	for(unsigned int c=0; c < sizeof(mt->skills)/sizeof(mt->skills[0]); c++) {
 		if(skname == mt->skills[c])
 			return mt->speciallevel;

@@ -69,6 +69,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int i, j, k, l;
 	int last = -1;
 	AString skname;
+	SkillType *pS;
 
 	if(f.OpenByName(rules) == -1) {
 		return 0;
@@ -1183,9 +1184,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	for(i = 0; i < NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
-		skname = ItemDefs[i].pSkill;
-		last = LookupSkill(&skname);
-		if(last != -1 && (SkillDefs[last].flags & SkillType::DISABLED))
+		pS = FindSkill(ItemDefs[i].pSkill);
+		if(!pS || (pS->flags & SkillType::DISABLED))
 			continue;
 		last = 0;
 		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
@@ -1569,14 +1569,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 			comma = 0;
 			temp = "";
 			for(j=0; j<(int)(sizeof(mt->skills)/sizeof(mt->skills[0])); j++) {
-				if(mt->skills[j] == NULL) continue;
-				skname = mt->skills[j];
-				int sk = LookupSkill(&skname);
-				if (sk == -1) continue;
-				if(SkillDefs[sk].flags & SkillType::DISABLED) continue;
+				pS = FindSkill(mt->skills[j]);
+				if (!pS || (pS->flags & SkillType::DISABLED)) continue;
 				spec = 1;
 				if(comma) temp += ", ";
-				temp += SkillDefs[sk].name;
+				temp += pS->name;
 				comma++;
 			}
 			if(!spec) temp = "None.";
@@ -1875,10 +1872,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	for(i = 0; i < NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
-		skname = ItemDefs[i].pSkill;
-		last = LookupSkill(&skname);
-		if(last != -1 && (SkillDefs[last].flags & SkillType::DISABLED))
-			continue;
+		pS = FindSkill(ItemDefs[i].pSkill);
+		if (!pS || (pS->flags & SkillType::DISABLED)) continue;
 		last = 0;
 		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
 						sizeof(ItemDefs->pInput[0])); j++) {
@@ -1894,10 +1889,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(ItemDefs[i].name);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		if(ItemDefs[i].pSkill != NULL) {
-			skname = ItemDefs[i].pSkill;
-			int sk = LookupSkill(&skname);
-			temp = SkillDefs[sk].name;
+		if(pS != NULL) {
+			temp = pS->name;
 			temp += AString(" (") + ItemDefs[i].pLevel + ")";
 			f.PutStr(temp);
 		}
@@ -1967,10 +1960,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 				if(wp->defenseBonus > -1) temp += "+";
 				temp += wp->defenseBonus;
 				temp += " on defense";
-			    if(wp->flags & WeaponType::NEEDSKILL &&
-						!(SkillDefs[wp->baseSkill].flags&SkillType::DISABLED)){
-					temp += " (needs ";
-					temp += SkillDefs[wp->baseSkill].name;
+			    if(wp->flags & WeaponType::NEEDSKILL) {
+					pS = FindSkill(wp->baseSkill);
+					if (pS && !(pS->flags & SkillType::DISABLED))
+						temp += AString(" (needs ") + pS->name;
+					pS = FindSkill(wp->orSkill);
+					if (pS && !(pS->flags & SkillType::DISABLED))
+						temp += AString(" or ") + pS->name;
 					temp += " skill)";
 				}
 				temp += ".<br />";
@@ -1983,12 +1979,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		if(ItemDefs[i].type & IT_MOUNT) {
 			MountType *mp = FindMount(ItemDefs[i].abr);
-			skname = mp->skill;
-			int sk = LookupSkill(&skname);
-			if (sk != -1 &&
-					!(SkillDefs[sk].flags & SkillType::DISABLED)) {
+			pS = FindSkill(mp->skill);
+			if (pS && !(pS->flags & SkillType::DISABLED)) {
 				temp += "Gives a riding bonus with the ";
-				temp += SkillDefs[sk].name;
+				temp += pS->name;
 				temp += " skill.<br />";
 			}
 		}
@@ -2008,10 +2002,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
 				if(ItemDefs[j].mult_item != i) continue;
 				if(!(ItemDefs[j].type & IT_NORMAL)) continue;
-				skname = ItemDefs[j].pSkill;
-				k = LookupSkill(&skname);
-				if(k != -1 && (SkillDefs[k].flags & SkillType::DISABLED))
-					continue;
+				pS = FindSkill(ItemDefs[j].pSkill);
+				if (!pS || (pS->flags & SkillType::DISABLED)) continue;
 				last = 0;
 				for(k = 0; k < (int) (sizeof(ItemDefs->pInput) /
 						sizeof(ItemDefs->pInput[0])); k++) {
@@ -2034,129 +2026,30 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "center");
 	temp = "All items except silver and trade goods are produced with the ";
 	temp += f.Link("#produce", "PRODUCE") + " order.";
-	if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
-		last = -1;
-		temp2 = "";
-		for(i = 0; i < (int) (sizeof(ItemDefs->pInput) /
-				sizeof(ItemDefs->pInput[0])); i++) {
-			j = ItemDefs[I_SWORD].pInput[i].item;
-			if(j == -1) continue;
-			if(ItemDefs[j].flags & ItemType::DISABLED) continue;
-			if(last == -1) {
-				last = j;
-				continue;
-			}
-			temp2 += ItemDefs[last].names;
-			temp2 += " and ";
-			last = j;
-		}
-		if(last != -1) temp2 += ItemDefs[last].names;
-		skname = ItemDefs[I_SWORD].pSkill;
-		j = LookupSkill(&skname);
-		if(j!= -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
-			temp += " Example: PRODUCE SWORDS will produce as many swords "
-				"as possible during the month, provided that the unit has "
-				"adequate supplies of ";
-			temp += temp2;
-			temp += " and has the ";
-			temp += SkillDefs[j].name;
-			temp += " skill. Required skills and raw materials are in the "
-				"table above.";
-		}
-	}
+
+	temp += " Producings items will always produce as many items as "
+		"during a month up to the limit of the supplies carried by the "
+		"producing unit. The required skills and raw materials required "
+		"to produce one output item are in the table above.";
 	f.Paragraph(temp);
 	temp = "If an item requires raw materials, then the specified "
 		"amount of each material is consumed for each item produced. ";
-	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED)) {
-		last = -1;
-		temp2 = "";
-		k = 0;
-		for(i = 0; i < (int) (sizeof(ItemDefs->pInput) /
-				sizeof(ItemDefs->pInput[0])); i++) {
-			j = ItemDefs[I_LONGBOW].pInput[i].item;
-			if(j == -1) continue;
-			if(ItemDefs[j].flags & ItemType::DISABLED) continue;
-			if(last == -1) {
-				k = ItemDefs[I_LONGBOW].pInput[i].amt;
-				last = j;
-				continue;
-			}
-			temp2 += AString(5*k);
-			temp2 += " units of ";
-			temp2 += ItemDefs[last].names;
-			temp2 += " and ";
-			last = j;
-			k = ItemDefs[I_LONGBOW].pInput[i].amt;
-		}
-		if(last != -1) {
-			temp2 += AString(5*k);
-			temp2 += " units of ";
-			temp2 += ItemDefs[last].names;
-		}
-		skname = ItemDefs[I_LONGBOW].pSkill;
-		j = LookupSkill(&skname);
-		if(j != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
-			temp += "Thus to produce 5 longbows (a supply of arrows is "
-				"assumed to be included with the bow), ";
-			temp += temp2;
-			temp += " are required. ";
-		}
-	}
-	temp += "The higher ones skill, the more productive each man-month "
-		"of work";
-	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) &&
-			(ItemDefs[I_LONGBOW].pMonths == 1) &&
-			(ItemDefs[I_LONGBOW].pOut == 1)) {
-		temp += "; thus, 5 longbows could be produced by a 5-man unit of "
-			"skill 1, or a 1-man unit of skill 5.";
-		if(!(ItemDefs[I_PLATEARMOR].flags & ItemType::DISABLED) &&
-			(ItemDefs[I_PLATEARMOR].pMonths==ItemDefs[I_PLATEARMOR].pLevel)) {
-			temp += " (Plate armor is an exception; a unit must have skill ";
-			temp += ItemDefs[I_PLATEARMOR].pLevel;
-			temp += " to be able to produce it at all, and each man can only "
-				"produce 1 plate armor per month.";
-			last = -1;
-			temp2 = "";
-			k = 0;
-			for(i = 0; i < (int) (sizeof(ItemDefs->pInput) /
-					sizeof(ItemDefs->pInput[0])); i++) {
-				j = ItemDefs[I_PLATEARMOR].pInput[i].item;
-				if(j == -1) continue;
-				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
-				if(last == -1) {
-					last = j;
-					k = ItemDefs[I_PLATEARMOR].pInput[i].amt;
-					continue;
-				}
-				temp2 += AString(k);
-				temp2 += " units of ";
-				temp2 += ItemDefs[last].names;
-				temp2 += " and ";
-				last = j;
-				k = ItemDefs[I_PLATEARMOR].pInput[i].amt;
-			}
-			if(last != -1) {
-				temp2 += AString(k);
-				temp2 += " units of ";
-				temp2 += ItemDefs[last].names;
-			}
-			skname = ItemDefs[I_PLATEARMOR].pSkill;
-			j = LookupSkill(&skname);
-			if(j != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
-				temp += " Plate armor also takes ";
-				temp += temp2;
-				temp += " to produce.";
-			}
-			temp += ")";
-		}
-	} else {
-		temp += ".";
-	}
-	if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED)) {
-		temp += " Production of food works slightly differently; each worker "
-				"will only use one unit of material, but will produce "
-				"a number of units of food equal to their skill level.";
-	}
+	temp += "The higher the skill of the unit, the more productive each "
+		"man-month of work will be.  Thus, five men at skill level one are "
+		"exactly equivalent to one guy at skill level 5 in terms of base "
+		"output. Items which require multiple man-months to produce will "
+		"take still benefit from higher skill level units, just not as "
+		"quickly.  For example, if a unit of six level one men wanted to "
+		"produce something which required three man-months per item, that "
+		"unit could produce two of them in one month.  If their skill level "
+		"was raised to two, then they could produce four of them in a month. "
+		"At level three, they could then produce 6 per month.";
+	f.Paragraph(temp);
+	temp += "Some items may allow each man to produce multiple output "
+		"items per raw material or have other differences from these basic "
+		"rules.  Those items will explain their differences in the "
+		"description of the item.";
+	f.Paragraph(temp);
 
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp += " Only Trade factions can issue ";

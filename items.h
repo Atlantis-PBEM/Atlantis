@@ -211,8 +211,8 @@ class WeaponType
 		};
 		int flags;
 
-		int baseSkill;
-		int orSkill;
+		char *baseSkill;
+		char *orSkill;
 
 		int weapClass;
 		int attackType;

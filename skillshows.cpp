@@ -1317,13 +1317,12 @@ AString *ShowSkill::Report(Faction *f)
 		"contains ";
 	temp1 += "A unit with this skill may PRODUCE ";
 	temp2 += "A unit with this skill may create ";
-	AString skname;
-	int sk;
+	SkillType *sk1, *sk2;
+	sk1 = &SkillDefs[skill];
 	for(i = NITEMS - 1; i >= 0; i--) {
 		if(ITEM_DISABLED(i)) continue;
-		skname = ItemDefs[i].mSkill;
-		sk = LookupSkill(&skname);
-		if(sk == skill && ItemDefs[i].mLevel==level && last2==-1) {
+		sk2 = FindSkill(ItemDefs[i].mSkill);
+		if(sk1 == sk2 && ItemDefs[i].mLevel==level && last2==-1) {
 			int canmagic = 1;
 			for(c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
 				if(ItemDefs[i].mInput[c].item == -1) continue;
@@ -1335,9 +1334,8 @@ AString *ShowSkill::Report(Faction *f)
 				last2 = i;
 			}
 		}
-		skname = ItemDefs[i].pSkill;
-		sk = LookupSkill(&skname);
-		if(sk == skill && ItemDefs[i].pLevel == level) {
+		sk2 = FindSkill(ItemDefs[i].pSkill);
+		if(sk1 == sk2 && ItemDefs[i].pLevel == level) {
 			int canmake = 1;
 			int resource = 1;
 			for(c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); c++) {
@@ -1359,9 +1357,8 @@ AString *ShowSkill::Report(Faction *f)
 	for(i = 0; i < NITEMS; i++) {
 		if(ITEM_DISABLED(i)) continue;
 		int illusion = (ItemDefs[i].type & IT_ILLUSION);
-		skname = ItemDefs[i].mSkill;
-		sk = LookupSkill(&skname);
-		if(sk == skill && ItemDefs[i].mLevel == level) {
+		sk2 = FindSkill(ItemDefs[i].mSkill);
+		if(sk1 == sk2 && ItemDefs[i].mLevel == level) {
 			int canmagic = 1;
 			for(c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
 				if(ItemDefs[i].mInput[c].item == -1) continue;
@@ -1385,9 +1382,8 @@ AString *ShowSkill::Report(Faction *f)
 				}
 			}
 		}
-		skname = ItemDefs[i].pSkill;
-		sk = LookupSkill(&skname);
-		if(sk == skill && ItemDefs[i].pLevel == level) {
+		sk2 = FindSkill(ItemDefs[i].pSkill);
+		if(sk1 == sk2 && ItemDefs[i].pLevel == level) {
 			int canmake = 1;
 			int resource = 1;
 			for(c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); c++) {

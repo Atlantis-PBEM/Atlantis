@@ -1437,20 +1437,30 @@ int Unit::Taxers()
 
 			if (ItemDefs[pItem->type].type & IT_WEAPON) {
 				WeaponType *pWep = FindWeapon(ItemDefs[pItem->type].abr);
-				if (!(pWep->flags & WeaponType::NEEDSKILL)) {
-					// A melee weapon
-					if (GetSkill(S_COMBAT)) numUsableMelee += pItem->num;
-					numMelee += pItem->num;
-				} else if (pWep->baseSkill == S_RIDING) {
-					// A mounted weapon
-					if (GetSkill(S_RIDING)) numUsableMounted += pItem->num;
-					numMounted += pItem->num;
-				} else {
-					// Presume that anything else is a bow!
-					if (GetSkill(pWep->baseSkill) ||
-						(pWep->orSkill != -1 && GetSkill(pWep->orSkill)))
+				int num = pItem->num;
+				int numUse = 0;
+				int basesk = 0;
+				AString skname = pWep->baseSkill;
+				int sk = LookupSkill(&skname);
+				if (sk != -1) basesk = GetSkill(sk);
+				if (basesk == 0) {
+					skname = pWep->orSkill;
+					sk = LookupSkill(&skname);
+					if(sk != -1) basesk = GetSkill(sk);
+				}
+				if (basesk) {
+					numUse = num;
+					if (!(pWep->flags & WeaponType::NEEDSKILL)) {
+						numUsableMelee += numUse;
+						numMelee += num;
+					} else if (pWep->flags & WeaponType::NOFOOT) {
+						numUsableMounted += numUse;
+						numMounted += num;
+					} else {
+						// Presume that anything else is a bow!
 						numUsableBows += pItem->num;
-					numBows += pItem->num;
+						numBows += pItem->num;
+					}
 				}
 			}
 
@@ -1980,15 +1990,26 @@ int Unit::CanUseWeapon(WeaponType *pWep)
 {
 	int baseSkillLevel = 0;
 	int tempSkillLevel = 0;
-	if(pWep->baseSkill != -1) baseSkillLevel = GetSkill(pWep->baseSkill);
 
-	if(pWep->orSkill != -1) tempSkillLevel = GetSkill(pWep->orSkill);
+	int bsk, orsk;
+	AString skname;
+	if (pWep->baseSkill != NULL) {
+		skname = pWep->baseSkill;
+		bsk = LookupSkill(&skname);
+		if (bsk != -1) baseSkillLevel = GetSkill(bsk);
+	}
+
+	if (pWep->orSkill != NULL) {
+		skname = pWep->orSkill;
+		orsk = LookupSkill(&skname);
+		if (orsk != -1) tempSkillLevel = GetSkill(orsk);
+	}
 
 	if(tempSkillLevel > baseSkillLevel) {
 		baseSkillLevel = tempSkillLevel;
-		Practice(pWep->orSkill);
+		Practice(orsk);
 	} else
-		Practice(pWep->baseSkill);
+		Practice(bsk);
 
 	if(pWep->flags & WeaponType::NEEDSKILL && !baseSkillLevel) return -1;
 

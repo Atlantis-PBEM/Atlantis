@@ -69,16 +69,14 @@ void Game::ModifySkillCost(int sk, int cost)
 void Game::ModifySkillSpecial(int sk, char *special)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
-	SpecialType *sp = FindSpecial(special);
-	if (sp == NULL) return;
+	if (special && (FindSpecial(special) == NULL)) return;
 	SkillDefs[sk].special = special;
 }
 
 void Game::ModifySkillRange(int sk, char *range)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
-	RangeType *rp = FindRange(range);
-	if (rp == NULL) return;
+	if (range && (FindRange(range) == NULL)) return;
 	SkillDefs[sk].range = range;
 }
 
@@ -153,10 +151,7 @@ void Game::ModifyItemHitch(int it, int item, int capacity)
 void Game::ModifyItemProductionSkill(int it, char *sk, int lev)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
-	if (sk) {
-		AString skname = sk;
-		if (LookupSkill(&skname) == -1) return;
-	}
+	if (sk && (FindSkill(sk) == NULL)) return;
 	ItemDefs[it].pSkill = sk;
 	ItemDefs[it].pLevel = lev;
 }
@@ -184,10 +179,7 @@ void Game::ModifyItemProductionInput(int it, int i, int input, int amount)
 void Game::ModifyItemMagicSkill(int it, char *sk, int lev)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
-	if (sk) {
-		AString skname = sk;
-		if (LookupSkill(&skname) == -1) return;
-	}
+	if (sk && (FindSkill(sk) == NULL)) return;
 	ItemDefs[it].mSkill = sk;
 	ItemDefs[it].mLevel = lev;
 }
@@ -225,10 +217,7 @@ void Game::ModifyRaceSkills(char *r, int i, char *sk)
 	ManType *mt = FindRace(r);
 	if (mt == NULL) return;
 	if(i < 0 || i >= (int)(sizeof(mt->skills) / sizeof(mt->skills[0]))) return;
-	if (sk) {
-		AString skname = sk;
-		if (LookupSkill(&skname) == -1) return;
-	}
+	if (sk && (FindSkill(sk) == NULL)) return;
 	mt->skills[i] = sk;
 }
 
@@ -276,8 +265,7 @@ void Game::ModifyMonsterSpecial(char *mon, char *special, int lev)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
-	SpecialType *sp = FindSpecial(special);
-	if (sp == NULL) return;
+	if (special && (FindSpecial(special) == NULL)) return;
 	if(lev < 0) return;
 	pM->special = special;
 	pM->specialLevel = lev;
@@ -303,12 +291,12 @@ void Game::ModifyMonsterThreat(char *mon, int num, int hostileChance)
 	pM->number = num;
 }
 
-void Game::ModifyWeaponSkills(char *weap, int baseSkill, int orSkill)
+void Game::ModifyWeaponSkills(char *weap, char *baseSkill, char *orSkill)
 {
 	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
-	if(baseSkill < -1 || baseSkill > (NSKILLS - 1)) return;
-	if(orSkill < -1 || orSkill > (NSKILLS - 1)) return;
+	if (baseSkill && (FindSkill(baseSkill) == NULL)) return;
+	if (orSkill && (FindSkill(orSkill) == NULL)) return;
 	pw->baseSkill = baseSkill;
 	pw->orSkill = orSkill;
 }
@@ -369,10 +357,7 @@ void Game::ModifyMountSkill(char *mount, char *skill)
 {
 	MountType *pm = FindMount(mount);
 	if (pm == NULL) return;
-	if (skill) {
-		AString skname = skill;
-		if (LookupSkill(&skname) == -1) return;
-	}
+	if (skill && (FindSkill(skill) == NULL)) return;
 	pm->skill = skill;
 }
 
@@ -392,8 +377,7 @@ void Game::ModifyMountSpecial(char *mount, char *special, int level)
 {
 	MountType *pm = FindMount(mount);
 	if (pm == NULL) return;
-	SpecialType *sp = FindSpecial(special);
-	if (sp == NULL) return;
+	if (special && (FindSpecial(special) == NULL)) return;
 	if(level < 0) return;
 	pm->mountSpecial = special;
 	pm->specialLev = level;
@@ -580,8 +564,7 @@ void Game::ModifyBattleItemSpecial(char *item, char *special, int level)
 {
 	BattleItemType *pb = FindBattleItem(item);
 	if (pb == NULL) return;
-	SpecialType *sp = FindSpecial(special);
-	if (sp == NULL) return;
+	if (special && (FindSpecial(special) == NULL)) return;
 	if(level < 0) return;
 	pb->special = special;
 	pb->skillLevel = level;
@@ -617,8 +600,7 @@ void Game::ModifySpecialTargetEffects(char *special, int index, char *effect)
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
 	if(index < 0 || index > 3) return;
-	EffectType *ep = FindEffect(effect);
-	if (ep == NULL) return;
+	if (effect && (FindEffect(effect) == NULL)) return;
 	sp->effects[index] = effect;
 }
 
@@ -654,8 +636,7 @@ void Game::ModifySpecialDamage(char *special, int index, int type, int min,
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
 	if(index < 0 || index > 4) return;
-	EffectType *ep = FindEffect(effect);
-	if (ep == NULL) return;
+	if (effect && (FindEffect(effect) == NULL)) return;
 	if(type < -1 || type > NUM_ATTACK_TYPES) return;
 	if(cls < -1 || cls > (NUM_WEAPON_CLASSES-1)) return;
 	if(min < 0) return;
@@ -695,8 +676,7 @@ void Game::ModifyEffectCancelEffect(char *effect, char *uneffect)
 {
 	EffectType *ep = FindEffect(effect);
 	if (ep == NULL) return;
-	EffectType *up = FindEffect(uneffect);
-	if (up == NULL) return;
+	if (uneffect && (FindEffect(uneffect) == NULL)) return;
 	ep->cancelEffect = uneffect;
 }
 

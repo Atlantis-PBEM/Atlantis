@@ -93,11 +93,13 @@ class SkillType
 
 		SkillDepend depends[3];
 };
-extern SkillType * SkillDefs;
+extern SkillType *SkillDefs;
 
+SkillType *FindSkill(char *skname);
 int LookupSkill(AString *);
 int ParseSkill(AString *);
 AString SkillStrs(int);
+AString SkillStrs(SkillType *);
 
 class ShowType {
 	public:
