@@ -52,6 +52,11 @@ static int aq[] = { -1 };
 int *allowedQuartermasters = aq;
 int allowedQuartermastersSize = sizeof(aq) / sizeof(aq[0]);
 
+// at is already taken up for allowedtaxes, so I'll use ag (allowedgenghises) ;)
+static int ag[] = { -1 };
+int *allowedTacticians = ag;
+int allowedTacticiansSize = sizeof(ag) / sizeof(ag[0]);
+
 static GameDefs g = {
 	"Atlantis Conquest",	 // RULESET_NAME
 	MAKE_ATL_VER( 2, 0, 0 ), // RULESET_VERSION
@@ -210,6 +215,7 @@ static GameDefs g = {
 	3, // DELAY_MORTALITY
 	6, // DELAY_GROWTH
 	100, // TOWN_DEVELOPMENT
+	0, //TACTICS_NEEDS_WAR
 };
 
 GameDefs *Globals = &g;

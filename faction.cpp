@@ -436,6 +436,10 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			f->PutStr(AString("Quartermasters: ") + numqms + " (" +
 					pGame->AllowedQuarterMasters(this) + ")");
 		}
+		if (Globals->TACTICS_NEEDS_WAR) {
+			f->PutStr(AString("Tacticians: ") + numtacts + " (" +
+					pGame->AllowedTacticians(this) + ")");
+		}
 		f->PutStr(AString("Mages: ") + nummages + " (" +
 				pGame->AllowedMages(this) + ")");
 		if(Globals->APPRENTICES_EXIST) {

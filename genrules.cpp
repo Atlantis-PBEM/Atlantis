@@ -484,7 +484,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"be changed at the beginning of each turn, so a faction can "
 			"change and adapt to the conditions around it.  Faction Points "
 			"spent on War determine the number of regions in which factions "
-			"can obtain income by taxing or pillaging. Faction Points spent "
+			"can obtain income by taxing or pillaging";
+		if (Globals->TACTICS_NEEDS_WAR) {
+			temp += ", and also determines the number of level 5 tactics "
+				"leaders (tacticians) that a faction can train";
+		}
+		temp += ". Faction Points spent "
 			"on Trade determine the number of regions in which a faction "
 			"may conduct trade activity. Trade activity includes producing "
 			"goods, building ships and buildings, and buying trade items. ";
@@ -504,7 +509,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "table border=\"1\"");
 		f.Enclose(1, "tr");
 		f.TagText("th", "Faction Points");
-		f.TagText("th", "War (max tax regions)");
+		temp = "War (max tax regions";
+		if(Globals->TACTICS_NEEDS_WAR)
+			temp += "/tacticians";
+		temp += ")";
+		f.TagText("th", temp);
 		temp = "Trade (max trade regions";
 		if (qm_exist)
 			temp += "/quartermasters";
@@ -526,7 +535,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.PutStr(i);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\" nowrap");
-			f.PutStr(AllowedTaxes(&fac));
+			temp = AllowedTaxes(&fac);
+			if (Globals->TACTICS_NEEDS_WAR)
+				temp+= AString("/") + AllowedTacticians(&fac);
+			f.PutStr(temp);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\" nowrap");
 			temp = AllowedTrades(&fac);

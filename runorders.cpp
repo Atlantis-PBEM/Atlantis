@@ -1446,6 +1446,11 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 									"men.");
 							o->num = 0;
 						}
+						if (u->GetSkill(S_TACTICS) == 5) {
+							u->Error("BUY: Tacticians can't recruit more "
+									"men.");
+							o->num = 0;
+						}
 						if (((ItemDefs[o->item].type & IT_LEADER) &&
 								u->IsNormal()) ||
 								(!(ItemDefs[o->item].type & IT_LEADER) &&
@@ -2502,6 +2507,18 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 					if (CountQuarterMasters(t->faction) >=
 							AllowedQuarterMasters(t->faction)) {
 						u->Error("GIVE: Faction has too many quartermasters.");
+						return 0;
+					}
+				}
+			}
+		}
+
+		if (u->GetSkill(S_TACTICS) == 5) {
+			if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+				if (Globals->TACTICS_NEEDS_WAR) {
+					if (CountTacticians(t->faction) >=
+							AllowedTacticians(t->faction)) {
+						u->Error("GIVE: Faction has too many tacticians.");
 						return 0;
 					}
 				}

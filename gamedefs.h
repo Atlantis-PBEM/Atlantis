@@ -56,6 +56,8 @@ extern int *allowedTrades;
 extern int allowedTradesSize;
 extern int *allowedQuartermasters;
 extern int allowedQuartermastersSize;
+extern int *allowedTacticians;
+extern int allowedTacticiansSize;
 
 extern int NUMBATTLEITEMS;
 extern int NUMARMORS;
@@ -672,6 +674,9 @@ public:
 	// How developed pre-existing towns are at the start of the game
 	// (100 = standard).
 	int TOWN_DEVELOPMENT;
+	
+	// Whether you need to be a war faction to have tact-5 leaders
+	int TACTICS_NEEDS_WAR;
 };
 
 extern GameDefs *Globals;

@@ -185,6 +185,7 @@ public:
     int nummages;
 	int numapprentices;
 	int numqms;
+	int numtacts;
     AList war_regions;
     AList trade_regions;
 

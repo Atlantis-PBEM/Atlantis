@@ -997,6 +997,24 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 			}
 	}
 
+	// If TACTICS_NEEDS_WAR is enabled, and the unit is trying to study to tact-5,
+	// check that there's still space...
+	if (Globals->TACTICS_NEEDS_WAR && sk == S_TACTICS && 
+			u->GetSkill(sk) == 4 && u->skills.GetDays(sk)/u->GetMen() >= 390) {
+		
+		if (CountTacticians(u->faction) >=
+				AllowedTacticians(u->faction)) {
+			u->Error("STUDY: Can't have another level 5 tactics leader.");
+			return;
+		}
+
+		if (u->GetMen() != 1) {
+			u->Error("STUDY: Only 1-man units can study to level 5 in tactics.");
+			return;
+		}
+		
+	} // end tactics check
+
 	int days = 30 * u->GetMen() + o->days;
 
 	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetSkill(sk) >= 2) {

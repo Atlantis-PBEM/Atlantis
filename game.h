@@ -50,6 +50,10 @@ public:
 	void Error(const AString &error);
 };
 
+/// The main game class
+/** Currently this doc is here to switch on the class so that
+I can see what the modify.cpp docs look like.
+*/
 class Game
 {
 	friend class Faction;
@@ -133,6 +137,7 @@ private:
 	void CountAllMages();
 	void CountAllApprentices();
 	void CountAllQuarterMasters();
+	void CountAllTacticians();
 	void WriteReport();
 	// LLS - write order templates
 	void WriteTemplates();
@@ -371,6 +376,7 @@ private:
 	int CountMages(Faction *);
 	int CountApprentices(Faction *);
 	int CountQuarterMasters(Faction *);
+	int CountTacticians(Faction *);
 	void FindDeadFactions();
 	void DeleteEmptyUnits();
 	void DeleteEmptyInRegion(ARegion *);
@@ -385,12 +391,13 @@ private:
 	//
 	// Faction limit functions.
 	//
-	// The first 3 are game specific and can be found in extra.cpp. They
+	// The first 4 are game specific and can be found in extra.cpp. They
 	// may return -1 to indicate no limit.
 	//
 	int AllowedMages(Faction *pFac);
 	int AllowedApprentices(Faction *pFact);
 	int AllowedQuarterMasters(Faction *pFact);
+	int AllowedTacticians(Faction *pFact);
 	int AllowedTaxes(Faction *pFac);
 	int AllowedTrades(Faction *pFac);
 	int TaxCheck(ARegion *pReg, Faction *pFac);

@@ -53,7 +53,7 @@ AList::~AList()
 void AList::DeleteAll()
 {
 	AListElem * temp; ///< A temporary variable to contain the current list element.
-								 ///< Otherwise, when we delete list, we lose list->next too!
+								 ///  Otherwise, when we delete list, we lose list->next too!
 	while (list) {
 		temp = list->next;
 		delete list;
@@ -70,7 +70,7 @@ void AList::DeleteAll()
 void AList::Empty()
 {
 	AListElem * temp; ///< A temporary variable to contain the current list element.
-								 ///< Otherwise, when we delete list, we lose list->next too!
+								 ///  Otherwise, when we delete list, we lose list->next too!
 	while (list) {
 		temp = list->next;
 		list->next = 0;

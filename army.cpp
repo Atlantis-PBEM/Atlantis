@@ -488,8 +488,16 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			}
 		}
 	}
-	tactitian->PracticeAttribute("tactics");
-
+	// If TACTICS_NEEDS_WAR is enabled, we don't want to push leaders 
+	// from tact-4 to tact-5!
+	if (Globals->TACTICS_NEEDS_WAR) {
+		int currskill = tactitian->skills.GetDays(S_TACTICS)/tactitian->GetMen();
+		if (currskill < 450 - Globals->SKILL_PRACTICE_AMOUNT) {
+			tactitian->PracticeAttribute("tactics");
+		}
+	} else { // Only Globals->TACTICS_NEEDS_WAR == 0
+		tactitian->PracticeAttribute("tactics");
+	}
 	soldiers = new SoldierPtr[count];
 	int x = 0;
 	int y = count;

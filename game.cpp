@@ -1420,7 +1420,8 @@ void Game::WriteReport()
 		CountAllApprentices();
 	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT)
 		CountAllQuarterMasters();
-
+	if (Globals->TACTICS_NEEDS_WAR)
+		CountAllTacticians();
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
 		AString str = "report.";
@@ -1635,6 +1636,29 @@ void Game::CountAllQuarterMasters()
 	}
 }
 
+// This, along with counting apprentices, mages and quartermasters, 
+// should all be in the one function (CountSpecialists?)
+void Game::CountAllTacticians()
+{
+	forlist(&factions) {
+		((Faction *) elem)->numtacts = 0;
+	}
+
+	{
+		forlist(&regions) {
+			ARegion *r = (ARegion *) elem;
+			forlist(&r->objects) {
+				Object *o = (Object *) elem;
+				forlist(&o->units) {
+					Unit *u = (Unit *) elem;
+					if (u->GetSkill(S_TACTICS) == 5)
+						u->faction->numtacts++;
+				}
+			}
+		}
+	}
+}
+
 // LLS
 void Game::UnitFactionMap()
 {
@@ -1715,6 +1739,22 @@ int Game::CountQuarterMasters(Faction *pFac)
 	return i;
 }
 
+int Game::CountTacticians(Faction *pFac)
+{
+	int i = 0;
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *)elem;
+				if(u->faction == pFac && u->GetSkill(S_TACTICS) == 5) i++;
+			}
+		}
+	}
+	return i;
+}
+
 int Game::CountApprentices(Faction *pFac)
 {
 	int i = 0;
@@ -1750,6 +1790,17 @@ int Game::AllowedQuarterMasters(Faction *pFac)
 		points = allowedQuartermastersSize - 1;
 
 	return allowedQuartermasters[points];
+}
+
+int Game::AllowedTacticians(Faction *pFac)
+{
+	int points = pFac->type[F_WAR];
+
+	if (points < 0) points = 0;
+	if (points > allowedTacticiansSize - 1)
+		points = allowedTacticiansSize - 1;
+
+	return allowedTacticians[points];
 }
 
 int Game::AllowedApprentices(Faction *pFac)
