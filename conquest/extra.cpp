@@ -210,9 +210,9 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainItems(R_ISLAND_PLAIN, 0, I_HORSE, 100, 20);
 
 	ClearTerrainItems(R_ISLAND_SWAMP);
-	ModifyTerrainItems(R_ISLAND_PLAIN, 0, I_WOOD, 100, 10);
+	ModifyTerrainItems(R_ISLAND_SWAMP, 0, I_WOOD, 100, 10);
 
 	ClearTerrainItems(R_ISLAND_MOUNTAIN);
-	ModifyTerrainItems(R_ISLAND_PLAIN, 0, I_IRON, 100, 20);
+	ModifyTerrainItems(R_ISLAND_MOUNTAIN, 0, I_IRON, 100, 20);
 	return;
 }

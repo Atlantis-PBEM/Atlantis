@@ -1779,7 +1779,7 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
             f->PutStr(temp);
         }
 
-        if (num == 0) {
+        if (type == R_NEXUS) {
 			int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
 			char *nexus_desc = new char[len];
 			sprintf(nexus_desc, AC_STRING, Globals->WORLD_NAME,
@@ -2208,11 +2208,6 @@ int ARegionList::ReadRegions(Ainfile * f,AList * factions, ATL_VER v )
     int num = f->GetInt();
 
     numLevels = f->GetInt();
-	if(numLevels != 2 + Globals->UNDERWORLD_LEVELS +
-			Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL) {
-		Awrite("Number of regions changed from game file!");
-		return 0;
-	}
     CreateLevels( numLevels );
     int i;
     for( i = 0; i < numLevels; i++ )
