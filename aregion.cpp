@@ -962,6 +962,29 @@ void ARegion::CheckTownIncrease()
 	town->pop = town->basepop * 2 / 3;
 }
 
+int ARegion::GetNearestMapValue(int dir, int range, int type, int getrange)
+{
+	ARegion *nr = neighbors[dir];
+	if(!nr) return -1;
+	int retval = -1;
+	switch(type) {
+		case 0: retval = nr->maxwages;
+			break;
+		case 1: retval = nr->habitat;
+			break;
+		case 2: retval = nr->migration;
+			break;
+		case 3: retval = nr->development;
+	}
+	if (retval < 1) {
+		if (range == 1) return -1;
+		return nr->GetNearestMapValue(dir, range--, type, getrange);
+	}
+	if (getrange) return range;
+	retval *= range;
+	return retval;
+}
+
 int ARegion::CheckSea(int dir, int range, int remainocean)
 {
 	if (type != R_OCEAN) return 0;
@@ -2172,6 +2195,8 @@ void ARegion::Writeout(Aoutfile *f)
 	f->PutInt(maxwages);
 	f->PutInt(money);
 
+	f->PutInt(elevation);
+
 	f->PutInt(habitat);
 	f->PutInt(development);
 	f->PutInt(growth);
@@ -2227,6 +2252,8 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	wages = f->GetInt();
 	maxwages = f->GetInt();
 	money = f->GetInt();
+	
+	elevation = f->GetInt();
 
 	habitat = f->GetInt();
 	development = f->GetInt();
@@ -2487,7 +2514,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		f->AddTab();
 		if(Globals->WEATHER_EXISTS) {
 			temp = "It was ";
-			if (clearskies) temp = "unnaturally clear ";
+			if (clearskies) temp += "unnaturally clear ";
 			else {
 				if(weather == W_BLIZZARD) temp = "There was an unnatural ";
 				else if(weather == W_NORMAL) temp = "The weather was ";
@@ -2500,6 +2527,12 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			temp += " next month.";
 			f->PutStr(temp);
 		}
+		
+		/*
+		f->PutStr("");
+		temp = "Elevation is ";
+		f->PutStr(temp + elevation);
+		*/
 
 		if (type == R_NEXUS) {
 			int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
@@ -3301,6 +3334,9 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name
 	int sea = Globals->OCEAN;
 	if(Globals->LAKES_EXIST || Globals->ARCHIPELAGO)
 		sea = sea * (100 + 12 * (100 - Globals->ARCHIPELAGO) / 100) / 100;
+	
+	if (Globals->FRACTAL_MAP) InitGeographicMap(pRegionArrays[level]);
+		
 	MakeLand(pRegionArrays[level], sea, Globals->CONTINENT_SIZE);
 
 	CleanUpWater(pRegionArrays[level]);
@@ -3408,10 +3444,10 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				// Some initial values; these will get reset
 				//
 				reg->type = -1;
-				reg->race = -1;
-				reg->wages = -1;
-				reg->maxwages = -1;
-				reg->population = -1;
+				reg->race = -1; // 
+				reg->wages = -1; // initially store: name
+				reg->population = -1; // initially used as flag
+				reg->maxwages = -1; // store: elevation
 
 				Add(reg);
 				arr->SetRegion(x, y, reg);
@@ -3436,6 +3472,14 @@ void ARegionList::SetupNeighbors(ARegionArray *pRegs)
 	}
 }
 
+void ARegionList::InitGeographicMap(ARegionArray *pRegs)
+{
+	Awrite("Initialising the Geographic Map");
+	GeoMap geo = GeoMap(pRegs->x, pRegs->y);
+	geo.Seed(Globals->FRACTAL_SCATTER,Globals->FRACTAL_SMOOTHING);
+	geo.ApplyGeography(pRegs);
+}
+
 void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 		int continentSize)
 {
@@ -3443,95 +3487,87 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 	int ocean = total;
 
 	Awrite("Making land");
-	while (ocean > (total * percentOcean) / 100) {
-		int sz = getrandom(continentSize);
-		sz = sz * sz;
-
-		int tempx = getrandom(pRegs->x);
-		int yoff = pRegs->y / 40;
-		int yband = pRegs->y / 2 - 2 * yoff;
-		int tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
-
-		ARegion *reg = pRegs->GetRegion(tempx, tempy);
-		ARegion *newreg = reg;
-		ARegion *seareg = reg;
-
-		// Archipelago or Continent?
-		if (getrandom(100) < Globals->ARCHIPELAGO) {
-			// Make an Archipelago:
-			sz = sz / 5 + 1;
-			int first = 1;
-			int tries = 0;
-			for (int i=0; i<sz; i++) {
-				int direc = getrandom(NDIRS);
-				newreg = reg->neighbors[direc];
-				while (!newreg) {
-					direc = getrandom(6);
-					newreg = reg->neighbors[direc];
-				}
-				tries++;
-				for (int m = 0; m < 2; m++) {
-					seareg = newreg;
-					newreg = seareg->neighbors[direc];
-					if (!newreg) break;
-				}
-				if (!newreg) break;
-				if (newreg) {
-					seareg = newreg;
-					newreg = seareg->neighbors[getrandom(NDIRS)];
-					if (!newreg) break;
-					// island start point (~3 regions away from last island)
-					seareg = newreg;
-					if (first) {
-						seareg = reg;
-						first = 0;
-					}
-					if (seareg->type == -1) {
-						reg = seareg;
-						tries = 0;
+	
+	if (Globals->FRACTAL_MAP) {
+		// First lower the sea level
+		Awrite("Lower sea level");
+		int sealevel = 99;
+		//int fractalpercent = ((100 - percentOcean) * (100 - Globals->FRACTAL_MAP) / 100);
+		while (ocean > (total * (percentOcean)) / 100) {
+			for (int x=0; x < pRegs->x; x++) {
+				for (int y=0; y < pRegs->y/2; y++) {
+					ARegion *reg = pRegs->GetRegion(x, (y*2 + x%2));
+					if(!reg) continue;
+					if ((reg->type == -1) && (reg->maxwages > sealevel)) {
 						reg->type = R_NUM;
 						ocean--;
-					} else {
-						if (tries > 5) break;
-						continue;
-					}
-					int growit = getrandom(20);
-					int growth = 0;
-					int growch = 2;
-					// grow this island
-					while (growit > growch) {
-						growit = getrandom(20);
-						tries = 0;
-						int newdir = getrandom(NDIRS);
-						while (newdir == reg->GetRealDirComp(direc))
-							newdir = getrandom(NDIRS);
-						newreg = reg->neighbors[newdir];
-						while ((!newreg) && (tries < 36)) {
-							while (newdir == reg->GetRealDirComp(direc))
-								newdir = getrandom(NDIRS);
-							newreg = reg->neighbors[newdir];
-							tries++;
-						}
-						if (!newreg) continue;
-						reg = newreg;
-						tries = 0;
-						if (reg->type == -1) {
-							reg->type = R_NUM;
-							growth++;
-							if (growth > growch) growch = growth;
-							ocean--;
-						} else continue;
-					}
+					}				
 				}
 			}
-		} else {
+			sealevel--;
+			Adot();
+		}
+		Awrite("");
+	
+		Awrite("Add further land");
+		int coast = sealevel;
+		int dotter = 0;
+		while (ocean > (total * (percentOcean)) / 100) {
+			int sz = getrandom(continentSize);
+			sz = sz * sz;
+			dotter++;
+
+			int tempx = getrandom(pRegs->x);
+			int yoff = pRegs->y / 40;
+			int yband = pRegs->y / 2 - 2 * yoff;
+			int tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
+
+			ARegion *reg = pRegs->GetRegion(tempx, tempy);
+			if(!reg) continue;
+			ARegion *newreg = reg;
+
+			sealevel = coast;
+			while (reg->maxwages < sealevel) {
+				int tries = 0;
+				while ((reg->maxwages < sealevel) && (tries < 25)) {
+					tempx = getrandom(pRegs->x);
+					tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
+					newreg = pRegs->GetRegion(tempx, tempy);
+					if (!reg) continue;
+					reg = newreg;
+				}
+				sealevel--;
+			}
+		
+			if (dotter%50 == 0) Adot();
 			// make a continent
 			if (reg->type == -1) {
 				reg->type = R_NUM;
 				ocean--;
 			}
+			int dir;
 			for (int i=0; i<sz; i++) {
-				int dir = getrandom(NDIRS);
+				int dr = getrandom(NDIRS);
+				int maxe1, maxe2, d1, d2 = -1;
+				for (int d=0; d<NDIRS; d++) {
+					dir = dr + d;
+					while (dir >= NDIRS) dir -= NDIRS;
+					newreg = reg->neighbors[dir];
+					if(!newreg) continue;
+					if(newreg->type == -1) {
+						if(newreg->maxwages > maxe1) {
+							maxe1 = newreg->maxwages;
+							d1 = dir;
+						}
+					}
+					if(newreg->maxwages > maxe2) {
+						maxe2 = newreg->maxwages;
+						d2 = dir;
+					}
+				}
+				if (d1 >= 0) dir = d1;
+					else dir = d2;
+				
 				if ((reg->yloc < yoff*2) && ((dir < 2) || (dir = NDIRS-1))
 					&& (getrandom(4) < 3)) continue;
 				if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
@@ -3551,8 +3587,118 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 				}
 			}
 		}
-	}
+	} else {
+		while (ocean > (total * percentOcean) / 100) {
+			int sz = getrandom(continentSize);
+			sz = sz * sz;
 
+			int tempx = getrandom(pRegs->x);
+			int yoff = pRegs->y / 40;
+			int yband = pRegs->y / 2 - 2 * yoff;
+			int tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
+
+			ARegion *reg = pRegs->GetRegion(tempx, tempy);
+			if(!reg) continue;
+			ARegion *newreg = reg;
+			ARegion *seareg = reg;
+		
+			// Archipelago or Continent?
+			if (getrandom(100) < Globals->ARCHIPELAGO) {
+				// Make an Archipelago:
+				sz = sz / 5 + 1;
+				int first = 1;
+				int tries = 0;
+				for (int i=0; i<sz; i++) {
+					int direc = getrandom(NDIRS);
+					newreg = reg->neighbors[direc];
+					while (!newreg) {
+						direc = getrandom(6);
+						newreg = reg->neighbors[direc];
+					}
+					tries++;
+					for (int m = 0; m < 2; m++) {
+						seareg = newreg;
+						newreg = seareg->neighbors[direc];
+						if (!newreg) break;
+					}
+					if (!newreg) break;
+					if (newreg) {
+						seareg = newreg;
+						newreg = seareg->neighbors[getrandom(NDIRS)];
+						if (!newreg) break;
+						// island start point (~3 regions away from last island)
+						seareg = newreg;
+						if (first) {
+							seareg = reg;
+							first = 0;
+						}
+						if (seareg->type == -1) {
+							reg = seareg;
+							tries = 0;
+							reg->type = R_NUM;
+							ocean--;
+						} else {
+							if (tries > 5) break;
+							continue;
+						}
+						int growit = getrandom(20);
+						int growth = 0;
+						int growch = 2;
+						// grow this island
+						while (growit > growch) {
+							growit = getrandom(20);
+							tries = 0;
+							int newdir = getrandom(NDIRS);
+							while (newdir == reg->GetRealDirComp(direc))
+								newdir = getrandom(NDIRS);
+							newreg = reg->neighbors[newdir];
+							while ((!newreg) && (tries < 36)) {
+								while (newdir == reg->GetRealDirComp(direc))
+									newdir = getrandom(NDIRS);
+								newreg = reg->neighbors[newdir];
+								tries++;
+							}
+							if (!newreg) continue;
+							reg = newreg;
+							tries = 0;
+							if (reg->type == -1) {
+								reg->type = R_NUM;
+								growth++;
+								if (growth > growch) growch = growth;
+								ocean--;
+							} else continue;
+						}
+					}
+				}
+			} else {
+				// make a continent
+				if (reg->type == -1) {
+					reg->type = R_NUM;
+					ocean--;
+				}
+				for (int i=0; i<sz; i++) {
+					int dir = getrandom(NDIRS);
+					if ((reg->yloc < yoff*2) && ((dir < 2) || (dir = NDIRS-1))
+						&& (getrandom(4) < 3)) continue;
+					if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
+						&& (getrandom(4) < 3)) continue;				
+					ARegion *newreg = reg->neighbors[dir];
+					if (!newreg) break;
+					int polecheck = 0;
+					for (int v=0; v < NDIRS; v++) {
+						ARegion *creg = newreg->neighbors[v];
+						if (!creg) polecheck = 1;
+					}
+					if(polecheck) break;
+					reg = newreg;
+					if (reg->type == -1) {
+						reg->type = R_NUM;
+						ocean--;
+					}
+				}
+			}
+		}
+	}
 	// At this point, go back through and set all the rest to ocean
 	SetRegTypes(pRegs, R_OCEAN);
 	Awrite("");
@@ -4337,4 +4483,170 @@ void ARegionFlatArray::SetRegion(int x, ARegion *r) {
 
 ARegion *ARegionFlatArray::GetRegion(int x) {
 	return regions[x];
+}
+
+GeoMap::GeoMap(int x, int y)
+{
+	y = y/2;
+	int max = (x > y) ? x : y;
+	size = 8;
+	while (size < 2*max) size *= 2;
+	xscale = (size / x);
+	yscale = (size / y);
+	xoff = (size - x) / 2;
+	yoff = (size - y) / 2;
+	Geography g;
+	geomap.clear();
+	g.elevation = -1;
+	for (int a=0; a<x; a++) {
+		for (int b=0; b<y; b++) {
+			long int coords = (size+1)*a + b;
+			geomap.insert(make_pair(coords, g));
+		}
+	}
+}
+
+void GeoMap::Seed(int spread, int smoothness)
+{
+	int step = size;
+	for (int i=0; i < spread; i++) {
+		if (step > 16) step = step / 2;
+	}		
+	Awrite(AString("First fractal step = ") + step);
+	Awrite(AString("Size: ") +size + ", xscale: " +xscale + ", yscale: "+yscale);
+	for (int x = 0; x <= size; x += step) {
+		for (int y = 0; y <= size; y += step) {
+			Geography g;
+			int val = getrandom(10)+45;
+			g.elevation = val;
+			long int coords = (size+1) * x + y;
+			if (x >= size) {
+				g.elevation = GetElevation((x-size), y);
+			}
+			geomap.erase(coords);
+			geomap.insert(make_pair(coords, g));
+		}
+	}
+	int frac = 50;
+	int count = 0;
+	while (step > 1) {
+		count++;
+		int nextstep = step/2 + step%2;
+		Awrite(AString("Step #") + count + " with step value of " + step);
+		int showfirst = 1;
+		for (int x = 0; x <= size; x += step) {
+			for (int y = 0; y <= size; y += step) {
+				int average = 0;
+				int xcoor = x + nextstep;
+				int ycoor = y + nextstep;
+				if ((xcoor > size) || (ycoor > size)) continue;
+				int nb = 0;
+				for (int a = -1; a < 2; a += 2) {
+					for (int b = -1; b < 2; b += 2) {
+						int nx = xcoor + nextstep * a;
+						int ny = ycoor + nextstep * b;
+						if (nx > size) nx = nx - size;
+						if (nx < 0) nx = size - nx;
+						int ge = GetElevation(nx, ny);
+						if(ge != 0) {
+							average += ge;
+							nb++;
+						} else {
+							average += getrandom(25)+1;
+							nb++;
+						}
+					}
+				}
+				Geography g;
+				int r = getrandom(2*frac) - frac;
+				g.elevation = average/nb + average%nb + r;
+				if (g.elevation < 1) g.elevation = 1;
+				if (g.elevation > 200) g.elevation = 200;
+				long int coords = (size+1) * xcoor + ycoor;
+				geomap.erase(coords);
+				geomap.insert(make_pair(coords, g));
+				
+			}
+		}
+		showfirst = 1;
+		for (int x = 0; x <= size; x += step) {
+			for (int y = 0; y <= size; y += step) {
+				for (int i = 0; i < 2; i++) {
+					int average = 0;
+					int dx, dy;
+					if (i==0) {
+						dx = x + nextstep;
+						dy = y;
+					} else {
+						dx = x;
+						dy = y + nextstep;
+					}
+					if ((dx > size) || (dy > size)) continue;
+					int nb = 0;
+					for (int a = -1; a < 2; a += 2) {
+						int nx = dx + a*nextstep;
+						if (nx > size) nx = nx - size;
+						if (nx < 0) nx = size - nx;
+						int ge = GetElevation(nx, dy);
+						if (ge != 0) {
+							average += ge;
+							nb++;
+						} else {
+							average += getrandom(25)+1;
+							nb++;
+						}
+					}
+					for (int b = -1; b < 2; b += 2) {
+						int ny = dy + b*nextstep;
+						int ge = GetElevation(dx, ny);
+						if (ge != 0) {
+							average += ge;
+							nb++;
+						} else {
+							average += getrandom(25)+1;
+							nb++;
+						}
+					}
+					
+					Geography g;
+					int r = getrandom(2*frac) - frac;
+					g.elevation = average/nb + average%nb + r;
+					if (g.elevation < 1) g.elevation = 1;
+					if (g.elevation > 200) g.elevation = 200;
+					long int coords = (size+1) * dx + dy;
+					geomap.erase(coords);
+					geomap.insert(make_pair(coords, g));
+					
+				}
+			}
+		}
+		frac = (frac * (200-smoothness)/200);
+		step = nextstep;
+	}
+}
+
+int GeoMap::GetElevation(int x, int y)
+{
+	long int coords = (size+1)*x + y;
+	map<long int,Geography>::iterator it = geomap.find(coords);
+	if (it != geomap.end()) {
+		Geography g = it->second;
+		return g.elevation;
+	}
+	return 0;
+}
+
+void GeoMap::ApplyGeography(ARegionArray *pArr) 
+{
+	int x, y;
+	for(x = 0; x < pArr->x; x++) {
+		for(y = 0; y < pArr->y; y++) {
+			ARegion *reg = pArr->GetRegion(x, y);
+			if(!reg) continue;
+			int cx = (x * xscale); // x+xoff;
+			int cy = ((y/2) * yscale); // + yoff;
+			reg->maxwages = GetElevation(cx, cy);
+			reg->elevation = reg->maxwages;			
+		}
+	}
 }

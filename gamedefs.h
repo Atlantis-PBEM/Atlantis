@@ -339,6 +339,25 @@ public:
 	// Size factor for continent creation.
 	int CONTINENT_SIZE;
 	
+	// Should the fractal map algorithm be used for
+	// the surface level generation?
+	// This value also affects to what extent the
+	// fractal land distribution algorithm should
+	// be used and to what extent continents will
+	// be grown normally (100 = only fractal
+	// algorithm).
+	int FRACTAL_MAP;
+	
+	// How scattered is the land in the fractal map?
+	// Recommended: values between 1 and 4.
+	// Values lower than 0 and high values will have
+	// no effect.
+	int FRACTAL_SCATTER;
+	
+	// Smoothing in the fractal algorithm.
+	// 0 very coarse, 100 means very smooth.
+	int FRACTAL_SMOOTHING;
+	
 	// Granularity of terrain - default setting is 0.
 	// A value of 1 means maximum variability,
 	// higher values = more regular terrain spread

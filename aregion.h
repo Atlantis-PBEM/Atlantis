@@ -42,6 +42,7 @@ class ARegionList;
 #include "production.h"
 #include "market.h"
 #include "object.h"
+#include <map>
 
 /* Weather Types */
 enum {
@@ -256,6 +257,7 @@ class ARegion : public AListElem
 		int Development();
 		int TownDevelopment();
 		int CheckSea(int, int, int);
+		int GetNearestMapValue(int, int, int, int);
 
 		int CountWMons();
 		int IsGuarded();
@@ -288,6 +290,7 @@ class ARegion : public AListElem
 		int development;
 		int growth;
 		int mortality;
+		int elevation;
 		AList *roadsto;
 
 		/* Potential bonuses to economy */
@@ -354,6 +357,24 @@ class ARegionFlatArray
 		ARegion **regions;
 };
 
+struct Geography
+{
+	int elevation;
+};
+
+class GeoMap
+{
+	public:
+		GeoMap(int, int);
+		void Seed(int spread, int smoothness);
+		int GetElevation(int, int);
+		void ApplyGeography(ARegionArray *pArr);
+		
+		int size, xscale, yscale, xoff, yoff;
+		map<long int,Geography> geomap;
+		
+};
+
 class ARegionList : public AList
 {
 	public:
@@ -400,6 +421,7 @@ class ARegionList : public AList
 		void FinalSetupGates();
 
 		// JR
+		void InitGeographicMap(ARegionArray *pRegs);
 		void CleanUpWater(ARegionArray *pRegs);
 		void RemoveCoastalLakes(ARegionArray *pRegs);
 		void SeverLandBridges(ARegionArray *pRegs);

@@ -723,4 +723,8 @@ Changes from 4.0.10 -> 5.0.0
    -- Added in flags to individually turn off the ability to study, teach 
       or gain experience in a skill (another one of the TODO items, requested 
 	  for Ceran)
+   -- Option to create surface level with a fractal algorithm. A new GeoMap
+      class was implemented to handle the generation of fractal geographical
+      maps for world creation. Gamedefs FRACTAL_MAP, FRACTAL_SCATTER and
+      FRACTAL_SMOOTH govern this method of map generation
 	  
