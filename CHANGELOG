@@ -923,5 +923,9 @@ Changes from 4.0.10 -> 5.0.0
    -- updated the skillshows and itemshows to handle ship items properly
    -- added the STUDY [skill] [level] option for repeated study. STUDY is no longer useable with the
       '@' symbol as a repeating order  
+   -- moved EmptyHell() to Game:RunGame() to prevent dead mages bug with IMPROVED_FARSIGHT.
+   -- added an IsAlive() check to Unit::CanReallySwim() to prevent newly formed units from LEAVING
+      a ship and then drowning during give.
+   -- fixed bug where clear skies didn't affect sailing cost.
    	  ToDo: armored galleon bonus...?
    

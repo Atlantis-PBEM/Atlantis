@@ -1317,7 +1317,7 @@ int Unit::CanFly(int weight)
 
 int Unit::CanReallySwim()
 {
-	if (SwimmingCapacity() >= items.Weight()) return 1;
+	if (IsAlive() && (SwimmingCapacity() >= items.Weight())) return 1;
 	return 0;
 }
 

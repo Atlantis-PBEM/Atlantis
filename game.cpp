@@ -1046,6 +1046,8 @@ int Game::RunGame()
 	Awrite("");
 	battles.DeleteAll();
 
+	EmptyHell();
+
 	Awrite("Writing Playerinfo File...");
 	WritePlayers();
 

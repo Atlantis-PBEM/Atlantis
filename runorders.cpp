@@ -103,7 +103,9 @@ void Game::RunOrders()
 	Awrite("Post-Turn Processing...");
 	PostProcessTurn();
 	DeleteEmptyUnits();
-	EmptyHell();
+	//EmptyHell(); moved to Game::RunGame()
+	//to prevent dead mages from causing a
+	//a segfault with IMPROVED_FARSIGHT
 	RemoveEmptyObjects();
 }
 

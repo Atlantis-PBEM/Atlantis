@@ -128,7 +128,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * fleet,Unit * cap)
 				}
 				int cost = 1;
 				if(Globals->WEATHER_EXISTS) {
-					if (newreg->weather != W_NORMAL) cost = 2;
+					if (newreg->weather != W_NORMAL && !newreg->clearskies) cost = 2;
 				}
 
 				if (fleet->flying < 1 && !newreg->IsCoastal()) {
