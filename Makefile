@@ -5,6 +5,7 @@
 # Date        Person       Comments
 # ----        ------       --------
 # 2000/MAR/14 Davis Kulis  Added the template code.
+# 2004/MAR/29 Jan Rietema  Added/modified the gamesets
 
 GAME ?= standard
 
@@ -27,16 +28,13 @@ OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: conquest ceran realms standard wyreth fracas
+all: arcadia basic standard fracas kingdoms
 
-conquest: FORCE
-	$(MAKE) GAME=conquest
+arcadia: FORCE
+	$(MAKE) GAME=arcadia
 
-ceran: FORCE
-	$(MAKE) GAME=ceran
-
-realms: FORCE
-	$(MAKE) GAME=realms
+basic: FORCE
+	$(MAKE) GAME=basic
 
 standard: FORCE
 	$(MAKE) GAME=standard
@@ -44,35 +42,29 @@ standard: FORCE
 kingdoms: FORCE
 	$(MAKE) GAME=kingdoms
 
-wyreth: FORCE
-	$(MAKE) GAME=wyreth
-
 fracas: FORCE
 	$(MAKE) GAME=fracas
 
 $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
 
-all-clean: conquest-clean ceran-clean realms-clean standard-clean wyreth-clean \
-  fracas-clean
+all-clean: arcadia-clean basic-clean standard-clean fracas-clean \
+	kingdoms-clean
 
-conquest-clean:
-	$(MAKE) GAME=conquest clean
+arcadia-clean:
+	$(MAKE) GAME=arcadia clean
 
-ceran-clean:
-	$(MAKE) GAME=ceran clean
-
-realms-clean:
-	$(MAKE) GAME=realms clean
+basic-clean:
+	$(MAKE) GAME=basic clean
 
 standard-clean:
 	$(MAKE) GAME=standard clean
 
-wyreth-clean:
-	$(MAKE) GAME=wyreth clean
-
 fracas-clean:
 	$(MAKE) GAME=fracas clean
+	
+kingdoms-clean:
+	$(MAKE) GAME=kingdoms clean
 
 clean:
 	rm -f $(OBJECTS)
@@ -81,26 +73,23 @@ clean:
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
 
-all-rules: conquest-rules ceran-rules realms-rules standard-rules wyreth-rules \
-  fracas-rules
+all-rules: arcadia-rules basic-rules standard-rules fracas-rules \
+  kingdoms-rules
 
-conquest-rules:
-	$(MAKE) GAME=conquest rules
+arcadia-rules:
+	$(MAKE) GAME=arcadia rules
 
-ceran-rules:
-	$(MAKE) GAME=ceran rules
-
-realms-rules:
-	$(MAKE) GAME=realms rules
+basic-rules:
+	$(MAKE) GAME=basic rules
 
 standard-rules:
 	$(MAKE) GAME=standard rules
 
-wyreth-rules:
-	$(MAKE) GAME=wyreth rules
-
 fracas-rules:
 	$(MAKE) GAME=fracas rules
+	
+kingdoms-rules:
+	$(MAKE) GAME=kingdoms rules
 
 rules: $(GAME)/$(GAME)
 	(cd $(GAME); \

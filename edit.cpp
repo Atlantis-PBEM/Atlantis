@@ -660,7 +660,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
                     delete pReg->town;
                     pReg->markets.DeleteAll();
                 }
-                pReg->AddEditTown(townname);
+                pReg->AddTown(townname);
 	            
 	            pReg->UpdateEditRegion(); // financial stuff! Does markets
             }

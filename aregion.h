@@ -315,7 +315,6 @@ class ARegion : public AListElem
 		int xloc, yloc, zloc;
 		
 		// Editing functions
-		void AddEditTown(AString *);
 		void UpdateEditRegion();
 		void SetupEditRegion();
 

@@ -249,7 +249,6 @@ void ARegion::AdjustPop(int adjustment)
 		population += adjustment;
 		return;
 	}
-	
 	// split between town and rural pop
 	int tspace = town->hab - town->pop;
 	int rspace = habitat - population;
@@ -257,7 +256,6 @@ void ARegion::AdjustPop(int adjustment)
 	if(town->pop < 0) town->pop = 0;
 	population += adjustment * rspace / (tspace + rspace);
 	if (population < 0) population = 0;
-
 }
 
 void ARegion::SetupCityMarket()
@@ -768,25 +766,20 @@ void ARegion::SetTownType(int level)
 	}
 }
 
-void ARegion::AddEditTown(AString *townname)
-{
-	AddTown(townname);
-}
-
 void ARegion::UpdateEditRegion()
 {
     // redo markets and entertainment/tax income for extra people.
 
-	money = (Wages() - Globals->MAINTENANCE_COST) * Population();
+	money = ((Wages() - Globals->MAINTENANCE_COST) * Population() / 10);
 	if (money < 0) money = 0;
 	// Setup working
 	Production *p = products.GetProd(I_SILVER, -1);
 	if(p) {
     	if (IsStartingCity()) {
     		// Higher wages in the entry cities.
-    		p->amount = Wages() * Population();
+    		p->amount = (Wages() * Population() / 10);
     	} else {
-    		p->amount = (Wages() * Population()) / Globals->WORK_FRACTION;
+    		p->amount = (Wages() * Population()) / (10 * Globals->WORK_FRACTION);
     	}
     	p->productivity = Wages();
 	}
@@ -807,27 +800,27 @@ void ARegion::UpdateEditRegion()
         }
     }
 
-	float ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
+	float ratio = ItemDefs[race].baseprice / (float) (Globals->BASE_MAN_COST * 10);
+	// hack: include wage factor of 10 in float calculation above
     Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),
 							Population()/5, 0, 10000, 0, 2000);
 	markets.Add(m);
 
 	if(Globals->LEADERS_EXIST) {
-		ratio = ItemDefs[I_LEADERS].baseprice / (float)Globals->BASE_MAN_COST;
+		ratio = ItemDefs[I_LEADERS].baseprice / (float) (Globals->BASE_MAN_COST * 10);
+		// hack: include wage factor of 10 in float calculation above
 		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
 						Population()/25, 0, 10000, 0, 400);
 		markets.Add(m);
-	}
-    
-    
+	}    
 }
 
 void ARegion::SetupEditRegion()
 {
-//Direct copy of SetupPop() except calls AddEditTown() instead of AddTown()
+	// Direct copy of SetupPop() except that it calls AddTown(AString*)
 	TerrainType *typer = &(TerrainDefs[type]);
 	habitat = typer->pop+1;
-	if (habitat < 100) habitat = 100;
+	if ((habitat < 100) && (typer->similar_type != R_OCEAN)) habitat = 100;
 
 	int pop = typer->pop;
 	int mw = typer->wages;
@@ -872,9 +865,9 @@ void ARegion::SetupEditRegion()
 	}
 	basepopulation = habitat;
 	// hmm... somewhere not too far off equilibrium pop
-	population = habitat * 66 / 100;
-
-	// Setup wages
+	population = habitat * (60 + getrandom(6) + getrandom(6)) / 100;
+	
+	// Setup development
 	int level = 1;
 	development = 1;
 	int prev = 0;
@@ -886,7 +879,7 @@ void ARegion::SetupEditRegion()
 			prev = 0;
 		}
 	}
-	development += getrandom(36);
+	development += getrandom(25);
 
 	if(Globals->TOWNS_EXIST) {
 		int adjacent = 0;
@@ -914,19 +907,21 @@ void ARegion::SetupEditRegion()
 		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
 			100 * spread) / 100;
 		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
-		AString *name = new AString("name");
-		if (getrandom(townch) < townprob) AddEditTown(name);
+		AString *name = new AString("Newtown");
+		if (getrandom(townch) < townprob) {
+			AddTown(name);
+		}
 	}
 
 	Production *p = new Production;
 	p->itemtype = I_SILVER;
 	maxwages = Wages();
-	money = Population() * (wages - 10 * Globals->MAINTENANCE_COST) / 10;	
+	money = (int) (Population() * ((float) (wages - 10 * Globals->MAINTENANCE_COST) / 10));
 	
 	if (money < 0) money = 0;
 	p->amount = money / Globals->WORK_FRACTION;
 	p->skill = -1;
-	p->productivity = Wages();
+	p->productivity = wages;
 	products.Add(p);
 
 	//
@@ -936,17 +931,20 @@ void ARegion::SetupEditRegion()
 	p->itemtype = I_SILVER;
 	p->amount = money / Globals->ENTERTAIN_FRACTION;
 	p->skill = S_ENTERTAINMENT;
-	/* multiply entertainment income by productivity factor 10 */
+	// raise entertainment income by productivity factor 10
 	p->productivity = Globals->ENTERTAIN_INCOME * 10;
 	products.Add(p);
-	float ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
+
+	float ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+	// hack: include wage factor of 10 in float assignment above
 	// Setup Recruiting
 	Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),
 							Population()/5, 0, 10000, 0, 2000);
 	markets.Add(m);
 
 	if(Globals->LEADERS_EXIST) {
-		ratio = ItemDefs[I_LEADERS].baseprice / (float)Globals->BASE_MAN_COST;
+		ratio = ItemDefs[I_LEADERS].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+		// hack: include wage factor of 10 in float assignment above
 		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
 						Population()/25, 0, 10000, 0, 400);
 		markets.Add(m);
@@ -1452,7 +1450,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		//
 		// Set money
 		//
-		money = (Wages() - Globals->MAINTENANCE_COST) * Population();
+		money = (Wages() - 10 * Globals->MAINTENANCE_COST) * Population() / 10;
 		if (money < 0) money = 0;
 
 		//
@@ -1463,9 +1461,9 @@ void ARegion::PostTurn(ARegionList *pRegs)
 			//
 			// Higher wages in the entry cities.
 			//
-			p->amount = Wages() * Population();
+			p->amount = Wages() * Population() / 10;
 		} else {
-			p->amount = (Wages() * Population()) / Globals->WORK_FRACTION;
+			p->amount = (Wages() * Population()) / (10 * Globals->WORK_FRACTION);
 		}
 		p->productivity = Wages();
 
