@@ -510,3 +510,5 @@ Changes from 4.0.9 -> 4.0.10
       queue.  This allows caravans using @TURN to work properly despite
       weather changing move costs.  Also fixed a bug where a single
       @TURN command would be lost because of a pointer being reused.
+   -- Modified TURN/ENDTURN processing to cope with arbitrarily deep
+      TURN and FORM nesting, and cleaned up the error handling.
