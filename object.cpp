@@ -230,9 +230,28 @@ Unit *Object::GetOwner()
 }
 
 void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
-		int detfac)
+		int detfac, int passobs, int passtrue, int passdetfac, int present)
 {
 	ObjectType *ob = &ObjectDefs[type];
+
+	if((type != O_DUMMY) && !present) {
+		if(IsBuilding() &&
+		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_BUILDINGS)) {
+			// This is a building and we don't see buildings in transit
+			return;
+		}
+		if(IsBoat() &&
+		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_SHIPS)) {
+			// This is a ship and we don't see ships in transit
+			return;
+		}
+		if(IsRoad() &&
+		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ROADS)) {
+			// This is a road and we don't see roads in transit
+			return;
+		}
+	}
+
 	if (type != O_DUMMY) {
 		AString temp = AString("+ ") + *name + " : " + ob->name;
 		if (incomplete > 0) {
@@ -267,7 +286,22 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 		if (u->faction == fac) {
 			u->WriteReport(f,-1,1,1,1);
 		} else {
-			u->WriteReport(f,obs,truesight,detfac,type != O_DUMMY);
+			if(present) {
+				u->WriteReport(f,obs,truesight,detfac,type != O_DUMMY);
+			} else {
+				if(((type == O_DUMMY) &&
+					(Globals->TRANSIT_REPORT &
+					 GameDefs::REPORT_SHOW_OUTDOOR_UNITS)) ||
+				   ((type != O_DUMMY) &&
+					(Globals->TRANSIT_REPORT &
+					 GameDefs::REPORT_SHOW_INDOOR_UNITS)) ||
+				   ((u->guard == GUARD_GUARD) &&
+					(Globals->TRANSIT_REPORT &
+					 GameDefs::REPORT_SHOW_GUARDS))) {
+					u->WriteReport(f, passobs, passtrue, passdetfac,
+							type != O_DUMMY);
+				}
+			}
 		}
 	}
 	f->EndLine();

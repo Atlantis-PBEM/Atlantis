@@ -140,9 +140,10 @@ static GameDefs g = {
 	0,	// UNDERDEEP_LEVELS
 	1,	// ABYSS_LEVEL
 	0,	// IMPROVED_FARSIGHT
-	0,	// GM_REPORT
+	1,	// GM_REPORT
 	0,	// DECAY
 	0,	// LIMITED_MAGES_PER_BUILDING
+	GameDefs::REPORT_NOTHING, // TRANSIT_REPORT
 };
 
 GameDefs * Globals = &g;

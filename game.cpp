@@ -1484,41 +1484,41 @@ void Game::ReadOrders()
 
 void Game::MakeFactionReportLists()
 {
-    FactionVector vector(factionseq);
-    
-    forlist(&regions) {
-        vector.ClearVector();
+	FactionVector vector(factionseq);
+
+	forlist(&regions) {
+		vector.ClearVector();
+
+		ARegion *reg = (ARegion *) elem;
+		forlist(&reg->farsees) {
+			Faction *fac = ((Farsight *) elem)->faction;
+			vector.SetFaction(fac->num, fac);
+		}
+		{
+			forlist(&reg->passers) {
+				Faction *fac = ((Farsight *)elem)->faction;
+				vector.SetFaction(fac->num, fac);
+			}
+		}
+		{
+			forlist(&reg->objects) {
+				Object *obj = (Object *) elem;
+
+				forlist(&obj->units) {
+					Unit *unit = (Unit *) elem;
+					vector.SetFaction(unit->faction->num, unit->faction);
+				}
+			}
+		}
         
-        ARegion *reg = (ARegion *) elem;
-        
-        {
-            forlist(&reg->farsees) {
-                Faction *fac = ((Farsight *) elem)->faction;
-                vector.SetFaction(fac->num, fac);
-            }
-        }
-        
-        {
-            forlist(&reg->objects) {
-                Object *obj = (Object *) elem;
-                
-                forlist(&obj->units) {
-                    Unit *unit = (Unit *) elem;
-                    vector.SetFaction(unit->faction->num, unit->faction);
-                }
-            }
-        }
-        
-        for (int i=0; i<vector.vectorsize; i++)
-        {
-            if (vector.GetFaction(i))
-            {
-                ARegionPtr *ptr = new ARegionPtr;
-                ptr->ptr = reg;
-                vector.GetFaction(i)->present_regions.Add(ptr);
-            }
-        }
-    }
+		for (int i=0; i<vector.vectorsize; i++) {
+			if (vector.GetFaction(i)) {
+				ARegionPtr *ptr = new ARegionPtr;
+				ptr->ptr = reg;
+				vector.GetFaction(i)->present_regions.Add(ptr);
+			}
+		}
+	}
 }
 
 void Game::WriteReport()
@@ -1536,7 +1536,8 @@ void Game::WriteReport()
         str = str + fac->num;
 
 		if(!fac->IsNPC() ||
-		   ((month == 0) && (year == 1) && (fac->num == 1))){
+		   ((((month == 0) && (year == 1)) || Globals->GM_REPORT) &&
+			(fac->num == 1))) {
 			f.OpenByName( str );
 			fac->WriteReport( &f, this );
 			f.Close();

@@ -88,129 +88,154 @@ void Game::RunSailOrders()
 
 ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 {
-    SailOrder * o = (SailOrder *) cap->monthorders;
-    int movepoints = Globals->SHIP_SPEED;
-    int moveok = 0;
-    
-    AList facs;
-    int wgt = 0;
-    int slr = 0;
-    forlist(&ship->units) {
-        Unit * unit = (Unit *) elem;
-        if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
-        if (!GetFaction2(&facs,unit->faction->num)) {
-            FactionPtr * p = new FactionPtr;
-            p->ptr = unit->faction;
-            facs.Add(p);
-        }
-        wgt += unit->Weight();
-        if (unit->monthorders && unit->monthorders->type == O_SAIL) {
-            slr += unit->GetSkill(S_SAILING) * unit->GetMen();
-        }
+	SailOrder * o = (SailOrder *) cap->monthorders;
+	int movepoints = Globals->SHIP_SPEED;
+	int moveok = 0;
 
-        // XXX - sheesh... gotta do something about this.        
-        int windlevel = unit->GetSkill(S_SUMMON_WIND);
-        if (windlevel) {
-            switch (ship->type) {
-            case O_LONGBOAT:
-                movepoints = Globals->SHIP_SPEED + 2;
-                unit->Event("Casts Summon Wind to aid the ship's progress.");
-                break;
-            case O_CLIPPER:
-            case O_BALLOON:
-                if (windlevel > 1) {
-                    movepoints = Globals->SHIP_SPEED + 2;
-                    unit->Event("Casts Summon Wind to aid the ship's progress.");
-                }
-                break;
-            default:
-                if (windlevel > 2) {
-                    movepoints = Globals->SHIP_SPEED + 2;
-                    unit->Event("Casts Summon Wind to aid the ship's progress.");
-                }
-                break;
-            }
-        }
-    }
-    
-    if (wgt > ObjectDefs[ship->type].capacity) {
-        cap->Error("SAIL: Ship is overloaded.");
-        moveok = 1;
-    } else {
-        if (slr < ObjectDefs[ship->type].sailors) {
-            cap->Error("SAIL: Not enough sailors.");
-            moveok = 1;
-        } else {
-            while (o->dirs.Num()) {
-                MoveDir * x = (MoveDir *) o->dirs.First();
-                o->dirs.Remove(x);
-                int i = x->dir;
-                delete x;
-                ARegion * newreg = reg->neighbors[i];
-                if (!newreg) {
-                    cap->Error("SAIL: Can't sail that way.");
-                    break;
-                }
-                int cost = 1;
-                if( Globals->WEATHER_EXISTS )
-                {
-                    if (newreg->weather != W_NORMAL) cost = 2;
-                }
-                
-                if (ship->type != O_BALLOON && !newreg->IsCoastal()) {
-                    cap->Error("SAIL: Can't sail inland.");
-                    break;
-                }
-                
-                if (ship->type != O_BALLOON && reg->type != R_OCEAN &&
-                    newreg->type != R_OCEAN) {
-                    cap->Error("SAIL: Can't sail inland.");
-                    break;
-                }
-                
-                if (movepoints < cost) {
-                    cap->Error("SAIL: Can't sail that far.");
-                    break;
-                }
-                
-                movepoints -= cost;
-                ship->MoveObject( newreg );
-                forlist(&facs) {
-                    Faction * f = ((FactionPtr *) elem)->ptr;
-                    f->Event(*ship->name + AString(" sails from ") +
-                             reg->ShortPrint( &regions ) + AString(" to ") +
-                             newreg->ShortPrint( &regions ) + AString("."));
-                }
-                reg = newreg;
-                if (newreg->ForbiddenShip(ship)) {
+	AList facs;
+	int wgt = 0;
+	int slr = 0;
+	forlist(&ship->units) {
+		Unit * unit = (Unit *) elem;
+		if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
+		if (!GetFaction2(&facs,unit->faction->num)) {
+			FactionPtr * p = new FactionPtr;
+			p->ptr = unit->faction;
+			facs.Add(p);
+		}
+		wgt += unit->Weight();
+		if (unit->monthorders && unit->monthorders->type == O_SAIL) {
+			slr += unit->GetSkill(S_SAILING) * unit->GetMen();
+		}
+
+        // XXX - sheesh... gotta do something about this.
+		int windlevel = unit->GetSkill(S_SUMMON_WIND);
+		if (windlevel) {
+			switch (ship->type) {
+				case O_LONGBOAT:
+					movepoints = Globals->SHIP_SPEED + 2;
+					unit->Event("Casts Summon Wind to aid the ship's "
+								"progress.");
+					break;
+				case O_CLIPPER:
+				case O_BALLOON:
+					if (windlevel > 1) {
+						movepoints = Globals->SHIP_SPEED + 2;
+						unit->Event("Casts Summon Wind to aid the ship's "
+									"progress.");
+					}
+					break;
+				default:
+					if (windlevel > 2) {
+						movepoints = Globals->SHIP_SPEED + 2;
+						unit->Event("Casts Summon Wind to aid the ship's "
+									"progress.");
+					}
+					break;
+			}
+		}
+	}
+
+	if (wgt > ObjectDefs[ship->type].capacity) {
+		cap->Error("SAIL: Ship is overloaded.");
+		moveok = 1;
+	} else {
+		if (slr < ObjectDefs[ship->type].sailors) {
+			cap->Error("SAIL: Not enough sailors.");
+			moveok = 1;
+		} else {
+			while (o->dirs.Num()) {
+				MoveDir * x = (MoveDir *) o->dirs.First();
+				o->dirs.Remove(x);
+				int i = x->dir;
+				delete x;
+				ARegion * newreg = reg->neighbors[i];
+				if (!newreg) {
+					cap->Error("SAIL: Can't sail that way.");
+					break;
+				}
+				int cost = 1;
+				if( Globals->WEATHER_EXISTS ) {
+					if (newreg->weather != W_NORMAL) cost = 2;
+				}
+
+				if (ship->type != O_BALLOON && !newreg->IsCoastal()) {
+					cap->Error("SAIL: Can't sail inland.");
+					break;
+				}
+
+				if ((ship->type != O_BALLOON) &&
+					(reg->type != R_OCEAN) &&
+					newreg->type != R_OCEAN) {
+					cap->Error("SAIL: Can't sail inland.");
+					break;
+				}
+
+				if (movepoints < cost) {
+					cap->Error("SAIL: Can't sail that far.");
+					break;
+				}
+
+				movepoints -= cost;
+				ship->MoveObject(newreg);
+				forlist(&facs) {
+					Faction * f = ((FactionPtr *) elem)->ptr;
+					f->Event(*ship->name + AString(" sails from ") +
+							reg->ShortPrint( &regions ) + AString(" to ") +
+							newreg->ShortPrint( &regions ) + AString("."));
+				}
+				if(Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
+					forlist(&ship->units) {
+						// Everyone onboard gets to see the sights
+						Unit *unit = (Unit *)elem;
+						Farsight *f;
+						// Note the hex being left
+						forlist(&reg->passers) {
+							f = (Farsight *)elem;
+							if(f->unit == unit) {
+								// We moved into here this turn
+								f->exits_used[i] = 1;
+							}
+						}
+						// And mark the hex being entered
+						f = new Farsight;
+						f->faction = unit->faction;
+						f->level = 0;
+						f->unit = unit;
+						f->exits_used[newreg->GetRealDirComp(i)] = 1;
+						newreg->passers.Add(f);
+					}
+				}
+				reg = newreg;
+				if (newreg->ForbiddenShip(ship)) {
 					cap->faction->Event(*ship->name +
 							AString(" is stopped by guards in ") +
 							newreg->ShortPrint(&regions) + AString("."));
 					break;
 				}
-            }
-        }
-    }
-    
-    /* Clear out everyone's orders */
-    {
-        forlist(&ship->units) {
-            Unit * unit = (Unit *) elem;
-            if (!moveok) {
-                unit->alias = 0;
-            }
-            
-            if (unit->monthorders) {
-                if ((!moveok && unit->monthorders->type == O_MOVE) ||
-                    unit->monthorders->type == O_SAIL) {
-                    delete unit->monthorders;
-                    unit->monthorders = 0;
-                }
-            }
-        }
-    }
-    
-    return reg;
+			}
+		}
+	}
+
+	/* Clear out everyone's orders */
+	{
+		forlist(&ship->units) {
+			Unit * unit = (Unit *) elem;
+			if (!moveok) {
+				unit->alias = 0;
+			}
+
+			if (unit->monthorders) {
+				if ((!moveok && unit->monthorders->type == O_MOVE) ||
+					unit->monthorders->type == O_SAIL) {
+					delete unit->monthorders;
+					unit->monthorders = 0;
+				}
+			}
+		}
+	}
+
+	return reg;
 }
 
 void Game::RunTeachOrders()
@@ -1084,6 +1109,28 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
         if (forbid) {
             unit->advancefrom = region;
         }
+		if(Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
+			// Update our visit record in the region we are leaving.
+			Farsight *f;
+			forlist(&region->passers) {
+				f = (Farsight *)elem;
+				if(f->unit == unit) {
+					// We moved into here this turn
+					if(i < MOVE_IN) {
+						f->exits_used[i] = 1;
+					}
+				}
+			}
+			// And mark the hex being entered
+			f = new Farsight;
+			f->faction = unit->faction;
+			f->level = 0;
+			f->unit = unit;
+			if(i < MOVE_IN) {
+				f->exits_used[newreg->GetRealDirComp(i)] = 1;
+			}
+			newreg->passers.Add(f);
+		}
         region = newreg;
     }
     

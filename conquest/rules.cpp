@@ -142,6 +142,7 @@ static GameDefs g = {
 	0,	// GM_REPORT
 	0,	// DECAY
 	0,	// LIMITED_MAGES_PER_BUILDING
+	GameDefs::REPORT_NOTHING, // TRANSIT_REPORT
 };
 
 GameDefs * Globals = &g;

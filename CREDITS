@@ -29,5 +29,8 @@ Terho Uotila
 Paul Mehrer
 	Submitted patch to allow limiting the number of mages which can study
 	  in any give building type.
+Stephen Baillie
+    Submitted a patch to allow units passing through a region (but not
+      stopping) to generate a partial, slightly innacurate hex report.
 Joseph Traub
     Changes, updates, and merging a few disparate branches

@@ -115,9 +115,12 @@ ARegionPtr * GetRegion(AList *,int);
 class Farsight : public AListElem
 {
 public:
+	Farsight();
+
     Faction *faction;
 	Unit *unit;
 	int level;
+	int exits_used[NDIRS];
 };
 
 Farsight *GetFarsight(AList *,Faction *);
@@ -163,10 +166,10 @@ public:
     
     int CanMakeAdv(Faction *,int);
     int HasItem(Faction *,int);
-    void WriteProducts(Areport *,Faction *);
-    void WriteMarkets(Areport *,Faction *);
-    void WriteEconomy(Areport *,Faction *);
-    void WriteExits(Areport *, ARegionList *pRegs );
+    void WriteProducts(Areport *, Faction *, int);
+    void WriteMarkets(Areport *, Faction *, int);
+    void WriteEconomy(Areport *,Faction *, int);
+    void WriteExits(Areport *, ARegionList *pRegs, int *exits_seen);
     void WriteReport( Areport *f, Faction *fac, int month,
                       ARegionList *pRegions );
     // DK
@@ -189,8 +192,8 @@ public:
     void SetLoc(int,int,int);
     int Present(Faction *);
     AList * PresentFactions();
-    int GetObservation(Faction *);
-    int GetTrueSight(Faction *);
+    int GetObservation(Faction *, int);
+    int GetTrueSight(Faction *, int);
     
     Object * GetObject(int);
     Object * GetDummy();
@@ -261,6 +264,8 @@ public:
     AList objects;
     AList hell; /* Where dead units go */
     AList farsees;
+	// List of units which passed through the region
+	AList passers;
     ProductionList products;
     MarketList markets;
     int xloc,yloc,zloc;

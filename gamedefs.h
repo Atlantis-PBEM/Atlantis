@@ -290,6 +290,55 @@ public:
 	// Do we limit the number of mages which can study inside of certain
 	// buildings.
 	int LIMITED_MAGES_PER_BUILDING;
+
+	// Transit report options
+	enum {
+		REPORT_NOTHING = 0x0000,
+		// Various things which can be shown
+		REPORT_SHOW_PEASANTS = 0x0001,
+		REPORT_SHOW_REGION_MONEY = 0x0002,
+		REPORT_SHOW_WAGES = 0x0004,
+		REPORT_SHOW_MARKETS = 0x0008,
+		REPORT_SHOW_RESOURCES = 0x0010,
+		REPORT_SHOW_ENTERTAINMENT = 0x0020,
+		// Collection of the the above
+		REPORT_SHOW_ECONOMY = (REPORT_SHOW_PEASANTS |
+							   REPORT_SHOW_REGION_MONEY |
+							   REPORT_SHOW_WAGES |
+							   REPORT_SHOW_MARKETS |
+							   REPORT_SHOW_RESOURCES |
+							   REPORT_SHOW_ENTERTAINMENT),
+		// Which type of exits to show
+		REPORT_SHOW_USED_EXITS = 0x0040,
+		REPORT_SHOW_ALL_EXITS = 0x0080,
+		// Which types of units to show
+		REPORT_SHOW_GUARDS = 0x0100,
+		REPORT_SHOW_INDOOR_UNITS = 0x0200,
+		REPORT_SHOW_OUTDOOR_UNITS = 0x0400,
+		// Collection of the above
+		REPORT_SHOW_UNITS = (REPORT_SHOW_GUARDS | REPORT_SHOW_INDOOR_UNITS |
+							 REPORT_SHOW_OUTDOOR_UNITS),
+		// Various types of buildings
+		REPORT_SHOW_BUILDINGS = 0x0800,
+		REPORT_SHOW_ROADS = 0x1000,
+		REPORT_SHOW_SHIPS = 0x2000,
+		// Collection of the above
+		REPORT_SHOW_STRUCTURES = (REPORT_SHOW_BUILDINGS |
+								  REPORT_SHOW_ROADS |
+								  REPORT_SHOW_SHIPS),
+		// Should the unit get to use their advanced skills?
+		REPORT_USE_UNIT_SKILLS = 0x8000,
+
+		// Some common collections
+		REPORT_SHOW_REGION = (REPORT_SHOW_ECONOMY | REPORT_SHOW_ALL_EXITS),
+		REPORT_SHOW_EVERYTHING = (REPORT_SHOW_REGION |
+								  REPORT_SHOW_UNITS |
+								  REPORT_SHOW_STRUCTURES),
+	};
+
+	// What sort of information should be shown to a unit just passing
+	// through a hex?
+	int TRANSIT_REPORT;
 };
 
 extern GameDefs * Globals;

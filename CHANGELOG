@@ -263,3 +263,15 @@ Changes from 4.0.7 -> 4.0.8
       wasn't.
    -- Fixed a bug where WITHDRAW was not being noted as an invalid order if
       the ALLOW_WITHDRAW gamedef was not set.
+   -- Fixed a bug with GM_REPORT which caused it not to work except on turn 1.
+   -- Added transit patch submitted by Stephen Baillie <baillie@cs.mu.OZ.AU>.
+      This patch enables the GM to show hex information to units which pass
+      through a hex but do not end the turn there.  The bits of information
+      which are shown are completely selectable from an enumeration in
+      gamedefs.h and default to the current behaviour (no reports).
+      WARNING: In an attempt to prevent clients from breaking, if you show
+      reports but do not show a specific piece of information (ie, wages or
+      entertainment or resources) the hex report will appear as if the hex
+      has NONE of that type of information (ie, wages 0, or Products: none).
+      So, be careful when turning this on as it COULD give your players a
+      false sense of having accurate data when they do not!

@@ -66,6 +66,7 @@
    -- Consider multiple levels of guard
    -- Consider having buildings which require specific items/skills to enter
    -- Add ability to set stances versus specific units, not just factions
+   -- Consider having 'conditional orders' specificall 'AT x,y,z'
 
 TODO for 5.0.0
 ----------------------------------------------
