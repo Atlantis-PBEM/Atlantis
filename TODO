@@ -6,6 +6,7 @@
       rather than array index. Remove all array indices from game files.
    -- Move all ruleset static data to human readable (and editable) files
    -- Localise all strings, to allow for internationalisation 
+   -- Exit with an error code on errors
 
 ** Combat
    -- Consider a gamedef which keeps tactics skill (and combat skills?)
