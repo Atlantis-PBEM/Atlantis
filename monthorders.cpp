@@ -941,7 +941,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 			return;
 		}
 		if(!(Globals->MAGE_NONLEADERS)) {
-			if (u->GetMen(I_LEADERS) != 1) {
+			if (u->GetLeaders() != 1) {
 				u->Error("STUDY: Only leaders may study magic.");
 				return;
 			}
@@ -968,7 +968,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 			return;
 		}
 		if(!(Globals->MAGE_NONLEADERS)) {
-			if(u->GetMen(I_LEADERS) != 1) {
+			if(u->GetLeaders() != 1) {
 				u->Error("STUDY: Only leaders may be apprentices.");
 				return;
 			}

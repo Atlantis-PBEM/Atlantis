@@ -1443,8 +1443,10 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 									"men.");
 							o->num = 0;
 						}
-						if ((o->item == I_LEADERS && u->IsNormal()) ||
-								(o->item != I_LEADERS && u->IsLeader())) {
+						if (((ItemDefs[o->item].type & IT_LEADER) &&
+								u->IsNormal()) ||
+								(!(ItemDefs[o->item].type & IT_LEADER) &&
+								 u->IsLeader())) {
 							u->Error("BUY: Can't mix leaders and normal men.");
 							o->num = 0;
 						}
@@ -2001,6 +2003,16 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 				ItemString(itm, amt)+".");
 		return 0;
 	}
+
+	if (ItemDefs[itm].max_inventory) {
+		int cur = u->items.GetNum(itm) + amt;
+		if (cur > ItemDefs[itm].max_inventory) {
+			u->Error(AString("WITHDRAW: Unit cannot have more than ")+
+					ItemString(itm, ItemDefs[itm].max_inventory));
+			return 0;
+		}
+	}
+
 	u->faction->unclaimed -= cost;
 	u->Event(AString("Withdraws ") + ItemString(o->item, amt) + ".");
 	u->items.SetNum(itm, u->items.GetNum(itm) + amt);
@@ -2541,11 +2553,11 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			u->Error("GIVE: Magicians can't transfer men.");
 			return 0;
 		}
-		if (o->item == I_LEADERS && t->IsNormal()) {
+		if ((ItemDefs[o->item].type & IT_LEADER) &&  t->IsNormal()) {
 			u->Error("GIVE: Can't mix leaders and normal men.");
 			return 0;
 		} else {
-			if (o->item != I_LEADERS && t->IsLeader()) {
+			if (!(ItemDefs[o->item].type & IT_LEADER) && t->IsLeader()) {
 				u->Error("GIVE: Can't mix leaders and normal men.");
 				return 0;
 			}
@@ -2571,6 +2583,15 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	if(ItemDefs[o->item].flags & ItemType::CANTGIVE) {
 		u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".");
 		return 0;
+	}
+
+	if (ItemDefs[o->item].max_inventory) {
+		int cur = t->items.GetNum(o->item) + amt;
+		if (cur > ItemDefs[o->item].max_inventory) {
+			u->Error(AString("GIVE: Unit cannot have more than ")+
+					ItemString(o->item, ItemDefs[o->item].max_inventory));
+			return 0;
+		}
 	}
 
 	u->Event(AString("Gives ") + ItemString(o->item, amt) + " to " +
@@ -2763,6 +2784,18 @@ void Game::CheckTransportOrders()
 						continue;
 					}
 
+					if (o->amount > 0 && ItemDefs[o->item].max_inventory) {
+						int cur = tar->unit->items.GetNum(o->item) + o->amount;
+						if (cur > ItemDefs[o->item].max_inventory) {
+							u->Error(ordertype +
+									": Target cannot have more than " +
+									ItemString(o->item,
+										ItemDefs[o->item].max_inventory));
+							o->type = NORDERS;
+							continue;
+						}
+					}
+
 					// Check if we have a trade hex
 					if (!TradeCheck(r, u->faction)) {
 						u->Error(ordertype + ": Faction cannot transport or "
@@ -2812,6 +2845,17 @@ void Game::RunTransportOrders()
 					} else if (amt > u->items.GetNum(t->item)) {
 						u->Error(ordertype + ": Not enough.");
 						amt = u->items.GetNum(t->item);
+					}
+
+					if (ItemDefs[t->item].max_inventory) {
+						int cur = tar->unit->items.GetNum(t->item) + amt;
+						if (cur > ItemDefs[t->item].max_inventory) {
+							u->Error(ordertype +
+									": Target cannot have more than " +
+									ItemString(t->item,
+										ItemDefs[t->item].max_inventory));
+							continue;
+						}
 					}
 
 					u->items.SetNum(t->item, u->items.GetNum(t->item) - amt);

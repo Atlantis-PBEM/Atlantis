@@ -145,6 +145,7 @@ class Unit : public AListElem
 		int IsNormal();
 		int GetMons();
 		int GetMen();
+		int GetLeaders();
 		int GetSoldiers();
 		int GetMen(int);
 		void SetMen(int,int);

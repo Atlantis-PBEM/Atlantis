@@ -715,6 +715,18 @@ int Unit::GetMen()
 	return n;
 }
 
+int Unit::GetLeaders()
+{
+	int n = 0;
+	forlist (&items) {
+		Item *i = (Item *)elem;
+		if (ItemDefs[i->type].type & IT_LEADER) {
+			n += i->num;
+		}
+	}
+	return n;
+}
+
 int Unit::GetSoldiers()
 {
 	int n = 0;
@@ -960,7 +972,7 @@ int Unit::Practice(int sk)
 
 int Unit::IsLeader()
 {
-	if (GetMen(I_LEADERS)) return 1;
+	if (GetLeaders()) return 1;
 	return 0;
 }
 
@@ -980,10 +992,10 @@ void Unit::AdjustSkills()
 		// Unit is all leaders: Make sure no skills are > max
 		//
 		forlist(&skills) {
-			Skill *s = (Skill *) elem;
-			if (GetRealSkill(s->type) >= SkillMax(s->type, I_LEADERS)) {
-				s->days = GetDaysByLevel(SkillMax(s->type, I_LEADERS)) *
-					GetMen();
+			Skill *theskill = (Skill *) elem;
+			int max = GetSkillMax(theskill->type);
+			if (GetRealSkill(theskill->type) >= max) {
+				theskill->days = GetDaysByLevel(max) * GetMen();
 			}
 		}
 	} else {
@@ -1035,7 +1047,7 @@ int Unit::MaintCost()
 	int levels = 0;
 	if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
 
-	int leaders = GetMen(I_LEADERS);
+	int leaders = GetLeaders();
 	if(leaders < 0) leaders = 0;
 	int nonleaders = GetMen() - leaders;
 	if (nonleaders < 0) nonleaders = 0;
@@ -1089,7 +1101,7 @@ void Unit::Short(int needed, int hunger)
 			if(type == U_MAGE) SkillStarvation();
 			return;
 		case GameDefs::STARVE_LEADERS:
-			if(GetMen(I_LEADERS)) SkillStarvation();
+			if(GetLeaders()) SkillStarvation();
 			return;
 		case GameDefs::STARVE_ALL:
 			SkillStarvation();
@@ -1102,7 +1114,7 @@ void Unit::Short(int needed, int hunger)
 			continue;
 		}
 
-		if(i == I_LEADERS) {
+		if(ItemDefs[i].type & IT_LEADER) {
 			// Don't starve leaders just yet.
 			continue;
 		}
@@ -1121,16 +1133,29 @@ void Unit::Short(int needed, int hunger)
 		}
 	}
 
-	while (GetMen(I_LEADERS)) {
-		if (getrandom(100) < Globals->STARVE_PERCENT) {
-			SetMen(I_LEADERS, GetMen(I_LEADERS) - 1);
-			n++;
+	// Now starve leaders
+	for (int i = 0; i<= NITEMS; i++) {
+		if(!(ItemDefs[ i ].type & IT_MAN)) {
+			// Only men need sustenance.
+			continue;
 		}
-		needed -= Globals->LEADER_COST;
-		hunger -= Globals->UPKEEP_MINIMUM_FOOD;
-		if (needed < 1 && hunger < 1) {
-			if (n) Error(AString(n) + " starve to death.");
-			return;
+
+		if (!(ItemDefs[i].type & IT_LEADER)) {
+			// now we're doing leaders
+			continue;
+		}
+
+		while (GetMen(i)) {
+			if (getrandom(100) < Globals->STARVE_PERCENT) {
+				SetMen(i, GetMen(i) - 1);
+				n++;
+			}
+			needed -= Globals->LEADER_COST;
+			hunger -= Globals->UPKEEP_MINIMUM_FOOD;
+			if (needed < 1 && hunger < 1) {
+				if (n) Error(AString(n) + " starve to death.");
+				return;
+			}
 		}
 	}
 }

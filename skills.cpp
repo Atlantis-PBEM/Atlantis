@@ -113,7 +113,7 @@ int SkillMax(int skill, int race)
 
 	if(!Globals->MAGE_NONLEADERS) {
 		if(SkillDefs[skill].flags & SkillType::MAGIC) {
-			if(race != I_LEADERS) return(0);
+			if(!(ItemDefs[race].type & IT_LEADER)) return(0);
 		}
 	}
 

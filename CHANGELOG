@@ -672,3 +672,10 @@ Changes from 4.0.10 -> 5.0.0
       rid of the majority of places where COMB, OBSE, STEA, and TACT were
       used raw in the code!
    -- Cleaned up NotifySpell so it's generic.
+   -- Items now have a max_inventory value.  This lets us ensure no more than
+      one balrog per unit nicely, and we can limit arbitrary items if we want.
+   -- The monster escape code is now much more generic.  Still not 100% great
+      but better than it was!
+   -- Lots of uses of I_LEADER replaced with a type flag IT_LEADER.  There
+      are still some, but the groundwork for multiple leader races is getting
+      there.

@@ -1654,7 +1654,7 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				it = -1;
 				for(int i = 0; i < NITEMS; i++) {
 					if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-					if(i == I_LEADERS) continue;
+					if(ItemDefs[i].type & IT_LEADER) continue;
 					if(ItemDefs[i].type & IT_MAN) {
 						it = i;
 						break;
@@ -2113,7 +2113,7 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		amt = token->value();
 	}
 	delete token;
-	int item = I_LEADERS;
+	int item = -1;
 	if (amt != -1) {
 		token = o->gettoken();
 		if(token) {

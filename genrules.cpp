@@ -785,11 +785,24 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Here is a sample region, as it might appear on your turn report:";
 	f.Paragraph(temp);
 	f.Paragraph("");
+
+	int manidx = -1;
+	int leadidx = -1;
+
+	for (i = 0; i < NITEMS; i++) {
+		if (!(ItemDefs[i].type & IT_MAN)) continue;
+		if (ItemDefs[i].type & IT_LEADER) {
+			if (leadidx == -1) leadidx = i;
+		} else {
+			if (manidx == -1) manidx = i;
+		}
+	}
+
 	f.Enclose(1, "pre");
 	f.ClearWrapTab();
 	temp = "plain (172,110) in Turia, 500 peasants";
 	if(Globals->RACES_EXIST)
-		temp += " (nomads)";
+		temp += AString("(") + ItemDefs[manidx].names + ")";
 	int money = (500 * (15 - Globals->MAINTENANCE_COST));
 	temp += AString(", $") + money + ".";
 	f.WrapStr(temp);
@@ -803,17 +816,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.WrapStr(temp);
 	f.WrapStr("Wanted: none.");
 	temp = "For Sale: 50 ";
-	if(Globals->RACES_EXIST)
-		temp += "nomads [NOMA]";
-	else
-		temp += "men [MAN]";
+	temp += AString(ItemDefs[manidx].names) + "[" + ItemDefs[manidx].abr + "]";
 	temp += " at $";
 	float ratio = ItemDefs[(Globals->RACES_EXIST?I_NOMAD:I_MAN)].baseprice/
 		(float)Globals->BASE_MAN_COST;
 	temp += (int)(60*ratio);
 	if(Globals->LEADERS_EXIST) {
-		ratio = ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
-		temp += ", 10 leaders [LEAD] at $";
+		ratio = ItemDefs[leadidx].baseprice/(float)Globals->BASE_MAN_COST;
+		temp += AString(", 10 ") + ItemDefs[leadidx].names + "[" +
+			ItemDefs[leadidx].abr + "]";
 		temp += (int)(60*ratio);
 	}
 	temp += ".";

@@ -57,7 +57,12 @@ enum {
 	IT_SPECIAL = 0x0400,
 	IT_TOOL = 0x0800,
 	IT_FOOD = 0x1000,
-	IT_ILLUSION = 0x2000
+	IT_ILLUSION = 0x2000,
+	IT_UNDEAD = 0x4000,
+	IT_DEMON = 0x8000,
+	IT_LEADER = 0x10000,
+	IT_MONEY = 0x20000,
+	IT_ANIMAL = 0x40000,
 };
 
 struct Materials
@@ -115,6 +120,21 @@ class ItemType
 		// LLS
 		int mult_item;
 		int mult_val;
+
+		int max_inventory;  // if non-zero, amount allowed in inventory.
+
+		enum {
+			// LOSE_LINKED only make sense with ESC_LEV_SQUARE or ESC_LEV_QUAD
+			LOSE_LINKED = 0x01,		// All items of same type will be lost.
+			// The rest of these are mutually exclusive
+			HAS_SKILL = 0x02,		// Check skill, if exists at level, no loss
+			ESC_LEV_SQUARE = 0x04,	// bottom of formula based on level square
+			ESC_LEV_QUAD = 0x08,	// bottom of formula based on level quad
+			LOSS_CHANCE = 0x10,		// flat chance of loss.
+		};
+		int escape;
+		char *esc_skill;
+		int esc_val; // level for has_skill, constant for all others
 };
 
 extern ItemType *ItemDefs;

@@ -1805,54 +1805,73 @@ void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
 
 void Game::MonsterCheck(ARegion *r, Unit *u)
 {
-	MonType *monP;
+	AString tmp;
+	int skill;
+	int linked = 0;
+	map< int, int > chances;
 
 	if (u->type != U_WMON) {
-		int escape = 0;
-		int totlosses = 0;
-		int level;
-		int skill;
-		int top;
 
 		forlist (&u->items) {
 			Item *i = (Item *) elem;
 			if(!i->num) continue;
-			/* XXX -- This should be genericized -- heavily! */
-			level = 1;
-			if(i->type == I_IMP || i->type == I_DEMON || i->type == I_BALROG) {
-				top = i->num * i->num;
-				if(i->type == I_IMP) skill = S_SUMMON_IMPS;
-				if(i->type == I_DEMON) skill = S_SUMMON_DEMON;
-				if(i->type == I_BALROG) skill = S_SUMMON_BALROG;
-				level = u->GetSkill(skill);
-				if(!level) {
-					/* Something does escape */
-					escape = 10000;
-				} else {
-					int bottom = level * level;
-					if(i->type == I_IMP) bottom *= 4;
-					bottom = bottom * bottom;
-					if(i->type != I_BALROG) bottom *= 20;
-					else bottom *= 4;
-					int chance = (top * 10000)/bottom;
-					if(chance > escape) escape = chance;
-				}
-			}
+			if (!ItemDefs[i->type].escape) continue;
 
-			if (i->type==I_SKELETON || i->type==I_UNDEAD || i->type==I_LICH) {
-				int losses = (i->num + getrandom(10)) / 10;
+			// Okay, check flat loss.
+			if (ItemDefs[i->type].escape & ItemType::LOSS_CHANCE) {
+				int losses = (i->num +
+						getrandom(ItemDefs[i->type].esc_val)) /
+					ItemDefs[i->type].esc_val;
 				u->items.SetNum(i->type,i->num - losses);
-				totlosses += losses;
-			}
+				u->Event(ItemString(i->type, losses) +
+						" decay into nothingness.");
+			} else if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
+				tmp = ItemDefs[i->type].esc_skill;
+				skill = LookupSkill(&tmp);
+				if (u->GetSkill(skill) < ItemDefs[i->type].esc_val) {
+					if(Globals->WANDERING_MONSTERS_EXIST) {
+						Faction *mfac = GetFaction(&factions, monfaction);
+						Unit *mon = GetNewUnit(mfac, 0);
+						MonType *mp = FindMonster(ItemDefs[i->type].abr,
+								(ItemDefs[i->type].type & IT_ILLUSION));
+						mon->MakeWMon(mp->name, i->type, i->num);
+						mon->MoveUnit(r->GetDummy());
+						// This will be zero unless these are set. (0 means
+						// full spoils)
+						mon->free = Globals->MONSTER_NO_SPOILS +
+							Globals->MONSTER_SPOILS_RECOVERY;
+					}
+					u->Event(AString("Loses control of ") +
+							ItemString(i->type, i->num) + ".");
+					u->items.SetNum(i->type, 0);
+				}
+			} else {
+				// ESC_LEV_SQUARED or ESC_LEV_QUAD
+				tmp = ItemDefs[i->type].esc_skill;
+				skill = LookupSkill(&tmp);
+				int level = u->GetSkill(skill);
+				int chance;
 
-			if (i->type==I_WOLF || i->type==I_EAGLE || i->type==I_DRAGON) {
-				if(i->type == I_WOLF) skill = S_WOLF_LORE;
-				if(i->type == I_EAGLE) skill = S_BIRD_LORE;
-				if(i->type == I_DRAGON) skill = S_DRAGON_LORE;
-				level = u->GetSkill(skill);
-				if(!level) {
-					if(Globals->WANDERING_MONSTERS_EXIST &&
-							Globals->RELEASE_MONSTERS) {
+				if (!level) chance = 10000;
+				else {
+					int top = i->num * i->num;
+					int bottom = 0;
+					if (ItemDefs[i->type].escape & ItemType::ESC_LEV_SQUARE)
+						bottom = level * level;
+					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_QUAD)
+						bottom = level * level * level * level;
+					else
+						bottom = 1;
+					bottom = bottom * ItemDefs[i->type].esc_val;
+					chance = (top * 10000)/bottom;
+				}
+
+				if (ItemDefs[i->type].escape & ItemType::LOSE_LINKED) {
+					if (chance > chances[ItemDefs[i->type].type])
+						chances[ItemDefs[i->type].type] = chance;
+					linked = 1;
+				} else if (chance > getrandom(10000)) {
+					if(Globals->WANDERING_MONSTERS_EXIST) {
 						Faction *mfac = GetFaction(&factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
 						MonType *mp = FindMonster(ItemDefs[i->type].abr,
@@ -1871,58 +1890,36 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 			}
 		}
 
-		if (totlosses) {
-			u->Event(AString(totlosses) + " undead decay into nothingness.");
-		}
-
-		if (escape > getrandom(10000)) {
-			if(!Globals->WANDERING_MONSTERS_EXIST) {
-				u->items.SetNum(I_IMP, 0);
-				u->items.SetNum(I_DEMON, 0);
-				u->items.SetNum(I_BALROG, 0);
-				u->Event("Summoned demons vanish.");
-			} else {
-				Faction *mfac = GetFaction(&factions,monfaction);
-				if (u->items.GetNum(I_IMP)) {
-					Unit *mon = GetNewUnit(mfac, 0);
-					monP = FindMonster(ItemDefs[I_IMP].abr,
-							(ItemDefs[I_IMP].type & IT_ILLUSION));
-					mon->MakeWMon(monP->name, I_IMP, u->items.GetNum(I_IMP));
-					mon->MoveUnit(r->GetDummy());
-					u->items.SetNum(I_IMP,0);
-					// This will be zero unless these are set. (0 means
-					// full spoils)
-					mon->free = Globals->MONSTER_NO_SPOILS +
-						Globals->MONSTER_SPOILS_RECOVERY;
+		if (linked) {
+			map < int, int >::iterator i;
+			for (i = chances.begin(); i != chances.end(); i++) {
+				// walk the chances list and for each chance, see if
+				// escape happens and if escape happens then walk all items
+				// and everything that is that type, get rid of it.
+				if ((*i).second < getrandom(10000)) continue;
+				forlist (&u->items) {
+					Item *it = (Item *)elem;
+					if (ItemDefs[it->type].type == (*i).first) {
+						if(Globals->WANDERING_MONSTERS_EXIST) {
+							Faction *mfac = GetFaction(&factions, monfaction);
+							Unit *mon = GetNewUnit(mfac, 0);
+							MonType *mp = FindMonster(ItemDefs[it->type].abr,
+									(ItemDefs[it->type].type & IT_ILLUSION));
+							mon->MakeWMon(mp->name, it->type, it->num);
+							mon->MoveUnit(r->GetDummy());
+							// This will be zero unless these are set. (0 means
+							// full spoils)
+							mon->free = Globals->MONSTER_NO_SPOILS +
+								Globals->MONSTER_SPOILS_RECOVERY;
+						}
+						u->Event(AString("Loses control of ") +
+								ItemString(it->type, it->num) + ".");
+						u->items.SetNum(it->type, 0);
+					}
 				}
-				if (u->items.GetNum(I_DEMON)) {
-					Unit *mon = GetNewUnit(mfac, 0);
-					monP = FindMonster(ItemDefs[I_DEMON].abr,
-							(ItemDefs[I_DEMON].type & IT_ILLUSION));
-					mon->MakeWMon(monP->name,I_DEMON,u->items.GetNum(I_DEMON));
-					mon->MoveUnit(r->GetDummy());
-					u->items.SetNum(I_DEMON,0);
-					// This will be zero unless these are set. (0 means
-					// full spoils)
-					mon->free = Globals->MONSTER_NO_SPOILS +
-						Globals->MONSTER_SPOILS_RECOVERY;
-				}
-				if (u->items.GetNum(I_BALROG)) {
-					Unit *mon = GetNewUnit(mfac, 0);
-					monP = FindMonster(ItemDefs[I_BALROG].abr,
-							(ItemDefs[I_BALROG].type & IT_ILLUSION));
-					mon->MakeWMon(monP->name,I_BALROG,
-							u->items.GetNum(I_BALROG));
-					mon->MoveUnit(r->GetDummy());
-					u->items.SetNum(I_BALROG,0);
-					// This will be zero unless these are set. (0 means
-					// full spoils)
-					mon->free = Globals->MONSTER_NO_SPOILS +
-						Globals->MONSTER_SPOILS_RECOVERY;
-				}
-				u->Event("Controlled demons break free!");
 			}
 		}
+
 	}
 }
 

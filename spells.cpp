@@ -1023,8 +1023,8 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 
 int Game::RunSummonBalrog(ARegion *r,Unit *u)
 {
-	if (u->items.GetNum(I_BALROG)) {
-		u->Error("Can't control more than one balrog.");
+	if (u->items.GetNum(I_BALROG) >= ItemDefs[I_BALROG].max_inventory) {
+		u->Error("Can't control any more balrogs.");
 		return 0;
 	}
 
