@@ -769,7 +769,8 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 	ProduceOrder * po = (ProduceOrder *) u->monthorders;
 	if (p->itemtype == po->item && p->skill == po->skill) {
 		if (p->skill == -1) {
-			po->productivity = u->GetMen() * p->productivity;
+			/* Factor for fractional productivity: 10 */
+			po->productivity = (int) ((float) (u->GetMen() * p->productivity / 10));
 			return po->productivity;
 		}
 		int level = u->GetSkill(p->skill);
@@ -795,7 +796,8 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 		/* check for bonus production */
 		// LLS
 		int bonus = u->GetProductionBonus(p->itemtype);
-		po->productivity = u->GetMen() * level * p->productivity + bonus;
+		/* Factor for fractional productivity: 10 */
+		po->productivity = (int) ((float) (u->GetMen() * level * p->productivity / 10)) + bonus;
 		return po->productivity;
 	}
 	return 0;

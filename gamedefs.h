@@ -682,9 +682,9 @@ public:
 	// Use grow algorithm for races?
 	int GROW_RACES;
 
-	/* Player-Run Economy */
-	// Does the game use the player-run economy rules?
-	int PLAYER_ECONOMY;
+	// Enable Creation of Towns mid-game, migration and population dynamics?
+	// NOTE: not implemented yet.
+	int DYNAMIC_POPULATION;
 
 	// Population growth rate modifier (100 = standard).
 	int POP_GROWTH;

@@ -874,4 +874,17 @@ Changes from 4.0.10 -> 5.0.0
    -- Fixed bug in market creation where disabled trade goods would leave blank spots
    -- Fixed bug in world creation where disabled races would still be used
    -- Added an updated version of the world editing code
+   -- Economy-Rehaul:
+   -- Wages are now fractional with one decimal point, and IMPORTANTLY(!!)
+      are stored as actual wages * 10 (int value). Concomitantly, productivity in Production
+      had to be raised by a factor of ten, too, so that silver production works as usual.
+   -- Wages now depend on development per default. TownType is determined not only
+      by town population but also by it's development.
+   -- TOWN_DEVELOPMENT gamedef now controls the town type for towns at creation time
+      as well as their relative development level.
+   -- New AddTown() functions to provide a name or town type at start. Changed the functions to
+      create StartingCities to reflect the changes in the town economy code.
+   -- [NOTE:] still to do: effective PostTurn adjustment of development, habitat for long-term growth
+      
+   
    

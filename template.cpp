@@ -359,7 +359,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	prod = products.GetProd(I_SILVER, -1);
 	if (prod) {
 		GetMapLine(buffer, line, pRegs);
-		sprintf(data, "Wage %5i (max %i)", prod->productivity, prod->amount);
+		sprintf(data, "Wage %5i.%1i (max %i)", (prod->productivity/10), (prod->productivity%10), prod->amount);
 		TrimWrite(f, buffer);
 		line++;
 	}

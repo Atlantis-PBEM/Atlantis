@@ -2502,11 +2502,14 @@ void ARegion::MakeStartingCity()
 	if(Globals->GATES_EXIST) gate = -1;
     if( !town )
     {
-        AddTown();
+        AddTown(TOWN_CITY);
     }
 
-    town->pop = 5000;
-    town->basepop = 5000;
+	if(!Globals->START_CITIES_EXIST) return;
+
+	town->hab = 125 * Globals->CITY_POP / 100;
+    town->pop = town->hab;
+    town->dev = TownDevelopment();
 
 	float ratio;
 	Market *m;
@@ -2522,24 +2525,28 @@ void ARegion::MakeStartingCity()
 				markets.Add(m);
 			}
 		}
-		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
+		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+		// hack: include wage factor of 10 in float calculation above
 		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1, 5000,5000,-1,-1);
 		markets.Add(m);
 		if(Globals->LEADERS_EXIST) {
-			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
+			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
+			// hack: include wage factor of 10 in float calculation above
 			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),
 					-1,5000,5000,-1,-1);
 			markets.Add(m);
 		}
 	} else {
 		SetupCityMarket();
-		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
+		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+		// hack: include wage factor of 10 in float calculation above
 		/* Setup Recruiting */
 		m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
 				Population()/5, 0, 10000, 0, 2000 );
 		markets.Add(m);
 		if( Globals->LEADERS_EXIST ) {
-			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
+			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
+			// hack: include wage factor of 10 in float calculation above
 			m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
 					Population()/25, 0, 10000, 0, 400 );
 			markets.Add(m);
@@ -2548,7 +2555,7 @@ void ARegion::MakeStartingCity()
 }
 
 int ARegion::IsStartingCity() {
-    if (town && town->pop == 5000) return 1;
+    if (town && town->pop >= (Globals->CITY_POP * 120 / 100)) return 1;
     return 0;
 }
 

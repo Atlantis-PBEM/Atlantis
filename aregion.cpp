@@ -81,10 +81,8 @@ TownInfo::TownInfo()
 {
 	name = 0;
 	pop = 0;
-	basepop = 0;
 	activity = 0;
-	growth = 0;
-	mortality = 0;
+	hab = 0;
 }
 
 TownInfo::~TownInfo()
@@ -96,18 +94,14 @@ void TownInfo::Readin(Ainfile *f, ATL_VER &v)
 {
 	name = f->GetStr();
 	pop = f->GetInt();
-	basepop = f->GetInt();
-	growth = f->GetInt();
-	mortality = f->GetInt();
+	hab = f->GetInt();
 }
 
 void TownInfo::Writeout(Aoutfile *f)
 {
 	f->PutStr(*name);
 	f->PutInt(pop);
-	f->PutInt(basepop);
-	f->PutInt(growth);
-	f->PutInt(mortality);
+	f->PutInt(hab);
 }
 
 ARegion::ARegion()
@@ -122,7 +116,6 @@ ARegion::ARegion()
 	town = 0;
 	development = 0;
 	habitat = 0;
-	mortality = 0;
 	growth = 0;
 	migration = 0;
 	clearskies = 0;
@@ -290,7 +283,7 @@ void ARegion::Setup()
 		LairCheck();
 }
 
-int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range)
+int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range, int dev)
 {
 	ARegionPtr *rn = new ARegionPtr();
 	rn->ptr = this;
@@ -301,26 +294,27 @@ int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range)
 	}
 	if(isnew == 0) return sum;
 	con->Add(rn);
-#if 0
-	Awrite(AString(" -> ") + *name + "(" + xloc + ", " + yloc + ")");
-	Awrite(AString("   +") + (town->TownType()+1));
-#endif
-	if(town) sum += town->TownType() + 1;
+	// Add bonus for connecting town
+	if(town) sum++;
+	// Add bonus if development is higher
+	if (development > dev + 9) sum++;
+	if (development * 2 > dev * 5) sum++;
+	// Check further along road
 	if(range > 0) {
 		for(int d=0; d<NDIRS; d++) {
 			if(!HasExitRoad(d)) continue;
 			ARegion *r = neighbors[d];
 			if(!r) continue;
 			if(dir == r->GetRealDirComp(d)) continue;
-			if(r->HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1);
+			if(r->HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1, dev+2);
 		}
 	}
 	return sum;
 }
 
-int ARegion::CountRoadConnectedTowns(int range)
+int ARegion::RoadDevelopmentBonus(int range, int dev)
 {
-	int townsum = 0;
+	int bonus = 0;
 	AList *con = new AList();
 	ARegionPtr *rp = new ARegionPtr();
 	rp->ptr = this;
@@ -329,9 +323,9 @@ int ARegion::CountRoadConnectedTowns(int range)
 		if(!HasExitRoad(d)) continue;
 		ARegion *r = neighbors[d];
 		if(!r) continue;
-		if(r->HasConnectingRoad(d)) townsum = r->TraceConnectedRoad(d, townsum, con, range-1);
+		if(r->HasConnectingRoad(d)) bonus = r->TraceConnectedRoad(d, bonus, con, range-1, dev);
 	}
-	return townsum;	
+	return bonus;	
 }
 
 // AS
@@ -966,7 +960,6 @@ void ARegion::Writeout(Aoutfile *f)
 	f->PutInt(habitat);
 	f->PutInt(development);
 	f->PutInt(growth);
-	f->PutInt(mortality);
 
 	if (town) {
 		f->PutInt(1);
@@ -1028,11 +1021,11 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	habitat = f->GetInt();
 	development = f->GetInt();
 	growth = f->GetInt();
-	mortality = f->GetInt();
 
 	if (f->GetInt()) {
 		town = new TownInfo;
 		town->Readin(f, v);
+		town->dev = TownDevelopment();
 	} else {
 		town = 0;
 	}
@@ -1220,6 +1213,10 @@ void ARegion::WriteEconomy(Areport *f, Faction *fac, int present)
 		f->PutStr(AString("Wages: ") + WagesForReport() + ".");
 	} else {
 		f->PutStr(AString("Wages: $0."));
+	}
+
+	if(town) {
+		f->PutStr(AString("Habitat: ") + TownHabitat());
 	}
 
 	WriteMarkets(f, fac, present);

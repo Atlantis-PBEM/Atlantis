@@ -2219,6 +2219,7 @@ void Game::CreateWorld()
 		regions.InitSetupGates( i );
 	}
 	// Underdeep has no gates, only the possible shafts above.
+
     regions.FinalSetupGates();
 
     regions.CalcDensities();
@@ -2328,17 +2329,16 @@ int ARegionList::GetLevelXScale(int level)
 
 	// We have multiple underworld levels
 	if(level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
-		// Topmost underworld level is full size in x direction
+		// Topmost level is full size in x direction
 		if(level == 2) return 1;
-		// All other levels are 1/2 size in the x direction
+		// All other levels are 1/2 size
 		return 2;
 	}
-
 	if(level >= Globals->UNDERWORLD_LEVELS+2 &&
 			level < (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2)){
-		// Topmost underdeep level is 1/2 size in the x direction
+		// Topmost underdeep level is 1/2 size
 		if(level == Globals->UNDERWORLD_LEVELS+2) return 2;
-		// All others are 1/4 size in the x direction
+		// All others are 1/4 size
 		return 4;
 	}
 	// We couldn't figure it out, assume not scaled.
@@ -2415,11 +2415,6 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
         return( W_NORMAL );
     }
 
-	if (!Globals->OPEN_ENDED && pReg->zloc == 3)
-	{
-		return (W_NORMAL);
-	}
-
     int ysize = pRegionArrays[ 1 ]->y;
 
     if ((3*( pReg->yloc+1))/ysize == 0)
@@ -2461,7 +2456,7 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
 
 int ARegion::CanBeStartingCity( ARegionArray *pRA )
 {
-    if (type == R_OCEAN) return 0;
+	if(type == R_OCEAN) return 0;
     if (!IsCoastal()) return 0;
     if (town && town->pop == 5000) return 0;
 
@@ -2473,11 +2468,9 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
     temp->ptr = this;
     inlist.Add(temp);
 
-    while(inlist.Num())
-    {
+    while(inlist.Num()) {
         ARegionPtr * reg = (ARegionPtr *) inlist.First();
-        for (int i=0; i<NDIRS; i++)
-        {
+        for (int i=0; i<NDIRS; i++) {
             ARegion * r2 = reg->ptr->neighbors[i];
             if (!r2) continue;
             if (r2->type == R_OCEAN) continue;
@@ -2502,11 +2495,14 @@ void ARegion::MakeStartingCity()
 	if(Globals->GATES_EXIST) gate = -1;
     if( !town )
     {
-        AddTown();
+        AddTown(TOWN_CITY);
     }
 
-    town->pop = 5000;
-    town->basepop = 5000;
+	if(!Globals->START_CITIES_EXIST) return;
+
+	town->hab = 125 * Globals->CITY_POP / 100;
+    town->pop = town->hab;
+    town->dev = TownDevelopment();
 
 	float ratio;
 	Market *m;
@@ -2517,29 +2513,33 @@ void ARegion::MakeStartingCity()
 			if( ItemDefs[ i ].type & IT_NORMAL ) {
 				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
 					continue;
-				m = new Market(M_BUY,i,(ItemDefs[i].baseprice * 5 / 2),-1,
+				m = new Market(M_BUY,i,(ItemDefs[i].baseprice*5/2),-1,
 						5000,5000,-1,-1);
 				markets.Add(m);
 			}
 		}
-		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
-		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1,5000,5000,-1,-1);
+		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+		// hack: include wage factor of 10 in float calculation above
+		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1, 5000,5000,-1,-1);
 		markets.Add(m);
 		if(Globals->LEADERS_EXIST) {
-			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
-			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),-1,
-					5000,5000,-1,-1);
+			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
+			// hack: include wage factor of 10 in float calculation above
+			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),
+					-1,5000,5000,-1,-1);
 			markets.Add(m);
 		}
 	} else {
 		SetupCityMarket();
-		ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
+		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+		// hack: include wage factor of 10 in float calculation above
 		/* Setup Recruiting */
 		m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
 				Population()/5, 0, 10000, 0, 2000 );
 		markets.Add(m);
 		if( Globals->LEADERS_EXIST ) {
-			ratio=ItemDefs[I_LEADERS].baseprice/(float)Globals->BASE_MAN_COST;
+			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
+			// hack: include wage factor of 10 in float calculation above
 			m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
 					Population()/25, 0, 10000, 0, 400 );
 			markets.Add(m);
@@ -2548,7 +2548,7 @@ void ARegion::MakeStartingCity()
 }
 
 int ARegion::IsStartingCity() {
-    if (town && town->pop == 5000) return 1;
+    if (town && town->pop >= (Globals->CITY_POP * 120 / 100)) return 1;
     return 0;
 }
 
@@ -2571,15 +2571,14 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
     if( pArr->y < maxY ) maxY = pArr->y;
 
 	int tries = 0;
-    while (!reg && tries < 10000)
-    {
+    while (!reg && tries < 10000) {
         //
         // We'll just let AC exits be all over the map.
         //
         int x = getrandom( maxX );
         int y = 2 * getrandom( maxY / 2 ) + x % 2;
 
-        reg = pArr->GetRegion( x, y );
+        reg = pArr->GetRegion( x, y);
 
         if(!reg || !reg->CanBeStartingCity( pArr )) {
             reg = 0;
@@ -2589,10 +2588,10 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 
         for (int j=0; j<i; j++) {
 			if(!AC->neighbors[j]) continue;
-            if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {
-                reg = 0;
+			if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {
+				reg = 0;
 				tries++;
-                break;
+				break;
             }
         }
     }
@@ -2608,21 +2607,21 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 		int x = getrandom( maxX );
 		int y = 2 * getrandom( maxY / 2 ) + x % 2;
 		reg = pArr->GetRegion( x, y);
-		if(!reg || reg->type == R_OCEAN) {
+		if (!reg || reg->type == R_OCEAN) {
 			tries++;
 			reg = 0;
 			continue;
 		}
 
-		for (int j=0; j<i; j++) {
+        for (int j=0; j<i; j++) {
 			if(!AC->neighbors[j]) continue;
 			if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {
 				reg = 0;
 				tries++;
 				break;
-			}
-		}
-	}
+            }
+        }
+    }
 
 	// Okay, if we still don't have anything, we're done.
     return reg;

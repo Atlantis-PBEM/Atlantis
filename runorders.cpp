@@ -1099,7 +1099,7 @@ void Game::MidProcessTurn()
 void Game::PostProcessTurn()
 {
 	// process migration before adjusting economy
-	if(Globals->PLAYER_ECONOMY) ProcessMigration();
+	//if(Globals->DYNAMIC_POPULATION) ProcessMigration();
 	
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;

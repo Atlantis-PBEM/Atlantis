@@ -45,7 +45,7 @@ Production::Production(int it, int maxamt)
 	if(Globals->RANDOM_ECONOMY)
 		amount += getrandom(maxamt);
 	baseamount = amount;
-	productivity = 1;
+	productivity = 10;
 	AString skname = ItemDefs[it].pSkill;
 	skill = LookupSkill(&skname);
 }

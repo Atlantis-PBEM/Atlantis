@@ -12,7 +12,7 @@ CPLUS = g++
 CC = gcc
 CFLAGS = -g -I. -I.. -Wall
 
-RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o
+RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
 ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o edit.o faction.o \
   fileio.o game.o gamedata.o gamedefs.o gameio.o genrules.o items.o main.o \
@@ -40,6 +40,9 @@ realms: FORCE
 
 standard: FORCE
 	$(MAKE) GAME=standard
+	
+kingdoms: FORCE
+	$(MAKE) GAME=kingdoms
 
 wyreth: FORCE
 	$(MAKE) GAME=wyreth

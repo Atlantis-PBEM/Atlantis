@@ -148,12 +148,11 @@ class TownInfo
 
 		AString *name;
 		int pop;
-		int basepop;
 		int activity;
-		
-		// Player-Econ stuff
-		int growth;
-		int mortality;
+		// achieved settled habitat
+		int hab;
+		// town's development
+		int dev;
 };
 
 class ARegion : public AListElem
@@ -251,11 +250,12 @@ class ARegion : public AListElem
 		int IsNativeRace(int);
 		void AdjustPop(int);
 		void Migrate();
-		void CheckTownIncrease();
-		int TraceConnectedRoad(int, int, AList *, int);
-		int CountRoadConnectedTowns(int);
+		void SetTownType(int);
+		int DetermineTownSize();
+		int TraceConnectedRoad(int, int, AList *, int, int);
+		int RoadDevelopmentBonus(int, int);
 		int TownHabitat();
-		int Development();
+		int RoadDevelopment();
 		int TownDevelopment();
 		int CheckSea(int, int, int);
 		int Slope();
@@ -269,7 +269,6 @@ class ARegion : public AListElem
 		int IsGuarded();
 
 		int Wages();
-		int LakeEffect();
 		AString WagesForReport();
 		int Population();
 
@@ -295,7 +294,6 @@ class ARegion : public AListElem
 		int habitat;
 		int development;
 		int growth;
-		int mortality;
 		int elevation;
 		int humidity;
 		int temperature;
@@ -328,10 +326,12 @@ class ARegion : public AListElem
 		int GetNearestProd(int);
 		void SetupCityMarket();
 		void AddTown();
+		void AddTown(int);
+		void AddTown(AString *);
+		void AddTown(int, AString *);
 		void MakeLair(int);
 		void LairCheck();
-		
-		void WagesFromDevelopment();
+
 };
 
 class ARegionArray

@@ -284,11 +284,12 @@ int Game::NewGame()
 
 	if(Globals->LAIR_MONSTERS_EXIST)
 		CreateVMons();
-		
+	
+	/*	
 	if(Globals->PLAYER_ECONOMY) {
-		DevelopTowns();
 		Equilibrate();
 	}
+	*/
 
 	return(1);
 }
@@ -2091,17 +2092,6 @@ void Game::ProcessMigration()
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
 		r->Migrate();
-	}
-}
-
-void Game::DevelopTowns()
-{
-	for(int i=0; i<5; i++) {
-		forlist(&regions) {
-			ARegion *r = (ARegion *) elem;
-			if((!r) || (!r->town)) continue;
-			r->CheckTownIncrease();
-		}
 	}
 }
 

@@ -59,8 +59,9 @@ void Market::PostTurn(int population, int wages)
 
 	if (ItemDefs[item].type & IT_MAN) {
 		float ratio = ItemDefs[item].baseprice /
-			(float)Globals->BASE_MAN_COST;
-		price = (int)(wages * 4 * ratio);
+			(10 * (float)Globals->BASE_MAN_COST);
+		// hack: included new wage factor of ten in float assignment above
+		price = (int)((float) wages * 4 * ratio);
 		if (ItemDefs[item].type & IT_LEADER)
 			amount = population / 25;
 		else
