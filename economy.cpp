@@ -1446,7 +1446,6 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	
 	/* update markets */
 	markets.PostTurn(Population(),Wages());
-	return;
 
 	/* update resources */
 	UpdateProducts();
