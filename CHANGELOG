@@ -493,11 +493,8 @@ Changes from 4.0.9 -> 4.0.10
       to allow skills to improve with practice.  A unit may improve at
       most one skill per month, and will only improve skills they already
       have.  Using a skill counts as practising its prerequisites if they
-      need to be impoved before the skill can advance further.  The only
-      skill which cannot be improved through practice is OBSE, as if it
-      can be improved it tended to be improved in preference to all other
-      skills, as it is used in the automatic attack phase.  I suggest a
-      value of 5 for SKILL_PRACTISE_AMOUNT.
+      need to be impoved before the skill can advance further.  I suggest
+      a value of 5 for SKILL_PRACTISE_AMOUNT.
    -- Fixed a bug where CanSee was not taking account of MIND skill.
    -- Modified combat acquisition algorithm for special attacks so that
       they will always find an appropriate target if one exists.
