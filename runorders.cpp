@@ -2007,7 +2007,7 @@ void Game::AssessMaintenance()
 				Object * obj = (Object *) elem;
 				forlist((&obj->units)) {
 					Unit * u = (Unit *) elem;
-					if (u->needed || u->hunger)
+					if (u->needed > 0 || u->hunger > 0)
 						u->Short(u->needed, u->hunger);
 				}
 			}
