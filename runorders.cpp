@@ -875,10 +875,6 @@ void Game::RunPromoteOrders()
 					delete u->promote;
 					u->promote = 0;
 				}
-			} else {
-				u->Error("PROMOTE: Can only promote inside structures.");
-				delete u->promote;
-				u->promote = 0;
 			}
 		}
 	}
@@ -895,10 +891,6 @@ void Game::RunPromoteOrders()
 						delete u->evictorders;
 						u->evictorders = 0;
 					}
-				} else {
-					u->Error("EVICT: Can only evict inside structures.");
-					delete u->evictorders;
-					u->evictorders = 0;
 				}
 			}
 		}
@@ -913,14 +905,30 @@ void Game::RunPromoteOrders()
 				forlist(&o->units) {
 					u = (Unit *) elem;
 					if (u->promote) {
-						u->Error("PROMOTE: Must be owner");
-						delete u->promote;
-						u->promote = 0;
+						if (o->type != O_DUMMY) {
+							u->Error("PROMOTE: Must be owner");
+							delete u->promote;
+							u->promote = 0;
+						}
+						else
+						{
+							u->Error("PROMOTE: Can only promote inside structures.");
+							delete u->promote;
+							u->promote = 0;
+						}
 					}
 					if (u->evictorders) {
-						u->Error("EVICT: Must be owner");
-						delete u->evictorders;
-						u->evictorders = 0;
+						if (o->type != O_DUMMY) {
+							u->Error("EVICT: Must be owner");
+							delete u->evictorders;
+							u->evictorders = 0;
+						}
+						else
+						{
+							u->Error("EVICT: Can only evict inside structures.");
+							delete u->evictorders;
+							u->evictorders = 0;
+						}
 					}
 				}
 			}
