@@ -25,9 +25,20 @@
 //
 // This file contains extra game-specific functions
 //
+
+/** \file
+ * Extra parts added to the game for a particular version.
+ * extra.cpp contains all of the version-specific functions necessary 
+ * to alter a game's data structures to suit the GM.
+ */
+
 #include "game.h"
 #include "gamedata.h"
 
+/// Run the initial setup for a faction
+/** This includes setting initial silver, creating your first leader, 
+adding any starting skills (eg. gate) and sticking him in the world.
+*/
 int Game::SetupFaction( Faction *pFac )
 {
 	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
@@ -78,11 +89,23 @@ int Game::SetupFaction( Faction *pFac )
 	return( 1 );
 }
 
+/// Check to see whether a player has won the game.
+/** This is left null in standard, since it's an open ended game.
+See wyreth if you're after an example of close-ended conditions.
+*/
 Faction *Game::CheckVictory()
 {
 	return NULL;
 }
 
+/// Modify certain starting statistics of the world's data structures.
+/** There are two types of changes in here, those caused by altering
+values in rules.cpp, and those added by the GM to change the default
+settings of the world. See the modify.cpp file if you want to make changes
+to your own game.
+Please don't alter standard -- copy it and alter that copy as detailed
+in the GAMEMASTER file.
+*/
 void Game::ModifyTablesPerRuleset(void)
 {
 	if(Globals->APPRENTICES_EXIST)

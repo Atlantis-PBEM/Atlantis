@@ -30,18 +30,42 @@
 #include "game.h"
 #include "gamedata.h"
 
+/** \file
+ * Functions which modify the game's data structures.
+ * To suit particular versions of Atlantis, it is sometimes necessary
+ * to alter objects, monsters, skills, etc.
+ * modify.cpp is where all of the relevant functions to do this are contained.
+ */
+
+/// Enable a skill
+/** Makes a skill available in play. 
+\arg \c sk One of the values from the NSKILLS enum in gamedata.h
+*/
 void Game::EnableSkill(int sk)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
 	SkillDefs[sk].flags &= ~SkillType::DISABLED;
 }
 
+/// Enable a skill
+/** Makes a skill unavailable in play. Please note that it is up to the GM
+to disable any other skills that might be dependent upon this one in the skill
+tree, and to generally make sure that the skill tree isn't messed up.
+\arg \c sk One of the values from the NSKILLS enum in gamedata.h
+*/
 void Game::DisableSkill(int sk)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
 	SkillDefs[sk].flags |= SkillType::DISABLED;
 }
 
+/// Change the dependency for a skill.
+/** Makes a skill available in play. 
+\arg \c sk One of the values from the NSKILLS enum in gamedata.h
+\arg \c i The dependency array that will be changed.
+\arg \c *dep The skill required in the dependency (eg. FORC, if sk is FIRE)
+\arg \c lev The level of skill required in the dependency
+*/
 void Game::ModifySkillDependancy(int sk, int i, char *dep, int lev)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
@@ -53,6 +77,15 @@ void Game::ModifySkillDependancy(int sk, int i, char *dep, int lev)
 	SkillDefs[sk].depends[i].level = lev;
 }
 
+/// Modify the flags for a skill.
+/** Alters some flags on a skill. Some of the flags that can be set are: 
+SkillType::BATTLEREP, SkillType::MAGIC, SkillType::FOUNDATION.
+You can set more than one flag by using the '|' or operator. See skills.h
+for the full list.
+
+\arg \c sk One of the values from the NSKILLS enum in gamedata.h
+\arg \c flags The flags that are going to be set
+*/
 void Game::ModifySkillFlags(int sk, int flags)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
