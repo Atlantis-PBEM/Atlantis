@@ -776,7 +776,7 @@ int Game::ReadPlayersLine( AString *pToken, AString *pLine, Faction *pFac,
     }
     else if( *pToken == "Password:" )
     {
-        pTemp = pLine->gettoken();
+        pTemp = pLine->StripWhite();
         delete pFac->password;
         if( pTemp )
         {
