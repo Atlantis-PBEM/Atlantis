@@ -570,3 +570,7 @@ Changes from 4.0.10b -> 4.0.10c
    -- Fixed bug in movement costs when WEATHER_EXISTS was 0.
    -- Added 'Spoils: none' line to indecisive battles to make ACB happier
    -- Fixed segfault in skill starvation code.
+
+Changes from 4.0.10c -> 4.0.10d
+--------------------------------------------------
+   -- Fixed a bug where gluttony became a sin (under skill starvation).
