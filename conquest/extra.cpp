@@ -163,6 +163,8 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableSkill(S_RANCHING);
 
 	/* Disable high-end production enhancer buildings */
+	DisableObject(O_RANCH);
+	DisableObject(O_FARM);
 	DisableObject(O_TEMPLE);
 	DisableObject(O_MQUARRY);
 	DisableObject(O_AMINE);
