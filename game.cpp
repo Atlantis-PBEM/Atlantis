@@ -801,6 +801,14 @@ int Game::ReadPlayersLine( AString *pToken, AString *pLine, Faction *pFac,
         pTemp = pLine->gettoken();
         pFac->times = pTemp->value();
     }
+	else if (*pToken == "LastOrders:" )
+	{
+		// Read this line and correctly set the lastorders for this
+		// faction if the game itself isn't maintaining them.
+		pTemp = pLine->gettoken();
+		if(Globals->LASTORDERS_MAINTAINED_BY_SCRIPTS)
+			pFac->lastorders = pTemp->value();
+	}
     else
     {
         pTemp = new AString( *pToken + *pLine );
@@ -991,8 +999,10 @@ int Game::RunGame()
     Awrite("Reading the Orders File...");
     ReadOrders();
 
-	Awrite("QUITting inactive Factions...");
-	RemoveInactiveFactions();
+	if(Globals->MAX_INACTIVE_TURNS != -1) {
+		Awrite("QUITting Inactive Factions...");
+		RemoveInactiveFactions();
+	}
   
     Awrite("Running the Turn...");
     RunOrders();
@@ -1594,6 +1604,9 @@ void Game::UnitFactionMap()
 //The following function added by Creative PBM February 2000
 void Game::RemoveInactiveFactions()
 {
+	if(Globals->MAX_INACTIVE_TURNS == -1)
+		return;
+
 	int cturn;
 	cturn = TurnNumber();
 	forlist(&factions) {

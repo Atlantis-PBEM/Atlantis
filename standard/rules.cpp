@@ -113,6 +113,7 @@ static GameDefs g = {
     50, // CITY_MARKET_TRADE_AMT
 
 	50,	// BASE_MAN_COST
+	1, // LASTORDERS_MAINTAINED_BY_SCRIPTS
 	10, // MAX_INACTIVE_TURNS
 
 	// *NOTE* If this is set to 1, you need to make sure the correct

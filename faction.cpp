@@ -327,6 +327,17 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 		f->EndLine();
 	}
 
+	if(Globals->MAX_INACTIVE_TURNS != -1) {
+		int cturn = pGame->TurnNumber() - lastorders;
+		if((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
+			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
+			f->PutStr( AString("WARNING: You have ")+cturn+
+					AString(" turns until your faction is automatically ")+
+					AString("removed due to inactivity!"));
+			f->EndLine();
+		}
+	}
+
     if (!exists) {
         if (quit == QUIT_AND_RESTART)
         {
@@ -503,6 +514,7 @@ void Faction::WriteFacInfo( Aoutfile *file )
     file->PutStr( AString( "Name: " ) + *name );
     file->PutStr( AString( "Email: " ) + *address );
     file->PutStr( AString( "Password: " ) + *password );
+	file->PutStr( AString( "LastOrders: " ) + lastorders );
     file->PutStr( AString( "SendTimes: " ) + times );
 
     forlist( &extraPlayers ) {

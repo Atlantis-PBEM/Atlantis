@@ -343,7 +343,8 @@ void Game::ParseOrders( int faction, Aorders *f, OrdersCheck *pCheck )
                         fac = 0;
                         break;
                     }
-                    fac->lastorders = TurnNumber();
+					if(!Globals->LASTORDERS_MAINTAINED_BY_SCRIPTS)
+						fac->lastorders = TurnNumber();
                 }
 
                 unit = 0;

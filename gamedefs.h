@@ -134,7 +134,11 @@ public:
     // JLT -- Allow races to have differing base costs
     int BASE_MAN_COST;
 
+	// Are the lastorders values maintained by external scripts?
+	int LASTORDERS_MAINTAINED_BY_SCRIPTS;
+
     // How many turns to allow a faction to be inactive.
+	// Set to -1 if you don't want this check performed.
     int MAX_INACTIVE_TURNS;
 
 	// Is it easier to deal with the underworld (allows teleport and
