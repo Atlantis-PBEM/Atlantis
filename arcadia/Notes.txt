@@ -137,6 +137,25 @@ Disabling or forgetting a hero's combat spell sets their combat spell to 'none'.
 Disabled skills marked in reports
 Faction ethnicity marked in reports
 
+050224:
+Updated advanced item values
+Updated Edit Import Function
+Incorporated ALL and LABEL orders, and modified code for TYPE orders.
+
+050226:
+Fixed LABEL not being recorded in gamefile bug & added label to unit constructor/destructor
+Updated SWIN, FEAR, COUR, SSTO
+Implemented CHAR
+Implemented ! handling in all 'easy' cases.
+Added staff of yew and NEVERLOST flag
+Added experience for unity, battletraining, frenzy, toughness, swiftness, second sight
+
+050227:
+Implemented silver sharing for BUY orders.
+Implemented ! handling for CAST, PROMOTE
+Allowed PROMOTE to work in open
+Added FDOL
+
 Todo:
 Allow transfer from leader to non-leader if errors are suppressed
 Rewrite rules magic section for heros, and normal->leader->hero progression
