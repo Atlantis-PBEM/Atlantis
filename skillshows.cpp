@@ -1690,7 +1690,7 @@ AString *ShowSkill::Report(void)
 				*str += "Create Phantasmal Demons at level 5 allows the "
 					   "mage to summon an illusionary balrog into his "
 					   "inventory. To summon an illusionary balrog, the "
-					   "mage should CAST Create_Phantasmal_Undead BALROG; "
+					   "mage should CAST Create_Phantasmal_Demons BALROG; "
 					   "the mage can only have one illusionary balrog in "
 					   "his inventory at one time.";
 			}
@@ -2058,7 +2058,7 @@ AString *ShowSkill::Report(void)
 						"shots, per round, equal to the skill level of the "
 						"wielder.  Super bows add a +2 to the bow skill of "
 						"the unit.  It takes two units of yew and one unit "
-						"of mithril to produce a double bow, which weighs "
+						"of mithril to produce a super bow, which weighs "
 						"one unit.";
 					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
 						*str += "  Production can be increased by using axes.";
