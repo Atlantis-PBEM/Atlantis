@@ -275,6 +275,9 @@ public:
 
 	// How many levels of the underdeep do we want?
 	int UNDERDEEP_LEVELS;
+
+	// Is there an abyss level?
+	int ABYSS_LEVEL;
 };
 
 extern GameDefs * Globals;

@@ -256,6 +256,10 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
             f.PutStr( AString( "Level " ) + i + ": Underworld" );
             WriteUnderworldMap( &f, pArr, type );
             break;
+		case ARegionArray::LEVEL_UNDERDEEP:
+			f.PutStr(AString( "Level ") + i + ": Underdeep" );
+			WriteUnderworldMap(&f, pArr, type );
+			break;
         }
     }
     
@@ -454,7 +458,10 @@ int Game::OpenGame()
     //
     // Read in the ARegions
     //
-    regions.ReadRegions( &f, &factions, eVersion );
+    i = regions.ReadRegions( &f, &factions, eVersion );
+	if(!i) {
+		return 0;
+	}
 
     // here we add ocean lairs
     if (doExtraInit > 0)

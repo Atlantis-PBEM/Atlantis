@@ -139,6 +139,7 @@ static GameDefs g = {
 	0,	// MULTI_HEX_NEXUS
 	0,	// UNDERWORLD_LEVELS
 	0,	// UNDERDEEP_LEVELS
+	0,	// ABYSS_LEVEL
 };
 
 GameDefs * Globals = &g;

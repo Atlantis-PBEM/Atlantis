@@ -1147,6 +1147,12 @@ AString ARegion::GetDecayFlavor()
 		case R_CERAN_UFOREST3:
 		case R_CERAN_TUNNELS1:
 		case R_CERAN_TUNNELS2:
+		case R_CHASM:
+		case R_CERAN_CHASM1:
+		case R_GROTTO:
+		case R_CERAN_GROTTO1:
+		case R_DFOREST:
+		case R_CERAN_DFOREST1:
             if (badWeather)
             {
                 flavor = AString("Lava flows have damaged ");
@@ -1236,6 +1242,12 @@ int ARegion::GetMaxClicks()
 		case R_CERAN_UFOREST3:
 		case R_CERAN_TUNNELS1:
 		case R_CERAN_TUNNELS2:
+		case R_CHASM:
+		case R_CERAN_CHASM1:
+		case R_GROTTO:
+		case R_CERAN_GROTTO1:
+		case R_DFOREST:
+		case R_CERAN_DFOREST1:
             terrainAdd = 1;
             terrainMult = 2;
             if (badWeather) weatherAdd = 6;
@@ -1391,7 +1403,30 @@ AString ARegion::ShortPrint( ARegionList *pRegs )
     if( pArr->strName )
     {
         temp += ",";
+		if(Globals->EASIER_UNDERWORLD &&
+		   (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
+			temp += AString("") + zloc + " <";
+		} else {
+			// add less explicit multilevel information about the underworld
+			if(zloc > 2 && zloc < Globals->UNDERWORLD_LEVELS+2) {
+				for(int i = zloc; i > 3; i--) {
+					temp += "very ";
+				}
+				temp += "deep ";
+			} else if((zloc > Globals->UNDERWORLD_LEVELS+2) &&
+					  (zloc < Globals->UNDERWORLD_LEVELS +
+					   		  Globals->UNDERDEEP_LEVELS + 2)) {
+				for(int i = zloc; i > Globals->UNDERWORLD_LEVELS + 3; i--) {
+					temp += "very ";
+				}
+				temp += "deep ";
+			}
+		}
         temp += *pArr->strName;
+		if(Globals->EASIER_UNDERWORLD &&
+		   (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
+			temp += ">";
+		}
     }
     temp += ")";
 
@@ -2245,11 +2280,16 @@ void ARegionList::WriteRegions( Aoutfile * f )
     }
 }
 
-void ARegionList::ReadRegions(Ainfile * f,AList * factions, ATL_VER v )
+int ARegionList::ReadRegions(Ainfile * f,AList * factions, ATL_VER v )
 {
     int num = f->GetInt();
 
     numLevels = f->GetInt();
+	if(numLevels != 2 + Globals->UNDERWORLD_LEVELS +
+			Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL) {
+		Awrite("Number of regions changed from game file!");
+		return 0;
+	}
     CreateLevels( numLevels );
     int i;
     for( i = 0; i < numLevels; i++ )
@@ -2306,6 +2346,7 @@ void ARegionList::ReadRegions(Ainfile * f,AList * factions, ATL_VER v )
             }
         }
     }
+	return 1;
 }
 
 ARegion * ARegionList::GetRegion(int n)
@@ -2506,6 +2547,29 @@ void ARegionList::CreateUnderworldLevel( int level,
 
     pRegionArrays[ level ]->SetName( name );
     pRegionArrays[ level ]->levelType = ARegionArray::LEVEL_UNDERWORLD;
+
+    SetRegTypes( pRegionArrays[ level ], R_NUM );
+
+    SetupAnchors( pRegionArrays[ level ] );
+
+    GrowTerrain( pRegionArrays[ level ], 1 );
+
+    AssignTypes( pRegionArrays[ level ] );
+
+    MakeUWMaze( pRegionArrays[ level ] );
+
+    FinalSetup( pRegionArrays[ level ] );
+}
+
+void ARegionList::CreateUnderdeepLevel( int level, 
+                                        int xSize,
+                                        int ySize,
+                                        char *name )
+{
+    MakeRegions( level, xSize, ySize );
+
+    pRegionArrays[ level ]->SetName( name );
+    pRegionArrays[ level ]->levelType = ARegionArray::LEVEL_UNDERDEEP;
 
     SetRegTypes( pRegionArrays[ level ], R_NUM );
 
@@ -2927,12 +2991,11 @@ void ARegionList::FinalSetup( ARegionArray *pArr )
                 //
                 // xxxxx
                 //
-                if( pArr->levelType == ARegionArray::LEVEL_UNDERWORLD )
-                {
+                if( pArr->levelType == ARegionArray::LEVEL_UNDERWORLD ) {
                     reg->SetName("The Undersea");
-                } 
-                else
-                {
+				} else if(pArr->levelType == ARegionArray::LEVEL_UNDERDEEP ) {
+					reg->SetName("The Deep Undersea");
+                } else {
 					AString ocean_name = Globals->WORLD_NAME;
 					ocean_name += " Ocean";
                     reg->SetName(ocean_name.getstr());

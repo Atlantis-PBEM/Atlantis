@@ -2132,23 +2132,106 @@ void Game::CreateWorld()
         }
     }
 
-	regions.CreateLevels( 4 );
+	regions.CreateLevels(2 + Globals->UNDERWORLD_LEVELS +
+			Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL);
 
     SetupNames();
 
     regions.CreateNexusLevel( 0, nx, ny, "nexus" );
     regions.CreateSurfaceLevel( 1, xx, yy, 60, 16, 0 );
-    regions.CreateUnderworldLevel( 2, xx / 2, yy / 2, "underworld" );
-	regions.CreateAbyssLevel(3, "abyss");
+
+	if(Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS==0) {
+		// Make the defaults act traditionally.
+		regions.CreateUnderworldLevel( 2, xx / 2, yy / 2, "underworld" );
+	} else {
+		int i;
+		// Underworld levels
+		for(i = 2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+			if(i == 2) {
+				// Topmost level is larger
+				regions.CreateUnderworldLevel(i, xx, yy/2, "underworld");
+			} else if(i == Globals->UNDERWORLD_LEVELS+1) {
+				// Lowest level is smaller
+				regions.CreateUnderworldLevel(i, xx/2, yy/4, "underworld");
+			} else {
+				// Rest are standard size
+				regions.CreateUnderworldLevel(i, xx/2, yy/2, "underworld");
+			}
+		}
+		// Underdeep levels
+		for(i=Globals->UNDERWORLD_LEVELS+2;
+				i<(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2);
+				i++) {
+			if(i == Globals->UNDERWORLD_LEVELS+2) {
+				// Topmost one is no larger than bottom underworld
+				regions.CreateUnderdeepLevel(i, xx/2, yy/4, "underdeep");
+			} else {
+				// Rest are smaller
+				regions.CreateUnderdeepLevel(i, xx/4, yy/4, "underdeep");
+			}
+		}
+	}
+
+	if(Globals->ABYSS_LEVEL) {
+		regions.CreateAbyssLevel(Globals->UNDERWORLD_LEVELS +
+				Globals->UNDERDEEP_LEVELS + 2, "abyss");
+	}
 
 	CountNames();
 
-    regions.MakeShaftLinks( 2, 1, 8 );
+	if(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS == 1) {
+		regions.MakeShaftLinks( 2, 1, 8 );
+	} else if(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS) {
+		int i, ii;
+		// shafts from surface to underworld
+		regions.MakeShaftLinks(2, 1, 10);
+		for(i=3; i<Globals->UNDERWORLD_LEVELS+2; i++) {
+			regions.MakeShaftLinks(i, 1, 10*i-10);
+		}
+		// Shafts from underworld to underworld
+		if(Globals->UNDERWORLD_LEVELS > 1) {
+			for(i = 3; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+				for(ii = 2; ii < i; ii++) {
+					if(i == ii+1) {
+						regions.MakeShaftLinks(i, ii, 12);
+					} else {
+						regions.MakeShaftLinks(i, ii, 24);
+					}
+				}
+			}
+		}
+		// underdeeps to underworld
+		if(Globals->UNDERDEEP_LEVELS && Globals->UNDERWORLD_LEVELS) {
+			// Connect the topmost of the underdeep to the bottommost
+			// underworld
+			regions.MakeShaftLinks(Globals->UNDERWORLD_LEVELS+2,
+					Globals->UNDERWORLD_LEVELS+1, 12);
+		}
+		// Now, connect the underdeep levels together
+		if(Globals->UNDERDEEP_LEVELS > 1) {
+			for(i = Globals->UNDERWORLD_LEVELS+3;
+					i < Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2;
+					i++) {
+				for(ii = Globals->UNDERWORLD_LEVELS+2; ii < i; ii++) {
+					if(i == ii+1) {
+						regions.MakeShaftLinks(i, ii, 12);
+					} else {
+						regions.MakeShaftLinks(i, ii, 25);
+					}
+				}
+			}
+		}
+	}
 
     regions.SetACNeighbors( 0, 1, xx, yy );
 
     regions.InitSetupGates( 1 );
-    regions.InitSetupGates( 2 );
+	// Set up gates on all levels of the underworld
+	for(int i=2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+		regions.InitSetupGates( i );
+	}
+	// Underdeep has no gates, only the possible shafts above.
+
     regions.FinalSetupGates();
 
     regions.CalcDensities();
@@ -2165,26 +2248,44 @@ int ARegionList::GetRegType( ARegion *pReg )
         lat = (7 - lat);
     }
 
-    if( pReg->zloc == 2 )
-    {
+	// Underworld region
+    if((pReg->zloc > 1) && (pReg->zloc < Globals->UNDERWORLD_LEVELS+2)) {
         int r = getrandom(4);
-        switch (r)
-        {
-        case 0:
-            return R_OCEAN;
-        case 1:
-            return R_CAVERN;
-        case 2:
-            return R_UFOREST;
-        case 3:
-            return R_TUNNELS;
-        default:
-            return( 0 );
+        switch (r) {
+			case 0:
+				return R_OCEAN;
+			case 1:
+				return R_CAVERN;
+			case 2:
+				return R_UFOREST;
+			case 3:
+				return R_TUNNELS;
+			default:
+				return( 0 );
         }
     }
 
-    if( pReg->zloc == 1 )
-    {
+	// Underdeep region
+	if((pReg->zloc > Globals->UNDERWORLD_LEVELS+1) &&
+			(pReg->zloc < Globals->UNDERWORLD_LEVELS+
+			 			  Globals->UNDERDEEP_LEVELS+2)) {
+		int r = getrandom(4);
+		switch(r) {
+			case 0:
+				return R_OCEAN;
+			case 1:
+				return R_CHASM;
+			case 2:
+				return R_DFOREST;
+			case 3:
+				return R_GROTTO;
+			default:
+				return (0);
+		}
+	}
+
+	// surface region
+    if( pReg->zloc == 1 ) {
         int r = getrandom(64);
         switch (lat)
         {
@@ -2231,8 +2332,8 @@ int ARegionList::GetRegType( ARegion *pReg )
 
 int ARegionList::CheckRegionExit( int nDir, ARegion *pFrom, ARegion *pTo )
 {
-    if( pFrom->zloc != 2 )
-    {
+    if((pFrom->zloc==1) ||
+		(pFrom->zloc>Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+1)) {
         return( 1 );
     }
 
@@ -2246,8 +2347,15 @@ int ARegionList::CheckRegionExit( int nDir, ARegion *pFrom, ARegion *pTo )
     {
         chance = 50;
     }
-    if (getrandom(100) < chance)
-    {
+	if(pFrom->type == R_GROTTO || pFrom->type == R_DFOREST ||
+	   pTo->type == R_GROTTO || pTo->type == R_DFOREST) {
+		// better connected underdeeps
+		chance = 40;
+	}
+	if(pFrom->type == R_CHASM || pTo->type == R_CHASM) {
+		chance = 60;
+	}
+    if (getrandom(100) < chance) {
         return( 0 );
     }
     return( 1 );
@@ -2260,16 +2368,11 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
         return W_NORMAL;
     }
 
-    if( pReg->zloc == 2 )
+    if( pReg->zloc > 1 )
     {
         return( W_NORMAL );
     }
 
-	if (!Globals->OPEN_ENDED && pReg->zloc == 3)
-	{
-		return( W_NORMAL );
-	}
-  
     int ysize = pRegionArrays[ 1 ]->y;
 
     if ((3*( pReg->yloc+1))/ysize == 0)

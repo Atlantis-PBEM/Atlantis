@@ -311,6 +311,7 @@ public:
         LEVEL_NEXUS,
         LEVEL_SURFACE,
         LEVEL_UNDERWORLD,
+		LEVEL_UNDERDEEP,
     };
     int levelType;
 };
@@ -336,7 +337,7 @@ public:
 
     ARegion * GetRegion(int);
     ARegion * GetRegion(int,int,int);
-    void ReadRegions( Ainfile *f, AList *, ATL_VER v );
+    int ReadRegions( Ainfile *f, AList *, ATL_VER v );
     void WriteRegions( Aoutfile *f );
     Location * FindUnit(int);
     
@@ -376,6 +377,7 @@ public:
                             int nPlayers,
                             char *name );
     void CreateUnderworldLevel( int level, int xSize, int ySize, char *name );
+    void CreateUnderdeepLevel( int level, int xSize, int ySize, char *name );
 
     void MakeShaftLinks( int levelFrom, int levelTo, int odds );
     void SetACNeighbors( int levelSrc, 
