@@ -859,6 +859,9 @@ void ARegion::CheckFleets()
 				if(unit->IsAlive()) alive = 1;
 				if(bail > 0) unit->MoveUnit(GetDummy());
 			}
+			// don't remove fleets when no living units are
+			// aboard when they're not at sea.
+			if(TerrainDefs[type].similar_type == R_OCEAN) alive = 1;
 			if((alive == 0) || (bail == 1)) {
 				objects.Remove(o);
 				delete o;

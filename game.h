@@ -546,6 +546,7 @@ private:
 	void Run1BuildOrder(ARegion *, Object *, Unit *);
 	void RunBuildShipOrder(ARegion *, Object *, Unit *);
 	void RunBuildHelpers(ARegion *);
+	int ShipConstruction(ARegion *, Unit *, int);
 	void RunSailOrders();
 	ARegion *Do1SailOrder(ARegion *, Object *, Unit *);
 	void ClearCastEffects();

@@ -505,138 +505,24 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
  */
 void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 {
-	if (!TradeCheck(r, u->faction)) {
-		u->Error("BUILD: Faction can't produce in that many regions.");
-		delete u->monthorders;
-		u->monthorders = 0;
-		return;
-	}
-
-	int item = abs(u->build);
-	AString skname = ItemDefs[item].pSkill;
-	int skill = LookupSkill(&skname);
-	int level = u->GetSkill(skill);
-	if (level < ItemDefs[item].pLevel) {
-		u->Error("BUILD: Can't build that.");
-		delete u->monthorders;
-		u->monthorders = 0;
-		return;
-	}
+	int ship = abs(u->build);
+	int output = ShipConstruction(r, u, ship);
 	
 	// are there unfinished ship items of the given type?
-	int unfinished = u->items.GetNum(item);
+	int unfinished = u->items.GetNum(ship);
 	
-	int number = u->GetMen() * level + u->GetProductionBonus(item);
-
-	// find the max we can possibly produce based on man-months of labor
-	int maxproduced;
-	if (ItemDefs[item].flags & ItemType::SKILLOUT)
-		maxproduced = u->GetMen();
-	else
-		// don't adjust for pMonths
-		// - pMonths represents total requirement
-		maxproduced = number;
-	
-	// adjust maxproduced for unfinished ships
-	if((unfinished > 0) && (maxproduced > unfinished))
-		maxproduced = unfinished;
-
-	if (ItemDefs[item].flags & ItemType::ORINPUTS) {
-		// Figure out the max we can produce based on the inputs
-		int count = 0;
-		unsigned int c;
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
-			int i = ItemDefs[item].pInput[c].item;
-			if(i != -1)
-				count += u->items.GetNum(i) / ItemDefs[item].pInput[c].amt;
-		}
-		if (maxproduced > count)
-			maxproduced = count;
-		count = maxproduced;
-		
-		// no required materials?
-		if(count < 1) {
-			u->Error("BUILD: Don't have the required materials.");
-			delete u->monthorders;
-			u->monthorders = 0;
-			return;
-		}
-		
-		// set up unfinished items
-		if(unfinished < 1) {
-			unfinished = ItemDefs[item].pMonths;
-			u->items.SetNum(item, unfinished);	
-		}
-		
-		/* regional economic improvement */
-		r->improvement += count;
-
-		// Deduct the items spent
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
-			int i = ItemDefs[item].pInput[c].item;
-			int a = ItemDefs[item].pInput[c].amt;
-			if(i != -1) {
-				int amt = u->items.GetNum(i);
-				if (count > amt / a) {
-					count -= amt / a;
-					u->items.SetNum(i, amt-(amt/a)*a);
-				} else {
-					u->items.SetNum(i, amt - count * a);
-					count = 0;
-				}
-			}
-		}
-	}
-	else {
-		// Figure out the max we can produce based on the inputs
-		unsigned int c;
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
-			int i = ItemDefs[item].pInput[c].item;
-			if(i != -1) {
-				int amt = u->items.GetNum(i);
-				if(amt/ItemDefs[item].pInput[c].amt < maxproduced) {
-					maxproduced = amt/ItemDefs[item].pInput[c].amt;
-				}
-			}
-		}
-		
-		// no required materials?
-		if(maxproduced < 1) {
-			u->Error("BUILD: Don't have the required materials.");
-			delete u->monthorders;
-			u->monthorders = 0;
-			return;
-		}
-		
-		/* regional economic improvement */
-		r->improvement += maxproduced;
-		
-		// set up unfinished items
-		if(unfinished < 1) {
-			unfinished = ItemDefs[item].pMonths;
-			u->items.SetNum(item, unfinished);	
-		}
-		
-		// Deduct the items spent
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
-			int i = ItemDefs[item].pInput[c].item;
-			int a = ItemDefs[item].pInput[c].amt;
-			if(i != -1) {
-				int amt = u->items.GetNum(i);
-				u->items.SetNum(i, amt-(maxproduced*a));
-			}
-		}
+	// set up unfinished items
+	if(unfinished == 0) {
+		unfinished = ItemDefs[ship].pMonths;
+		u->items.SetNum(ship, unfinished);	
 	}
 
 	// Now reduce unfinished by produced amount
-	int output = maxproduced * ItemDefs[item].pOut;
-	if (ItemDefs[item].flags & ItemType::SKILLOUT)
-		output *= level;
 	unfinished -= output;
 	if(unfinished < 0) unfinished = 0;
-	u->items.SetNum(item,unfinished);
+	u->items.SetNum(ship,unfinished);
 	if(unfinished == 0) {
-		u->Event(AString("Finishes building a ") + ItemDefs[item].name + " in " +
+		u->Event(AString("Finishes building a ") + ItemDefs[ship].name + " in " +
 			r->ShortPrint(&regions) + ".");
 		// Do we need to create a new fleet?
 		int newfleet = 1;
@@ -644,8 +530,8 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 			newfleet = 0;
 			int flying = obj->flying;
 			// are the fleets compatible?
-			if((flying > 0) && (ItemDefs[item].fly < 1)) newfleet = 1;
-			if((flying < 1) && (ItemDefs[item].fly > 0)) newfleet = 1;
+			if((flying > 0) && (ItemDefs[ship].fly < 1)) newfleet = 1;
+			if((flying < 1) && (ItemDefs[ship].fly > 0)) newfleet = 1;
 		}
 		if(newfleet != 0) {
 			// create a new fleet
@@ -653,23 +539,18 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 			fleet->type = O_FLEET;
 			fleet->num = shipseq++;
 			fleet->name = new AString(AString("Fleet [") + fleet->num + "]");
-			fleet->AddShip(item);
+			fleet->AddShip(ship);
 			u->object->region->objects.Add(fleet);
-			//Awrite(AString("Created fleet #") + fleet->num + " in " + 
-			//	u->object->region->ShortPrint(&regions) + ".");
 			u->MoveUnit(fleet);
 		} else {
-			obj->AddShip(item);
+			obj->AddShip(ship);
 		}
 	} else {
-		int percent = 100 * output / ItemDefs[item].pMonths;
-		u->Event(AString("Performs building work on a ") + 
-			ItemDefs[item].name + " (" + percent + "%) in " +
+		int percent = 100 * output / ItemDefs[ship].pMonths;
+		u->Event(AString("Performs construction work on a ") + 
+			ItemDefs[ship].name + " (" + percent + "%) in " +
 			r->ShortPrint(&regions) + ".");
 	}
-	u->Practice(skill);
-	delete u->monthorders;
-	u->monthorders = 0;
 }
 
 void Game::RunBuildHelpers(ARegion *r)
@@ -710,6 +591,28 @@ void Game::RunBuildHelpers(ARegion *r)
 						if(target->build > 0) {
 							tarobj = r->GetObject(target->build);
 						}
+						else {
+							// help build ships
+							int ship = abs(target->build);
+							int output = ShipConstruction(r, u, ship);
+							if(output < 1) return;
+							
+							int unfinished = target->items.GetNum(ship);
+							// set up unfinished items
+							if(unfinished == 0) {
+								unfinished = ItemDefs[ship].pMonths;
+								target->items.SetNum(ship, unfinished);	
+							}
+							unfinished -= output;
+							// hack: avoid that target starts
+							// building anew
+							if(unfinished == 0) unfinished = -1;
+							int percent = 100 * output / ItemDefs[ship].pMonths;
+							u->Event(AString("Helps ") +
+								*(target->name) + "  with construction of a " + 
+								ItemDefs[ship].name + " (" + percent + "%) in " +
+								r->ShortPrint(&regions) + ".");							
+						}
 						// no need to move unit if item-type ships
 						// are being built. (leave this commented out)
 						// if (tarobj == NULL) tarobj = target->object;
@@ -729,6 +632,131 @@ void Game::RunBuildHelpers(ARegion *r)
 	}
 }
 
+/* Checks and returns the amount of ship construction,
+ * handles material use and practice for both the main
+ * shipbuilders and the helpers.
+ */
+int Game::ShipConstruction(ARegion * r, Unit * u, int ship)
+{
+	if (!TradeCheck(r, u->faction)) {
+		u->Error("BUILD: Faction can't produce in that many regions.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return 0;
+	}
+
+	AString skname = ItemDefs[ship].pSkill;
+	int skill = LookupSkill(&skname);
+	int level = u->GetSkill(skill);
+	if (level < ItemDefs[ship].pLevel) {
+		u->Error("BUILD: Can't build that.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return 0;
+	}
+	
+	// are there unfinished ship items of the given type?
+	int unfinished = u->items.GetNum(ship);
+	
+	int number = u->GetMen() * level + u->GetProductionBonus(ship);
+
+	// find the max we can possibly produce based on man-months of labor
+	int maxproduced;
+	if (ItemDefs[ship].flags & ItemType::SKILLOUT)
+		maxproduced = u->GetMen();
+	else
+		// don't adjust for pMonths
+		// - pMonths represents total requirement
+		maxproduced = number;
+	
+	// adjust maxproduced for unfinished ships
+	if((unfinished > 0) && (maxproduced > unfinished))
+		maxproduced = unfinished;
+
+	if (ItemDefs[ship].flags & ItemType::ORINPUTS) {
+		// Figure out the max we can produce based on the inputs
+		int count = 0;
+		unsigned int c;
+		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+			int i = ItemDefs[ship].pInput[c].item;
+			if(i != -1)
+				count += u->items.GetNum(i) / ItemDefs[ship].pInput[c].amt;
+		}
+		if (maxproduced > count)
+			maxproduced = count;
+		count = maxproduced;
+		
+		// no required materials?
+		if(count < 1) {
+			u->Error("BUILD: Don't have the required materials.");
+			delete u->monthorders;
+			u->monthorders = 0;
+			return 0;
+		}
+		
+		/* regional economic improvement */
+		r->improvement += count;
+
+		// Deduct the items spent
+		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+			int i = ItemDefs[ship].pInput[c].item;
+			int a = ItemDefs[ship].pInput[c].amt;
+			if(i != -1) {
+				int amt = u->items.GetNum(i);
+				if (count > amt / a) {
+					count -= amt / a;
+					u->items.SetNum(i, amt-(amt/a)*a);
+				} else {
+					u->items.SetNum(i, amt - count * a);
+					count = 0;
+				}
+			}
+		}
+	}
+	else {
+		// Figure out the max we can produce based on the inputs
+		unsigned int c;
+		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+			int i = ItemDefs[ship].pInput[c].item;
+			if(i != -1) {
+				int amt = u->items.GetNum(i);
+				if(amt/ItemDefs[ship].pInput[c].amt < maxproduced) {
+					maxproduced = amt/ItemDefs[ship].pInput[c].amt;
+				}
+			}
+		}
+		
+		// no required materials?
+		if(maxproduced < 1) {
+			u->Error("BUILD: Don't have the required materials.");
+			delete u->monthorders;
+			u->monthorders = 0;
+			return 0;
+		}
+		
+		/* regional economic improvement */
+		r->improvement += maxproduced;
+		
+		// Deduct the items spent
+		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+			int i = ItemDefs[ship].pInput[c].item;
+			int a = ItemDefs[ship].pInput[c].amt;
+			if(i != -1) {
+				int amt = u->items.GetNum(i);
+				u->items.SetNum(i, amt-(maxproduced*a));
+			}
+		}
+	}
+	int output = maxproduced * ItemDefs[ship].pOut;
+	if (ItemDefs[ship].flags & ItemType::SKILLOUT)
+		output *= level;
+	
+	u->Practice(skill);
+	delete u->monthorders;
+	u->monthorders = 0;
+	
+	return output;
+}
 
 void Game::RunMonthOrders()
 {

@@ -501,9 +501,7 @@ void Game::SinkUncrewedFleets()
 {
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
-		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
-			r->CheckFleets();
-		}
+		r->CheckFleets();
 	}
 }
 
@@ -2315,12 +2313,14 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				").");
 			return 0;
 		}
+		/*
 		if(t->object->type != O_DUMMY) {
 			if (!(t->object->IsFleet()) || (!t->num == t->object->GetOwner()->num)) {
 				u->Error("GIVE: ships may only be given to fleet owner.");
 				return 0;
 			}
 		}
+		*/
 		if(u == t) {
 			u->Error(AString("GIVE: Attempt to give ")+ItemDefs[o->item].names+
 				" to self.");
@@ -2356,6 +2356,26 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 					amt = amt - o->except;
 				}
 			}
+		}
+		// give into existing fleet or form new fleet?
+		int newfleet = 0;
+		// target is not in fleet or not fleet owner
+		if (!(t->object->IsFleet()) ||
+			(!t->num == t->object->GetOwner()->num)) newfleet = 1;
+		// or target fleet is not of compatible type
+		else {
+			int flying = u->object->flying;
+			if((flying > 0) && (ItemDefs[o->item].fly < 1)) newfleet = 1;
+			if((flying < 1) && (ItemDefs[o->item].fly > 0)) newfleet = 1;
+		}
+		if (newfleet == 1) {
+			// create a new fleet
+			Object * fleet = new Object(r);
+			fleet->type = O_FLEET;
+			fleet->num = shipseq++;
+			fleet->name = new AString(AString("Fleet [") + fleet->num + "]");
+			t->object->region->objects.Add(fleet);
+			t->MoveUnit(fleet);
 		}
 		if (ItemDefs[o->item].max_inventory) {
 			int cur = t->object->GetNumShips(o->item) + amt;

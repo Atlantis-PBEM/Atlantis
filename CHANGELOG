@@ -912,5 +912,7 @@ Changes from 4.0.10 -> 5.0.0
       still be objects but then cannot act as parts of fleets and this is discouraged.
    	  Unfinished ships may not be given (except given away completely), but finished ship may be transferred
    	  between the owners of fleets.
+   -- modified GIVEing of ships so that new fleets get created dynamically, added code for
+      build helpers in shipbuilding, and cleaned up a bug in the removal of empty fleets
    	  ToDo: armored galleon bonus, builder helpers...?
    
