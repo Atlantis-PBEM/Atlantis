@@ -506,7 +506,8 @@ private:
 	void RunPillageRegion(ARegion *);
 	void RunTaxOrders();
 	void RunTaxRegion(ARegion *);
-	int CountTaxers(ARegion *);
+	int FortTaxBonus(Object *, Unit *);
+	int CountTaxes(ARegion *);
 	void RunFindOrders();
 	void RunFindUnit(Unit *);
 	void RunDestroyOrders();

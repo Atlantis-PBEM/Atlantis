@@ -679,11 +679,35 @@ void Game::RunTaxOrders()
 	}
 }
 
-int Game::CountTaxers(ARegion *reg)
+int Game::FortTaxBonus(Object *o, Unit *u)
+{
+	int protect = ObjectDefs[o->type].protect;
+	int fortbonus = 0;
+	forlist(&o->units) {
+		Unit *unit = (Unit *) elem;
+		int men = unit->GetMen();
+		if(unit->num == u->num) {
+			if(unit->taxing == TAX_TAX) {
+				int fortbonus = men;
+				int maxtax = unit->Taxers(1);
+				if(fortbonus > protect) fortbonus = protect;
+				if(fortbonus > maxtax) fortbonus = maxtax;
+				fortbonus *= Globals->TAX_BONUS_FORT;
+				return(fortbonus);
+			}
+		}
+		protect -= men;
+		if(protect < 0) protect = 0;	
+	}
+	return(fortbonus);
+}
+
+int Game::CountTaxes(ARegion *reg)
 {
 	int t = 0;
 	forlist(&reg->objects) {
 		Object *o = (Object *) elem;
+		int protect = ObjectDefs[o->type].protect;
 		forlist(&o->units) {
 			Unit *u = (Unit *) elem;
 			if (u->GetFlag(FLAG_AUTOTAX) && !Globals->TAX_PILLAGE_MONTH_LONG)
@@ -695,14 +719,18 @@ int Game::CountTaxers(ARegion *reg)
 					u->Error("TAX: A unit is on guard.");
 					u->taxing = TAX_NONE;
 				} else {
-					int men = u->Taxers();
+					int men = u->Taxers(0);
+					int fortbonus = u->GetMen();
+					if(fortbonus > protect) fortbonus = protect;
+					protect -= u->GetMen();
+					if(protect < 0) protect = 0;
 					if (men) {
 						if(!TaxCheck(reg, u->faction)) {
 							u->Error("TAX: Faction can't tax that many "
 									"regions.");
 							u->taxing = TAX_NONE;
 						} else {
-							t += men;
+							t += men + fortbonus * Globals->TAX_BONUS_FORT;
 						}
 					} else {
 						u->Error("TAX: Unit cannot tax.");
@@ -718,8 +746,7 @@ int Game::CountTaxers(ARegion *reg)
 
 void Game::RunTaxRegion(ARegion *reg)
 {
-	int taxers = CountTaxers(reg);
-	int desired = taxers *Globals->TAX_INCOME;
+	int desired = CountTaxes(reg);
 	if (desired < reg->money) desired = reg->money;
 
 	forlist(&reg->objects) {
@@ -727,12 +754,13 @@ void Game::RunTaxRegion(ARegion *reg)
 		forlist(&o->units) {
 			Unit *u = (Unit *) elem;
 			if (u->taxing == TAX_TAX) {
-				int t = u->Taxers();
-				double fAmt = ((double) t) * ((double) Globals->TAX_INCOME) *
+				int t = u->Taxers(0);
+				t += FortTaxBonus(o, u);
+				double fAmt = ((double) t) *
 					((double) reg->money) / ((double) desired);
 				int amt = (int) fAmt;
 				reg->money -= amt;
-				desired -= t *Globals->TAX_INCOME;
+				desired -= t;
 				u->SetMoney(u->GetMoney() + amt);
 				u->Event(AString("Collects $") + amt + " in taxes in " +
 						reg->ShortPrint(&regions) + ".");
@@ -761,7 +789,7 @@ int Game::CountPillagers(ARegion *reg)
 					u->Error("PILLAGE: A unit is on guard.");
 					u->taxing = TAX_NONE;
 				} else {
-					int men = u->Taxers();
+					int men = u->Taxers(1);
 					if (men) {
 						if(!TaxCheck(reg, u->faction)) {
 							u->Error("PILLAGE: Faction can't tax that many "
@@ -804,7 +832,7 @@ void Game::RunPillageRegion(ARegion *reg)
 	/* First, count up pillagers */
 	int pillagers = CountPillagers(reg);
 
-	if (pillagers * 2 * Globals->TAX_INCOME < reg->money) {
+	if (pillagers * 2 * Globals->TAX_BASE_INCOME < reg->money) {
 		ClearPillagers(reg);
 		return;
 	}
@@ -817,7 +845,7 @@ void Game::RunPillageRegion(ARegion *reg)
 			Unit *u = (Unit *) elem;
 			if (u->taxing == TAX_PILLAGE) {
 				u->taxing = TAX_NONE;
-				int num = u->Taxers();
+				int num = u->Taxers(1);
 				int temp = (amt * num)/pillagers;
 				amt -= temp;
 				pillagers -= num;
@@ -2643,7 +2671,7 @@ void Game::DoGuard1Orders()
 			forlist((&obj->units)) {
 				Unit *u = (Unit *) elem;
 				if (u->guard == GUARD_SET || u->guard == GUARD_GUARD) {
-					if (!u->Taxers()) {
+					if (!u->Taxers(1)) {
 						u->guard = GUARD_NONE;
 						u->Error("Must be combat ready to be on guard.");
 						continue;

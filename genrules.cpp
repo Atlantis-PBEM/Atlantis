@@ -2696,8 +2696,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "Illusory ";
 		temp += "creatures will assist in taxation. ";
 	}
-	temp +=	"Each taxing character can collect $";
-	temp += AString(Globals->TAX_INCOME) + ", though if the number of "
+	temp +=	"Each taxing character can collect a minimum of $";
+	temp += AString(Globals->TAX_BASE_INCOME) + ", though if the number of "
 		"taxers would tax more than the available tax income, the tax "
 		"income is split evenly among all taxers.";
 	f.Paragraph(temp);

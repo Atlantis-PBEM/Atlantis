@@ -860,3 +860,11 @@ Changes from 4.0.10 -> 5.0.0
    -- Added a gamedef ADVANCED_FORTS which implements the fort modification
       to attack chance idea. See gamdefs.h for details. Nothing done about
       routing or any other suggestions connected to forts yet.
+   -- Added some gamedefs that allow incremental calculation of tax income rather
+      than getting all-or-nothing. TAX_INCOME has been replaced by TAX_BASE_INCOME,
+      and there's TAX_BONUS_WEAPON for weapons, TAX_BONUS_ARMOR and TAX_BONUS_FORT.
+      The weapons usable by TAX_WEAPON_BONUS are determined by the setting of
+      the WHO_CAN_TAX gamedef. Note that only units that are basically able to
+      tax will receive ANY silver. *Still need to update genrules.cpp to reflect
+      this in detail!*
+   -- Put the tax-relevant gamedefs into one place.

@@ -213,7 +213,7 @@ class Unit : public AListElem
 				int &attackBonus, int &defenseBonus, int &attacks);
 		int CanUseWeapon(WeaponType *pWep, int riding);
 		int CanUseWeapon(WeaponType *pWep);
-		int Taxers();
+		int Taxers(int);
 
 		void MoveUnit( Object *newobj );
 

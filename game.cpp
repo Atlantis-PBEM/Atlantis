@@ -70,7 +70,7 @@ void Game::DefaultWorkOrder()
 						 u->taxing != TAX_NONE))
 					continue;
 				if(u->GetFlag(FLAG_AUTOTAX) &&
-						(Globals->TAX_PILLAGE_MONTH_LONG && u->Taxers())) {
+						(Globals->TAX_PILLAGE_MONTH_LONG && u->Taxers(1))) {
 					u->taxing = TAX_AUTO;
 				} else {
 					if(Globals->DEFAULT_WORK_ORDER) ProcessWorkOrder(u, 0);

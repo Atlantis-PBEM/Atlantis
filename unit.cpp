@@ -626,7 +626,7 @@ void Unit::DefaultOrders(Object *obj)
 		/* Set up default orders for factions which submit none */
 		if(obj->region->type != R_NEXUS) {
 			if(GetFlag(FLAG_AUTOTAX) &&
-					Globals->TAX_PILLAGE_MONTH_LONG && Taxers()) {
+					Globals->TAX_PILLAGE_MONTH_LONG && Taxers(1)) {
 				taxing = TAX_AUTO;
 			} else {
 				ProduceOrder *order = new ProduceOrder;
@@ -1413,13 +1413,109 @@ int Unit::Forbids(ARegion *r, Unit *u)
 	return 0;
 }
 
-int Unit::Taxers()
+/* This function was modified to either return the amount of
+   taxes this unit is eligible for (numtaxers == 0) or the
+   number of taxing men (numtaxers > 0).
+*/
+int Unit::Taxers(int numtaxers)
 {
 	int totalMen = GetMen();
 	int illusions = 0;
 	int creatures = 0;
 	int taxers = 0;
+	int basetax = 0;
+	int weapontax = 0;
+	int armortax = 0;
+	
+	// check out items
+	int numMelee= 0;
+	int numUsableMelee = 0;
+	int numBows = 0;
+	int numUsableBows = 0;
+	int numMounted= 0;
+	int numUsableMounted = 0;
+	int numMounts = 0;
+	int numUsableMounts = 0;
+	int numBattle = 0;
+	int numUsableBattle = 0;
+	int numArmor = 0;
 
+	forlist (&items) {
+		Item *pItem = (Item *) elem;
+		BattleItemType *pBat = NULL;
+
+		if ((ItemDefs[pItem->type].type & IT_BATTLE) &&
+		((pBat = FindBattleItem(ItemDefs[pItem->type].abr)) != NULL) &&
+		(pBat->flags & BattleItemType::SPECIAL)) {
+		// Only consider offensive items
+			if ((Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM) &&
+			(!(pBat->flags & BattleItemType::MAGEONLY) ||
+			 type == U_MAGE || type == U_APPRENTICE)) {
+				numUsableBattle += pItem->num;
+				numBattle += pItem->num;
+				continue; // Don't count this as a weapon as well!
+			}
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_BATTLE_ITEM) {
+				numBattle += pItem->num;
+				continue; // Don't count this as a weapon as well!
+			}
+		}
+
+		if (ItemDefs[pItem->type].type & IT_WEAPON) {
+			WeaponType *pWep = FindWeapon(ItemDefs[pItem->type].abr);
+			int num = pItem->num;
+			int numUse = 0;
+			int basesk = 0;
+			AString skname = pWep->baseSkill;
+			int sk = LookupSkill(&skname);
+			if (sk != -1) basesk = GetSkill(sk);
+			if (basesk == 0) {
+				skname = pWep->orSkill;
+				sk = LookupSkill(&skname);
+				if(sk != -1) basesk = GetSkill(sk);
+			}
+			if (basesk) {
+				numUse = num;
+				if (!(pWep->flags & WeaponType::NEEDSKILL)) {
+					numUsableMelee += numUse;
+					numMelee += num;
+				} else if (pWep->flags & WeaponType::NOFOOT) {
+					numUsableMounted += numUse;
+					numMounted += num;
+				} else {
+					// Presume that anything else is a bow!
+					numUsableBows += pItem->num;
+					numBows += pItem->num;
+				}
+			}
+		}
+
+		if (ItemDefs[pItem->type].type & IT_MOUNT) {
+			MountType *pm = FindMount(ItemDefs[pItem->type].abr);
+			if (pm->skill) {
+				AString skname = pm->skill;
+				int sk = LookupSkill(&skname);
+				if (pm->minBonus <= GetSkill(sk))
+					numUsableMounts += pItem->num;
+			} else
+				numUsableMounts += pItem->num;
+			numMounts += pItem->num;
+		}
+
+		if (ItemDefs[pItem->type].type & IT_MONSTER) {
+			if (ItemDefs[pItem->type].type & IT_ILLUSION)
+				illusions += pItem->num;
+			else
+				creatures += pItem->num;
+		}
+		
+		if (ItemDefs[pItem->type].type & IT_ARMOR) {
+			numArmor += pItem->num;
+		}
+	}
+
+
+	// Ok, now process the counts!
 	if ((Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE) ||
 		((Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL) &&
 		 GetSkill(S_COMBAT)) ||
@@ -1429,167 +1525,138 @@ int Unit::Taxers()
 		 GetSkill(S_RIDING)) ||
 		((Globals->WHO_CAN_TAX & GameDefs::TAX_STEALTH_SKILL) &&
 		 GetSkill(S_STEALTH))) {
+		basetax = totalMen;
 		taxers = totalMen;
+		
+		// Weapon tax bonus
+		if ((Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE) ||
+		((Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL) &&
+		 GetSkill(S_COMBAT)) ||
+		((Globals->WHO_CAN_TAX & GameDefs::TAX_STEALTH_SKILL) &&
+		 GetSkill(S_STEALTH))) {
+		 	if (numUsableMounted > numUsableMounts) {
+		 		weapontax = numUsableMounts;
+		 	} else {
+		 		weapontax = numUsableMounted;
+		 	}
+		 	weapontax += numMelee;
+		 }
+		 
+		if(((Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL) &&
+		 (GetSkill(S_CROSSBOW) || GetSkill(S_LONGBOW)))) {
+		 	weapontax += numUsableBows;
+		 }
+		if((Globals->WHO_CAN_TAX & GameDefs::TAX_RIDING_SKILL) &&
+		 GetSkill(S_RIDING)) {
+		 	if(weapontax < numUsableMounts) weapontax = numUsableMounts;
+		 }
+		
 	} else {
-		// check out items
-		int numMelee= 0;
-		int numUsableMelee = 0;
-		int numBows = 0;
-		int numUsableBows = 0;
-		int numMounted= 0;
-		int numUsableMounted = 0;
-		int numMounts = 0;
-		int numUsableMounts = 0;
-		int numBattle = 0;
-		int numUsableBattle = 0;
 
-		forlist (&items) {
-			Item *pItem = (Item *) elem;
-			BattleItemType *pBat = NULL;
-
-			if ((ItemDefs[pItem->type].type & IT_BATTLE) &&
-				((pBat = FindBattleItem(ItemDefs[pItem->type].abr)) != NULL) &&
-				(pBat->flags & BattleItemType::SPECIAL)) {
-				// Only consider offensive items
-				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM) &&
-					(!(pBat->flags & BattleItemType::MAGEONLY) ||
-					 type == U_MAGE || type == U_APPRENTICE)) {
-					numUsableBattle += pItem->num;
-					numBattle += pItem->num;
-					continue; // Don't count this as a weapon as well!
-				}
-				if (Globals->WHO_CAN_TAX & GameDefs::TAX_BATTLE_ITEM) {
-					numBattle += pItem->num;
-					continue; // Don't count this as a weapon as well!
-				}
-			}
-
-			if (ItemDefs[pItem->type].type & IT_WEAPON) {
-				WeaponType *pWep = FindWeapon(ItemDefs[pItem->type].abr);
-				int num = pItem->num;
-				int numUse = 0;
-				int basesk = 0;
-				AString skname = pWep->baseSkill;
-				int sk = LookupSkill(&skname);
-				if (sk != -1) basesk = GetSkill(sk);
-				if (basesk == 0) {
-					skname = pWep->orSkill;
-					sk = LookupSkill(&skname);
-					if(sk != -1) basesk = GetSkill(sk);
-				}
-				if (basesk) {
-					numUse = num;
-					if (!(pWep->flags & WeaponType::NEEDSKILL)) {
-						numUsableMelee += numUse;
-						numMelee += num;
-					} else if (pWep->flags & WeaponType::NOFOOT) {
-						numUsableMounted += numUse;
-						numMounted += num;
-					} else {
-						// Presume that anything else is a bow!
-						numUsableBows += pItem->num;
-						numBows += pItem->num;
-					}
-				}
-			}
-
-			if (ItemDefs[pItem->type].type & IT_MOUNT) {
-				MountType *pm = FindMount(ItemDefs[pItem->type].abr);
-				if (pm->skill) {
-					AString skname = pm->skill;
-					int sk = LookupSkill(&skname);
-					if (pm->minBonus <= GetSkill(sk))
-						numUsableMounts += pItem->num;
-				} else
-					numUsableMounts += pItem->num;
-				numMounts += pItem->num;
-			}
-
-			if (ItemDefs[pItem->type].type & IT_MONSTER) {
-				if (ItemDefs[pItem->type].type & IT_ILLUSION)
-					illusions += pItem->num;
-				else
-					creatures += pItem->num;
-			}
-		}
-
-		// Ok, now process the counts!
 		if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_WEAPON) {
 			if (numUsableMounted > numUsableMounts) {
+				weapontax = numUsableMounts;
 				taxers = numUsableMounts;
 				numMounts -= numUsableMounts;
 				numUsableMounts = 0;
 			} else {
+				weapontax = numUsableMounted;
 				taxers = numUsableMounted;
 				numMounts -= numUsableMounted;
 				numUsableMounts -= numUsableMounted;
 			}
+			weapontax += numMelee + numUsableBows;
 			taxers += numMelee + numUsableBows;
 		} else if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANY_WEAPON) {
+			weapontax = numMelee + numBows + numMounted;
 			taxers = numMelee + numBows + numMounted;
 		} else {
 			if (Globals->WHO_CAN_TAX &
 					GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL) {
 				if (numUsableMounted > numUsableMounts) {
+					weapontax += numUsableMounts;
 					taxers += numUsableMounts;
 					numMounts -= numUsableMounts;
 					numUsableMounts = 0;
 				} else {
+					weapontax += numUsableMounted;
 					taxers += numUsableMounted;
 					numMounts -= numUsableMounted;
 					numUsableMounts -= numUsableMounted;
 				}
+				weapontax += numUsableMelee;
 				taxers += numUsableMelee;
 			}
 			if (Globals->WHO_CAN_TAX &
 					GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON) {
+				weapontax += numUsableBows;
 				taxers += numUsableBows;
 			}
 		}
 
-		if (Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE)
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE) {
+			weapontax += numMounts;
 			taxers += numMounts;
-		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE_AND_RIDING_SKILL)
+		}
+		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE_AND_RIDING_SKILL) {
+			weapontax += numMounts;
 			taxers += numUsableMounts;
+		}
 
-		if (Globals->WHO_CAN_TAX & GameDefs::TAX_BATTLE_ITEM)
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_BATTLE_ITEM) {
+			weapontax += numBattle;
 			taxers += numBattle;
-		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM)
+		}
+		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM) {
+			weapontax += numUsableBattle;
 			taxers += numUsableBattle;
+		}
+		
 	}
 
 	// Ok, all the items categories done - check for mages taxing
 	if (type == U_MAGE) {
-		if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANY_MAGE)
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANY_MAGE) {
+			basetax = totalMen;
 			taxers = totalMen;
+		}
 		else {
 			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_COMBAT_SPELL) {
 				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) &&
-						SkillDefs[combat].flags & SkillType::DAMAGE)
+						SkillDefs[combat].flags & SkillType::DAMAGE) {
+					basetax = totalMen;
 					taxers = totalMen;
+				}
 
 				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR) &&
-						SkillDefs[combat].flags & SkillType::FEAR)
+						SkillDefs[combat].flags & SkillType::FEAR) {
+					basetax = totalMen;
 					taxers = totalMen;
+				}
 
 				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER) &&
-						SkillDefs[combat].flags & SkillType::MAGEOTHER)
+						SkillDefs[combat].flags & SkillType::MAGEOTHER) {
+					basetax = totalMen;
 					taxers = totalMen;
+				}
 			} else {
 				forlist(&skills) {
 					Skill *s = (Skill *)elem;
 					if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) &&
 							SkillDefs[s->type].flags & SkillType::DAMAGE) {
+						basetax = totalMen;
 						taxers = totalMen;
 						break;
 					}
 					if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR) &&
 							SkillDefs[s->type].flags & SkillType::FEAR) {
+						basetax = totalMen;
 						taxers = totalMen;
 						break;
 					}
 					if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER) &&
 							SkillDefs[s->type].flags & SkillType::MAGEOTHER) {
+						basetax = totalMen;
 						taxers = totalMen;
 						break;
 					}
@@ -1597,17 +1664,33 @@ int Unit::Taxers()
 			}
 		}
 	}
+	
+	armortax = numArmor;
+	
+	// Check for overabundance
+	if(weapontax > totalMen) weapontax = totalMen;
+	if(armortax > weapontax) armortax = weapontax;
+	
+	// Adjust basetax in case of weapon taxation
+	if(basetax < weapontax) basetax = weapontax;
 
 	// Now check for an overabundance of tax enabling objects
 	if (taxers > totalMen) taxers = totalMen;
 
 	// And finally for creatures
 	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES)
+		basetax += creatures;
 		taxers += creatures;
 	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
+		basetax += illusions;
 		taxers += illusions;
+	
+	if(numtaxers) return(taxers);
 
-	return(taxers);
+	int taxes = Globals->TAX_BASE_INCOME * basetax
+		+ Globals->TAX_BONUS_WEAPON * weapontax
+		+ Globals->TAX_BONUS_ARMOR * armortax;
+	return(taxes);
 }
 
 int Unit::GetFlag(int x)
@@ -1627,7 +1710,7 @@ void Unit::CopyFlags(Unit *x)
 {
 	flags = x->flags;
 	guard = GUARD_NONE;
-	if (x->Taxers()) {
+	if (x->Taxers(1)) {
 		if (x->guard != GUARD_SET && x->guard != GUARD_ADVANCE)
 			guard = x->guard;
 	} else {

@@ -1,5 +1,8 @@
 Recent Ideas/Suggestions:
 
+! Update genrules to reflect incremental taxes !
+ (somewhere near line 2700 in genrules.cpp)
+
 ** Economy
    -- allow markets to be switched on or off when disabling/enabling items
       (so that a GM can correct item choices made at world creation time).
@@ -37,7 +40,6 @@ Recent Ideas/Suggestions:
    -- unit control: allow npc units to be controlled by player factions.
       
 ** Battle
-   -- do that thing with 50% attack modifier on units in fortifications.
    -- modify chance of attack in free rounds according to tactics (first
       round) and speed (rout).
    -- item loss for winners' casualties too.
