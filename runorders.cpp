@@ -26,6 +26,7 @@
 // Date        Person          Comment
 // ----        ------          -------
 // 2001/Feb/18 Joseph Traub    Added apprentice support from Lacandon Conquest
+// 2001/Feb/21 Joseph Traub    Added FACLIM_UNLIMITED
 //
 #include "game.h"
 #include "rules.h"
@@ -955,17 +956,15 @@ void Game::PostProcessTurn()
         }
     }
 
-    if( Globals->WANDERING_MONSTERS_EXIST )
-    {
+    if( Globals->WANDERING_MONSTERS_EXIST ) {
         GrowWMons(Globals->WMON_FREQUENCY);
     }
     
-    if( Globals->LAIR_MONSTERS_EXIST )
-    {
+    if( Globals->LAIR_MONSTERS_EXIST ) {
         GrowLMons(Globals->LAIR_FREQUENCY);
     }
-	if( !Globals->OPEN_ENDED && !Globals->CONQUEST )
-	{
+	if( !Globals->OPEN_ENDED && !Globals->CONQUEST &&
+			Globals->LAIR_MONSTERS_EXIST ) {
 		GrowVMons();
 	}
 
@@ -1711,23 +1710,25 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
     if (amt == -1)
     {
         /* Give unit */
-        if (u->type == U_MAGE)
-        {
-            if (CountMages(t->faction) >= AllowedMages( t->faction )) {
-                u->Error("GIVE: Faction has too many mages.");
-                return 0;
-            }
+        if (u->type == U_MAGE) {
+			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
+				if (CountMages(t->faction) >= AllowedMages( t->faction )) {
+					u->Error("GIVE: Faction has too many mages.");
+					return 0;
+				}
+			}
         }
 		if(u->type == U_APPRENTICE) {
-			if(CountApprentices(t->faction)>=AllowedApprentices(t->faction)){
-				u->Error("GIVE: Faction has too many apprentices.");
-				return 0;
+			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
+				if(CountApprentices(t->faction)>=AllowedApprentices(t->faction)){
+					u->Error("GIVE: Faction has too many apprentices.");
+					return 0;
+				}
 			}
 		}
   
         int notallied = 1;
-        if (t->faction->GetAttitude(u->faction->num) == A_ALLY)
-        {
+        if (t->faction->GetAttitude(u->faction->num) == A_ALLY) {
             notallied = 0;
         }
         

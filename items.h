@@ -60,6 +60,7 @@ public:
 
     enum {
         CANTGIVE = 0x1,
+		DISABLED = 0x2,
     };
     int flags;
 

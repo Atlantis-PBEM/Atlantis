@@ -51,6 +51,10 @@ public:
   int canenter;
   int monster;
   int production;
+  enum {
+	  DISABLED = 0x1,
+  };
+  int flags;
 };
 
 extern ObjectType * ObjectDefs;

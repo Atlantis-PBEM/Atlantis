@@ -28,6 +28,7 @@
 // 2000/MAR/14 Larry Stanbery  Modified the elimiation message.
 // 2000/MAR/14 Davis Kulis     Added a new reporting Template.
 // 2001/Feb/18 Joseph Traub    Added Apprentices concept from Lacandon Conquest
+// 2001/Feb/21 Joseph Traub    Added a FACLIM_UNLIMITED option
 #include "rules.h"
 #include "game.h"
 
@@ -244,23 +245,17 @@ AString Faction::FactionTypeStr()
     AString temp;
     if (IsNPC()) return AString("NPC");
 
-    if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT )
-    {
+	if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED) {
+		return (AString("Unlmiited"));
+	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
         return( AString( "Normal" ));
-    }
-    else if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES )
-    {
+    } else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
         int comma = 0;
-        for (int i=0; i<NFACTYPES; i++)
-        {
-            if (type[i])
-            {
-                if (comma)
-                {
+        for (int i=0; i<NFACTYPES; i++) {
+            if (type[i]) {
+                if (comma) {
                     temp += ", ";
-            } 
-                else
-                {
+				} else {
                     comma = 1;
                 }
                 temp += AString(FactionStrs[i]) + " " + type[i];
@@ -301,7 +296,8 @@ void Faction::WriteReport( Areport *f, Game *pGame )
     }
     
     f->PutStr("Atlantis Report For:");
-    if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT )
+    if((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
+	   (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED))
     {
         f->PutStr( *name );
     }
@@ -368,7 +364,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
     }
 
     f->PutStr("Faction Status:");
-    if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT )
+    if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
     {
         f->PutStr( AString("Mages: ") + nummages + " (" + 
                    pGame->AllowedMages( this ) + ")");
@@ -376,9 +372,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 			f->PutStr( AString("Apprentices: ") + numapprentices + " (" +
 					pGame->AllowedApprentices(this)+ ")");
 		}
-    }
-    else if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES )
-    {
+    } else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
         f->PutStr( AString("Tax Regions: ") + war_regions.Num() + " (" +
                    pGame->AllowedTaxes( this ) + ")");
         f->PutStr( AString("Trade Regions: ") + trade_regions.Num() + " (" +

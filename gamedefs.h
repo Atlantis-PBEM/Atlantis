@@ -38,6 +38,7 @@
 // 2001/Feb/18 Joseph Traub      Added back in support for Conquest
 // 2001/Feb/19 Joseph Traub      Removed the ENGINE_VERSION from the gamedef
 //                               since it wasn't being used.
+// 2001/Feb/21 Joseph Traub      Added a FACLIM_UNLIMITED option
 //
 
 #ifndef GAME_DEFS
@@ -159,6 +160,7 @@ public:
     enum {
         FACLIM_MAGE_COUNT,
         FACLIM_FACTION_TYPES,
+		FACLIM_UNLIMITED,
     };
     int FACTION_LIMIT_TYPE;
 

@@ -30,6 +30,9 @@
 #include "game.h"
 #include "rules.h"
 
+// Make sure this is correct.   The default is 1000 towns and 1000 regions.
+#define NUMBER_OF_TOWNS 1000
+
 static char *regionnames[] =
 {
     "A'irhin",
@@ -2034,9 +2037,6 @@ static char *regionnames[] =
     "Zyrosihu",
 };
 
-// Make sure this is correct.   The default is 1000 towns and 1000 regions.
-#define NUMBER_OF_TOWNS 1000
-
 //
 // The following stuff is just for in this file, to setup the names during
 // world setup
@@ -2099,66 +2099,11 @@ char *AGetNameString( int name )
     return( regionnames[ name ] );
 }
 
-char Game::GetRChar(ARegion * r)
-{
-    int t = r->type;
-    char c;
-    switch (t) {
-    case R_OCEAN:
-        return '-';
-
-    case R_PLAIN:
-        c = 'p';
-        break;
-    case R_FOREST:
-        c = 'f';
-        break;
-    case R_MOUNTAIN:
-        c = 'm';
-        break;
-    case R_SWAMP:
-        c = 's';
-        break;
-    case R_JUNGLE:
-        c = 'j';
-        break;
-    case R_DESERT:
-        c = 'd';
-        break;
-    case R_TUNDRA:
-        c = 't';
-        break;
-    case R_CAVERN:
-        c = 'c';
-        break;
-    case R_UFOREST:
-        c = 'f';
-        break;
-    case R_TUNNELS:
-        c = 't';
-        break;
-	case R_ISLAND_PLAIN:
-		c = 'a';
-	case R_ISLAND_MOUNTAIN:
-		c = 'n';
-	case R_ISLAND_SWAMP:
-		c = 'w';
-    default:
-        return '?';
-
-    }
-    
-    if (r->town) {
-        c = (c - 'a') + 'A';
-    }
-    return c;
-}
-
 void Game::CreateWorld()
 {
     int nPlayers = 0;
 	while(nPlayers <= 0) {
-		Awrite("How many players iwll be in this game? ");
+		Awrite("How many players will be in this game? ");
 		nPlayers = Agetint();
 	}
 
@@ -2168,236 +2113,6 @@ void Game::CreateWorld()
     regions.CreateIslandLevel( 0, nPlayers, 0 );
 	CountNames();
 	regions.CalcDensities();
-}
-
-void Game::CreateNPCFactions()
-{
-	Faction *f;
-	AString *temp;
-	if(Globals->CITY_MONSTERS_EXIST) {
-		f = new Faction(factionseq++);
-		guardfaction = f->num;
-		temp = new AString("The Guardsmen");
-		f->SetName(temp);
-		f->SetNPC();
-		factions.Add(f);
-	}
-	if(Globals->WANDERING_MONSTERS_EXIST || Globals->LAIR_MONSTERS_EXIST) {
-		f = new Faction(factionseq++);
-		monfaction = f->num;
-		temp = new AString("Creatures");
-		f->SetName(temp);
-		f->SetNPC();
-		factions.Add(f);
-	}
-}
-
-void Game::CreateCityMon( ARegion *pReg, int percent )
-{
-    int skilllevel;
-    int AC = 0;
-	int IV = 0;
-	int num;
-    if( pReg->type == R_NEXUS || pReg->IsStartingCity() )
-    {
-        skilllevel = TOWN_CITY + 1;
-		if(Globals->SAFE_START_CITIES || (pReg->type == R_NEXUS))
-			IV = 1;
-        AC = 1;
-		num = Globals->AMT_START_CITY_GUARDS;
-    }
-    else
-    {
-        skilllevel = pReg->town->TownType() + 1;
-		num = Globals->CITY_GUARD * skilllevel;
-    }
-    num = num * percent / 100;
-
-    Faction *pFac = GetFaction( &factions, 1 );
-
-    Unit *u = GetNewUnit( pFac );
-    AString *s = new AString("City Guard");
-    u->SetName( s );
-    u->type = U_GUARD;
-    u->guard = GUARD_GUARD;
-  
-    u->SetMen(I_LEADERS,num);
-    u->items.SetNum(I_SWORD,num);
-    if (IV) u->items.SetNum(I_AMULETOFI,num);
-    u->SetMoney(num * Globals->GUARD_MONEY);	
-    u->SetSkill(S_COMBAT,skilllevel);
-    if (AC) {
-		if(Globals->START_CITY_GUARDS_PLATE)
-			u->items.SetNum(I_PLATEARMOR, num);
-        u->SetSkill(S_OBSERVATION,10);
-    } else {
-        u->SetSkill(S_OBSERVATION,skilllevel);
-    }
-    u->SetFlag(FLAG_HOLDING,1);
-    
-    u->MoveUnit( pReg->GetDummy() );
-
-	if(AC && Globals->START_CITY_MAGES) {
-    	u = GetNewUnit( pFac );
-		s = new AString("City Mage");
-		u->SetName(s);
-		u->type = U_GUARDMAGE;
-		u->SetMen(I_LEADERS,1);
-		if(IV) u->items.SetNum(I_AMULETOFI,1);
-		u->SetMoney(Globals->GUARD_MONEY);
-		u->SetSkill(S_FORCE,4);
-		u->SetSkill(S_FIRE,4);
-		u->combat = S_FIRE;
-		u->SetFlag(FLAG_BEHIND, 1);
-		u->SetFlag(FLAG_HOLDING, 1);
-		u->MoveUnit(pReg->GetDummy());
-	}
-}
-
-void Game::AdjustCityMons( ARegion *r )
-{
-    int guard = 0;
-    forlist(&r->objects) {
-        Object * o = (Object *) elem;
-        forlist(&o->units) {
-            Unit * u = (Unit *) elem;
-            if (u->type == U_GUARD || u->type == U_GUARDMAGE)
-            {
-                AdjustCityMon( r, u );
-                return;
-            }
-            if (u->guard == GUARD_GUARD) {
-                guard = 1;
-            }
-        }
-    }
-
-    if (!guard && getrandom(100) < Globals->GUARD_REGEN)
-    {
-        CreateCityMon( r, 10 );
-    }
-}
-
-void Game::AdjustCityMon( ARegion *r, Unit *u )
-{
-    int towntype;
-    int AC = 0;
-	int men;
-	int IV = 0;
-    if( r->type == R_NEXUS || r->IsStartingCity() )
-    {
-        towntype = TOWN_CITY;
-        AC = 1;
-		if(Globals->SAFE_START_CITIES || (r->type == R_NEXUS))
-			IV = 1;
-		if(u->type == U_GUARDMAGE) {
-			men = 1;
-		} else {
-			men = u->GetMen() + (Globals->AMT_START_CITY_GUARDS/10);
-			if(men > Globals->AMT_START_CITY_GUARDS)
-				men = Globals->AMT_START_CITY_GUARDS;
-		}
-    } else {
-        towntype = r->town->TownType();
-		men = u->GetMen() + (Globals->CITY_GUARD/10)*(towntype+1);
-		if(men > Globals->CITY_GUARD * (towntype+1))
-			men = Globals->CITY_GUARD * (towntype+1);
-    }
-
-    u->SetMen(I_LEADERS,men);
-	if (IV) u->items.SetNum(I_AMULETOFI,men);
-
-	if(u->type == U_GUARDMAGE) {
-		u->SetSkill(S_FORCE, 4);
-		u->SetSkill(S_FIRE, 4);
-		u->combat = S_FIRE;
-		u->SetFlag(FLAG_BEHIND, 1);
-        u->SetMoney(Globals->GUARD_MONEY);
-	} else {
-        u->SetMoney(men * Globals->GUARD_MONEY);
-		u->SetSkill(S_COMBAT,towntype + 1);
-		if (AC) {
-			u->SetSkill(S_OBSERVATION,10);
-			if(Globals->START_CITY_GUARDS_PLATE)
-				u->items.SetNum(I_PLATEARMOR,men);
-		} else {
-			u->SetSkill(S_OBSERVATION,towntype + 1);
-		}
-		u->items.SetNum(I_SWORD,men);
-	}
-}
-
-int Game::MakeWMon( ARegion *pReg )
-{
-
-    if (TerrainDefs[pReg->type].wmonfreq == 0)
-    {
-        return 0;
-    }
-
-    int montype = TerrainDefs[ pReg->type ].smallmon;
-    if (getrandom(2))
-        montype = TerrainDefs[ pReg->type ].humanoid;
-    if (TerrainDefs[ pReg->type ].bigmon != -1 && !getrandom(8)) {
-        montype = TerrainDefs[ pReg->type ].bigmon;
-    }
-    
-    int mondef = ItemDefs[montype].index;
-    
-    Faction *monfac = GetFaction( &factions, 2 );
-
-    Unit *u = GetNewUnit( monfac, 0 );
-    u->MakeWMon( MonDefs[mondef].name, montype,
-                 (MonDefs[mondef].number +
-                  getrandom(MonDefs[mondef].number) + 1) / 2);
-    u->MoveUnit( pReg->GetDummy() );
-    return( 1 );
-}
-
-void Game::MakeLMon( Object *pObj )
-{
-    int montype = ObjectDefs[ pObj->type ].monster;
-    if (montype == I_TRENT)
-    {
-        montype = TerrainDefs[ pObj->region->type].bigmon;
-    }
-    if (montype == I_CENTAUR)
-    {
-        montype = TerrainDefs[ pObj->region->type ].humanoid;
-    }
-
-    int mondef = ItemDefs[montype].index;
-    Faction *monfac = GetFaction( &factions, 2 );
-    Unit *u = GetNewUnit( monfac, 0 );
-    if (montype == I_IMP)
-    {
-        u->MakeWMon( "Demons",
-                     I_IMP,
-                     getrandom( MonDefs[MONSTER_IMP].number + 1 ));
-        u->items.SetNum( I_DEMON,
-                         getrandom( MonDefs[MONSTER_DEMON].number + 1 ));
-        u->items.SetNum( I_BALROG,
-                         getrandom( MonDefs[MONSTER_BALROG].number + 1 ));
-    }
-    else if (montype == I_SKELETON)
-    {
-        u->MakeWMon( "Undead",
-                     I_SKELETON,
-                     getrandom( MonDefs[MONSTER_SKELETON].number + 1 ));
-        u->items.SetNum( I_UNDEAD,
-                         getrandom( MonDefs[MONSTER_UNDEAD].number + 1 ));
-        u->items.SetNum( I_LICH,
-                         getrandom( MonDefs[MONSTER_LICH].number + 1 ));
-    }
-    else
-    {
-        u->MakeWMon( MonDefs[mondef].name,
-                     montype,
-                     ( MonDefs[mondef].number +
-                       getrandom( MonDefs[mondef].number ) + 1) / 2);
-    }
-
-    u->MoveUnit( pObj );
 }
 
 int ARegionList::GetRegType( ARegion *pReg )

@@ -28,6 +28,8 @@
 // 2000/MAR/14 Larry Stanbery  Fixed SHOW bug.
 // 2000/MAR/14 Davis Kulis     Added a new reporting Template.
 // 2001/Feb/18 Joseph Traub    Added support for Apprentices
+// 2001/Feb/21 Joseph Traub    Added the ablity to disable items/skills/objects
+// 2001/Feb/21 Joseph Traub    Added FACLIM_UNLIMITED
 #include "game.h"
 #include "gameio.h"
 #include "orders.h"
@@ -789,17 +791,15 @@ void Game::ProcessReshowOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			return;
 		}
 
+		if((SkillDefs[sk].flags & SkillType::DISABLED)) {
+			ParseError(pCheck, u, 0, "SHOW: No such skill.");
+			return;
+		}
 		if((SkillDefs[sk].flags & SkillType::APPRENTICE) &&
 				!Globals->APPRENTICES_EXIST) {
 			ParseError(pCheck, u, 0, "SHOW: No such skill.");
 			return;
 		}
-		if((SkillDefs[sk].flags & SkillType::NOT_CONQUEST) &&
-				Globals->CONQUEST) {
-			ParseError(pCheck, u, 0, "SHOW: No such skill.");
-			return;
-		}
-
 
 		token = o->gettoken();
 		if (!token)
@@ -842,6 +842,10 @@ void Game::ProcessReshowOrder(Unit * u,AString * o, OrdersCheck *pCheck )
             ParseError( pCheck, u, 0, "SHOW: No such item." );
             return;
         }
+		if(ItemDefs[item].flags & ItemType::DISABLED) {
+            ParseError( pCheck, u, 0, "SHOW: No such item." );
+            return;
+		}
 
         if( !pCheck )
         {
@@ -1322,6 +1326,10 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
             ParseError( pCheck, unit, 0, "BUILD: Not a valid object name.");
             return;
         }
+		if(ObjectDefs[ot].flags & ObjectType::DISABLED) {
+            ParseError( pCheck, unit, 0, "BUILD: Not a valid object name.");
+            return;
+		}
         if( pCheck )
         {
             if (unit->monthorders)
@@ -1425,6 +1433,10 @@ void Game::ProcessSellOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "SELL: Can't sell that.");
         return;
     }
+	if(ItemDefs[it].flags & ItemType::DISABLED) {
+        ParseError( pCheck, u, 0, "SELL: Can't sell that.");
+        return;
+	}
     if( !pCheck )
     {
         SellOrder * s = new SellOrder;
@@ -1462,6 +1474,11 @@ void Game::ProcessBuyOrder( Unit *u, AString *o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "BUY: Can't buy that.");
         return;
     }
+	if(ItemDefs[it].flags & ItemType::DISABLED) {
+        ParseError( pCheck, u, 0, "BUY: Can't buy that.");
+        return;
+	}
+
     if( !pCheck )
     {
         if (it == I_PEASANT)
@@ -1484,10 +1501,16 @@ void Game::ProcessProduceOrder(Unit * u,AString * o, OrdersCheck *pCheck )
     }
     int it = ParseItem(token);
     delete token;
+
     if (it == -1) {
         ParseError( pCheck, u, 0, "PRODUCE: Can't produce that.");
         return;
     }
+	if(ItemDefs[it].flags & ItemType::DISABLED) {
+		ParseError( pCheck, u, 0, "PRODUCE: Can't produce that.");
+		return;
+	}
+
     if( pCheck )
     {
         if (u->monthorders)
@@ -1596,13 +1619,13 @@ void Game::ProcessStudyOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         return;
     }
 
-	if((SkillDefs[sk].flags & SkillType::APPRENTICE) &&
-			!Globals->APPRENTICES_EXIST) {
+	if(SkillDefs[sk].flags & SkillType::DISABLED) {
 		ParseError(pCheck, u, 0, "STUDY: Invalid skill.");
 		return;
 	}
-	if((SkillDefs[sk].flags & SkillType::NOT_CONQUEST) &&
-			Globals->CONQUEST) {
+
+	if((SkillDefs[sk].flags & SkillType::APPRENTICE) &&
+			!Globals->APPRENTICES_EXIST) {
 		ParseError(pCheck, u, 0, "STUDY: Invalid skill.");
 		return;
 	}

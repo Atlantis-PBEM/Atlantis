@@ -68,7 +68,7 @@ public:
         CAST = 0x4,
         FOUNDATION = 0x8,
 		APPRENTICE = 0x10,
-		NOT_CONQUEST = 0x20,
+		DISABLED = 0x20,
     };
     int flags;
 

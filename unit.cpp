@@ -1325,4 +1325,38 @@ void Unit::Error(const AString & s) {
   faction->Error(temp);
 }
 
+int Unit::GetSkillBonus( int sk )
+{
+	int bonus = 0;
+	switch( sk ) {
+		case S_OBSERVATION:
+			if (GetMen()) {
+				bonus = (GetSkill(S_TRUE_SEEING) + 1) / 2;
+			}
+			if ((bonus != 3) && GetMen() && items.GetNum(I_AMULETOFTS)) {
+				bonus = 2;
+			}
+		   	break;
+		case S_STEALTH:
+			if (GetFlag(FLAG_INVIS) || GetMen() <= items.GetNum(I_RINGOFI)) {
+				bonus = 3;
+			}
+			break;
+		default:
+			bonus = 0;
+			break;
+	}
+	return bonus;
+}
 
+int Unit::GetProductionBonus( int item )
+{
+	int bonus = 0;
+	if (ItemDefs[item].mult_item != -1) {
+		bonus = items.GetNum(ItemDefs[item].mult_item);
+	} else {
+		bonus = GetMen();
+	}
+	if (bonus > GetMen()) bonus = GetMen();
+	return bonus * ItemDefs[item].mult_val;
+}

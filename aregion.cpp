@@ -324,9 +324,12 @@ void ARegion::SetupCityMarket()
     int i;
     for (i=0; i<NITEMS; i++)
     {
+		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+
         int j;
         if( ItemDefs[ i ].type & IT_NORMAL )
         {
+
             if (i==I_SILVER) continue;
             if (i==I_GRAIN || i==I_LIVESTOCK || i==I_FISH)
             {
@@ -546,6 +549,8 @@ void ARegion::SetupCityMarket()
     
     for (i=0; i<NITEMS; i++)
     {
+		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+
         if( ItemDefs[ i ].type & IT_TRADE )
         {
             int addbuy = 0;
@@ -723,47 +728,51 @@ void ARegion::LairCheck()
         return;
     }
 
-    if( check < tt->lairChance )
-    {
-        MakeLair( tt->lair1 );
-        return;
-    }
-    check -= tt->lairChance;
+	if(!(ObjectDefs[tt->lair1].flags & ObjectType::DISABLED)) {
+		if( check < tt->lairChance ) {
+			MakeLair( tt->lair1 );
+			return;
+		}
+		check -= tt->lairChance;
+	}
 
     if( tt->lair2 == -1 )
     {
         return;
     }
 
-    if( check < tt->lairChance )
-    {
-        MakeLair( tt->lair2 );
-        return;
-    }
-    check -= tt->lairChance;
+	if(!(ObjectDefs[tt->lair2].flags & ObjectType::DISABLED)) {
+		if( check < tt->lairChance ) {
+			MakeLair( tt->lair2 );
+			return;
+		}
+		check -= tt->lairChance;
+	}
 
     if( tt->lair3 == -1 )
     {
         return;
     }
 
-    if( check < tt->lairChance )
-    {
-        MakeLair( tt->lair3 );
-        return;
-    }
-    check -= tt->lairChance;
+	if(!(ObjectDefs[tt->lair3].flags & ObjectType::DISABLED)) {
+		if( check < tt->lairChance ) {
+			MakeLair( tt->lair3 );
+			return;
+		}
+		check -= tt->lairChance;
+	}
 
     if( tt->lair4 == -1 )
     {
         return;
     }
 
-    if( check < tt->lairChance )
-    {
-        MakeLair( tt->lair4 );
-        return;
-    }
+	if(!(ObjectDefs[tt->lair4].flags & ObjectType::DISABLED)) {
+		if( check < tt->lairChance ) {
+			MakeLair( tt->lair4 );
+			return;
+		}
+	}
 }
 
 void ARegion::MakeLair(int t)
@@ -1016,6 +1025,7 @@ AString ARegion::GetDecayFlavor()
     switch (type)
     {
         case R_PLAIN:
+		case R_ISLAND_PLAIN:
             flavor = AString("Floods have damaged ");
             break;
         case R_DESERT:
@@ -1032,6 +1042,7 @@ AString ARegion::GetDecayFlavor()
             }
             break;
         case R_MOUNTAIN:
+		case R_ISLAND_MOUNTAIN:
             if (badWeather)
             {
                 flavor = AString("Avalanches have damaged ");
@@ -1043,6 +1054,7 @@ AString ARegion::GetDecayFlavor()
             break;
         case R_FOREST:
         case R_SWAMP:
+		case R_ISLAND_SWAMP:
         case R_JUNGLE:
             flavor = AString("Encroaching vegetation has damaged ");
             break;
@@ -1078,16 +1090,19 @@ int ARegion::GetMaxClicks()
     switch (type)
     {
         case R_PLAIN:
+		case R_ISLAND_PLAIN:
         case R_TUNDRA:
             terrainAdd = -1;
             if (badWeather) weatherAdd = 4;
             break;
         case R_MOUNTAIN:
+		case R_ISLAND_MOUNTAIN:
             terrainMult = 2;
             if (badWeather) weatherAdd = 4;
             break;
         case R_FOREST:
         case R_SWAMP:
+		case R_ISLAND_SWAMP:
         case R_JUNGLE:
             terrainAdd = -1;
             terrainMult = 2;

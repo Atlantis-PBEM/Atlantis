@@ -27,6 +27,7 @@
 // ----        ------            --------
 // 2000/MAR/14 Larry Stanbery    Added production enhancement.
 // 2000/MAR/21 Azthar Septragen  Added roads.
+// 2001/Feb/21 Joseph Traub      Added FACLIM_UNLIMITED
 #include "game.h"
 #include "rules.h"
 
@@ -667,11 +668,12 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	
     if( ( SkillDefs[sk].flags & SkillType::MAGIC ) && u->type != U_MAGE)
     {
-        if (CountMages(u->faction) >= AllowedMages( u->faction ))
-        {
-            u->Error("STUDY: Can't have another magician.");
-            return;
-        }
+		if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
+			if (CountMages(u->faction) >= AllowedMages( u->faction )) {
+				u->Error("STUDY: Can't have another magician.");
+				return;
+			}
+		}
         if (u->GetMen() != 1)
         {
             u->Error("STUDY: Only 1-man units can be magicians.");
@@ -689,9 +691,11 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
     }
 
 	if((SkillDefs[sk].flags&SkillType::APPRENTICE) && u->type != U_APPRENTICE){
-		if(CountApprentices(u->faction) >= AllowedApprentices(u->faction)) {
-			u->Error("STUDY: Can't have another apprentice.");
-			return;
+		if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
+			if(CountApprentices(u->faction)>=AllowedApprentices(u->faction)) {
+				u->Error("STUDY: Can't have another apprentice.");
+				return;
+			}
 		}
 		if(u->GetMen() != 1) {
 			u->Error("STUDY: Only 1-man units can be apprentices.");
