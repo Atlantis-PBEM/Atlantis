@@ -427,13 +427,13 @@ void Game::ModifyObjectMonster(int ob, int monster)
 	ObjectDefs[ob].monster = monster;
 }
 
-void Game::ModifyObjectConstruction(int ob, int it, int num, int sk, int lev)
+void Game::ModifyObjectConstruction(int ob, int it, int num, char *sk, int lev)
 {
 	if(ob < 0 || ob > (NOBJECTS-1)) return;
 	if((it < -1 && it != I_WOOD_OR_STONE) || it > (NITEMS -1))
 		return;
 	if(num < 0) return;
-	if(sk < -1 || sk > (NSKILLS - 1)) return;
+	if (sk && FindSkill(sk) == NULL) return;
 	if(lev < 0) return;
 	ObjectDefs[ob].item = it;
 	ObjectDefs[ob].cost = num;

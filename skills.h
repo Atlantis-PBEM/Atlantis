@@ -80,6 +80,9 @@ class SkillType
 			SLOWSTUDY = 0x40,
 			BATTLEREP = 0x80,
 			NOTIFY = 0x100,
+			DAMAGE = 0x200,
+			FEAR = 0x400,
+			MAGEOTHER=0x800
 		};
 		int flags;
 

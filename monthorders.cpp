@@ -402,7 +402,8 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 		return;
 	}
 
-	int sk = ObjectDefs[obj->type].skill;
+	AString skname = ObjectDefs[obj->type].skill;
+	int sk = LookupSkill(&skname);
 	if (sk == -1) {
 		u->Error("BUILD: Can't build that.");
 		delete u->monthorders;

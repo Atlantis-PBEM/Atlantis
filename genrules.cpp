@@ -2135,9 +2135,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	for(i = 0; i < NOBJECTS; i++) {
 		if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 		if(!ObjectDefs[i].protect) continue;
-		j = ObjectDefs[i].skill;
-		if(j == -1) continue;
-		if(SkillDefs[j].flags & SkillType::MAGIC) continue;
+		pS = FindSkill(ObjectDefs[i].skill);
+		if(pS == NULL) continue;
+		if(pS->flags & SkillType::MAGIC) continue;
 		if(ObjectIsShip(i)) continue;
 		j = ObjectDefs[i].item;
 		if(j == -1) continue;
@@ -2163,7 +2163,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(temp);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		temp = SkillDefs[ObjectDefs[i].skill].name;
+		temp = pS->name;
 		temp += AString(" (") + ObjectDefs[i].level + ")";
 		f.PutStr(temp);
 		f.Enclose(0, "td");
@@ -2218,9 +2218,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(j == -1) continue;
 		if(ItemDefs[j].flags & ItemType::DISABLED) continue;
 		if(!(ItemDefs[j].type & IT_NORMAL)) continue;
-		j = ObjectDefs[i].skill;
-		if(j == -1) continue;
-		if(SkillDefs[j].flags & SkillType::MAGIC) continue;
+		pS = FindSkill(ObjectDefs[i].skill);
+		if (pS == NULL) continue;
+		if(pS->flags & SkillType::MAGIC) continue;
 		j = ObjectDefs[i].item;
 		if(j == -1) continue;
 		/* Need the >0 since item could be WOOD_OR_STONE (-2) */
@@ -2242,7 +2242,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(temp);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		temp = SkillDefs[ObjectDefs[i].skill].name;
+		temp = pS->name;
 		if(ObjectDefs[i].level > 1)
 			temp += AString(" (") + ObjectDefs[i].level + ")";
 		f.PutStr(temp);
@@ -2312,9 +2312,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 			if(ObjectDefs[i].productionAided != -1) continue;
 			if(ObjectDefs[i].protect) continue;
 			if(ObjectIsShip(i)) continue;
-			j = ObjectDefs[i].skill;
-			if(j == -1) continue;
-			if(SkillDefs[j].flags & SkillType::MAGIC) continue;
+			pS = FindSkill(ObjectDefs[i].skill);
+			if (pS == NULL) continue;
+			if(pS->flags & SkillType::MAGIC) continue;
 			j = ObjectDefs[i].item;
 			if(j == -1) continue;
 			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
@@ -2336,7 +2336,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.PutStr(temp);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"left\" nowrap");
-			temp = SkillDefs[ObjectDefs[i].skill].name;
+			temp = pS->name;
 			temp += AString(" (") + ObjectDefs[i].level + ")";
 			f.PutStr(temp);
 			f.Enclose(0, "td");
@@ -2389,9 +2389,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		for(i = 0; i < NOBJECTS; i++) {
 			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 			if(!ObjectIsShip(i)) continue;
-			j = ObjectDefs[i].skill;
-			if(j == -1) continue;
-			if(SkillDefs[j].flags & SkillType::MAGIC) continue;
+			pS = FindSkill(ObjectDefs[i].skill);
+			if(pS == NULL) continue;
+			if(pS->flags & SkillType::MAGIC) continue;
 			j = ObjectDefs[i].item;
 			if(j == -1) continue;
 			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
@@ -3520,9 +3520,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		for(i = 0; i < NOBJECTS; i++) {
 			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 			if(!ObjectDefs[i].maxMages) continue;
-			k = ObjectDefs[i].skill;
-			if(k == -1) continue;
-			if(SkillDefs[k].flags & SkillType::MAGIC) continue;
+			pS = FindSkill(ObjectDefs[i].skill);
+			if(pS == NULL) continue;
+			if(pS->flags & SkillType::MAGIC) continue;
 			k = ObjectDefs[i].item;
 			if(k == -1) continue;
 			/* Need the >0 since item could be WOOD_OR_STONE (-2) */

@@ -565,7 +565,7 @@ void Game::ModifyTablesPerRuleset(void)
 
 	ModifyObjectFlags(O_BKEEP, ObjectType::NEVERDECAY);
 	ModifyObjectFlags(O_DCLIFFS, ObjectType::CANENTER|ObjectType::NEVERDECAY);
-	ModifyObjectConstruction(O_DCLIFFS, I_ROOTSTONE, 50, S_DRAGON_LORE, 3);
+	ModifyObjectConstruction(O_DCLIFFS, I_ROOTSTONE, 50, "DRAG", 3);
 
 	// Make GateLore, ConstructGate and PortalLore take twice as long to study.
 	ModifySkillFlags(S_GATE_LORE,

@@ -55,7 +55,7 @@ class ObjectType {
 
 		int item;
 		int cost;
-		int skill;
+		char *skill;
 		int level;
 
 		int maxMaintenance;

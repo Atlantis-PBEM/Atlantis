@@ -1440,7 +1440,8 @@ AString *ShowSkill::Report(Faction *f)
 	temp = "A unit with this skill may BUILD the following structures: ";
 	for(i = 0; i < NOBJECTS; i++) {
 		if(OBJECT_DISABLED(i)) continue;
-		if(ObjectDefs[i].skill == skill && ObjectDefs[i].level == level) {
+		AString skname = SkillDefs[skill].abbr;
+		if(skname == ObjectDefs[i].skill && ObjectDefs[i].level == level) {
 			if(comma) temp += ", ";
 			comma = 1;
 			temp += ObjectDefs[i].name;

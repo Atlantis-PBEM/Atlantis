@@ -223,7 +223,7 @@ private:
 	void ModifyObjectDecay(int ob, int maxMaint, int maxMonthDecay, int mFact);
 	void ModifyObjectProduction(int ob, int it);
 	void ModifyObjectMonster(int ob, int monster);
-	void ModifyObjectConstruction(int ob, int it, int num, int sk, int lev);
+	void ModifyObjectConstruction(int ob, int it, int num, char *sk, int lev);
 	void ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages);
 
 	void ClearTerrainRaces(int t);

@@ -416,8 +416,10 @@ AString *ObjectDescription(int obj)
 			" mages to study above level 2.";
 	}
 	int buildable = 1;
-	if(o->item == -1 || o->skill == -1) buildable = 0;
-	if(SkillDefs[o->skill].flags & SkillType::DISABLED) buildable = 0;
+	SkillType *pS = NULL;
+	if(o->item == -1 || o->skill == NULL) buildable = 0;
+	if (o->skill != NULL) pS = FindSkill(o->skill);
+	if (pS && (pS->flags & SkillType::DISABLED)) buildable = 0;
 	if(o->item != I_WOOD_OR_STONE &&
 			(ItemDefs[o->item].flags & ItemType::DISABLED))
 		buildable = 0;
@@ -429,7 +431,7 @@ AString *ObjectDescription(int obj)
 		*temp += " This structure cannot be built by players.";
 	} else {
 		*temp += AString(" This structure is built using ") +
-			SkillStrs(o->skill) + " " + o->level + " and requires " +
+			SkillStrs(pS) + " " + o->level + " and requires " +
 			o->cost + " ";
 		if(o->item == I_WOOD_OR_STONE) {
 			*temp += "wood or stone";

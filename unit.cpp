@@ -1469,7 +1469,12 @@ int Unit::Taxers()
 
 			if (ItemDefs[pItem->type].type & IT_MOUNT) {
 				MountType *pm = FindMount(ItemDefs[pItem->type].abr);
-				if (pm->minBonus <= GetSkill(S_RIDING))
+				if (pm->skill) {
+					AString skname = pm->skill;
+					int sk = LookupSkill(&skname);
+					if (pm->minBonus <= GetSkill(sk))
+						numUsableMounts += pItem->num;
+				} else
 					numUsableMounts += pItem->num;
 				numMounts += pItem->num;
 			}
@@ -1534,42 +1539,35 @@ int Unit::Taxers()
 		else {
 			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_COMBAT_SPELL) {
 				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) &&
-						(combat == S_FIRE || combat == S_EARTHQUAKE ||
-						 combat == S_SUMMON_TORNADO ||
-						 combat == S_CALL_LIGHTNING ||
-						 combat == S_SUMMON_BLACK_WIND))
+						SkillDefs[combat].flags & SkillType::DAMAGE)
 					taxers = totalMen;
 
 				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR) &&
-						(combat == S_SUMMON_STORM ||
-						 combat == S_CREATE_AURA_OF_FEAR))
+						SkillDefs[combat].flags & SkillType::FEAR)
 					taxers = totalMen;
 
 				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER) &&
-						(combat == S_FORCE_SHIELD ||
-						 combat == S_ENERGY_SHIELD ||
-						 combat == S_SPIRIT_SHIELD ||
-						 combat == S_CLEAR_SKIES))
+						SkillDefs[combat].flags & SkillType::MAGEOTHER)
 					taxers = totalMen;
 			} else {
-				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) &&
-						(GetSkill(S_FIRE) || GetSkill(S_EARTHQUAKE) ||
-						 GetSkill(S_SUMMON_TORNADO) ||
-						 GetSkill(S_CALL_LIGHTNING) ||
-						 GetSkill(S_SUMMON_BLACK_WIND)))
-					taxers = totalMen;
-
-				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR) &&
-						(GetSkill(S_SUMMON_STORM) ||
-						 GetSkill(S_CREATE_AURA_OF_FEAR)))
-					taxers = totalMen;
-
-				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER) &&
-						(GetSkill(S_FORCE_SHIELD) ||
-						 GetSkill(S_ENERGY_SHIELD) ||
-						 GetSkill(S_SPIRIT_SHIELD) ||
-						 GetSkill(S_CLEAR_SKIES)))
-					taxers = totalMen;
+				forlist(&skills) {
+					Skill *s = (Skill *)elem;
+					if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) &&
+							SkillDefs[s->type].flags & SkillType::DAMAGE) {
+						taxers = totalMen;
+						break;
+					}
+					if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR) &&
+							SkillDefs[s->type].flags & SkillType::FEAR) {
+						taxers = totalMen;
+						break;
+					}
+					if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER) &&
+							SkillDefs[s->type].flags & SkillType::MAGEOTHER) {
+						taxers = totalMen;
+						break;
+					}
+				}
 			}
 		}
 	}
