@@ -1061,11 +1061,13 @@ void Game::ProcessWeaponOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		} else if (!(ItemDefs[it].type & IT_WEAPON)) {
 			ParseError(pCheck, u, 0, "WEAPON: Item is not a weapon.");
 		} else {
-			items[i++] = it;
+			if(!pCheck) items[i++] = it;
 		}
 		token = o->gettoken();
 	}
 	if (token) delete token;
+	if(pCheck) return;
+
 	while (i < MAX_READY) {
 		items[i++] = -1;
 	}
@@ -1109,11 +1111,13 @@ void Game::ProcessArmorOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		} else if (!(ItemDefs[it].type & IT_ARMOR)) {
 			ParseError(pCheck, u, 0, "ARMOR: Item is not armor.");
 		} else {
-			items[i++] = it;
+			if(!pCheck) items[i++] = it;
 		}
 		token = o->gettoken();
 	}
 	if (token) delete token;
+	if(pCheck) return;
+
 	while (i < MAX_READY) {
 		items[i++] = -1;
 	}
