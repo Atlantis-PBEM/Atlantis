@@ -1241,7 +1241,7 @@ int Unit::CanMoveTo(ARegion * r1,ARegion * r2)
 			break;
 		}
 	}
-	if (!exit) return 0;
+	if (exit) return 0;
 
 	int mt = MoveType();
 	if (((TerrainDefs[r1->type].similar_type == R_OCEAN) ||
