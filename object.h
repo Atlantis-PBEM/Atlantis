@@ -116,6 +116,7 @@ class Object : public AListElem
 		int GetNumShips(int);
 		void SetNumShips(int, int);
 		void AddShip(int);
+		AString FleetDefinition();
 		int FleetCapacity();
 		int FleetLoad();
 		int FleetSailingSkill(int);

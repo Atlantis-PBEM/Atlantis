@@ -303,8 +303,8 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 
 	/* Fleet Report */
 	if(IsFleet()) {
-		AString temp = AString("+ ") + *name + " : " + ob->name;
-		// report ships:
+		AString temp = AString("+ ") + *name + " : " + FleetDefinition();
+		/* report ships:
 		for(int item=0; item<NITEMS; item++) {
 			int num = GetNumShips(item);
 			if(num > 0) {
@@ -315,6 +315,7 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 				}
 			}
 		}
+		*/
 		if((fac == GetOwner()->faction) || (obs > 9)){
 			temp += ";";
 			if (incomplete > 0) {
@@ -492,6 +493,41 @@ void Object::AddShip(int type)
 	int num = GetNumShips(type);
 	num++;
 	SetNumShips(type, num);	
+}
+
+/* Returns the String 'Fleet' for multi-ship fleets
+ * and the name of the ship for single ship fleets
+ */
+AString Object::FleetDefinition()
+{
+	AString fleet;
+	int shiptype = -1;
+	int num = 0;
+	for(int i=0; i<NITEMS; i++) {
+		if(ItemDefs[i].type & IT_SHIP) {
+			int sn = GetNumShips(i);
+			if(sn > 0) {
+				num += sn;
+				shiptype = i;
+			}
+		}
+	}
+	if(num == 1) fleet = ItemDefs[shiptype].name;
+	else {
+		fleet = ObjectDefs[type].name;
+		// report ships:
+		for(int item=0; item<NITEMS; item++) {
+			num = GetNumShips(item);
+			if(num > 0) {
+				if(num > 1) {
+					fleet += AString(", ") + num + " " + ItemDefs[item].names;
+				} else {
+					fleet += AString(", ") + num + " " +ItemDefs[item].name;
+				}
+			}
+		}
+	}
+	return fleet;
 }
 
 /* Sets a fleet's sailing capacity.

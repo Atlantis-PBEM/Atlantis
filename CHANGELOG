@@ -914,5 +914,7 @@ Changes from 4.0.10 -> 5.0.0
    	  between the owners of fleets.
    -- modified GIVEing of ships so that new fleets get created dynamically, added code for
       build helpers in shipbuilding, and cleaned up a bug in the removal of empty fleets
-   	  ToDo: armored galleon bonus, builder helpers...?
+   -- changed fleet reports so that single-ship fleets show the ship type as <object type>
+      rather than "Fleet". Also no ship list is displayed for them.	  
+   	  ToDo: armored galleon bonus...?
    
