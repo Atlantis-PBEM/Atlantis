@@ -2002,6 +2002,7 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 	u->faction->unclaimed -= cost;
 	u->Event(AString("Withdraws ") + ItemString(o->item, amt) + ".");
 	u->items.SetNum(itm, u->items.GetNum(itm) + amt);
+	u->faction->DiscoverItem(itm, 0, 1);
 	return 0;
 }
 
@@ -2713,7 +2714,7 @@ void Game::CheckTransportOrders()
 					if ((o->type == O_TRANSPORT) &&
 						(u == obj->GetOwner()) &&
 						(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)) {
-						int maxdist = Globals->NONLOCAL_TRANSPORT;
+						maxdist = Globals->NONLOCAL_TRANSPORT;
 						if (maxdist >= 0 &&
 							Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
 							int level = u->GetSkill(S_QUARTERMASTER);
@@ -2813,8 +2814,9 @@ void Game::RunTransportOrders()
 						weight = (amt/Globals->FRACTIONAL_WEIGHT) + 1;
 					int cost = 0;
 					if (dist > Globals->LOCAL_TRANSPORT) {
-						cost = Globals->SHIPPING_COST * weight *
-							(4 - ((u->GetSkill(S_QUARTERMASTER)+1)/2));
+						cost = Globals->SHIPPING_COST * weight;
+						if (Globals->TRANSPORT & GameDefs::QM_AFFECT_COST)
+							cost *= (4 - ((u->GetSkill(S_QUARTERMASTER)+1)/2));
 					}
 
 					// if not, give it back

@@ -641,4 +641,6 @@ Changes from 4.0.10 -> 5.0.0
    -- Fixed bug where autotax didn't work if DEFAULT_WORK_ORDER was
       disabled and the unit was submitted as part of an orderset but had
       blank orders (only when TAX_PILLAGE_MONTHLONG was set).
+   -- Fixed a bug where withdraw didn't give item info on items which the
+      faction hadn't already seen the item info.
 

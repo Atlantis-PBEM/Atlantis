@@ -978,7 +978,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	}
 
 	if ((Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) &&
-			(sk == S_QUARTERMASTER) &&
+			(sk == S_QUARTERMASTER) && (u->GetSkill(S_QUARTERMASTER) == 0) &&
 			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)) {
 			if (CountQuarterMasters(u->faction) >=
 					AllowedQuarterMasters(u->faction)) {

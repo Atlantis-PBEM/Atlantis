@@ -606,6 +606,12 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_WORK:
 			ProcessWorkOrder(unit, pCheck);
 			break;
+		case O_TRANSPORT:
+			ProcessTransportOrder(unit, o, pCheck);
+			break;
+		case O_DISTRIBUTE:
+			ProcessDistributeOrder(unit, o, pCheck);
+			break;
 	}
 }
 
