@@ -697,3 +697,5 @@ Changes from 4.0.10 -> 5.0.0
       to something more reasonable than 10/20 if they are using the skill
       based upkeep unless they JUST want to penalize higher skilled leaders.
    -- Fixed bug where completed buildings weren't providing combat protection.
+   -- Add some additional information to battle reports to help out the
+      author of atlaclient.

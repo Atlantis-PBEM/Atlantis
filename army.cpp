@@ -86,7 +86,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		MonType *mp = FindMonster(ItemDefs[r].abr,
 				(ItemDefs[r].type & IT_ILLUSION));
 		if(u->type == U_WMON)
-			name = AString(mp->name);
+			name = AString(mp->name) + " in " + *(unit->name);
 		else
 			name = AString(mp->name) + " controlled by " + *(unit->name);
 		askill = mp->attackLevel;
@@ -657,12 +657,7 @@ void Army::Regenerate(Battle *b)
 		if (i<notbehind) {
 			int diff = s->maxhits - s->hits;
 			if (diff > 0) {
-				AString aName = AString(ItemDefs[s->race].name);
-				if (s->unit->type == U_WMON)
-					aName += AString(" in ");
-				else
-					aName += AString(" controlled by ");
-				aName += *s->unit->name;
+				AString aName = s->name;
 
 				if (s->damage != 0) {
 					b->AddLine(aName + " takes " + s->damage +
