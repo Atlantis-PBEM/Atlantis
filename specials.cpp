@@ -82,6 +82,7 @@ int Army::CheckSpecialTarget(int special,int tar)
 
 	if(spd->targflags & SpecialType::HIT_SOLDIERIF) {
 		match = 0;
+		if (soldiers[tar]->race == -1) return 0;
 		for(i = 0; i < 7; i++) {
 			if(soldiers[tar]->race == spd->targets[i]) match = 1;
 		}
@@ -90,6 +91,7 @@ int Army::CheckSpecialTarget(int special,int tar)
 
 	if(spd->targflags & SpecialType::HIT_SOLDIEREXCEPT) {
 		match = 0;
+		if (soldiers[tar]->race == -1) return 0;
 		for(i = 0; i < 7; i++) {
 			if(soldiers[tar]->race == spd->targets[i]) match = 1;
 		}
@@ -114,6 +116,7 @@ int Army::CheckSpecialTarget(int special,int tar)
 
 	if(spd->targflags & SpecialType::HIT_MOUNTIF) {
 		match = 0;
+		if (soldiers[tar]->riding == -1) return 0;
 		for(i = 0; i < 7; i++) {
 			if(soldiers[tar]->riding == spd->targets[i]) match = 1;
 		}
@@ -122,6 +125,7 @@ int Army::CheckSpecialTarget(int special,int tar)
 
 	if(spd->targflags & SpecialType::HIT_MOUNTEXCEPT) {
 		match = 0;
+		if (soldiers[tar]->riding == -1) return 0;
 		for(i = 0; i < 7; i++) {
 			if(soldiers[tar]->riding == spd->targets[i]) match = 1;
 		}

@@ -498,3 +498,5 @@ Changes from 4.0.9 -> 4.0.10
    -- Fixed a bug where CanSee was not taking account of MIND skill.
    -- Modified combat acquisition algorithm for special attacks so that
       they will always find an appropriate target if one exists.
+   -- Fixed a bug where unmounted units were being matched in the effect
+      matching code for MOUNTIF.
