@@ -663,15 +663,22 @@ void Army::Regenerate(Battle *b)
 		if (i<notbehind) {
 			int diff = s->maxhits - s->hits;
 			if (diff > 0) {
+				AString aName = AString(ItemDefs[s->race].name);
+				if (s->unit->type == U_WMON)
+					aName += AString(" in ");
+				else
+					aName += AString(" controlled by ");
+				aName += *s->unit->name;
+
 				if (s->regen) {
 					int regen = s->regen;
 					if (regen > diff) regen = diff;
 					s->hits += regen;
-					b->AddLine(AString(s->name) + " regenerates " + regen +
+					b->AddLine(aName + " regenerates " + regen +
 							" hits bringing it to " + s->hits + "/" +
 							s->maxhits + ".");
 				} else {
-					b->AddLine(AString(s->name) + " takes " + diff +
+					b->AddLine(aName + " takes " + diff +
 							" hits bringing it to " + s->hits + "/" +
 							s->maxhits + ".");
 				}
