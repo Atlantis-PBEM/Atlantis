@@ -119,8 +119,9 @@ public:
     void Readin( Ainfile *f, AList *, ATL_VER v );
     
     void WriteReport(Areport *,int,int,int,int);
+	AString GetName(int);
     AString MageReport();
-    AString * BattleReport();
+    AString * BattleReport(int);
     AString TemplateReport();
   
     void ClearOrders();
@@ -227,6 +228,7 @@ public:
     UnitId * promote;
     AList findorders;
     AList giveorders;
+	AList withdraworders;
     AList buyorders;
     AList sellorders;
     AList forgetorders;

@@ -124,7 +124,7 @@ public:
   Skill * Split(int,int); /* total num, num leaving */
 	
   int type;
-  int days;
+  unsigned int days;
 };
 
 class SkillList : public AList {

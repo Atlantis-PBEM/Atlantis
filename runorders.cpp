@@ -47,6 +47,10 @@ void Game::RunOrders()
     DoAutoAttacks();
     Awrite("Running STEAL/ASSASSINATE Orders...");
     RunStealOrders();
+	if(Globals->ALLOW_WITHDRAW) {
+		Awrite("Running WITHDRAW Orders...");
+		DoWithdrawOrders();
+	}
     Awrite("Running GIVE/PAY/TRANSFER Orders...");
     DoGiveOrders();
     Awrite("Running DESTROY Orders...");
@@ -1656,6 +1660,47 @@ void Game::AssessMaintenance()
         }
     }
 }
+
+void Game::DoWithdrawOrders()
+{
+	forlist((&regions)) {
+		ARegion *r = (ARegion *)elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *)elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *) elem;
+				forlist((&u->withdraworders)) {
+					WithdrawOrder *o = (WithdrawOrder *)elem;
+					if(DoWithdrawOrder(r, u, o)) break;
+				}
+				u->withdraworders.DeleteAll();
+			}
+		}
+	}
+}
+
+int Game::DoWithdrawOrder(ARegion * r,Unit * u, WithdrawOrder * o)
+{
+	int itm = o->item;
+	int amt = o->amount;
+	int cost = (ItemDefs[itm].baseprice *5/2)*amt;
+
+	if(r->type == R_NEXUS) {
+		u->Error("WITHDRAW: Withdraw does not work in the Nexus.");
+		return 1;
+	}
+	
+	if (cost > u->faction->unclaimed) {
+		u->Error(AString("WITHDRAW: To little unclaimed silver to withdraw ")+
+				ItemString(itm,amt)+".");
+		return 0;
+	}
+	u->faction->unclaimed -= cost;
+    u->Event(AString("Withdraws ") + ItemString(o->item,amt) + ".");
+    u->items.SetNum(itm,u->items.GetNum(itm) + amt);
+	return 0;
+}
+
 
 void Game::DoGiveOrders()
 {

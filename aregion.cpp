@@ -261,27 +261,15 @@ void ARegion::SetupPop()
 
 	float ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
     /* Setup Recruiting */
-    Market *m = new Market( M_BUY,
-                            race,
-                            Wages()*4*ratio,
-                            Population()/5,
-                            0,
-                            10000,
-                            0,
-                            2000 );
+    Market *m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
+                            Population()/5, 0, 10000, 0, 2000 );
     markets.Add(m);
 
     if( Globals->LEADERS_EXIST )
     {
 		ratio = ItemDefs[I_LEADERS].baseprice / (float)Globals->BASE_MAN_COST;
-        Market *m = new Market( M_BUY,
-                                I_LEADERS,
-                                Wages()*4*ratio,
-                                Population()/25,
-                                0,
-                                10000,
-                                0,
-                                400 );
+        m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
+                        Population()/25, 0, 10000, 0, 400 );
         markets.Add(m);
     }
 }
@@ -840,6 +828,19 @@ void ARegion::UpdateTown()
 		if(!done) {
 			markets.DeleteAll();
 			SetupCityMarket();
+			float ratio = ItemDefs[race].baseprice /
+				(float)Globals->BASE_MAN_COST;
+			/* Setup Recruiting */
+			Market *m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
+					Population()/5, 0, 10000, 0, 2000 );
+			markets.Add(m);
+			if( Globals->LEADERS_EXIST ) {
+				ratio = ItemDefs[I_LEADERS].baseprice /
+					(float)Globals->BASE_MAN_COST;
+				m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
+						Population()/25, 0, 10000, 0, 400 );
+				markets.Add(m);
+			}
 		}
 	}
 
@@ -1055,12 +1056,26 @@ AString ARegion::GetDecayFlavor()
     {
         case R_PLAIN:
 		case R_ISLAND_PLAIN:
+		case R_CERAN_PLAIN1:
+		case R_CERAN_PLAIN2:
+		case R_CERAN_PLAIN3:
+		case R_CERAN_LAKE:
             flavor = AString("Floods have damaged ");
             break;
         case R_DESERT:
+		case R_CERAN_DESERT1:
+		case R_CERAN_DESERT2:
+		case R_CERAN_DESERT3:
             flavor = AString("Flashfloods have damaged ");
             break;
+		case R_CERAN_WASTELAND:
+		case R_CERAN_WASTELAND1:
+			flavor = AString("Magical radiation has damaged ");
+			break;
         case R_TUNDRA:
+		case R_CERAN_TUNDRA1:
+		case R_CERAN_TUNDRA2:
+		case R_CERAN_TUNDRA3:
             if (badWeather)
             {
                 flavor = AString("Ground freezing has damaged ");
@@ -1072,6 +1087,9 @@ AString ARegion::GetDecayFlavor()
             break;
         case R_MOUNTAIN:
 		case R_ISLAND_MOUNTAIN:
+		case R_CERAN_MOUNTAIN1:
+		case R_CERAN_MOUNTAIN2:
+		case R_CERAN_MOUNTAIN3:
             if (badWeather)
             {
                 flavor = AString("Avalanches have damaged ");
@@ -1081,15 +1099,40 @@ AString ARegion::GetDecayFlavor()
                 flavor = AString("Rockslides have damaged ");
             }
             break;
+		case R_CERAN_HILL:
+		case R_CERAN_HILL1:
+		case R_CERAN_HILL2:
+			flavor = AString("Quakes have damaged ");
+			break;
         case R_FOREST:
         case R_SWAMP:
 		case R_ISLAND_SWAMP:
         case R_JUNGLE:
+		case R_CERAN_FOREST1:
+		case R_CERAN_FOREST2:
+		case R_CERAN_FOREST3:
+		case R_CERAN_MYSTFOREST:
+		case R_CERAN_MYSTFOREST1:
+		case R_CERAN_MYSTFOREST2:
+		case R_CERAN_SWAMP1:
+		case R_CERAN_SWAMP2:
+		case R_CERAN_SWAMP3:
+		case R_CERAN_JUNGLE1:
+		case R_CERAN_JUNGLE2:
+		case R_CERAN_JUNGLE3:
             flavor = AString("Encroaching vegetation has damaged ");
             break;
         case R_CAVERN:
         case R_UFOREST:
         case R_TUNNELS:
+		case R_CERAN_CAVERN1:
+		case R_CERAN_CAVERN2:
+		case R_CERAN_CAVERN3:
+		case R_CERAN_UFOREST1:
+		case R_CERAN_UFOREST2:
+		case R_CERAN_UFOREST3:
+		case R_CERAN_TUNNELS1:
+		case R_CERAN_TUNNELS2:
             if (badWeather)
             {
                 flavor = AString("Lava flows have damaged ");
@@ -1121,11 +1164,24 @@ int ARegion::GetMaxClicks()
         case R_PLAIN:
 		case R_ISLAND_PLAIN:
         case R_TUNDRA:
+		case R_CERAN_PLAIN1:
+		case R_CERAN_PLAIN2:
+		case R_CERAN_PLAIN3:
+		case R_CERAN_LAKE:
+		case R_CERAN_TUNDRA1:
+		case R_CERAN_TUNDRA2:
+		case R_CERAN_TUNDRA3:
             terrainAdd = -1;
             if (badWeather) weatherAdd = 4;
             break;
         case R_MOUNTAIN:
 		case R_ISLAND_MOUNTAIN:
+		case R_CERAN_MOUNTAIN1:
+		case R_CERAN_MOUNTAIN2:
+		case R_CERAN_MOUNTAIN3:
+		case R_CERAN_HILL:
+		case R_CERAN_HILL1:
+		case R_CERAN_HILL2:
             terrainMult = 2;
             if (badWeather) weatherAdd = 4;
             break;
@@ -1133,16 +1189,39 @@ int ARegion::GetMaxClicks()
         case R_SWAMP:
 		case R_ISLAND_SWAMP:
         case R_JUNGLE:
+		case R_CERAN_FOREST1:
+		case R_CERAN_FOREST2:
+		case R_CERAN_FOREST3:
+		case R_CERAN_MYSTFOREST:
+		case R_CERAN_MYSTFOREST1:
+		case R_CERAN_MYSTFOREST2:
+		case R_CERAN_SWAMP1:
+		case R_CERAN_SWAMP2:
+		case R_CERAN_SWAMP3:
+		case R_CERAN_JUNGLE1:
+		case R_CERAN_JUNGLE2:
+		case R_CERAN_JUNGLE3:
             terrainAdd = -1;
             terrainMult = 2;
             if (badWeather) weatherAdd = 1;
             break;
         case R_DESERT:
+		case R_CERAN_DESERT1:
+		case R_CERAN_DESERT2:
+		case R_CERAN_DESERT3:
             terrainAdd = -1;
             if (badWeather) weatherAdd = 5;
         case R_CAVERN:
         case R_UFOREST:
         case R_TUNNELS:
+		case R_CERAN_CAVERN1:
+		case R_CERAN_CAVERN2:
+		case R_CERAN_CAVERN3:
+		case R_CERAN_UFOREST1:
+		case R_CERAN_UFOREST2:
+		case R_CERAN_UFOREST3:
+		case R_CERAN_TUNNELS1:
+		case R_CERAN_TUNNELS2:
             terrainAdd = 1;
             terrainMult = 2;
             if (badWeather) weatherAdd = 6;
@@ -2339,6 +2418,11 @@ void ARegionList::CreateNexusLevel( int level, char *name )
     reg->type = R_NEXUS;
 
     FinalSetup( pRegionArrays[ level ] );
+
+	if(Globals->NEXUS_IS_CITY) {
+		reg->MakeStartingCity();
+		numberofgates++;
+	}
 }
 
 void ARegionList::CreateSurfaceLevel( int level,

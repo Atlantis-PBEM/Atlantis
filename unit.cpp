@@ -223,36 +223,50 @@ AString Unit::MageReport()
     return temp;
 }
 
+AString Unit::GetName(int obs)
+{
+	AString ret = *name;
+	int stealth = GetSkill(S_STEALTH);
+	if(reveal == REVEAL_FACTION || obs > stealth) {
+		ret += ", ";
+		ret += *faction->name;
+	}
+    return ret;
+}
+
 void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
 		       int autosee)
 {
     int stealth = GetSkill(S_STEALTH);
-    if (obs==-1) {
-        /* The unit belongs to the Faction writing the report */
-        obs = 2;
-    } else
-        if (obs < stealth) {
-            /* The unit cannot be seen */
-            if (reveal == REVEAL_FACTION) {
-                obs = 1;
-            } else {
-                if (guard == GUARD_GUARD || reveal == REVEAL_UNIT || autosee) {
-                    obs = 0;
-                } else {
-                    return;
-                }
-            }
-        } else
-            if (obs == stealth) {
-                /* Can see unit, but not Faction */
-                if (reveal == REVEAL_FACTION) {
-                    obs = 1;
-                } else {
-                    obs = 0;
-                }
-            } else
-                /* Can see unit and Faction */
-                obs = 1;
+	if (obs==-1) {
+		/* The unit belongs to the Faction writing the report */
+		obs = 2;
+	} else {
+		if (obs < stealth) {
+			/* The unit cannot be seen */
+			if (reveal == REVEAL_FACTION) {
+				obs = 1;
+			} else {
+				if (guard == GUARD_GUARD || reveal == REVEAL_UNIT || autosee) {
+					obs = 0;
+				} else {
+					return;
+				}
+			}
+		} else {
+			if (obs == stealth) {
+				/* Can see unit, but not Faction */
+				if (reveal == REVEAL_FACTION) {
+					obs = 1;
+				} else {
+					obs = 0;
+				}
+			} else { 
+				/* Can see unit and Faction */
+				obs = 1;
+			}
+		}
+	}
 
     /* Setup True Sight */
     if (obs == 2) {
@@ -343,9 +357,13 @@ AString Unit::TemplateReport() {
   return temp;
 }
 
-AString * Unit::BattleReport()
+AString * Unit::BattleReport(int obs)
 {
-  AString * temp = new AString(*name);
+  AString * temp = new AString("");
+  if(Globals->BATTLE_FACTION_INFO)
+	  *temp += GetName(obs);
+  else
+	  *temp += *name;
 
   if (GetFlag(FLAG_BEHIND)) *temp += ", behind";
   
@@ -874,7 +892,7 @@ void Unit::AdjustSkills()
                 //
                 // Find highest skill, eliminate others
                 //
-                int max = 0;
+                unsigned int max = 0;
                 Skill * maxskill = 0;
                 {
                     forlist(&skills) {

@@ -185,6 +185,7 @@ private:
 			                       int prod5, int chance5, int amt5);
 	void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum);
 	void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4);
+	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
 
 
     AList factions;
@@ -233,6 +234,7 @@ private:
     void ProcessDescribeOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessBehindOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessGiveOrder(Unit *,AString *, OrdersCheck *pCheck );
+	void ProcessWithdrawOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessDeclareOrder(Faction *,AString *, OrdersCheck *pCheck );
     void ProcessStudyOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessTeachOrder(Unit *,AString *, OrdersCheck *pCheck );
@@ -287,6 +289,7 @@ private:
     void EmptyHell();
     void DoGuard1Orders();
     void DoGiveOrders();
+	void DoWithdrawOrders();
 
     //
     // Faction limit functions.
@@ -306,6 +309,11 @@ private:
     // should be allowed
     //
     int DoGiveOrder(ARegion *,Unit *,GiveOrder *);
+    //
+    // The DoWithdrawOrder returns 0 normally, or 1 if no more WITHDRAW
+	// orders should be allowed
+    //
+    int DoWithdrawOrder(ARegion *,Unit *,WithdrawOrder *);
 
     //
     // These are game specific, and can be found in extra.cpp

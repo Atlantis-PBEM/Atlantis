@@ -380,6 +380,12 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 
     int num = u->GetMen() * usk;
 
+	// JLT
+	if(obj->incomplete == ObjectDefs[obj->type].cost) {
+		obj->num = u->object->region->buildingseq++;
+		obj->SetName(new AString("Building"));
+	}
+
     // AS
     AString job;
     if (obj->IsRoadUsable())
@@ -660,6 +666,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
     StudyOrder * o = (StudyOrder *) u->monthorders;
     int sk = o->skill;
     int cost = SkillCost(sk) * u->GetMen();
+	int reset_man = -1;
     if (cost > u->GetMoney())
     {
         u->Error("STUDY: Not enough funds.");
@@ -668,6 +675,10 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	
     if( ( SkillDefs[sk].flags & SkillType::MAGIC ) && u->type != U_MAGE)
     {
+		if(u->type == U_APPRENTICE) {
+			u->Error("STUDY: An apprentice cannot be made into an mage.");
+			return;
+		}
 		if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 			if (CountMages(u->faction) >= AllowedMages( u->faction )) {
 				u->Error("STUDY: Can't have another magician.");
@@ -687,10 +698,16 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
                 return;
             }
         }
+		reset_man = u->type;
         u->type = U_MAGE;
     }
 
 	if((SkillDefs[sk].flags&SkillType::APPRENTICE) && u->type != U_APPRENTICE){
+		if(u->type == U_MAGE) {
+			u->Error("STUDY: A mage cannot be made into an apprentice.");
+			return;
+		}
+
 		if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 			if(CountApprentices(u->faction)>=AllowedApprentices(u->faction)) {
 				u->Error("STUDY: Can't have another apprentice.");
@@ -707,6 +724,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 				return;
 			}
 		}
+		reset_man = u->type;
 		u->type = U_APPRENTICE;
 	}
   
@@ -725,6 +743,13 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
         u->SetMoney(u->GetMoney() - cost);
         u->Event(AString("Studies ") + SkillDefs[sk].name + ".");
     }
+	else
+	{
+		// if we just tried to become a mage or apprentice, but
+		// were unable to study, reset unit to whatever it was before.
+		if(reset_man != -1)
+			u->type = reset_man;
+	}
 }
 
 void Game::RunMoveOrders()
@@ -919,9 +944,13 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
         
         Unit * forbid = newreg->Forbidden(unit);
         if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
-            unit->Event(AString("Is forbidden entry to ") +
+			int obs = unit->GetObservation();
+			unit->Event(AString("Is forbidden entry to ") +
                         newreg->ShortPrint( &regions ) + " by " +
-                        *(forbid->name) + ".");
+						forbid->GetName(obs) + ".");
+			obs = forbid->GetObservation();
+			forbid->Event(AString("Forbids entry to ") +
+						  unit->GetName(obs) + ".");
             goto done_moving;
         }
         

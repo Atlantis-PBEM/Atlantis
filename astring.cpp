@@ -52,6 +52,14 @@ AString::AString(int l) {
   strcpy(str,buf);
 }
 
+AString::AString(unsigned int l) {
+  char buf[16];
+  sprintf(buf,"%u",l);
+  len = strlen(buf);
+  str = new char[len+1];
+  strcpy(str,buf);
+}
+
 AString::AString(char c) {
   len = 1;
   str = new char[2];

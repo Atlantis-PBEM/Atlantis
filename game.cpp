@@ -1814,15 +1814,53 @@ char Game::GetRChar(ARegion * r)
 	switch (t) {
 		case R_OCEAN: return '-';
 		case R_PLAIN: c = 'p'; break;
+		case R_CERAN_PLAIN1: c = 'p'; break;
+		case R_CERAN_PLAIN2: c = 'p'; break;
+		case R_CERAN_PLAIN3: c = 'p'; break;
 		case R_FOREST: c = 'f'; break;
+		case R_CERAN_FOREST1: c = 'f'; break;
+		case R_CERAN_FOREST2: c = 'f'; break;
+		case R_CERAN_FOREST3: c = 'f'; break;
+		case R_CERAN_MYSTFOREST: c = 'y'; break;
+		case R_CERAN_MYSTFOREST1: c = 'y'; break;
+		case R_CERAN_MYSTFOREST2: c = 'y'; break;
 		case R_MOUNTAIN: c = 'm'; break;
+		case R_CERAN_MOUNTAIN1: c = 'm'; break;
+		case R_CERAN_MOUNTAIN2: c = 'm'; break;
+		case R_CERAN_MOUNTAIN3: c = 'm'; break;
+		case R_CERAN_HILL: c = 'h'; break;
+		case R_CERAN_HILL1: c = 'h'; break;
+		case R_CERAN_HILL2: c = 'h'; break;
 		case R_SWAMP: c = 's'; break;
+		case R_CERAN_SWAMP1: c = 's'; break;
+		case R_CERAN_SWAMP2: c = 's'; break;
+		case R_CERAN_SWAMP3: c = 's'; break;
 		case R_JUNGLE: c = 'j'; break;
+		case R_CERAN_JUNGLE1: c = 'j'; break;
+		case R_CERAN_JUNGLE2: c = 'j'; break;
+		case R_CERAN_JUNGLE3: c = 'j'; break;
 		case R_DESERT: c = 'd'; break;
+		case R_CERAN_DESERT1: c = 'd'; break;
+		case R_CERAN_DESERT2: c = 'd'; break;
+		case R_CERAN_DESERT3: c = 'd'; break;
+		case R_CERAN_WASTELAND: c = 'z'; break;
+		case R_CERAN_WASTELAND1: c = 'z'; break;
+		case R_CERAN_LAKE: c = 'l'; break;
 		case R_TUNDRA: c = 't'; break;
+		case R_CERAN_TUNDRA1: c = 't'; break;
+		case R_CERAN_TUNDRA2: c = 't'; break;
+		case R_CERAN_TUNDRA3: c = 't'; break;
 		case R_CAVERN: c = 'c'; break;
+		case R_CERAN_CAVERN1: c = 'c'; break;
+		case R_CERAN_CAVERN2: c = 'c'; break;
+		case R_CERAN_CAVERN3: c = 'c'; break;
 		case R_UFOREST: c = 'u'; break;
+		case R_CERAN_UFOREST1: c = 'u'; break;
+		case R_CERAN_UFOREST2: c = 'u'; break;
+		case R_CERAN_UFOREST3: c = 'u'; break;
 		case R_TUNNELS: c = 't'; break;
+		case R_CERAN_TUNNELS1: c = 't'; break;
+		case R_CERAN_TUNNELS2: c = 't'; break;
 		case R_ISLAND_PLAIN: c = 'a'; break;
 		case R_ISLAND_MOUNTAIN: c = 'n'; break;
 		case R_ISLAND_SWAMP: c = 'w'; break;
@@ -2106,4 +2144,17 @@ void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4)
 	TerrainDefs[t].lair2 = l2;
 	TerrainDefs[t].lair3 = l3;
 	TerrainDefs[t].lair4 = l4;
+}
+
+void Game::ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move)
+{
+	if(t < 0 || t > (R_NUM -1)) return;
+	if(pop < 0) pop = 0;
+	if(wages < 0) wages = 0;
+	if(econ < 0) econ = 0;
+	if(move < 1) move = 1;
+	TerrainDefs[t].pop = pop;
+	TerrainDefs[t].wages = wages;
+	TerrainDefs[t].economy = econ;
+	TerrainDefs[t].movepoints = move;
 }

@@ -576,6 +576,9 @@ void Game::ProcessOrder( int orderNum, Unit *unit, AString *o,
     case O_FORGET:
         ProcessForgetOrder( unit, o, pCheck );
         break;
+	case O_WITHDRAW:
+		ProcessWithdrawOrder(unit, o, pCheck);
+		break;
     case O_GIVE:
         ProcessGiveOrder( unit, o, pCheck );
         break;
@@ -1371,9 +1374,6 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
             if (ObjectIsShip(ot)) {
                 obj->num = shipseq++;
                 obj->SetName(new AString(AString("Ship")));
-            } else {
-                obj->num = unit->object->region->buildingseq++;
-                obj->SetName(new AString(AString("Building")));
             }
             obj->incomplete = ObjectDefs[obj->type].cost;
             unit->MoveUnit( obj );
@@ -1719,6 +1719,50 @@ void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck )
             f->SetAttitude(fac,att);
         }
     }
+}
+
+void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
+{
+	AString *token = o->gettoken();
+	if(!token) {
+		ParseError (pCheck, unit, 0, "WITHDRAW: No amount given.");
+		return;
+	}
+	int amt = token->value();
+	delete token;
+	if(amt < 1) {
+		ParseError(pCheck, unit, 0, "WITHDRAW: Invalid amount given.");
+		return;
+	}
+	token = o->gettoken();
+	if(!token) {
+		ParseError( pCheck, unit, 0, "WITHDRAW: No item given.");
+		return;
+	}
+	int item = ParseItem(token);
+	delete token;
+
+    if (item == -1) {
+        ParseError( pCheck, unit, 0, "WITHDRAW: Invalid item.");
+        return;
+    }
+	if (ItemDefs[item].flags & ItemType::DISABLED) {
+        ParseError( pCheck, unit, 0, "WITHDRAW: Invalid item.");
+        return;
+	}
+	if (!(ItemDefs[item].type & IT_NORMAL)) {
+        ParseError( pCheck, unit, 0, "WITHDRAW: Invalid item.");
+        return;
+	}
+
+    if( !pCheck )
+    {
+        WithdrawOrder *order = new WithdrawOrder;
+        order->item = item;
+        order->amount = amt;
+        unit->withdraworders.Add(order);
+    }
+    return;
 }
 
 void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck )

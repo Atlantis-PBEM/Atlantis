@@ -247,7 +247,18 @@ public:
 	char *WORLD_NAME;
 
 	// Does the nexus allow gating out of it
-	int NEXUS_GATE;
+	int NEXUS_GATE_OUT;
+
+	// Is the nexus also a city?
+	int NEXUS_IS_CITY;
+
+	// Do battle reports show factions if ANY unit on the opposing side
+	// could see it.   Non-involved observers will ALSO see this
+	// information.
+	int BATTLE_FACTION_INFO;
+
+	// Is the withdraw order enabled
+	int ALLOW_WITHDRAW;
 
 };
 

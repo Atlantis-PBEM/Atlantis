@@ -28,3 +28,35 @@ Changes from 4.0.5 -> 4.0.6
       and the price a city will pay ranges from 150-210.   If it is not
       enabled, the price ranges from 60-90 for selling and from 90-120 for
       buying.  This option is not on by default.
+   -- Added quite a few options to help Georg Gottschalk with Ceran
+   -- Added more ceran things to support Georg
+   -- Fixed a bug whereby a unit which studied a mage skill but failed to
+      study due to insufficient funds was still marked (and counted) as a
+      mage.
+   -- Fixed a bug that allowed units apprentices to become mages and vice
+      versa without needing to FORGET first.
+   -- Guarding units see who they forbid entry too.
+   -- A unit forbidden entry (or the guarding unit) will see the faction of
+      the unit that forbid them (or that they forbid) if they have sufficient
+      observation of if the unit is revealing faction.
+   -- Added BATTLE_FACTION_INFO option in gamedefs.   If this is true, then
+      units involved in a battle will display their faction information IF
+      *ANY* unit on the opposite side has sufficent OBSE to see it.   The
+      reason this is an option (unlike the guarding units one) is that the
+      same battle report is sent to non-involved observers of the battle.
+      Due to the way the battle information is stored, it is not possible to
+      customize this info per-faction seeing.
+   -- Fixed a bug where a failed build incremented the building sequence
+      number leading to a method whereby a region could be made deliberately
+      unusable for building.
+   -- Increased the range on the days of skill so that it shouldn't wrap
+      to negatives.  Overflow sucks.
+   -- Changed the message when no spoils are gained in a battle to
+      'Spoils: none.' to alleviate problems with clients that didn't bother
+      to figure out that the message used to be 'No spoils'.  Besides, a
+      consistant format is good.
+   -- Implemented WITHDRAW order, making unlimited markets unnecessary.
+      This order is not enabled by default (enable via ALLOW_WITHDRAW in
+      gamedefs.h).   If this option is enabled, the world building code will
+      not build unlimited markets in the starting city, but will build regular
+      markets instead.

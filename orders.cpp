@@ -74,7 +74,8 @@ char * od[] = {
   "study",
   "tax",
   "teach",
-  "work"
+  "withdraw",
+  "work",
 };
 
 char ** OrderStrs = od;
@@ -104,6 +105,13 @@ ForgetOrder::ForgetOrder() {
 }
 
 ForgetOrder::~ForgetOrder() {
+}
+
+WithdrawOrder::WithdrawOrder() {
+	type = O_WITHDRAW;
+}
+
+WithdrawOrder::~WithdrawOrder() {
 }
 
 GiveOrder::GiveOrder() {

@@ -31,6 +31,9 @@
 #include "game.h"
 #include "gamedata.h"
 #include <stdio.h>
+#ifdef WIN32
+#include <memory.h>
+#endif
 #include <string.h>
 
 #define LINE_WIDTH         70
@@ -136,6 +139,137 @@ static char *fill[] = {
  // Island mountain
  " /\\/\\ ",
  "/  \\ \\",
+
+ // For Ceran terrains
+
+ // plain1
+ "      ",
+ "      ",
+ // plain2
+ "      ",
+ "      ",
+ // plain3
+ "      ",
+ "      ",
+
+ // forest1
+ "  ^ ^ ",
+ " ^ ^  ",
+ // forest2
+ "  ^ ^ ",
+ " ^ ^  ",
+ // forest3
+ "  ^ ^ ",
+ " ^ ^  ",
+ 
+ // mystforest
+ "  ` ` ",
+ " ` `  ",
+ // mystforest1
+ "  ` ` ",
+ " ` `  ",
+ // mystforest2
+ "  ` ` ",
+ " ` `  ",
+ 
+ // mountain1
+ " /\\/\\ ",
+ "/  \\ \\",
+ // mountain2
+ " /\\/\\ ",
+ "/  \\ \\",
+ // mountain3
+ " /\\/\\ ",
+ "/  \\ \\",
+
+ // hill
+ "  * * ",
+ " * *  ",
+ // hill1
+ "  * * ",
+ " * *  ",
+ // hill2
+ "  * * ",
+ " * *  ",
+ 
+ // swamp1
+ "  v v ",
+ " v v  ",
+ // swamp2
+ "  v v ",
+ " v v  ",
+ // swamp3
+ "  v v ",
+ " v v  ",
+ 
+ // jungle1
+ "  @ @ ",
+ " @ @  ",
+ // jungle2
+ "  @ @ ",
+ " @ @  ",
+ // jungle3
+ "  @ @ ",
+ " @ @  ",
+ 
+ // desert1
+ "  . . ",
+ " . .  ",
+ // desert2
+ "  . . ",
+ " . .  ",
+ // desert3
+ "  . . ",
+ " . .  ",
+ 
+ // wasteland
+ "  ; ; ",
+ " ; ;  ",
+ // wasteland1
+ "  ; ; ",
+ " ; ;  ",
+ 
+ // lake
+ "  ~ ~ ",
+ " ~ ~  ",
+ 
+ // tundra1
+ "  ' ' ",
+ " ' '  ",
+ // tundra2
+ "  ' ' ",
+ " ' '  ",
+ // tundra2
+ "  ' ' ",
+ " ' '  ",
+ 
+ // cavern1
+ "  . . ",
+ " . .  ",
+ // cavern2
+ "  . . ",
+ " . .  ",
+ // cavern3
+ "  . . ",
+ " . .  ",
+ 
+ // underforest1
+ "  ^ ^ ",
+ " ^ ^  ",
+ // underforest2
+ "  ^ ^ ",
+ " ^ ^  ",
+ // underforest3
+ "  ^ ^ ",
+ " ^ ^  ",
+ 
+ // tunnels1
+ "      ",
+ "      ",
+ // tunnels2
+ "      ",
+ "      ",
+
 };
 
 // NEW FUNCTION DK 2000.03.07,

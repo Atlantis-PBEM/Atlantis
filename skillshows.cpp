@@ -344,8 +344,8 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "A unit with this skill may construct weapons via "
 					   "the PRODUCE order.";
-				if(!ItemDefs[I_IRON].flags & ItemType::DISABLED) {
-					if(!ItemDefs[I_SWORD].flags & ItemType::DISABLED) {
+				if(!(ItemDefs[I_IRON].flags & ItemType::DISABLED)) {
+					if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
 						*str += " Swords may be produced from iron.";
 					}
 					if(!(ItemDefs[I_PICK].flags & ItemType::DISABLED)) {
@@ -357,7 +357,7 @@ AString *ShowSkill::Report(void)
 							   "increased by using hammers.";
 					}
 				}
-				if(!ItemDefs[I_WOOD].flags & ItemType::DISABLED) {
+				if(!(ItemDefs[I_WOOD].flags & ItemType::DISABLED)) {
 					if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED)) {
 						*str += " Longbows may be produced from wood.";
 					}
@@ -373,6 +373,18 @@ AString *ShowSkill::Report(void)
 							   "increased by using axes.";
 					}
 				}
+			} else if (level == 2) {
+				if(ItemDefs[I_LANCE].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_WOOD].flags & ItemType::DISABLED) break;
+				if(SkillDefs[S_RIDING].flags & SkillType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may use the PRODUCE "
+						"order to produce lances from wood.  A lance "
+						"attacks as if the target has a defensive skill of "
+						"0, and requires riding skill to wield.  It takes "
+						"two units of wood to produce a lance, which "
+						"weighs two units.  A unit wielding a lance attacks"
+						"with a combat skill equal to their riding skill + 5.";
 			} else if (level == 3) {
 				if(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED) break;
 				if(ItemDefs[I_MSWORD].flags & ItemType::DISABLED) break;
@@ -398,37 +410,52 @@ AString *ShowSkill::Report(void)
 					   "per round.  It takes one unit of ironwood to "
 					   "produce a magic crossbow, which weighs one unit.";
 			} else if(level == 5) {
-				if(ItemDefs[I_YEW].flags & ItemType::DISABLED) break;
-				if(ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED) break;
-				if((SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED) &&
-			       (SkillDefs[S_LONGBOW].flags & SkillType::DISABLED))
-					break;
-				found = 1;
-				*str += "A unit with this skill may use the PRODUCE order "
-					   "to produce double bows, the ultimate (natural) "
-					   "dealer of death on a battlefield. Double bows may "
-					   "be used by units skilled in ";
-				if(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED) {
-					*str += "Crossbow";
-				}
-				if(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED) {
-					if(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED) {
-						*str += " or ";
+				if(!(ItemDefs[I_YEW].flags & ItemType::DISABLED) &&
+				   !(ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED) &&
+				   (!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED) ||
+					!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED))) {
+					found = 1;
+					*str += "A unit with this skill may use the PRODUCE "
+						"order to produce double bows, the ultimate "
+						"(natural) dealer of death on a battlefield. Double "
+						"bows may be used by units skilled in ";
+					if(!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
+						*str += "Crossbow";
 					}
-					*str += "Longbow";
+					if(!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED)) {
+						if(!(SkillDefs[S_CROSSBOW].flags&SkillType::DISABLED)){
+							*str += " or ";
+						}
+						*str += "Longbow";
+					}
+					*str += ". A double bow fires as if the target has "
+						"a defensive skill of 0, and fires a number of "
+						"shots, per round, equal to the skill level of the "
+						"wielder. It takes one unit of yew to produce a "
+						"double bow, which weighs one unit.";
+					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
+						*str += "  Production can be increased by using axes.";
+					}
 				}
-				*str += ". A double bow fires as if the target has "
-					   "a defensive skill of 0, and fires a number of "
-					   "shots, per round, equal to the skill level of the "
-					   "wielder. It takes one unit of yew to produce a "
-					   "double bow, which weighs one unit.";
-				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
-					*str += "Production can be increased by using axes.";
+				if(!(ItemDefs[I_ICESPEAR].flags & ItemType::DISABLED) &&
+				   !(ItemDefs[I_ICESPEAR].flags & ItemType::DISABLED) &&
+				   !(SkillDefs[S_COMBAT].flags & SkillType::DISABLED)) {
+					if(found) *str += " ";
+					found = 1;
+					*str += "A unit with this skill may use the PRODUCE "
+						"order to produce icespears from spears.  "
+				        "A icespear attacks as if the target has "
+						"a defensive skill of 0, and requires combat "
+					    "skill to wield.  It takes one spear to "
+						"produce a icespear, which weighs one unit.  "
+						"A icespear gives a +2 combat bonus when attacking "
+						"and allows its possessor three attacks per round.";
 				}
 			}
 			break;
 		case S_ARMORER:
 			if(level == 1) {
+				if(found) *str += " ";
 				if((ItemDefs[I_CLOTHARMOR].flags & ItemType::DISABLED) &&
 			       (ItemDefs[I_LEATHERARMOR].flags & ItemType::DISABLED) &&
 				   (ItemDefs[I_CHAINARMOR].flags & ItemType::DISABLED))
@@ -567,35 +594,50 @@ AString *ShowSkill::Report(void)
 			break;
 		case S_BUILDING:
 			if (level == 1) {
-				if(ItemDefs[I_STONE].flags & ItemType::DISABLED) break;
-				if((ObjectDefs[O_TOWER].flags & ObjectType::DISABLED) &&
-				   (ObjectDefs[O_FORT].flags & ObjectType::DISABLED) &&
-				   (ObjectDefs[O_CASTLE].flags & ObjectType::DISABLED) &&
-				   (ObjectDefs[O_CITADEL].flags & ObjectType::DISABLED))
-					break;
+				if(!(ItemDefs[I_STONE].flags & ItemType::DISABLED) &&
+				   (!(ObjectDefs[O_TOWER].flags & ObjectType::DISABLED) ||
+				    !(ObjectDefs[O_FORT].flags & ObjectType::DISABLED) ||
+					!(ObjectDefs[O_CASTLE].flags & ObjectType::DISABLED) ||
+				    !(ObjectDefs[O_CITADEL].flags & ObjectType::DISABLED) ||
+				    !(ObjectDefs[O_STOCKADE].flags & ObjectType::DISABLED))) {
+					found = 1;
+					*str += "A unit with this skill may use the BUILD order "
+						"to construct buildings from stone.  At this level, "
+						"the buildings that are able to be built are the ";
+					int comma = 0;
+					if(!(ObjectDefs[O_TOWER].flags & ObjectType::DISABLED)) {
+						*str += "Tower";
+						comma = 1;
+					}
+					if(!(ObjectDefs[O_FORT].flags & ObjectType::DISABLED)) {
+						if(comma) *str += ", ";
+						*str += "Fort";
+						comma = 1;
+					}
+					if(!(ObjectDefs[O_CASTLE].flags & ObjectType::DISABLED)) {
+						if(comma) *str += ", ";
+						*str += "Castle";
+						comma = 1;
+					}
+					if(!(ObjectDefs[O_CITADEL].flags & ObjectType::DISABLED)) {
+						if(comma) *str += ", and ";
+						*str += "Citadel";
+					}
+					*str += ".";
+				}
+				if(!(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
+				   (!(ObjectDefs[O_STOCKADE].flags & ObjectType::DISABLED))) {
+					if(found) *str += " ";
+					found = 1;
+					*str += "  A unit with this skill may use the BUILD order "
+						"to construct Stockades from wood.";
+				}
+			} else if(level == 2) {
+				if(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED) break;
+				if(ObjectDefs[O_MTOWER].flags & ObjectType::DISABLED) break;
 				found = 1;
-				*str += "A unit with this skill may use the BUILD order "
-					   "to construct buildings from stone.  At this level, "
-					   "the buildings that are able to be built are the ";
-				int comma = 0;
-				if(!(ObjectDefs[O_TOWER].flags & ObjectType::DISABLED)) {
-					*str += "Tower";
-					comma = 1;
-				}
-				if(!(ObjectDefs[O_FORT].flags & ObjectType::DISABLED)) {
-					if(comma) *str += ", ";
-					*str += "Fort";
-					comma = 1;
-				}
-				if(!(ObjectDefs[O_CASTLE].flags & ObjectType::DISABLED)) {
-					if(comma) *str += ", ";
-					*str += "Castle";
-					comma = 1;
-				}
-				if(!(ObjectDefs[O_CITADEL].flags & ObjectType::DISABLED)) {
-					if(comma) *str += ", and ";
-					*str += "Citadel";
-				}
+				*str += "A unit with this skill may use the BUILD order to "
+					"construct a Magical Tower from rootstone.";
 			} else if(level == 3) {
 				if(!(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED) &&
 				   !(ObjectDefs[O_MFORTRESS].flags & ObjectType::DISABLED)) {
@@ -648,6 +690,13 @@ AString *ShowSkill::Report(void)
 							"order to produce Roads from stone.";
 					}
 				}
+				if(!(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED) &&
+				   !(ObjectDefs[O_HUT].flags & ObjectType::DISABLED)) {
+					if(found) *str += " ";
+					found = 1;
+					*str += "A unit with this skill may use the BULID order "
+						"to produce a Hermits Hut from ironwood.";
+				}
 			}
 			break;
 		case S_SHIPBUILDING:
@@ -687,16 +736,28 @@ AString *ShowSkill::Report(void)
 					   "units, as well as offer protection (in the same "
 					   "manner as a building) to the first 200 men within.";
 			} else if (level == 5) {
-				if(ItemDefs[I_FLOATER].flags & ItemType::DISABLED) break;
-				if(ObjectDefs[O_BALLOON].flags & ObjectType::DISABLED) break;
-				found = 1;
-				*str += "A unit with this skill may use the BUILD order to "
-					   "construct balloons, using 50 units of floater hide. "
-					   "A balloon functions in the same manner as a ship, "
-					   "using the SAIL order to move. However, as opposed "
-					   "to normal ships, a balloon can sail over land. A "
-					   "balloon requires 10 sailors to sail, and has a "
-					   "capacity of 800 weight units.";
+				if(!(ItemDefs[I_FLOATER].flags & ItemType::DISABLED) &&
+				   !(ObjectDefs[O_BALLOON].flags & ObjectType::DISABLED)) {
+					found = 1;
+					*str += "A unit with this skill may use the BUILD order "
+						"to construct balloons, using 50 units of floater "
+						"hide. A balloon functions in the same manner as a "
+						"ship, using the SAIL order to move. However, as "
+						"opposed to normal ships, a balloon can sail over "
+						"land. A balloon requires 10 sailors to sail, and "
+						"has a capacity of 800 weight units.";
+				}
+				if(!(ItemDefs[I_YEW].flags & ItemType::DISABLED) &&
+				   !(ObjectDefs[O_WGALLEON].flags & ObjectType::DISABLED)) {
+					if(found) *str += " ";
+					found = 1;
+					*str += "A unit with this skill may use the BUILD order "
+						"to construct war galleons from 100 units of yew. "
+						"A war galleon can carry 2500 weight units, as well "
+						"as offer protection (in the same manner as a "
+						"building) to the first 350 men within.";
+				}
+				   
 			}
 			break;
 		case S_ENTERTAINMENT:
@@ -909,12 +970,12 @@ AString *ShowSkill::Report(void)
 					   "after battle";
 				if(!(ItemDefs[I_HERBS].flags & ItemType::DISABLED)) {
 					*str += " without the aid of herbs.";
-					if(!SkillDefs[S_HEALING].flags & SkillType::DISABLED) {
-						*str += " Other than not needing herbs, this healing"
+					if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED)) {
+						*str += " Other than not needing herbs, this healing "
 							   "works the same as normal healing.";
 					}
 				} else {
-					if(!SkillDefs[S_HEALING].flags & SkillType::DISABLED) {
+					if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED)) {
 						*str += " This healing works the same as normal "
 							   "healing.";
 					}
@@ -1644,6 +1705,21 @@ AString *ShowSkill::Report(void)
 					   "the item being created. A mage with knowledge of "
 					   "the Artifact Lore skill will detect the use of "
 					   "Artifact Lore by any other mage in the region.";
+			} else {
+				if(level == 2) {
+					if(ItemDefs[I_FIRESPEAR].flags & ItemType::DISABLED) break;
+					if(ItemDefs[I_SPEAR].flags & ItemType::DISABLED) break;
+					if(SkillDefs[S_COMBAT].flags & SkillType::DISABLED) break;
+					found = 1;
+					*str += "A unit with this skill may use the PRODUCE "
+						"order to produce firespears from spears.  "
+				        "A firespear attacks as if the target has "
+						"a defensive skill of 0, and requires combat "
+					    "skill to wield.  It takes one spear to "
+						"produce a firespear, which weighs one unit.  "
+						"A firespear gives a +3 combat bonus when attacking "
+						"and allows its possessor two attacks per round.";
+				}
 			}
 			break;
 		case S_CREATE_RING_OF_INVISIBILITY:
@@ -1891,6 +1967,35 @@ AString *ShowSkill::Report(void)
 					   "mages. Continued study of this skill gives no "
 					   "further advantages.";
 			}
+			break;
+		case S_TAME_DRAGON:
+			if(level == 1) {
+				found = 1;
+				*str += "For Ceran!!! Georg needs to write this skill "
+					"description and the implementation!!!!!!";
+			} else if(level == 3) {
+				if(ObjectDefs[O_DCLIFFS].flags & ObjectType::DISABLED) break;
+				if(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += " A unit with this skill may use the BUILD order "
+						   "to build a Dragon Cliffs from rootstone.  "
+						   "Dragon Cliffs will produce dragons over time.";
+			}
+			break;
+		case S_WEAPONCRAFT:
+			if(level == 1) {
+				found = 1;
+				*str += "For Ceran!!! Georg needs to write this skill "
+					"description and the implementation!!!!!!";
+			}
+			break;
+		case S_ARMORCRAFT:
+			if(level == 1) {
+				found = 1;
+				*str += "For Ceran!!! Georg needs to write this skill "
+					"description and the implementation!!!!!!";
+			}
+			break;
 	}
 	if(!found) *str += "No skill report.";
 	return str;

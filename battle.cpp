@@ -247,7 +247,7 @@ void Battle::Run( ARegion * region,
         if (spoils->Num()) {
             temp = AString("Spoils: ") + spoils->Report(2,0,1) + ".";
         } else {
-            temp = "No spoils.";
+            temp = "Spoils: none.";
         }
         armies[1]->Win(this,spoils);
         AddLine("");
@@ -279,7 +279,7 @@ void Battle::Run( ARegion * region,
         if (spoils->Num()) {
             temp = AString("Spoils: ") + spoils->Report(2,0,1) + ".";
         } else {
-            temp = "No spoils.";
+            temp = "Spoils: none.";
         }
         armies[0]->Win(this,spoils);
         AddLine("");
@@ -318,22 +318,34 @@ void Battle::WriteSides(ARegion * r,
 	    r->ShortPrint( pRegs ) + "!");
   }
   AddLine("");
+
+  int dobs = 0;
+  int aobs = 0;
+  {
+	  forlist(defs) {
+		  int a = ((Location *)elem)->unit->GetObservation();
+		  if(a > dobs) dobs = a;
+	  }
+  }
+
   AddLine("Attackers:");
-  {	
-    forlist(atts) {
-      AString * temp = ((Location *) elem)->unit->BattleReport();
-      AddLine(*temp);
-      delete temp;
-    }
+  {
+	  forlist(atts) {
+		  int a = ((Location *)elem)->unit->GetObservation();
+		  if(a > aobs) aobs = a;
+		  AString * temp = ((Location *) elem)->unit->BattleReport(dobs);
+		  AddLine(*temp);
+		  delete temp;
+	  }
   }
   AddLine("");
   AddLine("Defenders:");
-  {	
-    forlist(defs) {
-      AString * temp = ((Location *) elem)->unit->BattleReport();
-      AddLine(*temp);
-      delete temp;
-    }
+  {
+	  forlist(defs) {
+		  AString * temp = ((Location *) elem)->unit->BattleReport(aobs);
+		  AddLine(*temp);
+		  delete temp;
+	  }
   }
   AddLine("");
 }

@@ -1321,7 +1321,7 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
         return;
     }
 
-	nexgate = Globals->NEXUS_GATE && (r->type == R_NEXUS);
+	nexgate = Globals->NEXUS_GATE_OUT && (r->type == R_NEXUS);
     if (!r->gate && !nexgate)
     {
         u->Error("CAST: There is no gate in that region.");

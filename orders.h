@@ -28,6 +28,7 @@
 class Order;
 class AttackOrder;
 class MoveOrder;
+class WithdrawOrder;
 class GiveOrder;
 class StudyOrder;
 class TeachOrder;
@@ -100,6 +101,7 @@ enum {
   O_STUDY,
   O_TAX,
   O_TEACH,
+  O_WITHDRAW,
   O_WORK,
   NORDERS
 };
@@ -141,6 +143,15 @@ public:
 	
   int advancing;
   AList dirs;
+};
+
+class WithdrawOrder : public Order {
+public:
+	WithdrawOrder();
+	~WithdrawOrder();
+
+	int item;
+	int amount;
 };
 
 class GiveOrder : public Order {

@@ -37,6 +37,7 @@ public:
     AString(char *);
     AString(const char *);
     AString(int);
+	AString(unsigned int);
     AString(char);
     AString(const AString &);
     ~AString();
