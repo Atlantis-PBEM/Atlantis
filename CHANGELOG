@@ -565,3 +565,12 @@ Changes from 4.0.10 -> 5.0.0
    -- Fixed bug in generation of extremely large and extremely small worlds
       and levels.  Second bug was introduced by artic towns patch.
    -- Fixed bug in movement costs when WEATHER_EXISTS was 0
+   -- Fixed the broken 'faction: newNoLeader' and 'startLoc:' directives.
+      'Faction: new' now takes some additional parameters on the data line
+	  so you can say 'Faction: new' (create a normal faction),
+	  'Faction: new 10 10 1' (create a normal faction but put the initial
+      leader in location 10,10,1 instead of nexus) or 'Faction: new noleader'
+	  (you can also use 'Faction: new noleader 10 10 1') which will
+	  create a leaderless faction (with the location if specified).  And
+	  you can then use the newUnit/Item/Skill commands to customize that
+	  unit exactly as you want.
