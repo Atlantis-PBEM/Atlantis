@@ -2271,8 +2271,8 @@ void Game::CreateCityMon( ARegion *pReg, int percent )
 		u->SetMen(I_LEADERS,1);
 		if(IV) u->items.SetNum(I_AMULETOFI,1);
 		u->SetMoney(Globals->GUARD_MONEY);
-		u->SetSkill(S_FORCE,2);
-		u->SetSkill(S_FIRE,2);
+		u->SetSkill(S_FORCE,4);
+		u->SetSkill(S_FIRE,4);
 		u->combat = S_FIRE;
 		u->SetFlag(FLAG_BEHIND, 1);
 		u->SetFlag(FLAG_HOLDING, 1);
@@ -2334,8 +2334,8 @@ void Game::AdjustCityMon( ARegion *r, Unit *u )
 	if (IV) u->items.SetNum(I_AMULETOFI,men);
 
 	if(u->type == U_GUARDMAGE) {
-		u->SetSkill(S_FORCE, 2);
-		u->SetSkill(S_FIRE, 2);
+		u->SetSkill(S_FORCE, 4);
+		u->SetSkill(S_FIRE, 4);
 		u->combat = S_FIRE;
 		u->SetFlag(FLAG_BEHIND, 1);
         u->SetMoney(Globals->GUARD_MONEY);

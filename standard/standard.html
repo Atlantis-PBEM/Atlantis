@@ -534,7 +534,11 @@ the city much safer from attack (See the section on Non-Player Units
 for more information on city guardsmen).
 As a drawback, these cities tend to be
 extremely crowded, and most factions will wish to leave the starting
-cities when possible. <p>
+cities when possible.<p>
+It is always possible to enter any starting city from the nexus, even if
+that starting city has been taken over and guarded.  This is due to the
+transportation from the Nexus to the starting city being magical in
+nature.<p>
 
 There are three methods of departing the starting cities.  The first
 is by land, but keep in mind that the lands immediately surrounding
@@ -1077,16 +1081,19 @@ Here is a table giving some information about common items in Atlantis: <p>
   <th>Skill</th>
   <th>Material</th>
   <th>Weight (Capacity)</th>
+  <th>Combat information</th>
  </tr>
  <tr>
   <td align=center>Silver</td>
   <td> </td>
   <td> </td>
   <td align=center>0</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Grain</td>
   <td align=center>Farming</td>
+  <td> </td>
   <td> </td>
   <td align=center>5</td>
  </tr>
@@ -1095,144 +1102,168 @@ Here is a table giving some information about common items in Atlantis: <p>
   <td align=center>Ranching</td>
   <td> </td>
   <td align=center>50 (0)</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Iron</td>
   <td align=center>Mining</td>
   <td> </td>
   <td align=center>5</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Wood</td>
   <td align=center>Lumberjack</td>
   <td> </td>
   <td align=center>5</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Stone</td>
   <td align=center>Quarrying</td>
   <td> </td>
   <td align=center>50</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Fur</td>
   <td align=center>Hunting</td>
   <td> </td>
   <td align=center>1</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Fish</td>
   <td align=center>Fishing</td>
   <td> </td>
   <td align=center>1</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Herbs</td>
   <td align=center>Herb Lore</td>
   <td> </td>
   <td align=center>0</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Horse</td>
   <td align=center>Horse Training</td>
   <td> </td>
   <td align=center>50 (20)</td>
+  <td> Bonus in some terrains with riding skill </td>
  </tr>
  <tr>
   <td align=center>Sword</td>
   <td align=center>Weaponsmith</td>
   <td align=center>Iron</td>
   <td align=center>1</td>
+  <td> +2 to combat </td>
  </tr>
  <tr>
   <td align=center>Crossbow</td>
   <td align=center>Weaponsmith</td>
   <td align=center>Wood</td>
   <td align=center>1</td>
+  <td> hit from range (with skill) </td>
  </tr>
  <tr>
   <td align=center>Longbow</td>
   <td align=center>Weaponsmith</td>
   <td align=center>Wood</td>
   <td align=center>1</td>
+  <td> hit from range (with skill) </td>
  </tr>
  <tr>
   <td align=center>Chain Armor</td>
   <td align=center>Armorer</td>
   <td align=center>Iron</td>
   <td align=center>1</td>
+  <td> 1 in 3 chance to survive a hit </td>
  </tr>
  <tr>
   <td align=center>Plate Armor</td>
   <td align=center>Armorer</td>
   <td align=center>Iron</td>
   <td align=center>3</td>
+  <td> 2 in 3 chance to survive a hit </td>
  </tr>
  <tr>
   <td align=center>Wagon</td>
   <td align=center>Carpenter</td>
   <td align=center>Wood</td>
   <td align=center>50 (200)</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Pick</td>
   <td align=center>Weaponsmith</td>
   <td align=center>Iron</td>
   <td align=center>1</td>
+  <td> +1 to combat </td>
  </tr>
  <tr>
   <td align=center>Spear</td>
   <td align=center>Weaponsmith</td>
   <td align=center>Wood</td>
   <td align=center>1</td>
+  <td> +1 to combat </td>
  </tr>
  <tr>
   <td align=center>Axe</td>
   <td align=center>Weaponsmith</td>
   <td align=center>Wood</td>
   <td align=center>1</td>
+  <td> +1 to combat </td>
  </tr>
  <tr>
   <td align=center>Hammer</td>
   <td align=center>Weaponsmith</td>
   <td align=center>Iron</td>
   <td align=center>1</td>
+  <td> +1 to combat </td>
  </tr>
  <tr>
   <td align=center>Net</td>
   <td align=center>Fishing</td>
   <td align=center>Herbs</td>
   <td align=center>1</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Lasso</td>
   <td align=center>Herblore</td>
   <td align=center>Herbs</td>
   <td align=center>1</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Bag</td>
   <td align=center>Herblore</td>
   <td align=center>Herbs</td>
   <td align=center>1</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Spinning Wheel</td>
   <td align=center>Carpenter</td>
   <td align=center>Wood</td>
   <td align=center>1</td>
+  <td> </td>
  </tr>
  <tr>
   <td align=center>Leather Armor</td>
   <td align=center>Armorer</td>
   <td align=center>Furs</td>
   <td align=center>1</td>
+  <td> 1 in 4 chance to survive a hit </td>
  </tr>
  <tr>
   <td align=center>Cloth Armor</td>
   <td align=center>Armorer</td>
   <td align=center>Herbs</td>
   <td align=center>1</td>
+  <td> 1 in 6 chance to survive a hit </td>
  </tr>
 </table> </center> <p>
 
@@ -1612,15 +1643,12 @@ War factions may collect taxes in a region.  This is done using the
 (which is not a full month order).  The amount of tax money that can be
 collected each month in a region is shown in the region description.  Only
 combat ready units may <a href="#tax"> TAX</a>;
-a unit is combat ready if it either: has Combat
-skill of at least 1,
-or has Longbow or Crossbow skill of at least 1 and also
-has the appropriate bow in his possession. Each taxing character can collect
-$50, though if the number of taxers would tax more than the available tax
-income, the tax income is split evenly. Note that possession of a sword,
-while giving a man an effective Combat skill of 2, does not confer the
-ability to tax if the unit does not also have a Combat skill of at least
-one. <p>
+a unit is combat ready if it either: has Combat skill of at least 1,
+has Longbow or Crossbow skill of at least 1 and also has the appropriate bow
+in his possession, or has a weapon (such as a sword) which requires no skill
+in his possession. Each taxing character can collect $50, though if the number
+of taxers would tax more than the available tax income, the tax income is
+split evenly.<p>
 
 War factions may also pillage a region.  To do this requires the faction to
 have enough combat trained men in the region to tax half of the available
