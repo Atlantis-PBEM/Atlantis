@@ -982,7 +982,7 @@ int Unit::Study(int sk, int days)
 		}
 	}
 	int max = GetSkillMax(sk);
-	if (GetRealSkill(sk) >= max) {
+	if (GetRealSkill(sk) >= max && max >= 0) {
 		Error("STUDY: Maximum level for skill reached.");
 		return 0;
 	}
