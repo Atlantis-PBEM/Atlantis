@@ -4042,8 +4042,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("leave");
 	f.TagText("H4", "LEAVE");
-	temp = "Leave the object you are currently in.  The order cannot be "
-		"used at sea.";
+	temp = "Leave the object you are currently in.";
+	if(move_over_water) {
+		temp += " If a unit is capable of swimming ";
+		if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
+			temp += "or flying ";
+		temp += "then this order is usable to leave a boat while at sea.";
+	} else
+		temp += " The order cannot be used at sea."
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Leave the current object";
