@@ -31,14 +31,11 @@ int ParseItem(AString * token)
     for (int i=0; i<NITEMS; i++)
     {
         if (ItemDefs[i].type & IT_MONSTER &&
-            ItemDefs[i].index == MONSTER_ILLUSION)
-        { 
+            ItemDefs[i].index == MONSTER_ILLUSION) { 
             if (*token == AString("i") + ItemDefs[i].name) return i;
             if (*token == AString("i") + ItemDefs[i].names) return i;
             if (*token == AString("i") + ItemDefs[i].abr) return i;
-        } 
-        else
-        {
+        } else {
             if (*token == ItemDefs[i].name) return i;
             if (*token == ItemDefs[i].names) return i;
             if (*token == ItemDefs[i].abr) return i;
@@ -101,8 +98,7 @@ AString Item::Report(int seeillusions)
 {
     AString ret = ItemString(type,num);
     if (seeillusions && ItemDefs[type].type & IT_MONSTER &&
-        ItemDefs[type].index == MONSTER_ILLUSION)
-    {
+        ItemDefs[type].index == MONSTER_ILLUSION) {
         ret = ret + " (illusion)";
     }
     return ret;
@@ -195,12 +191,10 @@ AString ItemList::BattleReport()
     AString temp;
     forlist(this) {
         Item * i = (Item *) elem;
-        if (ItemDefs[i->type].combat)
-        {
+        if (ItemDefs[i->type].combat) {
             temp += ", ";
             temp += i->Report(0);
-            if (ItemDefs[i->type].type & IT_MONSTER)
-            {
+            if (ItemDefs[i->type].type & IT_MONSTER) {
                 MonType & mondef = MonDefs[ItemDefs[i->type].index];
                 temp += AString(" (Combat ") + mondef.attackLevel + 
 					"/" + mondef.combatDefense + ", Attacks " +

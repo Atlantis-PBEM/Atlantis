@@ -1194,17 +1194,18 @@ int Unit::GetAttitude(ARegion * r,Unit * u) {
   }
 }
 
-int Unit::Hostile() {
-  if (type != U_WMON) return 0;
-  int retval = 0;
-  forlist(&items) {
-    Item * i = (Item *) elem;
-    if (ItemDefs[i->type].type & IT_MONSTER) {
-      int hos = MonDefs[ItemDefs[i->type].index].hostile;
-      if (hos > retval) retval = hos;
-    }
-  }
-  return retval;
+int Unit::Hostile()
+{
+	if (type != U_WMON) return 0;
+	int retval = 0;
+	forlist(&items) {
+		Item * i = (Item *) elem;
+		if (ItemDefs[i->type].type & IT_MONSTER) {
+			int hos = MonDefs[ItemDefs[i->type].index].hostile;
+			if (hos > retval) retval = hos;
+		}
+	}
+	return retval;
 }
 
 int Unit::Forbids(ARegion * r,Unit * u) {
@@ -1327,8 +1328,7 @@ int Unit::GetBattleItem( int batType, int index )
         }
 
         if( ItemDefs[ pItem->type ].type & batType
-            && ItemDefs[ pItem->type ].index == index )
-        {
+            && ItemDefs[ pItem->type ].index == index ) {
             //
             // We found it
             //

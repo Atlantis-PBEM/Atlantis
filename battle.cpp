@@ -106,20 +106,16 @@ void Battle::DoAttack( int round,
     for (int i = 0; i < numAttacks; i++ )
     {
         WeaponType *pWep = 0;
-        if( a->weapon != -1 )
-        {
+        if( a->weapon != -1 ) {
             pWep = &WeaponDefs[ ItemDefs[ a->weapon ].index ];
         }
 
-        if( behind )
-        {
-            if( !pWep )
-            {
+        if( behind ) {
+            if( !pWep ) {
                 break;
             }
 
-            if( !( pWep->flags & WeaponType::RANGED ))
-            {
+            if( !( pWep->flags & WeaponType::RANGED )) {
                 break;
             }
         }
@@ -127,8 +123,7 @@ void Battle::DoAttack( int round,
         int flags = 0;
 		int attackType = ATTACK_COMBAT;
 		int mountBonus = 0;
-        if( pWep )
-		{
+        if( pWep ) {
 			flags = pWep->flags;
 			attackType = pWep->attackType;
 			mountBonus = pWep->mountBonus;

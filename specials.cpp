@@ -64,8 +64,7 @@ int Army::CheckSpecialTarget(int special,int tar)
         return 0;
     case SPECIAL_DISPEL_ILLUSIONS:
         if (ItemDefs[soldiers[tar]->race].type & IT_MONSTER &&
-            ItemDefs[soldiers[tar]->race].index == MONSTER_ILLUSION)
-        {
+            ItemDefs[soldiers[tar]->race].index == MONSTER_ILLUSION) {
             return 1;
         }
         return 0;

@@ -88,8 +88,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
     }
 
     /* Is this a monster? */
-    if (ItemDefs[r].type & IT_MONSTER)
-    {
+    if (ItemDefs[r].type & IT_MONSTER) {
         int mon = ItemDefs[r].index;
 		if(u->type == U_WMON)
 			name = AString(MonDefs[mon].name);
@@ -99,8 +98,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
         askill = MonDefs[mon].attackLevel;
         dskill[ATTACK_COMBAT] += MonDefs[mon].combatDefense;
 		dskill[ATTACK_RIDING] += MonDefs[mon].ridingDefense;
-        if (MonDefs[mon].energyDefense > dskill[ATTACK_ENERGY])
-        {
+        if (MonDefs[mon].energyDefense > dskill[ATTACK_ENERGY]) {
             dskill[ATTACK_ENERGY] = MonDefs[mon].energyDefense;
         }
         if (MonDefs[mon].spiritDefense > dskill[ATTACK_SPIRIT])
@@ -350,24 +348,19 @@ void Soldier::SetupCombatItems()
 
         SET_BIT( battleItems, battleType );
 
-        if( pBat->flags & BattleItemType::SPECIAL )
-        {
+        if( pBat->flags & BattleItemType::SPECIAL ) {
             special = pBat->index;
             slevel = pBat->skillLevel;
         }
 
-        if( pBat->flags & BattleItemType::SHIELD )
-        {
-            if( pBat->index == NUM_ATTACK_TYPES )
-            {
+        if( pBat->flags & BattleItemType::SHIELD ) {
+            if( pBat->index == NUM_ATTACK_TYPES ) {
                 int i;
-                for( i = 0; i < NUM_ATTACK_TYPES; i++ )
-                {
+                for( i = 0; i < NUM_ATTACK_TYPES; i++ ) {
                     //
                     // xxxxx - hmm... how should this work?
                     //
-                    if( dskill[ i ] < pBat->skillLevel )
-                    {
+                    if( dskill[ i ] < pBat->skillLevel ) {
                         dskill[ i ] = pBat->skillLevel;
                     }
                 }
@@ -377,8 +370,7 @@ void Soldier::SetupCombatItems()
                 //
                 // xxxxx - hmm... how should this work?
                 //
-                if( dskill[ pBat->index ] < pBat->skillLevel )
-                {
+                if( dskill[ pBat->index ] < pBat->skillLevel ) {
                     dskill[ pBat->index ] = pBat->skillLevel;
                 }
             }
@@ -387,8 +379,7 @@ void Soldier::SetupCombatItems()
         //
         // xxxxx - Hard-coded amulet of invulnerability.
         //
-        if( item == I_AMULETOFI )
-        {
+        if( item == I_AMULETOFI ) {
             amuletofi = 1;
         }
     }
