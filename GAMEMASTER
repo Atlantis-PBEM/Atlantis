@@ -4,8 +4,8 @@ This document describes how to compile, setup, modify and run a game of
 Atlantis.
 
 The maintainer is Anthony Briggs, who can be contacted at 
-<abriggs@iinet.net.au>. Send any feedback, suggestions, comments, etc. to 
-him. This document is heavily based on the previous gamemaster guide, 
+<abriggs@iinet.net.au>. Send any feedback, suggestions, comments, etc. 
+to him. This document is heavily based on the previous gamemaster guide, 
 which was written by JT Traub.
 
 Thanks to: JT Traub, "Mr. Mistofeles", "Draig" and "Iyhael" for their 
@@ -37,23 +37,23 @@ yahoo.com/group/atlantisdev/files/Sources/>. At the time of writing this
 Guide, the most recent release was 4.0.10e.
 
 The second option is to get a copy of the sources from CVS. Under a UNIX
-system, issue the following commands to obtain a copy of the 
-Atlantis sources:
+system, issue the following commands to obtain a copy of the Atlantis 
+sources:
 
 If you want the latest updates of the stable version 4:
 cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs login
-cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs checkout -r RELEASE_410 
-atlantis
+cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs checkout -r \ 
+RELEASE_410 atlantis
 
 If you want the 'dangerous' version 5:
 cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs login
 cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs checkout atlantis
 
-WARNING: If you are unsure about C++ and compiling from sources, or this
-is your first try at running a game, you almost certainly want to get 
-the stable version. The CVS sources (particularly version 5) contain
-many 'in progress' updates to the code, which may result in bugs and 
-other instabilities, and are not for the faint hearted.
+WARNING: If you are unsure about C++ and compiling from sources, or 
+this is your first try at running a game, you almost certainly want 
+to get the stable version. The CVS sources (particularly version 5) 
+contain many 'in progress' updates to the code, which may result in 
+bugs and other instabilities, and are not for the faint hearted.
 
 
 2. Compiling Atlantis
@@ -139,6 +139,42 @@ However, it is very easy to make a VC project to compile Atlantis:
    You'll probably want to compile the 'Checked' version in case you
    want to debug.
 
+2.2.1 Compiling Atlantis with Dev-C++ on Windows 
+      (Submitted by malakh@subdimension.com)
+
+Assuming you have Dev-C++ installed (from http://www.bloodshed.net/)
+and you have downloaded the Atlantis source code, the first thing you 
+will need to do is copy all the files from c:\dev-cpp\include\c++\
+mingw32\bits into c:\dev-cpp\include\c++\bits .
+
+Now open Dev-C++ and start a Static Library C project. Make sure you 
+select C as the language or it will not work. Then save the project as 
+i_rand.dev and name the project i_rand . Now go to Project -> Add to 
+Project. And add i_rand.c . Now go to Execute -> Compile. It should 
+compile and may tell you this is not executable. This is fine. Make 
+sure that you now have an i_rand.a in the same directory as the 
+Atlantis sources. If you do, close the i_rand project and move on.
+
+Start a new C++ console project. Save the *.dev in the same directory 
+as the *.cpp source files for Atlantis if you are using anything prior 
+to WinXP. This is to help from running into a limitation on the length 
+of commands in DOS that may prevent the linker from working. Close the 
+generated main.cpp without saving it. Now go to Project -> Add to 
+Project and add all the *.cpp sources including those in the sub 
+directory for the rules set you plan to use.
+
+Now go to Project -> Project Options, in here at the bottom where it 
+says 'Linker Options/Optional Libs or Object files:' click the Add 
+Library or Object button and find i_rand.a . Then in the same window 
+go to the Files/Directories tab then the Include Directories tab and 
+add in the paths for your atlantis sources and also a path to your 
+rules set subdirectory. Then click OK.
+
+Now go to Execute -> Compile. Be patient, this will take some time 
+to complete. You will know it is done compiling when the Compile Log 
+minimizes.
+
+You should now have an .exe of your project.
 
 2.3 The gory details (for advanced users, or the terminally curious)
 
@@ -443,4 +479,3 @@ will be added to the source, usually in gamedefs.h and rules.cpp. If you
 update your source, but not your custom game's rules.cpp file, your game
 may not run any more, or will run strangely, which will make you sad.
 Adding the new gamedefs in will make you happy again ;)
-                                                                                                  

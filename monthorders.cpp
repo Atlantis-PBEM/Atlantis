@@ -334,12 +334,6 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 	forlist(&order->targets) {
 		UnitId * id = (UnitId *) elem;
 		Unit * target = reg->GetUnitId(id,unit->faction->num);
-		int sk = ((StudyOrder *) target->monthorders)->skill;
-		// Check whether it's a valid skill to teach
-		if (SkillDefs[sk].flags & SkillType::NOTEACH) {
-			unit->Error(AString("TEACH: ") + AString(SkillDefs[sk].name) + " cannot be taught.");
-			return;
-		}
 		if (!target) {
 			order->targets.Remove(id);
 			unit->Error("TEACH: No such unit.");
@@ -365,7 +359,16 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 						order->targets.Remove(id);
 						delete id;
 					} else {
-						students += target->GetMen();
+						// Check whether it's a valid skill to teach
+						int sk = ((StudyOrder *) target->monthorders)->skill;
+						if (SkillDefs[sk].flags & SkillType::NOTEACH) {
+							unit->Error(AString("TEACH: ") + 
+									AString(SkillDefs[sk].name) + 
+									" cannot be taught.");
+							return;
+						} else {
+							students += target->GetMen();
+						}
 					}
 				}
 			}
