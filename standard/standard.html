@@ -125,7 +125,6 @@ for putting together this table of contents. <p>
 <LI><a href="#name">name</a>
 <li><a href="#noaid">noaid</a>
 <li><a href="#nocross">nocross</a>
-<li><a href="#nospoils">nospoils</a>
 <LI><a href="#option">option</a>
 <LI><a href="#password">password</a>
 <LI><a href="#pillage">pillage</a>
@@ -137,6 +136,7 @@ for putting together this table of contents. <p>
 <LI><a href="#sail">sail</a>
 <LI><a href="#sell">sell</a>
 <LI><a href="#show">show</a>
+<LI><a href="#spoils">spoils</a>
 <LI><a href="#steal">steal</a>
 <LI><a href="#study">study</a>
 <LI><a href="#tax">tax</a>
@@ -2801,20 +2801,6 @@ Set a unit to not permit itself to cross water. <p>
 </pre> <p>
 
 <hr>
-<a name="nospoils"></a>
-<h4> NOSPOILS [flag] </h4>
-NOSPOILS 1 indeicates that a unit should not stop to collect spoils after a 
-battle.  The unit will not be given any spoils which have weight. NOSPOILS 0
-cancels this.<p>
-
-Example:<p>
-Set a unit to not recieve battle spoils.<p>
-<pre>
-   NOSPOILS 1
-</pre>
-<p>
-
-<hr>
 <a name="option"> </a>
 <h4> OPTION TIMES </h4>
 <h4> OPTION NOTIMES </h4>
@@ -3007,6 +2993,27 @@ Get some information about Iron. <p>
 </pre> <p>
 
 <hr>
+<a name="spoils"></a>
+<h4> SPOILS [type] </h4>
+<h4> SPOILS </h4>
+
+The SPOILS order determines which types of spoils the unit should take
+after a battle.  The valid values for type are 'NONE', 'WALK', 'RIDE',
+'FLY' or 'ALL'.   The second form is equivalent to 'SPOILS ALL'.<p>
+
+When this command is issued, only spoils with 0 weight (at level NONE) or
+spoils which weigh less than their capacity in the specified movement mode
+(at any level other than ALL) will be picked up.  SPOILS ALL will allow
+a unit to collect any spoils which are dropped.<p>
+
+Example:<p>
+Set a unit to only pick up items which will not reduce a unit below flying
+speed.<p>
+<pre>
+    SPOILS FLY
+</pre> <p>
+
+<hr>
 <a name="steal"> </a>
 <h4> STEAL [unit] [item] </h4>
 
@@ -3108,11 +3115,11 @@ Each turn, the following sequence of events occurs: <p>
 <a href="#name">NAME</a>,
 <a href="#noaid">NOAID</a>,
 <a href="#nocross">NOCROSS</a>,
-<a href="#nospoils">NOSPOILS</a>,
 <a href="#option">OPTION</a>,
 <a href="#password">PASSWORD</a>,
-<a href="#reveal">REVEAL</a>, and
-<a href="#show">SHOW</a>
+<a href="#reveal">REVEAL</a>,
+<a href="#show">SHOW</a>, and
+<a href="#spoils">SPOILS</a>
 orders are processed.
 <li> <a href="#find">FIND</a> orders are processed.
 <li> <a href="#leave">LEAVE</a> orders are processed.

@@ -99,6 +99,7 @@ enum {
 	O_SAIL,
 	O_SELL,
 	O_SHOW,
+	O_SPOILS,
 	O_STEAL,
 	O_STUDY,
 	O_TAX,

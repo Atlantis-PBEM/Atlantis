@@ -226,6 +226,32 @@ AString Unit::GetName(int obs)
     return ret;
 }
 
+int Unit::CanGetSpoil(Item *i)
+{
+	if(!i) return 0;
+	int weight = ItemDefs[i->type].weight;
+	if(!weight) return 1; // any unit can carry 0 weight spoils
+
+	int fly = ItemDefs[i->type].fly;
+	int ride = ItemDefs[i->type].ride;
+	int walk = ItemDefs[i->type].walk;
+
+	if(flags & FLAG_NOSPOILS) return 0;
+	if((flags & FLAG_FLYSPOILS) && fly < weight) return 0; // only flying
+	if((flags & FLAG_WALKSPOILS) && walk < weight) return 0; // only walking
+	if((flags & FLAG_RIDESPOILS) && ride < weight) return 0; // only riding
+	return 1; // all spoils
+}
+
+AString Unit::SpoilsReport() {
+	AString temp;
+	if(GetFlag(FLAG_NOSPOILS)) temp = ", weightless battle spoils";
+	else if(GetFlag(FLAG_FLYSPOILS)) temp = ", flying battle spoils";
+	else if(GetFlag(FLAG_WALKSPOILS)) temp = ", walking battle spoils";
+	else if(GetFlag(FLAG_RIDESPOILS)) temp = ", riding battle spoils";
+	return temp;
+}
+
 void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
 		       int autosee)
 {
@@ -298,7 +324,7 @@ void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
         if (GetFlag(FLAG_CONSUMING_FACTION)) 
             temp += ", consuming faction's food";
 		if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
-		if (GetFlag(FLAG_NOSPOILS)) temp += ", no battle spoils";
+		temp += SpoilsReport();
     }
   
     temp += items.Report(obs,truesight,0);
@@ -323,40 +349,40 @@ void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
     f->PutStr(temp);
 }
 
-AString Unit::TemplateReport() {
-  /* Write the report */
-  AString temp;
-  temp = *name;
-  
-  if (guard == GUARD_GUARD) temp += ", on guard";
-  if (guard == GUARD_AVOID) temp += ", avoiding";
-  if (GetFlag(FLAG_BEHIND)) temp += ", behind";
-  if (reveal == REVEAL_UNIT) temp += ", revealing unit";
-  if (reveal == REVEAL_FACTION) temp += ", revealing faction";
-  if (GetFlag(FLAG_HOLDING)) temp += ", holding";
-  if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
-  if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
-  if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
-  if (GetFlag(FLAG_CONSUMING_FACTION)) 
-    temp += ", consuming faction's food";
-  if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
-  if (GetFlag(FLAG_NOSPOILS)) temp += ", no battle spoils";
-  
-  temp += items.Report(2,1,0);
-  temp += ". Skills: ";
-  temp += skills.Report(GetMen());
-  
-  if (type == U_MAGE || type == U_GUARDMAGE) {
-    temp += MageReport();
-  }
-  temp += ReadyItem();
-  temp += StudyableSkills();
-  
-  if (describe) {
-    temp += AString("; ") + *describe;
-  }
-  temp += ".";
-  return temp;
+AString Unit::TemplateReport()
+{
+	/* Write the report */
+	AString temp;
+	temp = *name;
+
+	if (guard == GUARD_GUARD) temp += ", on guard";
+	if (guard == GUARD_AVOID) temp += ", avoiding";
+	if (GetFlag(FLAG_BEHIND)) temp += ", behind";
+	if (reveal == REVEAL_UNIT) temp += ", revealing unit";
+	if (reveal == REVEAL_FACTION) temp += ", revealing faction";
+	if (GetFlag(FLAG_HOLDING)) temp += ", holding";
+	if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
+	if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
+	if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
+	if (GetFlag(FLAG_CONSUMING_FACTION)) temp += ", consuming faction's food";
+	if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
+	temp += SpoilsReport();
+
+	temp += items.Report(2,1,0);
+	temp += ". Skills: ";
+	temp += skills.Report(GetMen());
+
+	if (type == U_MAGE || type == U_GUARDMAGE) {
+		temp += MageReport();
+	}
+	temp += ReadyItem();
+	temp += StudyableSkills();
+
+	if (describe) {
+		temp += AString("; ") + *describe;
+	}
+	temp += ".";
+	return temp;
 }
 
 AString * Unit::BattleReport(int obs)

@@ -49,201 +49,205 @@ class UnitId;
 #include "object.h"
 
 enum {
-    GUARD_NONE,
-    GUARD_GUARD,
-    GUARD_AVOID,
-    GUARD_SET,
-    GUARD_ADVANCE
+	GUARD_NONE,
+	GUARD_GUARD,
+	GUARD_AVOID,
+	GUARD_SET,
+	GUARD_ADVANCE
 };
 
 enum {
-  TAX_NONE,
-  TAX_TAX,
-  TAX_PILLAGE,
-  TAX_AUTO,
+	TAX_NONE,
+	TAX_TAX,
+	TAX_PILLAGE,
+	TAX_AUTO,
 };
 
 enum {
-  REVEAL_NONE,
-  REVEAL_UNIT,
-  REVEAL_FACTION
+	REVEAL_NONE,
+	REVEAL_UNIT,
+	REVEAL_FACTION
 };
 
 enum {
-  U_NORMAL,
-  U_MAGE,
-  U_GUARD,
-  U_WMON,
-  U_GUARDMAGE,
-  U_APPRENTICE,
-  NUNITTYPES
+	U_NORMAL,
+	U_MAGE,
+	U_GUARD,
+	U_WMON,
+	U_GUARDMAGE,
+	U_APPRENTICE,
+	NUNITTYPES
 };
 
-#define FLAG_BEHIND 0x1
-#define FLAG_NOCROSS_WATER 0x2
-#define FLAG_AUTOTAX 0x4
-#define FLAG_HOLDING 0x8
-#define FLAG_NOAID 0x10
-#define FLAG_INVIS 0x20
-#define FLAG_CONSUMING_UNIT 0x40
-#define FLAG_CONSUMING_FACTION 0x80
-#define FLAG_NOSPOILS 0x100
+#define FLAG_BEHIND				0x0001
+#define FLAG_NOCROSS_WATER		0x0002
+#define FLAG_AUTOTAX			0x0004
+#define FLAG_HOLDING			0x0008
+#define FLAG_NOAID				0x0010
+#define FLAG_INVIS				0x0020
+#define FLAG_CONSUMING_UNIT		0x0040
+#define FLAG_CONSUMING_FACTION	0x0080
+#define FLAG_NOSPOILS			0x0100
+#define FLAG_FLYSPOILS			0x0200
+#define FLAG_WALKSPOILS			0x0400
+#define FLAG_RIDESPOILS			0x0800
 
 class UnitId : public AListElem {
-public:
-  UnitId();
-  ~UnitId();
-  AString Print();
-  
-  int unitnum; /* if 0, it is a new unit */
-  int alias;
-  int faction;
+	public:
+		UnitId();
+		~UnitId();
+		AString Print();
+
+		int unitnum; /* if 0, it is a new unit */
+		int alias;
+		int faction;
 };
 
 class UnitPtr : public AListElem {
-public:
-  Unit * ptr;
+	public:
+		Unit * ptr;
 };
-
 UnitPtr *GetUnitList(AList *, Unit *);
 
 class Unit : public AListElem
 {
-public:
-    Unit();
-    Unit(int,Faction *,int = 0);
-    ~Unit();
+	public:
+		Unit();
+		Unit(int,Faction *,int = 0);
+		~Unit();
 
-    void SetMonFlags();
-    void MakeWMon(char *,int,int);
-  
-    void Writeout( Aoutfile *f );
-    void Readin( Ainfile *f, AList *, ATL_VER v );
-    
-    void WriteReport(Areport *,int,int,int,int);
-	AString GetName(int);
-    AString MageReport();
-	AString ReadyItem();
-	AString StudyableSkills();
-    AString * BattleReport(int);
-    AString TemplateReport();
-  
-    void ClearOrders();
-    void ClearCastOrders();
-    void DefaultOrders(Object *);
-    void SetName(AString *);
-    void SetDescribe(AString *);
-    void PostTurn(ARegion *reg);
-    
-    int IsLeader();
-    int IsNormal();
-    int GetMons();
-    int GetMen();
-    int GetSoldiers();
-    int GetMen(int);
-    void SetMen(int,int);
-    int GetMoney();
-    void SetMoney(int);
-    int IsAlive();
+		void SetMonFlags();
+		void MakeWMon(char *,int,int);
 
-    int MaintCost();
-    void Short(int);
-	int SkillLevels();
-	void SkillStarvation();
-	Skill *GetSkillObject(int);
-	
-    int GetStealth();
-    int GetTactics();
-    int GetObservation();
-    int GetEntertainment();
-    int GetAttackRiding();
-    int GetDefenseRiding();
+		void Writeout( Aoutfile *f );
+		void Readin( Ainfile *f, AList *, ATL_VER v );
 
-    //
-    // These are rule-set specific, in extra.cpp.
-    //
-    // LLS
-    int GetSkillBonus(int);
-    int GetProductionBonus(int);
+		AString SpoilsReport(void);
+		int CanGetSpoil(Item *i);
+		void WriteReport(Areport *,int,int,int,int);
+		AString GetName(int);
+		AString MageReport();
+		AString ReadyItem();
+		AString StudyableSkills();
+		AString * BattleReport(int);
+		AString TemplateReport();
 
-    int GetSkill(int);
-    void SetSkill(int,int);
-    int GetRealSkill(int);
-    void ForgetSkill(int);
-    int CheckDepend(int,SkillDepend &s);
-    int CanStudy(int);
-    int Study(int,int); /* Returns 1 if it succeeds */
-    void AdjustSkills();
+		void ClearOrders();
+		void ClearCastOrders();
+		void DefaultOrders(Object *);
+		void SetName(AString *);
+		void SetDescribe(AString *);
+		void PostTurn(ARegion *reg);
 
-    int CanSee(ARegion *,Unit *); /* Return 1 if can see, 2 if can see
-                                     faction */
-    int CanCatch(ARegion *,Unit *);
-    int GetAttitude(ARegion *,Unit *); /* Get this unit's attitude toward
-                                          the Unit parameter */
-    int Hostile();
-    int Forbids(ARegion *,Unit *);
-    int Weight();
-    int CanFly(int);
-    int CanFly();
-    int CanRide(int);
-    int CanWalk(int);
-    int CanSwim();
-	int CanReallySwim();
-    int MoveType();
-    int CalcMovePoints();
-    int CanMoveTo(ARegion *,ARegion *);
-    int GetFlag(int);
-    void SetFlag(int,int);
-    void CopyFlags(Unit *);
-	int GetBattleItem( int batType, int index );
-	int CanUseWeapon(WeaponType *pWep, int riding);
-	int CanUseWeapon(WeaponType *pWep);
-    int Taxers();
+		int IsLeader();
+		int IsNormal();
+		int GetMons();
+		int GetMen();
+		int GetSoldiers();
+		int GetMen(int);
+		void SetMen(int,int);
+		int GetMoney();
+		void SetMoney(int);
+		int IsAlive();
 
-    void MoveUnit( Object *newobj );
+		int MaintCost();
+		void Short(int);
+		int SkillLevels();
+		void SkillStarvation();
+		Skill *GetSkillObject(int);
 
-    void Event(const AString &);
-    void Error(const AString &);
-  
-    Faction * faction;
-    Object *object;
-    AString * name;
-    AString * describe;
-    int num;
-    int type;
-    int alias;
-	int gm_alias;	/* used for gm manual creation of new units */
-    int guard;	/* Also, avoid- see enum above */
-    int reveal;
-    int flags;
-    int taxing;
-    int movepoints;
-    int canattack;
-    int nomove;
-    SkillList skills;
-    ItemList items;
-    int combat;
-	int readyItem;
-    AList oldorders;
-    int needed; /* For assessing maintenance */
-    int losses;
-    
-    /* Orders */
-    int destroy;
-    int enter;
-    UnitId * promote;
-    AList findorders;
-    AList giveorders;
-	AList withdraworders;
-    AList buyorders;
-    AList sellorders;
-    AList forgetorders;
-    CastOrder *castorders;
-    TeleportOrder *teleportorders;
-    Order * stealorders;
-    Order * monthorders;
-    AttackOrder * attackorders;
-    ARegion * advancefrom;
+		int GetStealth();
+		int GetTactics();
+		int GetObservation();
+		int GetEntertainment();
+		int GetAttackRiding();
+		int GetDefenseRiding();
+
+		//
+		// These are rule-set specific, in extra.cpp.
+		//
+		// LLS
+		int GetSkillBonus(int);
+		int GetProductionBonus(int);
+
+		int GetSkill(int);
+		void SetSkill(int,int);
+		int GetRealSkill(int);
+		void ForgetSkill(int);
+		int CheckDepend(int,SkillDepend &s);
+		int CanStudy(int);
+		int Study(int,int); /* Returns 1 if it succeeds */
+		void AdjustSkills();
+
+		int CanSee(ARegion *,Unit *); /* Return 1 if can see, 2 if can see
+										 faction */
+		int CanCatch(ARegion *,Unit *);
+		int GetAttitude(ARegion *,Unit *); /* Get this unit's attitude toward
+											  the Unit parameter */
+		int Hostile();
+		int Forbids(ARegion *,Unit *);
+		int Weight();
+		int CanFly(int);
+		int CanFly();
+		int CanRide(int);
+		int CanWalk(int);
+		int CanSwim();
+		int CanReallySwim();
+		int MoveType();
+		int CalcMovePoints();
+		int CanMoveTo(ARegion *,ARegion *);
+		int GetFlag(int);
+		void SetFlag(int,int);
+		void CopyFlags(Unit *);
+		int GetBattleItem( int batType, int index );
+		int CanUseWeapon(WeaponType *pWep, int riding);
+		int CanUseWeapon(WeaponType *pWep);
+		int Taxers();
+
+		void MoveUnit( Object *newobj );
+
+		void Event(const AString &);
+		void Error(const AString &);
+
+		Faction *faction;
+		Object *object;
+		AString *name;
+		AString *describe;
+		int num;
+		int type;
+		int alias;
+		int gm_alias; /* used for gm manual creation of new units */
+		int guard; /* Also, avoid- see enum above */
+		int reveal;
+		int flags;
+		int taxing;
+		int movepoints;
+		int canattack;
+		int nomove;
+		SkillList skills;
+		ItemList items;
+		int combat;
+		int readyItem;
+		AList oldorders;
+		int needed; /* For assessing maintenance */
+		int losses;
+
+		/* Orders */
+		int destroy;
+		int enter;
+		UnitId *promote;
+		AList findorders;
+		AList giveorders;
+		AList withdraworders;
+		AList buyorders;
+		AList sellorders;
+		AList forgetorders;
+		CastOrder *castorders;
+		TeleportOrder *teleportorders;
+		Order *stealorders;
+		Order *monthorders;
+		AttackOrder *attackorders;
+		ARegion *advancefrom;
 };
 
 #endif

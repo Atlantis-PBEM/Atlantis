@@ -72,6 +72,7 @@ char * od[] = {
   "sail",
   "sell",
   "show",
+  "spoils",
   "steal",
   "study",
   "tax",

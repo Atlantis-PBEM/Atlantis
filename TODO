@@ -67,7 +67,6 @@
    -- Add ability to set stances versus specific units, not just factions
    -- Consider having 'conditional orders' specificall 'AT x,y,z'
    -- Figure out how an autoclaim option for studying could be made to work
-   -- Improve handling of NOSPOILS
    -- Clean up spell system -- Damage spells have been parameterized,
       Object creation spells, summoning spells and 'other' spells still
 	  need some sort of parameterization and genericization so that they

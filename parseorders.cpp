@@ -627,6 +627,9 @@ void Game::ProcessOrder( int orderNum, Unit *unit, AString *o,
     case O_SHOW:
         ProcessReshowOrder( unit, o, pCheck );
         break;
+	case O_SPOILS:
+		ProcessSpoilsOrder(unit, o, pCheck);
+		break;
     case O_STEAL:
         ProcessStealOrder( unit, o, pCheck );
         break;
@@ -2225,8 +2228,41 @@ void Game::ProcessNoaidOrder(Unit * u,AString * o, OrdersCheck *pCheck )
     }
 }
 
+void Game::ProcessSpoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	/* Instant order */
+	AString *token = o->gettoken();
+	int flag = 0;
+	int val = 1;
+	if(token) {
+		if(*token == "none") flag = FLAG_NOSPOILS;
+		else if(*token == "walk") flag = FLAG_WALKSPOILS;
+		else if(*token == "ride") flag = FLAG_RIDESPOILS;
+		else if(*token == "fly") flag = FLAG_FLYSPOILS;
+		else if(*token == "all") val = 0;
+		else ParseError(pCheck, u, 0, "SPOILS: Bad argument.");
+		delete token;
+	}
+
+	if(!pCheck) {
+		/* Clear all the flags */
+		u->SetFlag(FLAG_NOSPOILS, 0);
+		u->SetFlag(FLAG_WALKSPOILS, 0);
+		u->SetFlag(FLAG_RIDESPOILS, 0);
+		u->SetFlag(FLAG_FLYSPOILS, 0);
+
+		/* Set the flag we're trying to set */
+		if(flag) {
+			u->SetFlag(flag, val);
+		}
+	}
+}
+
 void Game::ProcessNospoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
+	ParseError(pCheck, u, 0, "NOSPOILS: This command is deprecated.  "
+			"Use the 'SPOILS' command instead");
+
     /* Instant order */
     AString * token = o->gettoken();
     if (!token) {
@@ -2240,6 +2276,9 @@ void Game::ProcessNospoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
         return;
     }
     if( !pCheck ) {
+		u->SetFlag(FLAG_FLYSPOILS, 0);
+		u->SetFlag(FLAG_RIDESPOILS, 0);
+		u->SetFlag(FLAG_WALKSPOILS, 0);
         u->SetFlag(FLAG_NOSPOILS,val);
     }
 }

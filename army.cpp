@@ -814,68 +814,63 @@ void Army::DoHealLevel( Battle *b, int type, int useItems )
 void Army::Win(Battle * b,ItemList * spoils)
 {
 	int wintype;
-	if (count - NumAlive()) {
-		wintype = WIN_DEAD;
-	} else {
-		wintype = WIN_NO_DEAD;
-	}
+	if (count - NumAlive()) wintype = WIN_DEAD;
+	else wintype = WIN_NO_DEAD;
 
 	DoHeal(b);
 
 	WriteLosses(b);
 	int na = NumAlive();
-	int ns = NumSpoilers();
+	AList units;
+
 	forlist(spoils) {
-		Item * i = (Item *) elem;
-		int weight = ItemDefs[i->type].weight;
-		int t;
-		int nospoil = 0;
+		Item *i = (Item *) elem;
+		if(i && na) {
+			Unit *u;
 
-		if(weight) {
-			if(weight < ItemDefs[i->type].walk) {
-				t = na;
-			} else {
-				nospoil = 1;
-				if(ns) t = ns;
-				else t = 0;
+			// Make a list of units who can get this type of spoil
+			for(int x = 0; x < na; x++) {
+				u = soldiers[x]->unit;
+				if(u->CanGetSpoil(i)) units.Add(u);
 			}
-		} else if(!weight) {
-			t = na;
-		}
 
-		if(t) {
-			int n;
-			n = i->num / t;
-			if (n>=1) {
-				for(int x=0; x<na; x++) {
-					Unit * u = soldiers[x]->unit;
-					if((u->flags & FLAG_NOSPOILS) && nospoil) continue;
-					u->items.SetNum(i->type,u->items.GetNum(i->type) + n);
-					u->faction->DiscoverItem(i->type, 0, 1);
+			int ns = units.Num();
+			if(ns > 0) {
+				int n = i->num/ns; // Divide spoils equally
+				if(n >= 1) {
+					forlist(&units) {
+						u = (Unit *)elem;
+						u->items.SetNum(i->type, u->items.GetNum(i->type)+n);
+						u->faction->DiscoverItem(i->type, 0, 1);
+					}
 				}
-			}
-			n = i->num % t;
-			for (int x=0; x<n && ns; x++) {
-				t = getrandom(na);
-				Unit *u;
-				u = soldiers[t]->unit;
-				while ((u->flags & FLAG_NOSPOILS) && nospoil) {
-					t = getrandom(na);
-					u = soldiers[t]->unit;
+				n = i->num % ns; // allocate the remainder
+				if(n) {
+					for(int x = 0; x < n; x++) {
+						int t = getrandom(ns);
+						Unit *u = (Unit *)units.First();
+						if(u) {
+							Unit *p;
+							while(t > 0) {
+								p = (Unit *)units.Next(u);
+								if(p) u = p;
+								else break;
+								--t;
+							}
+							u->items.SetNum(i->type,u->items.GetNum(i->type)+1);
+							u->faction->DiscoverItem(i->type, 0, 1);
+						}
+					}
 				}
-				u->items.SetNum(i->type,u->items.GetNum(i->type) + 1);
-				u->faction->DiscoverItem(i->type, 0, 1);
+				units.Empty();
 			}
 		}
 	}
 
-	for(int x=0; x<count; x++) {
+	for(int x = 0; x < count; x++) {
 		Soldier * s = soldiers[x];
-		if (x<NumAlive()) {
-			s->Alive(wintype);
-		} else {
-			s->Dead();
-		}
+		if (x<NumAlive()) s->Alive(wintype);
+		else s->Dead();
 		delete s;
 	}
 }
