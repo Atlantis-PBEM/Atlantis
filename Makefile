@@ -62,10 +62,8 @@ wyreth-clean:
 	$(MAKE) GAME=wyreth clean
 
 clean:
-	if [ -d $(GAME)/obj ]; then
-		rm -f $(OBJECTS)
-		rmdir $(GAME)/obj;
-	fi
+	rm -f $(OBJECTS)
+	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
 	rm -f $(GAME)/$(GAME)
 
 FORCE:
