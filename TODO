@@ -50,7 +50,9 @@
 
 ** Items
    -- Consider adding the ability to produce trade goods.
-   -- Consider an option to disable trade goods.
+   -- Consider an option to disable trade all goods.
+   -- Consider reducing the number of trade goods to make viable routes
+      more likely.
    -- Consider Duergar's war horses [See atlantisdev post #1119]
    -- Consider having use'd items [i.e., items which are utilised by a USE
       order; may be part of an expanded magic system].
@@ -81,6 +83,8 @@
       [Suggested in atlantisdev article #57]
    -- It would be nice to have 'overwriting' errors only occur when the
       order being overridden was non repeating.
+   -- It might be nice to have "no such unit" errors only occur in
+      GIVEs if the order is non repeating (giving to caravans).
    -- Possibly modify the orders processor to replace 'NEW XX' for the
       faction which owns the unit in question (or which the unit in question
       considers ally?) with the actual unit number in templated orders.
