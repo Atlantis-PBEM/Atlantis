@@ -140,6 +140,7 @@ void Game::RunCastOrders()
   }
 }
 
+/* Moved to game.cpp, where it belongs...
 int Game::CountMages(Faction *pFac)
 {
 	int i = 0;
@@ -155,6 +156,7 @@ int Game::CountMages(Faction *pFac)
 	}
 	return(i);
 }
+*/
 
 int Game::TaxCheck(ARegion *pReg, Faction *pFac)
 {

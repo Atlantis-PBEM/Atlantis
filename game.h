@@ -134,10 +134,11 @@ private:
 	void RunOrders();
 	void ClearOrders(Faction *);
 	void MakeFactionReportLists();
-	void CountAllMages();
-	void CountAllApprentices();
-	void CountAllQuarterMasters();
-	void CountAllTacticians();
+	void CountAllSpecialists();
+	//void CountAllMages();
+	//void CountAllApprentices();
+	//void CountAllQuarterMasters();
+	//void CountAllTacticians();
 	void WriteReport();
 	// LLS - write order templates
 	void WriteTemplates();
@@ -378,6 +379,7 @@ private:
 	int CountApprentices(Faction *);
 	int CountQuarterMasters(Faction *);
 	int CountTacticians(Faction *);
+	
 	void FindDeadFactions();
 	void DeleteEmptyUnits();
 	void DeleteEmptyInRegion(ARegion *);

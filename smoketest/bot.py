@@ -9,7 +9,6 @@ attitudes = ['hostile', 'unfriendly', 'neutral', 'friendly', 'ally',]
                 
 def generateturn(report, template):
     """Given a report and a template, return a set of orders as a string."""
-    firstunit = 'no'
     orders = ''
     maxfactionfound = 0
     
@@ -43,7 +42,7 @@ def generateturn(report, template):
     
     terrainpattern = re.compile(r'''(\w+)''')
     
-    regionpattern = re.compile(r'''in\s+(.*?)'''
+    #regionpattern = re.compile(r'''in\s+(.*?)''')
     
     regionpattern = re.compile(r'''(\w+)  # initial region
 \s+                     # then a space
@@ -104,12 +103,12 @@ def generateturn(report, template):
         lineindex = report.index(line)
         if lineindex+1 < len(report) and report[lineindex+1].startswith('---'):
             #the current line must be the start of a region
-            print "Found a region:",report[lineindex]
+            #print "Found a region:",report[lineindex]
             
-            wibble = regionpattern.search(report[lineindex][:-1])
-            if wibble != None:
-                print line
-                print "Found a co-ordinate in this line!"
+            #wibble = regionpattern.search(report[lineindex][:-1])
+            #if wibble != None:
+                #print line
+                #print "Found a co-ordinate in this line!"
 
             wibble = regionpattern.search(report[lineindex][:-1])
             if wibble != None:
@@ -301,6 +300,9 @@ def generateturn(report, template):
                 itemlist=unit['skillbit'].split(',')
                 #print itemlist
                 for thingo in itemlist:
+                    thingo = thingo.strip()
+                    if thingo.startswith('Skills:'):
+                        thingo = thingo[8:]
                     if '[' in thingo:
                         #print thingo, "is a skill!"
                         unit['skills'].append(thingo)
@@ -323,6 +325,7 @@ def generateturn(report, template):
     #print unitbynum.keys()
     
     # Read each line of the template.
+    firstunit = 'no'
     for line in template:
         if line.startswith('#end'):  #end of file, or end of orders
             orders += "; Found the end!\n"
@@ -334,25 +337,24 @@ def generateturn(report, template):
             orders += "; Found a unit!\n"
             ignored, unitnumber = line.split(' ',1)
             unitnumber = int(unitnumber.strip())
-            #print ">>>", unitnumber
-            #print unitbynum[unitnumber]
+            print ">>>", unitnumber
             
             if firstunit == 'no':
                 orders += "option template map\n"
                 orders += "option notimes\n"
                 orders += "option showattitudes\n"
+                firstunit = 'found'
                 
                 #declare towards a random faction
-                decfaction = int(random.random()*maxfactionfound)
-                orders += "declare "+str(decfaction)+" "
+                #decfaction = int(random.random()*maxfactionfound)
+                #orders += "declare "+str(decfaction)+" "
                 
-                decattitude = int(random.random()*len(attitudes))
-                orders += attitudes[decattitude] + "\n"
+                #decattitude = int(random.random()*len(attitudes))
+                #orders += attitudes[decattitude] + "\n"
                 
                 #orders += "declare default hostile\n"
                 #orders += "declare 1 neutral\n"
                 #orders += "declare 2 neutral\n"
-                firstunit = 'found'
             
             #set units to avoid and behind -- hopefully that way 
             # they'll stay alive long enough for me to check that
@@ -364,10 +366,31 @@ def generateturn(report, template):
                 temp = int(random.random()*len(directions))
                 temp2 = int(random.random()*len(directions))
                 orders += "move "+directions[temp]+" "+directions[temp2]+"\n"
-            elif random.random() >= 0.1:
-                orders += "work\n"
+            #elif random.random() >= 0.6:
+            #    orders += "work\n"
+                print "Moving..."
             else:
-                orders += "study combat\n"
+                print unitbynum[unitnumber]['items']
+                print unitbynum[unitnumber]['skills']
+                combat = -1
+                for item in unitbynum[unitnumber]['skills']:
+                    if item.strip().startswith('combat'):
+                        print "Found combat skill..."
+                        combskill = re.search(r'\((\d+)\)', item)
+                        if combskill != None:
+                            print "Found combat skill: ",combskill.group(0)[1:-1]
+                            combat = int(combskill.group(0)[1:-1])
+                            print "Found combat skill: ",combat
+                print "Combat skill is ", combat
+                if combat == -1:
+                    orders += ";I don't have a combat skill!\n"
+                else:
+                    orders += ";my combat skill is "+str(combat)+"\n"
+                if combat < 60:
+                    orders += "study combat\n"
+                else:
+                    orders += "buy 1 peas\n"
+                    
             # 1. do nothing (ie work/tax if not enough silver)
             #orders += "@work\n"
             # 2. study combat/buy men (if it has enough)
@@ -379,7 +402,7 @@ def generateturn(report, template):
                 #orders += "give new "+str(unitnum)+" 100 silv"
                 formstring = "form "+str(unitnum)+"\n"
                 formstring += '  name unit "Captain Random"\n  claim 100\n  buy 1 peas\n'
-                formstring += 'end\n\n'
+                formstring += '  study combat\nend\n\n'
                 orders += formstring
     return orders
 

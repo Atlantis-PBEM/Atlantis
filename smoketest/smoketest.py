@@ -35,6 +35,8 @@ args = sys.argv
 if len(args) == 1 or "--help" in args:
     # print usage message and quit
     print "You need to feed smoketest some arguments to tell it what to do:"
+    print "  --turns=...      The number of turns that you want to run"
+    print "  --players=...    The number of test players in the game"
     print "  --cvs            Download up-to-date sources from the CVS"
     print "  --make           Make a new version of the code"
     print "  --test           Test the code"

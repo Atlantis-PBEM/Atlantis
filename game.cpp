@@ -1419,6 +1419,8 @@ void Game::WriteReport()
 	Areport f;
 
 	MakeFactionReportLists();
+	CountAllSpecialists();
+	/*
 	CountAllMages();
 	if(Globals->APPRENTICES_EXIST)
 		CountAllApprentices();
@@ -1426,6 +1428,7 @@ void Game::WriteReport()
 		CountAllQuarterMasters();
 	if (Globals->TACTICS_NEEDS_WAR)
 		CountAllTacticians();
+	*/
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
 		AString str = "report.";
@@ -1599,6 +1602,38 @@ Unit *Game::GetUnit(int num)
 	return(ppUnits[num]);
 }
 
+
+void Game::CountAllSpecialists()
+{
+	forlist(&factions) {
+		((Faction *) elem)->nummages = 0;
+		((Faction *) elem)->numqms = 0;
+		((Faction *) elem)->numtacts = 0;
+		((Faction *) elem)->numapprentices = 0;
+	}
+
+	{
+		forlist(&regions) {
+			ARegion *r = (ARegion *) elem;
+			forlist(&r->objects) {
+				Object *o = (Object *) elem;
+				forlist(&o->units) {
+					Unit *u = (Unit *) elem;
+					if (u->type == U_MAGE) u->faction->nummages++;
+					if (u->GetSkill(S_QUARTERMASTER))
+						u->faction->numqms++;
+					if (u->GetSkill(S_TACTICS) == 5)
+						u->faction->numtacts++;
+					if (u->type == U_APPRENTICE)
+						u->faction->numapprentices++;
+				}
+			}
+		}
+	}
+}
+
+
+/*
 void Game::CountAllMages()
 {
 	forlist(&factions) {
@@ -1662,6 +1697,7 @@ void Game::CountAllTacticians()
 		}
 	}
 }
+*/
 
 // LLS
 void Game::UnitFactionMap()
@@ -1705,6 +1741,7 @@ void Game::RemoveInactiveFactions()
 	}
 }
 
+/*
 void Game::CountAllApprentices()
 {
 	if(!Globals->APPRENTICES_EXIST) return;
@@ -1725,6 +1762,23 @@ void Game::CountAllApprentices()
 			}
 		}
 	}
+}
+*/
+
+int Game::CountMages(Faction *pFac)
+{
+	int i = 0;
+	forlist(&regions) {
+		ARegion *r = (ARegion *) elem;
+		forlist(&r->objects) {
+			Object *o = (Object *) elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *) elem;
+				if (u->faction == pFac && u->type == U_MAGE) i++;
+			}
+		}
+	}
+	return(i);
 }
 
 int Game::CountQuarterMasters(Faction *pFac)
