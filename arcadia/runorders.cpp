@@ -320,41 +320,41 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 	Unit *tar = r->GetUnitId(so->target, u->faction->num);
 
 	if (!tar) {
-		u->Error("ASSASSINATE: Invalid unit given.");
+		u->Error("ASSASSINATE: Invalid unit given.", so->quiet);
 		return;
 	}
 	if (!tar->IsReallyAlive()) {
-		u->Error("ASSASSINATE: Invalid unit given.");
+		u->Error("ASSASSINATE: Invalid unit given.", so->quiet);
 		return;
 	}
 
 	// New rule -- You can only assassinate someone you can see
 	if (!u->CanSee(r, tar)) {
-		u->Error("ASSASSINATE: Invalid unit given.");
+		u->Error("ASSASSINATE: Invalid unit given.", so->quiet);
 		return;
 	}
 
 	if (tar->type == U_GUARD || tar->type == U_WMON ||
 			tar->type == U_GUARDMAGE) {
 		u->Error("ASSASSINATE: Can only assassinate other player's "
-				"units.");
+				"units.", so->quiet);
 		return;
 	}
 
 	if (u->GetMen() != 1) {
-		u->Error("ASSASSINATE: Must be executed by a 1-man unit.");
+		u->Error("ASSASSINATE: Must be executed by a 1-man unit.", so->quiet);
 		return;
 	}
 	
 	if (u->IsMage() && tar->IsMage()) {
-        u->Error("ASSASSINATE: Heros cannot assassinate other heros");
+        u->Error("ASSASSINATE: Heros cannot assassinate other heros", so->quiet);
         return;
     }
     
     int def = tar->GetSkill(S_SECSIGHT);
     while(def > 0) {
         if(getrandom(2)) {
-            u->Error("ASSASSINATE: Attempt is foiled by target's second sight");
+            u->Error("ASSASSINATE: Attempt is foiled by target's second sight", so->quiet);
             return;
         }
         def--;
@@ -423,32 +423,32 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	Unit *tar = r->GetUnitId(so->target, u->faction->num);
 
 	if (!tar) {
-		u->Error("STEAL: Invalid unit given.");
+		u->Error("STEAL: Invalid unit given.", so->quiet);
 		return;
 	}
 
 	// New RULE!! You can only steal from someone you can see.
 	if(!u->CanSee(r, tar)) {
-		u->Error("STEAL: Invalid unit given.");
+		u->Error("STEAL: Invalid unit given.", so->quiet);
 		return;
 	}
 
 	if (tar->type == U_GUARD || tar->type == U_WMON ||
 			tar->type == U_GUARDMAGE) {
 		u->Error("STEAL: Can only steal from other player's "
-				"units.");
+				"units.", so->quiet);
 		return;
 	}
 
 	if (u->GetMen() != 1) {
-		u->Error("STEAL: Must be executed by a 1-man unit.");
+		u->Error("STEAL: Must be executed by a 1-man unit.", so->quiet);
 		return;
 	}
 	
     int def = tar->GetSkill(S_SECSIGHT);
     while(def > 0) {
         if(getrandom(2)) {
-            u->Error("ASSASSINATE: Attempt is foiled by target's second sight");
+            u->Error("ASSASSINATE: Attempt is foiled by target's second sight", so->quiet);
             return;
         }
         def--;
@@ -965,14 +965,14 @@ void Game::RunPromoteOrders()
 		r = (ARegion *)elem;
 		forlist(&r->objects) {
 			o = (Object *)elem;
-			if (o->type != O_DUMMY) {
+//			if (o->type != O_DUMMY) {     //BS mod - allow promote in open area.
 				u = o->GetOwner();
 				if(u && u->promote) {
 					Do1PromoteOrder(o, u);
 					delete u->promote;
 					u->promote = 0;
 				}
-			}
+//			}
 		}
 	}
 	/* Now do any evict orders */
@@ -1002,23 +1002,23 @@ void Game::RunPromoteOrders()
 				forlist(&o->units) {
 					u = (Unit *) elem;
 					if (u->promote) {
-						if (o->type != O_DUMMY) {
-							u->Error("PROMOTE: Must be owner");
+//						if (o->type != O_DUMMY) {
+							u->Error("PROMOTE: Must be owner", u->promotequiet);
 							delete u->promote;
 							u->promote = 0;
-						} else {
-							u->Error("PROMOTE: Can only promote inside structures.");
-							delete u->promote;
-							u->promote = 0;
-						}
+//						} else {
+//							u->Error("PROMOTE: Can only promote inside structures.", u->promotequiet);
+//							delete u->promote;
+//							u->promote = 0;
+//						}
 					}
 					if (u->evictorders) {
 						if (o->type != O_DUMMY) {
-							u->Error("EVICT: Must be owner");
+							u->Error("EVICT: Must be owner",u->evictorders->quiet);
 							delete u->evictorders;
 							u->evictorders = 0;
 						} else {
-							u->Error("EVICT: Can only evict inside structures.");
+							u->Error("EVICT: Can only evict inside structures.",u->evictorders->quiet);
 							delete u->evictorders;
 							u->evictorders = 0;
 						}
@@ -1033,7 +1033,7 @@ void Game::Do1PromoteOrder(Object *obj, Unit *u)
 {
 	Unit *tar = obj->GetUnitId(u->promote, u->faction->num);
 	if (!tar) {
-		u->Error("PROMOTE: Can't find target.");
+		u->Error("PROMOTE: Can't find target.", u->promotequiet);
 		return;
 	}
 	obj->units.Remove(tar);
@@ -1053,7 +1053,7 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 		if(obj->IsBoat() &&
 			(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
 			(!tar->CanReallySwim() || tar->GetFlag(FLAG_NOCROSS_WATER))) {
-			u->Error("EVICT: Cannot forcibly evict units over ocean.");
+			u->Error("EVICT: Cannot forcibly evict units over ocean.", ord->quiet);
 			continue;
 		}
 		Object *to = obj->region->GetDummy();
@@ -1470,7 +1470,7 @@ void Game::RunSellOrders()
     					}   
 				    } else {
     					forlist((&u->sellorders)) {
-    					    u->Error("SELL: Can't buy that.");
+    					    u->Error("SELL: Can't sell that.");
     					}
 					}
 					u->sellorders.DeleteAll();
@@ -1496,7 +1496,7 @@ int Game::GetSellAmount(ARegion *r, Market *m)
 					if (o->num > u->items.CanSell(o->item)) {
 						o->num = u->items.CanSell(o->item);
 						u->Error("SELL: Unit attempted to sell more than "
-								"it had.");
+								"it had.", o->quiet);
 					}
 					if (o->num < 0) o->num = 0;
 					u->items.Selling(o->item, o->num);
@@ -1588,64 +1588,119 @@ void Game::RunBuyOrders()
 
 int Game::GetBuyAmount(ARegion *r, Market *m)
 {
+    //cycle through and make sure each faction's orders are legal first!
+    forlist(&factions) {
+        Faction * fac = (Faction *) elem;
+        int sharedsilver = 0;
+        int shareditembuys = 0;
+    	forlist((&r->objects)) {
+    		Object *obj = (Object *) elem;
+    		forlist((&obj->units)) {
+    			Unit *u = (Unit *) elem;
+    			if(u->faction != fac) continue;
+    			if(!sharedsilver && u->GetFlag(FLAG_SHARING)) sharedsilver = u->GetSharedMoney();
+    			forlist ((&u->buyorders)) {
+    				BuyOrder *o = (BuyOrder *) elem;
+    				if (o->item == m->item) {
+    					if (ItemDefs[o->item].type & IT_MAN) {
+    						if (u->type == U_MAGE) {
+    							u->Error("BUY: Heroes can't recruit more men.", o->quiet);
+    							o->num = 0;
+    						}
+    						if(u->type == U_APPRENTICE) {
+    							u->Error("BUY: Apprentices can't recruit more "
+    									"men.", o->quiet);
+    							o->num = 0;
+    						}
+    						// XXX: there has to be a better way
+    						if (u->GetRealSkill(S_QUARTERMASTER)) {
+    							u->Error("BUY: Quartermasters can't recruit more "
+    									"men.", o->quiet);
+    							o->num = 0;
+    						}
+    						if (Globals->TACTICS_NEEDS_WAR && u->GetRealSkill(S_TACTICS) == 5) {
+    							u->Error("BUY: Tacticians can't recruit more "
+    									"men.", o->quiet);       //Why not? They wouldn't be a TACT 5 unit anymore if they did!
+    							o->num = 0;
+    						}
+    						if (((ItemDefs[o->item].type & IT_LEADER) &&
+    								u->IsNormal()) ||
+    								(!(ItemDefs[o->item].type & IT_LEADER) &&
+    								 u->IsLeader())) {
+    							u->Error("BUY: Can't mix leaders and normal men.", o->quiet);
+    							o->num = 0;
+    						}
+    					}
+    					if (ItemDefs[o->item].type & IT_TRADE) {
+    						if(!TradeCheck(r, u->faction)) {
+    							u->Error("BUY: Can't buy trade items in that "
+    									"many regions.", o->quiet);
+    							o->num = 0;
+    						}
+    					}
+    					
+    					
+    					
+    					if (o->num == -1) {
+    						o->num = u->GetSharedMoney()/m->price;       //here "ALL" orders draw on shared money ... should they?
+    					}
+    					if (o->num * m->price > u->GetSharedMoney()) {
+    						o->num = u->GetSharedMoney() / m->price;
+    						u->Error("BUY: Unit attempted to buy more than it "
+    								"could afford.", o->quiet);
+    					}
+    					//we want to add the orders to faction's total shared-money orders
+    					if(u->GetFlag(FLAG_SHARING)) shareditembuys += o->num*m->price; //this is the amount of the order drawing on shared money
+    					else if(o->num * m->price > u->GetMoney()) shareditembuys += o->num*m->price - u->GetMoney(); //this is the amount of the order drawing on shared money
+    				}
+    				if (o->num < 1 && o->num != -1) {
+    					u->buyorders.Remove(o);
+    					delete o;
+    				}
+    			}
+    		}
+    	}
+    //if we are attempting to buy more items with shared silver than we have shared silver, we need to reduce our orders so we don't try buying more than we can afford
+        if(sharedsilver < shareditembuys) {
+            forlist((&r->objects)) {
+        		Object *obj = (Object *) elem;
+        		forlist((&obj->units)) {
+        			Unit *u = (Unit *) elem;
+        			if(sharedsilver >= shareditembuys) continue; //we have closed the gap, no need to deduct more
+        			forlist ((&u->buyorders)) {
+        				BuyOrder *o = (BuyOrder *) elem;
+        				if (o->item == m->item) {
+                            int ownmoney = 0;
+                            if(!u->GetFlag(FLAG_SHARING)) ownmoney = u->GetMoney();
+                            int excess = o->num - (ownmoney/m->price);
+                            //work out how much we can buy with our 'fraction' of the shared silver
+                            int newamount = excess * sharedsilver / shareditembuys;
+                            o->num -= (excess-newamount);
+                            //count the money spent here as this unit's own money, removing both items and money from the temporary share 'pool'. However, don't claim it for real because we may not be able to buy the items in the end
+                            shareditembuys -= excess;
+                            sharedsilver -= (o->num*m->price - ownmoney); //subtracting the amount we need to claim
+                        }
+        				if (o->num < 1 && o->num != -1) {
+		        			u->buyorders.Remove(o);
+				        	delete o;
+        				}
+                    }
+                }
+            }
+        }
+    }
+    
+    //we now know that all factions are attempting to buy within the limits of what they can afford.
+    //also, no need to check legality of purchase - that's done above
+    
 	int num = 0;
-	forlist((&r->objects)) {
+	forlist_reuse((&r->objects)) {
 		Object *obj = (Object *) elem;
 		forlist((&obj->units)) {
 			Unit *u = (Unit *) elem;
 			forlist ((&u->buyorders)) {
 				BuyOrder *o = (BuyOrder *) elem;
-				if (o->item == m->item) {
-					if (ItemDefs[o->item].type & IT_MAN) {
-						if (u->type == U_MAGE) {
-							u->Error("BUY: Mages can't recruit more men.");
-							o->num = 0;
-						}
-						if(u->type == U_APPRENTICE) {
-							u->Error("BUY: Apprentices can't recruit more "
-									"men.");
-							o->num = 0;
-						}
-						// XXX: there has to be a better way
-						if (u->GetRealSkill(S_QUARTERMASTER)) {
-							u->Error("BUY: Quartermasters can't recruit more "
-									"men.");
-							o->num = 0;
-						}
-						if (Globals->TACTICS_NEEDS_WAR && u->GetRealSkill(S_TACTICS) == 5) {
-							u->Error("BUY: Tacticians can't recruit more "
-									"men.");       //Why not? They wouldn't be a TACT 5 unit anymore if they did!
-							o->num = 0;
-						}
-						if (((ItemDefs[o->item].type & IT_LEADER) &&
-								u->IsNormal()) ||
-								(!(ItemDefs[o->item].type & IT_LEADER) &&
-								 u->IsLeader())) {
-							u->Error("BUY: Can't mix leaders and normal men.");
-							o->num = 0;
-						}
-					}
-					if (ItemDefs[o->item].type & IT_TRADE) {
-						if(!TradeCheck(r, u->faction)) {
-							u->Error("BUY: Can't buy trade items in that "
-									"many regions.");
-							o->num = 0;
-						}
-					}
-					if (o->num == -1) {
-						o->num = u->GetMoney()/m->price;
-					}
-					if (o->num * m->price > u->GetMoney()) {
-						o->num = u->GetMoney() / m->price;
-						u->Error("BUY: Unit attempted to buy more than it "
-								"could afford.");
-					}
-					num += o->num;
-				}
-				if (o->num < 1 && o->num != -1) {
-					u->buyorders.Remove(o);
-					delete o;
-				}
+				if (o->item == m->item) num += o->num;
 			}
 		}
 	}
@@ -1703,7 +1758,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 					}
 					u->items.SetNum(o->item, u->items.GetNum(o->item) + temp);
 					u->faction->DiscoverItem(o->item, 0, 1);
-					u->SetMoney(u->GetMoney() - (temp * m->price * (20-bonus) + 19) / 20);
+					u->ConsumeSharedMoney((temp * m->price * (20-bonus) + 19) / 20);
 					u->buyorders.Remove(o);
 					u->Event(AString("Buys ") + ItemString(o->item, temp)
 							+ " at $" + (m->price * (20-bonus) + 19) / 20 + " each.");
@@ -2190,13 +2245,13 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 	int cost = (ItemDefs[itm].baseprice *5/2)*amt;
 
 	if(r->type == R_NEXUS) {
-		u->Error("WITHDRAW: Withdraw does not work in the Nexus.");
+		u->Error("WITHDRAW: Withdraw does not work in the Nexus.", o->quiet);
 		return 1;
 	}
 
 	if (cost > u->faction->unclaimed) {
 		u->Error(AString("WITHDRAW: Too little unclaimed silver to withdraw ")+
-				ItemString(itm, amt)+".");
+				ItemString(itm, amt)+".", o->quiet);
 		return 0;
 	}
 
@@ -2204,7 +2259,7 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 		int cur = u->items.GetNum(itm) + amt;
 		if (cur > ItemDefs[itm].max_inventory) {
 			u->Error(AString("WITHDRAW: Unit cannot have more than ")+
-					ItemString(itm, ItemDefs[itm].max_inventory));
+					ItemString(itm, ItemDefs[itm].max_inventory), o->quiet);
 			return 0;
 		}
 	}
@@ -2232,7 +2287,7 @@ int Game::DoWishdrawOrder(ARegion *r, Unit *u, WishdrawOrder *o)
 		int cur = u->items.GetNum(itm) + amt;
 		if (cur > ItemDefs[itm].max_inventory) {
 			u->Error(AString("WISHDRAW: Unit cannot have more than ")+
-					ItemString(itm, ItemDefs[itm].max_inventory));
+					ItemString(itm, ItemDefs[itm].max_inventory), o->quiet);
 			return 0;
 		}
 	}
@@ -2258,22 +2313,22 @@ int Game::DoWishskillOrder(ARegion *r, Unit *u, WishskillOrder *o)
 
 	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->type != U_MAGE) {
 		if(u->type == U_APPRENTICE) {
-			u->Error("WISHSKILL: An apprentice cannot be made into an mage.");
+			u->Error("WISHSKILL: An apprentice cannot be made into an mage.", o->quiet);
 			return 0;
 		}
 		if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 			if (CountMages(u->faction) >= AllowedMages(u->faction)) {
-				u->Error("WISHSKILL: Can't have another magician.");
+				u->Error("WISHSKILL: Can't have another magician.", o->quiet);
 				return 0;
 			}
 		}
 		if (u->GetMen() != 1) {
-			u->Error("WISHSKILL: Only 1-man units can be magicians.");
+			u->Error("WISHSKILL: Only 1-man units can be magicians.", o->quiet);
 			return 0;
 		}
 		if(!(Globals->MAGE_NONLEADERS)) {
 			if (u->IsLeader() != 1) {
-				u->Error("WISHSKILL: Only leaders may study magic.");
+				u->Error("WISHSKILL: Only leaders may study magic.", o->quiet);
 				return 0;
 			}
 		}
@@ -2283,23 +2338,23 @@ int Game::DoWishskillOrder(ARegion *r, Unit *u, WishskillOrder *o)
 	if((SkillDefs[sk].flags&SkillType::APPRENTICE) &&
 			u->type != U_APPRENTICE) {
 		if(u->type == U_MAGE) {
-			u->Error("WISHSKILL: A mage cannot be made into an apprentice.");
+			u->Error("WISHSKILL: A mage cannot be made into an apprentice.", o->quiet);
 			return 0;
 		}
 
 		if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 			if(CountApprentices(u->faction)>=AllowedApprentices(u->faction)) {
-				u->Error("WISHSKILL: Can't have another apprentice.");
+				u->Error("WISHSKILL: Can't have another apprentice.", o->quiet);
 				return 0;
 			}
 		}
 		if(u->GetMen() != 1) {
-			u->Error("WISHSKILL: Only 1-man units can be apprentices.");
+			u->Error("WISHSKILL: Only 1-man units can be apprentices.", o->quiet);
 			return 0;
 		}
 		if(!(Globals->MAGE_NONLEADERS)) {
 			if(u->IsLeader() != 1) {
-				u->Error("WISHSKILL: Only leaders may be apprentices.");
+				u->Error("WISHSKILL: Only leaders may be apprentices.", o->quiet);
 				return 0;
 			}
 		}
@@ -2310,20 +2365,20 @@ int Game::DoWishskillOrder(ARegion *r, Unit *u, WishskillOrder *o)
 			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)) {
 			if (CountQuarterMasters(u->faction) >=
 					AllowedQuarterMasters(u->faction)) {
-				u->Error("WISHSKILL: Can't have another quartermaster.");
+				u->Error("WISHSKILL: Can't have another quartermaster.", o->quiet);
 				return 0;
 			}
 			if(u->GetMen() != 1) {
-				u->Error("WISHSKILL: Only 1-man units can be quartermasters.");
+				u->Error("WISHSKILL: Only 1-man units can be quartermasters.", o->quiet);
 				return 0;
 			}
 	}
 
-	if(Globals->SKILL_LIMIT_NONLEADERS && !u->IsLeader()) {
+	if(Globals->SKILL_LIMIT_NONLEADERS && u->IsNormal()) {
 		if (u->skills.Num()) {
 			Skill * s = (Skill *) u->skills.First();
 			if (s->type != sk) {
-				u->Error("WISHSKILL: Can know only 1 skill.");
+				u->Error("WISHSKILL: Can know only 1 skill.", o->quiet);
 				return 0;
 			}
 		}
@@ -2389,7 +2444,7 @@ void Game::DoBankOrder(ARegion *r, Unit *u, BankOrder *o)
 	int fee;
 
 	if(r->type == R_NEXUS) {
-		u->Error("BANK: does not work in the Nexus.");
+		u->Error("BANK: does not work in the Nexus.", o->quiet);
 		u->bankorders.Remove(o);
 		return;
 	}
@@ -2420,12 +2475,12 @@ void Game::DoBankOrder(ARegion *r, Unit *u, BankOrder *o)
 		if (ObjectDefs[O_OBANK].flags & ObjectType::DISABLED) {
 			// if banks are disabled, inbank will be 1, so ignore it
 			//FIXME
-			u->Error("BANK1: A unit is on guard - banking is not allowed.");
+			u->Error("BANK1: A unit is on guard - banking is not allowed.", o->quiet);
 			u->bankorders.Remove(o);
 			return;
 		} else { // pay attention to inbank
 			if (!inbank) { // if a unit is in a bank, then allow nevertheless
-				u->Error("BANK2: A unit is on guard - banking is not allowed."); //FIXME
+				u->Error("BANK2: A unit is on guard - banking is not allowed.", o->quiet); //FIXME
 				u->bankorders.Remove(o);
 				return;
 			}
@@ -2434,12 +2489,12 @@ void Game::DoBankOrder(ARegion *r, Unit *u, BankOrder *o)
 
 	if(!u->object->region->town && (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)) {
 		if (ObjectDefs[O_OBANK].flags & ObjectType::DISABLED) { // if banks are disabled, inbank will be 1, so ignore it
-			u->Error("BANK: Unit is not in a village, town or city.");
+			u->Error("BANK: Unit is not in a village, town or city.", o->quiet);
 			u->bankorders.Remove(o);
 			return;
 		} else { // pay attention to inbank
 			if (!inbank) { // if a unit is in a bank, then allow nevertheless
-				u->Error("BANK: Unit is not in a village, town or city.");
+				u->Error("BANK: Unit is not in a village, town or city.", o->quiet);
 				u->bankorders.Remove(o);
 				return;
 			}
@@ -2447,7 +2502,7 @@ void Game::DoBankOrder(ARegion *r, Unit *u, BankOrder *o)
 	}
 
 	if ((amt > u->faction->bankaccount) && (what == 1)) {
-		u->Error(AString("BANK: Too little silver in the bank to withdraw."));
+		u->Error(AString("BANK: Too little silver in the bank to withdraw."), o->quiet);
 		u->bankorders.Remove(o);
 		return;
 	}
@@ -2456,12 +2511,12 @@ void Game::DoBankOrder(ARegion *r, Unit *u, BankOrder *o)
 			AString temp = "BANK: Withdrawal limited to ";
 			temp += max;
 			temp += " silver.";
-			u->Error(temp);
+			u->Error(temp, o->quiet);
 			amt = max;
 		}
 	} else { // deposit
 		if (u->items.GetNum(I_SILVER) == 0) {
-			u->Error(AString("BANK: No silver available."));
+			u->Error(AString("BANK: No silver available."), o->quiet);
 			u->bankorders.Remove(o);
 			return;
 		} else {
@@ -2469,7 +2524,7 @@ void Game::DoBankOrder(ARegion *r, Unit *u, BankOrder *o)
 				AString temp = "BANK: Deposit limited to ";
 				temp += max;
 				temp += " silver.";
-				u->Error(temp);
+				u->Error(temp, o->quiet);
 				amt = max;
 			}
 			if (u->items.GetNum(I_SILVER) < amt)
@@ -2541,7 +2596,7 @@ void Game::DoGiveOrders()
 								}
 							}
 						} else {
-							u->Error("GIVE: Invalid item.");
+							u->Error("GIVE: Invalid item.", o->quiet);
 						}
 					} else if (DoGiveOrder(r, u, o)) {
 						break;
@@ -2585,7 +2640,7 @@ void Game::DoSendOrders()
 								}
 							}
 						} else {
-							u->Error("SEND: Invalid item.");
+							u->Error("SEND: Invalid item.", o->quiet);
 						}
 					} else if (DoSendOrder(r, u, o)) {
 						break;
@@ -2641,7 +2696,7 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 	Unit *t = r->GetUnitId(o->target, u->faction->num);
 	if (!t) {
 		u->Error(AString("EXCHANGE: Nonexistent target (") +
-				o->target->Print() + ").");
+				o->target->Print() + ").", o->quiet);
 		u->exchangeorders.Remove(o);
 		return;
 	}
@@ -2649,26 +2704,26 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 	// Check each Item can be given
 	if(ItemDefs[o->giveItem].flags & ItemType::CANTGIVE) {
 		u->Error(AString("EXCHANGE: Can't trade ") +
-				ItemDefs[o->giveItem].names + ".");
+				ItemDefs[o->giveItem].names + ".", o->quiet);
 		u->exchangeorders.Remove(o);
 		return;
 	}
 
 	if(ItemDefs[o->expectItem].flags & ItemType::CANTGIVE) {
 		u->Error(AString("EXCHANGE: Can't trade ") +
-				ItemDefs[o->expectItem].names + ".");
+				ItemDefs[o->expectItem].names + ".", o->quiet);
 		u->exchangeorders.Remove(o);
 		return;
 	}
 
 	if (ItemDefs[o->giveItem].type & IT_MAN) {
-		u->Error("EXCHANGE: Exchange aborted.  Men may not be traded.");
+		u->Error("EXCHANGE: Exchange aborted.  Men may not be traded.", o->quiet);
 		u->exchangeorders.Remove(o);
 		return;
 	}
 
 	if (ItemDefs[o->expectItem].type & IT_MAN) {
-		u->Error("EXCHANGE: Exchange aborted. Men may not be traded.");
+		u->Error("EXCHANGE: Exchange aborted. Men may not be traded.", o->quiet);
 		u->exchangeorders.Remove(o);
 		return;
 	}
@@ -2676,7 +2731,7 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 	// New RULE -- Must be able to see unit to give something to them!
 	if(!u->CanSee(r, t)) {
 		u->Error(AString("EXCHANGE: Nonexistent target (") +
-				o->target->Print() + ").");
+				o->target->Print() + ").", o->quiet);
 		return;
 	}
 	// Check other unit has enough to give
@@ -2707,11 +2762,11 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 						t->Error(AString("EXCHANGE: Not giving enough. ") +
 								"Expecting " +
 								ItemString(o->expectItem, o->expectAmount) +
-								".");
+								".", o->quiet);
 						u->Error(AString("EXCHANGE: Exchange aborted. ") +
 								"Not enough recieved. Expecting " +
 								ItemString(o->expectItem, o->expectAmount) +
-								".");
+								".", o->quiet);
 						tOrder->exchangeStatus = 0;
 						o->exchangeStatus = 0;
 						return;
@@ -2719,11 +2774,11 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 						t->Error(AString("EXCHANGE: Exchange aborted. Too ") +
 								"much given. Expecting " +
 								ItemString(o->expectItem, o->expectAmount) +
-								".");
+								".", o->quiet);
 						u->Error(AString("EXCHANGE: Exchange aborted. Too ") +
 								"much offered. Expecting " +
 								ItemString(o->expectItem, o->expectAmount) +
-								".");
+								".", o->quiet);
 						tOrder->exchangeStatus = 0;
 						o->exchangeStatus = 0;
 					} else if (tOrder->giveAmount == o->expectAmount)
@@ -2767,12 +2822,12 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 	if (!exchangeOrderFound) {
 		if(!u->CanSee(r, t)) {
 			u->Error(AString("EXCHANGE: Nonexistent target (") +
-					o->target->Print() + ").");
+					o->target->Print() + ").", o->quiet);
 			u->exchangeorders.Remove(o);
 			return;
 		} else {
 			u->Error("EXCHANGE: target unit did not issue a matching "
-					"exchange order.");
+					"exchange order.", o->quiet);
 			u->exchangeorders.Remove(o);
 			return;
 		}
@@ -2784,14 +2839,14 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	// Check there is enough to give
 	int amt = o->amount;
 	if (amt != -2 && amt > u->items.GetNum(o->item)) {
-		u->Error("GIVE: Not enough.");
+		u->Error("GIVE: Not enough.", o->quiet);
 		amt = u->items.GetNum(o->item);
 	} else if (amt == -2) {
 		amt = u->items.GetNum(o->item);
 		if(o->except) {
 			if(o->except > amt) {
 				amt = 0;
-				u->Error("GIVE: EXCEPT value greater than amount on hand.");
+				u->Error("GIVE: EXCEPT value greater than amount on hand.", o->quiet);
 			} else {
 				amt = amt - o->except;
 			}
@@ -2803,7 +2858,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		if (amt == -1) {
             Faction *civfac = GetFaction(&factions, peasantfaction);
             if(!civfac) {
-    			u->Error("Can't discard a whole unit.");
+    			u->Error("Can't discard a whole unit.", o->quiet);
     			return 0;
 			}
     		u->Event(AString("Gives unit to ") + *(civfac->name) + ".");
@@ -2818,9 +2873,14 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		}
 
 		if (amt < 0) {
-			u->Error("Cannot give a negative number of items.");
+			u->Error("Cannot give a negative number of items.", o->quiet);
 			return 0;
 		}
+		
+		if(ItemDefs[o->item].flags & ItemType::NEVERLOST) {
+            u->Error("Cannot discard that item.", o->quiet);
+            return 0;
+        }
 
 		AString temp = "Discards ";
 		if (ItemDefs[o->item].type & IT_MAN) {
@@ -2853,13 +2913,13 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	Unit *t = r->GetUnitId(o->target, u->faction->num);
 	if (!t) {
 		u->Error(AString("GIVE: Nonexistent target (") + o->target->Print() +
-				").");
+				").", o->quiet);
 		return 0;
 	}
 
 	if(u == t) {
 		u->Error(AString("GIVE: Attempt to give ")+ItemString(o->item, amt)+
-				" to self.");
+				" to self.", o->quiet);
 		return 0;
 	}
 
@@ -2867,14 +2927,14 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	if(!u->CanSee(r, t) &&
 			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
 		u->Error(AString("GIVE: Nonexistent target (") + o->target->Print() +
-				").");
+				").", o->quiet);
 		return 0;
 	}
 
 	if (o->item != I_SILVER &&
 			t->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
 	    //This eliminates guards, monsters, ghosts and peasant factions.
-		u->Error("GIVE: Target is not a member of a friendly faction.");
+		u->Error("GIVE: Target is not a member of a friendly faction.", o->quiet);
 		return 0;
 	}
 
@@ -2884,7 +2944,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		if (u->type == U_MAGE) {
 			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 				if (CountMages(t->faction) >= AllowedMages(t->faction)) {
-					u->Error("GIVE: Faction has too many mages.");
+					u->Error("GIVE: Faction has too many mages.", o->quiet);
 					return 0;
 				}
 			}
@@ -2893,7 +2953,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 				if(CountApprentices(t->faction) >=
 						AllowedApprentices(t->faction)){
-					u->Error("GIVE: Faction has too many apprentices.");
+					u->Error("GIVE: Faction has too many apprentices.", o->quiet);
 					return 0;
 				}
 			}
@@ -2904,7 +2964,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
 					if (CountQuarterMasters(t->faction) >=
 							AllowedQuarterMasters(t->faction)) {
-						u->Error("GIVE: Faction has too many quartermasters.");
+						u->Error("GIVE: Faction has too many quartermasters.", o->quiet);
 						return 0;
 					}
 				}
@@ -2916,7 +2976,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				if (Globals->TACTICS_NEEDS_WAR) {
 					if (CountTacticians(t->faction) >=
 							AllowedTacticians(t->faction)) {
-						u->Error("GIVE: Faction has too many tacticians.");
+						u->Error("GIVE: Faction has too many tacticians.", o->quiet);
 						return 0;
 					}
 				}
@@ -2934,7 +2994,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 		if (notallied && u->monthorders && u->monthorders->type == O_MOVE &&
 				((MoveOrder *) u->monthorders)->advancing) {
-			u->Error("Unit cannot advance after being given.");
+			u->Error("Unit cannot advance after being given.", 0);
 			delete u->monthorders;
 			u->monthorders = 0;
 		}
@@ -2968,23 +3028,23 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	if (ItemDefs[o->item].type & IT_MAN) {
 		if (u->type == U_MAGE || u->type == U_APPRENTICE ||
 				t->type == U_MAGE || t->type == U_APPRENTICE) {
-			u->Error("GIVE: Heroes can't give or recieve men.");
+			u->Error("GIVE: Heroes can't give or recieve men.", o->quiet);
 			return 0;
 		}
 		if (u->type != t->type) {
 		    //changed for new leader handling
-			u->Error("GIVE: Can't mix leaders and normal men.");
+			u->Error("GIVE: Can't mix leaders and normal men.", o->quiet);
 			return 0;
 		}
 		
 		// Small hack for Ceran
 		if(o->item == I_MERC && t->GetMen()) {
-			u->Error("GIVE: Can't mix mercenaries with other men.");
+			u->Error("GIVE: Can't mix mercenaries with other men.", o->quiet);
 			return 0;
 		}
 
 		if (u->faction != t->faction) {
-			u->Error("GIVE: Can't give men to another faction.");   //would be nice to be able to give men to a unit which you have just given to another faction
+			u->Error("GIVE: Can't give men to another faction.", o->quiet);   //would be nice to be able to give men to a unit which you have just given to another faction
 			return 0;
 		}
 
@@ -2996,7 +3056,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	}
 
 	if(ItemDefs[o->item].flags & ItemType::CANTGIVE) {
-		u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".");
+		u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".", o->quiet);
 		return 0;
 	}
 
@@ -3004,7 +3064,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		int cur = t->items.GetNum(o->item) + amt;
 		if (cur > ItemDefs[o->item].max_inventory) {
 			u->Error(AString("GIVE: Unit cannot have more than ")+
-					ItemString(o->item, ItemDefs[o->item].max_inventory));
+					ItemString(o->item, ItemDefs[o->item].max_inventory), o->quiet);
 			return 0;
 		}
 	}
@@ -3041,13 +3101,13 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
 	int amt = o->amount;
 	if (amt != -2 && amt > u->GetSharedNum(o->item)) {
 		amt = u->GetSharedNum(o->item);
-		u->Error(AString("SEND: Not enough. Sending ") + amt + " instead.");
+		u->Error(AString("SEND: Not enough. Sending ") + amt + " instead.", o->quiet);
 	} else if (amt == -2) {
 		amt = u->items.GetNum(o->item);  //if sending "ALL" do not check other inventories.
 		if(o->except) {
 			if(o->except > amt) {
 				amt = 0;
-				u->Error("SEND: EXCEPT value greater than amount on hand.");
+				u->Error("SEND: EXCEPT value greater than amount on hand.", o->quiet);
 				return 0;
 			} else {
 				amt = amt - o->except;
@@ -3064,18 +3124,18 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
             if(u->object->inner >= 0) {
                 reg = regions.GetRegion(u->object->inner);
             } else {
-			    u->Error("SEND: Cannot send IN there.");
+			    u->Error("SEND: Cannot send IN there.", o->quiet);
 			    return 0;
             }
         } else if(o->direction > MOVE_ENTER) {
             int inreg = r->GetObject(o->direction - MOVE_ENTER)->inner;
             if(inreg < 0) {
-			    u->Error("SEND: Cannot send IN that.");
+			    u->Error("SEND: Cannot send IN that.", o->quiet);
 			    return 0;
             } else reg = regions.GetRegion(inreg);
         }
         if(!reg) {
-		    u->Error("SEND: No region in that direction.");
+		    u->Error("SEND: No region in that direction.", o->quiet);
 		    return 0;
         }
         //we now have the specified region 'reg'.
@@ -3123,27 +3183,27 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
             //the target is not adjacent, and no-one has a quartermastery skill.
             if(target) delete target;
             if(quartermaster) delete quartermaster;
-    		u->Error("SEND: Cannot find target or target is not a member of a friendly faction");
+    		u->Error("SEND: Cannot find target or target is not a member of a friendly faction", o->quiet);
     		return 0;
         }
         //we now have a SEND order using the QUARTERMASTERY skill.
         if (quartermaster && quartermaster->unit->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
     	    //This eliminates guards, monsters, ghosts and peasant factions.
     	    //These errors all have to be the same to prevent any way of players finding the location of stealth units.
-    		u->Error("SEND: Cannot find target or target is not a member of a friendly faction");
+    		u->Error("SEND: Cannot find target or target is not a member of a friendly faction", o->quiet);
 	        delete target;
 	        if(quartermaster) delete quartermaster;
 		    return 0;
 	    }
 	    if(quartermaster && level < 4) {
-    		u->Error("SEND: Insufficient quartermastery level to use VIA");
+    		u->Error("SEND: Insufficient quartermastery level to use VIA", o->quiet);
 	        delete target;
 	        if(quartermaster) delete quartermaster;
 		    return 0;
         }
 	    
 	    if (quartermaster && !quartermaster->unit->IsStationary()) {
-		    u->Error(AString("SEND: Cannot send goods via a moving unit."));
+		    u->Error(AString("SEND: Cannot send goods via a moving unit."), o->quiet);
 	        delete target;
 	        if(quartermaster) delete quartermaster;
 		    return 0;
@@ -3153,7 +3213,7 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
 		int dist = regions.GetDistance(r, target->region);
 		if(quartermaster) dist = regions.GetDistance(r,quartermaster->region)+regions.GetDistance(quartermaster->region,target->region);
 		if (dist > level) {
-			u->Error("SEND: Target is too far away.");
+			u->Error("SEND: Target is too far away.", o->quiet);
 	        delete target;
 	        if(quartermaster) delete quartermaster;
 		    return 0;
@@ -3175,12 +3235,12 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
         int multiplier = 1;
         cost = reg->MoveCost(M_WALK, r, o->direction, 0); //movement cost
         if(cost < 0 && !level) {
-    		u->Error(AString("SEND: Intervening terrain blocks sending."));
+    		u->Error(AString("SEND: Intervening terrain blocks sending."), o->quiet);
     		return 0;
         }
     	if(cost > Globals->FOOT_SPEED) multiplier = 2;
     	if((cost > Globals->HORSE_SPEED) && !level) {
-    		u->Error(AString("SEND: Target region cannot be ridden to."));
+    		u->Error(AString("SEND: Target region cannot be ridden to."), o->quiet);
     		return 0;
     	}
     	
@@ -3194,12 +3254,12 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
 
 	if (tar->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
 	    //This eliminates guards, monsters, ghosts and peasant factions.
-		u->Error("SEND: Cannot find target or target is not a member of a friendly faction");
+		u->Error("SEND: Cannot find target or target is not a member of a friendly faction", o->quiet);
 		return 0;
 	}
 	
 	if (!tar->IsStationary()) {
-		u->Error(AString("SEND: Cannot send goods to a moving unit."));
+		u->Error(AString("SEND: Cannot send goods to a moving unit."), o->quiet);
 		return 0;
     }
     
@@ -3208,7 +3268,7 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
                 (ItemDefs[o->item].type & IT_MAN) || 
                 (ItemDefs[o->item].type & IT_MONSTER) || 
                 (ItemDefs[o->item].type & IT_ILLUSION) ) {
-		u->Error(AString("SEND: Can't send ") + ItemDefs[o->item].names + ".");
+		u->Error(AString("SEND: Can't send ") + ItemDefs[o->item].names + ".", o->quiet);
 		return 0;
 	}
 
@@ -3216,18 +3276,18 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
 		int cur = tar->items.GetNum(o->item) + tar->itemsintransit.GetNum(o->item) + amt;
 		if (cur > ItemDefs[o->item].max_inventory) {
 			u->Error(AString("SEND: Target unit cannot have more than ")+
-					ItemString(o->item, ItemDefs[o->item].max_inventory));
+					ItemString(o->item, ItemDefs[o->item].max_inventory), o->quiet);
 			return 0;
 		}
 	}
 
     //cost is zero if a quartermaster transfer!    
 	if(!u->GetSharedMoney(cost)) {
-        u->Error(AString("SEND: Not enough silver to SEND that."));
+        u->Error(AString("SEND: Not enough silver to SEND that."), o->quiet);
         return 0;
     }   //don't forget to double count if sending silver and also paying with it:
     if(o->item == I_SILVER && cost+amt > u->GetSharedNum(I_SILVER)) {
-        u->Error(AString("SEND: Not enough silver to SEND that."));
+        u->Error(AString("SEND: Not enough silver to SEND that."), o->quiet);
         return 0;
     }
 
@@ -3314,7 +3374,7 @@ void Game::CheckTransportOrders()
 						(o->type == O_DISTRIBUTE) ? "DISTRIBUTE" :
 						"TRANSPORT";
 					if (!o->target || o->target->unitnum == -1) {
-						u->Error(ordertype + ": Target does not exist.");
+						u->Error(ordertype + ": Target does not exist.", o->quiet);
 						o->type = NORDERS;
 						continue;
 					}
@@ -3322,14 +3382,14 @@ void Game::CheckTransportOrders()
 					Location *tar = regions.GetUnitId(o->target,
 							u->faction->num, r);
 					if (!tar) {
-						u->Error(ordertype + ": Target does not exist.");
+						u->Error(ordertype + ": Target does not exist.", o->quiet);
 						o->type = NORDERS;
 						continue;
 					}
 
 					// Make sure target isn't self
 					if (tar->unit == u) {
-						u->Error(ordertype + ": Target is self.");
+						u->Error(ordertype + ": Target is self.", o->quiet);
 						o->type = NORDERS;
 						continue;
 					}
@@ -3339,7 +3399,7 @@ void Game::CheckTransportOrders()
 							A_FRIENDLY) {
 						u->Error(ordertype +
 								": Target is not a member of a friendly "
-								"faction.");
+								"faction.", o->quiet);
 						o->type = NORDERS;
 						continue;
 					}
@@ -3350,7 +3410,7 @@ void Game::CheckTransportOrders()
 					if (o->type == O_TRANSPORT) {
 						if (tar->unit->GetSkill(S_QUARTERMASTER) == 0) {
 							u->Error(ordertype +
-									": Target is not a quartermaster");
+									": Target is not a quartermaster", o->quiet);
 							o->type = NORDERS;
 							continue;
 						}
@@ -3359,7 +3419,7 @@ void Game::CheckTransportOrders()
 									ObjectType::TRANSPORT) ||
 								(tar->obj->incomplete > 0)) {
 							u->Error(ordertype + ": Target does not own "
-									"a transport structure.");
+									"a transport structure.", o->quiet);
 							o->type = NORDERS;
 							continue;
 						}
@@ -3381,7 +3441,7 @@ void Game::CheckTransportOrders()
 					} else
 						maxdist = Globals->LOCAL_TRANSPORT;
 					if (dist > maxdist) {
-						u->Error(ordertype + ": Recipient is too far away.");
+						u->Error(ordertype + ": Recipient is too far away.", o->quiet);
 						o->type = NORDERS;
 						continue;
 					}
@@ -3393,7 +3453,7 @@ void Game::CheckTransportOrders()
 						 (o->type == O_TRANSPORT))) {
 						if (u->GetSkill(S_QUARTERMASTER == 0)) {
 							u->Error(ordertype +
-									": Unit is not a quartermaster");
+									": Unit is not a quartermaster", o->quiet);
 							o->type = NORDERS;
 							continue;
 						}
@@ -3402,7 +3462,7 @@ void Game::CheckTransportOrders()
 								ObjectType::TRANSPORT) ||
 							(obj->incomplete > 0)) {
 						u->Error(ordertype +
-								": Unit does not own transport structure.");
+								": Unit does not own transport structure.", o->quiet);
 						o->type = NORDERS;
 						continue;
 						}
@@ -3410,7 +3470,7 @@ void Game::CheckTransportOrders()
 
 					// make sure amount is available (all handled later)
 					if (o->amount > 0 && o->amount > u->items.GetNum(o->item)) {
-						u->Error(ordertype + ": Not enough.");
+						u->Error(ordertype + ": Not enough.", o->quiet);
 						o->type = NORDERS;
 						continue;
 					}
@@ -3421,7 +3481,7 @@ void Game::CheckTransportOrders()
 							u->Error(ordertype +
 									": Target cannot have more than " +
 									ItemString(o->item,
-										ItemDefs[o->item].max_inventory));
+										ItemDefs[o->item].max_inventory), o->quiet);
 							o->type = NORDERS;
 							continue;
 						}
@@ -3430,7 +3490,7 @@ void Game::CheckTransportOrders()
 					// Check if we have a trade hex
 					if (!TradeCheck(r, u->faction)) {
 						u->Error(ordertype + ": Faction cannot transport or "
-								"distribute in that many hexes.");
+								"distribute in that many hexes.", o->quiet);
 						o->type = NORDERS;
 						continue;
 					}
@@ -3468,13 +3528,13 @@ void Game::RunTransportOrders()
 								amt = 0;
 								u->Error(ordertype +
 										": EXCEPT value greater than amount "
-										"on hand.");
+										"on hand.", t->quiet);
 							} else {
 								amt = amt - t->except;
 							}
 						}
 					} else if (amt > u->items.GetNum(t->item)) {
-						u->Error(ordertype + ": Not enough.");
+						u->Error(ordertype + ": Not enough.", t->quiet);
 						amt = u->items.GetNum(t->item);
 					}
 
@@ -3484,7 +3544,7 @@ void Game::RunTransportOrders()
 							u->Error(ordertype +
 									": Target cannot have more than " +
 									ItemString(t->item,
-										ItemDefs[t->item].max_inventory));
+										ItemDefs[t->item].max_inventory), t->quiet);
 							continue;
 						}
 					}
@@ -3504,7 +3564,7 @@ void Game::RunTransportOrders()
 
 					// if not, give it back
 					if (cost > u->items.GetNum(I_SILVER)) {
-						u->Error(ordertype + ": Cannot afford shipping cost.");
+						u->Error(ordertype + ": Cannot afford shipping cost.", t->quiet);
 						u->items.SetNum(t->item, u->items.GetNum(t->item)+amt);
 						continue;
 					}

@@ -90,7 +90,8 @@ class ItemType
 			// inputs
 			SKILLOUT = 0x10,
 			// This item cannot be transported.
-			NOTRANSPORT = 0x20
+			NOTRANSPORT = 0x20,
+			NEVERLOST = 0x40
 		};
 		int flags;
 
@@ -323,6 +324,7 @@ class BattleItemType
 			MAGEONLY = 0x1,
 			SPECIAL = 0x2,
 			SHIELD = 0x4,
+			ENERGY = 0x8 //currently only works if the item is also a weapon.
 		};
 
 		int flags;
@@ -346,6 +348,7 @@ extern MountType *FindMount(char *abbr);
 extern MonType *FindMonster(char *abbr, int illusion);
 extern ManType *FindRace(char *abbr);
 extern AString AttType(int atype);
+extern AString EffectStr(char *effect);
 extern AString EthnicityString(int atype);
 
 enum {

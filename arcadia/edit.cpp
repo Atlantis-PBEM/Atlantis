@@ -1875,7 +1875,9 @@ void Game::EditGameGlobalEffects()
         Awrite( " [products] to provide a production summary ");
         Awrite( " [buildings] to provide a buildings summary ");
         Awrite( " [rename] [terrain] [level] [name] to rename all of a terrain type on a level. ");
-        Awrite( " [import] [filename] [level] to reset the terrain of a level according to a text file. [not implemented] ");
+        Awrite( " [importmap] [level] [filename] to set the terrain of a level according to a text file.");
+        Awrite( " [importeth] [level] [filename] to set the ethnicities of a level according to a text file.");
+        Awrite( " [importriv] [level] [filename] to set the rivers of a level according to a text file.");
         Awrite( " q) Return to previous menu." );
 
         int exit = 0; 
@@ -2085,7 +2087,58 @@ void Game::EditGameGlobalEffects()
                             *r->name = *pToken;
                         }
                     }
-                    SAFE_DELETE(pToken); 
+                    SAFE_DELETE(pToken);
+    			} else if (*pToken == "importmap") {
+    			    SAFE_DELETE( pToken );
+
+                    pToken = pStr->gettoken(); 
+                    if( !pToken ) { 
+                        Awrite( "Try again." ); 
+                        break; 
+                    } 
+                    int level = pToken->value();
+                    if(level == -1) { 
+                        Awrite( "Invalid level." ); 
+                        break; 
+                    } 
+                    SAFE_DELETE( pToken );
+                    pToken = pStr->gettoken();
+                    if(pToken) ImportMapFile(pToken, level);
+                    SAFE_DELETE( pToken );
+    			} else if (*pToken == "importeth") {
+    			    SAFE_DELETE( pToken );
+
+                    pToken = pStr->gettoken(); 
+                    if( !pToken ) { 
+                        Awrite( "Try again." ); 
+                        break; 
+                    } 
+                    int level = pToken->value();
+                    if(level == -1) { 
+                        Awrite( "Invalid level." ); 
+                        break; 
+                    } 
+                    SAFE_DELETE( pToken );
+                    pToken = pStr->gettoken();
+                    if(pToken) ImportEthFile(pToken, level);
+                    SAFE_DELETE( pToken );
+    			} else if (*pToken == "importriv") {
+    			    SAFE_DELETE( pToken );
+
+                    pToken = pStr->gettoken(); 
+                    if( !pToken ) { 
+                        Awrite( "Try again." ); 
+                        break; 
+                    } 
+                    int level = pToken->value();
+                    if(level == -1) { 
+                        Awrite( "Invalid level." ); 
+                        break; 
+                    } 
+                    SAFE_DELETE( pToken );
+                    pToken = pStr->gettoken();
+                    if(pToken) ImportRivFile(pToken, level);
+                    SAFE_DELETE( pToken );
     			} else if (*pToken == "buildingseq") {
     			    SAFE_DELETE( pToken );
     			    
@@ -2119,6 +2172,382 @@ void Game::EditGameGlobalEffects()
     } 
     while( 1 ); 
 } 
+
+void Game::ImportRivFile(AString *filename, int level)
+{
+    Ainfile f;
+	if(f.OpenByName(*filename) == -1) {
+        Awrite("Could not open file.");
+        return;
+    }
+
+    int yy = 0;
+    AString *line = f.GetStr();
+
+    int maxx = regions.GetRegionArray(level)->x;
+    int maxy = regions.GetRegionArray(level)->y;
+
+    while(line && yy <= maxy) {
+        AString *type = line->gettoken();
+        int xx = yy%2;
+        
+        while(type && xx <= maxx) {
+            int rivers = type->value()%10;
+            int bridges = (type->value()/10)%10; //not implemented below yet
+            
+            ARegion *pReg = regions.GetRegion(xx,yy,level);
+            //prevent stupid input making rivers in oceans
+            if(TerrainDefs[pReg->type].similar_type == R_OCEAN) rivers = 0;
+            if(pReg) {
+                Hexside *h1 = pReg->hexside[0];
+                Hexside *h2 = pReg->hexside[1];
+                Hexside *h4 = pReg->hexside[2];
+                if(rivers%2 && (!pReg->neighbors[0] || TerrainDefs[pReg->neighbors[0]->type].similar_type != R_OCEAN)) h1->type = H_RIVER;
+                else if(h1->type == H_RIVER) h1->type = H_DUMMY;
+                if((rivers%4 > 1) && (!pReg->neighbors[1] || TerrainDefs[pReg->neighbors[1]->type].similar_type != R_OCEAN)) h2->type = H_RIVER;
+                else if(h2->type == H_RIVER) h2->type = H_DUMMY;
+                if((rivers%8 > 3) && (!pReg->neighbors[2] || TerrainDefs[pReg->neighbors[2]->type].similar_type != R_OCEAN)) h4->type = H_RIVER;
+                else if(h4->type == H_RIVER) h4->type = H_DUMMY;
+            }
+            xx += 2;
+            delete type;
+            type = line->gettoken();
+        }
+        yy += 1;
+        if(line) delete line;
+        line = f.GetStr();
+    }
+}
+
+void Game::ImportEthFile(AString *filename, int level)
+{
+    Ainfile f;
+	if(f.OpenByName(*filename) == -1) {
+        Awrite("Could not open file.");
+        return;
+    }
+
+    int yy = 0;
+    AString *line = f.GetStr();
+
+    int maxx = regions.GetRegionArray(level)->x;
+    int maxy = regions.GetRegionArray(level)->y;
+
+    while(line && yy <= maxy) {
+        AString *type = line->gettoken();
+        int xx = yy%2;
+        
+        while(type && xx <= maxx) {
+            int ethnicity = -1;
+            
+            if (*type == "d") ethnicity = RA_DWARF;
+            else if (*type == "e") ethnicity = RA_ELF;
+            else if (*type == "h") ethnicity = RA_HUMAN;
+            else if (*type == "o") ethnicity = RA_OTHER;
+            else if (*type == "r") ethnicity = getrandom(RA_NA);
+            
+            if(ethnicity != -1) {
+                ARegion *pReg = regions.GetRegion(xx,yy,level);
+                if(pReg) pReg->SetEthnicity(ethnicity, &regions);
+            }
+            xx += 2;
+            delete type;
+            type = line->gettoken();
+        }
+        yy += 1;
+        if(line) delete line;
+        line = f.GetStr();
+    }
+    
+    Awrite("Clearing City Guards");
+	forlist(&regions) {
+		ARegion *reg = (ARegion *)elem;
+		forlist(&reg->objects) {
+			Object *obj = (Object *)elem;
+			forlist(&obj->units) {
+				Unit *u = (Unit *)elem;
+				if(u->type == U_GUARD || u->type == U_GUARDMAGE) reg->Kill(u);
+			}
+		}
+	}
+    Awrite("Making City Guards");
+    CreateCityMons();
+    Awrite("Done.");
+}
+
+void Game::ImportMapFile(AString *filename, int level)
+{
+    Ainfile f;
+	if(f.OpenByName(*filename) == -1) {
+        Awrite("Could not open file.");
+        return;
+    }
+
+    int yy = 0;
+    AString *line = f.GetStr();
+
+    int maxx = regions.GetRegionArray(level)->x;
+    int maxy = regions.GetRegionArray(level)->y;
+
+    while(line && yy <= maxy) {
+        AString *type = line->gettoken();
+        int xx = yy%2;
+        
+        while(type && xx <= maxx) {
+            int regiontype = -1;
+            int iscity = 0;                    //0 means no city, 1 means city, -1 means random
+            
+            if (*type == "d") regiontype = R_DESERT;
+            else if (*type == "f") regiontype = R_FOREST;
+            else if (*type == "j") regiontype = R_JUNGLE;
+            else if (*type == "l") regiontype = R_LAKE;
+            else if (*type == "m") regiontype = R_MOUNTAIN;
+            else if (*type == "o") regiontype = R_OCEAN;
+            else if (*type == "p") regiontype = R_PLAIN;
+            else if (*type == "s") regiontype = R_SWAMP;
+            else if (*type == "t") regiontype = R_TUNDRA;
+            
+            char *str = type->Str();
+            if(*str >= 'A' && *str <= 'Z') iscity = 1;
+            
+            if(regiontype > -1) {
+                ARegion *pReg = regions.GetRegion(xx,yy,level);
+                if(pReg) pReg->RedoAs(regiontype, iscity, &regions);
+            }
+            xx += 2;
+            delete type;
+            type = line->gettoken();
+        }
+        yy += 1;
+        if(line) delete line;
+        line = f.GetStr();
+    }
+
+#define NUMREGIONNAMES 1000
+
+    Awrite("Clearing City Guards / Setting Region Names");
+	forlist(&regions) {
+		ARegion *reg = (ARegion *)elem;
+		AString *name = 0;
+		if(TerrainDefs[reg->type].similar_type == R_OCEAN) {
+		    name = new AString(Globals->WORLD_NAME);
+	        *name += " Ocean";
+		} else {
+    		for(int i=0; i<NDIRS; i++) {
+    		    if(i > 1 && i < 5) continue;
+    		    if(reg->neighbors[i] && reg->neighbors[i]->type == reg->type) name = new AString(*(reg->neighbors[i]->name));
+    		}
+    		if(!name) name = new AString(AGetNameString(NUMREGIONNAMES + getrandom(NUMREGIONNAMES)));
+		}
+        reg->SetName((*name).Str());
+    	delete name;
+      		
+		forlist(&reg->objects) {
+			Object *obj = (Object *)elem;
+			forlist(&obj->units) {
+				Unit *u = (Unit *)elem;
+				if(u->type == U_GUARD || u->type == U_GUARDMAGE) reg->Kill(u);
+			}
+		}
+	}
+    Awrite("Making City Guards");
+    CreateCityMons();
+    Awrite("Done.");
+}
+
+void ARegion::SetEthnicity(int ethnicity, ARegionList *pRegs)
+{
+Awrite(EthnicityString(ethnicity));
+    int chance = getrandom(100);
+    
+    switch(type) {
+        case R_OCEAN:
+            race = I_MERFOLK;
+            break;
+        case R_LAKE:
+            race = I_MERFOLK;
+            break;
+            //raiders = I_VIKING
+            //ancient elves = I_DARKMAN
+            //plain dwarves = I_PLAINSMAN
+        case R_MOUNTAIN:
+            if(ethnicity == RA_HUMAN) {
+                if(chance < 80) race = I_BARBARIAN;
+                else race = I_VIKING;
+                if(IsCoastal() && !getrandom(10)) race = I_VIKING;
+                
+            } else if(ethnicity == RA_DWARF) {
+                if(chance < 85) race = I_HILLDWARF;
+                else race = I_UNDERDWARF;
+                if(IsCoastal() && !getrandom(10)) race = I_ICEDWARF;
+                
+            } else if(ethnicity == RA_ELF) {
+                if(chance < 70) race = I_HIGHELF;
+                else if(chance < 90) race = I_DARKMAN;
+                else race = I_TRIBALELF;
+                if(IsCoastal() && !getrandom(2)) race = I_SEAELF;
+                
+            } else {
+                race = I_ORC;
+            }
+            break;
+        case R_FOREST:
+            if(ethnicity == RA_HUMAN) {
+                if(chance < 60) race = I_TRIBESMAN;
+                else race = I_ESKIMO;
+                if(IsCoastal() && !getrandom(4)) race = I_VIKING;
+            
+            } else if(ethnicity == RA_DWARF) {
+                if(chance < 60) race = I_UNDERDWARF;
+                else if(chance < 90) race = I_ICEDWARF;
+                else race = I_PLAINSMAN;
+                            
+            } else if(ethnicity == RA_ELF) {
+                if(chance < 50) race = I_WOODELF;
+                else if(chance < 90) race = I_DARKMAN;
+                else race = I_TRIBALELF;
+                if(IsCoastal() && !getrandom(6)) race = I_SEAELF;
+                
+            } else {
+                race = I_ORC;
+            }
+            break;
+        case R_PLAIN:
+            if(ethnicity == RA_HUMAN) {
+                if(chance < 75) race = I_NOMAD;
+                else race = I_VIKING;
+                if(IsCoastal() && !getrandom(3)) race = I_VIKING;
+            
+            } else if(ethnicity == RA_DWARF) {
+                if(chance < 75) race = I_PLAINSMAN;
+                else race = I_DESERTDWARF;
+                            
+            } else if(ethnicity == RA_ELF) {
+                if(chance < 80) race = I_HIGHELF;
+                else race = I_DARKMAN;
+                if(IsCoastal() && !getrandom(4)) race = I_SEAELF;
+                
+            } else {
+                race = I_ORC;
+            }
+            break;
+        case R_DESERT:
+            if(ethnicity == RA_HUMAN) {
+                if(chance < 50) race = I_NOMAD;
+                else race = I_BARBARIAN;
+                if(IsCoastal() && !getrandom(6)) race = I_VIKING;
+            
+            } else if(ethnicity == RA_DWARF) {
+                if(chance < 80) race = I_DESERTDWARF;
+                else race = I_PLAINSMAN;
+                            
+            } else if(ethnicity == RA_ELF) {
+                if(chance < 70) race = I_DARKMAN;
+                else if(chance < 85) race = I_TRIBALELF;
+                else race = I_HIGHELF;
+                if(IsCoastal() && !getrandom(2)) race = I_SEAELF;
+                
+            } else {
+                race = I_ORC;
+            }
+            break;
+        case R_JUNGLE:
+            if(ethnicity == RA_HUMAN) {
+                if(chance < 90) race = I_TRIBESMAN;
+                else race = I_NOMAD;
+                if(IsCoastal() && !getrandom(5)) race = I_VIKING;
+            
+            } else if(ethnicity == RA_DWARF) {
+                race = I_UNDERDWARF;
+
+            } else if(ethnicity == RA_ELF) {
+                if(chance < 70) race = I_TRIBALELF;
+                else race = I_WOODELF;
+                if(IsCoastal() && !getrandom(10)) race = I_SEAELF;
+                
+            } else {
+                race = I_ORC;
+            }
+            break;
+        case R_SWAMP:
+            if(ethnicity == RA_HUMAN) {
+                if(chance < 50) race = I_TRIBESMAN;
+                else if(chance < 75) race = I_BARBARIAN;
+                else race = I_VIKING;
+            
+            } else if(ethnicity == RA_DWARF) {
+                race = I_UNDERDWARF;
+
+            } else if(ethnicity == RA_ELF) {
+                if(chance < 90) race = I_TRIBALELF;
+                else race = I_SEAELF;
+                if(IsCoastal() && !getrandom(5)) race = I_SEAELF;
+                
+            } else {
+                race = I_ORC;
+            }
+            break;
+        case R_TUNDRA:
+            if(ethnicity == RA_HUMAN) {
+                if(chance < 90) race = I_ESKIMO;
+                else race = I_TRIBESMAN;
+            } else if(ethnicity == RA_DWARF) {
+                if(chance < 90) race = I_ICEDWARF;
+                else race = I_UNDERDWARF;
+            } else if(ethnicity == RA_ELF) {
+                if(chance < 60) race = I_TRIBALELF;
+                else if(chance < 80) race = I_HIGHELF;
+                else race = I_SEAELF;
+                if(IsCoastal() && !getrandom(2)) race = I_SEAELF;
+                
+            } else {
+                race = I_ORC;
+            }
+            break;
+        default:
+            break;
+    }
+    
+    UpdateEditRegion();
+}
+
+void ARegion::RedoAs(int tertype, int hastown, ARegionList *pRegs)
+{
+Awrite(TerrainDefs[tertype].name);
+    //reset terrain
+    int wasocean = 0;
+    int toocean = 0;
+    if(TerrainDefs[type].similar_type == R_OCEAN) wasocean = 1;
+    if(TerrainDefs[tertype].similar_type == R_OCEAN) toocean = 1;
+    
+    if(wasocean && !toocean) OceanToLand();
+    
+    if(toocean && !wasocean) SinkRegion(pRegs);
+    else type = tertype;
+    
+    if(town) delete town;
+    town = NULL;
+
+    products.DeleteAll();
+    SetupProds();
+    
+    markets.DeleteAll();
+
+    SetupEditRegion();
+    UpdateEditRegion();
+    
+    if(hastown < 0) return;
+    else if(hastown == 0 && town) {
+        //remove town - for some reason this code doesn't seem to be 100% working?!
+        delete town;
+        town = NULL;
+        markets.DeleteAll();
+        UpdateEditRegion();
+    } else if(hastown == 1 && !town) {
+        AddEditTown();
+        UpdateEditRegion();
+    }
+}
 
 int Game::GetMarketTradeVariance()
 {

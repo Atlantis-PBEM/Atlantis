@@ -53,7 +53,7 @@ public:
   int baseprice;
   int activity;
 
-  void PostTurn(int,int);
+  void PostTurn(int,int,int);
   void Writeout(Aoutfile * f);
   void Readin(Ainfile * f);
   AString Report();
@@ -61,7 +61,7 @@ public:
 
 class MarketList : public AList {
 public:
-  void PostTurn(int,int);
+  void PostTurn(int,int,int);
   void Writeout(Aoutfile * f);
   void Readin(Ainfile * f);
 };

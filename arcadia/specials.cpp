@@ -448,14 +448,14 @@ void Battle::UpdateRoundSpells(Army *armya, Army *armyb)
     float taca = 100;
     while(fogb > 0) {
         fogb--;
-        taca /= 1.5;
+        taca *= 0.7;
     }
     armya->taccontrol = (int) taca;
 
     float tacb = 100;
     while(foga > 0) {
         foga--;
-        tacb /= 1.5;
+        tacb *= 0.7;
     }
     armyb->taccontrol = (int) tacb;
     

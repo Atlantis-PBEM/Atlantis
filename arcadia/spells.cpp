@@ -61,7 +61,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck, int isqui
         //
         switch(sk) {
 			case S_MIND_READING:
-				ProcessMindReading(u,o, pCheck );
+				ProcessMindReading(u,o, pCheck, isquiet );
 				break;
 			case S_CONSTRUCT_PORTAL: // Disabled in Earthsea
 			case S_ENCHANT_SWORDS:
@@ -86,24 +86,24 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck, int isqui
 			//Earthsea spells
 			case S_PHANTASMAL_ENTERTAINMENT: // castable in earthsea mod.
    			case S_CONCEALMENT:	 // Adds to stealth of friendly units which do not attack/steal/assassinate
-				ProcessGenericSpell(u,sk, pCheck );
+				ProcessGenericSpell(u,sk, pCheck, isquiet );
 				break;
 			case S_WOLF_LORE:
 			case S_SUMMON_IMPS:
 			case S_SUMMON_DEMON:
 			case S_RAISE_UNDEAD:
-			    if(Globals->ARCADIA_MAGIC) ProcessSummonCreaturesSpell(u,o, sk, pCheck );
-			    else ProcessGenericSpell(u,sk, pCheck );
+			    if(Globals->ARCADIA_MAGIC) ProcessSummonCreaturesSpell(u,o, sk, pCheck, isquiet );
+			    else ProcessGenericSpell(u,sk, pCheck, isquiet );
 			    break;
 			case S_FOG:  // Blanks out region for others
-                ProcessFogSpell(u,o, pCheck);
+                ProcessFogSpell(u,o, pCheck, isquiet);
 			case S_CLEAR_SKIES:
 			case S_EARTH_LORE:
 				rt = FindRange(SkillDefs[sk].range);
 				if (rt == NULL && !Globals->ARCADIA_MAGIC) {
-				    ProcessGenericSpell(u, sk, pCheck);
+				    ProcessGenericSpell(u, sk, pCheck, isquiet);
 				} else
-					ProcessRegionSpell(u, o, sk, pCheck); //large option
+					ProcessRegionSpell(u, o, sk, pCheck, isquiet); //large option
 				break;
 			case S_FARSIGHT: // small/large
 			case S_TELEPORTATION:
@@ -112,53 +112,53 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck, int isqui
 			case S_BLIZZARD:   //summons small/large blizzard around target region
 			case S_CREATE_PORTAL: //earthsea - creates a portal, may be linked to another.
 			case S_SEAWARD: // delays region sinking.
-				ProcessRegionSpell(u, o, sk, pCheck); //"large" a possibility now for all region spells. Used for blizzard, clear skies
+				ProcessRegionSpell(u, o, sk, pCheck, isquiet); //"large" a possibility now for all region spells. Used for blizzard, clear skies
 				break;
 			case S_BIRD_LORE:
-				ProcessBirdLore(u,o, pCheck );
+				ProcessBirdLore(u,o, pCheck, isquiet );
 				break;
 			case S_INVISIBILITY:
-				ProcessUnitsSpell(u,o, sk, pCheck );
+				ProcessUnitsSpell(u,o, sk, pCheck, isquiet );
 				break;
 			case S_GATE_LORE:
-				ProcessCastGateLore(u,o, pCheck );
+				ProcessCastGateLore(u,o, pCheck, isquiet );
 				break;
 			case S_PORTAL_LORE:
-				ProcessCastPortalLore(u,o, pCheck );
+				ProcessCastPortalLore(u,o, pCheck, isquiet );
 				break;
 			case S_CREATE_PHANTASMAL_BEASTS:
-				ProcessPhanBeasts(u,o, pCheck );
+				ProcessPhanBeasts(u,o, pCheck, isquiet );
 				break;
 			case S_CREATE_PHANTASMAL_UNDEAD:
-				ProcessPhanUndead(u,o, pCheck );
+				ProcessPhanUndead(u,o, pCheck, isquiet );
 				break;
 			case S_CREATE_PHANTASMAL_DEMONS:
-				ProcessPhanDemons(u,o, pCheck );
+				ProcessPhanDemons(u,o, pCheck, isquiet );
 				break;
 			//Earthsea spells:
 			case S_ILLUSORY_CREATURES: // summons illusory creatures of specified type
-			    ProcessPhanCreatures(u,o, pCheck );
+			    ProcessPhanCreatures(u,o, pCheck, isquiet );
                 break;
 			case S_SUMMON_MEN: // summons men of particular race for $50 each
-                ProcessSummonMen(u,o,pCheck);
+                ProcessSummonMen(u,o,pCheck, isquiet);
                 break;
 			case S_SPIRIT_OF_DEAD: //cast: summons long dead mage
-				ProcessUnitsSpell(u,o, sk, pCheck );                
+				ProcessUnitsSpell(u,o, sk, pCheck, isquiet );                
                 break;
 			case S_TRANSMUTATION: //turns 2 pieces of one item type into one piece of another
-                ProcessChangeSpell(u,o, sk, pCheck );
+                ProcessChangeSpell(u,o, sk, pCheck, isquiet );
                 break;
 			case S_MODIFICATION: //modifies region product
-                ProcessModificationSpell(u,o,pCheck);
+                ProcessModificationSpell(u,o,pCheck, isquiet);
                 break;
 			case S_REJUVENATION: //modifies region terrain. High levels: includes ocean
-                ProcessRejuvenationSpell(u,o,pCheck);
+                ProcessRejuvenationSpell(u,o,pCheck, isquiet);
                 break;
 			case S_HYPNOSIS: //hypnotises target non-mage unit(s). Maximum men limit. Can give work/tax/produce/build orders. Higher level can give move/pillage/advance orders
-                ProcessHypnosisSpell(u,o,pCheck);
+                ProcessHypnosisSpell(u,o,pCheck, isquiet);
                 break;		
 			case S_ARTIFACT_LORE: //creates shieldstone or AMPR in EarthSea.
-			    ProcessArtifactSpell(u,o,pCheck);
+			    ProcessArtifactSpell(u,o,pCheck, isquiet);
                 break;	                	
 		}
 	}
@@ -177,12 +177,12 @@ void Unit::AddCastOrder(CastOrder *order)
     castlistorders.Add(order);
 }
 
-void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
     UnitId *id = ParseUnit(o);
 
     if (!id) {
-        u->Error("CAST: No unit specified.");
+        u->Error("CAST: No unit specified.", 0);
         return;
     }
 
@@ -190,22 +190,24 @@ void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck )
     order->id = id;
     order->spell = S_MIND_READING;
     order->level = 1;
+    order->quiet = isquiet;
 
     u->AddCastOrder(order);
 }
 
-void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
     AString *token = o->gettoken();
 
     if (!token) {
-        u->Error("CAST: Missing arguments.");
+        u->Error("CAST: Missing arguments.", 0);
         return;
     }
 
     if (*token == "eagle") {
         CastIntOrder *order = new CastIntOrder;
         order->spell = S_BIRD_LORE;
+        order->quiet = isquiet;
 		order->level = 3;
 		order->target = -1;  //Earthsea mod, does nothing in non-Earthsea.
 		delete token;
@@ -218,35 +220,37 @@ void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck )
         return;
     }
 
-    if (*token == "large") {
-    //Earthsea
+/*    if (*token == "large") {
+    //ARC-III only
 		delete token;
         CastIntOrder *order = new CastIntOrder;
         order->spell = S_BIRD_LORE;
+        order->quiet = isquiet;
 		order->level = 4;
 		order->target = 0; //just for safety.
         u->AddCastOrder(order);
         return;
-    }
+    }*/
 
     if (*token == "direction") {
         delete token;
         token = o->gettoken();
 
         if (!token) {
-            u->Error("CAST: Missing arguments.");
+            u->Error("CAST: Missing arguments.", 0);
             return;
         }
 
         int dir = ParseDir(token);
         delete token;
         if (dir == -1 || dir > NDIRS) {
-            u->Error("CAST: Invalid direction.");
+            u->Error("CAST: Invalid direction.", 0);
             return;
         }
 
         CastIntOrder *order = new CastIntOrder;
         order->spell = S_BIRD_LORE;
+        order->quiet = isquiet;
         order->level = 1;
         order->target = dir;
         u->AddCastOrder(order);
@@ -254,11 +258,11 @@ void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck )
         return;
     }
 
-    u->Error("CAST: Invalid arguments.");
+    u->Error("CAST: Invalid arguments.", 0);
     delete token;
 }
 
-void Game::ProcessFogSpell(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessFogSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
     AString *token = o->gettoken();
 
@@ -277,18 +281,19 @@ void Game::ProcessFogSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 
     CastIntOrder *order = new CastIntOrder;
     order->spell = S_FOG;
+    order->quiet = isquiet;
     order->level = 1+3*large;
     order->target = dir;
     u->AddCastOrder(order);
     return;
 }
 
-void Game::ProcessUnitsSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck )
+void Game::ProcessUnitsSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck, int isquiet )
 {
     AString *token = o->gettoken();
     
     if (!token || (!(*token == "units") && !(*token == "unit")) ) {
-        u->Error("CAST: Must specify units.");
+        u->Error("CAST: Must specify units.", 0);
         return;
     }
     delete token;
@@ -300,10 +305,12 @@ void Game::ProcessUnitsSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck 
     forlist(&u->castlistorders) {
         CastOrder *ord = (CastOrder *) elem;
         if(ord->spell == spell) order = (CastUnitsOrder *) ord;
+        if(order->quiet & !isquiet) order->quiet = isquiet; //if earlier line wasn't quiet, don't make it quiet now
     }
     if(!order) {
         order = new CastUnitsOrder;
         order->spell = spell;
+        order->quiet = isquiet;
         order->level = 1;
         u->AddCastOrder(order);
     }
@@ -315,19 +322,19 @@ void Game::ProcessUnitsSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck 
     }
 }
 
-void Game::ProcessChangeSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck )
+void Game::ProcessChangeSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck, int isquiet )
 {
     AString *token = o->gettoken();
 
     if (!token) {
-        u->Error("CAST: Arguments missing.");
+        u->Error("CAST: Arguments missing.", 0);
         return;
     }
     
     int toitem = ParseEnabledItem(token);
 	delete token;
     if(toitem<0) {
-		u->Error("CAST: Invalid item.");
+		u->Error("CAST: Invalid item.", 0);
 		return;
     }
     
@@ -339,12 +346,12 @@ void Game::ProcessChangeSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck
         fromitem = ParseEnabledItem(token);
     	delete token;
         if(fromitem<0) {
-    		u->Error("CAST: Invalid item.");
+    		u->Error("CAST: Invalid item.", 0);
     		return;
         }
     }
     if(toitem == fromitem) {
-        u->Error("CAST: to item is same as from item.");
+        u->Error("CAST: to item is same as from item.", 0);
         return;
     }
     
@@ -358,6 +365,7 @@ void Game::ProcessChangeSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck
     CastChangeOrder *order;
     order = new CastChangeOrder;
     order->spell = spell;
+    order->quiet = isquiet;
     order->level = 1;
     order->toitem = toitem;
     order->fromitem = fromitem;
@@ -372,7 +380,7 @@ void Game::ProcessChangeSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck
     }
 }
 
-void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
     AString *token = o->gettoken();
 
@@ -383,31 +391,31 @@ void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
     } else if (*token == "Decrease") {
         type = 3;
     } else {
-		u->Error("CAST: Invalid argument.");
+		u->Error("CAST: Invalid argument.", 0);
 		return;
     }
     delete token;
     token = o->gettoken();
     if(!token) {
-        u->Error("CAST: Insufficient arguments");
+        u->Error("CAST: Insufficient arguments", 0);
         return;
     }   
     int firstitem = ParseEnabledItem(token);
 	delete token;     
     if(firstitem<0) {
-		u->Error("CAST: Invalid item.");
+		u->Error("CAST: Invalid item.", 0);
 		return;
     }
 
     token = o->gettoken();
     if(!token) {
-        u->Error("CAST: Insufficient arguments");
+        u->Error("CAST: Insufficient arguments", 0);
         return;
     }   
     int seconditem = ParseEnabledItem(token);
     delete token;
     if(seconditem<0) {
-        u->Error("CAST: Invalid item.");
+        u->Error("CAST: Invalid item.", 0);
     	return;
     }
 
@@ -419,7 +427,7 @@ void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 	    delete token;
 		token = o->gettoken();
 		if(!token) {
-			u->Error("CAST: Region X coordinate not specified.");
+			u->Error("CAST: Region X coordinate not specified.", 0);
 			return;
 		}
 		x = token->value();
@@ -427,7 +435,7 @@ void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 
 		token = o->gettoken();
 		if(!token) {
-			u->Error("CAST: Region Y coordinate not specified.");
+			u->Error("CAST: Region Y coordinate not specified.", 0);
 			return;
 		}
 		y = token->value();
@@ -442,7 +450,7 @@ void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 				if(z < 0 || (z >= Globals->UNDERWORLD_LEVELS +
 							Globals->UNDERDEEP_LEVELS +
 							Globals->ABYSS_LEVEL + 2)) {
-					u->Error("CAST: Invalid Z coordinate specified.");
+					u->Error("CAST: Invalid Z coordinate specified.", 0);
 					return;
 				}
 			}
@@ -457,6 +465,7 @@ void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
     CastModifyOrder *order;
     order = new CastModifyOrder;
     order->spell = S_MODIFICATION;
+    order->quiet = isquiet;
     order->level = type;
     order->xloc = x;
     order->yloc = y;
@@ -472,11 +481,11 @@ void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 
 }
 
-void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
     AString *token = o->gettoken();
     if(!token) {
-        u->Error("CAST: No arguments supplied");
+        u->Error("CAST: No arguments supplied", 0);
         return;
     }   
 
@@ -484,7 +493,7 @@ void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
     delete token;
 
     if(type >= R_CAVERN) {
-        u->Error("CAST: Cannot rejuvenate a region to non-surface terrain.");
+        u->Error("CAST: Cannot rejuvenate a region to non-surface terrain.", 0);
         return;
     }
 
@@ -496,7 +505,7 @@ void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 	    delete token;
 		token = o->gettoken();
 		if(!token) {
-			u->Error("CAST: Region X coordinate not specified.");
+			u->Error("CAST: Region X coordinate not specified.", 0);
 			return;
 		}
 		x = token->value();
@@ -504,7 +513,7 @@ void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 
 		token = o->gettoken();
 		if(!token) {
-			u->Error("CAST: Region Y coordinate not specified.");
+			u->Error("CAST: Region Y coordinate not specified.", 0);
 			return;
 		}
 		y = token->value();
@@ -519,7 +528,7 @@ void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 				if(z < 0 || (z >= Globals->UNDERWORLD_LEVELS +
 							Globals->UNDERDEEP_LEVELS +
 							Globals->ABYSS_LEVEL + 2)) {
-					u->Error("CAST: Invalid Z coordinate specified.");
+					u->Error("CAST: Invalid Z coordinate specified.", 0);
 					return;
 				}
 			}
@@ -534,6 +543,7 @@ void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
     CastModifyOrder *order;
     order = new CastModifyOrder;
     order->spell = S_REJUVENATION;
+    order->quiet = isquiet;
     order->level = 1;
     order->xloc = x;
     order->yloc = y;
@@ -544,17 +554,18 @@ void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck )
     u->AddCastOrder(order);
 }
 
-void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
     CastIntOrder *order = new CastIntOrder;
     order->spell = S_CREATE_PHANTASMAL_DEMONS;
+    order->quiet = isquiet;
     order->level = 0;
     order->target = 1;
 
     AString *token = o->gettoken();
 
     if (!token) {
-        u->Error("CAST: Illusion to summon must be given.");
+        u->Error("CAST: Illusion to summon must be given.", 0);
         delete order;
         return;
     }
@@ -574,7 +585,7 @@ void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
     delete token;
 
     if (!order->level) {
-        u->Error("CAST: Can't summon that illusion.");
+        u->Error("CAST: Can't summon that illusion.", 0);
         delete order;
         return;
     }
@@ -591,17 +602,18 @@ void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
     u->AddCastOrder(order);
 }
 
-void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
+void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet)
 {
 	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_UNDEAD;
+    order->quiet = isquiet;
 	order->level = 0;
 	order->target = 1;
 
 	AString *token = o->gettoken();
 
 	if (!token) {
-		u->Error("CAST: Must specify which illusion to summon.");
+		u->Error("CAST: Must specify which illusion to summon.", 0);
 		delete order;
 		return;
 	}
@@ -621,7 +633,7 @@ void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
 	delete token;
 
 	if (!order->level) {
-		u->Error("CAST: Must specify which illusion to summon.");
+		u->Error("CAST: Must specify which illusion to summon.", 0);
 		delete order;
 		return;
 	}
@@ -638,17 +650,18 @@ void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
 	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_BEASTS;
+    order->quiet = isquiet;
 	order->level = 0;
 	order->target = 1;
 
 	AString *token = o->gettoken();
 
 	if (!token) {
-		u->Error("CAST: Must specify which illusion to summon.");
+		u->Error("CAST: Must specify which illusion to summon.", 0);
 		delete order;
 		return;
 	}
@@ -666,7 +679,7 @@ void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
 	delete token;
 	if (!order->level) {
 		delete order;
-		u->Error("CAST: Must specify which illusion to summon.");
+		u->Error("CAST: Must specify which illusion to summon.", 0);
 		return;
 	}
 
@@ -679,17 +692,18 @@ void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessPhanCreatures(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessPhanCreatures(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
 	CastMenOrder *order = new CastMenOrder;
 	order->spell = S_ILLUSORY_CREATURES;
+    order->quiet = isquiet;
 	order->level = 0;
 	order->men = 1;
 
 	AString *token = o->gettoken();
 
 	if (!token) {
-		u->Error("CAST: Must specify which illusion to summon.");
+		u->Error("CAST: Must specify which illusion to summon.", 0);
 		delete order;
 		return;
 	}
@@ -738,7 +752,7 @@ void Game::ProcessPhanCreatures(Unit *u,AString *o, OrdersCheck *pCheck )
 	delete token;
 	if (!order->level) {
 		delete order;
-		u->Error("CAST: Must specify which illusion to summon.");
+		u->Error("CAST: Must specify which illusion to summon.", 0);
 		return;
 	}
 
@@ -750,15 +764,16 @@ void Game::ProcessPhanCreatures(Unit *u,AString *o, OrdersCheck *pCheck )
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck *pCheck )
+void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck *pCheck, int isquiet )
 {
 	CastOrder *order = new CastOrder;
 	order->spell = spell;
+    order->quiet = isquiet;
 	order->level = 1;
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessSummonCreaturesSpell(Unit *u, AString *o, int spell, OrdersCheck *pCheck )
+void Game::ProcessSummonCreaturesSpell(Unit *u, AString *o, int spell, OrdersCheck *pCheck, int isquiet )
 {
 	AString *token = o->gettoken();
 	int number = -1;
@@ -767,12 +782,13 @@ void Game::ProcessSummonCreaturesSpell(Unit *u, AString *o, int spell, OrdersChe
     }
 	CastIntOrder *order = new CastIntOrder;
 	order->spell = spell;
+    order->quiet = isquiet;
 	order->level = 1;
 	order->target = number;
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessArtifactSpell(Unit *u, AString *o, OrdersCheck *pCheck )
+void Game::ProcessArtifactSpell(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet )
 {
     if(!Globals->ARCADIA_MAGIC) return;
 	AString *token = o->gettoken();
@@ -786,12 +802,13 @@ void Game::ProcessArtifactSpell(Unit *u, AString *o, OrdersCheck *pCheck )
         delete token;
     } 
     if(type<0) {
-        u->Error("CAST: Invalid argument");
+        u->Error("CAST: Invalid argument", 0);
         return;
     }
     
 	CastOrder *order = new CastOrder;
 	order->spell = S_ARTIFACT_LORE;
+    order->quiet = isquiet;
 	order->level = type;
 	u->AddCastOrder(order);
 }
@@ -799,7 +816,7 @@ void Game::ProcessArtifactSpell(Unit *u, AString *o, OrdersCheck *pCheck )
 
 
 void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
-		OrdersCheck *pCheck)
+		OrdersCheck *pCheck, int isquiet)
 {
 	AString *token = o->gettoken();
 	int x = -1;
@@ -820,7 +837,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 			delete token;
 			token = o->gettoken();
 			if(!token) {
-				u->Error("CAST: Region X coordinate not specified.");
+				u->Error("CAST: Region X coordinate not specified.", 0);
 				return;
 			}
 			x = token->value();
@@ -828,7 +845,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 
 			token = o->gettoken();
 			if(!token) {
-				u->Error("CAST: Region Y coordinate not specified.");
+				u->Error("CAST: Region Y coordinate not specified.", 0);
 				return;
 			}
 			y = token->value();
@@ -842,7 +859,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 					if(z < 0 || (z >= Globals->UNDERWORLD_LEVELS +
 								Globals->UNDERDEEP_LEVELS +
 								Globals->ABYSS_LEVEL + 2)) {
-						u->Error("CAST: Invalid Z coordinate specified.");
+						u->Error("CAST: Invalid Z coordinate specified.", 0);
 						return;
 					}
 				}
@@ -861,6 +878,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 	else
 		order = new CastRegionOrder;
 	order->spell = spell;
+    order->quiet = isquiet;
 	order->level = 1+size; //Earthsea mod. sets level to 4 if "large"
 	order->xloc = x;
 	order->yloc = y;
@@ -876,33 +894,33 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 	}
 }
 
-void Game::ProcessSummonMen(Unit *u, AString *o, OrdersCheck *pCheck)
+void Game::ProcessSummonMen(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet)
 {
 	AString *token = o->gettoken();
 	if (!token) {
-		u->Error("CAST: No arguments submitted.");
+		u->Error("CAST: No arguments submitted.", 0);
 		return;
 	}
 	int number = token->value();
 	delete token; 	
 	if(number<1) {
-		u->Error("CAST: Specify number of men to summon.");
+		u->Error("CAST: Specify number of men to summon.", 0);
 		return;
 	}
 	token = o->gettoken(); 
 	if (!token) {
-		u->Error("CAST: No race specified.");
+		u->Error("CAST: No race specified.", 0);
 		return;
 	} 
     int race = ParseEnabledItem(token);
 	delete token;     
     if(!(ItemDefs[race].type & IT_MAN)) {
-		u->Error("CAST: Invalid Race.");
+		u->Error("CAST: Invalid Race.", 0);
 		return;
     }
  	token = o->gettoken(); 
 	if (!token || (!(*token == "unit") && !(*token == "units")) ) {
-		u->Error("CAST: Unit not specified.");
+		u->Error("CAST: Unit not specified.", 0);
 		delete token;
 		return;
 	}
@@ -911,6 +929,7 @@ void Game::ProcessSummonMen(Unit *u, AString *o, OrdersCheck *pCheck)
 	CastMenOrder *order;
 	order = new CastMenOrder;
 	order->spell = S_SUMMON_MEN; //spell;
+    order->quiet = isquiet;
 	order->level = 1;
 	order->men = number;
 	order->race = race;
@@ -924,11 +943,11 @@ void Game::ProcessSummonMen(Unit *u, AString *o, OrdersCheck *pCheck)
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
 	AString *token = o->gettoken();
 	if (!token) {
-		u->Error("CAST: Requires a target mage.");
+		u->Error("CAST: Requires a target mage.", 0);
 		return;
 	}
 	int gate = token->value();
@@ -936,12 +955,12 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	token = o->gettoken();
 
 	if (!token) {
-		u->Error("CAST: No units to teleport.");
+		u->Error("CAST: No units to teleport.", 0);
 		return;
 	}
 
 	if (!(*token == "units") && !(*token == "unit") ) {
-		u->Error("CAST: No units to teleport.");
+		u->Error("CAST: No units to teleport.", 0);
 		delete token;
 		return;
 	}
@@ -958,6 +977,7 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 
 	order->gate = gate;
 	order->spell = S_PORTAL_LORE;
+    order->quiet = isquiet;
 	order->level = 1;
 
 	UnitId *id = ParseUnit(o);
@@ -967,12 +987,12 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	}
 }
 
-void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
 	AString *token = o->gettoken();
 
 	if (!token) {
-		u->Error("CAST: Missing argument.");
+		u->Error("CAST: Missing argument.", 0);
 		return;
 	}
 
@@ -981,7 +1001,7 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		token = o->gettoken();
 
 		if (!token) {
-			u->Error("CAST: Requires a target gate.");
+			u->Error("CAST: Requires a target gate.", 0);
 			return;
 		}
 
@@ -998,6 +1018,7 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 
 		order->gate = token->value();
 		order->spell = S_GATE_LORE;
+        order->quiet = isquiet;
 		order->level = 3;
 
 		delete token;
@@ -1032,6 +1053,7 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 
 		order->gate = -1;
 		order->spell = S_GATE_LORE;
+        order->quiet = isquiet;
 		order->level = 1;
 
 		delete token;
@@ -1057,6 +1079,7 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		CastOrder *to = new CastOrder;
 		to->spell = S_GATE_LORE;
 		to->level = 2;
+        to->quiet = isquiet;
 		token = o->gettoken();
 		if(token) {
 		    if(*token == "large") to->level = 5;
@@ -1067,10 +1090,10 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	}
 
 	delete token;
-	u->Error("CAST: Invalid argument.");
+	u->Error("CAST: Invalid argument.", 0);
 }
 
-void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
 {
 /* Am going to have to move cast before tax! */
 	AString *token = o->gettoken();
@@ -1079,7 +1102,7 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 	int tax = TAX_NONE;
 	
 	if (!token) {
-		u->Error("CAST: Missing argument.");
+		u->Error("CAST: Missing argument.", 0);
 		return;
 	}
 
@@ -1132,7 +1155,7 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck )
     			    x->dir = d;
     			    m->dirs.Add(x);
     		    } else {
-    		        u->Error("CAST: Bad move direction.");
+    		        u->Error("CAST: Bad move direction.", 0);
     		        return;
     		    }
 		    }
@@ -1170,7 +1193,7 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck )
     			    x->dir = d;
     			    m->dirs.Add(x);
     		    } else {
-    		        u->Error("CAST: Bad move direction.");
+    		        u->Error("CAST: Bad move direction.", 0);
     		        return;
     		    }
 		    }
@@ -1199,7 +1222,7 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck )
     			    x->dir = d;
     			    m->dirs.Add(x);
     		    } else {
-    		        u->Error("CAST: Bad move direction.");
+    		        u->Error("CAST: Bad move direction.", 0);
     		        return;
     		    }
 		    }
@@ -1213,7 +1236,7 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck )
         token = o->gettoken();
 
     	if (!token) {
-    		u->Error("CAST: No skill given.");
+    		u->Error("CAST: No skill given.", 0);
     		return;
     	}
     	int sk = ParseSkill(token);
@@ -1221,13 +1244,13 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck )
     	token = o->gettoken();
     	
     	if (sk==-1 || (SkillDefs[sk].flags & SkillType::DISABLED)) {
-    		u->Error("CAST: Invalid skill.");
+    		u->Error("CAST: Invalid skill.", 0);
     		return;
     	}
     	
     	if((SkillDefs[sk].flags & SkillType::APPRENTICE) || 
                 (SkillDefs[sk].flags & SkillType::APPRENTICE)) {
-    		u->Error("CAST: Cannot hypnotise with magic or apprentice skills.");
+    		u->Error("CAST: Cannot hypnotise with magic or apprentice skills.", 0);
     		return;
     	}
     
@@ -1239,17 +1262,17 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck )
         
 	} else {
 	    delete token;
-	    u->Error("CAST: Invalid month order");
+	    u->Error("CAST: Invalid month order", 0);
 	    return;
     }
 
 	if (!token) {
-		u->Error("CAST: No units specified to hypnotise.");
+		u->Error("CAST: No units specified to hypnotise.", 0);
 		return;
 	}
 	if(!(*token == "units") && !(*token == "unit")) {
 	    delete token;
-	    u->Error("CAST: Must specify units to hypnotise.");
+	    u->Error("CAST: Must specify units to hypnotise.", 0);
 	    return;
 	}
     delete token;
@@ -1257,6 +1280,7 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck )
 	CastHypnosisOrder *order;
 	order = new CastHypnosisOrder;
 	order->spell = S_HYPNOSIS; //spell;
+    order->quiet = isquiet;
 	order->level = level;  // level required.
 	order->monthorder = monthorders;
 	order->taxing = tax;
@@ -1274,7 +1298,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u, CastOrder *order)
 {
 	int val;
 	if (u->type != U_MAGE) {
-		u->Error("CAST: Unit is not a mage.");
+		u->Error("CAST: Unit is not a mage.", order->quiet);
 		return;
 	}
 
@@ -1284,7 +1308,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u, CastOrder *order)
 
 	if (u->GetSkill(order->spell) < order->level ||
 			order->level == 0) {
-		u->Error("CAST: Skill level isn't that high.");
+		u->Error("CAST: Skill level isn't that high.", order->quiet);
 		return;
 	}
 	
@@ -1302,10 +1326,10 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u, CastOrder *order)
 			val = RunEnchantSwords(r,u);
 			break;
 		case S_CONSTRUCT_GATE:
-			val = RunConstructGate(r,u,sk);
+			val = RunConstructGate(r,u,sk,order->quiet);
 			break;
 		case S_ENGRAVE_RUNES_OF_WARDING:
-			val = RunEngraveRunes(r,o,u);
+			val = RunEngraveRunes(r,o,u,order->quiet);
 			break;
 		case S_CONSTRUCT_PORTAL:
 			val = RunCreateArtifact(r,u,sk,I_PORTAL);
@@ -1350,7 +1374,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u, CastOrder *order)
 			break;
 		case S_SUMMON_BALROG:
 		    if(Globals->ARCADIA_MAGIC) val = RunSummonHigherCreature(r,u,sk,I_BALROG);
-		    else val = RunSummonBalrog(r,u);
+		    else val = RunSummonBalrog(r,u,order->quiet);
 			break;
 		case S_SUMMON_LICH:
 			if(Globals->ARCADIA_MAGIC) val = RunSummonHigherCreature(r,u,sk,I_LICH);
@@ -1364,14 +1388,14 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u, CastOrder *order)
 			val = RunSummonSkeletons(r,u);
 			break;
 		case S_DRAGON_LORE:
-			val = RunDragonLore(r,u);
+			val = RunDragonLore(r,u,order->quiet);
 			break;
 		case S_BIRD_LORE:
 			val = RunBirdLore(r,u);
 			break;
 		case S_WOLF_LORE:
 		    if(Globals->ARCADIA_MAGIC && SkillDefs[sk].cast_cost > 0) val = RunSummonCreatures(r,u,sk,I_WOLF,8);
-			else val = RunWolfLore(r,u);
+			else val = RunWolfLore(r,u,order->quiet);
 			break;
 		case S_INVISIBILITY:
 			val = RunInvisibility(r,u);
@@ -1461,17 +1485,17 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u, CastOrder *order)
 
 }
 
-int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell, int penalty)
+int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell, int quiet, int penalty)
 {
 	int level = u->GetSkill(spell);
 	if(!level) {
-		u->Error("CAST: You don't know that spell.");
+		u->Error("CAST: You don't know that spell.", quiet);
 		return 0;
 	}
 
 	RangeType *range = FindRange(SkillDefs[spell].range);
 	if (range == NULL) {
-		u->Error("CAST: Spell is not castable at range.");
+		u->Error("CAST: Spell is not castable at range.", quiet);
 		return 0;
 	}
 
@@ -1480,29 +1504,29 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell, int pen
 	int rtype = regions.GetRegionArray(r->zloc)->levelType;
 	if((rtype == ARegionArray::LEVEL_NEXUS) &&
 			!(range->flags & RangeType::RNG_NEXUS_SOURCE)) {
-		u->Error("CAST: Spell does not work from the Nexus.");
+		u->Error("CAST: Spell does not work from the Nexus.", quiet);
 		return 0;
 	}
 
 	if(!tar) {
-		u->Error("CAST: No such region.");
+		u->Error("CAST: No such region.", quiet);
 		return 0;
 	}
 
 	rtype = regions.GetRegionArray(tar->zloc)->levelType;
 	if((rtype == ARegionArray::LEVEL_NEXUS) &&
 			!(range->flags & RangeType::RNG_NEXUS_TARGET)) {
-		u->Error("CAST: Spell does not work to the Nexus.");
+		u->Error("CAST: Spell does not work to the Nexus.", quiet);
 		return 0;
 	}
 
 	if((rtype != ARegionArray::LEVEL_SURFACE) &&
 			(range->flags & RangeType::RNG_SURFACE_ONLY)) {
-		u->Error("CAST: Spell can only target regions on the surface.");
+		u->Error("CAST: Spell can only target regions on the surface.", quiet);
 		return 0;
 	}
 	if(!(range->flags&RangeType::RNG_CROSS_LEVELS) && (r->zloc != tar->zloc)) {
-		u->Error("CAST: Spell is not able to work across levels.");
+		u->Error("CAST: Spell is not able to work across levels.", quiet);
 		return 0;
 	}
 
@@ -1530,7 +1554,7 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell, int pen
 	else
 		dist = regions.GetDistance(tar, r);
 	if(dist > maxdist) {
-		u->Error("CAST: Target region out of range.");
+		u->Error("CAST: Target region out of range.", quiet);
 		return 0;
 	}
 	return 1;
@@ -1543,7 +1567,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 
 	Unit *tar = r->GetUnitId(order->id,u->faction->num);
 	if (!tar) {
-		u->Error("No such unit.");
+		u->Error("No such unit.", order->quiet);
 		return 0;
 	}
 	
@@ -1557,7 +1581,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 	AString temp2;
     switch(mevent) {
         case 4:
-            u->Error("Attempts to read minds, but the spell is reflected.");
+            u->Error("Attempts to read minds, but the spell is reflected.", order->quiet);
         	temp2 = AString("Gets a vision of: ") + *(u->name) + ", " +
         		*(u->faction->name) + ".";
         	temp2 += u->items.Report(2,5,0,u->type) + ". Skills: ";
@@ -1569,7 +1593,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
             break;
         case 2:
         case 1:
-            u->Error("Attempts to read minds, but the spell fizzles.");
+            u->Error("Attempts to read minds, but the spell fizzles.", order->quiet);
             return 1;
         default:
             break;
@@ -1619,7 +1643,7 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
         cost = u->GetCastCost(S_ENCHANT_ARMOR,order->extracost,--max);
     }
     if(!max) {
-        u->Error("CAST: Not enough energy to cast that.");
+        u->Error("CAST: Not enough energy to cast that.", order->quiet);
         return 0;
     }
 
@@ -1635,7 +1659,7 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 	}
 
 	if (max == 0) {
-        u->Error("CAST: Do not have the required item.");
+        u->Error("CAST: Do not have the required item.", order->quiet);
         return 0;
     }
 
@@ -1693,18 +1717,18 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
     int mevent = u->MysticEvent();
     switch(mevent) {
         case 4:
-            u->Error("Attempts to enchant armour, but the spell goes wrong, producing chain armour.");
+            u->Error("Attempts to enchant armour, but the spell goes wrong, producing chain armour.", order->quiet);
             u->items.SetNum(I_CHAINARMOR,u->items.GetNum(I_CHAINARMOR) + max);
 	        u->Event(AString("Enchants ") + num + " chain armour.");
             return 1;
         case 3:
-            u->Error("Attempts to enchant armour, but the spell goes wrong, producing pearl plate armour.");
+            u->Error("Attempts to enchant armour, but the spell goes wrong, producing pearl plate armour.", order->quiet);
             u->items.SetNum(I_PPLATE,u->items.GetNum(I_PPLATE) + max);
 	        u->Event(AString("Enchants ") + num + " pearl plate armour.");
             return 1;
         case 2:
         case 1:
-            u->Error("Attempts to enchant armour, but the spell fizzles and they disappear.");
+            u->Error("Attempts to enchant armour, but the spell fizzles and they disappear.", order->quiet);
             return 1;
         default:
             break;
@@ -1731,7 +1755,7 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
         cost = u->GetCastCost(S_ENCHANT_SWORDS,order->extracost,--max);
     }
     if(!max) {
-        u->Error("CAST: Not enough energy to cast that.");
+        u->Error("CAST: Not enough energy to cast that.", order->quiet);
         return 0;
     }
     
@@ -1746,7 +1770,7 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 	}
 
 	if (max == 0) {
-        u->Error("CAST: Do not have the required item.");
+        u->Error("CAST: Do not have the required item.", order->quiet);
         return 0;
     }
 
@@ -1804,7 +1828,7 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
         case 3:
         case 2:
         case 1:
-            u->Error("Attempts to enchant swords, but the spell fizzles and they disappear.");
+            u->Error("Attempts to enchant swords, but the spell fizzles and they disappear.", order->quiet);
             return 1;
         default:
             break;
@@ -1864,21 +1888,21 @@ int Game::RunCreateFood(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
+int Game::RunConstructGate(ARegion *r,Unit *u, int spell, int isquiet)
 {
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
-		u->Error("Gates may not be constructed at sea.");
+		u->Error("Gates may not be constructed at sea.", isquiet);
 		return 0;
 	}
 
 	if (r->gate) {
-		u->Error("There is already a gate in that region.");
+		u->Error("There is already a gate in that region.", isquiet);
 		return 0;
 	}
 
 	if(!Globals->ARCADIA_MAGIC) {
     	if (!u->GetSharedMoney(1000)) {
-    		u->Error("Can't afford to construct a Gate.");
+    		u->Error("Can't afford to construct a Gate.", isquiet);
     		return 0;
     	}
     
@@ -1908,7 +1932,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 	
 	int cost = u->GetCastCost(spell,order->extracost,1);
 	if(u->energy < cost) {
-       u->Error("CAST: Not enough energy to cast that spell.");
+       u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
        return 0;
     }
     u->energy -= cost;
@@ -1927,13 +1951,13 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
         		torder->gate = -1;
         		torder->spell = S_GATE_LORE;
         		torder->level = 1;
-        		u->Error("Attempts to construct a gate, but the spell backfires into a random gate jump instead.");
+        		u->Error("Attempts to construct a gate, but the spell backfires into a random gate jump instead.", order->quiet);
         		return 1;
     		}
         case 3:
         case 2:
         case 1:
-            u->Error("Attempts to construct a gate, but the spell fizzles.");
+            u->Error("Attempts to construct a gate, but the spell fizzles.", order->quiet);
             return 1;
         default:
             break;
@@ -1952,16 +1976,16 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 	return 1;
 }
 
-int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
+int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u, int isquiet)
 {
 	if (!o->IsBuilding()) {
-		u->Error("Runes of Warding may only be engraved on a building.");
+		u->Error("Runes of Warding may only be engraved on a building.", isquiet);
 		return 0;
 	}
 
 	if (o->incomplete > 0) {
 		u->Error( "Runes of Warding may only be engraved on a completed "
-				"building.");
+				"building.", isquiet);
 		return 0;
 	}
 
@@ -1982,12 +2006,12 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
     			if (o->type == O_TOWER) break;
     		default:
     			u->Error("Not high enough level to engrave Runes of Warding on "
-    					"that building.");
+    					"that building.", isquiet);
     			return 0;
     	}
     
     	if (!u->GetSharedMoney(600)) {
-    		u->Error("Can't afford to engrave Runes of Warding.");
+    		u->Error("Can't afford to engrave Runes of Warding.", isquiet);
     		return 0;
     	}
     
@@ -2009,13 +2033,13 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 	if(ObjectDefs[o->type].protect > 999) size++;
 	
 	if(size > level) {
-	    u->Error("CAST: Insufficient level to engrave runes on that building.");
+	    u->Error("CAST: Insufficient level to engrave runes on that building.", isquiet);
 	    return 0;
 	}
 	
 	
     if(!(ObjectDefs[o->type].flags & ObjectType::CANMODIFY)) {
-        u->Error("CAST: Cannot engrave runes on that building.");
+        u->Error("CAST: Cannot engrave runes on that building type.", isquiet);
         return 0;    
     }
 	
@@ -2023,7 +2047,7 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 	
 	int cost = u->GetCastCost(S_ENGRAVE_RUNES_OF_WARDING,order->extracost,size);
 	if(u->energy < cost) {
-       u->Error("CAST: Not enough energy to cast that spell.");
+       u->Error("CAST: Not enough energy to cast that spell.", isquiet);
        return 0;
     }
     u->energy -= cost;
@@ -2037,19 +2061,19 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
     switch(mevent) {
         case 4:
             if(o->runes == 0 && level <= 4) {
-                u->Error("While engraving runes, the spell escapes the mage's control, engraving runes two levels higher than usual.");
+                u->Error("While engraving runes, the spell escapes the mage's control, engraving runes two levels higher than usual.", isquiet);
                 level += 2;
                 break;
             }
         case 3:
             if(o->runes) {
-                u->Error("Attempts to engrave runes, but the spell backfires, leaving the building without engravings.");
+                u->Error("Attempts to engrave runes, but the spell backfires, leaving the building without engravings.", isquiet);
                 o->runes = 0;
                 return 1;
             }
         case 2:
         case 1:
-            u->Error("Attempts to engrave runes, but the spell fizzles.");
+            u->Error("Attempts to engrave runes, but the spell fizzles.", isquiet);
             return 1;
         default:
             break;
@@ -2061,12 +2085,12 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 	return 1;
 }
 
-int Game::RunSummonBalrog(ARegion *r,Unit *u)
+int Game::RunSummonBalrog(ARegion *r,Unit *u, int isquiet)
 {
 	int level = u->GetSkill(S_SUMMON_BALROG);
 	if(!Globals->ARCADIA_MAGIC) {
     	if (u->items.GetNum(I_BALROG) >= ItemDefs[I_BALROG].max_inventory) {
-    		u->Error("Can't control any more balrogs.");
+    		u->Error("Can't control any more balrogs.", isquiet);
     		return 0;
     	}
     
@@ -2077,7 +2101,7 @@ int Game::RunSummonBalrog(ARegion *r,Unit *u)
     	return 1;
 	}
     if (u->items.GetNum(I_BALROG) >= level) {
-    	u->Error("Can't control any more balrogs.");
+    	u->Error("Can't control any more balrogs.", isquiet);
     	return 0;
     }
     return 0;
@@ -2115,7 +2139,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 	    if(num > 1) cost = (cost + level - 1) / level;        //cost to make one.
 	    
 		if(cost > u->energy) {
-		    u->Error("CAST: Not enough energy to cast that spell.");
+		    u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
 		    return 0;
 		}
 
@@ -2126,7 +2150,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
     		if(amt < cost) {
     			u->Error(AString("CAST: Doesn't have sufficient ") +
     					ItemDefs[ItemDefs[item].mInput[c].item].name +
-    					" to create that.");
+    					" to create that.", order->quiet);
     			return 0;
     		}
     		if(amt < cost*num) num = amt / cost;     //reduce num if we don't have enough items.
@@ -2158,7 +2182,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
             case 3:
             case 2:
             case 1:
-                u->Error(AString("Attempts to create an ") + ItemDefs[item].name + ", but the spell fizzles.");
+                u->Error(AString("Attempts to create an ") + ItemDefs[item].name + ", but the spell fizzles.", order->quiet);
                 return 1;
             default:
                 break;
@@ -2211,13 +2235,13 @@ int Game::RunSummonSkeletons(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunDragonLore(ARegion *r, Unit *u)
+int Game::RunDragonLore(ARegion *r, Unit *u, int isquiet)
 {
 	int level = u->GetSkill(S_DRAGON_LORE);
 
 	int num = u->items.GetNum(I_DRAGON);
 	if (num >= level) {
-		u->Error("Mage may not summon more dragons.");
+		u->Error("Mage may not summon more dragons.", isquiet);
 		return 0;
 	}
 
@@ -2243,14 +2267,14 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 		AString error = "CAST: Bird Lore may only be cast on the surface of ";
 		error += Globals->WORLD_NAME;
 		error += ".";
-		u->Error(error.Str());
+		u->Error(error.Str(), order->quiet);
 		return 0;
 	}
 
 	if (order->level < 3) {
 	    int cost = u->GetCastCost(S_BIRD_LORE,order->extracost);
 		if(cost > u->energy) {
-		    u->Error("CAST: Not enough energy to cast that spell.");
+		    u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
 		    return 0;
 		} else u->energy -= cost;
 		
@@ -2263,7 +2287,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
         switch(mevent) {
             case 4:
             case 3:
-                u->Error("Summoned birds get confused, and visit the wrong region.");
+                u->Error("Summoned birds get confused, and visit the wrong region.", order->quiet);
                 do{
                     newdir = getrandom(6);
                 } while (newdir == order->target);
@@ -2271,7 +2295,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
                 break;
             case 2:
             case 1:
-                u->Error("Attempts to send birds to a neighbouring region, but they fail to return.");
+                u->Error("Attempts to send birds to a neighbouring region, but they fail to return.", order->quiet);
                 return 1;
             default:
                 break;
@@ -2287,7 +2311,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
     		level--;
     		ARegion *tar = tempReg->neighbors[dir];
     		if (!tar) {
-    			if(!count) u->Error("CAST: No such region.");
+    			if(!count) u->Error("CAST: No such region.", order->quiet);
     			return 0;
     		}
     		count++;
@@ -2346,13 +2370,13 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
  	if(cost > 0) {
  	num = (10*u->energy) / cost;
      	if(num < 1) {
-     	    u->Error("CAST: Not enough energy to cast that spell.");
+     	    u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
      	    return 0;
         }
     }
  	if( (num + currentnum) > (level-2)*(level-2) ) num = (level-2)*(level-2) - currentnum;
  	if(num < 1) {
- 	    u->Error("CAST: Already have the maximum number of eagles.");
+ 	    u->Error("CAST: Already have the maximum number of eagles.", order->quiet);
  	    return 0;
     }
  	if(order->target > 0 && order->target < num) num = order->target;
@@ -2369,7 +2393,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
     switch(mevent) {
         case 4:
             if(currentnum>0) {
-                u->Error(AString("Attempts to summon ") + ItemDefs[I_EAGLE].names + ", but all of those creatures magically disappear.");
+                u->Error(AString("Attempts to summon ") + ItemDefs[I_EAGLE].names + ", but all of those creatures magically disappear.", order->quiet);
                 u->items.SetNum(I_EAGLE,0);
                 return 1;
             }
@@ -2377,7 +2401,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
         case 3:
         case 2:
         case 1:
-            u->Error(AString("Attempts to cast ") + SkillDefs[S_BIRD_LORE].name + ", but talking parrots appear instead.");
+            u->Error(AString("Attempts to cast ") + SkillDefs[S_BIRD_LORE].name + ", but talking parrots appear instead.", order->quiet);
             return 1;
         default:
             break;
@@ -2389,12 +2413,12 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunWolfLore(ARegion *r,Unit *u)
+int Game::RunWolfLore(ARegion *r,Unit *u, int isquiet)
 { //in Arcadia, SummonCreatures is called instead unless there is no energy cost.
 	if (TerrainDefs[r->type].similar_type != R_MOUNTAIN &&
 		TerrainDefs[r->type].similar_type != R_FOREST) {
 		u->Error("CAST: Can only summon wolves in mountain and "
-				 "forest regions.");
+				 "forest regions.", isquiet);
 		return 0;
 	}
 
@@ -2429,15 +2453,15 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
 	}
 
 	if (!num) {
-		u->Error("CAST: No valid targets to turn invisible.");
+		u->Error("CAST: No valid targets to turn invisible.", order->quiet);
 		return 0;
 	}
 	
 	if (num > max) {
-		u->Error("CAST: Can't render that many men or creatures invisible.");
+		u->Error("CAST: Can't render that many men or creatures invisible.", order->quiet);
 	}
 	if (num > energymax) {
-	    u->Error("CAST: Not enough energy to render that many men or creatures invisible.");
+	    u->Error("CAST: Not enough energy to render that many men or creatures invisible.", order->quiet);
     }
     if(energymax < max) max = energymax; //max is now the smaller of the two limits.
 
@@ -2446,17 +2470,17 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
     int mevent = u->MysticEvent();
     switch(mevent) {
         case 4:
-            u->Error("Attempts to cast invisibility, but the spell backfires, decreasing the stealth of the mage and targets by 2.");
+            u->Error("Attempts to cast invisibility, but the spell backfires, decreasing the stealth of the mage and targets by 2.", order->quiet);
             backfire = 2;
             u->SetFlag(FLAG_VISIB,1);
             break;
         case 3:
-            u->Error("Attempts to cast invisibility, but the spell backfires, decreasing the stealth of the targets by 2.");
+            u->Error("Attempts to cast invisibility, but the spell backfires, decreasing the stealth of the targets by 2.", order->quiet);
             backfire = 2;
             break;
         case 2:
         case 1:
-            u->Error("Attempts to cast invisibility, but the spell fizzles.");
+            u->Error("Attempts to cast invisibility, but the spell fizzles.", order->quiet);
             backfire = 1; //continue, because we have to count targets to know how much energy to deduct.
             break;
         default:
@@ -2513,7 +2537,7 @@ int Game::RunPhanDemons(ARegion *r,Unit *u)
 	}
 
 	if (order->target > max || order->target <= 0) {
-		u->Error("CAST: Can't create that many Phantasmal Demons.");
+		u->Error("CAST: Can't create that many Phantasmal Demons.", order->quiet);
 		return 0;
 	}
 
@@ -2542,7 +2566,7 @@ int Game::RunPhanUndead(ARegion *r,Unit *u)
 	}
 
 	if (order->target > max || order->target <= 0) {
-		u->Error("CAST: Can't create that many Phantasmal Undead.");
+		u->Error("CAST: Can't create that many Phantasmal Undead.", order->quiet);
 		return 0;
 	}
 
@@ -2571,7 +2595,7 @@ int Game::RunPhanBeasts(ARegion *r,Unit *u)
 	}
 
 	if (order->target > max || order->target <= 0) {
-		u->Error("CAST: Can't create that many Phantasmal Beasts.");
+		u->Error("CAST: Can't create that many Phantasmal Beasts.", order->quiet);
 		return 0;
 	}
 
@@ -2586,7 +2610,7 @@ int Game::RunPhanCreatures(ARegion *r,Unit *u)
 	int level = u->GetSkill(S_ILLUSORY_CREATURES);
 
 	if(order->level > level) {
-		u->Error("CAST: Insufficient level to create that illusion.");
+		u->Error("CAST: Insufficient level to create that illusion.", order->quiet);
 		return 0;
   	}
 
@@ -2594,7 +2618,7 @@ int Game::RunPhanCreatures(ARegion *r,Unit *u)
 	//or 4 demons, or 40 imps.
   	int change = order->men - u->items.GetNum(order->race);
   	if(!change) {
-  	    u->Error("CAST: The mage already has that many of that creature.");
+  	    u->Error("CAST: The mage already has that many of that creature.", order->quiet);
   	    return 1;
   	}
   	
@@ -2621,13 +2645,13 @@ int Game::RunPhanCreatures(ARegion *r,Unit *u)
                 cost = cost/5;
                 break;
             default:
-                u->Error("CAST: That does not seem to be an illusionary creature. This error should not occur, contact your GM.");
+                u->Error("CAST: That does not seem to be an illusionary creature. This error should not occur, contact your GM.", 0);
                 return 1;
   	    }
   	}
 
   	if(cost > u->energy) {
-  	    u->Error("CAST: Not enough energy to create that many illusions.");
+  	    u->Error("CAST: Not enough energy to create that many illusions.", order->quiet);
   	    return 0;
   	}
   	u->energy -= cost;
@@ -2636,19 +2660,19 @@ int Game::RunPhanCreatures(ARegion *r,Unit *u)
   	int mevent = u->MysticEvent();
     switch(mevent) {
         case 4:
-            u->Error("Attempts to create illusionary creatures, but the spell backfires, and all his illusory creatures are lost!");
+            u->Error("Attempts to create illusionary creatures, but the spell backfires, and all his illusory creatures are lost!", order->quiet);
             for(int i=0; i<NITEMS; i++) if(ItemDefs[i].type & IT_ILLUSION) u->items.SetNum(i,0);
             return 0;
         case 3:
             u->Error("Attempts to create illusionary creatures, but the spell backfires, and illusory cockroaches "
-                "swarm over him all month long, despite his efforts to get rid of them.");
+                "swarm over him all month long, despite his efforts to get rid of them.", order->quiet);
             u->energy -= 4;
             if(u->energy < 0) u->energy = 0;
             u->Experience(S_ILLUSORY_CREATURES,10);
             return 1;
         case 2:
         case 1:
-            u->Error("Attempts to create illusionary creatures, but the spell fizzles, producing only illusory roast dinners.");
+            u->Error("Attempts to create illusionary creatures, but the spell fizzles, producing only illusory roast dinners.", order->quiet);
             u->Experience(S_ILLUSORY_CREATURES,10);
             return 1;
         default:
@@ -2666,19 +2690,19 @@ int Game::RunPhanCreatures(ARegion *r,Unit *u)
 }
 
 int Game::RunPhanEntertainment(ARegion *r,Unit *u)
-//castable spell in Earthsea only.
+//castable spell in Arc-III only.
 {
     CastOrder *order = (CastOrder *) u->activecastorder;
     int level = u->GetSkill(S_PHANTASMAL_ENTERTAINMENT);
     
     if(!r->town || r->town->TownType() != TOWN_CITY) {
-        u->Error("CAST: That spell can only be cast in cities.");
+        u->Error("CAST: That spell can only be cast in cities.", order->quiet);
         return 0;
     }
 
 	int cost = u->GetCastCost(S_PHANTASMAL_ENTERTAINMENT,order->extracost);
 	if(cost > u->energy) {
-	    u->Error("CAST: Not enough energy to cast that spell");
+	    u->Error("CAST: Not enough energy to cast that spell", order->quiet);
 	    return 0;
     }
     u->energy -= cost;
@@ -2692,7 +2716,7 @@ int Game::RunPhanEntertainment(ARegion *r,Unit *u)
         case 4:
         case 3:
             u->Error("Attempts to entertain the nobility, and succeeds so well that jealous husbands leave him penniless, "
-                "while their wives leave him exhausted!");
+                "while their wives leave him exhausted!", order->quiet);
             u->energy = 0;
             u->items.SetNum(I_SILVER,0);
             u->Experience(S_PHANTASMAL_ENTERTAINMENT,10);
@@ -2700,14 +2724,14 @@ int Game::RunPhanEntertainment(ARegion *r,Unit *u)
             return 1;
         case 2:
             u->Error("Attempts to entertain the nobility, but they are a humourless bunch, and he is forced to weave "
-                "a web of illusions to escape unharmed.");
+                "a web of illusions to escape unharmed.", order->quiet);
             u->energy -= cost;
             if(u->energy < 0) u->energy = 0;
             u->Experience(S_PHANTASMAL_ENTERTAINMENT,20);
             u->Experience(S_ILLUSION,40);
             return 1;
         case 1:
-            u->Error("Attempts to entertain the nobility, but his spells fizzle, and he gets covered in rotten tomato juice.");
+            u->Error("Attempts to entertain the nobility, but his spells fizzle, and he gets covered in rotten tomato juice.", order->quiet);
             u->Experience(S_PHANTASMAL_ENTERTAINMENT,10);
             //unfortunately there is not yet any fruit-dodging skill to practise.
             return 1;
@@ -2737,14 +2761,14 @@ int Game::RunEarthLore(ARegion *r,Unit *u)
 	RangeType *range = FindRange(SkillDefs[S_EARTH_LORE].range);
 	if(range != NULL) {
 		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-		val = GetRegionInRange(r, tar, u, S_EARTH_LORE,penalty);
+		val = GetRegionInRange(r, tar, u, S_EARTH_LORE,order->quiet,penalty);
 		if(!val) return 0;
 		temp += " on ";
 		temp += tar->ShortPrint(&regions);
 	}
 
 	if(TerrainDefs[tar->type].similar_type == R_OCEAN) {
-	    u->Error("CAST: Cannot cast Earth Lore at sea.");
+	    u->Error("CAST: Cannot cast Earth Lore at sea.", order->quiet);
 	    return 0;
 	}
 
@@ -2752,7 +2776,7 @@ int Game::RunEarthLore(ARegion *r,Unit *u)
 	int largecost = u->GetCastCost(S_EARTH_LORE,order->extracost, 4);
 	
 	if(cost > u->energy) {   //if large and not enough energy for large casting, we default to small, so don't exit
-	    u->Error("CAST: Not enough energy to cast that spell");
+	    u->Error("CAST: Not enough energy to cast that spell", order->quiet);
 	    return 0;
     }
 
@@ -2763,7 +2787,7 @@ int Game::RunEarthLore(ARegion *r,Unit *u)
         case 3:
         case 2:
         case 1:
-            u->Error("Attempts to cast earth lore, but the spell fizzles.");
+            u->Error("Attempts to cast earth lore, but the spell fizzles.", order->quiet);
             u->Experience(S_EARTH_LORE,10);
             if(!size) u->energy -= cost;
             else u->energy -= largecost;
@@ -2779,7 +2803,7 @@ int Game::RunEarthLore(ARegion *r,Unit *u)
     int count = 0;
 	if (size && Globals->ARCADIA_MAGIC) {
 	    if(level < 4) {
-	        u->Error("CAST: Not high enough level for large casting.");
+	        u->Error("CAST: Not high enough level for large casting.", order->quiet);
 	    } else if(largecost <= u->energy) {
     	    for (int i = 0; i<6; i++) {
     	        if(tar->neighbors[i] && TerrainDefs[tar->neighbors[i]->type].similar_type != R_OCEAN) {
@@ -2791,7 +2815,7 @@ int Game::RunEarthLore(ARegion *r,Unit *u)
             if(range == NULL) temp += AString(" on ") + tar->ShortPrint(&regions);
             temp += AString(" and ") + count + " neighbouring regions";
         } else {
-            u->Error("CAST: Not enough energy for large casting.");
+            u->Error("CAST: Not enough energy for large casting.", order->quiet);
         }
 	}
 	temp += AString(", raising ") + amt + " silver.";
@@ -2824,7 +2848,7 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
 	RangeType *range = FindRange(SkillDefs[S_CLEAR_SKIES].range);
 	if(range != NULL) {
 		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-		val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES, penalty);
+		val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES, order->quiet, penalty);
 		if(!val) return 0;
 		temp += " on ";
 		temp += tar->ShortPrint(&regions);
@@ -2834,13 +2858,13 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
 
     if(Globals->ARCADIA_MAGIC) {
         if(size && level < 4) {
-            u->Error("CAST: Not high enough level for large casting.");
+            u->Error("CAST: Not high enough level for large casting.", order->quiet);
             return 0;
         }
         if(penalty < 1) penalty = 1;
      	int cost = u->GetCastCost(S_CLEAR_SKIES,order->extracost,penalty*penalty); //*4 if large
      	if(u->energy < cost) {
-     	    u->Error("CAST: Not enough energy to cast that spell.");
+     	    u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
      	    return 0;
      	}
         u->energy -= cost;
@@ -2853,7 +2877,7 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
         int yy;
         switch(mevent) {
             case 4:
-                u->Error("Attempts to cast clearskies, but a terrible blizzard appears instead.");
+                u->Error("Attempts to cast clearskies, but a terrible blizzard appears instead.", order->quiet);
                 tar->weather = W_BLIZZARD;
                 return 1;
             case 3:
@@ -2864,13 +2888,13 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
                 } while ( (xx+yy)%2 );
                 tar = regions.GetRegion(xx,yy,1);
                 if(!tar) {
-                    u->Error("Attempts to cast clearskies, but the spell fizzles.");
+                    u->Error("Attempts to cast clearskies, but the spell fizzles.", order->quiet);
                     return 1;
                 }
-                u->Error(AString("Attempts to cast clearskies, but the spell is misaimed, hitting ") + tar->ShortPrint(&regions));
+                u->Error(AString("Attempts to cast clearskies, but the spell is misaimed, hitting ") + tar->ShortPrint(&regions), order->quiet);
                 break;
             case 1:
-                u->Error("Attempts to cast clearskies, but the spell fizzles, and the mage gets rained on.");
+                u->Error("Attempts to cast clearskies, but the spell fizzles, and the mage gets rained on.", order->quiet);
                 return 1;
             default:
                 break;
@@ -2904,7 +2928,7 @@ int Game::RunWeatherLore(ARegion *r, Unit *u)
 	CastRegionOrder *order = (CastRegionOrder *)u->activecastorder;
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_WEATHER_LORE);
+	val = GetRegionInRange(r, tar, u, S_WEATHER_LORE, order->quiet, 0);
 	if(!val) return 0;
 
 	int level = u->GetSkill(S_WEATHER_LORE);
@@ -2945,21 +2969,21 @@ int Game::RunFarsight(ARegion *r,Unit *u)
 	if(size) penalty = 2;
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_FARSIGHT, penalty);
+	val = GetRegionInRange(r, tar, u, S_FARSIGHT, order->quiet, penalty);
 	if(!val) return 0;
 
 	int level = u->GetSkill(S_FARSIGHT);
 
 	if(Globals->ARCADIA_MAGIC) {
         if(size && level < 4) {
-            u->Error("CAST: Not high enough level for large casting.");
+            u->Error("CAST: Not high enough level for large casting.", order->quiet);
             return 0;
         }
         
         if(penalty<1) penalty=1;
      	int cost = u->GetCastCost(S_FARSIGHT, order->extracost, penalty*penalty); //*4 if large
      	if(u->energy < cost) {
-     	    u->Error("CAST: Not enough energy to cast that spell.");
+     	    u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
      	    return 0;
      	}
         u->energy -= cost;
@@ -2973,7 +2997,7 @@ int Game::RunFarsight(ARegion *r,Unit *u)
         switch(mevent) {
             case 4:
                 u->Error("Attempts to cast farsight, but it is reflected, displaying the mage's region for all in the "
-                    "target region to see.");
+                    "target region to see.", order->quiet);
                     //not programmed
                 return 1;
             case 3:
@@ -2984,13 +3008,13 @@ int Game::RunFarsight(ARegion *r,Unit *u)
                 } while ( (xx+yy)%2 );
                 tar = regions.GetRegion(xx,yy,1);
                 if(!tar) {
-                    u->Error("Attempts to cast farsight, but the spell fizzles.");
+                    u->Error("Attempts to cast farsight, but the spell fizzles.", order->quiet);
                     return 1;
                 }
-                u->Error(AString("Attempts to cast farsight, but the spell is misaimed, hitting ") + tar->ShortPrint(&regions));
+                u->Error(AString("Attempts to cast farsight, but the spell is misaimed, hitting ") + tar->ShortPrint(&regions), order->quiet);
                 break;
             case 1:
-                u->Error("Attempts to cast farsight, but the spell fizzles, and the mage gets two black eyes.");
+                u->Error("Attempts to cast farsight, but the spell fizzles, and the mage gets two black eyes.", order->quiet);
                 return 1;
             default:
                 break;
@@ -3028,22 +3052,22 @@ int Game::RunFarsight(ARegion *r,Unit *u)
 
 int Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 {
-	int level = u->GetSkill(S_GATE_LORE);
-
-	if (level == 1) {
-		u->Error("CAST: Casting Gate Lore at level 1 has no effect.");
-		return 0;
-	}
-	
 	CastOrder *order = (CastOrder *)u->activecastorder;
 	int distance = 1;
 	if(order->level == 5) distance = 2;
+
+	int level = u->GetSkill(S_GATE_LORE);
+
+	if (level == 1) {
+		u->Error("CAST: Insufficient level to DETECT gates.",order->quiet);
+		return 0;
+	}
 	
 	if(Globals->ARCADIA_MAGIC) {
         
      	int cost = u->GetCastCost(S_GATE_LORE, order->extracost, distance*distance);
      	if(u->energy < cost) {
-     	    u->Error("CAST: Not enough energy to cast that spell.");
+     	    u->Error("CAST: Not enough energy to cast that spell.",order->quiet);
      	    return 0;
      	}
         u->energy -= cost;
@@ -3142,7 +3166,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	CastRegionOrder *order = (CastRegionOrder *)u->teleportorders;
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_TELEPORTATION);
+	val = GetRegionInRange(r, tar, u, S_TELEPORTATION, order->quiet, 0);
 	if(!val) return 0;
 
 	int level = u->GetSkill(S_TELEPORTATION);
@@ -3150,14 +3174,14 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	if(Globals->ARCADIA_MAGIC) maxweight *= level;	
 
 	if (u->Weight() > maxweight) {
-		u->Error("CAST: Can't carry that much when teleporting.");
+		u->Error("CAST: Can't carry that much when teleporting.", order->quiet);
 		return 0;
 	}
 
 	// Presume they had to open the portal to see if target is ocean
 	if (TerrainDefs[tar->type].similar_type == R_OCEAN) {
 		u->Error(AString("CAST: ") + tar->Print(&regions) +
-		    " is an ocean.");
+		    " is an ocean.",order->quiet);
 		return 1;
 	}
 
@@ -3166,7 +3190,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
      	int cost = u->GetCastCost(S_TELEPORTATION,order->extracost,(u->Weight()/level)); //This is 50 times the cost.
      	cost /= 50;
      	if(u->energy < cost) {
-     	    u->Error("CAST: Not enough energy to cast that spell.");
+     	    u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
      	    return 0;
      	}
         u->energy -= cost;
@@ -3191,14 +3215,14 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
                 } while ( tar == 0 || TerrainDefs[tar->type].similar_type == R_OCEAN );
                 
                 if(!tar) {
-                    u->Error("Attempts to cast teleport, but the spell fizzles.");
+                    u->Error("Attempts to cast teleport, but the spell fizzles.", order->quiet);
                     return 1;
                 }
-                u->Error(AString("Attempts to teleport, but the spell is misaimed, teleporting the mage to ") + tar->ShortPrint(&regions));
+                u->Error(AString("Attempts to teleport, but the spell is misaimed, teleporting the mage to ") + tar->ShortPrint(&regions), order->quiet);
                 break;
             case 2:
             case 1:
-                u->Error("Attempts to cast teleport, but the spell fizzles.");
+                u->Error("Attempts to cast teleport, but the spell fizzles.", order->quiet);
                 return 1;
             default:
                 break;
@@ -3215,27 +3239,28 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 {
 	int level = u->GetSkill(S_GATE_LORE);
 	int nexgate = 0;
+
+	TeleportOrder *order = u->teleportorders;
+	
 	if( !level ) {
-		u->Error( "CAST: Unit doesn't have that skill." );
+		u->Error( "CAST: Unit doesn't have that skill.", order->quiet );
 		return 0;
 	}
 
-	TeleportOrder *order = u->teleportorders;
-
 	if (order->gate != -1 && level < 3) {
-		u->Error("CAST: Unit Doesn't know Gate Lore at that level.");
+		u->Error("CAST: Unit Doesn't know Gate Lore at that level.", order->quiet);
 		return 0;
 	}
 
 	nexgate = Globals->NEXUS_GATE_OUT &&
 		(TerrainDefs[r->type].similar_type == R_NEXUS);
 	if (!r->gate && !nexgate) {
-		u->Error("CAST: There is no gate in that region.");
+		u->Error("CAST: There is no gate in that region.", order->quiet);
 		return 0;
 	}
 
 	if (!r->gateopen) {
-	    u->Error("CAST: Gate not open at this time of year.");
+	    u->Error("CAST: Gate not open at this time of year.", order->quiet);
 	    return 0;
 	}
 
@@ -3268,7 +3293,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 	if (weight > maxweight) {
 		u->Error( "CAST: That mage cannot carry that much weight "
-		    "through a Gate.");
+		    "through a Gate.", order->quiet);
 		return 0;
 	}
 	
@@ -3299,11 +3324,11 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
             case 2:
                 if(order->gate != -1) {
                     order->gate = -1;
-                    u->Error("Attempts to jump to a particular gate, but the spell backfires, sending the mage to a random gate.");
+                    u->Error("Attempts to jump to a particular gate, but the spell backfires, sending the mage to a random gate.", order->quiet);
                     break;
                 }
             case 1:
-                u->Error("Attempts to cast gate jump, but the spell fizzles.");
+                u->Error("Attempts to cast gate jump, but the spell fizzles.", order->quiet);
                 return 1;
             default:
                 break;
@@ -3333,17 +3358,17 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 		u->Event("Casts Random Gate Jump.");
 	} else {
 		if (order->gate < 1 || order->gate > regions.numberofgates) {
-			u->Error("CAST: No such target gate.");
+			u->Error("CAST: No such target gate.", order->quiet);
 			return 0;
 		}
 
 		tar = regions.FindGate(order->gate);
 		if (!tar) {
-			u->Error("CAST: No such target gate.");
+			u->Error("CAST: No such target gate.", order->quiet);
 			return 0;
 		}
 		if(!tar->gateopen) {
-		    u->Error("CAST: Target gate not open at this time of year.");
+		    u->Error("CAST: Target gate not open at this time of year.", order->quiet);
 		    return 0;
 		}
 
@@ -3362,7 +3387,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 				}
 
 				if (loc->unit->GetAttitude(r,u) < A_ALLY) {
-					u->Error("CAST: Unit is not allied.");
+					u->Error("CAST: Unit is not allied.", order->quiet);
 				} else {
 					if (comma) {
 						unitlist += AString(", ") + AString(loc->unit->num);
@@ -3379,7 +3404,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 				}
 				delete loc;
 			} else {
-				u->Error("CAST: No such unit.");
+				u->Error("CAST: No such unit.", order->quiet);
 			}
 		}
 	}
@@ -3399,12 +3424,12 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	TeleportOrder *order = u->teleportorders;
 
 	if (!level) {
-		u->Error("CAST: Doesn't know Portal Lore.");
+		u->Error("CAST: Doesn't know Portal Lore.", order->quiet);
 		return 0;
 	}
 
 	if (!u->items.GetNum(I_PORTAL)) {
-		u->Error("CAST: Unit doesn't have a Portal.");
+		u->Error("CAST: Unit doesn't have a Portal.", order->quiet);
 		return 0;
 	}
 
@@ -3417,32 +3442,32 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 
     if (weight > maxweight) {
 		u->Error("CAST: That mage cannot teleport that much weight through a "
-				"Portal.");
+				"Portal.", order->quiet);
 		return 0;
 	}
 
 	Location *tar = regions.FindUnit(order->gate);
 	if (!tar) {
-		u->Error("CAST: No such target mage.");
+		u->Error("CAST: No such target mage.", order->quiet);
 		return 0;
 	}
 
 	if (tar->unit->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
-		u->Error("CAST: Target mage is not friendly.");
+		u->Error("CAST: Target mage is not friendly.", order->quiet);
 		return 0;
 	}
 
 	if (tar->unit->type != U_MAGE) {
-		u->Error("CAST: Target is not a mage.");
+		u->Error("CAST: Target is not a mage.", order->quiet);
 		return 0;
 	}
 
 	if (!tar->unit->items.GetNum(I_PORTAL)) {
-		u->Error("CAST: Target does not have a Portal.");
+		u->Error("CAST: Target does not have a Portal.", order->quiet);
 		return 0;
 	}
 
-	if (!GetRegionInRange(r, tar->region, u, S_PORTAL_LORE)) return 0;
+	if (!GetRegionInRange(r, tar->region, u, S_PORTAL_LORE, order->quiet, 0)) return 0;
 
 	u->Event("Casts Portal Jump.");
 
@@ -3451,7 +3476,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 			Location *loc = r->GetLocation((UnitId *) elem,u->faction->num);
 			if (loc) {
 				if (loc->unit->GetAttitude(r,u) < A_ALLY) {
-					u->Error("CAST: Unit is not allied.");
+					u->Error("CAST: Unit is not allied.", order->quiet);
 				} else {
 					loc->unit->Event(AString("Is teleported to ") +
 							tar->region->Print( &regions ) +
@@ -3461,7 +3486,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 				}
 				delete loc;
 			} else {
-				u->Error("CAST: No such unit.");
+				u->Error("CAST: No such unit.", order->quiet);
 			}
 		}
 	}
@@ -3521,18 +3546,18 @@ int Game::RunBlizzard(ARegion *r, Unit *u)
 	int level = u->GetSkill(S_BLIZZARD);
 	
 	if(size && level < 4) {
-	    u->Error("CAST: Not high enough level for large casting.");
+	    u->Error("CAST: Not high enough level for large casting.", order->quiet);
 	    return 0;
 	}
 	
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_BLIZZARD, penalty);
+	val = GetRegionInRange(r, tar, u, S_BLIZZARD, order->quiet, penalty);
 	if(!val) return 0;
 
 	if(penalty<1) penalty = 1;
  	int cost = u->GetCastCost(S_BLIZZARD,order->extracost, penalty*penalty); // 4 times cost for large casting.
 	if(cost > u->energy) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
 	}
 	u->energy -= cost;
@@ -3544,7 +3569,7 @@ int Game::RunBlizzard(ARegion *r, Unit *u)
     switch(mevent) {
         case 4:
         case 3:
-            u->Error("Attempts to cast a blizzard, but the spell is reflected back on the caster!");
+            u->Error("Attempts to cast a blizzard, but the spell is reflected back on the caster!", order->quiet);
             tar = r;
             //get experience normally!
             break;
@@ -3555,15 +3580,15 @@ int Game::RunBlizzard(ARegion *r, Unit *u)
             } while ( (xx+yy)%2 );
             tar = regions.GetRegion(xx,yy,1);
             if(!tar) {
-                u->Error("Attempts to cast a blizzard, but the spell fizzles.");
+                u->Error("Attempts to cast a blizzard, but the spell fizzles.", order->quiet);
                 u->Experience(S_BLIZZARD,10);
                 return 1;
             }
-            u->Error(AString("Attempts to cast a blizzard, but the spell is misaimed, hitting ") + tar->ShortPrint(&regions));
+            u->Error(AString("Attempts to cast a blizzard, but the spell is misaimed, hitting ") + tar->ShortPrint(&regions), order->quiet);
             //get experience normally!
             break;
         case 1:
-            u->Error("Attempts to cast a blizzard, but the spell fizzles, and the mage is seen shivering all month long.");
+            u->Error("Attempts to cast a blizzard, but the spell fizzles, and the mage is seen shivering all month long.", order->quiet);
             u->Experience(S_BLIZZARD,10);
             return 1;
         default:
@@ -3607,12 +3632,12 @@ int Game::RunSeaward(ARegion *r, Unit *u)
 	int time = level/2 + level%2;
 
 	if(size && level < 4) {
-	    u->Error("CAST: Not high enough level for large casting.");
+	    u->Error("CAST: Not high enough level for large casting.", order->quiet);
 	    return 0;
 	}
 	
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_SEAWARD, penalty);
+	val = GetRegionInRange(r, tar, u, S_SEAWARD, order->quiet, penalty);
 
 	// should have something here for reducing range of large spells.
 	if(!val) return 0;
@@ -3620,13 +3645,13 @@ int Game::RunSeaward(ARegion *r, Unit *u)
  	int cost = u->GetCastCost(S_SEAWARD,order->extracost); // cost of normal size
  	if(size) cost = u->GetCastCost(S_SEAWARD,order->extracost,3); //note, only 3, not usual 4, because it is highly unlikely all six neighbouring regions can be affected.
 	if(cost > u->energy) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
 	}
 	//subtraction of energy done at the end.
 
 	if(!size && (tar->willsink == 0 || tar->willsink >= time)) {
-	    u->Error("CAST: That region is not sinking."); //check so it doesn't have a chance to fizzle in single cast.
+	    u->Error("CAST: That region is not sinking.", order->quiet); //check so it doesn't have a chance to fizzle in single cast.
 	    return 0;
     }
 	
@@ -3637,7 +3662,7 @@ int Game::RunSeaward(ARegion *r, Unit *u)
     switch(mevent) {
         case 4:
             u->Error("Attempts to ward off the sea, but the spell backfires, attracting the ocean to "
-                "the target's neighbouring regions as well.");
+                "the target's neighbouring regions as well.", order->quiet);
     	    for (int i = 0; i<6; i++) {
     	        if(tar->neighbors[i]) {
                     if(TerrainDefs[tar->neighbors[i]->type].similar_type == R_OCEAN) continue; //do not try to sink ocean regions!
@@ -3650,7 +3675,7 @@ int Game::RunSeaward(ARegion *r, Unit *u)
             return 1;
         case 3:
             if(tar->willsink < 1) break;
-            u->Error("Mystic energies cause a sea ward to have incredible effectiveness.");
+            u->Error("Mystic energies cause a sea ward to have incredible effectiveness.", order->quiet);
             permanent = 1;
             break;
         case 2:
@@ -3670,10 +3695,10 @@ int Game::RunSeaward(ARegion *r, Unit *u)
                     destroyed++;
                 }
             }
-            if(destroyed) u->Error(AString("While warding off the sea, high winds destroy ") + destroyed + " structures in the region.");
+            if(destroyed) u->Error(AString("While warding off the sea, high winds destroy ") + destroyed + " structures in the region.", order->quiet);
             break;
         case 1:
-            u->Error("Attempts to ward off the sea, but the spell fizzles, and a freak storm of fish land on the mage.");
+            u->Error("Attempts to ward off the sea, but the spell fizzles, and a freak storm of fish land on the mage.", order->quiet);
             u->Experience(S_SEAWARD,10);
             u->energy -= cost;
             if(!(ItemDefs[I_FISH].flags & ItemType::DISABLED)) u->items.SetNum(I_FISH,u->items.GetNum(I_FISH) + 20);
@@ -3714,7 +3739,7 @@ int Game::RunSeaward(ARegion *r, Unit *u)
     }
 
 	if(!done) {
-	    u->Error("CAST: That region is not sinking.");
+	    u->Error("CAST: That region is not sinking.", order->quiet);
         return 0;
     }
 
@@ -3739,12 +3764,12 @@ int Game::RunDiversion(ARegion *r, Unit *u)
 	CastRegionOrder *order = (CastRegionOrder *)u->activecastorder;
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_DIVERSION);
+	val = GetRegionInRange(r, tar, u, S_DIVERSION, order->quiet, 0);
 	if(!val) return 0;
 	
  	int cost = u->GetCastCost(S_DIVERSION,order->extracost);
 	if(cost > u->energy) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
 	}
 	u->energy -= cost;	
@@ -3772,14 +3797,14 @@ int Game::RunDiversion(ARegion *r, Unit *u)
                 }
             } while ( (tar == 0 || rivers == 0 ) && tries++ < 1000);
             if(!tar) {
-                u->Error("Attempts to cast diversion, but the spell fizzles.");
+                u->Error("Attempts to cast diversion, but the spell fizzles.", order->quiet);
                 return 1;
             }
-            u->Error(AString("Attempts to cast diversion, but the spell is misaimed, hitting ") + tar->ShortPrint(&regions));
+            u->Error(AString("Attempts to cast diversion, but the spell is misaimed, hitting ") + tar->ShortPrint(&regions), order->quiet);
             break;
         case 2:
         case 1:
-            u->Error("Attempts to cast diversion, but the spell fizzles, dragging the mage into a nearby well.");
+            u->Error("Attempts to cast diversion, but the spell fizzles, dragging the mage into a nearby well.", order->quiet);
             return 1;
         default:
             break;
@@ -3792,11 +3817,11 @@ int Game::RunDiversion(ARegion *r, Unit *u)
         if(tar->hexside[i]->type == H_RIVER) rivers++;
     }
     if(!rivers) {
-        u->Error("CAST: No rivers in that region.");
+        u->Error("CAST: No rivers in that region.", order->quiet);
         return 0;
     }
     if(rivers == 6) {
-        u->Error("CAST: Nowhere to divert river to.");
+        u->Error("CAST: Nowhere to divert river to.", order->quiet);
         return 0;
     }
 
@@ -3939,19 +3964,19 @@ int Game::RunSummonCreatures(ARegion *r, Unit *u, int skill, int item, int max)
     if(item == I_WOLF && TerrainDefs[r->type].similar_type != R_MOUNTAIN &&
 		TerrainDefs[r->type].similar_type != R_FOREST) {
 		u->Error("CAST: Can only summon wolves in mountain and "
-				 "forest regions.");
+				 "forest regions.", order->quiet);
 		return 0;
 	}
 
  	int cost = u->GetCastCost(skill,order->extracost); //cost of 10 creatures !
  	int num = (10*u->energy) / cost;
  	if(num < 1) {
- 	    u->Error("CAST: Not enough energy to cast that spell.");
+ 	    u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
  	    return 0;
     }
   	if(max > 0 && (num + currentnum) > max*level*level ) num = max*level*level - currentnum;
  	if(num < 1) {
- 	    u->Error("CAST: Already have the maximum number of that creature.");
+ 	    u->Error("CAST: Already have the maximum number of that creature.", order->quiet);
  	    return 0;
     }
  	if(order->target > 0 && order->target < num) num = order->target;
@@ -3970,7 +3995,7 @@ int Game::RunSummonCreatures(ARegion *r, Unit *u, int skill, int item, int max)
     switch(mevent) {
         case 4:
             if(currentnum>0) {
-                u->Error(AString("Attempts to summon ") + ItemDefs[item].names + ", but all of those creatures magically disappear.");
+                u->Error(AString("Attempts to summon ") + ItemDefs[item].names + ", but all of those creatures magically disappear.", order->quiet);
                 u->items.SetNum(item,0);
                 return 1;
             }
@@ -3979,13 +4004,13 @@ int Game::RunSummonCreatures(ARegion *r, Unit *u, int skill, int item, int max)
             if(item == I_DEMON) newitem = I_IMP;
             else if(item == I_UNDEAD) newitem = I_SKELETON;
             else break;
-            u->Error(AString("Attempts to summon ") + ItemDefs[item].names + ", but something goes wrong and " + ItemDefs[newitem].names + " appear instead.");
+            u->Error(AString("Attempts to summon ") + ItemDefs[item].names + ", but something goes wrong and " + ItemDefs[newitem].names + " appear instead.", order->quiet);
             item = newitem;
             currentnum = u->items.GetNum(item);
             break;
         case 2:
         case 1:
-            u->Error(AString("Attempts to cast ") + SkillDefs[skill].name + ", but the spell fizzles.");
+            u->Error(AString("Attempts to cast ") + SkillDefs[skill].name + ", but the spell fizzles.", order->quiet);
             return 1;
         default:
             break;
@@ -4009,13 +4034,13 @@ int Game::RunSummonHigherCreature(ARegion *r, Unit *u, int skill, int item)
 	int num = u->items.GetNum(item);
 	if(item == I_LICH) num = 0; //special case, no limit for liches
 	if (num >= maxnum) {
-		u->Error(AString("Mage may not control more ") + ItemDefs[item].names + ".");
+		u->Error(AString("Mage may not control more ") + ItemDefs[item].names + ".", order->quiet);
 		return 0;
 	}
 
  	int cost = u->GetCastCost(skill,order->extracost, 1, 2*num);
 	if(cost > u->energy) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
 	}
 	
@@ -4038,7 +4063,7 @@ int Game::RunSummonHigherCreature(ARegion *r, Unit *u, int skill, int item)
     switch(mevent) {
         case 4:
             if(num>0) {
-                u->Error(AString("Attempts to summon a ") + ItemDefs[item].name + ", but all of those creatures magically disappear.");
+                u->Error(AString("Attempts to summon a ") + ItemDefs[item].name + ", but all of those creatures magically disappear.", order->quiet);
                 u->items.SetNum(item,0);
                 return 1;
             }
@@ -4047,13 +4072,13 @@ int Game::RunSummonHigherCreature(ARegion *r, Unit *u, int skill, int item)
             if(item == I_BALROG) newitem = I_DEMON;
             else if(item == I_GRYFFIN) newitem = I_EAGLE;
             else if(item == I_LICH) newitem = I_UNDEAD;
-            u->Error(AString("Attempts to summon a ") + ItemDefs[item].name + ", but something goes wrong and a " + ItemDefs[newitem].name + " appears instead.");
+            u->Error(AString("Attempts to summon a ") + ItemDefs[item].name + ", but something goes wrong and a " + ItemDefs[newitem].name + " appears instead.", order->quiet);
             item = newitem;
             num = u->items.GetNum(item);
             break;
         case 2:
         case 1:
-            u->Error(AString("Attempts to cast ") + SkillDefs[skill].name + ", but the spell fizzles.");
+            u->Error(AString("Attempts to cast ") + SkillDefs[skill].name + ", but the spell fizzles.", order->quiet);
             return 1;
         default:
             break;
@@ -4080,7 +4105,7 @@ not of the region - at least until after the sail and move phases. */
     
     int skill = u->GetSkill(S_FOG);
     if(large && skill < 4) {
-        u->Error("CAST: Not high enough skill level to cast large fog");
+        u->Error("CAST: Not high enough skill level to cast large fog", order->quiet);
         return 0;
     }
 
@@ -4091,7 +4116,7 @@ not of the region - at least until after the sail and move phases. */
  	int cost = u->GetCastCost(S_FOG,order->extracost); // cost of normal sized fog
  	if(large) cost = u->GetCastCost(S_FOG,order->extracost,4);
 	if(cost > u->energy) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
 	}
 	u->energy -= cost;
@@ -4106,7 +4131,7 @@ not of the region - at least until after the sail and move phases. */
     switch(mevent) {
         case 4:
             u->Error("Attempts to cast fog, but the spell backfires, "
-                "clearing the region of all bad weather and making the mage a local hero.");
+                "clearing the region of all bad weather and making the mage a local hero.", order->quiet);
             if(r->clearskies == 0) r->clearskies = 1;
             return 1;
         case 3:
@@ -4121,11 +4146,11 @@ not of the region - at least until after the sail and move phases. */
             }
             if(tar == u) break;
             u->Error(AString("Attempts to cast fog, but the spell follows ")
-                + *(tar->name) + " instead.");
+                + *(tar->name) + " instead.", order->quiet);
             break;
         case 2:
         case 1:
-            u->Error("Attempts to cast fog, but the spell fizzles.");
+            u->Error("Attempts to cast fog, but the spell fizzles.", order->quiet);
             return 1;
         default:
             break;
@@ -4146,11 +4171,11 @@ int Game::RunSummonMen(ARegion *r, Unit *u)
 
 //checks: race must be a man and not a leader:
     if(!(ItemDefs[order->race].type & IT_MAN) || (ItemDefs[order->race].flags & ItemType::DISABLED)) {
-        u->Error(AString("CAST: Incorrect race"));
+        u->Error(AString("CAST: Incorrect race"), order->quiet);
         return 0;
     }
     if(ItemDefs[order->race].type & IT_LEADER) {
-        u->Error(AString("CAST: Cannot summon leaders"));
+        u->Error(AString("CAST: Cannot summon leaders"), order->quiet);
         return 0;
     }
 
@@ -4159,7 +4184,7 @@ int Game::RunSummonMen(ARegion *r, Unit *u)
     int amt = u->GetSharedNum(I_SILVER);
 
 	if(amt < cost) {
-		u->Error(AString("CAST: Doesn't have sufficient silver to summon that."));
+		u->Error(AString("CAST: Doesn't have sufficient silver to summon that."), order->quiet);
 		return 0;
 	}
 
@@ -4171,21 +4196,21 @@ int Game::RunSummonMen(ARegion *r, Unit *u)
 	if( (num * energycost) / 10 > u->energy) num = (u->energy * 10) / energycost;
 
     if(!num) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
     }
 
 	Unit *tar = r->GetUnitId((UnitId *) order->units.First(),u->faction->num);
 	if (!tar) {
-	    u->Error("CAST: Invalid unit number.");
+	    u->Error("CAST: Invalid unit number.", order->quiet);
 	    return 0;
     }
 	if (tar->faction != u->faction) {
-	    u->Error("CAST: Target unit is not from your faction.");
+	    u->Error("CAST: Target unit is not from your faction.", order->quiet);
 	    return 0;
 	}
 	if(tar->type != U_NORMAL) {
-        u->Error("CAST: Can only summon men into normal units.");
+        u->Error("CAST: Can only summon men into normal units.", order->quiet);
         return 0;
     }
 
@@ -4199,7 +4224,7 @@ int Game::RunSummonMen(ARegion *r, Unit *u)
     
     switch(mevent) {
         case 4:
-            u->Error("Attempts to cast summon men, but he summons women instead. The lure of temptation is too great, and the mage ends the month exhausted.");
+            u->Error("Attempts to cast summon men, but he summons women instead. The lure of temptation is too great, and the mage ends the month exhausted.", order->quiet);
             u->energy = 0;
             u->Experience(S_SUMMON_MEN,10);
             return 1;
@@ -4213,11 +4238,11 @@ int Game::RunSummonMen(ARegion *r, Unit *u)
                 if(!getrandom(++numraces)) race = i;
             }
             if(race == -1) break;
-            u->Error("Attempts to cast summon men, but the spell backfires, summoning the wrong race.");
+            u->Error("Attempts to cast summon men, but the spell backfires, summoning the wrong race.", order->quiet);
             order->race = race;
             break;
         case 1:
-            u->Error("Attempts to cast summon men, but the spell fizzles, producing only a frog.");
+            u->Error("Attempts to cast summon men, but the spell fizzles, producing only a frog.", order->quiet);
             u->Experience(S_SUMMON_MEN,10);
             u->energy -= cost;
             if(u->energy < 0) u->energy = 0;
@@ -4253,29 +4278,29 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	int fromitem = order->fromitem;
 	int toitem = order->toitem;
    	if(level<5 && fromitem<0) {
-	    u->Error("CAST: Must specify item to transmute.");
+	    u->Error("CAST: Must specify item to transmute.", order->quiet);
 	    return 0;
 	}
 	if(!IsPrimary(toitem)) {
 	    if(level<2) {
-	        u->Error("CAST: To item is not a primary item.");
+	        u->Error("CAST: To item is not a primary item.", order->quiet);
 	        return 0;
 	    }
 	    if(IsPrimary(fromitem)) {
-	        u->Error("CAST: Cannot transmute a primary item into a manufactured item.");
+	        u->Error("CAST: Cannot transmute a primary item into a manufactured item.", order->quiet);
 	        return 0;
 	    }
 	}
 	
 	if( (fromitem >= 0) && ItemDefs[toitem].baseprice >= 2*ItemDefs[fromitem].baseprice) {
-	        u->Error("CAST: To item is too valuable to be transmuted from that.");
+	        u->Error("CAST: To item is too valuable to be transmuted from that.", order->quiet);
 	        return 0;
 	}
 	
 	int ratio = 1;
 	if(!(ItemDefs[toitem].type & IT_NORMAL) ) {
 	    if(level<5) {
-	        u->Error("CAST: Can only create normal items.");
+	        u->Error("CAST: Can only create normal items.", order->quiet);
 	        return 0;
 	    }
 	    if(toitem == I_MITHRIL && !(ItemDefs[I_IRON].flags & ItemType::DISABLED)) 
@@ -4295,14 +4320,14 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	    else if(toitem == I_WHORSE && !(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) 
             fromitem = I_HORSE;
         else {
-            u->Error("CAST: Cannot create that item.");
+            u->Error("CAST: Cannot create that item.", order->quiet);
             return 0;
         }
 	    ratio = 4;
 	}
 	
 	if(fromitem<0) {
-	    u->Error("CAST: Must specify item to transmute.");
+	    u->Error("CAST: Must specify item to transmute.", order->quiet);
 	    return 0;
 	}	
 	
@@ -4316,24 +4341,24 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 
 	
 	if(ItemDefs[toitem].type & IT_MAN || ItemDefs[fromitem].type & IT_MAN ) {
-	    u->Error("CAST: Cannot transmute men.");
+	    u->Error("CAST: Cannot transmute men.", order->quiet);
 	    return 0;
 	}
 	
 	if(ItemDefs[toitem].type & IT_MONSTER || ItemDefs[fromitem].type & IT_MONSTER ) {
-	    u->Error("CAST: Cannot transmute creatures.");
+	    u->Error("CAST: Cannot transmute creatures.", order->quiet);
 	    return 0;
 	}
 	
 	if(toitem == I_PLATEARMOR) {
 	//should generalise this to anything needing more than 1 input to make.
-	    u->Error("CAST: Cannot transmute into items which require more than one input to manufacture.");
+	    u->Error("CAST: Cannot transmute into items which require more than one input to manufacture.", order->quiet);
 	    return 0;
 	}
 	
 	int num = u->GetSharedNum(fromitem);
 	if(!num) {
-        u->Error("CAST: Not enough of that item to transmute.");
+        u->Error("CAST: Not enough of that item to transmute.", order->quiet);
         return 0;
 	}
 	if(num > 4*level*level) num = 4*level*level; // max items to transmute
@@ -4346,7 +4371,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 
 	if(num > (8 * u->energy) / cost) num = (8 * u->energy) / cost;
 	if(!num) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
 	}
 	
@@ -4363,11 +4388,11 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
     switch(mevent) {
         case 4:
             noinput = 1;
-            u->Error("Transmutation spell produces resources from nothing!");
+            u->Error("Transmutation spell produces resources from nothing!", order->quiet);
             break;
         case 3:
             nooutput = 1;
-            u->Error("Attempts to cast transmutation, but it fizzles, and the resources vanish. ");
+            u->Error("Attempts to cast transmutation, but it fizzles, and the resources vanish. ", order->quiet);
             break;
         case 2:
             for(i=0; i<NITEMS; i++) {
@@ -4381,11 +4406,11 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
                 if(!getrandom(++numitems)) item = i;
             }
             if(item == -1) break;
-            u->Error("Attempts to cast transmutation, but the spell backfires, producing the wrong output.");
+            u->Error("Attempts to cast transmutation, but the spell backfires, producing the wrong output.", order->quiet);
             toitem = item;
             break;
         case 1:
-            u->Error("Attempts to cast transmutation, but the spell fizzles, and the mage's hat disappears.");
+            u->Error("Attempts to cast transmutation, but the spell fizzles, and the mage's hat disappears.", order->quiet);
             if(u->describe) *u->describe = AString("Hatless. ") + *u->describe;  // crossing my fingers this will not overwrite data.
             else u->describe = new AString("Hatless");
             u->Experience(S_TRANSMUTATION,8);
@@ -4424,7 +4449,7 @@ int Game::RunModification(ARegion *r, Unit *u)
 	ARegion *tar;
 	int val;
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_MODIFICATION);
+	val = GetRegionInRange(r, tar, u, S_MODIFICATION, order->quiet, 0);
 	if(!val) return 0;
 
 	int increase = 1;
@@ -4432,7 +4457,7 @@ int Game::RunModification(ARegion *r, Unit *u)
 	// increase = 1 to go up, 0 to decrease
 	
 	if(!increase && level<3) {
-	    u->Error("CAST: Not high enough level to decrease resources.");
+	    u->Error("CAST: Not high enough level to decrease resources.", order->quiet);
 	    return 0;	
 	}
 
@@ -4441,12 +4466,12 @@ int Game::RunModification(ARegion *r, Unit *u)
     if(!(ItemDefs[toitem].type & IT_NORMAL)) {
         if(increase) {
             if(level<4) {
-                u->Error("CAST: Not high enough level to increase advanced resources.");
+                u->Error("CAST: Not high enough level to increase advanced resources.", order->quiet);
                 return 0;
             }
         } else { //ie if decreasing
             if(level<5) {
-                u->Error("CAST: Not high enough level to decrease advanced resources.");
+                u->Error("CAST: Not high enough level to decrease advanced resources.", order->quiet);
                 return 0;
             }
         }
@@ -4455,7 +4480,7 @@ int Game::RunModification(ARegion *r, Unit *u)
 	
     if(!(ItemDefs[fromitem].type & IT_NORMAL)) {
         if(level<5) {
-            u->Error("CAST: Not high enough level to modify advanced resources.");
+            u->Error("CAST: Not high enough level to modify advanced resources.", order->quiet);
             return 0;
         }
         advanced = 1;
@@ -4464,12 +4489,12 @@ int Game::RunModification(ARegion *r, Unit *u)
    	if(advanced) level -= 2;
 
 	if(toitem == I_SILVER || fromitem == I_SILVER) {
-	    u->Error("CAST: Cannot modify wages.");
+	    u->Error("CAST: Cannot modify wages.", order->quiet);
 	    return 0;	
 	}
 
 	if(toitem == fromitem) {
-	    u->Error("CAST: Item increasing and item decreasing are the same.");
+	    u->Error("CAST: Item increasing and item decreasing are the same.", order->quiet);
 	    return 0;
 	}
 
@@ -4484,7 +4509,7 @@ int Game::RunModification(ARegion *r, Unit *u)
     }
 
     if(!toprod || !fromprod) {
-        u->Error("CAST: Product not present in region.");
+        u->Error("CAST: Product not present in region.", order->quiet);
         return 0;
 	}
 
@@ -4501,14 +4526,14 @@ int Game::RunModification(ARegion *r, Unit *u)
 
 	if(!toamount || !fromamount) {
 	//This should never occur.
-	    u->Error("CAST: Product does not naturally occur in target region type.");
+	    u->Error("CAST: Product does not naturally occur in target region type.", order->quiet);
 	    return 0;
     }
 	
 	int cost = u->GetCastCost(S_MODIFICATION,order->extracost); //cost per resource changed up/down.
 	if(advanced) cost = u->GetCastCost(S_MODIFICATION,order->extracost,4); //4 times cost.
     if(cost > u->energy) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
     }
     
@@ -4521,7 +4546,7 @@ int Game::RunModification(ARegion *r, Unit *u)
         case 3:
         case 2:
         case 1:
-            u->Error("Attempts to cast modification, but the spell fizzles.");
+            u->Error("Attempts to cast modification, but the spell fizzles.", order->quiet);
             u->Experience(S_MODIFICATION,10);
             u->energy -= 4*cost;
             if(u->energy < 0) u->energy = 0;
@@ -4538,7 +4563,7 @@ int Game::RunModification(ARegion *r, Unit *u)
 	    change = toamount + toamount * level / 2 - toprod->baseamount;
 		if(change > level * 6) change = level*6;
 		if(change <= 0) {
-		    u->Error("CAST: Mage is not skilled enough to increase the quantity of that resource");
+		    u->Error("CAST: Mage is not skilled enough to increase the quantity of that resource", order->quiet);
 		    return 0;
         }
         if(change*cost > u->energy) change = u->energy / cost;
@@ -4600,21 +4625,21 @@ int Game::RunRejuvenation(ARegion *r, Unit *u)
 	ARegion *tar;
 	int val;
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	val = GetRegionInRange(r, tar, u, S_REJUVENATION);
+	val = GetRegionInRange(r, tar, u, S_REJUVENATION, order->quiet, 0);
 	if(!val) return 0;
 
 	if(TerrainDefs[regtype].similar_type == TerrainDefs[tar->type].similar_type) {
-	    u->Error("CAST: Region is already of that type.");
+	    u->Error("CAST: Region is already of that type.", order->quiet);
 	    return 0;	
 	}
 
 	if(TerrainDefs[tar->type].similar_type == R_OCEAN && level < 3) {
-	    u->Error("CAST: Not high enough level to rejuvenate oceans or lakes.");
+	    u->Error("CAST: Not high enough level to rejuvenate oceans or lakes.", order->quiet);
 	    return 0;
     }
 
 	if(TerrainDefs[regtype].similar_type == R_OCEAN && level < 5) {
-	    u->Error("CAST: Not high enough level to create oceans or lakes.");
+	    u->Error("CAST: Not high enough level to create oceans or lakes.", order->quiet);
 	    return 0;
     }
 
@@ -4622,7 +4647,7 @@ int Game::RunRejuvenation(ARegion *r, Unit *u)
     if(TerrainDefs[regtype].similar_type == R_OCEAN) cost = u->GetCastCost(S_REJUVENATION,order->extracost, 3, 4);
     else if(TerrainDefs[tar->type].similar_type == R_OCEAN) cost = u->GetCastCost(S_REJUVENATION,order->extracost, 2, 2);
     if(cost > u->energy) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
     }
     u->energy -= cost;
@@ -4639,7 +4664,7 @@ int Game::RunRejuvenation(ARegion *r, Unit *u)
     //case 1: fizzles
     switch(mevent) {
         case 4:
-            u->Error("Attempts to cast rejuvenation, but the spell backfires, rejuvenating nearby regions.");
+            u->Error("Attempts to cast rejuvenation, but the spell backfires, rejuvenating nearby regions.", order->quiet);
             large = 1;
             tar = r;
             do {
@@ -4655,15 +4680,15 @@ int Game::RunRejuvenation(ARegion *r, Unit *u)
             } while ( (xx+yy)%2 );
             tar = regions.GetRegion(xx,yy,1);
             if(!tar) {
-                u->Error("Attempts to cast rejuvenation, but the spell fizzles.");
+                u->Error("Attempts to cast rejuvenation, but the spell fizzles.", order->quiet);
                 u->Experience(S_REJUVENATION,10);
                 return 1;
             }
-            u->Error(AString("Attempts to cast rejuvenation, but the spell is misaimed, rejuvenating ") + tar->ShortPrint(&regions));
+            u->Error(AString("Attempts to cast rejuvenation, but the spell is misaimed, rejuvenating ") + tar->ShortPrint(&regions), order->quiet);
             //get experience normally!
             break;
         case 2:
-            u->Error("Attempts to cast rejuvenation, but the spell backfires, rejuvenating the local region.");
+            u->Error("Attempts to cast rejuvenation, but the spell backfires, rejuvenating the local region.", order->quiet);
             tar = r;
             do {
                 regtype = getrandom(R_CAVERN);
@@ -4671,7 +4696,7 @@ int Game::RunRejuvenation(ARegion *r, Unit *u)
             //get experience normally!
             break;
         case 1:
-            u->Error("Attempts to cast rejuvenation, but the spell fizzles.");
+            u->Error("Attempts to cast rejuvenation, but the spell fizzles.", order->quiet);
             u->Experience(S_REJUVENATION,10);
             return 1;
         default:
@@ -4801,14 +4826,14 @@ int Game::RunSpiritOfDead(ARegion *r, Unit *u)
 	if(order->units.First()) {
     	tar = r->GetUnitId((UnitId *) order->units.First(),u->faction->num);
     	if (!tar) {
-    	    u->Error("CAST: Cannot find that unit.");
+    	    u->Error("CAST: Cannot find that unit.", order->quiet);
     	    return 0;
     	}
 	} else {
 	    // list shades in the region.
 	    int cost = (u->GetCastCost(S_SPIRIT_OF_DEAD,order->extracost)+4)/5;
 	    if(cost > u->energy) {
-	         u->Error("CAST: Not enough energy to cast that spell.");
+	         u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
 	         return 0;
 	    }
 	    u->energy -= cost;
@@ -4816,7 +4841,7 @@ int Game::RunSpiritOfDead(ARegion *r, Unit *u)
 	    
         #ifdef FIZZLES
 	    if(u->MysticEvent()) {
-	         u->Error("Attempts to search for shades, but the spell fizzles.");
+	         u->Error("Attempts to search for shades, but the spell fizzles.", order->quiet);
 	         u->Experience(S_SPIRIT_OF_DEAD,2);
 	         return 0;
 	    }
@@ -4839,29 +4864,29 @@ int Game::RunSpiritOfDead(ARegion *r, Unit *u)
 	}
 	// we have a target. Make sure it satisfies all conditions
 	if(!tar->dead) {
-	    u->Error("CAST: That unit is not dead.");
+	    u->Error("CAST: That unit is not dead.", order->quiet);
 	    return 0;
 	}
 	
 	if(!tar->faction->num == ghostfaction) {
-	    u->Error("CAST: That unit appears to be dead, but not a ghost. Please contact your GM.");
+	    u->Error("CAST: That unit appears to be dead, but not a ghost. Please contact your GM.", 0);
 	    return 1;
 	}
 	
 	if(!tar->type == U_MAGE) {
-	    u->Error("CAST: That unit appears to be dead, but not a mage. Please contact your GM.");
+	    u->Error("CAST: That unit appears to be dead, but not a mage. Please contact your GM.", 0);
 	    return 1;
 	}	
 
 	if((tar->dead != 1) && (tar->dead != u->faction->num)) {
 	//This mage is loyal to another faction.
-	    u->Error("CAST: That mage is still loyal to another.");
+	    u->Error("CAST: That mage is still loyal to another.", order->quiet);
 	    return 0;	
 	}
 
 	int cost = u->GetCastCost(S_SPIRIT_OF_DEAD,order->extracost);	
     if(cost > u->energy) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
     }
     u->energy -= cost;
@@ -4873,7 +4898,7 @@ int Game::RunSpiritOfDead(ARegion *r, Unit *u)
     switch(mevent) {
         case 4:
             u->Error("Attempts to summon a spirit of the dead, but the spell backfires, sucking the mage "
-                        "into the spirit world.");
+                        "into the spirit world.", order->quiet);
             u->MoveUnit(r->GetDummy());
             u->dead = u->faction->num;
             gf = GetFaction(&factions, ghostfaction);
@@ -4888,12 +4913,12 @@ int Game::RunSpiritOfDead(ARegion *r, Unit *u)
         case 3: //could give spirit mage to another faction - have to find another faction & check for too many mages.
         case 2:
             u->Error("Attempts to summon a spirit of the dead, but the spell backfires, sucking the mage's "
-                        "energy into the spirit world.");
+                        "energy into the spirit world.", order->quiet);
             u->energy = 0;
             u->Experience(S_SPIRIT_OF_DEAD,10);
             return 1;
         case 1:
-            u->Error("Attempts to summon a spirit of the dead, but the spell fizzles. The mage spends the month hearing tortured whispers in his head.");
+            u->Error("Attempts to summon a spirit of the dead, but the spell fizzles. The mage spends the month hearing tortured whispers in his head.", order->quiet);
             u->Experience(S_SPIRIT_OF_DEAD,10);
             return 1;
         default:
@@ -4909,7 +4934,7 @@ int Game::RunSpiritOfDead(ARegion *r, Unit *u)
 	
 	if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 		if (CountMages(u->faction) >= AllowedMages(u->faction)) {
-			u->Error("CAST: Faction has too many mages.");
+			u->Error("CAST: Faction has too many mages.", order->quiet);
 			u->Event(AString("Summons the spirit of ") + *tar->name + " who is unable to join your faction due to lack of magic faction points.");
 			u->Experience(S_SPIRIT_OF_DEAD,20);
 			return 1;
@@ -4932,12 +4957,12 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
 	CastHypnosisOrder *order = (CastHypnosisOrder *) u->activecastorder;
 
 	if(level < order->level) {
-	    u->Error("CAST: Insufficient level for that month order.");
+	    u->Error("CAST: Insufficient level for that month order.", order->quiet);
 	    return 0;
     }
 
     if(!u->energy) {
-        u->Error("CAST: Insufficient energy to cast that spell.");
+        u->Error("CAST: Insufficient energy to cast that spell.", order->quiet);
         return 0;
     }
 
@@ -4960,7 +4985,7 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
     switch(mevent) {
         case 4:
         case 3:
-            u->Error("Attempts to hypnotise, but the spell is reflected onto himself.");
+            u->Error("Attempts to hypnotise, but the spell is reflected onto himself.", order->quiet);
             delete u->monthorders;
             u->monthorders = order->monthorder;
             u->taxing = order->taxing;
@@ -4969,7 +4994,7 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
             u->Experience(S_HYPNOSIS, 20);
             return 1;
         case 2:
-            u->Error("Attempts to hypnotise, but cannot convince them to do more than work.");
+            u->Error("Attempts to hypnotise, but cannot convince them to do more than work.", order->quiet);
             delete order->monthorder;
             p = new ProduceOrder;
             p->skill = -1;
@@ -4977,7 +5002,7 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
             order->monthorder = p;
             break;
         case 1:
-            u->Error("Attempts to hypnotise, but the spell fizzles.");
+            u->Error("Attempts to hypnotise, but the spell fizzles.", order->quiet);
             u->energy -= cost;
             if(u->energy < 0) u->energy = 0;
             u->Experience(S_HYPNOSIS,10);
@@ -5004,7 +5029,7 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
 	}
 
 	if (!num) {
-		u->Error("CAST: Can't hypnotise that many men.");
+		u->Error("CAST: Can't hypnotise that many men.", order->quiet);
 		return 0;
 	}
 
@@ -5023,13 +5048,14 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
 
 int Game::RunCreatePortal(ARegion *r, Unit *u)
 {
-    if(TerrainDefs[r->type].similar_type == R_OCEAN) {
-        u->Error("CAST: Cannot create a portal in the ocean.");
-        return 0;    
-    }
 
 //	int level = u->GetSkill(S_CREATE_PORTAL);
 	CastRegionOrder *order = (CastRegionOrder *) u->activecastorder;
+	
+    if(TerrainDefs[r->type].similar_type == R_OCEAN) {
+        u->Error("CAST: Cannot create a portal in the ocean.", order->quiet);
+        return 0;    
+    }
 
 	RangeType *range = FindRange(SkillDefs[S_CREATE_PORTAL].range);
 	ARegion *tar;
@@ -5037,16 +5063,16 @@ int Game::RunCreatePortal(ARegion *r, Unit *u)
 	
 	if(range != NULL) {
 		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-		val = GetRegionInRange(r, tar, u, S_CREATE_PORTAL);
+		val = GetRegionInRange(r, tar, u, S_CREATE_PORTAL, order->quiet, 0);
 		if(!val) return 0;
 	} else {
-	    u->Error("CAST: Create Portal Range class does not exist. Contact your GM.");
+	    u->Error("CAST: Create Portal Range class does not exist. Contact your GM.", 0);
 	    return 0;
 	}
 
 	int cost = u->GetCastCost(S_CREATE_PORTAL,order->extracost);	
     if(cost > u->energy) {
-        u->Error("CAST: Not enough energy to cast that spell.");
+        u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
         return 0;
     }
     //energy subtracted at end.
@@ -5057,13 +5083,13 @@ int Game::RunCreatePortal(ARegion *r, Unit *u)
     int yy;
     switch(mevent) {
         case 4:
-            u->Error("Attempts to create a portal, but the spell backfires, sucking away the mage's energy.");
+            u->Error("Attempts to create a portal, but the spell backfires, sucking away the mage's energy.", order->quiet);
             u->energy = 0;
             u->Experience(S_CREATE_PORTAL,15);
             return 1;
         case 3:
             if(tar != r) {
-                u->Error(AString("Attempts to create a linked portal, but the spell backfires, teleporting the mage to ") + tar->ShortPrint(&regions));
+                u->Error(AString("Attempts to create a linked portal, but the spell backfires, teleporting the mage to ") + tar->ShortPrint(&regions), order->quiet);
                 u->energy -= cost;
                 u->MoveUnit(tar->GetDummy());
                 u->Experience(S_TELEPORTATION,10);
@@ -5076,14 +5102,14 @@ int Game::RunCreatePortal(ARegion *r, Unit *u)
                 } while ( (xx+yy)%2 );
                 tar = regions.GetRegion(xx,yy,1);
                 if(!tar) break;
-                u->Error(AString("Attempts to create a linked portal, but the spell backfires, teleporting the mage to ") + tar->ShortPrint(&regions));
+                u->Error(AString("Attempts to create a linked portal, but the spell backfires, teleporting the mage to ") + tar->ShortPrint(&regions), order->quiet);
                 u->MoveUnit(tar->GetDummy());
                 u->Experience(S_TELEPORTATION,10);
                 return 0;
             }
         case 2:
         case 1:
-            u->Error("Attempts to create a portal, but the spell fizzles.");
+            u->Error("Attempts to create a portal, but the spell fizzles.", order->quiet);
             u->energy -= cost;
             u->Experience(S_CREATE_PORTAL,10);
             return 1;
@@ -5119,7 +5145,7 @@ int Game::RunCreatePortal(ARegion *r, Unit *u)
 	        }
      	}
      	if(!done) {
-     	    u->Error("CAST: No unlinked portal belongs to this mage in the target region.");
+     	    u->Error("CAST: No unlinked portal belongs to this mage in the target region.", order->quiet);
      	    r->objects.Remove(o);
      	    delete o;
      	    r->buildingseq--;
@@ -5136,27 +5162,28 @@ void Game::DoMerchantBuy(Unit *u, BuyOrder *o)
 {
     int level = u->GetSkill(S_MERCHANTRY);
     if(level < 4) {
-        u->Error("BUY: Insufficient Merchantry level to BUY");
+        u->Error("BUY: Insufficient Merchantry level to BUY", o->quiet);
         return;
     }
     if((ItemDefs[o->item].type & IT_ADVANCED) && level < 6) {
-        u->Error("BUY: Insufficient Merchantry level to buy advanced items");
+        u->Error("BUY: Insufficient Merchantry level to buy advanced items", o->quiet);
         return;
     }
 
     if(ItemDefs[o->item].type & IT_MAN || ItemDefs[o->item].type & IT_MONSTER || ItemDefs[o->item].type & IT_MAGIC || ItemDefs[o->item].type & IT_SPECIAL || ItemDefs[o->item].type & IT_TRADE || ItemDefs[o->item].type & IT_ILLUSION) {
-        u->Error(AString("BUY: Cannot merchant buy ") + ItemDefs[o->item].names);
+        u->Error(AString("BUY: Cannot merchant buy ") + ItemDefs[o->item].names, o->quiet);
         return;
     }
 
     if(!(ItemDefs[o->item].type & IT_NORMAL) && !(ItemDefs[o->item].type & IT_ADVANCED)) {
-        u->Error(AString("BUY: Item problem. Please alert your GM. Cannot merchant buy ") + ItemDefs[o->item].names);
+        u->Error(AString("BUY: Item problem. Please alert your GM. Cannot merchant buy ") + ItemDefs[o->item].names, 0);
         Awrite("Merchant BUY problem!");
         return;
     }
 
-    int cost = ItemDefs[o->item].baseprice * (10-level);
-    if(!(ItemDefs[o->item].type & IT_ADVANCED)) cost = (cost+1)/2;    //rounded up!  3, 2.5, 2 times baseprice, or 120,100,80% of withdraw cost.
+    int cost = ItemDefs[o->item].baseprice * (17-level);
+    if(!(ItemDefs[o->item].type & IT_ADVANCED)) cost = (cost+3)/4;    //rounded up!  3.25, 3, 2.75 times baseprice, or 130,120,110% of withdraw cost.
+    else cost = ItemDefs[o->item].baseprice * 4;
     int silver = u->GetSharedMoney();
     if(o->num < 0 || o->num > silver/cost) o->num = silver/cost;
     if(u->ConsumeSharedMoney(o->num*cost)) {
@@ -5171,17 +5198,17 @@ void Game::DoMerchantSell(Unit *u, SellOrder *o)
     int level = u->GetSkill(S_MERCHANTRY);
     
     if(ItemDefs[o->item].type & IT_MAN || ItemDefs[o->item].type & IT_MONSTER || ItemDefs[o->item].type & IT_SPECIAL || ItemDefs[o->item].type & IT_ILLUSION) {
-        u->Error(AString("SELL: Cannot merchant sell ") + ItemDefs[o->item].names);
+        u->Error(AString("SELL: Cannot merchant sell ") + ItemDefs[o->item].names, o->quiet);
     }
     
         if(!(ItemDefs[o->item].type & IT_NORMAL) && !(ItemDefs[o->item].type & IT_ADVANCED) && !(ItemDefs[o->item].type & IT_MAGIC) && !(ItemDefs[o->item].type & IT_TRADE)) {
-        u->Error(AString("SELL: Item problem. Please alert your GM. Cannot merchant sell ") + ItemDefs[o->item].names);
+        u->Error(AString("SELL: Item problem. Please alert your GM. Cannot merchant sell ") + ItemDefs[o->item].names, o->quiet);
         Awrite("Merchant SELL problem!");
         return;
     }
 
-    int price = ItemDefs[o->item].baseprice * (11+3*level);
-    price /= 16;    //rounded down!    This is 7/8, 17/16, 5/4, 23/16, 13/8, 29/16 of bp, or 35, 42.5, 50, 57.5, 65, 72.5% of withdraw cost
+    int price = ItemDefs[o->item].baseprice * (6+level);
+    price /= 8;    //rounded down!    This is 7/8, 1, 9/8, 5/4, 11/8, 3/2 of bp, or 35, 40, 45, 50, 55, 60% of withdraw cost
     if(o->num < 0) o->num = u->items.GetNum(o->item);
     else if(!u->GetSharedNum(o->item,o->num)) o->num = u->GetSharedNum(o->item);
 

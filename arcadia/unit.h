@@ -158,6 +158,7 @@ class Unit : public AListElem
 		void DefaultOrders(Object *, int peasantfac=0);
 		void SetName(AString *);
 		void SetDescribe(AString *);
+		void SetLabel(AString *);
 		void PostTurn(ARegion *reg);
 
 		int IsMage();
@@ -213,7 +214,7 @@ class Unit : public AListElem
 		void ForgetSkill(int);
 		int CheckDepend(int,SkillDepend &s);
 		int CanStudy(int);
-		int Study(int,int, int overflow = 1); /* Returns 1 if it succeeds */
+		int Study(int,int, int quiet = 0, int overflow = 1); /* Returns 1 if it succeeds */
 		void Experience(int sk,int exp,int group = 1, int dividenonspecials = 1); //if(group), multiplies experience by nummen.
 		int Practice(int);
 		void AdjustSkills(int overflow = 0);
@@ -257,7 +258,7 @@ class Unit : public AListElem
 		int HasBoat(ARegion *reg); //in runorders.cpp
 
 		void Event(const AString &);
-		void Error(const AString &);
+		void Error(const AString &, int quiet = 0);
 		void Message(const AString &); //BS mod
 
 		Faction *faction;
@@ -265,6 +266,7 @@ class Unit : public AListElem
 		Object *object;
 		AString *name;
 		AString *describe;
+		AString *label;
 		int num;
 		int type;
 		int GetEnergy(int transferring = 0);
@@ -327,6 +329,7 @@ class Unit : public AListElem
 		Object *build;
 		int leftShip;
 		UnitId *promote;
+		int promotequiet;
 		AList findorders;
 		AList giveorders;
 		AList sendorders;

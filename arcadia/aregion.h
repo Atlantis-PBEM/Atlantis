@@ -292,6 +292,8 @@ class ARegion : public AListElem
 		int untaxed;  //amount of silver NOT taxed (used in guard regeneration).
 		void SinkRegion(ARegionList *pRegs);
 		void OceanToLand();
+		void SetEthnicity(int ethnicity, ARegionList *pRegs);
+		void RedoAs(int tertype, int town, ARegionList *pRegs);
 		void Event(const AString &);
 		AList events;
 
@@ -332,7 +334,7 @@ class ARegion : public AListElem
 		MarketList markets;
 		int xloc, yloc, zloc;
 
-		void AddEditTown(AString *);
+		void AddEditTown(AString * = 0);
 		void UpdateEditRegion();
 		void SetupEditRegion(int canmakecity = 1);
 		void EditAdjustAreaName(AString name);

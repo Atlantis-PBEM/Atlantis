@@ -319,7 +319,7 @@ AString ItemString(int type, int num, int flags, int unitclass)
 	return temp;
 }
 
-static AString EffectStr(char *effect)
+AString EffectStr(char *effect)
 {
 	AString temp, temp2;
 	int comma = 0;
@@ -1137,8 +1137,15 @@ AString *ItemDescription(int item, int full)
 				}
 				*temp += ".";
 			}
-			*temp += AString(" ") + "Item can cast " +
+			if(bt->flags & BattleItemType::SPECIAL || bt->flags & BattleItemType::SHIELD) {
+                *temp += AString(" ") + "Item can cast " +
 				ShowSpecial(bt->special, bt->skillLevel, 1, 1);
+            }
+            if(bt->flags & BattleItemType::ENERGY) {
+                *temp += AString(" ") + "This item allows the "
+                "wielder to cast combat spells in battle without "
+                "draining their own energy supply.";
+            }
 		}
 	}
 	if((ItemDefs[item].flags & ItemType::CANTGIVE) && full) {

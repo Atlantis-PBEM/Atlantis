@@ -39,7 +39,7 @@ char **AttitudeStrs = as;
 char *fs[] = {
 	"War",
 	"Trade",
-	"Magic"
+	"Heroes"
 };
 
 char **FactionStrs = fs;
@@ -151,6 +151,13 @@ FormTemplate::~FormTemplate()
     if(name) delete name;
 }
 
+AString *FormTemplate::GetLine(int linenum)
+{
+    if(linenum < 0 || linenum >= orders.Num()) return 0;
+    AString *line = (AString *) orders.First();  //return this for linenum = 0
+    while(linenum--) line = (AString *) orders.Next(line);
+    return (new AString(*line));
+}
     
 Faction::Faction()
 {
@@ -377,7 +384,6 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 				itemshows.DeleteAll();
 				f->EndLine();
 			}
-
 			objectshows.DeleteAll();
 			for(i = 1; i < NOBJECTS; i++) {
 				AString *show = ObjectDescription(i);
@@ -417,7 +423,7 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 				terrainshows.DeleteAll();
 				f->EndLine();
 			}
-
+			
 			present_regions.DeleteAll();
 			forlist(&(pGame->regions)) {
 				ARegion *reg = (ARegion *)elem;
@@ -447,8 +453,8 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		f->PutStr(*name + " (" + FactionTypeStr() + ")");
 	}
-	f->PutStr(AString("Alignment: ") + EthnicityString(ethnicity));
 	f->PutStr(AString(MonthNames[ pGame->month ]) + ", Year " + pGame->year);
+	f->PutStr(AString("Alignment: ") + EthnicityString(ethnicity));
 	f->EndLine();
 
 	f->PutStr(AString("Atlantis Engine Version: ") +
@@ -663,6 +669,14 @@ void Faction::WriteFormTemplates(Areport *f)
     if(!formtemplates.Num()) return; 
      f->PutStr("Stored Unit Types:");
      forlist(&formtemplates) {
+         FormTemplate *formtem = (FormTemplate *) elem;
+         f->PutStr("");
+         f->PutStr(*formtem->name);
+         forlist(&formtem->orders) {
+             f->PutStr(*((AString *) elem));
+         }
+     }
+     forlist_reuse(&labeltemplates) {
          FormTemplate *formtem = (FormTemplate *) elem;
          f->PutStr("");
          f->PutStr(*formtem->name);

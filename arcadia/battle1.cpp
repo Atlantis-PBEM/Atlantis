@@ -845,6 +845,7 @@ void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
 			int num = (int)(i->num * percent);
 			int num2 = (num + getrandom(2))/2;
 			//if some types of items should never be lost, set num2 = num here for those item types.
+			if(ItemDefs[i->type].flags & ItemType::NEVERLOST) num2 = num;
 			spoils->SetNum(i->type, spoils->GetNum(i->type) + num2);
 			u->items.SetNum(i->type, i->num - num);
 		}

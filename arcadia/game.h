@@ -140,6 +140,9 @@ private:
 	void EditGameUnitMove(Unit *pUnit);
 	void EditGameUnitDetails(Unit *pUnit);
 	void EditGameGlobalEffects();
+	void ImportMapFile(AString *name, int level);
+	void ImportEthFile(AString *name, int level);
+	void ImportRivFile(AString *name, int level);
 	int GetMarketTradeVariance();
 	void EditGameBuildingsSummary();
 	void EditGameProductsSummary();
@@ -355,6 +358,7 @@ private:
 	void ProcessGuardOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessNameOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessDescribeOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
+	void ProcessLabelOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessBehindOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessFightAsOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessTacticsOrder(Unit *, AString *, OrdersCheck *pCheck);
@@ -413,8 +417,10 @@ private:
 	void ProcessTransportOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessDistributeOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);
 	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
-	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int);
+	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int, FormTemplate *ft = 0, int fl = -1);
 	AString *ProcessTemplateOrder(Aorders *, OrdersCheck *pCheck, AString *, Faction *fac);
+	AString *ProcessAllOrder(Aorders *, OrdersCheck *pCheck, AString *, Faction *fac);
+    void DoLabelOrders(OrdersCheck *pCheck, Unit *u, Faction *fac, int faction, AString *unittype = 0);
 
 	void RemoveInactiveFactions();
 

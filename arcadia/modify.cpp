@@ -1001,7 +1001,7 @@ void Game::ModifySpecialDamage(char *special, int index, int type, int min,
 	if(index < 0 || index > 4) return;
 	if (effect && (FindEffect(effect) == NULL)) return;
 	if(type < -1 || type > NUM_ATTACK_TYPES) return;
-	if(cls < -1 || cls > (NUM_WEAPON_CLASSES-1)) return;
+	if(cls < -1 || cls > (NUM_WEAPON_CLASSES)) return;   //NUM_WEAPON_CLASSES is allowed for courage, which ignores armour completely
 	if(min < 0) return;
 	sp->damage[index].type = type;
 	sp->damage[index].minnum = min;

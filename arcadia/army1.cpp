@@ -2377,9 +2377,12 @@ void Army::DoExperience(int enemydead)
 		int exper = (int) exp;
 		//if riding leader, give 2/3 of normal bonus to riding skill & normal skill
 
+        if(s->unit->GetSkill(S_FRENZY)) s->unit->Experience(S_FRENZY,(2*exper/3),0);
+        if(s->unit->GetSkill(S_BASE_BATTLETRAINING)) s->unit->Experience(S_BASE_BATTLETRAINING,(2*exper/3),0);
+
 		if(s->riding != -1) {
 		    //has riding skill.
-		    if(ItemDefs[s->race].type & IT_LEADER) {
+		    if(!s->unit->IsNormal()) {
 		        exper = (int) (2*exp/3);
 		        s->unit->Experience(S_RIDING,exper,0);
 		    } else s->unit->Experience(S_RIDING,exper,0);
@@ -2401,7 +2404,7 @@ void Army::DoExperience(int enemydead)
             
         } else if(!s->special) s->unit->Experience(S_COMBAT,exper,0);
         //practise special if we are a mage.
-        if(s->special && s->unit->type == U_MAGE && s->unit->combat != -1) s->unit->Experience(s->unit->combat,(int) (exp/3), 0);
+        if(s->special && s->unit->IsMage() && s->unit->combat != -1) s->unit->Experience(s->unit->combat,(int) (exp/3), 0);
 	}
 }
 
@@ -2453,6 +2456,8 @@ void Army::DoEthnicMoraleEffects(Battle *b)
     // penalties are now between 0 and 2, depending on racial fractions in the army.
     for(int i=0; i<RA_NA; i++) racecount[i] = 0;
     
+    int max = unity;
+    
     for(int i=0; i<count; i++) {
         Soldier *s = GetSoldier(i);
         ManType *mt = FindRace(ItemDefs[s->race].abr);
@@ -2475,6 +2480,13 @@ void Army::DoEthnicMoraleEffects(Battle *b)
     AString temp = AString("Unity calms ") + unityhelps + " of " + *pLeader->name + "'s soldiers.";
     if(unityhelps) b->AddLine(temp);
     
+    if(max > unity) {
+        for(int i=0; i<count; i++) {
+            Soldier *s = GetSoldier(i);
+            if(s->special == "UNIY") s->unit->Experience(S_UNITY,(10*(max-unity)+max/2)/max,0);
+        }
+    }       
+    
     temp = AString(total) + " of " + *pLeader->name + "'s soldiers suffer a morale penalty due to the presence of soldiers from different ethnic groups.";
-    if(total) b->AddLine(temp);    
+    if(total) b->AddLine(temp);
 }

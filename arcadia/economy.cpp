@@ -32,8 +32,8 @@
 
 int TownInfo::TownType()
 {
-	if (pop < 1000) return TOWN_VILLAGE;
-	if (pop < 2000) return TOWN_TOWN;
+	if (pop < 1000*Globals->POP_LEVEL) return TOWN_VILLAGE;
+	if (pop < 2000*Globals->POP_LEVEL) return TOWN_TOWN;
 	return TOWN_CITY;
 }
 
@@ -162,6 +162,7 @@ void ARegion::SetupPop()
 		wages = 0;
 		maxwages = 0;
 		money = 0;
+		if(typer->similar_type == R_OCEAN) race = I_MERMEN;
 
 		/*
 		if(Globals->PLAYER_ECONOMY) {
@@ -658,8 +659,7 @@ void ARegion::SetupCityMarket()
 
 	while (buy1 == buy2) buy2 = GetArcadianTrade(numtrade,0);
 	while (sell1 == buy1 || sell1 == buy2) sell1 = GetArcadianTrade(numtrade,1);
-	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
-		sell2 = GetArcadianTrade(numtrade,1);
+	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1) sell2 = GetArcadianTrade(numtrade,1);
 
 	for (int i=0; i<NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
@@ -795,56 +795,40 @@ int ARegion::GetArcadianTradeAveraged(int numtrade, int producing)
 */
 int ARegion::GetArcadianTrade(int numtrade, int producing)
 {
-    if(numtrade != 19) {
-        Awrite(AString("Wrong number of trade items") + numtrade);
+    if(numtrade != 12) {
+        Awrite(AString("Wrong number of trade items: ") + numtrade);
         return getrandom(numtrade);
     }
     if(zloc != 1) return getrandom(numtrade);
     
-    //Work out which island we are on
-    int island;
-    if(yloc<xloc) {
-        //N or E
-        if(yloc+xloc < 56) island = 2;  //north
-        else island = 3;                //east
-    } else {
-        //W or S
-        if(yloc+xloc < 56) island = 1;  //west
-        else island = 4;                //south
-    }
+    ManType *mt = FindRace(ItemDefs[race].abr);
+    if(!mt) return getrandom(numtrade);
 
     if(producing) {
-        int selection = getrandom(9);
-        switch(selection) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-                return (island*3 - 3 + selection%3); //0,1,2  3,4,5  6,7,8  9,10,11            
-            case 6:
-                return (11 + island);              //12  13  14  15
-            case 7:
-                return (12 + island%4);            //13  14  15  12  - can want also
-            case 8:
-                return (16 + island%2);            //17  16  17  16  - can want also
+        switch(mt->ethnicity) {
+            case RA_HUMAN:
+                return getrandom(4);
+            case RA_ELF:
+                return 4+getrandom(4);
+            case RA_DWARF:
+                return 8+getrandom(4);
+            default:
+                return getrandom(numtrade);
         }
     } else {
-        //this city wants an item
-        int selection = getrandom(16);
-        if(selection < (island-1)*3 ) return selection; //  -                    0,1,2          0,1,2,3,4,5  0,1,2,3,4,5,6,7,8
-        if(selection < 9) return selection + 3;         //  3,4,5,6,7,8,9,10,11  6,7,8,9,10,11  9,10,11      -
-        if(selection == 9) return 16;                   //  16                   16             16           16   
-        if(selection == 10) return 17;                  //  17                   17             17           17
-        if(selection == 11) return 18; //gems               18                   18             18           18
-        //selection is 12,13,14,15
-        int addit = 0;
-        if(selection-island > 10) addit = 1;
-        if(selection==15) addit = 3;
-        return selection+addit;                      //   13,14,15,18             12,14,15,18       12,13,15,18     12,13,14,18  
+        switch(mt->ethnicity) {
+            case RA_HUMAN:
+                return 4+getrandom(8);
+            case RA_ELF:
+                if(getrandom(2)) return getrandom(4);
+                else return 8+getrandom(4);
+            case RA_DWARF:
+                return getrandom(8);
+            default:
+                return getrandom(numtrade);
+        }
     }
-    return 18; //should never occur
+    return getrandom(numtrade); //should never occur
 }
 
 void ARegion::SetupProds()
@@ -931,7 +915,10 @@ void ARegion::AddTown()
 
 void ARegion::AddEditTown(AString *townname)
 {
+#define NUMTOWNNAMES 1000
 /* This should be a direct copy of the above except for the naming*/
+    if(!townname) townname = new AString(AGetNameString(getrandom(NUMTOWNNAMES)));
+    if(town) delete town;
 	town = new TownInfo;
 	town->name = townname;
 	// PLAYER_ECONOMY
@@ -992,7 +979,7 @@ void ARegion::UpdateEditRegion()
     	p->baseamount = money / Globals->ENTERTAIN_FRACTION;
     	p->amount = p->baseamount;
 	}
-	markets.PostTurn(Population(), Wages());
+	markets.PostTurn(Population(), Wages(), race);
 	
 	//Replace man selling
 	forlist(&markets) {
@@ -1014,8 +1001,6 @@ void ARegion::UpdateEditRegion()
 						Population()/(25*Globals->POP_LEVEL), 0, 10000, 0, 400);
 		markets.Add(m);
 	}
-    
-    
 }
 
 void ARegion::SetupEditRegion(int canmakecity)
@@ -1038,7 +1023,8 @@ void ARegion::SetupEditRegion(int canmakecity)
 		basepopulation = 0;
 		wages = 0;
 		maxwages = 0;
-		money = 0;
+		money = 0;		
+		if(typer->similar_type == R_OCEAN) race = I_MERMEN;
 
 		/*
 		if(Globals->PLAYER_ECONOMY) {
@@ -1151,8 +1137,7 @@ void ARegion::SetupEditRegion(int canmakecity)
 		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
 			100 * spread) / 100;
 		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
-		AString *name = new AString("name");
-		if (getrandom(townch) < townprob) AddEditTown(name);
+		if (getrandom(townch) < townprob) AddEditTown();
 	}
 
 	Production *p = new Production;
@@ -1705,7 +1690,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 			Awrite("");
 #endif
 
-			markets.PostTurn(Population(),Wages());
+			markets.PostTurn(Population(),Wages(), race);
 		}
 		return;
 	}
@@ -1777,7 +1762,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		p = products.GetProd(I_SILVER, S_ENTERTAINMENT);
 		p->baseamount = money / Globals->ENTERTAIN_FRACTION;
 
-		markets.PostTurn(Population(), Wages());
+		markets.PostTurn(Population(), Wages(), race);
 	}
 
 	UpdateProducts();

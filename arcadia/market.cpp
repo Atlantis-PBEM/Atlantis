@@ -47,7 +47,7 @@ Market::Market(int a, int b, int c, int d, int e, int f, int g, int h)
 	activity = 0;
 }
 
-void Market::PostTurn(int population, int wages)
+void Market::PostTurn(int population, int wages, int race)
 {
 	// Nothing to do to the markets.
 	if(!(Globals->VARIABLE_ECONOMY)) return;
@@ -60,11 +60,14 @@ void Market::PostTurn(int population, int wages)
 	if (ItemDefs[item].type & IT_MAN) {
 		float ratio = ItemDefs[item].baseprice /
 			(float)Globals->BASE_MAN_COST;
+		if(wages < 10) wages = 10;   //minimum cost of $40 for normal race.
 		price = (int)(wages * 4 * ratio);
 		if (ItemDefs[item].type & IT_LEADER)
 			amount = population / (25*Globals->POP_LEVEL);
-		else
+		else {
 			amount = population / (5*Globals->POP_LEVEL);
+			item = race; //allows for race of region to change.
+		}
 		return;
 	}
 
@@ -130,10 +133,10 @@ AString Market::Report()
 	return temp;
 }
 
-void MarketList::PostTurn(int population, int wages)
+void MarketList::PostTurn(int population, int wages, int race)
 {
 	forlist(this) {
-		((Market *) elem)->PostTurn(population, wages);
+		((Market *) elem)->PostTurn(population, wages, race);
 	}
 }
 

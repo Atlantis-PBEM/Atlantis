@@ -1410,7 +1410,7 @@ void Game::WriteReports()
 		CountAllTacticians();
     CountAllPower(); //counts men as well
 	
-	
+
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
 		AString str = "report.";
@@ -1974,6 +1974,8 @@ void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
     	if(level) u->Experience(S_OBSERVATION,level); //can otherwise only be gained by killing would-be-assassins or study
     	level = u->GetSkill(S_TRUE_SEEING);
     	if(level) u->Experience(S_TRUE_SEEING,level); //can otherwise only be gained by study
+    	level = u->GetSkill(S_SECSIGHT);
+    	if(level) u->Experience(S_SECSIGHT,level); //can otherwise only be gained by study
 	}
 }
 
@@ -2279,7 +2281,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	} else {
 	    num = num * percent / 100;
 	}
-	
+
 	int fac = guardfaction;
 	if(Globals->ARCADIA_MAGIC) {
     	ManType *mt = FindRace(ItemDefs[pReg->race].abr);

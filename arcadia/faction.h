@@ -132,6 +132,7 @@ class FormTemplate : public AListElem
         ~FormTemplate();
         void Writeout(Aoutfile * );
         void Readin( Ainfile * );
+        AString * GetLine(int);
         
         AString * name;
         AList orders;
@@ -235,6 +236,7 @@ public:
 	ItemList items;
 	//List of templates
 	AList formtemplates; //FORM_TEMPLATES
+	AList labeltemplates; //FORM_TEMPLATES
 	
     //
     // Both are lists of AStrings

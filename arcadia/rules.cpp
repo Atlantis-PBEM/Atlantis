@@ -33,7 +33,7 @@
 // the html file containing the rules to correctly reflect the changes!
 //
 
-static int am[] = { 1, 2, 3, 4, 5, 6 };
+static int am[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 int *allowedMages = am;
 int allowedMagesSize = sizeof(am) / sizeof(am[0]);
 
@@ -41,11 +41,11 @@ static int aa[] = { 0, 2, 4, 6, 10, 14 };
 int *allowedApprentices = aa;
 int allowedApprenticesSize = sizeof(aa) / sizeof(aa[0]);
 
-static int aw[] = { 1, 8, 15, 22, 29, 36 };
+static int aw[] = { 1, 4, 7, 10, 13, 16, 19, 22, 25 };
 int *allowedTaxes = aw;
 int allowedTaxesSize = sizeof(aw) / sizeof(aw[0]);
 
-static int at[] = { 1, 8, 15, 22, 29, 36 };
+static int at[] = { 1, 4, 7, 10, 13, 16, 19, 22, 25 };
 int *allowedTrades = at;
 int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
@@ -78,7 +78,7 @@ static GameDefs g = {
 	33, /* STARVE_PERCENT */
 	GameDefs::STARVE_LEADERS, /* SKILL_STARVATION */
 
-	7520, /* START_MONEY */
+	1007520, /* START_MONEY */
 	4, /* WORK_FRACTION */
 	20, /* ENTERTAIN_FRACTION */
 	20, /* ENTERTAIN_INCOME */
@@ -101,7 +101,7 @@ static GameDefs g = {
 	35, /* WMON_FREQUENCY */
 	17, /* LAIR_FREQUENCY */
 
-	4, /* FACTION_POINTS */
+	8, /* FACTION_POINTS */
 
 	100, /* TIMES_REWARD */
 	
@@ -165,8 +165,8 @@ static GameDefs g = {
 	0,	// BANK_MAXSKILLPERLEVEL
 	0,	// CITY_RENAME_COST
 	1,	// MULTI_HEX_NEXUS
-	1,	// UNDERWORLD_LEVELS
-	1,	// UNDERDEEP_LEVELS
+	0,	// UNDERWORLD_LEVELS
+	0,	// UNDERDEEP_LEVELS
 	0,	// ABYSS_LEVEL
 	0,  // FLAT_WORLD
 	250,	  // TOWN_PROBABILITY
@@ -234,7 +234,7 @@ static GameDefs g = {
 	1, // ARCADIA_MAGIC
 	1, // EARTHSEA_VICTORY
 	1, // REAL_EXPERIENCE
-	0, // WISHSKILLS_ENABLED
+	1, // WISHSKILLS_ENABLED
 	20, // POP_LEVEL
 	1, // FORM_TEMPLATES
 };

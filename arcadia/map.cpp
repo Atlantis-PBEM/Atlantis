@@ -218,7 +218,6 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 
 	if (Globals->HEXSIDE_TERRAIN) AddBeaches(pRegionArrays[level]);
 
-	Awrite("7");
 	CheckHexsides(pRegionArrays[level]);	
  
     FinalSetup(pRegionArrays[level]);    

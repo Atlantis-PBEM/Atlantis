@@ -61,6 +61,7 @@ Unit::Unit()
 {
 	name = 0;
 	describe = 0;
+	label = 0;
 	num = 0;
 	type = U_NORMAL;
 	dead = 0;
@@ -106,6 +107,7 @@ Unit::Unit(int seq, Faction *f, int a)
 	type = U_NORMAL;
 	name = new AString;
 	describe = 0;
+	label = 0;
 	*name = AString("Unit (") + num + ")";
 
 	dead = 0;
@@ -155,6 +157,7 @@ Unit::~Unit()
 	if (stealorders) delete stealorders;
 	if (name) delete name;
 	if (describe) delete describe;
+	if (label) delete label;
 //Awrite("Deleting Unit");
 }
 
@@ -181,6 +184,11 @@ void Unit::Writeout(Aoutfile *s)
 	s->PutStr(*name);
 	if (describe) {
 		s->PutStr(*describe);
+	} else {
+		s->PutStr("none");
+	}
+	if (label) {
+		s->PutStr(*label);
 	} else {
 		s->PutStr("none");
 	}
@@ -220,6 +228,11 @@ void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
 	if (*describe == "none") {
 		delete describe;
 		describe = 0;
+	}
+	label = s->GetStr();
+	if (*label == "none") {
+		delete label;
+		label = 0;
 	}
 	num = s->GetInt();
 	type = s->GetInt();
@@ -508,8 +521,9 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 	}
 
 	if (guard == GUARD_GUARD) temp += ", on guard";
-	if (obs > 0) {
-		temp += AString(", ") + *faction->name + " [" + EthnicityString(faction->ethnicity) + "]";
+	if (obs > 0) temp += AString(", ") + *faction->name + " [" + EthnicityString(faction->ethnicity) + "]";
+	if(obs == 2 && label) temp += AString(", ") + *label;
+	if (obs > 0) {		
 		if (guard == GUARD_AVOID) temp += ", avoiding";
 		if (GetFlag(FLAG_BEHIND)) temp += ", behind";
 	}
@@ -572,10 +586,11 @@ AString Unit::TemplateReport()
 	AString temp;
 	temp = *name;
 
-	if (GetFlag(FLAG_COMMANDER)) temp += ", commanding faction";
 	if (guard == GUARD_GUARD) temp += ", on guard";
+	if (label) temp += AString(", ") + *label;
 	if (guard == GUARD_AVOID) temp += ", avoiding";
 	if (GetFlag(FLAG_BEHIND)) temp += ", behind";
+	if (GetFlag(FLAG_COMMANDER)) temp += ", commanding faction";
 	if (reveal == REVEAL_UNIT) temp += ", revealing unit";
 	if (reveal == REVEAL_FACTION) temp += ", revealing faction";
 	if (GetFlag(FLAG_HOLDING)) temp += ", holding";
@@ -665,6 +680,7 @@ void Unit::ClearOrders()
 	if (stealorders) delete stealorders;
 	stealorders = 0;
 	promote = 0;
+	promotequiet = 0;
 	taxing = TAX_NONE;
 	advancefrom = 0;
 	movepoints = 0;
@@ -878,6 +894,17 @@ void Unit::SetDescribe(AString *s)
 		describe = newname;
 	} else
 		describe = 0;
+}
+
+void Unit::SetLabel(AString *s)
+{
+	if (label) delete label;
+	if (s) {
+		AString *newname = s->getlegal();
+		delete s;
+		label = newname;
+	} else
+		label = 0;
 }
 
 int Unit::IsAlive()
@@ -1169,22 +1196,23 @@ int Unit::CanStudy(int sk)
 	return 1;
 }
 
-int Unit::Study(int sk, int days, int overflow)
+int Unit::Study(int sk, int days, int quiet, int overflow)
 {
     //Upgrading gets handled differently to other skills.
 	if(SkillDefs[sk].flags & SkillType::UPGRADE) {
 	    switch(sk) {
 	        case S_LEADERSHIP:
 	            if(type != U_NORMAL) {
-	                Error("STUDY: Only normal units can study leadership");
+	                Error("STUDY: Only normal units can study leadership", quiet);
 	                return 0;
 	            } else type = U_LEADER;
 	            return 1;
             case S_HEROSHIP:
-                if(type != U_LEADER) {
-	                Error("STUDY: Only leader units can study heroship");
+                if(type != U_LEADER || GetMen() != 1) {
+	                Error("STUDY: Only one man leader units can study heroship", quiet);
 	                return 0;
-	            } else type = U_MAGE;
+	            }
+                type = U_MAGE;
 	            return 1;
             default:
                 break;
@@ -1199,7 +1227,7 @@ int Unit::Study(int sk, int days, int overflow)
 			if (s->type != sk) {
 			    //Real experience patch
 			    if(s->days >= 30 || s->experience >= 30) {
-    				Error("STUDY: Can know only 1 skill.");
+    				Error("STUDY: Can know only 1 skill.", quiet);
     				return 0;
 				}
 			}
@@ -1208,19 +1236,19 @@ int Unit::Study(int sk, int days, int overflow)
 	int max = GetSkillKnowledgeMax(sk);
 	if (GetDaysSkill(sk) >= max) {
 	    if(!Globals->REAL_EXPERIENCE) {
-    		Error("STUDY: Maximum level for skill reached.");
+    		Error("STUDY: Maximum level for skill reached.", quiet);
     		return 0;
    		} else if (!overflow) {
-   		    Error("STUDY: Maximum knowledge level for skill reached, teaching has no effect.");
+   		    Error("STUDY: Maximum knowledge level for skill reached, teaching has no effect.", quiet);
    		    return 0;
 		} else if (GetExperSkill(sk) >= GetSkillExperMax(sk) ) {
-    		Error("STUDY: Maximum level for skill reached.");
+    		Error("STUDY: Maximum level for skill reached.", quiet);
     		return 0;
 		}
 	}
 
 	if (!CanStudy(sk) && overflow) {   //overflow == 0 is only called for teaching, when to stick to old behaviour we don't want this checked. For Arcadia IV, review this.
-		Error("STUDY: Doesn't have the pre-requisite skills to study that.");
+		Error("STUDY: Doesn't have the pre-requisite skills to study that.", quiet);
 		return 0;
 	}
 
@@ -1243,7 +1271,7 @@ void Unit::Experience(int sk, int experience, int group, int dividenonspecials) 
     
 	Skill *s;
 
-	if(Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
+	if(Globals->SKILL_LIMIT_NONLEADERS && IsNormal()) {
 	//if can know only one skill, and first skill is not the one to experience, do not get experience.
 		if (skills.Num()) {
 			s = (Skill *) skills.First();
@@ -1255,7 +1283,7 @@ void Unit::Experience(int sk, int experience, int group, int dividenonspecials) 
 	
 	if(GetSkillExperMax(sk) == 0) return;
 	    
-	if(dividenonspecials && !IsLeader()) {
+	if(dividenonspecials) {
 	//if non-specialist skill, divide experience gain by 2 (from 10 to 5 in most cases).
 	    if(!IsASpeciality(sk)) experience /= 2;
 	}
@@ -1409,7 +1437,7 @@ int Unit::Practice(int sk)
 	}
 
 	if (bonus) {
-		Study(sk, men * bonus);
+		Study(sk, men * bonus, 1);
 		practiced = 1;
 	}
 
@@ -1648,7 +1676,7 @@ void Unit::Short(int needed, int hunger)
 				needed -= Globals->MAINTENANCE_COST;
 			hunger -= Globals->UPKEEP_MINIMUM_FOOD;
 			if (needed < 1 && hunger < 1) {
-				if (n) Error(AString(n) + " starve to death.");
+				if (n) Error(AString(n) + " starve to death.", 0);
 				return;
 			}
 		}
@@ -1681,7 +1709,7 @@ void Unit::Short(int needed, int hunger)
 				needed -= Globals->LEADER_COST;
 			hunger -= Globals->UPKEEP_MINIMUM_FOOD;
 			if (needed < 1 && hunger < 1) {
-				if (n) Error(AString(n) + " starve to death.");
+				if (n) Error(AString(n) + " starve to death.", 0);
 				return;
 			}
 		}
@@ -2455,8 +2483,12 @@ void Unit::Event(const AString & s)
 	faction->Event(temp);
 }
 
-void Unit::Error(const AString & s)
+void Unit::Error(const AString & s, int quiet)
 {
+    if(quiet) {
+        Event(s);
+        return;
+    }
 	AString temp = *name + ": " + s;
 	faction->Error(temp);
 }
@@ -2501,12 +2533,14 @@ int Unit::GetAttribute(char *attrib)
 			temp = ap->mods[index].ident;
 			int sk = LookupSkill(&temp);
 			val = GetRealSkill(sk);
-			if (ap->mods[index].modtype == AttribModItem::UNIT_LEVEL_HALF) {
-				val = ((val + 1)/2) * ap->mods[index].val;
-			} else if (ap->mods[index].modtype == AttribModItem::CONSTANT) {
-				val = ap->mods[index].val;
-			} else {
-				val *= ap->mods[index].val;
+			if(val > 0) {
+    			if (ap->mods[index].modtype == AttribModItem::UNIT_LEVEL_HALF) {
+    				val = ((val + 1)/2) * ap->mods[index].val;
+    			} else if (ap->mods[index].modtype == AttribModItem::CONSTANT) {
+    				val = ap->mods[index].val;
+    			} else {
+    				val *= ap->mods[index].val;
+    			}
 			}
 		} else if (ap->mods[index].flags & AttribModItem::ITEM) {
 			val = 0;
@@ -2652,7 +2686,7 @@ void Unit::SkillStarvation()
 			}
 		}
 		AString temp = AString(count) + " starve to death.";
-		Error(temp);
+		Error(temp, 0);
 		return;
 	}
 	count = getrandom(count)+1;
@@ -2662,7 +2696,7 @@ void Unit::SkillStarvation()
 				Skill *s = GetSkillObject(i);
 				AString temp = AString("Starves and forgets one level of ")+
 					SkillDefs[i].name + ".";
-				Error(temp);
+				Error(temp, 0);
 				switch(GetLevelByDays(s->days)) {
 					case 1:
 						s->days -= 30;

@@ -63,6 +63,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	slevel = 0;
 
 	int def = - (u->crossbridge); //crossing bridges/walls mod - penalty of 1 usually. Set to zero for others. (Hexside Terrain).
+	if(TerrainDefs[regtype].similar_type == R_OCEAN) def += ObjectDefs[o->type].oceanbonus;
+
 
 	askill = def;
 
@@ -82,20 +84,22 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	
 	int terrainflags = TerrainDefs[regtype].flags;
  	
+ 	
+ 	
 	/* BS 030825 Multiple Hit Men */
     if (ItemDefs[r].type & IT_MAN) {
         ManType *mt = FindRace(ItemDefs[r].abr);    
-       hits = mt->hits;
-       maxhits = mt->hits;
-       if(unit->GetSkill(S_TOUGHNESS)) {
-           int level = unit->GetSkill(S_TOUGHNESS);
-           int gain = 0;
-           while(level > 0) {                      //2,4,7,11,16,22
-               gain += level--;
-           }
-           hits += gain;
-           maxhits += gain;
-       }
+        hits = mt->hits;
+        maxhits = mt->hits;
+        if(unit->GetSkill(S_TOUGHNESS)) {
+            int level = unit->GetSkill(S_TOUGHNESS);
+            int gain = 0;
+            while(level > 0) {                      //2,4,7,11,16,22
+                gain += level--;
+            }
+            hits += gain;
+            maxhits += gain;
+        }
     }
     
     if (ItemDefs[r].type & IT_ILLUSION) {
@@ -116,7 +120,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		if (o->runes) {
 			dskill[ATTACK_ENERGY] += o->runes;
 			dskill[ATTACK_SPIRIT] += o->runes;
-			dskill[ATTACK_WEATHER] += o->runes/2;
+			dskill[ATTACK_WEATHER] += o->runes;
 		}
 		o->capacity--;
 	}
@@ -285,12 +289,14 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		// Weapons (like Runeswords) which are both weapons and battle
 		// items will be skipped in the battle items setup and handled
 		// here.
-		if ((ItemDefs[weapon].type & IT_BATTLE) && special == NULL) {
+		if ((ItemDefs[weapon].type & IT_BATTLE)) {
 			BattleItemType *pBat = FindBattleItem(ItemDefs[weapon].abr);
-			if(pBat->flags & BattleItemType::SPECIAL) { //BS mod - only do so if battleitem is set to make a special; if ever have one which makes a shield, then add the shield coding here.
+			 //BS mod - only do so if battleitem is set to make a special; if ever have one which makes a shield, then add the shield coding here.
+			if(special == NULL && pBat->flags & BattleItemType::SPECIAL) {
     			special = pBat->special;
     			slevel = pBat->skillLevel;
 			}
+			//BS - BattleItemType::ENERGY is dealt with in DoSpellCost below
 		}
 		//set attacktype to weapontype
 		WeaponType *pWep = FindWeapon(ItemDefs[weapon].abr);
@@ -486,6 +492,9 @@ void Soldier::RestoreItems()
 void Soldier::Alive(int state)
 {
 	RestoreItems();
+	if(maxhits > hits && (ItemDefs[race].type & IT_MAN)) {
+        if(unit->GetSkill(S_TOUGHNESS)) unit->Experience(S_TOUGHNESS,50*(maxhits-hits)/maxhits);
+    }
 
 	if (state == LOSS) {
 		unit->canattack = 0;
@@ -613,6 +622,19 @@ int Soldier::DoSpellCost(int round, Battle *b)
 //returns 1 if can cast the spell, 0 if cannot.
 {
     if(!Globals->ARCADIA_MAGIC) return 1;
+    
+    //staff of yew coding
+    if ((ItemDefs[weapon].type & IT_BATTLE)) {
+		BattleItemType *pBat = FindBattleItem(ItemDefs[weapon].abr);
+		if(pBat->flags & BattleItemType::ENERGY) {
+        //can cast, energy cost of zero.
+            int exper = 8 - round; //7, 6, then 5, then 4 ... sum of 27 in 6 rounds, then 1 per round.
+	        if(exper < 1) exper = 1;
+            unit->Experience(unit->combat, exper, 0);
+            return 1;
+		}
+	}
+
 
 	if(!exhausted && unit->type == U_MAGE && unit->combat != -1) {
 	    int cost;

@@ -80,7 +80,6 @@ AString EnergyString(int skill, int fromlevel, int tolevel, int multiplier)
 AString *ShowSkill::Report(Faction *f)
 {
 	if(SkillDefs[skill].flags & SkillType::DISABLED) return NULL;
-
 	AString *str = new AString;
 	RangeType *range = NULL;
 //Awrite(AString("starting") + skill);
@@ -809,7 +808,7 @@ AString *ShowSkill::Report(Faction *f)
 				*str += " If the mage is flying, he will receive 2 extra "
 					   "movement points.";
 			} else if (level == 2) {
-				if(OBJECT_DISABLED(O_CLIPPER)) break;
+				if(OBJECT_DISABLED(O_MERCHANT)) break;
 				*str += "With level 2 Summon Wind, any ship of Clipper size "
 					   "or smaller that the mage is inside will receive a "
 					   "2 movement point bonus.";
@@ -1770,9 +1769,8 @@ AString *ShowSkill::Report(Faction *f)
     				*str += "A mage with the Engrave Runes of Warding may "
     					"engrave runes of warding on a building; these runes "
     					"will increase the defence skill of any occupants "
-    					"against energy and spirit attacks by the mage's skill "
-                        "level (at time of casting), and their defence against "
-                        "weather attacks by half this value (rounded down). To use this "
+    					"against energy, spirit and weather attacks by the mage's skill "
+                        "level (at time of casting). To use this "
     					"spell, the mage should CAST Engrave_Runes_of_Warding, "
     					"and be within the building he wishes to engrave runes "
     					"upon. At level 1 this spell may be cast on a ";
@@ -2058,8 +2056,8 @@ AString *ShowSkill::Report(Faction *f)
                     + EnergyString(skill,1,6,1) + " When "
                     "used in battle, this spell interferes with the tactical "
                     "effectiveness of enemy officers, by a multiplicative factor of "
-                    "0.67 per skill level (ie at skill level 2, the tactics effectiveness "
-                    "would be 0.67 squared times their usual effectiveness). This "
+                    "0.7 per skill level (ie at skill level 2, the tactics effectiveness "
+                    "would be 0.7 squared times their usual effectiveness). This "
                     "is cumulative with any reduction due to the darkness spell. "
                     "If multiple mages cast fog in battle, only the highest level "
                     "spell will have an effect.";
@@ -2870,9 +2868,9 @@ AString *ShowSkill::Report(Faction *f)
                "location, bringing an unnatural darkness to the surrounding "
                "area. When cast in combat this spell will act like a fog spell "
                "and reduce the tactical effectiveness of tactitians in BOTH "
-               "armies by a multiplicative factor of 0.67 per skill level (ie "
+               "armies by a multiplicative factor of 0.7 per skill level (ie "
                "at skill level 2, the tactics effectiveness will be "
-               "0.67 squared). This skill will also reduce the attack "
+               "0.7 squared). This skill will also reduce the attack "
                "skill and chance-to-attack of all troops in the battle by the "
                "caster's skill level, drastically reducing casualties in the battle. "
                "If multiple mages cast darkness, only the highest level spell "
@@ -2998,8 +2996,14 @@ AString *ShowSkill::Report(Faction *f)
 			break;		
 		case S_BASE_CHARISMA: //Earthsea
 			if(level > 1) break;
-			*str += "Charisma has no purpose in itself, but enables a hero to "
-                "develop further skills to aid themself.";
+			*str += "Charisma is a powerful tool, and subsequent skills allow heroes to charm or "
+                "persuade others into aiding the hero. Charisma itself gives a hero "
+                "the chance to learn from locals of advanced resources in a region, "
+                "even if the hero would not normally be able to detect them. The "
+                "chance of NOT detecting each advanced resource present is 1 in "
+                "2 to the power of the hero's charisma skill level. This skill "
+                "is used automatically in the region where the hero ends the month, "
+                "providing there are local peasants.";
 			break;		
 		case S_TOUGHNESS: //Earthsea
 			if(level > 1) break;
@@ -3068,7 +3072,7 @@ AString *ShowSkill::Report(Faction *f)
                     "of their withdraw cost (for non-normal items, this value may "
                     "be found in reference material that comes with the game, or "
                     "through experimentation). Each additional skill level raises "
-                    "this price by 7.5% of the withdraw cost. This price will be "
+                    "this price by 5% of the withdraw cost. This price will be "
                     "rounded down, per item. Note that, if a hero attempts to sell "
                     "items that the local market can buy, the items will be sold "
                     "through the market at the market price, even if the hero is "
@@ -3076,8 +3080,8 @@ AString *ShowSkill::Report(Faction *f)
                     "market.";
             } else if(level == 4) {
     			*str += "At level 4, merchants may buy any normal item, anywhere. "
-                    "However, the item will cost 120% of its withdraw price. Each "
-                    "additional level in merchantry reduces the cost by 20% of "
+                    "However, the item will cost 130% of its withdraw price. Each "
+                    "additional level in merchantry reduces the cost by 10% of "
                     "the withdraw price. This price will be rounded up, per item. "
                     "Note that, if a hero attempts to buy "
                     "items that the local market can provide, the items will be bought "
@@ -3299,7 +3303,7 @@ AString *ShowSkill::Report(Faction *f)
 		if(!(*str == "")) *str += " ";
 		*str += temp + ".";
 	}
-	
+
 	//Hexsides
 	comma = 0;
 	temp = "A unit with this skill may BUILD the following terrain edge features: ";

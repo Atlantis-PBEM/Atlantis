@@ -38,36 +38,25 @@ int Game::SetupFaction( Faction *pFac )
 	//
 	// Set up first unit.
 	//
+	int race = -1;
 	Unit *temp2 = GetNewUnit( pFac );
-	temp2->SetMen( I_VIKING, 1 );
+	pFac->ethnicity = getrandom(RA_OTHER);
+	switch(pFac->ethnicity) {
+	    case RA_HUMAN:
+	    race = I_BARBARIAN;
+	    break;
+	    case RA_ELF:
+	    race = I_DARKMAN;
+	    break;
+	    default:
+	    race = I_HILLDWARF;
+	    break;
+    }
+	temp2->SetMen( race, 1 );
 	temp2->reveal = REVEAL_FACTION;
+	temp2->SetFlag(FLAG_COMMANDER,1);
+   	temp2->type = U_MAGE;
 
-	if(!Globals->ARCADIA_MAGIC) {
-    	temp2->type = U_MAGE;
-    	temp2->Study(S_PATTERN, 30);
-    	temp2->Study(S_SPIRIT, 30);
-    	temp2->Study(S_GATE_LORE, 30);
-    
-    	if (TurnNumber() >= 25) {
-    		temp2->Study(S_PATTERN, 60);
-    		temp2->Study(S_SPIRIT, 60);
-    		temp2->Study(S_FORCE, 90);
-    		temp2->Study(S_COMBAT, 30);
-    	}
-	}
-
-	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
-	{
-		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED))
-			temp2->items.SetNum(I_FOOD, 6);
-		else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
-			temp2->items.SetNum(I_FISH, 6);
-		else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
-			temp2->items.SetNum(I_LIVESTOCK, 6);
-		else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
-			temp2->items.SetNum(I_GRAIN, 2);
-		temp2->items.SetNum(I_SILVER, 10);
-	}
 
 	ARegion *reg = NULL;
 	if(pFac->pStartLoc) {
@@ -81,6 +70,7 @@ int Game::SetupFaction( Faction *pFac )
 		}
 	}
 	temp2->MoveUnit( reg->GetDummy() );
+	reg->race = race;
 
 	return( 1 );
 }
@@ -236,7 +226,7 @@ void Game::ModifyTablesPerRuleset(void)
         //Skilltree stuff
         ModifySkillName(S_FIRE,"fireball","FIRE");
 	    ModifySkillDependancy(S_FIRE, 0, "WKEY", 1);
-	    ModifySkillDependancy(S_FORCE_SHIELD, 0, "FIRE", 3);
+	    ModifySkillDependancy(S_FORCE_SHIELD, 0, "FIRE", 4);
 	    ModifySkillDependancy(S_FARSIGHT, 0, "WKEY", 1);
 	    ModifySkillDependancy(S_FARSIGHT, 1, NULL, 0);
 	    ModifySkillDependancy(S_SUMMON_WIND, 0, "WKEY", 1);
@@ -246,7 +236,7 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_CLEAR_SKIES, 0, "WKEY", 1);
 	    ModifySkillRange(S_CLEAR_SKIES, "rng_linear");
 //	    ModifySkillDependancy(S_BLIZZARD, 0, "WKEY", 4);
-//	    ModifySkillDependancy(S_FOG, 0, "WKEY", 1);
+	    ModifySkillDependancy(S_FOG, 0, "WKEY", 3);
 	    ModifySkillDependancy(S_FOG, 1, NULL, 0);
 	    ModifySkillFlags(S_FOG, SkillType::MAGIC | SkillType::COMBAT | SkillType::CAST | SkillType::MAGEOTHER);
 	    
@@ -256,12 +246,12 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_TELEPORTATION, 1, NULL, 0);
 	    ModifySkillDependancy(S_CONSTRUCT_GATE, 0, "GATE", 4);
 	    ModifySkillDependancy(S_CONSTRUCT_GATE, 1, NULL, 0);
-//	    ModifySkillDependancy(S_CREATE_PORTAL, 0, "TELE", 4);
+	    ModifySkillDependancy(S_CREATE_PORTAL, 0, "TELE", 3);
 	    ModifySkillDependancy(S_EARTH_LORE, 0, "PTTN", 1);
 	    ModifySkillDependancy(S_MAGICAL_HEALING, 0, "PTTN", 1);
 	    ModifySkillDependancy(S_RESURRECTION, 0, "NECR", 3);
 //	    ModifySkillDependancy(S_RESURRECTION, 1, "MHEA", 3);
-//	    ModifySkillDependancy(S_SUMMON_SPIRIT_OF_DEAD, 1, "RESU", 3);
+//	    ModifySkillDependancy(S_SUMMON_SPIRIT_OF_DEAD, 0, "RESU", 3);
 //	    ModifySkillDependancy(S_MODIFICATION, 0, "EART", 4);
 //	    ModifySkillDependancy(S_DIVERSION, 0, "EART", 4);
 	    
@@ -269,12 +259,12 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_INVISIBILITY, 0, "CONC", 5);
 	    ModifySkillDependancy(S_TRUE_SEEING, 0, "CONC", 4);
 	    ModifySkillDependancy(S_TRANSMUTATION, 0, "MYST", 1);
-	    ModifySkillDependancy(S_ENCHANT_SWORDS, 0, "TRAM", 1);
-	    ModifySkillDependancy(S_ENCHANT_ARMOR, 0, "TRAM", 1);
+	    ModifySkillDependancy(S_ENCHANT_SWORDS, 0, "TRAM", 2);
+	    ModifySkillDependancy(S_ENCHANT_ARMOR, 0, "TRAM", 2);
 	    ModifySkillDependancy(S_ENERGY_SHIELD, 0, "MYST", 1);
-	    //hypnosis
-        //binding
-        //dragonlore
+	    ModifySkillDependancy(S_HYPNOSIS, 0, "MYST", 1);
+	    ModifySkillDependancy(S_BINDING, 0, "HYPN", 3);
+	    ModifySkillDependancy(S_DRAGON_TALK, 0, "BIND", 3);
 	    
 	    ModifySkillDependancy(S_SPIRIT_SHIELD, 0, "SUMM", 1);
 	    ModifySkillDependancy(S_SPIRIT_SHIELD, 1, NULL, 0);
@@ -284,7 +274,7 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_SUMMON_LICH, 0, "RAIS", 4);
 	    ModifySkillDependancy(S_BANISH_UNDEAD, 0, "NECR", 1);
 	    ModifySkillDependancy(S_LIGHT, 0, "SUMM", 1);
-	    ModifySkillDependancy(S_DARKNESS, 0, "LIGT", 3);
+	    ModifySkillDependancy(S_DARKNESS, 0, "LIGT", 4);
 	    ModifySkillDependancy(S_SUMMON_MEN, 0, "SUMM", 1);
         ModifySkillName(S_DEMON_LORE,"blankb","ZZZB");
         ModifySkillName(S_SUMMON_IMPS,"demon lore","DEMO");
@@ -298,40 +288,43 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillFlags(S_BASE_ARTIFACTLORE, SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST | SkillType::FOUNDATION);
 	    ModifyItemMagicSkill(I_SHIELDSTONE, "ARTL", 3);
 	    ModifyItemMagicSkill(I_AMULETOFP, "ARTL", 1);
-	    ModifySkillDependancy(S_CREATE_RING_OF_INVISIBILITY, 0, "INVI", 5);
+	    ModifySkillDependancy(S_CREATE_RING_OF_INVISIBILITY, 0, "INVI", 4);
 	    ModifySkillDependancy(S_CREATE_RING_OF_INVISIBILITY, 1, "ARTL", 4);
 	    ModifySkillDependancy(S_CREATE_AMULET_OF_TRUE_SEEING, 0, "TRUE", 4);
 	    ModifySkillDependancy(S_CREATE_AMULET_OF_TRUE_SEEING, 1, "ARTL", 4);
-	    ModifySkillDependancy(S_CREATE_CLOAK_OF_INVULNERABILITY, 0, "SSHI", 3);
-	    ModifySkillDependancy(S_CREATE_CLOAK_OF_INVULNERABILITY, 1, "FSHI", 3);
-	    ModifySkillDependancy(S_CREATE_CLOAK_OF_INVULNERABILITY, 2, "ARTL", 4);
+	    ModifySkillDependancy(S_CREATE_CLOAK_OF_INVULNERABILITY, 0, "FSHI", 4);
+	    ModifySkillDependancy(S_CREATE_CLOAK_OF_INVULNERABILITY, 1, "ARTL", 4);
+	    ModifySkillDependancy(S_CREATE_CLOAK_OF_INVULNERABILITY, 2, NULL, 0);
 	    ModifySkillDependancy(S_CREATE_STAFF_OF_FIRE, 0, "FIRE", 3);
 	    ModifySkillDependancy(S_CREATE_STAFF_OF_FIRE, 1, "ARTL", 1);
 	    ModifySkillDependancy(S_CREATE_STAFF_OF_LIGHTNING, 0, "CALL", 3);
 	    ModifySkillDependancy(S_CREATE_STAFF_OF_LIGHTNING, 1, "ARTL", 5);
 	    ModifySkillDependancy(S_CREATE_RUNESWORD, 0, "FEAR", 2);
-	    ModifySkillDependancy(S_CREATE_RUNESWORD, 1, "ARTL", 4);
-	    ModifySkillDependancy(S_CREATE_MAGIC_CARPET, 1, "ARTL", 2);
+	    ModifySkillDependancy(S_CREATE_RUNESWORD, 1, "ARTL", 3);
+	    ModifySkillDependancy(S_CREATE_MAGIC_CARPET, 0, "ARTL", 1);
 	    ModifySkillDependancy(S_CREATE_MAGIC_CARPET, 1, "SWIN", 3);
 	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 0, "ARTL", 1);
-	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 1, "SSHI", 1);
-	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 2, "ESHI", 1);
+	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 1, "ESHI", 1);
+	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 2, NULL, 0);
 	    
-	    ModifySkillDependancy(S_INNER_STRENGTH, 0, "BATT", 2);
+	    ModifySkillDependancy(S_INNER_STRENGTH, 0, "BATT", 3);
 	    ModifySkillDependancy(S_PHANTASMAL_ENTERTAINMENT, 0, "BATT", 1);
         ModifySkillName(S_PHANTASMAL_ENTERTAINMENT,"gladiator","GLAD");
 	    ModifySkillDependancy(S_CREATE_AURA_OF_FEAR, 0, "FREN", 1);
-	    ModifySkillDependancy(S_INSTILL_COURAGE, 0, "FREN", 1);
-	    
+	    ModifySkillDependancy(S_INSTILL_COURAGE, 0, "FREN", 5);
+	    //swiftness (2)
+	    //toughness (3)
+	    //unity (2,1)
+	    //frenzy (1)
 	    
 	    
 	    ModifySkillDependancy(S_WOLF_LORE, 0, "CHAR", 1);
 	    ModifySkillDependancy(S_BIRD_LORE, 0, "CHAR", 1);
-	    //gryffin lore
-	    //unity
-	    //trading
-	    //merchantry
-	    //quartermaster
+	    //gryffin lore (4,4)
+	    //unity (1,2)
+	    //trading (1)
+	    //merchantry (3)
+	    //quartermastery (4)
 	    
 
 	    ModifyItemMagicInput(I_AMULETOFTS, 0, I_IRON, 8);
@@ -345,6 +338,8 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifyItemMagicInput(I_SHIELDSTONE, 0, I_IRON, 1);
 	    ModifyItemMagicInput(I_RUNESWORD, 0, I_MSWORD, 1);
 	    ModifyItemMagicInput(I_MCARPET, 0, I_HERBS, 1);
+	    
+	    EnableItem(I_STAFFOFY);
 
 	    //Illusory Creatures Stuff
    	    EnableItem(I_IGRYFFIN);
@@ -419,7 +414,7 @@ void Game::ModifyTablesPerRuleset(void)
         
         //lich 30 energy to summon, 0 to maintain, 10% decay chance (average 3 to maintain if count recast cost).
         ModifyMonsterAttacksAndHits("LICH", 40, 40, 0);
-        ModifySpecialDamage("fear", 0, ATTACK_SPIRIT,2,40,  WeaponType::RANGED,MAGIC_SPIRIT, "fear");
+        ModifySpecialDamage("fear", 0, ATTACK_SPIRIT,2,60,  WeaponType::RANGED,MAGIC_SPIRIT, "fear");
         ModifyMonsterSpecial("LICH", "fear", 4);
         ModifyItemCapacities(I_LICH, 150, 0, 0, 0);
         ModifyItemWeight(I_LICH, 100);
@@ -478,7 +473,7 @@ void Game::ModifyTablesPerRuleset(void)
         ModifySpecialDamage("mindblast", 0, ATTACK_SPIRIT,2,125, WeaponType::RANGED,MAGIC_SPIRIT,0);
         ModifySpecialDamage("earthquake", 0, ATTACK_COMBAT,2,50, WeaponType::RANGED,ARMORPIERCING,0); // should this be num_attack_types?
         ModifySpecialDamage("dispel_illusion", 0, NUM_ATTACK_TYPES,2,50, WeaponType::RANGED,MAGIC_ENERGY,0);
-        ModifySpecialDamage("storm", 0, ATTACK_WEATHER,2,200, WeaponType::RANGED,MAGIC_WEATHER,"storm");
+        ModifySpecialDamage("storm", 0, ATTACK_WEATHER,2,300, WeaponType::RANGED,MAGIC_WEATHER,"storm");
         ModifyEffectFlags("storm", EffectType::EFF_ONESHOT);
         ModifySpecialDamage("tornado", 0, ATTACK_WEATHER,2,50, WeaponType::RANGED,MAGIC_WEATHER, 0);
         ModifySpecialDamage("black_wind", 0, ATTACK_SPIRIT,2,150, WeaponType::RANGED,MAGIC_SPIRIT,0);
@@ -487,7 +482,7 @@ void Game::ModifyTablesPerRuleset(void)
         ModifySpecialDamage("icebreath", 0, ATTACK_WEATHER,2,5, WeaponType::RANGED,MAGIC_WEATHER,0);
         ModifySpecialDamage("light", 0, ATTACK_ENERGY,2,10, WeaponType::RANGED,MAGIC_ENERGY,0);
         ModifySpecialDamage("wounds", 0, ATTACK_SPIRIT,2,40,  WeaponType::RANGED,MAGIC_SPIRIT, "wounds");
-        ModifySpecialDamage("courage", 0, NUM_ATTACK_TYPES,2,40,  WeaponType::RANGED,NUM_WEAPON_CLASSES, "courage");
+        ModifySpecialDamage("courage", 0, NUM_ATTACK_TYPES,2,100,  WeaponType::RANGED,NUM_WEAPON_CLASSES, "courage");
 
     //Get rid of dragons from the terrain table. Also, level 3 is Arcadia specific.
         ModifyTerrainWMons(R_CAVERN, 4, I_RAT, I_HYDRA, I_GOBLIN);
@@ -507,20 +502,20 @@ void Game::ModifyTablesPerRuleset(void)
 	    
 	    ModifyRaceSkills("BARB", "COMB","MINI","WEAP","OBSE");
 	    ModifyRaceSkills("ESKI", "HEAL","BUIL","FISH","HERB");
-	    ModifyRaceSkills("NOMA", "RIDI","RANC","HORS","ENTE");
+	    ModifyRaceSkills("NOMA", "RIDI","RANC","HORS","BUIL");
 	    ModifyRaceSkills("TMAN", "LUMB","CONS","FARM","OBSE");
 	    
 	    ModifyRaceSkills("WELF", "LUMB","LBOW","FARM","ENTE");
 	    ModifyRaceSkills("SELF", "FISH","SAIL","CONS","RANC");
 	    ModifyRaceSkills("HELF", "HORS","ENTE","RIDI","HEAL");
 	    ModifyRaceSkills("TELF", "HERB","HEAL","STEA","LBOW");
-	    
-	    ModifyRaceSkills("IDWA", "COMB","BUIL","HERB","GCUT");
+
+	    ModifyRaceSkills("IDWA", "COMB","BUIL","HERB","FISH");
 	    ModifyRaceSkills("HDWA", "COMB","MINI","WEAP","ARMO");
-	    ModifyRaceSkills("UDWA", "XBOW","MINI","QUAR","GCUT");
+	    ModifyRaceSkills("UDWA", "XBOW","MINI","QUAR","STEA");
 	    ModifyRaceSkills("DDWA", "XBOW","QUAR","ARMO","RANC");
-	    
-	    ModifyRaceSkills("MERM", "STEA","FISH","GCUT","DOLP");
+
+	    ModifyRaceSkills("MERM", "STEA","FISH","ARMO","DOLP");
 	    ModifyRaceSkills("ORC", "COMB");
 	}
 	
@@ -542,6 +537,7 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifyRaceSkillLevels("UDWA",2,1);
 	    ModifyRaceSkillLevels("DDWA",2,1);
 	    ModifyRaceSkillLevels("ORC",3,0);
+	    ModifyRaceSkillLevels("MERM",2,1);
 /*	    ModifyRaceSkillLevels("MAN",3,3);
 	    ModifyRaceSkillLevels("FAIR",3,1);
 	    ModifyRaceSkillLevels("LIZA",2,1);
@@ -570,15 +566,13 @@ void Game::ModifyTablesPerRuleset(void)
 	    
 	    ModifyItemProductionSkill(I_FLOATER, "FLOA", 4);
 	    ModifyItemProductionSkill(I_ROOTSTONE, "QUAR", 3);
-	    ModifyItemProductionSkill(I_PPLATE, "GCUT", 4);
+	    ModifyItemProductionSkill(I_PPLATE, "ARMO", 4);
 	    ModifyItemProductionSkill(I_WHORSE, "HORS", 6);
      	ModifyItemProductionSkill(I_MUSHROOM, "HERB", 4);
      	ModifyItemProductionSkill(I_HEALPOTION, "HEAL", 4);
      	ModifyMountBonuses("WING", 4, 8, 3);
      	ModifyItemType(I_MCARPET, IT_MAGIC|IT_MOUNT);
 	    
-	    ModifyObjectConstruction(O_BALLOON, I_FLOATER, 50, "SHIP", 5);
-	    ModifyObjectConstruction(O_AGALLEON, I_IRONWOOD, 100, "SHIP", 4);
 	    // Leave temples, stables, road etc. as they are.
     }
 
@@ -710,26 +704,40 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_WAGON);
 
 	EnableItem(I_PPLATE);
-    ModifyItemBasePrice(I_PEARL, 200);
     ModifyItemType(I_PEARL, IT_ADVANCED);
     ModifyItemProductionSkill(I_PEARL, "FISH", 4);
     ModifyItemProductionOutput(I_PEARL, 1, 1);
     
-    DisableItem(I_TAROTCARDS);  // total of 19 trade items
+	EnableItem(I_MUSHROOM);
+	EnableItem(I_HEALPOTION);
+    //no rough gems, gems, or gemcutting
+    
+    DisableItem(I_TAROTCARDS);
+    DisableItem(I_VELVET);
+    DisableItem(I_VODKA);
+    DisableItem(I_IVORY);
+    DisableItem(I_MINK);
+    DisableItem(I_SPICES);
+    DisableItem(I_COTTON);  // total of 18 trade items
     ModifyItemWeight(I_CASHMERE,2);
     //changed roses to orchids
     //changed velvet to goatcheese
     //changed order of items for island placement
 
-	ModifyItemBasePrice(I_DOUBLEBOW,400);
+
 //	ModifyItemBasePrice(I_WAGON,60);
 	ModifyItemBasePrice(I_PLATEARMOR,200);
-	ModifyItemBasePrice(I_ADPLATE,500);
+	ModifyItemBasePrice(I_DOUBLEBOW,320);
+	ModifyItemBasePrice(I_MPLATE,320);
+	ModifyItemBasePrice(I_PPLATE,320);
+	ModifyItemBasePrice(I_MSWORD,320);
 	ModifyItemBasePrice(I_YEW,200);
-	ModifyItemBasePrice(I_HEALPOTION,200);
-	ModifyItemBasePrice(I_ROUGHGEM,100);
-    ModifyItemType(I_ROUGHGEM, IT_ADVANCED);
+	ModifyItemBasePrice(I_MITHRIL,200);
+    ModifyItemBasePrice(I_PEARL, 200);
 	ModifyItemBasePrice(I_WHORSE,200);
+	ModifyItemBasePrice(I_HEALPOTION,200);
+//	ModifyItemBasePrice(I_ROUGHGEM,100);
+//  ModifyItemType(I_ROUGHGEM, IT_ADVANCED);
 	ModifyItemBasePrice(I_LEATHERARMOR,60);
 	ModifyItemBasePrice(I_LIVESTOCK,20);
 	ModifyItemBasePrice(I_GRAIN,20);
@@ -748,21 +756,34 @@ void Game::ModifyTablesPerRuleset(void)
  	DisableSkill(S_CARPENTER);
  	DisableSkill(S_SHIPBUILDING);
  	
-	EnableObject(O_CORACLE); 	
- 	ModifyObjectManpower(O_CORACLE,0,20,2,0);
- 	ModifyObjectManpower(O_BARGE,0,6000,15,0);
- 	ModifyObjectManpower(O_GALLEON,0,2800,15,0);
-	ModifyObjectManpower(O_AGALLEON,200,2800,15,1);
-	ModifyObjectManpower(O_TRIREME,0,1000,20,0);
-	ModifyObjectConstruction(O_CORACLE, I_FUR, 3, "CONS", 1);
+	EnableObject(O_CORACLE);
+	ModifyObjectManpower(O_TRIREME,0,2200,100,1);
+	ModifyObjectManpower(O_ATRIREME,220,2200,120,1);
+	ModifyObjectManpower(O_MERCHANT,0,1800,15,0);
+ 	ModifyObjectManpower(O_CORACLE,0,20,1,0);
+ 	ModifyObjectManpower(O_BARGE,0,6000,40,0);
+ 	ModifyObjectManpower(O_JUNK,0,1200,20,0);
+	ModifyObjectManpower(O_LONGBOAT,0,300,10,0);
+	ModifyObjectManpower(O_BALLOON,0,800,10,0);
+	ModifyObjectManpower(O_TREASUREARK,0,10000,10,0);
+	
+	ModifyObjectConstruction(O_CORACLE, I_FUR, 2, "CONS", 1);
 	ModifyObjectConstruction(O_LONGBOAT, I_WOOD, 20, "CONS", 1);
-	ModifyObjectConstruction(O_TRIREME, I_WOOD, 50, "CONS", 3);
-	ModifyObjectConstruction(O_CLIPPER, I_WOOD, 50, "CONS", 4);
-	ModifyObjectConstruction(O_BARGE, I_WOOD, 80, "CONS", 2);
-	ModifyObjectConstruction(O_GALLEON, I_WOOD, 80, "CONS", 3);
-	ModifyObjectConstruction(O_AGALLEON, I_IRONWOOD, 80, "CONS", 5);
+	ModifyObjectConstruction(O_MERCHANT, I_WOOD, 100, "CONS", 4);
+	ModifyObjectConstruction(O_TRIREME, I_WOOD, 200, "CONS", 3);
+	ModifyObjectConstruction(O_ATRIREME, I_IRONWOOD, 200, "CONS", 4);
+	ModifyObjectConstruction(O_BARGE, I_WOOD, 100, "CONS", 2);
+	ModifyObjectConstruction(O_JUNK, I_WOOD, 40, "CONS", 2);
 	ModifyObjectConstruction(O_BALLOON, I_FLOATER, 50, "CONS", 5);
+    ModifyObjectConstruction(O_TREASUREARK, I_WOOD, 150, "CONS", 3);
 //	ModifyItemProductionSkill(I_WAGON, "CONS", 1);
+
+    ModifyObjectDefence(O_TOWER, 2, 2, 2, 2, 2, 2);
+    ModifyObjectDefence(O_FORT, 2, 3, 3, 3, 2, 3);
+    ModifyObjectDefence(O_CASTLE, 3, 3, 3, 3, 3, 3);
+    ModifyObjectDefence(O_CITADEL, 3, 4, 4, 4, 3, 4);
+    ModifyObjectDefence(O_MFORTRESS, 4, 4, 4, 4, 3, 4);
+    ModifyObjectDefence(O_ATRIREME, 2, 2, 2, 2, 2, 2);
 
 	EnableObject(O_MESSAGESTONE);
 	
@@ -770,8 +791,10 @@ void Game::ModifyTablesPerRuleset(void)
 
     ModifyWeaponAttack("DBOW", PIERCING, ATTACK_RANGED, WeaponType::NUM_ATTACKS_SKILL);
     ModifyWeaponAttack("MSWO", ARMORPIERCING, ATTACK_COMBAT, 1);
+    ModifyWeaponAttack("RUNE", ARMORPIERCING, ATTACK_COMBAT, 1);
     ModifyWeaponBonuses("XBOW", 2, 0, 0);
     ModifyWeaponBonuses("DBOW", 2, 0, 0);
+    ModifyWeaponBonuses("RUNE", 5, 5, 0);
 
 	ModifyArmorFlags("LARM", ArmorType::DEFINASSASSINATE);
 	ModifyArmorSaveAll("LARM", 6, 2, 0, 3);
@@ -886,11 +909,12 @@ void Game::ModifyTablesPerRuleset(void)
 	ClearTerrainItems(R_OCEAN);	
 	ModifyTerrainItems(R_OCEAN, 0, I_FISH, 100, 40);
 	ModifyTerrainItems(R_OCEAN, 1, I_DOLPHIN, 50, 10);
-	ModifyTerrainItems(R_OCEAN, 1, I_PEARL, 15, 8);
+	ModifyTerrainItems(R_OCEAN, 2, I_PEARL, 15, 8);
+	ModifyTerrainItems(R_OCEAN, 3, I_FDOLPHIN, 10, 5);
 	
 	ClearTerrainItems(R_LAKE);	
 	ModifyTerrainItems(R_LAKE, 0, I_FISH, 100, 60);
-	ModifyTerrainItems(R_LAKE, 1, I_PEARL, 33, 10);
+	ModifyTerrainItems(R_LAKE, 1, I_PEARL, 35, 10);
 
     
     /* End Standard Arcadia Changes */

@@ -456,6 +456,12 @@ AString *ObjectDescription(int obj)
 			}
 		} // end for
 	}
+	
+	if(o->oceanbonus) {
+	    *temp += AString(" Units in this structure will recieve a bonus of ") +
+	        o->oceanbonus + " to their attack and all defence skills for battles "
+	        "which take place in an ocean or lake region.";
+	}
 
 	/*
 	 * Handle all the specials

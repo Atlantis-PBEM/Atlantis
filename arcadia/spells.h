@@ -31,35 +31,35 @@
 //
 // Spell parsing - generic
 //
-void ProcessGenericSpell(Unit *, int, OrdersCheck *pCheck);
-void ProcessRegionSpell(Unit *, AString *, int, OrdersCheck *pCheck);
+void ProcessGenericSpell(Unit *, int, OrdersCheck *pCheck, int isquiet);
+void ProcessRegionSpell(Unit *, AString *, int, OrdersCheck *pCheck, int isquiet);
 
 //
 // Spell parsing - specific
 //
-void ProcessCastGateLore(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessCastPortalLore(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessPhanBeasts(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessPhanUndead(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessPhanDemons(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessBirdLore(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessMindReading(Unit *,AString *, OrdersCheck *pCheck );
+void ProcessCastGateLore(Unit *,AString *, OrdersCheck *pCheck, int isquiet );
+void ProcessCastPortalLore(Unit *,AString *, OrdersCheck *pCheck, int isquiet );
+void ProcessPhanBeasts(Unit *,AString *, OrdersCheck *pCheck, int isquiet );
+void ProcessPhanUndead(Unit *,AString *, OrdersCheck *pCheck, int isquiet );
+void ProcessPhanDemons(Unit *,AString *, OrdersCheck *pCheck, int isquiet );
+void ProcessBirdLore(Unit *,AString *, OrdersCheck *pCheck, int isquiet );
+void ProcessMindReading(Unit *,AString *, OrdersCheck *pCheck, int isquiet );
 //Arcadia
-void ProcessSummonCreaturesSpell(Unit *, AString *, int spell, OrdersCheck *pCheck); //wolf, imp, demon, undead
-void ProcessSummonMen(Unit *, AString *, OrdersCheck *pCheck); //SummonMen
-void ProcessUnitsSpell(Unit *,AString *, int spell, OrdersCheck *pCheck ); //Invis, SummonSpirit
-void ProcessChangeSpell(Unit *,AString *, int spell, OrdersCheck *pCheck ); //Transmutation
-void ProcessModificationSpell(Unit *,AString *, OrdersCheck *pCheck ); //Modification
-void ProcessRejuvenationSpell(Unit *,AString *, OrdersCheck *pCheck ); //Rejuvenation
-void ProcessArtifactSpell(Unit *,AString *, OrdersCheck *pCheck ); //Artifact_Lore
-void ProcessHypnosisSpell(Unit *,AString *, OrdersCheck *pCheck ); //
-void ProcessFogSpell(Unit *, AString *, OrdersCheck *pCheck ); //Fog
-void ProcessPhanCreatures(Unit *,AString *, OrdersCheck *pCheck ); //Illusory Creatures
+void ProcessSummonCreaturesSpell(Unit *, AString *, int spell, OrdersCheck *pCheck, int isquiet); //wolf, imp, demon, undead
+void ProcessSummonMen(Unit *, AString *, OrdersCheck *pCheck, int isquiet); //SummonMen
+void ProcessUnitsSpell(Unit *,AString *, int spell, OrdersCheck *pCheck, int isquiet ); //Invis, SummonSpirit
+void ProcessChangeSpell(Unit *,AString *, int spell, OrdersCheck *pCheck, int isquiet ); //Transmutation
+void ProcessModificationSpell(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //Modification
+void ProcessRejuvenationSpell(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //Rejuvenation
+void ProcessArtifactSpell(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //Artifact_Lore
+void ProcessHypnosisSpell(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //
+void ProcessFogSpell(Unit *, AString *, OrdersCheck *pCheck, int isquiet ); //Fog
+void ProcessPhanCreatures(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //Illusory Creatures
 
 //
 // Spell helpers
 //
-int GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell, int penalty = 0);
+int GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell, int quiet, int penalty = 0);
 
 //
 // Spell running
@@ -76,18 +76,18 @@ int RunPhanBeasts(ARegion *,Unit *);    //disabled in ES
 int RunPhanUndead(ARegion *,Unit *);    //disabled in ES
 int RunPhanDemons(ARegion *,Unit *);    //disabled in ES
 int RunInvisibility(ARegion *,Unit *);     //done skillshows, cost, experience, and 3/3 mevents.
-int RunWolfLore(ARegion *,Unit *);         //disabled in ES (summoncreatures used instead)
+int RunWolfLore(ARegion *,Unit *, int quiet);         //disabled in ES (summoncreatures used instead)
 int RunBirdLore(ARegion *,Unit *);           //done skillshows, cost, experience, and 2/2,1/1,2/2 mevents.
-int RunDragonLore(ARegion *,Unit *);    //disabled in ES
+int RunDragonLore(ARegion *,Unit *, int quiet);    //disabled in ES
 int RunSummonSkeletons(ARegion *,Unit *);//disabled in ES
 int RunRaiseUndead(ARegion *,Unit *);   //disabled in ES (summoncreatures used instead)
 int RunSummonLich(ARegion *,Unit *);    //disabled in ES (summoncreatures used instead)
 int RunSummonImps(ARegion *,Unit *);    //disabled in ES (summoncreatures used instead)
 int RunSummonDemon(ARegion *,Unit *);   //disabled in ES (summoncreatures used instead)
-int RunSummonBalrog(ARegion *,Unit *);  //disabled in ES (summoncreatures used instead)
+int RunSummonBalrog(ARegion *,Unit *, int quiet);  //disabled in ES (summoncreatures used instead)
 int RunCreateArtifact(ARegion *,Unit *,int,int);   //done skillshows, cost, experience, and 1/1 mevents.
-int RunEngraveRunes(ARegion *,Object *,Unit *);    //done skillshows, cost, experience, and 3/3 mevents.
-int RunConstructGate(ARegion *,Unit *,int);     //done skillshows, cost, experience, and 2/2 mevents.
+int RunEngraveRunes(ARegion *,Object *,Unit *, int quiet);    //done skillshows, cost, experience, and 3/3 mevents.
+int RunConstructGate(ARegion *,Unit *,int, int quiet);     //done skillshows, cost, experience, and 2/2 mevents.
 int RunEnchantSwords(ARegion *,Unit *);        //done skillshows, cost, experience
 int RunEnchantArmor(ARegion *,Unit *);         //done skillshows, cost, experience
 int RunMindReading(ARegion *,Unit *);

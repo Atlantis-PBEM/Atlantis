@@ -64,17 +64,17 @@ void Game::SailShips(ARegion *r, int phase, AList * regs)
 			forlist(&o->units) {
 				Unit * u2 = (Unit *) elem;
 				if (u2->monthorders && u2->monthorders->type == O_SAIL) {
-					delete u2->monthorders;
-					u2->monthorders = 0;
 					switch(tmpError) {
 						case 1:
-							u2->Error("SAIL: Ship is not finished.");
+							u2->Error("SAIL: Ship is not finished.", u2->monthorders->quiet);
 							break;
 						case 2:
-                            if(o->IsBoat()) u2->Error("SAIL: Owner must sail ship.");
-                            else u2->Error("SAIL: That unit is not in a ship.");
+                            if(o->IsBoat()) u2->Error("SAIL: Owner must sail ship.", u2->monthorders->quiet);
+                            else u2->Error("SAIL: That unit is not in a ship.", u2->monthorders->quiet);
 							break;
 					}
+					delete u2->monthorders;
+					u2->monthorders = 0;
 				}
 			}
 		}
@@ -97,8 +97,10 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 
 	//get move direction
 	int dir;
+	int quiet;
 	if(captain->monthorders->type == O_SAIL) {
     	SailOrder * o = (SailOrder *) captain->monthorders;
+    	quiet = o->quiet;
     	if (o->dirs.Num()) {
     		MoveDir * x = (MoveDir *) o->dirs.First();
     		o->dirs.Remove(x);
@@ -108,6 +110,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 	} else if(captain->monthorders->type == O_FOLLOW) {
 	    FollowOrder * o = (FollowOrder *) captain->monthorders;
 	    dir = o->dir;
+    	quiet = o->quiet;
 	} else goto done_sailing; //this should never occur.
 
 
@@ -167,10 +170,10 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
     	movepoints += ship->speedbonus; //have to do it this way so bonus carries over to subsequent phases (but only if the mage had the energy to cast SWIN originally)
 
     	if (wgt > ObjectDefs[ship->type].capacity) {
-    		captain->Error("SAIL: Ship is overloaded.");
+    		captain->Error("SAIL: Ship is overloaded.", quiet);
     		moved = 0;
     	} else if (slr < ObjectDefs[ship->type].sailors) {
-			captain->Error("SAIL: Not enough sailors.");
+			captain->Error("SAIL: Not enough sailors.", quiet);
 			moved = 0;
 		} else {
 		    //guts of the sailing code, and movepoints check.
@@ -183,7 +186,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 			if(ship->hexside < 0) {    //ie starts from the middle of a hex.
 				ARegion * newreg = reg->neighbors[dir];
 				if (!newreg) {
-					captain->Error("SAIL: Can't sail that way.");
+					captain->Error("SAIL: Can't sail that way.", quiet);
 					goto done_sailing;
 				}
 				if(Globals->WEATHER_EXISTS) {
@@ -192,14 +195,14 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 				}
 
 				if (!(ObjectDefs[ship->type].flags & ObjectType::SAILOVERLAND) && !newreg->IsCoastal()) {
-					captain->Error("SAIL: Can't sail inland.");
+					captain->Error("SAIL: Can't sail inland.", quiet);
 					goto done_sailing;
 				}
 
 				if (!(ObjectDefs[ship->type].flags & ObjectType::SAILOVERLAND) &&        //remember this is for ships starting in the centre of the hex, so if
 					(TerrainDefs[reg->type].similar_type != R_OCEAN) &&           //if the hex is not ocean, we are clearly NOT using hexside terrain rules.
 					(TerrainDefs[newreg->type].similar_type != R_OCEAN)) {
-					captain->Error("SAIL: Can't sail inland.");
+					captain->Error("SAIL: Can't sail inland.", quiet);
 					goto done_sailing;
 				}
 
@@ -242,7 +245,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 						captain->Error(AString("SAIL: Could not sail ") +
 								DirectionStrs[dir] + AString(" from ") +
 								reg->ShortPrint(&regions) +
-								". Cannot sail through land.");
+								". Cannot sail through land.", quiet);
 					    goto done_sailing;
 					}
 				}
@@ -257,15 +260,15 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 				    cost = (cost+1) / 2;  //ie 1 in winter, 3 in blizzard
 
                     if(waterdepth==1 && ObjectDefs[ship->type].sailable==2) {
-                        captain->Error(AString("SAIL: Water is too shallow for ship to approach ") + newreg->ShortPrint(&regions));
+                        captain->Error(AString("SAIL: Water is too shallow for ship to approach ") + newreg->ShortPrint(&regions), quiet);
                         goto done_sailing;
                     }
                     if(waterdepth==2 && ObjectDefs[ship->type].sailable==1) {  //currently no hexside terrain with depth 2, but put in just in case of shallow ship sailing from a lake to such terrain
-                        captain->Error(AString("SAIL: Water is too deep for ship to approach. NB This should never occur in Nylandor, contact your GM!") + newreg->ShortPrint(&regions));
+                        captain->Error(AString("SAIL: Water is too deep for ship to approach. NB This should never occur in Arcadia, contact your GM!") + newreg->ShortPrint(&regions), 0);
                         goto done_sailing;
                     }
                     if(waterdepth==0) {
-                        captain->Error(AString("SAIL: Terrain prevents ship sailing to ") + newreg->ShortPrint(&regions));
+                        captain->Error(AString("SAIL: Terrain prevents ship sailing to ") + newreg->ShortPrint(&regions), quiet);
                         goto done_sailing;
                     }                        
                     newhexside = reg->GetRealDirComp(dir);   //this is the hexside we land at.
@@ -277,7 +280,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 				    if(captain->monthorders->type == O_SAIL) {
 				        SailOrder *o = (SailOrder *) captain->monthorders;
     					captain->Error("SAIL: Can't sail that far;"
-    						" remaining moves queued.");
+    						" remaining moves queued.", quiet);
     					TurnOrder *tOrder = new TurnOrder;
     					tOrder->repeating = 0;
     					AString order = "SAIL ";
@@ -290,7 +293,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
     					tOrder->turnOrders.Add(new AString(order));
     					captain->turnorders.Insert(tOrder);
    					} else {
-			            captain->Error("SAIL: Unit has insufficient movement points to continue following.");
+			            captain->Error("SAIL: Unit has insufficient movement points to continue following.", quiet);
    					}
   					goto done_sailing;
 				}
@@ -348,7 +351,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 			    if(dir==ship->hexside) {
 				    newreg = reg->neighbors[dir];
     				    if (!newreg) {
-        					captain->Error("SAIL: Can't sail that way - no region present.");
+        					captain->Error("SAIL: Can't sail that way - no region present.", quiet);
         					goto done_sailing;
     					}
 				    newhexside = (ship->hexside+3)%6;                 //ie opposite edge. Could also use GetCompDir here I think.			    
@@ -369,7 +372,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 			    else if(dir == (ship->hexside+1)%6 || dir == (ship->hexside+5)%6 ) {
 				    newreg = reg->neighbors[dir];
     				    if (!newreg) {
-        					captain->Error("SAIL: Can't sail that way - no region present.");
+        					captain->Error("SAIL: Can't sail that way - no region present.", quiet);
         					goto done_sailing;
     					}
 				    if(dir == (ship->hexside+1)%6 ) {
@@ -382,16 +385,16 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 			    
 			    //if sailing towards hex centre
 			    else if(dir == (ship->hexside+3)%6 ) {
-					captain->Error("SAIL: Can't sail across land");	
+					captain->Error("SAIL: Can't sail across land", quiet);	
         			goto done_sailing;
 			    }
 			    else {
-					captain->Error("SAIL: This sailing error should never be called. Contact your GM.");		
+					captain->Error("SAIL: This sailing error should never be called. Contact your GM.", 0);		
         			goto done_sailing;
 			    }
 			    
 			    if(newhexside<0 || newhexside>5) {
-					captain->Error("SAIL: This hexside error should never be called. Contact your GM");	
+					captain->Error("SAIL: This hexside error should never be called. Contact your GM", 0);	
         			goto done_sailing;
 			    }
 			    //we now have the new region and new hexside!
@@ -415,11 +418,11 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
                     } */                        //removed as this was allowing sailing onto rocks
 			    }
 			    if(!waterdepth) {
-				    captain->Error("SAIL: That location cannot be sailed to.");	
+				    captain->Error("SAIL: That location cannot be sailed to.", quiet);	
         			goto done_sailing;
 			    }
 			    if(ObjectDefs[ship->type].sailable != waterdepth && ObjectDefs[ship->type].sailable != 3 && waterdepth != 3) {
-			        captain->Error("SAIL: That ship type cannot sail there.");	
+			        captain->Error("SAIL: That ship type cannot sail there.", quiet);	
         			goto done_sailing;
 			    }
 			    
@@ -434,7 +437,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 				    if(captain->monthorders->type == O_SAIL) {
 				        SailOrder *o = (SailOrder *) captain->monthorders;
     					captain->Error("SAIL: Can't sail that far;"
-    						" remaining moves queued.");
+    						" remaining moves queued.", quiet);
     					TurnOrder *tOrder = new TurnOrder;
     					tOrder->repeating = 0;
     					AString order = "SAIL ";
@@ -447,7 +450,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
     					tOrder->turnOrders.Add(new AString(order));
     					captain->turnorders.Insert(tOrder);
    					} else {
-			            captain->Error("SAIL: Unit has insufficient movement points to continue following.");
+			            captain->Error("SAIL: Unit has insufficient movement points to continue following.", quiet);
    					}
   					goto done_sailing;
 				}
@@ -570,37 +573,39 @@ void Game::RunTeachOrders()
 
 void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 {
+	TeachOrder * order = (TeachOrder *) unit->monthorders;
+	int quiet = order->quiet;
+	
 	/* First pass, find how many to teach */
-	if(!unit->IsLeader()) {
+	if(unit->IsNormal()) {
 		/* small change to handle Ceran's mercs */
 		if(!unit->GetMen(I_MERC)) {
 			// Mercs can teach even though they are not leaders.
 			// They cannot however improve their own skills
-			unit->Error("TEACH: Only leaders can teach.");
+			unit->Error("TEACH: Normal units cannot teach.", quiet);
 			return;
 		}
 	}
 
 	int students = 0;
-	TeachOrder * order = (TeachOrder *) unit->monthorders;
 	forlist(&order->targets) {
 		UnitId * id = (UnitId *) elem;
 		Unit * target = reg->GetUnitId(id,unit->faction->num);
 		if (!target) {
 			order->targets.Remove(id);
-			unit->Error("TEACH: No such unit.");
+			unit->Error("TEACH: No such unit.", quiet);
 			delete id;
 		} else {
 			if (target->faction->GetAttitude(unit->faction->num) < A_FRIENDLY) {
 				unit->Error(AString("TEACH: ") + *(target->name) +
-							" is not a member of a friendly faction.");
+							" is not a member of a friendly faction.", quiet);
 				order->targets.Remove(id);
 				delete id;
 			} else {
 				if ((!target->monthorders ||
 					target->monthorders->type != O_STUDY) && !Globals->ARCADIA_MAGIC || !target->IsMage() || !target->herostudyorders) {
 					unit->Error(AString("TEACH: ") + *(target->name) +
-								" is not studying.");
+								" is not studying.", quiet);
 					order->targets.Remove(id);
 					delete id;
 				} else {
@@ -612,7 +617,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 					/* REAL_EXPERIENCE Patch: Can teach units with lower total skill OR lower days skill */
 						unit->Error(AString("TEACH: ") +
 									*(target->name) + " is not studying "
-									"a skill you can teach.");
+									"a skill you can teach.", quiet);
 						order->targets.Remove(id);
 						delete id;
 					} else {
@@ -620,7 +625,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 						if (SkillDefs[sk].flags & SkillType::NOTEACH) {
 							unit->Error(AString("TEACH: ") + 
 									AString(SkillDefs[sk].name) + 
-									" cannot be taught.");
+									" cannot be taught.", quiet);
 							return;
 						} else {
 							students += target->GetMen();
@@ -696,8 +701,10 @@ int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit * u)
 
 void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 {
+    int quiet = u->monthorders->quiet;
+
 	if (!TradeCheck(r, u->faction)) {
-		u->Error("BUILD: Faction can't produce in that many regions.");
+		u->Error("BUILD: Faction can't produce in that many regions.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -706,7 +713,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	AString skname = ObjectDefs[obj->type].skill;
 	int sk = LookupSkill(&skname);
 	if (sk == -1) {
-		u->Error("BUILD: Can't build that.");
+		u->Error("BUILD: Can't build that.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -714,39 +721,39 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 
 	int usk = u->GetSkill(sk);
 	if (usk < ObjectDefs[obj->type].level) {
-		u->Error("BUILD: Can't build that.");
+		u->Error("BUILD: Can't build that.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
 	}
 	if ((Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) && (obj->type == O_OBANK)) { // trying to build a bank ?
 		if ((Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD) && !(r->CanTax(u))) {
-			u->Error("BUILD: Cannot build banks if there are guarding units.");
+			u->Error("BUILD: Cannot build banks if there are guarding units.", quiet);
 			delete u->monthorders;
 			u->monthorders = 0;
 			return;
 		}
 		if (!r->town && (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)) {
-			u->Error("BUILD: Cannot build banks outside settlements.");
+			u->Error("BUILD: Cannot build banks outside settlements.", quiet);
 			delete u->monthorders;
 			u->monthorders = 0;
 			return;
 		}
 		if ((Globals->ALLOW_BANK & GameDefs::BANK_SKILLTOBUILD) && (SkillDefs[S_BANKING].flags & SkillType::DISABLED)) {
 			// GM error - requested banking skill to build but skill is disabled
-			u->Error("BUILD: Impossible to build banks due to missing skill.");
+			u->Error("BUILD: Impossible to build banks due to missing skill.", quiet);
 			delete u->monthorders;
 			u->monthorders = 0;
 			return;
 		}
 		if ((Globals->ALLOW_BANK & GameDefs::BANK_SKILLTOBUILD) && (!u->GetSkill(S_BANKING))) {
-			u->Error("BUILD: Can't build that.");
+			u->Error("BUILD: Can't build that.", quiet);
 			delete u->monthorders;
 			u->monthorders = 0;
 			return;
 		}
 	} else if (obj->type == O_OBANK) { // This is only if a dumb GM enables banks but not the gamedef
-		u->Error("BUILD: Bank ? What is that ?"); // maybe give same error "Can't build that." ?
+		u->Error("BUILD: Bank ? What is that ?", quiet); // maybe give same error "Can't build that." ?
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -758,7 +765,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	// AS
 	if(((ObjectDefs[type].flags&ObjectType::NEVERDECAY) || !Globals->DECAY) &&
 			needed < 1) {
-		u->Error("BUILD: Object is finished.");
+		u->Error("BUILD: Object is finished.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -766,7 +773,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 
 	// AS
 	if(needed <= -(ObjectDefs[type].maxMaintenance)) {
-		u->Error("BUILD: Object does not yet require maintenance.");
+		u->Error("BUILD: Object does not yet require maintenance.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -776,20 +783,20 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 /* Hexside Patch 030825 BS */
    	if(Globals->HEXSIDE_TERRAIN) {
     	if(ObjectDefs[type].hexside && obj->hexside==-1) {
-    	u->Error("BUILD: Problem type 1 with hexside terrain, please contact your GM");
+    	u->Error("BUILD: Problem type 1 with hexside terrain, please contact your GM", 0);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
     	}
     	if(!ObjectDefs[type].hexside && obj->hexside>-1) {
-    	u->Error("BUILD: Problem type 2 with hexside terrain, please contact your GM");
+    	u->Error("BUILD: Problem type 2 with hexside terrain, please contact your GM", 0);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
     	}
     	if(ObjectDefs[type].hexside) {
     	    if (!HexsideCanGoThere(r,obj,u)) {
-    	    u->Error("Build: That structure cannot not be built there.");
+    	    u->Error("Build: That structure cannot not be built there.", quiet);
     		delete u->monthorders;
     		u->monthorders = 0;
     		return;
@@ -805,7 +812,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	}
 
 	if (itn == 0) {
-		u->Error("BUILD: Don't have the required item.");
+		u->Error("BUILD: Don't have the required item.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -898,10 +905,12 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 
 void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
 {
+    int quiet = u->monthorders->quiet;
+
     if(!Globals->HEXSIDE_TERRAIN) return;
 
 	if (!TradeCheck(r, u->faction)) {
-		u->Error("BUILD: Faction can't produce in that many regions.");
+		u->Error("BUILD: Faction can't produce in that many regions.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -911,7 +920,7 @@ void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
 	AString skname = HexsideDefs[o->terrain].skill;
 	int sk = LookupSkill(&skname);
 	if (sk == -1) {
-		u->Error("BUILD: Can't build that.");
+		u->Error("BUILD: Can't build that.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -919,7 +928,7 @@ void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
 
 	int usk = u->GetSkill(sk);
 	if (usk < HexsideDefs[o->terrain].level) {
-		u->Error("BUILD: Can't build that.");
+		u->Error("BUILD: Can't build that.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -928,7 +937,7 @@ void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
 	Hexside *h = r->hexside[o->direction];
 	if(!h) {
 	    //This should never occur.
-	    u->Error("BUILD: Hexside does not exist. Contact your GM.");
+	    u->Error("BUILD: Hexside does not exist. Contact your GM.", 0);
 		delete u->monthorders;
 		u->monthorders = 0;	    
 	    return;
@@ -938,13 +947,13 @@ void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
 	// If hexside terrain gets expanded to other types, have to redo this!
 	if(o->terrain == H_ROAD) {
 	    if(h->road < 0) {
-	        u->Error("BUILD: Road is finished.");
+	        u->Error("BUILD: Road is finished.", quiet);
 	        delete u->monthorders;
 	        u->monthorders = 0;
 	        return;
         }
         if(!r->neighbors[o->direction] || TerrainDefs[r->neighbors[o->direction]->type].similar_type == R_OCEAN) {
-            u->Error("BUILD: A road cannot be built there.");
+            u->Error("BUILD: A road cannot be built there.", quiet);
             delete u->monthorders;
             u->monthorders = 0;
             return;
@@ -955,13 +964,13 @@ void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
 	else if(o->terrain == H_BRIDGE) {
 	    //since bridge blockeffect = -1
 	    if(HexsideDefs[h->type].blockeffect != 1) {
-	        u->Error("BUILD: Nothing to bridge.");
+	        u->Error("BUILD: Nothing to bridge.", quiet);
 	        delete u->monthorders;
 	        u->monthorders = 0;
 	        return;
 	    }
 	    if(h->bridge < 0) {
-	        u->Error("BUILD: Bridge is finished.");
+	        u->Error("BUILD: Bridge is finished.", quiet);
 	        delete u->monthorders;
 	        u->monthorders = 0;
 	        return;
@@ -971,14 +980,14 @@ void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
     }
 	else if(o->terrain == H_HARBOUR) {
 	    if(h->type != H_BEACH) {
-	        u->Error("BUILD: Harbours can only be built on beaches.");
+	        u->Error("BUILD: Harbours can only be built on beaches.", quiet);
 	        delete u->monthorders;
 	        u->monthorders = 0;
 	        return;
 	    }
 	    if(h->harbour < 0) {
 	    //this should never occur
-	        u->Error("BUILD: Harbour appears to be finished. Contact your GM.");
+	        u->Error("BUILD: Harbour appears to be finished. Contact your GM.", 0);
 	        delete u->monthorders;
 	        u->monthorders = 0;
 	        return;
@@ -987,7 +996,7 @@ void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
         needed = h->harbour;
     }
     else {
-        u->Error("BUILD: Cannot BUILD that!");
+        u->Error("BUILD: Cannot BUILD that!", quiet);
 	        delete u->monthorders;
 	        u->monthorders = 0;
 	        return;
@@ -1002,7 +1011,7 @@ void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
 	}
 
 	if (itn == 0) {
-		u->Error("BUILD: Don't have the required item.");
+		u->Error("BUILD: Don't have the required item.", quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -1084,7 +1093,7 @@ void Game::RunBuildHelpers(ARegion *r)
 					if(o->target) {
 						Unit *target = r->GetUnitId(o->target,u->faction->num);
 						if(!target) {
-							u->Error("BUILD: No such unit to help.");
+							u->Error("BUILD: No such unit to help.", o->quiet);
 							delete u->monthorders;
 							u->monthorders = 0;
 							continue;
@@ -1092,7 +1101,7 @@ void Game::RunBuildHelpers(ARegion *r)
 						// Make sure that unit is building
 						if (target->monthorders &&
 								target->monthorders->type != O_BUILD) {
-							u->Error("BUILD: Unit isn't building.");
+							u->Error("BUILD: Unit isn't building.", o->quiet);
 							delete u->monthorders;
 							u->monthorders = 0;
 							continue;
@@ -1101,7 +1110,7 @@ void Game::RunBuildHelpers(ARegion *r)
 						if(target->faction->GetAttitude(u->faction->num) <
 								A_FRIENDLY) {
 							u->Error("BUILD: Unit you are helping rejects "
-									"your help.");
+									"your help.", o->quiet);
 							delete u->monthorders;
 							u->monthorders = 0;
 							continue;
@@ -1138,7 +1147,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	ProduceOrder * o = (ProduceOrder *) u->monthorders;
 
 	if (o->item == I_SILVER) {
-		u->Error("Can't do that in this region.");
+		u->Error("Can't do that in this region.", o->quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -1146,7 +1155,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 
 	int input = ItemDefs[o->item].pInput[0].item;
 	if (input == -1) {
-		u->Error("PRODUCE: Can't produce that.");
+		u->Error("PRODUCE: Can't produce that.", o->quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -1154,14 +1163,14 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 
 	int level = u->GetSkill(o->skill);
 	if (level < ItemDefs[o->item].pLevel) {
-		u->Error("PRODUCE: Can't produce that.");
+		u->Error("PRODUCE: Can't produce that.", o->quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
 	}
 
 	if (!TradeCheck(r, u->faction)) {
-		u->Error("PRODUCE: Faction can't produce in that many regions.");
+		u->Error("PRODUCE: Faction can't produce in that many regions.", o->quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -1288,7 +1297,7 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 		int level = u->GetSkill(p->skill);
 		//	if (level < p->level) {
 		if (level < ItemDefs[p->itemtype].pLevel) {
-			u->Error("PRODUCE: Unit isn't skilled enough.");
+			u->Error("PRODUCE: Unit isn't skilled enough.", po->quiet);
 			delete u->monthorders;
 			u->monthorders = 0;
 			return 0;
@@ -1299,7 +1308,7 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 		// unit is entertaining or working, and the limit does not apply
 		//
 		if (p->itemtype != I_SILVER && !TradeCheck(r, u->faction)) {
-			u->Error("PRODUCE: Faction can't produce in that many regions.");
+			u->Error("PRODUCE: Faction can't produce in that many regions.", po->quiet);
 			delete u->monthorders;
 			u->monthorders = 0;
 			return 0;
@@ -1456,34 +1465,41 @@ void Game::RunIdleOrders(ARegion *r)
 void Game::Do1StudyOrder(Unit *u,Object *obj)
 {
 	StudyOrder * o;
-    if(u->monthorders->type == O_STUDY) o = (StudyOrder *) u->monthorders;
-    else o = u->herostudyorders; //ARCADIA_MAGIC MOD    
+    if(u->monthorders && u->monthorders->type == O_STUDY) o = (StudyOrder *) u->monthorders;
+    else o = u->herostudyorders; //ARCADIA_MAGIC MOD  
     
 	int sk = o->skill;
 	int cost = SkillCost(sk) * u->GetMen();
 	if (!u->GetSharedMoney(cost)) {
-		u->Error("STUDY: Not enough funds.");
+		u->Error("STUDY: Not enough funds.", o->quiet);
 		return;
 	}
 
 	// Check that the skill can be studied
 	if (SkillDefs[sk].flags & SkillType::NOSTUDY) {
-		u->Error( AString("STUDY: ") + AString(SkillDefs[sk].name) + " cannot be studied.");
+		u->Error( AString("STUDY: ") + AString(SkillDefs[sk].name) + " cannot be studied.", o->quiet);
 		return;
 	}
 	
 	// Small patch for Ceran Mercs
 	if(u->GetMen(I_MERC)) {
-		u->Error("STUDY: Mercenaries are not allowed to study.");
+		u->Error("STUDY: Mercenaries are not allowed to study.", o->quiet);
 		return;
 	}
 
 	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->type != U_MAGE) {
-		u->Error("STUDY: That skill can only be studied by heroes.");
+		u->Error("STUDY: That skill can only be studied by heroes.", o->quiet);
 	}
+	
+	if(sk == S_HEROSHIP && Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
+		if (CountMages(u->faction) >= AllowedMages(u->faction)) {
+		    u->Error("STUDY: Faction has too many heroes.", o->quiet);
+	        return;
+        }
+    }
 
 	if((SkillDefs[sk].flags&SkillType::APPRENTICE) && u->type != U_APPRENTICE) {
-		u->Error("STUDY: That skill can only be studied by apprentices.");
+		u->Error("STUDY: That skill can only be studied by apprentices.", o->quiet);
 	}
 
 //TO CHECK:
@@ -1492,11 +1508,11 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)) {
 			if (CountQuarterMasters(u->faction) >=
 					AllowedQuarterMasters(u->faction)) {
-				u->Error("STUDY: Can't have another quartermaster.");
+				u->Error("STUDY: Can't have another quartermaster.", o->quiet);
 				return;
 			}
 			if(u->GetMen() != 1) {
-				u->Error("STUDY: Only 1-man units can be quartermasters.");
+				u->Error("STUDY: Only 1-man units can be quartermasters.", o->quiet);
 				return;
 			}
 	}
@@ -1508,12 +1524,12 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		
 		if (CountTacticians(u->faction) >=
 				AllowedTacticians(u->faction)) {
-			u->Error("STUDY: Can't have another level 5 tactics leader.");
+			u->Error("STUDY: Can't have another level 5 tactics leader.", o->quiet);
 			return;
 		}
 
 		if (u->GetMen() != 1) {
-			u->Error("STUDY: Only 1-man units can study to level 5 in tactics.");
+			u->Error("STUDY: Only 1-man units can study to level 5 in tactics.", o->quiet);
 			return;
 		}
 		
@@ -1526,12 +1542,12 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		if(Globals->LIMITED_MAGES_PER_BUILDING) {
 			if (obj->incomplete > 0 || obj->type == O_DUMMY) {
 				u->Error("Warning: Magic study rate outside of a building "
-						"cut in half above level 2.");
+						"cut in half above level 2.", o->quiet);
 				days /= 2;
 				taughtdays /= 2;
 			} else if(obj->mages == 0) {
 				u->Error("Warning: Magic rate cut in half above level 2 due "
-						"to number of mages studying in structure.");
+						"to number of mages studying in structure.", o->quiet);
 				days /= 2;
 				taughtdays /= 2;
 			} else {
@@ -1539,7 +1555,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 			}
 		} else if(!(ObjectDefs[obj->type].protect) || (obj->incomplete > 0)) {
 			u->Error("Warning: Magic study rate outside of a building cut in "
-					"half above level 2.");
+					"half above level 2.", o->quiet);
 			days /= 2;
 				taughtdays /= 2;
 		}
@@ -1551,8 +1567,8 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	}
 
 
-	if (u->Study(sk,days)) {
-	    if(taughtdays) u->Study(sk,taughtdays,0);  //the 0 means any taught knowledge does not overflow to experience
+	if (u->Study(sk,days,o->quiet)) {
+	    if(taughtdays) u->Study(sk,taughtdays,0,0);  //the second 0 means any taught knowledge does not overflow to experience
 		u->ConsumeSharedMoney(cost);                         //We checked earlier that we can get this
 		AString str("Studies ");
 		str += SkillDefs[sk].name;
@@ -1648,7 +1664,7 @@ void Game::RunMoveOrders()
                         				shipping->Add(p);
                         				o->target = 0; //since we have moved.
                     				} else {
-                    				    unit->Error("SAIL: Ship is not finished.");
+                    				    unit->Error("SAIL: Ship is not finished.", o->quiet);
                     				    delete o;
                     				    unit->monthorders = 0;
                     				    o = 0;
@@ -1872,30 +1888,30 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 		if (i >= MOVE_ENTER) {
 			Object * to = region->GetObject(i - MOVE_ENTER);
 			if (!to) {
-				unit->Error("MOVE: Can't find object.");
+				unit->Error("MOVE: Can't find object.", o->quiet);
 				continue;
 			}
 
 			if (!to->CanEnter(region,unit)) {
-				unit->Error("ENTER: Can't enter that.");
+				unit->Error("ENTER: Can't enter that.", o->quiet);
 				continue;
 			}
 
 			Unit *forbid = to->ForbiddenBy(region, unit);
 			if (forbid && !o->advancing) {
-				unit->Error("ENTER: Is refused entry.");
+				unit->Error("ENTER: Is refused entry.", o->quiet);
 				continue;
 			}
 
 			if(forbid && region->IsSafeRegion())
 			{
-				unit->Error("ENTER: No battles allowed in safe regions.");
+				unit->Error("ENTER: No battles allowed in safe regions.", o->quiet);
 				continue;
 			}
 
 			if (forbid && !(unit->canattack && unit->IsReallyAlive())) {
 				unit->Error(AString("ENTER: Unable to attack ") +
-						*(forbid->name));
+						*(forbid->name), o->quiet);
 				continue;
 			}
 
@@ -1905,7 +1921,7 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 				int result = RunBattle(region, unit, forbid, 0, 0);
 				if(result == BATTLE_IMPOSSIBLE) {
 					unit->Error(AString("ENTER: Unable to attack ")+
-							*(forbid->name));
+							*(forbid->name), o->quiet);
 					done = 1;
 					break;
 				}
@@ -1926,7 +1942,7 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 						(!unit->CanSwim() ||
 						 unit->GetFlag(FLAG_NOCROSS_WATER)))
 				{
-					unit->Error("MOVE: Can't leave ship.");
+					unit->Error("MOVE: Can't leave ship.", o->quiet);
 					continue;
 				}
 
@@ -1947,8 +1963,10 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 	if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
 
 	int i;
+	int quiet;
 	if(unit->monthorders->type == O_MOVE || unit->monthorders->type == O_ADVANCE) {
     	MoveOrder * o = (MoveOrder *) unit->monthorders;
+    	quiet = o->quiet;
     	if (o->advancing) unit->guard = GUARD_ADVANCE;
     	if (o->dirs.Num()) {
     		MoveDir * x = (MoveDir *) o->dirs.First();
@@ -1958,6 +1976,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
     	} else goto done_moving;
 	} else if(unit->monthorders->type == O_FOLLOW) {
 	    FollowOrder * o = (FollowOrder *) unit->monthorders;
+    	quiet = o->quiet;
 	    if(o->advancing) unit->guard = GUARD_ADVANCE;
 	    i = o->dir;
 	} else goto done_moving; //this should never occur.
@@ -1970,7 +1989,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 		int portalwgt = 0;
 		if (i == MOVE_IN) {
 			if (obj->inner == -1) {
-				unit->Error("MOVE: Can't move IN there.");
+				unit->Error("MOVE: Can't move IN there.", quiet);
 				goto done_moving;
 			} else if(obj->type == O_ESEAPORTAL) {
 			    portalwgt += unit->Weight();  // ARCADIA_MAGIC Patch (portals)
@@ -1981,7 +2000,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 		}
 
 		if (!newreg) {
-			unit->Error(AString("MOVE: Can't move that direction."));
+			unit->Error(AString("MOVE: Can't move that direction."), quiet);
 			goto done_moving;
 		}
 
@@ -1990,20 +2009,20 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 
 		if((TerrainDefs[region->type].similar_type == R_OCEAN) &&
 		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))) {
-			unit->Error(AString("MOVE: Can't move while in the ocean."));
+			unit->Error(AString("MOVE: Can't move while in the ocean."), quiet);
 			goto done_moving;
 		}
 		
 		//BS edit to prevent merfolk beaching themselves (and any other swimming monster with no walk capacity)
 		if(unit->type == U_WMON && (TerrainDefs[region->type].similar_type == R_OCEAN) &&
 		   (TerrainDefs[newreg->type].similar_type != R_OCEAN) && !unit->CanWalk(unit->items.Weight())) {
-			unit->Error(AString("MOVE: Can't move out of ocean."));
+			unit->Error(AString("MOVE: Can't move out of ocean."), quiet);
 			goto done_moving;
 		}
 
 		if(Globals->ARCADIA_MAGIC) {
             if(unit->type == U_WMON && newreg->willsink > 0 && newreg->willsink < region->willsink && !unit->CanSwim() ) {
-                unit->Error("MOVE: Monsters don't move into sinking regions.");
+                unit->Error("MOVE: Monsters don't move into sinking regions.", quiet);
                 goto done_moving;
             }
         }
@@ -2019,9 +2038,9 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 
 		    if(!locmage || (locmage->unit->GetEnergy(portalwgt) < 0) ) {
 		          //cannot pass through
-		        unit->Error(AString("MOVE: The portal collapses as unit enters."));
+		        unit->Error(AString("MOVE: The portal collapses as unit enters."), quiet);
 		        if(locmage) {
-		            locmage->unit->Error(AString("Not enough energy to hold a portal open, which promptly collapses"));
+		            locmage->unit->Error(AString("Not enough energy to hold a portal open, which promptly collapses"), quiet);
 		        }
 		        if(locmage) delete locmage;
 		        locmage = 0;
@@ -2058,12 +2077,12 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 		if (region->type != R_NEXUS &&
 				unit->CalcMovePoints() - unit->movepoints < cost) {
 			if(unit->MoveType() == M_NONE) {
-				unit->Error("MOVE: Unit is overloaded and cannot move.");
+				unit->Error("MOVE: Unit is overloaded and cannot move.", quiet);
 			} else if(unit->monthorders->type == O_FOLLOW) {
-			    unit->Error("MOVE: Unit has insufficient movement points to continue following.");
+			    unit->Error("MOVE: Unit has insufficient movement points to continue following.", quiet);
 			} else {
 				unit->Error("MOVE: Unit has insufficient movement points;"
-						" remaining moves queued.");
+						" remaining moves queued.", quiet);
 				MoveOrder * o = (MoveOrder *) unit->monthorders;
 				TurnOrder *tOrder = new TurnOrder;
 				AString order;
@@ -2145,10 +2164,12 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 		case M_RIDE:
 			temp = AString("Rides ") + road;
 			unit->Experience(S_RIDING,cost);
+			if(unit->GetSkill(S_SWIFTNESS)) unit->Experience(S_SWIFTNESS,cost);
 			break;
 		case M_FLY:
 			temp = "Flies ";
 			unit->Experience(S_RIDING,cost);
+			if(unit->GetSkill(S_SWIFTNESS)) unit->Experience(S_SWIFTNESS,cost);
 			break;
 		}
 		unit->Event(temp + AString("from ") + region->ShortPrint(&regions)

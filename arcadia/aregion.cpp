@@ -1127,6 +1127,7 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 }
 
 int ARegion::CanMakeAdv(Faction *fac, int item)
+//currently only called for report writing.
 {
 	AString skname;
 	int sk;
@@ -1166,6 +1167,12 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 				sk = LookupSkill(&skname);
 				if (u->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
+				if(u->GetSkill(S_BASE_CHARISMA) && Population()) {   //hardcoded charisma effect
+				    int charis = u->GetSkill(S_BASE_CHARISMA);
+				    while(--charis) {
+				        if(getrandom(2)) return 1;
+				    }
+				}
 			}
 		}
 	}
@@ -2582,7 +2589,7 @@ int lastocean = -1;
                 if(TerrainDefs[neighbors[k]->type].similar_type == R_OCEAN) lastocean = k;
             }
         }
-    
+
         forlist(&objects) {
            	Object *obj = (Object *) elem;
            	if(obj->IsBoat()) {
@@ -2637,16 +2644,17 @@ int lastocean = -1;
     	}
     	if(lake) neighbors[k]->type = R_LAKE;
    	}
-   	AString name = Globals->WORLD_NAME;
-   	name += " Island";
+   	#define NUMREGIONNAMES 1000
+   	
+   	AString tempname = AString(AGetNameString(NUMREGIONNAMES + getrandom(NUMREGIONNAMES)));
    	
    	for(int j=0; j<6; j++) {
    	    if(!neighbors[j]) continue;
    	    if(TerrainDefs[neighbors[j]->type].similar_type == R_OCEAN) continue;
-   	    name = *(neighbors[j]->name);
+   	    tempname = *(neighbors[j]->name);
    	}
    	
- 	SetName(name.Str());
+ 	SetName(tempname.Str());
 }
 
 void ARegion::Event(const AString &s)

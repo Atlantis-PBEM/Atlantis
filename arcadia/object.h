@@ -121,6 +121,7 @@ class ObjectType {
 		
 		int hexside;
 		int sailable;
+		int oceanbonus;
 };
 
 extern ObjectType *ObjectDefs;
