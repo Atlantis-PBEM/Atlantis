@@ -471,7 +471,7 @@ void Game::DrownUnits()
 {
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;
-		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
+		if (Terra4inDefs[r->type].similar_type == R_OCEAN) {
 			forlist(&r->objects) {
 				Object * o = (Object *) elem;
 				if(o->type != O_DUMMY) continue;
@@ -486,7 +486,7 @@ void Game::DrownUnits()
 						if(Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_NONE)
 							drown = 1;
 						else
-							drown = u->CanSwim();
+							drown = !(u->CanSwim());
 					} else {
 						switch(Globals->FLIGHT_OVER_WATER) {
 							case GameDefs::WFLIGHT_UNLIMITED:
