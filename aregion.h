@@ -493,4 +493,6 @@ class ARegionList : public AList
 };
 
 int LookupRegionType(AString *);
+int ParseTerrain(AString *);
+
 #endif

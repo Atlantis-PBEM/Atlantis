@@ -2187,3 +2187,16 @@ void ARegionFlatArray::SetRegion(int x, ARegion *r) {
 ARegion *ARegionFlatArray::GetRegion(int x) {
 	return regions[x];
 }
+
+int ParseTerrain(AString *token)
+{
+	for (int i = 0; i < R_NUM; i++) {
+		if (*token == TerrainDefs[i].type) return i;
+	}
+	
+	for (int i = 0; i < R_NUM; i++) {
+		if (*token == TerrainDefs[i].name) return i;
+	}
+	
+	return (-1);
+}

@@ -31,7 +31,7 @@ int Game::EditGame(int *pSaveGame)
 
 		if(*pStr == "qq") {
 			exit = 1;
-			Awrite("Quiting without saving.");
+			Awrite("Quitting without saving.");
 		} else if(*pStr == "x") {
 			exit = 1;
 			*pSaveGame = 1;
@@ -205,6 +205,8 @@ void Game::EditGameRegionObjects( ARegion *pReg )
                     break; 
                 } 
                 SAFE_DELETE( pToken ); 
+                
+                /*
                 int dir=-1;
                 if(ObjectDefs[objType].hexside && Globals->HEXSIDE_TERRAIN ) {
                     if(!ObjectIsShip(objType) || !(TerrainDefs[pReg->type].similar_type == R_OCEAN) ) {
@@ -220,12 +222,13 @@ void Game::EditGameRegionObjects( ARegion *pReg )
                         }
                     }
                 }
+                */
                 
                 Object *o = new Object(pReg); 
                 o->type = objType; 
                 o->incomplete = 0; 
                 o->inner = -1; 
-                o->hexside = dir;
+                // o->hexside = dir;
                 if (o->IsBoat()) { 
                     o->num = shipseq++; 
                     o->name = new AString(AString("Ship") + " [" + o->num + "]"); 
