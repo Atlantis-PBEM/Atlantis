@@ -35,6 +35,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	Ainfile introf;
 	Arules f;
 	AString temp, temp2;
+	int cap;
+	int i;
 
 	if(f.OpenByName(rules) == -1) {
 		return 0;
@@ -59,7 +61,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "HEAD");
 	f.Enclose(1, "BODY");
 	f.Enclose(1, "CENTER");
-	f.TagText("H1", temp);
+	f.TagText("H1", AString("Rules for ") + temp);
 	f.TagText("H1", AString("Based on Atlantis v") +
 			ATL_VER_STR(CURRENT_ATL_VER));
 	f.TagText("H2", AString("Copyright 1996 by Geoff Dunbar"));
@@ -502,14 +504,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"faction something like \"The Great Northern Mining Company\" "
 			"or whatever.");
 	f.PutStr("<BR><BR>");
-	f.Enclose(1, "<PRE>");
+	f.Enclose(1, "PRE");
 	f.PutNoFormat("  * Merlin the Magician (17), Merlin (27), leader");
 	f.PutNoFormat("    [LEAD].  Skills: none.");
 	f.PutNoFormat("  * Merlin's Guards (33), Merlin (27), 20 vikings");
 	f.PutNoFormat("    [VIKI], 20 swords [SWOR]. Skills: none.");
 	f.PutNoFormat("  * Merlin's Workers (34), Merlin (27), 50 vikings");
 	f.PutNoFormat("    [VIKI].  Skills: none.");
-	f.Enclose(0, "<PRE>");
+	f.Enclose(0, "PRE");
 	f.PutStr("<BR><BR>");
 	f.PutStr(f.LinkRef("playing_units"));
 	f.TagText("H3", "Units:");
@@ -920,7 +922,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr("<BR><BR>");
 	}
 
-	f..PutStr(f.LinkRef("movement"));
+	f.PutStr(f.LinkRef("movement"));
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Movement");
 	if(may_sail)
@@ -994,12 +996,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "TR ALIGN=CENTER");
 		f.TagText("TD", ItemDefs[i].name);
 		f.TagText("TD", ItemDefs[i].weight);
-		int cap = ItemDefs[i].walk - ItemDefs[i].weight;
+		cap = ItemDefs[i].walk - ItemDefs[i].weight;
 		if(cap) {
 			if(ItemDefs[i].hitchItem == -1)
 			f.TagText("TD", cap);
 			else {
-				temp = (cap + hitchwalk);
+				temp = (cap + ItemDefs[i].hitchwalk);
 				temp += " (with ";
 				temp += ItemDefs[ItemDefs[i].hitchItem].name;
 				temp += ")";
@@ -1012,72 +1014,104 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Enclose(0, "TABLE");
 	f.Enclose(0, "CENTER");
+	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
+		temp = "A unit which can fly, is capable of travelling over water.";
+		if(Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_MUST_LAND)
+			temp += " However, if the unit ends its turn over a water hex "
+				"that unit will drown.";
+		f.PutStr(temp);
+		f.PutStr("<BR><BR>");
+	}
+
+	temp = "Since regions are hexagonal, each region has six neighbouring "
+		"regions to the north, northeast, southeast, south, southwest and "
+		"northwest.  Moving from one region to another normally takes one "
+		"movement point, except that the following terrain types take two "
+		"movement points for riding or walking units to enter:";
+	temp += "Forest, Mountain, ";
+	if(Globals->CONQUEST_GAME)
+		temp += "and ";
+	temp += "Swamp";
+	if(!Globals->CONQUEST_GAME)
+		temp += ", Jungle, Desert or Tundra";
+	temp += ".";
+	if (Globals->WEATHER_EXISTS) {
+		temp += " Also, during certain seasons (depending on the latitude "
+			"of the region), all units (including flying ones) have a "
+			"harder time and travel will take twice as many movement "
+			"points as normal, as freezing weather makes travel difficult; "
+			"in the tropics, seasonal hurricane winds and torrential "
+			"rains have a similar effect.";
+	}
+	temp += " Units may not move through ocean regions ";
+	if(may_sail) {
+		temp += "without using the ";
+		temp += f.Link("#sail", "SAIL") + " order";
+	}
+	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
+		temp += " unless they are capable of flight";
+		if (Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_MUST_LAND) {
+			temp += ", and even then, flying units must end their "
+				"movement on land or else drown";
+		}
+	}
+	temp += ".";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	temp = "Units may also enter or exit structures while moving.  Moving "
+		"into or out of a structure does not use any movement points at "
+		"all.  Note that a unit can also use the ";
+	temp += f.Link("#enter", "ENTER") + " and " + f.Link("#leave", "LEAVE");
+	temp += "orders to move in and out of structures, without issuing a ";
+	temp += f.Link("#move", "MOVE") + " order.";
+	temp += " The unit can also use the ";
+	temp += f.Link("#move", "MOVE") + " order to enter or leave a structure.";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	temp = "Finally, certain structures contain interior passages to other "
+		"regions.  The ";
+	temp += f.Link("#move", "MOVE") + " IN order can be used to go through ";
+	temp += "these passages; the movement point cost is equal to the normal "
+		"cost to enter the destination region.";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	temp = "Example: One man with a horse, sword, and chain mail wants to "
+		"move north, then northeast.  The capacity of the horse is ";
+	cap = ItemDefs[I_HORSE].ride - ItemDefs[I_HORSE].weight;
+	temp += cap;
+	temp += " and the weight of the man and other items is ";
+	int weight = ItemDefs[I_MAN].weight + ItemDefs[I_SWORD].weight + 
+			ItemDefs[I_CHAINARMOR].weight;
+	temp += weight;
+	if(cap > weight)
+		temp += ", so he can ride.";
+	else
+		temp += ", so he must walk.";
+	temp += " The month is April, so he has ";
+	temp += Globals->HORSE_SPEED;
+	int travel = Globals->HORSE_SPEED;
+	temp += " movement points.  He issues the order MOVE NORTH NORTHEAST.";
+	temp += " First he moves north, into a plain region.  This uses ";
+	int cost = TerrainDefs[R_PLAIN].movepoints;
+	temp += AString(cost) + " movement point" + (cost == 1?"":"s") + ".";
+	travel -= cost;
+	if(travel > TerrainDefs[R_FOREST].movepoints) {
+		temp += " Then he moves northeast, into a forest region. This uses ";
+		cost = TerrainDefs[R_FOREST].movepoints;
+		temp += AString(cost) + " movement point" + (cost == 1?"":"s") + ",";
+		travel -= cost;
+		temp += " so the movement is completed with ";
+		temp += AString(travel) + " movement point" + (cost == 1?"":"s");
+		temp += " to spare.";
+	} else {
+		temp += " He does not have the ";
+		cost = TerrainDefs[R_FOREST].movepoints;
+		temp += AString(cost) + " movement point" + (cost == 1?"":"s");
+		temp += " needed to move into the forest region to the northeast, "
+			"so the movement is halted at this point.";
+	}
+
 #if 0
- int ws=Globals->FOOT_SPEED;
- int hs=Globals->HORSE_SPEED;
- int ss=Globals->SHIP_SPEED;
- int fs=Globals->FLY_SPEED;
- if (Globals->FLIGHT_OVER_WATER!=GameDefs::WFLIGHT_NONE)
-  {
-   printf("  A unit which can fly is capable of travelling over water.\n");
-  if (Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_MUST_LAND)
-   {
-    printf("   However, if the\n");
-    printf("   unit ends it's turn over a water hex, that unit will drown.\n");
-   }
- printf("<p>\n");
-  }
- printf("\n");
- printf("Since regions are hexagonal, each region has six neighbouring regions to the\n");
- printf("north, northeast, southeast, south, southwest and northwest.  Moving from one\n");
- printf("region to another normally takes one movement point, except that the following\n");
- printf("terrain types take two movement points for riding or walking units to enter:\n");
- printf("Forest, Mountain, Swamp, Jungle and Tundra.\n");
- if (Globals->WEATHER_EXISTS)
-  {
-   printf("  Also, during certain seasons\n");
-   printf("  (depending on the latitude of the region), all units (including flying ones)\n");
-   printf("  have a harder time and travel will take twice as many movement points\n");
-   printf("  as normal, as freezing weather makes travel difficult (in the tropics,\n");
-   printf("  seasonal hurricane winds and torrential rains have a similar effect).\n");
-  }
- printf("Units may not move through ocean regions\n");
- if (SKILL_ENABLED(S_SAILING))
-  {
- printf("without using the <a href=\"#sail\">SAIL</a> order \n");
-  }
- if (Globals->FLIGHT_OVER_WATER!=GameDefs::WFLIGHT_NONE)
-  {
-   printf("  unless they are capable of flight\n");
-  if (Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_MUST_LAND)
-   {
-    printf("   , and even then, flying units must end\n");
-    printf("   their movement on land or else drown\n");
-   }
-  }
- printf(". <p>\n");
- printf("\n");
- printf("Units may also enter or exit structures while moving.  Moving into or out of a\n");
- printf("structure does not use any movement points at all.  Note that a unit can also\n");
- printf("use the <a href=\"#enter\"> ENTER </a> and <a href=\"#leave\"> LEAVE </a>\n");
- printf("orders to move in and out of structures, without\n");
- printf("issuing a <a href=\"#move\"> MOVE </a> order. <p>\n");
- printf("\n");
- printf("Finally, certain structures contain interior passages to other regions.  The\n");
- printf("<a href=\"#move\"> MOVE </a> IN order can be used to go\n");
- printf("through these passages; the movement point cost\n");
- printf("is equal to the normal cost to enter the destination region. <p>\n");
- printf("\n");
- /* TODO expects 4 mp/riding */
- printf("\n");
- printf("Example: One man with a horse, sword, and chain mail wants to move north, then\n");
- printf("northeast.  The capacity of the horse is 20 and the weight of the man and other\n");
- printf("items is 12, so he can ride.  The month is April so he has four movement\n");
- printf("points.  He issues the order MOVE NORTH NORTHEAST.  First he moves north, into\n");
- printf("a plain region.  This uses one movement point.  Then he moves northeast, into a\n");
- printf("forest region.  This uses two movement points, so the movement is completed\n");
- printf("with one to spare. <p>\n");
- printf("\n");
  if (SKILL_ENABLED(S_SAILING))
   {
  printf("<a name=\"movement_sailing\">\n");
