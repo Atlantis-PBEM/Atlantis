@@ -561,6 +561,15 @@ public:
 	// A negative value for this def indicates no maximum.
 	int UPKEEP_MAXIMUM_FOOD;
 	int UPKEEP_FOOD_VALUE;
+
+	// Should ships be prevented from sailing through single hex landmasses
+	// during the same turn. (does not prevent them from stopping in a
+	// single hex one turn and sailing on through the next turn.
+	int PREVENT_SAIL_THROUGH;
+
+	// If we are preventing sail through, should we also prevent the 'easy
+	// portage' that the above allows by default?
+	int ALLOW_TRIVIAL_PORTAGE;
 };
 
 extern GameDefs * Globals;

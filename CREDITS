@@ -57,6 +57,7 @@ Ales Privetivy
     Variou bugfixes and the unit weight/capacity info patch
 Jan Rietema
     Patch for improved world generation
+	Patch to prevent sailing through single hex land masses.
 Joseph Traub
     Changes, updates, and merging a few disparate branches
 	Maintaining and extending the 4.0.X code.

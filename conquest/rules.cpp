@@ -187,6 +187,8 @@ static GameDefs g = {
 	0,	// UPKEEP_MINIMUM_FOOD
 	-1,	// UPKEEP_MAXIMUM_FOOD
 	10,	// UPKEEP_FOOD_VALUE
+	0,	// PREVENT_SAIL_THROUGH
+	0,	// ALLOW_TRIVIAL_PORTAGE
 };
 
 GameDefs * Globals = &g;

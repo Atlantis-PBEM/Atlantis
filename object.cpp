@@ -23,9 +23,9 @@
 //
 // END A3HEADER
 // MODIFICATONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2000/MAR/21 Azthar Septragen  Added roads.
+// Date			Person				Comments
+// ----			------				--------
+// 2000/MAR/21	Azthar Septragen	Added roads.
 #include "object.h"
 #include "items.h"
 #include "skills.h"
@@ -53,7 +53,7 @@ int ObjectIsShip(int ot)
 	return 0;
 }
 
-Object::Object( ARegion *reg )
+Object::Object(ARegion *reg)
 {
 	num = 0;
 	type = O_DUMMY;
@@ -65,6 +65,7 @@ Object::Object( ARegion *reg )
 	inner = -1;
 	runes = 0;
 	region = reg;
+	prevdir = -1;
 }
 
 Object::~Object()
@@ -74,7 +75,7 @@ Object::~Object()
 	region = (ARegion *)NULL;
 }
 
-void Object::Writeout( Aoutfile *f )
+void Object::Writeout(Aoutfile *f)
 {
 	f->PutInt(num);
 	f->PutInt(type);
@@ -86,10 +87,15 @@ void Object::Writeout( Aoutfile *f )
 		f->PutStr("none");
 	}
 	f->PutInt(inner);
+	f->PutInt(-1);
+	if (Globals->PREVENT_SAIL_THROUGH && !Globals->ALLOW_TRIVIAL_PORTAGE)
+		f->PutInt(prevdir);
+	else
+		f->PutInt(-1);
 	f->PutInt(runes);
 	f->PutInt(units.Num());
 	forlist ((&units))
-		((Unit *) elem)->Writeout( f );
+		((Unit *) elem)->Writeout(f);
 }
 
 void Object::Readin(Ainfile * f,AList * facs,ATL_VER v)
@@ -106,12 +112,20 @@ void Object::Readin(Ainfile * f,AList * facs,ATL_VER v)
 		describe = 0;
 	}
 	inner = f->GetInt();
-	runes = f->GetInt();
+	int dummy = f->GetInt();
+	if (dummy == -1) {
+		prevdir = f->GetInt();
+		runes = f->GetInt();
+	} else
+		runes = dummy;
+	// Now, fix up a save file if ALLOW_TRIVIAL_PORTAGE is allowed, just
+	// in case it wasn't when the save file was made.
+	if (Globals->ALLOW_TRIVIAL_PORTAGE) prevdir = -1;
 	int i = f->GetInt();
 	for (int j=0; j<i; j++) {
 		Unit * temp = new Unit;
 		temp->Readin(f,facs,v);
-		temp->MoveUnit( this );
+		temp->MoveUnit(this);
 	}
 	mages = ObjectDefs[type].maxMages;
 }
@@ -120,7 +134,7 @@ void Object::SetName(AString * s)
 {
 	if (s && (CanModify())) {
 		AString * newname = s->getlegal();
-		if( !newname ) {
+		if(!newname) {
 			delete s;
 			return;
 		}
@@ -210,17 +224,17 @@ int Object::CanEnter(ARegion * reg,Unit * u)
 			 u->type == U_APPRENTICE)) {
 		return 0;
 	}
-    return 1;
+	return 1;
 }
 
 Unit *Object::ForbiddenBy(ARegion *reg, Unit *u)
 {
 	Unit *owner = GetOwner();
-	if( !owner ) {
-		return( 0 );
+	if(!owner) {
+		return(0);
 	}
 
-	if( owner->GetAttitude( reg, u ) < A_FRIENDLY ) {
+	if(owner->GetAttitude(reg, u) < A_FRIENDLY) {
 		return owner;
 	}
 	return 0;
@@ -229,10 +243,10 @@ Unit *Object::ForbiddenBy(ARegion *reg, Unit *u)
 Unit *Object::GetOwner()
 {
 	Unit *owner = (Unit *) units.First();
-	while( owner && !owner->GetMen() ) {
-		owner = (Unit *) units.Next( owner );
+	while(owner && !owner->GetMen()) {
+		owner = (Unit *) units.Next(owner);
 	}
-	return( owner );
+	return(owner);
 }
 
 void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
@@ -316,11 +330,16 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 	}
 }
 
-void Object::MoveObject( ARegion *toreg )
+void Object::SetPrevDir(int newdir)
 {
-	region->objects.Remove( this );
+	prevdir = newdir;
+}
+
+void Object::MoveObject(ARegion *toreg)
+{
+	region->objects.Remove(this);
 	region = toreg;
-	toreg->objects.Add( this );
+	toreg->objects.Add(this);
 }
 
 int Object::IsRoad()

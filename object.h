@@ -23,9 +23,9 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2000/MAR/21 Azthar Septragen  Added roads.
+// Date			Person				Comments
+// ----			------				--------
+// 2000/MAR/21	Azthar Septragen	Added roads.
 #ifndef OBJECT_CLASS
 #define OBJECT_CLASS
 
@@ -104,6 +104,7 @@ class Object : public AListElem
 		Unit *ForbiddenBy(ARegion *, Unit *);
 		Unit *GetOwner();
 
+		void SetPrevDir(int);
 		void MoveObject( ARegion *toreg );
 
 		AString *name;
@@ -115,6 +116,7 @@ class Object : public AListElem
 		int incomplete;
 		int capacity;
 		int runes;
+		int prevdir;
 		int mages;
 		AList units;
 };
