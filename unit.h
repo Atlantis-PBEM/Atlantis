@@ -153,7 +153,7 @@ class Unit : public AListElem
 		int IsAlive();
 
 		int MaintCost();
-		void Short(int);
+		void Short(int, int);
 		int SkillLevels();
 		void SkillStarvation();
 		Skill *GetSkillObject(int);
@@ -241,6 +241,8 @@ class Unit : public AListElem
 		int readyArmor[MAX_READY];
 		AList oldorders;
 		int needed; /* For assessing maintenance */
+		int hunger;
+		int stomach_space;
 		int losses;
 		int free;
 		int practised; // Has this unit practised a skill this turn

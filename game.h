@@ -415,9 +415,20 @@ private:
     void CheckFactionMaintenance( int consume );
     void CheckAllyMaintenance();
 
+	// Similar to the above, but for minimum food requirements
+	void CheckUnitHunger();
+	void CheckFactionHunger();
+	void CheckAllyHunger();
+
     void CheckUnitMaintenanceItem(int item, int value, int consume );
     void CheckFactionMaintenanceItem(int item, int value, int consume );
     void CheckAllyMaintenanceItem(int item, int value);
+
+	// Hunger again
+	void CheckUnitHungerItem(int item, int value);
+	void CheckFactionHungerItem(int item, int value);
+	void CheckAllyHungerItem(int item, int value);
+
     void AssessMaintenance();
 
     void GrowWMons(int);

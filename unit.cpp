@@ -1139,9 +1139,12 @@ int Unit::MaintCost()
 	return retval;
 }
 
-void Unit::Short(int needed)
+void Unit::Short(int needed, int hunger)
 {
 	int n = 0;
+
+	if (faction->IsNPC())
+		return; // Don't starve monsters and the city guard!
 
 	switch(Globals->SKILL_STARVATION) {
 		case GameDefs::STARVE_MAGES:
@@ -1155,7 +1158,7 @@ void Unit::Short(int needed)
 			return;
 	}
 
-	if(!needed) return;
+	if (needed < 1 && hunger < 1) return;
 
 	for (int i = 0; i<= NITEMS; i++) {
 		if( !( ItemDefs[ i ].type & IT_MAN )) {
@@ -1174,7 +1177,8 @@ void Unit::Short(int needed)
 				n++;
 			}
 			needed -= Globals->MAINTENANCE_COST;
-			if (needed <= 0) {
+			hunger -= Globals->UPKEEP_MINIMUM_FOOD;
+			if (needed < 1 && hunger < 1) {
 				if (n) Error(AString(n) + " starve to death.");
 				return;
 			}
@@ -1187,7 +1191,8 @@ void Unit::Short(int needed)
 			n++;
 		}
 		needed -= Globals->LEADER_COST;
-		if (needed <= 0) {
+		hunger -= Globals->UPKEEP_MINIMUM_FOOD;
+		if (needed < 1 && hunger < 1) {
 			if (n) Error(AString(n) + " starve to death.");
 			return;
 		}

@@ -551,6 +551,16 @@ public:
 
 	// Amount of skill improvement when a skill is used
 	int SKILL_PRACTISE_AMOUNT;
+
+	// Options on using food for upkeep
+	// Note that all these values are in silver equivalents!
+	int UPKEEP_MINIMUM_FOOD;
+	// MAXIMUM_FOOD is the maximum contribution of food to upkeep
+	// per man, and therefore CAN be lower than MINIMUM_FOOD
+	// (although this seems a silly thing to do).
+	// A negative value for this def indicates no maximum.
+	int UPKEEP_MAXIMUM_FOOD;
+	int UPKEEP_FOOD_VALUE;
 };
 
 extern GameDefs * Globals;

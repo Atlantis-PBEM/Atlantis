@@ -1646,7 +1646,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp = "If the unit is a leader, it";
 		else
 			temp = "A unit";
-		temp += " will loose a skill level in some of its skills.";
+		temp += " will lose a skill level in some of its skills.";
 		f.PutStr(temp);
 		f.Enclose(0, "LI");
 		if(Globals->SKILL_STARVATION != GameDefs::STARVE_ALL) {
@@ -1661,18 +1661,31 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(0, "UL");
 		temp = "";
 	} else {
-		temp += " starving to death. ";
+		temp += "starving to death. ";
 	}
-	temp += "It is up to you to make sure that your people have enough money "
-		"available . Money will be shared automatically between your units "
+	temp += "It is up to you to make sure that your people have enough money ";
+	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
+		temp += "and food ";
+	temp +=	"available. Money ";
+	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
+		temp += "and food ";
+	temp += "will be shared automatically between your units "
 		"in the same region, if one is starving and another has more than "
 		"enough; but this will not happen between units in different "
 		"regions (this sharing of money applies only for maintenance costs, "
 		"and does not occur for other purposes). If you have silver in your "
 		"unclaimed fund, then that silver will be automatically claimed by "
-		"units that would otherwise starve. Lastly, if a faction is allied "
-		"to yours, their units will provide surplus cash to your units for "
-		"maintenance, as a last resort.";
+		"units that would otherwise starve. ";
+	if (Globals->UPKEEP_MINIMUM_FOOD && Globals->ALLOW_WITHDRAW) {
+		temp += "Similarly, food will automatically be ";
+		temp +=	f.Link("#withdraw", "withdraw");
+		temp += "n if needed and unclaimed funds are available. ";
+	}
+	temp += "Lastly, if a faction is allied to yours, their units will "
+		"provide surplus cash ";
+	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
+		temp += "or food ";
+	temp += "to your units for maintenance, as a last resort.";
 	f.Paragraph(temp);
 	if(Globals->MULTIPLIER_USE == GameDefs::MULT_NONE) {
 		temp = AString("This fee is generally ") + Globals->MAINTENANCE_COST +
@@ -1706,13 +1719,24 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	temp += ".";
 	if (Globals->FOOD_ITEMS_EXIST) {
-		temp += " If this is not available, units may substitute one unit "
-			"of grain, livestock, or fish for this maintenance";
-		if(Globals->LEADERS_EXIST)
-			temp += " (two units for a leader)";
-		temp += ". A unit may use the ";
+		temp += " Units may substitute one unit of grain, livestock, or "
+			"fish for each ";
+		temp += Globals->UPKEEP_FOOD_VALUE;
+		temp += " silver of maintenance owed. ";
+		if (Globals->UPKEEP_MINIMUM_FOOD > 0) {
+			temp += "A unit must be given at least ";
+			temp +=	Globals->UPKEEP_MINIMUM_FOOD;
+			temp += " maintenance per man in the form of food. ";
+		}
+		if (Globals->UPKEEP_MAXIMUM_FOOD >= 0) {
+			temp += "At most ";
+			temp += Globals->UPKEEP_MAXIMUM_FOOD;
+			temp += " silver worth of food can be counted against each "
+					"man's maintenance. ";
+		}
+		temp += "A unit may use the ";
 		temp += f.Link("#consume", "CONSUME") + " order to specify that it "
-			" wishes to use food items in preference to silver.  Note that ";
+			"wishes to use food items in preference to silver.  Note that ";
 		temp += "these items are worth more when sold in towns, so selling "
 			"them and using the money is more economical than using them for "
 			"maintenance.";

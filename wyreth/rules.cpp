@@ -185,6 +185,9 @@ static GameDefs g = {
 	0,	// MONSTER_BATTLE_REGEN
 	GameDefs::TAX_NORMAL, // WHO_CAN_TAX
 	0,	// SKILL_PRACTISE_AMOUNT
+	0,	// UPKEEP_MINIMUM_FOOD
+	-1,	// UPKEEP_MAXIMUM_FOOD
+	10,	// UPKEEP_FOOD_VALUE
 };
 
 GameDefs * Globals = &g;

@@ -524,3 +524,6 @@ Changes from 4.0.9 -> 4.0.10
       amount more configurability in the world generation process.
    -- Changed template generation to understand the terrain types again
       after the previous fix.
+   -- Added gamedefs to control the minimum and maximum amounts of food
+      that a unit requires for maintenance, and the value of food for
+      maintenance.

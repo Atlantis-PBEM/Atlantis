@@ -2038,25 +2038,46 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 	}
 }
 
-void Game::CheckUnitMaintenance( int consume )
+void Game::CheckUnitMaintenance(int consume)
 {
-	CheckUnitMaintenanceItem(I_GRAIN, 10, consume );
-	CheckUnitMaintenanceItem(I_LIVESTOCK, 10, consume );
-	CheckUnitMaintenanceItem(I_FISH, 10, consume );
+	CheckUnitMaintenanceItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE, consume);
+	CheckUnitMaintenanceItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE, consume);
+	CheckUnitMaintenanceItem(I_FISH, Globals->UPKEEP_FOOD_VALUE, consume);
 }
 
-void Game::CheckFactionMaintenance( int consume )
+void Game::CheckFactionMaintenance(int con)
 {
-	CheckFactionMaintenanceItem(I_GRAIN, 10, consume );
-	CheckFactionMaintenanceItem(I_LIVESTOCK, 10, consume );
-	CheckFactionMaintenanceItem(I_FISH, 10, consume );
+	CheckFactionMaintenanceItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE, con);
+	CheckFactionMaintenanceItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE, con);
+	CheckFactionMaintenanceItem(I_FISH, Globals->UPKEEP_FOOD_VALUE, con);
 }
 
 void Game::CheckAllyMaintenance()
 {
-	CheckAllyMaintenanceItem(I_GRAIN, 10);
-	CheckAllyMaintenanceItem(I_LIVESTOCK, 10);
-	CheckAllyMaintenanceItem(I_FISH, 10);
+	CheckAllyMaintenanceItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE);
+	CheckAllyMaintenanceItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE);
+	CheckAllyMaintenanceItem(I_FISH, Globals->UPKEEP_FOOD_VALUE);
+}
+
+void Game::CheckUnitHunger()
+{
+	CheckUnitHungerItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE);
+	CheckUnitHungerItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE);
+	CheckUnitHungerItem(I_FISH, Globals->UPKEEP_FOOD_VALUE);
+}
+
+void Game::CheckFactionHunger()
+{
+	CheckFactionHungerItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE);
+	CheckFactionHungerItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE);
+	CheckFactionHungerItem(I_FISH, Globals->UPKEEP_FOOD_VALUE);
+}
+
+void Game::CheckAllyHunger()
+{
+	CheckAllyHungerItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE);
+	CheckAllyHungerItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE);
+	CheckAllyHungerItem(I_FISH, Globals->UPKEEP_FOOD_VALUE);
 }
 
 char Game::GetRChar(ARegion * r)

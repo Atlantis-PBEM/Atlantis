@@ -49,6 +49,17 @@ int Game::SetupFaction( Faction *pFac )
         temp2->Study(S_GATE_LORE, 30);
     }
 
+	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
+	{
+		if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
+			temp2->items.SetNum(I_FISH, 6);
+		else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
+			temp2->items.SetNum(I_LIVESTOCK, 6);
+		else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
+			temp2->items.SetNum(I_GRAIN, 2);
+		temp2->items.SetNum(I_SILVER, 10);
+	}
+
     ARegion *reg = NULL;
 	if(pFac->pStartLoc) {
 		reg = pFac->pStartLoc;

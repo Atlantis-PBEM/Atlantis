@@ -81,6 +81,18 @@ int Game::SetupFaction( Faction *pFac )
 		Unit *temp2 = GetNewUnit( pFac );
 		temp2->SetMen( I_MAN, 1 );
 		temp2->reveal = REVEAL_FACTION;
+
+		if (Globals->UPKEEP_MINIMUM_FOOD > 0)
+		{
+			if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
+				temp2->items.SetNum(I_FISH, 6);
+			else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
+				temp2->items.SetNum(I_LIVESTOCK, 6);
+			else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
+				temp2->items.SetNum(I_GRAIN, 2);
+			temp2->items.SetNum(I_SILVER, 10);
+		}
+
 		temp2->MoveUnit(obj);
 	}
 
