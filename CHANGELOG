@@ -134,6 +134,8 @@ Changes from 4.0.6 -> 4.0.7
    -- Fixed bug in combat where if all of the attackers unit in a hex were
       set avoid, the attacker could (in contradiction to the rules) issue
       an attack against an ally.
+   -- Fixed bug where FORCE Shield did not protect agaisnt bow attacks.
+      Force shield changed to protect against all ranged weapon attacks.
 
 TODO
 ----------------
@@ -157,3 +159,25 @@ TODO
    -- Consider some sorts of dangers for production
    -- Consider having artifact spells require physical components rather than
       merely money.
+   -- Increase number of products possible per terrain type from 5 to 7?
+   -- Consider a gamedef which keeps tactics skill (and combat skills?)
+      hidden from combatants.  (I personally think this a bad idea, but it
+      was suggested, thus goes on this list)
+   -- Consider hiding battle details from units which are completely wiped
+      out?  [You know a battle occured, but no details of the enemy forces].
+      Again, I suspect rumors travel (ie, the peasants in the area that saw
+      the battle talk and the word of their strenght spreads).   Given that
+      generating *inaccurate* reports would be a royal pain, I will probably
+      leave this be.
+   -- Consider allowing luxury food items (chocolate, vodka, cavier) to be
+      able to be eaten.  Again, don't think this is a good idea, but will
+      at least think on it.
+   -- Tune the amounts of new resources
+   -- Add underdeep changes from Georg (make underdeep specific terrain as well)
+   -- Consider adding the ability to produce trade goods.
+   -- Consider Duergar's war horses
+   -- Consider building specific skills.
+   -- Consider non-teachable skills.
+   -- Consider having use'd items.
+   -- Need a tool which given template files and globals structures can
+      build an accurate rules set.

@@ -1105,18 +1105,16 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 
     /* 2. Attack shield */
     Shield * hi;
-    if((attackType == ATTACK_COMBAT) || (attackType == ATTACK_RIDING))
-    {
+    if((attackType == ATTACK_COMBAT) || (attackType == ATTACK_RIDING)) {
         hi = 0;
-    } 
-    else
-    {
+    } else {
+		if(attackType == ATTACK_RANGED)
+			attackType = ATTACK_COMBAT;
         int shtype = attackType;
         hi = shields.GetHighShield(shtype);
     }
     
-    if (hi)
-    {
+    if (hi) {
         /* Check if we get through shield */
         if( !Hits( attackLevel, hi->shieldskill )) 
         {

@@ -979,8 +979,8 @@ AString *ShowSkill::Report(void)
 				   !(ItemDefs[I_MCROSSBOW].flags & ItemType::DISABLED) ||
 				   !(ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED)) {
 					*str += " This shield will be effective against all "
-						   "bow attacks against the mage's army, at a level "
-						   "equal to the mage's skill level.";
+						   "ranged attacks against the mage's army, at a "
+						   "level equal to the mage's skill level.";
 				}
 				*str += " The mage himself will gain a defensive bonus "
 					   "against normal combat attacks, equal to his skill. "
@@ -1661,25 +1661,25 @@ AString *ShowSkill::Report(void)
 		case S_CREATE_PHANTASMAL_DEMONS:
 			if(level == 1) {
 				found = 1;
-				*str + "A mage with Create Phantasmal Demons may summon "
-					  "illusionary demons that appear in the mage's "
-					  "inventory. These demons will fight in combat, but "
-					  "do not attack, and are killed whenever they are "
-					  "attacked. Create Phantasmal Demons at level 1 "
-					  "allows the mage to summon illusionary imps; the "
-					  "number the mage can summon, or have in his inventory "
-					  "at one time is equal to the mage's skill squared "
-					  "times 4. To use this spell, the mage should CAST "
-					  "Create_Phantasmal_Demons IMP <number>, where "
-					  "<number> is the number of imps that the mage "
-					  "wishes to have appear in his inventory. Note: "
-					  "illusionary demons will appear on reports as if "
-					  "they were normal items, except on the owner's "
-					  "report, where they are marked as illusionary. To "
-					  "reference these items in orders, you must "
-					  "prepend an 'i' to the normal string. (Example: "
-					  "to reference an illusionary demon, you would use "
-					  "'idemon').";
+				*str += "A mage with Create Phantasmal Demons may summon "
+					    "illusionary demons that appear in the mage's "
+						"inventory. These demons will fight in combat, but "
+						"do not attack, and are killed whenever they are "
+						"attacked. Create Phantasmal Demons at level 1 "
+						"allows the mage to summon illusionary imps; the "
+						"number the mage can summon, or have in his inventory "
+						"at one time is equal to the mage's skill squared "
+						"times 4. To use this spell, the mage should CAST "
+						"Create_Phantasmal_Demons IMP <number>, where "
+						"<number> is the number of imps that the mage "
+						"wishes to have appear in his inventory. Note: "
+						"illusionary demons will appear on reports as if "
+						"they were normal items, except on the owner's "
+						"report, where they are marked as illusionary. To "
+						"reference these items in orders, you must "
+						"prepend an 'i' to the normal string. (Example: "
+						"to reference an illusionary demon, you would use "
+						"'idemon').";
 			} else if (level == 3) {
 				found = 1;
 				*str += "Create Phantasmal Demons at level 3 allows the "

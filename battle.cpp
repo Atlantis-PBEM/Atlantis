@@ -134,6 +134,9 @@ void Battle::DoAttack( int round,
 		if(flags & WeaponType::NEEDMOUNT) {
 			type = ATTACK_RIDING;
 		}
+		if(flags & WeaponType::RANGED) {
+			type = ATTACK_RANGED;
+		}
         def->DoAnAttack( 0, 1, type, a->askill, flags, 0 );
         if (!def->NumAlive()) break;
     }
