@@ -45,11 +45,11 @@ void Battle::FreeRound(Army * att,Army * def)
 {
     /* Write header */
     AddLine(*(att->leader->name) + " gets a free round of attacks.");
-    
+
     /* Update both army's shields */
     att->shields.DeleteAll();
     UpdateShields(att);
-    
+
     def->shields.DeleteAll();
     UpdateShields(def);
 
@@ -67,7 +67,7 @@ void Battle::FreeRound(Army * att,Army * def)
         Soldier * a = att->GetAttacker(num, behind);
         DoAttack(att->round, a, att, def, behind);
     }
-    
+
     /* Write losses */
     alv -= def->NumAlive();
     AddLine(*(def->leader->name) + " loses " + alv + ".");
@@ -75,15 +75,15 @@ void Battle::FreeRound(Army * att,Army * def)
     att->Reset();
 }
 
-void Battle::DoAttack( int round, 
+void Battle::DoAttack( int round,
                        Soldier *a,
                        Army *attackers,
-                       Army *def, 
+                       Army *def,
                        int behind )
 {
     DoSpecialAttack( round, a, attackers, def, behind );
     if (!def->NumAlive()) return;
-    
+
 	if (!behind && (a->riding != -1)) {
 		MountType *pMt = &MountDefs[ItemDefs[a->riding].index];
 		if(pMt->mountSpecial != -1) {
@@ -165,11 +165,11 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 {
     /* Write round header */
     AddLine(AString("Round ") + round + ":");
-    
+
     /* Update both army's shields */
     UpdateShields(a);
     UpdateShields(b);
-	
+
     /* Initialize variables */
     a->round++;
     b->round++;
@@ -179,7 +179,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
     int bialive = balive;
     int aatt = a->CanAttack();
     int batt = b->CanAttack();
-	
+
     /* Run attacks until done */
     while (aalive && balive && (aatt || batt))
     {
@@ -190,7 +190,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
             num -= aatt;
             Soldier * s = b->GetAttacker(num, behind);
             DoAttack(b->round, s, b, a, behind);
-        } 
+        }
         else
         {
             Soldier * s = a->GetAttacker(num, behind);
@@ -201,7 +201,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
         aatt = a->CanAttack();
         batt = b->CanAttack();
     }
-    
+
     /* Finish round */
     aialive -= aalive;
     AddLine(*(a->leader->name) + " loses " + aialive + ".");
@@ -242,22 +242,22 @@ int Battle::Run( ARegion * region,
     Army * armies[2];
     assassination = ASS_NONE;
     attacker = att->faction;
-  
+
     armies[0] = new Army(att,atts,region->type,ass);
     armies[1] = new Army(tar,defs,region->type,ass);
-  
+
     if (ass) {
         FreeRound(armies[0],armies[1]);
     } else {
         if (armies[0]->tac > armies[1]->tac) FreeRound(armies[0],armies[1]);
         if (armies[1]->tac > armies[0]->tac) FreeRound(armies[1],armies[0]);
     }
-  
+
     int round = 1;
     while (!armies[0]->Broken() && !armies[1]->Broken() && round < 101) {
         NormalRound(round++,armies[0],armies[1]);
     }
-  
+
     if ((armies[0]->Broken() && !armies[1]->Broken()) ||
         (!armies[0]->NumAlive() && armies[1]->NumAlive())) {
         if (ass) assassination = ASS_FAIL;
@@ -322,7 +322,7 @@ int Battle::Run( ARegion * region,
         delete armies[1];
         return BATTLE_WON;
     }
-  
+
     AddLine("The battle ends indecisively.");
     AddLine("");
     AddLine("Total Casualties:");
