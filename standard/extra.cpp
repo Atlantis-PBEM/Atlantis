@@ -70,47 +70,6 @@ Faction *Game::CheckVictory()
 	return NULL;
 }
 
-int Game::AllowedMages( Faction *pFac )
-{
-	int points = pFac->type[F_MAGIC];
-
-	if (points < 0) points = 0;
-	if (points > allowedMagesSize - 1) points = allowedMagesSize - 1;
-
-	return allowedMages[points];
-}
-
-int Game::AllowedApprentices( Faction *pFac )
-{
-	int points = pFac->type[F_MAGIC];
-
-	if (points < 0) points = 0;
-	if (points > allowedApprenticesSize - 1)
-		points = allowedApprenticesSize - 1;
-
-	return allowedApprentices[points];
-}
-
-int Game::AllowedTaxes( Faction *pFac )
-{
-	int points = pFac->type[F_WAR];
-
-	if (points < 0) points = 0;
-	if (points > allowedTaxesSize - 1) points = allowedTaxesSize - 1;
-
-	return allowedTaxes[points];
-}
-
-int Game::AllowedTrades( Faction *pFac )
-{
-	int points = pFac->type[F_TRADE];
-
-	if (points < 0) points = 0;
-	if (points > allowedTradesSize - 1) points = allowedTradesSize - 1;
-
-	return allowedTrades[points];
-}
-
 void Game::ModifyTablesPerRuleset(void)
 {
 	if(Globals->APPRENTICES_EXIST)

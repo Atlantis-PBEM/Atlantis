@@ -140,26 +140,6 @@ Faction *Game::CheckVictory()
 	return pVictor;
 }
 
-int Game::AllowedMages( Faction *pFac )
-{
-    return 5;
-}
-
-int Game::AllowedApprentices( Faction *pFac )
-{
-    return 10;
-}
-
-int Game::AllowedTaxes( Faction *pFac )
-{
-    return -1;
-}
-
-int Game::AllowedTrades( Faction *pFac )
-{
-    return -1;
-}
-
 void Game::ModifyTablesPerRuleset(void)
 {
 	if(!Globals->FOOD_ITEMS_EXIST) {
