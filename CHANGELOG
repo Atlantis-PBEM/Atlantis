@@ -480,3 +480,5 @@ Changes from 4.0.9 -> 4.0.10
 	  configuration option.
    -- Patch for multiple types of taxing behaviour controlling who is
       allowed to tax.  Patch submitted by Stephen Baillie.
+   -- Fixed a bug in BUY where two buys of the same item would cause the
+      second to fail with a "Can't buy that" error.
