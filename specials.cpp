@@ -136,13 +136,13 @@ void Battle::UpdateShields(Army *a)
 		if(a->soldiers[i]->special == -1) continue;
 		spd = &SpecialDefs[a->soldiers[i]->special];
 
-		if(!(spd->effectflags & FX_SHIELD)) continue;
+		if(!(spd->effectflags & SpecialType::FX_SHIELD)) continue;
 
 		for(shtype = 0; shtype < 4; shtype++) {
 			if(spd->shield[shtype].type == -1) continue;
-			if(spd->effectflags & FX_DEFBONUS) {
+			if(spd->effectflags & SpecialType::FX_DEFBONUS) {
 				int bonus = spd->shield[shtype].value;
-				if(spd->effectflags & FX_USE_LEV)
+				if(spd->effectflags & SpecialType::FX_USE_LEV)
 					bonus *= a->soldiers[i]->slevel;
 				if(a->round == 0)
 					a->soldiers[i]->dskill[spd->shield[shtype].type] += bonus;
@@ -151,7 +151,7 @@ void Battle::UpdateShields(Army *a)
 			Shield *sh = new Shield;
 			sh->shieldtype = spd->shield[shtype].type;
 			sh->shieldskill = a->soldiers[i]->slevel;
-			a->shield.Add(sh);
+			a->shields.Add(sh);
             AddLine(*(a->soldiers[i]->unit->name) + " casts " +
 					spd->shielddesc + ".");
 		}
@@ -161,235 +161,35 @@ void Battle::UpdateShields(Army *a)
 void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 		Army *def, int behind)
 {
-	int num,num2;
-	switch (a->special) {
-		case -1:
-			break;
+	SpecialType *spd;
+	int i, num, tot = -1;
 
-		case SPECIAL_TORNADO:
-        num = def->DoAnAttack( a->special,
-                               getrandom(a->slevel * 25)
-                               + getrandom(a->slevel * 25) + 2,
-                               ATTACK_WEATHER,
-                               a->slevel,
-                               SPECIAL_FLAGS, SPECIAL_CLASS,
-                               0, 0);
-        if (num == -1) {
-            AddLine(a->name + " summons a wild tornado, but it is "
-                    "deflected.");
-        } else {
-            AddLine(a->name + " summons a wild tornado, killing " +
-                    num + ".");
-        }
-        break;
-        
-    case SPECIAL_SUMMON_STORM:
-        num = def->DoAnAttack(a->special,
-                              getrandom(25 * a->slevel)
-                              + getrandom(25 * a->slevel) + 2,
-                              ATTACK_WEATHER,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              EFFECT_STORM, 0);
-        if (num == -1) {
-            AddLine(a->name + " summons a terrible storm, "
-                    "but it is deflected.");
-        } else {
-            AddLine(a->name + " summons a terrible storm, "
-                    "reducing the effectiveness of " + num + " troops.");
-        }
-        break;
-        
-    case SPECIAL_DISPEL_ILLUSIONS:
-        num = def->DoAnAttack(a->special,
-                              getrandom(50 * a->slevel)
-                              + getrandom(50 * a->slevel) + 2,
-                              NUM_ATTACK_TYPES,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              0, 0);
-        AddLine(a->name + " casts Dispel Illusions, dispelling " +
-                num + " illusions.");
-        break;
-        
-    case SPECIAL_BANISH_UNDEAD:
-        num = def->DoAnAttack(a->special,
-                              getrandom(25 * a->slevel)
-                              + getrandom(25 * a->slevel) + 2,
-                              NUM_ATTACK_TYPES,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              0, 0);
-        AddLine(a->name + " casts Banish Undead, banishing " +
-                num + " undead.");
-        break;
-        
-    case SPECIAL_BANISH_DEMONS:
-        num = def->DoAnAttack(a->special,
-                              getrandom(25 * a->slevel)
-                              + getrandom(25 * a->slevel) + 2,
-                              NUM_ATTACK_TYPES,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              0, 0);
-        AddLine(a->name + " casts Banish Demons, banishing " +
-                num + " demons.");
-        break;
-        
-    case SPECIAL_EARTHQUAKE:
-        num = def->DoAnAttack(a->special,
-                              getrandom(50 * a->slevel) +
-                              getrandom(50 * a->slevel) + 2,
-                              ATTACK_COMBAT,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              0, 0);
-        if (num == -1) {
-            AddLine(a->name + " invokes a mighty Earthquake, "
-                    "but it is deflected.");
-        } else {
-            AddLine(a->name + " invokes a mighty Earthquake, "
-                    "killing " + num + ".");
-        }
-        break;
+	if(a->special == -1) return;
+	spd = &SpecialDefs[a->special];
 
-    case SPECIAL_LSTRIKE:
-        num = def->DoAnAttack(a->special,
-                              getrandom(30 * a->slevel)
-                              + getrandom(30 * a->slevel) + 2,
-                              ATTACK_WEATHER,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              0, 0);
-        num2 = def->DoAnAttack(a->special,
-                               getrandom(30 * a->slevel)
-                               + getrandom(30 * a->slevel) + 2,
-                               ATTACK_ENERGY,
-                               a->slevel,
-                               SPECIAL_FLAGS, SPECIAL_CLASS,
-                               0, 0);
-        if (num == -1 && num2 == -1) {
-            AddLine(a->name + " unleashes a mighty lightning "
-                    "strike, but it is deflected.");
-        } else {
-            if( num == -1 || num2 == -1 )
-            {
-                num++;
-            }
-            AddLine(a->name + " unleashes a mighty lightning "
-                    "strike, killing " + (num + num2) + ".");
-        }
-        break;
-       
-		/* FOO */
-    case SPECIAL_FIREBALL:
-        num = def->DoAnAttack(a->special,
-                              getrandom(a->slevel * 5) +
-                              getrandom(a->slevel * 5) + 2,
-                              ATTACK_ENERGY,
-                              a->slevel,
-                              SPECIAL_FLAGS,  SPECIAL_CLASS,
-                              0, 0);
-        if (num == -1) {
-            AddLine(a->name + " shoots a Fireball, but it is "
-                    "deflected.");
-        } else {
-            AddLine(a->name + " shoots a Fireball, killing " +
-                    num + ".");
-        }
-        break;
-	case SPECIAL_FIREBREATH:
-		num = def->DoAnAttack(a->special,
-				getrandom(a->slevel * 5) + getrandom(a->slevel * 5) + 2,
-				ATTACK_ENERGY, a->slevel, SPECIAL_FLAGS, SPECIAL_CLASS,
-				0, 0);
-		if (num == -1) {
-			AddLine(a->name + " breathes Fire, but it is deflected.");
-		} else {
-			AddLine(a->name + " breathes Fire, killing " + num + ".");
+	if(!(spd->effectflags & SpecialType::FX_DAMAGE)) return;
+
+	for(i = 0; i < 4; i++) {
+		if(spd->damage[i].type == -1) continue;
+		int times = spd->damage[i].value;
+		if(spd->effectflags & SpecialType::FX_USE_LEV)
+			times *= a->slevel;
+		int realtimes = spd->damage[i].minnum + getrandom(times) +
+			getrandom(times);
+        num = def->DoAnAttack(a->special, realtimes,
+				spd->damage[i].type, a->slevel,
+				spd->damage[i].flags, spd->damage[i].dclass,
+				spd->damage[i].effect, 0);
+		if(num != -1) {
+			if(tot == -1) tot = num;
+			else tot += num;
 		}
-		break;
-	case SPECIAL_ICEBREATH:
-		num = def->DoAnAttack(a->special,
-				getrandom(a->slevel * 5) + getrandom(a->slevel * 5) + 2,
-				ATTACK_ENERGY, a->slevel, SPECIAL_FLAGS, SPECIAL_CLASS,
-				0, 0);
-		if (num == -1) {
-			AddLine(a->name + " breathes Ice, but it is deflected.");
-		} else {
-			AddLine(a->name + " breathes Ice, killing " + num + ".");
-		}
-		break;
-    case SPECIAL_HELLFIRE:
-        num = def->DoAnAttack(a->special,
-                              getrandom(a->slevel * 25) +
-                              getrandom(a->slevel * 25) + 2,
-                              ATTACK_ENERGY,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              0, 0);
-        if (num == -1) {
-            AddLine(a->name + " blasts the enemy with Hellfire, but it is "
-                    "deflected.");
-        } else {
-            AddLine(a->name + " blasts the enemy with Hellfire, killing " +
-                    num + ".");
-        }
-        break;
-        
-    case SPECIAL_CAUSEFEAR:
-        num = def->DoAnAttack(a->special,
-                              getrandom(a->slevel * 10)
-                              + getrandom(a->slevel * 10) + 2,
-                              ATTACK_SPIRIT,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              EFFECT_FEAR, 0);
-        if (num == -1) {
-            AddLine(a->name + " attempts to strike fear into the "
-                    "enemy, but the spell is deflected.");
-        } else {
-            AddLine(a->name + " strikes fear into the hearts "
-                    "of " + num + " men.");
-        }
-        break;
-        
-    case SPECIAL_BLACK_WIND:
-        num = def->DoAnAttack(a->special,
-                              getrandom(a->slevel * 100) +
-                              getrandom(a->slevel * 100) + 2,
-                              ATTACK_SPIRIT,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              0, 0);
-        if (num == -1) {
-            AddLine(a->name + " attempts to summon the black wind, "
-                    "but the spell is deflected.");
-        } else {
-            AddLine(a->name + " summons the black wind, killing " + num +
-                    ".");
-        }
-        break;
-        
-    case SPECIAL_MINDBLAST:
-        num = def->DoAnAttack(a->special,
-                              getrandom(125) + getrandom(125) + 2,
-                              ATTACK_SPIRIT,
-                              a->slevel,
-                              SPECIAL_FLAGS, SPECIAL_CLASS,
-                              0, 0);
-        if (num == -1) {
-            AddLine(a->name + " attempts to blast the minds of the "
-                    "enemy, but the spell is deflected.");
-        } else {
-            AddLine(a->name + " mind blasts " + num +
-                    " to death.");
-        }
-        break;
-        
-    default:
-        /* Probably a shield spell */
-        break;
-    }
+	}
+	if(tot == -1) {
+		AddLine(a->name + " " + spd->spelldesc + ", but it is deflected.");
+	} else {
+		AddLine(a->name + " " + spd->spelldesc + ", " + spd->spelldesc2 +
+				tot + spd->spelltarget + ".");
+	}
 }
 
