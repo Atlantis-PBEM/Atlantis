@@ -1,188 +1,446 @@
+Atlantis Gamemaster's Guide
 
-                        Atlantis Gamemaster's Guide
-                                      
-   This document describes how to compile, setup, and run a game of
-   Atlantis.
-   
-Compiling Atlantis
+This document describes how to compile, setup, modify and run a game of 
+Atlantis.
 
-   Atlantis is a standard C++ program, with no UI or other
-   platform-specific features. As such, simply putting all of the source
-   files into a project or makefile and compiling it as a command-line
-   application is about all there is to it. Note that there are source
-   files in two directories; the basic Atlantis engine files live in the
-   main directory, and the rule-set specific files are in a
-   sub-directory. You need to include both sets of source files in the
-   makefile. The sample Atlantis rule-set is called Atlantis Conquest,
-   and is in the sub-directory conquest.
-   
-Unix
+The maintainer is Anthony Briggs, who can be contacted at 
+<abriggs@iinet.net.au>. Send any feedback, suggestions, comments, etc. to 
+him. This document is heavily based on the previous gamemaster guide, 
+which was written by JT Traub.
 
-   A makefile is included for compilation on Unix, using the GNU gcc
-   compiler. This has only been tested on Linux, but should probably work
-   on any Unix system. Just type 'make <gamedirname>' at the top level,
-   where <gamedirname> is one of the various subdirectories.  You can get
-   more information about the GNU compiler at http://www.gnu.org.
-   
-Windows
+Thanks to: JT Traub, "Mr. Mistofeles", "Draig" and "Iyhael" for their 
+valuable feedback.
 
-   I am now using the GNU gcc compiler on Windows as well. This has the
-   advantage that I can use it on both Unix and Windows, and as an added
-   bonus the compiler is freely available. As above, just switch into the
-   rule-set subdirectory and type 'make'. The Win32 port of gcc can be
-   found at http://sourceware.cygnus.com/cygwin/.
-   
-   I'm no longer using Visual C++, so I don't include a Visual C++
-   makefile. If someone wants to create a makefile for others to use,
-   I'll be happy to put it on the download page.
-   
-   However, it is very easy to make a VC project to compile Atlantis:
-    1. Choose a rule-set that you want to compile. For instance, the
-       Atlantis Conquest rule-set is in the subdirectory conquest.
-    2. Create a 'Console Application' Workspace in the rule-set
-       directory.
-    3. Add all of the Atlantis engine source files to the project. These
-       are all of the .cpp files located in the main directory.
-    4. Add all of the rule-set specific source files; these are all of
-       the .cpp files in the rule-set directory.
-    5. Update the include path to include both the main directory and the
-       rule-set directory.
-    6. That's it; you should be able to compile Atlantis at this point.
-       You'll probably want to compile the 'Checked' version in case you
-       want to debug.
-       
-Running a Game of Atlantis
 
-   The Atlantis program is actually very simple in terms of input and
-   output. It takes a set of files as input, runs the turn, and writes
-   out a set of files to the same directory. The Atlantis program does
-   not do anything in terms of scanning for email, sending email, or
-   anything of that nature. It is up to the gamemaster to either make
-   sure the files are in the right place, and the right emails get sent
-   out, or he must find or write a program to do that.
-   
-   Explanation: Atlantis is designed to be a very generic program, that
-   will run on many computer systems, and in different ways. Different
-   computer systems handle email in different ways; making Atlantis work
-   on all of these different systems would be quite a task, and in my
-   opinion one that is best separated from the actual game-running
-   program. Further, nothing about Atlantis requires that it be an email
-   game at all; the engine could be used in many different ways (a
-   web-based version, for instance, wouldn't be too hard to do).
-   
-   The rest of this section assumes that the gamemaster is moving the
-   files around by hand; if he is using a program to automate the
-   process, he should follow the instructions with that program.
-   
-Setting Up the Game
+Table of Contents
 
-   Generally, I find it best to make a directory to run a game of
-   Atlantis, and then store each turn as a sub-directory. To start the
-   game, make the directory game, and the subdirectory game/turn.0.
-   Change the current directory to be game/turn.0 (Atlantis uses the
-   current directory to find any files it is looking for), and run the
-   program atlantis new (note that the actually program name may well be
-   something different, depending on how you compiled it). This will
-   output the files game.out and players.out; these are the initial game
-   database and game status file. At this point, you are ready to prepare
-   for the first turn; follow the instructions below for how to prepare
-   and run a turn.
-   
-Running a Turn
+1.      Obtaining a copy of Atlantis
 
-   To set-up a turn, first make the directory for the turn (i.e.
-   game/turn.1), and copy the previous turn's game.out and players.out
-   into place as the new game.in and players.in. At this point, you can
-   edit the players.in file to add or remove players from the game.
-   
-   The players.in file will be in the following format:
-   
-AtlantisPlayerStatus
-Version: 262144
-TurnNumber: 1
-GameStatus: Running
+2.      Compiling Atlantis
+2.1     Unix
+2.1.1   A sample compile under UNIX
+2.2     Windows (copied directly from the old guide)
+2.3     The gory details (for advanced users, or the terminally curious)
 
-Faction: 1
-Name: Merry Pranksters (1)
-Email: gdunbar@prankster.com
-Password: none
-Faction: 2
-Name: Evil Faction (2)
-Email: evil@prankster.com
-Password: none
+3.      Running a game
+3.1     Running a game of Atlantis by hand (the hard way)
+3.2     Running a game the easy way (with scripts)
 
-   This file will be your primary method of communicating with the
-   Atlantis program. The first 2 lines tell Atlantis that this is a game
-   status file, and what version of the Atlantis engine was used to write
-   this file. The next line indicates the last turn that was run, and the
-   GameStatus: line indicates the current status of the game (the 3
-   settings of GameStatus: are "New", "Running", and "Finished"). None of
-   the first four lines should be modified by the gamemaster.
-   
-   Next in the file comes a list of the factions in the game, and some
-   information about the faction. You can perform the following actions
-   on a faction using this file:
-    1. You can change the name, email address, or password for the
-       faction. Note that there are in-game methods for doing this as
-       well (the ADDRESS order, for instance), but it is preferable to
-       change things in the players.in file. This is because the in-game
-       methods do not take effect until the next turn is run; whereas
-       editing the file is immediate.
-    2. You can remove a faction from the game. Do this by adding the line
-       "Order: Quit" to the faction's section of the players.in file.
-    3. You can add silver to a faction's unclaimed fund by adding the
-       line "Reward: [amount]" to the faction's section of the players.in
-       file.
-    4. Any other lines within a faction's section will be kept in the
-       players.out file when a turn is run, so you can store extra
-       information about a faction in this file. For instance, if you
-       wish to implement an Atlantis Times newsletter feature, you can
-       add a line "Times: on" or "Times: off" to each faction's section
-       indicating whether they wish to receive the Times or not.
-    5. You can add a faction to the game by making a new faction section,
-       leading with the line "Faction: New". It isn't required that you
-       fill in the email address and password, but it's probably always a
-       good idea. After the turn is run, the faction will be assigned a
-       faction number, and will be present in the players.out file.
-       
-   Also before running a turn, players will probably want to issue orders
-   for their faction. Orders should be put into the turn directory
-   (game/turn.1, in our example), with the filename orders.[num], where
-   [num] is the faction number. This file should be a proper Atlantis
-   order file, with the #atlantis line at the beginning of the orders and
-   #end at the end. Note that new factions cannot issue orders for their
-   faction.
-   
-   Once the players.in file has been updated, and any orders are in place
-   for the turn, you are ready to run the Atlantis program. Do this by
-   changing into the turn directory (recall that Atlantis only looks for
-   files in the current directory), and issue the command atlantis run.
-   (Again, note that the actual executable name depends on how you
-   compiled the program). This will run the turn, generating the files
-   game.out, players.out, and report.[num] for each faction in the game.
-   Each report file can then be sent to its owner, and you are ready to
-   set-up for the next turn.
-   
-Syntax Checker
+4.      Altering game rules
 
-   The Atlantis program can also act as a syntax checker for a set of
-   orders. Run the program atlantis check [orders] [check], where the
-   actual program name is the program that you compiled. [orders] should
-   be the filename of the orders file, and [check] will be the filename
-   that is created, containing the results of the syntax check. If you
-   have a program that automatically handles email, players often
-   appreciate getting a copy of the syntax check results whenever they
-   send in orders.
-   
-Game Editing
 
-   The Atlantis program can also be used to edit the game database. To
-   use the game editor, change the current directory to be the turn
-   directory (like game/turn.1), and run the command atlantis edit. This
-   will present a rudimentary text interface to change some parts of the
-   game, such as unit possessions. When done editing, you can either quit
-   without saving changes, or save and exit. If you choose the save
-   changes, a new game database file game.out will be created; to use
-   this file as the new game database file, move the file to game.in,
-   replacing the old game.in file.
-     _________________________________________________________________
+1. Obtaining a copy of Atlantis
+
+There are two options if you want to get a copy of Atlantis: the first 
+is to download a release tarball from yahoo groups at <http://groups.
+yahoo.com/group/atlantisdev/files/Sources/>. At the time of writing this
+Guide, the most recent release was 4.0.10e.
+
+The second option is to get a copy of the sources from CVS. Under a UNIX
+system, issue the following commands to obtain a copy of the 
+Atlantis sources:
+
+If you want the latest updates of the stable version 4:
+cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs login
+cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs checkout -r RELEASE_410 
+atlantis
+
+If you want the 'dangerous' version 5:
+cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs login
+cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs checkout atlantis
+
+WARNING: If you are unsure about C++ and compiling from sources, or this
+is your first try at running a game, you almost certainly want to get 
+the stable version. The CVS sources (particularly version 5) contain
+many 'in progress' updates to the code, which may result in bugs and 
+other instabilities, and are not for the faint hearted.
+
+
+2. Compiling Atlantis
+
+2.1 Unix
+
+A makefile is included for compilation on Unix, using the GNU gcc 
+compiler. You can get more information about the GNU compiler at 
+http://www.gnu.org. This has been tested on Linux and FreeBSD, and 
+should work on any Unix system. Just type 'make <gamedirname>' at the 
+top level, where <gamedirname> is one of the various subdirectories, 
+such as wyreth or standard. 
+
+You may run into trouble if your system uses a non-gnu make (such as 
+FreeBSD). In that case, you need to type gmake <gamedirname> instead of 
+make. The specific error is something like: gcc: No input files 
+specified, followed by *** Error code 1, and make quitting.
+
+Once the compile has completed, you should find the game specific files 
+within the game's subdirectory. The main one is the game binary, which 
+should be named after the game. There will also be a html directory with
+the rules in it, if you've also done a 'make <gamedirname>-rules'.
+
+If for some reason you want to clean up the sources afterwards (ie. 
+remove object files, for reasons of disk space, perhaps) you can use 
+'make <gamedir>-clean' or 'make GAME=gamedir clean'
+
+
+2.1.1 A sample compile under UNIX
+
+bash-2.04$ gmake wyreth
+gmake GAME=wyreth
+gmake[1]: Entering directory `/usr/home/anthony/atlantis/atlantisv5/
+atlantis'
+if [ ! -d wyreth/obj ]; then mkdir wyreth/obj; fi
+g++ -g -I. -I.. -Wall -c -o wyreth/obj/extra.o wyreth/extra.cpp
+g++ -g -I. -I.. -Wall -c -o wyreth/obj/monsters.o wyreth/monsters.cpp
+g++ -g -I. -I.. -Wall -c -o wyreth/obj/rules.o wyreth/rules.cpp
+g++ -g -I. -I.. -Wall -c -o wyreth/obj/world.o wyreth/world.cpp
+.
+.
+.
+gcc -g -I. -I.. -Wall -c -o wyreth/obj/i_rand.o i_rand.c
+g++ -g -I. -I.. -Wall -o wyreth/wyreth wyreth/obj/extra.o wyreth/obj/
+monsters.o wyreth/obj/rules.o wyreth/obj/world.o wyreth/obj/alist.o 
+wyreth/obj/aregion.o wyreth/obj/army.o wyreth/obj/astring.o wyreth/obj/
+battle.o wyreth/obj/faction.o wyreth/obj/fileio.o wyreth/obj/game.o 
+wyreth/obj/gamedata.o wyreth/obj/gamedefs.o wyreth/obj/gameio.o wyreth/
+obj/genrules.o wyreth/obj/items.o wyreth/obj/main.o wyreth/obj/market.o 
+wyreth/obj/modify.o wyreth/obj/monthorders.o wyreth/obj/npc.o wyreth/obj
+/object.o wyreth/obj/orders.o wyreth/obj/parseorders.o wyreth/obj/
+production.o wyreth/obj/runorders.o wyreth/obj/shields.o wyreth/obj/
+skills.o wyreth/obj/skillshows.o wyreth/obj/specials.o wyreth/obj/
+spells.o wyreth/obj/template.o wyreth/obj/unit.o wyreth/obj/i_rand.o
+gmake[1]: Leaving directory `/usr/home/anthony/atlantis/atlantisv5/
+atlantis'
+
+
+2.2 Windows (copied directly from the old guide)
+
+I am now using the GNU gcc compiler on Windows as well. This has the 
+advantage that I can use it on both Unix and Windows, and as an added 
+bonus the compiler is freely available. As above, just switch into the 
+rule-set subdirectory and type 'make'. The Win32 port of gcc can be 
+found at <http://www.cygwin.com/>.
+   
+I'm no longer using Visual C++, so I don't include a Visual C++ 
+makefile. If someone wants to create a makefile for others to use, I'll 
+be happy to put it on the download page.
+   
+However, it is very easy to make a VC project to compile Atlantis:
+1. Choose a rule-set that you want to compile. For instance, the
+   Atlantis Conquest rule-set is in the subdirectory conquest.
+2. Create a 'Console Application' Workspace in the rule-set
+   directory.
+3. Add all of the Atlantis engine source files to the project. These
+   are all of the .cpp files located in the main directory.
+4. Add all of the rule-set specific source files; these are all of
+   the .cpp files in the rule-set directory.
+5. Update the include path to include both the main directory and the
+   rule-set directory.
+6. That's it; you should be able to compile Atlantis at this point.
+   You'll probably want to compile the 'Checked' version in case you
+   want to debug.
+
+
+2.3 The gory details (for advanced users, or the terminally curious)
+
+Atlantis is a standard C++ program, and is deliberately written with no 
+UI or other platform specific features. It does not handle email, 
+running turns, or adding players, which is all left up to the GM.
+
+If you are building from your own project or makefile, you will need to 
+include both sets of source files in the makefile.  As such, simply 
+putting all of the source files into a project or makefile and compiling
+it as a command-line application is about all there is to it. 
+
+Atlantis has a number of variant games, with different races, monsters 
+and features. For each of these games there is a subdirectory for all of
+the rule set specific files; the common Atlantis engine files live in 
+the main directory. 
+
+
+3. Running a Game of Atlantis
+
+The Atlantis program is actually very simple in terms of input and 
+output. It takes a set of files as input, runs the turn, and writes out 
+a set of files to the same directory. The Atlantis program does not do 
+anything in terms of scanning for email, sending email, or anything of 
+that nature. It is up to the gamemaster to either make sure the files 
+are in the right place, and the right emails get sent out, or he must 
+find or write a program to do that.  
+
+Explanation: Atlantis is designed to be a very generic program, that 
+will run on many computer systems, and in different ways. Different 
+computer systems handle email in different ways; making Atlantis work   
+on all of these different systems would be quite a task, and in my 
+opinion one that is best separated from the actual game-running program.
+
+Further, nothing about Atlantis requires that it be an email game at 
+all; the engine can be used in many different ways. For example, a web 
+based version of Atlantis is available at <http://grelth.army-of-
+darkness.it/>  
+
+
+3.1 Running a game of Atlantis by hand (the hard way)
+
+I'll give this as a list of commented UNIX commands. The Windows 
+commands are very similar: move instead of mv, copy instead of cp, etc.
+
+Firstly, you'll need to create a game directory outside your source 
+directory, to avoid it being cluttered up with random files. Assuming 
+that you want to run a wyreth variant, and you're in the wyreth 
+directory:
+
+	bash-2.04$ mkdir ../../mygame
+	bash-2.04$ cp wyreth ../../mygame
+	bash-2.04$ cd ../../mygame
+	bash-2.04$ ./wyreth new
+  
+At this point, you'll be asked how big the map should be. For a first 
+test game, you'll probably want a 16x16 world:
+
+	Atlantis Engine Version: 4.0.10 (beta)
+	Wyreth, Version: 1.0.5 (beta)
+	
+	How wide should the map be? 
+	16
+	How tall should the map be? 
+	16
+	Making a level...
+
+	...Lots of other stuff about the world
+
+So, what have you got now? You should have the game info for your new 
+game, stored in game.out, and the player info, stored in players.out.
+
+	bash-2.04$ ls
+	game.out        players.out     wyreth
+
+In order to run our first turn, we need to do two things: feed wyreth 
+the game and players file, and add ourselves as a player. First, the 
+easy part:
+
+	mv game.out game.in
+	mv players.out players.in
+	
+Atlantis will automatically read game.in and players.in when it runs. 
+Now for the second bit. Edit the players.in file with your favorite text
+editor, and make it look like this:
+
+	AtlantisPlayerStatus
+	Version: 262154
+	TurnNumber: 9
+	GameStatus: Running
+	
+	Faction: 1
+	Name: The Guardsmen (1)
+	Email: NoAddress
+	Password: none
+	LastOrders: 0
+	SendTimes: 1
+	Faction: 2
+	Name: Creatures (2)
+	Email: NoAddress
+	Password: none
+	LastOrders: 0
+	SendTimes: 1
+	Faction: new
+	Name: Anthony
+	Email: anthony@beastie.house
+	Password: Test
+	Lastorders: 0
+	SendTimes: 1
+	
+Note: The first two factions are reserved for town guards and monsters, 
+which can cause some confusion. The first player faction will start as 
+faction number 3, the next as number 4, and so on.
+
+Now when the game runs, it'll add you (well, me in this example) to the 
+game. Let's run it and see what happens:
+
+	bash-2.04$ ./wyreth run
+	Atlantis Engine Version: 4.0.10 (beta)
+	Wyreth, Version: 1.0.5 (beta)
+	
+	Saved Game Engine Version: 4.0.10 (beta)
+	Saved Rule-Set Version: 1.0.5 (beta)
+	Reading the regions...
+	Setting up the neighbors...
+	Setting Up Turn...
+	Reading the Gamemaster File...
+	Reading the Orders File...
+	QUITting Inactive Factions...
+	Running the Turn...
+	Running FIND Orders...
+	Etcetera...
+
+Now if you look in the directory, you should see the following:
+
+	bash-2.04$ ls
+	game.in         players.in      report.1        wyreth
+	game.out        players.out     report.3
+
+The game has updated the world, and stored it in game.out and players.
+out. If you look at report.3, you should see your turn:
+
+	bash-2.04$ more report.3
+	Atlantis Report For:
+	Anthony (3) (War 1, Trade 1, Magic 1)
+	January, Year 1
+
+If you want to submit orders for your first turn, you'd leave your 
+orders in a file called orders.3 in the directory, and follow similar 
+steps to the ones you just did to run your first turn. Move game.in, 
+players.in and any report files out of the way:
+
+	mkdir 0
+	mv game.in players.i report.* 0
+
+And then do exactly what you did previously:
+
+	mv game.out game.in
+	mv players.out players.in
+	./wyreth run
+	
+In later turns, you'll want to move old orders out of the way too.
+
+
+3.2 Running a game the easy way (with scripts)
+
+Of course, this all gets very tedious, especially when running a game of
+more than four or five people. There are a number of scripts that can 
+help you out. In it's simplest form, a script will look like this:
+
+	#!/bin/bash
+	#The argument tells you what turn is running
+	gameturn=$1
+	
+	mkdir $gameturn
+	mv game.in players.in report.* $gameturn
+	
+	mv players.out players.in
+	mv game.out game.in
+	
+	./wyreth run
+	mv orders.* $gameturn
+
+under windows, this script will look more like (this is untested):
+
+set ARGUMENT=%1
+	
+	mkdir %ARGUMENT%
+	move game.in players.in report.* %ARGUMENT%
+	
+	move players.out players.in
+	move game.out game.in
+	
+	./wyreth run
+	move orders.* %ARGUMENT%
+
+These scripts will help you run turns by hand, by automating the tedious
+moving and copying of files. Just run it as ./runturn <gameturn> (after
+doing a chmod u+x runturn, of course).
+
+Once you've got a handle on that, there are a number of scripts 
+available to help you automate most, if not all of the email side of 
+things too, which is how the 'big boys' run games of several hundred 
+players. 
+
+There are many scripts in the files/GMTools section of yahoo groups: 
+<http://groups.yahoo.com/group/atlantisdev/files/GM%20Tools/>. Getting 
+them up and running is outside the scope of this FAQ, and the authors 
+will do a better job of it too, so you should ask them if you are in any
+doubt.
+
+
+4. Altering game rules
+
+There may come a time when you ask yourself "Why do War factions get so 
+much darned silver?" or "Why are Balrogs so darned powerful?" In this 
+case, you've probably played and run a couple of games, and are looking 
+to tweak the rules! Welcome to the club ;)
+
+The first step is to create your own subdirectory to store your game. 
+It's easier if you base your game on an existing variant. So do 
+something like 'cp -r wyreth mywyreth', except swap 'mywyreth' for 
+something a little more original.
+
+Once you've done that, have a closer look inside the subdirectory. The 
+two files that will interest you are extra.cpp and rules.cpp. They 
+contain all of the goodies that you'll want to tamper with. Don't worry 
+about tampering with forces beyond your ken. That's all part of the fun.
+
+Assume that you wanted to make the two changes above. First, change the 
+default tax amount for war factions. Edit rules.cpp, and change this:
+
+        50, /* TAX_INCOME */
+
+to this:
+
+        30, /* TAX_INCOME */
+
+Hah! That'll learn those pesky war factions!
+
+Balrogs are a little more tricky. You could add the following line to 
+the end of the ModifyTablesPerRuleset function in extra.cpp:
+
+	DisableItem(I_BALROG);
+
+This will disable Balrogs in your game. Of course, none of the mages in 
+your game will be very amused by your little joke when they finally reach 
+SUBA, so we'd better do something a little more sensible. How about:
+
+	ModifyMonsterAttacksAndHits(MONSTER_BALROG, 100, 100, 0);
+
+Now any balrogs will have 100 hits, and do 100 melee attacks, instead of
+200. That's pretty cool, but now they're just easier to harvest. D'oh! 
+Well, we can do something about that, too. Just add the following line:
+
+	ModifyMonsterSpoils(MONSTER_BALROG, 20000, IT_ADVANCED);
+
+Cool - now Balrogs will only give out advanced spoils, in addition to
+being wussier. It's important to balance these sorts of things out. A
+wussy creature that explodes with treasure is just asking for some sort
+of abuse ;) 
+
+Note also that we're using different 'values' for these functions - 
+DisableItem uses I_BALROG, but ModifyMonster uses MONSTER_BALROG instead. 
+The difference is which table it's indexing into.  The I_ values affect 
+things in the ItemDefs table. The spoils and treasure type of the 
+monster are in the MonDefs table. Enable/DisableItem work on Items 
+(and thus I_ is correct there). 
+
+Similarly, if you were modifying weapon characteristics, you would use 
+WEAPON_ for things like weapon class, etc. The name of the function tells 
+you which table you are working with. If you're in doubt, check out the 
+gamedata.h file in the main source tree.
+
+Most settings in the game will either be boolean (ie true/false) or 
+integer values, but some will be enum types. What this means is that you
+can set individual bits of a value. A good example is the new TRANSPORT 
+variable, used to set the behaviour of quartermasters:
+
+	enum {
+		ALLOW_TRANSPORT = 0x01, // Do we allow transport/distribute?
+		QM_AFFECT_COST = 0x02, // QM level affect shipping cost?
+		QM_AFFECT_DIST = 0x04, // QM level affect longrange dist?
+	};
+	int TRANSPORT;
+
+If you wanted to switch on quartermasters, and have their level affect 
+shipping costs, but not distance, you would set the variable in rules.cpp 
+like so:
+
+	Gamedefs::ALLOW_TRANSPORT | GameDefs::QM_AFFECT_COST, // TRANSPORT
+
+Note that the different values are set using a boolean OR |, not a 
+logical OR ||.
+
+Once you've finished twisting the game to your own evil purposes, be sure 
+to let your players know of all the wonderful modifications you've made 
+to the game, so they can plan their tactics accordingly. 
+
+One final note on modifying Atlantis games: from time to time, Gamedefs 
+will be added to the source, usually in gamedefs.h and rules.cpp. If you
+update your source, but not your custom game's rules.cpp file, your game
+may not run any more, or will run strangely, which will make you sad.
+Adding the new gamedefs in will make you happy again ;)
+                                                                                                  
