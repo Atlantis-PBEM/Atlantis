@@ -1999,11 +1999,13 @@ AString *ShowSkill::Report(void)
 					*str += " A unit with this skill may use the PRODUCE "
 						    "order to produce lances from wood.  A lance "
 							"attacks as if the target has a defensive skill "
-							"of 0, and requires riding skill to wield.  It "
-							"takes two units of wood to produce a lance, "
-							"which weighs two units.  A unit wielding a "
-							"lance attacks with a combat skill equal to "
-							"their riding skill + 5.";
+							"of their riding skill (as modified by mount "
+							"and terrain) if they are mounted, or 0 if they "
+							"are not mounted.   A lance requires riding "
+							"skill to wield.  It takes two units of wood "
+							"to produce a lance, which weighs two units.  "
+							"A unit wielding a lance attacks with a combat "
+							"skill equal to their mount bonus + 5.";
 					if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
 						*str += " Production can be increased by using axes.";
 					}

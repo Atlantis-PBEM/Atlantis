@@ -105,6 +105,7 @@ void Battle::DoAttack( int round,
 
     for (int i = 0; i < numAttacks; i++ )
     {
+		int type = ATTACK_COMBAT;
         WeaponType *pWep = 0;
         if( a->weapon != -1 )
         {
@@ -130,7 +131,10 @@ void Battle::DoAttack( int round,
             flags = pWep->flags;
         }
 
-        def->DoAnAttack( 0, 1, ATTACK_COMBAT, a->askill, flags, 0 );
+		if(flags & WeaponType::NEEDMOUNT) {
+			type = ATTACK_RIDING;
+		}
+        def->DoAnAttack( 0, 1, type, a->askill, flags, 0 );
         if (!def->NumAlive()) break;
     }
     

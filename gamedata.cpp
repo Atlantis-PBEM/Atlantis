@@ -597,31 +597,33 @@ WeaponType wepd[] = {
     { -1, -1, 0, 4, 1 },
 	// WEAPON_SUPERBOW
 	{ S_LONGBOW, S_CROSSBOW,
-	  WeaponType::NEEDSKILL | WeaponType::RANGED |
-	  WeaponType::NODEFENSE | WeaponType::GOODARMOR,
+	  WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
+	  WeaponType::NOATTACKERDEFENSE | WeaponType::GOODARMOR,
 	  2, WeaponType::NUM_ATTACKS_SKILL },
     // WEAPON_DOUBLEBOW
     { S_LONGBOW, S_CROSSBOW,
-      WeaponType::NEEDSKILL | WeaponType::RANGED |
-      WeaponType::NODEFENSE | WeaponType::GOODARMOR, 
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
+	  WeaponType::NOATTACKERDEFENSE | WeaponType::GOODARMOR, 
       0, WeaponType::NUM_ATTACKS_SKILL },
     // WEAPON_MCROSSBOW
     { S_CROSSBOW, -1,
       WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
-      WeaponType::GOODARMOR,
+      WeaponType::NOATTACKERDEFENSE | WeaponType::GOODARMOR,
       0, 1 },
     // WEAPON_LONGBOW
     { S_LONGBOW, -1,
-      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE,
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
+	  WeaponType::NOATTACKERDEFENSE,
       -2, 1 },
     // WEAPON_CROSSBOW
     { S_CROSSBOW, -1,
       WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NODEFENSE |
-      WeaponType::GOODARMOR,
+	  WeaponType::NOATTACKERDEFENSE | WeaponType::GOODARMOR,
       0, -2 },
 	// WEAPON_LANCE
 	{ S_RIDING, -1,
-	  WeaponType::NEEDSKILL | WeaponType::NODEFENSE | WeaponType::NEEDMOUNT,
+	  WeaponType::NEEDSKILL | WeaponType::NOATTACKERDEFENSE |
+	  WeaponType::NEEDMOUNT,
 	  5, 1},
 	// WEAPON_ABAX
 	{ -1, -1, WeaponType::GOODARMOR, 8, -2},

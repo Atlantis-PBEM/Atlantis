@@ -269,8 +269,12 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
             //
             if( pWep->flags & WeaponType::NEEDSKILL )
             {
-                askill = level1 + pWep->skillBonus;
-				if(!(pWep->flags & WeaponType::NODEFENSE))
+				if(pWep->flags & WeaponType::NEEDMOUNT) {
+					askill += pWep->skillBonus;
+				} else {
+					askill = level1 + pWep->skillBonus;
+				}
+				if(!(pWep->flags & WeaponType::NOATTACKERDEFENSE))
 					dskill[ ATTACK_COMBAT ] += level1 + pWep->skillBonus;
             }
             else
@@ -1149,6 +1153,8 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
         {
             tlev = 0;
         }
+
+		// Handle lancers specially
 
         /* 5. Attack soldier */
         if ( attackType != NUM_ATTACK_TYPES)

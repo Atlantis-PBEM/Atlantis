@@ -128,6 +128,7 @@ public:
         NODEFENSE = 0x8,
         GOODARMOR = 0x10,
         NEVERMISS = 0x20,
+		NOATTACKERDEFENSE = 0x40,
     };
         
     int skill1;
