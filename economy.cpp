@@ -377,9 +377,9 @@ void ARegion::SetupCityMarket()
 		demand[i] = 0;
 		rare[i] = 0;
 		antiques[i] = 0;
-		if(ItemDefs[i].type & IT_TRADE) numtrade++;
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(ItemDefs[i].flags & ItemType::NOMARKET) continue;
+		if(ItemDefs[i].type & IT_TRADE) numtrade++;
 		if (i==I_SILVER) continue;
 		if((ItemDefs[i].type & IT_MAN)
 			|| (ItemDefs[i].type & IT_LEADER)) continue;

@@ -70,6 +70,7 @@ class TerrainType
 		enum {
 			RIDINGMOUNTS = 0x1,
 			FLYINGMOUNTS = 0x2,
+			BARREN       = 0x4,
 		};
 		int flags;
 

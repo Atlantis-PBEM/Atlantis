@@ -1051,8 +1051,10 @@ void ARegionList::UnsetRace(ARegionArray *pArr)
 
 void ARegionList::RaceAnchors(ARegionArray *pArr)
 {
+	Awrite("Setting Race Anchors");
 	UnsetRace(pArr);
 	int x, y;
+	int wigout = 0;
 	for(x = 0; x < pArr->x; x++) {
 		for(y = 0; y < pArr->y; y++) {
 			// Anchor distribution: depends on GROW_RACES value
@@ -1061,12 +1063,14 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			int xoff = x + 2 - getrandom(3) - getrandom(3);
 			ARegion *reg = pArr->GetRegion(xoff, y);
 			if(!reg) continue;
-
+			
 			if((reg->type == R_LAKE) && (!Globals->LAKESIDE_IS_COASTAL))
 				continue;
-
+			if (TerrainDefs[reg->type].flags & TerrainType::BARREN) continue;
+			
 			reg->race = -1;
-
+			wigout = 0; // reset sanity
+			
 			if(TerrainDefs[reg->type].similar_type == R_OCEAN) {
 				// setup near coastal race here
 				int d = getrandom(NDIRS);
@@ -1078,7 +1082,13 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 						int rnum =
 							sizeof(TerrainDefs[nreg->type].coastal_races) /
 							sizeof(int);
-						reg->race = TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
+						
+						while ( reg->race == -1 || 
+								(ItemDefs[reg->race].flags & ItemType::DISABLED)) {
+							reg->race = 
+								TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
+							if (++wigout > 100) break;
+						}
 					} else {
 						int dir = getrandom(NDIRS);
 						if(d == nreg->GetRealDirComp(dir)) continue;
@@ -1089,7 +1099,27 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			} else {
 				// setup noncoastal race here
 				int rnum = sizeof(TerrainDefs[reg->type].races)/sizeof(int);
-				reg->race = TerrainDefs[reg->type].races[getrandom(rnum)];
+				
+				while ( reg->race == -1 || 
+				        (ItemDefs[reg->race].flags & ItemType::DISABLED)) {
+					reg->race = TerrainDefs[reg->type].races[getrandom(rnum)];
+					if (++wigout > 100) break;
+				}
+			}
+			
+			/* leave out this sort of check for the moment
+			if (wigout > 100) {
+				// do something!
+				Awrite("There is a problem with the races in the ");
+				Awrite(TerrainDefs[reg->type].name);
+				Awrite(" region type");
+			}
+			*/
+			
+			if (reg->race == -1) {
+				cout << "Hey! No race anchor got assigned to the " 
+				     << TerrainDefs[reg->type].name 
+					 << " at " << x << "," << y << "\n";
 			}
 		}
 	}
@@ -1097,6 +1127,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 
 void ARegionList::GrowRaces(ARegionArray *pArr)
 {
+	Awrite("Growing Races");
 	RaceAnchors(pArr);
 	int a, x, y;
 	for(a = 0; a < 25; a++) {

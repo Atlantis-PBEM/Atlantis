@@ -258,7 +258,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyMonsterSpecial("LICH", "black_wind", 1);
 	ModifyMonsterDefense("LICH", 5, 4);
 	ModifyMonsterDefense("LICH", 0, 5);
-	ModifyMonsterDefense("TREN", 2, 5);
 	
 	// Beef up Undead and Skeletons slightly, too...
 	ModifyMonsterSpecial("SKEL", "fear", 2);
@@ -277,6 +276,7 @@ void Game::ModifyTablesPerRuleset(void)
 
 	// Living Trees (ie Ents) should resist missile attacks
 	ModifyMonsterDefense("TREN", 5, 3);
+	ModifyMonsterDefense("TREN", 2, 5);
 	
 	// Why doesn't the sphinx have tact?
 	ModifyMonsterSkills("SPHI", 4, 3, 0); // tact, obse, stea
