@@ -1,0 +1,42 @@
+   -- GIVE ALL TRADE (to give away all trade goods) (other categories for
+      other obvious flags) (maybe.. there are issues with this)
+   -- BUY ALL/SELL ALL
+   -- Improve the item/hex editor
+   -- Gamedef to handle various options around combat/weapons/bows for taxing
+   -- Gamedefs for various economy options. (far future)
+   -- Give more information when SHOW <item> is done.
+   -- Add option to allow towers/forts/etc to allow training only a certain
+      number of mages.
+   -- Consider more complicated GIVE processing of 'GIVE ALL EXCEPT .....'
+   -- Consider requiring both food and pay for upkeep.
+   -- Merchent skill (limited number of merchents)/Limited number
+      of tacticians/generals?
+   -- Make errors for overwriting orders ONLY be an error if overwriting a
+      NON-@ order.
+   -- Find some way to allow multiple factions starting a build on the same
+      turn to help.
+   -- Consider some sorts of dangers for production
+   -- Consider having artifact spells require physical components rather than
+      merely money.
+   -- Increase number of products possible per terrain type from 5 to 7?
+   -- Consider a gamedef which keeps tactics skill (and combat skills?)
+      hidden from combatants.  (I personally think this a bad idea, but it
+      was suggested, thus goes on this list)
+   -- Consider hiding battle details from units which are completely wiped
+      out?  [You know a battle occured, but no details of the enemy forces].
+      Again, I suspect rumors travel (ie, the peasants in the area that saw
+      the battle talk and the word of their strenght spreads).   Given that
+      generating *inaccurate* reports would be a royal pain, I will probably
+      leave this be.
+   -- Consider allowing luxury food items (chocolate, vodka, cavier) to be
+      able to be eaten.  Again, don't think this is a good idea, but will
+      at least think on it.
+   -- Tune the amounts of new resources
+   -- Add underdeep changes from Georg (make underdeep specific terrain as well)
+   -- Consider adding the ability to produce trade goods.
+   -- Consider Duergar's war horses
+   -- Consider building specific skills.
+   -- Consider non-teachable skills.
+   -- Consider having use'd items.
+   -- Need a tool which given template files and globals structures can
+      build an accurate rules set.

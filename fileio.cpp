@@ -72,32 +72,49 @@ Areport::~Areport() {
 	delete file;
 }
 
-void Aoutfile::Open(const AString & s) {
-  while (! (file->rdbuf()->is_open())) {
-    AString * name = getfilename(s);
-    file->open(name->Str(),ios::noreplace | ios::out);
-    delete name;
-  }
+void Aoutfile::Open(const AString & s)
+{
+	AString * name = getfilename(s);
+	ifstream tfile;
+	tfile.open(name->Str(),ios::in);
+	if(tfile.rdbuf()->is_open()) {
+		delete name;
+		tfile.close();
+	}
+	tfile.close();
+
+	while (! (file->rdbuf()->is_open())) {
+		file->open(name->Str(),/*ios::noreplace |*/ ios::out);
+		delete name;
+	}
 }
 
-int Aoutfile::OpenByName(const AString & s) {
-  AString temp = s;
-  file->open(temp.Str(),ios::noreplace | ios::out);
-  if (!file->rdbuf()->is_open()) return -1;
-  return 0;
+int Aoutfile::OpenByName(const AString & s)
+{
+	AString temp = s;
+	ifstream tfile;
+	tfile.open(temp.Str(), ios::in);
+	if(tfile.rdbuf()->is_open()) {
+		tfile.close();
+		return -1;
+	}
+	tfile.close();
+	file->open(temp.Str(),/*ios::noreplace |*/ ios::out);
+	if (!file->rdbuf()->is_open()) return -1;
+	return 0;
 }
 
 void Ainfile::Open(const AString & s) {
   while (! (file->rdbuf()->is_open())) {
     AString * name = getfilename(s);
-    file->open(name->Str(),ios::in | ios::nocreate);
+    file->open(name->Str(),ios::in /*| ios::nocreate*/);
     delete name;
   }
 }
 
 int Ainfile::OpenByName(const AString & s) {
   AString temp = s;
-  file->open(temp.Str(),ios::in | ios::nocreate);
+  file->open(temp.Str(),ios::in /*| ios::nocreate*/);
   if (! (file->rdbuf()->is_open())) return -1;
   return 0;
 }
@@ -168,7 +185,7 @@ void Aorders::Open(const AString & s)
     while (! (file->rdbuf()->is_open()))
     {
         AString * name = getfilename(s);
-        file->open(name->Str(),ios::in | ios::nocreate);
+        file->open(name->Str(),ios::in /*| ios::nocreate*/);
         delete name;
     }
 }
@@ -176,7 +193,7 @@ void Aorders::Open(const AString & s)
 int Aorders::OpenByName(const AString & s)
 {
     AString temp = s;
-    file->open(temp.Str(),ios::in | ios::nocreate);
+    file->open(temp.Str(),ios::in /*| ios::nocreate*/);
     if (! (file->rdbuf()->is_open())) return -1;
     return 0;
 }
@@ -192,10 +209,19 @@ AString * Aorders::GetLine() {
 
 void Areport::Open(const AString & s)
 {
+    AString * name = getfilename(s);
+	ifstream tfile;
+	tfile.open(name->Str(), ios::in);
+	if(tfile.rdbuf()->is_open()) {
+		delete name;
+		tfile.close();
+		return;
+	}
+	tfile.close();
+
     while (! (file->rdbuf()->is_open()))
     {
-        AString * name = getfilename(s);
-        file->open(name->Str(),ios::noreplace | ios::out);
+        file->open(name->Str(),/*ios::noreplace |*/ ios::out);
         delete name;
     }
     tabs = 0;
@@ -204,7 +230,14 @@ void Areport::Open(const AString & s)
 int Areport::OpenByName(const AString & s)
 {
     AString temp = s;
-    file->open(temp.Str(),ios::noreplace | ios::out);
+	ifstream tfile;
+	tfile.open(temp.Str(), ios::in);
+	if(tfile.rdbuf()->is_open()) {
+		tfile.close();
+		return -1;
+	}
+	tfile.close();
+    file->open(temp.Str(),/*ios::noreplace |*/ ios::out);
     tabs = 0;
     if (!file->rdbuf()->is_open()) return -1;
     return 0;
