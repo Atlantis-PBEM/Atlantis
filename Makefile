@@ -21,8 +21,8 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o faction.o \
   spells.o template.o unit.o
 
 OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
-  $(patsubst %.o,$(GAME)/obj/%.o,$(ENGINE_OBJECTS)) \
-  $(GAME)/obj/i_rand.o
+  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) \
+  obj/i_rand.o
 
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
@@ -66,6 +66,7 @@ wyreth-clean:
 
 clean:
 	rm -f $(OBJECTS)
+	if [ -d obj ]; then rmdir obj; fi
 	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
@@ -95,14 +96,15 @@ rules: $(GAME)/$(GAME)
 FORCE:
 
 objdir:
+	if [ ! -d obj ]; then mkdir obj; fi
 	if [ ! -d $(GAME)/obj ]; then mkdir $(GAME)/obj; fi
 
 
 $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
 	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
-$(patsubst %.o,$(GAME)/obj/%.o,$(ENGINE_OBJECTS)): $(GAME)/obj/%.o: %.cpp
+$(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
 	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
-$(GAME)/obj/i_rand.o: i_rand.c
+obj/i_rand.o: i_rand.c
 	$(CC) $(CFLAGS) -c -o $@ $<
