@@ -736,7 +736,7 @@ void ARegion::SetupProds()
 		if (typer->economy) {
 			// Foodchoice = 0 or 1 if inland, 0, 1, or 2 if coastal
 			int foodchoice = getrandom(2 +
-					(Globals->COSTAL_FISH && IsCoastal()));
+					(Globals->COASTAL_FISH && IsCoastal()));
 			switch (foodchoice) {
 				case 0:
 					if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
