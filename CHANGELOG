@@ -487,7 +487,7 @@ Changes from 4.0.9 -> 4.0.10
    -- Added EVICT order as submitted by Peter Rayner
       <wacky_wizard001@hotmail.com> with slight modifications.
    -- Fixed bugs in combat where riding skill was being counted twice in
-      defence, and ranged weaponswere using COMB skill for attack strength.
+      defence, and ranged weapons were using COMB skill for attack strength.
    -- Fixed bug in EVICT code that caused a segmentation fault
    -- Added SKILL_PRACTISE_AMOUNT and associated code all over the place
       to allow skills to improve with practice.  A unit may improve at
@@ -505,3 +505,8 @@ Changes from 4.0.9 -> 4.0.10
       insufficient checking that you could sell both quantities.  This
 	  bug existed for a while but never showed up because of the bug
 	  with multiple sells of the same item which I fixed a few weeks ago.
+   -- Changed MOVE and SAIL so that if the unit runs out of movement
+      points, the remaining moves are added to the front of the TURN
+      queue.  This allows caravans using @TURN to work properly despite
+      weather changing move costs.  Also fixed a bug where a single
+      @TURN command would be lost because of a pointer being reused.

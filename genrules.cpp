@@ -1237,7 +1237,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		cost = TerrainDefs[R_FOREST].movepoints;
 		temp += NumToWord(cost) + " movement point" + (cost == 1?"":"s");
 		temp += " needed to move into the forest region to the northeast, "
-			"so the movement is halted at this point.";
+			"so the movement is halted at this point.  The remaining move"
+			"will be added to his orders for the next turn, before any";
+		temp += f.Link("#turn", "TURN") + " orders are processed.";
 	}
 	f.Paragraph(temp);
 
@@ -4834,8 +4836,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"ENDTURN line.";
 	f.Paragraph(temp);
 	f.Paragraph("Examples:");
-	temp = "Study combat, this month, move north next month, and then in two "
-		"months, pillaging and advane north.";
+	temp = "Study combat this month, move north next month, and then in two "
+		"months, pillaging and advance north.";
 	temp2 = "STUDY COMB\n";
 	temp2 += "TURN\n";
 	temp2 += "    MOVE N\n";
@@ -4858,24 +4860,29 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "MOVE N\n";
 	temp2 += "@TURN\n";
 	temp2 += "    GIVE 13523 1000 SILV\n";
-	temp2 += "    MOVE S\n";
+	temp2 += "    MOVE S S S\n";
 	temp2 += "ENDTURN\n";
 	temp2 += "@TURN\n";
-	temp2 += "    MOVE N\n";
+	temp2 += "    MOVE N N N\n";
 	temp2 += "ENDTURN";
 	f.CommandExample(temp, temp2);
 	temp = "After the turn, the orders for that unit would look as "
 		"follows in the orders template:";
 	temp2 = "GIVE 13523 1000 SILV\n";
-	temp2 += "MOVE S\n";
+	temp2 += "MOVE S S S\n";
 	temp2 += "@TURN\n";
-	temp2 += "    MOVE N\n";
+	temp2 += "    MOVE N N N\n";
 	temp2 += "ENDTURN\n";
 	temp2 += "@TURN\n";
 	temp2 += "    GIVE 13523 1000 SILV\n";
-	temp2 += "    MOVE S\n";
+	temp2 += "    MOVE S S S\n";
 	temp2 += "ENDTURN";
 	f.CommandExample(temp, temp2);
+	temp = "If the unit does not have enough movement points to cover "
+			"the full distance, the MOVE commands will automatically "
+			"be completed over multiple turns before executing the next "
+			"TURN block.";
+	f.Paragraph(temp);
 
 	if(Globals->USE_WEAPON_ARMOR_COMMAND) {
 		f.ClassTagText("DIV", "rule", "");

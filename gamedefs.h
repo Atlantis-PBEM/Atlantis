@@ -60,6 +60,7 @@ enum {
 };
 
 extern char **DirectionStrs;
+extern char **DirectionAbrs;
 
 extern char **MonthNames;
 

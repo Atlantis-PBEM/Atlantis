@@ -36,15 +36,6 @@
 #include "skills.h"
 #include "gamedata.h"
 
-char * DirectionAbrs[] = {
-	"N",
-	"NE",
-	"SE",
-	"S",
-	"SW",
-	"NW"
-};
-
 OrdersCheck::OrdersCheck()
 {
 	pCheckFile = 0;

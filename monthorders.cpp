@@ -176,7 +176,19 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
 				}
 
 				if (movepoints < cost) {
-					cap->Error("SAIL: Can't sail that far.");
+					cap->Error("SAIL: Can't sail that far;"
+								" remaining moves queued.");
+					TurnOrder *tOrder = new TurnOrder;
+					tOrder->repeating = 0;
+					AString order = "SAIL ";
+					order += DirectionAbrs[i];
+					forlist(&o->dirs) {
+						MoveDir *move = (MoveDir *) elem;
+						order += " ";
+						order += DirectionAbrs[move->dir];
+					}
+					tOrder->turnOrders.Add(new AString(order));
+					cap->turnorders.Insert(tOrder);
 					break;
 				}
 
@@ -1070,7 +1082,27 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 			if(unit->MoveType() == M_NONE) {
 				unit->Error("MOVE: Unit is overloaded and cannot move.");
 			} else {
-				unit->Error("MOVE: Unit has insufficient movement points.");
+				unit->Error("MOVE: Unit has insufficient movement points;"
+						" remaining moves queued.");
+				TurnOrder *tOrder = new TurnOrder;
+				AString order;
+				tOrder->repeating = 0;
+    			if (o->advancing) order = "ADVANCE ";
+				else order = "MOVE ";
+				if (i < NDIRS) order += DirectionAbrs[i];
+				else if (i == MOVE_IN) order += "IN";
+				else if (i == MOVE_OUT) order += "OUT";
+				else order += i - MOVE_ENTER;
+				forlist(&o->dirs) {
+					MoveDir *move = (MoveDir *) elem;
+					order += " ";
+					if (move->dir < NDIRS) order += DirectionAbrs[move->dir];
+					else if (move->dir == MOVE_IN) order += "IN";
+					else if (move->dir == MOVE_OUT) order += "OUT";
+					else order += move->dir - MOVE_ENTER;
+				}
+				tOrder->turnOrders.Add(new AString(order));
+				unit->turnorders.Insert(tOrder);
 			}
             goto done_moving;
         }

@@ -1915,15 +1915,15 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 
 				if (u->turnorders.First()) {
 					int first = 1;
+					TurnOrder *tOrder;
 					forlist(&u->turnorders) {
-						TurnOrder *tOrder = new TurnOrder;
 						tOrder = (TurnOrder *)elem;
+						Awrite("loop");
 						if (first) {
 							forlist(&tOrder->turnOrders) {
 								f->PutStr(*((AString *) elem));
 							}
 							first = 0;
-							if (tOrder->repeating) u->turnorders.Add(tOrder);
 						} else {
 							if (tOrder->repeating)
 								f->PutStr(AString("@TURN"));
@@ -1935,6 +1935,14 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 							}
 							f->PutStr(AString("ENDTURN"));
 						}
+					}
+					tOrder = (TurnOrder *) u->turnorders.First();
+					if (tOrder->repeating) {
+						f->PutStr(AString("@TURN"));
+						forlist(&tOrder->turnOrders) {
+							f->PutStr(*((AString *) elem));
+						}
+						f->PutStr(AString("ENDTURN"));
 					}
 				}
 				u->turnorders.DeleteAll();

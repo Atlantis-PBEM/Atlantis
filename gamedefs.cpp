@@ -35,6 +35,17 @@ char *dr[] = {
 
 char ** DirectionStrs = dr;
 
+char *da[] = {
+    "N",
+    "NE",
+    "SE",
+    "S",
+    "SW",
+    "NW"
+};
+
+char ** DirectionAbrs = da;
+
 char *mn[] = {
   "January",
   "February",

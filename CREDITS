@@ -39,6 +39,8 @@ Stephen Baillie
       farsight code and other places.
 	Implemented multiple taxation options controlling who could tax.
 	Implemented skill improvement through practise code.
+	Changed MOVE and SAIL to queue moves that failed because of lack
+	of movement points, so that @TURN caravans can cope with weather.
 Nick Hoggard
     Implementation of the EXCHANGE order.
 	Implementation of the TURN order which allows pre-doing turn orders as
