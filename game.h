@@ -146,6 +146,9 @@ private:
     void CountAllMages();
 	void CountAllApprentices();
     void WriteReport();
+    // LLS - write order templates
+    void WriteTemplates();
+
     void DeleteDeadFactions();
 
     //

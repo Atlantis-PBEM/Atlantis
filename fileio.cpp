@@ -426,11 +426,12 @@ void Arules::TagText(const AString &tag, const AString &text)
 	Enclose(0, tag);
 }
 
+// LLS - converted HTML tags to lowercase
 void Arules::ClassTagText(const AString &tag, const AString &cls,
 		const AString &text)
 {
 	AString temp = tag;
-	temp +=  " CLASS=\"";
+	temp +=  " class=\"";
 	temp += cls;
 	temp += "\"";
 	Enclose(1, temp);
@@ -438,28 +439,32 @@ void Arules::ClassTagText(const AString &tag, const AString &cls,
 	Enclose(0, tag);
 }
 
+// LLS - converted HTML tags to lowercase
 void Arules::Paragraph(const AString &text)
 {
-	Enclose(1, "P");
+	Enclose(1, "p");
 	PutStr(text);
-	Enclose(0, "P");
+	Enclose(0, "p");
 }
 
+// LLS - converted HTML tags to lowercase
 void Arules::CommandExample(const AString &header, const AString &examp)
 {
 	Paragraph(header);
 	Paragraph("");
-	Enclose(1, "PRE");
+	Enclose(1, "pre");
 	PutNoFormat(examp);
-	Enclose(0, "PRE");
+	Enclose(0, "pre");
 }
 
+// LLS - converted HTML tags to lowercase
 AString Arules::Link(const AString &href, const AString &text)
 {
-	return (AString("<A HREF=\"")+href+"\">"+text+"</A>");
+	return (AString("<a href=\"")+href+"\">"+text+"</a>");
 }
 
+// LLS - converted HTML tags to lowercase
 void Arules::LinkRef(const AString &name)
 {
-	PutStr(AString("<A NAME=\"")+name+"\"></A>");
+	PutStr(AString("<a name=\"")+name+"\"></a>");
 }

@@ -551,3 +551,14 @@ Changes from 4.0.10 -> 5.0.0
 --------------------------------------------------
    -- Fixed brokeness in conquest map generation caused by terrain patch
    -- Fixed potential namespace conflict on 'fill' from template.cpp
+   -- Changed function of TEMPLATE order, as well as report format:
+      the TEMPLATE order information is now stored with the other faction
+      details (like TIMES), in the "players" file, like so:
+      Template: {off|short|long|map}
+      It is left to the server to handle this item (much like the
+      "SendTimes:" item in the "players" file).  During turn run, there will
+      be two files produced for each faction ID:  report.ID, and template.ID .
+      In cases where "off" was chosen, a "short" report will be produced
+      for the faction (thus allowing your server to propagate a set of
+      orders automatically [if you do that sort of thing] to the next
+      turn).

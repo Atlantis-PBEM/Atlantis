@@ -766,6 +766,13 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 		} else {
 			pFac->password = 0;
 		}
+        // LLS - looked like a good place to stick the Template test
+        } else if( *pToken == "Template:" ) {
+            pTemp = pLine->gettoken();
+            int nTemp = ParseTemplate(pTemp);
+            pFac->temformat = TEMPLATE_LONG;
+            if (nTemp != -1)
+                pFac->temformat = nTemp;
 	} else if( *pToken == "Reward:" ) {
 		pTemp = pLine->gettoken();
 		int nAmt = pTemp->value();
@@ -1105,6 +1112,10 @@ int Game::RunGame()
 
     Awrite("Writing the Report File...");
     WriteReport();
+	Awrite("");
+    // LLS - write order templates
+    Awrite("Writing order templates...");
+    WriteTemplates();
 	Awrite("");
     battles.DeleteAll();
 
@@ -1559,6 +1570,28 @@ void Game::WriteReport()
         Adot();
     }
 }
+
+// LLS - write order templates for factions
+void Game::WriteTemplates()
+{
+    Areport f;
+
+    forlist(&factions) {
+        Faction * fac = (Faction *) elem;
+        AString str = "template.";
+        str = str + fac->num;
+
+        if(!fac->IsNPC()) {
+            int i = f.OpenByName( str );
+            if (i != -1) {
+                fac->WriteTemplate( &f, this );
+                f.Close();
+            }
+        }
+        Adot();
+    }
+}
+
 
 void Game::DeleteDeadFactions()
 {

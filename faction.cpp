@@ -33,6 +33,8 @@
 //                             even in scenarios where they aren't used or
 //                             else your city guard and monster facs lose
 //                             their NPC status in UNLIMITED
+// 2002/AUG/01 Larry Stanbery  Seperated report from template: report.ID and
+//                             template.ID are now created
 //
 #include "gamedata.h"
 #include "game.h"
@@ -54,6 +56,23 @@ char *fs[] = {
 };
 
 char **FactionStrs = fs;
+
+// LLS - fix up the template strings
+char *tp[] = {
+    "off",
+    "short",
+    "long",
+    "map"
+};
+
+char **TemplateStrs = tp;
+
+int ParseTemplate(AString *token)
+{
+    for (int i = 0; i < NTEMPLATES; i++)
+        if (*token == TemplateStrs[i]) return i;
+    return -1;
+}
 
 int ParseAttitude(AString *token)
 {
@@ -532,13 +551,25 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	f->PutStr("");
 
 	forlist(&present_regions) {
-		((ARegionPtr *) elem)->ptr->WriteReport( f, this, pGame->month,
-												 &( pGame->regions ));
+		((ARegionPtr *) elem)->ptr->WriteReport( f, this, pGame->month, &( pGame->regions ));
 	} 
+        // LLS - maybe we don't want this -- I'll assume not, for now 
+	//f->PutStr("#end");
+	f->EndLine();
 
-	if (temformat != TEMPLATE_OFF) {
-		f->PutStr("");
+	present_regions.DeleteAll();
+}
 
+// LLS - write order template
+void Faction::WriteTemplate( Areport *f, Game *pGame )
+{
+    AString temp;
+    int tFormat = temformat;
+    if (!IsNPC())
+    {
+        if (tFormat == TEMPLATE_OFF)
+            tFormat = TEMPLATE_SHORT;
+        f->PutStr("");
 		switch (temformat) {
 			case TEMPLATE_SHORT:
 				f->PutStr("Orders Template (Short Format):");
@@ -560,20 +591,13 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 		f->PutStr(temp);
 		forlist((&present_regions)) {
 			// DK
-			((ARegionPtr *) elem)->ptr->WriteTemplate( f, this,
-													   &( pGame->regions ),
-													   pGame->month );
-		}
-	} else {
-		f->PutStr("");
-		f->PutStr("Orders Template (Off)");
+            ((ARegionPtr *) elem)->ptr->WriteTemplate( f, this, &( pGame->regions ), pGame->month );
 	}
 
 	f->PutStr("");
 	f->PutStr("#end");
 	f->EndLine();
-
-	present_regions.DeleteAll();
+    }
 }
 
 void Faction::WriteFacInfo( Aoutfile *file )
@@ -584,6 +608,8 @@ void Faction::WriteFacInfo( Aoutfile *file )
 	file->PutStr( AString( "Password: " ) + *password );
 	file->PutStr( AString( "LastOrders: " ) + lastorders );
 	file->PutStr( AString( "SendTimes: " ) + times );
+        // LLS - write template info to players file
+        file->PutStr( AString( "Template: " ) + TemplateStrs[temformat] );
 
 	forlist( &extraPlayers ) {
 		AString *pStr = (AString *) elem;

@@ -60,11 +60,13 @@ enum {
 };
 
 // DK
+// LLS - make templates cleaner for save/restore
 enum {
     TEMPLATE_OFF,
     TEMPLATE_SHORT,
     TEMPLATE_LONG,
-    TEMPLATE_MAP
+    TEMPLATE_MAP,
+    NTEMPLATES
 };
 
 enum {
@@ -78,6 +80,10 @@ enum {
 
 extern char ** AttitudeStrs;
 extern char ** FactionStrs;
+
+// LLS - include strings for the template enum
+extern char **TemplateStrs;
+int ParseTemplate(AString *);
 
 int ParseAttitude(AString *);
 
@@ -133,6 +139,8 @@ public:
     
     AString FactionTypeStr();
     void WriteReport( Areport *f, Game *pGame );
+    // LLS - write order template
+    void WriteTemplate(Areport *f, Game *pGame);
     void WriteFacInfo(Aoutfile *);
     
     void SetAttitude(int,int); /* faction num, attitude */
