@@ -59,7 +59,7 @@ class SkillList;
 
 struct SkillDepend
 {
-	int skill;
+	char *skill;
 	int level;
 };
 

@@ -298,7 +298,7 @@ AString Unit::StudyableSkills()
 	int j=0;
 
 	for (int i=0; i<NSKILLS; i++) {
-		if(SkillDefs[i].depends[0].skill != -1) {
+		if(SkillDefs[i].depends[0].skill != NULL) {
 			if (CanStudy(i)) {
 				if (j) {
 					temp += ", ";
@@ -852,7 +852,10 @@ void Unit::ForgetSkill(int sk)
 
 int Unit::CheckDepend(int lev, SkillDepend &dep)
 {
-	int temp = GetRealSkill(dep.skill);
+	AString skname = dep.skill;
+	int sk = LookupSkill(&skname);
+	if (sk == -1) return 0;
+	int temp = GetRealSkill(sk);
 	if(temp < dep.level) return 0;
 	if(lev >= temp) return 0;
 	return 1;
@@ -866,10 +869,9 @@ int Unit::CanStudy(int sk)
 
 	unsigned int c;
 	for(c = 0; c < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); c++) {
-		if(SkillDefs[sk].depends[c].skill == -1) return 1;
-		if(SkillDefs[SkillDefs[sk].depends[c].skill].flags &
-			SkillType::DISABLED)
-			continue;
+		if(SkillDefs[sk].depends[c].skill == NULL) return 1;
+		SkillType *pS = FindSkill(SkillDefs[sk].depends[c].skill);
+		if (pS && (pS->flags & SkillType::DISABLED)) continue;
 		if(!CheckDepend(curlev, SkillDefs[sk].depends[c])) return 0;
 	}
 	return 1;
@@ -949,7 +951,8 @@ int Unit::Practice(int sk)
 	if (curlev >= max) return 0;
 
 	for(i = 0; i < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); i++) {
-		reqsk = SkillDefs[sk].depends[i].skill;
+		AString skname = SkillDefs[sk].depends[i].skill;
+		reqsk = LookupSkill(&skname);
 		if (reqsk == -1) break;
 		if (SkillDefs[reqsk].flags & SkillType::DISABLED) continue;
 		reqlev = GetRealSkill(reqsk);
@@ -1919,7 +1922,8 @@ void Unit::SkillStarvation()
 			int dependancy_level = 0;
 			unsigned int c;
 			for(c=0;c < sizeof(SkillDefs[i].depends)/sizeof(SkillDepend);c++) {
-				if(SkillDefs[i].depends[c].skill == j) {
+				AString skname = SkillDefs[i].depends[c].skill;
+				if (skname == SkillDefs[j].abbr) {
 					dependancy_level = SkillDefs[i].depends[c].level;
 					break;
 				}

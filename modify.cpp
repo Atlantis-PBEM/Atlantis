@@ -42,12 +42,12 @@ void Game::DisableSkill(int sk)
 	SkillDefs[sk].flags |= SkillType::DISABLED;
 }
 
-void Game::ModifySkillDependancy(int sk, int i, int dep, int lev)
+void Game::ModifySkillDependancy(int sk, int i, char *dep, int lev)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
 	if(i < 0 || i >= (int)(sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend)))
 		return;
-	if(dep < -1 || dep > (NSKILLS-1)) return;
+	if (dep && (FindSkill(dep) == NULL)) return;
 	if(lev < 0) return;
 	SkillDefs[sk].depends[i].skill = dep;
 	SkillDefs[sk].depends[i].level = lev;

@@ -1479,8 +1479,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(SkillDefs[i].flags & SkillType::MAGIC) continue;
 		found = 0;
 		for(j = 0; j < 3; j++) {
-			k = SkillDefs[i].depends[j].skill;
-			if(k != -1 && !(SkillDefs[k].flags & SkillType::DISABLED)) {
+			SkillType *pS = FindSkill(SkillDefs[i].depends[j].skill);
+			if (pS && !(pS->flags & SkillType::DISABLED)) {
 				found = 1;
 				break;
 			}

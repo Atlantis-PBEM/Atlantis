@@ -171,7 +171,7 @@ private:
 	// Functions to allow enabling/disabling parts of the data tables
 	void EnableSkill(int sk); // Enabled a disabled skill
 	void DisableSkill(int sk);  // Prevents skill being studied or used
-	void ModifySkillDependancy(int sk, int i, int dep, int lev);
+	void ModifySkillDependancy(int sk, int i, char *dep, int lev);
 	void ModifySkillFlags(int sk, int flags);
 	void ModifySkillCost(int sk, int cost);
 	void ModifySkillSpecial(int sk, char *special);

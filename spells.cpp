@@ -702,7 +702,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 	}
 	if (val) {
 		u->Practice(sk);
-		r->NotifySpell(u, sk, &regions);
+		r->NotifySpell(u, SkillDefs[sk].abbr, &regions);
 	}
 
 }

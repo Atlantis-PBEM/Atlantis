@@ -2537,27 +2537,30 @@ int ARegion::HasCityGuard()
 	return 0;
 }
 
-int ARegion::NotifySpell(Unit *caster, int spell, ARegionList *pRegs)
+int ARegion::NotifySpell(Unit *caster, char *spell, ARegionList *pRegs)
 {
 	AList flist;
 	unsigned int i;
 
-	if (!(SkillDefs[spell].flags & SkillType::NOTIFY)) {
+	SkillType *pS = FindSkill(spell);
+
+	if (!(pS->flags & SkillType::NOTIFY)) {
 		// Okay, we aren't notifyable, check our prerequisites
-		for(i=0; i<sizeof(SkillDefs[spell].depends)/sizeof(SkillDepend); i++) {
-			int reqsk = SkillDefs[spell].depends[i].skill;
-			if (reqsk == -1) break;
-			if(NotifySpell(caster, reqsk, pRegs)) return 1;
+		for(i = 0; i < sizeof(pS->depends)/sizeof(SkillDepend); i++) {
+			if (pS->depends[i].skill == NULL) break;
+			if(NotifySpell(caster, pS->depends[i].skill, pRegs)) return 1;
 		}
 		return 0;
 	}
 
+	AString skname = spell;
+	int sp = LookupSkill(&skname);
 	forlist((&objects)) {
 		Object *o = (Object *) elem;
 		forlist ((&o->units)) {
 			Unit *u = (Unit *) elem;
 			if (u->faction == caster->faction) continue;
-			if (u->GetSkill(spell)) {
+			if (u->GetSkill(sp)) {
 				if (!GetFaction2(&flist, u->faction->num)) {
 					FactionPtr *fp = new FactionPtr;
 					fp->ptr = u->faction;
@@ -2569,8 +2572,8 @@ int ARegion::NotifySpell(Unit *caster, int spell, ARegionList *pRegs)
 
 	forlist_reuse (&flist) {
 		FactionPtr *fp = (FactionPtr *) elem;
-		fp->ptr->Event(AString(*(caster->name)) + " uses " +
-					   SkillStrs(spell) + " in " + Print(pRegs) + ".");
+		fp->ptr->Event(AString(*(caster->name)) + " uses " + SkillStrs(sp) +
+				" in " + Print(pRegs) + ".");
 	}
 	return 1;
 }

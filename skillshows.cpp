@@ -1455,29 +1455,34 @@ AString *ShowSkill::Report(Faction *f)
 	}
 
 	// Required skills
+	SkillType *lastpS = NULL;
 	last = -1;
 	if(level == 1) {
 		comma = 0;
 		int found = 0;
 		temp = "This skill requires ";
 		for(c=0; c<sizeof(SkillDefs[skill].depends)/sizeof(SkillDepend); c++) {
-			if(SkillDefs[skill].depends[c].skill == -1) continue;
-			if(SKILL_DISABLED(SkillDefs[skill].depends[c].skill)) continue;
+			SkillType *pS = FindSkill(SkillDefs[skill].depends[c].skill);
+			if (!pS || (pS->flags & SkillType::DISABLED)) continue;
 			found = 1;
-			if(last == -1) {
+			if(lastpS == NULL) {
+				lastpS = pS;
 				last = c;
 				continue;
 			}
-			temp += SkillStrs(SkillDefs[skill].depends[last].skill) + " " +
+			temp += SkillStrs(lastpS) + " " +
 				SkillDefs[skill].depends[last].level + ", ";
+			lastpS = pS;
 			last = c;
 			comma++;
 		}
 		if(comma) {
 			temp += "and ";
 		}
-		temp += SkillStrs(SkillDefs[skill].depends[last].skill) + " " +
+		if (found) {
+			temp += SkillStrs(lastpS) + " " +
 				SkillDefs[skill].depends[last].level;
+		}
 
 		if(found) {
 			if(!(*str == "")) *str += " ";
