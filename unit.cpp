@@ -981,21 +981,10 @@ int Unit::Study(int sk, int days)
 			}
 		}
 	}
-	forlist(&skills) {
-		s = (Skill *)elem;
-		if (s->type != sk) continue;
-		int max = 1000;
-		forlist (&items) {
-			Item *i = (Item *)elem;
-			if (ItemDefs[i->type].type & IT_MAN) {
-				int m = SkillMax(s->type, i->type);
-				if (m < max) max = m;
-			}
-		}
-		if (GetRealSkill(s->type) >= max) {
-			Error("STUDY: Maximum level for skill reached.");
-			return 0;
-		}
+	int max = GetSkillMax(sk);
+	if (GetRealSkill(sk) >= max) {
+		Error("STUDY: Maximum level for skill reached.");
+		return 0;
 	}
 
 	if (!CanStudy(sk)) {
@@ -1015,18 +1004,44 @@ int Unit::Study(int sk, int days)
 	return 1;
 }
 
+int Unit::GetSkillMax(int sk)
+{
+	int max = 0;
+
+	if (SkillDefs[sk].flags & SkillType::DISABLED) return 0;
+
+	forlist(&skills) {
+		Skill *s = (Skill *) elem;
+		if (s->type != sk) continue;
+		forlist (&items) {
+			Item *i = (Item *)elem;
+			if (ItemDefs[i->type].flags & ItemType::DISABLED) continue;
+			if (!(ItemDefs[i->type].type & IT_MAN)) continue;
+			int m = SkillMax(s->type, i->type);
+			if ((max == 0 && m > max) || (m < max)) max = m;
+		}
+	}
+	return max;
+}
+
 int Unit::Practice(int sk)
 {
-	int days, bonus, men, curlev, reqsk, reqlev;
+	int bonus, men, curlev, reqsk, reqlev;
 	unsigned int i;
 
 	bonus = Globals->SKILL_PRACTICE_AMOUNT;
 	if (practiced || (bonus < 1)) return 1;
-	days = skills.GetDays(sk);
-	men = GetMen();
-	if (men < 1 || days < 1 || days >= 450 * men) return 0;
 
+	/*
+	 * Let's do this check for max level correctly.. Non-leader units
+	 * won't ever be able to get to 450 days like the original code checked
+	 * for.  GetSkillMax will make sure that there are men in the unit and
+	 * that the unit knows the skill.
+	 */
+	int max = GetSkillMax(sk);
 	curlev = GetRealSkill(sk);
+	if (curlev >= max) return 0;
+
 	for(i = 0; i < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); i++) {
 		reqsk = SkillDefs[sk].depends[i].skill;
 		if (reqsk == -1) break;
@@ -1042,6 +1057,7 @@ int Unit::Practice(int sk)
 	}
 
 	if (bonus) {
+		men = GetMen();
 		Study(sk, men * bonus);
 		practiced = 1;
 	}
@@ -1108,19 +1124,11 @@ void Unit::AdjustSkills()
 		}
 
 		//
-		// Limit remaining skills to max
+		// Limit remaining skill to max
 		//
 		forlist(&skills) {
 			Skill *theskill = (Skill *) elem;
-			int max = 100;
-			forlist(&items) {
-				Item *i = (Item *) elem;
-				if (ItemDefs[i->type].type & IT_MAN) {
-					if (SkillMax(theskill->type, i->type) < max) {
-						max = SkillMax(theskill->type, i->type);
-					}
-				}
-			}
+			int max = GetSkillMax(theskill->type);
 			if (GetRealSkill(theskill->type) >= max) {
 				theskill->days = GetDaysByLevel(max) * GetMen();
 			}
