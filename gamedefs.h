@@ -383,6 +383,9 @@ public:
 	
 	// Relative frequency of TUNDRA terrain
 	int TUNDRAS;
+	
+	// Relative frequency of LAKE terrain
+	int LAKES;
 
 	// Enable Archipelago Creation
 	// = chance of creating archipelagos vs continents
@@ -402,13 +405,6 @@ public:
 	// creation time will rise exponentially with this value.
 	// Recommended: 8-12
 	int SEA_LIMIT;
-	
-	// Chance for Lake Creation
-	// Setting LAKES_EXIST is the chance that
-	// such regions will end up as lakes. The chance
-	// for lakes otherwise is 1/10 this value.
-	// suggested value: around 12.
-	int LAKES_EXIST;
 
 	// Lake Effect on Wages Options
 	// Lakes will add one to adjacent regions wages if set

@@ -1031,9 +1031,9 @@ int ARegion::TerrainProbability(int terrain)
 			break;
 		case R_FOREST:
 			retval += (100 - vegetation) * (100 - vegetation) / 18;
-			if (temperature > 60) retval += (temperature-60) * (temperature-60) / 24;
+			if (temperature > 55) retval += (temperature-55) * (temperature-55) / 18;
 			if (temperature < 30) retval += (temperature-30) * (temperature-30) / 24;
-			retval += TerrainFactor(humidity, 50);
+			retval += TerrainFactor(humidity, 65);
 			break;
 		case R_MOUNTAIN:
 			retval += (95-elevation) * (95-elevation) / 5;
@@ -1043,8 +1043,8 @@ int ARegion::TerrainProbability(int terrain)
 			break;
 		case R_SWAMP:
 			retval += (100-humidity) * (100-humidity) / 36;
-			retval += TerrainFactor(elevation, 10);
-			retval += SurfaceWater() * SurfaceWater() / 16;
+			retval += TerrainFactor(elevation, 15);
+			retval += (SurfaceWater()-3) * (SurfaceWater()-3) / 16;
 			break;
 		case R_JUNGLE:
 			retval += (90-vegetation) * (90-vegetation) / 36;
@@ -1057,11 +1057,21 @@ int ARegion::TerrainProbability(int terrain)
 			retval += (90-temperature) * (90-temperature) / 49;
 			if (vegetation > 25) retval += TerrainFactor(vegetation, 15);
 			break;
-		default: // R_TUNDRA
+		case R_TUNDRA:
 			if (temperature > 3)
 				retval += (temperature-3) * (temperature-3) / 6;
 			retval += Winds() * Winds() / 3;
 			retval += TerrainFactor(vegetation, 5);
+			break;
+		default: // LAKE
+			for(int i=0; i < NDIRS; i++) {
+				ARegion *nr = neighbors[i];
+				if(!nr) continue;
+				if(nr->type == R_OCEAN) retval += 500;
+			}
+			if (SurfaceWater() < 52)
+				retval += (52-SurfaceWater()) * (52-SurfaceWater()) / 7;
+			retval += TerrainFactor(humidity, 85) / 5;
 		}
 	return retval;
 }
@@ -3466,7 +3476,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name
 
 	SeverLandBridges(pRegionArrays[level]);
 
-	if (Globals->LAKES_EXIST) RemoveCoastalLakes(pRegionArrays[level]);
+	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
 
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
@@ -4204,8 +4214,9 @@ void ARegionList::CleanUpWater(ARegionArray *pRegs)
 				if(dotter++%2000 == 0) Adot();
 				if (remainocean > 0) continue;
 				reg->wages = 0;
-				if (getrandom(100) < Globals->LAKES_EXIST) {
-					reg->type = R_LAKE;
+				if ((!Globals->FRACTAL_MAP) && 
+					(getrandom(100) < Globals->LAKES)) {
+						reg->type = R_LAKE;
 				} else reg->type = R_NUM;
 			}
 		}
@@ -4376,14 +4387,14 @@ void ARegionList::SetFractalTerrain(ARegionArray *pArr)
 	for(int l=0; l < 2; l++) {
 		int set = 0;
 		//Awrite(AString("Fractal Terrain: run #") + (l+1) + ".");
-		/*
+		
 		int skip = 250;
 		int f = 2;
 		if(Globals->TERRAIN_GRANULARITY) {
 			skip = Globals->TERRAIN_GRANULARITY;
 			while (skip > 5) {
 				f++;
-				skip -= 5;  // yes, that's intended!
+				skip -= 5;
 				if (skip < 1) skip = 1;
 			}
 			skip = 100 * ((skip+3) * f + 2) / (skip + f - 2);
@@ -4391,53 +4402,60 @@ void ARegionList::SetFractalTerrain(ARegionArray *pArr)
 		for (int x=0; x<(pArr->x)/f; x++) {
 			for (int y=0; y<(pArr->y)/(f*2); y++) {
 				if(getrandom(1000) > skip) continue;
-		*/
-		for(int x = 0; x < pArr->x; x++) {
-			for(int y = 0; y < pArr->y; y++) {
-				ARegion *reg = pArr->GetRegion(x, y);
-				if(!reg) continue;
+				for (int i=0; i<4; i++) {
+					int tempx = x * f + getrandom(f);
+					int tempy = y * f * 2 + getrandom(f)*2 + tempx%2;
+					ARegion *reg = pArr->GetRegion(tempx, tempy);
+					if(!reg) continue;
 
-				if (reg->type == R_NUM) {
-					int max = 0;
-					int mtype = -1;
-					int limit = 1000;
-					for(int t = R_PLAIN; t < (R_TUNDRA+1); t++) {
-						int prob = reg->TerrainProbability(t);
-						if(l==0) {
-							switch(t) {
-								case R_PLAIN: limit = Globals->PLAINS;
-									break;
-								case R_FOREST: limit = Globals->FORESTS;
-									break;
-								case R_MOUNTAIN: limit = Globals->MOUNTAINS;
-									break;
-								case R_SWAMP: limit = Globals->SWAMPS;
-									break;
-								case R_JUNGLE: limit = Globals->JUNGLES;
-									break;
-								case R_DESERT: limit = Globals->DESERTS;
-									break;
-								default: limit = Globals->TUNDRAS;
+					if (reg->type == R_NUM) {
+						int max = 0;
+						int mtype = -1;
+						int ttype = 0;
+						int limit = 1000;
+						for(int t = R_PLAIN; t <= (R_TUNDRA+1); t++) {
+							int prob = reg->TerrainProbability(t);
+							ttype = t;
+							if (t == R_TUNDRA+1) ttype = R_LAKE;
+							if(l==0) {
+								switch(t) {
+									case R_PLAIN: limit = Globals->PLAINS;
+										break;
+									case R_FOREST: limit = Globals->FORESTS;
+										break;
+									case R_MOUNTAIN: limit = Globals->MOUNTAINS;
+										break;
+									case R_SWAMP: limit = Globals->SWAMPS;
+										break;
+									case R_JUNGLE: limit = Globals->JUNGLES;
+										break;
+									case R_DESERT: limit = Globals->DESERTS;
+										break;
+									case R_TUNDRA: limit = Globals->TUNDRAS;
+										break;
+									default: // LAKES
+										limit = Globals->LAKES;
+								}
+							}
+							prob = limit - prob;
+							if (prob < 0) continue;
+							if (prob > max) {
+								max = prob;
+								mtype = ttype;
 							}
 						}
-						prob = limit - prob;
-						if (prob < 0) continue;
-						if (prob > max) {
-							max = prob;
-							mtype = t;
+						if(mtype > -1) {
+							reg->type = mtype;
+							reg->population = 1;
+							if (TerrainDefs[reg->type].similar_type != R_OCEAN)
+								reg->wages = AGetName(0);
+							set++;
 						}
-					}
-					if(mtype > -1) {
-						reg->type = mtype;
-						reg->population = 1;
-						if (TerrainDefs[reg->type].similar_type != R_OCEAN)
-							reg->wages = AGetName(0);
-						set++;
 					}
 				}
 			}
 		}
-		//Awrite(AString("Set ") + set + " land regions of " + land + " total.");
+		Awrite(AString("Set ") + set + " land regions of " + land + " total.");
 	}
 }
 
@@ -4491,13 +4509,22 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 			for(y = 0; y < pArr->y; y++) {
 				ARegion *reg = pArr->GetRegion(x, y);
 				if(!reg) continue;
+				reg->population = 1;
+			}
+		}
+		for(x = 0; x < pArr->x; x++) {
+			for(y = 0; y < pArr->y; y++) {
+				ARegion *reg = pArr->GetRegion(x, y);
+				if(!reg) continue;
 				if ((j > 0) && (j < 21) && (getrandom(3) < 2)) continue;
 				if (reg->type == R_NUM) {
+				
 					// Check for Lakes
-					if (Globals->LAKES_EXIST &&
-							(getrandom(100) < (Globals->LAKES_EXIST/10 + 1))) {
-						reg->type = R_LAKE;
-						break;
+					if (Globals->LAKES &&
+						(!Globals->FRACTAL_MAP) &&
+							(getrandom(100) < (Globals->LAKES/10 + 1))) {
+								reg->type = R_LAKE;
+								break;
 					}
 					// Check for Odd Terrain
 					if (getrandom(1000) < Globals->ODD_TERRAIN) {
@@ -4506,16 +4533,18 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 							reg->wages = AGetName(0);
 						break;
 					}
+					
 
 					int init = getrandom(6);
 					for (int i=0; i<NDIRS; i++) {
 						ARegion *t = reg->neighbors[(i+init) % NDIRS];
 						if (t) {
-							if ((j==0) && (t->population < 1)) continue;
-							if (j==0) t->population--;
+							if (t->population < 1) continue;
 							if(t->type != R_NUM &&
 								(TerrainDefs[t->type].similar_type!=R_OCEAN ||
 								 (growOcean && (t->type != R_LAKE)))) {
+								if (j==0) t->population = 0;
+								reg->population = 0;
 								reg->race = t->type;
 								reg->wages = t->wages;
 								break;
