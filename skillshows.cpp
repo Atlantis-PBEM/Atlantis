@@ -1358,6 +1358,8 @@ AString *ShowSkill::Report(Faction *f)
 	AString temp;
 	AString temp1;
 	AString temp2;
+	AString temp3;
+	AString temp4;
 	int comma = 0;
 	int comma1 = 0;
 	int comma2 = 0;
@@ -1366,6 +1368,7 @@ AString *ShowSkill::Report(Faction *f)
 	int last2 = -1;
 	unsigned int c;
 	int i;
+	int build = 0;
 
 	// If this is a combat spell, note it.
 	if(level == 1 && (SkillDefs[skill].flags & SkillType::COMBAT)) {
@@ -1380,6 +1383,9 @@ AString *ShowSkill::Report(Faction *f)
 		"contains ";
 	temp1 += "A unit with this skill may PRODUCE ";
 	temp2 += "A unit with this skill may create ";
+	// for the new ship items
+	temp3 += "A unit with this skill may BUILD ";
+
 	SkillType *sk1, *sk2;
 	sk1 = &SkillDefs[skill];
 	for(i = NITEMS - 1; i >= 0; i--) {
@@ -1457,6 +1463,11 @@ AString *ShowSkill::Report(Faction *f)
 				}
 			}
 			if(canmake) {
+				// IT_SHIP: switch to BUILD description
+				if((ItemDefs[i].type & IT_SHIP) && (build == 0)) {
+					temp1 = temp3;
+					build = 1;
+				}
 				if(comma1) {
 					if(last1 == i) {
 						if(comma1 > 1) temp1 += ",";

@@ -566,51 +566,68 @@ AString *ItemDescription(int item, int full)
 
 	AString *temp = new AString;
 	int illusion = (ItemDefs[item].type & IT_ILLUSION);
-
+	
 	*temp += AString(illusion?"illusory ":"")+ ItemDefs[item].name + " [" +
-		(illusion?"I":"") + ItemDefs[item].abr + "], weight " +
-		ItemDefs[item].weight;
+			(illusion?"I":"") + ItemDefs[item].abr + "]";
+		
+	/* new ship items */
+	if (ItemDefs[item].type & IT_SHIP) {
+		if(ItemDefs[item].swim > 0) {
+			*temp += AString(". This is a ship with a capacity of ") + ItemDefs[item].swim;
+		}
+		if(ItemDefs[item].fly > 0) {
+			*temp += AString(". This is a flying 'ship' with a capacity of ") + ItemDefs[item].fly;
+		}
+		*temp += AString(". This ship requires a total of ") + ItemDefs[item].pMonths/5 + " levels of sailing skill to sail";
+		if(ItemDefs[item].pLevel > 1) {
+			*temp += AString(". This is an advanced ship that is best handled by sailors of skill level ")
+				+ ItemDefs[item].pLevel + " or higher";
+		}
+	} else {
+		
+		*temp += AString(", weight ") + ItemDefs[item].weight;
 
-	if (ItemDefs[item].walk) {
-		int cap = ItemDefs[item].walk - ItemDefs[item].weight;
-		if(cap) {
-			*temp += AString(", walking capacity ") + cap;
-		} else {
-			*temp += ", can walk";
+		if (ItemDefs[item].walk) {
+			int cap = ItemDefs[item].walk - ItemDefs[item].weight;
+			if(cap) {
+				*temp += AString(", walking capacity ") + cap;
+			} else {
+				*temp += ", can walk";
+			}
 		}
-	}
-	if((ItemDefs[item].hitchItem != -1 )&&
-			!(ItemDefs[ItemDefs[item].hitchItem].flags & ItemType::DISABLED)) {
-		int cap = ItemDefs[item].walk - ItemDefs[item].weight +
-			ItemDefs[item].hitchwalk;
-		if(cap) {
-			*temp += AString(", walking capacity ") + cap +
-				" when hitched to a " +
-				ItemDefs[ItemDefs[item].hitchItem].name;
+		if((ItemDefs[item].hitchItem != -1 )&&
+				!(ItemDefs[ItemDefs[item].hitchItem].flags & ItemType::DISABLED)) {
+			int cap = ItemDefs[item].walk - ItemDefs[item].weight +
+				ItemDefs[item].hitchwalk;
+			if(cap) {
+				*temp += AString(", walking capacity ") + cap +
+					" when hitched to a " +
+					ItemDefs[ItemDefs[item].hitchItem].name;
+			}
 		}
-	}
-	if (ItemDefs[item].ride) {
-		int cap = ItemDefs[item].ride - ItemDefs[item].weight;
-		if(cap) {
-			*temp += AString(", riding capacity ") + cap;
-		} else {
-			*temp += ", can ride";
+		if (ItemDefs[item].ride) {
+			int cap = ItemDefs[item].ride - ItemDefs[item].weight;
+			if(cap) {
+				*temp += AString(", riding capacity ") + cap;
+			} else {
+				*temp += ", can ride";
+			}
 		}
-	}
-	if (ItemDefs[item].swim) {
-		int cap = ItemDefs[item].swim - ItemDefs[item].weight;
-		if(cap) {
-			*temp += AString(", swimming capacity ") + cap;
-		} else {
-			*temp += ", can swim";
+		if (ItemDefs[item].swim) {
+			int cap = ItemDefs[item].swim - ItemDefs[item].weight;
+			if(cap) {
+				*temp += AString(", swimming capacity ") + cap;
+			} else {
+				*temp += ", can swim";
+			}
 		}
-	}
-	if (ItemDefs[item].fly) {
-		int cap = ItemDefs[item].fly - ItemDefs[item].weight;
-		if(cap) {
-			*temp += AString(", flying capacity ") + cap;
-		} else {
-			*temp += ", can fly";
+		if (ItemDefs[item].fly) {
+			int cap = ItemDefs[item].fly - ItemDefs[item].weight;
+			if(cap) {
+				*temp += AString(", flying capacity ") + cap;
+			} else {
+				*temp += ", can fly";
+			}
 		}
 	}
 
@@ -925,12 +942,20 @@ AString *ItemDescription(int item, int full)
 	if(pS && !(pS->flags & SkillType::DISABLED)) {
 		unsigned int c;
 		unsigned int len;
+		AString *nn = new AString;
 		*temp += AString(" Units with ") + SkillStrs(pS) +
-			" of at least level " + ItemDefs[item].pLevel + " may PRODUCE ";
+				" of at least level " + ItemDefs[item].pLevel;
+		if(ItemDefs[item].type & IT_SHIP) {
+			*temp += AString(" may BUILD ");
+			*nn = AString("ship");
+		} else {
+			*temp += AString(" may PRODUCE ");
+			*nn = AString("item");
+		}
 		if (ItemDefs[item].flags & ItemType::SKILLOUT)
-			*temp += "a number of this item equal to their skill level";
+			*temp += AString("a number of this ") + *nn + " equal to their skill level";
 		else
-			*temp += "this item";
+			*temp += AString("this ") + *nn;
 		len = sizeof(ItemDefs[item].pInput)/sizeof(Materials);
 		int count = 0;
 		int tot = len;
@@ -952,16 +977,21 @@ AString *ItemDescription(int item, int full)
 				*temp += ", ";
 			}
 			count++;
+			if(ItemDefs[item].type & IT_SHIP) amt = ItemDefs[item].pMonths;
 			*temp += ItemString(itm, amt);
 		}
-		if(ItemDefs[item].pOut) {
-			*temp += AString(" at a rate of ") + ItemDefs[item].pOut;
-			if(ItemDefs[item].pMonths) {
-				if(ItemDefs[item].pMonths == 1) {
-					*temp += " per man-month.";
-				} else {
-					*temp += AString(" per ") + ItemDefs[item].pMonths +
-						" man-months.";
+		if(ItemDefs[item].type & IT_SHIP) {
+			*temp += ". ";
+		} else {
+			if(ItemDefs[item].pOut) {
+				*temp += AString(" at a rate of ") + ItemDefs[item].pOut;
+				if(ItemDefs[item].pMonths) {
+					if(ItemDefs[item].pMonths == 1) {
+						*temp += " per man-month.";
+					} else {
+						*temp += AString(" per ") + ItemDefs[item].pMonths +
+							" man-months.";
+					}
 				}
 			}
 		}

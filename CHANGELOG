@@ -918,6 +918,8 @@ Changes from 4.0.10 -> 5.0.0
       rather than "Fleet". Also no ship list is displayed for them.
    -- implemented ENTER NEW <alias>. New fleets created during GIVE orders are now given aliases that
       may be specified in an Enter order.	
-   -- implemented handling of ship items in spoils  
+   -- implemented handling of ship items in spoils
+   -- prevented ship items from being PRODUCED
+   -- updated the skillshows and itemshows to handle ship items properly  
    	  ToDo: armored galleon bonus...?
    
