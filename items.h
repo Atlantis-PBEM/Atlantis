@@ -123,6 +123,7 @@ extern ItemType *ItemDefs;
 class ManType
 {
 	public:
+		int terrain;
 		int speciallevel;
 		int defaultlevel;
 		int skills[6];

@@ -1512,6 +1512,8 @@ void Game::DoBuy(ARegion *r, Market *m)
 						SkillList *sl = new SkillList;
 						u->AdjustSkills();
 						delete sl;
+						/* region economy effects */
+						r->Recruit(temp);
 					}
 					u->items.SetNum(o->item, u->items.GetNum(o->item) + temp);
 					u->faction->DiscoverItem(o->item, 0, 1);
@@ -2407,6 +2409,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		AString temp = "Discards ";
 		if (ItemDefs[o->item].type & IT_MAN) {
 			u->SetMen(o->item, u->GetMen(o->item) - amt);
+			r->DisbandInRegion(o->item, amt);
 			temp = "Disbands ";
 		} else if(Globals->RELEASE_MONSTERS &&
 				(ItemDefs[o->item].type & IT_MONSTER)) {

@@ -238,6 +238,9 @@ class ARegion : public AListElem
 		// JR
 		int GetPoleDistance(int dir);
 		void SetGateStatus(int month);
+		void DisbandInRegion(int, int);
+		void Recruit(int);
+		int IsNativeRace(int);
 
 		int CountWMons();
 		int IsGuarded();
@@ -262,6 +265,12 @@ class ARegion : public AListElem
 		int wages;
 		int maxwages;
 		int money;
+		
+		/* Player-run economy */
+		int habitat;
+		int development;
+		int growth;
+		int mortality;
 
 		/* Potential bonuses to economy */
 		int clearskies;
@@ -286,6 +295,8 @@ class ARegion : public AListElem
 		void AddTown();
 		void MakeLair(int);
 		void LairCheck();
+		
+		void WagesFromDevelopment();
 };
 
 class ARegionArray
@@ -375,6 +386,9 @@ class ARegionList : public AList
 		void CleanUpWater(ARegionArray *pRegs);
 		void RemoveCoastalLakes(ARegionArray *pRegs);
 		void SeverLandBridges(ARegionArray *pRegs);
+		void UnsetRace(ARegionArray *pRegs);
+		void RaceAnchors(ARegionArray *pRegs);
+		void GrowRaces(ARegionArray *pRegs);
 
 		void CalcDensities();
 		int GetLevelXScale(int level);

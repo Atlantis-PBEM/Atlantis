@@ -643,4 +643,13 @@ Changes from 4.0.10 -> 5.0.0
       blank orders (only when TAX_PILLAGE_MONTHLONG was set).
    -- Fixed a bug where withdraw didn't give item info on items which the
       faction hadn't already seen the item info.
+   -- GROW_RACES option to disperse races across an area at world creation
+      rather than set them up hex-by-hex. This is tuneable by adjusting the
+      gamedef value.
+   -- PLAYER_ECONOMY: very basic ruleset for the player-run economy are in place.
+      Enabling this means that population grows or dies according to given
+      space (habitat) and other factors and that the economy is determined by
+      a region's development parameter. Recruitment reduces the population while
+      give 0 orders increase it (no check for races yet). This is not yet
+      reflected in the rules.
 

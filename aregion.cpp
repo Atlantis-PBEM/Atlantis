@@ -134,6 +134,10 @@ ARegion::ARegion()
 	gatemonth = 0;
 	gateopen = 1;
 	town = 0;
+	development = 60;
+	habitat = 800;
+	mortality = 0;
+	growth = 0;
 	clearskies = 0;
 	earthlore = 0;
 	for (int i=0; i<NDIRS; i++)
@@ -168,15 +172,32 @@ int ARegion::Population()
 	}
 }
 
+void ARegion::WagesFromDevelopment()
+{
+	// Calculate new wages
+	wages = 0;
+	if (Population() == 0) return;
+	int level = 1;
+	int last = 0;
+	while (development >= level) {
+		wages++;
+		last = level;
+	    level += wages+1;
+	}
+	wages *= 10;
+	if (development > last) wages += 10 *  (development - last) / (level - last);	
+}
+
 int ARegion::Wages()
 {
 	int retval;
+	if (Globals->PLAYER_ECONOMY) {
+		retval = (int) wages/10;
+	} else retval = wages;
 	if (town) {
 		/* hack, assumes that TownType + 1 = town wages */
-		retval = wages + town->TownType() + 1;
-	} else {
-		retval = wages;
-	}
+		retval = retval + town->TownType() + 1;
+	} 
 	if (earthlore) retval++;
 	if (clearskies) retval++;
 	// AS
@@ -236,6 +257,8 @@ AString ARegion::WagesForReport()
 void ARegion::SetupPop()
 {
 	TerrainType *typer = &(TerrainDefs[type]);
+	habitat = typer->pop+1;
+	if (habitat < 100) habitat = 100;
 
 	int pop = typer->pop;
 	int mw = typer->wages;
@@ -246,35 +269,85 @@ void ARegion::SetupPop()
 		wages = 0;
 		maxwages = 0;
 		money = 0;
+		
+		if(Globals->PLAYER_ECONOMY) {
+			// All regions need silver production
+			// even if no income can be gained
+			Production * p = new Production;
+			p->itemtype = I_SILVER;
+			p->amount = 0;
+			p->skill = -1;
+			p->productivity = 0;
+			products.Add(p);
+
+			p = new Production;
+			p->itemtype = I_SILVER;
+			p->amount = 0;
+			p->skill = S_ENTERTAINMENT;
+			p->productivity = Globals->ENTERTAIN_INCOME;
+			products.Add(p);
+		}
+		
 		return;
 	}
-	int noncoastalraces = sizeof(typer->races)/sizeof(int);
-	int allraces = noncoastalraces + sizeof(typer->coastal_races)/sizeof(int);
-
-	race = -1;
-	while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
-		int n = getrandom(IsCoastal() ? allraces : noncoastalraces);
-		if(n > noncoastalraces-1) {
-			race = typer->coastal_races[n-noncoastalraces-1];
-		} else
-			race = typer->races[n];
+	
+	// Only select race here if it hasn't been set during Race Growth
+	// in the World Creation process.
+	if (((Globals->GROW_RACES) && (race == -1)) || (!Globals->GROW_RACES)) {
+		int noncoastalraces = sizeof(typer->races)/sizeof(int);
+		int allraces = noncoastalraces + sizeof(typer->coastal_races)/sizeof(int);
+	
+		race = -1;
+		while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
+			int n = getrandom(IsCoastal() ? allraces : noncoastalraces);
+			if(n > noncoastalraces-1) {
+				race = typer->coastal_races[n-noncoastalraces-1];
+			} else
+				race = typer->races[n];
+		}
 	}
 
-	if(Globals->RANDOM_ECONOMY) {
-		population = (pop + getrandom(pop)) / 2;
-	} else {
-		population = pop;
-	}
+	if(Globals->PLAYER_ECONOMY) {
+    	if (ManDefs[ItemDefs[race].index].terrain == typer->similar_type) {
+    		habitat = (habitat * 9)/8;
+    	}
+    	if (IsNativeRace(race)) {
+    		habitat = (habitat * 9)/8;
+    	}
+    	// hmm... somewhere not too far off equilibrium pop
+    	population = habitat * 66 / 100;
+    } else
+		if(Globals->RANDOM_ECONOMY) {
+			population = (pop + getrandom(pop)) / 2;
+		} else {
+			population = pop;
+		}
 
 	basepopulation = population;
 
-	if(Globals->RANDOM_ECONOMY) {
-		mw += getrandom(3);
-	}
-
 	/* Setup wages */
-	wages = mw;
-	maxwages = mw;
+	if(Globals->PLAYER_ECONOMY) {
+		int level = 1;
+		development = 1;
+		int prev = 0;
+		while (level <= mw) {
+			development++;
+			prev++;
+			if(prev > level) {
+				level++;
+				prev = 0;
+			}
+		}
+		if(Globals->RANDOM_ECONOMY) {
+			development += getrandom(30);
+		}
+	} else {
+		if(Globals->RANDOM_ECONOMY) {
+			mw += getrandom(3);
+		}
+		wages = mw;
+		maxwages = mw;
+	}
 
 	if(Globals->TOWNS_EXIST) {
 		int adjacent = 0;
@@ -302,10 +375,16 @@ void ARegion::SetupPop()
 		if (adjacent == 0)
 			if (getrandom(townch) < townprob) AddTown();
 	}
+	
+	if(Globals->PLAYER_ECONOMY) {
+		WagesFromDevelopment();
+		maxwages = wages;
+	}
 
 	Production *p = new Production;
 	p->itemtype = I_SILVER;
 	money = Population() * (Wages() - Globals->MAINTENANCE_COST);
+	if (money < 0) money = 0;
 	p->amount = money / Globals->WORK_FRACTION;
 	p->skill = -1;
 	p->productivity = Wages();
@@ -333,6 +412,44 @@ void ARegion::SetupPop()
 						Population()/25, 0, 10000, 0, 400);
 		markets.Add(m);
 	}
+}
+
+void ARegion::DisbandInRegion(int item, int amt)
+{
+	if (!Globals->PLAYER_ECONOMY) return;
+	if (amt > 0) {
+		if (amt > population) {
+			// exchange region race!
+			race = item;
+			population = amt;
+		} else {
+			if (race == item) population += amt;
+			else population += (2 * amt / 3);
+		}
+	}
+}
+
+void ARegion::Recruit(int amt)
+{
+	if (!Globals->PLAYER_ECONOMY) return;
+	population -= amt;
+	if (population < 0) population = 0;
+}
+
+int ARegion::IsNativeRace(int item)
+{
+	TerrainType * typer = &(TerrainDefs[type]);
+	int coastal = sizeof(typer->coastal_races)/sizeof(int);
+	int noncoastal = sizeof(typer->races)/sizeof(int);
+	if(IsCoastal()) {
+		for(int i=0; i<coastal; i++) {
+			if (item == typer->coastal_races[i]) return 1;
+		}
+	}
+	for(int i=0; i<noncoastal; i++) {
+		if (item == typer->races[i]) return 1;
+	}
+	return 0;
 }
 
 int ARegion::GetNearestProd(int item)
@@ -659,6 +776,19 @@ void ARegion::AddTown()
 	town = new TownInfo;
 
 	town->name = new AString(AGetNameString(AGetName(1)));
+	
+	/* PLAYER_ECONOMY
+	 * basepop is the town's habitat
+	 * set pop to a base level at first
+	 */
+	if(Globals->PLAYER_ECONOMY) {
+		town->basepop = (3000 + getrandom(habitat) + getrandom(habitat)) / 4;
+		if((!IsNativeRace(race)) || (town->basepop < habitat)) town->basepop = (town->basepop + habitat) / 2;
+		town->pop = getrandom(100) + getrandom(100);
+		town->activity = 0;
+		SetupCityMarket();
+		return;
+	}
 
 	if(Globals->RANDOM_ECONOMY) {
 		int popch = 2500;
@@ -677,6 +807,13 @@ void ARegion::AddTown()
 		town->pop = 500+getrandom(popch);
 	} else {
 		town->pop = 500;
+	}
+
+	// this is still very crude...
+	if (Globals->PLAYER_ECONOMY) {
+		habitat += town->pop/2;
+		population += town->pop/2;
+		development += getrandom(town->pop/80);
 	}
 
 	town->basepop = town->pop;
@@ -858,6 +995,144 @@ void ARegion::UpdateTown()
 
 void ARegion::PostTurn(ARegionList *pRegs)
 {
+	/* Rules for PLAYER-RUN ECONOMY */
+	if (Globals->PLAYER_ECONOMY) {
+	
+		/*  // uncomment this for economy info output for debugging purposes
+			Awrite(AString("_______________________________________"));
+			Awrite(*name + " (" + TerrainDefs[type].name + ") in " +xloc + "," + yloc + ".");
+			if (town) Awrite(AString("   contains ") + *town->name + " [" + TownString(town->TownType()) + "].");
+			Awrite("");
+		*/
+	  
+		// Decay desolate areas
+		if (Population() < (habitat / 100))
+			if (development > 0) development--;
+	
+		// Check for Development increase
+		int fooddemand = 1;
+		int foodavailable = 1;
+		forlist(&markets) {
+			Market * m = (Market *) elem;
+			if (m->amount < 1) continue;
+			int npcprod = 0;
+			forlist(&products) {
+		  		Production * re = (Production *) elem;
+		  		if (re->itemtype == m->item) npcprod = re->amount - re->activity;
+		  		//if (ItemDefs[re->itemtype].type & IT_FOOD) npcprod *= (100 + development) / 200;
+		  		//else if (ItemDefs[re->itemtype].type & IT_NORMAL) npcprod *= (population * development ) / (100 * habitat);
+		  	}
+	  		if (ItemDefs[m->item].type & IT_MAN) {
+		  		// reduce population
+		  		population -= m->activity;
+		  	} else if (m->type == M_SELL) {
+		  		if (ItemDefs[m->item].type & IT_FOOD) {
+		  	    	fooddemand += m->amount;
+		  	    	foodavailable += m->activity + npcprod;
+		  	    }
+		  	    int supply = npcprod + m->activity;
+		  	    if ((m->amount <= supply * 4) && (getrandom(m->amount) < supply)) {
+		  	    	//Awrite(AString("*Development Raise: sold ") + ItemDefs[m->item].names + ".");
+		  	    	development++;
+				}
+	  		} else if (m->type == M_BUY) {
+		  		int supply = m->activity;
+		  	    if ((m->amount <= supply * 3) && (getrandom(3 * m->amount) < (supply * 2))) {
+	  		    	//Awrite(AString("*Development Raise: bought ") + ItemDefs[m->item].names + ".");
+	  	    		development++;
+		  	    }
+		  	}
+	  		// TODO: a function to update markets (incl. npcprod)
+		}
+				 	 
+		WagesFromDevelopment();	    
+		
+		// calculate natural population growth
+		int delay = Globals->DELAY_GROWTH;
+		if (delay < 2) delay = 2;
+		int lastgrowth = growth;
+		if (delay > 2) 
+			for (int i=1; i<delay-1; i++) growth += lastgrowth;
+		// growth based on available space and wages
+		int curg = ((Globals->POP_GROWTH / 100) * (Wages()-5) * ( ( (habitat * (1+Wages()/8)) - 2*population) / (40 * delay) ) );
+		// growth based on existing population
+		curg += ((Population() * Globals->POP_GROWTH) / (20000));
+		growth = growth + curg;
+		growth = growth / delay;
+		if (population < 1) growth = 0;
+		  
+		// calculate mortality
+		delay = Globals->DELAY_MORTALITY;
+		if (delay < 2) delay = 2;
+		int lastmort = mortality;
+		int curm = 0;
+		int starve = 0;
+		if (delay > 2) 
+			for (int i=1; i<delay-1; i++) curm += lastmort;
+		// mortality based on starvation:
+		if ((habitat > 0) && (fooddemand > 0)) starve = (population * population * (fooddemand - foodavailable)) / (fooddemand * habitat * 4);
+		// mortality based on crowding:
+		int crowd = (population - (habitat * 7/10));
+		if (crowd < 0) crowd = 0;
+		crowd = (crowd * crowd) / (habitat / 25);
+		if (crowd > 0) {
+			int c1 = getrandom(crowd);
+		 	int c2 = getrandom(crowd);
+		 	crowd = c1>c2 ? c1 : c2;
+		}
+		mortality += curm + crowd + starve;
+		mortality = mortality / delay;
+		if ((mortality < 0) || (population < 1)) mortality = 0;
+		  	  
+		// Update population
+		population += growth - mortality;
+		if (population < 0) population = 0;
+	  
+		// Check decay
+		if(Globals->DECAY) {
+			DoDecayCheck(pRegs);
+		}
+	
+		// Set tax base
+		money = (Wages() - Globals->MAINTENANCE_COST) * Population();
+		if (money < 0) money = 0;
+	
+		if (type != R_NEXUS) {
+    		// Setup working
+			// Production * p = products.GetProd(I_SILVER,-1);
+			int hack = 0;
+			if (IsStartingCity()) {
+				// Higher wages in the entry cities.
+				hack = Wages() * Population();
+			} else {
+				hack = (Wages() * Population()) / 5; // (Globals->WORK_FRACTION);
+			}
+			// TODO: Silver available for work and entertainment
+			// still causes a segmentation fault!!!
+			// p->amount = hack;
+			// p->productivity = Wages();
+	
+    		// Entertainment.
+	    	// p = products.GetProd(I_SILVER,S_ENTERTAINMENT);
+			// p->baseamount = money / Globals->ENTERTAIN_FRACTION;
+		
+			/* //uncomment for economy info output used for debugging
+			Awrite(AString("population:  ") + population + " " + ItemDefs[race].names);
+			Awrite(AString("wages:       ") + (wages/10) + "  (tax base: "+ money + ")");
+			Awrite(AString("development: ") + development);
+			Awrite(AString("habitat:     ") + (habitat - population) + " / " + habitat);
+			Awrite(AString("growth:      ") + growth + "  (this month: " + curg + ")");
+			Awrite(AString("mortality:   ") + mortality + "  (" + starve + " starve, " + crowd + " die of crowding)");
+			Awrite(AString("food:        ") + (foodavailable-1) + " / " + (fooddemand-1));
+			Awrite("");
+			*/
+		  
+			markets.PostTurn(Population(),Wages());
+		}
+		return;
+	}
+	
+	/* Standard economy */
 	//
 	// First update population based on production
 	//
@@ -1552,6 +1827,11 @@ void ARegion::Writeout(Aoutfile *f)
 	f->PutInt(wages);
 	f->PutInt(maxwages);
 	f->PutInt(money);
+	
+	f->PutInt(habitat);
+	f->PutInt(development);
+	f->PutInt(growth);
+	f->PutInt(mortality);
 
 	if (town) {
 		f->PutInt(1);
@@ -1602,6 +1882,11 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	wages = f->GetInt();
 	maxwages = f->GetInt();
 	money = f->GetInt();
+	
+	habitat = f->GetInt();
+	development = f->GetInt();
+	growth = f->GetInt();
+	mortality = f->GetInt();
 
 	if (f->GetInt()) {
 		town = new TownInfo;
@@ -2663,6 +2948,8 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize,
 		SeverLandBridges(pRegionArrays[level]);
 
 	if (Globals->LAKES_EXIST) RemoveCoastalLakes(pRegionArrays[level]);
+	
+	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
 }
@@ -2681,6 +2968,8 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char *name)
 	MakeCentralLand(pRegionArrays[level]);
 	MakeIslands(pRegionArrays[level], nPlayers);
 	RandomTerrain(pRegionArrays[level]);
+	
+	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
 }
@@ -2702,6 +2991,8 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 	AssignTypes(pRegionArrays[level]);
 
 	MakeUWMaze(pRegionArrays[level]);
+	
+	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
 }
@@ -2723,6 +3014,8 @@ void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
 	AssignTypes(pRegionArrays[level]);
 
 	MakeUWMaze(pRegionArrays[level]);
+	
+	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
 }
@@ -3252,6 +3545,102 @@ void ARegionList::AssignTypes(ARegionArray *pArr)
 {
 	// RandomTerrain() will set all of the un-set region types and names.
 	RandomTerrain(pArr);
+}
+
+void ARegionList::UnsetRace(ARegionArray *pArr)
+{
+	int x, y;
+	for(x = 0; x < pArr->x; x++) {
+		for(y = 0; y < pArr->y; y++) {
+			ARegion *reg = pArr->GetRegion(x, y);
+			if(!reg) continue;
+			reg->race = - 1;
+		}
+	}
+}
+
+
+void ARegionList::RaceAnchors(ARegionArray *pArr)
+{
+	UnsetRace(pArr);
+	int x, y;
+	for(x = 0; x < pArr->x; x++) {
+		for(y = 0; y < pArr->y; y++) {
+			// Anchor distribution: depends on GROW_RACES value
+			int jiggle = 4 + 2 * Globals->GROW_RACES;
+			if((y + ((x % 2) * jiggle/2)) % jiggle > 1) continue;
+			int xoff = x + 2 - getrandom(3) - getrandom(3);
+			ARegion *reg = pArr->GetRegion(xoff, y);
+			if(!reg) continue;
+			
+			if((reg->type == R_LAKE) && (!Globals->LAKESIDE_IS_COASTAL)) continue;
+			
+			reg->race = -1;			
+			
+			if(TerrainDefs[reg->type].similar_type == R_OCEAN) {
+			// setup near coastal race here
+				int d = getrandom(NDIRS);
+				int ctr = 0;
+				ARegion *nreg = reg->neighbors[d];
+				if(!nreg) continue;
+				while((ctr++ < 20) && (reg->race == -1)) {
+					if(TerrainDefs[nreg->type].similar_type != R_OCEAN) {
+						int rnum = sizeof(TerrainDefs[nreg->type].coastal_races)/sizeof(int);
+						reg->race = TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];					
+					} else {
+						int dir = getrandom(NDIRS);
+						if(dir == nreg->GetRealDirComp(d)) continue;
+						if(!(nreg->neighbors[dir])) continue;
+						nreg = nreg->neighbors[dir];
+					}
+				}				
+			
+			} else {
+			// setup noncoastal race here
+				int rnum = sizeof(TerrainDefs[reg->type].races)/sizeof(int);
+				reg->race = TerrainDefs[reg->type].races[getrandom(rnum)];	
+			}
+		}
+	}
+}
+
+void ARegionList::GrowRaces(ARegionArray *pArr)
+{
+	RaceAnchors(pArr);
+	int a, x, y;
+	for(a = 0; a < 25; a++) {
+		for(x = 0; x < pArr->x; x++) {
+			for(y = 0; y < pArr->y; y++) {
+				ARegion *reg = pArr->GetRegion(x, y);
+				if((!reg) || (reg->race == -1)) continue;
+				
+				for(int dir = 0; dir < NDIRS; dir++) {
+					ARegion *nreg = reg->neighbors[dir];
+					if ((!nreg) || (nreg->race != -1)) continue;
+					int iscoastal = 0;
+					int cnum = sizeof(TerrainDefs[reg->type].coastal_races)/sizeof(int);
+					for(int i=0; i<cnum; i++) {
+						if (reg->race == TerrainDefs[reg->type].coastal_races[i]) iscoastal = 1;
+					}
+					// Only coastal races may pass from sea to land
+					if ((TerrainDefs[nreg->type].similar_type == R_OCEAN) &&
+						(!iscoastal)) continue;
+
+					int ch = getrandom(5);
+					if (iscoastal) {
+						if (TerrainDefs[nreg->type].similar_type == R_OCEAN) ch += 2;					
+					} else {
+						if (ManDefs[reg->race].terrain == TerrainDefs[nreg->type].similar_type) ch += 2;
+						int rnum = sizeof(TerrainDefs[nreg->type].races)/sizeof(int);
+						for(int i=0; i<rnum; i++) {
+							if (TerrainDefs[nreg->type].races[i] == reg->race) ch++;
+						}
+					}
+					if (ch > 3) nreg->race = reg->race;
+				}
+			}
+		}
+	}
 }
 
 void ARegionList::FinalSetup(ARegionArray *pArr)

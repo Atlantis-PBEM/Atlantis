@@ -626,6 +626,26 @@ public:
 	// quantities actually have some heft?
 	// Leave 0 for no fractional weight.  Otherwise, X items weigh 1.
 	int FRACTIONAL_WEIGHT;
+	
+	// Use grow algorithm for races?
+	int GROW_RACES;
+	
+	/* Player-Run Economy */
+	// Does the game use the player-run economy rules?
+	int PLAYER_ECONOMY;
+	
+	// Population growth rate modifier (100 = standard).
+	int POP_GROWTH;
+	
+	// Mortality delay - in months. Minimum = 2 months. Suggested are THREE months
+	int DELAY_MORTALITY;
+	
+	// Growth effects delay - in months. Minimum = 2 months. Suggested are SIX months.
+	int DELAY_GROWTH;
+	
+	// How developed pre-existing towns are at the start of the game (100 = standard).
+	int TOWN_DEVELOPMENT;
+	
 
 };
 
