@@ -136,13 +136,14 @@ ARegion::ARegion()
 	earthlore = 0;
 	for (int i=0; i<NDIRS; i++)
 		neighbors[i] = 0;
+	roadsto = 0;
 }
 
 ARegion::~ARegion()
 {
 	if (name) delete name;
 	if (town) delete town;
-	delete roadsto;
+	if (roadsto) delete roadsto;
 }
 
 void ARegion::ZeroNeighbors()
