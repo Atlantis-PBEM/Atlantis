@@ -270,7 +270,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 			return;
 		}
 	}
-    
+
     int students = 0;
     TeachOrder * order = (TeachOrder *) unit->monthorders;
     forlist(&order->targets) {
@@ -301,7 +301,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
                                 " is not studying.");
                     order->targets.Remove(id);
                     delete id;
-                } 
+                }
                 else
                 {
                     int sk = ((StudyOrder *) target->monthorders)->skill;
@@ -322,21 +322,21 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
         }
     }
     if (!students) return;
-    
+
     int days = (30 * unit->GetMen() * Globals->STUDENTS_PER_TEACHER);
-    
+
     /* We now have a list of valid targets */
     {
         forlist(&order->targets) {
             UnitId * id = (UnitId *) elem;
             Unit * u = reg->GetUnitId(id,unit->faction->num);
-            
+
             int umen = u->GetMen();
             int tempdays = (umen * days) / students;
             if (tempdays > 30 * umen) tempdays = 30 * umen;
             days -= tempdays;
             students -= umen;
-            
+
             StudyOrder * o = (StudyOrder *) u->monthorders;
             o->days += tempdays;
             if (o->days > 30 * umen)
@@ -430,7 +430,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	// AS
 	AString job;
 	if (needed < 1) {
-		// This looks wrong, but isn't.  
+		// This looks wrong, but isn't.
 		// If a building has a maxMaintainence of 75 and the road is at
 		// -70 (ie, 5 from max) then we want the value of maintMax to be
 		// 5 here.  Then we divide by maintFactor (some things are easier
@@ -470,7 +470,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 
     // AS
     u->Event(AString("Performs") + job + "on " + *(obj->name));
-  
+
     delete u->monthorders;
     u->monthorders = 0;
 }
@@ -523,7 +523,7 @@ void Game::RunMonthOrders()
 void Game::RunUnitProduce(ARegion * r,Unit * u)
 {
 	ProduceOrder * o = (ProduceOrder *) u->monthorders;
-  
+
 	if (o->item == I_SILVER) {
 		u->Error("Can't do that in this region.");
 		delete u->monthorders;
@@ -538,7 +538,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 		u->monthorders = 0;
 		return;
 	}
-  
+
 	int level = u->GetSkill(o->skill);
 	if (level < ItemDefs[o->item].pLevel) {
 		u->Error("PRODUCE: Can't produce that.");
@@ -556,7 +556,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 		u->monthorders = 0;
 		return;
 	}
- 
+
 	// find the max we can possibly produce based on man-months of labor
 	int maxproduced = number/ItemDefs[o->item].pMonths;
 
@@ -634,7 +634,7 @@ int Game::ValidProd(Unit * u,ARegion * r,Production * p)
             u->monthorders = 0;
             return 0;
         }
-		
+
         //
         // Check faction limits on production. If the item is silver, then the
         // unit is entertaining or working, and the limit does not apply
@@ -646,7 +646,7 @@ int Game::ValidProd(Unit * u,ARegion * r,Production * p)
             u->monthorders = 0;
             return 0;
         }
-    
+
         /* check for bonus production */
         // LLS
         int bonus = u->GetProductionBonus(p->itemtype);
@@ -674,7 +674,7 @@ void Game::RunAProduction(ARegion * r,Production * p)
 {
     p->activity = 0;
     if (p->amount == 0) return;
-    
+
     /* First, see how many units are trying to work */
     int attempted = FindAttemptedProd(r,p);
     int amt = p->amount;
@@ -696,7 +696,7 @@ void Game::RunAProduction(ARegion * r,Production * p)
 
             /* We need to implement a hack to avoid overflowing */
             int uatt, ubucks;
-            
+
             uatt = po->productivity;
             if (uatt && amt && attempted)
             {
@@ -708,13 +708,13 @@ void Game::RunAProduction(ARegion * r,Production * p)
             {
                 ubucks = 0;
             }
-            
+
             amt -= ubucks;
             attempted -= uatt;
             u->items.SetNum(po->item,u->items.GetNum(po->item)
                             + ubucks);
             p->activity += ubucks;
-            
+
             /* Show in unit's events section */
             if (po->item == I_SILVER)
             {
@@ -740,7 +740,7 @@ void Game::RunAProduction(ARegion * r,Production * p)
             else
             {
                 /* Everything else */
-                u->Event(AString("Produces ") + ItemString(po->item,ubucks) + 
+                u->Event(AString("Produces ") + ItemString(po->item,ubucks) +
                          " in " + r->ShortPrint( &regions ) + ".");
             }
             delete u->monthorders;
@@ -782,7 +782,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		u->Error("STUDY: Mercenaries are not allowed to study.");
 		return;
 	}
-	
+
 	if( ( SkillDefs[sk].flags & SkillType::MAGIC ) && u->type != U_MAGE) {
 		if(u->type == U_APPRENTICE) {
 			u->Error("STUDY: An apprentice cannot be made into an mage.");
@@ -917,32 +917,32 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
     MoveOrder * o;
     if (!unit->monthorders || (unit->monthorders->type != O_MOVE)) return;
     o = (MoveOrder *) unit->monthorders;
-    
+
     while (o->dirs.Num()) {
         MoveDir * x = (MoveDir *) o->dirs.First();
         int i = x->dir;
         if (i != MOVE_OUT && i < MOVE_ENTER) return;
         o->dirs.Remove(x);
         delete x;
-        
+
         if (i >= MOVE_ENTER) {
             Object * to = region->GetObject(i - MOVE_ENTER);
             if (!to) {
                 unit->Error("MOVE: Can't find object.");
                 continue;
             }
-            
+
             if (!to->CanEnter(region,unit)) {
                 unit->Error("ENTER: Can't enter that.");
                 continue;
             }
-            
+
             Unit *forbid = to->ForbiddenBy(region, unit);
             if (forbid && !o->advancing) {
                 unit->Error("ENTER: Is refused entry.");
                 continue;
             }
-            
+
             if( forbid && region->IsSafeRegion() )
             {
                 unit->Error( "ENTER: No battles allowed in safe regions." );
@@ -972,7 +972,7 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
                 forbid = to->ForbiddenBy(region, unit);
             }
             if (done) continue;
-            
+
             unit->MoveUnit( to );
             unit->Event(AString("Enters ") + *(to->name) + ".");
             *obj = to;
@@ -999,10 +999,10 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
     Location * loc = new Location;
     MoveOrder * o = (MoveOrder *) unit->monthorders;
     int movetype = unit->MoveType();
-    
+
     if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
     if (o->advancing) unit->guard = GUARD_ADVANCE;
-    
+
     /* Ok, now we can move a region */
     if (o->dirs.Num()) {
         MoveDir * x = (MoveDir *) o->dirs.First();
@@ -1010,7 +1010,7 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
         int i = x->dir;
 		int startmove = 0;
         delete x;
-        
+
         /* Setup region to move to */
         ARegion * newreg;
         if (i == MOVE_IN) {
@@ -1022,7 +1022,7 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
         } else {
             newreg = region->neighbors[i];
         }
-        
+
         if (!newreg) {
             unit->Error(AString("MOVE: Can't move that direction."));
             goto done_moving;
@@ -1030,14 +1030,14 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
 
 		if(region->type == R_NEXUS && newreg->IsStartingCity())
 			startmove = 1;
-        
+
         if( region->type == R_OCEAN &&
 		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)) )
         {
             unit->Error( AString("MOVE: Can't move while in the ocean.") );
             goto done_moving;
         }
-        
+
         int cost = newreg->MoveCost(movetype);
         // AS
         if (cost > 1 && movetype != M_FLY && region->HasExitRoad(i) &&
@@ -1046,25 +1046,25 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
             cost /= 2;
         }
         if (region->type != R_NEXUS &&
-            unit->CalcMovePoints() - unit->movepoints < cost) 
+            unit->CalcMovePoints() - unit->movepoints < cost)
         {
             unit->Error(AString("MOVE: Unit does not have enough movement points."));
             goto done_moving;
         }
-        
+
         if(newreg->type == R_OCEAN &&
 		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)) ) {
-            unit->Event(AString("Discovers that ") + 
+            unit->Event(AString("Discovers that ") +
                         newreg->ShortPrint( &regions ) +
                         AString(" is ocean."));
             goto done_moving;
         }
-        
+
         if (unit->type == U_WMON && newreg->town && newreg->IsGuarded()) {
             unit->Event("Monsters don't move into guarded towns.");
             goto done_moving;
         }
-        
+
         if (unit->guard == GUARD_ADVANCE) {
             Unit *ally = newreg->ForbiddenByAlly(unit);
             if (ally && !startmove) {
@@ -1073,7 +1073,7 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
                 goto done_moving;
             }
         }
-        
+
         Unit * forbid = newreg->Forbidden(unit);
         if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
 			int obs = unit->GetObservation();
@@ -1085,10 +1085,10 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
 						  unit->GetName(obs) + ".");
             goto done_moving;
         }
-        
+
         /* Clear the unit's alias out, so as not to interfere with TEACH */
         unit->alias = 0;
-        
+
         unit->movepoints += cost;
         unit->MoveUnit( newreg->GetDummy() );
 
@@ -1134,12 +1134,12 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
 		}
         region = newreg;
     }
-    
+
     loc->unit = unit;
     loc->region = region;
     loc->obj = obj;
     return loc;
-    
+
 done_moving:
     delete o;
     unit->monthorders = 0;
