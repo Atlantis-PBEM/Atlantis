@@ -2306,13 +2306,15 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			AString temp = "Abandons ";
 			// discard unfinished ships from inventory
 			if(hasitem) {
+				int ship = -1;
 				forlist(&u->items) {
 					Item *it = (Item *) elem;
 					if(it->type == o->item) {
 						u->Event(temp + it->Report(1) + ".");
-						it->num = 0;
+						ship = it->type;
 					}
 				}
+				if(ship > 0) u->items.SetNum(ship,0);
 				return 0;
 			// abandon fleet ships
 			} else if(!(u->object->IsFleet()) || 
@@ -2365,12 +2367,17 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			return 0;
 		}
 		// Check amount
+		int num = u->object->GetNumShips(o->item);
+		if(num < 1) {
+			u->Error("GIVE: no such ship in fleet.");
+			return 0;
+		}
 		int amt = o->amount;
-		if (amt != -2 && amt > u->object->GetNumShips(o->item)) {
+		if (amt != -2 && amt > num) {
 			u->Error("GIVE: Not enough.");
-			amt = u->object->GetNumShips(o->item);
+			amt = num;
 		} else if (amt == -2) {
-			amt = u->object->GetNumShips(o->item);
+			amt = num;
 			if(o->except) {
 				if(o->except > amt) {
 					amt = 0;

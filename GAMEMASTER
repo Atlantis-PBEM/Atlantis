@@ -20,6 +20,7 @@ Table of Contents
 2.1     Unix
 2.1.1   A sample compile under UNIX
 2.2     Windows (copied directly from the old guide)
+2.2.1   Compiling Atlantis with Dev-C++ on Windows
 2.3     The gory details (for advanced users, or the terminally curious)
 
 3.      Running a game
@@ -50,13 +51,13 @@ system, issue the following commands to obtain a copy of the Atlantis
 sources:
 
 If you want the latest updates of the stable version 4:
-cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs login
-cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs checkout -r \ 
+cvs -d :pserver:guest@cvs.dragoncat.net:/data/cvs login
+cvs -d :pserver:guest@cvs.dragoncat.net:/data/cvs checkout -r \ 
 RELEASE_410 atlantis
 
 If you want the 'dangerous' version 5:
-cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs login
-cvs -d :pserver:guest@cvs.dragoncat.net:/home/cvs checkout atlantis
+cvs -d :pserver:guest@cvs.dragoncat.net:/data/cvs login
+cvs -d :pserver:guest@cvs.dragoncat.net:/data/cvs checkout atlantis
 
 WARNING: If you are unsure about C++ and compiling from sources, or 
 this is your first try at running a game, you almost certainly want 
@@ -151,57 +152,125 @@ However, it is very easy to make a VC project to compile Atlantis:
 2.2.1 Compiling Atlantis with Dev-C++ on Windows 
       (Submitted by malakh@subdimension.com)
       (Added to by gmfangs@asmrb.org)
-      
-First you should have have downloaded the Atlantis source code and 
-decompressed it (remembering to preserve the files as unix files), and 
-have Dev-C++ version 5 installed (from 
-http://www.bloodshed.net/dev/devcpp.html, this howto tested with "Dev-
-C++ 5.0 beta 9 (4.9.9.1) (7.6 MB) with Mingw/GCC 
-3.3.1"). Copy the atlantis folder inside C:\Dev-Cpp\
 
-Next you must change some compiler options. Open Dev-C++, and select the 
-menu Tools -> Compiler Options, and then click on the Directories tab. 
-Make sure that there is a path to your binaries at C:\Dev-Cpp\bin (they 
-should be set there by default, but we've run into cases where the Dev-
-C++ beta installer leaves this empty).
+First, you need to have the open source compiler Dev-C++ version 5 
+installed (homepage: <http://www.bloodshed.net/dev/devcpp.html>, this 
+howto tested with the version "Dev-C++ 5.0 beta 9 (4.9.9.1) (7.6 MB) 
+with Mingw/GCC 3.3.1").
 
-Next click on the C++ Includes tab, and add the path C:\Dev-
-Cpp\include\c++\3.3.1\mingw32\bits and close the compiler options.
+I recommend installing it to "C:\Dev-Cpp\" if you are using anything 
+prior to Windows XP -- this will help from running into a limitation on 
+the length of commands in DOS that may prevent the linker from working. 
+Otherwise it may be installed anywhere.
 
-Next, select File -> Project and start a Static Library C project. Make 
-sure you select C as the language or it will not work. Then name the 
-project i_rand and save the project in a new folder C:\Dev-Cpp\i_rand 
-with the name i_rand.dev.
+Next, you'll need to download the Atlantis source code. One of the best 
+ways to do this is to use open source Tortoise CVS (homepage: 
+<http://www.tortoisecvs.org/>, current version: 
+<http://prdownloads.sourceforge.net/tortoisecvs/TortoiseCVS-1.8.11.exe>). 
 
-Now go to Project -> Add to Project. And add i_rand.c from your atlantis 
-sources. Now go to Execute -> Compile. It should compile and may tell 
-you this is not executable. This is fine.
+Once Tortoise CVS is installed, select the "C:\Dev-Cpp\" folder, right-
+click and select the "CVS Checkout..." menu item. In the checkout 
+dialog, select for the Protocol: "Password server (:pserver)", for the 
+Server: enter "cvs.dragoncat.net", for the Repository folder: enter 
+"/data/cvs", for the User name: enter "guest", for the Module: enter 
+"atlantis", and leave the port blank. If you want the Atlantis 4 stable 
+branch, click on the Revision tab, select "Choose branch or tag", and 
+enter "RELEASE_410" for the Branch. Then click "Ok" and the current 
+version of Atlantis 5, (or Atlantis 4.10 if you selected that branch) 
+will be downloaded into the folder "C:\Dev-Cpp\atlantis\".
 
-Next, start a new C++ console project. Save the *.dev in the same 
-directory as the *.cpp source files for Atlantis if you are using 
-anything prior to WinXP, this is to help from running into a limitation 
-on the length of commands in DOS that may prevent the linker from 
-working. Otherwise, you can create a folder anywhere, for example 
-C:\Dev-Cpp\standard
+If you don't want to use Tortoise CVS, you can downloaded the Atlantis 
+source code, decompressed it (remembering to preserve the files as unix 
+files), and then copy the atlantis folder inside "C:\Dev-Cpp\".
 
-Close the pre-generated main.cpp without saving it. Now go to Project -> 
-Add to Project and add all the *.cpp sources including those in the sub 
-directory for the rules set you plan to use, for example:
-C:\Dev-Cpp\atlantis\standard
+To compile Atlantis, you must first change some compiler options. Open 
+Dev-C++, and select the menu Tools -> Compiler Options, and then click 
+on the "Directories" tab. Make sure that there is a path to your 
+binaries at "C:\Dev-Cpp\bin" (they should be set there by default, but 
+I've run into cases where the Dev-C++ beta installer leaves this empty).
 
-Now go to Project -> Project Options, in here at the bottom where it 
-says 'Linker Options/Optional Libs or Object files:' click the Add 
-Library or Object button and find i_rand.a. Then in the same window go 
-to the Files/Directories tab then the Include Directories tab and add in 
-the paths for your atlantis sources (i.e. C:\Dev-Cpp\atlantis) and also 
-a path to your rules set subdirectory (i.e. C:\Dev-
-Cpp\atlantis\standard). Then click OK.
+Next click on the "C++ Includes" tab, and add the path to the
+"C:\Dev-Cpp\include\c++\3.3.1\mingw32\bits" folder. Now you can close 
+the compiler options.
 
-Now go to Execute -> Compile. Be patient, this will take some time to 
+If you are compiling Atlantis 5.0 project, start a new C++ console 
+project. Save the *.dev in the same folder as the *.cpp source files for 
+Atlantis if you are using anything prior to Windows XP (again this keeps 
+the paths short.) Otherwise, you can create a folder anywhere, for 
+example "C:\Dev-Cpp\standard"
+
+When you first create a project, it starts with a pre-generated main.cpp 
+file. Close it without saving it. You should now have an empty project.
+
+Next go to Project -> Add to Project, and click on the popup "Files of 
+Type" so that you see only C++ sources. Then click to select the first 
+c++ source file in the "C:\Dev-Cpp\atlantis" folder (normally 
+alist.cpp), and then shift-click on the last file (normally unit.h). 
+Then click "Open" to add all of these files to your project.
+
+Next go to Project -> Add to Project, and now select all the .cpp files 
+that are in the sub-folder for the rules variant you plan to use, for 
+"C:\Dev-Cpp\atlantis\standard", and click on "Open" to add all of these 
+files to the project.
+
+Now go to Project -> Project Options menu, and click on "Directories" 
+tab then click on the "Include Directories" sub-tab and add in the 
+paths for your atlantis sources (i.e. "C:\Dev-Cpp\atlantis") and also a 
+path to your rules set sub-folder (i.e. "C:\Dev-Cpp\atlantis\standard"). 
+Then click OK.
+
+Finally go to Execute -> Compile. Be patient, this will take some time to 
 complete. You will know it is done compiling when the Compile Log 
 minimizes.
 
-You should now have an .exe of your project.
+You should now have an .exe of your project inside "C:\Dev-Cpp\standard".
+
+If you are compiling an Atlantis 4.0 project, there is one file that you 
+will have to separately prepare in advance. First, select File -> 
+Project and start a Static Library C project. Make sure you select C as 
+the language or it will not work. Then name the project "i_rand" and 
+save the project in a new folder "C:\Dev-Cpp\i_rand" with the name 
+"i_rand.dev".
+
+Now go to Project -> Add to Project, show all files, and add i_rand.c 
+and i_rand.h from your atlantis sources. Now go to Execute -> Compile. 
+It should compile and may tell you this is not executable. This is fine.
+
+Next follow the instructions for compiling Atlantis 5.0, except before 
+compiling you need to go to Project -> Project Options, in there at the 
+bottom where it says 'Linker Options/Optional Libs or Object files:' 
+click the "Add Library or Object" button and find i_rand.a. Then click OK. 
+Now you can run Execute -> Compile to generate an .exe of your Atlantis 
+4.0 project.
+
+You can quickly test your .exe build by creating a shortcut to the .exe 
+file, then right-click to select file properties, and append to the 
+"Target:" field the text " new", i.e. "C:\Dev-Cpp\test-build\atlantis-
+standard.exe new". Then rename this shortcut "new". When you double-
+click on the shortcut, you should be asked how wide the map should be, 
+and how tall the map should be. If there are no errors, there should be 
+a game.out and a players.out file in your test folder.
+
+If you want to test further, you can now copy this shortcut and change 
+the appended Target parameter from " new" to " edit" and you can now 
+edit your generated world (if you make changes a new game.out file will 
+be created with the changes.)
+
+I like to use Atlantis Advisor (home page
+<http://gnawer.byte-force.yar.ru/advisor/>, announcements at 
+<http://games.groups.yahoo.com/group/atlantis_advisor_en>, and current 
+version at <http://atlantis.chol.ru/advisor_3.24.00.exe>) to test new 
+builds.
+
+Atlantis Advisor allows you to run a local copy of the Atlantis 
+completely inside Windows. Run Atlantis Advisor, and select "Options" 
+and add the path to your .exe file, and then select "New Game" and click 
+on the "Local game" box. Atlantis Advisor will create a new world, allow 
+you to enter orders for a single faction, then you can select "Run next 
+local turn" from the file menu to run your commands. It only runs turns
+for single user, but it is an excellent way to test out any changes that
+you may have made to your rules files.
+
 
 2.3 The gory details (for advanced users, or the terminally curious)
 

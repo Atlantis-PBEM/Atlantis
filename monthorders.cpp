@@ -506,6 +506,10 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 {
 	int ship = abs(u->build);
+	AString skname = ItemDefs[ship].pSkill;
+	int skill = LookupSkill(&skname);
+	int level = u->GetSkill(skill);
+
 	// get needed to complete
 	int maxbuild = 0;
 	if((u->monthorders) && 
@@ -513,7 +517,9 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 			BuildOrder *border = (BuildOrder *) u->monthorders;
 			maxbuild = border->needtocomplete;
 	}
-	int output = ShipConstruction(r, u, maxbuild, ship);
+	int output = ShipConstruction(r, u, level, maxbuild, ship);
+	
+	if (output < 1) return;
 	
 	// are there unfinished ship items of the given type?
 	int unfinished = u->items.GetNum(ship);
@@ -523,6 +529,9 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 		unfinished = ItemDefs[ship].pMonths;
 		u->items.SetNum(ship, unfinished);	
 	}
+
+	// practice
+	u->Practice(skill);
 
 	// Now reduce unfinished by produced amount
 	unfinished -= output;
@@ -581,13 +590,16 @@ void Game::RunBuildHelpers(ARegion *r)
 						else {
 							// help build ships
 							int ship = abs(target->build);
+							AString skname = ItemDefs[ship].pSkill;
+							int skill = LookupSkill(&skname);
+							int level = u->GetSkill(skill);
 							int needed = 0;
 							if((target->monthorders) && 
 									(target->monthorders->type == O_BUILD)) {
 										BuildOrder *border = (BuildOrder *) target->monthorders;
 										needed = border->needtocomplete;
 							}
-							int output = ShipConstruction(r, u, needed, ship);
+							int output = ShipConstruction(r, u, level, needed, ship);
 							if(output < 1) return;
 							
 							int unfinished = target->items.GetNum(ship);
@@ -597,6 +609,10 @@ void Game::RunBuildHelpers(ARegion *r)
 								target->items.SetNum(ship, unfinished);	
 							}
 							unfinished -= output;
+							
+							// practice
+							u->Practice(skill);
+							
 							if(unfinished > 0) {
 								target->items.SetNum(ship, unfinished);
 								if((target->monthorders) && 
@@ -677,7 +693,7 @@ void Game::CreateShip(ARegion *r, Unit * u, int ship)
  * handles material use and practice for both the main
  * shipbuilders and the helpers.
  */
-int Game::ShipConstruction(ARegion * r, Unit * u, int needed, int ship)
+int Game::ShipConstruction(ARegion * r, Unit * u, int level, int needed, int ship)
 {
 	if (!TradeCheck(r, u->faction)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
@@ -686,19 +702,16 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int needed, int ship)
 		return 0;
 	}
 
-	AString skname = ItemDefs[ship].pSkill;
-	int skill = LookupSkill(&skname);
-	int level = u->GetSkill(skill);
 	if (level < ItemDefs[ship].pLevel) {
 		u->Error("BUILD: Can't build that.");
 		delete u->monthorders;
 		u->monthorders = 0;
 		return 0;
 	}
-	
+		
 	// are there unfinished ship items of the given type?
 	int unfinished = u->items.GetNum(ship);
-	
+
 	int number = u->GetMen() * level + u->GetProductionBonus(ship);
 
 	// find the max we can possibly produce based on man-months of labor
@@ -793,8 +806,7 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int needed, int ship)
 	int output = maxproduced * ItemDefs[ship].pOut;
 	if (ItemDefs[ship].flags & ItemType::SKILLOUT)
 		output *= level;
-	
-	u->Practice(skill);
+
 	delete u->monthorders;
 	u->monthorders = 0;
 	
