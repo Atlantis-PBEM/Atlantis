@@ -419,10 +419,24 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"character.)";
 	f.Paragraph(temp);
 	Faction fac;
+	int app_exist = (Globals->APPRENTICES_EXIST);
+	if (app_exist) {
+		int found = 0;
+		/* Make sure we have a skill with the APPRENTICE flag */
+		for(i = 0; i < NSKILLS; i++) {
+			if(SkillDefs[i].flags & SkillType::DISABLED) continue;
+			if(SkillDefs[i].flags & SkillType::APPRENTICE) {
+				found = 1;
+				break;
+			}
+		}
+		if (!found) app_exist = 0;
+	}
+
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		temp = "A faction has one pre-set limit; it may not contain more than ";
 		temp += AString(AllowedMages(&fac)) + " mages";
-		if(Globals->APPRENTICES_EXIST) {
+		if(app_exist) {
 			temp += AString("and ") + AllowedApprentices(&fac) + " apprentices";
 		}
 		temp += ". Magic is a rare art, and only a few in the world can "
@@ -444,7 +458,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"may conduct trade activity. Trade activity includes producing "
 			"goods, building ships and buildings, and buying trade items. "
 			"Faction Points spent on Magic determines the number of mages ";
-		if(Globals->APPRENTICES_EXIST)
+		if(app_exist)
 			temp += "and apprentices ";
 		temp += "the faction may have. (More information on all of the "
 			"faction activities is in further sections of the rules).  Here "
@@ -458,7 +472,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", "War (max tax regions)");
 		f.TagText("th", "Trade (max trade regions)");
 		temp = "Magic (max mages";
-		if(Globals->APPRENTICES_EXIST)
+		if(app_exist)
 			temp += "/apprentices";
 		temp += ")";
 		f.TagText("th", temp);
@@ -480,7 +494,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\" nowrap");
 			temp = AllowedMages(&fac);
-			if(Globals->APPRENTICES_EXIST)
+			if(app_exist)
 				temp += AString("/") + AllowedApprentices(&fac);
 			f.PutStr(temp);
 			f.Enclose(0, "td");
@@ -509,7 +523,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "perform trade in ";
 		temp += AString(nt) + " region" + (nt==1?"":"s") + ", and have ";
 		temp += AString(nm) + " mage" + (nm==1?"":"s");
-		if(Globals->APPRENTICES_EXIST) {
+		if(app_exist) {
 			temp += " as well as ";
 			temp += AString(na) + " apprentice" + (na==1?"":"s");
 		}
@@ -534,14 +548,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += AString("only perform trade in ") + nt + " region" +
 				(nt == 1?"":"s");
 		temp += ", ";
-		if(!Globals->APPRENTICES_EXIST)
+		if(!app_exist)
 			temp += "and ";
 		if(nm == 0)
 			temp += "could not possess any mages";
 		else
 			temp += AString("could only possess ") + nm + " mage" +
 				(nm == 1?"":"s");
-		if(Globals->APPRENTICES_EXIST) {
+		if(app_exist) {
 			temp += ", and ";
 			if(na == 0)
 				temp += "could not possess any apprentices";
@@ -3421,14 +3435,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		for(i = 0; i < NOBJECTS; i++) {
 			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 			if(!ObjectDefs[i].maxMages) continue;
-			j = ObjectDefs[i].skill;
-			if(j == -1) continue;
-			if(SkillDefs[j].flags & SkillType::MAGIC) continue;
-			j = ObjectDefs[i].item;
-			if(j == -1) continue;
+			k = ObjectDefs[i].skill;
+			if(k == -1) continue;
+			if(SkillDefs[k].flags & SkillType::MAGIC) continue;
+			k = ObjectDefs[i].item;
+			if(k == -1) continue;
 			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
-			if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
-			if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+			if(k > 0 && (ItemDefs[k].flags & ItemType::DISABLED)) continue;
+			if(k > 0 && !(ItemDefs[k].type & IT_NORMAL)) continue;
 			/* Okay, this is a valid object to build! */
 			f.Enclose(1, "tr");
 			f.Enclose(1, "td align=\"left\" nowrap");
@@ -3481,6 +3495,30 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"of the physical world.";
 	}
 	f.Paragraph(temp);
+
+	if(app_exist) {
+		temp = "Apprentices may be created by having them study ";
+		comma = 0;
+		for(i = 0; i < NSKILLS; i++) {
+			if(SkillDefs[i].flags & SkillType::DISABLED) continue;
+			if(!(SkillDefs[i].flags & SkillType::APPRENTICE)) continue;
+			if(last == -1) {
+				last = i;
+				continue;
+			}
+			temp += SkillDefs[last].name;
+			temp += ", ";
+			comma++;
+			last = i;
+		}
+		if(comma) temp += "or ";
+		temp += SkillDefs[last].name;
+		temp += ". ";
+		temp += "Apprentices may not cast spells, but may utilize items "
+			"which otherwise only mages can use.";
+		f.Paragraph(temp);
+	}
+
 	f.LinkRef("magic_furtherstudy");
 	f.TagText("h3", "Further Magic Study:");
 	temp = "Once a mage has begun study of one or more Foundations, more "
