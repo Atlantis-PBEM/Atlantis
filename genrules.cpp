@@ -582,7 +582,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "There are different races that make up the population of "
 			"Atlantis. (See the section on skills for a list of these.)";
 		if(Globals->LEADERS_EXIST) {
-			temp += " In addition, there are \"leaders\" who are presumed "
+			temp += " In addition, there are \"leaders\", who are presumed "
 				"to be of one of the other races, but are all the same "
 				"in game terms.";
 		}
@@ -1657,7 +1657,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp = ItemDefs[i].pMonths;
 			temp += AString(" month") + (ItemDefs[i].pMonths == 1 ? "" : "s");
 		} else {
-			tmep = "&nbsp;";
+			temp = "&nbsp;";
 		}
 		f.PutStr(temp);
 		f.Enclose(0, "TD");
