@@ -285,7 +285,7 @@ void Game::ModifyMonsterThreat(int mon, int num, int hostileChance)
 
 void Game::ModifyWeaponSkills(char *weap, int baseSkill, int orSkill)
 {
-	WeaponType *pw = findWeapon(weap);
+	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
 	if(baseSkill < -1 || baseSkill > (NSKILLS - 1)) return;
 	if(orSkill < -1 || orSkill > (NSKILLS - 1)) return;
@@ -295,7 +295,7 @@ void Game::ModifyWeaponSkills(char *weap, int baseSkill, int orSkill)
 
 void Game::ModifyWeaponFlags(char *weap, int flags)
 {
-	WeaponType *pw = findWeapon(weap);
+	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
 	pw->flags = flags;
 }
@@ -303,7 +303,7 @@ void Game::ModifyWeaponFlags(char *weap, int flags)
 void Game::ModifyWeaponAttack(char *weap, int wclass, int attackType,
 		int numAtt)
 {
-	WeaponType *pw = findWeapon(weap);
+	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
 	if(wclass < 0 || wclass > (NUM_WEAPON_CLASSES - 1)) return;
 	if(attackType < 0 || attackType > (NUM_ATTACK_TYPES - 1)) return;
@@ -314,7 +314,7 @@ void Game::ModifyWeaponAttack(char *weap, int wclass, int attackType,
 
 void Game::ModifyWeaponBonuses(char *weap, int attack, int defense, int vsMount)
 {
-	WeaponType *pw = findWeapon(weap);
+	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
 	pw->attackBonus = attack;
 	pw->defenseBonus = defense;
@@ -323,14 +323,14 @@ void Game::ModifyWeaponBonuses(char *weap, int attack, int defense, int vsMount)
 
 void Game::ModifyArmorFlags(char *armor, int flags)
 {
-	ArmorType *pa = findArmor(armor);
+	ArmorType *pa = FindArmor(armor);
 	if (pa == NULL) return;
 	pa->flags = flags;
 }
 
 void Game::ModifyArmorSaveFrom(char *armor, int from)
 {
-	ArmorType *pa = findArmor(armor);
+	ArmorType *pa = FindArmor(armor);
 	if (pa == NULL) return;
 	if(from < 0) return;
 	pa->from = from;
@@ -338,38 +338,41 @@ void Game::ModifyArmorSaveFrom(char *armor, int from)
 
 void Game::ModifyArmorSaveValue(char *armor, int wclass, int val)
 {
-	ArmorType *pa = findArmor(armor);
+	ArmorType *pa = FindArmor(armor);
 	if (pa == NULL) return;
 	if(wclass < 0 || wclass > (NUM_WEAPON_CLASSES - 1)) return;
 	if(val < 0 || val > pa->from) return;
 	pa->saves[wclass] = val;
 }
 
-void Game::ModifyMountSkill(int mount, int skill)
+void Game::ModifyMountSkill(char *mount, int skill)
 {
-	if(mount < 0 || mount > (NUMMOUNTS - 1)) return;
+	MountType *pm = FindMount(mount);
+	if (pm == NULL) return;
 	if(skill < -1 || skill > (NSKILLS - 1)) return;
-	MountDefs[mount].skill = skill;
+	pm->skill = skill;
 }
 
-void Game::ModifyMountBonuses(int mount, int min, int max, int hampered)
+void Game::ModifyMountBonuses(char *mount, int min, int max, int hampered)
 {
-	if(mount < 0 || mount > (NUMMOUNTS - 1)) return;
+	MountType *pm = FindMount(mount);
+	if (pm == NULL) return;
 	if(min < 0) return;
 	if(max < 0) return;
 	if(hampered < min) return;
-	MountDefs[mount].minBonus = min;
-	MountDefs[mount].maxBonus = max;
-	MountDefs[mount].maxHamperedBonus = hampered;
+	pm->minBonus = min;
+	pm->maxBonus = max;
+	pm->maxHamperedBonus = hampered;
 }
 
-void Game::ModifyMountSpecial(int mount, int special, int level)
+void Game::ModifyMountSpecial(char *mount, int special, int level)
 {
-	if(mount < 0 || mount > (NUMMOUNTS - 1)) return;
+	MountType *pm = FindMount(mount);
+	if (pm == NULL) return;
 	if(special < 0 || special > (NUMSPECIALS-1)) return;
 	if(level < 0) return;
-	MountDefs[mount].mountSpecial = special;
-	MountDefs[mount].specialLev = level;
+	pm->mountSpecial = special;
+	pm->specialLev = level;
 }
 
 void Game::EnableObject(int obj)
@@ -544,14 +547,14 @@ void Game::ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move)
 
 void Game::ModifyBattleItemFlags(char *item, int flags)
 {
-	BattleItemType *pb = findBattleItem(item);
+	BattleItemType *pb = FindBattleItem(item);
 	if (pb == NULL) return;
 	pb->flags = flags;
 }
 
 void Game::ModifyBattleItemSpecial(char *item, int index, int level)
 {
-	BattleItemType *pb = findBattleItem(item);
+	BattleItemType *pb = FindBattleItem(item);
 	if (pb == NULL) return;
 	if(level < 0) return;
 

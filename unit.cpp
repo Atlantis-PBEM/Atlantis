@@ -1486,7 +1486,7 @@ int Unit::Taxers()
 			BattleItemType *pBat = NULL;
 
 			if ((ItemDefs[pItem->type].type & IT_BATTLE) &&
-				((pBat = findBattleItem(ItemDefs[pItem->type].abr)) != NULL) &&
+				((pBat = FindBattleItem(ItemDefs[pItem->type].abr)) != NULL) &&
 				(pBat->flags & BattleItemType::SPECIAL)) {
 				// Only consider offensive items
 				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM) &&
@@ -1503,7 +1503,7 @@ int Unit::Taxers()
 			}
 
 			if (ItemDefs[pItem->type].type & IT_WEAPON) {
-				WeaponType *pWep = findWeapon(ItemDefs[pItem->type].abr);
+				WeaponType *pWep = FindWeapon(ItemDefs[pItem->type].abr);
 				if (!(pWep->flags & WeaponType::NEEDSKILL)) {
 					// A melee weapon
 					if (GetSkill(S_COMBAT)) numUsableMelee += pItem->num;
@@ -1522,8 +1522,8 @@ int Unit::Taxers()
 			}
 
 			if (ItemDefs[pItem->type].type & IT_MOUNT) {
-				if (MountDefs[ItemDefs[pItem->type].index].minBonus
-						<= GetSkill(S_RIDING))
+				MountType *pm = FindMount(ItemDefs[pItem->type].abr);
+				if (pm->minBonus <= GetSkill(S_RIDING))
 					numUsableMounts += pItem->num;
 				numMounts += pItem->num;
 			}
@@ -1684,8 +1684,9 @@ int Unit::GetBattleItem(AString &itm)
 int Unit::GetArmor(AString &itm, int ass)
 {
 	int item = LookupItem(&itm);
-	ArmorType *pa = findArmor(itm.Str());
+	ArmorType *pa = FindArmor(itm.Str());
 
+	if (pa == NULL) return -1;
 	if (ass && !(pa->flags & ArmorType::USEINASSASSINATE)) return -1;
 
 	int num = items.GetNum(item);
@@ -1696,56 +1697,56 @@ int Unit::GetArmor(AString &itm, int ass)
 	return item;
 }
 
-int Unit::GetMount(int index, int canFly, int canRide, int &bonus)
+int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 {
 	bonus = 0;
+
+	// This region doesn't allow riding or flying, so no mounts, bail
 	if(!canFly && !canRide) return -1;
-	forlist(&items) {
-		Item *pItem = (Item *)elem;
-		if(!pItem->num) continue;
-		int item = pItem->type;
-		if((ItemDefs[item].type&IT_MOUNT) && (ItemDefs[item].index==index)) {
-			// Found a possible mount
-			if(canFly) {
-				if(!ItemDefs[item].fly) {
-					// The mount cannot fly, see if the region allows
-					// riding mounts
-					if(!canRide) continue;
-				}
-			} else {
-				// This region allows riding mounts, so if the mount
-				// can not carry at a riding level, continue
-				if(!ItemDefs[item].ride) continue;
-			}
-			MountType *pMnt = &MountDefs[index];
-			bonus = GetSkill(pMnt->skill);
-			if(bonus < pMnt->minBonus) {
-				// Unit isn't skilled enough for this mount
-				bonus = 0;
-				continue;
-			}
-			// Limit to max mount bonus;
-			if(bonus > pMnt->maxBonus) bonus = pMnt->maxBonus;
-			// If the mount can fly and the terrain doesn't allow
-			// flying mounts, limit the bonus to the maximum hampered
-			// bonus allowed by the mount
-			if(ItemDefs[item].fly && !canFly) {
-				if(bonus > pMnt->maxHamperedBonus)
-					bonus = pMnt->maxHamperedBonus;
-			}
-			// Get the mount
-			items.SetNum(item, pItem->num - 1);
-			return item;
-		}
+
+	int item = LookupItem(&itm);
+	MountType *pMnt = FindMount(itm.Str());
+
+	int num = items.GetNum(item);
+	if (num < 1) return -1;
+
+	if (canFly) {
+		// If the mount cannot fly, and the region doesn't allow
+		// riding mounts, bail
+		if (!ItemDefs[item].fly && !canRide) return -1;
+	} else {
+		// This region allows riding mounts, so if the mount
+		// can not carry at a riding level, bail
+		if (!ItemDefs[item].ride) return -1;
 	}
-	return -1;
+
+	bonus = GetSkill(pMnt->skill);
+	if(bonus < pMnt->minBonus) {
+		// Unit isn't skilled enough for this mount
+		bonus = 0;
+		return -1;
+	}
+	// Limit to max mount bonus;
+	if(bonus > pMnt->maxBonus) bonus = pMnt->maxBonus;
+	// If the mount can fly and the terrain doesn't allow
+	// flying mounts, limit the bonus to the maximum hampered
+	// bonus allowed by the mount
+	if(ItemDefs[item].fly && !canFly) {
+		if(bonus > pMnt->maxHamperedBonus)
+			bonus = pMnt->maxHamperedBonus;
+	}
+	// Get the mount
+	items.SetNum(item, num - 1);
+	return item;
 }
 
 int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 		int &attackBonus, int &defenseBonus, int &attacks)
 {
 	int item = LookupItem(&itm);
-	WeaponType *pWep = findWeapon(itm.Str());
+	WeaponType *pWep = FindWeapon(itm.Str());
+
+	if (pWep == NULL) return -1;
 
 	int num = items.GetNum(item);
 	if (num < 1) return -1;

@@ -29,7 +29,7 @@
 #include "object.h"
 #include "gamedata.h"
 
-BattleItemType *findBattleItem(char *abbr)
+BattleItemType *FindBattleItem(char *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMBATTLEITEMS; i++) {
@@ -40,7 +40,7 @@ BattleItemType *findBattleItem(char *abbr)
 	return NULL;
 }
 
-ArmorType *findArmor(char *abbr)
+ArmorType *FindArmor(char *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMARMORS; i++) {
@@ -51,13 +51,24 @@ ArmorType *findArmor(char *abbr)
 	return NULL;
 }
 
-WeaponType *findWeapon(char *abbr)
+WeaponType *FindWeapon(char *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMWEAPONS; i++) {
 		if (WeaponDefs[i].abbr == NULL) continue;
 		if (AString(abbr) == WeaponDefs[i].abbr)
 			return &WeaponDefs[i];
+	}
+	return NULL;
+}
+
+MountType *FindMount(char *abbr)
+{
+	if (abbr == NULL) return NULL;
+	for (int i = 0; i < NUMMOUNTS; i++) {
+		if (MountDefs[i].abbr == NULL) continue;
+		if (AString(abbr) == MountDefs[i].abbr)
+			return &MountDefs[i];
 	}
 	return NULL;
 }
@@ -644,7 +655,7 @@ AString *ItemDescription(int item, int full)
 	}
 
 	if(ItemDefs[item].type & IT_WEAPON) {
-		WeaponType *pW = findWeapon(ItemDefs[item].abr);
+		WeaponType *pW = FindWeapon(ItemDefs[item].abr);
 		*temp += " This is a ";
 		*temp += WeapType(pW->flags, pW->weapClass) + " weapon.";
 		if(pW->flags & WeaponType::NEEDSKILL) {
@@ -758,7 +769,7 @@ AString *ItemDescription(int item, int full)
 
 	if(ItemDefs[item].type & IT_ARMOR) {
 		*temp += " This is a type of armor.";
-		ArmorType *pA = findArmor(ItemDefs[item].abr);
+		ArmorType *pA = FindArmor(ItemDefs[item].abr);
 		*temp += " This armor will protect its wearer ";
 		for(i = 0; i < NUM_WEAPON_CLASSES; i++) {
 			if(i == NUM_WEAPON_CLASSES - 1) {
@@ -844,8 +855,7 @@ AString *ItemDescription(int item, int full)
 
 	if(ItemDefs[item].type & IT_MOUNT) {
 		*temp += " This is a mount.";
-		int mnt = ItemDefs[item].index;
-		MountType *pM = &MountDefs[mnt];
+		MountType *pM = FindMount(ItemDefs[item].abr);
 		if(pM->skill == -1) {
 			*temp += " No skill is required to use this mount.";
 		} else if(SkillDefs[pM->skill].flags & SkillType::DISABLED) {
@@ -950,7 +960,7 @@ AString *ItemDescription(int item, int full)
 
 	if((ItemDefs[item].type & IT_BATTLE) && full) {
 		*temp += " This item is a miscellaneous combat item.";
-		BattleItemType *bt = findBattleItem(ItemDefs[item].abr);
+		BattleItemType *bt = FindBattleItem(ItemDefs[item].abr);
 		if(bt != NULL) {
 			if(bt->flags & BattleItemType::MAGEONLY) {
 				*temp += " This item may only be used by a mage";

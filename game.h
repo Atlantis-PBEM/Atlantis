@@ -214,9 +214,9 @@ private:
 	void ModifyArmorSaveFrom(char *armor, int from);
 	void ModifyArmorSaveValue(char *armor, int wclass, int val);
 
-	void ModifyMountSkill(int mount, int skill);
-	void ModifyMountBonuses(int mount, int min, int max, int hampered);
-	void ModifyMountSpecial(int mount, int special, int level);
+	void ModifyMountSkill(char *mount, int skill);
+	void ModifyMountBonuses(char *mount, int min, int max, int hampered);
+	void ModifyMountSpecial(char *mount, int special, int level);
 
 	void EnableObject(int ob); // Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built

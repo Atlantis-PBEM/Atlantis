@@ -263,7 +263,7 @@ ItemType id[] =
 	 ItemType::NOTRANSPORT,
 	 S_HORSETRAINING,1,1,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 50, IT_NORMAL | IT_MOUNT, 30,1,MOUNT_HORSE,
+	 50, IT_NORMAL | IT_MOUNT, 30,1, -1,
 	 70,70,0,0,
 	 -1,0,
 	 I_LASSO,1},
@@ -335,7 +335,7 @@ ItemType id[] =
 	 ItemType::NOTRANSPORT,
 	 S_HORSETRAINING,5,1,1, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 50, IT_ADVANCED | IT_MOUNT, 100,1,MOUNT_WHORSE,
+	 50, IT_ADVANCED | IT_MOUNT, 100,1, -1,
 	 70,70,70,0,
 	 -1,0,
 	 I_LASSO,1},
@@ -1360,7 +1360,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOTRANSPORT,
 	 S_CAMELTRAINING,1,1,1, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 50, IT_NORMAL|IT_MOUNT,30,1,MOUNT_CAMEL,
+	 50, IT_NORMAL|IT_MOUNT,30,1, -1,
 	 70,70,0,0,
 	 -1,0,
 	 I_LASSO,1},
@@ -1496,7 +1496,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET | ItemType::NOTRANSPORT,
 	 S_MONSTERTRAINING,1,2,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 10, IT_ADVANCED | IT_MOUNT , 30,1,MOUNT_MWOLF,
+	 10, IT_ADVANCED | IT_MOUNT , 30,1, -1,
 	 17,17,0,0,
 	 -1,0,
 	 I_LASSO,1},
@@ -1504,7 +1504,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET | ItemType::NOTRANSPORT,
 	 S_MONSTERTRAINING,3,3,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 50, IT_ADVANCED | IT_MOUNT, 30,1,MOUNT_MSPIDER,
+	 50, IT_ADVANCED | IT_MOUNT, 30,1, -1,
 	 60,60,0,0,
 	 -1,0,
 	 I_LASSO,1},
@@ -1512,7 +1512,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET | ItemType::NOTRANSPORT,
 	 S_MONSTERTRAINING,3,3,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 100, IT_ADVANCED | IT_MOUNT, 50,1,MOUNT_MOLE,
+	 100, IT_ADVANCED | IT_MOUNT, 50,1, -1,
 	 130,130,0,0,
 	 -1,0,
 	 I_LASSO,1},
@@ -2211,22 +2211,23 @@ int NUMARMORS = sizeof(armd) / sizeof(armd[0]);
 //
 MountType mountd[] = {
 	// MOUNT_NONE
-	{-1, 0, 0, 0, -1, 0},
+	{ NULL, -1, 0, 0, 0, -1, 0},
 	// MOUNT_WHORSE
-	{S_RIDING, 3, 5, 3, -1, 0},
+	{ "WING", S_RIDING, 3, 5, 3, -1, 0},
 	// MOUNT_HORSE
-	{S_RIDING, 1, 3, 3, -1, 0},
+	{ "HORS", S_RIDING, 1, 3, 3, -1, 0},
 	// MOUNT_CAMEL
-	{S_RIDING, 1, 2, 2, SPECIAL_CAMEL_FEAR, 3},
+	{ "CAME", S_RIDING, 1, 2, 2, SPECIAL_CAMEL_FEAR, 3},
 	// MOUNT_MWOLF
-	{S_RIDING, 1, 3, 3, -1, 0},
-	// MOUNT_SPIDER
-	{S_RIDING, 2, 3, 3, -1, 0},
+	{ "MWOL", S_RIDING, 1, 3, 3, -1, 0},
+	// MOUNT_MSPIDER
+	{ "MSPI", S_RIDING, 2, 3, 3, -1, 0},
 	// MOUNT_MOLE
-	{S_RIDING, 2, 3, 3, -1, 0},
+	{ "MOLE", S_RIDING, 2, 3, 3, -1, 0},
 };
 
 MountType *MountDefs = mountd;
+int NUMMOUNTS = sizeof(mountd) / sizeof(mountd[0]);
 
 //
 // Table of other battle items

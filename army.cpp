@@ -172,7 +172,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		//
 		int mountType;
 		for(mountType = 1; mountType < NUMMOUNTS; mountType++) {
-			item = unit->GetMount(mountType, canFly, canRide, ridingBonus);
+			abbr = MountDefs[mountType].abbr;
+			item = unit->GetMount(abbr, canFly, canRide, ridingBonus);
 			if(item == -1) continue;
 			// Defer adding the combat bonus until we know if the weapon
 			// allows it.  The defense bonus for riding can be added now
@@ -226,7 +227,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		// items will be skipped in the battle items setup and handled
 		// here.
 		if ((ItemDefs[weapon].type & IT_BATTLE) && special == -1) {
-			BattleItemType *pBat = findBattleItem(ItemDefs[weapon].abr);
+			BattleItemType *pBat = FindBattleItem(ItemDefs[weapon].abr);
 			special = pBat->index;
 			slevel = pBat->skillLevel;
 		}
@@ -406,7 +407,7 @@ int Soldier::ArmorProtect(int weaponClass)
 	// Return 1 if the armor is successful
 	//
 	ArmorType *pArm = NULL;
-	if(armor > 0) pArm = findArmor(ItemDefs[armor].abr);
+	if(armor > 0) pArm = FindArmor(ItemDefs[armor].abr);
 	if (pArm == NULL) return 0;
 	int chance = pArm->saves[weaponClass];
 
@@ -1088,7 +1089,7 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 		Soldier * tar = GetTarget(tarnum);
 		int tarFlags = 0;
 		if(tar->weapon != -1) {
-			WeaponType *pw = findWeapon(ItemDefs[tar->weapon].abr);
+			WeaponType *pw = FindWeapon(ItemDefs[tar->weapon].abr);
 			tarFlags = pw->flags;
 		}
 

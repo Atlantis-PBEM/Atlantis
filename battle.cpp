@@ -82,7 +82,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 	if (!def->NumAlive()) return;
 
 	if (!behind && (a->riding != -1)) {
-		MountType *pMt = &MountDefs[ItemDefs[a->riding].index];
+		MountType *pMt = FindMount(ItemDefs[a->riding].abr);
 		if(pMt->mountSpecial != -1) {
 			int i, num, tot = -1;
 			SpecialType *spd = &SpecialDefs[pMt->mountSpecial];
@@ -123,7 +123,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 	for (int i = 0; i < numAttacks; i++) {
 		WeaponType *pWep = NULL;
 		if(a->weapon != -1)
-			pWep = findWeapon(ItemDefs[a->weapon].abr);
+			pWep = FindWeapon(ItemDefs[a->weapon].abr);
 
 		if(behind) {
 			if(!pWep) break;

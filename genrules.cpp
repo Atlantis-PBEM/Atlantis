@@ -1933,7 +1933,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "td align=\"left\"");
 		temp = "";
 		if(ItemDefs[i].type & IT_WEAPON) {
-			WeaponType *wp = findWeapon(ItemDefs[i].abr);
+			WeaponType *wp = FindWeapon(ItemDefs[i].abr);
 			if(wp->attackBonus || wp->defenseBonus ||
 					(wp->flags & WeaponType::RANGED) ||
 					(wp->flags & WeaponType::NEEDSKILL)) {
@@ -1964,7 +1964,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			}
 		}
 		if(ItemDefs[i].type & IT_MOUNT) {
-			MountType *mp = &MountDefs[ItemDefs[i].index];
+			MountType *mp = FindMount(ItemDefs[i].abr);
 			if(mp->skill > 0 &&
 					!(SkillDefs[mp->skill].flags & SkillType::DISABLED)) {
 				temp += "Gives a riding bonus with the ";
@@ -1973,7 +1973,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			}
 		}
 		if(ItemDefs[i].type & IT_ARMOR) {
-			ArmorType *at = findArmor(ItemDefs[i].abr);
+			ArmorType *at = FindArmor(ItemDefs[i].abr);
 			temp += "Gives a ";
 			temp += at->saves[SLASHING];
 			temp += " in ";
@@ -3243,19 +3243,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"which are fighting hand-to-hand without specific weapons are "
 		"assumed to be irregularly armed with makeshift weapons such as "
 		"clubs, pitchforks, torches, etc. ";
-	if(!(SkillDefs[S_RIDING].flags & SkillType::DISABLED) &&
-			!(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
-		temp += "Possession of a horse, and Riding skill, also confers a "
-			"bonus to effective Combat skill equal to the Riding skill "
-			"level (up to a maximum of ";
-		temp += MountDefs[MOUNT_HORSE].maxBonus;
-		temp += ") provided that the terrain allows horses to be used in "
-			"combat. ";
-		if(!(ItemDefs[I_WHORSE].flags & ItemType::DISABLED)) {
-			temp += "Winged horse are better yet, but require more basic "
-				"Riding skill to gain any advantage. ";
-		}
-	}
+	f.Paragraph(temp);
+
+	temp += " Possession of a mount, and the appropriate skill to use that "
+		"mount will also confer a bonus to the effective Combat skill. The "
+		"amount of the bonus will depend on the level of the appropriate "
+		"skill and the mount in question.  Some mounts are better than "
+		"others, and may provide better bonus, but may also require higher "
+		"levels of skill to get any bonus at all.  Some terrain might not "
+		"allow mounts to give a combat advantage.";
+	f.Paragraph(temp);
+
 	temp += "Certain weapons may provide different attack and defense "
 		"bonuses, or have additional attack bonuses against mounted "
 		"opponents or other special characteristics. These bonuses will "
@@ -3475,7 +3473,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				if(!(ItemDefs[i].type & IT_ARMOR)) continue;
 				if(!(ItemDefs[i].type & IT_NORMAL)) continue;
 				if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-				ArmorType *at = findArmor(ItemDefs[i].abr);
+				ArmorType *at = FindArmor(ItemDefs[i].abr);
 				if (at == NULL) continue;
 				if (!(at->flags & ArmorType::USEINASSASSINATE)) continue;
 				if(last == -1) {

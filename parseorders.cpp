@@ -921,7 +921,7 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		ParseError(pCheck, u, 0, "PREPARE: Invalid item.");
 		return;
 	}
-	BattleItemType *bt = findBattleItem(token->Str());
+	BattleItemType *bt = FindBattleItem(token->Str());
 	delete token;
 
 	if(bt == NULL) {

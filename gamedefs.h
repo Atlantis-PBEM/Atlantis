@@ -60,6 +60,7 @@ extern int allowedQuartermastersSize;
 extern int NUMBATTLEITEMS;
 extern int NUMARMORS;
 extern int NUMWEAPONS;
+extern int NUMMOUNTS;
 
 class GameDefs {
 public:

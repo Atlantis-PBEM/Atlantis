@@ -343,20 +343,6 @@ enum {
 };
 
 //
-// Types of mounts
-//
-enum {
-	MOUNT_NONE,
-	MOUNT_WHORSE,
-	MOUNT_HORSE,
-	MOUNT_CAMEL,
-	MOUNT_MWOLF,
-	MOUNT_MSPIDER,
-	MOUNT_MOLE,
-	NUMMOUNTS
-};
-
-//
 // Types of skills.
 //
 enum {

@@ -243,6 +243,8 @@ extern ArmorType *ArmorDefs;
 class MountType
 {
 	public:
+		char *abbr;
+
 		//
 		// This is the skill needed to use this mount.
 		//
@@ -295,9 +297,10 @@ int ParseEnabledItem(AString *);
 int ParseTransportableItem(AString *);
 int LookupItem(AString *);
 
-BattleItemType *findBattleItem(char *);
-ArmorType *findArmor(char *);
-WeaponType *findWeapon(char *);
+BattleItemType *FindBattleItem(char *);
+ArmorType *FindArmor(char *);
+WeaponType *FindWeapon(char *);
+MountType *FindMount(char *);
 
 AString ItemString(int type, int num);
 AString *ItemDescription(int item, int full);

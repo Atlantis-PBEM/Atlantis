@@ -653,5 +653,6 @@ Changes from 4.0.10 -> 5.0.0
       the population while give 0 orders increase it (no check for races
       yet). This is not yet reflected in the rules.
    -- Started work on getting rid of the hardcoded enums.  Battle Items,
-      Weapons, and Armors are now done.  They are now completely looked
-	  up based on the abbreviation of the item which has that property.
+      Weapons, Armors and Mounts are now done.  They are now completely
+	  looked up based on the abbreviation of the item which has that
+	  property.
