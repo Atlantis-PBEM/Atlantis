@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Realms of the Arcane",	 // RULESET_NAME
-	MAKE_ATL_VER( 4, 0, 10 ), // RULESET_VERSION
+	MAKE_ATL_VER( 5, 0, 0 ), // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */

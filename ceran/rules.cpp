@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Ceran",				// RULESET_NAME
-	MAKE_ATL_VER( 2, 0, 4 ), // RULESET_VERSION
+	MAKE_ATL_VER( 3, 0, 0 ), // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */

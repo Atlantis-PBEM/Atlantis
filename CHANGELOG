@@ -546,3 +546,8 @@ Changes from 4.0.9 -> 4.0.10
    -- Fixed a bug in teleport and such which allowed entry into and out of
       the Abyss (and viewing it via farsight and such).  Bad JT, no biscuit.
       Thanks AZ for pointing it out.
+
+Changes from 4.0.10 -> 5.0.0
+--------------------------------------------------
+   -- Fixed brokeness in conquest map generation caused by terrain patch
+   -- Fixed potential namespace conflict on 'fill' from template.cpp
