@@ -2088,7 +2088,7 @@ int AGetName( ARegion *pReg, int town )
 		if(++i >= number) i=0;
 	}
     for (i=0; i<number; i++) nameused[i+offset] = 0;
-    i = getrandom(nnames);
+    i = getrandom(number);
 	j = i+offset;
     nameused[j] = 1;
     return j;
@@ -2425,7 +2425,9 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
 
 void ARegion::MakeStartingCity() 
 {
-    gate = -1;
+	if(!Globals->TOWNS_EXIST) return;
+
+	if(Globals->GATES_EXIST) gate = -1;
     if( !town )
     {
         AddTown();

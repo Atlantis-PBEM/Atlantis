@@ -440,7 +440,7 @@ ItemType id[] =
 	 -1,0,-1,0,-1,0,250,IT_MONSTER, 50,1,MONSTER_HYDRA,300,0,0,0, -1,0},
 	{"storm giant","storm giants","STGI",ItemType::CANTGIVE|ItemType::DISABLED,
 	 -1,0,-1,0,-1,0,200,IT_MONSTER,50,1,MONSTER_STORMGIANT,250,0,0,0, -1,0},
-	{"cloud giant","cloud giants","STGI",ItemType::CANTGIVE|ItemType::DISABLED,
+	{"cloud giant","cloud giants","CLGI",ItemType::CANTGIVE|ItemType::DISABLED,
 	 -1,0,-1,0,-1,0,200,IT_MONSTER,50,1,MONSTER_CLOUDGIANT,250,0,0,0, -1,0},
 	{"illyrthid","illyrthil","ILLY",ItemType::CANTGIVE|ItemType::DISABLED,
 	 -1,0,-1,0,-1,0,50,IT_MONSTER,50,1,MONSTER_ILLYRTHID,75,0,0,0, -1,0},
@@ -880,7 +880,6 @@ static SkillType sd[] = {
      0,S_ARTIFACT_LORE,3, S_PORTAL_LORE,3,-1,0},
 	{"manipulation","MANI",100,SkillType::APPRENTICE | SkillType::DISABLED,
 	 0,-1,0,-1,0,-1,0},
-	// Extra spells for Ceran
 	{"weaponcraft","WCRA",10, SkillType::DISABLED,0,S_WEAPONSMITH,5,-1,0,-1,0},
 	{"armorcraft","ACRA",10, SkillType::DISABLED,0,S_ARMORER,5,-1,0,-1,0},
 	{"camel training","CAME",10,SkillType::DISABLED,0,-1,0,-1,0,-1,0},
@@ -985,9 +984,9 @@ static TerrainType td[] = {
     // pop, wages, economy, movepoints, prod1, chance1, amt1,
     // prod2, chance2, amt2, prod3, chance3, amt3,
     // prod4, chance4, amt4, prod5, chance5, amt5,
-    // race1, race2, race3, coastalrace1, coastalrace2,
+    // race1, race2, race3, race4, coastalrace1, coastalrace2, coastalrace3,
     // wmonfreq, smallmon, bigmon, humanoid,
-    // lairChance, lair1, lair2, lair3, lair4
+    // lairChance, lair1, lair2, lair3, lair4, lair5, lair6
     //
     {"ocean", R_OCEAN, 0,
      0,0,0,1,I_FISH,100,20,

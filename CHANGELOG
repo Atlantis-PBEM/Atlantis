@@ -109,6 +109,17 @@ Changes from 4.0.6 -> 4.0.7
       makes the units default order TAX instead of WORK)
    -- Fixed bug that caused monster generation to hang if unable to generate
       monsters because all of them were disabled.
+   -- Fixed a typo which had storm giants and cloud giants having the same tag
+   -- Fixed up the code slightly so that if you defined NEXUS_IS_CITY it
+      actually gives the nexus some sort of items and population.
+   -- Fixed up the code slightly so that starting citys aren't created if you
+      set TOWNS_EXIST to false.
+   -- Fixed up the code so that gates aren't created and gate lore is disabled
+      if GATES_EXIST is set to false.
+   -- Fixed bug where large maps were coring all over themselves due to
+      a stack smash.  Stupid bug.
+   -- Fixed another bug where regions got trashed when you managed (say
+      during world creation) to create more than 10000 units in a turn.
 
 TODO
 ----------------

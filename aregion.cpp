@@ -1838,7 +1838,7 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
         
         WriteExits( f, pRegions );
         
-        if( Globals->GATES_EXIST && gate )
+        if( Globals->GATES_EXIST && gate && gate != -1)
         {
             int sawgate = 0;
             forlist(&objects) {
@@ -2386,18 +2386,21 @@ void ARegionList::CreateAbyssLevel( int level, char *name )
 			reg->wages = -2;
 		}
 	}
-	int gateset = 0;
+
 	int tempx, tempy;
-	do {
-        tempx = getrandom(4);
-        tempy = getrandom(4);
-		reg = pRegionArrays[level]->GetRegion(tempx, tempy);
-		if(reg) {
-			gateset = 1;
-			numberofgates++;
-			reg->gate = -1;
-		}
-	} while(!gateset);
+	if(Globals->GATES_EXIST) {
+		int gateset = 0;
+		do {
+			tempx = getrandom(4);
+			tempy = getrandom(4);
+			reg = pRegionArrays[level]->GetRegion(tempx, tempy);
+			if(reg) {
+				gateset = 1;
+				numberofgates++;
+				reg->gate = -1;
+			}
+		} while(!gateset);
+	}
 
     FinalSetup( pRegionArrays[ level ] );
 
@@ -2433,9 +2436,11 @@ void ARegionList::CreateNexusLevel( int level, char *name )
 
     FinalSetup( pRegionArrays[ level ] );
 
-	if(Globals->NEXUS_IS_CITY) {
+	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
 		reg->MakeStartingCity();
-		numberofgates++;
+		if(Globals->GATES_EXIST) {
+			numberofgates++;
+		}
 	}
 }
 
@@ -3043,12 +3048,17 @@ void ARegionList::SetACNeighbors( int levelSrc,
         ARegion *pReg = GetStartingCity( AC, i, levelTo, maxX, maxY );
         AC->neighbors[i] = pReg;
         pReg->MakeStartingCity();
-        numberofgates++;
+		if(Globals->GATES_EXIST) {
+			numberofgates++;
+		}
     }
 }
 
 void ARegionList::InitSetupGates( int level )
 {
+
+	if(!Globals->GATES_EXIST) return;
+
     ARegionArray *pArr = pRegionArrays[ level ];
 
     int i, j, k;
@@ -3074,6 +3084,8 @@ void ARegionList::InitSetupGates( int level )
 
 void ARegionList::FinalSetupGates()
 {
+	if(!Globals->GATES_EXIST) return;
+
     int *used = new int[numberofgates];
 
     int i;

@@ -211,10 +211,15 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_HIGHLANDER);
 	EnableItem(I_MINOTAUR);
 
-	ModifyTerrainRaces(R_NEXUS, I_FAIRY, -1, -1, -1, -1, -1, -1);
-    ModifyTerrainItems(R_NEXUS, I_HERBS, 100, 20, I_ROOTSTONE, 100, 10,
-			I_MITHRIL, 100, 10, I_YEW, 100, 10, I_IRONWOOD, 100, 10);
-	ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
+	if(!Globals->GATES_EXIST)
+		DisableSkill(S_GATE_LORE);
+
+	if(Globals->NEXUS_IS_CITY) {
+		ModifyTerrainRaces(R_NEXUS, I_FAIRY, -1, -1, -1, -1, -1, -1);
+		ModifyTerrainItems(R_NEXUS, I_HERBS, 100, 20, I_ROOTSTONE, 100, 10,
+				I_MITHRIL, 100, 10, I_YEW, 100, 10, I_IRONWOOD, 100, 10);
+		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
+	}
 
 	ModifyTerrainRaces(R_TUNDRA,I_ESKIMO,I_ICEDWARF,I_GNOLL,-1,
 			I_SEAELF,I_VIKING, -1);

@@ -182,6 +182,16 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainRaces(R_ISLAND_MOUNTAIN,I_MAN,-1,-1,-1,-1, -1, -1);
 	ModifyTerrainRaces(R_ISLAND_SWAMP,I_MAN,-1,-1,-1,-1, -1, -1);
 
+	if(!Globals->GATES_EXIST)
+		DisableSkill(S_GATE_LORE);
+
+	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
+		ModifyTerrainRaces(R_NEXUS, I_MAN, -1, -1, -1, -1, -1, -1);
+		ModifyTerrainItems(R_NEXUS, I_IRON, 100, 10, I_WOOD, 100, 10,
+				I_STONE, 100, 10, -1, 0, 0, -1, 0, 0);
+		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
+	}
+
 	/* Limit the resources on the islands and remove fish */
 	ModifyTerrainItems(R_OCEAN, -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0);
 	ModifyTerrainItems(R_ISLAND_PLAIN, I_HORSE,100,20, -1,0,0, -1,0,0,

@@ -113,6 +113,17 @@ void Game::ModifyTablesPerRuleset(void)
 	if(Globals->APPRENTICES_EXIST)
 		EnableSkill(S_MANIPULATE);
 
+    if(!Globals->GATES_EXIST)
+		DisableSkill(S_GATE_LORE);
+
+	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
+		ModifyTerrainRaces(R_NEXUS, I_HIGHELF, I_VIKING, I_PLAINSMAN,
+				-1, -1, -1, -1);
+		ModifyTerrainItems(R_NEXUS, I_IRON, 100, 10, I_WOOD, 100, 10,
+				I_STONE, 100, 10, -1, 0, 0, -1, 0, 0);
+		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
+	}
+
     EnableItem(I_PICK);
 	EnableItem(I_SPEAR);
 	EnableItem(I_AXE);

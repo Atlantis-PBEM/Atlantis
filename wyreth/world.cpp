@@ -2335,7 +2335,9 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
 
 void ARegion::MakeStartingCity() 
 {
-    gate = -1;
+	if(!Globals->TOWNS_EXIST) return;
+
+	if(Globals->GATES_EXIST) gate = -1;
     if( !town )
     {
         AddTown();
