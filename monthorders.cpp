@@ -977,6 +977,20 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		u->type = U_APPRENTICE;
 	}
 
+	if ((Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) &&
+			(sk == S_QUARTERMASTER) &&
+			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)) {
+			if (CountQuarterMasters(u->faction) >=
+					AllowedQuarterMasters(u->faction)) {
+				u->Error("STUDY: Can't have another quartermaster.");
+				return;
+			}
+			if(u->GetMen() != 1) {
+				u->Error("STUDY: Only 1-man units can be quartermasters.");
+				return;
+			}
+	}
+
 	int days = 30 * u->GetMen() + o->days;
 
 	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetSkill(sk) >= 2) {

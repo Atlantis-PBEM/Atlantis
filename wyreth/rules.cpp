@@ -22,12 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date			Person			Comments
-// ----			------			--------
-// 2001/Feb/22	Joseph Traub	Moved the Item and such definitions out
-//								into gamedata.cpp
-//
+
 #include "gamedata.h"
 #include "gamedefs.h"
 
@@ -53,6 +48,10 @@ int allowedTaxesSize = sizeof(aw) / sizeof(aw[0]);
 static int at[] = { 0, 10, 24, 40, 60, 100 };
 int *allowedTrades = at;
 int allowedTradesSize = sizeof(at) / sizeof(at[0]);
+
+static int aq[] = { 0, 1, 2, 3, 5, 8 };
+int *allowedQuartermasters = aq;
+int allowedQuartermastersSize = sizeof(aq) / sizeof(aq[0]);
 
 static GameDefs g = {
 	"Wyreth",				// RULESET_NAME
@@ -204,4 +203,4 @@ static GameDefs g = {
 	5000,	// FRACTIONAL_WEIGHT
 };
 
-GameDefs * Globals = &g;
+GameDefs *Globals = &g;

@@ -77,6 +77,25 @@ int Game::GenRules(const AString &rules, const AString &css,
 		return 0;
 	}
 
+	int qm_exist = (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT);
+	if (qm_exist) {
+		/* Make sure the S_QUARTERMASTER skill is enabled */
+		if (SkillDefs[S_QUARTERMASTER].flags & SkillType::DISABLED)
+			qm_exist = 0;
+	}
+	int found = 0;
+	if (qm_exist) {
+		/* Make there is an enabled building with transport set */
+		for(i = 0; i < NOBJECTS; i++) {
+			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+			if (ObjectDefs[i].flags & ObjectType::TRANSPORT) {
+				found = 1;
+				break;
+			}
+		}
+		if (!found) qm_exist = 0;
+	}
+
 	f.PutStr("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 "
 			"Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">");
 	f.Enclose(1, "html");
@@ -183,6 +202,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		f.TagText("li", f.Link("#economy_entertainment", "Entertainment"));
 	f.TagText("li", f.Link("#economy_taxingpillaging", "Taxing/Pillaging"));
+	if (qm_exist)
+		f.TagText("li", f.Link("#economy_transport", "Transporting goods"));
 	if(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED)
 		f.TagText("li", f.Link("#economy_banking", "Banking"));
 	f.Enclose(0, "ul");
@@ -272,6 +293,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#declare", "declare"));
 	f.TagText("li", f.Link("#describe", "describe"));
 	f.TagText("li", f.Link("#destroy", "destroy"));
+	if (qm_exist)
+		f.TagText("li", f.Link("#distribute", "distribute"));
 	f.TagText("li", f.Link("#enter", "enter"));
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		f.TagText("li", f.Link("#entertain", "entertain"));
@@ -321,6 +344,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#study", "study"));
 	f.TagText("li", f.Link("#tax", "tax"));
 	f.TagText("li", f.Link("#teach", "teach"));
+	if (qm_exist)
+		f.TagText("li", f.Link("#transport", "transport"));
 	f.TagText("li", f.Link("#turn", "turn"));
 	if(Globals->USE_WEAPON_ARMOR_COMMAND)
 		f.TagText("li", f.Link("#weapon", "weapon"));
@@ -425,7 +450,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	Faction fac;
 	int app_exist = (Globals->APPRENTICES_EXIST);
 	if (app_exist) {
-		int found = 0;
+		found = 0;
 		/* Make sure we have a skill with the APPRENTICE flag */
 		for(i = 0; i < NSKILLS; i++) {
 			if(SkillDefs[i].flags & SkillType::DISABLED) continue;
@@ -460,8 +485,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"can obtain income by taxing or pillaging. Faction Points spent "
 			"on Trade determine the number of regions in which a faction "
 			"may conduct trade activity. Trade activity includes producing "
-			"goods, building ships and buildings, and buying trade items. "
-			"Faction Points spent on Magic determines the number of mages ";
+			"goods, building ships and buildings, and buying trade items. ";
+		if (qm_exist) {
+			temp += "Faction points spent on Trade also determine the "
+				"of quartermaster units a trade faction can have. ";
+		}
+		temp += "Faction Points spent on Magic determine the number of mages ";
 		if(app_exist)
 			temp += "and apprentices ";
 		temp += "the faction may have. (More information on all of the "
@@ -474,7 +503,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "tr");
 		f.TagText("th", "Faction Points");
 		f.TagText("th", "War (max tax regions)");
-		f.TagText("th", "Trade (max trade regions)");
+		temp = "Trade (max trade regions";
+		if (qm_exist)
+			temp += "/quartermasters";
+		temp += ")";
+		f.TagText("th", temp);
 		temp = "Magic (max mages";
 		if(app_exist)
 			temp += "/apprentices";
@@ -494,7 +527,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.PutStr(AllowedTaxes(&fac));
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\" nowrap");
-			f.PutStr(AllowedTrades(&fac));
+			temp = AllowedTrades(&fac);
+			if (qm_exist)
+				temp += AString("/") + AllowedQuarterMasters(&fac);
+			f.PutStr(temp);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\" nowrap");
 			temp = AllowedMages(&fac);
@@ -511,9 +547,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		fac.type[F_WAR] = w = (Globals->FACTION_POINTS+1)/3;
 		fac.type[F_TRADE] = t = Globals->FACTION_POINTS/3;
 		fac.type[F_MAGIC] = m = (Globals->FACTION_POINTS+2)/3;
-		int nm, na, nw, nt;
+		int nm, na, nw, nt, nq;
 		nm = AllowedMages(&fac);
 		na = AllowedApprentices(&fac);
+		nq = AllowedQuarterMasters(&fac);
 		nt = AllowedTrades(&fac);
 		nw = AllowedTaxes(&fac);
 		temp = "For example, a well rounded faction might spend ";
@@ -531,6 +568,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += " as well as ";
 			temp += AString(na) + " apprentice" + (na==1?"":"s");
 		}
+		if (qm_exist) {
+			temp += " and ";
+			temp += AString(nq) + " quartermaster" + (nq==1?"":"s");
+		}
 		temp += ".";
 		f.Paragraph(temp);
 
@@ -538,6 +579,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		fac.type[F_MAGIC] = m = 0;
 		fac.type[F_TRADE] = t = 0;
 		nw = AllowedTaxes(&fac);
+		nq = AllowedQuarterMasters(&fac);
 		nt = AllowedTrades(&fac);
 		nm = AllowedMages(&fac);
 		na = AllowedApprentices(&fac);
@@ -566,6 +608,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 			else
 				temp += AString("could only possess ") + na + " apprentice" +
 					(na == 1?"":"s");
+		}
+		if (qm_exist) {
+			temp += ", and ";
+			if (nq == 0)
+				temp += "count not possess any quartermasters";
+			else
+				temp += AString("could only possess ") + nq +
+					"quartermaster" + (nq == 1?"":"s");
 		}
 		temp += ".";
 		f.Paragraph(temp);
@@ -1409,7 +1459,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"another in Atlantis is skills.  The following skills are "
 		"available: ";
 	int comma = 0;
-	int found = 0;
+	found = 0;
 	last = -1;
 	for(i = 0; i < NSKILLS; i++) {
 		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
@@ -2510,60 +2560,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Paragraph(temp);
 	}
-	if(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
-		f.LinkRef("economy_banking");
-		f.TagText("H3","Banking:");
-		temp = "Each faction has access to a bank account where silver can be "
-			"deposited and withdrawn.  Initially the bank account is empty "
-			"and can be operated using the ";
-		temp += f.Link("#bank","BANK") + " order. ";
-		if (!(ObjectDefs[O_OBANK].flags & ObjectType::DISABLED)
-				|| (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)
-				|| (Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD)) {
-			temp += "A unit issuing the ";
-			temp += f.Link("#bank","BANK") + " order ";
-			if (!(ObjectDefs[O_OBANK].flags & ObjectType::DISABLED)) { // do we have banks ?
-				temp += "must be inside a bank";
-				if (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)
-					temp += ", which ";
-			}
-			if(Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT) {
-				temp += "must be located in a region ";
-				temp += "with a settlement of any size";
-			}
-			if(Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD)
-				temp += " which cannot be guarded by a faction with an attitude less than Friendly";
-			temp += ".";
-		}
-		//temp += " away from the Nexus. ";
-		if (!(SkillDefs[S_BANKING].flags & SkillType::DISABLED)) { // do we have banking skill ?
-			temp += " To be able to use the ";
-			temp += f.Link("#bank","BANK") + " order, a unit must possess the BANKING skill. ";
-			temp += "Each level of this skill enables the unit to withdraw or deposit ";
-			temp += Globals->BANK_MAXSKILLPERLEVEL;
-			temp += " silver.";
-		} else {
-			temp += " Each unit is limited to withdrawing or depositing ";
-			temp += Globals->BANK_MAXUNSKILLED;
-			temp += " silver.";
-		}
-		if (Globals->ALLOW_BANK & GameDefs::BANK_FEES) {
-			temp += " Every operation (be it depositing or withdrawing) will incur in a fee of ";
-			temp += Globals->BANK_FEE;
-			temp += "% the amount.  The full amount will be deducted from the bank account (for ";
-			temp += "a withdrawal) and from the unit (for a deposit), though only the amount after";
-			temp += " the fees will be transferred.  For example, a unit trying to deposit 5000";
-			temp += " silver, would see 5000 silver taken from its pockets, but only ";
-			temp += (5000 - (5000 * Globals->BANK_FEE)/100);
-			temp += " silver would be credited in the bank account.";
-		}
-		if (Globals->ALLOW_BANK & GameDefs::BANK_TRADEINTEREST) {
-			temp += " Each faction will receive an interest in the deposit equal to the number ";
-			temp += "of its trade points in percentage (a trade 5 faction would get 5%). ";
-		}
-		temp += "FIXME: mention \"Globals->ALLOW_BANK & GameDefs::BANK_SKILLTOBUILD\" here";
-		f.Paragraph(temp);
-	}
+
 	f.LinkRef("economy_taxingpillaging");
 	f.TagText("h3", "Taxing/Pillaging:");
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
@@ -2807,6 +2804,143 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " are always visible regardless of Stealth skill, and ";
 	temp += "will be marked as being \"on guard\" in the region description.";
 	f.Paragraph(temp);
+
+	if (qm_exist) {
+		f.LinkRef("economy_transport");
+		f.TagText("H3", "Transportation of goods");
+
+		temp = "Trade factions may train Quartermaster units.  A "
+			"Quartermaster unit, may accept ";
+		temp += f.Link("#transport", "TRANSPORT") + "ed items, from "
+			"any unit within " + Globals->LOCAL_TRANSPORT + " hexes "
+			"distance from the hex containing the quartermaster. ";
+		temp += "Quartermasters may also";
+		temp += f.Link("#distribute", "DISTRIBUTE") + " items to any "
+			"unit within " + Globals->LOCAL_TRANSPORT + " hexes "
+			"distance from the hex containing the quartermaster and may " +
+			f.Link("#transport", "TRANSPORT") + " items to another "
+			"quartermaster up to " + Globals->NONLOCAL_TRANSPORT +
+			" hexes distant.";
+		if (Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
+			temp += " The distance a quartermaster can ";
+			temp += f.Link("#transport", "TRANSPORT") + " items to "
+				"another quartermaster will increase with the level of "
+				"skill possessed by the quartermaster unit.";
+		}
+		f.Paragraph(temp);
+		temp = "In order to accomplish this function, a quartermaster "
+			"must be the owner of a structure which allows transportation "
+			"of items.  The structures which allow this are: ";
+		last = -1;
+		comma = 0;
+		j = 0;
+		for (i = 0; i < NOBJECTS; i++) {
+			if (!(ObjectDefs[i].flags & ObjectType::TRANSPORT)) continue;
+			j++;
+			if (last == -1) {
+				last = i;
+				continue;
+			}
+			temp += ObjectDefs[i].name;
+			temp += ", ";
+			comma++;
+			last = i;
+		}
+		if (comma) temp += "and ";
+		temp += ObjectDefs[last].name;
+		temp += ".";
+		f.Paragraph(temp);
+
+		if (Globals->SHIPPING_COST > 0) {
+			temp = "The cost of transport items from one quartermaster to "
+				"another is based on the weight of the items and costs $";
+			temp += Globals->SHIPPING_COST;
+			temp += " silver per weight unit.";
+			if (Globals->TRANSPORT & GameDefs::QM_AFFECT_COST) {
+				temp += " The cost of shipping is increased for units with a "
+					"lower quartermaster skill, dropping to the minimum "
+					"above when the unit is at the maximum skill level.";
+			}
+			f.Paragraph(temp);
+		}
+
+		temp = "Quartermasters must be single man units";
+		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+			temp += ", and a faction is limited in the number of "
+				"quartermasters it may have at any one time";
+		}
+		temp += ".  Both the ";
+		temp += f.Link("#transport", "TRANSPORT") + " and " +
+			f.Link("#distribute", "DISTRIBUTE") + " orders count as "
+			"trade activity in the hex of the unit issuing the order. ";
+		temp += " The target unit must be at least FRIENDLY to the unit "
+			"which issues the order.";
+		f.Paragraph(temp);
+	}
+
+	if(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
+		f.LinkRef("economy_banking");
+		f.TagText("H3","Banking:");
+		temp = "Each faction has access to a bank account where silver can "
+			"be deposited and withdrawn.  Initially the bank account is "
+			"empty and can be operated using the ";
+		temp += f.Link("#bank","BANK") + " order. ";
+		if (!(ObjectDefs[O_OBANK].flags & ObjectType::DISABLED)
+				|| (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)
+				|| (Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD)) {
+			temp += "A unit issuing the ";
+			temp += f.Link("#bank","BANK") + " order ";
+			if (!(ObjectDefs[O_OBANK].flags & ObjectType::DISABLED)) {
+				// do we have banks ?
+				temp += "must be inside a bank";
+				if (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)
+					temp += ", which ";
+			}
+			if(Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT) {
+				temp += "must be located in a region ";
+				temp += "with a settlement of any size";
+			}
+			if(Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD)
+				temp += " which cannot be guarded by a faction with "
+					"an attitude less than Friendly";
+			temp += ".";
+		}
+		if (!(SkillDefs[S_BANKING].flags & SkillType::DISABLED)) {
+			// do we have banking skill ?
+			temp += " To be able to use the ";
+			temp += f.Link("#bank","BANK") + " order, a unit must possess "
+				"the BANKING skill. Each level of this skill enables the "
+				"unit to withdraw or deposit ";
+			temp += Globals->BANK_MAXSKILLPERLEVEL;
+			temp += " silver.";
+		} else {
+			temp += " Each unit is limited to withdrawing or depositing ";
+			temp += Globals->BANK_MAXUNSKILLED;
+			temp += " silver.";
+		}
+		if (Globals->ALLOW_BANK & GameDefs::BANK_FEES) {
+			temp += " Every operation (be it depositing or withdrawing) "
+				"will incur in a fee of ";
+			temp += Globals->BANK_FEE;
+			temp += "% the amount.  The full amount will be deducted from "
+				"the bank account (for a withdrawal) and from the unit "
+				"(for a deposit), though only the amount after the fees "
+				"will be transferred.  For example, a unit trying to "
+				"deposit 5000 silver, would see 5000 silver taken from "
+				"its inventory, but only ";
+			temp += (5000 - (5000 * Globals->BANK_FEE)/100);
+			temp += " silver would be credited in the bank account.";
+		}
+		if (Globals->ALLOW_BANK & GameDefs::BANK_TRADEINTEREST) {
+			temp += " Each faction will receive an interest in the deposit "
+				"equal to the number of its trade points in percentage (a "
+				"trade 5 faction would get 5%). ";
+		}
+		// FIXME: mention Globals->ALLOW_BANK & GameDefs::BANK_SKILLTOBUILD
+		//  here";
+		f.Paragraph(temp);
+	}
+
 	f.LinkRef("com");
 	f.ClassTagText("div", "rule", "");
 	f.TagText("h2", "Combat");
@@ -4160,6 +4294,29 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "DESTROY";
 	f.CommandExample(temp, temp2);
 
+	if (qm_exist) {
+		f.ClassTagText("div", "rule", "");
+		f.LinkRef("distribute");
+		f.TagText("h4", "DISTRIBUTE [unit] [num] [item]");
+		f.TagText("h4", "DISTRIBUTE [unit] ALL [item]");
+		f.TagText("h4", "DISTRIBUTE [unit] ALL [item] EXCEPT [amount]");
+		temp = "Distribute the specified items to the given friendly unit. "
+			"In the second form, all of that item, are distributed.  In the "
+			"last form, all of that item except for the specified amount "
+			"are distributed.";
+		temp += " The unit issuing the distribute order must have the "
+			"quartermaster skill, and be the owner of a transport "
+			"structure. Use of this order counts as trade activity in "
+			"the hex.";
+		f.Paragraph(temp);
+		f.Paragraph("Examples:");
+		temp = "Distribute 10 STON to unit 1234";
+		temp2 = "DISTRIBUTE 1234 10 STON";
+		f.CommandExample(temp, temp2);
+		temp = "Distribute all except 10 SWOR to unit 3432";
+		temp2 = "DISTRIBUTE 3432 ALL SWOR EXCEPT 10";
+	}
+
 	f.ClassTagText("div", "rule", "");
 	f.LinkRef("enter");
 	f.TagText("h4", "ENTER [object]");
@@ -4243,6 +4400,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += f.Link("#forget", "FORGET") + " all its magic skills. ";
 		temp += "If you have too many mages for the number of points you "
 			"try to assign to MAGIC, the FACTION order will fail.";
+		if (qm_exist) {
+			temp += " Similar problems could occur with TRADE points and "
+				"the number of quartermasters controlled by the faction.";
+		}
 		f.Paragraph(temp);
 		f.Paragraph("Examples:");
 		temp = "Assign 2 faction points to WAR, 2 to TRADE, and 1 to MAGIC.";
@@ -4981,6 +5142,49 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "TEACH NEW 2\nTEACH 510";
 	f.CommandExample(temp, temp2);
 
+	if (qm_exist) {
+		f.ClassTagText("div", "rule", "");
+		f.LinkRef("transport");
+		f.TagText("h4", "TRANSPORT [unit] [num] [item]");
+		f.TagText("h4", "TRANSPORT [unit] ALL [item]");
+		f.TagText("h4", "TRANSPORT [unit] ALL [item] EXCEPT [amount]");
+		temp = "Transport the specified items to the given target.  In "
+			"the second form all of the specified item is transport.  In "
+			"the last form, all of the specified item except for the "
+			"specified amount is transport.";
+		if (Globals->SHIPPING_COST > 0) {
+			temp += " Long distance transportation of goods between ";
+			temp += Globals->LOCAL_TRANSPORT;
+			temp += AString(" and ") + Globals->NONLOCAL_TRANSPORT;
+			temp += " hexes away has an associated cost.  This cost is based "
+				"on the weight of the items being transported.";
+			if (Globals->TRANSPORT & GameDefs::QM_AFFECT_COST) {
+				temp += " At higher skill levels of the quartermaster "
+					"skill, the cost for transporting goods will be less.";
+			}
+			if (Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
+				temp += " At higher skill levels of the quartermaster "
+					"skill, the maximum distance goods can be transported "
+					"increases over the above.";
+			}
+		}
+		temp += " The target of the transport unit must be a unit with the "
+			"quartermaster skill and must be the owner of a transport "
+			"structure.";
+		temp += " For long distance transport between quartermasters, the "
+			"issuing unit must also be a quartermaster and be the owner of "
+			"a transport structure.  Use of this order counts as trade "
+			"activity in the hex.";
+		f.Paragraph(temp);
+		f.Paragraph("Examples:");
+		temp = "Transport 10 STON to unit 1234";
+		temp2 = "TRANSPORT 1234 10 STON";
+		f.CommandExample(temp, temp2);
+		temp = "Transport all except 10 SWOR to unit 3432";
+		temp2 = "TRANSPORT 3432 ALL SWOR EXCEPT 10";
+		f.CommandExample(temp, temp2);
+	}
+
 	f.ClassTagText("div", "rule", "");
 	f.LinkRef("turn");
 	f.TagText("h4", "TURN");
@@ -5268,6 +5472,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Teleportation spells are ";
 	temp += f.Link("#cast", "CAST") + ".";
 	f.TagText("li", temp);
+	if (qm_exist) {
+		temp = f.Link("#transport", "TRANSPORT") + " and " +
+			f.Link("#distribute", "DISTRIBUTE") + " orders are processed.";
+		f.TagText("li", temp);
+	}
 	f.TagText("li", "Maintenance costs are assessed.");
 	f.Enclose(0, "OL");
 	temp = "Where there is no other basis for deciding in which order units "

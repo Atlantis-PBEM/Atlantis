@@ -94,8 +94,11 @@ void Game::RunOrders()
 	Awrite("Running Month-long Orders...");
 	RunMonthOrders();
 	RunTeleportOrders();
-	Awrite("Running Transport Orders...");
-	RunTransportOrders();
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+		Awrite("Running Transport Orders...");
+		CheckTransportOrders();
+		RunTransportOrders();
+	}
 	Awrite("Assessing Maintenance costs...");
 	AssessMaintenance();
 	Awrite("Post-Turn Processing...");
@@ -113,7 +116,7 @@ void Game::ClearCastEffects()
 			Object *o = (Object *) elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
-				u->SetFlag(FLAG_INVIS,0);
+				u->SetFlag(FLAG_INVIS, 0);
 			}
 		}
 	}
@@ -128,7 +131,7 @@ void Game::RunCastOrders()
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
 				if (u->castorders) {
-					RunACastOrder(r,o,u);
+					RunACastOrder(r, o, u);
 					delete u->castorders;
 					u->castorders = 0;
 				}
@@ -247,9 +250,9 @@ void Game::RunStealOrders()
 				Unit *u = (Unit *) elem;
 				if (u->stealorders) {
 					if (u->stealorders->type == O_STEAL) {
-						Do1Steal(r,o,u);
+						Do1Steal(r, o, u);
 					} else if (u->stealorders->type == O_ASSASSINATE) {
-						Do1Assassinate(r,o,u);
+						Do1Assassinate(r, o, u);
 					}
 					delete u->stealorders;
 					u->stealorders = 0;
@@ -259,13 +262,13 @@ void Game::RunStealOrders()
 	}
 }
 
-AList *Game::CanSeeSteal(ARegion *r,Unit *u)
+AList *Game::CanSeeSteal(ARegion *r, Unit *u)
 {
 	AList *retval = new AList;
 	forlist(&factions) {
 		Faction *f = (Faction *) elem;
 		if (r->Present(f)) {
-			if (f->CanSee(r,u, Globals->SKILL_PRACTICE_AMOUNT > 0)) {
+			if (f->CanSee(r, u, Globals->SKILL_PRACTICE_AMOUNT > 0)) {
 				FactionPtr *p = new FactionPtr;
 				p->ptr = f;
 				retval->Add(p);
@@ -275,10 +278,10 @@ AList *Game::CanSeeSteal(ARegion *r,Unit *u)
 	return retval;
 }
 
-void Game::Do1Assassinate(ARegion *r,Object *o,Unit *u)
+void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 {
 	AssassinateOrder *so = (AssassinateOrder *) u->stealorders;
-	Unit *tar = r->GetUnitId(so->target,u->faction->num);
+	Unit *tar = r->GetUnitId(so->target, u->faction->num);
 
 	if (!tar) {
 		u->Error("ASSASSINATE: Invalid unit given.");
@@ -307,7 +310,7 @@ void Game::Do1Assassinate(ARegion *r,Object *o,Unit *u)
 		return;
 	}
 
-	AList *seers = CanSeeSteal(r,u);
+	AList *seers = CanSeeSteal(r, u);
 	int succ = 1;
 	forlist(seers) {
 		Faction *f = ((FactionPtr *) elem)->ptr;
@@ -349,13 +352,13 @@ void Game::Do1Assassinate(ARegion *r,Object *o,Unit *u)
 		}
 	}
 	u->Practice(S_STEALTH);
-	RunBattle(r,u,tar,ass);
+	RunBattle(r, u, tar, ass);
 }
 
-void Game::Do1Steal(ARegion *r,Object *o,Unit *u)
+void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 {
 	StealOrder *so = (StealOrder *) u->stealorders;
-	Unit *tar = r->GetUnitId(so->target,u->faction->num);
+	Unit *tar = r->GetUnitId(so->target, u->faction->num);
 
 	if (!tar) {
 		u->Error("STEAL: Invalid unit given.");
@@ -380,7 +383,7 @@ void Game::Do1Steal(ARegion *r,Object *o,Unit *u)
 		return;
 	}
 
-	AList *seers = CanSeeSteal(r,u);
+	AList *seers = CanSeeSteal(r, u);
 	int succ = 1;
 	forlist(seers) {
 		Faction *f = ((FactionPtr *) elem)->ptr;
@@ -431,23 +434,21 @@ void Game::Do1Steal(ARegion *r,Object *o,Unit *u)
 		}
 	}
 
-	if (tar->items.GetNum(so->item) < amt) {
-		amt = 0;
-	}
+	if (tar->items.GetNum(so->item) < amt) amt = 0;
 
-	u->items.SetNum(so->item,u->items.GetNum(so->item) + amt);
-	tar->items.SetNum(so->item,tar->items.GetNum(so->item) - amt);
+	u->items.SetNum(so->item, u->items.GetNum(so->item) + amt);
+	tar->items.SetNum(so->item, tar->items.GetNum(so->item) - amt);
 
 	{
 		AString temp = *(u->name) + " steals " +
-			ItemString(so->item,amt) + " from " + *(tar->name) + ".";
+			ItemString(so->item, amt) + " from " + *(tar->name) + ".";
 		forlist(seers) {
 			Faction *f = ((FactionPtr *) elem)->ptr;
 			f->Event(temp);
 		}
 	}
 
-	tar->Event(AString("Has ") + ItemString(so->item,amt) + " stolen.");
+	tar->Event(AString("Has ") + ItemString(so->item, amt) + " stolen.");
 	u->Practice(S_STEALTH);
 	return;
 }
@@ -464,10 +465,8 @@ void Game::DrownUnits()
 					Unit *u = (Unit *)elem;
 					int drown = 0;
 					if(u->type == U_WMON) {
-						/*
-						 * Make sure flying monsters only drown if we
-						 * are in WFLIGHT_NONE mode
-						 */
+						 // Make sure flying monsters only drown if we
+						 // are in WFLIGHT_NONE mode
 						if(Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_NONE)
 							drown = 1;
 						else
@@ -584,7 +583,7 @@ void Game::RunDestroyOrders()
 			Unit *u = o->GetOwner();
 			if (u) {
 				if (u->destroy) {
-					Do1Destroy(r,o,u);
+					Do1Destroy(r, o, u);
 					continue;
 				} else {
 					forlist(&o->units)
@@ -595,7 +594,7 @@ void Game::RunDestroyOrders()
 	}
 }
 
-void Game::Do1Destroy(ARegion *r,Object *o,Unit *u) {
+void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 		u->Error("DESTROY: Can't destroy a ship while at sea.");
 		forlist(&o->units) {
@@ -652,7 +651,7 @@ void Game::RunFindUnit(Unit *u)
 		FindOrder *f = (FindOrder *) elem;
 		if(f->find == 0) all = 1;
 		if(!all) {
-			fac = GetFaction(&factions,f->find);
+			fac = GetFaction(&factions, f->find);
 			if (fac) {
 				u->faction->Event(AString("The address of ") + *(fac->name) +
 						" is " + *(fac->address) + ".");
@@ -708,7 +707,7 @@ int Game::CountTaxers(ARegion *reg)
 					} else {
 						u->Error("TAX: Unit cannot tax.");
 						u->taxing = TAX_NONE;
-						u->SetFlag(FLAG_AUTOTAX,0);
+						u->SetFlag(FLAG_AUTOTAX, 0);
 					}
 				}
 			}
@@ -857,7 +856,7 @@ void Game::RunPromoteOrders()
 			if (o->type != O_DUMMY) {
 				u = o->GetOwner();
 				if(u && u->promote) {
-					Do1PromoteOrder(o,u);
+					Do1PromoteOrder(o, u);
 					delete u->promote;
 					u->promote = 0;
 				}
@@ -920,7 +919,7 @@ void Game::RunPromoteOrders()
 
 void Game::Do1PromoteOrder(Object *obj, Unit *u)
 {
-	Unit *tar = obj->GetUnitId(u->promote,u->faction->num);
+	Unit *tar = obj->GetUnitId(u->promote, u->faction->num);
 	if (!tar) {
 		u->Error("PROMOTE: Can't find target.");
 		return;
@@ -961,13 +960,13 @@ void Game::RunEnterOrders()
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
 				if (u->enter)
-					Do1EnterOrder(r,o,u);
+					Do1EnterOrder(r, o, u);
 			}
 		}
 	}
 }
 
-void Game::Do1EnterOrder(ARegion *r,Object *in,Unit *u)
+void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 {
 	Object *to;
 	if (u->enter == -1) {
@@ -986,7 +985,7 @@ void Game::Do1EnterOrder(ARegion *r,Object *in,Unit *u)
 			u->Error("ENTER: Can't enter that.");
 			return;
 		}
-		if (!to->CanEnter(r,u)) {
+		if (!to->CanEnter(r, u)) {
 			u->Error("ENTER: Can't enter that.");
 			return;
 		}
@@ -1028,7 +1027,7 @@ void Game::MidProcessUnit(ARegion *r, Unit *u)
 	MidProcessUnitExtra(r, u);
 }
 
-void Game::PostProcessUnit(ARegion *r,Unit *u)
+void Game::PostProcessUnit(ARegion *r, Unit *u)
 {
 	PostProcessUnitExtra(r, u);
 }
@@ -1080,7 +1079,7 @@ void Game::PostProcessTurn()
 			Object *o = (Object *) elem;
 			forlist (&o->units) {
 				Unit *u = (Unit *) elem;
-				PostProcessUnit(r,u);
+				PostProcessUnit(r, u);
 			}
 		}
 	}
@@ -1128,7 +1127,7 @@ void Game::DoAutoAttacksRegion(ARegion *r)
 		Object *o = (Object *) elem;
 		forlist(&o->units) {
 			Unit *u = (Unit *) elem;
-			if (u->canattack && u->IsAlive()) DoAutoAttack(r,u);
+			if (u->canattack && u->IsAlive()) DoAutoAttack(r, u);
 		}
 	}
 }
@@ -1140,17 +1139,17 @@ void Game::DoAdvanceAttacks(AList *locs)
 		Unit *u = l->unit;
 		ARegion *r = l->region;
 		if (u->canattack && u->IsAlive()) {
-			DoAutoAttack(r,u);
+			DoAutoAttack(r, u);
 			if(!u->canattack || !u->IsAlive()) {
 				u->guard = GUARD_NONE;
 			}
 		}
 		if (u->canattack && u->guard == GUARD_ADVANCE && u->IsAlive()) {
-			DoAdvanceAttack(r,u);
+			DoAdvanceAttack(r, u);
 			u->guard = GUARD_NONE;
 		}
 		if (u->IsAlive()) {
-			DoAutoAttackOn(r,u);
+			DoAutoAttackOn(r, u);
 			if(!u->canattack || !u->IsAlive()) {
 				u->guard = GUARD_NONE;
 			}
@@ -1158,36 +1157,36 @@ void Game::DoAdvanceAttacks(AList *locs)
 	}
 }
 
-void Game::DoAutoAttackOn(ARegion *r,Unit *t)
+void Game::DoAutoAttackOn(ARegion *r, Unit *t)
 {
 	forlist(&r->objects) {
 		Object *o = (Object *) elem;
 		forlist(&o->units) {
 			Unit *u = (Unit *) elem;
 			if (u->guard != GUARD_AVOID &&
-					(u->GetAttitude(r,t) == A_HOSTILE) && u->IsAlive() &&
+					(u->GetAttitude(r, t) == A_HOSTILE) && u->IsAlive() &&
 					u->canattack)
-				AttemptAttack(r,u,t,1);
+				AttemptAttack(r, u, t, 1);
 			if (!t->IsAlive()) return;
 		}
 	}
 }
 
-void Game::DoAdvanceAttack(ARegion *r,Unit *u) {
+void Game::DoAdvanceAttack(ARegion *r, Unit *u) {
 	Unit *t = r->Forbidden(u);
 	while (t && u->canattack && u->IsAlive()) {
-		AttemptAttack(r,u,t,1,1);
+		AttemptAttack(r, u, t, 1, 1);
 		t = r->Forbidden(u);
 	}
 }
 
-void Game::DoAutoAttack(ARegion *r,Unit *u) {
+void Game::DoAutoAttack(ARegion *r, Unit *u) {
   forlist(&r->objects) {
 	Object *o = (Object *) elem;
 	forlist(&o->units) {
 	  Unit *t = (Unit *) elem;
-	  if (u->guard != GUARD_AVOID && (u->GetAttitude(r,t) == A_HOSTILE)) {
-	AttemptAttack(r,u,t,1);
+	  if (u->guard != GUARD_AVOID && (u->GetAttitude(r, t) == A_HOSTILE)) {
+	AttemptAttack(r, u, t, 1);
 	  }
 	  if (u->canattack == 0 || u->IsAlive() == 0)
 	return;
@@ -1195,7 +1194,7 @@ void Game::DoAutoAttack(ARegion *r,Unit *u) {
   }
 }
 
-int Game::CountWMonTars(ARegion *r,Unit *mon) {
+int Game::CountWMonTars(ARegion *r, Unit *mon) {
 	int retval = 0;
 	forlist(&r->objects) {
 		Object *o = (Object *) elem;
@@ -1203,7 +1202,7 @@ int Game::CountWMonTars(ARegion *r,Unit *mon) {
 			Unit *u = (Unit *) elem;
 			if (u->type == U_NORMAL || u->type == U_MAGE ||
 					u->type == U_APPRENTICE) {
-				if (mon->CanSee(r,u) && mon->CanCatch(r,u)) {
+				if (mon->CanSee(r, u) && mon->CanCatch(r, u)) {
 					retval += u->GetMen();
 				}
 			}
@@ -1212,14 +1211,14 @@ int Game::CountWMonTars(ARegion *r,Unit *mon) {
 	return retval;
 }
 
-Unit *Game::GetWMonTar(ARegion *r,int tarnum,Unit *mon) {
+Unit *Game::GetWMonTar(ARegion *r, int tarnum, Unit *mon) {
 	forlist(&r->objects) {
 		Object *o = (Object *) elem;
 		forlist(&o->units) {
 			Unit *u = (Unit *) elem;
 			if (u->type == U_NORMAL || u->type == U_MAGE ||
 					u->type == U_APPRENTICE) {
-				if (mon->CanSee(r,u) && mon->CanCatch(r,u)) {
+				if (mon->CanSee(r, u) && mon->CanCatch(r, u)) {
 					int num = u->GetMen();
 					if (num && tarnum < num) return u;
 					tarnum -= num;
@@ -1230,16 +1229,16 @@ Unit *Game::GetWMonTar(ARegion *r,int tarnum,Unit *mon) {
 	return 0;
 }
 
-void Game::CheckWMonAttack(ARegion *r,Unit *u) {
-  int tars = CountWMonTars(r,u);
+void Game::CheckWMonAttack(ARegion *r, Unit *u) {
+  int tars = CountWMonTars(r, u);
   if (!tars) return;
 
   int rand = 300 - tars;
   if (rand < 100) rand = 100;
   if (getrandom(rand) >= u->Hostile()) return;
 
-  Unit *t = GetWMonTar(r,getrandom(tars),u);
-  if (t) AttemptAttack(r,u,t,1);
+  Unit *t = GetWMonTar(r, getrandom(tars), u);
+  if (t) AttemptAttack(r, u, t, 1);
 }
 
 void Game::DoAttackOrders()
@@ -1252,7 +1251,7 @@ void Game::DoAttackOrders()
 				Unit *u = (Unit *) elem;
 				if (u->type == U_WMON) {
 					if (u->canattack && u->IsAlive()) {
-						CheckWMonAttack(r,u);
+						CheckWMonAttack(r, u);
 					}
 				} else {
 					if (u->attackorders && u->IsAlive()) {
@@ -1260,11 +1259,11 @@ void Game::DoAttackOrders()
 						while (ord->targets.Num()) {
 							UnitId *id = (UnitId *) ord->targets.First();
 							ord->targets.Remove(id);
-							Unit *t = r->GetUnitId(id,u->faction->num);
+							Unit *t = r->GetUnitId(id, u->faction->num);
 							delete id;
 							if (u->canattack && u->IsAlive()) {
 								if (t) {
-									AttemptAttack(r,u,t,0);
+									AttemptAttack(r, u, t, 0);
 								} else {
 									u->Error("ATTACK: Non-existent unit.");
 								}
@@ -1279,31 +1278,29 @@ void Game::DoAttackOrders()
 	}
 }
 
-/*
- * Presume that u is alive, can attack, and wants to attack t.
- * Check that t is alive, u can see t, and u has enough riding
- * skill to catch t.
- *
- * Return 0 if success.
- * 1 if t is already dead.
- * 2 if u can't see t
- * 3 if u lacks the riding to catch t
- */
-void Game::AttemptAttack(ARegion *r,Unit *u,Unit *t,int silent,int adv)
+// Presume that u is alive, can attack, and wants to attack t.
+// Check that t is alive, u can see t, and u has enough riding
+// skill to catch t.
+//
+// Return 0 if success.
+// 1 if t is already dead.
+// 2 if u can't see t
+// 3 if u lacks the riding to catch t
+void Game::AttemptAttack(ARegion *r, Unit *u, Unit *t, int silent, int adv)
 {
 	if (!t->IsAlive()) return;
 
-	if (!u->CanSee(r,t)) {
+	if (!u->CanSee(r, t)) {
 		if (!silent) u->Error("ATTACK: Non-existent unit.");
 		return;
 	}
 
-	if (!u->CanCatch(r,t)) {
+	if (!u->CanCatch(r, t)) {
 		if (!silent) u->Error("ATTACK: Can't catch that unit.");
 		return;
 	}
 
-	RunBattle(r,u,t,0,adv);
+	RunBattle(r, u, t, 0, adv);
 	return;
 }
 
@@ -1314,7 +1311,7 @@ void Game::RunSellOrders()
 		forlist((&r->markets)) {
 			Market *m = (Market *) elem;
 			if (m->type == M_SELL)
-				DoSell(r,m);
+				DoSell(r, m);
 		}
 		{
 			forlist((&r->objects)) {
@@ -1331,7 +1328,7 @@ void Game::RunSellOrders()
 	}
 }
 
-int Game::GetSellAmount(ARegion *r,Market *m)
+int Game::GetSellAmount(ARegion *r, Market *m)
 {
 	int num = 0;
 	forlist((&r->objects)) {
@@ -1359,10 +1356,10 @@ int Game::GetSellAmount(ARegion *r,Market *m)
 	return num;
 }
 
-void Game::DoSell(ARegion *r,Market *m)
+void Game::DoSell(ARegion *r, Market *m)
 {
 	/* First, find the number of items being sold */
-	int attempted = GetSellAmount(r,m);
+	int attempted = GetSellAmount(r, m);
 
 	if (attempted < m->amount) attempted = m->amount;
 	m->activity = 0;
@@ -1383,10 +1380,10 @@ void Game::DoSell(ARegion *r,Market *m)
 					attempted -= o->num;
 					m->amount -= temp;
 					m->activity += temp;
-					u->items.SetNum(o->item,u->items.GetNum(o->item) - temp);
+					u->items.SetNum(o->item, u->items.GetNum(o->item) - temp);
 					u->SetMoney(u->GetMoney() + temp * m->price);
 					u->sellorders.Remove(o);
-					u->Event(AString("Sells ") + ItemString(o->item,temp)
+					u->Event(AString("Sells ") + ItemString(o->item, temp)
 							+ " at $" + m->price + " each.");
 					delete o;
 				}
@@ -1403,7 +1400,7 @@ void Game::RunBuyOrders()
 		forlist((&r->markets)) {
 			Market *m = (Market *) elem;
 			if (m->type == M_BUY)
-				DoBuy(r,m);
+				DoBuy(r, m);
 		}
 		{
 			forlist((&r->objects)) {
@@ -1420,7 +1417,7 @@ void Game::RunBuyOrders()
 	}
 }
 
-int Game::GetBuyAmount(ARegion *r,Market *m)
+int Game::GetBuyAmount(ARegion *r, Market *m)
 {
 	int num = 0;
 	forlist((&r->objects)) {
@@ -1437,6 +1434,12 @@ int Game::GetBuyAmount(ARegion *r,Market *m)
 						}
 						if(u->type == U_APPRENTICE) {
 							u->Error("BUY: Apprentices can't recruit more "
+									"men.");
+							o->num = 0;
+						}
+						// XXX: there has to be a better way
+						if (u->GetSkill(S_QUARTERMASTER)) {
+							u->Error("BUY: Quartermasters can't recruit more "
 									"men.");
 							o->num = 0;
 						}
@@ -1473,10 +1476,10 @@ int Game::GetBuyAmount(ARegion *r,Market *m)
 	return num;
 }
 
-void Game::DoBuy(ARegion *r,Market *m)
+void Game::DoBuy(ARegion *r, Market *m)
 {
 	/* First, find the number of items being purchased */
-	int attempted = GetBuyAmount(r,m);
+	int attempted = GetBuyAmount(r, m);
 
 	if (m->amount != -1)
 		if (attempted < m->amount) attempted = m->amount;
@@ -1510,11 +1513,11 @@ void Game::DoBuy(ARegion *r,Market *m)
 						u->AdjustSkills();
 						delete sl;
 					}
-					u->items.SetNum(o->item,u->items.GetNum(o->item) + temp);
+					u->items.SetNum(o->item, u->items.GetNum(o->item) + temp);
 					u->faction->DiscoverItem(o->item, 0, 1);
 					u->SetMoney(u->GetMoney() - temp * m->price);
 					u->buyorders.Remove(o);
-					u->Event(AString("Buys ") + ItemString(o->item,temp)
+					u->Event(AString("Buys ") + ItemString(o->item, temp)
 							+ " at $" + m->price + " each.");
 					delete o;
 				}
@@ -1631,7 +1634,7 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 						forlist((&obj2->units)) {
 							Unit *u2 = (Unit *) elem;
 							if (u->faction != u2->faction &&
-								u2->GetAttitude(r,u) == A_ALLY) {
+								u2->GetAttitude(r, u) == A_ALLY) {
 								int amount = u2->items.GetNum(item);
 								if (amount) {
 									int eat = (u->needed + value - 1) / value;
@@ -1763,7 +1766,7 @@ void Game::CheckAllyHungerItem(int item, int value)
 						forlist((&obj2->units)) {
 							Unit *u2 = (Unit *) elem;
 							if (u->faction != u2->faction &&
-								u2->GetAttitude(r,u) == A_ALLY) {
+								u2->GetAttitude(r, u) == A_ALLY) {
 								int amount = u2->items.GetNum(item);
 								if (amount) {
 									int eat = (u->hunger + value - 1) / value;
@@ -1980,7 +1983,7 @@ void Game::DoWithdrawOrders()
 	}
 }
 
-int Game::DoWithdrawOrder(ARegion *r,Unit *u, WithdrawOrder *o)
+int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 {
 	int itm = o->item;
 	int amt = o->amount;
@@ -1993,12 +1996,12 @@ int Game::DoWithdrawOrder(ARegion *r,Unit *u, WithdrawOrder *o)
 
 	if (cost > u->faction->unclaimed) {
 		u->Error(AString("WITHDRAW: Too little unclaimed silver to withdraw ")+
-				ItemString(itm,amt)+".");
+				ItemString(itm, amt)+".");
 		return 0;
 	}
 	u->faction->unclaimed -= cost;
-	u->Event(AString("Withdraws ") + ItemString(o->item,amt) + ".");
-	u->items.SetNum(itm,u->items.GetNum(itm) + amt);
+	u->Event(AString("Withdraws ") + ItemString(o->item, amt) + ".");
+	u->items.SetNum(itm, u->items.GetNum(itm) + amt);
 	return 0;
 }
 
@@ -2039,7 +2042,7 @@ void Game::DoBankWithdrawOrders()
 	}
 }
 
-void Game::DoBankOrder(ARegion *r,Unit *u, BankOrder *o)
+void Game::DoBankOrder(ARegion *r, Unit *u, BankOrder *o)
 {
 	int what = o->what;
 	int amt = o->amount;
@@ -2075,10 +2078,12 @@ void Game::DoBankOrder(ARegion *r,Unit *u, BankOrder *o)
 		inbank = 1;
 		max = Globals->BANK_MAXSKILLPERLEVEL * lvl;
 	}
-	
+
 	if (!r->CanTax(u) && (Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD)) {
-		if (ObjectDefs[O_OBANK].flags & ObjectType::DISABLED) { // if banks are disabled, inbank will be 1, so ignore it
-			u->Error("BANK1: A unit is on guard - banking is not allowed."); //FIXME
+		if (ObjectDefs[O_OBANK].flags & ObjectType::DISABLED) {
+			// if banks are disabled, inbank will be 1, so ignore it
+			//FIXME
+			u->Error("BANK1: A unit is on guard - banking is not allowed.");
 			u->bankorders.Remove(o);
 			return;
 		} else { // pay attention to inbank
@@ -2158,10 +2163,10 @@ void Game::DoBankOrder(ARegion *r,Unit *u, BankOrder *o)
 	u->Event(temp);
 	if (what == 2) {// deposit
 		u->faction->bankaccount += amt - fee;
-		u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) - amt);
+		u->items.SetNum(I_SILVER, u->items.GetNum(I_SILVER) - amt);
 	} else { // withdrawal
 		u->faction->bankaccount -= amt;
-		u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) + amt - fee);
+		u->items.SetNum(I_SILVER, u->items.GetNum(I_SILVER) + amt - fee);
 	}
 
 	u->bankorders.Remove(o);
@@ -2217,17 +2222,17 @@ void Game::DoExchangeOrders()
 				Unit *u = (Unit *) elem;
 				forlist((&u->exchangeorders)) {
 					Order *o = (Order *) elem;
-					DoExchangeOrder(r,u,(ExchangeOrder *) o);
+					DoExchangeOrder(r, u, (ExchangeOrder *) o);
 				}
 			}
 		}
 	}
 }
 
-void Game::DoExchangeOrder(ARegion *r,Unit *u,ExchangeOrder *o)
+void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 {
 	// Check if the destination unit exists
-	Unit *t = r->GetUnitId(o->target,u->faction->num);
+	Unit *t = r->GetUnitId(o->target, u->faction->num);
 	if (!t) {
 		u->Error(AString("EXCHANGE: Nonexistant target (") +
 				o->target->Print() + ").");
@@ -2275,7 +2280,7 @@ void Game::DoExchangeOrder(ARegion *r,Unit *u,ExchangeOrder *o)
 				ItemString(o->expectItem, o->expectAmount) + ".");
 		u->Error(AString("EXCHANGE: Exchange aborted.  Not enough ") +
 				"recieved. Expecting " +
-			ItemString(o->expectItem,o->expectAmount) + ".");
+			ItemString(o->expectItem, o->expectAmount) + ".");
 		o->exchangeStatus = 0;
 		return;
 	}
@@ -2292,11 +2297,11 @@ void Game::DoExchangeOrder(ARegion *r,Unit *u,ExchangeOrder *o)
 					if (tOrder->giveAmount < o->expectAmount) {
 						t->Error(AString("EXCHANGE: Not giving enough. ") +
 								"Expecting " +
-								ItemString(o->expectItem,o->expectAmount) +
+								ItemString(o->expectItem, o->expectAmount) +
 								".");
 						u->Error(AString("EXCHANGE: Exchange aborted. ") +
 								"Not enough recieved. Expecting " +
-								ItemString(o->expectItem,o->expectAmount) +
+								ItemString(o->expectItem, o->expectAmount) +
 								".");
 						tOrder->exchangeStatus = 0;
 						o->exchangeStatus = 0;
@@ -2304,11 +2309,11 @@ void Game::DoExchangeOrder(ARegion *r,Unit *u,ExchangeOrder *o)
 					} else if (tOrder->giveAmount > o->expectAmount) {
 						t->Error(AString("EXCHANGE: Exchange aborted. Too ") +
 								"much given. Expecting " +
-								ItemString(o->expectItem,o->expectAmount) +
+								ItemString(o->expectItem, o->expectAmount) +
 								".");
 						u->Error(AString("EXCHANGE: Exchange aborted. Too ") +
 								"much offered. Expecting " +
-								ItemString(o->expectItem,o->expectAmount) +
+								ItemString(o->expectItem, o->expectAmount) +
 								".");
 						tOrder->exchangeStatus = 0;
 						o->exchangeStatus = 0;
@@ -2327,7 +2332,7 @@ void Game::DoExchangeOrder(ARegion *r,Unit *u,ExchangeOrder *o)
 								ItemString(tOrder->giveItem,
 									tOrder->giveAmount) + " with " +
 								*u->name + " for " +
-								ItemString(o->giveItem,o->giveAmount) + ".");
+								ItemString(o->giveItem, o->giveAmount) + ".");
 						u->items.SetNum(o->giveItem,
 								u->items.GetNum(o->giveItem) - o->giveAmount);
 						t->items.SetNum(o->giveItem,
@@ -2367,7 +2372,7 @@ void Game::DoExchangeOrder(ARegion *r,Unit *u,ExchangeOrder *o)
 	}
 }
 
-int Game::DoGiveOrder(ARegion *r,Unit *u,GiveOrder *o)
+int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 {
 	// Check there is enough to give
 	int amt = o->amount;
@@ -2400,12 +2405,12 @@ int Game::DoGiveOrder(ARegion *r,Unit *u,GiveOrder *o)
 
 		AString temp = "Discards ";
 		if (ItemDefs[o->item].type & IT_MAN) {
-			u->SetMen(o->item,u->GetMen(o->item) - amt);
+			u->SetMen(o->item, u->GetMen(o->item) - amt);
 			temp = "Disbands ";
 		} else if(Globals->RELEASE_MONSTERS &&
 				(ItemDefs[o->item].type & IT_MONSTER)) {
 			temp = "Releases ";
-			u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
+			u->items.SetNum(o->item, u->items.GetNum(o->item) - amt);
 			if(Globals->WANDERING_MONSTERS_EXIST) {
 				Faction *mfac = GetFaction(&factions, monfaction);
 				Unit *mon = GetNewUnit(mfac, 0);
@@ -2418,13 +2423,13 @@ int Game::DoGiveOrder(ARegion *r,Unit *u,GiveOrder *o)
 					Globals->MONSTER_SPOILS_RECOVERY;
 			}
 		} else {
-			u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
+			u->items.SetNum(o->item, u->items.GetNum(o->item) - amt);
 		}
 		u->Event(temp + ItemString(o->item, amt) + ".");
 		return 0;
 	}
 
-	Unit *t = r->GetUnitId(o->target,u->faction->num);
+	Unit *t = r->GetUnitId(o->target, u->faction->num);
 	if (!t) {
 		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
@@ -2432,7 +2437,7 @@ int Game::DoGiveOrder(ARegion *r,Unit *u,GiveOrder *o)
 	}
 
 	if(u == t) {
-		u->Error(AString("GIVE: Attempt to give ")+ItemString(o->item,amt)+
+		u->Error(AString("GIVE: Attempt to give ")+ItemString(o->item, amt)+
 				" to self.");
 		return 0;
 	}
@@ -2471,6 +2476,18 @@ int Game::DoGiveOrder(ARegion *r,Unit *u,GiveOrder *o)
 			}
 		}
 
+		if (u->GetSkill(S_QUARTERMASTER)) {
+			if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+				if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+					if (CountQuarterMasters(t->faction) >=
+							AllowedQuarterMasters(t->faction)) {
+						u->Error("GIVE: Faction has too many quartermasters.");
+						return 0;
+					}
+				}
+			}
+		}
+
 		int notallied = 1;
 		if (t->faction->GetAttitude(u->faction->num) == A_ALLY) {
 			notallied = 0;
@@ -2494,9 +2511,9 @@ int Game::DoGiveOrder(ARegion *r,Unit *u,GiveOrder *o)
 			int oldlvl = u->faction->skills.GetDays(skill->type);
 			if (newlvl > oldlvl) {
 				for (int i=oldlvl+1; i<=newlvl; i++) {
-					u->faction->shows.Add(new ShowSkill(skill->type,i));
+					u->faction->shows.Add(new ShowSkill(skill->type, i));
 				}
-				u->faction->skills.SetDays(skill->type,newlvl);
+				u->faction->skills.SetDays(skill->type, newlvl);
 			}
 		}
 
@@ -2541,7 +2558,7 @@ int Game::DoGiveOrder(ARegion *r,Unit *u,GiveOrder *o)
 
 		if (u->nomove) t->nomove = 1;
 
-		SkillList *temp = u->skills.Split(u->GetMen(),amt);
+		SkillList *temp = u->skills.Split(u->GetMen(), amt);
 		t->skills.Combine(temp);
 		delete temp;
 	}
@@ -2551,14 +2568,14 @@ int Game::DoGiveOrder(ARegion *r,Unit *u,GiveOrder *o)
 		return 0;
 	}
 
-	u->Event(AString("Gives ") + ItemString(o->item,amt) + " to " +
+	u->Event(AString("Gives ") + ItemString(o->item, amt) + " to " +
 			*t->name + ".");
 	if (u->faction != t->faction) {
-		t->Event(AString("Receives ") + ItemString(o->item,amt) +
+		t->Event(AString("Receives ") + ItemString(o->item, amt) +
 				" from " + *u->name + ".");
 	}
-	u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
-	t->items.SetNum(o->item,t->items.GetNum(o->item) + amt);
+	u->items.SetNum(o->item, u->items.GetNum(o->item) - amt);
+	t->items.SetNum(o->item, t->items.GetNum(o->item) + amt);
 	t->faction->DiscoverItem(o->item, 0, 1);
 
 	if (ItemDefs[o->item].type & IT_MAN) {
@@ -2653,9 +2670,33 @@ void Game::CheckTransportOrders()
 						continue;
 					}
 
-					// make sure target owns structure if it is target of
-					// transport
+					// Make sure target isn't self
+					if (tar->unit == u) {
+						u->Error(ordertype + ": Target is self.");
+						o->type = NORDERS;
+						continue;
+					}
+
+					// Make sure the target and unit are at least friendly
+					if (tar->unit->faction->GetAttitude(u->faction->num) <
+							A_FRIENDLY) {
+						u->Error(ordertype +
+								": Target is not a member of a friendly "
+								"faction.");
+						o->type = NORDERS;
+						continue;
+					}
+
+					// Make sure the target of a transport order is a unit
+					// with the quartermaster skill who owns a transport
+					// structure
 					if (o->type == O_TRANSPORT) {
+						if (tar->unit->GetSkill(S_QUARTERMASTER) == 0) {
+							u->Error(ordertype +
+									": Target is not a quartermaster");
+							o->type = NORDERS;
+							continue;
+						}
 						if ((tar->obj->GetOwner() != tar->unit) ||
 								!(ObjectDefs[tar->obj->type].flags &
 									ObjectType::TRANSPORT)) {
@@ -2687,20 +2728,38 @@ void Game::CheckTransportOrders()
 						continue;
 					}
 
-					// make sure issuer is owner of structure on distribute
-					// or long range transport
-					if ((o->type == O_DISTRIBUTE) &&
-						((u != obj->GetOwner()) ||
-						 (!(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)))) {
-						u->Error(ordertype + ": Unit does not own transport structure.");
+					// On long range transport or distribute, make sure the
+					// issuer is a quartermaster and is owner of a structure
+					if ((o->type == O_DISTRIBUTE) ||
+						((dist > Globals->LOCAL_TRANSPORT) &&
+						 (o->type == O_TRANSPORT))) {
+						if (u->GetSkill(S_QUARTERMASTER == 0)) {
+							u->Error(ordertype +
+									": Unit is not a quartermaster");
+							o->type = NORDERS;
+							continue;
+						}
+						if ((u != obj->GetOwner()) ||
+							!(ObjectDefs[obj->type].flags&ObjectType::TRANSPORT)) {
+						u->Error(ordertype +
+								": Unit does not own transport structure.");
+						o->type = NORDERS;
+						continue;
+						}
+					}
+
+					// make sure amount is available (all handled later)
+					if (o->amount > 0 && o->amount > u->items.GetNum(o->item)) {
+						u->Error(ordertype + ": Not enough.");
 						o->type = NORDERS;
 						continue;
 					}
 
-					// make sure amount is availble (all handled later)
-					if (o->amount > 0 && o->amount > u->items.GetNum(o->item)) {
-						u->Error(ordertype + ": Insufficient amount of item.");
+					// Check if we have a trade hex
+					if (!TradeCheck(r, u->faction)) {
+						u->Error(ordertype + ": Faction cannot transport or distribute in that many hexes.");
 						o->type = NORDERS;
+						continue;
 					}
 				}
 			}
@@ -2719,7 +2778,71 @@ void Game::RunTransportOrders()
 			forlist((&obj->units)) {
 				Unit *u = (Unit *)elem;
 				forlist ((&u->transportorders)) {
+					TransportOrder *t = (TransportOrder *)elem;
+					if (t->type != O_TRANSPORT && t->type != O_DISTRIBUTE)
+						continue;
+					Location *tar = regions.GetUnitId(t->target,
+							u->faction->num, r);
+					if (!tar) continue;
+					AString ordertype = (t->type == O_TRANSPORT) ?
+						"TRANSPORT" : "DISTRIBUTE";
+
+					int amt = t->amount;
+					if (amt < 0) {
+						amt = u->items.GetNum(t->item);
+						if (t->except) {
+							if (t->except > amt) {
+								amt = 0;
+								u->Error(ordertype +
+										": EXCEPT value greater than amount "
+										"on hand.");
+							} else {
+								amt = amt - t->except;
+							}
+						}
+					} else if (amt > u->items.GetNum(t->item)) {
+						u->Error(ordertype + ": Not enough.");
+						amt = u->items.GetNum(t->item);
+					}
+
+					u->items.SetNum(t->item, u->items.GetNum(t->item) - amt);
+					// now see if the unit can pay for shipping
+					int dist = regions.GetDistance(r, tar->region);
+					int weight = ItemDefs[t->item].weight * amt;
+					if (weight == 0 && Globals->FRACTIONAL_WEIGHT > 0)
+						weight = (amt/Globals->FRACTIONAL_WEIGHT) + 1;
+					int cost = 0;
+					if (dist > Globals->LOCAL_TRANSPORT) {
+						cost = Globals->SHIPPING_COST * weight *
+							(4 - ((u->GetSkill(S_QUARTERMASTER)+1)/2));
+					}
+
+					// if not, give it back
+					if (cost > u->items.GetNum(I_SILVER)) {
+						u->Error(ordertype + ": Cannot afford shipping cost.");
+						u->items.SetNum(t->item, u->items.GetNum(t->item)+amt);
+						continue;
+					}
+					u->items.SetNum(I_SILVER, u->items.GetNum(I_SILVER) - cost);
+
+					ordertype = (t->type == O_TRANSPORT) ?
+						"Transports " : "Distributes ";
+					u->Event(ordertype + ItemString(t->item, amt) + " to " +
+							*tar->unit->name + ".");
+					if (u->faction != tar->unit->faction) {
+						tar->unit->Event(AString("Recieves ") +
+								ItemString(t->item, amt) + " from " +
+								*u->name + ".");
+					}
+
+					tar->unit->items.SetNum(t->item,
+							tar->unit->items.GetNum(t->item) + amt);
+					tar->unit->faction->DiscoverItem(t->item, 0, 1);
+
+					u->Practice(S_QUARTERMASTER);
+
 				}
+				u->transportorders.DeleteAll();
 			}
 		}
 	}

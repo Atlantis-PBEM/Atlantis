@@ -54,6 +54,8 @@ extern int *allowedTaxes;
 extern int allowedTaxesSize;
 extern int *allowedTrades;
 extern int allowedTradesSize;
+extern int *allowedQuartermasters;
+extern int allowedQuartermastersSize;
 
 class GameDefs {
 public:
@@ -593,7 +595,7 @@ public:
 	// Are gates in starting cities open all year round? Need only be set
 	// if GATES_NOT_PERENNIAL is selected.
 	int START_GATES_OPEN;
-	
+
 	// Should a message appear in the report that a closed gate exists when
 	// a that is closed would normally be detected (this might affect some
 	// clients with unflexible parsers badly...)
@@ -624,7 +626,7 @@ public:
 	// quantities actually have some heft?
 	// Leave 0 for no fractional weight.  Otherwise, X items weigh 1.
 	int FRACTIONAL_WEIGHT;
-	
+
 };
 
 extern GameDefs *Globals;

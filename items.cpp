@@ -144,6 +144,7 @@ int ParseTransportableItem(AString *token)
 	for (int i=0; i<NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(ItemDefs[i].flags & ItemType::NOTRANSPORT) continue;
+		if(ItemDefs[i].flags & ItemType::CANTGIVE) continue;
 		if ((ItemDefs[i].type & IT_MONSTER) &&
 				ItemDefs[i].index == MONSTER_ILLUSION) {
 			if ((*token == (AString("i") + ItemDefs[i].name)) ||
@@ -1029,11 +1030,8 @@ int ItemList::Weight()
 		if (ItemDefs[i->type].weight == 0) frac += i->num;
 		else wt += ItemDefs[i->type].weight * i->num;
 	}
-	if (Globals->FRACTIONAL_WEIGHT > 0) {
-		int temp = frac/Globals->FRACTIONAL_WEIGHT;
-		if (temp) wt += temp;
-		else if (frac) wt++;
-	}
+	if (Globals->FRACTIONAL_WEIGHT > 0)
+		wt += ((frac/Globals->FRACTIONAL_WEIGHT) + 1);
 	return wt;
 }
 

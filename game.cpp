@@ -1412,6 +1412,8 @@ void Game::WriteReport()
 	CountAllMages();
 	if(Globals->APPRENTICES_EXIST)
 		CountAllApprentices();
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT)
+		CountAllQuarterMasters();
 
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
@@ -1606,6 +1608,27 @@ void Game::CountAllMages()
 	}
 }
 
+void Game::CountAllQuarterMasters()
+{
+	forlist(&factions) {
+		((Faction *) elem)->numqms = 0;
+	}
+
+	{
+		forlist(&regions) {
+			ARegion *r = (ARegion *) elem;
+			forlist(&r->objects) {
+				Object *o = (Object *) elem;
+				forlist(&o->units) {
+					Unit *u = (Unit *) elem;
+					if (u->GetSkill(S_QUARTERMASTER))
+						u->faction->numqms++;
+				}
+			}
+		}
+	}
+}
+
 // LLS
 void Game::UnitFactionMap()
 {
@@ -1670,6 +1693,22 @@ void Game::CountAllApprentices()
 	}
 }
 
+int Game::CountQuarterMasters(Faction *pFac)
+{
+	int i = 0;
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *)elem;
+				if(u->faction == pFac && u->GetSkill(S_QUARTERMASTER)) i++;
+			}
+		}
+	}
+	return i;
+}
+
 int Game::CountApprentices(Faction *pFac)
 {
 	int i = 0;
@@ -1694,6 +1733,17 @@ int Game::AllowedMages(Faction *pFac)
 	if (points > allowedMagesSize - 1) points = allowedMagesSize - 1;
 
 	return allowedMages[points];
+}
+
+int Game::AllowedQuarterMasters(Faction *pFac)
+{
+	int points = pFac->type[F_TRADE];
+
+	if (points < 0) points = 0;
+	if (points > allowedQuartermastersSize - 1)
+		points = allowedQuartermastersSize - 1;
+
+	return allowedQuartermasters[points];
 }
 
 int Game::AllowedApprentices(Faction *pFac)

@@ -132,6 +132,7 @@ private:
 	void MakeFactionReportLists();
 	void CountAllMages();
 	void CountAllApprentices();
+	void CountAllQuarterMasters();
 	void WriteReport();
 	// LLS - write order templates
 	void WriteTemplates();
@@ -366,6 +367,7 @@ private:
 	//
 	int CountMages(Faction *);
 	int CountApprentices(Faction *);
+	int CountQuarterMasters(Faction *);
 	void FindDeadFactions();
 	void DeleteEmptyUnits();
 	void DeleteEmptyInRegion(ARegion *);
@@ -385,6 +387,7 @@ private:
 	//
 	int AllowedMages(Faction *pFac);
 	int AllowedApprentices(Faction *pFact);
+	int AllowedQuarterMasters(Faction *pFact);
 	int AllowedTaxes(Faction *pFac);
 	int AllowedTrades(Faction *pFac);
 	int TaxCheck(ARegion *pReg, Faction *pFac);

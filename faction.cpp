@@ -432,6 +432,10 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 				pGame->AllowedTaxes(this) + ")");
 		f->PutStr(AString("Trade Regions: ") + trade_regions.Num() + " (" +
 				pGame->AllowedTrades(this) + ")");
+		if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+			f->PutStr(AString("Quartermasters: ") + numqms + " (" +
+					pGame->AllowedQuarterMasters(this) + ")");
+		}
 		f->PutStr(AString("Mages: ") + nummages + " (" +
 				pGame->AllowedMages(this) + ")");
 		if(Globals->APPRENTICES_EXIST) {

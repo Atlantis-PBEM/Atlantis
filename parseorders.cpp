@@ -1080,13 +1080,13 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	int oldfactype[ NFACTYPES ];
-	int factype[ NFACTYPES ];
+	int oldfactype[NFACTYPES];
+	int factype[NFACTYPES];
 
 	int i;
 	if(!pCheck) {
 		for(i = 0; i < NFACTYPES; i++) {
-			oldfactype[ i ] = u->faction->type[ i ];
+			oldfactype[i] = u->faction->type[i];
 		}
 	}
 
@@ -1098,20 +1098,42 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	if(!pCheck) {
 		int m = CountMages(u->faction);
+		int a = CountApprentices(u->faction);
 
-		for(i = 0; i < NFACTYPES; i++) {
-			u->faction->type[i] = factype[i];
-		}
+		for(i = 0; i < NFACTYPES; i++) u->faction->type[i] = factype[i];
 
 		if(m > AllowedMages(u->faction)) {
 			u->Error(AString("FACTION: Too many mages to change to that "
 							 "faction type."));
 
-			for(i = 0; i < NFACTYPES; i++) {
-				u->faction->type[ i ] = oldfactype[ i ];
-			}
+			for(i = 0; i < NFACTYPES; i++)
+				u->faction->type[i] = oldfactype[i];
 
 			return;
+		}
+
+		if (a > AllowedApprentices(u->faction)) {
+			u->Error(AString("FACTION: Too many apprentices to change to that "
+							 "faction type."));
+
+			for(i = 0; i < NFACTYPES; i++)
+				u->faction->type[i] = oldfactype[i];
+
+			return;
+		}
+
+		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+			int q = CountQuarterMasters(u->faction);
+			if((Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) &&
+					(q > AllowedQuarterMasters(u->faction))) {
+				u->Error(AString("FACTION: Too many quartermasters to "
+							"change to that faction type."));
+
+				for(i = 0; i < NFACTYPES; i++)
+					u->faction->type[i] = oldfactype[i];
+
+				return;
+			}
 		}
 
 		u->faction->lastchange = TurnNumber();

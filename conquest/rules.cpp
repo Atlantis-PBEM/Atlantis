@@ -22,12 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date			Person			Comments
-// ----			------			--------
-// 2001/Feb/21	Joseph Traub	Moved the item and such definitions into
-//								gamedata.cpp
-//
+
 #include "gamedata.h"
 #include "gamedefs.h"
 
@@ -52,6 +47,10 @@ int allowedTaxesSize = sizeof(aw) / sizeof(aw[0]);
 static int at[] = { -1 };
 int *allowedTrades = at;
 int allowedTradesSize = sizeof(at) / sizeof(at[0]);
+
+static int aq[] = { -1 };
+int *allowedQuartermasters = aq;
+int allowedQuartermastersSize = sizeof(aq) / sizeof(aq[0]);
 
 static GameDefs g = {
 	"Atlantis Conquest",	 // RULESET_NAME
@@ -203,4 +202,4 @@ static GameDefs g = {
 	5000,	// FRACTIONAL_WEIGHT
 };
 
-GameDefs * Globals = &g;
+GameDefs *Globals = &g;
