@@ -58,8 +58,8 @@ void ProcessMindReading(Unit *,AString *, OrdersCheck *pCheck );
 //
 // Spell helpers
 //
-ARegion *GetRegionInRange(ARegion *r, Unit *u, int spell, int rangemult,
-		int rangeclass, int nexus, int surface, int underworld);
+int GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell,
+		int rangemult, int rangeclass, int nexus, int surface, int underworld);
 
 //
 // Spell running

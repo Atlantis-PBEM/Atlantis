@@ -693,28 +693,20 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 	}
 }
 
-ARegion *Game::GetRegionInRange(ARegion *r, Unit *u, int spell, int rangemult,
-		int rangeclass, int nexus, int surface, int underworld)
+int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell,
+		int rangemult, int rangeclass, int nexus, int surface, int underworld)
 {
-	CastRegionOrder *order;
-
-	if(spell == S_TELEPORTATION) {
-		order = (CastRegionOrder *)u->teleportorders;
-	} else {
-		order = (CastRegionOrder *)u->castorders;
-	}
-
 	int level = u->GetSkill(spell);
 	if(!level) {
 		u->Error("CAST: You don't know that spell.");
-		return NULL;
+		return 0;
 	}
 
 	switch(regions.GetRegionArray(r->zloc)->levelType) {
 		case ARegionArray::LEVEL_NEXUS:
 			if(!nexus) {
 				u->Error("CAST Spell does not work from the Nexus.");
-				return NULL;
+				return 0;
 			}
 			break;
 		case ARegionArray::LEVEL_SURFACE:
@@ -723,7 +715,7 @@ ARegion *Game::GetRegionInRange(ARegion *r, Unit *u, int spell, int rangemult,
 				error += Globals->WORLD_NAME;
 				error += ".";
 				u->Error(error);
-				return NULL;
+				return 0;
 			}
 			break;
 		case ARegionArray::LEVEL_UNDERWORLD:
@@ -734,24 +726,24 @@ ARegion *Game::GetRegionInRange(ARegion *r, Unit *u, int spell, int rangemult,
 				error += Globals->WORLD_NAME;
 				error += ".";
 				u->Error(error);
-				return NULL;
+				return 0;
 			}
 			break;
 		default:
 			u->Error("CAST: Spell does not work on this level.");
-			return NULL;
-	}
-	ARegion *tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	if(!tar) {
-		u->Error("CAST: No such region.");
-		return NULL;
+			return 0;
 	}
 
-	switch(regions.GetRegionArray(order->zloc)->levelType) {
+	if(!tar) {
+		u->Error("CAST: No such region.");
+		return 0;
+	}
+
+	switch(regions.GetRegionArray(tar->zloc)->levelType) {
 		case ARegionArray::LEVEL_NEXUS:
 			if(!nexus) {
 				u->Error("CAST: Spell does not work to the Nexus.");
-				return NULL;
+				return 0;
 			}
 			break;
 		case ARegionArray::LEVEL_SURFACE:
@@ -760,7 +752,7 @@ ARegion *Game::GetRegionInRange(ARegion *r, Unit *u, int spell, int rangemult,
 				error += Globals->WORLD_NAME;
 				error += ".";
 				u->Error(error);
-				return NULL;
+				return 0;
 			}
 			break;
 		case ARegionArray::LEVEL_UNDERWORLD:
@@ -771,12 +763,12 @@ ARegion *Game::GetRegionInRange(ARegion *r, Unit *u, int spell, int rangemult,
 				error += Globals->WORLD_NAME;
 				error += ".";
 				u->Error(error);
-				return NULL;
+				return 0;
 			}
 			break;
 		default:
 			u->Error("CAST: Spell does not work to that level.");
-			return NULL;
+			return 0;
 	}
 
 	int range;
@@ -804,9 +796,9 @@ ARegion *Game::GetRegionInRange(ARegion *r, Unit *u, int spell, int rangemult,
 		dist = regions.GetDistance(tar, r);
 	if(dist > range) {
 		u->Error("CAST: Target region out of range.");
-		return NULL;
+		return 0;
 	}
-	return tar;
+	return 1;
 }
 
 void Game::RunMindReading(ARegion *r,Unit *u)
@@ -1324,10 +1316,15 @@ void Game::RunClearSkies(ARegion *r, Unit *u)
 {
 	ARegion *tar = r;
 	AString temp = "Casts Clear Skies";
+	int val;
+
+	CastRegionOrder *order = (CastRegionOrder *)u->castorders;
 
 	if(Globals->CLEAR_SKIES_REGION) {
-		tar = GetRegionInRange(r, u, S_CLEAR_SKIES, 2, RANGE_LEVEL2, 0, 1, 0);
-		if(!tar) return;
+		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
+		val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES, 2, RANGE_LEVEL2,
+				0, 1, 0);
+		if(!val) return;
 		temp += " on ";
 		temp += tar->ShortPrint(&regions);
 	}
@@ -1341,9 +1338,14 @@ void Game::RunClearSkies(ARegion *r, Unit *u)
 void Game::RunWeatherLore(ARegion *r, Unit *u)
 {
 	ARegion *tar;
-	tar = GetRegionInRange(r, u, S_WEATHER_LORE, 4, RANGE_LEVEL2, 0, 1,
+	int val;
+
+	CastRegionOrder *order = (CastRegionOrder *)u->castorders;
+
+	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
+	val = GetRegionInRange(r, tar, u, S_WEATHER_LORE, 4, RANGE_LEVEL2, 0, 1,
 			Globals->EASIER_UNDERWORLD);
-	if(!tar) return;
+	if(!val) return;
 
 	int level = u->GetSkill(S_WEATHER_LORE);
 	int months = 3;
@@ -1374,9 +1376,14 @@ void Game::RunWeatherLore(ARegion *r, Unit *u)
 void Game::RunFarsight(ARegion *r,Unit *u)
 {
 	ARegion *tar;
-	tar = GetRegionInRange(r, u, S_FARSIGHT, 4, RANGE_LEVEL2, 0, 1,
+	int val;
+
+	CastRegionOrder *order = (CastRegionOrder *)u->castorders;
+
+	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
+	val = GetRegionInRange(r, tar, u, S_FARSIGHT, 4, RANGE_LEVEL2, 0, 1,
 			Globals->EASIER_UNDERWORLD);
-	if(!tar) return;
+	if(!val) return;
 
 	Farsight *f = new Farsight;
 	f->faction = u->faction;
@@ -1421,9 +1428,14 @@ void Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 void Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 {
 	ARegion *tar;
-	tar = GetRegionInRange(r, u, S_TELEPORTATION, 2, RANGE_LEVEL2, 0, 1,
+	int val;
+
+	CastRegionOrder *order = (CastRegionOrder *)u->teleportorders;
+
+	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
+	val = GetRegionInRange(r, tar, u, S_TELEPORTATION, 2, RANGE_LEVEL2, 0, 1,
 			Globals->EASIER_UNDERWORLD);
-	if(!tar) return;
+	if(!val) return;
 
 	int level = u->GetSkill(S_TELEPORTATION);
 	int maxweight = level * 15;
