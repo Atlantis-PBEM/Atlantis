@@ -289,3 +289,19 @@ Changes from 4.0.7 -> 4.0.8
       ALL is the default and allows a unit to carry any spoils.   The other
       modes will only allow a unit to pick up a given spoil if that item has
       a capacity in that mode at least equal to it's weight.
+
+Changes from 4.0.8 -> 4.0.9
+--------------------------------------------------
+   -- Added a gamedef to allow markets to always show advanced items, not
+      solely when a unit which has them shows up in the city.
+   -- Added the 'prepare' command from Lacandon with a gamedef to enable
+      it's use.
+   -- Added two gamedef variables to control when a monster can advance
+      rather than just move.
+   -- Added a gamedef to define (for the automatic rules generation) if
+      a game has the 'special email commands' (#create, #times, #rumor).
+   -- Moved the generation of unlimited items in start cities under
+      'START_CITIES_START_UNLIMITED' gamedef.  This allows correct rules
+      generation and more GM options.
+   -- Added automatic generation of rules files from the gamedefs and
+      internal tables.

@@ -2468,13 +2468,12 @@ void ARegion::MakeStartingCity()
 	float ratio;
 	Market *m;
     markets.DeleteAll();
-	if(!Globals->ALLOW_WITHDRAW) {
+	if(Globals->START_CITIES_START_UNLIMITED) {
 		for (int i=0; i<NITEMS; i++) {
 			if( ItemDefs[i].flags & ItemType::DISABLED ) continue;
 			if( ItemDefs[ i ].type & IT_NORMAL ) {
-				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN) {
+				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
 					continue;
-				}
 				m = new Market(M_BUY,i,(ItemDefs[i].baseprice*5/2),-1,
 						5000,5000,-1,-1);
 				markets.Add(m);

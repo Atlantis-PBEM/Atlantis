@@ -363,6 +363,10 @@ public:
 	// Set this to 1 if your scripts can handle the following commands
 	// #create, #resend, #times, #rumor, #remind, #email
 	int HAVE_EMAIL_SPECIAL_COMMANDS;
+
+	// Should starting cities begin with unlimited markets at world
+	// generation time.
+	int START_CITIES_START_UNLIMITED;
 };
 
 extern GameDefs * Globals;

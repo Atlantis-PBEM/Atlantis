@@ -242,7 +242,7 @@ void ARegion::SetupPop()
     p->productivity = Wages();
     products.Add(p);
 
-    //	
+    //
     // Setup entertainment
     //
     p = new Production;
@@ -276,7 +276,7 @@ int ARegion::GetNearestProd(int item)
     ARegionPtr * p = new ARegionPtr;
     p->ptr = this;
     regs.Add(p);
-  
+
     for (int i=0; i<5; i++) {
         forlist(rptr) {
             ARegion * r = ((ARegionPtr *) elem)->ptr;
@@ -575,7 +575,7 @@ void ARegion::SetupProds()
 void ARegion::AddTown()
 {
     town = new TownInfo;
-    
+
     town->name = new AString( AGetNameString( AGetName(1 )));
 
     if( Globals->RANDOM_ECONOMY )
@@ -597,7 +597,7 @@ void ARegion::LairCheck()
 {
     /* No lair if town in region */
     if (town) return;
-    
+
 
     TerrainType *tt = &TerrainDefs[ type ];
 
@@ -737,12 +737,12 @@ void ARegion::UpdateTown()
                 }
             }
         }
-    
+
         int tarpop;
         if (tot)
         {
             tarpop = (Globals->CITY_POP * amt) / tot;
-        } 
+        }
         else
         {
             tarpop = 0;
@@ -751,9 +751,9 @@ void ARegion::UpdateTown()
         /* Let's bump tarpop up */
         tarpop = (tarpop * 3) / 2;
         if (tarpop > Globals->CITY_POP) tarpop = Globals->CITY_POP;
-        
+
         town->pop = town->pop + (tarpop - town->pop) / 5;
-        
+
         /* Check base population */
         if (town->pop < town->basepop)
         {
@@ -792,7 +792,7 @@ void ARegion::PostTurn()
         {
             population = population + diff / 5;
         }
-        
+
         //
         // Now, if there is a town, update its population.
         //
@@ -805,7 +805,7 @@ void ARegion::PostTurn()
 		if(Globals->DECAY) {
 			DoDecayCheck();
 		}
-        
+
         //
         // Now, reset population based stuff.
         // Recover Wages.
@@ -817,7 +817,7 @@ void ARegion::PostTurn()
         //
         money = (Wages() - Globals->MAINTENANCE_COST) * Population();
         if (money < 0) money = 0;
-        
+
         //
         // Setup working
         //
@@ -828,30 +828,30 @@ void ARegion::PostTurn()
             // Higher wages in the entry cities.
             //
             p->amount = Wages() * Population();
-        } 
+        }
         else
         {
             p->amount = (Wages() * Population()) / Globals->WORK_FRACTION;
         }
         p->productivity = Wages();
-        
+
         //
         // Entertainment.
         //
         p = products.GetProd(I_SILVER,S_ENTERTAINMENT);
         p->baseamount = money / Globals->ENTERTAIN_FRACTION;
-        
+
         markets.PostTurn(Population(),Wages());
     }
-    
+
     UpdateProducts();
-    
+
     //
     // Set these guys to 0.
     //
     earthlore = 0;
     clearskies = 0;
-    
+
     forlist(&objects) {
         Object *o = (Object *) elem;
         forlist(&o->units) {
@@ -1227,7 +1227,7 @@ AString ARegion::ShortPrint( ARegionList *pRegs )
     AString temp = TerrainDefs[type].name;
 
     temp += AString(" (") + xloc + "," + yloc;
-    
+
     ARegionArray *pArr = pRegs->pRegionArrays[ zloc ];
     if( pArr->strName )
     {
@@ -1309,7 +1309,7 @@ void ARegion::Kill(Unit * u)
             u->items.SetNum(i->type,0);
         }
     }
-  
+
     u->MoveUnit( 0 );
     hell.Add(u);
 }
@@ -1430,21 +1430,21 @@ void ARegion::Writeout( Aoutfile *f )
     f->PutInt(wages);
     f->PutInt(maxwages);
     f->PutInt(money);
-    
+
     if (town) {
         f->PutInt(1);
         town->Writeout( f );
     } else {
         f->PutInt(0);
     }
-    
+
     f->PutInt(xloc);
     f->PutInt(yloc);
     f->PutInt(zloc);
-    
+
     products.Writeout(f);
     markets.Writeout(f);
-    
+
     f->PutInt(objects.Num());
     forlist ((&objects))
         ((Object *) elem)->Writeout( f );
@@ -1453,7 +1453,7 @@ void ARegion::Writeout( Aoutfile *f )
 void ARegion::Readin( Ainfile * f,AList * facs, ATL_VER v )
 {
     name = f->GetStr();
-  
+
     num = f->GetInt();
     type = f->GetInt();
     buildingseq = f->GetInt();
@@ -1465,7 +1465,7 @@ void ARegion::Readin( Ainfile * f,AList * facs, ATL_VER v )
     wages = f->GetInt();
     maxwages = f->GetInt();
     money = f->GetInt();
-  
+
     if (f->GetInt()) {
         town = new TownInfo;
         town->Readin(f,v);
@@ -1474,9 +1474,9 @@ void ARegion::Readin( Ainfile * f,AList * facs, ATL_VER v )
     }
 
     xloc = f->GetInt();
-    yloc = f->GetInt();	
+    yloc = f->GetInt();
     zloc = f->GetInt();
-  
+
     products.Readin(f);
     markets.Readin(f);
 
@@ -1811,7 +1811,7 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 				}
 			}
 			if(sawgate) {
-				f->PutStr(AString("There is a Gate here (Gate ") + gate + 
+				f->PutStr(AString("There is a Gate here (Gate ") + gate +
 						" of " + (pRegions->numberofgates - 1) + ").");
 				f->PutStr("");
 			}
@@ -1950,7 +1950,7 @@ int ARegion::GetTrueSight(Faction *f, int usepassers)
 	return truesight;
 }
 
-int ARegion::GetObservation(Faction * f, int usepassers) 
+int ARegion::GetObservation(Faction * f, int usepassers)
 {
 	int obs = 0;
 
@@ -2084,7 +2084,7 @@ void ARegion::NotifySpell( Unit *caster, int spell, ARegionList *pRegs )
     {
         forlist(&flist) {
             FactionPtr *fp = (FactionPtr *) elem;
-            fp->ptr->Event(AString(*(caster->name)) + " uses " + 
+            fp->ptr->Event(AString(*(caster->name)) + " uses " +
                            SkillStrs(spell) +
                            " in " + Print( pRegs ) + ".");
         }
@@ -2144,7 +2144,7 @@ int ARegion::CanPillage(Unit *u)
 		}
 	}
 	return 1;
-}	
+}
 
 int ARegion::ForbiddenShip(Object * ship)
 {
@@ -2296,7 +2296,7 @@ int ARegionList::ReadRegions(Ainfile * f,AList * factions, ATL_VER v )
     }
 
     numberofgates = f->GetInt();
-  
+
     ARegionFlatArray fa(num);
 
     Awrite("Reading the regions...");
@@ -2310,7 +2310,7 @@ int ARegionList::ReadRegions(Ainfile * f,AList * factions, ATL_VER v )
         pRegionArrays[ temp->zloc ]->SetRegion( temp->xloc, temp->yloc,
                                                 temp );
     }
-  
+
     Awrite("Setting up the neighbors...");
     {
         delete f->GetStr();
@@ -2322,7 +2322,7 @@ int ARegionList::ReadRegions(Ainfile * f,AList * factions, ATL_VER v )
                 if (j != -1)
                 {
                     reg->neighbors[i] = fa.GetRegion(j);
-                } 
+                }
                 else
                 {
                     reg->neighbors[i] = 0;
@@ -2460,7 +2460,7 @@ void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 				reg->SetName(nex_name.Str());
 				reg->type = R_NEXUS;
 			}
-		}
+		:
 	}
 
     FinalSetup( pRegionArrays[ level ] );
@@ -2520,7 +2520,7 @@ void ARegionList::CreateIslandLevel( int level,
     FinalSetup( pRegionArrays[ level ] );
 }
 
-void ARegionList::CreateUnderworldLevel( int level, 
+void ARegionList::CreateUnderworldLevel( int level,
                                          int xSize,
                                          int ySize,
                                          char *name )
@@ -2543,7 +2543,7 @@ void ARegionList::CreateUnderworldLevel( int level,
     FinalSetup( pRegionArrays[ level ] );
 }
 
-void ARegionList::CreateUnderdeepLevel( int level, 
+void ARegionList::CreateUnderdeepLevel( int level,
                                         int xSize,
                                         int ySize,
                                         char *name )
@@ -2594,7 +2594,7 @@ void ARegionList::MakeRegions( int level, int xSize, int ySize )
                 reg->race = -1;
                 reg->wages = -1;
                 reg->maxwages = -1;
-                
+
                 Add( reg );
                 arr->SetRegion( x, y, reg );
             }
@@ -2624,13 +2624,13 @@ void ARegionList::SetupNeighbors( ARegionArray *pRegs )
     }
 }
 
-void ARegionList::MakeLand( ARegionArray *pRegs, 
+void ARegionList::MakeLand( ARegionArray *pRegs,
                             int percentOcean,
                             int continentSize )
 {
-    int total = pRegs->x * pRegs->y / 2; 
+    int total = pRegs->x * pRegs->y / 2;
     int ocean = total;
-  
+
     Awrite("Making land");
     while (ocean > ( total * percentOcean ) / 100)
     {
@@ -2647,7 +2647,7 @@ void ARegionList::MakeLand( ARegionArray *pRegs,
             reg->type = R_NUM;
             ocean--;
         }
-    
+
         int i;
         for (i=0; i<sz; i++)
         {
@@ -2979,13 +2979,13 @@ void ARegionList::FinalSetup( ARegionArray *pArr )
 					ocean_name += " Ocean";
                     reg->SetName(ocean_name.Str());
                 }
-            } 
+            }
             else
             {
                 if (reg->wages == -1)
                 {
                     reg->SetName("Unnamed");
-                } 
+                }
                 else if(reg->wages != -2)
                 {
                     reg->SetName( AGetNameString( reg->wages ));
@@ -3001,7 +3001,7 @@ void ARegionList::FinalSetup( ARegionArray *pArr )
     }
 }
 
-void ARegionList::MakeShaft( ARegion *reg, ARegionArray *pFrom, 
+void ARegionList::MakeShaft( ARegion *reg, ARegionArray *pFrom,
                              ARegionArray *pTo )
 {
     if( reg->type == R_OCEAN )
@@ -3009,9 +3009,9 @@ void ARegionList::MakeShaft( ARegion *reg, ARegionArray *pFrom,
         return;
     }
 
-    int tempx = reg->xloc * pTo->x / pFrom->x + 
+    int tempx = reg->xloc * pTo->x / pFrom->x +
         getrandom( pTo->x / pFrom->x );
-    int tempy = reg->yloc * pTo->y / pFrom->y + 
+    int tempy = reg->yloc * pTo->y / pFrom->y +
         getrandom( pTo->y / pFrom->y );
     //
     // Make sure we get a valid region.
@@ -3031,7 +3031,7 @@ void ARegionList::MakeShaft( ARegion *reg, ARegionArray *pFrom,
 	o->incomplete = 0;
 	o->inner = temp->num;
 	reg->objects.Add(o);
-	
+
 	o = new Object( reg );
 	o->num = temp->buildingseq++;
 	o->name = new AString(AString("Shaft [") + o->num + "]");
@@ -3072,7 +3072,7 @@ void ARegionList::CalcDensities()
     Awrite("Densities:");
     int arr[R_NUM];
     int i;
-    for (i=0; i<R_NUM; i++) 
+    for (i=0; i<R_NUM; i++)
     {
         arr[i] = 0;
     }
@@ -3086,13 +3086,13 @@ void ARegionList::CalcDensities()
     {
 		if(arr[i]) Awrite(AString(TerrainDefs[i].name) + " " + arr[i]);
     }
-    
+
     Awrite("");
 }
 
-void ARegionList::SetACNeighbors( int levelSrc, 
-                                  int levelTo, 
-                                  int maxX, 
+void ARegionList::SetACNeighbors( int levelSrc,
+                                  int levelTo,
+                                  int maxX,
                                   int maxY )
 {
 	ARegionArray *ar = GetRegionArray(levelSrc);
@@ -3151,10 +3151,10 @@ void ARegionList::FinalSetupGates()
 
     int i;
     for (i=0; i<numberofgates; i++) used[i] = 0;
-    
+
     forlist(this) {
         ARegion *r = (ARegion *) elem;
-        
+
         if (r->gate == -1)
         {
             int index = getrandom(numberofgates);
@@ -3287,7 +3287,7 @@ ARegionArray::~ARegionArray()
     delete [] regions;
 }
 
-void ARegionArray::SetRegion(int xx,int yy,ARegion * r) 
+void ARegionArray::SetRegion(int xx,int yy,ARegion * r)
 {
     regions[ xx / 2 + yy * x / 2 ] = r;
 }

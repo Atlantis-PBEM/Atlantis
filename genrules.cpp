@@ -931,10 +931,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(!Globals->MULTI_HEX_NEXUS)
 			temp += "six ";
 		temp += "starting cities offer much to a starting faction; ";
-		if (!Globals->SAFE_START_CITIES && Globals->CITY_MONSTERS_EXIST)
-			temp += "until someone conquers the guardsmen, ";
-		temp += "there are unlimited amounts of many materials and men "
-			"(though the prices are often quite high).";
+		if(START_CITIES_START_UNLIMITED) {
+			if (!Globals->SAFE_START_CITIES && Globals->CITY_MONSTERS_EXIST)
+				temp += "until someone conquers the guardsmen, ";
+			temp += "there are unlimited amounts of many materials and men "
+				"(though the prices are often quite high).";
+		} else {
+			temp += "there are materials as well as a very large supply of "
+				"men (though the prices are often quite high).";
+		}
 		if(Globals->SAFE_START_CITIES || Globals->CITY_MONSTERS_EXIST)
 			temp += " In addition, ";
 		if(Globals->SAFE_START_CITIES)
@@ -1388,7 +1393,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	f.LinkRef("skills_limitations");
 	f.TagText("H3", "Limitations:");
-	if (Globals->LEADERS_EXIST&&Globals->SKILL_LIMIT_NONLEADERS) {
+	if (Globals->LEADERS_EXIST && Globals->SKILL_LIMIT_NONLEADERS) {
 		temp = "A unit made up of leaders may know one or more skills; "
 			"for the rest of this section, the word \"leader\" will refer "
 			"to such a unit.  Other units, those which contain "
@@ -1396,6 +1401,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"unit may only know one skill.";
 		f.Paragraph(temp);
 	}
+	if(!Globals->RACES_EXIST) {
+		if(Globals->SKILL_LIMIT_NONLEADERS) {
+			temp = "A unit may only learn one skill. ";
+		} else {
+			temp = "A unit may learn as many skills as it requires. ";
+		}
+		temp += "Skills can be learned up to a maximum level of ";
+		temp += ManDefs[MAN_MAN].defaultlevel;
+		temp += ".";
+		f.Paragraph(temp);
+	}
+
 	if (Globals->RACES_EXIST) {
 		temp = "Skills may be learned up to a maximum level depending on "
 			"the race of the studying unit (remembering that for units "
@@ -4578,9 +4595,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "UL");
 	temp = f.Link("#guard","GUARD") + " 1 orders are processed.";
 	f.TagText("LI", temp);
-	if(Globals->TOWNS_EXIST)
+	if(Globals->TOWNS_EXIST) {
 		temp = f.Link("#sell","SELL") + " orders are processed.";
-	f.TagText("LI", temp);
+		f.TagText("LI", temp);
+	}
 	temp = f.Link("#buy","BUY") + " orders are processed.";
 	f.TagText("LI", temp);
 	temp = f.Link("#quit","QUIT") + " and ";
