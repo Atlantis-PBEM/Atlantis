@@ -365,3 +365,5 @@ Changes from 4.0.8 -> 4.0.9
    -- Fixed the swim code to give a Swims message and work with flight
       over water.  Changed item giving of dying units to not cause other
 	  units to drown.
+   -- Fixed a bug where spoils calculation could wrap causing spoils
+      earned to be a negative value of an object.
