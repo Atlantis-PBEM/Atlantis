@@ -577,15 +577,22 @@ void Game::ModifySpecialEffectFlags(int special, int effectflags)
 	SpecialDefs[special].effectflags = effectflags;
 }
 
-void Game::ModifySpecialShieldData(int special, int index, int type, int val)
+void Game::ModifySpecialShields(int special, int index, int type)
 {
 	if(special < 0 || special > (NUMSPECIALS-1)) return;
 	if(index < 0 || index > 4) return;
 	if(type < -1 || type > (NUM_ATTACK_TYPES)) return;
-	SpecialDefs[special].shield[index].type = type;
-	SpecialDefs[special].shield[index].value = val;
+	SpecialDefs[special].shield[index] = type;
 }
 
+void Game::ModifySpecialDefenseMods(int special, int index, int type, int val)
+{
+	if(special < 0 || special > (NUMSPECIALS-1)) return;
+	if(index < 0 || index > 4) return;
+	if(type < -1 || type > (NUM_ATTACK_TYPES)) return;
+	SpecialDefs[special].defs[index].type = type;
+	SpecialDefs[special].defs[index].val = val;
+}
 void Game::ModifySpecialDamage(int special, int index, int type, int min,
 		int val, int flags, int cls, int effect)
 {
@@ -601,12 +608,6 @@ void Game::ModifySpecialDamage(int special, int index, int type, int min,
 	SpecialDefs[special].damage[index].flags = flags;
 	SpecialDefs[special].damage[index].dclass = cls;
 	SpecialDefs[special].damage[index].effect = effect;
-}
-
-void Game::ModifySpecialTargetLevelAdj(int special, int lev)
-{
-	if(special < 0 || special > (NUMSPECIALS-1)) return;
-	SpecialDefs[special].targetLevAdj = lev;
 }
 
 void Game::ModifyEffectFlags(int effect, int flags)

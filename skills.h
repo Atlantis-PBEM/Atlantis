@@ -159,6 +159,12 @@ class ShieldType {
 	public:
 		int type;
 		int value;
+}
+;
+class DefenseMod {
+	public:
+		int type;
+		int val;
 };
 
 class SpecialType {
@@ -188,26 +194,20 @@ class SpecialType {
 			FX_DAMAGE	=	0x02,
 			FX_USE_LEV	=	0x04,
 			FX_DEFBONUS	=	0x08,
+			FX_NOBUILDING =	0x10,
 		};
 		int effectflags;
 
-		ShieldType shield[4];
+		int shield[4];
+		DefenseMod defs[4];
 		char *shielddesc;
 
 		DamageType damage[4];
 		char *spelldesc;
 		char *spelldesc2;
 		char *spelltarget;
-
-		int targetLevAdj;
 };
 extern SpecialType *SpecialDefs;
-
-class DefenseMod {
-	public:
-		int type;
-		int val;
-};
 
 class EffectType {
 	public:
@@ -218,7 +218,7 @@ class EffectType {
 
 		enum {
 			EFF_ONESHOT	= 0x001,
-			EFF_NOFLAG	= 0x002,
+			EFF_NOSET = 0x002,
 		};
 		int flags;
 };

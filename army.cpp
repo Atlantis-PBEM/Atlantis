@@ -389,7 +389,7 @@ void Soldier::SetEffect(int eff)
 		ClearEffect(e->cancelEffect);
 	}
 
-	if(!(e->flags & EffectType::EFF_NOFLAG)) {
+	if(!(e->flags & EffectType::EFF_NOSET)) {
 		effects = effects | n;
 	}
 }
@@ -1043,8 +1043,6 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 
 	if(canShield) {
 		int shieldType = attackType;
-		if(attackType == ATTACK_RANGED)
-			shieldType = ATTACK_COMBAT;
 
 		hi = shields.GetHighShield(shieldType);
 		if (hi) {
@@ -1080,7 +1078,10 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 		if(attackType != NUM_ATTACK_TYPES)
 			tlev = tar->dskill[ attackType ];
 		if(special > 0) {
-			tlev += SpecialDefs[special].targetLevAdj;
+			if((SpecialDefs[special].effectflags&SpecialType::FX_NOBUILDING) &&
+					tar->building) {
+				tlev -= 2;
+			}
 		}
 
 		/* 4.1 Check whether defense is allowed against this weapon */

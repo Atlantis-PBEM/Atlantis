@@ -249,10 +249,10 @@ private:
 	void ModifySpecialTargetItems(int special, int index, int item);
 	void ModifySpecialTargetEffects(int special, int index, int effect);
 	void ModifySpecialEffectFlags(int special, int effectflags);
-	void ModifySpecialShieldData(int special, int index, int type, int val);
+	void ModifySpecialShields(int special, int index, int type);
+	void ModifySpecialDefenseMods(int special, int index, int type, int val);
 	void ModifySpecialDamage(int special, int index, int type, int min,
 			int val, int flags, int cls, int effect);
-	void ModifySpecialTargetLevelAdj(int special, int mod);
 
 	void ModifyEffectFlags(int effect, int flags);
 	void ModifyEffectAttackMod(int effect, int val);

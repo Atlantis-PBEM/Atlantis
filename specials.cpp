@@ -152,25 +152,31 @@ void Battle::UpdateShields(Army *a)
 		if(a->soldiers[i]->special == -1) continue;
 		spd = &SpecialDefs[a->soldiers[i]->special];
 
-		if(!(spd->effectflags & SpecialType::FX_SHIELD)) continue;
+		if(!(spd->effectflags & SpecialType::FX_SHIELD) &&
+				!(spd->effectflags & SpecialType::FX_DEFBONUS)) continue;
 
-		for(shtype = 0; shtype < 4; shtype++) {
-			if(spd->shield[shtype].type == -1) continue;
-			if(spd->effectflags & SpecialType::FX_DEFBONUS) {
-				int bonus = spd->shield[shtype].value;
+		if(spd->effectflags & SpecialType::FX_SHIELD) {
+			for(shtype = 0; shtype < 4; shtype++) {
+				if(spd->shield[shtype] == -1) continue;
+				Shield *sh = new Shield;
+				sh->shieldtype = spd->shield[shtype];
+				sh->shieldskill = a->soldiers[i]->slevel;
+				a->shields.Add(sh);
+			}
+		}
+
+		if(spd->effectflags & SpecialType::FX_DEFBONUS && a->round == 0) {
+			for(shtype = 0; shtype < 4; shtype++) {
+				if(spd->defs[shtype].type == -1) continue;
+				int bonus = spd->defs[shtype].val;
 				if(spd->effectflags & SpecialType::FX_USE_LEV)
 					bonus *= a->soldiers[i]->slevel;
-				if(a->round == 0)
-					a->soldiers[i]->dskill[spd->shield[shtype].type] += bonus;
+				a->soldiers[i]->dskill[spd->defs[shtype].type] += bonus;
 			}
-
-			Shield *sh = new Shield;
-			sh->shieldtype = spd->shield[shtype].type;
-			sh->shieldskill = a->soldiers[i]->slevel;
-			a->shields.Add(sh);
-            AddLine(*(a->soldiers[i]->unit->name) + " casts " +
-					spd->shielddesc + ".");
 		}
+
+		AddLine(*(a->soldiers[i]->unit->name) + " casts " +
+				spd->shielddesc + ".");
 	}
 }
 

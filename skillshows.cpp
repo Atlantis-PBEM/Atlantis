@@ -220,46 +220,18 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 		case S_FIRE:
 			if(level > 1) break;
-			*str += "A unit with this magic skill may throw Fireballs in "
-				"combat, inflicting Energy attacks on the enemy. The "
-				"Fireball will inflict from 2 to the mage's Fire skill "
-				"times 10 attacks, at a skill level equal to the mage's "
-				"Fire skill.";
 			break;
 		case S_EARTHQUAKE:
 			if(level > 1) break;
-			*str += "A mage with this skill may create violent Earthquakes "
-				"in battle. Earthquakes are dangerous only to those enemies "
-				"within a building. An Earthquake will inflict between 2 "
-				"and the mage's Earthquake skill level times 100 attacks, "
-				"at a skill level equal to the mage's Earthquake skill; "
-				"these attacks will only be directed against enemies within "
-				"a building. Note that the defense bonus that normally "
-				"applies to units within a building does not apply during "
-				"an Earthquake strike.";
 			break;
 		case S_FORCE_SHIELD:
 			if(level > 1) break;
-			*str += "A mage with this skill may cast a Force Shield in "
-				"combat. This shield will be effective against all ranged "
-				"attacks against the mage's army, at a level equal to the "
-				"mage's skill level. The mage himself will gain a "
-				"defensive bonus against normal combat attacks, equal to "
-				"his skill.";
 			break;
 		case S_ENERGY_SHIELD:
 			if(level > 1) break;
-			*str += "A mage with this skill may cast an Energy Shield in "
-				"combat. This shield will be effective against all Energy "
-				"attacks against the mage's army, at a level equal to the "
-				"mage's skill level.";
 			break;
 		case S_SPIRIT_SHIELD:
 			if(level > 1) break;
-			*str += "A mage with this skill may cast a Spirit Shield in "
-				"combat. This shield will be effective against all Spirit "
-				"attacks against the mage's army, at a level equal to the "
-				"mage's skill level.";
 			break;
 		case S_MAGICAL_HEALING:
 			/* XXX -- This should be cleaner somehow. */
@@ -468,50 +440,23 @@ AString *ShowSkill::Report(Faction *f)
 			}
 			break;
 		case S_SUMMON_STORM:
-			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
-			*str += "A mage with Summon Storm can summon a storm against "
-				"enemy forces, reducing their combat effectiveness. Each "
-				"round, the storm will affect from 2 to mage's Summon Storm "
-				"level times 50 men, and will reduce their effective Combat "
-				"skill by 2 for the duration of the battle.";
 			break;
 		case S_SUMMON_TORNADO:
-			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
-			*str += "A mage with Summon Tornado can summon a mighty tornado "
-				"to use against enemy forces in battle. A tornado issues a "
-				"number of Weather attacks from 2 to the mage's Summon "
-				"Tornado level times 50, of skill level equal to the "
-				"mage's level.";
 			break;
 		case S_CALL_LIGHTNING:
-			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
-			*str += "The Call Lightning spell is a combat spell, allowing "
-				"the mage to summon mighty blasts of lightning from the sky "
-				"against his foes. A lightning blast deals a number of "
-				"attacks from 4 to the mage's skill level times 120, of "
-				"skill level equal to the mage's level. This spell is a bit "
-				"different than most combat spells, in that half of the "
-				"attacks are treated as Weather attacks, and the other half "
-				"as Energy attacks.";
 			break;
 		case S_CLEAR_SKIES:
-			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
-			/* XXX -- This needs to handle flat economy (non-random) */
-			*str += "The Clear Skies spell has two uses. When cast using "
-				"the CAST order, it causes the region to have good weather "
-				"for the entire month; movement is at the normal rate (even "
-				"if it is winter) and the economic production of the region "
-				"is improved for a month (this improvement of the economy "
-				"will actually take effect during the turn after the spell "
-				"is cast). To use the spell in this fashion, CAST "
-				"Clear_Skies; no arguments are necessary. The other use of "
-				"the spell is in combat, as a defense against weather "
-				"attacks acting a shield of level equal to the mage's Clear "
-				"Skies skill.";
+			*str += "When cast using the CAST order, it causes the region to "
+				"have good weather for the entire month; movement is at the "
+				"normal rate (even if it is winter) and the economic "
+				"production of the region is improved for a month (this "
+				"improvement of the economy will actually take effect during "
+				"the turn after the spell is cast). To use the spell in this "
+				"fashion, CAST Clear_Skies; no arguments are necessary.";
 			break;
 		case S_EARTH_LORE:
 			if(level > 1) break;
@@ -621,36 +566,15 @@ AString *ShowSkill::Report(Faction *f)
 				"the order CAST Summon_Lich.";
 			break;
 		case S_CREATE_AURA_OF_FEAR:
-			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
-			*str += "Create Aura of Fear is a combat spell; a mage who casts "
-				"it will project an aura of fear on his enemies, reducing "
-				"their combat effectiveness by 2. A mage with this skill can "
-				"strike fear into the hearts of 2 to his skill level times "
-				"20 men; note that this spell does not affect any type of "
-				"creature. The attacks are Spirit attacks, and may be "
-				"blocked by a Spirit shield.";
 			break;
 		case S_SUMMON_BLACK_WIND:
-			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
-			*str += "This spell allows the mage to summon the black wind, a "
-				"supernatural wind that destroys life. A mage who casts "
-				"this spell in combat will deal from 2 to his skill level "
-				"times 200 Spirit attacks, at a level equal to the mage's "
-				"skill level. However, the black wind has no effect on "
-				"undead or demons.";
 			break;
 		case S_BANISH_UNDEAD:
-			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
-			*str += "A mage with the Banish Undead skill can banish undead "
-				"in combat. The mage will deal from 2 to his skill level "
-				"times 50 attacks on undead, with no defense against these "
-				"attacks.";
 			break;
 		case S_DEMON_LORE:
-			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
 			*str += "Demon Lore is the art of summoning and controlling "
 				"demons. The Demon Lore skill does not give the mage any "
@@ -705,12 +629,7 @@ AString *ShowSkill::Report(Faction *f)
 				"spell, the mage should issue the order CAST Summon_Balrog.";
 			break;
 		case S_BANISH_DEMONS:
-			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
-			*str += "A mage with the Banish Demons skill can banish demons "
-				"in combat. The mage will deal from 2 to his skill level "
-				"times 50 attacks on demons, with no defense against these "
-				"attacks.";
 			break;
 		case S_ILLUSION:
 			if(level > 1) break;
@@ -722,6 +641,7 @@ AString *ShowSkill::Report(Faction *f)
 				"the same region.";
 			break;
 		case S_PHANTASMAL_ENTERTAINMENT:
+			/* XXX -- This should be cleaner somehow */
 			if(level > 1) break;
 			*str += "A mage with the Phantasmal Entertainment skill may use "
 				"his powers of Illusion to earn money by creating "
@@ -886,11 +806,6 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 		case S_DISPEL_ILLUSIONS:
 			if(level > 1) break;
-			*str += "A mage with the Dispel Illusions spell can dispel "
-				"illusionary foes in combat. Dispelling an illusionary foe "
-				"always destroys the foe; there is no defense against it. "
-				"Dispel Illusions will dispel between 2 and the mage's level "
-				"times 100 illusions.";
 			break;
 		case S_ARTIFACT_LORE:
 			if(level > 1) break;
@@ -1149,6 +1064,8 @@ AString *ShowSkill::Report(Faction *f)
 
 	// If this is a combat spell, note it.
 	if(level == 1 && (SkillDefs[skill].flags & SkillType::COMBAT)) {
+		*str += AString(" A mage with this skill can cast ") +
+			ShowSpecial(SkillDefs[skill].special, level, 0);
 		*str += " In order to use this spell in combat, the mage should use "
 			"the COMBAT order to set it as his combat spell.";
 	}
@@ -1293,33 +1210,41 @@ AString *ShowSkill::Report(Faction *f)
 	}
 
 	// Required skills
+	last = -1;
 	if(level == 1) {
 		comma = 0;
+		int found = 0;
 		temp = "This skill requires ";
 		for(c=0; c<sizeof(SkillDefs[skill].depends)/sizeof(SkillDepend); c++) {
 			if(SkillDefs[skill].depends[c].skill == -1) continue;
 			if(SKILL_DISABLED(SkillDefs[skill].depends[c].skill)) continue;
-			if(comma) {
-				if(c==sizeof(SkillDefs[skill].depends)/sizeof(SkillDepend)-1) {
-					if(comma > 1) temp += ",";
-					temp += " and ";
-				} else {
-					temp += ", ";
-				}
+			found = 1;
+			if(last == -1) {
+				last = c;
+				continue;
 			}
+			temp += SkillStrs(SkillDefs[skill].depends[last].skill) + " " +
+				SkillDefs[skill].depends[last].level + ", ";
+			last = c;
 			comma++;
-			temp += AString(SkillDefs[SkillDefs[skill].depends[c].skill].name)+
-				" " + SkillDefs[skill].depends[c].level;
 		}
-		if(!(*str == "")) *str += " ";
-		if(comma) *str += temp + " to study.";
+		if(comma) {
+			temp += "and ";
+		}
+		temp += SkillStrs(SkillDefs[skill].depends[last].skill) + " " +
+				SkillDefs[skill].depends[last].level;
+
+		if(found) {
+			if(!(*str == "")) *str += " ";
+			*str += temp + " to begin to study.";
+		}
 	}
 
 	if(level == 1) {
 		if(SkillDefs[skill].cost) {
 			if(!(*str == "")) *str += " ";
 			*str += AString("This skill costs ") + SkillDefs[skill].cost +
-				" silver to study.";
+				" silver per month of study.";
 		}
 		if(SkillDefs[skill].flags & SkillType::SLOWSTUDY) {
 			if(!(*str == "")) *str += " ";

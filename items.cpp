@@ -24,7 +24,28 @@
 // END A3HEADER
 #include "items.h"
 #include "skills.h"
+#include "object.h"
 #include "gamedata.h"
+
+static AString AttType(int atype)
+{
+	switch(atype) {
+		case ATTACK_COMBAT: return AString("melee");
+		case ATTACK_ENERGY: return AString("energy");
+		case ATTACK_SPIRIT: return AString("spirit");
+		case ATTACK_WEATHER: return AString("weather");
+		case ATTACK_RIDING: return AString("riding");
+		case ATTACK_RANGED: return AString("ranged");
+		case NUM_ATTACK_TYPES: return AString("non-resistable");
+		default: return AString("unknown");
+	}
+}
+
+static AString DefType(int atype)
+{
+	if(atype == NUM_ATTACK_TYPES) return AString("all");
+	return AttType(atype);
+}
 
 int ParseItem(AString * token)
 {
@@ -78,22 +99,74 @@ AString ItemString(int type, int num)
 	return temp;
 }
 
-AString ShowSpecial(int special, int level)
+static AString EffectStr(int effect)
 {
+	AString temp, temp2;
+	int comma = 0;
+	int i;
+
+	temp += EffectDefs[effect].name;
+
+	if(EffectDefs[effect].attackVal) {
+		temp2 += AString(EffectDefs[effect].attackVal) + " to attack";
+		comma = 1;
+	}
+
+	for(i = 0; i < 4; i++) {
+		if(EffectDefs[effect].defMods[i].type == -1) continue;
+		if(comma) temp2 += ", ";
+		temp2 += AString(EffectDefs[effect].defMods[i].val) + " versus " +
+			DefType(EffectDefs[effect].defMods[i].type) + " attacks";
+		comma = 1;
+	}
+
+	if(comma) {
+		temp += AString(" (") + temp2 + ")";
+	}
+
+	if(comma) {
+		if(EffectDefs[effect].flags & EffectType::EFF_ONESHOT) {
+			temp += " for their next attack";
+		} else {
+			temp += " for the rest of the battle";
+		}
+	}
+	temp += ".";
+
+	if(EffectDefs[effect].cancelEffect != -1) {
+		if(comma) temp += " ";
+		temp += AString("This effect cancels out the effects of ") +
+			EffectDefs[EffectDefs[effect].cancelEffect].name + ".";
+	}
+	return temp;
+}
+
+AString ShowSpecial(int special, int level, int expandlev)
+{
+	AString temp;
 	int comma = 0;
 	int i;
 	int last = -1;
+	int val;
+
 	if(special < 0 || special > (NUMSPECIALS-1)) special = 0;
 	SpecialType *spd = &SpecialDefs[special];
 	temp += spd->specialname;
-	temp += AString(" in battle at a level of ") + level; + ".";
+	temp += AString(" in battle");
+	if(expandlev) {
+		temp += AString(" at a skill level of ") + level;
+	}
+	temp += ".";
 	if((spd->targflags & SpecialType::HIT_BUILDINGIF) ||
 			(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
-		temp += " Targets for this ability must ";
+		temp += " This ability will ";
 		if(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
 			temp += "not ";
+		} else {
+			temp += "only ";
 		}
-		temp += "be inside of ";
+
+		temp += "target units which are inside the following structures: ";
 		for(i = 0; i < 3; i++) {
 			if(spd->buildings[i] == -1) continue;
 			if(ObjectDefs[spd->buildings[i]].flags & ObjectType::DISABLED)
@@ -102,30 +175,30 @@ AString ShowSpecial(int special, int level)
 				last = i;
 				continue;
 			}
-			temp += ObjectDefs[spd->buildings[last]].name;
-			if(comma) {
-				temp += ", ";
-			}
+			temp += AString(ObjectDefs[spd->buildings[last]].name) + ", ";
+			last = i;
 			comma++;
 		}
 		if(comma) {
-			temp += ", or ";
+			temp += "or ";
 		}
-		temp += ObjectDefs[spd->buildings[last]].name;
+		temp += AString(ObjectDefs[spd->buildings[last]].name) + ".";
 	}
 	if((spd->targflags & SpecialType::HIT_SOLDIERIF) ||
 			(spd->targflags & SpecialType::HIT_SOLDIEREXCEPT) ||
 			(spd->targflags & SpecialType::HIT_MOUNTIF) ||
 			(spd->targflags & SpecialType::HIT_MOUNTEXCEPT)) {
-		temp += " Targets for this ability must ";
+		temp += " This ability will ";
 		if((spd->targflags & SpecialType::HIT_SOLDIEREXCEPT) ||
 				(spd->targflags & SpecialType::HIT_MOUNTEXCEPT)) {
 			temp += "not ";
+		} else {
+			temp += "only ";
 		}
-		temp += "be ";
+		temp += "target ";
 		if((spd->targflags & SpecialType::HIT_MOUNTIF) ||
 				(spd->targflags & SpecialType::HIT_MOUNTEXCEPT)) {
-			temp += "mounted on ";
+			temp += "units mounted on ";
 		}
 		comma = 0;
 		last = -1;
@@ -136,55 +209,135 @@ AString ShowSpecial(int special, int level)
 				last = i;
 				continue;
 			}
-			temp += ItemDefs[spd->targets[last]].names + " [" +
-				ItemDefs[spd->targets[last]].abr + "]";
-			if(comma) {
-				temp += ", ";
-			}
+			temp += AString(ItemDefs[spd->targets[last]].names) + " [" +
+				ItemDefs[spd->targets[last]].abr + "], ";
+			last = i;
 			comma++;
 		}
 		if(comma) {
-			temp += ", and ";
+			temp += "or ";
 		}
-		temp += ItemDefs[spd->targets[last]].names + " [" +
-			ItemDefs[spd->targets[last]].abr + "]";
+		temp += AString(ItemDefs[spd->targets[last]].names) + " [" +
+			ItemDefs[spd->targets[last]].abr + "].";
 	}
 	if((spd->targflags & SpecialType::HIT_EFFECTIF) ||
 			(spd->targflags & SpecialType::HIT_EFFECTEXCEPT)) {
-		temp += " Targets for this ability must ";
+		temp += " This ability will ";
 		if(spd->targflags & SpecialType::HIT_EFFECTEXCEPT) {
 			temp += "not ";
+		} else {
+			temp += "only ";
 		}
-		temp += "be effected by ";
+		temp += "target units which are effected by ";
 		for(i = 0; i < 3; i++) {
 			if(spd->effects[i] == -1) continue;
 			if(last == -1) {
 				last = i;
 				continue;
 			}
-			temp += EffectDefs[spd->effects[last]].name;
-			if(comma) {
-				temp += ", ";
-			}
+			temp += AString(EffectDefs[spd->effects[last]].name) + ", ";
+			last = i;
 			comma++;
 		}
 		if(comma) {
-			temp += ", or ";
+			temp += "or ";
 		}
-		temp += EffectDefs[spd->effects[last]].name;
+		temp += AString(EffectDefs[spd->effects[last]].name) + ".";
 	}
 	if(spd->targflags & SpecialType::HIT_ILLUSION) {
-		temp += " Targets for this ability must be illusions.";
+		temp += " This ability will only target illusions.";
 	}
 	if(spd->targflags & SpecialType::HIT_NOMONSTER) {
-		temp += " Targets for this ability must not be monsters.";
+		temp += " This ability cannot target monsters.";
+	}
+	if(spd->effectflags & SpecialType::FX_NOBUILDING) {
+		temp += AString(" The bonus given to units inside buildings is ") +
+			"not effective against this ability.";
 	}
 
-	if((spd->effectflags & FX_SHIELD) || (spd->effectflags & FX_DEFBONUS)) {
-		/* FOO */
+	if(spd->effectflags & SpecialType::FX_SHIELD) {
+		temp += " This ability provides a shield against all ";
+		comma = 0;
+		last = -1;
+		for(i = 0; i < 4; i++) {
+			if(spd->shield[i] == -1) continue;
+			if(last == -1) {
+				last = i;
+				continue;
+			}
+			temp += DefType(spd->shield[last]) + ", ";
+			last = i;
+			comma++;
+		}
+		if(comma) {
+			temp += "and ";
+		}
+		temp += DefType(spd->shield[last]) + " attacks against the mage's " +
+			"army at a skill level equal to the mage's skill.";
+	}
+	if(spd->effectflags & SpecialType::FX_DEFBONUS) {
+		temp += " This ability provides ";
+		comma = 0;
+		last = -1;
+		for(i = 0; i < 4; i++) {
+			if(spd->defs[i].type == -1) continue;
+			if(last == -1) {
+				last = i;
+				continue;
+			}
+			val = spd->defs[last].val;
+			if(expandlev) {
+				if(spd->effectflags & SpecialType::FX_USE_LEV)
+					val *= level;
+			}
+
+			temp += AString("a defensive bonus of ") + val;
+			if(!expandlev) {
+				temp += " per skill level";
+			}
+			temp += AString(" versus ") + DefType(spd->defs[last].type) +
+				" attacks, ";
+			last = i;
+			comma++;
+		}
+		if(comma) {
+			temp += "and ";
+		}
+		val = spd->defs[last].val;
+		if(expandlev) {
+			if(spd->effectflags & SpecialType::FX_USE_LEV)
+				val *= level;
+		}
+		temp += AString("a defensive bonus of ") + val;
+		if(!expandlev) {
+			temp += " per skill level";
+		}
+		temp += AString(" versus ") + DefType(spd->defs[last].type) +
+			" attacks";
+		temp += " to the casting mage.";
 	}
 
-	// XXX -- Handle the effect data.
+	/* Now the damages */
+	for(i = 0; i < 4; i++) {
+		if(spd->damage[i].type == -1) continue;
+		temp += AString(" This ability does between ") +
+			spd->damage[i].minnum + " and ";
+		val = spd->damage[i].value * 2;
+		if(expandlev) {
+			if(spd->effectflags & SpecialType::FX_USE_LEV)
+				val *= level;
+		}
+		temp += AString(val);
+		if(!expandlev) {
+			temp += " times the skill level of the mage";
+		}
+		temp += AString(" ") + AttType(spd->damage[i].type) + " attacks.";
+		if(spd->damage[i].effect) {
+			temp += " Each attack causes the target to be effected by ";
+			temp += EffectStr(spd->damage[i].effect);
+		}
+	}
+
 	return temp;
 }
 
@@ -223,20 +376,6 @@ static AString WeapClass(int wclass)
 		case CRUSHING: return AString("crushing");
 		case CLEAVING: return AString("cleaving");
 		case ARMORPIERCING: return AString("armorpiercing");
-		default: return AString("unknown");
-	}
-}
-
-static AString AttType(int atype)
-{
-	switch(atype) {
-		case ATTACK_COMBAT: return AString("melee");
-		case ATTACK_ENERGY: return AString("energy");
-		case ATTACK_SPIRIT: return AString("spirit");
-		case ATTACK_WEATHER: return AString("weather");
-		case ATTACK_RIDING: return AString("riding");
-		case ATTACK_RANGED: return AString("ranged");
-		case NUM_ATTACK_TYPES: return AString("all");
 		default: return AString("unknown");
 	}
 }
@@ -338,14 +477,14 @@ AString *ItemDescription(int item, int full)
 		if(MonDefs[mon].special && MonDefs[mon].special != -1) {
 			*temp += AString(" ") +
 				"Monster can cast " +
-				ShowSpecial(MonDefs[mon].special, MonDefs[mon].specialLevel);
+				ShowSpecial(MonDefs[mon].special, MonDefs[mon].specialLevel, 1);
 		}
 		if(full) {
 			int hits = MonDefs[mon].hits;
 			int atts = MonDefs[mon].numAttacks;
 			if(!hits) hits = 1;
 			if(!atts) atts = 1;
-			*temp += AString(" This monster has ") + atts + " " +
+			*temp += AString(" This monster has ") + atts + " melee " +
 				((atts > 1)?"attacks":"attack") + " per round and takes " +
 				hits + " " + ((hits > 1)?"hits":"hit") + " to kill.";
 			*temp += AString(" This monster has a tactics score of ") +
@@ -545,7 +684,10 @@ AString *ItemDescription(int item, int full)
 					"terrain which allows ridden mounts but not flying "+
 					"mounts.";
 			}
-			/* XXX -- handle mount special */
+			if(pM->mountSpecial != -1) {
+				*temp += AString(" When ridden, this mount causes ") +
+					ShowSpecial(pM->mountSpecial, pM->specialLev, 1);
+			}
 		}
 	}
 
@@ -631,7 +773,7 @@ AString *ItemDescription(int item, int full)
 				}
 				*temp += AString(" ") + "Item can cast " +
 					ShowSpecial(BattleItemDefs[i].index,
-							BattleItemDefs[i].skillLevel);
+							BattleItemDefs[i].skillLevel, 1);
 			}
 		}
 	}
