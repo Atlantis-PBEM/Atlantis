@@ -475,7 +475,7 @@ ManType mt[] = {
 	//
 	// Special level, default, 1st skill, 2nd, 3rd, 4th
 	//
-  { 0,0,0,0,0,0 }, /*  MAN_NONE */
+  { 0,0,-1,-1,-1,-1 }, /*  MAN_NONE */
   { 5,5,-1,-1,-1,-1 }, /* MAN_LEADER */
   { 3,2,S_SHIPBUILDING,S_SAILING,S_LUMBERJACK,S_COMBAT }, /* MAN_VIKING */
   { 3,2,S_MINING,S_HUNTING,S_WEAPONSMITH,S_COMBAT }, /* MAN_BARBARIAN */

@@ -3042,7 +3042,7 @@ void ARegionList::CalcDensities()
     }
     for (i=0; i<R_NUM; i++)
     {
-        Awrite(AString(TerrainDefs[i].name) + " " + arr[i]);
+		if(arr[i]) Awrite(AString(TerrainDefs[i].name) + " " + arr[i]);
     }
     
     Awrite("");
