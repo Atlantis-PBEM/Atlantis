@@ -20,9 +20,9 @@ Unix
 
    A makefile is included for compilation on Unix, using the GNU gcc
    compiler. This has only been tested on Linux, but should probably work
-   on any Unix system. Just switch into the rule-set sub-directory and
-   type 'make'. You can get more information about the GNU compiler at
-   http://www.gnu.org.
+   on any Unix system. Just type 'make <gamedirname>' at the top level,
+   where <gamedirname> is one of the various subdirectories.  You can get
+   more information about the GNU compiler at http://www.gnu.org.
    
 Windows
 

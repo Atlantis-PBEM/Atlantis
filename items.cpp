@@ -81,27 +81,8 @@ AString ItemString(int type, int num)
 static AString ItemSpecial(int special, int level)
 {
 	AString temp = "Can cast ";
-	switch(special) {
-		case SPECIAL_FIREBALL: temp += "a fireball"; break;
-		case SPECIAL_HELLFIRE: temp += "hellfire"; break;
-		case SPECIAL_CAUSEFEAR: temp += "cause fear"; break;
-		case SPECIAL_LSTRIKE: temp += "a lightning strike"; break;
-		case SPECIAL_MINDBLAST: temp += "a mindblast"; break;
-		case SPECIAL_EARTHQUAKE: temp += "earthquakes"; break;
-		case SPECIAL_FORCE_SHIELD: temp += "a force shield"; break;
-		case SPECIAL_ENERGY_SHIELD: temp += "an energy shield"; break;
-		case SPECIAL_SPIRIT_SHIELD: temp += "a spirit shield"; break;
-		case SPECIAL_DISPEL_ILLUSIONS: temp += "dispel illusions"; break;
-		case SPECIAL_SUMMON_STORM: temp += "a summoned storm"; break;
-		case SPECIAL_TORNADO: temp += "a tornado"; break;
-		case SPECIAL_CLEAR_SKIES: temp += "clear skies"; break;
-		case SPECIAL_BLACK_WIND: temp += "a black wind"; break;
-		case SPECIAL_BANISH_UNDEAD: temp += "banish undead"; break;
-		case SPECIAL_BANISH_DEMONS: temp += "banish demons"; break;
-		case SPECIAL_FIREBREATH: temp += "fiery breath"; break;
-		case SPECIAL_ICEBREATH: temp += "icy breath"; break;
-		default: temp += "an unknown attack"; break;
-	}
+	if(special < 0 || special > (NUMSPECIALS-1)) special = 0;
+	temp += SpecialDefs[special].specialname;
 	temp += AString(" in battle at level ") + level + ".";
 	// XXX -- Handle the effect data.
 	return temp;

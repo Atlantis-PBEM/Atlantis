@@ -252,6 +252,7 @@ private:
 	void ModifySpecialShieldData(int special, int index, int type, int val);
 	void ModifySpecialDamage(int special, int index, int type, int min,
 			int val, int flags, int cls, int effect);
+	void ModifySpecialTargetLevelAdj(int special, int mod);
 
 	void ModifyEffectFlags(int effect, int flags);
 	void ModifyEffectAttackMod(int effect, int val);

@@ -163,6 +163,8 @@ class ShieldType {
 
 class SpecialType {
 	public:
+		char *specialname;
+
 		enum {
 			HIT_BUILDINGIF		= 0x001,	/* mutually exclusive (1) */
 			HIT_BUILDINGEXCEPT	= 0x002,	/* mutually exclusive (1) */

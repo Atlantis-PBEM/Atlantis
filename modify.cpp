@@ -552,7 +552,7 @@ void Game::ModifySpecialTargetObjects(int special, int index, int obj)
 	if(special < 0 || special > (NUMSPECIALS-1)) return;
 	if(index < 0 || index > 3) return;
 	if((obj != -1 && obj < 1) || (obj > (NOBJECTS-1))) return;
-	SpecialDefs[special].buldings[index] = obj;
+	SpecialDefs[special].buildings[index] = obj;
 }
 
 void Game::ModifySpecialTargetItems(int special, int index, int item)

@@ -3455,7 +3455,7 @@ HealType * HealDefs = hd;
 
 static SpecialType spd[] = {
 	// NONE
-	{"a dummy special",
+	{"an unknown attack",
 	 0,
 	 {-1, -1, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
