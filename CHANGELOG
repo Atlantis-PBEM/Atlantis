@@ -192,3 +192,6 @@ Changes from 4.0.6 -> 4.0.7
    -- Removed the special case of earthquakes not affecting MFORTRESS.  This
       is now handled by a NOEARTHQUAKE flags on the object in the ObjectDefs
       structure.
+   -- Added skillflag SLOWSTUDY.  If you modify a skill to have this flag,
+      a month of study will only produce 15 days of learning in the skill.
+      This is cumulative with non-tower penalty for magic skills over level 2.

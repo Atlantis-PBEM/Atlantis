@@ -325,9 +325,6 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
     }
 }
 
-// AS
-#define MAX_ROAD_STATE -24
-
 void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 {
 	if (!TradeCheck( r, u->faction )) {
