@@ -832,17 +832,19 @@ void Army::Win(Battle * b,ItemList * spoils)
 
 		if(t) {
 			int n;
+			int can_spoil = 0;
 			n = i->num / t;
 			if (n>=1) {
 				for(int x=0; x<na; x++) {
 					Unit * u = soldiers[x]->unit;
 					if(u->flags & FLAG_NOSPOILS) continue;
+					can_spoil++;
 					u->items.SetNum(i->type,u->items.GetNum(i->type) + n);
 					u->faction->DiscoverItem(i->type, 0, 1);
 				}
 			}
 			n = i->num % t;
-			for (int x=0; x<n; x++) {
+			for (int x=0; x<n && can_spoil; x++) {
 				t = getrandom(na);
 				Unit *u;
 				u = soldiers[t]->unit;

@@ -254,3 +254,7 @@ Changes from 4.0.7 -> 4.0.8
       Baillie (baillie@cs.mu.oz.au) which caused it give odd results if
       multiple mages from the same faction with different skills cast farsight
       on the same hex during a turn.
+   -- Fixed bug in BUILD HELP which caused an infinite loop when the helper
+      was already in the building to be helped with.
+   -- Fixed bug in NOSPOILS code which caused an infinite loop if no army
+      unit would accept spoils.
