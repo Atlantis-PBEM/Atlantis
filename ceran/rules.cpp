@@ -49,7 +49,7 @@ static int at[] = { 1, 10, 24, 40, 60, 100 };
 int *allowedTrades = at;
 int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
-static int aq[] = { 1, 2, 3, 4, 6, 8, 12 };
+static int aq[] = { 2, 3, 4, 5, 8, 12, 20 };
 int *allowedQuartermasters = aq;
 int allowedQuatermastersSize = sizeof(aq)/ sizeof(aq[0]);
 

@@ -622,4 +622,16 @@ Changes from 4.0.10 -> 5.0.0
       nothing. (Bug reported by Sergey Budnevitch <fabler@mtu.ru>)
    -- Fixed bug in faction type changing where a faction could set magic
       5, get apprentices, and then change away from magic 5 but keep the
-	  apprentices.
+      apprentices.
+   -- Added 'transport' and 'distribute' orders.  Transport allows movement
+      between friendly units with the quartermaster skill within non-local
+      transport distance and from any friendly unit within local transport
+      distance to a quartermaster.  Distribute allows shipment of items
+      from a quartermaster to any friendly unit within local transport
+      range.  Use of these skills require the quartermaster to be located
+      in a caravanserai (requires building 2/20 wood or stone to construct).
+      The number of quartermasters is limited by the number of trade points.
+      Use of distribute and transport counts as a trade use in the hex as
+      well.  There are options to allow the level of Quartermaster skill
+      to affect the non-local transport distance or the cost of shipping
+      items non-locally.

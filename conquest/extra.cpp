@@ -63,7 +63,7 @@ int Game::SetupFaction( Faction *pFac )
 		return 0;
 	}
 
-    pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
+	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
 
 	// Make a citadel for this faction
 	Object *obj = new Object(pReg);
@@ -74,9 +74,9 @@ int Game::SetupFaction( Faction *pFac )
 	obj->inner = -1;
 	pReg->objects.Add(obj);
 
-    //
-    // Set up first unit.
-    //
+	//
+	// Set up first unit.
+	//
 	if(!pFac->noStartLeader) {
 		Unit *temp2 = GetNewUnit( pFac );
 		temp2->SetMen( I_MAN, 1 );
@@ -98,7 +98,7 @@ int Game::SetupFaction( Faction *pFac )
 		temp2->MoveUnit(obj);
 	}
 
-    return( 1 );
+	return( 1 );
 }
 
 Faction *Game::CheckVictory()
@@ -170,7 +170,7 @@ void Game::ModifyTablesPerRuleset(void)
 	}
 
 	/* Enable apprentices if we should */
-    if(Globals->APPRENTICES_EXIST)
+	if(Globals->APPRENTICES_EXIST)
 		EnableSkill(S_MANIPULATE);
 
 	if(!Globals->RACES_EXIST) {
@@ -241,5 +241,9 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableSkill(S_CREATE_MAGIC_CARPET);
 	DisableSkill(S_CARPENTER);
 
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+		EnableSkill(S_QUARTERMASTER);
+		EnableObject(O_CARAVANSERAI);
+	}
 	return;
 }

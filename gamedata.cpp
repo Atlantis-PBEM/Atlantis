@@ -3045,7 +3045,7 @@ static ObjectType ot[] =
 	 ObjectType::DISABLED | ObjectType::CANENTER |
 		 ObjectType::CANMODIFY | ObjectType::TRANSPORT,
 	 0, 0, 0, 0,
-	 I_WOOD_OR_STONE, 20, S_QUARTERMASTER, 1,
+	 I_WOOD_OR_STONE, 20, S_BUILDING, 2,
 	 15, 3, 3,
 	 -1, -1},
 };

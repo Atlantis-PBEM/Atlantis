@@ -30,12 +30,12 @@
 
 int Game::SetupFaction( Faction *pFac )
 {
-    pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
+	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
 
 	if(pFac->noStartLeader)
 		return 1;
 
-    ARegion *reg = NULL;
+	ARegion *reg = NULL;
 	if(pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
 	} else if(!Globals->MULTI_HEX_NEXUS) {
@@ -47,23 +47,23 @@ int Game::SetupFaction( Faction *pFac )
 		}
 	}
 
-    //
-    // Set up first unit.
-    //
-    Unit *temp2 = GetNewUnit( pFac );
-    temp2->SetMen( I_LEADERS, 1 );
-    temp2->reveal = REVEAL_FACTION;
+	//
+	// Set up first unit.
+	//
+	Unit *temp2 = GetNewUnit( pFac );
+	temp2->SetMen( I_LEADERS, 1 );
+	temp2->reveal = REVEAL_FACTION;
 
-    temp2->type = U_MAGE;
-    temp2->Study(S_PATTERN, 30);
-    temp2->Study(S_SPIRIT, 30);
-    temp2->Study(S_GATE_LORE, 30);
+	temp2->type = U_MAGE;
+	temp2->Study(S_PATTERN, 30);
+	temp2->Study(S_SPIRIT, 30);
+	temp2->Study(S_GATE_LORE, 30);
 
-    if (TurnNumber() >= 12) {
+	if (TurnNumber() >= 12) {
 		temp2->Study(S_FORCE, 30);
 		temp2->Study(S_FIRE, 30);
 		temp2->Study(S_COMBAT, 30);
-    }
+	}
 	if(TurnNumber() >= 24) {
 		temp2->Study(S_PATTERN, 60);
 		temp2->Study(S_SPIRIT, 60);
@@ -92,7 +92,7 @@ int Game::SetupFaction( Faction *pFac )
 
 	temp2->MoveUnit( reg->GetDummy() );
 
-    return( 1 );
+	return( 1 );
 }
 
 Faction *Game::CheckVictory()
@@ -660,8 +660,13 @@ void Game::ModifyTablesPerRuleset(void)
 	if(Globals->EASIER_UNDERWORLD) {
 		ModifyRangeFlags(RANGE_TELEPORT, RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags(RANGE_FARSIGHT, RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags(RANGE_CLEAR_SKIES, RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags(RANGE_WEATHER_LORE, RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags(RANGE_CLEAR_SKIES, RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags(RANGE_WEATHER_LORE, RangeType::RNG_CROSS_LEVELS);
+	}
+
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+		EnableSkill(S_QUARTERMASTER);
+		EnableObject(O_CARAVANSERAI);
 	}
 
 	return;

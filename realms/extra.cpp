@@ -30,24 +30,24 @@
 
 int Game::SetupFaction( Faction *pFac )
 {
-    pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
+	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
 
 	if(pFac->noStartLeader)
 		return 1;
 
-    //
-    // Set up first unit.
-    //
-    Unit *temp2 = GetNewUnit( pFac );
-    temp2->SetMen( I_LEADERS, 1 );
-    temp2->reveal = REVEAL_FACTION;
+	//
+	// Set up first unit.
+	//
+	Unit *temp2 = GetNewUnit( pFac );
+	temp2->SetMen( I_LEADERS, 1 );
+	temp2->reveal = REVEAL_FACTION;
 
-    if (TurnNumber() >= 12) {
-        temp2->type = U_MAGE;
-        temp2->Study(S_PATTERN, 30);
-        temp2->Study(S_SPIRIT, 30);
-        temp2->Study(S_GATE_LORE, 30);
-    }
+	if (TurnNumber() >= 12) {
+		temp2->type = U_MAGE;
+		temp2->Study(S_PATTERN, 30);
+		temp2->Study(S_SPIRIT, 30);
+		temp2->Study(S_GATE_LORE, 30);
+	}
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
@@ -62,7 +62,7 @@ int Game::SetupFaction( Faction *pFac )
 		temp2->items.SetNum(I_SILVER, 10);
 	}
 
-    ARegion *reg = NULL;
+	ARegion *reg = NULL;
 	if(pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
 	} else if(!Globals->MULTI_HEX_NEXUS) {
@@ -75,7 +75,7 @@ int Game::SetupFaction( Faction *pFac )
 	}
 	temp2->MoveUnit( reg->GetDummy() );
 
-    return( 1 );
+	return( 1 );
 }
 
 Faction *Game::CheckVictory()
@@ -88,7 +88,7 @@ void Game::ModifyTablesPerRuleset(void)
 	if(Globals->APPRENTICES_EXIST)
 		EnableSkill(S_MANIPULATE);
 
-    if(!Globals->GATES_EXIST)
+	if(!Globals->GATES_EXIST)
 		DisableSkill(S_GATE_LORE);
 
 	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
@@ -104,7 +104,7 @@ void Game::ModifyTablesPerRuleset(void)
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
-    EnableItem(I_PICK);
+	EnableItem(I_PICK);
 	EnableItem(I_SPEAR);
 	EnableItem(I_AXE);
 	EnableItem(I_HAMMER);
@@ -119,7 +119,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_CLOTHARMOR);
 	EnableItem(I_BOOTS);
 
-    EnableItem(I_BAXE);
+	EnableItem(I_BAXE);
 	EnableItem(I_MBAXE);
 	EnableItem(I_IMARM);
 	EnableItem(I_SUPERBOW);
@@ -154,12 +154,17 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_GEMCUTTING);
 	}
 
-    // Modify the various spells which are allowed to cross levels
+	// Modify the various spells which are allowed to cross levels
 	if(Globals->EASIER_UNDERWORLD) {
 		ModifyRangeFlags(RANGE_TELEPORT, RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags(RANGE_FARSIGHT, RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags(RANGE_CLEAR_SKIES, RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags(RANGE_WEATHER_LORE, RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags(RANGE_CLEAR_SKIES, RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags(RANGE_WEATHER_LORE, RangeType::RNG_CROSS_LEVELS);
+	}
+
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+		EnableSkill(S_QUARTERMASTER);
+		EnableObject(O_CARAVANSERAI);
 	}
 
 	// XXX -- This is just here to preserve existing behavior

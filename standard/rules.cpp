@@ -49,7 +49,7 @@ static int at[] = { 0, 10, 24, 40, 60, 100 };
 int *allowedTrades = at;
 int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
-static int aq[] = { 0, 1, 2, 3, 5, 8 };
+static int aq[] = { 0, 2, 4, 8, 12, 20 };
 int *allowedQuartermasters = aq;
 int allowedQuartermastersSize = sizeof(aq) / sizeof(aq[0]);
 
@@ -164,7 +164,7 @@ static GameDefs g = {
 	0,	// LAKESIDE_IS_COASTAL
 	0,	// ODD_TERRAIN
 	0,	// IMPROVED_FARSIGHT
-	1,	// GM_REPORT
+	0,	// GM_REPORT
 	0,	// DECAY
 	0,	// LIMITED_MAGES_PER_BUILDING
 	GameDefs::REPORT_NOTHING, // TRANSIT_REPORT
