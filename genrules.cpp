@@ -280,7 +280,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#move", "move"));
 	f.TagText("LI", f.Link("#name", "name"));
 	f.TagText("LI", f.Link("#noaid", "noaid"));
-	f.TagText("LI", f.Link("#nocross", "nocross"));
+	int move_over_water = 0;
+	if((Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) ||
+			(!(ItemDefs[I_BOOTS].flags & ItemType::DISABLED)))
+		move_over_water =1;
+	if(move_over_water)
+		f.TagText("LI", f.Link("#nocross", "nocross"));
 	f.TagText("LI", f.Link("#option", "option"));
 	f.TagText("LI", f.Link("#password", "password"));
 	f.TagText("LI", f.Link("#pillage", "pillage"));
@@ -293,7 +298,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#reveal", "reveal"));
 	if (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
 		f.TagText("LI", f.Link("#sail", "sail"));
-	f.TagText("LI", f.Link("#sell", "sell"));
+	if(Globals->TOWNS_EXIST)
+		f.TagText("LI", f.Link("#sell", "sell"));
 	f.TagText("LI", f.Link("#show", "show"));
 	f.TagText("LI", f.Link("#spoils", "spoils"));
 	if(has_stea)
@@ -446,7 +452,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("TH", temp);
 		f.Enclose(0, "TR");
 		int i;
-		for(i = 1; i <= Globals->FACTION_POINTS; i++) {
+		for(i = 0; i <= Globals->FACTION_POINTS; i++) {
 			fac.type[F_WAR]=i;
 			fac.type[F_TRADE]=i;
 			fac.type[F_MAGIC]=i;
@@ -2622,15 +2628,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"phase (before any movement has occurred).  The defender has a unit "
 		"of soldiers in adjacent region B.  They have 2 movement points at "
 		"this stage. ";
-	if(Globals->WEATHER_EXISTS) {
-		temp += "They will buy horses later in the turn, so that when "
-			"they execute their ";
-		temp += f.Link("#move", "MOVE") + " order they will have 4 movement "
-			"points, but right now they have 2. ";
+	temp += "They will buy horses later in the turn, so that when "
+		"they execute their ";
+	temp += f.Link("#move", "MOVE") + " order they will have 4 movement "
+		"points, but right now they have 2. ";
+	if(Globals->WEATHER_EXISTS)
 		temp += "Region A is forest, but fortunately it is summer, ";
-	} else {
-		temp += "Fortunately, region A is plains, ";
-	}
+	else
+		temp += "Region A is forest, ";
 	temp += "so the soldiers can join the fight.";
 	f.Paragraph(temp);
 	temp = "It is important to note that the units in nearby regions do not "
@@ -3176,7 +3181,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#cast", "CAST") + " order is not a full month order; "
 		"a mage may still ";
 	temp += f.Link("#move", "MOVE") + ", ";
-	temp += f.Link("#study", "STUDY") + ", or use any other moth long order. ";
+	temp += f.Link("#study", "STUDY") + ", or use any other month long order. ";
 	temp += "The justification for this (as well as being for game balance) "
 		"is that a spell drains a mage of his magic power for the month, "
 		"but does not actually take the entire month to cast.";
@@ -3282,7 +3287,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				if(Globals->SAFE_START_CITIES)
 					temp += "may not be defeated.";
 				else
-					temp += "are harder therefore to kill.";
+					temp += "are therefore harder to kill.";
 			}
 				
 			if(Globals->START_CITY_MAGES) {
@@ -3827,13 +3832,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "UNIT 17\n";
 	temp2 += "FORM 1\n";
 	temp2 += "    NAME UNIT \"Merlin's Guards\"\n";
-	temp2 += "    BUY 5 Plainsmen\n";
+	if(Globals->RACES_EXIST)
+		temp2 += "    BUY 5 Plainsmen\n";
+	else
+		temp2 += "    BUY 5 men\n";
 	temp2 += "    STUDY COMBAT\n";
 	temp2 += "END\n";
 	temp2 += "FORM 2\n";
 	temp2 += "    NAME UNIT \"Merlin's Workers\"\n";
 	temp2 += "    DESCRIBE UNIT \"wearing dirty overalls\"\n";
-	temp2 += "    BUY 15 Plainsmen\n";
+	if(Globals->RACES_EXIST)
+		temp2 += "    BUY 15 Plainsmen\n";
+	else
+		temp2 += "    BUY 15 men\n";
 	temp2 += "END\n";
 	temp2 += "CLAIM 2500\n";
 	temp2 += "GIVE NEW 1 1000 silver\n";
@@ -4001,8 +4012,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"and a castle or mystic fortress to rename a city. ";
 		if (Globals->CITY_RENAME_COST) {
 			int c=Globals->CITY_RENAME_COST;
-			temp += AString("It also costs $") + c + " to rename a village, ";
-			temp += AString(2*c) + " to rename a town, and ";
+			temp += AString("It also costs $") + c + " to rename a village, $";
+			temp += AString(2*c) + " to rename a town, and $";
 			temp += AString(3*c) + " to rename a city.";
 		}
 		f.Paragraph(temp);
@@ -4029,25 +4040,26 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "NOAID 1";
 	f.CommandExample(temp, temp2);
 
-	f.ClassTagText("DIV", "rule", "");
-	f.LinkRef("nocross");
-	f.TagText("H4", "NOCROSS [flag]");
-	temp = "NOCROSS 1 indicates that if a unit attempts to cross a "
-		"body of water then that unit should instead not cross it, "
-		"regardless of whether the unit otherwise could do so. ";
-	if(may_sail) {
-		temp += "Units inside of a ship are not affected by this flag "
-			"(IE, they are able to sail within the ship). ";
+	if(move_over_water) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("nocross");
+		f.TagText("H4", "NOCROSS [flag]");
+		temp = "NOCROSS 1 indicates that if a unit attempts to cross a "
+			"body of water then that unit should instead not cross it, "
+			"regardless of whether the unit otherwise could do so. ";
+		if(may_sail) {
+			temp += "Units inside of a ship are not affected by this flag "
+				"(IE, they are able to sail within the ship). ";
+		}
+		temp += "This flag is useful to prevent scouts from accidentally "
+			"drowning when exploring in games where movement over water "
+			"is allowed. NOCROSS 0 cancels this.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Set a unit to not permit itself to cross water.";
+		temp2 = "NOCROSS 1";
+		f.CommandExample(temp, temp2);
 	}
-	temp += "This flag is useful for games where the rules have been "
-		"set so that water crossing is allowed, or items exist which "
-		"give a unit swimming capacity, and has no effect in the "
-		"'standard' ruleset. NOCROSS 0 cancels this.";
-	f.Paragraph(temp);
-	f.Paragraph("Example:");
-	temp = "Set a unit to not permit itself to cross water.";
-	temp2 = "NOCROSS 1";
-	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("option");
@@ -4074,14 +4086,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"be additional symbols for unusual/special terrain):";
 	f.Paragraph(temp);
 	f.Enclose(1, "TABLE");
-	f.Enclose(1, "TR");
-	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
-	f.PutStr("####");
-	f.Enclose(0, "TD");
-	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-	f.PutStr("BLOCKED HEX (Underworld)");
-	f.Enclose(0, "TD");
-	f.Enclose(0, "TR");
+	if(Globals->UNDERWORLD_LEVELS) {
+		f.Enclose(1, "TR");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+		f.PutStr("####");
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr("BLOCKED HEX (Underworld)");
+		f.Enclose(0, "TD");
+		f.Enclose(0, "TR");
+	}
 	f.Enclose(1, "TR");
 	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
 	f.PutStr("~~~~");
@@ -4095,7 +4109,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("    ");
 	f.Enclose(0, "TD");
 	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-	f.PutStr("PLAINS/TUNNELS HEX");
+	temp = "PLAINS";
+	if(Globals->UNDERWORLD_LEVELS)
+		temp += "/TUNNELS";
+	temp += " HEX";
+	f.PutStr(temp);
 	f.Enclose(0, "TD");
 	f.Enclose(0, "TR");
 	f.Enclose(1, "TR");
@@ -4103,7 +4121,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("^^^^");
 	f.Enclose(0, "TD");
 	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-	f.PutStr("FOREST/UNDERFOREST HEX");
+	temp = "FOREST";
+	if(Globals->UNDERWORLD_LEVELS)
+		temp += "/UNDERFOREST";
+	temp += " HEX";
+	f.PutStr(temp);
 	f.Enclose(0, "TD");
 	f.Enclose(0, "TR");
 	f.Enclose(1, "TR");
@@ -4122,30 +4144,36 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("SWAMP HEX");
 	f.Enclose(0, "TD");
 	f.Enclose(0, "TR");
-	f.Enclose(1, "TR");
-	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
-	f.PutStr("@@@@");
-	f.Enclose(0, "TD");
-	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-	f.PutStr("JUNGLE HEX");
-	f.Enclose(0, "TD");
-	f.Enclose(0, "TR");
-	f.Enclose(1, "TR");
-	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
-	f.PutStr("....");
-	f.Enclose(0, "TD");
-	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-	f.PutStr("DESERT/CAVERN HEX");
-	f.Enclose(0, "TD");
-	f.Enclose(0, "TR");
-	f.Enclose(1, "TR");
-	f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
-	f.PutStr(",,,,");
-	f.Enclose(0, "TD");
-	f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-	f.PutStr("TUNDRA HEX");
-	f.Enclose(0, "TD");
-	f.Enclose(0, "TR");
+	if(!Globals->CONQUEST_GAME) {
+		f.Enclose(1, "TR");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+		f.PutStr("@@@@");
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr("JUNGLE HEX");
+		f.Enclose(0, "TD");
+		f.Enclose(0, "TR");
+		f.Enclose(1, "TR");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+		f.PutStr("....");
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		temp = "DESERT";
+		if(Globals->UNDERWORLD_LEVELS)
+			temp += "/CAVERN";
+		temp += " HEX";
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(0, "TR");
+		f.Enclose(1, "TR");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
+		f.PutStr(",,,,");
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr("TUNDRA HEX");
+		f.Enclose(0, "TD");
+		f.Enclose(0, "TR");
+	}
 	if(Globals->NEXUS_EXISTS) {
 		f.Enclose(1, "TR");
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP CLASS=fixed");
@@ -4301,22 +4329,24 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.CommandExample(temp, temp2);
 	}
 
-	f.ClassTagText("DIV", "rule", "");
-	f.LinkRef("sell");
-	f.TagText("H4", "SELL [quantity] [item]");
-	f.TagText("H4", "SELL ALL [item]");
-	temp = "Attempt to sell the amount given of the item given.  If the "
-		"unit does not have as many of the item as it is trying to sell, "
-		"it will attempt to sell all that it has. The second form will "
-		"attempt to sell all of that item, regardless of how many it has. "
-		"If more of the item are on sale (by all the units in the region) "
-		"than are wanted by the region, the number sold per unit will be "
-		"split up in proportion to the number each unit tried to sell.";
-	f.Paragraph(temp);
-	f.Paragraph("Example:");
-	temp = "Sell 10 furs to the market.";
-	temp2 = "SELL 10 furs";
-	f.CommandExample(temp, temp2);
+	if(Globals->TOWNS_EXIST) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("sell");
+		f.TagText("H4", "SELL [quantity] [item]");
+		f.TagText("H4", "SELL ALL [item]");
+		temp = "Attempt to sell the amount given of the item given.  If the "
+			"unit does not have as many of the item as it is trying to sell, "
+			"it will attempt to sell all that it has. The second form will "
+			"attempt to sell all of that item, regardless of how many it has. "
+			"If more of the item are on sale (by all the units in the region) "
+			"than are wanted by the region, the number sold per unit will be "
+			"split up in proportion to the number each unit tried to sell.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Sell 10 furs to the market.";
+		temp2 = "SELL 10 furs";
+		f.CommandExample(temp, temp2);
+	}
 
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("show");
@@ -4484,7 +4514,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#hold", "HOLD") + ", ";
 	temp += f.Link("#name", "NAME") + ", ";
 	temp += f.Link("#noaid", "NOAID") + ", ";
-	temp += f.Link("#nocross", "NOCROSS") + ", ";
+	if(move_over_water)
+		temp += f.Link("#nocross", "NOCROSS") + ", ";
 	temp += f.Link("#option", "OPTION") + ", ";
 	temp += f.Link("#password", "PASSWORD") + ", ";
 	if(Globals->USE_PREPARE_COMMAND)
@@ -4547,7 +4578,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "UL");
 	temp = f.Link("#guard","GUARD") + " 1 orders are processed.";
 	f.TagText("LI", temp);
-	temp = f.Link("#sell","SELL") + " orders are processed.";
+	if(Globals->TOWNS_EXIST)
+		temp = f.Link("#sell","SELL") + " orders are processed.";
 	f.TagText("LI", temp);
 	temp = f.Link("#buy","BUY") + " orders are processed.";
 	f.TagText("LI", temp);
