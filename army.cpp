@@ -565,7 +565,6 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
             Object * obj = ((Location *) elem)->obj;
             int temp = u->GetSkill(S_TACTICS);
             if (temp > tac) tac = temp;
-            int n = u->GetSoldiers();
             if (ass)
             {
                 forlist(&u->items) {
@@ -879,7 +878,6 @@ void Army::Win(Battle * b,ItemList * spoils) {
   
   WriteLosses(b);
   int na = NumAlive();
-  int nd = count - NumAlive();
   forlist(spoils) {
     Item * i = (Item *) elem;
     int n = i->num / na;

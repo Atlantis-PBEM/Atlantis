@@ -79,6 +79,7 @@ Faction *Game::CheckVictory()
 			}
 		}
 	}
+	return NULL;
 }
 
 int Game::AllowedMages( Faction *pFac )

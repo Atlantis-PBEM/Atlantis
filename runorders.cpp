@@ -1204,7 +1204,6 @@ void Game::RunSellOrders() {
 	forlist((&obj->units)) {
 	  Unit * u = (Unit *) elem;
 	  forlist((&u->sellorders)) {
-	    SellOrder * o = (SellOrder *) elem;
 	    u->Error("SELL: Can't sell that.");
 	  }
 	  u->sellorders.DeleteAll();
@@ -1289,7 +1288,6 @@ void Game::RunBuyOrders() {
 				forlist((&obj->units)) {
 					Unit * u = (Unit *) elem;
 					forlist((&u->buyorders)) {
-						BuyOrder * o = (BuyOrder *) elem;
 						u->Error("BUY: Can't buy that.");
 					}
 					u->buyorders.DeleteAll();

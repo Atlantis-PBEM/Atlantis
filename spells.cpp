@@ -1212,8 +1212,6 @@ void Game::RunFarsight(ARegion *r,Unit *u)
 }
     
 void Game::RunDetectGates(ARegion *r,Object *o,Unit *u) {
-  CastOrder *order = (CastOrder *) u->castorders;
-
   int level = u->GetSkill(S_GATE_LORE);
 
   if (level == 1) {

@@ -1485,7 +1485,7 @@ void Unit::SkillStarvation()
 		Error(temp);
 		return;
 	}
-	int random_number = getrandom(count);
+	count = getrandom(count);
 	for(i = 0; i < NSKILLS; i++) {
 		if(can_forget[i]) {
 			if(--count == 0) {

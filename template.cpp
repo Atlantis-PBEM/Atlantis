@@ -386,7 +386,7 @@ void ARegion::GetMapLine(char *buffer, int line, ARegionList *pRegs )
 
     ARegion *r = this;
     int x, y, t, i = 0;
-    char *p, *name;
+    char *name;
 
     t = (r->type + 1) * 2;
     name = (r->town ? r->town->name->Str() : NULL);

@@ -1003,7 +1003,6 @@ void ARegion::DoDecayClicks(Object *o)
 // AS
 void ARegion::RunDecayEvent(Object *o)
 {
-    Areport * fReport;
     AList * pFactions;
     pFactions = PresentFactions();
     forlist (pFactions)
