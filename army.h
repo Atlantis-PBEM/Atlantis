@@ -119,8 +119,10 @@ class Army
 		int CanAttack();
 		int NumFront();
 		Soldier *GetAttacker( int, int & );
+		int GetEffectNum(int effect);
 		int GetTargetNum( int = SPECIAL_NONE );
 		Soldier *GetTarget( int );
+		int RemoveEffect(int num, int effect);
 		int DoAnAttack( int special, int numAttacks, int attackType,
 				int attackLevel, int flags, int weaponClass, int effect,
 				int mountBonus);

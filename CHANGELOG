@@ -499,3 +499,5 @@ Changes from 4.0.9 -> 4.0.10
       skills, as it is used in the automatic attack phase.  I suggest a
       value of 5 for SKILL_PRACTISE_AMOUNT.
    -- Fixed a bug where CanSee was not taking account of MIND skill.
+   -- Modified combat acquisition algorithm for special attacks so that
+      they will always find an appropriate target if one exists.
