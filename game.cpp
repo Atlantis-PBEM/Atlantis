@@ -33,6 +33,8 @@
 #include <memory.h>  // Needed for memcpy on windows
 #endif
 
+#include <string.h>
+
 #include "game.h"
 #include "unit.h"
 #include "fileio.h"
