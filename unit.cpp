@@ -172,10 +172,10 @@ AString Unit::MageReport()
 AString Unit::StudyableSkills()
 {
 	AString temp;
-
 	int j=0;
+
 	for (int i=0; i<NSKILLS; i++) {
-		if(SkillDefs[i].depend1 != -1) {
+		if(SkillDefs[i].depends[0].skill != -1) {
 			if (CanStudy(i)) {
 				if (j) {
 					temp += ", ";
@@ -778,32 +778,26 @@ void Unit::ForgetSkill(int sk)
 	}
 }
 
-int Unit::CheckDepend(int lev,int dep,int deplev) {
-  int temp = GetRealSkill(dep);
-  if (temp < deplev) return 0;
-  if (lev >= temp) return 0;
-  return 1;
+int Unit::CheckDepend(int lev, SkillDepend &dep)
+{
+	int temp = GetRealSkill(dep.skill);
+	if(temp < dep.level) return 0;
+	if(lev >= temp) return 0;
+	return 1;
 }
 
-int Unit::CanStudy(int sk) {
-  int curlev = GetRealSkill(sk);
+int Unit::CanStudy(int sk)
+{
+	int curlev = GetRealSkill(sk);
 
-  if(SkillDefs[sk].flags & SkillType::DISABLED) return 0;
+	if(SkillDefs[sk].flags & SkillType::DISABLED) return 0;
 
-  if (SkillDefs[sk].depend1 != -1) {
-    if (!CheckDepend(curlev,SkillDefs[sk].depend1,SkillDefs[sk].level1))
-      return 0;
-  } else return 1;
-  if (SkillDefs[sk].depend2 != -1) {
-    if (!CheckDepend(curlev,SkillDefs[sk].depend2,SkillDefs[sk].level2))
-      return 0;
-  } else return 1;
-  if (SkillDefs[sk].depend3 != -1) {
-    if (!CheckDepend(curlev,SkillDefs[sk].depend3,SkillDefs[sk].level3))
-      return 0;
-  } else return 1;
-
-  return 1;
+	unsigned int c;
+	for(c = 0; c < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); c++) {
+		if(SkillDefs[sk].depends[c].skill == -1) return 1;
+		if(!CheckDepend(curlev, SkillDefs[sk].depends[c])) return 0;
+	}
+	return 1;
 }
 
 int Unit::Study(int sk,int days)
@@ -1451,12 +1445,13 @@ void Unit::SkillStarvation()
 			if(SkillDefs[j].flags & SkillType::DISABLED) continue;
 			Skill *sj = GetSkillObject(j);
 			int dependancy_level = 0;
-			if(SkillDefs[i].depend1 == j)
-				dependancy_level = SkillDefs[i].level1;
-			else if(SkillDefs[i].depend2 == j)
-				dependancy_level = SkillDefs[i].level2;
-			else if(SkillDefs[i].depend3 == j)
-				dependancy_level = SkillDefs[i].level3;
+			unsigned int c;
+			for(c=0;c < sizeof(SkillDefs[i].depends)/sizeof(SkillDepend);c++) {
+				if(SkillDefs[i].depends[c].skill == j) {
+					dependancy_level = SkillDefs[i].depends[c].level;
+					break;
+				}
+			}
 			if(dependancy_level > 0) {
 				if(GetLevelByDays(sj->days) == GetLevelByDays(si->days)) {
 					can_forget[j] = 0;

@@ -52,6 +52,12 @@ enum {
 	IT_TOOL = 0x800,
 };
 
+struct Materials
+{
+	int item;
+	int amt;
+};
+
 class ItemType
 {
 public:
@@ -65,17 +71,24 @@ public:
     };
     int flags;
 
-    int skill;
-    int level;
-    int input;
-    int number;
-	int input2;
-	int number2;
+
+	int pSkill; // production skill
+    int pLevel; // production skill level
+    int pMonths; // Man months required for production
+	int pOut; // How many of the item we get
+    Materials pInput[2];
+
+    int mSkill; // magical production skill
+    int mLevel; // magical production skill level
+	int mOut; // How many of the item are conjured
+    Materials mInput[2];
+
     int weight;
     int type;
     int baseprice;
     int combat;
     int index;
+
     int walk;
     int ride;
     int fly;
@@ -92,10 +105,7 @@ class ManType
 public:
     int speciallevel;
     int defaultlevel;
-    int firstskill;
-    int secondskill;
-    int thirdskill;
-    int fourthskill;
+	int skills[4];
 };
 
 extern ManType * ManDefs;
@@ -215,7 +225,7 @@ public:
 	//
 	// This is the max bonus a mount will grant if it can normally fly
 	// but the region doesn't allow flying mounts
-	int maxRiding;
+	int maxHamperedBonus;
 };
 
 extern MountType *MountDefs;
@@ -275,6 +285,3 @@ public:
 };
 
 #endif
-	
-
-

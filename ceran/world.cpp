@@ -2063,7 +2063,7 @@ void CountNames()
 	Awrite(AString("Regions ") + nregions);
 }
 
-int AGetName( ARegion *pReg, int town )
+int AGetName(int town )
 {
 	int offset, number;
 	if(town) {
@@ -2416,7 +2416,7 @@ int ARegionList::GetRegType( ARegion *pReg )
     return( R_OCEAN );
 }
 
-int ARegionList::CheckRegionExit( int nDir, ARegion *pFrom, ARegion *pTo )
+int ARegionList::CheckRegionExit(ARegion *pFrom, ARegion *pTo )
 {
     if((pFrom->zloc==1) ||
 		(pFrom->zloc>Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+1)) {
@@ -2514,8 +2514,9 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
     }
 }
 
-int ARegion::CanBeStartingCity( ARegionArray *pRA )
+int ARegion::CanBeStartingCity(ARegionArray *pRA)
 {
+	void *dummy = pRA;
     if (type == R_OCEAN) return 0;
     if (!IsCoastal()) return 0;
     if (town && town->pop == 5000) return 0;

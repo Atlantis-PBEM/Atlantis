@@ -170,7 +170,7 @@ public:
     void SetSkillDays(int,int);
     int GetRealSkill(int);
     void ForgetSkill(int);
-    int CheckDepend(int,int,int);
+    int CheckDepend(int,SkillDepend &s);
     int CanStudy(int);
     int Study(int,int); /* Returns 1 if it succeeds */
     void AdjustSkills();

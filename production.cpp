@@ -48,7 +48,7 @@ Production::Production(int it,int maxamt)
     baseamount = amount;
     level = 1;
     productivity = 1;
-    skill = ItemDefs[it].skill;
+    skill = ItemDefs[it].pSkill;
 }
 
 void Production::Writeout(Aoutfile * f)
@@ -71,7 +71,7 @@ void Production::Readin(Ainfile * f)
     productivity = f->GetInt();
     if (itemtype != I_SILVER)
     {
-        skill = ItemDefs[itemtype].skill;
+        skill = ItemDefs[itemtype].pSkill;
     }
 }
 

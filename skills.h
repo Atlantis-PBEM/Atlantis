@@ -46,7 +46,7 @@ class SkillList;
   structure, or at the level you are trying to study to.
 
   Example:
-  SANDLE has depend1 = SHOE and level1 = 3.
+  SANDLE has depends[0].skill = SHOE and depends[0].level = 3.
 
   To study:   requires:
   SANDLE 1    SHOE 3
@@ -55,6 +55,13 @@ class SkillList;
   SANDLE 4    SHOE 4
   SANDLE 5    SHOE 5
 */
+
+struct SkillDepend
+{
+	int skill;
+	int level;
+};
+
 class SkillType
 {
 public:
@@ -77,12 +84,7 @@ public:
     //
     int special;
 
-    int depend1;
-    int level1;
-    int depend2;
-    int level2;
-    int depend3;
-    int level3;
+	SkillDepend depends[3];
 };
 
 extern SkillType * SkillDefs;

@@ -176,23 +176,40 @@ private:
 	// Functions to allow enabling/disabling parts of the data tables
 	void EnableSkill(int sk); // Enabled a disabled skill
 	void DisableSkill(int sk);  // Prevents skill being studied or used
+	void ModifySkillDependancy(int sk, int i, int dep, int lev);
+	void ModifySkillFlags(int sk, int flags);
+	void ModifySkillCost(int sk, int cost);
+	void ModifySkillSpecial(int sk, int special);
+
 	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
+	void ModifyItemFlags(int it, int flags);
+	void ModifyItemType(int it, int type);
+	void ModifyItemWeight(int it, int weight);
+	void ModifyItemBasePrice(int it, int price);
+	void ModifyItemCapacities(int it, int walk, int ride, int fly, int swim);
+	void ModifyItemProductionBooster(int it, int item, int bonus);
+	void ModifyItemProductionSkill(int it, int sk, int lev);
+	void ModifyItemProductionOutput(int it, int months, int count);
+	void ModifyItemProductionInput(int it, int i, int input, int amount);
+	void ModifyItemMagicSkill(int it, int sk, int lev);
+	void ModifyItemMagicOutput(int it, int count);
+	void ModifyItemMagicInput(int it, int i, int input, int amount);
+
+	void ModifyRaceSkillLevels(int race, int special, int def);
+	void ModifyRaceSkills(int race, int i, int sk);
+
 	void EnableObject(int ob); // Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built
 
 	void ClearTerrainRaces(int t);
 	void ModifyTerrainRace(int t, int i, int r);
 	void ModifyTerrainCoastRace(int t, int i, int r);
-
 	void ClearTerrainItems(int t);
 	void ModifyTerrainItems(int t, int i, int p, int c, int a);
-
 	void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum);
-
 	void ModifyTerrainLairChance(int t, int chance);
 	void ModifyTerrainLair(int t, int i, int lair);
-
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
 
 

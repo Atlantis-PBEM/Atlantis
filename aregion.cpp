@@ -94,7 +94,7 @@ TownInfo::~TownInfo()
     if (name) delete name;
 }
 
-void TownInfo::Readin( Ainfile *f, ATL_VER ver)
+void TownInfo::Readin(Ainfile *f, ATL_VER &v)
 {
     name = f->GetStr();
     pop = f->GetInt();
@@ -271,7 +271,7 @@ int ARegion::GetNearestProd(int item)
     for (int i=0; i<5; i++) {
         forlist(rptr) {
             ARegion * r = ((ARegionPtr *) elem)->ptr;
-            if (r->products.GetProd(item,ItemDefs[item].skill)) {
+            if (r->products.GetProd(item,ItemDefs[item].pSkill)) {
                 regs.DeleteAll();
                 regs2.DeleteAll();
                 return i;
@@ -338,7 +338,7 @@ void ARegion::SetupCityMarket()
             } 
             else
             {
-                if (ItemDefs[i].input == -1) {
+                if (ItemDefs[i].pInput[0].item == -1) {
 					// Check if the product can be produced in the region
 					int canProduce = 0;
 					for(unsigned int c = 0;
@@ -653,7 +653,7 @@ void ARegion::AddTown()
 {
     town = new TownInfo;
     
-    town->name = new AString( AGetNameString( AGetName( this, 1 )));
+    town->name = new AString( AGetNameString( AGetName(1 )));
 
     if( Globals->RANDOM_ECONOMY )
     {
@@ -1593,11 +1593,8 @@ int ARegion::CanMakeAdv(Faction * fac,int item)
         Object * o = (Object *) elem;
         forlist(&o->units) {
             Unit * u = (Unit *) elem;
-            if (u->faction == fac)
-            {
-                if (u->GetSkill(ItemDefs[item].skill) >=
-                    ItemDefs[item].level)
-                {
+            if (u->faction == fac) {
+                if (u->GetSkill(ItemDefs[item].pSkill)>=ItemDefs[item].pLevel) {
                     return 1;
                 }
             }
@@ -2762,7 +2759,7 @@ void ARegionList::SetupAnchors(ARegionArray * ta)
 
                     if (reg->type != R_OCEAN)
                     {
-                        reg->wages = AGetName( reg, 0 );
+                        reg->wages = AGetName(0 );
                     }
 
                     break;
@@ -2846,7 +2843,7 @@ void ARegionList::RandomTerrain( ARegionArray *pArr )
             if (reg->type == R_NUM)
             {
                 reg->type = GetRegType( reg );
-                reg->wages = AGetName( reg, 0 );
+                reg->wages = AGetName(0 );
             }
         }
     }
@@ -2876,7 +2873,7 @@ void ARegionList::MakeUWMaze( ARegionArray *pArr )
                 ARegion *n = reg->neighbors[i];
                 if (n)
                 {
-                    if( !CheckRegionExit( i, reg, n ))
+                    if( !CheckRegionExit(reg, n ))
                     {
 						count = 0;
 						for(int k = D_NORTH; k<NDIRS; k++) {

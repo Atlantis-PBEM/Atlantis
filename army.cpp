@@ -211,8 +211,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 			// so, limit the bonus the mount can give.
 			if(ItemDefs[item].fly &&
 			   !(pTer->flags & TerrainType::FLYINGMOUNTS)) {
-				if(bonus > pMnt->maxRiding)
-					bonus = pMnt->maxRiding;
+				if(bonus > pMnt->maxHamperedBonus)
+					bonus = pMnt->maxHamperedBonus;
 			}
 
             askill += bonus;

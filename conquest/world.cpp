@@ -2063,7 +2063,7 @@ void CountNames()
 	Awrite(AString("Regions ") + nregions);
 }
 
-int AGetName( ARegion *pReg, int town )
+int AGetName(int town )
 {
 	int offset, number;
 	if(town) {
@@ -2178,7 +2178,7 @@ int ARegionList::GetRegType( ARegion *pReg )
 	return( R_OCEAN );
 }
 
-int ARegionList::CheckRegionExit( int nDir, ARegion *pFrom, ARegion *pTo )
+int ARegionList::CheckRegionExit(ARegion *pFrom, ARegion *pTo )
 {
 	return( 1 );
 }

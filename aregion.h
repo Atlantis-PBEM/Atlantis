@@ -101,7 +101,7 @@ public:
 
 Location * GetUnit(AList *,int);
 
-int AGetName( ARegion *pReg, int town );
+int AGetName(int town );
 char *AGetNameString( int name );
 
 class ARegionPtr : public AListElem
@@ -133,7 +133,7 @@ public:
     TownInfo();
     ~TownInfo();
     
-    void Readin(Ainfile *, ATL_VER v );
+    void Readin(Ainfile *, ATL_VER &);
     void Writeout(Aoutfile * );
     int TownType();
     
@@ -400,7 +400,7 @@ private:
     // Game-specific world stuff (see world.cpp)
     //
     int GetRegType( ARegion *pReg );
-    int CheckRegionExit( int nDir, ARegion *pFrom, ARegion *pTo );
+    int CheckRegionExit(ARegion *pFrom, ARegion *pTo );
 };
 
 #endif

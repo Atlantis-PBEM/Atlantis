@@ -461,68 +461,71 @@ void Game::RunMonthOrders() {
 
 void Game::RunUnitProduce(ARegion * r,Unit * u)
 {
-    ProduceOrder * o = (ProduceOrder *) u->monthorders;
+	ProduceOrder * o = (ProduceOrder *) u->monthorders;
   
-    if (o->item == I_SILVER) {
-        u->Error("Can't do that in this region.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
-
-    int input = ItemDefs[o->item].input;
-    if (input == -1) {
-        u->Error("PRODUCE: Can't produce that.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
-  
-    int level = u->GetSkill(o->skill);
-    if (level < ItemDefs[o->item].level) {
-        u->Error("PRODUCE: Can't produce that.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
-
-    // LLS
-    int number = u->GetMen() * level + u->GetProductionBonus(o->item);
-  
-    if (!TradeCheck( r, u->faction ))
-    {
-        u->Error("PRODUCE: Faction can't produce in that many regions.");
-        delete u->monthorders;
-        u->monthorders = 0;
-        return;
-    }
-  
-    int inputno = ItemDefs[o->item].number;
-	int maxproduced;
-
-	int input2 = ItemDefs[o->item].input2;
-	int inputno2 = ItemDefs[o->item].number2;
-	if(input2 != -1) {
-		maxproduced = number/(inputno + inputno2);
-	} else {
-		maxproduced = number/inputno;
-	}
-   
-    if (maxproduced * inputno > u->items.GetNum(input))
-        maxproduced = u->items.GetNum(input) / inputno;
-
-	if((input2 != -1) && (maxproduced * inputno > u->items.GetNum(input2))) {
-		int max2 = u->items.GetNum(input2)/inputno2;
-		if(max2 < maxproduced) maxproduced = max2;
+	if (o->item == I_SILVER) {
+		u->Error("Can't do that in this region.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
 	}
 
-    u->items.SetNum(input,u->items.GetNum(input) - maxproduced * inputno);
-	if(input2 != -1) {
-		u->items.SetNum(input2, u->items.GetNum(input2)-maxproduced*inputno2);
+	int input = ItemDefs[o->item].pInput[0].item;
+	if (input == -1) {
+		u->Error("PRODUCE: Can't produce that.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
 	}
-    u->items.SetNum(o->item,u->items.GetNum(o->item) + maxproduced);
-    u->Event(AString("Produces ") + ItemString(o->item,maxproduced) + " in " +
-             r->ShortPrint( &regions ) + ".");
+  
+	int level = u->GetSkill(o->skill);
+	if (level < ItemDefs[o->item].pLevel) {
+		u->Error("PRODUCE: Can't produce that.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
+	}
+
+	// LLS
+	int number = u->GetMen() * level + u->GetProductionBonus(o->item);
+
+	if (!TradeCheck( r, u->faction )) {
+		u->Error("PRODUCE: Faction can't produce in that many regions.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
+	}
+ 
+	// find the max we can possibly produce based on man-months of labor
+	int maxproduced = number/ItemDefs[o->item].pMonths;
+
+	// Figure out the max we can produce based on the inputs
+	unsigned int c;
+	for(c = 0; c < sizeof(ItemDefs[o->item].pInput)/sizeof(Materials); c++) {
+		int i = ItemDefs[o->item].pInput[c].item;
+		if(i != -1) {
+			int amt = u->items.GetNum(i);
+			if(amt/ItemDefs[o->item].pInput[c].amt < maxproduced) {
+				maxproduced = amt/ItemDefs[o->item].pInput[c].amt;
+			}
+		}
+	}
+
+	// Deduct the items spent
+	for(c = 0; c < sizeof(ItemDefs[o->item].pInput)/sizeof(Materials); c++) {
+		int i = ItemDefs[o->item].pInput[c].item;
+		int a = ItemDefs[o->item].pInput[c].amt;
+		if(i != -1) {
+			int amt = u->items.GetNum(i);
+			u->items.SetNum(i, amt-(maxproduced*a));
+		}
+	}
+
+	// Now give the items produced
+	int output = maxproduced * ItemDefs[o->item].pOut;
+    u->items.SetNum(o->item,u->items.GetNum(o->item) + output);
+    u->Event(AString("Produces ") + ItemString(o->item,output) + " in " +
+			r->ShortPrint( &regions ) + ".");
     delete u->monthorders;
     u->monthorders = 0;
 }
@@ -562,7 +565,7 @@ int Game::ValidProd(Unit * u,ARegion * r,Production * p)
         }
         int level = u->GetSkill(p->skill);
         //    if (level < p->level) {
-        if (level < ItemDefs[p->itemtype].level) {
+        if (level < ItemDefs[p->itemtype].pLevel) {
             u->Error("PRODUCE: Unit isn't skilled enough.");
             delete u->monthorders;
             u->monthorders = 0;
