@@ -141,8 +141,8 @@ public:
     void RemoveAttitude(int);
     
     int CanCatch(ARegion *,Unit *);
-    int CanSee(ARegion *,Unit *); /* Return 1 if can see, 2 if can see
-				   faction */
+	/* Return 1 if can see, 2 if can see faction */
+    int CanSee(ARegion *,Unit *, int practise = 0);
     
     void DefaultOrders();
     void TimesReward();

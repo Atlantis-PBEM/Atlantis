@@ -690,7 +690,7 @@ int Faction::CanCatch(ARegion *r, Unit *t)
 	return 0;
 }
 
-int Faction::CanSee(ARegion * r,Unit * u)
+int Faction::CanSee(ARegion * r,Unit * u, int practise)
 {
 	int detfac = 0;
 	if (u->faction == this) return 2;
@@ -706,10 +706,21 @@ int Faction::CanSee(ARegion * r,Unit * u)
 			if (u == temp && dummy == 0) retval = 1;
 			if (temp->faction == this) {
 				if (temp->GetSkill(S_OBSERVATION) > u->GetSkill(S_STEALTH)) {
-					return 2;
+					if (practise) {
+						temp->Practise(S_OBSERVATION);
+						temp->Practise(S_TRUE_SEEING);
+						retval = 2;
+					}
+					else
+						return 2;
 				} else {
-					if (temp->GetSkill(S_OBSERVATION)==u->GetSkill(S_STEALTH))
-						retval = 1;
+					if (temp->GetSkill(S_OBSERVATION)==u->GetSkill(S_STEALTH)) {
+						if (practise) {
+							temp->Practise(S_OBSERVATION);
+							temp->Practise(S_TRUE_SEEING);
+						}
+						if (retval < 1) retval = 1;
+					}
 				}
 				if (temp->GetSkill(S_MIND_READING) > 2) detfac = 1;
 			}

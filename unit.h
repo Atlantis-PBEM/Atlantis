@@ -182,8 +182,8 @@ class Unit : public AListElem
 		int Practise(int);
 		void AdjustSkills();
 
-		int CanSee(ARegion *,Unit *); /* Return 1 if can see, 2 if can see
-										 faction */
+		/* Return 1 if can see, 2 if can see faction */
+		int CanSee(ARegion *,Unit *, int practise = 0);
 		int CanCatch(ARegion *,Unit *);
 		int AmtsPreventCrime(Unit *);
 		int GetAttitude(ARegion *,Unit *); /* Get this unit's attitude toward

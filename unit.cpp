@@ -1315,9 +1315,9 @@ int Unit::CanCatch(ARegion *r,Unit *u)
 	return faction->CanCatch(r,u);
 }
 
-int Unit::CanSee(ARegion * r,Unit * u)
+int Unit::CanSee(ARegion * r,Unit * u, int practise)
 {
-	return faction->CanSee(r,u);
+	return faction->CanSee(r,u, practise);
 }
 
 int Unit::AmtsPreventCrime(Unit *u)
@@ -1363,7 +1363,7 @@ int Unit::Forbids(ARegion * r,Unit * u)
 {
 	if (guard != GUARD_GUARD) return 0;
 	if (!IsAlive()) return 0;
-	if (!CanSee(r,u)) return 0;
+	if (!CanSee(r,u, Globals->SKILL_PRACTISE_AMOUNT > 0)) return 0;
 	if (!CanCatch(r,u)) return 0;
 	if (GetAttitude(r,u) < A_NEUTRAL) return 1;
 	return 0;

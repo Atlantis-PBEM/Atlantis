@@ -278,7 +278,7 @@ AList * Game::CanSeeSteal(ARegion * r,Unit * u)
 	forlist(&factions) {
 		Faction * f = (Faction *) elem;
 		if (r->Present(f)) {
-			if (f->CanSee(r,u)) {
+			if (f->CanSee(r,u, Globals->SKILL_PRACTISE_AMOUNT > 0)) {
 				FactionPtr * p = new FactionPtr;
 				p->ptr = f;
 				retval->Add(p);
