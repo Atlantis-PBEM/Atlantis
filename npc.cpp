@@ -31,7 +31,7 @@ void Game::CreateCityMons()
 
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
-		if (r->type == R_NEXUS || r->IsStartingCity() || r->town) {
+		if ((r->type == R_NEXUS) || r->IsStartingCity() || r->town) {
 			CreateCityMon(r, 100, 1);
 		}
 	}
@@ -362,10 +362,11 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 				}
 			}
 		}
-		/*
+		
 		AString *tmp = new AString(" (behind)");
 		if(!behind) tmp = new AString("");
-		Awrite(AString("Found ") + n + " fitting weapons " + *tmp + ".");
+		/*
+		 * Awrite(AString("Found ") + n + " fitting weapons " + *tmp + ".");
 		*/
 		if(n < 1) {
 			weaponlevel++;
@@ -416,7 +417,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 	if(level > maxskill) level = maxskill;
 	u->SetMen(mantype, num);
 	/*
-	Awrite(AString("-> chose ") + ItemDefs[witem].name);
+	Awrite(AString("Unit (") + u->num + ") -> chose " + ItemDefs[witem].name);
 	*/
 	u->items.SetNum(witem, num);
 	u->SetSkill(sk, level);

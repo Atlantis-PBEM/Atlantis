@@ -1940,9 +1940,15 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	}
 	u->SetFlag(FLAG_HOLDING,1);
 	u->MoveUnit(pReg->GetDummy());
+	/*
+	Awrite(AString(*u->BattleReport(3)));
+	*/
 	if((!Globals->LEADERS_EXIST) && (pReg->type != R_NEXUS)) {
 		u2->SetFlag(FLAG_HOLDING,1);
 		u2->MoveUnit(pReg->GetDummy());
+		/*
+		Awrite(AString(*u2->BattleReport(3)));
+		*/
 	}
 
 	if(AC && Globals->START_CITY_MAGES && needmage) {

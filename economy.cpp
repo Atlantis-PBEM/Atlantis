@@ -1097,10 +1097,10 @@ int ARegion::TownGrowth()
 		if (amt > tot) amt = tot;
 
 		if (tot) {
-			tarpop = (Globals->CITY_POP * amt) / tot;
+			tarpop += (Globals->CITY_POP * amt) / tot;
 		} 
 		// Let's bump tarpop up
-		tarpop = (tarpop * 5) / 4;
+		// tarpop = (tarpop * 5) / 4;
 		if (tarpop > Globals->CITY_POP) tarpop = Globals->CITY_POP;
 	}
 	return tarpop;

@@ -309,7 +309,6 @@ class ARegion : public AListElem
 		// economic improvement
 		int improvement;
 		
-
 		/* Potential bonuses to economy */
 		int clearskies;
 		int earthlore;

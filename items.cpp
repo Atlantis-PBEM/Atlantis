@@ -1237,7 +1237,7 @@ AString ItemList::ReportByType(int type, int obs, int seeillusions,
 void ItemList::SetNum(int t,int n)
 {
 	// sanity check: does this item type exist?
-	if ((t<0) || (t>=(int)sizeof(ItemDefs))) return;
+	if ((t<0) || (t>=NITEMS)) return;
 	if (n) {
 		forlist(this) {
 			Item *i = (Item *) elem;

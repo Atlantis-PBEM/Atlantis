@@ -706,6 +706,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 	int fractal = 0;
 	if (!fractal) {
 		while (ocean > (total * percentOcean) / 100) {
+			Adot();
 			int sz = getrandom(continentSize);
 			sz = sz * sz;
 
