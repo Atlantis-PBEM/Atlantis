@@ -44,6 +44,9 @@ standard: FORCE
 wyreth: FORCE
 	$(MAKE) GAME=wyreth
 
+$(GAME)/$(GAME): FORCE
+	$(MAKE) GAME=$(GAME)
+
 all-clean: conquest-clean ceran-clean realms-clean standard-clean wyreth-clean
 
 conquest-clean:
@@ -66,6 +69,8 @@ clean:
 	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
+
+all-rules: conquest-rules ceran-rules realms-rules standard-rules wyreth-rules
 
 conquest-rules:
 	$(MAKE) GAME=conquest rules

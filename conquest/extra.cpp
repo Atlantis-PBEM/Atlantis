@@ -167,6 +167,9 @@ void Game::ModifyTablesPerRuleset(void)
 		DisableSkill(S_FISHING);
 		DisableSkill(S_FARMING);
 		DisableSkill(S_RANCHING);
+		DisableItem(I_GRAIN);
+		DisableItem(I_LIVESTOCK);
+		DisableItem(I_FISH);
 		/* Disable production enhancer buildings */
 		DisableObject(O_RANCH);
 		DisableObject(O_FARM);

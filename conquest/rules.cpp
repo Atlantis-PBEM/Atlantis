@@ -55,7 +55,7 @@ static GameDefs g = {
     33, /* STARVE_PERCENT */
 	GameDefs::STARVE_NONE, /* SKILL_STARVATION */
 
-    5020, /* START_MONEY */
+    5010, /* START_MONEY */
     5, /* WORK_FRACTION */
     20, /* ENTERTAIN_FRACTION */
     20, /* ENTERTAIN_INCOME */

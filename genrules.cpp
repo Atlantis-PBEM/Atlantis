@@ -135,8 +135,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "Atlantis Nexus";
 		f.TagText("LI", f.Link("#world_nexus", temp));
 	}
-	if(Globals->CONQUEST_GAME)
-		f.TagText("LI", f.Link("#world_conquest", "Conquest"));
+	if(Globals->CONQUEST_GAME) {
+		temp = "The World of Atlantis Conquest";
+		f.TagText("LI", f.Link("#world_conquest", temp));
+	}
 	f.Enclose(0, "UL");
 	f.Enclose(0, "LI");
 	f.Enclose(1, "LI");
@@ -400,7 +402,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	Faction fac;
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		temp = "A faction has one pre-set limit; it may not contain more than ";
-		temp += AString(AllowedMages(&fac)) + "mages";
+		temp += AString(AllowedMages(&fac)) + " mages";
 		if(Globals->APPRENTICES_EXIST) {
 			temp += AString("and ") + AllowedApprentices(&fac) + " apprentices";
 		}
@@ -923,19 +925,27 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(!Globals->MULTI_HEX_NEXUS)
 			temp += "six ";
 		temp += "starting cities offer much to a starting faction; ";
-		if (!Globals->SAFE_START_CITIES)
+		if (!Globals->SAFE_START_CITIES && Globals->CITY_MONSTERS_EXIST)
 			temp += "until someone conquers the guardsmen, ";
 		temp += "there are unlimited amounts of many materials and men "
 			"(though the prices are often quite high).";
-		temp += " In addition, ";
+		if(Globals->SAFE_START_CITIES || Globals->CITY_MONSTERS_EXIST)
+			temp += " In addition, ";
 		if(Globals->SAFE_START_CITIES)
-			temp += "no battles are allowed in starting cities.";
-		else
+			temp += "no battles are allowed in starting cities";
+		if(Globals->CITY_MONSTERS_EXIST) {
+			if(Globals->SAFE_START_CITIES) temp += " and ";
 			temp += "the starting cities are guarded by strong guardsmen, "
-				"keeping any units within the city much safer from attack "
-				"(See the section on Non-Player Units for more information "
-				"on city guardsmen).";
-		temp += " As a drawback, these cities tend to be extremely crowded, "
+				"keeping any units within the city ";
+			if(!Globals->SAFE_START_CITIES)
+				temp += "much safer ";
+			else
+				temp += "safe ";
+			temp += "from attack. See the section on Non-Player Units for "
+				"more information on city guardsmen";
+		}
+		temp += ". ";
+		temp += "As a drawback, these cities tend to be extremely crowded, "
 			"and most factions will wish to leave the starting cities when "
 			"possible.";
 		f.Paragraph(temp);
@@ -1037,11 +1047,24 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"A unit can ride provided that the carrying capacity of its "
 		"horses is at least as great as the weight of its people and "
 		"all other items.  A unit can walk provided that the carrying "
-		"capacity of its people, horses and wagons is at least as great "
-		"as the weight of all its other items, and provided that it has "
-		"at least as many horses as wagons (otherwise the excess wagons "
-		"count as weight, not capacity). Otherwise the unit cannot issue "
-		"a ";
+		"capacity of its people";
+	if(!(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
+		if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED)) temp += ", ";
+		else temp += " and ";
+		temp += "horses";
+	}
+	if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED) &&
+			(!(ItemDefs[I_HORSE].flags & ItemType::DISABLED))) {
+		temp += ", and wagons";
+	}
+	temp += " is at least as great as the weight of all its other items";
+	if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED) &&
+			(!(ItemDefs[I_HORSE].flags & ItemType::DISABLED))) {
+		temp += ", and provided that it has at least as many horses as "
+			"wagons (otherwise the excess wagons count as weight, not "
+			"capacity)";
+	}
+	temp += ". Otherwise the unit cannot issue a ";
 	temp += f.Link("#move", "MOVE") + " order.";
 	temp += " Most people weigh 10 units and have a capacity of 5 units; "
 		"data for items is as follows:";
@@ -1135,12 +1158,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += " The unit can also use the ";
 	temp += f.Link("#move", "MOVE") + " order to enter or leave a structure.";
 	f.Paragraph(temp);
-	temp = "Finally, certain structures contain interior passages to other "
-		"regions.  The ";
-	temp += f.Link("#move", "MOVE") + " IN order can be used to go through ";
-	temp += "these passages; the movement point cost is equal to the normal "
-		"cost to enter the destination region.";
-	f.Paragraph(temp);
+	if(Globals->UNDERWORLD_LEVELS || Globals->UNDERDEEP_LEVELS) {
+		temp = "Finally, certain structures contain interior passages to "
+			"other regions.  The ";
+		temp += f.Link("#move", "MOVE") + " IN order can be used to go ";
+		temp += "through these passages; the movement point cost is equal "
+			"to the normal cost to enter the destination region.";
+		f.Paragraph(temp);
+	}
 	temp = "Example: One man with a horse, sword, and chain mail wants to "
 		"move north, then northeast.  The capacity of the horse is ";
 	cap = ItemDefs[I_HORSE].ride - ItemDefs[I_HORSE].weight;
@@ -1150,10 +1175,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 			ItemDefs[I_CHAINARMOR].weight;
 	temp += weight;
 	if(cap > weight)
-		temp += ", so he can ride.";
+		temp += ", so he can ride";
 	else
-		temp += ", so he must walk.";
-	temp += " The month is April, so he has ";
+		temp += ", so he must walk";
+	if(Globals->WEATHER_EXISTS)
+		temp += ". The month is April, so he has ";
+	else
+		temp += " and has ";
 	temp += NumToWord(Globals->HORSE_SPEED);
 	int travel = Globals->HORSE_SPEED;
 	temp += " movement point";
@@ -1736,7 +1764,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				}
 			    if(wp->flags & WeaponType::NEEDSKILL &&
 						!(SkillDefs[wp->baseSkill].flags&SkillType::DISABLED)){
-					temp += "(needs ";
+					temp += " (needs ";
 					temp += SkillDefs[wp->baseSkill].name;
 					temp += " skill)";
 				}
@@ -3239,14 +3267,26 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "guards may be killed by players, although they will form "
 			"again if the city is left unguarded.";
 		f.Paragraph(temp);
-		if (Globals->START_CITY_GUARDS_PLATE || Globals->START_CITY_MAGES) {
-			if(Globals->START_CITY_GUARDS_PLATE) {
+		if(Globals->SAFE_START_CITIES || Globals->START_CITY_GUARDS_PLATE ||
+				Globals->START_CITY_MAGES) {
+			if(Globals->AMT_START_CITY_GUARDS) {
 				temp = "Note that the city guardsmen in the starting cities "
-					"of Atlantis possess plate armor in addition to being "
-					"more numerous and are harder therefore to kill.";
+					"of Atlantis possess ";
+				if(Globals->SAFE_START_CITIES)
+					temp += "Amulets of Invincibility ";
+				if(Globals->START_CITY_GUARDS_PLATE) {
+					if(Globals->SAFE_START_CITIES) temp += "and ";
+					temp += "plate armor ";
+				}
+				temp += "in addtion to being more numerous and ";
+				if(Globals->SAFE_START_CITIES)
+					temp += "may not be defeated.";
+				else
+					temp += "are harder therefore to kill.";
 			}
+				
 			if(Globals->START_CITY_MAGES) {
-				if(Globals->START_CITY_GUARDS_PLATE)
+				if(Globals->AMT_START_CITY_GUARDS)
 					temp += " Additionally, in ";
 				else
 					temp += "In ";
