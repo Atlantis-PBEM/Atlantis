@@ -2607,6 +2607,15 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			u->Error("GIVE: Magicians can't transfer men.");
 			return 0;
 		}
+		if (u->GetSkill(S_TACTICS) == 5 || t->GetSkill(S_TACTICS) == 5) {
+			u->Error("GIVE: Tacticians can't transfer men.");
+			return 0;
+		}
+		if (u->GetSkill(S_QUARTERMASTER) > 0 || t->GetSkill(S_QUARTERMASTER) > 0) {
+			u->Error("GIVE: Quartermasters can't transfer men.");
+			return 0;
+		}
+
 		if ((ItemDefs[o->item].type & IT_LEADER) &&  t->IsNormal()) {
 			u->Error("GIVE: Can't mix leaders and normal men.");
 			return 0;

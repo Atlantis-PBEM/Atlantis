@@ -1009,28 +1009,26 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	if ((Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) &&
 			(sk == S_QUARTERMASTER) && (u->GetSkill(S_QUARTERMASTER) == 0) &&
 			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)) {
-			if (CountQuarterMasters(u->faction) >=
-					AllowedQuarterMasters(u->faction)) {
-				u->Error("STUDY: Can't have another quartermaster.");
-				return;
-			}
-			if(u->GetMen() != 1) {
-				u->Error("STUDY: Only 1-man units can be quartermasters.");
-				return;
-			}
+		if (CountQuarterMasters(u->faction) >=
+				AllowedQuarterMasters(u->faction)) {
+			u->Error("STUDY: Can't have another quartermaster.");
+			return;
+		}
+		if(u->GetMen() != 1) {
+			u->Error("STUDY: Only 1-man units can be quartermasters.");
+			return;
+		}
 	}
 
 	// If TACTICS_NEEDS_WAR is enabled, and the unit is trying to study to tact-5,
 	// check that there's still space...
 	if (Globals->TACTICS_NEEDS_WAR && sk == S_TACTICS && 
-			u->GetSkill(sk) == 4 && u->skills.GetDays(sk)/u->GetMen() >= 390) {
-		
+			u->GetSkill(sk) == 4 && u->skills.GetDays(sk)/u->GetMen() >= 300) {
 		if (CountTacticians(u->faction) >=
 				AllowedTacticians(u->faction)) {
-			u->Error("STUDY: Can't have another level 5 tactics leader.");
+			u->Error("STUDY: Can't start another level 5 tactics leader.");
 			return;
 		}
-
 		if (u->GetMen() != 1) {
 			u->Error("STUDY: Only 1-man units can study to level 5 in tactics.");
 			return;
