@@ -399,6 +399,21 @@ void ARegion::SetupCityMarket()
 				Market * m = new Market (M_SELL, i, price, amt, population,
 						population+2000, amt, amt*2);
 				markets.Add(m);
+			} else if (i == I_FOOD) {
+				int amt = Globals->CITY_MARKET_NORMAL_AMT;
+				int price;
+
+				if(Globals->RANDOM_ECONOMY) {
+					amt += getrandom(amt);
+					price = (ItemDefs[i].baseprice * (120 + getrandom(80))) /
+						100;
+				} else {
+					price = ItemDefs[ i ].baseprice;
+				}
+
+				Market * m = new Market (M_BUY, i, price, amt, population+500,
+						population+3000, amt, amt*5);
+				markets.Add(m);
 			} else {
 				if (ItemDefs[i].pInput[0].item == -1) {
 					// Check if the product can be produced in the region

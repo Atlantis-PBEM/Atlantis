@@ -2040,6 +2040,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 
 void Game::CheckUnitMaintenance(int consume)
 {
+	CheckUnitMaintenanceItem(I_FOOD, Globals->UPKEEP_FOOD_VALUE, consume);
 	CheckUnitMaintenanceItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE, consume);
 	CheckUnitMaintenanceItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE, consume);
 	CheckUnitMaintenanceItem(I_FISH, Globals->UPKEEP_FOOD_VALUE, consume);
@@ -2047,6 +2048,7 @@ void Game::CheckUnitMaintenance(int consume)
 
 void Game::CheckFactionMaintenance(int con)
 {
+	CheckFactionMaintenanceItem(I_FOOD, Globals->UPKEEP_FOOD_VALUE, con);
 	CheckFactionMaintenanceItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE, con);
 	CheckFactionMaintenanceItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE, con);
 	CheckFactionMaintenanceItem(I_FISH, Globals->UPKEEP_FOOD_VALUE, con);
@@ -2054,6 +2056,7 @@ void Game::CheckFactionMaintenance(int con)
 
 void Game::CheckAllyMaintenance()
 {
+	CheckAllyMaintenanceItem(I_FOOD, Globals->UPKEEP_FOOD_VALUE);
 	CheckAllyMaintenanceItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE);
 	CheckAllyMaintenanceItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE);
 	CheckAllyMaintenanceItem(I_FISH, Globals->UPKEEP_FOOD_VALUE);
@@ -2061,6 +2064,7 @@ void Game::CheckAllyMaintenance()
 
 void Game::CheckUnitHunger()
 {
+	CheckUnitHungerItem(I_FOOD, Globals->UPKEEP_FOOD_VALUE);
 	CheckUnitHungerItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE);
 	CheckUnitHungerItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE);
 	CheckUnitHungerItem(I_FISH, Globals->UPKEEP_FOOD_VALUE);
@@ -2068,6 +2072,7 @@ void Game::CheckUnitHunger()
 
 void Game::CheckFactionHunger()
 {
+	CheckFactionHungerItem(I_FOOD, Globals->UPKEEP_FOOD_VALUE);
 	CheckFactionHungerItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE);
 	CheckFactionHungerItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE);
 	CheckFactionHungerItem(I_FISH, Globals->UPKEEP_FOOD_VALUE);
@@ -2075,6 +2080,7 @@ void Game::CheckFactionHunger()
 
 void Game::CheckAllyHunger()
 {
+	CheckAllyHungerItem(I_FOOD, Globals->UPKEEP_FOOD_VALUE);
 	CheckAllyHungerItem(I_GRAIN, Globals->UPKEEP_FOOD_VALUE);
 	CheckAllyHungerItem(I_LIVESTOCK, Globals->UPKEEP_FOOD_VALUE);
 	CheckAllyHungerItem(I_FISH, Globals->UPKEEP_FOOD_VALUE);

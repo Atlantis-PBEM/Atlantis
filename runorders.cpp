@@ -1960,7 +1960,7 @@ void Game::AssessMaintenance()
 				Object * obj = (Object *) elem;
 				forlist((&obj->units)) {
 					Unit * u = (Unit *) elem;
-					if (u->needed && u->faction->unclaimed)
+					if (u->needed > 0 && u->faction->unclaimed)
 					{
 						/* Now see if faction has money */
 						if (u->faction->unclaimed >= u->needed)

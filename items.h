@@ -80,6 +80,11 @@ class ItemType
 			CANTGIVE = 0x1,
 			DISABLED = 0x2,
 			NOMARKET = 0x4,
+			// This item requires ANY of its inputs, not ALL of them
+			ORINPUTS = 0x8,
+			// A number of items are produced equal to the producer's
+			// skill, based on a fixed number of inputs
+			SKILLOUT = 0x10,
 		};
 		int flags;
 
@@ -87,12 +92,12 @@ class ItemType
 		int pLevel; // production skill level
 		int pMonths; // Man months required for production
 		int pOut; // How many of the item we get
-		Materials pInput[2];
+		Materials pInput[4];
 
 		int mSkill; // magical production skill
 		int mLevel; // magical production skill level
 		int mOut; // How many of the item are conjured
-		Materials mInput[2];
+		Materials mInput[4];
 
 		int weight;
 		int type;
@@ -119,7 +124,7 @@ class ManType
 	public:
 		int speciallevel;
 		int defaultlevel;
-		int skills[4];
+		int skills[6];
 };
 
 extern ManType * ManDefs;

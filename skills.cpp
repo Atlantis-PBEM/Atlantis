@@ -66,7 +66,8 @@ int SkillMax(int skill,int race)
 		}
 	}
 
-	for(unsigned int c=0; c<sizeof(ManDefs[mantype].skills)/sizeof(int); c++) {
+	for(unsigned int c=0; c < sizeof(ManDefs[mantype].skills) /
+								sizeof(ManDefs[mantype].skills[0]); c++) {
 		if(ManDefs[mantype].skills[c] == skill)
 			return ManDefs[mantype].speciallevel;
 	}

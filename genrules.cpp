@@ -1106,7 +1106,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(last != -1 && (SkillDefs[last].flags & SkillType::DISABLED))
 			continue;
 		last = 0;
-		for(j = 0; j < 2; j++) {
+		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
+				sizeof(ItemDefs->pInput[0])); j++) {
 			k = ItemDefs[i].pInput[j].item;
 			if(k != -1 && (ItemDefs[k].flags & ItemType::DISABLED))
 				last = 1;
@@ -1473,7 +1474,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 			int spec = 0;
 			comma = 0;
 			temp = "";
-			for(j = 0; j < 4; j++) {
+			for(j = 0; j < (int)(sizeof(ManDefs->skills) /
+						 sizeof(ManDefs->skills[0])); j++) {
 				if(ManDefs[m].skills[j] < 0) continue;
 				if(SkillDefs[ManDefs[m].skills[j]].flags & SkillType::DISABLED)
 					continue;
@@ -1784,7 +1786,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(last != -1 && (SkillDefs[last].flags & SkillType::DISABLED))
 			continue;
 		last = 0;
-		for(j = 0; j < 2; j++) {
+		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
+						sizeof(ItemDefs->pInput[0])); j++) {
 			k = ItemDefs[i].pInput[j].item;
 			if(k != -1 &&
 					!(ItemDefs[k].flags & ItemType::DISABLED) &&
@@ -1806,7 +1809,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		comma = 0;
 		temp = "";
-		for(j = 0; j < 2; j++) {
+		if (ItemDefs[k].flags & ItemType::ORINPUTS)
+			temp = "Any of : ";
+		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
+						sizeof(ItemDefs->pInput[0])); j++) {
 			k = ItemDefs[i].pInput[j].item;
 			if(k < 0 || (ItemDefs[k].flags&ItemType::DISABLED))
 				continue;
@@ -1908,7 +1914,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 				if(k != -1 && (SkillDefs[k].flags & SkillType::DISABLED))
 					continue;
 				last = 0;
-				for(k = 0; k < 2; k++) {
+				for(k = 0; k < (int) (sizeof(ItemDefs->pInput) /
+						sizeof(ItemDefs->pInput[0])); k++) {
 					l = ItemDefs[j].pInput[k].item;
 					if(l != -1 &&
 							!(ItemDefs[l].flags & ItemType::DISABLED) &&
@@ -1931,7 +1938,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
 		last = -1;
 		temp2 = "";
-		for(i = 0; i < 2; i++) {
+		for(i = 0; i < (int) (sizeof(ItemDefs->pInput) /
+				sizeof(ItemDefs->pInput[0])); i++) {
 			j = ItemDefs[I_SWORD].pInput[i].item;
 			if(j == -1) continue;
 			if(ItemDefs[j].flags & ItemType::DISABLED) continue;
@@ -1957,13 +1965,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 	}
 	f.Paragraph(temp);
-	temp = "If an item requires raw materials, then the specified amount "
-		"of each material is consumed for each item produced. ";
+	temp = "If an item requires raw materials, then the specified "
+		"amount of each material is consumed for each item produced. ";
 	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED)) {
 		last = -1;
 		temp2 = "";
 		k = 0;
-		for(i = 0; i < 2; i++) {
+		for(i = 0; i < (int) (sizeof(ItemDefs->pInput) /
+				sizeof(ItemDefs->pInput[0])); i++) {
 			j = ItemDefs[I_LONGBOW].pInput[i].item;
 			if(j == -1) continue;
 			if(ItemDefs[j].flags & ItemType::DISABLED) continue;
@@ -2008,7 +2017,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 			last = -1;
 			temp2 = "";
 			k = 0;
-			for(i = 0; i < 2; i++) {
+			for(i = 0; i < (int) (sizeof(ItemDefs->pInput) /
+					sizeof(ItemDefs->pInput[0])); i++) {
 				j = ItemDefs[I_PLATEARMOR].pInput[i].item;
 				if(j == -1) continue;
 				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
@@ -2040,6 +2050,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	} else {
 		temp += ".";
 	}
+	if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED)) {
+		temp += " Production of food works slightly differently; each worker "
+				"will only use one unit of material, but will produce "
+				"a number of units of food equal to their skill level.";
+	}
 
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp += " Only Trade factions can issue ";
@@ -2048,8 +2063,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Paragraph(temp);
 	temp = "Items which increase production may increase production of "
-		"advanced items in addition to the basic items listed.    Some of "
-		"them also increase production of other tools.   Read the skill "
+		"advanced items in addition to the basic items listed.  Some of "
+		"them also increase production of other tools.  Read the skill "
 		"descriptions for details on which tools aid which production when "
 		"not noted above.";
 	f.Paragraph(temp);

@@ -527,3 +527,6 @@ Changes from 4.0.9 -> 4.0.10
    -- Added gamedefs to control the minimum and maximum amounts of food
       that a unit requires for maintenance, and the value of food for
       maintenance.
+   -- Added a processed food item (FOOD), cooking skill and Create Food
+      spell to go with the possibility of requiring food for upkeep.
+      Made food buyable in all town markets.

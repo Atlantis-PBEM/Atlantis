@@ -212,7 +212,8 @@ void Game::ModifyRaceSkillLevels(int r, int spec, int def)
 void Game::ModifyRaceSkills(int r, int i, int sk)
 {
 	if(r < 0 || r > (NUMMAN-1)) return;
-	if(i < 0 || i >= (int)(sizeof(ManDefs[r].skills)/sizeof(int))) return;
+	if(i < 0 || i >= (int)(sizeof(ManDefs[r].skills) /
+							sizeof(ManDefs[r].skills[0]))) return;
 	if(sk < -1 || sk > (NSKILLS-1)) sk = -1;
 
 	ManDefs[r].skills[i] = sk;

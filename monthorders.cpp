@@ -586,32 +586,69 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	}
 
 	// find the max we can possibly produce based on man-months of labor
-	int maxproduced = number/ItemDefs[o->item].pMonths;
+	int maxproduced;
+	if (ItemDefs[o->item].flags & ItemType::SKILLOUT)
+		maxproduced = u->GetMen();
+	else
+		maxproduced = number/ItemDefs[o->item].pMonths;
 
-	// Figure out the max we can produce based on the inputs
-	unsigned int c;
-	for(c = 0; c < sizeof(ItemDefs[o->item].pInput)/sizeof(Materials); c++) {
-		int i = ItemDefs[o->item].pInput[c].item;
-		if(i != -1) {
-			int amt = u->items.GetNum(i);
-			if(amt/ItemDefs[o->item].pInput[c].amt < maxproduced) {
-				maxproduced = amt/ItemDefs[o->item].pInput[c].amt;
+	if (ItemDefs[o->item].flags & ItemType::ORINPUTS) {
+		// Figure out the max we can produce based on the inputs
+		int count = 0;
+		unsigned int c;
+		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+			int i = ItemDefs[o->item].pInput[c].item;
+			if(i != -1)
+				count += u->items.GetNum(i) / ItemDefs[o->item].pInput[c].amt;
+		}
+		if (maxproduced > count)
+			maxproduced = count;
+		count = maxproduced;
+
+		// Deduct the items spent
+		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+			int i = ItemDefs[o->item].pInput[c].item;
+			int a = ItemDefs[o->item].pInput[c].amt;
+			if(i != -1) {
+				int amt = u->items.GetNum(i);
+				if (count > amt / a) {
+					count -= amt / a;
+					u->items.SetNum(i, amt-(amt/a)*a);
+				} else {
+					u->items.SetNum(i, amt - count * a);
+					count = 0;
+				}
 			}
 		}
 	}
+	else {
+		// Figure out the max we can produce based on the inputs
+		unsigned int c;
+		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+			int i = ItemDefs[o->item].pInput[c].item;
+			if(i != -1) {
+				int amt = u->items.GetNum(i);
+				if(amt/ItemDefs[o->item].pInput[c].amt < maxproduced) {
+					maxproduced = amt/ItemDefs[o->item].pInput[c].amt;
+				}
+			}
+		}
 
-	// Deduct the items spent
-	for(c = 0; c < sizeof(ItemDefs[o->item].pInput)/sizeof(Materials); c++) {
-		int i = ItemDefs[o->item].pInput[c].item;
-		int a = ItemDefs[o->item].pInput[c].amt;
-		if(i != -1) {
-			int amt = u->items.GetNum(i);
-			u->items.SetNum(i, amt-(maxproduced*a));
+		// Deduct the items spent
+		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+			int i = ItemDefs[o->item].pInput[c].item;
+			int a = ItemDefs[o->item].pInput[c].amt;
+			if(i != -1) {
+				int amt = u->items.GetNum(i);
+				u->items.SetNum(i, amt-(maxproduced*a));
+			}
 		}
 	}
 
 	// Now give the items produced
 	int output = maxproduced * ItemDefs[o->item].pOut;
+	if (ItemDefs[o->item].flags & ItemType::SKILLOUT)
+		output *= level;
     u->items.SetNum(o->item,u->items.GetNum(o->item) + output);
     u->Event(AString("Produces ") + ItemString(o->item,output) + " in " +
 			r->ShortPrint( &regions ) + ".");

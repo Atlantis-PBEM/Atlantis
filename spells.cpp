@@ -81,6 +81,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_RUNESWORD:
 			case S_CREATE_SHIELDSTONE:
 			case S_CREATE_MAGIC_CARPET:
+			case S_CREATE_FOOD:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
@@ -696,6 +697,9 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 		case S_CLEAR_SKIES:
 			RunClearSkies(r,u);
 			break;
+		case S_CREATE_FOOD:
+			RunCreateFood(r, u);
+			break;
 	}
 
 }
@@ -893,6 +897,53 @@ void Game::RunEnchantSwords(ARegion *r,Unit *u)
 	u->Event(AString("Enchants ") + num + " mithril swords.");
 	u->Practise(S_ENCHANT_SWORDS);
 	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
+}
+
+void Game::RunCreateFood(ARegion *r,Unit *u)
+{
+	int level = u->GetSkill(S_CREATE_FOOD);
+	int max = ItemDefs[I_FOOD].mOut * level;
+	int num = 0;
+	int count = 0;
+	unsigned int c;
+	int found;
+
+	// Figure out how many components there are
+	for(c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
+		if(ItemDefs[I_FOOD].mInput[c].item != -1) count++;
+	}
+
+	while(max) {
+		int i, a;
+		found = 0;
+		// See if we have enough of all items
+		for(c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
+			i = ItemDefs[I_FOOD].mInput[c].item;
+			a = ItemDefs[I_FOOD].mInput[c].amt;
+			if(i != -1) {
+				if(u->items.GetNum(i) >= a) found++;
+			}
+		}
+		// We do not, break.
+		if(found != count) break;
+
+		// Decrement our inputs
+		for(c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
+			i = ItemDefs[I_FOOD].mInput[c].item;
+			a = ItemDefs[I_FOOD].mInput[c].amt;
+			if(i != -1) {
+				u->items.SetNum(i, u->items.GetNum(i) - a);
+			}
+		}
+		// We've made one.
+		num++;
+		max--;
+	}
+
+	u->items.SetNum(I_FOOD,u->items.GetNum(I_FOOD) + num);
+	u->Event(AString("Creates ") + num + " food.");
+	u->Practise(S_CREATE_FOOD);
+	r->NotifySpell(u,S_EARTH_LORE, &regions );
 }
 
 void Game::RunConstructGate(ARegion *r,Unit *u)

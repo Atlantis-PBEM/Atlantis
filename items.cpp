@@ -515,7 +515,8 @@ AString *ItemDescription(int item, int full)
 		int found = 0;
 		*temp += " This race may study ";
 		unsigned int c;
-		unsigned int len = sizeof(ManDefs[man].skills)/sizeof(int);
+		unsigned int len = sizeof(ManDefs[man].skills) /
+							sizeof(ManDefs[man].skills[0]);
 		for(c = 0; c < len; c++) {
 			int skill = ManDefs[man].skills[c];
 			if(skill != -1) {
@@ -815,7 +816,11 @@ AString *ItemDescription(int item, int full)
 		unsigned int c;
 		unsigned int len;
 		*temp += AString(" Units with ") + SkillStrs(ItemDefs[item].pSkill) +
-			" " + ItemDefs[item].pLevel + " may PRODUCE this item";
+			" " + ItemDefs[item].pLevel + " may PRODUCE ";
+		if (ItemDefs[item].flags & ItemType::SKILLOUT)
+			*temp += "a number of this item equal to their skill level";
+		else
+			*temp += "this item";
 		len = sizeof(ItemDefs[item].pInput)/sizeof(Materials);
 		int count = 0;
 		int tot = len;
@@ -828,6 +833,8 @@ AString *ItemDescription(int item, int full)
 			}
 			if(count == 0) {
 				*temp += " from ";
+				if (ItemDefs[item].flags & ItemType::ORINPUTS)
+					*temp += "any of ";
 			} else if (count == tot) {
 				if(c > 1) *temp += ",";
 				*temp += " and ";

@@ -1233,6 +1233,21 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "This skill deals with all aspects of traking monster "
 				"mounts.";
 			break;
+		case S_COOKING:
+			if(level > 1) break;
+			*str += "This skill deals with creating provisions from basic "
+					"foodstuffs.  A skilled cook can feed many more people "
+					"than a farmer alone.";
+			break;
+		case S_CREATE_FOOD:
+			/* XXX -- This should be cleaner somehow. */
+			if(level > 1) break;
+			if(ITEM_DISABLED(I_FOOD)) break;
+			*str += "A mage with the Create Food skill may magically "
+				"create food. A mage may create 5 times his skill level "
+				"provisions per turn. The mage should issue the order "
+				"CAST Create_Food to cast this spell.";
+			break;
 	}
 
 	AString temp;

@@ -83,4 +83,5 @@ void RunConstructGate(ARegion *,Unit *);
 void RunEnchantSwords(ARegion *,Unit *);
 void RunEnchantArmor(ARegion *,Unit *);
 void RunMindReading(ARegion *,Unit *);
+void RunCreateFood(ARegion *,Unit *);
 #endif

@@ -236,6 +236,8 @@ enum {
 	I_SHORTBOW,
 	I_HEAVYCROSSBOW,
 	I_HARP,
+	// Generic processed food
+	I_FOOD,
 	NITEMS
 };
 
@@ -533,6 +535,9 @@ enum {
 	S_GEMCUTTING,
 	S_MONSTERTRAINING,
 	S_CREATE_FLAMING_SWORD,
+	// Food related skills
+	S_COOKING,
+	S_CREATE_FOOD,
 	NSKILLS
 };
 
