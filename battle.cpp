@@ -395,15 +395,43 @@ void Battle::AddLine(const AString & s) {
 
 void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
 {
+	int AlliesIncluded = 0;
+	
+	// First, check whether allies should assist in this combat
+	if (Globals->ALLIES_NOAID == 0) {
+		AlliesIncluded = 1;
+	} else {
+		// Check whether any of the target faction's
+		// units aren't set to noaid
+        	forlist((&r->objects)) {
+        		Object * obj = (Object *) elem;
+        		forlist((&obj->units)) {
+        			Unit * u = (Unit *) elem;
+        			if (u->IsAlive()) {
+        				if (u->faction == t->faction &&
+        				    (u->GetFlag(FLAG_NOAID) == 0)) {
+        					AlliesIncluded = 1;
+        					break;
+        				}
+        			}
+        			if (AlliesIncluded == 1) break; // forlist(units)
+        		}
+        		if (AlliesIncluded == 1) break; // forlist (objects)
+        	}
+		//delete obj;
+		//delete u;
+	}
+	
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
 		forlist((&obj->units)) {
 			Unit * u = (Unit *) elem;
 			if (u->IsAlive()) {
 				if (u->faction == t->faction ||
-					(u->guard != GUARD_AVOID &&
-					 u->GetAttitude(r,t) == A_ALLY &&
-					 !Globals->ALLIES_NOAID)) {
+					(AlliesIncluded == 1 && 
+					 u->guard != GUARD_AVOID &&
+					 u->GetAttitude(r,t) == A_ALLY) ){
+
 					if (!GetFaction2(&facs,u->faction->num)) {
 						FactionPtr * p = new FactionPtr;
 						p->ptr = u->faction;
