@@ -679,13 +679,13 @@ void Army::Regenerate(Battle *b)
 					int regen = s->regen;
 					if (regen > diff) regen = diff;
 					s->hits += regen;
-					b->AddLine(AString(s->name) + AString(" regenerates ") +
-							regen + " hits to " + s->hits + " out of " +
+					b->AddLine(AString(s->name) + " regenerates " + regen +
+							" hits bringing it to " + s->hits + "/" +
 							s->maxhits + ".");
 				} else {
-					b->AddLine(AString(s->name) +
-							AString(" has been damaged to ") + s->hits +
-							" hits out of " + s->maxhits + ".");
+					b->AddLine(AString(s->name) + " takes " + diff +
+							" hits bringing it to " + s->hits + "/" +
+							s->maxhits + ".");
 				}
 			}
 		}
