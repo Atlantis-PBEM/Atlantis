@@ -84,6 +84,10 @@ void Game::DefaultWorkOrder()
 AString Game::GetXtraMap(ARegion *reg,int type)
 {
 	int i;
+
+	if (!reg)
+		return(" ");
+
 	switch (type) {
 		case 0:
 			return (reg->IsStartingCity() ? "!" :
@@ -2029,7 +2033,11 @@ void Game::CheckAllyHunger()
 
 char Game::GetRChar(ARegion *r)
 {
-	int t = r->type;
+	int t;
+
+	if (!r)
+		return '#';
+	t = r->type;
 	if (t < 0 || t > R_NUM) return '?';
 	char c = TerrainDefs[r->type].marker;
 	if (r->town) {

@@ -451,6 +451,8 @@ class ARegionList : public AList
 		//
 		void MakeRegions(int level, int xSize, int ySize);
 		void SetupNeighbors(ARegionArray *pRegs);
+		void MakeIcosahedralRegions(int level, int xSize, int ySize);
+		void SetupIcosahedralNeighbors(ARegionArray *pRegs);
 		void NeighSetup(ARegion *r, ARegionArray *ar);
 
 		void SetRegTypes(ARegionArray *pRegs, int newType);

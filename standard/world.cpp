@@ -2581,7 +2581,7 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 
         reg = pArr->GetRegion( x, y );
 
-        if( !reg->CanBeStartingCity( pArr )) {
+        if(!reg || !reg->CanBeStartingCity( pArr )) {
             reg = 0;
 			tries++;
             continue;
@@ -2608,7 +2608,7 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 		int x = getrandom( maxX );
 		int y = 2 * getrandom( maxY / 2 ) + x % 2;
 		reg = pArr->GetRegion( x, y);
-		if(reg->type == R_OCEAN) {
+		if(!reg || reg->type == R_OCEAN) {
 			tries++;
 			reg = 0;
 			continue;

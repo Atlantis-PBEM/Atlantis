@@ -44,6 +44,8 @@ Stephen Baillie
     Changed MOVE and SAIL to queue moves that failed because of lack
       of movement points, so that @TURN caravans can cope with weather.
     Cleaned up TURN processing significantly.
+    Added code to generate icosahedral (ie, approximately spherical)
+      levels.
     Various small changes and fixes
 Nick Hoggard
     Implementation of the EXCHANGE order.

@@ -1010,9 +1010,7 @@ int ARegion::CheckSea(int dir, int range, int remainocean)
 	if (type != R_OCEAN) return 0;
 	if (range-- < 1) return 1;
 	for (int d2 = -1; d2< 2; d2++) {
-		int direc = dir + d2;
-		if (direc < 0) direc = NDIRS - direc;
-		if (direc >= NDIRS) direc = direc - NDIRS;
+		int direc = (dir + d2 + NDIRS) % NDIRS;
 		ARegion *newregion = neighbors[direc];
 		if (!newregion) continue;
 		remainocean += newregion->CheckSea(dir, range, remainocean);
@@ -1040,9 +1038,9 @@ int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range)
 	if(range > 0) {
 		for(int d=0; d<NDIRS; d++) {
 			if(!HasExitRoad(d)) continue;
-			if(d == GetRealDirComp(dir)) continue;
 			ARegion *r = neighbors[d];
 			if(!r) continue;
+			if(d == r->GetRealDirComp(dir)) continue;
 			if(r->HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1);
 		}
 	}
@@ -1883,7 +1881,11 @@ int ARegion::CountConnectingRoads()
 // AS
 int ARegion::HasConnectingRoad(int realDirection)
 {
-	if (HasExitRoad(GetRealDirComp(realDirection))) return 1;
+	for (int i = D_NORTH; i < NDIRS; i++)
+		if (neighbors[i]
+				&& neighbors[i]->GetRealDirComp(i) == realDirection
+				&& HasExitRoad(i))
+			return 1;
 	return 0;
 }
 
@@ -1918,6 +1920,14 @@ int ARegion::GetRoadDirection(int realDirection)
 int ARegion::GetRealDirComp(int realDirection)
 {
 	int complementDirection = 0;
+
+	if (neighbors[realDirection]) {
+		ARegion *n = neighbors[realDirection];
+		for (int i = 0; i < NDIRS; i++)
+			if (n->neighbors[i] == this)
+				return i;
+	}
+
 	switch (realDirection) {
 		case D_NORTH:
 			complementDirection = D_SOUTH;
@@ -3510,6 +3520,284 @@ void ARegionList::SetupNeighbors(ARegionArray *pRegs)
 	}
 }
 
+void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
+{
+	int scale, x2, y2;
+
+	Awrite("Making an icosahedral level...");
+
+	scale = xSize / 10;
+	if (scale < 1) {
+		Awrite("Can't create an icosahedral level with xSize < 10!");
+		return;
+	}
+	if (ySize < scale * 10) {
+		Awrite("ySize must be at least xSize!");
+		return;
+	}
+
+	// Create the arrays as the specified size, as some code demands that
+	// the RegionArray be multiples of 8 in each direction
+	ARegionArray *arr = new ARegionArray(xSize, ySize);
+	pRegionArrays[level] = arr;
+
+	// but we'll only use up to multiples of 10, as that is required
+	// by the geometry of the resulting icosahedron.  The best choice
+	// would be to satisfy both criteria by choosing a multiple of 40,
+	// of course (remember that sublevels are halved in size though)!
+	xSize = scale * 10;
+	ySize = xSize;
+
+	//
+	// Make the regions themselves
+	//
+	int x, y;
+	for(y = 0; y < ySize; y++) {
+		for(x = 0; x < xSize; x++) {
+			if(!((x + y) % 2)) {
+				// These cases remove all the hexes that are cut out to
+				// make the world join up into a big icosahedron (d20).
+				if (y < 2) {
+					if (x)
+						continue;
+				}
+				else if (y <= 3 * scale) {
+					x2 = x % (2 * scale);
+					if (y < 3 * x2 && y <= 3 * (2 * scale - x2))
+						continue;
+				}
+				else if (y < 7 * scale - 3) {
+					// Include all of this band
+				}
+				else if (y < 10 * scale - 4) {
+					x2 = (x + 2 * scale - 1) % (2 * scale);
+					y2 = 10 * scale - 3 - y;
+					if (y2 < 3 * x2 && y2 <= 3 * (2 * scale - x2))
+						continue;
+				}
+				else if (y < 10 * scale - 2) {
+					if (x != 1)
+						continue;
+				}
+				else
+					continue;
+
+				ARegion *reg = new ARegion;
+				reg->SetLoc(x, y, level);
+				reg->num = Num();
+
+				//
+				// Some initial values; these will get reset
+				//
+				reg->type = -1;
+				reg->race = -1; // 
+				reg->wages = -1; // initially store: name
+				reg->population = -1; // initially used as flag
+				reg->elevation = -1;
+				
+
+				Add(reg);
+				arr->SetRegion(x, y, reg);
+			}
+		}
+	}
+
+	SetupIcosahedralNeighbors(arr);
+
+	Awrite("");
+}
+
+void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs)
+{
+	int scale, x, y, x2, y2, x3, neighX, neighY;
+
+	scale = pRegs->x / 10;
+
+	for(x = 0; x < pRegs->x; x++) {
+		for(y = 0; y < pRegs->y; y++) {
+			ARegion *reg = pRegs->GetRegion(x, y);
+			if(!reg) continue;
+			// Always try to connect in the standard way...
+			NeighSetup(reg, pRegs);
+			// but if that fails, use the special icosahedral connections:
+			// x2 is the x-coord of this hex inside its "wedge"
+			if (y < 5 * scale)
+				x2 = x % (2 * scale);
+			else
+				x2 = (x + 2 * scale - 1) % (2 * scale);
+			x3 = (2 * scale - x2) % (2 * scale);
+			// y2 is the distance from the SOUTH pole
+			y2 = 10 * scale - 3 - y;
+			if (!reg->neighbors[D_NORTH]) {
+				if (y > 0 & y < 3 * scale)
+				{
+					if (y == 2) {
+						neighX = 0;
+						neighY = 0;
+					}
+					else if (y == 3 * x2) {
+						neighX = x + 2 * (scale - x2) + 1;
+						neighY = y - 1;
+					}
+					else {
+						neighX = x + 2 * (scale - x2);
+						neighY = y - 2;
+					}
+					neighX %= (scale * 10);
+					reg->neighbors[D_NORTH] = pRegs->GetRegion(neighX, neighY);
+				}
+			}
+			if (!reg->neighbors[D_NORTHEAST]) {
+				neighX = x + 1;
+				neighY = y - 1;
+				neighX %= (scale * 10);
+				reg->neighbors[D_NORTHEAST] = pRegs->GetRegion(neighX, neighY);
+			}
+			if (!reg->neighbors[D_NORTHEAST]) {
+				if (y == 0) {
+					neighX = 4 * scale;
+					neighY = 2;
+				}
+				else if (y < 3 * scale) {
+					if (y == 3 * x2) {
+						neighX = x + 2 * (scale - x2) + 1;
+						neighY = y + 1;
+					}
+					else {
+						neighX = x + 2 * (scale - x2);
+						neighY = y;
+					}
+				}
+				else if (y2 < 1) {
+					neighX = 2 * scale + 1;
+					neighY = 10 * scale - 5;
+				}
+				else if (y2 < 3 * scale) {
+					neighX = x + 2 * (scale - x2);
+					neighY = y - 2;
+				}
+				neighX %= (scale * 10);
+				reg->neighbors[D_NORTHEAST] = pRegs->GetRegion(neighX, neighY);
+			}
+			if (!reg->neighbors[D_SOUTHEAST]) {
+				neighX = x + 1;
+				neighY = y + 1;
+				neighX %= (scale * 10);
+				reg->neighbors[D_SOUTHEAST] = pRegs->GetRegion(neighX, neighY);
+			}
+			if (!reg->neighbors[D_SOUTHEAST]) {
+				if (y == 0) {
+					neighX = 2 * scale;
+					neighY = 2;
+				}
+				else if (y2 < 1) {
+					neighX = 4 * scale + 1;
+					neighY = 10 * scale - 5;
+				}
+				else if (y2 < 3 * scale) {
+					if (y2 == 3 * x2) {
+						neighX = x + 2 * (scale - x2) + 1;
+						neighY = y - 1;
+					}
+					else {
+						neighX = x + 2 * (scale - x2);
+						neighY = y;
+					}
+				}
+				else if (y < 3 * scale) {
+					neighX = x + 2 * (scale - x2);
+					neighY = y + 2;
+				}
+				neighX %= (scale * 10);
+				reg->neighbors[D_SOUTHEAST] = pRegs->GetRegion(neighX, neighY);
+			}
+			if (!reg->neighbors[D_SOUTH]) {
+				if (y2 > 0 & y2 < 3 * scale)
+				{
+					if (y2 == 2) {
+						neighX = 1;
+						neighY = 10 * scale - 3;
+					}
+					else if (y2 == 3 * x2) {
+						neighX = x + 2 * (scale - x2) + 1;
+						neighY = y + 1;
+					}
+					else {
+						neighX = x + 2 * (scale - x2);
+						neighY = y + 2;
+					}
+					neighX = (neighX + scale * 10) % (scale * 10);
+					reg->neighbors[D_SOUTH] = pRegs->GetRegion(neighX, neighY);
+				}
+			}
+			if (!reg->neighbors[D_SOUTHWEST]) {
+				neighX = x - 1;
+				neighY = y + 1;
+				neighX = (neighX + scale * 10) % (scale * 10);
+				reg->neighbors[D_SOUTHWEST] = pRegs->GetRegion(neighX, neighY);
+			}
+			if (!reg->neighbors[D_SOUTHWEST]) {
+				if (y == 0) {
+					neighX = 8 * scale;
+					neighY = 2;
+				}
+				else if (y2 < 1) {
+					neighX = 6 * scale + 1;
+					neighY = 10 * scale - 5;
+				}
+				else if (y2 < 3 * scale) {
+					if (y2 == 3 * x3 + 4) {
+						neighX = x + 2 * (x3 - scale) + 1;
+						neighY = y + 1;
+					}
+					else {
+						neighX = x + 2 * (x3 - scale);
+						neighY = y;
+					}
+				}
+				else if (y < 3 * scale) {
+					neighX = x - 2 * scale + x3 + 1;
+					neighY = y + 1;
+				}
+				neighX = (neighX + scale * 10) % (scale * 10);
+				reg->neighbors[D_SOUTHWEST] = pRegs->GetRegion(neighX, neighY);
+			}
+			if (!reg->neighbors[D_NORTHWEST]) {
+				neighX = x - 1;
+				neighY = y - 1;
+				neighX = (neighX + scale * 10) % (scale * 10);
+				reg->neighbors[D_NORTHWEST] = pRegs->GetRegion(neighX, neighY);
+			}
+			if (!reg->neighbors[D_NORTHWEST]) {
+				if (y == 0) {
+					neighX = 6 * scale;
+					neighY = 2;
+				}
+				else if (y < 3 * scale) {
+					if (y == 3 * x3 + 4) {
+						neighX = x + 2 * (x3 - scale) + 1;
+						neighY = y - 1;
+					}
+					else {
+						neighX = x + 2 * (x3 - scale);
+						neighY = y;
+					}
+				}
+				else if (y2 < 1) {
+					neighX = 8 * scale + 1;
+					neighY = 10 * scale - 5;
+				}
+				else if (y2 < 3 * scale) {
+					neighX = x - 2 * scale + x3 + 1;
+					neighY = y - 1;
+				}
+				neighX = (neighX + scale * 10) % (scale * 10);
+				reg->neighbors[D_NORTHWEST] = pRegs->GetRegion(neighX, neighY);
+			}
+		}
+	}
+}
+
 void ARegionList::InitGeographicMap(ARegionArray *pRegs)
 {
 	GeoMap geo = GeoMap(pRegs->x, pRegs->y);
@@ -3521,8 +3809,14 @@ void ARegionList::InitGeographicMap(ARegionArray *pRegs)
 void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 		int continentSize)
 {
-	int total = pRegs->x * pRegs->y / 2;
-	int ocean = total;
+	int total, ocean;
+
+	total = 0;
+	for (int x=0; x < pRegs->x; x++)
+		for (int y=0; y < pRegs->y; y++)
+			if (pRegs->GetRegion(x, y))
+				total++;
+	ocean = total;
 
 	Awrite("Making land");
 	
@@ -4155,6 +4449,8 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 				int tempx = x * f + getrandom(f);
 				int tempy = y * f * 2 + getrandom(f)*2 + tempx%2;
 				reg = ta->GetRegion(tempx, tempy);
+				if (!reg)
+					continue;
 				if (reg->type == R_NUM) {
 					if (Globals->FRACTAL_MAP) {
 						reg->type = GetFractalTerrain(reg);
@@ -4269,7 +4565,7 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
 			ARegion *reg = pArr->GetRegion(x, y);
 			if(!reg) continue;
 
-			for (int i=D_SOUTHEAST; i<= D_SOUTHWEST; i++) {
+			for (int i=D_NORTH; i<= NDIRS; i++) {
 				int count = 0;
 				for(int j=D_NORTH; j< NDIRS; j++)
 					if(reg->neighbors[j]) count++;
@@ -4277,14 +4573,16 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
 
 				ARegion *n = reg->neighbors[i];
 				if (n) {
+					if (n->xloc < x || (n->xloc == x && n->yloc < y))
+						continue;
 					if(!CheckRegionExit(reg, n)) {
 						count = 0;
 						for(int k = D_NORTH; k<NDIRS; k++) {
 							if(n->neighbors[k]) count++;
 						}
 						if(count <= 1) break;
+						n->neighbors[reg->GetRealDirComp(i)] = 0;
 						reg->neighbors[i] = 0;
-						n->neighbors[(i+3) % NDIRS] = 0;
 					}
 				}
 			}
@@ -4452,6 +4750,8 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 	tempy += (tempx + tempy) % 2;
 
 	ARegion *temp = pTo->GetRegion(tempx, tempy);
+	if (!temp)
+		return;
 	if(TerrainDefs[temp->type].similar_type == R_OCEAN) return;
 
 	Object *o = new Object(reg);
@@ -4542,7 +4842,7 @@ void ARegionList::InitSetupGates(int level)
 				int tempx = i*8 + getrandom(8);
 				int tempy = j*16 + getrandom(8)*2 + tempx%2;
 				ARegion *temp = pArr->GetRegion(tempx, tempy);
-				if (TerrainDefs[temp->type].similar_type != R_OCEAN &&
+				if (temp && TerrainDefs[temp->type].similar_type != R_OCEAN &&
 						temp->gate != -1) {
 					numberofgates++;
 					temp->gate = -1;

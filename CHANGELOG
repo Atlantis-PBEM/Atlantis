@@ -728,3 +728,7 @@ Changes from 4.0.10 -> 5.0.0
       maps for world creation. Gamedefs FRACTAL_MAP, FRACTAL_SCATTER and
       FRACTAL_SMOOTH govern this method of map generation
    -- Fix bug in ARegion destructor  
+   -- Added code to generate Icosahedral (ie, approximately spherical)
+      levels.  Cleaned up some direction handling and some assumptions
+      about there always being a region where you expected one to be.
+   -- Fixed bug in CheckSea() where left of D_NORTH gave you D_NORTHEAST.

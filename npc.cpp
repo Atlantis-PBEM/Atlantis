@@ -69,7 +69,7 @@ void Game::GrowWMons(int rate)
 				for (int x=0; x<8; x++) {
 					for (int y=0; y<16; y+=2) {
 						ARegion *reg = pArr->GetRegion(x+xsec*8, y+ysec*16+x%2);
-						if (!reg->IsGuarded()) {
+						if (reg && !reg->IsGuarded()) {
 							mons += reg->CountWMons();
 							/*
 							 * Make sure there is at least one monster type
@@ -103,7 +103,7 @@ void Game::GrowWMons(int rate)
 						int m=getrandom(8);
 						int n=getrandom(8)*2+m%2;
 						ARegion *reg = pArr->GetRegion(m+xsec*8, n+ysec*16);
-						if (!reg->IsGuarded() && MakeWMon(reg)) {
+						if (reg && !reg->IsGuarded() && MakeWMon(reg)) {
 							i++;
 						}
 					}
