@@ -600,6 +600,9 @@ void Game::ProcessOrder( int orderNum, Unit *unit, AString *o,
     case O_PILLAGE:
         ProcessPillageOrder( unit, pCheck );
         break;
+	case O_PREPARE:
+		ProcessPrepareOrder(unit, o, pCheck);
+		break;
     case O_PRODUCE:
         ProcessProduceOrder( unit, o, pCheck );
         break;
@@ -942,9 +945,67 @@ void Game::ProcessCombatOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         }
         
         u->combat = sk;
-        u->Event(AString("Combat spell set to ") +
-                 SkillDefs[sk].name + ".");
+		AString temp = AString("Combat spell set to") + SkillDefs[sk].name;
+		if(Globals->USE_PREPARE_COMMAND) {
+			u->readyItem = -1;
+			temp += " and prepared item set to none";
+		}
+		temp += ".";
+
+        u->Event(temp);
     }
+}
+
+// Lacandon's prepare command
+void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	if(!(Globals->USE_PREPARE_COMMAND)) {
+		ParseError(pCheck, unit, 0, "PREPARE is not a valid order.");
+		return;
+	}
+
+	AString *token = o->gettoken();
+	if(!token) {
+		if(!pCheck) {
+			u->readyItem = -1;
+			u->Event("Prepared battle item set to none.");
+		}
+		return;
+	}
+	int it = ParseItem(token);
+	int bt = ParseBattleItem(it);
+	delete token;
+
+	if(bt == -1) {
+		ParseError(pCheck, u, 0, "PREPARE: Invalid item.");
+		return;
+	}
+	if(!(BattleItemDefs[bt].flags & BattleItemType::SPECIAL)) {
+		ParseError(pCheck, u, 0, "PREPARE: That item cannot be prepared.");
+		return;
+	}
+
+	if(!pCheck) {
+		if((BattleItemDefs[bt].flags & BattleItemType::MAGEONLY) &&
+		   !((u->type == U_MAGE) || (u->type == U_APPRENTICE) ||
+			 (u->type == U_GUARDMAGE))) {
+			u->Error("PREPARE: Only a mage or apprentice may use this item.");
+			return;
+		}
+		if(!u->items.GetNum(it)) {
+			u->Error("PREPARE: Unit does not possess that item.");
+			return;
+		}
+		u->readyItem = it;
+		AString temp;
+		temp = AString("Prepared item set to ") + ItemDefs[it].name;
+		if(u->combat != -1) {
+			u->combat = -1;
+			temp += " and combat spell set to none";
+		}
+		temp += ".";
+		u->Event(temp);
+	}
 }
 
 void Game::ProcessClaimOrder(Unit * u,AString * o, OrdersCheck *pCheck )

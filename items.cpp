@@ -53,6 +53,14 @@ int ParseItem(AString * token)
 	return r;
 }
 
+int ParseBattleItem(int item)
+{
+	for(int i = 0; i < NUMBATTLEITEMS; i++) {
+		if(item == BattleItemDefs[i].itemNum) return i;
+	}
+	return -1;
+}
+
 AString ItemString(int type, int num)
 {
 	AString temp;
@@ -496,7 +504,8 @@ AString *ItemDescription(int item, int full)
 			}
 		}
 	}
-	if(ItemDefs[item].mSkill != -1) {
+	if(ItemDefs[item].mSkill != -1 &&
+			!(SkillDefs[ItemDefs[item].mSkill].flags & SkillType::DISABLED)) {
 		unsigned int c;
 		unsigned int len;
 		*temp += AString(" Units with ") + SkillStrs(ItemDefs[item].mSkill) +

@@ -1922,29 +1922,36 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
 		}
 
 		if (escape > getrandom(10000)) {
-			Faction * mfac = GetFaction(&factions,monfaction);
-			if (u->items.GetNum(I_IMP)) {
-				Unit *mon = GetNewUnit( mfac, 0 );
-				mon->MakeWMon(MonDefs[MONSTER_IMP].name,I_IMP,
-						u->items.GetNum(I_IMP));
-				mon->MoveUnit( r->GetDummy() );
-				u->items.SetNum(I_IMP,0);
+			if(!Globals->WANDERING_MONSTERS_EXIST) {
+				u->items.SetNum(I_IMP, 0);
+				u->items.SetNum(I_DEMON, 0);
+				u->items.SetNum(I_BALROG, 0);
+				u->Event("Summoned demons vanish.");
+			} else {
+				Faction * mfac = GetFaction(&factions,monfaction);
+				if (u->items.GetNum(I_IMP)) {
+					Unit *mon = GetNewUnit( mfac, 0 );
+					mon->MakeWMon(MonDefs[MONSTER_IMP].name,I_IMP,
+							u->items.GetNum(I_IMP));
+					mon->MoveUnit( r->GetDummy() );
+					u->items.SetNum(I_IMP,0);
+				}
+				if (u->items.GetNum(I_DEMON)) {
+					Unit *mon = GetNewUnit( mfac, 0 );
+					mon->MakeWMon(MonDefs[MONSTER_DEMON].name,I_DEMON,
+							u->items.GetNum(I_DEMON));
+					mon->MoveUnit( r->GetDummy() );
+					u->items.SetNum(I_DEMON,0);
+				}
+				if (u->items.GetNum(I_BALROG)) {
+					Unit *mon = GetNewUnit( mfac, 0 );
+					mon->MakeWMon(MonDefs[MONSTER_BALROG].name,I_BALROG,
+							u->items.GetNum(I_BALROG));
+					mon->MoveUnit( r->GetDummy() );
+					u->items.SetNum(I_BALROG,0);
+				}
+				u->Event("Controlled demons break free!");
 			}
-			if (u->items.GetNum(I_DEMON)) {
-				Unit *mon = GetNewUnit( mfac, 0 );
-				mon->MakeWMon(MonDefs[MONSTER_DEMON].name,I_DEMON,
-						u->items.GetNum(I_DEMON));
-				mon->MoveUnit( r->GetDummy() );
-				u->items.SetNum(I_DEMON,0);
-			}
-			if (u->items.GetNum(I_BALROG)) {
-				Unit *mon = GetNewUnit( mfac, 0 );
-				mon->MakeWMon(MonDefs[MONSTER_BALROG].name,I_BALROG,
-						u->items.GetNum(I_BALROG));
-				mon->MoveUnit( r->GetDummy() );
-				u->items.SetNum(I_BALROG,0);
-			}
-			u->Event("Controlled demons break free!");
 		}
 	}
 }
@@ -2055,15 +2062,17 @@ void Game::CreateNPCFactions()
 		f->lastorders = 0;
 		factions.Add(f);
 	}
-	// Always create a monsters faction since even in conquest, demons
-	// and such can break free.
-	f = new Faction(factionseq++);
-	monfaction = f->num;
-	temp = new AString("Creatures");
-	f->SetName(temp);
-	f->SetNPC();
-	f->lastorders = 0;
-	factions.Add(f);
+	// Only create the monster faction if wandering monsters or lair
+	// monsters exist.
+	if(Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
+		f = new Faction(factionseq++);
+		monfaction = f->num;
+		temp = new AString("Creatures");
+		f->SetName(temp);
+		f->SetNPC();
+		f->lastorders = 0;
+		factions.Add(f);
+	}
 }
 
 void Game::CreateCityMon( ARegion *pReg, int percent, int needmage )

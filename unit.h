@@ -123,6 +123,7 @@ public:
     void WriteReport(Areport *,int,int,int,int);
 	AString GetName(int);
     AString MageReport();
+	AString ReadyItem();
 	AString StudyableSkills();
     AString * BattleReport(int);
     AString TemplateReport();
@@ -222,6 +223,7 @@ public:
     SkillList skills;
     ItemList items;
     int combat;
+	int readyItem;
     AList oldorders;
     int needed; /* For assessing maintenance */
     int losses;

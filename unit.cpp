@@ -77,6 +77,7 @@ Unit::Unit()
     reveal = REVEAL_NONE;
     flags = 0;
     combat = -1;
+	readyItem = -1;
     object = 0;
 }
 
@@ -93,6 +94,7 @@ Unit::Unit(int seq,Faction * f,int a)
     reveal = REVEAL_NONE;
     flags = 0;
     combat = -1;
+	readyItem = -1;
     ClearOrders();
     object = 0;
 }
@@ -136,6 +138,8 @@ void Unit::Writeout( Aoutfile *s )
     s->PutInt(flags);
     items.Writeout(s);
     skills.Writeout(s);
+	s->PutInt(-1);
+	s->PutInt(readyItem);
     s->PutInt(combat);
 }
 
@@ -158,7 +162,15 @@ void Unit::Readin( Ainfile *s, AList *facs, ATL_VER v )
     flags = s->GetInt();
     items.Readin(s);
     skills.Readin(s);
-    combat = s->GetInt();
+
+	readyItem = s->GetInt();
+	if(readyItem == -1) {
+		readyItem = s->GetInt();
+		combat = s->GetInt();
+	} else {
+		combat = readyItem;
+		readyItem = -1;
+	}
 }
 
 AString Unit::MageReport()
@@ -167,6 +179,15 @@ AString Unit::MageReport()
 
 	if (combat != -1) {
 		temp = AString(". Combat spell: ") + SkillStrs(combat);
+	}
+	return temp;
+}
+
+AString Unit::ReadyItem()
+{
+	AString temp;
+	if(readyItem != -1) {
+		temp = AString(". Prepared item: ") + ItemString(readyItem, 1);
 	}
 	return temp;
 }
@@ -287,7 +308,9 @@ void Unit::WriteReport(Areport * f,int obs,int truesight,int detfac,
     if (obs == 2 && (type == U_MAGE || type == U_GUARDMAGE)) {
         temp += MageReport();
     }
+
 	if(obs == 2) {
+		temp += ReadyItem();
 		temp += StudyableSkills();
 	}
   
@@ -324,6 +347,7 @@ AString Unit::TemplateReport() {
   if (type == U_MAGE || type == U_GUARDMAGE) {
     temp += MageReport();
   }
+  temp += ReadyItem();
   temp += StudyableSkills();
   
   if (describe) {

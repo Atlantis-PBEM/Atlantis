@@ -316,6 +316,7 @@ private:
     void ProcessFactionOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessClaimOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessCombatOrder(Unit *,AString *, OrdersCheck *pCheck );
+	void ProcessPrepareOrder(Unit *, AString *, OrdersCheck *pCheck);
     void ProcessCastOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessEntertainOrder(Unit *, OrdersCheck *pCheck );
     void ProcessForgetOrder(Unit *,AString *, OrdersCheck *pCheck );

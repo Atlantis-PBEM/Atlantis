@@ -261,6 +261,7 @@ class BattleItemType
 extern BattleItemType *BattleItemDefs;
 
 int ParseItem(AString *);
+int ParseBattleItem(int);
 
 AString ItemString(int type,int num);
 AString *ItemDescription(int item, int full);

@@ -340,6 +340,12 @@ public:
 	// through a hex?
 	int TRANSIT_REPORT;
 
+	// Should advanced items be shown in markets at all times.
+	int MARKETS_SHOW_ADVANCED_ITEMS;
+
+	// Do we require the 'ready' command to set up battle items
+	int USE_PREPARE_COMMAND;
+
 	// Monsters have the option of advancing occasionally instead of just
 	// using move.
 	// There are two values which control this.
@@ -353,7 +359,6 @@ public:
 	// to 0 and HOSTILE_PERCENT to what you want.
 	int MONSTER_ADVANCE_MIN_PERCENT;
 	int MONSTER_ADVANCE_HOSTILE_PERCENT;
-	
 };
 
 extern GameDefs * Globals;

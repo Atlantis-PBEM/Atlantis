@@ -1604,9 +1604,10 @@ void ARegion::WriteMarkets(Areport * f,Faction * fac, int present)
 			continue;
 		if (m->type == M_SELL) {
 			if (ItemDefs[m->item].type & IT_ADVANCED) {
-				/* XXX -- Look into why this is here! */
-				if (!HasItem(fac,m->item)) {
-					continue;
+				if(!Globals->MARKETS_SHOW_ADVANCED_ITEMS) {
+					if (!HasItem(fac,m->item)) {
+						continue;
+					}
 				}
 			}
 			if (has) {

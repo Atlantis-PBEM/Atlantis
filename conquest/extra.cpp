@@ -162,10 +162,15 @@ int Game::AllowedTrades( Faction *pFac )
 
 void Game::ModifyTablesPerRuleset(void)
 {
-	/* There are no foodstuffs in conquest */
-	DisableSkill(S_FISHING);
-	DisableSkill(S_FARMING);
-	DisableSkill(S_RANCHING);
+	if(!Globals->FOOD_ITEMS_EXIST) {
+		/* There are no foodstuffs in conquest */
+		DisableSkill(S_FISHING);
+		DisableSkill(S_FARMING);
+		DisableSkill(S_RANCHING);
+		/* Disable production enhancer buildings */
+		DisableObject(O_RANCH);
+		DisableObject(O_FARM);
+	}
 
 	/* Enable apprentices if we should */
     if(Globals->APPRENTICES_EXIST)
@@ -173,10 +178,6 @@ void Game::ModifyTablesPerRuleset(void)
 
 	/* Enable the man type */
 	EnableItem(I_MAN);
-
-	/* Disable production enhancer buildings */
-	DisableObject(O_RANCH);
-	DisableObject(O_FARM);
 
 	/* All men are created equal */
 	ClearTerrainRaces(R_PLAIN);
@@ -219,5 +220,22 @@ void Game::ModifyTablesPerRuleset(void)
 
 	ClearTerrainItems(R_ISLAND_MOUNTAIN);
 	ModifyTerrainItems(R_ISLAND_MOUNTAIN, 0, I_IRON, 100, 20);
+
+	/* Disable some other items which aren't part of standard conquest */
+	DisableItem(I_WAGON);
+	DisableItem(I_MITHRIL);
+	DisableItem(I_IRONWOOD);
+	DisableItem(I_WHORSE);
+	DisableItem(I_YEW);
+	DisableItem(I_MSWORD);
+	DisableItem(I_MARMOR);
+	DisableItem(I_DOUBLEBOW);
+	DisableItem(I_FLOATER);
+	DisableItem(I_ROOTSTONE);
+	DisableItem(I_MAGICCARPET);
+	DisableItem(I_CLOAK_OF_INVULNERABILITY);
+	DisableItem(I_AMULET_OF_PROTECTION);
+
+	DisableSkill(S_CARPENTER);
 	return;
 }

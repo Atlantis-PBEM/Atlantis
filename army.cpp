@@ -304,62 +304,61 @@ void Soldier::SetupSpell()
 void Soldier::SetupCombatItems()
 {
     int battleType;
-    for( battleType = NUMBATTLEITEMS - 1;
-         battleType > 0; battleType-- )
-    {
+    for(battletype = 1; battletype < NUMBATTLEITEMS; battletype++) {
         BattleItemType *pBat = &BattleItemDefs[ battleType ];
-        if(( pBat->flags & BattleItemType::SPECIAL ) && special != -1 )
-        {
-            //
-            // This unit already has a special attack
-            //
-            continue;
-        }
 
-        if( pBat->flags & BattleItemType::MAGEONLY &&
-            unit->type != U_MAGE && unit->type != U_GUARDMAGE && 
-			unit->type != U_APPRENTICE)
-        {
-            //
-            // Only mages/apprentices can use this item
-            //
-            continue;
-        }
+		/*
+		 * If we are using the ready command, skip this item unless
+		 * it's the right one.
+		 */
+		if(!Globals->USE_PREPARE_COMMAND || (pBat->itemNum==unit->readyItem)) {
+			if(( pBat->flags & BattleItemType::SPECIAL ) && special != -1 ) {
+				//
+				// This unit already has a special attack
+				//
+				continue;
+			}
+			if(pBat->flags & BattleItemType::MAGEONLY &&
+			   unit->type != U_MAGE && unit->type != U_GUARDMAGE &&
+			   unit->type != U_APPRENTICE) {
+				//
+				// Only mages/apprentices can use this item
+				//
+				continue;
+			}
 
-        int item = unit->GetBattleItem( IT_BATTLE, battleType );
-        if( item == -1 )
-        {
-            continue;
-        }
+			int item = unit->GetBattleItem( IT_BATTLE, battleType );
+			if( item == -1 ) {
+				continue;
+			}
+			SET_BIT( battleItems, battleType );
 
-        SET_BIT( battleItems, battleType );
+			if( pBat->flags & BattleItemType::SPECIAL ) {
+				special = pBat->index;
+				slevel = pBat->skillLevel;
+			}
+		}
 
-        if( pBat->flags & BattleItemType::SPECIAL ) {
-            special = pBat->index;
-            slevel = pBat->skillLevel;
-        }
+		if( pBat->flags & BattleItemType::SHIELD ) {
+			if( pBat->index == NUM_ATTACK_TYPES ) {
+				int i;
+				for( i = 0; i < NUM_ATTACK_TYPES; i++ ) {
+					if( dskill[ i ] < pBat->skillLevel ) {
+						dskill[ i ] = pBat->skillLevel;
+					}
+				}
+			} else {
+				if( dskill[ pBat->index ] < pBat->skillLevel ) {
+					dskill[ pBat->index ] = pBat->skillLevel;
+				}
+			}
+		}
 
-        if( pBat->flags & BattleItemType::SHIELD ) {
-            if( pBat->index == NUM_ATTACK_TYPES ) {
-                int i;
-                for( i = 0; i < NUM_ATTACK_TYPES; i++ ) {
-                    if( dskill[ i ] < pBat->skillLevel ) {
-                        dskill[ i ] = pBat->skillLevel;
-                    }
-                }
-            }
-            else
-            {
-                if( dskill[ pBat->index ] < pBat->skillLevel ) {
-                    dskill[ pBat->index ] = pBat->skillLevel;
-                }
-            }
-        }
+		if( item == I_AMULETOFI ) {
+			amuletofi = 1;
+		}
 
-        if( item == I_AMULETOFI ) {
-            amuletofi = 1;
-        }
-    }
+	}
 }
 
 int Soldier::HasEffect(int eff)
