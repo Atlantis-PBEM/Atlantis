@@ -366,7 +366,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			case O_TURN:
 				if (unit && unit->inTurnBlock) {
 					ParseError(pCheck, unit, fac,"TURN: cannot nest" );
-				}
+				} else if (!unit)
+					ParseError(pCheck, 0, fac, "Order given without a unit selected.");
 				else {
 					// faction is 0 if checking syntax only, not running turn.
 					if (faction != 0) {
@@ -387,7 +388,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				}
 				break;
 			case O_ENDTURN:
-				if (unit->inTurnBlock) {
+				if (unit && unit->inTurnBlock) {
 					if (unit->monthorders) delete unit->monthorders;
 					unit->monthorders = unit->presentMonthOrders;
 					unit->presentMonthOrders = 0;
