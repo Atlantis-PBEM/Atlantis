@@ -224,6 +224,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 	int formerOnTurnDelay = 0;
 	Order *formerTurnDelayOrders = 0;
 	Order *formerMonthOrders = 0;
+	int savetype = -1;
 
 	AString *order = f->GetLine();
 	while (order) {
@@ -364,8 +365,10 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 								former->orderDelayMonthOrders;
 							unit->orderDelayMonthOrders = 0;
 						}
-						if (former->monthorders)
+						if (former->monthorders) {
 							formerMonthOrders = former->monthorders;
+							savetype = former->monthorders->type;
+						}
 
 						unit = ProcessFormOrder( unit, order, pCheck );
 						if(!pCheck) {
@@ -392,9 +395,10 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 						}
 
 						if(pCheck) {
-							if (formerMonthOrders)
-								unit->monthorders = formerMonthOrders;
-							else
+							if (formerMonthOrders) {
+								unit->monthorders->type = savetype;
+								formerMonthOrders = 0;
+							} else
 								unit->monthorders = 0;
 						}
 						former = 0;
@@ -420,9 +424,10 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 						}
 
 						if(pCheck) {
-							if (formerMonthOrders)
-								unit->monthorders = formerMonthOrders;
-							else
+							if (formerMonthOrders) {
+								unit->monthorders->type = savetype;
+								formerMonthOrders = 0;
+							} else
 								unit->monthorders = 0;
 						}
 						former = 0;
@@ -454,9 +459,10 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 						}
 
 						if(pCheck) {
-							if (formerMonthOrders)
-								unit->monthorders = formerMonthOrders;
-							else
+							if (formerMonthOrders) {
+								unit->monthorders->type = savetype;
+								formerMonthOrders = 0;
+							} else
 								unit->monthorders = 0;
 						}
 						former = 0;
@@ -1730,8 +1736,20 @@ void Game::ProcessBuyOrder( Unit *u, AString *o, OrdersCheck *pCheck )
 	}
 	int it = ParseGiveableItem(token);
 	if(it == -1) {
-		if(*token == "peasant") {
-			it = u->object->region->race;
+		if(*token == "peasant" || *token == "peasants" || *token == "peas") {
+			if(pCheck) {
+				it = -1;
+				for(int i = 0; i < NITEMS; i++) {
+					if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+					if(i == I_LEADERS) continue;
+					if(ItemDefs[i].type & IT_MAN) {
+						it = i;
+						break;
+					}
+				}
+			} else {
+				it = u->object->region->race;
+			}
 		}
 	}
 	delete token;
