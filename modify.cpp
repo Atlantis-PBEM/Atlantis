@@ -365,11 +365,14 @@ void Game::ModifyArmorSaveValue(char *armor, int wclass, int val)
 	pa->saves[wclass] = val;
 }
 
-void Game::ModifyMountSkill(char *mount, int skill)
+void Game::ModifyMountSkill(char *mount, char *skill)
 {
 	MountType *pm = FindMount(mount);
 	if (pm == NULL) return;
-	if(skill < -1 || skill > (NSKILLS - 1)) return;
+	if (skill) {
+		AString skname = skill;
+		if (LookupSkill(&skname) == -1) return;
+	}
 	pm->skill = skill;
 }
 

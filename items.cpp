@@ -549,6 +549,8 @@ static AString WeapType(int flags, int wclass)
 AString *ItemDescription(int item, int full)
 {
 	int i;
+	AString skname;
+	int skill;
 
 	if(ItemDefs[item].flags & ItemType::DISABLED)
 		return NULL;
@@ -619,8 +621,8 @@ AString *ItemDescription(int item, int full)
 		unsigned int len = sizeof(mt->skills) / sizeof(mt->skills[0]);
 		for(c = 0; c < len; c++) {
 			if (mt->skills[c] == NULL) continue;
-			AString skname = mt->skills[c];
-			int skill = LookupSkill(&skname);
+			skname = mt->skills[c];
+			skill = LookupSkill(&skname);
 			if(skill != -1) {
 				if(SkillDefs[skill].flags & SkillType::DISABLED) continue;
 				if(found) *temp += ", ";
@@ -880,13 +882,18 @@ AString *ItemDescription(int item, int full)
 	if(ItemDefs[item].type & IT_MOUNT) {
 		*temp += " This is a mount.";
 		MountType *pM = FindMount(ItemDefs[item].abr);
-		if(pM->skill == -1) {
+		if(pM->skill == NULL) {
 			*temp += " No skill is required to use this mount.";
-		} else if(SkillDefs[pM->skill].flags & SkillType::DISABLED) {
-			*temp += " This mount is unridable.";
 		} else {
-			*temp += AString(" This mount requires ") + SkillStrs(pM->skill) +
-				" of at least level " + pM->minBonus + " to ride in combat.";
+			skname = pM->skill;
+			skill = LookupSkill(&skname);
+			if (skill == -1 || (SkillDefs[skill].flags & SkillType::DISABLED)) {
+				*temp += " This mount is unridable.";
+			} else {
+				*temp += AString(" This mount requires ") +
+					SkillStrs(skill) + " of at least level " + pM->minBonus +
+					" to ride in combat.";
+			}
 		}
 		*temp += AString(" This mount gives a minimum bonus of +") +
 			pM->minBonus + " when ridden into combat.";
@@ -906,12 +913,12 @@ AString *ItemDescription(int item, int full)
 		}
 	}
 
-	AString skname = ItemDefs[item].pSkill;
-	int sk = LookupSkill(&skname);
-	if(sk != -1 && !(SkillDefs[sk].flags & SkillType::DISABLED)) {
+	skname = ItemDefs[item].pSkill;
+	skill = LookupSkill(&skname);
+	if(skill != -1 && !(SkillDefs[skill].flags & SkillType::DISABLED)) {
 		unsigned int c;
 		unsigned int len;
-		*temp += AString(" Units with ") + SkillStrs(sk) +
+		*temp += AString(" Units with ") + SkillStrs(skill) +
 			" " + ItemDefs[item].pLevel + " may PRODUCE ";
 		if (ItemDefs[item].flags & ItemType::SKILLOUT)
 			*temp += "a number of this item equal to their skill level";
@@ -954,11 +961,11 @@ AString *ItemDescription(int item, int full)
 	}
 
 	skname = ItemDefs[item].mSkill;
-	sk = LookupSkill(&skname);
-	if(sk != -1 && !(SkillDefs[sk].flags & SkillType::DISABLED)) {
+	skill = LookupSkill(&skname);
+	if(skill != -1 && !(SkillDefs[skill].flags & SkillType::DISABLED)) {
 		unsigned int c;
 		unsigned int len;
-		*temp += AString(" Units with ") + SkillStrs(sk) +
+		*temp += AString(" Units with ") + SkillStrs(skill) +
 			" of at least level " + ItemDefs[item].mLevel +
 			" may attempt to create this item via magic";
 		len = sizeof(ItemDefs[item].mInput)/sizeof(Materials);

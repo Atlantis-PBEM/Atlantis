@@ -270,7 +270,7 @@ class MountType
 		//
 		// This is the skill needed to use this mount.
 		//
-		int skill;
+		char *skill;
 
 		//
 		// This is the minimum bonus (and minimal skill level) for this mount.

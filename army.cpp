@@ -274,6 +274,8 @@ void Soldier::SetupCombatItems()
 		// it's the right one, or unless it is a shield which doesn't
 		// need preparing.
 		if(!Globals->USE_PREPARE_COMMAND ||
+				((unit->readyItem == -1) &&
+				 (Globals->USE_PREPARE_COMMAND == GameDefs::PREPARE_NORMAL)) ||
 				(item == unit->readyItem) ||
 				(pBat->flags & BattleItemType::SHIELD)) {
 			if((pBat->flags & BattleItemType::SPECIAL) && special != NULL) {

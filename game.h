@@ -213,7 +213,7 @@ private:
 	void ModifyArmorSaveFrom(char *armor, int from);
 	void ModifyArmorSaveValue(char *armor, int wclass, int val);
 
-	void ModifyMountSkill(char *mount, int skill);
+	void ModifyMountSkill(char *mount, char *skill);
 	void ModifyMountBonuses(char *mount, int min, int max, int hampered);
 	void ModifyMountSpecial(char *mount, char *special, int level);
 

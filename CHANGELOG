@@ -679,3 +679,8 @@ Changes from 4.0.10 -> 5.0.0
    -- Lots of uses of I_LEADER replaced with a type flag IT_LEADER.  There
       are still some, but the groundwork for multiple leader races is getting
       there.
+   -- Changed USE_PREPARE slightly.  There is now a 'strict' and a 'normal'
+      setting for USE_PREPARE.  Under strict, the READY command MUST be
+      used or the unit will not use any battle items.  Under normal, the
+      unit will fall back on the battle items list.
+

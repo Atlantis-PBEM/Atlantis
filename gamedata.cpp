@@ -2487,19 +2487,19 @@ int NUMARMORS = sizeof(armd) / sizeof(armd[0]);
 //
 MountType mountd[] = {
 	// MOUNT_NONE
-	{ NULL, -1, 0, 0, 0, NULL, 0},
+	{ NULL, NULL, 0, 0, 0, NULL, 0},
 	// MOUNT_WHORSE
-	{ "WING", S_RIDING, 3, 5, 3, NULL, 0},
+	{ "WING", "RIDI", 3, 5, 3, NULL, 0},
 	// MOUNT_HORSE
-	{ "HORS", S_RIDING, 1, 3, 3, NULL, 0},
+	{ "HORS", "RIDI", 1, 3, 3, NULL, 0},
 	// MOUNT_CAMEL
-	{ "CAME", S_RIDING, 1, 2, 2, "spook_horses", 3},
+	{ "CAME", "RIDI", 1, 2, 2, "spook_horses", 3},
 	// MOUNT_MWOLF
-	{ "MWOL", S_RIDING, 1, 3, 3, NULL, 0},
+	{ "MWOL", "RIDI", 1, 3, 3, NULL, 0},
 	// MOUNT_MSPIDER
-	{ "MSPI", S_RIDING, 2, 3, 3, NULL, 0},
+	{ "MSPI", "RIDI", 2, 3, 3, NULL, 0},
 	// MOUNT_MOLE
-	{ "MOLE", S_RIDING, 2, 3, 3, NULL, 0},
+	{ "MOLE", "RIDI", 2, 3, 3, NULL, 0},
 };
 
 MountType *MountDefs = mountd;

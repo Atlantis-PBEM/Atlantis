@@ -434,6 +434,13 @@ public:
 	int MARKETS_SHOW_ADVANCED_ITEMS;
 
 	// Do we require the 'ready' command to set up battle items
+    // If prepare is strict, then the READY command MUST be used
+	// and there will be no automatic selection of battle items.
+	enum {
+		PREPARE_NONE = 0,
+		PREPARE_NORMAL = 1,
+		PREPARE_STRICT = 2,
+	};
 	int USE_PREPARE_COMMAND;
 
 	// Monsters have the option of advancing occasionally instead of just

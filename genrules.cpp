@@ -1983,10 +1983,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		if(ItemDefs[i].type & IT_MOUNT) {
 			MountType *mp = FindMount(ItemDefs[i].abr);
-			if(mp->skill > 0 &&
-					!(SkillDefs[mp->skill].flags & SkillType::DISABLED)) {
+			skname = mp->skill;
+			int sk = LookupSkill(&skname);
+			if (sk != -1 &&
+					!(SkillDefs[sk].flags & SkillType::DISABLED)) {
 				temp += "Gives a riding bonus with the ";
-				temp += SkillDefs[mp->skill].name;
+				temp += SkillDefs[sk].name;
 				temp += " skill.<br />";
 			}
 		}
@@ -4905,13 +4907,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.LinkRef("prepare");
 		f.TagText("h4", "PREPARE [item]");
 		temp = "This command allows a mage or apprentice to prepare a "
-			"battle item (e.g. a Staff of Fire) for use in battle.  This "
-			"allows the mage to override the usual selection of battle "
-			"items, and also cancesl any spells set via the ";
+			"battle item (e.g. a Staff of Fire) for use in battle. ";
+		if (Globals->USE_PREPARE_COMMAND == GameDefs::PREPARE_STRICT) {
+			temp += " This selects the battle item which will be used, ";
+		} else {
+			temp += "This allows the mage to override the usual selection "
+				"of battle items, ";
+		}
+		temp += "and also cancels any spells set via the ";
 		temp += f.Link("#combat", "COMBAT") + " order.";
 		f.Paragraph(temp);
 		f.Paragraph("Example:");
-		temp = "Use a staff of fire in preference to any other battle item.";
+		temp = "Select a staff of fire as the ";
+		if (!(Globals->USE_PREPARE_COMMAND == GameDefs::PREPARE_STRICT))
+			temp += "preferred ";
+		temp += "battle item.";
 		temp2 = "PREPARE STAF";
 		f.CommandExample(temp, temp2);
 	}

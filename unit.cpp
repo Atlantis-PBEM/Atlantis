@@ -1653,24 +1653,28 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 		if (!ItemDefs[item].ride) return -1;
 	}
 
-	bonus = GetSkill(pMnt->skill);
-	if(bonus < pMnt->minBonus) {
-		// Unit isn't skilled enough for this mount
-		bonus = 0;
-		return -1;
-	}
-	// Limit to max mount bonus;
-	if(bonus > pMnt->maxBonus) bonus = pMnt->maxBonus;
-	// If the mount can fly and the terrain doesn't allow
-	// flying mounts, limit the bonus to the maximum hampered
-	// bonus allowed by the mount
-	if(ItemDefs[item].fly && !canFly) {
-		if(bonus > pMnt->maxHamperedBonus)
-			bonus = pMnt->maxHamperedBonus;
-	}
+	if (pMnt->skill) {
+		AString skname = pMnt->skill;
+		int sk = LookupSkill(&skname);
+		bonus = GetSkill(sk);
+		if(bonus < pMnt->minBonus) {
+			// Unit isn't skilled enough for this mount
+			bonus = 0;
+			return -1;
+		}
+		// Limit to max mount bonus;
+		if(bonus > pMnt->maxBonus) bonus = pMnt->maxBonus;
+		// If the mount can fly and the terrain doesn't allow
+		// flying mounts, limit the bonus to the maximum hampered
+		// bonus allowed by the mount
+		if(ItemDefs[item].fly && !canFly) {
+			if(bonus > pMnt->maxHamperedBonus)
+				bonus = pMnt->maxHamperedBonus;
+		}
 
-	// Practice the mount's skill
-	Practice(pMnt->skill);
+		// Practice the mount's skill
+		Practice(sk);
+	}
 
 	// Get the mount
 	items.SetNum(item, num - 1);
