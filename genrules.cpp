@@ -4987,7 +4987,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", temp);
 	f.Enclose(0, "UL");
 	f.Enclose(0, "LI");
-	f.TagText("LI", "Combat is processed.");
+	f.Enclose(1, "LI");
+	f.PutStr("Combat is processed.");
+	f.Enclose(1, "UL");
+	temp = f.Link("#attack", "ATTACK") + " orders are processed.";
+	f.TagText("LI", temp);
+	f.Enclose(0, "UL");
+	f.Enclose(0, "LI");
 	if (has_stea) {
 		f.Enclose(1, "LI");
 		f.PutStr("Steal orders.");

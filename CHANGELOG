@@ -500,3 +500,4 @@ Changes from 4.0.9 -> 4.0.10
       they will always find an appropriate target if one exists.
    -- Fixed a bug where unmounted units were being matched in the effect
       matching code for MOUNTIF.
+   -- Cleaned up a small section of rules for clarity.
