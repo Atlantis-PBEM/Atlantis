@@ -67,8 +67,8 @@
    -- Consider having buildings which require specific items/skills to enter
    -- Add ability to set stances versus specific units, not just factions
    -- Consider having 'conditional orders' specificall 'AT x,y,z'
-   -- Add an 'autoclaim' flag
-   -- Improve the handling of nospoils
+   -- Figure out how an autoclaim option for studying could be made to work
+   -- Improve handling of NOSPOILS
    -- Clean up spell system.
    -- Merge Lacandom spells.
 

@@ -500,6 +500,7 @@ AString *ShowSkill::Report(Faction *f)
 		case S_CLEAR_SKIES:
 			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
+			/* XXX -- This needs to handle flat economy (non-random) */
 			*str += "The Clear Skies spell has two uses. When cast using "
 				"the CAST order, it causes the region to have good weather "
 				"for the entire month; movement is at the normal rate (even "
