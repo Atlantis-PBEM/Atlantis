@@ -1973,7 +1973,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			}
 		}
 		if(ItemDefs[i].type & IT_ARMOR) {
-			ArmorType *at = &ArmorDefs[ItemDefs[i].index];
+			ArmorType *at = findArmor(ItemDefs[i].abr);
 			temp += "Gives a ";
 			temp += at->saves[SLASHING];
 			temp += " in ";
@@ -3496,9 +3496,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 				if(!(ItemDefs[i].type & IT_ARMOR)) continue;
 				if(!(ItemDefs[i].type & IT_NORMAL)) continue;
 				if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-				j = ItemDefs[i].index;
-				if(!(ArmorDefs[j].flags & ArmorType::USEINASSASSINATE))
-					continue;
+				ArmorType *at = findArmor(ItemDefs[i].abr);
+				if (at == NULL) continue;
+				if (!(at->flags & ArmorType::USEINASSASSINATE)) continue;
 				if(last == -1) {
 					last = i;
 					continue;

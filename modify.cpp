@@ -316,25 +316,28 @@ void Game::ModifyWeaponBonuses(int weap, int attack, int defense, int vsMount)
 	WeaponDefs[weap].mountBonus = vsMount;
 }
 
-void Game::ModifyArmorFlags(int armor, int flags)
+void Game::ModifyArmorFlags(char *armor, int flags)
 {
-	if(armor < 0 || armor > (NUMARMORS - 1)) return;
-	ArmorDefs[armor].flags = flags;
+	ArmorType *pa = findArmor(armor);
+	if (pa == NULL) return;
+	pa->flags = flags;
 }
 
-void Game::ModifyArmorSaveFrom(int armor, int from)
+void Game::ModifyArmorSaveFrom(char *armor, int from)
 {
-	if(armor < 0 || armor > (NUMARMORS - 1)) return;
+	ArmorType *pa = findArmor(armor);
+	if (pa == NULL) return;
 	if(from < 0) return;
-	ArmorDefs[armor].from = from;
+	pa->from = from;
 }
 
-void Game::ModifyArmorSaveValue(int armor, int wclass, int val)
+void Game::ModifyArmorSaveValue(char *armor, int wclass, int val)
 {
-	if(armor < 0 || armor > (NUMARMORS - 1)) return;
+	ArmorType *pa = findArmor(armor);
+	if (pa == NULL) return;
 	if(wclass < 0 || wclass > (NUM_WEAPON_CLASSES - 1)) return;
-	if(val < 0 || val > ArmorDefs[armor].from) return;
-	ArmorDefs[armor].saves[wclass] = val;
+	if(val < 0 || val > pa->from) return;
+	pa->saves[wclass] = val;
 }
 
 void Game::ModifyMountSkill(int mount, int skill)
@@ -534,19 +537,21 @@ void Game::ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move)
 	TerrainDefs[t].movepoints = move;
 }
 
-void Game::ModifyBattleItemFlags(int item, int flags)
+void Game::ModifyBattleItemFlags(char *item, int flags)
 {
-	if(item < 0 || item > (NUMBATTLEITEMS-1)) return;
-	BattleItemDefs[item].flags = flags;
+	BattleItemType *pb = findBattleItem(item);
+	if (pb == NULL) return;
+	pb->flags = flags;
 }
 
-void Game::ModifyBattleItemSpecial(int item, int index, int level)
+void Game::ModifyBattleItemSpecial(char *item, int index, int level)
 {
-	if(item < 0 || item > (NUMBATTLEITEMS-1)) return;
+	BattleItemType *pb = findBattleItem(item);
+	if (pb == NULL) return;
 	if(level < 0) return;
 
-	BattleItemDefs[item].index = index;
-	BattleItemDefs[item].skillLevel = level;
+	pb->index = index;
+	pb->skillLevel = level;
 }
 
 void Game::ModifySpecialTargetFlags(int special, int targetflags)

@@ -58,6 +58,7 @@ extern int *allowedQuartermasters;
 extern int allowedQuartermastersSize;
 
 extern int NUMBATTLEITEMS;
+extern int NUMARMORS;
 
 class GameDefs {
 public:

@@ -51,7 +51,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static int aq[] = { 2, 3, 4, 5, 8, 12, 20 };
 int *allowedQuartermasters = aq;
-int allowedQuatermastersSize = sizeof(aq)/ sizeof(aq[0]);
+int allowedQuartermastersSize = sizeof(aq)/ sizeof(aq[0]);
 
 static GameDefs g = {
 	"Ceran",				// RULESET_NAME

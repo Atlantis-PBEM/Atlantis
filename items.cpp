@@ -40,6 +40,17 @@ BattleItemType *findBattleItem(char *abbr)
 	return NULL;
 }
 
+ArmorType *findArmor(char *abbr)
+{
+	if (abbr == NULL) return NULL;
+	for (int i = 0; i < NUMARMORS; i++) {
+		if (ArmorDefs[i].abbr == NULL) continue;
+		if (AString(abbr) == ArmorDefs[i].abbr)
+			return &ArmorDefs[i];
+	}
+	return NULL;
+}
+
 static AString AttType(int atype)
 {
 	switch(atype) {
@@ -177,14 +188,6 @@ int ParseTransportableItem(AString *token)
 		if(ItemDefs[r].flags & ItemType::DISABLED) r = -1;
 	}
 	return r;
-}
-
-int ParseBattleItem(int item)
-{
-	for(int i = 0; i < NUMBATTLEITEMS; i++) {
-		if(item == BattleItemDefs[i].itemNum) return i;
-	}
-	return -1;
 }
 
 AString ItemString(int type, int num)
@@ -745,8 +748,7 @@ AString *ItemDescription(int item, int full)
 
 	if(ItemDefs[item].type & IT_ARMOR) {
 		*temp += " This is a type of armor.";
-		int arm = ItemDefs[item].index;
-		ArmorType *pA = &ArmorDefs[arm];
+		ArmorType *pA = findArmor(ItemDefs[item].abr);
 		*temp += " This armor will protect its wearer ";
 		for(i = 0; i < NUM_WEAPON_CLASSES; i++) {
 			if(i == NUM_WEAPON_CLASSES - 1) {
@@ -938,19 +940,17 @@ AString *ItemDescription(int item, int full)
 
 	if((ItemDefs[item].type & IT_BATTLE) && full) {
 		*temp += " This item is a miscellaneous combat item.";
-		for(i = 0; i < NUMBATTLEITEMS; i++) {
-			if(BattleItemDefs[i].itemNum == item) {
-				if(BattleItemDefs[i].flags & BattleItemType::MAGEONLY) {
-					*temp += " This item may only be used by a mage";
-					if(Globals->APPRENTICES_EXIST) {
-						*temp += " or an apprentice";
-					}
-					*temp += ".";
+		BattleItemType *bt = findBattleItem(ItemDefs[item].abr);
+		if(bt != NULL) {
+			if(bt->flags & BattleItemType::MAGEONLY) {
+				*temp += " This item may only be used by a mage";
+				if(Globals->APPRENTICES_EXIST) {
+					*temp += " or an apprentice";
 				}
-				*temp += AString(" ") + "Item can cast " +
-					ShowSpecial(BattleItemDefs[i].index,
-							BattleItemDefs[i].skillLevel, 1, 1);
+				*temp += ".";
 			}
+			*temp += AString(" ") + "Item can cast " +
+				ShowSpecial(bt->index, bt->skillLevel, 1, 1);
 		}
 	}
 	if((ItemDefs[item].flags & ItemType::CANTGIVE) && full) {

@@ -295,7 +295,7 @@ ItemType id[] =
 	 0,
 	 S_ARMORER,1,1,1, {{I_IRON,1},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 1, IT_NORMAL | IT_ARMOR, 60,1,ARMOR_CHAINARMOR,
+	 1, IT_NORMAL | IT_ARMOR, 60,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_HAMMER,1},
@@ -303,7 +303,7 @@ ItemType id[] =
 	 0,
 	 S_ARMORER,3,3,1, {{I_IRON,3},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 3, IT_NORMAL | IT_ARMOR, 250,1,ARMOR_PLATEARMOR,
+	 3, IT_NORMAL | IT_ARMOR, 250,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_HAMMER,1},
@@ -375,7 +375,7 @@ ItemType id[] =
 	 0,
 	 S_ARMORER,5,1,1, {{I_MITHRIL,1},{-1,0},{-1,0},{-1,0}},
 	 S_ENCHANT_ARMOR,1,5, {{I_PLATEARMOR,1},{-1,0},{-1,0},{-1,0}},
-	 1,IT_ADVANCED | IT_ARMOR, 500,1,ARMOR_MARMOR,
+	 1,IT_ADVANCED | IT_ARMOR, 500,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_HAMMER,1},
@@ -839,7 +839,7 @@ ItemType id[] =
 	 ItemType::NOMARKET | ItemType::NOTRANSPORT,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 S_CREATE_CLOAK_OF_INVULNERABILITY,1,20, {{I_SILVER,800},{-1,0},{-1,0},{-1,0}},
-	 0, IT_MAGIC | IT_ARMOR, 8000, 1, ARMOR_CLOAKOFI,
+	 0, IT_MAGIC | IT_ARMOR, 8000, 1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 -1,0},
@@ -1079,7 +1079,7 @@ ItemType id[] =
 	 ItemType::DISABLED,
 	 S_ARMORER,1,1,1, {{I_FUR,1},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 1,IT_NORMAL | IT_ARMOR, 45,1,ARMOR_LEATHERARMOR,
+	 1,IT_NORMAL | IT_ARMOR, 45,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_SPINNING,2},
@@ -1087,7 +1087,7 @@ ItemType id[] =
 	 ItemType::DISABLED,
 	 S_ARMORER,1,1,1, {{I_HERBS,1},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 1,IT_NORMAL | IT_ARMOR, 40,1,ARMOR_CLOTHARMOR,
+	 1,IT_NORMAL | IT_ARMOR, 40,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_SPINNING,2},
@@ -1328,7 +1328,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORCRAFT,1,1,1, {{I_MPLATE,1},{I_MITHRIL,1},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 1, IT_ADVANCED | IT_ARMOR, 1000,1,ARMOR_IMITHRIL,
+	 1, IT_ADVANCED | IT_ARMOR, 1000,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_HAMMER,1},
@@ -1336,7 +1336,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORCRAFT,3,2,1, {{I_ADMANTIUM,1},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 1,IT_ADVANCED | IT_ARMOR, 3000,1,ARMOR_ADRING,
+	 1,IT_ADVANCED | IT_ARMOR, 3000,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_HAMMER,1},
@@ -1344,7 +1344,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORCRAFT,5,4,1, {{I_ADMANTIUM,3},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 1,IT_ADVANCED | IT_ARMOR, 6000,1,ARMOR_ADPLATE,
+	 1,IT_ADVANCED | IT_ARMOR, 6000,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_HAMMER,1},
@@ -1520,7 +1520,7 @@ ItemType id[] =
 	 ItemType::DISABLED,
 	 S_ARMORER,2,1,1, {{I_IRONWOOD,1},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 1,IT_NORMAL | IT_ARMOR, 75,1,ARMOR_BPLATE,
+	 1,IT_NORMAL | IT_ARMOR, 75,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_AXE,1},
@@ -1528,7 +1528,7 @@ ItemType id[] =
 	 ItemType::DISABLED,
 	 S_ARMORER,5,1,2, {{I_MITHRIL,1},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 1,IT_ADVANCED | IT_ARMOR, 400,1,ARMOR_MCHAIN,
+	 1,IT_ADVANCED | IT_ARMOR, 400,1, -1,
 	 0,0,0,0,
 	 -1,0,
 	 I_HAMMER,1},
@@ -2174,37 +2174,38 @@ WeaponType *WeaponDefs = wepd;
 //
 // Table of armor.
 //
-// flags, from, slashChance, pierceChance, crushChance, cleaveChance,
+// abbr, flags, from, slashChance, pierceChance, crushChance, cleaveChance,
 // armorpiercingChance, energyChance, spiritChance, weatherChance;
 //
 ArmorType armd[] = {
 	// ARMOR_NONE
-	{ 0, 100, {0, 0, 0, 0, 0, 0, 0, 0}},
+	{ NULL, 0, 100, {0, 0, 0, 0, 0, 0, 0, 0}},
 	// ARMOR_CLOAKOFI
-	{ 0, 100, {99, 99, 99, 99, 99, 99, 99, 99}},
+	{ "CLOA", 0, 100, {99, 99, 99, 99, 99, 99, 99, 99}},
 	// ARMOR_ADPLATE
-	{ 0, 100, {95, 95, 95, 95, 90, 90, 90, 90}},
+	{ "AARM", 0, 100, {95, 95, 95, 95, 90, 90, 90, 90}},
 	// ARMOR_ADRING
-	{ 0, 100, {90, 90, 90, 90, 80, 80, 80, 80}},
+	{ "ARNG", 0, 100, {90, 90, 90, 90, 80, 80, 80, 80}},
 	// ARMOR_IMITHRIL
-	{ 0, 100, {90, 90, 90, 90, 75, 75, 75, 75}},
+	{ "IMTH", 0, 100, {90, 90, 90, 90, 75, 75, 75, 75}},
 	// ARMOR_MARMOR
-	{ 0, 300, {270, 270, 270, 270, 200, 200, 200, 200}}, // 90%/66.67%
+	{ "MARM", 0, 300, {270, 270, 270, 270, 200, 200, 200, 200}}, // 90%/66.67%
 	// ARMOR_MCHAIN
-	{ 0, 300, {225, 200, 150, 225, 150, 150, 150, 150}},
+	{ "MCAR", 0, 300, {225, 200, 150, 225, 150, 150, 150, 150}},
 	// ARMOR_PLATEARMOR
-	{ 0, 300, {200, 200, 200, 200, 0, 0, 0, 0}},
+	{ "PARM", 0, 300, {200, 200, 200, 200, 0, 0, 0, 0}},
 	// ARMOR_BPLATE
-	{ 0, 300, {100, 270, 200, 75, 100, 100, 100, 100}},
+	{ "BPLA", 0, 300, {100, 270, 200, 75, 100, 100, 100, 100}},
 	// ARMOR_CHAINARMOR
-	{ 0, 300, {100, 100, 100, 100, 0, 0, 0, 0}},
+	{ "CARM", 0, 300, {100, 100, 100, 100, 0, 0, 0, 0}},
 	// ARMOR_LEATHERARMOR
-	{ 0, 100, {25, 25, 25, 25, 0, 0, 0, 0}},
+	{ "LARM", 0, 100, {25, 25, 25, 25, 0, 0, 0, 0}},
 	// ARMOR_CLOTHARMOR
-	{ ArmorType::USEINASSASSINATE, 6, {1, 1, 1, 1, 0, 0, 0, 0}},
+	{ "CLAR", ArmorType::USEINASSASSINATE, 6, {1, 1, 1, 1, 0, 0, 0, 0}},
 };
 
 ArmorType *ArmorDefs = armd;
+int NUMARMORS = sizeof(armd) / sizeof(armd[0]);
 
 //
 // Table of mounts
@@ -2234,28 +2235,28 @@ MountType *MountDefs = mountd;
 //
 BattleItemType bitd[] = {
 	// BATTLE_NONE
-	{ NULL, 0, 0, 0, 0 },
+	{ NULL, 0, 0, 0 },
 	// BATTLE_STAFFOFL
 	{"STAL", BattleItemType::MAGEONLY | BattleItemType::SPECIAL,
-	 I_STAFFOFL, SPECIAL_LSTRIKE, 3 },
+	 SPECIAL_LSTRIKE, 3 },
 	// BATTLE_STAFFOFF
 	{"STAF", BattleItemType::MAGEONLY | BattleItemType::SPECIAL,
-	 I_STAFFOFF, SPECIAL_FIREBALL, 3 },
+	 SPECIAL_FIREBALL, 3 },
 	// BATTLE_FSWORD
 	{"FSWO", BattleItemType::SPECIAL,
-	 I_FSWORD, SPECIAL_FIREBALL, 1 },
+	 SPECIAL_FIREBALL, 1 },
 	// BATTLE_RUNESWORD
 	{"RUNE", BattleItemType::SPECIAL,
-	 I_RUNESWORD, SPECIAL_CAUSEFEAR, 3 },
+	 SPECIAL_CAUSEFEAR, 3 },
 	// BATTLE_AOFI
 	{"XXXX", BattleItemType::SHIELD,
-	 I_AMULETOFI, SPECIAL_INVULNERABILITY, 5 },
+	 SPECIAL_INVULNERABILITY, 5 },
 	// BATTLE_AMULETOFP
 	{"AMPR", BattleItemType::SHIELD,
-	 I_AMULETOFP, SPECIAL_SPIRIT_SHIELD, 3 },
+	 SPECIAL_SPIRIT_SHIELD, 3 },
 	// BATTLE_SHIELDSTONE
 	{"SHST", BattleItemType::SHIELD,
-	 I_SHIELDSTONE, SPECIAL_ENERGY_SHIELD, 3 },
+	 SPECIAL_ENERGY_SHIELD, 3 },
 };
 
 BattleItemType *BattleItemDefs = bitd;

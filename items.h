@@ -223,6 +223,8 @@ extern WeaponType *WeaponDefs;
 class ArmorType
 {
 	public:
+		char *abbr;
+
 		enum {
 			USEINASSASSINATE = 0x1,
 		};
@@ -281,7 +283,6 @@ class BattleItemType
 		};
 
 		int flags;
-		int itemNum;
 		int index;
 		int skillLevel;
 };
@@ -292,10 +293,10 @@ int ParseGiveableItem(AString *);
 int ParseAllItems(AString *);
 int ParseEnabledItem(AString *);
 int ParseTransportableItem(AString *);
-int ParseBattleItem(int);
 int LookupItem(AString *);
 
 BattleItemType *findBattleItem(char *);
+ArmorType *findArmor(char *);
 
 AString ItemString(int type, int num);
 AString *ItemDescription(int item, int full);

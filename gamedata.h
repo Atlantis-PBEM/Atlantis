@@ -384,27 +384,6 @@ enum {
 };
 
 //
-// Types of armor
-//
-// LLS
-// Added new items.
-enum {
-	ARMOR_NONE,
-	ARMOR_CLOAKOFI,
-	ARMOR_ADPLATE,
-	ARMOR_ADRING,
-	ARMOR_IMITHRIL,
-	ARMOR_MARMOR,
-	ARMOR_MCHAIN,
-	ARMOR_PLATEARMOR,
-	ARMOR_BPLATE,
-	ARMOR_CHAINARMOR,
-	ARMOR_LEATHERARMOR,
-	ARMOR_CLOTHARMOR,
-	NUMARMORS
-};
-
-//
 // Types of mounts
 //
 enum {

@@ -1666,21 +1666,19 @@ void Unit::CopyFlags(Unit *x)
 	reveal = x->reveal;
 }
 
-int Unit::GetBattleItem(int index)
+int Unit::GetBattleItem(AString itm)
 {
-	forlist(&items) {
-		Item *pItem = (Item *) elem;
-		if(!pItem->num) continue;
-		int item = pItem->type;
-		if ((ItemDefs[item].type & IT_BATTLE) &&
-				(findBattleItem(ItemDefs[item].abr) == NULL))
-			continue;
-		// Exclude weapons.  They will be handled later.
-		if (ItemDefs[item].type & IT_WEAPON) continue;
-		items.SetNum(item, pItem->num - 1);
-		return item;
-	}
-	return -1;
+	int item = LookupItem(&itm);
+	if (item == -1) return -1;
+
+	int num = items.GetNum(item);
+	if (num < 1) return -1;
+
+	if (!(ItemDefs[item].type & IT_BATTLE)) return -1;
+	// Exclude weapons.  They will be handled later.
+	if (ItemDefs[item].type & IT_WEAPON) return -1;
+	items.SetNum(item, num - 1);
+	return item;
 }
 
 int Unit::GetArmor(int index, int ass)

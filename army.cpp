@@ -274,14 +274,14 @@ void Soldier::SetupCombatItems()
 	for(battleType = 1; battleType < NUMBATTLEITEMS; battleType++) {
 		BattleItemType *pBat = &BattleItemDefs[ battleType ];
 
-		int item = unit->GetBattleItem(battleType);
+		int item = unit->GetBattleItem(AString(pBat->abbr));
 		if(item == -1) continue;
 
 		// If we are using the ready command, skip this item unless
 		// it's the right one, or unless it is a shield which doesn't
 		// need preparing.
 		if(!Globals->USE_PREPARE_COMMAND ||
-				(pBat->itemNum==unit->readyItem) ||
+				(item == unit->readyItem) ||
 				(pBat->flags & BattleItemType::SHIELD)) {
 			if((pBat->flags & BattleItemType::SPECIAL) && special != -1) {
 				// This unit already has a special attack so give the item
@@ -401,12 +401,9 @@ int Soldier::ArmorProtect(int weaponClass)
 	//
 	// Return 1 if the armor is successful
 	//
-	ArmorType *pArm;
-	int armorType = ARMOR_NONE;
-	if(armor > 0) armorType = ItemDefs[armor].index;
-	if(armorType < ARMOR_NONE || armorType >= NUMARMORS)
-		armorType = ARMOR_NONE;
-	pArm = &ArmorDefs[armorType];
+	ArmorType *pArm = NULL;
+	if(armor > 0) pArm = findArmor(ItemDefs[armor].abr);
+	if (pArm == NULL) return 0;
 	int chance = pArm->saves[weaponClass];
 
 	if(chance <= 0) return 0;
@@ -438,7 +435,8 @@ void Soldier::RestoreItems()
 		BattleItemType *pBat = &BattleItemDefs[ battleType ];
 
 		if(GET_BIT(battleItems, battleType)) {
-			int item = pBat->itemNum;
+			AString itm(pBat->abbr);
+			int item = LookupItem(&itm);
 			unit->items.SetNum(item, unit->items.GetNum(item) + 1);
 		}
 	}

@@ -917,22 +917,27 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	int it = ParseEnabledItem(token);
-	int bt = ParseBattleItem(it);
-	delete token;
-
-	if(bt == -1) {
+	if (it == -1) {
 		ParseError(pCheck, u, 0, "PREPARE: Invalid item.");
 		return;
 	}
-	if(!(BattleItemDefs[bt].flags & BattleItemType::SPECIAL)) {
+	BattleItemType *bt = findBattleItem(token->Str());
+	delete token;
+
+	if(bt == NULL) {
+		ParseError(pCheck, u, 0, "PREPARE: Invalid item.");
+		return;
+	}
+
+	if (!bt->flags & BattleItemType::SPECIAL) {
 		ParseError(pCheck, u, 0, "PREPARE: That item cannot be prepared.");
 		return;
 	}
 
 	if(!pCheck) {
-		if((BattleItemDefs[bt].flags & BattleItemType::MAGEONLY) &&
-				!((u->type == U_MAGE) || (u->type == U_APPRENTICE) ||
-					(u->type == U_GUARDMAGE))) {
+		if ((bt->flags & BattleItemType::MAGEONLY) &&
+			!((u->type == U_MAGE) || (u->type == U_APPRENTICE) ||
+				(u->type == U_GUARDMAGE))) {
 			u->Error("PREPARE: Only a mage or apprentice may use this item.");
 			return;
 		}

@@ -210,9 +210,9 @@ private:
 	void ModifyWeaponAttack(int weap, int wclass, int attackType, int numAtt);
 	void ModifyWeaponBonuses(int weap, int attack, int defense, int vsMount);
 
-	void ModifyArmorFlags(int armor, int flags);
-	void ModifyArmorSaveFrom(int armor, int from);
-	void ModifyArmorSaveValue(int armor, int wclass, int val);
+	void ModifyArmorFlags(char *armor, int flags);
+	void ModifyArmorSaveFrom(char *armor, int from);
+	void ModifyArmorSaveValue(char *armor, int wclass, int val);
 
 	void ModifyMountSkill(int mount, int skill);
 	void ModifyMountBonuses(int mount, int min, int max, int hampered);
@@ -237,8 +237,8 @@ private:
 	void ModifyTerrainLair(int t, int i, int lair);
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
 
-	void ModifyBattleItemFlags(int item, int flags);
-	void ModifyBattleItemSpecial(int item, int special, int level);
+	void ModifyBattleItemFlags(char *item, int flags);
+	void ModifyBattleItemSpecial(char *item, int special, int level);
 
 	void ModifySpecialTargetFlags(int special, int targetflags);
 	void ModifySpecialTargetObjects(int special, int index, int obj);

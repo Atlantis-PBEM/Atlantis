@@ -31,45 +31,45 @@
 using namespace std;
 
 class AString : public AListElem {
-    friend ostream & operator <<(ostream &os, const AString &);
-    friend istream & operator >>(istream &is, AString &);
+	friend ostream & operator <<(ostream &os, const AString &);
+	friend istream & operator >>(istream &is, AString &);
 public:
 
-    AString();
-    AString(char *);
-    AString(const char *);
-    AString(int);
+	AString();
+	AString(char *);
+	AString(const char *);
+	AString(int);
 	AString(unsigned int);
-    AString(char);
-    AString(const AString &);
-    ~AString();
+	AString(char);
+	AString(const AString &);
+	~AString();
 
-    int operator==(const AString &);
-    int operator==(char *);
-    int operator==(const char *);
-    int CheckPrefix(const AString &);
-    AString operator+(const AString &);
-    AString & operator+=(const AString &);
+	int operator==(const AString &);
+	int operator==(char *);
+	int operator==(const char *);
+	int CheckPrefix(const AString &);
+	AString operator+(const AString &);
+	AString & operator+=(const AString &);
 
-    AString & operator=(const AString &);
-    AString & operator=(const char *);
+	AString & operator=(const AString &);
+	AString & operator=(const char *);
 
-    char *Str();
-    int Len();
+	char *Str();
+	int Len();
 
-    AString *gettoken();
-    int getat();
-    AString *getlegal();
-    AString *Trunc(int, int back=30);
-    int value();
-    AString *StripWhite();
+	AString *gettoken();
+	int getat();
+	AString *getlegal();
+	AString *Trunc(int, int back=30);
+	int value();
+	AString *StripWhite();
 
 private:
 
-    int len;
+	int len;
 	int size;
-    char * str;
-    int isEqual(const char *);
+	char *str;
+	int isEqual(const char *);
 };
 
 #endif
