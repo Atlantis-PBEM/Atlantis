@@ -79,13 +79,13 @@ enum {
 };
 
 #define FLAG_BEHIND 0x1
-#define FLAG_AUTOTAX 0x2
-#define FLAG_HOLDING 0x4
-#define FLAG_NOAID 0x8
-#define FLAG_INVIS 0x10
-#define FLAG_CONSUMING_UNIT 0x20
-#define FLAG_CONSUMING_FACTION 0x40
-#define FLAG_NOCROSS_WATER 0x80
+#define FLAG_NOCROSS_WATER 0x2
+#define FLAG_AUTOTAX 0x4
+#define FLAG_HOLDING 0x8
+#define FLAG_NOAID 0x10
+#define FLAG_INVIS 0x20
+#define FLAG_CONSUMING_UNIT 0x40
+#define FLAG_CONSUMING_FACTION 0x80
 
 class UnitId : public AListElem {
 public:
