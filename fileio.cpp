@@ -376,7 +376,7 @@ void Arules::PutStr(const AString &s)
 		for (int i=0; i<tabs; i++) temp += "  ";
 		temp += *temp2;
 		delete temp2;
-		temp2 = temp.Trunc(78, 30);
+		temp2 = temp.Trunc(78, 70);
 		*file << temp << F_ENDLINE;
 	}
 }

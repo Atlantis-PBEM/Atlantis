@@ -311,12 +311,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "LI");
 		f.PutStr(f.Link("#specialcommands", "Special Commands"));
 		f.Enclose(1, "UL");
-		f.TagText("LI", f.Link("#create", "#Create"));
-		f.TagText("LI", f.Link("#resend", "#Resend"));
-		f.TagText("LI", f.Link("#times", "#Times"));
-		f.TagText("LI", f.Link("#rumor", "#Rumor"));
-		f.TagText("LI", f.Link("#remind", "#Remind"));
-		f.TagText("LI", f.Link("#email", "#Email"));
+		f.TagText("LI", f.Link("#_create", "#Create"));
+		f.TagText("LI", f.Link("#_resend", "#Resend"));
+		f.TagText("LI", f.Link("#_times", "#Times"));
+		f.TagText("LI", f.Link("#_rumor", "#Rumor"));
+		f.TagText("LI", f.Link("#_remind", "#Remind"));
+		f.TagText("LI", f.Link("#_email", "#Email"));
 		f.Enclose(0, "UL");
 		f.Enclose(0, "LI");
 	}
@@ -2395,7 +2395,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"factions, e.g. ";
 	temp += f.Link("#declare", "DECLARE") + " 27 ALLY will declare the "
 		"Ally attitude to faction 27.  (Note that this does not necessarily "
-		"mean that faction 27 has decided to treat you as an ally.";
+		"mean that faction 27 has decided to treat you as an ally.)";
 	f.Paragraph(temp);
 	temp = "Ally means that you will fight to defend units of that faction "
 		"whenever they come under attack, if you have non-avoiding units in "
@@ -2687,9 +2687,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"bonus to effective Combat skill equal to the Riding skill "
 			"level (up to a maximum of ";
 		temp += MountDefs[MOUNT_HORSE].maxBonus;
-		temp += ") provided that the terrain allows horses to be used.";
+		temp += ") provided that the terrain allows horses to be used in "
+			"combat. ";
 		if(!(ItemDefs[I_WHORSE].flags & ItemType::DISABLED)) {
-			temp += " Winged horse are better yet, but require more basic "
+			temp += "Winged horse are better yet, but require more basic "
 				"Riding skill to gain any advantage. ";
 		}
 	}
@@ -4287,7 +4288,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"returns some information about an item that is not otherwise "
 		"apparent on a report, such as the weight. The last form "
 		"returns some information about an object (such as a ship or a "
-		"building.";
+		"building).";
 	f.Paragraph(temp);
 	f.Paragraph("Examples:");
 	temp = "Show the skill report for Mining 3 again.";
@@ -4313,7 +4314,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"level NONE) or spoils which weigh less than or equal to their "
 		"capacity in the specified movement mode (at any level other than "
 		"ALL) will be picked up.  SPOILS ALL will allow a unit to collect "
-		"any spoils which are dropped.";
+		"any spoils which are dropped regardless of weight or capacity.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Set a unit to only pick up items which have flying capacity";
@@ -4414,7 +4415,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph("Example:");
 	temp = "Work all month.";
 	temp2 = "WORK";
-	f.CommandExample(temp);
+	f.CommandExample(temp, temp2);
 
 	f.LinkRef("sequenceofevents");
 	f.ClassTagText("DIV", "rule", "");
@@ -4428,27 +4429,28 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = f.Link("#form", "FORM") + " orders are processed.";
 	f.TagText("LI", temp);
 	temp = f.Link("#address", "ADDRESS") + ", ";
-	temp = f.Link("#autotax", "AUTOTAX") + ", ";
-	temp = f.Link("#avoid", "AVOID") + ", ";
-	temp = f.Link("#behind", "BEHIND") + ", ";
-	temp = f.Link("#claim", "CLAIM") + ", ";
-	temp = f.Link("#combat", "COMBAT") + ", ";
+	temp += f.Link("#autotax", "AUTOTAX") + ", ";
+	temp += f.Link("#avoid", "AVOID") + ", ";
+	temp += f.Link("#behind", "BEHIND") + ", ";
+	temp += f.Link("#claim", "CLAIM") + ", ";
+	temp += f.Link("#combat", "COMBAT") + ", ";
 	if(Globals->FOOD_ITEMS_EXIST)
-		temp = f.Link("#consume", "CONSUME") + ", ";
-	temp = f.Link("#declare", "DECLARE") + ", ";
-	temp = f.Link("#describe", "DESCRIBE") + ", ";
-	if(Globals-.FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-		temp = f.Link("#faction", "FACTION") + ", ";
-	temp = f.Link("#guard", "GUARD") + " 0, ";
-	temp = f.Link("#hold", "HOLD") + ", ";
-	temp = f.Link("#name", "NAME") + ", ";
-	temp = f.Link("#noaid", "NOAID") + ", ";
-	temp = f.Link("#option", "OPTION") + ", ";
-	temp = f.Link("#password", "PASSWORD") + ", ";
-	if(Globals->USE_PREPARE_ORDER)
-		temp = f.Link("#prepare", "PREPARE") + ", ";
-	temp = f.Link("#reveal", "REVEAL") + ", and ";
-	temp = f.Link("#show", "SHOW") + " orders are processed.";
+		temp += f.Link("#consume", "CONSUME") + ", ";
+	temp += f.Link("#declare", "DECLARE") + ", ";
+	temp += f.Link("#describe", "DESCRIBE") + ", ";
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+		temp += f.Link("#faction", "FACTION") + ", ";
+	temp += f.Link("#guard", "GUARD") + " 0, ";
+	temp += f.Link("#hold", "HOLD") + ", ";
+	temp += f.Link("#name", "NAME") + ", ";
+	temp += f.Link("#noaid", "NOAID") + ", ";
+	temp += f.Link("#option", "OPTION") + ", ";
+	temp += f.Link("#password", "PASSWORD") + ", ";
+	if(Globals->USE_PREPARE_COMMAND)
+		temp += f.Link("#prepare", "PREPARE") + ", ";
+	temp += f.Link("#reveal", "REVEAL") + ", ";
+	temp += f.Link("#show", "SHOW") + ", and ";
+	temp += f.Link("#spoils", "SPOILS") + " orders are processed.";
 	f.TagText("LI", temp);
 	temp = f.Link("#find", "FIND") + " orders are processed.";
 	f.TagText("LI", temp);
@@ -4489,290 +4491,314 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", temp);
 	f.Enclose(0, "UL");
 	f.Enclose(0, "LI");
-#if 0
- printf("<li> Instant Magic\n");
- printf("\n");
- printf("<ul>\n");
- printf("<li> Old spells are cancelled.\n");
- printf("<li> Spells are <a href=\"#cast\">CAST</a> (except for Teleportation spells).\n");
- printf("</ul>\n");
- printf("\n");
- printf("<li> Market orders.\n");
- printf("\n");
- printf("<ul>\n");
- printf("<li> <a href=\"#guard\">GUARD</a> 1 orders are processed.\n");
- printf("<li> <a href=\"#sell\">SELL</a> orders are processed.\n");
- printf("<li> <a href=\"#buy\">BUY</a> orders are processed.\n");
- printf("<li> <a href=\"#quit\">QUIT</a> and <a href=\"#restart\">RESTART</a>\n");
- printf("orders are processed.\n");
- printf("<li> <a href=\"#forget\">FORGET</a> orders are processed.\n");
- printf("</ul>\n");
- printf("\n");
- if (Globals->ALLOW_WITHDRAW)
-  {
-   printf("  <li> Withdraw orders.\n");
-   printf("  <ul>\n");
-   printf("  <li> <a href=\"#withdraw\">WITHDRAW</a> orders are processed.\n");
-   printf("  </ul>\n");
-  }
- printf("\n");
- printf("<li> Movement orders.\n");
- printf("\n");
- printf("<ul>\n");
- if (SKILL_ENABLED(S_SAILING))
-  {
-   printf("  <li> <a href=\"#sail\">SAIL</a> orders are processed.  \n");
-  }
- printf("<li> <a href=\"#advance\">ADVANCE</a>\n");
- printf("and <a href=\"#move\">MOVE</a>\n");
- printf("orders are processed (including any combat resulting from\n");
- printf("these orders).\n");
- printf("</ul>\n");
- printf("\n");
- printf("<li> Month long orders.\n");
- printf("\n");
- printf("<ul>\n");
- printf("<li> <a href=\"#build\">BUILD</a>,\n");
- if (SKILL_ENABLED(S_ENTERTAINMENT))
-  {
-   printf("  <a href=\"#entertain\">ENTERTAIN</a>,\n");
-  }
- printf("<a href=\"#produce\">PRODUCE</a>,\n");
- printf("<a href=\"#study\">STUDY</a>,\n");
- printf("<a href=\"#teach\">TEACH</a> and\n");
- printf("<a href=\"#work\">WORK</a> orders are processed.\n");
- printf("<li>\n");
- printf("Costs associated with these orders (such as study fees) are collected.\n");
- printf("</ul>\n");
- printf("<li> Teleportation spells are <a href=\"#cast\">CAST</a>.\n");
- printf("\n");
- printf("<li> Maintenance costs are assessed.\n");
- printf("\n");
- printf("</ol>\n");
- printf("\n");
- printf("Where there is no other basis for deciding in which order units will be\n");
- printf("processed within a phase, units that appear higher on the report get\n");
- printf("precedence. <p>\n");
- printf("\n");
-#if 0
- printf("<a name=\"reportformat\"></a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Report Format </h2>\n");
- printf("\n");
- printf("The most important sections of the turn report are the \"Events During Turn\"\n");
- printf("section which lists what happened last month, and the \"Current Status\" section\n");
- printf("which gives the description of each region in which you have units.\n");
- printf("<p>\n");
- printf("\n");
- printf("Your units in the Current Status section are flagged with a \"*\" character. \n");
- printf("Units belonging to other factions are flagged with a \"-\" character.  You may be\n");
- printf("informed which faction they belong to, if you have high enough Observation\n");
- printf("skill. <p>\n");
- printf("\n");
- printf("Objects are flagged with a \"+\" character.  The units listed under an object (if\n");
- printf("any) are inside the object.  The first unit listed under an object is its\n");
- printf("owner. <p>\n");
- printf("\n");
- printf("If you can see a unit, you can see any large items it is carrying.  This means\n");
- printf("all items other than %s, herbs, and other small items (which are of zero\n",silver);
- printf("size units, and are small enough to be easily concealed).  Items carried by\n");
- printf("your own units of course will always be listed. <p>\n");
- printf("\n");
- printf("At the bottom of your turn report is an Orders Template.  This template\n");
- printf("gives you a formatted orders form, with all of your units listed.  You\n");
- printf("may use this to fill in your orders, or write them on your own. The\n");
- printf("<a href=\"#option\">OPTION</a> order gives you the option of giving\n");
- printf("more or less information in this template, or turning it of altogether.\n");
- printf("You can precede orders with an '@' sign in your orders, in which case\n");
- printf("they will appear in your template on the next turn's report. <p>\n");
- printf("\n");
- printf("<a name=\"hintsfornew\"></a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Hints for New Players </h2>\n");
- printf("\n");
- printf("Make sure to use the correct #ATLANTIS and UNIT lines in your orders.\n");
- printf("<p>\n");
- printf("\n");
- printf("Always have a month's supply of spare cash in every region in which you have\n");
- printf("units, so that even if they are deprived of income for a month (due to a\n");
- printf("mistake in your orders, for example), they will not starve to death.  It is\n");
- printf("very frustrating to have half your faction wiped out because you neglected to\n");
- printf("provide enough money for them to live on. <p>\n");
- printf("\n");
- printf("Be conservative with your money.  Leaders especially are very hard to maintain,\n");
- printf("as they cannot usually earn enough by <a href=\"#work\"> WORK</a>ing\n");
- printf("to pay their maintenance fee.  Even once\n");
- printf("you have recruited men, notice that it is expensive for them to\n");
- printf("<a href=\"#study\"> STUDY </a> (and\n");
- printf("become productive units), so be sure to save money to that end. <p>\n");
- printf("\n");
- printf("Don't leave it until the last minute to send orders.  If there is a delay in\n");
- printf("the mailer, your orders will not arrive on time, and turns will NOT be rerun,\n");
- printf("nor will it be possible to change the data file for the benefit of players\n");
- printf("whose orders weren't there by the deadline.  If you are going to send your\n");
- printf("orders at the last minute, send a preliminary set earlier in the week so that\n");
- printf("at worst your faction will not be left with no orders at all. <p>\n");
- printf("\n");
- printf("<a name=\"specialcommands\"></a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Special Commands </h2>\n");
- printf("These special commands have been added via the scripts processing the email\n");
- printf("to help you interact with the game and submit times and rumors.   Please\n");
- printf("read over these new commands and their uses.   Also note that all commands\n");
- printf("sent to the server are logged, including orders submissions, so if you have\n");
- printf("a problem, or if you attempt to abuse the system, it will get noticed and\n");
- printf("it will be tracked down.\n");
- printf("<p>\n");
- printf("\n");
- printf("<a name=\"create\"></a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h4>#Create \"faction name\" \"password\"</h4>\n");
- printf("This will create a new faction (add it to players.in), with the desired name\n");
- printf("and password, and it will use the player's \"from\" address as the email\n");
- printf("address of record (this, of course, can be changed in the game).<br>\n");
- printf("<br>\n");
- printf("The \"\" characters are required.  If they miss some, it'll do interesting\n");
- printf("things to your registration.<br>\n");
- printf("<br>\n");
- printf("So, if you wanted to join the game, you would send an email which only\n");
- printf("contained the message:<br>\n");
- printf("<br>\n");
- printf("#create \"Mighty Ducks\" \"quack!\"\n");
- printf("<br>\n");
- printf("\n");
- printf("<a name=\"resend\"> </a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h4>#Resend [faction] \"password\"</h4>\n");
- printf("The faction number and your current password (if you have one) are required.\n");
- printf("The most recent turn report (that can be found) will be sent.<br>\n");
- printf("<br>\n");
- printf("Please note:  Due to space limitations, only a certain number of turns of\n");
- printf("reports may be kept available.  Thus, the command is limited to the most\n");
- printf("recently run turn.  If the report is available, it'll be sent to your email\n");
- printf("address of record (whatever was set for the most recent turn).<br>\n");
- printf("<br>\n");
- printf("So, if you want a copy of last turn's report (because the cat danced on the\n");
- printf("keyboard and toasted your \"original\"):<br>\n");
- printf("<br>\n");
- printf("#resend 999 \"quack!\"<br>\n");
- printf("<br>\n");
- printf("\n");
- printf("<a name=\"times\"> </a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h4>#Times [faction] \"password\"<br>\n");
- printf("body of times<br>\n");
- printf("#end</h4>\n");
- printf("Everything between the #times and #end lines is included in your article.\n");
- printf("Your article is prefaced with the name and number of your faction, so you\n");
- printf("needn't worry about adding that. \n");
- if (Globals->TIMES_REWARD)
-  {
-   printf("  And, you'll get $%d for making your submission.<br>\n",Globals->TIMES_REWARD);
-  }
- printf("<br>\n");
- printf("So, if you wanted to make a proclaimation, you might submit:<br>\n");
- printf("<br>\n");
- printf("#times 999 \"quack!\"<br>\n");
- printf("The Mighty Ducks declare war on the world!<br>\n");
- printf("Quack!<br>\n");
- printf("#end<br>\n");
- printf("<br>\n");
- printf("And it would appear something like:<br>\n");
- printf("<br>\n");
- printf("---------------------------------<br>\n");
- printf("Mighty Ducks (999) writes:<br>\n");
- printf("<br>\n");
- printf("The Might Ducks declare war on the world!<br>\n");
- printf("Quack!<br>\n");
- printf("<br>\n");
- printf("---------------------------------<br>\n");
- printf("<br>\n");
- printf("\n");
- printf("<a name=\"rumors\"> </a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h4>#Rumor [faction] \"password\"</h4>\n");
- printf("Now, you may be wondering -- won't people know I submitted the item because\n");
- printf("it appears in faction-number order?  Nope -- because it's not done that way.\n");
- printf("The list of rumors is randomized a bit -- so there's no telling who\n");
- printf("submitted which item, in what order.  Just don't depend on specific\n");
- printf("placement of your rumors. =) <br>\n");
- printf("<br>\n");
- printf("So, if you were malicious, you might do:<br>\n");
- printf("<br>\n");
- printf("#rumor 999 \"quack!\" <br>\n");
- printf("Oleg is a fink!<br>\n");
- printf("#end<br>\n");
- printf("<br>\n");
- printf("And it would appear somewhere in the Rumors section of the Times, without\n");
- printf("your faction name or number on it.<br>\n");
- printf("<br>\n");
- printf("\n");
- printf("<a name=\"remind\"> </a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h4>#Remind [faction] \"password\"</h4>\n");
- printf("This special order will have the software find your last set of orders and mail\n");
- printf("them to you.  Note:  don't try to get someone else's orders -- you'll be\n");
- printf("surprised when the person sends you a nasty-gram about the activity.  All\n");
- printf("bad password attempts are forwarded to the faction owner, so beware.<br>\n");
- printf("<br>\n");
- printf("Example:<br>\n");
- printf("<br>\n");
- printf("#Remind 999 \"quack!\" <br>\n");
- printf("<br>\n");
- printf("And it would remind you of your last orders you sent in.<br>\n");
- printf("<br>\n");
- printf("\n");
- printf("<a name=\"email\"> </a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h4>#Email [unit]<br>\n");
- printf("[ text of email ]</h4>\n");
- printf("\n");
- printf("A diplomatic email command has been added to the software to help with\n");
- printf("contacting units which have you have no way of contacting otherwise.\n");
- printf("The software will not tell you who the unit belongs to, but will forward\n");
- printf("your email to the owner of the unit specified.\n");
- printf("\n");
- printf("There is no need for a \"#end\" line -- the entire email message you send will\n");
- printf("be forwarded to the unit's master.  Yes, this does mean that your email\n");
- printf("address will be forwarded along with the note.   If you are contacting them\n");
- printf("then you lose your ability to be private to that person.\n");
- printf("\n");
- printf("So, if you sent:\n");
- printf("\n");
- printf("#email 9999\n");
- printf("Greetings.  You've entered the Kingdom of Foo.  Please contact us.\n");
- printf("\n");
- printf("Lord Foo\n");
- printf("foo@bar.com\n");
- printf("\n");
- printf("Faction X, owner of 9999, would receive:\n");
- printf("<pre>\n");
- printf("From: Foo &lt;foo@bar.com&gt;\n");
- printf("Subject:  Greetings!\n");
- printf("\n");
- printf("#email 9999\n");
- printf("Greetings.  You've entered the Kingdom of Foo.  Please\n");
- printf("contact us.\n");
- printf("\n");
- printf("Lord Foo\n");
- printf("foo@bar.com\n");
- printf("</pre>\n");
- printf("\n");
- printf("<a name=\"credits\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2>Credits</h2>\n");
- printf("\n");
- printf("Atlantis was originally created and programmed by Russell Wallace. Russell\n");
- printf("Wallace created Atlantis 1.0, and partially designed Atlantis 2.0 and\n");
- printf("Atlantis 3.0.<p>\n");
- printf("\n");
- printf("Geoff Dunbar designed and programmed Atlantis 2.0 and 3.0, and created the\n");
- printf("Atlantis Project to freely release and maintain the Atlantis source code.\n");
- printf("See the Atlantis Project web page at\n");
- printf("<a href=\"http://www.prankster.com/project\">http://www.prankster.com/project</a>\n");
- printf("for more information, and more information on Credits.<p>\n");
- printf("\n");
-#endif
+	f.Enclose(1, "LI");
+	f.PutStr("Instant Magic");
+	f.Enclose(1, "UL");
+	f.TagText("LI", "Old spells are cancelled.");
+	temp = "Spells are ";
+	temp += f.Link("#cast", "CAST");
+	temp += " (except for Teleportation spells).";
+	f.TagText("LI", temp);
+	f.Enclose(0, "UL");
+	f.Enclose(0, "LI");
+	f.Enclose(1, "LI");
+	f.PutStr("Market orders.");
+	f.Enclose(1, "UL");
+	temp = f.Link("#guard","GUARD") + " 1 orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#sell","SELL") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#buy","BUY") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#quit","QUIT") + " and ";
+	temp += f.Link("#restart", "RESTART") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#forget","FORGET") + " orders are processed.";
+	f.TagText("LI", temp);
+	f.Enclose(0, "UL");
+	f.Enclose(0, "LI");
+	if (Globals->ALLOW_WITHDRAW) {
+		f.Enclose(1, "LI");
+		f.PutStr("Withdraw orders.");
+		f.Enclose(1, "UL");
+		temp = f.Link("#withdraw","WITHDRAW") + " orders are processed.";
+		f.TagText("LI", temp);
+		f.Enclose(0, "UL");
+		f.Enclose(0, "LI");
+	}
+	f.Enclose(1, "LI");
+	f.PutStr("Movement orders.");
+	f.Enclose(1, "UL");
+	if(may_sail) {
+		temp = f.Link("#sail","SAIL") + " orders are processed.";
+		f.TagText("LI", temp);
+	}
+	temp = f.Link("#advance","ADVANCE") + " and ";
+	temp += f.Link("#move", "MOVE") + " orders are processed (including any "
+		"combat resulting from these orders).";
+	f.TagText("LI", temp);
+	f.Enclose(0, "UL");
+	f.Enclose(0, "LI");
+	f.Enclose(1, "LI");
+	f.PutStr("Month long orders.");
+	f.Enclose(1, "UL");
+	temp = f.Link("#build", "BUILD") + ", ";
+	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
+		temp += f.Link("#entertain", "ENTERTAIN") + ", ";
+	temp += f.Link("#produce", "PRODUCE") + ", ";
+	temp += f.Link("#study", "STUDY") + ", ";
+	temp += f.Link("#teach", "TEACH") + ", and ";
+	temp = f.Link("#work", "WORK") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = "Costs associated with these orders (such as study fees) are "
+		"collected.";
+	f.TagText("LI", temp);
+	f.Enclose(0, "UL");
+	f.Enclose(0, "LI");
+	temp = "Teleportation spells are ";
+	temp += f.Link("#cast", "CAST") + ".";
+	f.TagText("LI", temp);
+	f.TagText("LI", "Maintenance costs are assessed.");
+	f.Enclose(0, "OL");
+	temp = "Where there is no other basis for deciding in which order units "
+		"will be processed within a phase, units that appear higher on the "
+		"report get precedence.";
+	f.Paragraph(temp);
+	f.LinkRef("reportformat");
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Report Format");
+	temp = "The most important sections of the turn report are the \"Events "
+		"During Turn\" section which lists what happened last month, and "
+		"the \"Current Status\" section which gives the description of each "
+		"region in which you have units.";
+	f.Paragraph(temp);
+	temp = "Your units in the Current Status section are flagged with a "
+		"\"*\" character. Units belonging to other factions are flagged "
+		"with a \"-\" character. You may be informed which faction they "
+		"belong to, if ";
+	if(has_obse)
+		temp += "you have high enough Observation skill or ";
+	temp += "they are revealing that information.";
+	f.Paragraph(temp);
+	temp = "Objects are flagged with a \"+\" character.  The units listed "
+		"under an object (if any) are inside the object.  The first unit "
+		"listed under an object is its owner.";
+	f.Paragraph(temp);
+	temp = "If you can see a unit, you can see any large items it is "
+		"carrying.  This means all items other than silver";
+	if(!(ItemDefs[I_HERBS].flags & ItemType::DISABLED))
+		temp += ", herbs,";
+	temp += " and other small items (which are of zero size units, and are "
+		"small enough to be easily concealed). Items carried by your own "
+		"units of course will always be listed.";
+	f.Paragraph(temp);
+	temp = "At the bottom of your turn report is an Orders Template.  This "
+		"template gives you a formatted orders form, with all of your "
+		"units listed. You may use this to fill in your orders, or write "
+		"them on your own. The ";
+	temp += f.Link("#option", "OPTION") + " order gives you the option of "
+		"giving more or less information in this template, or turning it "
+		"of altogether. You can precede orders with an '@' sign in your "
+		"orders, in which case they will appear in your template on the "
+		"next turn's report.";
+	f.Paragraph(temp);
+	f.LinkRef("hintsfornew");
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Hints for New Players");
+	temp = "Make sure to use the correct #ATLANTIS and UNIT lines in your "
+		"orders.";
+	f.Paragraph(temp);
+	temp = "Always have a month's supply of spare cash in every region in "
+		"which you have units, so that even if they are deprived of "
+		"income for a month (due to a mistake in your orders, for "
+		"example), they will not starve to death.  It is very frustrating "
+		"to have half your faction wiped out because you neglected to "
+		"provide enough money for them to live on.";
+	f.Paragraph(temp);
+	temp = "Be conservative with your money. ";
+	if(Globals->LEADERS_EXIST) {
+		temp += "Leaders especially are very hard to maintain, as they "
+			"cannot usually earn enough by ";
+		temp += f.Link("#work", "WORK") + "ing to pay their maintenance "
+			"fee. ";
+	}
+	temp += "Even once you have recruited men, notice that it is "
+		"expensive for them to ";
+	temp += f.Link("#study", "STUDY") + " (and become productive units), "
+		"so be sure to save money to that end.";
+	f.Paragraph(temp);
+	temp = "Don't leave it until the last minute to send orders.  If "
+		"there is a delay in the mailer, your orders will not arrive "
+		"on time, and turns will NOT be rerun, nor will it be possible "
+		"to change the data file for the benefit of players whose orders "
+		"weren't there by the deadline.  If you are going to send your "
+		"orders at the last minute, send a preliminary set earlier in the "
+		"week so that at worst your faction will not be left with no "
+		"orders at all.";
+	f.Paragraph(temp);
+
+	if(Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+		f.LinkRef("specialcommands");
+		f.ClassTagText("DIV", "rule", "");
+		f.TagText("H2", "Special Commands");
+		temp = "These special commands have been added via the scripts "
+			"processing the email to help you interact with the game "
+			"and submit times and rumors. Please read over these new "
+			"commands and their uses. Also note that all commands sent "
+			"to the server are logged, including orders submissions, so "
+			"if you have a problem, or if you attempt to abuse the system, "
+			"it will get noticed and it will be tracked down.";
+		f.Paragraph(temp);
+		f.LinkRef("_create");
+		f.ClassTagText("DIV", "rule", "");
+		f.TagText("H4", "#create \"faction name\" \"password\"");
+		temp = "This will create a new faction with the desired name and "
+			"password, and it will use the player's \"from\" address as "
+			"the email address of record (this, of course, can be changed "
+			"from within the game).";
+		f.Paragraph(temp);
+		temp = "The \"\" characters are required. If they are missing, the "
+			"server will not create the faction.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Join the game as the faction named \"Mighty Ducks\" with the "
+			"password of \"quack\"";
+		temp2="#create \"Mighty Ducks\" \"quack\"";
+		f.CommandExample(temp, temp2);
+
+		f.LinkRef("_resend");
+		f.ClassTagText("DIV", "rule", "");
+		f.TagText("H4", "#resend [faction] \"password\"");
+		temp = "The faction number and your current password (if you have "
+			"one) are required. The most recent turn report will be sent to "
+			"the address of record.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "You are faction 999 with password \"quack\" and need another "
+			"copy of the last turn (because your harddrive crashed)";
+		temp2 = "#resend 999 \"quack\"";
+		f.CommandExample(temp, temp2);
+
+		f.LinkRef("_times");
+		f.ClassTagText("DIV", "rule", "");
+		f.TagText("H4", "#times [faction] \"password\"");
+		f.PutStr("[body of article]");
+		f.TagText("H4", "#end");
+		temp = "Everything between the #times and #end lines is included "
+			"in your article. Your article will be marked as being "
+			"sent by your fation, so you need not include that "
+			"attribution in the article.";
+		if (Globals->TIMES_REWARD) {
+			temp += " You will receive $";
+			temp += Globals->TIMES_REWARD;
+			temp += " for submitting the article.";
+		}
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Faction 999 wants to declare war on everyone";
+		temp2 = "#times 999 \"quack\"\n";
+		temp2 += "The Mighty Ducks declare war on the world!!\n";
+		temp2 += "Quack!\n";
+		temp2 += "#end";
+		f.CommandExample(temp, temp2);
+		temp = "And it would appear something like:";
+		temp2 = "---------------------------------\n";
+		temp2 += "The Mighty Ducks declare war on the world!!\n";
+		temp2 += "Quack!\n\n";
+		temp2 += "[Article submitted by The Mighty Ducks (999)]\n";
+		temp2 += "---------------------------------";
+		f.CommandExample(temp, temp2);
+
+		f.LinkRef("_rumor");
+		f.ClassTagText("DIV", "rule", "");
+		f.TagText("H4", "#rumor [faction] \"password\"");
+		f.PutStr("[body of rumor]");
+		f.TagText("H4", "#end");
+		temp = "Submit a rumor for publication in the next news.  These "
+			"articles are not attributed (unlike times articles) and will "
+			"appear in the rumor section of the next news in a random order.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Start a malicious rumor";
+		temp2 = "#rumor 999 \"quack\"\n";
+		temp2 += "Oleg is a running-dog lackey of Azthar Spleenmonger.\n";
+		temp2 += "#end";
+		f.CommandExample(temp, temp2);
+
+		f.LinkRef("_remind");
+		f.ClassTagText("DIV", "rule", "");
+		f.TagText("H4", "#remind [faction] \"password\"");
+		temp = "This order will have the server find the most recent set of "
+			"orders you have submitted for the current turn and mail them "
+			"back to your address of record.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Remind faction 999 of its last order set.";
+		temp2 = "#remind 999 \"quack\"";
+		f.CommandExample(temp, temp2);
+
+		f.LinkRef("_email");
+		f.ClassTagText("DIV", "rule", "");
+		f.TagText("H4", "#email [unit]");
+		f.PutStr("[text of email]");
+		temp = "This command allows you to send email to the owner of a unit "
+			"even when you cannot see that unit's faction affiliation.  You "
+			"will not be told who the unit belongs to, but will simply "
+			"forward your email to them. When you use this command, they "
+			"will recieve YOUR email and can contact you if they choose. It "
+			"is provided simply as a courtesy to players to help with "
+			"diplomacy in first contact situations.";
+		f.Paragraph(temp);
+		temp = "There is no need for a \"#end\" line (such as is used in "
+			"times and rumor submissions -- the entire email message you "
+			"send will be forwarded to the unit's master.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Send an email to the owner of unit 9999";
+		temp2 = "#email 9999\n";
+		temp2 += "Greetings.  You've entered the Kingdom of Foo.\n";
+		temp2 += "Please contact us.\n\n";
+		temp2 += "Lord Foo\n";
+		temp2 += "foo@some.email";
+		f.CommandExample(temp, temp2);
+		temp = "Faction X, the owner of 9999 would receive:";
+		temp2 = "From: Foo &lt;foo@some.email&gt;\n";
+		temp2 += "Subject:  Greetings!\n\n";
+		temp2 += "#email 9999\n";
+		temp2 += "Greetings.  You've entered the Kingdom of Foo.\n";
+		temp2 += "Please contact us.\n\n";
+		temp2 += "Lord Foo\n";
+		temp2 += "foo@some.email";
+		f.CommandExample(temp, temp2);
+	}
+	f.LinkRef("credits");
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Credits");
+	temp = "Atlantis was originally created and programmed by Russell "
+		"Wallace. Russell Wallace created Atlantis 1.0, and partially "
+		"designed Atlantis 2.0 and Atlantis 3.0.";
+	f.Paragraph(temp);
+	temp = "Geoff Dunbar designed and programmed Atlantis 2.0, 3.0, and 4.0 "
+		"up through version 4.0.4 and created the Atlantis Project to "
+		"freely release and maintain the Atlantis source code.";
+	f.Paragraph(temp);
+	temp = "Larry Stanbery created the Atlantis 4.0.4+ derivative.";
+	f.Paragraph(temp);
+	temp = f.Link("mailto:jtraub@dragoncat.net", "JT Traub");
+	temp += " took over the source code and merged the then forking versions "
+		"of 4.0.4c and 4.0.4+ back into 4.0.5 along with modifications of his "
+		"own and has been maintaining the code.";
+	f.Paragraph(temp);
+	temp = "Development of the code is open and there is a egroup devoted to "
+		"it located at ";
+	temp += f.Link("http://groups.yahoo.com/group/atlantisdev", 
+			"The YahooGroups AtlantisDev egroup");
+	temp += ". Please join this egroup if you work on the code and share your "
+		"changes back into the codebase as a whole";
+	f.Paragraph(temp);
+	temp = "Please see the CREDITS file in the source distribution for a "
+		"complete (hopefully) list of all contributers.";
+	f.Paragraph(temp);
 	f.Enclose(0, "BODY");
 	f.Enclose(0, "HTML");
 	return 1;
