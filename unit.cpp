@@ -1642,7 +1642,7 @@ int Unit::GetWeapon(int index, int riding, int ridingBonus, int &attackBonus,
 			if(baseSkillLevel == -1) continue;
 			int flags = pWep->flags;
 			// Attack and defense skill
-			if(flags & WeaponType::NEEDSKILL) baseSkillLevel = combatSkill;
+			if(!(flags & WeaponType::NEEDSKILL)) baseSkillLevel = combatSkill;
 			attackBonus = baseSkillLevel + pWep->attackBonus;
 			if(flags & WeaponType::NOATTACKERSKILL)
 				defenseBonus = pWep->defenseBonus;
