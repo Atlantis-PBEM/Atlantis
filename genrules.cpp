@@ -1933,7 +1933,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "td align=\"left\"");
 		temp = "";
 		if(ItemDefs[i].type & IT_WEAPON) {
-			WeaponType *wp = &WeaponDefs[ItemDefs[i].index];
+			WeaponType *wp = findWeapon(ItemDefs[i].abr);
 			if(wp->attackBonus || wp->defenseBonus ||
 					(wp->flags & WeaponType::RANGED) ||
 					(wp->flags & WeaponType::NEEDSKILL)) {
@@ -3234,17 +3234,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"chance, etc.";
 	f.Paragraph(temp);
 	temp = "";
-	if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
-		temp += "Possession of a sword confers a ";
-		if(WeaponDefs[WEAPON_SWORD].attackBonus > -1) temp += "+";
-		temp += WeaponDefs[WEAPON_SWORD].attackBonus;
-		temp += " bonus to Combat skill for attack and a ";
-		if(WeaponDefs[WEAPON_SWORD].defenseBonus > -1) temp += "+";
-		temp += WeaponDefs[WEAPON_SWORD].defenseBonus;
-		temp += " bonus for defense. ";
-	}
-	temp += "Troops which are fighting hand-to-hand without specific weapons "
-		"are assumed to be irregularly armed with makeshift weapons such as "
+	temp = "There are a variety of weapons in the world which can increase "
+		"a soldier's skill on attack or defense.  Better weapons will "
+		"generally convey better bonuses, but not all weapons are as good "
+		"in all situations.  Specifics about the bonuses conferred by "
+		"specific weapons can be found both in these rules (for most basic "
+		"weapons), and in the descriptions of the weapons themselves. Troops "
+		"which are fighting hand-to-hand without specific weapons are "
+		"assumed to be irregularly armed with makeshift weapons such as "
 		"clubs, pitchforks, torches, etc. ";
 	if(!(SkillDefs[S_RIDING].flags & SkillType::DISABLED) &&
 			!(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
@@ -3271,30 +3268,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	temp = "Ranged weapons are slightly different from melee weapons.  The "
 		"target will generally not get any sort of combat bonus to defense "
-		"against a ranged attack. ";
-	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) &&
-			!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED)) {
-		temp += "The skill check to hit with a long bow is made against an "
-			"effective defense of ";
-		temp += -(WeaponDefs[WEAPON_LONGBOW].attackBonus);
-		temp += "; i.e., a longbowman with a skill 1, having made the 50% "
-			"chance of getting an effective attack, has a 1:2 chance of "
-			"hitting a target. ";
-	}
-	if(!(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED) &&
-			!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
-		temp += "A crossbow is an easier weapon to use, so the chance to hit "
-			"is calculated against a defense of ";
-		temp += -(WeaponDefs[WEAPON_CROSSBOW].attackBonus);
-		if(WeaponDefs[WEAPON_CROSSBOW].numAttacks < 0) {
-			temp += "; on the other hand, a crossbow can only fire once "
-				"every ";
-			temp += -(WeaponDefs[WEAPON_CROSSBOW].numAttacks);
-			temp += " rounds, including the free round of attacks if ones "
-				"side has one";
-		}
-		temp += ".";
-	}
+		"against a ranged attack.";
+	f.Paragraph(temp);
+	temp = "Some weapons, including some ranged weapons, may only attack "
+		"every other round, or even less frequently. When a weapon is not "
+		"able to attack every round, this will be specified in the item "
+		"description.";
 	f.Paragraph(temp);
 	temp = "Weapons may have one of several different attack types: "
 		"Slashing, Piercing, Crushing, Cleaving and Armor Piercing.  "

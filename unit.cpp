@@ -1503,7 +1503,7 @@ int Unit::Taxers()
 			}
 
 			if (ItemDefs[pItem->type].type & IT_WEAPON) {
-				WeaponType *pWep = WeaponDefs + ItemDefs[pItem->type].index;
+				WeaponType *pWep = findWeapon(ItemDefs[pItem->type].abr);
 				if (!(pWep->flags & WeaponType::NEEDSKILL)) {
 					// A melee weapon
 					if (GetSkill(S_COMBAT)) numUsableMelee += pItem->num;
@@ -1666,7 +1666,7 @@ void Unit::CopyFlags(Unit *x)
 	reveal = x->reveal;
 }
 
-int Unit::GetBattleItem(AString itm)
+int Unit::GetBattleItem(AString &itm)
 {
 	int item = LookupItem(&itm);
 	if (item == -1) return -1;
@@ -1681,22 +1681,19 @@ int Unit::GetBattleItem(AString itm)
 	return item;
 }
 
-int Unit::GetArmor(int index, int ass)
+int Unit::GetArmor(AString &itm, int ass)
 {
-	if(ass && !(ArmorDefs[index].flags & ArmorType::USEINASSASSINATE))
-		return -1;
+	int item = LookupItem(&itm);
+	ArmorType *pa = findArmor(itm.Str());
 
-	forlist(&items) {
-		Item *pItem = (Item *)elem;
-		if(!pItem->num) continue;
-		int item = pItem->type;
-		if((ItemDefs[item].type&IT_ARMOR) && (ItemDefs[item].index==index)) {
-			// Get the armor
-			items.SetNum(item, pItem->num - 1);
-			return item;
-		}
-	}
-	return -1;
+	if (ass && !(pa->flags & ArmorType::USEINASSASSINATE)) return -1;
+
+	int num = items.GetNum(item);
+	if (num < 1) return -1;
+
+	if (!(ItemDefs[item].type & IT_ARMOR)) return -1;
+	items.SetNum(item, num - 1);
+	return item;
 }
 
 int Unit::GetMount(int index, int canFly, int canRide, int &bonus)
@@ -1744,54 +1741,51 @@ int Unit::GetMount(int index, int canFly, int canRide, int &bonus)
 	return -1;
 }
 
-int Unit::GetWeapon(int index, int riding, int ridingBonus, int &attackBonus,
-		int &defenseBonus, int &attacks)
+int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
+		int &attackBonus, int &defenseBonus, int &attacks)
 {
+	int item = LookupItem(&itm);
+	WeaponType *pWep = findWeapon(itm.Str());
+
+	int num = items.GetNum(item);
+	if (num < 1) return -1;
+
+	if (!(ItemDefs[item].type & IT_WEAPON)) return -1;
+
 	attackBonus = 0;
 	defenseBonus = 0;
 	attacks = 1;
 	int combatSkill = GetSkill(S_COMBAT);
-	forlist(&items) {
-		Item *pItem = (Item *)elem;
-		if(!pItem->num) continue;
-		int item = pItem->type;
-		WeaponType *pWep = &WeaponDefs[index];
-		if((ItemDefs[item].type&IT_WEAPON) && (ItemDefs[item].index==index)) {
-			// Found a weapon, check flags and skills
-			int baseSkillLevel = CanUseWeapon(pWep, riding);
-			// returns -1 if weapon cannot be used, else the usable skill level
-			if(baseSkillLevel == -1) continue;
-			int flags = pWep->flags;
-			// Attack and defense skill
-			if(!(flags & WeaponType::NEEDSKILL)) baseSkillLevel = combatSkill;
-			attackBonus = baseSkillLevel + pWep->attackBonus;
-			if(flags & WeaponType::NOATTACKERSKILL)
-				defenseBonus = pWep->defenseBonus;
-			else
-				defenseBonus = baseSkillLevel + pWep->defenseBonus;
-			// Riding bonus
-			if(flags & WeaponType::RIDINGBONUS)
-				attackBonus += ridingBonus;
-			if(flags & (WeaponType::RIDINGBONUSDEFENSE |
-						WeaponType::RIDINGBONUS))
-				defenseBonus += ridingBonus;
-			// Number of attacks
-			attacks = pWep->numAttacks;
-			// Note: NUM_ATTACKS_SKILL must be > NUM_ATTACKS_HALF_SKILL
-			if(attacks >= WeaponType::NUM_ATTACKS_SKILL)
-				attacks += baseSkillLevel - WeaponType::NUM_ATTACKS_SKILL;
-			else if(attacks >= WeaponType::NUM_ATTACKS_HALF_SKILL)
-				attacks += (baseSkillLevel +1)/2 -
-					WeaponType::NUM_ATTACKS_HALF_SKILL;
-			// Sanity check
-			if(attacks == 0) attacks = 1;
 
-			// get the weapon
-			items.SetNum(item, pItem->num - 1);
-			return item;
-		}
-	}
-	return -1;
+	// Found a weapon, check flags and skills
+	int baseSkillLevel = CanUseWeapon(pWep, riding);
+	// returns -1 if weapon cannot be used, else the usable skill level
+	if(baseSkillLevel == -1) return -1;
+
+	// Attack and defense skill
+	if(!(pWep->flags & WeaponType::NEEDSKILL)) baseSkillLevel = combatSkill;
+	attackBonus = baseSkillLevel + pWep->attackBonus;
+	if(pWep->flags & WeaponType::NOATTACKERSKILL)
+		defenseBonus = pWep->defenseBonus;
+	else
+		defenseBonus = baseSkillLevel + pWep->defenseBonus;
+	// Riding bonus
+	if(pWep->flags & WeaponType::RIDINGBONUS) attackBonus += ridingBonus;
+	if(pWep->flags & (WeaponType::RIDINGBONUSDEFENSE|WeaponType::RIDINGBONUS))
+		defenseBonus += ridingBonus;
+	// Number of attacks
+	attacks = pWep->numAttacks;
+	// Note: NUM_ATTACKS_SKILL must be > NUM_ATTACKS_HALF_SKILL
+	if(attacks >= WeaponType::NUM_ATTACKS_SKILL)
+		attacks += baseSkillLevel - WeaponType::NUM_ATTACKS_SKILL;
+	else if(attacks >= WeaponType::NUM_ATTACKS_HALF_SKILL)
+		attacks += (baseSkillLevel +1)/2 - WeaponType::NUM_ATTACKS_HALF_SKILL;
+	// Sanity check
+	if(attacks == 0) attacks = 1;
+
+	// get the weapon
+	items.SetNum(item, num-1);
+	return item;
 }
 
 void Unit::MoveUnit(Object *toobj)

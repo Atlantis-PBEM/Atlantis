@@ -121,8 +121,9 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 	}
 
 	for (int i = 0; i < numAttacks; i++) {
-		WeaponType *pWep = 0;
-		if(a->weapon != -1) pWep = &WeaponDefs[ItemDefs[a->weapon ].index];
+		WeaponType *pWep = NULL;
+		if(a->weapon != -1)
+			pWep = findWeapon(ItemDefs[a->weapon].abr);
 
 		if(behind) {
 			if(!pWep) break;

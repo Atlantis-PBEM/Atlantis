@@ -591,24 +591,24 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyItemProductionInput(I_FSWORD, 0, I_MSWORD, 1);
 	ModifyItemProductionInput(I_FSWORD, 0, I_MITHRIL, 2);
 	ModifyItemProductionOutput(I_FSWORD, 3, 1);
-	ModifyWeaponFlags(WEAPON_MCROSSBOW,
+	ModifyWeaponFlags("MXBO",
 			WeaponType::NEEDSKILL | WeaponType::RANGED |
 			WeaponType::NOATTACKERSKILL);
-	ModifyWeaponSkills(WEAPON_MCROSSBOW,S_CROSSBOW,-1);
-	ModifyWeaponAttack(WEAPON_MCROSSBOW,ARMORPIERCING,ATTACK_RANGED,1);
-	ModifyWeaponBonuses(WEAPON_MCROSSBOW,4,0,0);
-	ModifyWeaponFlags(WEAPON_LONGBOW,
+	ModifyWeaponSkills("MXBO",S_CROSSBOW,-1);
+	ModifyWeaponAttack("MXBO",ARMORPIERCING,ATTACK_RANGED,1);
+	ModifyWeaponBonuses("MXBO",4,0,0);
+	ModifyWeaponFlags("LBOW",
 			WeaponType::NEEDSKILL | WeaponType::RANGED |
 			WeaponType::NOATTACKERSKILL);
-	ModifyWeaponSkills(WEAPON_LONGBOW,S_LONGBOW,-1);
-	ModifyWeaponAttack(WEAPON_LONGBOW,ARMORPIERCING,ATTACK_RANGED,
+	ModifyWeaponSkills("LBOW",S_LONGBOW,-1);
+	ModifyWeaponAttack("LBOW",ARMORPIERCING,ATTACK_RANGED,
 			WeaponType::NUM_ATTACKS_SKILL);
-	ModifyWeaponBonuses(WEAPON_LONGBOW,0,0,0);
-	ModifyWeaponAttack(WEAPON_BOW,PIERCING,ATTACK_RANGED,1);
-	ModifyWeaponBonuses(WEAPON_BOW,0,0,0);
-	ModifyWeaponAttack(WEAPON_SHORTBOW,PIERCING,ATTACK_RANGED,1);
-	ModifyWeaponBonuses(WEAPON_SHORTBOW,-2,0,0);
-	ModifyWeaponBonuses(WEAPON_SPEAR,1,1,2);
+	ModifyWeaponBonuses("LBOW",0,0,0);
+	ModifyWeaponAttack("BOW",PIERCING,ATTACK_RANGED,1);
+	ModifyWeaponBonuses("BOW",0,0,0);
+	ModifyWeaponAttack("SHBO",PIERCING,ATTACK_RANGED,1);
+	ModifyWeaponBonuses("SHBO",-2,0,0);
+	ModifyWeaponBonuses("SPEA",1,1,2);
 	// new armortable
 	ModifyItemWeight(I_MPLATE,2);
 	ModifyItemWeight(I_IMARM,3);

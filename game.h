@@ -205,10 +205,10 @@ private:
 	void ModifyMonsterSpoils(int mon, int silver, int spoilType);
 	void ModifyMonsterThreat(int mon, int num, int hostileChance);
 
-	void ModifyWeaponSkills(int weap, int baseSkill, int orSkill);
-	void ModifyWeaponFlags(int weap, int flags);
-	void ModifyWeaponAttack(int weap, int wclass, int attackType, int numAtt);
-	void ModifyWeaponBonuses(int weap, int attack, int defense, int vsMount);
+	void ModifyWeaponSkills(char *weap, int baseSkill, int orSkill);
+	void ModifyWeaponFlags(char *weap, int flags);
+	void ModifyWeaponAttack(char *weap, int wclass, int attackType, int numAtt);
+	void ModifyWeaponBonuses(char *weap, int attack, int defense, int vsMount);
 
 	void ModifyArmorFlags(char *armor, int flags);
 	void ModifyArmorSaveFrom(char *armor, int from);

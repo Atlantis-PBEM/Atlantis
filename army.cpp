@@ -135,13 +135,14 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	SetupCombatItems();
 
 	// Set up armor
+	AString abbr;
 	int i, item, armorType;
 	for(i = 0; i < MAX_READY; i++) {
 		// Check preferred armor first.
 		item = unit->readyArmor[i];
 		if(item == -1) break;
-		armorType = ItemDefs[item].index;
-		item = unit->GetArmor(armorType, ass);
+		abbr = ItemDefs[item].abr;
+		item = unit->GetArmor(abbr, ass);
 		if(item != -1) {
 			armor = item;
 			break;
@@ -149,7 +150,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	}
 	if(armor == -1) {
 		for(armorType = 1; armorType < NUMARMORS; armorType++) {
-			item = unit->GetArmor(armorType, ass);
+			abbr = ArmorDefs[armorType].abbr;
+			item = unit->GetArmor(abbr, ass);
 			if(item != -1) {
 				armor = item;
 				break;
@@ -192,8 +194,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		// Check the preferred weapon first.
 		item = unit->readyWeapon[i];
 		if(item == -1) break;
-		weaponType = ItemDefs[item].index;
-		item = unit->GetWeapon(weaponType, riding, ridingBonus, attackBonus,
+		abbr = ItemDefs[item].abr;
+		item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus,
 				defenseBonus, numAttacks);
 		if(item != -1) {
 			weapon = item;
@@ -202,8 +204,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	}
 	if(weapon == -1) {
 		for(weaponType = 1; weaponType < NUMWEAPONS; weaponType++) {
-			item = unit->GetWeapon(weaponType, riding, ridingBonus,
-					attackBonus, defenseBonus, numAttacks);
+			abbr = WeaponDefs[weaponType].abbr;
+			item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus,
+					defenseBonus, numAttacks);
 			if(item != -1) {
 				weapon = item;
 				break;
@@ -272,9 +275,10 @@ void Soldier::SetupCombatItems()
 {
 	int battleType;
 	for(battleType = 1; battleType < NUMBATTLEITEMS; battleType++) {
-		BattleItemType *pBat = &BattleItemDefs[ battleType ];
+		BattleItemType *pBat = &BattleItemDefs[battleType];
 
-		int item = unit->GetBattleItem(AString(pBat->abbr));
+		AString abbr = pBat->abbr;
+		int item = unit->GetBattleItem(abbr);
 		if(item == -1) continue;
 
 		// If we are using the ready command, skip this item unless
@@ -1084,7 +1088,8 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 		Soldier * tar = GetTarget(tarnum);
 		int tarFlags = 0;
 		if(tar->weapon != -1) {
-			tarFlags = WeaponDefs[ItemDefs[tar->weapon].index].flags;
+			WeaponType *pw = findWeapon(ItemDefs[tar->weapon].abr);
+			tarFlags = pw->flags;
 		}
 
 		/* 4. Add in any effects, if applicable */

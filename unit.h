@@ -207,10 +207,10 @@ class Unit : public AListElem
 		int GetFlag(int);
 		void SetFlag(int,int);
 		void CopyFlags(Unit *);
-		int GetBattleItem(AString itm);
-		int GetArmor(int index, int ass);
+		int GetBattleItem(AString &itm);
+		int GetArmor(AString &itm, int ass);
 		int GetMount(int index, int canFly, int canRide, int &bonus);
-		int GetWeapon(int index, int riding, int ridingBonus,
+		int GetWeapon(AString &itm, int riding, int ridingBonus,
 				int &attackBonus, int &defenseBonus, int &attacks);
 		int CanUseWeapon(WeaponType *pWep, int riding);
 		int CanUseWeapon(WeaponType *pWep);

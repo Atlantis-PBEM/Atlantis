@@ -51,6 +51,17 @@ ArmorType *findArmor(char *abbr)
 	return NULL;
 }
 
+WeaponType *findWeapon(char *abbr)
+{
+	if (abbr == NULL) return NULL;
+	for (int i = 0; i < NUMWEAPONS; i++) {
+		if (WeaponDefs[i].abbr == NULL) continue;
+		if (AString(abbr) == WeaponDefs[i].abbr)
+			return &WeaponDefs[i];
+	}
+	return NULL;
+}
+
 static AString AttType(int atype)
 {
 	switch(atype) {
@@ -633,8 +644,7 @@ AString *ItemDescription(int item, int full)
 	}
 
 	if(ItemDefs[item].type & IT_WEAPON) {
-		int wep = ItemDefs[item].index;
-		WeaponType *pW = &WeaponDefs[wep];
+		WeaponType *pW = findWeapon(ItemDefs[item].abr);
 		*temp += " This is a ";
 		*temp += WeapType(pW->flags, pW->weapClass) + " weapon.";
 		if(pW->flags & WeaponType::NEEDSKILL) {

@@ -297,6 +297,7 @@ int LookupItem(AString *);
 
 BattleItemType *findBattleItem(char *);
 ArmorType *findArmor(char *);
+WeaponType *findWeapon(char *);
 
 AString ItemString(int type, int num);
 AString *ItemDescription(int item, int full);

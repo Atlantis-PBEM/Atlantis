@@ -283,37 +283,42 @@ void Game::ModifyMonsterThreat(int mon, int num, int hostileChance)
 	MonDefs[mon].number = num;
 }
 
-void Game::ModifyWeaponSkills(int weap, int baseSkill, int orSkill)
+void Game::ModifyWeaponSkills(char *weap, int baseSkill, int orSkill)
 {
-	if(weap < 0 || weap > (NUMWEAPONS - 1)) return;
+	WeaponType *pw = findWeapon(weap);
+	if (pw == NULL) return;
 	if(baseSkill < -1 || baseSkill > (NSKILLS - 1)) return;
 	if(orSkill < -1 || orSkill > (NSKILLS - 1)) return;
-	WeaponDefs[weap].baseSkill = baseSkill;
-	WeaponDefs[weap].orSkill = orSkill;
+	pw->baseSkill = baseSkill;
+	pw->orSkill = orSkill;
 }
 
-void Game::ModifyWeaponFlags(int weap, int flags)
+void Game::ModifyWeaponFlags(char *weap, int flags)
 {
-	if(weap < 0 || weap > (NUMWEAPONS - 1)) return;
-	WeaponDefs[weap].flags = flags;
+	WeaponType *pw = findWeapon(weap);
+	if (pw == NULL) return;
+	pw->flags = flags;
 }
 
-void Game::ModifyWeaponAttack(int weap, int wclass, int attackType, int numAtt)
+void Game::ModifyWeaponAttack(char *weap, int wclass, int attackType,
+		int numAtt)
 {
-	if(weap < 0 || weap > (NUMWEAPONS - 1)) return;
+	WeaponType *pw = findWeapon(weap);
+	if (pw == NULL) return;
 	if(wclass < 0 || wclass > (NUM_WEAPON_CLASSES - 1)) return;
 	if(attackType < 0 || attackType > (NUM_ATTACK_TYPES - 1)) return;
-	WeaponDefs[weap].weapClass = wclass;
-	WeaponDefs[weap].attackType = attackType;
-	WeaponDefs[weap].numAttacks = numAtt;
+	pw->weapClass = wclass;
+	pw->attackType = attackType;
+	pw->numAttacks = numAtt;
 }
 
-void Game::ModifyWeaponBonuses(int weap, int attack, int defense, int vsMount)
+void Game::ModifyWeaponBonuses(char *weap, int attack, int defense, int vsMount)
 {
-	if(weap < 0 || weap > (NUMWEAPONS -1)) return;
-	WeaponDefs[weap].attackBonus = attack;
-	WeaponDefs[weap].defenseBonus = defense;
-	WeaponDefs[weap].mountBonus = vsMount;
+	WeaponType *pw = findWeapon(weap);
+	if (pw == NULL) return;
+	pw->attackBonus = attack;
+	pw->defenseBonus = defense;
+	pw->mountBonus = vsMount;
 }
 
 void Game::ModifyArmorFlags(char *armor, int flags)
