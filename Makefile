@@ -64,7 +64,28 @@ wyreth-clean:
 clean:
 	rm -f $(OBJECTS)
 	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
+	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
+
+conquest-rules:
+	$(MAKE) GAME=conquest rules
+
+ceran-rules:
+	$(MAKE) GAME=ceran rules
+
+realms-rules:
+	$(MAKE) GAME=realms rules
+
+standard-rules:
+	$(MAKE) GAME=standard rules
+
+wyreth-rules:
+	$(MAKE) GAME=wyreth rules
+
+rules: $(GAME)/$(GAME)
+	(cd $(GAME); \
+	 ./$(GAME) genrules $(GAME)_intro.html $(GAME).css html/$(GAME).html \
+	)
 
 FORCE:
 

@@ -4062,27 +4062,32 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "PASSWORD xyzzy";
 	f.CommandExample(temp, temp2);
 
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("pillage");
+	f.TagText("H4", "PILLAGE");
+	temp = "Use force to extort as much money as possible from the region. "
+		"Note that the ";
+	temp += f.Link("#tax", "TAX") + " order and the PILLAGE order are ";
+	temp += "mutually exclusive; a unit may only attempt to do one in a "
+		"turn.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Pillage the current hex.";
+	temp2 = "PILLAGE";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("produce");
+	f.TagText("H4", "PRODUCE [item]");
+	temp = "Spend the month producing as much as possible of the specified "
+		"item.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Produce as many crossbows as possible.";
+	temp2 = "PRODUCE crossbows";
+	f.CommandExample(temp, temp2);
+
 #if 0
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"pillage\"> </a>\n");
- printf("<h4> PILLAGE </h4>\n");
- printf("\n");
- printf("Use force to extort as much money as possible from the region. Note that\n");
- printf("the <a href=\"#tax\">TAX</a> order and PILLAGE order are mutually\n");
- printf("exclusive; a unit may only attempt to do one in a turn.<p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"produce\"> </a>\n");
- printf("<h4> PRODUCE [item] </h4>\n");
- printf("\n");
- printf("Spend the month producing as much as possible of the specified item. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Produce as many crossbows as possible. <p>\n");
- printf("<pre>\n");
-   printf("  PRODUCE crossbows\n");
- printf("</pre> <p>\n");
- printf("\n");
  printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
  printf("<a name=\"promote\"> </a>\n");
  printf("<h4> PROMOTE [unit] </h4>\n");
