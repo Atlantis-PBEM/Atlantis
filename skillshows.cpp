@@ -727,7 +727,7 @@ AString *ShowSkill::Report(void)
 				   !(ObjectDefs[O_HUT].flags & ObjectType::DISABLED)) {
 					if(found) *str += " ";
 					found = 1;
-					*str += "A unit with this skill may use the BULID order "
+					*str += "A unit with this skill may use the BUILD order "
 						"to produce a Hermits Hut from ironwood.";
 				}
 			}
