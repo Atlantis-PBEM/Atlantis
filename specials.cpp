@@ -306,7 +306,26 @@ void Battle::DoSpecialAttack( int round,
                     num + ".");
         }
         break;
-        
+	case SPECIAL_FIREBREATH:
+		num = def->DoAnAttack(a->special,
+				getrandom(a->slevel * 5) + getrandom(a->slevel * 5) + 2,
+				ATTACK_ENERGY, a->slevel, SPECIAL_FLAGS, 0 );
+		if (num == -1) {
+			AddLine(a->name + " breathes Fire, but it is deflected.");
+		} else {
+			AddLine(a->name + " breathes Fire, killing " + num + ".");
+		}
+		break;
+	case SPECIAL_ICEBREATH:
+		num = def->DoAnAttack(a->special,
+				getrandom(a->slevel * 5) + getrandom(a->slevel * 5) + 2,
+				ATTACK_ENERGY, a->slevel, SPECIAL_FLAGS, 0 );
+		if (num == -1) {
+			AddLine(a->name + " breathes Ice, but it is deflected.");
+		} else {
+			AddLine(a->name + " breathes Ice, killing " + num + ".");
+		}
+		break;
     case SPECIAL_HELLFIRE:
         num = def->DoAnAttack(a->special,
                               getrandom(a->slevel * 25) +

@@ -126,7 +126,7 @@ void Game::GrowLMons( int rate )
             Object * obj = (Object *) elem;
             if (obj->units.Num()) continue;
             int montype = ObjectDefs[obj->type].monster;
-			int grow = !(ObjectDefs[obj->type].flags & ObjectType::NO_MON_GROWTH);
+			int grow=!(ObjectDefs[obj->type].flags&ObjectType::NO_MON_GROWTH);
             if ((montype != -1) && grow) {
                 if (getrandom(100) < rate) {
                     MakeLMon( obj );
@@ -134,4 +134,122 @@ void Game::GrowLMons( int rate )
             }
         }
     }
+}
+
+int Game::MakeWMon( ARegion *pReg )
+{
+	if(!Globals->WANDERING_MONSTERS_EXIST) return 0;
+
+	if (TerrainDefs[pReg->type].wmonfreq == 0) return 0;
+
+	int montype = TerrainDefs[ pReg->type ].smallmon;
+	if (getrandom(2) && (TerrainDefs[pReg->type].humanoid != -1))
+		montype = TerrainDefs[ pReg->type ].humanoid;
+	if (TerrainDefs[ pReg->type ].bigmon != -1 && !getrandom(8)) {
+		montype = TerrainDefs[ pReg->type ].bigmon;
+	}
+	if((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
+		return 0;
+
+	int mondef = ItemDefs[montype].index;
+	Faction *monfac = GetFaction( &factions, 2 );
+	Unit *u = GetNewUnit( monfac, 0 );
+	u->MakeWMon( MonDefs[mondef].name, montype,
+			(MonDefs[mondef].number+getrandom(MonDefs[mondef].number)+1)/2);
+	u->MoveUnit( pReg->GetDummy() );
+	return( 1 );
+}
+
+void Game::MakeLMon( Object *pObj )
+{
+	if(!Globals->LAIR_MONSTERS_EXIST) return;
+	if(ObjectDefs[pObj->type].flags & ObjectType::NO_MON_GROWTH) return;
+
+	int montype = ObjectDefs[ pObj->type ].monster;
+
+	if (montype == I_TRENT) {
+		montype = TerrainDefs[ pObj->region->type].bigmon;
+	}
+	if (montype == I_CENTAUR) {
+		montype = TerrainDefs[ pObj->region->type ].humanoid;
+	}
+	if((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
+		return;
+
+	int mondef = ItemDefs[montype].index;
+	Faction *monfac = GetFaction( &factions, 2 );
+	Unit *u = GetNewUnit( monfac, 0 );
+	switch(montype) {
+		case I_IMP:
+			u->MakeWMon( "Demons", I_IMP,
+					getrandom( MonDefs[MONSTER_IMP].number + 1 ));
+			u->items.SetNum( I_DEMON,
+					getrandom( MonDefs[MONSTER_DEMON].number + 1 ));
+			u->items.SetNum( I_BALROG,
+					getrandom( MonDefs[MONSTER_BALROG].number + 1 ));
+			break;
+		case I_SKELETON:
+			u->MakeWMon( "Undead", I_SKELETON,
+					getrandom( MonDefs[MONSTER_SKELETON].number + 1 ));
+			u->items.SetNum( I_UNDEAD,
+					getrandom( MonDefs[MONSTER_UNDEAD].number + 1 ));
+			u->items.SetNum( I_LICH,
+					getrandom( MonDefs[MONSTER_LICH].number + 1 ));
+			break;
+		case I_MAGICIANS:
+			u->MakeWMon(MonDefs[MONSTER_WARRIORS].name, I_WARRIORS,
+					(MonDefs[MONSTER_WARRIORS].number +
+					 getrandom( MonDefs[MONSTER_WARRIORS].number ) + 1) / 2);
+			u->MoveUnit( pObj );
+			u = GetNewUnit( monfac, 0 );
+			u->MakeWMon( "Evil Mages", I_MAGICIANS,
+					(MonDefs[MONSTER_MAGICIANS].number +
+					 getrandom( MonDefs[MONSTER_MAGICIANS].number ) + 1) / 2);
+			u->items.SetNum( I_SORCERERS,
+					getrandom( MonDefs[MONSTER_SORCERERS].number + 1));
+			u->SetFlag(FLAG_BEHIND, 1);
+			break;
+		case I_DARKMAGE:
+			u->MakeWMon( MonDefs[MONSTER_DROW].name, I_DROW,
+					(MonDefs[MONSTER_DROW].number +
+					 getrandom( MonDefs[MONSTER_DROW].number ) + 1) / 2);
+			u->MoveUnit( pObj );
+			u = GetNewUnit( monfac, 0 );
+			u->MakeWMon( "Dark Mages", I_MAGICIANS,
+					(MonDefs[MONSTER_MAGICIANS].number +
+					 getrandom( MonDefs[MONSTER_MAGICIANS].number ) + 1) / 2);
+			u->items.SetNum( I_SORCERERS,
+					getrandom( MonDefs[MONSTER_SORCERERS].number + 1));
+			u->items.SetNum( I_DARKMAGE,
+					getrandom( MonDefs[MONSTER_DARKMAGE].number + 1));
+			u->SetFlag(FLAG_BEHIND, 1);
+			break;
+        case I_ILLYRTHID:
+			u->MakeWMon( "Undead", I_SKELETON,
+					getrandom( MonDefs[MONSTER_SKELETON].number + 1 ));
+			u->items.SetNum( I_UNDEAD,
+					getrandom( MonDefs[MONSTER_UNDEAD].number + 1 ));
+			u->MoveUnit( pObj );
+			u = GetNewUnit( monfac, 0 );
+			u->MakeWMon( MonDefs[MONSTER_ILLYRTHID].name, I_ILLYRTHID,
+					(MonDefs[MONSTER_ILLYRTHID].number +
+					 getrandom( MonDefs[MONSTER_ILLYRTHID].number ) + 1) / 2);
+			u->SetFlag(FLAG_BEHIND, 1);
+			break;
+        case I_STORMGIANT:
+			if (getrandom(3) < 1) {
+				mondef = MONSTER_CLOUDGIANT;
+				montype = I_CLOUDGIANT;
+			}
+			u->MakeWMon( MonDefs[mondef].name, montype,
+					(MonDefs[mondef].number +
+					 getrandom( MonDefs[mondef].number ) + 1) / 2);
+			break;
+		default:
+			u->MakeWMon( MonDefs[mondef].name, montype,
+					(MonDefs[mondef].number +
+					 getrandom( MonDefs[mondef].number ) + 1) / 2);
+			break;
+	}
+	u->MoveUnit( pObj );
 }
