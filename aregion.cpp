@@ -443,10 +443,7 @@ void ARegion::SetupCityMarket()
 		} else if( ItemDefs[ i ].type & IT_MAGIC ) {
 			j = getrandom(8);
 			if (j==2) {
-				// XXX --
-				// For now, just use the amounts found for advanced items
-				// for any magical items which are allowed onto the markets
-				int amt = Globals->CITY_MARKET_ADVANCED_AMT;
+				int amt = Globals->CITY_MARKET_MAGIC_AMT;
 				int price;
 
 				if( Globals->RANDOM_ECONOMY ) {

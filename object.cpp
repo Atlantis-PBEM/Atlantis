@@ -159,11 +159,7 @@ int Object::IsBuilding()
 
 int Object::CanModify()
 {
-	if (type == O_DUMMY) return 0;
-	if (type == O_SHAFT) return 0;
-	/* XXX -- This check is not really correct */
-	if (ObjectDefs[type].monster == -1) return 1;
-	return 0;
+	return (ObjectDefs[type].flags & ObjectType::CANMODIFY);
 } 
 
 Unit * Object::GetUnit(int num)
@@ -362,13 +358,28 @@ AString *ObjectDescription(int obj)
 		*temp += AString(" This structure provides defense to the first ") +
 			o->protect + " men inside it.";
 	}
+
 	/*
-	 * XXX -- This flag needs to go away.. need to handle the SpecialTypes
-	 * table
+	 * Handle all the specials
 	 */
-	if(o->flags & ObjectType::NOEARTHQUAKE) {
-		*temp += " Units in this structure are not affected by earthquakes.";
+	for(int i = 0; i < NUMSPECIALS; i++) {
+		SpecialType *spd = &SpecialDefs[i];
+		AString effect = "are";
+		int match = 0;
+		if(!(spd->targflags & SpecialType::HIT_BUILDINGIF) &&
+				!(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
+			continue;
+		}
+		for(int j = 0; j < 3; j++)
+			if(spd->buildings[j] == obj) match = 1;
+		if(!match) continue;
+		if(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
+			effect += " not";
+		}
+		*temp += " Units in this structure ";
+		*temp += effect + " affected by " + spd->specialname + ".";
 	}
+
 	if(o->sailors) {
 		*temp += AString(" This ship requires ") + o->sailors +
 			" total levels of sailing skill to sail.";

@@ -272,8 +272,8 @@ AString ShowSpecial(int special, int level, int expandlev)
 		if(comma) {
 			temp += "and ";
 		}
-		temp += DefType(spd->shield[last]) + " attacks against the mage's " +
-			"army at a skill level equal to the mage's skill.";
+		temp += DefType(spd->shield[last]) + " attacks against the entire" +
+			" army at a level equal to the skill level of the ability.";
 	}
 	if(spd->effectflags & SpecialType::FX_DEFBONUS) {
 		temp += " This ability provides ";
@@ -627,8 +627,12 @@ AString *ItemDescription(int item, int full)
 				   }
 			   }
 			   comma++;
-			   *temp += AString(ItemDefs[i].names) + " by " +
-				   ItemDefs[i].mult_val;
+			   if(i == I_SILVER) {
+				   *temp += "entertainment";
+			   } else {
+				   *temp += ItemDefs[i].names;
+			   }
+			   *temp += AString(" by ") + ItemDefs[i].mult_val;
 		   }
 		}
 		*temp += ".";
@@ -735,7 +739,8 @@ AString *ItemDescription(int item, int full)
 		unsigned int c;
 		unsigned int len;
 		*temp += AString(" Units with ") + SkillStrs(ItemDefs[item].mSkill) +
-			" " + ItemDefs[item].mLevel + " may create this item via magic";
+			" of at least level " + ItemDefs[item].mLevel +
+			" may attempt to create this item via magic";
 		len = sizeof(ItemDefs[item].mInput)/sizeof(Materials);
 		int count = 0;
 		int tot = len;
@@ -747,7 +752,7 @@ AString *ItemDescription(int item, int full)
 				continue;
 			}
 			if(count == 0) {
-				*temp += " from ";
+				*temp += " at a cost of ";
 			} else if (count == tot) {
 				if(c > 1) *temp += ",";
 				*temp += " and ";

@@ -42,11 +42,12 @@ class ObjectType {
 	public:
 		char *name;
 		enum {
-			DISABLED = 0x1,
-			NOMONSTERGROWTH = 0x2,
-			NEVERDECAY = 0x4,
-			CANENTER = 0x8,
-			NOEARTHQUAKE = 0x10,
+			DISABLED		= 0x001,
+			NOMONSTERGROWTH	= 0x002,
+			NEVERDECAY		= 0x004,
+			CANENTER		= 0x008,
+			NOEARTHQUAKE	= 0x010,
+			CANMODIFY		= 0x020,
 		};
 		int flags;
 

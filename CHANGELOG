@@ -281,3 +281,5 @@ Changes from 4.0.7 -> 4.0.8
    -- Moved the makefiles out of the subdirectories and coallesced them into
       one makefile at the top level which can be used to build the various
 	  games.  By default the 'standard' game is built.
+   -- Removed some of the 'XXX' (fixme) comments from the code.   Still more
+      to do.

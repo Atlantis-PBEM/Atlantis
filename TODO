@@ -48,7 +48,6 @@
       it). Multiple 'turn' orders can be used to give orders arbitrarily
       into the future. 'turn' can be combined with @ to creating loops.
       (Dunno if this or Tzargs way is the 'correct' way to handle this)
-   -- Handle spell damages generically.
    -- Handle speed increase from summon wind configurably.
    -- Add more items so that apprentices are actually useful.
    -- rethink some of the current spells.
@@ -69,8 +68,13 @@
    -- Consider having 'conditional orders' specificall 'AT x,y,z'
    -- Figure out how an autoclaim option for studying could be made to work
    -- Improve handling of NOSPOILS
-   -- Clean up spell system.
-   -- Merge Lacandom spells.
+   -- Clean up spell system -- Damage spells have been parameterized,
+      Object creation spells, summoning spells and 'other' spells still
+	  need some sort of parameterization and genericization so that they
+	  can be tweaked on a game basis if desired.
+   -- Merge Lacandon spells -- SOME work has been done on this already
+      but a LOT more needs to be done before this is really doable without
+	  a lot of heartache and pain.
    -- Make monster movement only choose among viable exits
 
 TODO for 5.0.0

@@ -1233,7 +1233,7 @@ void Game::EditGameFindUnit()
 
 void Game::EditGameRegion( ARegion *pReg )
 {
-    // XXX -- Implemented region editor
+    // XXX -- Implement region editor
     Awrite( "Not implemented yet." );
 }
 

@@ -168,6 +168,8 @@ public:
     int CITY_MARKET_NORMAL_AMT;
     int CITY_MARKET_ADVANCED_AMT;
     int CITY_MARKET_TRADE_AMT;
+	// If any magic items are not set NOMARKET, how many are allowed?
+	int CITY_MARKET_MAGIC_AMT;
 	// JLT -- Allow higher margins on trade goods.
 	int MORE_PROFITABLE_TRADE_GOODS;
 
