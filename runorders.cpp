@@ -108,7 +108,7 @@ void Game::ClearCastEffects()
         }
     }
 }
-    
+
 void Game::RunCastOrders()
 {
     forlist(&regions) {
@@ -173,7 +173,7 @@ int Game::TaxCheck( ARegion *pReg, Faction *pFac )
             // Can't tax here.
             //
             return 0;
-        } 
+        }
         else
         {
             //
@@ -223,7 +223,7 @@ int Game::TradeCheck( ARegion *pReg, Faction *pFac )
             // This faction is over its trade limit.
             //
             return 0;
-        } 
+        }
         else
         {
             //
@@ -301,7 +301,7 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
         u->Error("ASSASSINATE: Invalid unit given.");
         return;
     }
-  
+
     if (tar->type == U_GUARD || tar->type == U_WMON ||
 			tar->type == U_GUARDMAGE) {
         u->Error("ASSASSINATE: Can only assassinate other player's "
@@ -313,7 +313,7 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
         u->Error("ASSASSINATE: Must be executed by a 1-man unit.");
         return;
     }
-  
+
     AList * seers = CanSeeSteal(r,u);
     int succ = 1;
     forlist(seers) {
@@ -371,19 +371,19 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
         u->Error("STEAL: Invalid unit given.");
         return;
 	}
-  
+
     if (tar->type == U_GUARD || tar->type == U_WMON ||
 			tar->type == U_GUARDMAGE) {
         u->Error("STEAL: Can only steal from other player's "
                  "units.");
         return;
     }
-  
+
     if (u->GetMen() != 1) {
         u->Error("STEAL: Must be executed by a 1-man unit.");
         return;
     }
-  
+
     AList * seers = CanSeeSteal(r,u);
     int succ = 1;
     {
@@ -403,7 +403,7 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
             }
         }
     }
-  
+
     if (!succ) {
         AString temp = *(u->name) + " is caught attempting to steal from " +
             *(tar->name) + " in " + *(r->name) + ".";
@@ -435,23 +435,23 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
             amt = 200;
         }
     }
-  
+
     if (tar->items.GetNum(so->item) < amt) {
         amt = 0;
     }
-  
+
     u->items.SetNum(so->item,u->items.GetNum(so->item) + amt);
     tar->items.SetNum(so->item,tar->items.GetNum(so->item) - amt);
-  
+
     {
-        AString temp = *(u->name) + " steals " + 
+        AString temp = *(u->name) + " steals " +
             ItemString(so->item,amt) + " from " + *(tar->name) + ".";
         forlist(seers) {
             Faction * f = ((FactionPtr *) elem)->ptr;
             f->Event(temp);
         }
     }
-  
+
     tar->Event(AString("Has ") + ItemString(so->item,amt) + " stolen.");
     return;
 }
@@ -559,7 +559,7 @@ void Game::RunDestroyOrders()
                 {
                     Do1Destroy(r,o,u);
                     continue;
-                } 
+                }
                 else
                 {
                     forlist(&o->units) {
@@ -605,7 +605,7 @@ void Game::Do1Destroy(ARegion * r,Object * o,Unit * u) {
     }
   }
 }
-		
+
 void Game::RunFindOrders()
 {
 	forlist(&regions) {
@@ -711,7 +711,7 @@ void Game::RunTaxRegion(ARegion * reg)
 				reg->money -= amt;
 				desired -= t * Globals->TAX_INCOME;
 				u->SetMoney(u->GetMoney() + amt);
-				u->Event(AString("Collects $") + amt + " in taxes in " + 
+				u->Event(AString("Collects $") + amt + " in taxes in " +
 						reg->ShortPrint( &regions ) + ".");
 				u->taxing = TAX_NONE;
 			}
@@ -799,7 +799,7 @@ void Game::RunPillageRegion(ARegion * reg)
 				amt -= temp;
 				pillagers -= num;
 				u->SetMoney(u->GetMoney() + temp);
-				u->Event(AString("Pillages $") + temp + " from " + 
+				u->Event(AString("Pillages $") + temp + " from " +
 						reg->ShortPrint( &regions ) + ".");
 				forlist(facs) {
 					Faction * fp = ((FactionPtr *) elem)->ptr;
@@ -840,7 +840,7 @@ void Game::RunPromoteOrders()
             }
         }
     }
-    
+
     /* Then, clear out other promote orders */
     {
         forlist(&regions) {
@@ -857,7 +857,7 @@ void Game::RunPromoteOrders()
                 }
             }
         }
-    }	
+    }
 }
 
 void Game::Do1PromoteOrder(Object * obj,Unit * u) {
@@ -996,7 +996,7 @@ void Game::PostProcessTurn()
     if( Globals->WANDERING_MONSTERS_EXIST ) {
         GrowWMons(Globals->WMON_FREQUENCY);
     }
-    
+
     if( Globals->LAIR_MONSTERS_EXIST ) {
         GrowLMons(Globals->LAIR_FREQUENCY);
     }
@@ -1214,13 +1214,13 @@ void Game::DoAttackOrders()
 void Game::AttemptAttack(ARegion * r,Unit * u,Unit * t,int silent,int adv)
 {
     if (!t->IsAlive()) return;
-    
+
     if (!u->CanSee(r,t))
     {
         if (!silent) { u->Error("ATTACK: Non-existent unit."); }
         return;
     }
-    
+
     if (!u->CanCatch(r,t))
     {
         if (!silent) { u->Error("ATTACK: Can't catch that unit."); }
@@ -1401,7 +1401,7 @@ void Game::DoBuy(ARegion * r,Market * m)
 {
 	/* First, find the number of items being purchased */
 	int attempted = GetBuyAmount(r,m);
-  
+
 	if (m->amount != -1)
 		if (attempted < m->amount) attempted = m->amount;
 
@@ -1458,7 +1458,7 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
             Object * obj = (Object *) elem;
             forlist((&obj->units)) {
                 Unit * u = (Unit *) elem;
-                if (u->needed && ((!consume) || 
+                if (u->needed && ((!consume) ||
                                   (u->GetFlag(FLAG_CONSUMING_UNIT) ||
                                    u->GetFlag(FLAG_CONSUMING_FACTION)))) {
                     int amount = u->items.GetNum(item);
@@ -1492,7 +1492,7 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
                         Object * obj2 = (Object *) elem;
                         forlist((&obj2->units)) {
                             Unit * u2 = (Unit *) elem;
-                            
+
                             if (u->faction == u2->faction && u != u2) {
                                 int amount = u2->items.GetNum(item);
                                 if (amount) {
@@ -1508,7 +1508,7 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
                                 }
                             }
                         }
-                        
+
                         if (u->needed == 0) break;
                     }
                 }
@@ -1531,7 +1531,7 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
                         Object * obj2 = (Object *) elem;
                         forlist((&obj2->units)) {
                             Unit * u2 = (Unit *) elem;
-                            if (u->faction != u2->faction && 
+                            if (u->faction != u2->faction &&
                                 u2->GetAttitude(r,u) == A_ALLY) {
                                 int amount = u2->items.GetNum(item);
                                 if (amount) {
@@ -1543,7 +1543,7 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
                                                              (u->needed /
                                                               value)) +
                                                   " for maintenance.");
-                                        u->Event(AString("Borrows ") + 
+                                        u->Event(AString("Borrows ") +
                                                  ItemString(item,
                                                             amount +
                                                             (u->needed /
@@ -1557,10 +1557,10 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
                                         break;
                                     } else {
                                         u2->items.SetNum(item, 0);
-                                        u2->Event(*(u->name) + " borrows " + 
+                                        u2->Event(*(u->name) + " borrows " +
                                                   ItemString(item, amount) +
                                                   " for maintenance.");
-                                        u->Event(AString("Borrows ") + 
+                                        u->Event(AString("Borrows ") +
                                                  ItemString(item, amount) +
                                                  " from " + *(u2->name) +
                                                  " for maintenance.");
@@ -1568,7 +1568,7 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
                                 }
                             }
                         }
-                        
+
                         if (u->needed == 0) break;
                     }
                 }
@@ -1644,7 +1644,7 @@ void Game::AssessMaintenance()
                                      " silver for maintenance.");
                             u->faction->unclaimed -= u->needed;
                             u->needed = 0;
-                        } 
+                        }
                         else
                         {
                             u->Event(AString("Claims ") +
@@ -1720,7 +1720,7 @@ int Game::DoWithdrawOrder(ARegion * r,Unit * u, WithdrawOrder * o)
 		u->Error("WITHDRAW: Withdraw does not work in the Nexus.");
 		return 1;
 	}
-	
+
 	if (cost > u->faction->unclaimed) {
 		u->Error(AString("WITHDRAW: To little unclaimed silver to withdraw ")+
 				ItemString(itm,amt)+".");
@@ -1865,7 +1865,7 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 		}
 
 		return notallied;
-	} 
+	}
 
 	/* If the item to be given is a man, combine skills */
 	if (ItemDefs[o->item].type & IT_MAN) {
@@ -1921,7 +1921,7 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 	}
 	return 0;
 }
-  
+
 void Game::DoGuard1Orders() {
   forlist((&regions)) {
     ARegion * r = (ARegion *) elem;

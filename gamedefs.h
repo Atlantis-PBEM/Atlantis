@@ -80,7 +80,7 @@ public:
     int LEADER_COST;
 
 	// If we use skill level multiplier then no units, all units, leaders,
-	// or just mages pay X per level of skill they have per man.   The 
+	// or just mages pay X per level of skill they have per man.   The
 	// first value (MAINTENCE_MULTIPLIER) is how much is payed per skill
 	// level.   The second value (MULTIPLIER_USE) is set to one of the
 	// values in the given enumeration.
@@ -228,7 +228,7 @@ public:
 	//
 	// Do starting cities have a fire mages.  (0 for no mages, otherwise
 	// this is the level of their fire skill)
-	// 
+	//
 	//
 	int START_CITY_MAGES;
 
@@ -359,6 +359,10 @@ public:
 	// to 0 and HOSTILE_PERCENT to what you want.
 	int MONSTER_ADVANCE_MIN_PERCENT;
 	int MONSTER_ADVANCE_HOSTILE_PERCENT;
+
+	// Set this to 1 if your scripts can handle the following commands
+	// #create, #resend, #times, #rumor, #remind, #email
+	int HAVE_EMAIL_SPECIAL_COMMANDS;
 };
 
 extern GameDefs * Globals;

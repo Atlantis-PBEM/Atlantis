@@ -282,6 +282,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#option", "option"));
 	f.TagText("LI", f.Link("#password", "password"));
 	f.TagText("LI", f.Link("#pillage", "pillage"));
+	if(Globals->USE_PREPARE_COMMAND)
+		f.TagText("LI", f.Link("#prepare", "prepare"));
 	f.TagText("LI", f.Link("#produce", "produce"));
 	f.TagText("LI", f.Link("#promote", "promote"));
 	f.TagText("LI", f.Link("#quit", "quit"));
@@ -305,17 +307,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#sequenceofevents", "Sequence of Events"));
 	f.TagText("LI", f.Link("#reportformat", "Report Format"));
 	f.TagText("LI", f.Link("#hintsfornew", "Hints for New Players"));
-	f.Enclose(1, "LI");
-	f.PutStr(f.Link("#specialcommands", "Special Commands"));
-	f.Enclose(1, "UL");
-	f.TagText("LI", f.Link("#create", "#Create"));
-	f.TagText("LI", f.Link("#resend", "#Resend"));
-	f.TagText("LI", f.Link("#times", "#Times"));
-	f.TagText("LI", f.Link("#rumors", "#Rumors"));
-	f.TagText("LI", f.Link("#remind", "#Remind"));
-	f.TagText("LI", f.Link("#email", "#Email"));
-	f.Enclose(0, "UL");
-	f.Enclose(0, "LI");
+	if(Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+		f.Enclose(1, "LI");
+		f.PutStr(f.Link("#specialcommands", "Special Commands"));
+		f.Enclose(1, "UL");
+		f.TagText("LI", f.Link("#create", "#Create"));
+		f.TagText("LI", f.Link("#resend", "#Resend"));
+		f.TagText("LI", f.Link("#times", "#Times"));
+		f.TagText("LI", f.Link("#rumor", "#Rumor"));
+		f.TagText("LI", f.Link("#remind", "#Remind"));
+		f.TagText("LI", f.Link("#email", "#Email"));
+		f.Enclose(0, "UL");
+		f.Enclose(0, "LI");
+	}
 	f.TagText("LI", f.Link("#credits", "Credits"));
 	f.Enclose(0, "UL");
 	f.Paragraph("Index of Tables");
@@ -339,6 +343,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 					"Table of Road Structures"));
 	if(may_sail)
 		f.TagText("LI", f.Link("#tableshipinfo", "Table of Ship Information"));
+	if(Globals->LIMITED_MAGES_PER_BUILDING) {
+		f.TagText("LI",
+				f.Link("#tablemagebuildings", "Table of Mages/Building"));
+	}
 	f.Enclose(0, "UL");
 	f.LinkRef("intro");
 	f.ClassTagText("DIV", "rule", "");
@@ -1570,11 +1578,35 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"to yours, their units will provide surplus cash to your units for "
 		"maintenance, as a last resort.";
 	f.Paragraph(temp);
-	temp = AString("This fee is generally ") + Globals->MAINTENANCE_COST +
-		" silver for a normal character";
-	if (Globals->LEADERS_EXIST) {
-		temp += AString(", and ") + Globals->LEADER_COST +
-			" silver for a leader";
+	if(Globals->MULTIPLIER_USE == GameDefs::MULT_NONE) {
+		temp = AString("This fee is generally ") + Globals->MAINTENANCE_COST +
+			" silver for a normal character";
+		if (Globals->LEADERS_EXIST) {
+			temp += AString(", and ") + Globals->LEADER_COST +
+				" silver for a leader";
+		}
+	} else {
+		if(Globals->MULTIPLIER_USE == GameDefs::MULT_MAGES) {
+			temp += "Mages ";
+		} else if(Globals->MULTIPLIER_USE==GameDefs::MULT_LEADERS &&
+				Globals->LEADERS_EXIST) {
+			temp += "Leaders ";
+		} else {
+			temp += "All units ";
+		}
+		temp += "pay a fee based on the number of skill levels the character "
+			"has.  This fee is $";
+		temp += Globals->MAINTENANCE_MULTIPLIER + " per skill level";
+		if(Globals->MULTIPLIER_USE != GameDefs::MULT_ALL) {
+			temp += ". All other characters pay a fee of ";
+			temp += Globals->MAINTENANCE_COST;
+			temp += " silver for a normal character";
+			if (Globals->LEADERS_EXIST) {
+				temp += ", and ";
+				temp += Globals->LEADER_COST;
+				temp += " silver for a leader";
+			}
+		}
 	}
 	temp += ".";
 	if (Globals->FOOD_ITEMS_EXIST) {
@@ -2994,11 +3026,55 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"skills, and certain other Magic skills, will make other skills "
 		"available to the mage. Also, study into a magic skill above "
 		"level 2 requires that the mage be located in some sort of "
-		"building which can offer protection.  Trade structures do not "
-		"count. If the mage is not in such a structure, his study rate "
-		"is cut in half, as he does not have the proper environment and "
-		"equipment for research.";
+		"building which can ";
+	if(!Globals->LIMITED_MAGES_PER_BUILDING) {
+		temp += "offer protection.  Trade structures do not count. ";
+	} else {
+		temp += "offer specific protection to mages.  Certain types of "
+			"buildings can offer shelter and support and a proper "
+			"environment, some more so than others. ";
+	}
+	temp += "If the mage is not in such a structure, his study rate is cut "
+			"in half, as he does not have the proper environment and "
+			"equipment for research.";
 	f.Paragraph(temp);
+
+	if(Globals->LIMITED_MAGES_PER_BUILDING) {
+		temp = "It is possible that there are advanced buildings not listed "
+			"here which also can support mages.  The description of a "
+			"building will tell you for certain.  The common buildings and "
+			"the mages a building of that type can support follows:";
+		f.LinkRef("tablemagebuildings");
+		f.Enclose(1, "CENTER");
+		f.Enclose(1, "TABLE BORDER=1");
+		f.Enclose(1, "TR");
+		f.TagText("TD", "");
+		f.TagText("TH", "Mages");
+		f.Enclose(0, "TR");
+		for(i = 0; i < NOBJECTS; i++) {
+			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+			if(!ObjectDefs[i].maxMages) continue;
+			j = ObjectDefs[i].skill;
+			if(j == -1) continue;
+			if(SkillDefs[j].flags & SkillType::MAGIC) continue;
+			j = ObjectDefs[i].item;
+			if(j == -1) continue;
+			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
+			if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
+			if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+			/* Okay, this is a valid object to build! */
+			f.Enclose(1, "TR");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].name);
+			f.Enclose(0, "TD");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].maxMages);
+			f.Enclose(0, "TD");
+		}
+		f.Enclose(0, "TABLE");
+		f.Enclose(0, "CENTER");
+	}
+
 	f.LinkRef("magic_foundations");
 	f.TagText("H3", "Foundations:");
 	temp = "The ";
@@ -3300,6 +3376,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "IMPORTANT: Remember that names containing spaces (e.g., "
 		"\"Plate Armor\"), must be surrounded by double quotes, or the "
 		"spaces must be replaced with underscores \"_\" (e.g., Plate_Armor).";
+	f.Paragraph(temp);
+	temp = "Also remember that anything used in an example is just that, "
+		"an example and makes no gaurentee that such an item, structure, "
+		"or skill actually exists within the game.";
 	f.Paragraph(temp);
 
 	f.ClassTagText("DIV", "rule", "");
@@ -4076,6 +4156,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "PILLAGE";
 	f.CommandExample(temp, temp2);
 
+	if(Globals->USE_PREPARE_COMMAND) {
+		/* XXX -- Info about the prepare command */
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("prepare");
+	}
+
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("produce");
 	f.TagText("H4", "PRODUCE [item]");
@@ -4190,204 +4276,220 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Sell 10 furs to the market.";
 	temp2 = "SELL 10 furs";
 	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("show");
+	f.TagText("H4", "SHOW SKILL [skill] [level]");
+	f.TagText("H4", "SHOW ITEM [item]");
+	f.TagText("H4", "SHOW OBJECT [object]");
+	temp = "The first form of the order shows the skill description for a "
+		"skill that your faction already possesses. The second form "
+		"returns some information about an item that is not otherwise "
+		"apparent on a report, such as the weight. The last form "
+		"returns some information about an object (such as a ship or a "
+		"building.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "Show the skill report for Mining 3 again.";
+	temp2 = "SHOW SKILL Mining 3";
+	f.CommandExample(temp, temp2);
+	temp = "Show the item information for swords again.";
+	temp2 = "SHOW ITEM sword";
+	f.CommandExample(temp, temp2);
+	temp = "Show the information for towers again.";
+	temp2 = "SHOW OBJECT tower";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("spoils");
+	f.TagText("H4", "SPOILS [type]");
+	f.TagText("H4", "SPOILS");
+	temp = "The SPOILS order determines which types of spoils the unit "
+		"should take after a battle.  The valid values for type are "
+		"'NONE', 'WALK', 'RIDE', 'FLY', or 'ALL'. The second form is "
+		"equivalent to 'SPOILS ALL'.";
+	f.Paragraph(temp);
+	temp = "When this command is issued, only spoils with 0 weight (at "
+		"level NONE) or spoils which weigh less than or equal to their "
+		"capacity in the specified movement mode (at any level other than "
+		"ALL) will be picked up.  SPOILS ALL will allow a unit to collect "
+		"any spoils which are dropped.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Set a unit to only pick up items which have flying capacity";
+	temp2 = "SPOILS FLY";
+	f.CommandExample(temp, temp2);
+
+	if(has_stea) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("steal");
+		f.TagText("H4", "STEAL [unit] [item]");
+		temp = "Attempt to steal as much as possible of the specified "
+			"item from the specified unit. The order may only be issued "
+			"by a one-man unit.";
+		f.Paragraph(temp);
+		temp = "A unit may only attempt to steal from a unit which is "
+			"able to be seen.";
+		f.Paragraph(temp);
+		f.Paragraph("Examples:");
+		temp = "Steal silver from unit 123.";
+		temp2 = "STEAL 123 SILVER";
+		f.CommandExample(temp, temp2);
+		temp = "Steal wood from unit 321.";
+		temp2 = "STEAL 321 wood";
+		f.CommandExample(temp, temp2);
+	}
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("study");
+	f.TagText("H4", "STUDY [skill]");
+	temp = "Spend the month studying the specified skill.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Study horse training.";
+	temp2 = "STUDY \"Horse Training\"";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("tax");
+	f.TagText("H4", "TAX");
+	temp = "Attempt to collect taxes from the region. ";
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+		temp += "Only War factions may collect taxes, and then ";
+	else
+		temp += "Taxes may be collected ";
+	temp += "only if there are no non-Friendly units on guard. Only "
+		"combat-ready units may issue this order. Note that the TAX order "
+		"and the ";
+	temp += f.Link("#pillage", "PILLAGE") + " order are mutually exclusive; "
+		"a unit may only attempt to do one in a turn.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Attempt to collect taxes.";
+	temp2 = "TAX";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("teach");
+	f.TagText("H4", "TEACH [unit] ...");
+	temp = "Attempt to teach the specified units whatever skill they are "
+		"studying that month.  A list of several units may be specified. "
+		"All units to be taught must have declared you Friendly. "
+		"Subsequent TEACH orders can be used to add units to be taught.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Teach new unit 2 and unit 510 whatever they are studying.";
+	temp2 = "TEACH NEW 2 510";
+	f.CommandExample(temp, temp2);
+	temp = "or:";
+	temp2 = "TEACH NEW 2\nTEACH 510";
+	f.CommandExample(temp, temp2);
+
+	if(Globals->ALLOW_WITHDRAW) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("withdraw");
+		f.TagText("H4", "WITHDRAW [item]");
+		f.TagText("H4", "WITHDRAW [quantity] [item]");
+		temp = "Use unclaimed funds to aquire basic items that you need. "
+			"If you do not have sufficient unclaimed, or if you try "
+			"withdraw any other than a basic item, an error will be given. "
+			"Withdraw can NOT be used in the Nexus (to prevent building "
+			"towers and such there).  The first form is the same as "
+			"WITHDRAW 1 [item] in the second form.";
+		f.Paragraph(temp);
+		f.Paragraph("Examples:");
+		temp = "Withdraw 5 stone.";
+		temp2 = "WITHDRAW 5 stone";
+		f.CommandExample(temp, temp2);
+		temp = "Withdraw 1 iron.";
+		temp2 = "WITHDRAW iron";
+		f.CommandExample(temp, temp2);
+	}
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("work");
+	f.TagText("H4", "WORK");
+	temp = "Spend the month performing manual work for wages.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Work all month.";
+	temp2 = "WORK";
+	f.CommandExample(temp);
+
+	f.LinkRef("sequenceofevents");
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Sequence of Events");
+	temp = "Each turn, the following sequence of events occurs:";
+	f.Paragraph(temp);
+	f.Enclose(1, "OL");
+	f.Enclose(1, "LI");
+	f.PutStr("Instant orders.");
+	f.Enclose(1, "UL");
+	temp = f.Link("#form", "FORM") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#address", "ADDRESS") + ", ";
+	temp = f.Link("#autotax", "AUTOTAX") + ", ";
+	temp = f.Link("#avoid", "AVOID") + ", ";
+	temp = f.Link("#behind", "BEHIND") + ", ";
+	temp = f.Link("#claim", "CLAIM") + ", ";
+	temp = f.Link("#combat", "COMBAT") + ", ";
+	if(Globals->FOOD_ITEMS_EXIST)
+		temp = f.Link("#consume", "CONSUME") + ", ";
+	temp = f.Link("#declare", "DECLARE") + ", ";
+	temp = f.Link("#describe", "DESCRIBE") + ", ";
+	if(Globals-.FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+		temp = f.Link("#faction", "FACTION") + ", ";
+	temp = f.Link("#guard", "GUARD") + " 0, ";
+	temp = f.Link("#hold", "HOLD") + ", ";
+	temp = f.Link("#name", "NAME") + ", ";
+	temp = f.Link("#noaid", "NOAID") + ", ";
+	temp = f.Link("#option", "OPTION") + ", ";
+	temp = f.Link("#password", "PASSWORD") + ", ";
+	if(Globals->USE_PREPARE_ORDER)
+		temp = f.Link("#prepare", "PREPARE") + ", ";
+	temp = f.Link("#reveal", "REVEAL") + ", and ";
+	temp = f.Link("#show", "SHOW") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#find", "FIND") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#leave", "LEAVE") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#enter", "ENTER") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#promote", "PROMOTE") + " orders are processed.";
+	f.TagText("LI", temp);
+	f.Enclose(0, "UL");
+	f.Enclose(0, "LI");
+	f.TagText("LI", "Combat is processed.");
+	if (has_stea) {
+		f.Enclose(1, "LI");
+		f.PutStr("Steal orders.");
+		f.Enclose(1, "UL");
+		temp = f.Link("#steal", "STEAL") + " and ";
+		temp += f.Link("#assassinate", "ASSASSINATE") +
+			" orders are processed.";
+		f.TagText("LI", temp);
+		f.Enclose(0, "UL");
+		f.Enclose(0, "LI");
+	}
+	f.Enclose(1, "LI");
+	f.PutStr("Give orders.");
+	f.Enclose(1, "UL");
+	temp = f.Link("#destroy", "DESTROY") + " and ";
+	temp += f.Link("#give", "GIVE") + " orders are processed.";
+	f.TagText("LI", temp);
+	f.Enclose(0, "UL");
+	f.Enclose(0, "LI");
+	f.Enclose(1, "LI");
+	f.PutStr("Tax orders.");
+	f.Enclose(1, "UL");
+	temp = f.Link("#pillage","PILLAGE") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#tax","TAX") + " orders are processed.";
+	f.TagText("LI", temp);
+	f.Enclose(0, "UL");
+	f.Enclose(0, "LI");
 #if 0
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"show\"> </a>\n");
- printf("<h4> SHOW SKILL [skill] [level] </h4>\n");
- printf("<h4> SHOW ITEM [item] </h4>\n");
- printf("\n");
- printf("The first form of the order shows the skill description for a skill\n");
- printf("that your faction already possesses. The second form returns some\n");
- printf("information about an item that is not otherwise apparent on a\n");
- printf("report, such as the weight. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Show the skill report for Mining 3 again. <p>\n");
- printf("<pre>\n");
-   printf("  SHOW SKILL Mining 3\n");
- printf("</pre> <p>\n");
- printf("Get some information about Iron. <p>\n");
- printf("<pre>\n");
-   printf("  SHOW ITEM Iron\n");
- printf("</pre> <p>\n");
- printf("\n");
- if (st_ena)
-  {
-   printf("  <center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
-   printf("  <a name=\"steal\"> </a>\n");
-   printf("  <h4> STEAL [unit] [item] </h4>\n");
- printf("\n");
-   printf("  Attempt to steal as much as possible of the specified item from the specified\n");
-   printf("  unit.  The order may only be issued by a one-man unit. <p>\n");
- printf("\n");
-   printf("  A unit may only attempt to steal from a unit which is able to be seen.<p>\n");
- printf("\n");
-   printf("  Example: <p>\n");
-   printf("  Steal %s from unit 123. <p>\n",silver);
-   printf("  <pre>\n");
-   printf("  STEAL 123 SILVER\n");
-   printf("  </pre> <p>\n");
-   printf("  Steal wood from unit 321. <p>\n");
-   printf("  <pre>\n");
-   printf("  STEAL 321 wood\n");
-   printf("  </pre> <p>\n");
-  }
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"study\"> </a>\n");
- printf("<h4> STUDY [skill] </h4>\n");
- printf("\n");
- printf("Spend the month studying the specified skill. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Study horse training. <p>\n");
- printf("<pre>\n");
-   printf("  STUDY \"Horse Training\"\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"tax\"> </a>\n");
- printf("<h4> TAX </h4>\n");
- printf("\n");
- printf("Attempt to collect taxes from the region.  Only War factions may collect taxes,\n");
- printf("and then only if there are no non-Friendly units on guard. Only\n");
- printf("combat-ready units may issue this order. Note that the TAX order and the\n");
- printf("<a href=\"#pillage\">PILLAGE</a> order are mutually exclusive; a unit\n");
- printf("may only attempt to do one in a turn.<p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Attempt to collect taxes. <p>\n");
- printf("<pre>\n");
-   printf("  TAX\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"teach\"> </a>\n");
- printf("<h4> TEACH [unit] ... </h4>\n");
- printf("\n");
- printf("Attempt to teach the specified units whatever skill they are studying that\n");
- printf("month.  A list of several units may be specified.  All units to be taught must\n");
- printf("have declared you Friendly.  Subsequent TEACH orders can be used to add units\n");
- printf("to be taught.  Thus: <p>\n");
- printf("<pre>\n");
-   printf("  TEACH 1\n");
-   printf("  TEACH 2\n");
- printf("</pre> <p>\n");
- printf("is equivalent to <p>\n");
- printf("<pre>\n");
-   printf("  TEACH 1 2\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Teach new unit 2 and unit 5 whatever they are studying. <p>\n");
- printf("<pre>\n");
-   printf("  TEACH NEW 2 5\n");
- printf("</pre> <p>\n");
- printf("\n");
- if (Globals->ALLOW_WITHDRAW)
-  {
- printf("\n");
-   printf("  <center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
-   printf("  <a name=\"withdraw\"> </a>\n");
-   printf("  <h4> WITHDRAW [item]\n");
-   printf("  <h4> WITHDRAW [quantity] [item]</h4>\n");
- printf("\n");
-   printf("  Use unclaimed funds to aquire basic items that you need.  If you do not\n");
-   printf("  have sufficient unclaimed, or if you try withdraw any other than a\n");
-   printf("  non-basic item, an error will be given.   Withdraw can NOT be used in the\n");
-   printf("  Nexus (to prevent building towers and such there).  The first form is\n");
-   printf("  the same as WITHDRAW 1 [item] in the second form.<p>\n");
- printf("\n");
-   printf("  Examples: <p>\n");
-   printf("  Withdraw 5 stone.<p>\n");
-   printf("  <pre>\n");
-    printf("   WITHDRAW 5 STON\n");
-   printf("  </pre>\n");
-   printf("  Withdraw 1 iron.<p>\n");
-   printf("  <pre>\n");
-    printf("   WITHDRAW IRON\n");
-   printf("  </pre>\n");
- printf("\n");
-  }
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"work\"> </a>\n");
- printf("<h4> WORK </h4>\n");
- printf("\n");
- printf("Spend the month performing manual work for wages. <p>\n");
- printf("\n");
- printf("<a name=\"sequenceofevents\"> </a>\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Sequence of Events </h2>\n");
- printf("\n");
- printf("Each turn, the following sequence of events occurs: <p>\n");
- printf("\n");
- printf("<ol>\n");
- printf("<li> Instant orders.\n");
- printf("\n");
- printf("<ul>\n");
- printf("<li> <a href=\"#form\">FORM</a> orders are processed.\n");
- printf("<li> <a href=\"#address\">ADDRESS</a>,\n");
- printf("<a href=\"#autotax\">AUTOTAX</a>,\n");
- printf("<a href=\"#avoid\">AVOID</a>,\n");
- printf("<a href=\"#behind\">BEHIND</a>,\n");
- printf("<a href=\"#claim\">CLAIM</a>,\n");
- printf("<a href=\"#combat\">COMBAT</a>,\n");
- if (Globals->FOOD_ITEMS_EXIST)
-  {
-   printf("  <a href=\"#consume\">CONSUME</a>,\n");
-  }
- printf("<a href=\"#declare\">DECLARE</a>,\n");
- printf("<a href=\"#describe\">DESCRIBE</a>,\n");
- if(Globals-.FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-	 printf("<a href=\"#faction\">FACTION</a>,\n");
- printf("<a href=\"#guard\">GUARD</a> 0,\n");
- printf("<a href=\"#hold\">HOLD</a>,\n");
- printf("<a href=\"#name\">NAME</a>,\n");
- printf("<a href=\"#noaid\">NOAID</a>,\n");
- if (Globals->FLIGHT_OVER_WATER!=GameDefs::WFLIGHT_NONE)
-  {
-   printf("  <a href=\"#nocross\">NOCROSS</a>,\n");
-  }
- printf("<a href=\"#nospoils\">NOSPOILS</a>,\n");
- printf("<a href=\"#option\">OPTION</a>,\n");
- printf("<a href=\"#password\">PASSWORD</a>,\n");
- printf("<a href=\"#reveal\">REVEAL</a>, and\n");
- printf("<a href=\"#show\">SHOW</a>\n");
- printf("orders are processed.\n");
- printf("<li> <a href=\"#find\">FIND</a> orders are processed.\n");
- printf("<li> <a href=\"#leave\">LEAVE</a> orders are processed.\n");
- printf("<li> <a href=\"#enter\">ENTER</a> orders are processed.\n");
- printf("<li> <a href=\"#promote\">PROMOTE</a> orders are processed.\n");
- printf("</ul>\n");
- printf("\n");
- printf("<li> Combat is processed.\n");
- printf("\n");
- if (st_ena)
-  {
-   printf("  <li> Steal orders.\n");
- printf("\n");
-   printf("  <ul>\n");
-   printf("  <li> <a href=\"#steal\">STEAL</a> and\n");
-   printf("  <a href=\"#assassinate\">ASSASSINATE</a> orders are processed.\n");
-   printf("  </ul>\n");
-  }
- printf("\n");
- printf("<li> Give orders.\n");
- printf("\n");
- printf("<ul>\n");
- printf("<li> <a href=\"#destroy\">DESTROY</a> and\n");
- printf("<a href=\"#give\">GIVE</a> orders are processed.\n");
- printf("</ul>\n");
- printf("\n");
- printf("<li> Tax orders.\n");
- printf("\n");
- printf("<ul>\n");
- printf("<li> <a href=\"#pillage\">PILLAGE</a> orders are processed.\n");
- printf("<li> <a href=\"#tax\">TAX</a> orders are processed.\n");
- printf("</ul>\n");
- printf("\n");
  printf("<li> Instant Magic\n");
  printf("\n");
  printf("<ul>\n");
@@ -4452,6 +4554,7 @@ int Game::GenRules(const AString &rules, const AString &css,
  printf("processed within a phase, units that appear higher on the report get\n");
  printf("precedence. <p>\n");
  printf("\n");
+#if 0
  printf("<a name=\"reportformat\"></a>\n");
  printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
  printf("<h2> Report Format </h2>\n");
