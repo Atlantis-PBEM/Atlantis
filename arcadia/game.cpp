@@ -2318,6 +2318,96 @@ void Game::CreateNPCFactions()
     }
 }
 
+void Game::CreateFortMon(ARegion *pReg, Object *o)
+{
+    //no regional guards in towns, else their behaviour will get reset to town guards later :(
+    if(pReg->town) return;
+
+//The world is set up by now
+//However, some regions (eg nexus) do not have a race assigned. If leaders are disabled that can cause this to crash. So:
+    int i=0;
+    while(pReg->race < 0) { //we're desperate, take the first enabled race ;)
+        if((ItemDefs[i].type & IT_MAN) && !(ItemDefs[i].flags & ItemType::DISABLED)) {
+            pReg->race = i;
+        }
+        i++;
+    }
+	int size = ObjectDefs[o->type].protect;
+	if(size < 10) return;
+	int skilllevel = 1;
+	if(size > 40) skilllevel++;
+	if(size > 160) skilllevel++;
+	int num = size / (5*skilllevel);
+	num *= 5; //ie only have guard units in multiples of 5
+	
+	int fac = guardfaction;
+	if(Globals->ARCADIA_MAGIC) {
+    	ManType *mt = FindRace(ItemDefs[pReg->race].abr);
+    	switch(mt->ethnicity) {
+    	    case RA_ELF: 
+    	        fac = elfguardfaction;
+    	        break;
+    	    case RA_DWARF: 
+    	        fac = dwarfguardfaction;
+    	        break;
+    	    case RA_OTHER: 
+    	        fac = independentguardfaction;
+    	        break;
+    	    default: 
+    	        fac = guardfaction;
+    	        break;
+    	}
+	}
+
+	Faction *pFac = GetFaction(&factions, fac);
+	AString *s = new AString("Regional Guards");
+
+	if(skilllevel > 1) {
+    //one front unit
+    	Unit *u = MakeManUnit(pFac, pReg, num, skilllevel, 1,
+    		0, 0);
+    	u->SetMoney(num * Globals->GUARD_MONEY / 2);
+    	u->SetName(s);
+    	u->type = U_GUARD;
+    	u->guard = GUARD_GUARD;
+    	u->SetSkill(S_OBSERVATION, skilllevel);
+    	u->SetFlag(FLAG_HOLDING,1);
+    	u->reveal = REVEAL_FACTION;
+    	u->MoveUnit(o);
+    //one behind unit
+    	Unit *u2 = MakeManUnit(pFac, pReg, num, skilllevel, 1,
+    		0, 1);
+    	u2->SetMoney(num * Globals->GUARD_MONEY / 2);
+    	u2->SetName(s);
+    	u2->type = U_GUARD;
+    	u2->guard = GUARD_GUARD;
+    	u2->SetSkill(S_OBSERVATION, skilllevel);
+    	u2->SetFlag(FLAG_HOLDING,1);
+    	u2->reveal = REVEAL_FACTION;
+    	u2->MoveUnit(o);
+   	}
+   	if(skilllevel != 2) {
+    //one unit of best type
+        int behind = SkillMax("XBOW", pReg->race);
+        if (SkillMax("LBOW", pReg->race) > behind) behind = SkillMax("LBOW", pReg->race);
+        int front = SkillMax("COMB", pReg->race);
+        if (SkillMax("RIDI", pReg->race) > front) front = SkillMax("RIDI", pReg->race);
+        if(behind > front) behind = 1;
+        else behind = 0;
+        
+    	Unit *u = MakeManUnit(pFac, pReg, num, skilllevel, 1,
+    		0, behind);
+    	u->SetMoney(num * Globals->GUARD_MONEY / 2);
+    	u->SetName(s);
+    	u->type = U_GUARD;
+    	u->guard = GUARD_GUARD;
+    	u->SetSkill(S_OBSERVATION, skilllevel);
+    	u->SetFlag(FLAG_HOLDING,1);
+    	u->reveal = REVEAL_FACTION;
+    	u->MoveUnit(o);
+   	}
+}
+
 void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
 #define GUARDFRONT 1
 #define GUARDBEHIND 2
@@ -2345,6 +2435,8 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
 	} else {
 		skilllevel = pReg->town->TownType() + 1;
 		num = Globals->CITY_GUARD * skilllevel;
+		if(!Globals->GUARD_DEPENDS_ON_TAX) num = Globals->CITY_GUARD * skilllevel;
+		else num = pReg->money * Globals->CITY_GUARD / 5000;
 	}
 	if(Globals->GUARD_DEPENDS_ON_TAX && percent < 20) {
 	    num = pReg->untaxed / (20 * Globals->GUARD_MONEY);
@@ -2401,7 +2493,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
 		int plate = 0;
 		if((AC) && (Globals->START_CITY_GUARDS_PLATE)) plate = 1;
 		if(needguard%(2*GUARDFRONT)/GUARDFRONT) {
-    		u = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
+    		u = MakeManUnit(pFac, pReg, n, skilllevel, 1,
     			plate, 0);
     		if (IV) u->items.SetNum(I_AMULETOFI,num);
     		u->SetMoney(num * Globals->GUARD_MONEY / 2);
@@ -2410,7 +2502,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
     		u->guard = GUARD_GUARD;
 		}
 		if(needguard%(2*GUARDBEHIND)/GUARDBEHIND) {
-    		u2 = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
+    		u2 = MakeManUnit(pFac, pReg, n, skilllevel, 1,
     			plate, 1);
     		if (IV) u2->items.SetNum(I_AMULETOFI,num);
     		u2->SetMoney(num * Globals->GUARD_MONEY / 2);
@@ -2431,7 +2523,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
 		u2->reveal = REVEAL_FACTION;
 		u2->MoveUnit(pReg->GetDummy());
 	}
-	if((pReg->type == R_NEXUS || pReg->town->TownType() == TOWN_CITY) && (needguard%(2*GUARDMAGE)/GUARDMAGE)) {
+	if((pReg->type == R_NEXUS || (Globals->START_CITY_MAGES + pReg->town->TownType() - 2) > 0) && (needguard%(2*GUARDMAGE)/GUARDMAGE)) {
 		u = GetNewUnit(pFac);
 		s = new AString("City Mage");
 		u->SetName(s);
@@ -2441,8 +2533,8 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
     		if(IV) u->items.SetNum(I_AMULETOFI,1);
     		u->SetMoney(Globals->GUARD_MONEY);
     		if(!Globals->ARCADIA_MAGIC) u->SetSkill(S_FORCE,Globals->START_CITY_MAGES);
-    		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES);
-    		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES);
+    		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES+pReg->town->TownType()-2);
+    		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES+pReg->town->TownType()-2);
     		if(Globals->START_CITY_TACTICS && !(SkillDefs[S_TACTICS].flags & SkillType::DISABLED))
     			u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
     		u->combat = S_FIRE;
@@ -2454,8 +2546,8 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
     	    u->SetMen(pReg->race,1);
     		u->SetMoney(Globals->GUARD_MONEY);
     		if(!Globals->ARCADIA_MAGIC) u->SetSkill(S_FORCE,Globals->START_CITY_MAGES);
-    		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES);
-    		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES);
+    		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES+pReg->town->TownType()-2);
+    		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES+pReg->town->TownType()-2);
     		u->combat = S_FIRE;
     		u->SetFlag(FLAG_BEHIND, 1);
     		u->SetFlag(FLAG_HOLDING, 1);
@@ -2482,11 +2574,11 @@ void Game::AdjustCityMons(ARegion *r)
 				else if(u->GetFlag(FLAG_BEHIND)) needguard -= GUARDBEHIND;
 				else needguard -= GUARDFRONT;
 			}
-			if(u->guard == GUARD_GUARD) needguard = 0; //ie if someone else is guarding, no guards needed.
+			if(u->guard == GUARD_GUARD) needguard = 0; //ie if someone else is guarding, no guards needed. This could subsequently go negative ...
 		}
 	}
 
-	if (needguard && (getrandom(100) < Globals->GUARD_REGEN) && r->untaxed > getrandom(r->money)) {  //less chance if being taxed.
+	if ((needguard > 0) && (getrandom(100) < Globals->GUARD_REGEN) && r->untaxed > getrandom(r->money)) {  //less chance if being taxed.
 		if(!Globals->GUARD_DEPENDS_ON_TAX || r->untaxed >= 20*Globals->GUARD_MONEY) CreateCityMon(r, 10, needguard);
 	}
 }
@@ -2505,6 +2597,8 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 	int maxweapon = 0;
 	int armor = -1;
 	int maxarmor = 0;
+	int mount = -1;
+	int maxmount = 0;
 	for(int i=0; i<NITEMS; i++) {
 		int num = u->items.GetNum(i);
 		if(num == 0) continue;
@@ -2519,15 +2613,27 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 			armor = i;
 			maxarmor = num;
 		}
+		if((ItemDefs[i].type & IT_MOUNT)
+			&& (num > maxmount)) {
+			mount = i;
+			maxmount = num;
+		}
 	}
-	int skill = S_COMBAT;
+	
+	int skill = S_COMBAT;         //put in a mod for riding races in riding terrain
 	
 	if (weapon != -1) {
 		WeaponType *wp = FindWeapon(ItemDefs[weapon].abr);
 		if(FindSkill(wp->baseSkill) == FindSkill("XBOW")) skill = S_CROSSBOW;
 		if(FindSkill(wp->baseSkill) == FindSkill("LBOW")) skill = S_LONGBOW;
-	}
-	
+	} else weapon = I_SWORD;
+
+	if (mount != -1) {
+        if(skill == S_COMBAT && (u->GetSkillKnowledgeMax(S_RIDING) > u->GetSkillKnowledgeMax(S_COMBAT)) && (TerrainDefs[r->type].flags & TerrainType::RIDINGMOUNTS) && !(TerrainDefs[r->type].flags & TerrainType::RIDINGLIMITED)) {
+		    skill = S_RIDING;
+        } else mount = -1;
+	} 
+
 	if(u->type == U_GUARDMAGE) {
 		men = 1;
 	} else {
@@ -2546,8 +2652,8 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 		if(Globals->START_CITY_TACTICS && !(SkillDefs[S_TACTICS].flags & SkillType::DISABLED))
 			u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
 		if(!Globals->ARCADIA_MAGIC) u->SetSkill(S_FORCE,Globals->START_CITY_MAGES);
-		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES);
-		u->SetSkill(S_FIRE, Globals->START_CITY_MAGES);
+		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES+towntype-2);
+		u->SetSkill(S_FIRE, Globals->START_CITY_MAGES+towntype-2);
 		u->combat = S_FIRE;
 		u->SetFlag(FLAG_BEHIND, 1);
 		u->reveal = REVEAL_FACTION;
@@ -2559,6 +2665,8 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 		u->SetSkill(S_OBSERVATION,towntype + 1);
 		u->AdjustSkills(1);
 		u->items.SetNum(weapon,men);
+		if(armor != -1) u->items.SetNum(armor,men);
+		if(mount != -1) u->items.SetNum(mount,men);
 	}
 }
 

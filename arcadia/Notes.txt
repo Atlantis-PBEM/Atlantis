@@ -159,10 +159,15 @@ Added FDOL
 050228:
 Fixed crash bugs in CLOA-1hp check and ethnic morale penalty
 
+?
+Fixed bug for study orders not being cleared
+Generalised TEMPLATE / ALL to act after order parsing, not during
+
+050303:
+Fixed crash bug from STAY coding
+Implemented skill-level check for studying magic skills
+
 Todo:
 Allow transfer from leader to non-leader if errors are suppressed
 Rewrite rules magic section for heros, and normal->leader->hero progression
 Note for buying: multiple buyers - don't count silver twice if possible.
-
-ToCheck:
-Disabling a combat skill may be nasty

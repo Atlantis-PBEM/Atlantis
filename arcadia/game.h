@@ -50,6 +50,28 @@ public:
 	void Error(const AString &error);
 };
 
+class WorldEvent
+{
+public:
+    WorldEvent();
+    ~WorldEvent();
+
+	enum {
+		BATTLE,
+		CITY_CONQUEST,
+		ARMY,
+		CONVERSION,
+		HERO_DEATH,
+		HERO_DISMISSED,
+		HERO_HOPE,
+	};
+
+    int type;
+    Location *place;
+    
+    AString *Text();
+};
+
 /// The main game class
 /** Currently this doc is here to switch on the class so that
 I can see what the modify.cpp docs look like.
@@ -143,6 +165,7 @@ private:
 	void ImportMapFile(AString *name, int level);
 	void ImportEthFile(AString *name, int level);
 	void ImportRivFile(AString *name, int level);
+	void ImportFortFile(AString *name, int level);
 	int GetMarketTradeVariance();
 	void EditGameBuildingsSummary();
 	void EditGameProductsSummary();
@@ -175,7 +198,18 @@ private:
 	void CreateWMons();
 	void CreateLMons();
 	void CreateVMons();
-	Unit *MakeManUnit(Faction*, int, int, int, int, int, int);
+	Unit *MakeManUnit(Faction*, ARegion*, int, int, int, int, int);
+
+	//
+	// Game-specific creation functions (see world.cpp).
+	//
+	void CreateWorld();
+	void CreateNPCFactions();
+	void CreateCityMon(ARegion *pReg, int percent, int needguard);
+	void CreateFortMon(ARegion *pReg, Object *o);
+	int MakeWMon(ARegion *pReg);
+	void MakeLMon(Object *pObj);
+
 	// These are in magic.cpp:
 	void GenerateDragons(ARegion *r);
 	void GenerateVolcanic(ARegion *r);
@@ -184,16 +218,7 @@ private:
 	void SpecialErrors(ARegion *r);
 	void SpecialError(ARegion *r, AString message, Faction *dontshowtothisfac = NULL);
 	void SetupGuardsmenAttitudes();
-
-	//
-	// Game-specific creation functions (see world.cpp).
-	//
-	void CreateWorld();
-	void CreateNPCFactions();
-	void CreateCityMon(ARegion *pReg, int percent, int needmage);
-	int MakeWMon(ARegion *pReg);
-	void MakeLMon(Object *pObj);
-
+	
 	void WriteSurfaceMap(Aoutfile *f, ARegionArray *pArr, int type);
 	void WriteUnderworldMap(Aoutfile *f, ARegionArray *pArr, int type);
 	char GetRChar(ARegion *r);
@@ -311,6 +336,7 @@ private:
 	AList factions;
 	AList newfactions; /* List of strings */
 	AList battles;
+	AList worldevents;
 	ARegionList regions;
 	int factionseq;
 	unsigned int unitseq;

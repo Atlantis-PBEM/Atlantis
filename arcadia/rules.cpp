@@ -148,7 +148,7 @@ static GameDefs g = {
 	0,   // SAFE_START_CITIES
 	50, // AMT_START_CITY_GUARDS
 	0,   // START_CITY_GUARDS_PLATE
-	2,   // START_CITY_MAGES
+	3,   // START_CITY_MAGES
 	0,   // START_CITY_TACTICS
 	0,   // APPRENTICES_EXIST  // should be set to zero with Arcadia
 

@@ -32,7 +32,7 @@ void Game::CreateCityMons()
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
 		if (r->type == R_NEXUS || r->IsStartingCity() || r->town) {
-			CreateCityMon(r, 100, 1);
+			CreateCityMon(r, 100, 7);
 		}
 	}
 }
@@ -175,7 +175,7 @@ void Game::MakeLMon(Object *pObj)
 		montype = TerrainDefs[pObj->region->type].humanoid;                        //33% humanoid
 		if(!getrandom(3) && TerrainDefs[pObj->region->type].smallmon != -1) montype = TerrainDefs[pObj->region->type].smallmon;    //17% smallmon
 		if(!getrandom(2) && TerrainDefs[pObj->region->type].bigmon != -1) montype = TerrainDefs[pObj->region->type].bigmon;    //50% bigmon
-		if(!getrandom(10)) montype = I_IWOLF;    //10% illusions
+//		if(!getrandom(10)) montype = I_IWOLF;    //10% illusions
 	}
 
 	if((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
@@ -297,10 +297,10 @@ void Game::MakeLMon(Object *pObj)
 	u->MoveUnit(pObj);
 }
 
-Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weaponlevel, int armor, int behind)
+Unit *Game::MakeManUnit(Faction *fac, ARegion *pReg, int num, int level, int weaponlevel, int armor, int behind)
 {
 	Unit *u = GetNewUnit(fac);
-	ManType *men = FindRace(ItemDefs[mantype].abr);
+	ManType *men = FindRace(ItemDefs[pReg->race].abr);
 	if(!men) men = FindRace("HELF");
 
 /*   BS:
@@ -308,15 +308,18 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
     it, I've just deleted the original and written my own.
 */
     if(!behind) {
-    	u->SetMen(mantype, num);
+    	u->SetMen(pReg->race, num);
     	u->items.SetNum(I_SWORD, num);
-    	u->SetSkill(S_COMBAT, level);
+    	if( (u->GetSkillKnowledgeMax(S_RIDING) > u->GetSkillKnowledgeMax(S_COMBAT)) && (TerrainDefs[pReg->type].flags & TerrainType::RIDINGMOUNTS) && !(TerrainDefs[pReg->type].flags & TerrainType::RIDINGLIMITED) ) {
+    	    u->SetSkill(S_RIDING, level);
+    	    u->items.SetNum(I_HORSE, num);
+    	} else u->SetSkill(S_COMBAT, level);
     //  u->SetFlag(FLAG_BEHIND,1);
     	if(armor) {
     		u->items.SetNum(I_LEATHERARMOR, num);    //only the frontrow gets armour
     	}
     } else {
-    	u->SetMen(mantype, num);
+    	u->SetMen(pReg->race, num);
     	if(u->GetSkillKnowledgeMax(S_CROSSBOW) > u->GetSkillKnowledgeMax(S_LONGBOW)) {
     	    u->items.SetNum(I_CROSSBOW, num);
     	    u->SetSkill(S_CROSSBOW, level);

@@ -2147,11 +2147,21 @@ void Game::EditGameGlobalEffects()
                     ImportMapFile(new AString("xanaxor.txt"), 1);
                     ImportEthFile(new AString("xanaxoreth.txt"), 1);
                     ImportRivFile(new AString("xanaxorriv.txt"), 1);
+                    ImportFortFile(new AString("xanaxorfort.txt"), 1);
                     
                     int frequency = 10;
                     
     			    forlist(&regions) {
     			        ARegion *r = (ARegion *) elem;
+    			        //reset building sequence
+    			        int maxnum = 0;
+    			        forlist(&r->objects) {
+    			            Object *o = (Object *) elem;
+    			            if(o->num > maxnum) maxnum = o->num;
+    			        }
+    			        r->buildingseq = maxnum + 1;
+    			        
+    			        //delete or make gates as necessary
     			        int needsgate = 0;
     			        if(TerrainDefs[r->type].similar_type != R_OCEAN) needsgate = !getrandom(frequency);
                         if(r->gate > 0 && !needsgate) {
@@ -2182,7 +2192,7 @@ void Game::EditGameGlobalEffects()
                             r->gate = gatenum;
                             r->gatemonth = getrandom(12);
                         }
-                    }                    
+                    }
                 } else if (*pToken == "resetgates") {
     			    SAFE_DELETE( pToken );
 
@@ -2276,6 +2286,73 @@ void Game::EditGameGlobalEffects()
     while( 1 ); 
 } 
 
+void Game::ImportFortFile(AString *filename, int level)
+{
+    Ainfile f;
+	if(f.OpenByName(*filename) == -1) {
+        Awrite("Could not open file.");
+        return;
+    }
+
+    int yy = 0;
+    AString *line = f.GetStr();
+
+    int maxx = regions.GetRegionArray(level)->x;
+    int maxy = regions.GetRegionArray(level)->y;
+
+   while(line && yy <= maxy) {
+        AString *type = line->gettoken();
+        int xx = yy%2;
+        
+        while(type && xx <= maxx) {
+            ARegion *pReg = regions.GetRegion(xx,yy,level);
+            if(pReg) {
+                forlist(&pReg->objects) {
+                    Object *o = (Object *) elem;
+                    if(o->type == O_DUMMY) continue;
+                    
+                    forlist(&o->units) {
+            			Unit *u = (Unit *) elem;
+            			pReg->Kill(u);
+            		}
+		            pReg->objects.Remove(o);
+                }
+            
+                int forttype = -1;
+                
+                if (*type == "t") forttype = O_TOWER;
+                else if (*type == "f") forttype = O_FORT;
+                else if (*type == "c") forttype = O_CASTLE;
+                else if (*type == "i") forttype = O_CITADEL;
+                else if (*type == "m") forttype = O_MFORTRESS;
+                else if (*type == "1") forttype = TerrainDefs[pReg->type].lairs[1];
+                else if (*type == "2") forttype = TerrainDefs[pReg->type].lairs[2];
+                else if (*type == "3") forttype = TerrainDefs[pReg->type].lairs[3];
+                else if (*type == "4") forttype = TerrainDefs[pReg->type].lairs[4];
+                else if (*type == "5") forttype = TerrainDefs[pReg->type].lairs[5];
+                else if (*type == "6") forttype = TerrainDefs[pReg->type].lairs[6];
+                
+                if(forttype > -1) {
+                    ARegion *pReg = regions.GetRegion(xx,yy,level);
+                    pReg->MakeLair(forttype);
+                    forlist(&pReg->objects) {
+                        Object *o = (Object *) elem;
+                        if (o->units.Num()) continue;
+                        if (ObjectDefs[o->type].monster != -1) MakeLMon(o);
+                        if (ObjectDefs[o->type].protect > 0) CreateFortMon(pReg,o);
+                    }
+                }
+            }
+            xx += 2;
+            delete type;
+            type = line->gettoken();
+        }
+        yy += 1;
+        if(line) delete line;
+        line = f.GetStr();
+    }
+}
+
 void Game::ImportRivFile(AString *filename, int level)
 {
     Ainfile f;
@@ -2320,6 +2397,7 @@ void Game::ImportRivFile(AString *filename, int level)
         if(line) delete line;
         line = f.GetStr();
     }
+    Awrite("done");
 }
 
 void Game::ImportEthFile(AString *filename, int level)

@@ -141,7 +141,9 @@ COUR (instill courage): Gives +2 bonus (up from +1) and +1 against ranged attack
 SWIN (summon wind): Energy cost halved
 
 Items added:
-Dolphins
+Dolphins (normal, mount)
+Flying dolphins (advanced, mount)
+Staves of Yew (magic, weapon)
 
 Items removed:
 Wagons
