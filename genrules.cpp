@@ -4087,108 +4087,110 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "PRODUCE crossbows";
 	f.CommandExample(temp, temp2);
 
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("promote");
+	f.TagText("H4", "PROMOTE [unit]");
+	temp = "Promote the specified unit to owner of the object of which you "
+		"are currently the owner.  The target unit must have declared you "
+		"Friendly.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Promote unit 415 to be the owner of the object that this unit "
+		"owns.";
+	temp2 = "PROMOTE 415";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("quit");
+	f.TagText("H4", "QUIT [password]");
+	temp = "Quit the game.  On issuing this order, your faction will be "
+		"completely and permanently destroyed. Note that you must give "
+		"your password for the quit order to work; this is to provide "
+		"some safety against accidentally issuing this order.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Quit the game if your password is foobar.";
+	temp2 = "QUIT \"foobar\"";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("restart");
+	f.TagText("H4", "RESTART [password]");
+	temp = "Similar to the ";
+	temp += f.Link("#quit", "QUIT") + " order, this order will completely "
+		"and permanently destroy your faction. However, it will begin a "
+		"brand new faction for you (you will get a separate turn report for "
+		"the new faction). Note that you must give your password for this "
+		"order to work, to provide some protection against accidentally "
+		"issuing this order.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Restart as a new faction if your password is foobar.";
+	temp2 = "RESTART \"foobar\"";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("reveal");
+	f.TagText("H4", "REVEAL");
+	f.TagText("H4", "REVEAL UNIT");
+	f.TagText("H4", "REVEAL FACTION");
+	temp = "Cause the unit to either show itself (REVEAL UNIT), or show "
+		"itself and its faction affiliation (REVEAL FACTION), in the turn "
+		"report, to all other factions in the region. ";
+	if(has_stea) {
+		temp += "Used to reveal high stealth scouts, should there be some "
+			"reason to. ";
+	}
+	temp += "REVEAL is used to cancel this.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "Show the unit to all factions.";
+	temp2 = "REVEAL UNIT";
+	f.CommandExample(temp, temp2);
+	temp = "Show the unit and it's affiliation to all factions.";
+	temp2 = "REVEAL FACTION";
+	f.CommandExample(temp, temp2);
+	temp = "Cancels revealling.";
+	temp2 = "REVEAL";
+	f.CommandExample(temp, temp2);
+
+	if(may_sail) {
+		f.ClassTagText("DIV", "rule", "");
+		f.LinkRef("sail");
+		f.TagText("H4", "SAIL [dir] ...");
+		f.TagText("H4", "SAIL");
+		temp = "The first form will sail the ship, which the unit must be "
+			"the owner of, in the directions given.  The second form "
+			"will cause the unit to aid in the sailing of the ship, using "
+			"the Sailing skill.  See the section on movement for more "
+			"information on the mechanics of sailing.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Sail north, then northwest.";
+		temp2 = "SAIL N NW";
+		f.CommandExample(temp, temp2);
+		temp = "or:";
+		temp2 = "SAIL N\nSAIL NW";
+		f.CommandExample(temp, temp2);
+	}
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("sell");
+	f.TagText("H4", "SELL [quantity] [item]");
+	f.TagText("H4", "SELL ALL [item]");
+	temp = "Attempt to sell the amount given of the item given.  If the "
+		"unit does not have as many of the item as it is trying to sell, "
+		"it will attempt to sell all that it has. The second form will "
+		"attempt to sell all of that item, regardless of how many it has. "
+		"If more of the item are on sale (by all the units in the region) "
+		"than are wanted by the region, the number sold per unit will be "
+		"split up in proportion to the number each unit tried to sell.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Sell 10 furs to the market.";
+	temp2 = "SELL 10 furs";
+	f.CommandExample(temp, temp2);
 #if 0
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"promote\"> </a>\n");
- printf("<h4> PROMOTE [unit] </h4>\n");
- printf("\n");
- printf("Promote the specified unit to owner of the object of which you are currently\n");
- printf("the owner.  The target unit must have declared you Friendly. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Promote unit 415 to be the owner of the object that this unit owns. <p>\n");
- printf("<pre>\n");
-   printf("  PROMOTE 415\n");
- printf("</pre> <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"quit\"> </a>\n");
- printf("<h4> QUIT [password] </h4>\n");
- printf("\n");
- printf("Quit the game.  On issuing this order, your faction will be completely and\n");
- printf("permanently destroyed. Note that you must give your password for the quit\n");
- printf("order to work; this is to provide some safety against accidentally issuing\n");
- printf("this order. <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"restart\"></a>\n");
- printf("<h4> RESTART [password] </h4>\n");
- printf("\n");
- printf("Similar to the <a href=\"#quit\">QUIT</a> order, this order will completely\n");
- printf("and permanently destroy your faction. However, it will begin a brand new\n");
- printf("faction for you (you will get a separate turn report for the new\n");
- printf("faction). Note that you must give your password for this order to work,\n");
- printf("to provide some protection against accidentally issuing this order. <p>\n");
- printf("\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"reveal\"> </a>\n");
- printf("<h4> REVEAL </h4>\n");
- printf("<h4> REVEAL UNIT </h4>\n");
- printf("<h4> REVEAL FACTION </h4>\n");
- printf("\n");
- printf("Cause the unit to either show itself (REVEAL UNIT), or show itself and its\n");
- printf("faction affiliation (REVEAL FACTION), in the turn report, to all other factions\n");
- printf("in the region.  \n");
- if (st_ena)
-  {
-   printf("  Used to reveal high stealth scouts, should there be some reason to.  \n");
-  }
- printf("REVEAL is used to cancel this. <p>\n");
- printf("\n");
- printf("Examples: <p>\n");
- printf("Show the unit to all factions. <p>\n");
- printf("<pre>\n");
-   printf("  REVEAL UNIT \n");
- printf("</pre> <p>\n");
- printf("Show the unit and it's affiliation to all factions. <p>\n");
- printf("<pre>\n");
-   printf("  REVEAL FACTION\n");
- printf("</pre> <p>\n");
- printf("Cancels revealling. <p>\n");
- printf("<pre>\n");
-   printf("  REVEAL\n");
- printf("</pre> <p>\n");
- printf("\n");
- if (SKILL_ENABLED(S_SAILING))
-  {
-   printf("  <center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
-   printf("  <a name=\"sail\"> </a>\n");
-   printf("  <h4> SAIL [dir] ... </h4>\n");
-   printf("  <h4> SAIL </h4>\n");
-   printf("  \n");
-   printf("  The first form will sail the ship, which the unit must be the owner of, in the\n");
-   printf("  directions given.  The second form will cause the unit to aid in the sailing\n");
-   printf("  of the ship, using the Sailing skill.  See the section on movement for more\n");
-   printf("  information on the mechanics of sailing. <p>\n");
-   printf("  \n");
-   printf("  Example: <p>\n");
-   printf("  Sail north, then northwest. <p>\n");
-   printf("  <pre>\n");
-    printf("   SAIL N NW\n");
-   printf("  </pre> <p>\n");
-   printf("  or: <p>\n");
-   printf("  <pre>\n");
-   printf("  SAIL N\n");
-   printf("  SAIL NW\n");
-   printf("  </pre> <p>\n");
- printf("\n");
-  }
-   printf("  \n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<a name=\"sell\"> </a>\n");
- printf("<h4> SELL [quantity] [item] </h4>\n");
- printf("\n");
- printf("Attempt to sell the amount given of the item given.  If the unit does not have\n");
- printf("as many of the item as it is trying to sell, it will attempt to sell all that\n");
- printf("it has.  If more of the item are on sale (by all the units in the region) than\n");
- printf("are wanted by the region, the number sold per unit will be split up in\n");
- printf("proportion to the number each unit tried to sell. <p>\n");
- printf("\n");
- printf("Example: <p>\n");
- printf("Sell 10 furs to the market. <p>\n");
- printf("<pre>\n");
-   printf("  SELL 10 furs\n");
- printf("</pre> <p>\n");
  printf("\n");
  printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
  printf("<a name=\"show\"> </a>\n");
