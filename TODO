@@ -43,6 +43,8 @@
    -- Consider Geoff Dunbars more complicated (left/middle/right,
       behind,command) combat system as he proposed it [in atlantisdev message
       #2703].
+   -- Consider Tim Martel's suggestion of having tactical advantage be a
+      contest of skills, rather than a straight comparison.
 
 ** Items
    -- Consider adding the ability to produce trade goods.
@@ -62,9 +64,6 @@
 
 
 ** Orders
-   -- Add an 'EJECT' order to allow a building owner to move a unit out
-      of a structure it owns. [Make sure it cannot be used to drown a unit
-      at sea]
    -- consider ADVERTISE/PURCHASE orders (ADVERTISE run end of month,
       PURCHASE run at beginning) to allow player run markets in a hex for
       the succeeding month.  [Perennial suggestion.  Reason for using
@@ -100,11 +99,6 @@
       having skills which are only learnable through specific game actions
       or events (ie, GM intervention or the buildings in the last bullet and
       not transferrable to all units).]
-   -- Consider skill improvement through use. [This has gone around a couple
-      of times.. I think it would be very very hard to do 'right' and causes
-      more problems than it solves.  Probably not something I'll do, but it
-      is something for people to consider if they want. (and if they want it
-      to code it and submit it to me under a gamedef)]
    -- Unit grouping.
    -- Add option for entertain being an instant order.
    -- Consider having allied units tagged as a '=' instead of a '-'. (extend
