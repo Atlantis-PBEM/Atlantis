@@ -2226,9 +2226,12 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 		}
 	}
 	int skill = S_COMBAT;
-	WeaponType *wp = FindWeapon(ItemDefs[weapon].abr);
-	if(FindSkill(wp->baseSkill) == FindSkill("XBOW")) skill = S_CROSSBOW;
-	if(FindSkill(wp->baseSkill) == FindSkill("LBOW")) skill = S_LONGBOW;
+	
+	if (weapon != -1) {
+		WeaponType *wp = FindWeapon(ItemDefs[weapon].abr);
+		if(FindSkill(wp->baseSkill) == FindSkill("XBOW")) skill = S_CROSSBOW;
+		if(FindSkill(wp->baseSkill) == FindSkill("LBOW")) skill = S_LONGBOW;
+	}
 	
 	int sl = u->GetRealSkill(skill);
 		
