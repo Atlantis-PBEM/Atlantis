@@ -261,3 +261,5 @@ Changes from 4.0.7 -> 4.0.8
    -- Fixed another bug in the NOSPOILS code.  NOSPOILS was supposed to still
       allow 0 weight and weight < walking capacity items to be aquired.  It
       wasn't.
+   -- Fixed a bug where WITHDRAW was not being noted as an invalid order if
+      the ALLOW_WITHDRAW gamedef was not set.

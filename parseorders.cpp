@@ -1786,7 +1786,10 @@ void Game::ProcessDeclareOrder(Faction * f,AString * o, OrdersCheck *pCheck )
 
 void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	if(!(Globals->ALLOW_WITHDRAW)) return;
+	if(!(Globals->ALLOW_WITHDRAW)) {
+		ParseError(pCheck, unit, 0, "WITHDRAW is not a valid order.");
+		return;
+	}
 
 	AString *token = o->gettoken();
 	if(!token) {
