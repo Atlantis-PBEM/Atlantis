@@ -584,3 +584,6 @@ Changes from 4.0.10 -> 5.0.0
    -- Fixed RunPortalLore to actually use GetTargetInRange() rather than
       calling GetDist() directly.
    -- Added "number of days taught" to output from study.
+   -- Fixed misleading damage message on monsters.
+   -- Fixed coredump and rangecheck when a region that was out of range was
+      used in a targetted spell.
