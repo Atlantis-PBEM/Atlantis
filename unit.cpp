@@ -598,8 +598,8 @@ void Unit::DefaultOrders(Object * obj)
 		combat = S_FIRE;
 	} else{
 		if(obj->region->type != R_NEXUS) {
-			if(GetFlag(FLAG_AUTOTAX) && Globals->TAX_PILLAGE_MONTH_LONG &&
-					Taxers()) {
+			if(GetFlag(FLAG_AUTOTAX) &&
+					Globals->TAX_PILLAGE_MONTH_LONG && Taxers()) {
 				taxing = TAX_AUTO;
 			} else {
 				ProduceOrder * order = new ProduceOrder;
@@ -1336,69 +1336,190 @@ int Unit::Forbids(ARegion * r,Unit * u)
 int Unit::Taxers()
 {
 	int totalMen = GetMen();
+	int illusions = 0;
+	int creatures = 0;
+	int taxers = 0;
 
-	if( !totalMen ) return( 0 );
+	if ((Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE) ||
+		((Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL) &&
+		 GetSkill(S_COMBAT)) ||
+		((Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL) &&
+		 (GetSkill(S_CROSSBOW) || GetSkill(S_LONGBOW))) ||
+		((Globals->WHO_CAN_TAX & GameDefs::TAX_RIDING_SKILL) &&
+		 GetSkill(S_RIDING)) ||
+		((Globals->WHO_CAN_TAX & GameDefs::TAX_STEALTH_SKILL) &&
+		 GetSkill(S_STEALTH))) {
+		taxers = totalMen;
+	} else {
+		// check out items
+		int numMelee= 0;
+		int numUsableMelee = 0;
+		int numBows = 0;
+		int numUsableBows = 0;
+		int numMounted= 0;
+		int numUsableMounted = 0;
+		int numMounts = 0;
+		int numUsableMounts = 0;
+		int numBattle = 0;
+		int numUsableBattle = 0;
 
-	if (GetSkill(S_COMBAT)) return( totalMen );
-
-	int numNoWeapons = totalMen;
-	int numNoFootWeapons = totalMen;
-	int numMounts = 0;
-	int numMountedWeapons = 0;
-	int numUsableMounted = 0;
-	int weaponType;
-	for( weaponType = 1; weaponType < NUMWEAPONS; weaponType++ ) {
-		WeaponType *pWep = &( WeaponDefs[ weaponType ]);
-
-		//
-		// Here's a weapon to look for
-		//
-		forlist( &items ) {
+		forlist (&items) {
 			Item *pItem = (Item *) elem;
-			if( !pItem->num ) {
-				continue;
+
+			if ((ItemDefs[pItem->type].type & IT_BATTLE) &&
+				(ItemDefs[pItem->type].index <= BATTLE_FSWORD)) {
+				// Only consider offensive items
+				if ((Globals->WHO_CAN_TAX &
+							GameDefs::TAX_USABLE_BATTLE_ITEM) &&
+					(!(BattleItemDefs[ItemDefs[pItem->type].index].flags &
+					   BattleItemType::MAGEONLY) ||
+					 type == U_MAGE || type == U_APPRENTICE)) {
+					numUsableBattle += pItem->num;
+					numBattle += pItem->num;
+					continue; // Don't count this as a weapon as well!
+				}
+				if (Globals->WHO_CAN_TAX & GameDefs::TAX_BATTLE_ITEM) {
+					numBattle += pItem->num;
+					continue; // Don't count this as a weapon as well!
+				}
 			}
 
-			if( ItemDefs[ pItem->type ].type & IT_MOUNT ) {
-				// don't bother checking skill, that's done later
+			if (ItemDefs[pItem->type].type & IT_WEAPON) {
+				WeaponType *pWep = WeaponDefs + ItemDefs[pItem->type].index;
+				if (!(pWep->flags & WeaponType::NEEDSKILL)) {
+					// A melee weapon
+					if (GetSkill(S_COMBAT)) numUsableMelee += pItem->num;
+					numMelee += pItem->num;
+				} else if (pWep->baseSkill == S_RIDING) {
+					// A mounted weapon
+					if (GetSkill(S_RIDING)) numUsableMounted += pItem->num;
+					numMounted += pItem->num;
+				} else {
+					// Presume that anything else is a bow!
+					if (GetSkill(pWep->baseSkill) ||
+						(pWep->orSkill != -1 && GetSkill(pWep->orSkill)))
+						numUsableBows += pItem->num;
+					numBows += pItem->num;
+				}
+			}
+
+			if (ItemDefs[pItem->type].type & IT_MOUNT) {
+				if (MountDefs[ItemDefs[pItem->type].index].minBonus
+						<= GetSkill(S_RIDING))
+					numUsableMounts += pItem->num;
 				numMounts += pItem->num;
-				numUsableMounted = numMountedWeapons;
-				if (numUsableMounted > numMounts) numUsableMounted = numMounts;
-				numNoWeapons = numNoFootWeapons - numUsableMounted;
-				continue;
 			}
 
-			if( !( ItemDefs[ pItem->type ].type & IT_WEAPON )) {
-				continue;
+			if (ItemDefs[pItem->type].type & IT_MONSTER) {
+				if (ItemDefs[pItem->type].index == MONSTER_ILLUSION)
+					illusions += pItem->num;
+				else
+					creatures += pItem->num;
 			}
+		}
 
-			if( ItemDefs[ pItem->type ].index != weaponType ) {
-				continue;
+		// Ok, now process the counts!
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_WEAPON) {
+			if (numUsableMounted > numUsableMounts) {
+				taxers = numUsableMounts;
+				numMounts -= numUsableMounts;
+				numUsableMounts = 0;
+			} else {
+				taxers = numUsableMounted;
+				numMounts -= numUsableMounted;
+				numUsableMounts -= numUsableMounted;
 			}
-
-			if (CanUseWeapon(pWep) == -1) continue;
-			//
-			// OK, the unit has the skill to use this weapon,
-			// or no skill is required
-			//
-
-			if (pWep->flags & WeaponType::NOFOOT) {
-				// Check for mounted only weapons
-				numMountedWeapons += pItem->num;
-				numUsableMounted = numMountedWeapons;
-				if (numUsableMounted > numMounts) numUsableMounted = numMounts;
-				numNoWeapons = numNoFootWeapons - numUsableMounted;
-				if( numNoWeapons <= 0) return( totalMen );
-				continue;
+			taxers += numMelee + numUsableBows;
+		} else if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANY_WEAPON) {
+			taxers = numMelee + numBows + numMounted;
+		} else {
+			if (Globals->WHO_CAN_TAX &
+					GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL) {
+				if (numUsableMounted > numUsableMounts) {
+					taxers += numUsableMounts;
+					numMounts -= numUsableMounts;
+					numUsableMounts = 0;
+				} else {
+					taxers += numUsableMounted;
+					numMounts -= numUsableMounted;
+					numUsableMounts -= numUsableMounted;
+				}
+				taxers += numUsableMelee;
 			}
+			if (Globals->WHO_CAN_TAX &
+					GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON) {
+				taxers += numUsableBows;
+			}
+		}
 
-			numNoFootWeapons -= pItem->num;
-			numNoWeapons = numNoFootWeapons - numUsableMounted;
-			if( numNoWeapons <= 0 ) return( totalMen );
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE)
+			taxers += numMounts;
+		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE_AND_RIDING_SKILL)
+			taxers += numUsableMounts;
+
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_BATTLE_ITEM)
+			taxers += numBattle;
+		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM)
+			taxers += numUsableBattle;
+	}
+
+	// Ok, all the items categories done - check for mages taxing
+	if (type == U_MAGE) {
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANY_MAGE)
+			taxers = totalMen;
+		else {
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_COMBAT_SPELL) {
+				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) &&
+						(combat == S_FIRE || combat == S_EARTHQUAKE ||
+						 combat == S_SUMMON_TORNADO ||
+						 combat == S_CALL_LIGHTNING ||
+						 combat == S_SUMMON_BLACK_WIND))
+					taxers = totalMen;
+
+				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR) &&
+						(combat == S_SUMMON_STORM ||
+						 combat == S_CREATE_AURA_OF_FEAR))
+					taxers = totalMen;
+
+				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER) &&
+						(combat == S_FORCE_SHIELD ||
+						 combat == S_ENERGY_SHIELD ||
+						 combat == S_SPIRIT_SHIELD ||
+						 combat == S_CLEAR_SKIES))
+					taxers = totalMen;
+			} else {
+				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) &&
+						(GetSkill(S_FIRE) || GetSkill(S_EARTHQUAKE) ||
+						 GetSkill(S_SUMMON_TORNADO) ||
+						 GetSkill(S_CALL_LIGHTNING) ||
+						 GetSkill(S_SUMMON_BLACK_WIND)))
+					taxers = totalMen;
+
+				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR) &&
+						(GetSkill(S_SUMMON_STORM) ||
+						 GetSkill(S_CREATE_AURA_OF_FEAR)))
+					taxers = totalMen;
+
+				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER) &&
+						(GetSkill(S_FORCE_SHIELD) ||
+						 GetSkill(S_ENERGY_SHIELD) ||
+						 GetSkill(S_SPIRIT_SHIELD) ||
+						 GetSkill(S_CLEAR_SKIES)))
+					taxers = totalMen;
+			}
 		}
 	}
 
-	return( totalMen - numNoWeapons );
+	// Now check for an overabundance of tax enabling objects
+	if (taxers > totalMen) taxers = totalMen;
+
+	// And finally for creatures
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES)
+		taxers += creatures;
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
+		taxers += illusions;
+
+	return(taxers);
 }
 
 int Unit::GetFlag(int x)

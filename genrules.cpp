@@ -2432,11 +2432,201 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(!Globals->TAX_PILLAGE_MONTH_LONG) temp += "not ";
 	temp += "a full month order). The amount of tax money that can be "
 		"collected each month in a region is shown in the region "
-		"description. Only combat ready units may ";
-	temp += f.Link("#tax", "TAX") + "; a unit is combat ready if it either: "
-		"has Combat skill of at least 1 or has a weapon (along with the "
-		"appropriate skill for the weapon if required) in its possession. "
-		"Each taxing character can collect $";
+		"description. ";
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE) {
+		temp += "Any unit may ";
+		temp += f.Link("#tax", "TAX");
+	} else {
+		AString temp3;
+		int prev = 0, hold = 0;
+		temp += "A unit may ";
+		temp += f.Link("#tax", "TAX");
+		temp += " if it ";
+		if (Globals->WHO_CAN_TAX &
+				(GameDefs::TAX_COMBAT_SKILL | GameDefs::TAX_BOW_SKILL |
+				 GameDefs::TAX_RIDING_SKILL | GameDefs::TAX_STEALTH_SKILL)) {
+			int	prev2 = 0, hold2 = 0;
+			if (hold) {
+				if (prev) temp += ", ";
+				temp += temp2;
+				prev= 1;
+			}
+			temp2 = "has ";
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL) {
+				temp3 = "Combat";
+				hold2 = 1;
+			}
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL) {
+				if (hold2) {
+					temp2 += temp3;
+					prev2 = 1;
+				}
+				if (prev2) temp2 += ", ";
+				temp2 += "Longbow";
+				prev2 = 1;
+				temp3 = "Crossbow";
+				hold2 = 1;
+			}
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_RIDING_SKILL) {
+				if (hold2) {
+					if (prev2) temp2 += ", ";
+					temp2 += temp3;
+					prev2 = 1;
+				}
+				temp3 = "Riding";
+				hold2 = 1;
+			}
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_STEALTH_SKILL) {
+				if (hold2) {
+					if (prev2) temp2 += ", ";
+					temp2 += temp3;
+					prev2= 1;
+				}
+				temp3 = "Stealth";
+				hold2 = 1;
+			}
+			if (prev2) temp2 += " or ";
+			temp2 += temp3;
+			temp2 += " skill of at least level 1";
+			hold = 1;
+		}
+		if (Globals->WHO_CAN_TAX &
+				(GameDefs::TAX_ANY_WEAPON | GameDefs::TAX_USABLE_WEAPON |
+				 GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL |
+				 GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON)) {
+			if (hold) {
+				if (prev) temp += ", ";
+				temp += temp2;
+				prev= 1;
+			}
+			temp2 = "has ";
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANY_WEAPON)
+				temp2 += "a weapon (regardless of skill requirements)";
+			else if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_WEAPON)
+				temp2 += "a weapon and the appropriate skill to use it";
+			else if (Globals->WHO_CAN_TAX &
+					(GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL |
+					 GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON)) {
+				AString temp3;
+				int prev2 = 0, hold2 = 0;
+				if (Globals->WHO_CAN_TAX &
+						GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL) {
+					temp2 += "Combat skill of at least level 1 and a "
+						"weapon which does not require any skill";
+					temp3 = "Riding skill of at least level 1 and "
+						"a weapon which requires riding skill";
+					prev2 = 1;
+					hold2 = 1;
+				}
+				if (Globals->WHO_CAN_TAX &
+						GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON) {
+					if (hold2) {
+						temp2 += ", ";
+						temp2 += temp3;
+					}
+					temp3 = "a Bow (Longbow or Crossbow) skill and a weapon "
+						"which requires that skill";
+					hold2 = 1;
+				}
+				if (prev2) temp2 += " or ";
+				temp2 += temp3;
+			}
+			hold = 1;
+		}
+		if (Globals->WHO_CAN_TAX &
+				(GameDefs::TAX_HORSE | GameDefs::TAX_HORSE_AND_RIDING_SKILL)) {
+			if (hold) {
+				if (prev) temp += ", ";
+				temp += temp2;
+				prev= 1;
+			}
+			temp2 = "has a mount";
+			if (!(Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE))
+				temp2 += " and sufficient skill to ride it in combat";
+			hold = 1;
+		}
+		if (Globals->WHO_CAN_TAX &
+				(GameDefs::TAX_ANY_MAGE | GameDefs::TAX_MAGE_DAMAGE |
+				 GameDefs::TAX_MAGE_FEAR | GameDefs::TAX_MAGE_OTHER)) {
+			if (hold) {
+				if (prev) temp += ", ";
+				temp += temp2;
+				prev= 1;
+			}
+			temp2 = "is a mage ";
+			if ((Globals->WHO_CAN_TAX &
+						(GameDefs::TAX_MAGE_DAMAGE |
+						 GameDefs::TAX_MAGE_FEAR |
+						 GameDefs::TAX_MAGE_OTHER)) ==
+					(GameDefs::TAX_MAGE_DAMAGE | GameDefs::TAX_MAGE_FEAR |
+					 GameDefs::TAX_MAGE_OTHER)) {
+				if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_COMBAT_SPELL)
+					temp2 += "who has a combat spell set";
+				else
+					temp2 += "who knows a combat spell";
+			} else {
+				int hold2 = 0, prev2 = 0;
+				AString temp3;
+				if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_COMBAT_SPELL)
+					temp2 += "whose combat spell ";
+				else
+					temp2 += "who knows a spell which ";
+				if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) {
+					temp3 = "damages enemies";
+					hold2 = 1;
+				}
+				if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR) {
+					if (hold2) {
+						temp2 += temp3;
+						prev2 = 1;
+					}
+					temp3 = "weakens opponents";
+					hold2 = 1;
+				}
+				if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER) {
+					if (hold2) {
+						if (prev2) temp2 += ", ";
+						temp2 += temp3;
+						prev2 = 1;
+					}
+					temp3 = "protects in combat";
+					hold2 = 1;
+				}
+				if (prev2) temp2 += " or ";
+				temp2 += temp3;
+			}
+			hold = 1;
+		}
+		if (Globals->WHO_CAN_TAX &
+				(GameDefs::TAX_BATTLE_ITEM |
+				 GameDefs::TAX_USABLE_BATTLE_ITEM)) {
+			if (hold) {
+				if (prev) temp += ", ";
+				temp += temp2;
+				prev= 1;
+			}
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM)
+				temp2 = "has a ";
+			else
+				temp2 = "can use a ";
+			temp2 += "magical item which gives a special attack in combat";
+			hold = 1;
+		}
+		if (prev) temp += " or ";
+		temp += temp2;
+		temp += ". ";
+	}
+	if (Globals->WHO_CAN_TAX &
+			(GameDefs::TAX_CREATURES | GameDefs::TAX_ILLUSIONS)) {
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES) {
+			temp += "Summoned ";
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
+				temp += "and illusory ";
+		} else if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
+			temp += "Illusory ";
+		temp += "creatures will assist in taxation. ";
+	}
+	temp +=	"Each taxing character can collect $";
 	temp += AString(Globals->TAX_INCOME) + ", though if the number of "
 		"taxers would tax more than the available tax income, the tax "
 		"income is split evenly among all taxers.";

@@ -478,3 +478,5 @@ Changes from 4.0.9 -> 4.0.10
    -- Tom Alsen added code to Blitzgame allowing monsters to regenerate hits
       during combat.  I have merged this code into the main base under a
 	  configuration option.
+   -- Patch for multiple types of taxing behaviour controlling who is
+      allowed to tax.  Patch submitted by Stephen Baillie.

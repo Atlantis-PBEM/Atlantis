@@ -26,8 +26,6 @@
       specific types of armor/weapons (such as pirates or skeleton or
       kobolds).  Possibly make those monsters not give normal loot, but
       only the stuff they carried.
-   -- Add a gamedef to have rout based on total number of hits on a side
-      rather than on total number of creatures (men/monsters) on a side?
    -- Consider Tactics alternative -- High tactics side gets a combat bonus
       of +X to all attacks (decreasing by one per round down to 0) where X
       is the difference in tactical advantage. [Found in an old suggestion
@@ -64,9 +62,6 @@
 
 
 ** Orders
-   -- Consider more complicated GIVE processing of 'GIVE ALL EXCEPT .....'
-      [I personally believe this will be a royal pain, but if someone
-      submits me a patch, I'll consider it.]
    -- Add an 'EJECT' order to allow a building owner to move a unit out
       of a structure it owns. [Make sure it cannot be used to drown a unit
       at sea]
@@ -97,11 +92,6 @@
       in the 4.0 series of Atlantis.]
 
 ** Rules
-   -- Gamedef to handle various options around combat/weapons/bows for taxing
-      [This would allow the GM to say that combat skill is required for 
-      taxing/pillaging, or that a weapon (+needed skill if any) is required,
-      or that the current situation of either a weapon (+needed skill if
-      any) or combat skill
    -- Consider some sorts of dangers for production
    -- Consider building specific skills. [Meaning here that there are skills
       which could only be learned in that specific location.  Requested for
@@ -193,9 +183,6 @@
       them to learn magic skills, but none above level 2.. This would take
       a bit more work, but is a valid option]
    -- rethink some of the current spells. [Az's beastform spell]
-   -- consider having summoned creatures drop no loot. Possibly have
-      them regain (or gain) loot over time, so the longer a monster is free
-      the more money and stuff it has.
    -- Clean up spell system -- Damage spells have been parameterized,
       Object creation spells, summoning spells and 'other' spells still
       need some sort of parameterization and genericization so that they

@@ -439,6 +439,45 @@ public:
 
 	// Do monsters regenerate during battle?
 	int MONSTER_BATTLE_REGEN;
+
+	// Options to control who is able to tax
+	enum {
+		TAX_ANYONE = 0x00001,
+		TAX_COMBAT_SKILL = 0x00002,
+		TAX_BOW_SKILL = 0x00004,
+		TAX_RIDING_SKILL = 0x00008,
+		TAX_USABLE_WEAPON = 0x00010, // no requirement or has required skill
+		TAX_ANY_WEAPON = 0x00020, // Pay up lest I beat thee with my longbow!
+		TAX_HORSE = 0x00040, // someone who HAS a horse, not the horse itself
+		// Usually a weapon that requires no skill, plus COMB, but also
+		// LANC (which requires RIDI) and RIDI
+		TAX_MELEE_WEAPON_AND_MATCHING_SKILL = 0x00080,
+		TAX_BOW_SKILL_AND_MATCHING_WEAPON = 0x00100,
+		TAX_HORSE_AND_RIDING_SKILL = 0x00200,
+		// Probably more petty theft than tax, but then there are those
+		// who argue that taxation IS theft ;->
+		TAX_STEALTH_SKILL = 0x00400,
+		// Should mages be able to tax?  I'd give my tax to someone who
+		// was aiming the black wind at me...
+		TAX_MAGE_DAMAGE = 0x00800,
+		TAX_MAGE_FEAR = 0x01000, // or able to flatten my barn?
+		TAX_MAGE_OTHER = 0x02000, // or able to create magical armour?
+		TAX_ANY_MAGE = 0x04000, // or who just has an impressive pointy hat?
+		// Wasn't sure whether mages should be judged on whether they
+		// know the spell, or their current combat spell (he's ordered
+		// to cast shield in combat, but still knows how to fireball
+		// unruly peasants).  Setting this uses only the current
+		// spell set with the COMBAT order.
+		TAX_MAGE_COMBAT_SPELL = 0x08000,
+		TAX_BATTLE_ITEM = 0x10000, // Has a staff of lightning?
+		TAX_USABLE_BATTLE_ITEM = 0x20000,
+		TAX_CREATURES = 0x40000, // Do magical critters help to tax?
+		TAX_ILLUSIONS = 0x80000, // What if they're not really there?
+
+		// Abbreviation for "the usual"
+		TAX_NORMAL = TAX_COMBAT_SKILL | TAX_USABLE_WEAPON,
+	};
+	int WHO_CAN_TAX;
 };
 
 extern GameDefs * Globals;
