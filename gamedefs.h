@@ -270,6 +270,11 @@ public:
 	// Are we allowing a multi-hex nexus
 	int MULTI_HEX_NEXUS;
 
+	// How many levels of the underworld do we want?
+	int UNDERWORLD_LEVELS;
+
+	// How many levels of the underdeep do we want?
+	int UNDERDEEP_LEVELS;
 };
 
 extern GameDefs * Globals;

@@ -270,6 +270,29 @@ static char *fill[] = {
  "      ",
  "      ",
 
+ // volcano
+ " /\\/\\ ",
+ "/  \\ \\",
+
+ // grotto
+ "  . . ",
+ " . .  ",
+ // deepforest
+ "  ^ ^ ",
+ " ^ ^  ",
+ // chasm
+ "      ",
+ "      ",
+ // grotto1
+ "  . . ",
+ " . .  ",
+ // deepforest1
+ "  ^ ^ ",
+ " ^ ^  ",
+ // chasm1
+ "      ",
+ "      ",
+
 };
 
 // NEW FUNCTION DK 2000.03.07,

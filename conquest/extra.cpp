@@ -188,17 +188,18 @@ void Game::ModifyTablesPerRuleset(void)
 	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
 		ModifyTerrainRaces(R_NEXUS, I_MAN, -1, -1, -1, -1, -1, -1);
 		ModifyTerrainItems(R_NEXUS, I_IRON, 100, 10, I_WOOD, 100, 10,
-				I_STONE, 100, 10, -1, 0, 0, -1, 0, 0);
+				I_STONE, 100, 10, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0);
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
 	/* Limit the resources on the islands and remove fish */
-	ModifyTerrainItems(R_OCEAN, -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0);
+	ModifyTerrainItems(R_OCEAN, -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0,
+			-1, 0, 0, -1, 0, 0);
 	ModifyTerrainItems(R_ISLAND_PLAIN, I_HORSE,100,20, -1,0,0, -1,0,0,
-			-1,0,0, -1,0,0);
+			-1,0,0, -1,0,0, -1, 0, 0, -1, 0, 0);
 	ModifyTerrainItems(R_ISLAND_SWAMP, I_WOOD,100,10, -1,0,0, -1,0,0,
-			-1,0,0, -1,0,0);
+			-1,0,0, -1,0,0, -1, 0, 0, -1, 0, 0);
 	ModifyTerrainItems(R_ISLAND_MOUNTAIN, I_IRON,100,20, I_STONE,100,10,
-			-1,0,0, -1,0,0, -1,0,0);
+			-1,0,0, -1,0,0, -1,0,0, -1, 0, 0, -1, 0, 0);
 	return;
 }

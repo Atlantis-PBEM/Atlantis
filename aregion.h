@@ -82,6 +82,12 @@ public:
     int prod5;
     int chance5;
     int amt5;
+	int prod6;
+	int chance6;
+	int amt6;
+	int prod7;
+	int chance7;
+	int amt7;
     int race1;
     int race2;
     int race3;

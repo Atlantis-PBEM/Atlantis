@@ -138,6 +138,8 @@ static GameDefs g = {
 	0,	// CITY_RENAME_COST
 	0,	// TAX_PILLAGE_MONTH_LONG
 	0,	// MULTI_HEX_NEXUS
+	3,	// UNDERWORLD_LEVELS
+	2,	// UNDERDEEP_LEVELS
 };
 
 GameDefs * Globals = &g;

@@ -226,7 +226,8 @@ void Game::ModifyTablesPerRuleset(void)
 	if(Globals->NEXUS_IS_CITY) {
 		ModifyTerrainRaces(R_NEXUS, I_FAIRY, -1, -1, -1, -1, -1, -1);
 		ModifyTerrainItems(R_NEXUS, I_HERBS, 100, 20, I_ROOTSTONE, 100, 10,
-				I_MITHRIL, 100, 10, I_YEW, 100, 10, I_IRONWOOD, 100, 10);
+				I_MITHRIL, 100, 10, I_YEW, 100, 10, I_IRONWOOD, 100, 10,
+				-1, 0, 0, -1, 0, 0);
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
@@ -240,6 +241,13 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_RRAT);
 	EnableItem(I_NOOGLE);
 	EnableItem(I_MUTANT);
+	if((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
+		EnableItem(I_MUSHROOM);
+		EnableItem(I_HEALPOTION);
+		EnableItem(I_ROUGHGEM);
+		EnableItem(I_GEMS);
+		EnableSkill(S_GEMCUTTING);
+	}
 
 	return;
 }

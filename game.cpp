@@ -1938,6 +1938,13 @@ char Game::GetRChar(ARegion * r)
 		case R_ISLAND_PLAIN: c = 'a'; break;
 		case R_ISLAND_MOUNTAIN: c = 'n'; break;
 		case R_ISLAND_SWAMP: c = 'w'; break;
+		case R_VOLCANO: c = 'v'; break;
+		case R_CHASM: c = 'l'; break;
+		case R_CERAN_CHASM1: c = 'l'; break;
+		case R_GROTTO: c = 'g'; break;
+		case R_CERAN_GROTTO1: c = 'g'; break;
+		case R_DFOREST: c = 'e'; break;
+		case R_CERAN_DFOREST1: c = 'e'; break;
 		default: return '?';
 	}
 	if (r->town) {
@@ -2162,7 +2169,9 @@ void Game::ModifyTerrainItems(int t, int p1, int c1, int a1,
 		                             int p2, int c2, int a2,
 		                             int p3, int c3, int a3,
 		                             int p4, int c4, int a4,
-		                             int p5, int c5, int a5)
+		                             int p5, int c5, int a5,
+									 int p6, int c6, int a6,
+									 int p7, int c7, int a7)
 {
 	if(t < 0 || t > (R_NUM -1)) return;
 	if(p1 > NITEMS-1) p1 = -1;
@@ -2170,16 +2179,22 @@ void Game::ModifyTerrainItems(int t, int p1, int c1, int a1,
 	if(p3 > NITEMS-1) p3 = -1;
 	if(p4 > NITEMS-1) p4 = -1;
 	if(p5 > NITEMS-1) p5 = -1;
+	if(p6 > NITEMS-1) p6 = -1;
+	if(p7 > NITEMS-1) p7 = -1;
 	if(c1 < 0 || c1 > 100) c1 = 0;
 	if(c2 < 0 || c2 > 100) c2 = 0;
 	if(c3 < 0 || c3 > 100) c3 = 0;
 	if(c4 < 0 || c4 > 100) c4 = 0;
 	if(c5 < 0 || c5 > 100) c5 = 0;
+	if(c6 < 0 || c6 > 100) c6 = 0;
+	if(c7 < 0 || c7 > 100) c7 = 0;
 	if(a1 < 0) a1 = 0;
 	if(a2 < 0) a2 = 0;
 	if(a3 < 0) a3 = 0;
 	if(a4 < 0) a4 = 0;
 	if(a5 < 0) a5 = 0;
+	if(a6 < 0) a6 = 0;
+	if(a7 < 0) a7 = 0;
 	TerrainDefs[t].prod1 = p1;
 	TerrainDefs[t].chance1 = c1;
 	TerrainDefs[t].amt1 = a1;
@@ -2195,6 +2210,12 @@ void Game::ModifyTerrainItems(int t, int p1, int c1, int a1,
 	TerrainDefs[t].prod5 = p5;
 	TerrainDefs[t].chance5 = c5;
 	TerrainDefs[t].amt5 = a5;
+	TerrainDefs[t].prod6 = p6;
+	TerrainDefs[t].chance6 = c6;
+	TerrainDefs[t].amt6 = a6;
+	TerrainDefs[t].prod7 = p7;
+	TerrainDefs[t].chance7 = c7;
+	TerrainDefs[t].amt7 = a7;
 }
 
 void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum)

@@ -187,7 +187,9 @@ private:
 			int prod2, int chance2, int amt2,
 			int prod3, int chance3, int amt3,
 			int prod4, int chance4, int amt4,
-			int prod5, int chance5, int amt5);
+			int prod5, int chance5, int amt5,
+			int prod6, int chance6, int amt6,
+			int prod7, int chance7, int amt7);
 	void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum);
 	void ModifyTerrainLMons(int t, int chance, int l1, int l2, int l3, int l4);
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);

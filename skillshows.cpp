@@ -101,6 +101,18 @@ AString *ShowSkill::Report(void)
 				if(ITEM_ENABLED(I_PICK)) {
 					*str += " Production can be increased by using picks.";
 				}
+			} else if(level == 2) {
+				if(ITEM_DISABLED(I_ROUGHGEM)) break;
+				found = 1;
+				*str += "A unit with this skill may use the PRODUCE order "
+						"to produces rough gems in designated regions (Note "
+						"that a Mining skill of 2 is requires to even "
+						"determine that rough gems may be produced.  One "
+						"unit of rough gems weighs 2 weight units.";
+				if(SKILL_ENABLED(S_GEMCUTTING)) {
+					*str += "  Gemcutters may use rough gems to produce "
+							"higher valued gems.";
+				}
 			} else if(level == 3) {
 				if(ITEM_ENABLED(I_MITHRIL)) {
 					found = 1;
@@ -2157,6 +2169,16 @@ AString *ShowSkill::Report(void)
 					*str += " Production of camels can be increased using "
 						    "lassos.";
 				}
+			}
+			break;
+		case S_GEMCUTTING:
+			if(level == 1) {
+				if(ITEM_DISABLED(I_ROUGHGEM)) break;
+				if(ITEM_DISABLED(I_GEMS)) break;
+				found = 1;
+				*str += "A unit with this skill may PRODUCE gems from rough "
+						"gems, increasing their value.  Gems can be sold in "
+						"some cities for high prices.";
 			}
 			break;
 	}

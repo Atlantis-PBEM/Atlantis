@@ -129,8 +129,16 @@ void Game::ModifyTablesPerRuleset(void)
 		ModifyTerrainRaces(R_NEXUS, I_HIGHELF, I_VIKING, I_PLAINSMAN,
 				-1, -1, -1, -1);
 		ModifyTerrainItems(R_NEXUS, I_IRON, 100, 10, I_WOOD, 100, 10,
-				I_STONE, 100, 10, -1, 0, 0, -1, 0, 0);
+				I_STONE, 100, 10, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0);
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
+	}
+
+	if((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
+		EnableItem(I_MUSHROOM);
+		EnableItem(I_HEALPOTION);
+		EnableItem(I_ROUGHGEM);
+		EnableItem(I_GEMS);
+		EnableSkill(S_GEMCUTTING);
 	}
 
 	return;

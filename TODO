@@ -22,7 +22,6 @@
    -- Consider some sorts of dangers for production
    -- Consider having artifact spells require physical components rather than
       merely money.
-   -- Increase number of products possible per terrain type from 5 to 7?
    -- Consider a gamedef which keeps tactics skill (and combat skills?)
       hidden from combatants.  (I personally think this a bad idea, but it
       was suggested, thus goes on this list)
@@ -35,7 +34,6 @@
    -- Consider allowing luxury food items (chocolate, vodka, cavier) to be
       able to be eaten.  Again, don't think this is a good idea, but will
       at least think on it.
-   -- Tune the amounts of new resources
    -- Add underdeep changes from Georg (make underdeep specific terrain as well)
    -- Consider adding the ability to produce trade goods.
    -- Consider Duergar's war horses

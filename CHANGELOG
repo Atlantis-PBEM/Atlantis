@@ -167,3 +167,5 @@ Changes from 4.0.6 -> 4.0.7
    -- Various small fixes provided by Ben Lloyd
    -- Fixed WITHDRAW <item> to be the same as WITHDRAW 1 <item>
    -- Some other small fixes from Ben Lloyd. <Ben.Lloyd.1@uni.massey.ac.nz>
+   -- Increased the number of possible products per hex from 5 to 7.
+   -- Added Georg Gottschalks underdeep and multi-level underworld and gems.
