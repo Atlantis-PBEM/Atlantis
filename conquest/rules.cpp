@@ -38,7 +38,7 @@
 // the html file containing the rules to correctly reflect the changes!
 static GameDefs g = {
     "Atlantis Conquest",     // RULESET_NAME
-    MAKE_ATL_VER( 1, 0, 4 ), // RULESET_VERSION
+    MAKE_ATL_VER( 1, 0, 5 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */
@@ -151,6 +151,13 @@ static GameDefs g = {
 	0,	// START_CITIES_START_UNLIMITED
 	0,	// PROPORTIONAL_AMTS_USAGE
 	0,  // USE_WEAPON_ARMOR_COMMAND
+    0,  // MONSTER_NO_SPOILS
+    0,  // MONSTER_SPOILS_RECOVERY
+    0,  // MAX_ASSASSIN_FREE_ATTACKS
+    0,  // RELEASE_MONSTERS
+    0,  // CHECK_MONSTER_CONTROL_MID_TURN
+    0,  // DETECT_GATE_NUMBERS
+    0,  // CLEAR_SKIES_REGION
 };
 
 GameDefs * Globals = &g;

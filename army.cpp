@@ -153,6 +153,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	int terrainflags = TerrainDefs[regtype].flags;
 	int canFly = (terrainflags & TerrainType::FLYINGMOUNTS);
 	int canRide = (terrainflags & TerrainType::RIDINGMOUNTS);
+	int ridingBonus = 0;
 	if(canFly || canRide) {
 		//
 		// Mounts of some type _are_ allowed in this region
@@ -160,11 +161,12 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		int mountType;
 		for(mountType = 1; mountType < NUMMOUNTS; mountType++ ) {
 			int bonus = 0;
-			item = unit->GetMount(mountType, canFly, canRide, bonus);
+			item = unit->GetMount(mountType, canFly, canRide, ridingBonus);
 			if(item == -1) continue;
-			askill += bonus;
-			dskill[ATTACK_COMBAT] += bonus;
-			dskill[ATTACK_RIDING] += bonus;
+			// Defer adding the combat bonus until we know if the weapon
+			// allows it.  The defense bonus for riding can be added now
+			// however.
+			dskill[ATTACK_RIDING] += ridingBonus;
 			riding = item;
 			break;
 		}
@@ -182,8 +184,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		item = unit->readyWeapon[i];
 		if(item == -1) break;
 		weaponType = ItemDefs[item].index;
-		item = unit->GetWeapon(weaponType, riding, attackBonus, defenseBonus,
-				numAttacks);
+		item = unit->GetWeapon(weaponType, riding, ridingBonus, attackBonus,
+				defenseBonus, numAttacks);
 		if(item != -1) {
 			weapon = item;
 			break;
@@ -191,8 +193,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	}
 	if(weapon == -1) {
 		for( weaponType = 1; weaponType < NUMWEAPONS; weaponType++ ) {
-			item = unit->GetWeapon(weaponType, riding, attackBonus,
-					defenseBonus, numAttacks);
+			item = unit->GetWeapon(weaponType, riding, ridingBonus,
+					attackBonus, defenseBonus, numAttacks);
 			if(item != -1) {
 				weapon = item;
 				break;
@@ -200,14 +202,15 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		}
 	}
 	// If we did not get a weapon, set attack and defense bonuses to
-	// combat skill.
+	// combat skill (and riding bonus if applicable).
 	if( weapon == -1 ) {
-		attackBonus = unit->GetSkill(S_COMBAT);
-		defenseBonus = attackBonus;
+		attackBonus = unit->GetSkill(S_COMBAT) + ridingBonus;
+		defenseBonus = attackBonus + ridingBonus;
 		numAttacks = 1;
 	}
 
 	// Set the attack and defense skills
+	// These will include the riding bonus if they should be included.
 	askill += attackBonus;
 	dskill[ATTACK_COMBAT] += defenseBonus;
 	attacks = numAttacks;
@@ -591,53 +594,62 @@ void Army::WriteLosses(Battle * b) {
     }
 }
 
-void Army::GetMonSpoils(ItemList *spoils,int monitem)
+void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 {
-    /* First, silver */
-    spoils->SetNum(I_SILVER,spoils->GetNum(I_SILVER) +
-                   getrandom(MonDefs[ItemDefs[monitem].index].silver));
+	if((Globals->MONSTER_NO_SPOILS > 0) &&
+			(free >= Globals->MONSTER_SPOILS_RECOVERY)) {
+		// This monster is in it's period of absolutely no spoils.
+		return;
+	}
 
-    int thespoil = MonDefs[ItemDefs[monitem].index].spoiltype;
+	/* First, silver */
+	int silv = MonDefs[ItemDefs[monitem].index].silver;
+	if((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
+		// Adjust the spoils for length of freedom.
+		silv *= (Globals->MONSTER_SPOILS_RECOVERY-free);
+		silv /= Globals->MONSTER_SPOILS_RECOVERY;
+	}
+	spoils->SetNum(I_SILVER,spoils->GetNum(I_SILVER) + getrandom(silv));
 
-    if (thespoil == -1) return;
-    if (thespoil == IT_NORMAL && getrandom(2))
-    {
-        thespoil = IT_TRADE;
-    }
+	int thespoil = MonDefs[ItemDefs[monitem].index].spoiltype;
 
-    int count = 0;
-    int i;
-    for (i=0; i<NITEMS; i++)
-    {
-        if ((ItemDefs[i].type & thespoil) &&
-			!(ItemDefs[i].type & IT_SPECIAL) &&
-			!(ItemDefs[i].flags & ItemType::DISABLED))
-        {
-            count ++;
-        }
-    }
+	if (thespoil == -1) return;
+	if (thespoil == IT_NORMAL && getrandom(2)) thespoil = IT_TRADE;
 
-    count = getrandom(count) + 1;
+	int count = 0;
+	int i;
+	for (i=0; i<NITEMS; i++) {
+		if ((ItemDefs[i].type & thespoil) &&
+				!(ItemDefs[i].type & IT_SPECIAL) &&
+				!(ItemDefs[i].flags & ItemType::DISABLED)) {
+			count ++;
+		}
+	}
 
-    for (i=0; i<NITEMS; i++) {
-        if ((ItemDefs[i].type & thespoil) &&
-			!(ItemDefs[i].type & IT_SPECIAL) &&
-			!(ItemDefs[i].flags & ItemType::DISABLED))
-        {
-            count--;
-            if (count == 0)
-            {
-                thespoil = i;
-                break;
-            }
-        }
-    }
+	count = getrandom(count) + 1;
 
-    int val = getrandom(MonDefs[ItemDefs[monitem].index].silver * 2);
+	for (i=0; i<NITEMS; i++) {
+		if ((ItemDefs[i].type & thespoil) &&
+				!(ItemDefs[i].type & IT_SPECIAL) &&
+				!(ItemDefs[i].flags & ItemType::DISABLED)) {
+			count--;
+			if (count == 0) {
+				thespoil = i;
+				break;
+			}
+		}
+	}
 
-    spoils->SetNum(thespoil,spoils->GetNum(thespoil) +
-                   (val + getrandom(ItemDefs[thespoil].baseprice))
-                   / ItemDefs[thespoil].baseprice);
+	int val = getrandom(MonDefs[ItemDefs[monitem].index].silver * 2);
+	if((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
+		// Adjust for length of monster freedom.
+		val *= (Globals->MONSTER_SPOILS_RECOVERY-free);
+		val /= Globals->MONSTER_SPOILS_RECOVERY;
+	}
+
+	spoils->SetNum(thespoil,spoils->GetNum(thespoil) +
+			(val + getrandom(ItemDefs[thespoil].baseprice)) /
+			ItemDefs[thespoil].baseprice);
 }
 
 void Army::Lose(Battle *b,ItemList *spoils)
@@ -648,9 +660,8 @@ void Army::Lose(Battle *b,ItemList *spoils)
 		if (i<notbehind) {
 			s->Alive(LOSS);
 		} else {
-			if (s->unit->type==U_WMON && (ItemDefs[s->race].type&IT_MONSTER)) {
-				GetMonSpoils(spoils,s->race);
-			}
+			if ((s->unit->type==U_WMON) && (ItemDefs[s->race].type&IT_MONSTER))
+				GetMonSpoils(spoils,s->race,s->unit->free);
 			s->Dead();
 		}
 		delete s;

@@ -1726,21 +1726,15 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 
 		f->AddTab();
 		if( Globals->WEATHER_EXISTS ) {
-			if (weather == W_BLIZZARD)
-				temp = "There was an unnatural blizzard last month; ";
-			if (weather == W_WINTER)
-				temp = "It was winter last month; ";
-			if (weather == W_MONSOON)
-				temp = "It was monsoon season last month; ";
-			if (weather == W_NORMAL)
-				temp = "The weather was clear last month; ";
+			temp = "It was ";
+			if(weather == W_BLIZZARD) temp = "There was an unnatural ";
+			else if(weather == W_NORMAL) temp = "The weather was ";
+			temp += SeasonNames[weather];
+			temp += " last month; ";
 			int nxtweather = pRegions->GetWeather( this, (month + 1) % 12 );
-			if (nxtweather == W_WINTER)
-				temp += "it will be winter next month.";
-			if (nxtweather == W_MONSOON)
-				temp += "it will be monsoon season next month.";
-			if (nxtweather == W_NORMAL)
-				temp += "it will be clear next month.";
+			temp += "it will be ";
+			temp += SeasonNames[nxtweaterh];
+			temp += " next month.";
 			f->PutStr(temp);
 		}
 

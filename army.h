@@ -108,7 +108,7 @@ class Army
 		void DoHeal(Battle *);
 		void DoHealLevel(Battle *,int,int useItems );
 
-		void GetMonSpoils(ItemList *,int);
+		void GetMonSpoils(ItemList *,int, int);
 
 		int Broken();
 		int NumAlive();

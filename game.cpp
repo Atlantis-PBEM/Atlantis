@@ -1835,91 +1835,84 @@ void Game::CreateOceanLairs()
 	}
 }
 
-void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
+void Game::MidProcessUnitExtra(ARegion *r, Unit *u)
+{
+	if(Globals->CHECK_MONSTER_CONTROL_MID_TURN)
+		MonsterCheck(r, u);
+}
+
+void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
+{
+	if(!Globals->CHECK_MONSTER_CONTROL_MID_TURN)
+		MonsterCheck(r, u);
+}
+
+void Game::MonsterCheck(ARegion *r, Unit *u)
 {
 	if (u->type != U_WMON) {
 		int escape = 0;
 		int totlosses = 0;
 		int losecontrol = 0;
 		int level;
+		int skill;
+		int top;
+
 		forlist (&u->items) {
 			Item *i = (Item *) elem;
-			if (i->type == I_IMP) {
-				int top = i->num * i->num;
-				if (top) {
-					level = u->GetSkill(S_SUMMON_IMPS);
-					if (!level) {
-						escape = 10000;
-					} else {
-						int bottom = level * level * 4;
-						bottom = bottom * bottom * 20;
-						int chance = (top * 10000) / bottom;
-						if (chance > escape) escape = chance;
-					}
-				}
-			}
-			if (i->type == I_DEMON) {
-				int top = i->num * i->num;
-				if (top) {
-					level = u->GetSkill(S_SUMMON_DEMON);
-					if (!level) {
-						escape = 10000;
-					} else {
-						int bottom = level * level;
-						bottom = bottom * bottom * 20;
-						int chance = (top * 10000) / bottom;
-						if (chance > escape) escape = chance;
-					}
-				}
-			}
-			if (i->type == I_BALROG) {
-				int top = i->num * i->num;
-				if (top) {
-					level = u->GetSkill(S_SUMMON_BALROG);
-					if (!level) {
-						escape = 10000;
-					} else {
-						int bottom = level * level;
-						bottom = bottom * bottom * 4;
-						int chance = (top * 10000) / bottom;
-						if (chance > escape) escape = chance;
-					}
+			if(!i->num) continue;
+			/* XXX -- This should be genericized -- heavily! */
+			level = 1;
+			if(i->type == I_IMP || i->type == I_DEMON || i->type == I_BALROG) {
+				top = i->num * i->num;
+				if(i->type == I_IMP) skill = S_SUMMON_IMPS;
+				if(i->type == I_DEMON) skill = S_SUMMON_DEMON;
+				if(i->type == I_BALROG) skill = S_SUMMON_BALROG;
+				level = u->GetSkill(skill);
+				if(!level) {
+					/* Something does escape */
+					escape = 10000;
+				} else {
+					int bottom = level * level;
+					if(i->type == I_IMP) bottom *= 4;
+					bottom = bottom * bottom;
+					if(i->type != I_BALROG) bottom *= 20;
+					else bottom *= 4;
+					int chance = (top * 10000)/bottom;
+					if(chance > escape) escape = chance;
 				}
 			}
 
-			if (i->type == I_SKELETON || i->type == I_UNDEAD ||
-					i->type == I_LICH) {
+			if (i->type==I_SKELETON || i->type==I_UNDEAD || i->type==I_LICH) {
 				int losses = (i->num + getrandom(10)) / 10;
 				u->items.SetNum(i->type,i->num - losses);
 				totlosses += losses;
 			}
 
-			if (i->type == I_WOLF) {
-				level = u->GetSkill(S_WOLF_LORE);
+			if (i->type==I_WOLF || i->type==I_EAGLE || i->type==I_DRAGON) {
+				if(i->type == I_WOLF) skill = S_WOLF_LORE;
+				if(i->type == I_EAGLE) skill = S_EAGLE_LORE;
+				if(i->type == I_DRAGON) skill = S_DRAGON_LORE;
+				level = u->GetSkill(skill);
 				if(!level) {
-					losecontrol += i->num;
-					u->items.SetNum(i->type, 0);
-				}
-			}
-			if (i->type == I_DRAGON) {
-				level = u->GetSkill(S_DRAGON_LORE);
-				if(!level) {
-					losecontrol += i->num;
-					u->items.SetNum(i->type, 0);
-				}
-			}
-			if (i->type == I_EAGLE) {
-				level = u->GetSkill(S_BIRD_LORE);
-				if(!level) {
-					losecontrol += i->num;
+					if(Globals->WANDERING_MONSTERS_EXIST &&
+							Globals->RELEASE_MONSTERS) {
+						Faction *mfac = GetFaction(&factions, monfaction);
+						Unit *mon = GetNewUnit(mfac, 0);
+						int mondef = ItemDefs[i->type].index;
+						mon->MakeWMon(MonDefs[mondef].name, i->type, i->num);
+						mon->MoveUnit(r->GetDummy());
+						// This will be zero unless these are set. (0 means
+						// full spoils)
+						mon->free = Globals->MONSTER_NO_SPOILS +
+							Globals->MONSTER_SPOILS_RECOVERY;
+					}
+					u->Event(AString("Loses control of ") +
+							ItemString(i->type, i->num) + ".");
 					u->items.SetNum(i->type, 0);
 				}
 			}
 		}
 
-		if(losecontrol) {
-			u->Event(AString(losecontrol) + " summoned creatures leave.");
-		}
 		if (totlosses) {
 			u->Event(AString(totlosses) + " undead decay into nothingness.");
 		}
@@ -1931,13 +1924,17 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
 				u->items.SetNum(I_BALROG, 0);
 				u->Event("Summoned demons vanish.");
 			} else {
-				Faction * mfac = GetFaction(&factions,monfaction);
+				Faction *mfac = GetFaction(&factions,monfaction);
 				if (u->items.GetNum(I_IMP)) {
 					Unit *mon = GetNewUnit( mfac, 0 );
 					mon->MakeWMon(MonDefs[MONSTER_IMP].name,I_IMP,
 							u->items.GetNum(I_IMP));
 					mon->MoveUnit( r->GetDummy() );
 					u->items.SetNum(I_IMP,0);
+					// This will be zero unless these are set. (0 means
+					// full spoils)
+					mon->free = Globals->MONSTER_NO_SPOILS +
+						Globals->MONSTER_SPOILS_RECOVERY;
 				}
 				if (u->items.GetNum(I_DEMON)) {
 					Unit *mon = GetNewUnit( mfac, 0 );
@@ -1945,6 +1942,10 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
 							u->items.GetNum(I_DEMON));
 					mon->MoveUnit( r->GetDummy() );
 					u->items.SetNum(I_DEMON,0);
+					// This will be zero unless these are set. (0 means
+					// full spoils)
+					mon->free = Globals->MONSTER_NO_SPOILS +
+						Globals->MONSTER_SPOILS_RECOVERY;
 				}
 				if (u->items.GetNum(I_BALROG)) {
 					Unit *mon = GetNewUnit( mfac, 0 );
@@ -1952,6 +1953,10 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
 							u->items.GetNum(I_BALROG));
 					mon->MoveUnit( r->GetDummy() );
 					u->items.SetNum(I_BALROG,0);
+					// This will be zero unless these are set. (0 means
+					// full spoils)
+					mon->free = Globals->MONSTER_NO_SPOILS +
+						Globals->MONSTER_SPOILS_RECOVERY;
 				}
 				u->Event("Controlled demons break free!");
 			}

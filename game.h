@@ -40,7 +40,7 @@ class Game;
 #include "production.h"
 #include "object.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 0, 9 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 0, 10 )
 
 class OrdersCheck
 {
@@ -414,13 +414,19 @@ private:
     void GrowLMons(int);
 	void GrowVMons();
     void PostProcessUnit(ARegion *,Unit *);
+	void MidProcessUnit(ARegion *, Unit *);
 
     //
-    // PostProcessUnitExtra can be used to provide game-specific unit
-    // post processing.
+    // Mid and PostProcessUnitExtra can be used to provide game-specific
+	// unit processing at the approrpriate times.
     //
+	void MidProcessUnitExtra(ARegion *, Unit *);
+	void MidProcessTurn();
     void PostProcessUnitExtra(ARegion *,Unit *);
     void PostProcessTurn();
+
+	// Handle escaped monster check
+	void MonsterCheck(ARegion *r, Unit *u);
 
     //
     // CheckVictory is used to see if the game is over.

@@ -63,12 +63,11 @@ class Battle : public AListElem
 
 		int Run(ARegion *, Unit *, AList *, Unit *, AList *, int ass,
 				ARegionList *pRegs);
-		void FreeRound(Army *,Army *);
+		void FreeRound(Army *,Army *, int ass = 0);
 		void NormalRound(int,Army *,Army *);
 		void DoAttack(int round, Soldier *a, Army *attackers, Army *def,
-				int behind);
+				int behind, int ass = 0);
 
-		void DoAttack(int, Soldier *, Army *, int);
 		void GetSpoils(AList *,ItemList *, int);
 
 		//

@@ -405,3 +405,36 @@ Changes from 4.0.9 -> 4.0.10
    -- Fixed bug which caused AMTS protection vs RING to fail when the # of
       AMTS was identical to the number of men in the unit.
    -- Fixed two small display glitch bugs as reported by Jason Cortina.
+   -- Fixed riding bonus for archers bug.  Added new weapontype flags of
+      RIDINGBONUS and RIDINGBONUSDEFENSE [Implemented by Tom Alsen]
+   -- Implemented no spoils from summoned monsters which are released for
+      some number of turns.  Added gamedefs of MONSTER_NO_SPOILS (how many
+	  turns a summoned monster has no spoils, -1 for infinity) and
+	  MONSTER_SPOILS_RECOVERY (how many turns after the NO_SPOILS turns
+	  until it is equivalent to a non-summoned monster).  [Implemented
+	  by Tom Alsen, who recommends values of 3 and 9 respectively]
+   -- Added NUM_ATTACKS_HALF_SKILL.  [Implemented by Tom Alsen, who
+      recommends using this for DBOW and RUNE, and NUM_ATTACKS_HALF_SKILL+1
+	  for SBOW].
+   -- Added gamedef MAX_ASSASSIN_FREE_ATTACKS. [Implemented by Tom Alsen
+      who recommends a value of 2].  If set, this will limit the number of
+	  attacks in the free round off assassination to that value.
+   -- Added gamedef RELEASE_MONSTERS. If set, enables 'GIVE 0 <num>
+      <monster>' for any monster and will create wandering monsters from
+	  the ones released or ones that are lost control of (this makes dragons
+	  eagles and wolves similar to demons and such if this gamedef is
+	  enabled).  [Implemented by Tom Alsen]
+   -- Added gamedef CHECK_MONSTER_CONTROL_MID_TURN to check for demons
+      breaking free and zombie decay in mid-turn (before move) rather than
+	  at the end of move.  [Implemented by Tom Alsen].  This makes it
+	  harder to have mages sending in directed balrog missiles [for
+	  instance] if it is set.
+   -- Added WEATHER_LORE as a castable spell. Use CAST Weather_Lore 
+      [REGION <x> <y>] to predict the weather for 3,6 and 12 months at
+	  levels 1,3 and 5 respectively. Range is same as Farsight -
+	  4*level*level. [Implemented by Tom Alsen]
+   -- Made spell range checking more generic.  There are now methods for
+      pre- and post-processing spell ranges.  Teleport, Farsight and
+	  Weather Lore now use this mechanism [Implemented by Tom Alsen]
+   -- Added CLEAR_SKIES_REGION gamedef to allow Clear Skies to be cast as
+      a ranged spell at range 2*level*level.  [Implemented by Tom Alsen].

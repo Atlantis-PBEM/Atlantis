@@ -41,48 +41,44 @@ Battle::~Battle()
     }
 }
 
-void Battle::FreeRound(Army * att,Army * def)
+void Battle::FreeRound(Army * att,Army * def, int ass)
 {
-    /* Write header */
-    AddLine(*(att->leader->name) + " gets a free round of attacks.");
+	/* Write header */
+	AddLine(*(att->leader->name) + " gets a free round of attacks.");
 
-    /* Update both army's shields */
-    att->shields.DeleteAll();
-    UpdateShields(att);
+	/* Update both army's shields */
+	att->shields.DeleteAll();
+	UpdateShields(att);
 
-    def->shields.DeleteAll();
-    UpdateShields(def);
+	def->shields.DeleteAll();
+	UpdateShields(def);
 
-    //
-    // Update the attacking armies round counter
-    //
-    att->round++;
+	//
+	// Update the attacking armies round counter
+	//
+	att->round++;
 
-    /* Run attacks until done */
-    int alv = def->NumAlive();
-    while (att->CanAttack() && def->NumAlive())
-    {
-        int num = getrandom(att->CanAttack());
-        int behind;
-        Soldier * a = att->GetAttacker(num, behind);
-        DoAttack(att->round, a, att, def, behind);
-    }
+	/* Run attacks until done */
+	int alv = def->NumAlive();
+	while (att->CanAttack() && def->NumAlive()) {
+		int num = getrandom(att->CanAttack());
+		int behind;
+		Soldier * a = att->GetAttacker(num, behind);
+		DoAttack(att->round, a, att, def, behind, ass);
+	}
 
-    /* Write losses */
-    alv -= def->NumAlive();
-    AddLine(*(def->leader->name) + " loses " + alv + ".");
-    AddLine("");
-    att->Reset();
+	/* Write losses */
+	alv -= def->NumAlive();
+	AddLine(*(def->leader->name) + " loses " + alv + ".");
+	AddLine("");
+	att->Reset();
 }
 
-void Battle::DoAttack( int round,
-                       Soldier *a,
-                       Army *attackers,
-                       Army *def,
-                       int behind )
+void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
+		int behind, int ass)
 {
-    DoSpecialAttack( round, a, attackers, def, behind );
-    if (!def->NumAlive()) return;
+	DoSpecialAttack(round, a, attackers, def, behind);
+	if (!def->NumAlive()) return;
 
 	if (!behind && (a->riding != -1)) {
 		MountType *pMt = &MountDefs[ItemDefs[a->riding].index];
@@ -112,41 +108,30 @@ void Battle::DoAttack( int round,
 	}
 	if(!def->NumAlive()) return;
 
-    int numAttacks = a->attacks;
-    if( a->attacks < 0 )
-    {
-        if( round % ( -1 * a->attacks ) == 1 )
-        {
-            numAttacks = 1;
-        }
-        else
-        {
-            numAttacks = 0;
-        }
-    }
+	int numAttacks = a->attacks;
+	if(a->attacks < 0) {
+		if(round % ( -1 * a->attacks ) == 1)
+			numAttacks = 1;
+		else
+			numAttacks = 0;
+	} else if(ass && (numAttacks > Globals->MAX_ASSASSIN_FREE_ATTACKS)) {
+		numAttacks = Globals->MAX_ASSASSIN_FREE_ATTACKS;
+	}
 
-    for (int i = 0; i < numAttacks; i++ )
-    {
-        WeaponType *pWep = 0;
-        if( a->weapon != -1 ) {
-            pWep = &WeaponDefs[ ItemDefs[ a->weapon ].index ];
-        }
+	for (int i = 0; i < numAttacks; i++) {
+		WeaponType *pWep = 0;
+		if(a->weapon != -1) pWep = &WeaponDefs[ItemDefs[a->weapon ].index];
 
-        if( behind ) {
-            if( !pWep ) {
-                break;
-            }
+		if(behind) {
+			if(!pWep) break;
+			if(!( pWep->flags & WeaponType::RANGED)) break;
+		}
 
-            if( !( pWep->flags & WeaponType::RANGED )) {
-                break;
-            }
-        }
-
-        int flags = 0;
+		int flags = 0;
 		int attackType = ATTACK_COMBAT;
 		int mountBonus = 0;
 		int attackClass = SLASHING;
-        if( pWep ) {
+		if(pWep) {
 			flags = pWep->flags;
 			attackType = pWep->attackType;
 			mountBonus = pWep->mountBonus;
@@ -154,9 +139,8 @@ void Battle::DoAttack( int round,
 		}
 		def->DoAnAttack( 0, 1, attackType, a->askill, flags, attackClass,
 				0, mountBonus);
-        if (!def->NumAlive()) break;
-
-    }
+		if (!def->NumAlive()) break;
+	}
 
 	a->ClearOneTimeEffects();
 }
@@ -250,7 +234,7 @@ int Battle::Run( ARegion * region,
     armies[1] = new Army(tar,defs,region->type,ass);
 
     if (ass) {
-        FreeRound(armies[0],armies[1]);
+        FreeRound(armies[0],armies[1], ass);
     } else {
         if (armies[0]->tac > armies[1]->tac) FreeRound(armies[0],armies[1]);
         if (armies[1]->tac > armies[0]->tac) FreeRound(armies[1],armies[0]);
