@@ -780,7 +780,7 @@ void Game::RunEnchantSwords(ARegion *r,Unit *u) {
 }
 
 void Game::RunConstructGate(ARegion *r,Unit *u) {
-  if (r->type == R_OCEAN) {
+  if (TerrainDefs[r->type].similar_type == R_OCEAN) {
     u->Error("Gates may not be constructed at sea.");
     return;
   }
@@ -804,150 +804,154 @@ void Game::RunConstructGate(ARegion *r,Unit *u) {
 
 void Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 {
-    if (!o->IsBuilding() || o->type == O_AGALLEON)
-    {
-        u->Error("Runes of Warding may only be engraved on a building.");
-        return;
-    }
+	if (!o->IsBuilding() || o->type == O_AGALLEON) {
+		u->Error("Runes of Warding may only be engraved on a building.");
+		return;
+	}
 
-    if (o->incomplete)
-    {
-        u->Error( "Runes of Warding may only be engraved on a completed "
-                  "building.");
-        return;
-    }
+	if (o->incomplete) {
+		u->Error( "Runes of Warding may only be engraved on a completed "
+				"building.");
+		return;
+	}
 
-    int level = u->GetSkill(S_ENGRAVE_RUNES_OF_WARDING);
+	int level = u->GetSkill(S_ENGRAVE_RUNES_OF_WARDING);
 
-    switch (level)
-    {
-    case 5:
-        if (o->type == O_MFORTRESS) break;
-    case 4:
-        if (o->type == O_CITADEL) break;
-    case 3:
-        if (o->type == O_CASTLE) break;
-    case 2:
-        if (o->type == O_FORT) break;
-    case 1:
-        if (o->type == O_TOWER) break;
-    default:
-        u->Error("Not high enough level to engrave Runes of Warding on that "
-                 "building.");
-        return;
-    }
+	switch (level) {
+		case 5:
+			if (o->type == O_MFORTRESS) break;
+		case 4:
+			if (o->type == O_CITADEL) break;
+		case 3:
+			if (o->type == O_CASTLE) break;
+		case 2:
+			if (o->type == O_FORT) break;
+			if (o->type == O_MTOWER) break;
+		case 1:
+			if (o->type == O_TOWER) break;
+		default:
+			u->Error("Not high enough level to engrave Runes of Warding on "
+					"that building.");
+			return;
+	}
 
-    if (u->GetMoney() < 600)
-    {
-        u->Error("Can't afford to engrave Runes of Warding.");
-        return;
-  }
+	if (u->GetMoney() < 600) {
+		u->Error("Can't afford to engrave Runes of Warding.");
+		return;
+	}
 
-    u->SetMoney(u->GetMoney() - 600);
-    if( o->type == O_MFORTRESS )
-    {
-        o->runes = 5;
-    }
-    else
-    {
-        o->runes = 3;
-    }
-    u->Event(AString("Engraves Runes of Warding on ") + *(o->name) + ".");
-    r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
+	u->SetMoney(u->GetMoney() - 600);
+	if( o->type == O_MFORTRESS ) {
+		o->runes = 5;
+	} else if(o->type == O_MTOWER) {
+		o->runes = 4;
+	} else {
+		o->runes = 3;
+	}
+	u->Event(AString("Engraves Runes of Warding on ") + *(o->name) + ".");
+	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
 }
 
-void Game::RunSummonBalrog(ARegion *r,Unit *u) {
-  if (u->items.GetNum(I_BALROG)) {
-    u->Error("Can't control more than one balrog.");
-    return;
-  }
+void Game::RunSummonBalrog(ARegion *r,Unit *u)
+{
+	if (u->items.GetNum(I_BALROG)) {
+		u->Error("Can't control more than one balrog.");
+		return;
+	}
 
-  int level = u->GetSkill(S_SUMMON_BALROG);
+	int level = u->GetSkill(S_SUMMON_BALROG);
 
-  int num = (level * 20 + getrandom(100)) / 100;
+	int num = (level * 20 + getrandom(100)) / 100;
 
-  u->items.SetNum(I_BALROG,u->items.GetNum(I_BALROG) + num);
-  u->Event(AString("Summons ") + ItemString(I_BALROG,num) + ".");
-  r->NotifySpell(u,S_DEMON_LORE, &regions );
+	u->items.SetNum(I_BALROG,u->items.GetNum(I_BALROG) + num);
+	u->Event(AString("Summons ") + ItemString(I_BALROG,num) + ".");
+	r->NotifySpell(u,S_DEMON_LORE, &regions );
 }
 
-void Game::RunSummonDemon(ARegion *r,Unit *u) {
-  u->items.SetNum(I_DEMON,u->items.GetNum(I_DEMON) + 1);
-  u->Event(AString("Summons ") + ItemString(I_DEMON,1) + ".");
-  r->NotifySpell(u,S_DEMON_LORE, &regions );
+void Game::RunSummonDemon(ARegion *r,Unit *u)
+{
+	u->items.SetNum(I_DEMON,u->items.GetNum(I_DEMON) + 1);
+	u->Event(AString("Summons ") + ItemString(I_DEMON,1) + ".");
+	r->NotifySpell(u,S_DEMON_LORE, &regions );
 }
 
-void Game::RunSummonImps(ARegion *r,Unit *u) {
-  int level = u->GetSkill(S_SUMMON_IMPS);
+void Game::RunSummonImps(ARegion *r,Unit *u)
+{
+	int level = u->GetSkill(S_SUMMON_IMPS);
 
-  u->items.SetNum(I_IMP,u->items.GetNum(I_IMP) + level);
-  u->Event(AString("Summons ") + ItemString(I_IMP,level) + ".");
-  r->NotifySpell(u,S_DEMON_LORE, &regions );
+	u->items.SetNum(I_IMP,u->items.GetNum(I_IMP) + level);
+	u->Event(AString("Summons ") + ItemString(I_IMP,level) + ".");
+	r->NotifySpell(u,S_DEMON_LORE, &regions );
 }
 
-void Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item,int rate,int cost) {
-  int level = u->GetSkill(skill);
+void Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item,int rate,
+		int cost) {
+	int level = u->GetSkill(skill);
 
-  if (u->items.GetNum(I_SILVER) < cost) {
-    u->Error("Doesn't have enough silver to create that.");
-    return;
-  }
+	if (u->items.GetNum(I_SILVER) < cost) {
+		u->Error("Doesn't have enough silver to create that.");
+		return;
+	}
 
-  int num = (level * rate + getrandom(100))/100;
+	int num = (level * rate + getrandom(100))/100;
 
-  u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) - cost);
-  u->items.SetNum(item,u->items.GetNum(item) + num);
-  u->Event(AString("Creates ") + ItemString(item,num) + ".");
-  r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
+	u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) - cost);
+	u->items.SetNum(item,u->items.GetNum(item) + num);
+	u->Event(AString("Creates ") + ItemString(item,num) + ".");
+	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
 }
 			       
-void Game::RunSummonLich(ARegion *r,Unit *u) {
-  int level = u->GetSkill(S_SUMMON_LICH);
+void Game::RunSummonLich(ARegion *r,Unit *u)
+{
+	int level = u->GetSkill(S_SUMMON_LICH);
 
-  int num = ((2 * level * level) + getrandom(100))/100;
+	int num = ((2 * level * level) + getrandom(100))/100;
 
-  u->items.SetNum(I_LICH,u->items.GetNum(I_LICH) + num);
-  u->Event(AString("Summons ") + ItemString(I_LICH,num) + ".");
-  r->NotifySpell(u,S_NECROMANCY, &regions );
+	u->items.SetNum(I_LICH,u->items.GetNum(I_LICH) + num);
+	u->Event(AString("Summons ") + ItemString(I_LICH,num) + ".");
+	r->NotifySpell(u,S_NECROMANCY, &regions );
 }
 
-void Game::RunRaiseUndead(ARegion *r,Unit *u) {
-  int level = u->GetSkill(S_RAISE_UNDEAD);
+void Game::RunRaiseUndead(ARegion *r,Unit *u)
+{
+	int level = u->GetSkill(S_RAISE_UNDEAD);
 
-  int num = ((10 * level * level) + getrandom(100))/100;
+	int num = ((10 * level * level) + getrandom(100))/100;
 
-  u->items.SetNum(I_UNDEAD,u->items.GetNum(I_UNDEAD) + num);
-  u->Event(AString("Raises ") + ItemString(I_UNDEAD,num) + ".");
-  r->NotifySpell(u,S_NECROMANCY, &regions );
+	u->items.SetNum(I_UNDEAD,u->items.GetNum(I_UNDEAD) + num);
+	u->Event(AString("Raises ") + ItemString(I_UNDEAD,num) + ".");
+	r->NotifySpell(u,S_NECROMANCY, &regions );
 }
 
-void Game::RunSummonSkeletons(ARegion *r,Unit *u) {
-  int level = u->GetSkill(S_SUMMON_SKELETONS);
+void Game::RunSummonSkeletons(ARegion *r,Unit *u)
+{
+	int level = u->GetSkill(S_SUMMON_SKELETONS);
 
-  int num = ((40 * level * level) + getrandom(100))/100;
+	int num = ((40 * level * level) + getrandom(100))/100;
 
-  u->items.SetNum(I_SKELETON,u->items.GetNum(I_SKELETON) + num);
-  u->Event(AString("Summons ") + ItemString(I_SKELETON,num) + ".");
-  r->NotifySpell(u,S_NECROMANCY, &regions );
+	u->items.SetNum(I_SKELETON,u->items.GetNum(I_SKELETON) + num);
+	u->Event(AString("Summons ") + ItemString(I_SKELETON,num) + ".");
+	r->NotifySpell(u,S_NECROMANCY, &regions );
 }
 
-void Game::RunDragonLore(ARegion *r, Unit *u) {
-  int level = u->GetSkill(S_DRAGON_LORE);
+void Game::RunDragonLore(ARegion *r, Unit *u)
+{
+	int level = u->GetSkill(S_DRAGON_LORE);
 
-  int num = u->items.GetNum(I_DRAGON);
-  if (num >= level) {
-    u->Error("Mage may not summon more dragons.");
-    return;
-  }
+	int num = u->items.GetNum(I_DRAGON);
+	if (num >= level) {
+		u->Error("Mage may not summon more dragons.");
+		return;
+	}
 
-  int chance = level * level * 4;
-  if (getrandom(100) < chance) {
-    u->items.SetNum(I_DRAGON,num + 1);
-    u->Event("Summons a dragon.");
-  } else {
-    u->Event("Attempts to summon a dragon, but fails.");
-  }
-  r->NotifySpell(u,S_EARTH_LORE, &regions );
+	int chance = level * level * 4;
+	if (getrandom(100) < chance) {
+		u->items.SetNum(I_DRAGON,num + 1);
+		u->Event("Summons a dragon.");
+	} else {
+		u->Event("Attempts to summon a dragon, but fails.");
+	}
+	r->NotifySpell(u,S_EARTH_LORE, &regions );
 }
   
 void Game::RunBirdLore(ARegion *r,Unit *u)
@@ -997,24 +1001,27 @@ void Game::RunBirdLore(ARegion *r,Unit *u)
     r->NotifySpell(u,S_EARTH_LORE, &regions );
 }
       
-void Game::RunWolfLore(ARegion *r,Unit *u) {
-  if (r->type != R_MOUNTAIN && r->type != R_FOREST) {
-    u->Error("CAST: Can only summon wolves in mountain and forest regions.");
-    return;
-  }
+void Game::RunWolfLore(ARegion *r,Unit *u)
+{
+	if (TerrainDefs[r->type].similar_type != R_MOUNTAIN &&
+		TerrainDefs[r->type].similar_type != R_FOREST) {
+		u->Error("CAST: Can only summon wolves in mountain and "
+				 "forest regions.");
+		return;
+	}
 
-  int level = u->GetSkill(S_WOLF_LORE);
-  int max = level * level * 4;
+	int level = u->GetSkill(S_WOLF_LORE);
+	int max = level * level * 4;
 
-  int num = u->items.GetNum(I_WOLF);
-  int summon = max - num;
-  if (summon > level) summon = level;
-  if (summon < 0) summon = 0;
+	int num = u->items.GetNum(I_WOLF);
+	int summon = max - num;
+	if (summon > level) summon = level;
+	if (summon < 0) summon = 0;
 
-  u->Event(AString("Casts Wolf Lore, summoning ") + ItemString(I_WOLF,summon) +
-	   ".");
-  u->items.SetNum(I_WOLF,num + summon);
-  r->NotifySpell(u,S_EARTH_LORE, &regions );
+	u->Event(AString("Casts Wolf Lore, summoning ") +
+			ItemString(I_WOLF,summon) + ".");
+	u->items.SetNum(I_WOLF,num + summon);
+	r->NotifySpell(u,S_EARTH_LORE, &regions );
 }
 
 void Game::RunInvisibility(ARegion *r,Unit *u) {
@@ -1293,7 +1300,7 @@ void Game::RunTeleport(ARegion *r,Object *o,Unit *u)
         return;
     }
 
-    if (tar->type == R_OCEAN) 
+    if (TerrainDefs[tar->type].similar_type == R_OCEAN) 
     {
         u->Error(AString("CAST: ") + tar->Print( &regions ) + " is an ocean.");
         return;
@@ -1321,7 +1328,8 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
         return;
     }
 
-	nexgate = Globals->NEXUS_GATE_OUT && (r->type == R_NEXUS);
+	nexgate = Globals->NEXUS_GATE_OUT &&
+		(TerrainDefs[r->type].similar_type == R_NEXUS);
     if (!r->gate && !nexgate)
     {
         u->Error("CAST: There is no gate in that region.");

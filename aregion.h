@@ -55,6 +55,7 @@ class TerrainType
 {
 public:
     char * name;
+	int similar_type;
 
     enum {
         RIDINGMOUNTS = 0x1,

@@ -1832,13 +1832,11 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 
 	/* If the item to be given is a man, combine skills */
 	if (ItemDefs[o->item].type & IT_MAN) {
-		if (u->nomove) t->nomove = 1;
 		if (u->type == U_MAGE || u->type == U_APPRENTICE ||
 				t->type == U_MAGE || t->type == U_APPRENTICE) {
 			u->Error("GIVE: Magicians can't transfer men.");
 			return 0;
 		}
-
 		if (o->item == I_LEADERS && t->IsNormal()) {
 			u->Error("GIVE: Can't mix leaders and normal men.");
 			return 0;
@@ -1848,11 +1846,19 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 				return 0;
 			}
 		}
+		// Small hack for Ceran
+		if(o->item == I_MERC && t->GetMen()) {
+			u->Error("GIVE: Can't mix mercenaries with other men.");
+			return 0;
+		}
 
 		if (u->faction != t->faction) {
 			u->Error("GIVE: Can't give men to another faction.");
 			return 0;
 		}
+
+		if (u->nomove) t->nomove = 1;
+
 		SkillList * temp = u->skills.Split(u->GetMen(),amt);
 		t->skills.Combine(temp);
 		delete temp;

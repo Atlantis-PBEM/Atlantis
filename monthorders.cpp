@@ -208,33 +208,38 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * ship,Unit * cap)
     return reg;
 }
 
-void Game::RunTeachOrders() {
-  forlist((&regions)) {
-    ARegion * r = (ARegion *) elem;
-    forlist((&r->objects)) {
-      Object * obj = (Object *) elem;
-      forlist((&obj->units)) {
-	Unit * u = (Unit *) elem;
-	if (u->monthorders) {
-	  if (u->monthorders->type == O_TEACH) {
-	    Do1TeachOrder(r,u);
-	    delete u->monthorders;
-	    u->monthorders = 0;
-	  }
+void Game::RunTeachOrders()
+{
+	forlist((&regions)) {
+		ARegion * r = (ARegion *) elem;
+		forlist((&r->objects)) {
+			Object * obj = (Object *) elem;
+			forlist((&obj->units)) {
+				Unit * u = (Unit *) elem;
+				if (u->monthorders) {
+					if (u->monthorders->type == O_TEACH) {
+						Do1TeachOrder(r,u);
+						delete u->monthorders;
+						u->monthorders = 0;
+					}
+				}
+			}
+		}
 	}
-      }
-    }
-  }
 }
 
 void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 {
     /* First pass, find how many to teach */
-    if( Globals->LEADERS_EXIST && !unit->IsLeader() )
-    {
-        unit->Error("TEACH: Only leaders can teach.");
-        return;
-    }
+    if( Globals->LEADERS_EXIST && !unit->IsLeader() ) {
+		/* small change to handle Ceran's mercs */
+		if(!unit->GetMen(I_MERC)) {
+			// Mercs can teach even though they are not leaders.
+			// They cannot however improve their own skills
+			unit->Error("TEACH: Only leaders can teach.");
+			return;
+		}
+	}
     
     int students = 0;
     TeachOrder * order = (TeachOrder *) unit->monthorders;
@@ -701,6 +706,12 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
         u->Error("STUDY: Not enough funds.");
         return;
     }
+
+	// Small patch for Ceran Mercs
+	if(u->GetMen(I_MERC)) {
+		u->Error("STUDY: Mercenaries are not allowed to study.");
+		return;
+	}
 	
     if( ( SkillDefs[sk].flags & SkillType::MAGIC ) && u->type != U_MAGE)
     {

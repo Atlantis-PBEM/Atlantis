@@ -89,6 +89,10 @@ Changes from 4.0.5 -> 4.0.6
       is that any orders for the repaired unit get lost, but that is
       unavoidable.  It also warns the GM so that he can look into it and
       hopefully fix it.
+   -- Added a 'similar_type' to the TerrainDefs structure so that spells
+      (such as wolf-lore) worked correctly with the Ceran types and the
+      conquest types enabled.  There are possibly other places where the
+      similar_type should be used instead of the direct type.
 
 TODO
 ----------------
