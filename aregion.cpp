@@ -2183,7 +2183,7 @@ int ARegion::IsCoastalOrLakeside()
 	return seacount;
 }
 
-int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir)
+int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 {
 	int cost = 1;
 	if(Globals->WEATHER_EXISTS) {
@@ -2193,8 +2193,11 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir)
 	}
 	if (movetype == M_WALK || movetype == M_RIDE) {
 		cost = (TerrainDefs[type].movepoints * cost);
-		if((cost>1) && fromRegion->HasExitRoad(dir) && HasConnectingRoad(dir))
+		if(fromRegion->HasExitRoad(dir) && HasConnectingRoad(dir)) {
 			cost -= cost/2;
+			if (road)
+				*road = " on a road";
+		}
 	}
 	if(cost < 1) cost = 1;
 	return cost;

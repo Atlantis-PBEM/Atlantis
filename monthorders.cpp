@@ -1103,6 +1103,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 	Location * loc = new Location;
 	MoveOrder * o = (MoveOrder *) unit->monthorders;
 	int movetype = unit->MoveType();
+	AString road;
 
 	if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
 	if (o->advancing) unit->guard = GUARD_ADVANCE;
@@ -1141,7 +1142,8 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 			goto done_moving;
 		}
 
-		int cost = newreg->MoveCost(movetype, region, i);
+		road = "";
+		int cost = newreg->MoveCost(movetype, region, i, &road);
 
 		if (region->type != R_NEXUS &&
 				unit->CalcMovePoints() - unit->movepoints < cost) {
@@ -1216,12 +1218,12 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 		AString temp;
 		switch (movetype) {
 		case M_WALK:
-			temp = "Walks ";
+			temp = AString("Walks ") + road;
 			if(TerrainDefs[newreg->type].similar_type == R_OCEAN)
 				temp = "Swims ";
 			break;
 		case M_RIDE:
-			temp = "Rides ";
+			temp = AString("Rides ") + road;
 			break;
 		case M_FLY:
 			temp = "Flies ";

@@ -1421,7 +1421,7 @@ int Unit::CanMoveTo(ARegion * r1,ARegion * r2)
 			(!CanSwim() || GetFlag(FLAG_NOCROSS_WATER)))
 		return 0;
 	int mp = CalcMovePoints() - movepoints;
-	if (mp < (r2->MoveCost(mt, r1, dir))) return 0;
+	if (mp < (r2->MoveCost(mt, r1, dir, 0))) return 0;
 	return 1;
 }
 
