@@ -2207,9 +2207,11 @@ void Game::DoGiveOrders()
 				forlist((&u->giveorders)) {
 					GiveOrder *o = (GiveOrder *)elem;
 					if(o->item < 0) {
-						if(o->amount != -2) {
-							u->Error("GIVE: Invalid item.");
-						} else {
+						if (o->amount == -1) {
+							/* do 'give X unit' command */
+							DoGiveOrder(r, u, o);
+						} else if (o->amount == -2) {
+							/* do 'give all type' command */
 							forlist((&u->items)) {
 								Item *item = (Item *)elem;
 								if((o->item == -NITEMS) ||
@@ -2224,6 +2226,8 @@ void Game::DoGiveOrders()
 									go.target = NULL;
 								}
 							}
+						} else {
+							u->Error("GIVE: Invalid item.");
 						}
 					} else if (DoGiveOrder(r, u, o)) {
 						break;
