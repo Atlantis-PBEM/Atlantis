@@ -635,3 +635,10 @@ Changes from 4.0.10 -> 5.0.0
       well.  There are options to allow the level of Quartermaster skill
       to affect the non-local transport distance or the cost of shipping
       items non-locally.
+   -- Fixed bug in tax being a month-long order and issuing the 'tax'
+      command giving an error about work overwriting and then the unit
+      working instead of taxing.
+   -- Fixed bug where autotax didn't work if DEFAULT_WORK_ORDER was
+      disabled and the unit was submitted as part of an orderset but had
+      blank orders (only when TAX_PILLAGE_MONTHLONG was set).
+

@@ -630,6 +630,7 @@ void Unit::DefaultOrders(Object *obj)
 	} else if(type == U_GUARDMAGE) {
 		combat = S_FIRE;
 	} else{
+		/* Set up default orders for factions which submit none */
 		if(obj->region->type != R_NEXUS) {
 			if(GetFlag(FLAG_AUTOTAX) &&
 					Globals->TAX_PILLAGE_MONTH_LONG && Taxers()) {
