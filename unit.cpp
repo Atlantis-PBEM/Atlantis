@@ -563,7 +563,7 @@ void Unit::ClearOrders()
 	canattack = 1;
 	nomove = 0;
 	enter = 0;
-	build = NULL;
+	build = 0;
 	leftShip = 0;
 	destroy = 0;
 	if (attackorders) delete attackorders;
@@ -1200,6 +1200,8 @@ int Unit::FlyingCapacity()
 	int cap = 0;
 	forlist(&items) {
 		Item *i = (Item *) elem;
+		// except ship items
+		if(i->type & IT_SHIP) continue;
 		cap += ItemDefs[i->type].fly * i->num;
 	}
 
@@ -1222,6 +1224,8 @@ int Unit::SwimmingCapacity()
 	int cap = 0;
 	forlist(&items) {
 		Item *i = (Item *) elem;
+		// except ship items
+		if(i->type & IT_SHIP) continue;
 		cap += ItemDefs[i->type].swim * i->num;
 	}
 
@@ -1852,7 +1856,21 @@ void Unit::MoveUnit(Object *toobj)
 {
 	if(object) object->units.Remove(this);
 	object = toobj;
-	if(object) object->units.Add(this);
+	if(object) {
+		object->units.Add(this);
+	}
+}
+
+void Unit::DiscardUnfinishedShips() {
+	int discard = 0;
+	// remove all unfinished ship-type items
+	for(int i=0; i<NITEMS; i++) {
+		if(ItemDefs[i].type & IT_SHIP) {
+			if(items.GetNum(i) > 0) discard = 1;
+			items.SetNum(i,0);
+		}
+	}
+	if(discard > 0) Event("discards all unfinished ships.");	
 }
 
 void Unit::Event(const AString & s)

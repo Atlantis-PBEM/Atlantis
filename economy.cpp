@@ -32,7 +32,7 @@
 // Depends on population and town development
 int TownInfo::TownType()
 {
-	int prestige = pop * (dev +  200) / 250;
+	int prestige = pop * (dev +  220) / 270;
 	if (prestige < Globals->CITY_POP / 4) return TOWN_VILLAGE;
 	if (prestige < Globals->CITY_POP * 4 / 5) return TOWN_TOWN;
 	return TOWN_CITY;
@@ -322,6 +322,7 @@ void ARegion::SetupCityMarket()
 		antiques[i] = 0;
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(ItemDefs[i].flags & ItemType::NOMARKET) continue;
+		if(ItemDefs[i].type & IT_SHIP) continue;
 		if(ItemDefs[i].type & IT_TRADE) numtrade++;
 		if (i==I_SILVER) continue;
 		if((ItemDefs[i].type & IT_MAN)
@@ -771,7 +772,7 @@ void ARegion::SetTownType(int level)
 	int poptown = getrandom((level -1) * (level -1) * 250) + level * level * 250;
 	town->hab += poptown;
 	town->pop = town->hab * 2 / 3;
-	development += level * level * 3;
+	development += level * 6 + 2;
 	town->dev = TownDevelopment();
 
 	// now increment until we reach the right size
@@ -779,7 +780,7 @@ void ARegion::SetTownType(int level)
 		// Increase?
 		if(level > town->TownType()) {
 			development += getrandom(Globals->TOWN_DEVELOPMENT / 10 + 5);
-			int poplus = getrandom(1200) + getrandom(1250);
+			int poplus = getrandom(1400) + getrandom(1400);
 			// don't overgrow!
 			while (town->pop + poplus > Globals->CITY_POP) {
 				poplus = poplus / 2;
@@ -957,7 +958,6 @@ int ARegion::TownHabitat()
 	// Effect of existing buildings
 	int farm = 0;
 	int inn = 0;
-	int bank = 0;
 	int temple = 0;
 	int caravan = 0;
 	int fort = 0;
@@ -967,7 +967,6 @@ int ARegion::TownHabitat()
 		if(ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_FOOD) farm++;
 		if(ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
 		if(ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
-		if(ObjectDefs[obj->type].name == "Bank") bank++;
 		if((ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
 			&& (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_MOUNT)) caravan++;
 	}
@@ -982,7 +981,6 @@ int ARegion::TownHabitat()
 	if(farm) build++;
 	if(inn) build++;
 	if(temple) build++;
-	if(bank) build++;
 	if(caravan) build++;
 	if(build > 2) build = 2;
 	
@@ -1135,9 +1133,11 @@ void ARegion::Grow()
 			p->itemtype != I_SILVER) {
 			activity += p->activity;
 			basedev += activity;
-			// base on baseamount - for maximum
-			// benefit of trade structures!
-			// Ant: What does that mean? It sounds like Japlish :)
+			// bonuses for productivity are calculated from
+			// the _baseamount_ of all resources.
+			// because trade structures increase the produceable
+			// amount and not the baseamount this creates an 
+			// effective advantage for trade structures
 			amount += p->baseamount;
 		}
 	}
@@ -1158,7 +1158,7 @@ void ARegion::Grow()
 	int adiff = abs(diff);
 	//if(adiff < 0) adiff = adiff * (- 1);
 	
-	/* Adjust basepop? 
+	// Adjust basepop? 
 	// raise basepop depending on production
 	// absolute basepop increase
 	if(diff > (basepopulation / 20)) {
@@ -1173,7 +1173,6 @@ void ARegion::Grow()
 		int depop = (basepopulation - population) / 4;
 		basepopulation -= depop + getrandom(depop);			
 	}
-	*/
 	
 	// debug strings
 	//Awrite(AString("immigrants = ") + immigrants);

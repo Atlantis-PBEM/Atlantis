@@ -216,6 +216,7 @@ class Unit : public AListElem
 		int Taxers(int);
 
 		void MoveUnit( Object *newobj );
+		void DiscardUnfinishedShips();
 
 		void Event(const AString &);
 		void Error(const AString &);
@@ -253,7 +254,7 @@ class Unit : public AListElem
 		/* Orders */
 		int destroy;
 		int enter;
-		Object *build;
+		int build;
 		int leftShip;
 		UnitId *promote;
 		AList findorders;

@@ -22,6 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+// 13/06/04 changed Object class to handle fleets (ravanrooke)
 
 #include "object.h"
 #include "items.h"
@@ -37,18 +38,35 @@ int LookupObject(AString *token)
 	return -1;
 }
 
-int ParseObject(AString *token)
+/* ParseObject checks for matching Object types AND
+ * for matching ship-type items (which are also
+ * produced using the build order) if the ships
+ * argument is given.
+ */
+int ParseObject(AString *token, int ships)
 {
 	int r = -1;
 	for (int i=O_DUMMY+1; i<NOBJECTS; i++) {
 		if (*token == ObjectDefs[i].name) {
+			if(ObjectDefs[i].flags & ObjectType::DISABLED) return -1;
 			r = i;
 			break;
 		}
 	}
-	if(r != -1) {
-		if(ObjectDefs[r].flags & ObjectType::DISABLED) r = -1;
+	// Check for ship-type items:
+	if((r == -1) && (ships > 0)) {
+		for (int i=0; i<NITEMS; i++) {
+			if(ItemDefs[i].type & IT_SHIP) {
+				if ((*token == ItemDefs[i].name) ||
+					(*token == ItemDefs[i].abr)) {
+						if(ItemDefs[i].flags & ItemType::DISABLED) return -1;
+						r = -(i+1);
+						break;
+				}
+			}
+		}
 	}
+
 	return r;
 }
 
@@ -71,6 +89,8 @@ Object::Object(ARegion *reg)
 	runes = 0;
 	region = reg;
 	prevdir = -1;
+	flying = 0;
+	ships.Empty();
 }
 
 Object::~Object()
@@ -101,6 +121,7 @@ void Object::Writeout(Aoutfile *f)
 	f->PutInt(units.Num());
 	forlist ((&units))
 		((Unit *) elem)->Writeout(f);
+	WriteoutFleet(f);
 }
 
 void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
@@ -136,6 +157,7 @@ void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
 		temp->MoveUnit(this);
 	}
 	mages = ObjectDefs[type].maxMages;
+	ReadinFleet(f);
 }
 
 void Object::SetName(AString *s)
@@ -165,10 +187,9 @@ void Object::SetDescribe(AString *s)
 	}
 }
 
-int Object::IsBoat()
+int Object::IsFleet()
 {
-	if (ObjectDefs[type].capacity)
-		return 1;
+	if(type == O_FLEET) return 1;
 	return 0;
 }
 
@@ -268,7 +289,7 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 			// This is a building and we don't see buildings in transit
 			return;
 		}
-		if(IsBoat() &&
+		if(IsFleet() &&
 		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_SHIPS)) {
 			// This is a ship and we don't see ships in transit
 			return;
@@ -280,7 +301,33 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 		}
 	}
 
-	if (type != O_DUMMY) {
+	/* Fleet Report */
+	if(IsFleet()) {
+		AString temp = AString("+ ") + *name + " : " + ob->name;
+		// report ships:
+		for(int item=0; item<NITEMS; item++) {
+			int num = GetNumShips(item);
+			if(num > 0) {
+				if(num > 1) {
+					temp += AString(", ") + num + " " + ItemDefs[item].names;
+				} else {
+					temp += AString(", ") + num + " " +ItemDefs[item].name;
+				}
+			}
+		}
+		if((fac == GetOwner()->faction) || (obs > 9)){
+			temp += ";";
+			if (incomplete > 0) {
+				temp += AString(" ") + incomplete + "% damaged;";
+			}
+			temp += AString(" Load: ") + FleetLoad() + "/" + FleetCapacity() + ";";
+			temp += AString(" Sailors: ") + FleetSailingSkill(1) + "/" + GetFleetSize() + ";";
+			temp += AString(" MaxSpeed: ") + GetFleetSpeed(1);
+		}
+		temp += ".";
+		f->PutStr(temp);
+		f->AddTab();
+	} else if (type != O_DUMMY) {
 		AString temp = AString("+ ") + *name + " : " + ob->name;
 		if (incomplete > 0) {
 			temp += AString(", needs ") + incomplete;
@@ -355,6 +402,226 @@ int Object::IsRoad()
 {
 	if (type >= O_ROADN && type <= O_ROADS) return 1;
 	return 0;
+}
+
+/* Performs a basic check on items for ship-types.
+ * (note: always fails for non-Fleet Objects.)
+ */
+int Object::CheckShip(int item)
+{
+	if(type != O_FLEET) return 0;
+	if(!(ItemDefs[item].flags & ItemType::DISABLED)
+		&& (ItemDefs[item].type & IT_SHIP)) return 1;
+	return 0;
+}
+
+void Object::WriteoutFleet(Aoutfile *f)
+{
+	if(type != O_FLEET) return;
+	int nships = (int) ships.Num();
+	f->PutInt(nships);
+	forlist(&ships)
+		((Item *) elem)->Writeout(f);
+}
+
+void Object::ReadinFleet(Ainfile *f)
+{
+	if(type != O_FLEET) return;
+	int nships = f->GetInt();
+	for(int i=0; i<nships; i++) {
+		Item *ship = new Item;
+		ship->Readin(f);
+		ships.Add(ship);
+	}
+}
+
+/* Returns the number of component ships of a given
+ * type.
+ */
+int Object::GetNumShips(int type)
+{
+	if(CheckShip(type) != 0) {
+		forlist(&ships) {
+			Item *ship = (Item *) elem;
+			if(ship->type == type) {
+				return ship->num;
+			}
+		}
+	}
+	return 0;
+}
+
+/* Erases possible previous entries for ship type
+ * and resets the number of ships.
+ */
+void Object::SetNumShips(int type, int num)
+{
+	if(CheckShip(type) != 0) {
+		if(num > 0) {
+			forlist(&ships) {
+				Item *ship = (Item *) elem;
+				if(ship->type == type) {
+					Awrite(AString("Setting ") + ItemDefs[type].names + " to " + num + ".");
+					ship->num = num;
+					return;
+				}
+			}
+			Item *ship = new Item;
+			ship->type = type;
+			ship->num = num;
+			ships.Add(ship);
+			Awrite(AString("Setting ") + ItemDefs[type].names + " to " + num + ".");
+		} else {
+			forlist(&ships) {
+				Item *ship = (Item *) elem;
+				if(ship->type == type) {
+					ships.Remove(ship);
+					delete ship;
+					return;
+				}
+			}
+		}
+	}
+}
+
+/* Adds one ship of the given type.
+ */
+void Object::AddShip(int type)
+{	
+	if(CheckShip(type) == 0) return;
+	int num = GetNumShips(type);
+	num++;
+	SetNumShips(type, num);	
+}
+
+/* Sets a fleet's sailing capacity.
+ */
+int Object::FleetCapacity()
+{
+	capacity = 0;
+	if(type != O_FLEET) return 0;
+	for(int item=0; item<NITEMS; item++) {
+		int num = GetNumShips(item);
+		// It is assumed that flying and swimming
+		// "ships" are never built or given
+		// into the same fleet! (i.e. the build
+		// and give code checks for that)
+		if (ItemDefs[item].fly > 0) {
+			capacity += num * ItemDefs[item].fly;
+			flying = 1;
+		} else {
+			capacity += num * ItemDefs[item].swim;
+			flying = 0;
+		}
+	}
+	return capacity;
+}
+
+/* Returns a fleet's load or -1 for non-fleet objects.
+ */
+int Object::FleetLoad()
+{
+	int load = -1;
+	int wgt = 0;
+	if(type == O_FLEET) {
+		forlist(&units) {
+			Unit * unit = (Unit *) elem;
+			wgt += unit->Weight();
+		}
+		load = wgt;
+	}
+	return load;
+}
+
+/* Returns the total skill level of all sailors.
+ * If report is not 0, returns the total skill level of all
+ * units regardless if they have sail orders (for report
+ * purposes).
+ */
+int Object::FleetSailingSkill(int report)
+{
+	int skill = -1;
+	int slvl = 0;
+	if(type == O_FLEET) {
+		forlist(&units) {
+			Unit * unit = (Unit *) elem;
+			if ((report != 0) ||
+				(unit->monthorders && unit->monthorders->type == O_SAIL)) {
+				slvl += unit->GetSkill(S_SAILING) * unit->GetMen();
+			}
+		}
+		skill = slvl;
+	}
+	return skill;
+}
+
+/* Returns fleet size - which is the total of
+ * sailors needed to move the fleet.
+ */
+int Object::GetFleetSize()
+{
+	if(type != O_FLEET) return 0;
+	int inertia = 0;
+	for(int item=0; item<NITEMS; item++) {
+		int num = GetNumShips(item);
+		if (num > 0) inertia += num * ItemDefs[item].pMonths;
+	}
+	return (inertia / 5);
+}
+
+/* Returns the fleet speed - theoretical if report
+ * argument is greater than zero (which means all
+ * potential sailors issued a SAIL command). The
+ * latter is mainly for report purposes. Game
+ * functions for moving the fleet provide a zero
+ * argument.
+ */
+int Object::GetFleetSpeed(int report)
+{
+	if(type != O_FLEET) return 0;
+	int tskill = FleetSailingSkill(report);
+	int speed = Globals->SHIP_SPEED;
+	int inertia = 0;
+	int skillreq = 0;
+	for(int item=0; item<NITEMS; item++) {
+		int num = GetNumShips(item);
+		if (num > 0) {
+			int diff = num * ItemDefs[item].pMonths;
+			skillreq += diff * ItemDefs[item].pLevel;
+			inertia += diff;
+		}
+	}
+	if (inertia < 1) return 0;
+	if(inertia > 0) skillreq = skillreq / inertia;
+	// check for sufficient sailing skill!
+	if(tskill < (inertia / 5)) return 0;
+	// check for wind mages & sailor bonus
+	int windbonus = 0;
+	int sailexp = 0;
+	int sailors = 0;
+	forlist(&units) {
+		Unit * unit = (Unit *) elem;
+		int wb = unit->GetAttribute("wind");
+		if(wb > 0) windbonus += (wb+1) * (wb+1) * 8;
+		int sb = unit->GetSkill(S_SAILING);
+		if(sb > 0) {
+			sailors += unit->GetMen();
+			sailexp += unit->GetMen() * sb;
+		}
+	}
+	sailexp = sailexp / sailors;
+	// up to 50% speed gain through wind:
+	speed += (Globals->SHIP_SPEED / 2) * windbonus / inertia;
+	// less than required skill: speed = 0!
+	int minskill = skillreq-2;
+	if(minskill < 1) minskill = 1;
+	if (sailexp < minskill) return 0;
+	int boost = 125 * (skillreq - 1);
+	int bonus1 = 1000 + boost * (sailexp-1);
+	int bonus2 = 1000 * tskill / (inertia / 5) + boost * 2;
+	if (bonus2 < bonus1) bonus1 = bonus2;
+	speed += (Globals->SHIP_SPEED / 4) * bonus1 / 1000;	
+	return speed;
 }
 
 AString *ObjectDescription(int obj)

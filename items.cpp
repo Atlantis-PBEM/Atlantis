@@ -1044,7 +1044,12 @@ Item::~Item()
 
 AString Item::Report(int seeillusions)
 {
-	AString ret = ItemString(type,num);
+	AString ret = "";
+	// special handling of the unfinished ship items
+	if(ItemDefs[type].type & IT_SHIP) {
+		ret += AString("unfinished ") + ItemDefs[type].name +
+			" [" + ItemDefs[type].abr + "] (needs " + num + ")";
+	} else ret += ItemString(type,num);
 	if (seeillusions && (ItemDefs[type].type & IT_ILLUSION)) {
 		ret = ret + " (illusion)";
 	}
@@ -1107,6 +1112,9 @@ int ItemList::Weight()
 	int frac = 0;
 	forlist(this) {
 		Item *i = (Item *) elem;
+		// Except unfinished ships from weight calculations:
+		// these just get removed when the unit moves.
+		if (ItemDefs[i->type].type & IT_SHIP) continue;
 		if (ItemDefs[i->type].weight == 0) frac += i->num;
 		else wt += ItemDefs[i->type].weight * i->num;
 	}

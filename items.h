@@ -63,6 +63,7 @@ enum {
 	IT_LEADER = 0x10000,
 	IT_MONEY = 0x20000,
 	IT_ANIMAL = 0x40000,
+	IT_SHIP = 0x80000
 };
 
 struct Materials

@@ -199,7 +199,7 @@ void Game::EditGameRegionObjects( ARegion *pReg )
                     break; 
                 } 
 
-                int objType = ParseObject(pToken); 
+                int objType = ParseObject(pToken, 0); 
                 if( (objType == -1) || (ObjectDefs[objType].flags & ObjectType::DISABLED) ) { 
                     Awrite( "No such object." ); 
                     break; 
@@ -229,9 +229,9 @@ void Game::EditGameRegionObjects( ARegion *pReg )
                 o->incomplete = 0; 
                 o->inner = -1; 
                 // o->hexside = dir;
-                if (o->IsBoat()) { 
+                if (o->IsFleet()) { 
                     o->num = shipseq++; 
-                    o->name = new AString(AString("Ship") + " [" + o->num + "]"); 
+                    o->name = new AString(AString("Fleet") + " [" + o->num + "]"); 
                 } 
                 else { 
                     o->num = pReg->buildingseq++; 
@@ -356,8 +356,8 @@ void Game::EditGameRegionObjects( ARegion *pReg )
                         Awrite("Object not on a hexside.");
                         break;
                     }                
-                    if(tmp->IsBoat()) {
-                        Awrite("Ships cannot be mirrored.");
+                    if(tmp->IsFleet()) {
+                        Awrite("Fleets cannot be mirrored.");
                         break;
                     }                
                     if(!Globals->HEXSIDE_TERRAIN) {

@@ -429,13 +429,6 @@ private:
 	void CheckFactionMaintenance(int consume);
 	void CheckAllyMaintenance();
 
-	// Bank functions
-	void ProcessBankOrder(Unit *, AString *, OrdersCheck *);
-	void DoBankDepositOrders();
-	void DoBankWithdrawOrders();
-	void BankInterest();
-	void DoBankOrder(ARegion *, Unit *, BankOrder *);
-
 	// Similar to the above, but for minimum food requirements
 	void CheckUnitHunger();
 	void CheckFactionHunger();
@@ -522,7 +515,7 @@ private:
 	void RunQuitOrders();
 	void RunForgetOrders();
 	void Do1Quit(Faction *);
-	void SinkUncrewedShips();
+	void SinkUncrewedFleets();
 	void DrownUnits();
 	void RunStealOrders();
 	void RunTransportOrders();
@@ -551,6 +544,7 @@ private:
 	void RunAProduction(ARegion *, Production *);
 	void RunUnitProduce(ARegion *, Unit *);
 	void Run1BuildOrder(ARegion *, Object *, Unit *);
+	void RunBuildShipOrder(ARegion *, Object *, Unit *);
 	void RunBuildHelpers(ARegion *);
 	void RunSailOrders();
 	ARegion *Do1SailOrder(ARegion *, Object *, Unit *);

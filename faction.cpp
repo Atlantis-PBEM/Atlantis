@@ -154,7 +154,6 @@ Faction::Faction(int n)
 	defaultattitude = A_NEUTRAL;
 	quit = 0;
 	unclaimed = 0;
-	bankaccount = 0;
 	pReg = NULL;
 	pStartLoc = NULL;
 	noStartLeader = 0;
@@ -177,7 +176,6 @@ void Faction::Writeout(Aoutfile *f)
 	f->PutInt(lastchange);
 	f->PutInt(lastorders);
 	f->PutInt(unclaimed);
-	f->PutInt(bankaccount);
 	f->PutStr(*name);
 	f->PutStr(*address);
 	f->PutStr(*password);
@@ -202,7 +200,6 @@ void Faction::Readin(Ainfile *f, ATL_VER v)
 	lastchange = f->GetInt();
 	lastorders = f->GetInt();
 	unclaimed = f->GetInt();
-	bankaccount = f->GetInt();
 
 	name = f->GetStr();
 	address = f->GetStr();
@@ -537,13 +534,7 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 
 	temp = AString("Unclaimed silver: ") + unclaimed + ".";
 	f->PutStr(temp);
-	if (Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
-		temp = AString("Silver in the Bank: ") + bankaccount;
-		if (Globals->ALLOW_BANK & GameDefs::BANK_TRADEINTEREST)
-			temp += AString(" (+")+interest+AString(" interest)");
-		temp += + ".";
-		f->PutStr(temp);
-	}	f->PutStr("");
+	f->PutStr("");
 
 	forlist(&present_regions) {
 		((ARegionPtr *) elem)->ptr->WriteReport(f, this, pGame->month, &(pGame->regions));

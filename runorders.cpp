@@ -69,15 +69,8 @@ void Game::RunOrders()
 	RunQuitOrders();
 	Awrite("Removing Empty Units...");
 	DeleteEmptyUnits();
-	SinkUncrewedShips();
+	SinkUncrewedFleets();
 	DrownUnits();
-	if (Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
-		Awrite("Running BANK orders...");
-		if (Globals->ALLOW_BANK & GameDefs::BANK_TRADEINTEREST)
-			BankInterest();
-		DoBankDepositOrders();
-		DoBankWithdrawOrders();
-	}
 	if(Globals->ALLOW_WITHDRAW) {
 		Awrite("Running WITHDRAW Orders...");
 		DoWithdrawOrders();
@@ -86,7 +79,7 @@ void Game::RunOrders()
 	RunSailOrders();
 	Awrite("Running Move Orders...");
 	RunMoveOrders();
-	SinkUncrewedShips();
+	SinkUncrewedFleets();
 	DrownUnits();
 	FindDeadFactions();
 	Awrite("Running Teach Orders...");
@@ -504,33 +497,12 @@ void Game::DrownUnits()
 	}
 }
 
-void Game::SinkUncrewedShips()
+void Game::SinkUncrewedFleets()
 {
-	Unit *u;
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
 		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
-			forlist(&r->objects) {
-				Object *o = (Object *) elem;
-				if(!o->IsBoat()) continue;
-
-				int men = 0;
-				forlist(&o->units) {
-					u = (Unit *)elem;
-					men += u->GetMen();
-				}
-
-				if(men <= 0) {
-					/* No men onboard, move all units out to ocean */
-					forlist(&o->units) {
-						u = (Unit *)elem;
-						u->MoveUnit(r->GetDummy());
-					}
-					/* And sink the boat */
-					r->objects.Remove(o);
-					delete o;
-				}
-			}
+			r->CheckFleets();
 		}
 	}
 }
@@ -976,7 +948,7 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 		Unit *tar = obj->GetUnitId(id, u->faction->num);
 		delete id;
 		if (!tar) continue;
-		if(obj->IsBoat() &&
+		if(obj->IsFleet() &&
 			(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
 			(!tar->CanReallySwim() || tar->GetFlag(FLAG_NOCROSS_WATER))) {
 			u->Error("EVICT: Cannot forcibly evict units over ocean.");
@@ -1015,7 +987,7 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 			u->Error("LEAVE: Can't leave a ship in the ocean.");
 			return;
 		}
-		if (in->IsBoat() && u->CanSwim()) u->leftShip = 1;
+		if (in->IsFleet() && u->CanSwim()) u->leftShip = 1;
 	} else {
 		to = r->GetObject(u->enter);
 		u->enter = 0;
@@ -1041,6 +1013,8 @@ void Game::RemoveEmptyObjects()
 		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
 			Object *o = (Object *) elem;
+			if((o->IsFleet()) && 
+				(TerrainDefs[r->type].similar_type != R_OCEAN)) continue;
 			if (ObjectDefs[o->type].cost &&
 					o->incomplete >= ObjectDefs[o->type].cost) {
 				forlist(&o->units) {
@@ -2089,174 +2063,6 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 	return 0;
 }
 
-
-void Game::DoBankDepositOrders()
-{
-	forlist((&regions)) {
-		ARegion *r = (ARegion *)elem;
-		forlist((&r->objects)) {
-			Object *obj = (Object *)elem;
-			forlist((&obj->units)) {
-				Unit *u = (Unit *) elem;
-				forlist((&u->bankorders)) {
-					BankOrder *o = (BankOrder *)elem;
-					if (o->what == 2) // deposit
-						DoBankOrder(r, u, o);
-				}
-			}
-		}
-	}
-}
-
-void Game::DoBankWithdrawOrders()
-{
-	forlist((&regions)) {
-		ARegion *r = (ARegion *)elem;
-		forlist((&r->objects)) {
-			Object *obj = (Object *)elem;
-			forlist((&obj->units)) {
-				Unit *u = (Unit *) elem;
-				forlist((&u->bankorders)) {
-					BankOrder *o = (BankOrder *)elem;
-					DoBankOrder(r, u, o);
-				}
-				u->bankorders.DeleteAll();
-			}
-		}
-	}
-}
-
-void Game::DoBankOrder(ARegion *r, Unit *u, BankOrder *o)
-{
-	int what = o->what;
-	int amt = o->amount;
-	int max;// = o->max;
-	int lvl;// = o->level;
-	int inbank;// = o->inbank;
-	int fee;
-
-	if(r->type == R_NEXUS) {
-		u->Error("BANK: does not work in the Nexus.");
-		u->bankorders.Remove(o);
-		return;
-	}
-	if (!(SkillDefs[S_BANKING].flags & SkillType::DISABLED)) { // banking skill ?
-		lvl = u->GetSkill(S_BANKING);
-	} else { // skill disabled - pretend level 5
-		lvl = 5;
-	}
-	if (!(ObjectDefs[O_OBANK].flags & ObjectType::DISABLED)) { // banks enabled ?
-		if (u->object->type != O_OBANK) // Are they in Bank ?
-			inbank = 0; // No they are not
-		else { // Yes they are in bank
-			if (u->object->incomplete > 0) // Is it completed ?
-				inbank = 0; // Not completed
-			else
-				inbank = 1; // Completed
-		}
-		if (inbank)
-			max = Globals->BANK_MAXSKILLPERLEVEL * lvl * inbank;
-		else
-			max = Globals->BANK_MAXUNSKILLED;
-	} else { // banks disabled - pretend they are in a bank
-		inbank = 1;
-		max = Globals->BANK_MAXSKILLPERLEVEL * lvl;
-	}
-
-	if (!r->CanTax(u) && (Globals->ALLOW_BANK & GameDefs::BANK_NOTONGUARD)) {
-		if (ObjectDefs[O_OBANK].flags & ObjectType::DISABLED) {
-			// if banks are disabled, inbank will be 1, so ignore it
-			//FIXME
-			u->Error("BANK1: A unit is on guard - banking is not allowed.");
-			u->bankorders.Remove(o);
-			return;
-		} else { // pay attention to inbank
-			if (!inbank) { // if a unit is in a bank, then allow nevertheless
-				u->Error("BANK2: A unit is on guard - banking is not allowed."); //FIXME
-				u->bankorders.Remove(o);
-				return;
-			}
-		}
-	}
-
-	if(!u->object->region->town && (Globals->ALLOW_BANK & GameDefs::BANK_INSETTLEMENT)) {
-		if (ObjectDefs[O_OBANK].flags & ObjectType::DISABLED) { // if banks are disabled, inbank will be 1, so ignore it
-			u->Error("BANK: Unit is not in a village, town or city.");
-			u->bankorders.Remove(o);
-			return;
-		} else { // pay attention to inbank
-			if (!inbank) { // if a unit is in a bank, then allow nevertheless
-				u->Error("BANK: Unit is not in a village, town or city.");
-				u->bankorders.Remove(o);
-				return;
-			}
-		}
-	}
-
-	if ((amt > u->faction->bankaccount) && (what == 1)) {
-		u->Error(AString("BANK: Too little silver in the bank to withdraw."));
-		u->bankorders.Remove(o);
-		return;
-	}
-	if (what == 1) { // withdraw
-		if (amt > max) {
-			AString temp = "BANK: Withdrawal limited to ";
-			temp += max;
-			temp += " silver.";
-			u->Error(temp);
-			amt = max;
-		}
-	} else { // deposit
-		if (u->items.GetNum(I_SILVER) == 0) {
-			u->Error(AString("BANK: No silver available."));
-			u->bankorders.Remove(o);
-			return;
-		} else {
-			if (amt > max) {
-				AString temp = "BANK: Deposit limited to ";
-				temp += max;
-				temp += " silver.";
-				u->Error(temp);
-				amt = max;
-			}
-			if (u->items.GetNum(I_SILVER) < amt)
-				amt = u->items.GetNum(I_SILVER);
-		}
-	}
-	if (Globals->ALLOW_BANK & GameDefs::BANK_FEES)
-		fee = (amt * Globals->BANK_FEE)/100;
-	else
-		fee = 0;
-	AString temp;
-	if (what == 2)
-		temp += "Deposits ";
-	else
-		temp += "Withdraws ";
-	temp += amt - fee;
-	if (what == 2)
-		temp += " in";
-	else
-		temp += " from";
-	temp += " the bank";
-	if (Globals->ALLOW_BANK & GameDefs::BANK_FEES) {
-		temp += " (fees ";
-		temp += fee;
-		temp += ")";
-	}
-	temp += ".";
-	u->Event(temp);
-	if (what == 2) {// deposit
-		u->faction->bankaccount += amt - fee;
-		u->items.SetNum(I_SILVER, u->items.GetNum(I_SILVER) - amt);
-	} else { // withdrawal
-		u->faction->bankaccount -= amt;
-		u->items.SetNum(I_SILVER, u->items.GetNum(I_SILVER) + amt - fee);
-	}
-
-	u->bankorders.Remove(o);
-	return;
-}
-
 void Game::DoGiveOrders()
 {
 	forlist((&regions)) {
@@ -2462,6 +2268,115 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 
 int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 {
+	/* Transfer/GIVE ship items: */
+	if(ItemDefs[o->item].type & IT_SHIP) {
+		// GIVE 0
+		if(o->target->unitnum == -1) {
+			int hasitem = u->items.GetNum(o->item);
+			AString temp = "Abandons ";
+			// discard unfinished ships from inventory
+			if(hasitem) {
+				forlist(&u->items) {
+					Item *it = (Item *) elem;
+					if(it->type == o->item) {
+						u->Event(temp + it->Report(1) + ".");
+						it->num = 0;
+					}
+				}
+				return 0;
+			// abandon fleet ships
+			} else if(!(u->object->IsFleet()) || 
+				(u->num != u->object->GetOwner()->num)) {
+				u->Error("GIVE: only fleet owner can give ships.");
+				return 0;
+			}
+			// Check amount
+			int num = u->object->GetNumShips(o->item);
+			if(num < 1) {
+				u->Error("GIVE: no such ship in fleet.");
+				return 0;
+			}
+			if ((num < o->amount) && (o->amount != -2)) {
+				u->Error("GIVE: not enough ships.");
+				o->amount = num;
+			}
+			u->object->SetNumShips(o->item, num - o->amount);
+			u->Event(AString(temp) + ItemString(o->item, num - o->amount) + ".");
+			return 0;
+		}
+		// GIVE to unit:	
+		Unit *t = r->GetUnitId(o->target, u->faction->num);
+		if (!t) {
+			u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
+				").");
+			return 0;
+		} else if(t->faction->IsNPC()) {
+			u->Error(AString("GIVE: Can't give to non-player unit (") + o->target->Print() +
+				").");
+			return 0;
+		}
+		if(t->object->type != O_DUMMY) {
+			if (!(t->object->IsFleet()) || (!t->num == t->object->GetOwner()->num)) {
+				u->Error("GIVE: ships may only be given to fleet owner.");
+				return 0;
+			}
+		}
+		if(u == t) {
+			u->Error(AString("GIVE: Attempt to give ")+ItemDefs[o->item].names+
+				" to self.");
+			return 0;
+		}
+		if(!u->CanSee(r, t) &&
+			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
+				u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
+					").");
+				return 0;
+		}
+		if (o->item != I_SILVER &&
+			t->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
+				u->Error("GIVE: Target is not a member of a friendly faction.");
+				return 0;
+		}
+		if(ItemDefs[o->item].flags & ItemType::CANTGIVE) {
+			u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".");
+			return 0;
+		}
+		// Check amount
+		int amt = o->amount;
+		if (amt != -2 && amt > u->object->GetNumShips(o->item)) {
+			u->Error("GIVE: Not enough.");
+			amt = u->object->GetNumShips(o->item);
+		} else if (amt == -2) {
+			amt = u->object->GetNumShips(o->item);
+			if(o->except) {
+				if(o->except > amt) {
+					amt = 0;
+					u->Error("GIVE: EXCEPT value greater than amount on hand.");
+				} else {
+					amt = amt - o->except;
+				}
+			}
+		}
+		if (ItemDefs[o->item].max_inventory) {
+			int cur = t->object->GetNumShips(o->item) + amt;
+			if (cur > ItemDefs[o->item].max_inventory) {
+				u->Error(AString("GIVE: Fleets cannot have more than ")+
+					ItemString(o->item, ItemDefs[o->item].max_inventory) +".");
+				return 0;
+			}
+		}
+		u->Event(AString("Transfers ") + ItemString(o->item, amt) + " to " +
+			*t->object->name + ".");
+		if (u->faction != t->faction) {
+			t->Event(AString("Receives ") + ItemString(o->item, amt) +
+				" from " + *u->object->name + ".");
+		}
+		u->object->SetNumShips(o->item, u->object->GetNumShips(o->item)-amt);
+		t->object->SetNumShips(o->item, t->object->GetNumShips(o->item)+amt);
+		t->faction->DiscoverItem(o->item, 0, 1);		
+		return 0;
+	}
+	
 	// Check there is enough to give
 	int amt = o->amount;
 	if (amt != -2 && amt > u->items.GetNum(o->item)) {

@@ -205,6 +205,7 @@ class ARegion : public AListElem
 
 		Object *GetObject(int);
 		Object *GetDummy();
+		void CheckFleets();
 
 		int MoveCost(int, ARegion *, int, AString *road);
 		Unit *Forbidden(Unit *); /* Returns unit that is forbidding */

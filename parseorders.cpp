@@ -459,9 +459,6 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_AVOID:
 			ProcessAvoidOrder(unit, o, pCheck);
 			break;
-		case O_BANK:
-			ProcessBankOrder(unit, o, pCheck);
-			break;
 		case O_IDLE:
 			ProcessIdleOrder(unit, o, pCheck);
 			break;
@@ -809,7 +806,7 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			return;
 		}
 
-		int obj = ParseObject(token);
+		int obj = ParseObject(token, 0);
 		delete token;
 
 		if(obj == -1 || (ObjectDefs[obj].flags & ObjectType::DISABLED)) {
@@ -1344,58 +1341,6 @@ void Game::ProcessConsumeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessBankOrder(Unit *u, AString *o, OrdersCheck *pCheck)
-{
-	int amt;
-	int what;
-//	int inbank;
-//	int lvl;
-//	int max = Globals->BANK_MAXSKILLPERLEVEL *5; // value if banks & skills disabled
-
-	if (!(Globals->ALLOW_BANK & GameDefs::BANK_ENABLED)) {
-		ParseError(pCheck, u, 0, "There are no banks in this game.");
-		return;
-	}
-	AString *token = o->gettoken();
-	if (token) {
-		if (*token == "deposit")
-			what = 2;
-		if (*token == "withdraw")
-			what = 1;
-		delete token;
-		if (what == 2) {
-			token = o->gettoken();
-			if (!token) {
-				ParseError(pCheck, u, 0, "BANK: No amount to deposit given.");
-				return;
-			}
-			amt = token->value();
-			delete token;
-		} else if (what == 1) {	// withdrawal
-			token = o->gettoken();
-			if (!token) {
-				ParseError(pCheck, u, 0, "BANK: No amount to withdraw given.");
-				return;
-			}
-			amt = token->value();
-			delete token;
-		} else {
-			ParseError(pCheck, u, 0, "BANK: No WITHDRAW or DEPOSIT given.");
-			return;
-		}
-	} else {
-		ParseError(pCheck, u, 0, "BANK: No action given.");
-		return;
-	}
-	if(!pCheck) {
-		BankOrder *order = new BankOrder;
-		order->what = what;
-		order->amount = amt;
-		u->bankorders.Add(order);
-	}
-	return;
-}
-
 void Game::ProcessRevealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	if(!pCheck) {
@@ -1524,17 +1469,13 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			order->target = targ;	// set the order's target to the unit number helped
 		} else {
 			// token exists and != "help": must be something like 'build longboat'
-			int ot = ParseObject(token);
+			int ot = ParseObject(token, 1);
 			delete token;
 			if (ot==-1) {
 				ParseError(pCheck, unit, 0, "BUILD: Not a valid object name.");
 				return;
 			}
-			if(ObjectDefs[ot].flags & ObjectType::DISABLED) {
-				ParseError(pCheck, unit, 0, "BUILD: Not a valid object name.");
-				return;
-			}
-			
+		
 			if (!pCheck) {
 				ARegion *reg = unit->object->region;
 				if (TerrainDefs[reg->type].similar_type == R_OCEAN){
@@ -1542,21 +1483,27 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 					return;
 				}
 				
-				if (ObjectIsShip(ot)) {
-				    if (!reg->IsCoastalOrLakeside() && ot != O_BALLOON) {
+				if (ot < 0) {
+					/* Build SHIP item */
+					int st = abs(ot+1);
+					if(ItemDefs[st].flags & ItemType::DISABLED) {
+						ParseError(pCheck, unit, 0, "BUILD: Not a valid object name.");
+						return;
+					}
+					int flying = ItemDefs[st].fly;
+				    if (!reg->IsCoastalOrLakeside() && (flying <= 0)) {
 						unit->Error("BUILD: Can't build ship in "
 								"non-coastal or lakeside region.");
 						return;
 					}
-					
-					Object * obj = new Object(reg);
-					obj->type = ot;
-					obj->incomplete = ObjectDefs[obj->type].cost;
-					obj->num = shipseq++;
-					obj->SetName(new AString("Ship"));
-					unit->build = obj;
-					unit->object->region->objects.Add(obj);
+					unit->build = -st;
+					// Don't create a fleet yet	
 				} else {
+					/* build standard OBJECT */
+					if(ObjectDefs[ot].flags & ObjectType::DISABLED) {
+						ParseError(pCheck, unit, 0, "BUILD: Not a valid object name.");
+						return;
+					}
 					if (reg->buildingseq > 99) {
 						unit->Error("BUILD: The region is full.");
 						return;
@@ -1566,7 +1513,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 					obj->incomplete = ObjectDefs[obj->type].cost;
 					obj->num = unit->object->region->buildingseq++;
 					obj->SetName(new AString("Building"));
-					unit->build = obj;
+					unit->build = obj->num;
 					unit->object->region->objects.Add(obj);
 				}
 			}
@@ -2193,6 +2140,9 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 				} else if((*token == "item") || (*token == "items")) {
 					item = -NITEMS;
 					found = 1;
+				} else if((*token == "ship") || (*token == "ships")) {
+					item = -IT_SHIP;
+					found = 1;
 				} else if(item != -1) {
 					found = 1;
 				}
@@ -2290,6 +2240,8 @@ void Game::ProcessNameOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		ParseError(pCheck, unit, 0, "NAME: No argument.");
 		return;
 	}
+	
+	Awrite(AString("Parsing NAME order from unit ") + unit->num + ".");
 	if (*token == "faction") {
 		delete token;
 		token = o->gettoken();
@@ -2329,6 +2281,10 @@ void Game::ProcessNameOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			// Fix to prevent non-owner units from renaming objects
 			if(unit != unit->object->GetOwner()) {
 				unit->Error("NAME: Unit is not owner.");
+				return;
+			}
+			if(!unit->object->CanModify()) {
+				unit->Error("NAME: Can't name this type of object.");
 				return;
 			}
 			unit->object->SetName(token);

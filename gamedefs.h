@@ -312,36 +312,6 @@ public:
 	// Is the withdraw order enabled
 	int ALLOW_WITHDRAW;
 
-	// Is the BANK order enabled ?
-	enum {
-		// Do we allow banking in this game ?
-		BANK_ENABLED = 0x01,
-		// if Banks are enabled, can the bank be built if units are
-		// on guard? units can use the bank anyhow if it's there
-		// already if Banks are disabled, can units BANK if region
-		// is guarded?
-		BANK_NOTONGUARD = 0x02,
-		// if Banks are enabled, can the bank be built in settlements
-		// only?  units can use the bank anyhow if it's there already
-		// if Banks are disabled, can units BANK in settlements only?
-		BANK_INSETTLEMENT = 0x04,
-		// Do Trade factions get interest in deposits ?
-		BANK_TRADEINTEREST = 0x08,
-		// If banks are enabled, is BANKING 1 required in addition to
-		// BUILDING ? FIXME: ignored
-		BANK_SKILLTOBUILD = 0x10,
-		// Do operations require money ? (only if banks are enabled)
-		BANK_FEES = 0x20,
-	};
-	int ALLOW_BANK;
-	int BANK_FEE; // percentage if enabled.
-	int BANK_MAXUNSKILLED; // max silver if banks and/or skill disabled, or
-								// if unskilled and skill disabled or
-								// if banke enabled and not in bank
-	int BANK_MAXSKILLPERLEVEL;	// if skill is enabled, how much can be withdrawn deposited per skill level
-								// if disabled, skill is presumed to be 5, so if you have 1000 here,
-								// max would be 5000.
-
 	// Do cities have a cost to rename them?  If this value is set,
 	// the cost is the city size (1, 2, 3) * this value
 	int CITY_RENAME_COST;

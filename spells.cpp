@@ -1507,7 +1507,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 		    " is an ocean.");
 		return 1;
 	}
-
+	u->DiscardUnfinishedShips();
 	u->Event(AString("Teleports to ") + tar->Print(&regions) + ".");
 	u->MoveUnit(tar->GetDummy());
 	return 1;
@@ -1628,7 +1628,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 						unitlist += AString(loc->unit->num);
 						comma = 1;
 					}
-
+					loc->unit->DiscardUnfinishedShips();
 					loc->unit->Event(AString("Is teleported through a ") +
 							"Gate to " + tar->Print(&regions) + " by " +
 							*u->name + ".");
@@ -1641,7 +1641,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 			}
 		}
 	}
-
+	u->DiscardUnfinishedShips();
 	u->Event(AString("Jumps through a Gate to ") +
 			tar->Print( &regions ) + ".");
 	if (comma) {
@@ -1711,6 +1711,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 				if (loc->unit->GetAttitude(r,u) < A_ALLY) {
 					u->Error("CAST: Unit is not allied.");
 				} else {
+					loc->unit->DiscardUnfinishedShips();
 					loc->unit->Event(AString("Is teleported to ") +
 							tar->region->Print( &regions ) +
 							" by " + *u->name + ".");

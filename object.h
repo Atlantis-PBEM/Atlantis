@@ -33,6 +33,7 @@ class Object;
 #include "gamedefs.h"
 #include "faction.h"
 #include "items.h"
+#include <map>
 
 #define I_WOOD_OR_STONE -2
 
@@ -45,7 +46,8 @@ class ObjectType {
 			NEVERDECAY	= 0x004,
 			CANENTER	= 0x008,
 			CANMODIFY	= 0x020,
-			TRANSPORT	= 0x040
+			TRANSPORT	= 0x040,
+			GROUP		= 0x080
 		};
 		int flags;
 
@@ -73,7 +75,7 @@ extern ObjectType *ObjectDefs;
 
 AString *ObjectDescription(int obj);
 
-int ParseObject(AString *);
+int ParseObject(AString *, int ships);
 
 int ObjectIsShip(int);
 
@@ -97,7 +99,7 @@ class Object : public AListElem
 		// AS
 		int IsRoad();
 
-		int IsBoat();
+		int IsFleet();
 		int IsBuilding();
 		int CanModify();
 		int CanEnter(ARegion *, Unit *);
@@ -106,7 +108,20 @@ class Object : public AListElem
 
 		void SetPrevDir(int);
 		void MoveObject(ARegion *toreg);
-
+		
+		// Fleets
+		void ReadinFleet(Ainfile *f);
+		void WriteoutFleet(Aoutfile *f);
+		int CheckShip(int);
+		int GetNumShips(int);
+		void SetNumShips(int, int);
+		void AddShip(int);
+		int FleetCapacity();
+		int FleetLoad();
+		int FleetSailingSkill(int);
+		int GetFleetSize();
+		int GetFleetSpeed(int);
+		
 		AString *name;
 		AString *describe;
 		ARegion *region;
@@ -115,10 +130,13 @@ class Object : public AListElem
 		int type;
 		int incomplete;
 		int capacity;
+		int flying;
+		int load;
 		int runes;
 		int prevdir;
 		int mages;
 		AList units;
+		AList ships;
 };
 
 #endif

@@ -903,6 +903,14 @@ Changes from 4.0.10 -> 5.0.0
       army-wide shields (taken from Bradley's Nylandor code).
    -- added Ant's GM's code of conduct into the GAMEMASTER file.
    -- fixed the bug where NOMOUNT type weapons (pikes) were never used.
-      
-   
+   -- removed all traces of BANKS.
+   -- added FLEETS. Ships are now handled as items, either belonging to a fleet object or to
+      a units itemlist as unfinished ships. Also, finally Summon Wind is handled in a neat way.
+      There's a bonus to fleet speeds for summon wind mages (who can bundle their efforts) and
+      for highly skilled sailors sailing in good ships. Also changed the skillshow for S_SUMMON_WIND
+      and the genrules (just scantily) to take the ship info from both items and objects. Ships _may_
+      still be objects but then cannot act as parts of fleets and this is discouraged.
+   	  Unfinished ships may not be given (except given away completely), but finished ship may be transferred
+   	  between the owners of fleets.
+   	  ToDo: armored galleon bonus, builder helpers...?
    

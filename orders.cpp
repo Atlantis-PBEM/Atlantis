@@ -35,7 +35,6 @@ char *od[] = {
 	"attack",
 	"autotax",
 	"avoid",
-	"bank",
 	"behind",
 	"build",
 	"buy",
@@ -326,15 +325,6 @@ EvictOrder::EvictOrder()
 }
 
 EvictOrder::~EvictOrder()
-{
-}
-
-BankOrder::BankOrder()
-{
-       type = O_BANK;
-}
-
-BankOrder::~BankOrder()
 {
 }
 
