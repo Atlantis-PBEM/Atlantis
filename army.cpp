@@ -822,33 +822,37 @@ void Army::Win(Battle * b,ItemList * spoils)
 		Item * i = (Item *) elem;
 		int weight = ItemDefs[i->type].weight;
 		int t;
+		int nospoil = 0;
 
 		if(weight) {
-			if(ns) t = ns;
-			else t = 0;
+			if(weight < ItemDefs[i->type].walk) {
+				t = na;
+			} else {
+				nospoil = 1;
+				if(ns) t = ns;
+				else t = 0;
+			}
 		} else if(!weight) {
 			t = na;
 		}
 
 		if(t) {
 			int n;
-			int can_spoil = 0;
 			n = i->num / t;
 			if (n>=1) {
 				for(int x=0; x<na; x++) {
 					Unit * u = soldiers[x]->unit;
-					if(u->flags & FLAG_NOSPOILS) continue;
-					can_spoil++;
+					if((u->flags & FLAG_NOSPOILS) && nospoil) continue;
 					u->items.SetNum(i->type,u->items.GetNum(i->type) + n);
 					u->faction->DiscoverItem(i->type, 0, 1);
 				}
 			}
 			n = i->num % t;
-			for (int x=0; x<n && can_spoil; x++) {
+			for (int x=0; x<n && ns; x++) {
 				t = getrandom(na);
 				Unit *u;
 				u = soldiers[t]->unit;
-				while (u->flags & FLAG_NOSPOILS) {
+				while ((u->flags & FLAG_NOSPOILS) && nospoil) {
 					t = getrandom(na);
 					u = soldiers[t]->unit;
 				}

@@ -258,3 +258,6 @@ Changes from 4.0.7 -> 4.0.8
       was already in the building to be helped with.
    -- Fixed bug in NOSPOILS code which caused an infinite loop if no army
       unit would accept spoils.
+   -- Fixed another bug in the NOSPOILS code.  NOSPOILS was supposed to still
+      allow 0 weight and weight < walking capacity items to be aquired.  It
+      wasn't.
