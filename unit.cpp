@@ -1201,7 +1201,7 @@ int Unit::FlyingCapacity()
 	forlist(&items) {
 		Item *i = (Item *) elem;
 		// except ship items
-		if(i->type & IT_SHIP) continue;
+		if(ItemDefs[i->type].type & IT_SHIP) continue;
 		cap += ItemDefs[i->type].fly * i->num;
 	}
 
@@ -1225,7 +1225,7 @@ int Unit::SwimmingCapacity()
 	forlist(&items) {
 		Item *i = (Item *) elem;
 		// except ship items
-		if(i->type & IT_SHIP) continue;
+		if(ItemDefs[i->type].type & IT_SHIP) continue;
 		cap += ItemDefs[i->type].swim * i->num;
 	}
 
