@@ -23,6 +23,12 @@
 //
 // END A3HEADER
 
+/* This file implements FRACTAL WORLD GENERATION
+   make sure this is what you want to use for your game
+   before including it in your gameset. This is NOT
+   standard Atlantis stuff!
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include "game.h"
@@ -103,46 +109,63 @@ int ARegion::TerrainFactor(int value, int average)
 int ARegion::TerrainProbability(int terrain)
 {
 	int retval = 0;
+	int l=0;
 	switch(terrain) {
 		case R_PLAIN:
-			if (elevation > 10)
-				retval += (elevation-10) * (elevation-10) / 36;
+			l = 10;
+			if (elevation > l)
+				retval += (elevation-l) * (elevation-l) / 36;
 			retval += TerrainFactor(vegetation, 50);
 			retval += TerrainFactor(humidity, 50);
+			if (temperature > 52) retval += TerrainFactor(temperature, 52);
 			retval += Slope() * Slope() / 16;
 			break;
 		case R_FOREST:
-			retval += (100 - vegetation) * (100 - vegetation) / 18;
-			if (temperature > 55) retval += (temperature-55) * (temperature-55) / 18;
-			if (temperature < 30) retval += (temperature-30) * (temperature-30) / 24;
+			l = 93;
+			if (vegetation < l)
+				retval += (l - vegetation) * (l - vegetation) / 26;
+			l = 55;
+			if (temperature > l) retval += (temperature-l) * (temperature-l) / 24;
+			l = 30;
+			if (temperature < l) retval += (temperature-l) * (temperature-l) / 32;
 			retval += TerrainFactor(humidity, 65);
 			break;
 		case R_MOUNTAIN:
-			retval += (95-elevation) * (95-elevation) / 5;
+			l = 90;
+			if (elevation < l)
+				retval += (l-elevation) * (l-elevation) / 10;
 			if ((10 - Slope()) > 0)
-				retval += (10 - Slope()) * (10 - Slope()) / 4;
+				retval += (10 - Slope()) * (10 - Slope()) / 8;
 			if (Slope() < 30) retval += TerrainFactor(Slope(),30);
 			break;
 		case R_SWAMP:
-			retval += (100-humidity) * (100-humidity) / 36;
+			l = 95;
+			if (humidity < l) retval += (l-humidity) * (l-humidity) / 24;
 			retval += TerrainFactor(elevation, 15);
-			retval += (SurfaceWater()-3) * (SurfaceWater()-3) / 16;
+			retval += (SurfaceWater()-3) * (SurfaceWater()-3) / 32;
 			break;
 		case R_JUNGLE:
-			retval += (90-vegetation) * (90-vegetation) / 36;
-			retval += (100-temperature) * (100-temperature) / 36;
+			l = 90;
+			if (vegetation < l)
+				retval += (l-vegetation) * (l-vegetation) / 56;
+			retval += (100-temperature) * (100-temperature) / 49;
 			retval += Soil() * Soil() / 49;
 			retval += TerrainFactor(humidity, 85);
 			break;
 		case R_DESERT:
-			retval += humidity * humidity / 28;
-			retval += (90-temperature) * (90-temperature) / 49;
+			l = 10;
+			if (humidity > l)
+				retval += (humidity-l) * (humidity-l) / 32;
+			l = 91;
+			if (temperature < l)
+				retval += (l-temperature) * (l-temperature) / 64;
 			if (vegetation > 25) retval += TerrainFactor(vegetation, 15);
 			break;
 		case R_TUNDRA:
-			if (temperature > 3)
-				retval += (temperature-3) * (temperature-3) / 6;
-			retval += Winds() * Winds() / 3;
+			l = 3;
+			if (temperature > l)
+				retval += (temperature-l) * (temperature-l) / 9;
+			retval += Winds() * Winds() / 5;
 			retval += TerrainFactor(vegetation, 5);
 			break;
 		default: // LAKE
@@ -1189,7 +1212,7 @@ void ARegionList::SetFractalTerrain(ARegionArray *pArr)
 void ARegionList::NameRegions(ARegionArray *pArr)
 {
 	Awrite("Naming Regions");
-	int unnamed = 1;
+	// int unnamed = 1;
 	for(int x = 0; x < pArr->x; x++) {
 		for(int y = 0; y < pArr->y; y++) {
 			ARegion *r = pArr->GetRegion(x,y);
@@ -1748,20 +1771,17 @@ GeoMap::GeoMap(int x, int y)
 
 void GeoMap::Generate(int spread, int smoothness)
 {
-	int step = size;
-	for (int i=0; i < spread; i++) {
-		if (step > 16) step = step / 2;
-	}		
-	Awrite(AString("Generating GeoMap - first fractal step = ") + step);
-	Awrite(AString("Size: ") +size + ", xscale: " +xscale + ", yscale: "+yscale);
+	int step = size / 2;
+	while (step > 16) step = step / 2;
+	Awrite(AString("Generating GeoMap - size: ") +size + ", xscale: " +xscale + ", yscale: "+yscale);
 	for (int x = 0; x <= size; x += step) {
 		for (int y = 0; y <= size; y += step) {
 			Geography g;
 			int tval = (size/2 - abs(size/2 - y)) * 25 / (size/2);
-			g.elevation = getrandom(5)+getrandom(5)+45;
-			g.humidity = getrandom(20)+getrandom(20)+30;
+			g.elevation = getrandom(30)+getrandom(30)+20;
+			g.humidity = getrandom(30)+getrandom(30)+20;
 			g.temperature = getrandom(tval/2)+getrandom(tval/2)+tval;
-			g.vegetation = getrandom(20)+getrandom(20)+30;
+			g.vegetation = getrandom(30)+getrandom(30)+20;
 			g.culture = getrandom(20)+getrandom(20)+tval;
 			long int coords = (size+1) * x + y;
 			if (x >= size) {
@@ -2022,11 +2042,28 @@ void GeoMap::ApplyGeography(ARegionArray *pArr)
 			if(!reg) continue;
 			int cx = (x * xscale); // x+xoff;
 			int cy = ((y/2 + x%2) * yscale); // + yoff;
-			reg->elevation = GetElevation(cx, cy);
-			reg->humidity = GetHumidity(cx, cy);
-			reg->temperature = GetTemperature(cx, cy);
-			reg->vegetation = GetVegetation(cx, cy);
-			reg->culture = GetCulture(cx, cy);
+			int ctr = 0;
+			for(int dx = -3; dx < 4; dx++) {
+				for(int dy = -3; dy < 4; dy++) {
+					if(abs(dx * dy) == 9) continue;
+					int f = 64;
+					for(int i = abs(dx * dy); i > 0; i--) f = f / 2;
+					int lx = cx + dx;
+					int ly = cy + dy;
+					if ((dx == 0) && (dy == 0)) f = 12 / Globals->TERRAIN_GRANULARITY;
+					reg->elevation += f * GetElevation(lx, ly);
+					reg->humidity += f * GetHumidity(lx, ly);
+					reg->temperature += f * GetTemperature(lx, ly);
+					reg->vegetation += f * GetVegetation(lx, ly);
+					reg->culture += f * GetCulture(lx, ly);
+					ctr += f;
+				}
+			}
+			reg->elevation = reg->elevation / ctr;
+			reg->humidity = reg->humidity / ctr;
+			reg->temperature = reg->temperature / ctr;
+			reg->vegetation = reg->vegetation / ctr;
+			reg->culture = reg->culture / ctr;	
 			if (reg->humidity > hmax) hmax = reg->humidity;
 			if (reg->humidity < hmin) hmin = reg->humidity;
 		}

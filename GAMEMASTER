@@ -28,6 +28,13 @@ Table of Contents
 
 4.      Altering game rules
 
+5.		World Creation Guide
+5.1		Basics: world size, land mass and levels
+5.2.	Land Mass Distribution
+5.3.	Terrain Distribution
+5.4.	Towns and Races
+5.5		Special: Fractal Generation
+
 
 1. Obtaining a copy of Atlantis
 
@@ -479,3 +486,321 @@ will be added to the source, usually in gamedefs.h and rules.cpp. If you
 update your source, but not your custom game's rules.cpp file, your game
 may not run any more, or will run strangely, which will make you sad.
 Adding the new gamedefs in will make you happy again ;)
+
+
+
+5. World Creation Guide
+
+The following is not a technical guide but a description of the options
+involved in Atlantis world creation. None of the information here is
+relevant if you merely want to run a standard game. However if you as
+GM wish to tweak the generation process to your wishes then the following
+guide is meant as an introduction. World creation is currently an area
+under code development - I strongly suggest you experiment with the
+aspects of world creation that interest you most to find the settings
+that are optimal for your game. Welcome to the art and science of Atlantis
+world creation!
+
+All of the following assumes that you have access to the GM report in order
+to view the game map after creation - at least while you're experimenting.
+You will have to make sure the gamedef GM_REPORT is set to 1. The GM_REPORT
+will be created as 'report.1' in the atlantis directory - it's an omniscient
+turn report.
+
+
+5.1. Basics: world size, land mass and levels
+
+The most important consideration for any game is world size as this will
+determine the number of players that can comfortably join a game and the
+amount of competition.
+
+The amount of land hexes per player will give you a good indication whether
+your game is too large or too small. You are prompted for the width and
+height of the world when you run the program to generate a new world.
+
+# of surface hexes = width * (height / 2)
+
+The gamedef OCEAN_PERCENT is a rough estimate of how much of these will be
+land mass:
+
+# of surface land hexes = width * (height / 2) * OCEAN_PERCENT / 100
+
+For instance with a default OCEAN_PERCENT of 60, a 128 x 128 map will have
+8192 surface hexes and about 4915 land hexes. In standard Atlantis, a faction
+can make use of 100 maximum. Reduce that somewhat for mixed factions, magic
+factions and a little bit of friction and you might want to aim for 50 land
+hexes per player. That means that a game this size would allow up to 100
+players to expand and play comfortably (note: this is just a very rough
+sketch and things can vary considerably on the play style chosen by your
+players and other rules you may or may not have enforced in your game).
+
+Underworld levels, while not being available to players immediately at
+start, also have an effect on the total number of regions available for
+play. They are set by the gamedefs UNDERWORLD_LEVELS (the number of
+underworld levels beneath the surface), UNDERDEEP_LEVELS (the number of
+underdeep levels) and ABYSS_LEVEL (this is just an on/off switch).
+The underworld levels are only 1/2 the size in both coordinates of the
+surface level (except the top one if there's more than one), underdeep
+levels are 1/4th the size in both coordinates (except the topmost if
+there's more than one - that will be 1/2 size), and the Abyss is just
+a tiny area with a Black Keep for the Wyreth victory conditions.
+
+
+5.2. Land Mass Distribution
+
+The distribution of land mass determines whether players will be able to
+expand on a large continental mass and how important ships and sailing
+will be in the game. Here's a description of the gamedefs that govern
+land mass distribution and shape:
+
+CONTINENT_SIZE: this gamedef will control how much land is allocated to
+a continent at a time. The default is 16 (and less is recommended should
+you decide to use the SEA_LIMIT gamedef). For smaller worlds this value
+should be decreased or you'll find that all your land mass is allocated
+to one or two continents only. For huge worlds it might be increased
+correspondingly if you want to have continents fit for your world size.
+
+ARCHIPELAGO: this gamedef controls how often land is created not as a
+continent but as a small island chain. The size of the islands can range
+from very small to a value that's linked with continent size but even
+the bigger islands will tend to be much smaller than your continents.
+So while an archipelago world might be created by setting CONTINENT_SIZE
+to a really low value, setting ARCHIPELAGO will allow your world to have
+both solid continents and islands at the same time. The value of
+ARCHIPELAGO is treated as a percent chance that any attempt at creating
+new land mass will end up forming an archipelago. Note that because
+archipelagos are much smaller than continents, the overall land mass
+allocated to them will be smaller than this gamedef value (i.e. an 
+ARCHIPELAGO setting of 50% might only allocate 30% of total land mass
+to archipelagos).
+
+SEA_LIMIT: standard Atlantis maps tend to show either a web of land
+hexes against a backdrop of water or continents with a shotgun
+pattern of ocean sprinkled in between. The SEA_LIMIT gamedef controls
+an option that erases ocean hexes caught in a continental land mass
+without a connection to the main ocean. The erased hexes get filled in
+with land so continents will get blockier if you opt for this (which in
+turn can be adjusted by tuning CONTINENT_SIZE downwards).
+The value of SEA_LIMIT tells the game to erase any ocean hex that cannot
+trace at least <SEA_LIMIT> number of ocean hexes in any direction.
+Setting SEA_LIMIT to 3 will therefore erase all inland seas smaller than
+three hexes in diameter but leave the larger ones intact. A value of 10
+will erase most inland seas. The algorithm that implements SEA_LIMIT will
+have to work considerably harder for higher values so that the time
+needed to generate the world will rise exponentially with higher settings.
+Please be advised to use sane values here and consider your computer's
+processing power.
+
+SEVER_LAND_BRIDGES: this option finishes what SEA_LIMIT begins - it
+cuts the web-like strands of land between continents that riddle standard
+Atlantis maps. The setting here governs the chance that any such  1-hex
+wide links get severed. A setting between 15 and 40 is recommended here if
+this option is desired. The effect of this is that Atlantis Ocean
+becomes a much more continuous area and that the importance of sailing
+is emphasised. Especially if PREVENT_SAIL_THROUGH is enabled it is
+suggested that this gamedef is used as well.
+
+
+5.3. Terrain Distribution
+
+Terrain distribution is probably more a matter of style and flavor than
+the aspects discussed in previous chapters. It can become a matter of
+resource availability if not much land is available either due to
+world or continent size.
+
+Terrain types are allocated in 'world.cpp' in the function
+GetRegType(ARegion *pReg). Depending on the region's level and distance
+to the equator a different table of terrain type choices is used. If you
+want to have more or less of a specific terrain or add in new types you'll
+need to edit these tables. For most games using the standard terrain set
+you won't need to look into this. (The exception to this are lakes which
+are currently handled by their own gamedef - see below)
+
+Terrain is distributed in the following fashion: in a first step a certain
+number of 'seed' hexes are given a terrain type. In the second step the
+allocated terrain grows outwards from these seed hexes into neighboring,
+unallocated land hexes. Obviously the distance of these seed hexes will
+determine how big or small the 'patches' of hexes of similar terrain will
+be.
+
+TERRAIN_GRANULARITY: this gamedef controls how distant to each other the
+'seed' hexes are placed. A setting of 0 is default Atlantis behavior -
+which means that exactly one seed hex is placed in each 4 x 4 area.
+A setting higher than 0 means that each square of the settings' height
+and width in hexes will have one seed hex (on average). A setting of '1'
+will therefore create a different terrain in every hex, while a value
+of '4' means that 1 out of 10 hexes will be a seed hex, and at TERRAIN_
+GRANULARITY setting of '8' 1 out of 18 hexes will be a seed hex.
+It's important to remember that seed hexes are placed randomly in their
+area of placement, not in any determined pattern. It's therefore entirely
+possible (if unlikely) that at a setting of '4' one patch of terrain will
+extend 12 or more hexes in one direction (because the seeds are placed as far
+apart as possible), while another is only 1 hex wide because the seeds
+were placed right next to each other. There is also no guarantee that
+neighboring seeds actually have different terrain types and any large
+patch of one terrain could have been caused by a number of seeds of the
+same type.
+In short, TERRAIN_GRANULARITY is very useful to tailor your terrain detail
+to world size. Remember: small values mean lots of terrain variety and
+smaller patches of equal terrain, larger values mean considerably larger
+stretches of terrain.
+
+LAKES: lakes are a terrain type that is impassable by foot but can be
+sailed on or flown over just like ocean. They are meant to introduce
+added variety and some hindrance to land movement on the continents
+where inland sea masses have been erased. They can be set so that all
+adjacent hexes act as coastal terrain (having similar races and possibly
+resources) by using the LAKESIDE_IS_COASTAL gamedef. Lakes can also
+provide some economic benefit to adjacent land hexes, this is handled by
+the LAKE_WAGE_EFFECT setting. Here we are concerned with lake placement.
+
+The LAKES gamedef sets the chance that any given land hex is allocated
+as lake and not as any other type of terrain. The basic chance for this
+to happen depends on whether this hex has previously been an ocean hex
+that has been filled in via the SEA_LIMIT option. In case it has, the
+percent chance is equal to the LAKES setting. In all other cases, the
+chance is LAKES / 10 + 1 %.
+For instance, a LAKES setting of 16 will create a lake from a filled-in
+inland sea hex with a 16% chance, and with a 2% chance from all others.
+This creates areas with a higher abundance of lakes, usually on
+main continents and not islands.
+
+ODD_TERRAIN: this gamedef adds a sprinkle of chaos to your maps by
+inserting single hexes of different terrain. The terrain type is still
+allocated in the normal way - it might just be different from the patch
+of terrain around it.
+The value of ODD_TERRAIN is the chance that this happens, per hex, in
+0.1%. A setting of '4' will therefore create interspersed terrain in
+0.4% of all hexes. Note that the terrain type can of course end up to
+be the same as that of the surrounding hexes.
+
+
+5.4 Towns and Races
+
+Towns are always a focus of economic activities in Atlantis and are
+strategically important locations. The number and placement of towns
+can therefore have a strong effect on the competition and feel of a
+game. Races are a bit more of a flavor aspect but with a growing
+trend towards custom games with special races and possibly racial
+leaders their distribution will become much more important.
+
+TOWN_PROBABILITY: this is the chance for creating towns compared to
+standard Atlantis. '100' is the default setting. A value of '80'
+means that only 80% of the usual number of towns will be created.
+
+TOWN_SPREAD: normally towns are much more likely in plains than anywhere
+else. This might or might not suit your game - why should your
+dwarves have less towns just because they live in the mountains?
+At the default value of '0', the chance for a town is directly
+proportional to the terrain's economy value. At a TOWN_SPREAD setting
+of '100' at the other end of the scale the chance is exactly the same
+regardless of terrain. The effect is that other terrain types - which
+are already economically less interesting than plains - become much
+more viable as a base for factions.
+
+TOWNS_NOT_ADJACENT: ever seen too many towns in one spot, especially
+on those already rich plains? This gamedef is a possible check against
+town clustering. TOWNS_NOT_ADJACENT is the percent chance that a
+town will not be created if another one has already been created next
+to it. A setting of '50' for instance will decrease the likelihood by
+50%, and a setting of '100' and above will prevent towns from being
+adjacent. Note that starting cities are an exception to this since
+they are created by a different part of the code and are necessary
+for the game.
+
+LESS_ARCTIC_TOWNS: use this gamedef to reduce chances of towns near the
+polar caps (within 9 hexes of the map border). The town chance is
+reduced by approximately the LESS_ARCTIC_TOWNS setting x 3% times
+9 minus the distance from the polar cap. For instance, depending on the
+distance from the polar caps, the chances are reduced as follows:
+Setting	Chance at six hexes	Chance at three hexes
+1		- 22%					- 53%
+2		- 36%					- 69%
+3		- 46%					- 77%
+4		- 53%					- 82%
+5		- 58%					- 85%
+Towns that are created will also be considerably smaller than usual.
+
+GROW_RACES: in standard Atlantis, a random race is allocated per hex.
+With the GROW_RACES gamedef it's now possible to have populations
+stretch out over several hexes. This alternative way of distributing
+races works much like terrain distribution works now - races are set
+up in 'seed' hexes and are afterwards 'grown' from them. The only
+difference is that a race has a lower chance to grow into a terrain
+that it isn't native to and when it does, it will have a lower
+population than normal. This means that dwarves can live in the plains,
+only that they don't settle there in great numbers and won't build
+big cities there.
+The GROW_RACES setting works much like TERRAIN_GRANULARITY works for
+terrains, only that race anchors are set up regularly rather than
+randomly. A greater setting for GROW_RACES means that a population
+will spread over a wider area. Seafaring races can also spread across
+ocean hexes, so that nearby islands often have the same race type.
+
+
+5.5. Special: Fractal Generation
+
+This chapter addresses the code developments for an alternate world
+creation mechanism that is used by the Kingdoms gameset. The
+alternate code can be found in the 'map.cpp' file in the gameset.
+
+Fractal generation is an attempt to use a method that's popular for
+realistic map generation (the 'diamond-square' method) in Atlantis
+world generation. Before doing anything else the fractal world gen
+creates a two dimensional graph of geographic parameters such as
+elevation, humidity, temperature and vegetation. It then assigns
+land and water mass as well as terrain types based on these geo-
+graphic factors. The effect is that coastlines will look more
+natural and that terrains are not just placed completely at random
+but alternate according to local parameters. This creates more
+variety while at the same time the map has a more realistic feel
+to it. So much for the theory...
+
+To use fractal generation in your game you must make sure the right
+'map.cpp' file is in your gameset directory. The Kingdoms game uses
+fractal map generation by default. Just copy the 'map.cpp' from
+there into your game directory before compiling.
+
+Fractal map generation uses all of the gamedefs and options
+mentioned in the previous chapters. There are ways to tweak the
+process but you'll need to edit the code directly.
+
+In the currently supplied version of the code, the coastline is
+generated in the standard way and only the terrain is fractal. This
+method of map generation is still under construction and I found
+the standard method of generating the coastline more customisable and
+more useful for the game. This might be due to change as the code
+develops. You can test the fractal land mass distribution by doing
+the following: In 'map.cpp', near the top of the 
+ARegionList::MakeLand(..) function set the variable 'fractal' to 1.
+
+Terrain distribution works by assigning each hex a probability value
+per terrain type according to it's geographic parameters. The amount
+of each terrain can be easily tweaked by adjusting the so-called
+terrain type limits. In 'map.cpp', in the center loop of the function
+ARegionList::SetFractalTerrain(..) you can find the limit variable
+being set to '100' for each terrain. Setting the 'plain amount' to
+'80' for instance will reduce the number of plains hexes. Similarly,
+increasing a value will increase the overall number of that kind of
+hex. Since terrain types sort of 'compete' for hexes with certain
+other kinds regarding the geographic parameters, other terrain types
+will be greatly affected by the changes you make. For instance, lowering
+the value for 'jungles' will probably increase forests and swamps
+greatly, and deserts and mountains to a lesser extent.
+
+One problem with fractal terrain distribution is that sometimes
+'fluke' worlds would have very few hexes of a single terrain - such
+as 128 x 128 worlds with only four mountain hexes! This is due to
+the partly random, partly deterministic nature of fractal generation
+and I recommend you check the region count from the Atlantis console
+output to check whether this has ocurred before using the generated
+map for an actual game.
+
+At the time this guide was written, a decent method for region naming
+under the fractal world generation had not yet been implemented,
+so you'll just find a different name for each region.
+
+The author of fractal world generation, Jan Rietema, would be
+grateful for your comments and suggestions and can be contacted at
+<ravanrooke@yahoo.de>.
+

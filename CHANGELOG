@@ -732,3 +732,7 @@ Changes from 4.0.10 -> 5.0.0
       levels.  Cleaned up some direction handling and some assumptions
       about there always being a region where you expected one to be.
    -- Fixed bug in CheckSea() where left of D_NORTH gave you D_NORTHEAST.
+   -- created map.cpp in the gameset directory and moved world creation code
+      from aregion.cpp to map.cpp to allow for game specific setup routines
+   -- removed FRACTAL_... gamedefs - these things are now handled by game
+      specific code in map.cpp

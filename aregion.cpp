@@ -295,7 +295,7 @@ void ARegion::SetupPop()
 
 	// Only select race here if it hasn't been set during Race Growth
 	// in the World Creation process.
-	if (((Globals->GROW_RACES) && (race == -1)) || (!Globals->GROW_RACES)) {
+	if ((race == -1) || (!Globals->GROW_RACES)) {
 		int noncoastalraces = sizeof(typer->races)/sizeof(int);
 		int allraces =
 			noncoastalraces + sizeof(typer->coastal_races)/sizeof(int);
@@ -954,9 +954,10 @@ void ARegion::CheckTownIncrease()
 	int b = 20;
 	if(Globals->TOWN_DEVELOPMENT < 60) b = Globals->TOWN_DEVELOPMENT / 3;
 	development = development + a + getrandom(b);
+	/*
 	Awrite(AString("> increased city in ") + TerrainDefs[type].name + " in " +
 		*name + " (" + xloc + ", " + yloc + ") to dev = " + development);
-
+	*/
 	TownHabitat();
 	town->pop = town->basepop * 2 / 3;
 }
@@ -1205,7 +1206,7 @@ void ARegion::UpdateTown()
 		if(crowd > 0) migration += crowd / 36;
 		if(starve > 0) migration += starve / 36;
 		*/
-/* if 0 */
+#if 0
 		if((development > 190) && (!IsStartingCity())) {
 		Awrite(AString("===== Town(") + town->TownType() + ") in " + *name 
 			+ " in (" + xloc + ", " + yloc + ") =====");
@@ -1219,7 +1220,7 @@ void ARegion::UpdateTown()
 		Awrite(AString(" migration:   ") + migration);
 		Awrite("");
 		}
-/* endif */
+#endif
 		return;
 	}
 	
@@ -2509,7 +2510,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			f->PutStr(temp);
 		}
 		
-		
+#if 0
 		f->PutStr("");
 		temp = "Elevation is ";
 		f->PutStr(temp + elevation);
@@ -2517,7 +2518,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		f->PutStr(temp + humidity);
 		temp = "Temperature is ";
 		f->PutStr(temp + temperature);
-		
+#endif
 
 		if (type == R_NEXUS) {
 			int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
