@@ -86,6 +86,7 @@ def generateturn(report, template):
     # Might be easier to do with split/string stuff, too
     region = {}
     units={}
+    unitbynum={}
     dictstring=None
     for line in report:
         lineindex = report.index(line)
@@ -99,7 +100,7 @@ def generateturn(report, template):
                 #print "***MATCH***: ",wibble.groups()
                 
                 thisregion = {}
-                thisregion['type']=wibble.groups()[0]
+                thisregion['terrain']=wibble.groups()[0]
                 thisregion['x']=wibble.groups()[1]
                 thisregion['y']=wibble.groups()[2]
                 thisregion['province']=wibble.groups()[3]
@@ -166,30 +167,46 @@ def generateturn(report, template):
             ente = re.search('\$(\d+)\.', report[lineindex+6])
             if ente != None:
                 thisregion['entertain'] = int(ente.groups()[0])
-                print "Entertainment: ", thisregion['entertain']
+                #print "Entertainment: ", thisregion['entertain']
             #thisregion['entertain'] = report[lineindex+6]
             
             #Products
-            thisregion['products'] = report[lineindex+7]
+            ignored,stuff = report[lineindex+7].split(': ', 1)
+            itemlist = stuff.split(', ')
+            #print itemlist
+            thisregion['products'] = itemlist
             
             #Exits
+            #exitlist = ['North','Northeast','Southeast','South','Southwest','Northwest']
+            hexdirections = {}
             counter = lineindex+9
             while 1:
-                #print report[counter]
+                try:
+                    temp,rest = report[counter].split(' : ', 1)
+                    temp = temp.strip()
+                    #print ">"+temp+"<"
+                    if temp in directiondict.keys():
+                        #print "Found an exit!", temp
+                        # NB: this assumes that terrain is one word...
+                        terrain, coord, ignored, regionname = rest.split(' ', 3)
+                        hexdirections[temp]=[coord, terrain, regionname]
+                except ValueError:
+                    pass
                 
                 counter += 1
                 if report[counter].startswith('*'):
+                    thisregion['directions'] = hexdirections
                     break
             
             #Now that we have all the info, commit it to 'memory'
-            dictstring = wibble.groups()[1]+','+wibble.groups()[2]
+            dictstring = thisregion['x']+','+thisregion['y']
             region[dictstring]=thisregion
             
             # and initialise the list of units
             units[dictstring]=[]
         
         # Now for the units...
-        unitstarts = ['= ', ': ', '- ', '% ', '! ']
+        unitstarts = ['= ', ': ', '- ', '% ', '! ', '* ']
         if  line[:2] in unitstarts:                
             unit = {}
             unit['skills']=[]
@@ -221,13 +238,22 @@ def generateturn(report, template):
             if len(temp)==5:  # Normal unit
                 unit['main'], unit['weight'], unit['capacity'], unit['skillbit'], ignored = line.split('.')
                 unit['combatspell']=unit['spells']=None
+                #print "Found a normal unit!"
             elif len(temp)==2:  #Not one of our units
                 unit['main'], ignored = line.split('.')
                 unit['combatspell']=unit['spells']=unit['weight']=unit['capacity']=unit['skillbit']=None
+                #print "Found another faction's unit!"
+            elif len(temp)==6:  # Mage unit with no combat spell
+                unit['main'], unit['weight'], unit['capacity'], unit['skillbit'], unit['spells'], ignored = line.split('.')
+                unit['combatspell'] = None
+                #print "Found a mage unit! (no combat spell)"
             elif len(temp)==7:  # Mage unit
                 unit['main'], unit['weight'], unit['capacity'], unit['skillbit'], unit['combatspell'], unit['spells'], ignored = line.split('.')
+                #print "Found a mage unit!"
             else:
-                #print "Found a wacky unit:",line
+                #print "Found a wacky unit, with "+str(len(temp))+" parts:",line
+                unit['main'], ignored = line.split('.')
+                unit['combatspell']=unit['spells']=unit['weight']=unit['capacity']=unit['skillbit']=None
                 continue
             
             #Grab the unit number and faction number
@@ -235,15 +261,16 @@ def generateturn(report, template):
             if wibble != None and len(wibble.groups()) == 2:
                 unit['faction'] = int(wibble.groups()[1])
                 unit['unitnum'] = int(wibble.groups()[0])
-                print "Found numbers: FN ==",unit['faction'],"and UN ==",unit['unitnum']
+                #print "Found numbers: FN ==",unit['faction'],"and UN ==",unit['unitnum']
                 if unit['faction'] > maxfactionfound:
                     maxfactionfound = unit['faction']
+            
             else:
                 wibble = re.search('\((\d+)\)', unit['main'])
                 if wibble != None and len(wibble.groups()) == 1:
                     unit['unitnum'] = int(wibble.groups()[0])
                     unit['faction'] = 0
-                    print "Found non-revealing unit: UN ==",unit['unitnum']
+                    #print "Found non-revealing unit: UN ==",unit['unitnum']
             
             
             itemlist=unit['main'].split(',')
@@ -260,6 +287,9 @@ def generateturn(report, template):
                     if '[' in thingo:
                         #print thingo, "is a skill!"
                         unit['skills'].append(thingo)
+                        
+            # Add the unit to unitbynum
+            unitbynum[unit['unitnum']] = unit
             
             # Need the region dictstring at this point... should be ok
             if dictstring==None: #we're in the nexus
@@ -268,12 +298,12 @@ def generateturn(report, template):
                 units['nexus'].append(unit)
             else:
                 units[dictstring].append(unit)
-            #print
-    
+                
     #print region
     #print
     #print units
     
+    #print unitbynum.keys()
     
     # Read each line of the template.
     for line in template:
@@ -285,12 +315,16 @@ def generateturn(report, template):
         # When it gets to a unit, that unit will either
         if line.startswith("unit"):
             orders += "; Found a unit!\n"
+            ignored, unitnumber = line.split(' ',1)
+            unitnumber = int(unitnumber.strip())
+            #print ">>>", unitnumber
+            #print unitbynum[unitnumber]
             
             if firstunit == 'no':
                 orders += "option template map\n"
                 orders += "option notimes\n"
                 orders += "option showattitudes\n"
-
+                
                 #declare towards a random faction
                 decfaction = int(random.random()*maxfactionfound)
                 orders += "declare "+str(decfaction)+" "
