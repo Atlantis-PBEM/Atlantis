@@ -249,6 +249,7 @@ class ARegion : public AListElem
 		int IsNativeRace(int);
 		void AdjustPop(int);
 		void Migrate();
+		void CheckTownIncrease();
 		int TraceConnectedRoad(int, int, AList *, int);
 		int CountRoadConnectedTowns(int);
 		int TownHabitat();

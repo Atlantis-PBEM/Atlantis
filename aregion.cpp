@@ -127,8 +127,8 @@ ARegion::ARegion()
 	gatemonth = 0;
 	gateopen = 1;
 	town = 0;
-	development = 60;
-	habitat = 800;
+	development = 0;
+	habitat = 0;
 	mortality = 0;
 	growth = 0;
 	migration = 0;
@@ -189,6 +189,7 @@ int ARegion::Wages()
 {
 	int retval;
 	if (Globals->PLAYER_ECONOMY) {
+		WagesFromDevelopment();
 		retval = (int) wages/10;
 	} else {
 		retval = wages;
@@ -316,8 +317,8 @@ void ARegion::SetupPop()
 		if (mt->terrain == typer->similar_type) {
 			habitat = (habitat * 9)/8;
 		}
-		if (IsNativeRace(race)) {
-			habitat = (habitat * 6)/5;
+		if (!IsNativeRace(race)) {
+			habitat = (habitat * 4)/5;
 		}
 		basepopulation = habitat;
 		// hmm... somewhere not too far off equilibrium pop
@@ -934,6 +935,33 @@ void ARegion::Setup()
 		LairCheck();
 }
 
+// Used at start to set initial town's
+// development level
+void ARegion::CheckTownIncrease()
+{
+	if(!town) return;
+	
+	//if(town) return;
+	
+	if(town->pop > 3000) {
+		development = development + ((getrandom(Globals->TOWN_DEVELOPMENT) + Globals->TOWN_DEVELOPMENT) / 10);
+		return;
+	}
+	
+	if(getrandom(200) > Globals->TOWN_DEVELOPMENT) return;
+	
+	int a = 5;
+	if(Globals->TOWN_DEVELOPMENT < 10) a = Globals->TOWN_DEVELOPMENT / 2;
+	int b = 20;
+	if(Globals->TOWN_DEVELOPMENT < 60) b = Globals->TOWN_DEVELOPMENT / 3;
+	development = development + a + getrandom(b);
+	Awrite(AString("> increased city in ") + TerrainDefs[type].name + " in " +
+		*name + " (" + xloc + ", " + yloc + ") to dev = " + development);
+
+	TownHabitat();
+	town->pop = town->basepop * 2 / 3;
+}
+
 int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range)
 {
 	ARegionPtr *rn = new ARegionPtr();
@@ -1018,9 +1046,9 @@ int ARegion::TownHabitat()
 	if(LakeEffect()) hab += 100;
 	
 	// Effect of Development:
-	hab += TownDevelopment() / 100 * (basepopulation + 2800 + hab);
+	int totalhab = hab + TownDevelopment() / 100 * (basepopulation + 2800 + hab);
 	
-	return hab;
+	return totalhab;
 }
 
 // Use this to determine development including
@@ -1066,15 +1094,15 @@ int ARegion::TownDevelopment()
 	int basedev = 1;
 	int prev = 0;
 	while (level <= TerrainDefs[type].wages) {
-		basedev++;
 		prev++;
+		basedev++;
 		if(prev > level) {
 			level++;
 			prev = 0;
 		}
 	}
 	
-	int df = 100 * (development - basedev) / (basedev + 150);
+	int df = 100 * (development - basedev) / 90;
 	if(df < 0) df = 0;
 	if(df > 100) df = 100;
 	
@@ -1124,7 +1152,7 @@ void ARegion::UpdateTown()
 
 	if(Globals->PLAYER_ECONOMY) {
 	
-		TownHabitat();
+		town->basepop = TownHabitat();
 		
 		// *Town Pop Growth*
 		int delay = Globals->DELAY_GROWTH;
@@ -1132,10 +1160,18 @@ void ARegion::UpdateTown()
 		int lastgrowth = town->growth;
 		if (delay > 2)
 			for (int i=1; i<delay-1; i++) town->growth += lastgrowth;
-		// growth based on available space and wages
+		// growth based on available space
+		int space = town->basepop - town->pop;
+		if(space < 0) space = 0;
+		int sgrow = 0;
+		if((3 * space/(town->basepop+1)) < 2) sgrow = space / 10; 
+			else sgrow = (space / (town->basepop + 1) * 15) * space;
+		// growth based on population and wages
 		int curg = ((Globals->POP_GROWTH / 100) * (Wages()-5) *
-			 (((town->basepop * (1+Wages()/8)) - 2*town->pop) / (40 * delay)));
-		if (curg > 0) town->growth += curg;
+			 (((town->basepop * (1+Wages()/8)) - 2 * town->pop) / (40 * delay)));
+		if (sgrow > 0) sgrow = 0;
+		if (curg > 0) curg = 0;
+		town->growth += sgrow + curg;
 		town->growth = town->growth / delay;
 		if (town->pop < 1) town->growth = 0;
 		
@@ -1150,17 +1186,15 @@ void ARegion::UpdateTown()
 		
 		// mortality based on starvation:
 		
-		
 		// mortality based on crowding:
-		int crowd = (town->pop - (town->basepop * 66/100));
-		if (crowd < 0) crowd = 0;
-		crowd = crowd / (town->basepop / 25);
+		int crowd = 3 * town->pop - 2 * town->basepop;
+		if ((3 * crowd / town->basepop) < 2) crowd = 0;
 		if (crowd > 0) {
-			int c1 = getrandom(crowd);
-			int c2 = getrandom(crowd);
-			crowd = c1>c2 ? c1 : c2;
+			float cfactor = 2 / (crowd + 1);
+			cfactor = cfactor * cfactor / 4;
+			crowd = (int) ((town->pop / 10) * (1 - cfactor));
 		}
-		town->mortality += curm;
+
 		if(crowd > 0) town->mortality += crowd;
 		if(starve > 0) town->mortality += starve;
 		town->mortality = town->mortality / delay;
@@ -1172,17 +1206,21 @@ void ARegion::UpdateTown()
 		if(crowd > 0) migration += crowd / 36;
 		if(starve > 0) migration += starve / 36;
 		*/
+/* if 0 */
+		if((development > 190) && (!IsStartingCity())) {
 		Awrite(AString("===== Town(") + town->TownType() + ") in " + *name 
 			+ " in (" + xloc + ", " + yloc + ") =====");
 		Awrite(AString(" growth:      ") + town->growth);
 		Awrite(AString(" mortality:   ") + town->mortality);
 		Awrite(AString(" town pop:    ") + town->pop);
 		Awrite(AString(" town hab:    ") + town->basepop);
-		Awrite(AString(" rural pop:   ") + population);
-		Awrite(AString(" rural hab:   ") + habitat);
+		Awrite(AString(" development: ") + development);
+		int td = TownDevelopment();
+		Awrite(AString(" towndevel.:  ") + td);
 		Awrite(AString(" migration:   ") + migration);
 		Awrite("");
-	
+		}
+/* endif */
 		return;
 	}
 	
@@ -1305,20 +1343,30 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		WagesFromDevelopment();
 
 		// *Population Growth*
-		int totalpop = Population();
 		int delay = Globals->DELAY_GROWTH;
 		if (delay < 2) delay = 2;
 		int lastgrowth = growth;
 		if (delay > 2)
 			for (int i=1; i<delay-1; i++) growth += lastgrowth;
-		// growth based on available space and wages
+		// growth based on available space
+		int space = habitat - population;
+		if(space < 0) space = 0;
+		int sgrow = 0;
+		if((3*space/(habitat+1)) < 2) sgrow = space / 10; 
+			else sgrow = (space / (habitat + 1) * 15) * space;			
+		// growth based on wages
 		int curg = ((Globals->POP_GROWTH / 100) * (Wages()-5) *
-			 (((habitat * (1+Wages()/8)) - 2*population) / (40 * delay)));
+			 (habitat - 2 * population) / 200);
+		if(curg < 0) curg = 0;
+		curg = curg * (2 * habitat - 3 * population) / (habitat + 1);
 		// growth based on existing population
-		curg += ((totalpop * Globals->POP_GROWTH) / (20000));
-		growth = growth + curg;
+		int pgrow = population;
+		if(pgrow > habitat) pgrow = habitat;
+		pgrow *= Globals->POP_GROWTH / 20000;
+		if(sgrow < 0) sgrow = 0;
+		if(curg < 0) curg = 0;
+		if(population > 0) growth += curg + sgrow + pgrow;
 		growth = growth / delay;
-		if (population < 1) growth = 0;
 
 		// *Mortality*
 		delay = Globals->DELAY_MORTALITY;
@@ -1331,22 +1379,24 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		// mortality based on starvation:
 		int totalhab = habitat;
 		if(town) totalhab += town->basepop;
+		/*
 		if ((habitat > 0) && (fooddemand > 0))
 			starve = (population * population *
 					(fooddemand - foodavailable)) /
 				(fooddemand * habitat * 4);
+		*/
+				
 		// mortality based on crowding:
-		int crowd = (population - (habitat * 66/100));
-		if (crowd < 0) crowd = 0;
-		crowd = (crowd * crowd) / (habitat / 25);
+		int crowd = 3 * population - 2 * habitat;
+		if ((3 * crowd / habitat) < 2) crowd = 0;
 		if (crowd > 0) {
-			int c1 = getrandom(crowd);
-			int c2 = getrandom(crowd);
-			crowd = c1>c2 ? c1 : c2;
+			float cfactor = 2 / (crowd + 1);
+			cfactor = cfactor * cfactor / 4;
+			crowd = (int) ((population / 10) * (1 - cfactor));
 		}
-		mortality += crowd + starve;
+		if(population > 0) mortality += crowd + starve;
 		mortality = mortality / delay;
-		if ((mortality < 0) || (population < 1)) mortality = 0;
+		if(mortality < 0) mortality = 0;
 		migration = (crowd + starve) / 18;
 
 		// Update population
@@ -1385,6 +1435,9 @@ void ARegion::PostTurn(ARegionList *pRegs)
 			// p->baseamount = money / Globals->ENTERTAIN_FRACTION;
 #if 0
 			//uncomment for economy info output used for debugging
+			Awrite(AString("===== ") +
+				TerrainDefs[type].name + " in " + *name
+				+ " (" + xloc + ", " + yloc + ") =====");
 			Awrite(AString("population:  ") + population + " " +
 					ItemDefs[race].names);
 			Awrite(AString("wages:	   ") +

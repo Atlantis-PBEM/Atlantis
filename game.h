@@ -454,7 +454,8 @@ private:
 	// Migration effects for alternate player-driven economy
 	void ProcessMigration();
 	
-	// Run equilibration turns (econ-only) at start
+	// Run setup and equilibration turns (econ-only) at start
+	void DevelopTowns();
 	void Equilibrate();
 
 	// Handle escaped monster check
