@@ -2223,24 +2223,26 @@ BattleItemType bitd[] = {
 	// Made Runesword match order in WeaponDefs, so that its special
 	// is mapped correctly.
 	// BATTLE_RUNESWORD
-	{ BattleItemType::SPECIAL, I_RUNESWORD, SPECIAL_CAUSEFEAR, 3 },
+	{BattleItemType::SPECIAL,
+	 I_RUNESWORD, SPECIAL_CAUSEFEAR, 3 },
 	// BATTLE_STAFFOFL
-	{ BattleItemType::MAGEONLY | BattleItemType::SPECIAL,
-	  I_STAFFOFL, SPECIAL_LSTRIKE, 3 },
+	{BattleItemType::MAGEONLY | BattleItemType::SPECIAL,
+	 I_STAFFOFL, SPECIAL_LSTRIKE, 3 },
 	// BATTLE_STAFFOFF
-	{ BattleItemType::MAGEONLY | BattleItemType::SPECIAL,
-	  I_STAFFOFF, SPECIAL_FIREBALL, 3 },
+	{BattleItemType::MAGEONLY | BattleItemType::SPECIAL,
+	 I_STAFFOFF, SPECIAL_FIREBALL, 3 },
 	// BATTLE_FSWORD
-	{ BattleItemType::SPECIAL, I_FSWORD, SPECIAL_FIREBALL, 1 },
+	{BattleItemType::SPECIAL,
+	 I_FSWORD, SPECIAL_FIREBALL, 1 },
 	// BATTLE_AOFI
-	{ BattleItemType::SHIELD,
-	  I_AMULETOFI, NUM_ATTACK_TYPES, 5 },
+	{BattleItemType::SHIELD,
+	 I_AMULETOFI, SPECIAL_INVULNERABILITY, 5 },
 	// BATTLE_AMULETOFP
-	{ BattleItemType::SHIELD,
-	  I_AMULETOFP, ATTACK_SPIRIT, 3 },
+	{BattleItemType::SHIELD,
+	 I_AMULETOFP, SPECIAL_SPIRIT_SHIELD, 3 },
 	// BATTLE_SHIELDSTONE
-	{ BattleItemType::SHIELD,
-	  I_SHIELDSTONE, ATTACK_ENERGY, 3 },
+	{BattleItemType::SHIELD,
+	 I_SHIELDSTONE, SPECIAL_ENERGY_SHIELD, 3 },
 };
 
 BattleItemType *BattleItemDefs = bitd;
@@ -3734,25 +3736,39 @@ static SpecialType spd[] = {
 	  {-1, 0, 0, 0, 0, 0}},
 	 "strikes fear into enemy mounts", "causing ", " mounts to panic",
 	 0},
+	// SPECIAL_INVULNERABILITY
+	{"invulnerability",
+	 0,
+	 {-1, -1, -1},
+	 {-1, -1, -1, -1, -1, -1, -1},
+	 {-1, -1, -1},
+	 SpecialType::FX_SHIELD,
+	 {{NUM_ATTACK_TYPES, 0}, {-1, 0}, {-1, 0}, {-1, 0}}, "invulnerability",
+	 {{-1, 0, 0, 0, 0, 0},
+	  {-1, 0, 0, 0, 0, 0},
+	  {-1, 0, 0, 0, 0, 0},
+	  {-1, 0, 0, 0, 0, 0}},
+	 "casts something that is not a spell", "annoying ", "",
+	 0},
 };
 
 SpecialType *SpecialDefs = spd;
 
 static EffectType efd[] = {
 	// EFFECT_DAZZLE
-	{-2,
+	{"dazzle", -2,
 	 {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
 	 -1,
 	 EffectType::EFF_ONESHOT
 	},
 	// EFFECT_FEAR
-	{-2,
+	{"fear", -2,
 	 {{ATTACK_COMBAT, -2}, {ATTACK_RIDING, -2}, {-1, 0}, {-1, 0}},
 	 -1,
 	 0
 	},
 	//EFFECT_STORM
-	{-2,
+	{"storm", -2,
 	 {{ATTACK_COMBAT, -2}, {-1, 0}, {-1, 0}, {-1, 0}},
 	 -1,
 	 0

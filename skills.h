@@ -170,10 +170,10 @@ class SpecialType {
 			HIT_BUILDINGEXCEPT	= 0x002,	/* mutually exclusive (1) */
 			HIT_SOLDIERIF		= 0x004,	/* mutually exclusive (2) */
 			HIT_SOLDIEREXCEPT	= 0x008,	/* mutually exclusive (2) */
-			HIT_EFFECTIF		= 0x010,	/* mutually exclusive (3) */
-			HIT_EFFECTEXCEPT	= 0x020,	/* mutually exclusive (3) */
-			HIT_MOUNTIF			= 0x040,	/* mutually exclusive (4) */
-			HIT_MOUNTEXCEPT		= 0x080,	/* mutually exclusive (4) */
+			HIT_MOUNTIF			= 0x010,	/* mutually exclusive (2) */
+			HIT_MOUNTEXCEPT		= 0x020,	/* mutually exclusive (2) */
+			HIT_EFFECTIF		= 0x040,	/* mutually exclusive (3) */
+			HIT_EFFECTEXCEPT	= 0x080,	/* mutually exclusive (3) */
 			HIT_ILLUSION		= 0x100,
 			HIT_NOMONSTER		= 0x200,
 		};
@@ -211,6 +211,7 @@ class DefenseMod {
 
 class EffectType {
 	public:
+		char *name;
 		int attackVal;
 		DefenseMod defMods[4];
 		int cancelEffect;

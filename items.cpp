@@ -78,12 +78,112 @@ AString ItemString(int type, int num)
 	return temp;
 }
 
-static AString ItemSpecial(int special, int level)
+AString ShowSpecial(int special, int level)
 {
-	AString temp = "Can cast ";
+	int comma = 0;
+	int i;
+	int last = -1;
 	if(special < 0 || special > (NUMSPECIALS-1)) special = 0;
-	temp += SpecialDefs[special].specialname;
-	temp += AString(" in battle at level ") + level + ".";
+	SpecialType *spd = &SpecialDefs[special];
+	temp += spd->specialname;
+	temp += AString(" in battle at a level of ") + level; + ".";
+	if((spd->targflags & SpecialType::HIT_BUILDINGIF) ||
+			(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
+		temp += " Targets for this ability must ";
+		if(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
+			temp += "not ";
+		}
+		temp += "be inside of ";
+		for(i = 0; i < 3; i++) {
+			if(spd->buildings[i] == -1) continue;
+			if(ObjectDefs[spd->buildings[i]].flags & ObjectType::DISABLED)
+				continue;
+			if(last == -1) {
+				last = i;
+				continue;
+			}
+			temp += ObjectDefs[spd->buildings[last]].name;
+			if(comma) {
+				temp += ", ";
+			}
+			comma++;
+		}
+		if(comma) {
+			temp += ", or ";
+		}
+		temp += ObjectDefs[spd->buildings[last]].name;
+	}
+	if((spd->targflags & SpecialType::HIT_SOLDIERIF) ||
+			(spd->targflags & SpecialType::HIT_SOLDIEREXCEPT) ||
+			(spd->targflags & SpecialType::HIT_MOUNTIF) ||
+			(spd->targflags & SpecialType::HIT_MOUNTEXCEPT)) {
+		temp += " Targets for this ability must ";
+		if((spd->targflags & SpecialType::HIT_SOLDIEREXCEPT) ||
+				(spd->targflags & SpecialType::HIT_MOUNTEXCEPT)) {
+			temp += "not ";
+		}
+		temp += "be ";
+		if((spd->targflags & SpecialType::HIT_MOUNTIF) ||
+				(spd->targflags & SpecialType::HIT_MOUNTEXCEPT)) {
+			temp += "mounted on ";
+		}
+		comma = 0;
+		last = -1;
+		for(i = 0; i < 7; i++) {
+			if(spd->targets[i] == -1) continue;
+			if(ItemDefs[spd->targets[i]].flags & ItemType::DISABLED) continue;
+			if(last == -1) {
+				last = i;
+				continue;
+			}
+			temp += ItemDefs[spd->targets[last]].names + " [" +
+				ItemDefs[spd->targets[last]].abr + "]";
+			if(comma) {
+				temp += ", ";
+			}
+			comma++;
+		}
+		if(comma) {
+			temp += ", and ";
+		}
+		temp += ItemDefs[spd->targets[last]].names + " [" +
+			ItemDefs[spd->targets[last]].abr + "]";
+	}
+	if((spd->targflags & SpecialType::HIT_EFFECTIF) ||
+			(spd->targflags & SpecialType::HIT_EFFECTEXCEPT)) {
+		temp += " Targets for this ability must ";
+		if(spd->targflags & SpecialType::HIT_EFFECTEXCEPT) {
+			temp += "not ";
+		}
+		temp += "be effected by ";
+		for(i = 0; i < 3; i++) {
+			if(spd->effects[i] == -1) continue;
+			if(last == -1) {
+				last = i;
+				continue;
+			}
+			temp += EffectDefs[spd->effects[last]].name;
+			if(comma) {
+				temp += ", ";
+			}
+			comma++;
+		}
+		if(comma) {
+			temp += ", or ";
+		}
+		temp += EffectDefs[spd->effects[last]].name;
+	}
+	if(spd->targflags & SpecialType::HIT_ILLUSION) {
+		temp += " Targets for this ability must be illusions.";
+	}
+	if(spd->targflags & SpecialType::HIT_NOMONSTER) {
+		temp += " Targets for this ability must not be monsters.";
+	}
+
+	if((spd->effectflags & FX_SHIELD) || (spd->effectflags & FX_DEFBONUS)) {
+		/* FOO */
+	}
+
 	// XXX -- Handle the effect data.
 	return temp;
 }
@@ -237,7 +337,8 @@ AString *ItemDescription(int item, int full)
 		}
 		if(MonDefs[mon].special && MonDefs[mon].special != -1) {
 			*temp += AString(" ") +
-				ItemSpecial(MonDefs[mon].special, MonDefs[mon].specialLevel);
+				"Monster can cast " +
+				ShowSpecial(MonDefs[mon].special, MonDefs[mon].specialLevel);
 		}
 		if(full) {
 			int hits = MonDefs[mon].hits;
@@ -528,16 +629,9 @@ AString *ItemDescription(int item, int full)
 					}
 					*temp += ".";
 				}
-				if(BattleItemDefs[i].flags & BattleItemType::SPECIAL) {
-					*temp += AString(" ") +
-						ItemSpecial(BattleItemDefs[i].index,
-								BattleItemDefs[i].skillLevel);
-				} else if(BattleItemDefs[i].flags & BattleItemType::SHIELD) {
-					*temp += AString("Can cast a shield against ") +
-						AttType(BattleItemDefs[i].index) +
-						" attacks at level " + BattleItemDefs[i].skillLevel +
-						".";
-				}
+				*temp += AString(" ") + "Item can cast " +
+					ShowSpecial(BattleItemDefs[i].index,
+							BattleItemDefs[i].skillLevel);
 			}
 		}
 	}

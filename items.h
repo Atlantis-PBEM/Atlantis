@@ -302,4 +302,6 @@ class ItemList : public AList
 		void SetNum(int,int); /* type, number */
 };
 
+extern AString ShowSpecial(int special, int level);
+
 #endif
