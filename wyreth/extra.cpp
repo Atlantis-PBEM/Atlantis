@@ -39,11 +39,16 @@ int Game::SetupFaction( Faction *pFac )
     temp2->SetMen( I_LEADERS, 1 );
     temp2->reveal = REVEAL_FACTION;
 
-    if (TurnNumber() >= 12) {
-        temp2->type = U_MAGE;
-        temp2->Study(S_PATTERN, 30);
-        temp2->Study(S_SPIRIT, 30);
-        temp2->Study(S_GATE_LORE, 30);
+    temp2->type = U_MAGE;
+    temp2->Study(S_PATTERN, 30);
+    temp2->Study(S_SPIRIT, 30);
+    temp2->Study(S_GATE_LORE, 30);
+
+    if (TurnNumber() >= 25) {
+		temp2->Study(S_PATTERN, 60);
+		temp2->Study(S_SPIRIT, 60);
+		temp2->Study(S_FORCE, 90);
+		temp2->Study(S_COMBAT, 30);
     }
 
     temp2->MoveUnit( ((ARegion *) (regions.First()))->GetDummy() );
