@@ -62,6 +62,8 @@ class TerrainType
 {
 	public:
 		char *name;
+		char *type;
+		char marker;
 		int similar_type;
 
 		enum {

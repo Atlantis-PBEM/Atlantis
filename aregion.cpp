@@ -1815,7 +1815,7 @@ void ARegion::Writeout(Aoutfile *f)
 {
 	f->PutStr(*name);
 	f->PutInt(num);
-	if (type != -1) f->PutStr(TerrainDefs[type].name);
+	if (type != -1) f->PutStr(TerrainDefs[type].type);
 	else f->PutStr("NO_TERRAIN");
 	f->PutInt(buildingseq);
 	f->PutInt(gate);
@@ -1827,7 +1827,7 @@ void ARegion::Writeout(Aoutfile *f)
 	f->PutInt(wages);
 	f->PutInt(maxwages);
 	f->PutInt(money);
-	
+
 	f->PutInt(habitat);
 	f->PutInt(development);
 	f->PutInt(growth);
@@ -1854,7 +1854,7 @@ void ARegion::Writeout(Aoutfile *f)
 int LookupRegionType(AString *token)
 {
 	for (int i = 0; i < R_NUM; i++) {
-		if (*token == TerrainDefs[i].name) return i;
+		if (*token == TerrainDefs[i].type) return i;
 	}
 	return -1;
 }
@@ -1882,7 +1882,7 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	wages = f->GetInt();
 	maxwages = f->GetInt();
 	money = f->GetInt();
-	
+
 	habitat = f->GetInt();
 	development = f->GetInt();
 	growth = f->GetInt();
