@@ -36,7 +36,7 @@ void Game::CreateCityMons()
         ARegion * r = (ARegion *) elem;
         if (r->type == R_NEXUS || r->IsStartingCity() || r->town)
         {
-            CreateCityMon( r, 100 );
+            CreateCityMon( r, 100, 1 );
         }
     }
 }

@@ -2062,7 +2062,7 @@ void Game::CreateNPCFactions()
 	factions.Add(f);
 }
 
-void Game::CreateCityMon( ARegion *pReg, int percent )
+void Game::CreateCityMon( ARegion *pReg, int percent, int needmage )
 {
 	int skilllevel;
 	int AC = 0;
@@ -2102,7 +2102,7 @@ void Game::CreateCityMon( ARegion *pReg, int percent )
 	u->SetFlag(FLAG_HOLDING,1);
 	u->MoveUnit( pReg->GetDummy() );
 
-	if(AC && Globals->START_CITY_MAGES) {
+	if(AC && Globals->START_CITY_MAGES && needmage) {
 		u = GetNewUnit( pFac );
 		s = new AString("City Mage");
 		u->SetName(s);
@@ -2124,21 +2124,22 @@ void Game::CreateCityMon( ARegion *pReg, int percent )
 void Game::AdjustCityMons( ARegion *r )
 {
 	int guard = 0;
+	int needmage = 1;
 	forlist(&r->objects) {
 		Object * o = (Object *) elem;
 		forlist(&o->units) {
 			Unit * u = (Unit *) elem;
 			if (u->type == U_GUARD || u->type == U_GUARDMAGE) {
 				AdjustCityMon( r, u );
-			}
-			if (u->guard == GUARD_GUARD) {
 				guard = 1;
+				if(u->type == U_GUARDMAGE)
+					needmage = 0;
 			}
 		}
 	}
 
-    if (!guard && getrandom(100) < Globals->GUARD_REGEN) {
-		CreateCityMon( r, 10 );
+    if (!guard && (getrandom(100) < Globals->GUARD_REGEN)) {
+		CreateCityMon( r, 10, needmage );
 	}
 }
 

@@ -158,7 +158,7 @@ private:
     //
     void CreateWorld();
     void CreateNPCFactions();
-    void CreateCityMon( ARegion *pReg, int percent );
+    void CreateCityMon( ARegion *pReg, int percent, int needmage );
     int MakeWMon( ARegion *pReg );
     void MakeLMon( Object *pObj );
 
