@@ -926,7 +926,10 @@ void Game::RunMoveOrders()
 void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 {
     MoveOrder * o;
-    if (!unit->monthorders || (unit->monthorders->type != O_MOVE)) return;
+    if (!unit->monthorders ||
+			((unit->monthorders->type != O_MOVE) &&
+			 (unit->monthorders->type != O_ADVANCE)))
+		return;
     o = (MoveOrder *) unit->monthorders;
 
     while (o->dirs.Num()) {
