@@ -35,47 +35,72 @@ void InitItemDefs()
 
 int Game::SetupFaction( Faction *pFac )
 {
+	// Factions can only be added at the start of the game
+	if(TurnNumber() != 1)
+	{
+		return (0);
+	}
+
+	// Lets see if there is an available regions for this unit
+	ARegion *pReg = 0;
+	forlist(&regions) {
+		pReg = (ARegion *)elem;
+		ARegionArray *pRA = regions.pRegionArrays[pReg->zloc];
+
+		if(!pReg->CanBeStartingCity(pRA)) {
+			pReg = 0;
+			continue;
+		}
+
+		if(pReg->IsStartingCity()) {
+			// This region has already been set up.
+			pReg = 0;
+			continue;
+		}
+		break;
+	}
+
+	if(!pReg) {
+		// We couldn't find a region to make the faction in.
+		return 0;
+	}
+
     pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
+
+	// Make a citadel for this faction
+	Object *obj = new Object(pReg);
+	obj->num = pReg->buildingseq++;
+	obj->name = new AString(AString("Citadel [")+obj->num+"]");
+	obj->type = O_CITADEL;
+	obj->incomplete = 0;
+	obj->inner = -1;
+	pReg->objects.Add(obj);
 
     //
     // Set up first unit.
     //
     Unit *temp2 = GetNewUnit( pFac );
-    temp2->SetMen( I_LEADERS, 1 );
+    temp2->SetMen( I_MAN, 1 );
     temp2->reveal = REVEAL_FACTION;
-
-    if (TurnNumber() >= 12) {
-        temp2->type = U_MAGE;
-        temp2->Study(S_PATTERN, 30);
-        temp2->Study(S_SPIRIT, 30);
-        temp2->Study(S_GATE_LORE, 30);
-    }
-
-    temp2->MoveUnit( ((ARegion *) (regions.First()))->GetDummy() );
+	temp2->MoveUnit(obj);
 
     return( 1 );
 }
 
 void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
 {
-    if (u->type != U_WMON)
-    {
+    if (u->type != U_WMON) {
         int escape = 0;
         int totlosses = 0;
         forlist (&u->items) {
             Item *i = (Item *) elem;
-            if (i->type == I_IMP)
-            {
+            if (i->type == I_IMP) {
                 int top = i->num * i->num;
-                if (top)
-                {
+                if (top) {
                     int level = u->GetSkill(S_SUMMON_IMPS);
-                    if (!level)
-                    {
+                    if (!level) {
                         escape = 10000;
-                    }
-                    else
-                    {
+                    } else {
                         int bottom = level * level * 4;
                         bottom = bottom * bottom * 20;
                         int chance = (top * 10000) / bottom;
@@ -84,18 +109,13 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
                 }
             }
             
-            if (i->type == I_DEMON)
-            {
+            if (i->type == I_DEMON) {
                 int top = i->num * i->num;
-                if (top)
-                {
+                if (top) {
                     int level = u->GetSkill(S_SUMMON_DEMON);
-                    if (!level)
-                    {
+                    if (!level) {
                         escape = 10000;
-                    }
-                    else
-                    {
+                    } else {
                         int bottom = level * level;
                         bottom = bottom * bottom * 20;
                         int chance = (top * 10000) / bottom;
@@ -104,18 +124,13 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
                 }
             }
             
-            if (i->type == I_BALROG)
-            {
+            if (i->type == I_BALROG) {
                 int top = i->num * i->num;
-                if (top)
-                {
+                if (top) {
                     int level = u->GetSkill(S_SUMMON_BALROG);
-                    if (!level)
-                    {
+                    if (!level) {
                         escape = 10000;
-                    }
-                    else
-                    {
+                    } else {
                         int bottom = level * level;
                         bottom = bottom * bottom * 4;
                         int chance = (top * 10000) / bottom;
@@ -125,8 +140,7 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
             }
             
             if (i->type == I_SKELETON || i->type == I_UNDEAD ||
-                i->type == I_LICH)
-            {
+                i->type == I_LICH) {
                 int losses = (i->num + getrandom(10)) / 10;
                 u->items.SetNum(i->type,i->num - losses);
                 totlosses += losses;
@@ -138,12 +152,10 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
             u->Event(AString(totlosses) + " undead decay into nothingness.");
         }
 
-        if (escape > getrandom(10000))
-        {
+        if (escape > getrandom(10000)) {
             Faction * mfac = GetFaction(&factions,monfaction);
             
-            if (u->items.GetNum(I_IMP))
-            {
+            if (u->items.GetNum(I_IMP)) {
                 Unit *mon = GetNewUnit( mfac, 0 );
                 mon->MakeWMon(MonDefs[MONSTER_IMP].name,I_IMP,
                               u->items.GetNum(I_IMP));
@@ -151,8 +163,7 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
                 u->items.SetNum(I_IMP,0);
             }
             
-            if (u->items.GetNum(I_DEMON))
-            {
+            if (u->items.GetNum(I_DEMON)) {
                 Unit *mon = GetNewUnit( mfac, 0 );
                 mon->MakeWMon(MonDefs[MONSTER_DEMON].name,I_DEMON,
                               u->items.GetNum(I_DEMON));
@@ -160,8 +171,7 @@ void Game::PostProcessUnitExtra(ARegion *r,Unit *u)
                 u->items.SetNum(I_DEMON,0);
             }
             
-            if (u->items.GetNum(I_BALROG))
-            {
+            if (u->items.GetNum(I_BALROG)) {
                 Unit *mon = GetNewUnit( mfac, 0 );
                 mon->MakeWMon(MonDefs[MONSTER_BALROG].name,I_BALROG,
                               u->items.GetNum(I_BALROG));
@@ -197,106 +207,74 @@ void Game::CheckAllyMaintenance()
 
 Faction *Game::CheckVictory()
 {
-	ARegion *reg;
-	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
-		forlist(&r->objects) {
-			Object *obj = (Object *)elem;
-			if(obj->type != O_BKEEP) continue;
-			if(obj->units.Num()) return NULL;
-			reg = r;
-			break;
+	Faction *pVictor = 0;
+
+	// First, if there is only one living faction, it is the winner.
+	forlist(&factions) {
+		Faction *pFac = (Faction *)elem;
+		if(pFac->exists) {
+			if(pVictor) {
+				// This is the second faction we've found.  No winner.
+				pVictor = 0;
+				break;
+			}
+			pVictor = pFac;
 		}
 	}
+
+	if(pVictor)
+		return pVictor;
+
+	// Next, if one faction holds all citadels, it is the winner
 	{
-		// Now see find the first faction guarding the region
-		forlist(&reg->objects) {
-			Object *o = reg->GetDummy();
-			forlist(&o->units) {
-				Unit *u = (Unit *)elem;
-				if(u->guard == GUARD_GUARD) return u->faction;
+		forlist(&regions) {
+			ARegion *pReg = (ARegion *)elem;
+			if(pReg->IsStartingCity()) {
+				forlist(&(pReg->objects)) {
+					Object *pObj = (Object *)elem;
+					if(pObj->type != O_CITADEL) {
+						continue;
+					}
+					Unit *u = pObj->GetOwner();
+					if(!u) {
+						// Noone controls
+						return 0;
+					}
+					if(!pVictor) {
+						pVictor = u->faction;
+					} else {
+						if(pVictor != u->faction) {
+							return 0;
+						}
+					}
+					// We've found one citadel.. no need to keep going on
+					// this object
+					break;
+				}
 			}
 		}
 	}
-}
-
-int Game::AllowedApprentices( Faction *pFac )
-{
-	switch( pFac->type[ F_MAGIC ]) {
-		case 0:
-			return 0;
-		case 1:
-			return 2;
-		case 2:
-			return 4;
-		case 3:
-			return 6;
-		case 4:
-			return 10;
-		case 5:
-			return 14;
-	}
-	return 0;
+	return pVictor;
 }
 
 int Game::AllowedMages( Faction *pFac )
 {
-    switch( pFac->type[ F_MAGIC ])
-    {
-    case 0:
-        return 0;
-    case 1:
-        return 1;
-    case 2:
-        return 2;
-    case 3:
-        return 3;
-    case 4:
-        return 5;
-    case 5:
-        return 7;
-    }
-    return 0;
+    return 5;
+}
+
+int Game::AllowedApprentices( Faction *pFac )
+{
+    return 10;
 }
 
 int Game::AllowedTaxes( Faction *pFac )
 {
-    switch( pFac->type[ F_WAR ])
-    {
-    case 0:
-        return 0;
-    case 1:
-        return 10;
-    case 2:
-        return 24;
-    case 3:
-        return 40;
-    case 4:
-        return 60;
-    case 5:
-        return 100;
-    }
-    return 0;
+    return -1;
 }
 
 int Game::AllowedTrades( Faction *pFac )
 {
-    switch( pFac->type[ F_TRADE ])
-    {
-    case 0:
-        return 0;
-    case 1:
-        return 10;
-    case 2:
-        return 24;
-    case 3:
-        return 40;
-    case 4:
-        return 60;
-    case 5:
-        return 100;
-    }
-    return 0;
+    return -1;
 }
 
 int Unit::GetSkillBonus( int sk )

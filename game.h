@@ -27,6 +27,7 @@
 // ----        ------          -------
 // 2000/MAR/14 Larry Stanbery  Added a unit:faction list capability.
 // 2000/MAR/25 Larry Stanbery  Added support for ruleset changes.
+// 2001/Feb/18 Joseph Traub    Added support for Apprentices
 #ifndef GAME_CLASS
 #define GAME_CLASS
 
@@ -130,6 +131,7 @@ private:
     void ClearOrders(Faction *);
     void MakeFactionReportLists();
     void CountAllMages();
+	void CountAllApprentices();
     void WriteReport();
     void DeleteDeadFactions();
     
@@ -253,6 +255,7 @@ private:
     // This can be called by parse functions
     //
     int CountMages(Faction *);
+	int CountApprentices(Faction *);
     void FindDeadFactions();
     void DeleteEmptyUnits();
     void DeleteEmptyInRegion(ARegion *);
@@ -267,6 +270,7 @@ private:
     // may return -1 to indicate no limit.
     //
     int AllowedMages( Faction *pFac );
+	int AllowedApprentices(Faction *pFact);
     int AllowedTaxes( Faction *pFac );
     int AllowedTrades( Faction *pFac );
     int TaxCheck( ARegion *pReg, Faction *pFac );

@@ -28,6 +28,9 @@
 // 2000/MAR/14 Larry Stanbery  Corrected logical flaw in creation of mages.
 //                             Replaced specific skill bonus functions with
 //                             generic function.
+// 2001/Feb/18 Joseph Traub    Added support for Apprentices
+//
+
 #include "unit.h"
 #include "rules.h"
 
@@ -482,7 +485,7 @@ void Unit::SetDescribe(AString * s) {
 
 int Unit::IsAlive()
 {
-    if( type == U_MAGE )
+    if( type == U_MAGE || type == U_APPRENTICE )
     {
         return( GetMen() );
     }
@@ -709,33 +712,34 @@ void Unit::SetSkill(int sk,int level)
 
 void Unit::SetSkillDays(int sk,int days)
 {
-    if (days)
-    {
+    if (days) {
         skills.SetDays(sk,days * GetMen());
-        if (days)
-        {
-            if( ( SkillDefs[sk].flags & SkillType::MAGIC ))
-            {
-                if( Globals->MAGE_NONLEADERS )
-                {
-                    if( GetMen() == 1 )
-                    {
+        if (days) {
+            if( ( SkillDefs[sk].flags & SkillType::MAGIC )) {
+                if( Globals->MAGE_NONLEADERS ) {
+                    if( GetMen() == 1 ) {
                         // LLS
                         type = U_MAGE;
                     }
-                }
-                else
-                {
-                    if( GetMen(I_LEADERS) == 1)
-                    {
+                } else {
+                    if( GetMen(I_LEADERS) == 1) {
                         type = U_MAGE;
                     }
                 }
             }
+			if ((SkillDefs[sk].flags & SkillType::APPRENTICE)) {
+				if(Globals->MAGE_NONLEADERS) {
+					if(GetMen() == 1) {
+						type = U_APPRENTICE;
+					}
+				} else {
+					if(GetMen(I_LEADERS) == 1) {
+						type = U_APPRENTICE;
+					}
+				}
+			}
         }
-    } 
-    else
-    {
+    } else {
         ForgetSkill(sk);
     }
 }

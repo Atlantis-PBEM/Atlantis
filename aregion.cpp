@@ -29,6 +29,10 @@
 // 2000/MAR/21 Azthar Septragen  Added roads.
 // 2000/SEP/06 Joseph Traub      Added base man cost to allow races to have
 //                               different base costs
+// 2001/Feb/16 Joseph Traub      Semi-fixed a bug which allowed multiple
+//                               disconnected regions in the underworld.
+//
+
 #include "game.h"
 #include "rules.h"
 

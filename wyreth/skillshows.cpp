@@ -960,6 +960,10 @@ static ShowType sd[] = {
     "times his skill level chance of creating a Portal, and the "
     "attempt costs 600 silver. To use this spell, CAST "
     "Construct_Portal." },
+  { S_MANIPULATE, 1,
+	"A unit with this skill becomes an apprentice mage. While apprentices "
+	"cannot cast spells directly, they can use magic items created by mages. "
+	"Continued study of this skill gives no further advantages." },
   { -1, -1, ""}
 };
 

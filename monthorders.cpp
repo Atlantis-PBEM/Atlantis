@@ -404,10 +404,6 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
     }
 
     /* Perform the build */
-    // AS
-    //if (num > needed) num = needed;
-    //if (itn < num) num = itn;
-    //obj->incomplete -= num;
 
     if (it == I_WOOD_OR_STONE) {
         if (num > u->items.GetNum(I_STONE)) {
@@ -691,6 +687,24 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
         }
         u->type = U_MAGE;
     }
+
+	if((SkillDefs[sk].flags&SkillType::APPRENTICE) && u->type != U_APPRENTICE){
+		if(CountApprentices(u->faction) >= AllowedApprentices(u->faction)) {
+			u->Error("STUDY: Can't have another apprentice.");
+			return;
+		}
+		if(u->GetMen() != 1) {
+			u->Error("STUDY: Only 1-man units can be apprentices.");
+			return;
+		}
+		if(!(Globals->MAGE_NONLEADERS)) {
+			if(u->GetMen(I_LEADERS) != 1) {
+				u->Error("STUDY: Only leaders may be apprentices.");
+				return;
+			}
+		}
+		u->type = U_APPRENTICE;
+	}
   
     int days = 30 * u->GetMen() + o->days;
     

@@ -29,6 +29,7 @@
 //                             generic function.
 //                             Added function to compute production bonus.
 // 2001/FEB/07 Joseph Traub    Changes to allow mage support for city guards.
+// 2001/Feb/18 Joseph Traub    Added support for Apprentices.
 
 #ifndef UNIT_CLASS
 #define UNIT_CLASS
@@ -69,8 +70,9 @@ enum {
   U_NORMAL,
   U_MAGE,
   U_GUARD,
-  U_GUARDMAGE,
   U_WMON,
+  U_GUARDMAGE,
+  U_APPRENTICE,
   NUNITTYPES
 };
 

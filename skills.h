@@ -22,6 +22,12 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+// MODIFICATIONS
+// Date        Person          Comment
+// ----        ------          -------
+// 2001/Feb/18 Joseph Traub    Added apprentice support from Lacandon Conquest
+// 2001/Feb/18 Joseph Traub    Added support for conquest
+//
 #ifndef SKILL_CLASS
 #define SKILL_CLASS
 
@@ -61,6 +67,8 @@ public:
         COMBAT = 0x2,
         CAST = 0x4,
         FOUNDATION = 0x8,
+		APPRENTICE = 0x10,
+		NOT_CONQUEST = 0x20,
     };
     int flags;
 

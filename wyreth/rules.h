@@ -171,6 +171,7 @@ enum {
     I_KRAKEN,
     I_MERFOLK,
     I_ELEMENTAL,
+	I_MAN,
     NITEMS
 };
 
@@ -196,6 +197,7 @@ enum {
     MAN_UNDERDWARF,
     MAN_DESERTDWARF,
     MAN_ORC,
+	MAN_MAN,
     NUMMAN
 };
 
@@ -398,6 +400,7 @@ enum {
     S_ENCHANT_SWORDS,
     S_ENCHANT_ARMOR,
     S_CONSTRUCT_PORTAL,
+	S_MANIPULATE,
     NSKILLS
 };
 
@@ -458,9 +461,6 @@ enum {
     O_DERELICT,
     O_OCAVE,
     O_WHIRL,
-	// JT
-	// Abyss Lair
-	O_BKEEP,
     // AS
     O_ROADN,
     O_ROADNW,
@@ -468,13 +468,14 @@ enum {
     O_ROADSW,
     O_ROADSE,
     O_ROADS,
-#ifdef EXTRA_STRUCTURES
 	O_TEMPLE,
 	O_MQUARRY,
 	O_AMINE,
 	O_PRESERVE,
     O_SACGROVE,
-#endif
+	// JT
+	// Abyss Lair
+	O_BKEEP,
     NOBJECTS
 };
 
@@ -495,6 +496,9 @@ enum {
     R_UFOREST,
     R_TUNNELS,
     R_NEXUS,
+	R_ISLAND_PLAIN,
+	R_ISLAND_SWAMP,
+	R_ISLAND_MOUNTAIN,
     R_NUM
 };
 

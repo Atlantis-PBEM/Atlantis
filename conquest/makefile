@@ -9,7 +9,7 @@
 #OPTIONS
 #
 # Define this if you have EASIER_UNDERWORLD set to 1 in the gamedefs struct
-EASY_UNDER = -DEASY_UNDERWORLD
+#EASY_UNDER = -DEASY_UNDERWORLD
 
 CFLAGS = -g -I. -I.. ${EASY_UNDER}
 
@@ -25,12 +25,12 @@ OBJECTS = $(patsubst %.o,obj/%.o,$(RULESET_OBJECTS)) \
   $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) \
   obj/i_rand.o
 
-wyreth: $(OBJECTS)
-	g++ $(CFLAGS) -o wyreth $(OBJECTS)
+conquest: $(OBJECTS)
+	g++ $(CFLAGS) -o conquest $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS)
-	rm -f wyreth
+	rm -f conquest
 
 $(patsubst %.o,obj/%.o,$(RULESET_OBJECTS)): obj/%.o: %.cpp
 	g++ $(CFLAGS) -c -o $@ $<

@@ -196,7 +196,7 @@ Unit * Object::GetUnitId(UnitId * id,int faction) {
 int Object::CanEnter(ARegion * reg,Unit * u)
 {
     if( !ObjectDefs[type].canenter &&
-        ( u->type == U_MAGE || u->type == U_NORMAL ))
+        ( u->type == U_MAGE || u->type == U_NORMAL || u->type == U_APPRENTICE))
     {
         return 0;
     }
@@ -241,20 +241,12 @@ void Object::Report( Areport * f,Faction * fac,int obs,int truesight,
         {
             if (incomplete == 0)
             {
-//                fac->Event(*name + " " + ObjectDefs[type].name +
-//                    " in " + (AString) TerrainDefs[region->type].name +
-//                    " (" + region->xloc + "," + region->yloc + ") in " +
-//                    *region->name + DoDecayWarning());
                 temp += DoDecayWarning();
             }
             if (incomplete < 0 &&
                 incomplete > (0 - (region->GetMaxClicks() +
                 region->PillageCheck())))
             {
-//                fac->Event(*name + " " + ObjectDefs[type].name + " in " +
-//                    (AString) TerrainDefs[region->type].name + " (" +
-//                    region->xloc + "," + region->yloc + ") in " +
-//                    *region->name + DoMaintenanceWarning());
                 temp += DoMaintenanceWarning();
             }
         }

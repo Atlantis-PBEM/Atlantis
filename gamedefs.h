@@ -34,6 +34,8 @@
 //                               and to make them slightly tougher.
 //                               Added option to give starting city guards
 //                               mage support.
+// 2001/Feb/18 Joseph Traub      Added Apprentices idea from Lacandon Conquest
+// 2001/Feb/18 Joseph Traub      Added back in support for Conquest
 
 #ifndef GAME_DEFS
 #define GAME_DEFS
@@ -111,6 +113,7 @@ public:
     int LAIR_MONSTERS_EXIST;
     int WEATHER_EXISTS;
     int OPEN_ENDED;
+	int CONQUEST;
 
     //
     // RANDOM_ECONOMY determines whether the economy for different regions
@@ -189,6 +192,10 @@ public:
 	//
 	int START_CITY_MAGES;
 
+	//
+	// Are we allowing apprentices?
+	//
+	int APPRENTICES_EXIST;
 };
 
 extern GameDefs * Globals;

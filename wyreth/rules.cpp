@@ -39,6 +39,7 @@
 //                               and to make them slightly tougher.
 //                               Added option to give starting city guards
 //                               mage support.
+// 2001/Feb/18 Joseph Traub      Added support for apprentices if desired
 
 #include "rules.h"
 #include "items.h"
@@ -49,10 +50,13 @@
 //
 // Define the various globals for this game.
 //
+// If you change any of these, it is incumbent on you, the GM to change
+// the html file containing the rules to correctly reflect the changes!
+//
 static GameDefs g = {
     "Wyreth",                // RULESET_NAME
     MAKE_ATL_VER( 1, 0, 0 ), // RULESET_VERSION
-    MAKE_ATL_VER( 4, 0, 4 ), // ENGINE_VERSION
+    MAKE_ATL_VER( 4, 0, 5 ), // ENGINE_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */
@@ -104,6 +108,7 @@ static GameDefs g = {
     1, // LAIR_MONSTERS_EXIST
     1, // WEATHER_EXISTS
     0, // OPEN_ENDED
+	0, // CONQUEST
 
     1, // RANDOM_ECONOMY
     1, // VARIABLE_ECONOMY
@@ -132,6 +137,7 @@ static GameDefs g = {
 	500, // AMT_START_CITY_GUARDS
 	1,   // START_CITY_GUARDS_PLATE
 	1,   // START_CITY_MAGES
+	0,   // APPRENTICES_EXIST
 };
 
 GameDefs * Globals = &g;
@@ -524,6 +530,8 @@ ItemType id[] =
     {"elemental","elementals","ELEM",ItemType::CANTGIVE,
      -1,0,-1,0,250,IT_MONSTER,
      50,1,MONSTER_ELEMENTAL,300,0,0,0,-1,0},
+	{"man", "men", "MAN", 0, -1, 0, -1, 0, 10, IT_MAN,
+	 50, 1, MAN_MAN, 15, 0, 0, 0, -1, 0},
 };
 
 ItemType * ItemDefs = id;
@@ -555,6 +563,7 @@ ManType mt[] = {
   { 3,2,S_MINING,S_QUARRYING,S_CROSSBOW,S_ARMORER }, /* MAN_UNDERDWARF */
   { 3,2,S_QUARRYING,S_BUILDING,S_ARMORER,S_CROSSBOW }, /* MAN_DESERTDWARF */
   { 4,1,S_COMBAT,-1,-1,-1 }, /* MAN_ORC */
+  { 5,5,-1,-1,-1,-1 }, /* MAN_MAN */
 };
 
 ManType * ManDefs = mt;
@@ -779,7 +788,7 @@ static SkillType sd[] = {
     {"lumberjack","LUMB",10,0,0,-1,0,-1,0,-1,0},
     {"quarrying","QUAR",10,0,0,-1,0,-1,0,-1,0},
     {"hunting","HUNT",10,0,0,-1,0,-1,0,-1,0},
-    {"fishing","FISH",10,0,0,-1,0,-1,0,-1,0},
+    {"fishing","FISH",10,SkillType::NOT_CONQUEST,0,-1,0,-1,0,-1,0},
     {"herb lore","HERB",10,0,0,-1,0,-1,0,-1,0},
     {"horse training","HORS",10,0,0,-1,0,-1,0,-1,0},
     {"weaponsmith","WEAP",10,0,0,-1,0,-1,0,-1,0},
@@ -797,8 +806,8 @@ static SkillType sd[] = {
     {"observation","OBSE",50,0,0,-1,0,-1,0,-1,0},
     {"healing","HEAL",10,0,0,-1,0,-1,0,-1,0},
     {"sailing","SAIL",10,0,0,-1,0,-1,0,-1,0},
-    {"farming","FARM",10,0,0,-1,0,-1,0,-1,0},
-    {"ranching","RANC",10,0,0,-1,0,-1,0,-1,0},
+    {"farming","FARM",10,SkillType::NOT_CONQUEST,0,-1,0,-1,0,-1,0},
+    {"ranching","RANC",10,SkillType::NOT_CONQUEST,0,-1,0,-1,0,-1,0},
     {"force","FORC",100, SkillType::MAGIC | SkillType::FOUNDATION,
      0,-1,0,-1,0,-1,0},
     {"pattern","PATT",100, SkillType::MAGIC | SkillType::FOUNDATION,
@@ -921,7 +930,8 @@ static SkillType sd[] = {
     {"enchant armor","EARM",100,SkillType::MAGIC | SkillType::CAST,
      0,S_ARTIFACT_LORE,1,-1,0,-1,0},
     {"construct portal","CPOR",100,SkillType::MAGIC | SkillType::CAST,
-     0,S_ARTIFACT_LORE,3, S_PORTAL_LORE,3,-1,0}
+     0,S_ARTIFACT_LORE,3, S_PORTAL_LORE,3,-1,0},
+	{"manipulation","MANI",100,SkillType::APPRENTICE,0,-1,0,-1,0,-1,0},
 };
 
 SkillType * SkillDefs = sd;
@@ -964,9 +974,6 @@ static ObjectType ot[] =
     {"Derelict Ship",0,0,-1,-1,0,-1,0,0,I_KRAKEN,-1},
     {"Cavern",0,0,-1,-1,0,-1,0,0,I_MERFOLK,-1},
     {"Whirlpool",0,0,-1,-1,0,-1,0,0,I_ELEMENTAL,-1},
-	// JT
-	// Added Abyss Lair
-	{"Black Keep",0,0,-1,-1,0,-1,0,0,-1,-1},
     // AS
     {"Road N",0,0,I_STONE,75,3,S_BUILDING,0,1,-1,-1},
     {"Road NW",0,0,I_STONE,75,3,S_BUILDING,0,1,-1,-1},
@@ -974,13 +981,14 @@ static ObjectType ot[] =
     {"Road SW",0,0,I_STONE,75,3,S_BUILDING,0,1,-1,-1},
     {"Road SE",0,0,I_STONE,75,3,S_BUILDING,0,1,-1,-1},
     {"Road S",0,0,I_STONE,75,3,S_BUILDING,0,1,-1,-1},
-#ifdef EXTRA_STRUCTURES
 	{"Temple",0,0,I_STONE,10,3,S_BUILDING,0,1,-1,I_HERBS},
 	{"Mystic Quarry",0, 0, I_ROOTSTONE,20,3,S_QUARRYING,0,1,-1,I_ROOTSTONE},
 	{"Arcane Mine",0,0,I_MITHRIL,20,3,S_MINING,0,1,-1,I_MITHRIL},
 	{"Forest Preserve",0,0,I_IRONWOOD,20,3,S_LUMBERJACK,0,1,-1,I_IRONWOOD},
 	{"Sacred Grove",0,0,I_YEW,30,5,S_LUMBERJACK,0,1,-1,I_YEW},
-#endif
+	// JT
+	// Added Abyss Lair
+	{"Black Keep",0,0,-1,-1,0,-1,0,0,-1,-1},
 };
 
 ObjectType * ObjectDefs = ot;
@@ -1081,7 +1089,29 @@ static TerrainType td[] = {
      -1,0,0,-1,0,0,
      -1,-1,-1,-1,-1,
      0,-1,-1,-1,
-     0,-1,-1,-1,-1}
+     0,-1,-1,-1,-1},
+	// Terrain types for the islands
+	{"plain", TerrainType::RIDINGMOUNTS | TerrainType::FLYINGMOUNTS,
+	 800,14,40,1,I_HORSE,100,20,
+	 -1,0,0,-1,0,0,
+	 -1,0,0,-1,0,0,
+	 I_MAN,-1,-1,-1,-1,
+	 0,-1,-1,-1,
+	 0,-1,-1,-1,-1},
+	{"swamp", TerrainType::FLYINGMOUNTS,
+	 200,11,10,2,I_WOOD,100,10,
+	 -1,0,0,-1,0,0,
+	 -1,0,0,-1,0,0,
+	 I_MAN,-1,-1,-1,-1,
+	 0,-1,-1,-1,
+	 0,-1,-1,-1,-1},
+	{"mountain", TerrainType::FLYINGMOUNTS,
+	 400,12,20,2,I_IRON,100,20,
+	 I_STONE,100,10,-1,0,0,
+	 -1,0,0,-1,0,0,
+	 I_MAN,-1,-1,-1,-1,
+	 0,-1,-1,-1,
+	 0,-1,-1,-1,-1},
 };
 
 TerrainType * TerrainDefs = td;

@@ -22,6 +22,11 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+// MODIFICATIONS
+// Date        Person          Comment
+// ----        ------          -------
+// 2001/Feb/18 Joseph Traub    Added apprentice support from Lacandon Conquest
+//
 #include "game.h"
 #include "rules.h"
 
@@ -959,7 +964,7 @@ void Game::PostProcessTurn()
     {
         GrowLMons(Globals->LAIR_FREQUENCY);
     }
-	if( !Globals->OPEN_ENDED )
+	if( !Globals->OPEN_ENDED && !Globals->CONQUEST )
 	{
 		GrowVMons();
 	}
@@ -1071,36 +1076,38 @@ void Game::DoAutoAttack(ARegion * r,Unit * u) {
 }
 
 int Game::CountWMonTars(ARegion * r,Unit * mon) {
-  int retval = 0;
-  forlist(&r->objects) {
-    Object * o = (Object *) elem;
-    forlist(&o->units) {
-      Unit * u = (Unit *) elem;
-      if (u->type == U_NORMAL || u->type == U_MAGE) {
-	if (mon->CanSee(r,u) && mon->CanCatch(r,u)) {
-	  retval += u->GetMen();
+	int retval = 0;
+	forlist(&r->objects) {
+		Object * o = (Object *) elem;
+		forlist(&o->units) {
+			Unit * u = (Unit *) elem;
+			if (u->type == U_NORMAL || u->type == U_MAGE ||
+					u->type == U_APPRENTICE) {
+				if (mon->CanSee(r,u) && mon->CanCatch(r,u)) {
+					retval += u->GetMen();
+				}
+			}
+		}
 	}
-      }
-    }
-  }
-  return retval;
+	return retval;
 }
 
 Unit * Game::GetWMonTar(ARegion * r,int tarnum,Unit * mon) {
-  forlist(&r->objects) {
-    Object * o = (Object *) elem;
-    forlist(&o->units) {
-      Unit * u = (Unit *) elem;
-      if (u->type == U_NORMAL || u->type == U_MAGE) {
-	if (mon->CanSee(r,u) && mon->CanCatch(r,u)) {
-	  int num = u->GetMen();
-	  if (num && tarnum < num) return u;
-	  tarnum -= num;
+	forlist(&r->objects) {
+		Object * o = (Object *) elem;
+		forlist(&o->units) {
+			Unit * u = (Unit *) elem;
+			if (u->type == U_NORMAL || u->type == U_MAGE ||
+					u->type == U_APPRENTICE) {
+				if (mon->CanSee(r,u) && mon->CanCatch(r,u)) {
+					int num = u->GetMen();
+					if (num && tarnum < num) return u;
+					tarnum -= num;
+				}
+			}
+		}
 	}
-      }
-    }
-  }
-  return 0;
+	return 0;
 }
 
 void Game::CheckWMonAttack(ARegion * r,Unit * u) {
@@ -1268,31 +1275,29 @@ void Game::DoSell(ARegion * r,Market * m) {
 }
 
 void Game::RunBuyOrders() {
-  forlist((&regions)) {
-    ARegion * r = (ARegion *) elem;
-
-    {
-      forlist((&r->markets)) {
-	Market * m = (Market *) elem;
-	if (m->type == M_BUY)
-	  DoBuy(r,m);
-      }
-    }
-
-    {
-      forlist((&r->objects)) {
-	Object * obj = (Object *) elem;
-	forlist((&obj->units)) {
-	  Unit * u = (Unit *) elem;
-	  forlist((&u->buyorders)) {
-	    BuyOrder * o = (BuyOrder *) elem;
-	    u->Error("BUY: Can't buy that.");
-	  }
-	  u->buyorders.DeleteAll();
+	forlist((&regions)) {
+		ARegion * r = (ARegion *) elem;
+		{
+			forlist((&r->markets)) {
+				Market * m = (Market *) elem;
+				if (m->type == M_BUY)
+					DoBuy(r,m);
+			}
+		}
+		{
+			forlist((&r->objects)) {
+				Object * obj = (Object *) elem;
+				forlist((&obj->units)) {
+					Unit * u = (Unit *) elem;
+					forlist((&u->buyorders)) {
+						BuyOrder * o = (BuyOrder *) elem;
+						u->Error("BUY: Can't buy that.");
+					}
+					u->buyorders.DeleteAll();
+				}
+			}
+		}
 	}
-      }
-    }
-  }
 }
 
 int Game::GetBuyAmount(ARegion * r,Market * m)
@@ -1310,6 +1315,10 @@ int Game::GetBuyAmount(ARegion * r,Market * m)
                             u->Error("BUY: Mages can't recruit more men.");
                             o->num = 0;
                         }
+						if(u->type == U_APPRENTICE) {
+							u->Error("BUY: Apprentices can't recruit more men.");
+							o->num = 0;
+						}
                         if ((o->item == I_LEADERS && u->IsNormal()) ||
                             (o->item != I_LEADERS && u->IsLeader())) {
                             u->Error("BUY: Can't mix leaders and normal men.");
@@ -1709,6 +1718,12 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
                 return 0;
             }
         }
+		if(u->type == U_APPRENTICE) {
+			if(CountApprentices(t->faction)>=AllowedApprentices(t->faction)){
+				u->Error("GIVE: Faction has too many apprentices.");
+				return 0;
+			}
+		}
   
         int notallied = 1;
         if (t->faction->GetAttitude(u->faction->num) == A_ALLY)
@@ -1751,7 +1766,8 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
     {
         if (u->nomove) t->nomove = 1;
 
-        if (u->type == U_MAGE || t->type == U_MAGE)
+        if (u->type == U_MAGE || u->type == U_APPRENTICE ||
+				t->type == U_MAGE || t->type == U_APPRENTICE)
         {
             u->Error("GIVE: Magicians can't transfer men.");
             return 0;

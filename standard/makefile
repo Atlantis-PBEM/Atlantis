@@ -11,11 +11,8 @@
 # Define this if you have EASIER_UNDERWORLD set to 1 in the gamedefs struct
 #EASY_UNDER = -DEASY_UNDERWORLD
 #
-# Define this if you want the additional structures for increasing
-# production
-#EXTRA_STRUCTS = -DEXTRA_STRUCTURES
 
-CFLAGS = -g -I. -I.. ${EASY_UNDER} ${EXTRA_STRUCTS}
+CFLAGS = -g -I. -I.. ${EASY_UNDER}
 
 RULESET_OBJECTS = extra.o rules.o skillshows.o specials.o spells.o world.o
 

@@ -27,6 +27,7 @@
 // ----        ------          -------
 // 2000/MAR/14 Larry Stanbery  Added a unit:faction map capability.
 // 2000/MAR/25 Larry Stanbery  Added support routines for upgrading ruleset.
+// 2001/Feb/18 Joseph Traub    Added apprentice support from Lacandon Conquest
 #include "game.h"
 #include "unit.h"
 #include "fileio.h"
@@ -272,12 +273,19 @@ int Game::NewGame()
     seedrandomrandom();
 
     CreateWorld();
-    CreateNPCFactions();
+	if(Globals->CITY_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST ||
+			Globals->LAIR_MONSTERS_EXIST)
+		CreateNPCFactions();
 
-    CreateCityMons();
-    CreateWMons();
-    CreateLMons();
-	CreateVMons();
+	if(Globals->CITY_MONSTERS_EXIST)
+		CreateCityMons();
+	if(Globals->WANDERING_MONSTERS_EXIST)
+		CreateWMons();
+	if(Globals->LAIR_MONSTERS_EXIST)
+		CreateLMons();
+
+	if(!Globals->CONQUEST && !Globals->OPEN_ENDED)
+		CreateVMons();
 
     return( 1 );
 }
@@ -369,7 +377,7 @@ int Game::OpenGame()
                     ATL_VER_MAJOR( Globals->RULESET_VERSION ), 0, 0 ) ) );
         if ( ! UpgradeMajorVersion( gVersion ) )
         {
-            Awrite( "Error occurred!  Aborting!" );
+            Awrite( "Unable to upgrade!  Aborting!" );
             return( 0 );
         }
         gVersion =
@@ -384,7 +392,7 @@ int Game::OpenGame()
                     ATL_VER_MINOR( Globals->RULESET_VERSION ), 0 ) ) );
         if ( ! UpgradeMinorVersion( gVersion ) )
         {
-            Awrite( "Error occurred!  Aborting!" );
+            Awrite( "Unable to upgrade!  Aborting!" );
             return( 0 );
         }
         gVersion = MAKE_ATL_VER( ATL_VER_MAJOR( gVersion ),
@@ -396,7 +404,7 @@ int Game::OpenGame()
             ATL_VER_STRING( Globals->RULESET_VERSION ) );
         if ( ! UpgradePatchLevel( gVersion ) )
         {
-            Awrite( "Error occurred!  Aborting!" );
+            Awrite( "Unable to upgrade!  Aborting!" );
             return( 0 );
         }
         gVersion = MAKE_ATL_VER( ATL_VER_MAJOR( gVersion ),
@@ -1444,6 +1452,8 @@ void Game::WriteReport()
     
     MakeFactionReportLists();
     CountAllMages();
+	if(Globals->APPRENTICES_EXIST)
+		CountAllApprentices();
 
     forlist(&factions) {
         Faction * fac = (Faction *) elem;
@@ -1617,3 +1627,42 @@ void Game::RemoveInactiveFactions()
 		}
 	}
 }
+
+void Game::CountAllApprentices()
+{
+	if(!Globals->APPRENTICES_EXIST)
+		return;
+
+	forlist(&factions) {
+		((Faction *)elem)->numapprentices = 0;
+	}
+	{
+		forlist(&regions) {
+			ARegion *r = (ARegion *)elem;
+			forlist(&r->objects) {
+				Object *o = (Object *)elem;
+				forlist(&o->units) {
+					Unit *u = (Unit *)elem;
+					if(u->type == U_APPRENTICE)
+						u->faction->numapprentices++;
+				}
+			}
+		}
+	}
+}
+
+int Game::CountApprentices(Faction *pFac)
+{
+	int i = 0;
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *)elem;
+				if(u->faction == pFac && u->type == U_APPRENTICE) i++;
+			}
+		}
+	}
+}
+

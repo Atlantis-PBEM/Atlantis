@@ -28,6 +28,7 @@
 // 2000/MAR/16 Larry Stanbery  Corrected bug in Soldier constructor.
 //                             Fixed "assassination bug" reported on
 //                             DejaNews.
+// 2001/Feb/18 Joseph Traub    Added Apprentices concept from Lacondon Conquest
 #include "army.h"
 #include "gameio.h"
 #include "rules.h"
@@ -335,10 +336,11 @@ void Soldier::SetupCombatItems()
         }
 
         if( pBat->flags & BattleItemType::MAGEONLY &&
-            unit->type != U_MAGE && unit->type != U_GUARDMAGE)
+            unit->type != U_MAGE && unit->type != U_GUARDMAGE && 
+			unit->type != U_APPRENTICE)
         {
             //
-            // Only mages can use this item
+            // Only mages/apprentices can use this item
             //
             continue;
         }

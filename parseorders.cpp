@@ -27,6 +27,7 @@
 // ----        ------          -------- 
 // 2000/MAR/14 Larry Stanbery  Fixed SHOW bug.
 // 2000/MAR/14 Davis Kulis     Added a new reporting Template.
+// 2001/Feb/18 Joseph Traub    Added support for Apprentices
 #include "game.h"
 #include "gameio.h"
 #include "orders.h"
@@ -787,6 +788,18 @@ void Game::ProcessReshowOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			ParseError(pCheck, u, 0, "SHOW: No such skill.");
 			return;
 		}
+
+		if((SkillDefs[sk].flags & SkillType::APPRENTICE) &&
+				!Globals->APPRENTICES_EXIST) {
+			ParseError(pCheck, u, 0, "SHOW: No such skill.");
+			return;
+		}
+		if((SkillDefs[sk].flags & SkillType::NOT_CONQUEST) &&
+				Globals->CONQUEST) {
+			ParseError(pCheck, u, 0, "SHOW: No such skill.");
+			return;
+		}
+
 
 		token = o->gettoken();
 		if (!token)
@@ -1582,6 +1595,17 @@ void Game::ProcessStudyOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         ParseError( pCheck, u, 0, "STUDY: Invalid skill.");
         return;
     }
+
+	if((SkillDefs[sk].flags & SkillType::APPRENTICE) &&
+			!Globals->APPRENTICES_EXIST) {
+		ParseError(pCheck, u, 0, "STUDY: Invalid skill.");
+		return;
+	}
+	if((SkillDefs[sk].flags & SkillType::NOT_CONQUEST) &&
+			Globals->CONQUEST) {
+		ParseError(pCheck, u, 0, "STUDY: Invalid skill.");
+		return;
+	}
 
     if( pCheck )
     {

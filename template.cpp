@@ -25,8 +25,9 @@
 // MODIFICATIONS
 // Date
 // ----
-// 2000/MAR/16 Davis Kulis  Added a new reporting Template.
-//                          Added this file.
+// 2000/MAR/16 Davis Kulis    Added a new reporting Template.
+//                            Added this file.
+// 2001/Feb/18 Joseph Traub   Added support for Conquest map types
 #include "game.h"
 #include "rules.h"
 #include <stdio.h>
@@ -120,7 +121,20 @@ static char *fill[] = {
 
  // nexus
  " !!!! ",
- " !!!! "
+ " !!!! ",
+
+ // For conquest
+ // Island Plain
+ "      ",
+ "      ",
+
+ // Island swamp
+ "  v v ",
+ " v v  ",
+
+ // Island mountain
+ " /\\/\\ ",
+ "/  \\ \\",
 };
 
 // NEW FUNCTION DK 2000.03.07,

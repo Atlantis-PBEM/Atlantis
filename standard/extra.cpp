@@ -240,6 +240,26 @@ int Game::AllowedMages( Faction *pFac )
     return 0;
 }
 
+int Game::AllowedApprentices( Faction *pFac )
+{
+    switch( pFac->type[ F_MAGIC ])
+    {
+    case 0:
+        return 0;
+    case 1:
+        return 2;
+    case 2:
+        return 4;
+    case 3:
+        return 6;
+    case 4:
+        return 10;
+    case 5:
+        return 14;
+    }
+    return 0;
+}
+
 int Game::AllowedTaxes( Faction *pFac )
 {
     switch( pFac->type[ F_WAR ])

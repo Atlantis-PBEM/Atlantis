@@ -23,9 +23,10 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date        Person       Comments
-// ----        ------       --------
-// 2000/MAR/14 Davis Kulis  Added a new reporting Template.
+// Date        Person         Comments
+// ----        ------         --------
+// 2000/MAR/14 Davis Kulis    Added a new reporting Template.
+// 2001/Feb/18 Joseph Traub   Added Apprentices from Lacandon Conquest
 #ifndef FACTION_CLASS
 #define FACTION_CLASS
 
@@ -169,6 +170,7 @@ public:
     int numshows;
     
     int nummages;
+	int numapprentices;
     AList war_regions;
     AList trade_regions;
 

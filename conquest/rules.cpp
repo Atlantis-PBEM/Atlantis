@@ -40,6 +40,7 @@
 //                               Added option to give starting city guards
 //                               mage support.
 // 2001/Feb/18 Joseph Traub      Added support for Apprentices if desired.
+// 2001/Feb/18 Joseph Traub      Recreated a conquest scenario
 
 #include "rules.h"
 #include "items.h"
@@ -52,10 +53,9 @@
 //
 // If you change any of these, it is incumbent on you, the GM to change
 // the html file containing the rules to correctly reflect the changes!
-//
 static GameDefs g = {
-    "Standard Atlantis",     // RULESET_NAME
-    MAKE_ATL_VER( 4, 0, 5 ), // RULESET_VERSION
+    "Atlantis Conquest",     // RULESET_NAME
+    MAKE_ATL_VER( 1, 0, 0 ), // RULESET_VERSION
     MAKE_ATL_VER( 4, 0, 5 ), // ENGINE_VERSION
 
     2, /* FOOT_SPEED */
@@ -68,7 +68,7 @@ static GameDefs g = {
 
     10, /* STUDENTS_PER_TEACHER */
     10, /* MAINTENANCE_COST */
-    20, /* LEADER_COST */
+    10, /* LEADER_COST */
     33, /* STARVE_PERCENT */
     5020, /* START_MONEY */
     5, /* WORK_FRACTION */
@@ -96,29 +96,29 @@ static GameDefs g = {
 
     50, /* TIMES_REWARD */
 
-    1, // TOWNS_EXIST
-    1, // LEADERS_EXIST
-    1, // SKILL_LIMIT_NONLEADERS
-    0, // MAGE_NONLEADERS
-    1, // RACES_EXIST
-    1, // GATES_EXIST
-    1, // FOOD_ITEMS_EXIST
-    1, // CITY_MONSTERS_EXIST
-    1, // WANDERING_MONSTERS_EXIST
-    1, // LAIR_MONSTERS_EXIST
-    1, // WEATHER_EXISTS
-    1, // OPEN_ENDED
-	0, // CONQUEST
+    0, // TOWNS_EXIST
+    0, // LEADERS_EXIST
+    0, // SKILL_LIMIT_NONLEADERS
+    1, // MAGE_NONLEADERS
+    0, // RACES_EXIST
+    0, // GATES_EXIST
+    0, // FOOD_ITEMS_EXIST
+    0, // CITY_MONSTERS_EXIST
+    0, // WANDERING_MONSTERS_EXIST
+    0, // LAIR_MONSTERS_EXIST
+    0, // WEATHER_EXISTS
+    0, // OPEN_ENDED
+	1, // CONQUEST
 
-    1, // RANDOM_ECONOMY
-    1, // VARIABLE_ECONOMY
+    0, // RANDOM_ECONOMY
+    0, // VARIABLE_ECONOMY
 
-    50, // CITY_MARKET_NORMAL_AMT
-    20, // CITY_MARKET_ADVANCED_AMT
-    50, // CITY_MARKET_TRADE_AMT
+    0, // CITY_MARKET_NORMAL_AMT
+    0, // CITY_MARKET_ADVANCED_AMT
+    0, // CITY_MARKET_TRADE_AMT
 
 	50,	// BASE_MAN_COST
-	1, // LASTORDERS_MAINTAINED_BY_SCRIPTS
+	0, // LASTORDERS_MAINTAINED_BY_SCRIPTS
 	10, // MAX_INACTIVE_TURNS
 
 	// *NOTE* If this is set to 1, you need to make sure the correct
@@ -129,16 +129,16 @@ static GameDefs g = {
 
 	0, // DEFAULT_WORK_ORDER
 
-    GameDefs::FACLIM_FACTION_TYPES, // FACTION_LIMIT_TYPE
+    GameDefs::FACLIM_MAGE_COUNT, // FACTION_LIMIT_TYPE
 
 	GameDefs::WFLIGHT_NONE,	// FLIGHT_OVER_WATER
 
-	1,   // SAFE_START_CITIES
+	0,   // SAFE_START_CITIES
 	120, // AMT_START_CITY_GUARDS
 	0,   // START_CITY_GUARDS_PLATE
 	0,   // START_CITY_MAGES
 
-	0,   // APPRENTICES_EXIST
+	1,   // APPRENTICES_EXIST
 };
 
 GameDefs * Globals = &g;
@@ -531,8 +531,8 @@ ItemType id[] =
     {"elemental","elementals","ELEM",ItemType::CANTGIVE,
      -1,0,-1,0,250,IT_MONSTER,
      50,1,MONSTER_ELEMENTAL,300,0,0,0,-1,0},
-	{"man", "men", "MAN", 0, -1, 0, -1, 0, 10, IT_MAN,
-	 50, 1, MAN_MAN, 15, 0, 0, 0, -1, 0},
+	{"man","men", "MAN",0,-1,0,-1,0,10,IT_MAN,
+	 50,1,MAN_MAN,15,0,0,0,-1,0},
 };
 
 ItemType * ItemDefs = id;
@@ -953,7 +953,7 @@ static ObjectType ot[] =
     {"Tower",10,0,I_STONE,10,1,S_BUILDING,0,1,-1,-1},
     {"Fort",50,0,I_STONE,40,1,S_BUILDING,0,1,-1,-1},
     {"Castle",250,0,I_STONE,160,1,S_BUILDING,0,1,-1,-1},
-    {"Citadel",1250,0,I_STONE,640,1,S_BUILDING,0,1,-1,-1},
+    {"Citadel",1250,0,-1,-1,0,-1,0,1,-1,-1},
     {"Shaft",0,0,-1,-1,0,-1,0,1,-1,-1},
     {"Lair",0,0,-1,-1,0,-1,0,0,I_TRENT,-1},
     {"Ruin",0,0,-1,-1,0,-1,0,0,I_CENTAUR,-1},
@@ -1008,7 +1008,7 @@ static TerrainType td[] = {
     // lairChance, lair1, lair2, lair3, lair4
     //
     {"ocean",0,
-     0,0,0,1,I_FISH,100,20,
+     0,0,0,1,-1,0,0,
      -1,0,0,-1,0,0,
      -1,0,0,-1,0,0,
      -1,-1,-1,-1,-1,
@@ -1018,49 +1018,49 @@ static TerrainType td[] = {
      800,14,40,1,I_HORSE,100,20,
      I_WHORSE,25,5,-1,0,0,
      -1,0,0,-1,0,0,
-     I_PLAINSMAN,I_NOMAD,I_HIGHELF,I_VIKING,I_SEAELF,
+     I_MAN,-1,-1,-1,-1,
      1,I_LION,-1,I_CENTAUR,
      3,O_RUIN,O_CRYPT,-1,-1},
     {"forest", TerrainType::FLYINGMOUNTS,
      400,12,20,2,I_WOOD,100,20,
      I_FUR,100,10,I_HERBS,100,10,
      I_IRONWOOD,25,5,I_YEW,25,5,
-     I_WOODELF,I_VIKING,-1,I_SEAELF,-1,
+     I_MAN,-1,-1,-1,-1,
      2,I_WOLF,I_TRENT,I_KOBOLD,
      3,O_LAIR,O_RUIN,O_CRYPT,-1},
     {"mountain", TerrainType::FLYINGMOUNTS,
      400,12,20,2,I_IRON,100,20,
      I_STONE,100,10,I_MITHRIL,25,5,
      I_ROOTSTONE,25,5,-1,0,0,
-     I_BARBARIAN,I_HILLDWARF,I_ORC,I_VIKING,I_SEAELF,
+     I_MAN,-1,-1,-1,-1,
      2,I_GBEAR,I_ROC,I_OGRE,
      3, O_LAIR, O_RUIN, O_CAVE, O_CRYPT },
     {"swamp", TerrainType::FLYINGMOUNTS,
      200,11,10,2,I_WOOD,100,10,
      I_FLOATER,25,10,I_HERBS,100,10,
      -1,0,0,-1,0,0,
-     I_TRIBESMAN,I_TRIBALELF,-1,I_VIKING,I_SEAELF,
+     I_MAN,-1,-1,-1,-1,
      2,I_CROCODILE,I_BTHING,I_LMEN,
      3, O_LAIR, O_RUIN, O_CRYPT, -1 },
     {"jungle", TerrainType::FLYINGMOUNTS,
      200,11,20,2,I_WOOD,100,10,
      I_HERBS,100,20,-1,0,0,
      -1,0,0,-1,0,0,
-     I_TRIBESMAN,I_TRIBALELF,I_WOODELF,I_SEAELF,-1,
+     I_MAN,-1,-1,-1,-1,
      2,I_ANACONDA,I_KONG,I_WMEN,
      3, O_LAIR, O_RUIN, O_CRYPT, -1 },
     {"desert", TerrainType::RIDINGMOUNTS | TerrainType::FLYINGMOUNTS,
      200,11,10,1,I_IRON,100,10,
      I_STONE,100,10,I_ROOTSTONE,25,5,
      -1,0,0,-1,0,0,
-     I_NOMAD,I_DESERTDWARF,-1,I_SEAELF,I_VIKING,
+     I_MAN,-1,-1,-1,-1,
      2,I_SCORPION,I_SPHINX,I_SANDLING,
      3, O_LAIR, O_RUIN, O_CRYPT, -1 },
     {"tundra", TerrainType::RIDINGMOUNTS | TerrainType::FLYINGMOUNTS,
      200,11,10,2,I_FUR,100,10,
      I_HERBS,100,10,-1,0,0,
      -1,0,0,-1,0,0,
-     I_ESKIMO,I_ICEDWARF,-1,I_SEAELF,I_VIKING,
+     I_MAN,-1,-1,-1,-1,
      2,I_PBEAR,I_IWURM,I_YETI,
      3, O_LAIR, O_RUIN, O_CRYPT, -1 },
     {"cavern", TerrainType::FLYINGMOUNTS,
@@ -1091,9 +1091,9 @@ static TerrainType td[] = {
      -1,-1,-1,-1,-1,
      0,-1,-1,-1,
      0,-1,-1,-1,-1},
-	// Terrain types for the islands
+	// Terrain types for the conquest islands
 	{"plain", TerrainType::RIDINGMOUNTS | TerrainType::FLYINGMOUNTS,
-	 800,14,40,1,I_HORSE,100,20,
+     800,14,40,1,I_HORSE,100,20,
 	 -1,0,0,-1,0,0,
 	 -1,0,0,-1,0,0,
 	 I_MAN,-1,-1,-1,-1,

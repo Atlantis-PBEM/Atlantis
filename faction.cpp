@@ -27,6 +27,7 @@
 // ----        ------          --------
 // 2000/MAR/14 Larry Stanbery  Modified the elimiation message.
 // 2000/MAR/14 Davis Kulis     Added a new reporting Template.
+// 2001/Feb/18 Joseph Traub    Added Apprentices concept from Lacandon Conquest
 #include "rules.h"
 #include "game.h"
 
@@ -371,6 +372,10 @@ void Faction::WriteReport( Areport *f, Game *pGame )
     {
         f->PutStr( AString("Mages: ") + nummages + " (" + 
                    pGame->AllowedMages( this ) + ")");
+		if(Globals->APPRENTICES_EXIST) {
+			f->PutStr( AString("Apprentices: ") + numapprentices + " (" +
+					pGame->AllowedApprentices(this)+ ")");
+		}
     }
     else if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES )
     {
@@ -380,6 +385,10 @@ void Faction::WriteReport( Areport *f, Game *pGame )
                    pGame->AllowedTrades( this ) + ")");
         f->PutStr( AString("Mages: ") + nummages + " (" + 
                    pGame->AllowedMages( this ) + ")");
+		if(Globals->APPRENTICES_EXIST) {
+			f->PutStr( AString("Apprentices: ") + numapprentices + " (" +
+					pGame->AllowedApprentices(this)+ ")");
+		}
     }
     f->PutStr("");
   
