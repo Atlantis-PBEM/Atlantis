@@ -311,11 +311,12 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 
 	forlist ((&units)) {
 		Unit *u = (Unit *) elem;
+		int isally = fac->GetAttitude(u->faction->num);
 		if (u->faction == fac) {
-			u->WriteReport(f, -1, 1, 1, 1);
+			u->WriteReport(f, -1, 1, 1, 1, isally);
 		} else {
 			if(present) {
-				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY);
+				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY, isally);
 			} else {
 				if(((type == O_DUMMY) &&
 					(Globals->TRANSIT_REPORT &
@@ -327,7 +328,7 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 					(Globals->TRANSIT_REPORT &
 					 GameDefs::REPORT_SHOW_GUARDS))) {
 					u->WriteReport(f, passobs, passtrue, passdetfac,
-							type != O_DUMMY);
+							type != O_DUMMY, isally);
 				}
 			}
 		}

@@ -465,7 +465,7 @@ void Soldier::Dead()
 Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 {
 	int tacspell = 0;
-	Unit * tactitian = ldr;
+	Unit * tactician = ldr;
 
 	leader = ldr;
 	round = 0;
@@ -484,19 +484,19 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			int temp = u->GetAttribute("tactics");
 			if (temp > tac) {
 				tac = temp;
-				tactitian = u;
+				tactician = u;
 			}
 		}
 	}
 	// If TACTICS_NEEDS_WAR is enabled, we don't want to push leaders 
 	// from tact-4 to tact-5!
-	if (Globals->TACTICS_NEEDS_WAR) {
-		int currskill = tactitian->skills.GetDays(S_TACTICS)/tactitian->GetMen();
+	if (Globals->TACTICS_NEEDS_WAR && (tactician->skills.Num() != 0)) {
+		int currskill = tactician->skills.GetDays(S_TACTICS)/tactician->GetMen();
 		if (currskill < 450 - Globals->SKILL_PRACTICE_AMOUNT) {
-			tactitian->PracticeAttribute("tactics");
+			tactician->PracticeAttribute("tactics");
 		}
 	} else { // Only Globals->TACTICS_NEEDS_WAR == 0
-		tactitian->PracticeAttribute("tactics");
+		tactician->PracticeAttribute("tactics");
 	}
 	soldiers = new SoldierPtr[count];
 	int x = 0;

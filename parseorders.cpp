@@ -656,6 +656,20 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
+	if (*token == "allyequals") {
+		delete token;
+		u->faction->Event("Allies will now have an equals sign in front.");
+		u->faction->allyequals = 1;
+		return;
+	}
+
+	if (*token == "noallyequals") {
+		delete token;
+		u->faction->Event("Allies will now have a minus sign in front.");
+		u->faction->allyequals = 0;
+		return;
+	}
+
 	if (*token == "template") {
 		delete token;
 

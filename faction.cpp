@@ -126,6 +126,7 @@ Faction::Faction()
 	address = 0;
 	password = 0;
 	times = 0;
+	allyequals = 0;
 	temformat = TEMPLATE_OFF;
 	quit = 0;
 	defaultattitude = A_NEUTRAL;
@@ -148,6 +149,7 @@ Faction::Faction(int n)
 	address = new AString("NoAddress");
 	password = new AString("none");
 	times = 1;
+	allyequals = 0;
 	temformat = TEMPLATE_LONG;
 	defaultattitude = A_NEUTRAL;
 	quit = 0;
@@ -180,6 +182,7 @@ void Faction::Writeout(Aoutfile *f)
 	f->PutStr(*address);
 	f->PutStr(*password);
 	f->PutInt(times);
+	f->PutInt(allyequals);
 	f->PutInt(temformat);
 
 	skills.Writeout(f);
@@ -205,6 +208,7 @@ void Faction::Readin(Ainfile *f, ATL_VER v)
 	address = f->GetStr();
 	password = f->GetStr();
 	times = f->GetInt();
+	allyequals = f->GetInt();
 	temformat = f->GetInt();
 
 	skills.Readin(f);

@@ -351,7 +351,7 @@ AString Unit::SpoilsReport() {
 }
 
 void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
-			   int autosee)
+			   int autosee, int isally)
 {
 	int stealth = GetAttribute("stealth");
 	if (obs==-1) {
@@ -402,7 +402,11 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 	if (obs == 2) {
 		temp += AString("* ") + *name;
 	} else {
-		temp += AString("- ") + *name;
+		if (faction->allyequals == 1 && isally) {
+			temp += AString("= ") +*name;
+		} else {
+			temp += AString("- ") + *name;
+		}
 	}
 
 	if (guard == GUARD_GUARD) temp += ", on guard";

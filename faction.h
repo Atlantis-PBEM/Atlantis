@@ -177,6 +177,7 @@ public:
     AString * address;
     AString * password;
     int times;
+    int allyequals;
     int temformat;
     char exists;
     int quit;
