@@ -441,9 +441,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"can obtain income by taxing or pillaging. Faction Points spent "
 			"on Trade determine the number of regions in which a faction "
 			"may conduct trade activity. Trade activity includes producing "
-			"goods, building ships and buildings, and buying and selling "
-			"trade items. Faction Points spent on Magic determines the "
-			"number of mages ";
+			"goods, building ships and buildings, and buying trade items. "
+			"Faction Points spent on Magic determines the number of mages ";
 		if(Globals->APPRENTICES_EXIST)
 			temp += "and apprentices ";
 		temp += "the faction may have. (More information on all of the "
