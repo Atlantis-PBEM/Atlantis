@@ -3069,7 +3069,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	temp += "Also, all non-avoiding units located in the target region "
 		"belonging to factions allied with the defending unit will join "
-		"in on the defending side.";
+		"in on the defending side";
+	if(Globals->ALLIES_NOAID)
+		temp += ", provided that at least one of the units belonging to "
+		    "the defending faction is not set to noaid.";
+	else
+		temp += ".";
 	f.Paragraph(temp);
 	temp = "Units in adjacent regions can also become involved.  This is "
 		"the exception to the general rule that you cannot interact with "

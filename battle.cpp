@@ -402,7 +402,8 @@ void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
 			if (u->IsAlive()) {
 				if (u->faction == t->faction ||
 					(u->guard != GUARD_AVOID &&
-					 u->GetAttitude(r,t) == A_ALLY)) {
+					 u->GetAttitude(r,t) == A_ALLY &&
+					 !Globals->ALLIES_NOAID)) {
 					if (!GetFaction2(&facs,u->faction->num)) {
 						FactionPtr * p = new FactionPtr;
 						p->ptr = u->faction;

@@ -223,7 +223,8 @@ static GameDefs g = {
 	3, // DELAY_MORTALITY
 	6, // DELAY_GROWTH
 	100, // TOWN_DEVELOPMENT
-	1, //TACTICS_NEEDS_WAR
+	1, // TACTICS_NEEDS_WAR
+	1, // ALLIES_NOAID
 };
 
 GameDefs *Globals = &g;
