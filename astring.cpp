@@ -327,6 +327,8 @@ int AString::value()
 	int ret = 0;
 	while ((str[place] >= '0') && (str[place] <= '9')) {
 		ret *= 10;
+		// Fix integer overflow to negative.
+		if (ret < 0) return 0;
 		ret += (str[place++] - '0');
 	}
 	return ret;

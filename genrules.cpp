@@ -77,7 +77,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 
 	f.PutStr("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 "
-			"Transitional//EN\">");
+			"Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">");
 	f.Enclose(1, "HTML");
 	f.Enclose(1, "HEAD");
 	f.PutStr("<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; "

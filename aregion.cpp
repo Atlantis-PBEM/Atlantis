@@ -444,8 +444,8 @@ void ARegion::SetupCityMarket()
 							}
 
 							Market * m = new Market (M_BUY, i, price, 0,
-									1000+population, 4000+population, 0,
-									50 + getrandom(50));
+									1000+population, 4000+population,
+									0, amt);
 							markets.Add(m);
 						}
 					} else {

@@ -69,13 +69,15 @@ void Game::DefaultWorkOrder()
 			Object * o = (Object *) elem;
 			forlist(&o->units) {
 				Unit * u = (Unit *) elem;
-				if (!(u->monthorders) && !u->faction->IsNPC()) {
-					if(u->GetFlag(FLAG_AUTOTAX) &&
-					   Globals->TAX_PILLAGE_MONTH_LONG && u->Taxers()) {
-						u->taxing = TAX_AUTO;
-					} else {
-						ProcessWorkOrder(u, 0);
-					}
+				if (u->monthorders || u->faction->IsNPC() ||
+						(Globals->TAX_PILLAGE_MONTH_LONG &&
+						 u->taxing != TAX_NONE))
+					continue;
+				if(u->GetFlag(FLAG_AUTOTAX) &&
+						(Globals->TAX_PILLAGE_MONTH_LONG && u->Taxers())) {
+					u->taxing = TAX_AUTO;
+				} else {
+					if(Globals->DEFAULT_WORK_ORDER) ProcessWorkOrder(u, 0);
 				}
 			}
 		}
@@ -1488,8 +1490,7 @@ void Game::ReadOrders()
                 ParseOrders( fac->num, &file, 0 );
                 file.Close();
             }
-			if(Globals->DEFAULT_WORK_ORDER)
-				DefaultWorkOrder();
+			DefaultWorkOrder();
         }
     }
 }

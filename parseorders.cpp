@@ -1099,6 +1099,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	if(!pCheck) {
 		int m = CountMages(u->faction);
+		int a = CountApprentices(u->faction);
 
 		for(i = 0; i < NFACTYPES; i++) {
 			u->faction->type[i] = factype[i];
@@ -1107,6 +1108,16 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		if(m > AllowedMages(u->faction)) {
 			u->Error(AString("FACTION: Too many mages to change to that "
 							 "faction type."));
+
+			for(i = 0; i < NFACTYPES; i++) {
+				u->faction->type[ i ] = oldfactype[ i ];
+			}
+
+			return;
+		}
+		if(a > AllowedApprentices(u->faction)) {
+			u->Error(AString("FACTION: Too many apprentices to change "
+						"to that faction type."));
 
 			for(i = 0; i < NFACTYPES; i++) {
 				u->faction->type[ i ] = oldfactype[ i ];
@@ -2261,7 +2272,7 @@ void Game::ProcessNameOrder(Unit *unit,AString * o, OrdersCheck *pCheck)
 					break;
 			}
 			if(Globals->CITY_RENAME_COST) {
-				cost = towntype+1* Globals->CITY_RENAME_COST;
+				cost = (towntype+1)* Globals->CITY_RENAME_COST;
 			}
 			int ok = 0;
 			switch(towntype) {
