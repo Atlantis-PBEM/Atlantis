@@ -393,6 +393,10 @@ AString *ShowSkill::Report(void)
 				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
 					*str += "Production can be increased by using axes.";
 				}
+				*str += ". A magic crossbow fires as if the target has "
+					   "a defensive skill of 0, and fires one shot"
+					   "per round.  It takes one unit of ironwood to "
+					   "produce a magic crossbow, which weighs one unit.";
 			} else if(level == 5) {
 				if(ItemDefs[I_YEW].flags & ItemType::DISABLED) break;
 				if(ItemDefs[I_DOUBLEBOW].flags & ItemType::DISABLED) break;
