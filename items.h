@@ -104,7 +104,6 @@ class ItemType
 		int baseprice;
 		int combat;
 		int index;
-		int battleindex;
 
 		int walk;
 		int ride;
@@ -173,6 +172,8 @@ enum {
 class WeaponType
 {
 	public:
+		char *abbr;
+
 		enum {
 			NEEDSKILL = 0x1, // No bonus or use unless skilled
 			ALWAYSREADY = 0x2, // Ignore the 50% chance to attack
@@ -271,6 +272,8 @@ extern MountType *MountDefs;
 class BattleItemType
 {
 	public:
+		char *abbr;
+
 		enum {
 			MAGEONLY = 0x1,
 			SPECIAL = 0x2,
@@ -291,6 +294,8 @@ int ParseEnabledItem(AString *);
 int ParseTransportableItem(AString *);
 int ParseBattleItem(int);
 int LookupItem(AString *);
+
+BattleItemType *findBattleItem(char *);
 
 AString ItemString(int type, int num);
 AString *ItemDescription(int item, int full);

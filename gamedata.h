@@ -419,23 +419,6 @@ enum {
 };
 
 //
-// Other battle items
-//
-// LLS
-// Changed order of battle items to match Runesword
-enum {
-	BATTLE_NONE,
-	BATTLE_RUNESWORD,
-	BATTLE_STAFFOFL,
-	BATTLE_STAFFOFF,
-	BATTLE_FSWORD,
-	BATTLE_AOFI,
-	BATTLE_AMULETOFP,
-	BATTLE_SHIELDSTONE,
-	NUMBATTLEITEMS
-};
-
-//
 // Types of skills.
 //
 enum {

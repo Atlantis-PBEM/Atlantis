@@ -1483,14 +1483,14 @@ int Unit::Taxers()
 
 		forlist (&items) {
 			Item *pItem = (Item *) elem;
+			BattleItemType *pBat = NULL;
 
 			if ((ItemDefs[pItem->type].type & IT_BATTLE) &&
-				(BattleItemDefs[ItemDefs[pItem->type].battleindex].flags & BattleItemType::SPECIAL)) {
+				((pBat = findBattleItem(ItemDefs[pItem->type].abr)) != NULL) &&
+				(pBat->flags & BattleItemType::SPECIAL)) {
 				// Only consider offensive items
-				if ((Globals->WHO_CAN_TAX &
-							GameDefs::TAX_USABLE_BATTLE_ITEM) &&
-					(!(BattleItemDefs[ItemDefs[pItem->type].battleindex].flags &
-					   BattleItemType::MAGEONLY) ||
+				if ((Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM) &&
+					(!(pBat->flags & BattleItemType::MAGEONLY) ||
 					 type == U_MAGE || type == U_APPRENTICE)) {
 					numUsableBattle += pItem->num;
 					numBattle += pItem->num;
@@ -1672,12 +1672,13 @@ int Unit::GetBattleItem(int index)
 		Item *pItem = (Item *) elem;
 		if(!pItem->num) continue;
 		int item = pItem->type;
-		if((ItemDefs[item].type&IT_BATTLE) && (ItemDefs[item].battleindex==index)) {
-			// Exclude weapons.  They will be handled later.
-			if (ItemDefs[item].type & IT_WEAPON) continue;
-			items.SetNum(item, pItem->num - 1);
-			return item;
-		}
+		if ((ItemDefs[item].type & IT_BATTLE) &&
+				(findBattleItem(ItemDefs[item].abr) == NULL))
+			continue;
+		// Exclude weapons.  They will be handled later.
+		if (ItemDefs[item].type & IT_WEAPON) continue;
+		items.SetNum(item, pItem->num - 1);
+		return item;
 	}
 	return -1;
 }

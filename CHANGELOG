@@ -646,10 +646,17 @@ Changes from 4.0.10 -> 5.0.0
    -- GROW_RACES option to disperse races across an area at world creation
       rather than set them up hex-by-hex. This is tuneable by adjusting the
       gamedef value.
-   -- PLAYER_ECONOMY: very basic ruleset for the player-run economy are in place.
-      Enabling this means that population grows or dies according to given
-      space (habitat) and other factors and that the economy is determined by
-      a region's development parameter. Recruitment reduces the population while
-      give 0 orders increase it (no check for races yet). This is not yet
-      reflected in the rules.
-
+   -- PLAYER_ECONOMY: very basic ruleset for the player-run economy are in
+      place.  Enabling this means that population grows or dies according to
+      given space (habitat) and other factors and that the economy is
+      determined by a region's development parameter. Recruitment reduces
+      the population while give 0 orders increase it (no check for races
+      yet). This is not yet reflected in the rules.
+   -- Battle items are now looked up by item abbreviation.  The
+      BATTLE_ITEMs enumeration is completely gone.  1 down 5 zillion to
+      go.  Once all of the hardcoded references to objects via enum are
+      gone, it should be easier to pull all item data out into files and
+      load them, allowing items (and eventually skills and terrains, etc) to
+      be game specific bits easily.  NOTE -- the order of items is still
+      used for figuring 'best'.  We need a ranking system (for weapons, armor
+      and battle items).

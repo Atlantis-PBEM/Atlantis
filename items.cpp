@@ -29,6 +29,17 @@
 #include "object.h"
 #include "gamedata.h"
 
+BattleItemType *findBattleItem(char *abbr)
+{
+	if (abbr == NULL) return NULL;
+	for (int i = 0; i < NUMBATTLEITEMS; i++) {
+		if (BattleItemDefs[i].abbr == NULL) continue;
+		if (AString(abbr) == BattleItemDefs[i].abbr)
+			return &BattleItemDefs[i];
+	}
+	return NULL;
+}
+
 static AString AttType(int atype)
 {
 	switch(atype) {

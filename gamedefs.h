@@ -57,6 +57,8 @@ extern int allowedTradesSize;
 extern int *allowedQuartermasters;
 extern int allowedQuartermastersSize;
 
+extern int NUMBATTLEITEMS;
+
 class GameDefs {
 public:
 	char *RULESET_NAME;
