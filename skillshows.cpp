@@ -372,7 +372,7 @@ AString *ShowSkill::Report(Faction *f)
 						"calculation. Attempting to view across different "
 						"levels increases the distance by ";
 					*str += range->crossLevelPenalty;
-					*str += ". ";
+					*str += " per level difference. ";
 					*str += "To use this skill, CAST Farsight REGION <x> <y> "
 						"<z> where <x>, <y>, and <z> are the coordinates of "
 						"the region that you wish to view. If you omit the "
@@ -456,7 +456,7 @@ AString *ShowSkill::Report(Faction *f)
 						"calculation. Attempting to view across different "
 						"levels increases the distance by ";
 					*str += range->crossLevelPenalty;
-					*str += ". ";
+					*str += " per level difference. ";
 					*str += "To use this skill, CAST Teleportation REGION "
 						"<x> <y> <z> where <x>, <y>, and <z> are the "
 						"coordinates of the region that you wish to "
@@ -517,7 +517,7 @@ AString *ShowSkill::Report(Faction *f)
 						"calculation. Attempting to view across different "
 						"levels increases the distance by ";
 					*str += range->crossLevelPenalty;
-					*str += ". ";
+					*str += " per level difference. ";
 					*str += "To use this skill, CAST Weather_Lore REGION "
 						"<x> <y> <z> where <x>, <y>, and <z> are the "
 						"coordinates of the region where you wish to "
@@ -615,7 +615,7 @@ AString *ShowSkill::Report(Faction *f)
 							"calculation. Attempting to view across "
 							"different levels increases the distance by ";
 						*str += range->crossLevelPenalty;
-						*str += ". ";
+						*str += " per level difference. ";
 						*str += "To use this skill, CAST Clear_Skies REGION "
 							"<x> <y> <z> where <x>, <y>, and <z> are the "
 							"coordinates of the region where you wish to "

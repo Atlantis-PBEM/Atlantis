@@ -541,3 +541,8 @@ Changes from 4.0.9 -> 4.0.10
    -- Added unit weight/capacity patch from Ales Privetivy <ales@ucw.cz>
    -- Added patch from Jan Rietema <ravanrooke@yahoo.de> to conditionally
       prevent ships from sailing through single-hex land-masses.
+   -- Fixed a bug in the cross-level teleport stuff (if allowed) which caused
+      the penalty to be a flat value rather than per difference in level.
+   -- Fixed a bug in teleport and such which allowed entry into and out of
+      the Abyss (and viewing it via farsight and such).  Bad JT, no biscuit.
+      Thanks AZ for pointing it out.

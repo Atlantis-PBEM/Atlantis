@@ -3388,6 +3388,14 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty)
 			two->zloc == ARegionArray::LEVEL_NEXUS)
 		return 10000000;
 
+	if (Globals->ABYSS_LEVEL) {
+		/* make sure you cannot teleport into or from the abyss */
+		int ablevel = Globals->UNDERWORLD_LEVELS +
+		    Globals->UNDERDEEP_LEVELS + 2;
+		if (one->zloc == ablevel || two->zloc == ablevel)
+			return 10000000;
+	}
+
 	int one_x, one_y, two_x, two_y;
 	int maxy;
 	ARegionArray *pArr=pRegionArrays[ARegionArray::LEVEL_SURFACE];
@@ -3414,7 +3422,12 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty)
 
 	if(maxy > maxx) maxx = (maxx+maxy)/2;
 
-	if(one->zloc != two->zloc) maxx += penalty;
+	if(one->zloc != two->zloc) {
+		int zdist = (one->zloc - two->zloc);
+		if ((two->zloc - one->zloc) > zdist)
+			zdist = two->zloc - one->zloc;
+		maxx += (penalty * zdist);
+	}
 
 	return maxx;
 }
