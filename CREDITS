@@ -11,8 +11,9 @@ James Riechel
     Various changes for his Unlimited Atlantis code
 Stefan Morrell
     The patch for Apprentices/revamping Lacandon Conquest
-Steve
-    Pointed out a but in the easier underworld code.
+Stephen Baillie
+    Pointed out bugs in the easier underworld code and the improved
+    farsight code.
 Jon Bagshaw
     Working with Stefan on Lacandon Conquest
 Tom Alsen (aka Tzarg)
@@ -23,7 +24,7 @@ Georg Gottschalk
 	Bugfixes and suggestions and lots of ideas for Ceran.
 Andrew Zhilenko
     Small bug fixes and code cleanup
-Terho T Uotila
+Terho Uotila
     A couple of ideas and items
 Paul Mehrer
 	Submitted patch to allow limiting the number of mages which can study

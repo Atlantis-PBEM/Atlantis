@@ -1486,11 +1486,12 @@ int ARegion::CanMakeAdv(Faction * fac,int item)
 {
 
 	if(Globals->IMPROVED_FARSIGHT) {
-		Farsight *farsight = GetFarsight(&farsees, fac);
-		if(farsight && farsight->unit) {
-			if(farsight->unit->GetSkill(ItemDefs[item].pSkill) >=
-					ItemDefs[item].pLevel) {
-				return 1;
+		forlist(&farsees) {
+			Farsight *f = (Farsight *)elem;
+			if(f && f->faction == fac && f->unit) {
+				if(f->unit->GetSkill(ItemDefs[item].pSkill) >=
+							ItemDefs[item].pLevel)
+					return 1;
 			}
 		}
 	}
@@ -1705,9 +1706,14 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 			int sawgate = 0;
 			if(fac->IsNPC())
 				sawgate = 1;
-			if(Globals->IMPROVED_FARSIGHT && farsight && farsight->unit) {
-				if(farsight->unit->GetSkill(S_GATE_LORE)) {
-					sawgate = 1;
+			if(Globals->IMPROVED_FARSIGHT && farsight) {
+				forlist(&farsees) {
+					Farsight *watcher = (Farsight *)elem;
+					if(watcher && watcher->faction == fac && watcher->unit) {
+						if(watcher->unit->GetSkill(S_GATE_LORE)) {
+							sawgate = 1;
+						}
+					}
 				}
 			}
 			forlist(&objects) {
@@ -1743,9 +1749,15 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 				}
 			}
 		}
-		if(Globals->IMPROVED_FARSIGHT && farsight && farsight->unit &&
-				farsight->unit->GetSkill(S_MIND_READING) > 2) {
-			detfac = 1;
+		if(Globals->IMPROVED_FARSIGHT && farsight) {
+			forlist(&farsees) {
+				Farsight *watcher = (Farsight *)elem;
+				if(watcher && watcher->faction == fac && watcher->unit) {
+					if(watcher->unit->GetSkill(S_MIND_READING) > 2) {
+						detfac = 1;
+					}
+				}
+			}
 		}
 
 		{
@@ -1800,9 +1812,12 @@ int ARegion::GetTrueSight(Faction *f)
 	int truesight = 0;
 
 	if(Globals->IMPROVED_FARSIGHT) {
-		Farsight *farsight = GetFarsight(&farsees, f);
-		if(farsight && farsight->unit) {
-			truesight = farsight->unit->GetSkill(S_TRUE_SEEING);
+		forlist(&farsees) {
+			Farsight *farsight = (Farsight *)elem;
+			if(farsight && farsight->faction == f && farsight->unit) {
+				int t = farsight->unit->GetSkill(S_TRUE_SEEING);
+				if(t > truesight) truesight = t;
+			}
 		}
 	}
 
@@ -1824,9 +1839,12 @@ int ARegion::GetObservation(Faction * f)
 	int obs = 0;
 
 	if(Globals->IMPROVED_FARSIGHT) {
-		Farsight *farsight = GetFarsight(&farsees, f);
-		if(farsight && farsight->unit) {
-			obs = farsight->unit->GetSkill(S_OBSERVATION);
+		forlist(&farsees) {
+			Farsight *farsight = (Farsight *)elem;
+			if(farsight && farsight->faction == f && farsight->unit) {
+				int o = farsight->unit->GetSkill(S_OBSERVATION);
+				if(o > obs) obs = o;
+			}
 		}
 	}
 

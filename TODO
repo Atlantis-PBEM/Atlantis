@@ -64,6 +64,8 @@
    -- Add a 'MAINTAINONLY' flag to buildings so that a building can decay and
       be kept up, but cannot be constructed. (requested for Ceran)
    -- Consider multiple levels of guard
+   -- Consider having buildings which require specific items/skills to enter
+   -- Add ability to set stances versus specific units, not just factions
 
 TODO for 5.0.0
 ----------------------------------------------
