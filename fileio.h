@@ -39,70 +39,96 @@ using namespace std;
 #endif
 
 class Ainfile {
-public:
-  Ainfile();
-  ~Ainfile();
-	
-  void Open(const AString &);
-  int OpenByName(const AString &);
-  void Close();
-  
-  AString * GetStr();
-  AString * GetStrNoSkip();
-  int GetInt();
-  
-  ifstream * file;
+	public:
+		Ainfile();
+		~Ainfile();
+
+		void Open(const AString &);
+		int OpenByName(const AString &);
+		void Close();
+
+		AString * GetStr();
+		AString * GetStrNoSkip();
+		int GetInt();
+
+		ifstream * file;
 };
 
 class Aoutfile {
-public:
-  Aoutfile();
-  ~Aoutfile();
-  
-  void Open(const AString &);
-  int OpenByName(const AString &);
-  void Close();
-	
-  void PutStr(char *);
-  void PutStr(const AString &);
-  void PutInt(int);
-  
-  ofstream * file;
+	public:
+		Aoutfile();
+		~Aoutfile();
+
+		void Open(const AString &);
+		int OpenByName(const AString &);
+		void Close();
+
+		void PutStr(char *);
+		void PutStr(const AString &);
+		void PutInt(int);
+
+		ofstream * file;
 };
 
 class Aorders {
-public:
-  Aorders();
-  ~Aorders();
-  
-  void Open(const AString &);
-  int OpenByName(const AString &);
-  void Close();
-  
-  AString * GetLine();
-  
-  ifstream * file;
+	public:
+		Aorders();
+		~Aorders();
+
+		void Open(const AString &);
+		int OpenByName(const AString &);
+		void Close();
+
+		AString * GetLine();
+
+		ifstream * file;
 };
 
 class Areport {
-public:
-  Areport();
-  ~Areport();
-	
-  void Open(const AString &);
-  int OpenByName(const AString &);
-  void Close();
-  
-  void AddTab();
-  void DropTab();
-  void ClearTab();
-  
-  void PutStr(const AString &,int = 0);
-  void PutNoFormat(const AString &);
-  void EndLine();
-	
-  ofstream * file;
-  int tabs;
+	public:
+		Areport();
+		~Areport();
+
+		void Open(const AString &);
+		int OpenByName(const AString &);
+		void Close();
+
+		void AddTab();
+		void DropTab();
+		void ClearTab();
+
+		void PutStr(const AString &,int = 0);
+		void PutNoFormat(const AString &);
+		void EndLine();
+
+		ofstream * file;
+		int tabs;
 };
 
+class Arules {
+	public:
+		Arules();
+		~Arules();
+
+		void Open(const AString &);
+		int OpenByName(const AString &);
+		void Close();
+
+		void AddTab();
+		void DropTab();
+		void ClearTab();
+
+		void PutStr(const AString &);
+		void PutNoFormat(const AString &);
+		void EndLine();
+
+		void Enclose(int flag, const AString &tag);
+		void TagText(const AString &tag, const AString &text);
+		void Example(const AString &header, const AString &examp);
+		AString Link(const AString &href, const AString &text);
+		AString LinkRef(const AString &name);
+
+		ofstream * file;
+		int tabs;
+};
 #endif

@@ -76,7 +76,6 @@ public:
 	
     int STUDENTS_PER_TEACHER;
 
-
     int MAINTENANCE_COST;
     int LEADER_COST;
 
@@ -130,9 +129,6 @@ public:
   
     int FACTION_POINTS;
 
-    int MAX_AC_X;
-    int MAX_AC_Y;
-
     int TURN_COST;
 
     int TIMES_REWARD;
@@ -149,6 +145,8 @@ public:
     int LAIR_MONSTERS_EXIST;
     int WEATHER_EXISTS;
     int OPEN_ENDED;
+	int NEXUS_EXISTS;
+	int CONQUEST_GAME;
 
     //
     // RANDOM_ECONOMY determines whether the economy for different regions

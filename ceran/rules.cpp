@@ -76,9 +76,6 @@ static GameDefs g = {
 	
     5, /* FACTION_POINTS */
 
-    64, /* MAX_AC_X */
-    64, /* MAX_AC_Y */
-
     100, /* TURN_COST */
 
     60, /* TIMES_REWARD */
@@ -95,6 +92,8 @@ static GameDefs g = {
     1, // LAIR_MONSTERS_EXIST
     1, // WEATHER_EXISTS
     1, // OPEN_ENDED
+	1, // NEXUS_EXISTS
+	0, // CONQUEST_GAME
 
     1, // RANDOM_ECONOMY
     1, // VARIABLE_ECONOMY

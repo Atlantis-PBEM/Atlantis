@@ -41,6 +41,9 @@ typedef unsigned int ATL_VER;
 AString( (int) ATL_VER_PATCH( x ) ) ) + \
 ( ( ATL_VER_MINOR( x ) % 2 ) ? "" : " (beta)" )
 
+#define ATL_VER_STR( x ) AString((int)ATL_VER_MAJOR(x)) + \
+		"." + ((int)ATL_VER_MINOR(x)) + "." + (int)ATL_VER_PATCH(x)
+
 //
 // Some bitfield functions
 //

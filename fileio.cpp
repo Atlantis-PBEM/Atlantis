@@ -80,6 +80,16 @@ Areport::~Areport()
 	delete file;
 }
 
+Arules::Arules()
+{
+	file = new ofstream;
+}
+
+Arules::~Arules()
+{
+	delete file;
+}
+
 void Aoutfile::Open(const AString &s)
 {
 	while(!(file->rdbuf()->is_open())) {
@@ -292,4 +302,109 @@ void Areport::PutNoFormat(const AString &s)
 void Areport::EndLine()
 {
 	*file << F_ENDLINE;
+}
+
+void Arules::Open(const AString &s)
+{
+	while(!(file->rdbuf()->is_open())) {
+		AString *name = getfilename(s);
+		file->open(name->Str(),ios::out|ios::ate);
+        delete name;
+		// Handle a broke ios::ate implementation on some boxes
+		file->seekp(0, ios::end);
+		if(file->tellp()!=0) file->close();
+    }
+    tabs = 0;
+}
+
+int Arules::OpenByName(const AString &s)
+{
+	AString temp = s;
+	file->open(temp.Str(), ios::out|ios::trunc);
+    if (!file->rdbuf()->is_open()) return -1;
+	// Handle a broke ios::ate implementation on some boxes
+	file->seekp(0, ios::end);
+	if(file->tellp() != 0) {
+		file->close();
+		return -1;
+	}
+    tabs = 0;
+    return 0;
+}
+
+void Arules::AddTab()
+{
+	tabs++;
+}
+
+void Arules::DropTab()
+{
+	if (tabs > 0) tabs--;
+}
+
+void Arules::ClearTab()
+{
+	tabs = 0;
+}
+
+void Arules::PutStr(const AString &s)
+{
+	AString temp;
+	for (int i=0; i<tabs; i++) temp += "  ";
+	temp += s;
+	AString *temp2 = temp.Trunc(78);
+	*file << temp << F_ENDLINE;
+	while (temp2) {
+		temp = "";
+		for (int i=0; i<tabs; i++) temp += "  ";
+		temp += *temp2;
+		delete temp2;
+		temp2 = temp.Trunc(78);
+		*file << temp << F_ENDLINE;
+	}
+}
+
+void Arules::PutNoFormat(const AString &s)
+{
+	*file << s << F_ENDLINE;
+}
+
+void Arules::EndLine()
+{
+	*file << F_ENDLINE;
+}
+
+void Arules::Enclose(int flag, const AString &tag)
+{
+	if(flag) {
+		PutStr(AString("<") + tag + ">");
+		AddTab();
+	} else {
+		DropTab();
+		PutStr(AString("</")+ tag + ">");
+	}
+}
+
+void Arules::TagText(const AString &tag, const AString &text)
+{
+	PutStr(AString("<")+tag+">"+ text + "</" + tag + ">");
+}
+
+void Arules::Example(const AString &header, const AString &examp)
+{
+	PutStr(header);
+	PutStr("<BR>");
+	Enclose(1, "PRE");
+	PutStr(examp);
+	Enclose(0, "PRE");
+}
+
+AString Arules::Link(const AString &href, const AString &text)
+{
+	return (AString("<A HREF=\"")+href+"\">"+text+"</A>");
+}
+
+AString Arules::LinkRef(const AString &name)
+{
+	return (AString("<A NAME=\"")+name+"\"></A>");
 }

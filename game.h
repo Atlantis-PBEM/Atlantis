@@ -81,6 +81,7 @@ public:
     int ViewMap(const AString &,const AString &);
     // LLS
     void UnitFactionMap();
+	int GenRules(const AString &, const AString &, const AString &);
 	int DoOrdersCheck( const AString &strOrders, const AString &strCheck );
 
     Faction *AddFaction();
