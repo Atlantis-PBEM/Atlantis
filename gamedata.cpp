@@ -2640,8 +2640,7 @@ static ObjectType ot[] =
 	 0,0,0,
 	 -1,-1},
 	{"Magical Fortress",
-	 ObjectType::NEVERDECAY | ObjectType::CANENTER | ObjectType::NOEARTHQUAKE |
-		 ObjectType::CANMODIFY,
+	 ObjectType::NEVERDECAY | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 250,0,0,60,
 	 I_ROOTSTONE,160,S_BUILDING,3,
 	 0,0,0,
@@ -2798,8 +2797,7 @@ static ObjectType ot[] =
 	 50,5,2,
 	 I_DRAGON,-1},
 	{"Magical Tower",
-	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::NOEARTHQUAKE |
-		 ObjectType::CANMODIFY,
+	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 10,0,0,10,
 	 I_ROOTSTONE,10,S_BUILDING,2,
 	 5,1,2,

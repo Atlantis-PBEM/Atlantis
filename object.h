@@ -46,7 +46,6 @@ class ObjectType {
 			NOMONSTERGROWTH	= 0x002,
 			NEVERDECAY		= 0x004,
 			CANENTER		= 0x008,
-			NOEARTHQUAKE	= 0x010,
 			CANMODIFY		= 0x020,
 		};
 		int flags;
