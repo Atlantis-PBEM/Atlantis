@@ -65,90 +65,136 @@ struct SkillDepend
 
 class SkillType
 {
-public:
-    char * name;
-    char * abbr;
-    int cost;
-    
-    enum {
-        MAGIC = 0x1,
-        COMBAT = 0x2,
-        CAST = 0x4,
-        FOUNDATION = 0x8,
-		APPRENTICE = 0x10,
-		DISABLED = 0x20,
-		SLOWSTUDY = 0x40,
-    };
-    int flags;
+	public:
+		char * name;
+		char * abbr;
+		int cost;
 
-    //
-    // special for combat spells only
-    //
-    int special;
+		enum {
+			MAGIC = 0x1,
+			COMBAT = 0x2,
+			CAST = 0x4,
+			FOUNDATION = 0x8,
+			APPRENTICE = 0x10,
+			DISABLED = 0x20,
+			SLOWSTUDY = 0x40,
+		};
+		int flags;
 
-	SkillDepend depends[3];
+		//
+		// special for combat spells only
+		//
+		int special;
+
+		SkillDepend depends[3];
 };
-
 extern SkillType * SkillDefs;
 
 int ParseSkill(AString *);
-
 AString SkillStrs(int);
 
-class ShowType { 
-public:
-  int skill;
-  int level;
-  char * desc;
+class ShowType {
+	public:
+		int skill;
+		int level;
+		char * desc;
 };
-
 extern ShowType * ShowDefs;
 
 int SkillCost(int);
 int SkillMax(int,int); /* skill, race */
-
 int GetLevelByDays(int);
 int GetDaysByLevel(int);
 
 class ShowSkill : public AListElem {
-public:
-  ShowSkill(int,int);
-  
-  AString * Report(Faction *);
-  
-  int skill;
-  int level;
+	public:
+		ShowSkill(int,int);
+
+		AString * Report(Faction *);
+
+		int skill;
+		int level;
 };
 
 class Skill : public AListElem {
-public:
-  void Readin(Ainfile *);
-  void Writeout(Aoutfile *);
-  
-  Skill * Split(int,int); /* total num, num leaving */
-	
-  int type;
-  unsigned int days;
+	public:
+		void Readin(Ainfile *);
+		void Writeout(Aoutfile *);
+
+		Skill * Split(int,int); /* total num, num leaving */
+
+		int type;
+		unsigned int days;
 };
 
 class SkillList : public AList {
-public:
-  int GetDays(int); /* Skill */
-  void SetDays(int,int); /* Skill, days */
-  void Combine(SkillList *);
-  SkillList * Split(int,int); /* total men, num to split */
-  AString Report(int); /* Number of men */
-  void Readin(Ainfile *);
-  void Writeout(Aoutfile *);
+	public:
+		int GetDays(int); /* Skill */
+		void SetDays(int,int); /* Skill, days */
+		void Combine(SkillList *);
+		SkillList * Split(int,int); /* total men, num to split */
+		AString Report(int); /* Number of men */
+		void Readin(Ainfile *);
+		void Writeout(Aoutfile *);
 };
 
-class HealType
-{	
-public:
-	int num;
-	int rate;
+class HealType {
+	public:
+		int num;
+		int rate;
 };
-
 extern HealType * HealDefs;
+
+class DamageType {
+	public:
+		int type;
+		int minnum;
+		int value;
+		int flags;
+		int dclass;
+		int effect;
+};
+
+class ShieldType {
+	public:
+		int type;
+		int value;
+};
+
+class SpecialType {
+	public:
+		enum {
+			HIT_BUILDINGIF		= 0x001,	/* mutually exclusive (1) */
+			HIT_BUILDINGEXCEPT	= 0x002,	/* mutually exclusive (1) */
+			HIT_SOLDIERIF		= 0x004,	/* mutually exclusive (2) */
+			HIT_SOLDIEREXCEPT	= 0x008,	/* mutually exclusive (2) */
+			HIT_EFFECTIF		= 0x010,	/* mutually exclusive (3) */
+			HIT_EFFECTEXCEPT	= 0x020,	/* mutually exclusive (3) */
+			HIT_ILLUSION		= 0x040,
+			HIT_NOMONSTER		= 0x080,
+		};
+		int targflags;
+
+		int buildings[3];
+		int targets[7];
+		int effects[3];
+
+		enum {
+			FX_SHIELD	=	0x01,
+			FX_DAMAGE	=	0x02,
+			FX_USE_LEV	=	0x04,
+			FX_DEFBONUS	=	0x08,
+		};
+		int effectflags;
+
+		ShieldType shield[4];
+		char *shielddesc;
+
+		DamageType damage[4];
+		char *spelldesc;
+		char *spelldesc2;
+		char *spelltarget;
+};
+extern SpecialType *SpecialDefs;
 
 #endif

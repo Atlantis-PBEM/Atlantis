@@ -362,6 +362,10 @@ AString *ObjectDescription(int obj)
 		*temp += AString(" This structure provides defense to the first ") +
 			o->protect + " men inside it.";
 	}
+	/*
+	 * XXX -- This flag needs to go away.. need to handle the SpecialTypes
+	 * table
+	 */
 	if(o->flags & ObjectType::NOEARTHQUAKE) {
 		*temp += " Units in this structure are not affected by earthquakes.";
 	}

@@ -56,115 +56,117 @@ void Soldier::SetupHealing()
 
 int Army::CheckSpecialTarget(int special,int tar)
 {
-    switch (special)
-    {
-    case SPECIAL_EARTHQUAKE:
-        if (soldiers[tar]->building && 
-            soldiers[tar]->building != O_MFORTRESS) return 1;
-        return 0;
-    case SPECIAL_DISPEL_ILLUSIONS:
-        if (ItemDefs[soldiers[tar]->race].type & IT_MONSTER &&
-            ItemDefs[soldiers[tar]->race].index == MONSTER_ILLUSION) {
-            return 1;
-        }
-        return 0;
-    case SPECIAL_BANISH_DEMONS:
-        {
-            int itemtype = soldiers[tar]->race;
-            if (itemtype == I_IMP || itemtype == I_DEMON ||
-                itemtype == I_BALROG) return 1;
-            return 0;
-        }
-    case SPECIAL_BANISH_UNDEAD:
-        {
-            int itemtype = soldiers[tar]->race;
-            if (itemtype == I_SKELETON || itemtype == I_UNDEAD ||
-                itemtype == I_LICH) return 1;
-            return 0;
-        }
-    case SPECIAL_SUMMON_STORM:
-        if (soldiers[tar]->HasEffect(EFFECT_STORM)) return 0;
-        return 1;
-    case SPECIAL_CAUSEFEAR:
-        if (soldiers[tar]->HasEffect(EFFECT_FEAR)) return 0;
-        if (ItemDefs[soldiers[tar]->race].type & IT_MONSTER) return 0;
-        return 1;
-    case SPECIAL_BLACK_WIND:
-        {
-            int itemtype = soldiers[tar]->race;
-            if (itemtype == I_SKELETON || itemtype == I_UNDEAD ||
-                itemtype == I_LICH || itemtype == I_IMP ||
-                itemtype == I_DEMON || itemtype == I_BALROG)
-            {
-                return 0;
-            }
-            return 1;
-        }
-    }
+	SpecialType *spd = &SpecialDefs[special];
+	int i;
+	int match = 0;
+
+	if(spd->targflags & SpecialType::HIT_BUILDINGIF) {
+		match = 0;
+		for(i = 0; i < 3; i++) {
+			if (soldiers[tar]->building &&
+					(spd->buildings[i] == soldiers[tar]->building)) match = 1;
+		}
+		if(!match) return 0;
+	}
+
+	if(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
+		match = 0;
+		for(i = 0; i < 3; i++) {
+			if (soldiers[tar]->building &&
+					(spd->buildings[i] == soldiers[tar]->building)) match = 1;
+		}
+		if(match) return 0;
+	}
+
+	if(spd->targflags & SpecialType::HIT_SOLDIERIF) {
+		match = 0;
+		for(i = 0; i < 7; i++) {
+			if(soldiers[tar]->race == spd->targets[i]) match = 1;
+		}
+		if(!match) return 0;
+	}
+
+	if(spd->targflags & SpecialType::HIT_SOLDIEREXCEPT) {
+		match = 0;
+		for(i = 0; i < 7; i++) {
+			if(soldiers[tar]->race == spd->targets[i]) match = 1;
+		}
+		if(match) return 0;
+	}
+
+	if(spd->targflags & SpecialType::HIT_EFFECTIF) {
+		match = 0;
+		for(i = 0; i < 3; i++) {
+			if(soldiers[tar]->HasEffect(spd->effects[i])) match = 1;
+		}
+		if(!match) return 0;
+	}
+
+	if(spd->targflags & SpecialType::HIT_EFFECTEXCEPT) {
+		match = 0;
+		for(i = 0; i < 3; i++) {
+			if(soldiers[tar]->HasEffect(spd->effects[i])) match = 1;
+		}
+		if(match) return 0;
+	}
+
+	if(spd->targflags & SpecialType::HIT_ILLUSION) {
+		// All illusions are of type monster, so lets make sure we get it
+		// right.  If we ever have other types of illusions, we can change
+		// this.
+		if(!(ItemDefs[soldiers[tar]->race].type & IT_MONSTER))
+			return 0;
+		if(ItemDefs[soldiers[tar]->race].index != MONSTER_ILLUSION)
+			return 0;
+	}
+
+	if(spd->targflags & SpecialType::HIT_NOMONSTER) {
+		if(ItemDefs[soldiers[tar]->race].type & IT_MONSTER)
+			return 0;
+	}
     return 1;
 }
 
 void Battle::UpdateShields(Army *a)
 {
-    for (int i=0; i<a->notbehind; i++)
-    {
-        int shtype = -1;
-        AString shdesc;
-        if (a->soldiers[i]->special == SPECIAL_FORCE_SHIELD)
-        {
-            shtype = ATTACK_COMBAT;
-            shdesc = "Force Shield";
+	for (int i=0; i<a->notbehind; i++) {
+		int shtype = -1;
+		SpecialType *spd;
 
-            //
-            // Note: Force shield gives a defensive bonus to the caster.
-            // Be sure to only apply this bonus once!
-            //
-            if( a->round == 0 )
-            {
-                a->soldiers[ i ]->dskill[ ATTACK_COMBAT ] += 
-                    a->soldiers[ i ]->slevel;
-            }
-        }
-        if (a->soldiers[i]->special == SPECIAL_ENERGY_SHIELD)
-        {
-            shtype = ATTACK_ENERGY;
-            shdesc = "Energy Shield";
-        }
-        if (a->soldiers[i]->special == SPECIAL_SPIRIT_SHIELD)
-        {
-            shtype = ATTACK_SPIRIT;
-            shdesc = "Spirit Shield";
-        }
-        if (a->soldiers[i]->special == SPECIAL_CLEAR_SKIES)
-        {
-            shtype = ATTACK_WEATHER;
-            shdesc = "Clear Skies";
-        }
+		if(a->soldiers[i]->special == -1) continue;
+		spd = &SpecialDefs[a->soldiers[i]->special];
 
-        if (shtype != -1)
-        {
-            Shield *sh = new Shield;
-            sh->shieldtype = shtype;
-            sh->shieldskill = a->soldiers[i]->slevel;
-            a->shields.Add(sh);
-            AddLine(*(a->soldiers[i]->unit->name) + " casts " + shdesc + ".");
-        }
-    }
+		if(!(spd->effectflags & FX_SHIELD)) continue;
+
+		for(shtype = 0; shtype < 4; shtype++) {
+			if(spd->shield[shtype].type == -1) continue;
+			if(spd->effectflags & FX_DEFBONUS) {
+				int bonus = spd->shield[shtype].value;
+				if(spd->effectflags & FX_USE_LEV)
+					bonus *= a->soldiers[i]->slevel;
+				if(a->round == 0)
+					a->soldiers[i]->dskill[spd->shield[shtype].type] += bonus;
+			}
+
+			Shield *sh = new Shield;
+			sh->shieldtype = spd->shield[shtype].type;
+			sh->shieldskill = a->soldiers[i]->slevel;
+			a->shield.Add(sh);
+            AddLine(*(a->soldiers[i]->unit->name) + " casts " +
+					spd->shielddesc + ".");
+		}
+	}
 }
 
-void Battle::DoSpecialAttack( int round, 
-                              Soldier *a,
-                              Army *attackers,
-                              Army *def, 
-                              int behind )
+void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
+		Army *def, int behind)
 {
-    int num,num2;
-    switch (a->special)
-    {
-    case -1:
-        break;
+	int num,num2;
+	switch (a->special) {
+		case -1:
+			break;
 
-    case SPECIAL_TORNADO:
+		case SPECIAL_TORNADO:
         num = def->DoAnAttack( a->special,
                                getrandom(a->slevel * 25)
                                + getrandom(a->slevel * 25) + 2,
@@ -278,7 +280,8 @@ void Battle::DoSpecialAttack( int round,
                     "strike, killing " + (num + num2) + ".");
         }
         break;
-        
+       
+		/* FOO */
     case SPECIAL_FIREBALL:
         num = def->DoAnAttack(a->special,
                               getrandom(a->slevel * 5) +

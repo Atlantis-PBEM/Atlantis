@@ -1069,7 +1069,9 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
 		}
 
 		/* 4. Add in any effects, if applicable */
-		int tlev = tar->dskill[ attackType ];
+		int tlev = 0;
+		if(attackType != NUM_ATTACK_TYPES)
+			tlev = tar->dskill[ attackType ];
 		if (special == SPECIAL_EARTHQUAKE) {
 			tlev -= 2;
 		}

@@ -945,7 +945,7 @@ void Game::ProcessCombatOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         }
         
         u->combat = sk;
-		AString temp = AString("Combat spell set to") + SkillDefs[sk].name;
+		AString temp = AString("Combat spell set to ") + SkillDefs[sk].name;
 		if(Globals->USE_PREPARE_COMMAND) {
 			u->readyItem = -1;
 			temp += " and prepared item set to none";
