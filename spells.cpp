@@ -1447,7 +1447,7 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	if (order->gate == -1) {
 		int good = 0;
 		int gatenum = getrandom(regions.numberofgates);
-		tar = regions.FindGate(gatenum);
+		tar = regions.FindGate(gatenum+1);
 
 		if(tar && tar->zloc == r->zloc) good = 1;
 		if(tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
@@ -1455,7 +1455,7 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 		while( !good ) {
 			gatenum = getrandom(regions.numberofgates);
-			tar = regions.FindGate(gatenum);
+			tar = regions.FindGate(gatenum+1);
 			if(tar && tar->zloc == r->zloc) good = 1;
 			if(tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
 				good = 1;
@@ -1463,7 +1463,7 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 		u->Event("Casts Random Gate Jump.");
 	} else {
-		if (order->gate < 0 || order->gate >= regions.numberofgates) {
+		if (order->gate < 1 || order->gate > regions.numberofgates) {
 			u->Error("CAST: No such target gate.");
 			return;
 		}
