@@ -22,6 +22,8 @@
    -- Consider a gamedef which has monsters only give silver as loot,
       never items (maybe up the amount of silver given slightly under this
       option)
+   -- Consider a gamedef which prevents trade goods being given as loot,
+      as they tend to just annoy non-trade factions.
    -- Consider having specific types of wandering monsters carrying
       specific types of armor/weapons (such as pirates or skeleton or
       kobolds).  Possibly make those monsters not give normal loot, but
@@ -48,6 +50,7 @@
 
 ** Items
    -- Consider adding the ability to produce trade goods.
+   -- Consider an option to disable trade goods.
    -- Consider Duergar's war horses [See atlantisdev post #1119]
    -- Consider having use'd items [i.e., items which are utilised by a USE
       order; may be part of an expanded magic system].
