@@ -1127,7 +1127,7 @@ int Army::DoAnAttack( int special, int numAttacks, int attackType,
             return -1;
         }
 
-        if( numAttacks > 1 && !effect )
+        if( numAttacks > 1 && !effect && attackType != ATTACK_COMBAT)
         {
             /* We got through shield... if killing spell, destroy shield */
             shields.Remove(hi);
