@@ -341,6 +341,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("li", f.Link("#sail", "sail"));
 	if(Globals->TOWNS_EXIST)
 		f.TagText("li", f.Link("#sell", "sell"));
+	f.TagText("li", f.Link("#share", "share"));
 	f.TagText("li", f.Link("#show", "show"));
 	f.TagText("li", f.Link("#spoils", "spoils"));
 	if(has_stea)
@@ -5148,6 +5149,42 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 
 	f.ClassTagText("div", "rule", "");
+	f.LinkRef("share");
+	f.TagText("h4", "SHARE [flag]");
+	temp = "SHARE 1 instructs the unit to share its possessions with any "
+		"other unit of your faction that needs them.  Thus a unit with a "
+		"supply of silver could automatically provide silver if any of "
+		"your other units in the same region does not have enough to "
+		"perform an action, such as ";
+	temp +=	f.Link("#study", "studying");
+	temp += ", ";
+	temp +=	f.Link("#buy", "buying");
+	temp += " or ";
+	temp +=	f.Link("#produce", "producing");
+	temp += ".  SHARE 0 returns a unit to its default selfish state.";
+	f.Paragraph(temp);
+	temp = "This sharing does not extend to the heat of battle, "
+		"only to economic actions.  So a unit that is sharing will provide "
+		"silver for buying or studying, and resources for production "
+		"(for example, if a sharing unit has wood in its inventory, and "
+		"another unit is produceing axes but has no wood, then the sharing "
+		"unit will automatically supply wood for that production),"
+		"but will not provide weapons to all units if combat occurs.";
+	f.Paragraph(temp);
+	temp = "Note that in the case of sharing silver, this can leave the "
+		"sharing unit without enough funds to pay maintenance, so "
+		"sharing is to be used with care.  You may like to make sure that "
+		"there is a unit with sufficient funds for maintenance in the "
+		"same region, and which is not sharing, as those funds will be "
+		"shared for maintenance, but not for less important purposes.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Instruct the unit to share its possessions with other units "
+			"of the same faction.";
+	temp2 = "SHARE 1";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("div", "rule", "");
 	f.LinkRef("show");
 	f.TagText("h4", "SHOW SKILL [skill] [level]");
 	f.TagText("h4", "SHOW ITEM [item]");
@@ -5320,7 +5357,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	f.Paragraph("Examples:");
 	temp = "Study combat this month, move north next month, and then in two "
-		"months, pillaging and advance north.";
+		"months, pillage and advance north.";
 	temp2 = "STUDY COMB\n";
 	temp2 += "TURN\n";
 	temp2 += "    MOVE N\n";
@@ -5339,7 +5376,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 += "ENDTURN";
 	f.CommandExample(temp, temp2);
 	temp = "Set up a simple cash caravan (It's assumed here that someone is "
-		"funnelling cash into this unit.";
+		"funnelling cash into this unit).";
 	temp2 = "MOVE N\n";
 	temp2 += "@TURN\n";
 	temp2 += "    GIVE 13523 1000 SILV\n";

@@ -1396,11 +1396,6 @@ int Game::GetSellAmount(ARegion *r, Market *m)
 					if(o->num == -1) {
 						o->num = u->items.CanSell(o->item);
 					}
-					if (o->num > u->items.CanSell(o->item)) {
-						o->num = u->items.CanSell(o->item);
-						u->Error("SELL: Unit attempted to sell more than "
-								"it had.");
-					}
 					if (o->num < 0) o->num = 0;
 					u->items.Selling(o->item, o->num);
 					num += o->num;
@@ -1427,6 +1422,11 @@ void Game::DoSell(ARegion *r, Market *m)
 				SellOrder *o = (SellOrder *) elem;
 				if (o->item == m->item) {
 					int temp = 0;
+					if (o->num > u->GetSharedNum(o->item)) {
+						o->num = u->GetSharedNum(o->item);
+						u->Error("SELL: Unit attempted to sell "
+								"more than it had.");
+					}
 					if (attempted) {
 						temp = (m->amount *o->num + getrandom(attempted))
 							/ attempted;
@@ -1435,7 +1435,7 @@ void Game::DoSell(ARegion *r, Market *m)
 					attempted -= o->num;
 					m->amount -= temp;
 					m->activity += temp;
-					u->items.SetNum(o->item, u->items.GetNum(o->item) - temp);
+					u->ConsumeShared(o->item, temp);
 					u->SetMoney(u->GetMoney() + temp * m->price);
 					u->sellorders.Remove(o);
 					u->Event(AString("Sells ") + ItemString(o->item, temp)
@@ -1519,10 +1519,10 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 						}
 					}
 					if (o->num == -1) {
-						o->num = u->GetMoney()/m->price;
+						o->num = u->GetSharedMoney()/m->price;
 					}
-					if (o->num * m->price > u->GetMoney()) {
-						o->num = u->GetMoney() / m->price;
+					if (o->num * m->price > u->GetSharedMoney()) {
+						o->num = u->GetSharedMoney() / m->price;
 						u->Error("BUY: Unit attempted to buy more than it "
 								"could afford.");
 					}
@@ -1595,7 +1595,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 					}
 					u->items.SetNum(o->item, u->items.GetNum(o->item) + temp);
 					u->faction->DiscoverItem(o->item, 0, 1);
-					u->SetMoney(u->GetMoney() - temp * m->price);
+					u->ConsumeSharedMoney(temp * m->price);
 					u->buyorders.Remove(o);
 					u->Event(AString("Buys ") + ItemString(o->item, temp)
 							+ " at $" + m->price + " each.");
@@ -2202,7 +2202,7 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 	}
 	// Check other unit has enough to give
 	int amtRecieve = o->expectAmount;
-	if (amtRecieve > t->items.GetNum(o->expectItem)) {
+	if (amtRecieve > t->GetSharedNum(o->expectItem)) {
 		t->Error(AString("EXCHANGE: Not giving enough. Expecting ") +
 				ItemString(o->expectItem, o->expectAmount) + ".");
 		u->Error(AString("EXCHANGE: Exchange aborted.  Not enough ") +
@@ -2260,13 +2260,10 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 									tOrder->giveAmount) + " with " +
 								*u->name + " for " +
 								ItemString(o->giveItem, o->giveAmount) + ".");
-						u->items.SetNum(o->giveItem,
-								u->items.GetNum(o->giveItem) - o->giveAmount);
+						u->ConsumeShared(o->giveItem, o->giveAmount);
 						t->items.SetNum(o->giveItem,
 								t->items.GetNum(o->giveItem) + o->giveAmount);
-						t->items.SetNum(tOrder->giveItem,
-								t->items.GetNum(tOrder->giveItem) -
-								tOrder->giveAmount);
+						t->ConsumeShared(tOrder->giveItem, tOrder->giveAmount);
 						u->items.SetNum(tOrder->giveItem,
 								u->items.GetNum(tOrder->giveItem) +
 								tOrder->giveAmount);
@@ -2425,9 +2422,9 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	
 	// Check there is enough to give
 	int amt = o->amount;
-	if (amt != -2 && amt > u->items.GetNum(o->item)) {
+	if (amt != -2 && amt > u->GetSharedNum(o->item)) {
 		u->Error("GIVE: Not enough.");
-		amt = u->items.GetNum(o->item);
+		amt = u->GetSharedNum(o->item);
 	} else if (amt == -2) {
 		amt = u->items.GetNum(o->item);
 		if(o->except) {
@@ -2474,7 +2471,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 					Globals->MONSTER_SPOILS_RECOVERY;
 			}
 		} else {
-			u->items.SetNum(o->item, u->items.GetNum(o->item) - amt);
+			u->ConsumeShared(o->item, amt);
 		}
 		u->Event(temp + ItemString(o->item, amt) + ".");
 		return 0;
@@ -2584,7 +2581,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			}
 		}
 
-		// Okay, not for each item that the unit has, tell the new faction
+		// Okay, now for each item that the unit has, tell the new faction
 		// about it in case they don't know about it yet.
 		{
 			forlist(&u->items) {
@@ -2659,7 +2656,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		t->Event(AString("Receives ") + ItemString(o->item, amt) +
 				" from " + *u->name + ".");
 	}
-	u->items.SetNum(o->item, u->items.GetNum(o->item) - amt);
+	u->ConsumeShared(o->item, amt);
 	t->items.SetNum(o->item, t->items.GetNum(o->item) + amt);
 	t->faction->DiscoverItem(o->item, 0, 1);
 
@@ -2837,7 +2834,7 @@ void Game::CheckTransportOrders()
 					}
 
 					// make sure amount is available (all handled later)
-					if (o->amount > 0 && o->amount > u->items.GetNum(o->item)) {
+					if (o->amount > 0 && o->amount > u->GetSharedNum(o->item)) {
 						u->Error(ordertype + ": Not enough.");
 						o->type = NORDERS;
 						continue;
@@ -2901,9 +2898,9 @@ void Game::RunTransportOrders()
 								amt = amt - t->except;
 							}
 						}
-					} else if (amt > u->items.GetNum(t->item)) {
+					} else if (amt > u->GetSharedNum(t->item)) {
 						u->Error(ordertype + ": Not enough.");
-						amt = u->items.GetNum(t->item);
+						amt = u->GetSharedNum(t->item);
 					}
 
 					if (ItemDefs[t->item].max_inventory) {
@@ -2917,7 +2914,7 @@ void Game::RunTransportOrders()
 						}
 					}
 
-					u->items.SetNum(t->item, u->items.GetNum(t->item) - amt);
+					u->ConsumeShared(t->item, amt);
 					// now see if the unit can pay for shipping
 					int dist = regions.GetDistance(r, tar->region);
 					int weight = ItemDefs[t->item].weight * amt;
@@ -2931,12 +2928,12 @@ void Game::RunTransportOrders()
 					}
 
 					// if not, give it back
-					if (cost > u->items.GetNum(I_SILVER)) {
+					if (cost > u->GetSharedMoney()) {
 						u->Error(ordertype + ": Cannot afford shipping cost.");
 						u->items.SetNum(t->item, u->items.GetNum(t->item)+amt);
 						continue;
 					}
-					u->items.SetNum(I_SILVER, u->items.GetNum(I_SILVER) - cost);
+					u->ConsumeSharedMoney(cost);
 
 					ordertype = (t->type == O_TRANSPORT) ?
 						"Transports " : "Distributes ";

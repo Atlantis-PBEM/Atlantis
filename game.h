@@ -369,6 +369,7 @@ private:
 	void ProcessIdleOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessTransportOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessDistributeOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
 	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int);
 
 	void RemoveInactiveFactions();

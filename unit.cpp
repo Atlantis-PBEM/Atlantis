@@ -445,6 +445,7 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 		if (GetFlag(FLAG_HOLDING)) temp += ", holding";
 		if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
 		if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
+		if (GetFlag(FLAG_SHARING)) temp += ", sharing";
 		if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
 		if (GetFlag(FLAG_CONSUMING_FACTION))
 			temp += ", consuming faction's food";
@@ -499,6 +500,7 @@ AString Unit::TemplateReport()
 	if (GetFlag(FLAG_HOLDING)) temp += ", holding";
 	if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
 	if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
+	if (GetFlag(FLAG_SHARING)) temp += ", sharing";
 	if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
 	if (GetFlag(FLAG_CONSUMING_FACTION)) temp += ", consuming faction's food";
 	if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
@@ -774,6 +776,70 @@ void Unit::SetMoney(int n)
 int Unit::GetMoney()
 {
 	return items.GetNum(I_SILVER);
+}
+
+int Unit::GetSharedNum(int item)
+{
+	int count = 0;
+
+	if (ItemDefs[item].type & IT_MAN)
+		return items.GetNum(item);
+
+	forlist((&object->region->objects)) {
+		Object *obj = (Object *) elem;
+		forlist((&obj->units)) {
+			Unit *u = (Unit *) elem;
+			if (u->faction == faction && u->GetFlag(FLAG_SHARING))
+				count += u->items.GetNum(item);
+		}
+	}
+
+	return count;
+}
+
+void Unit::ConsumeShared(int item, int n)
+{
+	if (items.GetNum(item) >= n) {
+		// This unit doesn't need to use shared resources
+		items.SetNum(item, items.GetNum(item) - n);
+		return;
+	}
+
+	// Use up items carried by the using unit first
+	n -= items.GetNum(item);
+	items.SetNum(item, 0);
+
+	forlist((&object->region->objects)) {
+		Object *obj = (Object *) elem;
+		forlist((&obj->units)) {
+			Unit *u = (Unit *) elem;
+			if (u->faction == faction && u->GetFlag(FLAG_SHARING)) {
+				if (u->items.GetNum(item) < 1)
+					continue;
+				if (u->items.GetNum(item) >= n) {
+					u->items.SetNum(item, u->items.GetNum(item) - n);
+					u->Event(*(u->name) + " shares " + ItemString(item, n) +
+							" with " + *name + ".");
+					return;
+				}
+				u->Event(*(u->name) + " shares " +
+						ItemString(item, u->items.GetNum(item)) +
+						" with " + *name + ".");
+				n -= u->items.GetNum(item);
+				u->items.SetNum(item, 0);
+			}
+		}
+	}
+}
+
+int Unit::GetSharedMoney()
+{
+	return GetSharedNum(I_SILVER);
+}
+
+void Unit::ConsumeSharedMoney(int n)
+{
+	return ConsumeShared(I_SILVER, n);
 }
 
 int Unit::GetAttackRiding()

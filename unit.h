@@ -93,6 +93,7 @@ enum {
 #define FLAG_FLYSPOILS			0x0200
 #define FLAG_WALKSPOILS			0x0400
 #define FLAG_RIDESPOILS			0x0800
+#define FLAG_SHARING			0x1000
 
 class UnitId : public AListElem {
 	public:
@@ -151,6 +152,10 @@ class Unit : public AListElem
 		void SetMen(int,int);
 		int GetMoney();
 		void SetMoney(int);
+		int GetSharedNum(int);
+		void ConsumeShared(int,int);
+		int GetSharedMoney();
+		void ConsumeSharedMoney(int);
 		int IsAlive();
 
 		int MaintCost();

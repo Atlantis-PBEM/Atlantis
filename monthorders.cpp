@@ -432,9 +432,9 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	int it = ObjectDefs[type].item;
 	int itn;
 	if (it == I_WOOD_OR_STONE) {
-		itn = u->items.GetNum(I_WOOD) + u->items.GetNum(I_STONE);
+		itn = u->GetSharedNum(I_WOOD) + u->GetSharedNum(I_STONE);
 	} else {
-		itn = u->items.GetNum(it);
+		itn = u->GetSharedNum(it);
 	}
 
 	if (itn == 0) {
@@ -478,15 +478,15 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	u->MoveUnit(obj);
 
 	if (it == I_WOOD_OR_STONE) {
-		if (num > u->items.GetNum(I_STONE)) {
-			num -= u->items.GetNum(I_STONE);
-			u->items.SetNum(I_STONE,0);
-			u->items.SetNum(I_WOOD,u->items.GetNum(I_WOOD) - num);
+		if (num > u->GetSharedNum(I_STONE)) {
+			num -= u->GetSharedNum(I_STONE);
+			u->ConsumeShared(I_STONE, u->GetSharedNum(I_STONE));
+			u->ConsumeShared(I_WOOD, num);
 		} else {
-			u->items.SetNum(I_STONE,u->items.GetNum(I_STONE) - num);
+			u->ConsumeShared(I_STONE, num);
 		}
 	} else {
-		u->items.SetNum(it,itn - num);
+		u->ConsumeShared(it, num);
 	}
 	
 	/* Regional economic improvement */
@@ -724,7 +724,7 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int needed, int ship)
 		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[ship].pInput[c].item;
 			if(i != -1)
-				count += u->items.GetNum(i) / ItemDefs[ship].pInput[c].amt;
+				count += u->GetSharedNum(i) / ItemDefs[ship].pInput[c].amt;
 		}
 		if (maxproduced > count)
 			maxproduced = count;
@@ -746,12 +746,12 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int needed, int ship)
 			int i = ItemDefs[ship].pInput[c].item;
 			int a = ItemDefs[ship].pInput[c].amt;
 			if(i != -1) {
-				int amt = u->items.GetNum(i);
+				int amt = u->GetSharedNum(i);
 				if (count > amt / a) {
 					count -= amt / a;
-					u->items.SetNum(i, amt-(amt/a)*a);
+					u->ConsumeShared(i, (amt/a)*a);
 				} else {
-					u->items.SetNum(i, amt - count * a);
+					u->ConsumeShared(i, count * a);
 					count = 0;
 				}
 			}
@@ -763,7 +763,7 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int needed, int ship)
 		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[ship].pInput[c].item;
 			if(i != -1) {
-				int amt = u->items.GetNum(i);
+				int amt = u->GetSharedNum(i);
 				if(amt/ItemDefs[ship].pInput[c].amt < maxproduced) {
 					maxproduced = amt/ItemDefs[ship].pInput[c].amt;
 				}
@@ -786,8 +786,7 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int needed, int ship)
 			int i = ItemDefs[ship].pInput[c].item;
 			int a = ItemDefs[ship].pInput[c].amt;
 			if(i != -1) {
-				int amt = u->items.GetNum(i);
-				u->items.SetNum(i, amt-(maxproduced*a));
+				u->ConsumeShared(i, maxproduced*a);
 			}
 		}
 	}
@@ -864,7 +863,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[o->item].pInput[c].item;
 			if(i != -1)
-				count += u->items.GetNum(i) / ItemDefs[o->item].pInput[c].amt;
+				count += u->GetSharedNum(i) / ItemDefs[o->item].pInput[c].amt;
 		}
 		if (maxproduced > count)
 			maxproduced = count;
@@ -878,12 +877,12 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 			int i = ItemDefs[o->item].pInput[c].item;
 			int a = ItemDefs[o->item].pInput[c].amt;
 			if(i != -1) {
-				int amt = u->items.GetNum(i);
+				int amt = u->GetSharedNum(i);
 				if (count > amt / a) {
 					count -= amt / a;
-					u->items.SetNum(i, amt-(amt/a)*a);
+					u->ConsumeShared(i, (amt/a)*a);
 				} else {
-					u->items.SetNum(i, amt - count * a);
+					u->ConsumeShared(i, count * a);
 					count = 0;
 				}
 			}
@@ -895,7 +894,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[o->item].pInput[c].item;
 			if(i != -1) {
-				int amt = u->items.GetNum(i);
+				int amt = u->GetSharedNum(i);
 				if(amt/ItemDefs[o->item].pInput[c].amt < maxproduced) {
 					maxproduced = amt/ItemDefs[o->item].pInput[c].amt;
 				}
@@ -910,8 +909,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 			int i = ItemDefs[o->item].pInput[c].item;
 			int a = ItemDefs[o->item].pInput[c].amt;
 			if(i != -1) {
-				int amt = u->items.GetNum(i);
-				u->items.SetNum(i, amt-(maxproduced*a));
+				u->ConsumeShared(i, maxproduced*a);
 			}
 		}
 	}
@@ -1132,7 +1130,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	int sk = o->skill;
 	int cost = SkillCost(sk) * u->GetMen();
 	int reset_man = -1;
-	if (cost > u->GetMoney()) {
+	if (cost > u->GetSharedMoney()) {
 		u->Error("STUDY: Not enough funds.");
 		return;
 	}
@@ -1261,7 +1259,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	}
 
 	if (u->Study(sk,days)) {
-		u->SetMoney(u->GetMoney() - cost);
+		u->ConsumeSharedMoney(cost);
 		AString str("Studies ");
 		str += SkillDefs[sk].name;
 		taughtdays = taughtdays/u->GetMen();

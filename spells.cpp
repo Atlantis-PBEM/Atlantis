@@ -828,7 +828,7 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 			i = ItemDefs[I_MPLATE].mInput[c].item;
 			a = ItemDefs[I_MPLATE].mInput[c].amt;
 			if(i != -1) {
-				if(u->items.GetNum(i) >= a) found++;
+				if(u->GetSharedNum(i) >= a) found++;
 			}
 		}
 		// We do not, break.
@@ -839,7 +839,7 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 			i = ItemDefs[I_MPLATE].mInput[c].item;
 			a = ItemDefs[I_MPLATE].mInput[c].amt;
 			if(i != -1) {
-				u->items.SetNum(i, u->items.GetNum(i) - a);
+				u->ConsumeShared(i, a);
 			}
 		}
 		// We've made one.
@@ -847,7 +847,7 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 		max--;
 	}
 
-	u->items.SetNum(I_MPLATE,u->items.GetNum(I_MPLATE) + num);
+	u->items.SetNum(I_MPLATE, u->items.GetNum(I_MPLATE) + num);
 	u->Event(AString("Enchants ") + num + " mithril armor.");
 	if (num == 0) return 0;
 	return 1;
@@ -875,7 +875,7 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 			i = ItemDefs[I_MSWORD].mInput[c].item;
 			a = ItemDefs[I_MSWORD].mInput[c].amt;
 			if(i != -1) {
-				if(u->items.GetNum(i) >= a) found++;
+				if(u->GetSharedNum(i) >= a) found++;
 			}
 		}
 		// We do not, break.
@@ -886,7 +886,7 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 			i = ItemDefs[I_MSWORD].mInput[c].item;
 			a = ItemDefs[I_MSWORD].mInput[c].amt;
 			if(i != -1) {
-				u->items.SetNum(i, u->items.GetNum(i) - a);
+				u->ConsumeShared(i, a);
 			}
 		}
 		// We've made one.
@@ -922,7 +922,7 @@ int Game::RunCreateFood(ARegion *r,Unit *u)
 			i = ItemDefs[I_FOOD].mInput[c].item;
 			a = ItemDefs[I_FOOD].mInput[c].amt;
 			if(i != -1) {
-				if(u->items.GetNum(i) >= a) found++;
+				if(u->GetSharedNum(i) >= a) found++;
 			}
 		}
 		// We do not, break.
@@ -933,7 +933,7 @@ int Game::RunCreateFood(ARegion *r,Unit *u)
 			i = ItemDefs[I_FOOD].mInput[c].item;
 			a = ItemDefs[I_FOOD].mInput[c].amt;
 			if(i != -1) {
-				u->items.SetNum(i, u->items.GetNum(i) - a);
+				u->ConsumeShared(i, a);
 			}
 		}
 		// We've made one.
@@ -959,12 +959,12 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 		return 0;
 	}
 
-	if (u->GetMoney() < 1000) {
+	if (u->GetSharedMoney() < 1000) {
 		u->Error("Can't afford to construct a Gate.");
 		return 0;
 	}
 
-	u->SetMoney(u->GetMoney() - 1000);
+	u->ConsumeSharedMoney(1000);
 
 	int level = u->GetSkill(spell);
 	int chance = level * 20;
@@ -1018,12 +1018,12 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 			return 0;
 	}
 
-	if (u->GetMoney() < 600) {
+	if (u->GetSharedMoney() < 600) {
 		u->Error("Can't afford to engrave Runes of Warding.");
 		return 0;
 	}
 
-	u->SetMoney(u->GetMoney() - 600);
+	u->ConsumeSharedMoney(600);
 	if( o->type == O_MFORTRESS ) {
 		o->runes = 5;
 	} else if(o->type == O_MTOWER) {
@@ -1073,7 +1073,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 	unsigned int c;
 	for(c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
 		if(ItemDefs[item].mInput[c].item == -1) continue;
-		int amt = u->items.GetNum(ItemDefs[item].mInput[c].item);
+		int amt = u->GetSharedNum(ItemDefs[item].mInput[c].item);
 		int cost = ItemDefs[item].mInput[c].amt;
 		if(amt < cost) {
 			u->Error(AString("Doesn't have sufficient ") +
@@ -1086,9 +1086,8 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 	// Deduct the costs
 	for(c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
 		if(ItemDefs[item].mInput[c].item == -1) continue;
-		int amt = u->items.GetNum(ItemDefs[item].mInput[c].item);
 		int cost = ItemDefs[item].mInput[c].amt;
-		u->items.SetNum(ItemDefs[item].mInput[c].item, amt-cost);
+		u->ConsumeShared(ItemDefs[item].mInput[c].item, cost);
 	}
 
 	int num = (level * ItemDefs[item].mOut + getrandom(100))/100;

@@ -582,6 +582,9 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_SELL:
 			ProcessSellOrder(unit, o, pCheck);
 			break;
+		case O_SHARE:
+			ProcessShareOrder(unit, o, pCheck);
+			break;
 		case O_SHOW:
 			ProcessReshowOrder(unit, o, pCheck);
 			break;
@@ -1447,7 +1450,6 @@ void Game::ProcessEnterOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int i = token->value();
 	// negative obj# for new alias
 	if(newfleet == 1) {
-		int old = i;
 		i = -(i+1);
 	}
 	delete token;
@@ -2593,7 +2595,6 @@ void Game::ProcessNocrossOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-
 void Game::ProcessHoldOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	/* Instant order */
@@ -2968,3 +2969,23 @@ void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 	return;
 }
+
+void Game::ProcessShareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	/* Instant order */
+	AString *token = o->gettoken();
+	if (!token) {
+		ParseError(pCheck, u, 0, "SHARE: Invalid value.");
+		return;
+	}
+	int val = ParseTF(token);
+	delete token;
+	if (val==-1) {
+		ParseError(pCheck, u, 0, "SHARE: Invalid value.");
+		return;
+	}
+	if(!pCheck) {
+		u->SetFlag(FLAG_SHARING, val);
+	}
+}
+
