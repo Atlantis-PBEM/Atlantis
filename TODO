@@ -126,6 +126,7 @@
       as well as making the game more easily handle higher FP total maximums.
       (currently the total max number of Faction points is variable, but in
       order for it to actually 'work' you need to change game-specific stuff)
+   -- Show faction of ally in refusal to attack or assassinate.
 
 ** Rules, food
    -- Consider requiring both food and pay for upkeep (make upkeep more
