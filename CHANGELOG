@@ -71,6 +71,7 @@ TODO
    -- GIVE ALL [ITEM]
    -- GIVE ALL TRADE (to give away all trade goods) (other categories for
       other obvious flags)
+   -- GIVE ALL [ITEM] except [NUM]
    -- Improve the item/hex editor
    -- Gamedef to handle various options around combat/weapons/bows for taxing
    -- Gamedefs for various economy options. (far future)

@@ -576,11 +576,11 @@ AString *ShowSkill::Report(void)
 				*str += " from wood.";
 				if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED) &&
 				   !(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
-					*str += "A wagon, used with a horse, can carry up to "
+					*str += " A wagon, used with a horse, can carry up to "
 						   "200 units of weight.";
 				}
 				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
-					*str += "Production can be increased by using axes.";
+					*str += " Production can be increased by using axes.";
 				}
 			} else if (level == 3) {
 				if(ItemDefs[I_MWAGON].flags & ItemType::DISABLED) break;
@@ -594,7 +594,7 @@ AString *ShowSkill::Report(void)
 				*str += "weighs 50 units, and may carry 250 units of "
 					   "weight.";
 				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
-					*str += "Production can be increased by using axes.";
+					*str += " Production can be increased by using axes.";
 				}
 			} else if (level == 5) {
 				if(ItemDefs[I_FLOATER].flags & ItemType::DISABLED) break;
@@ -604,7 +604,7 @@ AString *ShowSkill::Report(void)
 				       "floater hides. A glider weighs 5 units, and may "
 					   "carry 15 units of weight while flying.";
 				if(!(ItemDefs[I_AXE].flags & ItemType::DISABLED)) {
-					*str += "Production can be increased by using axes.";
+					*str += " Production can be increased by using axes.";
 				}
 			}
 			break;
