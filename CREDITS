@@ -63,6 +63,8 @@ Michael Scalet
 Sergey Budnevitch
     Fixed integer overflow bug which allowed creating items via bogus
       give orders.
+Anthony Briggs
+    Coastal fish patch
 Joseph Traub
     Changes, updates, and merging a few disparate branches
     Maintaining and extending the 4.0.X code.

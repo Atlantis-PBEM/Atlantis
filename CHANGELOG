@@ -661,3 +661,4 @@ Changes from 4.0.10 -> 5.0.0
       the 'base' races, but would have failed on any of the extended ones.
    -- Fixed bug in transport which didn't prevent the use of incomplete
       transport structures.
+   -- Added Tony Briggs <abriggs@iinet.net.au> COASTAL_FISH patch.

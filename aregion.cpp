@@ -729,20 +729,29 @@ void ARegion::SetupCityMarket()
 
 void ARegion::SetupProds()
 {
-	Production *p;
+	Production *p = NULL;
 	TerrainType *typer = &(TerrainDefs[type]);
 
 	if(Globals->FOOD_ITEMS_EXIST) {
 		if (typer->economy) {
-			if (getrandom(2)&&!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED)){
-				p = new Production(I_GRAIN, typer->economy);
-				products.Add(p);
-			} else {
-				if(!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED)) {
-					p = new Production(I_LIVESTOCK, typer->economy);
-					products.Add(p);
-				}
+			// Foodchoice = 0 or 1 if inland, 0, 1, or 2 if coastal
+			int foodchoice = getrandom(2 +
+					(Globals->COSTAL_FISH && IsCoastal()));
+			switch (foodchoice) {
+				case 0:
+					if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
+						p = new Production(I_GRAIN, typer->economy);
+					break;
+				case 1:
+					if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
+						p = new Production(I_LIVESTOCK, typer->economy);
+					break;
+				case 2:
+					if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
+						p = new Production(I_FISH, typer->economy);
+					break;
 			}
+			products.Add(p);
 		}
 	}
 
