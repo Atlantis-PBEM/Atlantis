@@ -443,6 +443,7 @@ class ARegionList : public AList
 		void SeverLandBridges(ARegionArray *pRegs);
 		void RescaleFractalParameters(ARegionArray *pArr);
 		void SetFractalTerrain(ARegionArray *pArr);
+		void NameRegions(ARegionArray *pArr);
 		void UnsetRace(ARegionArray *pRegs);
 		void RaceAnchors(ARegionArray *pRegs);
 		void GrowRaces(ARegionArray *pRegs);
