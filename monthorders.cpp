@@ -909,7 +909,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 
 	if((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetSkill(sk) >= 2) {
 		if(Globals->LIMITED_MAGES_PER_BUILDING) {
-		   	if (obj->incomplete < 1 || obj->type == O_DUMMY) {
+		   	if (obj->incomplete > 0 || obj->type == O_DUMMY) {
 				u->Error("Warning: Magic study rate outside of a building "
 						"cut in half above level 2.");
 				days /= 2;

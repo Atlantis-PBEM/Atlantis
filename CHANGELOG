@@ -535,3 +535,5 @@ Changes from 4.0.9 -> 4.0.10
 	  returned.
    -- Fixed display of hits/regen to show unit number and creature in unit
       which took the damage.
+   -- Fixed bug in magic studying in protected buildings under LIMITED_MAGES
+      case as reported by Vitauts Stochka <vit@dau.lv>
