@@ -544,6 +544,8 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	}
 
 	/* Perform the build */
+	
+	u->MoveUnit(obj);
 
 	if (it == I_WOOD_OR_STONE) {
 		if (num > u->items.GetNum(I_STONE)) {
@@ -602,7 +604,7 @@ void Game::RunBuildHelpers(ARegion *r)
 						}
 						tarobj = target->build;
 						if (tarobj == NULL) tarobj = target->object;
-						if(u->object != tarobj)
+						if((tarobj != NULL) && (u->object != tarobj))
 							u->MoveUnit(tarobj);
 					} else if (u->build != NULL && u->build != u->object) {
 						u->MoveUnit(u->build);
