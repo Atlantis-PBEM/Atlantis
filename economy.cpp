@@ -1110,83 +1110,122 @@ int ARegion::TownGrowth()
  * migration parameters */
 void ARegion::Grow()
 {
-	/* do we need to do anything? */
+	// We don't need to grow 0 pop regions
 	if(basepopulation == 0) return;
 	
-	// Init overall population growth	
+	// growpop is the overall population growth	
 	int growpop = 0;
+	
 	// Init migration parameters
+	// immigrants = entering this region, 
+	// emigrants = leaving
 	immigrants = habitat - basepopulation;
 	emigrants = population - basepopulation;
 	
 	// basic development activity
 	int basedev = 0;
 	
-	/* First, check regional population growth */
+	// First, check regional population growth
 	// Check resource production activity
-	if (basepopulation) {
-		int activity = 0;
-		int amount = 0;
-		forlist(&products) {
-			Production *p = (Production *) elem;
-			if (ItemDefs[p->itemtype].type & IT_NORMAL &&
-				p->itemtype != I_SILVER) {
-				activity += p->activity;
-				basedev += activity;
-				// base on baseamount - for maximum
-				// benefit of trade structures!
-				amount += p->baseamount;
-			}
+	int activity = 0;
+	int amount = 0;
+	forlist(&products) {
+		Production *p = (Production *) elem;
+		if (ItemDefs[p->itemtype].type & IT_NORMAL &&
+			p->itemtype != I_SILVER) {
+			activity += p->activity;
+			basedev += activity;
+			// base on baseamount - for maximum
+			// benefit of trade structures!
+			// Ant: What does that mean? It sounds like Japlish :)
+			amount += p->baseamount;
 		}
-		int tarpop = habitat - population + basepopulation;
-		if (amount) tarpop += ((habitat - basepopulation) * 2 * activity) / (3 * amount);
-		int diff = tarpop - population;
-		int adiff = diff;
-		if(adiff < 0) adiff = adiff * (- 1);
-		/* Adjust basepop? 
-		// raise basepop depending on production
-		// absolute basepop increase
-		if(diff > (basepopulation / 20)) {
-			int gpop = getrandom(Globals->CITY_POP / 600);
-			if(gpop > diff / 20) gpop = diff / 20;
-			// relative basepop increase
-			int relativeg = basepopulation * gpop / 1000;
-			if (diff > habitat / 20) basepopulation += gpop + relativeg;
-		}
-		// lower basepop for extremely low levels of population
-		if (population < basepopulation) {
-			int depop = (basepopulation - population) / 4;
-			basepopulation -= depop + getrandom(depop);			
-		}
-		*/
-		// Limit excessive growth at low pop / hab ratios
-		// and avoid overflowing
-		long int grow2 = 5 * ((long int) habitat + 3 * (long int) adiff);
-		long int dgrow = ((long int) diff / grow2) * ((long int) habitat / grow2);
-		// long int dgrow = ((long int) diff) * ((long int) habitat)
-		//	/ (5 * (long int) ((long int) habitat + 3 * (long int) abs(diff)));
-		growpop += (int) dgrow;
-		/*
-			Awrite(AString("growpop = ") + growpop);
-			Awrite(AString("grow2 = ") + (unsigned int) grow2);
-			Awrite(AString("adiff = ") + adiff);
-			Awrite(AString("diff = ") + diff);
-		*/
-		// update emigrants - only if region has a decent population level
-		if (emigrants > 0) emigrants += diff;
 	}
 	
-	/* Now check town population growth */
+	// Now set the target population for the hex
+	// Ant: I'm not sure why population's being subtracted here..
+	// 		Shouldn't it be something like :
+	// 			tarpop = habitat + basepopulation?
+	int tarpop = habitat - population + basepopulation;
+	
+	// Ant: Increase tarpop for any trading that's going on?
+	// 		Not sure why (habitat - basepopulation) is included
+	if (amount) tarpop += ((habitat - basepopulation) * 2 * activity) /
+						   (3 * amount);
+	
+	// diff is the amount we can grow?
+	int diff = tarpop - population;
+	int adiff = diff;
+	if(adiff < 0) adiff = adiff * (- 1);
+	
+	/* Adjust basepop? 
+	// raise basepop depending on production
+	// absolute basepop increase
+	if(diff > (basepopulation / 20)) {
+		int gpop = getrandom(Globals->CITY_POP / 600);
+		if(gpop > diff / 20) gpop = diff / 20;
+		// relative basepop increase
+		int relativeg = basepopulation * gpop / 1000;
+		if (diff > habitat / 20) basepopulation += gpop + relativeg;
+	}
+	// lower basepop for extremely low levels of population
+	if (population < basepopulation) {
+		int depop = (basepopulation - population) / 4;
+		basepopulation -= depop + getrandom(depop);			
+	}
+	*/
+	
+	// debug strings
+	Awrite(AString("immigrants = ") + immigrants);
+	Awrite(AString("emigrants = ") + emigrants);
+	Awrite(AString("adiff = ") + adiff);
+	Awrite(AString("diff = ") + diff);
+	Awrite(AString("habitat = ") + habitat);
+	
+	// Limit excessive growth at low pop / hab ratios
+	// and avoid overflowing
+	// What are grow2 and grow representing? Maybe these formulae
+	// could be broken up a bit more and commented?
+	long int grow2 = 5 * ((long int) habitat + (3 * (long int) adiff));
+	Awrite(AString("grow2 = ") + (unsigned int) grow2); // debug string
+	
+	// Ant: In the following formula, dgrow is almost always 0!
+	long int dgrow = 	((long int) diff / grow2) * 
+						((long int) habitat / grow2);
+	Awrite(AString("dgrow = ") + (unsigned int) dgrow); // debug string
+
+	// long int dgrow = ((long int) diff) * ((long int) habitat)
+	//	/ (5 * (long int) ((long int) habitat + 3 * (long int) abs(diff)));
+	growpop += (int) dgrow;
+	/*
+		Awrite(AString("growpop = ") + growpop);
+		Awrite(AString("grow2 = ") + (unsigned int) grow2);
+		Awrite(AString("adiff = ") + adiff);
+		Awrite(AString("diff = ") + diff);
+	*/
+	// update emigrants - only if region has a decent population level
+	if (emigrants > 0) emigrants += diff;
+
+	
+	// Now check town population growth
 	if(town) {
 		int maxpop = TownGrowth();
-		int tgrowth = maxpop - town->pop;
+		int tgrowth = maxpop - town->pop; // available room to grow
 		immigrants += tgrowth;
 		// less growth of towns in DYNAMIC_POPULATION
 		// to balance town creation and population dynamics
 		// through migration
 		if(Globals->DYNAMIC_POPULATION) tgrowth = tgrowth / 4;
 		// Dampen growth curve at high population levels
-		growpop += (int) ((float) (tgrowth * (2 * town->hab - town->pop) / (10 * town->hab)));
+		// Ant: maybe this formula could be broken up a bit?
+		//		also, is (2 * town->hab - town->pop) correct?
+		//		it's not meant to be 2 * (town->hab - town->pop)?
+		//		((2 * town->hab) - town->pop) seems clearer
+		float increase = tgrowth * (2 * town->hab - town->pop);
+		float limitingfactor = (10 * town->hab);
+		
+		// Ant: Not sure whether we still need the typecasts here
+		growpop += (int) (increase / limitingfactor);
 	}
 	
 	// Update population
