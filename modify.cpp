@@ -359,6 +359,62 @@ void Game::DisableObject(int obj)
 	ObjectDefs[obj].flags |= ObjectType::DISABLED;
 }
 
+void Game::ModifyObjectFlags(int ob, int flags)
+{
+	if(ob < 0 || ob > (NOBJECTS-1)) return;
+	ObjectDefs[ob].flags = flags;
+}
+
+void Game::ModifyObjectDecay(int ob, int maxMaint, int maxMonthDecay, int mFact)
+{
+	if(ob < 0 || ob > (NOBJECTS-1)) return;
+	if(maxMonthDecay > maxMaint) return;
+	if(maxMaint < 0) return;
+	if(maxMonthDecay < 0) return;
+	if(mFact < 0) return;
+	ObjectDefs[ob].maxMaintenance = maxMaint;
+	ObjectDefs[ob].maxMonthlyDecay = maxMonthDecay;
+	ObjectDefs[ob].maintFactor = mFact;
+}
+
+void Game::ModifyObjectProduction(int ob, int it)
+{
+	if(ob < 0 || ob > (NOBJECTS-1)) return;
+	if(it < -1 || it > (NITEMS -1)) return;
+	ObjectDefs[ob].productionAided = it;
+}
+
+void Game::ModifyObjectMonster(int ob, int monster)
+{
+	if(ob < 0 || ob > (NOBJECTS-1)) return;
+	if(monster < -1 || monster > (NITEMS -1)) return;
+	ObjectDefs[ob].monster = monster;
+}
+
+void Game::ModifyObjectConstruction(int ob, int it, int num, int sk, int lev)
+{
+	if(ob < 0 || ob > (NOBJECTS-1)) return;
+	if((it < -1 && it != I_WOOD_OR_STONE) || it > (NITEMS -1))
+		return;
+	if(num < 0) return;
+	if(sk < -1 || sk > (NSKILLS - 1)) return;
+	if(lev < 0) return;
+	ObjectDefs[ob].item = it;
+	ObjectDefs[ob].cost = num;
+	ObjectDefs[ob].skill = sk;
+	ObjectDefs[ob].level = lev;
+}
+
+void Game::ModifyObjectManpower(int ob, int protect, int capacity, int sailors)
+{
+	if(ob < 0 || ob > (NOBJECTS-1)) return;
+	if(protect < 0) return;
+	if(capacity < 0) return;
+	if(sailors < 0) return;
+	ObjectDefs[ob].protect = protect;
+	ObjectDefs[ob].capacity = capacity;
+	ObjectDefs[ob].sailors = sailors;
+}
 
 void Game::ClearTerrainRaces(int t)
 {

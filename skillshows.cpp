@@ -1126,6 +1126,11 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "This skill enables a unit to fashion higher quality "
 				"gems from lower quality ones.";
 			break;
+		case S_MONSTERTRAINING:
+			if(level > 1) break;
+			*str += "This skill deals with all aspects of traking monster "
+				"mounts.";
+			break;
 	}
 
 	AString temp;

@@ -55,88 +55,100 @@ char * fs[] = {
 
 char ** FactionStrs = fs;
 
-int ParseAttitude(AString * token) {
-  for (int i=0; i<NATTITUDES; i++)
-    if (*token == AttitudeStrs[i]) return i;
-  return -1;
+int ParseAttitude(AString * token)
+{
+	for (int i=0; i<NATTITUDES; i++)
+		if (*token == AttitudeStrs[i]) return i;
+	return -1;
 }
 
-FactionVector::FactionVector(int size) {
-  vector = new Faction *[size];
-  vectorsize = size;
-  ClearVector();
+FactionVector::FactionVector(int size)
+{
+	vector = new Faction *[size];
+	vectorsize = size;
+	ClearVector();
 }
 
-FactionVector::~FactionVector() {
-  delete vector;
+FactionVector::~FactionVector()
+{
+	delete vector;
 }
 
-void FactionVector::ClearVector() {
-  for (int i=0; i<vectorsize; i++) vector[i] = 0;
+void FactionVector::ClearVector()
+{
+	for (int i=0; i<vectorsize; i++) vector[i] = 0;
 }
 
-void FactionVector::SetFaction(int x, Faction *fac) {
-  vector[x] = fac;
+void FactionVector::SetFaction(int x, Faction *fac)
+{
+	vector[x] = fac;
 }
 
-Faction *FactionVector::GetFaction(int x) {
-  return vector[x];
+Faction *FactionVector::GetFaction(int x)
+{
+	return vector[x];
 }
 
-Attitude::Attitude() {
+Attitude::Attitude()
+{
 }
 
-Attitude::~Attitude() {
+Attitude::~Attitude()
+{
 }
 
 void Attitude::Writeout( Aoutfile *f )
 {
-    f->PutInt(factionnum);
-    f->PutInt(attitude);
+	f->PutInt(factionnum);
+	f->PutInt(attitude);
 }
 
 void Attitude::Readin( Ainfile *f, ATL_VER v )
 {
-    factionnum = f->GetInt();
-    attitude = f->GetInt();
+	factionnum = f->GetInt();
+	attitude = f->GetInt();
 }
 
 Faction::Faction()
 {
-    exists = 1;
-    name = 0;
-    for (int i=0; i<NFACTYPES; i++)
-    {
-        type[i] = 1;
-    }
-    lastchange = -6;
-    address = 0;
-    password = 0;
-    times = 0;
-    temformat = TEMPLATE_OFF;
-    quit = 0;
-    defaultattitude = A_NEUTRAL;
-    unclaimed = 0;
+	exists = 1;
+	name = 0;
+	for (int i=0; i<NFACTYPES; i++) {
+		type[i] = 1;
+	}
+	lastchange = -6;
+	address = 0;
+	password = 0;
+	times = 0;
+	temformat = TEMPLATE_OFF;
+	quit = 0;
+	defaultattitude = A_NEUTRAL;
+	unclaimed = 0;
+	pReg = NULL;
+	pStartLoc = NULL;
+	noStartLeader = 0;
 }
 
 Faction::Faction(int n)
 {
-    exists = 1;
-    num = n;
-    for (int i=0; i<NFACTYPES; i++)
-    {
-        type[i] = 1;
-    }
-    lastchange = -6;
-    name = new AString;
-    *name = AString("Faction (") + AString(num) + AString(")");
-    address = new AString("NoAddress");
-    password = new AString("none");
-    times = 1;
-    temformat = TEMPLATE_LONG;
-    defaultattitude = A_NEUTRAL;
-    quit = 0;
-    unclaimed = 0;
+	exists = 1;
+	num = n;
+	for (int i=0; i<NFACTYPES; i++) {
+		type[i] = 1;
+	}
+	lastchange = -6;
+	name = new AString;
+	*name = AString("Faction (") + AString(num) + AString(")");
+	address = new AString("NoAddress");
+	password = new AString("none");
+	times = 1;
+	temformat = TEMPLATE_LONG;
+	defaultattitude = A_NEUTRAL;
+	quit = 0;
+	unclaimed = 0;
+	pReg = NULL;
+	pStartLoc = NULL;
+	noStartLeader = 0;
 }
 
 Faction::~Faction()

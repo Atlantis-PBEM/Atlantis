@@ -199,6 +199,8 @@ public:
 	// These are used for 'granting' units to a faction via the players.in
 	// file
 	ARegion *pReg;
+	ARegion *pStartLoc;
+	int noStartLeader;
 };
 
 Faction * GetFaction(AList *,int);

@@ -32,6 +32,9 @@ int Game::SetupFaction( Faction *pFac )
 {
     pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
 
+	if(pFac->noStartLeader)
+		return 1;
+
     //
     // Set up first unit.
     //
@@ -52,10 +55,12 @@ int Game::SetupFaction( Faction *pFac )
     }
 
 	ARegion *reg = NULL;
-	if(!Globals->MULTI_HEX_NEXUS) {
+	if(pFac->pStartLoc) {
+		reg = pFac->pStartLoc;
+	} else if(!Globals->MULTI_HEX_NEXUS) {
 		reg = (ARegion *)(regions.First());
 	} else {
-		ARegionArray * pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
+		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
 			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
 		}

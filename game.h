@@ -223,6 +223,13 @@ private:
 
 	void EnableObject(int ob); // Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built
+	void ModifyObjectFlags(int ob, int flags);
+	void ModifyObjectDecay(int ob, int maxMaint, int maxMonthDecay, int mFact);
+	void ModifyObjectProduction(int ob, int it);
+	void ModifyObjectMonster(int ob, int monster);
+	void ModifyObjectConstruction(int ob, int it, int num, int sk, int lev);
+	void ModifyObjectManpower(int ob, int protect, int capacity, int sailors);
+	
 
 	void ClearTerrainRaces(int t);
 	void ModifyTerrainRace(int t, int i, int r);

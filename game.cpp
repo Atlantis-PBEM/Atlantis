@@ -794,6 +794,31 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 				}
 			}
 		}
+	} else if(*pToken == "StartLoc:") {
+		int x, y, z;
+		pTemp = pLine->gettoken();
+		if(pTemp) {
+			x = pTemp->value();
+			delete pTemp;
+			pTemp = pLine->gettoken();
+			if(pTemp) {
+				y = pTemp->value();
+				delete pTemp;
+				pTemp = pLine->gettoken();
+				if(pTemp) {
+					z = pTemp->value();
+					ARegion *pReg = regions.GetRegion( x, y, z );
+					if(pReg) {
+						pFac->pStartLoc = pReg;
+						if(!pFac->pReg) pFac->pReg = pReg;
+					} else {
+						Awrite(AString("Invalid StartLoc:")+x+","+y+","+z+
+								" in faction " + pFac->num);
+						pFac->pStartLoc = NULL;
+					}
+				}
+			}
+		}
 	} else if(*pToken == "NewUnit:") {
 		// Creates a new unit in the location specified by a Loc: line
 		// with a gm_alias of whatever is after the NewUnit: tag.
@@ -944,6 +969,8 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 				}
 			}
 		}
+	} else if( *pToken == "NoStartLeader" ) {
+		pFac->noStartLeader = 1;
 	} else if( *pToken == "Order:" ) {
 		pTemp = pLine->StripWhite();
 		if( *pTemp == "quit" ) {

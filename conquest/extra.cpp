@@ -38,21 +38,24 @@ int Game::SetupFaction( Faction *pFac )
 
 	// Lets see if there is an available regions for this unit
 	ARegion *pReg = 0;
-	forlist(&regions) {
-		pReg = (ARegion *)elem;
-		ARegionArray *pRA = regions.pRegionArrays[pReg->zloc];
+	if(pFac->pStartingLoc) {
+		pReg = pFac->pStartingLoc;
+	} else {
+		forlist(&regions) {
+			pReg = (ARegion *)elem;
+			ARegionArray *pRA = regions.pRegionArrays[pReg->zloc];
 
-		if(!pReg->CanBeStartingCity(pRA)) {
-			pReg = 0;
-			continue;
+			if(!pReg->CanBeStartingCity(pRA)) {
+				pReg = 0;
+				continue;
+			}
+			if(pReg->IsStartingCity()) {
+				// This region has already been set up.
+				pReg = 0;
+				continue;
+			}
+			break;
 		}
-
-		if(pReg->IsStartingCity()) {
-			// This region has already been set up.
-			pReg = 0;
-			continue;
-		}
-		break;
 	}
 
 	if(!pReg) {
@@ -74,10 +77,12 @@ int Game::SetupFaction( Faction *pFac )
     //
     // Set up first unit.
     //
-    Unit *temp2 = GetNewUnit( pFac );
-    temp2->SetMen( I_MAN, 1 );
-    temp2->reveal = REVEAL_FACTION;
-	temp2->MoveUnit(obj);
+	if(!pFac->noStartLeader) {
+		Unit *temp2 = GetNewUnit( pFac );
+		temp2->SetMen( I_MAN, 1 );
+		temp2->reveal = REVEAL_FACTION;
+		temp2->MoveUnit(obj);
+	}
 
     return( 1 );
 }

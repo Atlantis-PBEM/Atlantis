@@ -671,6 +671,9 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 		case S_CREATE_MAGIC_CARPET:
 			RunCreateArtifact(r,u,sk,I_MCARPET);
 			break;
+		case S_CREATE_FLAMING_SWORD:
+			RunCreateArtifact(r,u,sk,I_FSWORD);
+			break;
 		case S_SUMMON_IMPS:
 			RunSummonImps(r,u);
 			break;
