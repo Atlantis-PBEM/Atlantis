@@ -396,6 +396,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						if(pCheck) {
 							if (formerMonthOrders) {
+								unit->monthorders = &( pCheck->dummyOrder );
 								unit->monthorders->type = savetype;
 								formerMonthOrders = 0;
 							} else
@@ -425,6 +426,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						if(pCheck) {
 							if (formerMonthOrders) {
+								unit->monthorders = &( pCheck->dummyOrder );
 								unit->monthorders->type = savetype;
 								formerMonthOrders = 0;
 							} else
@@ -460,6 +462,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						if(pCheck) {
 							if (formerMonthOrders) {
+								unit->monthorders = &( pCheck->dummyOrder );
 								unit->monthorders->type = savetype;
 								formerMonthOrders = 0;
 							} else
