@@ -263,7 +263,7 @@ AString Faction::FactionTypeStr()
 	if (IsNPC()) return AString("NPC");
 
 	if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED) {
-		return (AString("Unlmiited"));
+		return (AString("Unlimited"));
 	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		return( AString( "Normal" ));
 	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {

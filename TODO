@@ -40,6 +40,8 @@
       newsgroup]
    -- Consider Tim Martel's suggestion to allow ranged attacks from front
       row troops to hit the rear row of defenders.
+   -- Consider Tim Martel's suggestion of 'low magic'/'no magic' areas.
+   -- Consider 'overall' morale score which could affect routing.
 
 ** Items
    -- Consider adding the ability to produce trade goods.
@@ -54,6 +56,8 @@
    -- Consider a smaller boat than a longboat which can be used for quick
       scouts/easy ocean screens but can only hold a few men. [see
       atlantisdev post #79]
+   -- Consider Tim Martel's idea of a total limit on production of a
+      resource in a hex with a chance of regeneration.
 
 
 ** Orders
