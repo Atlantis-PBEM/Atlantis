@@ -814,6 +814,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 				Unit *u = GetNewUnit(pFac);
 				u->gm_alias = val;
 				u->MoveUnit(pFac->pReg->GetDummy());
+				u->Event("Is given to your faction.");
 			}
 		}
 	} else if(*pToken == "Item:") {
@@ -858,6 +859,11 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 								} else {
 									int has = u->items.GetNum(it);
 									u->items.SetNum(it, has + v);
+									if(!u->gm_alias) {
+										u->Event(AString("Is given ") +
+												ItemString(it, v) +
+												" by the gods.");
+									}
 								}
 							}
 						}
@@ -897,7 +903,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 								Awrite(AString("Must specify a days for ") +
 										"Skill: in faction " + pFac->num);
 							} else {
-								int days = pTemp->value();
+								int days = pTemp->value() * u->GetMen();
 								if(!days) {
 									Awrite(AString("Must specify a days for ")+
 											"Skill: in faction " + pFac->num);
@@ -909,6 +915,12 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 									if(lvl > pFac->skills.GetDays(sk)) {
 										pFac->skills.SetDays(sk, lvl);
 										pFac->shows.Add(new ShowSkill(sk,lvl));
+									}
+									if(!u->gm_alias) {
+										u->Event(AString("Is taught ") +
+												days + " days of " +
+												SkillStrs(sk) +
+												" by the gods.");
 									}
 								}
 							}
