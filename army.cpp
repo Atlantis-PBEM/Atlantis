@@ -634,6 +634,7 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 	for (i=0; i<NITEMS; i++) {
 		if ((ItemDefs[i].type & thespoil) &&
 				!(ItemDefs[i].type & IT_SPECIAL) &&
+				!(ItemDefs[i].type & IT_SHIP) &&
 				!(ItemDefs[i].flags & ItemType::DISABLED)) {
 			count ++;
 		}
@@ -816,31 +817,43 @@ void Army::Win(Battle * b,ItemList * spoils)
 
 			int ns = units.Num();
 			if(ns > 0) {
-				int n = i->num/ns; // Divide spoils equally
-				if(n >= 1) {
+				if(ItemDefs[i->type].type & IT_SHIP) {
+					// randomly give all to one
+					int n = i->num/ns;
 					forlist(&units) {
 						up = (UnitPtr *)elem;
-						up->ptr->items.SetNum(i->type,
-								up->ptr->items.GetNum(i->type)+n);
-						up->ptr->faction->DiscoverItem(i->type, 0, 1);
+						if(up->ptr->items.GetNum(i->type) != 0) continue;
+						if(getrandom(i->num) > n) continue;
+						up->ptr->items.SetNum(i->type, i->num);
+						break;
 					}
-				}
-				n = i->num % ns; // allocate the remainder
-				if(n) {
-					for(int x = 0; x < n; x++) {
-						int t = getrandom(ns);
-						up = (UnitPtr *)units.First();
-						if(up) {
-							UnitPtr *p;
-							while(t > 0) {
-								p = (UnitPtr *)units.Next(up);
-								if(p) up = p;
-								else break;
-								--t;
-							}
+				} else {
+					int n = i->num/ns; // Divide spoils equally
+					if(n >= 1) {
+						forlist(&units) {
+							up = (UnitPtr *)elem;
 							up->ptr->items.SetNum(i->type,
-									up->ptr->items.GetNum(i->type)+1);
+									up->ptr->items.GetNum(i->type)+n);
 							up->ptr->faction->DiscoverItem(i->type, 0, 1);
+						}
+					}
+					n = i->num % ns; // allocate the remainder
+					if(n) {
+						for(int x = 0; x < n; x++) {
+							int t = getrandom(ns);
+							up = (UnitPtr *)units.First();
+							if(up) {
+								UnitPtr *p;
+								while(t > 0) {
+									p = (UnitPtr *)units.Next(up);
+									if(p) up = p;
+									else break;
+									--t;
+								}
+								up->ptr->items.SetNum(i->type,
+										up->ptr->items.GetNum(i->type)+1);
+								up->ptr->faction->DiscoverItem(i->type, 0, 1);
+							}
 						}
 					}
 				}

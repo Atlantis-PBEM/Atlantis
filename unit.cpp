@@ -327,6 +327,13 @@ AString Unit::GetName(int obs)
 int Unit::CanGetSpoil(Item *i)
 {
 	if(!i) return 0;
+	// units with NOSPOILS, FLYSPOILS or RIDESPOILS will
+	// NOT pick up incomplete ships, as well as those
+	// already having a ship of the same type
+	if(ItemDefs[i->type].type & IT_SHIP) {
+		if ((flags & FLAG_FLYSPOILS) || (flags & FLAG_RIDESPOILS)) return 0;
+		if (items.GetNum(i->type) > 0) return 0;
+	}
 	int weight = ItemDefs[i->type].weight;
 	if(!weight) return 1; // any unit can carry 0 weight spoils
 

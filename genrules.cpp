@@ -2443,43 +2443,75 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "center");
 		f.Enclose(1, "table border=\"1\"");
 		f.Enclose(1, "tr");
-		f.TagText("td", "");
+		f.TagText("td", "&nbsp;");
 		f.TagText("th", "Capacity");
 		f.TagText("th", "Cost");
-		f.TagText("th", "Material");
 		f.TagText("th", "Sailors");
+		f.TagText("th", "Skill");
+		f.TagText("th", "Fleet?");
 		f.Enclose(0, "tr");
+		for(i = 0; i < NITEMS; i++) {
+			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if(!(ItemDefs[i].type & IT_SHIP)) continue;
+			int pub = 1;
+			for(int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(Materials); c++) {
+				int m = ItemDefs[i].pInput[c].item;
+				if(m != -1) {
+					if(ItemDefs[m].flags & ItemType::DISABLED) pub = 0;
+					if((ItemDefs[m].type & IT_ADVANCED) ||
+						(ItemDefs[m].type & IT_MAGIC)) pub = 0;
+				}
+			}
+			if(pub == 0) continue;
+			int slevel = ItemDefs[i].pLevel;
+			if(slevel > 3) continue;
+			f.Enclose(1, "tr");
+			f.Enclose(1, "td align=\"center\"");
+			f.PutStr(ItemDefs[i].name);
+			f.Enclose(0, "td");
+			f.Enclose(1, "td align=\"center\"");
+			f.PutStr(ItemDefs[i].swim);
+			f.Enclose(0, "td");
+			f.Enclose(1, "td align=\"center\"");
+			f.PutStr(ItemDefs[i].pMonths);
+			f.Enclose(0, "td");
+			f.Enclose(1, "td align=\"center\"");
+			f.PutStr(ItemDefs[i].pMonths/5);
+			f.Enclose(0, "td");
+			f.Enclose(1, "td align=\"center\"");
+			f.PutStr(slevel);
+			f.Enclose(0, "td");
+			f.Enclose(1, "td align=\"center\"");
+			f.PutStr(AString("yes"));
+			f.Enclose(0, "td");
+			f.Enclose(0, "tr");
+		}					
 		for(i = 0; i < NOBJECTS; i++) {
 			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 			if(!ObjectIsShip(i)) continue;
-			pS = FindSkill(ObjectDefs[i].skill);
-			if(pS == NULL) continue;
-			if(pS->flags & SkillType::MAGIC) continue;
-			j = ObjectDefs[i].item;
-			if(j == -1) continue;
-			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
-			if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
-			if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
-			/* Okay, this is a valid object to build! */
+			if(ItemDefs[ObjectDefs[i].item].flags & ItemType::DISABLED)
+				continue;
+			int normal = (ItemDefs[ObjectDefs[i].item].type & IT_NORMAL);
+			normal |= (ItemDefs[ObjectDefs[i].item].type & IT_TRADE);
+			if(!normal) continue;
 			f.Enclose(1, "tr");
-			f.Enclose(1, "td align=\"left\" nowrap");
+			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(ObjectDefs[i].name);
 			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"left\" nowrap");
+			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(ObjectDefs[i].capacity);
 			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"left\" nowrap");
+			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(ObjectDefs[i].cost);
 			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"left\" nowrap");
-			if(j == I_WOOD_OR_STONE)
-				temp = "wood or stone";
-			else
-				temp = ItemDefs[j].name;
-			f.PutStr(temp);
-			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"left\" nowrap");
+			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(ObjectDefs[i].sailors);
+			f.Enclose(0, "td");
+			f.Enclose(1, "td align=\"center\"");
+			f.PutStr(AString("")+1);
+			f.Enclose(0, "td");
+			f.Enclose(1, "td align=\"center\"");
+			f.PutStr(AString("no"));
 			f.Enclose(0, "td");
 			f.Enclose(0, "tr");
 		}

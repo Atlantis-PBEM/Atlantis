@@ -207,6 +207,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 
 void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
 {
+	ItemList *ships = new ItemList;
 	forlist(losers) {
 		Unit * u = ((Location *) elem)->unit;
 		int numalive = u->GetSoldiers();
@@ -214,15 +215,32 @@ void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
 		forlist(&u->items) {
 			Item * i = (Item *) elem;
 			if(IsSoldier(i->type)) continue;
+			// ignore incomplete ships
+			if(ItemDefs[i->type].type & IT_SHIP) continue;
 			// New rule:  Assassins with RINGS cannot get AMTS in spoils
 			// This rule is only meaningful with Proportional AMTS usage
 			// is enabled, otherwise it has no effect.
 			if((ass == 2) && (i->type == I_AMULETOFTS)) continue;
 			float percent = (float)numdead/(float)(numalive+numdead);
-			int num = (int)(i->num * percent);
-			int num2 = (num + getrandom(2))/2;
-			spoils->SetNum(i->type, spoils->GetNum(i->type) + num2);
-			u->items.SetNum(i->type, i->num - num);
+			// incomplete ships:
+			if(ItemDefs[i->type].type & IT_SHIP) {
+				if(getrandom(100) < percent) {
+					u->items.SetNum(i->type, 0);
+					if(i->num < ships->GetNum(i->type))
+						ships->SetNum(i->type, i->num);
+				}
+			} else {
+				int num = (int)(i->num * percent);
+				int num2 = (num + getrandom(2))/2;
+				spoils->SetNum(i->type, spoils->GetNum(i->type) + num2);
+				u->items.SetNum(i->type, i->num - num);
+			}
+		}
+	}
+	// add incomplete ships to spoils...
+	for(int sh = 0; sh < NITEMS; sh++) {
+		if(ItemDefs[sh].type & IT_SHIP) {
+			spoils->SetNum(sh, ships->GetNum(sh));
 		}
 	}
 }

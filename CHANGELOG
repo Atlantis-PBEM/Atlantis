@@ -917,6 +917,7 @@ Changes from 4.0.10 -> 5.0.0
    -- changed fleet reports so that single-ship fleets show the ship type as <object type>
       rather than "Fleet". Also no ship list is displayed for them.
    -- implemented ENTER NEW <alias>. New fleets created during GIVE orders are now given aliases that
-      may be specified in an Enter order.	  
+      may be specified in an Enter order.	
+   -- implemented handling of ship items in spoils  
    	  ToDo: armored galleon bonus...?
    
