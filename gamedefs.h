@@ -312,21 +312,27 @@ public:
 
 	// Raising this value will lessen the effects
 	// of a region type's economy on the chance
-	// for creating towns (overall probability
-	// will also vary a bit).
-	// Default = 0. For high values the town probability
-	// will need to be adjusted downwards to get
-	// comparable number of towns.
+	// for creating towns. At 100% chances will
+	// be exactly equal for all types of regions,
+	// at 0 the chance will be directly proportional
+	// to the economy value.
 	int TOWN_SPREAD;
 
-	// Flag for disallowing settlements in adjacent regions
-	// (except near starting cities)
+	// Reduction (in %) of the chance for towns forming adjacent
+	// to each other (0 = normal chance, 100 = no chance of towns
+	// forming adjacent to each other)
 	int TOWNS_NOT_ADJACENT;
 
 	// Make settlements near the arctic less likely and smaller
 	// Higher values decrease likeliness of settlements
 	// suggested: 0-5
 	int LESS_ARCTIC_TOWNS;
+	
+	// Percent of surface level covered with ocean.
+	int OCEAN;
+	
+	// Size factor for continent creation.
+	int CONTINENT_SIZE;
 
 	// Enable Archipelago Creation
 	// = chance of creating archipelagos vs continents

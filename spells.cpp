@@ -968,6 +968,12 @@ int Game::RunConstructGate(ARegion *r,Unit *u)
 	u->SetMoney(u->GetMoney() - 1000);
 	regions.numberofgates++;
 	r->gate = regions.numberofgates;
+	if(Globals->GATES_NOT_PERENNIAL) {
+		int dm = Globals->GATES_NOT_PERENNIAL / 2;
+		int gm = month + 1 - getrandom(dm) - getrandom(dm) - getrandom(Globals->GATES_NOT_PERENNIAL % 2);
+		while(gm < 0) gm += 12;
+		r->gatemonth = gm;
+	}
 	return 1;
 }
 

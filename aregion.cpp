@@ -359,10 +359,12 @@ void ARegion::SetupPop()
 				townch = townch + 25 * (9 - dsouth) *
 					(9 - dsouth) * Globals->LESS_ARCTIC_TOWNS;
 		}
-		int townprob = TerrainDefs[type].economy * 4 /
-			(Globals->TOWN_SPREAD+1) + 50 * Globals->TOWN_SPREAD;
-		if (adjacent == 0)
-			if (getrandom(townch) < townprob) AddTown();
+		int spread = Globals->TOWN_SPREAD;
+		if(spread > 100) spread = 100;
+		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
+			100 * spread) / 100;
+		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
+		if (getrandom(townch) < townprob) AddTown();
 	}
 
 	if(Globals->PLAYER_ECONOMY) {
@@ -1645,7 +1647,7 @@ void ARegion::SetGateStatus(int month)
 	gateopen = 0;
 	for (int i = 0; i < Globals->GATES_NOT_PERENNIAL; i++) {
 		int dmon = gatemonth + i;
-		if (dmon > 12) dmon = dmon - 12;
+		if (dmon > 11) dmon = dmon - 12;
 		if (dmon == month) gateopen = 1;
 	}
 }
@@ -2946,14 +2948,13 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char *name)
 	}
 }
 
-void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize,
-		int percentOcean, int continentSize, char *name)
+void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name)
 {
 	MakeRegions(level, xSize, ySize);
 
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
-	MakeLand(pRegionArrays[level], percentOcean, continentSize);
+	MakeLand(pRegionArrays[level], Globals->OCEAN, Globals->CONTINENT_SIZE);
 
 	if (Globals->LAKES_EXIST) CleanUpWater(pRegionArrays[level]);
 
@@ -3843,7 +3844,7 @@ void ARegionList::FinalSetupGates()
 			used[index] = 1;
 			// setting up gatemonth
 			int nmon = (getrandom(3) - 1) + (getrandom(3) - 1) + ((index+1) % 12);
-			if (nmon > 12) nmon = nmon - 12;
+			if (nmon > 11) nmon = nmon - 12;
 			if (nmon < 0) nmon = nmon + 12;
 			r->gatemonth = nmon;
 		}

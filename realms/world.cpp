@@ -2143,7 +2143,7 @@ void Game::CreateWorld()
     SetupNames();
 
     regions.CreateNexusLevel( 0, nx, ny, "nexus" );
-    regions.CreateSurfaceLevel( 1, xx, yy, 60, 16, 0 );
+    regions.CreateSurfaceLevel( 1, xx, yy, 0 );
 
     // Create underworld levels
 	int i;
