@@ -913,6 +913,7 @@ int IsSoldier(int item)
 
 Item::Item()
 {
+	selling = 0;
 }
 
 Item::~Item()
@@ -979,6 +980,23 @@ int ItemList::Weight()
 		wt += ItemDefs[i->type].weight * i->num;
 	}
 	return wt;
+}
+
+int ItemList::CanSell(int t)
+{
+	forlist(this) {
+		Item *i = (Item *)elem;
+		if (i->type == t) return i->num - i->selling;
+	}
+	return 0;
+}
+
+void ItemList::Selling(int t, int n)
+{
+	forlist(this) {
+		Item *i = (Item *)elem;
+		if (i->type == t) i->selling += n;
+	}
 }
 
 AString ItemList::Report(int obs,int seeillusions,int nofirstcomma)

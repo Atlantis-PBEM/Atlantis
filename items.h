@@ -301,6 +301,7 @@ class Item : public AListElem
 
 		int type;
 		int num;
+		int selling;
 };
 
 class ItemList : public AList
@@ -315,6 +316,8 @@ class ItemList : public AList
 		int Weight();
 		int GetNum(int);
 		void SetNum(int,int); /* type, number */
+		int CanSell(int);
+		void Selling(int, int); /* type, number */
 };
 
 extern AString ShowSpecial(int special, int level, int expandLevel,

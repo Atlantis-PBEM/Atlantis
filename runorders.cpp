@@ -1369,14 +1369,15 @@ int Game::GetSellAmount(ARegion * r,Market * m)
 				SellOrder * o = (SellOrder *) elem;
 				if (o->item == m->item) {
 					if(o->num == -1) {
-						o->num = u->items.GetNum(o->item);
+						o->num = u->items.CanSell(o->item);
 					}
-					if (o->num > u->items.GetNum(o->item)) {
-						o->num = u->items.GetNum(o->item);
+					if (o->num > u->items.CanSell(o->item)) {
+						o->num = u->items.CanSell(o->item);
 						u->Error("SELL: Unit attempted to sell more than "
 								"it had.");
 					}
 					if (o->num < 0) o->num = 0;
+					u->items.Selling(o->item, o->num);
 					num += o->num;
 				}
 			}
