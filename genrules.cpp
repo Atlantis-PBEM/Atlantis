@@ -4444,6 +4444,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#hold", "HOLD") + ", ";
 	temp += f.Link("#name", "NAME") + ", ";
 	temp += f.Link("#noaid", "NOAID") + ", ";
+	temp += f.Link("#nocross", "NOCROSS") + ", ";
 	temp += f.Link("#option", "OPTION") + ", ";
 	temp += f.Link("#password", "PASSWORD") + ", ";
 	if(Globals->USE_PREPARE_COMMAND)
@@ -4548,7 +4549,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#produce", "PRODUCE") + ", ";
 	temp += f.Link("#study", "STUDY") + ", ";
 	temp += f.Link("#teach", "TEACH") + ", and ";
-	temp = f.Link("#work", "WORK") + " orders are processed.";
+	temp += f.Link("#work", "WORK") + " orders are processed.";
 	f.TagText("LI", temp);
 	temp = "Costs associated with these orders (such as study fees) are "
 		"collected.";
