@@ -1187,6 +1187,8 @@ void Unit::Short(int needed, int hunger)
 	if (faction->IsNPC())
 		return; // Don't starve monsters and the city guard!
 
+	if (needed < 1 && hunger < 1) return;
+
 	switch(Globals->SKILL_STARVATION) {
 		case GameDefs::STARVE_MAGES:
 			if(type == U_MAGE) SkillStarvation();
@@ -1198,8 +1200,6 @@ void Unit::Short(int needed, int hunger)
 			SkillStarvation();
 			return;
 	}
-
-	if (needed < 1 && hunger < 1) return;
 
 	for (int i = 0; i<= NITEMS; i++) {
 		if(!(ItemDefs[ i ].type & IT_MAN)) {
