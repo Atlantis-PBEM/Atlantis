@@ -656,7 +656,10 @@ public:
 	// Transport and related settings
 	enum {
 		ALLOW_TRANSPORT = 0x01, // Do we allow transport/distribute?
+		// actual cost will be * (4 - (level+1)/2), which means that 
+		// the cost will be from *1 (at level 5) to *3 (at level 1)
 		QM_AFFECT_COST = 0x02, // QM level affect shipping cost?
+		// actual distance will be NONLOCAL_TRANSPORT + ((level + 1)/3)
 		QM_AFFECT_DIST = 0x04, // QM level affect longrange dist?
 	};
 	int TRANSPORT;
@@ -668,10 +671,7 @@ public:
 	// (0 to allow instant transport between structures anywhere in world)
 	int NONLOCAL_TRANSPORT;
 
-	// Base cost per weight unit to ship items.  (QM skill can affect
-	// this as a multiplier at lower skill levels.
-	// Function is 4-(level+1)/2), which means that the cost will be from
-	// 1 (at level 5) to 3 (at level 1) times this value per weight unit.
+	// Base cost per weight unit to ship items.
 	int SHIPPING_COST;
 
 	// Will 0 weight items have a fractional weight so that large

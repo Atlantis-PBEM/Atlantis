@@ -30,43 +30,149 @@
 
 int Game::SetupFaction( Faction *pFac )
 {
-	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
+	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 500;
 
 	if(pFac->noStartLeader)
 		return 1;
-
+	
+	AString *name;
 	//
 	// Set up first unit.
 	//
-	Unit *temp2 = GetNewUnit( pFac );
-	temp2->SetMen( I_LEADERS, 1 );
-	temp2->reveal = REVEAL_FACTION;
+	Unit *leader = GetNewUnit(pFac);
+	leader->SetMen(I_LEADERS, 1);
+	leader->reveal = REVEAL_FACTION;
+	leader->SetFlag(FLAG_BEHIND, 1);
+	name = new AString("House Leader");
+	leader->SetName(name);
+	leader->items.SetNum(I_HORSE, 1);
 
-	temp2->type = U_MAGE;
-	temp2->Study(S_PATTERN, 30);
-	temp2->Study(S_SPIRIT, 30);
-	temp2->Study(S_GATE_LORE, 30);
+	leader->type = U_MAGE;
+	leader->Study(S_TACTICS, 180);
+	leader->Study(S_PATTERN, 30);
+	leader->Study(S_SPIRIT, 30);
+	leader->Study(S_GATE_LORE, 30);
+	leader->Study(S_FORCE, 90);
+	leader->Study(S_FIRE, 90);
+	leader->combat = S_FIRE;
 
 	if (TurnNumber() >= 25) {
-		temp2->Study(S_PATTERN, 60);
-		temp2->Study(S_SPIRIT, 60);
-		temp2->Study(S_FORCE, 90);
-		temp2->Study(S_COMBAT, 30);
+		leader->Study(S_PATTERN, 60);
+		leader->Study(S_SPIRIT, 60);
+		leader->Study(S_FORCE, 90);
+		leader->Study(S_COMBAT, 30);
 	}
+	
+	//
+	// Set up other supporting units
+	//
+	Unit *army = GetNewUnit(pFac);
+	army->SetMen(I_LEADERS, 10);
+	army->reveal = REVEAL_FACTION;
+	name = new AString("House Guard");
+	army->SetName(name);
+	army->items.SetNum(I_SWORD, 10);
+	army->items.SetNum(I_HORSE, 10);
+	army->items.SetNum(I_CHAINARMOR, 10);
+	army->Study(S_COMBAT, 1800);
+	army->Study(S_RIDING, 1800);
+	
+	
+	Unit *archers = GetNewUnit(pFac);
+	archers->SetMen(I_LEADERS, 10);
+	archers->reveal = REVEAL_FACTION;
+	archers->SetFlag(FLAG_BEHIND, 1);
+	name = new AString("House Guard");
+	archers->SetName(name);
+	archers->items.SetNum(I_CROSSBOW, 10);
+	archers->items.SetNum(I_HORSE, 10);
+	archers->items.SetNum(I_CHAINARMOR, 10);
+	archers->Study(S_CROSSBOW, 1800);
+	archers->Study(S_RIDING, 1800);
+	
+	
+	Unit *sneak = GetNewUnit(pFac);
+	sneak->SetMen(I_LEADERS, 1);
+	sneak->reveal = REVEAL_NONE;
+	sneak->SetFlag(FLAG_BEHIND, 1);
+	sneak->guard = GUARD_AVOID;
+	name = new AString("Captain of the Hunt");
+	sneak->SetName(name);
+	sneak->items.SetNum(I_HORSE, 1);
+	sneak->items.SetNum(I_CLOTHARMOR, 1);
+	sneak->Study(S_STEALTH, 180);
+	sneak->Study(S_OBSERVATION, 180);
+	sneak->Study(S_HUNTING, 180);
+	
+	
+	Unit *quartermaster = GetNewUnit(pFac);
+	quartermaster->SetMen(I_LEADERS, 1);
+	quartermaster->reveal = REVEAL_FACTION;
+	quartermaster->SetFlag(FLAG_BEHIND, 1);
+	quartermaster->guard = GUARD_AVOID;
+	name = new AString("Store Master");
+	quartermaster->SetName(name);
+	quartermaster->items.SetNum(I_WOOD, 10);
+	quartermaster->items.SetNum(I_STONE, 10);
+	quartermaster->Study(S_QUARTERMASTER, 180);
+	quartermaster->Study(S_OBSERVATION, 180);
+	
+	
+	Unit *retainer = GetNewUnit(pFac);
+	retainer->SetMen(I_LEADERS, 1);
+	retainer->reveal = REVEAL_FACTION;
+	retainer->SetFlag(FLAG_BEHIND, 1);
+	retainer->guard = GUARD_AVOID;
+	name = new AString("Old Family Retainer");
+	retainer->SetName(name);
+	retainer->Study(S_FARMING, 180);
+	retainer->Study(S_RANCHING, 180);
+	retainer->Study(S_FISHING, 180);	
+	
+	
+	Unit *merchant = GetNewUnit(pFac);
+	merchant->SetMen(I_LEADERS, 1);
+	merchant->reveal = REVEAL_FACTION;
+	merchant->SetFlag(FLAG_BEHIND, 1);
+	merchant->guard = GUARD_AVOID;
+	name = new AString("Trusted City Merchant");
+	merchant->SetName(name);
+	merchant->items.SetNum(I_HORSE, 1);
+	merchant->Study(S_HORSETRAINING, 180);
+	merchant->Study(S_LUMBERJACK, 180);
+	merchant->Study(S_BUILDING, 180);
+	merchant->Study(S_SHIPBUILDING, 180);
+	
 
+	Unit *smith = GetNewUnit(pFac);
+	smith->SetMen(I_LEADERS, 1);
+	smith->reveal = REVEAL_FACTION;
+	smith->SetFlag(FLAG_BEHIND, 1);
+	smith->guard = GUARD_AVOID;
+	name = new AString("Blacksmith");
+	smith->SetName(name);
+	smith->items.SetNum(I_IRON, 10);
+	smith->Study(S_MINING, 180);
+	smith->Study(S_WEAPONSMITH, 180);
+	smith->Study(S_ARMORER, 180);
+	smith->Study(S_QUARRYING, 180);
+
+	
+	/* Food is stoopid! (IMHO, of course)
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
 		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED))
-			temp2->items.SetNum(I_FOOD, 6);
+			leader->items.SetNum(I_FOOD, 6);
 		else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
-			temp2->items.SetNum(I_FISH, 6);
+			leader->items.SetNum(I_FISH, 6);
 		else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
-			temp2->items.SetNum(I_LIVESTOCK, 6);
+			leader->items.SetNum(I_LIVESTOCK, 6);
 		else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
-			temp2->items.SetNum(I_GRAIN, 2);
-		temp2->items.SetNum(I_SILVER, 10);
+			leader->items.SetNum(I_GRAIN, 2);
+		leader->items.SetNum(I_SILVER, 10);
 	}
-
+	*/
+	
 	ARegion *reg = NULL;
 	if(pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
@@ -76,7 +182,7 @@ int Game::SetupFaction( Faction *pFac )
 		} else {
 			// Get the surface
 			ARegionArray *pArr = regions.GetRegionArray(1);
-			// Let's look for a random, city hex
+			// Let's look for a random city hex
 			while (!reg) {
 				reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
 				// reg->town will be null if there is no town.
@@ -95,7 +201,15 @@ int Game::SetupFaction( Faction *pFac )
 			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
 		}
 	}
-	temp2->MoveUnit( reg->GetDummy() );
+	
+	leader->MoveUnit( reg->GetDummy() );
+	army->MoveUnit( reg->GetDummy() );
+	archers->MoveUnit( reg->GetDummy() );
+	sneak->MoveUnit( reg->GetDummy() );
+	quartermaster->MoveUnit( reg->GetDummy() );
+	retainer->MoveUnit( reg->GetDummy() );
+	merchant->MoveUnit( reg->GetDummy() );
+	smith->MoveUnit( reg->GetDummy() );
 
 	return( 1 );
 }
@@ -125,17 +239,17 @@ void Game::ModifyTablesPerRuleset(void)
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
-	EnableItem(I_PICK);
-	EnableItem(I_SPEAR);
-	EnableItem(I_AXE);
-	EnableItem(I_HAMMER);
+	//EnableItem(I_PICK);
+	//EnableItem(I_SPEAR);
+	//EnableItem(I_AXE);
+	//EnableItem(I_HAMMER);
 	EnableItem(I_MCROSSBOW);
 	EnableItem(I_MWAGON);
-	EnableItem(I_GLIDER);
-	EnableItem(I_NET);
-	EnableItem(I_LASSO);
-	EnableItem(I_BAG);
-	EnableItem(I_SPINNING);
+	//EnableItem(I_GLIDER);
+	//EnableItem(I_NET);
+	//EnableItem(I_LASSO);
+	//EnableItem(I_BAG);
+	//EnableItem(I_SPINNING);
 	EnableItem(I_LEATHERARMOR);
 	EnableItem(I_CLOTHARMOR);
 	EnableItem(I_BOOTS);
@@ -146,10 +260,27 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_LANCE);
 	EnableItem(I_JAVELIN);
 	EnableItem(I_PIKE);
+	// Hmm, shouldn't LBOW be armour piercing?
+	ModifyWeaponAttack("LBOW", ARMORPIERCING, ATTACK_RANGED, 1);
 
-	EnableItem(I_GREYELF);
-	EnableItem(I_MINOTAUR);
-	EnableItem(I_DROWMAN);
+	//EnableItem(I_GREYELF);
+	//EnableItem(I_MINOTAUR);
+	//EnableItem(I_DROWMAN);
+	
+	// Racial skills are modified too - but that
+	// bit's at the bottom
+	DisableItem(I_GNOME);
+	DisableItem(I_ESKIMO);
+	DisableItem(I_TRIBESMAN);
+	DisableItem(I_NOMAD);
+	DisableItem(I_WOODELF);
+	DisableItem(I_TRIBALELF);
+	DisableItem(I_ICEDWARF);
+	DisableItem(I_UNDERDWARF);
+	DisableItem(I_SEAELF);
+
+	EnableItem(I_CENTAURMAN);
+	EnableItem(I_GOBLINMAN);
 
 	EnableSkill(S_ARMORCRAFT);
 	EnableSkill(S_WEAPONCRAFT);
@@ -166,7 +297,8 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_PRESERVE);
 	EnableObject(O_SACGROVE);
 	DisableObject(O_BKEEP);
-
+	DisableObject(O_PALACE);
+	
 	EnableObject(O_ISLE);
 	EnableObject(O_DERELICT);
 	EnableObject(O_OCAVE);
@@ -184,13 +316,13 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_GEMCUTTING);
 	}
 
-        // Modify the various spells which are allowed to cross levels
-        if(Globals->EASIER_UNDERWORLD) {
-                ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
-                ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
-                ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
-                ModifyRangeFlags("rng_weather", RangeType::RNG_CROSS_LEVELS);
-        }
+	// Modify the various spells which are allowed to cross levels
+	if(Globals->EASIER_UNDERWORLD) {
+		ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags("rng_weather", RangeType::RNG_CROSS_LEVELS);
+	}
 
 
 	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
@@ -198,7 +330,7 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableObject(O_CARAVANSERAI);
 	}
 	// XXX -- This is just here to preserve existing behavior
-	ModifyItemProductionBooster(I_AXE, I_HAMMER, 1);
+	//ModifyItemProductionBooster(I_AXE, I_HAMMER, 1);
 	
 	// I reckon you should be able to transport LIVE and HORSES
 	ModifyItemFlags(I_LIVESTOCK, 0);
@@ -220,23 +352,6 @@ void Game::ModifyTablesPerRuleset(void)
 
 	ModifyTerrainItems(R_SWAMP, 4, I_IRONWOOD, 5, 3);
 	ModifyTerrainItems(R_SWAMP, 5, I_YEW, 5, 3);
-
-	// Anything else? What about enabling Hills?
-	// Looks like we need to enable it in world.cpp too
-	ClearTerrainRaces(R_CERAN_HILL);
-	ModifyTerrainRace(R_CERAN_HILL, 0, I_HILLDWARF);
-	ModifyTerrainRace(R_CERAN_HILL, 1, I_BARBARIAN);
-	ModifyTerrainRace(R_CERAN_HILL, 2, I_ORC);
-	ModifyTerrainCoastRace(R_CERAN_HILL, 0, I_VIKING);
-	ModifyTerrainCoastRace(R_CERAN_HILL, 1, I_HILLDWARF);
-	ModifyTerrainCoastRace(R_CERAN_HILL, 2, I_SEAELF);
-
-	ClearTerrainItems(R_CERAN_HILL);
-	ModifyTerrainItems(R_CERAN_HILL, 0, I_IRON, 80, 15);
-	ModifyTerrainItems(R_CERAN_HILL, 1, I_STONE, 100, 20);
-	ModifyTerrainItems(R_CERAN_HILL, 2, I_MITHRIL, 10, 5);
-	ModifyTerrainItems(R_CERAN_HILL, 3, I_ROOTSTONE, 25, 5);
-	ModifyTerrainItems(R_CERAN_HILL, 4, I_HERBS, 10, 10);
 
 	// Reduce the cost of roads...
 	ModifyObjectConstruction(O_ROADN, I_STONE, 40, "BUIL", 3);
@@ -264,7 +379,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyMonsterDefense("LICH", 0, 5);
 	
 	// Beef up Undead and Skeletons slightly, too...
-	ModifyMonsterSpecial("SKEL", "fear", 2);
+	ModifyMonsterSpecial("SKEL", "fear", 1);
 	ModifyMonsterAttacksAndHits("SKEL", 1, 2, 0);
 	ModifyMonsterDefense("SKEL", 5, 2); // skel resist missile attacks
 	ModifyMonsterSpecial("UNDE", "fear", 3);
@@ -293,19 +408,19 @@ void Game::ModifyTablesPerRuleset(void)
 	// With fewer trade items, the chance of good trade routes goes up.
 	//DisableItem(I_IVORY);
 	DisableItem(I_PEARL);
-	//DisableItem(I_JEWELRY);
+	DisableItem(I_JEWELRY);
 	DisableItem(I_FIGURINES);
 	DisableItem(I_TAROTCARDS);
 	DisableItem(I_CAVIAR);
 	//DisableItem(I_WINE);
 	//DisableItem(I_SPICES);
-	//DisableItem(I_CHOCOLATE);
-	//DisableItem(I_TRUFFLES);
+	DisableItem(I_CHOCOLATE);
+	DisableItem(I_TRUFFLES);
 	DisableItem(I_VODKA);
 	DisableItem(I_ROSES);
 	DisableItem(I_PERFUME);
 	//DisableItem(I_SILK);
-	//DisableItem(I_VELVET);
+	DisableItem(I_VELVET);
 	//DisableItem(I_MINK);
 	DisableItem(I_CASHMERE);
 	DisableItem(I_COTTON);
@@ -330,6 +445,113 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyArmorSaveValue("IMTH", 5, 80);
 	ModifyArmorSaveValue("IMTH", 6, 80);
 	ModifyArmorSaveValue("IMTH", 7, 80);
+
+	// Redo all of the races for fracas!
+	// Tundra has been disabled too!
+	ClearTerrainRaces(R_PLAIN);
+	ModifyTerrainRace(R_PLAIN, 0, I_PLAINSMAN);
+	ModifyTerrainRace(R_PLAIN, 1, I_HIGHELF);
+	ModifyTerrainRace(R_PLAIN, 2, I_CENTAURMAN);
+	ModifyTerrainCoastRace(R_PLAIN, 0, I_VIKING);
+	ModifyTerrainCoastRace(R_PLAIN, 1, I_HIGHELF);
+	//ModifyTerrainCoastRace(R_PLAIN, 2, I_SEAELF);
+
+	ClearTerrainRaces(R_FOREST);
+	ModifyTerrainRace(R_FOREST, 0, I_VIKING);
+	ModifyTerrainRace(R_FOREST, 1, I_HIGHELF);
+	ModifyTerrainRace(R_FOREST, 2, I_CENTAURMAN);
+	ModifyTerrainCoastRace(R_FOREST, 0, I_VIKING);
+	ModifyTerrainCoastRace(R_FOREST, 1, I_HIGHELF);
+	//ModifyTerrainCoastRace(R_FOREST, 2, I_SEAELF);
+
+	ClearTerrainRaces(R_MOUNTAIN);
+	ModifyTerrainRace(R_MOUNTAIN, 0, I_HILLDWARF);
+	ModifyTerrainRace(R_MOUNTAIN, 1, I_ORC);
+	ModifyTerrainRace(R_MOUNTAIN, 2, I_BARBARIAN);
+	ModifyTerrainCoastRace(R_MOUNTAIN, 0, I_VIKING);
+	ModifyTerrainCoastRace(R_MOUNTAIN, 1, I_HIGHELF);
+	//ModifyTerrainCoastRace(R_MOUNTAIN, 2, I_SEAELF);
+
+	ClearTerrainRaces(R_SWAMP);
+	ModifyTerrainRace(R_SWAMP, 0, I_GOBLINMAN);
+	ModifyTerrainRace(R_SWAMP, 1, I_ORC);
+	ModifyTerrainRace(R_SWAMP, 2, I_DARKMAN);
+	ModifyTerrainCoastRace(R_SWAMP, 0, I_GOBLINMAN);
+	ModifyTerrainCoastRace(R_SWAMP, 1, I_ORC);
+	//ModifyTerrainCoastRace(R_SWAMP, 2, I_SEAELF);
+
+	ClearTerrainRaces(R_JUNGLE);
+	ModifyTerrainRace(R_JUNGLE, 0, I_GOBLINMAN);
+	ModifyTerrainRace(R_JUNGLE, 1, I_ORC);
+	ModifyTerrainRace(R_JUNGLE, 2, I_DARKMAN);
+	ModifyTerrainCoastRace(R_JUNGLE, 0, I_GOBLINMAN);
+	ModifyTerrainCoastRace(R_JUNGLE, 1, I_ORC);
+	ModifyTerrainCoastRace(R_JUNGLE, 2, I_VIKING);
+
+	ClearTerrainRaces(R_DESERT);
+	ModifyTerrainRace(R_DESERT, 0, I_CENTAURMAN);
+	ModifyTerrainRace(R_DESERT, 1, I_DARKMAN);
+	ModifyTerrainRace(R_DESERT, 2, I_PLAINSMAN);
+	ModifyTerrainCoastRace(R_DESERT, 0, I_CENTAURMAN);
+	ModifyTerrainCoastRace(R_DESERT, 1, I_PLAINSMAN);
+	ModifyTerrainCoastRace(R_DESERT, 2, I_VIKING);
+
+	// Anything else? What about enabling Hills?
+	// Looks like we need to enable it in world.cpp too
+	ClearTerrainRaces(R_CERAN_HILL);
+	ModifyTerrainRace(R_CERAN_HILL, 0, I_HILLDWARF);
+	ModifyTerrainRace(R_CERAN_HILL, 1, I_BARBARIAN);
+	ModifyTerrainRace(R_CERAN_HILL, 2, I_ORC);
+	ModifyTerrainCoastRace(R_CERAN_HILL, 0, I_VIKING);
+	ModifyTerrainCoastRace(R_CERAN_HILL, 1, I_HILLDWARF);
+	ModifyTerrainCoastRace(R_CERAN_HILL, 2, I_BARBARIAN);
+
+	ClearTerrainItems(R_CERAN_HILL);
+	ModifyTerrainItems(R_CERAN_HILL, 0, I_IRON, 80, 15);
+	ModifyTerrainItems(R_CERAN_HILL, 1, I_STONE, 100, 20);
+	ModifyTerrainItems(R_CERAN_HILL, 2, I_MITHRIL, 10, 5);
+	ModifyTerrainItems(R_CERAN_HILL, 3, I_ROOTSTONE, 25, 5);
+	ModifyTerrainItems(R_CERAN_HILL, 4, I_HERBS, 10, 10);
+	
+	// Ok, now for the rest of the racial stuff...
+	ModifyItemBasePrice(I_GOBLINMAN, 40);
+	ModifyItemBasePrice(I_HIGHELF, 75);
+	ModifyItemBasePrice(I_CENTAURMAN, 75);
+	ModifyItemBasePrice(I_HILLDWARF, 75);
+	
+	//ModifyRaceSkillLevels(char *r, int spec, int def);
+	//ModifyRaceSkills(char *r, int i, char *sk);
+	
+	ModifyRaceSkills("GBLN", 0, "XBOW");
+	
+	ModifyRaceSkills("HELF", 0, "COMB");
+	ModifyRaceSkills("HELF", 1, "LBOW");
+	ModifyRaceSkills("HELF", 2, "LUMB");
+	ModifyRaceSkills("HELF", 3, "WEAP");
+	ModifyRaceSkills("HELF", 4, "HORS");
+	ModifyRaceSkills("HELF", 5, "ARMO");
+
+	ModifyRaceSkills("HDWA", 0, "COMB");
+	ModifyRaceSkills("HDWA", 1, "MINI");
+	ModifyRaceSkills("HDWA", 2, "ARMO");
+	ModifyRaceSkills("HDWA", 3, "WEAP");
+	ModifyRaceSkills("HDWA", 4, "QUAR");
+	ModifyRaceSkills("HDWA", 5, "BUIL");
+
+	ModifyRaceSkills("CTAU", 0, "HORS");
+	ModifyRaceSkills("CTAU", 1, "RIDI");
+	ModifyRaceSkills("CTAU", 2, "RANC");
+
+	ModifyRaceSkills("PLAI", 0, "FARM");
+	ModifyRaceSkills("PLAI", 1, "RANC");
+	ModifyRaceSkills("PLAI", 2, "HORS");
+	ModifyRaceSkills("PLAI", 3, "RIDI");
+
+	ModifyRaceSkills("VIKI", 0, "COMB");
+	ModifyRaceSkills("VIKI", 1, "SHIP");
+	ModifyRaceSkills("VIKI", 2, "SAIL");
+	ModifyRaceSkills("VIKI", 3, "LUMB");
+	ModifyRaceSkills("VIKI", 4, "CARP");
 
 	return;
 }

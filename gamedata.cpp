@@ -42,6 +42,7 @@
 // mult_item, mult_val, max_inventory
 // escape, esc_skill, esc_val
 
+
 ItemType id[] =
 {
 	{"leader", "leaders", "LEAD",
@@ -203,6 +204,15 @@ ItemType id[] =
 	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 10,IT_MAN, 50,1,
 	 15,0,0,0,
+	 -1,0,
+	 -1,0, 0,
+	 0, NULL, 0},
+	{"centaur","centaurs","CTAU",
+	 ItemType::DISABLED | ItemType::NOTRANSPORT,
+	 NULL,0,0,0, {{-1,0}, {-1,0},{-1,0},{-1,0}},
+	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 50, IT_MAN | IT_MOUNT, 60,1,
+	 70,70,0,0,
 	 -1,0,
 	 -1,0, 0,
 	 0, NULL, 0},
@@ -1917,6 +1927,9 @@ ManType mt[] = {
 	// Tzarg's
 	{"GELF", R_UFOREST,
 	 3,2,{"XBOW", "COMB", "WEAP", "ARMO", NULL, NULL}},
+    // Fracas
+	{"CTAU", R_PLAIN,
+	 3,2,{"HORS", "RANC", "RIDI", NULL, NULL, NULL}},
 };
 
 ManType *ManDefs = mt;
@@ -2500,6 +2513,8 @@ MountType mountd[] = {
 	{ "MSPI", "RIDI", 2, 3, 3, NULL, 0},
 	// MOUNT_MOLE
 	{ "MOLE", "RIDI", 2, 3, 3, NULL, 0},
+	// MOUNT_CENTAUR
+	{ "CTAU", "RIDI", 1, 3, 3, NULL, 0},
 };
 
 MountType *MountDefs = mountd;

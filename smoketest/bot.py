@@ -200,7 +200,7 @@ def generateturn(report, template):
                 try:
                     temp,rest = report[counter].split(' : ', 1)
                     temp = temp.strip()
-                    #print ">"+temp+"<"
+                    print ">"+temp+"<   >"+rest+"<"
                     if temp in directiondict.keys():
                         #print "Found an exit!", temp
                         # NB: this assumes that terrain is one word...
@@ -210,10 +210,12 @@ def generateturn(report, template):
                     pass
                 
                 counter += 1
-                if report[counter].startswith('*'):
-                    thisregion['directions'] = hexdirections
+                if counter > len(report) or report[counter] == '':
                     break
-            
+                if not report[counter].startswith(' '):
+                    break
+            thisregion['directions'] = hexdirections
+
             #Now that we have all the info, commit it to 'memory'
             dictstring = thisregion['x']+','+thisregion['y']
             region[dictstring]=thisregion

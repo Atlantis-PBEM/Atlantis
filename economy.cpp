@@ -1193,7 +1193,7 @@ void ARegion::Grow()
 	long int dgrow = 	((long int) diff / grow2) * 
 						((long int) habitat / grow2);
 	Awrite(AString("dgrow = ") + (unsigned int) dgrow); // debug string
-
+	
 	// long int dgrow = ((long int) diff) * ((long int) habitat)
 	//	/ (5 * (long int) ((long int) habitat + 3 * (long int) abs(diff)));
 	growpop += (int) dgrow;
