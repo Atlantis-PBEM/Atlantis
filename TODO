@@ -34,6 +34,7 @@ Recent Ideas/Suggestions:
    -- add an arm% to MakeManUnit to allow for less than 100% armed units.
    -- add a way of adding game-specific npc factions and a turn phase where
       the npc ai gives orders.
+   -- unit control: allow npc units to be controlled by player factions.
       
 ** Battle
    -- do that thing with 50% attack modifier on units in fortifications.
@@ -42,7 +43,7 @@ Recent Ideas/Suggestions:
    -- item loss for winners' casualties too.
    -- item loss in battle due to usage.
    -- mounts: chance for killing mount for each hit on the rider.
-   -- need to do something about the 10 men in front protection 1000 archers
+   -- need to do something about the 10 men in front protecting 1000 archers
       behind situation (such as a 1% chance to hit the rear rank per
       10x ratio back-to-front).
    -- change CLOA protection to 97% (was 99%).
@@ -63,6 +64,8 @@ Recent Ideas/Suggestions:
       outside world and can interact with it.
    -- entering a lair (requiring an OBSE leader or so) causes a fight
       with ALL monsters in the lair. Only these fights give full spoils.
+   -- have (some) lairs act as shafts and not have any shafts from the
+      surface to the underworld.
    
 ** Stealth/Observation:
    -- SEARCH command: a month-long order giving a possible OBSE bonus
@@ -71,6 +74,7 @@ Recent Ideas/Suggestions:
       100 men in the unit.
    -- Add a chance where a stealth unit loses one point of stealth after
       performing a theft or assassination.
+   -- Figure weight into Stealth.
       
 ** Movement:
    -- keep a record of unused MP and move direction from turn to turn.
@@ -103,6 +107,14 @@ Recent Ideas/Suggestions:
       undead in the aftermath of a battle.
    -- do something about illusions (make them impervious to all attacks
       except melee?).
+      
+** World Creation:
+   -- address region naming (create a generic way to do this).
+   -- underworld: more customisability and more terrains (also fix lakes
+      in the underworld).
+   -- find a new algorithm for making land with the fractal options
+      (something that's at least partially based on elevation so that
+      worlds don't turn out so different each time).
 
 ---------------------------------------------------------------------------
 Pre-Version 5 TODO:

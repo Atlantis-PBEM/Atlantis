@@ -2096,6 +2096,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	Unit *u2;
 	AString *s = new AString("City Guard");
 	
+	/*
 	Awrite(AString("Begin setting up city guard in..."));
 		
 	AString temp = TerrainDefs[pReg->type].name;
@@ -2103,6 +2104,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	temp += ")";
 	temp += AString(" in ") + *pReg->name;
 	Awrite(temp);
+	*/
 	
 	if((Globals->LEADERS_EXIST) || (pReg->type == R_NEXUS)) {
 		/* standard Leader-type guards */

@@ -856,3 +856,4 @@ Changes from 4.0.10 -> 5.0.0
       npc units consisting of normal men, their weapons and armor (if any).
       The idea is that the same code can be used to easily create roaming
       npc units later on...
+   -- fixed NameRegions() in the fractal set-up (in the kingdoms game).

@@ -362,9 +362,11 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 				}
 			}
 		}
+		/*
 		AString *tmp = new AString(" (behind)");
 		if(!behind) tmp = new AString("");
 		Awrite(AString("Found ") + n + " fitting weapons " + *tmp + ".");
+		*/
 		if(n < 1) {
 			weaponlevel++;
 			continue;
@@ -373,12 +375,16 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 			while(secondtry <= 0) {
 				weapon = -1;
 				int w = getrandom(n);
+				/*
 				Awrite(AString("Roll: ") + w);
+				*/
 				n = -1;
 				for(int i=0; i<NUMWEAPONS; i++) {
 					if(fitting[i]) {
 						n += fitting[i];
+						/*
 						Awrite(WeaponDefs[i].abbr);
+						*/
 						if((n >= w)  && (weapon == -1))
 							weapon = i;
 					}
@@ -409,7 +415,9 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 	if(special) maxskill = men->speciallevel;
 	if(level > maxskill) level = maxskill;
 	u->SetMen(mantype, num);
+	/*
 	Awrite(AString("-> chose ") + ItemDefs[witem].name);
+	*/
 	u->items.SetNum(witem, num);
 	u->SetSkill(sk, level);
 	if(behind) u->SetFlag(FLAG_BEHIND,1);

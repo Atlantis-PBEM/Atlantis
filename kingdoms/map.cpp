@@ -693,10 +693,13 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 {
 	int total, ocean;
 	total = 0;
-	for (int x=0; x < pRegs->x; x++)
-		for (int y=0; y < pRegs->y; y++)
-			if (pRegs->GetRegion(x, y))
-				total++;
+	for (int x=0; x < pRegs->x; x++) {
+		for (int y=0; y < pRegs->y; y++) {
+			ARegion *r = pRegs->GetRegion(x,y);
+			if (!r) continue;
+			total++;				
+		}
+	}
 	ocean = total;
 
 	Awrite("Making land");
@@ -786,6 +789,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 				}
 			} else {
 				// make a continent
+				
 				if (reg->type == -1) {
 					reg->type = R_NUM;
 					ocean--;
@@ -1211,23 +1215,31 @@ void ARegionList::SetFractalTerrain(ARegionArray *pArr)
 
 void ARegionList::NameRegions(ARegionArray *pArr)
 {
+	int seed = 0;
+	int grown = 0;
 	Awrite("Naming Regions");
-	// int unnamed = 1;
+	int unnamed = 1;
+	int toname = 0;
 	for(int x = 0; x < pArr->x; x++) {
 		for(int y = 0; y < pArr->y; y++) {
 			ARegion *r = pArr->GetRegion(x,y);
 			if(!r) continue;
-			// r->wages = -1;
-			r->wages = AGetName(0);
+			r->wages = -1;
+			if (r->type != R_OCEAN) toname++;
+			// r->wages = AGetName(0);
 			r->population = 1;
 		}
 	}
-	/*
+
 	while(unnamed) {
 		unnamed = 0;
 		int sz = Globals->CONTINENT_SIZE / 3 + 1;
-		int terrainsnamed[R_TUNDRA+1];
-		for(int i=0; i < R_TUNDRA+1; i++) terrainsnamed[i] = 0;
+		int tnamedx[R_TUNDRA+1];
+		int tnamedy[R_TUNDRA+1];
+		for(int i=0; i < R_TUNDRA+1; i++) {
+			tnamedx[i] = -1;
+			tnamedy[i] = -1;
+		}
 		for(int x1 = 0; x1 < pArr->x; x1++) {
 			for(int y1 = 0; y1 < pArr->y; y1++) {
 				ARegion *r1 = pArr->GetRegion(x1, y1);
@@ -1235,20 +1247,32 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 				if((r1->type < 0) || (r1->type == R_NUM) || (r1->type == R_OCEAN)) continue;
 				if(r1->wages >= 0) continue;
 				if(TerrainDefs[r1->type].similar_type > R_TUNDRA) continue;
-				if(terrainsnamed[TerrainDefs[r1->type].similar_type] == 0) {
-					// Awrite(AString("3. selected hex of type ")
-					//	+ TerrainDefs[r1->type].name);
-					
+				int lastnamed = 0;
+				int xmin = tnamedx[TerrainDefs[r1->type].similar_type];
+				int ymin = tnamedy[TerrainDefs[r1->type].similar_type];
+				int dx = abs(r1->xloc - xmin);
+				int dy = abs((r1->yloc - ymin) / 2);
+				if((xmin > 0) && (r1->xloc > xmin))
+					lastnamed += dx;
+				if((ymin > 0) && (r1->yloc > ymin))
+					lastnamed += dy;
+				if((xmin < 0) && (ymin < 0))
+					lastnamed = 2 * Globals->CONTINENT_SIZE;
+				if(lastnamed > (3 * Globals->CONTINENT_SIZE / 2)) {
 					r1->wages = AGetName(0);
-					r1->population = (getrandom(sz) + sz)
-						* (getrandom(sz) + sz);
-					terrainsnamed[TerrainDefs[r1->type].similar_type]++;
+					r1->population = (getrandom(2) + sz / 2)
+						* (getrandom(2) + sz);
+					
+					if(r1->xloc > xmin)
+						tnamedx[TerrainDefs[r1->type].similar_type] = r1->xloc;
+					if(r1->yloc > ymin)
+						tnamedy[TerrainDefs[r1->type].similar_type] = r1->yloc;
 					unnamed = 1;	
+					seed++;
 				}
 			}
 		}
 		int named_a_reg = 1;
-		Adot();
 		while(named_a_reg) {
 			named_a_reg = 0;
 			for(int x = 0; x < pArr->x; x++) {
@@ -1256,42 +1280,52 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 					ARegion *reg = pArr->GetRegion(x,y);
 					if((!reg) || (reg->type == R_OCEAN) 
 						|| (reg->wages >= 0) || (reg->type == R_NUM)) continue;
-					int name1, name2 = -99;
-					int nw1, nw2 = 0;
+					int name1 = -99, name2 = -99;
+					int nw1 = 0, nw2 = 0, nc1 = 0, nc2 = 0, nn = 0;
 					int db = getrandom(NDIRS);
 					for(int d=0; d < NDIRS; d++) {
 						int dir = (d + db + NDIRS) % NDIRS;
 						ARegion *n = reg->neighbors[dir];
-						if((!n) || (n->type == R_NUM)
-							|| (n->type == R_OCEAN)
-							|| (n->wages < 0) || (n->population < 2)) continue;
-						if(TerrainDefs[n->type].similar_type != TerrainDefs[reg->type].similar_type)
+						if((!n) || (n->type == R_NUM)) continue;
+						if(TerrainDefs[n->type].similar_type != TerrainDefs[reg->type].similar_type) {
+							nn++;
 							continue;
+						}
+						if((n->type == R_OCEAN) || (n->wages < 0)) continue;
 						if((name1 < 0) || (n->wages == name1)) {
 							name1 = n->wages;
 							nw1 += n->population;
+							nc1++;
 						} else if((name2 < 0) || (n->wages == name2)) {
 							name2 = n->wages;
 							nw2 += n->population;
+							nc2++;
 						}
 					}
-					// Awrite("!");
-					if((nw1 > 0) || (nw2 > 0)) {
+					if((nc1 > 0) || (nc2 > 0)) {
 						if(nw1 > nw2) {
 							reg->wages = name1;
-							reg->population = nw1 * 2 / 3;
+							float npop = (nc1 * (nw1 + nc1 + nn) / (nc1 + 1 + nn))
+								+ nn + (nc1 - 1);
+							if(npop > (nw1 / nc1)) npop = nw1 / nc1;
+							reg->population = (int) npop;
 							named_a_reg = 1;
+							grown++;
 						} else {
 							reg->wages = name2;
-							reg->population = nw2 * 2 / 3;
+							float npop = (nc2 * (nw2 + nc2) / (nc2 + 1 + nn))
+								+ nn + (nc2 - 1);
+							if(npop > (nw2 / nc2)) npop = nw2 / nc2;
+							reg->population = (int) npop;
 							named_a_reg = 1;
+							grown++;
 						}
 					}
 				}
 			}
 		}
+		Adot();
 	}
-	*/
 	Awrite("");
 }
 
