@@ -344,7 +344,7 @@ public:
 	// This value also affects to what extent the
 	// fractal land distribution algorithm should
 	// be used and to what extent continents will
-	// be grown normally (100 = only fractal
+	// be grown by placement (100 = only fractal
 	// algorithm).
 	int FRACTAL_MAP;
 	

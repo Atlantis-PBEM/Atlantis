@@ -3489,18 +3489,39 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 	Awrite("Making land");
 	
 	if (Globals->FRACTAL_MAP) {
+		int sealevel = 99;
+
 		// First lower the sea level
 		Awrite("Lower sea level");
-		int sealevel = 99;
-		//int fractalpercent = ((100 - percentOcean) * (100 - Globals->FRACTAL_MAP) / 100);
-		while (ocean > (total * (percentOcean)) / 100) {
+		int fractalpercent = ((100 - percentOcean) * (100 - Globals->FRACTAL_MAP) / 100);
+		while (ocean > (total * (percentOcean + fractalpercent)) / 100) {
 			for (int x=0; x < pRegs->x; x++) {
 				for (int y=0; y < pRegs->y/2; y++) {
 					ARegion *reg = pRegs->GetRegion(x, (y*2 + x%2));
 					if(!reg) continue;
-					if ((reg->type == -1) && (reg->maxwages > sealevel)) {
-						reg->type = R_NUM;
-						ocean--;
+					if ((reg->type == -1) && (reg->elevation > sealevel)) {
+						int cont = 0;
+						for (int i=0; i < NDIRS; i++) {
+							ARegion *nr = reg->neighbors[i];
+							if(!nr) continue;
+							if(nr->elevation > sealevel) {
+								cont++;
+								if (cont >= 2) break;
+								for (int k=-1; k < 2; k++) {
+									int d = i + k;
+									if (d < 0) d += NDIRS;
+									if (d >= NDIRS) d = NDIRS - d;
+									ARegion *ar = nr->neighbors[d];
+									if(!ar) continue;
+									if(ar->elevation > sealevel) cont++;
+								}
+							}
+							if (cont >= 2) break;
+						}
+						if (cont >= 2) {
+							reg->type = R_NUM;
+							ocean--;
+						}
 					}				
 				}
 			}
@@ -3508,7 +3529,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			Adot();
 		}
 		Awrite("");
-	
+		
 		Awrite("Add further land");
 		int coast = sealevel;
 		int dotter = 0;
@@ -3521,15 +3542,16 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			int yoff = pRegs->y / 40;
 			int yband = pRegs->y / 2 - 2 * yoff;
 			int tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
+			int margin = getrandom(sealevel/10 + Globals->FRACTAL_SCATTER) + Globals->FRACTAL_SCATTER;
 
 			ARegion *reg = pRegs->GetRegion(tempx, tempy);
 			if(!reg) continue;
 			ARegion *newreg = reg;
 
 			sealevel = coast;
-			while (reg->maxwages < sealevel) {
+			while (reg->elevation < sealevel-margin) {
 				int tries = 0;
-				while ((reg->maxwages < sealevel) && (tries < 25)) {
+				while ((reg->elevation < sealevel-margin) && (tries < 25)) {
 					tempx = getrandom(pRegs->x);
 					tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
 					newreg = pRegs->GetRegion(tempx, tempy);
@@ -3537,7 +3559,16 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 					reg = newreg;
 				}
 				sealevel--;
+				margin = getrandom(sealevel/10 + Globals->FRACTAL_SCATTER) + Globals->FRACTAL_SCATTER;
 			}
+			
+			int cont = 0;
+			for (int i=0; i<NDIRS; i++) {
+				ARegion *nr = reg->neighbors[i];
+				if(!nr) continue;
+				if(nr->elevation >= reg->elevation-3) cont++;
+			}
+			if (cont < 3) continue;
 		
 			if (dotter%50 == 0) Adot();
 			// make a continent
@@ -3548,25 +3579,21 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			int dir;
 			for (int i=0; i<sz; i++) {
 				int dr = getrandom(NDIRS);
-				int maxe1, maxe2, d1, d2 = -1;
+				int maxe1, d1 = -1;
 				for (int d=0; d<NDIRS; d++) {
 					dir = dr + d;
 					while (dir >= NDIRS) dir -= NDIRS;
 					newreg = reg->neighbors[dir];
 					if(!newreg) continue;
-					if(newreg->type == -1) {
-						if(newreg->maxwages > maxe1) {
+					if((newreg->type == -1) && (newreg->elevation > sealevel/2)) {
+						if(newreg->elevation+getrandom(10) > maxe1) {
 							maxe1 = newreg->maxwages;
 							d1 = dir;
 						}
 					}
-					if(newreg->maxwages > maxe2) {
-						maxe2 = newreg->maxwages;
-						d2 = dir;
-					}
 				}
 				if (d1 >= 0) dir = d1;
-					else dir = d2;
+					else dir = getrandom(NDIRS);
 				
 				if ((reg->yloc < yoff*2) && ((dir < 2) || (dir = NDIRS-1))
 					&& (getrandom(4) < 3)) continue;
