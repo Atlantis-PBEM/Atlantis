@@ -84,7 +84,6 @@ void Battle::DoAttack( int round,
     DoSpecialAttack( round, a, attackers, def, behind );
     if (!def->NumAlive()) return;
     
-    if (a->HasEffect(EFFECT_DAZZLE)) a->askill -= 2;
 	if (!behind && (a->riding != -1)) {
 		MountType *pMt = &MountDefs[ItemDefs[a->riding].index];
 		if(pMt->mountSpecial != -1) {
@@ -158,11 +157,8 @@ void Battle::DoAttack( int round,
         if (!def->NumAlive()) break;
 
     }
-    
-    if (a->HasEffect(EFFECT_DAZZLE)) {
-        a->ClearEffect(EFFECT_DAZZLE);
-        a->askill += 2;
-    }
+   
+	a->ClearOneTimeEffects();
 }
 
 void Battle::NormalRound(int round,Army * a,Army * b)
