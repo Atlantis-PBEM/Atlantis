@@ -1047,7 +1047,6 @@ void Unit::AdjustSkills()
 int Unit::MaintCost()
 {
 	int retval = 0;
-	int levels = 0;
 	int i;
 	if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
 
@@ -1073,9 +1072,9 @@ int Unit::MaintCost()
 	if (Globals->MULTIPLIER_USE == GameDefs::MULT_ALL) {
 		i = nonleaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
 		if (i < (nonleaders * Globals->MAINTENANCE_COST))
-			i = nonleaders * Globals->Globals->MAINTENANCE_COST;
+			i = nonleaders * Globals->MAINTENANCE_COST;
 	} else
-		i = nonleaders * Globals->Globals->MAINTENANCE_COST;
+		i = nonleaders * Globals->MAINTENANCE_COST;
 	retval += i;
 
 	return retval;
