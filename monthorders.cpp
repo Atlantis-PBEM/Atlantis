@@ -382,8 +382,18 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 
 	// JLT
 	if(obj->incomplete == ObjectDefs[obj->type].cost) {
-		obj->num = u->object->region->buildingseq++;
-		obj->SetName(new AString("Building"));
+		if(ObjectIsShip(obj->type)) {
+			obj->num = shipseq++;
+			obj->SetName(new AString("Ship"));
+		} else {
+			obj->num = u->object->region->buildingseq++;
+			obj->SetName(new AString("Building"));
+		}
+	}
+	// Hack to fix bogus ship numbers
+	if(ObjectisShip(obj->type) && obj->num < 100) {
+		obj->num = shipseq++;
+		obj->SetName(new AString("Ship"));
 	}
 
     // AS

@@ -1375,10 +1375,6 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
             }
             Object * obj = new Object( unit->object->region );
             obj->type = ot;
-            if (ObjectIsShip(ot)) {
-                obj->num = shipseq++;
-                obj->SetName(new AString(AString("Ship")));
-            }
             obj->incomplete = ObjectDefs[obj->type].cost;
             unit->MoveUnit( obj );
             unit->object->region->objects.Add(obj);
