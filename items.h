@@ -326,7 +326,11 @@ extern MountType *FindMount(char *abbr);
 extern MonType *FindMonster(char *abbr, int illusion);
 extern ManType *FindRace(char *abbr);
 
-extern AString ItemString(int type, int num, int fullnum=0);
+enum {
+	FULLNUM = 0x01,
+	ALWAYSPLURAL = 0x02
+};
+extern AString ItemString(int type, int num, int flags=0);
 extern AString *ItemDescription(int item, int full);
 
 extern int IsSoldier(int);

@@ -233,13 +233,16 @@ int ParseTransportableItem(AString *token)
 	return r;
 }
 
-AString ItemString(int type, int num, int fullnum)
+AString ItemString(int type, int num, int flags)
 {
 	AString temp;
 	if (num == 1) {
-		if (fullnum)
+		if (flags & FULLNUM)
 			temp += AString(num) + " ";
-		temp += AString(ItemDefs[type].name) + " [" + ItemDefs[type].abr + "]";
+		temp +=
+			AString((flags & ALWAYSPLURAL) ?
+				ItemDefs[type].names: ItemDefs[type].name) +
+			" [" + ItemDefs[type].abr + "]";
 	} else {
 		if (num == -1) {
 			temp += AString("unlimited ") + ItemDefs[type].names + " [" +
@@ -366,16 +369,14 @@ AString ShowSpecial(char *special, int level, int expandLevel, int fromItem)
 				last = i;
 				continue;
 			}
-			temp += AString(ItemDefs[spd->targets[last]].names) + " [" +
-				ItemDefs[spd->targets[last]].abr + "], ";
+			temp += ItemString(spd->targets[last], 1, ALWAYSPLURAL) + ", ";
 			last = i;
 			comma++;
 		}
 		if(comma) {
 			temp += "or ";
 		}
-		temp += AString(ItemDefs[spd->targets[last]].names) + " [" +
-			ItemDefs[spd->targets[last]].abr + "].";
+		temp += ItemString(spd->targets[last], 1, ALWAYSPLURAL) + ".";
 	}
 	if((spd->targflags & SpecialType::HIT_EFFECTIF) ||
 			(spd->targflags & SpecialType::HIT_EFFECTEXCEPT)) {
@@ -844,7 +845,7 @@ AString *ItemDescription(int item, int full)
 			   if(i == I_SILVER) {
 				   *temp += "entertainment";
 			   } else {
-				   *temp += ItemDefs[i].names;
+				   *temp += ItemString(i, 1);
 			   }
 			   *temp += AString(" by ") + ItemDefs[i].mult_val;
 		   }
@@ -943,7 +944,7 @@ AString *ItemDescription(int item, int full)
 				*temp += ", ";
 			}
 			count++;
-			*temp += AString(amt) + " " + ItemDefs[itm].names;
+			*temp += ItemString(itm, amt);
 		}
 		if(ItemDefs[item].pOut) {
 			*temp += AString(" at a rate of ") + ItemDefs[item].pOut;
@@ -984,7 +985,7 @@ AString *ItemDescription(int item, int full)
 				*temp += ", ";
 			}
 			count++;
-			*temp += AString(amt) + " " + ItemDefs[itm].names;
+			*temp += ItemString(itm, amt);
 		}
 		*temp += ".";
 	}
@@ -1010,7 +1011,7 @@ AString *ItemDescription(int item, int full)
 
 	if ((ItemDefs[item].max_inventory) && full) {
 		*temp += AString("  A unit may have at most ") +
-			ItemString(item, ItemDefs[item].max_inventory, 1) + ".";
+			ItemString(item, ItemDefs[item].max_inventory, FULLNUM) + ".";
 	}
 
 	return temp;

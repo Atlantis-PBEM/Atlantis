@@ -1125,7 +1125,7 @@ int Army::DoAnAttack(char *special, int numAttacks, int attackType,
 		}
 
 		/* 6. If attack got through, apply effect, or kill */
-		if (effect != NULL) {
+		if (effect == NULL) {
 			/* 7. Last chance... Check armor */
 			if (tar->ArmorProtect(weaponClass)) {
 				continue;

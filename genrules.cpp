@@ -1185,8 +1185,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
 		pS = FindSkill(ItemDefs[i].pSkill);
-		if(!pS || (pS->flags & SkillType::DISABLED))
-			continue;
+		if(pS && (pS->flags & SkillType::DISABLED)) continue;
 		last = 0;
 		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
 				sizeof(ItemDefs->pInput[0])); j++) {
@@ -1873,7 +1872,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
 		pS = FindSkill(ItemDefs[i].pSkill);
-		if (!pS || (pS->flags & SkillType::DISABLED)) continue;
+		if (pS && (pS->flags & SkillType::DISABLED)) continue;
 		last = 0;
 		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
 						sizeof(ItemDefs->pInput[0])); j++) {
@@ -2027,7 +2026,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "All items except silver and trade goods are produced with the ";
 	temp += f.Link("#produce", "PRODUCE") + " order.";
 
-	temp += " Producings items will always produce as many items as "
+	temp += " Producing items will always produce as many items as "
 		"during a month up to the limit of the supplies carried by the "
 		"producing unit. The required skills and raw materials required "
 		"to produce one output item are in the table above.";
