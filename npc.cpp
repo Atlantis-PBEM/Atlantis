@@ -280,3 +280,144 @@ void Game::MakeLMon(Object *pObj)
 	}
 	u->MoveUnit(pObj);
 }
+
+Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weaponlevel, int armor, int behind)
+{
+	Unit *u = GetNewUnit(fac);
+	ManType *men = FindRace(ItemDefs[mantype].abr);
+	// Check skills:
+	int scomb = men->defaultlevel;
+	int sxbow = men->defaultlevel;
+	int slbow = men->defaultlevel;
+	for (unsigned int i=0;
+		i<(sizeof(men->skills)/sizeof(men->skills[0]));
+			i++) {
+				if(men->skills[i] == NULL) continue;
+				if(FindSkill(men->skills[i]) == FindSkill("COMB"))
+					scomb = men->speciallevel;
+				if(FindSkill(men->skills[i]) == FindSkill("XBOW"))
+					sxbow = men->speciallevel;
+				if(FindSkill(men->skills[i]) == FindSkill("LBOW"))
+					slbow = men->speciallevel;
+	}
+	int combat = scomb;
+	AString *s = new AString("COMB");
+	int sk = LookupSkill(s);
+	if(behind) {
+		if(slbow >= sxbow) {
+			*s = AString("LBOW");
+			sk = LookupSkill(s);
+			combat = slbow;
+		} else {
+			*s = AString("XBOW");
+			sk = LookupSkill(s);
+			combat = sxbow;
+		}
+	}
+	if(combat < level) weaponlevel += level - combat;
+	int weapon = -1;
+	int witem = -1;
+	while (weapon == -1) {
+		int fitting[NUMWEAPONS];
+		int n = 0;
+		for(int i=0; i<NUMWEAPONS; i++) {
+			fitting[i] = 0;
+			AString *it = new AString(WeaponDefs[i].abbr);
+			if(ItemDefs[LookupItem(it)].flags & ItemType::DISABLED) continue;
+			// disregard picks!
+			AString *ps = new AString("PICK");
+			if(LookupItem(it) == LookupItem(ps)) continue;
+			
+			// Sort out the more exotic weapons!
+			int producelevel = ItemDefs[LookupItem(it)].pLevel;
+			if(ItemDefs[LookupItem(it)].pSkill != FindSkill("WEAP")->abbr) continue;
+
+			AString *s1 = new AString(WeaponDefs[i].baseSkill);
+			AString *s2 = new AString(WeaponDefs[i].orSkill);			
+			if((WeaponDefs[i].flags & WeaponType::RANGED)
+				&& (!behind)) continue;
+			int attack = WeaponDefs[i].attackBonus;
+			if(attack < (producelevel-1)) attack = producelevel-1;
+			if((LookupSkill(s1) == sk)
+				|| (LookupSkill(s2) == sk)) {
+				if((behind) && (attack + combat <= weaponlevel)) {
+					fitting[i] = 1;
+					if(WeaponDefs[i].attackBonus == weaponlevel) fitting[i] = 5;
+					n += fitting[i];
+				} else if ((!behind) && (attack == weaponlevel)) {
+					fitting[i] = 1;
+					//if(WeaponDefs[i].attackBonus == weaponlevel) fitting[i] = 5;
+					n += fitting[i];
+				} else continue;
+			} else {
+				// make Javelins possible
+				AString *cs = new AString("COMB");
+				if((behind) && (scomb > combat)) {
+					if((WeaponDefs[i].flags & WeaponType::RANGED)
+						&& ((LookupSkill(s1) == LookupSkill(cs))
+							|| (LookupSkill(s2) == LookupSkill(cs)))) {
+							fitting[i] = 1;
+							n++;
+					}
+				}
+			}
+		}
+		AString *tmp = new AString(" (behind)");
+		if(!behind) tmp = new AString("");
+		Awrite(AString("Found ") + n + " fitting weapons " + *tmp + ".");
+		if(n < 1) {
+			weaponlevel++;
+			continue;
+		} else {
+			int secondtry = -1;
+			while(secondtry <= 0) {
+				weapon = -1;
+				int w = getrandom(n);
+				Awrite(AString("Roll: ") + w);
+				n = -1;
+				for(int i=0; i<NUMWEAPONS; i++) {
+					if(fitting[i]) {
+						n += fitting[i];
+						Awrite(WeaponDefs[i].abbr);
+						if((n >= w)  && (weapon == -1))
+							weapon = i;
+					}
+				}
+				if(weapon >= 0) {
+					AString *ws = new AString(WeaponDefs[weapon].abbr);
+					witem = LookupItem(ws);
+					secondtry++;
+					if(men->CanUse(witem)) break;
+				}
+			}
+		}
+	}
+	// Check again which skills the weapon uses
+	AString *ws1 = new AString(WeaponDefs[weapon].baseSkill);
+	AString *ws2 = new AString(WeaponDefs[weapon].orSkill);
+	if((LookupSkill(ws1) != sk) && (LookupSkill(ws2) != sk))
+		sk = LookupSkill(ws1);
+	int maxskill = men->defaultlevel;
+	int special = 0;
+	for(unsigned int i=0;
+		i<(sizeof(men->skills)/sizeof(men->skills[0]));
+		i++) {
+		if(FindSkill(men->skills[i]) == FindSkill(SkillDefs[sk].abbr)) {
+			special = 1;
+		}		
+	}
+	if(special) maxskill = men->speciallevel;
+	if(level > maxskill) level = maxskill;
+	u->SetMen(mantype, num);
+	Awrite(AString("-> chose ") + ItemDefs[witem].name);
+	u->items.SetNum(witem, num);
+	u->SetSkill(sk, level);
+	if(behind) u->SetFlag(FLAG_BEHIND,1);
+	if(armor) {
+		int ar = I_PLATEARMOR;
+		if(!men->CanUse(ar)) ar = I_CHAINARMOR;
+		if(!men->CanUse(ar)) ar = I_LEATHERARMOR;
+		u->items.SetNum(ar, num);
+	}
+	return u;
+}

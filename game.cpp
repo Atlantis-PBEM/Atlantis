@@ -2091,16 +2091,19 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		num = Globals->CITY_GUARD * skilllevel;
 	}
 	num = num * percent / 100;
-	int num2 = 0;
-	ManType *guards = FindRace(ItemDefs[pReg->race].abr);
 	Faction *pFac = GetFaction(&factions, guardfaction);
 	Unit *u = GetNewUnit(pFac);
 	Unit *u2;
 	AString *s = new AString("City Guard");
-	u->SetName(s);
-	u->type = U_GUARD;
-	u->guard = GUARD_GUARD;
-
+	
+	Awrite(AString("Begin setting up city guard in..."));
+		
+	AString temp = TerrainDefs[pReg->type].name;
+	temp += AString(" (") + pReg->xloc + "," + pReg->yloc;
+	temp += ")";
+	temp += AString(" in ") + *pReg->name;
+	Awrite(temp);
+	
 	if((Globals->LEADERS_EXIST) || (pReg->type == R_NEXUS)) {
 		/* standard Leader-type guards */
 		u->SetMen(I_LEADERS,num);
@@ -2108,85 +2111,44 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		if (IV) u->items.SetNum(I_AMULETOFI,num);
 		u->SetMoney(num * Globals->GUARD_MONEY);
 		u->SetSkill(S_COMBAT,skilllevel);
+		u->SetName(s);
+		u->type = U_GUARD;
+		u->guard = GUARD_GUARD;
 	} else {
 		/* non-leader guards */
-		int cskill = 0;
-		int xbo = 0;
-		int lbo = 0;
-		for (unsigned int i=0;
-			i<(sizeof(guards->skills)/sizeof(guards->skills[0]));
-			i++) {
-				if(guards->skills[i] == NULL) continue;
-				if(FindSkill(guards->skills[i]) == FindSkill("COMB"))
-					cskill = 1;
-				if(FindSkill(guards->skills[i]) == FindSkill("XBOW"))
-					xbo = 1;
-				if(FindSkill(guards->skills[i]) == FindSkill("LBOW"))
-					lbo = 1;
-		}
-		if (cskill == 0) {
-			if ((xbo == 0) && (lbo == 0)) {
-				num = (guards->defaultlevel+2) * num
-					/ (guards->defaultlevel+1);
-			} else {
-				num2 = 3 * num / 8;
-			}
-		}				
-		u->SetMen(pReg->race, num);
-		int weapon = I_SWORD;
-		if(!guards->CanUse(weapon)) weapon = I_SPEAR;
-		if(!guards->CanUse(weapon)) weapon = I_AXE;
-		if(!guards->CanUse(weapon)) weapon = I_SPEAR;
-		u->items.SetNum(weapon, num);
+		int n = 3 * num / 4;
+		int plate = 0;
+		if((AC) && (Globals->START_CITY_GUARDS_PLATE)) plate = 1;
+		u = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
+			plate, 0);
 		if (IV) u->items.SetNum(I_AMULETOFI,num);
-		int mn = skilllevel * Globals->CITY_GUARD * (num / (num + num2));
-		u->SetMoney(mn * Globals->GUARD_MONEY);
-		int skl = skilllevel;
-		while ((skl > guards->defaultlevel) && (cskill == 0)) skl--; 
-		u->SetSkill(S_COMBAT,skl);
-		// Setup second unit?
-		if(num2 > 0) {
-			u2 = GetNewUnit(pFac);
-			AString *ns = new AString("City Guard");
-			u2->SetName(ns);
-			u2->type = U_GUARD;
-			u2->guard = GUARD_GUARD;
-			u2->SetMen(pReg->race, num2);
-			if(xbo) {
-				u2->items.SetNum(I_CROSSBOW, num2);
-				u2->SetSkill(S_CROSSBOW, skilllevel);
-			} else {
-				u2->items.SetNum(I_LONGBOW, num2);
-				u2->SetSkill(S_LONGBOW, skilllevel);
-			}
-			if (IV) u2->items.SetNum(I_AMULETOFI,num);
-			mn = skilllevel * Globals->CITY_GUARD * (num2 / (num + num2));
-			u2->SetMoney(mn * Globals->GUARD_MONEY);
-			u2->SetFlag(FLAG_BEHIND,1);
-			u2->type = U_GUARD;
-			u2->guard = GUARD_GUARD;		
-		}
-	}
+		u->SetMoney(num * Globals->GUARD_MONEY / 2);
+		u->SetName(s);
+		u->type = U_GUARD;
+		u->guard = GUARD_GUARD;
+		u2 = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
+			plate, 1);
+		if (IV) u2->items.SetNum(I_AMULETOFI,num);
+		u2->SetMoney(num * Globals->GUARD_MONEY / 2);
+		AString *un = new AString("City Guard");
+		u2->SetName(un);
+		u2->type = U_GUARD;
+		u2->guard = GUARD_GUARD;
+	}			
+	
 	if (AC) {
 		if(Globals->START_CITY_GUARDS_PLATE) {
 			if(Globals->LEADERS_EXIST) u->items.SetNum(I_PLATEARMOR, num);
-			else {
-				int armor = I_PLATEARMOR;
-				if(!guards->CanUse(armor)) armor = I_CHAINARMOR;
-				if(!guards->CanUse(armor)) armor = I_LEATHERARMOR;
-				u->items.SetNum(armor, num);
-				if(num2 > 0) u2->items.SetNum(armor, num2);
-			}
 		}
 		u->SetSkill(S_OBSERVATION,10);
 		if(Globals->START_CITY_TACTICS)
 			u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
 	} else {
-		u->SetSkill(S_OBSERVATION,skilllevel);
+		u->SetSkill(S_OBSERVATION, skilllevel);
 	}
 	u->SetFlag(FLAG_HOLDING,1);
 	u->MoveUnit(pReg->GetDummy());
-	if(num2 > 0) {
+	if((!Globals->LEADERS_EXIST) && (pReg->type != R_NEXUS)) {
 		u2->SetFlag(FLAG_HOLDING,1);
 		u2->MoveUnit(pReg->GetDummy());
 	}
@@ -2277,12 +2239,8 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 			men = 1;
 		} else {
 			maxmen = Globals->AMT_START_CITY_GUARDS;
-			if(skill != S_COMBAT) maxmen = 3 * maxmen / 8;
-			if(sl < towntype+1) {
-				ManType *m = FindRace(ItemDefs[mantype].abr);
-				maxmen = (m->defaultlevel+2) * maxmen
-					/ (m->defaultlevel+1);
-			}			
+			if((!Globals->LEADERS_EXIST) && (r->type != R_NEXUS))
+				maxmen = 3 * maxmen / 4;
 			men = u->GetMen() + (Globals->AMT_START_CITY_GUARDS/10);
 			if(men > maxmen)
 				men = maxmen;
@@ -2290,12 +2248,7 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 	} else {
 		towntype = r->town->TownType();
 		maxmen = Globals->CITY_GUARD * (towntype+1);
-		if(skill != S_COMBAT) maxmen = 3 * maxmen / 8;
-		if(sl < towntype+1) {
-			ManType *m = FindRace(ItemDefs[mantype].abr);
-			maxmen = (m->defaultlevel+1) * maxmen
-				/ m->defaultlevel;
-		}
+		if(!Globals->LEADERS_EXIST) maxmen = 3 * maxmen / 4;
 		men = u->GetMen() + (maxmen/10);
 		if(men > maxmen)
 			men = maxmen;

@@ -1,3 +1,16 @@
+Recent Ideas/Suggestions:
+
+** Economy
+   -- add a selection gamedef to allow for enabling individual item types
+      (basic resources, mounts, tools, weapons, armor) for markets.
+
+** Order Parser
+   -- when parsing unit lists, check for multiple unit entries and disregard
+      them.
+
+---------------------------------------------------------------------------
+Pre-Version 5 TODO:
+
 ** Architecture
    -- Improve the item/hex editor [low priority]
    -- I'd like to add some code that will do a bit of validation on a

@@ -151,6 +151,7 @@ private:
 	void CreateWMons();
 	void CreateLMons();
 	void CreateVMons();
+	Unit *MakeManUnit(Faction*, int, int, int, int, int, int);
 
 	//
 	// Game-specific creation functions (see world.cpp).
