@@ -454,7 +454,8 @@ int Game::OpenGame()
     {
         CreateOceanLairs();
     }
-    
+   
+    FixBoatNums();	
     SetupUnitNums();
     
     f.Close();
@@ -1537,6 +1538,20 @@ void Game::SetupUnitSeq()
 		}
 	}
 	unitseq = max+1;
+}
+
+void Game::FixBoatNums()
+{
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			if(ObjectIsShip(o->type) && (o->num < 100)) {
+				o->num = shipseq++;
+				o->SetName(new AString("Ship"));
+			}
+		}
+	}
 }
 
 void Game::SetupUnitNums()

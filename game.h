@@ -103,6 +103,9 @@ public:
     //
 	void SetupUnitSeq();
     void SetupUnitNums();
+
+	// Fix broken boat numbers
+	void FixBoatNums();
   
     //
     // Get a unit by its number.
