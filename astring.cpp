@@ -35,16 +35,20 @@ AString::AString()
 
 AString::AString(char *s)
 {
-	len = strlen(s);
+	len = 0;
+	if (s) len = strlen(s);
 	str = new char[len + 1];
-	strcpy(str,s);
+	str[0] = '\0';
+	if (s) strcpy(str,s);
 }
 
 AString::AString(const char *s)
 {
-	len = strlen(s);
+	len = 0;
+	if (s) len = strlen(s);
 	str = new char[len + 1];
-	strcpy(str,s);
+	str[0] = '\0';
+	if (s) strcpy(str,s);
 }
 
 AString::AString(int l)
@@ -76,6 +80,7 @@ AString::AString(char c)
 AString::~AString()
 {
 	if (str) delete str;
+	str = NULL;
 }
 
 AString::AString(const AString &s)
@@ -96,10 +101,11 @@ AString & AString::operator=(const AString &s)
 
 AString & AString::operator=(const char *c)
 {
-	len = strlen(c);
+	len = 0;
+	if (c) len = strlen(c);
 	if (str) delete str;
 	str = new char[len + 1];
-	strcpy(str,c);
+	if (c) strcpy(str,c);
 	return *this;
 }
 
@@ -121,6 +127,12 @@ int AString::operator==(const AString &s)
 int AString::isEqual(const char *temp2)
 {
 	char *temp1 = str;
+
+	// Handle comparisons with null
+	if (temp1 && !temp2) return 0;
+	if (temp2 && !temp1) return 0;
+	if (!temp1 && !temp2) return 1;
+
 	while ((*temp1) && (*temp2)) {
 		char t1 = *temp1;
 		if ((t1 >= 'A') && (t1 <= 'Z'))

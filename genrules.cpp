@@ -68,6 +68,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int cap;
 	int i, j, k, l;
 	int last = -1;
+	AString skname;
 
 	if(f.OpenByName(rules) == -1) {
 		return 0;
@@ -802,7 +803,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.ClearWrapTab();
 	temp = "plain (172,110) in Turia, 500 peasants";
 	if(Globals->RACES_EXIST)
-		temp += AString("(") + ItemDefs[manidx].names + ")";
+		temp += AString(" (") + ItemDefs[manidx].names + ")";
 	int money = (500 * (15 - Globals->MAINTENANCE_COST));
 	temp += AString(", $") + money + ".";
 	f.WrapStr(temp);
@@ -816,15 +817,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.WrapStr(temp);
 	f.WrapStr("Wanted: none.");
 	temp = "For Sale: 50 ";
-	temp += AString(ItemDefs[manidx].names) + "[" + ItemDefs[manidx].abr + "]";
+	temp += AString(ItemDefs[manidx].names) + " [" + ItemDefs[manidx].abr + "]";
 	temp += " at $";
 	float ratio = ItemDefs[(Globals->RACES_EXIST?I_NOMAD:I_MAN)].baseprice/
 		(float)Globals->BASE_MAN_COST;
 	temp += (int)(60*ratio);
 	if(Globals->LEADERS_EXIST) {
 		ratio = ItemDefs[leadidx].baseprice/(float)Globals->BASE_MAN_COST;
-		temp += AString(", 10 ") + ItemDefs[leadidx].names + "[" +
-			ItemDefs[leadidx].abr + "]";
+		temp += AString(", 10 ") + ItemDefs[leadidx].names + " [" +
+			ItemDefs[leadidx].abr + "] at $";
 		temp += (int)(60*ratio);
 	}
 	temp += ".";
@@ -1182,7 +1183,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	for(i = 0; i < NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
-		last = ItemDefs[i].pSkill;
+		skname = ItemDefs[i].pSkill;
+		last = LookupSkill(&skname);
 		if(last != -1 && (SkillDefs[last].flags & SkillType::DISABLED))
 			continue;
 		last = 0;
@@ -1567,12 +1569,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 			comma = 0;
 			temp = "";
 			for(j=0; j<(int)(sizeof(mt->skills)/sizeof(mt->skills[0])); j++) {
-				if(mt->skills[j] < 0) continue;
-				if(SkillDefs[mt->skills[j]].flags & SkillType::DISABLED)
-					continue;
+				if(mt->skills[j] == NULL) continue;
+				skname = mt->skills[j];
+				int sk = LookupSkill(&skname);
+				if (sk == -1) continue;
+				if(SkillDefs[sk].flags & SkillType::DISABLED) continue;
 				spec = 1;
 				if(comma) temp += ", ";
-				temp += SkillDefs[mt->skills[j]].name;
+				temp += SkillDefs[sk].name;
 				comma++;
 			}
 			if(!spec) temp = "None.";
@@ -1871,9 +1875,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	for(i = 0; i < NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
-		j = ItemDefs[i].pSkill;
-		if(j != -1 && (SkillDefs[j].flags & SkillType::DISABLED)) continue;
-		last = ItemDefs[i].pSkill;
+		skname = ItemDefs[i].pSkill;
+		last = LookupSkill(&skname);
 		if(last != -1 && (SkillDefs[last].flags & SkillType::DISABLED))
 			continue;
 		last = 0;
@@ -1891,8 +1894,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(ItemDefs[i].name);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		if(ItemDefs[i].pSkill != -1) {
-			temp = SkillDefs[ItemDefs[i].pSkill].name;
+		if(ItemDefs[i].pSkill != NULL) {
+			skname = ItemDefs[i].pSkill;
+			int sk = LookupSkill(&skname);
+			temp = SkillDefs[sk].name;
 			temp += AString(" (") + ItemDefs[i].pLevel + ")";
 			f.PutStr(temp);
 		}
@@ -2001,7 +2006,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
 				if(ItemDefs[j].mult_item != i) continue;
 				if(!(ItemDefs[j].type & IT_NORMAL)) continue;
-				k = ItemDefs[j].pSkill;
+				skname = ItemDefs[j].pSkill;
+				k = LookupSkill(&skname);
 				if(k != -1 && (SkillDefs[k].flags & SkillType::DISABLED))
 					continue;
 				last = 0;
@@ -2043,8 +2049,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 			last = j;
 		}
 		if(last != -1) temp2 += ItemDefs[last].names;
-		j = ItemDefs[I_SWORD].pSkill;
-		if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
+		skname = ItemDefs[I_SWORD].pSkill;
+		j = LookupSkill(&skname);
+		if(j!= -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
 			temp += " Example: PRODUCE SWORDS will produce as many swords "
 				"as possible during the month, provided that the unit has "
 				"adequate supplies of ";
@@ -2084,8 +2091,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp2 += " units of ";
 			temp2 += ItemDefs[last].names;
 		}
-		j = ItemDefs[I_LONGBOW].pSkill;
-		if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
+		skname = ItemDefs[I_LONGBOW].pSkill;
+		j = LookupSkill(&skname);
+		if(j != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
 			temp += "Thus to produce 5 longbows (a supply of arrows is "
 				"assumed to be included with the bow), ";
 			temp += temp2;
@@ -2130,8 +2138,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 				temp2 += " units of ";
 				temp2 += ItemDefs[last].names;
 			}
-			j = ItemDefs[I_PLATEARMOR].pSkill;
-			if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
+			skname = ItemDefs[I_PLATEARMOR].pSkill;
+			j = LookupSkill(&skname);
+			if(j != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
 				temp += " Plate armor also takes ";
 				temp += temp2;
 				temp += " to produce.";

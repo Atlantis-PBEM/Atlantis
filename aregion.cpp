@@ -454,7 +454,9 @@ int ARegion::GetNearestProd(int item)
 	for (int i=0; i<5; i++) {
 		forlist(rptr) {
 			ARegion *r = ((ARegionPtr *) elem)->ptr;
-			if (r->products.GetProd(item, ItemDefs[item].pSkill)) {
+			AString skname = ItemDefs[item].pSkill;
+			int sk = LookupSkill(&skname);
+			if (r->products.GetProd(item, sk)) {
 				regs.DeleteAll();
 				regs2.DeleteAll();
 				return i;
@@ -1909,13 +1911,17 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 
 int ARegion::CanMakeAdv(Faction *fac, int item)
 {
+	AString skname;
+	int sk;
+	Farsight *f;
 
 	if(Globals->IMPROVED_FARSIGHT) {
 		forlist(&farsees) {
-			Farsight *f = (Farsight *)elem;
+			f = (Farsight *)elem;
 			if(f && f->faction == fac && f->unit) {
-				if(f->unit->GetSkill(ItemDefs[item].pSkill) >=
-							ItemDefs[item].pLevel)
+				skname = ItemDefs[item].pSkill;
+				sk = LookupSkill(&skname);
+				if(f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
 			}
 		}
@@ -1924,10 +1930,11 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	if((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
 	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) {
 		forlist(&passers) {
-			Farsight *f = (Farsight *)elem;
+			f = (Farsight *)elem;
 			if(f && f->faction == fac && f->unit) {
-				if(f->unit->GetSkill(ItemDefs[item].pSkill) >=
-						ItemDefs[item].pLevel)
+				skname = ItemDefs[item].pSkill;
+				sk = LookupSkill(&skname);
+				if(f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
 			}
 		}
@@ -1938,10 +1945,10 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 		forlist(&o->units) {
 			Unit *u = (Unit *) elem;
 			if (u->faction == fac) {
-				if (u->GetSkill(ItemDefs[item].pSkill) >=
-						ItemDefs[item].pLevel) {
+				skname = ItemDefs[item].pSkill;
+				sk = LookupSkill(&skname);
+				if (u->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
-				}
 			}
 		}
 	}

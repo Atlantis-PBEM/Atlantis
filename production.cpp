@@ -46,7 +46,8 @@ Production::Production(int it, int maxamt)
 		amount += getrandom(maxamt);
 	baseamount = amount;
 	productivity = 1;
-	skill = ItemDefs[it].pSkill;
+	AString skname = ItemDefs[it].pSkill;
+	skill = LookupSkill(&skname);
 }
 
 void Production::Writeout(Aoutfile *f)
@@ -73,13 +74,11 @@ void Production::Readin(Ainfile *f)
 	amount = f->GetInt();
 	baseamount = f->GetInt();
 
-	if (itemtype == I_SILVER) {
-		temp = f->GetStr();
-		skill = LookupSkill(temp);
-		delete temp;
-	} else {
-		skill = ItemDefs[itemtype].pSkill;
-	}
+	if (itemtype == I_SILVER) temp = f->GetStr();
+	else temp = new AString(ItemDefs[itemtype].pSkill);
+	skill = LookupSkill(temp);
+	delete temp;
+
 	productivity = f->GetInt();
 }
 

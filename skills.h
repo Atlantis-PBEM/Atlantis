@@ -108,7 +108,7 @@ class ShowType {
 extern ShowType * ShowDefs;
 
 int SkillCost(int);
-int SkillMax(int,int); /* skill, race */
+int SkillMax(char *,int); /* skill, race */
 int GetLevelByDays(int);
 int GetDaysByLevel(int);
 

@@ -105,20 +105,22 @@ int SkillCost(int skill)
 	return SkillDefs[skill].cost;
 }
 
-int SkillMax(int skill, int race)
+int SkillMax(char *skill, int race)
 {
 	ManType *mt = FindRace(ItemDefs[race].abr);
 
 	if (mt == NULL) return 0;
 
+	AString skname = skill;
 	if(!Globals->MAGE_NONLEADERS) {
-		if(SkillDefs[skill].flags & SkillType::MAGIC) {
+		int sk = LookupSkill(&skname);
+		if(SkillDefs[sk].flags & SkillType::MAGIC) {
 			if(!(ItemDefs[race].type & IT_LEADER)) return(0);
 		}
 	}
 
 	for(unsigned int c=0; c < sizeof(mt->skills)/sizeof(mt->skills[0]); c++) {
-		if(mt->skills[c] == skill)
+		if(skname == mt->skills[c])
 			return mt->speciallevel;
 	}
 	return mt->defaultlevel;

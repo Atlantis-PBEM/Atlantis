@@ -94,13 +94,13 @@ class ItemType
 		};
 		int flags;
 
-		int pSkill; // production skill
+		char *pSkill; // production skill
 		int pLevel; // production skill level
 		int pMonths; // Man months required for production
 		int pOut; // How many of the item we get
 		Materials pInput[4];
 
-		int mSkill; // magical production skill
+		char *mSkill; // magical production skill
 		int mLevel; // magical production skill level
 		int mOut; // How many of the item are conjured
 		Materials mInput[4];
@@ -146,7 +146,7 @@ class ManType
 		int terrain;
 		int speciallevel;
 		int defaultlevel;
-		int skills[6];
+		char *skills[6];
 };
 
 extern ManType *ManDefs;
@@ -326,7 +326,7 @@ extern MountType *FindMount(char *abbr);
 extern MonType *FindMonster(char *abbr, int illusion);
 extern ManType *FindRace(char *abbr);
 
-extern AString ItemString(int type, int num);
+extern AString ItemString(int type, int num, int fullnum=0);
 extern AString *ItemDescription(int item, int full);
 
 extern int IsSoldier(int);

@@ -233,10 +233,12 @@ int ParseTransportableItem(AString *token)
 	return r;
 }
 
-AString ItemString(int type, int num)
+AString ItemString(int type, int num, int fullnum)
 {
 	AString temp;
 	if (num == 1) {
+		if (fullnum)
+			temp += AString(num) + " ";
 		temp += AString(ItemDefs[type].name) + " [" + ItemDefs[type].abr + "]";
 	} else {
 		if (num == -1) {
@@ -616,7 +618,9 @@ AString *ItemDescription(int item, int full)
 		unsigned int c;
 		unsigned int len = sizeof(mt->skills) / sizeof(mt->skills[0]);
 		for(c = 0; c < len; c++) {
-			int skill = mt->skills[c];
+			if (mt->skills[c] == NULL) continue;
+			AString skname = mt->skills[c];
+			int skill = LookupSkill(&skname);
 			if(skill != -1) {
 				if(SkillDefs[skill].flags & SkillType::DISABLED) continue;
 				if(found) *temp += ", ";
@@ -902,11 +906,12 @@ AString *ItemDescription(int item, int full)
 		}
 	}
 
-	if(ItemDefs[item].pSkill != -1 &&
-			!(SkillDefs[ItemDefs[item].pSkill].flags & SkillType::DISABLED)) {
+	AString skname = ItemDefs[item].pSkill;
+	int sk = LookupSkill(&skname);
+	if(sk != -1 && !(SkillDefs[sk].flags & SkillType::DISABLED)) {
 		unsigned int c;
 		unsigned int len;
-		*temp += AString(" Units with ") + SkillStrs(ItemDefs[item].pSkill) +
+		*temp += AString(" Units with ") + SkillStrs(sk) +
 			" " + ItemDefs[item].pLevel + " may PRODUCE ";
 		if (ItemDefs[item].flags & ItemType::SKILLOUT)
 			*temp += "a number of this item equal to their skill level";
@@ -947,11 +952,13 @@ AString *ItemDescription(int item, int full)
 			}
 		}
 	}
-	if(ItemDefs[item].mSkill != -1 &&
-			!(SkillDefs[ItemDefs[item].mSkill].flags & SkillType::DISABLED)) {
+
+	skname = ItemDefs[item].mSkill;
+	sk = LookupSkill(&skname);
+	if(sk != -1 && !(SkillDefs[sk].flags & SkillType::DISABLED)) {
 		unsigned int c;
 		unsigned int len;
-		*temp += AString(" Units with ") + SkillStrs(ItemDefs[item].mSkill) +
+		*temp += AString(" Units with ") + SkillStrs(sk) +
 			" of at least level " + ItemDefs[item].mLevel +
 			" may attempt to create this item via magic";
 		len = sizeof(ItemDefs[item].mInput)/sizeof(Materials);
@@ -995,6 +1002,11 @@ AString *ItemDescription(int item, int full)
 	}
 	if((ItemDefs[item].flags & ItemType::CANTGIVE) && full) {
 		*temp += " This item cannot be given to other units.";
+	}
+
+	if ((ItemDefs[item].max_inventory) && full) {
+		*temp += AString("  A unit may have at most ") +
+			ItemString(item, ItemDefs[item].max_inventory, 1) + ".";
 	}
 
 	return temp;

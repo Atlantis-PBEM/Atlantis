@@ -921,7 +921,7 @@ int Unit::GetSkillMax(int sk)
 		Item *i = (Item *)elem;
 		if (ItemDefs[i->type].flags & ItemType::DISABLED) continue;
 		if (!(ItemDefs[i->type].type & IT_MAN)) continue;
-		int m = SkillMax(sk, i->type);
+		int m = SkillMax(SkillDefs[sk].abbr, i->type);
 		if ((max == 0 && m > max) || (m < max)) max = m;
 	}
 	return max;

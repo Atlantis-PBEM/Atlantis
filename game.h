@@ -186,15 +186,15 @@ private:
 	void ModifyItemCapacities(int it, int walk, int ride, int fly, int swim);
 	void ModifyItemProductionBooster(int it, int item, int bonus);
 	void ModifyItemHitch(int it, int item, int bonus);
-	void ModifyItemProductionSkill(int it, int sk, int lev);
+	void ModifyItemProductionSkill(int it, char *sk, int lev);
 	void ModifyItemProductionOutput(int it, int months, int count);
 	void ModifyItemProductionInput(int it, int i, int input, int amount);
-	void ModifyItemMagicSkill(int it, int sk, int lev);
+	void ModifyItemMagicSkill(int it, char *sk, int lev);
 	void ModifyItemMagicOutput(int it, int count);
 	void ModifyItemMagicInput(int it, int i, int input, int amount);
 
 	void ModifyRaceSkillLevels(char *race, int special, int def);
-	void ModifyRaceSkills(char *race, int i, int sk);
+	void ModifyRaceSkills(char *race, int i, char *sk);
 
 	void ModifyMonsterAttackLevel(char *mon, int lev);
 	void ModifyMonsterDefense(char *mon, int defenseType, int level);

@@ -150,10 +150,13 @@ void Game::ModifyItemHitch(int it, int item, int capacity)
 	ItemDefs[it].hitchwalk = capacity;
 }
 
-void Game::ModifyItemProductionSkill(int it, int sk, int lev)
+void Game::ModifyItemProductionSkill(int it, char *sk, int lev)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
-	if(sk < -1 || sk > (NSKILLS-1)) return;
+	if (sk) {
+		AString skname = sk;
+		if (LookupSkill(&skname) == -1) return;
+	}
 	ItemDefs[it].pSkill = sk;
 	ItemDefs[it].pLevel = lev;
 }
@@ -178,10 +181,13 @@ void Game::ModifyItemProductionInput(int it, int i, int input, int amount)
 	ItemDefs[it].pInput[i].amt = amount;
 }
 
-void Game::ModifyItemMagicSkill(int it, int sk, int lev)
+void Game::ModifyItemMagicSkill(int it, char *sk, int lev)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
-	if(sk < -1 || sk > (NSKILLS-1)) return;
+	if (sk) {
+		AString skname = sk;
+		if (LookupSkill(&skname) == -1) return;
+	}
 	ItemDefs[it].mSkill = sk;
 	ItemDefs[it].mLevel = lev;
 }
@@ -214,12 +220,15 @@ void Game::ModifyRaceSkillLevels(char *r, int spec, int def)
 	mt->defaultlevel = def;
 }
 
-void Game::ModifyRaceSkills(char *r, int i, int sk)
+void Game::ModifyRaceSkills(char *r, int i, char *sk)
 {
 	ManType *mt = FindRace(r);
 	if (mt == NULL) return;
 	if(i < 0 || i >= (int)(sizeof(mt->skills) / sizeof(mt->skills[0]))) return;
-	if(sk < -1 || sk > (NSKILLS-1)) sk = -1;
+	if (sk) {
+		AString skname = sk;
+		if (LookupSkill(&skname) == -1) return;
+	}
 	mt->skills[i] = sk;
 }
 
