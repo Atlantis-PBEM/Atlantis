@@ -1,3 +1,7 @@
+import random
+
+directions = ['n','s','se','sw','ne','nw']
+
 def generateturn(report, template):
     """Given a report and a template, return a set of orders as a string."""
     firstunit = 'no'
@@ -16,9 +20,9 @@ def generateturn(report, template):
             if firstunit == 'no':
                 orders += "option template map\n"
                 orders += "option notimes\n"
-                #orders += "declare default hostile\n"
-                #orders += "declare 1 neutral\n"
-                #orders += "declare 2 neutral\n"
+                orders += "declare default hostile\n"
+                orders += "declare 1 neutral\n"
+                orders += "declare 2 neutral\n"
                 firstunit = 'found'
             
             # for a test, we'll move around randomly
