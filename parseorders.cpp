@@ -1077,7 +1077,8 @@ void Game::ProcessClaimOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 void Game::ProcessFactionOrder( Unit *u, AString *o, OrdersCheck *pCheck )
 {
 	if( Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_FACTION_TYPES ) {
-		u->Error( "FACTION: Invalid order, no faction types in this game." );
+		ParseError(pCheck, u, 0,
+			   	"FACTION: Invalid order, no faction types in this game.");
 		return;
 	}
 
@@ -1156,12 +1157,12 @@ void Game::ProcessStealOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 		return;
 	}
 
+	if (IsSoldier(i)) {
+		ParseError(pCheck, u, 0, "STEAL: Can't steal that.");
+		delete id;
+		return;
+	}
 	if( !pCheck ) {
-		if (IsSoldier(i)) {
-			u->Error("STEAL: Can't steal that.");
-			delete id;
-			return;
-		}
 		StealOrder * ord = new StealOrder;
 		ord->target = id;
 		ord->item = i;
@@ -1325,7 +1326,7 @@ void Game::ProcessRevealOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 void Game::ProcessTaxOrder(Unit * u, OrdersCheck *pCheck )
 {
 	if (u->taxing == TAX_PILLAGE) {
-		u->Error("TAX: The unit is already pillaging.");
+		ParseError(pCheck, u, 0, "TAX: The unit is already pillaging.");
 		return;
 	}
 	if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
@@ -1343,7 +1344,7 @@ void Game::ProcessTaxOrder(Unit * u, OrdersCheck *pCheck )
 void Game::ProcessPillageOrder(Unit * u, OrdersCheck *pCheck )
 {
 	if (u->taxing == TAX_TAX) {
-		u->Error("PILLAGE: The unit is already taxing.");
+		ParseError(pCheck, u, 0, "PILLAGE: The unit is already taxing.");
 		return;
 	}
 	if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
