@@ -324,12 +324,12 @@ void ARegion::SetupPop()
 		// hmm... somewhere not too far off equilibrium pop
 		population = habitat * 66 / 100;
 	} else {
-		basepopulation = population;
 		if(Globals->RANDOM_ECONOMY) {
 			population = (pop + getrandom(pop)) / 2;
 		} else {
 			population = pop;
 		}
+		basepopulation = population;
 	}
 
 	// Setup wages
