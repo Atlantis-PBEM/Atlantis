@@ -45,6 +45,7 @@ class CastMindOrder;
 class CastRegionOrder;
 class TeleportOrder;
 class ForgetOrder;
+class EvictOrder;
 
 #include "unit.h"
 #include "gamedefs.h"
@@ -76,6 +77,7 @@ enum {
 	O_ENDTURN,
 	O_ENTER,
 	O_ENTERTAIN,
+	O_EVICT,
 	O_EXCHANGE,
 	O_FACTION,
 	O_FIND,
@@ -172,7 +174,7 @@ class GiveOrder : public Order {
 		int amount;
 		int except;
 
-		UnitId * target;
+		UnitId *target;
 };
 
 class StudyOrder : public Order {
@@ -350,5 +352,14 @@ class CastUnitsOrder : public CastOrder {
 
 		AList units;
 };
+
+class EvictOrder : public Order {
+	public:
+		EvictOrder();
+		~EvictOrder();
+
+		AList targets;
+};
+
 
 #endif

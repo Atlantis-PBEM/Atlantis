@@ -484,3 +484,5 @@ Changes from 4.0.9 -> 4.0.10
       cause the second to fail with an error.
    -- Fixed another instance of the missing ENDFORM order which caused a
       crash.
+   -- Added EVICT order as submitted by Peter Rayner
+      <wacky_wizard001@hotmail.com> with slight modifications.

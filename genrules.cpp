@@ -270,6 +270,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#enter", "enter"));
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		f.TagText("LI", f.Link("#entertain", "entertain"));
+	f.TagText("LI", f.Link("#evict", "evict"));
 	f.TagText("LI", f.Link("#exchange", "exchange"));
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		f.TagText("LI", f.Link("#faction", "faction"));
@@ -3768,7 +3769,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"all of the targets will be attacked.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
-	temp = "To attacks units 17, 431, and 985:";
+	temp = "To attack units 17, 431, and 985:";
 	temp2 = "ATTACK 17\nATTACK 431 985";
 	f.CommandExample(temp, temp2);
 	temp = "or:";
@@ -4006,6 +4007,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp2 = "ENTERTAIN";
 		f.CommandExample(temp, temp2);
 	}
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("evict");
+	f.TagText("H4", "EVICT [unit] ...");
+	temp = "Evict the specified unit from the object of which you are "
+		"currently the owner.  If multipe EVICT orders are given, all "
+		"of the units will be evicted.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Evict units 415 and 698 from an object that this unit owns.";
+	temp2 = "EVICT 415 698";
+	f.CommandExample(temp, temp2);
+	temp = "or";
+	temp2 = "EVICT 415\nEVICT 698";
+	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("exchange");

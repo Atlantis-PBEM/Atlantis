@@ -330,6 +330,7 @@ private:
     void ProcessEnterOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessLeaveOrder(Unit *, OrdersCheck *pCheck );
     void ProcessPromoteOrder(Unit *,AString *, OrdersCheck *pCheck );
+    void ProcessEvictOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessTaxOrder(Unit *, OrdersCheck *pCheck );
     void ProcessPillageOrder(Unit *, OrdersCheck *pCheck );
     void ProcessConsumeOrder(Unit *, AString *, OrdersCheck *pCheck );
@@ -466,6 +467,7 @@ private:
     void Do1EnterOrder(ARegion *,Object *,Unit *);
     void RunPromoteOrders();
     void Do1PromoteOrder(Object *,Unit *);
+    void Do1EvictOrder(Object *,Unit *);
     void RunPillageOrders();
     int CountPillagers(ARegion *);
     void ClearPillagers(ARegion *);

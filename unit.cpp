@@ -551,6 +551,7 @@ void Unit::ClearOrders()
 	leftShip = 0;
 	destroy = 0;
 	attackorders = 0;
+	evictorders = 0;
 	stealorders = 0;
 	promote = 0;
 	taxing = TAX_NONE;

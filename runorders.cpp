@@ -40,7 +40,7 @@ void Game::RunOrders()
 	RunFindOrders();
 	Awrite("Running ENTER/LEAVE Orders...");
 	RunEnterOrders();
-	Awrite("Running PROMOTE Orders...");
+	Awrite("Running PROMOTE/EVICT Orders...");
 	RunPromoteOrders();
 	Awrite("Running Combat...");
 	DoAttackOrders();
@@ -859,38 +859,68 @@ void Game::RunPillageRegion(ARegion * reg)
 
 void Game::RunPromoteOrders()
 {
+	ARegion *r;
+	Object *o;
+	Unit *u;
+
 	/* First, do any promote orders */
+	forlist(&regions) {
+		r = (ARegion *)elem;
+		forlist(&r->objects) {
+			o = (Object *)elem;
+			if (o->type != O_DUMMY) {
+				u = o->GetOwner();
+				if(u && u->promote) {
+					Do1PromoteOrder(o,u);
+					delete u->promote;
+					u->promote = 0;
+				}
+			} else {
+				u->Error("PROMOTE: Can only promote inside structures.");
+				delete u->promote;
+				u->promote = 0;
+			}
+		}
+	}
+	/* Now do any evict orders */
 	{
 		forlist(&regions) {
-			ARegion * r = (ARegion *) elem;
+			r = (ARegion *)elem;
 			forlist(&r->objects) {
-				Object * o = (Object *) elem;
-				if (o->type != O_DUMMY)
-				{
-					Unit *u = o->GetOwner();
-					if( u && u->promote )
-					{
-						Do1PromoteOrder(o,u);
-						delete u->promote;
-						u->promote = 0;
+				o = (Object *)elem;
+				if (o->type != O_DUMMY) {
+					u = o->GetOwner();
+					if (u && u->evictorders) {
+						Do1EvictOrder(o, u);
+						delete u->evictorders;
+						u->evictorders = 0;
 					}
+				} else {
+					u->Error("EVICT: Can only evict inside structures.");
+					delete u->evictorders;
+					u->evictorders = 0;
 				}
 			}
 		}
 	}
 
-	/* Then, clear out other promote orders */
+	/* Then, clear out other promote/evict orders */
 	{
 		forlist(&regions) {
-			ARegion * r = (ARegion *) elem;
+			r = (ARegion *) elem;
 			forlist(&r->objects) {
-				Object * o = (Object *) elem;
+				o = (Object *) elem;
 				forlist(&o->units) {
-					Unit * u = (Unit *) elem;
-					if (u->promote)
-					{
+					u = (Unit *) elem;
+					if (u->promote) {
+						u->Error("PROMOTE: Must be owner");
 						delete u->promote;
 						u->promote = 0;
+					}
+					if (u->evictorders) {
+						u->Error("EVICT: Must be owner");
+						delete u->evictorders;
+						u->evictorders = 0;
 					}
 				}
 			}
@@ -898,14 +928,39 @@ void Game::RunPromoteOrders()
 	}
 }
 
-void Game::Do1PromoteOrder(Object * obj,Unit * u) {
-  Unit * tar = obj->GetUnitId(u->promote,u->faction->num);
-  if (!tar) {
-	u->Error("PROMOTE: Can't find target.");
-	return;
-  }
-  obj->units.Remove(tar);
-  obj->units.Insert(tar);
+void Game::Do1PromoteOrder(Object *obj, Unit *u)
+{
+	Unit *tar = obj->GetUnitId(u->promote,u->faction->num);
+	if (!tar) {
+		u->Error("PROMOTE: Can't find target.");
+		return;
+	}
+	obj->units.Remove(tar);
+	obj->units.Insert(tar);
+}
+
+void Game::Do1EvictOrder(Object *obj, Unit *u)
+{
+	EvictOrder *ord = u->evictorders;
+
+	while (ord && ord->targets.Num()) {
+		UnitId *id = (UnitId *)ord->targets.First();
+		ord->targets.Remove(id);
+		Unit *tar = obj->GetUnitId(id, u->faction->num);
+		delete id;
+		if(obj->IsBoat() &&
+			(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
+			(!tar->CanReallySwim() || tar->GetFlag(FLAG_NOCROSS_WATER))) {
+			u->Error("EVICT: Cannot forcibly evict units over ocean.");
+			continue;
+		}
+		Object *to = obj->region->GetDummy();
+		tar->MoveUnit(to);
+		tar->Event(AString("Evicted from ") + *obj->name + " by " +
+				*u->name);
+		u->Event(AString("Evicted ") + *tar->name + " from " +
+				*obj->name);
+	}
 }
 
 void Game::RunEnterOrders()

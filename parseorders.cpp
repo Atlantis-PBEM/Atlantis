@@ -578,6 +578,9 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_ENTERTAIN:
 			ProcessEntertainOrder( unit, pCheck );
 			break;
+		case O_EVICT:
+			ProcessEvictOrder(unit, o, pCheck);
+			break;
 		case O_EXCHANGE:
 			ProcessExchangeOrder( unit, o, pCheck );
 			break;
@@ -2965,5 +2968,17 @@ void Game::ProcessSailOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 				return;
 			}
 		}
+	}
+}
+
+void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	UnitId * id = ParseUnit(o);
+	while (id && id->unitnum != -1) {
+		if(!pCheck) {
+			if (!u->evictorders) u->evictorders = new EvictOrder;
+			u->evictorders->targets.Add(id);
+		}
+		id = ParseUnit(o);
 	}
 }

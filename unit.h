@@ -259,6 +259,7 @@ class Unit : public AListElem
 		Order *stealorders;
 		Order *monthorders;
 		AttackOrder *attackorders;
+		EvictOrder *evictorders;
 		ARegion *advancefrom;
 
 		AList exchangeorders;

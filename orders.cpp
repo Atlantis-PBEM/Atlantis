@@ -49,6 +49,7 @@ char * od[] = {
 	"endturn",
 	"enter",
 	"entertain",
+	"evict",
 	"exchange",
 	"faction",
 	"find",
@@ -311,5 +312,14 @@ CastUnitsOrder::CastUnitsOrder()
 }
 
 CastUnitsOrder::~CastUnitsOrder()
+{
+}
+
+EvictOrder::EvictOrder()
+{
+	type = O_EVICT;
+}
+
+EvictOrder::~EvictOrder()
 {
 }
