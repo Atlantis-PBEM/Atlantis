@@ -99,12 +99,28 @@ Changes from 4.0.5 -> 4.0.6
    -- Implemented GIVE [unit] ALL [item] and GIVE [unit] ALL [item]
       EXCEPT [amount].   Updated the rules to reflect the changes.
 
+Changes from 4.0.6 -> 4.0.7
+--------------------------------------------------
+   -- Added TAX_PILLAGE_MONTH_LONG gamedef.  If this is set to one, then
+      taxing and pillaging are month-long orders.  The AUTOTAX flag, when
+      this is set, is still used, but now what it means is that a unit
+      with this flag will tax if a) no other orders have been given for
+      the unit and b) it is capable of taxing.  (IE, the autotax flag
+      makes the units default order TAX instead of WORK)
+
 TODO
 ----------------
    -- GIVE ALL TRADE (to give away all trade goods) (other categories for
-      other obvious flags)
+      other obvious flags) (maybe.. there are issues with this)
+   -- BUY ALL/SELL ALL
    -- Improve the item/hex editor
    -- Gamedef to handle various options around combat/weapons/bows for taxing
    -- Gamedefs for various economy options. (far future)
    -- Gamedef for alternate nexus layouts
    -- Give more information when SHOW <item> is done.
+   -- Add option to allow towers/forts/etc to allow training only a certain
+      number of mages.
+   -- Consider more complicated GIVE processing of 'GIVE ALL EXCEPT .....'
+   -- Consider requiring both food and pay for upkeep.
+   -- Merchent skill (limited number of merchents)/Limited number
+      of tacticians/generals?

@@ -653,10 +653,11 @@ void Game::RunFindUnit(Unit * u)
 	u->findorders.DeleteAll();
 }
 
-void Game::RunTaxOrders() {
-  forlist(&regions) {
-    RunTaxRegion((ARegion *) elem);
-  }
+void Game::RunTaxOrders()
+{
+	forlist(&regions) {
+		RunTaxRegion((ARegion *) elem);
+	}
 }
 
 int Game::CountTaxers(ARegion * reg)
@@ -666,7 +667,10 @@ int Game::CountTaxers(ARegion * reg)
         Object * o = (Object *) elem;
         forlist(&o->units) {
             Unit * u = (Unit *) elem;
-            if (u->GetFlag(FLAG_AUTOTAX)) u->taxing = TAX_TAX;
+            if (u->GetFlag(FLAG_AUTOTAX) && !Globals->TAX_PILLAGE_MONTH_LONG)
+				u->taxing = TAX_TAX;
+			if(u->taxing == TAX_AUTO) u->taxing = TAX_TAX;
+
             if (u->taxing == TAX_TAX) {
                 if (!reg->CanTax(u)) {
                     u->Error("TAX: A unit is on guard.");
@@ -704,8 +708,7 @@ void Game::RunTaxRegion(ARegion * reg)
         Object * o = (Object *) elem;
         forlist(&o->units) {
             Unit * u = (Unit *) elem;
-            if (u->taxing == TAX_TAX)
-            {
+            if (u->taxing == TAX_TAX) {
                 int t = u->Taxers();
                 double fAmt = ((double) t) * ((double) Globals->TAX_INCOME ) *
                     ((double) reg->money ) / ((double) desired );
@@ -721,10 +724,11 @@ void Game::RunTaxRegion(ARegion * reg)
     }
 }
 
-void Game::RunPillageOrders() {
-  forlist (&regions) {
-    RunPillageRegion((ARegion *) elem);
-  }
+void Game::RunPillageOrders()
+{
+	forlist (&regions) {
+		RunPillageRegion((ARegion *) elem);
+	}
 }
 
 int Game::CountPillagers(ARegion * reg)
@@ -760,62 +764,65 @@ int Game::CountPillagers(ARegion * reg)
     return p;
 }
 
-void Game::ClearPillagers(ARegion * reg) {
-  forlist(&reg->objects) {
-    Object * o = (Object *) elem;
-    forlist(&o->units) {
-      Unit * u = (Unit *) elem;
-      if (u->taxing == TAX_PILLAGE) {
-	u->Error("PILLAGE: Not enough men to pillage.");
-	u->taxing = TAX_NONE;
-      }
-    }
-  }
+void Game::ClearPillagers(ARegion * reg)
+{
+	forlist(&reg->objects) {
+		Object * o = (Object *) elem;
+		forlist(&o->units) {
+			Unit * u = (Unit *) elem;
+			if (u->taxing == TAX_PILLAGE) {
+				u->Error("PILLAGE: Not enough men to pillage.");
+				u->taxing = TAX_NONE;
+			}
+		}
+	}
 }
 
-void Game::RunPillageRegion(ARegion * reg) {
-  if (reg->type == R_OCEAN) return;
-  if (reg->money < 1) return;
-  if (reg->Wages() < 11) return;
-  
-  /* First, count up pillagers */
-  int pillagers = CountPillagers(reg);
-  
-  if (pillagers * 2 < reg->money / Globals->TAX_INCOME) {
-    ClearPillagers(reg);
-    return;
-  }
-  
-  AList * facs = reg->PresentFactions();
-  int amt = reg->money * 2;
-  forlist(&reg->objects) {
-    Object * o = (Object *) elem;
-    forlist(&o->units) {
-      Unit * u = (Unit *) elem;
-      if (u->taxing == TAX_PILLAGE) {
-	u->taxing = TAX_NONE;
-	int num = u->Taxers();
-	int temp = (amt * num)/pillagers;
-	amt -= temp;
-	pillagers -= num;
-	u->SetMoney(u->GetMoney() + temp);
-	u->Event(AString("Pillages $") + temp + " from " + 
-             reg->ShortPrint( &regions ) + ".");
-	forlist(facs) {
-	  Faction * fp = ((FactionPtr *) elem)->ptr;
-	  if (fp != u->faction) {
-	    fp->Event(*(u->name) + " pillages " + *(reg->name) + ".");
-	  }
+void Game::RunPillageRegion(ARegion * reg)
+{
+	if (reg->type == R_OCEAN) return;
+	if (reg->money < 1) return;
+	if (reg->Wages() < 11) return;
+
+	/* First, count up pillagers */
+	int pillagers = CountPillagers(reg);
+
+	if (pillagers * 2 < reg->money / Globals->TAX_INCOME) {
+		ClearPillagers(reg);
+		return;
 	}
-      }
-    }
-  }
-  delete facs;
-  
-  /* Destroy economy */
-  reg->money = 0;
-  reg->wages -= 6;
-  if (reg->wages < 6) reg->wages = 6;
+
+	AList * facs = reg->PresentFactions();
+	int amt = reg->money * 2;
+	forlist(&reg->objects) {
+		Object * o = (Object *) elem;
+		forlist(&o->units) {
+			Unit * u = (Unit *) elem;
+			if (u->taxing == TAX_PILLAGE) {
+				u->taxing = TAX_NONE;
+				int num = u->Taxers();
+				int temp = (amt * num)/pillagers;
+				amt -= temp;
+				pillagers -= num;
+				u->SetMoney(u->GetMoney() + temp);
+				u->Event(AString("Pillages $") + temp + " from " + 
+						reg->ShortPrint( &regions ) + ".");
+				forlist(facs) {
+					Faction * fp = ((FactionPtr *) elem)->ptr;
+					if (fp != u->faction) {
+						fp->Event(*(u->name) + " pillages " +
+								*(reg->name) + ".");
+					}
+				}
+			}
+		}
+	}
+	delete facs;
+
+	/* Destroy economy */
+	reg->money = 0;
+	reg->wages -= 6;
+	if (reg->wages < 6) reg->wages = 6;
 }
 				
 void Game::RunPromoteOrders()

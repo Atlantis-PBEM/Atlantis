@@ -36,9 +36,10 @@
 //                               profit margin
 //
 
+#include <stdio.h>
+#include <string.h>
 #include "game.h"
 #include "gamedata.h"
-#include "stdio.h"
 
 Location * GetUnit(AList * list,int n)
 {

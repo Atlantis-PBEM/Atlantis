@@ -897,8 +897,9 @@ void Game::ProcessEntertainOrder(Unit * unit, OrdersCheck *pCheck )
 {
     if( pCheck )
     {
-        if (unit->monthorders)
-        {
+        if (unit->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((unit->taxing == TAX_TAX) || (unit->taxing == TAX_PILLAGE)))) {
             pCheck->Error("ENTERTAIN: Overwriting previous month-long order.");
         }
         unit->monthorders = &( pCheck->dummyOrder );
@@ -906,7 +907,9 @@ void Game::ProcessEntertainOrder(Unit * unit, OrdersCheck *pCheck )
     }
     else
     {
-        if (unit->monthorders) {
+        if (unit->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((unit->taxing == TAX_TAX) || (unit->taxing == TAX_PILLAGE)))) {
             unit->Error("ENTERTAIN: Overwriting previous month-long order.");
             delete unit->monthorders;
         }
@@ -1271,20 +1274,39 @@ void Game::ProcessTaxOrder(Unit * u, OrdersCheck *pCheck )
             u->Error("TAX: The unit is already pillaging.");
             return;
         }
-        u->taxing = TAX_TAX;
-    }
+		if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
+			delete u->monthorders;
+			u->monthorders = NULL;
+			u->Error("TAX: Overwriting previous month-long order.");
+		}
+    } else {
+		if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
+			pCheck->Error("TAX: Overwriting previous month-long order.");
+			u->monthorders = NULL;
+		}
+	}
+    u->taxing = TAX_TAX;
 }
 
 void Game::ProcessPillageOrder(Unit * u, OrdersCheck *pCheck )
 {
-    if( !pCheck )
-    {
+    if( !pCheck ) {
         if (u->taxing == TAX_TAX) {
             u->Error("PILLAGE: The unit is already taxing.");
             return;
         }
-        u->taxing = TAX_PILLAGE;
-    }
+		if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
+			delete u->monthorders;
+			u->monthorders = NULL;
+			u->Error("PILLAGE: Overwriting previous month-long order.");
+		}
+    } else {
+		if(Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
+			pCheck->Error("PILLAGE: Overwriting previous month-long order.");
+			u->monthorders = NULL;
+		}
+	}
+    u->taxing = TAX_PILLAGE;
 }
 
 void Game::ProcessPromoteOrder(Unit * u,AString * o, OrdersCheck *pCheck )
@@ -1347,10 +1369,13 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
 		}
         if( pCheck )
         {
-            if (unit->monthorders)
-            {
+			if (unit->monthorders ||
+				(Globals->TAX_PILLAGE_MONTH_LONG &&
+				 ((unit->taxing == TAX_TAX) ||
+				  (unit->taxing == TAX_PILLAGE)))) {
                 pCheck->Error("BUILD: Overwriting previous month-long order.");
             }
+			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
             unit->monthorders = &( pCheck->dummyOrder );
             unit->monthorders->type = O_BUILD;
             return;
@@ -1384,10 +1409,13 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
     {
         if( pCheck )
         {
-            if (unit->monthorders)
-            {
+			if (unit->monthorders ||
+				(Globals->TAX_PILLAGE_MONTH_LONG &&
+				 ((unit->taxing == TAX_TAX) ||
+				  (unit->taxing == TAX_PILLAGE)))) {
                 pCheck->Error("BUILD: Overwriting previous month-long order.");
             }
+			if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
             unit->monthorders = &( pCheck->dummyOrder );
             unit->monthorders->type = O_BUILD;
             return;
@@ -1395,11 +1423,13 @@ void Game::ProcessBuildOrder( Unit *unit, AString *o, OrdersCheck *pCheck )
     }
 
     BuildOrder * order = new BuildOrder;
-    if (unit->monthorders)
-    {
+	if (unit->monthorders ||
+		(Globals->TAX_PILLAGE_MONTH_LONG &&
+		 ((unit->taxing == TAX_TAX) || (unit->taxing == TAX_PILLAGE)))) {
         delete unit->monthorders;
         unit->Error("BUILD: Overwriting previous month-long order.");
     }
+	if(Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
     unit->monthorders = order;
     if (unit->enter == -1) unit->enter = 0;
 }
@@ -1519,12 +1549,13 @@ void Game::ProcessProduceOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 		return;
 	}
 
-    if( pCheck )
-    {
-        if (u->monthorders)
-        {
+    if( pCheck ) {
+		if (u->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             pCheck->Error("PRODUCE: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = &( pCheck->dummyOrder );
         u->monthorders->type = O_PRODUCE;
     }
@@ -1533,10 +1564,13 @@ void Game::ProcessProduceOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         ProduceOrder * p = new ProduceOrder;
         p->item = it;
         p->skill = ItemDefs[it].skill;
-        if (u->monthorders) {
+		if (u->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             delete u->monthorders;
             u->Error("PRODUCE: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = p;
     }
 }
@@ -1545,10 +1579,12 @@ void Game::ProcessWorkOrder(Unit * u, OrdersCheck *pCheck )
 {
     if( pCheck )
     {
-        if (u->monthorders)
-        {
+		if (u->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             pCheck->Error("WORK: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = &( pCheck->dummyOrder );
         u->monthorders->type = O_WORK;
     }
@@ -1557,10 +1593,13 @@ void Game::ProcessWorkOrder(Unit * u, OrdersCheck *pCheck )
         ProduceOrder * order = new ProduceOrder;
         order->skill = -1;
         order->item = I_SILVER;
-        if (u->monthorders) {
+		if (u->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             delete u->monthorders;
             u->Error("WORK: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = order;
     }
 }
@@ -1571,10 +1610,12 @@ void Game::ProcessTeachOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 
     if( pCheck )
     {
-        if (u->monthorders && u->monthorders->type != O_TEACH) 
-        {
+		if ((u->monthorders && (u->monthorders->type != O_TEACH)) ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             pCheck->Error("TEACH: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = &( pCheck->dummyOrder );
         u->monthorders->type = O_TEACH;
     }
@@ -1605,10 +1646,13 @@ void Game::ProcessTeachOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 
     if( !pCheck )
     {
-        if (u->monthorders && u->monthorders->type != O_TEACH) {
+		if ((u->monthorders && (u->monthorders->type != O_TEACH)) ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             delete u->monthorders;
             u->Error("TEACH: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = order;
     }
 }
@@ -1640,10 +1684,12 @@ void Game::ProcessStudyOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 
     if( pCheck )
     {
-        if (u->monthorders)
-        {
+		if (u->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             pCheck->Error("STUDY: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = &( pCheck->dummyOrder );
         u->monthorders->type = O_STUDY;
     }
@@ -1652,10 +1698,13 @@ void Game::ProcessStudyOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         StudyOrder * order = new StudyOrder;
         order->skill = sk;
         order->days = 0;
-        if (u->monthorders) {
+		if (u->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             delete u->monthorders;
             u->Error("STUDY: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = order;
     }
 }
@@ -2248,21 +2297,25 @@ void Game::ProcessAdvanceOrder(Unit * u,AString * o, OrdersCheck *pCheck )
     MoveOrder *m = 0;
     if( pCheck )
     {
-        if (u->monthorders && u->monthorders->type != O_ADVANCE)
-        {
+		if ((u->monthorders && u->monthorders->type != O_ADVANCE) ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             pCheck->Error("ADVANCE: Overwriting previous month-long orders.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = &( pCheck->dummyOrder );
         u->monthorders->type = O_ADVANCE;
     }
     else
     {
-        if (u->monthorders && u->monthorders->type != O_MOVE)
-        {
+		if ((u->monthorders && u->monthorders->type != O_ADVANCE) ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             u->Error("ADVANCE: Overwriting previous month-long orders.");
             delete u->monthorders;
             u->monthorders = 0;
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         if (!u->monthorders) {
             u->monthorders = new MoveOrder;
         }
@@ -2296,20 +2349,25 @@ void Game::ProcessMoveOrder(Unit * u,AString * o, OrdersCheck *pCheck )
     MoveOrder *m = 0;
     if( pCheck )
     {
-        if (u->monthorders && u->monthorders->type != O_MOVE)
-        {
+		if ((u->monthorders && u->monthorders->type != O_MOVE) ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             pCheck->Error("MOVE: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = &( pCheck->dummyOrder );
         u->monthorders->type = O_MOVE;
     }
     else
     {
-        if (u->monthorders && u->monthorders->type != O_MOVE) {
+		if ((u->monthorders && u->monthorders->type != O_MOVE) ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             u->Error("MOVE: Overwriting previous month-long order.");
             delete u->monthorders;
             u->monthorders = 0;
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         if (!u->monthorders) {
             u->monthorders = new MoveOrder;
         }
@@ -2343,20 +2401,25 @@ void Game::ProcessSailOrder(Unit * u,AString * o, OrdersCheck *pCheck )
     SailOrder *m = 0;
     if( pCheck )
     {
-        if (u->monthorders && u->monthorders->type != O_SAIL)
-        {
+		if ((u->monthorders && u->monthorders->type != O_SAIL) ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             pCheck->Error("SAIL: Overwriting previous month-long order.");
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         u->monthorders = &( pCheck->dummyOrder );
         u->monthorders->type = O_SAIL;
     }
     else
     {
-        if (u->monthorders && u->monthorders->type != O_SAIL) {
+		if ((u->monthorders && u->monthorders->type != O_SAIL) ||
+			(Globals->TAX_PILLAGE_MONTH_LONG &&
+			 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
             u->Error("SAIL: Overwriting previous month-long order.");
             delete u->monthorders;
             u->monthorders = 0;
         }
+		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
         if (!u->monthorders) {
             u->monthorders = new SailOrder;
         }
@@ -2386,4 +2449,4 @@ void Game::ProcessSailOrder(Unit * u,AString * o, OrdersCheck *pCheck )
             }
         }
     }
-}		
+}

@@ -446,7 +446,8 @@ void Unit::ClearCastOrders() {
   teleportorders = 0;
 }
 
-void Unit::DefaultOrders(Object * obj) {
+void Unit::DefaultOrders(Object * obj)
+{
 	ClearOrders();
 	if (type == U_WMON) {
 		if (ObjectDefs[obj->type].monster == -1) {
@@ -463,10 +464,15 @@ void Unit::DefaultOrders(Object * obj) {
 		combat = S_FIRE;
 	} else{
 		if(obj->region->type != R_NEXUS) {
-			ProduceOrder * order = new ProduceOrder;
-			order->skill = -1;
-			order->item = I_SILVER;
-			monthorders = order;
+			if(GetFlag(FLAG_AUTOTAX) && Globals->TAX_PILLAGE_MONTH_LONG &&
+					Taxers()) {
+				taxing = TAX_AUTO;
+			} else {
+				ProduceOrder * order = new ProduceOrder;
+				order->skill = -1;
+				order->item = I_SILVER;
+				monthorders = order;
+			}
 		}
 	}
 }

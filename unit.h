@@ -59,7 +59,8 @@ enum {
 enum {
   TAX_NONE,
   TAX_TAX,
-  TAX_PILLAGE
+  TAX_PILLAGE,
+  TAX_AUTO,
 };
 
 enum {

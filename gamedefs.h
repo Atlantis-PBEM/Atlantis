@@ -264,6 +264,9 @@ public:
 	// the cost is the city size (1, 2, 3) * this value
 	int CITY_RENAME_COST;
 
+	// Are taxing and pillaging month-long actions?
+	int TAX_PILLAGE_MONTH_LONG;
+
 };
 
 extern GameDefs * Globals;

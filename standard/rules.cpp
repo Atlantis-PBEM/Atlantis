@@ -39,7 +39,7 @@
 //
 static GameDefs g = {
     "Standard Atlantis",     // RULESET_NAME
-    MAKE_ATL_VER( 4, 0, 6 ), // RULESET_VERSION
+    MAKE_ATL_VER( 4, 0, 7 ), // RULESET_VERSION
 
     2, /* FOOT_SPEED */
     4, /* HORSE_SPEED */
@@ -137,6 +137,7 @@ static GameDefs g = {
 	0,	// BATTLE_FACTION_INFO
 	0,	// ALLOW_WITHDRAW
 	0,	// CITY_RENAME_COST
+	0,	// TAX_PILLAGE_MONTH_LONG
 };
 
 GameDefs * Globals = &g;
