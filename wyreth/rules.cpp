@@ -131,7 +131,10 @@ static GameDefs g = {
 
 	"Wyreth", // WORLD_NAME
 
-	1,  // NEXUS_GATE
+	1,  // NEXUS_GATE_OUT
+	0,  // NEXUS_IS_CITY
+	0,	// BATTLE_FACTION_INFO
+	1,	// ALLOW_WITHDRAW
 };
 
 GameDefs * Globals = &g;
