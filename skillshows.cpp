@@ -289,7 +289,7 @@ AString *ShowSkill::Report(void)
 					   "only available in ocean regions.";
 				if(!(ItemDefs[I_NET].flags & ItemType::DISABLED)) {
 					*str += " A unit with this skill may also PRODUCE nets "
-						   "from herbs. Producton can be increased by using "
+						   "from herbs. Production can be increased by using "
 						   "nets.";
 				}
 			}
@@ -655,7 +655,7 @@ AString *ShowSkill::Report(void)
 					break;
 				found = 1;
 				*str += "A unit with this skill may use the BUILD order to "
-				       "construct diffrent types of ships from wood.  At "
+				       "construct different types of ships from wood.  At "
 					   "this level, the ships that may be built are ";
 				int comma = 0;
 				if(!(ObjectDefs[O_LONGBOAT].flags & ObjectType::DISABLED)) {
@@ -998,7 +998,7 @@ AString *ShowSkill::Report(void)
 					   "and the caster must be trained in Portal Lore. The "
 					   "caster may teleport units weighing up to 50 weight "
 					   "units times his skill level, to the target mage's "
-					   "region, provided the target region is no further "
+					   "region, provided the target region is no farther "
 					   "than 2 times the caster's skill level squared "
 					   "regions away. To use this skill, CAST Portal_Lore "
 					   "<target> UNITS <unit> ..., where <target> is the "
@@ -1582,7 +1582,7 @@ AString *ShowSkill::Report(void)
 					   "minus 2, squared.";
 			} else if (level == 5) {
 				found = 1;
-				*str += "Create Phantasmal Undead at level 5 allows the "
+				*str += "Create Phantasmal Demons at level 5 allows the "
 					   "mage to summon an illusionary balrog into his "
 					   "inventory. To summon an illusionary balrog, the "
 					   "mage should CAST Create_Phantasmal_Undead BALROG; "
