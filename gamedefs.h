@@ -141,6 +141,9 @@ public:
 	// farsight into the underworld)
 	int EASIER_UNDERWORLD;
 
+	// Should units with no orders perform a default 'work' order
+	int DEFAULT_WORK_ORDER;
+
     //
     // The type of faction limits that are in effect in this game.
     //

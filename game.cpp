@@ -1383,7 +1383,8 @@ void Game::ReadOrders()
                 ParseOrders( fac->num, &file, 0 );
                 file.Close();
             }
-			DefaultWorkOrder();
+			if(Globals->DEFAULT_WORK_ORDER)
+				DefaultWorkOrder();
         }
     }
 }

@@ -121,6 +121,8 @@ static GameDefs g = {
 	// skill description is enabled instead
 	0, // EASIER_UNDERWORLD
 
+	0, // DEFAULT_WORK_ORDER
+
     GameDefs::FACLIM_FACTION_TYPES, // FACTION_LIMIT_TYPE
 
 	GameDefs::WFLIGHT_NONE,	// FLIGHT_OVER_WATER
