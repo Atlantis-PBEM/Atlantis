@@ -207,7 +207,7 @@ class ARegion : public AListElem
 		int CanPillage(Unit *);
 		int ForbiddenShip(Object *);
 		int HasCityGuard();
-		void NotifySpell(Unit *, int, ARegionList *pRegs);
+		int NotifySpell(Unit *, int, ARegionList *pRegs);
 		void NotifyCity(Unit *, AString& oldname, AString& newname);
 
 		void DefaultOrders();

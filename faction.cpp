@@ -716,20 +716,18 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 			Unit* temp = (Unit *) elem;
 			if (u == temp && dummy == 0) retval = 1;
 			if (temp->faction == this) {
-				if (temp->GetSkill(S_OBSERVATION) > u->GetSkill(S_STEALTH)) {
+				if (temp->GetAttribute("observation") >
+						u->GetAttribute("stealth")) {
 					if (practice) {
-						temp->Practice(S_OBSERVATION);
-						temp->Practice(S_TRUE_SEEING);
+						temp->PracticeAttribute("observation");
 						retval = 2;
 					}
 					else
 						return 2;
 				} else {
-					if (temp->GetSkill(S_OBSERVATION)==u->GetSkill(S_STEALTH)) {
-						if (practice) {
-							temp->Practice(S_OBSERVATION);
-							temp->Practice(S_TRUE_SEEING);
-						}
+					if (temp->GetAttribute("observation") ==
+							u->GetAttribute("stealth")) {
+						if (practice) temp->PracticeAttribute("observation");
 						if (retval < 1) retval = 1;
 					}
 				}

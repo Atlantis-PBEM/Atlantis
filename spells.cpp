@@ -700,7 +700,10 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			val = RunCreateFood(r, u);
 			break;
 	}
-	if (val) u->Practice(sk);
+	if (val) {
+		u->Practice(sk);
+		r->NotifySpell(u, sk, &regions);
+	}
 
 }
 
@@ -846,7 +849,6 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_MPLATE,u->items.GetNum(I_MPLATE) + num);
 	u->Event(AString("Enchants ") + num + " mithril armor.");
-	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
 	if (num == 0) return 0;
 	return 1;
 }
@@ -894,7 +896,6 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_MSWORD,u->items.GetNum(I_MSWORD) + num);
 	u->Event(AString("Enchants ") + num + " mithril swords.");
-	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
 	if (num == 0) return 0;
 	return 1;
 }
@@ -942,7 +943,6 @@ int Game::RunCreateFood(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_FOOD,u->items.GetNum(I_FOOD) + num);
 	u->Event(AString("Creates ") + num + " food.");
-	r->NotifySpell(u,S_EARTH_LORE, &regions );
 	if (num == 0) return 0;
 	return 1;
 }
@@ -968,7 +968,6 @@ int Game::RunConstructGate(ARegion *r,Unit *u)
 	u->SetMoney(u->GetMoney() - 1000);
 	regions.numberofgates++;
 	r->gate = regions.numberofgates;
-	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
 	return 1;
 }
 
@@ -1019,7 +1018,6 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 		o->runes = 3;
 	}
 	u->Event(AString("Engraves Runes of Warding on ") + *(o->name) + ".");
-	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
 	return 1;
 }
 
@@ -1036,7 +1034,6 @@ int Game::RunSummonBalrog(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_BALROG,u->items.GetNum(I_BALROG) + num);
 	u->Event(AString("Summons ") + ItemString(I_BALROG,num) + ".");
-	r->NotifySpell(u,S_DEMON_LORE, &regions );
 	return 1;
 }
 
@@ -1044,7 +1041,6 @@ int Game::RunSummonDemon(ARegion *r,Unit *u)
 {
 	u->items.SetNum(I_DEMON,u->items.GetNum(I_DEMON) + 1);
 	u->Event(AString("Summons ") + ItemString(I_DEMON,1) + ".");
-	r->NotifySpell(u,S_DEMON_LORE, &regions );
 	return 1;
 }
 
@@ -1054,7 +1050,6 @@ int Game::RunSummonImps(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_IMP,u->items.GetNum(I_IMP) + level);
 	u->Event(AString("Summons ") + ItemString(I_IMP,level) + ".");
-	r->NotifySpell(u,S_DEMON_LORE, &regions );
 	return 1;
 }
 
@@ -1086,7 +1081,6 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 
 	u->items.SetNum(item,u->items.GetNum(item) + num);
 	u->Event(AString("Creates ") + ItemString(item,num) + ".");
-	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
 	if (num == 0) return 0;
 	return 1;
 }
@@ -1099,7 +1093,6 @@ int Game::RunSummonLich(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_LICH,u->items.GetNum(I_LICH) + num);
 	u->Event(AString("Summons ") + ItemString(I_LICH,num) + ".");
-	r->NotifySpell(u,S_NECROMANCY, &regions );
 	if (num == 0) return 0;
 	return 1;
 }
@@ -1112,7 +1105,6 @@ int Game::RunRaiseUndead(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_UNDEAD,u->items.GetNum(I_UNDEAD) + num);
 	u->Event(AString("Raises ") + ItemString(I_UNDEAD,num) + ".");
-	r->NotifySpell(u,S_NECROMANCY, &regions );
 	if (num == 0) return 0;
 	return 1;
 }
@@ -1125,7 +1117,6 @@ int Game::RunSummonSkeletons(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_SKELETON,u->items.GetNum(I_SKELETON) + num);
 	u->Event(AString("Summons ") + ItemString(I_SKELETON,num) + ".");
-	r->NotifySpell(u,S_NECROMANCY, &regions );
 	if (num == 0) return 0;
 	return 1;
 }
@@ -1149,7 +1140,6 @@ int Game::RunDragonLore(ARegion *r, Unit *u)
 		u->Event("Attempts to summon a dragon, but fails.");
 		num = 0;
 	}
-	r->NotifySpell(u,S_EARTH_LORE, &regions );
 	if (num == 0) return 0;
 	return 1;
 }
@@ -1181,7 +1171,6 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 		tar->farsees.Add(f);
 		u->Event(AString("Sends birds to spy on ") +
 				tar->Print( &regions ) + ".");
-		r->NotifySpell(u,S_EARTH_LORE, &regions );
 		return 1;
 	}
 
@@ -1195,7 +1184,6 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_EAGLE,u->items.GetNum(I_EAGLE) + 1);
 	u->Event("Summons an eagle.");
-	r->NotifySpell(u,S_EARTH_LORE, &regions );
 	return 1;
 }
 
@@ -1219,7 +1207,6 @@ int Game::RunWolfLore(ARegion *r,Unit *u)
 	u->Event(AString("Casts Wolf Lore, summoning ") +
 			ItemString(I_WOLF,summon) + ".");
 	u->items.SetNum(I_WOLF,num + summon);
-	r->NotifySpell(u,S_EARTH_LORE, &regions );
 	if (summon == 0) return 0;
 	return 1;
 }
@@ -1258,7 +1245,6 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
 		}
 	}
 
-	r->NotifySpell(u,S_ILLUSION, &regions );
 	u->Event("Casts invisibility.");
 	return 1;
 }
@@ -1289,7 +1275,6 @@ int Game::RunPhanDemons(ARegion *r,Unit *u)
 
 	u->items.SetNum(create,order->target);
 	u->Event("Casts Create Phantasmal Demons.");
-	r->NotifySpell(u,S_ILLUSION, &regions );
 	return 1;
 }
 
@@ -1319,7 +1304,6 @@ int Game::RunPhanUndead(ARegion *r,Unit *u)
 
 	u->items.SetNum(create,order->target);
 	u->Event("Casts Create Phantasmal Undead.");
-	r->NotifySpell(u,S_ILLUSION, &regions );
 	return 1;
 }
 
@@ -1349,7 +1333,6 @@ int Game::RunPhanBeasts(ARegion *r,Unit *u)
 
 	u->items.SetNum(create,order->target);
 	u->Event("Casts Create Phantasmal Beasts.");
-	r->NotifySpell(u,S_ILLUSION, &regions );
 	return 1;
 }
 
@@ -1362,7 +1345,6 @@ int Game::RunEarthLore(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) + amt);
 	u->Event(AString("Casts Earth Lore, raising ") + amt + " silver.");
-	r->NotifySpell(u,S_EARTH_LORE, &regions );
 	return 1;
 }
 
@@ -1386,7 +1368,6 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
 	int level = u->GetSkill(S_CLEAR_SKIES);
 	if (level > r->clearskies) r->clearskies = level;
 	u->Event(temp);
-	r->NotifySpell(u,S_WEATHER_LORE, &regions);
 	return 1;
 }
 
@@ -1424,7 +1405,6 @@ int Game::RunWeatherLore(ARegion *r, Unit *u)
 			temp += ".";
 	}
 	u->Event(temp);
-	r->NotifySpell(u, S_WEATHER_LORE, &regions);
 	return 1;
 }
 

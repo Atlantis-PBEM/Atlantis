@@ -349,7 +349,7 @@ void Battle::WriteSides(ARegion * r,
   int aobs = 0;
   {
 	  forlist(defs) {
-		  int a = ((Location *)elem)->unit->GetObservation();
+		  int a = ((Location *)elem)->unit->GetAttribute("observation");
 		  if(a > dobs) dobs = a;
 	  }
   }
@@ -357,7 +357,7 @@ void Battle::WriteSides(ARegion * r,
   AddLine("Attackers:");
   {
 	  forlist(atts) {
-		  int a = ((Location *)elem)->unit->GetObservation();
+		  int a = ((Location *)elem)->unit->GetAttribute("observation");
 		  if(a > aobs) aobs = a;
 		  AString * temp = ((Location *) elem)->unit->BattleReport(dobs);
 		  AddLine(*temp);

@@ -724,7 +724,7 @@ void Game::ModifyAttribMod(char *mod, int index, int flags, char *ident,
 {
 	AttribModType *mp = FindAttrib(mod);
 	if (mp == NULL) return;
-	if (index < 0 || index > 3) return;
+	if (index < 0 || index > 5) return;
 	if (!ident) return;
 	if (type < 0 || type > AttribModItem::NUMMODTYPE-1) return;
 

@@ -79,6 +79,7 @@ class SkillType
 			DISABLED = 0x20,
 			SLOWSTUDY = 0x40,
 			BATTLEREP = 0x80,
+			NOTIFY = 0x100,
 		};
 		int flags;
 
@@ -284,6 +285,7 @@ class AttribModItem {
 			CONSTANT,
 			UNIT_LEVEL,
 			UNIT_LEVEL_HALF,
+			FORCECONSTANT,
 			NUMMODTYPE,
 		};
 		int modtype;
@@ -294,7 +296,14 @@ class AttribModItem {
 class AttribModType {
 	public:
 		char *key;
-		AttribModItem mods[4];
+
+		enum {
+			CHECK_MONSTERS = 0x01,
+			USE_WORST = 0x02,
+		};
+		int flags;
+
+		AttribModItem mods[5];
 };
 
 extern AttribModType *AttribDefs;

@@ -158,10 +158,6 @@ class Unit : public AListElem
 		void SkillStarvation();
 		Skill *GetSkillObject(int);
 
-		int GetStealth();
-		int GetTactics();
-		int GetObservation();
-		int GetEntertainment();
 		int GetAttackRiding();
 		int GetDefenseRiding();
 
@@ -170,6 +166,7 @@ class Unit : public AListElem
 		//
 		// LLS
 		int GetAttribute(char *ident);
+		int PracticeAttribute(char *ident);
 		int GetProductionBonus(int);
 
 		int GetSkill(int);

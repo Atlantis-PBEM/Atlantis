@@ -1263,11 +1263,11 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 
 		Unit * forbid = newreg->Forbidden(unit);
 		if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
-			int obs = unit->GetObservation();
+			int obs = unit->GetAttribute("observation");
 			unit->Event(AString("Is forbidden entry to ") +
 						newreg->ShortPrint(&regions) + " by " +
 						forbid->GetName(obs) + ".");
-			obs = forbid->GetObservation();
+			obs = forbid->GetAttribute("observation");
 			forbid->Event(AString("Forbids entry to ") +
 						  unit->GetName(obs) + ".");
 			goto done_moving;

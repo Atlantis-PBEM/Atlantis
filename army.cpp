@@ -223,9 +223,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		}
 	}
 
-	unit->Practice(S_COMBAT);
-	if (ridingBonus)
-		unit->Practice(S_RIDING);
+	unit->PracticeAttribute("combat");
 
 	// Set the attack and defense skills
 	// These will include the riding bonus if they should be included.
@@ -468,7 +466,7 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 
 	leader = ldr;
 	round = 0;
-	tac = ldr->GetTactics();
+	tac = ldr->GetAttribute("tactics");
 	count = 0;
 	hitstotal = 0;
 
@@ -480,14 +478,14 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			Unit * u = ((Location *) elem)->unit;
 			count += u->GetSoldiers();
 			u->losses = 0;
-			int temp = u->GetTactics();
+			int temp = u->GetAttribute("tactics");
 			if (temp > tac) {
 				tac = temp;
 				tactitian = u;
 			}
 		}
 	}
-	tactitian->Practice(S_TACTICS);
+	tactitian->PracticeAttribute("tactics");
 
 	soldiers = new SoldierPtr[count];
 	int x = 0;

@@ -736,39 +736,6 @@ int Unit::GetMoney()
 	return items.GetNum(I_SILVER);
 }
 
-int Unit::GetTactics()
-{
-	int retval = GetAttribute("tactics");
-
-	forlist(&items) {
-		Item *i = (Item *) elem;
-		if (ItemDefs[i->type].type & IT_MONSTER) {
-			MonType *mp = FindMonster(ItemDefs[i->type].abr,
-					(ItemDefs[i->type].type & IT_ILLUSION));
-			int temp = mp->tactics;
-			if (temp > retval) retval = temp;
-		}
-	}
-
-	return retval;
-}
-
-int Unit::GetObservation()
-{
-	int retval = GetAttribute("observation");
-	forlist(&items) {
-		Item *i = (Item *) elem;
-		if (ItemDefs[i->type].type & IT_MONSTER) {
-			MonType *mp = FindMonster(ItemDefs[i->type].abr,
-					(ItemDefs[i->type].type & IT_ILLUSION));
-			int temp = mp->obs;
-			if (temp > retval) retval = temp;
-		}
-	}
-
-	return retval;
-}
-
 int Unit::GetAttackRiding()
 {
 	int riding = 0;
@@ -824,36 +791,11 @@ int Unit::GetDefenseRiding()
 	return riding;
 }
 
-int Unit::GetStealth()
-{
-	int monstealth = 100;
-	int manstealth = GetAttribute("stealth");
-
-	if (guard == GUARD_GUARD) return 0;
-
-	forlist(&items) {
-		Item *i = (Item *) elem;
-		if (ItemDefs[i->type].type & IT_MONSTER) {
-			MonType *mp = FindMonster(ItemDefs[i->type].abr,
-					(ItemDefs[i->type].type & IT_ILLUSION));
-			int temp = mp->stealth;
-			if (temp < monstealth) monstealth = temp;
-		}
-	}
-
-	/* XXX -- hack to adjust for invisible monsters */
-	/* XXX -- This bonus should not be hard coded */
-	if (GetFlag(FLAG_INVIS)) monstealth += 3;
-
-	if (monstealth < manstealth) return monstealth;
-	return manstealth;
-}
-
 int Unit::GetSkill(int sk)
 {
-	if (sk == S_TACTICS) return GetTactics();
-	if (sk == S_STEALTH) return GetStealth();
-	if (sk == S_OBSERVATION) return GetObservation();
+	if (sk == S_TACTICS) return GetAttribute("tactics");
+	if (sk == S_STEALTH) return GetAttribute("stealth");
+	if (sk == S_OBSERVATION) return GetAttribute("observation");
 	if (sk == S_ENTERTAINMENT) return GetAttribute("entertainment");
 	int retval = GetRealSkill(sk);
 	return retval;
@@ -1701,6 +1643,10 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 		if(bonus > pMnt->maxHamperedBonus)
 			bonus = pMnt->maxHamperedBonus;
 	}
+
+	// Practice the mount's skill
+	Practice(pMnt->skill);
+
 	// Get the mount
 	items.SetNum(item, num - 1);
 	return item;
@@ -1775,12 +1721,35 @@ void Unit::Error(const AString & s)
 int Unit::GetAttribute(char *attrib)
 {
 	AttribModType *ap = FindAttrib(attrib);
-	AString temp;
 	if(ap == NULL) return 0;
+	AString temp;
 	int base = 0;
 	int bonus = 0;
+	int monbase = -1;
+	int monbonus = 0;
 
-	for(int index = 0; index < 4; index++) {
+	if (ap->flags & AttribModType::CHECK_MONSTERS) {
+		forlist (&items) {
+			Item *i = (Item *) elem;
+			if (ItemDefs[i->type].type & IT_MONSTER) {
+				MonType *mp = FindMonster(ItemDefs[i->type].abr,
+						(ItemDefs[i->type].type & IT_ILLUSION));
+				int val = 0;
+				temp = attrib;
+				if (temp == "observation") val = mp->obs;
+				else if (temp == "stealth") val = mp->stealth;
+				else if (temp == "tactics") val = mp->tactics;
+				else continue;
+				if (monbase == -1) monbase = val;
+				else if (ap->flags & AttribModType::USE_WORST)
+					monbase = (val < monbase) ? val : monbase;
+				else
+					monbase = (val > monbase) ? val : monbase;
+			}
+		}
+	}
+
+	for(int index = 0; index < 5; index++) {
 		int val = 0;
 		if (ap->mods[index].flags & AttribModItem::SKILL) {
 			temp = ap->mods[index].ident;
@@ -1807,17 +1776,51 @@ int Unit::GetAttribute(char *attrib)
 				val = ap->mods[index].val;
 			}
 		} else if (ap->mods[index].flags & AttribModItem::FLAGGED) {
-			if (ap->mods[index].ident == "invis")
+			temp = ap->mods[index].ident;
+			if (temp == "invis")
 				val = (GetFlag(FLAG_INVIS) ? ap->mods[index].val : 0);
+			if (temp == "guard")
+				val = (guard == GUARD_GUARD ? ap->mods[index].val : 0);
+
 		}
 		if (ap->mods[index].flags & AttribModItem::NOT)
 			val = ((val == 0) ? ap->mods[index].val : 0);
+		if (val && ap->mods[index].modtype == AttribModItem::FORCECONSTANT)
+			return val;
+		// Only flags can add to monster bonuses
+		if (ap->mods[index].flags & AttribModItem::FLAGGED) {
+			if (ap->flags & AttribModType::CHECK_MONSTERS) monbonus += val;
+		}
 		if (ap->mods[index].flags & AttribModItem::CUMULATIVE)
 			base += val;
 		else if (val > bonus) bonus = val;
 	}
 
-	return base+bonus;
+	base += bonus;
+
+	if (monbase != -1) {
+		monbase += monbonus;
+		if (ap->flags & AttribModType::USE_WORST)
+			base = (monbase < base) ? monbase : base;
+		else
+			base = (monbase > base) ? monbase : base;
+	}
+	return base;
+}
+
+int Unit::PracticeAttribute(char *attrib)
+{
+	AttribModType *ap = FindAttrib(attrib);
+	if(ap == NULL) return 0;
+	for(int index = 0; index < 5; index++) {
+		if (ap->mods[index].flags & AttribModItem::SKILL) {
+			AString temp = ap->mods[index].ident;
+			int sk = LookupSkill(&temp);
+			if (sk != -1)
+				if (Practice(sk)) return 1;
+		}
+	}
+	return 0;
 }
 
 int Unit::GetProductionBonus(int item)
@@ -1946,12 +1949,6 @@ int Unit::CanUseWeapon(WeaponType *pWep, int riding)
 
 int Unit::CanUseWeapon(WeaponType *pWep)
 {
-	// we don't care in this case, their combat skill will be used.
-	if (!(pWep->flags & WeaponType::NEEDSKILL)) {
-		Practice(S_COMBAT);
-		return 0;
-	}
-
 	int baseSkillLevel = 0;
 	int tempSkillLevel = 0;
 	if(pWep->baseSkill != -1) baseSkillLevel = GetSkill(pWep->baseSkill);
