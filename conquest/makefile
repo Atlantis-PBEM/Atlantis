@@ -6,12 +6,7 @@
 # ----        ------       --------
 # 2000/MAR/14 Davis Kulis  Added the template code.
 
-#OPTIONS
-#
-# Define this if you have EASIER_UNDERWORLD set to 1 in the gamedefs struct
-#EASY_UNDER = -DEASY_UNDERWORLD
-
-CFLAGS = -g -I. -I.. ${EASY_UNDER}
+CFLAGS = -g -I. -I..
 
 RULESET_OBJECTS = extra.o rules.o world.o
 
