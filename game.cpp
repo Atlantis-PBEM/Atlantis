@@ -2092,6 +2092,7 @@ char Game::GetRChar(ARegion * r)
 	char c;
 	switch (t) {
 		case R_OCEAN: return '-';
+		case R_LAKE: return '-';
 		case R_PLAIN: c = 'p'; break;
 		case R_CERAN_PLAIN1: c = 'p'; break;
 		case R_CERAN_PLAIN2: c = 'p'; break;

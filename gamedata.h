@@ -654,7 +654,6 @@ enum {
 /* ARegion Types */
 enum {
 	R_OCEAN,
-	R_LAKE,
 	R_PLAIN,
 	R_FOREST,
 	R_MOUNTAIN,
@@ -714,6 +713,7 @@ enum {
 	R_CERAN_DFOREST1,
 	R_CERAN_CHASM1,
 	R_VOLCANO,
+	R_LAKE,
 	R_NUM
 };
 
