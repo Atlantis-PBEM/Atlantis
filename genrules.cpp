@@ -236,13 +236,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(Globals->WANDERING_MONSTERS_EXIST) {
 		f.TagText("li", f.Link("#nonplayers_monsters", "Wandering Monsters"));
 	}
-	f.TagText("li", f.Link("#noplayers_controlled", "Controlled Monsters"));
+	f.TagText("li", f.Link("#nonplayers_controlled", "Controlled Monsters"));
 	f.Enclose(0, "ul");
 	f.Enclose(0, "li");
 	f.Enclose(1, "li");
 	f.PutStr(f.Link("#orders", "Orders"));
 	f.Enclose(1, "ul");
-	f.TagText("li", f.Link("#orders_appreviations", "Abbreviations"));
+	f.TagText("li", f.Link("#orders_abbreviations", "Abbreviations"));
 	f.Enclose(0, "ul");
 	f.Enclose(0, "li");
 	f.Enclose(1, "li");

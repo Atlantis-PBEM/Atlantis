@@ -1385,7 +1385,7 @@ void Game::RunClearSkies(ARegion *r, Unit *u)
 void Game::RunWeatherLore(ARegion *r, Unit *u)
 {
 	ARegion *tar;
-	int val;
+	int val, i;
 
 	CastRegionOrder *order = (CastRegionOrder *)u->castorders;
 
@@ -1402,7 +1402,7 @@ void Game::RunWeatherLore(ARegion *r, Unit *u)
 	temp += tar->ShortPrint(&regions);
 	temp += ". It will be ";
 	int weather, futuremonth;
-	for(int i; i <= months; i++) {
+	for(i = 0; i <= months; i++) {
 		futuremonth = (month + i)%12;
 		weather=regions.GetWeather(tar, futuremonth);
 		temp += SeasonNames[weather];
