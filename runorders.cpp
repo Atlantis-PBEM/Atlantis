@@ -962,6 +962,7 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 		ord->targets.Remove(id);
 		Unit *tar = obj->GetUnitId(id, u->faction->num);
 		delete id;
+		if (!tar) continue;
 		if(obj->IsBoat() &&
 			(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
 			(!tar->CanReallySwim() || tar->GetFlag(FLAG_NOCROSS_WATER))) {
@@ -970,10 +971,8 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 		}
 		Object *to = obj->region->GetDummy();
 		tar->MoveUnit(to);
-		tar->Event(AString("Evicted from ") + *obj->name + " by " +
-				*u->name);
-		u->Event(AString("Evicted ") + *tar->name + " from " +
-				*obj->name);
+		tar->Event(AString("Evicted from ") + *obj->name + " by " + *u->name);
+		u->Event(AString("Evicted ") + *tar->name + " from " + *obj->name);
 	}
 }
 

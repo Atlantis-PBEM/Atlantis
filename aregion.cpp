@@ -665,10 +665,14 @@ void ARegion::AddTown()
 		if(Globals->LESS_ARCTIC_TOWNS) {
 			int dnorth = GetPoleDistance(D_NORTH);
 			int dsouth = GetPoleDistance(D_SOUTH);
-			if (dnorth < 9)
-				popch = popch - (9 - dnorth) * ((9 - dnorth) + 10) * 15;
-			if (dsouth < 9)
-				popch = popch - (9 - dsouth) * ((9 - dsouth) + 10) * 15;
+			int dist = dnorth;
+			/*
+			 * On small worlds or the underworld levels, a city could be
+			 * within 9 of both poles.. chose the one it's closest to
+			 */
+			if (dsouth < dist) dist = dsouth;
+			if (dist < 9)
+				popch = popch - (9 - dist) * ((9 - dist) + 10) * 15;
 		}
 		town->pop = 500+getrandom(popch);
 	} else {

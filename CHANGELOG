@@ -562,3 +562,5 @@ Changes from 4.0.10 -> 5.0.0
       for the faction (thus allowing your server to propagate a set of
       orders automatically [if you do that sort of thing] to the next
       turn).
+   -- Fixed bug in generation of extremely large and extremely small worlds
+      and levels.  Second bug was introduced by artic towns patch.
