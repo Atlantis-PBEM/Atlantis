@@ -136,6 +136,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"Buildings and Trade Structures"));
 	if(!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED))
 		f.TagText("LI", f.Link("#economy_roads", "Roads"));
+	if(Globals->DECAY)
+		f.TagText("LI", f.Link("#economy_builddecay", "Building Decay"));
 	int may_sail = (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED)) &&
 		(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED));
 	if(may_sail)
@@ -229,7 +231,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#describe", "describe"));
 	f.TagText("LI", f.Link("#destroy", "destroy"));
 	f.TagText("LI", f.Link("#enter", "enter"));
-	f.TagText("LI", f.Link("#entertain", "entertain"));
+	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
+		f.TagText("LI", f.Link("#entertain", "entertain"));
 	f.TagText("LI", f.Link("#faction", "faction"));
 	f.TagText("LI", f.Link("#find", "find"));
 	f.TagText("LI", f.Link("#forget", "forget"));
@@ -1612,13 +1615,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		f.PutStr(ItemDefs[i].name);
 		f.Enclose(0, "TD");
-		f.Enclose(1, "TD ALIGN=CENTER NOWRAP");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		temp = SkillDefs[ItemDefs[i].pSkill].name;
 		if(ItemDefs[i].pLevel > 1)
 			temp += AString("(") + ItemDefs[i].pLevel + ")";
 		f.PutStr(temp);
 		f.Enclose(0, "TD");
-		f.Enclose(1, "TD ALIGN=CENTER NOWRAP");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		comma = 0;
 		temp = "";
 		for(j = 0; j < 2; j++) {
@@ -1633,12 +1636,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.PutStr(temp);
 		f.Enclose(0, "TD");
-		f.Enclose(1, "TD ALIGN=CENTER NOWRAP");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		temp = ItemDefs[i].pMonths;
 		temp += AString(" month") + (ItemDefs[i].pMonths == 1 ? "" : "s");
 		f.PutStr(temp);
 		f.Enclose(0, "TD");
-		f.Enclose(1, "TD ALIGN=CENTER NOWRAP");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		temp = ItemDefs[i].weight;
 		if(ItemDefs[i].walk) {
 			temp += AString("(") + (ItemDefs[i].walk - ItemDefs[i].weight) +
@@ -1798,552 +1801,686 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(temp);
 		f.PutStr("<P></P>");
 	}
+	f.PutStr(f.LinkRef("economy_buildings"));
+	f.TagText("H3", "Buildings and Trade Structures:");
+	temp = "Construction of buildings ";
+	if(may_sail) temp += "and ships ";
+	temp += "goes as follows: each unit of work requires a unit of the "
+		"required resource and a man-month of work by a character with "
+		"the appropriate skill and level; higher skill levels allow work "
+		"to proceed faster still using one unit of the required resource "
+		"per unit of work done). ";
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		temp += "Again, only Trade factions can issue ";
+		temp += f.Link("#build", "BUILD") + " orders. ";
+	}
+	temp += "Here is a table of the various building types:";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("tablebuildings"));
+	f.Enclose(1, "CENTER");
+	f.Enclose(1, "TABLE BORDER=1");
+	f.Enclose(1, "TR");
+	f.TagText("TD", "");
+	f.TagText("TH", "Size");
+	f.TagText("TH", "Cost");
+	f.TagText("TH", "Material");
+	f.TagText("TH", "Skill (level)");
+	f.Enclose(0, "TR");
+	for(i = 0; i < NOBJECTS; i++) {
+		if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+		if(!ObjectDefs[i].protect) continue;
+		j = ObjectDefs[i].skill;
+		if(j == -1) continue;
+		if(SkillDefs[j].flags & SkillType::MAGIC) continue;
+		if(ObjectIsShip(i)) continue;
+		j = ObjectDefs[i].item;
+		if(j == -1) continue;
+		/* Need the >0 since item could be WOOD_OR_STONE (-2) */
+		if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
+		if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+		/* Okay, this is a valid object to build! */
+		f.Enclose(1, "TR");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr(ObjectDefs[i].name);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr(ObjectDefs[i].protect);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr(ObjectDefs[i].cost);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		if(j == I_WOOD_OR_STONE)
+			temp = "wood or stone";
+		else
+			temp = ItemDefs[j].name;
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		temp = SkillDefs[ObjectDefs[i].skill].name;
+		if(ObjectDefs[i].level > 1)
+			temp += AString("(") + ObjectDefs[i].level + ")";
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(0, "TR");
+	}
+	f.Enclose(0, "TABLE");
+	f.Enclose(0, "CENTER");
+	temp = "Size is the number of people that the building can shelter. Cost "
+		"is both the number of man-months of labor and the number of units "
+		"of material required to complete the building.  There are possibly "
+		"other buildings which can be built that require more advanced "
+		"resources, or odd skills to construct.   The description of a skill "
+		"will include any buildings which it allows to be built.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "There are other structures that increase the maximum production "
+		"of certain resources in regions";
+	if(!(ObjectDefs[O_MINE].flags & ObjectType::DISABLED))
+		temp += "; for example, a Mine will increase the amount of iron "
+			"that is available to be mined in a region";
+	temp += ".  To construct these structures requires a high skill level in "
+		"the production skill related to the item that the structure will "
+		"help produce. ";
+	if(!(ObjectDefs[O_INN].flags & ObjectType::DISABLED)) {
+		temp += "(Inns are an exception to this rule, requiring the Building "
+			"skill, not the Entertainment skill.) ";
+	}
+	temp += "This bonus in production is available to any unit in the "
+		"region; there is no need to be inside the structure.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "The first structure built in a region will increase the maximum "
+		"production of the related product by 25%; the amount added by each "
+		"additional structure will be half of the the effect of the previous "
+		"one.  (Note that if you build enough of the same type of structure "
+		"in a region, the new structures may not add _any_ to the production "
+		"'level).";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("tabletradestructures"));
+	f.Enclose(1, "CENTER");
+	f.Enclose(1, "TABLE BORDER=1");
+	f.Enclose(1, "TR");
+	f.TagText("TD", "");
+	f.TagText("TH", "Cost");
+	f.TagText("TH", "Material");
+	f.TagText("TH", "Skill (level)");
+	f.TagText("TH", "Production Aided");
+	f.Enclose(0, "TR");
+	for(i = 0; i < NOBJECTS; i++) {
+		if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+		if(ObjectDefs[i].protect) continue;
+		if(ObjectIsShip(i)) continue;
+		j = ObjectDefs[i].productionAided;
+		if(j == -1) continue;
+		if(ItemDefs[j].flags & ItemType::DISABLED) continue;
+		if(!(ItemDefs[j].type & IT_NORMAL)) continue;
+		j = ObjectDefs[i].skill;
+		if(j == -1) continue;
+		if(SkillDefs[j].flags & SkillType::MAGIC) continue;
+		j = ObjectDefs[i].item;
+		if(j == -1) continue;
+		/* Need the >0 since item could be WOOD_OR_STONE (-2) */
+		if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
+		if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+		/* Okay, this is a valid object to build! */
+		f.Enclose(1, "TR");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr(ObjectDefs[i].name);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr(ObjectDefs[i].cost);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		if(j == I_WOOD_OR_STONE)
+			temp = "wood or stone";
+		else
+			temp = ItemDefs[j].name;
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		temp = SkillDefs[ObjectDefs[i].skill].name;
+		if(ObjectDefs[i].level > 1)
+			temp += AString("(") + ObjectDefs[i].level + ")";
+		f.PutStr(temp);
+		f.Enclose(0, "TD");
+		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+		f.PutStr(ItemDefs[ObjectDefs[i].productionAided].name);
+		f.Enclose(0, "TD");
+		f.Enclose(0, "TR");
+	}
+	f.Enclose(0, "TABLE");
+	f.Enclose(0, "CENTER");
+	f.PutStr("<P></P>");
+	temp = "Note that these structures will not increase the availability "
+		"of an item in a region which does not already have that item "
+		"available. Also Trade structures do not offer defensive bonuses "
+		"(which is why they do not have a size associated with them).  As "
+		"with regular buildings, the Cost is the number of man-months of "
+		"labor and also the number of units of raw material required to "
+		"complete the structure.  It is possible that there are structures "
+		"not listed above which require either advanced resources to build "
+		"or which increase the production of advanced resources.  The skill "
+		"description for a skill will always note if new structures may "
+		"be built based on knowing that skill.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	if(!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED)) {
+		f.PutStr(f.LinkRef("economy_roads"));
+		f.TagText("H3", "Roads:");
+		temp = "There is a another type of structure called roads.  They do "
+			"not protect units, nor aid in the production of resources, but "
+			"do aid movement, and can improve the economy of a hex.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		temp = "Roads are directional and are only considered to reach from "
+			"one hexside to the center of the hex.  To gain a movement "
+			"bonus, there must be two matching roads, one in each adjacent "
+			"hex.  Only one road may be built in each direction.  If a road "
+			"in the given direction is connected, units move along that "
+			"road at half cost to a minimum of 1 movement point.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		temp = "For example: If a unit is moving northwest, then hex it is "
+			"in must have a northwest road, and the hex it is moving into "
+			"must have a southeast road.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		temp = "To gain an economy bonus, a hex must have roads that connect "
+			"to roads in at least two adjoining hexes.  The economy bonus "
+			"for the connected roads raises the wages in the region by 1 "
+			"point.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		f.PutStr(f.LinkRef("tableroadstructures"));
+		f.Enclose(1, "CENTER");
+		f.Enclose(1, "TABLE BORDER=1");
+		f.Enclose(1, "TR");
+		f.TagText("TD", "");
+		f.TagText("TH", "Cost");
+		f.TagText("TH", "Material");
+		f.TagText("TH", "Skill (level)");
+		f.Enclose(0, "TR");
+		for(i = 0; i < NOBJECTS; i++) {
+			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+			if(ObjectDefs[i].productionAided != -1) continue;
+			if(ObjectDefs[i].protect) continue;
+			if(ObjectIsShip(i)) continue;
+			j = ObjectDefs[i].skill;
+			if(j == -1) continue;
+			if(SkillDefs[j].flags & SkillType::MAGIC) continue;
+			j = ObjectDefs[i].item;
+			if(j == -1) continue;
+			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
+			if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
+			if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+			/* Okay, this is a valid object to build! */
+			f.Enclose(1, "TR");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].name);
+			f.Enclose(0, "TD");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].cost);
+			f.Enclose(0, "TD");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			if(j == I_WOOD_OR_STONE)
+				temp = "wood or stone";
+			else
+				temp = ItemDefs[j].name;
+			f.PutStr(temp);
+			f.Enclose(0, "TD");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			temp = SkillDefs[ObjectDefs[i].skill].name;
+			if(ObjectDefs[i].level > 1)
+				temp += AString("(") + ObjectDefs[i].level + ")";
+			f.PutStr(temp);
+			f.Enclose(0, "TD");
+			f.Enclose(0, "TR");
+		}
+		f.Enclose(0, "TABLE");
+		f.Enclose(0, "CENTER");
+		f.PutStr("<P></P>");
+	}
+	if (Globals->DECAY) {
+		f.PutStr(f.LinkRef("economy_builddecay"));
+		f.TagText("H3", "Building Decay:");
+		temp = "Some structures will decay over time if they are not "
+			"maintained. Difficult terrain and bad weather will speed up "
+			"this decay. Maintnenance involves having units with the "
+			"appropriate level of skill expend a small amount of the "
+			"material used to build the structure and labor on a fairly "
+			"regular basis in the exactly same manner as they would work on "
+			"the building it if it was not completed. In other words, enter "
+			"the structure and issue the BUILD command with no parameters. "
+			"If a structure will need maintenance, that information will be "
+			"related in the object information given about the structure. "
+			"If a structure is allowed to decay, it will not give any of "
+			"its bonuses until it is repaired.";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+	}
+	if(may_sail) {
+		f.PutStr(f.LinkRef("economy_ships"));
+		f.TagText("H3", "Ships:");
+		temp = "Ships are constructed similarly to buildings, except they "
+			"tend to be constructed out of wood, not stone, and their "
+			"construction tends to depend on the Shipbuilding skill, not
+			"the Building skill. ";
+		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+			temp += "Only faction with at least one faction point spent on "
+				"trade can issue";
+			temp += f.Link("#build", "BUILD") + " orders. ";
+		}
+		temp += "Here is a table on the various ship types:";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+		f.PutStr(f.LinkRef("tableshipinfo"));
+		f.Enclose(1, "CENTER");
+		f.Enclose(1, "TABLE BORDER=1");
+		f.Enclose(1, "TR");
+		f.TagText("TD", "");
+		f.TagText("TH", "Capacity");
+		f.TagText("TH", "Cost");
+		f.TagText("TH", "Material");
+		f.TagText("TH", "Sailors");
+		f.Enclose(0, "TR");
+		for(i = 0; i < NOBJECTS; i++) {
+			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+			if(!ObjectIsShip(i)) continue;
+			j = ObjectDefs[i].skill;
+			if(j == -1) continue;
+			if(SkillDefs[j].flags & SkillType::MAGIC) continue;
+			j = ObjectDefs[i].item;
+			if(j == -1) continue;
+			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
+			if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
+			if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+			/* Okay, this is a valid object to build! */
+			f.Enclose(1, "TR");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].name);
+			f.Enclose(0, "TD");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].capacity);
+			f.Enclose(0, "TD");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].cost);
+			f.Enclose(0, "TD");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			if(j == I_WOOD_OR_STONE)
+				temp = "wood or stone";
+			else
+				temp = ItemDefs[j].name;
+			f.PutStr(temp);
+			f.Enclose(0, "TD");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].sailors);
+			f.Enclose(0, "TD");
+			f.Enclose(0, "TR");
+		}
+		f.Enclose(0, "TABLE");
+		f.Enclose(0, "CENTER");
+		f.PutStr("<P></P>");
+		temp = "The capacity of a ship is the maximum weight that the ship "
+			"may have aboard and still move. The cost is both the "
+			"man-months of labor and the number of units of material "
+			"required to complete the ship. The sailors are the number of "
+			"skill levels of the Sailing skill that must be aboard the "
+			"ship (and issuing the ";
+		temp += f.Link("#sail", "SAIL") + " order in order for the ship "
+			"to sail).";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+	}
+	f.PutStr(f.LinkRef("economy_advanceditems"));
+	f.TagText("H3", "Advanced Items:");
+	temp = "There are also certain advanced items that highly skilled units "
+		"can produce. These are not available to starting players, but can "
+		"be discovered through study.  When a unit is skilled enough to "
+		"produce one of these items, he will receive a skill report "
+		"describing the production of this item. Production of advanced "
+		"items is generally done in a manner similar to the normal items.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("economy_income"));
+	f.TagText("H3", "Income");
+	temp = "Units can earn money with the ";
+	temp += f.Link("#work", "WORK") + " order.  This means that the unit "
+		"spends the month performing manual work for wages. The amount to "
+		"be earned from this is usually not very high, so it is generally "
+		"a last resort to be used if one is running out of money. The "
+		"current wages are shown in the region description for each region. "
+		"All units may ";
+	temp += f.Link("#work", "WORK") + " regardless of skills or faction "
+		"type.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
+		f.PutStr(f.LinkRef("economy_entertainment"));
+		f.TagText("H3", "Entertainment:");
+		temp = "Units with the Entertainment skill can use it to earn "
+			"money.  A unit with Entertainment level 1 will earn ";
+		temp += Globals->ENTERTAIN_INCOME + " silver per man by issuing the ";
+		temp += f.Link("#entertain", "ENTERTAIN") + " order.  The total "
+			"amount of money that can be earned this way is shown in the "
+			"region descriptions.  Higher levels of Entertainment skill can "
+			"earn more, so a character with Entertainment skill 2 can earn "
+			"twice as much money as one with skill 1 (and uses twice as "
+			"much of the demand for entertainment in the region). Note that "
+			"entertainment income is much less, per region, than the income "
+			"available through working or taxing.";
+		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+			temp += " All factions may have entertainers, regardless of "
+				"faction type.";
+		}
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+	}
+	f.PutStr(f.LinkRef("economy_taxingpillaging"));
+	f.TagText("H3", "Taxing/Pillaging:");
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+		temp = "War factions ";
+	else
+		temp = "Factions ";
+	temp += "may collect taxes in a region.  This is done using the ";
+	temp += f.Link("#tax", "TAX") + " order (which is ";
+	if(!Globals->TAX_PILLAGE_MONTH_LONG) temp += "not ";
+	temp += "a full month order). The amount of tax money that can be "
+		"collected each month in a region is shown in the region "
+		"description. Only combat ready units may ";
+	temp += f.Link("#tax", "TAX") + "; a unit is combat ready if it either: "
+		"has Combat skill of at least 1 or has a weapon (along with the "
+		"appropriate skill for the weapon if required) in its possession. "
+		"Each taxing character can collect $";
+	temp += AString(Globals->TAX_INCOME) + ", though if the number of "
+		"taxers would tax more than the available tax income, the tax "
+		"income is split evenly among all taxers.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+		temp = "War factions ";
+	else
+		temp = "Factions ";
+	temp += "may also pillage a region. To do this requires the faction to "
+		"have enough combat ready men in the region to tax half of the "
+		"available money in the region. The total amount of money that can "
+		"be pillaged will then be shared out between every combat ready "
+		"unit that issues the ";
+	temp += f.Link("#pillage", "PILLAGE") + " order. The amount of money "
+		"collected is equal to twice the available tax money. However, the "
+		"economy of the region will be seriously damaged by pillaging, and "
+		"will only slowly recover over time.  Note that ";
+	temp += f.Link("#pillage", "PILLAGE") + " comes before " +
+		f.Link("#tax", "TAX") + ", so a unit performing " +
+		f.Link("#tax", "TAX") + " will collect no money in that region that "
+		"month.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "It is possible to safeguard one's tax income in regions one "
+		"controls.  Units which have the Guard flag set (using the ";
+	temp += f.Link("#guard", "GUARD") + " order) will block " +
+		f.Link("#tax", "TAX") + "orders issued by other factions in the same "
+		"region, unless you have declared the faction in question Friendly. "
+		"Units on guard will also block ";
+	temp += f.Link("#pillage", "PILLAGE") + " orders issued by other "
+		"factions in the same region, regardless of your attitude towards "
+		"the faction in question, and they will attempt to prevent "
+		"Unfriendly units from entering the region.  Only units which are "
+		"able to tax may be on guard.  Units on guard ";
+	if(has_stea)
+		temp += " are always visible regardless of Stealth skill, and ";
+	temp += "will be marked as being \"on guard\" in the region description.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("com"));
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Combat");
+	temp = "Combat occurs when one unit attacks another.  The computer then "
+		"gathers together all the units on the attacking side, and all the "
+		"units on the defending side, and the two sides fight until an "
+		"outcome is reached.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("com_attitudes"));
+	f.TagText("H3", "Attitudes:");
+	temp = "Which side a faction's units will fight on depends on declared "
+		"attitudes.  A faction can have one of the following attitudes "
+		"towards another faction:  Ally, Friendly, Neutral, Unfriendly or "
+		"Hostile.  Each faction has a general attitude, called the \"Default "
+		"Attitude\", that it normally takes towards other factions; this is "
+		"initially Neutral, but can be changed.  It is also possible to ";
+	temp += f.Link("#declare", "DECLARE") + " attitudes to specific "
+		"factions, e.g. ";
+	temp += f.Link("#declare", "DECLARE") + " 27 ALLY will declare the "
+		"Ally attitude to faction 27.  (Note that this does not necessarily "
+		"mean that faction 27 has decided to treat you as an ally.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Ally means that you will fight to defend units of that faction "
+		"whenever they come under attack, if you have non-avoiding units in "
+		"the region where the attack occurs. ";
+	if(has_stea) {
+		temp += " You will also attempt to prevent any theft of "
+			"assassination attempts against units of the faction";
+		if(has_obse) {
+			temp += ", if you are capable of seeing the unit which is "
+				"attempting the crime";
+		}
+		temp += ". ";
+	}
+	temp += "It also has the implications of the Friendly attitude.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Friendly means that you will accept gifts from units of that "
+		"faction.  This includes the giving of items, units of people, and "
+		"the teaching of skills.  You will also admit units of that faction "
+		"into buildings or ships owned by one of your units, and you will "
+		"permit units of that faction to collect taxes (but not pillage) "
+		"in regions where you have units on guard.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Unfriendly means that you will not admit units of that faction "
+		"into any region where you have units on guard.  You will not, "
+		"however, automatically attack unfriendly units which are already "
+		"present.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Hostile means that any of your units which do not have the "
+		"Avoid Combat flag set (using the ";
+	temp += f.Link("#avoid", "AVOID") + " order ) will attack any units of "
+		"that faction wherever they find them.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "If a unit can see another unit, but ";
+	if(has_obse) {
+		temp += "does not have high enough Observation skill to determine "
+			"its faction,";
+	} else {
+		temp += "it is not revealing its faction,"
+	}
+	temp += "it will treat the unit using the faction's default attitude, "
+		"even if the unit belongs to an Unfriendly or Hostile faction, "
+		"because it does not know the unit's identity.  However, if your "
+		"faction has declared an attitude of Friendly or Ally towards that "
+		"unit's faction, the unit will be treated with the better attitude; "
+		"it is assumed that the unit will produce proof of identity when "
+		"relevant.";
+	if(has_stea) {
+		temp += " (See the section on stealth for more information on when "
+			"units can see each other.)";
+	}
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "If a faction declares Unfriendly or Hostile as default attitude "
+		"(the latter is a good way to die fast), it will block or attack "
+		"unidentified units, unless they belong to factions for which a "
+		"Friendly or Ally attitude has been specifically declared.";
+	if(has_stea) {
+		temp += " Units which cannot be seen at all cannot be directly "
+			"blocked or attacked, of course.";
+	}
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	f.PutStr(f.LinkRef("com_attacking"));
+	f.TagText("H3", "Attacking");
+	temp = "A unit can attack another by issuing an ";
+	temp += f.Link("#attack", "ATTACK") + " order. A unit that does not "
+		"have Avoid Combat set will automatically attack any Hostile units "
+		"it identifies as such.";
+	if(has_stea || !(SkillDefs[S_RIDING].flags & Skill::DISABLED)) {
+		temp += " When a unit issues the ";
+		temp += f.Link("#attack", "ATTACK") + " order, or otherwise "
+			"decides to attack another unit, it must first be able to "
+			"attack the unit. ";
+		if(has_stea && !(SkillDefs[S_RIDING].flags & Skill::DISABLED))
+			temp += "There are two conditions for this; the first is that the"
+		else
+			temp += "The";
+		if(has_stea) {
+			temp += " attacking unit must be able to see the unit that it "
+				"wishes to attack.  More information is available on this "
+				"in the stealth section of the rules."
+		}
+		if(!SkillDefs[S_RIDING].flags & Skill::DISABLED) {
+			if(has_stea) {
+				f.PutStr(temp);
+				f.PutStr("<P></P>");
+				temp += "Secondly, the";
+			}
+			temp += " attacking unit must be able to catch the unit it "
+				"wishes to attack.  A unit may only catch a unit if its "
+				"effective Riding skill is greater than or equal to the "
+				"target unit's effective Riding skill; otherwise, the "
+				"target unit just rides away from the attacking unit.  "
+				"Effective Riding is the unit's Riding skill, but with "
+				"a potential maximum; if the unit can not ride, the "
+				"effective Riding skill is 0; if the unit can ride, the "
+				"maximum effective Riding is 3; if the unit can fly, the "
+				"maximum effective Riding is 5. Note that the effective "
+				"Riding also depends on whether the unit is attempting to "
+				"attack or defend; for attack purposes, only one man in "
+				"the unit needs to be able to ride or fly (generally, this "
+				"means one of the men must possess a horse, or other form "
+				"of transportation), whereas for defense purposes the entire "
+				"unit needs to be able to ride or fly (usually meaning "
+				"that every man in the unit must possess a horse or other "
+				"form of speedier transportation). Also, note that for a "
+				"unit to be able to use its defensive Riding ability to "
+				"avoid attack, the unit cannot be in a building, ship, or "
+				"structure of any type.";
+		}
+	}
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "A unit which is on guard, and is Unfriendly towards a unit, "
+		"will deny access to units using the ";
+	temp += f.Link("#move", "MOVE") + " order to enter its region. ";
+	if(has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+		temp += "Note that to deny access to a unit, at least one unit "
+			"from the same faction as the unit guarding the hex must satisfy "
+			"the above requirements. ";
+	}
+	temp += "A unit using ";
+	temp += f.Link("#advance", "ADVANCE") + " instead of " +
+		f.Link("#move", "MOVE") + " to enter a region, will attack any "
+		"units that attempt to deny it access.  If the advancing unit loses "
+		"the battle, it will be forced to retreat to the previous region it "
+		"moved through.  If the unit wins the battle and its army doesn't "
+		"lose any men, it is allowed to continue to move, provided that it "
+		"has enough movement points.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	if(has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+		temp = "Note that ";
+		if(has_stea && !(SkillDefs[S_RIDING].flags & SkillType::DISABLED))
+			temp += "these restrictions do ";
+		else
+			temp += "this restriction does ";
+		temp += "not apply for sea combat, as ";
+		if(has_stea)
+			temp += "units within a ship are always visible";
+		if(!(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+			if(has_stea) temp += ", and";
+			temp += " Riding does not play a part in combat on board ships";
+		}
+		temp += ".";
+		f.PutStr(temp);
+		f.PutStr("<P></P>");
+	}
+	f.PutStr(f.LinkRef("#com_muster"));
+	f.TagText("H3", "The Muster:");
+	temp = "Once the attack has been made, the sides are gathered.  Although "
+		"the ";
+	temp += f.Link("#attack", "ATTACK") + " order takes a unit rather than "
+		"a faction as its parameter (mainly so that unidentified units can "
+		"be attacked), an attack is basically considered to be by an entire "
+		"faction, against an entire faction and its allies.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "On the attacking side are all units of the attacking faction in "
+		"the region where the fight is taking place, except those with Avoid "
+		"Combat set.  A unit which has explicitly (or implicitly via ";
+	temp += f.Link("#advance", "ADVANCE") + ") issued an " +
+		f.Link("#attack", "ATTACK") + " order will join the fight anyway, "
+		"regardless of whether Avoid Combat is set.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Also on the attacking side are all units of other factions that "
+		"attacked the target faction (implicitly or explicitly) in the "
+		"region where the fight is taking place.  In other words, if several "
+		"factions attack one, then all their armies join together to attack "
+		"at the same time (even if they are enemies and will later fight "
+		"each other).";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "On the defending side are all identifiable units belonging to "
+		"the defending faction.  If a unit has Avoid Combat set and it "
+		"belongs to the target faction, it will be uninvolved only if its "
+		"faction cannot be identified by the attacking faction.  A unit "
+		"which was explicitly attacked will be involved anyway, regardless "
+		"of Avoid Combat. Also, all non-avoiding units located in the target "
+		"region belonging to factions allied with the defending unit will "
+		"join in on the defending side.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Units in adjacent regions can also become involved.  This is "
+		"the exception to the general rule that you cannot interact with "
+		"units in a different region.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "If a faction has at least one unit involved in the initial "
+		"region, then any units in adjacent regions will join the fight, "
+		"if they could reach the region and do not have Avoid Combat set. "
+		"There are a few flags that units may set to affect this; a unit "
+		"with the Hold flag (set using the ";
+	temp += f.Link("#hold", "HOLD") + " order) will not join battles in "
+		"adjacent regions.  This flag applies to both attacking and "
+		"defending factions.  A unit with the Noaid flag (set using the ";
+	temp += f.Link("#noaid", "NOAID") + " order) will receive no aid from "
+		"adjacent hexes when attacked, or when it issues an attack.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+	temp = "Example:  A fight starts in region A, in the initial combat "
+		"phase (before any movement has occurred).  The defender has a unit "
+		"of soldiers in adjacent region B.  They have 2 movement points at "
+		"this stage. ";
+	if(Globals->WEATHER_EXISTS) {
+		temp += "They will buy horses later in the turn, so that when "
+			"they execute their ";
+		temp += f.Link("#move", "MOVE") + " order they will have 4 movement "
+			"points, but right now they have 2. ";
+		temp += "Region A is forest, but fortunately it is summer, ";
+	} else {
+		temp += "Fortunately, region A is plains, ";
+	}
+	temp += "so the soldiers can join the fight.";
+	f.PutStr(temp);
+	f.PutStr("<P></P>");
+
+	// RESUME
 #if 0
- printf("<a name=\"economy_buildings\">\n");
- printf("<h3> Buildings and Trade Structures: </h3>\n");
- printf("\n");
- printf("Construction of buildings and ships goes as follows: each unit of work on a\n");
- printf("building requires a unit of stone and a man-month of work by a character with\n");
- printf("Building skill at least 1; higher skill levels allow work to proceed faster\n");
- printf("(still using one unit of stone per unit of work done).\n");
- printf("Again, only Trade factions can issue\n");
- printf("<a href=\"#build\"> BUILD </a>\n");
- printf("orders.  Here is a table of the various building types: <p>\n");
- printf("\n");
- printf("<a name=\"tablebuildings\">\n");
- printf("<center>\n");
- printf("<table border>\n");
-  printf(" <tr>\n");
-   printf("  <td> </td>\n");
-   printf("  <th>Size</th>\n");
-   printf("  <th>Cost</th>\n");
-   printf("  <th>Material</th>\n");
-  printf(" </tr>\n");
- {
- int lbs[]={O_TOWER,O_FORT,O_CASTLE,O_CITADEL};
- int nlbs=sizeof(lbs)/sizeof(int);
- for (int i=0;i<nlbs;i++)
-  {
-  if (OBJECT_ENABLED(lbs[i]))
-   {
-   ObjectType *ot=ObjectDefs+lbs[i];
-    printf("   <tr>\n");
-     printf("    <td>%s</td>\n",ot->name);
-     printf("    <td>%d</td>\n",ot->protect);
-     printf("    <td>%d</td>\n",ot->cost);
-     printf("    <td>%s</td>\n",ItemDefs[ot->item].name);
-    printf("   </tr>\n");
-   }
-  }
- }
- printf("</table> </center> <p>\n");
- printf("\n");
- printf("Size is the number of people that the building can shelter. Cost is\n");
- printf("the number of person-months of labor and the number of units of material\n");
- printf("required to complete the building.\n");
- printf("<p>\n");
- printf("\n");
- printf("There are other structures that increase the maximum production of certain\n");
- printf("items in regions; for example, a Mine will increase the amount of iron that is\n");
- printf("available to be mined in a region.  To construct these structures\n");
- printf("requires a high skill level in the production skill related to the\n");
- printf("item that the structure will help produce.\n");
- if (OBJECT_ENABLED(O_INN))
-  {
-   printf("  (Inns are an exception\n");
-   printf("  to this rule, requiring the Building skill, not the Entertainment\n");
-   printf("  skill.)\n");
-  }
- printf("This bonus in production is available to any unit in the\n");
- printf("region; there is no need to be inside the structure. <p>\n");
- printf("\n");
- printf("The first structure built in a region will increase\n");
- printf("the maximum production of the related product by 25%%; the amount added\n");
- printf("by each additional structure will be half of the the effect of the\n");
- printf("previous one.  (Note that if you build enough of the same type of\n");
- printf("structure in a region, the new structures may not add _any_ to the\n");
- printf("production level). <p>\n");
- printf("\n");
- printf("<a name=\"tabletradestructures\">\n");
- printf("<center>\n");
- printf("<table border> \n");
-  printf(" <tr>\n");
-   printf("  <td> </td>\n");
-   printf("  <th>Cost</th>\n");
-   printf("  <th>Material</th>\n");
-   printf("  <th>Skill</th>\n");
-   printf("  <th>Production Aided</th>\n");
-  printf(" </tr>\n");
- {
- int lbs[]={O_MINE,O_FARM,O_RANCH,O_TIMBERYARD,O_INN,O_QUARRY,O_TEMPLE,
-            O_MQUARRY,O_AMINE,O_PRESERVE,O_SACGROVE};
- int nlbs=sizeof(lbs)/sizeof(int);
- for (int i=0;i<nlbs;i++)
-  {
-  if (OBJECT_ENABLED(lbs[i]))
-   {
-   ObjectType *ot=ObjectDefs+lbs[i];
-    printf("   <tr>\n");
-     printf("    <td align=center>%s</td>\n",ot->name);
-     printf("    <td align=center>%d</td>\n",ot->cost);
-     printf("    <td align=center>%s</td>\n",ot->item==I_WOOD_OR_STONE?"wood or stone":ItemDefs[ot->item].name);
-     printf("    <td align=center>%s %d</td>\n",SkillDefs[ot->skill].name,ot->level);
-     printf("    <td align=center>%s</td>\n",ItemDefs[ot->productionAided].name);
-    printf("   </tr>\n");
-   }
-  }
- }
- printf("</table> </center> <p>\n");
- printf("\n");
- printf("Note that structures will not increase the availability of an\n");
- printf("item in a region that does not already have the item available.\n");
- printf("Also, Trade structures do not offer defensive bonuses\n");
- printf("(which is why they do not have a\n");
- printf("size associated with them).  As for regular buildings, the Cost\n");
- printf("is the number of person-months of labor and also the number of\n");
- printf("units of raw material required to complete a trade structure.\n");
- printf("You can use two different materials (wood or stone) to construct most trade\n");
- printf("structures.<p>\n");
- printf("\n");
- if (OBJECT_ENABLED(O_ROADN))
-  {
-   printf("  <a name=\"economy_roads\"></a>\n");
-   printf("  <h3> Roads: </h3>\n");
- printf("\n");
-   printf("  There is a another type of structure called roads.  They require the building\n");
-   printf("  skill and do not protect units, nor aid in the production of resources, but \n");
-   printf("  do aid movement, and can improve the economy of a hex.<p>\n");
- printf("\n");
-   printf("  Roads are directional and are only considered to reach from one hexside to\n");
-   printf("  the center of the hex.  To gain a movement bonus, there must be two\n");
-   printf("  connecting roads, one in each adjacent hex.  Only one road may be built in\n");
-   printf("  each direction.  If a road in the given direction is connected, units\n");
-   printf("  move along that road at half cost to a minimum of 1 movement point.<p>\n");
- printf("\n");
-   printf("  For example: If a unit is moving northwest, then hex it is in must have a\n");
-   printf("  northwest road, and the hex it is moving into must have a southeast road.<p>\n");
- printf("\n");
-   printf("  To gain an economy bonus, a hex must have roads that connect to roads in\n");
-   printf("  two adjoining hexes.  The economy bonus for the connected roads raises\n");
-   printf("  the wages in the region by 1 point.<p>\n");
- printf("\n");
-   printf("  There are six different road structures, one for each direction. They each\n");
-   printf("  require %d %s to build.<p>\n",ObjectDefs[O_ROADN].cost,ItemDefs[ObjectDefs[O_ROADN].item].name);
- printf("\n");
-  if (Globals->DECAY&&!(ObjectDefs[O_ROADN].flags&ObjectType::NEVERDECAY))
-   {
-    printf("   Unlike other structures, roads will decay over time if they are not\n");
-    printf("   maintained. Difficult terrain and bad weather will speed this decay.\n");
-    printf("   Maintnenance involves having units with the appropriate level of building\n");
-    printf("   skill expend a small amount of stone and labor on a fairly regular basis in\n");
-    printf("   the exactly same manner as they would finish building it if it was not\n");
-    printf("   completed. In other words, enter the structure and issue the BUILD command\n");
-    printf("   with no parameters.<p>\n");
- printf("\n");
-    printf("   Once a road decays, it will give no bonuses until it is repaired. <p>\n");
-   }
- printf("\n");
-   printf("  <a name=\"tableroadstructures\">\n");
-   printf("  <center>\n");
-   printf("  <table border> \n");
-    printf("   <tr>\n");
-     printf("    <td> </td>\n");
-     printf("    <th>Cost</th>\n");
-     printf("    <th>Material</th>\n");
-     printf("    <th>Skill</th>\n");
-    printf("   </tr>\n");
-   {
-   int lbs[]={O_ROADN,O_ROADNW,O_ROADNE,O_ROADS,O_ROADSW,O_ROADSE};
-   int nlbs=sizeof(lbs)/sizeof(int);
-   for (int i=0;i<nlbs;i++)
-    {
-    if (OBJECT_ENABLED(lbs[i]))
-     {
-     ObjectType *ot=ObjectDefs+lbs[i];
-      printf("     <tr>\n");
-       printf("      <td align=center>%s</td>\n",ot->name);
-       printf("      <td align=center>%d</td>\n",ot->cost);
-       printf("      <td align=center>%s</td>\n",ot->item==I_WOOD_OR_STONE?"wood or stone":ItemDefs[ot->item].name);
-       printf("      <td align=center>%s %d</td>\n",SkillDefs[ot->skill].name,ot->level);
-      printf("     </tr>\n");
-     }
-    }
-   }
-   printf("  </table> </center> <p>\n");
- printf("\n");
-  }
- printf("\n");
- if (SKILL_ENABLED(S_SHIPBUILDING))
-  {
-   printf("  <a name=\"economy_ships\">\n");
-   printf("  <h3> Ships: </h3>\n");
- printf("\n");
-   printf("  Ships are constructed similarly to buildings, except that they\n");
-   printf("  are constructed of wood, not stone; and their construction requires\n");
-   printf("  the Shipbuilding skill, not the Building skill. Only factions with\n");
-   printf("  at least one faction point spent on trade can issue\n");
-   printf("  <a href=\"#build\"> BUILD </a> orders. Here is a table on the various\n");
-   printf("  ship types: <p>\n");
- printf("\n");
-   printf("  <a name=\"tableshipinfo\">\n");
-   printf("  <center>\n");
-   printf("  <table border>\n");
-    printf("   <tr>\n");
-     printf("    <td> </td>\n");
-     printf("    <th>Capacity</th>\n");
-     printf("    <th>Cost</th>\n");
-     printf("    <th>Material</th>\n");
-     printf("    <th>Sailors</th>\n");
-    printf("   </tr>\n");
-   {
-   int lbs[]={O_LONGBOAT,O_CLIPPER,O_GALLEON};
-   int nlbs=sizeof(lbs)/sizeof(int);
-   for (int i=0;i<nlbs;i++)
-    {
-    if (OBJECT_ENABLED(lbs[i]))
-     {
-     ObjectType *ot=ObjectDefs+lbs[i];
-      printf("     <tr>\n");
-       printf("      <td align=center>%s</td>\n",ot->name);
-       printf("      <td align=center>%d</td>\n",ot->capacity);
-       printf("      <td align=center>%d</td>\n",ot->cost);
-       printf("      <td align=center>%s</td>\n",ot->item==I_WOOD_OR_STONE?"wood or stone":ItemDefs[ot->item].name);
-       printf("      <td align=center>%d</td>\n",ot->sailors);
-      printf("     </tr>\n");
-     }
-    }
-   }
- printf("</table> </center> <p>\n");
- printf("\n");
-   printf("  The capacity of a ship is the maximum weight that the ship may have\n");
-   printf("  aboard and still move. The cost is both the person-months of labor\n");
-   printf("  and the number of units of wood required to complete the ship. The\n");
-   printf("  sailors are the number of skill levels of the Sailing skill that\n");
-   printf("  must be aboard the ship (and issuing the\n");
-   printf("  <a href=\"#sail\"> SAIL </a> order in order for the ship to sail). <p>\n");
-  }
- printf("\n");
- printf("<a name=\"economy_advanceditems\">\n");
- printf("<h3> Advanced Items: </h3>\n");
- printf("\n");
- printf("There are also certain advanced items that highly skilled units can produce.\n");
- printf("These are not available to starting players, but can be discovered through\n");
- printf("study.  When a unit is skilled enough to produce one of these items, he will\n");
- printf("generally receive a skill report describing the production of this item.\n");
- printf("Production of advanced items is generally done in a manner similar to\n");
- printf("the normal items. <p>\n");
- printf("\n");
- printf("<a name=\"economy_income\">\n");
- printf("<h3> Income: </h3>\n");
- printf("\n");
- printf("Units can earn money with the <a href=\"#work\"> WORK </a>\n");
- printf("order.  This means that the unit spends the\n");
- printf("month performing manual work for wages.  The amount to be earned from this is\n");
- printf("usually not very high, so it is generally a last resort to be used if one is\n");
- printf("running out of money.  The current wages are shown in the region description\n");
- printf("for each region.  All units may <a href=\"#work\"> WORK</a>,\n");
- printf("regardless of skills or faction type.\n");
- printf("<p>\n");
- printf("\n");
- if (SKILL_ENABLED(S_ENTERTAINMENT))
-  {
- printf("\n");
-   printf("  <a name=\"economy_entertainment\">\n");
-   printf("  <h3> Entertainment: </h3>\n");
- printf("\n");
-   printf("  Units with the Entertainment skill can use it to earn money.  A unit with\n");
-   printf("  Entertainment level 1 will earn %d %s per man by issuing the \n",Globals->ENTERTAIN_INCOME,silver);
-   printf("  <a href=\"#entertain\"> ENTERTAIN </a>\n");
-   printf("  order.  The total amount of money that can be earned this way is shown in the\n");
-   printf("  region descriptions.  Higher levels of Entertainment skill can earn more, so\n");
-   printf("  a character with Entertainment skill 2 can earn twice as much money as one with\n");
-   printf("  skill 1 (and uses twice as much of the demand for entertainment in the region).\n");
-   printf("  Note that entertainment income is much less, per region, than the income\n");
-   printf("  available through working or taxing.  All factions may have entertainers,\n");
-   printf("  regardless of faction type. <p>\n");
-  }
- printf("\n");
- printf("<a name=\"economy_taxingpillaging\">\n");
- printf("<h3> Taxing/Pillaging: </h3>\n");
- printf("\n");
- printf("War factions may collect taxes in a region.  This is done using the\n");
- printf("<a href=\"#tax\"> TAX </a> order\n");
- printf("(which is %s a full month order).  The amount of tax money that can be\n",Globals->TAX_PILLAGE_MONTH_LONG?"":"not");
- printf("collected each month in a region is shown in the region description.  Only\n");
- printf("combat ready units may <a href=\"#tax\"> TAX</a>;\n");
- printf("a unit is combat ready if it either: has Combat skill of at least 1,\n");
- printf("has Longbow or Crossbow skill of at least 1 and also has the appropriate bow\n");
- printf("in his possession, or has a weapon (such as a sword) which requires no skill\n");
- printf("in his possession. Each taxing character can collect $%d, though if the number\n",Globals->TAX_INCOME);
- printf("of taxers would tax more than the available tax income, the tax income is\n");
- printf("split evenly.<p>\n");
- printf("\n");
- printf("War factions may also pillage a region.  To do this requires the faction to\n");
- printf("have enough combat trained men in the region to tax half of the available\n");
- printf("money in the region.  The total amount of money that can be pillaged will then\n");
- printf("be shared out between every combat trained unit that issues the\n");
- printf("<a href=\"#pillage\"> PILLAGE </a> order.\n");
- printf("The amount of money collected is equal to twice the available tax money.\n");
- printf("However, the economy of the region will be seriously damaged by pillaging, and\n");
- printf("will only slowly recover over time.  Note that\n");
- printf("<a href=\"#pillage\"> PILLAGE </a> comes before\n");
- printf("<a href=\"#tax\"> TAX</a>, so\n");
- printf("<a href=\"#tax\"> TAX </a> will collect no money in that region that month . <p>\n");
- printf("\n");
- printf("It is possible to safeguard one's tax income in regions one controls.  Units\n");
- printf("which have the Guard flag set (using the\n");
- printf("<a href=\"#guard\"> GUARD </a> order) will block\n");
- printf("<a href=\"#tax\"> TAX </a> orders\n");
- printf("issued by other factions in the same region, unless you have declared the\n");
- printf("faction in question Friendly.  Units on guard will also block\n");
- printf("<a href=\"#pillage\"> PILLAGE </a> orders\n");
- printf("issued by other factions in the same region, regardless of your attitude\n");
- printf("towards the faction in question, and they will attempt to prevent Unfriendly\n");
- printf("units from entering the region.  Only units which are able to tax may be\n");
- printf("on guard.  Units on guard \n");
- if (st_ena)
-  {
-   printf("  are always visible regardless of Stealth skill, and\n");
-  }
- printf("will be marked as being \"on guard\" in the region description.\n");
- printf("<p>\n");
- printf("\n");
- printf("<a name=\"com\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Combat </h2>\n");
- printf("\n");
- printf("Combat occurs when one unit attacks another.  The computer then gathers\n");
- printf("together all the units on the attacking side, and all the units on the\n");
- printf("defending side, and the two sides fight until an outcome is reached. <p>\n");
- printf("\n");
- printf("<a name=\"com_attitudes\">\n");
- printf("<h3> Attitudes: </h3>\n");
- printf("\n");
- printf("Which side a faction's units will fight on depends on declared attitudes.  A\n");
- printf("faction can have one of the following attitudes towards another faction:  Ally,\n");
- printf("Friendly, Neutral, Unfriendly or Hostile.  Each faction has a general attitude,\n");
- printf("called the \"Default Attitude\", that it normally takes towards other factions;\n");
- printf("this is initially Neutral, but can be changed.  It is also possible to declare\n");
- printf("attitudes to specific factions, e.g.\n");
- printf("<a href=\"#declare\"> DECLARE </a> 27 ALLY will declare the Ally\n");
- printf("attitude to faction 27.  (Note that this does not necessarily mean that\n");
- printf("faction 27 is allied to you.) <p>\n");
- printf("\n");
- printf("Ally means that you will fight to defend units of that faction whenever they\n");
- printf("come under attack, if you have non-avoiding units in the region where the\n");
- printf("attack occurs. \n");
- if (st_ena)
-  {
-   printf("  You will also prevent stealing and assassination attempts\n");
-   printf("  against units of the faction\n");
-  if (ob_ena)
-   {
-    printf("   , if you are capable of seeing the unit attempting the crime\n");
-   }
-   printf("  .\n");
-  }
- printf("It also has the implications of the Friendly\n");
- printf("attitude.\n");
- printf("<p>\n");
- printf("\n");
- printf("Friendly means that you will accept gifts from units of that faction.  This\n");
- printf("includes the giving of items, units of people, \n");
- printf("and the teaching of skills.  You will also admit units of that\n");
- printf("faction into\n");
- printf("buildings or ships owned by one of your units, and you will permit units of\n");
- printf("that faction to collect taxes (but not pillage) in regions where you have units\n");
- printf("on guard. <p>\n");
- printf("\n");
- printf("Unfriendly means that you will not admit units of that faction into any region\n");
- printf("where you have units on guard.  You will not, however, automatically attack\n");
- printf("unfriendly units which are already present. <p>\n");
- printf("\n");
- printf("Hostile means that any of your units which do not have the Avoid Combat flag\n");
- printf("set (using the <a href=\"#avoid\"> AVOID </a> order)\n");
- printf("will attack any units of that faction wherever they\n");
- printf("find them. <p>\n");
- printf("\n");
- printf("If a unit can see another unit, but \n");
- if (ob_ena)
-  {
-   printf("  does not have high enough Observation skill to determine its faction,\n");
-  }
- else
-  {
-   printf("  it is not revealing its faction\n");
-  }
- printf("it will treat the unit using the faction's default\n");
- printf("attitude, even if the unit belongs to an Unfriendly or Hostile faction,\n");
- printf("because it does not know the unit's identity.  However, if your faction has\n");
- printf("declared an attitude of Friendly or Ally towards that unit's faction,\n");
- printf("the unit will be treated with the better\n");
- printf("attitude; it is assumed that the unit will produce proof of identity when\n");
- printf("relevant.\n");
- if (st_ena)
-  {
-   printf("  (See the section on stealth for more information on when units can\n");
-   printf("  see each other.)\n");
-  }
- printf("<p>\n");
- printf("\n");
- printf("If a faction declares Unfriendly or Hostile as default attitude (the latter is\n");
- printf("a good way to die fast), it will block or attack unidentified units, unless\n");
- printf("they belong to factions for which a more friendly attitude has been\n");
- printf("specifically declared.\n");
- if (st_ena)
-  {
-   printf("  Units which cannot be seen at all cannot be directly\n");
-   printf("  blocked or attacked, of course.\n");
-  }
- printf("<p>\n");
- printf("\n");
- printf("<a name=\"com_attacking\">\n");
- printf("<h3> Attacking: </h3>\n");
- printf("\n");
- printf("A unit can attack another by issuing an\n");
- printf("<a href=\"#attack\">ATTACK</a> order.  A unit that does not\n");
- printf("have Avoid Combat set will automatically attack any Hostile units it identifies\n");
- printf("as such.  \n");
- {
- int ncond=!!st_ena+!!SKILL_ENABLED(S_RIDING);
- if (ncond)
-  {
-   printf("  When a unit issues the <a href=\"#attack\"> ATTACK </a> order, or\n");
-   printf("  otherwise decides to attack another unit, it must first be able\n");
-   printf("  to attack the unit.\n");
- printf("\n");
-  if (st_ena)
-  {
-   if (ncond==2)
-    {
-     printf("    There are two conditions for this; the first is that the\n");
-    }
-   else
-    {
-     printf("    The\n");
-    }
-    printf("   attacking unit must be able to see the unit that it\n");
-    printf("   wishes to attack.  More information is available on this in the\n");
-    printf("   stealth section of the rules. <p>\n");
-   }
- printf("\n");
-  if (SKILL_ENABLED(S_RIDING))
-   {
-   if (ncond==2)
-    {
-     printf("    Secondly, the \n");
-    }
-   else
-    {
-     printf("    The\n");
-    }
-    printf("   attacking unit must be able to catch the unit it\n");
-    printf("   wishes to attack.  A unit may only catch a unit if its effective\n");
-    printf("   Riding skill is greater than or equal to the target unit's effective\n");
-    printf("   Riding skill; otherwise, the target unit just rides away from the\n");
-    printf("   attacking unit.  Effective Riding is the unit's Riding skill, but with\n");
-    printf("   a potential maximum; if the unit can not ride, the effective Riding\n");
-    printf("   skill is 0; if the unit can ride, the maximum effective Riding is\n");
-    printf("   3; if the unit can fly, the maximum effective Riding is 5. Note that\n");
-    printf("   the effective Riding also depends on whether the unit is attempting\n");
-    printf("   to attack or defend;\n");
-    printf("   for attack purposes, only one man in the unit needs to be able to\n");
-    printf("   ride or fly (generally, this means one of the men must possess a\n");
-    printf("   horse, or other form of transportation),\n");
-    printf("   whereas for defense purposes the entire unit needs to\n");
-    printf("   be able to ride or fly (usually meaning that every man in the unit must \n");
-    printf("   possess a horse or other form of speedier transportation).\n");
-    printf("   Also, note that for a unit to be able to\n");
-    printf("   use its defensive Riding ability to avoid attack, the unit cannot\n");
-    printf("   be in a building, ship, or structure of any type. <p>\n");
-   }
-  }
- printf("\n");
-   printf("  A unit which is on guard, and is Unfriendly towards a unit, will\n");
-   printf("  deny access to units using the <a href=\"#move\">MOVE</a> order to\n");
-   printf("  enter its region.\n");
-  if (ncond)
-   {
-    printf("   Note that to deny access to a unit, the guarding unit\n");
-    printf("   must satisfy the above requirements.\n");
-   }
-   printf("  A unit using <a href=\"#advance\">ADVANCE</a>\n");
-   printf("  instead of <a href=\"#move\">MOVE</a> to enter a region, will attack\n");
-   printf("  any units that identify it as Unfriendly and attempt to deny it access.  If\n");
-   printf("  the advancing unit loses the battle, it will be forced to retreat to the\n");
-   printf("  previous region it moved through.  If the unit wins the battle\n");
-   printf("  and its army doesn't lose any men, it is allowed to continue to\n");
-   printf("  move, provided that it has enough movement points. <p>\n");
- printf("\n");
- if (ncond)
-  {
-   printf("  Note that these restrictions do not apply for sea combat, as\n");
-  if (st_ena)
-   {
-    printf("   units within a ship are always visible\n");
-   }
-   printf("  %s\n",ncond==2?", and ":"");
-  if (SKILL_ENABLED(S_RIDING))
-   {
-    printf("   Riding does not play a part in combat on board ships\n");
-   }
-   printf("  .<p>\n");
-  }
- printf("\n");
- }
- printf("\n");
- printf("<a name=\"com_muster\">\n");
- printf("<h3> The Muster: </h3>\n");
- printf("\n");
- printf("Once the attack has been made, the sides are gathered.  Although the\n");
- printf("<a href=\"#attack\"> ATTACK </a>\n");
- printf("order takes a unit rather than a faction as its parameter (mainly so that\n");
- printf("unidentified units can be attacked), an attack is basically considered to be by\n");
- printf("an entire faction, against an entire faction and its allies. <p>\n");
- printf("\n");
- printf("On the attacking side are all units of the attacking faction in the region\n");
- printf("where the fight is taking place, except those with Avoid Combat set.  A unit\n");
- printf("which has explicitly issued an\n");
- printf("<a href=\"#attack\"> ATTACK </a> order will join the fight anyway,\n");
- printf("regardless of Avoid Combat. <p>\n");
- printf("\n");
- printf("Also on the attacking side are all units of other factions that attacked the\n");
- printf("target faction in the region where the fight is taking place.  In other words,\n");
- printf("if several factions attack one, then all their armies join together to attack\n");
- printf("at the same time (even if they are enemies and will later fight each other).\n");
- printf("<p>\n");
- printf("\n");
- printf("On the defending side are all identifiable units belonging to the defending\n");
- printf("faction.  If a unit has Avoid Combat set, and its faction cannot be identified\n");
- printf("by the attacking faction, it will not be involved in the battle.  A unit which\n");
- printf("was explicitly attacked will be involved anyway, regardless of Avoid Combat.\n");
- printf("Also, all non-avoiding units in factions allied with the defending unit will join in\n");
- printf("on the defending side. <p>\n");
- printf("\n");
- printf("Units in adjacent regions can also become involved.  This is the exception to\n");
- printf("the general rule that you cannot interact with units in a different region.\n");
- printf("<p>\n");
- printf("\n");
- printf("If a faction has at least one unit involved in the initial region, then any\n");
- printf("units in adjacent regions will join the fight, if they could reach the region\n");
- printf("and do not have Avoid Combat set.  There are a few flags that units may\n");
- printf("set to affect this; a unit with the Hold flag\n");
- printf("(set using the <a href=\"#hold\"> HOLD </a> order)\n");
- printf("will not join battles in adjacent regions.  \n");
- printf("This flag applies to both attacking and defending factions.  A unit with\n");
- printf("the Noaid flag (set using the <a href=\"#noaid\"> NOAID </a> order) will\n");
- printf("receive no aid from adjacent hexes when attacked, or when it issues an\n");
- printf("attack. <p>\n");
- printf("\n");
- printf("Example:  A fight starts in region A, in the initial combat phase (before any\n");
- printf("movement has occurred).  The defender has a unit of soldiers in adjacent region\n");
- printf("B.  They have 2 movement points at this stage.  They will buy horses later in\n");
- printf("the turn, so that when they execute their\n");
- printf("<a href=\"#move\"> MOVE </a> order they will have 4 movement\n");
- printf("points, but right now they have 2.  Region A is forest but fortunately it is\n");
- printf("summer so the soldiers can join the fight.\n");
- printf("<p>\n");
- printf("\n");
  printf("It is important to note that the units in nearby regions do not actually move\n");
  printf("to the region where the fighting happens; the computer only checks that they\n");
  printf("could move there.  (In game world terms, presumably they did move\n");
@@ -2362,6 +2499,7 @@ int Game::GenRules(const AString &rules, const AString &css,
  printf("always defend an ally against attack, even if it means that you fight\n");
  printf("against other factions that you are allied with. <p>\n");
  printf("\n");
+ 
  printf("<a name=\"com_thebattle\">\n");
  printf("<h3> The Battle: </h3>\n");
  printf("\n");

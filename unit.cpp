@@ -684,9 +684,12 @@ int Unit::GetAttackRiding()
 		int lowriding = 0;
 		forlist(&items) {
 			Item *i = (Item *) elem;
+			/* XXX -- Fix this -- not all men weigh the same */
+			/* XXX --             Use the least weight man */
 			if (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= 10) {
 				return riding;
 			}
+			/* XXX -- Fix this -- Should also be able to carry the man */
 			if (ItemDefs[i->type].ride - ItemDefs[i->type].weight) {
 				if (riding <= 3) return riding;
 				lowriding = 3;
