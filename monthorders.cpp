@@ -906,7 +906,9 @@ void Game::RunMoveOrders()
 				forlist(&obj->units) {
 					Unit * unit = (Unit *) elem;
 					if (phase == unit->movepoints && unit->monthorders &&
-						unit->monthorders->type == O_MOVE && !unit->nomove) {
+						(unit->monthorders->type == O_MOVE ||
+						 unit->monthorders->type == O_ADVANCE) &&
+						!unit->nomove) {
 						locs->Add(DoAMoveOrder(unit,region,obj));
 					}
 				}

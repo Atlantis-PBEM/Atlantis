@@ -3973,7 +3973,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "The classes of items which are exceptable for the fourth form of "
 		"this order are, NORMAL, ADVANCED, TRADE, MAN or MEN, MONSTER or "
 		"MONSTERS, MAGIC, WEAPON OR WEAPONS, ARMOR, MOUNT or MOUNTS, BATTLE, "
-		"SPECIAL, TOOL or TOOLS, and FOOD.";
+		"SPECIAL, TOOL or TOOLS, FOOD, and ITEM or ITEMS (which is the "
+		"combination of all of the previous categories).";
 	f.Paragraph(temp);
 	temp = "A unit may only give items, including silver, to a unit which "
 		"it is able to see, unless the faction of the target unit has "

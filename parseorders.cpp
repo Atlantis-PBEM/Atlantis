@@ -2276,6 +2276,9 @@ void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
 				} else if((*token == "tool") || (*token == "tools")) {
 					item = -IT_TOOL;
 					found = 1;
+				} else if((*token == "item") || (*token == "items")) {
+					item = -NITEMS;
+					found = 1;
 				} else if(item != -1) {
 					found = 1;
 				}
@@ -2810,6 +2813,7 @@ void Game::ProcessAdvanceOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 		if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 		if (!u->monthorders) {
 			u->monthorders = new MoveOrder;
+			u->monthorders->type = O_ADVANCE;
 		}
 		m = (MoveOrder *) u->monthorders;
 		m->advancing = 1;

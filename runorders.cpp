@@ -1746,7 +1746,8 @@ void Game::DoGiveOrders()
 						} else {
 							forlist((&u->items)) {
 								Item *item = (Item *)elem;
-								if(ItemDefs[item->type].type & (-o->item)) {
+								if((o->item == -NITEMS) ||
+									(ItemDefs[item->type].type & (-o->item))) {
 									GiveOrder go;
 									go.amount = item->num;
 									go.except = 0;

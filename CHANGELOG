@@ -386,3 +386,7 @@ Changes from 4.0.8 -> 4.0.9
       todo list to at least consider? [This would probably also help to
       attach atlantisdev post articles to various todo list items, which
       has been requested].
+   -- Fixed a bug where ADVANCE orders were combined together during the
+      orders checker, but not during the actual game run.
+   -- Added GIVE XXX ALL ITEMS which gives them everything, *including men*
+      in one fell swoop!
