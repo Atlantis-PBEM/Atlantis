@@ -126,7 +126,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"Buildings and Trade Structures"));
 	if(!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED))
 		f.TagText("LI", f.Link("#economy_roads", "Roads"));
-	if(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED))
+	int may_sail = (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED)) &&
+		(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED));
+	if(may_sail)
 		f.TagText("LI", f.Link("#economy_ships", "Ships"));
 	f.TagText("LI", f.Link("#economy_advanceditems", "Advanced Items"));
 	f.TagText("LI", f.Link("#economy_income", "Income"));
@@ -262,7 +264,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("LI", f.Link("#tablefactionpoints",
 					"Table of Faction Points"));
 	f.TagText("LI", f.Link("#tableitemweights", "Table of Item Weights"));
-	if(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED))
+	if(may_sail)
 		f.TagText("LI", f.Link("#tableshipcapacities",
 					"Table of Ship Capacities"));
 	if(Globals->RACES_EXIST)
@@ -274,7 +276,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED))
 		f.TagText("LI", f.Link("#tableroadstructures",
 					"Table of Road Structures"));
-	if(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED))
+	if(may_sail)
 		f.TagText("LI", f.Link("#tableshipinfo", "Table of Ship Information"));
 	f.TagText("LI", f.Link("#tablebuildcapacity",
 				"Table of Building Capacity"));
@@ -608,7 +610,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += ". (There may be other types of terrain to be discovered as the "
 		"game progresses.)  Regions can contain units belonging to players; "
 		"they can also contain structures such as buildings";
-	if(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED))
+	if(may_sail)
 		temp += " and ships";
 	temp += ". Two units in the same region can normally interact, unless "
 		"one of them is concealed in some way.  Two units in different "
@@ -736,7 +738,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr(f.LinkRef("world_structures"));
 	f.TagText("H3", "Structures:");
 	temp = "Regions may also contain structures, such as buildings";
-	if(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED))
+	if(may_sail)
 		temp += "or ships";
 	temp += ". These will appear directly below the list of units.  Here is "
 		"a sample structure:";
@@ -765,263 +767,256 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if (has_stea)
 		temp += " Units within a structure are always visible, even if "
 			"they would otherwise not be seen.";
-   f.PutStr(temp);
-   f.PutStr("<BR><BR>");
-   f.PutStr("Units inside structures are still considered to be in the "
-		   "region, and other units can interact with them; however, they "
-		   "may gain benefits, such as defensive bonuses in combat from "
-		   "being inside a building.  The first unit to enter an object is "
-		   "considered to be the owner; only this unit can do things such "
-		   "as renaming the object, or permitting other units to enter. "
-		   "The owner of an object can be identified on the turn report, as "
-		   "it is the first unit listed under the object.  Only units with "
-		   "men in them can be structure owners, so newly created units "
-		   "cannot own a structure until they contain men.");
-   f.PutStr("<BR><BR>");
-   if(Globals->NEXUS_EXISTS) {
-	   f.PutStr(f.LinkRef("world_nexus"));
-	   f.TagText("H3", "Atlantis Nexus:");
-	   f.PutStr("Note: the following section contains some details that "
-			   "you may wish to skip over until you have had a chance to "
-			   "read the rest of the rules, and understand the mechanics "
-			   "of Atlantis.  However, be sure to read this section before "
-			   "playing, as it will affect your early plans in Atlantis.");
-	   f.PutStr("<BR><BR>");
-	   temp = "When a faction first starts in Atlantis, it begins with "
-		   "one unit, in a special region called the Atlantis Nexus.";
-	   if(Globals->MULTI_HEX_NEXUS) {
-		   temp += " These regions exist ";
-	   } else {
-		   temp += " This region exists ";
-	   }
-	   if (!Globals->NEXUS_IS_CITY) {
-		   temp += "outside of the normal world of Atlantis, and as such ";
-		   if(Globals->MULTI_HEX_NEXUS)
-			   temp += "have ";
-		   else
-			   temp += "has ";
-		   temp += "no products or marketplaces; ";
-		   if(Globals->MULTI_HEX_NEXUS)
-			   temp += "they merely serve ";
-		   else
-			   temp += "it merely serves ";
-		   temp += "as the magical entry into Atlantis.";
-	   } else {
-		   temp += "outside of the normal world of Atlantis, but ";
-		   if(Globals->MULTI_HEX_NEXUS)
-			   temp += "each contains ";
-		   else
-			   temp += "contains ";
-		   temp += "a starting city with all its benefits";
-		   if(Globals->GATES_EXIST)
-			   temp += ", including a gate";
-		   temp += ". ";
-		   if(Globals->MULTI_HEX_NEXUS)
-			   temp += "They also serve ";
-		   else
-			   temp += "It also serves ";
-		   temp += "as the magical entry into Atlantis.";
-	   }
-	   f.PutStr(temp);
-	   f.PutStr("<BR><BR>");
-	   if(Globals->MULTI_HEX_NEXUS) {
-		   temp = "From the Nexus hexes, there are exits either to other "
-			   "Nexus hexes, or to starting cities in Atlantis.  Units may "
-			   "move through these exits as normal, but once in a starting "
-			   "city, there is no way to regain entry to the Nexus.";
-	   } else {
-		   temp = "From the Atlantis Nexus, there are six exits into the "
-			   "starting cities of Atlantis.  Units may move through these "
-			   "exits as normal, but once through an exit, there is no "
-			   "return path to the Nexus.";
-	   }
-	   if(Globals->GATES_EXIST &&
-			   (Globals->NEXUS_GATE_OUT || Globals->NEXUS_IS_CITY)) {
-		   temp += " It is also possible to use Gate Lore to get out of "
-			   "Nexus";
-		   if(Globals->NEXUS_GATE_OUT && !Globals->NEXUS_IS_CITY)
-			   temp += " (but not to return)";
-		   temp += ".";
-	   }
-	   temp += " The ";
-	   if(!Globals->MULTI_HEX_NEXUS)
-		   temp += "six ";
-	   temp += "starting cities offer much to a starting faction; ";
-	   if (!Globals->SAFE_START_CITIES)
-		   temp += "until someone conquers the guardsmen, ";
-	   temp += "there are unlimited amounts of many materials and men "
-		   "(though the prices are often quite high).";
-	   temp += " In addition, ";
-	   if(Globals->SAFE_START_CITIES)
-		   temp += "no battles are allowed in starting cities.";
-	   else
-		   temp += "the starting cities are guarded by strong guardsmen, "
-			   "keeping any units within the city much safer from attack "
-			   "(See the section on Non-Player Units for more information "
-			   "on city guardsmen).";
-	   temp += " As a drawback, these cities tend to be extremely crowded, "
-		   "and most factions will wish to leave the starting cities when "
-		   "possible.";
-	   f.PutStr(temp);
-	   f.PutStr("<BR><BR>");
-	   temp = "It is always possible to enter any starting city from the "
-		   "nexus";
-	   if(!Globals->SAFE_START_CITIES)
-		   temp += ", even if that starting city has been taken over and "
-			   "guarded by another faction";
-	   temp += ". This is due to the transportation from the Nexus to the "
-		   "starting city being magical in nature.";
-	   if(!Globals->SAFE_START_CITIES)
-		   temp += " Once in the start city however, no gaurentee of "
-			   "safety is given.";
-	   f.PutStr(temp);
-	   f.PutStr("<BR><BR>");
-	   int may_sail = (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED)) &&
-		   (!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED));
-	   int num_methods = 1 + (Globals->GATES_EXIST?1:0) + (may_sail?1:0);
-	   char *methods[] = {"You must go ", "The first is ", "The second is "};
-	   int method = 1;
-	   if (num_methods == 1) method = 0;
-	   temp = AString("There ") + (num_methods == 1?"is ":"are ") +
-		   num_methods + " method" + (num_methods == 1?" ":"s ") +
-		   "of departing the starting cities.";
-	   temp += methods[method++];
-	   temp += " by land, but keep in mind that the lands immediately "
-		   "surrounding the starting cities will tend to be highly "
-		   "populated, and possibly quite dangerous to travel.";
-	   if(may_sail) {
-		   temp += AString(" ") + methods[method];
-		   temp += " by sea.  all of the starting cities lie against an "
-			   "ocean, and a faction may easily purchase wood and "
-			   "construct a ship to ";
-		   temp += f.Link("#sail", "SAIL");
-		   temp += " away.  Be wary of pirates seeking to prey on new "
-			   "factions, however!";
-	   }
-	   if (Globals->GATES_EXIST) {
-		   temp += "And last, rumors of a magical Gate Lore suggest yet "
-			   "another way to travel from the starting cities.  The rumors "
-			   "are vague, but factions wishing to travel far from the "
-			   "starting cities, taking only a few men with them, might "
-			   "wish to pursue this method.";
-	   }
-	   f.PutStr(temp);
-	   f.PutStr("<BR><BR>");
-   }
-   if(Globals->CONQUEST_GAME) {
-	   f.PutStr(f.LinkRef("world_conquest"));
-	   f.TagText("H3", "The World of Atlantis Conquest");
-	   f.PutStr("In a game of Atlantis Conquest, each player begins the "
-			   "game on a small island of 8 regions, seperated by ocean "
-			   "from the rest of the players.  The starting islands are "
-			   "located around the perimeter of a larger central island. "
-			   "Sailing from the starting islands towards the center of "
-			   "the map should lead to the central island within a few "
-			   "regions.");
-	   f.PutStr("<BR><BR>");
-   }
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	f.PutStr("Units inside structures are still considered to be in the "
+			"region, and other units can interact with them; however, they "
+			"may gain benefits, such as defensive bonuses in combat from "
+			"being inside a building.  The first unit to enter an object is "
+			"considered to be the owner; only this unit can do things such "
+			"as renaming the object, or permitting other units to enter. "
+			"The owner of an object can be identified on the turn report, as "
+			"it is the first unit listed under the object.  Only units with "
+			"men in them can be structure owners, so newly created units "
+			"cannot own a structure until they contain men.");
+	f.PutStr("<BR><BR>");
+	if(Globals->NEXUS_EXISTS) {
+		f.PutStr(f.LinkRef("world_nexus"));
+		f.TagText("H3", "Atlantis Nexus:");
+		f.PutStr("Note: the following section contains some details that "
+				"you may wish to skip over until you have had a chance to "
+				"read the rest of the rules, and understand the mechanics "
+				"of Atlantis.  However, be sure to read this section before "
+				"playing, as it will affect your early plans in Atlantis.");
+		f.PutStr("<BR><BR>");
+		temp = "When a faction first starts in Atlantis, it begins with "
+			"one unit, in a special region called the Atlantis Nexus.";
+		if(Globals->MULTI_HEX_NEXUS)
+			temp += " These regions exist ";
+		else
+			temp += " This region exists ";
+		if (!Globals->NEXUS_IS_CITY) {
+			temp += "outside of the normal world of Atlantis, and as such ";
+			if(Globals->MULTI_HEX_NEXUS)
+				temp += "have ";
+			else
+				temp += "has ";
+			temp += "no products or marketplaces; ";
+			if(Globals->MULTI_HEX_NEXUS)
+				temp += "they merely serve ";
+			else
+				temp += "it merely serves ";
+			temp += "as the magical entry into Atlantis.";
+		} else {
+			temp += "outside of the normal world of Atlantis, but ";
+			if(Globals->MULTI_HEX_NEXUS)
+				temp += "each contains ";
+			else
+				temp += "contains ";
+			temp += "a starting city with all its benefits";
+			if(Globals->GATES_EXIST)
+				temp += ", including a gate";
+			temp += ". ";
+			if(Globals->MULTI_HEX_NEXUS)
+				temp += "They also serve ";
+			else
+				temp += "It also serves ";
+			temp += "as the magical entry into Atlantis.";
+		}
+		f.PutStr(temp);
+		f.PutStr("<BR><BR>");
+		if(Globals->MULTI_HEX_NEXUS) {
+			temp = "From the Nexus hexes, there are exits either to other "
+				"Nexus hexes, or to starting cities in Atlantis.  Units may "
+				"move through these exits as normal, but once in a starting "
+				"city, there is no way to regain entry to the Nexus.";
+		} else {
+			temp = "From the Atlantis Nexus, there are six exits into the "
+				"starting cities of Atlantis.  Units may move through these "
+				"exits as normal, but once through an exit, there is no "
+				"return path to the Nexus.";
+		}
+		if(Globals->GATES_EXIST &&
+				(Globals->NEXUS_GATE_OUT || Globals->NEXUS_IS_CITY)) {
+			temp += " It is also possible to use Gate Lore to get out of "
+				"Nexus";
+			if(Globals->NEXUS_GATE_OUT && !Globals->NEXUS_IS_CITY)
+				temp += " (but not to return)";
+			temp += ".";
+		}
+		temp += " The ";
+		if(!Globals->MULTI_HEX_NEXUS)
+			temp += "six ";
+		temp += "starting cities offer much to a starting faction; ";
+		if (!Globals->SAFE_START_CITIES)
+			temp += "until someone conquers the guardsmen, ";
+		temp += "there are unlimited amounts of many materials and men "
+			"(though the prices are often quite high).";
+		temp += " In addition, ";
+		if(Globals->SAFE_START_CITIES)
+			temp += "no battles are allowed in starting cities.";
+		else
+			temp += "the starting cities are guarded by strong guardsmen, "
+				"keeping any units within the city much safer from attack "
+				"(See the section on Non-Player Units for more information "
+				"on city guardsmen).";
+		temp += " As a drawback, these cities tend to be extremely crowded, "
+			"and most factions will wish to leave the starting cities when "
+			"possible.";
+		f.PutStr(temp);
+		f.PutStr("<BR><BR>");
+		temp = "It is always possible to enter any starting city from the "
+			"nexus";
+		if(!Globals->SAFE_START_CITIES)
+			temp += ", even if that starting city has been taken over and "
+				"guarded by another faction";
+		temp += ". This is due to the transportation from the Nexus to the "
+			"starting city being magical in nature.";
+		if(!Globals->SAFE_START_CITIES)
+			temp += " Once in the start city however, no gaurentee of "
+				"safety is given.";
+		f.PutStr(temp);
+		f.PutStr("<BR><BR>");
+		int num_methods = 1 + (Globals->GATES_EXIST?1:0) + (may_sail?1:0);
+		char *methods[] = {"You must go ", "The first is ", "The second is "};
+		int method = 1;
+		if (num_methods == 1) method = 0;
+		temp = AString("There ") + (num_methods == 1?"is ":"are ") +
+			num_methods + " method" + (num_methods == 1?" ":"s ") +
+			"of departing the starting cities.";
+		temp += methods[method++];
+		temp += " by land, but keep in mind that the lands immediately "
+			"surrounding the starting cities will tend to be highly "
+			"populated, and possibly quite dangerous to travel.";
+		if(may_sail) {
+			temp += AString(" ") + methods[method];
+			temp += " by sea.  all of the starting cities lie against an "
+				"ocean, and a faction may easily purchase wood and "
+				"construct a ship to ";
+			temp += f.Link("#sail", "SAIL");
+			temp += " away.  Be wary of pirates seeking to prey on new "
+				"factions, however!";
+		}
+		if (Globals->GATES_EXIST) {
+			temp += "And last, rumors of a magical Gate Lore suggest yet "
+				"another way to travel from the starting cities.  The rumors "
+				"are vague, but factions wishing to travel far from the "
+				"starting cities, taking only a few men with them, might "
+				"wish to pursue this method.";
+		}
+		f.PutStr(temp);
+		f.PutStr("<BR><BR>");
+	}
+	if(Globals->CONQUEST_GAME) {
+		f.PutStr(f.LinkRef("world_conquest"));
+		f.TagText("H3", "The World of Atlantis Conquest");
+		f.PutStr("In a game of Atlantis Conquest, each player begins the "
+				"game on a small island of 8 regions, seperated by ocean "
+				"from the rest of the players.  The starting islands are "
+				"located around the perimeter of a larger central island. "
+				"Sailing from the starting islands towards the center of "
+				"the map should lead to the central island within a few "
+				"regions.");
+		f.PutStr("<BR><BR>");
+	}
 
+	f..PutStr(f.LinkRef("movement"));
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Movement");
+	if(may_sail)
+		temp = "There are two main methods of movement in Atlantis.  The "
+			"first ";
+	else
+		temp = "The main method of movement in Atlantis ";
+	temp += "done using the ";
+	temp += f.Link("#move", "MOVE") + " order (or the " +
+		f.Link("#advance", "ADVANCE");
+	temp += " order), and moves units individually from one region to "
+		"another. ";
+	if(may_sail) {
+		temp += "The other method is done using the ";
+		temp += f.Link("#sail", "SAIL") + " order, which can sail a ";
+		temp += "ship, including all of its occupants from one region to "
+			"another. ";
+	}
+	temp += "Certain powerful mages may also teleport themselves, or even "
+		"other units, but the knowledge of the workings of this magic is "
+		"carefully gaurded.";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+
+	f.PutStr(f.LinkRef("movement_normal"));
+	f.TagText("H3", "Normal Movement");
+	temp = "In one month, a unit can issue a single ";
+	temp += f.Link("#move", "MOVE") + " order, using one or more of its "
+		"movement points. There are three modes of travel: walking, riding "
+		"and flying. Walking units have";
+	temp += AString(Globals->FOOT_SPEED) + " movement point" +
+		(Globals->FOOT_SPEED==1?"":"s") + ", riding units have ";
+	temp += AString(Globals->HORSE_SPEED) + " movement point" +
+		(Globals->HORSE_SPEED==1?"":"s") + ", and flying units have ";
+	temp += AString(Globals->FLY_SPEED) + " movement point" +
+		(Globals->FLY_SPEED==1?"":"s") + ".";
+	temp += " A unit will automatically use the fastest mode of travel "
+		"it has available. The ";
+	temp += f.Link("#advance", "ADVANCE") + " order is the same as " +
+		f.Link("#move", "MOVE") + " except that it implies attacks on " +
+		"units which try to forbid access; see the section on combat for " +
+		"details.";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+
+	temp = "Flying units are not initially available to starting players. "
+		"A unit can ride provided that the carrying capacity of its "
+		"horses is at least as great as the weight of its people and "
+		"all other items.  A unit can walk provided that the carrying "
+		"capacity of its people, horses and wagons is at least as great "
+		"as the weight of all its other items, and provided that it has "
+		"at least as many horses as wagons (otherwise the excess wagons "
+		"count as weight, not capacity). Otherwise the unit cannot issue "
+		"a ";
+	temp += f.Link("#move", "MOVE") + " order.";
+	temp += " Most people weigh 10 units and have a capacity of 5 units; "
+		"data for items is as follows:";
+	f.PutStr(temp);
+	f.PutStr("<BR><BR>");
+	f.PutStr(f.LinkRef("tableitemweights"));
+	f.Enclose(1, "CENTER");
+	f.Enclose(1, "TABLE BORDER=1");
+	f.Enclose(1, "TR ALIGN=CENTER");
+	f.TagText("TH", "Item");
+	f.TagText("TH", "Weight");
+	f.TagText("TH", "Capacity");
+	f.Enclose(0, "TR");
+	for(i = 0; i < NITEMS; i++) {
+		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
+		f.Enclose(1, "TR ALIGN=CENTER");
+		f.TagText("TD", ItemDefs[i].name);
+		f.TagText("TD", ItemDefs[i].weight);
+		int cap = ItemDefs[i].walk - ItemDefs[i].weight;
+		if(cap) {
+			if(ItemDefs[i].hitchItem == -1)
+			f.TagText("TD", cap);
+			else {
+				temp = (cap + hitchwalk);
+				temp += " (with ";
+				temp += ItemDefs[ItemDefs[i].hitchItem].name;
+				temp += ")";
+				f.TagText("TD", temp);
+			}
+		} else {
+			f.TagText("TD", "&nbsp;");
+		}
+		f.Enclose(0, "TR");
+	}
+	f.Enclose(0, "TABLE");
+	f.Enclose(0, "CENTER");
 #if 0
- printf("<a name=\"movement\">\n");
- printf("<center><img src=\"images/bar.jpg\" width=347 height=23></center>\n");
- printf("<h2> Movement </h2>\n");
- printf("\n");
- if (SKILL_ENABLED(S_SAILING))
-  {
-   printf("  There are two main methods of movements in Atlantis.  The first is done using\n");
-   printf("  the <a href=\"#move\"> MOVE </a>\n");
-   printf("  order (or the <a href=\"#advance\"> ADVANCE </a>\n");
-   printf("  order), and moves units individually from one\n");
-   printf("  region to another.  The other method is done using the\n");
-   printf("  <a href=\"#sail\"> SAIL </a> order, which can\n");
-   printf("  sail a ship, including all of it's occupants, from one regions to another.\n");
-  }
- else
-  {
-   printf("  The main method of movement in Atlantis is done using\n");
-   printf("  the <a href=\"#move\"> MOVE </a>\n");
-   printf("  order (or the <a href=\"#advance\"> ADVANCE </a>\n");
-   printf("  order), and moves units individually from one\n");
-   printf("  region to another.\n");
-  }
- printf("Certain powerful mages may also teleport themselves, or even other\n");
- printf("units, but knowledge of the workings of this magic is carefully\n");
- printf("guarded.\n");
- printf("<p>\n");
- printf("\n");
- {
  int ws=Globals->FOOT_SPEED;
  int hs=Globals->HORSE_SPEED;
  int ss=Globals->SHIP_SPEED;
  int fs=Globals->FLY_SPEED;
- printf("\n");
- printf("<a name=\"movement_normal\">\n");
- printf("<h3> Normal Movement: </h3>\n");
- printf("\n");
- printf("In one month, a unit can issue a single\n");
- printf("<a href=\"#move\"> MOVE </a> order, using one or more of its\n");
- printf("movement points.  There are three modes of travel, walking, riding and flying. \n");
- printf("Walking units have %d movement point%s,\n",ws,ws==1?"":"s");
- printf("riding units have %d, and flying\n",hs);
- printf("units have %d.  A unit will automatically use the fastest mode of travel it\n",fs);
- printf("has available.  (The <a href=\"#advance\"> ADVANCE </a>\n");
- printf("order is the same as <a href=\"#move\"> MOVE</a>,\n");
- printf("except that it implies\n");
- printf("attacks on units which try to forbid access; see the section on combat for\n");
- printf("details.) <p>\n");
- printf("\n");
- printf("Flying units are not initially available to starting players.  A unit can ride\n");
- printf("provided that the carrying capacity of its horses is at least as great as the\n");
- printf("weight of its people and all other items.  A unit can walk provided that the\n");
- printf("carrying capacity of its people, horses and wagons is at least as great as the\n");
- printf("weight of all its other items, and provided that it has at least as many horses\n");
- printf("as wagons (otherwise the excess wagons count as weight, not capacity).\n");
- printf("Otherwise the unit cannot issue a\n");
- printf("<a href=\"#move\"> MOVE </a> order.  People weigh 10 units and have a\n");
- printf("capacity of 5 units; data for items is as follows: <p>\n");
- printf("\n");
- printf("<a name=\"tableitemweights\">\n");
- printf("<center>\n");
- printf("<table border>\n");
-  printf(" <tr>\n");
-   printf("  <td> </td>\n");
-   printf("  <th>Weight</th>\n");
-   printf("  <th>Capacity</th>\n");
-  printf(" </tr>\n");
- int zoits[]={I_SILVER,I_GRAIN,I_LIVESTOCK,I_IRON,I_WOOD,I_STONE,I_FUR,I_FISH,I_HERBS,
-               I_HORSE ,I_SWORD,I_CROSSBOW,I_LONGBOW,
-               I_CHAINARMOR,I_PLATEARMOR,I_WAGON,I_PICK,
-               I_SPEAR,I_AXE,I_HAMMER,I_NET,I_LASSO,I_BAG,I_SPINNING,
-               I_LEATHERARMOR,I_CLOTHARMOR,I_BAXE};
- int nz=sizeof(zoits)/sizeof(int);
- for (int i=0;i<nz;i++)
-  {
-  if (ITEM_ENABLED(zoits[i]))
-   {
-   int cap=ItemDefs[zoits[i]].walk;
-   int wg=ItemDefs[zoits[i]].weight;
-    printf("   <tr>\n");
-     printf("    <td align=center>%s</td>\n",ItemDefs[zoits[i]].name);
-     printf("    <td align=center>%d</td>\n",wg);
-     printf("    <td>\n");
-   if (zoits[i]==I_WAGON)
-    {
-     printf("    200\n");
-    } else
-   if (cap)
-    {
-     printf("    %d\n",cap-wg);
-    }
-   else
-    {
-     printf("    &nbsp;\n");
-    }
-     printf("    </td>\n");
-    printf("   </tr>\n");
-   }
-  }
- printf("</table> </center> <p>\n");
- printf("\n");
  if (Globals->FLIGHT_OVER_WATER!=GameDefs::WFLIGHT_NONE)
   {
    printf("  A unit which can fly is capable of travelling over water.\n");
