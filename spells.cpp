@@ -1349,8 +1349,8 @@ void Game::RunEarthLore(ARegion *r,Unit *u)
 {
 	int level = u->GetSkill(S_EARTH_LORE);
 
-	int amt = r->Wages() * level * 2;
 	if (level > r->earthlore) r->earthlore = level;
+	int amt = r->Wages() * level * 2;
 
 	u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) + amt);
 	u->Event(AString("Casts Earth Lore, raising ") + amt + " silver.");
