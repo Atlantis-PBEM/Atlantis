@@ -1739,7 +1739,17 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 	if (amt != -2 && amt > u->items.GetNum(o->item)) {
 		u->Error("GIVE: Not enough.");
 		amt = u->items.GetNum(o->item);
+	} else if (amt == -2) {
+		amt = u->items.GetNum(o->item);
+		if(o->except) {
+			if(o->except > amt) {
+				amt = 0;
+				u->Error("GIVE: EXCEPT value greater than amount on hand.");
+			}
+		}
+		amt = amt - o->except;
 	}
+
 
 	if (o->target->unitnum == -1) {
 		/* Give 0 */

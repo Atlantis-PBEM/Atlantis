@@ -343,7 +343,14 @@ AString *ShowSkill::Report(void)
 						"are found in the underworld.  (Note that an "
 						"Herblore skill of 3 is required to even determine "
 						"that mushrooms may be produced).";
-				/* XXX -- What are mushrooms used for!! */
+				if(!(ItemDefs[I_HEALPOTION].flags & ItemType::DISABLED) &&
+				   !(SkillDefs[S_HEALING].flags & SkillType::DISABLED)) {
+					*str += "  Mushrooms may be used by skilled healers to "
+						    "create healing potions.  Healing potions may be "
+						    "used even by units without a healing skill and "
+						    "each potion can heal up to 10 men with the same"
+						    "effects as if a healer with herbs treated them.";
+				}
 			   	if(!(ItemDefs[I_BAG].flags & ItemType::DISABLED)) {
 					*str += " Production of mushrooms may be increased "
 						    "by using bags.";
@@ -870,6 +877,19 @@ AString *ShowSkill::Report(void)
 				found = 1;
 				*str += "A unit with this skill can use herbs to heal "
 					   "units after a battle has been won.";
+			} else if(level == 3) {
+				if(ItemDefs[I_MUSHROOM].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_HERBS].flags & ItemType::DISABLED) break;
+				if(ItemDefs[I_HEALPOTION].flags & ItemType::DISABLED) break;
+				found = 1;
+				*str += "A unit with this skill may use the PRODUCE order "
+					    "to produce healing potions.  Healing potions may be "
+						"used even by units without a healing skill and "
+						"each potion can heal up to 10 men with the same "
+						"effects as if a healer with herbs treated them.  A "
+						"healing potion weighs one weight unit and will be "
+						"used automaticlaly if needed.  The potion is "
+						"expended if any men are healed using it.";
 			}
 			break;
 		case S_SAILING:

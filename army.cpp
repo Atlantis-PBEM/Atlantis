@@ -490,8 +490,13 @@ void Soldier::RestoreItems()
 {
     if (healing && healitem != -1 )
     {
-        unit->items.SetNum( healitem,
-                            unit->items.GetNum( healitem ) + healing);
+		if(healitem == I_HERBS) {
+			unit->items.SetNum( healitem,
+					unit->items.GetNum( healitem ) + healing);
+		} else if(healitem == I_HEALPOTION) {
+			unit->items.SetNum(healitem,
+					unit->items.GetNum(healitem)+healing/10);
+		}
     }
     if (weapon != -1)
     {
@@ -841,6 +846,10 @@ void Army::DoHealLevel( Battle *b, int type, int rate, int useItems )
         {
             continue;
         }
+		// This should be here.. Use the best healing first
+		if(s->healtype != type) {
+			continue;
+		}
         if( !s->healing )
         {
             continue;

@@ -161,7 +161,9 @@ public:
   ~GiveOrder();
 	
   int item;
-  int amount; /* if amount == -1, transfer whole unit */
+  int amount; /* if amount == -1, transfer whole unit, -2 means all of item */
+  int except;
+
   UnitId * target;
 };
 

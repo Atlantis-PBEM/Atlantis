@@ -53,14 +53,20 @@ void Soldier::SetupHealing()
         }
     }
 
-    healing = unit->GetSkill(S_HEALING) * Globals->HEALS_PER_MAN;
-    if (healing)
-    {
-        healtype = HEAL_ONE;
-        int herbs = unit->items.GetNum(I_HERBS);
-        if (herbs < healing) healing = herbs;
-        unit->items.SetNum(I_HERBS,herbs - healing);
-        healitem = I_HERBS;
+	if(unit->items.GetNum(I_HEALPOTION)) {
+		healtype = HEAL_ONE;
+		unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
+		healing = 10;
+		healitem = I_HEALPOTION;
+	} else {
+		healing = unit->GetSkill(S_HEALING) * Globals->HEALS_PER_MAN;
+		if (healing) {
+			healtype = HEAL_ONE;
+			int herbs = unit->items.GetNum(I_HERBS);
+			if (herbs < healing) healing = herbs;
+			unit->items.SetNum(I_HERBS,herbs - healing);
+			healitem = I_HERBS;
+		}
     }
 }
 

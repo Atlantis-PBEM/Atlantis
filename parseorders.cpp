@@ -1780,6 +1780,8 @@ void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
     int amt;
     if (*token == "unit") {
         amt = -1;
+	} else if(*token == "all") {
+		amt = -2;
     } else {
         amt = token->value();
     }
@@ -1800,12 +1802,35 @@ void Game::ProcessGiveOrder(Unit *unit,AString * o, OrdersCheck *pCheck )
         return;
     }
 
+	token = o->gettoken();
+	int excpt = 0;
+	if(token && *token == "except") {
+		if(amt == -2) {
+			delete token;
+			token = o->gettoken();
+			if(!token) {
+				ParseError(pCheck, unit, 0, "GIVE: EXCEPT requires a value.");
+				return;
+			}
+			excpt = token->value();
+			if(excpt <= 0) {
+				ParseError(pCheck, unit, 0, "GIVE: Invalid EXCEPT value.");
+				return;
+			}
+		} else {
+			ParseError(pCheck, unit, 0, "GIVE: EXCEPT only valid with ALL");
+			return;
+		}
+		delete token;
+	}
+
     if( !pCheck )
     {
         GiveOrder * order = new GiveOrder;
         order->item = item;
         order->target = t;
         order->amount = amt;
+		order->except = excpt;
         unit->giveorders.Add(order);
     }
     return;

@@ -93,13 +93,16 @@ Changes from 4.0.5 -> 4.0.6
       (such as wolf-lore) worked correctly with the Ceran types and the
       conquest types enabled.  There are possibly other places where the
       similar_type should be used instead of the direct type.
+   -- Added healing potions which are made from mushrooms (a new resource)
+      and which can be carried along with armies. Each potion acts as a
+      healer of skill level 1.
+   -- Implemented GIVE [unit] ALL [item] and GIVE [unit] ALL [item]
+      EXCEPT [amount].   Updated the rules to reflect the changes.
 
 TODO
 ----------------
-   -- GIVE ALL [ITEM]
    -- GIVE ALL TRADE (to give away all trade goods) (other categories for
       other obvious flags)
-   -- GIVE ALL [ITEM] except [NUM]
    -- Improve the item/hex editor
    -- Gamedef to handle various options around combat/weapons/bows for taxing
    -- Gamedefs for various economy options. (far future)
