@@ -191,6 +191,7 @@ class StudyOrder : public Order {
 
 		int skill;
 		int days;
+		int level;
 };
 
 class TeachOrder : public Order {

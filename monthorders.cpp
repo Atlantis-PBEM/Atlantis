@@ -1225,6 +1225,24 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		}
 		str += ".";
 		u->Event(str);
+		// study to level order
+		if(o->level != -1) {
+			if(u->GetSkill(sk) < o->level) {
+    			TurnOrder *tOrder = new TurnOrder;
+    			AString order;
+    			tOrder->repeating = 0;
+    			order = AString("STUDY ") + SkillDefs[sk].abbr + " " + o->level;
+    			tOrder->turnOrders.Add(new AString(order));
+    			u->turnorders.Insert(tOrder);
+			} else {
+				AString msg("Completes study to level ");
+				msg += o->level;
+				msg += " in ";
+				msg += SkillDefs[sk].name;
+				msg += ".";
+				u->Event(msg);
+			}	
+		}
 	} else {
 		// if we just tried to become a mage or apprentice, but
 		// were unable to study, reset unit to whatever it was before.

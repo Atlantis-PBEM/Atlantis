@@ -1801,6 +1801,37 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		err += "month-long order.";
 		ParseError(pCheck, u, 0, err);
 	}
+	// parse study level:
+	token = o->gettoken();
+	if(token) {
+    	order->level = token->value();
+    	delete token;
+    	if(u->GetSkillMax(sk) < order->level) {
+    		order->level = u->GetSkillMax(sk);
+    		if(u->GetRealSkill(sk) >= order->level) {
+    			AString err = "STUDY: cannot study ";
+    			err += SkillDefs[sk].name;
+    			err += " beyond level ";
+    			err += order->level;
+    			err += ".";
+    			ParseError(pCheck, u, 0, err);
+    			return;
+    		} else {
+    			AString err = "STUDY: set study goal for ";
+    			err += SkillDefs[sk].name;
+    			err += " to the maximum achievable level (";
+    			err += order->level;
+    			err += ").";
+    			ParseError(pCheck, u, 0, err);
+    		}
+    	}
+	} else order->level = -1;
+	if((order->level != -1) && (u->GetRealSkill(sk) >= order->level)) {
+		AString err = "STUDY: already reached specified level, nothing to study.";
+		ParseError(pCheck, u, 0, err);
+		return;
+	}
+	
 	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 	u->monthorders = order;
 }

@@ -5032,11 +5032,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.ClassTagText("div", "rule", "");
 	f.LinkRef("study");
 	f.TagText("h4", "STUDY [skill]");
-	temp = "Spend the month studying the specified skill.";
+	f.TagText("h4", "STUDY [skill] [level]");
+	temp = "Spend the month studying the specified skill. "
+	       "A level may be specified which means that study "
+	       "will be continued from turn to turn until the unit "
+	       " reaches that skill level. "
+	       "Study may not be used as a repeating order using "
+	       "the &#64; sign, instead a target level must be "
+	       "given for repeated study.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Study horse training.";
 	temp2 = "STUDY \"Horse Training\"";
+	f.CommandExample(temp, temp2);
+	temp = "Study combat to level 3.";
+	temp2 = "STUDY combat 3";
 	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("div", "rule", "");

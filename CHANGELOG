@@ -920,6 +920,8 @@ Changes from 4.0.10 -> 5.0.0
       may be specified in an Enter order.	
    -- implemented handling of ship items in spoils
    -- prevented ship items from being PRODUCED
-   -- updated the skillshows and itemshows to handle ship items properly  
+   -- updated the skillshows and itemshows to handle ship items properly
+   -- added the STUDY [skill] [level] option for repeated study. STUDY is no longer useable with the
+      '@' symbol as a repeating order  
    	  ToDo: armored galleon bonus...?
    
