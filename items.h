@@ -132,6 +132,7 @@ class MonType
 
 		int numAttacks;
 		int hits;
+		int regen;
 
 		int tactics;
 		int stealth;

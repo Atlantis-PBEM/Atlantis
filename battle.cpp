@@ -68,6 +68,7 @@ void Battle::FreeRound(Army * att,Army * def, int ass)
 	}
 
 	/* Write losses */
+	def->Regenerate(this);
 	alv -= def->NumAlive();
 	AddLine(*(def->leader->name) + " loses " + alv + ".");
 	AddLine("");
@@ -187,6 +188,8 @@ void Battle::NormalRound(int round,Army * a,Army * b)
     }
 
     /* Finish round */
+	a->Regenerate(this);
+	b->Regenerate(this);
     aialive -= aalive;
     AddLine(*(a->leader->name) + " loses " + aialive + ".");
     bialive -= balive;

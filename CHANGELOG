@@ -475,3 +475,6 @@ Changes from 4.0.9 -> 4.0.10
    -- Fixed bug in forlist during assassination which caused assassinations
       to stop if the person you assassinated was directly below you in the
 	  unit list in the object.
+   -- Tom Alsen added code to Blitzgame allowing monsters to regenerate hits
+      during combat.  I have merged this code into the main base under a
+	  configuration option.

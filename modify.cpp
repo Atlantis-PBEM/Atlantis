@@ -232,13 +232,16 @@ void Game::ModifyMonsterDefense(int mon, int defenseType, int level)
 	MonDefs[mon].defense[defenseType] = level;
 }
 
-void Game::ModifyMonsterAttacksAndHits(int mon, int numattacks, int hits)
+void Game::ModifyMonsterAttacksAndHits(int mon, int numattacks, int hits,
+		int regen)
 {
 	if(mon < 0 || mon > (NUMMONSTERS - 1)) return;
 	if(numattacks < 0) return;
-   	if(hits < 0) return;
+	if(hits < 0) return;
+	if(regen < 0) return;
 	MonDefs[mon].numAttacks = numattacks;
 	MonDefs[mon].hits = hits;
+	MonDefs[mon].regen = regen;
 }
 
 void Game::ModifyMonsterSkills(int mon, int tact, int stealth, int obs)

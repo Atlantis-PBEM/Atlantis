@@ -71,6 +71,7 @@ class Soldier {
 		int healtype;
 		int healitem;
 		int canbehealed;
+		int regen;
 
 		/* Attack info */
 		int weapon;
@@ -84,6 +85,7 @@ class Soldier {
 		int dskill[NUM_ATTACK_TYPES];
 		int armor;
 		int hits;
+		int maxhits;
 
 		BITFIELD battleItems;
 		int amuletofi;
@@ -107,6 +109,7 @@ class Army
 		int CanBeHealed();
 		void DoHeal(Battle *);
 		void DoHealLevel(Battle *,int,int useItems );
+		void Regenerate(Battle *);
 
 		void GetMonSpoils(ItemList *,int, int);
 

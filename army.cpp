@@ -49,6 +49,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	healtype = 0;
 	healitem = -1;
 	canbehealed = 1;
+	regen = 0;
 
 	armor = -1;
 	riding = -1;
@@ -69,6 +70,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	dskill[ATTACK_RIDING] = 0;
 	dskill[ATTACK_RANGED] = 0;
 	hits = 1;
+	maxhits = 1;
 	amuletofi = 0;
 	battleItems = 0;
 
@@ -109,11 +111,16 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		dskill[ATTACK_RIDING] += MonDefs[mon].defense[ATTACK_RIDING];
 		dskill[ATTACK_RANGED] += MonDefs[mon].defense[ATTACK_RANGED];
 		hits = MonDefs[mon].hits;
-		if (!hits) hits = 1;
+		if (hits < 1) hits = 1;
+		maxhits = hits;
 		attacks = MonDefs[mon].numAttacks;
 		if(!attacks) attacks = 1;
 		special = MonDefs[mon].special;
 		slevel = MonDefs[mon].specialLevel;
+		if (Globals->MONSTER_BATTLE_REGEN) {
+			regen = MonDefs[mon].regen;
+			if (regen < 0) regen = 0;
+		}
 		return;
 	}
 
@@ -638,6 +645,30 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 	spoils->SetNum(thespoil,spoils->GetNum(thespoil) +
 			(val + getrandom(ItemDefs[thespoil].baseprice)) /
 			ItemDefs[thespoil].baseprice);
+}
+
+void Army::Regenerate(Battle *b)
+{
+	for (int i = 0; i < count; i++) {
+		Soldier *s = soldiers[i];
+		if (i<notbehind) {
+			int diff = s->maxhits - s->hits;
+			if (diff > 0) {
+				if (s->regen) {
+					int regen = s->regen;
+					if (regen > diff) regen = diff;
+					s->hits += regen;
+					b->AddLine(AString(s->name) + AString(" regenerates ") +
+							regen + " hits to " + s->hits + " out of " +
+							s->maxhits + ".");
+				} else {
+					b->AddLine(AString(s->name) +
+							AString(" has been damaged to ") + s->hits +
+							" hits out of " + s->maxhits + ".");
+				}
+			}
+		}
+	}
 }
 
 void Army::Lose(Battle *b,ItemList *spoils)

@@ -551,11 +551,16 @@ AString *ItemDescription(int item, int full)
 		if(full) {
 			int hits = MonDefs[mon].hits;
 			int atts = MonDefs[mon].numAttacks;
+			int regen = MonDefs[mon].regen;
 			if(!hits) hits = 1;
 			if(!atts) atts = 1;
 			*temp += AString(" This monster has ") + atts + " melee " +
 				((atts > 1)?"attacks":"attack") + " per round and takes " +
 				hits + " " + ((hits > 1)?"hits":"hit") + " to kill.";
+			if (regen > 0) {
+				*temp += AString(" This monsters regenerates ") + regen +
+					" hits per round of battle.";
+			}
 			*temp += AString(" This monster has a tactics score of ") +
 				MonDefs[mon].tactics + ", a stealth score of " +
 				MonDefs[mon].stealth + ", and an observation score of " +

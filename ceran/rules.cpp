@@ -156,6 +156,7 @@ static GameDefs g = {
 	0,	// FULL_TRUESEEING_BONUS
 	0,	// IMPROVED_AMTS
 	0,	// FULL_INVIS_ON_SELF
+	0,	// MONSTER_BATTLE_REGEN
 };
 
 GameDefs * Globals = &g;

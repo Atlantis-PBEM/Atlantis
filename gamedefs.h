@@ -436,6 +436,9 @@ public:
 	// also set the FULL_TRUESEEING_BONUS above.  This was added for
 	// Lacandon.
 	int FULL_INVIS_ON_SELF;
+
+	// Do monsters regenerate during battle?
+	int MONSTER_BATTLE_REGEN;
 };
 
 extern GameDefs * Globals;
