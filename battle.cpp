@@ -225,8 +225,8 @@ void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
 			// This rule is only meaningful with Proportional AMTS usage
 			// is enabled, otherwise it has no effect.
 			if((ass == 2) && (i->type == I_AMULETOFTS)) continue;
-			int num = (i->num * numdead + getrandom(numalive + numdead)) /
-				(numalive + numdead);
+			float percent = (float)numdead/(float)(numalive+numdead);
+			int num = (int)(i->num * percent);
 			int num2 = (num + getrandom(2))/2;
 			spoils->SetNum(i->type, spoils->GetNum(i->type) + num2);
 			u->items.SetNum(i->type, i->num - num);
