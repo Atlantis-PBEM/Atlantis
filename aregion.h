@@ -291,7 +291,9 @@ class ARegion : public AListElem
 		int growth;
 		int mortality;
 		int elevation;
-		AList *roadsto;
+		int humidity;
+		int temperature;
+		int culture;
 
 		/* Potential bonuses to economy */
 		int clearskies;
@@ -360,14 +362,20 @@ class ARegionFlatArray
 struct Geography
 {
 	int elevation;
+	int humidity;
+	int temperature;
+	int culture;
 };
 
 class GeoMap
 {
 	public:
 		GeoMap(int, int);
-		void Seed(int spread, int smoothness);
+		void Generate(int spread, int smoothness);
 		int GetElevation(int, int);
+		int GetHumidity(int, int);
+		int GetTemperature(int, int);
+		int GetCulture(int, int);
 		void ApplyGeography(ARegionArray *pArr);
 		
 		int size, xscale, yscale, xoff, yoff;

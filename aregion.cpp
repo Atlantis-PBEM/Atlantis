@@ -136,14 +136,12 @@ ARegion::ARegion()
 	earthlore = 0;
 	for (int i=0; i<NDIRS; i++)
 		neighbors[i] = 0;
-	roadsto = 0;
 }
 
 ARegion::~ARegion()
 {
 	if (name) delete name;
 	if (town) delete town;
-	if (roadsto) delete roadsto;
 }
 
 void ARegion::ZeroNeighbors()
@@ -969,13 +967,13 @@ int ARegion::GetNearestMapValue(int dir, int range, int type, int getrange)
 	if(!nr) return -1;
 	int retval = -1;
 	switch(type) {
-		case 0: retval = nr->maxwages;
+		case 0: retval = nr->elevation;
 			break;
-		case 1: retval = nr->habitat;
+		case 1: retval = nr->humidity;
 			break;
-		case 2: retval = nr->migration;
+		case 2: retval = nr->temperature;
 			break;
-		case 3: retval = nr->development;
+		case 3: retval = nr->culture;
 	}
 	if (retval < 1) {
 		if (range == 1) return -1;
@@ -2197,6 +2195,9 @@ void ARegion::Writeout(Aoutfile *f)
 	f->PutInt(money);
 
 	f->PutInt(elevation);
+	f->PutInt(humidity);
+	f->PutInt(temperature);
+	f->PutInt(culture);
 
 	f->PutInt(habitat);
 	f->PutInt(development);
@@ -2255,6 +2256,9 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	money = f->GetInt();
 	
 	elevation = f->GetInt();
+	humidity = f->GetInt();
+	temperature = f->GetInt();
+	culture = f->GetInt();
 
 	habitat = f->GetInt();
 	development = f->GetInt();
@@ -3448,7 +3452,8 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				reg->race = -1; // 
 				reg->wages = -1; // initially store: name
 				reg->population = -1; // initially used as flag
-				reg->maxwages = -1; // store: elevation
+				reg->elevation = -1;
+				
 
 				Add(reg);
 				arr->SetRegion(x, y, reg);
@@ -3477,7 +3482,7 @@ void ARegionList::InitGeographicMap(ARegionArray *pRegs)
 {
 	Awrite("Initialising the Geographic Map");
 	GeoMap geo = GeoMap(pRegs->x, pRegs->y);
-	geo.Seed(Globals->FRACTAL_SCATTER,Globals->FRACTAL_SMOOTHING);
+	geo.Generate(Globals->FRACTAL_SCATTER,Globals->FRACTAL_SMOOTHING);
 	geo.ApplyGeography(pRegs);
 }
 
@@ -4526,6 +4531,9 @@ GeoMap::GeoMap(int x, int y)
 	Geography g;
 	geomap.clear();
 	g.elevation = -1;
+	g.humidity = -1;
+	g.temperature = -1;
+	g.culture = -1;
 	for (int a=0; a<x; a++) {
 		for (int b=0; b<y; b++) {
 			long int coords = (size+1)*a + b;
@@ -4534,7 +4542,7 @@ GeoMap::GeoMap(int x, int y)
 	}
 }
 
-void GeoMap::Seed(int spread, int smoothness)
+void GeoMap::Generate(int spread, int smoothness)
 {
 	int step = size;
 	for (int i=0; i < spread; i++) {
@@ -4545,11 +4553,17 @@ void GeoMap::Seed(int spread, int smoothness)
 	for (int x = 0; x <= size; x += step) {
 		for (int y = 0; y <= size; y += step) {
 			Geography g;
-			int val = getrandom(10)+45;
-			g.elevation = val;
+			int tval = (size/2 - abs(size/2 - y)) * 25 / (size/2);
+			g.elevation = getrandom(5)+getrandom(5)+45;
+			g.humidity = getrandom(5)+getrandom(5)+45;
+			g.temperature = getrandom(tval/2)+getrandom(tval/2)+tval;
+			g.culture = getrandom(10)+getrandom(5)+tval;
 			long int coords = (size+1) * x + y;
 			if (x >= size) {
 				g.elevation = GetElevation((x-size), y);
+				g.humidity = GetHumidity((x-size), y);
+				g.temperature = GetTemperature((x-size), y);
+				g.culture = GetCulture((x-size), y);
 			}
 			geomap.erase(coords);
 			geomap.insert(make_pair(coords, g));
@@ -4564,7 +4578,10 @@ void GeoMap::Seed(int spread, int smoothness)
 		int showfirst = 1;
 		for (int x = 0; x <= size; x += step) {
 			for (int y = 0; y <= size; y += step) {
-				int average = 0;
+				int av_ele = 0;
+				int av_hum = 0;
+				int av_tem = 0;
+				int av_cul = 0;
 				int xcoor = x + nextstep;
 				int ycoor = y + nextstep;
 				if ((xcoor > size) || (ycoor > size)) continue;
@@ -4576,19 +4593,37 @@ void GeoMap::Seed(int spread, int smoothness)
 						if (nx > size) nx = nx - size;
 						if (nx < 0) nx = size - nx;
 						int ge = GetElevation(nx, ny);
+						int gh = GetHumidity(nx, ny);
+						int gt = GetTemperature(nx, ny);
+						int gc = GetCulture(nx, ny);
 						if(ge != 0) {
-							average += ge;
+							av_ele += ge;
+							av_hum += gh;
+							av_tem += gt;
+							av_cul += gc;
 							nb++;
 						} else {
-							average += getrandom(25)+1;
+							av_ele += getrandom(25)+1;
+							av_hum += getrandom(25)+1;
+							av_tem += getrandom(25)+1;
+							av_cul += getrandom(25)+1;
 							nb++;
 						}
 					}
 				}
 				Geography g;
-				int r = getrandom(2*frac) - frac;
-				g.elevation = average/nb + average%nb + r;
+				int r1 = getrandom(2*frac) - frac;
+				int r2 = getrandom(2*frac) - frac;
+				int r3 = getrandom(2*frac) - frac;
+				int r4 = getrandom(2*frac) - frac;
+				g.elevation = av_ele/nb + av_ele%nb + r1;
+				g.humidity = av_hum/nb + av_hum%nb + r2;
+				g.temperature = av_tem/nb + av_tem%nb + r3;
+				g.culture = av_cul/nb + av_cul%nb + r4;
 				if (g.elevation < 1) g.elevation = 1;
+				if (g.humidity < 1) g.humidity = 1;
+				if (g.temperature < 1) g.temperature = 1;
+				if (g.culture < 1) g.culture = 1;
 				if (g.elevation > 200) g.elevation = 200;
 				long int coords = (size+1) * xcoor + ycoor;
 				geomap.erase(coords);
@@ -4600,7 +4635,10 @@ void GeoMap::Seed(int spread, int smoothness)
 		for (int x = 0; x <= size; x += step) {
 			for (int y = 0; y <= size; y += step) {
 				for (int i = 0; i < 2; i++) {
-					int average = 0;
+					int av_ele = 0;
+					int av_hum = 0;
+					int av_tem = 0;
+					int av_cul = 0;
 					int dx, dy;
 					if (i==0) {
 						dx = x + nextstep;
@@ -4616,30 +4654,57 @@ void GeoMap::Seed(int spread, int smoothness)
 						if (nx > size) nx = nx - size;
 						if (nx < 0) nx = size - nx;
 						int ge = GetElevation(nx, dy);
+						int gh = GetHumidity(nx, dy);
+						int gt = GetTemperature(nx, dy);
+						int gc = GetCulture(nx, dy);
 						if (ge != 0) {
-							average += ge;
+							av_ele += ge;
+							av_hum += gh;
+							av_tem += gt;
+							av_cul += gc;
 							nb++;
 						} else {
-							average += getrandom(25)+1;
+							av_ele += getrandom(25)+1;
+							av_hum += getrandom(25)+1;
+							av_tem += getrandom(25)+1;
+							av_cul += getrandom(25)+1;
 							nb++;
 						}
 					}
 					for (int b = -1; b < 2; b += 2) {
 						int ny = dy + b*nextstep;
 						int ge = GetElevation(dx, ny);
+						int gh = GetHumidity(dx, ny);
+						int gt = GetTemperature(dx, ny);
+						int gc = GetCulture(dx, ny);
 						if (ge != 0) {
-							average += ge;
+							av_ele += ge;
+							av_hum += gh;
+							av_tem += gt;
+							av_cul += gc;
 							nb++;
 						} else {
-							average += getrandom(25)+1;
+							av_ele += getrandom(25)+1;
+							av_hum += getrandom(25)+1;
+							av_tem += getrandom(25)+1;
+							av_cul += getrandom(25)+1;
 							nb++;
 						}
 					}
 					
 					Geography g;
-					int r = getrandom(2*frac) - frac;
-					g.elevation = average/nb + average%nb + r;
+					int r1 = getrandom(2*frac) - frac;
+					int r2 = getrandom(2*frac) - frac;
+					int r3 = getrandom(2*frac) - frac;
+					int r4 = getrandom(2*frac) - frac;
+					g.elevation = av_ele/nb + av_ele%nb + r1;
+					g.humidity = av_hum/nb + av_hum%nb + r2;
+					g.temperature = av_tem/nb + av_hum%nb + r3;
+					g.culture = av_cul/nb + av_cul%nb + r4;
 					if (g.elevation < 1) g.elevation = 1;
+					if (g.humidity < 1) g.humidity = 1;
+					if (g.temperature < 1) g. temperature = 1;
+					if (g.culture < 1) g.culture = 1;
 					if (g.elevation > 200) g.elevation = 200;
 					long int coords = (size+1) * dx + dy;
 					geomap.erase(coords);
@@ -4664,6 +4729,39 @@ int GeoMap::GetElevation(int x, int y)
 	return 0;
 }
 
+int GeoMap::GetHumidity(int x, int y)
+{
+	long int coords = (size+1)*x + y;
+	map<long int,Geography>::iterator it = geomap.find(coords);
+	if (it != geomap.end()) {
+		Geography g = it->second;
+		return g.humidity;
+	}
+	return 0;
+}
+
+int GeoMap::GetTemperature(int x, int y)
+{
+	long int coords = (size+1)*x + y;
+	map<long int,Geography>::iterator it = geomap.find(coords);
+	if (it != geomap.end()) {
+		Geography g = it->second;
+		return g.temperature;
+	}
+	return 0;
+}
+
+int GeoMap::GetCulture(int x, int y)
+{
+	long int coords = (size+1)*x + y;
+	map<long int,Geography>::iterator it = geomap.find(coords);
+	if (it != geomap.end()) {
+		Geography g = it->second;
+		return g.culture;
+	}
+	return 0;
+}
+
 void GeoMap::ApplyGeography(ARegionArray *pArr) 
 {
 	int x, y;
@@ -4673,8 +4771,7 @@ void GeoMap::ApplyGeography(ARegionArray *pArr)
 			if(!reg) continue;
 			int cx = (x * xscale); // x+xoff;
 			int cy = ((y/2) * yscale); // + yoff;
-			reg->maxwages = GetElevation(cx, cy);
-			reg->elevation = reg->maxwages;			
+			reg->elevation = GetElevation(cx, cy);
 		}
 	}
 }
