@@ -1616,7 +1616,6 @@ int Unit::Taxers(int numtaxers)
 		if (ItemDefs[pItem->type].type & IT_WEAPON) {
 			WeaponType *pWep = FindWeapon(ItemDefs[pItem->type].abr);
 			int num = pItem->num;
-			int numUse = 0;
 			int basesk = 0;
 			AString skname = pWep->baseSkill;
 			int sk = LookupSkill(&skname);
@@ -1626,18 +1625,27 @@ int Unit::Taxers(int numtaxers)
 				sk = LookupSkill(&skname);
 				if(sk != -1) basesk = GetSkill(sk);
 			}
-			if (basesk) {
-				numUse = num;
-				if (!(pWep->flags & WeaponType::NEEDSKILL)) {
-					numUsableMelee += numUse;
-					numMelee += num;
-				} else if (pWep->flags & WeaponType::NOFOOT) {
-					numUsableMounted += numUse;
-					numMounted += num;
+			if (!(pWep->flags & WeaponType::NEEDSKILL)) {
+				if (basesk) {
+					numUsableMelee += num;
+				}
+				numMelee += num;
+			} else if (pWep->flags & WeaponType::NOFOOT) {
+				if (basesk) {
+					numUsableMounted += num;
+				}
+				numMounted += num;
+			} else {
+				if (pWep->flags & WeaponType::RANGED) {
+					if (basesk) {
+						numUsableBows += num;
+					}
+					numBows += num;
 				} else {
-					// Presume that anything else is a bow!
-					numUsableBows += pItem->num;
-					numBows += pItem->num;
+					if (basesk) {
+						numUsableMelee += num;
+					}
+					numMelee += num;
 				}
 			}
 		}
