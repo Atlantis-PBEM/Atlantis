@@ -570,6 +570,24 @@ public:
 	// If we are preventing sail through, should we also prevent the 'easy
 	// portage' that the above allows by default?
 	int ALLOW_TRIVIAL_PORTAGE;
+	
+	// Non-Perennial Gates: setting this between 1 and 11 will cause gates
+	// to open and close. Gates will be open this number of months per year.
+	// Each gate will have a different period of opening (although they are
+	// somewhat related to gate index). A gate will not be detectable or
+	// useable while closed; EXCEPTION: a closed gate may be the TARGET for
+	// a random jump (stranding the jumper until the gate opens). Nexus
+	// gates (and optionally, starting city gates) are open all the time.
+	int GATES_NOT_PERENNIAL;
+	
+	// Are gates in starting cities open all year round? Need only be set
+	// if GATES_NOT_PERENNIAL is selected.
+	int START_GATES_OPEN;
+	
+	// Should a message appear in the report that a closed gate exists when
+	// a that is closed would normally be detected (this might affect some
+	// clients with unflexible parsers badly...)
+	int SHOW_CLOSED_GATES;
 };
 
 extern GameDefs * Globals;

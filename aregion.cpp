@@ -131,6 +131,8 @@ ARegion::ARegion()
 	yloc = 0;
 	buildingseq = 1;
 	gate = 0;
+	gatemonth = 0;
+	gateopen = 1;
 	town = 0;
 	clearskies = 0;
 	earthlore = 0;
@@ -1362,6 +1364,21 @@ void ARegion::SetLoc(int x,int y,int z)
 	zloc = z;
 }
 
+void ARegion::SetGateStatus(int month)
+{
+    if ((type == R_NEXUS) || (Globals->START_GATES_OPEN && IsStartingCity())) {
+	gateopen = 1;
+	return;
+    }
+    gateopen = 0;
+    for (int i = 0; i < Globals->GATES_NOT_PERENNIAL; i++)
+    {
+	int dmon = gatemonth + i;
+	if (dmon > 12) dmon = dmon - 12;
+	if (dmon == month) gateopen = 1;
+    }
+}
+
 void ARegion::Kill(Unit * u)
 {
 	Unit * first = 0;
@@ -1516,6 +1533,7 @@ void ARegion::Writeout(Aoutfile *f)
 	f->PutInt(type);
 	f->PutInt(buildingseq);
 	f->PutInt(gate);
+	if(gate > 0) f->PutInt(gatemonth);
 	f->PutInt(race);
 	f->PutInt(population);
 	f->PutInt(basepopulation);
@@ -1550,6 +1568,7 @@ void ARegion::Readin(Ainfile * f,AList * facs, ATL_VER v)
 	type = f->GetInt();
 	buildingseq = f->GetInt();
 	gate = f->GetInt();
+	if(gate > 0) gatemonth = f->GetInt();
 
 	race = f->GetInt();
 	population = f->GetInt();
@@ -1897,9 +1916,14 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 				}
 			}
 			if(sawgate) {
-				f->PutStr(AString("There is a Gate here (Gate ") + gate +
-						" of " + (pRegions->numberofgates) + ").");
-				f->PutStr("");
+				if(gateopen) {
+					f->PutStr(AString("There is a Gate here (Gate ") + gate +
+							" of " + (pRegions->numberofgates) + ").");
+					f->PutStr("");
+				} else if (Globals->SHOW_CLOSED_GATES) {
+					f->PutStr(AString("There is a closed Gate here."));
+					f->PutStr("");
+				}
 			}
 		}
 
@@ -3376,6 +3400,11 @@ void ARegionList::FinalSetupGates()
 			}
 			r->gate = index+1;
 			used[index] = 1;
+			// setting up gatemonth
+			int nmon = (getrandom(3) - 1) + (getrandom(3) - 1) + ((index+1) % 12);
+	    	if (nmon > 12) nmon = nmon - 12;
+	    	if (nmon < 0) nmon = nmon + 12;
+	    	r->gatemonth = nmon;
 		}
 	}
 	delete used;

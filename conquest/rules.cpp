@@ -189,6 +189,9 @@ static GameDefs g = {
 	10,	// UPKEEP_FOOD_VALUE
 	0,	// PREVENT_SAIL_THROUGH
 	0,	// ALLOW_TRIVIAL_PORTAGE
+	0,  // GATES_NOT_PERENNIAL
+	0,  // START_GATES_OPEN
+	0,  // SHOW_CLOSED_GATES
 };
 
 GameDefs * Globals = &g;

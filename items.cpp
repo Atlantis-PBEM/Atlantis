@@ -1009,26 +1009,11 @@ void ItemList::Selling(int t, int n)
 AString ItemList::Report(int obs,int seeillusions,int nofirstcomma)
 {
 	AString temp;
-	forlist(this) {
-		Item * i = (Item *) elem;
-		if (obs == 2) {
-			if (nofirstcomma) {
-				nofirstcomma = 0;
-			} else {
-				temp += ", ";
-			}
-			temp += i->Report(seeillusions);
-		} else {
-			if (ItemDefs[i->type].weight) {
-				if (nofirstcomma) {
-					nofirstcomma = 0;
-				} else {
-					temp += ", ";
-				}
-				temp += i->Report(seeillusions);
-			}
-		}
-	}
+	for (int s = 0; s < 7; s++) 
+	{
+	    temp += ReportByType(s, obs, seeillusions, nofirstcomma);
+	    if (temp.Len()) nofirstcomma = 0;
+	}	
 	return temp;
 }
 
@@ -1050,6 +1035,57 @@ AString ItemList::BattleReport()
 		}
 	}
 	return temp;
+}
+
+AString ItemList::ReportByType(int type,int obs,int seeillusions,int nofirstcomma)
+{
+    AString temp;
+    forlist(this) {
+	int report = 0;
+	Item * i = (Item *) elem;
+	switch (type) {
+	    case 0: if (ItemDefs[i->type].type & IT_MAN) report = 1;
+		break;
+	    case 1: if (ItemDefs[i->type].type & IT_MONSTER) report = 1;
+		break;
+	    case 2: if ((ItemDefs[i->type].type & IT_WEAPON) || (ItemDefs[i->type].type & IT_BATTLE) || (ItemDefs[i->type].type & IT_ARMOR) || (ItemDefs[i->type].type & IT_MAGIC))  report = 1;
+		break;
+	    case 3: if (ItemDefs[i->type].type & IT_MOUNT) report = 1;
+		break;
+	    case 4: if ((i->type == I_WAGON) || (i->type == I_MWAGON)) report = 1;
+		break;
+	    case 5: report = 1;
+		if (ItemDefs[i->type].type & IT_MAN) report = 0;
+		if (ItemDefs[i->type].type & IT_MONSTER) report = 0;
+		if (i->type == I_SILVER) report = 0;
+		if ((ItemDefs[i->type].type & IT_WEAPON) || (ItemDefs[i->type].type & IT_BATTLE) || (ItemDefs[i->type].type & IT_ARMOR) || (ItemDefs[i->type].type & IT_MAGIC))  report = 0;
+		if (ItemDefs[i->type].type & IT_MOUNT) report = 0;
+		if ((i->type == I_WAGON) || (i->type == I_MWAGON)) report = 0;
+		break;
+	    case 6: if (i->type == I_SILVER) report = 1;
+	}
+	if (report)
+	{
+	    if (obs == 2) {
+		if (nofirstcomma) {
+		    nofirstcomma = 0;
+		} else {
+		    temp += ", ";
+		}
+		temp += i->Report(seeillusions);
+	    } else {
+		if (ItemDefs[i->type].weight) {
+		    if (nofirstcomma) {
+			nofirstcomma = 0;
+		    } else {
+			temp += ", ";
+		    }
+		    temp += i->Report(seeillusions);
+		}
+	    }
+	}
+    }
+    return temp;
 }
 
 void ItemList::SetNum(int t,int n)

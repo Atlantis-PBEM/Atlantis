@@ -237,6 +237,7 @@ class ARegion : public AListElem
 
 		// JR
 		int GetPoleDistance(int dir);
+		void SetGateStatus(int month);
 
 		int CountWMons();
 		int IsGuarded();
@@ -251,6 +252,8 @@ class ARegion : public AListElem
 		int buildingseq;
 		int weather;
 		int gate;
+		int gatemonth;
+		int gateopen;
 
 		TownInfo * town;
 		int race;

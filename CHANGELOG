@@ -587,3 +587,18 @@ Changes from 4.0.10 -> 5.0.0
    -- Fixed misleading damage message on monsters.
    -- Fixed coredump and rangecheck when a region that was out of range was
       used in a targetted spell.
+   -- Sorted item reporting [men/monsters/arms/mounts/vehicles/other/
+      silver] in ItemList.
+   -- Gates are closed part of the year when GATES_NOT_PERENNIAL is set to a
+      value between 1 and 11 (the number of months a gate is open). Closed
+      gates cannot be detected (other than by casting detect gate in the
+      same region), and cannot be used except as a target gate for random
+      jumps. The nexus gate is always open, as are the starting city gates
+      when START_GATES_OPEN is set. Closed gates are reported as such when 
+      SHOW_CLOSED_GATES is set (this gamedef was introduced to keep report
+      formats consistent with what some clients' parsers might expect). If
+      this is not set, the presence of closed gates will not be reported at
+      all.
+      Note that closing gates introduce a strategic element as not all gates
+      will lead to all others (through targetted jumps anyway) - the opening
+      period of both gates need to overlap to make a targetted jump possible.

@@ -318,6 +318,7 @@ class ItemList : public AList
 
 		AString Report(int,int,int);
 		AString BattleReport();
+		AString ReportByType(int,int,int,int);
 
 		int Weight();
 		int GetNum(int);

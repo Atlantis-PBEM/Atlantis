@@ -1454,6 +1454,9 @@ void Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 
 	u->Event("Casts Gate Lore, detecting nearby Gates:");
 	int found = 0;
+	if ((r->gate) && (!r->gateopen)) {
+	    u->Event(AString("Identified local gate number ") + (r->gate) + " in " + r->ShortPrint(&regions) + ".");
+	}
 	for (int i=0; i<NDIRS; i++) {
 		ARegion *tar = r->neighbors[i];
 		if (tar) {
@@ -1526,6 +1529,11 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 		u->Error("CAST: There is no gate in that region.");
 		return;
 	}
+	
+	if (!r->gateopen) {
+	    u->Error("CAST: Gate not open at this time of year.");
+	    return;
+	}
 
 	int maxweight = 10;
 	if (order->gate != -1) level -= 2;
@@ -1586,6 +1594,11 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 		if (!tar) {
 			u->Error("CAST: No such target gate.");
 			return;
+		}
+		
+		if(!tar->gateopen) {
+		    u->Error("CAST: Target gate not open at this time of year.");
+		    return;
 		}
 
 		u->Event("Casts Gate Jump.");
