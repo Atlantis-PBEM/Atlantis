@@ -3151,11 +3151,13 @@ void ARegionList::RandomTerrain(ARegionArray *pArr)
 						adjname = newregion->wages;
 					}
 				}
-				if (adjtype) {
+				if (adjtype && !Globals->CONQUEST_GAME) {
 					reg->type = adjtype;
 					reg->wages = adjname;
-				} else reg->type = GetRegType(reg);
-				reg->wages = AGetName(0);
+				} else {
+					reg->type = GetRegType(reg);
+					reg->wages = AGetName(0);
+				}
 			}
 		}
 	}

@@ -74,7 +74,7 @@ static int dircrd[] = {
 };
 
 
-static char *fill[] = {
+static char *terfill[] = {
  // block
  " #### ",
  " #### ",
@@ -566,11 +566,11 @@ void ARegion::GetMapLine(char *buffer, int line, ARegionList *pRegs )
                     if (len > FILL_SIZE) len = FILL_SIZE;
                     memcpy(dest + x, name, len);
                 } else {
-                    memcpy(dest + x, fill[t], FILL_SIZE);
+                    memcpy(dest + x, terfill[t], FILL_SIZE);
                 }
             } else {
                 t++;
-                memcpy(dest + x, fill[t], FILL_SIZE);
+                memcpy(dest + x, terfill[t], FILL_SIZE);
             }
         }
 
