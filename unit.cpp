@@ -88,6 +88,7 @@ Unit::Unit()
 	object = 0;
 	orderIsTurnDelayed = 0;
 	orderDelayMonthOrders = NULL;
+	free = 0;
 }
 
 Unit::Unit(int seq, Faction * f, int a)
@@ -113,6 +114,7 @@ Unit::Unit(int seq, Faction * f, int a)
 	object = 0;
 	orderIsTurnDelayed = 0;
 	orderDelayMonthOrders = NULL;
+	free = 0;
 }
 
 Unit::~Unit()
@@ -153,7 +155,8 @@ void Unit::Writeout( Aoutfile *s )
 	s->PutInt(faction->num);
 	s->PutInt(guard);
 	s->PutInt(reveal);
-	s->PutInt(-2);
+	s->PutInt(-3);
+	s->PutInt(free);
 	s->PutInt(readyItem);
 	for(int i = 0; i < MAX_READY; ++i) {
 		s->PutInt(readyWeapon[i]);
@@ -182,25 +185,41 @@ void Unit::Readin( Ainfile *s, AList *facs, ATL_VER v )
 	if(guard == GUARD_SET) guard = GUARD_GUARD;
 	reveal = s->GetInt();
 
-	/* Handle the new 'ready item' */
-	readyItem = s->GetInt();
-	if(readyItem == -1) {
-		readyItem = s->GetInt();
-		flags = s->GetInt();
-	} else if(readyItem == -2) {
-		readyItem = s->GetInt();
-		for(i = 0; i < MAX_READY; i++) {
-			readyWeapon[i] = s->GetInt();
-			readyArmor[i] = s->GetInt();
-		}
-		flags = s->GetInt();
-	} else {
-		flags = readyItem;
-		readyItem = -1;
-		for(i = 0; i < MAX_READY; i++) {
-			readyWeapon[i] = -1;
-			readyArmor[i] = -1;
-		}
+	/* Handle the new 'ready item', ready weapons/armor, and free */
+	free = 0;
+	readyItem = -1;
+	for(i = 0; i < MAX_READY; i++) {
+		readyWeapon[i] = -1;
+		readyArmor[i] = -1;
+	}
+
+	// Negative indicates extra values inserted vs older games
+	i = s->GetInt();
+	switch(i) {
+		default: // ie >= 0
+			flags = i;
+			break;
+		case -1:
+			readyItem = s->GetInt();
+			flags = s->GetInt();
+			break;
+		case -2:
+			readyItem = s->GetInt();
+			for(i = 0; i < MAX_READY; i++) {
+				readyWeapon[i] = s->GetInt();
+				readyArmor[i] = s->GetInt();
+			}
+			flags = s->GetInt();
+			break;
+		case -3:
+			free = s->GetInt();
+			readyItem = s->GetInt();
+			for(i = 0; i < MAX_READY; i++) {
+				readyWeapon[i] = s->GetInt();
+				readyArmor[i] = s->GetInt();
+			}
+			flags = s->GetInt();
+			break;
 	}
 
 	items.Readin(s);
@@ -601,6 +620,7 @@ void Unit::PostTurn(ARegion *r)
 				delete i;
 			}
 		}
+		if(free > 0) --free;
 	}
 }
 
@@ -1480,8 +1500,8 @@ int Unit::GetMount(int index, int canFly, int canRide, int &bonus)
 	return -1;
 }
 
-int Unit::GetWeapon(int index, int riding, int &attackBonus, int &defenseBonus,
-		int &attacks)
+int Unit::GetWeapon(int index, int riding, int ridingBonus, int &attackBonus,
+		int &defenseBonus, int &attacks)
 {
 	attackBonus = 0;
 	defenseBonus = 0;
@@ -1497,18 +1517,31 @@ int Unit::GetWeapon(int index, int riding, int &attackBonus, int &defenseBonus,
 			int baseSkillLevel = CanUseWeapon(pWep, riding);
 			// returns -1 if weapon cannot be used, else the usable skill level
 			if(baseSkillLevel == -1) continue;
+			int flags = pWep->flags;
 			// Attack and defense skill
-			if(!pWep->flags & WeaponType::NEEDSKILL)
-				baseSkillLevel = combatSkill;
+			if(flags & WeaponType::NEEDSKILL) baseSkillLevel = combatSkill;
 			attackBonus = baseSkillLevel + pWep->attackBonus;
-			if(pWep->flags & WeaponType::NOATTACKERSKILL)
+			if(flags & WeaponType::NOATTACKERSKILL)
 				defenseBonus = pWep->defenseBonus;
 			else
 				defenseBonus = baseSkillLevel + pWep->defenseBonus;
+			// Riding bonus
+			if(flags & WeaponType::RIDINGBONUS)
+				attackBonus += ridingBonus;
+			if(flags & (WeaponType::RIDINGBONUSDEFENSE |
+						WeaponType::RIDINGBONUS))
+				defenseBonus += ridingBonus;
 			// Number of attacks
 			attacks = pWep->numAttacks;
+			// Note: NUM_ATTACKS_SKILL must be > NUM_ATTACKS_HALF_SKILL
 			if(attacks >= WeaponType::NUM_ATTACKS_SKILL)
 				attacks += baseSkillLevel - WeaponType::NUM_ATTACKS_SKILL;
+			else if(attacks >= WeaponType::NUM_ATTACKS_HALF_SKILL)
+				attacks += (baseSkillLevel +1)/2 -
+					WeaponType::NUM_ATTACKS_HALF_SKILL;
+			// Sanity check
+			if(attacks == 0) attacks = 1;
+
 			// get the weapon
 			items.SetNum(item, pItem->num - 1);
 			return item;

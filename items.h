@@ -175,7 +175,9 @@ class WeaponType
 			LONG = 0x40, // Long melee weapon (e.g. lance, pike)
 			RANGED = 0x80, // Missile weapon
 			NOATTACKERSKILL = 0x100, // Attacker gets no combat/skill defense.
-	   	};
+			RIDINGBONUS = 0x200, // Unit gets riding bonus on att and def.
+			RIDINGBONUSDEFENSE = 0x400, // Unit gets riding bonus on def only.
+		};
 		int flags;
 
 		int baseSkill;
@@ -187,11 +189,17 @@ class WeaponType
 		// For numAttacks:
 		// - A positive number is the number of attacks per round.
 		// - A negative number is the number of rounds per attack.
+		// - NUM_ATTACKS_HALF_SKILL indicates that the weapon gives as many
+		//   attacks as the skill of the user divided by 2, rounded up.
+		// - NUM_ATTACKS_HALF_SKILL+1 indicates that the weapon gives an extra
+		//   attack above that, etc.
 		// - NUM_ATTACKS_SKILL indicates the the weapon gives as many attacks
-		//   as the skill of the user. NUM_ATTACKS_SKILL+1 indicates the the
-		//   weapon gives as many attacks as the skill of the user + 1.
+		//   as the skill of the user.
+		// - NUM_ATTACKS_SKILL+1 indicates the the weapon gives as many
+		//   attacks as the skill of the user + 1, etc.
 		//
 		enum {
+			NUM_ATTACKS_HALF_SKILL = 50,
 			NUM_ATTACKS_SKILL = 100,
 		};
 		int numAttacks;

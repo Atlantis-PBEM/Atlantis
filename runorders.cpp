@@ -68,11 +68,14 @@ void Game::RunOrders()
     RunBuyOrders();
     Awrite("Running FORGET Orders...");
     RunForgetOrders();
+	Awrite("Mid-Turn Processing...");
+	MidProcessTurn();
     Awrite("Running QUIT Orders...");
     RunQuitOrders();
     Awrite("Removing Empty Units...");
     DeleteEmptyUnits();
-    SinkShips();
+    SinkUncrewedShips();
+	DrownUnits();
 	if(Globals->ALLOW_WITHDRAW) {
 		Awrite("Running WITHDRAW Orders...");
 		DoWithdrawOrders();
@@ -81,7 +84,8 @@ void Game::RunOrders()
     RunSailOrders();
     Awrite("Running Move Orders...");
     RunMoveOrders();
-    SinkShips();
+    SinkUncrewedShips();
+	DrownUnits();
     FindDeadFactions();
     Awrite("Running Teach Orders...");
     RunTeachOrders();
@@ -457,21 +461,27 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
     return;
 }
 
-void Game::SinkShips()
+void Game::DrownUnits()
 {
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;
 		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 			forlist(&r->objects) {
 				Object * o = (Object *) elem;
-				if (o->IsBoat() && o->units.Num() == 0) {
-					r->objects.Remove(o);
-					delete o;
-				}
-				if (o->type == O_DUMMY) {
-					forlist(&o->units) {
-						Unit * u = (Unit *) elem;
-						int drown;
+				if(o->type != O_DUMMY) continue;
+				forlist(&o->units) {
+					Unit *u = (Unit *)elem;
+					int drown = 0;
+					if(u->type == U_WMON) {
+						/*
+						 * Make sure flying monsters only drown if we
+						 * are in WFLIGHT_NONE mode
+						 */
+						if(Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_NONE)
+							drown = 1;
+						else
+							drown = u->CanSwim();
+					} else {
 						switch(Globals->FLIGHT_OVER_WATER) {
 							case GameDefs::WFLIGHT_UNLIMITED:
 								drown = !(u->CanSwim());
@@ -484,11 +494,42 @@ void Game::SinkShips()
 								drown = 1;
 								break;
 						}
-						if (drown) {
-							r->Kill(u);
-							u->Event("Drowns in the ocean.");
-						}
 					}
+					if (drown) {
+						r->Kill(u);
+						u->Event("Drowns in the ocean.");
+					}
+				}
+			}
+		}
+	}
+}
+
+void Game::SinkUncrewedShips()
+{
+	Unit *u;
+	forlist(&regions) {
+		ARegion * r = (ARegion *) elem;
+		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
+			forlist(&r->objects) {
+				Object * o = (Object *) elem;
+				if(!o->IsBoat()) continue;
+
+				int men = 0;
+				forlist(&o->units) {
+					u = (Unit *)elem;
+					men += u->GetMen();
+				}
+
+				if(men <= 0) {
+					/* No men onboard, move all units out to ocean */
+					forlist(&o->units) {
+						u = (Unit *)elem;
+						u->MoveUnit(r->GetDummy());
+					}
+					/* And sink the boat */
+					r->objects.Remove(o);
+					delete o;
 				}
 			}
 		}
@@ -938,96 +979,95 @@ void Game::EmptyHell()
     }
 }
 
-void Game::PostProcessUnit(ARegion *r,Unit *u)
+void Game::MidProcessUnit(ARegion *r, Unit *u)
 {
-    PostProcessUnitExtra( r, u );
+	MidProcessUnitExtra(r, u);
 }
 
-void Game::EndGame( Faction *pVictor )
+void Game::PostProcessUnit(ARegion *r,Unit *u)
 {
-    forlist( &factions ) {
-        Faction *pFac = (Faction *) elem;
-        pFac->exists = 0;
-        if( pFac == pVictor )
-        {
-            pFac->quit = QUIT_WON_GAME;
-        }
-        else
-        {
-            pFac->quit = QUIT_GAME_OVER;
-        }
+	PostProcessUnitExtra(r, u);
+}
 
-        if( pVictor )
-        {
-            pFac->Event( *( pVictor->name ) + " has won the game!" );
-        }
-        else
-        {
-            pFac->Event( "The game has ended with no winner." );
-        }
-    }
+void Game::EndGame(Faction *pVictor)
+{
+	forlist( &factions ) {
+		Faction *pFac = (Faction *) elem;
+		pFac->exists = 0;
+		if(pFac == pVictor)
+			pFac->quit = QUIT_WON_GAME;
+		else
+			pFac->quit = QUIT_GAME_OVER;
 
-    gameStatus = GAME_STATUS_FINISHED;
+		if(pVictor)
+			pFac->Event( *( pVictor->name ) + " has won the game!" );
+		else
+			pFac->Event( "The game has ended with no winner." );
+	}
+
+	gameStatus = GAME_STATUS_FINISHED;
+}
+
+void Game::MidProcessTurn()
+{
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		// r->MidTurn(); // Not yet implemented
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *)elem;
+				MidProcessUnit(r, u);
+			}
+		}
+	}
 }
 
 void Game::PostProcessTurn()
 {
-    forlist(&regions) {
-        ARegion * r = (ARegion *) elem;
-        r->PostTurn();
+	forlist(&regions) {
+		ARegion * r = (ARegion *) elem;
+		r->PostTurn();
 
-        if( Globals->CITY_MONSTERS_EXIST && ( r->town || r->type == R_NEXUS ))
-        {
-            AdjustCityMons( r );
-        }
+		if(Globals->CITY_MONSTERS_EXIST && (r->town || r->type == R_NEXUS))
+			AdjustCityMons( r );
 
-        forlist (&r->objects) {
-            Object *o = (Object *) elem;
-            forlist (&o->units) {
-                Unit *u = (Unit *) elem;
-                PostProcessUnit(r,u);
-            }
-        }
-    }
-
-    if( Globals->WANDERING_MONSTERS_EXIST ) {
-        GrowWMons(Globals->WMON_FREQUENCY);
-    }
-
-    if( Globals->LAIR_MONSTERS_EXIST ) {
-        GrowLMons(Globals->LAIR_FREQUENCY);
-    }
-	if(Globals->LAIR_MONSTERS_EXIST) {
-		GrowVMons();
+		forlist (&r->objects) {
+			Object *o = (Object *) elem;
+			forlist (&o->units) {
+				Unit *u = (Unit *) elem;
+				PostProcessUnit(r,u);
+			}
+		}
 	}
+
+	if(Globals->WANDERING_MONSTERS_EXIST) GrowWMons(Globals->WMON_FREQUENCY);
+
+	if(Globals->LAIR_MONSTERS_EXIST) GrowLMons(Globals->LAIR_FREQUENCY);
+
+	if(Globals->LAIR_MONSTERS_EXIST) GrowVMons();
 
     //
     // Check if there are any factions left.
     //
-    int livingFacs = 0;
-    {
-        forlist( &factions ) {
-            Faction *pFac = (Faction *) elem;
-            if( pFac->exists )
-            {
-                livingFacs = 1;
-                break;
-            }
-        }
-    }
+	int livingFacs = 0;
+	{
+		forlist(&factions) {
+			Faction *pFac = (Faction *) elem;
+			if(pFac->exists) {
+				livingFacs = 1;
+				break;
+			}
+		}
+	}
 
-    if( !livingFacs )
-    {
-        EndGame( 0 );
-    }
-    else if( !( Globals->OPEN_ENDED ))
-    {
-        Faction *pVictor = CheckVictory();
-        if( pVictor )
-        {
-            EndGame( pVictor );
-        }
-    }
+	if(!livingFacs)
+		EndGame(0);
+	else if(!(Globals->OPEN_ENDED)) {
+		Faction *pVictor = CheckVictory();
+		if(pVictor)
+			EndGame( pVictor );
+	}
 }
 
 void Game::DoAutoAttacks()
@@ -1955,12 +1995,29 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 			return 0;
 		}
 
-		u->Event(AString("Discards ") + ItemString(o->item,amt) + ".");
+		AString temp = "Discards ";
 		if (ItemDefs[o->item].type & IT_MAN) {
 			u->SetMen(o->item,u->GetMen(o->item) - amt);
+			temp = "Disbands ";
+		} else if(Globals->RELEASE_MONSTERS &&
+				(ItemDefs[o->item].type & IT_MONSTER)) {
+			temp = "Releases ";
+			u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
+			if(Globals->WANDERING_MONSTERS_EXIST) {
+				Faction *mfac = GetFaction(&factions, monfaction);
+				Unit *mon = GetNewUnit(mfac, 0);
+				int mondef = ItemDefs[o->item].index;
+				mon->MakeWMon(MonDefs[mondef].name, o->item, amt);
+				mon->MoveUnit(r->GetDummy());
+				// This will result in 0 unless MONSTER_NO_SPOILS or
+				// MONSTER_SPOILS_RECOVERY are set.
+				mon->free = Globals->MONSTER_NO_SPOILS +
+					Globals->MONSTER_SPOILS_RECOVERY;
+			}
 		} else {
 			u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
 		}
+		u->Event(temp + ItemString(o->item, amt) + ".");
 		return 0;
 	}
 

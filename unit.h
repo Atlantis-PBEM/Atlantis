@@ -205,8 +205,8 @@ class Unit : public AListElem
 		int GetBattleItem(int index);
 		int GetArmor(int index, int ass);
 		int GetMount(int index, int canFly, int canRide, int &bonus);
-		int GetWeapon(int index, int riding, int &attackBonus,
-				int &defenseBonus, int &attacks);
+		int GetWeapon(int index, int riding, int ridingBonus,
+				int &attackBonus, int &defenseBonus, int &attacks);
 		int CanUseWeapon(WeaponType *pWep, int riding);
 		int CanUseWeapon(WeaponType *pWep);
 		int Taxers();
@@ -241,6 +241,7 @@ class Unit : public AListElem
 		AList oldorders;
 		int needed; /* For assessing maintenance */
 		int losses;
+		int free;
 
 		/* Orders */
 		int destroy;

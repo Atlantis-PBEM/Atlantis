@@ -439,6 +439,7 @@ int Game::OpenGame()
 	}
 
 	FixBoatNums();
+	FixGateNums();
 	SetupUnitNums();
 
 	f.Close();
@@ -1611,6 +1612,34 @@ void Game::SetupUnitSeq()
 	unitseq = max+1;
 }
 
+void Game::FixGateNums()
+{
+	for(int i=1; i <= regions.numberofgates; i++) {
+		ARegion *tar = regions.FindGate(i);
+		int done = 0;
+		while(!done) {
+			// We have a missing gate, add it
+
+			// Get the z coord, exclude the nexus (and the abyss as well)
+			int z = getrandom(regions.numLevels);
+			ARegionArray *arr = regions.GetRegionArray(z);
+			if(arr->levelType == ARegionArray::LEVEL_NEXUS) continue;
+
+			// Get a random hex within that level
+			int x = getrandom(arr->x);
+			int y = getrandom(arr->y);
+			tar = arr->GetRegion(x, y);
+			if(!tar) continue;
+
+			// Make sure the hex can have a gate and doesn't already
+			if((TerrainDefs[tar->type].similar_type==R_OCEAN) || tar->gate)
+				continue;
+			tar->gate = i;
+			done = 1;
+		}
+	}
+}
+
 void Game::FixBoatNums()
 {
 	forlist(&regions) {
@@ -1852,7 +1881,6 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 	if (u->type != U_WMON) {
 		int escape = 0;
 		int totlosses = 0;
-		int losecontrol = 0;
 		int level;
 		int skill;
 		int top;
@@ -1890,7 +1918,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 
 			if (i->type==I_WOLF || i->type==I_EAGLE || i->type==I_DRAGON) {
 				if(i->type == I_WOLF) skill = S_WOLF_LORE;
-				if(i->type == I_EAGLE) skill = S_EAGLE_LORE;
+				if(i->type == I_EAGLE) skill = S_BIRD_LORE;
 				if(i->type == I_DRAGON) skill = S_DRAGON_LORE;
 				level = u->GetSkill(skill);
 				if(!level) {

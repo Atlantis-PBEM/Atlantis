@@ -2002,7 +2002,7 @@ WeaponType wepd[] = {
 	// Rearranged priority, to make Runesword more important.
 	// Added new items.
 	// WEAPON_RUNESWORD
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, 1,
 	 4, 4, 0},
@@ -2047,38 +2047,38 @@ WeaponType wepd[] = {
 	 ARMORPIERCING, ATTACK_RANGED, -2,
 	 0, 0, 0},
 	// WEAPON_JAVELIN
-    {WeaponType::RANGED,
+    {WeaponType::RANGED|WeaponType::RIDINGBONUSDEFENSE,
 	 -1, -1,
 	 PIERCING, ATTACK_RANGED, -2,
 	 -1, 0, 0},
 	// WEAPON_LANCE
-	{WeaponType::NEEDSKILL | WeaponType::NOFOOT |
+	{WeaponType::NEEDSKILL | WeaponType::NOFOOT | WeaponType::RIDINGBONUS |
 		WeaponType::NOATTACKERSKILL | WeaponType::LONG,
 	 S_RIDING, -1,
 	 PIERCING, ATTACK_RIDING, 1,
 	 4, 0, 0},
 	// WEAPON_ABAX
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 ARMORPIERCING, ATTACK_COMBAT, -2,
 	 8, 8, 0},
 	// WEAPON_ASWR
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 ARMORPIERCING, ATTACK_COMBAT,1,
 	 6, 6, 0},
 	// WEAPON_FSWORD
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, 1,
 	 4, 4, 0},
 	// WEAPON_MBAXE
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
 	 6, 6, 0},
 	// WEAPON_MSWORD
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, 1,
 	 4, 4, 0},
@@ -2088,32 +2088,32 @@ WeaponType wepd[] = {
 	 PIERCING, ATTACK_COMBAT, 1,
 	 2, 2, 3},
 	// WEAPON_BAXE
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
 	 4, 4, 0},
 	// WEAPON_BHAMMER
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, 1,
 	 3, 3, 0},
 	// WEAPON_SABRE
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, 1,
 	 3, 2, 0},
 	// WEAPON_MSTAR
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, 1,
 	 4, 1, 0},
 	// WEAPON_SWORD
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, 1,
 	 2, 2, 0},
 	// WEAPON_MACE
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, 1,
 	 2, 2, 0},
@@ -2123,32 +2123,32 @@ WeaponType wepd[] = {
 	 CRUSHING, ATTACK_COMBAT, 1,
 	 1, 3, 1},
 	// WEAPON_PDAGGER
-	{WeaponType::SHORT,
+	{WeaponType::SHORT | WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 PIERCING, ATTACK_COMBAT, 2,
 	 1, 5, 0},
 	// WEAPON_DAGGER
-	{WeaponType::SHORT,
+	{WeaponType::SHORT | WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 PIERCING, ATTACK_COMBAT, 3,
 	 1, 1, 0},
 	// WEAPON_PICK
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 PIERCING, ATTACK_COMBAT, 1,
 	 1, 1, 0},
 	// WEAPON_SPEAR
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 PIERCING, ATTACK_COMBAT, 1,
 	 1, 1, 0},
 	// WEAPON_AXE
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, 1,
 	 1, 1, 0},
 	// WEAPON_HAMMER
-	{0,
+	{WeaponType::RIDINGBONUS,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, 1,
 	 1, 1, 0},
@@ -2372,7 +2372,7 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::CAST, 0,
 	 {{S_PATTERN,1},{-1,0},{-1,0}}},
 	{"weather lore","WEAT",100,
-	 SkillType::MAGIC, 0,
+	 SkillType::MAGIC | SkillType::CAST, 0,
 	 {{S_FORCE,1},{S_PATTERN,1},{-1,0}}},
 	{"summon wind","SWIN",100,
 	 SkillType::MAGIC, 0,

@@ -438,3 +438,6 @@ Changes from 4.0.9 -> 4.0.10
 	  Weather Lore now use this mechanism [Implemented by Tom Alsen]
    -- Added CLEAR_SKIES_REGION gamedef to allow Clear Skies to be cast as
       a ranged spell at range 2*level*level.  [Implemented by Tom Alsen].
+   -- Boats which have only monster/creatures on board will now sink.
+      [no more leaving skeleton crews around [pun intended]]
+   -- Unit with no physical weapons are assumed to have 'SHORT' weapons.

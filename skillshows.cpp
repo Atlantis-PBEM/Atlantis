@@ -409,11 +409,42 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 		case S_WEATHER_LORE:
 			if(level > 1) break;
-			*str += "Weather Lore is the magic of the weather; the skill "
-				"Weather Lore itself has no use, except to allow further "
-				"study into more powerful areas of magic. A mage with "
-				"Weather Lore skill will perceive the use of Weather Lore "
-				"by any other mage in the same region.";
+			/* XXX -- This should be templated */
+			*str += "Weather Lore is the magic of the weather; a mage with "
+				"this skill can predict the weather in nearby regions. "
+				"Weather Lore also allows further study into more powerful "
+				"areas of magic. ";
+			if(!Globals->EASIER_UNDERWORLD)
+				*str += "This skill only works on the surface of the world. ";
+			*str += "The mage may predice the weather in regions that are "
+				"within the mage's skill level squared time 4 regions of "
+				"mage's current location. The weather may be predicted for "
+				"3 month at level 1, 6 months at level 3, and a full year "
+				"at level 5.";
+			if(Globals->EASIER_UNDERWORLD) {
+				*str += "Coordinates of locations not on the surface are "
+					"doubled for this calculation. Attempting to view across "
+					"different levels increases the distance by 4.";
+				*str += " To use this skill, CAST Weather_Lore REGION <x> "
+					"<y> <z> where <x>, <y>, and <z> are the coordinates of "
+					"the region that you wish to view. If you omit the <z> "
+					"coordinate, the <z> coordinate of the caster's current "
+					"region will be used. If you omit the REGION entirely, "
+					"then the caster's current position is used.";
+				if(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS == 1) {
+					*str += " The <z> coordinate for the surface is '1' and "
+						"the <z>-coordinate for the underworld is '2'.";
+				}
+				*str += " Note that Weather Lore cannot be used either into "
+					"or out of the Nexus.";
+			} else {
+				*str += " To use this skill, CAST Weather_Lore REGION <x> "
+					"<y>, where <x> and <y> are the coordinates of the "
+					"region that you wish to view. If you omit the REGION "
+					"entirely, then the caster's current position is used.";
+			}
+			*str += "A mage with Weather Lore skill will perceive the use "
+				"of Weather Lore by any other mage in the same region.";
 			break;
 		case S_SUMMON_WIND:
 			/* XXX -- This should be cleaner somehow. */
@@ -449,14 +480,23 @@ AString *ShowSkill::Report(Faction *f)
 			if(level > 1) break;
 			break;
 		case S_CLEAR_SKIES:
+			/* XXX -- this range stuff needs cleaning up */
 			if(level > 1) break;
 			*str += "When cast using the CAST order, it causes the region to "
 				"have good weather for the entire month; movement is at the "
 				"normal rate (even if it is winter) and the economic "
 				"production of the region is improved for a month (this "
 				"improvement of the economy will actually take effect during "
-				"the turn after the spell is cast). To use the spell in this "
-				"fashion, CAST Clear_Skies; no arguments are necessary.";
+				"the turn after the spell is cast).";
+			if(Globals->CLEAR_SKIES_REGION) {
+				*str += " Clear Skies has a range of twice the mage's skill "
+					"level squared.  To use the spell in this fashion, CAST "
+					"Clear_Skies REGION <x> <y>.  If the REGION is omitted, "
+					"then the caster's current position is used.";
+			} else {
+				*str += " To use the spell in tihs fashion, CAST "
+					"Clear_Skies; no arguments are necessary.";
+			}
 			break;
 		case S_EARTH_LORE:
 			if(level > 1) break;

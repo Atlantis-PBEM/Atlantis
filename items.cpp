@@ -22,6 +22,8 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+
+#include <stdlib.h>
 #include "items.h"
 #include "skills.h"
 #include "object.h"
@@ -429,6 +431,17 @@ static AString WeapClass(int wclass)
 	}
 }
 
+static AString WeapType(int flags, int wclass)
+{
+	AString type;
+	if(flags & WeaponType::RANGED) type = "ranged";
+	if(flags & WeaponType::LONG) type = "long";
+	if(flags & WeaponType::SHORT) type = "short";
+	type += " ";
+	type += WeapClass(wclass);
+	return type;
+}
+
 AString *ItemDescription(int item, int full)
 {
 	int i;
@@ -545,7 +558,7 @@ AString *ItemDescription(int item, int full)
 				MonDefs[mon].stealth + ", and an observation score of " +
 				MonDefs[mon].obs + ".";
 		}
-		*temp += " This monster can have ";
+		*temp += " This monster might have ";
 		if(MonDefs[mon].spoiltype != -1) {
 			if(MonDefs[mon].spoiltype & IT_MAGIC) {
 				*temp += "magic items and ";
@@ -557,85 +570,123 @@ AString *ItemDescription(int item, int full)
 		}
 		*temp += "silver as treasure.";
 	}
+
 	if(ItemDefs[item].type & IT_WEAPON) {
-		*temp += " This is a weapon.";
 		int wep = ItemDefs[item].index;
 		WeaponType *pW = &WeaponDefs[wep];
+		*temp += " This is a ";
+		*temp += WeapType(pW->flags, pW->weapClass) + " weapon.";
 		if(pW->flags & WeaponType::NEEDSKILL) {
 			*temp += AString(" Knowledge of ") + SkillStrs(pW->baseSkill);
-			if(pW->orSkill != -1) {
+			if(pW->orSkill != -1)
 				*temp += AString(" or ") + SkillStrs(pW->orSkill);
-			}
 			*temp += " is needed to wield this weapon.";
 		} else {
-			if(pW->baseSkill == -1 && pW->orSkill == -1) {
+			if(pW->baseSkill == -1 && pW->orSkill == -1)
 				*temp += " No skill is needed to wield this weapon.";
-			}
-		}
-		*temp += AString(" This is a ") + WeapClass(pW->weapClass) +
-			" weapon.";
-		if(pW->flags & WeaponType::LONG) {
-			*temp += " This weapon has a long reach.";
-		} else if(pW->flags & WeaponType::SHORT) {
-			*temp += " This weapon has a short reach.";
-		} else if(pW->flags & WeaponType::RANGED) {
-			*temp += " This is a ranged weapon.";
-		} else {
-			*temp += " This weapon has a normal reach.";
 		}
 
-		if(pW->flags & WeaponType::NOFOOT) {
-			*temp += " Only mounted troops may use this weapon.";
-		} else if(pW->flags & WeaponType::NOMOUNT) {
-			*temp += " Only foot troops may use this weapon.";
+		int flag = 0;
+		if(pW->attackBonus != 0) {
+			*temp += " This weapon grants a ";
+			*temp += ((pW->attackBonus > 0) ? "bonus of " : "penalty of ");
+			*temp += abs(pW->attackBonus);
+			*temp += " on attack";
+			flag = 1;
 		}
+		if(pW->defenseBonus != 0) {
+			if(flag) {
+				if(pW->attackBonus == pW->defenseBonus) {
+					*temp += " and defense.";
+					flag = 0;
+				} else {
+					*temp += " and a ";
+				}
+			} else {
+				*temp += " This weapon grants a ";
+				flag = 1;
+			}
+			if(flag) {
+				*temp += ((pW->defenseBonus > 0)?"bonus of ":"penalty of ");
+				*temp += abs(pW->defenseBonus);
+				*temp += " on defense.";
+				flag = 0;
+			}
+		}
+		if(flag) *temp += ".";
+		if(pW->mountBonus && full) {
+			*temp += " This weapon ";
+			if(pW->attackBonus != 0 || pW->defenseBonus != 0)
+				*temp += "also ";
+			*temp += "grants a ";
+			*temp += ((pW->mountBonus > 0)?"bonus of ":"penalty of ");
+			*temp += abs(pW->mountBonus);
+			*temp += " against mounted opponents.";
+		}
+
+		if(pW->flags & WeaponType::NOFOOT)
+			*temp += " Only mounted troops may use this weapon.";
+		else if(pW->flags & WeaponType::NOMOUNT)
+			*temp += " Only foot troops may use this weapon.";
+
+		if(pW->flags & WeaponType::RIDINGBONUS) {
+			*temp += " Wielders of this weapon, if mounted, get their riding "
+				"skill bonus on combat attack and defense.";
+		} else if(pW->flags & WeaponType::RIDINGBONUSDEFENSE) {
+			*temp += " Wielders of this weapon, if mounted, get their riding "
+				"skill bonus on combat defense.";
+		}
+
 		if(pW->flags & WeaponType::NODEFENSE) {
 			*temp += " Defenders are treated as if they have an "
 				"effective combat skill of 0.";
 		}
+
 		if(pW->flags & WeaponType::NOATTACKERSKILL) {
 			*temp += " Attackers do not get skill bonus on defense.";
 		}
+
 		if(pW->flags & WeaponType::ALWAYSREADY) {
 			*temp += " Wielders of this weapon never miss a round to ready "
 				"their weapon.";
+		} else {
+			*temp += " There is a 50% chance that the wielder of this weapon "
+				"gets a chance to attack in any given round.";
 		}
 
 		if(full) {
+			int atts = pW->numAttacks;
 			*temp += AString(" This weapon attacks versus the target's ") +
 				"defense against " + AttType(pW->attackType) + " attacks.";
 			*temp += AString(" This weapon allows ");
-			if(pW->numAttacks > 0) {
-				if(pW->numAttacks >= WeaponType::NUM_ATTACKS_SKILL) {
-					*temp += " a number of attacks equal to skill level";
-					if(pW->numAttacks > WeaponType::NUM_ATTACKS_SKILL) {
-						int val = pW->numAttacks -
-							WeaponType::NUM_ATTACKS_SKILL;
-						*temp += AString("+") + val;
+			if(atts > 0) {
+				if(atts >= WeaponType::NUM_ATTACKS_HALF_SKILL) {
+					int max = WeaponType::NUM_ATTACKS_HALF_SKILL;
+					char *attd = "half the skill level (rounded up)";
+					if(atts >= WeaponType::NUM_ATTACKS_SKILL) {
+						max = WeaponType::NUM_ATTACKS_SKILL;
+						attd = "the skill level";
 					}
+					*temp += "a number of attacks equal to ";
+					*temp += attd;
+					*temp += " of the attacker";
+					int val = atts - max;
+					if(val > 0) *temp += AString(" plus ") + val;
 				} else {
-					*temp += AString(pW->numAttacks) + " attacks";
+					*temp += AString(atts) + ((atts==1)?" attack ":" attacks");
 				}
 				*temp += " per round.";
 			} else {
-				*temp += AString("1 attack every ") + -pW->numAttacks +
-					" rounds.";
-			}
-		}
-		*temp += AString(" This weapon grants ") +
-			((pW->attackBonus>=0)?"+":"") + pW->attackBonus + " on attack " +
-			"and " + ((pW->defenseBonus>=0)?"+":"") + pW->defenseBonus +
-			" on defense.";
-		if(full) {
-			if(pW->mountBonus) {
-				*temp += AString(" This weapon grants ") +
-					((pW->mountBonus>0)?"+":"") + pW->mountBonus +
-					" versus mounted opponents.";
+				atts = -atts;
+				*temp += "1 attack every ";
+				if(atts == 1) *temp += "round .";
+				else *temp += AString(atts) + " rounds.";
 			}
 		}
 	}
+
 	if(ItemDefs[item].type & IT_ARMOR) {
-		*temp += " This is an armor.";
+		*temp += " This is a type of armor.";
 		int arm = ItemDefs[item].index;
 		ArmorType *pA = &ArmorDefs[arm];
 		*temp += " This armor will protect its wearer ";

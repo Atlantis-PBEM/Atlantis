@@ -28,21 +28,38 @@
 // class in game.h
 //
 
+
+// Range classes
+enum {
+	RANGE_ABSOLUTE = 0,	// Range not based on skill
+	RANGE_LEVEL,		// Range based on skill
+	RANGE_LEVEL2,		// Range based on level squared
+	RANGE_LEVEL3,		// Range based on level cubed
+};
+
 //
-// Spell parsing
+// Spell parsing - generic
+//
+void ProcessGenericSpell(Unit *, int, OrdersCheck *pCheck);
+void ProcessRegionSpell(Unit *, AString *, int, OrdersCheck *pCheck);
+
+//
+// Spell parsing - specific
 //
 void ProcessCastGateLore(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessCastPortalLore(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessFarsight(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessTeleportation(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessGenericSpell(Unit *, int, OrdersCheck *pCheck );
 void ProcessPhanBeasts(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessPhanUndead(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessPhanDemons(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessInvisibility(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessBirdLore(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessCastRegion(Unit *,int,AString *,AString &, OrdersCheck *pCheck );
 void ProcessMindReading(Unit *,AString *, OrdersCheck *pCheck );
+
+//
+// Spell helpers
+//
+ARegion *GetRegionInRange(ARegion *r, Unit *u, int spell, int rangemult,
+		int rangeclass, int nexus, int surface, int underworld);
 
 //
 // Spell running
@@ -53,6 +70,7 @@ void RunGateJump(ARegion *,Object *,Unit *);
 void RunTeleport(ARegion *,Object *,Unit *);
 void RunPortalLore(ARegion *,Object *,Unit *);
 void RunEarthLore(ARegion *,Unit *);
+void RunWeatherLore(ARegion *, Unit *);
 void RunClearSkies(ARegion *,Unit *);
 void RunPhanBeasts(ARegion *,Unit *);
 void RunPhanUndead(ARegion *,Unit *);

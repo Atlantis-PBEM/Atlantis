@@ -1733,7 +1733,7 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 			temp += " last month; ";
 			int nxtweather = pRegions->GetWeather( this, (month + 1) % 12 );
 			temp += "it will be ";
-			temp += SeasonNames[nxtweaterh];
+			temp += SeasonNames[nxtweather];
 			temp += " next month.";
 			f->PutStr(temp);
 		}

@@ -70,7 +70,6 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_SUMMON_LICH:
 			case S_DRAGON_LORE:
 			case S_WOLF_LORE:
-			case S_CLEAR_SKIES:
 			case S_EARTH_LORE:
 			case S_CREATE_RING_OF_INVISIBILITY:
 			case S_CREATE_CLOAK_OF_INVULNERABILITY:
@@ -83,6 +82,17 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_MAGIC_CARPET:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
+			case S_CLEAR_SKIES:
+				if(Globals->CLEAR_SKIES_REGION)
+					ProcessRegionSpell(u, o, sk, pCheck);
+				else
+					ProcessGenericSpell(u, sk, pCheck);
+				break;
+			case S_FARSIGHT:
+			case S_TELEPORTATION:
+			case S_WEATHER_LORE:
+				ProcessRegionSpell(u, o, sk, pCheck);
+				break;
 			case S_BIRD_LORE:
 				ProcessBirdLore(u,o, pCheck );
 				break;
@@ -94,12 +104,6 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 				break;
 			case S_PORTAL_LORE:
 				ProcessCastPortalLore(u,o, pCheck );
-				break;
-			case S_FARSIGHT:
-				ProcessFarsight(u,o, pCheck );
-				break;
-			case S_TELEPORTATION:
-				ProcessTeleportation(u,o, pCheck );
 				break;
 			case S_CREATE_PHANTASMAL_BEASTS:
 				ProcessPhanBeasts(u,o, pCheck );
@@ -350,123 +354,77 @@ void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
 
 void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck *pCheck )
 {
-	u->ClearCastOrders();
 	CastOrder *orders = new CastOrder;
 	orders->spell = spell;
 	orders->level = 1;
+	u->ClearCastOrders();
 	u->castorders = orders;
 }
 
-void Game::ProcessTeleportation(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
+		OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
-	if (!token) {
-		u->Error("CAST: Must specify a target region.");
-		return;
-	}
-	if (!(*token == "region")) {
-		delete token;
-		u->Error("CAST: Must specify a target region.");
-		return;
-	}
-	delete token;
+	int x = -1;
+	int y = -1;
+	int z = -1;
+	if(token) {
+		if(*token == "region") {
+			delete token;
+			token = o->gettoken();
+			if(!token) {
+				u->Error("CAST: Region X coordinate not specified.");
+				return;
+			}
+			x = token->value();
+			delete token;
 
-	token = o->gettoken();
-	if (!token) {
-		u->Error("CAST: Must specify a target region.");
-		return;
-	}
-	int x=token->value();
-	delete token;
+			token = o->gettoken();
+			if(!token) {
+				u->Error("CAST: Region Y coordinate not specified.");
+				return;
+			}
+			y = token->value();
+			delete token;
 
-	token = o->gettoken();
-	if (!token) {
-		u->Error("CAST: Must specify a target region.");
-		return;
-	}
-	int y=token->value();
-	delete token;
-
-	int z = u->object->region->zloc;
-	if(Globals->EASIER_UNDERWORLD) {
-		token = o->gettoken();
-		if(token) {
-			z = token->value();
+			if(Globals->EASIER_UNDERWORLD) {
+				token = o->gettoken();
+				if(token) {
+					z = token->value();
+					delete token;
+				}
+				if(z < 0 || (z > Globals->UNDERWORLD_LEVELS +
+							Globals->UNDERDEEP_LEVELS +
+							Globals->ABYSS_LEVEL + 1)) {
+					u->Error("CAST: Invalid Z coordinate specified.");
+					return;
+				}
+			}
+		} else {
 			delete token;
 		}
-		if(z < 0 || (z > Globals->UNDERWORLD_LEVELS +
-				   	Globals->UNDERDEEP_LEVELS +
-				   	Globals->ABYSS_LEVEL + 1)) {
-			u->Error("CAST: Invalid Z coordinate specified");
-			return;
-		}
 	}
+	if(x == -1) x = u->object->region->xloc;
+	if(y == -1) y = u->object->region->yloc;
+	if(z == -1) z = u->object->region->zloc;
 
-	TeleportOrder *order = new TeleportOrder;
-	u->ClearCastOrders();
-	order->xloc = x;
-	order->yloc = y;
-	order->zloc = z;
-	order->spell = S_TELEPORTATION;
-	order->level = 1;
-	u->teleportorders = order;
-}
-
-void Game::ProcessFarsight(Unit *u,AString *o, OrdersCheck *pCheck )
-{
-	AString *token = o->gettoken();
-	if (!token) {
-		u->Error("CAST: Region to view must be specified.");
-		return;
-	}
-	if (!(*token == "region")) {
-		delete token;
-		u->Error("CAST: Region to view must be specified.");
-		return;
-	}
-	delete token;
-
-	/* Should be through REGION crap */
-	token = o->gettoken();
-	if (!token) {
-		u->Error("CAST: Region to view must be specified.");
-		return;
-	}
-	int x = token->value();
-	delete token;
-
-	token = o->gettoken();
-	if (!token) {
-		u->Error("CAST: Region to view must be specified.");
-		return;
-	}
-	int y = token->value();
-	delete token;
-
-	int z = u->object->region->zloc;
-	if(Globals->EASIER_UNDERWORLD) {
-		token = o->gettoken();
-		if(token) {
-			z = token->value();
-			delete token;
-		}
-		if(z < 0 || (z > Globals->UNDERWORLD_LEVELS +
-					Globals->UNDERDEEP_LEVELS +
-					Globals->ABYSS_LEVEL + 1)) {
-			u->Error("CAST: Invalid Z coordinate specified");
-			return;
-		}
-	}
-
-	CastRegionOrder *order = new CastRegionOrder;
-	order->spell = S_FARSIGHT;
+	CastRegionOrder *order;
+	if(spell == S_TELEPORTATION)
+		order = new TeleportOrder;
+	else
+		order = new CastRegionOrder;
+	order->spell = spell;
 	order->level = 1;
 	order->xloc = x;
 	order->yloc = y;
 	order->zloc = z;
 
 	u->ClearCastOrders();
-	u->castorders = order;
+	/* Teleports happen late in the turn! */
+	if(spell == S_TELEPORTATION)
+		u->teleportorders = (TeleportOrder *)order;
+	else
+		u->castorders = order;
 }
 
 void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
@@ -726,10 +684,129 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 		case S_EARTH_LORE:
 			RunEarthLore(r,u);
 			break;
+		case S_WEATHER_LORE:
+			RunWeatherLore(r, u);
+			break;
 		case S_CLEAR_SKIES:
 			RunClearSkies(r,u);
 			break;
 	}
+}
+
+ARegion *Game::GetRegionInRange(ARegion *r, Unit *u, int spell, int rangemult,
+		int rangeclass, int nexus, int surface, int underworld)
+{
+	CastRegionOrder *order;
+
+	if(spell == S_TELEPORTATION) {
+		order = (CastRegionOrder *)u->teleportorders;
+	} else {
+		order = (CastRegionOrder *)u->castorders;
+	}
+
+	int level = u->GetSkill(spell);
+	if(!level) {
+		u->Error("CAST: You don't know that spell.");
+		return NULL;
+	}
+
+	switch(regions.GetRegionArray(r->zloc)->levelType) {
+		case ARegionArray::LEVEL_NEXUS:
+			if(!nexus) {
+				u->Error("CAST Spell does not work from the Nexus.");
+				return NULL;
+			}
+			break;
+		case ARegionArray::LEVEL_SURFACE:
+			if(!surface) {
+				AString error = "CAST: Spell does not work on the surface of ";
+				error += Globals->WORLD_NAME;
+				error += ".";
+				u->Error(error);
+				return NULL;
+			}
+			break;
+		case ARegionArray::LEVEL_UNDERWORLD:
+		case ARegionArray::LEVEL_UNDERDEEP:
+			if(!underworld) {
+				AString error = "CAST: Spell does not work under the "
+					"surface of ";
+				error += Globals->WORLD_NAME;
+				error += ".";
+				u->Error(error);
+				return NULL;
+			}
+			break;
+		default:
+			u->Error("CAST: Spell does not work on this level.");
+			return NULL;
+	}
+	ARegion *tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
+	if(!tar) {
+		u->Error("CAST: No such region.");
+		return NULL;
+	}
+
+	switch(regions.GetRegionArray(order->zloc)->levelType) {
+		case ARegionArray::LEVEL_NEXUS:
+			if(!nexus) {
+				u->Error("CAST: Spell does not work to the Nexus.");
+				return NULL;
+			}
+			break;
+		case ARegionArray::LEVEL_SURFACE:
+			if(!surface) {
+				AString error = "CAST: Spell does not work to the surface of ";
+				error += Globals->WORLD_NAME;
+				error += ".";
+				u->Error(error);
+				return NULL;
+			}
+			break;
+		case ARegionArray::LEVEL_UNDERWORLD:
+		case ARegionArray::LEVEL_UNDERDEEP:
+			if(!underworld) {
+				AString error = "CAST: Spell does not work to under the "
+					"surface of ";
+				error += Globals->WORLD_NAME;
+				error += ".";
+				u->Error(error);
+				return NULL;
+			}
+			break;
+		default:
+			u->Error("CAST: Spell does not work to that level.");
+			return NULL;
+	}
+
+	int range;
+	switch(rangeclass) {
+		default:
+		case RANGE_ABSOLUTE:
+			range = 1;
+			break;
+		case RANGE_LEVEL:
+			range = level;
+			break;
+		case RANGE_LEVEL2:
+			range = level * level;
+			break;
+		case RANGE_LEVEL3:
+			range = level * level * level;
+			break;
+	}
+	range *= rangemult;
+
+	int dist;
+	if(Globals->EASIER_UNDERWORLD)
+		dist = regions.GetPlanarDistance(tar, r);
+	else
+		dist = regions.GetDistance(tar, r);
+	if(dist > range) {
+		u->Error("CAST: Target region out of range.");
+		return NULL;
+	}
+	return tar;
 }
 
 void Game::RunMindReading(ARegion *r,Unit *u)
@@ -1243,69 +1320,73 @@ void Game::RunEarthLore(ARegion *r,Unit *u)
 	r->NotifySpell(u,S_EARTH_LORE, &regions );
 }
 
-void Game::RunClearSkies(ARegion *r,Unit *u)
+void Game::RunClearSkies(ARegion *r, Unit *u)
 {
+	ARegion *tar = r;
+	AString temp = "Casts Clear Skies";
+
+	if(Globals->CLEAR_SKIES_REGION) {
+		tar = GetRegionInRange(r, u, S_CLEAR_SKIES, 2, RANGE_LEVEL2, 0, 1, 0);
+		if(!tar) return;
+		temp += " on ";
+		temp += tar->ShortPrint(&regions);
+	}
+	temp += ".";
 	int level = u->GetSkill(S_CLEAR_SKIES);
-
 	if (level > r->clearskies) r->clearskies = level;
+	u->Event(temp);
+	r->NotifySpell(u,S_WEATHER_LORE, &regions);
+}
 
-	u->Event(AString("Casts Clear Skies."));
-	r->NotifySpell(u,S_WEATHER_LORE, &regions );
+void Game::RunWeatherLore(ARegion *r, Unit *u)
+{
+	ARegion *tar;
+	tar = GetRegionInRange(r, u, S_WEATHER_LORE, 4, RANGE_LEVEL2, 0, 1,
+			Globals->EASIER_UNDERWORLD);
+	if(!tar) return;
+
+	int level = u->GetSkill(S_WEATHER_LORE);
+	int months = 3;
+	if(level >= 5) months = 12;
+	else if (level >= 3) months = 6;
+
+	AString temp = "Casts Weather Lore on ";
+	temp += tar->ShortPrint(&regions);
+	temp += ". It will be ";
+	int weather, futuremonth;
+	for(int i; i <= months; i++) {
+		futuremonth = (month + i)%12;
+		weather=regions.GetWeather(tar, futuremonth);
+		temp += SeasonNames[weather];
+		temp += " in ";
+		temp += MonthNames[futuremonth];
+		if(i < (months-1))
+			temp += ", ";
+		else if(i == (months-1))
+			temp += " and ";
+		else
+			temp += ".";
+	}
+	u->Event(temp);
+	r->NotifySpell(u, S_WEATHER_LORE, &regions);
 }
 
 void Game::RunFarsight(ARegion *r,Unit *u)
 {
-	CastRegionOrder *order = (CastRegionOrder *) u->castorders;
-
-	int level = u->GetSkill(S_FARSIGHT);
-	if (!level) {
-		u->Error("CAST: You don't know that spell.");
-		return;
-	}
-
-	int range = 4 * level * level;
-
-	if(Globals->EASIER_UNDERWORLD) {
-		if(regions.GetRegionArray(r->zloc)->levelType ==
-				ARegionArray::LEVEL_NEXUS) {
-			u->Error("CAST: Farsight does not work from or to the Nexus.");
-			return;
-		}
-	} else {
-		if( regions.GetRegionArray( r->zloc )->levelType !=
-				ARegionArray::LEVEL_SURFACE) {
-			AString error = "CAST: Farsight only works on the surface of ";
-			error += Globals->WORLD_NAME;
-			error += ".";
-			u->Error(error.Str());
-			return;
-		}
-	}
-
-	ARegion *tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
-	if (!tar) {
-		u->Error("CAST: No such region.");
-		return;
-	}
-
-	int dist;
-	if(Globals->EASIER_UNDERWORLD) {
-		dist = regions.GetPlanarDistance(tar, r);
-	} else {
-		dist = regions.GetDistance(tar, r);
-	}
-
-	if (dist > range) {
-		u->Error("CAST: Can't view a region that distant.");
-		return;
-	}
+	ARegion *tar;
+	tar = GetRegionInRange(r, u, S_FARSIGHT, 4, RANGE_LEVEL2, 0, 1,
+			Globals->EASIER_UNDERWORLD);
+	if(!tar) return;
 
 	Farsight *f = new Farsight;
 	f->faction = u->faction;
-	f->level = level;
+	f->level = u->GetSkill(S_FARSIGHT);
 	f->unit = u;
 	tar->farsees.Add(f);
-	u->Event("Casts Farsight.");
+	AString temp = "Casts Farsight on ";
+	temp += tar->ShortPrint(&regions);
+	temp += ".";
+	u->Event(temp);
 }
 
 void Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
@@ -1323,7 +1404,12 @@ void Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 		ARegion *tar = r->neighbors[i];
 		if (tar) {
 			if (tar->gate) {
-				u->Event((tar->Print( &regions )) + " contains a Gate.");
+				if(Globals->DETECT_GATE_NUMBERS) {
+					u->Event(tar->Print(&regions) + " contains Gate " +
+							tar->gate + ".");
+				} else {
+					u->Event(tar->Print(&regions) + " contains a Gate.");
+				}
 				found = 1;
 			}
 		}
@@ -1334,28 +1420,12 @@ void Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 
 void Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 {
+	ARegion *tar;
+	tar = GetRegionInRange(r, u, S_TELEPORTATION, 2, RANGE_LEVEL2, 0, 1,
+			Globals->EASIER_UNDERWORLD);
+	if(!tar) return;
+
 	int level = u->GetSkill(S_TELEPORTATION);
-	TeleportOrder *order = u->teleportorders;
-
-	if (!level) {
-		u->Error("CAST: Unit doesn't know teleportation.");
-		return;
-	}
-
-	if(Globals->EASIER_UNDERWORLD) {
-		if(regions.GetRegionArray(r->zloc)->levelType ==
-				ARegionArray::LEVEL_NEXUS) {
-			u->Error("CAST: Teleportation does not work to or from the Nexus.");
-			return;
-		}
-	} else {
-		if( regions.GetRegionArray( r->zloc )->levelType !=
-				ARegionArray::LEVEL_SURFACE ) {
-			u->Error("CAST: Teleportation only works on the surface.");
-			return;
-		}
-	}
-
 	int maxweight = level * 15;
 
 	if (u->Weight() > maxweight) {
@@ -1363,32 +1433,13 @@ void Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 		return;
 	}
 
-	ARegion *tar = regions.GetRegion( order->xloc, order->yloc, order->zloc );
-	if (!tar) {
-		u->Error("CAST: No such region.");
-		return;
-	}
-
-	int maxdist = level * level * 2;
-	int dist;
-
-	if(Globals->EASIER_UNDERWORLD)
-		dist = regions.GetPlanarDistance(r, tar);
-	else
-		dist = regions.GetDistance(r, tar);
-
-	if (dist > maxdist) {
-		u->Error("CAST: Can't teleport that far.");
-		return;
-	}
-
 	if (TerrainDefs[tar->type].similar_type == R_OCEAN) {
-		u->Error(AString("CAST: ") + tar->Print( &regions ) + " is an ocean.");
+		u->Error(AString("CAST: ") + tar->Print(&regions) + " is an ocean.");
 		return;
 	}
 
-	u->Event(AString("Teleports to ") + tar->Print( &regions ) + ".");
-	u->MoveUnit( tar->GetDummy() );
+	u->Event(AString("Teleports to ") + tar->Print(&regions) + ".");
+	u->MoveUnit(tar->GetDummy());
 }
 
 void Game::RunGateJump(ARegion *r,Object *o,Unit *u)

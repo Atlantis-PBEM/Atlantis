@@ -160,7 +160,6 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		//
 		int mountType;
 		for(mountType = 1; mountType < NUMMOUNTS; mountType++ ) {
-			int bonus = 0;
 			item = unit->GetMount(mountType, canFly, canRide, ridingBonus);
 			if(item == -1) continue;
 			// Defer adding the combat bonus until we know if the weapon

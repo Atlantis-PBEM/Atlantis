@@ -63,6 +63,8 @@ extern char **DirectionStrs;
 
 extern char **MonthNames;
 
+extern char **SeasonNames;
+
 class GameDefs {
 public:
     char *RULESET_NAME;
@@ -381,6 +383,32 @@ public:
 	// list.
 	int USE_WEAPON_ARMOR_COMMAND;
 
+	// Set MONSTER_NO_SPOILS > 0 to disable spoils from released monsters
+	// for that many months.
+	int MONSTER_NO_SPOILS;
+	// Set MONSTER_SPOILS_RECOVERY > 0 to set a time in months over which
+	// monster spoils are slowly regained.
+	// This has no effect unles MONSTER_NO_SPOILS is also set.
+	int MONSTER_SPOILS_RECOVERY;
+
+	// Use this to limit the number of attacks an assassin gets in the free
+	// round.
+	int MAX_ASSASSIN_FREE_ATTACKS;
+
+	// Set to 1 to allow 'GIVE 0 <num> <monster>' for summoned monsters
+	// (dragons, wolves, eagles currently)
+	int RELEASE_MONSTERS;
+
+	// Set to 1 to check for demons breaking free and undead decaying before
+	// movemeent rather than at the end of the turn.  This prevents 'balrog
+	// missiles'
+	int CHECK_MONSTER_CONTROL_MID_TURN;
+
+	// Set to 1 if CAST GATE DETECT shows the actual gate numbers.
+	int DETECT_GATE_NUMBERS;
+
+	// Set to 1 if Clear Skies can be cast at range.
+	int CLEAR_SKIES_REGION;
 };
 
 extern GameDefs * Globals;

@@ -318,24 +318,21 @@ class CastMindOrder : public CastOrder {
 		UnitId *id;
 };
 
-class TeleportOrder : public CastOrder {
-	public:
-		TeleportOrder();
-		~TeleportOrder();
-
-		int gate;
-		int xloc;
-		int yloc;
-		int zloc;
-		AList units;
-};
-
 class CastRegionOrder : public CastOrder {
 	public:
 		CastRegionOrder();
 		~CastRegionOrder();
 
 		int xloc, yloc, zloc;
+};
+
+class TeleportOrder : public CastRegionOrder {
+	public:
+		TeleportOrder();
+		~TeleportOrder();
+
+		int gate;
+		AList units;
 };
 
 class CastIntOrder : public CastOrder {

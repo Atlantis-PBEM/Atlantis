@@ -127,7 +127,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 			if(!( pWep->flags & WeaponType::RANGED)) break;
 		}
 
-		int flags = 0;
+		int flags = WeaponType::SHORT;
 		int attackType = ATTACK_COMBAT;
 		int mountBonus = 0;
 		int attackClass = SLASHING;

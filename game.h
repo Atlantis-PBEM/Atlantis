@@ -107,6 +107,8 @@ public:
 
 	// Fix broken boat numbers
 	void FixBoatNums();
+	// Fix broken/missing gates
+	void FixGateNums();
 
     //
     // Get a unit by its number.
@@ -471,7 +473,8 @@ private:
     void RunQuitOrders();
     void RunForgetOrders();
     void Do1Quit(Faction *);
-    void SinkShips();
+    void SinkUncrewedShips();
+	void DrownUnits();
     void RunStealOrders();
     AList * CanSeeSteal(ARegion *,Unit *);
     void Do1Steal(ARegion *,Object *,Unit *);
