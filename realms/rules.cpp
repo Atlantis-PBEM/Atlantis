@@ -52,7 +52,13 @@ static GameDefs g = {
     10, /* STUDENTS_PER_TEACHER */
     10, /* MAINTENANCE_COST */
     20, /* LEADER_COST */
+
+	0,  /* MAINTAINENCE_MULTIPLIER */
+	GameDefs::MULT_NONE, /* MULTIPLIER_USE */
+
     33, /* STARVE_PERCENT */
+	GameDefs::STARVE_NONE, /* SKILL_STARVATION */
+
     5020, /* START_MONEY */
     5, /* WORK_FRACTION */
     20, /* ENTERTAIN_FRACTION */

@@ -143,6 +143,9 @@ public:
 
     int MaintCost();
     void Short(int);
+	int SkillLevels();
+	void SkillStarvation();
+	Skill *GetSkillObject(int);
 	
     int GetStealth();
     int GetTactics();

@@ -75,9 +75,42 @@ public:
     int WAGON_CAPACITY;
   
     int STUDENTS_PER_TEACHER;
+
+
     int MAINTENANCE_COST;
     int LEADER_COST;
+
+	// If we use skill level multiplier then no units, all units, leaders,
+	// or just mages pay X per level of skill they have per man.   The 
+	// first value (MAINTENCE_MULTIPLIER) is how much is payed per skill
+	// level.   The second value (MULTIPLIER_USE) is set to one of the
+	// values in the given enumeration.
+	// The costs listed above are used for any units NOT covered by the
+	// multiplier use
+	int MAINTENANCE_MULTIPLIER;
+
+	enum {
+		MULT_NONE,
+		MULT_MAGES,
+		MULT_LEADERS,
+		MULT_ALL,
+	};
+	int MULTIPLIER_USE;
+
     int STARVE_PERCENT;
+
+	enum {
+		STARVE_NONE,
+		STARVE_MAGES,
+		STARVE_LEADERS,
+		STARVE_ALL,
+	};
+
+	// Instead of dying, lose skill levels, but only for the types of
+	// units listed below.   Any unit which should lose a skill level and
+	// is unable to will die, period.
+	int SKILL_STARVATION;
+
     int START_MONEY;
     int WORK_FRACTION;
     int ENTERTAIN_FRACTION;
@@ -205,6 +238,7 @@ public:
 	// Are we allowing apprentices?
 	//
 	int APPRENTICES_EXIST;
+
 };
 
 extern GameDefs * Globals;

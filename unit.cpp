@@ -927,13 +927,45 @@ void Unit::AdjustSkills()
 int Unit::MaintCost()
 {
     int retval = 0;
+	int levels = 0;
     if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
-    
-    int nonleaders = GetMen() - GetMen(I_LEADERS);
+
+	int leaders = GetMen(I_LEADERS);
+	if(leaders < 0) leaders = 0;
+    int nonleaders = GetMen() - leaders;
     if (nonleaders < 0) nonleaders = 0;
-  
-    retval += Globals->MAINTENANCE_COST * nonleaders;
-    retval += Globals->LEADER_COST * (GetMen(I_LEADERS));
+
+	switch(Globals->MULTIPLIER_USE) {
+		case GameDefs::MULT_NONE:
+			retval += Globals->MAINTENANCE_COST * nonleaders;
+			retval += Globals->LEADER_COST * leaders;
+			break;
+		case GameDefs::MULT_MAGES:
+			if(type == U_MAGE) {
+				retval += SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
+			} else {
+				retval += Globals->MAINTENANCE_COST * nonleaders;
+				retval += Globals->LEADER_COST * leaders;
+			}
+			break;
+		case GameDefs::MULT_LEADERS:
+			levels = SkillLevels();
+			if(levels)
+				retval += levels * Globals->MAINTENANCE_MULTIPLIER * leaders;
+			else
+				retval += Globals->LEADER_COST * leaders;
+			retval += Globals->MAINTENANCE_COST * nonleaders;
+			break;
+		case GameDefs::MULT_ALL:
+			levels = SkillLevels();
+			if(levels) {
+				retval += levels*Globals->MAINTENANCE_MULTIPLIER*leaders;
+				retval += levels*Globals->MAINTENANCE_MULTIPLIER*nonleaders;
+			} else {
+				retval += Globals->LEADER_COST * leaders;
+				retval += Globals->MAINTENANCE_COST * nonleaders;
+			}
+	}
   
     return retval;
 }
@@ -941,6 +973,22 @@ int Unit::MaintCost()
 void Unit::Short(int needed)
 {
     int n = 0;
+
+	switch(Globals->SKILL_STARVATION) {
+		case GameDefs::STARVE_MAGES:
+			if(type == U_MAGE)
+				SkillStarvation();
+			return;
+		case GameDefs::STARVE_LEADERS:
+			if(GetMen(I_LEADERS))
+				SkillStarvation();
+			return;
+		case GameDefs::STARVE_ALL:
+			SkillStarvation();
+			return;
+	}
+
+	if(!needed) return;
 	
     for (int i = 0; i<= NITEMS; i++)
     {
@@ -1365,4 +1413,107 @@ int Unit::GetProductionBonus( int item )
 	}
 	if (bonus > GetMen()) bonus = GetMen();
 	return bonus * ItemDefs[item].mult_val;
+}
+
+int Unit::SkillLevels()
+{
+	int levels = 0;
+	forlist(&skills) {
+		Skill *s = (Skill *)elem;
+		levels += GetLevelByDays(s->days);
+	}
+	return levels;
+}
+
+Skill *Unit::GetSkillObject(int sk)
+{
+	forlist(&skills) {
+		Skill *s = (Skill *)elem;
+		if(s->type == sk)
+			return s;
+	}
+	return NULL;
+}
+
+void Unit::SkillStarvation()
+{
+	int can_forget[NSKILLS];
+	int count = 0;
+	int i;
+	for(i = 0; i < NSKILLS; i++) {
+		if(SkillDefs[i].flags & SkillType::DISABLED) {
+			can_forget[i] = 0;
+			continue;
+		}
+		if(GetSkillObject(i)) {
+			can_forget[i] = 1;
+			count++;
+		} else {
+			can_forget[i] = 0;
+		}
+	}
+	for(i = 0; i < NSKILLS; i++) {
+		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
+		Skill *si = GetSkillObject(i);
+		for(int j=0; j < NSKILLS; j++) {
+			if(SkillDefs[j].flags & SkillType::DISABLED) continue;
+			Skill *sj = GetSkillObject(j);
+			int dependancy_level = 0;
+			if(SkillDefs[i].depend1 == j)
+				dependancy_level = SkillDefs[i].level1;
+			else if(SkillDefs[i].depend2 == j)
+				dependancy_level = SkillDefs[i].level2;
+			else if(SkillDefs[i].depend3 == j)
+				dependancy_level = SkillDefs[i].level3;
+			if(dependancy_level > 0) {
+				if(GetLevelByDays(sj->days) == GetLevelByDays(si->days)) {
+					can_forget[j] = 0;
+					count--;
+				}
+			}
+		}
+	}
+	if(!count) {
+		forlist(&items) {
+			Item *i = (Item *)elem;
+			if(ItemDefs[i->type].type & IT_MAN) {
+				count += items.GetNum(i->type);
+				items.SetNum(i->type, 0);
+			}
+		}
+		AString temp = AString(count) + " starve to death.";
+		Error(temp);
+		return;
+	}
+	int random_number = getrandom(count);
+	for(i = 0; i < NSKILLS; i++) {
+		if(can_forget[i]) {
+			if(--count == 0) {
+				Skill *s = GetSkillObject(i);
+				AString temp = AString("Starves and forgets one level of ")+
+					SkillDefs[i].name + ".";
+				Error(temp);
+				switch(GetLevelByDays(s->days)) {
+					case 1:
+						s->days -= 30;
+						if(s->days <= 0)
+							ForgetSkill(i);
+						break;
+					case 2:
+						s->days -= 60;
+						break;
+					case 3:
+						s->days -= 90;
+						break;
+					case 4:
+						s->days -= 120;
+						break;
+					case 5:
+						s->days -= 150;
+						break;
+				}
+			}
+		}
+	}
+	return;
 }
