@@ -2043,21 +2043,21 @@ int ARegion::IsCoastal()
     return 0;
 }
 
-int ARegion::MoveCost(int movetype)
+int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir)
 {
-    int mult = 1;
-    if( Globals->WEATHER_EXISTS )
-    {
-        mult = 2;
-        if (weather == W_BLIZZARD) return 10;
-        if (weather == W_NORMAL) mult = 1;
-        if (clearskies) mult = 1;
-    }
-    if (movetype == M_WALK || movetype == M_RIDE)
-    {
-        return (TerrainDefs[type].movepoints * mult);
-    }
-    return mult;
+	int cost = -1;
+	if(Globals->WEATHER_EXISTS) {
+		cost = 2;
+		if (weather == W_BLIZZARD) return 10;
+		if (weather == W_NORMAL || clearskies) cost = 1;
+	}
+	if (movetype == M_WALK || movetype == M_RIDE) {
+		cost = (TerrainDefs[type].movepoints * cost);
+		if((cost>1) && fromRegion->HasExitRoad(dir) && HasConnectingRoad(dir))
+			cost -= cost/2;
+	}
+	if(cost < 1) cost = 1;
+	return cost;
 }
 
 Unit * ARegion::Forbidden(Unit * u)

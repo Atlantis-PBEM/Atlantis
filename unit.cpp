@@ -1179,8 +1179,8 @@ int Unit::CanWalk(int weight)
 			if(!(ItemDefs[hitch].flags & ItemType::DISABLED)) {
 				int hitches = items.GetNum(hitch);
 				int hitched = i->num;
-				if(i->num > hitches ) hitched = hitches;
-				cap += hitches * ItemDefs[i->type].hitchwalk;
+				if(hitched > hitches ) hitched = hitches;
+				cap += hitched * ItemDefs[i->type].hitchwalk;
 			}
 		}
 	}
@@ -1222,19 +1222,22 @@ int Unit::CanMoveTo(ARegion * r1,ARegion * r2)
 {
 	if (r1 == r2) return 1;
 
-	int exit = 0;
+	int exit = 1;
 	int i;
-	for ( i=0; i<NDIRS; i++) {
+	int dir;
+
+	for (i=0; i<NDIRS; i++) {
 		if (r1->neighbors[i] == r2) {
-			exit = 1;
+			exit = 0;
+			dir = i;
 			break;
 		}
 	}
-	if (!exit) return 0;
-	exit = 0;
+	if (exit) return 0;
+	exit = 1;
 	for (i=0; i<NDIRS; i++) {
 		if (r2->neighbors[i] == r1) {
-			exit = 1;
+			exit = 0;
 			break;
 		}
 	}
@@ -1246,7 +1249,7 @@ int Unit::CanMoveTo(ARegion * r1,ARegion * r2)
 			(!CanSwim() || GetFlag(FLAG_NOCROSS_WATER)))
 		return 0;
 	int mp = CalcMovePoints() - movepoints;
-	if (mp < (r2->MoveCost(mt))) return 0;
+	if (mp < (r2->MoveCost(mt, r1, dir))) return 0;
 	return 1;
 }
 

@@ -1005,7 +1005,7 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
     }
 }
 
-Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
+Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 {
     Location * loc = new Location;
     MoveOrder * o = (MoveOrder *) unit->monthorders;
@@ -1043,19 +1043,13 @@ Location * Game::DoAMoveOrder(Unit * unit,ARegion * region,Object * obj)
 			startmove = 1;
 
         if((TerrainDefs[region->type].similar_type == R_OCEAN) &&
-		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)) )
-        {
+		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)) ) {
             unit->Error( AString("MOVE: Can't move while in the ocean.") );
             goto done_moving;
         }
 
-        int cost = newreg->MoveCost(movetype);
-        // AS
-        if (cost > 1 && movetype != M_FLY && region->HasExitRoad(i) &&
-            newreg->HasConnectingRoad(i))
-        {
-            cost /= 2;
-        }
+        int cost = newreg->MoveCost(movetype, region, i);
+
         if (region->type != R_NEXUS &&
 				unit->CalcMovePoints() - unit->movepoints < cost) {
 			if(unit->MoveType() == M_NONE) {
