@@ -243,28 +243,27 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
             // We found a weapon; check flags and skills
             //
 			int baseSkillLevel = unit->CanUseWeapon(pWep, riding);
-			// returns 1 if weapon needs no skill, else skill level
-			// since unit could have a 0 combat skill.
+			// returns -1 if weapon cannot be used, else the usable skill
+			// level.
 
-			if(!baseSkillLevel) {
+			if(baseSkillLevel == -1) {
 				unit->items.SetNum(item, unit->items.GetNum(item)+1);
 				continue;
 			}
 
             weapon = item;
+			if(!(pWep->flags & WeaponType::NEEDSKILL)) {
+				baseSkillLevel = combatSkill;
+			}
 
             //
             // Attack and defense skill
             //
-            if( pWep->flags & WeaponType::NEEDSKILL )
-            {
-				askill = baseSkillLevel + pWep->attackBonus;
+			askill = baseSkillLevel + pWep->attackBonus;
+			if(pWep->flags & WeaponType::NOATTACKERSKILL) {
+				dskill[ATTACK_COMBAT] += pWep->defenseBonus;
+			} else {
 				dskill[ATTACK_COMBAT] += baseSkillLevel+pWep->defenseBonus;
-            }
-            else
-            {
-				askill = combatSkill + pWep->attackBonus;
-				dskill[ATTACK_COMBAT] += combatSkill + pWep->defenseBonus;
             }
 
             //

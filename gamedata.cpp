@@ -641,28 +641,28 @@ WeaponType wepd[] = {
 	{ -1, -1, WeaponType::SLASHING, 4, 4, ATTACK_COMBAT, 0, 1 },
 	// WEAPON_SUPERBOW
 	{ S_LONGBOW, S_CROSSBOW,
-      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING, 
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING | WeaponType::NOATTACKERSKILL, 
       2, 0, ATTACK_RANGED, 0, WeaponType::NUM_ATTACKS_SKILL },
 	// WEAPON_DOUBLEBOW
 	{ S_LONGBOW, S_CROSSBOW,
-      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING, 
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING | WeaponType::NOATTACKERSKILL, 
       0, 0, ATTACK_RANGED, 0, WeaponType::NUM_ATTACKS_SKILL },
 	// WEAPON_MCROSSBOW
 	{ S_CROSSBOW, -1,
-      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING,
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING | WeaponType::NOATTACKERSKILL,
       0, 0, ATTACK_RANGED, 0, 1 },
 	// WEAPON_LONGBOW
 	{ S_LONGBOW, -1,
-      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::PIERCING,
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::PIERCING | WeaponType::NOATTACKERSKILL,
 	  -2, 0, ATTACK_RANGED, 0, 1 },
 	// WEAPON_CROSSBOW
 	{ S_CROSSBOW, -1,
-      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING,
+      WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::ARMORPIERCING | WeaponType::NOATTACKERSKILL,
       0, 0, ATTACK_RANGED, 0, -2 },
 	// WEAPON_JAVELIN
     { -1, -1, WeaponType::RANGED | WeaponType::PIERCING, -1, 0, ATTACK_RANGED, 0, -2 },
 	// WEAPON_LANCE
-	{ S_RIDING, -1, WeaponType::NEEDSKILL | WeaponType::PIERCING | WeaponType::NOFOOT |
+	{ S_RIDING, -1, WeaponType::NEEDSKILL | WeaponType::PIERCING | WeaponType::NOFOOT | WeaponType::NOATTACKERSKILL |
 	  WeaponType::LONG, 4, 0, ATTACK_RIDING, 0, 1 },
 	// WEAPON_ABAX
 	{ -1, -1, WeaponType::ARMORPIERCING, 8, 8, ATTACK_COMBAT, 0, -2 },

@@ -142,6 +142,7 @@ public:
 		CRUSHING  = 0x400, // e.g. mace attack
 		CLEAVING  = 0x800, // e.g. axe attack
 		ARMORPIERCING = 0x1000, // Armour piercing attack, e.g. crossbow, magic
+		NOATTACKERSKILL = 0x2000, // Attacker gets no combat/skill defense.
     };
         
     int baseSkill;

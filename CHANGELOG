@@ -170,3 +170,4 @@ Changes from 4.0.6 -> 4.0.7
    -- Increased the number of possible products per hex from 5 to 7.
    -- Added Georg Gottschalks underdeep and multi-level underworld and gems.
    -- Removed a whole bunch of unused ifdefs from the code
+   -- Added new combat system from Tom Alsen

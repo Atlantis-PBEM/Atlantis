@@ -1269,7 +1269,7 @@ int Unit::Taxers()
 				continue;
 			}
 
-			if (!CanUseWeapon(pWep)) continue;
+			if (CanUseWeapon(pWep) == -1) continue;
 			//
 			// OK, the unit has the skill to use this weapon,
 			// or no skill is required
@@ -1513,16 +1513,18 @@ void Unit::SkillStarvation()
 int Unit::CanUseWeapon(WeaponType *pWep, int riding)
 {
 	if (riding == -1) {
-		if( pWep->flags & WeaponType::NOFOOT) return 0;
+		if( pWep->flags & WeaponType::NOFOOT) return -1;
 	} else {
-		if( pWep->flags & WeaponType::NOMOUNT) return 0;
+		if( pWep->flags & WeaponType::NOMOUNT) return -1;
 	}
 	return CanUseWeapon(pWep);
 }
 
 int Unit::CanUseWeapon(WeaponType *pWep)
 {
-	if ( !(pWep->flags & WeaponType::NEEDSKILL) ) return 1; // just in case
+	// we don't care in this case, their combat skill will be used.
+	if ( !(pWep->flags & WeaponType::NEEDSKILL) ) return 0;
+
 	int baseSkillLevel = 0;
 	int tempSkillLevel = 0;
 	if( pWep->baseSkill != -1 ) {
@@ -1537,7 +1539,7 @@ int Unit::CanUseWeapon(WeaponType *pWep)
 		baseSkillLevel = tempSkillLevel;
 	}
 
-	if( pWep->flags & WeaponType::NEEDSKILL && !baseSkillLevel ) return 0;
+	if( pWep->flags & WeaponType::NEEDSKILL && !baseSkillLevel ) return -1;
 
 	return baseSkillLevel;
 }
