@@ -1608,17 +1608,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "TR");
 	for(i = 0; i < NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if(SkillDefs[ItemDefs[i].pSkill].flags & SkillType::DISABLED) continue;
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
+		j = ItemDefs[i].pSkill;
+		if(j != -1 && (SkillDefs[j].flags & SkillType::DISABLED)) continue;
 		f.Enclose(1, "TR");
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		f.PutStr(ItemDefs[i].name);
 		f.Enclose(0, "TD");
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-		temp = SkillDefs[ItemDefs[i].pSkill].name;
-		if(ItemDefs[i].pLevel > 1)
-			temp += AString("(") + ItemDefs[i].pLevel + ")";
-		f.PutStr(temp);
+		if(j != -1) {
+			temp = SkillDefs[ItemDefs[i].pSkill].name;
+			if(ItemDefs[i].pLevel > 1)
+				temp += AString("(") + ItemDefs[i].pLevel + ")";
+			f.PutStr(temp);
+		}
 		f.Enclose(0, "TD");
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 		comma = 0;
