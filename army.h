@@ -86,6 +86,7 @@ class Soldier {
 		int armor;
 		int hits;
 		int maxhits;
+		int damage;
 
 		BITFIELD battleItems;
 		int amuletofi;

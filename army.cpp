@@ -70,6 +70,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	dskill[ATTACK_WEATHER] = -2;
 	dskill[ATTACK_RIDING] = 0;
 	dskill[ATTACK_RANGED] = 0;
+	damage = 0;
 	hits = 1;
 	maxhits = 1;
 	amuletofi = 0;
@@ -111,6 +112,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		}
 		dskill[ATTACK_RIDING] += MonDefs[mon].defense[ATTACK_RIDING];
 		dskill[ATTACK_RANGED] += MonDefs[mon].defense[ATTACK_RANGED];
+		damage = 0;
 		hits = MonDefs[mon].hits;
 		if (hits < 1) hits = 1;
 		maxhits = hits;
@@ -672,15 +674,20 @@ void Army::Regenerate(Battle *b)
 					aName += AString(" controlled by ");
 				aName += *s->unit->name;
 
+				if (s->damage != 0) {
+					b->AddLine(aName + " takes " + s->damage +
+							" hits bringing it to " + s->hits + "/" +
+							s->maxhits + ".");
+					s->damage = 0;
+				} else {
+					b->AddLine(aName + " takes no hits leaving it at " +
+							s->hits + "/" + s->maxhits + ".");
+				}
 				if (s->regen) {
 					int regen = s->regen;
 					if (regen > diff) regen = diff;
 					s->hits += regen;
 					b->AddLine(aName + " regenerates " + regen +
-							" hits bringing it to " + s->hits + "/" +
-							s->maxhits + ".");
-				} else {
-					b->AddLine(aName + " takes " + diff +
 							" hits bringing it to " + s->hits + "/" +
 							s->maxhits + ".");
 				}
@@ -1154,6 +1161,7 @@ void Army::Kill(int killed)
 
 	if(Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_INDIVIDUAL)
 		hitsalive--;
+	temp->damage++;
 	temp->hits--;
 	if(temp->hits > 0) return;
 	temp->unit->losses++;

@@ -573,4 +573,8 @@ Changes from 4.0.10b -> 4.0.10c
 
 Changes from 4.0.10c -> 4.0.10d
 --------------------------------------------------
+   -- Fixed a coredump when a region affecting spell was used on a z level
+      that was out of range.  Bad range-check.. bad!
+   -- Fixed misleading damage messages on monsters.
    -- Fixed a bug where gluttony became a sin (under skill starvation).
+   -- Fixed rounding error in pillaging 

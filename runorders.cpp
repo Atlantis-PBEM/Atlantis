@@ -825,7 +825,7 @@ void Game::RunPillageRegion(ARegion * reg)
 	/* First, count up pillagers */
 	int pillagers = CountPillagers(reg);
 
-	if (pillagers * 2 < reg->money / Globals->TAX_INCOME) {
+	if (pillagers * 2 * Globals->TAX_INCOME < reg->money) {
 		ClearPillagers(reg);
 		return;
 	}

@@ -2460,6 +2460,9 @@ ARegion * ARegionList::GetRegion(int n)
 
 ARegion *ARegionList::GetRegion(int x, int y, int z)
 {
+
+	if (z >= numLevels) return NULL;
+
 	ARegionArray *arr = pRegionArrays[ z ];
 
 	x = (x + arr->x) % arr->x;
