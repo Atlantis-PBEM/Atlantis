@@ -350,6 +350,7 @@ AString Unit::TemplateReport() {
   if (type == U_MAGE || type == U_GUARDMAGE) {
     temp += MageReport();
   }
+  temp += StudyableSkills();
   
   if (describe) {
     temp += AString("; ") + *describe;
