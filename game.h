@@ -123,12 +123,17 @@ private:
 	//
 	ARegion *EditGameFindRegion();
 	void EditGameFindUnit();
+	void EditGameCreateUnit();
 	void EditGameRegion(ARegion *pReg);
+	void EditGameRegionObjects(ARegion *pReg);
+	void EditGameRegionTerrain(ARegion *pReg );
+	void EditGameRegionMarkets(ARegion *pReg );
 	void EditGameUnit(Unit *pUnit);
 	void EditGameUnitItems(Unit *pUnit);
 	void EditGameUnitSkills(Unit *pUnit);
 	void EditGameUnitMove(Unit *pUnit);
-
+	void EditGameUnitDetails(Unit *pUnit);
+	
 	void PreProcessTurn();
 	void ReadOrders();
 	void RunOrders();

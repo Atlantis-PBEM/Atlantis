@@ -147,6 +147,10 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_JAVELIN);
 	EnableItem(I_PIKE);
 
+	EnableItem(I_GREYELF);
+	EnableItem(I_MINOTAUR);
+	EnableItem(I_DROWMAN);
+
 	EnableSkill(S_ARMORCRAFT);
 	EnableSkill(S_WEAPONCRAFT);
 

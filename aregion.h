@@ -315,6 +315,11 @@ class ARegion : public AListElem
 		ProductionList products;
 		MarketList markets;
 		int xloc, yloc, zloc;
+		
+		// Editing functions
+		void AddEditTown(AString *);
+		void UpdateEditRegion();
+		void SetupEditRegion();
 
 	private:
 		/* Private Setup Functions */

@@ -868,3 +868,10 @@ Changes from 4.0.10 -> 5.0.0
       tax will receive ANY silver. *Still need to update genrules.cpp to reflect
       this in detail!*
    -- Put the tax-relevant gamedefs into one place.
+   
+   -- Lots of stuff that people haven't documented here (including me) ...
+   
+   -- Fixed bug in market creation where disabled trade goods would leave blank spots
+   -- Fixed bug in world creation where disabled races would still be used
+   -- Added an updated version of the world editing code
+   

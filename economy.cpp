@@ -362,9 +362,8 @@ void ARegion::SetupCityMarket()
 	int cap;
 	int offset = 0;
 	int citymax = Globals->CITY_POP;
-	
 	ManType *locals = FindRace(ItemDefs[race].abr);
-	
+	if(!locals) locals = FindRace("SELF");
 	/* compose array of possible supply & demand items */
 	int supply[NITEMS]; 
 	int demand[NITEMS];
@@ -377,9 +376,9 @@ void ARegion::SetupCityMarket()
 		demand[i] = 0;
 		rare[i] = 0;
 		antiques[i] = 0;
+		if(ItemDefs[i].type & IT_TRADE) numtrade++;
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(ItemDefs[i].flags & ItemType::NOMARKET) continue;
-		if(ItemDefs[i].type & IT_TRADE) numtrade++;
 		if (i==I_SILVER) continue;
 		if((ItemDefs[i].type & IT_MAN)
 			|| (ItemDefs[i].type & IT_LEADER)) continue;
@@ -418,15 +417,12 @@ void ARegion::SetupCityMarket()
 				}
 			}
 		}
-		
 		int canProduce = 0;
 		// Check if the locals can produce this item
 		if(canProduceHere) canProduce = locals->CanProduce(i);
-		
 		int isUseful = 0;
 		// Check if the item is useful to the locals
 		isUseful = locals->CanUse(i);
-		
 		//Normal Items
 		if(ItemDefs[ i ].type & IT_NORMAL) {
 			
@@ -452,7 +448,6 @@ void ARegion::SetupCityMarket()
 				// Add foodstuffs directly to market
 				int amt = Globals->CITY_MARKET_NORMAL_AMT;
 				int price;
-
 				if(Globals->RANDOM_ECONOMY) {
 					amt += getrandom(amt);
 					price = (ItemDefs[i].baseprice * (120 + getrandom(80))) /
@@ -478,6 +473,7 @@ void ARegion::SetupCityMarket()
 					} else if(isUseful) demand[i] = 4;
 				}
 			} else {
+			
 				// Tool, weapon or armor
 				if(isUseful) {
 					// Add to supply?
@@ -501,7 +497,6 @@ void ARegion::SetupCityMarket()
 			if(ItemDefs[i].hitchItem > 0) antiques[i] = 2;
 		}
 	}
-	
 	/* Check for advanced item */
 	if((Globals->CITY_MARKET_ADVANCED_AMT) && (getrandom(4) == 1)) {
 		int ad = 0;
@@ -533,7 +528,6 @@ void ARegion::SetupCityMarket()
 			}
 		}
 	}
-	
 	/* Check for magic item */
 	if((Globals->CITY_MARKET_MAGIC_AMT) && (getrandom(8) == 1)) {
 		int mg = 0;
@@ -639,7 +633,6 @@ void ARegion::SetupCityMarket()
 		supply[i] = 0;
 		num--;
 	}
-	
 	/* Set up the trade items */
 	int buy1 = getrandom(numtrade);
 	int buy2 = getrandom(numtrade);
@@ -772,9 +765,7 @@ void ARegion::SetupProds()
 void ARegion::AddTown()
 {
 	town = new TownInfo;
-
 	town->name = new AString(AGetNameString(AGetName(1)));
-
 	// PLAYER_ECONOMY
 	// basepop is the town's habitat
 	// set pop to a base level at first
@@ -789,7 +780,7 @@ void ARegion::AddTown()
 	}
 
 	if(Globals->RANDOM_ECONOMY) {
-		int popch = 2500;
+		int popch = 2000;
 		if(Globals->LESS_ARCTIC_TOWNS) {
 			int dnorth = GetPoleDistance(D_NORTH);
 			int dsouth = GetPoleDistance(D_SOUTH);
@@ -805,12 +796,282 @@ void ARegion::AddTown()
 	} else {
 		town->pop = 500;
 	}
-
 	town->basepop = town->pop;
 	town->activity = 0;
 
 	SetupCityMarket();
 }
+
+void ARegion::AddEditTown(AString *townname)
+{
+/* This should be a direct copy of the above except for the naming*/
+	town = new TownInfo;
+	town->name = townname;
+	// PLAYER_ECONOMY
+	// basepop is the town's habitat
+	// set pop to a base level at first
+	if(Globals->PLAYER_ECONOMY) {
+		town->basepop = TownHabitat();
+		town->pop = town->basepop * 2 / 3;
+		town->activity = 0;
+		town->growth = 0;
+		town->mortality = 0;
+		SetupCityMarket();
+		return;
+	}
+
+	if(Globals->RANDOM_ECONOMY) {
+		int popch = 2000;
+		if(Globals->LESS_ARCTIC_TOWNS) {
+			int dnorth = GetPoleDistance(D_NORTH);
+			int dsouth = GetPoleDistance(D_SOUTH);
+			int dist = dnorth;
+			//
+			// On small worlds or the underworld levels, a city could be
+			// within 9 of both poles.. chose the one it's closest to
+			if (dsouth < dist) dist = dsouth;
+			if (dist < 9)
+				popch = popch - (9 - dist) * ((9 - dist) + 10) * 15;
+		}
+		town->pop = 500+getrandom(popch);
+	} else {
+		town->pop = 500;
+	}
+	town->basepop = town->pop;
+	town->activity = 0;
+	SetupCityMarket();
+}
+
+void ARegion::UpdateEditRegion()
+{
+    // redo markets and entertainment/tax income for extra people.
+
+	money = (Wages() - Globals->MAINTENANCE_COST) * Population();
+	if (money < 0) money = 0;
+	// Setup working
+	Production *p = products.GetProd(I_SILVER, -1);
+	if(p) {
+    	if (IsStartingCity()) {
+    		// Higher wages in the entry cities.
+    		p->amount = Wages() * Population();
+    	} else {
+    		p->amount = (Wages() * Population()) / Globals->WORK_FRACTION;
+    	}
+    	p->productivity = Wages();
+	}
+	// Entertainment.
+	p = products.GetProd(I_SILVER, S_ENTERTAINMENT);
+	if(p) {
+    	p->baseamount = money / Globals->ENTERTAIN_FRACTION;
+    	p->amount = p->baseamount;
+	}
+	markets.PostTurn(Population(), Wages());
+	
+	//Replace man selling
+	forlist(&markets) {
+	    Market *m = (Market *) elem;
+	    if(ItemDefs[m->item].type & IT_MAN) {
+	        markets.Remove(m);
+	        delete m;
+        }
+    }
+
+	float ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
+    Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),
+							Population()/5, 0, 10000, 0, 2000);
+	markets.Add(m);
+
+	if(Globals->LEADERS_EXIST) {
+		ratio = ItemDefs[I_LEADERS].baseprice / (float)Globals->BASE_MAN_COST;
+		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
+						Population()/25, 0, 10000, 0, 400);
+		markets.Add(m);
+	}
+    
+    
+}
+
+void ARegion::SetupEditRegion()
+{
+//Direct copy of SetupPop() except calls AddEditTown() instead of AddTown()
+	TerrainType *typer = &(TerrainDefs[type]);
+	habitat = typer->pop+1;
+	if (habitat < 100) habitat = 100;
+
+	int pop = typer->pop;
+	int mw = typer->wages;
+	
+	// fix economy when MAINTENANCE_COST has been adjusted
+	mw += Globals->MAINTENANCE_COST - 10;
+	if (mw < 0) mw = 0;
+
+	if (pop == 0) {
+		population = 0;
+		basepopulation = 0;
+		wages = 0;
+		maxwages = 0;
+		money = 0;
+
+		/*
+		if(Globals->PLAYER_ECONOMY) {
+			// All regions need silver production
+			// even if no income can be gained
+			Production *p = new Production;
+			p->itemtype = I_SILVER;
+			p->amount = 0;
+			p->skill = -1;
+			p->productivity = 0;
+			products.Add(p);
+
+			p = new Production;
+			p->itemtype = I_SILVER;
+			p->amount = 0;
+			p->skill = S_ENTERTAINMENT;
+			p->productivity = Globals->ENTERTAIN_INCOME;
+			products.Add(p);
+		}
+		*/
+
+		return;
+	}
+
+	// Only select race here if it hasn't been set during Race Growth
+	// in the World Creation process.
+	if ((race == -1) || (!Globals->GROW_RACES)) {
+		int noncoastalraces = sizeof(typer->races)/sizeof(int);
+		int allraces =
+			noncoastalraces + sizeof(typer->coastal_races)/sizeof(int);
+
+		race = -1;
+		while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
+			int n = getrandom(IsCoastal() ? allraces : noncoastalraces);
+			if(n > noncoastalraces-1) {
+				race = typer->coastal_races[n-noncoastalraces-1];
+			} else
+				race = typer->races[n];
+		}
+	}
+
+	if(Globals->PLAYER_ECONOMY) {
+		if(Globals->RANDOM_ECONOMY)	habitat = habitat * 2/3 + getrandom(habitat/3);
+		ManType *mt = FindRace(ItemDefs[race].abr);
+		if (mt->terrain == typer->similar_type) {
+			habitat = (habitat * 9)/8;
+		}
+		if (!IsNativeRace(race)) {
+			habitat = (habitat * 4)/5;
+		}
+		basepopulation = habitat;
+		// hmm... somewhere not too far off equilibrium pop
+		population = habitat * 66 / 100;
+	} else {
+		if(Globals->RANDOM_ECONOMY) {
+			population = (pop + getrandom(pop)) / 2;
+		} else {
+			population = pop;
+		}
+		basepopulation = population;
+	}
+
+	// Setup wages
+	if(Globals->PLAYER_ECONOMY) {
+		int level = 1;
+		development = 1;
+		int prev = 0;
+		while (level < mw) {
+			development++;
+			prev++;
+			if(prev > level) {
+				level++;
+				prev = 0;
+			}
+		}
+		if(Globals->RANDOM_ECONOMY) {
+			development += getrandom(36);
+		}
+	} else {
+		if(Globals->RANDOM_ECONOMY) {
+			mw += getrandom(3);
+		}
+		wages = mw;
+		maxwages = mw;
+	}
+
+	if(Globals->TOWNS_EXIST) {
+		int adjacent = 0;
+		int prob = Globals->TOWN_PROBABILITY;
+		if (prob < 1) prob = 100;
+		int townch = (int) 80000 / prob;
+		if (Globals->TOWNS_NOT_ADJACENT) {
+			for (int d = 0; d < NDIRS; d++) {
+				ARegion *newregion = neighbors[d];
+				if ((newregion) &&  (newregion->town)) adjacent++;
+			}
+		}
+		if(Globals->LESS_ARCTIC_TOWNS) {
+			int dnorth = GetPoleDistance(D_NORTH);
+			int dsouth = GetPoleDistance(D_SOUTH);
+			if (dnorth < 9)
+				townch = townch + 25 * (9 - dnorth) *
+					(9 - dnorth) * Globals->LESS_ARCTIC_TOWNS;
+			if (dsouth < 9)
+				townch = townch + 25 * (9 - dsouth) *
+					(9 - dsouth) * Globals->LESS_ARCTIC_TOWNS;
+		}
+		int spread = Globals->TOWN_SPREAD;
+		if(spread > 100) spread = 100;
+		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
+			100 * spread) / 100;
+		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
+		AString *name = new AString("name");
+		if (getrandom(townch) < townprob) AddEditTown(name);
+	}
+
+	Production *p = new Production;
+	p->itemtype = I_SILVER;
+	money = Population() * (Wages() - Globals->MAINTENANCE_COST);
+
+	if(Globals->PLAYER_ECONOMY) {
+		WagesFromDevelopment();
+		maxwages = wages;
+		money = Population() * (wages - 100) / 10;
+	}	
+	
+	if (money < 0) money = 0;
+	p->amount = money / Globals->WORK_FRACTION;
+	p->skill = -1;
+	if (Globals->PLAYER_ECONOMY) p->productivity = wages;
+		else p->productivity = Wages();
+	products.Add(p);
+
+	//
+	// Setup entertainment
+	//
+	p = new Production;
+	p->itemtype = I_SILVER;
+	p->amount = money / Globals->ENTERTAIN_FRACTION;
+	p->skill = S_ENTERTAINMENT;
+	p->productivity = Globals->ENTERTAIN_INCOME;
+	products.Add(p);
+	float ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
+	// Setup Recruiting
+	Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),
+							Population()/5, 0, 10000, 0, 2000);
+	markets.Add(m);
+
+	if(Globals->LEADERS_EXIST) {
+		ratio = ItemDefs[I_LEADERS].baseprice / (float)Globals->BASE_MAN_COST;
+		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
+						Population()/25, 0, 10000, 0, 400);
+		markets.Add(m);
+	}
+}
+
+
+
+
+
+
 
 // Used at start to set initial town's
 // development level
