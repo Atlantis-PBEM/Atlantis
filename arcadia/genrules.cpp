@@ -133,10 +133,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("table_of_contents");
 	f.ClassTagText("div", "rule", "");
 	f.TagText("h2", "Table of Contents");
-	temp = AString("Thanks to ") +
-		f.Link("mailto:ken@satori.gso.uri.edu","Kenneth Casey")+
-		" for putting together this table of contents.";
-	f.Paragraph(temp);
 	f.Paragraph("");
 	f.Enclose(1, "ul");
 	f.TagText("li", f.Link("#intro", "Introduction"));
@@ -376,7 +372,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("li", f.Link("#weapon", "weapon"));
 	if (Globals->ALLOW_WITHDRAW) {
 		f.TagText("li", f.Link("#withdraw", "withdraw"));
-	    if(Globals->WISHSKILLS_ENABLED) {
+	    if(Globals->TESTGAME_ENABLED) {
         	f.TagText("li", f.Link("#wishdraw", "wishdraw"));
          	f.TagText("li", f.Link("#wishskill", "wishskill"));
  	    }
@@ -441,90 +437,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 				f.Link("#tablemagebuildings", "Table of Mages/Building"));
 	}
 	f.Enclose(0, "ul");
-	
-	f.Paragraph("Arcadia specific changes");
-	f.Paragraph("");
-	f.Enclose(1, "ul");
-	f.TagText("li", f.Link("#tablefactionpoints","Table of Faction Points"));
-	f.TagText("li", f.Link("#tableitemweights", "Table of Item Weights"));
-	f.TagText("li", f.Link("#tablehexsideterrain", "Table of Terrain Features"));	
-	f.TagText("li", f.Link("#tableshipcapacities", "Table of Ship Capacities"));
-	f.TagText("li", f.Link("#tableraces", "Table of Races"));
-	f.TagText("li", f.Link("#tableunittypes", "Table of Unit Types"));
-	f.TagText("li", f.Link("#tableiteminfo", "Table of Item Information"));
-	f.TagText("li", f.Link("#tablebuildings", "Table of Buildings"));
-	f.TagText("li", f.Link("#tabletradestructures",	"Table of Trade Structures"));
-	f.TagText("li", f.Link("#tableshipinfo", "Table of Ship Information"));
-	f.TagText("li", f.Link("#tablebattleterrain", "Table of Battle Terrains"));	
-	f.TagText("li",	f.Link("#tablemagebuildings", "Table of Mages/Building"));
-	f.PutNoFormat("");
-	f.TagText("li", f.Link("#world_regions", "Regions"));
-	f.Enclose(0, "ul");	
-	f.Enclose(1, "li");
-	f.PutStr(f.Link("#movement", "Movement"));
-	f.Enclose(1, "ul");
-	f.TagText("li", f.Link("#movement_normal", "Normal Movement"));
-	if(!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
-		f.TagText("li", f.Link("#movement_sailing", "Sailing"));
-	f.TagText("li", f.Link("#movement_order", "Order of Movement"));
-	f.Enclose(0, "ul");
-	f.Enclose(0, "li");
-	f.Enclose(1, "li");
-	f.PutStr(f.Link("#skills", "Skills"));
-	f.Enclose(1, "ul");
-	f.TagText("li", f.Link("#skills_limitations", "Limitations"));
-	f.TagText("li", f.Link("#skills_teaching", "Teaching"));
-    f.TagText("li", f.Link("#skills_experience", "Experience"));
-	f.TagText("li", f.Link("#skills_overflow", "Overflow"));
-	f.TagText("li", f.Link("#skills_skillreports", "Skill Reports"));
-	f.Enclose(0, "ul");
-	f.Enclose(0, "li");
-	
-	f.Enclose(1, "li");
-	f.PutStr(f.Link("#com", "Combat"));
-	f.Enclose(1, "ul");
-	f.TagText("li", f.Link("#com_thebattle", "The Battle"));
-	f.TagText("li", f.Link("#com_report", "The Battle Report"));
-	f.TagText("li", f.Link("#com_victory", "Victory!"));
-	f.Enclose(0, "ul");
-	f.Enclose(0, "li");	
-
-	f.Enclose(1, "ul");
-	f.TagText("li", f.Link("#stealthobs_assassination",
-				"Assassination"));
-	f.Enclose(0, "ul");
-	
-	f.Enclose(1, "li");
-	f.PutStr(f.Link("#magic", "Heroes and Magic"));
-	f.Enclose(1, "ul");
-	f.TagText("li", f.Link("#magic_skills", "Hero Skills"));
-	f.TagText("li", f.Link("#magic_foundations", "Foundations"));
-	f.TagText("li", f.Link("#magic_furtherstudy", "Further Hero Study"));
-	f.TagText("li", f.Link("#magic_usingmagic", "Using Hero Skills"));
-	f.TagText("li", f.Link("#magic_energy", "Magical Energy"));
-	f.TagText("li", f.Link("#magic_incombat", "Heroes In Combat"));
-	f.TagText("li", f.Link("#magic_miscellaneous", "Miscellaneous Hero Rules"));
-	if(Globals->EARTHSEA_VICTORY) f.TagText("li", f.Link("#magic_mastery", "Mage Masteries"));
-	f.Enclose(0, "ul");
-	f.Enclose(0, "li");
-	
-	f.TagText("li", f.Link("#all", "all"));
-	f.TagText("li", f.Link("#command", "command"));
-	f.TagText("li", f.Link("#fightas", "fightas"));
-	f.TagText("li", f.Link("#follow", "follow"));
-	f.TagText("li", f.Link("#leave", "leave"));
-	f.TagText("li", f.Link("#master", "master"));
-	f.TagText("li", f.Link("#recruit", "recruit"));
-	if(Globals->SEND_COST >= 0)
-		f.TagText("li", f.Link("#send", "send"));
-	f.TagText("li", f.Link("#study", "study"));
-	f.TagText("li", f.Link("#tactics", "tactics"));
-	f.TagText("li", f.Link("#template", "template"));
-	f.TagText("li", f.Link("#type", "type"));
-	if(Globals->WISHSKILLS_ENABLED) {
-    	f.TagText("li", f.Link("#wishdraw", "wishdraw"));
-     	f.TagText("li", f.Link("#wishskill", "wishskill"));
-  	}
 	
 	f.LinkRef("intro");
 	f.ClassTagText("div", "rule", "");
@@ -785,6 +697,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.Paragraph(temp);
 		}
 	}
+		
+	temp = "Each faction also has an ethnicity. This is determined by the "
+        "ethnicity of the hero commanding your faction, as set with the ";
+	temp += f.Link("#command", "COMMAND") + " order. The ethnicity of your "
+        "faction determines how expensive it is to keep units; for example "
+        "a dwarvish faction will pay only half as much to employ a dwarf as "
+        "to employ an elf, human or orc. To change your faction's "
+        "ethnicity, you must have a hero of the ethnicity you wish your "
+        "faction to become, and use the ";
+	temp += f.Link("#command", "COMMAND") + " order to get him or her to take "
+	    "command of your faction.";
+	f.Paragraph(temp);
+	
 	temp = "When a faction starts the game, it is given a one-man unit and ";
 	temp += Globals->START_MONEY;
 	temp += " silver in unclaimed money.  Unclaimed money is cash that your "
@@ -2473,7 +2398,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 			}
 		}
 	}
-	temp += ".";
+//	temp += ".";
+	//Xanaxor:
+    temp += ", and is always doubled if the character's ethnicity is "
+                "different to that of your faction. A listing of the exact costs may be found ";
+	temp += f.Link("#tableunittypes", "here") + ".";
+	temp += " Note that if your commanding hero is killed, then your faction will fall into chaos, "
+	    "and all units in the subsequent turn will cost the double maintenance amount if you do not appoint a new "
+	    "commanding hero. Because of this, it is always wise to have a second hero "
+        "of the same ethnicity who can, in an emergency, take over command "
+	    "of your faction.";
+	f.Paragraph(temp);
+	temp = "";
+	
 	if (Globals->FOOD_ITEMS_EXIST) {
 		temp += " Units may substitute one unit of grain, livestock, or "
 			"fish for each ";
@@ -3832,12 +3769,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", " Flying ");
 		f.TagText("th", " Ranged ");		
 		f.Enclose(0, "tr");
-		int num = 8;
+		/*int num = 8;
 		if(Globals->UNDERWORLD_LEVELS > 0) num = 11;
-    	if(Globals->UNDERDEEP_LEVELS > 0) num = 14;
+    	if(Globals->UNDERDEEP_LEVELS > 0) num = 14;*/
 		
 		
-		for(i = 0; i < num; i++) {
+
+	    for(i = 0; i < R_NUM; i++) {
+	        if(TerrainDefs[i].flags & TerrainType::DISABLED) continue;
+	        if(i == R_NEXUS) continue;
 //			if(RegionDefs[i].flags & RegionDefs::DISABLED) continue;
 
 			/* Okay, this is a valid region for standard games! */
@@ -3872,7 +3812,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Enclose(0, "table");
 		f.Enclose(0, "center");
-            
+
 	temp = "If the terrain does not allow for riding in battle, "
            "then any units which would normally ride will fight on foot. "
            "If flying units are not allowed in the terrain, then those "
@@ -3886,7 +3826,11 @@ int Game::GenRules(const AString &rules, const AString &css,
            "any battle maneuvres, such as flanking around outnumbered "
            "opponents. If ranged attacks are restricted, "
            "ranged units have a -1 penalty to their attack skill "
-           "and chance-to-attack. ";
+           "and chance-to-attack. Enhanced ranged attacks gain a +1 bonus. "
+           "Note two exceptions here: because of their skill with ranged weapons, "
+           "elves do not suffer from ranged penalties, and, except for elves, "
+           "enhanced range bonuses apply only to magic attacks, not to "
+           "attacks with bow or crossbow.";
 	f.Paragraph(temp); 
  /*
 	temp = "Formations are also limited by the skill of the tactitian "
@@ -3912,7 +3856,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	
 	temp = "Coordinating large armies is no easy task, however, it is assumed "
            "the commander of an army delegates sufficient officers to help "
-           "him or her control it. However, some spells are able to interfere "
+           "him or her control it. Some spells are able to interfere "
            "with this control; if one is active, and there is no friendly mage "
            "able to cast a counterspell, then some soldiers will not be placed in their proper formation. In "
            "addition, the lack of coordination will effect the success of "
@@ -3920,6 +3864,21 @@ int Game::GenRules(const AString &rules, const AString &css,
            "These magic spells can potentially turn a well commanded army into "
            "a confused horde of soldiers, which may (depending on the army's "
            "makeup) make a massive difference to its success in battle.";
+	f.Paragraph(temp);
+	
+	temp = "Armies made of mixed ethnicities will suffer morale problems, as soldiers "
+	       "do not like to fight alongside troops they are not well disposed to. "
+	       "On average, if x% of the army are of a different ethnicity, then "
+	       "a soldier will suffer a penalty of \"2x\" to his or her attack "
+	       "melee defence skills. So if an army is composed of 90 elves and "
+	       "10 orcs, the elves will, on average lose 0.2 to their attack and "
+	       "defence skills (which means they have a 20% chance of a -1 penalty, "
+	       "since attack and defence skills are always integers), while the orcs "
+	       "will suffer a penalty of 1.8, ie an 80% chance of a -2 penalty and a "
+	       "20% chance of a -1 penalty. Monsters fighting in an army do not cause "
+           "or suffer morale penalties, except for the undead, who will cause "
+           "morale penalties to elves, dwarves and humans. The hero skill \"unity\" "
+           "can help alleviate morale penalties in battle.";
 	f.Paragraph(temp);
 	
 	temp = AString("In each combat round, combat formations vie for position. ") +
@@ -4054,7 +4013,7 @@ int Game::GenRules(const AString &rules, const AString &css,
     temp += " In this version of Atlantis, Slashing, Piercing, "
         "Crushing and Cleaving weapons all have identical effects, "
         "and there is no difference between these types of attacks. "
-        "The terminology is included only because Atlantis "
+        "The terminology is included only because Atlantis is "
         "based on a game engine which has the ability to be more "
         "more complex.";
 	f.Paragraph(temp);
@@ -4833,6 +4792,9 @@ int Game::GenRules(const AString &rules, const AString &css,
         "is done before the check for chance-to-attack for the bowmen, "
         "so this is effectively a 2% chance per actual attack.";
 	f.Paragraph(temp);
+	temp = "There are a few hero spells which provide a beneficial effect for the "
+        "hero's army. These spells cannot be blocked by enemy shields.";
+	f.Paragraph(temp);
 	f.LinkRef("magic_miscellaneous");
 	f.TagText("h3", "Miscellaneous Hero Rules:");
 	temp = "Because of the status given to heroes, and their respect for their "
@@ -5044,6 +5006,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"row. For example, to tax every turn:";
 	f.Paragraph(temp);
 	temp = "@TAX";
+	f.Paragraph(temp);
+	temp = "You may suppress errors generated by most (but not all) orders "
+        "with an exclamation mark (!), in which case, providing the order "
+        "is a valid order, errors will not be shown in your next report "
+        "if the order is unable to be carried out (for example because the "
+        "target unit was not present). This is "
+		"useful for orders which can only take place sometimes, and you "
+        "do not wish to receive errors when they are not successful. For example, "
+        "to not receive an error if a repeating GIVE order fails:";
+	f.Paragraph(temp);
+	temp = "@!GIVE 200 ALL WOOD";
 	f.Paragraph(temp);
 	
 	f.LinkRef("orders_abbreviations");
@@ -6737,7 +6710,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "Withdraw 1 iron.";
 		temp2 = "WITHDRAW iron";
 		f.CommandExample(temp, temp2);
-		if(Globals->WISHSKILLS_ENABLED) {	    	
+		if(Globals->TESTGAME_ENABLED) {	    	
     		f.ClassTagText("div", "rule", "");
     		f.LinkRef("wishdraw");
     		f.TagText("h4", "WISHDRAW [item]");
@@ -6902,17 +6875,17 @@ int Game::GenRules(const AString &rules, const AString &css,
     	f.Enclose(0, "ul");
     	f.Enclose(0, "li");
     }	
-	
-	f.Enclose(1, "li");
-	f.PutStr("Tax orders.");
-	f.Enclose(1, "ul");
-	temp = f.Link("#pillage","PILLAGE") + " orders are processed.";
-	f.TagText("li", temp);
-	temp = f.Link("#tax","TAX") + " orders are processed.";
-	f.TagText("li", temp);
-	f.Enclose(0, "ul");
-	f.Enclose(0, "li");
-	
+	if(!Globals->LATE_TAX) {
+    	f.Enclose(1, "li");
+    	f.PutStr("Tax orders.");
+    	f.Enclose(1, "ul");
+    	temp = f.Link("#pillage","PILLAGE") + " orders are processed.";
+    	f.TagText("li", temp);
+    	temp = f.Link("#tax","TAX") + " orders are processed.";
+    	f.TagText("li", temp);
+    	f.Enclose(0, "ul");
+    	f.Enclose(0, "li");
+	}
     if(!Globals->ARCADIA_MAGIC) {
     	f.Enclose(1, "li");
     	f.PutStr("Instant Magic");
@@ -6957,6 +6930,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(0, "ul");
 		f.Enclose(0, "li");
 	}
+	
+	if(Globals->LATE_TAX) {
+    	f.Enclose(1, "li");
+    	f.PutStr("Tax orders.");
+    	f.Enclose(1, "ul");
+    	temp = f.Link("#pillage","PILLAGE") + " orders are processed.";
+    	f.TagText("li", temp);
+    	temp = f.Link("#tax","TAX") + " orders are processed.";
+    	f.TagText("li", temp);
+    	f.Enclose(0, "ul");
+    	f.Enclose(0, "li");
+	}
+	
 	f.Enclose(1, "li");
 	f.PutStr("Movement orders.");
 	f.Enclose(1, "ul");
@@ -6986,12 +6972,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", temp);
 	f.Enclose(0, "ul");
 	f.Enclose(0, "li");
+	temp = "Goods from ";
+	temp += f.Link("#send", "SEND") + "and " + f.Link("#produce", "PRODUCE");
+	temp += " orders are credited.";
+	f.TagText("li", temp);
 	temp = "Teleportation spells are ";
 	temp += f.Link("#cast", "CAST") + ".";
-	f.TagText("li", temp);
-	temp = "Goods from ";
-	temp += f.Link("#send", "SEND") + ".";
-	temp += " orders are credited.";
 	f.TagText("li", temp);
 	if (qm_exist) {
 		temp = f.Link("#transport", "TRANSPORT") + " and " +
@@ -7324,7 +7310,8 @@ int Game::GenRules(const AString &rules, const AString &css,
             "your mage more energy with which to cast them. The skill 'inner strength' also helps "
             "increase a mage's energy, though it is not technically a foundation skill. If you find "
             "you have more energy than you are using, study some more spells. Remember, you can "
-            "cast up to three different spells per turn, plus use other spells in battle.";
+            "cast as many spells as you like per turn, plus use other spells in battle, as long "
+            "as you have sufficient energy.";
     f.Paragraph(temp);
 
 	temp = "Q: After years of studying I finally got a staff of fire. But my mage keeps casting storms instead! <br></br>";
@@ -7377,7 +7364,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	        "up to a cost of 3 to cast on one man (and 5 energy to cast on two, 8 on 3, etc.). ";
     f.Paragraph(temp);
     
-	temp = "Q: Is the Arcadia bug-free? <br></br>";
+	temp = "Q: Is Arcadia bug-free? <br></br>";
 	temp += "A: No. Arcadia is based on Atlantis V5, which is now close to bug-free. However, there have been many "
             "modifications made for the Arcadia series, and while testing has been done to reduce the number of bugs, there "
             "are certainly some remaining. If you become aware of a bug in the program (either harmful OR beneficial) please "
@@ -7392,8 +7379,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "A: No. There are a few combat spells which are not cumulative - these include fog, darkness, "
             "concealment, and their counter-spells. To save energy, only the best skilled mage from each army will cast "
             "these spells in combat; however if this mage runs out of energy, then the second mage "
-            "will cast instead. Note though, that if the spell fizzles, the second mage will not attempt "
-            "to cast during that combat round. Shield spells do not follow this pattern - multiple shields may "
+            "will cast instead. " /*Note though, that if the spell fizzles, the second mage will not attempt "
+            "to cast during that combat round. */ "Shield spells do not follow this pattern - multiple shields may "
             "be cast, in case the first shield is destroyed.";
     f.Paragraph(temp);
 
@@ -7459,7 +7446,7 @@ int Game::GenRules(const AString &rules, const AString &css,
             "of the settlement (this is slightly less than the total population of the region). Define M as "
             "'P/120000 - 0.08'. If t < MT, the settlement will lose population equal to (P-Pt/MT)/20, but will "
             "not drop below 80% of the greatest size the settlement has previously reached. If t > MT, the "
-            "city will grow by G*(1- exp(1-(t/MT)) ), where G is '150 + P(120000-P)/24000000'.";
+            "city will grow by G*(1- exp(1-(t/MT)) ), where G is '3000 + P(120000-P)/24000000'.";
     f.Paragraph(temp);
 
    	temp = "Q: How many casualties will my mage's spell XXXX cause in a battle? <br></br>";
@@ -7637,7 +7624,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("th", "Withdraw Value*");
 	f.Enclose(0, "tr");
 	SkillType *mS;
-	int numtrade = 0;
+//	int numtrade = 0;
 	
 	for(i = 0; i < NITEMS; i++) {
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
@@ -8191,7 +8178,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "td align=\"left\" nowrap");
 		temp = "";
 		first = 1;
-		for(int c = 0; c < sizeof(SkillDefs[i].depends)/sizeof(SkillDepend); c++) {
+		for(unsigned int c = 0; c < sizeof(SkillDefs[i].depends)/sizeof(SkillDepend); c++) {
 		    if(SkillDefs[i].depends[c].skill != NULL) {
 		        pS = FindSkill(SkillDefs[i].depends[c].skill);
 		        if(pS && !(pS->flags & SkillType::DISABLED)) {

@@ -158,8 +158,11 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck, int isqui
                 ProcessHypnosisSpell(u,o,pCheck, isquiet);
                 break;		
 			case S_ARTIFACT_LORE: //creates shieldstone or AMPR in EarthSea.
-			    ProcessArtifactSpell(u,o,pCheck, isquiet);
-                break;	                	
+			case S_BASE_ARTIFACTLORE:
+			    ProcessArtifactSpell(u,o,sk,pCheck, isquiet);
+                break;
+            default:
+                u->Error("CAST: That spell does not seem to have process code. Please contact your GM.");     	
 		}
 	}
 }
@@ -170,8 +173,10 @@ void Unit::AddCastOrder(CastOrder *order)
      else {
          forlist(&castlistorders) {
             CastOrder *ord = (CastOrder *) elem;
-            if(ord->spell == order->spell) castlistorders.Remove(ord);
-    		delete ord;
+            if(ord->spell == order->spell) { 
+                castlistorders.Remove(ord);
+    		    delete ord;
+    		}
         }
     }
     castlistorders.Add(order);
@@ -788,7 +793,7 @@ void Game::ProcessSummonCreaturesSpell(Unit *u, AString *o, int spell, OrdersChe
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessArtifactSpell(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessArtifactSpell(Unit *u, AString *o, int sk, OrdersCheck *pCheck, int isquiet )
 {
     if(!Globals->ARCADIA_MAGIC) return;
 	AString *token = o->gettoken();
@@ -807,7 +812,7 @@ void Game::ProcessArtifactSpell(Unit *u, AString *o, OrdersCheck *pCheck, int is
     }
     
 	CastOrder *order = new CastOrder;
-	order->spell = S_ARTIFACT_LORE;
+	order->spell = sk;
     order->quiet = isquiet;
 	order->level = type;
 	u->AddCastOrder(order);
@@ -1305,15 +1310,12 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u, CastOrder *order)
 	if (order->level == 0) {
 		order->level = u->GetSkill(order->spell);
 	}
-
 	if (u->GetSkill(order->spell) < order->level ||
 			order->level == 0) {
 		u->Error("CAST: Skill level isn't that high.", order->quiet);
 		return;
 	}
-	
 	u->activecastorder = order;
-
 	int sk = order->spell;
 	switch (sk) {
 		case S_MIND_READING:
@@ -1480,7 +1482,6 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u, CastOrder *order)
 		u->Practice(sk);
 		r->NotifySpell(u, SkillDefs[sk].abbr, &regions);
 	}
-
     u->activecastorder = 0;
 
 }
@@ -1632,9 +1633,9 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 {
 	int level = u->GetSkill(S_ENCHANT_ARMOR);
 	int max = ItemDefs[I_MPLATE].mOut * level;
-	int count = 0;
+//	int count = 0;
 	unsigned int c;
-	int found;
+//	int found;
 
 	CastOrder *order = u->activecastorder;
 
@@ -1648,12 +1649,12 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
     }
 
 
-	for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
-		int i = ItemDefs[I_MPLATE].pInput[c].item;
+	for(c = 0; c < sizeof(ItemDefs->mInput)/sizeof(Materials); c++) {
+		int i = ItemDefs[I_MPLATE].mInput[c].item;
 		if(i != -1) {
 			int amt = u->GetSharedNum(i);
-			if(amt/ItemDefs[I_MPLATE].pInput[c].amt < max) {
-				max = amt/ItemDefs[I_MPLATE].pInput[c].amt;
+			if(amt/ItemDefs[I_MPLATE].mInput[c].amt < max) {
+				max = amt/ItemDefs[I_MPLATE].mInput[c].amt;
 			}
 		}
 	}
@@ -1664,9 +1665,9 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
     }
 
 	// Deduct the items used
-	for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
-		int i = ItemDefs[I_MPLATE].pInput[c].item;
-		int a = ItemDefs[I_MPLATE].pInput[c].amt;
+	for(c = 0; c < sizeof(ItemDefs->mInput)/sizeof(Materials); c++) {
+		int i = ItemDefs[I_MPLATE].mInput[c].item;
+		int a = ItemDefs[I_MPLATE].mInput[c].amt;
 		if(i != -1) {
 			u->ConsumeShared(i, max*a);
 		}
@@ -1744,9 +1745,9 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 {
 	int level = u->GetSkill(S_ENCHANT_SWORDS);
 	int max = ItemDefs[I_MSWORD].mOut * level;
-	int count = 0;
+//	int count = 0;
 	unsigned int c;
-	int found;
+//	int found;
 
 	CastOrder *order = u->activecastorder;
 
@@ -1759,12 +1760,12 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
         return 0;
     }
     
-    for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
-		int i = ItemDefs[I_MSWORD].pInput[c].item;
+    for(c = 0; c < sizeof(ItemDefs->mInput)/sizeof(Materials); c++) {
+		int i = ItemDefs[I_MSWORD].mInput[c].item;
 		if(i != -1) {
 			int amt = u->GetSharedNum(i);
-			if(amt/ItemDefs[I_MSWORD].pInput[c].amt < max) {
-				max = amt/ItemDefs[I_MSWORD].pInput[c].amt;
+			if(amt/ItemDefs[I_MSWORD].mInput[c].amt < max) {
+				max = amt/ItemDefs[I_MSWORD].mInput[c].amt;
 			}
 		}
 	}
@@ -1775,9 +1776,9 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
     }
 
 	// Deduct the items used
-	for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
-		int i = ItemDefs[I_MSWORD].pInput[c].item;
-		int a = ItemDefs[I_MSWORD].pInput[c].amt;
+	for(c = 0; c < sizeof(ItemDefs->mInput)/sizeof(Materials); c++) {
+		int i = ItemDefs[I_MSWORD].mInput[c].item;
+		int a = ItemDefs[I_MSWORD].mInput[c].amt;
 		if(i != -1) {
 			u->ConsumeShared(i, max*a);
 		}
@@ -2134,9 +2135,10 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 	    int num;	
         if(SkillDefs[skill].flags & SkillType::COSTVARIES) num = 1;    //always produce one
         else num = (level * level * ItemDefs[item].mOut)/100;                  //produce level^2 * fixed value. This should give at least 2 for level=2, ie .mOut needs to be at least 50, typically 100.
-
+        int max = num;
+        
 	    int cost = u->GetCastCost(skill,order->extracost,1);  //cost to make one if num = 1, or level otherwise.
-	    if(num > 1) cost = (cost + level - 1) / level;        //cost to make one.
+	    if(num > 1) cost = (cost + level - 1) / level;        //cost to make one. Final cost is recalculated below to account for rounding.
 	    
 		if(cost > u->energy) {
 		    u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
@@ -2146,14 +2148,14 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
     	for(c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
     		if(ItemDefs[item].mInput[c].item == -1) continue;
     		int amt = u->GetSharedNum(ItemDefs[item].mInput[c].item);
-    		int cost = ItemDefs[item].mInput[c].amt;
-    		if(amt < cost) {
+    		int itemcost = ItemDefs[item].mInput[c].amt;
+    		if(amt < itemcost) {
     			u->Error(AString("CAST: Doesn't have sufficient ") +
     					ItemDefs[ItemDefs[item].mInput[c].item].name +
     					" to create that.", order->quiet);
     			return 0;
     		}
-    		if(amt < cost*num) num = amt / cost;     //reduce num if we don't have enough items.
+    		if(amt < itemcost*num) num = amt / itemcost;     //reduce num if we don't have enough items.
     	}
 		
 		if(num > 1) {
@@ -2166,7 +2168,11 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
             }
 		}
         u->energy -= cost;
-		u->Experience(skill,10);
+        
+        int exper = (20*num + max - 1)/ max;
+        if(exper > 10) exper = 10;
+        
+		u->Experience(skill,exper);
     	// Deduct the costs
     	for(c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
     		if(ItemDefs[item].mInput[c].item == -1) continue;
@@ -2197,6 +2203,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 	// non-Earthsea:
 	
     //This got corrupted, and needs to be replaced if ARCADIA_MAGIC is turned off
+    return 0;
 }
 
 int Game::RunSummonLich(ARegion *r,Unit *u)
@@ -2279,7 +2286,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 		} else u->energy -= cost;
 		
 		int level = u->GetSkill(S_BIRD_LORE);
-		u->Experience(S_BIRD_LORE,10);
+		u->Experience(S_BIRD_LORE,5);
 
 		#ifdef FIZZLES
         int mevent = u->MysticEvent();
@@ -2366,7 +2373,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
     
 
  	int cost = u->GetCastCost(S_BIRD_LORE,order->extracost,10); //cost of 10 creatures !
- 	int num = 1;
+ 	int num = 1;   //if free energy, only summon one at once
  	if(cost > 0) {
  	num = (10*u->energy) / cost;
      	if(num < 1) {
@@ -2429,6 +2436,8 @@ int Game::RunWolfLore(ARegion *r,Unit *u, int isquiet)
 	int summon = max - num;
 	if (summon > level) summon = level;
 	if (summon < 0) summon = 0;
+	
+    u->Experience(S_WOLF_LORE,summon); //typically 'level' experience.
 
 	u->Event(AString("Casts Wolf Lore, summoning ") +
 			ItemString(I_WOLF,summon) + ".");
@@ -3655,7 +3664,7 @@ int Game::RunSeaward(ARegion *r, Unit *u)
 	    return 0;
     }
 	
-	int destroyed = 0;
+//	int destroyed = 0;
 	int permanent = 0;
 	#ifdef FIZZLES
 	int mevent = u->MysticEvent();
@@ -3981,11 +3990,11 @@ int Game::RunSummonCreatures(ARegion *r, Unit *u, int skill, int item, int max)
     }
  	if(order->target > 0 && order->target < num) num = order->target;
  	
- 	cost = u->GetCastCost(skill,order->extracost,num);
+ 	cost = u->GetCastCost(skill,order->extracost,num); //this gives 10*cost
  	cost = (cost+9)/10;
  	u->energy -= cost;
  	
- 	int experience = num;
+ 	int experience = num/2+cost;
  	if(experience > 20) experience = 20;
  	u->Experience(skill,experience);
  	
@@ -4045,15 +4054,15 @@ int Game::RunSummonHigherCreature(ARegion *r, Unit *u, int skill, int item)
 	}
 	
 	if(!cost) {
-	    //free spell to cast; eg gryffin lore in Arc IV. Let's make a 10% summon chance, since it's free.
-        u->Experience(skill,4);
+	    //free spell to cast; eg gryffin lore in Arc IV. Let's make a 10% summon chance per level, since it's free.
+        u->Experience(skill,5);
 	    if(getrandom(100) >= 10*(level - 2*num)) {
             u->Event("Attempts to summon a gryffin, but fails.");
 	        return 1;
         }
     } else {
         u->energy -= cost;
-    	u->Experience(skill,25); //this skill would usually only be cast 3 times, and is energy intensive.
+    	u->Experience(skill,24); //this skill would usually only be cast 3 times, and is energy intensive.
 	}
 	
 	#ifdef FIZZLES
@@ -4375,9 +4384,9 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
         return 0;
 	}
 	
-    int i = 0;
-    int numitems = 0;
-    int item = -1;
+//    int i = 0;
+//    int numitems = 0;
+//    int item = -1;
     int nooutput = 0;
     int noinput = 0;
 	#ifdef FIZZLES
@@ -5013,18 +5022,23 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
     #endif
 
 	int num = 0;
+	int mageerror = 0;
+	int numberserror = 0;
 	forlist (&(order->units)) {
 		Unit *tar = r->GetUnitId((UnitId *) elem,u->faction->num);
 		if (!tar) continue;
-		if (tar->faction == u->faction) continue;
-		if (num + tar->GetMen() > max) break;
-		else {
-            num += tar->GetMen();
-            delete tar->monthorders;
-            tar->monthorders = order->monthorder;
-            order->monthorder = 0;
-            tar->taxing = order->taxing;
-            tar->Event(AString("Is hypnotised by ") + *(u->name) + ".");
+		if (tar->faction != u->faction) {
+    		if (!tar->IsMage()) {
+        		if (tar->GetMen() && (num + tar->GetMen()) <= max) {
+                    num += tar->GetMen();
+                    delete tar->monthorders;
+                    tar->monthorders = order->monthorder;
+                    order->monthorder = 0;                               //this isn't going to work for unit #2! Need to clone it.
+                    tar->taxing = order->taxing;
+                    tar->Event(AString("Is hypnotised by ") + *(u->name) + ".");
+                    u->Event(AString("Hypnotises ") + *(tar->name) + ".");
+                } else numberserror = 1;
+            } else mageerror = 1;
         }
 	}
 
@@ -5032,6 +5046,15 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
 		u->Error("CAST: Can't hypnotise that many men.", order->quiet);
 		return 0;
 	}
+	
+	if(numberserror) {
+	    u->Error("CAST: Can't hypnotise that many men. Hypnotising as many as able.", order->quiet);
+	}
+	
+	if(mageerror) {
+	    u->Error("CAST: Can't hypnotise heroes.", order->quiet);
+	}
+
 
 	cost = cost * num / (10 * level);
 	if((cost*num)%(10*level)) cost++; //round up
@@ -5222,7 +5245,6 @@ void Game::DoMerchantSell(Unit *u, SellOrder *o)
 
 /*
 Todo:
-battle experience - include some due to enemy casualties.
 
 non urgent:
 Hexside updates - walls? generalise to int array rather than bridge, road etc.

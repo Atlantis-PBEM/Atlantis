@@ -737,7 +737,7 @@ public:
     //not behave properly with non-leader mages (see unit::adjustskills).
 	int REAL_EXPERIENCE;
 	
-	int WISHSKILLS_ENABLED;
+	int TESTGAME_ENABLED;
 	
 	int POP_LEVEL;
 	
@@ -748,6 +748,11 @@ public:
 		SHOW_AS_EVENTS,
 	};
 	int SUPPRESS_ERRORS;
+	int LATE_TAX;
+	//this is a value of 0 to 100, specifiying the % chance of undead to self-resurrect
+	int MAGE_UNDEAD_INVINCIBLE;
+	// value of zero means magic CAN be taught:
+	int CANT_TEACH_MAGIC;
 };
 
 extern GameDefs *Globals;

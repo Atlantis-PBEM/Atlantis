@@ -603,7 +603,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 				delete id;
 			} else {
 				if ((!target->monthorders ||
-					target->monthorders->type != O_STUDY) && !Globals->ARCADIA_MAGIC || !target->IsMage() || !target->herostudyorders) {
+					target->monthorders->type != O_STUDY ) && (!Globals->ARCADIA_MAGIC || !target->IsMage() || !target->herostudyorders) ) {
 					unit->Error(AString("TEACH: ") + *(target->name) +
 								" is not studying.", quiet);
 					order->targets.Remove(id);
@@ -622,7 +622,8 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 						delete id;
 					} else {
 						// Check whether it's a valid skill to teach
-						if (SkillDefs[sk].flags & SkillType::NOTEACH) {
+						if ( (SkillDefs[sk].flags & SkillType::NOTEACH) || 
+                            ((SkillDefs[sk].flags & SkillType::MAGIC) && Globals->CANT_TEACH_MAGIC) ) {
 							unit->Error(AString("TEACH: ") + 
 									AString(SkillDefs[sk].name) + 
 									" cannot be taught.", quiet);
@@ -683,7 +684,40 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 			// The TEACHER may learn something in this process!
 			unit->Practice(o->skill);		
 		}
+	//Recycle any spare teaching ability to stop multi-teaching only giving 29 days due to rounding down errors
+	    if(days > 0) {
+    		forlist_reuse(&order->targets) {
+    		    if(days < 1) continue; //we've allocated it all, break out.
+    		    
+    			UnitId * id = (UnitId *) elem;
+    			Unit * u = reg->GetUnitId(id,unit->faction->num);
+
+    			//int sk = ((StudyOrder *) u->monthorders)->skill;
+                int sk;
+                if(Globals->ARCADIA_MAGIC && u->IsMage() && u->herostudyorders) {
+                   sk = ((StudyOrder *) u->herostudyorders)->skill;
+                } else sk = ((StudyOrder *) u->monthorders)->skill;
+    
+    			int umen = u->GetMen();
+    
+    			StudyOrder * o = (StudyOrder *) u->monthorders;
+    			if(Globals->ARCADIA_MAGIC && u->herostudyorders) o = (StudyOrder *) u->herostudyorders;
+
+    			if (o->days < 30 * umen) // this unit can still be taught
+    			{
+    				o->days += days;
+    				days = 0;
+    			}
+    			//check if we've given too much:
+    			if (o->days > 30 * umen) // this bit returns any spare days to the teacher
+    			{
+    				days += o->days - 30 * umen;
+    				o->days = 30 * umen;
+    			}
+    		}
+	    }
 	}
+	
 }
 
 /* Hexside Patch 030825 BS */
@@ -1259,7 +1293,10 @@ u->Error(AString("Can't do that in this region. Error Code: ") + o->skill + " " 
 	int output = maxproduced * ItemDefs[o->item].pOut;
 	if (ItemDefs[o->item].flags & ItemType::SKILLOUT)
 		output *= level;
-	u->items.SetNum(o->item,u->items.GetNum(o->item) + output);
+	//u->items.SetNum(o->item,u->items.GetNum(o->item) + output);
+	//mod for Xanaxor games. Produced items go into list credited later to prevent SHARE reusing them for secondary prod:
+	u->itemsintransit.SetNum(o->item, u->itemsintransit.GetNum(o->item) + output);
+	
 	u->Event(AString("Produces ") + ItemString(o->item,output) + " in " +
 			r->ShortPrint(&regions) + ".");
 	u->Practice(o->skill);
@@ -1959,8 +1996,8 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 
 Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 {
-	Location * loc = new Location;
-	int movetype = unit->MoveType();
+	Location * loc = new Location;	
+//	int movetype = unit->MoveType(); //dummy movetype until we know where we are going.
 	AString road;
 
 	if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
@@ -2074,12 +2111,14 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 		    //otherwise, this portal can be used.
 		}
 
+	    int movetype = unit->MoveType(newreg);
 
 		road = "";
 		int cost = newreg->MoveCost(movetype, region, i, &road);
 		if (region->type != R_NEXUS &&
-				unit->CalcMovePoints() - unit->movepoints < cost) {
-			if(unit->MoveType() == M_NONE) {
+				unit->CalcMovePoints(newreg) - unit->movepoints < cost) {
+				//we don't have enough movement points to move!
+			if(unit->MoveType(newreg) == M_NONE) {
 				unit->Error("MOVE: Unit is overloaded and cannot move.", quiet);
 			} else if(unit->monthorders->type == O_FOLLOW) {
 			    unit->Error("MOVE: Unit has insufficient movement points to continue following.", quiet);

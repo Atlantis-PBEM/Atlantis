@@ -53,10 +53,12 @@ void Game::RunOrders()
     	ClearCastEffects();
     	RunCastOrders();	
 	}
-	Awrite("Running PILLAGE Orders...");
-	RunPillageOrders();
-	Awrite("Running TAX Orders...");
-	RunTaxOrders();
+	if(!Globals->LATE_TAX) {
+    	Awrite("Running PILLAGE Orders...");
+    	RunPillageOrders();
+    	Awrite("Running TAX Orders...");
+    	RunTaxOrders();
+	}
 	Awrite("Running GUARD 1 Orders...");
 	DoGuard1Orders();
 	if(!Globals->ARCADIA_MAGIC) {
@@ -90,6 +92,12 @@ void Game::RunOrders()
 	if(Globals->ALLOW_WITHDRAW) {
 		Awrite("Running WITHDRAW Orders...");
 		DoWithdrawOrders();
+	}
+	if(Globals->LATE_TAX) {
+    	Awrite("Running PILLAGE Orders...");
+    	RunPillageOrders();
+    	Awrite("Running TAX Orders...");
+    	RunTaxOrders();
 	}
 	Awrite("Running Move Orders...");
 	RunMoveOrders();
@@ -372,10 +380,12 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 			succ = 0;
 			break;
 		}
-		if (f->num == guardfaction || f->num == elfguardfaction ||                         //TODO: Don't stop other races getting assassinated
+		if (f->num == guardfaction || f->num == elfguardfaction ||
                 f->num == dwarfguardfaction || f->num == independentguardfaction) {
-			succ = 0;
-			break;
+            if(f->ethnicity == tar->faction->ethnicity) {
+    			succ = 0;
+    			break;
+			}
 		}
 	}
 	if (tar->type == U_MAGE && Globals->ARCADIA_MAGIC) {
@@ -466,9 +476,12 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 			succ = 0;
 			break;
 		}
-		if (f->num == guardfaction) {
-			succ = 0;
-			break;
+		if (f->num == guardfaction || f->num == elfguardfaction ||    
+                f->num == dwarfguardfaction || f->num == independentguardfaction) {
+            if(f->ethnicity == tar->faction->ethnicity) {
+    			succ = 0;
+    			break;
+			}
 		}
 	}
 
@@ -641,6 +654,10 @@ void Game::RunQuitOrders()
 
 void Game::Do1Quit(Faction *f)
 {
+    if(f->start != -1 && regions.GetRegion(f->start) && 
+        regions.GetRegion(f->start)->flagpole == FL_USED_START_LOC) 
+            regions.GetRegion(f->start)->flagpole = FL_UNUSED_START_LOC;
+    
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
@@ -648,7 +665,7 @@ void Game::Do1Quit(Faction *f)
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
 				if (u->faction == f) {
-					o->units.Remove(u);
+					o->units.Remove(u);         //Remove(u), not Kill(u) ?! WHY?
 					delete u;
 				}
 			}
@@ -950,8 +967,8 @@ void Game::RunPillageRegion(ARegion *reg)
 
 	/* Destroy economy */
 	reg->money = 0;
-	reg->wages -= 6;
-	if (reg->wages < 6) reg->wages = 6;
+	reg->wages -= 7;    //used to be 6, 7 for Xan because of the lower base wage for tax purposes (old breakeven point $25, with 6 would now be $20, with 7 is $26, closer to old behaviour)
+	if (reg->wages < 5) reg->wages = 5;
 }
 
 void Game::RunPromoteOrders()
@@ -2941,6 +2958,10 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 	if (amt == -1) {
 		/* Give unit */
+		if(u->GetFlag(FLAG_COMMANDER)) {
+		    u->Error("GIVE: Cannot GIVE your commanding unit.");
+		    return 0;
+		}
 		if (u->type == U_MAGE) {
 			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 				if (CountMages(t->faction) >= AllowedMages(t->faction)) {
@@ -3301,9 +3322,11 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
     u->ConsumeSharedMoney(cost);        //pays SEND cost
 
 	u->Event(AString("Sends ") + ItemString(o->item, amt) + " to " +
-			*tar->name + ".");
+			*tar->name + " at a cost of " + cost + " silver.");
+	if(u->faction != tar->faction) tar->Event(AString("Is sent ") + ItemString(o->item, amt) +
+            " from " + *u->name);
 	u->ConsumeShared(o->item, amt);
-	tar->itemsintransit.SetNum(o->item, tar->items.GetNum(o->item) + amt);
+	tar->itemsintransit.SetNum(o->item, tar->itemsintransit.GetNum(o->item) + amt);
 	tar->faction->DiscoverItem(o->item, 0, 1);
     return 0;    
 }

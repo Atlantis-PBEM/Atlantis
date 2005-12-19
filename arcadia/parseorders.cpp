@@ -205,8 +205,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 	Unit *unit = 0;
 
 	AString *order = f->GetLine();
-	FormTemplate * formtem = 0;
-	int formtemline = 0;
+//	FormTemplate * formtem = 0;
+//	int formtemline = 0;
 	
 	while (order) {
 		AString saveorder = *order;
@@ -344,7 +344,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 						}
 					} else {
 						ParseError(pCheck, 0, fac,
-								"Order given without a unit selected.");
+								"Order given without a unit selected:");
+						ParseError(pCheck, 0, fac, saveorder);
 					}
 				}
 				break;
@@ -366,7 +367,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			case O_ALL:
 			    if(fac) {
                     //want to unselect unit here!
-    				while (unit) {
+/*    				while (unit) {
     					Unit *former = unit->former;
     					if (unit->inTurnBlock)
     						ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
@@ -378,27 +379,31 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
     					unit = former;
     				}
     				unit = 0;
-        				
+        */				
     				// faction is 0 if checking syntax only, not running turn.
-    				if (faction == 0) {
+/*    				if (faction == 0) {
     				    unit = &(pCheck->dummyUnit);
 						unit->monthorders = 0;
     				} else {
-
+*/
+    					if(pCheck) {
+    						pCheck->pCheckFile->PutStr(saveorder);
+			      		}
+			      		
     					AString *retval;
     					retval = ProcessAllOrder(f, pCheck, order, fac); //no need to carry quiet sign - produce errors for incorrect TURN
     					if (retval) {
     						delete order;
     						order = retval;
     						continue;
-    					}
+//    					}
     				}
 				}
 				break;
 			case O_TEMPLATE:
 				if(fac) {
                     //want to unselect unit here!
-    				while (unit) {
+/*    				while (unit) {
     					Unit *former = unit->former;
     					if (unit->inTurnBlock)
     						ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
@@ -410,9 +415,9 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
     					unit = former;
     				}
     				unit = 0;
-        				
+        				*/
 				    // faction is 0 if checking syntax only, not running turn.
-    				if (faction == 0) {
+/*    				if (faction == 0) {
     				    unit = &(pCheck->dummyUnit);
 						unit->monthorders = 0;
     				} else {
@@ -429,23 +434,28 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
         					unit = former;
         				}
         				unit = 0;
-    				
+    				*/
+    					if(pCheck) {
+    						pCheck->pCheckFile->PutStr(saveorder);
+			      		}
+			      		
     					AString *retval;
     					retval = ProcessTemplateOrder(f, pCheck, order, fac); //no need to carry quiet sign - produce errors for incorrect TURN
     					if (retval) {
     						delete order;
     						order = retval;
     						continue;
-    					}
+//    					}
     				}
 				}
 				break;
 			case O_TURN:
 				if (unit && unit->inTurnBlock) {
 					ParseError(pCheck, unit, fac, "TURN: cannot nest");
-				} else if (!unit)
-					ParseError(pCheck, 0, fac, "Order given without a unit selected.");
-				else {
+				} else if (!unit) {
+						ParseError(pCheck, 0, fac, "Order given without a unit selected:");
+						ParseError(pCheck, 0, fac, saveorder);
+				} else {
 					// faction is 0 if checking syntax only, not running turn.
 					if (faction != 0) {
 						AString *retval;
@@ -484,8 +494,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						ProcessOrder(i, unit, order, pCheck, getquietsign);
 					} else {
-						ParseError(pCheck, 0, fac,
-								"Order given without a unit selected.");
+						ParseError(pCheck, 0, fac, "Order given without a unit selected:");
+						ParseError(pCheck, 0, fac, saveorder);
 					}
 				}
 			}
@@ -502,7 +512,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
         order = f->GetLine();
 		
 		if(pCheck) {
-			pCheck->pCheckFile->PutStr(saveorder);  //initial orders removed from checkfile
+			pCheck->pCheckFile->PutStr(saveorder);
 		}
 	}
 	
@@ -2306,6 +2316,10 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int
 
 void Game::ProcessMasterOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int isquiet)
 {
+    //MASTER not enabled for Xanaxor
+	ParseError(pCheck, unit, 0, "MASTER is not a valid order.");
+
+/*
 	if(!(Globals->ARCADIA_MAGIC)) {
 		ParseError(pCheck, unit, 0, "MASTER is not a valid order.");
 		return;
@@ -2341,13 +2355,13 @@ void Game::ProcessMasterOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int i
         	unit->monthorders->quiet = isquiet;
  	    }
  	}
-
+*/
 	return;
 }
 
 void Game::ProcessWishdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	if(!(Globals->WISHSKILLS_ENABLED) && (pCheck || !unit->faction->IsNPC() ) ) {
+	if(!(Globals->TESTGAME_ENABLED) && (pCheck || !unit->faction->IsNPC() ) ) {
 		ParseError(pCheck, unit, 0, "WISHDRAW is not a valid order.");
 		return;
 	}
@@ -2391,7 +2405,7 @@ void Game::ProcessWishdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessWishskillOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	if(!(Globals->WISHSKILLS_ENABLED) && (pCheck || !unit->faction->IsNPC() ) ) {
+	if(!(Globals->TESTGAME_ENABLED) && (pCheck || !unit->faction->IsNPC() ) ) {
 		ParseError(pCheck, unit, 0, "WISHSKILL is not a valid order.");
 		return;
 	}
@@ -2580,6 +2594,8 @@ AString *Game::ProcessTemplateOrder(Aorders *f, OrdersCheck *pCheck, AString *na
     
 	AString *order, *token;
 
+	int exitafterone = 0;
+	
 	while (1) {
 		// get the next line
 		order = f->GetLine();
@@ -2587,6 +2603,9 @@ AString *Game::ProcessTemplateOrder(Aorders *f, OrdersCheck *pCheck, AString *na
 			// Fake end of commands to invoke appropriate processing
 			order = new AString("#end");
 		}
+		
+		if(exitafterone) return order;
+		
 		AString	saveorder = *order;
 		token = order->gettoken();
 
@@ -2599,12 +2618,20 @@ AString *Game::ProcessTemplateOrder(Aorders *f, OrdersCheck *pCheck, AString *na
 				case O_ALL:
 					return new AString(saveorder);
 					break;
+				case O_ENDTEMPLATE:
+				    exitafterone = 1;
+				    break;
 				default:
 					unittype->orders.Add(new AString(saveorder));
 					break;
 			}
 			delete token;
 		}
+		
+		if(pCheck) {
+			pCheck->pCheckFile->PutStr(saveorder);
+		}
+		
 		delete order;
 	}
 
@@ -2635,14 +2662,21 @@ AString *Game::ProcessAllOrder(Aorders *f, OrdersCheck *pCheck, AString *name, F
     
 	AString *order, *token;
 
+	int exitafterone = 0;
+
 	while (1) {
+	    
 		// get the next line
 		order = f->GetLine();
 		if (!order) {
 			// Fake end of commands to invoke appropriate processing
 			order = new AString("#end");
 		}
+		
+		if(exitafterone) return order;
+		
 		AString	saveorder = *order;
+		
 		token = order->gettoken();
 
 		if (token) {
@@ -2654,12 +2688,20 @@ AString *Game::ProcessAllOrder(Aorders *f, OrdersCheck *pCheck, AString *name, F
 				case O_ALL:
 					return new AString(saveorder);
 					break;
+				case O_ENDALL:
+				    exitafterone = 1;
+				    break;
 				default:
 					labelorders->orders.Add(new AString(saveorder));
 					break;
 			}
 			delete token;
 		}
+		
+		if(pCheck) {
+			pCheck->pCheckFile->PutStr(saveorder);
+		}
+		
 		delete order;
 	}
 
@@ -3365,7 +3407,7 @@ void Game::ProcessDisableOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isq
 	int val = 1;
 	
 	if (token) {
-	    int val = ParseTF(token);
+	    val = ParseTF(token);
 	    delete token;
 	}
 	
@@ -3568,7 +3610,7 @@ Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck, int 
 
 	AString *t = o->gettoken();
 	int an = 0;
-	int error = 0;
+//	int error = 0;
 	if(t) {
         an = t->value();
 	    delete t;

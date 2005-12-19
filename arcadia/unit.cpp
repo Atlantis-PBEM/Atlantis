@@ -1241,7 +1241,7 @@ int Unit::Study(int sk, int days, int quiet, int overflow)
 			s = (Skill *) skills.First();
 			if (s->type != sk) {
 			    //Real experience patch
-			    if(s->days >= 30 || s->experience >= 30) {
+			    if(s->days >= 30*GetMen() || s->experience >= 30*GetMen()) {
     				Error("STUDY: Can know only 1 skill.", quiet);
     				return 0;
 				}
@@ -1311,10 +1311,10 @@ void Unit::Experience(int sk, int experience, int group, int dividenonspecials) 
            SkillDefs[SkillDefs[sk].baseskill].baseskill == SkillDefs[sk].baseskill) {
             int baseexp = (experience)/2;
             if(baseexp>4) baseexp = 4;
-            Experience(SkillDefs[sk].baseskill, baseexp, 1, 0); //don't divide non-specials again!
+            Experience(SkillDefs[sk].baseskill, baseexp, group, 0); //don't divide non-specials again!
         }
 	}
-
+	
 	if(group) experience *= GetMen();
 	
 	skills.SetExper(sk, skills.GetExper(sk) + experience);
@@ -1461,7 +1461,7 @@ int Unit::Practice(int sk)
 
 int Unit::IsMage()
 {
-    if(type == U_MAGE) return 1;
+    if(type == U_MAGE || type == U_GUARDMAGE) return 1;
 	return 0;
 }
 
@@ -1588,7 +1588,7 @@ void Unit::AdjustSkills(int overflow)
 
 int Unit::MaintCost()
 {
-	int retval = 0;
+//	int retval = 0;
 	int i;
 	if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
 
@@ -1896,22 +1896,44 @@ int Unit::TryToSwim()
 	return 0;
 }
 
-int Unit::MoveType()
+int Unit::CanDolphinRide()
 {
+    //this is a specific alternative to introducing a fifth movement class 'riding-at-sea'
+	int cap = 0;
+	cap = ItemDefs[I_DOLPHIN].swim * items.GetNum(I_DOLPHIN);
+	if(cap >= items.Weight()) return 1;
+	
+	return 0;
+}
+
+int Unit::MoveType(ARegion *regionto)
+{
+	/* Check if we should be able to 'swim' */
+	/* This should become it's own M_TYPE sometime */
+	//we can swim if we are going to ocean from anywhere, or if we are going to land FROM ocean.
+	//likewise, if we are going to OR from ocean, and cannot swim, we cannot move even if we can walk and are going to land.
+	if((regionto && TerrainDefs[regionto->type].similar_type == R_OCEAN) || 
+        TerrainDefs[object->region->type].similar_type == R_OCEAN) {
+        
+        if((Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) && this->CanFly()) return M_FLY;
+        
+		if(CanReallySwim()) {
+		    if(CanDolphinRide()) return M_RIDE;
+            return M_WALK;
+        }
+		else return M_NONE;
+	}
+		
 	int weight = items.Weight();
 	if (CanFly(weight)) return M_FLY;
 	if (CanRide(weight)) return M_RIDE;
-	/* Check if we should be able to 'swim' */
-	/* This should become it's own M_TYPE sometime */
-	if(TerrainDefs[object->region->type].similar_type == R_OCEAN)
-		if(CanSwim()) return M_WALK;
 	if (CanWalk(weight)) return M_WALK;
 	return M_NONE;
 }
 
-int Unit::CalcMovePoints()
+int Unit::CalcMovePoints(ARegion *regionto)
 {
-	switch (MoveType()) {
+	switch (MoveType(regionto)) {
 		case M_NONE:
 			return 0;
 		case M_WALK:
@@ -1926,6 +1948,8 @@ int Unit::CalcMovePoints()
 
 int Unit::CanMoveTo(ARegion *r1, ARegion *r2)
 {
+//moving to r1 from r2
+
 	if (r1 == r2) {
 	//hexside terrain mod. If the unit has advanced here, then subtract any modifiers due to edge terrain.
         if(Globals->HEXSIDE_TERRAIN && advancefrom) {
@@ -1945,7 +1969,7 @@ int Unit::CanMoveTo(ARegion *r1, ARegion *r2)
 	int exit = 1;
 	int i;
 	int dir;
-
+//we seem to be checking the connection was 2-way ... but shouldn't we be subtracting the penalty even if one way?
 	for (i=0; i<NDIRS; i++) {
 		if (r1->neighbors[i] == r2) {
 			exit = 0;
@@ -1969,12 +1993,12 @@ int Unit::CanMoveTo(ARegion *r1, ARegion *r2)
 	}
 	if (exit) return 0;
 
-	int mt = MoveType();
+	int mt = MoveType(r2);
 	if (((TerrainDefs[r1->type].similar_type == R_OCEAN) ||
 				(TerrainDefs[r2->type].similar_type == R_OCEAN)) &&
 			(!CanSwim() || GetFlag(FLAG_NOCROSS_WATER)))
 		return 0;
-	int mp = CalcMovePoints() - movepoints;
+	int mp = CalcMovePoints(r1) - movepoints;
 	int mc = r2->MoveCost(mt, r1, dir, 0);
 	if (mp < mc || mc < 0) return 0;   //mc less than 0 means blocked from moving there.
 	return 1;
@@ -2386,16 +2410,28 @@ int Unit::GetArmor(AString &itm, int ass)
 	return item;
 }
 
-int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus, int &type)
+int Unit::GetMount(AString &itm, int canFly, int canRide, int ocean, int &bonus, int &type)
 {
+
 	bonus = 0;
+
+	int item = LookupItem(&itm);
+	MountType *pMnt = FindMount(itm.Str());
+	
+	if(ocean) {
+	    //if this mount can swim in ocean, we can ride here
+	    if(ItemDefs[item].swim) canRide = 1;
+	    //otherwise; normal behaviour (ie no riding in Xan)
+	} else {
+	    //if we can't ride, we can't ride.
+	    if(!ItemDefs[item].ride) canRide = 0;
+	    //otherwise, normal behaviour
+	}
 
 	// This region doesn't allow riding or flying, so no mounts, bail
 	if(!canFly && !canRide) return -1;
 
-	int item = LookupItem(&itm);
-	MountType *pMnt = FindMount(itm.Str());
-
+	//we can either fly or swim
 	int num = items.GetNum(item);
 	if (num < 1) return -1;
 
@@ -2403,11 +2439,11 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus, int &type)
 		// If the mount cannot fly, and the region doesn't allow
 		// riding mounts, bail
 		if (!ItemDefs[item].fly && !canRide) return -1;
-	} else {
+	} /*else {
 		// This region allows riding mounts, so if the mount
 		// can not carry at a riding level, bail
-		if (!ItemDefs[item].ride) return -1;
-	}
+		if (!ItemDefs[item].ride && !ItemDefs[item].swim) return -1;
+	}*/
 
 	if (pMnt->skill) {
 		AString skname = pMnt->skill;
@@ -2420,13 +2456,13 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus, int &type)
 		}
 		// Limit to max mount bonus;
 		if(bonus > pMnt->maxBonus) bonus = pMnt->maxBonus;
+		
+		if(ItemDefs[item].fly) type = 4;
+        else type = 2;
+        
 		// If the mount can fly and the terrain doesn't allow
 		// flying mounts, limit the bonus to the maximum hampered
-		// bonus allowed by the mount
-		
-        if(ItemDefs[item].fly) type = 4;
-        else type = 2;
-		
+		// bonus allowed by the mount		
 		if(ItemDefs[item].fly && !canFly) {
 			if(bonus > pMnt->maxHamperedBonus)
 				bonus = pMnt->maxHamperedBonus;
@@ -2792,7 +2828,7 @@ int Unit::GetEnergy(int transferring)
     if(dead) return -1;
     int skill = GetSkill(S_CREATE_PORTAL);
     if(skill < 1) skill = 1;
-    int cost = (transferring + 30 * skill - 1) / (30 * skill);
+    int cost = (transferring + 40 * skill - 1) / (40 * skill);
     
     return (energy - cost);
 }
@@ -2932,7 +2968,7 @@ int Unit::GetSeniority()
         default:
             break;
     }
-    if(flags & FLAG_COMMANDER) score += 30;
+    if(flags & FLAG_COMMANDER) score += 40;
     score += GetSkill(S_COMBAT) + GetSkill(S_LONGBOW) + GetSkill(S_CROSSBOW) + 
              GetSkill(S_HEALING) + 2*GetSkill(S_BASE_BATTLETRAINING) + 
              2*GetSkill(S_TOUGHNESS) + 2*GetSkill(S_FRENZY) + 

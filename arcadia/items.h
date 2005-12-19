@@ -91,7 +91,9 @@ class ItemType
 			SKILLOUT = 0x10,
 			// This item cannot be transported.
 			NOTRANSPORT = 0x20,
-			NEVERLOST = 0x40
+			NEVERLOST = 0x40,
+			//For "advanced" resources that can always be seen in terrain
+			ALWAYSSEE = 0x80
 		};
 		int flags;
 
@@ -135,7 +137,7 @@ class ItemType
 		};
 		int escape;
 		char *esc_skill;
-		int esc_val; // level for has_skill, constant for all others
+		int esc_val; // level for has_skill, a constant (big = less loss) for all others
 };
 
 extern ItemType *ItemDefs;
@@ -226,6 +228,7 @@ class WeaponType
 			NOATTACKERSKILL = 0x100, // Attacker gets no combat/skill defense.
 			RIDINGBONUS = 0x200, // Unit gets riding bonus on att and def.
 			RIDINGBONUSDEFENSE = 0x400, // Unit gets riding bonus on def only.
+			RESTINPEACE = 0x800, //Target cannot be resurrected / healed
 		};
 		int flags;
 

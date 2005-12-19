@@ -78,6 +78,7 @@ void Game::CreateBattleEvents()
 		event->fact1 = b1->casualties;
 		event->reportdelay = 0;
 		worldevents.Add(event);
+		b1 = 0;
     }
     if(b2) {
         WorldEvent * event = new WorldEvent;
@@ -89,17 +90,19 @@ void Game::CreateBattleEvents()
 		event->fact1 = b2->casualties;
 		event->reportdelay = 0;
 		worldevents.Add(event);
+		b2 = 0;
     }
     if(b3) {
         WorldEvent * event = new WorldEvent;
         event->type = WorldEvent::BATTLE;
         event->place = new Location;
-		event->place->region = b2->region;
+		event->place->region = b3->region;
 		event->place->obj = 0;
 		event->place->unit = 0;
-		event->fact1 = b2->casualties;
+		event->fact1 = b3->casualties;
 		event->reportdelay = 0;
 		worldevents.Add(event);
+		b3 = 0;
     }
 }
 
@@ -112,7 +115,7 @@ void Game::WriteRumour(int &rumournum, AString rumour)
     AString str;
     
     do {
-        str = AString("rumor.") + rumournum;
+        str = AString("rumour.") + rumournum;
         rumournum++;
         i = g.OpenByName( str );
         if(i == 0) g.Close();
@@ -134,7 +137,7 @@ void Game::WriteTimes(int timesnum, AString times)
     AString str;
     
     str = AString("times.") + timesnum;
-    int i = f.OpenByName( str );
+    int i = f.OpenByName( str, 1 );
     if(i == -1) {
         Awrite("Could not write times");
         return;
@@ -149,13 +152,90 @@ void Game::CreateTimesReports()
     CreateBattleEvents();
 
     int rumournum = 1;
+    int timesnum = 1;
     AString rumour;
     AString times;
     Faction *pFac;
+
+    forlist(&factions) {
+        Faction *f = (Faction *) elem;
+        //This section writes an opening intro for each faction
+        
+        if(f->pStartLoc) {
+            //ie on turn faction is created.
+            //get hero name
+            AString hero;
+            AString race;
+            forlist(&f->pStartLoc->objects) {
+		        Object *o = (Object *) elem;
+		        forlist(&o->units) {
+		            Unit *u = (Unit *) elem;
+		            if(u->faction == f && u->type == U_MAGE) {
+                        hero = *u->name;
+                        race = EthnicityString(u->GetEthnicity());
+                    }
+		        }
+		    }
+		    AString *fname = new AString(*f->name);
+		    AString *token = fname->gettoken();
+		    int the = 0;
+		    if(*token == "the") the = 1;
+		    delete fname;
+		    fname = 0;
+		    delete token;
+		    token = 0;
+		    
+		    times = hero + ", a " + race + " hero from the ";
+		    if(f->pStartLoc->town) {
+		        times += TownString(f->pStartLoc->town->TownType()) + " ";
+		        times += *f->pStartLoc->town->name;
+		    } else {
+		    /////
+		    }
+		    times += ", has emerged from obscurity. As leader of "; 
+            if(!the) times += "the ";
+            times += *f->name;
+            times += AString(", ") + hero + " may yet achieve dominance over Xanaxor.";            
+            WriteTimes(f->num, times);
+        }
+    }
     
-    forlist(&worldevents) {
+    forlist_reuse(&regions) {
+		ARegion *r = (ARegion *) elem;
+		
+		//This section writes a message every time a city guard/mage unit is killed
+		if(r->timesmarker == 1) {
+            times = "The guards of ";
+            if(r->town) times += (*r->town->name);
+            else times += *r->name;
+            times += " have been callously slain!";
+            
+    		switch(r->GetEthnicity()) {
+    		    case RA_HUMAN:
+    		        timesnum = guardfaction;
+    		        break;
+    		    case RA_ELF:
+    		        timesnum = elfguardfaction;
+    		        break;
+    		    case RA_DWARF:
+    		        timesnum = dwarfguardfaction;
+    		        break;
+    		    case RA_OTHER:
+    		        timesnum = independentguardfaction;
+    		        break;
+    		    default:
+    		        timesnum = 0;
+    		        break;
+    		}
+    		
+    		if(timesnum) WriteTimes(timesnum, times);
+        } 
+    }
+
+    forlist_reuse(&worldevents) {
         WorldEvent *event = (WorldEvent *) elem;
         switch(event->type) {
+        //This writes a rumour for <the biggest 3> ALL? battles around the world
             case WorldEvent::BATTLE:
                 rumour = AString("A battle was fought in ") + *event->place->region->name + 
                     ", ";
@@ -178,23 +258,31 @@ void Game::CreateTimesReports()
                 times = AString(*pFac->name) + " has converted to the ";
         		switch(pFac->ethnicity) {
         		    case RA_HUMAN:
-        		        times += "human";
+        		        times += "human cause!";
+        		        timesnum = guardfaction;
         		        break;
         		    case RA_ELF:
-        		        times += "elven";
+        		        times += "elven cause!";
+        		        timesnum = elfguardfaction;
         		        break;
         		    case RA_DWARF:
-        		        times += "dwarven";
+        		        times += "dwarven cause!";
+        		        timesnum = dwarfguardfaction;
         		        break;
         		    case RA_OTHER:
-        		        times += "independent";
+        		        times += "independent cause!";
+        		        timesnum = independentguardfaction;
+        		        break;
+        		    case RA_NA:
+        		        times = AString("The leadership of ") + *pFac->name + " is in chaos.";
+        		        timesnum = peasantfaction;
         		        break;
         		    default:
         		        times += "!@#$ please alert your GM !@#$";
+        		        timesnum = guardfaction;
         		        break;    		
         		}
-                times += " cause!";
-                WriteTimes(1, times);
+                WriteTimes(timesnum, times);
                 break;
             default:
                 break;

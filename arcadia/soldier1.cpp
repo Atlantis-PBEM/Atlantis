@@ -49,7 +49,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	healtype = 0;
 	healitem = -1;
 	canbehealed = 1;
-	canberesurrected = 1;
+	restinpeace = 0;
 	regen = 0;
 	isdead = 0;
 	exhausted = 0;
@@ -117,6 +117,10 @@ cout << "@";
         illusion = 1;
         canbehealed = 0;
     }
+    if(ItemDefs[r].type & IT_UNDEAD && Globals->MAGE_UNDEAD_INVINCIBLE) {
+        canbehealed = 0;
+    }
+    
     
 	/* Building bonus */
 	if (o->capacity) {
@@ -227,16 +231,19 @@ cout << "#";
 	//
 	int canFly = (terrainflags & TerrainType::FLYINGMOUNTS);
 	int canRide = (terrainflags & TerrainType::RIDINGMOUNTS);
+	int ocean = (TerrainDefs[regtype].similar_type == R_OCEAN);
+	
 	ridingbonus = 0;
 	int formtype = 0;
-	if(canFly || canRide) {
+	if(canFly || canRide || ocean) {
 		//
 		// Mounts of some type _are_ allowed in this region
 		//
 		int mountType;
 		for(mountType = 1; mountType < NUMMOUNTS; mountType++) {
 			abbr = MountDefs[mountType].abbr;
-			item = unit->GetMount(abbr, canFly, canRide, ridingbonus, formtype);
+
+			item = unit->GetMount(abbr, canFly, canRide, ocean, ridingbonus, formtype);
 			if(item == -1) continue;
 			// Defer adding the combat bonus until we know if the weapon
 			// allows it.  The defense bonus for riding can be added now
@@ -339,11 +346,25 @@ cout << "$";
     	dskill[ATTACK_RANGED] += gain;
 	}
 	
+	
+	/* Xanaxino Mod */
+/*	if(regtype == R_JUNGLE || regtype == R_FOREST) {
+	    ManType *mt = FindRace(ItemDefs[race].abr);
+		if(mt->ethnicity == RA_ELF) {
+        	dskill[ATTACK_COMBAT] += 1;
+        	dskill[ATTACK_ENERGY] += 1;
+        	dskill[ATTACK_SPIRIT] += 1;
+        	dskill[ATTACK_WEATHER] += 1;
+        	dskill[ATTACK_RIDING] += 1;
+        	dskill[ATTACK_RANGED] += 1;
+ 	    }
+    }*/
+	
 	attacks = numAttacks;
 	
     if(unit->GetSkill(S_FRENZY)) {
         int level = unit->GetSkill(S_FRENZY);
-        int gain = 2*level*level; //+1,4,9,16,25,36
+        int gain = 2*level*level; //+2,8,18,32,50,72  (*50% later)
         if(attacks < 0) attacks = 1 - gain/attacks;  //ie bonus/rounds + 1.
         else attacks += gain;
     }
@@ -508,7 +529,7 @@ void Soldier::Alive(int state)
 {
 	RestoreItems();
 	if(maxhits > hits && (ItemDefs[race].type & IT_MAN)) {
-        if(unit->GetSkill(S_TOUGHNESS)) unit->Experience(S_TOUGHNESS,50*(maxhits-hits)/maxhits);
+        if(unit->GetSkill(S_TOUGHNESS)) unit->Experience(S_TOUGHNESS,60*(maxhits-hits)/maxhits);
     }
 
 	if (state == LOSS) {
@@ -695,6 +716,12 @@ int Soldier::DoSpellCost(int round, Battle *b)
 
 void Soldier::DoSpellCheck(int round, Battle *b)
 {
+    //staff of yew coding. If have a STAY, return and don't halve spell damage.
+    if (weapon != -1 && (ItemDefs[weapon].type & IT_BATTLE)) {
+		BattleItemType *pBat = FindBattleItem(ItemDefs[weapon].abr);
+		if(pBat->flags & BattleItemType::ENERGY) return;
+	}
+
 	if(!exhausted && unit->type == U_MAGE && unit->combat != -1) {
 	    int cost;
 	    if(round == 1) cost = unit->GetFirstCombatCost(unit->combat);

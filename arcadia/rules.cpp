@@ -59,7 +59,7 @@ int *allowedTacticians = ag;
 int allowedTacticiansSize = sizeof(ag) / sizeof(ag[0]);
 
 static GameDefs g = {
-	"Arcadia",				// RULESET_NAME
+	"Xanaxor",				// RULESET_NAME
 	MAKE_ATL_VER( 4, 0, 0 ), // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
@@ -78,7 +78,7 @@ static GameDefs g = {
 	33, /* STARVE_PERCENT */
 	GameDefs::STARVE_LEADERS, /* SKILL_STARVATION */
 
-	1007520, /* START_MONEY */
+	9100, /* START_MONEY */
 	4, /* WORK_FRACTION */
 	20, /* ENTERTAIN_FRACTION */
 	20, /* ENTERTAIN_INCOME */
@@ -198,7 +198,7 @@ static GameDefs g = {
 	0,  // USE_WEAPON_ARMOR_COMMAND
 	0,  // MONSTER_NO_SPOILS
 	0,  // MONSTER_SPOILS_RECOVERY
-	1,  // MAX_ASSASSIN_FREE_ATTACKS
+	3,  // MAX_ASSASSIN_FREE_ATTACKS
 	0,  // RELEASE_MONSTERS
 	1,  // CHECK_MONSTER_CONTROL_MID_TURN
 	1,  // DETECT_GATE_NUMBERS
@@ -229,15 +229,18 @@ static GameDefs g = {
 	6, // DELAY_GROWTH
 	100, // TOWN_DEVELOPMENT
 	0, //TACTICS_NEEDS_WAR
-	0, // ALLIES_NOAID
+	1, // ALLIES_NOAID
 	1, // HEXSIDE_TERRAIN
 	1, // ARCADIA_MAGIC
-	1, // EARTHSEA_VICTORY
+	0, // EARTHSEA_VICTORY
 	1, // REAL_EXPERIENCE
-	1, // WISHSKILLS_ENABLED
+	0, // TESTGAME_ENABLED
 	20, // POP_LEVEL
 	1, // FORM_TEMPLATES
 	GameDefs::SHOW_AS_EVENTS, // SUPPRESS_ERRORS
+	1, // LATE_TAX
+	80, // MAGE_UNDEAD_INVINCIBLE
+	1, // CANT_TEACH_MAGIC
 };
 
 GameDefs *Globals = &g;

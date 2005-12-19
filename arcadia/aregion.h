@@ -52,6 +52,12 @@ enum {
 	W_BLIZZARD
 };
 
+enum {
+    FL_NULL,
+    FL_UNUSED_START_LOC,
+    FL_USED_START_LOC
+};
+
 struct Product
 {
 	int product;
@@ -142,6 +148,8 @@ enum {
 	TOWN_CITY,
 	NTOWNS
 };
+
+AString TownString(int i);
 
 class TownInfo
 {
@@ -343,6 +351,7 @@ class ARegion : public AListElem
 		int GetArcadianTrade(int numtrade, int producing);
 		int marker; //temporary variable you can use for eg marking regions visited during a routine. Clear before using.
 		int flagpole; //variable, needs to be saved with region. Used in Arcadia for triggering region-specific events.
+		int timesmarker; //variable for times events.
 
 	private:
 		/* Private Setup Functions */

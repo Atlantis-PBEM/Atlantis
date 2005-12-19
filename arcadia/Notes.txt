@@ -167,6 +167,16 @@ Generalised TEMPLATE / ALL to act after order parsing, not during
 Fixed crash bug from STAY coding
 Implemented skill-level check for studying magic skills
 
+050323:
+Set max guard levels to depend on tax available
+
+050325:
+Included i_rand.cpp
+Allowed guards to use horses if appropriate
+Added 'regional' guards
+Basics of times/rumour reports added, and battle rumours coded
+
+
 Todo:
 Allow transfer from leader to non-leader if errors are suppressed
 Rewrite rules magic section for heros, and normal->leader->hero progression

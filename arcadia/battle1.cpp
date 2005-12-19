@@ -234,11 +234,11 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 						if (!(i != -1 && noaidd)) {
 							if (u->type == U_GUARD) {
 								/* The unit is a city guardsman */
-								if (i == -1/* && adv == 0*/)
+								if (i == -1/* && adv == 0*/ && u->faction->ethnicity == tar->faction->ethnicity)
 									add = ADD_DEFENSE;
 							} else if(u->type == U_GUARDMAGE) {
 								/* the unit is a city guard support mage */
-								if(i == -1/* && adv == 0*/)
+								if(i == -1/* && adv == 0*/ && u->faction->ethnicity == tar->faction->ethnicity)
 									add = ADD_DEFENSE;
 							} else {
 								/*
@@ -696,6 +696,13 @@ cout << ".";
 		numAttacks = Globals->MAX_ASSASSIN_FREE_ATTACKS;
 	}
 
+	int strength = 1;
+	int frenzy = 0;
+	if((ItemDefs[a->race].type & IT_MAN)) frenzy = a->unit->GetSkill(S_FRENZY); //used to upgrade attack below
+	if(frenzy > 1) strength = frenzy;
+	
+	int kills = 0;	
+	
 	for (int i = 0; i < numAttacks; i++) {
 		WeaponType *pWep = NULL;
 		if(a->weapon != -1)
@@ -710,19 +717,22 @@ cout << ".";
 			mountBonus = pWep->mountBonus;
 			attackClass = pWep->weapClass;
 		}
-		int strength = a->unit->GetSkill(S_FRENZY);
-		if(strength > 0) { //upgrade attack type by 1.
+
+		
+		if(frenzy) { //upgrade attack type by 1.
 		    if(attackClass != ARMORPIERCING) attackClass = ARMORPIERCING;
 		    else attackClass = NUM_WEAPON_CLASSES;
-        } else strength = 1; //minimum 1 attack per hit!
+        }
         
-		def->DoAnAttack(NULL, 1, a->race, attackType, a->askill, flags, attackClass,
+		kills += def->DoAnAttack(NULL, 1, a->race, attackType, a->askill, flags, attackClass,
 				NULL, mountBonus, attackers, a->inform, this, strength);
 #ifdef DEBUG2
 cout << ".";
 #endif
 		if (!def->NumAlive()) break;
 	}
+	
+	if(frenzy) AddLine(AString(*a->unit->name) + " attacks with unholy strength, killing " + kills);
 }
 
 void Battle::FormationsPhase(Army * armya, Army * armyb, int regtype, int bias, int ambush, int ass)
@@ -825,19 +835,19 @@ Awrite("Overwhelming");
 #endif
     //split overwhelming flank 0 formations. if concealed, go straight to flank 2
     if(!(TerrainDefs[regtype].flags & TerrainType::RESTRICTEDFOOT) ) {
-        armya->SplitOverwhelmingFrontFormations(this,armyb);
-        armyb->SplitOverwhelmingFrontFormations(this,armya);
+        if(bias != 1) armya->SplitOverwhelmingFrontFormations(this,armyb);
+        if(bias != 2) armyb->SplitOverwhelmingFrontFormations(this,armya);
     }
 
     //choose if reserves flank
     //flank choice
     //if concealed, flank 0 goes straight to flank 2. Otherwise, soldiers get added to
     //flank 1 formations.
-    armya->FlyingReservesMayFlank(this, armyb);
-    armyb->FlyingReservesMayFlank(this, armya);
+    if(bias != 1) armya->FlyingReservesMayFlank(this, armyb);
+    if(bias != 2) armyb->FlyingReservesMayFlank(this, armya);
 
-    armya->RidingReservesMayFlank(this, armyb);
-    armyb->RidingReservesMayFlank(this, armya);
+    if(bias != 1) armya->RidingReservesMayFlank(this, armyb);
+    if(bias != 2) armyb->RidingReservesMayFlank(this, armya);
 
 #ifdef DEBUG
 Awrite("Setting CanAttack");
@@ -858,8 +868,8 @@ Awrite("Setting CanAttack");
     //be placed after reserves have a chance to intercept flank 1s, and effectively pushes
     //flank 1s to flank 2 if they do not get intercepted.
     //If foot are restricted, they cannot flank here.
-    armya->SplitOverwhelmingFlankingFormations(this,armyb,regtype);    //need to modify so foot don't flank in restricted terrain.
-    armyb->SplitOverwhelmingFlankingFormations(this,armya,regtype);
+    if(bias != 1) armya->SplitOverwhelmingFlankingFormations(this,armyb,regtype);    //need to modify so foot don't flank in restricted terrain.
+    if(bias != 2) armyb->SplitOverwhelmingFlankingFormations(this,armya,regtype);
 
     //flank 2s engage & get combat bonus if appropriate (as tempbonus).
     //second choice of target (if any) is set as tryattack, or first choice if no men in the formation.
@@ -976,6 +986,9 @@ void Battle::WriteTerrainMessage(int regtype)
     } else {
         temp = "The terrain does not allow riding or flying. Mounted soldiers are forced to fight on foot.";
     }
+    /*Xanaxino mod*/
+//    if(regtype == R_JUNGLE || regtype == R_FOREST) temp += " In addition, elven soldiers gain +1 to all defences.";
+    
     AddLine(temp);
     AddLine("");
 }

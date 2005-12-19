@@ -130,7 +130,8 @@ ARegion::ARegion()
 	clearskies = 0;
 	earthlore = 0;
 	fog = 0;
-	flagpole = 0;
+	flagpole = FL_NULL;
+	timesmarker = 0;
 	for (int i=0; i<NDIRS; i++)
 		neighbors[i] = 0;
 	for (int i=0; i<NDIRS; i++)
@@ -799,6 +800,11 @@ void ARegion::SetGateStatus(int month)
 
 void ARegion::Kill(Unit *u)
 {
+    //edit for times reporting of dead guards.
+    if(u->type == U_GUARD || u->type == U_GUARDMAGE) {
+        timesmarker = 1;    
+    }
+
 	Unit *first = 0;
 	forlist((&objects)) {
 		Object *obj = (Object *) elem;
@@ -1127,11 +1133,13 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 }
 
 int ARegion::CanMakeAdv(Faction *fac, int item)
-//currently only called for report writing.
+//currently only called for report writing, so really "can see advanced"
 {
 	AString skname;
 	int sk;
 	Farsight *f;
+	
+	if(ItemDefs[item].flags & ItemType::ALWAYSSEE) return 1;
 
 	if(Globals->IMPROVED_FARSIGHT) {
 		forlist(&farsees) {
@@ -1786,7 +1794,7 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 		if (weather == W_BLIZZARD) return 10;
 		if (weather == W_NORMAL || clearskies) cost = 1;
 	}
-	if (movetype == M_WALK || movetype == M_RIDE) {
+	if (movetype != M_FLY) { //ie walk, ride, swim* or none   *: don't think swim gets sent here
 		cost = (TerrainDefs[type].movepoints * cost);
 
 		/* Hex Patch Dec '03 */
@@ -1936,10 +1944,13 @@ int ARegion::CanTax(Unit *u)
 		forlist ((&obj->units)) {
 			Unit *u2 = (Unit *) elem;
 			if (u2->guard == GUARD_GUARD && u2->IsReallyAlive())
-				if (u2->GetAttitude(this, u) <= A_NEUTRAL)
-					return 0;
+			    if(u2->type == U_GUARD || u2->type == U_GUARDMAGE) {
+			        if(town) return 0; //guards prevent taxing in towns
+			        if(u2->faction->ethnicity != u->faction->ethnicity) return 0; //guards prevent other ethnicities taxing
+				} else if (u2->GetAttitude(this, u) <= A_NEUTRAL) return 0;
 		}
 	}
+	
 	return 1;
 }
 

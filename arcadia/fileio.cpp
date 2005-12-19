@@ -97,14 +97,15 @@ void Aoutfile::Open(const AString &s)
 	}
 }
 
-int Aoutfile::OpenByName(const AString &s)
+int Aoutfile::OpenByName(const AString &s, int append)
 {
 	AString temp = s;
-	file->open(temp.Str(), ios::out|ios::ate);
+	if(!append) file->open(temp.Str(), ios::out|ios::ate);
+	else file->open(temp.Str(), ios::out|ios::app);
 	if(!file->rdbuf()->is_open()) return -1;
 	// Handle a broke ios::ate implementation on some boxes
 	file->seekp(0, ios::end);
-	if((int)file->tellp() != 0) {
+	if((int)file->tellp() != 0 && !append) {
 		file->close();
 		return -1;
 	}

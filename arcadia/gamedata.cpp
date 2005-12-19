@@ -306,10 +306,10 @@ ItemType id[] =
 	 I_LASSO,1, 0,
 	 0, NULL, 0},
 	{"dolphin","dolphins","DOLP",
-	 ItemType::NOTRANSPORT,
+	 ItemType::NOTRANSPORT | ItemType::ALWAYSSEE,
 	 "DOLP",1,1,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
 	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 200, IT_NORMAL | IT_MOUNT, 30,1,
+	 200, IT_ADVANCED | IT_MOUNT, 30,1,
 	 0,0,0,220,
 	 -1,0,
 	 -1,0, 0,
@@ -2906,7 +2906,7 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::CAST,
 	 NULL, "rng_teleport", S_BASE_MYSTICISM,
 	 {{"GATE",1},{"FARS",3},{NULL,0}},
-	 10, 0, 0},                            // cost per 50*level weight
+	 8, 0, 0},                            // cost per 50*level weight
 	{"portal lore","PORT",100,
 	 SkillType::MAGIC | SkillType::CAST,
 	 NULL, "rng_portal", -1,
@@ -3071,7 +3071,7 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::NOTIFY,
 	 NULL, NULL, S_BASE_ILLUSION,
 	 {{"FORC",1},{"PATT",1},{"SPIR",1}},
-	 12, 0, 0},                            //  cost for (level) AMPRs or SHSTs.
+	 3, 0, 0},                            //  cost for (level) AMPRs or SHSTs.
 	{"create ring of invisibility","CRRI",100,
 	 SkillType::MAGIC | SkillType::CAST | SkillType::COSTVARIES,
 	 NULL, NULL, S_BASE_ILLUSION,
@@ -3369,7 +3369,7 @@ static SkillType sd[] = {
 	 {{NULL,0},{NULL,0},{NULL,0}},
 	 0, 0, 0},
 	{"battletraining","BATT",100,
-	 SkillType::MAGIC | SkillType::DISABLED,
+	 SkillType::MAGIC | SkillType::BATTLEREP | SkillType::DISABLED,
 	 NULL, NULL, S_BASE_BATTLETRAINING,
 	 {{NULL,0},{NULL,0},{NULL,0}},
 	 0, 0, 0},
@@ -3382,7 +3382,7 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::DISABLED | SkillType::FOUNDATION,
 	 NULL, NULL, S_BASE_ARTIFACTLORE,
 	 {{NULL,0},{NULL,0},{NULL,0}},
-	 0, 0, 0},
+	 3, 0, 0},                              //  cost for (level) AMPRs or SHSTs.
 	{"quartermastery", "QUAT", 100,
 	 SkillType::MAGIC | SkillType::DISABLED,
 	 NULL, NULL, -1,
@@ -5049,7 +5049,7 @@ static SpecialType spd[] = {
 	 {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
 	 "a non-shield spell",
 	 {{NUM_ATTACK_TYPES,2,25,
-	   WeaponType::ALWAYSREADY|WeaponType::RANGED,MAGIC_ENERGY,0},
+	   WeaponType::ALWAYSREADY|WeaponType::RANGED|WeaponType::RESTINPEACE,MAGIC_ENERGY,0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0},
 	  {-1, 0, 0, 0, 0, 0}},

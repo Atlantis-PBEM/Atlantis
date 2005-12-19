@@ -111,14 +111,15 @@ int Unit::EnergyRecharge()
     //maintenance phase, thus potentially ending with negative energy here without losing portals. To avoid this,
     //all energy checks in the battle code should use the method Unit::GetEnergy rather than accessing
     //unit->energy directly.
+//for consistency, the cost here must match the cost in Unit::GetEnergy(). These could perhaps be combined into a new method.
     if(transferred > 0) {
         int skill = GetSkill(S_CREATE_PORTAL);
         if(skill < 1) skill = 1;
-        int cost = (transferred + 30 * skill - 1) / (30 * skill);
+        int cost = (transferred + 40 * skill - 1) / (40 * skill);
         energi -= cost;
         transferred = 0;
     }
-    
+
     //creature maintenance
     energi -= EnergyMaintenance(energy + energi);
 
@@ -159,18 +160,19 @@ int Unit::EnergyMaintenance(int maxallowed)
     } else energycost += monstercost;
     if(experience) Experience(S_SUMMON_BALROG, experience);
     
-    // 3 per gryffin.
-    monsters = items.GetNum(I_GRYFFIN);
-    monstercost = (float) 3 * monsters;
-    monstercost *= (float) (11 - GetSkill(S_GRYFFIN_LORE))/10;
-    experience = (int) (monstercost + 0.99);
-    if(monstercost + energycost > maxmaintenance) {
-        Event("Does not have enough energy to control his gryffins, which fly back to their home.");
-        items.SetNum(I_GRYFFIN,0);
-        experience = 0;
-    } else energycost += monstercost;
-    if(experience) Experience(S_GRYFFIN_LORE, experience);
-        
+    // 3 per gryffin unless the spell is free to cast!
+    if(SkillDefs[S_GRYFFIN_LORE].cast_cost) {
+        monsters = items.GetNum(I_GRYFFIN);
+        monstercost = (float) 3 * monsters;
+        monstercost *= (float) (11 - GetSkill(S_GRYFFIN_LORE))/10;
+        experience = (int) (monstercost + 0.99);
+        if(monstercost + energycost > maxmaintenance) {
+            Event("Does not have enough energy to control his gryffins, which fly back to their home.");
+            items.SetNum(I_GRYFFIN,0);
+            experience = 0;
+        } else energycost += monstercost;
+        if(experience) Experience(S_GRYFFIN_LORE, experience);
+    }
     //liches/undead/skeletons/wolves/eagles/dragons are free, because their cost is built into their recruitment cost.
 
     // 1 per demon
@@ -547,6 +549,19 @@ void Game::UpdateFactionAffiliations()
 				    else u->SetFlag(FLAG_COMMANDER,0);
                 }
             }
+        }
+    }
+    
+    forlist_reuse(&factions) {
+        Faction *f = (Faction *) elem;
+        if(f->IsNPC()) continue;
+        if(f->ethnicity == RA_NA) { //in "chaos"
+		    WorldEvent *event = new WorldEvent;
+            event->type = WorldEvent::CONVERSION;
+            event->fact1 = f->num;
+            event->fact2 = f->ethnicity;
+            event->reportdelay = 0;
+            worldevents.Add(event);
         }
     }
 }

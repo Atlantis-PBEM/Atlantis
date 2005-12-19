@@ -58,6 +58,22 @@ int Game::SetupFaction( Faction *pFac )
 	temp2->reveal = REVEAL_FACTION;
 	temp2->SetFlag(FLAG_COMMANDER,1);
    	temp2->type = U_MAGE;
+   	
+   	FindOrder *ord = new FindOrder;
+	ord->find = 0;
+	ord->quiet = 0;
+	temp2->findorders.Add(ord);
+
+   	//Xanaxor mod: see neighbours first turn!
+	if(pFac->pStartLoc) {
+   	    for(int i=0; i<6; i++) {
+	        if(!pFac->pStartLoc->neighbors[i]) continue;
+   	    	Farsight *f = new Farsight;
+    		f->faction = pFac;
+    		f->level = 1;
+    		pFac->pStartLoc->neighbors[i]->farsees.Add(f);
+  		}
+    }
 
 
 	ARegion *reg = NULL;
@@ -73,12 +89,92 @@ int Game::SetupFaction( Faction *pFac )
 	}
 	temp2->MoveUnit( reg->GetDummy() );
 	reg->race = race;
+/*
+    AString message = "Welcome to Xanaxor, the fourth game in the Arcadia series. This game is based on "
+        "Atlantis 5.0, and the source code is available from the Atlantis CVS repository "
+        "or by request from the GMs.";
+    AString message2 = "Up to 12 factions may be present in Xanaxor simultaneously. "
+        "4 factions will begin aligned with each of "
+        "three major ethnicities - dwarf, human and elf. None begin representing the "
+        "fourth alignment of orcs and merfolk. You may freely change your alignment "
+        "through the game, and may work with or against other factions regardless of their "
+        "alignment. However, the game will end when there are no surviving player factions aligned "
+        "with three of the major ethnicities (the fourth ethnicity will be declared victorious "
+        "across Xanaxor), or earlier by agreement of the surviving players.";
+    AString message3 = "Your hero has begun their reign in their home village. As a bonus to help you "
+        "along you have recieved details of all regions adjacent to your hero's "
+        "home village. This bonus will not be repeated in future turns. Good Luck!";
+
+    pFac->Message("");
+    pFac->Message(message);
+    pFac->Message("");
+    pFac->Message(message2);
+    pFac->Message("");
+    pFac->Message(message3);
+*/
+    AString message1 = "Welcome to Xanaxor, the fourth game in the Arcadia series based on the Xanaxor code. This game is based on "
+        "Atlantis 5.0, and the source code is available from the Atlantis CVS repository "
+        "or by request from the GM. Many changes have been made both from Atlantis 5.0, and "
+        "Arcadia 3 (Nylandor). If you are not aware of the changes, you should read about them "
+        "as soon as possible.";
+    AString message2 = "Up to 12 player factions may be present in the world of Xanaxor, as well as "
+        "the seven non-player factions. "
+        "4 player factions begin aligned with each of the three major ethnicities across the land - "
+        "humans, dwarves and elves. Yet there is nothing to prevent leaders changing their allegiances "
+        "between these three races, or even for some to lead the outcasts of Xanaxor, the orcs and merfolk. "
+        "And nor is there anything preventing one race co-operating with another, if only for a short while. ";
+    AString message3 = "Xanaxor will end when there are no surviving player factions supporting three of the "
+        "four possible alignments - that is, all factions belong either to a particular alignment, or are "
+        "in chaos following the death of their commanding hero. Xanaxor may also finish earlier "
+        "by agreement of the surviving players.";
+    AString message4 = "Your hero has begun their reign in their home village. As a bonus to help you "
+        "along you have recieved details of all regions adjacent to your hero's "
+        "home village. This bonus will not be repeated in future turns. Good Luck!";
+
+    pFac->Message("");
+    pFac->Message(message1);
+    pFac->Message("");
+    pFac->Message(message2);
+    pFac->Message("");
+    pFac->Message(message3);
+    pFac->Message("");
+    pFac->Message(message4);
 
 	return( 1 );
 }
 
 Faction *Game::CheckVictory(AString *victoryline)
 {
+	int faction_present[RA_NA];
+	for(int i=0; i<RA_NA; i++) faction_present[i] = 0;
+	
+	forlist(&factions) {
+		Faction *f = (Faction *) elem;
+		if(f->IsNPC()) continue;
+		if(f->ethnicity < RA_NA) faction_present[f->ethnicity]++;
+	}
+	
+	int race_present = -1;
+	for(int i=0; i<RA_NA; i++) {
+	    if(race_present != -1) {
+	        if(faction_present[i]) return NULL;  //two ethnicities, no winner.
+	    } else if(faction_present) race_present = i;
+	}
+	
+	if(race_present == -1) return GetFaction(&factions,monfaction); //there appear to be no player factions left :(
+	
+	forlist_reuse(&factions) {
+		Faction *f = (Faction *) elem;
+		if(f->IsNPC()) continue;
+		*victoryline += EthnicityString(f->ethnicity) + " factions have taken over Xanaxor!";
+		return f; //we have one, let's return it.
+	}
+	
+	//huh? Oh well ...
+	return NULL;
+	
+	
+	/*
 	int cities = 0;
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
@@ -117,6 +213,7 @@ Faction *Game::CheckVictory(AString *victoryline)
 	}
 
 	return winner;
+	*/
 }
 
 void Game::ModifyTablesPerRuleset(void)
@@ -155,7 +252,7 @@ void Game::ModifyTablesPerRuleset(void)
 	if(Globals->ARCADIA_MAGIC) {
 	    ModifyAttribMod("stealth", 5, AttribModItem::SKILL,"INVI", AttribModItem::UNIT_LEVEL_HALF, 1);  //make sure 6 slots available - default version has only 5.
 	    ModifyAttribMod("stealth", 2, AttribModItem::FLAGGED,"invis", AttribModItem::CONSTANT, 2); //2 down from 3
-	    ModifyAttribMod("entertainment", 0, AttribModItem::SKILL,"PHEN", AttribModItem::UNIT_LEVEL, 10);    
+	    ModifyAttribMod("entertainment", 0, AttribModItem::SKILL,"GLAD", AttribModItem::UNIT_LEVEL, 10);    
 	
 	
 	    //Fundamental Skills
@@ -289,6 +386,7 @@ void Game::ModifyTablesPerRuleset(void)
         ModifySkillName(S_DEMON_LORE,"blankb","ZZZB");
         ModifySkillName(S_SUMMON_IMPS,"demon lore","DEMO");
         ModifyItemMagicSkill(I_IMP, "DEMO", 1);
+        ModifyItemEscapeSkill(I_IMP, "DEMO", 320);
 	    ModifySkillDependancy(S_SUMMON_IMPS, 0, "SUMM", 1);
 	    ModifySkillFlags(S_SUMMON_IMPS, SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST | SkillType::COSTVARIES);
 	    ModifySkillDependancy(S_SUMMON_DEMON, 0, "DEMO", 3);
@@ -313,7 +411,7 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_CREATE_STAFF_OF_LIGHTNING, 0, "CALL", 3);
 	    ModifySkillDependancy(S_CREATE_STAFF_OF_LIGHTNING, 1, "ARTL", 5);
 	    ModifySkillDependancy(S_CREATE_RUNESWORD, 0, "FEAR", 2);
-	    ModifySkillDependancy(S_CREATE_RUNESWORD, 1, "ARTL", 3);
+	    ModifySkillDependancy(S_CREATE_RUNESWORD, 1, "ARTL", 4);
 	    ModifySkillDependancy(S_CREATE_MAGIC_CARPET, 0, "ARTL", 1);
 	    ModifySkillDependancy(S_CREATE_MAGIC_CARPET, 1, "SWIN", 3);
 	    ModifySkillDependancy(S_ENGRAVE_RUNES_OF_WARDING, 0, "ARTL", 1);
@@ -497,7 +595,7 @@ void Game::ModifyTablesPerRuleset(void)
         ModifyEffectFlags("storm", EffectType::EFF_ONESHOT);
         ModifySpecialDamage("tornado", 0, ATTACK_WEATHER,2,50, WeaponType::RANGED,MAGIC_WEATHER, 0);
         ModifySpecialDamage("black_wind", 0, ATTACK_SPIRIT,2,150, WeaponType::RANGED,MAGIC_SPIRIT,0);
-        ModifySpecialDamage("banish_undead", 0, NUM_ATTACK_TYPES,2,60, WeaponType::RANGED,MAGIC_ENERGY,0);
+        ModifySpecialDamage("banish_undead", 0, NUM_ATTACK_TYPES,2,60, WeaponType::RANGED|WeaponType::RESTINPEACE,MAGIC_ENERGY,0);
         ModifySpecialDamage("banish_demon", 0, NUM_ATTACK_TYPES,2,60, WeaponType::RANGED,MAGIC_SPIRIT,0);
         ModifySpecialDamage("icebreath", 0, ATTACK_WEATHER,2,5, WeaponType::RANGED,MAGIC_WEATHER,0);
         ModifySpecialDamage("light", 0, ATTACK_ENERGY,2,10, WeaponType::RANGED,MAGIC_ENERGY,0);
@@ -525,10 +623,10 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifyRaceSkills("NOMA", "RIDI","RANC","HORS","BUIL");
 	    ModifyRaceSkills("TMAN", "LUMB","CONS","FARM","OBSE");
 	    
-	    ModifyRaceSkills("WELF", "LUMB","LBOW","FARM","ENTE");
+	    ModifyRaceSkills("WELF", "LUMB","LBOW","FARM","ENTE","BUIL");
 	    ModifyRaceSkills("SELF", "FISH","SAIL","CONS","RANC");
 	    ModifyRaceSkills("HELF", "HORS","ENTE","RIDI","HEAL");
-	    ModifyRaceSkills("TELF", "HERB","HEAL","STEA","LBOW");
+	    ModifyRaceSkills("TELF", "HERB","HEAL","STEA","LBOW","HUNT");
 
 	    ModifyRaceSkills("IDWA", "COMB","BUIL","HERB","FISH");
 	    ModifyRaceSkills("HDWA", "COMB","MINI","WEAP","ARMO");
@@ -882,12 +980,12 @@ void Game::ModifyTablesPerRuleset(void)
 	ClearTerrainItems(R_PARADISE);	
 	ModifyTerrainItems(R_PARADISE, 0, I_WOOD, 100, 20);
 	ModifyTerrainItems(R_PARADISE, 1, I_IRON, 100, 20);
-	ModifyTerrainItems(R_PARADISE, 2, I_HERBS, 100, 10);
-	ModifyTerrainItems(R_PARADISE, 3, I_FUR, 100, 10);
+	ModifyTerrainItems(R_PARADISE, 2, I_HERBS, 100, 15);
+	ModifyTerrainItems(R_PARADISE, 3, I_FUR, 100, 15);
 	ModifyTerrainItems(R_PARADISE, 4, I_STONE, 100, 20);
-	ModifyTerrainItems(R_PARADISE, 5, I_IRONWOOD, 100, 5);
-	ModifyTerrainItems(R_PARADISE, 6, I_FLOATER, 100, 10);
-	ModifyTerrainEconomy(R_PARADISE, 1000, 16, 40, 1);
+	ModifyTerrainItems(R_PARADISE, 5, I_IRONWOOD, 100, 10);
+	ModifyTerrainItems(R_PARADISE, 6, I_FLOATER, 100, 20);
+	ModifyTerrainEconomy(R_PARADISE, 1000, 18, 40, 1);
 /*
 	ClearTerrainItems(R_CAVERN);	
 	ModifyTerrainItems(R_CAVERN, 0, I_IRON, 100, 20);

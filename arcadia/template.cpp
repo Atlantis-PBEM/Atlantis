@@ -68,7 +68,7 @@ static int dircrd[] = {
    2-1,  5-1  // NW
 };
 
-
+//this crashes if more terrain types are added!
 static char *ter_fill[] = {
  // block
  " #### ",
@@ -117,11 +117,27 @@ static char *ter_fill[] = {
  // tunnels
  "      ",
  "      ",
-
+ 
+ // grotto
+ "  . . ",
+ " . .  ",
+ 
+ // deepforest
+ "  ^ ^ ",
+ " ^ ^  ",
+ 
+ // chasm
+ "      ",
+ "      ",
+ 
  // nexus
  " !!!! ",
  " !!!! ",
-
+ 
+ // paradise
+ "  + + ",
+ " + +  ",
+ 
  // For conquest
  // Island Plain
  "      ",
@@ -265,15 +281,6 @@ static char *ter_fill[] = {
  "      ",
  "      ",
 
- // grotto
- "  . . ",
- " . .  ",
- // deepforest
- "  ^ ^ ",
- " ^ ^  ",
- // chasm
- "      ",
- "      ",
  // grotto1
  "  . . ",
  " . .  ",
@@ -383,9 +390,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 					TrimWrite(f, buffer);
 					line++;
 				}
-
 				GetMapLine(buffer, line, pRegs);
-
 				if (m->amount == -1) {
 					sprintf(data, "%s unlim %4s @ %3i",
 						(any ? "    " : "Want"),
@@ -522,7 +527,6 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 //
 void ARegion::GetMapLine(char *buffer, int line, ARegionList *pRegs)
 {
-
 	for (int m=0; m<MAP_WIDTH; m++) {
 		buffer[m] = ' ';
 	}
@@ -533,14 +537,12 @@ void ARegion::GetMapLine(char *buffer, int line, ARegionList *pRegs)
 
 	char *dest = buffer+TMPL_MAP_OFS;
 	memcpy(dest, TemplateMap[line], TMPL_MAP_WIDTH);
-
 	ARegion *r = this;
 	int x, y, t, i = 0;
 	char *name;
 
 	t = (r->type + 1) * 2;
 	name = (r->town ? r->town->name->Str() : NULL);
-
 	for (;;) {
 
 		x = dircrd[i*2];
@@ -560,7 +562,6 @@ void ARegion::GetMapLine(char *buffer, int line, ARegionList *pRegs)
 				memcpy(dest + x, ter_fill[t], FILL_SIZE);
 			}
 		}
-
 		if (i >= NDIRS) break;
 
 		ARegion *r = neighbors[i];

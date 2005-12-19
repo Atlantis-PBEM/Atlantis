@@ -269,6 +269,8 @@ void Formation::Kill(int soldiernum, Army * itsarmy, int numhits)
         Awrite("Illegal Soldier Access");
         return;
     }
+    
+    if(numhits < 0) return;
 
     if (pSoldiers[soldiernum]->amuletofi) return;
     
@@ -355,8 +357,8 @@ void Formation::Sort(Army *itsarmy, Battle *b, int regtype)
 {
     int i=0;
     int missort=0;
-    int terrainlimited = 0;
-    int tacerror = 0; //1 = one downgrade, 2 = two downgrades
+//    int terrainlimited = 0;
+//    int tacerror = 0; //1 = one downgrade, 2 = two downgrades
 
     while(i<nummen) {
         if(pSoldiers[i]->defaultform == 0) i++;
@@ -401,9 +403,10 @@ int Formation::NumMeleeAttacks() const
 }
 
 int Formation::NumRangedAttacks() const
-//this is (I think) only used for selecting best target. Could maybe include tactics skill etc. here.
+//this is only used for selecting best target. Could maybe include tactics skill etc. here.
 {
     int attacks = 0;
+    int heroes = 0;
     for(int i=0; i<nummen; i++) {
         if(pSoldiers[i]->attacktype == ATTACK_RANGED) {
             if(pSoldiers[i]->attacks>0) attacks += pSoldiers[i]->attacks;
@@ -423,7 +426,20 @@ int Formation::NumRangedAttacks() const
             if(!damage) attacks += pSoldiers[i]->slevel * 20; //some bonus for other spells,
                                                           //eg shields, concealment, etc.
         }
+        if(pSoldiers[i]->unit->type == U_LEADER) {
+            attacks += 1;          //increased value for leaders
+        }
+        if(pSoldiers[i]->unit->type == U_MAGE) {
+			forlist(&pSoldiers[i]->unit->skills) {
+			    Skill *sk = (Skill *)elem;
+                attacks += (sk->days + sk->experience) / 30;     //increased value for heroes
+            }
+            heroes++;
+        }
     }
+    
+    //each hero gives an additional multiplicative bonus to the values
+    attacks = (attacks * (6+heroes))/6;
     return attacks;
 }
 

@@ -790,6 +790,12 @@ AString *ItemDescription(int item, int full)
 				mp->tactics + ", a stealth score of " + mp->stealth +
 				", and an observation score of " + mp->obs + ".";
 		}
+		if((ItemDefs[item].type & IT_UNDEAD) && Globals->MAGE_UNDEAD_INVINCIBLE ) {
+		    *temp += " When controlled by a hero, this monster has a ";
+		    *temp += AString(Globals->MAGE_UNDEAD_INVINCIBLE) + "% chance of "
+		        "coming back to life following a battle in which it is slain.";		
+		}
+		
 		if(mp->silver) {
             *temp += " This monster might have ";
     		if(mp->spoiltype != -1) {
@@ -936,7 +942,13 @@ AString *ItemDescription(int item, int full)
 				WeapClass(i) + " attacks";
 		}
 		*temp += ".";
-		if(full) {
+		
+		if(pA->flags & ArmorType::ONLYONEHIT) {
+		    *temp += " The wearer of this armour will be killed by a single successful attack, "
+            "even if they would usually have multiple hitpoints.";
+		}
+		
+//		if(full) {
 			if(pA->flags & ArmorType::USEINASSASSINATE) {
 				*temp += " This armour may be worn during assassination "
 					"attempts.";
@@ -945,7 +957,7 @@ AString *ItemDescription(int item, int full)
 				*temp += " This armour may be worn by the victim during an assassination "
 					"attempt.";
 			}
-		}
+//		}
 	}
 
 	if(ItemDefs[item].type & IT_TOOL) {
@@ -1138,7 +1150,7 @@ AString *ItemDescription(int item, int full)
 				*temp += ".";
 			}
 			if(bt->flags & BattleItemType::SPECIAL || bt->flags & BattleItemType::SHIELD) {
-                *temp += AString(" ") + "Item can cast " +
+                *temp += AString(" ") + "This item can cast " +
 				ShowSpecial(bt->special, bt->skillLevel, 1, 1);
             }
             if(bt->flags & BattleItemType::ENERGY) {

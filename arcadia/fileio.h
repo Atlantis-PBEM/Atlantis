@@ -53,7 +53,7 @@ class Aoutfile {
 		~Aoutfile();
 
 		void Open(const AString &);
-		int OpenByName(const AString &);
+		int OpenByName(const AString &, int append = 0);
 		void Close();
 
 		void PutStr(char *);

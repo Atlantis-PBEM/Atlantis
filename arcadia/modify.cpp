@@ -384,6 +384,16 @@ void Game::ModifyItemMagicInput(int it, int i, int input, int amount)
 	ItemDefs[it].mInput[i].amt = amount;
 }
 
+void Game::ModifyItemEscapeSkill(int it, char *sk, int val)
+{
+	if(it < 0 || it > (NITEMS-1)) return;
+	if (sk && (FindSkill(sk) == NULL)) return;
+	ItemDefs[it].esc_skill = sk;
+	ItemDefs[it].esc_val = val;
+}
+
+
+
 /// Change the base skill levels for specialised and non-specialised skills.
 /** For most races, this will be 3 for special skills, and 2 for non-special
 For orcs, it's 4 and 1; for leaders it's 5 and 5 (although it could be 0 and 5)

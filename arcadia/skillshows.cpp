@@ -1663,19 +1663,24 @@ AString *ShowSkill::Report(Faction *f)
 			if(!Globals->ARCADIA_MAGIC) {
     			*str += "A mage with the Create Runesword skill may create a "
     				"Runesword, which when wielded in combat gives the wielder "
-    				"a plus 4 bonus to Combat skill, and also allows the wielder "
+    				"a plus 5 bonus to Combat skill, and also allows the wielder "
     				"to project an Aura of Fear in battle, as if he had Create "
     				"Aura of Fear skill of level 2 (provided the wielder is "
     				"not casting any other combat spells). A mage has a 20 "
     				"percent times his skill level chance of creating a "
     				"Runesword. To cast this spell, CAST Create_Runesword.";
 			} else {
+			    WeaponType *pW = FindWeapon("RUNE");
+		        BattleItemType *bt = FindBattleItem("RUNE");
     			*str += AString("A mage with the Create Runesword skill may create a "
-    				"Runesword, which when wielded in combat gives the wielder "
-    				"a plus 4 bonus to Combat skill, and also allows the wielder "
+    				"Runesword, which when wielded in combat ");
+                if(pW) *str += AString("gives the wielder a plus ") + pW->attackBonus + 
+                    " bonus to Combat skill";
+                if(pW && bt) *str += ", and also ";
+                if(bt) *str += AString("allows the wielder "
     				"to project an Aura of Fear in battle, as if he had Create "
-    				"Aura of Fear skill of level 2 (provided the wielder is "
-    				"not casting any other combat spells). This skill ") + 
+    				"Aura of Fear skill of level ") + bt->skillLevel + " (provided the wielder is "
+    				"not casting any other combat spells). This skill " + 
                     EnergyString(skill,1,6,1) + " To use this "
                     "spell, CAST Create_Runesword.";
 			}
@@ -2259,10 +2264,11 @@ AString *ShowSkill::Report(Faction *f)
 		case S_RESURRECTION: //Arcadia
 			if(level == 1) {
     			*str += "This skill enables the mage to resurrect men who would "
-                    "usually be given up for dead. A mage with this skill may "
+                    "usually be given up for dead. At higher levels, a mage with this skill may "
                     "attempt to resurrect units from his own or an allied "
                     "faction who have been assassinated in "
-                    "the mage's region (not yet implemented). In battle, a mage may attempt to resurrect "
+                    "the mage's region, or even resurrect him/herself. "
+                    "From level 1, in battle a mage may attempt to resurrect "
                     "up to 4 times his skill level squared men who died and could "
                     "not be healed (from 4 corpses at level 1, up to 144 corpses "
                     "at level 6). All resurrection attempts have a 50 percent "
@@ -2450,7 +2456,7 @@ AString *ShowSkill::Report(Faction *f)
         					"Modification Increase <item to increase> <item to decrease>.";
         			}
             } else if(level == 3) {
-    			*str += "At level 1, a mage with modification may decrease "
+    			*str += "At level 3, a mage with modification may decrease "
                     "the base amount "
                     "of any normal resource present in a "
                     "region, at the cost of increasing the amount of another normal "
@@ -2847,7 +2853,7 @@ AString *ShowSkill::Report(Faction *f)
                         "Please contact your GM to have the problem corrected.";
     			}
     		*str += AString("If creating a portal, this spell ") + EnergyString(skill,1,6,1) +
-                " In addition, for every (20 * skill) weight units (or part "
+                " In addition, for every (40 * skill) weight units (or part "
                 "thereof) which pass through the portal, the mage will lose a point of "
                 "energy to maintain the portal connection. "
                 "If the mage does not have enough energy, the portal will collapse. Portals "
@@ -2980,12 +2986,30 @@ AString *ShowSkill::Report(Faction *f)
 				"knowledge of mysticism can be used for good or bad, and offense or defence.";    
 			break;	
 		case S_BASE_ARTIFACTLORE: //Earthsea
-			if(level > 1) break;
-			*str += "Artifact Lore is one of the Foundation skills on which other "
-				"magical skills are based. This skill deals with a mage's ability "
-				"to channel magical energy into artifacts, which can be used to "
-                "aid a mage without drawing on their power. Many artifacts "
-                "may also be used by men who are neither mages nor heros.";
+			if(level == 1) {
+    			*str += "Artifact Lore is one of the Foundation skills on which other "
+    				"magical skills are based. This skill deals with a mage's ability "
+    				"to channel magical energy into artifacts, which can be used to "
+                    "aid a mage without drawing on their power. Many artifacts "
+                    "may also be used by men who are neither mages nor heroes.";
+    			*str += AString(" A mage at level 1 may create amulets of "
+                    "protection, which grant the possessor a "
+    				"personal Spirit Shield of 3. A mage may create up to his skill "
+    				"level squared of these amulets per turn. For every skill "
+                    "level amulets created, this spell ") + EnergyString(skill,1,6,1) + 
+                    " To use this spell, CAST Artifact_Lore Protection, and "
+                    "the mage will create as many amulets of protection as he "
+                    "is able.";
+			} else if(level == 3) {
+    			*str += AString("A mage with artifact lore at level 3 may create "
+                    "shieldstones, which grant the possessor a "
+    				"personal Energy Shield of 3. A mage may create up to his skill "
+    				"level squared of shieldstones per turn. For every skill "
+                    "level shieldstones created, this spell ") + EnergyString(skill,3,6,1) +
+                    " To use this spell, CAST Artifact_Lore Shieldstone, and "
+                    "the mage will create as many shieldstones as he "
+                    "is able.";
+            }
 			break;	
 		case S_BASE_BATTLETRAINING: //Earthsea
 			if(level > 1) break;

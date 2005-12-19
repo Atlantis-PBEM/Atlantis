@@ -201,8 +201,7 @@ class Unit : public AListElem
   Do experience learning
   */
 
-        int GetActiveSkill(int);         //checks if a skill has been player-disabled.
-		int GetSkill(int);
+		int GetSkill(int);     //returns zero if skill is disabled
 		void SetSkill(int,int);
 		void SetSkill(int,int,int); /* REAL_EXPERIENCE Patch */
 		int IsASpeciality(int skill);
@@ -228,10 +227,10 @@ class Unit : public AListElem
 		int Hostile();
 		int Forbids(ARegion *,Unit *);
 		int Weight();
-	        int FlyingCapacity();
-	        int RidingCapacity();
-	        int SwimmingCapacity();
-	        int WalkingCapacity();
+	    int FlyingCapacity();
+	    int RidingCapacity();
+	    int SwimmingCapacity();
+	    int WalkingCapacity();
 		int CanFly(int);
 		int CanRide(int);
 		int CanWalk(int);
@@ -239,15 +238,16 @@ class Unit : public AListElem
 		int CanSwim();
 		int CanReallySwim();
 		int TryToSwim();
-		int MoveType();
-		int CalcMovePoints();
+		int CanDolphinRide();
+		int MoveType(ARegion *regionto = NULL);
+		int CalcMovePoints(ARegion *reg);
 		int CanMoveTo(ARegion *,ARegion *);
 		int GetFlag(int);
 		void SetFlag(int,int);
 		void CopyFlags(Unit *);
 		int GetBattleItem(AString &itm);
 		int GetArmor(AString &itm, int ass);
-		int GetMount(AString &itm, int canFly, int canRide, int &bonus, int &type);
+		int GetMount(AString &itm, int canFly, int canRide, int ocean, int &bonus, int &type);
 		int GetWeapon(AString &itm, int riding, int ridingBonus,
 				int &attackBonus, int &defenseBonus, int &attacks);
 		int CanUseWeapon(WeaponType *pWep, int riding);

@@ -622,11 +622,14 @@ int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, in
 		int attackbonus = 0;
 		attackbonus += attackers->formations[attackerform].bonus;
 		if((attackType != ATTACK_COMBAT) && (attackType != ATTACK_RIDING)) {
+		    ManType *mt = FindRace(ItemDefs[race].abr);
 		    if(attackers->rangedbonus < 0) {
 		    //elves don't get ranged penalties
-		        ManType *mt = FindRace(ItemDefs[race].abr);
 		        if(mt->ethnicity != RA_ELF || attackType != ATTACK_RANGED) attackbonus += attackers->rangedbonus;
-            } else attackbonus += attackers->rangedbonus;
+            //non-elves only get ranged bonuses for magic
+            } else if(mt->ethnicity == RA_ELF || attackType != ATTACK_RANGED) {
+                attackbonus += attackers->rangedbonus; //we know this bonus is >= 0 now!
+            }
 		}
 		
 		attackLevel += attackbonus; //adding here since protection values aren't supposed to be added
@@ -669,13 +672,18 @@ int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, in
 			if (tar->ArmorProtect(weaponClass)) {
 				continue;
 			}
-
+			//toughness gets a 1:level chance to dodge ranged/magic attacks:
 			if(attackType != ATTACK_COMBAT && attackType != ATTACK_RIDING && getrandom(tar->unit->GetSkill(S_TOUGHNESS)+1) ) {
                 continue;
             }
 
+            if((flags & WeaponType::RESTINPEACE) && strength >= tar->hits) {
+                //this soldier is going to die! - unless he has an amy of i in which case he'll never die anyway ...
+                tar->restinpeace = 1;
+            }
+
 			/* 8. Seeya! */
-			formations[formhit].Kill(tarnum, this);
+			formations[formhit].Kill(tarnum, this, strength);
 			ret++;
 		} else {
 			if (tar->HasEffect(effect)) {
@@ -954,8 +962,18 @@ void Army::DoHealLevel(Battle *b, int type, int useItems)
 void Army::DoResurrect(Battle *b)
 {
     //self-resurrection
+    int undead_return = 0;
+    
    	for (int i=NumAlive(); i<count; i++) {
 		Soldier * s = GetSoldier(i);
+		if(ItemDefs[s->race].type & IT_UNDEAD && 
+          s->unit->type == U_MAGE &&
+          getrandom(100) < Globals->MAGE_UNDEAD_INVINCIBLE &&
+          !s->restinpeace) {
+            undead_return++;
+            s->isdead = 0;
+            formations[NUMFORMS].TransferSoldier((i-NumAlive()), &formations[NUMFORMS-1]);
+		}
         if(s->unit->type == U_MAGE && (ItemDefs[s->race].type & IT_MAN) && s->unit->GetSkill(S_RESURRECTION) >= 5 && 
               s->unit->GetEnergy() >= s->unit->GetCastCost(S_RESURRECTION, 4)) {
              //unit can resurrect himself.
@@ -967,8 +985,12 @@ void Army::DoResurrect(Battle *b)
              } else  s->unit->Event("Rises from the dead.");
              s->unit->energy -= s->unit->GetEnergy(); //resurrected mage is exhausted.
              s->isdead = 0;
-             formations[NUMFORMS].TransferSoldier(0, &formations[NUMFORMS-1]);
+             formations[NUMFORMS].TransferSoldier((i-NumAlive()), &formations[NUMFORMS-1]);
         }
+    }
+    
+    if(undead_return) {
+        b->AddLine(AString(undead_return) + " slain undead come back to life.");
     }
 
     //resurrection of others. NB no resurrection of illusions.
@@ -1852,8 +1874,10 @@ void Army::FlyingReservesMayFlank(Battle *b, Army *enemy)
     }
     #endif
     float critical = 0.8;
+    if(pLeader->tactics == TACTICS_AGGRESSIVE) critical /= 4;
+    else if(pLeader->tactics == TACTICS_DEFENSIVE) critical *= 4;
     // if tactitians are able to be aggressive or defensive, adjust this number to
-    // 0.4 or 1.6 respectively.
+    // 0.2 or 3.2 respectively.
     
     if( (behindscore / inverseratio) < critical && (inverseratio > (1/3))) return; //decided not to flank, too much opposition.
     if( inverseratio > 4 ) return; //too much opposition to try and flank.
@@ -1930,7 +1954,7 @@ void Army::RidingReservesMayFlank(Battle *b, Army *enemy)
             for(int i=0; i<(NUMFORMS/FORM_DEAD); i++) {
                 if(enemy->formations[i].GetNumMen()) backline = 1;        
             }
-        if(!backline) return; //the enemy troops must have flanked, so lets intercept them as reserves.
+        if(!backline) return; //the enemy troops must have flanked, so lets intercept them as flanked ourselves.
         int moved = formations[2].GetNumMen();
         formations[2].MoveSoldiers(&formations[14]);
         //do not combine engagements
@@ -2055,9 +2079,9 @@ void Army::RidingReservesMayFlank(Battle *b, Army *enemy)
 //    #endif
     float critical = 0.8;
     if(pLeader->tactics == TACTICS_AGGRESSIVE) critical /= 2;
-    else if(pLeader->tactics == TACTICS_DEFENSIVE) critical *= 2;
+    else if(pLeader->tactics == TACTICS_DEFENSIVE) critical *= 3;
     // if tactitians are able to be aggressive or defensive, adjust this number to
-    // 0.4 or 1.6 respectively.
+    // 0.4 or 2.4 respectively.
     if( (behindscore / inverseratio) < critical && (inverseratio > (1/3))) return; //decided not to flank, too much opposition. (second part says we have less than three times the number of enemy cav)
     if( inverseratio >= 4 && pLeader->tactics != TACTICS_AGGRESSIVE) return; //too much opposition to try and flank.
 
@@ -2431,7 +2455,14 @@ void Army::DoExperience(int enemydead)
             
         } else if(!s->special) s->unit->Experience(S_COMBAT,exper,0);
         //practise special if we are a mage.
-        if(s->special && s->unit->IsMage() && s->unit->combat != -1) s->unit->Experience(s->unit->combat,(int) (exp/3), 0);
+        if(s->special && s->unit->IsMage() && s->unit->combat != -1) {
+        //spells which do not get experience awarded during battle (eg are not cast as spells) get more exp here:
+            if(s->unit->combat == S_UNITY) {
+                s->unit->Experience(s->unit->combat,(int) (exp), 0);
+            } else {
+                s->unit->Experience(s->unit->combat,(int) (exp/3), 0);
+            }
+        }
 	}
 }
 
@@ -2467,13 +2498,20 @@ void Army::DoEthnicMoraleEffects(Battle *b)
     for(int i=0; i<RA_NA; i++) racecount[i] = 0;
     int unity = 0;
     int unityhelps = 0;
+    int totalmen = 0;
     
     for(int i=0; i<count; i++) {
         Soldier *s = GetSoldier(i);
         if(s->special == SkillDefs[S_UNITY].special) unity += s->slevel*s->slevel;
         ManType *mt = FindRace(ItemDefs[s->race].abr);
-        if(mt) racecount[mt->ethnicity]++;
-        else racecount[RA_OTHER]++;
+        if(mt) {
+            racecount[mt->ethnicity]++;
+            totalmen++;
+        }
+        else if(ItemDefs[s->race].type & IT_UNDEAD) {
+            racecount[RA_OTHER]++; //don't affect orcs!
+            totalmen++;  // monsters other than undead do not contribute to morale penalty
+        }
     }
 #ifdef DEBUG2
 cout << " !";
@@ -2481,8 +2519,8 @@ cout << " !";
     unity *= 50; //unity 'heals' 50 men * lvl * lvl.
 
     float racepenalty[RA_NA];
-    for(int i=0; i<RA_NA; i++) racepenalty[i] = 2*(count - racecount[i]);
-    for(int i=0; i<RA_NA; i++) racepenalty[i] /= count;
+    for(int i=0; i<RA_NA; i++) racepenalty[i] = 2*(totalmen - racecount[i]);
+    for(int i=0; i<RA_NA; i++) racepenalty[i] /= totalmen;
     // penalties are now between 0 and 2, depending on racial fractions in the army.
     for(int i=0; i<RA_NA; i++) racecount[i] = 0;
     
@@ -2493,20 +2531,21 @@ cout << "@";
     for(int i=0; i<count; i++) {
         Soldier *s = GetSoldier(i);
         ManType *mt = FindRace(ItemDefs[s->race].abr);
-        int ethnic;
-        if(mt) ethnic = mt->ethnicity;
-        else ethnic = RA_OTHER;
-        int penalty = RoundRandom(racepenalty[ethnic]);
-        if(penalty && unity > 0) {
-            unity--;
-            if(getrandom(2)) {
-                unityhelps++;
-                penalty = 0;
+        int ethnic = -1;
+        if(mt) ethnic = mt->ethnicity; //monsters do not suffer morale penalties.
+        if(ethnic != -1) {
+            int penalty = RoundRandom(racepenalty[ethnic]);
+            if(penalty && unity > 0) {
+                unity--;
+                if(getrandom(2)) {
+                    unityhelps++;
+                    penalty = 0;
+                }
             }
+            if(penalty) racecount[ethnic]++;
+            s->askill -= penalty;
+            s->dskill[ATTACK_COMBAT] -= penalty;
         }
-        if(penalty) racecount[ethnic]++;
-        s->askill -= penalty;
-        s->dskill[ATTACK_COMBAT] -= penalty;
     }
     int total = 0;
     for(int i=0; i<RA_NA; i++) total += racecount[i];
@@ -2516,13 +2555,6 @@ cout << "#";
 
     AString temp = AString("Unity calms ") + unityhelps + " of " + *pLeader->name + "'s soldiers.";
     if(unityhelps) b->AddLine(temp);
-    
-    if(max > unity) {
-        for(int i=0; i<count; i++) {
-            Soldier *s = GetSoldier(i);
-            if(s->special == SkillDefs[S_UNITY].special) s->unit->Experience(S_UNITY,(10*(max-unity)+max/2)/max,0);
-        }
-    }       
     
     temp = AString(total) + " of " + *pLeader->name + "'s soldiers suffer a morale penalty due to the presence of soldiers from different ethnic groups.";
     if(total) b->AddLine(temp);

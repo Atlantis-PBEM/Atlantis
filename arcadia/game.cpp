@@ -644,12 +644,12 @@ int Game::ReadPlayers()
 					    int numfound = 0;
 					    forlist(&regions) {
 					        ARegion *reg = (ARegion *) elem;
-					        if(reg->flagpole) {
+					        if(reg->flagpole == FL_UNUSED_START_LOC) {
 					            numfound++;
 					            if(!getrandom(numfound)) pReg = reg;
 					        }
 					    }
-					    if(pReg) pReg->flagpole = 0;
+					    if(pReg) pReg->flagpole = FL_USED_START_LOC;
 					}
 
 					pFac = AddFaction(noleader, pReg);
@@ -667,7 +667,7 @@ int Game::ReadPlayers()
 					int nFacNum = pToken->value();
 					pFac = GetFaction(&factions, nFacNum);
 					lastWasNew = 0;
-			        if(pFac) pFac->TimesReward(); //Arcadia mod, always on!
+//			        if(pFac) pFac->TimesReward(); //Arcadia mod, always on!
 				}
 			} else if(pFac) {
 				if(!ReadPlayersLine(pToken, pLine, pFac, lastWasNew)) {
@@ -1153,8 +1153,8 @@ void Game::PreProcessTurn()
 	if (month>11) {
 		month = 0;
 		year++;
-	}
-	SetupUnitNums();
+	}	
+	SetupUnitNums();	
 	forlist(&factions) {
 		((Faction *) elem)->DefaultOrders();
 	}
@@ -1401,7 +1401,7 @@ void Game::WritePowers()
 
 	int i = f.OpenByName( str );
 	if(i != -1) {
-        f.PutStr("From the Peasants of Nylandor.");
+        f.PutStr("From the Peasants of Xanaxor.");
         f.PutStr("Bringing you statistics in June and December.");
         f.PutStr("");
         
@@ -1545,6 +1545,7 @@ Faction *Game::AddFaction(int noleader, ARegion *pStart)
 	temp->lastorders = TurnNumber();
 	temp->pStartLoc = pStart;
 	temp->pReg = pStart;
+	if(pStart) temp->start = pStart->num;
 	temp->noStartLeader = noleader;
 
 	if (!SetupFaction(temp)) {
@@ -2046,6 +2047,12 @@ void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
     	if(level) u->Experience(S_TRUE_SEEING,level); //can otherwise only be gained by study
     	level = u->GetSkill(S_SECSIGHT);
     	if(level) u->Experience(S_SECSIGHT,level); //can otherwise only be gained by study
+    	level = u->GetSkill(S_TRADING);
+    	if(level) u->Experience(S_TRADING,level); //can otherwise only be gained by study
+    	level = u->GetSkill(S_MERCHANTRY);
+    	if(level) u->Experience(S_MERCHANTRY,level); //can otherwise only be gained by study
+    	level = u->GetSkill(S_ARCADIA_QUARTERMASTERY);
+    	if(level) u->Experience(S_ARCADIA_QUARTERMASTERY,level); //can otherwise only be gained by study
 	}
 }
 
@@ -2270,7 +2277,7 @@ void Game::CreateNPCFactions()
     		factions.Add(f);
     		f = new Faction(factionseq++);
     		independentguardfaction = f->num;
-    		temp = new AString("City Guardsmen");
+    		temp = new AString("Independent Guardsmen");
             f->ethnicity = RA_OTHER;
     		f->SetName(temp);
     		f->SetNPC();
@@ -2363,10 +2370,12 @@ void Game::CreateFortMon(ARegion *pReg, Object *o)
 	}
 
 	Faction *pFac = GetFaction(&factions, fac);
-	AString *s = new AString("Regional Guards");
+	
 
 	if(skilllevel > 1) {
     //one front unit
+        AString *s = new AString("Regional Guards");
+        
     	Unit *u = MakeManUnit(pFac, pReg, num, skilllevel, 1,
     		0, 0);
     	u->SetMoney(num * Globals->GUARD_MONEY / 2);
@@ -2378,10 +2387,12 @@ void Game::CreateFortMon(ARegion *pReg, Object *o)
     	u->reveal = REVEAL_FACTION;
     	u->MoveUnit(o);
     //one behind unit
+        AString *s2 = new AString("Regional Guards");
+    
     	Unit *u2 = MakeManUnit(pFac, pReg, num, skilllevel, 1,
     		0, 1);
     	u2->SetMoney(num * Globals->GUARD_MONEY / 2);
-    	u2->SetName(s);
+    	u2->SetName(s2);
     	u2->type = U_GUARD;
     	u2->guard = GUARD_GUARD;
     	u2->SetSkill(S_OBSERVATION, skilllevel);
@@ -2390,13 +2401,16 @@ void Game::CreateFortMon(ARegion *pReg, Object *o)
     	u2->MoveUnit(o);
    	}
    	if(skilllevel != 2) {
-    //one unit of best type
+    //one unit of best type        
         int behind = SkillMax("XBOW", pReg->race);
         if (SkillMax("LBOW", pReg->race) > behind) behind = SkillMax("LBOW", pReg->race);
         int front = SkillMax("COMB", pReg->race);
-        if (SkillMax("RIDI", pReg->race) > front) front = SkillMax("RIDI", pReg->race);
+        if (SkillMax("RIDI", pReg->race) > front && (TerrainDefs[pReg->type].flags & TerrainType::RIDINGMOUNTS) && !(TerrainDefs[pReg->type].flags & TerrainType::RIDINGLIMITED)) 
+            front = SkillMax("RIDI", pReg->race);
         if(behind > front) behind = 1;
         else behind = 0;
+        
+        AString *s = new AString("Regional Guards");
         
     	Unit *u = MakeManUnit(pFac, pReg, num, skilllevel, 1,
     		0, behind);
@@ -2438,10 +2452,10 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
 	} else {
 		skilllevel = pReg->town->TownType() + 1;
 		num = Globals->CITY_GUARD * skilllevel;
-		if(!Globals->GUARD_DEPENDS_ON_TAX) num = Globals->CITY_GUARD * skilllevel;
+		if(!Globals->GUARD_DEPENDS_ON_TAX || !pReg->money) num = Globals->CITY_GUARD * skilllevel;
 		else num = pReg->money * Globals->CITY_GUARD / 5000;
 	}
-	if(Globals->GUARD_DEPENDS_ON_TAX && percent < 20) {
+	if(Globals->GUARD_DEPENDS_ON_TAX && percent < 20) {    //why less than 20? Need to excuse 100% for the initial start ...
 	    num = pReg->untaxed / (20 * Globals->GUARD_MONEY);
 	} else {
 	    num = num * percent / 100;
@@ -2476,7 +2490,6 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needguard)
 	temp += AString(" in ") + *pReg->name;
 	Awrite(temp);
 	*/
-	
 	if((Globals->LEADERS_EXIST)) {
 		/* standard Leader-type guards */
 		u = GetNewUnit(pFac);
@@ -2589,7 +2602,7 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 	int towntype;
     if(r->town) towntype = r->town->TownType();
     else towntype = TOWN_CITY;                 //nexus
-	int AC = 0;
+//	int AC = 0;
 	int men;
 //	int IV = 0;
 	int mantype;
@@ -2638,7 +2651,7 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 	if(u->type == U_GUARDMAGE) {
 		men = 1;
 	} else {
-		if(!Globals->GUARD_DEPENDS_ON_TAX) maxmen = Globals->CITY_GUARD * (towntype+1);
+		if(!Globals->GUARD_DEPENDS_ON_TAX || !r->money) maxmen = Globals->CITY_GUARD * (towntype+1);
 		else maxmen = r->money * Globals->CITY_GUARD / 5000;
 		if(!Globals->LEADERS_EXIST) maxmen = 3 * maxmen / 4;
 		if(!Globals->GUARD_DEPENDS_ON_TAX) men = u->GetMen() + (maxmen/10);
@@ -2654,8 +2667,16 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 			u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
 		if(!Globals->ARCADIA_MAGIC) u->SetSkill(S_FORCE,Globals->START_CITY_MAGES);
 		else u->SetSkill(S_BASE_WINDKEY,Globals->START_CITY_MAGES+towntype-2);
-		u->SetSkill(S_FIRE, Globals->START_CITY_MAGES+towntype-2);
-		u->combat = S_FIRE;
+		if(Globals->ARCADIA_MAGIC && u->IsASpeciality(S_LIGHT) && !u->IsASpeciality(S_FIRE) ) {
+		    u->SetSkill(S_LIGHT, Globals->START_CITY_MAGES+towntype-2);
+			u->combat = S_LIGHT;
+		} else {
+		    u->SetSkill(S_FIRE, Globals->START_CITY_MAGES+towntype-2);
+			u->combat = S_FIRE;
+		}
+		u->SetSkill(S_OBSERVATION,towntype + 1); //added AFTER adjust skills, as otherwise non-leaders are limited to ONE skill :(.
+		u->SetSkill(S_COMBAT,towntype + 1); //added AFTER adjust skills, as otherwise non-leaders are limited to ONE skill :(.
+
 		u->SetFlag(FLAG_BEHIND, 1);
 		u->reveal = REVEAL_FACTION;
 		u->SetMoney(Globals->GUARD_MONEY);
@@ -2663,8 +2684,8 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 		int money = men * Globals->GUARD_MONEY;
 		u->SetMoney(money);
 		u->SetSkill(skill, towntype + 1);
-		u->SetSkill(S_OBSERVATION,towntype + 1);
 		u->AdjustSkills(1);
+		u->SetSkill(S_OBSERVATION,towntype); //added AFTER adjust skills, as otherwise non-leaders are limited to ONE skill :(. Note the mage has +1 obse compared to normal guards. This set so that the obse should never become a unit's default skill (fingers crossed ... maybe still in cities).
 		u->items.SetNum(weapon,men);
 		if(armor != -1) u->items.SetNum(armor,men);
 		if(mount != -1) u->items.SetNum(mount,men);

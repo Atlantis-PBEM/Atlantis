@@ -255,6 +255,7 @@ public:
 	// file
 	ARegion *pReg;
 	ARegion *pStartLoc;
+	int start;
 	int noStartLeader;
 };
 

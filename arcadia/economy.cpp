@@ -442,8 +442,12 @@ void ARegion::SetupCityMarket()
 					price = ItemDefs[ i ].baseprice;
 				}
 
+				//reduce grain/livestock demand in ocean
+				if(i != I_FISH && TerrainDefs[type].similar_type == R_OCEAN) amt /= 10;
+
 				cap = (citymax * 3/4) - 1000;
 				if(cap < 0) cap = citymax/2;
+				
 				Market * m = new Market (M_SELL, i, price, amt, population,
 						population+cap, amt, amt*2);
 				markets.Add(m);
@@ -688,7 +692,7 @@ void ARegion::SetupCityMarket()
 				if(Globals->RANDOM_ECONOMY) {
 					amt += getrandom(amt);
 					if(Globals->MORE_PROFITABLE_TRADE_GOODS) {
-						price=(ItemDefs[i].baseprice*(350+getrandom(100)))/100;   //BS Arcadia increase from 250 to 350.
+						price=(ItemDefs[i].baseprice*(400+getrandom(100)))/100;   //BS Arcadia increase from 250 to 350.
 					} else {
 						price=(ItemDefs[i].baseprice*(150+getrandom(50)))/100;
 					}
@@ -698,14 +702,14 @@ void ARegion::SetupCityMarket()
 				
 //				cap = (citymax/2);        //2000  
                 cap = 1200*Globals->POP_LEVEL;
-				offset = tradesell++ * (tradesell * tradesell * citymax/40);   // 0,400
+				offset = tradesell++ *(citymax/9);   // 0,445  -  1200-1645
 				if(cap + offset < citymax) {
 					Market * m = new Market (M_SELL, i, price, amt/5, cap+population+offset,
 						citymax+population+offset, 0, amt);     //BS offset added into maxpop
 					markets.Add(m);
 				}
 			}
-//60-90 (90-145) :  210-270 (315-405)    buy prices : sell prices
+//60-90 (90-145) :  240-300 (360-450)    buy prices : sell prices
 			if(addsell) {
 				int amt = Globals->CITY_MARKET_TRADE_AMT;
 				int price;
@@ -722,8 +726,8 @@ void ARegion::SetupCityMarket()
 				}
 
 //				cap = (citymax/2);          //2000
-                cap = 1300*Globals->POP_LEVEL;
-				offset = tradebuy++ * (citymax/6);      //0 or 666
+                cap = 1250*Globals->POP_LEVEL;
+				offset = tradebuy++ * (citymax/12);      //0 or 333  -  1250-1583
 				if(cap+offset < citymax) {
 					Market * m = new Market (M_BUY, i, price, amt/6, cap+population+offset,
 						citymax+population+offset, 0, amt);          //   BS : +offset added into max
@@ -991,7 +995,9 @@ void ARegion::UpdateEditRegion()
     }
 
 	float ratio = ItemDefs[race].baseprice / (float)Globals->BASE_MAN_COST;
-    Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),
+	int wage = Wages();
+	if(wage < 10) wage = 10;
+    Market *m = new Market(M_BUY, race, (int)(wage*4*ratio),
 							Population()/(5*Globals->POP_LEVEL), 0, 10000, 0, 2000);
 	markets.Add(m);
 
@@ -1656,7 +1662,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 				// Higher wages in the entry cities.
 				hack = wages * Population() / 10;
 			} else {
-				// (Globals->WORK_FRACTION);
+				// (Globals->WORK_FRACTION); //This is PLAYER ECONOMY section
 				hack = (wages * Population()) / 50;
 			}
 			// TODO: Silver available for work and entertainment
@@ -1745,14 +1751,15 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		//
 		// Setup working
 		//
+		
 		Production *p = products.GetProd(I_SILVER, -1);
 		if (IsStartingCity()) {
 			//
 			// Higher wages in the entry cities.
-			//
-			p->amount = Wages() * Population();
+			//			
+			p->amount = Wages() * Population() / Globals->POP_LEVEL;
 		} else {
-			p->amount = (Wages() * Population()) / Globals->WORK_FRACTION;
+			p->amount = (Wages() * Population()) / (Globals->WORK_FRACTION * Globals->POP_LEVEL);
 		}
 		p->productivity = Wages();
 

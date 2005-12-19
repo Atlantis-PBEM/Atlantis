@@ -89,7 +89,7 @@ class Soldier
 		int healtype;
 		int healitem;
 		int canbehealed;
-		int canberesurrected;
+		int restinpeace;
 		int regen;
 		
 		/* Attack info */

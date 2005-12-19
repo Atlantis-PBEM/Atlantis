@@ -180,6 +180,7 @@ Faction::Faction()
 	noStartLeader = 0;
 	labryinth = 0; //BS mod.
 	ethnicity = RA_NA;
+	start = -1;
 }
 
 Faction::Faction(int n)
@@ -206,6 +207,7 @@ Faction::Faction(int n)
 	noStartLeader = 0;
 	labryinth = 0; //BS mod.
 	ethnicity = RA_NA;
+	start = -1;
 }
 
 Faction::~Faction()
@@ -234,6 +236,7 @@ void Faction::Writeout(Aoutfile *f)
 	f->PutInt(temformat);
 	f->PutInt(labryinth); //Arcadia only
 	f->PutInt(ethnicity);
+	f->PutInt(start);
 
 	skills.Writeout(f);
 	items.Writeout(f);
@@ -264,6 +267,7 @@ void Faction::Readin(Ainfile *f, ATL_VER v)
 	temformat = f->GetInt();
 	labryinth = f->GetInt();
 	ethnicity = f->GetInt();
+	start = f->GetInt();
 
 	skills.Readin(f);
 	items.Readin(f);
@@ -543,7 +547,6 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		}
 	}
 	f->PutStr("");
-	f->PutStr( AString("Guarded Cities: ") + guardedcities.Value() + " of " + pGame->numcities);
 	f->PutStr( AString("Empire Size: ") + nummen.Value() + " men");
 	if(pGame->month == 5 || pGame->month == 11) f->PutStr( AString("    Rank: ") + nummen.rank + ". Max Value: " + nummen.maxvalue + ".");
 	f->PutStr( AString("Empire Money: ") + totalsilver.Value() + " silver (" + ((100*totalsilver.Value()+totalnetworth.Value()/2)/totalnetworth.Value()) + "% of total)");
@@ -685,14 +688,14 @@ void Faction::WriteFormTemplates(Areport *f)
              f->PutStr(*((AString *) elem));
          }
      }
-     forlist_reuse(&labeltemplates) {
+/*     forlist_reuse(&labeltemplates) {
          FormTemplate *formtem = (FormTemplate *) elem;
          f->PutStr("");
          f->PutStr(*formtem->name);
          forlist(&formtem->orders) {
              f->PutStr(*((AString *) elem));
          }
-     }
+     }*/
 }
 
 // LLS - write order template

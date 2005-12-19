@@ -174,8 +174,8 @@ private:
 	void EditGameBuildingsSummary();
 	void EditGameProductsSummary();
 	void EditGameTradeSummary();
-	void EditGameWriteoutLine(int,int,int,int,int);
-	void EditGameWriteoutLine(int,int,int,int,int,int,int,int,int,int);
+	void EditGameWriteoutLine(int,int,int,int);
+	void EditGameWriteoutLine(int,int,int,int,int,int,int,int);
 
 	void PreProcessTurn();
 	void ReadOrders();
@@ -262,6 +262,7 @@ private:
 	void ModifyItemMagicSkill(int it, char *sk, int lev);
 	void ModifyItemMagicOutput(int it, int count);
 	void ModifyItemMagicInput(int it, int i, int input, int amount);
+    void ModifyItemEscapeSkill(int it, char *sk, int val);
 
 	void ModifyRaceSkillLevels(char *race, int special, int def);
 	void ModifyRaceHits(char *race, int num);

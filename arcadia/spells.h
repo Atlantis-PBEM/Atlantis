@@ -51,7 +51,7 @@ void ProcessUnitsSpell(Unit *,AString *, int spell, OrdersCheck *pCheck, int isq
 void ProcessChangeSpell(Unit *,AString *, int spell, OrdersCheck *pCheck, int isquiet ); //Transmutation
 void ProcessModificationSpell(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //Modification
 void ProcessRejuvenationSpell(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //Rejuvenation
-void ProcessArtifactSpell(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //Artifact_Lore
+void ProcessArtifactSpell(Unit *,AString *, int sk, OrdersCheck *pCheck, int isquiet ); //Artifact_Lore
 void ProcessHypnosisSpell(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //
 void ProcessFogSpell(Unit *, AString *, OrdersCheck *pCheck, int isquiet ); //Fog
 void ProcessPhanCreatures(Unit *,AString *, OrdersCheck *pCheck, int isquiet ); //Illusory Creatures

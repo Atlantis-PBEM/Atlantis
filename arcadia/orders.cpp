@@ -52,6 +52,8 @@ char *od[] = {
 	"disable",
 	"distribute",
 	"end",
+	"endall",
+	"endtemplate",
 	"endturn",
 	"enter",
 	"entertain",

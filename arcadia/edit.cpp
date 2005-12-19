@@ -518,6 +518,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 // write wages
 		Awrite(AString("Wages: ") + pReg->WagesForReport() + ".");
 		Awrite(AString("Maxwages: ") + pReg->maxwages + ".");
+		Awrite(AString("Taxes: ") + pReg->money + ".");
 
 // write products
     	AString temp = "Products: ";
@@ -577,8 +578,10 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
             Awrite( " [h] [dir] [type] to add/modify a hexside type ");
             Awrite( " [dh] [dir] to clear a hexside ");
         }
-        if(Globals->ARCADIA_MAGIC) Awrite( " [sink] [num] to set sink status ");
+        if(Globals->ARCADIA_MAGIC) Awrite( " [sink] [num] to set sink status");
+        Awrite( " [pop] to set population level");
         if(pReg->town) {
+        Awrite( " [townpop] to set town population level");
         Awrite( " [town] to regenerate a town" ); 
         Awrite( " [deltown] to remove a town" );
         Awrite( " [tn] [name] to rename a town" );
@@ -810,6 +813,37 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
                 *pReg->name = AString("");
                 pReg->EditAdjustAreaName(text);
             }
+            else if (*pToken == "pop") {
+                SAFE_DELETE(pToken);
+                pToken = pStr->gettoken();
+                int pop = 0;
+                if(pToken) {
+                    pop = pToken->value();
+                    SAFE_DELETE(pToken);
+                }
+                if(!pop) { 
+                    Awrite( "Try again." ); 
+                    break; 
+                }
+                pReg->population = pop;
+	            pReg->UpdateEditRegion(); // financial stuff! Does markets
+            }
+            else if (*pToken == "townpop") {
+                SAFE_DELETE(pToken);
+                pToken = pStr->gettoken();
+                int pop = 0;
+                if(pToken) {
+                    pop = pToken->value();
+                    SAFE_DELETE(pToken);
+                }
+                if(!pop || !pReg->town) { 
+                    Awrite( "Try again." ); 
+                    break; 
+                }
+                pReg->town->pop = pop;
+                pReg->town->basepop = pop;
+	            pReg->UpdateEditRegion(); // financial stuff! Does markets
+            }
             else if (*pToken == "tn") { 
                 SAFE_DELETE(pToken);
                 pToken = pStr->gettoken(); 
@@ -824,16 +858,16 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
             else if (*pToken == "town") { 
                 SAFE_DELETE(pToken);
                 
-                if(pReg->race<0) pReg->race = 9;
+                if(pReg->race<0) pReg->race = I_NOMAD;
                 
                 AString *townname = new AString("name");
                 if(pReg->town) {
                     *townname = *pReg->town->name;
                     delete pReg->town;
+                    pReg->town = 0;
                     pReg->markets.DeleteAll();
                 }
                 pReg->AddEditTown(townname);
-	            
 	            pReg->UpdateEditRegion(); // financial stuff! Does markets
             }
             else if (*pToken == "deltown") { 
@@ -1880,6 +1914,7 @@ void Game::EditGameGlobalEffects()
         Awrite( " [importriv] [level] [filename] to set the rivers/bridges of a level according to a text file.");
         Awrite( " [resetgates] [level] [frequency] to reset gates on specified level.");
         Awrite( " [makexan] to make Xanaxor.");
+        Awrite( " [genguards] to regenerate all guard units.");
         Awrite( " q) Return to previous menu." );
 
         int exit = 0; 
@@ -2052,6 +2087,7 @@ void Game::EditGameGlobalEffects()
                                 *newname2 += AString(" [") + o->num + "]";
                         		delete newname;
                         		o->name = newname2;
+                        		if(temp) delete temp;
                             }			            
     			        }
     			        r->buildingseq = buildingnum;
@@ -2141,8 +2177,36 @@ void Game::EditGameGlobalEffects()
                     pToken = pStr->gettoken();
                     if(pToken) ImportRivFile(pToken, level);
                     SAFE_DELETE( pToken );
+                } else if (*pToken == "genguards") {
+                    Awrite("Clearing City Guards");
+                	forlist(&regions) {
+                		ARegion *reg = (ARegion *)elem;
+//                		if(!reg->town) continue;   // temp fix to stop clearing regional guards
+                		forlist(&reg->objects) {
+                			Object *obj = (Object *)elem;
+                			forlist(&obj->units) {
+                				Unit *u = (Unit *)elem;
+                				if(u->type == U_GUARD || u->type == U_GUARDMAGE) reg->Kill(u);
+                			}
+                			if (ObjectDefs[obj->type].protect > 0) CreateFortMon(reg,obj);
+                		}
+                	}
+                    Awrite("Making City Guards");
+                    CreateCityMons();
     			} else if (*pToken == "makexan") {
     			    SAFE_DELETE( pToken );
+    			        			    
+    			    //clearing all units
+                    forlist(&regions) {
+                		ARegion *reg = (ARegion *)elem;
+                		forlist(&reg->objects) {
+                			Object *obj = (Object *)elem;
+                			forlist(&obj->units) {
+                				Unit *u = (Unit *)elem;
+                				reg->Kill(u);
+                			}
+                		}
+                	}
 
                     ImportMapFile(new AString("xanaxor.txt"), 1);
                     ImportEthFile(new AString("xanaxoreth.txt"), 1);
@@ -2151,7 +2215,7 @@ void Game::EditGameGlobalEffects()
                     
                     int frequency = 10;
                     
-    			    forlist(&regions) {
+    			    forlist_reuse(&regions) {
     			        ARegion *r = (ARegion *) elem;
     			        //reset building sequence
     			        int maxnum = 0;
@@ -2319,19 +2383,17 @@ void Game::ImportFortFile(AString *filename, int level)
                 }
             
                 int forttype = -1;
-                
                 if (*type == "t") forttype = O_TOWER;
                 else if (*type == "f") forttype = O_FORT;
                 else if (*type == "c") forttype = O_CASTLE;
                 else if (*type == "i") forttype = O_CITADEL;
                 else if (*type == "m") forttype = O_MFORTRESS;
-                else if (*type == "1") forttype = TerrainDefs[pReg->type].lairs[1];
-                else if (*type == "2") forttype = TerrainDefs[pReg->type].lairs[2];
-                else if (*type == "3") forttype = TerrainDefs[pReg->type].lairs[3];
-                else if (*type == "4") forttype = TerrainDefs[pReg->type].lairs[4];
-                else if (*type == "5") forttype = TerrainDefs[pReg->type].lairs[5];
-                else if (*type == "6") forttype = TerrainDefs[pReg->type].lairs[6];
-                
+                else if (*type == "1") forttype = TerrainDefs[pReg->type].lairs[0];
+                else if (*type == "2") forttype = TerrainDefs[pReg->type].lairs[1];
+                else if (*type == "3") forttype = TerrainDefs[pReg->type].lairs[2];
+                else if (*type == "4") forttype = TerrainDefs[pReg->type].lairs[3];
+                else if (*type == "5") forttype = TerrainDefs[pReg->type].lairs[4];
+                else if (*type == "6") forttype = TerrainDefs[pReg->type].lairs[5];
                 if(forttype > -1) {
                     ARegion *pReg = regions.GetRegion(xx,yy,level);
                     pReg->MakeLair(forttype);
@@ -2373,7 +2435,7 @@ void Game::ImportRivFile(AString *filename, int level)
         
         while(type && xx <= maxx) {
             int rivers = type->value()%10;
-            int bridges = (type->value()/10)%10; //not implemented below yet
+//            int bridges = (type->value()/10)%10; //not implemented below yet
             
             ARegion *pReg = regions.GetRegion(xx,yy,level);
             //prevent stupid input making rivers in oceans
@@ -2397,7 +2459,7 @@ void Game::ImportRivFile(AString *filename, int level)
         if(line) delete line;
         line = f.GetStr();
     }
-    Awrite("done");
+    Awrite("Done Rivers.");
 }
 
 void Game::ImportEthFile(AString *filename, int level)
@@ -2433,14 +2495,16 @@ void Game::ImportEthFile(AString *filename, int level)
                 //extra feature flagpoling:
                 char *str = type->Str();
                 if(*str >= 'A' && *str <= 'Z') {
-                    pReg->flagpole = 1;
-//temp startup cities get named "Starter"
-if(pReg->town) {
-    AString *newname = new AString(EthnicityString(ethnicity) + " Start");
-    delete pReg->town->name;
-    pReg->town->name = newname;
-}
-                } else pReg->flagpole = 0;
+                    pReg->flagpole = FL_UNUSED_START_LOC;
+                    
+                    //startup cities get named "Starter"
+                    if(Globals->TESTGAME_ENABLED && pReg->town) {
+                        AString *newname = new AString(EthnicityString(ethnicity) + " Start");
+                        delete pReg->town->name;
+                        pReg->town->name = newname;
+                    }
+                    
+                } else pReg->flagpole = FL_NULL;
             }
             xx += 2;
             delete type;
@@ -2464,7 +2528,7 @@ if(pReg->town) {
 	}
     Awrite("Making City Guards");
     CreateCityMons();
-    Awrite("Done.");
+    Awrite("Done Ethnicities.");
 }
 
 void Game::ImportMapFile(AString *filename, int level)
@@ -2556,10 +2620,10 @@ Awrite(EthnicityString(ethnicity));
     
     switch(type) {
         case R_OCEAN:
-            race = I_MERFOLK;
+            race = I_MERMEN;
             break;
         case R_LAKE:
-            race = I_MERFOLK;
+            race = I_MERMEN;
             break;
             //raiders = I_VIKING
             //ancient elves = I_DARKMAN
@@ -2847,50 +2911,38 @@ void Game::EditGameBuildingsSummary()
 
 void Game::EditGameProductsSummary()
 {
-    int northproducts[NITEMS];
-    int westproducts[NITEMS];
-    int eastproducts[NITEMS];
-    int southproducts[NITEMS];
+    int humanproducts[NITEMS];
+    int elfproducts[NITEMS];
+    int dwarfproducts[NITEMS];
     int otherproducts[NITEMS];
     
     for(int i=0; i<NITEMS; i++) {
-        northproducts[i] = 0;
-        westproducts[i] = 0;
-        eastproducts[i] = 0;
-        southproducts[i] = 0;
+        humanproducts[i] = 0;
+        elfproducts[i] = 0;
+        dwarfproducts[i] = 0;
         otherproducts[i] = 0;
     }
     
     forlist(&regions) {
         ARegion *r = (ARegion *) elem;
 //        if(!r->town) continue;
-        int island = 0;
-        if(r->zloc != 1) island = 5;
-        else if(r->xloc < 10 || r->xloc > 45) island = 5;
-        else if(r->xloc > r->yloc) {
-            if(r->xloc + r->yloc < (regions.GetRegionArray(1)->x + regions.GetRegionArray(1)->y)/2 ) island = 2;
-            else island = 3;
-        } else {
-            if(r->xloc + r->yloc < (regions.GetRegionArray(1)->x + regions.GetRegionArray(1)->y)/2 ) island = 1;
-            else island = 4;        
-        }
+
+        int ethnicity = r->GetEthnicity();
 
 	    forlist(&r->products) {
             Production *p = (Production *) elem;
-		    switch(island) {
-		         case 1:
-		             westproducts[p->itemtype] += p->baseamount;
+		    switch(ethnicity) {
+		         case RA_HUMAN:
+		             humanproducts[p->itemtype] += p->baseamount;
 		             break;
-		         case 2:
-		             northproducts[p->itemtype] += p->baseamount;
+		         case RA_ELF:
+		             elfproducts[p->itemtype] += p->baseamount;
 		             break;
-		         case 3:
-		             eastproducts[p->itemtype] += p->baseamount;
+		         case RA_DWARF:
+		             dwarfproducts[p->itemtype] += p->baseamount;
 		             break;
-		         case 4:
-		             southproducts[p->itemtype] += p->baseamount;
-		             break;
-		         case 5:
+		         case RA_OTHER:
+		         case RA_NA:
 		             otherproducts[p->itemtype] += p->baseamount;
 		             break;
                  default:
@@ -2899,74 +2951,59 @@ void Game::EditGameProductsSummary()
 	    }
     }
     
-    cout << "    \t" << "   W   " << "  N   " << "  E   " << "  S   " << "  O   " << endl;
+    cout << "    \t" << "   H   " << "  E   " << "  D   " << "  O   " << endl;
     for(int i=0; i<NITEMS; i++) {
-        if(westproducts[i] == 0 && northproducts[i] == 0 && eastproducts[i] == 0 && southproducts[i] == 0 && otherproducts[i] == 0) continue;
+        if(humanproducts[i] == 0 && elfproducts[i] == 0 && dwarfproducts[i] == 0 && otherproducts[i] == 0) continue;
         cout << ItemDefs[i].abr << "\t";
-        EditGameWriteoutLine(westproducts[i],northproducts[i],eastproducts[i],southproducts[i],otherproducts[i]);
+        EditGameWriteoutLine(humanproducts[i],elfproducts[i],dwarfproducts[i],otherproducts[i]);
     }
 }
 
 void Game::EditGameTradeSummary()
 {
-    int northbuyers[NITEMS];
-    int northsellers[NITEMS];
-    int westbuyers[NITEMS];
-    int westsellers[NITEMS];
-    int eastbuyers[NITEMS];
-    int eastsellers[NITEMS];
-    int southbuyers[NITEMS];
-    int southsellers[NITEMS];
+    int humanbuyers[NITEMS];
+    int humansellers[NITEMS];
+    int elfbuyers[NITEMS];
+    int elfsellers[NITEMS];
+    int dwarfbuyers[NITEMS];
+    int dwarfsellers[NITEMS];
     int otherbuyers[NITEMS];
     int othersellers[NITEMS];
 
     for(int i=0; i<NITEMS; i++) {
-        westbuyers[i] = 0;
-        northbuyers[i] = 0;
-        eastbuyers[i] = 0;
-        southbuyers[i] = 0;
+        humanbuyers[i] = 0;
+        elfbuyers[i] = 0;
+        dwarfbuyers[i] = 0;
         otherbuyers[i] = 0;
-        westsellers[i] = 0;
-        northsellers[i] = 0;
-        eastsellers[i] = 0;
-        southsellers[i] = 0;
+        
+        humansellers[i] = 0;
+        elfsellers[i] = 0;
+        dwarfsellers[i] = 0;
         othersellers[i] = 0;
     }
 
     forlist(&regions) {
         ARegion *r = (ARegion *) elem;
 //        if(!r->town) continue;
-        int island = 0;
-        if(r->zloc != 1) island = 5;
-        else if(r->xloc < 10 || r->xloc > 45) island = 5;
-        else if(r->xloc > r->yloc) {
-            if(r->xloc + r->yloc < (regions.GetRegionArray(1)->x + regions.GetRegionArray(1)->y)/2 ) island = 2;
-            else island = 3;
-        } else {
-            if(r->xloc + r->yloc < (regions.GetRegionArray(1)->x + regions.GetRegionArray(1)->y)/2 ) island = 1;
-            else island = 4;        
-        }
+        int ethnicity = r->GetEthnicity();
 
 	    forlist(&r->markets) {
 		    Market *m = (Market *) elem;
-		    switch(island) {
-		         case 1:
-		             if(m->type == M_BUY) westbuyers[m->item]++;
-		             else westsellers[m->item]++;
+		    switch(ethnicity) {
+		         case RA_HUMAN:
+		             if(m->type == M_BUY) humanbuyers[m->item]++;
+		             else humansellers[m->item]++;
 		             break;
-		         case 2:
-		             if(m->type == M_BUY) northbuyers[m->item]++;
-		             else northsellers[m->item]++;
+		         case RA_ELF:
+		             if(m->type == M_BUY) elfbuyers[m->item]++;
+		             else elfsellers[m->item]++;
 		             break;
-		         case 3:
-		             if(m->type == M_BUY) eastbuyers[m->item]++;
-		             else eastsellers[m->item]++;
+		         case RA_DWARF:
+		             if(m->type == M_BUY) dwarfbuyers[m->item]++;
+		             else dwarfsellers[m->item]++;
 		             break;
-		         case 4:
-		             if(m->type == M_BUY) southbuyers[m->item]++;
-		             else southsellers[m->item]++;
-		             break;
-		         case 5:
+		         case RA_OTHER:
+		         case RA_NA:
 		             if(m->type == M_BUY) otherbuyers[m->item]++;
 		             else othersellers[m->item]++;
 		             break;
@@ -2996,42 +3033,42 @@ void Game::EditGameTradeSummary()
 			}
             if (*pToken == "trade") { 
                 cout << "    \t" << "     Suppliers     \t" << "     Demands" << endl;
-                cout << "    \t" << "  W  " << " N  " << " E  " << " S  " << " O  " << "\t" << "  W  " << " N  " << " E  " << " S  " << " O  " << endl;
+                cout << "    \t" << "  H  " << " E  " << " D  " << " O" << "\t\t" << "  H  " << " E  " << " D  " << " O  " << endl;
                 for(int i=0; i<NITEMS; i++) {
                     if(!(ItemDefs[i].type & IT_TRADE)) continue;
                     if(ItemDefs[i].flags & ItemType::DISABLED) continue;
                     cout << ItemDefs[i].abr << "\t";
-                    EditGameWriteoutLine(westbuyers[i],northbuyers[i],eastbuyers[i],southbuyers[i],otherbuyers[i],westsellers[i],northsellers[i],eastsellers[i],southsellers[i],othersellers[i]);
+                    EditGameWriteoutLine(humanbuyers[i],elfbuyers[i],dwarfbuyers[i],otherbuyers[i],humansellers[i],elfsellers[i],dwarfsellers[i],othersellers[i]);
                 }
             }
             else if (*pToken == "normal") { 
                 cout << "    \t" << "     Suppliers     \t" << "     Demands" << endl;
-                cout << "    \t" << " W  " << " N  " << " E  " << " S  " << " O  " << "\t" << " W  " << " N  " << " E  " << " S  " << " O  " << endl;
+                cout << "    \t" << "  H  " << " E  " << " D  " << " O" << "\t\t" << "  H  " << " E  " << " D  " << " O  " << endl;
                 for(int i=0; i<NITEMS; i++) {
                     if(!(ItemDefs[i].type & IT_NORMAL)) continue;
                     if(ItemDefs[i].flags & ItemType::DISABLED) continue;
                     cout << ItemDefs[i].abr << "\t";
-                    EditGameWriteoutLine(westbuyers[i],northbuyers[i],eastbuyers[i],southbuyers[i],otherbuyers[i],westsellers[i],northsellers[i],eastsellers[i],southsellers[i],othersellers[i]);
+                    EditGameWriteoutLine(humanbuyers[i],elfbuyers[i],dwarfbuyers[i],otherbuyers[i],humansellers[i],elfsellers[i],dwarfsellers[i],othersellers[i]);
                 }
             }
             else if (*pToken == "men") { 
                 cout << "    \t" << "     Suppliers     \t" << "     Demands" << endl;
-                cout << "    \t" << " W  " << " N  " << " E  " << " S  " << " O  " << "\t" << " W  " << " N  " << " E  " << " S  " << " O  " << endl;
+                cout << "    \t" << "  H  " << " E  " << " D  " << " O" << "\t\t" << "  H  " << " E  " << " D  " << " O  " << endl;
                 for(int i=0; i<NITEMS; i++) {
                     if(!(ItemDefs[i].type & IT_MAN)) continue;
                     if(ItemDefs[i].flags & ItemType::DISABLED) continue;
                     cout << ItemDefs[i].abr << "\t";
-                    EditGameWriteoutLine(westbuyers[i],northbuyers[i],eastbuyers[i],southbuyers[i],otherbuyers[i],westsellers[i],northsellers[i],eastsellers[i],southsellers[i],othersellers[i]);
+                    EditGameWriteoutLine(humanbuyers[i],elfbuyers[i],dwarfbuyers[i],otherbuyers[i],humansellers[i],elfsellers[i],dwarfsellers[i],othersellers[i]);
                 }
             }
             else if (*pToken == "advanced") {
                 cout << "    \t" << "     Suppliers     \t" << "     Demands" << endl;
-                cout << "    \t" << " W  " << " N  " << " E  " << " S  " << " O  " << "\t" << " W  " << " N  " << " E  " << " S  " << " O  " << endl;
+                cout << "    \t" << "  H  " << " E  " << " D  " << " O" << "\t\t" << "  H  " << " E  " << " D  " << " O  " << endl;
                 for(int i=0; i<NITEMS; i++) {
                     if(!(ItemDefs[i].type & IT_ADVANCED)) continue;
                     if(ItemDefs[i].flags & ItemType::DISABLED) continue;
                     cout << ItemDefs[i].abr << "\t";
-                    EditGameWriteoutLine(westbuyers[i],northbuyers[i],eastbuyers[i],southbuyers[i],otherbuyers[i],westsellers[i],northsellers[i],eastsellers[i],southsellers[i],othersellers[i]);
+                    EditGameWriteoutLine(humanbuyers[i],elfbuyers[i],dwarfbuyers[i],otherbuyers[i],humansellers[i],elfsellers[i],dwarfsellers[i],othersellers[i]);
                 }
             }
 
@@ -3043,7 +3080,7 @@ void Game::EditGameTradeSummary()
 
 }
 
-void Game::EditGameWriteoutLine(int one, int two, int three, int four, int five)
+void Game::EditGameWriteoutLine(int one, int two, int three, int four)
 {
     if(one<10) cout << "    ";
     else if(one<100) cout << "   ";
@@ -3064,14 +3101,9 @@ void Game::EditGameWriteoutLine(int one, int two, int three, int four, int five)
     else if(four<100) cout << "   ";
     else if(four<1000) cout << "  ";
     else if(four<10000) cout << " ";
-    cout << four << " ";    
-    if(five<10) cout << "    ";
-    else if(five<100) cout << "   ";
-    else if(five<1000) cout << "  ";
-    else if(five<10000) cout << " ";
-    cout << five << endl;
+    cout << four << endl;
 }
-void Game::EditGameWriteoutLine(int one, int two, int three, int four, int five, int six, int seven, int eight, int nine, int ten)
+void Game::EditGameWriteoutLine(int one, int two, int three, int four, int five, int six, int seven, int eight)
 {
     if(one<10) cout << "  ";
     else if(one<100) cout << " ";
@@ -3084,10 +3116,10 @@ void Game::EditGameWriteoutLine(int one, int two, int three, int four, int five,
     cout << three << " ";    
     if(four<10) cout << "  ";
     else if(four<100) cout << " ";
-    cout << four << " ";    
+    cout << four << "\t\t";    
     if(five<10) cout << "  ";
     else if(five<100) cout << " ";
-    cout << five << "\t";    
+    cout << five << " ";    
     if(six<10) cout << "  ";
     else if(six<100) cout << " ";
     cout << six << " ";    
@@ -3096,13 +3128,7 @@ void Game::EditGameWriteoutLine(int one, int two, int three, int four, int five,
     cout << seven << " ";    
     if(eight<10) cout << "  ";
     else if(eight<100) cout << " ";
-    cout << eight << " ";    
-    if(nine<10) cout << "  ";
-    else if(nine<100) cout << " ";
-    cout << nine << " ";    
-    if(ten<10) cout << "  ";
-    else if(ten<100) cout << " ";
-    cout << ten << endl;
+    cout << eight << endl;
 }
 
 
