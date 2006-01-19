@@ -469,6 +469,90 @@ void Game::DummyGame()
 	//
 }
 
+void Game::FakeGame(Faction *realfac)
+{
+    //in all regions not visible to the realfac, make terrain "fake" and destroy all units
+    //in regions visible but not present, destroy all units
+    //in regions present, destroy all units cannot see
+    //this leaves us with just what the faction knows about from their last report.
+    
+    Awrite("Making a fake game!");
+    
+   	forlist(&regions) {
+		ARegion *reg = (ARegion *)elem;
+		reg->marker = 0;   //regions marked "0" default.
+    }
+    
+	forlist_reuse(&regions) {
+		ARegion *reg = (ARegion *)elem;
+	    if(reg->Present(realfac)) {
+	        reg->marker = 1;    //if we're present, regions get marked "1".
+	        
+	        for (int j=0; j<NDIRS; j++) {
+				if (reg->neighbors[j]) {
+				    if(!reg->neighbors[j]->marker) reg->neighbors[j]->marker = 2; //this region is visible to us. If we're not present there, mark it "2".
+                }
+            }
+	    }
+    }
+	forlist_reuse(&regions) {
+		ARegion *reg = (ARegion *)elem;
+		if(reg->marker == 0) {
+		    //we could not see this region. Make it a fake region type
+		    reg->Fake();
+		}
+
+        if(reg->marker != 1) {
+            //delete all units here since we're not present
+       		forlist(&reg->objects) {
+    			Object *obj = (Object *)elem;
+    			forlist(&obj->units) {
+    				Unit *u = (Unit *)elem;
+        			u->MoveUnit(0); //routine for destroying a unit, from ARegion::Kill()
+    	            reg->hell.Add(u);
+                }
+            }
+            //clear hexsides that aren't visible
+            if(Globals->HEXSIDE_TERRAIN) {
+                for (int i=0; i<NDIRS; i++) {
+                    if(reg->neighbors[i] && reg->neighbors[i]->marker != 1) {
+                		reg->hexside[i]->type = H_DUMMY;
+                		reg->hexside[i]->road = 0;
+                		reg->hexside[i]->bridge = 0;
+                		reg->hexside[i]->harbour = 0;
+            		}
+          		}
+            }
+        } else {
+            //we are present here ...
+       		forlist(&reg->objects) {
+    			Object *obj = (Object *)elem;
+    			forlist(&obj->units) {
+    				Unit *u = (Unit *)elem;
+        			if(u->faction != realfac) {
+        			    if(!realfac->CanSee(reg, u, 0)) {
+                            u->MoveUnit(0);  //we can't see it, so it doesn't exist!
+                            reg->hell.Add(u);
+        			    } //else if its foggy, delete the unit
+        			}
+                }
+            }
+        }
+    }
+    
+    
+    //spread free love around the world ...
+    forlist_reuse(&factions) {
+        Faction *f = (Faction *) elem;
+        if(f == realfac) continue;
+        //all other factions love everybody ...
+        f->defaultattitude = A_ALLY;
+        f->attitudes.DeleteAll();
+    }
+}
+
+
+
 #define PLAYERS_FIRST_LINE "AtlantisPlayerStatus"
 
 int Game::WritePlayers()
@@ -1092,6 +1176,93 @@ int Game::DoOrdersCheck(const AString &strOrders, const AString &strCheck)
 	return(1);
 }
 
+int Game::DoOrdersCheckAll(const AString &strOrders, const AString &strCheck)
+{
+	Awrite("Setting Up Turn...");
+	PreProcessTurn();
+	
+	Awrite("Reading the Gamemaster File...");
+	if(!ReadPlayers()) return(0);
+
+	Awrite("Done.");
+
+	if(gameStatus == GAME_STATUS_FINISHED) {
+		Awrite("This game is finished!");
+		return(0);
+	}
+	gameStatus = GAME_STATUS_RUNNING;
+	
+	if(Globals->ARCADIA_MAGIC) {
+	    SetupGuardsmenAttitudes();
+	}
+	
+ //setup the orders checking
+	Aorders ordersFile;
+	if(ordersFile.OpenByName(strOrders) == -1) {
+		Awrite("No such orders file!");
+		return(0);
+	}
+
+	Aoutfile checkFile;
+	if(checkFile.OpenByName(strCheck) == -1) {
+		Awrite("Couldn't open the orders check file!");
+		return(0);
+	}
+	
+	OrdersCheck check;
+	check.pCheckFile = &checkFile;
+
+    Faction *checkfaction = ReadUnknownOrders(&ordersFile);
+
+    if(!checkfaction) {
+        Awrite("We're stuffed now!");
+        checkFile.PutStr("Something went wrong with identifying your faction. Please contact the GM.");
+    } else {
+        FakeGame(checkfaction);
+        //we now have a game consisting only of the faction in question and what they can see.
+        //normally we would now runorders. However, there are some which we might like not to use.
+    
+        RunCheckAllOrders();
+        //the game's now done as far as the faction is concerned.
+    
+    	if (checkfaction->errors.Num()) {
+    	    checkFile.PutStr("Testing your orders appears to have generated the following errors:");
+    	    checkFile.PutStr("");
+    	    
+    		forlist((&checkfaction->errors)) {
+    			checkFile.PutStr(*((AString *) elem));
+    		}
+    		checkfaction->errors.DeleteAll();
+    		checkFile.PutStr("");
+    		checkFile.PutStr("Please note that those errors were generated without consideration for the actions of other factions, the conduct of battles, or terrain or units not visible in your last report. As such they may not be an accurate representation of your eventual turn.");
+    	} else {
+    	    checkFile.PutStr("Testing your orders appears to have generated no errors.");
+    	}
+    }
+	checkFile.PutStr("");
+	checkFile.PutStr("Below is the traditional order check, which currently may show additional or different errors.");
+	checkFile.PutStr("");
+	
+	//need to delete the game situation.
+	//currently not done ... seems to work *fingers crossed*
+	
+    ordersFile.Close();
+//    ordersFile.OpenByName(strOrders);  //recycling the old one this way doesn't seem to work, don't know why. So making a new one:
+	Aorders ordersFile2;
+	if(ordersFile2.OpenByName(strOrders) == -1) {
+		Awrite("No such orders file!");
+		return(0);
+	}
+
+    DummyGame();
+	ParseOrders(0, &ordersFile2, &check);
+
+	ordersFile2.Close();
+	checkFile.Close();
+
+	return(1);
+}
+
 int Game::RunGame()
 {
 	Awrite("Setting Up Turn...");
@@ -1201,6 +1372,12 @@ void Game::ReadOrders()
 			DefaultWorkOrder();       //does this need to be repeated after each load?
 		}
 	}
+}
+
+Faction * Game::ReadUnknownOrders(Aorders *f)
+{
+    Faction *fac = ParseOrders(0, f, 0);
+    return fac;
 }
 
 void Game::MakeFactionReportLists()
@@ -1397,7 +1574,7 @@ void Game::WritePowers()
 {
     Areport f;
 
-    AString str = "times.4";
+    AString str = "times.5";
 
 	int i = f.OpenByName( str );
 	if(i != -1) {
@@ -1442,7 +1619,7 @@ void Game::WritePowers()
                 }        
             }
         }
-
+/*
         f.PutStr("");
         f.PutStr("A count of Guarded Cities:");
         f.PutStr("");
@@ -1456,7 +1633,7 @@ void Game::WritePowers()
                 }
             }
         }
-
+*/
         f.PutStr("");
 
         f.PutStr("");
@@ -2041,18 +2218,55 @@ void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
 	if(Globals->REAL_EXPERIENCE) {
     	int level = u->GetRealSkill(S_STEALTH);
     	if(level) u->Experience(S_STEALTH,level);  //can otherwise only be gained by assassinating or study
+    	
     	level = u->GetSkill(S_OBSERVATION);
     	if(level) u->Experience(S_OBSERVATION,level); //can otherwise only be gained by killing would-be-assassins or study
+
     	level = u->GetSkill(S_TRUE_SEEING);
     	if(level) u->Experience(S_TRUE_SEEING,level); //can otherwise only be gained by study
+    	
     	level = u->GetSkill(S_SECSIGHT);
     	if(level) u->Experience(S_SECSIGHT,level); //can otherwise only be gained by study
+    	
     	level = u->GetSkill(S_TRADING);
-    	if(level) u->Experience(S_TRADING,level); //can otherwise only be gained by study
+    	if(level && u->numtraded) {
+//            u->Experience(S_TRADING,level); //can otherwise only be gained by study
+            int exper = 1;  //1 experience for trading anything at all
+            int value = 200;
+            while(u->numtraded > value) {
+                exper++;
+                value *= 2;
+            }
+            //ie 1 for trading $100, 2 for $200, 4 for $800, 6 for $3200, 8 for $12800 etc.
+            u->Experience(S_TRADING,exper);
+        }
+        
     	level = u->GetSkill(S_MERCHANTRY);
-    	if(level) u->Experience(S_MERCHANTRY,level); //can otherwise only be gained by study
+    	if(level && u->nummerchanted) {
+//            u->Experience(S_MERCHANTRY,level); //can otherwise only be gained by study
+            int exper = 1;  //1 experience for trading anything at all
+            int value = 100;
+            while(u->nummerchanted > value) {
+                exper++;
+                value *= 2;
+            }
+            //ie 1 for trading $100, 2 for $200, 4 for $800, 6 for $3200, 8 for $12800 etc.
+            u->Experience(S_MERCHANTRY,exper);
+        }
+
+
     	level = u->GetSkill(S_ARCADIA_QUARTERMASTERY);
-    	if(level) u->Experience(S_ARCADIA_QUARTERMASTERY,level); //can otherwise only be gained by study
+    	if(level && u->numquartermastered) {
+//            u->Experience(S_ARCADIA_QUARTERMASTERY,level); //can otherwise only be gained by study
+            int exper = 4;  //4 experience for trading anything at all
+            int value = 400;
+            while(u->numquartermastered > value && exper < 10) {   //this one can potentially be abused, so cap at 10.
+                exper++;
+                value *= 2;
+            }
+            //ie 5 for sending $400, 7 for $1600, 9 for $6400, 10 for $12800.
+            u->Experience(S_ARCADIA_QUARTERMASTERY,exper);
+        }
 	}
 }
 

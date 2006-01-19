@@ -144,11 +144,25 @@ int main(int argc, char *argv[])
 				usage();
 				break;
 			}
-
-			game.DummyGame();
-			if( !game.DoOrdersCheck( argv[ 2 ], argv[ 3 ] )) {
-				Awrite( "Couldn't check the orders!" );
-				break;
+			if(!Globals->ARCADIAN_CHECKER) {
+    			game.DummyGame();
+    			if( !game.DoOrdersCheck( argv[ 2 ], argv[ 3 ] )) {
+    				Awrite( "Couldn't check the orders!" );
+    				break;
+    			}
+			} else {
+			
+    			Awrite("Opening the game");
+    			if( !game.OpenGame() ) {
+    				Awrite( "Couldn't open the game file!" );
+    				break;
+    			}
+    			
+    			if( !game.DoOrdersCheckAll( argv[ 2 ], argv[ 3 ] )) {
+    				Awrite( "Couldn't check the orders!" );
+    				break;
+    			}
+			
 			}
 		} else if( AString( argv[1] ) == "mapunits" ) {
 			if( !game.OpenGame() ) {

@@ -1142,12 +1142,13 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isq
 	    monthorders = p;
     } else if(*token == "sail") {
         delete token;
-        token = o->gettoken();
+//        token = o->gettoken();
         level = 5;
     
     	SailOrder *m = new SailOrder;
 
         int done = 0;
+        int atleastone = 0;
     	while (!done) {
     		token = o->gettoken();
     		if(!token) done = 1;
@@ -1159,13 +1160,17 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isq
     			    MoveDir *x = new MoveDir;
     			    x->dir = d;
     			    m->dirs.Add(x);
+    			    atleastone = 1;
     		    } else {
     		        u->Error("CAST: Bad move direction.", 0);
     		        return;
     		    }
 		    }
     	}
-
+    	if(!atleastone) {
+    	    u->Error("CAST: No directions specified");
+    	    return;
+    	}
         monthorders = m;
 
     } else if(*token == "tax") {
@@ -1179,13 +1184,13 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isq
         tax = TAX_PILLAGE;
     } else if(*token == "move") {
         delete token;
-        token = o->gettoken();
         level = 3;
         
         MoveOrder *m = new MoveOrder;
         m->advancing = 0;
                 
         int done = 0;
+        int atleastone = 0;
     	while (!done) {
     		token = o->gettoken();
     		if(!token) done = 1;
@@ -1193,17 +1198,21 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isq
     		else {
     		    int d = ParseDir(token);
     		    delete token;
-    		    if (d!=-1) {
+    		    if (d != -1) {
     			    MoveDir *x = new MoveDir;
     			    x->dir = d;
     			    m->dirs.Add(x);
+    			    atleastone = 1;
     		    } else {
     		        u->Error("CAST: Bad move direction.", 0);
     		        return;
     		    }
 		    }
     	}
-
+    	if(!atleastone) {
+    	    u->Error("CAST: No directions specified");
+    	    return;
+    	}
         monthorders = m;
         
     } else if(*token == "advance") {
@@ -1215,6 +1224,7 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isq
         m->type = O_ADVANCE;
         
         int done = 0;
+        int atleastone = 0;
     	while (!done) {
     		token = o->gettoken();
     		if(!token) done = 1;
@@ -1226,11 +1236,16 @@ void Game::ProcessHypnosisSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isq
     			    MoveDir *x = new MoveDir;
     			    x->dir = d;
     			    m->dirs.Add(x);
+    			    atleastone = 1;
     		    } else {
     		        u->Error("CAST: Bad move direction.", 0);
     		        return;
     		    }
 		    }
+    	}
+    	if(!atleastone) {
+    	    u->Error("CAST: No directions specified");
+    	    return;
     	}
 
         monthorders = m;
@@ -5025,6 +5040,8 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
 	int mageerror = 0;
 	int numberserror = 0;
 	forlist (&(order->units)) {
+//cout << "Move is: " << O_MOVE << "Hypno is: " << order->monthorder->type << endl;
+
 		Unit *tar = r->GetUnitId((UnitId *) elem,u->faction->num);
 		if (!tar) continue;
 		if (tar->faction != u->faction) {
@@ -5032,9 +5049,62 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
         		if (tar->GetMen() && (num + tar->GetMen()) <= max) {
                     num += tar->GetMen();
                     delete tar->monthorders;
-                    tar->monthorders = order->monthorder;
-                    order->monthorder = 0;                               //this isn't going to work for unit #2! Need to clone it.
+                    tar->monthorders = 0;
+                    
                     tar->taxing = order->taxing;
+                    
+                    if(order->monthorder) {
+                        //not using a switch as have to initialise orders in here - else becomes a nightmare :(.
+                        if(order->monthorder->type == O_PRODUCE) {
+                            //this includes "WORK" orders
+                                ProduceOrder *p = new ProduceOrder;
+                                p->item = ((ProduceOrder *) order->monthorder)->item;
+                                p->skill = ((ProduceOrder *) order->monthorder)->skill;
+                                tar->monthorders = p;
+                        } else if(order->monthorder->type == O_SAIL) {
+                                SailOrder *m = new SailOrder;
+                                forlist(&((SailOrder *) order->monthorder)->dirs) {
+                                    MoveDir *old = (MoveDir *) elem;
+                                    MoveDir *toadd = new MoveDir;
+                                    toadd->dir = old->dir;
+                                    m->dirs.Add(toadd);
+                                }
+                                tar->monthorders = m;
+                        } else if(order->monthorder->type == O_MOVE || order->monthorder->type == O_ADVANCE) {
+                                MoveOrder *m = new MoveOrder;
+                                m->advancing = ((MoveOrder *) order->monthorder)->advancing;
+                                m->type = ((MoveOrder *) order->monthorder)->type;
+//cout << "Directions ";                                
+                                forlist(&((MoveOrder *) order->monthorder)->dirs) {
+//cout << "in list ";
+                                    MoveDir *old = (MoveDir *) elem;
+                                    MoveDir *toadd = new MoveDir;
+//cout << old->dir << " ";
+                                    toadd->dir = old->dir;
+                                    m->dirs.Add(toadd);
+                                }
+//cout << endl;
+                                tar->monthorders = m;
+                        } else if(order->monthorder->type == O_STUDY) {
+                                StudyOrder *m = new StudyOrder;
+                                m->skill = ((StudyOrder *) order->monthorder)->skill;
+                                m->days = 0;
+                                m->level = 0;
+                                tar->monthorders = m;
+                        } else {
+                               u->Error("Something went wrong with the HYPNOSIS order. Please contact your GM.");
+                               if(tar->taxing = TAX_NONE) {
+                                   ProduceOrder *p = new ProduceOrder;
+                                   p->item = I_SILVER;
+                                   p->skill = -1;
+                                   tar->monthorders = p;
+                                   u->Error("PS: Hypnosis defaulted to 'WORK'.");
+                               }
+                        }
+                    }
+                   
+//                    tar->monthorders = order->monthorder;        //this isn't going to work for unit #2! Need to clone it.
+
                     tar->Event(AString("Is hypnotised by ") + *(u->name) + ".");
                     u->Event(AString("Hypnotises ") + *(tar->name) + ".");
                 } else numberserror = 1;
@@ -5042,18 +5112,21 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
         }
 	}
 
-	if (!num) {
-		u->Error("CAST: Can't hypnotise that many men.", order->quiet);
-		return 0;
-	}
-	
-	if(numberserror) {
-	    u->Error("CAST: Can't hypnotise that many men. Hypnotising as many as able.", order->quiet);
-	}
-	
+    delete order->monthorder;
+    order->monthorder = 0;                       
+
 	if(mageerror) {
 	    u->Error("CAST: Can't hypnotise heroes.", order->quiet);
 	}
+	
+	if(numberserror) {
+	    if(num) u->Error("CAST: Can't hypnotise that many men. Hypnotising as many as able.", order->quiet);
+	    else {
+		if(!mageerror) u->Error("CAST: Can't hypnotise that many men.", order->quiet);
+		return 0;	        
+	    }
+	} 
+	
 
 
 	cost = cost * num / (10 * level);
@@ -5214,6 +5287,7 @@ void Game::DoMerchantBuy(Unit *u, BuyOrder *o)
     	u->Event(AString("Buys ") + ItemString(o->item, o->num)
             + " at $" + cost + " each.");
     }
+    u->nummerchanted += o->num*cost;
 }
 
 void Game::DoMerchantSell(Unit *u, SellOrder *o)
@@ -5240,6 +5314,7 @@ void Game::DoMerchantSell(Unit *u, SellOrder *o)
         u->Event(AString("Sells ") + ItemString(o->item, o->num)
 			+ " at $" + price + " each.");
     }
+    u->nummerchanted += o->num*price*2;  //double effect due to poor sell prices
 }
 
 

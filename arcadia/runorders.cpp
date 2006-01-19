@@ -134,6 +134,122 @@ void Game::RunOrders()
 	RemoveEmptyObjects();
 }
 
+void Game::RunCheckAllOrders()
+{
+	Awrite("Running FIND Orders...");
+	RunFindOrders();
+	
+	Awrite("Running ENTER/LEAVE Orders...");
+	RunEnterOrders();
+	
+	
+	Awrite("Running PROMOTE/EVICT Orders...");
+	RunPromoteOrders();
+	
+	Awrite("Running DESTROY Orders...");
+	RunDestroyOrders();
+	
+	Awrite("Running GIVE/PAY/TRANSFER Orders...");
+	DoGiveOrders();
+	/*
+	Awrite("Running EXCHANGE Orders...");
+	DoExchangeOrders();
+	*/
+	Awrite("Running DESTROY Orders...");
+	RunDestroyOrders();
+	
+	if(Globals->ARCADIA_MAGIC) { //moved forward for hypnosis, and since I couldn't think of any reason tax needed to come first.
+    	Awrite("Running Magic Orders...");
+    	ClearCastEffects();
+    	RunCastOrders();	
+	}
+	
+	if(!Globals->LATE_TAX) {
+    	Awrite("Running PILLAGE Orders...");
+    	RunPillageOrders();
+    	Awrite("Running TAX Orders...");
+    	RunTaxOrders();
+	}
+	
+	
+	Awrite("Running GUARD 1 Orders...");
+	DoGuard1Orders();
+	if(!Globals->ARCADIA_MAGIC) {
+    	Awrite("Running Magic Orders...");
+    	ClearCastEffects();
+    	RunCastOrders();
+	}
+	
+	Awrite("Running SELL Orders...");
+	RunSellOrders();
+	Awrite("Running BUY Orders...");
+	RunBuyOrders();
+	Awrite("Running SEND Orders...");
+	DoSendOrders();
+	Awrite("Running FORGET Orders...");
+	RunForgetOrders();
+	Awrite("Mid-Turn Processing...");
+	MidProcessTurn();
+	Awrite("Running QUIT Orders...");
+	RunQuitOrders();
+	Awrite("Removing Empty Units...");
+	DeleteEmptyUnits();
+	SinkUncrewedShips();
+	DrownUnits();
+	if (Globals->ALLOW_BANK & GameDefs::BANK_ENABLED) {
+		Awrite("Running BANK orders...");
+		if (Globals->ALLOW_BANK & GameDefs::BANK_TRADEINTEREST)
+			BankInterest();
+		DoBankDepositOrders();
+		DoBankWithdrawOrders();
+	}
+	if(Globals->ALLOW_WITHDRAW) {
+		Awrite("Running WITHDRAW Orders...");
+		DoWithdrawOrders();
+	}
+	
+	if(Globals->LATE_TAX) {
+    	Awrite("Running PILLAGE Orders...");
+    	RunPillageOrders();
+    	Awrite("Running TAX Orders...");
+    	RunTaxOrders();
+	}
+	
+	Awrite("Running Move Orders...");
+	RunMoveOrders();
+	Awrite("Sinking Ships...");
+	SinkUncrewedShips();
+	TransferNonShipUnits(); // BS Sailing Mod
+	DrownUnits();
+	Awrite("Clearing Factions...");
+	FindDeadFactions();
+	Awrite("Running Teach Orders...");
+	RunTeachOrders();
+	Awrite("Running Month-long Orders...");
+	RunMonthOrders(); //Build, produce, work
+	Awrite("Recieving sent goods");
+	RecieveSentGoods();
+	Awrite("Running Teleport Orders...");	
+	RunTeleportOrders();
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+		Awrite("Running Transport Orders...");
+		CheckTransportOrders();
+		RunTransportOrders();
+	}
+	if(Globals->ARCADIA_MAGIC) {
+        SinkLandRegions();
+	    DistributeFog();
+	    RechargeMages();
+    }
+	Awrite("Assessing Maintenance costs...");
+	AssessMaintenance();
+	Awrite("Post-Turn Processing...");
+	PostProcessTurn();
+	DeleteEmptyUnits();
+	EmptyHell();
+	RemoveEmptyObjects();
+}
+
 void Game::CountUnits()
 {
 //Test item. Not usually called from anywhere
@@ -1102,7 +1218,7 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 		to = r->GetDummy();
 		u->enter = 0;
 		if((TerrainDefs[r->type].similar_type == R_OCEAN) &&
-				(!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER))) {
+				( (!u->CanSwim() && u->items.Weight()) || u->GetFlag(FLAG_NOCROSS_WATER))) { //this allows empty units to leave ships - which can then have men bought into them ... but otherwise, bought merfolk can't leave ships.
 			u->Error("LEAVE: Can't leave a ship in the ocean.");
 			return;
 		}
@@ -1542,14 +1658,18 @@ void Game::DoSell(ARegion *r, Market *m)
 				if (o->item == m->item) {
 					//get any trading bonuses.
 				    int bonus = 0;
+				    Unit *trader = NULL;
 				    forlist((&r->objects)) {
 					    Object *obj2 = (Object *) elem;
 				    	forlist((&obj2->units)) {
 				    		Unit *u2 = (Unit *) elem;
-				    		if(u2->GetAttitude(r,u) == A_ALLY && u2->GetSkill(S_TRADING) > bonus) bonus = u2->GetSkill(S_TRADING);
+				    		if(u2->GetAttitude(r,u) == A_ALLY && u2->GetSkill(S_TRADING) > bonus) {
+                                bonus = u2->GetSkill(S_TRADING);
+                                trader = u2;
+                            }
 			            }
 				    }
-				
+
 					int temp = 0;
 					if (attempted) {
 						temp = (m->amount *o->num + getrandom(attempted))
@@ -1561,6 +1681,7 @@ void Game::DoSell(ARegion *r, Market *m)
 					m->activity += temp;
 					u->items.SetNum(o->item, u->items.GetNum(o->item) - temp);
 					u->SetMoney(u->GetMoney() + (temp * m->price * (20+bonus)) / 20);
+					if(trader) trader->numtraded += (temp * m->price * (20+bonus)) / 20;
 					u->sellorders.Remove(o);
 					u->Event(AString("Sells ") + ItemString(o->item, temp)
 							+ " at $" + (m->price * (20+bonus)) / 20 + " each.");
@@ -1743,11 +1864,15 @@ void Game::DoBuy(ARegion *r, Market *m)
 				if (o->item == m->item) {
 				    //get any trading bonuses.
 				    int bonus = 0;
+				    Unit *trader = NULL;
 				    forlist((&r->objects)) {
 					    Object *obj2 = (Object *) elem;
 				    	forlist((&obj2->units)) {
 				    		Unit *u2 = (Unit *) elem;
-				    		if(u2->GetAttitude(r,u) == A_ALLY && u2->GetSkill(S_TRADING) > bonus) bonus = u2->GetSkill(S_TRADING);
+				    		if(u2->GetAttitude(r,u) == A_ALLY && u2->GetSkill(S_TRADING) > bonus) {
+                                bonus = u2->GetSkill(S_TRADING);
+                                trader = u2;
+                            }
 			            }
 				    }
 				    
@@ -1776,6 +1901,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 					u->items.SetNum(o->item, u->items.GetNum(o->item) + temp);
 					u->faction->DiscoverItem(o->item, 0, 1);
 					u->ConsumeSharedMoney((temp * m->price * (20-bonus) + 19) / 20);
+					if(trader) trader->numtraded += (temp * m->price * (20-bonus) + 19) / 20;
 					u->buyorders.Remove(o);
 					u->Event(AString("Buys ") + ItemString(o->item, temp)
 							+ " at $" + (m->price * (20-bonus) + 19) / 20 + " each.");
@@ -3183,6 +3309,10 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
         		}
             }
         }
+        if(!tar) {
+            u->Error("SEND: No unit in that direction able to recieve sent goods");
+            return 0;
+        }
     } else {
            //try all directions for target unit
         int i=0;
@@ -3198,15 +3328,24 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
         }
     }
     int cost = 0;
-    
-    if (!tar) {
+    Unit *bestquartermaster = NULL;
+    if (!tar && o->target) {
         Location *target = regions.GetUnitId(o->target, u->faction->num, r);
         Location *quartermaster = NULL;
         if(o->via) quartermaster = regions.GetUnitId(o->via, u->faction->num, r);
         int level = 0;
-        if(u->GetSkill(S_ARCADIA_QUARTERMASTERY) > level) level = u->GetSkill(S_ARCADIA_QUARTERMASTERY);
-        if(target && target->unit->GetSkill(S_ARCADIA_QUARTERMASTERY) > level) level = target->unit->GetSkill(S_ARCADIA_QUARTERMASTERY);
-        if(quartermaster && quartermaster->unit->GetSkill(S_ARCADIA_QUARTERMASTERY) > level) level = quartermaster->unit->GetSkill(S_ARCADIA_QUARTERMASTERY);
+        if(u->GetSkill(S_ARCADIA_QUARTERMASTERY) > level) {
+            level = u->GetSkill(S_ARCADIA_QUARTERMASTERY);
+            bestquartermaster = u;
+        }
+        if(target && target->unit->GetSkill(S_ARCADIA_QUARTERMASTERY) > level) {
+            level = target->unit->GetSkill(S_ARCADIA_QUARTERMASTERY);
+            bestquartermaster = target->unit;
+        }
+        if(quartermaster && quartermaster->unit->GetSkill(S_ARCADIA_QUARTERMASTERY) > level) {
+            level = quartermaster->unit->GetSkill(S_ARCADIA_QUARTERMASTERY); //is ok to use other level if greater, as that is equivalent to not using the VIA command at all ...
+            bestquartermaster = quartermaster->unit;
+        }
         if(!level || !target) {
             //the target is not adjacent, and no-one has a quartermastery skill.
             if(target) delete target;
@@ -3258,8 +3397,12 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
         //the amount 'amt' and the target region 'reg'. We should now transfer it.
         //Check if the target hex can be walked to.
         int level = u->GetSkill(S_ARCADIA_QUARTERMASTERY);
-        if( tar->GetSkill(S_ARCADIA_QUARTERMASTERY) > level) level = tar->GetSkill(S_ARCADIA_QUARTERMASTERY);
-
+        if(level) bestquartermaster = u;
+        if( tar->GetSkill(S_ARCADIA_QUARTERMASTERY) > level) {
+            level = tar->GetSkill(S_ARCADIA_QUARTERMASTERY);
+            bestquartermaster = tar;
+        }
+        
         int multiplier = 1;
         cost = reg->MoveCost(M_WALK, r, o->direction, 0); //movement cost
         if(cost < 0 && !level) {
@@ -3279,7 +3422,6 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
     	cost = amt*weight*multiplier*Globals->SEND_COST; //silver cost
     	if(level) cost = 0; //quartermasters get free transport.
     }
-
 	if (tar->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
 	    //This eliminates guards, monsters, ghosts and peasant factions.
 		u->Error("SEND: Cannot find target or target is not a member of a friendly faction", o->quiet);
@@ -3299,7 +3441,6 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
 		u->Error(AString("SEND: Can't send ") + ItemDefs[o->item].names + ".", o->quiet);
 		return 0;
 	}
-
 	if (ItemDefs[o->item].max_inventory) {
 		int cur = tar->items.GetNum(o->item) + tar->itemsintransit.GetNum(o->item) + amt;
 		if (cur > ItemDefs[o->item].max_inventory) {
@@ -3328,6 +3469,9 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
 	u->ConsumeShared(o->item, amt);
 	tar->itemsintransit.SetNum(o->item, tar->itemsintransit.GetNum(o->item) + amt);
 	tar->faction->DiscoverItem(o->item, 0, 1);
+
+	if(bestquartermaster) bestquartermaster->numquartermastered += amt*ItemDefs[o->item].baseprice;
+
     return 0;    
 }
 

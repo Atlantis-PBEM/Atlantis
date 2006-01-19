@@ -98,6 +98,9 @@ Unit::Unit()
 	former = NULL;
 	free = 0;
 	practiced = 0;
+	numtraded = 0;
+	nummerchanted = 0;
+	numquartermastered = 0;
 	ClearOrders();
 }
 
@@ -145,6 +148,9 @@ Unit::Unit(int seq, Faction *f, int a)
 	former = NULL;
 	free = 0;
 	practiced = 0;
+	numtraded = 0;
+	nummerchanted = 0;
+	numquartermastered = 0;
 	ClearOrders();
 }
 
@@ -2091,6 +2097,9 @@ int Unit::Taxers(int numtaxers)
 	int numBattle = 0;
 	int numUsableBattle = 0;
 	int numArmor = 0;
+	
+	//added by BS
+	int spareMelee = 0;
 
 	forlist (&items) {
 		Item *pItem = (Item *) elem;
@@ -2126,11 +2135,24 @@ int Unit::Taxers(int numtaxers)
 				sk = LookupSkill(&skname);
 				if(sk != -1) basesk = GetSkill(sk);
 			}
+			/*
+			//use this bit if weapons that don't need a skill for combat shouldn't need one for taxing
+			if (!(pWep->flags & WeaponType::NEEDSKILL)) {
+				numUsableMelee += numUse;
+				numMelee += num;
+			}			
+			*/
+			//added by BS
+			if (!(pWep->flags & WeaponType::NEEDSKILL)) {
+				spareMelee += num;   //for BS mod these, with a horse and riding, allow taxation.
+			}	
+			
 			if (basesk) {
 				numUse = num;
 				if (!(pWep->flags & WeaponType::NEEDSKILL)) {
 					numUsableMelee += numUse;
 					numMelee += num;
+					spareMelee -= num;     //to avoid double counting; if here, these weapons are usable with the units skills already
 				} else if (pWep->flags & WeaponType::NOFOOT) {
 					numUsableMounted += numUse;
 					numMounted += num;
@@ -2177,7 +2199,7 @@ int Unit::Taxers(int numtaxers)
 		 GetSkill(S_RIDING)) ||
 		((Globals->WHO_CAN_TAX & GameDefs::TAX_STEALTH_SKILL) &&
 		 GetSkill(S_STEALTH))) {
-		basetax = totalMen;
+		basetax = totalMen;        //ie in this case, everyone in the unit can tax. Not sure the bonus are right in complex situations though! -BS
 		taxers = totalMen;
 		
 		// Weapon tax bonus
@@ -2206,7 +2228,7 @@ int Unit::Taxers(int numtaxers)
 	} else {
 
 		if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_WEAPON) {
-			if (numUsableMounted > numUsableMounts) {
+			if (numUsableMounted > numUsableMounts) {     //numusablemounted is a weapon type
 				weapontax = numUsableMounts;
 				taxers = numUsableMounts;
 				numMounts -= numUsableMounts;
@@ -2217,7 +2239,7 @@ int Unit::Taxers(int numtaxers)
 				numMounts -= numUsableMounted;
 				numUsableMounts -= numUsableMounted;
 			}
-			weapontax += numMelee + numUsableBows;
+			weapontax += numMelee + numUsableBows;      //shouldn't this be numUsableMelee? Not that it matters since in the current incarnation numMelee = numUsableMelee, but still ...
 			taxers += numMelee + numUsableBows;
 		} else if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANY_WEAPON) {
 			weapontax = numMelee + numBows + numMounted;
@@ -2253,6 +2275,17 @@ int Unit::Taxers(int numtaxers)
 		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE_AND_RIDING_SKILL) {
 			weapontax += numMounts;
 			taxers += numUsableMounts;
+		}
+		//BS mod
+		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE_AND_RIDING_SKILL_AND_MELEE_WEAPON) {
+		    //don't understand how the numMounts / numUsableMounts system works (or doesn't), so just doing this:
+		    if(numUsableMounts > spareMelee) {
+		        weapontax += spareMelee;
+		        taxers += spareMelee;
+		    } else {
+		        weapontax += numUsableMounts;
+		        taxers += numUsableMounts;
+		    }
 		}
 
 		if (Globals->WHO_CAN_TAX & GameDefs::TAX_BATTLE_ITEM) {
@@ -2322,6 +2355,9 @@ int Unit::Taxers(int numtaxers)
 	// Check for overabundance
 	if(weapontax > totalMen) weapontax = totalMen;
 	if(armortax > weapontax) armortax = weapontax;
+
+	//added by BS
+	if(basetax > totalMen) basetax = totalMen;
 	
 	// Adjust basetax in case of weapon taxation
 	if(basetax < weapontax) basetax = weapontax;
@@ -2336,7 +2372,8 @@ int Unit::Taxers(int numtaxers)
 	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
 		basetax += illusions;
 		taxers += illusions;
-	
+		
+
 	if(numtaxers) return(taxers);
 
 	int taxes = Globals->TAX_BASE_INCOME * basetax

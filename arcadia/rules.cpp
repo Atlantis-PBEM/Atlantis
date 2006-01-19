@@ -87,7 +87,7 @@ static GameDefs g = {
 	 0, /* TAX_BONUS_WEAPON */
 	 0, /* TAX_BONUS_ARMOR */
 	 0, /* TAX_BONUS_FORT */
-	GameDefs::TAX_NORMAL, // WHO_CAN_TAX
+	GameDefs::TAX_NORMAL | GameDefs::TAX_HORSE_AND_RIDING_SKILL_AND_MELEE_WEAPON, // WHO_CAN_TAX
 	1,	// TAX_PILLAGE_MONTH_LONG
 
 	5, /* HEALS_PER_MAN */
@@ -241,6 +241,7 @@ static GameDefs g = {
 	1, // LATE_TAX
 	80, // MAGE_UNDEAD_INVINCIBLE
 	1, // CANT_TEACH_MAGIC
+	1, // ARCADIAN_CHECKER
 };
 
 GameDefs *Globals = &g;

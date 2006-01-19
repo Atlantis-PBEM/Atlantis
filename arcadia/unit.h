@@ -310,6 +310,10 @@ class Unit : public AListElem
 		int losses;
 		int free;
 		int practiced; // Has this unit practiced a skill this turn
+		//three terms for Arcadian economy spells
+		int numtraded; //total value of trades made
+		int nummerchanted;
+		int numquartermastered;
 		
 		int crossbridge; //Used in combat code to see if a unit needs to cross a bridge to get to a combat. Set to zero in Game::GetSides.
 		int marker; //use wherever, clear before using.

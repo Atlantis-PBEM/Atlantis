@@ -571,7 +571,7 @@ cout << spd->key;
         return; //no targets to hit.
     }
 
-#ifdef DEBUG
+#ifdef DEBUG2
 cout << "-";
 #endif
 	//energy cost for mages using their combat spell only (ie not for monsters, battle items etc)
@@ -580,11 +580,14 @@ cout << "-";
 	if(cancast == 2) {
 	    hitself = (hitself+1)%2; //swop army to hit.
 	}
-#ifdef DEBUG
+#ifdef DEBUG2
 cout << "-";
 #endif
 
 	for(i = 0; i < 4; i++) {
+#ifdef DEBUG2
+cout << "!";
+#endif
 		if(spd->damage[i].type == -1) continue;
 		int times = spd->damage[i].value;
 		if(spd->effectflags & SpecialType::FX_USE_LEV)
@@ -599,6 +602,7 @@ cout << "-";
 				spd->damage[i].type, a->slevel,
 				spd->damage[i].flags, spd->damage[i].dclass,
 				spd->damage[i].effect, 0, attackers, a->inform, this); //'attackers' are still attackers; this is used to trigger random target selection rather than formation-specific.
+
 		if(spd->effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {
 			if(spd->damage[i].effect == NULL) {
 				results[dam] = AString("killing ") + num;

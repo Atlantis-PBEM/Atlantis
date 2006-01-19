@@ -635,6 +635,9 @@ Awrite("Doing attacks");
         aatt = armya->CanAttack();
         batt = armyb->CanAttack();
     }
+#ifdef DEBUG
+Awrite("Done attacks");
+#endif
     /* Finish round */
 	armya->Regenerate(this);
 	armyb->Regenerate(this);
@@ -643,6 +646,9 @@ Awrite("Doing attacks");
     bialive -= balive;
     AddLine(*(armyb->pLeader->name) + " loses " + bialive + ".");
     AddLine("");
+#ifdef DEBUG
+Awrite("Done round");
+#endif
 }
 
 void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def, int ass) //'attackers' is the army the soldier is from.

@@ -156,6 +156,11 @@ void Game::CreateTimesReports()
     AString rumour;
     AString times;
     Faction *pFac;
+    
+    int elfwritten = 0;
+    int humanwritten = 0;    
+    int dwarfwritten = 0;
+    int independentwritten = 0;
 
     forlist(&factions) {
         Faction *f = (Faction *) elem;
@@ -213,15 +218,19 @@ void Game::CreateTimesReports()
     		switch(r->GetEthnicity()) {
     		    case RA_HUMAN:
     		        timesnum = guardfaction;
+    		        humanwritten = 1;
     		        break;
     		    case RA_ELF:
     		        timesnum = elfguardfaction;
+    		        elfwritten = 1;
     		        break;
     		    case RA_DWARF:
     		        timesnum = dwarfguardfaction;
+    		        dwarfwritten = 1;
     		        break;
     		    case RA_OTHER:
     		        timesnum = independentguardfaction;
+    		        independentwritten = 1;
     		        break;
     		    default:
     		        timesnum = 0;
@@ -260,18 +269,22 @@ void Game::CreateTimesReports()
         		    case RA_HUMAN:
         		        times += "human cause!";
         		        timesnum = guardfaction;
+        		        humanwritten = 1;
         		        break;
         		    case RA_ELF:
         		        times += "elven cause!";
         		        timesnum = elfguardfaction;
+        		        elfwritten = 1;
         		        break;
         		    case RA_DWARF:
         		        times += "dwarven cause!";
         		        timesnum = dwarfguardfaction;
+        		        dwarfwritten = 1;
         		        break;
         		    case RA_OTHER:
         		        times += "independent cause!";
         		        timesnum = independentguardfaction;
+    		            independentwritten = 1;
         		        break;
         		    case RA_NA:
         		        times = AString("The leadership of ") + *pFac->name + " is in chaos.";
@@ -280,6 +293,7 @@ void Game::CreateTimesReports()
         		    default:
         		        times += "!@#$ please alert your GM !@#$";
         		        timesnum = guardfaction;
+        		        humanwritten = 1;
         		        break;    		
         		}
                 WriteTimes(timesnum, times);
@@ -288,4 +302,27 @@ void Game::CreateTimesReports()
                 break;
         }
     }
+    
+    //use this if your script doesn't add on the faction name when compiling times.
+    if(humanwritten) {
+        Faction *fac = GetFaction(&factions, guardfaction);
+        WriteTimes(guardfaction, AString(" "));
+        WriteTimes(guardfaction, AString(*fac->name));
+    }
+    if(elfwritten) {
+        Faction *fac = GetFaction(&factions, elfguardfaction);
+        WriteTimes(elfguardfaction, AString(" "));
+        WriteTimes(elfguardfaction, AString(*fac->name));
+    }
+    if(dwarfwritten) {
+        Faction *fac = GetFaction(&factions, dwarfguardfaction);
+        WriteTimes(dwarfguardfaction, AString(" "));
+        WriteTimes(dwarfguardfaction, AString(*fac->name));
+    }
+    if(independentwritten) {
+        Faction *fac = GetFaction(&factions, independentguardfaction);
+        WriteTimes(independentguardfaction, AString(" "));
+        WriteTimes(independentguardfaction, AString(*fac->name));
+    }
+    
 }

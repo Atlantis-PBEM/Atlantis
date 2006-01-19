@@ -199,7 +199,7 @@ void Game::ParseError(OrdersCheck *pCheck, Unit *pUnit, Faction *pFaction,
 	else if(pFaction) pFaction->Error(strError);
 }
 
-void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
+Faction * Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 {
 	Faction *fac = 0;
 	Unit *unit = 0;
@@ -207,7 +207,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 	AString *order = f->GetLine();
 //	FormTemplate * formtem = 0;
 //	int formtemline = 0;
-	
+
 	while (order) {
 		AString saveorder = *order;
 		int getatsign = order->getat();
@@ -235,7 +235,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					fac = &(pCheck->dummyFaction);
 					pCheck->numshows = 0;
 				} else {
-					fac = GetFaction(&factions, token->value());
+					if(!faction) faction = token->value();  //"faction" is only used for label orders. This stuck in to allow parsing orders without knowing which faction it is ... could also otherwise cause trouble if unexpected faction orders are pulled in
+					fac = GetFaction(&factions, faction);
 				}
 
 				if (!fac) break;
@@ -546,6 +547,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
  			}
  		}	
 	}
+	
+	return fac;
 }
 
 void Game::DoLabelOrders(OrdersCheck *pCheck, Unit *unit, Faction *fac, int faction)

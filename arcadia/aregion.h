@@ -300,6 +300,7 @@ class ARegion : public AListElem
 		int untaxed;  //amount of silver NOT taxed (used in guard regeneration).
 		void SinkRegion(ARegionList *pRegs);
 		void OceanToLand();
+		void Fake();
 		void SetEthnicity(int ethnicity, ARegionList *pRegs);
 		int GetEthnicity();
 		void RedoAs(int tertype, int town, ARegionList *pRegs);

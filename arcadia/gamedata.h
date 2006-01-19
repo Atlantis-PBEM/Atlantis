@@ -571,6 +571,7 @@ enum {
 	R_CERAN_CHASM1,
 	R_VOLCANO,
 	R_LAKE,
+	R_FAKE,
 	R_NUM
 };
 

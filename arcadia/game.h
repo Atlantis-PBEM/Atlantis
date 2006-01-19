@@ -90,6 +90,7 @@ public:
 	int NewGame();
 	int OpenGame();
 	void DummyGame();
+	void FakeGame(Faction *);
 
 	void DefaultWorkOrder();
 
@@ -108,6 +109,7 @@ public:
 	void UnitFactionMap();
 	int GenRules(const AString &, const AString &, const AString &);
 	int DoOrdersCheck(const AString &strOrders, const AString &strCheck);
+	int DoOrdersCheckAll(const AString &strOrders, const AString &strCheck);
 
 	Faction *AddFaction(int noleader=0, ARegion *pStart = NULL);
 
@@ -179,7 +181,9 @@ private:
 
 	void PreProcessTurn();
 	void ReadOrders();
+	Faction * ReadUnknownOrders(Aorders *f); //used for checkall.
 	void RunOrders();
+	void RunCheckAllOrders();
 	void ClearOrders(Faction *);
 	void MakeFactionReportLists();
 	void CountAllMages();
@@ -377,7 +381,7 @@ private:
 	int ParseDir(AString *token);
 
 
-	void ParseOrders(int faction, Aorders *ordersFile, OrdersCheck *pCheck);
+	Faction * ParseOrders(int faction, Aorders *ordersFile, OrdersCheck *pCheck);
 	void ProcessOrder(int orderNum, Unit *unit, AString *order,
 					   OrdersCheck *pCheck, int isquiet);
     void ProcessFollowOrder(Unit *, AString *, OrdersCheck *pCheck, int isquiet);

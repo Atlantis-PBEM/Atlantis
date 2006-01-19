@@ -505,12 +505,15 @@ int Hits(int a,int d)
 	return 0;
 }
 
-int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, int attackLevel, 
+int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, int attackLev, 
                   int flags, int weaponClass, char *effect, int mountBonus, Army *attackers, int attackerform, Battle *b, int strength)
 		/* The army in question is the army DEFENDING!
 		   */
 
 {
+#ifdef DEBUG2
+cout << "doing an attack" << endl;
+#endif
 	/* 1. Check against Global effects (not sure how yet). BS: What does this even mean? */
 	
 	/* 2. Attack shield */
@@ -531,14 +534,13 @@ int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, in
 			canShield = 1;
 			break;
 	}
-
 	if(canShield) {
 		int shieldType = attackType;
 
 		hi = shields.GetHighShield(shieldType);
 		if (hi) {
 			/* Check if we get through shield */
-			if(!Hits(attackLevel, hi->shieldskill)) {
+			if(!Hits(attackLev, hi->shieldskill)) {
 				return -1;
 			}
 
@@ -557,6 +559,10 @@ int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, in
 	//
 	int ret = 0; //number of successful attacks!
 	for(int i = 0; i < numAttacks; i++) {
+	    //initialise variables
+	    int attackLevel = attackLev;
+	
+	
 		/* 3. Get the target */
 		int formhit = -1;
 		int tarnum = GetTarget(attackers,attackerform,attackType,&formhit, special, b);
@@ -624,21 +630,20 @@ int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, in
 		if((attackType != ATTACK_COMBAT) && (attackType != ATTACK_RIDING)) {
 		    ManType *mt = FindRace(ItemDefs[race].abr);
 		    if(attackers->rangedbonus < 0) {
-		    //elves don't get ranged penalties
-		        if(mt->ethnicity != RA_ELF || attackType != ATTACK_RANGED) attackbonus += attackers->rangedbonus;
+		    //elves don't get ranged penalties //?for archers?
+		        if(!mt || mt->ethnicity != RA_ELF /*|| attackType != ATTACK_RANGED*/) attackbonus += attackers->rangedbonus;
             //non-elves only get ranged bonuses for magic
-            } else if(mt->ethnicity == RA_ELF || attackType != ATTACK_RANGED) {
+            } else if( (mt && mt->ethnicity == RA_ELF) || attackType != ATTACK_RANGED) {
                 attackbonus += attackers->rangedbonus; //we know this bonus is >= 0 now!
             }
 		}
-		
+
 		attackLevel += attackbonus; //adding here since protection values aren't supposed to be added
-		
+
 		/* 4.3 Add bonuses versus mounted */
 		if(tar->riding != -1) attackLevel += mountBonus; // this and the previous line will mess up multi-attacks.
 
 		/* 5. Attack soldier */
-		
 		if(!(flags & WeaponType::ALWAYSREADY)) {
 			if(Globals->ADVANCED_FORTS) {
 				attackbonus -= (tar->protection[attackType]+1)/2;
@@ -654,7 +659,6 @@ int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, in
 			int tomiss = 1-attackbonus;
 			if(tohit<1) tohit = 1;
 			if(tomiss<1) tomiss = 1;
-
 			if(getrandom(tohit+tomiss) < tomiss) {
 				continue;
 			}

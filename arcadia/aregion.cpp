@@ -936,6 +936,8 @@ Unit *ARegion::GetUnitId(UnitId *id, int faction)
 
 Location *ARegionList::GetUnitId(UnitId *id, int faction, ARegion *cur)
 {
+//    if(!id || !cur) return NULL;   //for safety
+    
 	Location *retval = NULL;
 	// Check current region first
 	retval = cur->GetLocation(id, faction);
@@ -1762,13 +1764,13 @@ void ARegion::SetWeather(int newWeather)
 
 int ARegion::IsCoastal()
 {
-	if (TerrainDefs[type].similar_type == R_OCEAN) return 1;
+	if (TerrainDefs[type].similar_type == R_OCEAN || TerrainDefs[type].similar_type == R_FAKE) return 1;
 	int seacount = 0;
 	for (int i=0; i<NDIRS; i++) {
-		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {
-		if (!Globals->LAKESIDE_IS_COASTAL && neighbors[i]->type == R_LAKE) continue;
-		seacount++;
-	}
+		if (neighbors[i] && (TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN || TerrainDefs[neighbors[i]->type].similar_type == R_FAKE) ) {
+		    if (!Globals->LAKESIDE_IS_COASTAL && neighbors[i]->type == R_LAKE) continue;
+		    seacount++;
+	    }
 	}
 	return seacount;
 }
@@ -1776,12 +1778,12 @@ int ARegion::IsCoastal()
 int ARegion::IsCoastalOrLakeside()
 {
 /* BS Sailing Patch */
-	if ((type != R_LAKE) && (TerrainDefs[type].similar_type == R_OCEAN)) return 1;
+	if ((type != R_LAKE) && (TerrainDefs[type].similar_type == R_OCEAN || TerrainDefs[type].similar_type == R_FAKE) ) return 1;
 	int seacount = 0;
 	for (int i=0; i<NDIRS; i++) {
-		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {
-		seacount++;
-	}
+		if (neighbors[i] && (TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN || TerrainDefs[neighbors[i]->type].similar_type == R_FAKE) ) {
+		    seacount++;
+	    }
 	}
 	return seacount;
 }
@@ -2418,6 +2420,52 @@ int ParseTerrain(AString *token)
 	}
 	
 	return (-1);
+}
+
+void ARegion::Fake()
+{
+    type = R_FAKE;
+    if(Globals->HEXSIDE_TERRAIN) {
+        for (int i=0; i<NDIRS; i++) {
+    		hexside[i]->type = H_DUMMY;
+    		hexside[i]->road = 0;
+    		hexside[i]->bridge = 0;
+    		hexside[i]->harbour = 0;
+  		}
+    }
+    
+    //gates left so the gate spell doesn't crash
+    willsink = 0;
+    untaxed = 0;
+    if(town) delete town;
+    town = 0;
+    //economics stuff
+    development = 0;
+	habitat = 0;
+	mortality = 0;
+	growth = 0;
+	migration = 0;
+	culture = 0;
+	clearskies = 0;
+	earthlore = 0;
+	fog = 0;
+	flagpole = FL_NULL;
+
+	race = -1;
+
+	population = 0;
+	basepopulation = 0;
+	wages = 0;
+	maxwages = 0;
+	money = 0;
+	
+	elevation = 0;
+	humidity = 0;
+	temperature = 0;
+	vegetation = 0;
+
+	products.DeleteAll();
+	markets.DeleteAll();
 }
 
 void ARegion::SinkRegion(ARegionList *pRegs)

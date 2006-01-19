@@ -40,6 +40,7 @@ class Soldier;
 
 #ifndef DEBUG
 //#define DEBUG
+//#define DEBUG2
 #endif
 
 enum {

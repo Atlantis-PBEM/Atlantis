@@ -351,12 +351,13 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_EARTH_LORE, 0, "PTTN", 1);
 	    ModifySkillDependancy(S_MAGICAL_HEALING, 0, "PTTN", 1);
 	    ModifySkillDependancy(S_RESURRECTION, 0, "NECR", 3);
+	    ModifySkillDependancy(S_ENERGY_SHIELD, 0, "PTTN", 1);
 //	    ModifySkillDependancy(S_RESURRECTION, 1, "MHEA", 3);
 //	    ModifySkillDependancy(S_SPIRIT_OF_DEAD, 0, "RESU", 3);
 //	    ModifySkillDependancy(S_MODIFICATION, 0, "EART", 4);
 //	    ModifySkillDependancy(S_DIVERSION, 0, "EART", 4);
 	    ModifyBaseSkills(S_BASE_PATTERNING, S_GATE_LORE, S_TELEPORTATION, S_CONSTRUCT_GATE, S_CREATE_PORTAL);
-	    ModifyBaseSkills(S_BASE_PATTERNING, S_EARTH_LORE, S_DIVERSION, S_MODIFICATION);
+	    ModifyBaseSkills(S_BASE_PATTERNING, S_EARTH_LORE, S_DIVERSION, S_MODIFICATION, S_ENERGY_SHIELD);
 	    ModifyBaseSkills(S_BASE_PATTERNING, S_MAGICAL_HEALING, S_RESURRECTION, S_SPIRIT_OF_DEAD);
 	    
 	    ModifySkillDependancy(S_CONCEALMENT, 0, "MYST", 2);
@@ -365,12 +366,11 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillDependancy(S_TRANSMUTATION, 0, "MYST", 1);
 	    ModifySkillDependancy(S_ENCHANT_SWORDS, 0, "TRAM", 2);
 	    ModifySkillDependancy(S_ENCHANT_ARMOR, 0, "TRAM", 2);
-	    ModifySkillDependancy(S_ENERGY_SHIELD, 0, "MYST", 1);
 	    ModifySkillDependancy(S_HYPNOSIS, 0, "MYST", 1);
 	    ModifySkillDependancy(S_BINDING, 0, "HYPN", 3);
 	    ModifySkillDependancy(S_DRAGON_TALK, 0, "BIND", 3);
 	    ModifyBaseSkills(S_BASE_MYSTICISM, S_CONCEALMENT, S_INVISIBILITY, S_TRUE_SEEING);
-	    ModifyBaseSkills(S_BASE_MYSTICISM, S_TRANSMUTATION, S_ENCHANT_SWORDS, S_ENCHANT_ARMOR, S_ENERGY_SHIELD);
+	    ModifyBaseSkills(S_BASE_MYSTICISM, S_TRANSMUTATION, S_ENCHANT_SWORDS, S_ENCHANT_ARMOR);
 	    ModifyBaseSkills(S_BASE_MYSTICISM, S_HYPNOSIS, S_BINDING, S_DRAGON_TALK);
 	    
 	    ModifySkillDependancy(S_SPIRIT_SHIELD, 0, "SUMM", 1);
@@ -399,6 +399,7 @@ void Game::ModifyTablesPerRuleset(void)
 	    ModifySkillFlags(S_BASE_ARTIFACTLORE, SkillType::MAGIC | SkillType::NOTIFY | SkillType::CAST | SkillType::FOUNDATION);
 	    ModifyItemMagicSkill(I_SHIELDSTONE, "ARTL", 3);
 	    ModifyItemMagicSkill(I_AMULETOFP, "ARTL", 1);
+        ModifySkillName(S_ARTIFACT_LORE,"blankc","ZZZC");
 	    ModifySkillDependancy(S_CREATE_RING_OF_INVISIBILITY, 0, "INVI", 4);
 	    ModifySkillDependancy(S_CREATE_RING_OF_INVISIBILITY, 1, "ARTL", 4);
 	    ModifySkillDependancy(S_CREATE_AMULET_OF_TRUE_SEEING, 0, "TRUE", 4);
@@ -432,6 +433,8 @@ void Game::ModifyTablesPerRuleset(void)
 	    //frenzy (1)
 	    ModifyBaseSkills(S_BASE_BATTLETRAINING, S_INNER_STRENGTH, S_PHANTASMAL_ENTERTAINMENT, S_CREATE_AURA_OF_FEAR, S_INSTILL_COURAGE);
 	    ModifyBaseSkills(S_BASE_BATTLETRAINING, S_SWIFTNESS, S_TOUGHNESS, S_UNITY, S_FRENZY);
+	    
+	    ModifySkillDependancy(S_SECSIGHT, 0, "BATT", 1);
 	    
 	    
 	    ModifySkillDependancy(S_WOLF_LORE, 0, "CHAR", 1);

@@ -186,7 +186,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 			if(ship->hexside < 0) {    //ie starts from the middle of a hex.
 				ARegion * newreg = reg->neighbors[dir];
 				if (!newreg) {
-					captain->Error("SAIL: Can't sail that way.", quiet);
+					captain->Error("SAIL: Can't sail that way.", quiet);   //ARCADIAN_CHECKER: This will give info away in underground caverns unless blocks are removed
 					goto done_sailing;
 				}
 				if(Globals->WEATHER_EXISTS) {
@@ -200,8 +200,8 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 				}
 
 				if (!(ObjectDefs[ship->type].flags & ObjectType::SAILOVERLAND) &&        //remember this is for ships starting in the centre of the hex, so if
-					(TerrainDefs[reg->type].similar_type != R_OCEAN) &&           //if the hex is not ocean, we are clearly NOT using hexside terrain rules.
-					(TerrainDefs[newreg->type].similar_type != R_OCEAN)) {
+					(TerrainDefs[reg->type].similar_type != R_OCEAN && TerrainDefs[reg->type].similar_type != R_FAKE) &&           //if the hex is not ocean, we are clearly NOT using hexside terrain rules.
+					(TerrainDefs[newreg->type].similar_type != R_OCEAN && TerrainDefs[newreg->type].similar_type != R_FAKE)) {
 					captain->Error("SAIL: Can't sail inland.", quiet);
 					goto done_sailing;
 				}
@@ -209,6 +209,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 				// Check to see if sailing THROUGH land!
 				// always allow retracing steps
 				//This section was not modified by BS in changing the sailing rules March '04
+				//This section not made compatible with ARCADIAN_CHECKER patch
 				if (Globals->PREVENT_SAIL_THROUGH &&
 						(TerrainDefs[reg->type].similar_type != R_OCEAN) &&
 						!(ObjectDefs[ship->type].flags & ObjectType::SAILOVERLAND) &&
@@ -254,7 +255,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 			    /* Hexside Patch 030825 BS */
 				// set hexside value for hexside ships
 				newhexside = -1;
-				if(TerrainDefs[newreg->type].similar_type != R_OCEAN  && ObjectDefs[ship->type].hexside && Globals->HEXSIDE_TERRAIN) {
+				if((TerrainDefs[newreg->type].similar_type != R_OCEAN && TerrainDefs[newreg->type].similar_type != R_FAKE) && ObjectDefs[ship->type].hexside && Globals->HEXSIDE_TERRAIN) {
 				    //check if the ship can land here. Since it is at sea, it cannot be river-only [Changed: it could be shallow only on a lake]. Check if the terrain forbids ocean-only ships.
 				    waterdepth = HexsideDefs[newreg->hexside[reg->GetRealDirComp(dir)]->type].sailable;
 				    cost = (cost+1) / 2;  //ie 1 in winter, 3 in blizzard
@@ -401,7 +402,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 			    //check that the new region/hexside can be sailed to!
 			    cost = 1;
                 waterdepth = 0;
-			    if(TerrainDefs[newreg->type].similar_type == R_OCEAN) {
+			    if(TerrainDefs[newreg->type].similar_type == R_OCEAN || TerrainDefs[newreg->type].similar_type == R_FAKE) {
                     newhexside=-1;
                     if(newreg->type == R_LAKE) waterdepth=3; //anything can sail onto a lake.
                     else waterdepth=2;

@@ -141,7 +141,7 @@ public:
 		// LANC (which requires RIDI) and RIDI
 		TAX_MELEE_WEAPON_AND_MATCHING_SKILL = 0x00080,
 		TAX_BOW_SKILL_AND_MATCHING_WEAPON = 0x00100,
-		TAX_HORSE_AND_RIDING_SKILL = 0x00200,
+		TAX_HORSE_AND_RIDING_SKILL = 0x00200,    //BS: Modified it to be Horse & riding skill & melee weapon
 		// Probably more petty theft than tax, but then there are those
 		// who argue that taxation IS theft ;->
 		TAX_STEALTH_SKILL = 0x00400,
@@ -161,6 +161,8 @@ public:
 		TAX_USABLE_BATTLE_ITEM = 0x20000,
 		TAX_CREATURES = 0x40000, // Do magical critters help to tax?
 		TAX_ILLUSIONS = 0x80000, // What if they're not really there?
+		
+		TAX_HORSE_AND_RIDING_SKILL_AND_MELEE_WEAPON = 0x100000, //like tax_horse_and_riding_skill, but also needs a spare skill-less weapon
 
 		// Abbreviation for "the usual"
 		TAX_NORMAL = TAX_COMBAT_SKILL | TAX_USABLE_WEAPON,
@@ -753,6 +755,7 @@ public:
 	int MAGE_UNDEAD_INVINCIBLE;
 	// value of zero means magic CAN be taught:
 	int CANT_TEACH_MAGIC;
+	int ARCADIAN_CHECKER;
 };
 
 extern GameDefs *Globals;
