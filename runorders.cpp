@@ -807,7 +807,7 @@ void Game::RunPillageRegion(ARegion *reg)
 {
 	if (TerrainDefs[reg->type].similar_type == R_OCEAN) return;
 	if (reg->wealth < 1) return;
-	if (reg->Wages() < 11) return;
+	if (reg->Wages() <= 10*Globals->MAINTENANCE_COST) return;
 
 	/* First, count up pillagers */
 	int pillagers = CountPillagers(reg);
@@ -845,13 +845,7 @@ void Game::RunPillageRegion(ARegion *reg)
 	delete facs;
 
 	/* Destroy economy */
-	reg->wealth = 0;
-	int damage = reg->development / 3;
-	reg->development -= damage;
-	int popdensity = Globals->CITY_POP / 2000;
-	reg->AdjustPop(- damage * getrandom(popdensity) - getrandom(5 * popdensity));
-	/* Stabilise at minimal development levels */
-	while (reg->Wages() < Globals->MAINTENANCE_COST / 2) reg->development += getrandom(5);
+	reg->Pillage();
 }
 
 void Game::RunPromoteOrders()

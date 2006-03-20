@@ -32,6 +32,7 @@
 
 class ARegion;
 class ARegionList;
+class ARegionArray;
 
 #include "gamedefs.h"
 #include "gameio.h"
@@ -212,6 +213,7 @@ class ARegion : public AListElem
 		Unit *ForbiddenByAlly(Unit *); /* Returns unit that is forbidding */
 		int CanTax(Unit *);
 		int CanPillage(Unit *);
+		void Pillage();
 		int ForbiddenShip(Object *);
 		int HasCityGuard();
 		int NotifySpell(Unit *, char *, ARegionList *pRegs);

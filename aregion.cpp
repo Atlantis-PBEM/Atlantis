@@ -1216,12 +1216,6 @@ void ARegion::WriteEconomy(Areport *f, Faction *fac, int present)
 	} else {
 		f->PutStr(AString("Wages: $0."));
 	}
-	
-	f->PutStr(AString("Regional Wealth: $") + wealth + ".");
-	
-	/*
-	f->PutStr(AString("basepop:" ) + basepopulation + ", development: " + development + ", habitat: " + habitat);		
-	*/
 
 	WriteMarkets(f, fac, present);
 

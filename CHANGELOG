@@ -941,4 +941,5 @@ Changes from 4.0.10 -> 5.0.0
    -- modified the ship type items and replaced clippers and galleons with more suitable
       alternatives. They are not balanced or all included yet for compatibility with currently
       running test games.
-   
+   -- fixed the bugs where pillaging could do too much damage to regions, and where maxwages and
+      maxentertainment could drop below zero.

@@ -189,6 +189,7 @@ void ARegion::SetupPop()
 	/* taxable region wealth */
 	wealth = (int) ((float) (Population()
 		* (Wages() - 10 * Globals->MAINTENANCE_COST) / 50));
+	if (wealth < 0) wealth = 0;
 
 	// wage-relevant population (/10 wages /5 popfactor)
 	int pp = Population();
@@ -197,8 +198,8 @@ void ARegion::SetupPop()
 		float wpfactor = (float) (120 / (61 - pp / 50));
 		pp += (int) ((float) ((wpfactor * pp + 3000)/(wpfactor + 1)));
 	}
-	int wagelimit = (int) ((float) (pp * (Wages() - 10 * Globals->MAINTENANCE_COST) /50)); 
-	if (wealth < 0) wealth = 0;
+	int wagelimit = (int) ((float) (pp * (Wages() - 10 * Globals->MAINTENANCE_COST) /50));
+	if (wagelimit < 0) wagelimit = 0;
 	Production * w = new Production;
 	w->itemtype = I_SILVER;
 	w->amount = wagelimit / Globals->WORK_FRACTION;
@@ -214,6 +215,7 @@ void ARegion::SetupPop()
 		ep = ep * epf / 100;
 	}
 	int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 1) /50));
+	if(maxent < 0) maxent = 0;
 	Production * e = new Production;
 	e->itemtype = I_SILVER;
 	e->skill = S_ENTERTAINMENT;
@@ -273,7 +275,8 @@ void ARegion::SetIncome()
 		float wpfactor = (float) (120 / (61 - pp / 50));
 		pp += (int) ((float) ((wpfactor * pp + 3000)/(wpfactor + 1)));
 	}
-	int maxwages = (int) ((float) (pp * (Wages() - 10 * Globals->MAINTENANCE_COST) /50)); 
+	int maxwages = (int) ((float) (pp * (Wages() - 10 * Globals->MAINTENANCE_COST) /50));
+	if(maxwages < 0) maxwages = 0;
 	Production * w = products.GetProd(I_SILVER,-1);
 	w->itemtype = I_SILVER;
 	w->amount = maxwages / Globals->WORK_FRACTION;
@@ -289,6 +292,7 @@ void ARegion::SetIncome()
 		ep = ep * epf / 100;
 	}
 	int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 10) /50));
+	if(maxent < 0) maxent = 0;
 	Production * e = products.GetProd(I_SILVER,S_ENTERTAINMENT);
 	e->itemtype = I_SILVER;
 	e->amount = maxent / Globals->ENTERTAIN_FRACTION;
@@ -677,7 +681,8 @@ void ARegion::SetupCityMarket()
 				}
 				
 				cap = (citymax/2);
-				offset = - (citymax/20) + tradesell++ * (tradesell * tradesell * citymax/40);
+				tradesell++;
+				offset = - (citymax/20) + tradesell * (tradesell * tradesell * citymax/40);
 				if(cap + offset < citymax) {
 					Market * m = new Market (M_SELL, i, price, amt/5, cap+population+offset,
 						citymax+population, 0, amt);
@@ -1065,7 +1070,8 @@ int ARegion::TownHabitat()
 	if(caravan) build++;
 	if(build > 2) build = 2;
 	
-	hab = (build++ * build + 1) * hab * hab + habitat / 4 + 50;
+	build++;
+	hab = (build * build + 1) * hab * hab + habitat / 4 + 50;
 	
 	// Effect of town development on habitat:
 	int totalhab = hab + (TownDevelopment() * (habitat + 800 + hab
@@ -1184,6 +1190,19 @@ int ARegion::TownGrowth()
 	}
 	return tarpop;
 }
+
+/* Damage region because of pillaging */
+void ARegion::Pillage()
+{
+	wealth = 0;
+	int damage = development / 3;
+	development -= damage;
+	int popdensity = Globals->CITY_POP / 2000;
+	AdjustPop(- damage * getrandom(popdensity) - getrandom(5 * popdensity));
+	/* Stabilise at minimal development levels */
+	while (Wages() < Globals->MAINTENANCE_COST / 20) development += getrandom(5);
+}
+
 
 /* Grow region and town population and set basic
  * migration parameters */
@@ -1311,11 +1330,6 @@ void ARegion::Grow()
 	
 	// Update population
 	AdjustPop(growpop);
-	
-	/* Check economic growth due to basic activity */
-	if(basedev > development) {
-		if(getrandom(development) > (basedev - development)) development++;	
-	}
 	
 	/* Initialise the migration variables */
 	migdev = 0;
@@ -1468,8 +1482,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		DoDecayCheck(pRegs);
 	}
 	
-	/* Check if development level improves
-	 * due to advanced producing and building */
+	/* Development increase due to player activity */
 	// scale improvement
 	float imp1 = improvement / 25;
 	int imp2 = (improvement * 2 + 15) / 3;
@@ -1478,7 +1491,14 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	if(improvement > development) {
 		int diff = improvement - development;
 		/* Let road development increase chance of improvement */
-		if(getrandom(development - RoadDevelopment()) < diff) development++;	
+		int progress = development - RoadDevelopment();
+		/* Three chances to improve */
+		for(int a=0; a<3; a++) if(getrandom(progress) < diff) development++;
+	}
+	
+	/* Development increase for very poor regions */
+	if(basedev > development) {
+		if(getrandom(basedev) > (basedev - development)) development++;	
 	}
 
 	/* Check if we were a starting city and got taken over */
