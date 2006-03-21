@@ -260,6 +260,8 @@ class ARegion : public AListElem
 		int DetermineTownSize();
 		int TraceConnectedRoad(int, int, AList *, int, int);
 		int RoadDevelopmentBonus(int, int);
+		int BaseDev();
+		int ProdDev();
 		int TownHabitat();
 		int RoadDevelopment();
 		int TownDevelopment();

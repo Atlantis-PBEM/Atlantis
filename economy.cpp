@@ -1039,6 +1039,41 @@ void ARegion::UpdateProducts()
 	}
 }
 
+/* BaseDev is the development floor at which poor
+ * regions stabilise without player activity */
+int ARegion::BaseDev()
+{
+	int level = 1;
+	int basedev = 1;
+	int prev = 0;
+	while (level <= TerrainDefs[type].wages) {
+		prev++;
+		basedev++;
+		if(prev > level) {
+			level++;
+			prev = 0;
+		}
+	}
+	
+	basedev = (Globals->MAINTENANCE_COST + basedev) / 2;
+	return basedev;
+}
+
+/* ProdDev is the development floor for regions
+ * factoring in player production in the region */
+int ARegion::ProdDev()
+{
+	int basedev = BaseDev();
+	forlist(&products) {
+		Production *p = (Production *) elem;
+		if (ItemDefs[p->itemtype].type & IT_NORMAL &&
+			p->itemtype != I_SILVER) {
+			basedev += p->activity;
+		}
+	}
+	return basedev;
+}
+
 int ARegion::TownHabitat()
 {
 	// Effect of existing buildings
@@ -1118,19 +1153,7 @@ int ARegion::RoadDevelopment()
 // considered outside of these limits.
 int ARegion::TownDevelopment()
 {
-	int level = 1;
-	int basedev = 1;
-	int prev = 0;
-	while (level <= TerrainDefs[type].wages) {
-		prev++;
-		basedev++;
-		if(prev > level) {
-			level++;
-			prev = 0;
-		}
-	}
-	
-	basedev = (Globals->MAINTENANCE_COST + basedev) / 2;
+	int basedev = BaseDev();
 	int df = development - basedev;
 	if(df < 0) df = 0;
 	if(df > 100) df = 100;
@@ -1220,9 +1243,6 @@ void ARegion::Grow()
 	immigrants = habitat - basepopulation;
 	emigrants = population - basepopulation;
 	
-	// basic development activity
-	int basedev = 0;
-	
 	// First, check regional population growth
 	// Check resource production activity
 	int activity = 0;
@@ -1232,7 +1252,6 @@ void ARegion::Grow()
 		if (ItemDefs[p->itemtype].type & IT_NORMAL &&
 			p->itemtype != I_SILVER) {
 			activity += p->activity;
-			basedev += activity;
 			// bonuses for productivity are calculated from
 			// the _baseamount_ of all resources.
 			// because trade structures increase the produceable
@@ -1497,6 +1516,8 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	}
 	
 	/* Development increase for very poor regions */
+	int basedev = ProdDev();
+	
 	if(basedev > development) {
 		if(getrandom(basedev) > (basedev - development)) development++;	
 	}
