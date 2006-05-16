@@ -2258,13 +2258,13 @@ void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
     	level = u->GetSkill(S_ARCADIA_QUARTERMASTERY);
     	if(level && u->numquartermastered) {
 //            u->Experience(S_ARCADIA_QUARTERMASTERY,level); //can otherwise only be gained by study
-            int exper = 4;  //4 experience for trading anything at all
+            int exper = 3;  //3 experience for trading anything at all
             int value = 400;
             while(u->numquartermastered > value && exper < 10) {   //this one can potentially be abused, so cap at 10.
                 exper++;
                 value *= 2;
             }
-            //ie 5 for sending $400, 7 for $1600, 9 for $6400, 10 for $12800.
+            //ie 4 for sending $400, 6 for $1600, 8 for $6400, 10 for $25600.
             u->Experience(S_ARCADIA_QUARTERMASTERY,exper);
         }
 	}

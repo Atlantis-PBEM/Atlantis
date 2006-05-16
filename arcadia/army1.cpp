@@ -539,11 +539,17 @@ cout << "doing an attack" << endl;
 
 		hi = shields.GetHighShield(shieldType);
 		if (hi) {
+#ifdef DEBUG
+cout << "Passing shield strength " << hi->shieldskill << endl;
+b->AddLine(AString("Testing shield strength ") + hi->shieldskill);
+#endif
 			/* Check if we get through shield */
 			if(!Hits(attackLev, hi->shieldskill)) {
 				return -1;
 			}
-
+#ifdef DEBUG
+b->AddLine("Through");
+#endif
 			if(effect == NULL && !combat) {
 				/* We got through shield... if killing spell, downgrade shield */
 				DowngradeShield(hi);
@@ -551,6 +557,9 @@ cout << "doing an attack" << endl;
 			if(combat && !getrandom(80/numAttacks) ) {
 				/* Damaging shot, downgrade shield */
 				DowngradeShield(hi);
+#ifdef DEBUG
+b->AddLine(AString("Damaged Shield ") + hi->shieldskill);
+#endif
 			}
 		}
 	}
@@ -664,6 +673,9 @@ cout << "doing an attack" << endl;
 			}
 		}
 
+#ifdef DEBUG
+b->AddLine(AString("TargetFac: ") + tar->unit->faction->num + " Attack: " + attackLevel + " Defence: " + tlev);
+#endif
 
 		if (attackType != NUM_ATTACK_TYPES) { //this excludes dispel illusions, anti-demons, etc.
     		if (!Hits(attackLevel,tlev)) {
@@ -685,7 +697,9 @@ cout << "doing an attack" << endl;
                 //this soldier is going to die! - unless he has an amy of i in which case he'll never die anyway ...
                 tar->restinpeace = 1;
             }
-
+#ifdef DEBUG
+b->AddLine(AString("Kill!"));
+#endif
 			/* 8. Seeya! */
 			formations[formhit].Kill(tarnum, this, strength);
 			ret++;
@@ -2437,6 +2451,7 @@ void Army::DoExperience(int enemydead)
 
 		if(s->riding != -1) {
 		    //has riding skill.
+            if(s->unit->GetSkill(S_SWIFTNESS)) s->unit->Experience(S_SWIFTNESS,(exper/3),0);
 		    if(!s->unit->IsNormal()) {
 		        exper = (int) (2*exp/3);
 		        s->unit->Experience(S_RIDING,exper,0);

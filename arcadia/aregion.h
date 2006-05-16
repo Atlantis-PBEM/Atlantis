@@ -343,6 +343,8 @@ class ARegion : public AListElem
 		ProductionList products;
 		MarketList markets;
 		int xloc, yloc, zloc;
+		
+		int dynamicexits;  //are the exits to this region the same for every unit present? Usually ... yes
 
 		void AddEditTown(AString * = 0);
 		void UpdateEditRegion();
@@ -387,6 +389,7 @@ class ARegionArray
 			LEVEL_SURFACE,
 			LEVEL_UNDERWORLD,
 			LEVEL_UNDERDEEP,
+			LEVEL_QUEST,
 		};
 		int levelType;
 };
@@ -469,6 +472,7 @@ class ARegionList : public AList
 		void CreateIslandLevel(int level, int nPlayers, char *name);
 		void CreateUnderworldLevel(int level, int xSize, int ySize, char *name);
 		void CreateUnderdeepLevel(int level, int xSize, int ySize, char *name);
+		void AddQuestLevel(int xSize, int ySize, char *name, int type);
 
 		void MakeShaftLinks(int levelFrom, int levelTo, int odds);
 		void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);

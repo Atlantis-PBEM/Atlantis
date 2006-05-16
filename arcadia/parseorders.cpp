@@ -2944,6 +2944,7 @@ void Game::ProcessSendOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int isq
 	}
 	
 	UnitId *tar = NULL;
+	UnitId *via = NULL;
 	
 	if(token && *token == "unit") {
 	    delete token;
@@ -2959,6 +2960,15 @@ void Game::ProcessSendOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int isq
 	    if(token) delete token;
     	ParseError(pCheck, unit, 0, "SEND: Must specify direction and/or unit number.");
     	return;
+	}
+
+	if(token && *token == "via") {
+	    delete token;
+    	via = ParseUnit(o);
+    	if (!tar) {
+    		ParseError(pCheck, unit, 0, "SEND: Invalid quartermaster.");
+    	}
+	    token = o->gettoken();
 	}
 
 	if (!token) {
@@ -3070,6 +3080,7 @@ void Game::ProcessSendOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int isq
 		SendOrder *ord = new SendOrder;
 		ord->item = item;
 		ord->target = tar;
+		ord->via = via;
 		ord->amount = amt;
 		ord->except = excpt;
 		ord->direction = dir;

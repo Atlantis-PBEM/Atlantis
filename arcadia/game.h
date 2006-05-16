@@ -194,6 +194,7 @@ private:
 	void CountAllPower();
 	void CountSkillPower();
 	void WriteReports();
+	void ClearCombatMovementMaluses();
 	// LLS - write order templates
 	void WriteTemplates();
 
@@ -217,6 +218,8 @@ private:
 	void CreateFortMon(ARegion *pReg, Object *o);
 	int MakeWMon(ARegion *pReg);
 	void MakeLMon(Object *pObj);
+	// Dynamic creation functions
+	void ResolveExits(ARegion *reg, Unit *u);
 
 	// These are in magic.cpp:
 	void GenerateDragons(ARegion *r);

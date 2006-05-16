@@ -852,7 +852,9 @@ void Faction::SetAttitude(int num, int att)
 
 int Faction::CanCatch(ARegion *r, Unit *t)
 {
-	if (TerrainDefs[r->type].similar_type == R_OCEAN && (t->object->IsBoat() || !t->CanFly())) return CanCatchAtSea(r,t);
+    if(t->guard == GUARD_GUARD) return 1;   //I think ... hope this doesn't give wierd behaviour. BS
+
+	if (TerrainDefs[r->type].similar_type == R_OCEAN && ((t->object && t->object->IsBoat()) || !t->CanFly())) return CanCatchAtSea(r,t);
 
 	int def = t->GetDefenseRiding();
 
@@ -909,7 +911,7 @@ int Faction::CanCatchAtSea(ARegion *r, Unit *t)
 
 int Faction::CanSee(ARegion* r, Unit* u, int practice)
 {
-    if(u->dead) return 0; //this is only for spirits of the dead in Arcadia.
+    if(u->dead) return 0; //this is only for spirits of the dead in Arcadia. NB better hope spirits are never guard-1.
 
 	int detfac = 0;
 	if (u->faction == this) return 2;

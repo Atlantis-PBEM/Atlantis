@@ -3329,7 +3329,7 @@ static SkillType sd[] = {
 	 {{"BATT",2},{NULL,0},{NULL,0}},
 	 0, 15, 15},
 	{"swiftness","SWIF",100,
-	 SkillType::MAGIC | SkillType::DISABLED | SkillType::MAGEOTHER,
+	 SkillType::MAGIC | SkillType::BATTLEREP | SkillType::DISABLED | SkillType::MAGEOTHER,
 	 NULL, NULL, S_BASE_MYSTICISM,
 	 {{"BATT",2},{NULL,0},{NULL,0}},
 	 0, 15, 15},

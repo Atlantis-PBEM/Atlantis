@@ -420,7 +420,7 @@ void Game::SpecialErrors(ARegion *r)
     int foggy = r->fog;
     if(foggy < 0) foggy = 0; //shouldn't be needed, but just in case.
     int blizzard = 0;
-    if(r->weather == W_BLIZZARD) blizzard = 1;
+    if(r->weather == W_BLIZZARD && !r->clearskies) blizzard = 1;
     if(sinking + foggy + blizzard == 0) return;
     
     
@@ -581,6 +581,8 @@ void Game::SetupGuardsmenAttitudes()
             break;
         }
         
+        Guardfac->attitudes.DeleteAll();
+        
         forlist(&factions) {
             Faction *f = (Faction *) elem;
             if(f->ethnicity != Guardfac->ethnicity) Guardfac->SetAttitude(f->num,A_UNFRIENDLY);
@@ -588,4 +590,40 @@ void Game::SetupGuardsmenAttitudes()
     }
 }
 
+//--------------------------
+//Quest stuff
+//--------------------------
 
+void Game::ResolveExits(ARegion *reg, Unit *u)
+{
+    Awrite("Reseeding Random Number Generator");
+    if(!u) return;
+    seedrandom(u->num);
+}
+
+void ARegionList::AddQuestLevel(int xSize, int ySize, char *name, int type)
+//Note: this is not functional yet.
+{
+    int level = ++numLevels;
+    ARegionArray **pRegionArraysNew = new ARegionArray *[numLevels];
+    for(int i=0; i<=numLevels-1; i++) {
+        pRegionArraysNew[i]=pRegionArrays[i];
+    }
+    pRegionArrays = pRegionArraysNew; //memory loss here, how do I clear up the old one?
+    
+    
+	MakeRegions(level, xSize, ySize);
+
+	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_QUEST;
+
+	SetRegTypes(pRegionArrays[level], type);
+
+	MakeUWMaze(pRegionArrays[level]);
+
+	AddHexsides(pRegionArrays[level]);
+//	if (Globals->HEXSIDE_TERRAIN) AddBeaches(pRegionArrays[level]);
+
+	CheckHexsides(pRegionArrays[level]);	
+    FinalSetup(pRegionArrays[level]);   
+}

@@ -186,7 +186,6 @@ void ARegion::SetupPop()
 
 		return;
 	}
-cout << "! ";
 	// Only select race here if it hasn't been set during Race Growth
 	// in the World Creation process.
 	if ((race == -1) || (!Globals->GROW_RACES)) {
@@ -203,7 +202,6 @@ cout << "! ";
 				race = typer->races[n];
 		}
 	}
-cout << "? ";
 	if(Globals->PLAYER_ECONOMY) {
 		if(Globals->RANDOM_ECONOMY)	habitat = habitat * 2/3 + getrandom(habitat/3);
 		ManType *mt = FindRace(ItemDefs[race].abr);
@@ -224,7 +222,6 @@ cout << "? ";
 		}
 		basepopulation = population;
 	}
-cout << "< ";
 	// Setup wages
 	if(Globals->PLAYER_ECONOMY) {
 		int level = 1;
@@ -248,7 +245,6 @@ cout << "< ";
 		wages = mw;
 		maxwages = mw;
 	}
-cout << "> ";
 	if(Globals->TOWNS_EXIST) {
 		int adjacent = 0;
 		int prob = Globals->TOWN_PROBABILITY;
@@ -1707,7 +1703,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	//
 	int activity = 0;
 	int amount = 0;
-	if (basepopulation) {
+	if (basepopulation || Population()) {
 		forlist(&products) {
 			Production *p = (Production *) elem;
 			if (ItemDefs[p->itemtype].type & IT_NORMAL &&
@@ -1753,22 +1749,24 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		//
 		
 		Production *p = products.GetProd(I_SILVER, -1);
-		if (IsStartingCity()) {
-			//
-			// Higher wages in the entry cities.
-			//			
-			p->amount = Wages() * Population() / Globals->POP_LEVEL;
-		} else {
-			p->amount = (Wages() * Population()) / (Globals->WORK_FRACTION * Globals->POP_LEVEL);
+        if(p) {
+    		if (IsStartingCity()) {
+    			//
+    			// Higher wages in the entry cities.
+    			//			
+    			p->amount = Wages() * Population() / Globals->POP_LEVEL;
+    		} else {
+    			p->amount = (Wages() * Population()) / (Globals->WORK_FRACTION * Globals->POP_LEVEL);
+    		}
+    		p->productivity = Wages();
 		}
-		p->productivity = Wages();
 
 		//
 		// Entertainment.
 		//
 		p = products.GetProd(I_SILVER, S_ENTERTAINMENT);
-		p->baseamount = money / Globals->ENTERTAIN_FRACTION;
-
+		if(p) p->baseamount = money / Globals->ENTERTAIN_FRACTION;
+		
 		markets.PostTurn(Population(), Wages(), race);
 	}
 
@@ -1777,8 +1775,11 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	//
 	// Set these guys to 0.
 	//
+	//BS: Why? There's no need anymore, and it makes report-writing harder.
+	/*
 	earthlore = 0;
 	clearskies = 0;
+*/
 
 	forlist(&objects) {
 		Object *o = (Object *) elem;

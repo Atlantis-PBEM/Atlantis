@@ -232,7 +232,7 @@ void Battle::UpdateShields(Army *a, Army *enemy)
 				Shield *sh = new Shield;
 				sh->shieldtype = spd->shield[shtype];
 				sh->shieldskill = pSold->slevel;
-				if(Globals->ARCADIA_MAGIC) sh->shieldskill++; //+1 bonus to shield strength
+				if(Globals->ARCADIA_MAGIC && sh->shieldtype != ATTACK_RANGED) sh->shieldskill++; //+1 bonus to shield strength
 				sh->pCaster = pSold;
 				a->shields.Add(sh);
 			}

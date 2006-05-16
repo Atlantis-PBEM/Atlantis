@@ -238,7 +238,8 @@ class Unit : public AListElem
 		int CanSwim();
 		int CanReallySwim();
 		int TryToSwim();
-		int CanDolphinRide();
+		int CanSeaFly();
+		int CanSeaRide();
 		int MoveType(ARegion *regionto = NULL);
 		int CalcMovePoints(ARegion *reg);
 		int CanMoveTo(ARegion *,ARegion *);
@@ -316,6 +317,7 @@ class Unit : public AListElem
 		int numquartermastered;
 		
 		int crossbridge; //Used in combat code to see if a unit needs to cross a bridge to get to a combat. Set to zero in Game::GetSides.
+		int movementmalus;
 		int marker; //use wherever, clear before using.
 		void CrossHexside(ARegion *from, ARegion *to);
 
@@ -324,7 +326,7 @@ class Unit : public AListElem
         int GetSharedNum(int, int);
 		int ConsumeShared(int,int);
 		int GetSharedMoney();
-		int GetSharedMoney(int);
+		int GetSharedMoney(int);  //returns 1 if the unit has access to at least the specified money
 		int ConsumeSharedMoney(int);
         
 		/* Orders */
@@ -362,6 +364,8 @@ class Unit : public AListElem
 		int presentTaxing;
 		AList transportorders;
 		Unit *former;
+		
+		AList gavemento; //list of unitid's.
 };
 
 #endif

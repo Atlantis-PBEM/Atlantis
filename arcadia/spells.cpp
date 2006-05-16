@@ -309,9 +309,12 @@ void Game::ProcessUnitsSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck,
     
     forlist(&u->castlistorders) {
         CastOrder *ord = (CastOrder *) elem;
-        if(ord->spell == spell) order = (CastUnitsOrder *) ord;
-        if(order->quiet & !isquiet) order->quiet = isquiet; //if earlier line wasn't quiet, don't make it quiet now
+        if(ord->spell == spell) {
+            order = (CastUnitsOrder *) ord;
+            if(order->quiet && !isquiet) order->quiet = isquiet; //if earlier line wasn't quiet, don't make it quiet now
+        }
     }
+
     if(!order) {
         order = new CastUnitsOrder;
         order->spell = spell;
@@ -1765,7 +1768,6 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 //	int found;
 
 	CastOrder *order = u->activecastorder;
-
 	int cost = u->GetCastCost(S_ENCHANT_SWORDS,order->extracost,max);
 	while(u->energy < cost) {
         cost = u->GetCastCost(S_ENCHANT_SWORDS,order->extracost,--max);
@@ -2154,7 +2156,6 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
         
 	    int cost = u->GetCastCost(skill,order->extracost,1);  //cost to make one if num = 1, or level otherwise.
 	    if(num > 1) cost = (cost + level - 1) / level;        //cost to make one. Final cost is recalculated below to account for rounding.
-	    
 		if(cost > u->energy) {
 		    u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
 		    return 0;
@@ -2177,13 +2178,13 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 		    cost = u->GetCastCost(skill,order->extracost,num);  //cost to make num*level
 		    cost = (cost + level - 1) / level;                  //cost to make num.
 		    if( cost > u->energy) {
-                num = (num*u->energy*level)/cost;               //reduce num if we don't have the energy.
+                num = (num*u->energy)/cost;               //reduce num if we don't have the energy.
 		        cost = u->GetCastCost(skill, order->extracost, num);
 		        cost = (cost + level - 1) / level;                  //cost to make num.
             }
 		}
         u->energy -= cost;
-        
+
         int exper = (20*num + max - 1)/ max;
         if(exper > 10) exper = 10;
         
@@ -3291,7 +3292,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	int maxweight = 10;
 	if (order->gate != -1) level -= 2; //subtract two levels if targetting a particular gate
 	if(Globals->ARCADIA_MAGIC) {
-	    maxweight = (18*u->GetEnergy()*u->GetEnergy())/(u->GetCastCost(S_GATE_LORE,order->extracost,1));
+	    maxweight = (18*u->GetEnergy())/(u->GetCastCost(S_GATE_LORE,order->extracost,1));
 	    maxweight *= level*level;   //can carry 3*level^2 weight per energy.
 	} else {
     	switch (level) {
@@ -4347,7 +4348,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
             u->Error("CAST: Cannot create that item.", order->quiet);
             return 0;
         }
-	    ratio = 4;
+	    ratio = 2;
 	}
 	
 	if(fromitem<0) {
@@ -4388,11 +4389,12 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	if(num > 4*level*level) num = 4*level*level; // max items to transmute
 	num /= ratio; // advanced items produce half as many.
  	
- 	int cost = u->GetCastCost(S_TRANSMUTATION,order->extracost, ratio); // cost of 8 items transmuted
+ 	int cost = u->GetCastCost(S_TRANSMUTATION,order->extracost, ratio*ratio); // cost of 8 items transmuted
 	// ratio: advanced resources cost 4 times more energy!
 	// but only 3 times more resources!
-	if(ratio == 4) ratio = 3;
+	if(ratio == 2) ratio = 3;
 
+	if(u->energy < 0) u->energy = 0; //status check to prevent silly negatives.
 	if(num > (8 * u->energy) / cost) num = (8 * u->energy) / cost;
 	if(!num) {
         u->Error("CAST: Not enough energy to cast that spell.", order->quiet);
@@ -4452,7 +4454,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 
     if(!noinput) u->ConsumeShared(fromitem, num*ratio);
 	if(!nooutput) u->items.SetNum(toitem,u->items.GetNum(toitem) + num);
-    
+
     if(!noinput && !nooutput) u->Event(AString("Transmutes ") + num*ratio + " " + ItemDefs[fromitem].names
       + " to " + num + " " + ItemDefs[toitem].names); //should rewrite this using the itemstring function.
       
@@ -5039,6 +5041,7 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
 	int num = 0;
 	int mageerror = 0;
 	int numberserror = 0;
+	int emptyerror = 0;
 	forlist (&(order->units)) {
 //cout << "Move is: " << O_MOVE << "Hypno is: " << order->monthorder->type << endl;
 
@@ -5046,68 +5049,79 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
 		if (!tar) continue;
 		if (tar->faction != u->faction) {
     		if (!tar->IsMage()) {
-        		if (tar->GetMen() && (num + tar->GetMen()) <= max) {
-                    num += tar->GetMen();
-                    delete tar->monthorders;
-                    tar->monthorders = 0;
-                    
-                    tar->taxing = order->taxing;
-                    
-                    if(order->monthorder) {
-                        //not using a switch as have to initialise orders in here - else becomes a nightmare :(.
-                        if(order->monthorder->type == O_PRODUCE) {
-                            //this includes "WORK" orders
-                                ProduceOrder *p = new ProduceOrder;
-                                p->item = ((ProduceOrder *) order->monthorder)->item;
-                                p->skill = ((ProduceOrder *) order->monthorder)->skill;
-                                tar->monthorders = p;
-                        } else if(order->monthorder->type == O_SAIL) {
-                                SailOrder *m = new SailOrder;
-                                forlist(&((SailOrder *) order->monthorder)->dirs) {
-                                    MoveDir *old = (MoveDir *) elem;
-                                    MoveDir *toadd = new MoveDir;
-                                    toadd->dir = old->dir;
-                                    m->dirs.Add(toadd);
-                                }
-                                tar->monthorders = m;
-                        } else if(order->monthorder->type == O_MOVE || order->monthorder->type == O_ADVANCE) {
-                                MoveOrder *m = new MoveOrder;
-                                m->advancing = ((MoveOrder *) order->monthorder)->advancing;
-                                m->type = ((MoveOrder *) order->monthorder)->type;
-//cout << "Directions ";                                
-                                forlist(&((MoveOrder *) order->monthorder)->dirs) {
-//cout << "in list ";
-                                    MoveDir *old = (MoveDir *) elem;
-                                    MoveDir *toadd = new MoveDir;
-//cout << old->dir << " ";
-                                    toadd->dir = old->dir;
-                                    m->dirs.Add(toadd);
-                                }
-//cout << endl;
-                                tar->monthorders = m;
-                        } else if(order->monthorder->type == O_STUDY) {
-                                StudyOrder *m = new StudyOrder;
-                                m->skill = ((StudyOrder *) order->monthorder)->skill;
-                                m->days = 0;
-                                m->level = 0;
-                                tar->monthorders = m;
-                        } else {
-                               u->Error("Something went wrong with the HYPNOSIS order. Please contact your GM.");
-                               if(tar->taxing = TAX_NONE) {
-                                   ProduceOrder *p = new ProduceOrder;
-                                   p->item = I_SILVER;
-                                   p->skill = -1;
-                                   tar->monthorders = p;
-                                   u->Error("PS: Hypnosis defaulted to 'WORK'.");
-                               }
+        		if (tar->GetMen()) {
+                    if( (num + tar->GetMen()) <= max) {
+                        num += tar->GetMen();
+                        delete tar->monthorders;
+                        tar->monthorders = 0;
+                        
+                        tar->taxing = order->taxing;
+                        
+                        if(order->monthorder) {
+                            //not using a switch as have to initialise orders in here - else becomes a nightmare :(.
+                            if(order->monthorder->type == O_PRODUCE) {
+                                //this includes "WORK" orders
+                                    ProduceOrder *p = new ProduceOrder;
+                                    p->item = ((ProduceOrder *) order->monthorder)->item;
+                                    p->skill = ((ProduceOrder *) order->monthorder)->skill;
+                                    tar->monthorders = p;
+                            } else if(order->monthorder->type == O_SAIL) {
+                                    SailOrder *m = new SailOrder;
+                                    forlist(&((SailOrder *) order->monthorder)->dirs) {
+                                        MoveDir *old = (MoveDir *) elem;
+                                        MoveDir *toadd = new MoveDir;
+                                        toadd->dir = old->dir;
+                                        m->dirs.Add(toadd);
+                                    }
+                                    tar->monthorders = m;
+                            } else if(order->monthorder->type == O_MOVE || order->monthorder->type == O_ADVANCE) {
+                                    MoveOrder *m = new MoveOrder;
+                                    m->advancing = ((MoveOrder *) order->monthorder)->advancing;
+                                    m->type = ((MoveOrder *) order->monthorder)->type;
+    //cout << "Directions ";                                
+                                    forlist(&((MoveOrder *) order->monthorder)->dirs) {
+    //cout << "in list ";
+                                        MoveDir *old = (MoveDir *) elem;
+                                        MoveDir *toadd = new MoveDir;
+    //cout << old->dir << " ";
+                                        toadd->dir = old->dir;
+                                        m->dirs.Add(toadd);
+                                    }
+    //cout << endl;
+                                    tar->monthorders = m;
+                            } else if(order->monthorder->type == O_STUDY) {
+                                    StudyOrder *m = new StudyOrder;
+                                    m->skill = ((StudyOrder *) order->monthorder)->skill;
+                                    m->days = 0;
+                                    m->level = 0;
+                                    tar->monthorders = m;
+                            } else {
+                                   u->Error("Something went wrong with the HYPNOSIS order. Please contact your GM.");
+                                   if(tar->taxing == TAX_NONE) {
+                                       ProduceOrder *p = new ProduceOrder;
+                                       p->item = I_SILVER;
+                                       p->skill = -1;
+                                       tar->monthorders = p;
+                                       u->Error("PS: Hypnosis defaulted to 'WORK'.");
+                                   }
+                            }
                         }
+                       
+    //                    tar->monthorders = order->monthorder;        //this isn't going to work for unit #2! Need to clone it.
+    
+                        tar->Event(AString("Is hypnotised by ") + *(u->name) + ".");
+                        u->Event(AString("Hypnotises ") + *(tar->name) + ".");
+                    } else numberserror = 1;
+                } else {
+                    emptyerror = 1;
+                    forlist(&tar->gavemento) {
+                		UnitId *id = new UnitId;
+                		id->unitnum = ((UnitId *) elem)->unitnum;
+                		id->alias = 0;
+                		id->faction = ((UnitId *) elem)->faction;
+                		order->units.Add(id);
                     }
-                   
-//                    tar->monthorders = order->monthorder;        //this isn't going to work for unit #2! Need to clone it.
-
-                    tar->Event(AString("Is hypnotised by ") + *(u->name) + ".");
-                    u->Event(AString("Hypnotises ") + *(tar->name) + ".");
-                } else numberserror = 1;
+                }
             } else mageerror = 1;
         }
 	}
@@ -5126,7 +5140,9 @@ int Game::RunHypnosis(ARegion *r, Unit *u)
 		return 0;	        
 	    }
 	} 
-	
+	if(emptyerror) {
+	    u->Error("CAST: Trying to hypnotise an empty unit", order->quiet);
+	} 
 
 
 	cost = cost * num / (10 * level);

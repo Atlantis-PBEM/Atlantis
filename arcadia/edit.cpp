@@ -1883,7 +1883,7 @@ void Game::EditGameCreateUnit()
 {
     Faction *fac = GetFaction(&factions, 1);
     Unit *newunit = GetNewUnit(fac);
-    newunit->SetMen(I_LEADERS, 1);
+    if(!(ItemDefs[I_LEADERS].flags & ItemType::DISABLED)) newunit->SetMen(I_LEADERS, 1);
     newunit->reveal = REVEAL_FACTION;
     newunit->MoveUnit(((ARegion *) regions.First())->GetDummy());
 

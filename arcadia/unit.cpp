@@ -101,6 +101,7 @@ Unit::Unit()
 	numtraded = 0;
 	nummerchanted = 0;
 	numquartermastered = 0;
+	movementmalus = 0;
 	ClearOrders();
 }
 
@@ -151,6 +152,7 @@ Unit::Unit(int seq, Faction *f, int a)
 	numtraded = 0;
 	nummerchanted = 0;
 	numquartermastered = 0;
+	movementmalus = 0;
 	ClearOrders();
 }
 
@@ -1865,13 +1867,24 @@ int Unit::TryToSwim()
 			    while(tries-- > 0) {
 				    int maxweight = 0;
 				    int type = -1;
-				    //pick the heaviest item to discard first
+				    //pick the heaviest item to discard first. Ignore men
 				    forlist(&items) {
 		                Item *i = (Item *) elem;
+		                if((ItemDefs[i->type].type & IT_MAN)) continue;
 		                if((ItemDefs[i->type].weight - ItemDefs[i->type].swim) > maxweight) {
                             maxweight = ItemDefs[i->type].weight - ItemDefs[i->type].swim;
                             type = i->type;
                         }
+	                }
+	                if(type == -1) {
+	                //only men left
+    				    forlist(&items) {
+    		                Item *i = (Item *) elem;
+    		                if((ItemDefs[i->type].weight - ItemDefs[i->type].swim) > maxweight) {
+                                maxweight = ItemDefs[i->type].weight - ItemDefs[i->type].swim;
+                                type = i->type;
+                            }
+    	                }
 	                }
 	                if(type < 0) break;
 				    int tolose = (items.Weight() - SwimmingCapacity() + maxweight - 1)/maxweight; //this is the number of our heaviest item we need to discard (need to round up).
@@ -1902,13 +1915,40 @@ int Unit::TryToSwim()
 	return 0;
 }
 
-int Unit::CanDolphinRide()
+int Unit::CanSeaFly()
 {
     //this is a specific alternative to introducing a fifth movement class 'riding-at-sea'
 	int cap = 0;
+	forlist(&items) {
+		Item *i = (Item *) elem;
+		//if an item can both ride and swim, we assume it can ride at sea.
+		int seaflying = ItemDefs[i->type].swim;
+		if(ItemDefs[i->type].fly < seaflying) seaflying = ItemDefs[i->type].ride;
+		if(seaflying > 0) cap += seaflying * i->num;
+	}
+/*	
 	cap = ItemDefs[I_DOLPHIN].swim * items.GetNum(I_DOLPHIN);
+*/
 	if(cap >= items.Weight()) return 1;
-	
+	return 0;
+}
+
+int Unit::CanSeaRide()
+{
+    //this is a specific alternative to introducing a fifth movement class 'riding-at-sea'
+	int cap = 0;
+	forlist(&items) {
+		Item *i = (Item *) elem;
+		//if an item can both ride and swim, we assume it can ride at sea.
+		//if a mount can swim, we assume it can ride at sea
+		int seariding = ItemDefs[i->type].swim;
+		if(ItemDefs[i->type].ride < seariding && !(ItemDefs[i->type].type & IT_MOUNT)) seariding = ItemDefs[i->type].ride;
+		if(seariding > 0) cap += seariding * i->num;
+	}
+/*	
+	cap = ItemDefs[I_DOLPHIN].swim * items.GetNum(I_DOLPHIN);
+*/
+	if(cap >= items.Weight()) return 1;
 	return 0;
 }
 
@@ -1924,13 +1964,28 @@ int Unit::MoveType(ARegion *regionto)
         if((Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) && this->CanFly()) return M_FLY;
         
 		if(CanReallySwim()) {
-		    if(CanDolphinRide()) return M_RIDE;
+		    if(CanSeaFly()) return M_FLY;
+		    if(CanSeaRide()) return M_RIDE;
             return M_WALK;
         }
 		else return M_NONE;
 	}
 		
 	int weight = items.Weight();
+	//do fake terrain for ARCADIAN_CHECKER patch.
+	if((regionto && TerrainDefs[regionto->type].similar_type == R_FAKE) || 
+        TerrainDefs[object->region->type].similar_type == R_FAKE) {
+        //we're going between two fake regions or a fake and a land region.
+    	if (CanFly(weight)) return M_FLY;
+    	if (CanRide(weight)) return M_RIDE;
+		if (CanReallySwim()) {
+		    if(CanSeaFly()) return M_FLY;
+		    if(CanSeaRide()) return M_RIDE;
+            return M_WALK;
+        }
+    	if (CanWalk(weight)) return M_WALK;
+    }
+
 	if (CanFly(weight)) return M_FLY;
 	if (CanRide(weight)) return M_RIDE;
 	if (CanWalk(weight)) return M_WALK;
@@ -2601,6 +2656,7 @@ int Unit::GetAttribute(char *attrib)
 	int bonus = 0;
 	int monbase = -1;
 	int monbonus = 0;
+	
 	if (ap->flags & AttribModType::CHECK_MONSTERS) {
 		forlist (&items) {
 			Item *i = (Item *) elem;
@@ -2621,12 +2677,15 @@ int Unit::GetAttribute(char *attrib)
 			}
 		}
 	}
+	
 	for(int index = 0; index < 6; index++) {  //BS mod 5 to 6 to expand stealth.
 		int val = 0;
+		int valuestored = 0;
 		if (ap->mods[index].flags & AttribModItem::SKILL) {
 			temp = ap->mods[index].ident;
 			int sk = LookupSkill(&temp);
 			val = GetRealSkill(sk);
+			valuestored = 1;
 			if(val > 0) {
     			if (ap->mods[index].modtype == AttribModItem::UNIT_LEVEL_HALF) {
     				val = ((val + 1)/2) * ap->mods[index].val;
@@ -2641,6 +2700,7 @@ int Unit::GetAttribute(char *attrib)
 			temp = ap->mods[index].ident;
 			int item = LookupItem(&temp);
 			if (item != -1) {
+			    valuestored = 1;
 				if (ap->mods[index].flags & AttribModItem::PERMAN) {
 					int men = GetMen();
 					if (men <= items.GetNum(item))
@@ -2652,16 +2712,22 @@ int Unit::GetAttribute(char *attrib)
 			}
 		} else if (ap->mods[index].flags & AttribModItem::FLAGGED) {
 			temp = ap->mods[index].ident;
-			if (temp == "invis")
-				val = (GetFlag(FLAG_INVIS) ? ap->mods[index].val : 0);
-			if (temp == "guard")
-				val = (guard == GUARD_GUARD ? ap->mods[index].val : 0);
-			if (temp == "visib")
-				val = (GetFlag(FLAG_VISIB) ? ap->mods[index].val : 0);
+			if (temp == "invis" && GetFlag(FLAG_INVIS)) {
+				val = ap->mods[index].val;
+			    valuestored = 1;
+			}
+			if (temp == "visib" && GetFlag(FLAG_VISIB)) {
+				val = ap->mods[index].val;
+			    valuestored = 1;
+			}
+			if (temp == "guard" && guard == GUARD_GUARD) {
+				val = ap->mods[index].val;
+			    valuestored = 1;
+			}
 		}
 		if (ap->mods[index].flags & AttribModItem::NOT)
 			val = ((val == 0) ? ap->mods[index].val : 0);
-		if (val && ap->mods[index].modtype == AttribModItem::FORCECONSTANT)
+		if (valuestored && ap->mods[index].modtype == AttribModItem::FORCECONSTANT)
 			return val;
 		// Only flags can add to monster bonuses
 		if (ap->mods[index].flags & AttribModItem::FLAGGED) {
@@ -2958,7 +3024,7 @@ int Unit::GetSharedMoney()
 
 int Unit::GetSharedMoney(int quantity)
 {
-	return GetSharedNum(I_SILVER);
+	return (GetSharedNum(I_SILVER) >= quantity);
 }
 
 int Unit::ConsumeSharedMoney(int n)

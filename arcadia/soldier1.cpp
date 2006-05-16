@@ -72,6 +72,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	slevel = 0;
 
 	int def = - (u->crossbridge); //crossing bridges/walls mod - penalty of 1 usually. Set to zero for others. (Hexside Terrain).
+	if(u->movementmalus > u->crossbridge) def = - (u->movementmalus);   //crossbridge comes from aiding. movementmalus comes from just moving across a bridge. Don't get double penalty if moved across a bridge and aiding across a second bridge.
+	
 	if(TerrainDefs[regtype].similar_type == R_OCEAN) def += ObjectDefs[o->type].oceanbonus;
 
 
@@ -339,11 +341,11 @@ cout << "$";
 	    int gain = unit->GetSkill(S_BASE_BATTLETRAINING);
     	askill += gain;
     	dskill[ATTACK_COMBAT] += gain;
-    	dskill[ATTACK_ENERGY] += gain;
-    	dskill[ATTACK_SPIRIT] += gain;
-    	dskill[ATTACK_WEATHER] += gain;
+    	dskill[ATTACK_ENERGY] += (gain+1)/2;
+    	dskill[ATTACK_SPIRIT] += (gain+1)/2;
+    	dskill[ATTACK_WEATHER] += (gain+1)/2;
     	dskill[ATTACK_RIDING] += gain;
-    	dskill[ATTACK_RANGED] += gain;
+    	dskill[ATTACK_RANGED] += (gain+1)/2;     //TODO: Update description
 	}
 	
 	
@@ -372,7 +374,7 @@ cout << "$";
 
 Soldier::~Soldier()
 {
-    #ifdef DEBUG
+    #ifdef DEBUG2
     Awrite("Soldier Destructor");
     #endif
 }
@@ -523,7 +525,7 @@ void Soldier::RestoreItems()
 			unit->items.SetNum(item, unit->items.GetNum(item) + 1);
 		}
 	}
-}
+} 
 
 void Soldier::Alive(int state)
 {
@@ -658,19 +660,20 @@ int Soldier::DoSpellCost(int round, Battle *b)
 //returns 1 if can cast the spell, 0 if cannot.
 {
     if(!Globals->ARCADIA_MAGIC) return 1;
-    
+
     //staff of yew coding
     if (weapon != -1 && (ItemDefs[weapon].type & IT_BATTLE)) {
+
 		BattleItemType *pBat = FindBattleItem(ItemDefs[weapon].abr);
-		if(pBat->flags & BattleItemType::ENERGY) {
+
+		if(pBat && (pBat->flags & BattleItemType::ENERGY)) {
         //can cast, energy cost of zero.
             int exper = 8 - round; //7, 6, then 5, then 4 ... sum of 27 in 6 rounds, then 1 per round.
 	        if(exper < 1) exper = 1;
-            unit->Experience(unit->combat, exper, 0);
+            if(unit->combat != -1) unit->Experience(unit->combat, exper, 0);
             return 1;
 		}
 	}
-
 
 	if(!exhausted && unit->type == U_MAGE && unit->combat != -1) {
 	    int cost;
@@ -697,7 +700,6 @@ int Soldier::DoSpellCost(int round, Battle *b)
 	} else if(exhausted && unit->type == U_MAGE && unit->combat != -1 && slevel) {
 	    unit->energy -= unit->GetEnergy(); //just in case wasn't set to zero earlier, eg in dospellcheck
 	}
-	
 	int mevent = unit->MysticEvent();
 	switch(mevent) {
 	    case 4:

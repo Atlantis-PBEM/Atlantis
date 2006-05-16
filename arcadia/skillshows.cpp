@@ -380,8 +380,10 @@ AString *ShowSkill::Report(Faction *f)
 					"level containing a gate, selected at random. To use "
 					"Gate Lore in this manner, use the syntax CAST Gate_Lore "
 					"RANDOM UNITS <unit> ... UNITS is followed by a list "
-					"of units to follow the mage through the Gate (the mage "
-					"always jumps through the Gate). If only the mage wishes "
+					"of units to follow the mage through the Gate. The mage "
+					"always jumps through the Gate, it is not possible to send "
+                    "units without the mage jumping with them. "
+                    "If only the mage wishes "
                     "to jump, then the syntax CAST Gate_Lore RANDOM is "
                     "sufficient. ";
                 if(!Globals->ARCADIA_MAGIC) {
@@ -745,8 +747,13 @@ AString *ShowSkill::Report(Faction *f)
     	            }
     	            if(found>1) *str += AString("or ") + temp;
     	            else *str += temp;
-    	            *str += ", to travel 20% times his skill level faster (rounded down), "
-                           "and the ship will not be slowed by winter or monsoons.";
+    	            *str += ". This spell has two effects: the ship will not be slowed "
+                           "by bad weather (winter, monsoons";
+                    if(!(SkillDefs[S_BLIZZARD].flags & SkillType::DISABLED)) {
+                        *str += " or blizzards";
+                    }
+                    *str += "), and will also travel 20% times his skill level faster "
+                           "than the normal good weather speed (rounded down, but with a minimum of +1 speed).";
     	            *str += AString(" However, the act of speeding the ship ") +
                            EnergyString(skill,1,6,1) + 
                            " If the mage does not have this much energy, the ship "
@@ -772,7 +779,7 @@ AString *ShowSkill::Report(Faction *f)
     	            if(found>1) *str += AString("or ") + temp;
     	            else *str += temp;
     				*str += AString(", to travel 20% times his skill level faster, "
-                           "without delay by winter or monsoons. This spell ") + 
+                           "without delay by bad weather. This spell ") + 
     				       EnergyString(skill,2,6,2);
     			} else if (level == 3) {
     				*str += "With level 3 Summon Wind, a mage may speed the passage "
@@ -792,7 +799,7 @@ AString *ShowSkill::Report(Faction *f)
     	            if(found>1) *str += AString("or ") + temp;
     	            else *str += temp;
     				*str += AString(", to travel 20% times his skill level faster, "
-                           "without delay by winter or monsoons. This spell ") + 
+                           "without delay by bad weather. This spell ") + 
     				       EnergyString(skill,2,6,3);
     			}
     			break;
@@ -837,9 +844,14 @@ AString *ShowSkill::Report(Faction *f)
     					"region to have good weather for the entire month; "
     					"movement is at the normal rate (even if it is winter) "
     					"and the economic and food production of the region is improved "
-    					"for a month (this improvement of the economy will "
-    					"actually take effect during the turn after the spell "
-    					"is cast).";
+    					"for a month. Note that the good weather will take effect during the turn "
+                        "in which the spell is cast, but the economy bonus will "
+    					"take effect during the turn after the spell "
+    					"is cast. Clear skies overwrites any other magical weather "
+                        "effects";
+                    if(!(SkillDefs[S_BLIZZARD].flags & SkillType::DISABLED)) {
+                        *str += ", such as blizzards.";
+                    } else *str += ".";
    					if(Globals->ARCADIA_MAGIC) {
                         *str += " In addition, this spell counteracts the effects "
                             "of fog both in battle and when CAST on the same region, "
@@ -1960,7 +1972,13 @@ AString *ShowSkill::Report(Faction *f)
     			*str += AString("A mage with the Blizzard skill may cast blizzards on distant regions. "
                         "The blizzard will make movement into the region take ten times as "
                         "many movement points as normal, effectively preventing movement into "
-                        "the region in almost all cases. This spell ") + EnergyString(skill,1,6,1);
+                        "the region in almost all cases. ");
+                if(!(SkillDefs[S_CLEAR_SKIES].flags & SkillType::DISABLED)) {
+                    *str += AString(" This spell is overwritten by the spell ") +
+                    SkillDefs[S_CLEAR_SKIES].name + ", that is, if both are cast "
+                    "on the same region, blizzard will have no effect. ";
+                }
+                *str += AString("This spell ") + EnergyString(skill,1,6,1);
     			range = FindRange(SkillDefs[skill].range);
     			if(range) {
     				if(range->flags & RangeType::RNG_SURFACE_ONLY) {

@@ -132,6 +132,7 @@ ARegion::ARegion()
 	fog = 0;
 	flagpole = FL_NULL;
 	timesmarker = 0;
+	dynamicexits = 0;
 	for (int i=0; i<NDIRS; i++)
 		neighbors[i] = 0;
 	for (int i=0; i<NDIRS; i++)
@@ -285,15 +286,15 @@ void ARegion::Setup()
 	//
 	// type and location have been setup, do everything else
 	SetupProds();
-
+cout << ".";
 	SetupPop();
-	
+cout << ".";
 	//
 	// Make the dummy object
 	//
 	Object *obj = new Object(this);
 	objects.Add(obj);
-
+cout << ".";
 	if(Globals->LAIR_MONSTERS_EXIST)
 		LairCheck();
 }
@@ -1179,8 +1180,11 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 					return 1;
 				if(u->GetSkill(S_BASE_CHARISMA) && Population()) {   //hardcoded charisma effect
 				    int charis = u->GetSkill(S_BASE_CHARISMA);
-				    while(--charis) {
-				        if(getrandom(2)) return 1;
+				    while(charis--) {
+				        if(getrandom(2)) {
+				            u->Event(AString("Learns about the presence of ") + ItemDefs[item].name + " in the local region.");
+                            return 1;
+                        }
 				    }
 				}
 			}
@@ -1793,7 +1797,7 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 	int cost = 1;
 	if(Globals->WEATHER_EXISTS) {
 		cost = 2;
-		if (weather == W_BLIZZARD) return 10;
+		if (weather == W_BLIZZARD && !clearskies) return 10;
 		if (weather == W_NORMAL || clearskies) cost = 1;
 	}
 	if (movetype != M_FLY) { //ie walk, ride, swim* or none   *: don't think swim gets sent here

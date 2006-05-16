@@ -222,11 +222,13 @@ void Formation::TransferSoldier(int soldiernum, Formation * pToForm)
 //Transfer a soldier from this formation to another. This preserves the
 //canattack status of the soldier.
 {
+    int canatt = 0;
+    if(soldiernum < canattack) canatt = 1;
     //Remove soldier from this formation
     Soldier * emmigrant = RemoveSoldier(soldiernum);
     //Add soldier to new formation
     //Check if the soldier canattack or not.
-    if(soldiernum <= canattack) pToForm->AddCanAttackSoldier(emmigrant); 
+    if(canatt) pToForm->AddCanAttackSoldier(emmigrant); 
     //remember than canattack just got decreased by 1, hence the '<=' above.
     else pToForm->AddSoldier(emmigrant);
 }

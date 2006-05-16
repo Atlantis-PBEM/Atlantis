@@ -277,7 +277,7 @@ int AString::getexclamation()
 	while (place < len && (str[place] == ' ' || str[place] == '\t'))
 		place++;
 	if (place >= len) return 0;
-	if (str[place] == '@') {
+	if (str[place] == '!') {
 		str[place] = ' ';
 		return 1;
 	}

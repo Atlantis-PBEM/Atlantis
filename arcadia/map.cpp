@@ -1516,7 +1516,6 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 		for(y = 0; y < pArr->y; y++) {
 			ARegion *reg = pArr->GetRegion(x, y);
 			if(!reg) continue;
-
 			if ((TerrainDefs[reg->type].similar_type == R_OCEAN) &&
 					(reg->type != R_LAKE)) {
 				if(pArr->levelType == ARegionArray::LEVEL_UNDERWORLD)
@@ -1529,14 +1528,22 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 					reg->SetName(ocean_name.Str());
 				}
 			} else {
-				if (reg->wages == -1) reg->SetName("Unnamed");
+			    if(pArr->levelType == ARegionArray::LEVEL_QUEST) {}//reg->SetName((*pArr->strName).Str());
+				else if (reg->wages == -1) reg->SetName("Unnamed");
 				else if(reg->wages != -2)
 					reg->SetName(AGetNameString(reg->wages));
 				else
 					reg->wages = -1;
 			}
-
-			reg->Setup();
+			if(pArr->levelType != ARegionArray::LEVEL_QUEST) reg->Setup();
+			else {  //This bit shouldn't really be here, move somewhere appropriate
+			    reg->race = -1;
+			    reg->population = 0;
+		        reg->basepopulation = 0;
+		        reg->wages = 0;
+		        reg->maxwages = 0;
+		        reg->money = 0;
+            }
 		}
 	}
 }

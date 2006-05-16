@@ -267,7 +267,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 											add = ADD_DEFENSE;
 										}
 									}
-								}
+								} 
 							}
 						}
 					}
@@ -401,16 +401,25 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 
 	result = b->Run(r,attacker,&atts,target,&defs,ass, &regions );
 	/* Remove all dead units */
+#ifdef DEBUG
+Awrite("Killing attackers");
+#endif
 	{
 		forlist(&atts) {
 			KillDead((Location *) elem);
 		}
 	}
+#ifdef DEBUG
+Awrite("Killing defenders");
+#endif
 	{
 		forlist(&defs) {
 			KillDead((Location *) elem);
 		}
 	}
+#ifdef DEBUG
+Awrite("Battle all run");
+#endif
 	return result;
 }
 
@@ -527,7 +536,10 @@ Awrite("battles 5");
         delete spoils;
         //soldiers seem to have already been deleted in win/lose/tie methods
         delete armies[0];      
-        delete armies[1];         
+        delete armies[1];
+#ifdef DEBUG		
+Awrite("returning loss");
+#endif
         return BATTLE_LOST;
     }
 
@@ -570,6 +582,9 @@ Awrite("battles 7");
         delete spoils;
         delete armies[0];
         delete armies[1];
+#ifdef DEBUG		
+Awrite("returning won");
+#endif
         return BATTLE_WON;
     }
 #ifdef DEBUG		
@@ -592,6 +607,9 @@ Awrite("battles 8.5");
 Awrite("battles 9");
 #endif
     delete armies[1];
+#ifdef DEBUG		
+Awrite("returning draw");
+#endif
     return BATTLE_DRAW;
 }
 
@@ -634,6 +652,9 @@ Awrite("Doing attacks");
         balive = armyb->NumAlive();
         aatt = armya->CanAttack();
         batt = armyb->CanAttack();
+#ifdef DEBUG
+AddLine(AString("Attacks left: ") + aatt + " - " + batt);
+#endif
     }
 #ifdef DEBUG
 Awrite("Done attacks");

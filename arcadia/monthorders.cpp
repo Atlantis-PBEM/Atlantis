@@ -119,7 +119,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
         if(ObjectDefs[ship->type].capacity > 499) shipclass++;
         if(ObjectDefs[ship->type].capacity > 1200) shipclass++;
 
-		//check weight onboard (need to do this every move, because someone might get on with a moveenter command)
+		//check weight onboard (need to do this every move, because someone might get on with a moveenter command). Also check SWIN mages
     	forlist(&ship->units) {
     		Unit * unit = (Unit *) elem;
     		if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
@@ -142,6 +142,7 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
         	if(Globals->ARCADIA_MAGIC) {
         	    //summon_wind speed bonus for ARCADIA
             	ship->speedbonus = (windlevel*movepoints)/5;
+            	if (ship->speedbonus == 0) ship->speedbonus = 1; //minimum bonus of 1. If don't want this, must prevent casting, else will cast every ship move
             	if(windmage) {
                     windmage->energy -= windmage->GetCastCost(S_SUMMON_WIND, 1, shipclass);
                     windmage->Event("Casts Summon Wind to aid the ship's "
@@ -190,8 +191,8 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 					goto done_sailing;
 				}
 				if(Globals->WEATHER_EXISTS) {
-					if (newreg->weather != W_NORMAL && !windlevel && !newreg->clearskies) cost *= 2;
-					if (newreg->weather == W_BLIZZARD && !windlevel && !newreg->clearskies) cost *= 5;
+					if (newreg->weather != W_NORMAL && !ship->speedbonus && !newreg->clearskies) cost *= 2;
+					if (newreg->weather == W_BLIZZARD && !ship->speedbonus && !newreg->clearskies) cost *= 5;
 				}
 
 				if (!(ObjectDefs[ship->type].flags & ObjectType::SAILOVERLAND) && !newreg->IsCoastal()) {
@@ -428,8 +429,8 @@ ARegion * Game::DoASailOrder(ARegion *reg, Object *ship, Unit *captain)
 			    }
 			    
 				if(Globals->WEATHER_EXISTS) {
-				    if (newreg->weather == W_BLIZZARD && !windlevel) cost = cost * 5;
-					else if (newreg->weather != W_NORMAL && !windlevel) cost = cost * 2;
+				    if (newreg->weather == W_BLIZZARD && !ship->speedbonus && !newreg->clearskies) cost = cost * 5;
+					else if (newreg->weather != W_NORMAL && !ship->speedbonus && !newreg->clearskies) cost = cost * 2;
 				}
 				if(newhexside != -1) cost = (cost+1)/2;  //ie half cost for moving to hexsides (rounded up).
 				
@@ -1000,7 +1001,7 @@ void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
     }
 	else if(o->terrain == H_BRIDGE) {
 	    //since bridge blockeffect = -1
-	    if(HexsideDefs[h->type].blockeffect != 1) {
+	    if(HexsideDefs[h->type].blockeffect != 1 && h->bridge <= 0) {   //allow finishing a bridge if partially completed then dive moved the river.
 	        u->Error("BUILD: Nothing to bridge.", quiet);
 	        delete u->monthorders;
 	        u->monthorders = 0;
@@ -1184,8 +1185,8 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	ProduceOrder * o = (ProduceOrder *) u->monthorders;
 
 	if (o->item == I_SILVER) {
-//		u->Error("Can't do that in this region.", o->quiet);
-u->Error(AString("Can't do that in this region. Error Code: ") + o->skill + " " + o->productivity, o->quiet);
+		u->Error("Can't do that in this region.", o->quiet);
+//u->Error(AString("Can't do that in this region. Error Code: ") + o->skill + " " + o->productivity, o->quiet);
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -1420,8 +1421,7 @@ void Game::RunAProduction(ARegion * r,Production * p)
 
 			amt -= ubucks;
 			attempted -= uatt;
-			u->items.SetNum(po->item,u->items.GetNum(po->item)
-							+ ubucks);
+			u->itemsintransit.SetNum(po->item, u->itemsintransit.GetNum(po->item) + ubucks);
 			p->activity += ubucks;
 
 			/* Show in unit's events section */
@@ -1633,6 +1633,20 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	}
 }
 
+void Game::ClearCombatMovementMaluses()
+{
+	forlist((&regions)) {
+		ARegion * region = (ARegion *) elem;
+		forlist((&region->objects)) {
+			Object * obj = (Object *) elem;
+			forlist(&obj->units) {
+				Unit * unit = (Unit *) elem;
+				unit->movementmalus = 0;
+			}
+		}
+	}
+}
+
 void Game::RunMoveOrders()
 {
 // This follow code is very messy. I don't recommend using it unless, like me,
@@ -1642,6 +1656,8 @@ void Game::RunMoveOrders()
 
 
 	for (int phase = 0; phase < Globals->MAX_SPEED; phase++) {
+
+	    ClearCombatMovementMaluses();
 
 		forlist((&regions)) {
 			ARegion * region = (ARegion *) elem;
@@ -1790,6 +1806,22 @@ void Game::SetupFollowers(int phase)
     			        } else {
                             tar = region->GetUnitId(o->targetid, unit->faction->num);
                             if(tar && !o->targetid->unitnum) o->targetid->unitnum = tar->num; //updates "NEW" targets so we can follow them beyond one hex.
+                            if(!tar && o->targetid && o->targetid->unitnum) {
+                                int done;
+                                do {
+                                    done = 0;
+                                    forlist(&region->hell) {
+                                        Unit *deadu = (Unit *) elem;
+                                        if(!done && deadu->num == o->targetid->unitnum) {
+                                            if(deadu->gavemento.First()) {
+                                                o->targetid->unitnum = ((UnitId *) deadu->gavemento.First())->unitnum;
+                                                done = 1;
+                                            }
+                                        }
+                                    }
+                                    if(done) tar = region->GetUnitId(o->targetid, unit->faction->num);
+                                } while(done && !tar);
+                            }
                         }
 /*                        if(tar && ObjectIsShip(tar->object->type) && tar->object != unit->object && (!tar->monthorders || (tar->monthorders->type != O_MOVE && tar->monthorders->type != O_ADVANCE && tar->monthorders->type != O_SAIL && tar->monthorders->type != O_FOLLOW))) {
                             //this target unit is not moving, but the ship he is on may be.
@@ -1834,9 +1866,9 @@ void Game::SetupFollowers(int phase)
                             //Ship captains try to follow their target by sailing not moving.
                             int iscaptain = 0;
                             if(unit->object->IsBoat() && unit->object->GetOwner() == unit) iscaptain = 1;
+                            int shouldadvance = 1;
                             if(!iscaptain && finaltar) {
                                 int shouldfollow = 1;
-                                int shouldadvance = 1;
                                 Object *to = finaltar->object;
                                 Unit *oldtar;
                                 tar = unit;
@@ -1874,7 +1906,8 @@ void Game::SetupFollowers(int phase)
                                     o->advancing = 0;
                                 } else if ( ((MoveOrder *)tar->monthorders)->dirs.Num()) {
                                     x = (MoveDir *) ((MoveOrder *)tar->monthorders)->dirs.First();
-                                    o->advancing = ((MoveOrder *)tar->monthorders)->advancing;
+                                    if(shouldadvance) o->advancing = ((MoveOrder *)tar->monthorders)->advancing;
+                                    else o->advancing = 0; //only advance after an ally.
                                 }
                                 if(x) {
                                     if(x->dir == MOVE_IN && unit->object != tar->object) {
@@ -1960,6 +1993,9 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 			while (forbid)
 			{
 				int result = RunBattle(region, unit, forbid, 0, 0);
+#ifdef DEBUG
+cout << "Returned to DoMoveEnter" << endl;
+#endif
 				if(result == BATTLE_IMPOSSIBLE) {
 					unit->Error(AString("ENTER: Unable to attack ")+
 							*(forbid->name), o->quiet);
@@ -1972,6 +2008,9 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 				}
 				forbid = to->ForbiddenBy(region, unit);
 			}
+#ifdef DEBUG
+cout << "Resolved forbidding" << endl;
+#endif
 			if (done) continue;
 
 			unit->MoveUnit(to);
@@ -2023,6 +2062,8 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 	} else goto done_moving; //this should never occur.
 	
 	/* Ok, now we can move a region */
+	if(region->dynamicexits) ResolveExits(region,unit);	
+	
 	{
 		int startmove = 0;
 		/* Setup region to move to */
@@ -2195,7 +2236,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 
 		unit->movepoints += cost;
 		unit->MoveUnit(newreg->GetDummy());
-		unit->CrossHexside(region, newreg);
+		if(movetype != M_FLY) unit->CrossHexside(region, newreg);
 
 		AString temp;
 		switch (movetype) {

@@ -194,9 +194,14 @@ void Unit::CrossHexside(ARegion *fromreg, ARegion *toreg)
     }
     if(dir == -1) return;
     Hexside *h = fromreg->hexside[dir];
+    
     if(HexsideDefs[h->type].stealthpen) SetFlag(FLAG_VISIB,1);
     else if(h->road < 0 && HexsideDefs[H_ROAD].stealthpen) SetFlag(FLAG_VISIB,1);
-    else if(h->road < 0 && HexsideDefs[H_BRIDGE].stealthpen) SetFlag(FLAG_VISIB,1);
+    else if(h->bridge < 0 && HexsideDefs[H_BRIDGE].stealthpen) SetFlag(FLAG_VISIB,1);
+    
+    if(HexsideDefs[h->type].advancepen) movementmalus += HexsideDefs[h->type].advancepen;
+    else if(h->road < 0) movementmalus += HexsideDefs[H_ROAD].advancepen;
+    else if(h->bridge < 0) movementmalus += HexsideDefs[H_BRIDGE].advancepen;
 }
 
 

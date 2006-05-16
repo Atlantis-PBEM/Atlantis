@@ -26,6 +26,10 @@
 #include "game.h"
 #include "gamedata.h"
 
+#ifndef DEBUG
+//#define DEBUG
+#endif
+
 void Game::RunOrders()
 {
 	//
@@ -539,6 +543,9 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 	u->Experience(S_STEALTH,10);
 	tar->Experience(S_OBSERVATION,10);
 	RunBattle(r, u, tar, ass);
+#ifdef DEBUG
+cout << "Returned to Do1Assassinate" << endl;
+#endif
 }
 
 void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
@@ -1044,7 +1051,7 @@ void Game::RunPillageRegion(ARegion *reg)
 {
 	if (TerrainDefs[reg->type].similar_type == R_OCEAN) return;
 	if (reg->money < 1) return;
-	if (reg->Wages() < 11) return;
+//	if (reg->Wages() < 11) return;
 
 	/* First, count up pillagers */
 	int pillagers = CountPillagers(reg);
@@ -1084,7 +1091,7 @@ void Game::RunPillageRegion(ARegion *reg)
 	/* Destroy economy */
 	reg->money = 0;
 	reg->wages -= 7;    //used to be 6, 7 for Xan because of the lower base wage for tax purposes (old breakeven point $25, with 6 would now be $20, with 7 is $26, closer to old behaviour)
-	if (reg->wages < 5) reg->wages = 5;
+	if (reg->wages < 0) reg->wages = 0;
 }
 
 void Game::RunPromoteOrders()
@@ -1447,6 +1454,9 @@ void Game::DoAutoAttackOn(ARegion *r, Unit *t)
 					(u->GetAttitude(r, t) == A_HOSTILE) && u->IsReallyAlive() &&
 					u->canattack)
 				AttemptAttack(r, u, t, 1);
+#ifdef DEBUG
+cout << "Attempted from DoAutoAttackOn" << endl;
+#endif
 			if (!t->IsReallyAlive()) return;
 		}
 	}
@@ -1456,7 +1466,10 @@ void Game::DoAdvanceAttack(ARegion *r, Unit *u) {
 	Unit *t = r->Forbidden(u);
 	while (t && u->canattack && u->IsReallyAlive()) {
 		AttemptAttack(r, u, t, 1, 1);
-		t = r->Forbidden(u);
+#ifdef DEBUG
+cout << "Attempted from DoAdvanceAttack" << endl;
+#endif
+		if(u->IsReallyAlive()) t = r->Forbidden(u);
 	}
 }
 
@@ -1467,6 +1480,9 @@ void Game::DoAutoAttack(ARegion *r, Unit *u) {
 	  Unit *t = (Unit *) elem;
 	  if (u->guard != GUARD_AVOID && (u->GetAttitude(r, t) == A_HOSTILE)) {
 	AttemptAttack(r, u, t, 1);
+#ifdef DEBUG
+cout << "Attempted from DoAutoAttack" << endl;
+#endif
 	  }
 	  if (u->canattack == 0 || u->IsReallyAlive() == 0)
 	return;
@@ -1517,6 +1533,9 @@ void Game::CheckWMonAttack(ARegion *r, Unit *u) {
 
   Unit *t = GetWMonTar(r, getrandom(tars), u);
   if (t) AttemptAttack(r, u, t, 1);
+#ifdef DEBUG
+cout << "Attempted from CheckWMonAttack" << endl;
+#endif
 }
 
 void Game::DoAttackOrders()
@@ -1542,6 +1561,9 @@ void Game::DoAttackOrders()
 							if (u->canattack && u->IsReallyAlive()) {
 								if (t) {
 									AttemptAttack(r, u, t, 0);
+#ifdef DEBUG
+cout << "Attempted from DoAttackOrders" << endl;
+#endif
 								} else {
 									u->Error("ATTACK: Non-existent unit.");
 								}
@@ -1566,19 +1588,33 @@ void Game::DoAttackOrders()
 // 3 if u lacks the riding to catch t
 void Game::AttemptAttack(ARegion *r, Unit *u, Unit *t, int silent, int adv)
 {
-	if (!t->IsReallyAlive()) return;
+	if (!t->IsReallyAlive()) {
+#ifdef DEBUG
+cout << "Not Alive" << endl;
+#endif	
+        return;    
+    }
 
 	if (!u->CanSee(r, t)) {
 		if (!silent) u->Error("ATTACK: Non-existent unit.");
+#ifdef DEBUG
+cout << "Can't See " << u->num << " " << t->num << endl;
+#endif	
 		return;
 	}
 
 	if (!u->CanCatch(r, t)) {
 		if (!silent) u->Error("ATTACK: Can't catch that unit.");
+#ifdef DEBUG
+cout << "Can't Catch" << endl;
+#endif	
 		return;
 	}
 
 	RunBattle(r, u, t, 0, adv);
+#ifdef DEBUG
+cout << "Returned to AttemptAttack" << endl;
+#endif	
 	return;
 }
 
@@ -1588,7 +1624,7 @@ void Game::RunSellOrders()
 		ARegion *r = (ARegion *) elem;
 		forlist((&r->markets)) {
 			Market *m = (Market *) elem;
-			if (m->type == M_SELL)
+			if (m->type == M_SELL && (m->amount > 0))  //second term added to prevent merchantry revealing 0-item markets (and stop them preventing merchantry from working)
 				DoSell(r, m);
 		}
 		{
@@ -1699,7 +1735,7 @@ void Game::RunBuyOrders()
 		ARegion *r = (ARegion *) elem;
 		forlist((&r->markets)) {
 			Market *m = (Market *) elem;
-			if (m->type == M_BUY)
+			if (m->type == M_BUY && (m->amount > 0))
 				DoBuy(r, m);
 		}
 		{
@@ -3206,6 +3242,14 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		SkillList *temp = u->skills.Split(u->GetMen(), amt);   //Is it really a good idea to do this here, when men could potentially be labelled as cantgive or max_inventory below?
 		t->skills.Combine(temp);
 		delete temp;
+		
+		//mark which units men have gone to.
+        UnitId *id = new UnitId;
+		id->unitnum = t->num;
+		if(o->target) id->alias = o->target->alias;
+		else id->alias = 0;
+		id->faction = t->faction->num;
+		u->gavemento.Add(id);
 	}
 
 	if(ItemDefs[o->item].flags & ItemType::CANTGIVE) {
@@ -3255,7 +3299,7 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
 	int amt = o->amount;
 	if (amt != -2 && amt > u->GetSharedNum(o->item)) {
 		amt = u->GetSharedNum(o->item);
-		u->Error(AString("SEND: Not enough. Sending ") + amt + " instead.", o->quiet);
+		u->Error(AString("SEND: Not enough. Sending ") + ItemString(o->item, amt) + " instead.", o->quiet);
 	} else if (amt == -2) {
 		amt = u->items.GetNum(o->item);  //if sending "ALL" do not check other inventories.
 		if(o->except) {
@@ -3329,9 +3373,10 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
     }
     int cost = 0;
     Unit *bestquartermaster = NULL;
-    if (!tar && o->target) {
+    if (o->via || (!tar && o->target) ) {
         Location *target = regions.GetUnitId(o->target, u->faction->num, r);
         Location *quartermaster = NULL;
+
         if(o->via) quartermaster = regions.GetUnitId(o->via, u->faction->num, r);
         int level = 0;
         if(u->GetSkill(S_ARCADIA_QUARTERMASTERY) > level) {
@@ -3350,14 +3395,14 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
             //the target is not adjacent, and no-one has a quartermastery skill.
             if(target) delete target;
             if(quartermaster) delete quartermaster;
-    		u->Error("SEND: Cannot find target or target is not a member of a friendly faction", o->quiet);
+    		u->Error(AString("SEND: Cannot find target ") + o->target->unitnum + " or target is not a member of a friendly faction", o->quiet);
     		return 0;
         }
         //we now have a SEND order using the QUARTERMASTERY skill.
         if (quartermaster && quartermaster->unit->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
     	    //This eliminates guards, monsters, ghosts and peasant factions.
     	    //These errors all have to be the same to prevent any way of players finding the location of stealth units.
-    		u->Error("SEND: Cannot find target or target is not a member of a friendly faction", o->quiet);
+    		u->Error(AString("SEND: Cannot find target  ") + o->via->unitnum + " or target is not a member of a friendly faction", o->quiet);
 	        delete target;
 	        if(quartermaster) delete quartermaster;
 		    return 0;
