@@ -148,6 +148,8 @@ class TownInfo
 		int activity;
 };
 
+class ARegionArray;
+
 class ARegion : public AListElem
 {
 	friend class Game;

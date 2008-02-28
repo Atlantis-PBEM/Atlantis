@@ -635,7 +635,8 @@ void ARegion::SetupCityMarket()
 				}
 				
 				cap = (citymax/2);
-				offset = - (citymax/20) + tradesell++ * (tradesell * tradesell * citymax/40);
+				offset = - (citymax/20) + tradesell * ((tradesell+1) * (tradesell+1) * citymax/40);
+				tradesell++;
 				if(cap + offset < citymax) {
 					Market * m = new Market (M_SELL, i, price, amt/5, cap+population+offset,
 						citymax+population, 0, amt);
