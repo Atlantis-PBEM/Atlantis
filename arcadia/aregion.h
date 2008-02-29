@@ -171,6 +171,8 @@ class TownInfo
 		int mortality;
 };
 
+class ARegionArray;
+
 class ARegion : public AListElem
 {
 	friend class Game;

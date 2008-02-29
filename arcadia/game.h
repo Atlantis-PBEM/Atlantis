@@ -269,12 +269,14 @@ private:
 	void ModifyItemMagicSkill(int it, char *sk, int lev);
 	void ModifyItemMagicOutput(int it, int count);
 	void ModifyItemMagicInput(int it, int i, int input, int amount);
-    void ModifyItemEscapeSkill(int it, char *sk, int val);
+	void ModifyItemEscapeSkill(int it, char *sk, int val);
 
 	void ModifyRaceSkillLevels(char *race, int special, int def);
 	void ModifyRaceHits(char *race, int num);
 	void ModifyRaceSkills(char *race, int i, char *sk);
-    void Game::ModifyRaceSkills(char *r, char *sk1, char *sk2 = NULL, char *sk3 = NULL, char *sk4 = NULL, char *sk5 = NULL, char *sk6 = NULL);
+	void ModifyRaceSkills(char *r, char *sk1,
+		char *sk2 = NULL, char *sk3 = NULL, char *sk4 = NULL,
+		char *sk5 = NULL, char *sk6 = NULL);
 
 	void ModifyMonsterAttackLevel(char *mon, int lev);
 	void ModifyMonsterDefense(char *mon, int defenseType, int level);
