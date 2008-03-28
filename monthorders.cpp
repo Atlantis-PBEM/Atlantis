@@ -585,6 +585,7 @@ void Game::RunBuildHelpers(ARegion *r)
 							continue;
 						}
 						if(target->build > 0) {
+							u->build=target->build;
 							tarobj = r->GetObject(target->build);
 						}
 						else {
@@ -600,7 +601,7 @@ void Game::RunBuildHelpers(ARegion *r)
 										needed = border->needtocomplete;
 							}
 							int output = ShipConstruction(r, u, level, needed, ship);
-							if(output < 1) return;
+							if(output < 1) continue;
 							
 							int unfinished = target->items.GetNum(ship);
 							// set up unfinished items
@@ -647,9 +648,9 @@ void Game::RunBuildHelpers(ARegion *r)
 					} else {
 						Object *buildobj = r->GetDummy();
 						// don't move if finishing a building
-						if ((u->object->type != O_DUMMY) && (u->object->type == u->build)) return;
+						if ((u->object->type != O_DUMMY) && (u->object->type == u->build)) continue;
 						if (u->build > 0) buildobj = r->GetObject(u->build);
-						if (!buildobj) return; // don't move into nonexistent objects
+						if (!buildobj) continue; // don't move into nonexistent objects
 						if (buildobj != r->GetDummy() && buildobj != u->object)
 						{
 							u->MoveUnit(buildobj);

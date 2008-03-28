@@ -680,7 +680,7 @@ public:
 	// Whether you need to be a war faction to have tact-5 leaders
 	int TACTICS_NEEDS_WAR;
 	
-	// Whether allies should aid you if you're set to noaid
+	// Whether allies will be affected by the noaid flag
 	int ALLIES_NOAID;
 	
 };

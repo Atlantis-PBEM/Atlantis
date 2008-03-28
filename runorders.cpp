@@ -2293,7 +2293,7 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 {
 	/* Transfer/GIVE ship items: */
-	if(ItemDefs[o->item].type & IT_SHIP) {
+	if((o->item >= 0) && (ItemDefs[o->item].type & IT_SHIP)) {
 		// GIVE 0
 		if(o->target->unitnum == -1) {
 			int hasitem = u->items.GetNum(o->item);

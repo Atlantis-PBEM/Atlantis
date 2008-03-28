@@ -142,7 +142,7 @@ void Game::EditGameRegion(ARegion *pReg)
         else {
             Awrite( "Select from the menu." ); 
         } 
-        delete pStr; 
+        if (pStr) delete pStr; 
 
         if( exit ) {
         break; 

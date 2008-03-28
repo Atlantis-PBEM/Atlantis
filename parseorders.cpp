@@ -1543,11 +1543,12 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	} else { 
 		// just a 'build' order
 		order->target = NULL;
-		Object * obj = unit->object;
-		int ot = obj->type;
-		int st = O_DUMMY;
-		if((ot == O_DUMMY) || (ObjectDefs[ot].flags & ObjectType::GROUP)) {
+		if (!pCheck) {
+			Object * obj = unit->object;
+			int ot = obj->type;
+			
 			// look for an incomplete ship type in inventory
+			int st = O_DUMMY;
 			forlist(&unit->items) {
 				Item * it = (Item *) elem;
 				if((ItemDefs[it->type].type & IT_SHIP)
@@ -1556,16 +1557,17 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 						break;
 				}
 			}
-		}
-		if((st == O_DUMMY) && (ot == O_DUMMY)) {
-			ParseError(pCheck, unit, 0, "BUILD: Nothing to build.");
-			return;			
-		}
-		if(st == O_DUMMY) {
-			unit->build = ot;
-		} else {
-			unit->build = st;
-			maxbuild = ItemDefs[st].pMonths - unit->items.GetNum(st);
+			
+			if((st == O_DUMMY) && (ot == O_DUMMY)) {
+				ParseError(pCheck, unit, 0, "BUILD: Nothing to build.");
+				return;			
+			}
+			if(st == O_DUMMY) {
+				unit->build = ot;
+			} else {
+				unit->build = st;
+				maxbuild = ItemDefs[-st].pMonths - unit->items.GetNum(-st);
+			}
 		}
 	}
 	// set neededtocomplete

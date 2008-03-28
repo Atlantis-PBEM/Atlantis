@@ -316,7 +316,7 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 			}
 		}
 		*/
-		if((fac == GetOwner()->faction) || (obs > 9)){
+		if((GetOwner() && fac == GetOwner()->faction) || (obs > 9)){
 			temp += ";";
 			if (incomplete > 0) {
 				temp += AString(" ") + incomplete + "% damaged;";
