@@ -714,9 +714,25 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 		forlist((&obj->units)) {
 			Unit* temp = (Unit *) elem;
 			if (u == temp && dummy == 0) retval = 1;
+
+			// penalty of 2 to stealth if assassinating and 1 if stealing
+			// TODO: not sure about the reasoning behind the IMPROVED_AMTS part
+			int stealpenalty = 0;
+			if (Globals->HARDER_ASSASSINATION && u->stealorders){
+				if (u->stealorders->type == O_STEAL) {
+					stealpenalty = 1;
+				} else if (u->stealorders->type == O_ASSASSINATE) {
+					if (Globals->IMPROVED_AMTS){
+						stealpenalty = 1;
+					} else {
+						stealpenalty = 2;
+					}
+				}
+			}
+
 			if (temp->faction == this) {
 				if (temp->GetAttribute("observation") >
-						u->GetAttribute("stealth")) {
+						u->GetAttribute("stealth") - stealpenalty) {
 					if (practice) {
 						temp->PracticeAttribute("observation");
 						retval = 2;
@@ -725,7 +741,7 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 						return 2;
 				} else {
 					if (temp->GetAttribute("observation") ==
-							u->GetAttribute("stealth")) {
+							u->GetAttribute("stealth") - stealpenalty) {
 						if (practice) temp->PracticeAttribute("observation");
 						if (retval < 1) retval = 1;
 					}

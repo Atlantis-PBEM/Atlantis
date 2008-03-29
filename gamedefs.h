@@ -682,7 +682,11 @@ public:
 	
 	// Whether allies will be affected by the noaid flag
 	int ALLIES_NOAID;
-	
+
+	// Whether assassination has a stealth penalty of -2
+	// and stealing a stealth penalty of -1
+	int HARDER_ASSASSINATION;
+
 };
 
 extern GameDefs *Globals;

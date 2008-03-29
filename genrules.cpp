@@ -3534,6 +3534,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 					"target faction's units have Observation (i.e. the "
 					"thief cannot be seen by the target faction), the theft "
 					"will succeed.";
+				if(Globals->HARDER_ASSASSINATION){
+					temp += " While stealing, the thief has a -1 penalty to his "
+						"Stealth Skill.";
+				}
 			} else {
 				temp = "The thief must know Stealth to attempt theft.";
 			}
@@ -3569,6 +3573,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 					"theft, allies of the target unit will prevent the "
 					"assassination from succeeding, if their Observation "
 					"level is high enough.";
+
+				if (Globals->HARDER_ASSASSINATION) {
+					temp += " While attemping an assassination, the assassin "
+						"has a ";
+					if (Globals->IMPROVED_AMTS) {
+						temp += "-1";
+					} else {
+						temp += "-2";
+					}
+					temp += " penalty to his Stealth Skill.";
+				}
+
 				f.Paragraph(temp);
 				temp = "";
 			} else {

@@ -222,6 +222,7 @@ static GameDefs g = {
 	100, // TOWN_DEVELOPMENT
 	0, //TACTICS_NEEDS_WAR
 	0, // ALLIES_NOAID
+	0, // HARDER_ASSASSINATION
 };
 
 GameDefs *Globals = &g;
