@@ -943,4 +943,3 @@ Changes from 4.0.10 -> 5.0.0
       running test games.
    -- fixed the bugs where pillaging could do too much damage to regions, and where maxwages and
       maxentertainment could drop below zero.
-
