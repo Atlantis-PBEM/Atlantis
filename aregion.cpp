@@ -635,7 +635,7 @@ void ARegion::SetupCityMarket()
 				}
 				
 				cap = (citymax/2);
-				offset = - (citymax/20) + tradesell * ((tradesell+1) * (tradesell+1) * citymax/40);
+				offset = - (citymax/20) + tradesell * ((tradesell + 1) * (tradesell + 1) * citymax/40);
 				tradesell++;
 				if(cap + offset < citymax) {
 					Market * m = new Market (M_SELL, i, price, amt/5, cap+population+offset,
@@ -2203,7 +2203,7 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 		if(fromRegion->HasExitRoad(dir) && HasConnectingRoad(dir)) {
 			cost -= cost/2;
 			if (road)
-				*road = "on a road ";
+				*road = " on a road";
 		}
 	}
 	if(cost < 1) cost = 1;

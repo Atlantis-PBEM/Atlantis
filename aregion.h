@@ -32,6 +32,7 @@
 
 class ARegion;
 class ARegionList;
+class ARegionArray;
 
 #include "gamedefs.h"
 #include "gameio.h"
@@ -147,8 +148,6 @@ class TownInfo
 		int basepop;
 		int activity;
 };
-
-class ARegionArray;
 
 class ARegion : public AListElem
 {
