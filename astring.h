@@ -28,6 +28,8 @@
 #include <iostream>
 #include "alist.h"
 
+// test
+
 using namespace std;
 
 class AString : public AListElem {
