@@ -1112,6 +1112,7 @@ int Game::RunGame()
 
     Awrite("Writing Playerinfo File...");
     WritePlayers();
+    EmptyHell(); 
 
     Awrite("Removing Dead Factions...");
     DeleteDeadFactions();

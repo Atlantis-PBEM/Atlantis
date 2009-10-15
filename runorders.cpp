@@ -97,7 +97,6 @@ void Game::RunOrders()
 	Awrite("Post-Turn Processing...");
 	PostProcessTurn();
 	DeleteEmptyUnits();
-	EmptyHell();
 	RemoveEmptyObjects();
 }
 
