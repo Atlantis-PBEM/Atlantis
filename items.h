@@ -75,9 +75,9 @@ struct Materials
 class ItemType
 {
 	public:
-		char *name;
-		char *names;
-		char *abr;
+		char const *name;
+		char const *names;
+		char const *abr;
 
 		enum {
 			CANTGIVE = 0x1,
@@ -95,13 +95,13 @@ class ItemType
 		};
 		int flags;
 
-		char *pSkill; // production skill
+		char const *pSkill; // production skill
 		int pLevel; // production skill level
 		int pMonths; // Man months required for production
 		int pOut; // How many of the item we get
 		Materials pInput[4];
 
-		char *mSkill; // magical production skill
+		char const *mSkill; // magical production skill
 		int mLevel; // magical production skill level
 		int mOut; // How many of the item are conjured
 		Materials mInput[4];
@@ -134,11 +134,11 @@ class ItemType
 			LOSS_CHANCE = 0x10,		// flat chance of loss.
 		};
 		int escape;
-		char *esc_skill;
+		char const *esc_skill;
 		int esc_val; // level for has_skill, constant for all others
 
-		char *grantSkill;
-		char *fromSkills[4];
+		char const *grantSkill;
+		char const *fromSkills[4];
 		int minGrant, maxGrant;
 };
 
@@ -147,11 +147,11 @@ extern ItemType *ItemDefs;
 class ManType
 {
 	public:
-		char *abbr;
+		char const *abbr;
 		int terrain;
 		int speciallevel;
 		int defaultlevel;
-		char *skills[6];
+		char const *skills[6];
 		
 		int CanProduce(int);
 		int CanUse(int);
@@ -173,15 +173,15 @@ class MonType
 		int stealth;
 		int obs;
 
-		char *special;
+		char const *special;
 		int specialLevel;
 
 		int silver;
 		int spoiltype;
 		int hostile; /* Percent */
 		int number;
-		char *name;
-		char *abbr;
+		char const *name;
+		char const *abbr;
 };
 
 extern MonType *MonDefs;
@@ -202,7 +202,7 @@ enum {
 class WeaponType
 {
 	public:
-		char *abbr;
+		char const *abbr;
 
 		enum {
 			NEEDSKILL = 0x1, // No bonus or use unless skilled
@@ -219,8 +219,8 @@ class WeaponType
 		};
 		int flags;
 
-		char *baseSkill;
-		char *orSkill;
+		char const *baseSkill;
+		char const *orSkill;
 
 		int weapClass;
 		int attackType;
@@ -253,7 +253,7 @@ extern WeaponType *WeaponDefs;
 class ArmorType
 {
 	public:
-		char *abbr;
+		char const *abbr;
 
 		enum {
 			USEINASSASSINATE = 0x1,
@@ -273,12 +273,12 @@ extern ArmorType *ArmorDefs;
 class MountType
 {
 	public:
-		char *abbr;
+		char const *abbr;
 
 		//
 		// This is the skill needed to use this mount.
 		//
-		char *skill;
+		char const *skill;
 
 		//
 		// This is the minimum bonus (and minimal skill level) for this mount.
@@ -297,7 +297,7 @@ class MountType
 
 		// If the mount has a special effect it generates when ridden in
 		// combat
-		char *mountSpecial;
+		char const *mountSpecial;
 		int specialLev;
 };
 
@@ -306,7 +306,7 @@ extern MountType *MountDefs;
 class BattleItemType
 {
 	public:
-		char *abbr;
+		char const *abbr;
 
 		enum {
 			MAGEONLY = 0x1,
@@ -316,7 +316,7 @@ class BattleItemType
 		};
 
 		int flags;
-		char *special;
+		char const *special;
 		int skillLevel;
 };
 
@@ -328,12 +328,12 @@ extern int ParseEnabledItem(AString *);
 extern int ParseTransportableItem(AString *);
 extern int LookupItem(AString *);
 
-extern BattleItemType *FindBattleItem(char *abbr);
-extern ArmorType *FindArmor(char *abbr);
-extern WeaponType *FindWeapon(char *abbr);
-extern MountType *FindMount(char *abbr);
-extern MonType *FindMonster(char *abbr, int illusion);
-extern ManType *FindRace(char *abbr);
+extern BattleItemType *FindBattleItem(char const *abbr);
+extern ArmorType *FindArmor(char const *abbr);
+extern WeaponType *FindWeapon(char const *abbr);
+extern MountType *FindMount(char const *abbr);
+extern MonType *FindMonster(char const *abbr, int illusion);
+extern ManType *FindRace(char const *abbr);
 extern AString AttType(int atype);
 
 enum {
@@ -380,7 +380,7 @@ class ItemList : public AList
 		void UncheckAll(); // re-set checked flag for all
 };
 
-extern AString ShowSpecial(char *special, int level, int expandLevel,
+extern AString ShowSpecial(char const *special, int level, int expandLevel,
 		int fromItem);
 
 #endif

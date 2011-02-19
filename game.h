@@ -267,12 +267,12 @@ private:
 	void ModifyEffectDefenseMod(char *effect, int index, int type, int val);
 	void ModifyEffectCancelEffect(char *effect, char *uneffect);
 
-	void ModifyRangeFlags(char *range, int flags);
-	void ModifyRangeClass(char *range, int rclass);
+	void ModifyRangeFlags(char const *range, int flags);
+	void ModifyRangeClass(char const *range, int rclass);
 	void ModifyRangeMultiplier(char *range, int mult);
 	void ModifyRangeLevelPenalty(char *range, int pen);
 
-	void ModifyAttribMod(char *mod, int index, int flags, char *ident,
+	void ModifyAttribMod(char const *mod, int index, int flags, char const *ident,
 			int type, int val);
 
 	AList factions;

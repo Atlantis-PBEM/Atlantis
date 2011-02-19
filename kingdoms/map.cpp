@@ -183,7 +183,7 @@ int ARegion::TerrainProbability(int terrain)
 
 
 
-void ARegionList::CreateAbyssLevel(int level, char *name)
+void ARegionList::CreateAbyssLevel(int level, char const *name)
 {
 	MakeRegions(level, 4, 4);
 	pRegionArrays[level]->SetName(name);
@@ -233,7 +233,7 @@ void ARegionList::CreateAbyssLevel(int level, char *name)
 }
 
 
-void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char *name)
+void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *name)
 {
 	MakeRegions(level, xSize, ySize);
 
@@ -269,7 +269,7 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char *name)
 	}
 }
 
-void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name)
+void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const *name)
 {
 	MakeRegions(level, xSize, ySize);
 
@@ -305,7 +305,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char *name
 }
 
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
-		char *name)
+		char const *name)
 {
 	MakeRegions(level, xSize, ySize);
 
@@ -328,7 +328,7 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 }
 
 void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
-		char *name)
+		char const *name)
 {
 	MakeRegions(level, xSize, ySize);
 

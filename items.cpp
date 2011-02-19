@@ -29,7 +29,7 @@
 #include "object.h"
 #include "gamedata.h"
 
-BattleItemType *FindBattleItem(char *abbr)
+BattleItemType *FindBattleItem(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMBATTLEITEMS; i++) {
@@ -40,7 +40,7 @@ BattleItemType *FindBattleItem(char *abbr)
 	return NULL;
 }
 
-ArmorType *FindArmor(char *abbr)
+ArmorType *FindArmor(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMARMORS; i++) {
@@ -51,7 +51,7 @@ ArmorType *FindArmor(char *abbr)
 	return NULL;
 }
 
-WeaponType *FindWeapon(char *abbr)
+WeaponType *FindWeapon(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMWEAPONS; i++) {
@@ -62,7 +62,7 @@ WeaponType *FindWeapon(char *abbr)
 	return NULL;
 }
 
-MountType *FindMount(char *abbr)
+MountType *FindMount(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMMOUNTS; i++) {
@@ -73,7 +73,7 @@ MountType *FindMount(char *abbr)
 	return NULL;
 }
 
-MonType *FindMonster(char *abbr, int illusion)
+MonType *FindMonster(char const *abbr, int illusion)
 {
 	if (abbr == NULL) return NULL;
 	AString tag = (illusion ? "i" : "");
@@ -87,7 +87,7 @@ MonType *FindMonster(char *abbr, int illusion)
 	return NULL;
 }
 
-ManType *FindRace(char *abbr)
+ManType *FindRace(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMMAN; i++) {
@@ -272,7 +272,7 @@ AString ItemString(int type, int num, int flags)
 	return temp;
 }
 
-static AString EffectStr(char *effect)
+static AString EffectStr(char const *effect)
 {
 	AString temp, temp2;
 	int comma = 0;
@@ -317,7 +317,7 @@ static AString EffectStr(char *effect)
 	return temp;
 }
 
-AString ShowSpecial(char *special, int level, int expandLevel, int fromItem)
+AString ShowSpecial(char const *special, int level, int expandLevel, int fromItem)
 {
 	AString temp;
 	int comma = 0;
@@ -809,7 +809,7 @@ AString *ItemDescription(int item, int full)
 			if(atts > 0) {
 				if(atts >= WeaponType::NUM_ATTACKS_HALF_SKILL) {
 					int max = WeaponType::NUM_ATTACKS_HALF_SKILL;
-					char *attd = "half the skill level (rounded up)";
+					char const *attd = "half the skill level (rounded up)";
 					if(atts >= WeaponType::NUM_ATTACKS_SKILL) {
 						max = WeaponType::NUM_ATTACKS_SKILL;
 						attd = "the skill level";

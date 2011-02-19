@@ -136,7 +136,7 @@ enum {
 /* Enter is MOVE_ENTER + num of object */
 #define MOVE_ENTER 100
 
-extern char ** OrderStrs;
+extern char const ** OrderStrs;
 
 int Parse1Order(AString *);
 

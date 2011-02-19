@@ -347,14 +347,14 @@ void Soldier::SetupCombatItems()
 	}
 }
 
-int Soldier::HasEffect(char *eff)
+int Soldier::HasEffect(char const *eff)
 {
 	if(eff == NULL) return 0;
 
 	return effects[eff];
 }
 
-void Soldier::SetEffect(char *eff)
+void Soldier::SetEffect(char const *eff)
 {
 	if(eff == NULL) return;
 	int i;
@@ -374,7 +374,7 @@ void Soldier::SetEffect(char *eff)
 	if(!(e->flags & EffectType::EFF_NOSET)) effects[eff] = 1;
 }
 
-void Soldier::ClearEffect(char *eff)
+void Soldier::ClearEffect(char const *eff)
 {
 	if(eff == NULL) return;
 	int i;
@@ -935,7 +935,7 @@ Soldier * Army::GetAttacker(int i,int &behind)
 	return retval;
 }
 
-int Army::GetTargetNum(char *special)
+int Army::GetTargetNum(char const *special)
 {
 	int tars = NumFront();
 	if (tars == 0) {
@@ -983,7 +983,7 @@ int Army::GetTargetNum(char *special)
 	return -1;
 }
 
-int Army::GetEffectNum(char *effect)
+int Army::GetEffectNum(char const *effect)
 {
 	int validtargs = 0;
 	int i, start = -1;
@@ -1040,7 +1040,7 @@ int Hits(int a,int d)
 	return 0;
 }
 
-int Army::RemoveEffects(int num, char *effect)
+int Army::RemoveEffects(int num, char const *effect)
 {
 	int ret = 0;
 	for(int i = 0; i < num; i++) {
@@ -1060,8 +1060,8 @@ int Army::RemoveEffects(int num, char *effect)
 	return(ret);
 }
 
-int Army::DoAnAttack(char *special, int numAttacks, int attackType,
-		int attackLevel, int flags, int weaponClass, char *effect,
+int Army::DoAnAttack(char const *special, int numAttacks, int attackType,
+		int attackLevel, int flags, int weaponClass, char const *effect,
 		int mountBonus)
 {
 	/* 1. Check against Global effects (not sure how yet) */

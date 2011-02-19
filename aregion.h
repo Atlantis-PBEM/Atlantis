@@ -63,8 +63,8 @@ struct Product
 class TerrainType
 {
 	public:
-		char *name;
-		char *type;
+		char const *name;
+		char const *type;
 		char marker;
 		int similar_type;
 
@@ -107,7 +107,7 @@ class Location : public AListElem
 Location *GetUnit(AList *, int);
 
 int AGetName(int town);
-char *AGetNameString(int name);
+char const *AGetNameString(int name);
 
 class ARegionPtr : public AListElem
 {
@@ -169,7 +169,7 @@ class ARegion : public AListElem
 		void Setup();
 
 		void ZeroNeighbors();
-		void SetName(char *);
+		void SetName(char const *);
 
 		void Writeout(Aoutfile *);
 		void Readin(Ainfile *, AList *, ATL_VER v);
@@ -216,7 +216,7 @@ class ARegion : public AListElem
 		void Pillage();
 		int ForbiddenShip(Object *);
 		int HasCityGuard();
-		int NotifySpell(Unit *, char *, ARegionList *pRegs);
+		int NotifySpell(Unit *, char const *, ARegionList *pRegs);
 		void NotifyCity(Unit *, AString& oldname, AString& newname);
 
 		void DefaultOrders();
@@ -361,7 +361,7 @@ class ARegionArray
 
 		void SetRegion(int, int, ARegion *);
 		ARegion *GetRegion(int, int);
-		void SetName(char *name);
+		void SetName(char const *name);
 
 		int x;
 		int y;
@@ -449,12 +449,12 @@ class ARegionList : public AList
 		// Public world creation stuff
 		//
 		void CreateLevels(int numLevels);
-		void CreateAbyssLevel(int level, char *name);
-		void CreateNexusLevel(int level, int xSize, int ySize, char *name);
-		void CreateSurfaceLevel(int level, int xSize, int ySize, char *name);
-		void CreateIslandLevel(int level, int nPlayers, char *name);
-		void CreateUnderworldLevel(int level, int xSize, int ySize, char *name);
-		void CreateUnderdeepLevel(int level, int xSize, int ySize, char *name);
+		void CreateAbyssLevel(int level, char const *name);
+		void CreateNexusLevel(int level, int xSize, int ySize, char const *name);
+		void CreateSurfaceLevel(int level, int xSize, int ySize, char const *name);
+		void CreateIslandLevel(int level, int nPlayers, char const *name);
+		void CreateUnderworldLevel(int level, int xSize, int ySize, char const *name);
+		void CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name);
 
 		void MakeShaftLinks(int levelFrom, int levelTo, int odds);
 		void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);

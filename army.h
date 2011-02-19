@@ -51,9 +51,9 @@ class Soldier {
 		//
 		void SetupHealing();
 
-		int HasEffect(char *);
-		void SetEffect(char *);
-		void ClearEffect(char *);
+		int HasEffect(char const *);
+		void SetEffect(char const *);
+		void ClearEffect(char const *);
 		void ClearOneTimeEffects(void);
 		int ArmorProtect(int weaponClass );
 
@@ -80,7 +80,7 @@ class Soldier {
 		int attacktype;
 		int askill;
 		int attacks;
-		char *special;
+		char const *special;
 		int slevel;
 
 		/* Defense info */
@@ -95,7 +95,7 @@ class Soldier {
 		int amuletofi;
 
 		/* Effects */
-		map< char *, int > effects;
+		map< char const *, int > effects;
 };
 
 typedef Soldier * SoldierPtr;
@@ -123,12 +123,12 @@ class Army
 		int CanAttack();
 		int NumFront();
 		Soldier *GetAttacker( int, int & );
-		int GetEffectNum(char *effect);
-		int GetTargetNum(char *special = NULL);
+		int GetEffectNum(char const *effect);
+		int GetTargetNum(char const *special = NULL);
 		Soldier *GetTarget( int );
-		int RemoveEffects(int num, char *effect);
-		int DoAnAttack(char *special, int numAttacks, int attackType,
-				int attackLevel, int flags, int weaponClass, char *effect,
+		int RemoveEffects(int num, char const *effect);
+		int DoAnAttack(char const *special, int numAttacks, int attackType,
+				int attackLevel, int flags, int weaponClass, char const *effect,
 				int mountBonus);
 		void Kill(int);
 		void Reset();
@@ -136,7 +136,7 @@ class Army
 		//
 		// These funcs are in specials.cpp
 		//
-		int CheckSpecialTarget(char *,int);
+		int CheckSpecialTarget(char const *,int);
 
 		SoldierPtr * soldiers;
 		Unit * leader;

@@ -59,15 +59,15 @@ class SkillList;
 
 struct SkillDepend
 {
-	char *skill;
+	char const *skill;
 	int level;
 };
 
 class SkillType
 {
 	public:
-		char * name;
-		char * abbr;
+		char const * name;
+		char const * abbr;
 		int cost;
 
 		enum {
@@ -92,16 +92,16 @@ class SkillType
 		//
 		// special for combat spells only
 		//
-		char *special;
+		char const *special;
 
 		// range class for ranged skills (-1 for all others)
-		char *range;
+		char const *range;
 
 		SkillDepend depends[3];
 };
 extern SkillType *SkillDefs;
 
-SkillType *FindSkill(char *skname);
+SkillType *FindSkill(char const *skname);
 int LookupSkill(AString *);
 int ParseSkill(AString *);
 AString SkillStrs(int);
@@ -111,12 +111,12 @@ class ShowType {
 	public:
 		int skill;
 		int level;
-		char * desc;
+		char const * desc;
 };
 extern ShowType * ShowDefs;
 
 int SkillCost(int);
-int SkillMax(char *,int); /* skill, race */
+int SkillMax(char const *,int); /* skill, race */
 int GetLevelByDays(int);
 int GetDaysByLevel(int);
 int StudyRateAdjustment(int, int); /* days, exp */
@@ -171,7 +171,7 @@ class DamageType {
 		int value;
 		int flags;
 		int dclass;
-		char *effect;
+		char const *effect;
 };
 
 class ShieldType {
@@ -188,8 +188,8 @@ class DefenseMod {
 
 class SpecialType {
 	public:
-		char *key;
-		char *specialname;
+		char const *key;
+		char const *specialname;
 
 		enum {
 			HIT_BUILDINGIF		= 0x001,	/* mutually exclusive (1) */
@@ -207,7 +207,7 @@ class SpecialType {
 
 		int buildings[3];
 		int targets[7];
-		char *effects[3];
+		char const *effects[3];
 
 		enum {
 			FX_SHIELD	=	0x01,
@@ -221,24 +221,24 @@ class SpecialType {
 
 		int shield[4];
 		DefenseMod defs[4];
-		char *shielddesc;
+		char const *shielddesc;
 
 		DamageType damage[4];
-		char *spelldesc;
-		char *spelldesc2;
-		char *spelltarget;
+		char const *spelldesc;
+		char const *spelldesc2;
+		char const *spelltarget;
 };
 extern SpecialType *SpecialDefs;
 extern int NUMSPECIALS;
 
-extern SpecialType *FindSpecial(char *key);
+extern SpecialType *FindSpecial(char const *key);
 
 class EffectType {
 	public:
-		char *name;
+		char const *name;
 		int attackVal;
 		DefenseMod defMods[4];
-		char *cancelEffect;
+		char const *cancelEffect;
 
 		enum {
 			EFF_ONESHOT	= 0x001,
@@ -249,11 +249,11 @@ class EffectType {
 extern EffectType *EffectDefs;
 extern int NUMEFFECTS;
 
-extern EffectType *FindEffect(char *effect);
+extern EffectType *FindEffect(char const *effect);
 
 class RangeType {
 	public:
-		char *key;
+		char const *key;
 		enum {
 			RNG_NEXUS_TARGET = 0x0001,	// Can cast *to* Nexus
 			RNG_NEXUS_SOURCE = 0x0002,	// Can cast *from* Nexus
@@ -278,7 +278,7 @@ class RangeType {
 extern RangeType *RangeDefs;
 extern int NUMRANGES;
 
-extern RangeType *FindRange(char *range);
+extern RangeType *FindRange(char const *range);
 
 class AttribModItem {
 	public:
@@ -292,7 +292,7 @@ class AttribModItem {
 		};
 		int flags;
 
-		char *ident;
+		char const *ident;
 
 		enum {
 			CONSTANT,
@@ -308,7 +308,7 @@ class AttribModItem {
 
 class AttribModType {
 	public:
-		char *key;
+		char const *key;
 
 		enum {
 			CHECK_MONSTERS = 0x01,
@@ -322,6 +322,6 @@ class AttribModType {
 extern AttribModType *AttribDefs;
 extern int NUMATTRIBMODS;
 
-extern AttribModType *FindAttrib(char *attrib);
+extern AttribModType *FindAttrib(char const *attrib);
 
 #endif

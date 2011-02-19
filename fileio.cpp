@@ -190,7 +190,7 @@ void Aoutfile::PutInt(int x)
 	*file << F_ENDLINE;
 }
 
-void Aoutfile::PutStr(char *s)
+void Aoutfile::PutStr(char const *s)
 {
 	*file << s << F_ENDLINE;
 }

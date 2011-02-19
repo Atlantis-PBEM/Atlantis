@@ -141,7 +141,7 @@ void Unit::SetMonFlags()
 	SetFlag(FLAG_HOLDING, 1);
 }
 
-void Unit::MakeWMon(char *monname, int mon, int num)
+void Unit::MakeWMon(char const *monname, int mon, int num)
 {
 	AString *temp = new AString(monname);
 	SetName(temp);
@@ -2042,7 +2042,7 @@ void Unit::Error(const AString & s)
 	faction->Error(temp);
 }
 
-int Unit::GetAttribute(char *attrib)
+int Unit::GetAttribute(char const *attrib)
 {
 	AttribModType *ap = FindAttrib(attrib);
 	if(ap == NULL) return 0;
@@ -2133,7 +2133,7 @@ int Unit::GetAttribute(char *attrib)
 	return base;
 }
 
-int Unit::PracticeAttribute(char *attrib)
+int Unit::PracticeAttribute(char const *attrib)
 {
 	AttribModType *ap = FindAttrib(attrib);
 	if(ap == NULL) return 0;

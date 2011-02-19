@@ -33,7 +33,7 @@
 // Make sure this is correct.   The default is 1000 towns and 1000 regions.
 #define NUMBER_OF_TOWNS 1000
 
-static char *regionnames[] =
+static char const *regionnames[] =
 {
 // Towns x1000
 	"Cahaba",
@@ -2095,7 +2095,7 @@ int AGetName(int town )
     return j;
 }
 
-char *AGetNameString( int name )
+char const *AGetNameString( int name )
 {
     return( regionnames[ name ] );
 }

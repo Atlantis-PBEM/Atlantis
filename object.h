@@ -39,7 +39,7 @@ class Object;
 
 class ObjectType {
 	public:
-		char *name;
+		char const *name;
 		enum {
 			DISABLED	= 0x001,
 			NOMONSTERGROWTH	= 0x002,
@@ -58,7 +58,7 @@ class ObjectType {
 
 		int item;
 		int cost;
-		char *skill;
+		char const *skill;
 		int level;
 
 		int maxMaintenance;

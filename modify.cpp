@@ -693,14 +693,14 @@ void Game::ModifyEffectCancelEffect(char *effect, char *uneffect)
 	ep->cancelEffect = uneffect;
 }
 
-void Game::ModifyRangeFlags(char *range, int flags)
+void Game::ModifyRangeFlags(char const *range, int flags)
 {
 	RangeType *rp = FindRange(range);
 	if (rp == NULL) return;
 	rp->flags = flags;
 }
 
-void Game::ModifyRangeClass(char *range, int rclass)
+void Game::ModifyRangeClass(char const *range, int rclass)
 {
 	RangeType *rp = FindRange(range);
 	if (rp == NULL) return;
@@ -724,7 +724,7 @@ void Game::ModifyRangeLevelPenalty(char *range, int pen)
 	rp->crossLevelPenalty = pen;
 }
 
-void Game::ModifyAttribMod(char *mod, int index, int flags, char *ident,
+void Game::ModifyAttribMod(char const *mod, int index, int flags, char const *ident,
 		int type, int val)
 {
 	AttribModType *mp = FindAttrib(mod);

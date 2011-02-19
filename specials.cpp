@@ -54,7 +54,7 @@ void Soldier::SetupHealing()
     }
 }
 
-int Army::CheckSpecialTarget(char *special,int tar)
+int Army::CheckSpecialTarget(char const *special,int tar)
 {
 	SpecialType *spd = FindSpecial(special);
 	int i;

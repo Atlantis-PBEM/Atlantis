@@ -26,7 +26,7 @@
 #include "gamedata.h"
 #include "game.h"
 
-char *as[] = {
+char const *as[] = {
 	"Hostile",
 	"Unfriendly",
 	"Neutral",
@@ -34,25 +34,25 @@ char *as[] = {
 	"Ally"
 };
 
-char **AttitudeStrs = as;
+char const **AttitudeStrs = as;
 
-char *fs[] = {
+char const *fs[] = {
 	"War",
 	"Trade",
 	"Magic"
 };
 
-char **FactionStrs = fs;
+char const **FactionStrs = fs;
 
 // LLS - fix up the template strings
-char *tp[] = {
+char const *tp[] = {
 	"off",
 	"short",
 	"long",
 	"map"
 };
 
-char **TemplateStrs = tp;
+char const **TemplateStrs = tp;
 
 int ParseTemplate(AString *token)
 {
