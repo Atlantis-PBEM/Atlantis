@@ -31,37 +31,34 @@ Table of Contents
 
 5.      Altering game rules
 
-6.		World Creation Guide
-6.1		Basics: world size, land mass and levels
+6.	World Creation Guide
+6.1	Basics: world size, land mass and levels
 6.2.	Land Mass Distribution
 6.3.	Terrain Distribution
 6.4.	Towns and Races
-6.5		Special: Fractal Generation
+6.5	Special: Fractal Generation
 
 
 1. Obtaining a copy of Atlantis
 
 There are two options if you want to get a copy of Atlantis: the first 
-is to download a release tarball from yahoo groups at <http://groups.
-yahoo.com/group/atlantisdev/files/Sources/>. At the time of writing this
-Guide, the most recent release was 4.0.10e.
+is to download a release tarball from yahoo groups at
+<http://groups.yahoo.com/group/atlantisdev/files/Sources/>.
+At the time of writing this Guide, the most recent release was 4.1.0.
 
-The second option is to get a copy of the sources from CVS. Under a UNIX
+The second option is to get a copy of the sources from SVN. Under a UNIX
 system, issue the following commands to obtain a copy of the Atlantis 
 sources:
 
 If you want the latest updates of the stable version 4:
-cvs -d :pserver:guest@cvs.dragoncat.net:/data/cvs login
-cvs -d :pserver:guest@cvs.dragoncat.net:/data/cvs checkout -r \ 
-RELEASE_410 atlantis
+svn co https://atlantis.svn.sourceforge.net/svnroot/atlantis/branches/PATCHES_410 atlantis
 
 If you want the 'dangerous' version 5:
-cvs -d :pserver:guest@cvs.dragoncat.net:/data/cvs login
-cvs -d :pserver:guest@cvs.dragoncat.net:/data/cvs checkout atlantis
+svn co https://atlantis.svn.sourceforge.net/svnroot/atlantis/trunk atlantis
 
 WARNING: If you are unsure about C++ and compiling from sources, or 
 this is your first try at running a game, you almost certainly want 
-to get the stable version. The CVS sources (particularly version 5) 
+to get the stable version. The SVN sources (particularly version 5) 
 contain many 'in progress' updates to the code, which may result in 
 bugs and other instabilities, and are not for the faint hearted.
 
