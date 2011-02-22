@@ -22,6 +22,9 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+
+#include <stdlib.h>
+
 #include "game.h"
 #include "skills.h"
 #include "items.h"

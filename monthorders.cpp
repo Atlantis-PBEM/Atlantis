@@ -28,6 +28,9 @@
 // 2000/MAR/14	Larry Stanbery		Added production enhancement.
 // 2000/MAR/21	Azthar Septragen	Added roads.
 // 2001/Feb/21	Joseph Traub		Added FACLIM_UNLIMITED
+
+#include <stdlib.h>
+
 #include "game.h"
 #include "gamedata.h"
 

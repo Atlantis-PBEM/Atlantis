@@ -23,6 +23,8 @@
 //
 // END A3HEADER
 
+#include <stdlib.h>
+
 #include "game.h"
 #include "gameio.h"
 #include "orders.h"

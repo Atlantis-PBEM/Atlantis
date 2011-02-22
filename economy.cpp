@@ -24,7 +24,9 @@
 // END A3HEADER
 
 #include <stdio.h>
+
 #include <string.h>
+#include <stdlib.h>
 #include "game.h"
 #include "gamedata.h"
 
