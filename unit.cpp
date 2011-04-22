@@ -976,21 +976,38 @@ int Unit::CanStudy(int sk)
 	return 1;
 }
 
-int Unit::Study(int sk,int days)
+/// perform the "study" order for this unit
+///@return 0 on fail, 1 on success
+int Unit::Study(int sk, int days)
 {
-	Skill *s;
-
-	if(Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
+	// if non-leaders can only have one skill, and this is not a leader
+	if (Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
+		// if we have a skill already
 		if (skills.Num()) {
-			s = (Skill *) skills.First();
+			Skill *s = (Skill*)skills.First();
+			// if we are not improving our one skill
 			if (s->type != sk) {
-				Error("STUDY: Can know only 1 skill.");
-				return 0;
+				// and it is not magic related
+				if (!Globals->MAGE_NONLEADERS) {
+					Error("STUDY: Can know only 1 skill.");
+					return 0;
+				}
+				//else, if this is not a magic skill
+				if ((SkillDefs[sk].flags & SkillType::MAGIC) == 0) {
+					Error("STUDY: Can know only 1 skill.");
+					return 0;
+				}
+				//else, if our "one" skill is not magic
+				if ((SkillDefs[s->type].flags & SkillType::MAGIC) == 0) {
+					Error("STUDY: Can know only 1 skill.");
+					return 0;
+				}
 			}
 		}
 	}
+
 	forlist(&skills) {
-		s = (Skill *)elem;
+		Skill *s = (Skill *)elem;
 		if (s->type != sk) continue;
 		int max = 1000;
 		forlist (&items) {
@@ -1011,16 +1028,17 @@ int Unit::Study(int sk,int days)
 		return 0;
 	}
 
-	skills.SetDays(sk,skills.GetDays(sk) + days);
+	skills.SetDays(sk, skills.GetDays(sk) + days);
 	AdjustSkills();
 
-	/* Check to see if we need to show a skill report */
+	// Check to see if we need to show a skill report
 	int lvl = GetRealSkill(sk);
 	if (lvl > faction->skills.GetDays(sk)) {
-		faction->skills.SetDays(sk,lvl);
-		faction->shows.Add(new ShowSkill(sk,lvl));
+		faction->skills.SetDays(sk, lvl);
+		faction->shows.Add(new ShowSkill(sk, lvl));
 	}
-	return 1;
+
+	return 1; // success
 }
 
 int Unit::Practise(int sk)
@@ -1082,69 +1100,85 @@ int Unit::IsNormal()
 	return 0;
 }
 
+/// limit the unit to one skill (for non MU)
+void Unit::limitSkillNoMagic()
+{
+	// Find highest skill, eliminate others
+	Skill *maxskill = 0; // live-out
+
+	unsigned max = 0; // loop-carry
+	forlist(&skills) {
+		Skill *s = (Skill*)elem;
+		if (s->days > max) {
+			max = s->days;
+			maxskill = s;
+		}
+	}
+
+	{
+		forlist(&skills) {
+			Skill *s = (Skill*)elem;
+			if (s != maxskill) {
+				skills.Remove(s);
+				delete s;
+			}
+		}
+	}
+}
+
+void Unit::limitSkillMagic()
+{
+	forlist(&skills) {
+		Skill *s = (Skill*)elem;
+		if(SkillDefs[s->type].flags & SkillType::MAGIC)
+			continue;
+
+		skills.Remove(s);
+		delete s;
+	}
+}
+
 void Unit::AdjustSkills()
 {
-	//
-	// First, is the unit a leader?
-	//
+	// if we are 100% leaders
 	if(IsLeader()) {
-		//
-		// Unit is all leaders: Make sure no skills are > max
-		//
+		// Make sure no skills are > max
 		forlist(&skills) {
-			Skill * s = (Skill *) elem;
-			if (GetRealSkill(s->type) >= SkillMax(s->type,I_LEADERS)) {
-				s->days = GetDaysByLevel(SkillMax(s->type,I_LEADERS)) *
+			Skill *s = (Skill*)elem;
+			if (GetRealSkill(s->type) >= SkillMax(s->type, I_LEADERS)) {
+				s->days = GetDaysByLevel(SkillMax(s->type, I_LEADERS)) *
 					GetMen();
 			}
 		}
-	} else {
-		if(Globals->SKILL_LIMIT_NONLEADERS) {
-			//
-			// Not a leader, can only know 1 skill
-			//
-			if (skills.Num() > 1) {
-				//
-				// Find highest skill, eliminate others
-				//
-				unsigned int max = 0;
-				Skill * maxskill = 0;
-				forlist(&skills) {
-					Skill * s = (Skill *) elem;
-					if (s->days > max) {
-						max = s->days;
-						maxskill = s;
-					}
-				}
-				{
-					forlist(&skills) {
-						Skill * s = (Skill *) elem;
-						if (s != maxskill) {
-							skills.Remove(s);
-							delete s;
-						}
-					}
+
+		return;
+	}
+	//else non-leaders
+
+	// if we can only know 1 skill, but know more
+	if(Globals->SKILL_LIMIT_NONLEADERS && skills.Num() > 1) {
+		if(!Globals->MAGE_NONLEADERS) {
+			limitSkillNoMagic();
+		} else {
+			limitSkillMagic();
+		}
+	}
+
+	// Limit remaining skills to max
+	forlist(&skills) {
+		Skill *theskill = (Skill*)elem;
+		int max = 100;
+		forlist(&items) {
+			Item *i = (Item*)elem;
+			if (ItemDefs[i->type].type & IT_MAN) {
+				if (SkillMax(theskill->type, i->type) < max) {
+					max = SkillMax(theskill->type,i->type);
 				}
 			}
 		}
 
-		//
-		// Limit remaining skills to max
-		//
-		forlist(&skills) {
-			Skill *theskill = (Skill *) elem;
-			int max = 100;
-			forlist(&items) {
-				Item * i = (Item *) elem;
-				if (ItemDefs[i->type].type & IT_MAN) {
-					if (SkillMax(theskill->type,i->type) < max) {
-						max = SkillMax(theskill->type,i->type);
-					}
-				}
-			}
-			if (GetRealSkill(theskill->type) >= max) {
-				theskill->days = GetDaysByLevel(max) * GetMen();
-			}
+		if (GetRealSkill(theskill->type) >= max) {
+			theskill->days = GetDaysByLevel(max) * GetMen();
 		}
 	}
 }
