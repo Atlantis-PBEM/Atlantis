@@ -27,7 +27,7 @@
 
 void Game::CreateCityMons()
 {
-	if(!Globals->CITY_MONSTERS_EXIST) return;
+	if (!Globals->CITY_MONSTERS_EXIST) return;
 
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
@@ -39,14 +39,14 @@ void Game::CreateCityMons()
 
 void Game::CreateWMons()
 {
-	if(!Globals->WANDERING_MONSTERS_EXIST) return;
+	if (!Globals->WANDERING_MONSTERS_EXIST) return;
 
 	GrowWMons(50);
 }
 
 void Game::CreateLMons()
 {
-	if(!Globals->LAIR_MONSTERS_EXIST) return;
+	if (!Globals->LAIR_MONSTERS_EXIST) return;
 
 	GrowLMons(50);
 }
@@ -58,7 +58,7 @@ void Game::GrowWMons(int rate)
 	// needed.
 	//
 	int level;
-	for(level = 0; level < regions.numLevels; level++) {
+	for (level = 0; level < regions.numLevels; level++) {
 		ARegionArray *pArr = regions.pRegionArrays[level];
 		int xsec;
 		for (xsec=0; xsec< pArr->x / 8; xsec++) {
@@ -77,19 +77,19 @@ void Game::GrowWMons(int rate)
 							 */
 							int avail = 0;
 							int mon = TerrainDefs[reg->type].smallmon;
-							if(!((mon == -1) ||
+							if (!((mon == -1) ||
 								 (ItemDefs[mon].flags & ItemType::DISABLED)))
 								avail = 1;
 							mon = TerrainDefs[reg->type].bigmon;
-							if(!((mon == -1) ||
+							if (!((mon == -1) ||
 								 (ItemDefs[mon].flags & ItemType::DISABLED)))
 								avail = 1;
 							mon = TerrainDefs[reg->type].humanoid;
-							if(!((mon == -1) ||
+							if (!((mon == -1) ||
 								 (ItemDefs[mon].flags & ItemType::DISABLED)))
 								avail = 1;
 
-							if(avail)
+							if (avail)
 								wanted += TerrainDefs[reg->type].wmonfreq;
 						}
 					}
@@ -138,7 +138,7 @@ void Game::GrowLMons(int rate)
 
 int Game::MakeWMon(ARegion *pReg)
 {
-	if(!Globals->WANDERING_MONSTERS_EXIST) return 0;
+	if (!Globals->WANDERING_MONSTERS_EXIST) return 0;
 
 	if (TerrainDefs[pReg->type].wmonfreq == 0) return 0;
 
@@ -148,7 +148,7 @@ int Game::MakeWMon(ARegion *pReg)
 	if (TerrainDefs[pReg->type].bigmon != -1 && !getrandom(8)) {
 		montype = TerrainDefs[pReg->type].bigmon;
 	}
-	if((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
+	if ((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
 		return 0;
 
 	MonType *mp = FindMonster(ItemDefs[montype].abr,
@@ -162,8 +162,8 @@ int Game::MakeWMon(ARegion *pReg)
 
 void Game::MakeLMon(Object *pObj)
 {
-	if(!Globals->LAIR_MONSTERS_EXIST) return;
-	if(ObjectDefs[pObj->type].flags & ObjectType::NOMONSTERGROWTH) return;
+	if (!Globals->LAIR_MONSTERS_EXIST) return;
+	if (ObjectDefs[pObj->type].flags & ObjectType::NOMONSTERGROWTH) return;
 
 	int montype = ObjectDefs[pObj->type].monster;
 
@@ -173,7 +173,7 @@ void Game::MakeLMon(Object *pObj)
 	if (montype == I_CENTAUR)
 		montype = TerrainDefs[pObj->region->type].humanoid;
 
-	if((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
+	if ((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
 		return;
 
 	MonType *mp = FindMonster(ItemDefs[montype].abr,
@@ -292,19 +292,19 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 	for (unsigned int i=0;
 		i<(sizeof(men->skills)/sizeof(men->skills[0]));
 			i++) {
-				if(men->skills[i] == NULL) continue;
-				if(FindSkill(men->skills[i]) == FindSkill("COMB"))
+				if (men->skills[i] == NULL) continue;
+				if (FindSkill(men->skills[i]) == FindSkill("COMB"))
 					scomb = men->speciallevel;
-				if(FindSkill(men->skills[i]) == FindSkill("XBOW"))
+				if (FindSkill(men->skills[i]) == FindSkill("XBOW"))
 					sxbow = men->speciallevel;
-				if(FindSkill(men->skills[i]) == FindSkill("LBOW"))
+				if (FindSkill(men->skills[i]) == FindSkill("LBOW"))
 					slbow = men->speciallevel;
 	}
 	int combat = scomb;
 	AString *s = new AString("COMB");
 	int sk = LookupSkill(s);
-	if(behind) {
-		if(slbow >= sxbow) {
+	if (behind) {
+		if (slbow >= sxbow) {
 			*s = AString("LBOW");
 			sk = LookupSkill(s);
 			combat = slbow;
@@ -314,46 +314,46 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 			combat = sxbow;
 		}
 	}
-	if(combat < level) weaponlevel += level - combat;
+	if (combat < level) weaponlevel += level - combat;
 	int weapon = -1;
 	int witem = -1;
 	while (weapon == -1) {
 		int fitting[NUMWEAPONS];
 		int n = 0;
-		for(int i=0; i<NUMWEAPONS; i++) {
+		for (int i=0; i<NUMWEAPONS; i++) {
 			fitting[i] = 0;
 			AString *it = new AString(WeaponDefs[i].abbr);
-			if(ItemDefs[LookupItem(it)].flags & ItemType::DISABLED) continue;
+			if (ItemDefs[LookupItem(it)].flags & ItemType::DISABLED) continue;
 			// disregard picks!
 			AString *ps = new AString("PICK");
-			if(LookupItem(it) == LookupItem(ps)) continue;
+			if (LookupItem(it) == LookupItem(ps)) continue;
 			
 			// Sort out the more exotic weapons!
 			int producelevel = ItemDefs[LookupItem(it)].pLevel;
-			if(ItemDefs[LookupItem(it)].pSkill != FindSkill("WEAP")->abbr) continue;
+			if (ItemDefs[LookupItem(it)].pSkill != FindSkill("WEAP")->abbr) continue;
 
 			AString *s1 = new AString(WeaponDefs[i].baseSkill);
 			AString *s2 = new AString(WeaponDefs[i].orSkill);			
-			if((WeaponDefs[i].flags & WeaponType::RANGED)
+			if ((WeaponDefs[i].flags & WeaponType::RANGED)
 				&& (!behind)) continue;
 			int attack = WeaponDefs[i].attackBonus;
-			if(attack < (producelevel-1)) attack = producelevel-1;
-			if((LookupSkill(s1) == sk)
+			if (attack < (producelevel-1)) attack = producelevel-1;
+			if ((LookupSkill(s1) == sk)
 				|| (LookupSkill(s2) == sk)) {
-				if((behind) && (attack + combat <= weaponlevel)) {
+				if ((behind) && (attack + combat <= weaponlevel)) {
 					fitting[i] = 1;
-					if(WeaponDefs[i].attackBonus == weaponlevel) fitting[i] = 5;
+					if (WeaponDefs[i].attackBonus == weaponlevel) fitting[i] = 5;
 					n += fitting[i];
 				} else if ((!behind) && (attack == weaponlevel)) {
 					fitting[i] = 1;
-					//if(WeaponDefs[i].attackBonus == weaponlevel) fitting[i] = 5;
+					//if (WeaponDefs[i].attackBonus == weaponlevel) fitting[i] = 5;
 					n += fitting[i];
 				} else continue;
 			} else {
 				// make Javelins possible
 				AString *cs = new AString("COMB");
-				if((behind) && (scomb > combat)) {
-					if((WeaponDefs[i].flags & WeaponType::RANGED)
+				if ((behind) && (scomb > combat)) {
+					if ((WeaponDefs[i].flags & WeaponType::RANGED)
 						&& ((LookupSkill(s1) == LookupSkill(cs))
 							|| (LookupSkill(s2) == LookupSkill(cs)))) {
 							fitting[i] = 1;
@@ -364,11 +364,11 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 		}
 		
 		AString *tmp = new AString(" (behind)");
-		if(!behind) tmp = new AString("");
+		if (!behind) tmp = new AString("");
 		/*
 		 * Awrite(AString("Found ") + n + " fitting weapons " + *tmp + ".");
 		*/
-		if(n < 1) {
+		if (n < 1) {
 			weaponlevel++;
 			continue;
 		} else {
@@ -380,21 +380,21 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 				Awrite(AString("Roll: ") + w);
 				*/
 				n = -1;
-				for(int i=0; i<NUMWEAPONS; i++) {
-					if(fitting[i]) {
+				for (int i=0; i<NUMWEAPONS; i++) {
+					if (fitting[i]) {
 						n += fitting[i];
 						/*
 						Awrite(WeaponDefs[i].abbr);
 						*/
-						if((n >= w)  && (weapon == -1))
+						if ((n >= w)  && (weapon == -1))
 							weapon = i;
 					}
 				}
-				if(weapon >= 0) {
+				if (weapon >= 0) {
 					AString *ws = new AString(WeaponDefs[weapon].abbr);
 					witem = LookupItem(ws);
 					secondtry++;
-					if(men->CanUse(witem)) break;
+					if (men->CanUse(witem)) break;
 				}
 			}
 		}
@@ -402,30 +402,30 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 	// Check again which skills the weapon uses
 	AString *ws1 = new AString(WeaponDefs[weapon].baseSkill);
 	AString *ws2 = new AString(WeaponDefs[weapon].orSkill);
-	if((LookupSkill(ws1) != sk) && (LookupSkill(ws2) != sk))
+	if ((LookupSkill(ws1) != sk) && (LookupSkill(ws2) != sk))
 		sk = LookupSkill(ws1);
 	int maxskill = men->defaultlevel;
 	int special = 0;
-	for(unsigned int i=0;
+	for (unsigned int i=0;
 		i<(sizeof(men->skills)/sizeof(men->skills[0]));
 		i++) {
-		if(FindSkill(men->skills[i]) == FindSkill(SkillDefs[sk].abbr)) {
+		if (FindSkill(men->skills[i]) == FindSkill(SkillDefs[sk].abbr)) {
 			special = 1;
 		}		
 	}
-	if(special) maxskill = men->speciallevel;
-	if(level > maxskill) level = maxskill;
+	if (special) maxskill = men->speciallevel;
+	if (level > maxskill) level = maxskill;
 	u->SetMen(mantype, num);
 	/*
 	Awrite(AString("Unit (") + u->num + ") -> chose " + ItemDefs[witem].name);
 	*/
 	u->items.SetNum(witem, num);
 	u->SetSkill(sk, level);
-	if(behind) u->SetFlag(FLAG_BEHIND,1);
-	if(armor) {
+	if (behind) u->SetFlag(FLAG_BEHIND,1);
+	if (armor) {
 		int ar = I_PLATEARMOR;
-		if(!men->CanUse(ar)) ar = I_CHAINARMOR;
-		if(!men->CanUse(ar)) ar = I_LEATHERARMOR;
+		if (!men->CanUse(ar)) ar = I_CHAINARMOR;
+		if (!men->CanUse(ar)) ar = I_LEATHERARMOR;
 		u->items.SetNum(ar, num);
 	}
 	return u;

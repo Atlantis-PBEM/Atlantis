@@ -117,7 +117,7 @@ ExchangeOrder::ExchangeOrder()
 
 ExchangeOrder::~ExchangeOrder()
 {
-	if(target) delete target;
+	if (target) delete target;
 }
 
 TurnOrder::TurnOrder()
@@ -164,7 +164,7 @@ GiveOrder::GiveOrder()
 
 GiveOrder::~GiveOrder()
 {
-	if(target) delete target;
+	if (target) delete target;
 }
 
 StudyOrder::StudyOrder()
@@ -228,7 +228,7 @@ BuildOrder::BuildOrder()
 
 BuildOrder::~BuildOrder()
 {
-	if(target) delete target;
+	if (target) delete target;
 }
 
 SailOrder::SailOrder()
@@ -349,5 +349,5 @@ TransportOrder::TransportOrder()
 
 TransportOrder::~TransportOrder()
 {
-	if(target) delete target;
+	if (target) delete target;
 }

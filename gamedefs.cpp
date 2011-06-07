@@ -25,40 +25,40 @@
 #include "gamedefs.h"
 
 char const *dr[] = {
-  "North",
-  "Northeast",
-  "Southeast",
-  "South",
-  "Southwest",
-  "Northwest"
+	"North",
+	"Northeast",
+	"Southeast",
+	"South",
+	"Southwest",
+	"Northwest"
 };
 
 char const ** DirectionStrs = dr;
 
 char const *da[] = {
-    "N",
-    "NE",
-    "SE",
-    "S",
-    "SW",
-    "NW"
+	"N",
+	"NE",
+	"SE",
+	"S",
+	"SW",
+	"NW"
 };
 
 char const ** DirectionAbrs = da;
 
 char const *mn[] = {
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December"
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December"
 };
 
 char const ** MonthNames = mn;

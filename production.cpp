@@ -42,7 +42,7 @@ Production::Production(int it, int maxamt)
 {
 	itemtype = it;
 	amount = maxamt;
-	if(Globals->RANDOM_ECONOMY)
+	if (Globals->RANDOM_ECONOMY)
 		amount += getrandom(maxamt);
 	baseamount = amount;
 	productivity = 10;

@@ -50,7 +50,7 @@ Market::Market(int a, int b, int c, int d, int e, int f, int g, int h)
 void Market::PostTurn(int population, int wages)
 {
 	// Nothing to do to the markets.
-	if(!(Globals->VARIABLE_ECONOMY)) return;
+	if (!(Globals->VARIABLE_ECONOMY)) return;
 
 	//
 	// Unlimited, unchanging market.

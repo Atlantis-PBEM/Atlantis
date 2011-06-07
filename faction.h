@@ -10,7 +10,7 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
@@ -23,10 +23,10 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date        Person         Comments
-// ----        ------         --------
-// 2000/MAR/14 Davis Kulis    Added a new reporting Template.
-// 2001/Feb/18 Joseph Traub   Added Apprentices from Lacandon Conquest
+// Date				Person				 Comments
+// ----				------				 --------
+// 2000/MAR/14 Davis Kulis		Added a new reporting Template.
+// 2001/Feb/18 Joseph Traub	 Added Apprentices from Lacandon Conquest
 #ifndef FACTION_CLASS
 #define FACTION_CLASS
 
@@ -44,38 +44,38 @@ class Game;
 #include "astring.h"
 
 enum {
-    A_HOSTILE,
-    A_UNFRIENDLY,
-    A_NEUTRAL,
-    A_FRIENDLY,
-    A_ALLY,
-    NATTITUDES
+	A_HOSTILE,
+	A_UNFRIENDLY,
+	A_NEUTRAL,
+	A_FRIENDLY,
+	A_ALLY,
+	NATTITUDES
 };
 
 enum {
-    F_WAR,
-    F_TRADE,
-    F_MAGIC,
-    NFACTYPES
+	F_WAR,
+	F_TRADE,
+	F_MAGIC,
+	NFACTYPES
 };
 
 // DK
 // LLS - make templates cleaner for save/restore
 enum {
-    TEMPLATE_OFF,
-    TEMPLATE_SHORT,
-    TEMPLATE_LONG,
-    TEMPLATE_MAP,
-    NTEMPLATES
+	TEMPLATE_OFF,
+	TEMPLATE_SHORT,
+	TEMPLATE_LONG,
+	TEMPLATE_MAP,
+	NTEMPLATES
 };
 
 enum {
-    QUIT_NONE,
-    QUIT_BY_ORDER,
-    QUIT_BY_GM,
-    QUIT_AND_RESTART,
-    QUIT_WON_GAME,
-    QUIT_GAME_OVER,
+	QUIT_NONE,
+	QUIT_BY_ORDER,
+	QUIT_BY_GM,
+	QUIT_AND_RESTART,
+	QUIT_WON_GAME,
+	QUIT_GAME_OVER,
 };
 
 extern char const ** AttitudeStrs;
@@ -91,122 +91,122 @@ int MagesByFacType(int);
 
 class FactionVector {
 public:
-  FactionVector(int);
-  ~FactionVector();
+	FactionVector(int);
+	~FactionVector();
 
-  void ClearVector();
-  void SetFaction(int, Faction *);
-  Faction *GetFaction(int);
+	void ClearVector();
+	void SetFaction(int, Faction *);
+	Faction *GetFaction(int);
 
-  Faction **vector;
-  int vectorsize;
+	Faction **vector;
+	int vectorsize;
 };
-  
+	
 class Attitude : public AListElem {
 public:
-  Attitude();
-  ~Attitude();
-  void Writeout(Aoutfile * );
-  void Readin( Ainfile *, ATL_VER version );
-  
-  int factionnum;
-  int attitude;
+	Attitude();
+	~Attitude();
+	void Writeout(Aoutfile * );
+	void Readin( Ainfile *, ATL_VER version );
+	
+	int factionnum;
+	int attitude;
 };
 
 class FactionPtr : public AListElem {
 public:
-  Faction * ptr;
+	Faction * ptr;
 };
 
 class Faction : public AListElem
 {
 public:
-    Faction();
-    Faction(int);
-    ~Faction();
-    
-    void Readin( Ainfile *, ATL_VER version );
-    void Writeout( Aoutfile * );
-    void View();
-    
-    void SetName(AString *);
-    void SetNameNoChange( AString *str );
-    void SetAddress( AString &strNewAddress );
-    
-    void CheckExist(ARegionList *);
-    void Error(const AString &);
-    void Event(const AString &);
-    
-    AString FactionTypeStr();
-    void WriteReport( Areport *f, Game *pGame );
-    // LLS - write order template
-    void WriteTemplate(Areport *f, Game *pGame);
-    void WriteFacInfo(Aoutfile *);
-    
-    void SetAttitude(int,int); /* faction num, attitude */
-    /* if attitude == -1, clear it */
-    int GetAttitude(int);
-    void RemoveAttitude(int);
-    
-    int CanCatch(ARegion *,Unit *);
+	Faction();
+	Faction(int);
+	~Faction();
+	
+	void Readin( Ainfile *, ATL_VER version );
+	void Writeout( Aoutfile * );
+	void View();
+	
+	void SetName(AString *);
+	void SetNameNoChange( AString *str );
+	void SetAddress( AString &strNewAddress );
+	
+	void CheckExist(ARegionList *);
+	void Error(const AString &);
+	void Event(const AString &);
+	
+	AString FactionTypeStr();
+	void WriteReport( Areport *f, Game *pGame );
+	// LLS - write order template
+	void WriteTemplate(Areport *f, Game *pGame);
+	void WriteFacInfo(Aoutfile *);
+	
+	void SetAttitude(int,int); /* faction num, attitude */
+	/* if attitude == -1, clear it */
+	int GetAttitude(int);
+	void RemoveAttitude(int);
+	
+	int CanCatch(ARegion *,Unit *);
 	/* Return 1 if can see, 2 if can see faction */
-    int CanSee(ARegion *,Unit *, int practice = 0);
-    
-    void DefaultOrders();
-    void TimesReward();
-    
-    void SetNPC();
-    int IsNPC();
+	int CanSee(ARegion *,Unit *, int practice = 0);
+	
+	void DefaultOrders();
+	void TimesReward();
+	
+	void SetNPC();
+	int IsNPC();
 
 	void DiscoverItem(int item, int force, int full);
 
-    int num;
+	int num;
 
-    //
-    // The type is only used if Globals->FACTION_LIMIT_TYPE ==
-    // FACLIM_FACTION_TYPES
-    //
-    int type[NFACTYPES];
+	//
+	// The type is only used if Globals->FACTION_LIMIT_TYPE ==
+	// FACLIM_FACTION_TYPES
+	//
+	int type[NFACTYPES];
 
-    int lastchange;
-    int lastorders;
-    int unclaimed;
+	int lastchange;
+	int lastorders;
+	int unclaimed;
 	int bankaccount;
 	int interest; // not written to game.out
-    AString * name;
-    AString * address;
-    AString * password;
-    int times;
-    int showunitattitudes;
-    int temformat;
-    char exists;
-    int quit;
-    int numshows;
-    
-    int nummages;
+	AString * name;
+	AString * address;
+	AString * password;
+	int times;
+	int showunitattitudes;
+	int temformat;
+	char exists;
+	int quit;
+	int numshows;
+	
+	int nummages;
 	int numapprentices;
 	int numqms;
 	int numtacts;
-    AList war_regions;
-    AList trade_regions;
+	AList war_regions;
+	AList trade_regions;
 
-    /* Used when writing reports */
-    AList present_regions;
-    
-    int defaultattitude;
-    AList attitudes;
-    SkillList skills;
+	/* Used when writing reports */
+	AList present_regions;
+	
+	int defaultattitude;
+	AList attitudes;
+	SkillList skills;
 	ItemList items;
 	
-    //
-    // Both are lists of AStrings
-    //
-    AList extraPlayers;
-    AList errors;
-    AList events;
-    AList battles;
-    AList shows;
-    AList itemshows;
+	//
+	// Both are lists of AStrings
+	//
+	AList extraPlayers;
+	AList errors;
+	AList events;
+	AList battles;
+	AList shows;
+	AList itemshows;
 	AList objectshows;
 
 	// These are used for 'granting' units to a faction via the players.in

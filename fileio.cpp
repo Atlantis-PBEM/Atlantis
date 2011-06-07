@@ -93,7 +93,7 @@ void Aoutfile::Open(const AString &s)
 		delete name;
 		// Handle a broke ios::ate implementation on some boxes
 		file->seekp(0, ios::end);
-		if((int)file->tellp()!= 0) file->close();
+		if ((int)file->tellp()!= 0) file->close();
 	}
 }
 
@@ -101,10 +101,10 @@ int Aoutfile::OpenByName(const AString &s)
 {
 	AString temp = s;
 	file->open(temp.Str(), ios::out|ios::ate);
-	if(!file->rdbuf()->is_open()) return -1;
+	if (!file->rdbuf()->is_open()) return -1;
 	// Handle a broke ios::ate implementation on some boxes
 	file->seekp(0, ios::end);
-	if((int)file->tellp() != 0) {
+	if ((int)file->tellp() != 0) {
 		file->close();
 		return -1;
 	}
@@ -232,27 +232,27 @@ void Areport::Open(const AString &s)
 	while(!(file->rdbuf()->is_open())) {
 		AString *name = getfilename(s);
 		file->open(name->Str(),ios::out|ios::ate);
-        delete name;
+		delete name;
 		// Handle a broke ios::ate implementation on some boxes
 		file->seekp(0, ios::end);
-		if((int)file->tellp()!=0) file->close();
-    }
-    tabs = 0;
+		if ((int)file->tellp()!=0) file->close();
+	}
+	tabs = 0;
 }
 
 int Areport::OpenByName(const AString &s)
 {
 	AString temp = s;
 	file->open(temp.Str(), ios::out|ios::ate);
-    if (!file->rdbuf()->is_open()) return -1;
+	if (!file->rdbuf()->is_open()) return -1;
 	// Handle a broke ios::ate implementation on some boxes
 	file->seekp(0, ios::end);
-	if((int)file->tellp() != 0) {
+	if ((int)file->tellp() != 0) {
 		file->close();
 		return -1;
 	}
-    tabs = 0;
-    return 0;
+	tabs = 0;
+	return 0;
 }
 
 void Areport::AddTab()
@@ -304,12 +304,12 @@ void Arules::Open(const AString &s)
 	while(!(file->rdbuf()->is_open())) {
 		AString *name = getfilename(s);
 		file->open(name->Str(),ios::out|ios::ate);
-        delete name;
+		delete name;
 		// Handle a broke ios::ate implementation on some boxes
 		file->seekp(0, ios::end);
-		if((int)file->tellp()!=0) file->close();
-    }
-    tabs = 0;
+		if ((int)file->tellp()!=0) file->close();
+	}
+	tabs = 0;
 	wraptab = 0;
 }
 
@@ -317,16 +317,16 @@ int Arules::OpenByName(const AString &s)
 {
 	AString temp = s;
 	file->open(temp.Str(), ios::out|ios::trunc);
-    if (!file->rdbuf()->is_open()) return -1;
+	if (!file->rdbuf()->is_open()) return -1;
 	// Handle a broke ios::ate implementation on some boxes
 	file->seekp(0, ios::end);
-	if((int)file->tellp() != 0) {
+	if ((int)file->tellp() != 0) {
 		file->close();
 		return -1;
 	}
-    tabs = 0;
+	tabs = 0;
 	wraptab = 0;
-    return 0;
+	return 0;
 }
 
 void Arules::AddTab()
@@ -351,7 +351,7 @@ void Arules::AddWrapTab()
 
 void Arules::DropWrapTab()
 {
-	if(wraptab > 0) wraptab--;
+	if (wraptab > 0) wraptab--;
 }
 
 void Arules::ClearWrapTab()
@@ -405,7 +405,7 @@ void Arules::EndLine()
 
 void Arules::Enclose(int flag, const AString &tag)
 {
-	if(flag) {
+	if (flag) {
 		PutStr(AString("<") + tag + ">");
 		AddTab();
 	} else {

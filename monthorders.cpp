@@ -749,7 +749,7 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int level, int needed, int shi
 		// Figure out the max we can produce based on the inputs
 		int count = 0;
 		unsigned int c;
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[ship].pInput[c].item;
 			if (i != -1)
 				count += u->GetSharedNum(i) / ItemDefs[ship].pInput[c].amt;
@@ -770,7 +770,7 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int level, int needed, int shi
 		r->improvement += count;
 
 		// Deduct the items spent
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[ship].pInput[c].item;
 			int a = ItemDefs[ship].pInput[c].amt;
 			if (i != -1) {
@@ -788,7 +788,7 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int level, int needed, int shi
 	else {
 		// Figure out the max we can produce based on the inputs
 		unsigned int c;
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[ship].pInput[c].item;
 			if (i != -1) {
 				int amt = u->GetSharedNum(i);
@@ -810,7 +810,7 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int level, int needed, int shi
 		r->improvement += maxproduced;
 		
 		// Deduct the items spent
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[ship].pInput[c].item;
 			int a = ItemDefs[ship].pInput[c].amt;
 			if (i != -1) {
@@ -887,7 +887,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 		// Figure out the max we can produce based on the inputs
 		int count = 0;
 		unsigned int c;
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[o->item].pInput[c].item;
 			if (i != -1)
 				count += u->GetSharedNum(i) / ItemDefs[o->item].pInput[c].amt;
@@ -900,7 +900,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 		r->improvement += count;
 
 		// Deduct the items spent
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[o->item].pInput[c].item;
 			int a = ItemDefs[o->item].pInput[c].amt;
 			if (i != -1) {
@@ -918,7 +918,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	else {
 		// Figure out the max we can produce based on the inputs
 		unsigned int c;
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[o->item].pInput[c].item;
 			if (i != -1) {
 				int amt = u->GetSharedNum(i);
@@ -932,7 +932,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 		r->improvement += maxproduced;
 		
 		// Deduct the items spent
-		for(c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
 			int i = ItemDefs[o->item].pInput[c].item;
 			int a = ItemDefs[o->item].pInput[c].amt;
 			if (i != -1) {

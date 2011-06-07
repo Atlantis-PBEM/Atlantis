@@ -49,12 +49,12 @@ class SkillList;
   Example:
   SANDLE has depends[0].skill = SHOE and depends[0].level = 3.
 
-  To study:   requires:
-  SANDLE 1    SHOE 3
-  SANDLE 2    SHOE 3
-  SANDLE 3    SHOE 3
-  SANDLE 4    SHOE 4
-  SANDLE 5    SHOE 5
+  To study:	requires:
+  SANDLE 1	SHOE 3
+  SANDLE 2	SHOE 3
+  SANDLE 3	SHOE 3
+  SANDLE 4	SHOE 4
+  SANDLE 5	SHOE 5
 */
 
 struct SkillDepend

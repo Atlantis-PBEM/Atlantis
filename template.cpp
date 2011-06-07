@@ -323,7 +323,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 
 	// ----------------------------------------------------------------
 
-	if(Globals->WEATHER_EXISTS) {
+	if (Globals->WEATHER_EXISTS) {
 		GetMapLine(buffer, line, pRegs);
 
 		char const * nextWeather = "";
@@ -485,7 +485,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 
 	// ----------------------------------------------------------------
 
-	if(Globals->GATES_EXIST && gate) {
+	if (Globals->GATES_EXIST && gate) {
 		int sawgate = 0;
 		forlist(&objects) {
 			Object *o = (Object *) elem;

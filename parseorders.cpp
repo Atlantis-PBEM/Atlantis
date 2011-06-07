@@ -1114,7 +1114,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	int i;
 	if (!pCheck) {
-		for(i = 0; i < NFACTYPES; i++) {
+		for (i = 0; i < NFACTYPES; i++) {
 			oldfactype[i] = u->faction->type[i];
 		}
 	}
@@ -1129,13 +1129,13 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		int m = CountMages(u->faction);
 		int a = CountApprentices(u->faction);
 
-		for(i = 0; i < NFACTYPES; i++) u->faction->type[i] = factype[i];
+		for (i = 0; i < NFACTYPES; i++) u->faction->type[i] = factype[i];
 
 		if (m > AllowedMages(u->faction)) {
 			u->Error(AString("FACTION: Too many mages to change to that "
 							 "faction type."));
 
-			for(i = 0; i < NFACTYPES; i++)
+			for (i = 0; i < NFACTYPES; i++)
 				u->faction->type[i] = oldfactype[i];
 
 			return;
@@ -1145,7 +1145,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			u->Error(AString("FACTION: Too many apprentices to change to that "
 							 "faction type."));
 
-			for(i = 0; i < NFACTYPES; i++)
+			for (i = 0; i < NFACTYPES; i++)
 				u->faction->type[i] = oldfactype[i];
 
 			return;
@@ -1158,7 +1158,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				u->Error(AString("FACTION: Too many quartermasters to "
 							"change to that faction type."));
 
-				for(i = 0; i < NFACTYPES; i++)
+				for (i = 0; i < NFACTYPES; i++)
 					u->faction->type[i] = oldfactype[i];
 
 				return;
@@ -1682,7 +1682,7 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		if (*token == "peasant" || *token == "peasants" || *token == "peas") {
 			if (pCheck) {
 				it = -1;
-				for(int i = 0; i < NITEMS; i++) {
+				for (int i = 0; i < NITEMS; i++) {
 					if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 					if (ItemDefs[i].type & IT_LEADER) continue;
 					if (ItemDefs[i].type & IT_MAN) {
@@ -2606,7 +2606,7 @@ void Game::ProcessNocrossOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		move_over_water = 1;
 	if (!move_over_water) {
 		int i;
-		for(i = 0; i < NITEMS; i++) {
+		for (i = 0; i < NITEMS; i++) {
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (ItemDefs[i].swim > 0) move_over_water = 1;
 		}

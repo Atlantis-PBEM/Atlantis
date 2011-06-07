@@ -508,7 +508,7 @@ AString Object::FleetDefinition()
 	AString fleet;
 	int shiptype = -1;
 	int num = 0;
-	for(int i=0; i<NITEMS; i++) {
+	for (int i=0; i<NITEMS; i++) {
 		if (ItemDefs[i].type & IT_SHIP) {
 			int sn = GetNumShips(i);
 			if (sn > 0) {
@@ -521,7 +521,7 @@ AString Object::FleetDefinition()
 	else {
 		fleet = ObjectDefs[type].name;
 		// report ships:
-		for(int item=0; item<NITEMS; item++) {
+		for (int item=0; item<NITEMS; item++) {
 			num = GetNumShips(item);
 			if (num > 0) {
 				if (num > 1) {
@@ -757,7 +757,7 @@ AString *ObjectDescription(int obj)
 	/*
 	 * Handle all the specials
 	 */
-	for(int i = 0; i < NUMSPECIALS; i++) {
+	for (int i = 0; i < NUMSPECIALS; i++) {
 		SpecialType *spd = &SpecialDefs[i];
 		AString effect = "are";
 		int match = 0;
@@ -765,7 +765,7 @@ AString *ObjectDescription(int obj)
 				!(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
 			continue;
 		}
-		for(int j = 0; j < SPECIAL_BUILDINGS; j++)
+		for (int j = 0; j < SPECIAL_BUILDINGS; j++)
 			if (spd->buildings[j] == obj) match = 1;
 		if (!match) continue;
 		if (spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {

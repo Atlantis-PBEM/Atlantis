@@ -23,10 +23,10 @@
 //
 // END A3HEADER
 // MODIFICATIONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2000/SEP/06 Joseph Traub      Added base man cost to allow races to have
-//                               different base costs
+// Date		Person			Comments
+// ----		------			--------
+// 2000/SEP/06 Joseph Traub	  Added base man cost to allow races to have
+//							   different base costs
 #include "game.h"
 #include "gamedata.h"
 
@@ -2051,10 +2051,10 @@ static int nregions;
 
 void SetupNames()
 {
-    nnames = sizeof regionnames / sizeof (char *);
-    nameused = new int[nnames];
+	nnames = sizeof regionnames / sizeof (char *);
+	nameused = new int[nnames];
 
-    for (int i=0; i<nnames; i++) nameused[i] = 0;
+	for (int i=0; i<nnames; i++) nameused[i] = 0;
 	ntowns = 0;
 	nregions = 0;
 }
@@ -2067,7 +2067,7 @@ void CountNames()
 int AGetName(int town )
 {
 	int offset, number;
-	if(town) {
+	if (town) {
 		offset = 0;
 		number = NUMBER_OF_TOWNS;
 	} else {
@@ -2075,36 +2075,36 @@ int AGetName(int town )
 		number = nnames-NUMBER_OF_TOWNS;
 	}
 
-	if(town) ntowns++;
+	if (town) ntowns++;
 	else nregions++;
 
-    int i=getrandom(number);
+	int i=getrandom(number);
 	int j;
-	for(int count=0; count < number; count++) {
+	for (int count=0; count < number; count++) {
 		j = i+offset;
-		if(nameused[j] == 0) {
+		if (nameused[j] == 0) {
 			nameused[j] = 1;
 			return j;
 		}
-		if(++i >= number) i=0;
+		if (++i >= number) i=0;
 	}
-    for (i=0; i<number; i++) nameused[i+offset] = 0;
-    i = getrandom(number);
+	for (i=0; i<number; i++) nameused[i+offset] = 0;
+	i = getrandom(number);
 	j = i+offset;
-    nameused[j] = 1;
-    return j;
+	nameused[j] = 1;
+	return j;
 }
 
 char const *AGetNameString( int name )
 {
-    return( regionnames[ name ] );
+	return( regionnames[ name ] );
 }
 
 void Game::CreateWorld()
 {
 	int nx = 0;
 	int ny = 1;
-	if(Globals->MULTI_HEX_NEXUS) {
+	if (Globals->MULTI_HEX_NEXUS) {
 		ny = 2;
 		while(nx <= 0) {
 			Awrite("How many hexes should the nexus region be?");
@@ -2119,71 +2119,71 @@ void Game::CreateWorld()
 		nx = 1;
 	}
 
-    int xx = 0;
-    while (xx <= 0) {
-        Awrite("How wide should the map be? ");
-        xx = Agetint();
-        if( xx % 8 ) {
-            xx = 0;
-            Awrite( "The width must be a multiple of 8." );
-        }
-    }
-    int yy = 0;
-    while (yy <= 0) {
-        Awrite("How tall should the map be? ");
-        yy = Agetint();
-        if( yy % 8 ) {
-            yy = 0;
-            Awrite( "The height must be a multiple of 8." );
-        }
-    }
+	int xx = 0;
+	while (xx <= 0) {
+		Awrite("How wide should the map be? ");
+		xx = Agetint();
+		if ( xx % 8 ) {
+			xx = 0;
+			Awrite( "The width must be a multiple of 8." );
+		}
+	}
+	int yy = 0;
+	while (yy <= 0) {
+		Awrite("How tall should the map be? ");
+		yy = Agetint();
+		if ( yy % 8 ) {
+			yy = 0;
+			Awrite( "The height must be a multiple of 8." );
+		}
+	}
 
 	regions.CreateLevels(2 + Globals->UNDERWORLD_LEVELS +
 			Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL);
 
-    SetupNames();
+	SetupNames();
 
 	// Leave the Nexus level in even if we're not going to use it;
 	// It makes the main body of code more general
 	regions.CreateNexusLevel( 0, nx, ny, "nexus" );
-    regions.CreateSurfaceLevel( 1, xx, yy, 0 );
+	regions.CreateSurfaceLevel( 1, xx, yy, 0 );
 
-    // Create underworld levels
+	// Create underworld levels
 	int i;
-	for(i = 2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+	for (i = 2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
 		int xs = regions.GetLevelXScale(i);
 		int ys = regions.GetLevelYScale(i);
 		regions.CreateUnderworldLevel(i, xx/xs, yy/ys, "underworld");
 	}
 	// Underdeep levels
-	for(i=Globals->UNDERWORLD_LEVELS+2;
+	for (i=Globals->UNDERWORLD_LEVELS+2;
 			i<(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2); i++) {
 		int xs = regions.GetLevelXScale(i);
 		int ys = regions.GetLevelYScale(i);
 		regions.CreateUnderdeepLevel(i, xx/xs, yy/ys, "underdeep");
 	}
 
-	if(Globals->ABYSS_LEVEL) {
+	if (Globals->ABYSS_LEVEL) {
 		regions.CreateAbyssLevel(Globals->UNDERWORLD_LEVELS +
 				Globals->UNDERDEEP_LEVELS + 2, "abyss");
 	}
 
 	CountNames();
 
-	if(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS == 1) {
+	if (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS == 1) {
 		regions.MakeShaftLinks( 2, 1, 8 );
-	} else if(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS) {
+	} else if (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS) {
 		int i, ii;
 		// shafts from surface to underworld
 		regions.MakeShaftLinks(2, 1, 10);
-		for(i=3; i<Globals->UNDERWORLD_LEVELS+2; i++) {
+		for (i=3; i<Globals->UNDERWORLD_LEVELS+2; i++) {
 			regions.MakeShaftLinks(i, 1, 10*i-10);
 		}
 		// Shafts from underworld to underworld
-		if(Globals->UNDERWORLD_LEVELS > 1) {
-			for(i = 3; i < Globals->UNDERWORLD_LEVELS+2; i++) {
-				for(ii = 2; ii < i; ii++) {
-					if(i == ii+1) {
+		if (Globals->UNDERWORLD_LEVELS > 1) {
+			for (i = 3; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+				for (ii = 2; ii < i; ii++) {
+					if (i == ii+1) {
 						regions.MakeShaftLinks(i, ii, 12);
 					} else {
 						regions.MakeShaftLinks(i, ii, 24);
@@ -2192,19 +2192,19 @@ void Game::CreateWorld()
 			}
 		}
 		// underdeeps to underworld
-		if(Globals->UNDERDEEP_LEVELS && Globals->UNDERWORLD_LEVELS) {
+		if (Globals->UNDERDEEP_LEVELS && Globals->UNDERWORLD_LEVELS) {
 			// Connect the topmost of the underdeep to the bottommost
 			// underworld
 			regions.MakeShaftLinks(Globals->UNDERWORLD_LEVELS+2,
 					Globals->UNDERWORLD_LEVELS+1, 12);
 		}
 		// Now, connect the underdeep levels together
-		if(Globals->UNDERDEEP_LEVELS > 1) {
-			for(i = Globals->UNDERWORLD_LEVELS+3;
+		if (Globals->UNDERDEEP_LEVELS > 1) {
+			for (i = Globals->UNDERWORLD_LEVELS+3;
 					i < Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2;
 					i++) {
-				for(ii = Globals->UNDERWORLD_LEVELS+2; ii < i; ii++) {
-					if(i == ii+1) {
+				for (ii = Globals->UNDERWORLD_LEVELS+2; ii < i; ii++) {
+					if (i == ii+1) {
 						regions.MakeShaftLinks(i, ii, 12);
 					} else {
 						regions.MakeShaftLinks(i, ii, 25);
@@ -2214,37 +2214,37 @@ void Game::CreateWorld()
 		}
 	}
 
-    // We can leave this one - it sets the starting cities
-    if (Globals->NEXUS_EXISTS)
-        regions.SetACNeighbors( 0, 1, xx, yy );
+	// We can leave this one - it sets the starting cities
+	if (Globals->NEXUS_EXISTS)
+		regions.SetACNeighbors( 0, 1, xx, yy );
 
-    regions.InitSetupGates( 1 );
+	regions.InitSetupGates( 1 );
 	// Set up gates on all levels of the underworld
-	for(int i=2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+	for (int i=2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
 		regions.InitSetupGates( i );
 	}
 	// Underdeep has no gates, only the possible shafts above.
 
-    regions.FinalSetupGates();
+	regions.FinalSetupGates();
 
-    regions.CalcDensities();
+	regions.CalcDensities();
 }
 
 int ARegionList::GetRegType( ARegion *pReg )
 {
-    //
-    // Figure out the distance from the equator, from 0 to 3.
-    //
-    int lat = ( pReg->yloc * 8 ) / ( pRegionArrays[ pReg->zloc ]->y );
-    if (lat > 3)
-    {
-        lat = (7 - lat);
-    }
+	//
+	// Figure out the distance from the equator, from 0 to 3.
+	//
+	int lat = ( pReg->yloc * 8 ) / ( pRegionArrays[ pReg->zloc ]->y );
+	if (lat > 3)
+	{
+		lat = (7 - lat);
+	}
 
 	// Underworld region
-    if((pReg->zloc > 1) && (pReg->zloc < Globals->UNDERWORLD_LEVELS+2)) {
-        int r = getrandom(4);
-        switch (r) {
+	if ((pReg->zloc > 1) && (pReg->zloc < Globals->UNDERWORLD_LEVELS+2)) {
+		int r = getrandom(4);
+		switch (r) {
 			case 0:
 				return R_OCEAN;
 			case 1:
@@ -2255,11 +2255,11 @@ int ARegionList::GetRegType( ARegion *pReg )
 				return R_TUNNELS;
 			default:
 				return( 0 );
-        }
-    }
+		}
+	}
 
 	// Underdeep region
-	if((pReg->zloc > Globals->UNDERWORLD_LEVELS+1) &&
+	if ((pReg->zloc > Globals->UNDERWORLD_LEVELS+1) &&
 			(pReg->zloc < Globals->UNDERWORLD_LEVELS+
 			 			  Globals->UNDERDEEP_LEVELS+2)) {
 		int r = getrandom(4);
@@ -2278,75 +2278,75 @@ int ARegionList::GetRegType( ARegion *pReg )
 	}
 
 	// surface region
-    if( pReg->zloc == 1 ) {
-        int r = getrandom(64);
-        switch (lat)
-        {
-        case 0: /* Arctic regions */
-            //if (r < 24) return R_TUNDRA;
-            if (r < 32) return R_CERAN_HILL;
-            if (r < 50) return R_MOUNTAIN;
-            if (r < 58) return R_FOREST;
-            return R_PLAIN;
-        case 1: /* Colder regions */
-            if (r < 16) return R_PLAIN;
-            if (r < 32) return R_FOREST;
-            if (r < 42) return R_CERAN_HILL;
-            if (r < 48) return R_MOUNTAIN;
-            return R_SWAMP;
-        case 2: /* Warmer regions */
-            if (r < 20) return R_PLAIN;
-            if (r < 28) return R_FOREST;
-            if (r < 36) return R_CERAN_HILL;
-            if (r < 42) return R_MOUNTAIN;
-            if (r < 48) return R_SWAMP;
-            if (r < 52) return R_JUNGLE;
-            return R_DESERT;
-        case 3: /* tropical */
-            if (r < 16) return R_PLAIN;
-            if (r < 22) return R_CERAN_HILL;
-            if (r < 28) return R_MOUNTAIN;
-            if (r < 36) return R_SWAMP;
-            if (r < 48) return R_JUNGLE;
-            return R_DESERT;
-        }
-        return R_OCEAN;
-    }
+	if ( pReg->zloc == 1 ) {
+		int r = getrandom(64);
+		switch (lat)
+		{
+		case 0: /* Arctic regions */
+			//if (r < 24) return R_TUNDRA;
+			if (r < 32) return R_CERAN_HILL;
+			if (r < 50) return R_MOUNTAIN;
+			if (r < 58) return R_FOREST;
+			return R_PLAIN;
+		case 1: /* Colder regions */
+			if (r < 16) return R_PLAIN;
+			if (r < 32) return R_FOREST;
+			if (r < 42) return R_CERAN_HILL;
+			if (r < 48) return R_MOUNTAIN;
+			return R_SWAMP;
+		case 2: /* Warmer regions */
+			if (r < 20) return R_PLAIN;
+			if (r < 28) return R_FOREST;
+			if (r < 36) return R_CERAN_HILL;
+			if (r < 42) return R_MOUNTAIN;
+			if (r < 48) return R_SWAMP;
+			if (r < 52) return R_JUNGLE;
+			return R_DESERT;
+		case 3: /* tropical */
+			if (r < 16) return R_PLAIN;
+			if (r < 22) return R_CERAN_HILL;
+			if (r < 28) return R_MOUNTAIN;
+			if (r < 36) return R_SWAMP;
+			if (r < 48) return R_JUNGLE;
+			return R_DESERT;
+		}
+		return R_OCEAN;
+	}
 
-    if( pReg->zloc == 0 )
-    {
-        //
-        // This really shouldn't ever get called.
-        //
-        return( R_NEXUS );
-    }
+	if ( pReg->zloc == 0 )
+	{
+		//
+		// This really shouldn't ever get called.
+		//
+		return( R_NEXUS );
+	}
 
-    //
-    // This really shouldn't get called either
-    //
-    return( R_OCEAN );
+	//
+	// This really shouldn't get called either
+	//
+	return( R_OCEAN );
 }
 
 int ARegionList::GetLevelXScale(int level)
 {
 	// Surface and nexus are unscaled
-	if(level < 2) return 1;
+	if (level < 2) return 1;
 
 	// If we only have one underworld level it's 1/2 size
-	if(Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
+	if (Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
 		return 2;
 
 	// We have multiple underworld levels
-	if(level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
+	if (level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
 		// Topmost level is full size in x direction
-		if(level == 2) return 1;
+		if (level == 2) return 1;
 		// All other levels are 1/2 size
 		return 2;
 	}
-	if(level >= Globals->UNDERWORLD_LEVELS+2 &&
+	if (level >= Globals->UNDERWORLD_LEVELS+2 &&
 			level < (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2)){
 		// Topmost underdeep level is 1/2 size
-		if(level == Globals->UNDERWORLD_LEVELS+2) return 2;
+		if (level == Globals->UNDERWORLD_LEVELS+2) return 2;
 		// All others are 1/4 size
 		return 4;
 	}
@@ -2357,22 +2357,22 @@ int ARegionList::GetLevelXScale(int level)
 int ARegionList::GetLevelYScale(int level)
 {
 	// Surface and nexus are unscaled
-	if(level < 2) return 1;
+	if (level < 2) return 1;
 
 	// If we only have one underworld level it's 1/2 size
-	if(Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
+	if (Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
 		return 2;
 
 	// We have multiple underworld levels
-	if(level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
+	if (level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
 		// Topmost level is 1/2 size in the y direction
-		if(level == 2) return 2;
+		if (level == 2) return 2;
 		// Bottommost is 1/4 size in the y direction
-		if(level == Globals->UNDERWORLD_LEVELS+1) return 4;
+		if (level == Globals->UNDERWORLD_LEVELS+1) return 4;
 		// All others are 1/2 size in the y direction
 		return 2;
 	}
-	if(level >= Globals->UNDERWORLD_LEVELS+2 &&
+	if (level >= Globals->UNDERWORLD_LEVELS+2 &&
 			level < (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2)){
 		// All underdeep levels are 1/4 size in the y direction.
 		return 4;
@@ -2383,143 +2383,143 @@ int ARegionList::GetLevelYScale(int level)
 
 int ARegionList::CheckRegionExit(ARegion *pFrom, ARegion *pTo )
 {
-    if((pFrom->zloc==1) ||
+	if ((pFrom->zloc==1) ||
 		(pFrom->zloc>Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+1)) {
-        return( 1 );
-    }
+		return( 1 );
+	}
 
-    int chance = 0;
-    if( pFrom->type == R_CAVERN || pFrom->type == R_UFOREST ||
-        pTo->type == R_CAVERN || pTo->type == R_UFOREST )
-    {
-        chance = 25;
-    }
-    if( pFrom->type == R_TUNNELS || pTo->type == R_TUNNELS)
-    {
-        chance = 50;
-    }
-	if(pFrom->type == R_GROTTO || pFrom->type == R_DFOREST ||
+	int chance = 0;
+	if ( pFrom->type == R_CAVERN || pFrom->type == R_UFOREST ||
+		pTo->type == R_CAVERN || pTo->type == R_UFOREST )
+	{
+		chance = 25;
+	}
+	if ( pFrom->type == R_TUNNELS || pTo->type == R_TUNNELS)
+	{
+		chance = 50;
+	}
+	if (pFrom->type == R_GROTTO || pFrom->type == R_DFOREST ||
 	   pTo->type == R_GROTTO || pTo->type == R_DFOREST) {
 		// better connected underdeeps
 		chance = 40;
 	}
-	if(pFrom->type == R_CHASM || pTo->type == R_CHASM) {
+	if (pFrom->type == R_CHASM || pTo->type == R_CHASM) {
 		chance = 60;
 	}
-    if (getrandom(100) < chance) {
-        return( 0 );
-    }
-    return( 1 );
+	if (getrandom(100) < chance) {
+		return( 0 );
+	}
+	return( 1 );
 }
 
 int ARegionList::GetWeather( ARegion *pReg, int month )
 {
-    if (pReg->zloc == 0)
-    {
-        return W_NORMAL;
-    }
+	if (pReg->zloc == 0)
+	{
+		return W_NORMAL;
+	}
 
-    if( pReg->zloc > 1 )
-    {
-        return( W_NORMAL );
-    }
+	if ( pReg->zloc > 1 )
+	{
+		return( W_NORMAL );
+	}
 
-    int ysize = pRegionArrays[ 1 ]->y;
+	int ysize = pRegionArrays[ 1 ]->y;
 
-    if ((3*( pReg->yloc+1))/ysize == 0)
-    {
-        /* Northern third of the world */
-        if (month > 9 || month < 2)
-        {
-            return W_WINTER;
-        }
-        else
-        {
-            return W_NORMAL;
-        }
-    }
+	if ((3*( pReg->yloc+1))/ysize == 0)
+	{
+		/* Northern third of the world */
+		if (month > 9 || month < 2)
+		{
+			return W_WINTER;
+		}
+		else
+		{
+			return W_NORMAL;
+		}
+	}
 
-    if ((3*( pReg->yloc+1))/ysize == 1)
-    {
-        /* Middle third of the world */
-        if (month == 11 || month == 0 || month == 5 || month == 6)
-        {
-            return W_MONSOON;
-        }
-        else
-        {
-            return W_NORMAL;
-        }
-    }
+	if ((3*( pReg->yloc+1))/ysize == 1)
+	{
+		/* Middle third of the world */
+		if (month == 11 || month == 0 || month == 5 || month == 6)
+		{
+			return W_MONSOON;
+		}
+		else
+		{
+			return W_NORMAL;
+		}
+	}
 
-    if (month > 3 && month < 8)
-    {
-        /* Southern third of the world */
-        return W_WINTER;
-    }
-    else
-    {
-        return W_NORMAL;
-    }
+	if (month > 3 && month < 8)
+	{
+		/* Southern third of the world */
+		return W_WINTER;
+	}
+	else
+	{
+		return W_NORMAL;
+	}
 }
 
 int ARegion::CanBeStartingCity( ARegionArray *pRA )
 {
-	if(type == R_OCEAN) return 0;
-    if (!IsCoastal()) return 0;
-    if (town && town->pop == 5000) return 0;
+	if (type == R_OCEAN) return 0;
+	if (!IsCoastal()) return 0;
+	if (town && town->pop == 5000) return 0;
 
-    int regs = 0;
-    AList inlist;
-    AList donelist;
+	int regs = 0;
+	AList inlist;
+	AList donelist;
 
-    ARegionPtr * temp = new ARegionPtr;
-    temp->ptr = this;
-    inlist.Add(temp);
+	ARegionPtr * temp = new ARegionPtr;
+	temp->ptr = this;
+	inlist.Add(temp);
 
-    while(inlist.Num()) {
-        ARegionPtr * reg = (ARegionPtr *) inlist.First();
-        for (int i=0; i<NDIRS; i++) {
-            ARegion * r2 = reg->ptr->neighbors[i];
-            if (!r2) continue;
-            if (r2->type == R_OCEAN) continue;
-            if (GetRegion(&inlist,r2->num)) continue;
-            if (GetRegion(&donelist,r2->num)) continue;
-            regs++;
-            if (regs>20) return 1;
-            ARegionPtr * temp = new ARegionPtr;
-            temp->ptr = r2;
-            inlist.Add(temp);
-        }
-        inlist.Remove(reg);
-        donelist.Add(reg);
-    }
-    return 0;
+	while(inlist.Num()) {
+		ARegionPtr * reg = (ARegionPtr *) inlist.First();
+		for (int i=0; i<NDIRS; i++) {
+			ARegion * r2 = reg->ptr->neighbors[i];
+			if (!r2) continue;
+			if (r2->type == R_OCEAN) continue;
+			if (GetRegion(&inlist,r2->num)) continue;
+			if (GetRegion(&donelist,r2->num)) continue;
+			regs++;
+			if (regs>20) return 1;
+			ARegionPtr * temp = new ARegionPtr;
+			temp->ptr = r2;
+			inlist.Add(temp);
+		}
+		inlist.Remove(reg);
+		donelist.Add(reg);
+	}
+	return 0;
 }
 
 void ARegion::MakeStartingCity()
 {
-	if(!Globals->TOWNS_EXIST) return;
+	if (!Globals->TOWNS_EXIST) return;
 
-	if(Globals->GATES_EXIST) gate = -1;
+	if (Globals->GATES_EXIST) gate = -1;
 	
-	if(town) delete town;
-    
-    AddTown(TOWN_CITY);
+	if (town) delete town;
+	
+	AddTown(TOWN_CITY);
 
-	if(!Globals->START_CITIES_EXIST) return;
+	if (!Globals->START_CITIES_EXIST) return;
 
 	town->hab = 125 * Globals->CITY_POP / 100;
-    while (town->pop < town->hab) town->pop += getrandom(200)+200;
-    town->dev = TownDevelopment();
+	while (town->pop < town->hab) town->pop += getrandom(200)+200;
+	town->dev = TownDevelopment();
 
 	float ratio;
 	Market *m;
-    markets.DeleteAll();
-	if(Globals->START_CITIES_START_UNLIMITED) {
+	markets.DeleteAll();
+	if (Globals->START_CITIES_START_UNLIMITED) {
 		for (int i=0; i<NITEMS; i++) {
-			if( ItemDefs[i].flags & ItemType::DISABLED ) continue;
-			if( ItemDefs[ i ].type & IT_NORMAL ) {
+			if ( ItemDefs[i].flags & ItemType::DISABLED ) continue;
+			if ( ItemDefs[ i ].type & IT_NORMAL ) {
 				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
 					continue;
 				m = new Market(M_BUY,i,(ItemDefs[i].baseprice*5/2),-1,
@@ -2531,7 +2531,7 @@ void ARegion::MakeStartingCity()
 		// hack: include wage factor of 10 in float calculation above
 		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1, 5000,5000,-1,-1);
 		markets.Add(m);
-		if(Globals->LEADERS_EXIST) {
+		if (Globals->LEADERS_EXIST) {
 			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
 			// hack: include wage factor of 10 in float calculation above
 			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),
@@ -2546,7 +2546,7 @@ void ARegion::MakeStartingCity()
 		m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
 				Population()/5, 0, 10000, 0, 2000 );
 		markets.Add(m);
-		if( Globals->LEADERS_EXIST ) {
+		if ( Globals->LEADERS_EXIST ) {
 			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
 			// hack: include wage factor of 10 in float calculation above
 			m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
@@ -2557,53 +2557,53 @@ void ARegion::MakeStartingCity()
 }
 
 int ARegion::IsStartingCity() {
-    if (town && town->pop >= (Globals->CITY_POP * 120 / 100)) return 1;
-    return 0;
+	if (town && town->pop >= (Globals->CITY_POP * 120 / 100)) return 1;
+	return 0;
 }
 
 int ARegion::IsSafeRegion()
 {
-	if(type == R_NEXUS) return 1;
-    return( Globals->SAFE_START_CITIES && IsStartingCity() );
+	if (type == R_NEXUS) return 1;
+	return( Globals->SAFE_START_CITIES && IsStartingCity() );
 }
 
 ARegion *ARegionList::GetStartingCity( ARegion *AC,
-                                       int i,
-                                       int level,
-                                       int maxX,
-                                       int maxY )
+					int i,
+					int level,
+					int maxX,
+					int maxY )
 {
-    ARegionArray *pArr = pRegionArrays[ level ];
-    ARegion * reg = 0;
+	ARegionArray *pArr = pRegionArrays[ level ];
+	ARegion * reg = 0;
 
-    if( pArr->x < maxX ) maxX = pArr->x;
-    if( pArr->y < maxY ) maxY = pArr->y;
+	if ( pArr->x < maxX ) maxX = pArr->x;
+	if ( pArr->y < maxY ) maxY = pArr->y;
 
 	int tries = 0;
-    while (!reg && tries < 10000) {
-        //
-        // We'll just let AC exits be all over the map.
-        //
-        int x = getrandom( maxX );
-        int y = 2 * getrandom( maxY / 2 ) + x % 2;
+	while (!reg && tries < 10000) {
+		//
+		// We'll just let AC exits be all over the map.
+		//
+		int x = getrandom( maxX );
+		int y = 2 * getrandom( maxY / 2 ) + x % 2;
 
-        reg = pArr->GetRegion( x, y);
+		reg = pArr->GetRegion( x, y);
 
-        if(!reg || !reg->CanBeStartingCity( pArr )) {
-            reg = 0;
+		if (!reg || !reg->CanBeStartingCity( pArr )) {
+			reg = 0;
 			tries++;
-            continue;
-        }
+			continue;
+		}
 
-        for (int j=0; j<i; j++) {
-			if(!AC->neighbors[j]) continue;
+		for (int j=0; j<i; j++) {
+			if (!AC->neighbors[j]) continue;
 			if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {
 				reg = 0;
 				tries++;
 				break;
-            }
-        }
-    }
+			}
+		}
+	}
 
 	// Okay, we failed to find something that normally would work
 	// we'll just take anything that's of the right distance
@@ -2616,23 +2616,23 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 		int x = getrandom( maxX );
 		int y = 2 * getrandom( maxY / 2 ) + x % 2;
 		reg = pArr->GetRegion( x, y);
-		if(!reg || reg->type == R_OCEAN) {
+		if (!reg || reg->type == R_OCEAN) {
 			tries++;
 			reg = 0;
 			continue;
 		}
 
-        for (int j=0; j<i; j++) {
-			if(!AC->neighbors[j]) continue;
+		for (int j=0; j<i; j++) {
+			if (!AC->neighbors[j]) continue;
 			if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {
 				reg = 0;
 				tries++;
 				break;
-            }
-        }
-    }
+			}
+		}
+	}
 
 	// Okay, if we still don't have anything, we're done.
-    return reg;
+	return reg;
 }
 

@@ -31,7 +31,7 @@
 
 AString NumToWord(int n)
 {
-	if(n > 20) return AString(n);
+	if (n > 20) return AString(n);
 	switch(n) {
 		case  0: return AString("zero");
 		case  1: return AString("one");
@@ -81,11 +81,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	AString skname;
 	SkillType *pS;
 
-	if(f.OpenByName(rules) == -1) {
+	if (f.OpenByName(rules) == -1) {
 		return 0;
 	}
 
-	if(introf.OpenByName(intro) == -1) {
+	if (introf.OpenByName(intro) == -1) {
 		return 0;
 	}
 
@@ -98,7 +98,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int found = 0;
 	if (qm_exist) {
 		/* Make there is an enabled building with transport set */
-		for(i = 0; i < NOBJECTS; i++) {
+		for (i = 0; i < NOBJECTS; i++) {
 			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 			if (ObjectDefs[i].flags & ObjectType::TRANSPORT) {
 				found = 1;
@@ -163,7 +163,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "ul");
 	f.TagText("li", f.Link("#world_regions", "Regions"));
 	f.TagText("li", f.Link("#world_structures", "Structures"));
-	if(Globals->NEXUS_EXISTS) {
+	if (Globals->NEXUS_EXISTS) {
 		temp = "Atlantis Nexus";
 		f.TagText("li", f.Link("#world_nexus", temp));
 	}
@@ -173,7 +173,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr(f.Link("#movement", "Movement"));
 	f.Enclose(1, "ul");
 	f.TagText("li", f.Link("#movement_normal", "Normal Movement"));
-	if(!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
+	if (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
 		f.TagText("li", f.Link("#movement_sailing", "Sailing"));
 	f.TagText("li", f.Link("#movement_order", "Order of Movement"));
 	f.Enclose(0, "ul");
@@ -193,21 +193,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#economy_maintenance", "Maintenance Costs"));
 	f.TagText("li", f.Link("#economy_recruiting", "Recruiting"));
 	f.TagText("li", f.Link("#economy_items", "Items"));
-	if(Globals->TOWNS_EXIST)
+	if (Globals->TOWNS_EXIST)
 		f.TagText("li", f.Link("#economy_towns", "Villages, Towns, Cities"));
 	f.TagText("li", f.Link("#economy_buildings",
 				"Buildings and Trade Structures"));
-	if(!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED))
+	if (!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED))
 		f.TagText("li", f.Link("#economy_roads", "Roads"));
-	if(Globals->DECAY)
+	if (Globals->DECAY)
 		f.TagText("li", f.Link("#economy_builddecay", "Building Decay"));
 	int may_sail = (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED)) &&
 		(!(SkillDefs[S_SHIPBUILDING].flags & SkillType::DISABLED));
-	if(may_sail)
+	if (may_sail)
 		f.TagText("li", f.Link("#economy_ships", "Ships"));
 	f.TagText("li", f.Link("#economy_advanceditems", "Advanced Items"));
 	f.TagText("li", f.Link("#economy_income", "Income"));
-	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
+	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		f.TagText("li", f.Link("#economy_entertainment", "Entertainment"));
 	f.TagText("li", f.Link("#economy_taxingpillaging", "Taxing/Pillaging"));
 	if (qm_exist)
@@ -227,16 +227,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 
 	int has_stea = !(SkillDefs[S_STEALTH].flags & SkillType::DISABLED);
 	int has_obse = !(SkillDefs[S_OBSERVATION].flags & SkillType::DISABLED);
-	if(has_stea || has_obse) {
-		if(has_stea) temp = "Stealth";
+	if (has_stea || has_obse) {
+		if (has_stea) temp = "Stealth";
 		else temp = "";
-		if(has_obse) {
-			if(has_stea) temp += " and ";
+		if (has_obse) {
+			if (has_stea) temp += " and ";
 			temp += "Observation";
 		}
 		f.Enclose(1, "li");
 		f.PutStr(f.Link("#stealthobs", temp));
-		if(has_stea) {
+		if (has_stea) {
 			f.Enclose(1, "ul");
 			f.TagText("li", f.Link("#stealthobs_stealing", "Stealing"));
 			f.TagText("li", f.Link("#stealthobs_assassination",
@@ -258,11 +258,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "li");
 	f.PutStr(f.Link("#nonplayers", "Non-Player Units"));
 	f.Enclose(1, "ul");
-	if(Globals->TOWNS_EXIST && Globals->CITY_MONSTERS_EXIST) {
+	if (Globals->TOWNS_EXIST && Globals->CITY_MONSTERS_EXIST) {
 		f.TagText("li", f.Link("#nonplayers_guards",
 					"City and Town Guardsmen"));
 	}
-	if(Globals->WANDERING_MONSTERS_EXIST) {
+	if (Globals->WANDERING_MONSTERS_EXIST) {
 		f.TagText("li", f.Link("#nonplayers_monsters", "Wandering Monsters"));
 	}
 	f.TagText("li", f.Link("#nonplayers_controlled", "Controlled Monsters"));
@@ -279,9 +279,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "ul");
 	f.TagText("li", f.Link("#address", "address"));
 	f.TagText("li", f.Link("#advance", "advance"));
-	if(Globals->USE_WEAPON_ARMOR_COMMAND)
+	if (Globals->USE_WEAPON_ARMOR_COMMAND)
 		f.TagText("li", f.Link("#armor", "armor"));
-	if(has_stea)
+	if (has_stea)
 		f.TagText("li", f.Link("#assassinate", "assassinate"));
 	f.TagText("li", f.Link("#attack", "attack"));
 	f.TagText("li", f.Link("#autotax", "autotax"));
@@ -300,11 +300,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if (qm_exist)
 		f.TagText("li", f.Link("#distribute", "distribute"));
 	f.TagText("li", f.Link("#enter", "enter"));
-	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
+	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		f.TagText("li", f.Link("#entertain", "entertain"));
 	f.TagText("li", f.Link("#evict", "evict"));
 	f.TagText("li", f.Link("#exchange", "exchange"));
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		f.TagText("li", f.Link("#faction", "faction"));
 	f.TagText("li", f.Link("#find", "find"));
 	f.TagText("li", f.Link("#forget", "forget"));
@@ -317,20 +317,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#name", "name"));
 	f.TagText("li", f.Link("#noaid", "noaid"));
 	int move_over_water = 0;
-	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
+	if (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
 		move_over_water = 1;
-	if(!move_over_water) {
-		for(i = 0; i < NITEMS; i++) {
-			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-			if(ItemDefs[i].swim > 0) move_over_water = 1;
+	if (!move_over_water) {
+		for (i = 0; i < NITEMS; i++) {
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (ItemDefs[i].swim > 0) move_over_water = 1;
 		}
 	}
-	if(move_over_water)
+	if (move_over_water)
 		f.TagText("li", f.Link("#nocross", "nocross"));
 	f.TagText("li", f.Link("#option", "option"));
 	f.TagText("li", f.Link("#password", "password"));
 	f.TagText("li", f.Link("#pillage", "pillage"));
-	if(Globals->USE_PREPARE_COMMAND)
+	if (Globals->USE_PREPARE_COMMAND)
 		f.TagText("li", f.Link("#prepare", "prepare"));
 	f.TagText("li", f.Link("#produce", "produce"));
 	f.TagText("li", f.Link("#promote", "promote"));
@@ -339,12 +339,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#reveal", "reveal"));
 	if (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
 		f.TagText("li", f.Link("#sail", "sail"));
-	if(Globals->TOWNS_EXIST)
+	if (Globals->TOWNS_EXIST)
 		f.TagText("li", f.Link("#sell", "sell"));
 	f.TagText("li", f.Link("#share", "share"));
 	f.TagText("li", f.Link("#show", "show"));
 	f.TagText("li", f.Link("#spoils", "spoils"));
-	if(has_stea)
+	if (has_stea)
 		f.TagText("li", f.Link("#steal", "steal"));
 	f.TagText("li", f.Link("#study", "study"));
 	f.TagText("li", f.Link("#tax", "tax"));
@@ -352,7 +352,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if (qm_exist)
 		f.TagText("li", f.Link("#transport", "transport"));
 	f.TagText("li", f.Link("#turn", "turn"));
-	if(Globals->USE_WEAPON_ARMOR_COMMAND)
+	if (Globals->USE_WEAPON_ARMOR_COMMAND)
 		f.TagText("li", f.Link("#weapon", "weapon"));
 	if (Globals->ALLOW_WITHDRAW)
 		f.TagText("li", f.Link("#withdraw", "withdraw"));
@@ -362,7 +362,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#sequenceofevents", "Sequence of Events"));
 	f.TagText("li", f.Link("#reportformat", "Report Format"));
 	f.TagText("li", f.Link("#hintsfornew", "Hints for New Players"));
-	if(Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
 		f.Enclose(1, "li");
 		f.PutStr(f.Link("#specialcommands", "Special Commands"));
 		f.Enclose(1, "ul");
@@ -384,23 +384,23 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("li", f.Link("#tablefactionpoints",
 					"Table of Faction Points"));
 	f.TagText("li", f.Link("#tableitemweights", "Table of Item Weights"));
-	if(may_sail)
+	if (may_sail)
 		f.TagText("li", f.Link("#tableshipcapacities",
 					"Table of Ship Capacities"));
-	if(Globals->RACES_EXIST)
+	if (Globals->RACES_EXIST)
 		f.TagText("li", f.Link("#tableraces", "Table of Races"));
-	if(Globals->REQUIRED_EXPERIENCE)
+	if (Globals->REQUIRED_EXPERIENCE)
 		f.TagText("li", f.Link("#studyprogress", "Table of Study Progress"));
 	f.TagText("li", f.Link("#tableiteminfo", "Table of Item Information"));
 	f.TagText("li", f.Link("#tablebuildings", "Table of Buildings"));
 	f.TagText("li", f.Link("#tabletradestructures",
 				"Table of Trade Structures"));
-	if(!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED))
+	if (!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED))
 		f.TagText("li", f.Link("#tableroadstructures",
 					"Table of Road Structures"));
-	if(may_sail)
+	if (may_sail)
 		f.TagText("li", f.Link("#tableshipinfo", "Table of Ship Information"));
-	if(Globals->LIMITED_MAGES_PER_BUILDING) {
+	if (Globals->LIMITED_MAGES_PER_BUILDING) {
 		f.TagText("li",
 				f.Link("#tablemagebuildings", "Table of Mages/Building"));
 	}
@@ -459,9 +459,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if (app_exist) {
 		found = 0;
 		/* Make sure we have a skill with the APPRENTICE flag */
-		for(i = 0; i < NSKILLS; i++) {
-			if(SkillDefs[i].flags & SkillType::DISABLED) continue;
-			if(SkillDefs[i].flags & SkillType::APPRENTICE) {
+		for (i = 0; i < NSKILLS; i++) {
+			if (SkillDefs[i].flags & SkillType::DISABLED) continue;
+			if (SkillDefs[i].flags & SkillType::APPRENTICE) {
 				found = 1;
 				break;
 			}
@@ -469,10 +469,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if (!found) app_exist = 0;
 	}
 
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		temp = "A faction has one pre-set limit; it may not contain more than ";
 		temp += AString(AllowedMages(&fac)) + " mages";
-		if(app_exist) {
+		if (app_exist) {
 			temp += AString("and ") + AllowedApprentices(&fac) + " apprentices";
 		}
 		temp += ". Magic is a rare art, and only a few in the world can "
@@ -480,7 +480,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"of units a faction may contain, nor to how many items can be "
 			"produced or regions taxed.";
 		f.Paragraph(temp);
-	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp = "Each faction has a type; this is decided by the player, "
 			"and determines what the faction may do.  The faction has ";
 		temp +=  Globals->FACTION_POINTS;
@@ -503,7 +503,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"of quartermaster units a trade faction can have. ";
 		}
 		temp += "Faction Points spent on Magic determine the number of mages ";
-		if(app_exist)
+		if (app_exist)
 			temp += "and apprentices ";
 		temp += "the faction may have. (More information on all of the "
 			"faction activities is in further sections of the rules).  Here "
@@ -515,7 +515,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "tr");
 		f.TagText("th", "Faction Points");
 		temp = "War (max tax regions";
-		if(Globals->TACTICS_NEEDS_WAR)
+		if (Globals->TACTICS_NEEDS_WAR)
 			temp += "/tacticians";
 		temp += ")";
 		f.TagText("th", temp);
@@ -525,13 +525,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ")";
 		f.TagText("th", temp);
 		temp = "Magic (max mages";
-		if(app_exist)
+		if (app_exist)
 			temp += "/apprentices";
 		temp += ")";
 		f.TagText("th", temp);
 		f.Enclose(0, "tr");
 		int i;
-		for(i = 0; i <= Globals->FACTION_POINTS; i++) {
+		for (i = 0; i <= Globals->FACTION_POINTS; i++) {
 			fac.type[F_WAR]=i;
 			fac.type[F_TRADE]=i;
 			fac.type[F_MAGIC]=i;
@@ -553,7 +553,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\" nowrap");
 			temp = AllowedMages(&fac);
-			if(app_exist)
+			if (app_exist)
 				temp += AString("/") + AllowedApprentices(&fac);
 			f.PutStr(temp);
 			f.Enclose(0, "td");
@@ -583,7 +583,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "perform trade in ";
 		temp += AString(nt) + " region" + (nt==1?"":"s") + ", and have ";
 		temp += AString(nm) + " mage" + (nm==1?"":"s");
-		if(app_exist) {
+		if (app_exist) {
 			temp += " as well as ";
 			temp += AString(na) + " apprentice" + (na==1?"":"s");
 		}
@@ -607,22 +607,22 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "This faction's type would appear as \"War ";
 		temp += AString(w) + "\", and it would be able to tax " + nw;
 		temp += AString(" region") + (nw==1?"":"s") + ", but could ";
-		if(nt == 0)
+		if (nt == 0)
 			temp += "not perform trade in any regions";
 		else
 			temp += AString("only perform trade in ") + nt + " region" +
 				(nt == 1?"":"s");
 		temp += ", ";
-		if(!app_exist)
+		if (!app_exist)
 			temp += "and ";
-		if(nm == 0)
+		if (nm == 0)
 			temp += "could not possess any mages";
 		else
 			temp += AString("could only possess ") + nm + " mage" +
 				(nm == 1?"":"s");
-		if(app_exist) {
+		if (app_exist) {
 			temp += ", and ";
-			if(na == 0)
+			if (na == 0)
 				temp += "could not possess any apprentices";
 			else
 				temp += AString("could only possess ") + na + " apprentice" +
@@ -658,7 +658,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"other factions. Units in your faction may use the ";
 	temp += f.Link("#claim", "CLAIM") + " order to take this silver, and use "
 		"it to buy goods or recruit men";
-	if(Globals->ALLOW_WITHDRAW) {
+	if (Globals->ALLOW_WITHDRAW) {
 		temp += ", or use the ";
 		temp += f.Link("#withdraw", "WITHDRAW");
 		temp += " order to withdraw goods directly";
@@ -678,14 +678,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph("");
 	f.Enclose(1, "pre");
 	f.ClearWrapTab();
-	if(Globals->LEADERS_EXIST) {
+	if (Globals->LEADERS_EXIST) {
 		f.WrapStr("* Merlin the Magician (17), Merlin (27), leader [LEAD].  "
 				"Skills: none.");
 	} else {
 		f.WrapStr("* Merlin the Magician (17), Merlin (27), man [MAN].  "
 				"Skills: none.");
 	}
-	if(Globals->RACES_EXIST) {
+	if (Globals->RACES_EXIST) {
 		f.WrapStr("* Merlin's Guards (33), Merlin (27), 20 vikings [VIKI], "
 				"20 swords [SWOR]. Skills: none.");
 		f.WrapStr("* Merlin's Workers (34), Merlin (27), 50 vikings "
@@ -712,17 +712,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"or 50 units of one person each, except that the former is very "
 		"much easier to handle.";
 	f.Paragraph(temp);
-	if(Globals->RACES_EXIST) {
+	if (Globals->RACES_EXIST) {
 		temp = "There are different races that make up the population of "
 			"Atlantis. (See the section on skills for a list of these.)";
-		if(Globals->LEADERS_EXIST) {
+		if (Globals->LEADERS_EXIST) {
 			temp += " In addition, there are \"leaders\", who are presumed "
 				"to be of one of the other races, but are all the same "
 				"in game terms.";
 		}
 	} else {
 		temp = "Units are made of of ordinary people";
-		if(Globals->LEADERS_EXIST) {
+		if (Globals->LEADERS_EXIST) {
 			temp += "as well as leaders";
 		}
 		temp += ".";
@@ -762,13 +762,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"region to another.  The orders which take an entire month are ";
 	temp += f.Link("#advance", "ADVANCE") + ", ";
 	temp += f.Link("#build", "BUILD") + ", ";
-	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
+	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		temp += f.Link("#entertain", "ENTERTAIN") + ", ";
 	temp += f.Link("#move", "MOVE") + ", ";
 	if (Globals->TAX_PILLAGE_MONTH_LONG)
 		temp += f.Link("#pillage", "PILLAGE") + ", ";
 	temp += f.Link("#produce", "PRODUCE") + ", ";
-	if(!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
+	if (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
 		temp += f.Link("#sail", "SAIL") + ", ";
 	temp += f.Link("#study", "STUDY") + ", ";
 	if (Globals->TAX_PILLAGE_MONTH_LONG)
@@ -786,7 +786,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += ". (There may be other types of terrain to be discovered as the "
 		"game progresses.)  Regions can contain units belonging to players; "
 		"they can also contain structures such as buildings";
-	if(may_sail)
+	if (may_sail)
 		temp += " and ships";
 	temp += ". Two units in the same region can normally interact, unless "
 		"one of them is concealed in some way.  Two units in different "
@@ -814,7 +814,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "pre");
 	f.ClearWrapTab();
 	temp = "plain (172,110) in Turia, 500 peasants";
-	if(Globals->RACES_EXIST)
+	if (Globals->RACES_EXIST)
 		temp += AString(" (") + ItemDefs[manidx].names + ")";
 	int money = (500 * (15 - Globals->MAINTENANCE_COST));
 	temp += AString(", $") + money + ".";
@@ -834,7 +834,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	float ratio = ItemDefs[(Globals->RACES_EXIST?I_NOMAD:I_MAN)].baseprice/
 		(float)Globals->BASE_MAN_COST;
 	temp += (int)(60*ratio);
-	if(Globals->LEADERS_EXIST) {
+	if (Globals->LEADERS_EXIST) {
 		ratio = ItemDefs[leadidx].baseprice/(float)Globals->BASE_MAN_COST;
 		temp += AString(", 10 ") + ItemDefs[leadidx].names + " [" +
 			ItemDefs[leadidx].abr + "] at $";
@@ -846,7 +846,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		(money/Globals->ENTERTAIN_FRACTION) + ".";
 	f.WrapStr(temp);
 	temp = "Products: ";
-	if(Globals->FOOD_ITEMS_EXIST)
+	if (Globals->FOOD_ITEMS_EXIST)
 		temp += "23 grain [GRAI], ";
 	temp += "37 horses [HORS].";
 	f.WrapStr(temp);
@@ -861,9 +861,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutNoFormat("");
 	f.DropWrapTab();
 	temp = "* Hans Shadowspawn (15), Merry Pranksters (14), ";
-	if(Globals->LEADERS_EXIST)
+	if (Globals->LEADERS_EXIST)
 		temp2 = "leader [LEAD]";
-	else if(Globals->RACES_EXIST)
+	else if (Globals->RACES_EXIST)
 		temp2 = "nomad [NOMA]";
 	else
 		temp2 = "man [MAN]";
@@ -876,7 +876,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"region.  The region type is plain, the name of the surrounding area "
 		"is Turia, and the coordinates of this region are (172,110).  The "
 		"population of this region is 500 ";
-	if(Globals->RACES_EXIST)
+	if (Globals->RACES_EXIST)
 		temp += "nomads";
 	else
 		temp += "peasants";
@@ -923,7 +923,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("world_structures");
 	f.TagText("h3", "Structures:");
 	temp = "Regions may also contain structures, such as buildings";
-	if(may_sail)
+	if (may_sail)
 		temp += " or ships";
 	temp += ". These will appear directly below the list of units.  Here is "
 		"a sample structure:";
@@ -937,9 +937,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += temp2 + ", sword [SWOR]";
 	f.WrapStr(temp);
 	temp = "- Rowing Doom (188), ";
-	if(Globals->RACES_EXIST)
+	if (Globals->RACES_EXIST)
 		temp += "10 nomads [NOMA]";
-	else if(Globals->LEADERS_EXIST)
+	else if (Globals->LEADERS_EXIST)
 		temp += "10 leaders [LEAD]";
 	else
 		temp += "10 men [MAN]";
@@ -965,7 +965,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"can be structure owners, so newly created units cannot own a "
 		"structure until they contain men.";
 	f.Paragraph(temp);
-	if(Globals->NEXUS_EXISTS) {
+	if (Globals->NEXUS_EXISTS) {
 		f.LinkRef("world_nexus");
 		temp = "Atlantis Nexus:";
 		f.TagText("h3", temp);
@@ -977,33 +977,33 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Paragraph(temp);
 		temp = "When a faction first starts in Atlantis, it begins with "
 			"one unit, in a special region called the Atlantis Nexus.";
-		if(Globals->MULTI_HEX_NEXUS)
+		if (Globals->MULTI_HEX_NEXUS)
 			temp += " These regions exist ";
 		else
 			temp += " This region exists ";
 		if (!Globals->NEXUS_IS_CITY) {
 			temp += "outside of the normal world of Atlantis, and as such ";
-			if(Globals->MULTI_HEX_NEXUS)
+			if (Globals->MULTI_HEX_NEXUS)
 				temp += "have ";
 			else
 				temp += "has ";
 			temp += "no products or marketplaces; ";
-			if(Globals->MULTI_HEX_NEXUS)
+			if (Globals->MULTI_HEX_NEXUS)
 				temp += "they merely serve ";
 			else
 				temp += "it merely serves ";
 			temp += "as the magical entry into Atlantis.";
 		} else {
 			temp += "outside of the normal world of Atlantis, but ";
-			if(Globals->MULTI_HEX_NEXUS)
+			if (Globals->MULTI_HEX_NEXUS)
 				temp += "each contains ";
 			else
 				temp += "contains ";
 			temp += "a starting city with all its benefits";
-			if(Globals->GATES_EXIST)
+			if (Globals->GATES_EXIST)
 				temp += ", including a gate";
 			temp += ". ";
-			if(Globals->MULTI_HEX_NEXUS)
+			if (Globals->MULTI_HEX_NEXUS)
 				temp += "They also serve ";
 			else
 				temp += "It also serves ";
@@ -1012,7 +1012,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += ".";
 		}
 		f.Paragraph(temp);
-		if(Globals->MULTI_HEX_NEXUS) {
+		if (Globals->MULTI_HEX_NEXUS) {
 			temp = "From the Nexus hexes, there are exits either to other "
 				"Nexus hexes, or to starting cities in Atlantis.  Units may "
 				"move through these exits as normal, but once in a starting "
@@ -1023,19 +1023,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"these exits as normal, but once through an exit, there is "
 				"no return path to the Nexus.";
 		}
-		if(Globals->GATES_EXIST &&
+		if (Globals->GATES_EXIST &&
 				(Globals->NEXUS_GATE_OUT || Globals->NEXUS_IS_CITY)) {
 			temp += " It is also possible to use Gate Lore to get out of "
 				"Nexus";
-			if(Globals->NEXUS_GATE_OUT && !Globals->NEXUS_IS_CITY)
+			if (Globals->NEXUS_GATE_OUT && !Globals->NEXUS_IS_CITY)
 				temp += " (but not to return)";
 			temp += ".";
 		}
 		temp += " The ";
-		if(!Globals->MULTI_HEX_NEXUS)
+		if (!Globals->MULTI_HEX_NEXUS)
 			temp += "six ";
 		temp += "starting cities offer much to a starting faction; ";
-		if(Globals->START_CITIES_START_UNLIMITED) {
+		if (Globals->START_CITIES_START_UNLIMITED) {
 			if (!Globals->SAFE_START_CITIES && Globals->CITY_MONSTERS_EXIST)
 				temp += "until someone conquers the guardsmen, ";
 			temp += "there are unlimited amounts of many materials and men "
@@ -1044,15 +1044,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "there are materials as well as a very large supply of "
 				"men (though the prices are often quite high).";
 		}
-		if(Globals->SAFE_START_CITIES || Globals->CITY_MONSTERS_EXIST)
+		if (Globals->SAFE_START_CITIES || Globals->CITY_MONSTERS_EXIST)
 			temp += " In addition, ";
-		if(Globals->SAFE_START_CITIES)
+		if (Globals->SAFE_START_CITIES)
 			temp += "no battles are allowed in starting cities";
-		if(Globals->CITY_MONSTERS_EXIST) {
-			if(Globals->SAFE_START_CITIES) temp += " and ";
+		if (Globals->CITY_MONSTERS_EXIST) {
+			if (Globals->SAFE_START_CITIES) temp += " and ";
 			temp += "the starting cities are guarded by strong guardsmen, "
 				"keeping any units within the city ";
-			if(!Globals->SAFE_START_CITIES)
+			if (!Globals->SAFE_START_CITIES)
 				temp += "much safer ";
 			else
 				temp += "safe ";
@@ -1066,12 +1066,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Paragraph(temp);
 		temp = "It is always possible to enter any starting city from the "
 			"nexus";
-		if(!Globals->SAFE_START_CITIES)
+		if (!Globals->SAFE_START_CITIES)
 			temp += ", even if that starting city has been taken over and "
 				"guarded by another faction";
 		temp += ". This is due to the transportation from the Nexus to the "
 			"starting city being magical in nature.";
-		if(!Globals->SAFE_START_CITIES)
+		if (!Globals->SAFE_START_CITIES)
 			temp += " Once in the starting city however, no gaurentee of "
 				"safety is given.";
 		f.Paragraph(temp);
@@ -1086,7 +1086,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " by land, but keep in mind that the lands immediately "
 			"surrounding the starting cities will tend to be highly "
 			"populated, and possibly quite dangerous to travel.";
-		if(may_sail) {
+		if (may_sail) {
 			temp += AString(" ") + methods[method];
 			temp += " by sea; all of the starting cities lie against an "
 				"ocean, and a faction may easily purchase wood and "
@@ -1108,7 +1108,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("movement");
 	f.ClassTagText("div", "rule", "");
 	f.TagText("h2", "Movement");
-	if(may_sail)
+	if (may_sail)
 		temp = "There are two main methods of movement in Atlantis.  The "
 			"first ";
 	else
@@ -1118,7 +1118,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Link("#advance", "ADVANCE");
 	temp += " order), and moves units individually from one region to "
 		"another. ";
-	if(may_sail) {
+	if (may_sail) {
 		temp += "The other method is done using the ";
 		temp += f.Link("#sail", "SAIL") + " order, which can sail a ";
 		temp += "ship, including all of its occupants from one region to "
@@ -1152,17 +1152,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"horses is at least as great as the weight of its people and "
 		"all other items.  A unit can walk provided that the carrying "
 		"capacity of its people";
-	if(!(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
-		if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED)) temp += ", ";
+	if (!(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
+		if (!(ItemDefs[I_WAGON].flags & ItemType::DISABLED)) temp += ", ";
 		else temp += " and ";
 		temp += "horses";
 	}
-	if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED) &&
+	if (!(ItemDefs[I_WAGON].flags & ItemType::DISABLED) &&
 			(!(ItemDefs[I_HORSE].flags & ItemType::DISABLED))) {
 		temp += ", and wagons";
 	}
 	temp += " is at least as great as the weight of all its other items";
-	if(!(ItemDefs[I_WAGON].flags & ItemType::DISABLED) &&
+	if (!(ItemDefs[I_WAGON].flags & ItemType::DISABLED) &&
 			(!(ItemDefs[I_HORSE].flags & ItemType::DISABLED))) {
 		temp += ", and provided that it has at least as many horses as "
 			"wagons (otherwise the excess wagons count as weight, not "
@@ -1181,20 +1181,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("th", "Weight");
 	f.TagText("th", "Capacity");
 	f.Enclose(0, "tr");
-	for(i = 0; i < NITEMS; i++) {
-		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
+	for (i = 0; i < NITEMS; i++) {
+		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if (!(ItemDefs[i].type & IT_NORMAL)) continue;
 		pS = FindSkill(ItemDefs[i].pSkill);
-		if(pS && (pS->flags & SkillType::DISABLED)) continue;
+		if (pS && (pS->flags & SkillType::DISABLED)) continue;
 		last = 0;
-		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
+		for (j = 0; j < (int) (sizeof(ItemDefs->pInput) /
 				sizeof(ItemDefs->pInput[0])); j++) {
 			k = ItemDefs[i].pInput[j].item;
-			if(k != -1 && (ItemDefs[k].flags & ItemType::DISABLED))
+			if (k != -1 && (ItemDefs[k].flags & ItemType::DISABLED))
 				last = 1;
-			if(k != -1 && !(ItemDefs[k].type & IT_NORMAL)) last = 1;
+			if (k != -1 && !(ItemDefs[k].type & IT_NORMAL)) last = 1;
 		}
-		if(last == 1) continue;
+		if (last == 1) continue;
 		f.Enclose(1, "tr");
 		f.Enclose(1, "td align=\"left\" nowrap");
 		f.PutStr(ItemDefs[i].name);
@@ -1204,8 +1204,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(0, "td");
 		cap = ItemDefs[i].walk - ItemDefs[i].weight;
 		f.Enclose(1, "td align=\"left\" nowrap");
-		if(ItemDefs[i].walk || (ItemDefs[i].hitchItem != -1)) {
-			if(ItemDefs[i].hitchItem == -1)
+		if (ItemDefs[i].walk || (ItemDefs[i].hitchItem != -1)) {
+			if (ItemDefs[i].hitchItem == -1)
 				f.PutStr(cap);
 			else {
 				temp = (cap + ItemDefs[i].hitchwalk);
@@ -1222,9 +1222,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Enclose(0, "table");
 	f.Enclose(0, "center");
-	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
+	if (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
 		temp = "A unit which can fly, is capable of travelling over water.";
-		if(Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_MUST_LAND)
+		if (Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_MUST_LAND)
 			temp += " However, if the unit ends its turn over a water hex "
 				"that unit will drown.";
 		f.Paragraph(temp);
@@ -1245,11 +1245,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"rains have a similar effect.";
 	}
 	temp += " Units may not move through ocean regions ";
-	if(may_sail) {
+	if (may_sail) {
 		temp += "without using the ";
 		temp += f.Link("#sail", "SAIL") + " order";
 	}
-	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
+	if (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
 		temp += " unless they are capable of flight";
 		if (Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_MUST_LAND) {
 			temp += ", and even then, flying units must end their "
@@ -1267,7 +1267,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += " The unit can also use the ";
 	temp += f.Link("#move", "MOVE") + " order to enter or leave a structure.";
 	f.Paragraph(temp);
-	if(Globals->UNDERWORLD_LEVELS || Globals->UNDERDEEP_LEVELS) {
+	if (Globals->UNDERWORLD_LEVELS || Globals->UNDERDEEP_LEVELS) {
 		temp = "Finally, certain structures contain interior passages to "
 			"other regions.  The ";
 		temp += f.Link("#move", "MOVE") + " IN order can be used to go ";
@@ -1283,11 +1283,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int weight = ItemDefs[I_MAN].weight + ItemDefs[I_SWORD].weight +
 			ItemDefs[I_CHAINARMOR].weight;
 	temp += weight;
-	if(cap > weight)
+	if (cap > weight)
 		temp += ", so he can ride";
 	else
 		temp += ", so he must walk";
-	if(Globals->WEATHER_EXISTS)
+	if (Globals->WEATHER_EXISTS)
 		temp += ". The month is April, so he has ";
 	else
 		temp += " and has ";
@@ -1300,7 +1300,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int cost = TerrainDefs[R_PLAIN].movepoints;
 	temp += NumToWord(cost) + " movement point" + (cost == 1?"":"s") + ".";
 	travel -= cost;
-	if(travel > TerrainDefs[R_FOREST].movepoints) {
+	if (travel > TerrainDefs[R_FOREST].movepoints) {
 		temp += " Then he moves northeast, into a forest region. This uses ";
 		cost = TerrainDefs[R_FOREST].movepoints;
 		temp += NumToWord(cost) + " movement point" + (cost == 1?"":"s") + ",";
@@ -1318,7 +1318,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Paragraph(temp);
 
-	if(may_sail) {
+	if (may_sail) {
 		f.LinkRef("movement_sailing");
 		f.TagText("h3", "Sailing:");
 		temp = "Movement by sea is in some ways similar. It does not use the ";
@@ -1389,7 +1389,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"ship to enter any region only costs one movement point; the "
 			"cost of two movement points for entering, say, a forest "
 			"coastal region, does not apply.";
-		if(Globals->WEATHER_EXISTS) {
+		if (Globals->WEATHER_EXISTS) {
 			temp += " Ships do, however, only get half movement points "
 				"during the winter months (or monsoon months in the "
 				"tropical latitudes).";
@@ -1418,21 +1418,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", "Sailors");
 		f.TagText("th", "Skill");
 		f.Enclose(0, "tr");
-		for(i = 0; i < NITEMS; i++) {
-			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-			if(!(ItemDefs[i].type & IT_SHIP)) continue;
+		for (i = 0; i < NITEMS; i++) {
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (!(ItemDefs[i].type & IT_SHIP)) continue;
 			int pub = 1;
-			for(int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(Materials); c++) {
+			for (int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(Materials); c++) {
 				int m = ItemDefs[i].pInput[c].item;
-				if(m != -1) {
-					if(ItemDefs[m].flags & ItemType::DISABLED) pub = 0;
-					if((ItemDefs[m].type & IT_ADVANCED) ||
+				if (m != -1) {
+					if (ItemDefs[m].flags & ItemType::DISABLED) pub = 0;
+					if ((ItemDefs[m].type & IT_ADVANCED) ||
 						(ItemDefs[m].type & IT_MAGIC)) pub = 0;
 				}
 			}
-			if(pub == 0) continue;
+			if (pub == 0) continue;
 			int slevel = ItemDefs[i].pLevel;
-			if(slevel > 3) continue;
+			if (slevel > 3) continue;
 			f.Enclose(1, "tr");
 			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(ItemDefs[i].name);
@@ -1451,14 +1451,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.Enclose(0, "td");
 			f.Enclose(0, "tr");
 		}					
-		for(i = 0; i < NOBJECTS; i++) {
-			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
-			if(!ObjectIsShip(i)) continue;
-			if(ItemDefs[ObjectDefs[i].item].flags & ItemType::DISABLED)
+		for (i = 0; i < NOBJECTS; i++) {
+			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+			if (!ObjectIsShip(i)) continue;
+			if (ItemDefs[ObjectDefs[i].item].flags & ItemType::DISABLED)
 				continue;
 			int normal = (ItemDefs[ObjectDefs[i].item].type & IT_NORMAL);
 			normal |= (ItemDefs[ObjectDefs[i].item].type & IT_TRADE);
-			if(!normal) continue;
+			if (!normal) continue;
 			f.Enclose(1, "tr");
 			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(ObjectDefs[i].name);
@@ -1502,7 +1502,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"their second hex (if they have enough movement points left). This "
 		"continues until no units can move anymore.";
 	f.Paragraph(temp);
-	if(may_sail) {
+	if (may_sail) {
 		temp = "Sailing is handled differently; Atlantis cycles through all "
 			"of the ships in Atlantis, moving them one at a time. When "
 			"Atlantis sails a ship, it sails it through its entire course, "
@@ -1512,7 +1512,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Paragraph(temp);
 	}
 	temp = "Note that";
-	if(may_sail) {
+	if (may_sail) {
 		temp += " in either case,";
 	}
 	temp += " the order in which the regions are processed is undefined "
@@ -1532,20 +1532,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int comma = 0;
 	found = 0;
 	last = -1;
-	for(i = 0; i < NSKILLS; i++) {
-		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
-		if(SkillDefs[i].flags & SkillType::APPRENTICE) continue;
-		if(SkillDefs[i].flags & SkillType::MAGIC) continue;
+	for (i = 0; i < NSKILLS; i++) {
+		if (SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if (SkillDefs[i].flags & SkillType::APPRENTICE) continue;
+		if (SkillDefs[i].flags & SkillType::MAGIC) continue;
 		found = 0;
-		for(j = 0; j < 3; j++) {
+		for (j = 0; j < 3; j++) {
 			SkillType *pS = FindSkill(SkillDefs[i].depends[j].skill);
 			if (pS && !(pS->flags & SkillType::DISABLED)) {
 				found = 1;
 				break;
 			}
 		}
-		if(found) continue;
-		if(last == -1) {
+		if (found) continue;
+		if (last == -1) {
 			last = i;
 			continue;
 		}
@@ -1555,8 +1555,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		last = i;
 		comma++;
 	}
-	if(last != -1) {
-		if(comma) temp += "and ";
+	if (last != -1) {
+		if (comma) temp += "and ";
 		temp += SkillDefs[last].name;
 	}
 
@@ -1576,8 +1576,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"unit may only know one skill.";
 		f.Paragraph(temp);
 	}
-	if(!Globals->RACES_EXIST) {
-		if(Globals->SKILL_LIMIT_NONLEADERS) {
+	if (!Globals->RACES_EXIST) {
+		if (Globals->SKILL_LIMIT_NONLEADERS) {
 			temp = "A unit may only learn one skill. ";
 		} else {
 			temp = "A unit may learn as many skills as it requires. ";
@@ -1598,7 +1598,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"the least common denominator).  Every race has a normal "
 			"maximum skill level, and  a list of skills that they "
 			"specialize in, and can learn up to higher level. ";
-		if(Globals->LEADERS_EXIST) {
+		if (Globals->LEADERS_EXIST) {
 			temp += "Leaders, being more powerful, can learn skills to "
 				"even higher levels. ";
 		}
@@ -1614,9 +1614,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", "Max Level (specialized skills)");
 		f.TagText("th", "Max Level (non-specialized skills)");
 		f.Enclose(0, "tr");
-		for(i = 0; i < NITEMS; i++) {
-			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-			if(!(ItemDefs[i].type & IT_MAN)) continue;
+		for (i = 0; i < NITEMS; i++) {
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (!(ItemDefs[i].type & IT_MAN)) continue;
 			f.Enclose(1, "tr");
 			ManType *mt = FindRace(ItemDefs[i].abr);
 			f.Enclose(1, "td align=\"left\" nowrap");
@@ -1626,19 +1626,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 			int spec = 0;
 			comma = 0;
 			temp = "";
-			for(j=0; j<(int)(sizeof(mt->skills)/sizeof(mt->skills[0])); j++) {
+			for (j=0; j<(int)(sizeof(mt->skills)/sizeof(mt->skills[0])); j++) {
 				pS = FindSkill(mt->skills[j]);
 				if (!pS || (pS->flags & SkillType::DISABLED)) continue;
 				spec = 1;
-				if(comma) temp += ", ";
+				if (comma) temp += ", ";
 				temp += pS->name;
 				comma++;
 			}
-			if(!spec) temp = "None.";
+			if (!spec) temp = "None.";
 			f.PutStr(temp);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"left\" nowrap");
-			if(spec)
+			if (spec)
 				f.PutStr(mt->speciallevel);
 			else
 				f.PutStr("--");
@@ -1663,7 +1663,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "For a unit to gain level 1 of a skill, they must gain one "
 		"months worth of training in that skill by issuing the ";
 	temp += f.Link("#study", "STUDY") + " order. ";
-	if(Globals->REQUIRED_EXPERIENCE) {
+	if (Globals->REQUIRED_EXPERIENCE) {
 		temp += "Initially, a unit will gain a full months worth of training "
 			"(30 day equivalents). However, high levels of "
 			"skill also require experience, which is gained by performing "
@@ -1705,7 +1705,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "To illustrate this, a unit would have to spend ";
 		temp += NumToWord(months2);
 		temp +=	" months studying to gain level 2 in a skill without any experience. ";
-		if(tries > 0) {
+		if (tries > 0) {
 			temp += "In order to reach level 3 only by studying, a total of ";
 			temp += NumToWord(months3);
 			temp += " months must be spent. ";
@@ -1716,7 +1716,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "The maximum skill level that is possible through "
 			"continuous study only (i.e. no experience involved) is ";
 		temp += NumToWord(mlevel) + ", ";
-		if(months5 > 36) {
+		if (months5 > 36) {
 			temp += "although it is hardly feasible without any experience at all, ";
 		}
 		temp += "taking ";
@@ -1746,7 +1746,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"just ";
 		temp += NumToWord(months2);
 		temp += " months of study, ";
-		if(tries > 0) {
+		if (tries > 0) {
 			temp += " and in order to reach level 3 only by studying, a total of ";
 			temp += NumToWord(months3);
 			temp += " months must be spent by a unit starting with 30 experience. ";
@@ -1786,14 +1786,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += next;
 		temp += ")</font>";
 		f.TagText("td", temp);
-		for(int m = 0; m < 9; m++) {
+		for (int m = 0; m < 9; m++) {
 			days += StudyRate(days, 0);
 			next = StudyRate(days, 0);
 			level = GetLevelByDays(days);
 			temp = "&nbsp;";
-			if(level > plevel) temp += "<b>";
+			if (level > plevel) temp += "<b>";
 			temp += level;
-			if(level > plevel) {
+			if (level > plevel) {
 				plevel = level;
 				temp += "</b>";
 			}
@@ -1819,14 +1819,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += next;
 		temp += ")</font>";
 		f.TagText("td", temp);
-		for(int m = 0; m < 9; m++) {
+		for (int m = 0; m < 9; m++) {
 			days += StudyRate(days, 30);
 			next = StudyRate(days, 30);
 			level = GetLevelByDays(days);
 			temp = "&nbsp;";
-			if(level > plevel) temp += "<b>";
+			if (level > plevel) temp += "<b>";
 			temp += level;
-			if(level > plevel) {
+			if (level > plevel) {
 				plevel = level;
 				temp += "</b>";
 			}
@@ -1893,14 +1893,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += SkillDefs[S_COMBAT].cost;
 	temp += " per person per month to study (in addition to normal "
 		"maintenance costs).  The exceptions are ";
-	if(has_stea || has_obse) {
-		if(has_stea) temp += "Stealth";
-		if(has_obse) {
-			if(has_stea) temp += " and ";
+	if (has_stea || has_obse) {
+		if (has_stea) temp += "Stealth";
+		if (has_obse) {
+			if (has_stea) temp += " and ";
 			temp += "Observation";
 		}
 		temp += " (";
-		if(has_stea && has_obse)
+		if (has_stea && has_obse)
 			temp += "both of which cost $";
 		else
 			temp += "which costs $";
@@ -1910,7 +1910,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "Magic skills (which cost $";
 	temp += SkillDefs[S_FORCE].cost;
 	temp += ")";
-	if(!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
+	if (!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
 		temp += ", and Tactics (which costs $";
 		temp += SkillDefs[S_TACTICS].cost;
 		temp += ")";
@@ -1947,7 +1947,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += (Globals->STUDENTS_PER_TEACHER == 1 ? "" : "s");
 	temp += " per teacher.";
 	f.Paragraph(temp);
-	if(Globals->LEADERS_EXIST) {
+	if (Globals->LEADERS_EXIST) {
 		temp = "Note: Only leaders may use the ";
 		temp += f.Link("#teach", "TEACH") + " order.";
 		f.Paragraph(temp);
@@ -1983,21 +1983,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"this maintenance cost has a ";
 	temp += Globals->STARVE_PERCENT;
 	temp += " percent chance of ";
-	if(Globals->SKILL_STARVATION != GameDefs::STARVE_NONE) {
+	if (Globals->SKILL_STARVATION != GameDefs::STARVE_NONE) {
 		temp += "starving, leading to the following effects:";
 		f.Paragraph(temp);
 		f.Enclose(1, "ul");
 		f.Enclose(1, "li");
-		if(Globals->SKILL_STARVATION == GameDefs::STARVE_MAGES)
+		if (Globals->SKILL_STARVATION == GameDefs::STARVE_MAGES)
 			temp = "If the unit is a mage, it";
-		else if(Globals->SKILL_STARVATION == GameDefs::STARVE_LEADERS)
+		else if (Globals->SKILL_STARVATION == GameDefs::STARVE_LEADERS)
 			temp = "If the unit is a leader, it";
 		else
 			temp = "A unit";
 		temp += " will lose a skill level in some of its skills.";
 		f.PutStr(temp);
 		f.Enclose(0, "li");
-		if(Globals->SKILL_STARVATION != GameDefs::STARVE_ALL) {
+		if (Globals->SKILL_STARVATION != GameDefs::STARVE_ALL) {
 			f.Enclose(1, "li");
 			f.PutStr("Otherwise, it will starve to death.");
 			f.Enclose(0, "li");
@@ -2036,7 +2036,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "to your units for maintenance, as a last resort.";
 	f.Paragraph(temp);
 	temp = "";
-	if(Globals->MULTIPLIER_USE == GameDefs::MULT_NONE) {
+	if (Globals->MULTIPLIER_USE == GameDefs::MULT_NONE) {
 		temp += AString("This fee is generally ") +
 			Globals->MAINTENANCE_COST + " silver for a normal character";
 		if (Globals->LEADERS_EXIST) {
@@ -2044,9 +2044,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 				" silver for a leader";
 		}
 	} else {
-		if(Globals->MULTIPLIER_USE == GameDefs::MULT_MAGES) {
+		if (Globals->MULTIPLIER_USE == GameDefs::MULT_MAGES) {
 			temp += "Mages ";
-		} else if(Globals->MULTIPLIER_USE==GameDefs::MULT_LEADERS &&
+		} else if (Globals->MULTIPLIER_USE==GameDefs::MULT_LEADERS &&
 				Globals->LEADERS_EXIST) {
 			temp += "Leaders ";
 		} else {
@@ -2058,7 +2058,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += " and a cost of $";
 		temp += AString(Globals->MAINTENANCE_COST) + " for normal characters";
 		temp += AString(" or $") + Globals->LEADER_COST + " for leaders";
-		if(Globals->MULTIPLIER_USE != GameDefs::MULT_ALL) {
+		if (Globals->MULTIPLIER_USE != GameDefs::MULT_ALL) {
 			temp += ". All other characters pay a fee of ";
 			temp += Globals->MAINTENANCE_COST;
 			temp += " silver for a normal character";
@@ -2127,27 +2127,27 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("th", "Weight (capacity)");
 	f.TagText("th", "Extra Information");
 	f.Enclose(0, "tr");
-	for(i = 0; i < NITEMS; i++) {
-		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
+	for (i = 0; i < NITEMS; i++) {
+		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if (!(ItemDefs[i].type & IT_NORMAL)) continue;
 		pS = FindSkill(ItemDefs[i].pSkill);
 		if (pS && (pS->flags & SkillType::DISABLED)) continue;
 		last = 0;
-		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
+		for (j = 0; j < (int) (sizeof(ItemDefs->pInput) /
 						sizeof(ItemDefs->pInput[0])); j++) {
 			k = ItemDefs[i].pInput[j].item;
-			if(k != -1 &&
+			if (k != -1 &&
 					!(ItemDefs[k].flags & ItemType::DISABLED) &&
 					!(ItemDefs[k].type & IT_NORMAL))
 				last = 1;
 		}
-		if(last == 1) continue;
+		if (last == 1) continue;
 		f.Enclose(1, "tr");
 		f.Enclose(1, "td align=\"left\" nowrap");
 		f.PutStr(ItemDefs[i].name);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		if(pS != NULL) {
+		if (pS != NULL) {
 			temp = pS->name;
 			temp += AString(" (") + ItemDefs[i].pLevel + ")";
 			f.PutStr(temp);
@@ -2158,15 +2158,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "";
 		if (ItemDefs[i].flags & ItemType::ORINPUTS)
 			temp = "Any of : ";
-		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
+		for (j = 0; j < (int) (sizeof(ItemDefs->pInput) /
 						sizeof(ItemDefs->pInput[0])); j++) {
 			k = ItemDefs[i].pInput[j].item;
-			if(k < 0 || (ItemDefs[k].flags&ItemType::DISABLED))
+			if (k < 0 || (ItemDefs[k].flags&ItemType::DISABLED))
 				continue;
-			if(comma) temp += ", ";
+			if (comma) temp += ", ";
 			temp += ItemDefs[i].pInput[j].amt;
 			temp += " ";
-			if(ItemDefs[i].pInput[j].amt > 1)
+			if (ItemDefs[i].pInput[j].amt > 1)
 				temp += ItemDefs[k].names;
 			else
 				temp += ItemDefs[k].name;
@@ -2175,7 +2175,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(temp);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		if(ItemDefs[i].pMonths) {
+		if (ItemDefs[i].pMonths) {
 			temp = ItemDefs[i].pMonths;
 			temp += AString(" month") + (ItemDefs[i].pMonths == 1 ? "" : "s");
 		} else {
@@ -2186,9 +2186,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "td align=\"left\" nowrap");
 		temp = ItemDefs[i].weight;
 		cap = ItemDefs[i].walk - ItemDefs[i].weight;
-		if(ItemDefs[i].walk || (ItemDefs[i].hitchItem != -1)) {
+		if (ItemDefs[i].walk || (ItemDefs[i].hitchItem != -1)) {
 			temp += " (";
-			if(ItemDefs[i].hitchItem == -1)
+			if (ItemDefs[i].hitchItem == -1)
 				temp += cap;
 			else {
 				temp += (cap + ItemDefs[i].hitchwalk);
@@ -2201,24 +2201,24 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\"");
 		temp = "";
-		if(ItemDefs[i].type & IT_WEAPON) {
+		if (ItemDefs[i].type & IT_WEAPON) {
 			WeaponType *wp = FindWeapon(ItemDefs[i].abr);
-			if(wp->attackBonus || wp->defenseBonus ||
+			if (wp->attackBonus || wp->defenseBonus ||
 					(wp->flags & WeaponType::RANGED) ||
 					(wp->flags & WeaponType::NEEDSKILL)) {
-				if(wp->flags & WeaponType::RANGED)
+				if (wp->flags & WeaponType::RANGED)
 					temp += "Ranged weapon";
 				else
 					temp += "Weapon";
 				temp += " which gives ";
-				if(wp->attackBonus > -1) temp += "+";
+				if (wp->attackBonus > -1) temp += "+";
 				temp += wp->attackBonus;
 				temp += " on attack";
 				temp += " and ";
-				if(wp->defenseBonus > -1) temp += "+";
+				if (wp->defenseBonus > -1) temp += "+";
 				temp += wp->defenseBonus;
 				temp += " on defense";
-			    if(wp->flags & WeaponType::NEEDSKILL) {
+				if (wp->flags & WeaponType::NEEDSKILL) {
 					pS = FindSkill(wp->baseSkill);
 					if (pS && !(pS->flags & SkillType::DISABLED))
 						temp += AString(" (needs ") + pS->name;
@@ -2229,13 +2229,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 				}
 				temp += ".<br />";
 			}
-			if(wp->numAttacks < 0) {
+			if (wp->numAttacks < 0) {
 				temp += "Gives 1 attack every ";
 				temp += -(wp->numAttacks);
 				temp += " rounds.<br />";
 			}
 		}
-		if(ItemDefs[i].type & IT_MOUNT) {
+		if (ItemDefs[i].type & IT_MOUNT) {
 			MountType *mp = FindMount(ItemDefs[i].abr);
 			pS = FindSkill(mp->skill);
 			if (pS && !(pS->flags & SkillType::DISABLED)) {
@@ -2244,34 +2244,34 @@ int Game::GenRules(const AString &rules, const AString &css,
 				temp += " skill.<br />";
 			}
 		}
-		if(ItemDefs[i].type & IT_ARMOR) {
+		if (ItemDefs[i].type & IT_ARMOR) {
 			ArmorType *at = FindArmor(ItemDefs[i].abr);
 			temp += "Gives a ";
 			temp += at->saves[SLASHING];
 			temp += " in ";
 			temp += at->from;
 			temp += " chance to survive a normal hit.<br />";
-			if((at->flags & ArmorType::USEINASSASSINATE) && has_stea) {
+			if ((at->flags & ArmorType::USEINASSASSINATE) && has_stea) {
 				temp += "May be used during assassinations.<br />";
 			}
 		}
-		if(ItemDefs[i].type & IT_TOOL) {
-			for(j = 0; j < NITEMS; j++) {
-				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
-				if(ItemDefs[j].mult_item != i) continue;
-				if(!(ItemDefs[j].type & IT_NORMAL)) continue;
+		if (ItemDefs[i].type & IT_TOOL) {
+			for (j = 0; j < NITEMS; j++) {
+				if (ItemDefs[j].flags & ItemType::DISABLED) continue;
+				if (ItemDefs[j].mult_item != i) continue;
+				if (!(ItemDefs[j].type & IT_NORMAL)) continue;
 				pS = FindSkill(ItemDefs[j].pSkill);
 				if (!pS || (pS->flags & SkillType::DISABLED)) continue;
 				last = 0;
-				for(k = 0; k < (int) (sizeof(ItemDefs->pInput) /
+				for (k = 0; k < (int) (sizeof(ItemDefs->pInput) /
 						sizeof(ItemDefs->pInput[0])); k++) {
 					l = ItemDefs[j].pInput[k].item;
-					if(l != -1 &&
+					if (l != -1 &&
 							!(ItemDefs[l].flags & ItemType::DISABLED) &&
 							!(ItemDefs[l].type & IT_NORMAL))
 						last = 1;
 				}
-				if(last == 1) continue;
+				if (last == 1) continue;
 				temp += AString("+") + ItemDefs[j].mult_val +
 					" bonus when producing " + ItemDefs[j].names + ".<br />";
 			}
@@ -2311,7 +2311,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"description of the item.";
 	f.Paragraph(temp);
 
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp = " Only Trade factions can issue ";
 		temp += f.Link("#produce", "PRODUCE") + " orders however, regardless "
 			"of skill levels.";
@@ -2330,20 +2330,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"is a list of the items that can be produced, and the amount of "
 		"each that can be produced per month.  This amount depends on the "
 		"region type. ";
-	if(Globals->RANDOM_ECONOMY) {
+	if (Globals->RANDOM_ECONOMY) {
 		temp += "It also varies from region to region of the same type. ";
 	}
 	temp += "If the units in a region attempt to produce more of a commodity "
 		"than can be produced that month, then the amount available is "
 		"distributed among the producers";
 	f.Paragraph(temp);
-	if(Globals->TOWNS_EXIST) {
+	if (Globals->TOWNS_EXIST) {
 		f.LinkRef("economy_towns");
 		f.TagText("h3", "Villages, Towns, and Cities:");
 		temp = "Some regions in Atlantis contain villages, towns, and "
 			"cities.  Villages add to the wages, population, and tax income "
 			"of the region they are in. ";
-		if(Globals->FOOD_ITEMS_EXIST) {
+		if (Globals->FOOD_ITEMS_EXIST) {
 			temp += "Also, villages will have an additional market for "
 				"grain, livestock, and fish. ";
 		}
@@ -2361,7 +2361,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "Trade items are bought and sold only by cities, and have "
 			"no other practical uses.  However, the profit margins on "
 			"these items are usually quite high. ";
-		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 			temp += "Buying of trade items in a region counts against a "
 				"Trade faction's quota of regions in which it may "
 				"undertake trade activity (note that buying and selling "
@@ -2372,13 +2372,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("economy_buildings");
 	f.TagText("h3", "Buildings and Trade Structures:");
 	temp = "Construction of buildings ";
-	if(may_sail) temp += "and ships ";
+	if (may_sail) temp += "and ships ";
 	temp += "goes as follows: each unit of work on a building requires a "
 		"unit of the required resource and a man-month of work by a "
 		"character with the appropriate skill and level; higher skill "
 		"levels allow work proceed faster (still using one unit of the "
 		"required resource per unit of work done). ";
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp += "Again, only Trade factions can issue ";
 		temp += f.Link("#build", "BUILD") + " orders. ";
 	}
@@ -2394,18 +2394,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("th", "Material");
 	f.TagText("th", "Skill (min level)");
 	f.Enclose(0, "tr");
-	for(i = 0; i < NOBJECTS; i++) {
-		if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
-		if(!ObjectDefs[i].protect) continue;
+	for (i = 0; i < NOBJECTS; i++) {
+		if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+		if (!ObjectDefs[i].protect) continue;
 		pS = FindSkill(ObjectDefs[i].skill);
-		if(pS == NULL) continue;
-		if(pS->flags & SkillType::MAGIC) continue;
-		if(ObjectIsShip(i)) continue;
+		if (pS == NULL) continue;
+		if (pS->flags & SkillType::MAGIC) continue;
+		if (ObjectIsShip(i)) continue;
 		j = ObjectDefs[i].item;
-		if(j == -1) continue;
+		if (j == -1) continue;
 		/* Need the >0 since item could be WOOD_OR_STONE (-2) */
-		if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
-		if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+		if (j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
+		if (j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
 		/* Okay, this is a valid object to build! */
 		f.Enclose(1, "tr");
 		f.Enclose(1, "td align=\"left\" nowrap");
@@ -2418,7 +2418,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(ObjectDefs[i].cost);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		if(j == I_WOOD_OR_STONE)
+		if (j == I_WOOD_OR_STONE)
 			temp = "wood or stone";
 		else
 			temp = ItemDefs[j].name;
@@ -2442,13 +2442,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	temp = "There are other structures that increase the maximum production "
 		"of certain items in regions";
-	if(!(ObjectDefs[O_MINE].flags & ObjectType::DISABLED))
+	if (!(ObjectDefs[O_MINE].flags & ObjectType::DISABLED))
 		temp += "; for example, a Mine will increase the amount of iron "
 			"that is available to be mined in a region";
 	temp += ".  To construct these structures requires a high skill level in "
 		"the production skill related to the item that the structure will "
 		"help produce. ";
-	if(!(ObjectDefs[O_INN].flags & ObjectType::DISABLED)) {
+	if (!(ObjectDefs[O_INN].flags & ObjectType::DISABLED)) {
 		temp += "(Inns are an exception to this rule, requiring the Building "
 			"skill, not the Entertainment skill.) ";
 	}
@@ -2472,22 +2472,22 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("th", "Skill (level)");
 	f.TagText("th", "Production Aided");
 	f.Enclose(0, "tr");
-	for(i = 0; i < NOBJECTS; i++) {
-		if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
-		if(ObjectDefs[i].protect) continue;
-		if(ObjectIsShip(i)) continue;
+	for (i = 0; i < NOBJECTS; i++) {
+		if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+		if (ObjectDefs[i].protect) continue;
+		if (ObjectIsShip(i)) continue;
 		j = ObjectDefs[i].productionAided;
-		if(j == -1) continue;
-		if(ItemDefs[j].flags & ItemType::DISABLED) continue;
-		if(!(ItemDefs[j].type & IT_NORMAL)) continue;
+		if (j == -1) continue;
+		if (ItemDefs[j].flags & ItemType::DISABLED) continue;
+		if (!(ItemDefs[j].type & IT_NORMAL)) continue;
 		pS = FindSkill(ObjectDefs[i].skill);
 		if (pS == NULL) continue;
-		if(pS->flags & SkillType::MAGIC) continue;
+		if (pS->flags & SkillType::MAGIC) continue;
 		j = ObjectDefs[i].item;
-		if(j == -1) continue;
+		if (j == -1) continue;
 		/* Need the >0 since item could be WOOD_OR_STONE (-2) */
-		if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
-		if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+		if (j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
+		if (j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
 		/* Okay, this is a valid object to build! */
 		f.Enclose(1, "tr");
 		f.Enclose(1, "td align=\"left\" nowrap");
@@ -2497,7 +2497,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(ObjectDefs[i].cost);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		if(j == I_WOOD_OR_STONE)
+		if (j == I_WOOD_OR_STONE)
 			temp = "wood or stone";
 		else
 			temp = ItemDefs[j].name;
@@ -2505,12 +2505,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
 		temp = pS->name;
-		if(ObjectDefs[i].level > 1)
+		if (ObjectDefs[i].level > 1)
 			temp += AString(" (") + ObjectDefs[i].level + ")";
 		f.PutStr(temp);
 		f.Enclose(0, "td");
 		f.Enclose(1, "td align=\"left\" nowrap");
-		if(ObjectDefs[i].productionAided == I_SILVER)
+		if (ObjectDefs[i].productionAided == I_SILVER)
 			f.PutStr("entertainment");
 		else
 			f.PutStr(ItemDefs[ObjectDefs[i].productionAided].names);
@@ -2526,7 +2526,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"with regular buildings, the Cost is the number of man-months of "
 		"labor and also the number of units of raw material required to "
 		"complete the structure. ";
-	if(!(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
+	if (!(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
 			!(ItemDefs[I_STONE].flags & ItemType::DISABLED)) {
 		temp += "You can use two different materials (wood or stone) to "
 			"construct most trade structures. ";
@@ -2537,7 +2537,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"description for a skill will always note if new structures may "
 		"be built based on knowing that skill.";
 	f.Paragraph(temp);
-	if(!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED)) {
+	if (!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED)) {
 		f.LinkRef("economy_roads");
 		f.TagText("h3", "Roads:");
 		temp = "There is a another type of structure called roads.  They do "
@@ -2569,19 +2569,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", "Material");
 		f.TagText("th", "Skill (min level)");
 		f.Enclose(0, "tr");
-		for(i = 0; i < NOBJECTS; i++) {
-			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
-			if(ObjectDefs[i].productionAided != -1) continue;
-			if(ObjectDefs[i].protect) continue;
-			if(ObjectIsShip(i)) continue;
+		for (i = 0; i < NOBJECTS; i++) {
+			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+			if (ObjectDefs[i].productionAided != -1) continue;
+			if (ObjectDefs[i].protect) continue;
+			if (ObjectIsShip(i)) continue;
 			pS = FindSkill(ObjectDefs[i].skill);
 			if (pS == NULL) continue;
-			if(pS->flags & SkillType::MAGIC) continue;
+			if (pS->flags & SkillType::MAGIC) continue;
 			j = ObjectDefs[i].item;
-			if(j == -1) continue;
+			if (j == -1) continue;
 			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
-			if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
-			if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+			if (j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
+			if (j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
 			/* Okay, this is a valid object to build! */
 			f.Enclose(1, "tr");
 			f.Enclose(1, "td align=\"left\" nowrap");
@@ -2591,7 +2591,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.PutStr(ObjectDefs[i].cost);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"left\" nowrap");
-			if(j == I_WOOD_OR_STONE)
+			if (j == I_WOOD_OR_STONE)
 				temp = "wood or stone";
 			else
 				temp = ItemDefs[j].name;
@@ -2624,14 +2624,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"its bonuses until it is repaired.";
 		f.Paragraph(temp);
 	}
-	if(may_sail) {
+	if (may_sail) {
 		f.LinkRef("economy_ships");
 		f.TagText("h3", "Ships:");
 		temp = "Ships are constructed similarly to buildings, except they "
 			"tend to be constructed out of wood, not stone, and their "
 			"construction tends to depend on the Shipbuilding skill, not "
 			"the Building skill. ";
-		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 			temp += "Only factions with at least one faction point spent on "
 				"trade can issue ";
 			temp += f.Link("#build", "BUILD") + " orders. ";
@@ -2648,21 +2648,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", "Sailors");
 		f.TagText("th", "Skill");
 		f.Enclose(0, "tr");
-		for(i = 0; i < NITEMS; i++) {
-			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-			if(!(ItemDefs[i].type & IT_SHIP)) continue;
+		for (i = 0; i < NITEMS; i++) {
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (!(ItemDefs[i].type & IT_SHIP)) continue;
 			int pub = 1;
-			for(int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(Materials); c++) {
+			for (int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(Materials); c++) {
 				int m = ItemDefs[i].pInput[c].item;
-				if(m != -1) {
-					if(ItemDefs[m].flags & ItemType::DISABLED) pub = 0;
-					if((ItemDefs[m].type & IT_ADVANCED) ||
+				if (m != -1) {
+					if (ItemDefs[m].flags & ItemType::DISABLED) pub = 0;
+					if ((ItemDefs[m].type & IT_ADVANCED) ||
 						(ItemDefs[m].type & IT_MAGIC)) pub = 0;
 				}
 			}
-			if(pub == 0) continue;
+			if (pub == 0) continue;
 			int slevel = ItemDefs[i].pLevel;
-			if(slevel > 3) continue;
+			if (slevel > 3) continue;
 			f.Enclose(1, "tr");
 			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(ItemDefs[i].name);
@@ -2681,14 +2681,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.Enclose(0, "td");
 			f.Enclose(0, "tr");
 		}					
-		for(i = 0; i < NOBJECTS; i++) {
-			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
-			if(!ObjectIsShip(i)) continue;
-			if(ItemDefs[ObjectDefs[i].item].flags & ItemType::DISABLED)
+		for (i = 0; i < NOBJECTS; i++) {
+			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+			if (!ObjectIsShip(i)) continue;
+			if (ItemDefs[ObjectDefs[i].item].flags & ItemType::DISABLED)
 				continue;
 			int normal = (ItemDefs[ObjectDefs[i].item].type & IT_NORMAL);
 			normal |= (ItemDefs[ObjectDefs[i].item].type & IT_TRADE);
-			if(!normal) continue;
+			if (!normal) continue;
 			f.Enclose(1, "tr");
 			f.Enclose(1, "td align=\"center\"");
 			f.PutStr(ObjectDefs[i].name);
@@ -2741,11 +2741,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"current wages are shown in the region description for each region. "
 		"All units may ";
 	temp += f.Link("#work", "WORK") + ", regardless of skills";
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		temp += " or faction type";
 	temp += ".";
 	f.Paragraph(temp);
-	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
+	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
 		f.LinkRef("economy_entertainment");
 		f.TagText("h3", "Entertainment:");
 		temp = "Units with the Entertainment skill can use it to earn "
@@ -2760,7 +2760,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"much of the demand for entertainment in the region). Note that "
 			"entertainment income is much less, per region, than the income "
 			"available through working or taxing.";
-		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 			temp += " All factions may have entertainers, regardless of "
 				"faction type.";
 		}
@@ -2769,13 +2769,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 
 	f.LinkRef("economy_taxingpillaging");
 	f.TagText("h3", "Taxing/Pillaging:");
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		temp = "War factions ";
 	else
 		temp = "Factions ";
 	temp += "may collect taxes in a region.  This is done using the ";
 	temp += f.Link("#tax", "TAX") + " order (which is ";
-	if(!Globals->TAX_PILLAGE_MONTH_LONG) temp += "not ";
+	if (!Globals->TAX_PILLAGE_MONTH_LONG) temp += "not ";
 	temp += "a full month order). The amount of tax money that can be "
 		"collected each month in a region is shown in the region "
 		"description. ";
@@ -2977,7 +2977,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"taxers would tax more than the available tax income, the tax "
 		"income is split evenly among all taxers.";
 	f.Paragraph(temp);
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		temp = "War factions ";
 	else
 		temp = "Factions ";
@@ -3006,7 +3006,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"the faction in question, and they will attempt to prevent "
 		"Unfriendly units from entering the region.  Only units which are "
 		"able to tax may be on guard.  Units on guard ";
-	if(has_stea)
+	if (has_stea)
 		temp += " are always visible regardless of Stealth skill, and ";
 	temp += "will be marked as being \"on guard\" in the region description.";
 	f.Paragraph(temp);
@@ -3109,10 +3109,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Ally means that you will fight to defend units of that faction "
 		"whenever they come under attack, if you have non-avoiding units in "
 		"the region where the attack occurs. ";
-	if(has_stea) {
+	if (has_stea) {
 		temp += " You will also attempt to prevent any theft or "
 			"assassination attempts against units of the faction";
-		if(has_obse) {
+		if (has_obse) {
 			temp += ", if you are capable of seeing the unit which is "
 				"attempting the crime";
 		}
@@ -3138,7 +3138,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"that faction wherever they find them.";
 	f.Paragraph(temp);
 	temp = "If a unit can see another unit, but ";
-	if(has_obse) {
+	if (has_obse) {
 		temp += "does not have high enough Observation skill to determine "
 			"its faction,";
 	} else {
@@ -3151,7 +3151,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"unit's faction, the unit will be treated with the better attitude; "
 		"it is assumed that the unit will produce proof of identity when "
 		"relevant.";
-	if(has_stea) {
+	if (has_stea) {
 		temp += " (See the section on stealth for more information on when "
 			"units can see each other.)";
 	}
@@ -3160,7 +3160,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"(the latter is a good way to die fast), it will block or attack "
 		"all unidentified units, unless they belong to factions for which a "
 		"Friendly or Ally attitude has been specifically declared.";
-	if(has_stea) {
+	if (has_stea) {
 		temp += " Units which cannot be seen at all cannot be directly "
 			"blocked or attacked, of course.";
 	}
@@ -3171,22 +3171,22 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#attack", "ATTACK") + " order. A unit that does not "
 		"have Avoid Combat set will automatically attack any Hostile units "
 		"it identifies as such.";
-	if(has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+	if (has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
 		temp += " When a unit issues the ";
 		temp += f.Link("#attack", "ATTACK") + " order, or otherwise "
 			"decides to attack another unit, it must first be able to "
 			"attack the unit. ";
-		if(has_stea && !(SkillDefs[S_RIDING].flags & SkillType::DISABLED))
+		if (has_stea && !(SkillDefs[S_RIDING].flags & SkillType::DISABLED))
 			temp += "There are two conditions for this; the first is that the";
 		else
 			temp += "The";
-		if(has_stea) {
+		if (has_stea) {
 			temp += " attacking unit must be able to see the unit that it "
 				"wishes to attack.  More information is available on this "
 				"in the stealth section of the rules.";
 		}
-		if(!(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
-			if(has_stea) {
+		if (!(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+			if (has_stea) {
 				f.Paragraph(temp);
 				temp = "Secondly, the";
 			}
@@ -3217,7 +3217,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "A unit which is on guard, and is Unfriendly towards a unit, "
 		"will deny access to units using the ";
 	temp += f.Link("#move", "MOVE") + " order to enter its region. ";
-	if(has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+	if (has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
 		temp += "Note that to deny access to a unit, at least one unit "
 			"from the same faction as the unit guarding the hex must satisfy "
 			"the above requirements. ";
@@ -3231,17 +3231,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"lose any men, it is allowed to continue to move, provided that it "
 		"has enough movement points.";
 	f.Paragraph(temp);
-	if(has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+	if (has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
 		temp = "Note that ";
-		if(has_stea && !(SkillDefs[S_RIDING].flags & SkillType::DISABLED))
+		if (has_stea && !(SkillDefs[S_RIDING].flags & SkillType::DISABLED))
 			temp += "these restrictions do ";
 		else
 			temp += "this restriction does ";
 		temp += "not apply for sea combat, as ";
-		if(has_stea)
+		if (has_stea)
 			temp += "units within a ship are always visible";
-		if(!(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
-			if(has_stea) temp += ", and";
+		if (!(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
+			if (has_stea) temp += ", and";
 			temp += " Riding does not play a part in combat on board ships";
 		}
 		temp += ".";
@@ -3276,16 +3276,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"faction cannot be identified by the attacking faction.  A unit "
 		"which was explicitly attacked will be involved anyway, regardless "
 		"of Avoid Combat. ";
-	if(has_stea) {
+	if (has_stea) {
 		temp += "(This means that Avoid Combat is mostly useful for high "
 			"stealth scouts.) ";
 	}
 	temp += "Also, all non-avoiding units located in the target region "
 		"belonging to factions allied with the defending unit will join "
 		"in on the defending side";
-	if(Globals->ALLIES_NOAID)
+	if (Globals->ALLIES_NOAID)
 		temp += ", provided that at least one of the units belonging to "
-		    "the defending faction is not set to noaid.";
+			"the defending faction is not set to noaid.";
 	else
 		temp += ".";
 	f.Paragraph(temp);
@@ -3312,7 +3312,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"they execute their ";
 	temp += f.Link("#move", "MOVE") + " order they will have 4 movement "
 		"points, but right now they have 2. ";
-	if(Globals->WEATHER_EXISTS)
+	if (Globals->WEATHER_EXISTS)
 		temp += "Region A is forest, but fortunately it is summer, ";
 	else
 		temp += "Region A is forest, ";
@@ -3341,7 +3341,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("com_thebattle");
 	f.TagText("h3", "The Battle:");
 	temp = "The troops having lined up, the fight begins.";
-	if(!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
+	if (!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
 		temp += " The computer selects the best tactician from each side; "
 			"that unit is regarded as the leader of its side.  If two or "
 			"more units on one side have the same Tactics skill, then the "
@@ -3353,7 +3353,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	temp = "In each combat round, the combatants each get to attack once, in "
 		"a random order. ";
-	if(!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
+	if (!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
 		temp += "(In a free round of attacks, only one side's forces get to "
 			"attack.) ";
 	}
@@ -3442,7 +3442,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"protection from it, then those units who have been in the building "
 		"longest will gain protection.  (Note that these units appear first "
 		"on the turn report.)";
-	if(!(ObjectDefs[O_FORT].flags & ObjectType::DISABLED)) {
+	if (!(ObjectDefs[O_FORT].flags & ObjectType::DISABLED)) {
 		temp += " If a unit of 200 men is inside a Fort (capacity ";
 		temp += ObjectDefs[O_FORT].protect;
 		temp += "), then the first ";
@@ -3468,7 +3468,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"a free round.";
 	f.Paragraph(temp);
 	/* XXX -- Here is where to put the ROUT information */
-	if(!(SkillDefs[S_HEALING].flags & SkillType::DISABLED) &&
+	if (!(SkillDefs[S_HEALING].flags & SkillType::DISABLED) &&
 			!(ItemDefs[I_HERBS].flags & SkillType::DISABLED)) {
 		temp = "Units with the Healing skill have a chance of being able "
 			"to heal casualties of the winning side, so that they recover "
@@ -3502,16 +3502,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"the battle, any units on this side will not be allowed to move, "
 		"or attack again for the rest of the turn.";
 	f.Paragraph(temp);
-	if(has_stea || has_obse) {
+	if (has_stea || has_obse) {
 		f.LinkRef("stealthobs");
 		f.ClassTagText("div", "rule", "");
 		temp = (has_stea ? "Stealth" : "");
-		if(has_obse) {
-			if(has_stea) temp += " and ";
+		if (has_obse) {
+			if (has_stea) temp += " and ";
 			temp += "Observation";
 		}
 		f.TagText("h2", temp);
-		if(has_stea && has_obse) {
+		if (has_stea && has_obse) {
 			temp = "The Stealth skill is used to hide units, while the "
 				"Observation skill is used to see units that would otherwise "
 				"be hidden. A unit can be seen only if you have at least "
@@ -3522,22 +3522,22 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"faction. If your Observation skill is higher than the "
 				"unit's Stealth skill, you will also see the name of the "
 				"faction that owns the unit.";
-		} else if(has_stea) {
+		} else if (has_stea) {
 			temp = "The Stealth skill is used to hide units. A unit can be "
 				"seen only if it doesn't know the Stealth skill and if you "
 				"have at least one unit in the same region.";
-		} else if(has_obse) {
+		} else if (has_obse) {
 			temp = "The Observation skill is used to see information about "
 				"units that would otherwise be hidden.  If your unit knows "
 				"the Observation skill, it will see the name of the faction "
 				"that owns any unit in the same region.";
 		}
 		f.Paragraph(temp);
-		if(has_stea) {
+		if (has_stea) {
 			temp = "Regardless of Stealth skill, units are always visible "
 				"when participating in combat; when guarding a region with "
 				"the Guard flag; or when in a building or aboard a ship.";
-			if(has_obse) {
+			if (has_obse) {
 				temp += " However, in order to see the faction that owns "
 					"the unit, you will still need a higher Observation "
 					"skill than the unit's Stealth skill.";
@@ -3551,12 +3551,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"The order specifies a target unit; the thief will then "
 				"attempt to steal the specified item from the target unit.";
 			f.Paragraph(temp);
-			if(has_obse) {
+			if (has_obse) {
 				temp = "If the thief has higher Stealth than any of the "
 					"target faction's units have Observation (i.e. the "
 					"thief cannot be seen by the target faction), the theft "
 					"will succeed.";
-				if(Globals->HARDER_ASSASSINATION){
+				if (Globals->HARDER_ASSASSINATION){
 					temp += " While stealing, the thief has a -1 penalty to his "
 						"Stealth Skill.";
 				}
@@ -3569,7 +3569,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"stolen.  If it is any other item, then only one will be "
 				"stolen (if available).";
 			f.Paragraph(temp);
-			if(has_obse) {
+			if (has_obse) {
 				temp = "Any unit with high enough Observation to see the "
 					"thief will see the attempt to steal, whether the "
 					"attempt is successful or not.  Allies of the target "
@@ -3586,7 +3586,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"the target unit contains more than one person, then one "
 				"will be singled out at random.";
 			f.Paragraph(temp);
-			if(has_obse) {
+			if (has_obse) {
 				temp = "Success for assassination is determined as for "
 					"theft, i.e. the assassin will fail if any of the "
 					"target faction's units can see him.  In this case, "
@@ -3613,7 +3613,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				temp = "The assasin must know Stealh to attempt "
 					"assassination.";
 			}
-			if(has_obse) {
+			if (has_obse) {
 				temp += "If the assassin has higher stealth than any of the "
 					"target faction's units have Observation, then a "
 					"one-on-one ";
@@ -3623,7 +3623,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "fight will take place between the assassin and the "
 				"target character.  The assassin automatically gets a "
 				"free round of attacks";
-			if(Globals->MAX_ASSASSIN_FREE_ATTACKS) {
+			if (Globals->MAX_ASSASSIN_FREE_ATTACKS) {
 				temp += ", except he is limited to ";
 				temp += Globals->MAX_ASSASSIN_FREE_ATTACKS;
 				temp += " total during the free round";
@@ -3634,14 +3634,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp2 = "";
 			last = -1;
 			comma = 0;
-			for(i = 0; i < NITEMS; i++) {
-				if(!(ItemDefs[i].type & IT_ARMOR)) continue;
-				if(!(ItemDefs[i].type & IT_NORMAL)) continue;
-				if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+			for (i = 0; i < NITEMS; i++) {
+				if (!(ItemDefs[i].type & IT_ARMOR)) continue;
+				if (!(ItemDefs[i].type & IT_NORMAL)) continue;
+				if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 				ArmorType *at = FindArmor(ItemDefs[i].abr);
 				if (at == NULL) continue;
 				if (!(at->flags & ArmorType::USEINASSASSINATE)) continue;
-				if(last == -1) {
+				if (last == -1) {
 					last = i;
 					continue;
 				}
@@ -3650,14 +3650,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 				last = i;
 				comma++;
 			}
-			if(comma) temp2 += "or ";
-			if(last != -1) {
+			if (comma) temp2 += "or ";
+			if (last != -1) {
 				temp2 += ItemDefs[last].name;
 				temp += " except ";
 				temp += temp2;
 			}
 			temp += ".";
-			if(last == -1)
+			if (last == -1)
 				temp += " Armor ";
 			else
 				temp += " Most armor ";
@@ -3685,13 +3685,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("h2", "Magic");
 	temp = "A character enters the world of magic in Atlantis by beginning "
 		"study on one of the Foundation magic skills.  Only one man units";
-	if(!Globals->MAGE_NONLEADERS && Globals->LEADERS_EXIST)
+	if (!Globals->MAGE_NONLEADERS && Globals->LEADERS_EXIST)
 		temp += ", with the man being a leader,";
 	temp += " are permitted to study these skills. ";
-	if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
+	if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 		temp += "The number of these units (known as \"magicians\" or "
 			"\"mages\") that a faction may own is ";
-		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
+		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
 			temp += "limited.";
 		else
 			temp += "determined by the faction's type.";
@@ -3713,11 +3713,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	last = -1;
 	comma = 0;
 	j = 0;
-	for(i = 0; i < NSKILLS; i++) {
-		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
-		if(!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
+	for (i = 0; i < NSKILLS; i++) {
+		if (SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if (!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
 		j++;
-		if(last == -1) {
+		if (last == -1) {
 			last = i;
 			continue;
 		}
@@ -3726,7 +3726,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		comma++;
 		last = i;
 	}
-	if(comma) temp += "and ";
+	if (comma) temp += "and ";
 	temp += SkillDefs[last].name;
 	temp += ". To become a mage, a unit undertakes study in one of these "
 		"Foundations.  As a unit studies the Foundations, he will be able "
@@ -3742,7 +3742,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"available to the mage. Also, study into a magic skill above "
 		"level 2 requires that the mage be located in some sort of "
 		"building which can ";
-	if(!Globals->LIMITED_MAGES_PER_BUILDING) {
+	if (!Globals->LIMITED_MAGES_PER_BUILDING) {
 		temp += "offer protection.  Trade structures do not count. ";
 	} else {
 		temp += "offer specific facilities for mages.  Certain types of "
@@ -3754,7 +3754,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"equipment for research.";
 	f.Paragraph(temp);
 
-	if(Globals->LIMITED_MAGES_PER_BUILDING) {
+	if (Globals->LIMITED_MAGES_PER_BUILDING) {
 		temp = "It is possible that there are advanced buildings not listed "
 			"here which also can support mages.  The description of a "
 			"building will tell you for certain.  The common buildings and "
@@ -3766,17 +3766,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("td", "");
 		f.TagText("th", "Mages");
 		f.Enclose(0, "tr");
-		for(i = 0; i < NOBJECTS; i++) {
-			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
-			if(!ObjectDefs[i].maxMages) continue;
+		for (i = 0; i < NOBJECTS; i++) {
+			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+			if (!ObjectDefs[i].maxMages) continue;
 			pS = FindSkill(ObjectDefs[i].skill);
-			if(pS == NULL) continue;
-			if(pS->flags & SkillType::MAGIC) continue;
+			if (pS == NULL) continue;
+			if (pS->flags & SkillType::MAGIC) continue;
 			k = ObjectDefs[i].item;
-			if(k == -1) continue;
+			if (k == -1) continue;
 			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
-			if(k > 0 && (ItemDefs[k].flags & ItemType::DISABLED)) continue;
-			if(k > 0 && !(ItemDefs[k].type & IT_NORMAL)) continue;
+			if (k > 0 && (ItemDefs[k].flags & ItemType::DISABLED)) continue;
+			if (k > 0 && !(ItemDefs[k].type & IT_NORMAL)) continue;
 			/* Okay, this is a valid object to build! */
 			f.Enclose(1, "tr");
 			f.Enclose(1, "td align=\"left\" nowrap");
@@ -3797,10 +3797,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += " Foundation skills are called ";
 	last = -1;
 	comma = 0;
-	for(i = 0; i < NSKILLS; i++) {
-		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
-		if(!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
-		if(last == -1) {
+	for (i = 0; i < NSKILLS; i++) {
+		if (SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if (!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
+		if (last == -1) {
 			last = i;
 			continue;
 		}
@@ -3809,34 +3809,34 @@ int Game::GenRules(const AString &rules, const AString &css,
 		comma++;
 		last = i;
 	}
-	if(comma) temp += "and ";
+	if (comma) temp += "and ";
 	temp += SkillDefs[last].name;
 	temp += ".";
 	/* XXX -- This needs better handling! */
 	/* Add each foundation here if it exists */
-	if(!(SkillDefs[S_FORCE].flags & SkillType::DISABLED)) {
+	if (!(SkillDefs[S_FORCE].flags & SkillType::DISABLED)) {
 		temp += " Force indicates the quantity of magical energy that a "
 			"mage is able to channel (a Force rating of 0 does not mean "
 			"that the mage can channel no magical energy at all, but only "
 			"a minimal amount).";
 	}
-	if(!(SkillDefs[S_PATTERN].flags & SkillType::DISABLED)) {
+	if (!(SkillDefs[S_PATTERN].flags & SkillType::DISABLED)) {
 		temp += " Pattern indicates ability to handle complex patterns, and "
 			"is important for things like healing and nature spells. ";
 	}
-	if(!(SkillDefs[S_SPIRIT].flags & SkillType::DISABLED)) {
+	if (!(SkillDefs[S_SPIRIT].flags & SkillType::DISABLED)) {
 		temp += " Spirit deals with meta-effects that lie outside the scope "
 			"of the physical world.";
 	}
 	f.Paragraph(temp);
 
-	if(app_exist) {
+	if (app_exist) {
 		temp = "Apprentices may be created by having them study ";
 		comma = 0;
-		for(i = 0; i < NSKILLS; i++) {
-			if(SkillDefs[i].flags & SkillType::DISABLED) continue;
-			if(!(SkillDefs[i].flags & SkillType::APPRENTICE)) continue;
-			if(last == -1) {
+		for (i = 0; i < NSKILLS; i++) {
+			if (SkillDefs[i].flags & SkillType::DISABLED) continue;
+			if (!(SkillDefs[i].flags & SkillType::APPRENTICE)) continue;
+			if (last == -1) {
 				last = i;
 				continue;
 			}
@@ -3845,7 +3845,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			comma++;
 			last = i;
 		}
-		if(comma) temp += "or ";
+		if (comma) temp += "or ";
 		temp += SkillDefs[last].name;
 		temp += ". ";
 		temp += "Apprentices may not cast spells, but may utilize items "
@@ -3958,51 +3958,51 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"these units must be discovered in the course of the game, but a "
 		"few basics are below.";
 	f.Paragraph(temp);
-	if(Globals->TOWNS_EXIST && Globals->CITY_MONSTERS_EXIST) {
+	if (Globals->TOWNS_EXIST && Globals->CITY_MONSTERS_EXIST) {
 		f.LinkRef("nonplayers_guards");
 		f.TagText("h3", "City and Town Guardsmen:");
 		temp = "All cities and towns begin with guardsmen in them.  These "
 			"units will defend any units that are attacked in the city or "
 			"town, and will also prevent theft and assassination attempts, ";
-		if(has_obse)
+		if (has_obse)
 			temp += "if their Observation level is high enough. ";
 		else
 			temp += "if they can see the criminal. ";
 		temp += "They are on guard, and will prevent other units from "
 			"taxing or pillaging. ";
-		if(Globals->SAFE_START_CITIES)
+		if (Globals->SAFE_START_CITIES)
 			temp += "Except in the starting cities, the ";
 		else
 			temp += "The ";
 		temp += "guards may be killed by players, although they will form "
 			"again if the city is left unguarded.";
 		f.Paragraph(temp);
-		if(Globals->SAFE_START_CITIES || Globals->START_CITY_GUARDS_PLATE ||
+		if (Globals->SAFE_START_CITIES || Globals->START_CITY_GUARDS_PLATE ||
 				Globals->START_CITY_MAGES) {
-			if(Globals->AMT_START_CITY_GUARDS) {
+			if (Globals->AMT_START_CITY_GUARDS) {
 				temp = "Note that the city guardsmen in the starting cities "
 					"of Atlantis possess ";
-				if(Globals->SAFE_START_CITIES)
+				if (Globals->SAFE_START_CITIES)
 					temp += "Amulets of Invincibility ";
-				if(Globals->START_CITY_GUARDS_PLATE) {
-					if(Globals->SAFE_START_CITIES) temp += "and ";
+				if (Globals->START_CITY_GUARDS_PLATE) {
+					if (Globals->SAFE_START_CITIES) temp += "and ";
 					temp += "plate armor ";
 				}
 				temp += "in addition to being more numerous and ";
-				if(Globals->SAFE_START_CITIES)
+				if (Globals->SAFE_START_CITIES)
 					temp += "may not be defeated.";
 				else
 					temp += "are therefore harder to kill.";
 			}
 
-			if(Globals->START_CITY_MAGES) {
-				if(Globals->AMT_START_CITY_GUARDS)
+			if (Globals->START_CITY_MAGES) {
+				if (Globals->AMT_START_CITY_GUARDS)
 					temp += " Additionally, in ";
 				else
 					temp += "In ";
 				temp += "the starting cities, Mage Guards will be found. "
 					"These mages are adept at the fire spell";
-				if(!Globals->SAFE_START_CITIES) {
+				if (!Globals->SAFE_START_CITIES) {
 					temp += " making any attempt to control a starting "
 						"city a much harder proposition";
 				}
@@ -4033,7 +4033,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"has the behind flag set. Whether or not you are allowed to give a "
 		"monster to other units depends on the type of monster; some may be "
 		"given freely, while others must remain with the controlling unit.";
-	if(Globals->RELEASE_MONSTERS) {
+	if (Globals->RELEASE_MONSTERS) {
 		temp += " All monsters may be released completely by using the ";
 		temp += f.Link("#give", "GIVE") + " order targetting unit 0.  When "
 			"this is done, the monster will become a wandering monster.";
@@ -4167,7 +4167,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "ADVANCE N 1 IN SE";
 	f.CommandExample(temp, temp2);
 
-	if(Globals->USE_WEAPON_ARMOR_COMMAND) {
+	if (Globals->USE_WEAPON_ARMOR_COMMAND) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("armor");
 		f.TagText("h4", "ARMOR [item1] [item2] [item3] [item4]");
@@ -4187,7 +4187,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.CommandExample(temp, temp2);
 	}
 
-	if(has_stea) {
+	if (has_stea) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("assassinate");
 		f.TagText("h4", "ASSASSINATE [unit]");
@@ -4512,7 +4512,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "EXCHANGE 3453 10 SWOR 10 LBOW";
 	f.CommandExample(temp, temp2);
 
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("faction");
 		f.TagText("h4", "FACTION [type] [points] ...");
@@ -4629,7 +4629,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "UNIT 17\n";
 	temp2 += "FORM 1\n";
 	temp2 += "    NAME UNIT \"Merlin's Guards\"\n";
-	if(Globals->RACES_EXIST)
+	if (Globals->RACES_EXIST)
 		temp2 += "    BUY 5 Plainsmen\n";
 	else
 		temp2 += "    BUY 5 men\n";
@@ -4638,7 +4638,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 += "FORM 2\n";
 	temp2 += "    NAME UNIT \"Merlin's Workers\"\n";
 	temp2 += "    DESCRIBE UNIT \"wearing dirty overalls\"\n";
-	if(Globals->RACES_EXIST)
+	if (Globals->RACES_EXIST)
 		temp2 += "    BUY 15 Plainsmen\n";
 	else
 		temp2 += "    BUY 15 men\n";
@@ -4736,9 +4736,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("leave");
 	f.TagText("h4", "LEAVE");
 	temp = "Leave the object you are currently in.";
-	if(move_over_water) {
+	if (move_over_water) {
 		temp += " If a unit is capable of swimming ";
-		if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
+		if (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
 			temp += "or flying ";
 		temp += "then this order is usable to leave a boat while at sea.";
 	} else
@@ -4851,14 +4851,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "NOAID 1";
 	f.CommandExample(temp, temp2);
 
-	if(move_over_water) {
+	if (move_over_water) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("nocross");
 		f.TagText("h4", "NOCROSS [flag]");
 		temp = "NOCROSS 1 indicates that if a unit attempts to cross a "
 			"body of water then that unit should instead not cross it, "
 			"regardless of whether the unit otherwise could do so. ";
-		if(may_sail) {
+		if (may_sail) {
 			temp += "Units inside of a ship are not affected by this flag "
 				"(IE, they are able to sail within the ship). ";
 		}
@@ -4897,7 +4897,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"be additional symbols for unusual/special terrain):";
 	f.Paragraph(temp);
 	f.Enclose(1, "table");
-	if(Globals->UNDERWORLD_LEVELS) {
+	if (Globals->UNDERWORLD_LEVELS) {
 		f.Enclose(1, "tr");
 		f.Enclose(1, "td align=\"left\" nowrap class=\"fixed\"");
 		f.PutStr("####");
@@ -4921,7 +4921,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "td");
 	f.Enclose(1, "td align=\"left\" nowrap");
 	temp = "PLAINS";
-	if(Globals->UNDERWORLD_LEVELS)
+	if (Globals->UNDERWORLD_LEVELS)
 		temp += "/TUNNELS";
 	temp += " HEX";
 	f.PutStr(temp);
@@ -4933,7 +4933,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "td");
 	f.Enclose(1, "td align=\"left\" nowrap");
 	temp = "FOREST";
-	if(Globals->UNDERWORLD_LEVELS)
+	if (Globals->UNDERWORLD_LEVELS)
 		temp += "/UNDERFOREST";
 	temp += " HEX";
 	f.PutStr(temp);
@@ -4969,7 +4969,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "td");
 	f.Enclose(1, "td align=\"left\" nowrap");
 	temp = "DESERT";
-	if(Globals->UNDERWORLD_LEVELS)
+	if (Globals->UNDERWORLD_LEVELS)
 		temp += "/CAVERN";
 	temp += " HEX";
 	f.PutStr(temp);
@@ -4983,7 +4983,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("TUNDRA HEX");
 	f.Enclose(0, "td");
 	f.Enclose(0, "tr");
-	if(Globals->NEXUS_EXISTS) {
+	if (Globals->NEXUS_EXISTS) {
 		f.Enclose(1, "tr");
 		f.Enclose(1, "td align=\"left\" nowrap class=\"fixed\"");
 		f.PutStr("!!!!");
@@ -5034,7 +5034,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "PILLAGE";
 	f.CommandExample(temp, temp2);
 
-	if(Globals->USE_PREPARE_COMMAND) {
+	if (Globals->USE_PREPARE_COMMAND) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("prepare");
 		f.TagText("h4", "PREPARE [item]");
@@ -5119,7 +5119,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Cause the unit to either show itself (REVEAL UNIT), or show "
 		"itself and its faction affiliation (REVEAL FACTION), in the turn "
 		"report, to all other factions in the region. ";
-	if(has_stea) {
+	if (has_stea) {
 		temp += "Used to reveal high stealth scouts, should there be some "
 			"reason to. ";
 	}
@@ -5136,7 +5136,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "REVEAL";
 	f.CommandExample(temp, temp2);
 
-	if(may_sail) {
+	if (may_sail) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("sail");
 		f.TagText("h4", "SAIL [dir] ...");
@@ -5156,7 +5156,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.CommandExample(temp, temp2);
 	}
 
-	if(Globals->TOWNS_EXIST) {
+	if (Globals->TOWNS_EXIST) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("sell");
 		f.TagText("h4", "SELL [quantity] [item]");
@@ -5254,7 +5254,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "SPOILS FLY";
 	f.CommandExample(temp, temp2);
 
-	if(has_stea) {
+	if (has_stea) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("steal");
 		f.TagText("h4", "STEAL [unit] [item]");
@@ -5279,9 +5279,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("h4", "STUDY [skill]");
 	f.TagText("h4", "STUDY [skill] [level]");
 	temp = "Spend the month studying the specified skill. "
-	       "A level may be specified which means that study "
-	       "will be continued from turn to turn until the unit "
-	       " reaches that skill level. ";
+		"A level may be specified which means that study "
+		"will be continued from turn to turn until the unit "
+		" reaches that skill level. ";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Study horse training.";
@@ -5295,7 +5295,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("tax");
 	f.TagText("h4", "TAX");
 	temp = "Attempt to collect taxes from the region. ";
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		temp += "Only War factions may collect taxes, and then ";
 	else
 		temp += "Taxes may be collected ";
@@ -5428,7 +5428,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"TURN block.";
 	f.Paragraph(temp);
 
-	if(Globals->USE_WEAPON_ARMOR_COMMAND) {
+	if (Globals->USE_WEAPON_ARMOR_COMMAND) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("weapon");
 		f.TagText("h4", "WEAPON [item] ...");
@@ -5449,7 +5449,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.CommandExample(temp, temp2);
 	}
 
-	if(Globals->ALLOW_WITHDRAW) {
+	if (Globals->ALLOW_WITHDRAW) {
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("withdraw");
 		f.TagText("h4", "WITHDRAW [item]");
@@ -5494,35 +5494,35 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = f.Link("#form", "FORM") + " orders are processed.";
 	f.TagText("li", temp);
 	temp = f.Link("#address", "ADDRESS") + ", ";
-	if(Globals->USE_WEAPON_ARMOR_COMMAND)
+	if (Globals->USE_WEAPON_ARMOR_COMMAND)
 		temp += f.Link("#armor", "ARMOR") + ", ";
 	temp += f.Link("#autotax", "AUTOTAX") + ", ";
 	temp += f.Link("#avoid", "AVOID") + ", ";
 	temp += f.Link("#behind", "BEHIND") + ", ";
 	temp += f.Link("#claim", "CLAIM") + ", ";
 	temp += f.Link("#combat", "COMBAT") + ", ";
-	if(Globals->FOOD_ITEMS_EXIST)
+	if (Globals->FOOD_ITEMS_EXIST)
 		temp += f.Link("#consume", "CONSUME") + ", ";
 	temp += f.Link("#declare", "DECLARE") + ", ";
 	temp += f.Link("#describe", "DESCRIBE") + ", ";
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		temp += f.Link("#faction", "FACTION") + ", ";
 	temp += f.Link("#guard", "GUARD") + " 0, ";
 	temp += f.Link("#hold", "HOLD") + ", ";
 	temp += f.Link("#name", "NAME") + ", ";
 	temp += f.Link("#noaid", "NOAID") + ", ";
-	if(move_over_water)
+	if (move_over_water)
 		temp += f.Link("#nocross", "NOCROSS") + ", ";
 	temp += f.Link("#option", "OPTION") + ", ";
 	temp += f.Link("#password", "PASSWORD") + ", ";
-	if(Globals->USE_PREPARE_COMMAND)
+	if (Globals->USE_PREPARE_COMMAND)
 		temp += f.Link("#prepare", "PREPARE") + ", ";
 	temp += f.Link("#reveal", "REVEAL") + ", ";
 	temp += f.Link("#show", "SHOW") + ", ";
-	if(!Globals->USE_WEAPON_ARMOR_COMMAND)
+	if (!Globals->USE_WEAPON_ARMOR_COMMAND)
 		temp += "and ";
 	temp += f.Link("#spoils", "SPOILS");
-	if(Globals->USE_WEAPON_ARMOR_COMMAND) {
+	if (Globals->USE_WEAPON_ARMOR_COMMAND) {
 		temp += ", and ";
 		temp += f.Link("#weapon", "WEAPON");
 	}
@@ -5590,7 +5590,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "ul");
 	temp = f.Link("#guard","GUARD") + " 1 orders are processed.";
 	f.TagText("li", temp);
-	if(Globals->TOWNS_EXIST) {
+	if (Globals->TOWNS_EXIST) {
 		temp = f.Link("#sell","SELL") + " orders are processed.";
 		f.TagText("li", temp);
 	}
@@ -5615,7 +5615,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "li");
 	f.PutStr("Movement orders.");
 	f.Enclose(1, "ul");
-	if(may_sail) {
+	if (may_sail) {
 		temp = f.Link("#sail","SAIL") + " orders are processed.";
 		f.TagText("li", temp);
 	}
@@ -5629,7 +5629,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr("Month long orders.");
 	f.Enclose(1, "ul");
 	temp = f.Link("#build", "BUILD") + ", ";
-	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
+	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		temp += f.Link("#entertain", "ENTERTAIN") + ", ";
 	temp += f.Link("#produce", "PRODUCE") + ", ";
 	temp += f.Link("#study", "STUDY") + ", ";
@@ -5667,7 +5667,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"\"*\" character. Units belonging to other factions are flagged "
 		"with a \"-\" character. You may be informed which faction they "
 		"belong to, if ";
-	if(has_obse)
+	if (has_obse)
 		temp += "you have high enough Observation skill or ";
 	temp += "they are revealing that information.";
 	f.Paragraph(temp);
@@ -5677,7 +5677,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	temp = "If you can see a unit, you can see any large items it is "
 		"carrying.  This means all items other than silver";
-	if(!(ItemDefs[I_HERBS].flags & ItemType::DISABLED))
+	if (!(ItemDefs[I_HERBS].flags & ItemType::DISABLED))
 		temp += ", herbs,";
 	temp += " and other small items (which are of zero size units, and are "
 		"small enough to be easily concealed). Items carried by your own "
@@ -5707,7 +5707,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"provide enough money for them to live on.";
 	f.Paragraph(temp);
 	temp = "Be conservative with your money. ";
-	if(Globals->LEADERS_EXIST) {
+	if (Globals->LEADERS_EXIST) {
 		temp += "Leaders especially are very hard to maintain, as they "
 			"cannot usually earn enough by ";
 		temp += f.Link("#work", "WORK") + "ing to pay their maintenance "
@@ -5728,7 +5728,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"orders at all.";
 	f.Paragraph(temp);
 
-	if(Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
 		f.LinkRef("specialcommands");
 		f.ClassTagText("div", "rule", "");
 		f.TagText("h2", "Special Commands");

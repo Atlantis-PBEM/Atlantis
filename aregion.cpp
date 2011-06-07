@@ -52,7 +52,7 @@ Farsight::Farsight()
 	unit = 0;
 	level = 0;
 	observation = 0;
-	for(int i = 0; i < NDIRS; i++)
+	for (int i = 0; i < NDIRS; i++)
 		exits_used[i] = 0;
 }
 
@@ -141,7 +141,7 @@ void ARegion::ZeroNeighbors()
 
 void ARegion::SetName(char const *c)
 {
-	if(name) delete name;
+	if (name) delete name;
 	name = new AString(c);
 }
 
@@ -151,12 +151,12 @@ int ARegion::IsNativeRace(int item)
 	TerrainType *typer = &(TerrainDefs[type]);
 	int coastal = sizeof(typer->coastal_races)/sizeof(int);
 	int noncoastal = sizeof(typer->races)/sizeof(int);
-	if(IsCoastal()) {
-		for(int i=0; i<coastal; i++) {
+	if (IsCoastal()) {
+		for (int i=0; i<coastal; i++) {
 			if (item == typer->coastal_races[i]) return 1;
 		}
 	}
-	for(int i=0; i<noncoastal; i++) {
+	for (int i=0; i<noncoastal; i++) {
 		if (item == typer->races[i]) return 1;
 	}
 	return 0;
@@ -209,16 +209,16 @@ void ARegion::LairCheck()
 
 	TerrainType *tt = &TerrainDefs[type];
 
-	if(!tt->lairChance) return;
+	if (!tt->lairChance) return;
 
 	int check = getrandom(100);
-	if(check >= tt->lairChance) return;
+	if (check >= tt->lairChance) return;
 
 	int count = 0;
 	unsigned int c;
-	for(c = 0; c < sizeof(tt->lairs)/sizeof(int); c++) {
-		if(tt->lairs[c] != -1) {
-			if(!(ObjectDefs[tt->lairs[c]].flags & ObjectType::DISABLED)) {
+	for (c = 0; c < sizeof(tt->lairs)/sizeof(int); c++) {
+		if (tt->lairs[c] != -1) {
+			if (!(ObjectDefs[tt->lairs[c]].flags & ObjectType::DISABLED)) {
 				count++;
 			}
 		}
@@ -226,10 +226,10 @@ void ARegion::LairCheck()
 	count = getrandom(count);
 
 	int lair = -1;
-	for(c = 0; c < sizeof(tt->lairs)/sizeof(int); c++) {
-		if(tt->lairs[c] != -1) {
-			if(!(ObjectDefs[tt->lairs[c]].flags & ObjectType::DISABLED)) {
-				if(!count) {
+	for (c = 0; c < sizeof(tt->lairs)/sizeof(int); c++) {
+		if (tt->lairs[c] != -1) {
+			if (!(ObjectDefs[tt->lairs[c]].flags & ObjectType::DISABLED)) {
+				if (!count) {
 					lair = tt->lairs[c];
 					break;
 				}
@@ -238,7 +238,7 @@ void ARegion::LairCheck()
 		}
 	}
 
-	if(lair != -1) {
+	if (lair != -1) {
 		MakeLair(lair);
 		return;
 	}
@@ -280,7 +280,7 @@ void ARegion::Setup()
 	Object *obj = new Object(this);
 	objects.Add(obj);
 
-	if(Globals->LAIR_MONSTERS_EXIST)
+	if (Globals->LAIR_MONSTERS_EXIST)
 		LairCheck();
 }
 
@@ -291,23 +291,23 @@ int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range, int dev
 	int isnew = 1;
 	forlist(con) {
 		ARegionPtr *reg = (ARegionPtr *) elem;
-		if ((reg) && (reg->ptr)) if(reg->ptr == this) isnew = 0;
+		if ((reg) && (reg->ptr)) if (reg->ptr == this) isnew = 0;
 	}
-	if(isnew == 0) return sum;
+	if (isnew == 0) return sum;
 	con->Add(rn);
 	// Add bonus for connecting town
-	if(town) sum++;
+	if (town) sum++;
 	// Add bonus if development is higher
 	if (development > dev + 9) sum++;
 	if (development * 2 > dev * 5) sum++;
 	// Check further along road
-	if(range > 0) {
-		for(int d=0; d<NDIRS; d++) {
-			if(!HasExitRoad(d)) continue;
+	if (range > 0) {
+		for (int d=0; d<NDIRS; d++) {
+			if (!HasExitRoad(d)) continue;
 			ARegion *r = neighbors[d];
-			if(!r) continue;
-			if(dir == r->GetRealDirComp(d)) continue;
-			if(r->HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1, dev+2);
+			if (!r) continue;
+			if (dir == r->GetRealDirComp(d)) continue;
+			if (r->HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1, dev+2);
 		}
 	}
 	return sum;
@@ -320,11 +320,11 @@ int ARegion::RoadDevelopmentBonus(int range, int dev)
 	ARegionPtr *rp = new ARegionPtr();
 	rp->ptr = this;
 	con->Add(rp);
-	for(int d=0; d<NDIRS; d++) {
-		if(!HasExitRoad(d)) continue;
+	for (int d=0; d<NDIRS; d++) {
+		if (!HasExitRoad(d)) continue;
 		ARegion *r = neighbors[d];
-		if(!r) continue;
-		if(r->HasConnectingRoad(d)) bonus = r->TraceConnectedRoad(d, bonus, con, range-1, dev);
+		if (!r) continue;
+		if (r->HasConnectingRoad(d)) bonus = r->TraceConnectedRoad(d, bonus, con, range-1, dev);
 	}
 	return bonus;	
 }
@@ -334,7 +334,7 @@ void ARegion::DoDecayCheck(ARegionList *pRegs)
 {
 	forlist (&objects) {
 		Object *o = (Object *) elem;
-		if(!(ObjectDefs[o->type].flags & ObjectType::NEVERDECAY)) {
+		if (!(ObjectDefs[o->type].flags & ObjectType::NEVERDECAY)) {
 			DoDecayClicks(o, pRegs);
 		}
 	}
@@ -343,17 +343,17 @@ void ARegion::DoDecayCheck(ARegionList *pRegs)
 // AS
 void ARegion::DoDecayClicks(Object *o, ARegionList *pRegs)
 {
-	if(ObjectDefs[o->type].flags & ObjectType::NEVERDECAY) return;
+	if (ObjectDefs[o->type].flags & ObjectType::NEVERDECAY) return;
 
 	int clicks = getrandom(GetMaxClicks());
 	clicks += PillageCheck();
 
-	if(clicks > ObjectDefs[o->type].maxMonthlyDecay)
+	if (clicks > ObjectDefs[o->type].maxMonthlyDecay)
 		clicks = ObjectDefs[o->type].maxMonthlyDecay;
 
 	o->incomplete += clicks;
 
-	if(o->incomplete > 0) {
+	if (o->incomplete > 0) {
 		// trigger decay event
 		RunDecayEvent(o, pRegs);
 	}
@@ -575,7 +575,7 @@ int ARegion::HasRoad()
 {
 	forlist (&objects) {
 		Object *o = (Object *) elem;
-		if(o->IsRoad() && o->incomplete < 1) return 1;
+		if (o->IsRoad() && o->incomplete < 1) return 1;
 	}
 	return 0;
 }
@@ -685,29 +685,29 @@ AString ARegion::ShortPrint(ARegionList *pRegs)
 	temp += AString(" (") + xloc + "," + yloc;
 
 	ARegionArray *pArr = pRegs->pRegionArrays[zloc];
-	if(pArr->strName) {
+	if (pArr->strName) {
 		temp += ",";
-		if(Globals->EASIER_UNDERWORLD &&
+		if (Globals->EASIER_UNDERWORLD &&
 		   (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
 			temp += AString("") + zloc + " <";
 		} else {
 			// add less explicit multilevel information about the underworld
-			if(zloc > 2 && zloc < Globals->UNDERWORLD_LEVELS+2) {
-				for(int i = zloc; i > 3; i--) {
+			if (zloc > 2 && zloc < Globals->UNDERWORLD_LEVELS+2) {
+				for (int i = zloc; i > 3; i--) {
 					temp += "very ";
 				}
 				temp += "deep ";
-			} else if((zloc > Globals->UNDERWORLD_LEVELS+2) &&
+			} else if ((zloc > Globals->UNDERWORLD_LEVELS+2) &&
 					  (zloc < Globals->UNDERWORLD_LEVELS +
 					   Globals->UNDERDEEP_LEVELS + 2)) {
-				for(int i = zloc; i > Globals->UNDERWORLD_LEVELS + 3; i--) {
+				for (int i = zloc; i > Globals->UNDERWORLD_LEVELS + 3; i--) {
 					temp += "very ";
 				}
 				temp += "deep ";
 			}
 		}
 		temp += *pArr->strName;
-		if(Globals->EASIER_UNDERWORLD &&
+		if (Globals->EASIER_UNDERWORLD &&
 		   (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
 			temp += ">";
 		}
@@ -777,9 +777,9 @@ void ARegion::Kill(Unit *u)
 				// the first unit can actually hold the stuff and not drown
 				// If the item would cause them to drown then they won't
 				// pick it up.
-				if(TerrainDefs[type].similar_type == R_OCEAN) {
-					if(first->object->type == O_DUMMY) {
-						if(!first->CanReallySwim()) {
+				if (TerrainDefs[type].similar_type == R_OCEAN) {
+					if (first->object->type == O_DUMMY) {
+						if (!first->CanReallySwim()) {
 							first->items.SetNum(i->type,
 									first->items.GetNum(i->type) - i->num);
 						}
@@ -831,13 +831,13 @@ void ARegion::CheckFleets()
 			int alive = 0;
 			forlist(&o->units) {
 				Unit * unit = (Unit *) elem;
-				if(unit->IsAlive()) alive = 1;
-				if(bail > 0) unit->MoveUnit(GetDummy());
+				if (unit->IsAlive()) alive = 1;
+				if (bail > 0) unit->MoveUnit(GetDummy());
 			}
 			// don't remove fleets when no living units are
 			// aboard when they're not at sea.
-			if(TerrainDefs[type].similar_type == R_OCEAN) alive = 1;
-			if((alive == 0) || (bail == 1)) {
+			if (TerrainDefs[type].similar_type == R_OCEAN) alive = 1;
+			if ((alive == 0) || (bail == 1)) {
 				objects.Remove(o);
 				delete o;
 			}
@@ -850,7 +850,7 @@ Unit *ARegion::GetUnit(int num)
 	forlist((&objects)) {
 		Object *obj = (Object *) elem;
 		Unit *u = obj->GetUnit(num);
-		if(u) {
+		if (u) {
 			return(u);
 		}
 	}
@@ -879,7 +879,7 @@ Unit *ARegion::GetUnitAlias(int alias, int faction)
 	forlist((&objects)) {
 		Object *obj = (Object *) elem;
 		Unit *u = obj->GetUnitAlias(alias, faction);
-		if(u) {
+		if (u) {
 			return(u);
 		}
 	}
@@ -945,7 +945,7 @@ void ARegion::Writeout(Aoutfile *f)
 	else f->PutStr("NO_TERRAIN");
 	f->PutInt(buildingseq);
 	f->PutInt(gate);
-	if(gate > 0) f->PutInt(gatemonth);
+	if (gate > 0) f->PutInt(gatemonth);
 	if (race != -1) f->PutStr(ItemDefs[race].abr);
 	else f->PutStr("NO_RACE");
 	f->PutInt(population);
@@ -1001,7 +1001,7 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	delete temp;
 	buildingseq = f->GetInt();
 	gate = f->GetInt();
-	if(gate > 0) gatemonth = f->GetInt();
+	if (gate > 0) gatemonth = f->GetInt();
 
 	temp = f->GetStr();
 	race = LookupItem(temp);
@@ -1053,26 +1053,26 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	int sk;
 	Farsight *f;
 
-	if(Globals->IMPROVED_FARSIGHT) {
+	if (Globals->IMPROVED_FARSIGHT) {
 		forlist(&farsees) {
 			f = (Farsight *)elem;
-			if(f && f->faction == fac && f->unit) {
+			if (f && f->faction == fac && f->unit) {
 				skname = ItemDefs[item].pSkill;
 				sk = LookupSkill(&skname);
-				if(f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
+				if (f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
 			}
 		}
 	}
 
-	if((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
+	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
 	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) {
 		forlist(&passers) {
 			f = (Farsight *)elem;
-			if(f && f->faction == fac && f->unit) {
+			if (f && f->faction == fac && f->unit) {
 				skname = ItemDefs[item].pSkill;
 				sk = LookupSkill(&skname);
-				if(f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
+				if (f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
 			}
 		}
@@ -1111,7 +1111,7 @@ void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
 		} else {
 			if (p->itemtype == I_SILVER) {
 				if (p->skill == S_ENTERTAINMENT) {
-					if((Globals->TRANSIT_REPORT &
+					if ((Globals->TRANSIT_REPORT &
 							GameDefs::REPORT_SHOW_ENTERTAINMENT) || present) {
 						f->PutStr(AString("Entertainment available: $") +
 								p->amount + ".");
@@ -1120,7 +1120,7 @@ void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
 					}
 				}
 			} else {
-				if(!present &&
+				if (!present &&
 				   !(Globals->TRANSIT_REPORT &
 					   GameDefs::REPORT_SHOW_RESOURCES))
 					continue;
@@ -1160,12 +1160,12 @@ void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
 	forlist(&markets) {
 		Market *m = (Market *) elem;
 		if (!m->amount) continue;
-		if(!present &&
+		if (!present &&
 		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS))
 			continue;
 		if (m->type == M_SELL) {
 			if (ItemDefs[m->item].type & IT_ADVANCED) {
-				if(!Globals->MARKETS_SHOW_ADVANCED_ITEMS) {
+				if (!Globals->MARKETS_SHOW_ADVANCED_ITEMS) {
 					if (!HasItem(fac, m->item)) {
 						continue;
 					}
@@ -1189,7 +1189,7 @@ void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
 		forlist(&markets) {
 			Market *m = (Market *) elem;
 			if (!m->amount) continue;
-			if(!present &&
+			if (!present &&
 			   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS))
 				continue;
 			if (m->type == M_BUY) {
@@ -1211,7 +1211,7 @@ void ARegion::WriteEconomy(Areport *f, Faction *fac, int present)
 {
 	f->AddTab();
 
-	if((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present) {
+	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present) {
 		f->PutStr(AString("Wages: ") + WagesForReport() + ".");
 	} else {
 		f->PutStr(AString("Wages: $0."));
@@ -1261,10 +1261,10 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			(present || farsight ||
 			 (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_PEASANTS))) {
 			temp += AString(", ") + Population() + " peasants";
-			if(Globals->RACES_EXIST) {
+			if (Globals->RACES_EXIST) {
 				temp += AString(" (") + ItemDefs[race].names + ")";
 			}
-			if(present || farsight ||
+			if (present || farsight ||
 			   Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY) {
 				temp += AString(", $") + wealth;
 			} else {
@@ -1277,12 +1277,12 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 				"-----------");
 
 		f->AddTab();
-		if(Globals->WEATHER_EXISTS) {
+		if (Globals->WEATHER_EXISTS) {
 			temp = "It was ";
 			if (clearskies) temp += "unnaturally clear ";
 			else {
-				if(weather == W_BLIZZARD) temp = "There was an unnatural ";
-				else if(weather == W_NORMAL) temp = "The weather was ";
+				if (weather == W_BLIZZARD) temp = "There was an unnatural ";
+				else if (weather == W_NORMAL) temp = "The weather was ";
 				temp += SeasonNames[weather];
 			}
 			temp += " last month; ";
@@ -1319,9 +1319,9 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		WriteEconomy(f, fac, present || farsight);
 
 		int exits_seen[NDIRS];
-		if(present || farsight ||
+		if (present || farsight ||
 		   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ALL_EXITS)) {
-			for(int i = 0; i < NDIRS; i++)
+			for (int i = 0; i < NDIRS; i++)
 				exits_seen[i] = 1;
 		} else {
 			// This is just a transit report and we're not showing all
@@ -1329,14 +1329,14 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 
 			// Show none by default.
 			int i;
-			for(i = 0; i < NDIRS; i++)
+			for (i = 0; i < NDIRS; i++)
 				exits_seen[i] = 0;
 			// Now, if we should, show the ones actually used.
-			if(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_USED_EXITS) {
+			if (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_USED_EXITS) {
 				forlist(&passers) {
 					Farsight *p = (Farsight *)elem;
-					if(p->faction == fac) {
-						for(i = 0; i < NDIRS; i++) {
+					if (p->faction == fac) {
+						for (i = 0; i < NDIRS; i++) {
 							exits_seen[i] |= p->exits_used[i];
 						}
 					}
@@ -1346,25 +1346,25 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 
 		WriteExits(f, pRegions, exits_seen);
 
-		if(Globals->GATES_EXIST && gate && gate != -1) {
+		if (Globals->GATES_EXIST && gate && gate != -1) {
 			int sawgate = 0;
-			if(fac->IsNPC())
+			if (fac->IsNPC())
 				sawgate = 1;
-			if(Globals->IMPROVED_FARSIGHT && farsight) {
+			if (Globals->IMPROVED_FARSIGHT && farsight) {
 				forlist(&farsees) {
 					Farsight *watcher = (Farsight *)elem;
-					if(watcher && watcher->faction == fac && watcher->unit) {
-						if(watcher->unit->GetSkill(S_GATE_LORE)) {
+					if (watcher && watcher->faction == fac && watcher->unit) {
+						if (watcher->unit->GetSkill(S_GATE_LORE)) {
 							sawgate = 1;
 						}
 					}
 				}
 			}
-			if(Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) {
+			if (Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) {
 				forlist(&passers) {
 					Farsight *watcher = (Farsight *)elem;
-					if(watcher && watcher->faction == fac && watcher->unit) {
-						if(watcher->unit->GetSkill(S_GATE_LORE)) {
+					if (watcher && watcher->faction == fac && watcher->unit) {
+						if (watcher->unit->GetSkill(S_GATE_LORE)) {
 							sawgate = 1;
 						}
 					}
@@ -1381,8 +1381,8 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 					}
 				}
 			}
-			if(sawgate) {
-				if(gateopen) {
+			if (sawgate) {
+				if (gateopen) {
 					f->PutStr(AString("There is a Gate here (Gate ") + gate +
 							" of " + (pRegions->numberofgates) + ").");
 					f->PutStr("");
@@ -1401,7 +1401,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		int passtrue = GetTrueSight(fac, 1);
 		int passdetfac = detfac;
 
-		if(fac->IsNPC()) {
+		if (fac->IsNPC()) {
 			obs = 10;
 			passobs = 10;
 		}
@@ -1415,23 +1415,23 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 				}
 			}
 		}
-		if(Globals->IMPROVED_FARSIGHT && farsight) {
+		if (Globals->IMPROVED_FARSIGHT && farsight) {
 			forlist(&farsees) {
 				Farsight *watcher = (Farsight *)elem;
-				if(watcher && watcher->faction == fac && watcher->unit) {
-					if(watcher->unit->GetSkill(S_MIND_READING) > 2) {
+				if (watcher && watcher->faction == fac && watcher->unit) {
+					if (watcher->unit->GetSkill(S_MIND_READING) > 2) {
 						detfac = 1;
 					}
 				}
 			}
 		}
 
-		if((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
+		if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
 		   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
 			forlist(&passers) {
 				Farsight *watcher = (Farsight *)elem;
-				if(watcher && watcher->faction == fac && watcher->unit) {
-					if(watcher->unit->GetSkill(S_MIND_READING) > 2) {
+				if (watcher && watcher->faction == fac && watcher->unit) {
+					if (watcher->unit->GetSkill(S_MIND_READING) > 2) {
 						passdetfac = 1;
 					}
 				}
@@ -1524,24 +1524,24 @@ int ARegion::GetTrueSight(Faction *f, int usepassers)
 {
 	int truesight = 0;
 
-	if(Globals->IMPROVED_FARSIGHT) {
+	if (Globals->IMPROVED_FARSIGHT) {
 		forlist(&farsees) {
 			Farsight *farsight = (Farsight *)elem;
-			if(farsight && farsight->faction == f && farsight->unit) {
+			if (farsight && farsight->faction == f && farsight->unit) {
 				int t = farsight->unit->GetSkill(S_TRUE_SEEING);
-				if(t > truesight) truesight = t;
+				if (t > truesight) truesight = t;
 			}
 		}
 	}
 
-	if(usepassers &&
+	if (usepassers &&
 	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
 	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
 		forlist(&passers) {
 			Farsight *farsight = (Farsight *)elem;
-			if(farsight && farsight->faction == f && farsight->unit) {
+			if (farsight && farsight->faction == f && farsight->unit) {
 				int t = farsight->unit->GetSkill(S_TRUE_SEEING);
-				if(t > truesight) truesight = t;
+				if (t > truesight) truesight = t;
 			}
 		}
 	}
@@ -1563,24 +1563,24 @@ int ARegion::GetObservation(Faction *f, int usepassers)
 {
 	int obs = 0;
 
-	if(Globals->IMPROVED_FARSIGHT) {
+	if (Globals->IMPROVED_FARSIGHT) {
 		forlist(&farsees) {
 			Farsight *farsight = (Farsight *)elem;
-			if(farsight && farsight->faction == f && farsight->unit) {
+			if (farsight && farsight->faction == f && farsight->unit) {
 				int o = farsight->observation;
-				if(o > obs) obs = o;
+				if (o > obs) obs = o;
 			}
 		}
 	}
 
-	if(usepassers &&
+	if (usepassers &&
 	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
 	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
 		forlist(&passers) {
 			Farsight *farsight = (Farsight *)elem;
-			if(farsight && farsight->faction == f && farsight->unit) {
+			if (farsight && farsight->faction == f && farsight->unit) {
 				int o = farsight->observation;
-				if(o > obs) obs = o;
+				if (o > obs) obs = o;
 			}
 		}
 	}
@@ -1631,20 +1631,20 @@ int ARegion::IsCoastalOrLakeside()
 int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 {
 	int cost = 1;
-	if(Globals->WEATHER_EXISTS) {
+	if (Globals->WEATHER_EXISTS) {
 		cost = 2;
 		if (weather == W_BLIZZARD) return 10;
 		if (weather == W_NORMAL || clearskies) cost = 1;
 	}
 	if (movetype == M_WALK || movetype == M_RIDE) {
 		cost = (TerrainDefs[type].movepoints * cost);
-		if(fromRegion->HasExitRoad(dir) && fromRegion->HasConnectingRoad(dir)) {
+		if (fromRegion->HasExitRoad(dir) && fromRegion->HasConnectingRoad(dir)) {
 			cost -= cost/2;
 			if (road)
 				*road = "on a road ";
 		}
 	}
-	if(cost < 1) cost = 1;
+	if (cost < 1) cost = 1;
 	return cost;
 }
 
@@ -1697,9 +1697,9 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 
 	if (!(pS->flags & SkillType::NOTIFY)) {
 		// Okay, we aren't notifyable, check our prerequisites
-		for(i = 0; i < sizeof(pS->depends)/sizeof(SkillDepend); i++) {
+		for (i = 0; i < sizeof(pS->depends)/sizeof(SkillDepend); i++) {
 			if (pS->depends[i].skill == NULL) break;
-			if(NotifySpell(caster, pS->depends[i].skill, pRegs)) return 1;
+			if (NotifySpell(caster, pS->depends[i].skill, pRegs)) return 1;
 		}
 		return 0;
 	}
@@ -1775,7 +1775,7 @@ int ARegion::CanPillage(Unit *u)
 		Object *obj = (Object *)elem;
 		forlist (&obj->units) {
 			Unit *u2 = (Unit *)elem;
-			if(u2->guard == GUARD_GUARD && u2->IsAlive() &&
+			if (u2->guard == GUARD_GUARD && u2->IsAlive() &&
 					u2->faction != u->faction)
 				return 0;
 		}
@@ -1856,7 +1856,7 @@ int ARegion::ResolveFleetAlias(int alias)
 	map<int, int>::iterator f;
 	f = newfleets.find(alias);
 	//Awrite(AString("Resolving Fleet Alias #") + alias + ": " + f->second);
-	if(f == newfleets.end()) return -1;
+	if (f == newfleets.end()) return -1;
 	return f->second;
 }
 
@@ -1869,9 +1869,9 @@ ARegionList::ARegionList()
 
 ARegionList::~ARegionList()
 {
-	if(pRegionArrays) {
+	if (pRegionArrays) {
 		int i;
-		for(i = 0; i < numLevels; i++) {
+		for (i = 0; i < numLevels; i++) {
 			delete pRegionArrays[i];
 		}
 
@@ -1885,11 +1885,11 @@ void ARegionList::WriteRegions(Aoutfile *f)
 
 	f->PutInt(numLevels);
 	int i;
-	for(i = 0; i < numLevels; i++) {
+	for (i = 0; i < numLevels; i++) {
 		ARegionArray *pRegs = pRegionArrays[i];
 		f->PutInt(pRegs->x);
 		f->PutInt(pRegs->y);
-		if(pRegs->strName) {
+		if (pRegs->strName) {
 			f->PutStr(*pRegs->strName);
 		} else {
 			f->PutStr("none");
@@ -1903,7 +1903,7 @@ void ARegionList::WriteRegions(Aoutfile *f)
 		f->PutStr("Neighbors");
 		forlist(this) {
 			ARegion *reg = (ARegion *) elem;
-			for(i = 0; i < NDIRS; i++) {
+			for (i = 0; i < NDIRS; i++) {
 				if (reg->neighbors[i]) {
 					f->PutInt(reg->neighbors[i]->num);
 				} else {
@@ -1921,12 +1921,12 @@ int ARegionList::ReadRegions(Ainfile *f, AList *factions, ATL_VER v)
 	numLevels = f->GetInt();
 	CreateLevels(numLevels);
 	int i;
-	for(i = 0; i < numLevels; i++) {
+	for (i = 0; i < numLevels; i++) {
 		int curX = f->GetInt();
 		int curY = f->GetInt();
 		AString *name = f->GetStr();
 		ARegionArray *pRegs = new ARegionArray(curX, curY);
-		if(*name == "none") {
+		if (*name == "none") {
 			pRegs->strName = 0;
 			delete name;
 		} else {
@@ -1941,7 +1941,7 @@ int ARegionList::ReadRegions(Ainfile *f, AList *factions, ATL_VER v)
 	ARegionFlatArray fa(num);
 
 	Awrite("Reading the regions...");
-	for(i = 0; i < num; i++) {
+	for (i = 0; i < num; i++) {
 		ARegion *temp = new ARegion;
 		temp->Readin(f, factions, v);
 		fa.SetRegion(temp->num, temp);
@@ -1956,7 +1956,7 @@ int ARegionList::ReadRegions(Ainfile *f, AList *factions, ATL_VER v)
 		delete f->GetStr();
 		forlist(this) {
 			ARegion *reg = (ARegion *) elem;
-			for(i = 0; i < NDIRS; i++) {
+			for (i = 0; i < NDIRS; i++) {
 				int j = f->GetInt();
 				if (j != -1) {
 					reg->neighbors[i] = fa.GetRegion(j);
@@ -2235,7 +2235,7 @@ void ARegionList::CalcDensities()
 		arr[reg->type]++;
 	}
 	for (i=0; i<R_NUM; i++)
-		if(arr[i]) Awrite(AString(TerrainDefs[i].name) + " " + arr[i]);
+		if (arr[i]) Awrite(AString(TerrainDefs[i].name) + " " + arr[i]);
 
 	Awrite("");
 }
@@ -2247,7 +2247,7 @@ void ARegionList::TownStatistics()
 	int cities = 0;
 	forlist(this) {
 		ARegion *reg = ((ARegion *) elem);
-		if(reg->town) {
+		if (reg->town) {
 			switch(reg->town->TownType()) {
 				case TOWN_VILLAGE:
 					villages++;
@@ -2283,7 +2283,7 @@ ARegion *ARegionList::FindGate(int x)
 
 int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty)
 {
-	if(one->zloc == ARegionArray::LEVEL_NEXUS ||
+	if (one->zloc == ARegionArray::LEVEL_NEXUS ||
 			two->zloc == ARegionArray::LEVEL_NEXUS)
 		return 10000000;
 
@@ -2306,22 +2306,22 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty)
 	two_y = two->yloc * GetLevelYScale(two->zloc);
 
 	maxy = one_y - two_y;
-	if(maxy < 0) maxy=-maxy;
+	if (maxy < 0) maxy=-maxy;
 
 	int maxx = one_x - two_x;
-	if(maxx < 0) maxx = -maxx;
+	if (maxx < 0) maxx = -maxx;
 
 	int max2 = one_x + pArr->x - two_x;
-	if(max2 < 0) max2 = -max2;
-	if(max2 < maxx) maxx = max2;
+	if (max2 < 0) max2 = -max2;
+	if (max2 < maxx) maxx = max2;
 
 	max2 = one_x - (two_x + pArr->x);
-	if(max2 < 0) max2 = -max2;
-	if(max2 < maxx) maxx = max2;
+	if (max2 < 0) max2 = -max2;
+	if (max2 < maxx) maxx = max2;
 
-	if(maxy > maxx) maxx = (maxx+maxy)/2;
+	if (maxy > maxx) maxx = (maxx+maxy)/2;
 
-	if(one->zloc != two->zloc) {
+	if (one->zloc != two->zloc) {
 		int zdist = (one->zloc - two->zloc);
 		if ((two->zloc - one->zloc) > zdist)
 			zdist = two->zloc - one->zloc;
@@ -2333,7 +2333,7 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty)
 
 int ARegionList::GetDistance(ARegion *one, ARegion *two)
 {
-	if(one->zloc != two->zloc) return(10000000);
+	if (one->zloc != two->zloc) return(10000000);
 
 	ARegionArray *pArr = pRegionArrays[one->zloc];
 
@@ -2375,7 +2375,7 @@ ARegionArray::ARegionArray(int xx, int yy)
 	strName = 0;
 
 	int i;
-	for(i = 0; i < x * y / 2; i++) regions[i] = 0;
+	for (i = 0; i < x * y / 2; i++) regions[i] = 0;
 }
 
 ARegionArray::~ARegionArray()
@@ -2393,13 +2393,13 @@ ARegion *ARegionArray::GetRegion(int xx, int yy)
 {
 	xx = (xx + x) % x;
 	yy = (yy + y) % y;
-	if((xx + yy) % 2) return(0);
+	if ((xx + yy) % 2) return(0);
 	return(regions[xx / 2 + yy * x / 2]);
 }
 
 void ARegionArray::SetName(char const *name)
 {
-	if(name) {
+	if (name) {
 		strName = new AString(name);
 	} else {
 		delete strName;

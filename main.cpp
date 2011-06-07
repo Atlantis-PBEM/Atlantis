@@ -67,97 +67,97 @@ int main(int argc, char *argv[])
 
 	do {
 		if (AString(argv[1]) == "new") {
-			if(!game.NewGame()) {
+			if (!game.NewGame()) {
 				Awrite( "Couldn't make the new game!" );
 				break;
 			}
 
-			if( !game.SaveGame() ) {
+			if ( !game.SaveGame() ) {
 				Awrite( "Couldn't save the game!" );
 				break;
 			}
 
-			if( !game.WritePlayers() ) {
+			if ( !game.WritePlayers() ) {
 				Awrite( "Couldn't write the players file!" );
 				break;
 			}
 		} else if (AString(argv[1]) == "map") {
-			if(argc != 4) {
+			if (argc != 4) {
 				usage();
 				break;
 			}
 
-			if( !game.OpenGame() ) {
+			if ( !game.OpenGame() ) {
 				Awrite( "Couldn't open the game file!" );
 				break;
 			}
 
-			if( !game.ViewMap( argv[2], argv[3] )) {
+			if ( !game.ViewMap( argv[2], argv[3] )) {
 				Awrite( "Couldn't write the map file!" );
 				break;
 			}
 		} else if (AString(argv[1]) == "run") {
-			if( !game.OpenGame() ) {
+			if ( !game.OpenGame() ) {
 				Awrite( "Couldn't open the game file!" );
 				break;
 			}
 
-			if( !game.RunGame() ) {
+			if ( !game.RunGame() ) {
 				Awrite( "Couldn't run the game!" );
 				break;
 			}
 
-			if( !game.SaveGame() ) {
+			if ( !game.SaveGame() ) {
 				Awrite( "Couldn't save the game!" );
 				break;
 			}
 		} else if (AString(argv[1]) == "edit") {
-			if( !game.OpenGame() ) {
+			if ( !game.OpenGame() ) {
 				Awrite( "Couldn't open the game file!" );
 				break;
 			}
 
 			int saveGame = 0;
-			if( !game.EditGame( &saveGame ) ) {
+			if ( !game.EditGame( &saveGame ) ) {
 				Awrite( "Couldn't edit the game!" );
 				break;
 			}
 
-			if( saveGame ) {
-				if( !game.SaveGame() ) {
+			if ( saveGame ) {
+				if ( !game.SaveGame() ) {
 					Awrite( "Couldn't save the game!" );
 					break;
 				}
 			}
-		} else if( AString( argv[1] ) == "check" ) {
-			if(argc != 4) {
+		} else if ( AString( argv[1] ) == "check" ) {
+			if (argc != 4) {
 				usage();
 				break;
 			}
 
 			game.DummyGame();
-			if( !game.DoOrdersCheck( argv[ 2 ], argv[ 3 ] )) {
+			if ( !game.DoOrdersCheck( argv[ 2 ], argv[ 3 ] )) {
 				Awrite( "Couldn't check the orders!" );
 				break;
 			}
-		} else if( AString( argv[1] ) == "mapunits" ) {
-			if( !game.OpenGame() ) {
+		} else if ( AString( argv[1] ) == "mapunits" ) {
+			if ( !game.OpenGame() ) {
 				Awrite( "Couldn't open the game file!" );
 				break;
 			}
 			game.UnitFactionMap();
-		} else if(AString(argv[1])== "genrules") {
-			if(argc != 5) {
+		} else if (AString(argv[1])== "genrules") {
+			if (argc != 5) {
 				usage();
 				break;
 			}
-			if(!game.GenRules(argv[4], argv[3], argv[2])) {
+			if (!game.GenRules(argv[4], argv[3], argv[2])) {
 				Awrite("Unable to generate rules!");
 				break;
 			}
 		}
-    } while( 0 );
+	} while( 0 );
 
-    doneIO();
-    return 0;
+	doneIO();
+	return 0;
 }

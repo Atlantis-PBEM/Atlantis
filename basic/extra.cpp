@@ -43,7 +43,7 @@ int Game::SetupFaction( Faction *pFac )
 {
 	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
 
-	if(pFac->noStartLeader)
+	if (pFac->noStartLeader)
 		return 1;
 
 	//
@@ -74,9 +74,9 @@ int Game::SetupFaction( Faction *pFac )
 	}
 
 	ARegion *reg = NULL;
-	if(pFac->pStartLoc) {
+	if (pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
-	} else if(!Globals->MULTI_HEX_NEXUS) {
+	} else if (!Globals->MULTI_HEX_NEXUS) {
 		reg = (ARegion *)(regions.First());
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
@@ -108,13 +108,13 @@ in the GAMEMASTER file.
 */
 void Game::ModifyTablesPerRuleset(void)
 {
-	if(Globals->APPRENTICES_EXIST)
+	if (Globals->APPRENTICES_EXIST)
 		EnableSkill(S_MANIPULATE);
 
-	if(!Globals->GATES_EXIST)
+	if (!Globals->GATES_EXIST)
 		DisableSkill(S_GATE_LORE);
 
-    if (Globals->FULL_TRUESEEING_BONUS) {
+	if (Globals->FULL_TRUESEEING_BONUS) {
 		ModifyAttribMod("observation", 1, AttribModItem::SKILL,
 				"TRUE", AttribModItem::UNIT_LEVEL, 1);
 	}
@@ -127,7 +127,7 @@ void Game::ModifyTablesPerRuleset(void)
 				"INVI", AttribModItem::UNIT_LEVEL, 1);
 	}
 
-	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
+	if (Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
 		ClearTerrainRaces(R_NEXUS);
 		ModifyTerrainRace(R_NEXUS, 0, I_HIGHELF);
 		ModifyTerrainRace(R_NEXUS, 1, I_VIKING);
@@ -139,7 +139,7 @@ void Game::ModifyTablesPerRuleset(void)
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
-	if((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
+	if ((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
 		EnableItem(I_MUSHROOM);
 		EnableItem(I_HEALPOTION);
 		EnableItem(I_ROUGHGEM);
@@ -148,7 +148,7 @@ void Game::ModifyTablesPerRuleset(void)
 	}
 
 	// Modify the various spells which are allowed to cross levels
-	if(Globals->EASIER_UNDERWORLD) {
+	if (Globals->EASIER_UNDERWORLD) {
 		ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);

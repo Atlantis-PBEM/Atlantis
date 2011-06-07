@@ -26,10 +26,10 @@
 ------------------------------------------------------------------------------
 rand.h: definitions for a random number generator
 MODIFIED:
-  960327: Creation (addition of randinit, really)
-  970719: use context, not global variables, for internal state
-  980324: renamed seed to flag
-  980605: recommend RANDSIZL=4 for noncryptography.
+	960327: Creation (addition of randinit, really)
+	970719: use context, not global variables, for internal state
+	980324: renamed seed to flag
+	980605: recommend RANDSIZL=4 for noncryptography.
 ------------------------------------------------------------------------------
 */
 #ifndef STANDARD
@@ -44,14 +44,14 @@ MODIFIED:
 /* context of random number generator */
 struct randctx
 {
-  ub4 randcnt;
-  ub4 randrsl[RANDSIZ];
-  ub4 randmem[RANDSIZ];
-  ub4 randa;
-  ub4 randb;
-  ub4 randc;
+	ub4 randcnt;
+	ub4 randrsl[RANDSIZ];
+	ub4 randmem[RANDSIZ];
+	ub4 randa;
+	ub4 randb;
+	ub4 randc;
 };
-typedef  struct randctx  randctx;
+typedef struct randctx randctx;
 
 /*
 ------------------------------------------------------------------------------
@@ -62,18 +62,16 @@ typedef  struct randctx  randctx;
 void randinit(randctx *ctx, word flag);
 void isaac(randctx *ctx);
 
-
-
 /*
 ------------------------------------------------------------------------------
  Call rand(/o_ randctx *r _o/) to retrieve a single 32-bit random value
 ------------------------------------------------------------------------------
 */
 #define isaac_rand(r) \
-   (!(r)->randcnt-- ? \
-     (isaac(r), (r)->randcnt=RANDSIZ-1, (r)->randrsl[(r)->randcnt]) : \
-     (r)->randrsl[(r)->randcnt])
+	(!(r)->randcnt-- ? \
+		(isaac(r), (r)->randcnt=RANDSIZ-1, \
+			(r)->randrsl[(r)->randcnt]) : \
+			(r)->randrsl[(r)->randcnt])
 
 #endif  /* RAND */
-
 

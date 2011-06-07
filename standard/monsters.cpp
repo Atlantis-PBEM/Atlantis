@@ -32,13 +32,13 @@
 
 void Game::CreateVMons()
 {
-	if(!Globals->LAIR_MONSTERS_EXIST) return;
+	if (!Globals->LAIR_MONSTERS_EXIST) return;
 
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;
 		forlist(&r->objects) {
 			Object * obj = (Object *) elem;
-			if(obj->type != O_BKEEP) continue;
+			if (obj->type != O_BKEEP) continue;
 			Faction *monfac = GetFaction( &factions, 2 );
 			Unit *u = GetNewUnit( monfac, 0 );
 			u->MakeWMon( "Elder Demons", I_BALROG, 200);
@@ -49,17 +49,17 @@ void Game::CreateVMons()
 
 void Game::GrowVMons()
 {
-	if(!Globals->LAIR_MONSTERS_EXIST) return;
+	if (!Globals->LAIR_MONSTERS_EXIST) return;
 
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
 		forlist(&r->objects) {
 			Object *obj = (Object *)elem;
-			if(obj->type != O_BKEEP) continue;
+			if (obj->type != O_BKEEP) continue;
 			forlist(&obj->units) {
 				Unit *u = (Unit *)elem;
 				int men = u->GetMen(I_BALROG) + 2;
-				if(men > 200) men = 200;
+				if (men > 200) men = 200;
 				u->items.SetNum(I_BALROG, men);
 			}
 		}

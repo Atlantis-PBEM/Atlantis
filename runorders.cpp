@@ -1099,7 +1099,7 @@ void Game::ProcessMigration()
 	/* process two "phases" of migration
 	 * allowing a region to spread it's migration
 	 * between different destinations. */
-	for(int phase = 1; phase <=2; phase++) {
+	for (int phase = 1; phase <=2; phase++) {
 		forlist(&regions) {
 			ARegion *r = (ARegion *) elem;
 			r->FindMigrationDestination(phase);
@@ -1574,7 +1574,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 							int exp = mt->speciallevel - mt->defaultlevel;
 							if (exp > 0) {
 								exp = exp * temp * GetDaysByLevel(1);
-								for(int ms = 0; ms < ((int) sizeof(mt->skills))/((int) sizeof(int)); ms++)
+								for (int ms = 0; ms < ((int) sizeof(mt->skills))/((int) sizeof(int)); ms++)
 								{
 									AString sname = mt->skills[ms];
 									int skill = LookupSkill(&sname);

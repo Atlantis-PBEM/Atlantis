@@ -242,7 +242,7 @@ void Faction::SetName(AString* s)
 
 void Faction::SetNameNoChange(AString *s)
 {
-	if(s) {
+	if (s) {
 		delete name;
 		name = new AString(*s);
 	}
@@ -259,11 +259,11 @@ AString Faction::FactionTypeStr()
 	AString temp;
 	if (IsNPC()) return AString("NPC");
 
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED) {
 		return (AString("Unlimited"));
-	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
+	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		return(AString("Normal"));
-	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		int comma = 0;
 		for (int i=0; i<NFACTYPES; i++) {
 			if (type[i]) {
@@ -283,20 +283,20 @@ AString Faction::FactionTypeStr()
 void Faction::WriteReport(Areport *f, Game *pGame)
 {
 	if (IsNPC() && num == 1) {
-		if(Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
+		if (Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
 			int i, j;
 			// Put all skills, items and objects in the GM report
 			shows.DeleteAll();
-			for(i = 0; i < NSKILLS; i++) {
-				for(j = 1; j < 6; j++) {
+			for (i = 0; i < NSKILLS; i++) {
+				for (j = 1; j < 6; j++) {
 					shows.Add(new ShowSkill(i, j));
 				}
 			}
-			if(shows.Num()) {
+			if (shows.Num()) {
 				f->PutStr("Skill reports:");
 				forlist(&shows) {
 					AString *string = ((ShowSkill *)elem)->Report(this);
-					if(string) {
+					if (string) {
 						f->PutStr("");
 						f->PutStr(*string);
 						delete string;
@@ -307,13 +307,13 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			}
 
 			itemshows.DeleteAll();
-			for(i = 0; i < NITEMS; i++) {
+			for (i = 0; i < NITEMS; i++) {
 				AString *show = ItemDescription(i, 1);
-				if(show) {
+				if (show) {
 					itemshows.Add(show);
 				}
 			}
-			if(itemshows.Num()) {
+			if (itemshows.Num()) {
 				f->PutStr("Item reports:");
 				forlist(&itemshows) {
 					f->PutStr("");
@@ -324,13 +324,13 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			}
 
 			objectshows.DeleteAll();
-			for(i = 0; i < NOBJECTS; i++) {
+			for (i = 0; i < NOBJECTS; i++) {
 				AString *show = ObjectDescription(i);
-				if(show) {
+				if (show) {
 					objectshows.Add(show);
 				}
 			}
-			if(objectshows.Num()) {
+			if (objectshows.Num()) {
 				f->PutStr("Object reports:");
 				forlist(&objectshows) {
 					f->PutStr("");
@@ -363,10 +363,10 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 	}
 
 	f->PutStr("Atlantis Report For:");
-	if((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
+	if ((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
 			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED)) {
 		f->PutStr(*name);
-	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		f->PutStr(*name + " (" + FactionTypeStr() + ")");
 	}
 	f->PutStr(AString(MonthNames[ pGame->month ]) + ", Year " + pGame->year);
@@ -383,14 +383,14 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		f->EndLine();
 	}
 
-	if(!password || (*password == "none")) {
+	if (!password || (*password == "none")) {
 		f->PutStr("REMINDER: You have not set a password for your faction!");
 		f->EndLine();
 	}
 
-	if(Globals->MAX_INACTIVE_TURNS != -1) {
+	if (Globals->MAX_INACTIVE_TURNS != -1) {
 		int cturn = pGame->TurnNumber() - lastorders;
-		if((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
+		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
 			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
 			f->PutStr(AString("WARNING: You have ") + cturn +
 					AString(" turns until your faction is automatically ")+
@@ -405,10 +405,10 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 					"has been removed, and a new faction has been started "
 					"for you. (Your new faction report will come in a "
 					"separate message.)");
-		} else if(quit == QUIT_GAME_OVER) {
+		} else if (quit == QUIT_GAME_OVER) {
 			f->PutStr("I'm sorry, the game has ended. Better luck in "
 					"the next game you play!");
-		} else if(quit == QUIT_WON_GAME) {
+		} else if (quit == QUIT_WON_GAME) {
 			f->PutStr("Congratulations, you have won the game!");
 		} else {
 			f->PutStr("I'm sorry, your faction has been eliminated.");
@@ -421,14 +421,14 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 	}
 
 	f->PutStr("Faction Status:");
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		f->PutStr(AString("Mages: ") + nummages + " (" +
 				pGame->AllowedMages(this) + ")");
-		if(Globals->APPRENTICES_EXIST) {
+		if (Globals->APPRENTICES_EXIST) {
 			f->PutStr(AString("Apprentices: ") + numapprentices + " (" +
 					pGame->AllowedApprentices(this)+ ")");
 		}
-	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		f->PutStr(AString("Tax Regions: ") + war_regions.Num() + " (" +
 				pGame->AllowedTaxes(this) + ")");
 		f->PutStr(AString("Trade Regions: ") + trade_regions.Num() + " (" +
@@ -443,7 +443,7 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		}
 		f->PutStr(AString("Mages: ") + nummages + " (" +
 				pGame->AllowedMages(this) + ")");
-		if(Globals->APPRENTICES_EXIST) {
+		if (Globals->APPRENTICES_EXIST) {
 			f->PutStr(AString("Apprentices: ") + numapprentices + " (" +
 					pGame->AllowedApprentices(this)+ ")");
 		}
@@ -500,7 +500,7 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		f->EndLine();
 	}
 
-	if(objectshows.Num()) {
+	if (objectshows.Num()) {
 		f->PutStr("Object reports:");
 		forlist(&objectshows) {
 			f->PutStr("");
@@ -799,16 +799,16 @@ Faction *GetFaction2(AList *facs, int n)
 void Faction::DiscoverItem(int item, int force, int full)
 {
 	int seen = items.GetNum(item);
-	if(!seen) {
-		if(full) {
+	if (!seen) {
+		if (full) {
 			items.SetNum(item, 2);
 		} else {
 			items.SetNum(item, 1);
 		}
 		force = 1;
 	} else {
-		if(seen == 1) {
-			if(full) {
+		if (seen == 1) {
+			if (full) {
 				items.SetNum(item, 2);
 			}
 			force = 1;
@@ -816,7 +816,7 @@ void Faction::DiscoverItem(int item, int force, int full)
 			full = 1;
 		}
 	}
-	if(force) {
+	if (force) {
 		itemshows.Add(ItemDescription(item, full));
 	}   
 }

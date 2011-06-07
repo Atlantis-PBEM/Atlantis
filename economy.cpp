@@ -61,7 +61,7 @@ int ARegion::Wages()
 	int dv = development + RoadDevelopment() + earthlore + clearskies;
 	// Note: earthlore and clearskies represent LEVEL of the spell
 	// Adjust for TownType
-	if(town) {
+	if (town) {
 		int tsize = town->TownType();
 		dv += (tsize * tsize + 1);
 	}
@@ -121,7 +121,7 @@ void ARegion::SetupPop()
 		race = -1;
 		while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
 			int n = getrandom(IsCoastal() ? allraces : noncoastalraces);
-			if(n > noncoastalraces-1) {
+			if (n > noncoastalraces-1) {
 				race = typer->coastal_races[n-noncoastalraces-1];
 			} else
 				race = typer->races[n];
@@ -147,14 +147,14 @@ void ARegion::SetupPop()
 	while (level < mw) {
 		development++;
 		prev++;
-		if(prev > level) {
+		if (prev > level) {
 			level++;
 			prev = 0;
 		}
 	}
 	development += getrandom(25);
 
-	if(Globals->TOWNS_EXIST) {
+	if (Globals->TOWNS_EXIST) {
 		int adjacent = 0;
 		int prob = Globals->TOWN_PROBABILITY;
 		if (prob < 1) prob = 100;
@@ -165,7 +165,7 @@ void ARegion::SetupPop()
 					if ((newregion) &&  (newregion->town)) adjacent++;
 				}
 			}
-		if(Globals->LESS_ARCTIC_TOWNS) {
+		if (Globals->LESS_ARCTIC_TOWNS) {
 			int dnorth = GetPoleDistance(D_NORTH);
 			int dsouth = GetPoleDistance(D_SOUTH);
 			if (dnorth < 9)
@@ -176,7 +176,7 @@ void ARegion::SetupPop()
 					(9 - dsouth) * Globals->LESS_ARCTIC_TOWNS;
 		}
 		int spread = Globals->TOWN_SPREAD;
-		if(spread > 100) spread = 100;
+		if (spread > 100) spread = 100;
 		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
 			100 * spread) / 100;
 		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
@@ -196,7 +196,7 @@ void ARegion::SetupPop()
 	// wage-relevant population (/10 wages /5 popfactor)
 	int pp = Population();
 	// adjustment for rural areas
-	if(pp < 3000) {
+	if (pp < 3000) {
 		float wpfactor = (float) (120 / (61 - pp / 50));
 		pp += (int) ((float) ((wpfactor * pp + 3000)/(wpfactor + 1)));
 	}
@@ -212,12 +212,12 @@ void ARegion::SetupPop()
 	/* Entertainment - setup or adjust */
 	int ep = Population();
 	// adjustment for rural areas
-	if(ep < 3000) {
+	if (ep < 3000) {
 		int epf = (ep / 10 + 300) / 6;
 		ep = ep * epf / 100;
 	}
 	int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 1) /50));
-	if(maxent < 0) maxent = 0;
+	if (maxent < 0) maxent = 0;
 	Production * e = new Production;
 	e->itemtype = I_SILVER;
 	e->skill = S_ENTERTAINMENT;
@@ -228,7 +228,7 @@ void ARegion::SetupPop()
 	
 	// note: wage factor 10, population factor 5 - included as "/ 50"
 	/* More wealth in safe Starting Cities */
-	if((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
+	if ((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
 		int wbonus = (Population() / 5) * Globals->MAINTENANCE_COST;
 		wealth += wbonus;
 		w->amount += wbonus / Globals->WORK_FRACTION;
@@ -246,7 +246,7 @@ void ARegion::SetupPop()
 							Population()/25, 0, 10000, 0, 2000);
 	markets.Add(m);
 
-	if(Globals->LEADERS_EXIST) {
+	if (Globals->LEADERS_EXIST) {
 		ratio = ItemDefs[I_LEADERS].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 		// hack: include wage factor of 10 in float assignment above
 		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
@@ -260,7 +260,7 @@ void ARegion::SetupPop()
 void ARegion::SetIncome()
 {
 	/* do nothing in unpopulated regions */
-	if(basepopulation == 0) return;
+	if (basepopulation == 0) return;
 
 	maxwages = Wages();
 	
@@ -273,12 +273,12 @@ void ARegion::SetIncome()
 	// wage-relevant population (/10 wages /5 popfactor)
 	int pp = Population();
 	// adjustment for rural areas
-	if(pp < 3000) {
+	if (pp < 3000) {
 		float wpfactor = (float) (120 / (61 - pp / 50));
 		pp += (int) ((float) ((wpfactor * pp + 3000)/(wpfactor + 1)));
 	}
 	int maxwages = (int) ((float) (pp * (Wages() - 10 * Globals->MAINTENANCE_COST) /50));
-	if(maxwages < 0) maxwages = 0;
+	if (maxwages < 0) maxwages = 0;
 	Production * w = products.GetProd(I_SILVER,-1);
 	w->itemtype = I_SILVER;
 	w->amount = maxwages / Globals->WORK_FRACTION;
@@ -289,12 +289,12 @@ void ARegion::SetIncome()
 	/* Entertainment - setup or adjust */
 	int ep = Population();
 	// adjustment for rural areas
-	if(ep < 3000) {
+	if (ep < 3000) {
 		int epf = (ep / 10 + 300) / 6;
 		ep = ep * epf / 100;
 	}
 	int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 10) /50));
-	if(maxent < 0) maxent = 0;
+	if (maxent < 0) maxent = 0;
 	Production * e = products.GetProd(I_SILVER,S_ENTERTAINMENT);
 	e->itemtype = I_SILVER;
 	e->amount = maxent / Globals->ENTERTAIN_FRACTION;
@@ -305,7 +305,7 @@ void ARegion::SetIncome()
 	
 	// note: wage factor 10, population factor 5 - included as "/ 50"
 	/* More wealth in safe Starting Cities */
-	if((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
+	if ((Globals->SAFE_START_CITIES) && (IsStartingCity())) {
 		int wbonus = (Population() / 5) * Globals->MAINTENANCE_COST;
 		wealth += wbonus;
 		w->amount += wbonus / Globals->WORK_FRACTION;
@@ -323,7 +323,7 @@ void ARegion::DisbandInRegion(int item, int amt)
 			// exchange region race!
 			race = item;
 			population = 0;
-			if(town) town->pop = 0;
+			if (town) town->pop = 0;
 			AdjustPop(amt);
 		} else {
 			if (race != item) amt = amt * 2 / 3;
@@ -340,7 +340,7 @@ void ARegion::Recruit(int amt)
 
 void ARegion::AdjustPop(int adjustment)
 {
-	if(!town) {
+	if (!town) {
 		population += adjustment;
 		return;
 	}
@@ -348,7 +348,7 @@ void ARegion::AdjustPop(int adjustment)
 	int tspace = town->hab - town->pop;
 	int rspace = habitat - population;
 	town->pop += adjustment * tspace / (tspace + rspace);
-	if(town->pop < 0) town->pop = 0;
+	if (town->pop < 0) town->pop = 0;
 	population += adjustment * rspace / (tspace + rspace);
 	if (population < 0) population = 0;
 }
@@ -360,7 +360,7 @@ void ARegion::SetupCityMarket()
 	int offset = 0;
 	int citymax = Globals->CITY_POP;
 	ManType *locals = FindRace(ItemDefs[race].abr);
-	if(!locals) locals = FindRace("SELF");
+	if (!locals) locals = FindRace("SELF");
 	/* compose array of possible supply & demand items */
 	int supply[NITEMS]; 
 	int demand[NITEMS];
@@ -373,23 +373,23 @@ void ARegion::SetupCityMarket()
 		demand[i] = 0;
 		rare[i] = 0;
 		antiques[i] = 0;
-		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if(ItemDefs[i].flags & ItemType::NOMARKET) continue;
-		if(ItemDefs[i].type & IT_SHIP) continue;
-		if(ItemDefs[i].type & IT_TRADE) numtrade++;
+		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if (ItemDefs[i].flags & ItemType::NOMARKET) continue;
+		if (ItemDefs[i].type & IT_SHIP) continue;
+		if (ItemDefs[i].type & IT_TRADE) numtrade++;
 		if (i==I_SILVER) continue;
-		if((ItemDefs[i].type & IT_MAN)
+		if ((ItemDefs[i].type & IT_MAN)
 			|| (ItemDefs[i].type & IT_LEADER)) continue;
 		
 		int canProduceHere = 0;
 		// Check if the product can be produced in the region
 		// Raw goods
 		if (ItemDefs[i].pInput[0].item == -1) {
-			for(unsigned int c = 0;
+			for (unsigned int c = 0;
 				c<(sizeof(TerrainDefs[type].prods)/sizeof(Product));
 				c++) {
 				int resource = TerrainDefs[type].prods[c].product;
-				if(i == resource) {
+				if (i == resource) {
 					canProduceHere = 1;
 					break;
 				}
@@ -398,18 +398,18 @@ void ARegion::SetupCityMarket()
 		// Non-raw goods
 		else {
 			canProduceHere = 1;
-			for(unsigned int c = 0;
+			for (unsigned int c = 0;
 				c<(sizeof(ItemDefs[i].pInput)/sizeof(Materials));
 				c++) {
 				int match = 0;
 				int need = ItemDefs[i].pInput[c].item;
-				for(unsigned int r=0;
+				for (unsigned int r=0;
 					r<(sizeof(TerrainDefs[type].prods)/sizeof(Product));
 					r++) {
-					if(TerrainDefs[type].prods[r].product == need)
+					if (TerrainDefs[type].prods[r].product == need)
 						match = 1;
 				}
-				if(!match) {
+				if (!match) {
 					canProduceHere = 0;
 					break;
 				}
@@ -417,19 +417,19 @@ void ARegion::SetupCityMarket()
 		}
 		int canProduce = 0;
 		// Check if the locals can produce this item
-		if(canProduceHere) canProduce = locals->CanProduce(i);
+		if (canProduceHere) canProduce = locals->CanProduce(i);
 		int isUseful = 0;
 		// Check if the item is useful to the locals
 		isUseful = locals->CanUse(i);
 		//Normal Items
-		if(ItemDefs[ i ].type & IT_NORMAL) {
+		if (ItemDefs[ i ].type & IT_NORMAL) {
 			
 			if (i==I_GRAIN || i==I_LIVESTOCK || i==I_FISH) {
 				// Add foodstuffs directly to market	
 				int amt = Globals->CITY_MARKET_NORMAL_AMT;
 				int price;
 
-				if(Globals->RANDOM_ECONOMY) {
+				if (Globals->RANDOM_ECONOMY) {
 					amt += getrandom(amt);
 					price = (ItemDefs[i].baseprice * (100 + getrandom(50))) /
 						100;
@@ -438,7 +438,7 @@ void ARegion::SetupCityMarket()
 				}
 
 				cap = (citymax * 3/4) - 5000;
-				if(cap < 0) cap = citymax/2;
+				if (cap < 0) cap = citymax/2;
 				Market * m = new Market (M_SELL, i, price, amt, population,
 						population+cap, amt, amt*2);
 				markets.Add(m);
@@ -446,7 +446,7 @@ void ARegion::SetupCityMarket()
 				// Add foodstuffs directly to market
 				int amt = Globals->CITY_MARKET_NORMAL_AMT;
 				int price;
-				if(Globals->RANDOM_ECONOMY) {
+				if (Globals->RANDOM_ECONOMY) {
 					amt += getrandom(amt);
 					price = (ItemDefs[i].baseprice * (120 + getrandom(80))) /
 						100;
@@ -455,61 +455,61 @@ void ARegion::SetupCityMarket()
 				}
 
 				cap = (citymax / 8);
-				if(cap < citymax) cap = (citymax * 3/4);
+				if (cap < citymax) cap = (citymax * 3/4);
 				Market * m = new Market (M_BUY, i, price, amt, population+cap,
 						population+6*cap, amt, amt*5);
 				markets.Add(m);
 			} else if (ItemDefs[i].pInput[0].item == -1) {
 				// Basic resource
 				// Add to supply?
-				if(canProduce) supply[i] = 4;
+				if (canProduce) supply[i] = 4;
 				// Add to demand?
-				if(!canProduceHere) {
+				if (!canProduceHere) {
 					// Is it a mount?
 					if (ItemDefs[i].type & IT_MOUNT) {
-						if(locals->CanProduce(i)) demand[i] = 4;
-					} else if(isUseful) demand[i] = 4;
+						if (locals->CanProduce(i)) demand[i] = 4;
+					} else if (isUseful) demand[i] = 4;
 				}
 			} else {
 			
 				// Tool, weapon or armor
-				if(isUseful) {
+				if (isUseful) {
 					// Add to supply?
-					if(canProduce) supply[i] = 2;
+					if (canProduce) supply[i] = 2;
 					// Add to demand?
-					if(!canProduceHere) demand[i] = 2;
+					if (!canProduceHere) demand[i] = 2;
 				}
 			}
 		} // end Normal Items
 		// Advanced Items
-		else if((Globals->CITY_MARKET_ADVANCED_AMT)
+		else if ((Globals->CITY_MARKET_ADVANCED_AMT)
 			&& (ItemDefs[i].type & IT_ADVANCED)) {
-			if(isUseful) rare[i] = 4;
-			if(ItemDefs[i].hitchItem > 0) rare[i] = 2;
+			if (isUseful) rare[i] = 4;
+			if (ItemDefs[i].hitchItem > 0) rare[i] = 2;
 		}
 		// Magic Items
-		else if((Globals->CITY_MARKET_MAGIC_AMT)
+		else if ((Globals->CITY_MARKET_MAGIC_AMT)
 			&& (ItemDefs[i].type & IT_MAGIC)) {
-			if(isUseful) antiques[i] = 4;
+			if (isUseful) antiques[i] = 4;
 				else antiques[i] = 1;
-			if(ItemDefs[i].hitchItem > 0) antiques[i] = 2;
+			if (ItemDefs[i].hitchItem > 0) antiques[i] = 2;
 		}
 	}
 	/* Check for advanced item */
-	if((Globals->CITY_MARKET_ADVANCED_AMT) && (getrandom(4) == 1)) {
+	if ((Globals->CITY_MARKET_ADVANCED_AMT) && (getrandom(4) == 1)) {
 		int ad = 0;
-		for(int i=0; i<NITEMS; i++) ad += rare[i];
+		for (int i=0; i<NITEMS; i++) ad += rare[i];
 		ad = getrandom(ad);
 		int i;
 		int sum = 0;
-		for(i=0; i<NITEMS; i++) {
+		for (i=0; i<NITEMS; i++) {
 			sum += rare[i];
-			if(ad < sum) break;
+			if (ad < sum) break;
 		}
-		if(ad < sum) {
+		if (ad < sum) {
 			int amt = Globals->CITY_MARKET_ADVANCED_AMT;
 			int price;
-			if(Globals->RANDOM_ECONOMY) {
+			if (Globals->RANDOM_ECONOMY) {
 				amt += getrandom(amt);
 				price = (ItemDefs[i].baseprice * (100 + getrandom(50))) / 100;
 			} else {
@@ -517,7 +517,7 @@ void ARegion::SetupCityMarket()
 			}
 
 			cap = (citymax *3/4) - 5000;
-			if(cap < citymax/2) cap = citymax / 2;
+			if (cap < citymax/2) cap = citymax / 2;
 			offset = citymax / 8;
 			if (cap+offset < citymax) {
 				Market * m = new Market (M_SELL, i, price, amt/6, population+cap+offset,
@@ -527,21 +527,21 @@ void ARegion::SetupCityMarket()
 		}
 	}
 	/* Check for magic item */
-	if((Globals->CITY_MARKET_MAGIC_AMT) && (getrandom(8) == 1)) {
+	if ((Globals->CITY_MARKET_MAGIC_AMT) && (getrandom(8) == 1)) {
 		int mg = 0;
-		for(int i=0; i<NITEMS; i++) mg += antiques[i];
+		for (int i=0; i<NITEMS; i++) mg += antiques[i];
 		mg = getrandom(mg);
 		int i;
 		int sum = 0;
-		for(i=0; i<NITEMS; i++) {
+		for (i=0; i<NITEMS; i++) {
 			sum += antiques[i];
-			if(mg < sum) break;
+			if (mg < sum) break;
 		}
-		if(mg < sum) {
+		if (mg < sum) {
 			int amt = Globals->CITY_MARKET_MAGIC_AMT;
 			int price;
 
-			if(Globals->RANDOM_ECONOMY) {
+			if (Globals->RANDOM_ECONOMY) {
 				amt += getrandom(amt);
 				price = (ItemDefs[i].baseprice * (100 + getrandom(50))) /
 					100;
@@ -550,7 +550,7 @@ void ARegion::SetupCityMarket()
 			}
 	
 			cap = (citymax *3/4) - 5000;
-			if(cap < citymax/2) cap = citymax / 2;
+			if (cap < citymax/2) cap = citymax / 2;
 			offset = (citymax/20) + ((citymax/5) * 2);
 			Market * m = new Market (M_SELL, i, price, amt/6, population+cap,
 					population+citymax, 0, amt);
@@ -563,21 +563,21 @@ void ARegion::SetupCityMarket()
 	int sum = 1;
 	while((num > 0) && (sum > 0)) {
 		int dm = 0;
-		for(int i=0; i<NITEMS; i++) dm += demand[i];
+		for (int i=0; i<NITEMS; i++) dm += demand[i];
 		dm = getrandom(dm);
 		int i;
 		sum = 0;
-		for(i=0; i<NITEMS; i++) {
+		for (i=0; i<NITEMS; i++) {
 			sum += demand[i];
-			if(dm < sum) break;
+			if (dm < sum) break;
 		}
-		if(dm >= sum) continue;
+		if (dm >= sum) continue;
 		
 		int amt = Globals->CITY_MARKET_NORMAL_AMT;
 		amt = demand[i] * amt / 4;
 		int price;
 	
-		if(Globals->RANDOM_ECONOMY) {
+		if (Globals->RANDOM_ECONOMY) {
 			amt += getrandom(amt);
 			price = (ItemDefs[i].baseprice *
 				(100 + getrandom(50))) / 100;
@@ -599,21 +599,21 @@ void ARegion::SetupCityMarket()
 	sum = 1;
 	while((num > 0) && (sum > 0)) {
 		int su = 0;
-		for(int i=0; i<NITEMS; i++) su += supply[i];
+		for (int i=0; i<NITEMS; i++) su += supply[i];
 		su = getrandom(su);
 		int i;
 		sum = 0;
-		for(i=0; i<NITEMS; i++) {
+		for (i=0; i<NITEMS; i++) {
 			sum += supply[i];
-			if(su < sum) break;
+			if (su < sum) break;
 		}
-		if(su >= sum) continue;
+		if (su >= sum) continue;
 
 		int amt = Globals->CITY_MARKET_NORMAL_AMT;
 		amt = supply[i] * amt / 4;
 		int price;
 
-		if(Globals->RANDOM_ECONOMY) {
+		if (Globals->RANDOM_ECONOMY) {
 			amt += getrandom(amt);
 			price = (ItemDefs[i].baseprice *
 				(150 + getrandom(50))) / 100;
@@ -648,10 +648,10 @@ void ARegion::SetupCityMarket()
 		sell2 = getrandom(numtrade);
 
 	for (int i=0; i<NITEMS; i++) {
-		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if(ItemDefs[i].flags & ItemType::NOMARKET) continue;
+		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if (ItemDefs[i].flags & ItemType::NOMARKET) continue;
 
-		if(ItemDefs[ i ].type & IT_TRADE) {
+		if (ItemDefs[ i ].type & IT_TRADE) {
 			int addbuy = 0;
 			int addsell = 0;
 
@@ -661,19 +661,19 @@ void ARegion::SetupCityMarket()
 			buy1--;
 			buy2--;
 
-			if(sell1 == 0 || sell2 == 0) {
+			if (sell1 == 0 || sell2 == 0) {
 				addsell = 1;
 			}
 			sell1--;
 			sell2--;
 
-			if(addbuy) {
+			if (addbuy) {
 				int amt = Globals->CITY_MARKET_TRADE_AMT;
 				int price;
 
-				if(Globals->RANDOM_ECONOMY) {
+				if (Globals->RANDOM_ECONOMY) {
 					amt += getrandom(amt);
-					if(Globals->MORE_PROFITABLE_TRADE_GOODS) {
+					if (Globals->MORE_PROFITABLE_TRADE_GOODS) {
 						price=(ItemDefs[i].baseprice*(250+getrandom(100)))/100;
 					} else {
 						price=(ItemDefs[i].baseprice*(150+getrandom(50)))/100;
@@ -685,20 +685,20 @@ void ARegion::SetupCityMarket()
 				cap = (citymax/2);
 				tradesell++;
 				offset = - (citymax/20) + tradesell * (tradesell * tradesell * citymax/40);
-				if(cap + offset < citymax) {
+				if (cap + offset < citymax) {
 					Market * m = new Market (M_SELL, i, price, amt/5, cap+population+offset,
 						citymax+population, 0, amt);
 					markets.Add(m);
 				}
 			}
 
-			if(addsell) {
+			if (addsell) {
 				int amt = Globals->CITY_MARKET_TRADE_AMT;
 				int price;
 
-				if(Globals->RANDOM_ECONOMY) {
+				if (Globals->RANDOM_ECONOMY) {
 					amt += getrandom(amt);
-					if(Globals->MORE_PROFITABLE_TRADE_GOODS) {
+					if (Globals->MORE_PROFITABLE_TRADE_GOODS) {
 						price=(ItemDefs[i].baseprice*(100+getrandom(90)))/100;
 					} else {
 						price=(ItemDefs[i].baseprice*(100+getrandom(50)))/100;
@@ -709,7 +709,7 @@ void ARegion::SetupCityMarket()
 
 				cap = (citymax/2);
 				offset = tradebuy++ * (citymax/6);
-				if(cap+offset < citymax) {
+				if (cap+offset < citymax) {
 					Market * m = new Market (M_BUY, i, price, amt/6, cap+population+offset,
 						citymax+population, 0, amt);
 					markets.Add(m);
@@ -724,7 +724,7 @@ void ARegion::SetupProds()
 	Production *p = NULL;
 	TerrainType *typer = &(TerrainDefs[type]);
 
-	if(Globals->FOOD_ITEMS_EXIST) {
+	if (Globals->FOOD_ITEMS_EXIST) {
 		if (typer->economy) {
 			// Foodchoice = 0 or 1 if inland, 0, 1, or 2 if coastal
 			int foodchoice = getrandom(2 +
@@ -747,12 +747,12 @@ void ARegion::SetupProds()
 		}
 	}
 
-	for(unsigned int c= 0; c < (sizeof(typer->prods)/sizeof(Product)); c++) {
+	for (unsigned int c= 0; c < (sizeof(typer->prods)/sizeof(Product)); c++) {
 		int item = typer->prods[c].product;
 		int chance = typer->prods[c].chance;
 		int amt = typer->prods[c].amount;
-		if(item != -1) {
-			if(!(ItemDefs[item].flags & ItemType::DISABLED) &&
+		if (item != -1) {
+			if (!(ItemDefs[item].flags & ItemType::DISABLED) &&
 					(getrandom(100) < chance)) {
 				p = new Production(item, amt);
 				products.Add(p);
@@ -795,8 +795,8 @@ void ARegion::AddTown(int size, AString * name)
 	/* remove all lairs */
 	forlist(&objects) {
 		Object *obj = (Object *) elem;
-		if(obj->type == O_DUMMY) continue;
-		if((ObjectDefs[obj->type].monster != -1)
+		if (obj->type == O_DUMMY) continue;
+		if ((ObjectDefs[obj->type].monster != -1)
 			&& (!(ObjectDefs[obj->type].flags & ObjectType::CANENTER))) {
 				obj->units.Empty();
 				objects.Remove(obj);
@@ -808,11 +808,11 @@ void ARegion::AddTown(int size, AString * name)
 int ARegion::DetermineTownSize()
 {
 	// is it a city?
-	if(getrandom(300) < Globals->TOWN_DEVELOPMENT) {
+	if (getrandom(300) < Globals->TOWN_DEVELOPMENT) {
 		return TOWN_CITY;
 	}
 	// is it a town?
-	if(getrandom(220) < Globals->TOWN_DEVELOPMENT + 10) {
+	if (getrandom(220) < Globals->TOWN_DEVELOPMENT + 10) {
 		return TOWN_TOWN;
 	}
 	// ... then it's a village!
@@ -822,14 +822,14 @@ int ARegion::DetermineTownSize()
 // Set an existing town to a specific town type
 void ARegion::SetTownType(int level)
 {
-	if(!town) return;
+	if (!town) return;
 	// set some basics
 	town->hab = TownHabitat();
 	town->pop = town->hab * 2 / 3;
 	town->dev = TownDevelopment();
 	
 	// Sanity check
-	if((level < TOWN_VILLAGE) || (level > TOWN_CITY)) return;
+	if ((level < TOWN_VILLAGE) || (level > TOWN_CITY)) return;
 	
 	// increment values
 	int poptown = getrandom((level -1) * (level -1) * Globals->CITY_POP/12) + level * level * Globals->CITY_POP/12;
@@ -841,7 +841,7 @@ void ARegion::SetTownType(int level)
 	// now increment until we reach the right size
 	while(town->TownType() != level) {
 		// Increase?
-		if(level > town->TownType()) {
+		if (level > town->TownType()) {
 			development += getrandom(Globals->TOWN_DEVELOPMENT / 10 + 5);
 			int poplus = getrandom(Globals->CITY_POP/3) + getrandom(Globals->CITY_POP/3);
 			// don't overgrow!
@@ -869,32 +869,32 @@ void ARegion::SetTownType(int level)
 
 void ARegion::UpdateEditRegion()
 {
-    // redo markets and entertainment/tax income for extra people.
+	// redo markets and entertainment/tax income for extra people.
 	SetIncome();
 	markets.PostTurn(Population(), Wages());
 	
 	//Replace man selling
 	forlist(&markets) {
-	    Market *m = (Market *) elem;
-	    if(ItemDefs[m->item].type & IT_MAN) {
-	        markets.Remove(m);
-	        delete m;
-        }
-    }
+		Market *m = (Market *) elem;
+		if (ItemDefs[m->item].type & IT_MAN) {
+			markets.Remove(m);
+			delete m;
+		}
+	}
 
 	float ratio = ItemDefs[race].baseprice / (float) (Globals->BASE_MAN_COST * 10);
 	// hack: include wage factor of 10 in float calculation above
-    Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),
+	Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),
 							Population()/25, 0, 10000, 0, 2000);
 	markets.Add(m);
 
-	if(Globals->LEADERS_EXIST) {
+	if (Globals->LEADERS_EXIST) {
 		ratio = ItemDefs[I_LEADERS].baseprice / (float) (Globals->BASE_MAN_COST * 10);
 		// hack: include wage factor of 10 in float calculation above
 		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
 						Population()/125, 0, 10000, 0, 400);
 		markets.Add(m);
-	}    
+	}	
 }
 
 void ARegion::SetupEditRegion()
@@ -932,7 +932,7 @@ void ARegion::SetupEditRegion()
 		race = -1;
 		while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
 			int n = getrandom(IsCoastal() ? allraces : noncoastalraces);
-			if(n > noncoastalraces-1) {
+			if (n > noncoastalraces-1) {
 				race = typer->coastal_races[n-noncoastalraces-1];
 			} else
 				race = typer->races[n];
@@ -958,14 +958,14 @@ void ARegion::SetupEditRegion()
 	while (level < mw) {
 		development++;
 		prev++;
-		if(prev > level) {
+		if (prev > level) {
 			level++;
 			prev = 0;
 		}
 	}
 	development += getrandom(25);
 
-	if(Globals->TOWNS_EXIST) {
+	if (Globals->TOWNS_EXIST) {
 		int adjacent = 0;
 		int prob = Globals->TOWN_PROBABILITY;
 		if (prob < 1) prob = 100;
@@ -976,7 +976,7 @@ void ARegion::SetupEditRegion()
 				if ((newregion) &&  (newregion->town)) adjacent++;
 			}
 		}
-		if(Globals->LESS_ARCTIC_TOWNS) {
+		if (Globals->LESS_ARCTIC_TOWNS) {
 			int dnorth = GetPoleDistance(D_NORTH);
 			int dsouth = GetPoleDistance(D_SOUTH);
 			if (dnorth < 9)
@@ -987,7 +987,7 @@ void ARegion::SetupEditRegion()
 					(9 - dsouth) * Globals->LESS_ARCTIC_TOWNS;
 		}
 		int spread = Globals->TOWN_SPREAD;
-		if(spread > 100) spread = 100;
+		if (spread > 100) spread = 100;
 		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
 			100 * spread) / 100;
 		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
@@ -1007,7 +1007,7 @@ void ARegion::SetupEditRegion()
 							Population()/25, 0, 10000, 0, 2000);
 	markets.Add(m);
 
-	if(Globals->LEADERS_EXIST) {
+	if (Globals->LEADERS_EXIST) {
 		ratio = ItemDefs[I_LEADERS].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 		// hack: include wage factor of 10 in float assignment above
 		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
@@ -1051,7 +1051,7 @@ int ARegion::BaseDev()
 	while (level <= TerrainDefs[type].wages) {
 		prev++;
 		basedev++;
-		if(prev > level) {
+		if (prev > level) {
 			level++;
 			prev = 0;
 		}
@@ -1086,26 +1086,26 @@ int ARegion::TownHabitat()
 	int fort = 0;
 	forlist(&objects) {
 		Object *obj = (Object *) elem;
-		if(ObjectDefs[obj->type].protect > fort) fort = ObjectDefs[obj->type].protect;
-		if(ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_FOOD) farm++;
-		if(ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
-		if(ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
-		if((ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
+		if (ObjectDefs[obj->type].protect > fort) fort = ObjectDefs[obj->type].protect;
+		if (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_FOOD) farm++;
+		if (ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
+		if (ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
+		if ((ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
 			&& (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_MOUNT)) caravan++;
 	}
 	int hab = 2;
 	int step = 0;
-	for(int i=0; i<5; i++) {
-		if(fort > step) hab++;
+	for (int i=0; i<5; i++) {
+		if (fort > step) hab++;
 		step *= 5;
-		if(step == 0) step = 10;
+		if (step == 0) step = 10;
 	}
 	int build = 0;
-	if(farm) build++;
-	if(inn) build++;
-	if(temple) build++;
-	if(caravan) build++;
-	if(build > 2) build = 2;
+	if (farm) build++;
+	if (inn) build++;
+	if (temple) build++;
+	if (caravan) build++;
+	if (build > 2) build = 2;
 	
 	build++;
 	hab = (build * build + 1) * hab * hab + habitat / 4 + 50;
@@ -1123,11 +1123,11 @@ int ARegion::RoadDevelopment()
 {
 	// Road bonus
 	int roads = 0;
-	for(int i=0; i<NDIRS; i++) if(HasExitRoad(i)) roads++;
+	for (int i=0; i<NDIRS; i++) if (HasExitRoad(i)) roads++;
 	int dbonus = 0;
-	if(roads > 0) {
+	if (roads > 0) {
 		dbonus = RoadDevelopmentBonus(8, development);
-		if(!town) dbonus = dbonus / 2;
+		if (!town) dbonus = dbonus / 2;
 	}
 	// Maximum bonus of 45 to development for roads
 	int bonus = 5;
@@ -1137,7 +1137,7 @@ int ARegion::RoadDevelopment()
 	while((dbonus > 0) && (totalb < 46)) {
 		dbonus--;
 		// reduce development adjustment gradually for large road bonuses
-		if(leveloff >= plateau) if (bonus > 1) {
+		if (leveloff >= plateau) if (bonus > 1) {
 			bonus--;
 			leveloff = 1;
 			plateau--;
@@ -1157,8 +1157,8 @@ int ARegion::TownDevelopment()
 {
 	int basedev = BaseDev();
 	int df = development - basedev;
-	if(df < 0) df = 0;
-	if(df > 100) df = 100;
+	if (df < 0) df = 0;
+	if (df > 100) df = 100;
 	
 	return df;
 } 
@@ -1234,7 +1234,7 @@ void ARegion::Pillage()
 void ARegion::Grow()
 {
 	// We don't need to grow 0 pop regions
-	if(basepopulation == 0) return;
+	if (basepopulation == 0) return;
 	
 	// growpop is the overall population growth	
 	int growpop = 0;
@@ -1277,14 +1277,14 @@ void ARegion::Grow()
 	// diff is the amount we can grow?
 	int diff = tarpop - population;
 	int adiff = abs(diff);
-	//if(adiff < 0) adiff = adiff * (- 1);
+	//if (adiff < 0) adiff = adiff * (- 1);
 	
 	// Adjust basepop? 
 	// raise basepop depending on production
 	// absolute basepop increase
-	if(diff > (basepopulation / 20)) {
+	if (diff > (basepopulation / 20)) {
 		int gpop = getrandom(Globals->CITY_POP / 600);
-		if(gpop > diff / 20) gpop = diff / 20;
+		if (gpop > diff / 20) gpop = diff / 20;
 		// relative basepop increase
 		int relativeg = basepopulation * gpop / 1000;
 		if (diff > habitat / 20) basepopulation += gpop + relativeg;
@@ -1311,7 +1311,7 @@ void ARegion::Grow()
 	
 	// Ant: In the following formula, dgrow is almost always 0!
 	long int dgrow = ((long int) adiff * (long int) habitat ) / grow2;
-	//if(diff < 0) dgrow = dgrow * (- 1);
+	//if (diff < 0) dgrow = dgrow * (- 1);
 	//Awrite(AString("dgrow = ") + (unsigned int) dgrow); // debug string
 	
 	// long int dgrow = ((long int) diff) * ((long int) habitat)
@@ -1329,14 +1329,14 @@ void ARegion::Grow()
 
 	
 	// Now check town population growth
-	if(town) {
+	if (town) {
 		int maxpop = TownGrowth();
 		int tgrowth = maxpop - town->pop; // available room to grow
 		immigrants += tgrowth;
 		// less growth of towns in DYNAMIC_POPULATION
 		// to balance town creation and population dynamics
 		// through migration
-		if(Globals->DYNAMIC_POPULATION) tgrowth = tgrowth / 4;
+		if (Globals->DYNAMIC_POPULATION) tgrowth = tgrowth / 4;
 		// Dampen growth curve at high population levels
 		// Ant: maybe this formula could be broken up a bit?
 		//		also, is (2 * town->hab - town->pop) correct?
@@ -1364,15 +1364,15 @@ void ARegion::Grow()
 void ARegion::FindMigrationDestination(int round)
 {
 	// is emigration possible?
-	if(emigrants < 0) return;
+	if (emigrants < 0) return;
 	
 	int maxattract = 0;
 	ARegion *target = this;
 	// Check all hexes within 2 hexes
 	// range one neighbours
-	for(int d=0; d < NDIRS; d++) {
+	for (int d=0; d < NDIRS; d++) {
 		ARegion *nb = neighbors[d];
-		if(!nb) continue;
+		if (!nb) continue;
 		if (TerrainDefs[nb->type].similar_type == R_OCEAN) continue;
 		int ma = nb->MigrationAttractiveness(development, 1, round);
 		// check that we didn't migrate there in previous round
@@ -1383,10 +1383,10 @@ void ARegion::FindMigrationDestination(int round)
 			maxattract = ma;
 		}
 		// range two neighbours
-		for(int d2=0; d2 < NDIRS; d2++) {
+		for (int d2=0; d2 < NDIRS; d2++) {
 			ARegion *nb2 = nb->neighbors[d2];
-			if(!nb2) continue;
-			if(TerrainDefs[nb2->type].similar_type == R_OCEAN) continue;
+			if (!nb2) continue;
+			if (TerrainDefs[nb2->type].similar_type == R_OCEAN) continue;
 			ma = nb2->MigrationAttractiveness(development, 2, round);
 			// check that we didn't migrate there the previous round
 			if ((ma > maxattract)  &&
@@ -1398,7 +1398,7 @@ void ARegion::FindMigrationDestination(int round)
 		}	
 	}
 	// do we have a target?
-	if(target == this) return;
+	if (target == this) return;
 	
 	// then add this region to the target's migfrom list
 	ARegion *self = this;
@@ -1423,7 +1423,7 @@ int ARegion::MigrationAttractiveness(int homedev, int range, int round)
 	/* available space */
 	float space = 1 / 2;
 	int offset = Globals->CITY_POP / 100;
-	if(town) {
+	if (town) {
 		space += ((habitat - population) + (town->hab - town->pop) + offset)
 			/ (habitat + town->hab + offset);
 	} else {
@@ -1442,10 +1442,10 @@ void ARegion::Migrate()
 {
 	// calculate total potential migrants
 	int totalmig = 0;
-	if(migfrom.First()) {
+	if (migfrom.First()) {
 		forlist(&migfrom) {
 			ARegion *r = (ARegion *) elem;
-			if(!r) continue;
+			if (!r) continue;
 			totalmig += r->emigrants;
 		}
 	}
@@ -1457,13 +1457,13 @@ void ARegion::Migrate()
 	int totalimm = 0;
 	forlist(&migfrom) {
 		ARegion *r = (ARegion *) elem;
-		if(!r) continue;
+		if (!r) continue;
 		
 		// figure range
 		int xdist = r->xloc - xloc;
-		if(xdist < 0) xdist = - xdist;
+		if (xdist < 0) xdist = - xdist;
 		int ydist = r->yloc - yloc;
-		if(ydist < 0) ydist = - ydist;
+		if (ydist < 0) ydist = - ydist;
 		ydist = (ydist - xdist) / 2;
 		int range = xdist + ydist;
 		
@@ -1472,9 +1472,9 @@ void ARegion::Migrate()
 		int migrants = (int) (immigrants * ((float) (r->emigrants / totalmig)));
 		int mdiff = development - 7 - r->development;
 		mdiff -= 8 * (range - 1);
-		if(mdiff < 0) continue;
+		if (mdiff < 0) continue;
 		int mmult = 1;
-		for(int x=1; x*x < mdiff; x++) mmult = x;
+		for (int x=1; x*x < mdiff; x++) mmult = x;
 		// adjust migrants according to development difference
 		migrants = (int) (migrants * (float) (((mdiff + 100) * mmult) / 500));
 		AdjustPop(migrants);
@@ -1487,7 +1487,7 @@ void ARegion::Migrate()
 		Awrite(wout);
 		// set the region's mid-way migration development
 		r->migdev = (development - 8 * (range-1) + r->development) / 2;
-		if(r->development > migdev) r->migdev = r->development;
+		if (r->development > migdev) r->migdev = r->development;
 	}
 	// reduce possible immigrants
 	immigrants -= totalimm;
@@ -1499,7 +1499,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 {
 
 	/* Check decay */
-	if(Globals->DECAY) {
+	if (Globals->DECAY) {
 		DoDecayCheck(pRegs);
 	}
 	
@@ -1509,33 +1509,33 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	int imp2 = (improvement * 2 + 15) / 3;
 	improvement = (int) (imp1 * imp2);
 	// development increase possible?
-	if(improvement > development) {
+	if (improvement > development) {
 		int diff = improvement - development;
 		/* Let road development increase chance of improvement */
 		int progress = development - RoadDevelopment();
 		/* Three chances to improve */
-		for(int a=0; a<3; a++) if(getrandom(progress) < diff) development++;
+		for (int a=0; a<3; a++) if (getrandom(progress) < diff) development++;
 	}
 	
 	/* Development increase for very poor regions */
 	int basedev = ProdDev();
 	
-	if(basedev > development) {
-		if(getrandom(basedev) > (basedev - development)) development++;	
+	if (basedev > development) {
+		if (getrandom(basedev) > (basedev - development)) development++;	
 	}
 
 	/* Check if we were a starting city and got taken over */
-	if(IsStartingCity() && !HasCityGuard() && !Globals->SAFE_START_CITIES) {
+	if (IsStartingCity() && !HasCityGuard() && !Globals->SAFE_START_CITIES) {
 		// Make sure we haven't already been modified.
 		int done = 1;
 		forlist(&markets) {
 			Market *m = (Market *)elem;
-			if(m->minamt == -1) {
+			if (m->minamt == -1) {
 				done = 0;
 				break;
 			}
 		}
-		if(!done) {
+		if (!done) {
 			markets.DeleteAll();
 			SetupCityMarket();
 			float ratio = ItemDefs[race].baseprice /
@@ -1544,7 +1544,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 			Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),
 					Population()/25, 0, 10000, 0, 2000);
 			markets.Add(m);
-			if(Globals->LEADERS_EXIST) {
+			if (Globals->LEADERS_EXIST) {
 				ratio = ItemDefs[I_LEADERS].baseprice /
 					(float)Globals->BASE_MAN_COST;
 				m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio),

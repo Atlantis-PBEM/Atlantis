@@ -50,10 +50,10 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_NEXUS;
 
 	ARegion *reg = NULL;
-	for(int x = 0; x < 4; x++) {
-		for(int y = 0; y < 4; y++) {
+	for (int x = 0; x < 4; x++) {
+		for (int y = 0; y < 4; y++) {
 			reg = pRegionArrays[level]->GetRegion(x, y);
-			if(!reg) continue;
+			if (!reg) continue;
 			reg->SetName("Abyssal Plains");
 			reg->type = R_DESERT;
 			reg->wages = -2;
@@ -61,13 +61,13 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 	}
 
 	int tempx, tempy;
-	if(Globals->GATES_EXIST) {
+	if (Globals->GATES_EXIST) {
 		int gateset = 0;
 		do {
 			tempx = getrandom(4);
 			tempy = getrandom(4);
 			reg = pRegionArrays[level]->GetRegion(tempx, tempy);
-			if(reg) {
+			if (reg) {
 				gateset = 1;
 				numberofgates++;
 				reg->gate = -1;
@@ -104,10 +104,10 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *
 	nex_name += " Nexus";
 
 	int x, y;
-	for(y = 0; y < ySize; y++) {
-		for(x = 0; x < xSize; x++) {
+	for (y = 0; y < ySize; y++) {
+		for (x = 0; x < xSize; x++) {
 			ARegion *reg = pRegionArrays[level]->GetRegion(x, y);
-			if(reg) {
+			if (reg) {
 				reg->SetName(nex_name.Str());
 				reg->type = R_NEXUS;
 			}
@@ -116,12 +116,12 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *
 
 	FinalSetup(pRegionArrays[level]);
 
-	for(y = 0; y < ySize; y++) {
-		for(int x = 0; x < xSize; x++) {
+	for (y = 0; y < ySize; y++) {
+		for (int x = 0; x < xSize; x++) {
 			ARegion *reg = pRegionArrays[level]->GetRegion(x, y);
-			if(reg && Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
+			if (reg && Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
 				reg->MakeStartingCity();
-				if(Globals->GATES_EXIST) {
+				if (Globals->GATES_EXIST) {
 					numberofgates++;
 				}
 			}
@@ -136,7 +136,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 	int sea = Globals->OCEAN;
-	if(Globals->SEA_LIMIT)
+	if (Globals->SEA_LIMIT)
 		sea = sea * (100 + 2 * Globals->SEA_LIMIT) / 100;
 			
 	MakeLand(pRegionArrays[level], sea, Globals->CONTINENT_SIZE);
@@ -235,9 +235,9 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 	// Make the regions themselves
 	//
 	int x, y;
-	for(y = 0; y < ySize; y++) {
-		for(x = 0; x < xSize; x++) {
-			if(!((x + y) % 2)) {
+	for (y = 0; y < ySize; y++) {
+		for (x = 0; x < xSize; x++) {
+			if (!((x + y) % 2)) {
 				ARegion *reg = new ARegion;
 				reg->SetLoc(x, y, level);
 				reg->num = Num();
@@ -263,10 +263,10 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 void ARegionList::SetupNeighbors(ARegionArray *pRegs)
 {
 	int x, y;
-	for(x = 0; x < pRegs->x; x++) {
-		for(y = 0; y < pRegs->y; y++) {
+	for (x = 0; x < pRegs->x; x++) {
+		for (y = 0; y < pRegs->y; y++) {
 			ARegion *reg = pRegs->GetRegion(x, y);
-			if(!reg) continue;
+			if (!reg) continue;
 			NeighSetup(reg, pRegs);
 		}
 	}
@@ -304,9 +304,9 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 	// Make the regions themselves
 	//
 	int x, y;
-	for(y = 0; y < ySize; y++) {
-		for(x = 0; x < xSize; x++) {
-			if(!((x + y) % 2)) {
+	for (y = 0; y < ySize; y++) {
+		for (x = 0; x < xSize; x++) {
+			if (!((x + y) % 2)) {
 				// These cases remove all the hexes that are cut out to
 				// make the world join up into a big icosahedron (d20).
 				if (y < 2) {
@@ -360,10 +360,10 @@ void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs)
 {
 	int x, y;
 
-	for(x = 0; x < pRegs->x; x++) {
-		for(y = 0; y < pRegs->y; y++) {
+	for (x = 0; x < pRegs->x; x++) {
+		for (y = 0; y < pRegs->y; y++) {
 			ARegion *reg = pRegs->GetRegion(x, y);
-			if(!reg) continue;
+			if (!reg) continue;
 			IcosahedralNeighSetup(reg, pRegs);
 		}
 	}
@@ -392,7 +392,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 		int tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
 
 		ARegion *reg = pRegs->GetRegion(tempx, tempy);
-		if(!reg) continue;
+		if (!reg) continue;
 		ARegion *newreg = reg;
 		ARegion *seareg = reg;
 		
@@ -483,7 +483,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 					ARegion *creg = newreg->neighbors[v];
 					if (!creg) polecheck = 1;
 				}
-				if(polecheck) break;
+				if (polecheck) break;
 				reg = newreg;
 				if (reg->type == -1) {
 					reg->type = R_NUM;
@@ -500,19 +500,19 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 
 void ARegionList::MakeCentralLand(ARegionArray *pRegs)
 {
-	for(int i = 0; i < pRegs->x; i++) {
-		for(int j = 0; j < pRegs->y; j++) {
+	for (int i = 0; i < pRegs->x; i++) {
+		for (int j = 0; j < pRegs->y; j++) {
 			ARegion *reg = pRegs->GetRegion(i, j);
-			if(!reg) continue;
+			if (!reg) continue;
 			// Initialize region to ocean.
 			reg->type = R_OCEAN;
 			// If the region is close to the edges, it stays ocean
-			if(i < 8 || i >= pRegs->x - 8 || j < 8 || j >= pRegs->y - 8)
+			if (i < 8 || i >= pRegs->x - 8 || j < 8 || j >= pRegs->y - 8)
 				continue;
 			// If the region is within 10 of the edges, it has a 50%
 			// chance of staying ocean.
-			if(i < 10 || i >= pRegs->x - 10 || j < 10 || j >= pRegs->y - 10) {
-				if(getrandom(100) > 50) continue;
+			if (i < 10 || i >= pRegs->x - 10 || j < 10 || j >= pRegs->y - 10) {
+				if (getrandom(100) > 50) continue;
 			}
 
 			// Otherwise, set the region to land.
@@ -526,28 +526,28 @@ void ARegionList::MakeIslands(ARegionArray *pArr, int nPlayers)
 	// First, make the islands along the top.
 	int i;
 	int nRow = (nPlayers + 3) / 4;
-	for(i = 0; i < nRow; i++)
+	for (i = 0; i < nRow; i++)
 		MakeOneIsland(pArr, 10 + i * 6, 2);
 	// Next, along the left.
 	nRow = (nPlayers + 2) / 4;
-	for(i = 0; i < nRow; i++)
+	for (i = 0; i < nRow; i++)
 		MakeOneIsland(pArr, 2, 10 + i * 6);
 	// The islands along the bottom.
 	nRow = (nPlayers + 1) / 4;
-	for(i = 0; i < nRow; i++)
+	for (i = 0; i < nRow; i++)
 		MakeOneIsland(pArr, 10 + i * 6, pArr->y - 6);
 	// And the islands on the right.
 	nRow = nPlayers / 4;
-	for(i = 0; i < nRow; i++)
+	for (i = 0; i < nRow; i++)
 		MakeOneIsland(pArr, pArr->x - 6, 10 + i * 6);
 }
 
 void ARegionList::MakeOneIsland(ARegionArray *pRegs, int xx, int yy)
 {
-	for(int i = 0; i < 4; i++) {
-		for(int j = 0; j < 4; j++) {
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
 			ARegion *pReg = pRegs->GetRegion(i + xx, j + yy);
-			if(!pReg) continue;
+			if (!pReg) continue;
 			pReg->type = R_NUM;
 		}
 	}
@@ -558,15 +558,15 @@ void ARegionList::CleanUpWater(ARegionArray *pRegs)
 	Awrite("Converting Scattered Water");
 	int dotter = 0;
 	for (int ctr = 0; ctr < Globals->SEA_LIMIT+1; ctr++) {
-		for(int i = 0; i < pRegs->x; i++) {
-			for(int j = 0; j < pRegs->y; j++) {
+		for (int i = 0; i < pRegs->x; i++) {
+			for (int j = 0; j < pRegs->y; j++) {
 				ARegion *reg = pRegs->GetRegion(i, j);
 				int remainocean = 0;
-				if((!reg) || (reg->type != R_OCEAN)) continue;
+				if ((!reg) || (reg->type != R_OCEAN)) continue;
 				for (int d = 0; d < NDIRS; d++) {
 					remainocean += reg->CheckSea(d, Globals->SEA_LIMIT, remainocean);
 				}
-				if(dotter++%2000 == 0) Adot();
+				if (dotter++%2000 == 0) Adot();
 				if (remainocean > 0) continue;
 				reg->wages = 0;
 				if (getrandom(100) < Globals->LAKES) {
@@ -582,8 +582,8 @@ void ARegionList::RemoveCoastalLakes(ARegionArray *pRegs)
 {
 	Awrite("Removing coastal 'lakes'");
 	for (int c = 0; c < 2; c++) {
-		for(int i = 0; i < pRegs->x; i++) {
-			for(int j = 0; j < pRegs->y; j++) {
+		for (int i = 0; i < pRegs->x; i++) {
+			for (int j = 0; j < pRegs->y; j++) {
 				ARegion *reg = pRegs->GetRegion(i, j);
 				if ((!reg) || (reg->type != R_LAKE)) continue;
 				if (reg->IsCoastal() > 0) {
@@ -636,8 +636,8 @@ void ARegionList::SeverLandBridges(ARegionArray *pRegs)
 {
 	Awrite("Severing land bridges");
 	// mark land hexes to delete
-	for(int i = 0; i < pRegs->x; i++) {
-		for(int j = 0; j < pRegs->y; j++) {
+	for (int i = 0; i < pRegs->x; i++) {
+		for (int j = 0; j < pRegs->y; j++) {
 			ARegion *reg = pRegs->GetRegion(i, j);
 			if ((!reg) || (TerrainDefs[reg->type].similar_type == R_OCEAN))
 				continue;
@@ -654,8 +654,8 @@ void ARegionList::SeverLandBridges(ARegionArray *pRegs)
 		}
 	}
 	// now change to ocean
-	for(int i = 0; i < pRegs->x; i++) {
-		for(int j = 0; j < pRegs->y; j++) {
+	for (int i = 0; i < pRegs->x; i++) {
+		for (int j = 0; j < pRegs->y; j++) {
 			ARegion *reg = pRegs->GetRegion(i, j);
 			if ((!reg) || (reg->wages > -2)) continue;
 			reg->type = R_OCEAN;
@@ -668,11 +668,11 @@ void ARegionList::SeverLandBridges(ARegionArray *pRegs)
 
 void ARegionList::SetRegTypes(ARegionArray *pRegs, int newType)
 {
-	for(int i = 0; i < pRegs->x; i++) {
-		for(int j = 0; j < pRegs->y; j++) {
+	for (int i = 0; i < pRegs->x; i++) {
+		for (int j = 0; j < pRegs->y; j++) {
 			ARegion *reg = pRegs->GetRegion(i, j);
-			if(!reg) continue;
-			if(reg->type == -1) reg->type = newType;
+			if (!reg) continue;
+			if (reg->type == -1) reg->type = newType;
 		}
 	}
 }
@@ -683,7 +683,7 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 	Awrite("Setting up the anchors");
 	int skip = 250;
 	int f = 2;
-	if(Globals->TERRAIN_GRANULARITY) {
+	if (Globals->TERRAIN_GRANULARITY) {
 		skip = Globals->TERRAIN_GRANULARITY;
 		while (skip > 5) {
 			f++;
@@ -695,7 +695,7 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 	int dotter = 0;
 	for (int x=0; x<(ta->x)/f; x++) {
 		for (int y=0; y<(ta->y)/(f*2); y++) {
-			if(getrandom(1000) > skip) continue;
+			if (getrandom(1000) > skip) continue;
 			ARegion *reg = 0;
 			for (int i=0; i<4; i++) {
 				int tempx = x * f + getrandom(f);
@@ -711,7 +711,7 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 					break;
 				}
 			}
-			if(dotter++%30 == 0) Adot();
+			if (dotter++%30 == 0) Adot();
 		}
 	}
 
@@ -723,17 +723,17 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 	Awrite("Growing Terrain...");
 	for (int j=0; j<30; j++) {
 		int x, y;
-		for(x = 0; x < pArr->x; x++) {
-			for(y = 0; y < pArr->y; y++) {
+		for (x = 0; x < pArr->x; x++) {
+			for (y = 0; y < pArr->y; y++) {
 				ARegion *reg = pArr->GetRegion(x, y);
-				if(!reg) continue;
+				if (!reg) continue;
 				reg->population = 1;
 			}
 		}
-		for(x = 0; x < pArr->x; x++) {
-			for(y = 0; y < pArr->y; y++) {
+		for (x = 0; x < pArr->x; x++) {
+			for (y = 0; y < pArr->y; y++) {
 				ARegion *reg = pArr->GetRegion(x, y);
-				if(!reg) continue;
+				if (!reg) continue;
 				if ((j > 0) && (j < 21) && (getrandom(3) < 2)) continue;
 				if (reg->type == R_NUM) {
 				
@@ -757,7 +757,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 						ARegion *t = reg->neighbors[(i+init) % NDIRS];
 						if (t) {
 							if (t->population < 1) continue;
-							if(t->type != R_NUM &&
+							if (t->type != R_NUM &&
 								(TerrainDefs[t->type].similar_type!=R_OCEAN ||
 								 (growOcean && (t->type != R_LAKE)))) {
 								if (j==0) t->population = 0;
@@ -772,11 +772,11 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 			}
 		}
 
-		for(x = 0; x < pArr->x; x++) {
-			for(y = 0; y < pArr->y; y++) {
+		for (x = 0; x < pArr->x; x++) {
+			for (y = 0; y < pArr->y; y++) {
 				ARegion *reg = pArr->GetRegion(x, y);
-				if(!reg) continue;
-				if(reg->type == R_NUM && reg->race != -1)
+				if (!reg) continue;
+				if (reg->type == R_NUM && reg->race != -1)
 					reg->type = reg->race;
 			}
 		}
@@ -786,10 +786,10 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 void ARegionList::RandomTerrain(ARegionArray *pArr)
 {
 	int x, y;
-	for(x = 0; x < pArr->x; x++) {
-		for(y = 0; y < pArr->y; y++) {
+	for (x = 0; x < pArr->x; x++) {
+		for (y = 0; y < pArr->y; y++) {
 			ARegion *reg = pArr->GetRegion(x, y);
-			if(!reg) continue;
+			if (!reg) continue;
 
 			if (reg->type == R_NUM) {
 				int adjtype = 0;
@@ -820,27 +820,27 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
 {
 	int x, y;
 
-	for(x = 0; x < pArr->x; x++) {
-		for(y = 0; y < pArr->y; y++) {
+	for (x = 0; x < pArr->x; x++) {
+		for (y = 0; y < pArr->y; y++) {
 			ARegion *reg = pArr->GetRegion(x, y);
-			if(!reg) continue;
+			if (!reg) continue;
 
 			for (int i=D_NORTH; i<= NDIRS; i++) {
 				int count = 0;
-				for(int j=D_NORTH; j< NDIRS; j++)
-					if(reg->neighbors[j]) count++;
-				if(count <= 1) break;
+				for (int j=D_NORTH; j< NDIRS; j++)
+					if (reg->neighbors[j]) count++;
+				if (count <= 1) break;
 
 				ARegion *n = reg->neighbors[i];
 				if (n) {
 					if (n->xloc < x || (n->xloc == x && n->yloc < y))
 						continue;
-					if(!CheckRegionExit(reg, n)) {
+					if (!CheckRegionExit(reg, n)) {
 						count = 0;
-						for(int k = D_NORTH; k<NDIRS; k++) {
-							if(n->neighbors[k]) count++;
+						for (int k = D_NORTH; k<NDIRS; k++) {
+							if (n->neighbors[k]) count++;
 						}
-						if(count <= 1) break;
+						if (count <= 1) break;
 						n->neighbors[reg->GetRealDirComp(i)] = 0;
 						reg->neighbors[i] = 0;
 					}
@@ -859,10 +859,10 @@ void ARegionList::AssignTypes(ARegionArray *pArr)
 void ARegionList::UnsetRace(ARegionArray *pArr)
 {
 	int x, y;
-	for(x = 0; x < pArr->x; x++) {
-		for(y = 0; y < pArr->y; y++) {
+	for (x = 0; x < pArr->x; x++) {
+		for (y = 0; y < pArr->y; y++) {
 			ARegion *reg = pArr->GetRegion(x, y);
-			if(!reg) continue;
+			if (!reg) continue;
 			reg->race = - 1;
 		}
 	}
@@ -874,30 +874,30 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 	UnsetRace(pArr);
 	int x, y;
 	int wigout = 0;
-	for(x = 0; x < pArr->x; x++) {
-		for(y = 0; y < pArr->y; y++) {
+	for (x = 0; x < pArr->x; x++) {
+		for (y = 0; y < pArr->y; y++) {
 			// Anchor distribution: depends on GROW_RACES value
 			int jiggle = 4 + 2 * Globals->GROW_RACES;
-			if((y + ((x % 2) * jiggle/2)) % jiggle > 1) continue;
+			if ((y + ((x % 2) * jiggle/2)) % jiggle > 1) continue;
 			int xoff = x + 2 - getrandom(3) - getrandom(3);
 			ARegion *reg = pArr->GetRegion(xoff, y);
-			if(!reg) continue;
+			if (!reg) continue;
 			
-			if((reg->type == R_LAKE) && (!Globals->LAKESIDE_IS_COASTAL))
+			if ((reg->type == R_LAKE) && (!Globals->LAKESIDE_IS_COASTAL))
 				continue;
 			if (TerrainDefs[reg->type].flags & TerrainType::BARREN) continue;
 			
 			reg->race = -1;
 			wigout = 0; // reset sanity
 			
-			if(TerrainDefs[reg->type].similar_type == R_OCEAN) {
+			if (TerrainDefs[reg->type].similar_type == R_OCEAN) {
 				// setup near coastal race here
 				int d = getrandom(NDIRS);
 				int ctr = 0;
 				ARegion *nreg = reg->neighbors[d];
-				if(!nreg) continue;
+				if (!nreg) continue;
 				while((ctr++ < 20) && (reg->race == -1)) {
-					if(TerrainDefs[nreg->type].similar_type != R_OCEAN) {
+					if (TerrainDefs[nreg->type].similar_type != R_OCEAN) {
 						int rnum =
 							sizeof(TerrainDefs[nreg->type].coastal_races) /
 							sizeof(int);
@@ -910,8 +910,8 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 						}
 					} else {
 						int dir = getrandom(NDIRS);
-						if(d == nreg->GetRealDirComp(dir)) continue;
-						if(!(nreg->neighbors[dir])) continue;
+						if (d == nreg->GetRealDirComp(dir)) continue;
+						if (!(nreg->neighbors[dir])) continue;
 						nreg = nreg->neighbors[dir];
 					}
 				}
@@ -920,7 +920,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 				int rnum = sizeof(TerrainDefs[reg->type].races)/sizeof(int);
 				
 				while ( reg->race == -1 || 
-				        (ItemDefs[reg->race].flags & ItemType::DISABLED)) {
+						(ItemDefs[reg->race].flags & ItemType::DISABLED)) {
 					reg->race = TerrainDefs[reg->type].races[getrandom(rnum)];
 					if (++wigout > 100) break;
 				}
@@ -937,8 +937,8 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			
 			if (reg->race == -1) {
 				cout << "Hey! No race anchor got assigned to the " 
-				     << TerrainDefs[reg->type].name 
-					 << " at " << x << "," << y << "\n";
+					<< TerrainDefs[reg->type].name 
+					<< " at " << x << "," << y << "\n";
 			}
 		}
 	}
@@ -949,19 +949,19 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
 	Awrite("Growing Races");
 	RaceAnchors(pArr);
 	int a, x, y;
-	for(a = 0; a < 25; a++) {
-		for(x = 0; x < pArr->x; x++) {
-			for(y = 0; y < pArr->y; y++) {
+	for (a = 0; a < 25; a++) {
+		for (x = 0; x < pArr->x; x++) {
+			for (y = 0; y < pArr->y; y++) {
 				ARegion *reg = pArr->GetRegion(x, y);
-				if((!reg) || (reg->race == -1)) continue;
+				if ((!reg) || (reg->race == -1)) continue;
 
-				for(int dir = 0; dir < NDIRS; dir++) {
+				for (int dir = 0; dir < NDIRS; dir++) {
 					ARegion *nreg = reg->neighbors[dir];
 					if ((!nreg) || (nreg->race != -1)) continue;
 					int iscoastal = 0;
 					int cnum = sizeof(TerrainDefs[reg->type].coastal_races) /
 						sizeof(int);
-					for(int i=0; i<cnum; i++) {
+					for (int i=0; i<cnum; i++) {
 						if (reg->race ==
 								TerrainDefs[reg->type].coastal_races[i])
 							iscoastal = 1;
@@ -981,7 +981,7 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
 							ch += 2;
 						int rnum = sizeof(TerrainDefs[nreg->type].races) /
 							sizeof(int);
-						for(int i=0; i<rnum; i++) {
+						for (int i=0; i<rnum; i++) {
 							if (TerrainDefs[nreg->type].races[i] == reg->race)
 								ch++;
 						}
@@ -996,16 +996,16 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
 void ARegionList::FinalSetup(ARegionArray *pArr)
 {
 	int x, y;
-	for(x = 0; x < pArr->x; x++) {
-		for(y = 0; y < pArr->y; y++) {
+	for (x = 0; x < pArr->x; x++) {
+		for (y = 0; y < pArr->y; y++) {
 			ARegion *reg = pArr->GetRegion(x, y);
-			if(!reg) continue;
+			if (!reg) continue;
 
 			if ((TerrainDefs[reg->type].similar_type == R_OCEAN) &&
 					(reg->type != R_LAKE)) {
-				if(pArr->levelType == ARegionArray::LEVEL_UNDERWORLD)
+				if (pArr->levelType == ARegionArray::LEVEL_UNDERWORLD)
 					reg->SetName("The Undersea");
-				else if(pArr->levelType == ARegionArray::LEVEL_UNDERDEEP)
+				else if (pArr->levelType == ARegionArray::LEVEL_UNDERDEEP)
 					reg->SetName("The Deep Undersea");
 				else {
 					AString ocean_name = Globals->WORLD_NAME;
@@ -1014,7 +1014,7 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 				}
 			} else {
 				if (reg->wages == -1) reg->SetName("Unnamed");
-				else if(reg->wages != -2)
+				else if (reg->wages != -2)
 					reg->SetName(AGetNameString(reg->wages));
 				else
 					reg->wages = -1;
@@ -1028,7 +1028,7 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 		ARegionArray *pTo)
 {
-	if(TerrainDefs[reg->type].similar_type == R_OCEAN) return;
+	if (TerrainDefs[reg->type].similar_type == R_OCEAN) return;
 
 	int tempx = reg->xloc * pTo->x / pFrom->x +
 		getrandom(pTo->x / pFrom->x);
@@ -1042,7 +1042,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 	ARegion *temp = pTo->GetRegion(tempx, tempy);
 	if (!temp)
 		return;
-	if(TerrainDefs[temp->type].similar_type == R_OCEAN) return;
+	if (TerrainDefs[temp->type].similar_type == R_OCEAN) return;
 
 	Object *o = new Object(reg);
 	o->num = reg->buildingseq++;
@@ -1067,12 +1067,12 @@ void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds)
 	ARegionArray *pTo = pRegionArrays[levelTo];
 
 	int x, y;
-	for(x = 0; x < pFrom->x; x++) {
-		for(y = 0; y < pFrom->y; y++) {
+	for (x = 0; x < pFrom->x; x++) {
+		for (y = 0; y < pFrom->y; y++) {
 			ARegion *reg = pFrom->GetRegion(x, y);
-			if(!reg) continue;
+			if (!reg) continue;
 
-			if(getrandom(odds) != 0) continue;
+			if (getrandom(odds) != 0) continue;
 
 			MakeShaft(reg, pFrom, pTo);
 		}
@@ -1083,17 +1083,17 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 {
 	ARegionArray *ar = GetRegionArray(levelSrc);
 
-	for(int x = 0; x < ar->x; x++) {
-		for(int y = 0; y < ar->y; y++) {
+	for (int x = 0; x < ar->x; x++) {
+		for (int y = 0; y < ar->y; y++) {
 			ARegion *AC = ar->GetRegion(x, y);
-			if(!AC) continue;
+			if (!AC) continue;
 			for (int i=0; i<NDIRS; i++) {
-				if(AC->neighbors[i]) continue;
+				if (AC->neighbors[i]) continue;
 				ARegion *pReg = GetStartingCity(AC, i, levelTo, maxX, maxY);
-				if(!pReg) continue;
+				if (!pReg) continue;
 				AC->neighbors[i] = pReg;
 				pReg->MakeStartingCity();
-				if(Globals->GATES_EXIST) {
+				if (Globals->GATES_EXIST) {
 					numberofgates++;
 				}
 			}
@@ -1104,7 +1104,7 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 void ARegionList::InitSetupGates(int level)
 {
 
-	if(!Globals->GATES_EXIST) return;
+	if (!Globals->GATES_EXIST) return;
 
 	ARegionArray *pArr = pRegionArrays[level];
 
@@ -1128,7 +1128,7 @@ void ARegionList::InitSetupGates(int level)
 
 void ARegionList::FinalSetupGates()
 {
-	if(!Globals->GATES_EXIST) return;
+	if (!Globals->GATES_EXIST) return;
 
 	int *used = new int[numberofgates];
 

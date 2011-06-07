@@ -2340,7 +2340,7 @@ ManType mt[] = {
 	// Tzarg's
 	{"GELF", R_UFOREST,
 	 3,2,{"XBOW", "COMB", "WEAP", "ARMO", NULL, NULL}},
-    // Fracas
+	// Fracas
 	{"CTAU", R_PLAIN,
 	 3,2,{"HORS", "RANC", "RIDI", NULL, NULL, NULL}},
 };

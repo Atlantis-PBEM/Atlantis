@@ -32,7 +32,7 @@ int Game::SetupFaction( Faction *pFac )
 {
 	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 500;
 
-	if(pFac->noStartLeader)
+	if (pFac->noStartLeader)
 		return 1;
 	
 	AString *name;
@@ -174,9 +174,9 @@ int Game::SetupFaction( Faction *pFac )
 	*/
 	
 	ARegion *reg = NULL;
-	if(pFac->pStartLoc) {
+	if (pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
-	} else if(!Globals->MULTI_HEX_NEXUS) {
+	} else if (!Globals->MULTI_HEX_NEXUS) {
 		if (Globals->NEXUS_EXISTS) {
 			reg = (ARegion *)(regions.First());
 		} else {
@@ -221,13 +221,13 @@ Faction *Game::CheckVictory()
 
 void Game::ModifyTablesPerRuleset(void)
 {
-	if(Globals->APPRENTICES_EXIST)
+	if (Globals->APPRENTICES_EXIST)
 		EnableSkill(S_MANIPULATE);
 
-	if(!Globals->GATES_EXIST)
+	if (!Globals->GATES_EXIST)
 		DisableSkill(S_GATE_LORE);
 
-	if(Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
+	if (Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
 		ClearTerrainRaces(R_NEXUS);
 		ModifyTerrainRace(R_NEXUS, 0, I_HIGHELF);
 		ModifyTerrainRace(R_NEXUS, 1, I_VIKING);
@@ -308,7 +308,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_MERFOLK);
 	EnableItem(I_ELEMENTAL);
 
-	if((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
+	if ((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
 		EnableItem(I_MUSHROOM);
 		EnableItem(I_HEALPOTION);
 		EnableItem(I_ROUGHGEM);
@@ -317,7 +317,7 @@ void Game::ModifyTablesPerRuleset(void)
 	}
 
 	// Modify the various spells which are allowed to cross levels
-	if(Globals->EASIER_UNDERWORLD) {
+	if (Globals->EASIER_UNDERWORLD) {
 		ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
