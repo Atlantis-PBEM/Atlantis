@@ -84,6 +84,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_FOOD:
 			case S_CREATE_AEGIS:
 			case S_CREATE_WINDCHIME:
+			case S_CREATE_GATE_CRYSTAL:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
@@ -531,7 +532,8 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	if ((*token) == "random") {
 		TeleportOrder *order;
 
-		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE &&
+		if (u->teleportorders &&
+				u->teleportorders->spell == S_GATE_LORE &&
 				u->teleportorders->gate == -1 ) {
 			order = u->teleportorders;
 		} else {
@@ -579,7 +581,7 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 {
 	int val;
-	if (u->type != U_MAGE) {
+	if (u->type != U_MAGE && u->type != U_APPRENTICE) {
 		u->Error("CAST: Unit is not a mage.");
 		return;
 	}
@@ -706,6 +708,9 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			break;
 		case S_CREATE_WINDCHIME:
 			val = RunCreateArtifact(r,u,sk,I_WINDCHIME);
+			break;
+		case S_CREATE_GATE_CRYSTAL:
+			val = RunCreateArtifact(r,u,sk,I_GATE_CRYSTAL);
 			break;
 	}
 	if (val) {
@@ -1577,8 +1582,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	}
 
 	if (weight > maxweight) {
-		u->Error( "CAST: That mage cannot carry that much weight "
-			"through a Gate.");
+		u->Error( "CAST: Can't carry that much weight through a Gate.");
 		return 0;
 	}
 

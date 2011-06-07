@@ -298,6 +298,8 @@ public:
 	// Are we allowing apprentices?
 	//
 	int APPRENTICES_EXIST;
+	// And what are they called?
+	char const *APPRENTICE_NAME;
 
 	// What is the name of the world?
 	char const *WORLD_NAME;
@@ -322,6 +324,9 @@ public:
 
 	// Are we allowing a multi-hex nexus
 	int MULTI_HEX_NEXUS;
+
+	// Is this world icosahedral (round), as opposed to the normal flat?
+	int ICOSAHEDRAL_WORLD;
 
 	// How many levels of the underworld do we want?
 	int UNDERWORLD_LEVELS;

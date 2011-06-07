@@ -151,6 +151,7 @@ static GameDefs g = {
 	4,   // START_CITY_MAGES
 	4,   // START_CITY_TACTICS
 	0,   // APPRENTICES_EXIST
+	"apprentice",   // APPRENTICE_NAME
 
 	"Fracas", // WORLD_NAME
 
@@ -160,6 +161,7 @@ static GameDefs g = {
 	1,	// ALLOW_WITHDRAW
 	0,	// CITY_RENAME_COST
 	0,	// MULTI_HEX_NEXUS
+	0,	// ICOSAHEDRAL_WORLD
 	0,	// UNDERWORLD_LEVELS
 	0,	// UNDERDEEP_LEVELS
 	0,	// ABYSS_LEVEL

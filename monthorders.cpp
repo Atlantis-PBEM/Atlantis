@@ -1176,7 +1176,9 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 
 	if ((SkillDefs[sk].flags & SkillType::MAGIC) && u->type != U_MAGE) {
 		if (u->type == U_APPRENTICE) {
-			u->Error("STUDY: An apprentice cannot be made into an mage.");
+			u->Error(AString("STUDY: An ") +
+				Globals->APPRENTICE_NAME +
+				" cannot be made into a mage.");
 			return;
 		}
 		if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
@@ -1202,23 +1204,26 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	if ((SkillDefs[sk].flags&SkillType::APPRENTICE) &&
 			u->type != U_APPRENTICE) {
 		if (u->type == U_MAGE) {
-			u->Error("STUDY: A mage cannot be made into an apprentice.");
+			u->Error(AString("STUDY: A mage cannot be made into an ") +
+				Globals->APPRENTICE_NAME + ".");
 			return;
 		}
 
 		if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 			if (CountApprentices(u->faction)>=AllowedApprentices(u->faction)) {
-				u->Error("STUDY: Can't have another apprentice.");
+				u->Error(AString("STUDY: Can't have another ") +					Globals->APPRENTICE_NAME + ".");
 				return;
 			}
 		}
 		if (u->GetMen() != 1) {
-			u->Error("STUDY: Only 1-man units can be apprentices.");
+			u->Error(AString("STUDY: Only 1-man units can be ") +
+				Globals->APPRENTICE_NAME + "s.");
 			return;
 		}
 		if (!(Globals->MAGE_NONLEADERS)) {
 			if (u->GetLeaders() != 1) {
-				u->Error("STUDY: Only leaders may be apprentices.");
+				u->Error(AString("STUDY: Only leaders may be ") +
+					Globals->APPRENTICE_NAME + "s.");
 				return;
 			}
 		}

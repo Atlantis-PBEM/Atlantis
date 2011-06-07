@@ -425,8 +425,15 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		f->PutStr(AString("Mages: ") + nummages + " (" +
 				pGame->AllowedMages(this) + ")");
 		if (Globals->APPRENTICES_EXIST) {
-			f->PutStr(AString("Apprentices: ") + numapprentices + " (" +
-					pGame->AllowedApprentices(this)+ ")");
+			AString temp;
+			temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
+			temp += Globals->APPRENTICE_NAME + 1;
+			temp += "s: ";
+			temp += numapprentices;
+			temp += " (";
+			temp += pGame->AllowedApprentices(this);
+			temp += ")";
+			f->PutStr(temp);
 		}
 	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		f->PutStr(AString("Tax Regions: ") + war_regions.Num() + " (" +
@@ -444,8 +451,15 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		f->PutStr(AString("Mages: ") + nummages + " (" +
 				pGame->AllowedMages(this) + ")");
 		if (Globals->APPRENTICES_EXIST) {
-			f->PutStr(AString("Apprentices: ") + numapprentices + " (" +
-					pGame->AllowedApprentices(this)+ ")");
+			AString temp;
+			temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
+			temp += Globals->APPRENTICE_NAME + 1;
+			temp += "s: ";
+			temp += numapprentices;
+			temp += " (";
+			temp += pGame->AllowedApprentices(this);
+			temp += ")";
+			f->PutStr(temp);
 		}
 	}
 	f->PutStr("");

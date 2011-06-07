@@ -953,6 +953,7 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 
 	if (!pCheck) {
+		AString temp;
 		if (!u->items.GetNum(it)) {
 			u->Error("PREPARE: Unit does not possess that item.");
 			return;
@@ -960,11 +961,16 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		if ((bt->flags & BattleItemType::MAGEONLY) &&
 			!((u->type == U_MAGE) || (u->type == U_APPRENTICE) ||
 				(u->type == U_GUARDMAGE))) {
-			u->Error("PREPARE: Only a mage or apprentice may use this item.");
+			temp = "PREPARE: Only a mage";
+			if (Globals->APPRENTICES_EXIST) {
+				temp += " or ";
+				temp += Globals->APPRENTICE_NAME;
+			}
+			temp += " may use this item.";
+			u->Error(temp);
 			return;
 		}
 		u->readyItem = it;
-		AString temp;
 		temp = AString("Prepared item set to ") + ItemDefs[it].name;
 		if (u->combat != -1) {
 			u->combat = -1;
@@ -1142,8 +1148,10 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		}
 
 		if (a > AllowedApprentices(u->faction)) {
-			u->Error(AString("FACTION: Too many apprentices to change to that "
-							 "faction type."));
+			u->Error(AString("FACTION: Too many ") +
+				Globals->APPRENTICE_NAME +
+				"s to change to that "
+				 "faction type.");
 
 			for (i = 0; i < NFACTYPES; i++)
 				u->faction->type[i] = oldfactype[i];

@@ -922,8 +922,15 @@ int Unit::GetAvailSkill(int sk)
 	forlist (&items) {
 		Item *i = (Item *)elem;
 		if (ItemDefs[i->type].flags & ItemType::DISABLED) continue;
+		if (ItemDefs[i->type].type & IT_MAGEONLY
+				&& type != U_MAGE
+				&& type != U_APPRENTICE
+				&& type != U_GUARDMAGE)
+			continue;
 		if ((SkillDefs[sk].flags & SkillType::MAGIC)
-				&& !(type != U_MAGE && type != U_APPRENTICE))
+				&& type != U_MAGE
+				&& type != U_APPRENTICE
+				&& type != U_GUARDMAGE)
 			continue;
 		if (i->num < GetMen())
 			continue;

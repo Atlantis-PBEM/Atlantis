@@ -473,7 +473,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "A faction has one pre-set limit; it may not contain more than ";
 		temp += AString(AllowedMages(&fac)) + " mages";
 		if (app_exist) {
-			temp += AString("and ") + AllowedApprentices(&fac) + " apprentices";
+			temp += AString("and ") + AllowedApprentices(&fac)
+				+ " " + Globals->APPRENTICE_NAME + "s";
 		}
 		temp += ". Magic is a rare art, and only a few in the world can "
 			"master it. Aside from that, there  is no limit to the number "
@@ -503,8 +504,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"of quartermaster units a trade faction can have. ";
 		}
 		temp += "Faction Points spent on Magic determine the number of mages ";
-		if (app_exist)
-			temp += "and apprentices ";
+		if (app_exist) {
+			temp += "and ";
+			temp += Globals->APPRENTICE_NAME;
+			temp += "s ";
+		}
 		temp += "the faction may have. (More information on all of the "
 			"faction activities is in further sections of the rules).  Here "
 			"is a chart detailing the limits on factions by Faction Points:";
@@ -525,8 +529,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ")";
 		f.TagText("th", temp);
 		temp = "Magic (max mages";
-		if (app_exist)
-			temp += "/apprentices";
+		if (app_exist) {
+			temp += "/";
+			temp += Globals->APPRENTICE_NAME;
+			temp += "s";
+		}
 		temp += ")";
 		f.TagText("th", temp);
 		f.Enclose(0, "tr");
@@ -585,7 +592,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += AString(nm) + " mage" + (nm==1?"":"s");
 		if (app_exist) {
 			temp += " as well as ";
-			temp += AString(na) + " apprentice" + (na==1?"":"s");
+			temp += AString(na) + " " + Globals->APPRENTICE_NAME
+				+ (na==1?"":"s");
 		}
 		if (qm_exist) {
 			temp += " and ";
@@ -622,11 +630,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 				(nm == 1?"":"s");
 		if (app_exist) {
 			temp += ", and ";
-			if (na == 0)
-				temp += "could not possess any apprentices";
-			else
-				temp += AString("could only possess ") + na + " apprentice" +
+			if (na == 0) {
+				temp += "could not possess any ";
+				temp += Globals->APPRENTICE_NAME;
+				temp += "s";
+			} else {
+				temp += AString("could only possess ") + na
+					+ " " + Globals->APPRENTICE_NAME +
 					(na == 1?"":"s");
+			}
 		}
 		if (qm_exist) {
 			temp += ", and ";
@@ -3831,7 +3843,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 
 	if (app_exist) {
-		temp = "Apprentices may be created by having them study ";
+		temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
+		temp += Globals->APPRENTICE_NAME + 1;
+		temp += "s may be created by having them study ";
 		comma = 0;
 		for (i = 0; i < NSKILLS; i++) {
 			if (SkillDefs[i].flags & SkillType::DISABLED) continue;
@@ -3848,7 +3862,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if (comma) temp += "or ";
 		temp += SkillDefs[last].name;
 		temp += ". ";
-		temp += "Apprentices may not cast spells, but may utilize items "
+		temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
+		temp += Globals->APPRENTICE_NAME + 1;
+		temp += "s may not cast spells, but may utilize items "
 			"which otherwise only mages can use.";
 		f.Paragraph(temp);
 	}
@@ -5038,12 +5054,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.ClassTagText("div", "rule", "");
 		f.LinkRef("prepare");
 		f.TagText("h4", "PREPARE [item]");
-		temp = "This command allows a mage or apprentice to prepare a "
+		temp = "This command allows a mage";
+		if (app_exist) {
+			temp += " or ";
+			temp += Globals->APPRENTICE_NAME;
+		}
+		temp += " to prepare a "
 			"battle item (e.g. a Staff of Fire) for use in battle. ";
 		if (Globals->USE_PREPARE_COMMAND == GameDefs::PREPARE_STRICT) {
 			temp += " This selects the battle item which will be used, ";
 		} else {
-			temp += "This allows the mage to override the usual selection "
+			temp += "This allows the unit to override the usual selection "
 				"of battle items, ";
 		}
 		temp += "and also cancels any spells set via the ";

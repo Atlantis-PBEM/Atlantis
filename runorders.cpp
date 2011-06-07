@@ -1482,8 +1482,11 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 							o->num = 0;
 						}
 						if (u->type == U_APPRENTICE) {
-							u->Error("BUY: Apprentices can't recruit more "
-									"men.");
+							AString temp = "BUY: ";
+							temp += (char) toupper(Globals->APPRENTICE_NAME[0]);
+							temp += Globals->APPRENTICE_NAME + 1;
+							temp += "s can't recruit more men.";
+							u->Error(temp);
 							o->num = 0;
 						}
 						// XXX: there has to be a better way
@@ -2562,7 +2565,11 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 				if (CountApprentices(t->faction) >=
 						AllowedApprentices(t->faction)){
-					u->Error("GIVE: Faction has too many apprentices.");
+					AString temp;
+					temp = "GIVE: Faction has too many ";
+					temp += Globals->APPRENTICE_NAME;
+					temp += "s.";
+					u->Error(temp);
 					return 0;
 				}
 			}

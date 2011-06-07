@@ -271,7 +271,11 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *
 
 void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const *name)
 {
-	MakeRegions(level, xSize, ySize);
+	if (Globals->ICOSAHEDRAL_WORLD) {
+		MakeIcosahedralRegions(level, xSize, ySize);
+	} else {
+		MakeRegions(level, xSize, ySize);
+	}
 
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
@@ -307,7 +311,11 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 		char const *name)
 {
-	MakeRegions(level, xSize, ySize);
+	if (Globals->ICOSAHEDRAL_WORLD) {
+		MakeIcosahedralRegions(level, xSize, ySize);
+	} else {
+		MakeRegions(level, xSize, ySize);
+	}
 
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERWORLD;
@@ -330,7 +338,11 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
 		char const *name)
 {
-	MakeRegions(level, xSize, ySize);
+	if (Globals->ICOSAHEDRAL_WORLD) {
+		MakeIcosahedralRegions(level, xSize, ySize);
+	} else {
+		MakeRegions(level, xSize, ySize);
+	}
 
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERDEEP;

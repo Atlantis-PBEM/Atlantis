@@ -1170,27 +1170,28 @@ void Game::EditGameUnitDetails(Unit *pUnit)
 		Awrite(AString("Unit: ") + *(pUnit->name));		
 		Awrite(AString("Unit faction: ") +
 				*(pUnit->faction->name));
-		AString temp;
+		AString temp = " (";
 		switch(pUnit->type) {
 			case U_NORMAL:
-				temp = AString(" (normal)");
+				temp += "normal";
 				break;
 			case U_MAGE:
-				temp = AString(" (mage)");
+				temp += "mage";
 				break;
 			case U_GUARD:
-				temp = AString(" (guard)");
+				temp += "guard";
 				break;
 			case U_WMON:
-				temp = AString(" (monster)");
+				temp += "monster";
 				break;				
 			case U_GUARDMAGE:
-				temp = AString(" (guardmage)");
+				temp += "guardmage";
 				break;
 			case U_APPRENTICE:
-				temp = AString(" (apprentice)");
+				temp += Globals->APPRENTICE_NAME;
 				break;				
 		}
+		temp += ")";
 		Awrite(AString("Unit type: ") + pUnit->type + temp);
 		
 		Awrite("");

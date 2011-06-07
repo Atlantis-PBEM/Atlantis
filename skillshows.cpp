@@ -1125,7 +1125,9 @@ AString *ShowSkill::Report(Faction *f)
 				"This item gives the possessor a bonus of 3 to his effective "
 				"Observation skill, but is only usable by mages";
 			if (Globals->APPRENTICES_EXIST) {
-				*str += " and apprentices";
+				*str += " and ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s";
 			}
 			*str += ". A mage has a 20 percent times his skill level chance to "
 			   "create an Aegis. To use this spell, CAST Create_Aegis.";
@@ -1310,8 +1312,11 @@ AString *ShowSkill::Report(Faction *f)
 		case S_MANIPULATE:
 			if (!Globals->APPRENTICES_EXIST) break;
 			if (level > 1) break;
-			*str += "A unit with this skill becomes an apprentice mage. "
-				"While apprentices cannot cast spells directly, they can "
+			*str += "A unit with this skill becomes an ";
+			*str += Globals->APPRENTICE_NAME;
+			*str += ". While ";
+			*str += Globals->APPRENTICE_NAME;
+			*str += "s cannot cast spells directly, they can "
 				"use magic items normally only usable by mages. Continued "
 				"study of this skill gives no further advantages.";
 			break;
@@ -1367,10 +1372,28 @@ AString *ShowSkill::Report(Faction *f)
 			}
 			*str += "This item is only usable by mages";
 			if (Globals->APPRENTICES_EXIST) {
-				*str += " and apprentices";
+				*str += " and ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s";
 			}
 			*str += ". A mage has a 20 percent times his skill level chance to "
 			   "create a Windchime. To use this spell, CAST Create_Windchime.";
+			break;
+		case S_CREATE_GATE_CRYSTAL:
+			/* XXX -- This should be cleaner somehow. */
+			if (ITEM_DISABLED(I_GATE_CRYSTAL)) break;
+			if (level > 1) break;
+			*str += "A mage with the Create Gate Crystal skill may create a Gate Crystal. ";
+			*str += "The possessor of this item may cast the Gate Lore spells as if they "
+				"had a skill level of 3 in Gate Lore. ";
+			*str += "This item is only usable by mages";
+			if (Globals->APPRENTICES_EXIST) {
+				*str += " and ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s";
+			}
+			*str += ". A mage has a 20 percent times his skill level chance to "
+			   "create a Gate Crystal. To use this spell, CAST Create_Gate_Crystal.";
 			break;
 	}
 

@@ -1086,7 +1086,8 @@ AString *ItemDescription(int item, int full)
 			if (bt->flags & BattleItemType::MAGEONLY) {
 				*temp += " This item may only be used by a mage";
 				if (Globals->APPRENTICES_EXIST) {
-					*temp += " or an apprentice";
+					*temp += " or an ";
+					*temp += Globals->APPRENTICE_NAME;
 				}
 				*temp += ".";
 			}

@@ -2257,6 +2257,16 @@ ItemType id[] =
 	 -1,0, 0,
 	 0, NULL, 0,
 	 "", { "", "", "", "" }, 0, 0},
+	{"gate crystal","gate crystals","GTCR",
+	 ItemType::DISABLED | ItemType::NOMARKET | ItemType::NOTRANSPORT,
+	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 "CRGC",1,20, {{I_ROOTSTONE,1},{I_SILVER,500},{-1,0},{-1,0}},
+	 0, IT_MAGIC | IT_MAGEONLY, 4000,0,
+	 0,0,0,0,
+	 -1,0,
+	 -1,0, 0,
+	 0, NULL, 0,
+	 "GATE", { "", "", "", "" }, 3, 3},
 };
 ItemType *ItemDefs = id;
 
@@ -3362,6 +3372,10 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
 	 NULL, NULL,
 	 {{"ARTI",2},{"SWIN",2},{NULL,0}}},
+	{"create gate crystal","CRGC",100,
+	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
+	 NULL, NULL,
+	 {{"ARTI",3},{"GATE",3},{NULL,0}}},
 };
 
 SkillType *SkillDefs = sd;
