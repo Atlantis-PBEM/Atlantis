@@ -85,6 +85,12 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_AEGIS:
 			case S_CREATE_WINDCHIME:
 			case S_CREATE_GATE_CRYSTAL:
+			case S_CREATE_STAFF_OF_HEALING:
+			case S_CREATE_SCRYING_ORB:
+			case S_CREATE_CORNUCOPIA:
+			case S_CREATE_BOOK_OF_EXORCISM:
+			case S_CREATE_HOLY_SYMBOL:
+			case S_CREATE_CENSER:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
@@ -711,6 +717,24 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			break;
 		case S_CREATE_GATE_CRYSTAL:
 			val = RunCreateArtifact(r,u,sk,I_GATE_CRYSTAL);
+			break;
+		case S_CREATE_STAFF_OF_HEALING:
+			val = RunCreateArtifact(r,u,sk,I_STAFFOFH);
+			break;
+		case S_CREATE_SCRYING_ORB:
+			val = RunCreateArtifact(r,u,sk,I_SCRYINGORB);
+			break;
+		case S_CREATE_CORNUCOPIA:
+			val = RunCreateArtifact(r,u,sk,I_CORNUCOPIA);
+			break;
+		case S_CREATE_BOOK_OF_EXORCISM:
+			val = RunCreateArtifact(r,u,sk,I_BOOKOFEXORCISM);
+			break;
+		case S_CREATE_HOLY_SYMBOL:
+			val = RunCreateArtifact(r,u,sk,I_HOLYSYMBOL);
+			break;
+		case S_CREATE_CENSER:
+			val = RunCreateArtifact(r,u,sk,I_CENSER);
 			break;
 	}
 	if (val) {

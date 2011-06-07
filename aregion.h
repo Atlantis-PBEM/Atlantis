@@ -331,11 +331,12 @@ class ARegion : public AListElem
 		ProductionList products;
 		MarketList markets;
 		int xloc, yloc, zloc;
+		int visited;
 
 		// Used for calculating distances using an A* search
 		int distance;
 		ARegion *next;
-		
+
 		// Editing functions
 		void UpdateEditRegion();
 		void SetupEditRegion();

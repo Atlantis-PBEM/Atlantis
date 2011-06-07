@@ -34,7 +34,7 @@ class Game;
 #include "production.h"
 #include "object.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER(5, 0, 0)
+#define CURRENT_ATL_VER MAKE_ATL_VER(5, 1, 0)
 
 class OrdersCheck
 {
@@ -275,6 +275,7 @@ private:
 
 	void ModifyAttribMod(char const *mod, int index, int flags, char const *ident,
 			int type, int val);
+	void ModifyHealing(int level, int patients, int success);
 
 	AList factions;
 	AList newfactions; /* List of strings */

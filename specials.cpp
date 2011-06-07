@@ -27,7 +27,9 @@
 
 void Soldier::SetupHealing()
 {
-	if (unit->type == U_MAGE) {
+	if (unit->type == U_MAGE ||
+			unit->type == U_APPRENTICE ||
+			unit->type == U_GUARDMAGE) {
 		healtype = unit->GetSkill(S_MAGICAL_HEALING);
 		if (healtype > 5) healtype = 5;
 		if (healtype > 0) {

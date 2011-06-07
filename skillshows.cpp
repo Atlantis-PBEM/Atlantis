@@ -295,22 +295,27 @@ AString *ShowSkill::Report(Faction *f)
 			if (level > 1) break;
 			break;
 		case S_MAGICAL_HEALING:
-			/* XXX -- This should be cleaner somehow. */
 			if (level == 1) {
 				*str += "This skill enables the mage to magically heal units "
-					"after battle. A mage at this level can heal up to 10 "
-					"casualties, with a 50 percent rate of success. No order "
-					"is necessary to use this spell, it will be used "
-					"automatically when the mage is involved in battle.";
-			} else if (level == 3) {
-				*str += "A mage at this level of skill can work greater "
-					"wonders of healing with his new found powers; he may "
-					"heal up to 25 casualties, with a success rate of 75 "
-					"percent.";
-			} else if (level == 5) {
-				*str += "A mage at this skill level can bring soldiers back "
-					"from near death; he may heal up to 100 casualties, with "
-					"a 90 percent rate of success.";
+					"after battle. No order is necessary to use this spell; "
+					"it will be used automatically when the mage is involved "
+					"in a battle. ";
+			}
+			if (HealDefs[level].num != HealDefs[level - 1].num ||
+					HealDefs[level].rate != HealDefs[level - 1].rate) {
+				*str += "A mage at this level of skill can ";
+				if (level > 4) {
+					*str += "bring soldiers back from near death, healing";
+				} else if (level > 2) {
+					*str += "work wonders of healing with his new-found powers; he may heal";
+				} else {
+					*str += "heal";
+				}
+				*str += " up to ";
+				*str += HealDefs[level].num;
+				*str += " casualties, with a ";
+				*str += HealDefs[level].rate;
+				*str += " percent success rate.";
 			}
 			break;
 		case S_GATE_LORE:
@@ -1311,14 +1316,27 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 		case S_MANIPULATE:
 			if (!Globals->APPRENTICES_EXIST) break;
-			if (level > 1) break;
-			*str += "A unit with this skill becomes an ";
-			*str += Globals->APPRENTICE_NAME;
-			*str += ". While ";
-			*str += Globals->APPRENTICE_NAME;
-			*str += "s cannot cast spells directly, they can "
-				"use magic items normally only usable by mages. Continued "
-				"study of this skill gives no further advantages.";
+			if (level == 1) {
+				*str += "A unit with this skill becomes an ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += ". While ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s cannot cast spells directly, they can "
+					"use magic items normally only usable by mages.";
+			}
+			if (ITEM_ENABLED(I_GATE_CRYSTAL) ||
+					ITEM_ENABLED(I_STAFFOFH) ||
+					ITEM_ENABLED(I_SCRYINGORB) ||
+					ITEM_ENABLED(I_CORNUCOPIA)) {
+				if (level == 1) {
+					*str += " This skill counts as a magical skill for those items "
+						"whose effectiveness is affected by the user's magical skills.";
+				} else if (level == 3) {
+					*str += "Continued study of this skill gives no further advantages.";
+				}
+			} else if (level == 1) {
+				*str += " Continued study of this skill gives no further advantages.";
+			}
 			break;
 		case S_WEAPONCRAFT:
 			if (level > 1) break;
@@ -1384,8 +1402,9 @@ AString *ShowSkill::Report(Faction *f)
 			if (ITEM_DISABLED(I_GATE_CRYSTAL)) break;
 			if (level > 1) break;
 			*str += "A mage with the Create Gate Crystal skill may create a Gate Crystal. ";
-			*str += "The possessor of this item may cast the Gate Lore spells as if they "
-				"had a skill level of 3 in Gate Lore. ";
+			*str += "The possessor of this item may cast the Gate Lore spells as if their "
+				"skill level in Gate Lore was that of the highest level magical skill "
+				"they possess, up to a maximum of level 3. ";
 			*str += "This item is only usable by mages";
 			if (Globals->APPRENTICES_EXIST) {
 				*str += " and ";
@@ -1394,6 +1413,105 @@ AString *ShowSkill::Report(Faction *f)
 			}
 			*str += ". A mage has a 20 percent times his skill level chance to "
 			   "create a Gate Crystal. To use this spell, CAST Create_Gate_Crystal.";
+			break;
+		case S_CREATE_STAFF_OF_HEALING:
+			/* XXX -- This should be cleaner somehow. */
+			if (ITEM_DISABLED(I_STAFFOFH)) break;
+			if (level > 1) break;
+			*str += "A mage with the Create Staff of Healing skill may create a Staff of Healing. ";
+			*str += "The possessor of this item may heal units after combat as if their "
+				"skill level in Magical Healing was that of the highest level magical "
+				"skill they possess, up to a maximum of level 3. ";
+			*str += "This item is only usable by mages";
+			if (Globals->APPRENTICES_EXIST) {
+				*str += " and ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s";
+			}
+			*str += ". A mage has a 20 percent times his skill level chance to "
+			   "create a Staff of Healing. To use this spell, CAST Create_Staff_of_Healing.";
+			break;
+		case S_CREATE_SCRYING_ORB:
+			/* XXX -- This should be cleaner somehow. */
+			if (ITEM_DISABLED(I_SCRYINGORB)) break;
+			if (level > 1) break;
+			*str += "A mage with the Create Scrying Orb skill may create a Scrying Orb. ";
+			*str += "The possessor of this item may cast the Farsight spell as if their "
+				"skill level in Farsight was that of the highest level magical skill "
+				"they possess, up to a maximum of level 3. ";
+			*str += "This item is only usable by mages";
+			if (Globals->APPRENTICES_EXIST) {
+				*str += " and ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s";
+			}
+			*str += ". A mage has a 20 percent times his skill level chance to "
+			   "create a Scrying Orb. To use this spell, CAST Create_Scrying_Orb.";
+			break;
+		case S_CREATE_CORNUCOPIA:
+			/* XXX -- This should be cleaner somehow. */
+			if (ITEM_DISABLED(I_CORNUCOPIA)) break;
+			if (level > 1) break;
+			*str += "A mage with the Create Cornucopia skill may create a Cornucopia. ";
+			*str += "The possessor of this item may cast the Earth Lore spell as if their "
+				"skill level in Earth Lore was that of the highest level magical skill "
+				"they possess, up to a maximum of level 2. ";
+			*str += "This item is only usable by mages";
+			if (Globals->APPRENTICES_EXIST) {
+				*str += " and ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s";
+			}
+			*str += ". A mage has a 20 percent times his skill level chance to "
+			   "create a Cornucopia. To use this spell, CAST Create_Cornucopia.";
+			break;
+		case S_CREATE_BOOK_OF_EXORCISM:
+			/* XXX -- This should be cleaner somehow. */
+			if (ITEM_DISABLED(I_BOOKOFEXORCISM)) break;
+			if (level > 1) break;
+			*str += "A mage with the Create Book of Exorcism skill may create a Book of Exorcism. ";
+			*str += "The possessor of this item may banish demons in combat as if they "
+				"had a skill level of 3 in Banish Demon. ";
+			*str += "This item is only usable by mages";
+			if (Globals->APPRENTICES_EXIST) {
+				*str += " and ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s";
+			}
+			*str += ". A mage has a 20 percent times his skill level chance to "
+			   "create a Book of Exorcism. To use this spell, CAST Create_Book_of_Exorcism.";
+			break;
+		case S_CREATE_HOLY_SYMBOL:
+			/* XXX -- This should be cleaner somehow. */
+			if (ITEM_DISABLED(I_HOLYSYMBOL)) break;
+			if (level > 1) break;
+			*str += "A mage with the Create Holy Symbol skill may create a Holy Symbol. ";
+			*str += "The possessor of this item may destroy undead in combat as if they "
+				"had a skill level of 3 in Banish Undead. ";
+			*str += "This item is only usable by mages";
+			if (Globals->APPRENTICES_EXIST) {
+				*str += " and ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s";
+			}
+			*str += ". A mage has a 20 percent times his skill level chance to "
+			   "create a Holy Symbol. To use this spell, CAST Create_Holy_Symbol.";
+			break;
+		case S_CREATE_CENSER:
+			/* XXX -- This should be cleaner somehow. */
+			if (ITEM_DISABLED(I_CENSER)) break;
+			if (level > 1) break;
+			*str += "A mage with the Create Censer of Protection skill may create a Censer of Protection. ";
+			*str += "The possessor of this item may cast a force shield in combat as if they "
+				"had a skill level of 3 in Force Shield. ";
+			*str += "This item is only usable by mages";
+			if (Globals->APPRENTICES_EXIST) {
+				*str += " and ";
+				*str += Globals->APPRENTICE_NAME;
+				*str += "s";
+			}
+			*str += ". A mage has a 20 percent times his skill level chance to "
+			   "create a Censer of Protection. To use this spell, CAST Create_Censer_of_Protection.";
 			break;
 	}
 

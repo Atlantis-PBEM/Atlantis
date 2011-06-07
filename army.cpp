@@ -332,6 +332,10 @@ void Soldier::SetupCombatItems()
 				exclusive = 1;
 			}
 
+			if (pBat->flags & BattleItemType::MAGEONLY) {
+				unit->Practice(S_MANIPULATE);
+			}
+
 			/* Make sure amulets of invulnerability are marked */
 			if (item == I_AMULETOFI) {
 				amuletofi = 1;

@@ -331,8 +331,6 @@ AString ShowSpecial(char const *special, int level, int expandLevel, int fromIte
 	if (expandLevel)
 		temp += AString(" at a skill level of ") + level;
 	temp += ".";
-	if (fromItem)
-		temp += " This ability only affects the possessor of the item.";
 
 	if ((spd->targflags & SpecialType::HIT_BUILDINGIF) ||
 			(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
@@ -1095,7 +1093,7 @@ AString *ItemDescription(int item, int full)
 				*temp += AString(" ") + "This item provides ";
 			else
 				*temp += AString(" ") + "This item can cast ";
-			*temp += ShowSpecial(bt->special, bt->skillLevel, 1, 1);
+			*temp += ShowSpecial(bt->special, bt->skillLevel, 1, bt->flags & BattleItemType::SHIELD);
 		}
 	}
 	if ((ItemDefs[item].flags & ItemType::CANTGIVE) && full) {

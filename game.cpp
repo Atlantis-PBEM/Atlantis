@@ -406,6 +406,10 @@ int Game::OpenGame()
 	i = regions.ReadRegions(&f, &factions, eVersion);
 	if (!i) return 0;
 
+	// read in quests
+	i = f.GetInt();
+	if (i) return 0;
+
 	SetupUnitNums();
 
 	f.Close();
@@ -447,6 +451,9 @@ int Game::SaveGame()
 	// Write out the ARegions
 	//
 	regions.WriteRegions(&f);
+
+	// Write out quests
+	f.PutInt(0);
 
 	f.Close();
 	return(1);

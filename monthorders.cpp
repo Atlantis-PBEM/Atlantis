@@ -210,6 +210,7 @@ ARegion * Game::Do1SailOrder(ARegion * reg,Object * fleet,Unit * cap)
 				moved = 1;
 				fleet->MoveObject(newreg);
 				fleet->SetPrevDir(reg->GetRealDirComp(i));
+				// if (!(cap->faction->IsNPC())) newreg->visited = 1;
 				forlist(&facs) {
 					Faction * f = ((FactionPtr *) elem)->ptr;
 					f->Event(*fleet->name + AString(" sails from ") +
@@ -1571,6 +1572,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 		unit->movepoints += cost;
 		unit->MoveUnit(newreg->GetDummy());
 		unit->DiscardUnfinishedShips();
+		// if (!(unit->faction->IsNPC())) newreg->visited = 1;
 
 		AString temp;
 		switch (movetype) {
@@ -1581,9 +1583,11 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 			break;
 		case M_RIDE:
 			temp = AString("Rides ") + road;
+			unit->Practice(S_RIDING);
 			break;
 		case M_FLY:
 			temp = "Flies ";
+			unit->Practice(S_RIDING);
 			break;
 		}
 		unit->Event(temp + AString("from ") + region->ShortPrint(&regions)

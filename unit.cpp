@@ -1093,6 +1093,55 @@ int Unit::Practice(int sk)
 	days = skills.GetDays(sk);
 	men = GetMen();
 
+	if (days < 1 && GetAvailSkill(sk) > 0) {
+		// This is a skill granted by an item, so try to practice
+		// the skills it depends on (if any)
+		AString str;
+
+		reqlev = 0;
+
+		forlist (&items) {
+			Item *it = (Item *)elem;
+			if (ItemDefs[it->type].flags & ItemType::DISABLED) continue;
+			if (ItemDefs[it->type].type & IT_MAGEONLY
+					&& type != U_MAGE
+					&& type != U_APPRENTICE
+					&& type != U_GUARDMAGE)
+				continue;
+			if ((SkillDefs[sk].flags & SkillType::MAGIC)
+					&& type != U_MAGE
+					&& type != U_APPRENTICE
+					&& type != U_GUARDMAGE)
+				continue;
+			if (it->num < GetMen())
+				continue;
+			str = ItemDefs[it->type].grantSkill;
+			if (ItemDefs[it->type].grantSkill && LookupSkill(&str) == sk) {
+				for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills)
+									 / sizeof(ItemDefs[0].fromSkills[0]); j++) {
+					if (ItemDefs[it->type].fromSkills[j]) {
+						int fromSkill;
+
+						str = ItemDefs[it->type].fromSkills[j];
+
+						fromSkill = LookupSkill(&str);
+						if (fromSkill != -1 && GetRealSkill(fromSkill) > reqlev) {
+							reqsk = fromSkill;
+							reqlev = GetRealSkill(fromSkill);
+						}
+					}
+				}
+			}
+		}
+
+		if (reqlev > 0) {
+			// Since granting items use the highest contributing
+			// skill, practice that skill.
+			Practice(reqsk);
+			return 1;
+		}
+	}
+
 	if (men < 1 || ((days < 1) && (!Globals->REQUIRED_EXPERIENCE))) return 0;
 
 	/*

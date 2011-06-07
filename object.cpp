@@ -153,6 +153,7 @@ void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
 		Unit *temp = new Unit;
 		temp->Readin(f, facs, v);
 		temp->MoveUnit(this);
+		if (!(temp->faction->IsNPC())) region->visited = 1;
 	}
 	mages = ObjectDefs[type].maxMages;
 	ReadinFleet(f);

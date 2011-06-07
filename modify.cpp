@@ -744,3 +744,11 @@ void Game::ModifyAttribMod(char const *mod, int index, int flags, char const *id
 	mp->mods[index].modtype = type;
 	mp->mods[index].val = val;
 }
+
+void Game::ModifyHealing(int level, int patients, int success)
+{
+	if (level < 1 || level > 5) return;
+	HealDefs[level].num = patients;
+	HealDefs[level].rate = success;
+}
+

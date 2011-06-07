@@ -124,6 +124,7 @@ ARegion::ARegion()
 	earthlore = 0;
 	for (int i=0; i<NDIRS; i++)
 		neighbors[i] = 0;
+	visited = 0;
 }
 
 ARegion::~ARegion()
@@ -973,6 +974,7 @@ void ARegion::Writeout(Aoutfile *f)
 	f->PutInt(xloc);
 	f->PutInt(yloc);
 	f->PutInt(zloc);
+	f->PutInt(visited);
 
 	products.Writeout(f);
 	markets.Writeout(f);
@@ -1033,6 +1035,7 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	xloc = f->GetInt();
 	yloc = f->GetInt();
 	zloc = f->GetInt();
+	visited = f->GetInt();
 
 	products.Readin(f);
 	markets.Readin(f);
