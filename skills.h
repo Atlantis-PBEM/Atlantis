@@ -186,6 +186,8 @@ class DefenseMod {
 		int val;
 };
 
+#define SPECIAL_BUILDINGS	5
+
 class SpecialType {
 	public:
 		char const *key;
@@ -205,7 +207,7 @@ class SpecialType {
 		};
 		int targflags;
 
-		int buildings[3];
+		int buildings[SPECIAL_BUILDINGS];
 		int targets[7];
 		char const *effects[3];
 

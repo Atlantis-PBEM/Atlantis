@@ -65,14 +65,14 @@ void Game::ModifySkillCost(int sk, int cost)
 	SkillDefs[sk].cost = cost;
 }
 
-void Game::ModifySkillSpecial(int sk, char *special)
+void Game::ModifySkillSpecial(int sk, char const *special)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
 	if (special && (FindSpecial(special) == NULL)) return;
 	SkillDefs[sk].special = special;
 }
 
-void Game::ModifySkillRange(int sk, char *range)
+void Game::ModifySkillRange(int sk, char const *range)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
 	if (range && (FindRange(range) == NULL)) return;
@@ -202,7 +202,7 @@ void Game::ModifyItemMagicInput(int it, int i, int input, int amount)
 	ItemDefs[it].mInput[i].amt = amount;
 }
 
-void Game::ModifyRaceSkillLevels(char *r, int spec, int def)
+void Game::ModifyRaceSkillLevels(char const *r, int spec, int def)
 {
 	ManType *mt = FindRace(r);
 	if (mt == NULL) return;
@@ -212,7 +212,7 @@ void Game::ModifyRaceSkillLevels(char *r, int spec, int def)
 	mt->defaultlevel = def;
 }
 
-void Game::ModifyRaceSkills(char *r, int i, char *sk)
+void Game::ModifyRaceSkills(char const *r, int i, char const *sk)
 {
 	ManType *mt = FindRace(r);
 	if (mt == NULL) return;
@@ -221,7 +221,7 @@ void Game::ModifyRaceSkills(char *r, int i, char *sk)
 	mt->skills[i] = sk;
 }
 
-void Game::ModifyMonsterAttackLevel(char *mon, int lev)
+void Game::ModifyMonsterAttackLevel(char const *mon, int lev)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -229,7 +229,7 @@ void Game::ModifyMonsterAttackLevel(char *mon, int lev)
 	pM->attackLevel = lev;
 }
 
-void Game::ModifyMonsterDefense(char *mon, int defenseType, int level)
+void Game::ModifyMonsterDefense(char const *mon, int defenseType, int level)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -237,7 +237,7 @@ void Game::ModifyMonsterDefense(char *mon, int defenseType, int level)
 	pM->defense[defenseType] = level;
 }
 
-void Game::ModifyMonsterAttacksAndHits(char *mon, int num, int hits, int regen)
+void Game::ModifyMonsterAttacksAndHits(char const *mon, int num, int hits, int regen)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -249,7 +249,7 @@ void Game::ModifyMonsterAttacksAndHits(char *mon, int num, int hits, int regen)
 	pM->regen = regen;
 }
 
-void Game::ModifyMonsterSkills(char *mon, int tact, int stealth, int obs)
+void Game::ModifyMonsterSkills(char const *mon, int tact, int stealth, int obs)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -261,7 +261,7 @@ void Game::ModifyMonsterSkills(char *mon, int tact, int stealth, int obs)
 	pM->obs = obs;
 }
 
-void Game::ModifyMonsterSpecial(char *mon, char *special, int lev)
+void Game::ModifyMonsterSpecial(char const *mon, char const *special, int lev)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -271,7 +271,7 @@ void Game::ModifyMonsterSpecial(char *mon, char *special, int lev)
 	pM->specialLevel = lev;
 }
 
-void Game::ModifyMonsterSpoils(char *mon, int silver, int spoilType)
+void Game::ModifyMonsterSpoils(char const *mon, int silver, int spoilType)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -281,7 +281,7 @@ void Game::ModifyMonsterSpoils(char *mon, int silver, int spoilType)
 	pM->spoiltype = spoilType;
 }
 
-void Game::ModifyMonsterThreat(char *mon, int num, int hostileChance)
+void Game::ModifyMonsterThreat(char const *mon, int num, int hostileChance)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -291,7 +291,7 @@ void Game::ModifyMonsterThreat(char *mon, int num, int hostileChance)
 	pM->number = num;
 }
 
-void Game::ModifyWeaponSkills(char *weap, char *baseSkill, char *orSkill)
+void Game::ModifyWeaponSkills(char const *weap, char *baseSkill, char *orSkill)
 {
 	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
@@ -301,14 +301,14 @@ void Game::ModifyWeaponSkills(char *weap, char *baseSkill, char *orSkill)
 	pw->orSkill = orSkill;
 }
 
-void Game::ModifyWeaponFlags(char *weap, int flags)
+void Game::ModifyWeaponFlags(char const *weap, int flags)
 {
 	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
 	pw->flags = flags;
 }
 
-void Game::ModifyWeaponAttack(char *weap, int wclass, int attackType,
+void Game::ModifyWeaponAttack(char const *weap, int wclass, int attackType,
 		int numAtt)
 {
 	WeaponType *pw = FindWeapon(weap);
@@ -320,7 +320,7 @@ void Game::ModifyWeaponAttack(char *weap, int wclass, int attackType,
 	pw->numAttacks = numAtt;
 }
 
-void Game::ModifyWeaponBonuses(char *weap, int attack, int defense, int vsMount)
+void Game::ModifyWeaponBonuses(char const *weap, int attack, int defense, int vsMount)
 {
 	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
@@ -329,14 +329,14 @@ void Game::ModifyWeaponBonuses(char *weap, int attack, int defense, int vsMount)
 	pw->mountBonus = vsMount;
 }
 
-void Game::ModifyArmorFlags(char *armor, int flags)
+void Game::ModifyArmorFlags(char const *armor, int flags)
 {
 	ArmorType *pa = FindArmor(armor);
 	if (pa == NULL) return;
 	pa->flags = flags;
 }
 
-void Game::ModifyArmorSaveFrom(char *armor, int from)
+void Game::ModifyArmorSaveFrom(char const *armor, int from)
 {
 	ArmorType *pa = FindArmor(armor);
 	if (pa == NULL) return;
@@ -344,7 +344,7 @@ void Game::ModifyArmorSaveFrom(char *armor, int from)
 	pa->from = from;
 }
 
-void Game::ModifyArmorSaveValue(char *armor, int wclass, int val)
+void Game::ModifyArmorSaveValue(char const *armor, int wclass, int val)
 {
 	ArmorType *pa = FindArmor(armor);
 	if (pa == NULL) return;
@@ -353,7 +353,7 @@ void Game::ModifyArmorSaveValue(char *armor, int wclass, int val)
 	pa->saves[wclass] = val;
 }
 
-void Game::ModifyMountSkill(char *mount, char *skill)
+void Game::ModifyMountSkill(char const *mount, char *skill)
 {
 	MountType *pm = FindMount(mount);
 	if (pm == NULL) return;
@@ -361,7 +361,7 @@ void Game::ModifyMountSkill(char *mount, char *skill)
 	pm->skill = skill;
 }
 
-void Game::ModifyMountBonuses(char *mount, int min, int max, int hampered)
+void Game::ModifyMountBonuses(char const *mount, int min, int max, int hampered)
 {
 	MountType *pm = FindMount(mount);
 	if (pm == NULL) return;
@@ -373,7 +373,7 @@ void Game::ModifyMountBonuses(char *mount, int min, int max, int hampered)
 	pm->maxHamperedBonus = hampered;
 }
 
-void Game::ModifyMountSpecial(char *mount, char *special, int level)
+void Game::ModifyMountSpecial(char const *mount, char const *special, int level)
 {
 	MountType *pm = FindMount(mount);
 	if (pm == NULL) return;
@@ -427,7 +427,7 @@ void Game::ModifyObjectMonster(int ob, int monster)
 	ObjectDefs[ob].monster = monster;
 }
 
-void Game::ModifyObjectConstruction(int ob, int it, int num, char *sk, int lev)
+void Game::ModifyObjectConstruction(int ob, int it, int num, char const *sk, int lev)
 {
 	if(ob < 0 || ob > (NOBJECTS-1)) return;
 	if((it < -1 && it != I_WOOD_OR_STONE) || it > (NITEMS -1))
@@ -465,6 +465,12 @@ void Game::ModifyObjectDefence(int ob, int co, int en, int sp, int we, int ri, i
 	ObjectDefs[ob].defenceArray[3] = we;
 	ObjectDefs[ob].defenceArray[4] = ri;
 	ObjectDefs[ob].defenceArray[5] = ra;
+}
+
+void Game::ModifyObjectName(int ob, char const *name)
+{
+	if (ob < 0 || ob > (NOBJECTS-1)) return;
+	ObjectDefs[ob].name = name;
 }
 
 void Game::ClearTerrainRaces(int t)
@@ -566,14 +572,14 @@ void Game::ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move)
 	TerrainDefs[t].movepoints = move;
 }
 
-void Game::ModifyBattleItemFlags(char *item, int flags)
+void Game::ModifyBattleItemFlags(char const *item, int flags)
 {
 	BattleItemType *pb = FindBattleItem(item);
 	if (pb == NULL) return;
 	pb->flags = flags;
 }
 
-void Game::ModifyBattleItemSpecial(char *item, char *special, int level)
+void Game::ModifyBattleItemSpecial(char const *item, char const *special, int level)
 {
 	BattleItemType *pb = FindBattleItem(item);
 	if (pb == NULL) return;
@@ -583,14 +589,14 @@ void Game::ModifyBattleItemSpecial(char *item, char *special, int level)
 	pb->skillLevel = level;
 }
 
-void Game::ModifySpecialTargetFlags(char *special, int targetflags)
+void Game::ModifySpecialTargetFlags(char const *special, int targetflags)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
 	sp->targflags = targetflags;
 }
 
-void Game::ModifySpecialTargetObjects(char *special, int index, int obj)
+void Game::ModifySpecialTargetObjects(char const *special, int index, int obj)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
@@ -599,7 +605,7 @@ void Game::ModifySpecialTargetObjects(char *special, int index, int obj)
 	sp->buildings[index] = obj;
 }
 
-void Game::ModifySpecialTargetItems(char *special, int index, int item)
+void Game::ModifySpecialTargetItems(char const *special, int index, int item)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
@@ -608,7 +614,7 @@ void Game::ModifySpecialTargetItems(char *special, int index, int item)
 	sp->targets[index] = item;
 }
 
-void Game::ModifySpecialTargetEffects(char *special, int index, char *effect)
+void Game::ModifySpecialTargetEffects(char const *special, int index, char const *effect)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
@@ -617,14 +623,14 @@ void Game::ModifySpecialTargetEffects(char *special, int index, char *effect)
 	sp->effects[index] = effect;
 }
 
-void Game::ModifySpecialEffectFlags(char *special, int effectflags)
+void Game::ModifySpecialEffectFlags(char const *special, int effectflags)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
 	sp->effectflags = effectflags;
 }
 
-void Game::ModifySpecialShields(char *special, int index, int type)
+void Game::ModifySpecialShields(char const *special, int index, int type)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
@@ -633,7 +639,7 @@ void Game::ModifySpecialShields(char *special, int index, int type)
 	sp->shield[index] = type;
 }
 
-void Game::ModifySpecialDefenseMods(char *special, int index, int type, int val)
+void Game::ModifySpecialDefenseMods(char const *special, int index, int type, int val)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
@@ -643,8 +649,8 @@ void Game::ModifySpecialDefenseMods(char *special, int index, int type, int val)
 	sp->defs[index].val = val;
 }
 
-void Game::ModifySpecialDamage(char *special, int index, int type, int min,
-		int val, int flags, int cls, char *effect)
+void Game::ModifySpecialDamage(char const *special, int index, int type, int min,
+		int val, int flags, int cls, char const *effect)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
@@ -661,21 +667,21 @@ void Game::ModifySpecialDamage(char *special, int index, int type, int min,
 	sp->damage[index].effect = effect;
 }
 
-void Game::ModifyEffectFlags(char *effect, int flags)
+void Game::ModifyEffectFlags(char const *effect, int flags)
 {
 	EffectType *ep = FindEffect(effect);
 	if (ep == NULL) return;
 	ep->flags = flags;
 }
 
-void Game::ModifyEffectAttackMod(char *effect, int val)
+void Game::ModifyEffectAttackMod(char const *effect, int val)
 {
 	EffectType *ep = FindEffect(effect);
 	if (ep == NULL) return;
 	ep->attackVal = val;
 }
 
-void Game::ModifyEffectDefenseMod(char *effect, int index, int type, int val)
+void Game::ModifyEffectDefenseMod(char const *effect, int index, int type, int val)
 {
 	EffectType *ep = FindEffect(effect);
 	if (ep == NULL) return;
@@ -685,7 +691,7 @@ void Game::ModifyEffectDefenseMod(char *effect, int index, int type, int val)
 	ep->defMods[index].val = val;
 }
 
-void Game::ModifyEffectCancelEffect(char *effect, char *uneffect)
+void Game::ModifyEffectCancelEffect(char const *effect, char *uneffect)
 {
 	EffectType *ep = FindEffect(effect);
 	if (ep == NULL) return;
@@ -708,7 +714,7 @@ void Game::ModifyRangeClass(char const *range, int rclass)
 	rp->rangeClass = rclass;
 }
 
-void Game::ModifyRangeMultiplier(char *range, int mult)
+void Game::ModifyRangeMultiplier(char const *range, int mult)
 {
 	RangeType *rp = FindRange(range);
 	if (rp == NULL) return;
@@ -716,7 +722,7 @@ void Game::ModifyRangeMultiplier(char *range, int mult)
 	rp->rangeMult = mult;
 }
 
-void Game::ModifyRangeLevelPenalty(char *range, int pen)
+void Game::ModifyRangeLevelPenalty(char const *range, int pen)
 {
 	RangeType *rp = FindRange(range);
 	if (rp == NULL) return;

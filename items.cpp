@@ -338,13 +338,13 @@ AString ShowSpecial(char const *special, int level, int expandLevel, int fromIte
 			(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
 		temp += " This ability will ";
 		if(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
-			temp += "not ";
+			temp += "only target units inside structures, with the exception of";
 		} else {
-			temp += "only ";
+			temp += "only target units which are inside";
 		}
 
-		temp += "target units which are inside the following structures: ";
-		for(i = 0; i < 3; i++) {
+		temp += " the following structures: ";
+		for(i = 0; i < SPECIAL_BUILDINGS; i++) {
 			if(spd->buildings[i] == -1) continue;
 			if(ObjectDefs[spd->buildings[i]].flags & ObjectType::DISABLED)
 				continue;
@@ -592,9 +592,47 @@ AString *ItemDescription(int item, int full)
 			*temp += AString(". This is a flying 'ship' with a capacity of ") + ItemDefs[item].fly;
 		}
 		*temp += AString(". This ship requires a total of ") + ItemDefs[item].pMonths/5 + " levels of sailing skill to sail";
-		if(ItemDefs[item].pLevel > 1) {
-			*temp += AString(". This is an advanced ship that is best handled by sailors of skill level ")
-				+ ItemDefs[item].pLevel + " or higher";
+		AString abbr = ItemDefs[item].name;
+		int objectno = LookupObject(&abbr);
+		if (objectno >= 0) {
+			if (ObjectDefs[objectno].protect > 0) {
+				*temp += ". This ship provides defense to the first ";
+				*temp += ObjectDefs[objectno].protect;
+				*temp += " men inside it. ";
+				int totaldef = 0;
+				for (int i=0; i<NUM_ATTACK_TYPES; i++) {
+					totaldef += (ObjectDefs[objectno].defenceArray[i] != 0);
+				}
+				// Now add the description to temp
+				*temp += AString("This ship gives a defensive bonus of ");
+				for (int i=0; i<NUM_ATTACK_TYPES; i++) {
+					if (ObjectDefs[objectno].defenceArray[i]) {
+						totaldef--;
+						*temp += AString(ObjectDefs[objectno].defenceArray[i]) + " against " +
+							AttType(i) + AString(" attacks");
+
+						if (totaldef >= 2) {
+							*temp += AString(", ");
+						} else {
+							if (totaldef == 1) {    // penultimate bonus
+								*temp += AString(" and ");
+							} else {	// last bonus
+							}
+						} // end if
+					}
+				} // end for
+			}
+			if (Globals->LIMITED_MAGES_PER_BUILDING && ObjectDefs[objectno].maxMages > 0) {
+				*temp += ". This ship will allow ";
+				if (ObjectDefs[objectno].maxMages > 1) {
+					*temp += "up to ";
+					*temp += ObjectDefs[objectno].maxMages;
+					*temp += " mages";
+				} else {
+					*temp += "one mage";
+				}
+				*temp += " to study above level 2";
+			}
 		}
 	} else {
 		

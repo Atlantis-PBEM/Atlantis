@@ -15,11 +15,11 @@ CFLAGS = -g -I. -I.. -Wall
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
-ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o edit.o faction.o \
-  fileio.o game.o gamedata.o gamedefs.o gameio.o genrules.o i_rand.o items.o main.o \
-  market.o modify.o monthorders.o npc.o object.o orders.o parseorders.o \
-  production.o runorders.o shields.o skills.o skillshows.o specials.o \
-  spells.o template.o unit.o
+ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
+  edit.o faction.o fileio.o game.o gamedata.o gamedefs.o gameio.o \
+  genrules.o i_rand.o items.o main.o market.o modify.o monthorders.o \
+  npc.o object.o orders.o parseorders.o production.o runorders.o \
+  shields.o skills.o skillshows.o specials.o spells.o template.o unit.o
 
 OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
   $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 
@@ -27,7 +27,7 @@ OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: arcadia basic standard fracas kingdoms
+all: basic standard fracas kingdoms
 
 arcadia: FORCE
 	$(MAKE) GAME=arcadia
@@ -47,8 +47,7 @@ fracas: FORCE
 $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
 
-all-clean: arcadia-clean basic-clean standard-clean fracas-clean \
-	kingdoms-clean
+all-clean: basic-clean standard-clean fracas-clean kingdoms-clean
 
 arcadia-clean:
 	$(MAKE) GAME=arcadia clean
@@ -72,8 +71,7 @@ clean:
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
 
-all-rules: arcadia-rules basic-rules standard-rules fracas-rules \
-  kingdoms-rules
+all-rules: basic-rules standard-rules fracas-rules kingdoms-rules
 
 arcadia-rules:
 	$(MAKE) GAME=arcadia rules

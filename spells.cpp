@@ -82,6 +82,8 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_SHIELDSTONE:
 			case S_CREATE_MAGIC_CARPET:
 			case S_CREATE_FOOD:
+			case S_CREATE_AEGIS:
+			case S_CREATE_WINDCHIME:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
@@ -699,6 +701,12 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 		case S_CREATE_FOOD:
 			val = RunCreateFood(r, u);
 			break;
+		case S_CREATE_AEGIS:
+			val = RunCreateArtifact(r,u,sk,I_AEGIS);
+			break;
+		case S_CREATE_WINDCHIME:
+			val = RunCreateArtifact(r,u,sk,I_WINDCHIME);
+			break;
 	}
 	if (val) {
 		u->Practice(sk);
@@ -1002,14 +1010,16 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 
 	switch (level) {
 		case 5:
-			if (o->type == O_MFORTRESS) break;
+			if (o->type == O_MCASTLE) break;
+			if (o->type == O_MCITADEL) break;
 		case 4:
 			if (o->type == O_CITADEL) break;
+			if (o->type == O_MFORTRESS) break;
 		case 3:
 			if (o->type == O_CASTLE) break;
+			if (o->type == O_MTOWER) break;
 		case 2:
 			if (o->type == O_FORT) break;
-			if (o->type == O_MTOWER) break;
 		case 1:
 			if (o->type == O_TOWER) break;
 		default:
@@ -1024,10 +1034,14 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 	}
 
 	u->ConsumeSharedMoney(600);
-	if (o->type == O_MFORTRESS ) {
+	if (o->type == O_MCITADEL ) {
+		o->runes = 5;
+	} else if (o->type == O_MCASTLE) {
+		o->runes = 5;
+	} else if (o->type == O_MFORTRESS) {
 		o->runes = 5;
 	} else if (o->type == O_MTOWER) {
-		o->runes = 4;
+		o->runes = 5;
 	} else {
 		o->runes = 3;
 	}

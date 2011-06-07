@@ -318,21 +318,19 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 					if (y < 3 * x2 && y <= 3 * (2 * scale - x2))
 						continue;
 				}
-				else if (y < 7 * scale - 3) {
+				else if (y < 7 * scale - 1) {
 					// Include all of this band
 				}
-				else if (y < 10 * scale - 4) {
-					x2 = (x + 2 * scale - 1) % (2 * scale);
-					y2 = 10 * scale - 3 - y;
+				else if (y < 10 * scale - 2) {
+					x2 = (x + 2 * scale + 1) % (2 * scale);
+					y2 = 10 * scale - 1 - y;
 					if (y2 < 3 * x2 && y2 <= 3 * (2 * scale - x2))
 						continue;
 				}
-				else if (y < 10 * scale - 2) {
-					if (x != 1)
+				else {
+					if (x != 10 * scale - 1)
 						continue;
 				}
-				else
-					continue;
 
 				ARegion *reg = new ARegion;
 				reg->SetLoc(x, y, level);
@@ -346,7 +344,6 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 				reg->wages = -1; // initially store: name
 				reg->population = -1; // initially used as flag
 				reg->elevation = -1;
-				
 
 				Add(reg);
 				arr->SetRegion(x, y, reg);
@@ -361,191 +358,13 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 
 void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs)
 {
-	int scale, x, y, x2, y2, x3, neighX, neighY;
-
-	scale = pRegs->x / 10;
+	int x, y;
 
 	for(x = 0; x < pRegs->x; x++) {
 		for(y = 0; y < pRegs->y; y++) {
 			ARegion *reg = pRegs->GetRegion(x, y);
 			if(!reg) continue;
-			// Always try to connect in the standard way...
-			NeighSetup(reg, pRegs);
-			// but if that fails, use the special icosahedral connections:
-			// x2 is the x-coord of this hex inside its "wedge"
-			if (y < 5 * scale)
-				x2 = x % (2 * scale);
-			else
-				x2 = (x + 2 * scale - 1) % (2 * scale);
-			x3 = (2 * scale - x2) % (2 * scale);
-			// y2 is the distance from the SOUTH pole
-			y2 = 10 * scale - 3 - y;
-			if (!reg->neighbors[D_NORTH]) {
-				if (y > 0 & y < 3 * scale)
-				{
-					if (y == 2) {
-						neighX = 0;
-						neighY = 0;
-					}
-					else if (y == 3 * x2) {
-						neighX = x + 2 * (scale - x2) + 1;
-						neighY = y - 1;
-					}
-					else {
-						neighX = x + 2 * (scale - x2);
-						neighY = y - 2;
-					}
-					neighX %= (scale * 10);
-					reg->neighbors[D_NORTH] = pRegs->GetRegion(neighX, neighY);
-				}
-			}
-			if (!reg->neighbors[D_NORTHEAST]) {
-				neighX = x + 1;
-				neighY = y - 1;
-				neighX %= (scale * 10);
-				reg->neighbors[D_NORTHEAST] = pRegs->GetRegion(neighX, neighY);
-			}
-			if (!reg->neighbors[D_NORTHEAST]) {
-				if (y == 0) {
-					neighX = 4 * scale;
-					neighY = 2;
-				}
-				else if (y < 3 * scale) {
-					if (y == 3 * x2) {
-						neighX = x + 2 * (scale - x2) + 1;
-						neighY = y + 1;
-					}
-					else {
-						neighX = x + 2 * (scale - x2);
-						neighY = y;
-					}
-				}
-				else if (y2 < 1) {
-					neighX = 2 * scale + 1;
-					neighY = 10 * scale - 5;
-				}
-				else if (y2 < 3 * scale) {
-					neighX = x + 2 * (scale - x2);
-					neighY = y - 2;
-				}
-				neighX %= (scale * 10);
-				reg->neighbors[D_NORTHEAST] = pRegs->GetRegion(neighX, neighY);
-			}
-			if (!reg->neighbors[D_SOUTHEAST]) {
-				neighX = x + 1;
-				neighY = y + 1;
-				neighX %= (scale * 10);
-				reg->neighbors[D_SOUTHEAST] = pRegs->GetRegion(neighX, neighY);
-			}
-			if (!reg->neighbors[D_SOUTHEAST]) {
-				if (y == 0) {
-					neighX = 2 * scale;
-					neighY = 2;
-				}
-				else if (y2 < 1) {
-					neighX = 4 * scale + 1;
-					neighY = 10 * scale - 5;
-				}
-				else if (y2 < 3 * scale) {
-					if (y2 == 3 * x2) {
-						neighX = x + 2 * (scale - x2) + 1;
-						neighY = y - 1;
-					}
-					else {
-						neighX = x + 2 * (scale - x2);
-						neighY = y;
-					}
-				}
-				else if (y < 3 * scale) {
-					neighX = x + 2 * (scale - x2);
-					neighY = y + 2;
-				}
-				neighX %= (scale * 10);
-				reg->neighbors[D_SOUTHEAST] = pRegs->GetRegion(neighX, neighY);
-			}
-			if (!reg->neighbors[D_SOUTH]) {
-				if (y2 > 0 & y2 < 3 * scale)
-				{
-					if (y2 == 2) {
-						neighX = 1;
-						neighY = 10 * scale - 3;
-					}
-					else if (y2 == 3 * x2) {
-						neighX = x + 2 * (scale - x2) + 1;
-						neighY = y + 1;
-					}
-					else {
-						neighX = x + 2 * (scale - x2);
-						neighY = y + 2;
-					}
-					neighX = (neighX + scale * 10) % (scale * 10);
-					reg->neighbors[D_SOUTH] = pRegs->GetRegion(neighX, neighY);
-				}
-			}
-			if (!reg->neighbors[D_SOUTHWEST]) {
-				neighX = x - 1;
-				neighY = y + 1;
-				neighX = (neighX + scale * 10) % (scale * 10);
-				reg->neighbors[D_SOUTHWEST] = pRegs->GetRegion(neighX, neighY);
-			}
-			if (!reg->neighbors[D_SOUTHWEST]) {
-				if (y == 0) {
-					neighX = 8 * scale;
-					neighY = 2;
-				}
-				else if (y2 < 1) {
-					neighX = 6 * scale + 1;
-					neighY = 10 * scale - 5;
-				}
-				else if (y2 < 3 * scale) {
-					if (y2 == 3 * x3 + 4) {
-						neighX = x + 2 * (x3 - scale) + 1;
-						neighY = y + 1;
-					}
-					else {
-						neighX = x + 2 * (x3 - scale);
-						neighY = y;
-					}
-				}
-				else if (y < 3 * scale) {
-					neighX = x - 2 * scale + x3 + 1;
-					neighY = y + 1;
-				}
-				neighX = (neighX + scale * 10) % (scale * 10);
-				reg->neighbors[D_SOUTHWEST] = pRegs->GetRegion(neighX, neighY);
-			}
-			if (!reg->neighbors[D_NORTHWEST]) {
-				neighX = x - 1;
-				neighY = y - 1;
-				neighX = (neighX + scale * 10) % (scale * 10);
-				reg->neighbors[D_NORTHWEST] = pRegs->GetRegion(neighX, neighY);
-			}
-			if (!reg->neighbors[D_NORTHWEST]) {
-				if (y == 0) {
-					neighX = 6 * scale;
-					neighY = 2;
-				}
-				else if (y < 3 * scale) {
-					if (y == 3 * x3 + 4) {
-						neighX = x + 2 * (x3 - scale) + 1;
-						neighY = y - 1;
-					}
-					else {
-						neighX = x + 2 * (x3 - scale);
-						neighY = y;
-					}
-				}
-				else if (y2 < 1) {
-					neighX = 8 * scale + 1;
-					neighY = 10 * scale - 5;
-				}
-				else if (y2 < 3 * scale) {
-					neighX = x - 2 * scale + x3 + 1;
-					neighY = y - 1;
-				}
-				neighX = (neighX + scale * 10) % (scale * 10);
-				reg->neighbors[D_NORTHWEST] = pRegs->GetRegion(neighX, neighY);
-			}
+			IcosahedralNeighSetup(reg, pRegs);
 		}
 	}
 }

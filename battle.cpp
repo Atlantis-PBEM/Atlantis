@@ -223,15 +223,21 @@ void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
 			if((ass == 2) && (i->type == I_AMULETOFTS)) continue;
 			float percent = (float)numdead/(float)(numalive+numdead);
 			// incomplete ships:
-			if(ItemDefs[i->type].type & IT_SHIP) {
-				if(getrandom(100) < percent) {
+			if (ItemDefs[i->type].type & IT_SHIP) {
+				if (getrandom(100) < percent) {
 					u->items.SetNum(i->type, 0);
-					if(i->num < ships->GetNum(i->type))
+					if (i->num < ships->GetNum(i->type))
 						ships->SetNum(i->type, i->num);
 				}
 			} else {
 				int num = (int)(i->num * percent);
 				int num2 = (num + getrandom(2))/2;
+				if (ItemDefs[i->type].type & IT_ALWAYS_SPOIL) {
+					num2 = num;
+				}
+				if (ItemDefs[i->type].type & IT_NEVER_SPOIL) {
+					num2 = 0;
+				}
 				spoils->SetNum(i->type, spoils->GetNum(i->type) + num2);
 				u->items.SetNum(i->type, i->num - num);
 			}

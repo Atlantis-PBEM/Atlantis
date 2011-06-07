@@ -516,6 +516,7 @@ class ARegionList : public AList
 		void MakeIcosahedralRegions(int level, int xSize, int ySize);
 		void SetupIcosahedralNeighbors(ARegionArray *pRegs);
 		void NeighSetup(ARegion *r, ARegionArray *ar);
+		void IcosahedralNeighSetup(ARegion *r, ARegionArray *ar);
 
 		void SetRegTypes(ARegionArray *pRegs, int newType);
 		void MakeLand(ARegionArray *pRegs, int percentOcean, int continentSize);

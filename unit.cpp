@@ -2091,7 +2091,12 @@ int Unit::GetAttribute(char const *attrib)
 			temp = ap->mods[index].ident;
 			int item = LookupItem(&temp);
 			if (item != -1) {
-				if (ap->mods[index].flags & AttribModItem::PERMAN) {
+				if (ItemDefs[item].type & IT_MAGEONLY
+					&& type != U_MAGE
+					&& type != U_APPRENTICE
+					&& type != U_GUARDMAGE) {
+					// Ignore mage only items for non-mages
+				} else if (ap->mods[index].flags & AttribModItem::PERMAN) {
 					int men = GetMen();
 					if (men <= items.GetNum(item))
 						val = ap->mods[index].val;

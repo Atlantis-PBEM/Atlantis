@@ -81,14 +81,14 @@ enum {
 
 #define MAX_READY 4 // maximum number of ready weapons or armors
 
-#define FLAG_BEHIND				0x0001
+#define FLAG_BEHIND			0x0001
 #define FLAG_NOCROSS_WATER		0x0002
 #define FLAG_AUTOTAX			0x0004
 #define FLAG_HOLDING			0x0008
-#define FLAG_NOAID				0x0010
-#define FLAG_INVIS				0x0020
+#define FLAG_NOAID			0x0010
+#define FLAG_INVIS			0x0020
 #define FLAG_CONSUMING_UNIT		0x0040
-#define FLAG_CONSUMING_FACTION	0x0080
+#define FLAG_CONSUMING_FACTION		0x0080
 #define FLAG_NOSPOILS			0x0100
 #define FLAG_FLYSPOILS			0x0200
 #define FLAG_WALKSPOILS			0x0400

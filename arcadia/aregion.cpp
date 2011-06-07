@@ -2232,6 +2232,198 @@ void ARegionList::NeighSetup(ARegion *r, ARegionArray *ar)
 	}
 }
 
+void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
+{
+	int scale, x, y, x2, y2, x3, neighX, neighY;
+
+	scale = ar->x / 10;
+
+	r->ZeroNeighbors();
+	// x2 is the x-coord of this hex inside its "wedge"
+	if (y < 5 * scale)
+		x2 = x % (2 * scale);
+	else
+		x2 = (x + 1) % (2 * scale);
+	// x3 is the distance of this hex from the right side of its "wedge"
+	x3 = (2 * scale - x2) % (2 * scale);
+	// y2 is the distance from the SOUTH pole
+	y2 = 10 * scale - 1 - y;
+	// Always try to connect in the standard way...
+	if (y > 1) {
+		r->neighbors[D_NORTH] = ar->GetRegion(x, y - 2);
+	}
+	// but if that fails, use the special icosahedral connections:
+	if (!r->neighbors[D_NORTH]) {
+		if (y > 0 & y < 3 * scale)
+		{
+			if (y == 2) {
+				neighX = 0;
+				neighY = 0;
+			}
+			else if (y == 3 * x2) {
+				neighX = x + 2 * (scale - x2) + 1;
+				neighY = y - 1;
+			}
+			else {
+				neighX = x + 2 * (scale - x2);
+				neighY = y - 2;
+			}
+			neighX %= (scale * 10);
+			r->neighbors[D_NORTH] = ar->GetRegion(neighX, neighY);
+		}
+	}
+	if (y > 0) {
+		neighX = x + 1;
+		neighY = y - 1;
+		neighX %= (scale * 10);
+		r->neighbors[D_NORTHEAST] = ar->GetRegion(neighX, neighY);
+	}
+	if (!r->neighbors[D_NORTHEAST]) {
+		if (y == 0) {
+			neighX = 4 * scale;
+			neighY = 2;
+		}
+		else if (y < 3 * scale) {
+			if (y == 3 * x2) {
+				neighX = x + 2 * (scale - x2) + 1;
+				neighY = y + 1;
+			}
+			else {
+				neighX = x + 2 * (scale - x2);
+				neighY = y;
+			}
+		}
+		else if (y2 < 1) {
+			neighX = x + 2 * scale;
+			neighY = y - 2;
+		}
+		else if (y2 < 3 * scale) {
+			neighX = x + 2 * (scale - x2);
+			neighY = y - 2;
+		}
+		neighX %= (scale * 10);
+		r->neighbors[D_NORTHEAST] = ar->GetRegion(neighX, neighY);
+	}
+	if (y2 > 0) {
+		neighX = x + 1;
+		neighY = y + 1;
+		neighX %= (scale * 10);
+		r->neighbors[D_SOUTHEAST] = ar->GetRegion(neighX, neighY);
+	}
+	if (!r->neighbors[D_SOUTHEAST]) {
+		if (y == 0) {
+			neighX = 2 * scale;
+			neighY = 2;
+		}
+		else if (y2 < 1) {
+			neighX = x + 4 * scale;
+			neighY = y - 2;
+		}
+		else if (y2 < 3 * scale) {
+			if (y2 == 3 * x2) {
+				neighX = x + 2 * (scale - x2) + 1;
+				neighY = y - 1;
+			}
+			else {
+				neighX = x + 2 * (scale - x2);
+				neighY = y;
+			}
+		}
+		else if (y < 3 * scale) {
+			neighX = x + 2 * (scale - x2);
+			neighY = y + 2;
+		}
+		neighX %= (scale * 10);
+		r->neighbors[D_SOUTHEAST] = ar->GetRegion(neighX, neighY);
+	}
+	if (y2 > 1) {
+		r->neighbors[D_SOUTH] = ar->GetRegion(x, y + 2);
+	}
+	if (!r->neighbors[D_SOUTH]) {
+		if (y2 > 0 & y2 < 3 * scale)
+		{
+			if (y2 == 2) {
+				neighX = 10 * scale - 1;
+				neighY = y + 2;
+			}
+			else if (y2 == 3 * x2) {
+				neighX = x + 2 * (scale - x2) + 1;
+				neighY = y + 1;
+			}
+			else {
+				neighX = x + 2 * (scale - x2);
+				neighY = y + 2;
+			}
+			neighX = (neighX + scale * 10) % (scale * 10);
+			r->neighbors[D_SOUTH] = ar->GetRegion(neighX, neighY);
+		}
+	}
+	if (y2 > 0) {
+		neighX = x - 1;
+		neighY = y + 1;
+		neighX = (neighX + scale * 10) % (scale * 10);
+		r->neighbors[D_SOUTHWEST] = ar->GetRegion(neighX, neighY);
+	}
+	if (!r->neighbors[D_SOUTHWEST]) {
+		if (y == 0) {
+			neighX = 8 * scale;
+			neighY = 2;
+		}
+		else if (y2 < 1) {
+			neighX = x + 6 * scale;
+			neighY = y - 2;
+		}
+		else if (y2 < 3 * scale) {
+			if (y2 == 3 * x3 + 4) {
+				neighX = x + 2 * (x3 - scale) + 1;
+				neighY = y + 1;
+			}
+			else {
+				neighX = x + 2 * (x3 - scale);
+				neighY = y;
+			}
+		}
+		else if (y < 3 * scale) {
+			neighX = x - 2 * (scale - x3) + 1;
+			neighY = y + 1;
+		}
+		neighX = (neighX + scale * 10) % (scale * 10);
+		r->neighbors[D_SOUTHWEST] = ar->GetRegion(neighX, neighY);
+	}
+	if (y > 0) {
+		neighX = x - 1;
+		neighY = y - 1;
+		neighX = (neighX + scale * 10) % (scale * 10);
+		r->neighbors[D_NORTHWEST] = ar->GetRegion(neighX, neighY);
+	}
+	if (!r->neighbors[D_NORTHWEST]) {
+		if (y == 0) {
+			neighX = 6 * scale;
+			neighY = 2;
+		}
+		else if (y < 3 * scale) {
+			if (y == 3 * x3 + 4) {
+				neighX = x + 2 * (x3 - scale) + 1;
+				neighY = y - 1;
+			}
+			else {
+				neighX = x + 2 * (x3 - scale);
+				neighY = y;
+			}
+		}
+		else if (y2 < 1) {
+			neighX = x + 8 * scale;
+			neighY = y - 2;
+		}
+		else if (y2 < 3 * scale) {
+			neighX = x - 2 * (scale - x3) + 1;
+			neighY = y - 1;
+		}
+		neighX = (neighX + scale * 10) % (scale * 10);
+		r->neighbors[D_NORTHWEST] = ar->GetRegion(neighX, neighY);
+	}
+}
+
 void ARegionList::CalcDensities()
 {
 	Awrite("Densities:");

@@ -2376,7 +2376,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "goes as follows: each unit of work on a building requires a "
 		"unit of the required resource and a man-month of work by a "
 		"character with the appropriate skill and level; higher skill "
-		"levels allow work proceed faster still using one unit of the "
+		"levels allow work proceed faster (still using one unit of the "
 		"required resource per unit of work done). ";
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp += "Again, only Trade factions can issue ";
@@ -3745,7 +3745,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(!Globals->LIMITED_MAGES_PER_BUILDING) {
 		temp += "offer protection.  Trade structures do not count. ";
 	} else {
-		temp += "offer specific protection to mages.  Certain types of "
+		temp += "offer specific facilities for mages.  Certain types of "
 			"buildings can offer shelter and support and a proper "
 			"environment, some more so than others. ";
 	}

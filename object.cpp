@@ -765,7 +765,7 @@ AString *ObjectDescription(int obj)
 				!(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
 			continue;
 		}
-		for(int j = 0; j < 3; j++)
+		for(int j = 0; j < SPECIAL_BUILDINGS; j++)
 			if (spd->buildings[j] == obj) match = 1;
 		if (!match) continue;
 		if (spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
@@ -780,8 +780,15 @@ AString *ObjectDescription(int obj)
 			" total levels of sailing skill to sail.";
 	}
 	if (o->maxMages && Globals->LIMITED_MAGES_PER_BUILDING) {
-		*temp += AString(" This structure will allow up to ") + o->maxMages +
-			" mages to study above level 2.";
+		*temp += " This structure will allow ";
+		if (o->maxMages > 1) {
+			*temp += "up to ";
+			*temp += o->maxMages;
+			*temp += " mages";
+		} else {
+			*temp += "one mage";
+		}
+		*temp += " to study above level 2.";
 	}
 	int buildable = 1;
 	SkillType *pS = NULL;

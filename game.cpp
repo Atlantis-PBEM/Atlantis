@@ -60,7 +60,9 @@ void Game::DefaultWorkOrder()
 {
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
-		if(r->type == R_NEXUS) continue;
+		if (r->type == R_NEXUS) continue;
+		// don't auto-work if there's no work to be had!
+		if (r->wages < 1) continue;
 		forlist(&r->objects) {
 			Object *o = (Object *) elem;
 			forlist(&o->units) {
@@ -69,11 +71,11 @@ void Game::DefaultWorkOrder()
 						(Globals->TAX_PILLAGE_MONTH_LONG &&
 						 u->taxing != TAX_NONE))
 					continue;
-				if(u->GetFlag(FLAG_AUTOTAX) &&
+				if (u->GetFlag(FLAG_AUTOTAX) &&
 						(Globals->TAX_PILLAGE_MONTH_LONG && u->Taxers(1))) {
 					u->taxing = TAX_AUTO;
-				} else {
-					if(Globals->DEFAULT_WORK_ORDER) ProcessWorkOrder(u, 0);
+				} else if (Globals->DEFAULT_WORK_ORDER) {
+					ProcessWorkOrder(u, 0);
 				}
 			}
 		}

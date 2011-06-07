@@ -953,14 +953,14 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 
 	if (!pCheck) {
+		if (!u->items.GetNum(it)) {
+			u->Error("PREPARE: Unit does not possess that item.");
+			return;
+		}
 		if ((bt->flags & BattleItemType::MAGEONLY) &&
 			!((u->type == U_MAGE) || (u->type == U_APPRENTICE) ||
 				(u->type == U_GUARDMAGE))) {
 			u->Error("PREPARE: Only a mage or apprentice may use this item.");
-			return;
-		}
-		if (!u->items.GetNum(it)) {
-			u->Error("PREPARE: Unit does not possess that item.");
 			return;
 		}
 		u->readyItem = it;
@@ -2426,12 +2426,15 @@ void Game::ProcessNameOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			switch(towntype) {
 				case TOWN_VILLAGE:
 					if (unit->object->type == O_TOWER) ok = 1;
+					if (unit->object->type == O_MTOWER) ok = 1;
 				case TOWN_TOWN:
 					if (unit->object->type == O_FORT) ok = 1;
+					if (unit->object->type == O_MFORTRESS) ok = 1;
 				case TOWN_CITY:
 					if (unit->object->type == O_CASTLE) ok = 1;
 					if (unit->object->type == O_CITADEL) ok = 1;
-					if (unit->object->type == O_MFORTRESS) ok = 1;
+					if (unit->object->type == O_MCASTLE) ok = 1;
+					if (unit->object->type == O_MCITADEL) ok = 1;
 			}
 			if (!ok) {
 				unit->Error(AString("NAME: Unit is not in a large ")+
