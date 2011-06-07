@@ -842,7 +842,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 int Game::RunEnchantArmor(ARegion *r,Unit *u)
 {
 	int level = u->GetSkill(S_ENCHANT_ARMOR);
-	int max = ItemDefs[I_MPLATE].mOut * level;
+	int max = ItemDefs[I_MPLATE].mOut * level / 100;
 	int num = 0;
 	int count = 0;
 	unsigned int c;
@@ -889,7 +889,7 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 int Game::RunEnchantSwords(ARegion *r,Unit *u)
 {
 	int level = u->GetSkill(S_ENCHANT_SWORDS);
-	int max = ItemDefs[I_MSWORD].mOut * level;
+	int max = ItemDefs[I_MSWORD].mOut * level / 100;
 	int num = 0;
 	int count = 0;
 	unsigned int c;
@@ -936,7 +936,7 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 int Game::RunCreateFood(ARegion *r,Unit *u)
 {
 	int level = u->GetSkill(S_CREATE_FOOD);
-	int max = ItemDefs[I_FOOD].mOut * level;
+	int max = ItemDefs[I_FOOD].mOut * level / 100;
 	int num = 0;
 	int count = 0;
 	unsigned int c;

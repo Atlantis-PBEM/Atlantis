@@ -795,6 +795,7 @@ AString *ObjectDescription(int obj)
 	SkillType *pS = NULL;
 	if (o->item == -1 || o->skill == NULL) buildable = 0;
 	if (o->skill != NULL) pS = FindSkill(o->skill);
+	if (!pS) buildable = 0;
 	if (pS && (pS->flags & SkillType::DISABLED)) buildable = 0;
 	if (o->item != I_WOOD_OR_STONE &&
 			(ItemDefs[o->item].flags & ItemType::DISABLED))
@@ -805,16 +806,6 @@ AString *ObjectDescription(int obj)
 		buildable = 0;
 	if (!buildable) {
 		*temp += " This structure cannot be built by players.";
-	} else {
-		*temp += AString(" This structure is built using ") +
-			SkillStrs(pS) + " " + o->level + " and requires " +
-			o->cost + " ";
-		if (o->item == I_WOOD_OR_STONE) {
-			*temp += "wood or stone";
-		} else {
-			*temp += ItemDefs[o->item].name;
-		}
-		*temp += " to build.";
 	}
 
 	if (o->productionAided != -1 &&

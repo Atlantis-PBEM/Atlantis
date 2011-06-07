@@ -47,6 +47,7 @@ AString *ShowSkill::Report(Faction *f)
 
 	AString *str = new AString;
 	RangeType *range = NULL;
+	int max;
 
 	// Here we pick apart the skill
 	switch (skill) {
@@ -1056,131 +1057,6 @@ AString *ShowSkill::Report(Faction *f)
 				"will detect the use of Artifact Lore by any other mage in "
 				"the region.";
 			break;
-		case S_CREATE_RING_OF_INVISIBILITY:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_RINGOFI)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Ring of Invisibility skill may "
-				"create a Ring of Invisibility, which grants a 3 bonus to a "
-				"unit's effective Stealth (note that a unit must possess "
-				"one ring for each man to gain this bonus).";
-			if (ITEM_ENABLED(I_AMULETOFTS)) {
-				*str += " A Ring of Invisibility has one limitation; a "
-					"unit possessing a ring cannot assassinate, nor steal "
-					"from, a unit with an Amulet of True Seeing. ";
-			}
-			*str += " A mage has a 20 percent times his level chance to "
-				"create a Ring of Invisibility. To use this spell, the mage "
-				"should CAST Create_Ring_of_Invisibility.";
-			break;
-		case S_CREATE_CLOAK_OF_INVULNERABILITY:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_CLOAKOFI)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Cloak of Invulnerability skill "
-				"may create a Cloak of Invulnerability. A mage has a 20 "
-				"percent times his level chance to create a Cloak of "
-				"Invulnerability. To use this spell, the mage should CAST "
-				"Create_Cloak_of_Invulnerability.";
-			break;
-		case S_CREATE_STAFF_OF_FIRE:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_STAFFOFF)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Staff of Fire skill may create a "
-				"Staff of Fire. A Staff of Fire allows any mage to throw "
-				"fireballs in combat as if he had a Fire skill of 3. A mage "
-				"has a 20 percent times his level chance to create a Staff "
-				"of Fire. To use this spell, CAST Create_Staff_of_Fire.";
-			break;
-		case S_CREATE_STAFF_OF_LIGHTNING:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_STAFFOFL)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Staff of Lightning skill may "
-				"create a Staff of Lightning. A Staff of Lightning allows "
-				"any mage to call down lightning bolts as if he had Call "
-				"Lightning skill of 3. A mage has a 20 percent times his "
-				"level chance to create a Staff of Lightning. To use this "
-				"spell, CAST Create_Staff_of_Lightning.";
-			break;
-		case S_CREATE_AMULET_OF_TRUE_SEEING:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_AMULETOFTS)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Amulet of Tree Seeing skill may "
-				"create an Amulet of True Seeing. This amulet gives the "
-				"possessor a bonus of 2 to his effective Observation skill. ";
-			if (ITEM_ENABLED(I_RINGOFI)) {
-				*str += "Also, a unit with an Amulet of True Seeing cannot "
-					"be assassinated by, nor have items stolen by, a unit "
-					"with a Ring of Invisibility (Note that the unit must "
-					"have at least one Amulet of True Seeing per man to "
-					"repel a unit with a Ring of Invisibility). ";
-			}
-			*str += "A mage has a 20 percent times his skill level chance to "
-			   "create an Amulet of True Seeing. To use this spell, CAST "
-			   "Create_Amulet_of_True_Seeing.";
-			break;
-		case S_CREATE_AEGIS:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_AEGIS)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Aegis skill may create an Aegis. "
-				"This item gives the possessor a bonus of 3 to his effective "
-				"Observation skill, but is only usable by mages";
-			if (Globals->APPRENTICES_EXIST) {
-				*str += " and ";
-				*str += Globals->APPRENTICE_NAME;
-				*str += "s";
-			}
-			*str += ". A mage has a 20 percent times his skill level chance to "
-			   "create an Aegis. To use this spell, CAST Create_Aegis.";
-			break;
-		case S_CREATE_AMULET_OF_PROTECTION:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_AMULETOFP)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Amulet of Protection skill may "
-				"create Amulets of Protection, which grants the possesor a "
-				"personal Spirit Shield of 3. A mage may create his skill "
-				"level of these amulets per turn. To use this spell, CAST "
-				"Create_Amulet_of_Protection.";
-			break;
-		case S_CREATE_RUNESWORD:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_RUNESWORD)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Runesword skill may create a "
-				"Runesword, which when wielded in combat gives the wielder "
-				"a plus 4 bonus to Combat skill, and also allows the wielder "
-				"to project an Aura of Fear in battle, as if he had Create "
-				"Aura of Fear skill of level 3 (provided the wielder is "
-				"not casting any other combat spells). A mage has a 20 "
-				"percent times his skill level chance of creating a "
-				"Runesword. To cast this spell, CAST Create_Runesword.";
-			break;
-		case S_CREATE_SHIELDSTONE:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_SHIELDSTONE)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Shieldstone skill may create "
-				"Shieldstones, which confers upon the possessor a personal "
-				"Energy Shield of 3. A mage may create his skill level in "
-				"Shieldstones per turn. To use this spell, CAST "
-				"Create_Shieldstone";
-			break;
-		case S_CREATE_MAGIC_CARPET:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_MCARPET)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Magic Carpet skill may create "
-				"Magic Carpets, which provide for flying transportation. A "
-				"Magic Carpet can carry up to 15 weight units in the air. "
-				"Casting this spell allows the mage to create his skill "
-				"level in Magic Carpets. To cast the spell, CAST "
-				"Create_Magic_Carpet.";
-			break;
 		case S_ENGRAVE_RUNES_OF_WARDING:
 			/* XXX -- This should be cleaner somehow. */
 			if (level == 1) {
@@ -1283,36 +1159,16 @@ AString *ShowSkill::Report(Faction *f)
 				"silver. To use this spell, the mage should issue the order "
 				"CAST Construct_Gate.";
 			break;
-		case S_ENCHANT_SWORDS:
-			/* XXX -- This should be cleaner somehow. */
-			if (level > 1) break;
-			if (ITEM_DISABLED(I_MSWORD)) break;
-			*str += "A mage with the Enchant Swords skill may magically "
-				"create mithril swords. A mage may create 5 times his "
-				"skill level mithril swords per turn. The mage should "
-				"issue the order CAST Enchant_Swords to cast this spell.";
-			break;
-		case S_ENCHANT_ARMOR:
-			/* XXX -- This should be cleaner somehow. */
-			if (level > 1) break;
-			if (ITEM_DISABLED(I_MPLATE)) break;
-			*str += "A mage with the Enchant Armor skill may magically "
-				"create mithril armor. A mage may create 5 times his skill "
-				"level mithril armors per turn. The mage should issue the "
-				"order CAST Enchant_Armor to cast this spell.";
-			break;
 		case S_CONSTRUCT_PORTAL:
 			/* XXX -- This should be cleaner somehow. */
 			if (level > 1) break;
-			if (ITEM_DISABLED(I_MPLATE)) break;
-			*str += "A mage with the Construct Portal skill may construct a "
-				"Portal";
+			if (ITEM_DISABLED(I_PORTAL)) break;
+			*str += "A mage with the Construct Portal skill may "
+				"construct a Portal";
 			if (SKILL_ENABLED(S_PORTAL_LORE)) {
 				*str += " for use with the Portal Lore skill";
 			}
-			*str += ". The mage has a 20 percent times his skill level "
-				"chance of creating a Portal, and the attempt costs 600 "
-				"silver. To use this spell, CAST Construct_Portal.";
+			*str += ".";
 			break;
 		case S_MANIPULATE:
 			if (!Globals->APPRENTICES_EXIST) break;
@@ -1324,18 +1180,15 @@ AString *ShowSkill::Report(Faction *f)
 				*str += "s cannot cast spells directly, they can "
 					"use magic items normally only usable by mages.";
 			}
+			max = 1;
+			if (ITEM_ENABLED(I_CORNUCOPIA))
+				max = 2;
 			if (ITEM_ENABLED(I_GATE_CRYSTAL) ||
 					ITEM_ENABLED(I_STAFFOFH) ||
-					ITEM_ENABLED(I_SCRYINGORB) ||
-					ITEM_ENABLED(I_CORNUCOPIA)) {
-				if (level == 1) {
-					*str += " This skill counts as a magical skill for those items "
-						"whose effectiveness is affected by the user's magical skills.";
-				} else if (level == 3) {
-					*str += "Continued study of this skill gives no further advantages.";
-				}
-			} else if (level == 1) {
-				*str += " Continued study of this skill gives no further advantages.";
+					ITEM_ENABLED(I_SCRYINGORB))
+				max = 3;
+			if (level == max) {
+				*str += "Continued study of this skill gives no further advantages.";
 			}
 			break;
 		case S_WEAPONCRAFT:
@@ -1368,151 +1221,6 @@ AString *ShowSkill::Report(Faction *f)
 					"foodstuffs.  A skilled cook can feed many more people "
 					"than a farmer alone.";
 			break;
-		case S_CREATE_FOOD:
-			/* XXX -- This should be cleaner somehow. */
-			if (level > 1) break;
-			if (ITEM_DISABLED(I_FOOD)) break;
-			*str += "A mage with the Create Food skill may magically "
-				"create food. A mage may create 5 times his skill level "
-				"provisions per turn. The mage should issue the order "
-				"CAST Create_Food to cast this spell.";
-			break;
-		case S_CREATE_WINDCHIME:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_WINDCHIME)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Windchime skill may create a Windchime. ";
-			if (Globals->FLEET_WIND_BOOST > 0) {
-				*str += "The possessor of this item will add ";
-				*str += Globals->FLEET_WIND_BOOST;
-				*str += " movement points to ships requiring up to "
-					"24 sailing skill points. ";
-			}
-			*str += "This item is only usable by mages";
-			if (Globals->APPRENTICES_EXIST) {
-				*str += " and ";
-				*str += Globals->APPRENTICE_NAME;
-				*str += "s";
-			}
-			*str += ". A mage has a 20 percent times his skill level chance to "
-			   "create a Windchime. To use this spell, CAST Create_Windchime.";
-			break;
-		case S_CREATE_GATE_CRYSTAL:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_GATE_CRYSTAL)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Gate Crystal skill may create a Gate Crystal. ";
-			*str += "The possessor of this item may cast the Gate Lore spells as if their "
-				"skill level in Gate Lore was that of the highest level magical skill "
-				"they possess, up to a maximum of level 3. ";
-			*str += "This item is only usable by mages";
-			if (Globals->APPRENTICES_EXIST) {
-				*str += " and ";
-				*str += Globals->APPRENTICE_NAME;
-				*str += "s";
-			}
-			*str += ". A mage has a 20 percent times his skill level chance to "
-			   "create a Gate Crystal. To use this spell, CAST Create_Gate_Crystal.";
-			break;
-		case S_CREATE_STAFF_OF_HEALING:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_STAFFOFH)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Staff of Healing skill may create a Staff of Healing. ";
-			*str += "The possessor of this item may heal units after combat as if their "
-				"skill level in Magical Healing was that of the highest level magical "
-				"skill they possess, up to a maximum of level 3. ";
-			*str += "This item is only usable by mages";
-			if (Globals->APPRENTICES_EXIST) {
-				*str += " and ";
-				*str += Globals->APPRENTICE_NAME;
-				*str += "s";
-			}
-			*str += ". A mage has a 20 percent times his skill level chance to "
-			   "create a Staff of Healing. To use this spell, CAST Create_Staff_of_Healing.";
-			break;
-		case S_CREATE_SCRYING_ORB:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_SCRYINGORB)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Scrying Orb skill may create a Scrying Orb. ";
-			*str += "The possessor of this item may cast the Farsight spell as if their "
-				"skill level in Farsight was that of the highest level magical skill "
-				"they possess, up to a maximum of level 3. ";
-			*str += "This item is only usable by mages";
-			if (Globals->APPRENTICES_EXIST) {
-				*str += " and ";
-				*str += Globals->APPRENTICE_NAME;
-				*str += "s";
-			}
-			*str += ". A mage has a 20 percent times his skill level chance to "
-			   "create a Scrying Orb. To use this spell, CAST Create_Scrying_Orb.";
-			break;
-		case S_CREATE_CORNUCOPIA:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_CORNUCOPIA)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Cornucopia skill may create a Cornucopia. ";
-			*str += "The possessor of this item may cast the Earth Lore spell as if their "
-				"skill level in Earth Lore was that of the highest level magical skill "
-				"they possess, up to a maximum of level 2. ";
-			*str += "This item is only usable by mages";
-			if (Globals->APPRENTICES_EXIST) {
-				*str += " and ";
-				*str += Globals->APPRENTICE_NAME;
-				*str += "s";
-			}
-			*str += ". A mage has a 20 percent times his skill level chance to "
-			   "create a Cornucopia. To use this spell, CAST Create_Cornucopia.";
-			break;
-		case S_CREATE_BOOK_OF_EXORCISM:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_BOOKOFEXORCISM)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Book of Exorcism skill may create a Book of Exorcism. ";
-			*str += "The possessor of this item may banish demons in combat as if they "
-				"had a skill level of 3 in Banish Demon. ";
-			*str += "This item is only usable by mages";
-			if (Globals->APPRENTICES_EXIST) {
-				*str += " and ";
-				*str += Globals->APPRENTICE_NAME;
-				*str += "s";
-			}
-			*str += ". A mage has a 20 percent times his skill level chance to "
-			   "create a Book of Exorcism. To use this spell, CAST Create_Book_of_Exorcism.";
-			break;
-		case S_CREATE_HOLY_SYMBOL:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_HOLYSYMBOL)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Holy Symbol skill may create a Holy Symbol. ";
-			*str += "The possessor of this item may destroy undead in combat as if they "
-				"had a skill level of 3 in Banish Undead. ";
-			*str += "This item is only usable by mages";
-			if (Globals->APPRENTICES_EXIST) {
-				*str += " and ";
-				*str += Globals->APPRENTICE_NAME;
-				*str += "s";
-			}
-			*str += ". A mage has a 20 percent times his skill level chance to "
-			   "create a Holy Symbol. To use this spell, CAST Create_Holy_Symbol.";
-			break;
-		case S_CREATE_CENSER:
-			/* XXX -- This should be cleaner somehow. */
-			if (ITEM_DISABLED(I_CENSER)) break;
-			if (level > 1) break;
-			*str += "A mage with the Create Censer of Protection skill may create a Censer of Protection. ";
-			*str += "The possessor of this item may cast a force shield in combat as if they "
-				"had a skill level of 3 in Force Shield. ";
-			*str += "This item is only usable by mages";
-			if (Globals->APPRENTICES_EXIST) {
-				*str += " and ";
-				*str += Globals->APPRENTICE_NAME;
-				*str += "s";
-			}
-			*str += ". A mage has a 20 percent times his skill level chance to "
-			   "create a Censer of Protection. To use this spell, CAST Create_Censer_of_Protection.";
-			break;
 	}
 
 	AString temp;
@@ -1522,10 +1230,9 @@ AString *ShowSkill::Report(Faction *f)
 	AString temp4;
 	int comma = 0;
 	int comma1 = 0;
-	int comma2 = 0;
+	int count;
 	int last = -1;
 	int last1 = -1;
-	int last2 = -1;
 	unsigned int c;
 	int i;
 	int build = 0;
@@ -1539,30 +1246,17 @@ AString *ShowSkill::Report(Faction *f)
 	}
 
 	// production and ability to see items
-	temp += "A unit with this skill is able to determine if a region "
+	temp = "A unit with this skill is able to determine if a region "
 		"contains ";
-	temp1 += "A unit with this skill may PRODUCE ";
-	temp2 += "A unit with this skill may create ";
+	temp1 = "A unit with this skill may PRODUCE ";
+	temp2 = "";
 	// for the new ship items
-	temp3 += "A unit with this skill may BUILD ";
+	temp3 = "A unit with this skill may BUILD ";
 
 	SkillType *sk1, *sk2;
 	sk1 = &SkillDefs[skill];
 	for (i = NITEMS - 1; i >= 0; i--) {
 		if (ITEM_DISABLED(i)) continue;
-		sk2 = FindSkill(ItemDefs[i].mSkill);
-		if (sk1 == sk2 && ItemDefs[i].mLevel==level && last2==-1) {
-			int canmagic = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
-				if (ItemDefs[i].mInput[c].item == -1) continue;
-				if (ITEM_DISABLED(ItemDefs[i].mInput[c].item)) {
-					canmagic = 0;
-				}
-			}
-			if (canmagic) {
-				last2 = i;
-			}
-		}
 		sk2 = FindSkill(ItemDefs[i].pSkill);
 		if (sk1 == sk2 && ItemDefs[i].pLevel == level) {
 			int canmake = 1;
@@ -1595,17 +1289,72 @@ AString *ShowSkill::Report(Faction *f)
 					canmagic = 0;
 				}
 			}
+			if (ItemDefs[i].mOut == 0)
+				canmagic = 0;
 			if (canmagic) {
-				if (comma2) {
-					if (last2 == i) {
-						if (comma2 > 1) temp2 += ",";
-						temp2 += " and ";
+				temp2 += "A mage with this skill ";
+				if (ItemDefs[i].mOut < 100) {
+					temp2 += "has a ";
+					temp2 += ItemDefs[i].mOut;
+					temp2 += " percent times their level chance to create a";
+					if (illusion) {
+						temp2 += "n illusory ";
 					} else {
-						temp2 += ", ";
+						switch (ItemDefs[i].name[0]) {
+							case 'a':
+							case 'e':
+							case 'i':
+							case 'o':
+							case 'u':
+							case 'A':
+							case 'E':
+							case 'I':
+							case 'O':
+							case 'U':
+								temp2 += "n";
+								break;
+							default:
+								break;
+						}
+						temp2 += " ";
 					}
+					temp2 += ItemDefs[i].name;
+				} else {
+					temp2 += "may create ";
+					if (ItemDefs[i].mOut > 100) {
+						temp2 += ItemDefs[i].mOut / 100;
+						temp2 += " times ";
+					}
+					temp2 += "their level in ";
+					temp2 += AString(illusion?"illusory ":"") + ItemDefs[i].names;
 				}
-				comma2++;
-				temp2 += AString(illusion?"illusory ":"") + ItemDefs[i].names;
+				temp2 += " [";
+				temp2 += ItemDefs[i].abr;
+				temp2 += "] via magic";
+				count = 0;
+				for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
+					if (ItemDefs[i].mInput[c].item == -1) continue;	
+					count++;
+				}
+				if (count > 0) {
+					temp2 += " at a cost of ";
+					temp4 = "";
+					count = 0;
+					for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
+						if (ItemDefs[i].mInput[c].item == -1) continue;	
+						if (!(temp4 == "")) {
+							if (count > 0)
+								temp2 += ", ";
+							temp2 += temp4;
+							count++;
+						}
+						temp4 = ItemString(ItemDefs[i].mInput[c].item,
+								ItemDefs[i].mInput[c].amt);
+					}
+					if (count > 0)
+						temp2 += " and ";
+					temp2 += temp4;
+				}
 				if (f) {
 					f->DiscoverItem(i, 1, 1);
 				}
@@ -1637,7 +1386,50 @@ AString *ShowSkill::Report(Faction *f)
 					}
 				}
 				comma1++;
+				if (ItemDefs[i].flags & ItemType::SKILLOUT) {
+					temp1 += "a number of ";
+				}
 				temp1 += AString(illusion?"illusory ":"") + ItemDefs[i].names;
+				temp1 += " [";
+				temp1 += ItemDefs[i].abr;
+				temp1 += "]";
+				if (ItemDefs[i].flags & ItemType::SKILLOUT) {
+					temp1 += " equal to their skill level";
+				}
+				if (!resource) {
+					temp1 += " from ";
+					if (ItemDefs[i].flags & ItemType::ORINPUTS)
+						temp1 += "any of ";
+					temp4 = "";
+					count = 0;
+					for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); c++) {
+						if (ItemDefs[i].pInput[c].item == -1) continue;	
+						if (!(temp4 == "")) {
+							if (count > 0)
+								temp1 += ", ";
+							temp1 += temp4;
+							count++;
+						}
+						temp4 = ItemString(ItemDefs[i].pInput[c].item,
+							ItemDefs[i].type & IT_SHIP ?
+								ItemDefs[i].pMonths :
+								ItemDefs[i].pInput[c].amt);
+					}
+					if (count > 0)
+						temp1 += " and ";
+					temp1 += temp4;
+				}
+				if (!build) {
+					temp1 += " at a rate of ";
+					temp1 += ItemDefs[i].pOut;
+					temp1 += " per ";
+					if (ItemDefs[i].pMonths == 1) {
+						temp1 += "man-month";
+					} else {
+						temp1 += ItemDefs[i].pMonths;
+						temp1 += " man-months";
+					}
+				}
 				if (f) {
 					f->DiscoverItem(i, 1, 1);
 				}
@@ -1664,27 +1456,107 @@ AString *ShowSkill::Report(Faction *f)
 		if (!(*str == "")) *str += " ";
 		*str += temp + ".";
 	}
-	if (comma2) {
+	if (!(temp2 == "")) {
 		if (!(*str == "")) *str += " ";
-		*str += temp2 + " via magic.";
+		*str += temp2 + ". To use this spell, the mage should CAST ";
+		count = 0;
+		for (i = 0; sk1->name[i]; i++) {
+			if (sk1->name[i] == ' ') {
+				*str += "_";
+				count = 0;
+			} else {
+				if (count == 0) {
+					*str += (char) toupper(sk1->name[i]);
+				} else {
+					*str += sk1->name[i];
+				}
+				count++;
+			}
+		}
+		*str += ".";
 	}
 
 	// Buildings
 	comma = 0;
-	temp = "A unit with this skill may BUILD the following structures: ";
+	temp = "";
+	temp2 = "";
 	for (i = 0; i < NOBJECTS; i++) {
 		if (OBJECT_DISABLED(i)) continue;
+		if (ObjectDefs[i].item == -1) continue;
+		if (ObjectDefs[i].item != I_WOOD_OR_STONE &&
+				(ItemDefs[ObjectDefs[i].item].flags & ItemType::DISABLED))
+			continue;
+		if (ObjectDefs[i].item == I_WOOD_OR_STONE &&
+				(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
+				(ItemDefs[I_STONE].flags & ItemType::DISABLED))
+			continue;
 		AString skname = SkillDefs[skill].abbr;
 		if (skname == ObjectDefs[i].skill && ObjectDefs[i].level == level) {
-			if (comma) temp += ", ";
-			comma = 1;
-			temp += ObjectDefs[i].name;
+			if (comma) {
+				temp += ", ";
+			}
+			temp += temp2;
+			if (!(temp == "")) comma = 1;
+			temp2 = "a";
+			switch (ObjectDefs[i].name[0]) {
+				case 'a':
+				case 'e':
+				case 'i':
+				case 'o':
+				case 'u':
+				case 'A':
+				case 'E':
+				case 'I':
+				case 'O':
+				case 'U':
+					temp2 += "n";
+					break;
+				default:
+					break;
+			}
+			temp2 += " ";
+			temp2 += ObjectDefs[i].name;
+			temp2 += " from ";
+			temp2 += ObjectDefs[i].cost;
+			temp2 += " ";
+			if (ObjectDefs[i].item == I_WOOD_OR_STONE) {
+				if (ItemDefs[I_WOOD].flags & ItemType::DISABLED) {
+					temp2 += ItemDefs[I_STONE].name;
+					temp2 += " [";
+					temp2 += ItemDefs[I_STONE].abr;
+					temp2 += "]";
+				} else if (ItemDefs[I_STONE].flags & ItemType::DISABLED) {
+					temp2 += ItemDefs[I_WOOD].name;
+					temp2 += " [";
+					temp2 += ItemDefs[I_WOOD].abr;
+					temp2 += "]";
+				} else {
+					temp2 += ItemDefs[I_WOOD].name;
+					temp2 += " [";
+					temp2 += ItemDefs[I_WOOD].abr;
+					temp2 += "] or ";
+					temp2 += ItemDefs[I_STONE].name;
+					temp2 += " [";
+					temp2 += ItemDefs[I_STONE].abr;
+					temp2 += "]";
+				}
+			} else {
+				temp2 += ItemDefs[ObjectDefs[i].item].name;
+					temp2 += " [";
+					temp2 += ItemDefs[ObjectDefs[i].item].abr;
+					temp2 += "]";
+			}
 			if (f) {
 				f->objectshows.Add(ObjectDescription(i));
 			}
 		}
 	}
-	if (comma) {
+	if (!(temp2 == "")) {
+		temp = AString("A unit with this skill may BUILD ") + temp;
+		if (comma) {
+			temp += " or ";
+		}
+		temp += temp2;
 		if (!(*str == "")) *str += " ";
 		*str += temp + ".";
 	}
@@ -1705,14 +1577,15 @@ AString *ShowSkill::Report(Faction *f)
 				last = c;
 				continue;
 			}
+			if (comma) temp += ", ";
 			temp += SkillStrs(lastpS) + " " +
-				SkillDefs[skill].depends[last].level + ", ";
+				SkillDefs[skill].depends[last].level;
 			lastpS = pS;
 			last = c;
 			comma++;
 		}
 		if (comma) {
-			temp += "and ";
+			temp += " and ";
 		}
 		if (found) {
 			temp += SkillStrs(lastpS) + " " +

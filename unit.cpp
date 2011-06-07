@@ -1093,7 +1093,7 @@ int Unit::Practice(int sk)
 	days = skills.GetDays(sk);
 	men = GetMen();
 
-	if (days < 1 && GetAvailSkill(sk) > 0) {
+	if (GetAvailSkill(sk) > GetRealSkill(sk)) {
 		// This is a skill granted by an item, so try to practice
 		// the skills it depends on (if any)
 		AString str;

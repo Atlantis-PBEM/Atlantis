@@ -812,7 +812,10 @@ Faction *GetFaction2(AList *facs, int n)
 
 void Faction::DiscoverItem(int item, int force, int full)
 {
-	int seen = items.GetNum(item);
+	int seen, skill, i;
+	AString skname;
+
+	seen = items.GetNum(item);
 	if (!seen) {
 		if (full) {
 			items.SetNum(item, 2);
@@ -832,5 +835,20 @@ void Faction::DiscoverItem(int item, int force, int full)
 	}
 	if (force) {
 		itemshows.Add(ItemDescription(item, full));
+		if (!full)
+			return;
+		// If we've found an item that grants a skill, give a
+		// report on the skill granted (if we haven't seen it
+		// before)
+		skname = ItemDefs[item].grantSkill;
+		skill = LookupSkill(&skname);
+		if (skill != -1 && !(SkillDefs[skill].flags & SkillType::DISABLED)) {
+			for (i = 1; i <= ItemDefs[item].maxGrant; i++) {
+				if (i > skills.GetDays(skill)) {
+					skills.SetDays(skill, i);
+					shows.Add(new ShowSkill(skill, i));
+				}
+			}
+		}
 	}   
 }

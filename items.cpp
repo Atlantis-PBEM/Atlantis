@@ -589,20 +589,20 @@ AString *ItemDescription(int item, int full)
 		if (ItemDefs[item].fly > 0) {
 			*temp += AString(". This is a flying 'ship' with a capacity of ") + ItemDefs[item].fly;
 		}
-		*temp += AString(". This ship requires a total of ") + ItemDefs[item].pMonths/5 + " levels of sailing skill to sail";
+		*temp += AString(". This ship requires a total of ") + ItemDefs[item].weight/50 + " levels of sailing skill to sail";
 		AString abbr = ItemDefs[item].name;
 		int objectno = LookupObject(&abbr);
 		if (objectno >= 0) {
 			if (ObjectDefs[objectno].protect > 0) {
 				*temp += ". This ship provides defense to the first ";
 				*temp += ObjectDefs[objectno].protect;
-				*temp += " men inside it. ";
+				*temp += " men inside it, ";
 				int totaldef = 0;
 				for (int i=0; i<NUM_ATTACK_TYPES; i++) {
 					totaldef += (ObjectDefs[objectno].defenceArray[i] != 0);
 				}
 				// Now add the description to temp
-				*temp += AString("This ship gives a defensive bonus of ");
+				*temp += AString("giving a defensive bonus of ");
 				for (int i=0; i<NUM_ATTACK_TYPES; i++) {
 					if (ObjectDefs[objectno].defenceArray[i]) {
 						totaldef--;
@@ -856,7 +856,7 @@ AString *ItemDescription(int item, int full)
 					int val = atts - max;
 					if (val > 0) *temp += AString(" plus ") + val;
 				} else {
-					*temp += AString(atts) + ((atts==1)?" attack ":" attacks");
+					*temp += AString(atts) + ((atts==1)?" attack":" attacks");
 				}
 				*temp += " per round.";
 			} else {
@@ -985,99 +985,165 @@ AString *ItemDescription(int item, int full)
 					ShowSpecial(pM->mountSpecial, pM->specialLev, 1, 0);
 			}
 		}
+	} else {
+		int found;
+
+		pS = FindSkill(ItemDefs[item].pSkill);
+		if (pS && !(pS->flags & SkillType::DISABLED)) {
+			found = 0;
+			for (i = 0; i < 4; i++)
+				if (ItemDefs[item].pInput[i].item != -1)
+					found = 1;
+			if (!found)
+				*temp += " This item is a trade resource.";
+		}
 	}
 
-	pS = FindSkill(ItemDefs[item].pSkill);
-	if (pS && !(pS->flags & SkillType::DISABLED)) {
-		unsigned int c;
-		unsigned int len;
-		AString *nn = new AString;
-		*temp += AString(" Units with ") + SkillStrs(pS) +
-				" of at least level " + ItemDefs[item].pLevel;
-		if (ItemDefs[item].type & IT_SHIP) {
-			*temp += AString(" may BUILD ");
-			*nn = AString("ship");
-		} else {
-			*temp += AString(" may PRODUCE ");
-			*nn = AString("item");
-		}
-		if (ItemDefs[item].flags & ItemType::SKILLOUT)
-			*temp += AString("a number of this ") + *nn + " equal to their skill level";
-		else
-			*temp += AString("this ") + *nn;
-		len = sizeof(ItemDefs[item].pInput)/sizeof(Materials);
-		int count = 0;
-		int tot = len;
-		for (c = 0; c < len; c++) {
-			int itm = ItemDefs[item].pInput[c].item;
-			int amt = ItemDefs[item].pInput[c].amt;
-			if (itm == -1 || ItemDefs[itm].flags & ItemType::DISABLED) {
-				tot--;
-				continue;
+	if (!full)
+		return temp;
+
+	AttribModType *ap = FindAttrib("observation");
+	if (ap) {
+		for (i = 0; i < 5; i++)
+			if (ap->mods[i].flags & AttribModItem::ITEM) {
+				AString abbr = ItemDefs[item].abr;
+				if (abbr == ap->mods[i].ident &&
+						ap->mods[i].modtype == AttribModItem::CONSTANT) {
+					*temp += " This item grants a ";
+					*temp += ap->mods[i].val;
+					*temp += " point bonus to a unit's observation skill";
+					if (ap->mods[i].flags & AttribModItem::PERMAN) {
+						*temp += " (note that a unit must possess one ";
+						*temp += abbr;
+						*temp += " for each man to gain this bonus)";
+					}
+					*temp += ".";
+				}
 			}
-			if (count == 0) {
-				*temp += " from ";
-				if (ItemDefs[item].flags & ItemType::ORINPUTS)
-					*temp += "any of ";
-			} else if (count == tot) {
-				if (c > 1) *temp += ",";
-				*temp += " and ";
-			} else {
-				*temp += ", ";
+	}
+	ap = FindAttrib("stealth");
+	if (ap) {
+		for (i = 0; i < 5; i++)
+			if (ap->mods[i].flags & AttribModItem::ITEM) {
+				AString abbr = ItemDefs[item].abr;
+				if (abbr == ap->mods[i].ident &&
+						ap->mods[i].modtype == AttribModItem::CONSTANT) {
+					*temp += " This item grants a ";
+					*temp += ap->mods[i].val;
+					*temp += " point bonus to a unit's stealth skill";
+					if (ap->mods[i].flags & AttribModItem::PERMAN) {
+						*temp += " (note that a unit must possess one ";
+						*temp += abbr;
+						*temp += " for each man to gain this bonus)";
+					}
+					*temp += ".";
+				}
 			}
-			count++;
-			if (ItemDefs[item].type & IT_SHIP) amt = ItemDefs[item].pMonths;
-			*temp += ItemString(itm, amt);
-		}
-		if (ItemDefs[item].type & IT_SHIP) {
-			*temp += ". ";
-		} else {
-			if (ItemDefs[item].pOut) {
-				*temp += AString(" at a rate of ") + ItemDefs[item].pOut;
-				if (ItemDefs[item].pMonths) {
-					if (ItemDefs[item].pMonths == 1) {
-						*temp += " per man-month.";
-					} else {
-						*temp += AString(" per ") + ItemDefs[item].pMonths +
-							" man-months.";
+	}
+	ap = FindAttrib("wind");
+	if (ap) {
+		for (i = 0; i < 5; i++)
+			if (ap->mods[i].flags & AttribModItem::ITEM) {
+				AString abbr = ItemDefs[item].abr;
+				if (abbr == ap->mods[i].ident &&
+						ap->mods[i].modtype == AttribModItem::CONSTANT) {
+					if (Globals->FLEET_WIND_BOOST > 0) {
+						*temp += " The possessor of this item will add ";
+						*temp += Globals->FLEET_WIND_BOOST;
+						*temp += " movement points to ships requiring up to ";
+						*temp += ap->mods[i].val * 12;
+						*temp += " sailing skill points.";
+						*temp += " This bonus is not cumulative with a mage's summon wind skill.";
 					}
 				}
 			}
-		}
 	}
 
-	pS = FindSkill(ItemDefs[item].mSkill);
-	if (pS && !(pS->flags & SkillType::DISABLED)) {
-		unsigned int c;
-		unsigned int len;
-		*temp += AString(" Units with ") + SkillStrs(pS) +
-			" of at least level " + ItemDefs[item].mLevel +
-			" may attempt to create this item via magic";
-		len = sizeof(ItemDefs[item].mInput)/sizeof(Materials);
-		int count = 0;
-		int tot = len;
-		for (c = 0; c < len; c++) {
-			int itm = ItemDefs[item].mInput[c].item;
-			int amt = ItemDefs[item].mInput[c].amt;
-			if (itm == -1 || ItemDefs[itm].flags & ItemType::DISABLED) {
-				tot--;
-				continue;
+	// special descriptions for items whose behaviour isn't fully
+	// described by the data tables.  In an ideal world there
+	// wouldn't be any of these...
+	switch (item) {
+		case I_RINGOFI:
+			if (!(ItemDefs[I_AMULETOFTS].flags & ItemType::DISABLED)) {
+				*temp += " A Ring of Invisibility has one limitation; "
+					"a unit possessing a RING cannot assassinate, "
+					"nor steal from, a unit with an Amulet of True Seeing.";
 			}
-			if (count == 0) {
-				*temp += " at a cost of ";
-			} else if (count == tot) {
-				if (c > 1) *temp += ",";
-				*temp += " and ";
-			} else {
-				*temp += ", ";
+			break;
+		case I_AMULETOFTS:
+			if (!(ItemDefs[I_RINGOFI].flags & ItemType::DISABLED)) {
+				*temp += " Also, a unit with an Amulet of True Seeing "
+					"cannot be assassinated by, nor have items "
+					"stolen by, a unit with a Ring of Invisibility "
+					"(note that the unit must have at least one "
+					"Amulet of True Seeing per man in order to repel "
+					"a unit with a Ring of Invisibility).";
 			}
-			count++;
-			*temp += ItemString(itm, amt);
+			break;
+		case I_PORTAL:
+			*temp += " This item is required for mages to use the Portal Lore skill.";
+			break;
+		case I_STAFFOFH:
+			*temp += " This item allows its possessor to magically heal "
+				"units after battle, as if their skill in Magical Healing "
+				"was the highest of their manipulation, pattern, force and "
+				"spirit skills, up to a maximum of level 3.";
+			break;
+		default:
+			break;
+	}
+
+	pS = FindSkill(ItemDefs[item].grantSkill);
+	if (pS && pS->flags & SkillType::CAST) {
+		*temp += " This item allows its possessor to CAST the ";
+		*temp += pS->name;
+		*temp += " spell as if their skill in ";
+		*temp += pS->name;
+		*temp += " was ";
+		if (ItemDefs[item].minGrant < ItemDefs[item].maxGrant) {
+			int count, found;
+			count = 0;
+			for (i = 0; i < 4; i++) {
+				pS = FindSkill(ItemDefs[item].fromSkills[i]);
+				if (pS && !(pS->flags & SkillType::DISABLED))
+					count++;
+			}
+			if (count > 1)
+				*temp += "the highest of ";
+			else
+				*temp += "that of ";
+			*temp += "their ";
+			found = 0;
+			for (i = 0; i < 4; i++) {
+				pS = FindSkill(ItemDefs[item].fromSkills[i]);
+				if (!pS || (pS->flags & SkillType::DISABLED))
+					continue;
+				if (found > 0) {
+					if ((found + 1) == count)
+						*temp += " and ";
+					else
+						*temp += ", ";
+				}
+				*temp += pS->name;
+				found++;
+			}
+			*temp += " skill";
+			if (count > 1)
+				*temp += "s";
+			*temp += ", up to a maximum of";
 		}
+		*temp += " level ";
+		*temp += ItemDefs[item].maxGrant;
 		*temp += ".";
+		if (ItemDefs[item].minGrant > 1 &&
+				ItemDefs[item].minGrant < ItemDefs[item].maxGrant) {
+			*temp += " A skill level of at least ";
+			*temp += ItemDefs[item].minGrant;
+			*temp += " will always be granted.";
+		}
 	}
 
-	if ((ItemDefs[item].type & IT_BATTLE) && full) {
+	if (ItemDefs[item].type & IT_BATTLE) {
 		*temp += " This item is a miscellaneous combat item.";
 		BattleItemType *bt = FindBattleItem(ItemDefs[item].abr);
 		if (bt != NULL) {
@@ -1095,12 +1161,24 @@ AString *ItemDescription(int item, int full)
 				*temp += AString(" ") + "This item can cast ";
 			*temp += ShowSpecial(bt->special, bt->skillLevel, 1, bt->flags & BattleItemType::SHIELD);
 		}
+	} else if (ItemDefs[item].type & IT_MAGEONLY) {
+		*temp += " This item may only be used by a mage";
+		if (Globals->APPRENTICES_EXIST) {
+			*temp += " or an ";
+			*temp += Globals->APPRENTICE_NAME;
+		}
+		*temp += ".";
 	}
-	if ((ItemDefs[item].flags & ItemType::CANTGIVE) && full) {
+	if (ItemDefs[item].type & IT_FOOD) {
+		*temp += " This item can be eaten to provide ";
+		*temp += Globals->UPKEEP_FOOD_VALUE;
+		*temp += " silver towards a unit's maintenance cost.";
+	}
+	if (ItemDefs[item].flags & ItemType::CANTGIVE) {
 		*temp += " This item cannot be given to other units.";
 	}
 
-	if ((ItemDefs[item].max_inventory) && full) {
+	if (ItemDefs[item].max_inventory) {
 		*temp += AString("  A unit may have at most ") +
 			ItemString(item, ItemDefs[item].max_inventory, FULLNUM) + ".";
 	}
