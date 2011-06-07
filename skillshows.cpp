@@ -1034,7 +1034,7 @@ AString *ShowSkill::Report(Faction *f)
 				"the illusion. This spell does not require any order to "
 				"use; it is used automatically.";
 			if(SKILL_ENABLED(S_OBSERVATION)) {
-				*str += "In addition, a mage with the True Seeing skill "
+				*str += " In addition, a mage with the True Seeing skill "
 					"receives a bonus to his Observation skill equal to his "
 					"True Seeing skill divided by 2, rounded up.";
 			}

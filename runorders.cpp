@@ -73,7 +73,7 @@ void Game::RunOrders()
 	DeleteEmptyUnits();
 	SinkUncrewedFleets();
 	DrownUnits();
-	if(Globals->ALLOW_WITHDRAW) {
+	if (Globals->ALLOW_WITHDRAW) {
 		Awrite("Running WITHDRAW Orders...");
 		DoWithdrawOrders();
 	}
@@ -96,7 +96,7 @@ void Game::RunOrders()
 	}
 	Awrite("Assessing Maintenance costs...");
 	AssessMaintenance();
-	if(Globals->DYNAMIC_POPULATION) {
+	if (Globals->DYNAMIC_POPULATION) {
 		Awrite("Processing Migration...");
 		ProcessMigration();
 	}
@@ -161,8 +161,8 @@ int Game::CountMages(Faction *pFac)
 
 int Game::TaxCheck(ARegion *pReg, Faction *pFac)
 {
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		if(AllowedTaxes(pFac) == -1) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if (AllowedTaxes(pFac) == -1) {
 			//
 			// No limit.
 			//
@@ -171,7 +171,7 @@ int Game::TaxCheck(ARegion *pReg, Faction *pFac)
 
 		forlist(&(pFac->war_regions)) {
 			ARegion *x = ((ARegionPtr *) elem)->ptr;
-			if(x == pReg) {
+			if (x == pReg) {
 				//
 				// This faction already performed a tax action in this
 				// region.
@@ -179,7 +179,7 @@ int Game::TaxCheck(ARegion *pReg, Faction *pFac)
 				return 1;
 			}
 		}
-		if(pFac->war_regions.Num() >= AllowedTaxes(pFac)) {
+		if (pFac->war_regions.Num() >= AllowedTaxes(pFac)) {
 			//
 			// Can't tax here.
 			//
@@ -203,8 +203,8 @@ int Game::TaxCheck(ARegion *pReg, Faction *pFac)
 
 int Game::TradeCheck(ARegion *pReg, Faction *pFac)
 {
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		if(AllowedTrades(pFac) == -1) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if (AllowedTrades(pFac) == -1) {
 			//
 			// No limit on trading on this faction.
 			//
@@ -343,11 +343,11 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 	}
 
 	int ass = 1;
-	if(u->items.GetNum(I_RINGOFI)) {
+	if (u->items.GetNum(I_RINGOFI)) {
 		ass = 2; // Check if assassin has a ring.
 		// New rule: if a target has an amulet of true seeing they
 		// cannot be assassinated by someone with a ring of invisibility
-		if(tar->AmtsPreventCrime(u)) {
+		if (tar->AmtsPreventCrime(u)) {
 			tar->Event("Assassination prevented by amulet of true seeing.");
 			u->Event(AString("Attempts to assassinate ") + *(tar->name) +
 					", but is prevented by amulet of true seeing.");
@@ -369,7 +369,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	}
 
 	// New RULE!! You can only steal from someone you can see.
-	if(!u->CanSee(r, tar)) {
+	if (!u->CanSee(r, tar)) {
 		u->Error("STEAL: Invalid unit given.");
 		return;
 	}
@@ -420,7 +420,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	// New rule; if a target has an amulet of true seeing they can't be
 	// stolen from by someone with a ring of invisibility
 	//
-	if(tar->AmtsPreventCrime(u)) {
+	if (tar->AmtsPreventCrime(u)) {
 		tar->Event("Theft prevented by amulet of true seeing.");
 		u->Event(AString("Attempts to steal from ") + *(tar->name) + ", but "
 				"is prevented by amulet of true seeing.");
@@ -463,14 +463,14 @@ void Game::DrownUnits()
 		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 			forlist(&r->objects) {
 				Object *o = (Object *) elem;
-				if(o->type != O_DUMMY) continue;
+				if (o->type != O_DUMMY) continue;
 				forlist(&o->units) {
 					Unit *u = (Unit *)elem;
 					int drown = 0;
-					if(u->type == U_WMON) {
+					if (u->type == U_WMON) {
 						 // Make sure flying monsters only drown if we
 						 // are in WFLIGHT_NONE mode
-						if(Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_NONE)
+						if (Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_NONE)
 							drown = 1;
 						else
 							drown = !(u->CanSwim());
@@ -629,8 +629,8 @@ void Game::RunFindUnit(Unit *u)
 	Faction *fac;
 	forlist(&u->findorders) {
 		FindOrder *f = (FindOrder *) elem;
-		if(f->find == 0) all = 1;
-		if(!all) {
+		if (f->find == 0) all = 1;
+		if (!all) {
 			fac = GetFaction(&factions, f->find);
 			if (fac) {
 				u->faction->Event(AString("The address of ") + *(fac->name) +
@@ -642,7 +642,7 @@ void Game::RunFindUnit(Unit *u)
 		} else {
 			forlist(&factions) {
 				fac = (Faction *)elem;
-				if(fac) {
+				if (fac) {
 					u->faction->Event(AString("The address of ") +
 							*(fac->name) + " is " + *(fac->address) + ".");
 				}
@@ -666,18 +666,18 @@ int Game::FortTaxBonus(Object *o, Unit *u)
 	forlist(&o->units) {
 		Unit *unit = (Unit *) elem;
 		int men = unit->GetMen();
-		if(unit->num == u->num) {
-			if(unit->taxing == TAX_TAX) {
+		if (unit->num == u->num) {
+			if (unit->taxing == TAX_TAX) {
 				int fortbonus = men;
 				int maxtax = unit->Taxers(1);
-				if(fortbonus > protect) fortbonus = protect;
-				if(fortbonus > maxtax) fortbonus = maxtax;
+				if (fortbonus > protect) fortbonus = protect;
+				if (fortbonus > maxtax) fortbonus = maxtax;
 				fortbonus *= Globals->TAX_BONUS_FORT;
 				return(fortbonus);
 			}
 		}
 		protect -= men;
-		if(protect < 0) protect = 0;	
+		if (protect < 0) protect = 0;	
 	}
 	return(fortbonus);
 }
@@ -692,7 +692,7 @@ int Game::CountTaxes(ARegion *reg)
 			Unit *u = (Unit *) elem;
 			if (u->GetFlag(FLAG_AUTOTAX) && !Globals->TAX_PILLAGE_MONTH_LONG)
 				u->taxing = TAX_TAX;
-			if(u->taxing == TAX_AUTO) u->taxing = TAX_TAX;
+			if (u->taxing == TAX_AUTO) u->taxing = TAX_TAX;
 
 			if (u->taxing == TAX_TAX) {
 				if (!reg->CanTax(u)) {
@@ -701,11 +701,11 @@ int Game::CountTaxes(ARegion *reg)
 				} else {
 					int men = u->Taxers(0);
 					int fortbonus = u->GetMen();
-					if(fortbonus > protect) fortbonus = protect;
+					if (fortbonus > protect) fortbonus = protect;
 					protect -= u->GetMen();
-					if(protect < 0) protect = 0;
+					if (protect < 0) protect = 0;
 					if (men) {
-						if(!TaxCheck(reg, u->faction)) {
+						if (!TaxCheck(reg, u->faction)) {
 							u->Error("TAX: Faction can't tax that many "
 									"regions.");
 							u->taxing = TAX_NONE;
@@ -771,7 +771,7 @@ int Game::CountPillagers(ARegion *reg)
 				} else {
 					int men = u->Taxers(1);
 					if (men) {
-						if(!TaxCheck(reg, u->faction)) {
+						if (!TaxCheck(reg, u->faction)) {
 							u->Error("PILLAGE: Faction can't tax that many "
 									"regions.");
 							u->taxing = TAX_NONE;
@@ -861,7 +861,7 @@ void Game::RunPromoteOrders()
 			o = (Object *)elem;
 			if (o->type != O_DUMMY) {
 				u = o->GetOwner();
-				if(u && u->promote) {
+				if (u && u->promote) {
 					Do1PromoteOrder(o, u);
 					delete u->promote;
 					u->promote = 0;
@@ -944,7 +944,7 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 		Unit *tar = obj->GetUnitId(id, u->faction->num);
 		delete id;
 		if (!tar) continue;
-		if(obj->IsFleet() &&
+		if (obj->IsFleet() &&
 			(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
 			(!tar->CanReallySwim() || tar->GetFlag(FLAG_NOCROSS_WATER))) {
 			u->Error("EVICT: Cannot forcibly evict units over ocean.");
@@ -984,7 +984,7 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 	if (u->enter == -1) {
 		to = r->GetDummy();
 		u->enter = 0;
-		if((TerrainDefs[r->type].similar_type == R_OCEAN) &&
+		if ((TerrainDefs[r->type].similar_type == R_OCEAN) &&
 				(!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER))) {
 			u->Error("LEAVE: Can't leave a ship in the ocean.");
 			return;
@@ -993,9 +993,9 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 	} else {
 		int on = u->enter;
 		// alias?
-		if(on < 0) {
+		if (on < 0) {
 			on = r->ResolveFleetAlias(-(on+1));
-			if(on < 1) {
+			if (on < 1) {
 				u->Error("ENTER: NEW fleet doesn't exist.");
 				return;
 			}
@@ -1024,7 +1024,7 @@ void Game::RemoveEmptyObjects()
 		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
 			Object *o = (Object *) elem;
-			if((o->IsFleet()) && 
+			if ((o->IsFleet()) && 
 				(TerrainDefs[r->type].similar_type != R_OCEAN)) continue;
 			if (ObjectDefs[o->type].cost &&
 					o->incomplete >= ObjectDefs[o->type].cost) {
@@ -1060,12 +1060,12 @@ void Game::EndGame(Faction *pVictor)
 	forlist(&factions) {
 		Faction *pFac = (Faction *) elem;
 		pFac->exists = 0;
-		if(pFac == pVictor)
+		if (pFac == pVictor)
 			pFac->quit = QUIT_WON_GAME;
 		else
 			pFac->quit = QUIT_GAME_OVER;
 
-		if(pVictor)
+		if (pVictor)
 			pFac->Event(*(pVictor->name) + " has won the game!");
 		else
 			pFac->Event("The game has ended with no winner.");
@@ -1080,7 +1080,7 @@ void Game::MidProcessTurn()
 		ARegion *r = (ARegion *)elem;
 		// r->MidTurn(); // Not yet implemented
 		/* regional population dynamics */
-		if(Globals->DYNAMIC_POPULATION) r->Grow();
+		if (Globals->DYNAMIC_POPULATION) r->Grow();
 		forlist(&r->objects) {
 			Object *o = (Object *)elem;
 			forlist(&o->units) {
@@ -1106,7 +1106,7 @@ void Game::ProcessMigration()
 		}
 		/* should always be true, but we need a
 		 * different scope for AList handling, anyway */
-		if(Globals->DYNAMIC_POPULATION) {
+		if (Globals->DYNAMIC_POPULATION) {
 			forlist(&regions) {
 				ARegion *r = (ARegion *) elem;
 				r->Migrate();
@@ -1121,7 +1121,7 @@ void Game::PostProcessTurn()
 		ARegion *r = (ARegion *) elem;
 		r->PostTurn(&regions);
 
-		if(Globals->CITY_MONSTERS_EXIST && (r->town || r->type == R_NEXUS))
+		if (Globals->CITY_MONSTERS_EXIST && (r->town || r->type == R_NEXUS))
 			AdjustCityMons(r);
 
 		forlist (&r->objects) {
@@ -1133,11 +1133,11 @@ void Game::PostProcessTurn()
 		}
 	}
 
-	if(Globals->WANDERING_MONSTERS_EXIST) GrowWMons(Globals->WMON_FREQUENCY);
+	if (Globals->WANDERING_MONSTERS_EXIST) GrowWMons(Globals->WMON_FREQUENCY);
 
-	if(Globals->LAIR_MONSTERS_EXIST) GrowLMons(Globals->LAIR_FREQUENCY);
+	if (Globals->LAIR_MONSTERS_EXIST) GrowLMons(Globals->LAIR_FREQUENCY);
 
-	if(Globals->LAIR_MONSTERS_EXIST) GrowVMons();
+	if (Globals->LAIR_MONSTERS_EXIST) GrowVMons();
 
 	//
 	// Check if there are any factions left.
@@ -1146,18 +1146,18 @@ void Game::PostProcessTurn()
 	{
 		forlist(&factions) {
 			Faction *pFac = (Faction *) elem;
-			if(pFac->exists) {
+			if (pFac->exists) {
 				livingFacs = 1;
 				break;
 			}
 		}
 	}
 
-	if(!livingFacs)
+	if (!livingFacs)
 		EndGame(0);
-	else if(!(Globals->OPEN_ENDED)) {
+	else if (!(Globals->OPEN_ENDED)) {
 		Faction *pVictor = CheckVictory();
-		if(pVictor)
+		if (pVictor)
 			EndGame(pVictor);
 	}
 }
@@ -1189,7 +1189,7 @@ void Game::DoAdvanceAttacks(AList *locs)
 		ARegion *r = l->region;
 		if (u->canattack && u->IsAlive()) {
 			DoAutoAttack(r, u);
-			if(!u->canattack || !u->IsAlive()) {
+			if (!u->canattack || !u->IsAlive()) {
 				u->guard = GUARD_NONE;
 			}
 		}
@@ -1199,7 +1199,7 @@ void Game::DoAdvanceAttacks(AList *locs)
 		}
 		if (u->IsAlive()) {
 			DoAutoAttackOn(r, u);
-			if(!u->canattack || !u->IsAlive()) {
+			if (!u->canattack || !u->IsAlive()) {
 				u->guard = GUARD_NONE;
 			}
 		}
@@ -1387,7 +1387,7 @@ int Game::GetSellAmount(ARegion *r, Market *m)
 			forlist ((&u->sellorders)) {
 				SellOrder *o = (SellOrder *) elem;
 				if (o->item == m->item) {
-					if(o->num == -1) {
+					if (o->num == -1) {
 						o->num = u->items.CanSell(o->item);
 					}
 					if (o->num < 0) o->num = 0;
@@ -1481,7 +1481,7 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 							u->Error("BUY: Mages can't recruit more men.");
 							o->num = 0;
 						}
-						if(u->type == U_APPRENTICE) {
+						if (u->type == U_APPRENTICE) {
 							u->Error("BUY: Apprentices can't recruit more "
 									"men.");
 							o->num = 0;
@@ -1506,7 +1506,7 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 						}
 					}
 					if (ItemDefs[o->item].type & IT_TRADE) {
-						if(!TradeCheck(r, u->faction)) {
+						if (!TradeCheck(r, u->faction)) {
 							u->Error("BUY: Can't buy trade items in that "
 									"many regions.");
 							o->num = 0;
@@ -1569,16 +1569,16 @@ void Game::DoBuy(ARegion *r, Market *m)
 						u->AdjustSkills();
 						delete sl;
 						/* Setup specialized skill experience */
-						if(Globals->REQUIRED_EXPERIENCE) {
+						if (Globals->REQUIRED_EXPERIENCE) {
 							ManType *mt = FindRace(ItemDefs[o->item].abr);
 							int exp = mt->speciallevel - mt->defaultlevel;
-							if(exp > 0) {
+							if (exp > 0) {
 								exp = exp * temp * GetDaysByLevel(1);
 								for(int ms = 0; ms < ((int) sizeof(mt->skills))/((int) sizeof(int)); ms++)
 								{
 									AString sname = mt->skills[ms];
 									int skill = LookupSkill(&sname);
-									if(skill == -1) continue;
+									if (skill == -1) continue;
 									int curxp = u->skills.GetExp(skill);
 									u->skills.SetExp(skill,exp+curxp);
 								} 
@@ -1952,7 +1952,7 @@ void Game::AssessMaintenance()
 	//
 	// Check for CONSUMEing units.
 	//
-	if(Globals->FOOD_ITEMS_EXIST) {
+	if (Globals->FOOD_ITEMS_EXIST) {
 		CheckUnitMaintenance(1);
 		CheckFactionMaintenance(1);
 	}
@@ -1967,7 +1967,7 @@ void Game::AssessMaintenance()
 	//
 	CheckFactionMaintenanceItem(I_SILVER, 1, 0);
 
-	if(Globals->FOOD_ITEMS_EXIST) {
+	if (Globals->FOOD_ITEMS_EXIST) {
 		//
 		// Check unit for possible food items.
 		//
@@ -2014,7 +2014,7 @@ void Game::AssessMaintenance()
 	//
 	CheckAllyMaintenanceItem(I_SILVER, 1);
 
-	if(Globals->FOOD_ITEMS_EXIST) {
+	if (Globals->FOOD_ITEMS_EXIST) {
 		//
 		// Check other factions for food items.
 		//
@@ -2049,7 +2049,7 @@ void Game::DoWithdrawOrders()
 				Unit *u = (Unit *) elem;
 				forlist((&u->withdraworders)) {
 					WithdrawOrder *o = (WithdrawOrder *)elem;
-					if(DoWithdrawOrder(r, u, o)) break;
+					if (DoWithdrawOrder(r, u, o)) break;
 				}
 				u->withdraworders.DeleteAll();
 			}
@@ -2063,7 +2063,7 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 	int amt = o->amount;
 	int cost = (ItemDefs[itm].baseprice *5/2)*amt;
 
-	if(r->type == R_NEXUS) {
+	if (r->type == R_NEXUS) {
 		u->Error("WITHDRAW: Withdraw does not work in the Nexus.");
 		return 1;
 	}
@@ -2100,7 +2100,7 @@ void Game::DoGiveOrders()
 				Unit *u = (Unit *) elem;
 				forlist((&u->giveorders)) {
 					GiveOrder *o = (GiveOrder *)elem;
-					if(o->item < 0) {
+					if (o->item < 0) {
 						if (o->amount == -1) {
 							/* do 'give X unit' command */
 							DoGiveOrder(r, u, o);
@@ -2108,7 +2108,7 @@ void Game::DoGiveOrders()
 							/* do 'give all type' command */
 							forlist((&u->items)) {
 								Item *item = (Item *)elem;
-								if((o->item == -NITEMS) ||
+								if ((o->item == -NITEMS) ||
 									(ItemDefs[item->type].type & (-o->item))) {
 									GiveOrder go;
 									go.amount = item->num;
@@ -2162,14 +2162,14 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 	}
 
 	// Check each Item can be given
-	if(ItemDefs[o->giveItem].flags & ItemType::CANTGIVE) {
+	if (ItemDefs[o->giveItem].flags & ItemType::CANTGIVE) {
 		u->Error(AString("EXCHANGE: Can't trade ") +
 				ItemDefs[o->giveItem].names + ".");
 		u->exchangeorders.Remove(o);
 		return;
 	}
 
-	if(ItemDefs[o->expectItem].flags & ItemType::CANTGIVE) {
+	if (ItemDefs[o->expectItem].flags & ItemType::CANTGIVE) {
 		u->Error(AString("EXCHANGE: Can't trade ") +
 				ItemDefs[o->expectItem].names + ".");
 		u->exchangeorders.Remove(o);
@@ -2189,7 +2189,7 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 	}
 
 	// New RULE -- Must be able to see unit to give something to them!
-	if(!u->CanSee(r, t)) {
+	if (!u->CanSee(r, t)) {
 		u->Error(AString("EXCHANGE: Nonexistant target (") +
 				o->target->Print() + ").");
 		return;
@@ -2276,7 +2276,7 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 		}
 	}
 	if (!exchangeOrderFound) {
-		if(!u->CanSee(r, t)) {
+		if (!u->CanSee(r, t)) {
 			u->Error(AString("EXCHANGE: Nonexistant target (") +
 					o->target->Print() + ").");
 			u->exchangeorders.Remove(o);
@@ -2293,32 +2293,33 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 {
 	/* Transfer/GIVE ship items: */
-	if((o->item >= 0) && (ItemDefs[o->item].type & IT_SHIP)) {
+	if ((o->item >= 0) && (ItemDefs[o->item].type & IT_SHIP)) {
 		// GIVE 0
-		if(o->target->unitnum == -1) {
+		if (o->target->unitnum == -1) {
 			int hasitem = u->items.GetNum(o->item);
 			AString temp = "Abandons ";
 			// discard unfinished ships from inventory
-			if(hasitem) {
+			if (hasitem) {
 				int ship = -1;
 				forlist(&u->items) {
 					Item *it = (Item *) elem;
-					if(it->type == o->item) {
+					if (it->type == o->item) {
 						u->Event(temp + it->Report(1) + ".");
 						ship = it->type;
 					}
 				}
-				if(ship > 0) u->items.SetNum(ship,0);
+				if (ship > 0) u->items.SetNum(ship,0);
 				return 0;
 			// abandon fleet ships
-			} else if(!(u->object->IsFleet()) || 
+			} else if (!(u->object->IsFleet()) || 
 				(u->num != u->object->GetOwner()->num)) {
 				u->Error("GIVE: only fleet owner can give ships.");
 				return 0;
 			}
+
 			// Check amount
 			int num = u->object->GetNumShips(o->item);
-			if(num < 1) {
+			if (num < 1) {
 				u->Error("GIVE: no such ship in fleet.");
 				return 0;
 			}
@@ -2326,6 +2327,25 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				u->Error("GIVE: not enough ships.");
 				o->amount = num;
 			}
+
+			// Check we're not dumping passengers in the ocean
+			if (TerrainDefs[r->type].similar_type == R_OCEAN) {
+				int shipcount = 0;
+				forlist(&(u->object->ships)) {
+					Item *s = (Item *) elem;
+					shipcount += s->num;
+				}
+				if (shipcount <= o->amount) {
+					forlist(&(u->object->units)) {
+						Unit *p = (Unit *) elem;
+						if ((!p->CanSwim() || p->GetFlag(FLAG_NOCROSS_WATER))) {
+							u->Error("GIVE: Can't abandon our last ship in the ocean.");
+							return 0;
+						}
+					}
+				}
+			}
+
 			u->object->SetNumShips(o->item, num - o->amount);
 			u->Event(AString(temp) + ItemString(o->item, num - o->amount) + ".");
 			return 0;
@@ -2336,17 +2356,17 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
 			return 0;
-		} else if(t->faction->IsNPC()) {
+		} else if (t->faction->IsNPC()) {
 			u->Error(AString("GIVE: Can't give to non-player unit (") + o->target->Print() +
 				").");
 			return 0;
 		}
-		if(u == t) {
+		if (u == t) {
 			u->Error(AString("GIVE: Attempt to give ")+ItemDefs[o->item].names+
 				" to self.");
 			return 0;
 		}
-		if(!u->CanSee(r, t) &&
+		if (!u->CanSee(r, t) &&
 			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
 				u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 					").");
@@ -2356,13 +2376,13 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				u->Error("GIVE: Target is not a member of a friendly faction.");
 				return 0;
 		}
-		if(ItemDefs[o->item].flags & ItemType::CANTGIVE) {
+		if (ItemDefs[o->item].flags & ItemType::CANTGIVE) {
 			u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".");
 			return 0;
 		}
 		// Check amount
 		int num = u->object->GetNumShips(o->item);
-		if(num < 1) {
+		if (num < 1) {
 			u->Error("GIVE: no such ship in fleet.");
 			return 0;
 		}
@@ -2372,8 +2392,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			amt = num;
 		} else if (amt == -2) {
 			amt = num;
-			if(o->except) {
-				if(o->except > amt) {
+			if (o->except) {
+				if (o->except > amt) {
 					amt = 0;
 					u->Error("GIVE: EXCEPT value greater than amount on hand.");
 				} else {
@@ -2381,6 +2401,25 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				}
 			}
 		}
+
+		// Check we're not dumping passengers in the ocean
+		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
+			int shipcount = 0;
+			forlist(&(u->object->ships)) {
+				Item *s = (Item *) elem;
+				shipcount += s->num;
+			}
+			if (shipcount <= amt) {
+				forlist(&(u->object->units)) {
+					Unit *p = (Unit *) elem;
+					if ((!p->CanSwim() || p->GetFlag(FLAG_NOCROSS_WATER))) {
+						u->Error("GIVE: Can't give away our last ship in the ocean.");
+						return 0;
+					}
+				}
+			}
+		}
+
 		// give into existing fleet or form new fleet?
 		int newfleet = 0;
 		// target is not in fleet or not fleet owner
@@ -2389,8 +2428,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		// or target fleet is not of compatible type
 		else {
 			int flying = u->object->flying;
-			if((flying > 0) && (ItemDefs[o->item].fly < 1)) newfleet = 1;
-			if((flying < 1) && (ItemDefs[o->item].fly > 0)) newfleet = 1;
+			if ((flying > 0) && (ItemDefs[o->item].fly < 1)) newfleet = 1;
+			if ((flying < 1) && (ItemDefs[o->item].fly > 0)) newfleet = 1;
 		}
 		if (newfleet == 1) {
 			// create a new fleet
@@ -2428,8 +2467,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		amt = u->GetSharedNum(o->item);
 	} else if (amt == -2) {
 		amt = u->items.GetNum(o->item);
-		if(o->except) {
-			if(o->except > amt) {
+		if (o->except) {
+			if (o->except > amt) {
 				amt = 0;
 				u->Error("GIVE: EXCEPT value greater than amount on hand.");
 			} else {
@@ -2455,11 +2494,11 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			u->SetMen(o->item, u->GetMen(o->item) - amt);
 			r->DisbandInRegion(o->item, amt);
 			temp = "Disbands ";
-		} else if(Globals->RELEASE_MONSTERS &&
+		} else if (Globals->RELEASE_MONSTERS &&
 				(ItemDefs[o->item].type & IT_MONSTER)) {
 			temp = "Releases ";
 			u->items.SetNum(o->item, u->items.GetNum(o->item) - amt);
-			if(Globals->WANDERING_MONSTERS_EXIST) {
+			if (Globals->WANDERING_MONSTERS_EXIST) {
 				Faction *mfac = GetFaction(&factions, monfaction);
 				Unit *mon = GetNewUnit(mfac, 0);
 				MonType *mp = FindMonster(ItemDefs[o->item].abr,
@@ -2483,20 +2522,20 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
 		return 0;
-	} else if(t->faction->IsNPC()) {
+	} else if (t->faction->IsNPC()) {
 		u->Error(AString("GIVE: Can't give to non-player unit (") + o->target->Print() +
 				").");
 		return 0;
 	}
 
-	if(u == t) {
+	if (u == t) {
 		u->Error(AString("GIVE: Attempt to give ")+ItemString(o->item, amt)+
 				" to self.");
 		return 0;
 	}
 
 	// New RULE -- Must be able to see unit to give something to them!
-	if(!u->CanSee(r, t) &&
+	if (!u->CanSee(r, t) &&
 			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
 		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
@@ -2512,16 +2551,16 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	if (amt == -1) {
 		/* Give unit */
 		if (u->type == U_MAGE) {
-			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
+			if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 				if (CountMages(t->faction) >= AllowedMages(t->faction)) {
 					u->Error("GIVE: Faction has too many mages.");
 					return 0;
 				}
 			}
 		}
-		if(u->type == U_APPRENTICE) {
-			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
-				if(CountApprentices(t->faction) >=
+		if (u->type == U_APPRENTICE) {
+			if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
+				if (CountApprentices(t->faction) >=
 						AllowedApprentices(t->faction)){
 					u->Error("GIVE: Faction has too many apprentices.");
 					return 0;
@@ -2620,7 +2659,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			}
 		}
 		// Small hack for Ceran
-		if(o->item == I_MERC && t->GetMen()) {
+		if (o->item == I_MERC && t->GetMen()) {
 			u->Error("GIVE: Can't mix mercenaries with other men.");
 			return 0;
 		}
@@ -2637,7 +2676,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		delete temp;
 	}
 
-	if(ItemDefs[o->item].flags & ItemType::CANTGIVE) {
+	if (ItemDefs[o->item].flags & ItemType::CANTGIVE) {
 		u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".");
 		return 0;
 	}

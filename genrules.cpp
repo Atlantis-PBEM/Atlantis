@@ -1396,9 +1396,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Paragraph(temp);
 		temp = "A ship can only move if the total weight of everything "
-			"aboard does not exceed the ship's capacity.  (The rules do "
+			"aboard does not exceed the ship's capacity (the rules do "
 			"not prevent an overloaded ship from staying afloat, only "
-			"from moving.)  Also, there must be enough sailors aboard "
+			"from moving).  Also, there must be enough sailors aboard "
 			"(using the ";
 		temp += f.Link("#sail", "SAIL") + " order), to sail the ship, or ";
 		temp += "it will not go anywhere.  Note that the sailing skill "
@@ -4795,11 +4795,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"happened either way.";
 	f.Paragraph(temp);
 	f.Paragraph("Examples:");
-	temp = "Move N, NE and In";
-	temp2 = "MOVE N\nMOVE NE IN";
+	temp = "Move N, NE, enter structure 1 and use the passage there";
+	temp2 = "MOVE N\nMOVE NE 1 IN";
 	f.CommandExample(temp, temp2);
 	temp = "or:";
-	temp2 = "MOVE N NE IN";
+	temp2 = "MOVE N NE 1 IN";
 	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("div", "rule", "");
@@ -5194,8 +5194,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"only to economic actions.  So a unit that is sharing will provide "
 		"silver for buying or studying, and resources for production "
 		"(for example, if a sharing unit has wood in its inventory, and "
-		"another unit is produceing axes but has no wood, then the sharing "
-		"unit will automatically supply wood for that production),"
+		"another unit is producing axes but has no wood, then the sharing "
+		"unit will automatically supply wood for that production), "
 		"but will not provide weapons to all units if combat occurs.";
 	f.Paragraph(temp);
 	temp = "Note that in the case of sharing silver, this can leave the "

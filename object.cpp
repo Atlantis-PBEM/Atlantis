@@ -45,29 +45,26 @@ int LookupObject(AString *token)
  */
 int ParseObject(AString *token, int ships)
 {
-	int r = -1;
-	for (int i=O_DUMMY+1; i<NOBJECTS; i++) {
-		if (*token == ObjectDefs[i].name) {
-			if(ObjectDefs[i].flags & ObjectType::DISABLED) return -1;
-			r = i;
-			break;
-		}
-	}
 	// Check for ship-type items:
-	if((r == -1) && (ships > 0)) {
+	if (ships > 0) {
 		for (int i=0; i<NITEMS; i++) {
-			if(ItemDefs[i].type & IT_SHIP) {
+			if (ItemDefs[i].type & IT_SHIP) {
 				if ((*token == ItemDefs[i].name) ||
 					(*token == ItemDefs[i].abr)) {
-						if(ItemDefs[i].flags & ItemType::DISABLED) return -1;
-						r = -(i+1);
-						break;
+						if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+						return -(i+1);
 				}
 			}
 		}
 	}
+	for (int i=O_DUMMY+1; i<NOBJECTS; i++) {
+		if (*token == ObjectDefs[i].name) {
+			if (ObjectDefs[i].flags & ObjectType::DISABLED) return -1;
+			return i;
+		}
+	}
 
-	return r;
+	return -1;
 }
 
 int ObjectIsShip(int ot)
@@ -103,7 +100,8 @@ Object::~Object()
 void Object::Writeout(Aoutfile *f)
 {
 	f->PutInt(num);
-	if (type != -1) f->PutStr(ObjectDefs[type].name);
+	if (IsFleet()) f->PutStr(ObjectDefs[O_FLEET].name);
+	else if (type != -1) f->PutStr(ObjectDefs[type].name);
 	else f->PutStr("NO_OBJECT");
 	f->PutInt(incomplete);
 	f->PutStr(*name);
@@ -164,7 +162,7 @@ void Object::SetName(AString *s)
 {
 	if (s && (CanModify())) {
 		AString *newname = s->getlegal();
-		if(!newname) {
+		if (!newname) {
 			delete s;
 			return;
 		}
@@ -189,7 +187,9 @@ void Object::SetDescribe(AString *s)
 
 int Object::IsFleet()
 {
-	if(type == O_FLEET) return 1;
+	if (type == O_FLEET) return 1;
+	if (ObjectDefs[type].sailors > 0) return 1;
+	if (ships.Num() > 0) return 1;
 	return 0;
 }
 
@@ -217,7 +217,7 @@ Unit *Object::GetUnitAlias(int alias, int faction)
 {
 	// First search for units with the 'formfaction'
 	forlist((&units)) {
-		if(((Unit *)elem)->alias == alias &&
+		if (((Unit *)elem)->alias == alias &&
 				((Unit *)elem)->formfaction->num == faction)
 			return ((Unit *)elem);
 	}
@@ -248,7 +248,7 @@ Unit *Object::GetUnitId(UnitId *id, int faction)
 
 int Object::CanEnter(ARegion *reg, Unit *u)
 {
-	if(!(ObjectDefs[type].flags & ObjectType::CANENTER) &&
+	if (!(ObjectDefs[type].flags & ObjectType::CANENTER) &&
 			(u->type == U_MAGE || u->type == U_NORMAL ||
 			 u->type == U_APPRENTICE)) {
 		return 0;
@@ -259,11 +259,11 @@ int Object::CanEnter(ARegion *reg, Unit *u)
 Unit *Object::ForbiddenBy(ARegion *reg, Unit *u)
 {
 	Unit *owner = GetOwner();
-	if(!owner) {
+	if (!owner) {
 		return(0);
 	}
 
-	if(owner->GetAttitude(reg, u) < A_FRIENDLY) {
+	if (owner->GetAttitude(reg, u) < A_FRIENDLY) {
 		return owner;
 	}
 	return 0;
@@ -283,18 +283,18 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 {
 	ObjectType *ob = &ObjectDefs[type];
 
-	if((type != O_DUMMY) && !present) {
-		if(IsBuilding() &&
-		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_BUILDINGS)) {
-			// This is a building and we don't see buildings in transit
-			return;
-		}
-		if(IsFleet() &&
+	if ((type != O_DUMMY) && !present) {
+		if (IsFleet() &&
 		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_SHIPS)) {
 			// This is a ship and we don't see ships in transit
 			return;
 		}
-		if(IsRoad() &&
+		if (IsBuilding() &&
+		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_BUILDINGS)) {
+			// This is a building and we don't see buildings in transit
+			return;
+		}
+		if (IsRoad() &&
 		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ROADS)) {
 			// This is a road and we don't see roads in transit
 			return;
@@ -302,13 +302,13 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 	}
 
 	/* Fleet Report */
-	if(IsFleet()) {
+	if (IsFleet()) {
 		AString temp = AString("+ ") + *name + " : " + FleetDefinition();
 		/* report ships:
-		for(int item=0; item<NITEMS; item++) {
+		for (int item=0; item<NITEMS; item++) {
 			int num = GetNumShips(item);
-			if(num > 0) {
-				if(num > 1) {
+			if (num > 0) {
+				if (num > 1) {
 					temp += AString(", ") + num + " " + ItemDefs[item].names;
 				} else {
 					temp += AString(", ") + num + " " +ItemDefs[item].name;
@@ -316,7 +316,7 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 			}
 		}
 		*/
-		if((GetOwner() && fac == GetOwner()->faction) || (obs > 9)){
+		if ((GetOwner() && fac == GetOwner()->faction) || (obs > 9)){
 			temp += ";";
 			if (incomplete > 0) {
 				temp += AString(" ") + incomplete + "% damaged;";
@@ -335,11 +335,11 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 		AString temp = AString("+ ") + *name + " : " + ob->name;
 		if (incomplete > 0) {
 			temp += AString(", needs ") + incomplete;
-		} else if(Globals->DECAY &&
+		} else if (Globals->DECAY &&
 				!(ob->flags & ObjectType::NEVERDECAY) && incomplete < 1) {
-			if(incomplete > (0 - ob->maxMonthlyDecay)) {
+			if (incomplete > (0 - ob->maxMonthlyDecay)) {
 				temp += ", about to decay";
-			} else if(incomplete > (0 - ob->maxMaintenance/2)) {
+			} else if (incomplete > (0 - ob->maxMaintenance/2)) {
 				temp += ", needs maintenance";
 			}
 		}
@@ -366,10 +366,10 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 		if (u->faction == fac) {
 			u->WriteReport(f, -1, 1, 1, 1, attitude);
 		} else {
-			if(present) {
+			if (present) {
 				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY, attitude);
 			} else {
-				if(((type == O_DUMMY) &&
+				if (((type == O_DUMMY) &&
 					(Globals->TRANSIT_REPORT &
 					 GameDefs::REPORT_SHOW_OUTDOOR_UNITS)) ||
 				   ((type != O_DUMMY) &&
@@ -413,15 +413,15 @@ int Object::IsRoad()
  */
 int Object::CheckShip(int item)
 {
-	if(type != O_FLEET) return 0;
-	if(!(ItemDefs[item].flags & ItemType::DISABLED)
+	if (!IsFleet()) return 0;
+	if (!(ItemDefs[item].flags & ItemType::DISABLED)
 		&& (ItemDefs[item].type & IT_SHIP)) return 1;
 	return 0;
 }
 
 void Object::WriteoutFleet(Aoutfile *f)
 {
-	if(type != O_FLEET) return;
+	if (!IsFleet()) return;
 	int nships = (int) ships.Num();
 	f->PutInt(nships);
 	forlist(&ships)
@@ -430,12 +430,13 @@ void Object::WriteoutFleet(Aoutfile *f)
 
 void Object::ReadinFleet(Ainfile *f)
 {
-	if(type != O_FLEET) return;
+	if (type != O_FLEET) return;
 	int nships = f->GetInt();
-	for(int i=0; i<nships; i++) {
+	for (int i=0; i<nships; i++) {
 		Item *ship = new Item;
 		ship->Readin(f);
-		ships.Add(ship);
+		SetNumShips(ship->type, ship->num);
+		delete ship;
 	}
 }
 
@@ -444,10 +445,10 @@ void Object::ReadinFleet(Ainfile *f)
  */
 int Object::GetNumShips(int type)
 {
-	if(CheckShip(type) != 0) {
+	if (CheckShip(type) != 0) {
 		forlist(&ships) {
 			Item *ship = (Item *) elem;
-			if(ship->type == type) {
+			if (ship->type == type) {
 				return ship->num;
 			}
 		}
@@ -460,12 +461,13 @@ int Object::GetNumShips(int type)
  */
 void Object::SetNumShips(int type, int num)
 {
-	if(CheckShip(type) != 0) {
-		if(num > 0) {
+	if (CheckShip(type) != 0) {
+		if (num > 0) {
 			forlist(&ships) {
 				Item *ship = (Item *) elem;
-				if(ship->type == type) {
+				if (ship->type == type) {
 					ship->num = num;
+					FleetCapacity();
 					return;
 				}
 			}
@@ -473,12 +475,14 @@ void Object::SetNumShips(int type, int num)
 			ship->type = type;
 			ship->num = num;
 			ships.Add(ship);
+			FleetCapacity();
 		} else {
 			forlist(&ships) {
 				Item *ship = (Item *) elem;
-				if(ship->type == type) {
+				if (ship->type == type) {
 					ships.Remove(ship);
 					delete ship;
+					FleetCapacity();
 					return;
 				}
 			}
@@ -490,7 +494,7 @@ void Object::SetNumShips(int type, int num)
  */
 void Object::AddShip(int type)
 {	
-	if(CheckShip(type) == 0) return;
+	if (CheckShip(type) == 0) return;
 	int num = GetNumShips(type);
 	num++;
 	SetNumShips(type, num);	
@@ -505,22 +509,22 @@ AString Object::FleetDefinition()
 	int shiptype = -1;
 	int num = 0;
 	for(int i=0; i<NITEMS; i++) {
-		if(ItemDefs[i].type & IT_SHIP) {
+		if (ItemDefs[i].type & IT_SHIP) {
 			int sn = GetNumShips(i);
-			if(sn > 0) {
+			if (sn > 0) {
 				num += sn;
 				shiptype = i;
 			}
 		}
 	}
-	if(num == 1) fleet = ItemDefs[shiptype].name;
+	if (num == 1) fleet = ItemDefs[shiptype].name;
 	else {
 		fleet = ObjectDefs[type].name;
 		// report ships:
 		for(int item=0; item<NITEMS; item++) {
 			num = GetNumShips(item);
-			if(num > 0) {
-				if(num > 1) {
+			if (num > 0) {
+				if (num > 1) {
 					fleet += AString(", ") + num + " " + ItemDefs[item].names;
 				} else {
 					fleet += AString(", ") + num + " " +ItemDefs[item].name;
@@ -535,21 +539,30 @@ AString Object::FleetDefinition()
  */
 int Object::FleetCapacity()
 {
+	AString *oname;
+	int ot;
+
 	capacity = 0;
-	if(type != O_FLEET) return 0;
-	for(int item=0; item<NITEMS; item++) {
+	// Calculate the maximum number of mages while we're at it
+	mages = 0;
+	if (!IsFleet()) return 0;
+	// Fleets are assumed to be flying, at least until we find any
+	// non-flying vessels in them
+	flying = 1;
+	for (int item=0; item < NITEMS; item++) {
 		int num = GetNumShips(item);
-		// It is assumed that flying and swimming
-		// "ships" are never built or given
-		// into the same fleet! (i.e. the build
-		// and give code checks for that)
-		if(num < 1) continue;
+		if (num < 1) continue;
 		if (ItemDefs[item].fly > 0) {
 			capacity += num * ItemDefs[item].fly;
-			flying = 1;
 		} else {
 			capacity += num * ItemDefs[item].swim;
 			flying = 0;
+		}
+		oname = new AString(ItemDefs[item].name);
+		ot = LookupObject(oname);
+		delete oname;
+		if (ot > 0) {
+			mages += num * ObjectDefs[ot].maxMages;
 		}
 	}
 	return capacity;
@@ -561,7 +574,7 @@ int Object::FleetLoad()
 {
 	int load = -1;
 	int wgt = 0;
-	if(type == O_FLEET) {
+	if (IsFleet()) {
 		forlist(&units) {
 			Unit * unit = (Unit *) elem;
 			wgt += unit->Weight();
@@ -580,7 +593,7 @@ int Object::FleetSailingSkill(int report)
 {
 	int skill = -1;
 	int slvl = 0;
-	if(type == O_FLEET) {
+	if (IsFleet()) {
 		forlist(&units) {
 			Unit * unit = (Unit *) elem;
 			if ((report != 0) ||
@@ -598,9 +611,9 @@ int Object::FleetSailingSkill(int report)
  */
 int Object::GetFleetSize()
 {
-	if(type != O_FLEET) return 0;
+	if (!IsFleet()) return 0;
 	int inertia = 0;
-	for(int item=0; item<NITEMS; item++) {
+	for (int item=0; item<NITEMS; item++) {
 		int num = GetNumShips(item);
 		if (num > 0) inertia += num * ItemDefs[item].weight / 10;
 	}
@@ -623,7 +636,7 @@ int Object::GetFleetSpeed(int report)
 	int bonus;
 	int windbonus = 0;
 
-	if (type != O_FLEET) return 0;
+	if (!IsFleet()) return 0;
 
 	for (int item = 0; item < NITEMS; item++) {
 		int num = GetNumShips(item);
@@ -689,30 +702,30 @@ int Object::GetFleetSpeed(int report)
 
 AString *ObjectDescription(int obj)
 {
-	if(ObjectDefs[obj].flags & ObjectType::DISABLED)
+	if (ObjectDefs[obj].flags & ObjectType::DISABLED)
 		return NULL;
 
 	ObjectType *o = &ObjectDefs[obj];
 	AString *temp = new AString;
 	*temp += AString(o->name) + ": ";
-	if(o->capacity) {
+	if (o->capacity) {
 		*temp += "This is a ship.";
 	} else {
 		*temp += "This is a building.";
 	}
 
-	if(Globals->LAIR_MONSTERS_EXIST && (o->monster != -1)) {
+	if (Globals->LAIR_MONSTERS_EXIST && (o->monster != -1)) {
 		*temp += " Monsters can potentially lair in this structure.";
-		if(o->flags & ObjectType::NOMONSTERGROWTH) {
+		if (o->flags & ObjectType::NOMONSTERGROWTH) {
 			*temp += " Monsters in this structures will never regenerate.";
 		}
 	}
 
-	if(o->flags & ObjectType::CANENTER) {
+	if (o->flags & ObjectType::CANENTER) {
 		*temp += " Units may enter this structure.";
 	}
 
-	if(o->protect) {
+	if (o->protect) {
 		*temp += AString(" This structure provides defense to the first ") +
 			o->protect + " men inside it.";
 		// Now do the defences. First, figure out how many to do.
@@ -748,47 +761,47 @@ AString *ObjectDescription(int obj)
 		SpecialType *spd = &SpecialDefs[i];
 		AString effect = "are";
 		int match = 0;
-		if(!(spd->targflags & SpecialType::HIT_BUILDINGIF) &&
+		if (!(spd->targflags & SpecialType::HIT_BUILDINGIF) &&
 				!(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
 			continue;
 		}
 		for(int j = 0; j < 3; j++)
-			if(spd->buildings[j] == obj) match = 1;
-		if(!match) continue;
-		if(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
+			if (spd->buildings[j] == obj) match = 1;
+		if (!match) continue;
+		if (spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
 			effect += " not";
 		}
 		*temp += " Units in this structure ";
 		*temp += effect + " affected by " + spd->specialname + ".";
 	}
 
-	if(o->sailors) {
+	if (o->sailors) {
 		*temp += AString(" This ship requires ") + o->sailors +
 			" total levels of sailing skill to sail.";
 	}
-	if(o->maxMages && Globals->LIMITED_MAGES_PER_BUILDING) {
+	if (o->maxMages && Globals->LIMITED_MAGES_PER_BUILDING) {
 		*temp += AString(" This structure will allow up to ") + o->maxMages +
 			" mages to study above level 2.";
 	}
 	int buildable = 1;
 	SkillType *pS = NULL;
-	if(o->item == -1 || o->skill == NULL) buildable = 0;
+	if (o->item == -1 || o->skill == NULL) buildable = 0;
 	if (o->skill != NULL) pS = FindSkill(o->skill);
 	if (pS && (pS->flags & SkillType::DISABLED)) buildable = 0;
-	if(o->item != I_WOOD_OR_STONE &&
+	if (o->item != I_WOOD_OR_STONE &&
 			(ItemDefs[o->item].flags & ItemType::DISABLED))
 		buildable = 0;
-	if(o->item == I_WOOD_OR_STONE &&
+	if (o->item == I_WOOD_OR_STONE &&
 			(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
 			(ItemDefs[I_STONE].flags & ItemType::DISABLED))
 		buildable = 0;
-	if(!buildable) {
+	if (!buildable) {
 		*temp += " This structure cannot be built by players.";
 	} else {
 		*temp += AString(" This structure is built using ") +
 			SkillStrs(pS) + " " + o->level + " and requires " +
 			o->cost + " ";
-		if(o->item == I_WOOD_OR_STONE) {
+		if (o->item == I_WOOD_OR_STONE) {
 			*temp += "wood or stone";
 		} else {
 			*temp += ItemDefs[o->item].name;
@@ -796,10 +809,10 @@ AString *ObjectDescription(int obj)
 		*temp += " to build.";
 	}
 
-	if(o->productionAided != -1 &&
+	if (o->productionAided != -1 &&
 			!(ItemDefs[o->productionAided].flags & ItemType::DISABLED)) {
 		*temp += " This trade structure increases the amount of ";
-		if(o->productionAided == I_SILVER) {
+		if (o->productionAided == I_SILVER) {
 			*temp += "entertainment";
 		} else {
 			*temp += ItemDefs[o->productionAided].names;
@@ -807,19 +820,19 @@ AString *ObjectDescription(int obj)
 		*temp += " available in the region.";
 	}
 
-	if(Globals->DECAY) {
-		if(o->flags & ObjectType::NEVERDECAY) {
+	if (Globals->DECAY) {
+		if (o->flags & ObjectType::NEVERDECAY) {
 			*temp += " This structure will never decay.";
 		} else {
 			*temp += AString(" This structure can take ") + o->maxMaintenance +
 				" units of damage before it begins to decay.";
 			*temp += AString(" Damage can occur at a maximum rate of ") +
 				o->maxMonthlyDecay + " units per month.";
-			if(buildable) {
+			if (buildable) {
 				*temp += AString(" Repair of damage is accomplished at ") +
 					"a rate of " + o->maintFactor + " damage units per " +
 					"unit of ";
-				if(o->item == I_WOOD_OR_STONE) {
+				if (o->item == I_WOOD_OR_STONE) {
 					*temp += "wood or stone.";
 				} else {
 					*temp += ItemDefs[o->item].name;

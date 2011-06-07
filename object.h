@@ -75,6 +75,8 @@ extern ObjectType *ObjectDefs;
 
 AString *ObjectDescription(int obj);
 
+int LookupObject(AString *token);
+
 int ParseObject(AString *, int ships);
 
 int ObjectIsShip(int);
@@ -136,6 +138,7 @@ class Object : public AListElem
 		int runes;
 		int prevdir;
 		int mages;
+		int shipno;
 		AList units;
 		AList ships;
 };

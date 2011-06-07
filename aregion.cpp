@@ -825,7 +825,7 @@ void ARegion::CheckFleets()
 {
 	forlist(&objects) {
 		Object *o = (Object *) elem;
-		if(o->type == O_FLEET) {
+		if (o->IsFleet()) {
 			int bail = 0;
 			if (o->FleetCapacity() < 1) bail = 1;
 			int alive = 0;

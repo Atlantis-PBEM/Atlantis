@@ -40,17 +40,17 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
         return;
     }
 
-    if( !( SkillDefs[sk].flags & SkillType::MAGIC )) {
+    if ( !( SkillDefs[sk].flags & SkillType::MAGIC )) {
         ParseError( pCheck, u, 0, "CAST: That is not a magic skill.");
         return;
     }
-    if( !( SkillDefs[sk].flags & SkillType::CAST )) {
+    if ( !( SkillDefs[sk].flags & SkillType::CAST )) {
         ParseError( pCheck, u, 0, "CAST: That skill cannot be CAST.");
         return;
     }
 
 	RangeType *rt = NULL;
-    if( !pCheck ) {
+    if ( !pCheck ) {
         //
         // XXX -- should be error checking spells
         //
@@ -373,11 +373,11 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 	int z = -1;
 	RangeType *range = FindRange(SkillDefs[spell].range);
 
-	if(token) {
-		if(*token == "region") {
+	if (token) {
+		if (*token == "region") {
 			delete token;
 			token = o->gettoken();
-			if(!token) {
+			if (!token) {
 				u->Error("CAST: Region X coordinate not specified.");
 				return;
 			}
@@ -385,19 +385,19 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 			delete token;
 
 			token = o->gettoken();
-			if(!token) {
+			if (!token) {
 				u->Error("CAST: Region Y coordinate not specified.");
 				return;
 			}
 			y = token->value();
 			delete token;
 
-			if(range && (range->flags & RangeType::RNG_CROSS_LEVELS)) {
+			if (range && (range->flags & RangeType::RNG_CROSS_LEVELS)) {
 				token = o->gettoken();
-				if(token) {
+				if (token) {
 					z = token->value();
 					delete token;
-					if(z < 0 || (z >= Globals->UNDERWORLD_LEVELS +
+					if (z < 0 || (z >= Globals->UNDERWORLD_LEVELS +
 								Globals->UNDERDEEP_LEVELS +
 								Globals->ABYSS_LEVEL + 2)) {
 						u->Error("CAST: Invalid Z coordinate specified.");
@@ -409,12 +409,12 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 			delete token;
 		}
 	}
-	if(x == -1) x = u->object->region->xloc;
-	if(y == -1) y = u->object->region->yloc;
-	if(z == -1) z = u->object->region->zloc;
+	if (x == -1) x = u->object->region->xloc;
+	if (y == -1) y = u->object->region->yloc;
+	if (z == -1) z = u->object->region->zloc;
 
 	CastRegionOrder *order;
-	if(spell == S_TELEPORTATION)
+	if (spell == S_TELEPORTATION)
 		order = new TeleportOrder;
 	else
 		order = new CastRegionOrder;
@@ -426,7 +426,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 
 	u->ClearCastOrders();
 	/* Teleports happen late in the turn! */
-	if(spell == S_TELEPORTATION)
+	if (spell == S_TELEPORTATION)
 		u->teleportorders = (TeleportOrder *)order;
 	else
 		u->castorders = order;
@@ -710,7 +710,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 {
 	int level = u->GetSkill(spell);
-	if(!level) {
+	if (!level) {
 		u->Error("CAST: You don't know that spell.");
 		return 0;
 	}
@@ -722,30 +722,30 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 	}
 
 	int rtype = regions.GetRegionArray(r->zloc)->levelType;
-	if((rtype == ARegionArray::LEVEL_NEXUS) &&
+	if ((rtype == ARegionArray::LEVEL_NEXUS) &&
 			!(range->flags & RangeType::RNG_NEXUS_SOURCE)) {
 		u->Error("CAST: Spell does not work from the Nexus.");
 		return 0;
 	}
 
-	if(!tar) {
+	if (!tar) {
 		u->Error("CAST: No such region.");
 		return 0;
 	}
 
 	rtype = regions.GetRegionArray(tar->zloc)->levelType;
-	if((rtype == ARegionArray::LEVEL_NEXUS) &&
+	if ((rtype == ARegionArray::LEVEL_NEXUS) &&
 			!(range->flags & RangeType::RNG_NEXUS_TARGET)) {
 		u->Error("CAST: Spell does not work to the Nexus.");
 		return 0;
 	}
 
-	if((rtype != ARegionArray::LEVEL_SURFACE) &&
+	if ((rtype != ARegionArray::LEVEL_SURFACE) &&
 			(range->flags & RangeType::RNG_SURFACE_ONLY)) {
 		u->Error("CAST: Spell can only target regions on the surface.");
 		return 0;
 	}
-	if(!(range->flags&RangeType::RNG_CROSS_LEVELS) && (r->zloc != tar->zloc)) {
+	if (!(range->flags&RangeType::RNG_CROSS_LEVELS) && (r->zloc != tar->zloc)) {
 		u->Error("CAST: Spell is not able to work across levels.");
 		return 0;
 	}
@@ -769,11 +769,11 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 	maxdist *= range->rangeMult;
 
 	int dist;
-	if(range->flags & RangeType::RNG_CROSS_LEVELS)
+	if (range->flags & RangeType::RNG_CROSS_LEVELS)
 		dist = regions.GetPlanarDistance(tar, r, range->crossLevelPenalty);
 	else
 		dist = regions.GetDistance(tar, r);
-	if(dist > maxdist) {
+	if (dist > maxdist) {
 		u->Error("CAST: Target region out of range.");
 		return 0;
 	}
@@ -817,7 +817,7 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 
 	// Figure out how many components there are
 	for(c=0; c<sizeof(ItemDefs[I_MPLATE].mInput)/sizeof(Materials); c++) {
-		if(ItemDefs[I_MPLATE].mInput[c].item != -1) count++;
+		if (ItemDefs[I_MPLATE].mInput[c].item != -1) count++;
 	}
 
 	while(max) {
@@ -827,18 +827,18 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 		for(c=0; c<sizeof(ItemDefs[I_MPLATE].mInput)/sizeof(Materials); c++) {
 			i = ItemDefs[I_MPLATE].mInput[c].item;
 			a = ItemDefs[I_MPLATE].mInput[c].amt;
-			if(i != -1) {
-				if(u->GetSharedNum(i) >= a) found++;
+			if (i != -1) {
+				if (u->GetSharedNum(i) >= a) found++;
 			}
 		}
 		// We do not, break.
-		if(found != count) break;
+		if (found != count) break;
 
 		// Decrement our inputs
 		for(c=0; c<sizeof(ItemDefs[I_MPLATE].mInput)/sizeof(Materials); c++) {
 			i = ItemDefs[I_MPLATE].mInput[c].item;
 			a = ItemDefs[I_MPLATE].mInput[c].amt;
-			if(i != -1) {
+			if (i != -1) {
 				u->ConsumeShared(i, a);
 			}
 		}
@@ -864,7 +864,7 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 
 	// Figure out how many components there are
 	for(c=0; c<sizeof(ItemDefs[I_MSWORD].mInput)/sizeof(Materials); c++) {
-		if(ItemDefs[I_MSWORD].mInput[c].item != -1) count++;
+		if (ItemDefs[I_MSWORD].mInput[c].item != -1) count++;
 	}
 
 	while(max) {
@@ -874,18 +874,18 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 		for(c=0; c<sizeof(ItemDefs[I_MSWORD].mInput)/sizeof(Materials); c++) {
 			i = ItemDefs[I_MSWORD].mInput[c].item;
 			a = ItemDefs[I_MSWORD].mInput[c].amt;
-			if(i != -1) {
-				if(u->GetSharedNum(i) >= a) found++;
+			if (i != -1) {
+				if (u->GetSharedNum(i) >= a) found++;
 			}
 		}
 		// We do not, break.
-		if(found != count) break;
+		if (found != count) break;
 
 		// Decrement our inputs
 		for(c=0; c<sizeof(ItemDefs[I_MSWORD].mInput)/sizeof(Materials); c++) {
 			i = ItemDefs[I_MSWORD].mInput[c].item;
 			a = ItemDefs[I_MSWORD].mInput[c].amt;
-			if(i != -1) {
+			if (i != -1) {
 				u->ConsumeShared(i, a);
 			}
 		}
@@ -911,7 +911,7 @@ int Game::RunCreateFood(ARegion *r,Unit *u)
 
 	// Figure out how many components there are
 	for(c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
-		if(ItemDefs[I_FOOD].mInput[c].item != -1) count++;
+		if (ItemDefs[I_FOOD].mInput[c].item != -1) count++;
 	}
 
 	while(max) {
@@ -921,18 +921,18 @@ int Game::RunCreateFood(ARegion *r,Unit *u)
 		for(c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
 			i = ItemDefs[I_FOOD].mInput[c].item;
 			a = ItemDefs[I_FOOD].mInput[c].amt;
-			if(i != -1) {
-				if(u->GetSharedNum(i) >= a) found++;
+			if (i != -1) {
+				if (u->GetSharedNum(i) >= a) found++;
 			}
 		}
 		// We do not, break.
-		if(found != count) break;
+		if (found != count) break;
 
 		// Decrement our inputs
 		for(c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
 			i = ItemDefs[I_FOOD].mInput[c].item;
 			a = ItemDefs[I_FOOD].mInput[c].amt;
-			if(i != -1) {
+			if (i != -1) {
 				u->ConsumeShared(i, a);
 			}
 		}
@@ -976,7 +976,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 	u->Event(AString("Constructs a Gate in ")+r->ShortPrint( &regions )+".");
 	regions.numberofgates++;
 	r->gate = regions.numberofgates;
-	if(Globals->GATES_NOT_PERENNIAL) {
+	if (Globals->GATES_NOT_PERENNIAL) {
 		int dm = Globals->GATES_NOT_PERENNIAL / 2;
 		int gm = month + 1 - getrandom(dm) - getrandom(dm) - getrandom(Globals->GATES_NOT_PERENNIAL % 2);
 		while(gm < 0) gm += 12;
@@ -987,7 +987,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 
 int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 {
-	if (!o->IsBuilding()) {
+	if (o->IsFleet() || !o->IsBuilding()) {
 		u->Error("Runes of Warding may only be engraved on a building.");
 		return 0;
 	}
@@ -1024,9 +1024,9 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 	}
 
 	u->ConsumeSharedMoney(600);
-	if( o->type == O_MFORTRESS ) {
+	if (o->type == O_MFORTRESS ) {
 		o->runes = 5;
-	} else if(o->type == O_MTOWER) {
+	} else if (o->type == O_MTOWER) {
 		o->runes = 4;
 	} else {
 		o->runes = 3;
@@ -1072,10 +1072,10 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 	int level = u->GetSkill(skill);
 	unsigned int c;
 	for(c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
-		if(ItemDefs[item].mInput[c].item == -1) continue;
+		if (ItemDefs[item].mInput[c].item == -1) continue;
 		int amt = u->GetSharedNum(ItemDefs[item].mInput[c].item);
 		int cost = ItemDefs[item].mInput[c].amt;
-		if(amt < cost) {
+		if (amt < cost) {
 			u->Error(AString("Doesn't have sufficient ") +
 					ItemDefs[ItemDefs[item].mInput[c].item].name +
 					" to create that.");
@@ -1085,7 +1085,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 
 	// Deduct the costs
 	for(c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
-		if(ItemDefs[item].mInput[c].item == -1) continue;
+		if (ItemDefs[item].mInput[c].item == -1) continue;
 		int cost = ItemDefs[item].mInput[c].amt;
 		u->ConsumeShared(ItemDefs[item].mInput[c].item, cost);
 	}
@@ -1162,7 +1162,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 	CastIntOrder *order = (CastIntOrder *) u->castorders;
 	int type = regions.GetRegionArray(r->zloc)->levelType;
 
-	if(type != ARegionArray::LEVEL_SURFACE) {
+	if (type != ARegionArray::LEVEL_SURFACE) {
 		AString error = "CAST: Bird Lore may only be cast on the surface of ";
 		error += Globals->WORLD_NAME;
 		error += ".";
@@ -1370,10 +1370,10 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
 	CastRegionOrder *order = (CastRegionOrder *)u->castorders;
 
 	RangeType *range = FindRange(SkillDefs[S_CLEAR_SKIES].range);
-	if(range != NULL) {
+	if (range != NULL) {
 		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 		val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES);
-		if(!val) return 0;
+		if (!val) return 0;
 		temp += " on ";
 		temp += tar->ShortPrint(&regions);
 	}
@@ -1393,11 +1393,11 @@ int Game::RunWeatherLore(ARegion *r, Unit *u)
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 	val = GetRegionInRange(r, tar, u, S_WEATHER_LORE);
-	if(!val) return 0;
+	if (!val) return 0;
 
 	int level = u->GetSkill(S_WEATHER_LORE);
 	int months = 3;
-	if(level >= 5) months = 12;
+	if (level >= 5) months = 12;
 	else if (level >= 3) months = 6;
 
 	AString temp = "Casts Weather Lore on ";
@@ -1410,9 +1410,9 @@ int Game::RunWeatherLore(ARegion *r, Unit *u)
 		temp += SeasonNames[weather];
 		temp += " in ";
 		temp += MonthNames[futuremonth];
-		if(i < (months-1))
+		if (i < (months-1))
 			temp += ", ";
-		else if(i == (months-1))
+		else if (i == (months-1))
 			temp += " and ";
 		else
 			temp += ".";
@@ -1430,7 +1430,7 @@ int Game::RunFarsight(ARegion *r,Unit *u)
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 	val = GetRegionInRange(r, tar, u, S_FARSIGHT);
-	if(!val) return 0;
+	if (!val) return 0;
 
 	Farsight *f = new Farsight;
 	f->faction = u->faction;
@@ -1464,7 +1464,7 @@ int Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 		ARegion *tar = r->neighbors[i];
 		if (tar) {
 			if (tar->gate) {
-				if(Globals->DETECT_GATE_NUMBERS) {
+				if (Globals->DETECT_GATE_NUMBERS) {
 					u->Event(tar->Print(&regions) +
 					    " contains Gate " + tar->gate +
 					    ".");
@@ -1490,7 +1490,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 	val = GetRegionInRange(r, tar, u, S_TELEPORTATION);
-	if(!val) return 0;
+	if (!val) return 0;
 
 	int level = u->GetSkill(S_TELEPORTATION);
 	int maxweight = level * 15;
@@ -1516,7 +1516,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 {
 	int level = u->GetSkill(S_GATE_LORE);
 	int nexgate = 0;
-	if( !level ) {
+	if ( !level ) {
 		u->Error( "CAST: Unit doesn't have that skill." );
 		return 0;
 	}
@@ -1575,15 +1575,15 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 		int gatenum = getrandom(regions.numberofgates);
 		tar = regions.FindGate(gatenum+1);
 
-		if(tar && tar->zloc == r->zloc) good = 1;
-		if(tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
+		if (tar && tar->zloc == r->zloc) good = 1;
+		if (tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
 			good = 1;
 
 		while( !good ) {
 			gatenum = getrandom(regions.numberofgates);
 			tar = regions.FindGate(gatenum+1);
-			if(tar && tar->zloc == r->zloc) good = 1;
-			if(tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
+			if (tar && tar->zloc == r->zloc) good = 1;
+			if (tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
 				good = 1;
 		}
 
@@ -1599,7 +1599,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 			u->Error("CAST: No such target gate.");
 			return 0;
 		}
-		if(!tar->gateopen) {
+		if (!tar->gateopen) {
 		    u->Error("CAST: Target gate not open at this time of year.");
 		    return 0;
 		}

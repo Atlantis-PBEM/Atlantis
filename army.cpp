@@ -34,6 +34,9 @@ enum {
 
 Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 {
+	AString abbr;
+	int i, item, armorType;
+
 	race = r;
 	unit = u;
 	building = 0;
@@ -70,6 +73,26 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	amuletofi = 0;
 	battleItems = 0;
 
+	/* Special case to allow protection from ships */
+	if (o->IsFleet() && o->capacity < 1 && o->shipno < o->ships.Num()) {
+		int objectno;
+
+		i = 0;
+		forlist(&o->ships) {
+			Item *ship = (Item *) elem;
+			if (o->shipno == i) {
+				abbr = ItemDefs[ship->type].name;
+				objectno = LookupObject(&abbr);
+				if (objectno >= 0 && ObjectDefs[objectno].protect > 0) {
+					o->capacity = ObjectDefs[objectno].protect * ship->num;
+					o->type = objectno;
+				}
+				o->shipno++;
+			}
+			i++;
+			if (o->capacity > 0) break;
+		}
+	}
 	/* Building bonus */
 	if (o->capacity) {
 		building = o->type;
@@ -131,8 +154,6 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	SetupCombatItems();
 
 	// Set up armor
-	AString abbr;
-	int i, item, armorType;
 	for(i = 0; i < MAX_READY; i++) {
 		// Check preferred armor first.
 		item = unit->readyArmor[i];

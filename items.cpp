@@ -121,14 +121,14 @@ static AString DefType(int atype)
 int LookupItem(AString *token)
 {
 	// hack... compatibility for obsolete ship types:
-	if (*token=="CLIP") *token = "KNARR";
-	if (*token=="GLON") *token = "COG";
+	// if (*token=="CLIP") *token = "KNARR";
+	// if (*token=="GLON") *token = "COG";
 	for(int i = 0; i < NITEMS; i++) {
-	    if (ItemDefs[i].type & IT_ILLUSION)  {
-	        if (*token == (AString("i") + ItemDefs[i].abr)) return i;
-        } else {
+		if (ItemDefs[i].type & IT_ILLUSION)  {
+	        	if (*token == (AString("i") + ItemDefs[i].abr)) return i;
+		} else {
 			if (*token == ItemDefs[i].abr) return i;
-	    }
+		}
 	}
 	return -1;
 }

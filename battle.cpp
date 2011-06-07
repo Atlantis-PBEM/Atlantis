@@ -564,6 +564,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 			forlist(&r2->objects) {
 				/* Can't get building bonus in another region */
 				((Object *) elem)->capacity = 0;
+				((Object *) elem)->shipno = ((Object *) elem)->ships.Num();
 			}
 		} else {
 			forlist(&r2->objects) {
@@ -571,6 +572,10 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 				/* Set building capacity */
 				if (o->incomplete < 1 && o->IsBuilding()) {
 					o->capacity = ObjectDefs[o->type].protect;
+					o->shipno = 0;
+				} else if (o->IsFleet()) {
+					o->capacity = 0;
+					o->shipno = 0;
 				}
 			}
 		}
