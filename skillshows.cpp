@@ -61,15 +61,32 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 		case S_MINING:
 			if(level > 1) break;
-			*str += "This skill deals with all aspects of extracting raw "
-				"metals and gems from the earth. Metals and gems tend to be "
-				"found more often in mountainous regions, but may be found "
-				"elsewhere as well.";
+			if (ITEM_ENABLED(I_IRON) ||
+				ITEM_ENABLED(I_MITHRIL) ||
+				ITEM_ENABLED(I_ADMANTIUM) ||
+				ITEM_ENABLED(I_GEMS)) {
+				*str += "This skill deals with all aspects of extracting raw ";
+				if (ITEM_ENABLED(I_IRON) ||
+					ITEM_ENABLED(I_MITHRIL) ||
+					ITEM_ENABLED(I_ADMANTIUM)) {
+					*str += "metals";
+					if (ITEM_ENABLED(I_GEMS)) {
+						*str += " and gems";
+					}
+				} else {
+					*str += "gems";
+				}
+				*str += " from the earth. They tend to be found more often "
+					"in mountainous regions, but may be found "
+					"elsewhere as well.";
+			} else {
+				*str += "The mining skill is overrated.";
+			}
 			break;
 		case S_LUMBERJACK:
 			if(level > 1) break;
 			*str += "This skill deals with all aspects of various wood "
-			    "production. Woods are more often found in forests, but "
+			    "production. Wood is most often found in forests, but "
 				"may also be found elsewhere.";
 			break;
 		case S_QUARTERMASTER:

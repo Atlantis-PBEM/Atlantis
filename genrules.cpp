@@ -507,7 +507,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "and apprentices ";
 		temp += "the faction may have. (More information on all of the "
 			"faction activities is in further sections of the rules).  Here "
-			"is a chart detailing the limits on factions by Faction Points.";
+			"is a chart detailing the limits on factions by Faction Points:";
 		f.Paragraph(temp);
 		f.LinkRef("tablefactionpoints");
 		f.Enclose(1, "center");
@@ -708,7 +708,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"unit, and all the people in a particular unit must be in the same "
 		"place at all times.  If you want to send people in the same unit "
 		"to different places, you must split up the unit.  Apart from "
-		"this, there is no difference between having one unit of 50 people, "
+		"this, there is little difference between having one unit of 50 people, "
 		"or 50 units of one person each, except that the former is very "
 		"much easier to handle.";
 	f.Paragraph(temp);
@@ -1454,11 +1454,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		f.Enclose(0, "table");
 		f.Enclose(0, "center");
-		temp = "The skill level is the level of shipbuilding skill required "
-			"to build that ship type. Higher levels also gain more bonuses to "
-			"movement if manned with sailing crews of high skill. The fleet "
-			"column indicates whether the ship travels within a fleet or can "
-			"only sail alone.";
+		temp = "The skill column is the level of shipbuilding skill required "
+			"to build that ship type.";
 		f.Paragraph(temp);
 	}
 	f.LinkRef("movement_order");
@@ -2134,7 +2131,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "td align=\"left\" nowrap");
 		comma = 0;
 		temp = "";
-		if (ItemDefs[k].flags & ItemType::ORINPUTS)
+		if (ItemDefs[i].flags & ItemType::ORINPUTS)
 			temp = "Any of : ";
 		for(j = 0; j < (int) (sizeof(ItemDefs->pInput) /
 						sizeof(ItemDefs->pInput[0])); j++) {
@@ -2610,7 +2607,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"construction tends to depend on the Shipbuilding skill, not "
 			"the Building skill. ";
 		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-			temp += "Only faction with at least one faction point spent on "
+			temp += "Only factions with at least one faction point spent on "
 				"trade can issue ";
 			temp += f.Link("#build", "BUILD") + " orders. ";
 		}
@@ -2720,7 +2717,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"All units may ";
 	temp += f.Link("#work", "WORK") + ", regardless of skills";
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-		temp += "or faction type";
+		temp += " or faction type";
 	temp += ".";
 	f.Paragraph(temp);
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
@@ -2950,7 +2947,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "Illusory ";
 		temp += "creatures will assist in taxation. ";
 	}
-	temp +=	"Each taxing character can collect a minimum of $";
+	temp +=	"Each taxing character can collect $";
 	temp += AString(Globals->TAX_BASE_INCOME) + ", though if the number of "
 		"taxers would tax more than the available tax income, the tax "
 		"income is split evenly among all taxers.";
@@ -4460,7 +4457,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("evict");
 	f.TagText("h4", "EVICT [unit] ...");
 	temp = "Evict the specified unit from the object of which you are "
-		"currently the owner.  If multipe EVICT orders are given, all "
+		"currently the owner.  If multiple EVICT orders are given, all "
 		"of the units will be evicted.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
@@ -4641,7 +4638,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"final form of the GIVE order gives the entire unit to the "
 		"specified unit's faction.";
 	f.Paragraph(temp);
-	temp = "The classes of items which are exceptable for the fourth form of "
+	temp = "The classes of items which are acceptable for the fourth form of "
 		"this order are, NORMAL, ADVANCED, TRADE, MAN or MEN, MONSTER or "
 		"MONSTERS, MAGIC, WEAPON OR WEAPONS, ARMOR, MOUNT or MOUNTS, BATTLE, "
 		"SPECIAL, TOOL or TOOLS, FOOD, and ITEM or ITEMS (which is the "
@@ -5259,10 +5256,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Spend the month studying the specified skill. "
 	       "A level may be specified which means that study "
 	       "will be continued from turn to turn until the unit "
-	       " reaches that skill level. "
-	       "Study may not be used as a repeating order using "
-	       "the &#64; sign, instead a target level must be "
-	       "given for repeated study.";
+	       " reaches that skill level. ";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Study horse training.";
@@ -5438,7 +5432,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "Use unclaimed funds to aquire basic items that you need. "
 			"If you do not have sufficient unclaimed, or if you try "
 			"withdraw any other than a basic item, an error will be given. "
-			"Withdraw can NOT be used in the Nexus (to prevent building "
+			"Withdraw CANNOT be used in the Nexus (to prevent building "
 			"towers and such there).  The first form is the same as "
 			"WITHDRAW 1 [item] in the second form.";
 		f.Paragraph(temp);
