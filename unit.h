@@ -277,6 +277,10 @@ class Unit : public AListElem
 		Order *presentMonthOrders;
 		int presentTaxing;
 		Unit *former;
+
+protected:
+	void limitSkillNoMagic();
+	void limitSkillMagic();
 };
 
 #endif
