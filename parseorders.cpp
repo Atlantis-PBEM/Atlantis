@@ -493,7 +493,7 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			break;
 		case O_DESTROY:
 			ProcessDestroyOrder(unit, pCheck);
-		break;
+			break;
 		case O_ENTER:
 			ProcessEnterOrder(unit, o, pCheck);
 			break;
@@ -1839,38 +1839,38 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 	// parse study level:
 	token = o->gettoken();
-	if(token) {
-    	order->level = token->value();
-    	delete token;
-    	int skmax = u->GetSkillMax(sk);
-    	if (skmax == 0) skmax = 5; // hack to allow newly formed units to use this
-    	if(u->GetSkillMax(sk) < order->level) {
-    		order->level = u->GetSkillMax(sk);
-    		if(u->GetRealSkill(sk) >= order->level) {
-    			AString err = "STUDY: cannot study ";
-    			err += SkillDefs[sk].name;
-    			err += " beyond level ";
-    			err += order->level;
-    			err += ".";
-    			ParseError(pCheck, u, 0, err);
-    			return;
-    		} else {
-    			AString err = "STUDY: set study goal for ";
-    			err += SkillDefs[sk].name;
-    			err += " to the maximum achievable level (";
-    			err += order->level;
-    			err += ").";
-    			ParseError(pCheck, u, 0, err);
-    		}
-    	}
+	if (token) {
+		order->level = token->value();
+		delete token;
+		int skmax = u->GetSkillMax(sk);
+		if (skmax == 0) skmax = 5; // hack to allow newly formed units to use this
+		if (skmax < order->level) {
+			order->level = skmax;
+			if (u->GetRealSkill(sk) >= order->level) {
+				AString err = "STUDY: cannot study ";
+				err += SkillDefs[sk].name;
+				err += " beyond level ";
+				err += order->level;
+				err += ".";
+				ParseError(pCheck, u, 0, err);
+				return;
+			} else {
+				AString err = "STUDY: set study goal for ";
+				err += SkillDefs[sk].name;
+				err += " to the maximum achievable level (";
+				err += order->level;
+				err += ").";
+				ParseError(pCheck, u, 0, err);
+			}
+		}
 	} else order->level = -1;
-	if((order->level != -1) && (u->GetRealSkill(sk) >= order->level)) {
+	if ((order->level != -1) && (u->GetRealSkill(sk) >= order->level)) {
 		AString err = "STUDY: already reached specified level, nothing to study.";
 		ParseError(pCheck, u, 0, err);
 		return;
 	}
 	
-	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
+	if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 	u->monthorders = order;
 }
 

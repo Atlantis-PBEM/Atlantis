@@ -67,6 +67,10 @@ static GameDefs g = {
 	4, /* SHIP_SPEED */
 	6, /* FLY_SPEED */
 	8, /* MAX_SPEED */
+	2, /* FLEET_WIND_BOOST */
+	0, /* FLEET_CREW_BOOST */
+	0, /* FLEET_LOAD_BOOST */
+
 
 	10, /* STUDENTS_PER_TEACHER */
 	10, /* MAINTENANCE_COST */

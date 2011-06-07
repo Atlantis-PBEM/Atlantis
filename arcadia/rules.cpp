@@ -67,6 +67,9 @@ static GameDefs g = {
 	8, /* SHIP_SPEED */   //This is no longer used!
 	6, /* FLY_SPEED */
 	16, /* MAX_SPEED */
+	2, /* FLEET_WIND_BOOST */
+	0, /* FLEET_CREW_BOOST */
+	0, /* FLEET_LOAD_BOOST */
 
 	10, /* STUDENTS_PER_TEACHER */
 	10, /* MAINTENANCE_COST */

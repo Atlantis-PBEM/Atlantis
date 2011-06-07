@@ -324,6 +324,9 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 			temp += AString(" Load: ") + FleetLoad() + "/" + FleetCapacity() + ";";
 			temp += AString(" Sailors: ") + FleetSailingSkill(1) + "/" + GetFleetSize() + ";";
 			temp += AString(" MaxSpeed: ") + GetFleetSpeed(1);
+			if (describe) {
+				temp += AString("; ") + *describe;
+			}
 		}
 		temp += ".";
 		f->PutStr(temp);
@@ -613,73 +616,74 @@ int Object::GetFleetSize()
  */
 int Object::GetFleetSpeed(int report)
 {
-	if(type != O_FLEET) return 0;
 	int tskill = FleetSailingSkill(report);
-	int speed = Globals->SHIP_SPEED;
-	int inertia = 0;
+	int speed = Globals->FLY_SPEED;
+	int weight = 0;
 	int capacity = 0;
-	int skillreq = 0;
-	int minskill = 0;
-	for(int item=0; item<NITEMS; item++) {
+	int bonus;
+	int windbonus = 0;
+
+	if (type != O_FLEET) return 0;
+
+	for (int item = 0; item < NITEMS; item++) {
 		int num = GetNumShips(item);
 		if (num > 0) {
-			if(ItemDefs[item].pLevel > minskill) minskill = ItemDefs[item].pLevel;
-			skillreq += num * ItemDefs[item].pLevel;
-			inertia += num * ItemDefs[item].weight;
+			weight += num * ItemDefs[item].weight;
 			if (ItemDefs[item].fly > 0) {
 				capacity += num * ItemDefs[item].fly;
 			} else {
+				speed = Globals->SHIP_SPEED;
 				capacity += num * ItemDefs[item].swim;
 			}
 		}
 	}
 	// no ships no speed
-	if (inertia < 1) return 0;
-	
+	if (weight < 1) return 0;
+
 	// check for sufficient sailing skill!
-	if(tskill < (inertia / 50)) return 0;
+	if (tskill < (weight / 50)) return 0;
 	
-	// check for wind mages & sailor bonus
-	int windbonus = 0;
-	int sailexp = 0;
-	int sailors = 0;
+	// count wind mages
 	forlist(&units) {
 		Unit * unit = (Unit *) elem;
 		int wb = unit->GetAttribute("wind");
-		if(wb > 0) windbonus += (wb+1) * (wb+1) * 8;
-		int sb = unit->GetSkill(S_SAILING);
-		if(sb > 0) {
-			sailors += unit->GetMen();
-			sailexp += unit->GetMen() * sb;
+		if (wb > 0) {
+			windbonus += wb * 12 * Globals->FLEET_WIND_BOOST;
 		}
 	}
-	// sailexp = sailexp / sailors;
-	// up to 50% speed gain through wind:
-	speed += (Globals->SHIP_SPEED / 2) * windbonus / (inertia / 10);
-	/* less than required skill: speed = 0!
-	//minskill = minskill-2;
-	if(minskill < 1) minskill = 1; 
-	if (sailexp < minskill) return 0; */
-	//Awrite(AString("FLEET SPEED: speed: ") + speed + ", sailexp: " + sailexp + ", min: " + minskill + ".");
-	// speed bonus due to skill level and more sailors
-	int boost = 125; // * capacity / inertia;
-	int skillbonus = 100 * sailexp / (inertia / 50);
-	//if (skillbonus > minskill) skillbonus = minskill;
-	int bonus1 = 1000;
-	if(skillbonus > 100) bonus1 += boost * sailexp / (inertia / 50);
-	int bonus2 = 1000 * tskill / ((inertia / 50) + 1) + boost * 2;
-	//Awrite(AString("Speed bonus1: ") + bonus1 + ", bonus2: " + bonus2);
-	if (bonus2 < bonus1) bonus1 = bonus2;
-	// speed bonus due to low load
-    int loadfactor = (capacity / FleetLoad()) - 1;
-	if(loadfactor >= 1) bonus1 += boost * loadfactor;
-	if(bonus1 > 1000) {
-		bonus1 -= 1000;
-		speed += (Globals->SHIP_SPEED / 4) * bonus1 / 1000;
+	// speed gain through wind:
+	bonus = windbonus / (weight / 50);
+	if (bonus > Globals->FLEET_WIND_BOOST)
+		bonus = Globals->FLEET_WIND_BOOST;
+	speed += bonus;
+
+	// speed bonus due to more / better skilled sailors:
+	bonus = 0;
+	while (tskill >= (weight / 25)) {
+		bonus++;
+		tskill /= 2;
 	}
-	if(speed > Globals->MAX_SPEED) speed = Globals->MAX_SPEED;
-	//Awrite(AString("FLEET skillreq: ") + skillreq + ", inertia/50: " + inertia/50 + ", boost: " + boost);
-	//Awrite(AString("FLEET BOOST: speed: ") + speed + ", loadfactor: " + loadfactor + ", final bonus: " + bonus1);	
+	if (bonus > Globals->FLEET_CREW_BOOST)
+		bonus = Globals->FLEET_CREW_BOOST;
+	speed += bonus;
+
+	// check for being overloaded
+	if (FleetLoad() > capacity) return 0;
+	
+	// speed bonus due to low load:
+	int loadfactor = (capacity / FleetLoad());
+	bonus = 0;
+	while (loadfactor >= 2) {
+		bonus++;
+		loadfactor /= 2;
+	}
+	if (bonus > Globals->FLEET_LOAD_BOOST)
+		bonus = Globals->FLEET_LOAD_BOOST;
+	speed += bonus;
+
+	// Cap everything at max speed
+	if (speed > Globals->MAX_SPEED) speed = Globals->MAX_SPEED;
+
 	return speed;
 }
 

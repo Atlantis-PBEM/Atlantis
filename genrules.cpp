@@ -1348,8 +1348,33 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Paragraph(temp);
 		temp = AString("Ships get ") + NumToWord(Globals->SHIP_SPEED);
 		temp += AString(" movement point") + (Globals->SHIP_SPEED==1?"":"s");
-		temp += " per turn.  A ship can move from an ocean region to "
-			"another ocean region, or from a coastal region to an ocean "
+		temp += " per turn.";
+		if (Globals->FLEET_CREW_BOOST > 0) {
+			temp += " Ships get an extra movement point for each "
+				"time they double the number of required crew, "
+				"up to a maximum of ";
+			temp += NumToWord(Globals->FLEET_CREW_BOOST);
+			temp += " extra point";
+			if (Globals->FLEET_CREW_BOOST > 1) temp += "s";
+			temp += ".";
+		}
+		if (Globals->FLEET_LOAD_BOOST > 0) {
+			temp += " Ships get extra movement points if they are "
+				"only lightly loaded. One extra point is given "
+				"if they are at 1/2 capacity or less";
+			if (Globals->FLEET_LOAD_BOOST > 1) {
+				temp += "; a second is given if they are at "
+					"1/4 capacity or less";
+				if (Globals->FLEET_LOAD_BOOST > 2) {
+					temp += ", and so on up to a maximum of ";
+					temp += NumToWord(Globals->FLEET_LOAD_BOOST);
+
+				}
+			}
+			temp += ".";
+		}
+		temp += " A ship can move from an ocean region to another "
+			"ocean region, or from a coastal region to an ocean "
 			"region, or from an ocean region to a coastal region.";
 		if (Globals->PREVENT_SAIL_THROUGH) {
 			temp += " Ships may not sail through single hex land masses "

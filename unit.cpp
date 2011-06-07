@@ -1114,7 +1114,7 @@ int Unit::Practice(int sk)
 	}
 
 	if (bonus) {
-		if(!Globals->REQUIRED_EXPERIENCE) {
+		if (!Globals->REQUIRED_EXPERIENCE) {
 			Study(sk, men * bonus);
 		} else {
 			Skill *s;

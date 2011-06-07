@@ -601,92 +601,20 @@ AString *ShowSkill::Report(Faction *f)
 				*str += "A mage with knowledge of Summon Wind can summon "
 					   "up the powers of the wind to aid him in sea or "
 					   "air travel. Usage of this spell is automatic. ";
+				if (Globals->FLEET_WIND_BOOST > 0) {
+					*str += "A mage with this skill will add ";
+					*str += Globals->FLEET_WIND_BOOST;
+					*str += " movement points to ships requiring up to "
+						"12 sailing skill points per skill level "
+						"of Summon Wind. ";
+				}
 					 
 				/*
 				*str += " If the mage is flying, he will receive 2 extra "
 					   "movement points.";
 					   */
+				*str += "The effects of all such mages in a fleet are cumulative. ";	
 			}
-			if(level > 0) {
-				int wind1 = (level+1) * (level+1) * 8;
-				int wind0 = level * level * 8;
-				int max1 = 0;
-				int max2 = 0;
-				int max3 = 0;
-				int item1 = -1;
-				int item2 = -1;
-				int item3 = -1;
-				for(int item=0; item<NITEMS; item++) {
-					if(ItemDefs[item].type & IT_SHIP) {
-						if(ItemDefs[item].flags & ItemType::DISABLED) continue;
-						int pub = 1;
-						for(int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(Materials); c++) {
-							int m = ItemDefs[item].pInput[c].item;
-							if(m != -1) {
-								if(ItemDefs[m].flags & ItemType::DISABLED) pub = 0;
-								if((ItemDefs[m].type & IT_ADVANCED) ||
-									(ItemDefs[m].type & IT_MAGIC)) pub = 0;
-							}
-						}
-						if(pub == 0) continue;
-						int slevel = ItemDefs[item].pLevel;
-						if(slevel > 3) continue;
-						int mass = ItemDefs[item].weight / 10;
-						if((wind1 >= mass*3) && (wind0 < mass*3)) {
-							if(mass >= max3) {
-								max3 = mass;
-								item3 = item;
-							}
-						} else if((wind1 >= mass*2) && (wind0 < mass*2)) {
-							if(mass >= max2) {
-								max2 = mass;
-								item2 = item;
-							}
-						} else if((wind1 >= mass) && (wind0 < mass)) {
-							if(mass >= max1) {
-								max1 = mass;
-								item1 = item;
-							}
-						}
-					}
-				}
-				if((item1 != -1) || (item2 != -1) || (item3 != -1)) {
-					*str += "At this level, a mage will effect a full bonus of ";
-					switch(Globals->SHIP_SPEED / 2) {
-						case '1': *str += "one ";
-							break;
-						case '2': *str += "two ";
-							break;
-						case '3': *str += "three ";
-							break;
-						case '4': *str += "four";
-							break;
-						default: *str += "two ";
-					}				
-					*str += "move points for";
-					int ctr = 0;
-					if(item1 != -1) {
-						*str += " one ";
-						*str += ItemDefs[item1].name;
-						ctr++;
-					}
-					if(item2 != -1) {
-						if(ctr++ > 0) {
-							if(item3 == -1) *str += " or ";
-							else *str += ", ";
-						}
-						*str += "two ";
-						*str += ItemDefs[item2].names;
-					}
-					if(item3 != -1) {
-						if(ctr > 0) *str += " or ";
-						*str += "three ";
-						*str += ItemDefs[item3].names;
-					}
-					*str += ", for instance. ";
-				}
-			}
-			*str += "The effects of all such mages in a fleet are cumulative. ";	
 			break;
 		case S_SUMMON_STORM:
 			if(level > 1) break;
