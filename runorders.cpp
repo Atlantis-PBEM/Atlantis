@@ -2838,24 +2838,31 @@ void Game::CheckTransportOrders()
 					}
 
 					// make sure target is in range.
-					int maxdist;
-					int dist = regions.GetDistance(r, tar->region);
+					int dist, maxdist;
 					if ((o->type == O_TRANSPORT) &&
 						(u == obj->GetOwner()) &&
 						(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)) {
 						maxdist = Globals->NONLOCAL_TRANSPORT;
-						if (maxdist >= 0 &&
+						if (maxdist > 0 &&
 							Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
 							int level = u->GetSkill(S_QUARTERMASTER);
 							maxdist += ((level + 1)/3);
-						} else if (maxdist == 0)
-							maxdist = 10000000;
+						}
 					} else
 						maxdist = Globals->LOCAL_TRANSPORT;
-					if (dist > maxdist) {
-						u->Error(ordertype + ": Recipient is too far away.");
-						o->type = NORDERS;
-						continue;
+					int penalty = 10000000;
+					RangeType *rt = FindRange("rng_transport");
+					if (rt) penalty = rt->crossLevelPenalty;
+					if (maxdist > 0) {
+						// 0 maxdist represents unlimited range
+						dist = regions.GetPlanarDistance(r, tar->region, penalty, maxdist);
+						if (dist > maxdist) {
+							u->Error(ordertype + ": Recipient is too far away.");
+							o->type = NORDERS;
+							continue;
+						}
+					} else {
+						dist = regions.GetPlanarDistance(r, tar->region, penalty, Globals->LOCAL_TRANSPORT);
 					}
 
 					// On long range transport or distribute, make sure the
@@ -2963,7 +2970,10 @@ void Game::RunTransportOrders()
 
 					u->ConsumeShared(t->item, amt);
 					// now see if the unit can pay for shipping
-					int dist = regions.GetDistance(r, tar->region);
+					int penalty = 10000000;
+					RangeType *rt = FindRange("rng_transport");
+					if (rt) penalty = rt->crossLevelPenalty;
+					int dist = regions.GetPlanarDistance(r, tar->region, penalty, Globals->LOCAL_TRANSPORT);
 					int weight = ItemDefs[t->item].weight * amt;
 					if (weight == 0 && Globals->FRACTIONAL_WEIGHT > 0)
 						weight = (amt/Globals->FRACTIONAL_WEIGHT) + 1;

@@ -2284,7 +2284,8 @@ ARegion *ARegionList::FindGate(int x)
 	return 0;
 }
 
-int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty)
+int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two,
+		int penalty, int maxdist)
 {
 	if (one->zloc == ARegionArray::LEVEL_NEXUS ||
 			two->zloc == ARegionArray::LEVEL_NEXUS)
@@ -2308,55 +2309,103 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty)
 	two_x = two->xloc * GetLevelXScale(two->zloc);
 	two_y = two->yloc * GetLevelYScale(two->zloc);
 
-	maxy = one_y - two_y;
-	if (maxy < 0) maxy=-maxy;
+	if (Globals->ICOSAHEDRAL_WORLD) {
+		int zdist, i;
+		ARegion *start, *target, *queue;
 
-	int maxx = one_x - two_x;
-	if (maxx < 0) maxx = -maxx;
+		start = pArr->GetRegion(one_x, one_y);
+		if (start == 0) {
+			one_x += GetLevelXScale(one->zloc) - 1;
+			one_y += GetLevelYScale(one->zloc) - 1;
+			start = pArr->GetRegion(one_x, one_y);
+		}
 
-	int max2 = one_x + pArr->x - two_x;
-	if (max2 < 0) max2 = -max2;
-	if (max2 < maxx) maxx = max2;
+		target = pArr->GetRegion(two_x, two_y);
+		if (target == 0) {
+			two_x += GetLevelXScale(two->zloc) - 1;
+			two_y += GetLevelYScale(two->zloc) - 1;
+			target = pArr->GetRegion(two_x, two_y);
+		}
 
-	max2 = one_x - (two_x + pArr->x);
-	if (max2 < 0) max2 = -max2;
-	if (max2 < maxx) maxx = max2;
+		if (start == 0 || target == 0) {
+			// couldn't find equivalent locations on
+			// the surface (this should never happen)
+			Awrite(AString("Unable to find ends pathing from (") +
+				one->xloc + "," +
+				one->yloc + "," +
+				one->zloc + ") to (" +
+				two->xloc + "," +
+				two->yloc + "," +
+				two->zloc + ")!");
+			return 10000000;
+		}
 
-	if (maxy > maxx) maxx = (maxx+maxy)/2;
+		forlist(this) {
+			ARegion *r = (ARegion *) elem;
+			r->distance = -1;
+			r->next = 0;
+		}
+		
+		zdist = (one->zloc - two->zloc);
+		if (zdist < 0) zdist = -zdist;
+		start->distance = zdist * penalty;
+		queue = start;
+		while (maxdist == -1 || start->distance <= maxdist) {
+			if (start->xloc == two_x && start->yloc == two_y) {
+				// found our target within range
+				return start->distance;
+			}
+			// add neighbours to the search list
+			for (i = 0; i < NDIRS; i++)
+				if (start->neighbors[i] &&
+					start->neighbors[i]->distance == -1) {
+					queue->next = start->neighbors[i];
+					queue = queue->next;
+					queue->distance = start->distance + 1;
+				}
+			start = start->next;
+			if (start == 0)
+			{
+				// ran out of hexes to search
+				// (this should never happen)
+				Awrite(AString("Unable to find path from (") +
+					one->xloc + "," +
+					one->yloc + "," +
+					one->zloc + ") to (" +
+					two->xloc + "," +
+					two->yloc + "," +
+					two->zloc + ")!");
+				return 10000000;
+			}
+		}
+		// didn't find the target within range
+		return start->distance;
+	} else {
+		maxy = one_y - two_y;
+		if (maxy < 0) maxy=-maxy;
 
-	if (one->zloc != two->zloc) {
-		int zdist = (one->zloc - two->zloc);
-		if ((two->zloc - one->zloc) > zdist)
-			zdist = two->zloc - one->zloc;
-		maxx += (penalty * zdist);
+		int maxx = one_x - two_x;
+		if (maxx < 0) maxx = -maxx;
+
+		int max2 = one_x + pArr->x - two_x;
+		if (max2 < 0) max2 = -max2;
+		if (max2 < maxx) maxx = max2;
+
+		max2 = one_x - (two_x + pArr->x);
+		if (max2 < 0) max2 = -max2;
+		if (max2 < maxx) maxx = max2;
+
+		if (maxy > maxx) maxx = (maxx+maxy)/2;
+
+		if (one->zloc != two->zloc) {
+			int zdist = (one->zloc - two->zloc);
+			if ((two->zloc - one->zloc) > zdist)
+				zdist = two->zloc - one->zloc;
+			maxx += (penalty * zdist);
+		}
+
+		return maxx;
 	}
-
-	return maxx;
-}
-
-int ARegionList::GetDistance(ARegion *one, ARegion *two)
-{
-	if (one->zloc != two->zloc) return(10000000);
-
-	ARegionArray *pArr = pRegionArrays[one->zloc];
-
-	int maxy;
-	maxy = one->yloc - two->yloc;
-	if (maxy < 0) maxy = -maxy;
-
-	int maxx = one->xloc - two->xloc;
-	if (maxx < 0) maxx = -maxx;
-
-	int max2 = one->xloc + pArr->x - two->xloc;
-	if (max2 < 0) max2 = -max2;
-	if (max2 < maxx) maxx = max2;
-
-	max2 = one->xloc - (two->xloc + pArr->x);
-	if (max2 < 0) max2 = -max2;
-	if (max2 < maxx) maxx = max2;
-
-	if (maxy > maxx) return (maxx + maxy) / 2;
-	return maxx;
 }
 
 ARegionArray *ARegionList::GetRegionArray(int level)

@@ -4924,6 +4924,7 @@ static RangeType rtd[] = {
 	{"rng_farsight", 0, RangeType::RNG_LEVEL2, 4, 4},
 	{"rng_weather", 0, RangeType::RNG_LEVEL2, 4, 4},
 	{"rng_clearsky", 0, RangeType::RNG_LEVEL2, 2, 4},
+	{"rng_transport", 0, RangeType::RNG_ABSOLUTE, 1, 10000000},
 };
 
 RangeType *RangeDefs = rtd;

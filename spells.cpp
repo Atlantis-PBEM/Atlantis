@@ -781,10 +781,7 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 	maxdist *= range->rangeMult;
 
 	int dist;
-	if (range->flags & RangeType::RNG_CROSS_LEVELS)
-		dist = regions.GetPlanarDistance(tar, r, range->crossLevelPenalty);
-	else
-		dist = regions.GetDistance(tar, r);
+	dist = regions.GetPlanarDistance(tar, r, range->crossLevelPenalty, maxdist);
 	if (dist > maxdist) {
 		u->Error("CAST: Target region out of range.");
 		return 0;

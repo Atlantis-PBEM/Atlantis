@@ -2597,7 +2597,7 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 
 		for (int j=0; j<i; j++) {
 			if (!AC->neighbors[j]) continue;
-			if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {
+			if (GetPlanarDistance(reg,AC->neighbors[j], 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
 				reg = 0;
 				tries++;
 				break;
@@ -2624,7 +2624,7 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 
 		for (int j=0; j<i; j++) {
 			if (!AC->neighbors[j]) continue;
-			if (GetDistance(reg,AC->neighbors[j]) < maxY / 10 + 2 ) {
+			if (GetPlanarDistance(reg,AC->neighbors[j], 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
 				reg = 0;
 				tries++;
 				break;

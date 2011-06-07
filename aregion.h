@@ -331,6 +331,10 @@ class ARegion : public AListElem
 		ProductionList products;
 		MarketList markets;
 		int xloc, yloc, zloc;
+
+		// Used for calculating distances using an A* search
+		int distance;
+		ARegion *next;
 		
 		// Editing functions
 		void UpdateEditRegion();
@@ -434,8 +438,7 @@ class ARegionList : public AList
 				int maxY);
 
 		ARegion *FindGate(int);
-		int GetDistance(ARegion *, ARegion *);
-		int GetPlanarDistance(ARegion *, ARegion *, int penalty);
+		int GetPlanarDistance(ARegion *, ARegion *, int penalty, int maxdist = -1);
 		int GetWeather(ARegion *pReg, int month);
 
 		ARegionArray *GetRegionArray(int level);
