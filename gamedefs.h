@@ -696,6 +696,10 @@ public:
 	// and stealing a stealth penalty of -1
 	int HARDER_ASSASSINATION;
 
+	// Turn on to make gate numbers non-contiguous, and spread
+	// over a wider range.  This option will also turn off reporting
+	// of the total number of gates in the game
+	int DISPERSE_GATE_NUMBERS;
 };
 
 extern GameDefs *Globals;

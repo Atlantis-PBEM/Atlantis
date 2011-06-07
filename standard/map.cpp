@@ -1140,29 +1140,47 @@ void ARegionList::InitSetupGates(int level)
 
 void ARegionList::FinalSetupGates()
 {
+	int ngates, log10, *used, i;
+
 	if (!Globals->GATES_EXIST) return;
 
-	int *used = new int[numberofgates];
+	ngates = numberofgates;
 
-	int i;
-	for (i=0; i<numberofgates; i++) used[i] = 0;
+	if (Globals->DISPERSE_GATE_NUMBERS) {
+		log10 = 0;
+		while (ngates > 0) {
+			ngates /= 10;
+			log10++;
+		}
+		ngates = 10;
+		while (log10 > 0) {
+			ngates *= 10;
+			log10--;
+		}
+	}
+
+	used = new int[ngates];
+
+	for (i = 0; i < ngates; i++)
+		used[i] = 0;
 
 	forlist(this) {
 		ARegion *r = (ARegion *) elem;
 
 		if (r->gate == -1) {
-			int index = getrandom(numberofgates);
+			int index = getrandom(ngates);
 			while (used[index]) {
-				index++;
-				index = index % numberofgates;
+				if (Globals->DISPERSE_GATE_NUMBERS) {
+					index = getrandom(ngates);
+				} else {
+					index++;
+					index = index % ngates;
+				}
 			}
 			r->gate = index+1;
 			used[index] = 1;
 			// setting up gatemonth
-			int nmon = (getrandom(3) - 1) + (getrandom(3) - 1) + ((index+1) % 12);
-			if (nmon > 11) nmon = nmon - 12;
-			if (nmon < 0) nmon = nmon + 12;
-			r->gatemonth = nmon;
+			r->gatemonth = getrandom(12);;
 		}
 	}
 	delete used;

@@ -1059,9 +1059,11 @@ int Unit::Study(int sk, int days)
 
 	/* Check to see if we need to show a skill report */
 	int lvl = GetRealSkill(sk);
-	if (lvl > faction->skills.GetDays(sk)) {
-		faction->skills.SetDays(sk, lvl);
-		faction->shows.Add(new ShowSkill(sk, lvl));
+	int shown = faction->skills.GetDays(sk);
+	while (lvl > shown) {
+		shown++;
+		faction->skills.SetDays(sk, shown);
+		faction->shows.Add(new ShowSkill(sk, shown));
 	}
 	return 1;
 }

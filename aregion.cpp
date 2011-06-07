@@ -1386,8 +1386,14 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			}
 			if (sawgate) {
 				if (gateopen) {
-					f->PutStr(AString("There is a Gate here (Gate ") + gate +
-							" of " + (pRegions->numberofgates) + ").");
+					AString temp;
+					temp = "There is a Gate here (Gate ";
+					temp += gate;
+					if (!Globals->DISPERSE_GATE_NUMBERS) {
+						temp += " of " + (pRegions->numberofgates);
+					}
+					temp += ").";
+					f->PutStr(temp);
 					f->PutStr("");
 				} else if (Globals->SHOW_CLOSED_GATES) {
 					f->PutStr(AString("There is a closed Gate here."));
@@ -2279,7 +2285,26 @@ void ARegionList::TownStatistics()
 
 ARegion *ARegionList::FindGate(int x)
 {
-	if (!x) return 0;
+	if (x == -1) {
+		int count = 0;
+
+		forlist(this) {
+			ARegion *r = (ARegion *) elem;
+			if (r->gate)
+				count++;
+		}
+		count = getrandom(count);
+		forlist_reuse(this) {
+			ARegion *r = (ARegion *) elem;
+			if (r->gate) {
+				if (!count)
+					return r;
+				count--;
+			}
+		}
+
+		return 0;
+	}
 	forlist(this) {
 		ARegion *r = (ARegion *) elem;
 		if (r->gate == x) return r;

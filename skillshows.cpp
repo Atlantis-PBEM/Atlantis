@@ -323,8 +323,10 @@ AString *ShowSkill::Report(Faction *f)
 			/* XXX -- This should be cleaner somehow. */
 			if (level == 1) {
 				*str += "Gate Lore is the art of detecting and using magical "
-					"Gates, which are spread through the world. The Gates are "
-					"numbered in order, but spread out randomly, so there is "
+					"Gates, which are spread through the world. The Gates are ";
+				if (!Globals->DISPERSE_GATE_NUMBERS)
+					*str += "numbered in order, but ";
+				*str += "spread out randomly, so there is "
 					"no correlation between the Gate number and the Gate's "
 					"location. A mage with skill 1 in Gate Lore can see a "
 					"Gate if one exists in the same region as the mage. This "

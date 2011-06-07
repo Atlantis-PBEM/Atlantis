@@ -229,6 +229,7 @@ static GameDefs g = {
 	0, //TACTICS_NEEDS_WAR
 	0, // ALLIES_NOAID
 	0, // HARDER_ASSASSINATION
+	0, //DISPERSE_GATE_NUMBERS
 };
 
 GameDefs *Globals = &g;

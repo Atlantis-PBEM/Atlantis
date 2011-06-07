@@ -982,6 +982,8 @@ int Game::RunCreateFood(ARegion *r,Unit *u)
 
 int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 {
+	int ngates, log10, *used, i;
+
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 		u->Error("Gates may not be constructed at sea.");
 		return 0;
@@ -1008,7 +1010,34 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 
 	u->Event(AString("Constructs a Gate in ")+r->ShortPrint( &regions )+".");
 	regions.numberofgates++;
-	r->gate = regions.numberofgates;
+	if (Globals->DISPERSE_GATE_NUMBERS) {
+		log10 = 0;
+		ngates = regions.numberofgates;
+		while (ngates > 0) {
+			ngates /= 10;
+			log10++;
+		}
+		ngates = 10;
+		while (log10 > 0) {
+			ngates *= 10;
+			log10--;
+		}
+		used = new int[ngates];
+		for (i = 0; i < ngates; i++)
+			used[i] = 0;
+		forlist(&regions) {
+			ARegion *reg = (ARegion *) elem;
+			if (reg->gate)
+				used[reg->gate - 1] = 1;
+		}
+		r->gate = getrandom(ngates);
+		while (used[r->gate])
+			r->gate = getrandom(ngates);
+		delete used;
+		r->gate++;
+	} else {
+		r->gate = regions.numberofgates;
+	}
 	if (Globals->GATES_NOT_PERENNIAL) {
 		int dm = Globals->GATES_NOT_PERENNIAL / 2;
 		int gm = month + 1 - getrandom(dm) - getrandom(dm) - getrandom(Globals->GATES_NOT_PERENNIAL % 2);
@@ -1610,16 +1639,14 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	ARegion *tar;
 	if (order->gate == -1) {
 		int good = 0;
-		int gatenum = getrandom(regions.numberofgates);
-		tar = regions.FindGate(gatenum+1);
+		tar = regions.FindGate(-1);
 
 		if (tar && tar->zloc == r->zloc) good = 1;
 		if (tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
 			good = 1;
 
 		while( !good ) {
-			gatenum = getrandom(regions.numberofgates);
-			tar = regions.FindGate(gatenum+1);
+			tar = regions.FindGate(-1);
 			if (tar && tar->zloc == r->zloc) good = 1;
 			if (tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
 				good = 1;
@@ -1627,7 +1654,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 		u->Event("Casts Random Gate Jump.");
 	} else {
-		if (order->gate < 1 || order->gate > regions.numberofgates) {
+		if (order->gate < 1 || (!Globals->DISPERSE_GATE_NUMBERS && order->gate > regions.numberofgates)) {
 			u->Error("CAST: No such target gate.");
 			return 0;
 		}
@@ -1638,7 +1665,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 			return 0;
 		}
 		if (!tar->gateopen) {
-			u->Error("CAST: Target gate not open at this time of year.");
+			u->Error("CAST: Target gate is not open at this time of year.");
 			return 0;
 		}
 

@@ -564,32 +564,65 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 				}
 				else if (*pToken == "dg") { 
 					SAFE_DELETE( pToken ); 
-					if (pReg->gate > 0) {
-						int numgates = regions.numberofgates;
-						forlist(&regions) {
-							ARegion *reg = (ARegion *) elem;
-							if (reg->gate == numgates) {
-								reg->gate = pReg->gate;
-								pReg->gate = 0;
-								regions.numberofgates--;
-								break;
+					if (Globals->DISPERSE_GATE_NUMBERS) {
+						pReg->gate = 0;
+						regions.numberofgates--;
+					} else {
+						if (pReg->gate > 0) {
+							int numgates = regions.numberofgates;
+							forlist(&regions) {
+								ARegion *reg = (ARegion *) elem;
+								if (reg->gate == numgates) {
+									reg->gate = pReg->gate;
+									pReg->gate = 0;
+									regions.numberofgates--;
+									break;
+								}
 							}
+							Awrite("Error: Could not find last gate");
 						}
-						Awrite("Error: Could not find last gate");
 					}
 				}
 				else if (*pToken == "ag") { 
 					SAFE_DELETE( pToken );
 					if (pReg->gate > 0) break;
-					regions.numberofgates++;				
-					int gatenum = getrandom(regions.numberofgates) + 1;
-					if (gatenum != regions.numberofgates) {
+					regions.numberofgates++;
+					if (Globals->DISPERSE_GATE_NUMBERS) {
+						int ngates, log10, *used, i;
+						log10 = 0;
+						ngates = regions.numberofgates;
+						while (ngates > 0) {
+							ngates /= 10;
+							log10++;
+						}
+						ngates = 10;
+						while (log10 > 0) {
+							ngates *= 10;
+							log10--;
+						}
+						used = new int[ngates];
+						for (i = 0; i < ngates; i++)
+							used[i] = 0;
 						forlist(&regions) {
 							ARegion *reg = (ARegion *) elem;
-							if (reg->gate == gatenum) reg->gate = regions.numberofgates;
+							if (reg->gate)
+								used[reg->gate - 1] = 1;
 						}
+						pReg->gate = getrandom(ngates);
+						while (used[pReg->gate])
+							pReg->gate = getrandom(ngates);
+						delete used;
+						pReg->gate++;
+					} else {
+						int gatenum = getrandom(regions.numberofgates) + 1;
+						if (gatenum != regions.numberofgates) {
+							forlist(&regions) {
+								ARegion *reg = (ARegion *) elem;
+								if (reg->gate == gatenum) reg->gate = regions.numberofgates;
+							}
+						}
+						pReg->gate = gatenum;
 					}
-					pReg->gate = gatenum;
 					pReg->gatemonth = getrandom(12);				
 				}
 				else if (*pToken == "w") {
