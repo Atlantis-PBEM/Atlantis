@@ -34,7 +34,7 @@
 // Depends on population and town development
 int TownInfo::TownType()
 {
-	int prestige = pop * (dev +  220) / 270;
+	int prestige = pop * (dev + 220) / 270;
 	if (prestige < Globals->CITY_POP / 4) return TOWN_VILLAGE;
 	if (prestige < Globals->CITY_POP * 4 / 5) return TOWN_TOWN;
 	return TOWN_CITY;
@@ -162,7 +162,7 @@ void ARegion::SetupPop()
 		if (Globals->TOWNS_NOT_ADJACENT) {
 				for (int d = 0; d < NDIRS; d++) {
 					ARegion *newregion = neighbors[d];
-					if ((newregion) &&  (newregion->town)) adjacent++;
+					if ((newregion) && (newregion->town)) adjacent++;
 				}
 			}
 		if (Globals->LESS_ARCTIC_TOWNS) {
@@ -973,7 +973,7 @@ void ARegion::SetupEditRegion()
 		if (Globals->TOWNS_NOT_ADJACENT) {
 			for (int d = 0; d < NDIRS; d++) {
 				ARegion *newregion = neighbors[d];
-				if ((newregion) &&  (newregion->town)) adjacent++;
+				if ((newregion) && (newregion->town)) adjacent++;
 			}
 		}
 		if (Globals->LESS_ARCTIC_TOWNS) {
@@ -1272,7 +1272,7 @@ void ARegion::Grow()
 	// Ant: Increase tarpop for any trading that's going on?
 	// 		Not sure why (habitat - basepopulation) is included
 	if (amount) tarpop += ((habitat - basepopulation) * 2 * activity) /
-						   (3 * amount);
+				(3 * amount);
 	
 	// diff is the amount we can grow?
 	int diff = tarpop - population;
@@ -1389,7 +1389,7 @@ void ARegion::FindMigrationDestination(int round)
 			if (TerrainDefs[nb2->type].similar_type == R_OCEAN) continue;
 			ma = nb2->MigrationAttractiveness(development, 2, round);
 			// check that we didn't migrate there the previous round
-			if ((ma > maxattract)  &&
+			if ((ma > maxattract) &&
 				(!((nb2->xloc == target->xloc) && (nb2->yloc == target->yloc)))) {
 				// set migration target
 				target = nb2;
@@ -1416,7 +1416,7 @@ int ARegion::MigrationAttractiveness(int homedev, int range, int round)
 	if (round > 1) mdev = migdev;
 	/* minimum development difference 8 x range */
 	mdev -= 8 * range;
-	if (mdev  <= homedev) return 0;
+	if (mdev <= homedev) return 0;
 	/* available entertainment */
 	Production *p = products.GetProd(I_SILVER, S_ENTERTAINMENT);
 	int entertain = p->activity / 20;
@@ -1437,7 +1437,7 @@ int ARegion::MigrationAttractiveness(int homedev, int range, int round)
 
 /* Performs migration for each region with a migration
  * route pointing to the region (i.e. element of migfrom AList),
- *  adjusting population for hex of origin and itself */
+ * adjusting population for hex of origin and itself */
 void ARegion::Migrate()
 {
 	// calculate total potential migrants
@@ -1481,7 +1481,7 @@ void ARegion::Migrate()
 		r->AdjustPop(-migrants);
 		r->emigrants -= migrants;
 		totalimm += migrants;
-		AString  wout = AString("Migrating from ") /* + (r->name) + " in " */ + r->xloc
+		AString wout = AString("Migrating from ") /* + (r->name) + " in " */ + r->xloc
 			+ "," + (r->yloc) + " to " /* + name + " in " */ + (xloc) + "," + yloc 
 			+ ": " + migrants + " migrants.";
 		Awrite(wout);

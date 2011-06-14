@@ -92,7 +92,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 					times *= pMt->specialLev;
 				int realtimes = spd->damage[i].minnum + getrandom(times) +
 					getrandom(times);
-				num  = def->DoAnAttack(pMt->mountSpecial, realtimes,
+				num = def->DoAnAttack(pMt->mountSpecial, realtimes,
 						spd->damage[i].type, pMt->specialLev,
 						spd->damage[i].flags, spd->damage[i].dclass,
 						spd->damage[i].effect, 0);
@@ -284,10 +284,10 @@ int Battle::Run( ARegion * region,
 		if (ass) assassination = ASS_FAIL;
 
 		if (armies[0]->NumAlive()) {
-		  AddLine(*(armies[0]->leader->name) + " is routed!");
-		  FreeRound(armies[1],armies[0]);
+			AddLine(*(armies[0]->leader->name) + " is routed!");
+			FreeRound(armies[1],armies[0]);
 		} else {
-		  AddLine(*(armies[0]->leader->name) + " is destroyed!");
+			AddLine(*(armies[0]->leader->name) + " is destroyed!");
 		}
 		AddLine("Total Casualties:");
 		ItemList *spoils = new ItemList;
@@ -313,15 +313,15 @@ int Battle::Run( ARegion * region,
 		if (ass) {
 			assassination = ASS_SUCC;
 			asstext = new AString(*(armies[1]->leader->name) +
-								  " is assassinated in " +
-								  region->ShortPrint( pRegs ) +
-								  "!");
+						" is assassinated in " +
+						region->ShortPrint( pRegs ) +
+						"!");
 		}
 		if (armies[1]->NumAlive()) {
-		  AddLine(*(armies[1]->leader->name) + " is routed!");
+			AddLine(*(armies[1]->leader->name) + " is routed!");
 			FreeRound(armies[0],armies[1]);
 		} else {
-		  AddLine(*(armies[1]->leader->name) + " is destroyed!");
+			AddLine(*(armies[1]->leader->name) + " is destroyed!");
 		}
 		AddLine("Total Casualties:");
 		ItemList *spoils = new ItemList;

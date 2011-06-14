@@ -1184,7 +1184,7 @@ void Game::WriteReport()
 		str = str + fac->num;
 
 		if (!fac->IsNPC() ||
-		   ((((month == 0) && (year == 1)) || Globals->GM_REPORT) &&
+				((((month == 0) && (year == 1)) || Globals->GM_REPORT) &&
 			(fac->num == 1))) {
 			int i = f.OpenByName(str);
 			if (i != -1) {
@@ -1463,10 +1463,10 @@ void Game::UnitFactionMap()
 		for (i = 1; i < unitseq; i++) {
 			u = GetUnit(i);
 			if (!u) {
-			  Awrite("doesn't exist");
+				Awrite("doesn't exist");
 			} else {
-			  Awrite(AString(i) + ":" + u->faction->num);
-			  f.PutStr(AString(i) + ":" + u->faction->num);
+				Awrite(AString(i) + ":" + u->faction->num);
+				f.PutStr(AString(i) + ":" + u->faction->num);
 			}
 		}
 	}

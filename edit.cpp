@@ -250,7 +250,7 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 					} 
 
 					int index = pToken->value(); 
-					if ( (index < 0) || (index >= pReg->objects.Num()) ) {   //modified minimum to <0 to allow deleting object 0. 030824 BS
+					if ( (index < 0) || (index >= pReg->objects.Num()) ) { //modified minimum to <0 to allow deleting object 0. 030824 BS
 						Awrite( "Incorrect index." ); 
 						break; 
 					} 
@@ -308,12 +308,12 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 					SAFE_DELETE(pToken); 
 					if (dir) { 
 						tmp->hexside = dir; 
-						if (tmp->mirror) {  //reset mirrors, else problems later
+						if (tmp->mirror) { // reset mirrors, else problems later
 							tmp->mirror->mirror = NULL;
 							tmp->mirror->mirrornum = -1;
 							Awrite("Object mirroring removed");
 						}
-						tmp->mirrornum = -1;  
+						tmp->mirrornum = -1;
 						tmp->mirror = NULL;
 					}
 				}
@@ -372,14 +372,14 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 			
 						Object *o = new Object(pReg->neighbors[tmp->hexside]);
 						o->num = pReg->neighbors[tmp->hexside]->buildingseq++;
-						o->type = ObjectDefs[tmp->type].mirror;  
+						o->type = ObjectDefs[tmp->type].mirror;
 						o->name = new AString(AString("Building [") + o->num + "]");
 						o->incomplete = 0;
 						o->hexside = pReg->GetRealDirComp(tmp->hexside);
 						o->inner = -1;
 						o->mirrornum = tmp->num;
 						o->mirror = tmp;
-						pReg->neighbors[tmp->hexside]->objects.Add(o);  
+						pReg->neighbors[tmp->hexside]->objects.Add(o);
 						
 						tmp->mirrornum = o->num;
 						tmp->mirror = o;							
@@ -638,7 +638,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 						int change = val - pReg->maxwages;
 						pReg->maxwages = val;
 						pReg->wages += change;
-					}  
+					}
 					pReg->UpdateEditRegion();
 				}					 
 				else if (*pToken == "p") { 
@@ -851,7 +851,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 						int price = (ItemDefs[mitem].baseprice * (100 + getrandom(50))) /
 							100;				
 						Market *m = new Market(M_SELL, mitem, price, 0, minimum, maximum, 0, 0);
-	//					m->PostTurn(pReg->Population(),pReg->Wages());  // updates amounts
+	//					m->PostTurn(pReg->Population(),pReg->Wages()); // updates amounts
 						pReg->markets.Add(m);
 					}
 
@@ -917,7 +917,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 						pReg->markets.Add(m);
 					}
 
-				}   
+				}
 				else if (*pToken == "c") { 
 					SAFE_DELETE(pToken);
 					
@@ -987,7 +987,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 							if (!done) {
 								if (m->type == M_SELL) m->type = M_BUY;
 								else m->type = M_SELL;
-								done = 1;  
+								done = 1;
 							} else {
 								pReg->markets.Remove(m);
 								delete m;
@@ -1017,7 +1017,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 						if (m->item == mitem) {
 							pReg->markets.Remove(m);
 							delete m;
-							done = 1;  
+							done = 1;
 						}
 					}				
 					if (!done) Awrite("No such market");				

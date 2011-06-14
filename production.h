@@ -34,28 +34,28 @@
 
 class Production : public AListElem {
 public:
-  Production(int,int); /* item type, amt max */
-  Production();
-  
-  void Writeout(Aoutfile *);
-  void Readin(Ainfile *);
-  AString WriteReport();
-  
-  int itemtype;
-  int baseamount;
-  int amount;
-  int skill;
-  int productivity;
-  int activity;
+	Production(int,int); /* item type, amt max */
+	Production();
+	
+	void Writeout(Aoutfile *);
+	void Readin(Ainfile *);
+	AString WriteReport();
+	
+	int itemtype;
+	int baseamount;
+	int amount;
+	int skill;
+	int productivity;
+	int activity;
 };
 
 class ProductionList : public AList {
 public:
-  Production * GetProd(int,int); /* item type, skill */
-  void AddProd(Production *);
-  
-  void Writeout(Aoutfile *);
-  void Readin(Ainfile *);
+	Production * GetProd(int,int); /* item type, skill */
+	void AddProd(Production *);
+	
+	void Writeout(Aoutfile *);
+	void Readin(Ainfile *);
 };
 
 #endif

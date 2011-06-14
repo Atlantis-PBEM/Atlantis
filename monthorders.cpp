@@ -648,7 +648,7 @@ void Game::RunBuildHelpers(ARegion *r)
 							if (unfinished == 0) unfinished = -1;
 							int percent = 100 * output / ItemDefs[ship].pMonths;
 							u->Event(AString("Helps ") +
-								*(target->name) + "  with construction of a " + 
+								*(target->name) + " with construction of a " + 
 								ItemDefs[ship].name + " (" + percent + "%) in " +
 								r->ShortPrint(&regions) + ".");							
 						}
@@ -1361,8 +1361,8 @@ void Game::RunMoveOrders()
 				}
 			}
 /*
-	  DoAdvanceAttacks(locs);
-	  locs->DeleteAll();
+			DoAdvanceAttacks(locs);
+			locs->DeleteAll();
 */
 		}
 		DoAdvanceAttacks(locs);
@@ -1427,8 +1427,8 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 					break;
 				}
 				if (!unit->canattack || !unit->IsAlive()) {
-				  done = 1;
-				  break;
+					done = 1;
+					break;
 				}
 				forbid = to->ForbiddenBy(region, unit);
 			}
@@ -1494,7 +1494,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 			startmove = 1;
 
 		if ((TerrainDefs[region->type].similar_type == R_OCEAN) &&
-		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))) {
+				(!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))) {
 			unit->Error(AString("MOVE: Can't move while in the ocean."));
 			goto done_moving;
 		}
@@ -1533,7 +1533,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 		}
 
 		if ((TerrainDefs[newreg->type].similar_type == R_OCEAN) &&
-		   (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))) {
+				(!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))) {
 			unit->Event(AString("Discovers that ") +
 						newreg->ShortPrint(&regions) + " is " +
 						TerrainDefs[newreg->type].name + ".");
@@ -1562,7 +1562,7 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 						forbid->GetName(obs) + ".");
 			obs = forbid->GetAttribute("observation");
 			forbid->Event(AString("Forbids entry to ") +
-						  unit->GetName(obs) + ".");
+						unit->GetName(obs) + ".");
 			goto done_moving;
 		}
 

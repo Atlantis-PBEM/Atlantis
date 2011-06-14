@@ -350,8 +350,8 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			{
 				forlist(&present_regions) {
 					((ARegionPtr*)elem)->ptr->WriteReport(f, this,
-														  pGame->month,
-														  &(pGame->regions));
+																pGame->month,
+																&(pGame->regions));
 				}
 			}
 			present_regions.DeleteAll();
@@ -850,5 +850,5 @@ void Faction::DiscoverItem(int item, int force, int full)
 				}
 			}
 		}
-	}   
+	}
 }

@@ -124,7 +124,7 @@ int LookupItem(AString *token)
 	// if (*token=="CLIP") *token = "KNARR";
 	// if (*token=="GLON") *token = "COG";
 	for (int i = 0; i < NITEMS; i++) {
-		if (ItemDefs[i].type & IT_ILLUSION)  {
+		if (ItemDefs[i].type & IT_ILLUSION) {
 			if (*token == (AString("i") + ItemDefs[i].abr)) return i;
 		} else {
 			if (*token == ItemDefs[i].abr) return i;
@@ -142,7 +142,7 @@ int ParseAllItems(AString *token)
 	if ((*token=="GLON") || (*token=="Galleon") || (*token=="Galleons"))
 		*token = "COG";
 	for (int i = 0; i < NITEMS; i++) {
-		if (ItemDefs[i].type & IT_ILLUSION)  {
+		if (ItemDefs[i].type & IT_ILLUSION) {
 			if ((*token == (AString("i") + ItemDefs[i].name)) ||
 				(*token == (AString("i") + ItemDefs[i].names)) ||
 				(*token == (AString("i") + ItemDefs[i].abr))) {
@@ -905,24 +905,24 @@ AString *ItemDescription(int item, int full)
 			}
 		}
 		for (i = 0; i < NITEMS; i++) {
-		   if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-		   if (ItemDefs[i].mult_item == item) {
-			   if (comma) {
-				   if (last == i) {
-					   if (comma > 1) *temp += ",";
-					   *temp += " and ";
-				   } else {
-					   *temp += ", ";
-				   }
-			   }
-			   comma++;
-			   if (i == I_SILVER) {
-				   *temp += "entertainment";
-			   } else {
-				   *temp += ItemString(i, 1);
-			   }
-			   *temp += AString(" by ") + ItemDefs[i].mult_val;
-		   }
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (ItemDefs[i].mult_item == item) {
+				if (comma) {
+					if (last == i) {
+						if (comma > 1) *temp += ",";
+						*temp += " and ";
+					} else {
+						*temp += ", ";
+					}
+				}
+				comma++;
+				if (i == I_SILVER) {
+					*temp += "entertainment";
+				} else {
+					*temp += ItemString(i, 1);
+				}
+				*temp += AString(" by ") + ItemDefs[i].mult_val;
+			}
 		}
 		*temp += ".";
 	}
@@ -1179,7 +1179,7 @@ AString *ItemDescription(int item, int full)
 	}
 
 	if (ItemDefs[item].max_inventory) {
-		*temp += AString("  A unit may have at most ") +
+		*temp += AString(" A unit may have at most ") +
 			ItemString(item, ItemDefs[item].max_inventory, FULLNUM) + ".";
 	}
 
@@ -1446,7 +1446,7 @@ void ItemList::SetNum(int t,int n)
 int ManType::CanProduce(int item)
 {
 	if (ItemDefs[item].flags & ItemType::DISABLED) return 0;
-	for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++)  {
+	for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
 		if (skills[i] == NULL) continue;
 		if (ItemDefs[item].pSkill == skills[i]) return 1;
 	}

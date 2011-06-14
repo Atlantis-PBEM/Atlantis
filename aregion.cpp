@@ -689,7 +689,7 @@ AString ARegion::ShortPrint(ARegionList *pRegs)
 	if (pArr->strName) {
 		temp += ",";
 		if (Globals->EASIER_UNDERWORLD &&
-		   (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
+				(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
 			temp += AString("") + zloc + " <";
 		} else {
 			// add less explicit multilevel information about the underworld
@@ -699,8 +699,8 @@ AString ARegion::ShortPrint(ARegionList *pRegs)
 				}
 				temp += "deep ";
 			} else if ((zloc > Globals->UNDERWORLD_LEVELS+2) &&
-					  (zloc < Globals->UNDERWORLD_LEVELS +
-					   Globals->UNDERDEEP_LEVELS + 2)) {
+						(zloc < Globals->UNDERWORLD_LEVELS +
+						Globals->UNDERDEEP_LEVELS + 2)) {
 				for (int i = zloc; i > Globals->UNDERWORLD_LEVELS + 3; i--) {
 					temp += "very ";
 				}
@@ -709,7 +709,7 @@ AString ARegion::ShortPrint(ARegionList *pRegs)
 		}
 		temp += *pArr->strName;
 		if (Globals->EASIER_UNDERWORLD &&
-		   (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
+				(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
 			temp += ">";
 		}
 	}
@@ -1069,7 +1069,7 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	}
 
 	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
-	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) {
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) {
 		forlist(&passers) {
 			f = (Farsight *)elem;
 			if (f && f->faction == fac && f->unit) {
@@ -1124,8 +1124,8 @@ void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
 				}
 			} else {
 				if (!present &&
-				   !(Globals->TRANSIT_REPORT &
-					   GameDefs::REPORT_SHOW_RESOURCES))
+						!(Globals->TRANSIT_REPORT &
+						GameDefs::REPORT_SHOW_RESOURCES))
 					continue;
 				if (has) {
 					temp += AString(", ") + p->WriteReport();
@@ -1164,7 +1164,7 @@ void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
 		Market *m = (Market *) elem;
 		if (!m->amount) continue;
 		if (!present &&
-		   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS))
+				!(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS))
 			continue;
 		if (m->type == M_SELL) {
 			if (ItemDefs[m->item].type & IT_ADVANCED) {
@@ -1193,7 +1193,7 @@ void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
 			Market *m = (Market *) elem;
 			if (!m->amount) continue;
 			if (!present &&
-			   !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS))
+					!(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS))
 				continue;
 			if (m->type == M_BUY) {
 				if (has) {
@@ -1258,7 +1258,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 	Farsight *passer = GetFarsight(&passers, fac);
 	int present = Present(fac) || fac->IsNPC();
 
-	if (farsight || passer || present)  {
+	if (farsight || passer || present) {
 		AString temp = Print(pRegions);
 		if (Population() &&
 			(present || farsight ||
@@ -1268,7 +1268,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 				temp += AString(" (") + ItemDefs[race].names + ")";
 			}
 			if (present || farsight ||
-			   Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY) {
+					Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY) {
 				temp += AString(", $") + wealth;
 			} else {
 				temp += AString(", $0");
@@ -1323,7 +1323,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 
 		int exits_seen[NDIRS];
 		if (present || farsight ||
-		   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ALL_EXITS)) {
+				(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ALL_EXITS)) {
 			for (int i = 0; i < NDIRS; i++)
 				exits_seen[i] = 1;
 		} else {
@@ -1436,7 +1436,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		}
 
 		if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
-		   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
+				(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
 			forlist(&passers) {
 				Farsight *watcher = (Farsight *)elem;
 				if (watcher && watcher->faction == fac && watcher->unit) {
@@ -1450,8 +1450,8 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		{
 			forlist (&objects) {
 				((Object *) elem)->Report(f, fac, obs, truesight, detfac,
-										  passobs, passtrue, passdetfac,
-										  present || farsight);
+							passobs, passtrue, passdetfac,
+							present || farsight);
 			}
 			f->EndLine();
 		}
@@ -1544,8 +1544,8 @@ int ARegion::GetTrueSight(Faction *f, int usepassers)
 	}
 
 	if (usepassers &&
-	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
-	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
 		forlist(&passers) {
 			Farsight *farsight = (Farsight *)elem;
 			if (farsight && farsight->faction == f && farsight->unit) {
@@ -1583,8 +1583,8 @@ int ARegion::GetObservation(Faction *f, int usepassers)
 	}
 
 	if (usepassers &&
-	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
-	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
 		forlist(&passers) {
 			Farsight *farsight = (Farsight *)elem;
 			if (farsight && farsight->faction == f && farsight->unit) {

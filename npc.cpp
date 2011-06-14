@@ -386,7 +386,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 						/*
 						Awrite(WeaponDefs[i].abbr);
 						*/
-						if ((n >= w)  && (weapon == -1))
+						if ((n >= w) && (weapon == -1))
 							weapon = i;
 					}
 				}

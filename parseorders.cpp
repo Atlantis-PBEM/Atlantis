@@ -855,8 +855,8 @@ void Game::ProcessEntertainOrder(Unit *unit, OrdersCheck *pCheck)
 {
 	if (unit->monthorders ||
 			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((unit->taxing == TAX_TAX) ||
-			  (unit->taxing == TAX_PILLAGE)))) {
+				((unit->taxing == TAX_TAX) ||
+					(unit->taxing == TAX_PILLAGE)))) {
 		AString err = "ENTERTAIN: Overwriting previous ";
 		if (unit->inTurnBlock) err += "DELAYED ";
 		err += "month-long order.";
@@ -1594,8 +1594,8 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	// Check that the unit isn't doing anything else important
 	if (unit->monthorders ||
 			(Globals->TAX_PILLAGE_MONTH_LONG &&
-			 ((unit->taxing == TAX_TAX) || 
-			  (unit->taxing == TAX_PILLAGE)))) {
+				((unit->taxing == TAX_TAX) || 
+					(unit->taxing == TAX_PILLAGE)))) {
 		if (unit->monthorders) delete unit->monthorders;
 		AString err = "BUILD: Overwriting previous ";
 		if (unit->inTurnBlock) err += "DELAYED ";

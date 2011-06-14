@@ -29,41 +29,41 @@
 #include "fileio.h"
 
 enum {
-  M_BUY,
-  M_SELL
+	M_BUY,
+	M_SELL
 };
 
 class Market : public AListElem {
 public:
-  Market();
+	Market();
 
-  /* type, item, price, amount, minpop, maxpop, minamt, maxamt */
-  Market(int,int,int,int,int,int,int,int);
+	/* type, item, price, amount, minpop, maxpop, minamt, maxamt */
+	Market(int,int,int,int,int,int,int,int);
 
-  int type;
-  int item;
-  int price;
-  int amount;
-  
-  int minpop;
-  int maxpop;
-  int minamt;
-  int maxamt;
+	int type;
+	int item;
+	int price;
+	int amount;
+	
+	int minpop;
+	int maxpop;
+	int minamt;
+	int maxamt;
 
-  int baseprice;
-  int activity;
+	int baseprice;
+	int activity;
 
-  void PostTurn(int,int);
-  void Writeout(Aoutfile * f);
-  void Readin(Ainfile * f);
-  AString Report();
+	void PostTurn(int,int);
+	void Writeout(Aoutfile * f);
+	void Readin(Ainfile * f);
+	AString Report();
 };
 
 class MarketList : public AList {
 public:
-  void PostTurn(int,int);
-  void Writeout(Aoutfile * f);
-  void Readin(Ainfile * f);
+	void PostTurn(int,int);
+	void Writeout(Aoutfile * f);
+	void Readin(Ainfile * f);
 };
 
 #endif

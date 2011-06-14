@@ -304,7 +304,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	f->PutStr("");
 
 	f->PutStr("-------------------------------------------------"
-			  "----------", 1);
+			"----------", 1);
 
 	// plain (X,Y) in Blah, contains Blah
 	f->PutStr(Print(pRegs), 1);
@@ -445,42 +445,42 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	// ----------------------------------------------------------------
 	any = 0;
 	{
-	   forlist((&products)) {
-		   Production *p = ((Production *) elem);
-		   if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
-			   if (!CanMakeAdv(fac, p->itemtype)) {
-				   continue;
-			   }
-		   } else {
-			   if (p->itemtype == I_SILVER) {
-				   continue;
-			   }
-		   }
+		 forlist((&products)) {
+			 Production *p = ((Production *) elem);
+			 if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
+				 if (!CanMakeAdv(fac, p->itemtype)) {
+					 continue;
+				 }
+			 } else {
+				 if (p->itemtype == I_SILVER) {
+					 continue;
+				 }
+			 }
 
-		   if (!any) {
-			   GetMapLine(buffer, line, pRegs);
-			   TrimWrite(f, buffer);
-			   line++;
-		   }
+			 if (!any) {
+				 GetMapLine(buffer, line, pRegs);
+				 TrimWrite(f, buffer);
+				 line++;
+			 }
 
-		   GetMapLine(buffer, line, pRegs);
+			 GetMapLine(buffer, line, pRegs);
 
-		   if (p->amount == -1) {
-			   sprintf(data, "%s unlim %4s",
-				   (any ? "    " : "Prod"),
-				   ItemDefs[p->itemtype].abr);
-		   } else {
-			   sprintf(data, "%s %5i %4s",
-				   (any ? "    " : "Prod"),
-				   p->amount,
-				   ItemDefs[p->itemtype].abr);
-		   }
+			 if (p->amount == -1) {
+				 sprintf(data, "%s unlim %4s",
+					 (any ? "    " : "Prod"),
+					 ItemDefs[p->itemtype].abr);
+			 } else {
+				 sprintf(data, "%s %5i %4s",
+					 (any ? "    " : "Prod"),
+					 p->amount,
+					 ItemDefs[p->itemtype].abr);
+			 }
 
-		   TrimWrite(f, buffer);
-		   line++;
-		   any = 1;
+			 TrimWrite(f, buffer);
+			 line++;
+			 any = 1;
 
-	   }
+		 }
 	}
 
 	// ----------------------------------------------------------------

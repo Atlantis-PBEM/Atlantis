@@ -45,10 +45,10 @@ MODIFIED:
 #endif
 
 
-#define ind(mm,x)  (*(ub4 *)((ub1 *)(mm) + ((x) & ((RANDSIZ-1)<<2))))
+#define ind(mm,x)	(*(ub4 *)((ub1 *)(mm) + ((x) & ((RANDSIZ-1)<<2))))
 #define rngstep(mix,a,b,mm,m,m2,r,x) \
 { \
-	x = *m;  \
+	x = *m; \
 	a = (a^(mix)) + *(m2++); \
 	*(m++) = y = ind(mm,x) + a + b; \
 	*(r++) = b = ind(mm,y>>RANDSIZL) + x; \

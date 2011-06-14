@@ -138,7 +138,7 @@ void Game::RunCastOrders()
 				}
 			}
 		}
-  }
+	}
 }
 
 /* Moved to game.cpp, where it belongs...
@@ -1230,17 +1230,17 @@ void Game::DoAdvanceAttack(ARegion *r, Unit *u) {
 }
 
 void Game::DoAutoAttack(ARegion *r, Unit *u) {
-  forlist(&r->objects) {
-	Object *o = (Object *) elem;
-	forlist(&o->units) {
-	  Unit *t = (Unit *) elem;
-	  if (u->guard != GUARD_AVOID && (u->GetAttitude(r, t) == A_HOSTILE)) {
-	AttemptAttack(r, u, t, 1);
-	  }
-	  if (u->canattack == 0 || u->IsAlive() == 0)
-	return;
+	forlist(&r->objects) {
+		Object *o = (Object *) elem;
+		forlist(&o->units) {
+			Unit *t = (Unit *) elem;
+			if (u->guard != GUARD_AVOID && (u->GetAttitude(r, t) == A_HOSTILE)) {
+				AttemptAttack(r, u, t, 1);
+			}
+			if (u->canattack == 0 || u->IsAlive() == 0)
+				return;
+		}
 	}
-  }
 }
 
 int Game::CountWMonTars(ARegion *r, Unit *mon) {
@@ -1279,15 +1279,15 @@ Unit *Game::GetWMonTar(ARegion *r, int tarnum, Unit *mon) {
 }
 
 void Game::CheckWMonAttack(ARegion *r, Unit *u) {
-  int tars = CountWMonTars(r, u);
-  if (!tars) return;
+	int tars = CountWMonTars(r, u);
+	if (!tars) return;
 
-  int rand = 300 - tars;
-  if (rand < 100) rand = 100;
-  if (getrandom(rand) >= u->Hostile()) return;
+	int rand = 300 - tars;
+	if (rand < 100) rand = 100;
+	if (getrandom(rand) >= u->Hostile()) return;
 
-  Unit *t = GetWMonTar(r, getrandom(tars), u);
-  if (t) AttemptAttack(r, u, t, 1);
+	Unit *t = GetWMonTar(r, getrandom(tars), u);
+	if (t) AttemptAttack(r, u, t, 1);
 }
 
 void Game::DoAttackOrders()
@@ -1614,8 +1614,8 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 			forlist((&obj->units)) {
 				Unit *u = (Unit *) elem;
 				if (u->needed > 0 && ((!consume) ||
-								  (u->GetFlag(FLAG_CONSUMING_UNIT) ||
-								   u->GetFlag(FLAG_CONSUMING_FACTION)))) {
+								(u->GetFlag(FLAG_CONSUMING_UNIT) ||
+								u->GetFlag(FLAG_CONSUMING_FACTION)))) {
 					int amount = u->items.GetNum(item);
 					if (amount) {
 						int eat = (u->needed + value - 1) / value;
@@ -1654,7 +1654,7 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 			forlist((&obj->units)) {
 				Unit *u = (Unit *) elem;
 				if (u->needed > 0 && ((!consume) ||
-								  u->GetFlag(FLAG_CONSUMING_FACTION))) {
+						u->GetFlag(FLAG_CONSUMING_FACTION))) {
 					/* Go through all units again */
 					forlist((&r->objects)) {
 						Object *obj2 = (Object *) elem;
@@ -1736,12 +1736,12 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 										u->needed -= eat * value;
 										u2->items.SetNum(item, amount - eat);
 										u2->Event(*(u->name) + " borrows " +
-												  ItemString(item, eat) +
-												  " for maintenance.");
+												ItemString(item, eat) +
+												" for maintenance.");
 										u->Event(AString("Borrows ") +
-												 ItemString(item, eat) +
-												 " from " + *(u2->name) +
-												 " for maintenance.");
+												ItemString(item, eat) +
+												" from " + *(u2->name) +
+												" for maintenance.");
 										u2->items.SetNum(item, amount - eat);
 									}
 								}
@@ -1859,12 +1859,12 @@ void Game::CheckAllyHungerItem(int item, int value)
 									}
 									u2->items.SetNum(item, amount - eat);
 										u2->Event(*(u->name) + " borrows " +
-												  ItemString(item, eat) +
-												  " to fend off starvation.");
+												ItemString(item, eat) +
+												" to fend off starvation.");
 										u->Event(AString("Borrows ") +
-												 ItemString(item, eat) +
-												 " from " + *(u2->name) +
-												 " to fend off starvation.");
+												ItemString(item, eat) +
+												" from " + *(u2->name) +
+												" to fend off starvation.");
 										u2->items.SetNum(item, amount - eat);
 								}
 							}
@@ -2656,7 +2656,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			return 0;
 		}
 
-		if ((ItemDefs[o->item].type & IT_LEADER) &&  t->IsNormal()) {
+		if ((ItemDefs[o->item].type & IT_LEADER) && t->IsNormal()) {
 			u->Error("GIVE: Can't mix leaders and normal men.");
 			return 0;
 		} else {

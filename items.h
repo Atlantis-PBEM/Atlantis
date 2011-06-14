@@ -125,7 +125,7 @@ class ItemType
 		int mult_item;
 		int mult_val;
 
-		int max_inventory;  // if non-zero, amount allowed in inventory.
+		int max_inventory; // if non-zero, amount allowed in inventory.
 
 		enum {
 			// LOSE_LINKED only make sense with ESC_LEV_SQUARE or ESC_LEV_QUAD

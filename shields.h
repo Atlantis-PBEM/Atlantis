@@ -29,13 +29,13 @@
 
 class Shield : public AListElem {
 public:
-  int shieldtype;
-  int shieldskill;
+	int shieldtype;
+	int shieldskill;
 };
 
 class ShieldList : public AList {
 public:
-  Shield * GetHighShield(int);
+	Shield * GetHighShield(int);
 };
 
 #endif /* SHIELD_CLASS */

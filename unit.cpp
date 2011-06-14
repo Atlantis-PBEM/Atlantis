@@ -358,7 +358,7 @@ AString Unit::SpoilsReport() {
 }
 
 void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
-			   int autosee, int attitude)
+				int autosee, int attitude)
 {
 	int stealth = GetAttribute("stealth");
 	if (obs==-1) {
@@ -535,36 +535,36 @@ AString Unit::TemplateReport()
 
 AString *Unit::BattleReport(int obs)
 {
-  AString *temp = new AString("");
-  if (Globals->BATTLE_FACTION_INFO)
-	  *temp += GetName(obs);
-  else
-	  *temp += *name;
+	AString *temp = new AString("");
+	if (Globals->BATTLE_FACTION_INFO)
+		*temp += GetName(obs);
+	else
+		*temp += *name;
 
-  if (GetFlag(FLAG_BEHIND)) *temp += ", behind";
+	if (GetFlag(FLAG_BEHIND)) *temp += ", behind";
 
-  *temp += items.BattleReport();
+	*temp += items.BattleReport();
 
-  forlist (&skills) {
-	  Skill *s = (Skill *)elem;
-	  if (SkillDefs[s->type].flags & SkillType::BATTLEREP) {
-		  int lvl = GetAvailSkill(s->type);
-		  if (lvl) {
-			  *temp += ", ";
-			  *temp += SkillDefs[s->type].name;
-			  *temp += " ";
-			  *temp += lvl;
-		  }
-	  }
-  }
+	forlist (&skills) {
+		Skill *s = (Skill *)elem;
+		if (SkillDefs[s->type].flags & SkillType::BATTLEREP) {
+			int lvl = GetAvailSkill(s->type);
+			if (lvl) {
+				*temp += ", ";
+				*temp += SkillDefs[s->type].name;
+				*temp += " ";
+				*temp += lvl;
+			}
+		}
+	}
 
-  if (describe) {
-	*temp += "; ";
-	*temp += *describe;
-  }
+	if (describe) {
+		*temp += "; ";
+		*temp += *describe;
+	}
 
-  *temp += ".";
-  return temp;
+	*temp += ".";
+	return temp;
 }
 
 void Unit::ClearOrders()

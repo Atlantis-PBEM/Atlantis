@@ -99,13 +99,13 @@ AString *ShowSkill::Report(Faction *f)
 				"and transport structures.";
 			if (Globals->SHIPPING_COST > 0) {
 				*str += " The cost of shipping one weight unit from one "
-				  "transport structure to another transport structure is ";
+					"transport structure to another transport structure is ";
 				if (Globals->TRANSPORT & GameDefs::QM_AFFECT_COST)
 					*str += AString("4-((level+1)/2) * ");
 				*str += AString(Globals->SHIPPING_COST) + " silver.";
 				if (Globals->FRACTIONAL_WEIGHT) {
 					*str += " Items with a normal weight of 0 are "
-					  "treated as if ";
+						"treated as if ";
 					*str += Globals->FRACTIONAL_WEIGHT;
 					*str += " of the item in question weigh one weight unit.";
 				}
@@ -113,7 +113,7 @@ AString *ShowSkill::Report(Faction *f)
 
 			if (Globals->NONLOCAL_TRANSPORT > 0) {
 				*str += " Items may be shipped between two transport "
-				  "structures which are up to ";
+					"structures which are up to ";
 				*str += Globals->NONLOCAL_TRANSPORT;
 				if (Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST)
 					*str += " plus (level+1)/3 ";
@@ -126,8 +126,8 @@ AString *ShowSkill::Report(Faction *f)
 			}
 			if (Globals->LOCAL_TRANSPORT > 0) {
 				*str += " Items may be distributed from a transport "
-				  "structure to any unit or transported to a transport "
-				  "structure by any unit located within ";
+					"structure to any unit or transported to a transport "
+					"structure by any unit located within ";
 				*str += Globals->LOCAL_TRANSPORT;
 				*str += (Globals->LOCAL_TRANSPORT != 1) ? " hexes" : " hex";
 				*str += " of the transport structure.";
@@ -607,8 +607,8 @@ AString *ShowSkill::Report(Faction *f)
 		case S_SUMMON_WIND:
 			if (level == 1) {
 				*str += "A mage with knowledge of Summon Wind can summon "
-					   "up the powers of the wind to aid him in sea or "
-					   "air travel. Usage of this spell is automatic. ";
+					"up the powers of the wind to aid him in sea or "
+					"air travel. Usage of this spell is automatic. ";
 				if (Globals->FLEET_WIND_BOOST > 0) {
 					*str += "A mage with this skill will add ";
 					*str += Globals->FLEET_WIND_BOOST;
@@ -619,8 +619,8 @@ AString *ShowSkill::Report(Faction *f)
 					 
 				/*
 				*str += " If the mage is flying, he will receive 2 extra "
-					   "movement points.";
-					   */
+					"movement points.";
+				*/
 				*str += "The effects of all such mages in a fleet are cumulative. ";	
 			}
 			break;
