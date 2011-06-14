@@ -484,7 +484,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp = "Each faction has a type; this is decided by the player, "
 			"and determines what the faction may do.  The faction has ";
-		temp +=  Globals->FACTION_POINTS;
+		temp += Globals->FACTION_POINTS;
 		temp += " Faction Points, which may be spent on any of the 3 "
 			"Faction Areas, War, Trade, and Magic.  The faction type may "
 			"be changed at the beginning of each turn, so a faction can "
@@ -2083,8 +2083,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	temp += ".";
 	if (Globals->FOOD_ITEMS_EXIST) {
-		temp += " Units may substitute one unit of grain, livestock, or "
-			"fish for each ";
+		temp += " Units may substitute one unit of ";
+		for (last = -1, i = 0, j = 0; i < NITEMS; i++) {
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (!(ItemDefs[i].type & IT_FOOD)) continue;
+			if (last != -1) {
+				if (j > 0) temp += ", ";
+				temp += ItemDefs[last].names;
+			}
+			last = i;
+			j++;
+		}
+		if (j > 0) temp += " or ";
+		temp += ItemDefs[last].names;
+		temp += " for each ";
 		temp += Globals->UPKEEP_FOOD_VALUE;
 		temp += " silver of maintenance owed. ";
 		if (Globals->UPKEEP_MINIMUM_FOOD > 0) {
