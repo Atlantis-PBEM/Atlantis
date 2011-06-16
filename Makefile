@@ -27,7 +27,7 @@ OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: basic standard fracas kingdoms
+all: basic standard fracas kingdoms havilah
 
 arcadia: FORCE
 	$(MAKE) GAME=arcadia
@@ -44,10 +44,14 @@ kingdoms: FORCE
 fracas: FORCE
 	$(MAKE) GAME=fracas
 
+havilah: FORCE
+	$(MAKE) GAME=havilah
+
 $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
 
-all-clean: basic-clean standard-clean fracas-clean kingdoms-clean
+all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
+	havilah-clean
 
 arcadia-clean:
 	$(MAKE) GAME=arcadia clean
@@ -64,6 +68,9 @@ fracas-clean:
 kingdoms-clean:
 	$(MAKE) GAME=kingdoms clean
 
+havilah-clean:
+	$(MAKE) GAME=havilah clean
+
 clean:
 	rm -f $(OBJECTS)
 	if [ -d obj ]; then rmdir obj; fi
@@ -71,7 +78,8 @@ clean:
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
 
-all-rules: basic-rules standard-rules fracas-rules kingdoms-rules
+all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
+	havilah-rules
 
 arcadia-rules:
 	$(MAKE) GAME=arcadia rules
@@ -87,6 +95,9 @@ fracas-rules:
 	
 kingdoms-rules:
 	$(MAKE) GAME=kingdoms rules
+
+havilah-rules:
+	$(MAKE) GAME=havilah rules
 
 rules: $(GAME)/$(GAME)
 	(cd $(GAME); \
