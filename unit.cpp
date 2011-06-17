@@ -1035,7 +1035,15 @@ int Unit::Study(int sk, int days)
 	Skill *s;
 
 	if (Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
-		if (skills.Num()) {
+		if (SkillDefs[sk].flags & SkillType::MAGIC) {
+			forlist(&skills) {
+				s = (Skill *) elem;
+				if (!(SkillDefs[s->type].flags & SkillType::MAGIC)) {
+					Error("STUDY: Non-leader mages cannot possess non-magical skills.");
+					return 0;
+				}
+			}
+		} else if (skills.Num()) {
 			s = (Skill *) skills.First();
 			if ((s->type != sk) && (s->days > 0)) {
 				Error("STUDY: Can know only 1 skill.");
@@ -1214,60 +1222,45 @@ int Unit::IsNormal()
 
 void Unit::AdjustSkills()
 {
-	//
-	// First, is the unit a leader?
-	//
-	if (IsLeader()) {
+	if (!IsLeader() && Globals->SKILL_LIMIT_NONLEADERS) {
 		//
-		// Unit is all leaders: Make sure no skills are > max
+		// Not a leader: can only know 1 skill
 		//
-		forlist(&skills) {
-			Skill *theskill = (Skill *) elem;
-			int max = GetSkillMax(theskill->type);
-			if (GetRealSkill(theskill->type) >= max) {
-				theskill->days = GetDaysByLevel(max) * GetMen();
-			}
-		}
-	} else {
-		if (Globals->SKILL_LIMIT_NONLEADERS) {
+		if (skills.Num() > 1) {
 			//
-			// Not a leader, can only know 1 skill
+			// Find highest skill, eliminate others
 			//
-			if (skills.Num() > 1) {
-				//
-				// Find highest skill, eliminate others
-				//
-				unsigned int max = 0;
-				Skill *maxskill = 0;
-				forlist(&skills) {
-					Skill *s = (Skill *) elem;
-					if (s->days > max) {
-						max = s->days;
-						maxskill = s;
-					}
+			unsigned int max = 0;
+			Skill *maxskill = 0;
+			forlist(&skills) {
+				Skill *s = (Skill *) elem;
+				if (s->days > max) {
+					max = s->days;
+					maxskill = s;
 				}
-				{
-					forlist(&skills) {
-						Skill *s = (Skill *) elem;
-						if (s != maxskill) {
-							if ((Globals->REQUIRED_EXPERIENCE) && (s->exp > 0)) continue;
-							skills.Remove(s);
-							delete s;
-						}
-					}
+			}
+			forlist_reuse(&skills) {
+				Skill *s = (Skill *) elem;
+				if (s != maxskill) {
+					// Allow multiple skills if they're all
+					// magical ones
+					if ((SkillDefs[maxskill->type].flags & SkillType::MAGIC) &&
+							(SkillDefs[s->type].flags & SkillType::MAGIC) )
+						continue;
+					if ((Globals->REQUIRED_EXPERIENCE) && (s->exp > 0)) continue;
+					skills.Remove(s);
+					delete s;
 				}
 			}
 		}
+	}
 
-		//
-		// Limit remaining skill to max
-		//
-		forlist(&skills) {
-			Skill *theskill = (Skill *) elem;
-			int max = GetSkillMax(theskill->type);
-			if (GetRealSkill(theskill->type) >= max) {
-				theskill->days = GetDaysByLevel(max) * GetMen();
-			}
+	// Everyone: limit all skills to their maximum level
+	forlist(&skills) {
+		Skill *theskill = (Skill *) elem;
+		int max = GetSkillMax(theskill->type);
+		if (GetRealSkill(theskill->type) >= max) {
+			theskill->days = GetDaysByLevel(max) * GetMen();
 		}
 	}
 }

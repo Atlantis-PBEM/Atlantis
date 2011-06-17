@@ -689,21 +689,44 @@ AString *ItemDescription(int item, int full)
 
 	if (ItemDefs[item].type & IT_MAN) {
 		ManType *mt = FindRace(ItemDefs[item].abr);
+		AString mani = "MANI";
+		AString last = "";
 		int found = 0;
 		*temp += " This race may study ";
 		unsigned int c;
 		unsigned int len = sizeof(mt->skills) / sizeof(mt->skills[0]);
 		for (c = 0; c < len; c++) {
 			pS = FindSkill(mt->skills[c]);
-			if (!pS || (pS->flags & SkillType::DISABLED)) continue;
-			if (found) *temp += ", ";
-			if (found && c == len - 1) *temp += "and ";
+			if (!pS) continue;
+			if (mani == pS->abbr && Globals->MAGE_NONLEADERS) {
+				if (!(last == "")) {
+					if (found)
+						*temp += ", ";
+					*temp += last;
+					found = 1;
+				}
+				last = "all magical skills";
+				continue;
+			}
+			if (pS->flags & SkillType::DISABLED) continue;
+			if (!(last == "")) {
+				if (found)
+					*temp += ", ";
+				*temp += last;
+				found = 1;
+			}
+			last = SkillStrs(pS);
+		}
+		if (!(last == "")) {
+			if (found)
+				*temp += " and ";
+			*temp += last;
 			found = 1;
-			*temp += SkillStrs(pS);
 		}
 		if (found) {
 			*temp += AString(" to level ") + mt->speciallevel +
-				" and all others to level " + mt->defaultlevel;
+				" and all other skills to level " +
+				mt->defaultlevel;
 		} else {
 			*temp += AString("all skills to level ") + mt->defaultlevel;
 		}

@@ -140,8 +140,12 @@ int SkillMax(char const *skill, int race)
 	}
 
 	AString skname = pS->abbr;
+	AString mani = "MANI";
 	for (unsigned int c=0; c < sizeof(mt->skills)/sizeof(mt->skills[0]); c++) {
 		if (skname == mt->skills[c])
+			return mt->speciallevel;
+		// Allow MANI to act as a placeholder for all magical skills
+		if ((pS->flags & SkillType::MAGIC) && mani == mt->skills[c])
 			return mt->speciallevel;
 	}
 	return mt->defaultlevel;

@@ -1626,6 +1626,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", "Max Level (specialized skills)");
 		f.TagText("th", "Max Level (non-specialized skills)");
 		f.Enclose(0, "tr");
+		temp2 = "MANI";
 		for (i = 0; i < NITEMS; i++) {
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_MAN)) continue;
@@ -1640,7 +1641,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp = "";
 			for (j=0; j<(int)(sizeof(mt->skills)/sizeof(mt->skills[0])); j++) {
 				pS = FindSkill(mt->skills[j]);
-				if (!pS || (pS->flags & SkillType::DISABLED)) continue;
+				if (!pS) continue;
+				if (temp2 == pS->abbr &&
+						Globals->MAGE_NONLEADERS) {
+					spec = 1;
+					if (comma) temp += ", ";
+					temp += "all magical skills";
+					comma++;
+					continue;
+				}
+				if (pS->flags & SkillType::DISABLED) continue;
 				spec = 1;
 				if (comma) temp += ", ";
 				temp += pS->name;
