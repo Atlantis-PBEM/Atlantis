@@ -558,10 +558,9 @@ static AString WeapClass(int wclass)
 static AString WeapType(int flags, int wclass)
 {
 	AString type;
-	if (flags & WeaponType::RANGED) type = "ranged";
-	if (flags & WeaponType::LONG) type = "long";
-	if (flags & WeaponType::SHORT) type = "short";
-	type += " ";
+	if (flags & WeaponType::RANGED) type = "ranged ";
+	if (flags & WeaponType::LONG) type = "long ";
+	if (flags & WeaponType::SHORT) type = "short ";
 	type += WeapClass(wclass);
 	return type;
 }

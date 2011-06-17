@@ -1390,7 +1390,8 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 					temp = "There is a Gate here (Gate ";
 					temp += gate;
 					if (!Globals->DISPERSE_GATE_NUMBERS) {
-						temp += " of " + (pRegions->numberofgates);
+						temp += " of ";
+						temp += pRegions->numberofgates;
 					}
 					temp += ").";
 					f->PutStr(temp);

@@ -884,6 +884,9 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	else
 		maxproduced = number/ItemDefs[o->item].pMonths;
 
+	if (o->target > 0 && maxproduced > o->target)
+		maxproduced = o->target;
+
 	if (ItemDefs[o->item].flags & ItemType::ORINPUTS) {
 		// Figure out the max we can produce based on the inputs
 		int count = 0;
@@ -950,6 +953,18 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	u->Event(AString("Produces ") + ItemString(o->item,output) + " in " +
 			r->ShortPrint(&regions) + ".");
 	u->Practice(o->skill);
+	o->target -= output;
+	if (o->target > 0) {
+		TurnOrder *tOrder = new TurnOrder;
+		AString order;
+		tOrder->repeating = 0;
+		order = "PRODUCE ";
+		order += o->target;
+		order += " ";
+		order += ItemDefs[o->item].abr;
+		tOrder->turnOrders.Add(new AString(order));
+		u->turnorders.Insert(tOrder);
+	}
 	delete u->monthorders;
 	u->monthorders = 0;
 }
@@ -1017,6 +1032,8 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 		int bonus = u->GetProductionBonus(p->itemtype);
 		/* Factor for fractional productivity: 10 */
 		po->productivity = (int) ((float) (u->GetMen() * level * p->productivity / 10)) + bonus;
+		if (po->target > 0 && po->productivity > po->target)
+			po->productivity = po->target;
 		return po->productivity;
 	}
 	return 0;
@@ -1081,6 +1098,18 @@ void Game::RunAProduction(ARegion * r,Production * p)
 			u->items.SetNum(po->item,u->items.GetNum(po->item)
 							+ ubucks);
 			p->activity += ubucks;
+			po->target -= ubucks;
+			if (po->target > 0) {
+				TurnOrder *tOrder = new TurnOrder;
+				AString order;
+				tOrder->repeating = 0;
+				order = "PRODUCE ";
+				order += po->target;
+				order += " ";
+				order += ItemDefs[po->item].abr;
+				tOrder->turnOrders.Add(new AString(order));
+				u->turnorders.Insert(tOrder);
+			}
 
 			/* Show in unit's events section */
 			if (po->item == I_SILVER)

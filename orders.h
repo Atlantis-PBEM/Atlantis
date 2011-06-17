@@ -211,6 +211,7 @@ class ProduceOrder : public Order {
 		int item;
 		int skill; /* -1 for none */
 		int productivity;
+		int target;
 };
 
 class BuyOrder : public Order {

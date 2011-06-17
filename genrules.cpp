@@ -5094,12 +5094,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.ClassTagText("div", "rule", "");
 	f.LinkRef("produce");
 	f.TagText("h4", "PRODUCE [item]");
-	temp = "Spend the month producing as much as possible of the specified "
-		"item.";
+	f.TagText("h4", "PRODUCE [number] [item]");
+	temp = "Spend the month producing the specified item.  If a number "
+		"is given then the unit will attempt to produce exactly "
+		"that number of items; if this is not possible in one month "
+		"then the order will carry over to subsequent months.  If "
+		"no number is given then the unit will produce as much "
+		"as possible of the specified item.";
 	f.Paragraph(temp);
-	f.Paragraph("Example:");
-	temp = "Produce as many crossbows as possible.";
-	temp2 = "PRODUCE crossbows";
+	f.Paragraph("Examples:");
+	temp = "Produce as much wood as possible.";
+	temp2 = "PRODUCE wood";
+	f.CommandExample(temp, temp2);
+	temp = "Produce exactly 3 crossbows.";
+	temp2 = "PRODUCE 3 crossbows";
 	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("div", "rule", "");

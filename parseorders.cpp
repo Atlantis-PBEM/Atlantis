@@ -866,6 +866,7 @@ void Game::ProcessEntertainOrder(Unit *unit, OrdersCheck *pCheck)
 	ProduceOrder *o = new ProduceOrder;
 	o->item = I_SILVER;
 	o->skill = S_ENTERTAINMENT;
+	o->target = 0;
 	unit->monthorders = o;
 }
 
@@ -1723,7 +1724,14 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
+	int target = 0;
 	AString *token = o->gettoken();
+
+	if (token && token->value() > 0)
+	{
+		target = token->value();
+		token = o->gettoken();
+	}
 	if (!token) {
 		ParseError(pCheck, u, 0, "PRODUCE: No item given.");
 		return;
@@ -1745,6 +1753,7 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	p->item = it;
 	AString skname = ItemDefs[it].pSkill;
 	p->skill = LookupSkill(&skname);
+	p->target = target;
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&
 		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
@@ -1763,6 +1772,7 @@ void Game::ProcessWorkOrder(Unit *u, OrdersCheck *pCheck)
 	ProduceOrder *order = new ProduceOrder;
 	order->skill = -1;
 	order->item = I_SILVER;
+	order->target = 0;
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&
 		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
