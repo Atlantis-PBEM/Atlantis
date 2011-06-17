@@ -2062,7 +2062,7 @@ void CountNames()
 	Awrite(AString("Regions ") + nregions);
 }
 
-int AGetName(int town )
+int AGetName(int town, ARegion *reg)
 {
 	int offset, number;
 	if (town) {

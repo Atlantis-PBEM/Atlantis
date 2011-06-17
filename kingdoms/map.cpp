@@ -1034,7 +1034,7 @@ void ARegionList::SetFractalTerrain(ARegionArray *pArr)
 							reg->type = mtype;
 							reg->population = 1;
 							// if (TerrainDefs[reg->type].similar_type != R_OCEAN)
-							//	reg->wages = AGetName(0);
+							//	reg->wages = AGetName(0, reg);
 							set++;
 						}
 					}
@@ -1058,7 +1058,7 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 			if (!r) continue;
 			r->wages = -1;
 			if (r->type != R_OCEAN) toname++;
-			// r->wages = AGetName(0);
+			// r->wages = AGetName(0, reg);
 			r->population = 1;
 		}
 	}
@@ -1091,7 +1091,7 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 				if ((xmin < 0) && (ymin < 0))
 					lastnamed = 2 * Globals->CONTINENT_SIZE;
 				if (lastnamed > (3 * Globals->CONTINENT_SIZE / 2)) {
-					r1->wages = AGetName(0);
+					r1->wages = AGetName(0, r1);
 					r1->population = (getrandom(2) + sz / 2)
 						* (getrandom(2) + sz);
 					
@@ -1191,7 +1191,7 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 					reg->type = GetRegType(reg);
 					reg->population = 1;
 					// if (TerrainDefs[reg->type].similar_type != R_OCEAN)
-					//	reg->wages = AGetName(0);
+					//	reg->wages = AGetName(0, reg);
 					break;
 				}
 			}
@@ -1231,7 +1231,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 					if (getrandom(1000) < Globals->ODD_TERRAIN) {
 						reg->type = GetRegType(reg);
 						// if (TerrainDefs[reg->type].similar_type != R_OCEAN)
-						//	reg->wages = AGetName(0);
+						//	reg->wages = AGetName(0, reg);
 						break;
 					}
 					
@@ -1293,7 +1293,7 @@ void ARegionList::RandomTerrain(ARegionArray *pArr)
 					reg->wages = adjname;
 				} else {
 					reg->type = GetRegType(reg);
-					reg->wages = AGetName(0);
+					reg->wages = AGetName(0, reg);
 				}
 			}
 		}

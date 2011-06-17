@@ -764,7 +764,7 @@ void ARegion::SetupProds()
 /* Create a town randomly */
 void ARegion::AddTown()
 {
-	 AString *tname = new AString(AGetNameString(AGetName(1)));
+	AString *tname = new AString(AGetNameString(AGetName(1, this)));
 	int size = DetermineTownSize();
 	AddTown(size, tname);
 }
@@ -779,7 +779,7 @@ void ARegion::AddTown(AString * tname)
 /* Create a town of given Town Type */
 void ARegion::AddTown(int size)
 {
-	AString *tname = new AString(AGetNameString(AGetName(1)));
+	AString *tname = new AString(AGetNameString(AGetName(1, this)));
 	AddTown(size, tname);	
 }
 

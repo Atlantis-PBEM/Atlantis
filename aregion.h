@@ -106,7 +106,7 @@ class Location : public AListElem
 
 Location *GetUnit(AList *, int);
 
-int AGetName(int town);
+int AGetName(int town, ARegion *r);
 char const *AGetNameString(int name);
 
 class ARegionPtr : public AListElem

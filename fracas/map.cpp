@@ -719,7 +719,7 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 					reg->type = GetRegType(reg);
 					reg->population = 1;
 					if (TerrainDefs[reg->type].similar_type != R_OCEAN)
-						reg->wages = AGetName(0);
+						reg->wages = AGetName(0, reg);
 					break;
 				}
 			}
@@ -759,7 +759,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 					if (getrandom(1000) < Globals->ODD_TERRAIN) {
 						reg->type = GetRegType(reg);
 						if (TerrainDefs[reg->type].similar_type != R_OCEAN)
-							reg->wages = AGetName(0);
+							reg->wages = AGetName(0, reg);
 						break;
 					}
 					
@@ -821,7 +821,7 @@ void ARegionList::RandomTerrain(ARegionArray *pArr)
 					reg->wages = adjname;
 				} else {
 					reg->type = GetRegType(reg);
-					reg->wages = AGetName(0);
+					reg->wages = AGetName(0, reg);
 				}
 			}
 		}
