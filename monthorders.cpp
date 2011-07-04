@@ -34,249 +34,389 @@
 #include "game.h"
 #include "gamedata.h"
 
-void Game::RunSailOrders()
+void Game::RunMovementOrders()
 {
-	// ALT 28-Jul-2000
-	// Fixes to prevent sailing of incomplete ships
-	int tmpError = 0;
+	int phase, error;
+	ARegion *r;
+	Object *o;
+	Unit *u;
+	AList locs;
+	int reported = -1;
+	Location *l;
+	MoveOrder *mo;
+	SailOrder *so;
+	MoveDir *d;
+	TurnOrder *tOrder;
+	AString order;
 
-	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
-		AList regs;
-		forlist(&r->objects) {
-			Object * o = (Object *) elem;
-			Unit * u = o->GetOwner();
-			if (u && u->monthorders &&
-					u->monthorders->type == O_SAIL &&
-					o->IsFleet()) {
-				if (o->incomplete < 50) {
-					ARegionPtr * p = new ARegionPtr;
-					p->ptr = Do1SailOrder(r,o,u);
-					regs.Add(p);
-				} else {
-					tmpError = 1;
-				}
-			} else {
-				tmpError = 2;
-			}
-
-			if (tmpError) {
+	for (phase = 0; phase < Globals->MAX_SPEED; phase++) {
+		forlist(&regions) {
+			r = (ARegion *) elem;
+			forlist(&r->objects) {
+				o = (Object *) elem;
 				forlist(&o->units) {
-					Unit * u2 = (Unit *) elem;
-					if (u2->monthorders && u2->monthorders->type == O_SAIL) {
-						delete u2->monthorders;
-						u2->monthorders = 0;
-						switch(tmpError) {
-							case 1:
-								u2->Error("SAIL: Fleet is too damaged to sail.");
-								break;
-							case 2:
-								u2->Error("SAIL: Owner must issue fleet directions.");
-								break;
+					u = (Unit *) elem;
+if (!u->faction->IsNPC() && reported < phase) {
+	u->Event(AString("Doing phase ") + phase);
+	reported = phase;
+}
+					Object *tempobj = o;
+					DoMoveEnter(u, r, &tempobj);
+				}
+			}
+		}
+		forlist_reuse(&regions) {
+			r = (ARegion *) elem;
+			forlist(&r->objects) {
+				o = (Object *) elem;
+				error = 1;
+				if (o->IsFleet()) {
+					u = o->GetOwner();
+					if (u->phase >= phase)
+						continue;
+					if (u && !u->nomove &&
+							u->monthorders &&
+							u->monthorders->type == O_SAIL)  {
+						u->phase = phase;
+						if (o->incomplete < 50) {
+							l = Do1SailOrder(r, o, u);
+							if (l) locs.Add(l);
+							error = 0;
+						} else
+							error = 3;
+					} else
+						error = 2;
+				}
+				if (error > 0) {
+					forlist(&o->units) {
+						u = (Unit *) elem;
+						if (u && u->monthorders &&
+								u->monthorders->type == O_SAIL) {
+							switch (error) {
+								case 1:
+									u->Error("SAIL: Must be on a ship.");
+									break;
+								case 2:
+									u->Error("SAIL: Owner must issue fleet directions.");
+									break;
+								case 3:
+									u->Error("SAIL: Fleet is too damaged to sail.");
+									break;
+							}
+							delete u->monthorders;
+							u->monthorders = 0;
 						}
 					}
 				}
 			}
 		}
-		{
-			forlist(&regs) {
-				ARegion * r2 = ((ARegionPtr *) elem)->ptr;
-				DoAutoAttacksRegion(r2);
+		forlist_reuse(&regions) {
+			r = (ARegion *) elem;
+			forlist(&r->objects) {
+				o = (Object *) elem;
+				forlist(&o->units) {
+					u = (Unit *) elem;
+					if (u->phase >= phase)
+						continue;
+					u->phase = phase;
+					if (u && !u->nomove && u->monthorders &&
+							(u->monthorders->type == O_MOVE ||
+							u->monthorders->type == O_ADVANCE)) {
+						l = DoAMoveOrder(u, r, o);
+						if (l) locs.Add(l);
+					}
+				}
+			}
+		}
+		DoMovementAttacks(&locs);
+		locs.DeleteAll();
+	}
+
+	// Do a final round of Enters after the phased movement is done,
+	// in case such a thing is at the end of a move chain
+	forlist(&regions) {
+		r = (ARegion *) elem;
+		forlist(&r->objects) {
+			o = (Object *) elem;
+			forlist(&o->units) {
+				u = (Unit *) elem;
+				Object *tempobj = o;
+				DoMoveEnter(u, r, &tempobj);
+			}
+		}
+	}
+
+	// Queue remaining moves
+	forlist_reuse(&regions) {
+		r = (ARegion *) elem;
+		forlist(&r->objects) {
+			o = (Object *) elem;
+			forlist(&o->units) {
+				u = (Unit *) elem;
+				if (!u->nomove && !u->moved &&
+						u->monthorders &&
+						u->monthorders->type == O_MOVE) {
+					mo = (MoveOrder *) u->monthorders;
+					d = (MoveDir *) mo->dirs.First();
+					if (u->savedmovedir != d->dir)
+						u->savedmovement = 0;
+					u->savedmovement += u->movepoints / Globals->MAX_SPEED;
+					u->savedmovedir = d->dir;
+				} else {
+					u->savedmovement = 0;
+					u->savedmovedir = -1;
+				}
+				if (u->monthorders && 
+						u->monthorders->type == O_MOVE) {
+					mo = (MoveOrder *) u->monthorders;
+					if (mo->dirs.Num() > 0) {
+						u->Event("MOVE: Unit has insufficient movement points;"
+								" remaining moves queued.");
+						tOrder = new TurnOrder;
+						tOrder->repeating = 0;
+						if (mo->advancing)
+							order = "ADVANCE";
+						else
+							order = "MOVE";
+						forlist(&mo->dirs) {
+							d = (MoveDir *) elem;
+							order += " ";
+							if (d->dir < NDIRS) order += DirectionAbrs[d->dir];
+							else if (d->dir == MOVE_IN) order += "IN";
+							else if (d->dir == MOVE_OUT) order += "OUT";
+							else order += d->dir - MOVE_ENTER;
+						}
+						tOrder->turnOrders.Add(new AString(order));
+						u->turnorders.Insert(tOrder);
+					}
+				}
+			}
+			u = o->GetOwner();
+			if (o->IsFleet() && u && !u->nomove &&
+					u->monthorders && 
+					u->monthorders->type == O_SAIL) {
+				so = (SailOrder *) u->monthorders;
+				if (so->dirs.Num() > 0) {
+					u->Event("SAIL: Can't sail that far;"
+						" remaining moves queued.");
+					tOrder = new TurnOrder;
+					tOrder->repeating = 0;
+					order = "SAIL";
+					forlist(&so->dirs) {
+						d = (MoveDir *) elem;
+						order += " ";
+						order += DirectionAbrs[d->dir];
+					}
+					tOrder->turnOrders.Add(new AString(order));
+					u->turnorders.Insert(tOrder);
+				}
 			}
 		}
 	}
 }
 
-ARegion * Game::Do1SailOrder(ARegion * reg,Object * fleet,Unit * cap)
+Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 {
-	SailOrder * o = (SailOrder *) cap->monthorders;
-	int movepoints = fleet->GetFleetSpeed(0);
-	int moveok = 0;
-	int moved = 0;
-
+	SailOrder *o = (SailOrder *) cap->monthorders;
+	int stop, wgt, slr, nomove, cost;
 	AList facs;
-	int wgt = 0;
-	int slr = 0;
+	ARegion *newreg;
+	MoveDir *x;
+	Unit *unit;
+	Location *loc;
+
+	fleet->movepoints += fleet->GetFleetSpeed(0);
+	stop = 0;
+	wgt = 0;
+	slr = 0;
+	nomove = 0;
 	forlist(&fleet->units) {
-		Unit * unit = (Unit *) elem;
-		if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
+		unit = (Unit *) elem;
 		if (!GetFaction2(&facs,unit->faction->num)) {
 			FactionPtr * p = new FactionPtr;
 			p->ptr = unit->faction;
 			facs.Add(p);
 		}
 		wgt += unit->Weight();
+		if (unit->nomove) {
+			// If any unit on-board was in a fight (and
+			// suffered casualties), then halt movement
+			nomove = 1;
+		}
 		if (unit->monthorders && unit->monthorders->type == O_SAIL) {
 			slr += unit->GetSkill(S_SAILING) * unit->GetMen();
 		}
 	}
 
-	if (wgt > fleet->FleetCapacity()) {
+	if (nomove) {
+		stop = 1;
+	} else if (wgt > fleet->FleetCapacity()) {
 		cap->Error("SAIL: Fleet is overloaded.");
-		moveok = 1;
+		stop = 1;
+	} else if (slr < fleet->GetFleetSize()) {
+		cap->Error("SAIL: Not enough sailors.");
+		stop = 1;
+	} else if (!o->dirs.Num()) {
+		// no more moves?
+		stop = 1;
 	} else {
-		if (slr < fleet->GetFleetSize()) {
-			cap->Error("SAIL: Not enough sailors.");
-			moveok = 1;
-		} else {
-			while (o->dirs.Num()) {
-				MoveDir * x = (MoveDir *) o->dirs.First();
-				o->dirs.Remove(x);
-				int i = x->dir;
-				delete x;
-				ARegion * newreg = reg->neighbors[i];
-				if (!newreg) {
-					cap->Error("SAIL: Can't sail that way.");
-					break;
-				}
-				int cost = 1;
-				if (Globals->WEATHER_EXISTS) {
-					if (newreg->weather != W_NORMAL && !newreg->clearskies) cost = 2;
-				}
-
-				if (fleet->flying < 1 && !newreg->IsCoastal()) {
-					cap->Error("SAIL: Can't sail inland.");
-					break;
-				}
-
-				if ((fleet->flying < 1) &&
-					(TerrainDefs[reg->type].similar_type != R_OCEAN) &&
-					(TerrainDefs[newreg->type].similar_type != R_OCEAN)) {
-					cap->Error("SAIL: Can't sail inland.");
-					break;
-				}
-
-				// Check to see if sailing THROUGH land!
-				// always allow retracing steps
-				if (Globals->PREVENT_SAIL_THROUGH &&
-						(TerrainDefs[reg->type].similar_type != R_OCEAN) &&
-						(fleet->flying < 1) &&
-						(fleet->prevdir != -1) &&
-						(fleet->prevdir != i)) {
-					int blocked1 = 0;
-					int blocked2 = 0;
-					int d1 = fleet->prevdir;
-					int d2 = i;
-					if (d1 > d2) {
-						int tmp = d1;
-						d1 = d2;
-						d2 = tmp;
-					}
-					for (int k = d1+1; k < d2; k++) {
-						ARegion *land1 = reg->neighbors[k];
-						if ((!land1) ||
-								(TerrainDefs[land1->type].similar_type !=
-								 R_OCEAN))
-							blocked1 = 1;
-					}
-					int sides = NDIRS - 2 - (d2 - d1 - 1);
-					for (int l = d2+1; l <= d2 + sides; l++) {
-						int dl = l;
-						if (dl >= NDIRS) dl -= NDIRS;
-						ARegion *land2 = reg->neighbors[dl];
-						if ((!land2) ||
-								(TerrainDefs[land2->type].similar_type !=
-								 R_OCEAN))
-							blocked2 = 1;
-					}
-					if ((blocked1) && (blocked2))
-					{
-						cap->Error(AString("SAIL: Could not sail ") +
-								DirectionStrs[i] + AString(" from ") +
-								reg->ShortPrint(&regions) +
-								". Cannot sail through land.");
-						break;
-					}
-				}
-
-				if (movepoints < cost) {
-					cap->Error("SAIL: Can't sail that far;"
-								" remaining moves queued.");
-					TurnOrder *tOrder = new TurnOrder;
-					tOrder->repeating = 0;
-					AString order = "SAIL ";
-					order += DirectionAbrs[i];
-					forlist(&o->dirs) {
-						MoveDir *move = (MoveDir *) elem;
-						order += " ";
-						order += DirectionAbrs[move->dir];
-					}
-					tOrder->turnOrders.Add(new AString(order));
-					cap->turnorders.Insert(tOrder);
-					break;
-				}
-
-				movepoints -= cost;
-				moved = 1;
-				fleet->MoveObject(newreg);
-				fleet->SetPrevDir(reg->GetRealDirComp(i));
-				// if (!(cap->faction->IsNPC())) newreg->visited = 1;
-				forlist(&facs) {
-					Faction * f = ((FactionPtr *) elem)->ptr;
-					f->Event(*fleet->name + AString(" sails from ") +
-							reg->ShortPrint(&regions) + AString(" to ") +
-							newreg->ShortPrint(&regions) + AString("."));
-				}
-				if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
-					forlist(&fleet->units) {
-						// Everyone onboard gets to see the sights
-						Unit *unit = (Unit *)elem;
-						
-						unit->DiscardUnfinishedShips();		
-						Farsight *f;
-						// Note the hex being left
-						forlist(&reg->passers) {
-							f = (Farsight *)elem;
-							if (f->unit == unit) {
-								// We moved into here this turn
-								f->exits_used[i] = 1;
-							}
-						}
-						// And mark the hex being entered
-						f = new Farsight;
-						f->faction = unit->faction;
-						f->level = 0;
-						f->unit = unit;
-						f->exits_used[reg->GetRealDirComp(i)] = 1;
-						newreg->passers.Add(f);
-					}
-				}
-				reg = newreg;
-				if (newreg->ForbiddenShip(fleet)) {
-					cap->faction->Event(*fleet->name +
-							AString(" is stopped by guards in ") +
-							newreg->ShortPrint(&regions) + AString("."));
-					break;
-				}
+		x = (MoveDir *) o->dirs.First();
+		newreg = reg->neighbors[x->dir];
+		cost = 1;
+		if (Globals->WEATHER_EXISTS) {
+			if (newreg && newreg->weather != W_NORMAL &&
+					!newreg->clearskies)
+				cost = 2;
+		}
+		// We probably shouldn't see terrain-based errors until
+		// we accumulate enough movement points to get there
+		if (fleet->movepoints < cost * Globals->MAX_SPEED)
+			return 0;
+		if (!newreg) {
+			cap->Error("SAIL: Can't sail that way.");
+			stop = 1;
+		} else if (fleet->flying < 1 && !newreg->IsCoastal()) {
+			cap->Error("SAIL: Can't sail inland.");
+			stop = 1;
+		} else if ((fleet->flying < 1) &&
+			(TerrainDefs[reg->type].similar_type != R_OCEAN) &&
+			(TerrainDefs[newreg->type].similar_type != R_OCEAN)) {
+			cap->Error("SAIL: Can't sail inland.");
+			stop = 1;
+		} else if (Globals->PREVENT_SAIL_THROUGH &&
+				(TerrainDefs[reg->type].similar_type != R_OCEAN) &&
+				(fleet->flying < 1) &&
+				(fleet->prevdir != -1) &&
+				(fleet->prevdir != x->dir)) {
+			// Check to see if sailing THROUGH land!
+			// always allow retracing steps
+			int blocked1 = 0;
+			int blocked2 = 0;
+			int d1 = fleet->prevdir;
+			int d2 = x->dir;
+			if (d1 > d2) {
+				int tmp = d1;
+				d1 = d2;
+				d2 = tmp;
+			}
+			for (int k = d1+1; k < d2; k++) {
+				ARegion *land1 = reg->neighbors[k];
+				if ((!land1) ||
+						(TerrainDefs[land1->type].similar_type !=
+						 R_OCEAN))
+					blocked1 = 1;
+			}
+			int sides = NDIRS - 2 - (d2 - d1 - 1);
+			for (int l = d2+1; l <= d2 + sides; l++) {
+				int dl = l;
+				if (dl >= NDIRS) dl -= NDIRS;
+				ARegion *land2 = reg->neighbors[dl];
+				if ((!land2) ||
+						(TerrainDefs[land2->type].similar_type !=
+						 R_OCEAN))
+					blocked2 = 1;
+			}
+			if ((blocked1) && (blocked2))
+			{
+				cap->Error(AString("SAIL: Could not sail ") +
+						DirectionStrs[x->dir] + AString(" from ") +
+						reg->ShortPrint(&regions) +
+						". Cannot sail through land.");
+				stop = 1;
 			}
 		}
-	}
 
-	/* Clear out everyone's orders */
-	{
-		forlist(&fleet->units) {
-			Unit * unit = (Unit *) elem;
-			if (!moveok) {
+		if (!stop) {
+			fleet->movepoints -= cost * Globals->MAX_SPEED;
+			fleet->MoveObject(newreg);
+			fleet->SetPrevDir(reg->GetRealDirComp(x->dir));
+			// if (!(cap->faction->IsNPC())) newreg->visited = 1;
+			forlist(&fleet->units) {
+				unit = (Unit *) elem;
+				unit->moved += cost;
+				if (unit->guard == GUARD_GUARD)
+					unit->guard = GUARD_NONE;
 				unit->alias = 0;
+				unit->PracticeAttribute("wind");
+				if (unit->monthorders) {
+					if (unit->monthorders->type == O_SAIL)
+						unit->Practice(S_SAILING);
+					if (unit->monthorders->type == O_MOVE) {
+						delete unit->monthorders;
+						unit->monthorders = 0;
+					}
+				}
+				unit->DiscardUnfinishedShips();
+				if (!GetFaction2(&facs, unit->faction->num)) {
+					FactionPtr *p = new FactionPtr;
+					p->ptr = unit->faction;
+					facs.Add(p);
+				}
 			}
 
-			unit->PracticeAttribute("wind");
+			forlist_reuse(&facs) {
+				Faction * f = ((FactionPtr *) elem)->ptr;
+				f->Event(*fleet->name +
+					AString(" sails from ") +
+					reg->ShortPrint(&regions) +
+					AString(" to ") +
+					newreg->ShortPrint(&regions) +
+					AString("."));
+			}
+			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
+				forlist(&fleet->units) {
+					// Everyone onboard gets to see the sights
+					unit = (Unit *) elem;
+					
+					Farsight *f;
+					// Note the hex being left
+					forlist(&reg->passers) {
+						f = (Farsight *)elem;
+						if (f->unit == unit) {
+							// We moved into here this turn
+							f->exits_used[x->dir] = 1;
+						}
+					}
+					// And mark the hex being entered
+					f = new Farsight;
+					f->faction = unit->faction;
+					f->level = 0;
+					f->unit = unit;
+					f->exits_used[reg->GetRealDirComp(x->dir)] = 1;
+					newreg->passers.Add(f);
+				}
+			}
+			reg = newreg;
+			if (newreg->ForbiddenShip(fleet)) {
+				cap->faction->Event(*fleet->name +
+					AString(" is stopped by guards in ") +
+					newreg->ShortPrint(&regions) + 
+					AString("."));
+				stop = 1;
+			}
+			o->dirs.Remove(x);
+			delete x;
+		}
+	}
 
-			if (unit->monthorders) {
-				if (unit->monthorders->type == O_SAIL) {
-					unit->Practice(S_SAILING);
-					delete unit->monthorders;
-					unit->monthorders = 0;
-				}
-				else if (!moveok && unit->monthorders->type == O_MOVE) {
-					delete unit->monthorders;
-					unit->monthorders = 0;
-				}
+	if (stop) {
+		// Clear out everyone's orders
+		forlist(&fleet->units) {
+			Unit *unit = (Unit *) elem;
+
+			if (unit->monthorders &&
+					unit->monthorders->type == O_SAIL) {
+				delete unit->monthorders;
+				unit->monthorders = 0;
 			}
 		}
 	}
 
-	return reg;
+	loc = new Location;
+	loc->unit = cap;
+	loc->region = reg;
+	loc->obj = fleet;
+	return loc;
 }
 
 void Game::RunTeachOrders()
@@ -388,8 +528,10 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 	}
 }
 
-void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
+void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 {
+	Object *buildobj;
+
 	if (!TradeCheck(r, u->faction)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
 		delete u->monthorders;
@@ -397,15 +539,19 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 		return;
 	}
 
+	buildobj = r->GetObject(u->build);
 	// plain "BUILD" order needs to check that the unit is in something
 	// that can be built AFTER enter/leave orders have executed
-	if (obj->type == O_DUMMY) {
+	if (!buildobj || buildobj->type == O_DUMMY) {
+		buildobj = obj;
+	}
+	if (!buildobj || buildobj->type == O_DUMMY) {
 		u->Error("BUILD: Nothing to build.");
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
 	}
-	AString skname = ObjectDefs[obj->type].skill;
+	AString skname = ObjectDefs[buildobj->type].skill;
 	int sk = LookupSkill(&skname);
 	if (sk == -1) {
 		u->Error("BUILD: Can't build that.");
@@ -415,15 +561,15 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	}
 
 	int usk = u->GetSkill(sk);
-	if (usk < ObjectDefs[obj->type].level) {
+	if (usk < ObjectDefs[buildobj->type].level) {
 		u->Error("BUILD: Can't build that.");
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
 	}
 	
-	int needed = obj->incomplete;
-	int type = obj->type;
+	int needed = buildobj->incomplete;
+	int type = buildobj->type;
 	// AS
 	if (((ObjectDefs[type].flags & ObjectType::NEVERDECAY) || !Globals->DECAY) &&
 			needed < 1) {
@@ -471,23 +617,25 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 		maintMax /= ObjectDefs[type].maintFactor;
 		if (num > maintMax) num = maintMax;
 		if (itn < num) num = itn;
-		job = " maintenance ";
-		obj->incomplete -= (num * ObjectDefs[type].maintFactor);
-		if (obj->incomplete < -(ObjectDefs[type].maxMaintenance))
-			obj->incomplete = -(ObjectDefs[type].maxMaintenance);
+		job = "Performs maintenance on ";
+		buildobj->incomplete -= (num * ObjectDefs[type].maintFactor);
+		if (buildobj->incomplete < -(ObjectDefs[type].maxMaintenance))
+			buildobj->incomplete = -(ObjectDefs[type].maxMaintenance);
 	} else if (needed > 0) {
 		if (num > needed) num = needed;
 		if (itn < num) num = itn;
-		job = " construction ";
-		obj->incomplete -= num;
-		if (obj->incomplete == 0) {
-			obj->incomplete = -(ObjectDefs[type].maxMaintenance);
+		job = "Performs construction on ";
+		buildobj->incomplete -= num;
+		if (buildobj->incomplete == 0) {
+			job = "Completes construction of ";
+			buildobj->incomplete = -(ObjectDefs[type].maxMaintenance);
 		}
 	}
 
 	/* Perform the build */
 	
-	u->MoveUnit(obj);
+	if (obj != buildobj)
+		u->MoveUnit(buildobj);
 
 	if (it == I_WOOD_OR_STONE) {
 		if (num > u->GetSharedNum(I_STONE)) {
@@ -505,7 +653,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	r->improvement += num;
 
 	// AS
-	u->Event(AString("Performs") + job + "on " + *(obj->name) + ".");
+	u->Event(job + *(buildobj->name) + " [" + buildobj->num + "].");
 	u->Practice(sk);
 
 	delete u->monthorders;
@@ -517,48 +665,62 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
  */
 void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 {
-	int ship = abs(u->build);
-	AString skname = ItemDefs[ship].pSkill;
-	int skill = LookupSkill(&skname);
-	int level = u->GetSkill(skill);
+	int ship, skill, level, maxbuild, unfinished, output, percent;
+	AString skname;
+
+	ship = abs(u->build);
+	skname = ItemDefs[ship].pSkill;
+	skill = LookupSkill(&skname);
+	level = u->GetSkill(skill);
 
 	// get needed to complete
-	int maxbuild = 0;
+	maxbuild = 0;
 	if ((u->monthorders) && 
 		(u->monthorders->type == O_BUILD)) {
 			BuildOrder *border = (BuildOrder *) u->monthorders;
 			maxbuild = border->needtocomplete;
 	}
-	int output = ShipConstruction(r, u, level, maxbuild, ship);
-	
-	if (output < 1) return;
-	
-	// are there unfinished ship items of the given type?
-	int unfinished = u->items.GetNum(ship);
-	
-	// set up unfinished items
-	if ((unfinished == 0) && (maxbuild > 0)) {
-		unfinished = ItemDefs[ship].pMonths;
-		u->items.SetNum(ship, unfinished);	
+	if (maxbuild < 1) {
+		// Our helpers have already finished the hard work, so
+		// just put the finishing touches on the new vessel
+		unfinished = 0;
+	} else {
+		output = ShipConstruction(r, u, u, level, maxbuild, ship);
+		
+		if (output < 1) return;
+		
+		// are there unfinished ship items of the given type?
+		unfinished = u->items.GetNum(ship);
+		
+		if (unfinished == 0) {
+			// Start a new ship's construction from scratch
+			unfinished = ItemDefs[ship].pMonths;
+			u->items.SetNum(ship, unfinished);	
+		}
+
+		// Now reduce unfinished by produced amount
+		unfinished -= output;
+		if (unfinished < 0)
+			unfinished = 0;
 	}
+	u->items.SetNum(ship, unfinished);
 
 	// practice
 	u->Practice(skill);
 
-	// Now reduce unfinished by produced amount
-	unfinished -= output;
-	if (unfinished < 0) unfinished = 0;
-	u->items.SetNum(ship,unfinished);
 	if (unfinished == 0) {
 		u->Event(AString("Finishes building a ") + ItemDefs[ship].name + " in " +
 			r->ShortPrint(&regions) + ".");
 		CreateShip(r, u, ship);
 	} else {
-		int percent = 100 * output / ItemDefs[ship].pMonths;
+		percent = 100 * output / ItemDefs[ship].pMonths;
 		u->Event(AString("Performs construction work on a ") + 
 			ItemDefs[ship].name + " (" + percent + "%) in " +
 			r->ShortPrint(&regions) + ".");
 	}
+
+	delete u->monthorders;
+	u->monthorders = 0;
 }
 
 void Game::RunBuildHelpers(ARegion *r)
@@ -580,7 +742,7 @@ void Game::RunBuildHelpers(ARegion *r)
 							continue;
 						}
 						// Make sure that unit is building
-						if (target->monthorders &&
+						if (!target->monthorders ||
 								target->monthorders->type != O_BUILD) {
 							u->Error("BUILD: Unit isn't building.");
 							delete u->monthorders;
@@ -597,10 +759,9 @@ void Game::RunBuildHelpers(ARegion *r)
 							continue;
 						}
 						if (target->build > 0) {
-							u->build=target->build;
+							u->build = target->build;
 							tarobj = r->GetObject(target->build);
-						}
-						else {
+						} else {
 							// help build ships
 							int ship = abs(target->build);
 							AString skname = ItemDefs[ship].pSkill;
@@ -612,12 +773,18 @@ void Game::RunBuildHelpers(ARegion *r)
 										BuildOrder *border = (BuildOrder *) target->monthorders;
 										needed = border->needtocomplete;
 							}
-							int output = ShipConstruction(r, u, level, needed, ship);
+							if (needed < 1) {
+								u->Error("BUILD: Construction is already complete.");
+								delete u->monthorders;
+								u->monthorders = 0;
+								continue;
+							}
+							int output = ShipConstruction(r, u, target, level, needed, ship);
 							if (output < 1) continue;
 							
 							int unfinished = target->items.GetNum(ship);
-							// set up unfinished items
 							if (unfinished == 0) {
+								// Start construction on a new ship
 								unfinished = ItemDefs[ship].pMonths;
 								target->items.SetNum(ship, unfinished);	
 							}
@@ -631,21 +798,18 @@ void Game::RunBuildHelpers(ARegion *r)
 								if ((target->monthorders) && 
 									(target->monthorders->type == O_BUILD)) {
 										BuildOrder *border = (BuildOrder *) target->monthorders;
-										border->needtocomplete -= output;
-										target->monthorders = border;
+										border->needtocomplete = unfinished;
 								}
 							} else {
-								CreateShip(r, target, ship);
+								// CreateShip(r, target, ship);
+								// don't create the ship yet; leave that for the unit we're helping
+								target->items.SetNum(ship, 1);
 								if ((target->monthorders) && 
 									(target->monthorders->type == O_BUILD)) {
 										BuildOrder *border = (BuildOrder *) target->monthorders;
 										border->needtocomplete = 0;
-										target->monthorders = border;
 								}
 							} 
-							// hack: avoid that target starts
-							// building anew
-							if (unfinished == 0) unfinished = -1;
 							int percent = 100 * output / ItemDefs[ship].pMonths;
 							u->Event(AString("Helps ") +
 								*(target->name) + " with construction of a " + 
@@ -658,14 +822,15 @@ void Game::RunBuildHelpers(ARegion *r)
 						if ((tarobj != NULL) && (u->object != tarobj))
 							u->MoveUnit(tarobj);
 					} else {
-						Object *buildobj = r->GetDummy();
-						// don't move if finishing a building
-						if ((u->object->type != O_DUMMY) && (u->object->type == u->build)) continue;
-						if (u->build > 0) buildobj = r->GetObject(u->build);
-						if (!buildobj) continue; // don't move into nonexistent objects
-						if (buildobj != r->GetDummy() && buildobj != u->object)
-						{
-							u->MoveUnit(buildobj);
+						Object *buildobj;
+						if (u->build > 0) {
+							buildobj = r->GetObject(u->build);
+							if (buildobj && 
+									buildobj != r->GetDummy() &&
+									buildobj != u->object)
+							{
+								u->MoveUnit(buildobj);
+							}
 						}
 					}
 				}
@@ -709,7 +874,7 @@ void Game::CreateShip(ARegion *r, Unit * u, int ship)
  * handles material use and practice for both the main
  * shipbuilders and the helpers.
  */
-int Game::ShipConstruction(ARegion * r, Unit * u, int level, int needed, int ship)
+int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int needed, int ship)
 {
 	if (!TradeCheck(r, u->faction)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
@@ -724,9 +889,9 @@ int Game::ShipConstruction(ARegion * r, Unit * u, int level, int needed, int shi
 		u->monthorders = 0;
 		return 0;
 	}
-		
+
 	// are there unfinished ship items of the given type?
-	int unfinished = u->items.GetNum(ship);
+	int unfinished = target->items.GetNum(ship);
 
 	int number = u->GetMen() * level + u->GetProductionBonus(ship);
 
@@ -845,7 +1010,8 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	ProduceOrder * o = (ProduceOrder *) u->monthorders;
 
 	if (o->item == I_SILVER) {
-		u->Error("Can't do that in this region.");
+		if (!o->quiet)
+			u->Error("Can't do that in this region.");
 		delete u->monthorders;
 		u->monthorders = 0;
 		return;
@@ -1302,7 +1468,9 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 					"cut in half above level 2.");
 			days /= 2;
 		} else if (obj->mages < 1) {
-			if (!obj->IsFleet() && !ObjectDefs[obj->type].maxMages) {
+			if (!Globals->LIMITED_MAGES_PER_BUILDING ||
+					(!obj->IsFleet() &&
+					!ObjectDefs[obj->type].maxMages)) {
 				u->Error("Warning: Magic study rate cut in half above level 2 due "
 						"to unsuitable building.");
 			} else {
@@ -1357,49 +1525,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	}
 }
 
-void Game::RunMoveOrders()
-{
-	for (int phase = 0; phase < Globals->MAX_SPEED; phase++) {
-		{
-			forlist((&regions)) {
-				ARegion * region = (ARegion *) elem;
-				forlist((&region->objects)) {
-					Object * obj = (Object *) elem;
-					forlist(&obj->units) {
-						Unit * unit = (Unit *) elem;
-						Object *tempobj = obj;
-						DoMoveEnter(unit,region,&tempobj);
-					}
-				}
-			}
-		}
-
-		AList * locs = new AList;
-		forlist((&regions)) {
-			ARegion * region = (ARegion *) elem;
-			forlist((&region->objects)) {
-				Object * obj = (Object *) elem;
-				forlist(&obj->units) {
-					Unit * unit = (Unit *) elem;
-					if (phase == unit->movepoints && unit->monthorders &&
-						(unit->monthorders->type == O_MOVE ||
-						 unit->monthorders->type == O_ADVANCE) &&
-						!unit->nomove) {
-						locs->Add(DoAMoveOrder(unit,region,obj));
-					}
-				}
-			}
-/*
-			DoAdvanceAttacks(locs);
-			locs->DeleteAll();
-*/
-		}
-		DoAdvanceAttacks(locs);
-		locs->DeleteAll();
-	}
-}
-
-void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
+void Game::DoMoveEnter(Unit *unit,ARegion *region,Object **obj)
 {
 	MoveOrder * o;
 	if (!unit->monthorders ||
@@ -1484,128 +1610,130 @@ void Game::DoMoveEnter(Unit * unit,ARegion * region,Object **obj)
 	}
 }
 
-Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
+Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 {
-	Location * loc = new Location;
-	MoveOrder * o = (MoveOrder *) unit->monthorders;
-	int movetype = unit->MoveType();
-	AString road;
+	MoveOrder *o = (MoveOrder *) unit->monthorders;
+	MoveDir *x;
+	ARegion *newreg;
+	AString road, temp;
+	int movetype, cost, startmove, weight;
+	Unit *ally, *forbid;
+	Location *loc;
 
-	if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
+	unit->movepoints += unit->CalcMovePoints();
+
+	if (!o->dirs.Num()) {
+		delete o;
+		unit->monthorders = 0;
+		return 0;
+	}
+
+	x = (MoveDir *) o->dirs.First();
+
+	if (x->dir == MOVE_IN) {
+		if (obj->inner == -1) {
+			unit->Error("MOVE: Can't move IN there.");
+			goto done_moving;
+		}
+		newreg = regions.GetRegion(obj->inner);
+	} else {
+		newreg = region->neighbors[x->dir];
+	}
+
+	if (!newreg) {
+		unit->Error(AString("MOVE: Can't move that direction."));
+		goto done_moving;
+	}
+
+	road = "";
+	startmove = 0;
+	movetype = unit->MoveType();
+	cost = newreg->MoveCost(movetype, region, x->dir, &road);
+	if (region->type == R_NEXUS && newreg->IsStartingCity()) {
+		cost = 1;
+		startmove = 1;
+	}
+	if (movetype == M_NONE) {
+		unit->Error("MOVE: Unit is overloaded and cannot move.");
+		goto done_moving;
+	}
+
+	if ((TerrainDefs[region->type].similar_type == R_OCEAN) &&
+			(!unit->CanSwim() ||
+			unit->GetFlag(FLAG_NOCROSS_WATER))) {
+		unit->Error(AString("MOVE: Can't move while in the ocean."));
+		goto done_moving;
+	}
+	weight = unit->items.Weight();
+	if ((TerrainDefs[newreg->type].similar_type != R_OCEAN) &&
+			!unit->CanWalk(weight)) {
+		unit->Error(AString("MOVE: Must be able to walk to climb out of the ocean."));
+		goto done_moving;
+	}
+	// If we've reached our movement limit, still can't move,
+	// haven't moved previously this month, are moving in the same
+	// direction as last month and have stored movement points,
+	// then add in those stored movement points
+	if (unit->movepoints / Globals->MAX_SPEED == unit->CalcMovePoints() &&
+			unit->movepoints < cost * Globals->MAX_SPEED &&
+			!unit->moved &&
+			x->dir == unit->savedmovedir) {
+		unit->movepoints += unit->savedmovement * Globals->MAX_SPEED;
+		unit->savedmovement = 0;
+	}
+
+	if (unit->movepoints < cost * Globals->MAX_SPEED)
+		return 0;
+
+	if ((TerrainDefs[newreg->type].similar_type == R_OCEAN) &&
+			(!unit->CanSwim() ||
+			unit->GetFlag(FLAG_NOCROSS_WATER))) {
+		unit->Event(AString("Discovers that ") +
+				newreg->ShortPrint(&regions) + " is " +
+				TerrainDefs[newreg->type].name + ".");
+		goto done_moving;
+	}
+
+	if (unit->type == U_WMON && newreg->town && newreg->IsGuarded()) {
+		unit->Event("Monsters don't move into guarded towns.");
+		goto done_moving;
+	}
+
+	if (unit->guard == GUARD_ADVANCE) {
+		ally = newreg->ForbiddenByAlly(unit);
+		if (ally && !startmove) {
+			unit->Event(AString("Can't ADVANCE: ") + *(newreg->name) +
+						" is guarded by " + *(ally->name) + ", an ally.");
+			goto done_moving;
+		}
+	}
+
 	if (o->advancing) unit->guard = GUARD_ADVANCE;
 
-	/* Ok, now we can move a region */
-	if (o->dirs.Num()) {
-		MoveDir * x = (MoveDir *) o->dirs.First();
-		o->dirs.Remove(x);
-		int i = x->dir;
-		int startmove = 0;
-		delete x;
+	forbid = newreg->Forbidden(unit);
+	if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
+		int obs = unit->GetAttribute("observation");
+		unit->Event(AString("Is forbidden entry to ") +
+					newreg->ShortPrint(&regions) + " by " +
+					forbid->GetName(obs) + ".");
+		obs = forbid->GetAttribute("observation");
+		forbid->Event(AString("Forbids entry to ") +
+					unit->GetName(obs) + ".");
+		goto done_moving;
+	}
 
-		/* Setup region to move to */
-		ARegion * newreg;
-		if (i == MOVE_IN) {
-			if (obj->inner == -1) {
-				unit->Error("MOVE: Can't move IN there.");
-				goto done_moving;
-			}
-			newreg = regions.GetRegion(obj->inner);
-		} else {
-			newreg = region->neighbors[i];
-		}
+	if (unit->guard == GUARD_GUARD) unit->guard = GUARD_NONE;
 
-		if (!newreg) {
-			unit->Error(AString("MOVE: Can't move that direction."));
-			goto done_moving;
-		}
+	unit->alias = 0;
+	unit->movepoints -= cost * Globals->MAX_SPEED;
+	unit->moved += cost;
+	unit->MoveUnit(newreg->GetDummy());
+	unit->DiscardUnfinishedShips();
+	// if (!(unit->faction->IsNPC())) newreg->visited = 1;
 
-		if (region->type == R_NEXUS && newreg->IsStartingCity())
-			startmove = 1;
-
-		if ((TerrainDefs[region->type].similar_type == R_OCEAN) &&
-				(!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))) {
-			unit->Error(AString("MOVE: Can't move while in the ocean."));
-			goto done_moving;
-		}
-
-		road = "";
-		int cost = newreg->MoveCost(movetype, region, i, &road);
-
-		if (region->type != R_NEXUS &&
-				unit->CalcMovePoints() - unit->movepoints < cost) {
-			if (unit->MoveType() == M_NONE) {
-				unit->Error("MOVE: Unit is overloaded and cannot move.");
-			} else {
-				unit->Error("MOVE: Unit has insufficient movement points;"
-						" remaining moves queued.");
-				TurnOrder *tOrder = new TurnOrder;
-				AString order;
-				tOrder->repeating = 0;
-				if (o->advancing) order = "ADVANCE ";
-				else order = "MOVE ";
-				if (i < NDIRS) order += DirectionAbrs[i];
-				else if (i == MOVE_IN) order += "IN";
-				else if (i == MOVE_OUT) order += "OUT";
-				else order += i - MOVE_ENTER;
-				forlist(&o->dirs) {
-					MoveDir *move = (MoveDir *) elem;
-					order += " ";
-					if (move->dir < NDIRS) order += DirectionAbrs[move->dir];
-					else if (move->dir == MOVE_IN) order += "IN";
-					else if (move->dir == MOVE_OUT) order += "OUT";
-					else order += move->dir - MOVE_ENTER;
-				}
-				tOrder->turnOrders.Add(new AString(order));
-				unit->turnorders.Insert(tOrder);
-			}
-			goto done_moving;
-		}
-
-		if ((TerrainDefs[newreg->type].similar_type == R_OCEAN) &&
-				(!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))) {
-			unit->Event(AString("Discovers that ") +
-						newreg->ShortPrint(&regions) + " is " +
-						TerrainDefs[newreg->type].name + ".");
-			goto done_moving;
-		}
-
-		if (unit->type == U_WMON && newreg->town && newreg->IsGuarded()) {
-			unit->Event("Monsters don't move into guarded towns.");
-			goto done_moving;
-		}
-
-		if (unit->guard == GUARD_ADVANCE) {
-			Unit *ally = newreg->ForbiddenByAlly(unit);
-			if (ally && !startmove) {
-				unit->Event(AString("Can't ADVANCE: ") + *(newreg->name) +
-							" is guarded by " + *(ally->name) + ", an ally.");
-				goto done_moving;
-			}
-		}
-
-		Unit * forbid = newreg->Forbidden(unit);
-		if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
-			int obs = unit->GetAttribute("observation");
-			unit->Event(AString("Is forbidden entry to ") +
-						newreg->ShortPrint(&regions) + " by " +
-						forbid->GetName(obs) + ".");
-			obs = forbid->GetAttribute("observation");
-			forbid->Event(AString("Forbids entry to ") +
-						unit->GetName(obs) + ".");
-			goto done_moving;
-		}
-
-		/* Clear the unit's alias out, so as not to interfere with TEACH */
-		unit->alias = 0;
-
-		unit->movepoints += cost;
-		unit->MoveUnit(newreg->GetDummy());
-		unit->DiscardUnfinishedShips();
-		// if (!(unit->faction->IsNPC())) newreg->visited = 1;
-
-		AString temp;
-		switch (movetype) {
+	switch (movetype) {
 		case M_WALK:
+		default:
 			temp = AString("Walks ") + road;
 			if (TerrainDefs[newreg->type].similar_type == R_OCEAN)
 				temp = "Swims ";
@@ -1618,48 +1746,52 @@ Location * Game::DoAMoveOrder(Unit * unit, ARegion * region, Object * obj)
 			temp = "Flies ";
 			unit->Practice(S_RIDING);
 			break;
-		}
-		unit->Event(temp + AString("from ") + region->ShortPrint(&regions)
-					+ AString(" to ") + newreg->ShortPrint(&regions) +
-					AString("."));
-		if (forbid) {
-			unit->advancefrom = region;
-		}
-		if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
-			// Update our visit record in the region we are leaving.
-			Farsight *f;
-			forlist(&region->passers) {
-				f = (Farsight *)elem;
-				if (f->unit == unit) {
-					// We moved into here this turn
-					if (i < MOVE_IN) {
-						f->exits_used[i] = 1;
-					}
-				}
-			}
-			// And mark the hex being entered
-			f = new Farsight;
-			f->faction = unit->faction;
-			f->level = 0;
-			f->unit = unit;
-			if (i < MOVE_IN) {
-				f->exits_used[region->GetRealDirComp(i)] = 1;
-			}
-			newreg->passers.Add(f);
-		}
-		region = newreg;
+	}
+	unit->Event(temp + AString("from ") + region->ShortPrint(&regions)
+			+ AString(" to ") + newreg->ShortPrint(&regions) +
+			AString("."));
+
+	if (forbid) {
+		unit->advancefrom = region;
 	}
 
+	// TODO: Should we get a transit report on the starting region?
+	if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
+		// Update our visit record in the region we are leaving.
+		Farsight *f;
+		forlist(&region->passers) {
+			f = (Farsight *)elem;
+			if (f->unit == unit) {
+				// We moved into here this turn
+				if (x->dir < MOVE_IN) {
+					f->exits_used[x->dir] = 1;
+				}
+			}
+		}
+		// And mark the hex being entered
+		f = new Farsight;
+		f->faction = unit->faction;
+		f->level = 0;
+		f->unit = unit;
+		if (x->dir < MOVE_IN) {
+			f->exits_used[region->GetRealDirComp(x->dir)] = 1;
+		}
+		newreg->passers.Add(f);
+	}
+
+	region = newreg;
+
+	o->dirs.Remove(x);
+	delete x;
+
+	loc = new Location;
 	loc->unit = unit;
 	loc->region = region;
-	loc->obj = obj;
+	loc->obj = 0;
 	return loc;
 
 done_moving:
 	delete o;
 	unit->monthorders = 0;
-	loc->unit = unit;
-	loc->region = region;
-	loc->obj = obj;
-	return loc;
+	return 0;
 }

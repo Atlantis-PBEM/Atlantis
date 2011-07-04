@@ -256,6 +256,10 @@ class Unit : public AListElem
 		int losses;
 		int free;
 		int practiced; // Has this unit practiced a skill this turn
+		int moved;
+		int phase;
+		int savedmovement;
+		int savedmovedir;
 
 		/* Orders */
 		int destroy;

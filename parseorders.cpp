@@ -606,7 +606,7 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			ProcessTeachOrder(unit, o, pCheck);
 			break;
 		case O_WORK:
-			ProcessWorkOrder(unit, pCheck);
+			ProcessWorkOrder(unit, 0, pCheck);
 			break;
 		case O_TRANSPORT:
 			ProcessTransportOrder(unit, o, pCheck);
@@ -1477,8 +1477,10 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
 	AString * token = o->gettoken();
 	BuildOrder * order = new BuildOrder;
+	int maxbuild, i;
+
 	// 'incomplete' for ships:
-	int maxbuild = 0;
+	maxbuild = 0;
 	unit->build = 0;
 	
 	if (token) {
@@ -1528,7 +1530,11 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 						return;
 					}
 					unit->build = -st;
-					maxbuild = ItemDefs[st].pMonths - unit->items.GetNum(st);
+					maxbuild = ItemDefs[st].pMonths;
+					// if we already have an unfinished
+					// ship, see how much work is left
+					if (unit->items.GetNum(st) > 0)
+						maxbuild = unit->items.GetNum(st);
 					// Don't create a fleet yet	
 				} else {
 					/* build standard OBJECT */
@@ -1550,24 +1556,30 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 						ParseError(pCheck, unit, 0, "BUILD: Can't build that.");
 						return;
 					}
-					Object * obj = new Object(reg);
-					obj->type = ot;
-					obj->incomplete = ObjectDefs[obj->type].cost;
-					obj->num = unit->object->region->buildingseq++;
-					obj->SetName(new AString("Building"));
-					unit->build = obj->num;
-					unit->object->region->objects.Add(obj);
+					for (i = 1; i < 100; i++)
+						if (!reg->GetObject(i))
+							break;
+					if (i < 100) {
+						Object * obj = new Object(reg);
+						obj->type = ot;
+						obj->incomplete = ObjectDefs[obj->type].cost;
+						obj->num = i;
+						obj->SetName(new AString("Building"));
+						unit->build = obj->num;
+						unit->object->region->objects.Add(obj);
+						unit->MoveUnit(obj);
+					} else {
+						unit->Error("BUILD: The region is full.");
+						return;
+					}
 				}
 			}
 			order->target = NULL; // Not helping anyone...
 		}
-	} else { 
+	} else {
 		// just a 'build' order
 		order->target = NULL;
 		if (!pCheck) {
-			Object * obj = unit->object;
-			int ot = obj->type;
-			
 			// look for an incomplete ship type in inventory
 			int st = O_DUMMY;
 			forlist(&unit->items) {
@@ -1580,10 +1592,12 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			}
 			
 			if (st == O_DUMMY) {
-				unit->build = ot;
+				// Build whatever we happen to be in when
+				// we get to the build phase
+				unit->build = 0;
 			} else {
 				unit->build = st;
-				maxbuild = ItemDefs[-st].pMonths - unit->items.GetNum(-st);
+				maxbuild = unit->items.GetNum(-st);
 			}
 		}
 	}
@@ -1607,7 +1621,6 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	// reset their taxation status if taxing is a month-long order
 	if (Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 	unit->monthorders = order;
-
 }
 
 void Game::ProcessAttackOrder(Unit *u, AString *o, OrdersCheck *pCheck)
@@ -1767,12 +1780,14 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	u->monthorders = p;
 }
 
-void Game::ProcessWorkOrder(Unit *u, OrdersCheck *pCheck)
+void Game::ProcessWorkOrder(Unit *u, int quiet, OrdersCheck *pCheck)
 {
 	ProduceOrder *order = new ProduceOrder;
 	order->skill = -1;
 	order->item = I_SILVER;
 	order->target = 0;
+	if (quiet)
+		order->quiet = 1;
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&
 		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {

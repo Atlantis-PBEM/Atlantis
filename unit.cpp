@@ -69,6 +69,7 @@ Unit::Unit()
 	guard = GUARD_NONE;
 	reveal = REVEAL_NONE;
 	flags = FLAG_NOCROSS_WATER;
+	movepoints = Globals->PHASED_MOVE_OFFSET % Globals->MAX_SPEED;
 	combat = -1;
 	for (int i = 0; i < MAX_READY; i++) {
 		readyWeapon[i] = -1;
@@ -88,6 +89,10 @@ Unit::Unit()
 	former = NULL;
 	free = 0;
 	practiced = 0;
+	moved = 0;
+	phase = -1;
+	savedmovement = 0;
+	savedmovedir = -1;
 	ClearOrders();
 }
 
@@ -104,6 +109,7 @@ Unit::Unit(int seq, Faction *f, int a)
 	guard = 0;
 	reveal = REVEAL_NONE;
 	flags = FLAG_NOCROSS_WATER;
+	movepoints = Globals->PHASED_MOVE_OFFSET % Globals->MAX_SPEED;
 	combat = -1;
 	for (int i = 0; i < MAX_READY; i++) {
 		readyWeapon[i] = -1;
@@ -122,6 +128,11 @@ Unit::Unit(int seq, Faction *f, int a)
 	presentMonthOrders = NULL;
 	former = NULL;
 	free = 0;
+	practiced = 0;
+	moved = 0;
+	phase = -1;
+	savedmovement = 0;
+	savedmovedir = -1;
 	ClearOrders();
 }
 
@@ -180,6 +191,8 @@ void Unit::Writeout(Aoutfile *s)
 	skills.Writeout(s);
 	if (combat != -1) s->PutStr(SkillDefs[combat].abbr);
 	else s->PutStr("NO_SKILL");
+	s->PutInt(savedmovement);
+	s->PutInt(savedmovedir);
 }
 
 void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
@@ -227,6 +240,8 @@ void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
 	temp = s->GetStr();
 	combat = LookupSkill(temp);
 	delete temp;
+	savedmovement = s->GetInt();
+	savedmovedir = s->GetInt();
 }
 
 AString Unit::MageReport()
@@ -584,7 +599,6 @@ void Unit::ClearOrders()
 	promote = 0;
 	taxing = TAX_NONE;
 	advancefrom = 0;
-	movepoints = 0;
 	if (monthorders) delete monthorders;
 	monthorders = 0;
 	inTurnBlock = 0;
@@ -1502,6 +1516,7 @@ int Unit::MoveType()
 	if (TerrainDefs[object->region->type].similar_type == R_OCEAN)
 		if (CanSwim()) return M_WALK;
 	if (CanWalk(weight)) return M_WALK;
+	if (object->region->type == R_NEXUS) return M_WALK;
 	return M_NONE;
 }
 
@@ -1515,7 +1530,9 @@ int Unit::CalcMovePoints()
 		case M_RIDE:
 			return Globals->HORSE_SPEED;
 		case M_FLY:
-			return Globals->FLY_SPEED + GetAttribute("flying");
+			if (GetAttribute("wind")> 0)
+				return Globals->FLY_SPEED + Globals->FLEET_WIND_BOOST;
+			return Globals->FLY_SPEED;
 	}
 	return 0;
 }
@@ -1550,7 +1567,7 @@ int Unit::CanMoveTo(ARegion *r1, ARegion *r2)
 				(TerrainDefs[r2->type].similar_type == R_OCEAN)) &&
 			(!CanSwim() || GetFlag(FLAG_NOCROSS_WATER)))
 		return 0;
-	int mp = CalcMovePoints() - movepoints;
+	int mp = CalcMovePoints() - moved;
 	if (mp < (r2->MoveCost(mt, r1, dir, 0))) return 0;
 	return 1;
 }

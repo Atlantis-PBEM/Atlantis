@@ -67,6 +67,7 @@ static GameDefs g = {
 	4, /* SHIP_SPEED */
 	6, /* FLY_SPEED */
 	8, /* MAX_SPEED */
+	7, /* PHASED_MOVE_OFFSET */
 	2, /* FLEET_WIND_BOOST */
 	0, /* FLEET_CREW_BOOST */
 	0, /* FLEET_LOAD_BOOST */

@@ -139,6 +139,7 @@ class Object : public AListElem
 		int prevdir;
 		int mages;
 		int shipno;
+		int movepoints;
 		AList units;
 		AList ships;
 };

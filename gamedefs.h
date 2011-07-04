@@ -76,6 +76,7 @@ public:
 	int SHIP_SPEED;
 	int FLY_SPEED;
 	int MAX_SPEED;
+	int PHASED_MOVE_OFFSET;
 	// Maximum speed boost for fleets from various sources
 	int FLEET_WIND_BOOST; // Mages with SWIN
 	int FLEET_CREW_BOOST; // Extra crew

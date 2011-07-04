@@ -249,7 +249,8 @@ void ARegion::MakeLair(int t)
 {
 	Object *o = new Object(this);
 	o->num = buildingseq++;
-	o->name = new AString(AString(ObjectDefs[t].name) + " [" + o->num + "]");
+	o->name = new AString(AString(ObjectDefs[t].name) +
+			" [" + o->num + "]");
 	o->type = t;
 	o->incomplete = 0;
 	o->inner = -1;
@@ -1041,9 +1042,12 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	markets.Readin(f);
 
 	int i = f->GetInt();
+	buildingseq = 1;
 	for (int j=0; j<i; j++) {
 		Object *temp = new Object(this);
 		temp->Readin(f, facs, v);
+		if (temp->num >= buildingseq)
+			buildingseq = temp->num + 1;
 		objects.Add(temp);
 	}
 	fleetalias = 1;
@@ -1619,9 +1623,9 @@ int ARegion::IsCoastal()
 	int seacount = 0;
 	for (int i=0; i<NDIRS; i++) {
 		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {
-		if (!Globals->LAKESIDE_IS_COASTAL && neighbors[i]->type == R_LAKE) continue;
-		seacount++;
-	}
+			if (!Globals->LAKESIDE_IS_COASTAL && neighbors[i]->type == R_LAKE) continue;
+			seacount++;
+		}
 	}
 	return seacount;
 }
@@ -1632,8 +1636,8 @@ int ARegion::IsCoastalOrLakeside()
 	int seacount = 0;
 	for (int i=0; i<NDIRS; i++) {
 		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {
-		seacount++;
-	}
+			seacount++;
+		}
 	}
 	return seacount;
 }

@@ -328,7 +328,7 @@ private:
 	void ProcessDeclareOrder(Faction *, AString *, OrdersCheck *pCheck);
 	void ProcessStudyOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessTeachOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessWorkOrder(Unit *, OrdersCheck *pCheck);
+	void ProcessWorkOrder(Unit *, int quiet, OrdersCheck *pCheck);
 	void ProcessProduceOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessBuyOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessSellOrder(Unit *, AString *, OrdersCheck *pCheck);
@@ -492,10 +492,10 @@ private:
 	int CountWMonTars(ARegion *, Unit *);
 	void AttemptAttack(ARegion *, Unit *, Unit *, int, int=0);
 	void DoAutoAttacks();
-	void DoAutoAttacksRegion(ARegion *);
 	void DoAdvanceAttack(ARegion *, Unit *);
 	void DoAutoAttack(ARegion *, Unit *);
-	void DoAdvanceAttacks(AList *);
+	void DoMovementAttacks(AList *);
+	void DoMovementAttack(ARegion *, Unit *);
 	void DoAutoAttackOn(ARegion *, Unit *);
 	void RemoveEmptyObjects();
 	void RunEnterOrders(int);
@@ -549,10 +549,11 @@ private:
 	void Run1BuildOrder(ARegion *, Object *, Unit *);
 	void RunBuildShipOrder(ARegion *, Object *, Unit *);
 	void RunBuildHelpers(ARegion *);
-	int ShipConstruction(ARegion *, Unit *, int, int, int);
+	int ShipConstruction(ARegion *, Unit *, Unit *, int, int, int);
 	void CreateShip(ARegion *, Unit *, int);
 	void RunSailOrders();
-	ARegion *Do1SailOrder(ARegion *, Object *, Unit *);
+	void RunMovementOrders();
+	Location *Do1SailOrder(ARegion *, Object *, Unit *);
 	void ClearCastEffects();
 	void RunCastOrders();
 	void RunACastOrder(ARegion *, Object *, Unit *);

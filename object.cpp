@@ -87,6 +87,7 @@ Object::Object(ARegion *reg)
 	region = reg;
 	prevdir = -1;
 	flying = 0;
+	movepoints = Globals->PHASED_MOVE_OFFSET % Globals->MAX_SPEED;
 	ships.Empty();
 }
 
@@ -616,9 +617,9 @@ int Object::GetFleetSize()
 	int inertia = 0;
 	for (int item=0; item<NITEMS; item++) {
 		int num = GetNumShips(item);
-		if (num > 0) inertia += num * ItemDefs[item].weight / 10;
+		if (num > 0) inertia += num * ItemDefs[item].weight;
 	}
-	return (inertia / 5);
+	return (inertia / 50);
 }
 
 /* Returns the fleet speed - theoretical if report

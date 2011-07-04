@@ -77,10 +77,15 @@ void Game::RunOrders()
 		Awrite("Running WITHDRAW Orders...");
 		DoWithdrawOrders();
 	}
+/*
 	Awrite("Running Sail Orders...");
 	RunSailOrders();
 	Awrite("Running Move Orders...");
 	RunMoveOrders();
+*/
+	Awrite("Running Consolidated Movement Orders...");
+	RunMovementOrders();
+
 	SinkUncrewedFleets();
 	DrownUnits();
 	FindDeadFactions();
@@ -103,9 +108,9 @@ void Game::RunOrders()
 	Awrite("Post-Turn Processing...");
 	PostProcessTurn();
 	DeleteEmptyUnits();
-	//EmptyHell(); moved to Game::RunGame()
-	//to prevent dead mages from causing a
-	//a segfault with IMPROVED_FARSIGHT
+	// EmptyHell(); moved to Game::RunGame()
+	// to prevent dead mages from causing
+	// a segfault with IMPROVED_FARSIGHT
 	RemoveEmptyObjects();
 }
 
@@ -1166,42 +1171,51 @@ void Game::DoAutoAttacks()
 {
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
-		DoAutoAttacksRegion(r);
-	}
-}
-
-void Game::DoAutoAttacksRegion(ARegion *r)
-{
-	forlist(&r->objects) {
-		Object *o = (Object *) elem;
-		forlist(&o->units) {
-			Unit *u = (Unit *) elem;
-			if (u->canattack && u->IsAlive()) DoAutoAttack(r, u);
-		}
-	}
-}
-
-void Game::DoAdvanceAttacks(AList *locs)
-{
-	forlist(locs) {
-		Location *l = (Location *) elem;
-		Unit *u = l->unit;
-		ARegion *r = l->region;
-		if (u->canattack && u->IsAlive()) {
-			DoAutoAttack(r, u);
-			if (!u->canattack || !u->IsAlive()) {
-				u->guard = GUARD_NONE;
+		forlist(&r->objects) {
+			Object *o = (Object *) elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *) elem;
+				if (u->canattack && u->IsAlive())
+					DoAutoAttack(r, u);
 			}
 		}
-		if (u->canattack && u->guard == GUARD_ADVANCE && u->IsAlive()) {
-			DoAdvanceAttack(r, u);
+	}
+}
+
+void Game::DoMovementAttacks(AList *locs)
+{
+	Location *l;
+	Unit *u;
+
+	forlist(locs) {
+		l = (Location *) elem;
+		if (l->obj) {
+			forlist(&l->obj->units) {
+				u = (Unit *) elem;
+				DoMovementAttack(l->region, u);
+			}
+		} else {
+			DoMovementAttack(l->region, l->unit);
+		}
+	}
+}
+
+void Game::DoMovementAttack(ARegion *r, Unit *u)
+{
+	if (u->canattack && u->IsAlive()) {
+		DoAutoAttack(r, u);
+		if (!u->canattack || !u->IsAlive()) {
 			u->guard = GUARD_NONE;
 		}
-		if (u->IsAlive()) {
-			DoAutoAttackOn(r, u);
-			if (!u->canattack || !u->IsAlive()) {
-				u->guard = GUARD_NONE;
-			}
+	}
+	if (u->canattack && u->guard == GUARD_ADVANCE && u->IsAlive()) {
+		DoAdvanceAttack(r, u);
+		u->guard = GUARD_NONE;
+	}
+	if (u->IsAlive()) {
+		DoAutoAttackOn(r, u);
+		if (!u->canattack || !u->IsAlive()) {
+			u->guard = GUARD_NONE;
 		}
 	}
 }
@@ -1230,11 +1244,13 @@ void Game::DoAdvanceAttack(ARegion *r, Unit *u) {
 }
 
 void Game::DoAutoAttack(ARegion *r, Unit *u) {
+	if (u->guard == GUARD_AVOID)
+		return;
 	forlist(&r->objects) {
 		Object *o = (Object *) elem;
 		forlist(&o->units) {
 			Unit *t = (Unit *) elem;
-			if (u->guard != GUARD_AVOID && (u->GetAttitude(r, t) == A_HOSTILE)) {
+			if (u->GetAttitude(r, t) == A_HOSTILE) {
 				AttemptAttack(r, u, t, 1);
 			}
 			if (u->canattack == 0 || u->IsAlive() == 0)
