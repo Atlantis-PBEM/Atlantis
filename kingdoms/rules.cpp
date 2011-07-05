@@ -62,10 +62,6 @@ static GameDefs g = {
 	"Kingdoms",	 // RULESET_NAME
 	MAKE_ATL_VER( 1, 0, 0 ), // RULESET_VERSION
 
-	2, /* FOOT_SPEED */
-	4, /* HORSE_SPEED */
-	4, /* SHIP_SPEED */
-	6, /* FLY_SPEED */
 	8, /* MAX_SPEED */
 	7, /* PHASED_MOVE_OFFSET */
 	2, /* FLEET_WIND_BOOST */
@@ -202,6 +198,7 @@ static GameDefs g = {
 	1,  // CHECK_MONSTER_CONTROL_MID_TURN
 	1,  // DETECT_GATE_NUMBERS
 	GameDefs::ARMY_ROUT_FIGURES,  // ARMY_ROUT
+	0,  // ONLY_ROUT_ONCE
 	1,  // ADVANCED_FORTS
 	0,	// FULL_TRUESEEING_BONUS
 	0,	// IMPROVED_AMTS

@@ -206,8 +206,8 @@ class Unit : public AListElem
 		int CanFly();
 		int CanSwim();
 		int CanReallySwim();
-		int MoveType();
-		int CalcMovePoints();
+		int MoveType(ARegion *r = 0);
+		int CalcMovePoints(ARegion *r = 0);
 		int CanMoveTo(ARegion *,ARegion *);
 		int GetFlag(int);
 		void SetFlag(int,int);
@@ -243,6 +243,7 @@ class Unit : public AListElem
 		int movepoints;
 		int canattack;
 		int nomove;
+		int routed;
 		SkillList skills;
 		ItemList items;
 		int combat;

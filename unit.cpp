@@ -586,6 +586,7 @@ void Unit::ClearOrders()
 {
 	canattack = 1;
 	nomove = 0;
+	routed = 0;
 	enter = 0;
 	build = 0;
 	leftShip = 0;
@@ -1168,11 +1169,6 @@ int Unit::Practice(int sk)
 
 	if (men < 1 || ((days < 1) && (!Globals->REQUIRED_EXPERIENCE))) return 0;
 
-	/*
-	 * Let's do this check for max level correctly.. Non-leader units
-	 * won't ever be able to get to 450 days like the original code checked
-	 * for.
-	 */
 	int max = GetSkillMax(sk);
 	curlev = GetRealSkill(sk);
 	if (curlev >= max) return 0;
@@ -1506,35 +1502,114 @@ int Unit::CanWalk(int weight)
 	return 0;
 }
 
-int Unit::MoveType()
+int Unit::MoveType(ARegion *r)
 {
-	int weight = items.Weight();
-	if (CanFly(weight)) return M_FLY;
-	if (CanRide(weight)) return M_RIDE;
-	/* Check if we should be able to 'swim' */
-	/* This should become it's own M_TYPE sometime */
-	if (TerrainDefs[object->region->type].similar_type == R_OCEAN)
-		if (CanSwim()) return M_WALK;
-	if (CanWalk(weight)) return M_WALK;
-	if (object->region->type == R_NEXUS) return M_WALK;
+	int weight;
+
+	if (!r)
+		r = object->region;
+	weight = items.Weight();
+	if (!weight)
+		return M_NONE;
+	if (CanFly(weight))
+		return M_FLY;
+	if (TerrainDefs[r->type].similar_type != R_OCEAN) {
+		if (CanRide(weight))
+			return M_RIDE;
+		if (CanWalk(weight))
+			return M_WALK;
+	} else {
+		/* Check if we should be able to 'swim' */
+		/* This should become it's own M_TYPE sometime */
+		if (CanSwim())
+			return M_SWIM;
+	}
+	if (r->type == R_NEXUS)
+		return M_WALK;
 	return M_NONE;
 }
 
-int Unit::CalcMovePoints()
+static int ContributesToMovement(int movetype, int item)
 {
-	switch (MoveType()) {
-		case M_NONE:
-			return 0;
+	switch(movetype) {
 		case M_WALK:
-			return Globals->FOOT_SPEED;
+			if (ItemDefs[item].walk > 0)
+				return ItemDefs[item].walk;
+			break;
 		case M_RIDE:
-			return Globals->HORSE_SPEED;
+			if (ItemDefs[item].ride > 0)
+				return ItemDefs[item].ride;
+			break;
 		case M_FLY:
-			if (GetAttribute("wind")> 0)
-				return Globals->FLY_SPEED + Globals->FLEET_WIND_BOOST;
-			return Globals->FLY_SPEED;
+			if (ItemDefs[item].fly > 0)
+				return ItemDefs[item].fly;
+			break;
+		case M_SWIM:
+			// incomplete ship items do have a "swimming"
+			// capacity given, but don't help us to swim
+			if (ItemDefs[item].type & IT_SHIP)
+				return 0;
+			if (ItemDefs[item].swim > 0)
+				return ItemDefs[item].swim;
+			break;
 	}
+	
 	return 0;
+}
+
+int Unit::CalcMovePoints(ARegion *r)
+{
+	int movetype, speed, weight, cap, hitches;
+	Item *i;
+
+	movetype = MoveType(r);
+	speed = 0;
+	if (movetype == M_NONE)
+		return 0;
+
+	forlist(&items) {
+		i = (Item *) elem;
+		if (ContributesToMovement(movetype, i->type)) {
+			if (ItemDefs[i->type].speed > speed)
+				speed = ItemDefs[i->type].speed;
+		}
+	}
+	weight = items.Weight();
+	while (weight > 0 && speed > 0) {
+		forlist(&items) {
+			i = (Item *) elem;
+			cap = ContributesToMovement(movetype, i->type);
+			if (ItemDefs[i->type].speed == speed) {
+				if (cap > 0)
+					weight -= cap * i->num;
+				else if (ItemDefs[i->type].hitchItem != -1) {
+					hitches = items.GetNum(ItemDefs[i->type].hitchItem);
+					if (i->num < hitches)
+						hitches = i->num;
+					weight -= hitches * ItemDefs[i->type].hitchwalk;
+				}
+			}
+		}
+		if (weight > 0) {
+			// Hm, can't move at max speed.  There must be
+			// items with different speeds, and we have to
+			// use some of the slower ones...
+			speed--;
+		}
+	}
+
+	if (weight > 0)
+		return 0; // not that this should be possible!
+
+	if (movetype == M_FLY) {
+		if (GetAttribute("wind") > 0)
+			speed += Globals->FLEET_WIND_BOOST;
+	}
+
+	if (speed > Globals->MAX_SPEED)
+		speed = Globals->MAX_SPEED;
+
+	return speed;
 }
 
 int Unit::CanMoveTo(ARegion *r1, ARegion *r2)

@@ -196,6 +196,7 @@ private:
 	void ModifyItemWeight(int it, int weight);
 	void ModifyItemBasePrice(int it, int price);
 	void ModifyItemCapacities(int it, int walk, int ride, int fly, int swim);
+	void ModifyItemSpeed(int it, int speed);
 	void ModifyItemProductionBooster(int it, int item, int bonus);
 	void ModifyItemHitch(int it, int item, int bonus);
 	void ModifyItemProductionSkill(int it, char *sk, int lev);

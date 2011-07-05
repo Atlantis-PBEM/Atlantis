@@ -588,6 +588,12 @@ AString *ItemDescription(int item, int full)
 		if (ItemDefs[item].fly > 0) {
 			*temp += AString(". This is a flying 'ship' with a capacity of ") + ItemDefs[item].fly;
 		}
+		*temp += " and a speed of ";
+		*temp += ItemDefs[item].speed;
+		*temp += " hex";
+		if (ItemDefs[item].speed != 1)
+			*temp += "es";
+		*temp += " per month";
 		*temp += AString(". This ship requires a total of ") + ItemDefs[item].weight/50 + " levels of sailing skill to sail";
 		AString abbr = ItemDefs[item].name;
 		int objectno = LookupObject(&abbr);
@@ -676,6 +682,14 @@ AString *ItemDescription(int item, int full)
 			} else {
 				*temp += ", can fly";
 			}
+		}
+		if (ItemDefs[item].speed) {
+			*temp += ", moves ";
+			*temp += ItemDefs[item].speed;
+			*temp += " hex";
+			if (ItemDefs[item].speed != 1)
+				*temp += "es";
+			*temp += " per month";
 		}
 	}
 

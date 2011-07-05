@@ -118,6 +118,7 @@ class ItemType
 		int ride;
 		int fly;
 		int swim;
+		int speed;
 
 		int hitchItem;
 		int hitchwalk;

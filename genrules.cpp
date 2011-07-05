@@ -1147,10 +1147,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#move", "MOVE") + " order, using one or more of its "
 		"movement points. There are three modes of travel: walking, riding "
 		"and flying. Walking units have ";
-	temp += NumToWord(Globals->FOOT_SPEED) + " movement point" +
-		(Globals->FOOT_SPEED==1?"":"s") + ", riding units have ";
-	temp += NumToWord(Globals->HORSE_SPEED) + ", and flying units have ";
-	temp += NumToWord(Globals->FLY_SPEED) + ". ";
+	temp += NumToWord(ItemDefs[I_LEADERS].speed) + " movement point" +
+		(ItemDefs[I_LEADERS].speed==1?"":"s") + ", riding units have ";
+	temp += NumToWord(ItemDefs[I_HORSE].speed) + ", and flying units have ";
+	temp += NumToWord(ItemDefs[I_WHORSE].speed) + ". ";
 	temp += "A unit will automatically use the fastest mode of travel "
 		"it has available. The ";
 	temp += f.Link("#advance", "ADVANCE") + " order is the same as " +
@@ -1303,10 +1303,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ". The month is April, so he has ";
 	else
 		temp += " and has ";
-	temp += NumToWord(Globals->HORSE_SPEED);
-	int travel = Globals->HORSE_SPEED;
+	temp += NumToWord(ItemDefs[I_HORSE].speed);
+	int travel = ItemDefs[I_HORSE].speed;
 	temp += " movement point";
-	temp += AString((Globals->HORSE_SPEED == 1) ? "" : "s") + ". ";
+	temp += AString((ItemDefs[I_HORSE].speed == 1) ? "" : "s") + ". ";
 	temp += "He issues the order MOVE NORTH NORTHEAST. First he moves north, "
 		"into a plain region.  This uses ";
 	int cost = TerrainDefs[R_PLAIN].movepoints;
@@ -1358,8 +1358,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += f.Link("#guard", "GUARD") +  " 1 order to guard a " +
 			"region after sailing.";
 		f.Paragraph(temp);
-		temp = AString("Ships get ") + NumToWord(Globals->SHIP_SPEED);
-		temp += AString(" movement point") + (Globals->SHIP_SPEED==1?"":"s");
+		temp = AString("Ships get ") + NumToWord(ItemDefs[I_KNARR].speed);
+		temp += AString(" movement point") + (ItemDefs[I_KNARR].speed==1?"":"s");
 		temp += " per turn.";
 		if (Globals->FLEET_CREW_BOOST > 0) {
 			temp += " Ships get an extra movement point for each "

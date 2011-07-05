@@ -131,6 +131,13 @@ void Game::ModifyItemCapacities(int it, int wlk, int rid, int fly, int swm)
 	ItemDefs[it].swim = swm;
 }
 
+void Game::ModifyItemSpeed(int it, int speed)
+{
+	if (it < 0 || it > (NITEMS-1)) return;
+	if (speed < 0) speed = 0;
+	ItemDefs[it].speed = speed;
+}
+
 void Game::ModifyItemProductionBooster(int it, int item, int bonus)
 {
 	if (it < 0 || it > (NITEMS-1)) return;

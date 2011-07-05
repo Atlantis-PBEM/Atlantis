@@ -632,7 +632,7 @@ int Object::GetFleetSize()
 int Object::GetFleetSpeed(int report)
 {
 	int tskill = FleetSailingSkill(report);
-	int speed = Globals->FLY_SPEED;
+	int speed = Globals->MAX_SPEED;
 	int weight = 0;
 	int capacity = 0;
 	int bonus;
@@ -647,9 +647,12 @@ int Object::GetFleetSpeed(int report)
 			if (ItemDefs[item].fly > 0) {
 				capacity += num * ItemDefs[item].fly;
 			} else {
-				speed = Globals->SHIP_SPEED;
 				capacity += num * ItemDefs[item].swim;
+				flying = 0;
 			}
+			// Fleets travel as fast as their slowest ship
+			if (ItemDefs[item].speed < speed)
+				speed = ItemDefs[item].speed;
 		}
 	}
 	// no ships no speed

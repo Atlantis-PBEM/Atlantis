@@ -153,7 +153,7 @@ if (!u->faction->IsNPC() && reported < phase) {
 			o = (Object *) elem;
 			forlist(&o->units) {
 				u = (Unit *) elem;
-				if (!u->nomove && !u->moved &&
+				if (!u->nomove &&
 						u->monthorders &&
 						u->monthorders->type == O_MOVE) {
 					mo = (MoveOrder *) u->monthorders;
@@ -1620,8 +1620,6 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	Unit *ally, *forbid;
 	Location *loc;
 
-	unit->movepoints += unit->CalcMovePoints();
-
 	if (!o->dirs.Num()) {
 		delete o;
 		unit->monthorders = 0;
@@ -1645,41 +1643,50 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 		goto done_moving;
 	}
 
+	unit->movepoints += unit->CalcMovePoints(newreg);
+
 	road = "";
 	startmove = 0;
-	movetype = unit->MoveType();
+	movetype = unit->MoveType(newreg);
 	cost = newreg->MoveCost(movetype, region, x->dir, &road);
 	if (region->type == R_NEXUS && newreg->IsStartingCity()) {
 		cost = 1;
 		startmove = 1;
+	}
+	if ((TerrainDefs[region->type].similar_type == R_OCEAN) &&
+			(!unit->CanSwim() ||
+			unit->GetFlag(FLAG_NOCROSS_WATER))) {
+		unit->Error("MOVE: Can't move while in the ocean.");
+		goto done_moving;
+	}
+	weight = unit->items.Weight();
+	if ((TerrainDefs[newreg->type].similar_type != R_OCEAN) &&
+			!unit->CanWalk(weight) &&
+			!unit->CanRide(weight) &&
+			!unit->CanFly(weight)) {
+		unit->Event("Must be able to walk to climb out of the ocean.");
+		goto done_moving;
 	}
 	if (movetype == M_NONE) {
 		unit->Error("MOVE: Unit is overloaded and cannot move.");
 		goto done_moving;
 	}
 
-	if ((TerrainDefs[region->type].similar_type == R_OCEAN) &&
-			(!unit->CanSwim() ||
-			unit->GetFlag(FLAG_NOCROSS_WATER))) {
-		unit->Error(AString("MOVE: Can't move while in the ocean."));
-		goto done_moving;
-	}
-	weight = unit->items.Weight();
-	if ((TerrainDefs[newreg->type].similar_type != R_OCEAN) &&
-			!unit->CanWalk(weight)) {
-		unit->Error(AString("MOVE: Must be able to walk to climb out of the ocean."));
-		goto done_moving;
-	}
-	// If we've reached our movement limit, still can't move,
-	// haven't moved previously this month, are moving in the same
-	// direction as last month and have stored movement points,
-	// then add in those stored movement points
-	if (unit->movepoints / Globals->MAX_SPEED == unit->CalcMovePoints() &&
+	// If we're moving in the same direction as last month and
+	// have stored movement points, then add in those stored
+	// movement points, but make sure that these are only used
+	// towards entering the hex we were trying to enter
+	if (!unit->moved &&
+			unit->movepoints >= Globals->MAX_SPEED &&
 			unit->movepoints < cost * Globals->MAX_SPEED &&
-			!unit->moved &&
 			x->dir == unit->savedmovedir) {
-		unit->movepoints += unit->savedmovement * Globals->MAX_SPEED;
+		while (unit->savedmovement > 0 &&
+				unit->movepoints < cost * Globals->MAX_SPEED) {
+			unit->movepoints += Globals->MAX_SPEED;
+			unit->savedmovement--;
+		}
 		unit->savedmovement = 0;
+		unit->savedmovedir = -1;
 	}
 
 	if (unit->movepoints < cost * Globals->MAX_SPEED)
@@ -1735,8 +1742,6 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 		case M_WALK:
 		default:
 			temp = AString("Walks ") + road;
-			if (TerrainDefs[newreg->type].similar_type == R_OCEAN)
-				temp = "Swims ";
 			break;
 		case M_RIDE:
 			temp = AString("Rides ") + road;
@@ -1744,7 +1749,11 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			break;
 		case M_FLY:
 			temp = "Flies ";
+			unit->Practice(S_SUMMON_WIND);
 			unit->Practice(S_RIDING);
+			break;
+		case M_SWIM:
+			temp = AString("Swims ");
 			break;
 	}
 	unit->Event(temp + AString("from ") + region->ShortPrint(&regions)

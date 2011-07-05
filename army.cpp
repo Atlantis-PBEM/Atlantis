@@ -478,6 +478,7 @@ void Soldier::Alive(int state)
 
 	if (state == LOSS) {
 		unit->canattack = 0;
+		unit->routed = 1;
 		/* Guards with amuletofi will not go off guard */
 		if (!amuletofi &&
 			(unit->guard == GUARD_GUARD || unit->guard == GUARD_SET)) {

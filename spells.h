@@ -80,8 +80,6 @@ int RunSummonBalrog(ARegion *,Unit *);
 int RunCreateArtifact(ARegion *,Unit *,int,int);
 int RunEngraveRunes(ARegion *,Object *,Unit *);
 int RunConstructGate(ARegion *,Unit *,int);
-int RunEnchantSwords(ARegion *,Unit *);
-int RunEnchantArmor(ARegion *,Unit *);
+int RunEnchant(ARegion *,Unit *, int, int);
 int RunMindReading(ARegion *,Unit *);
-int RunCreateFood(ARegion *,Unit *);
 #endif

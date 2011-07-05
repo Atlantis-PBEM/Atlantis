@@ -81,6 +81,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_RUNESWORD:
 			case S_CREATE_SHIELDSTONE:
 			case S_CREATE_MAGIC_CARPET:
+			case S_CREATE_FLAMING_SWORD:
 			case S_CREATE_FOOD:
 			case S_CREATE_AEGIS:
 			case S_CREATE_WINDCHIME:
@@ -608,10 +609,10 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			val = RunMindReading(r,u);
 			break;
 		case S_ENCHANT_ARMOR:
-			val = RunEnchantArmor(r,u);
+			val = RunEnchant(r, u, sk, I_MPLATE);
 			break;
 		case S_ENCHANT_SWORDS:
-			val = RunEnchantSwords(r,u);
+			val = RunEnchant(r, u, sk, I_MSWORD);
 			break;
 		case S_CONSTRUCT_GATE:
 			val = RunConstructGate(r,u,sk);
@@ -707,7 +708,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			val = RunClearSkies(r,u);
 			break;
 		case S_CREATE_FOOD:
-			val = RunCreateFood(r, u);
+			val = RunCreateArtifact(r, u, sk, I_FOOD);
 			break;
 		case S_CREATE_AEGIS:
 			val = RunCreateArtifact(r,u,sk,I_AEGIS);
@@ -839,143 +840,38 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunEnchantArmor(ARegion *r,Unit *u)
+int Game::RunEnchant(ARegion *r,Unit *u, int skill, int item)
 {
-	int level = u->GetSkill(S_ENCHANT_ARMOR);
-	int max = ItemDefs[I_MPLATE].mOut * level / 100;
-	int num = 0;
-	int count = 0;
+	int level, max, num, i, a;
 	unsigned int c;
-	int found;
 
-	// Figure out how many components there are
-	for (c=0; c<sizeof(ItemDefs[I_MPLATE].mInput)/sizeof(Materials); c++) {
-		if (ItemDefs[I_MPLATE].mInput[c].item != -1) count++;
+	level = u->GetSkill(skill);
+	max = ItemDefs[item].mOut * level / 100;
+	num = max;
+
+	// Figure out how many we can make based on available resources
+	for (c=0; c<sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
+		if (ItemDefs[item].mInput[c].item == -1)
+			continue;
+		i = ItemDefs[item].mInput[c].item;
+		a = ItemDefs[item].mInput[c].amt;
+		if (u->GetSharedNum(i) < num * a) {
+			num = u->GetSharedNum(i) / a;
+		}
 	}
 
-	while(max) {
-		int i, a;
-		found = 0;
-		// See if we have enough of all items
-		for (c=0; c<sizeof(ItemDefs[I_MPLATE].mInput)/sizeof(Materials); c++) {
-			i = ItemDefs[I_MPLATE].mInput[c].item;
-			a = ItemDefs[I_MPLATE].mInput[c].amt;
-			if (i != -1) {
-				if (u->GetSharedNum(i) >= a) found++;
-			}
-		}
-		// We do not, break.
-		if (found != count) break;
-
-		// Decrement our inputs
-		for (c=0; c<sizeof(ItemDefs[I_MPLATE].mInput)/sizeof(Materials); c++) {
-			i = ItemDefs[I_MPLATE].mInput[c].item;
-			a = ItemDefs[I_MPLATE].mInput[c].amt;
-			if (i != -1) {
-				u->ConsumeShared(i, a);
-			}
-		}
-		// We've made one.
-		num++;
-		max--;
+	// collect all the materials
+	for (c=0; c<sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
+		if (ItemDefs[item].mInput[c].item == -1)
+			continue;
+		i = ItemDefs[item].mInput[c].item;
+		a = ItemDefs[item].mInput[c].amt;
+		u->ConsumeShared(i, num * a);
 	}
 
-	u->items.SetNum(I_MPLATE, u->items.GetNum(I_MPLATE) + num);
-	u->Event(AString("Enchants ") + num + " mithril armor.");
-	if (num == 0) return 0;
-	return 1;
-}
-
-int Game::RunEnchantSwords(ARegion *r,Unit *u)
-{
-	int level = u->GetSkill(S_ENCHANT_SWORDS);
-	int max = ItemDefs[I_MSWORD].mOut * level / 100;
-	int num = 0;
-	int count = 0;
-	unsigned int c;
-	int found;
-
-	// Figure out how many components there are
-	for (c=0; c<sizeof(ItemDefs[I_MSWORD].mInput)/sizeof(Materials); c++) {
-		if (ItemDefs[I_MSWORD].mInput[c].item != -1) count++;
-	}
-
-	while(max) {
-		int i, a;
-		found = 0;
-		// See if we have enough of all items
-		for (c=0; c<sizeof(ItemDefs[I_MSWORD].mInput)/sizeof(Materials); c++) {
-			i = ItemDefs[I_MSWORD].mInput[c].item;
-			a = ItemDefs[I_MSWORD].mInput[c].amt;
-			if (i != -1) {
-				if (u->GetSharedNum(i) >= a) found++;
-			}
-		}
-		// We do not, break.
-		if (found != count) break;
-
-		// Decrement our inputs
-		for (c=0; c<sizeof(ItemDefs[I_MSWORD].mInput)/sizeof(Materials); c++) {
-			i = ItemDefs[I_MSWORD].mInput[c].item;
-			a = ItemDefs[I_MSWORD].mInput[c].amt;
-			if (i != -1) {
-				u->ConsumeShared(i, a);
-			}
-		}
-		// We've made one.
-		num++;
-		max--;
-	}
-
-	u->items.SetNum(I_MSWORD,u->items.GetNum(I_MSWORD) + num);
-	u->Event(AString("Enchants ") + num + " mithril swords.");
-	if (num == 0) return 0;
-	return 1;
-}
-
-int Game::RunCreateFood(ARegion *r,Unit *u)
-{
-	int level = u->GetSkill(S_CREATE_FOOD);
-	int max = ItemDefs[I_FOOD].mOut * level / 100;
-	int num = 0;
-	int count = 0;
-	unsigned int c;
-	int found;
-
-	// Figure out how many components there are
-	for (c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
-		if (ItemDefs[I_FOOD].mInput[c].item != -1) count++;
-	}
-
-	while(max) {
-		int i, a;
-		found = 0;
-		// See if we have enough of all items
-		for (c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
-			i = ItemDefs[I_FOOD].mInput[c].item;
-			a = ItemDefs[I_FOOD].mInput[c].amt;
-			if (i != -1) {
-				if (u->GetSharedNum(i) >= a) found++;
-			}
-		}
-		// We do not, break.
-		if (found != count) break;
-
-		// Decrement our inputs
-		for (c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
-			i = ItemDefs[I_FOOD].mInput[c].item;
-			a = ItemDefs[I_FOOD].mInput[c].amt;
-			if (i != -1) {
-				u->ConsumeShared(i, a);
-			}
-		}
-		// We've made one.
-		num++;
-		max--;
-	}
-
-	u->items.SetNum(I_FOOD,u->items.GetNum(I_FOOD) + num);
-	u->Event(AString("Creates ") + num + " food.");
+	// Add the created items
+	u->items.SetNum(item, u->items.GetNum(item) + num);
+	u->Event(AString("Enchants ") + num + " " + ItemDefs[item].names + ".");
 	if (num == 0) return 0;
 	return 1;
 }

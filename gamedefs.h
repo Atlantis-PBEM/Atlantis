@@ -71,10 +71,6 @@ public:
 	char const *RULESET_NAME;
 	ATL_VER RULESET_VERSION;
 
-	int FOOT_SPEED;
-	int HORSE_SPEED;
-	int SHIP_SPEED;
-	int FLY_SPEED;
 	int MAX_SPEED;
 	int PHASED_MOVE_OFFSET;
 	// Maximum speed boost for fleets from various sources
@@ -566,6 +562,7 @@ public:
 	};
 
 	int ARMY_ROUT;
+	int ONLY_ROUT_ONCE;
 	
 	// How are fortification bonuses handled?
 	// Setting this flag will enable fort bonuses to be treated as a

@@ -1650,7 +1650,10 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 		if (weather == W_BLIZZARD) return 10;
 		if (weather == W_NORMAL || clearskies) cost = 1;
 	}
-	if (movetype == M_WALK || movetype == M_RIDE) {
+	if (movetype == M_SWIM) {
+		cost = (TerrainDefs[type].movepoints * cost);
+		// Roads don't help swimming, even if there are any in the ocean
+	} else if (movetype == M_WALK || movetype == M_RIDE) {
 		cost = (TerrainDefs[type].movepoints * cost);
 		if (fromRegion->HasExitRoad(dir) && fromRegion->HasConnectingRoad(dir)) {
 			cost -= cost/2;

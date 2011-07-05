@@ -1365,6 +1365,11 @@ void Game::AttemptAttack(ARegion *r, Unit *u, Unit *t, int silent, int adv)
 		return;
 	}
 
+	if (t->routed && Globals->ONLY_ROUT_ONCE) {
+		if (!silent) u->Event("ATTACK: Target is already routed and scattered.");
+		return;
+	}
+
 	RunBattle(r, u, t, 0, adv);
 	return;
 }
