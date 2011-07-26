@@ -1104,6 +1104,7 @@ void Game::ProcessClaimOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		}
 		u->faction->unclaimed -= value;
 		u->SetMoney(u->GetMoney() + value);
+		u->faction->DiscoverItem(I_SILVER, 0, 1);
 		u->Event(AString("Claims $") + value + ".");
 	}
 }

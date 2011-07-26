@@ -41,7 +41,6 @@ void Game::RunMovementOrders()
 	Object *o;
 	Unit *u;
 	AList locs;
-	int reported = -1;
 	Location *l;
 	MoveOrder *mo;
 	SailOrder *so;
@@ -56,10 +55,6 @@ void Game::RunMovementOrders()
 				o = (Object *) elem;
 				forlist(&o->units) {
 					u = (Unit *) elem;
-if (!u->faction->IsNPC() && reported < phase) {
-	u->Event(AString("Doing phase ") + phase);
-	reported = phase;
-}
 					Object *tempobj = o;
 					DoMoveEnter(u, r, &tempobj);
 				}
@@ -1007,7 +1002,17 @@ void Game::RunMonthOrders()
 
 void Game::RunUnitProduce(ARegion * r,Unit * u)
 {
-	ProduceOrder * o = (ProduceOrder *) u->monthorders;
+	Production *p;
+	ProduceOrder *o = (ProduceOrder *) u->monthorders;
+
+	forlist(&r->products) {
+		p = (Production *) elem;
+		// PRODUCE orders for producing goods from the land
+		// are shared among factions, and therefore handled
+		// specially by the RunAProduction() function
+		if (o->skill == p->skill && o->item == p->itemtype)
+			return;
+	}
 
 	if (o->item == I_SILVER) {
 		if (!o->quiet)
@@ -1137,29 +1142,27 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 
 void Game::RunProduceOrders(ARegion * r)
 {
-	forlist ((&r->products))
-		RunAProduction(r,(Production *) elem);
-	{
-		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
-			forlist ((&obj->units)) {
-				Unit * u = (Unit *) elem;
-				if (u->monthorders) {
-					if (u->monthorders->type == O_PRODUCE) {
-						RunUnitProduce(r,u);
-					} else {
-						if (u->monthorders->type == O_BUILD) {
-							if (u->build >= 0) {
-								Run1BuildOrder(r,obj,u);
-							} else {
-								RunBuildShipOrder(r,obj,u);
-							}
+	forlist(&r->objects) {
+		Object * obj = (Object *) elem;
+		forlist ((&obj->units)) {
+			Unit * u = (Unit *) elem;
+			if (u->monthorders) {
+				if (u->monthorders->type == O_PRODUCE) {
+					RunUnitProduce(r,u);
+				} else {
+					if (u->monthorders->type == O_BUILD) {
+						if (u->build >= 0) {
+							Run1BuildOrder(r,obj,u);
+						} else {
+							RunBuildShipOrder(r,obj,u);
 						}
 					}
 				}
 			}
 		}
 	}
+	forlist_reuse(&r->products)
+		RunAProduction(r,(Production *) elem);
 }
 
 int Game::ValidProd(Unit * u,ARegion * r, Production * p)
@@ -1174,7 +1177,6 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 			return po->productivity;
 		}
 		int level = u->GetSkill(p->skill);
-		//	if (level < p->level) {
 		if (level < ItemDefs[p->itemtype].pLevel) {
 			u->Error("PRODUCE: Unit isn't skilled enough.");
 			delete u->monthorders;
@@ -1205,7 +1207,7 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 	return 0;
 }
 
-int Game::FindAttemptedProd(ARegion * r,Production * p)
+int Game::FindAttemptedProd(ARegion * r, Production * p)
 {
 	int attempted = 0;
 	forlist((&r->objects)) {
@@ -1220,7 +1222,7 @@ int Game::FindAttemptedProd(ARegion * r,Production * p)
 	return attempted;
 }
 
-void Game::RunAProduction(ARegion * r,Production * p)
+void Game::RunAProduction(ARegion * r, Production * p)
 {
 	p->activity = 0;
 	if (p->amount == 0) return;
@@ -1234,15 +1236,11 @@ void Game::RunAProduction(ARegion * r,Production * p)
 		forlist((&obj->units)) {
 			Unit * u = (Unit *) elem;
 			if (!u->monthorders || u->monthorders->type != O_PRODUCE)
-			{
 				continue;
-			}
 
 			ProduceOrder * po = (ProduceOrder *) u->monthorders;
 			if (po->skill != p->skill || po->item != p->itemtype)
-			{
 				continue;
-			}
 
 			/* We need to implement a hack to avoid overflowing */
 			int uatt, ubucks;
@@ -1263,6 +1261,7 @@ void Game::RunAProduction(ARegion * r,Production * p)
 			attempted -= uatt;
 			u->items.SetNum(po->item,u->items.GetNum(po->item)
 							+ ubucks);
+			u->faction->DiscoverItem(po->item, 0, 1);
 			p->activity += ubucks;
 			po->target -= ubucks;
 			if (po->target > 0) {
@@ -1643,11 +1642,11 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 		goto done_moving;
 	}
 
-	unit->movepoints += unit->CalcMovePoints(newreg);
+	unit->movepoints += unit->CalcMovePoints(region);
 
 	road = "";
 	startmove = 0;
-	movetype = unit->MoveType(newreg);
+	movetype = unit->MoveType(region);
 	cost = newreg->MoveCost(movetype, region, x->dir, &road);
 	if (region->type == R_NEXUS && newreg->IsStartingCity()) {
 		cost = 1;

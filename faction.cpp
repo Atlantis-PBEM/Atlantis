@@ -134,6 +134,7 @@ Faction::Faction()
 	pReg = NULL;
 	pStartLoc = NULL;
 	noStartLeader = 0;
+	startturn = 0;
 }
 
 Faction::Faction(int n)
@@ -157,6 +158,7 @@ Faction::Faction(int n)
 	pReg = NULL;
 	pStartLoc = NULL;
 	noStartLeader = 0;
+	startturn = 0;
 }
 
 Faction::~Faction()
@@ -563,10 +565,9 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 void Faction::WriteTemplate(Areport *f, Game *pGame)
 {
 	AString temp;
-	int tFormat = temformat;
+	if (temformat == TEMPLATE_OFF)
+		return;
 	if (!IsNPC()) {
-		if (tFormat == TEMPLATE_OFF)
-			tFormat = TEMPLATE_SHORT;
 		f->PutStr("");
 		switch (temformat) {
 			case TEMPLATE_SHORT:
@@ -590,11 +591,11 @@ void Faction::WriteTemplate(Areport *f, Game *pGame)
 		forlist((&present_regions)) {
 			// DK
 			((ARegionPtr *) elem)->ptr->WriteTemplate(f, this, &(pGame->regions), pGame->month);
-	}
+		}
 
-	f->PutStr("");
-	f->PutStr("#end");
-	f->EndLine();
+		f->PutStr("");
+		f->PutStr("#end");
+		f->EndLine();
 	}
 }
 
@@ -605,9 +606,11 @@ void Faction::WriteFacInfo(Aoutfile *file)
 	file->PutStr(AString("Email: ") + *address);
 	file->PutStr(AString("Password: ") + *password);
 	file->PutStr(AString("LastOrders: ") + lastorders);
+	file->PutStr(AString("FirstTurn: ") + startturn);
 	file->PutStr(AString("SendTimes: ") + times);
-		// LLS - write template info to players file
-		file->PutStr(AString("Template: ") + TemplateStrs[temformat]);
+
+	// LLS - write template info to players file
+	file->PutStr(AString("Template: ") + TemplateStrs[temformat]);
 
 	forlist(&extraPlayers) {
 		AString *pStr = (AString *) elem;

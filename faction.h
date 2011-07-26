@@ -214,6 +214,7 @@ public:
 	ARegion *pReg;
 	ARegion *pStartLoc;
 	int noStartLeader;
+	int startturn;
 };
 
 Faction * GetFaction(AList *,int);

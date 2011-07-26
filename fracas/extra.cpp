@@ -41,11 +41,13 @@ int Game::SetupFaction( Faction *pFac )
 	//
 	Unit *leader = GetNewUnit(pFac);
 	leader->SetMen(I_LEADERS, 1);
+	pFac->DiscoverItem(I_LEADERS, 0, 1);
 	leader->reveal = REVEAL_FACTION;
 	leader->SetFlag(FLAG_BEHIND, 1);
 	name = new AString("House Leader");
 	leader->SetName(name);
 	leader->items.SetNum(I_HORSE, 1);
+	pFac->DiscoverItem(I_HORSE, 0, 1);
 
 	leader->type = U_MAGE;
 	leader->Study(S_TACTICS, 180);
@@ -72,8 +74,11 @@ int Game::SetupFaction( Faction *pFac )
 	name = new AString("House Guard");
 	army->SetName(name);
 	army->items.SetNum(I_SWORD, 10);
+	pFac->DiscoverItem(I_SWORD, 0, 1);
 	army->items.SetNum(I_HORSE, 10);
+	pFac->DiscoverItem(I_HORSE, 0, 1);
 	army->items.SetNum(I_CHAINARMOR, 10);
+	pFac->DiscoverItem(I_CHAINARMOR, 0, 1);
 	army->Study(S_COMBAT, 1800);
 	army->Study(S_RIDING, 1800);
 	
@@ -85,8 +90,11 @@ int Game::SetupFaction( Faction *pFac )
 	name = new AString("House Guard");
 	archers->SetName(name);
 	archers->items.SetNum(I_CROSSBOW, 10);
+	pFac->DiscoverItem(I_CROSSBOW, 0, 1);
 	archers->items.SetNum(I_HORSE, 10);
+	pFac->DiscoverItem(I_HORSE, 0, 1);
 	archers->items.SetNum(I_CHAINARMOR, 10);
+	pFac->DiscoverItem(I_CHAINARMOR, 0, 1);
 	archers->Study(S_CROSSBOW, 1800);
 	archers->Study(S_RIDING, 1800);
 	
@@ -99,7 +107,9 @@ int Game::SetupFaction( Faction *pFac )
 	name = new AString("Captain of the Hunt");
 	sneak->SetName(name);
 	sneak->items.SetNum(I_HORSE, 1);
+	pFac->DiscoverItem(I_HORSE, 0, 1);
 	sneak->items.SetNum(I_CLOTHARMOR, 1);
+	pFac->DiscoverItem(I_CLOTHARMOR, 0, 1);
 	sneak->Study(S_STEALTH, 180);
 	sneak->Study(S_OBSERVATION, 180);
 	sneak->Study(S_HUNTING, 180);
@@ -113,7 +123,9 @@ int Game::SetupFaction( Faction *pFac )
 	name = new AString("Store Master");
 	quartermaster->SetName(name);
 	quartermaster->items.SetNum(I_WOOD, 10);
+	pFac->DiscoverItem(I_WOOD, 0, 1);
 	quartermaster->items.SetNum(I_STONE, 10);
+	pFac->DiscoverItem(I_STONE, 0, 1);
 	quartermaster->Study(S_QUARTERMASTER, 180);
 	quartermaster->Study(S_OBSERVATION, 180);
 	
@@ -138,6 +150,7 @@ int Game::SetupFaction( Faction *pFac )
 	name = new AString("Trusted City Merchant");
 	merchant->SetName(name);
 	merchant->items.SetNum(I_HORSE, 1);
+	pFac->DiscoverItem(I_HORSE, 0, 1);
 	merchant->Study(S_HORSETRAINING, 180);
 	merchant->Study(S_LUMBERJACK, 180);
 	merchant->Study(S_BUILDING, 180);
@@ -152,6 +165,7 @@ int Game::SetupFaction( Faction *pFac )
 	name = new AString("Blacksmith");
 	smith->SetName(name);
 	smith->items.SetNum(I_IRON, 10);
+	pFac->DiscoverItem(I_IRON, 0, 1);
 	smith->Study(S_MINING, 180);
 	smith->Study(S_WEAPONSMITH, 180);
 	smith->Study(S_ARMORER, 180);

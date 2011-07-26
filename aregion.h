@@ -462,6 +462,8 @@ class ARegionList : public AList
 
 		void MakeShaftLinks(int levelFrom, int levelTo, int odds);
 		void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);
+		ARegion *FindConnectedRegions(ARegion *r, ARegion *tail);
+		void FixUnconnectedRegions();
 		void InitSetupGates(int level);
 		void FinalSetupGates();
 

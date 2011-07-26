@@ -27,6 +27,7 @@
 #include "army.h"
 #include "gamedefs.h"
 #include "gamedata.h"
+#include "quests.h"
 
 Battle::Battle()
 {
@@ -208,6 +209,9 @@ void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
 		Unit * u = ((Location *) elem)->unit;
 		int numalive = u->GetSoldiers();
 		int numdead = u->losses;
+		if (!numalive) {
+			quests.CheckQuestKillTarget(u, spoils);
+		}
 		forlist(&u->items) {
 			Item * i = (Item *) elem;
 			if (IsSoldier(i->type)) continue;

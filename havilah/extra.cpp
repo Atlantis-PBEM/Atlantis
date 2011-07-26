@@ -27,6 +27,7 @@
 //
 #include "game.h"
 #include "gamedata.h"
+#include "quests.h"
 
 int Game::SetupFaction( Faction *pFac )
 {
@@ -39,7 +40,8 @@ int Game::SetupFaction( Faction *pFac )
 	// Set up first unit.
 	//
 	Unit *temp2 = GetNewUnit( pFac );
-	temp2->SetMen( I_LEADERS, 1 );
+	temp2->SetMen(I_LEADERS, 1);
+	pFac->DiscoverItem(I_LEADERS, 0, 1);
 	temp2->reveal = REVEAL_FACTION;
 
 /*
@@ -58,14 +60,19 @@ int Game::SetupFaction( Faction *pFac )
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
-		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED))
+		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_FOOD, 6);
-		else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
+			pFac->DiscoverItem(I_FOOD, 0, 1);
+		} else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_FISH, 6);
-		else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
+			pFac->DiscoverItem(I_FISH, 0, 1);
+		} else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_LIVESTOCK, 6);
-		else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
+			pFac->DiscoverItem(I_LIVESTOCK, 0, 1);
+		} else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_GRAIN, 2);
+			pFac->DiscoverItem(I_GRAIN, 0, 1);
+		}
 		temp2->items.SetNum(I_SILVER, 10);
 	}
 
@@ -80,18 +87,50 @@ int Game::SetupFaction( Faction *pFac )
 			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
 		}
 	}
-	temp2->MoveUnit( reg->GetDummy() );
+	temp2->MoveUnit(reg->GetDummy());
 
-	// Try to auto-declare all factions unfriendly to Creatures,
-	// since all they do is attack you
-	pFac->SetAttitude(2, 1);
+	if (Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
+		// Try to auto-declare all player factions unfriendly
+		// to Creatures, since all they do is attack you.
+		pFac->SetAttitude(monfaction, A_UNFRIENDLY);
+	}
 
 	return( 1 );
 }
 
+static void WriteTimesArticle(AString article)
+{
+	AString filename;
+	int result;
+	Arules f;
+
+	do {
+		filename = "times.";
+		filename += getrandom(10000);
+		result = access(filename.Str(), F_OK);
+	} while (result == 0);
+
+	if (f.OpenByName(filename) != -1) {
+		f.PutStr(article);
+		f.Close();
+	}
+}
+
 Faction *Game::CheckVictory()
 {
-	int visited, unvisited;
+	int visited, unvisited, d, moncount, reliccount;
+	int units, leaders, men, silver, stuff;
+	int skilldays, magicdays, skilllevels, magiclevels;
+	Quest *q, *q2;
+	Item *item;
+	ARegion *r;
+	Object *o;
+	Unit *u;
+	Faction *f;
+	Skill *s;
+	Location *l;
+	AString message, filename;
+	Arules wf;
 
 	visited = 0;
 	unvisited = 0;
@@ -107,6 +146,294 @@ Faction *Game::CheckVictory()
 	}
 
 	printf("Players have visited %d regions; %d unvisited.\n", visited, unvisited);
+
+	if (!unvisited) {
+		// Exploration phase complete: start creating relic quests
+		while (quests.Num() < 5) {
+			q = new Quest;
+			q->type = -1;
+			item = new Item;
+			item->type = I_RELICOFGRACE;
+			item->num = 1;
+			q->rewards.Add(item);
+			d = getrandom(100);
+			if (d < 100) {
+				// SLAY quest
+				q->type = Quest::SLAY;
+				moncount = 0;
+				// Count our current monsters
+				forlist(&regions) {
+					r = (ARegion *) elem;
+					if (TerrainDefs[r->type].similar_type == R_OCEAN)
+						continue;
+					forlist(&r->objects) {
+						o = (Object *) elem;
+						forlist(&o->units) {
+							u = (Unit *) elem;
+							if (u->faction->num == monfaction) {
+								moncount++;
+							}
+						}
+					}
+				}
+				if (!moncount)
+					continue;
+				// pick one as the object of the quest
+				d = getrandom(moncount);
+				forlist_reuse(&regions) {
+					r = (ARegion *) elem;
+					if (TerrainDefs[r->type].similar_type == R_OCEAN)
+						continue;
+					forlist(&r->objects) {
+						o = (Object *) elem;
+						forlist(&o->units) {
+							u = (Unit *) elem;
+							if (u->faction->num == monfaction) {
+								if (!d--) {
+									q->target = u->num;
+									
+								}
+							}
+						}
+					}
+				}
+				forlist_reuse(&quests) {
+					q2 = (Quest *) elem;
+					if (q2->type == Quest::SLAY &&
+							q2->target == q->target) {
+						// Don't hunt the same monster twice
+						q->type = -1;
+						break;
+					}
+				}
+			}
+			if (q->type != -1)
+				quests.Add(q);
+		}
+	}
+
+	// See if anyone has won by collecting enough relics of grace
+	forlist_reuse(&factions) {
+		f = (Faction *) elem;
+		// No accidentally sending all the Guardmen
+		// or Creatures to the Eternal City!
+		if (f->IsNPC())
+			continue;
+		reliccount = 0;
+		forlist(&regions) {
+			r = (ARegion *) elem;
+			forlist(&r->objects) {
+				o = (Object *) elem;
+				forlist(&o->units) {
+					u = (Unit *) elem;
+					if (u->faction == f) {
+						reliccount += u->items.GetNum(I_RELICOFGRACE);
+					}
+				}
+			}
+		}
+		if (reliccount > 6) {
+			// This faction has earned the right to go home
+			units = 0;
+			leaders = 0;
+			men = 0;
+			silver = f->unclaimed;
+			stuff = 0;
+			skilldays = 0;
+			magicdays = 0;
+			skilllevels = 0;
+			magiclevels = 0;
+			forlist(&regions) {
+				r = (ARegion *) elem;
+				forlist(&r->objects) {
+					o = (Object *) elem;
+					forlist(&o->units) {
+						u = (Unit *) elem;
+						if (u->faction == f) {
+							units++;
+							forlist(&u->items) {
+								item = (Item *) elem;
+								if (ItemDefs[item->type].type & IT_LEADER)
+									leaders += item->num;
+								else if (ItemDefs[item->type].type & IT_MAN)
+									men += item->num;
+								else if (ItemDefs[item->type].type & IT_MONEY)
+									silver += item->num * ItemDefs[item->type].baseprice;
+								else
+									stuff += item->num * ItemDefs[item->type].baseprice;
+									
+							}
+							forlist_reuse(&u->skills) {
+								s = (Skill *) elem;
+								if (SkillDefs[s->type].flags & SkillType::MAGIC) {
+									magicdays += s->days * SkillDefs[s->type].cost;
+									magiclevels += GetLevelByDays(s->days / u->GetMen()) * u->GetMen();
+								} else {
+									skilldays += s->days * SkillDefs[s->type].cost;
+									skilllevels += GetLevelByDays(s->days / u->GetMen()) * u->GetMen();
+								}
+							}
+							// Should really move this unit somewhere they'll be cleaned up,
+							// but given that the appropriate place for that function is
+							// r->hell, this doesn't seem right given what's happened.
+							// In this case, I'm willing to leak memory :-)
+							o->units.Remove(u);
+						}
+					}
+				}
+			}
+			f->exists = 0;
+			f->quit = QUIT_WON_GAME;
+			f->temformat = TEMPLATE_OFF;
+			message = "You have acquired ";
+			if (reliccount == 1) {
+				message += "a ";
+				message += ItemDefs[I_RELICOFGRACE].name;
+			} else {
+				message += reliccount;
+				message += " ";
+				message += ItemDefs[I_RELICOFGRACE].names;
+			}
+			message += " and returned to the Eternal City.";
+			f->Event(message);
+			message = "You returned after ";
+			message += TurnNumber() - f->startturn;
+			message += " months, with ";
+			message += units;
+			message += " unit";
+			if (units != 1)
+				message += "s";
+			message += " comprising ";
+			if (leaders > 0) {
+				message += leaders;
+				message += " leader";
+				if (leaders != 1)
+					message += "s";
+			}
+			if (leaders > 0 && men > 0)
+				message += " and ";
+			if (men > 0) {
+				message += men;
+				message += " other m";
+				if (leaders != 1)
+					message += "en";
+				else
+					message += "an";
+			}
+			if (silver > 0 || stuff > 0) {
+				message += ", and bringing with you ";
+				if (silver > 0) {
+					message += silver;
+					message += " silver";
+				}
+				if (silver > 0 && stuff > 0)
+					message += " and ";
+				if (stuff > 0) {
+					message += "goods worth ";
+					message += stuff;
+					message += " silver";
+				}
+				message += ".";
+			}
+			if (skilllevels > 0 || magiclevels > 0) {
+				message += "  You had acquired ";
+				if (skilllevels > 0) {
+					message += skilllevels;
+					message += " level";
+					if (skilllevels != 1)
+						message += "s";
+					message += " in mundane skills, worth ";
+					message += (int) (skilldays / 30);
+					message += " silver in tuition costs";
+				}
+				if (skilllevels > 0 && magiclevels > 0)
+					message += ", and ";
+				if (magiclevels > 0) {
+					message += (int) (magiclevels / 30);
+					message += " level";
+					if (magiclevels != 1)
+						message += "s";
+					message += " in magic skills, worth ";
+					message += magicdays;
+					message += " silver in tuition costs";
+				}
+				message += ".";
+			}
+			f->Event(message);
+
+			filename = "winner.";
+			filename += f->num;
+			if (wf.OpenByName(filename) != -1) {
+				message = TurnNumber();
+				message += ", ";
+				message += f->startturn;
+				message += ", ";
+				message += units;
+				message += ", ";
+				message += leaders;
+				message += ", ";
+				message += men;
+				message += ", ";
+				message += silver;
+				message += ", ";
+				message += stuff;
+				message += ", ";
+				message += skilllevels;
+				message += ", ";
+				message += skilldays;
+				message += ", ";
+				message += magiclevels;
+				message += ", ";
+				message += magicdays;
+				message += ", ";
+				message += f->num;
+				message += ", ";
+				message += *f->address;
+				message += ", ";
+				message += *f->name;
+				message += "\n";
+				wf.PutNoFormat(message);
+
+				wf.Close();
+			}
+		}
+	}
+
+	printf("%d quests active:\n", quests.Num());
+	forlist_reuse(&quests) {
+		q = (Quest *) elem;
+		switch(q->type) {
+			case Quest::SLAY:
+				l = regions.FindUnit(q->target);
+				if (!l || l->unit->faction->num != monfaction) {
+					// Something has gone wrong with this quest!
+					// shouldn't ever happen, but...
+					quests.Remove(q);
+					delete q;
+					if (l) delete l;
+				} else {
+					message = "In the ";
+					message += TerrainDefs[TerrainDefs[l->region->type].similar_type].name;
+					message += " of ";
+					message += *(l->region->name);
+					if (l->obj->type == O_DUMMY)
+						message += " roams";
+					else
+						message += " lurks";
+					message += " the ";
+					message += *(l->unit->name);
+					message += ".  Free the world from this menace and be rewarded!";
+					WriteTimesArticle(message);
+					delete l;
+				}
+
+				printf("Slay monster #%d.\n", q->target);
+				break;
+			default:
+				break;
+		}
+	}
+
 	return NULL;
 }
 
@@ -173,6 +500,18 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_BOOKOFEXORCISM);
 	EnableItem(I_HOLYSYMBOL);
 	EnableItem(I_CENSER);
+	EnableItem(I_RELICOFGRACE);
+
+	// Cut down the number of trade items to improve
+	// chances of good trade routes
+	DisableItem(I_FIGURINES);
+	DisableItem(I_TAROTCARDS);
+	DisableItem(I_CAVIAR);
+	DisableItem(I_CHOCOLATE);
+	DisableItem(I_ROSES);
+	DisableItem(I_VELVET);
+	DisableItem(I_CASHMERE);
+	DisableItem(I_WOOL);
 
 	EnableItem(I_FOOD);
 	EnableSkill(S_COOKING);
@@ -205,6 +544,12 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableSkill(S_CREATE_CENSER);
 
 	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
+
+	ModifyRaceSkills("NOMA", 3, "RIDI");
+	ModifyRaceSkills("DMAN", 3, "WEAP");
+	ModifyRaceSkills("BARB", 0, "RIDI");
+	ModifyRaceSkills("HELF", 0, "MANI");
+	ModifyRaceSkills("HELF", 3, "LBOW");
 
 	EnableObject(O_ROADN);
 	EnableObject(O_ROADNE);
@@ -314,7 +659,5 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_QUARTERMASTER);
 		EnableObject(O_CARAVANSERAI);
 	}
-	// XXX -- This is just here to preserve existing behavior
-	ModifyItemProductionBooster(I_AXE, I_HAMMER, 1);
 	return;
 }

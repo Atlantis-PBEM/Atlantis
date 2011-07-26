@@ -551,8 +551,7 @@ void Game::Do1Quit(Faction *f)
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
 				if (u->faction == f) {
-					o->units.Remove(u);
-					delete u;
+					r->Kill(u);
 				}
 			}
 		}
@@ -1122,7 +1121,27 @@ void Game::ProcessMigration()
 
 void Game::PostProcessTurn()
 {
-	forlist(&regions) {
+	//
+	// Check if there are any factions left.
+	//
+	int livingFacs = 0;
+	forlist(&factions) {
+		Faction *pFac = (Faction *) elem;
+		if (pFac->exists) {
+			livingFacs = 1;
+			break;
+		}
+	}
+
+	if (!livingFacs)
+		EndGame(0);
+	else if (!(Globals->OPEN_ENDED)) {
+		Faction *pVictor = CheckVictory();
+		if (pVictor)
+			EndGame(pVictor);
+	}
+
+	forlist_reuse(&regions) {
 		ARegion *r = (ARegion *) elem;
 		r->PostTurn(&regions);
 
@@ -1143,28 +1162,6 @@ void Game::PostProcessTurn()
 	if (Globals->LAIR_MONSTERS_EXIST) GrowLMons(Globals->LAIR_FREQUENCY);
 
 	if (Globals->LAIR_MONSTERS_EXIST) GrowVMons();
-
-	//
-	// Check if there are any factions left.
-	//
-	int livingFacs = 0;
-	{
-		forlist(&factions) {
-			Faction *pFac = (Faction *) elem;
-			if (pFac->exists) {
-				livingFacs = 1;
-				break;
-			}
-		}
-	}
-
-	if (!livingFacs)
-		EndGame(0);
-	else if (!(Globals->OPEN_ENDED)) {
-		Faction *pVictor = CheckVictory();
-		if (pVictor)
-			EndGame(pVictor);
-	}
 }
 
 void Game::DoAutoAttacks()
@@ -1908,6 +1905,8 @@ void Game::AssessMaintenance()
 			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
 				Unit *u = (Unit *) elem;
+				if (!(u->faction->IsNPC()))
+					r->visited = 1;
 				u->needed = u->MaintCost();
 				u->hunger = u->GetMen() * Globals->UPKEEP_MINIMUM_FOOD;
 				if (Globals->UPKEEP_MAXIMUM_FOOD < 0)

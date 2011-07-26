@@ -1072,7 +1072,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 	o->inner = temp->num;
 	reg->objects.Add(o);
 
-	o = new Object(reg);
+	o = new Object(temp);
 	o->num = temp->buildingseq++;
 	o->name = new AString(AString("Shaft [") + o->num + "]");
 	o->type = O_SHAFT;
@@ -1144,6 +1144,173 @@ void ARegionList::InitSetupGates(int level)
 			}
 		}
 	}
+}
+
+ARegion *ARegionList::FindConnectedRegions(ARegion *r, ARegion *tail)
+{
+	int i;
+	Object *o;
+	ARegion *inner;
+
+	for (i = 0; i < NDIRS; i++) {
+		if (r->neighbors[i] && r->neighbors[i]->distance == -1) {
+			tail->next = r->neighbors[i];
+			tail = tail->next;
+			tail->distance = r->distance + 1;
+		}
+	}
+	forlist(&r->objects) {
+		o = (Object *) elem;
+		if (o->inner != -1) {
+			inner = GetRegion(o->inner);
+			if (inner && inner->distance == -1) {
+				tail->next = inner;
+				tail = tail->next;
+				tail->distance = r->distance + 1;
+			}
+		}
+	}
+
+	return tail;
+}
+
+void ARegionList::FixUnconnectedRegions()
+{
+	ARegion *r, *head, *tail, *neighbors[NDIRS], *n;
+	int i, j, count, x, y, xscale, yscale;
+	Object *o;
+
+	forlist(this) {
+		r = (ARegion *) elem;
+		r->distance = -1;
+		r->next = 0;
+	}
+
+	// Build a list of all the regions we know we can get to:
+	// The nexus and anywhere that has a gate
+	head = 0;
+	tail = 0;
+	forlist_reuse(this) {
+		r = (ARegion *) elem;
+		if (r->zloc == ARegionArray::LEVEL_NEXUS || r->gate == -1) {
+			r->distance = 0;
+			r->next = head;
+			head = r;
+			if (!tail)
+				tail = r;
+		}
+	}
+	while (head) {
+		tail = FindConnectedRegions(head, tail);
+		head = head->next;
+	}
+	do {
+		count = 0;
+		forlist(this) {
+			r = (ARegion *) elem;
+			if (r->distance == -1) {
+				count++;
+			}
+		}
+		if (count > 0) {
+			i = getrandom(count);
+			forlist(this) {
+				r = (ARegion *) elem;
+				if (r->distance == -1) {
+					if (!i)
+						break;
+					i--;
+				}
+			}
+			// Found an unconnected region
+			// Try to link it in
+			n = 0;
+			// first, see if we can knock down a wall
+			// sadly we can only knock down all the walls at once
+			for (i = 0; i < NDIRS; i++)
+				neighbors[i] = r->neighbors[i];
+			if (Globals->ICOSAHEDRAL_WORLD) {
+				IcosahedralNeighSetup(r, pRegionArrays[r->zloc]);
+			} else {
+				NeighSetup(r, pRegionArrays[r->zloc]);
+			}
+			for (i = 0; i < NDIRS; i++) {
+				if (r->neighbors[i] && r->neighbors[i]->distance != -1) {
+					break;
+				}
+			}
+			for (j = 0; j < NDIRS; j++) {
+				// restore all the walls other than the one
+				// we meant to break
+				if (i != j)
+					r->neighbors[j] = neighbors[j];
+			}
+			if (i < NDIRS) {
+				// also restore the link on the other side
+				n = r->neighbors[i];
+				for (j = 0; j < NDIRS; j++)
+					neighbors[j] = n->neighbors[j];
+				if (Globals->ICOSAHEDRAL_WORLD) {
+					IcosahedralNeighSetup(n, pRegionArrays[r->zloc]);
+				} else {
+					NeighSetup(n, pRegionArrays[n->zloc]);
+				}
+				for (j = 0; j < NDIRS; j++)
+					if (n->neighbors[j] != r)
+						n->neighbors[j] = neighbors[j];
+			} else if (TerrainDefs[r->type].similar_type != R_OCEAN) {
+				// couldn't break a wall
+				// so try to put in a shaft
+				if (r->zloc > ARegionArray::LEVEL_SURFACE) {
+					x = r->xloc * GetLevelXScale(r->zloc) / GetLevelXScale(r->zloc - 1);
+					y = r->yloc * GetLevelYScale(r->zloc) / GetLevelYScale(r->zloc - 1);
+					xscale = GetLevelXScale(r->zloc) / GetLevelXScale(r->zloc - 1);
+					yscale = 2 * GetLevelYScale(r->zloc) / GetLevelYScale(r->zloc - 1);
+					for (i = 0; !n && i < xscale; i++)
+						for (j = 0; !n && j < yscale; j++) {
+							n = pRegionArrays[r->zloc - 1]->GetRegion(x + i, y + j);
+							if (n && TerrainDefs[n->type].similar_type == R_OCEAN)
+								n = 0;
+						}
+					if (n) {
+						o = new Object(n);
+						o->num = n->buildingseq++;
+						o->name = new AString(AString("Shaft [") + o->num + "]");
+						o->type = O_SHAFT;
+						o->incomplete = 0;
+						o->inner = r->num;
+						n->objects.Add(o);
+
+						o = new Object(r);
+						o->num = r->buildingseq++;
+						o->name = new AString(AString("Shaft [") + o->num + "]");
+						o->type = O_SHAFT;
+						o->incomplete = 0;
+						o->inner = n->num;
+						r->objects.Add(o);
+					}
+				}
+				if (!n) {
+					// None of that worked
+					// can we put in a gate?
+					if (Globals->GATES_EXIST) {
+						r->gate = -1;
+						r->distance = 0;
+						n = r;
+					}
+				}
+			}
+			if (n) {
+				head = n;
+				head->next = 0;
+				tail = head;
+				while (head) {
+					tail = FindConnectedRegions(head, tail);
+					head = head->next;
+				}
+			}
+		}
+	} while (count > 0);
 }
 
 void ARegionList::FinalSetupGates()

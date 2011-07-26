@@ -39,7 +39,8 @@ int Game::SetupFaction( Faction *pFac )
 	// Set up first unit.
 	//
 	Unit *temp2 = GetNewUnit( pFac );
-	temp2->SetMen( I_LEADERS, 1 );
+	temp2->SetMen(I_LEADERS, 1);
+	pFac->DiscoverItem(I_LEADERS, 0, 1);
 	temp2->reveal = REVEAL_FACTION;
 
 	temp2->type = U_MAGE;
@@ -56,14 +57,19 @@ int Game::SetupFaction( Faction *pFac )
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
-		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED))
+		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_FOOD, 6);
-		else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
+			pFac->DiscoverItem(I_FOOD, 0, 1);
+		} else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_FISH, 6);
-		else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
+			pFac->DiscoverItem(I_FISH, 0, 1);
+		} else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_LIVESTOCK, 6);
-		else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
+			pFac->DiscoverItem(I_LIVESTOCK, 0, 1);
+		} else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_GRAIN, 2);
+			pFac->DiscoverItem(I_GRAIN, 0, 1);
+		}
 		temp2->items.SetNum(I_SILVER, 10);
 	}
 
@@ -79,6 +85,12 @@ int Game::SetupFaction( Faction *pFac )
 		}
 	}
 	temp2->MoveUnit( reg->GetDummy() );
+
+	if (Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
+		// Try to auto-declare all player factions unfriendly
+		// to Creatures, since all they do is attack you.
+		pFac->SetAttitude(monfaction, A_UNFRIENDLY);
+	}
 
 	return( 1 );
 }

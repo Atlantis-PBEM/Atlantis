@@ -54,7 +54,9 @@ int Game::SetupFaction( Faction *pFac )
 	    break;
     }
 	temp2->SetMen( race, 1 );
+	pFac->DiscoverItem(race, 0, 1);
 	temp2->items.SetNum( I_STAFFOFY, 1 );
+	pFac->DiscoverItem(I_STAFFOFY, 0, 1);
 	temp2->reveal = REVEAL_FACTION;
 	temp2->SetFlag(FLAG_COMMANDER,1);
    	temp2->type = U_MAGE;

@@ -50,7 +50,8 @@ int Game::SetupFaction( Faction *pFac )
 	// Set up first unit.
 	//
 	Unit *temp2 = GetNewUnit( pFac );
-	temp2->SetMen( I_LEADERS, 1 );
+	temp2->SetMen(I_LEADERS, 1);
+	pFac->DiscoverItem(I_LEADERS, 0, 1);
 	temp2->reveal = REVEAL_FACTION;
 
 	if (TurnNumber() >= 12) {
@@ -62,14 +63,19 @@ int Game::SetupFaction( Faction *pFac )
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
-		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED))
+		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_FOOD, 6);
-		else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
+			pFac->DiscoverItem(I_FOOD, 0, 1);
+		} else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_FISH, 6);
-		else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
+			pFac->DiscoverItem(I_FISH, 0, 1);
+		} else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_LIVESTOCK, 6);
-		else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
+			pFac->DiscoverItem(I_LIVESTOCK, 0, 1);
+		} else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED)) {
 			temp2->items.SetNum(I_GRAIN, 2);
+			pFac->DiscoverItem(I_GRAIN, 0, 1);
+		}
 		temp2->items.SetNum(I_SILVER, 10);
 	}
 

@@ -1138,6 +1138,15 @@ void ARegionList::InitSetupGates(int level)
 	}
 }
 
+ARegion *FindConnectedRegions(ARegion *r, ARegion *tail)
+{
+	return tail;
+}
+
+void ARegionList::FixUnconnectedRegions()
+{
+}
+
 void ARegionList::FinalSetupGates()
 {
 	int ngates, log10, *used, i;

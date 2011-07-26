@@ -264,6 +264,8 @@ enum {
 	I_BOOKOFEXORCISM,
 	I_HOLYSYMBOL,
 	I_CENSER,
+	// Quest item for Havilah
+	I_RELICOFGRACE,
 	NITEMS
 };
 

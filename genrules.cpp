@@ -5943,5 +5943,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	f.Enclose(0, "body");
 	f.Enclose(0, "html");
+
+	f.Close();
+
 	return 1;
 }

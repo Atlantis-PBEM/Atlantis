@@ -493,6 +493,8 @@ void Game::CreateWorld()
 	}
 	// Underdeep has no gates, only the possible shafts above.
 
+	regions.FixUnconnectedRegions();
+
 	regions.FinalSetupGates();
 
 	regions.CalcDensities();

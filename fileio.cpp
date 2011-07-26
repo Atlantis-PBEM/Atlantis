@@ -148,6 +148,11 @@ void Areport::Close()
 	file->close();
 }
 
+void Arules::Close()
+{
+	file->close();
+}
+
 void skipwhite(ifstream *f)
 {
 	if (f->eof()) return;

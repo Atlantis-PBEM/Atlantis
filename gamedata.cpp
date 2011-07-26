@@ -2327,6 +2327,16 @@ ItemType id[] =
 	 -1,0, 0,
 	 0, NULL, 0,
 	 "", { "", "", "", "" }, 0, 0},
+	{"relic of grace","relics of grace","RGRC",
+	 ItemType::DISABLED | ItemType::NOMARKET | ItemType::NOTRANSPORT,
+	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 0, IT_SPECIAL | IT_NEVER_SPOIL, 0, 0,
+	 0,0,0,0,0,
+	 -1,0,
+	 -1,0, 0,
+	 0, NULL, 0,
+	 "", { "", "", "", "" }, 0, 0},
 };
 ItemType *ItemDefs = id;
 

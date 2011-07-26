@@ -1035,6 +1035,12 @@ AString *ItemDescription(int item, int full)
 		}
 	}
 
+	if (ItemDefs[item].type & IT_MONEY) {
+		*temp += " This is the currency of ";
+		*temp += Globals->WORLD_NAME;
+		*temp += ".";
+	}
+
 	if (!full)
 		return temp;
 
@@ -1124,6 +1130,11 @@ AString *ItemDescription(int item, int full)
 				"units after battle, as if their skill in Magical Healing "
 				"was the highest of their manipulation, pattern, force and "
 				"spirit skills, up to a maximum of level 3.";
+			break;
+		case I_RELICOFGRACE:
+			*temp += "  These items are given in recognition of having completed "
+				"holy quests.  Collect enough of these artifacts and you may "
+				"be able to return to the Eternal City.";
 			break;
 		default:
 			break;

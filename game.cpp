@@ -34,6 +34,7 @@
 #include "fileio.h"
 #include "astring.h"
 #include "gamedata.h"
+#include "quests.h"
 
 Game::Game()
 {
@@ -404,8 +405,8 @@ int Game::OpenGame()
 	if (!i) return 0;
 
 	// read in quests
-	i = f.GetInt();
-	if (i) return 0;
+	if (!quests.ReadQuests(&f))
+		return 0;
 
 	SetupUnitNums();
 
@@ -450,7 +451,7 @@ int Game::SaveGame()
 	regions.WriteRegions(&f);
 
 	// Write out quests
-	f.PutInt(0);
+	quests.WriteQuests(&f);
 
 	f.Close();
 	return(1);
@@ -650,6 +651,7 @@ int Game::ReadPlayers()
 					}
 					int nFacNum = pToken->value();
 					pFac = GetFaction(&factions, nFacNum);
+					pFac->startturn = TurnNumber();
 					lastWasNew = 0;
 				}
 			} else if (pFac) {
@@ -755,6 +757,9 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 		pTemp = pLine->gettoken();
 		if (Globals->LASTORDERS_MAINTAINED_BY_SCRIPTS)
 			pFac->lastorders = pTemp->value();
+	} else if (*pToken == "FirstTurn:") {
+		pTemp = pLine->gettoken();
+		pFac->startturn = pTemp->value();
 	} else if (*pToken == "Loc:") {
 		int x, y, z;
 		pTemp = pLine->gettoken();
@@ -1032,6 +1037,10 @@ int Game::RunGame()
 	}
 	gameStatus = GAME_STATUS_RUNNING;
 
+	Awrite("Removing Dead Factions...");
+	FindDeadFactions();
+	DeleteDeadFactions();
+
 	Awrite("Reading the Orders File...");
 	ReadOrders();
 
@@ -1057,8 +1066,6 @@ int Game::RunGame()
 	Awrite("Writing Playerinfo File...");
 	WritePlayers();
 
-	Awrite("Removing Dead Factions...");
-	DeleteDeadFactions();
 	Awrite("done");
 
 	return(1);
@@ -1075,15 +1082,13 @@ void Game::PreProcessTurn()
 	forlist(&factions) {
 		((Faction *) elem)->DefaultOrders();
 	}
-	{
-		forlist(&regions) {
-			ARegion *pReg = (ARegion *) elem;
-			if (Globals->WEATHER_EXISTS)
-				pReg->SetWeather(regions.GetWeather(pReg, month));
-			if (Globals->GATES_NOT_PERENNIAL)
-				pReg->SetGateStatus(month);
-			pReg->DefaultOrders();
-		}
+	forlist_reuse(&regions) {
+		ARegion *pReg = (ARegion *) elem;
+		if (Globals->WEATHER_EXISTS)
+			pReg->SetWeather(regions.GetWeather(pReg, month));
+		if (Globals->GATES_NOT_PERENNIAL)
+			pReg->SetGateStatus(month);
+		pReg->DefaultOrders();
 	}
 }
 
@@ -1238,6 +1243,7 @@ Faction *Game::AddFaction(int noleader, ARegion *pStart)
 	AString x("NoAddress");
 	temp->SetAddress(x);
 	temp->lastorders = TurnNumber();
+	temp->startturn = TurnNumber();
 	temp->pStartLoc = pStart;
 	temp->pReg = pStart;
 	temp->noStartLeader = noleader;
