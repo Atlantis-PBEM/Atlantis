@@ -472,29 +472,20 @@ void Game::DrownUnits()
 				forlist(&o->units) {
 					Unit *u = (Unit *)elem;
 					int drown = 0;
-					if (u->type == U_WMON) {
-						 // Make sure flying monsters only drown if we
-						 // are in WFLIGHT_NONE mode
-						if (Globals->FLIGHT_OVER_WATER==GameDefs::WFLIGHT_NONE)
-							drown = 1;
-						else
+					switch(Globals->FLIGHT_OVER_WATER) {
+						case GameDefs::WFLIGHT_UNLIMITED:
 							drown = !(u->CanSwim());
-					} else {
-						switch(Globals->FLIGHT_OVER_WATER) {
-							case GameDefs::WFLIGHT_UNLIMITED:
-								drown = !(u->CanSwim());
-								break;
-							case GameDefs::WFLIGHT_MUST_LAND:
-								drown = !(u->CanReallySwim() || u->leftShip);
-								u->leftShip = 0;
-								break;
-							case GameDefs::WFLIGHT_NONE:
-								drown = !(u->CanReallySwim());
-								break;
-							default: // Should never happen
-								drown = 1;
-								break;
-						}
+							break;
+						case GameDefs::WFLIGHT_MUST_LAND:
+							drown = !(u->CanReallySwim() || u->leftShip);
+							u->leftShip = 0;
+							break;
+						case GameDefs::WFLIGHT_NONE:
+							drown = !(u->CanReallySwim());
+							break;
+						default: // Should never happen
+							drown = 1;
+							break;
 					}
 					if (drown) {
 						r->Kill(u);
