@@ -365,6 +365,15 @@ class CastUnitsOrder : public CastOrder {
 		AList units;
 };
 
+class CastTransmuteOrder : public CastOrder {
+	public:
+		CastTransmuteOrder();
+		~CastTransmuteOrder();
+
+		int item;
+		int number;
+};
+
 class EvictOrder : public Order {
 	public:
 		EvictOrder();

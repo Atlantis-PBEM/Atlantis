@@ -2410,8 +2410,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "goes as follows: each unit of work on a building requires a "
 		"unit of the required resource and a man-month of work by a "
 		"character with the appropriate skill and level; higher skill "
-		"levels allow work proceed faster (still using one unit of the "
-		"required resource per unit of work done). ";
+		"levels allow work to proceed faster (still using one unit of "
+		"the required resource per unit of work done). ";
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		temp += "Again, only Trade factions can issue ";
 		temp += f.Link("#build", "BUILD") + " orders. ";
@@ -2427,6 +2427,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("th", "Cost");
 	f.TagText("th", "Material");
 	f.TagText("th", "Skill (min level)");
+	if (Globals->LIMITED_MAGES_PER_BUILDING) {
+		f.TagText("th", "Mages");
+	}
 	f.Enclose(0, "tr");
 	for (i = 0; i < NOBJECTS; i++) {
 		if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
@@ -2463,16 +2466,27 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += AString(" (") + ObjectDefs[i].level + ")";
 		f.PutStr(temp);
 		f.Enclose(0, "td");
+		if (Globals->LIMITED_MAGES_PER_BUILDING) {
+			f.Enclose(1, "td align=\"left\" nowrap");
+			f.PutStr(ObjectDefs[i].maxMages);
+			f.Enclose(0, "td");
+		}
 		f.Enclose(0, "tr");
 	}
 	f.Enclose(0, "table");
 	f.Enclose(0, "center");
 	temp = "Size is the number of people that the building can shelter. Cost "
 		"is both the number of man-months of labor and the number of units "
-		"of material required to complete the building.  There are possibly "
-		"other buildings which can be built that require more advanced "
-		"resources, or odd skills to construct.   The description of a skill "
-		"will include any buildings which it allows to be built.";
+		"of material required to complete the building.  ";
+	if (Globals->LIMITED_MAGES_PER_BUILDING) {
+		temp += "Mages is the number of mages that the building "
+			"provides study facilities for, to enable unhindered "
+			"study above level 2 in magical skills.  ";
+	}
+	temp += "There are possibly other buildings which can be built that "
+		"require more advanced resources, or odd skills to construct.   "
+		"The description of a skill will include any buildings which "
+		"it allows to be built.";
 	f.Paragraph(temp);
 	temp = "There are other structures that increase the maximum production "
 		"of certain items in regions";

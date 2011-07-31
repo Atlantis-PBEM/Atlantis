@@ -38,7 +38,7 @@ void usage()
 	Awrite("atlantis run");
 	Awrite("atlantis edit");
 	Awrite("");
-	Awrite("atlantis map <type> <mapfile>");
+	Awrite("atlantis map <geo|wmon|lair|gate> <mapfile>");
 	Awrite("atlantis mapunits");
 	Awrite("atlantis genrules <introfile> <cssfile> <rules-outputfile>");
 	Awrite("");
@@ -48,6 +48,7 @@ void usage()
 int main(int argc, char *argv[])
 {
 	Game game;
+	int retval = 1;
 
 	initIO();
 
@@ -155,9 +156,13 @@ int main(int argc, char *argv[])
 				Awrite("Unable to generate rules!");
 				break;
 			}
+		} else {
+			Awrite(AString("Unknown option: ") + argv[1]);
+			break;
 		}
+		retval = 0;
 	} while( 0 );
 
 	doneIO();
-	return 0;
+	return retval;
 }

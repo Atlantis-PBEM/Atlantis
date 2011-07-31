@@ -351,3 +351,12 @@ TransportOrder::~TransportOrder()
 {
 	if (target) delete target;
 }
+
+CastTransmuteOrder::CastTransmuteOrder()
+{
+}
+
+CastTransmuteOrder::~CastTransmuteOrder()
+{
+}
+

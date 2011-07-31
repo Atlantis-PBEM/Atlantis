@@ -46,6 +46,7 @@ void ProcessInvisibility(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessBirdLore(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessMindReading(Unit *,AString *, OrdersCheck *pCheck );
 void ProcessLacandonTeleport(Unit *, AString *, OrdersCheck *pCheck);
+void ProcessTransmutation(Unit *, AString *, OrdersCheck *pCheck);
 
 //
 // Spell helpers
@@ -82,4 +83,6 @@ int RunEngraveRunes(ARegion *,Object *,Unit *);
 int RunConstructGate(ARegion *,Unit *,int);
 int RunEnchant(ARegion *,Unit *, int, int);
 int RunMindReading(ARegion *,Unit *);
+int RunTransmutation(ARegion *,Unit *);
+int RunSacrifice(ARegion *,Unit *);
 #endif

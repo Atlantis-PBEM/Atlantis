@@ -153,6 +153,8 @@ void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	for (int j=0; j<i; j++) {
 		Unit *temp = new Unit;
 		temp->Readin(f, facs, v);
+		if (!temp->faction)
+			continue;
 		temp->MoveUnit(this);
 		if (!(temp->faction->IsNPC())) region->visited = 1;
 	}

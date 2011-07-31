@@ -193,6 +193,9 @@ void Unit::Writeout(Aoutfile *s)
 	else s->PutStr("NO_SKILL");
 	s->PutInt(savedmovement);
 	s->PutInt(savedmovedir);
+	// placeholder - this will be for storage of quest-related info,
+	// such as how far this unit has got towards completing a quest
+	s->PutInt(0);
 }
 
 void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
@@ -242,6 +245,8 @@ void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
 	delete temp;
 	savedmovement = s->GetInt();
 	savedmovedir = s->GetInt();
+	// Placeholder for quest completion info
+	s->GetInt();
 }
 
 AString Unit::MageReport()
@@ -622,24 +627,65 @@ void Unit::ClearCastOrders()
 
 void Unit::DefaultOrders(Object *obj)
 {
+	int count, weight, i;
+	ARegion *r, *n;
+
 	ClearOrders();
 	if (type == U_WMON) {
 		if (ObjectDefs[obj->type].monster == -1) {
-			MoveOrder *o = new MoveOrder;
-			o->advancing = 0;
-			int aper = Hostile();
-			aper *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
-			aper /= 100;
+			// count starts at 2 to give a 2 / (available dirs + 2)
+			// chance of a wandering monster not moving
+			count = 2;
+			weight = items.Weight();
+			r = obj->region;
+			for (i = 0; i < NDIRS; i++) {
+				n = r->neighbors[i];
+				if (!n)
+					continue;
+				if (TerrainDefs[n->type].similar_type == R_OCEAN &&
+						!CanReallySwim() &&
+						!(CanFly(weight) &&
+							Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED))
+					continue;
+				if (TerrainDefs[n->type].similar_type != R_OCEAN &&
+						!CanWalk(weight) &&
+						!CanRide(weight) &&
+						!CanFly(weight))
+					continue;
+				count++;
 
-			if (aper < Globals->MONSTER_ADVANCE_MIN_PERCENT)
-				aper = Globals->MONSTER_ADVANCE_MIN_PERCENT;
-
-			int n = getrandom(100);
-			if (n < aper) o->advancing = 1;
-			MoveDir *d = new MoveDir;
-			d->dir = getrandom(NDIRS);
-			o->dirs.Add(d);
-			monthorders = o;
+			}
+			count = getrandom(count);
+			for (i = 0; i < NDIRS; i++) {
+				n = r->neighbors[i];
+				if (!n)
+					continue;
+				if (TerrainDefs[n->type].similar_type == R_OCEAN &&
+						!CanReallySwim() &&
+						!(CanFly(weight) &&
+							Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED))
+					continue;
+				if (TerrainDefs[n->type].similar_type != R_OCEAN &&
+						!CanWalk(weight) &&
+						!CanRide(weight) &&
+						!CanFly(weight))
+					continue;
+				if (!count--) {
+					MoveOrder *o = new MoveOrder;
+					o->advancing = 0;
+					int aper = Hostile();
+					aper *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
+					aper /= 100;
+					if (aper < Globals->MONSTER_ADVANCE_MIN_PERCENT)
+						aper = Globals->MONSTER_ADVANCE_MIN_PERCENT;
+					if (getrandom(100) < aper)
+						o->advancing = 1;
+					MoveDir *d = new MoveDir;
+					d->dir = i;
+					o->dirs.Add(d);
+					monthorders = o;
+				}
+			}
 		}
 	} else if (type == U_GUARD) {
 		if (guard != GUARD_GUARD)

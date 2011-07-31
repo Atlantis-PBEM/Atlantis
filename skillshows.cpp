@@ -1172,6 +1172,89 @@ AString *ShowSkill::Report(Faction *f)
 			}
 			*str += ".";
 			break;
+		case S_TRANSMUTATION:
+			/* XXX -- This should be cleaner somehow. */
+			if (level == 1) {
+				*str += "A mage with Transmutation may transform "
+					"basic resources into more esoteric ones. ";
+				if ((ITEM_ENABLED(I_STONE) && ITEM_ENABLED(I_ROOTSTONE)) ||
+						(ITEM_ENABLED(I_IRON) && ITEM_ENABLED(I_MITHRIL))) {
+					*str += "At level 1 the mage may transmute ";
+					if (ITEM_ENABLED(I_STONE) && ITEM_ENABLED(I_ROOTSTONE)) {
+						*str += ItemString(I_STONE, 1);
+						*str += " into ";
+						*str += ItemString(I_ROOTSTONE, 1);
+					}
+					if (ITEM_ENABLED(I_STONE) &&
+							ITEM_ENABLED(I_ROOTSTONE) &&
+							ITEM_ENABLED(I_IRON) &&
+							ITEM_ENABLED(I_MITHRIL)) {
+						*str += " or ";
+					}
+					if (ITEM_ENABLED(I_IRON) && ITEM_ENABLED(I_MITHRIL)) {
+						*str += ItemString(I_IRON, 1);
+						*str += " into ";
+						*str += ItemString(I_MITHRIL, 1);
+					}
+					*str += ". ";
+				}
+				*str += "To use this spell, the mage should issue the order "
+					"CAST Transmutation <material>, where <material> "
+					"is the resource you wish to create. "
+					"This spell will transmute as many resources as the "
+					"mage's skill level in Transmutation.  Should you "
+					"wish to create fewer than this, you may "
+					"CAST Transmutation [number] <material> instead.";
+			} else if (level == 2) {
+				if (ITEM_ENABLED(I_WOOD) && ITEM_ENABLED(I_IRONWOOD)) {
+					*str += "At this level the mage may transmute ";
+					*str += ItemString(I_WOOD, 1);
+					*str += " into ";
+					*str += ItemString(I_IRONWOOD, 1);
+					*str += ".";
+				}
+			} else if (level == 3) {
+				if (ITEM_ENABLED(I_FUR) && ITEM_ENABLED(I_FLOATER)) {
+					*str += "At this level the mage may transmute ";
+					*str += ItemString(I_FUR, 1);
+					*str += " into ";
+					*str += ItemString(I_FLOATER, 1);
+					*str += ".";
+				}
+			} else if (level == 4) {
+				if (ITEM_ENABLED(I_WOOD) && ITEM_ENABLED(I_YEW)) {
+					*str += "At this level the mage may transmute ";
+					*str += ItemString(I_WOOD, 1);
+					*str += " into ";
+					*str += ItemString(I_YEW, 1);
+					*str += ".";
+				}
+			} else if (level == 5) {
+				if (ITEM_ENABLED(I_HORSE) && ITEM_ENABLED(I_WHORSE)) {
+					*str += "At this level the mage may transmute ";
+					*str += ItemString(I_HORSE, 1, ALWAYSPLURAL);
+					*str += " into ";
+					*str += ItemString(I_WHORSE, 1, ALWAYSPLURAL);
+					*str += ".";
+				}
+			}
+			break;
+		case S_SACRIFICE:
+			if (level > 1) break;
+			if (OBJECT_DISABLED(O_BKEEP)) break;
+			*str += "A mage with the Sacrifice skill may perform "
+				"a blasphemous ritual to sever the world of ";
+			*str += Globals->WORLD_NAME;
+			*str += " from the Eternal City. ";
+			*str += "This ritual requires ";
+			*str += ItemString(I_ROOTSTONE, 1);
+			*str += " and the sacrifice of a randomly selected "
+				"leader belonging to the mage's faction. ";
+			*str += "Many such sacrifices may be necessary to "
+				"complete the ritual; the caster will attempt "
+				"to perform as many sacrifices as their skill "
+				"level in Sacrifice.";
+			break;
 		case S_MANIPULATE:
 			if (!Globals->APPRENTICES_EXIST) break;
 			if (level == 1) {

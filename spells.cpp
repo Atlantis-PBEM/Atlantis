@@ -92,6 +92,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_BOOK_OF_EXORCISM:
 			case S_CREATE_HOLY_SYMBOL:
 			case S_CREATE_CENSER:
+			case S_SACRIFICE:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
@@ -126,6 +127,9 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 				break;
 			case S_CREATE_PHANTASMAL_DEMONS:
 				ProcessPhanDemons(u,o, pCheck );
+				break;
+			case S_TRANSMUTATION:
+				ProcessTransmutation(u, o, pCheck);
 				break;
 		}
 	}
@@ -585,6 +589,61 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	u->Error("CAST: Invalid argument.");
 }
 
+void Game::ProcessTransmutation(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	CastTransmuteOrder *order;
+	AString *token;
+
+	order = new CastTransmuteOrder;
+	order->spell = S_TRANSMUTATION;
+	order->level = 0;
+	order->item = -1;
+	order->number = -1;
+
+	token = o->gettoken();
+	if (token->value() > 0) {
+		order->number = token->value();
+		delete token;
+		token = o->gettoken();
+	}
+
+	order->item = ParseEnabledItem(token);
+	delete token;
+	if (order->item == -1) {
+		u->Error("CAST: You must specify what you wish to create.");
+		delete order;
+		return;
+	}
+
+	switch(order->item) {
+		case I_MITHRIL:
+		case I_ROOTSTONE:
+			order->level = 1;
+			break;
+		case I_IRONWOOD:
+			order->level = 2;
+			break;
+		case I_FLOATER:
+			order->level = 3;
+			break;
+		case I_YEW:
+			order->level = 4;
+			break;
+		case I_WHORSE:
+			order->level = 5;
+			break;
+		default:
+			u->Error("CAST: Can't create that by transmutation.");
+			delete order;
+			return;
+	}
+
+	u->ClearCastOrders();
+	u->castorders = order;
+
+	return;
+}
+
 void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 {
 	int val;
@@ -736,6 +795,12 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			break;
 		case S_CREATE_CENSER:
 			val = RunCreateArtifact(r,u,sk,I_CENSER);
+			break;
+		case S_TRANSMUTATION:
+			val = RunTransmutation(r, u);
+			break;
+		case S_SACRIFICE:
+			val = RunSacrifice(r, u);
 			break;
 	}
 	if (val) {
@@ -1686,6 +1751,160 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	}
 
 	delete tar;
+	return 1;
+}
+
+int Game::RunTransmutation(ARegion *r, Unit *u)
+{
+	CastTransmuteOrder *order;
+	int level, num, source;
+
+	order = (CastTransmuteOrder *) u->castorders;
+	level = u->GetSkill(S_TRANSMUTATION);
+	if (!level) {
+		u->Error("CAST: Unit doesn't have that skill.");
+		return 0;
+	}
+	if (level < order->level) {
+		u->Error("CAST: Can't create that by transmutation.");
+		return 0;
+	}
+	
+	switch(order->item) {
+		case I_MITHRIL:
+			source = I_IRON;
+			break;
+		case I_ROOTSTONE:
+			source = I_STONE;
+			break;
+		case I_FLOATER:
+			source = I_FUR;
+			break;
+		case I_IRONWOOD:
+		case I_YEW:
+			source = I_WOOD;
+			break;
+		case I_WHORSE:
+			source = I_HORSE;
+			break;
+	}
+	
+	num = u->GetSharedNum(source);
+	if (num > level)
+		num = level;
+	if (order->number != -1 && num > order->number)
+		num = order->number;
+	if (num < order->number)
+		u->Error("CAST: Can't create that many.");
+	u->ConsumeShared(source, num);
+	u->items.SetNum(order->item, u->items.GetNum(order->item) + num);
+	u->Event(AString("Transmutes ") +
+			ItemString(source, num) +
+			" into " +
+			ItemString(order->item, num) +
+			".");
+	
+	return 1;
+}
+
+int Game::RunSacrifice(ARegion *r, Unit *mage)
+{
+	CastOrder *order;
+	int level, num, sactype, sacrifices, i, sac;
+	Object *o, *tower;
+	Unit *u, *victim;
+	Item *item;
+
+	order = (CastOrder *) mage->castorders;
+	level = mage->GetSkill(S_SACRIFICE);
+	if (level < 1) {
+		mage->Error("CAST: Unit doesn't have that skill.");
+		return 0;
+	}
+	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
+		mage->Error(AString("CAST: Can't build a ") +
+			ObjectDefs[O_BKEEP].name +
+			" on water.");
+		return 0;
+	}
+	num = mage->GetSharedNum(I_ROOTSTONE);
+	if (num > level)
+		num = level;
+	tower = 0;
+	sactype = IT_LEADER;
+	sacrifices = 0;
+	forlist(&r->objects) {
+		o = (Object *) elem;
+		if (o->type == O_BKEEP)
+			tower = o;
+		forlist(&o->units) {
+			u = (Unit *) elem;
+			if (u->faction->num == mage->faction->num) {
+				forlist(&u->items) {
+					item = (Item *) elem;
+					if (ItemDefs[item->type].type & sactype)
+						sacrifices += item->num;
+				}
+			}
+		}
+	}
+	if (num > sacrifices)
+		num = sacrifices;
+	if (num < 1) {
+		mage->Error("CAST: Don't have the required materials.");
+		return 0;
+	}
+	if (!tower) {
+		for (i = 1; i < 100; i++)
+			if (!r->GetObject(i))
+				break;
+		if (i < 100) {
+			tower = new Object(r);
+			tower->type = O_BKEEP;
+			tower->incomplete = ObjectDefs[tower->type].cost;
+			tower->num = i;
+			tower->SetName(new AString("Building"));
+			r->objects.Add(tower);
+			WriteTimesArticle("The earth shakes as a blasphemous word is uttered.");
+		} else {
+			mage->Error("CAST: The region is full.");
+			return 0;
+		}
+	}
+	if (num > tower->incomplete)
+		num = tower->incomplete;
+	while (num-- > 0) {
+		victim = 0;
+		i = getrandom(sacrifices);
+		forlist(&r->objects) {
+			o = (Object *) elem;
+			forlist(&o->units) {
+				u = (Unit *) elem;
+				if (u->faction->num == mage->faction->num) {
+					forlist(&u->items) {
+						item = (Item *) elem;
+						if (ItemDefs[item->type].type & sactype) {
+							if (!victim && i < item->num) {
+								victim = u;
+								sac = item->type;
+							}
+							i -= item->num;
+						}
+					}
+				}
+			}
+		}
+		mage->ConsumeShared(I_ROOTSTONE, 1);
+		victim->SetMen(sac, victim->GetMen(sac) - 1);
+		sacrifices--;
+		tower->incomplete--;
+		mage->Event(AString("Sacrifices ") + ItemDefs[sac].name + " from " + victim->name->Str());
+		if (!victim->GetMen())
+			r->Kill(victim);
+		if (!mage->GetMen())
+			break;
+	}
+
 	return 1;
 }
 

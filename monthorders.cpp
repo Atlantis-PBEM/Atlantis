@@ -648,7 +648,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	r->improvement += num;
 
 	// AS
-	u->Event(job + *(buildobj->name) + " [" + buildobj->num + "].");
+	u->Event(job + *(buildobj->name));
 	u->Practice(sk);
 
 	delete u->monthorders;

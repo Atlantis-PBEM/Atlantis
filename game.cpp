@@ -158,15 +158,15 @@ void Game::WriteUnderworldMap(Aoutfile *f, ARegionArray *pArr, int type)
 			reg2 = pArr->GetRegion(x+xx*32+1,y+yy*16+1);
 			temp += AString(GetRChar(reg));
 			temp += GetXtraMap(reg,type);
-			if (reg2->neighbors[D_NORTH]) temp += "|";
+			if (reg2 && reg2->neighbors[D_NORTH]) temp += "|";
 			else temp += " ";
 
 			temp += " ";
-			if (reg->neighbors[D_SOUTHWEST]) temp2 += "/";
+			if (reg && reg->neighbors[D_SOUTHWEST]) temp2 += "/";
 			else temp2 += " ";
 
 			temp2 += " ";
-			if (reg->neighbors[D_SOUTHEAST]) temp2 += "\\";
+			if (reg && reg->neighbors[D_SOUTHEAST]) temp2 += "\\";
 			else temp2 += " ";
 
 			temp2 += " ";
@@ -180,18 +180,18 @@ void Game::WriteUnderworldMap(Aoutfile *f, ARegionArray *pArr, int type)
 			reg = pArr->GetRegion(x+xx*32,y+yy*16+1);
 			reg2 = pArr->GetRegion(x+xx*32-1,y+yy*16);
 
-			if (reg2->neighbors[D_SOUTH]) temp += "|";
+			if (reg2 && reg2->neighbors[D_SOUTH]) temp += "|";
 			else temp += " ";
 
 			temp += AString(" ");
 			temp += AString(GetRChar(reg));
 			temp += GetXtraMap(reg,type);
 
-			if (reg->neighbors[D_SOUTHWEST]) temp2 += "/";
+			if (reg && reg->neighbors[D_SOUTHWEST]) temp2 += "/";
 			else temp2 += " ";
 
 			temp2 += " ";
-			if (reg->neighbors[D_SOUTHEAST]) temp2 += "\\";
+			if (reg && reg->neighbors[D_SOUTHEAST]) temp2 += "\\";
 			else temp2 += " ";
 
 			temp2 += " ";
@@ -651,7 +651,8 @@ int Game::ReadPlayers()
 					}
 					int nFacNum = pToken->value();
 					pFac = GetFaction(&factions, nFacNum);
-					pFac->startturn = TurnNumber();
+					if (pFac)
+						pFac->startturn = TurnNumber();
 					lastWasNew = 0;
 				}
 			} else if (pFac) {
@@ -1037,10 +1038,6 @@ int Game::RunGame()
 	}
 	gameStatus = GAME_STATUS_RUNNING;
 
-	Awrite("Removing Dead Factions...");
-	FindDeadFactions();
-	DeleteDeadFactions();
-
 	Awrite("Reading the Orders File...");
 	ReadOrders();
 
@@ -1065,6 +1062,9 @@ int Game::RunGame()
 
 	Awrite("Writing Playerinfo File...");
 	WritePlayers();
+
+	Awrite("Removing Dead Factions...");
+	DeleteDeadFactions();
 
 	Awrite("done");
 
@@ -1842,7 +1842,7 @@ char Game::GetRChar(ARegion *r)
 	int t;
 
 	if (!r)
-		return '#';
+		return ' ';
 	t = r->type;
 	if (t < 0 || t > R_NUM) return '?';
 	char c = TerrainDefs[r->type].marker;
@@ -2114,3 +2114,22 @@ void Game::Equilibrate()
 	}
 	Awrite("");
 }
+
+void Game::WriteTimesArticle(AString article)
+{
+        AString filename;
+        int result;
+        Arules f;
+
+        do {
+                filename = "times.";
+                filename += getrandom(10000);
+                result = access(filename.Str(), F_OK);
+        } while (result == 0);
+
+        if (f.OpenByName(filename) != -1) {
+                f.PutStr(article);
+                f.Close();
+        }
+}
+

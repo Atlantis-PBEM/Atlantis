@@ -98,24 +98,6 @@ int Game::SetupFaction( Faction *pFac )
 	return( 1 );
 }
 
-static void WriteTimesArticle(AString article)
-{
-	AString filename;
-	int result;
-	Arules f;
-
-	do {
-		filename = "times.";
-		filename += getrandom(10000);
-		result = access(filename.Str(), F_OK);
-	} while (result == 0);
-
-	if (f.OpenByName(filename) != -1) {
-		f.PutStr(article);
-		f.Close();
-	}
-}
-
 Faction *Game::CheckVictory()
 {
 	int visited, unvisited, d, moncount, reliccount;
@@ -209,6 +191,25 @@ Faction *Game::CheckVictory()
 			}
 			if (q->type != -1)
 				quests.Add(q);
+		}
+	} else {
+		// Tell the players to get exploring :-)
+		d = getrandom(6);
+		if (d == 0) {
+			message = "Be productive and multiply; "
+				"fill the land and subdue it.";
+			WriteTimesArticle(message);
+		} else if (d == 1) {
+			message = "Go into all the world, and tell all "
+				"people of your fall from grace.";
+			WriteTimesArticle(message);
+		} else if (d < 4) {
+			message = "Players have visited ";
+			message += (visited * 100 / (visited + unvisited));
+			message += "% of all inhabited regions.";
+			WriteTimesArticle(message);
+		} else if (d == 4) {
+			// Give some pointer as to where still needs exploring
 		}
 	}
 
@@ -399,7 +400,20 @@ Faction *Game::CheckVictory()
 		}
 	}
 
-	printf("%d quests active:\n", quests.Num());
+	forlist_reuse(&regions) {
+		r = (ARegion *) elem;
+		forlist(&r->objects) {
+			o = (Object *) elem;
+			if (o->type == O_BKEEP) {
+				if (!o->incomplete) {
+					// You didn't think this was a
+					// _win_ condition, did you?
+					return GetFaction(&factions, monfaction);
+				}
+			}
+		}
+	}
+
 	forlist_reuse(&quests) {
 		q = (Quest *) elem;
 		switch(q->type) {
@@ -427,7 +441,6 @@ Faction *Game::CheckVictory()
 					delete l;
 				}
 
-				printf("Slay monster #%d.\n", q->target);
 				break;
 			default:
 				break;
@@ -482,15 +495,26 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_BAG);
 	EnableItem(I_SPINNING);
 	EnableItem(I_LEATHERARMOR);
-	EnableItem(I_CLOTHARMOR);
+	ModifyArmorFlags("LARM", ArmorType::USEINASSASSINATE);
+	ModifyWeaponAttack("DBOW",
+			ARMORPIERCING,
+			ATTACK_RANGED,
+			WeaponType::NUM_ATTACKS_HALF_SKILL);
+	// Make DBOWs require just LBOW, not XBOW?  And downgrade
+	// them from ARMORPIERCING to just PIERCING?
+	ModifyWeaponAttack("RUNE",
+			SLASHING,
+			ATTACK_COMBAT,
+			WeaponType::NUM_ATTACKS_HALF_SKILL);
+	// EnableItem(I_CLOTHARMOR);
 	EnableItem(I_BOOTS);
 	EnableItem(I_BAXE);
-	EnableItem(I_MBAXE);
-	EnableItem(I_IMARM);
-	EnableItem(I_SUPERBOW);
-	EnableItem(I_LANCE);
-	EnableItem(I_JAVELIN);
-	EnableItem(I_PIKE);
+	// EnableItem(I_MBAXE);
+	// EnableItem(I_IMARM);
+	// EnableItem(I_SUPERBOW);
+	// EnableItem(I_LANCE);
+	// EnableItem(I_JAVELIN);
+	// EnableItem(I_PIKE);
 	EnableItem(I_AEGIS);
 	EnableItem(I_WINDCHIME);
 	EnableItem(I_GATE_CRYSTAL);
@@ -513,9 +537,9 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_CASHMERE);
 	DisableItem(I_WOOL);
 
-	EnableItem(I_FOOD);
-	EnableSkill(S_COOKING);
-	EnableSkill(S_CREATE_FOOD);
+	// EnableItem(I_FOOD);
+	// EnableSkill(S_COOKING);
+	// EnableSkill(S_CREATE_FOOD);
 
 	DisableItem(I_STAFFOFL);
 	DisableItem(I_GNOME);
@@ -531,8 +555,8 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_COG);
 	DisableItem(I_CARRACK);
 
-	EnableSkill(S_ARMORCRAFT);
-	EnableSkill(S_WEAPONCRAFT);
+	// EnableSkill(S_ARMORCRAFT);
+	// EnableSkill(S_WEAPONCRAFT);
 	EnableSkill(S_CREATE_AEGIS);
 	EnableSkill(S_CREATE_WINDCHIME);
 	EnableSkill(S_CREATE_GATE_CRYSTAL);
@@ -542,6 +566,8 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableSkill(S_CREATE_BOOK_OF_EXORCISM);
 	EnableSkill(S_CREATE_HOLY_SYMBOL);
 	EnableSkill(S_CREATE_CENSER);
+	EnableSkill(S_TRANSMUTATION);
+	EnableSkill(S_SACRIFICE);
 
 	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
 
@@ -592,6 +618,12 @@ void Game::ModifyTablesPerRuleset(void)
 		ObjectDefs[O_AGALLEON].capacity,
 		ObjectDefs[O_AGALLEON].sailors,
 		1);
+	ModifyObjectName(O_BKEEP, "Black Tower");
+	ModifyObjectFlags(O_BKEEP, ObjectType::CANENTER |
+		ObjectType::NEVERDECAY |
+		ObjectType::CANMODIFY);
+	ModifyObjectMonster(O_BKEEP, -1);
+	ModifyObjectConstruction(O_BKEEP, I_ROOTSTONE, 6, NULL, 0);
 
 	ModifyTerrainItems(R_PLAIN, 0, I_HORSE, 25, 20);
 	ModifyTerrainItems(R_PLAIN, 1, -1, 0, 0);
@@ -632,7 +664,6 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_DERELICT);
 	EnableObject(O_OCAVE);
 	EnableObject(O_WHIRL);
-	DisableObject(O_BKEEP);
 	DisableObject(O_PALACE);
 	EnableItem(I_PIRATES);
 	EnableItem(I_KRAKEN);

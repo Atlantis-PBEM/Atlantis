@@ -1177,7 +1177,7 @@ ARegion *ARegionList::FindConnectedRegions(ARegion *r, ARegion *tail)
 void ARegionList::FixUnconnectedRegions()
 {
 	ARegion *r, *head, *tail, *neighbors[NDIRS], *n;
-	int i, j, count, x, y, xscale, yscale;
+	int i, j, count, offset, x, y, xscale, yscale;
 	Object *o;
 
 	forlist(this) {
@@ -1234,8 +1234,10 @@ void ARegionList::FixUnconnectedRegions()
 			} else {
 				NeighSetup(r, pRegionArrays[r->zloc]);
 			}
+			offset = getrandom(NDIRS);
 			for (i = 0; i < NDIRS; i++) {
-				if (r->neighbors[i] && r->neighbors[i]->distance != -1) {
+				if (r->neighbors[(i + offset) % NDIRS] &&
+						r->neighbors[(i + offset) % NDIRS]->distance != -1) {
 					break;
 				}
 			}
@@ -1243,11 +1245,11 @@ void ARegionList::FixUnconnectedRegions()
 				// restore all the walls other than the one
 				// we meant to break
 				if (i != j)
-					r->neighbors[j] = neighbors[j];
+					r->neighbors[(j + offset) % NDIRS] = neighbors[(j + offset) % NDIRS];
 			}
 			if (i < NDIRS) {
 				// also restore the link on the other side
-				n = r->neighbors[i];
+				n = r->neighbors[(i + offset) % NDIRS];
 				for (j = 0; j < NDIRS; j++)
 					neighbors[j] = n->neighbors[j];
 				if (Globals->ICOSAHEDRAL_WORLD) {

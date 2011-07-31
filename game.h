@@ -397,6 +397,8 @@ private:
 	void DoGiveOrders();
 	void DoWithdrawOrders();
 
+	void WriteTimesArticle(AString);
+
 	void DoExchangeOrders();
 	void DoExchangeOrder(ARegion *, Unit *, ExchangeOrder *);
 

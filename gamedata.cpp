@@ -3476,6 +3476,14 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
 	 NULL, NULL,
 	 {{"ARTI",3},{"FSHI",3},{NULL,0}}},
+	{"transmutation","TRNS",100,
+	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
+	 NULL, NULL,
+	 {{"ARTI",1},{NULL,0},{NULL,0}}},
+	{"sacrifice","SCRF",100,
+	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
+	 NULL, NULL,
+	 {{"DEMO",1},{"NECR",1},{NULL,0}}},
 };
 
 SkillType *SkillDefs = sd;
