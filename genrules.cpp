@@ -1235,10 +1235,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "table");
 	f.Enclose(0, "center");
 	if (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
-		temp = "A unit which can fly, is capable of travelling over water.";
+		temp = "A unit which can fly is capable of travelling over water";
 		if (Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_MUST_LAND)
-			temp += " However, if the unit ends its turn over a water hex "
-				"that unit will drown.";
+			temp += ", but if the unit ends its turn over a water "
+				"hex then it will drown.";
+		temp += ".";
 		f.Paragraph(temp);
 	}
 
@@ -1303,7 +1304,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ". The month is April, so he has ";
 	else
 		temp += " and has ";
-	temp += NumToWord(ItemDefs[I_HORSE].speed);
+	if (cap > weight)
+		temp += NumToWord(ItemDefs[I_HORSE].speed);
+	else
+		temp += NumToWord(ItemDefs[I_MAN].speed);
 	int travel = ItemDefs[I_HORSE].speed;
 	temp += " movement point";
 	temp += AString((ItemDefs[I_HORSE].speed == 1) ? "" : "s") + ". ";
@@ -1500,44 +1504,94 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "This section is probably unimportant to beginning players, but "
 		"it can be helpful for more experienced players.";
 	f.Paragraph(temp);
-	temp = "Normal movement in Atlantis, meaning ";
-	temp += f.Link("#advance", "ADVANCE") + " and " + f.Link("#move", "MOVE");
-	temp += " orders, is processed one hex of movement at a time, region "
-		"by region. So, Atlantis cycles through all of the regions; for "
-		"each region, it finds any units that wish to move, and moves "
-		"them (if they can move) one hex (and only one hex). After "
-		"processing one such region, it initiates any battles that take "
-		"place due to these movements, and then moves on to the next "
-		"region. After it has gone through all of the regions, you will "
-		"note that units have only moved one hex, so it goes back and "
-		"does the whole process again, except this time moving units "
-		"their second hex (if they have enough movement points left). This "
-		"continues until no units can move anymore.";
+	temp = "Movement in Atlantis is processed one hex of movement at a "
+		"time, region by region. "
+		"Atlantis cycles through all of the regions; for each region, "
+		"it finds any units that are due to move, and moves them (if "
+		"they can move) one hex (and only one hex). "
+		"After processing all the regions, it conducts any battles "
+		"that result from these movements. "
+		"After it has gone through all of the regions, units will "
+		"have moved at most one hex, so it goes back and does the "
+		"whole process again. "
+		"This is repeated until all units have had the opportunity "
+		"to move their allowed distance. "
+		"Units' movement is spread out over these phases "
+		"proportionally to their speed, so a unit riding at speed "
+		"4 would move twice as often as one walking at speed 2. "
+		"If the unit requires more than one move to enter a "
+		"particular region, then it will move once it has accumulated "
+		"enough movement points to do so. "
+		"Note that these movement points can be carried over from "
+		"one month to another if a MOVE (or ADVANCE) command did "
+		"not complete in the month - for example, a unit on foot "
+		"trying to move into a mountain region in winter would not "
+		"have enough movement points to enter in one turn, but if "
+		"it continues the same move on the next turn, it would use "
+		"the accumulated points from the last month and manage to "
+		"enter the mountains at last.";
 	f.Paragraph(temp);
 	if (may_sail) {
-		temp = "Sailing is handled differently; Atlantis cycles through all "
-			"of the ships in Atlantis, moving them one at a time. When "
-			"Atlantis sails a ship, it sails it through its entire course, "
-			"either to the end, or until the ship enters a hex guarded "
-			"against some unit on the ship, and then moves onto the next "
-			"ship.";
+		temp = "Sailing is handled the same way, with one minor "
+			"difference: where units using MOVE or ADVANCE will "
+			"be prevented from entering a GUARDed region (where "
+			"the guards are unfriendly or worse to the moving "
+			"unit), ships will instead enter the region and "
+			"then be stopped by the guards. ";
 		f.Paragraph(temp);
 	}
-	temp = "Note that";
-	if (may_sail) {
-		temp += " in either case,";
-	}
-	temp += " the order in which the regions are processed is undefined "
-		"by the rules. The computer generally does them in the same "
-		"order every time, but it is up to the wiles of the player to "
-		"determine (or not) these patterns. The order in which units or "
-		"ships are moved within a region is the order that they appear "
-		"on a turn report.";
+
+	temp = "The following table shows when exactly units will move, "
+		"given their base movement speed.  The \"x\"s mark the phases "
+		"in which a unit of that speed will move. "
+		"If you wish to make units of different speeds move together "
+		"(for example, to coordinate an attack), you may need to "
+		"tell the faster units to PAUSE in their movement.  See the ";
+	temp += f.Link("#move", "MOVE");
+	temp += " order for details.";
 	f.Paragraph(temp);
+
+	f.Enclose(1, "center");
+	f.Enclose(1, "table border=\"1\"");
+	f.Enclose(1, "tr");
+	f.Enclose(1, "td colspan=\"2\" rowspan=\"2\"");
+	f.Enclose(0, "td");
+	f.Enclose(1, AString("td colspan=\"") + Globals->MAX_SPEED + "\"");
+	f.PutStr("Movement Phase");
+	f.Enclose(0, "td");
+	f.Enclose(0, "tr");
+	f.Enclose(1, "tr");
+	for (i = 0; i < Globals->MAX_SPEED; i++) {
+		f.TagText("th", i + 1);
+	}
+	f.Enclose(0, "tr");
+	for (i = 0; i < Globals->MAX_SPEED; i++) {
+		f.Enclose(1, "tr");
+		if (!i) {
+			f.Enclose(1, AString("td rowspan=\"") + Globals->MAX_SPEED + "\"");
+			f.PutStr("Speed");
+			f.Enclose(0, "td");
+		}
+		f.TagText("th", i + 1);
+		k = Globals->PHASED_MOVE_OFFSET;
+		for (j = 0; j < Globals->MAX_SPEED; j++) {
+			k += i + 1;
+			if (k >= Globals->MAX_SPEED) {
+				f.TagText("td", "x");
+				k -= Globals->MAX_SPEED;
+			} else {
+				f.TagText("td", "");
+			}
+		}
+		f.Enclose(0, "tr");
+	}
+
+	f.Enclose(0, "table");
+	f.Enclose(0, "center");
+
 	f.LinkRef("skills");
 	f.ClassTagText("div", "rule", "");
 	f.TagText("h2", "Skills");
-
 	temp = "The most important thing distinguishing one character from "
 		"another in Atlantis is skills.  The following skills are "
 		"available: ";
@@ -3782,14 +3836,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"he may study will be indicated on your turn report.";
 	f.Paragraph(temp);
 	temp = "There are two major differences between Magic skills and most "
-		"normal skills. The first is that the ability to study Magic skills "
-		"sometimes depends on lower level Magic skills.  The Magic skills "
-		"that a mage may study are listed on his turn report, so he knows "
-		"which areas he may pursue.  Studying higher in the Foundation "
-		"skills, and certain other Magic skills, will make other skills "
-		"available to the mage. Also, study into a magic skill above "
-		"level 2 requires that the mage be located in some sort of "
-		"building which can ";
+		"normal skills. The first is that the ability to study Magic "
+		"skills sometimes depends on lower level Magic skills. "
+		"Magic skills cannot be learnt to a higher level than "
+		"the skills they depend upon.  For example, if a Magic skill "
+		"requires Spirit 2 to begin to study, then it can never be "
+		"studied to a level higher than the mage's Spirit skill, so "
+		"in order to increase that skill to level 3, his Spirit skill "
+		"would first have to be increased to level 3."
+		"The Magic skills that a mage may study are listed on his "
+		"turn report, so he knows which areas he may pursue. "
+		"Studying higher in the Foundation skills, and certain other "
+		"Magic skills, will make other skills available to the mage. "
+		"Secondly, study into a magic skill above level 2 requires "
+		"that the mage be located in some sort of building which can ";
 	if (!Globals->LIMITED_MAGES_PER_BUILDING) {
 		temp += "offer protection.  Trade structures do not count. ";
 	} else {
@@ -4825,26 +4885,30 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "4) IN, which will move through an inner passage in the "
 		"structure that the unit is currently in.";
 	f.Paragraph(temp);
+	temp = "5) PAUSE, which will instruct the unit to spend one movement "
+		"point admiring the scenery, presumably to coordinate with "
+		"slower moving companions.  This can be abbreviated P.";
+	f.Paragraph(temp);
 	temp = "Multiple MOVE orders given by one unit will chain together.";
 	f.Paragraph(temp);
 	temp = "Note that MOVE orders can lead to combat, due to hostile units "
 		"meeting, or due to an advancing unit being forbidden access to a "
-		"region.  In this case, combat occurs each time all movement out "
-		"of a single region occurs.";
+		"region.  Combat occurs after an antire movement phase has "
+		"been completed for all regions.";
 	f.Paragraph(temp);
 	temp = "Example 1: Units 1 and 2 are in Region A, and unit 3 is in "
-		"Region B.  Units 1 and 2 are hostile to unit 3.  Both unit 1 and "
-		"2 move into region B, and attack unit 3.  Since both units moved "
-		"out of the same region, they attack unit 3 at the same time, and "
-		"the battle is between units 1 and 2, and unit 3.";
+		"Region B.  Units 1 and 2 are hostile to unit 3.  Both units "
+		"1 and 2 move into region B, and attack unit 3.  Since combat "
+		"happens after all movement has been done for the phase, "
+		"they attack unit 3 at the same time, and the battle is "
+		"between units 1 and 2, and unit 3.";
 	f.Paragraph(temp);
 	temp = "Example 2: Same as example 1, except unit 2 is in Region C, "
-		"instead of region A.  Both units move into Region B, and attack "
-		"unit 3.  Since unit 1 and unit 2 moved out of different regions, "
-		"their battles occur at different times.  Thus, unit 1 attacks unit "
-		"3 first, and then unit 2 attacks unit 3 (assuming unit 3 survives "
-		"the first attack).  Note that the order of battles could have "
-		"happened either way.";
+		"instead of region A.  Both units move into Region B, and "
+		"attack unit 3.  Because combat happens after all movement "
+		"has been done for the phase, they still attack unit 3 at "
+		"the same time, and the battle is still between units 1 and "
+		"2, and unit 3.";
 	f.Paragraph(temp);
 	f.Paragraph("Examples:");
 	temp = "Move N, NE, enter structure 1 and use the passage there";

@@ -623,7 +623,7 @@ void Game::ModifyTablesPerRuleset(void)
 		ObjectType::NEVERDECAY |
 		ObjectType::CANMODIFY);
 	ModifyObjectMonster(O_BKEEP, -1);
-	ModifyObjectConstruction(O_BKEEP, I_ROOTSTONE, 6, NULL, 0);
+	ModifyObjectConstruction(O_BKEEP, I_ROOTSTONE, 666, NULL, 0);
 
 	ModifyTerrainItems(R_PLAIN, 0, I_HORSE, 25, 20);
 	ModifyTerrainItems(R_PLAIN, 1, -1, 0, 0);

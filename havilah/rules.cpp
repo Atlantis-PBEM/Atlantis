@@ -88,7 +88,10 @@ static GameDefs g = {
 	0,	/* TAX_BONUS_WEAPON */
 	0,	/* TAX_BONUS_ARMOR */
 	0,	/* TAX_BONUS_FORT */
-	GameDefs::TAX_NORMAL, // WHO_CAN_TAX
+	// WHO_CAN_TAX
+	GameDefs::TAX_NORMAL
+		| GameDefs::TAX_HORSE_AND_RIDING_SKILL
+		| GameDefs::TAX_MAGE_DAMAGE,
 	0,	// TAX_PILLAGE_MONTH_LONG
 
 	5,	/* HEALS_PER_MAN */

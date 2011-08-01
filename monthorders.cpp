@@ -179,6 +179,7 @@ void Game::RunMovementOrders()
 							if (d->dir < NDIRS) order += DirectionAbrs[d->dir];
 							else if (d->dir == MOVE_IN) order += "IN";
 							else if (d->dir == MOVE_OUT) order += "OUT";
+							else if (d->dir == MOVE_PAUSE) order += "P";
 							else order += d->dir - MOVE_ENTER;
 						}
 						tOrder->turnOrders.Add(new AString(order));
@@ -200,7 +201,10 @@ void Game::RunMovementOrders()
 					forlist(&so->dirs) {
 						d = (MoveDir *) elem;
 						order += " ";
-						order += DirectionAbrs[d->dir];
+						if (d->dir == MOVE_PAUSE)
+							order += "P";
+						else
+							order += DirectionAbrs[d->dir];
 					}
 					tOrder->turnOrders.Add(new AString(order));
 					u->turnorders.Insert(tOrder);
@@ -256,12 +260,19 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 		stop = 1;
 	} else {
 		x = (MoveDir *) o->dirs.First();
-		newreg = reg->neighbors[x->dir];
+		if (x->dir == MOVE_PAUSE) {
+			newreg = reg;
+		} else {
+			newreg = reg->neighbors[x->dir];
+		}
 		cost = 1;
 		if (Globals->WEATHER_EXISTS) {
 			if (newreg && newreg->weather != W_NORMAL &&
 					!newreg->clearskies)
 				cost = 2;
+		}
+		if (x->dir == MOVE_PAUSE) {
+			cost = 1;
 		}
 		// We probably shouldn't see terrain-based errors until
 		// we accumulate enough movement points to get there
@@ -270,6 +281,8 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 		if (!newreg) {
 			cap->Error("SAIL: Can't sail that way.");
 			stop = 1;
+		} else if (x->dir == MOVE_PAUSE) {
+			// Can always do maneuvers
 		} else if (fleet->flying < 1 && !newreg->IsCoastal()) {
 			cap->Error("SAIL: Can't sail inland.");
 			stop = 1;
@@ -323,8 +336,10 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
 		if (!stop) {
 			fleet->movepoints -= cost * Globals->MAX_SPEED;
-			fleet->MoveObject(newreg);
-			fleet->SetPrevDir(reg->GetRealDirComp(x->dir));
+			if (x->dir != MOVE_PAUSE) {
+				fleet->MoveObject(newreg);
+				fleet->SetPrevDir(reg->GetRealDirComp(x->dir));
+			}
 			// if (!(cap->faction->IsNPC())) newreg->visited = 1;
 			forlist(&fleet->units) {
 				unit = (Unit *) elem;
@@ -351,14 +366,22 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
 			forlist_reuse(&facs) {
 				Faction * f = ((FactionPtr *) elem)->ptr;
-				f->Event(*fleet->name +
-					AString(" sails from ") +
-					reg->ShortPrint(&regions) +
-					AString(" to ") +
-					newreg->ShortPrint(&regions) +
-					AString("."));
+				if (x->dir == MOVE_PAUSE) {
+					f->Event(*fleet->name +
+						AString(" performs maneuvers in ") +
+						reg->ShortPrint(&regions) +
+						AString("."));
+				} else {
+					f->Event(*fleet->name +
+						AString(" sails from ") +
+						reg->ShortPrint(&regions) +
+						AString(" to ") +
+						newreg->ShortPrint(&regions) +
+						AString("."));
+				}
 			}
-			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
+			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING &&
+					x->dir != MOVE_PAUSE) {
 				forlist(&fleet->units) {
 					// Everyone onboard gets to see the sights
 					unit = (Unit *) elem;
@@ -1633,6 +1656,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			goto done_moving;
 		}
 		newreg = regions.GetRegion(obj->inner);
+	} else if (x->dir == MOVE_PAUSE) {
+		newreg = region;
 	} else {
 		newreg = region->neighbors[x->dir];
 	}
@@ -1648,6 +1673,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	startmove = 0;
 	movetype = unit->MoveType(region);
 	cost = newreg->MoveCost(movetype, region, x->dir, &road);
+	if (x->dir == MOVE_PAUSE)
+		cost = 1;
 	if (region->type == R_NEXUS && newreg->IsStartingCity()) {
 		cost = 1;
 		startmove = 1;
@@ -1690,6 +1717,15 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 
 	if (unit->movepoints < cost * Globals->MAX_SPEED)
 		return 0;
+
+	if (x->dir == MOVE_PAUSE) {
+		unit->Event(AString("Pauses to admire the scenery in ") + region->ShortPrint(&regions) + ".");
+		unit->movepoints -= cost * Globals->MAX_SPEED;
+		unit->moved += cost;
+		o->dirs.Remove(x);
+		delete x;
+		return 0;
+	}
 
 	if ((TerrainDefs[newreg->type].similar_type == R_OCEAN) &&
 			(!unit->CanSwim() ||

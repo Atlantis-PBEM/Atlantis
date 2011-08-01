@@ -55,6 +55,7 @@ int Game::ParseDir(AString *token)
 	}
 	if (*token == "in") return MOVE_IN;
 	if (*token == "out") return MOVE_OUT;
+	if (*token == "pause" || *token == "p") return MOVE_PAUSE;
 	int num = token->value();
 	if (num) return MOVE_ENTER + num;
 	return -1;
@@ -2883,13 +2884,14 @@ void Game::ProcessSailOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			ParseError(pCheck, u, 0, "SAIL: Warning, bad direction.");
 			return;
 		} else {
-			if (d < NDIRS) {
+			if (d < NDIRS || d == MOVE_PAUSE) {
 				if (!pCheck) {
 					MoveDir *x = new MoveDir;
 					x->dir = d;
 					m->dirs.Add(x);
 				}
 			} else {
+				ParseError(pCheck, u, 0, "SAIL: Warning, bad direction.");
 				return;
 			}
 		}

@@ -132,6 +132,7 @@ enum {
 	M_SAIL
 };
 
+#define MOVE_PAUSE 97
 #define MOVE_IN 98
 #define MOVE_OUT 99
 /* Enter is MOVE_ENTER + num of object */
