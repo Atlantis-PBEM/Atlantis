@@ -930,7 +930,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if (Globals->TOWNS_EXIST)
 		temp += " Some regions will contain villages, towns, and cities. "
 			"More information on these is available in the section on the "
-			"ecomony.";
+			"economy.";
 	f.Paragraph(temp);
 	f.LinkRef("world_structures");
 	f.TagText("h3", "Structures:");
@@ -1084,7 +1084,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ". This is due to the transportation from the Nexus to the "
 			"starting city being magical in nature.";
 		if (!Globals->SAFE_START_CITIES)
-			temp += " Once in the starting city however, no gaurentee of "
+			temp += " Once in the starting city however, no guarantee of "
 				"safety is given.";
 		f.Paragraph(temp);
 		int num_methods = 1 + (Globals->GATES_EXIST?1:0) + (may_sail?1:0);
@@ -2036,7 +2036,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"a faction knows the skill), using the ";
 	temp += f.Link("#show", "SHOW") + " order. For example, when a faction ";
 	temp += "learned the skill Shoemaking level 3 for the first time, it "
-		"might receive the following (obviously farsical) report:";
+		"might receive the following (obviously farcical) report:";
 	f.Paragraph(temp);
 	f.Paragraph("");
 	f.Enclose(1, "pre");
@@ -2190,7 +2190,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"The ";
 	temp += f.Link("#buy", "BUY") + " order is used to recruit new people. ";
 	temp += "New recruits will not have any skills or items.  Note that the "
-		"process of recruiting a new unit is somewhat counterintuitive; it "
+		"process of recruiting a new unit is somewhat counter-intuitive; it "
 		"is necessary to ";
 	temp += f.Link("#form", "FORM")+" an empty unit, ";
 	temp += f.Link("#give", "GIVE")+" the empty unit some money, and have it ";
@@ -2437,7 +2437,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 		temp += "As the village's demand for these goods is met, the "
 			"population will increase. When the population reaches a "
-			"certain theshold, the village will turn into a town.  A "
+			"certain threshold, the village will turn into a town.  A "
 			"town will have some additional products that it demands, "
 			"in addition to what it previously wanted.  Also a town "
 			"will sell some new items as well. A town whose demands are "
@@ -3527,7 +3527,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Weapons may have one of several different attack types: "
 		"Slashing, Piercing, Crushing, Cleaving and Armor Piercing.  "
 		"Different types of armor may give different survival chances "
-		"against a sucessful attack of different types.";
+		"against a successful attack of different types.";
 	f.Paragraph(temp);
 	temp = "A soldier attacking with a ranged weapon will generally be "
 		"treated as if they have a Combat skill of 0, even if they have an "
@@ -3960,7 +3960,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ". ";
 		temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
 		temp += Globals->APPRENTICE_NAME + 1;
-		temp += "s may not cast spells, but may utilize items "
+		temp += "s may not cast spells, but may use items "
 			"which otherwise only mages can use.";
 		f.Paragraph(temp);
 	}
@@ -4246,7 +4246,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"spaces must be replaced with underscores \"_\" (e.g., Plate_Armor).";
 	f.Paragraph(temp);
 	temp = "Also remember that anything used in an example is just that, "
-		"an example and makes no gaurentee that such an item, structure, "
+		"an example and makes no guarantee that such an item, structure, "
 		"or skill actually exists within the game.";
 	f.Paragraph(temp);
 
@@ -5111,7 +5111,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Enclose(0, "table");
 	f.Paragraph("Example:");
-	temp = "Set your faction to recieve the map format order template";
+	temp = "Set your faction to receive the map format order template";
 	temp2 = "OPTION TEMPLATE MAP";
 	f.CommandExample(temp, temp2);
 
@@ -5261,7 +5261,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Show the unit and it's affiliation to all factions.";
 	temp2 = "REVEAL FACTION";
 	f.CommandExample(temp, temp2);
-	temp = "Cancels revealling.";
+	temp = "Cancels revealing.";
 	temp2 = "REVEAL";
 	f.CommandExample(temp, temp2);
 
@@ -5583,7 +5583,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.LinkRef("withdraw");
 		f.TagText("h4", "WITHDRAW [item]");
 		f.TagText("h4", "WITHDRAW [quantity] [item]");
-		temp = "Use unclaimed funds to aquire basic items that you need. "
+		temp = "Use unclaimed funds to acquire basic items that you need. "
 			"If you do not have sufficient unclaimed, or if you try "
 			"withdraw any other than a basic item, an error will be given. "
 			"Withdraw CANNOT be used in the Nexus (to prevent building "
@@ -5895,7 +5895,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Paragraph(temp);
 		f.Paragraph("Example:");
 		temp = "You are faction 999 with password \"quack\" and need another "
-			"copy of the last turn (because your harddrive crashed)";
+			"copy of the last turn (because your hard drive crashed)";
 		temp2 = "#resend 999 \"quack\"";
 		f.CommandExample(temp, temp2);
 
@@ -5906,7 +5906,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("h4", "#end");
 		temp = "Everything between the #times and #end lines is included "
 			"in your article. Your article will be marked as being "
-			"sent by your fation, so you need not include that "
+			"sent by your faction, so you need not include that "
 			"attribution in the article.";
 		if (Globals->TIMES_REWARD) {
 			temp += " You will receive $";
@@ -5965,7 +5965,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"even when you cannot see that unit's faction affiliation.  You "
 			"will not be told who the unit belongs to, but will simply "
 			"forward your email to them. When you use this command, they "
-			"will recieve YOUR email and can contact you if they choose. It "
+			"will receive YOUR email and can contact you if they choose. It "
 			"is provided simply as a courtesy to players to help with "
 			"diplomacy in first contact situations.";
 		f.Paragraph(temp);
@@ -6017,7 +6017,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"changes back into the codebase as a whole";
 	f.Paragraph(temp);
 	temp = "Please see the CREDITS file in the source distribution for a "
-		"complete (hopefully) list of all contributers.";
+		"complete (hopefully) list of all contributors.";
 	f.Paragraph(temp);
 	f.Enclose(0, "body");
 	f.Enclose(0, "html");
