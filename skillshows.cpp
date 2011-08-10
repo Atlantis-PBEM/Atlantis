@@ -344,7 +344,10 @@ AString *ShowSkill::Report(Faction *f)
 				*str += "A mage with Gate Lore skill 2 can detect Gates in "
 					"adjacent regions. The mage should use the syntax CAST "
 					"Gate_Lore DETECT in order to detect these nearby Gates. "
-					"Also, at level 2 Gate Lore, the mage may carry 100 "
+					"Also at level 2 Gate Lore, the mage may perform a "
+					"random gate jump without being restricted to the same "
+					"level; use CAST Gate_Lore RANDOM LEVEL UNITS <unit> ... "
+					"to use this option.  The mage may also now carry 100 "
 					"weight units through a Gate when doing a random jump.";
 			} else if (level == 3) {
 				*str += "A mage with Gate Lore skill 3 and higher can step "
