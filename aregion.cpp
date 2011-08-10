@@ -1619,7 +1619,11 @@ void ARegion::SetWeather(int newWeather)
 
 int ARegion::IsCoastal()
 {
-	if ((type != R_LAKE) && (TerrainDefs[type].similar_type == R_OCEAN)) return 1;
+	if (type == R_LAKE) {
+		if (Globals->LAKESIDE_IS_COASTAL)
+			return 1;
+	} else if (TerrainDefs[type].similar_type == R_OCEAN)
+		return 1;
 	int seacount = 0;
 	for (int i=0; i<NDIRS; i++) {
 		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {
@@ -1632,7 +1636,8 @@ int ARegion::IsCoastal()
 
 int ARegion::IsCoastalOrLakeside()
 {
-	if ((type != R_LAKE) && (TerrainDefs[type].similar_type == R_OCEAN)) return 1;
+	if (TerrainDefs[type].similar_type == R_OCEAN)
+		return 1;
 	int seacount = 0;
 	for (int i=0; i<NDIRS; i++) {
 		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {

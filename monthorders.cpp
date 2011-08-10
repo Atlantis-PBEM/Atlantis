@@ -283,7 +283,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			stop = 1;
 		} else if (x->dir == MOVE_PAUSE) {
 			// Can always do maneuvers
-		} else if (fleet->flying < 1 && !newreg->IsCoastal()) {
+		} else if (fleet->flying < 1 && !newreg->IsCoastalOrLakeside()) {
 			cap->Error("SAIL: Can't sail inland.");
 			stop = 1;
 		} else if ((fleet->flying < 1) &&
