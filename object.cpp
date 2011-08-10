@@ -715,7 +715,9 @@ AString *ObjectDescription(int obj)
 	ObjectType *o = &ObjectDefs[obj];
 	AString *temp = new AString;
 	*temp += AString(o->name) + ": ";
-	if (o->capacity) {
+	if (ObjectDefs[obj].flags & ObjectType::GROUP) {
+		*temp += "This is a group of ships.";
+	} else if (o->capacity) {
 		*temp += "This is a ship.";
 	} else {
 		*temp += "This is a building.";
@@ -810,7 +812,7 @@ AString *ObjectDescription(int obj)
 			(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
 			(ItemDefs[I_STONE].flags & ItemType::DISABLED))
 		buildable = 0;
-	if (!buildable) {
+	if (!buildable && !(ObjectDefs[obj].flags & ObjectType::GROUP)) {
 		*temp += " This structure cannot be built by players.";
 	}
 

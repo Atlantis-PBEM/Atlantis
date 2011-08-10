@@ -719,7 +719,10 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString *token = o->gettoken();
+	int sk, lvl, item, obj;
+	AString *token;
+	
+	token = o->gettoken();
 	if (!token) {
 		// LLS
 		ParseError(pCheck, u, 0, "SHOW: Show what?");
@@ -750,55 +753,28 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			ParseError(pCheck, u, 0, "SHOW: Show what skill?");
 			return;
 		}
-		int sk = ParseSkill(token);
+		sk = ParseSkill(token);
 		delete token;
-
-		if (sk == -1 ||
-				(SkillDefs[sk].flags & SkillType::DISABLED) ||
-				((SkillDefs[sk].flags & SkillType::APPRENTICE) &&
-				 !Globals->APPRENTICES_EXIST)) {
-			ParseError(pCheck, u, 0, "SHOW: No such skill.");
-			return;
-		}
 
 		token = o->gettoken();
 		if (!token) {
 			ParseError(pCheck, u, 0, "SHOW: No skill level given.");
 			return;
 		}
-		int lvl = token->value();
+		lvl = token->value();
 		delete token;
 
 		if (!pCheck) {
-			if (lvl > u->faction->skills.GetDays(sk)) {
+			if (sk == -1 ||
+					SkillDefs[sk].flags & SkillType::DISABLED ||
+					(SkillDefs[sk].flags & SkillType::APPRENTICE &&
+					                                 !Globals->APPRENTICES_EXIST) ||
+					lvl > u->faction->skills.GetDays(sk)) {
 				u->Error("SHOW: Faction doesn't have that skill.");
 				return;
 			}
 
 			u->faction->shows.Add(new ShowSkill(sk, lvl));
-		}
-		return;
-	}
-
-	if (*token == "item") {
-		delete token;
-		token = o->gettoken();
-
-		if (!token) {
-			ParseError(pCheck, u, 0, "SHOW: Show which item?");
-			return;
-		}
-
-		int item = ParseEnabledItem(token);
-		delete token;
-
-		if (item == -1 || (ItemDefs[item].flags & ItemType::DISABLED)) {
-			ParseError(pCheck, u, 0, "SHOW: No such item.");
-			return;
-		}
-
-		if (!pCheck) {
-			u->faction->DiscoverItem(item, 1, 0);
 		}
 		return;
 	}
@@ -812,16 +788,69 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			return;
 		}
 
-		int obj = ParseObject(token, 0);
+		obj = ParseObject(token, 1);
 		delete token;
 
-		if (obj == -1 || (ObjectDefs[obj].flags & ObjectType::DISABLED)) {
-			ParseError(pCheck, u, 0, "SHOW: No such object.");
+		if (!pCheck && obj >= -1) {
+			if (obj == -1 ||
+					obj == O_DUMMY ||
+					(ObjectDefs[obj].flags & ObjectType::DISABLED)) {
+				u->Error("SHOW: No such object.");
+				return;
+			}
+			u->faction->objectshows.Add(ObjectDescription(obj));
+		}
+		if (obj >= -1)
+			return;
+		token = new AString("item");
+		o = new AString(ItemDefs[-(obj + 1)].abr);
+	}
+
+	if (*token == "item") {
+		delete token;
+		token = o->gettoken();
+
+		if (!token) {
+			ParseError(pCheck, u, 0, "SHOW: Show which item?");
 			return;
 		}
 
+		item = ParseEnabledItem(token);
+		delete token;
+
 		if (!pCheck) {
-			u->faction->objectshows.Add(ObjectDescription(obj));
+			if (item == -1 || (ItemDefs[item].flags & ItemType::DISABLED)) {
+				u->Error("SHOW: You don't know anything about that item.");
+				return;
+			}
+			if (ItemDefs[item].pSkill) {
+				token = new AString(ItemDefs[item].pSkill);
+				sk = LookupSkill(token);
+				delete token;
+				if (ItemDefs[item].pLevel <= u->faction->skills.GetDays(sk)) {
+					u->faction->DiscoverItem(item, 1, 1);
+					return;
+				}
+			}
+			if (ItemDefs[item].mSkill) {
+				token = new AString(ItemDefs[item].mSkill);
+				sk = LookupSkill(token);
+				delete token;
+				if (ItemDefs[item].mLevel <= u->faction->skills.GetDays(sk)) {
+					u->faction->DiscoverItem(item, 1, 1);
+					return;
+				}
+			}
+			if (u->faction->items.GetNum(item)) {
+				u->faction->DiscoverItem(item, 1, 0);
+				return;
+			}
+			if (ItemDefs[item].type & (IT_MAN | IT_NORMAL | IT_TRADE | IT_MONSTER)) {
+				u->faction->DiscoverItem(item, 1, 0);
+				return;
+			}
+
+			u->Error("SHOW: You don't know anything about that item.");
 		}
 		return;
 	}

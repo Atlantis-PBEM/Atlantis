@@ -775,6 +775,7 @@ void Game::ModifyTablesPerRuleset(void)
 		ObjectDefs[O_AGALLEON].capacity,
 		ObjectDefs[O_AGALLEON].sailors,
 		1);
+	// DisableObject(O_BKEEP);
 	ModifyObjectName(O_BKEEP, "Black Tower");
 	ModifyObjectFlags(O_BKEEP, ObjectType::CANENTER |
 		ObjectType::NEVERDECAY |
