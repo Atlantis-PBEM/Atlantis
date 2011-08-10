@@ -1636,8 +1636,7 @@ int ARegion::IsCoastal()
 
 int ARegion::IsCoastalOrLakeside()
 {
-	if (TerrainDefs[type].similar_type == R_OCEAN)
-		return 1;
+	if (TerrainDefs[type].similar_type == R_OCEAN) return 1;
 	int seacount = 0;
 	for (int i=0; i<NDIRS; i++) {
 		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {
@@ -2325,6 +2324,84 @@ ARegion *ARegionList::FindGate(int x)
 	return 0;
 }
 
+ARegion *ARegionList::FindConnectedRegions(ARegion *r, ARegion *tail, int shaft)
+{
+        int i;
+        Object *o;
+        ARegion *inner;
+
+        for (i = 0; i < NDIRS; i++) {
+                if (r->neighbors[i] && r->neighbors[i]->distance == -1) {
+                        tail->next = r->neighbors[i];
+                        tail = tail->next;
+                        tail->distance = r->distance + 1;
+                }
+        }
+	if (shaft) {
+		forlist(&r->objects) {
+			o = (Object *) elem;
+			if (o->inner != -1) {
+				inner = GetRegion(o->inner);
+				if (inner && inner->distance == -1) {
+					tail->next = inner;
+					tail = tail->next;
+					tail->distance = r->distance + 1;
+				}
+			}
+		}
+	}
+
+        return tail;
+}
+
+ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
+{
+	ARegion *r, *queue, *inner;
+	int offset, i;
+        Object *o;
+
+	forlist(this) {
+		r = (ARegion *) elem;
+		r->distance = -1;
+		r->next = 0;
+	}
+
+	start->distance = 0;
+	queue = start;
+	while (start) {
+		queue = FindConnectedRegions(start, queue, 1);
+		start = start->next;
+		if (start && start->IsStartingCity()) {
+			if (dir) {
+				offset = getrandom(NDIRS);
+				for (i = 0; i < NDIRS; i++) {
+					r = start->neighbors[(i + offset) % NDIRS];
+					if (!r)
+						continue;
+					if (r->distance + 1 == start->distance) {
+						*dir = (i + offset) % NDIRS;
+						break;
+					}
+				}
+				forlist(&start->objects) {
+					o = (Object *) elem;
+					if (o->inner != -1) {
+						inner = GetRegion(o->inner);
+						if (inner->distance + 1 == start->distance) {
+							*dir = MOVE_IN;
+							break;
+						}
+					}
+				}
+			}
+			return start;
+		}
+	}
+
+	// This should never happen!
+	return 0;
+}
+
 int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two,
 		int penalty, int maxdist)
 {
@@ -2351,7 +2428,7 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two,
 	two_y = two->yloc * GetLevelYScale(two->zloc);
 
 	if (Globals->ICOSAHEDRAL_WORLD) {
-		int zdist, i;
+		int zdist;
 		ARegion *start, *target, *queue;
 
 		start = pArr->GetRegion(one_x, one_y);
@@ -2397,13 +2474,7 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two,
 				return start->distance;
 			}
 			// add neighbours to the search list
-			for (i = 0; i < NDIRS; i++)
-				if (start->neighbors[i] &&
-					start->neighbors[i]->distance == -1) {
-					queue->next = start->neighbors[i];
-					queue = queue->next;
-					queue->distance = start->distance + 1;
-				}
+			queue = FindConnectedRegions(start, queue, 0);
 			start = start->next;
 			if (start == 0)
 			{

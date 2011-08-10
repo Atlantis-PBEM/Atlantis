@@ -1146,38 +1146,10 @@ void ARegionList::InitSetupGates(int level)
 	}
 }
 
-ARegion *ARegionList::FindConnectedRegions(ARegion *r, ARegion *tail)
-{
-	int i;
-	Object *o;
-	ARegion *inner;
-
-	for (i = 0; i < NDIRS; i++) {
-		if (r->neighbors[i] && r->neighbors[i]->distance == -1) {
-			tail->next = r->neighbors[i];
-			tail = tail->next;
-			tail->distance = r->distance + 1;
-		}
-	}
-	forlist(&r->objects) {
-		o = (Object *) elem;
-		if (o->inner != -1) {
-			inner = GetRegion(o->inner);
-			if (inner && inner->distance == -1) {
-				tail->next = inner;
-				tail = tail->next;
-				tail->distance = r->distance + 1;
-			}
-		}
-	}
-
-	return tail;
-}
-
 void ARegionList::FixUnconnectedRegions()
 {
 	ARegion *r, *head, *tail, *neighbors[NDIRS], *n;
-	int i, j, count, offset, x, y, xscale, yscale;
+	int attempts, max, i, j, count, offset, x, y, xscale, yscale;
 	Object *o;
 
 	forlist(this) {
@@ -1201,16 +1173,20 @@ void ARegionList::FixUnconnectedRegions()
 		}
 	}
 	while (head) {
-		tail = FindConnectedRegions(head, tail);
+		tail = FindConnectedRegions(head, tail, 1);
 		head = head->next;
 	}
+	attempts = 0;
 	do {
+		max = 0;
 		count = 0;
 		forlist(this) {
 			r = (ARegion *) elem;
 			if (r->distance == -1) {
 				count++;
 			}
+			if (r->distance > max)
+				max = r->distance;
 		}
 		if (count > 0) {
 			i = getrandom(count);
@@ -1295,7 +1271,8 @@ void ARegionList::FixUnconnectedRegions()
 				if (!n) {
 					// None of that worked
 					// can we put in a gate?
-					if (Globals->GATES_EXIST) {
+					if (Globals->GATES_EXIST &&
+							!getrandom(10)) {
 						r->gate = -1;
 						r->distance = 0;
 						n = r;
@@ -1307,12 +1284,19 @@ void ARegionList::FixUnconnectedRegions()
 				head->next = 0;
 				tail = head;
 				while (head) {
-					tail = FindConnectedRegions(head, tail);
+					tail = FindConnectedRegions(head, tail, 1);
 					head = head->next;
 				}
+				attempts = 0;
 			}
 		}
-	} while (count > 0);
+		attempts++;
+	} while (count > 0 && attempts < 1000);
+
+	if (count > 0) {
+		printf("Unable to link up %d hexes!\n", count);
+	}
+	printf("Maximum distance from the Nexus: %d.\n", max);
 }
 
 void ARegionList::FinalSetupGates()

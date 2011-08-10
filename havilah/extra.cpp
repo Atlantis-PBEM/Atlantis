@@ -28,6 +28,7 @@
 #include "game.h"
 #include "gamedata.h"
 #include "quests.h"
+#include <string>
 
 int Game::SetupFaction( Faction *pFac )
 {
@@ -100,12 +101,14 @@ int Game::SetupFaction( Faction *pFac )
 
 Faction *Game::CheckVictory()
 {
-	int visited, unvisited, d, moncount, reliccount;
+	int visited, unvisited, surfacevisited, surfaceunvisited;
+	int d, count, moncount, reliccount;
 	int units, leaders, men, silver, stuff;
 	int skilldays, magicdays, skilllevels, magiclevels;
+	int dir;
 	Quest *q, *q2;
 	Item *item;
-	ARegion *r;
+	ARegion *r, *start;
 	Object *o;
 	Unit *u;
 	Faction *f;
@@ -113,17 +116,29 @@ Faction *Game::CheckVictory()
 	Location *l;
 	AString message, filename;
 	Arules wf;
+	map <string, int> vRegions, uvRegions;
+	map <string, int>::iterator it;
+	string stlstr;
 
 	visited = 0;
 	unvisited = 0;
+	surfacevisited = 0;
+	surfaceunvisited = 0;
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
-		if (TerrainDefs[r->type].similar_type != R_OCEAN &&
-				r->Population() > 0) {
-			if (r->visited)
+		if (r->Population() > 0) {
+			stlstr = r->name->Str();
+			if (r->visited) {
 				visited++;
-			else
+				if (r->zloc == ARegionArray::LEVEL_SURFACE)
+					surfacevisited++;
+				vRegions[stlstr]++;
+			} else {
 				unvisited++;
+				if (r->zloc == ARegionArray::LEVEL_SURFACE)
+					surfaceunvisited++;
+				uvRegions[stlstr]++;
+			}
 		}
 	}
 
@@ -194,29 +209,171 @@ Faction *Game::CheckVictory()
 		}
 	} else {
 		// Tell the players to get exploring :-)
-		d = getrandom(6);
-		if (d == 0) {
+		if (visited > 9 * unvisited) {
+			// 90% explored; specific hints
+			d = getrandom(12);
+		} else if (visited > 3 * unvisited) {
+			// 75% explored; some general hints
+			d = getrandom(8);
+		} else {
+			// lots of unexplored area; just tell them to explore
+			d = getrandom(6);
+		}
+		if (d == 2) {
 			message = "Be productive and multiply; "
 				"fill the land and subdue it.";
 			WriteTimesArticle(message);
-		} else if (d == 1) {
+		} else if (d == 3) {
 			message = "Go into all the world, and tell all "
 				"people of your fall from grace.";
 			WriteTimesArticle(message);
-		} else if (d < 4) {
+		} else if (d == 4 || d == 5) {
 			message = "Players have visited ";
 			message += (visited * 100 / (visited + unvisited));
 			message += "% of all inhabited regions.";
 			WriteTimesArticle(message);
-		} else if (d == 4) {
-			// Give some pointer as to where still needs exploring
+		} else if (d == 6) {
+			// report an incompletely explored region
+			count = 0;
+			// see how many incompletely unexplored regions we have
+			for (it = vRegions.begin(); it != vRegions.end(); it++) {
+				if (uvRegions[it->first] > 0)
+					count++;
+			}
+			if (count > 0) {
+				// choose one, and find it
+				count = getrandom(count);
+				for (it = vRegions.begin(); it != vRegions.end(); it++) {
+					if (uvRegions[it->first] > 0)
+						if (!count--)
+							break;
+				}
+				// pick a hex within that region, and find it
+				count = getrandom(it->second);
+				forlist(&regions) {
+					r = (ARegion *) elem;
+					if (it->first == r->name->Str()) {
+						if (!count--) {
+							// report this hex
+							message = "The ";
+							message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
+							message += " of ";
+							message += *(r->name);
+							if (TerrainDefs[r->type].similar_type == R_TUNNELS)
+								message += " are";
+							else
+								message += " is";
+							message += " only partly explored.";
+							WriteTimesArticle(message);
+						}
+					}
+				}
+			}
+		} else if (d == 7) {
+			// report a completely unknown region
+			count = 0;
+			// see how many completely unexplored regions we have
+			for (it = uvRegions.begin(); it != uvRegions.end(); it++) {
+				if (vRegions[it->first] == 0)
+					count++;
+			}
+			if (count > 0) {
+				// choose one, and find it
+				count = getrandom(count);
+				for (it = uvRegions.begin(); it != uvRegions.end(); it++) {
+					if (vRegions[it->first] == 0) {
+						if (!count--)
+							break;
+					}
+				}
+				// pick a hex within that region, and find it
+				count = getrandom(it->second);
+				forlist(&regions) {
+					r = (ARegion *) elem;
+					if (it->first == r->name->Str()) {
+						if (!count--) {
+							// report this hex
+							dir = -1;
+							start = regions.FindNearestStartingCity(r, &dir);
+							message = "The ";
+							message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
+							message += " of ";
+							message += *(r->name);
+							if (start == r) {
+								message += ", containing ";
+								message += *start->town->name;
+								message += ",";
+							} else if (start && dir != -1) {
+								message += ", ";
+								if (r->zloc != start->zloc && dir != MOVE_IN)
+									message += "through a shaft ";
+								switch (dir) {
+									case D_NORTH:
+									case D_NORTHWEST:
+										message += "north of";
+										break;
+									case D_NORTHEAST:
+										message += "east of";
+										break;
+									case D_SOUTH:
+									case D_SOUTHEAST:
+										message += "south of";
+										break;
+									case D_SOUTHWEST:
+										message += "west of";
+										break;
+									case MOVE_IN:
+										message += "through a shaft in";
+										break;
+								}
+								message += " ";
+								message += *start->town->name;
+								message += ",";
+							}
+							if (TerrainDefs[r->type].similar_type == R_TUNNELS)
+								message += " have";
+							else
+								message += " has";
+							message += " yet to be visited by exiles from the Eternal City.";
+							WriteTimesArticle(message);
+						}
+					}
+				}
+			}
+		} else if (d > 7) {
+			// report exact coords of an unexplored hex
+			count = getrandom(unvisited);
+			forlist(&regions) {
+				ARegion *r = (ARegion *)elem;
+				if (r->Population() > 0) {
+					if (!count--) {
+						message = "The people of the ";
+						message += r->ShortPrint(&regions);
+						switch (getrandom(4)) {
+							case 0:
+								message += " have not been visited by exiles.";
+								break;
+							case 1:
+								message += " have not yet heard the news of your rebellion.";
+								break;
+							case 2:
+								message += " have not yet been graced by your presence.";
+								break;
+							case 3:
+								message += " are still in need of your guidance.";
+								break;
+						}
+						WriteTimesArticle(message);
+					}
+				}
+			}
 		}
 	}
 
 	// See if anyone has won by collecting enough relics of grace
 	forlist_reuse(&factions) {
 		f = (Faction *) elem;
-		// No accidentally sending all the Guardmen
+		// No accidentally sending all the Guardsmen
 		// or Creatures to the Eternal City!
 		if (f->IsNPC())
 			continue;
@@ -628,7 +785,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainItems(R_PLAIN, 0, I_HORSE, 25, 20);
 	ModifyTerrainItems(R_PLAIN, 1, -1, 0, 0);
 	ModifyTerrainItems(R_TUNDRA, 2, I_WHORSE, 25, 5);
-	ModifyTerrainItems(R_DESERT, 3, I_HORSE, 75, 20);
+	ModifyTerrainItems(R_DESERT, 3, I_HORSE, 25, 10);
 	ModifyTerrainItems(R_JUNGLE, 3, I_IRONWOOD, 20, 5);
 	ModifyTerrainItems(R_UFOREST, 4, I_IRONWOOD, 20, 5);
 	ModifyTerrainItems(R_MOUNTAIN, 4, I_WOOD, 10, 5);

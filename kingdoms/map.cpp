@@ -1580,11 +1580,6 @@ void ARegionList::InitSetupGates(int level)
 	}
 }
 
-ARegion *FindConnectedRegions(ARegion *r, ARegion *tail)
-{
-	return tail;
-}
-
 void ARegionList::FixUnconnectedRegions()
 {
 }
