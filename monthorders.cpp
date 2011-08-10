@@ -340,7 +340,6 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 				fleet->MoveObject(newreg);
 				fleet->SetPrevDir(reg->GetRealDirComp(x->dir));
 			}
-			// if (!(cap->faction->IsNPC())) newreg->visited = 1;
 			forlist(&fleet->units) {
 				unit = (Unit *) elem;
 				unit->moved += cost;
@@ -382,6 +381,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			}
 			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING &&
 					x->dir != MOVE_PAUSE) {
+				if (!(cap->faction->IsNPC())) newreg->visited = 1;
 				forlist(&fleet->units) {
 					// Everyone onboard gets to see the sights
 					unit = (Unit *) elem;
@@ -1771,7 +1771,6 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	unit->moved += cost;
 	unit->MoveUnit(newreg->GetDummy());
 	unit->DiscardUnfinishedShips();
-	// if (!(unit->faction->IsNPC())) newreg->visited = 1;
 
 	switch (movetype) {
 		case M_WALK:
@@ -1801,6 +1800,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 
 	// TODO: Should we get a transit report on the starting region?
 	if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
+		if (!(unit->faction->IsNPC())) newreg->visited = 1;
 		// Update our visit record in the region we are leaving.
 		Farsight *f;
 		forlist(&region->passers) {
