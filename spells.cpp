@@ -502,7 +502,7 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		delete token;
 		token = o->gettoken();
 
-		if (!token) {
+		if (!token || token->value() < 1) {
 			u->Error("CAST: Requires a target gate.");
 			return;
 		}
@@ -561,6 +561,13 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 
 		token = o->gettoken();
 
+		if (!token) return;
+		if (*token == "level") {
+			order->gate = -2;
+			order->level = 2;
+			delete token;
+			token = o->gettoken();
+		}
 		if (!token) return;
 		if (!(*token == "units")) {
 			delete token;
@@ -1552,7 +1559,8 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 	TeleportOrder *order = u->teleportorders;
 
-	if (order->gate != -1 && level < 3) {
+	if ((order->gate > 0 && level < 3) ||
+			(order->gate == -2 && level < 2)) {
 		u->Error("CAST: Unit Doesn't know Gate Lore at that level.");
 		return 0;
 	}
@@ -1598,28 +1606,28 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	}
 
 	ARegion *tar;
-	if (order->gate == -1) {
+	if (order->gate < 0) {
 		int good = 0;
-		tar = regions.FindGate(-1);
 
-		if (tar && tar->zloc == r->zloc) good = 1;
-		if (tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
-			good = 1;
-
-		while( !good ) {
+		do {
 			tar = regions.FindGate(-1);
-			if (tar && tar->zloc == r->zloc) good = 1;
-			if (tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
+			if (!tar)
+				continue;
+
+			if (tar->zloc == r->zloc)
 				good = 1;
-		}
+			if (order->gate == -2) {
+				good = 1;
+printf("Gate jump allowed across levels\n");
+			}
+			if (nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
+				good = 1;
+			if (!tar->gateopen)
+				good = 0;
+		} while (!good);
 
 		u->Event("Casts Random Gate Jump.");
 	} else {
-		if (order->gate < 1 || (!Globals->DISPERSE_GATE_NUMBERS && order->gate > regions.numberofgates)) {
-			u->Error("CAST: No such target gate.");
-			return 0;
-		}
-
 		tar = regions.FindGate(order->gate);
 		if (!tar) {
 			u->Error("CAST: No such target gate.");
