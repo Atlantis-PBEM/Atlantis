@@ -1267,6 +1267,7 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
 	max = max * max;
 
 	int num = 0;
+	r->DeduplicateUnitList(&order->units, u->faction->num);
 	forlist (&(order->units)) {
 		Unit *tar = r->GetUnitId((UnitId *) elem,u->faction->num);
 		if (!tar) continue;
@@ -1283,15 +1284,13 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
 		u->Error("CAST: No valid targets to turn invisible.");
 		return 0;
 	}
-	{
-		forlist (&(order->units)) {
-			Unit *tar = r->GetUnitId((UnitId *) elem,u->faction->num);
-			if (!tar) continue;
-			if (tar->GetAttitude(r,u) < A_FRIENDLY) continue;
-			tar->SetFlag(FLAG_INVIS,1);
-			tar->Event(AString("Is rendered invisible by ") +
-					*(u->name) + ".");
-		}
+	forlist_reuse (&(order->units)) {
+		Unit *tar = r->GetUnitId((UnitId *) elem,u->faction->num);
+		if (!tar) continue;
+		if (tar->GetAttitude(r,u) < A_FRIENDLY) continue;
+		tar->SetFlag(FLAG_INVIS,1);
+		tar->Event(AString("Is rendered invisible by ") +
+				*(u->name) + ".");
 	}
 
 	u->Event("Casts invisibility.");
@@ -1595,6 +1594,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 	int weight = u->Weight();
 
+	r->DeduplicateUnitList(&order->units, u->faction->num);
 	forlist (&(order->units)) {
 		Unit *taru = r->GetUnitId((UnitId *) elem,u->faction->num);
 		if (taru && taru != u) weight += taru->Weight();
@@ -1700,6 +1700,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	}
 
 	int maxweight = 50 * level;
+	r->DeduplicateUnitList(&order->units, u->faction->num);
 	int weight = 0;
 	forlist (&(order->units)) {
 		Unit *taru = r->GetUnitId((UnitId *) elem,u->faction->num);

@@ -472,6 +472,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 
 	int students = 0;
 	TeachOrder * order = (TeachOrder *) unit->monthorders;
+	reg->DeduplicateUnitList(&order->targets, unit->faction->num);
 	forlist(&order->targets) {
 		UnitId * id = (UnitId *) elem;
 		Unit * target = reg->GetUnitId(id,unit->faction->num);

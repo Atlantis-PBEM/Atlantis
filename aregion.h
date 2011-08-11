@@ -196,6 +196,7 @@ class ARegion : public AListElem
 		Unit *GetUnit(int);
 		Unit *GetUnitAlias(int, int); /* alias, faction number */
 		Unit *GetUnitId(UnitId *, int);
+		void DeduplicateUnitList(AList *, int);
 		Location *GetLocation(UnitId *, int);
 
 		void SetLoc(int, int, int);
@@ -274,7 +275,7 @@ class ARegion : public AListElem
 		int TerrainProbability(int);
 		void AddFleet(Object *);
 		int ResolveFleetAlias(int);
-		
+
 		int CountWMons();
 		int IsGuarded();
 

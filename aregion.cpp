@@ -899,6 +899,30 @@ Unit *ARegion::GetUnitId(UnitId *id, int faction)
 	return retval;
 }
 
+void ARegion::DeduplicateUnitList(AList *list, int faction)
+{
+	int i, j;
+	UnitId *id;
+	Unit *outer, *inner;
+
+	i = 0;
+	forlist(list) {
+		id = (UnitId *) elem;
+		outer = GetUnitId(id, faction);
+		j = 0;
+		forlist(list) {
+			id = (UnitId *) elem;
+			inner = GetUnitId(id, faction);
+			if (inner->num == outer->num && j > i) {
+				list->Remove(id);
+				delete id;
+			}
+			j++;
+		}
+		i++;
+	}
+}
+
 Location *ARegionList::GetUnitId(UnitId *id, int faction, ARegion *cur)
 {
 	Location *retval = NULL;

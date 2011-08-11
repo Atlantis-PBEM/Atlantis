@@ -933,6 +933,7 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 {
 	EvictOrder *ord = u->evictorders;
 
+	obj->region->DeduplicateUnitList(&ord->targets, u->faction->num);
 	while (ord && ord->targets.Num()) {
 		UnitId *id = (UnitId *)ord->targets.First();
 		ord->targets.Remove(id);
@@ -1309,6 +1310,7 @@ void Game::DoAttackOrders()
 				} else {
 					if (u->attackorders && u->IsAlive()) {
 						AttackOrder *ord = u->attackorders;
+						r->DeduplicateUnitList(&ord->targets, u->faction->num);
 						while (ord->targets.Num()) {
 							UnitId *id = (UnitId *) ord->targets.First();
 							ord->targets.Remove(id);
