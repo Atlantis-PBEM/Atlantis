@@ -909,10 +909,14 @@ void ARegion::DeduplicateUnitList(AList *list, int faction)
 	forlist(list) {
 		id = (UnitId *) elem;
 		outer = GetUnitId(id, faction);
+		if (!outer)
+			continue;
 		j = 0;
 		forlist(list) {
 			id = (UnitId *) elem;
 			inner = GetUnitId(id, faction);
+			if (!inner)
+				continue;
 			if (inner->num == outer->num && j > i) {
 				list->Remove(id);
 				delete id;
