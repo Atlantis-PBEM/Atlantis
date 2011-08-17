@@ -1119,9 +1119,10 @@ AString *ItemDescription(int item, int full)
 				"spirit skills, up to a maximum of level 3.";
 			break;
 		case I_RELICOFGRACE:
-			*temp += "  These items are given in recognition of having completed "
-				"holy quests.  Collect enough of these artifacts and you may "
-				"be able to return to the Eternal City.";
+			*temp += "  This token was given to you by the Maker in recognition "
+				"of you turning away from your rebellion.  Complete more "
+				"quests as they are offered if you wish to continue to work "
+				"toward restoring your relationship.";
 			break;
 		default:
 			break;
