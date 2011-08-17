@@ -123,7 +123,8 @@ void Game::EditGameRegion(ARegion *pReg)
 //copied direct from AtlantisDev 030730 post
 { 
 	do {
-		Awrite( AString( "Region: " ) + pReg->Print( &regions ) ); 
+		Awrite( AString("Region ") + pReg->num + ": " +
+			pReg->Print( &regions ) ); 
 		Awrite( " 1) Edit objects..." ); 
 		Awrite( " 2) Edit terrain..." );
 		Awrite( " q) Return to previous menu." ); 
