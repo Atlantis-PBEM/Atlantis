@@ -63,6 +63,10 @@ int QuestList::ReadQuests(Ainfile *f)
 			case Quest::SLAY:
 				quest->target = f->GetInt();
 				break;
+			case Quest::HARVEST:
+				quest->objective.Readin(f);
+				quest->regionnum = f->GetInt();
+				break;
 			default:
 				quest->target = f->GetInt();
 				quest->objective.Readin(f);
@@ -102,6 +106,10 @@ void QuestList::WriteQuests(Aoutfile *f)
 			case Quest::SLAY:
 				f->PutInt(q->target);
 				break;
+			case Quest::HARVEST:
+				q->objective.Writeout(f);
+				f->PutInt(q->regionnum);
+				break;
 			default:
 				f->PutInt(q->target);
 				q->objective.Writeout(f);
@@ -125,7 +133,7 @@ void QuestList::WriteQuests(Aoutfile *f)
         return;
 }
 
-void QuestList::CheckQuestKillTarget(Unit * u, ItemList *reward)
+int QuestList::CheckQuestKillTarget(Unit * u, ItemList *reward)
 {
 	Quest *q;
 	Item *i;
@@ -140,7 +148,37 @@ void QuestList::CheckQuestKillTarget(Unit * u, ItemList *reward)
 			}
 			quests.Remove(q);
 			delete q;
+			return 1;
 		}
 	}
+
+	return 0;
+}
+
+int QuestList::CheckQuestHarvestTarget(ARegion *r,
+		int item, int harvested, int max,
+		ItemList *reward)
+{
+	Quest *q;
+	Item *i;
+
+	forlist(this) {
+		q = (Quest *) elem;
+		if (q->type == Quest::HARVEST &&
+				q->regionnum == r->num &&
+				q->objective.type == item) {
+			if (getrandom(max) < harvested) {
+				forlist (&q->rewards) {
+					i = (Item *) elem;
+					reward->SetNum(i->type, reward->GetNum(i->type) + i->num);
+				}
+				quests.Remove(q);
+				delete q;
+				return 1;
+			}
+		}
+	}
+
+	return 0;
 }
 

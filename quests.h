@@ -43,7 +43,8 @@ class Quest : public AListElem
 			HARVEST,
 			BUILD,
 			VISIT,
-			DELIVER
+			DELIVER,
+			DEMOLISH
 		};
 		int	type;
 		int	target;
@@ -60,7 +61,10 @@ class QuestList : public AList
 		int ReadQuests(Ainfile *f);
 		void WriteQuests(Aoutfile *f);
 
-		void CheckQuestKillTarget(Unit *u, ItemList *reward);
+		int CheckQuestKillTarget(Unit *u, ItemList *reward);
+		int CheckQuestHarvestTarget(ARegion *r,
+				int item, int harvested, int max,
+				ItemList *reward);
 };
 
 extern QuestList quests;

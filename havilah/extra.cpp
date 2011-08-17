@@ -30,6 +30,12 @@
 #include "quests.h"
 #include <string>
 
+#define RELICS_REQUIRED_FOR_VICTORY	7
+#define MINIMUM_ACTIVE_QUESTS		2
+#define MAXIMUM_ACTIVE_QUESTS		5
+#define QUEST_SPAWN_RATE		2
+#define QUEST_SPAWN_CHANCE		60
+
 int Game::SetupFaction( Faction *pFac )
 {
 	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 50;
@@ -99,14 +105,131 @@ int Game::SetupFaction( Faction *pFac )
 	return( 1 );
 }
 
+static void CreateQuest(ARegionList *regions, int monfaction)
+{
+	Quest *q, *q2;
+	Item *item;
+	int d, count;
+	ARegion *r;
+	Object *o;
+	Unit *u;
+	Production *p;
+	AString rname;
+
+	q = new Quest;
+	q->type = -1;
+	item = new Item;
+	item->type = I_RELICOFGRACE;
+	item->num = 1;
+	q->rewards.Add(item);
+	d = getrandom(100);
+	if (d < 60) {
+		// SLAY quest
+		q->type = Quest::SLAY;
+		count = 0;
+		// Count our current monsters
+		forlist(regions) {
+			r = (ARegion *) elem;
+			if (TerrainDefs[r->type].similar_type == R_OCEAN)
+				continue;
+			forlist(&r->objects) {
+				o = (Object *) elem;
+				forlist(&o->units) {
+					u = (Unit *) elem;
+					if (u->faction->num == monfaction) {
+						count++;
+					}
+				}
+			}
+		}
+		if (!count)
+			return;
+		// pick one as the object of the quest
+		d = getrandom(count);
+		forlist_reuse(regions) {
+			r = (ARegion *) elem;
+			if (TerrainDefs[r->type].similar_type == R_OCEAN)
+				continue;
+			forlist(&r->objects) {
+				o = (Object *) elem;
+				forlist(&o->units) {
+					u = (Unit *) elem;
+					if (u->faction->num == monfaction) {
+						if (!d--) {
+							q->target = u->num;
+							
+						}
+					}
+				}
+			}
+		}
+		forlist_reuse(&quests) {
+			q2 = (Quest *) elem;
+			if (q2->type == Quest::SLAY &&
+					q2->target == q->target) {
+				// Don't hunt the same monster twice
+				q->type = -1;
+				break;
+			}
+		}
+	} else if (d < 100) {
+		// Create a HARVEST quest
+		count = 0;
+		forlist(regions) {
+			r = (ARegion *) elem;
+			// Do allow lakes though
+			if (r->type == R_OCEAN)
+				continue;
+			forlist(&r->products) {
+				p = (Production *) elem;
+				if (p->itemtype != I_SILVER)
+					count++;
+			}
+		}
+		count = getrandom(count);
+		forlist_reuse(regions) {
+			r = (ARegion *) elem;
+			// Do allow lakes though
+			if (r->type == R_OCEAN)
+				continue;
+			forlist(&r->products) {
+				p = (Production *) elem;
+				if (p->itemtype != I_SILVER) {
+					if (!count--) {
+						q->type = Quest::HARVEST;
+						q->regionnum = r->num;
+						q->objective.type = p->itemtype;
+						q->objective.num = 1;
+					}
+				}
+			}
+		}
+		r = regions->GetRegion(q->regionnum);
+		rname = *r->name;
+		forlist_reuse(&quests) {
+			q2 = (Quest *) elem;
+			if (q2->type == Quest::HARVEST) {
+				r = regions->GetRegion(q2->regionnum);
+				if (rname == *r->name) {
+					// Don't have 2 harvest quests
+					// active in the same region
+					q->type = -1;
+				}
+			}
+		}
+	}
+	if (q->type != -1)
+		quests.Add(q);
+}
+
 Faction *Game::CheckVictory()
 {
 	int visited, unvisited, surfacevisited, surfaceunvisited;
-	int d, count, moncount, reliccount;
+	int d, i, count, reliccount;
 	int units, leaders, men, silver, stuff;
 	int skilldays, magicdays, skilllevels, magiclevels;
 	int dir;
-	Quest *q, *q2;
+	Quest *q;
 	Item *item;
 	ARegion *r, *start;
 	Object *o;
@@ -146,66 +269,13 @@ Faction *Game::CheckVictory()
 
 	if (!unvisited) {
 		// Exploration phase complete: start creating relic quests
-		while (quests.Num() < 5) {
-			q = new Quest;
-			q->type = -1;
-			item = new Item;
-			item->type = I_RELICOFGRACE;
-			item->num = 1;
-			q->rewards.Add(item);
-			d = getrandom(100);
-			if (d < 100) {
-				// SLAY quest
-				q->type = Quest::SLAY;
-				moncount = 0;
-				// Count our current monsters
-				forlist(&regions) {
-					r = (ARegion *) elem;
-					if (TerrainDefs[r->type].similar_type == R_OCEAN)
-						continue;
-					forlist(&r->objects) {
-						o = (Object *) elem;
-						forlist(&o->units) {
-							u = (Unit *) elem;
-							if (u->faction->num == monfaction) {
-								moncount++;
-							}
-						}
-					}
-				}
-				if (!moncount)
-					continue;
-				// pick one as the object of the quest
-				d = getrandom(moncount);
-				forlist_reuse(&regions) {
-					r = (ARegion *) elem;
-					if (TerrainDefs[r->type].similar_type == R_OCEAN)
-						continue;
-					forlist(&r->objects) {
-						o = (Object *) elem;
-						forlist(&o->units) {
-							u = (Unit *) elem;
-							if (u->faction->num == monfaction) {
-								if (!d--) {
-									q->target = u->num;
-									
-								}
-							}
-						}
-					}
-				}
-				forlist_reuse(&quests) {
-					q2 = (Quest *) elem;
-					if (q2->type == Quest::SLAY &&
-							q2->target == q->target) {
-						// Don't hunt the same monster twice
-						q->type = -1;
-						break;
-					}
-				}
-			}
-			if (q->type != -1)
-				quests.Add(q);
+		for (i = 0; i < QUEST_SPAWN_RATE; i++) {
+			if (quests.Num() < MAXIMUM_ACTIVE_QUESTS &&
+					getrandom(100) < QUEST_SPAWN_CHANCE)
+				CreateQuest(&regions, monfaction);
+		}
+		while (quests.Num() < MINIMUM_ACTIVE_QUESTS) {
+			CreateQuest(&regions, monfaction);
 		}
 	} else {
 		// Tell the players to get exploring :-)
@@ -390,7 +460,7 @@ Faction *Game::CheckVictory()
 				}
 			}
 		}
-		if (reliccount > 6) {
+		if (reliccount >= RELICS_REQUIRED_FOR_VICTORY) {
 			// This faction has earned the right to go home
 			units = 0;
 			leaders = 0;
@@ -507,12 +577,12 @@ Faction *Game::CheckVictory()
 				if (skilllevels > 0 && magiclevels > 0)
 					message += ", and ";
 				if (magiclevels > 0) {
-					message += (int) (magiclevels / 30);
+					message += magiclevels;
 					message += " level";
 					if (magiclevels != 1)
 						message += "s";
 					message += " in magic skills, worth ";
-					message += magicdays;
+					message += (int) (magicdays / 30);
 					message += " silver in tuition costs";
 				}
 				message += ".";
@@ -598,6 +668,15 @@ Faction *Game::CheckVictory()
 					delete l;
 				}
 
+				break;
+			case Quest::HARVEST:
+				r = regions.GetRegion(q->regionnum);
+				message = "Seek a token of the Maker's bounty amongst the ";
+				message += ItemDefs[q->objective.type].names;
+				message += " of ";
+				message += *r->name;
+				message += ".";
+				WriteTimesArticle(message);
 				break;
 			default:
 				break;

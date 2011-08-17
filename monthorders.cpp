@@ -33,6 +33,7 @@
 
 #include "game.h"
 #include "gamedata.h"
+#include "quests.h"
 
 void Game::RunMovementOrders()
 {
@@ -1275,6 +1276,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 				double dUbucks = ((double) amt) * ((double) uatt)
 					/ ((double) attempted);
 				ubucks = (int) dUbucks;
+				quests.CheckQuestHarvestTarget(r, po->item, ubucks, amt, &u->items);
 			}
 			else
 			{
