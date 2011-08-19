@@ -25,6 +25,7 @@
 
 #include "game.h"
 #include "gamedata.h"
+#include "quests.h"
 
 void Game::RunOrders()
 {
@@ -594,6 +595,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 			u->destroy = 0;
 			u->MoveUnit(dest);
 		}
+		quests.CheckQuestDemolishTarget(r, o->num, u);
 		r->objects.Remove(o);
 		delete o;
 	} else {

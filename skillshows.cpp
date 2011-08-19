@@ -1242,21 +1242,25 @@ AString *ShowSkill::Report(Faction *f)
 				}
 			}
 			break;
-		case S_SACRIFICE:
+		case S_BLASPHEMOUS_RITUAL:
 			if (level > 1) break;
 			if (OBJECT_DISABLED(O_BKEEP)) break;
-			*str += "A mage with the Sacrifice skill may perform "
-				"a blasphemous ritual to sever the world of ";
+			*str += "A mage with the Blasphemous Ritual skill may "
+				"perform a blasphemous ritual to sever the "
+				"world of ";
 			*str += Globals->WORLD_NAME;
 			*str += " from the Eternal City. ";
 			*str += "This ritual requires ";
 			*str += ItemString(I_ROOTSTONE, 1);
 			*str += " and the sacrifice of a randomly selected "
-				"leader belonging to the mage's faction. ";
-			*str += "Many such sacrifices may be necessary to "
-				"complete the ritual; the caster will attempt "
-				"to perform as many sacrifices as their skill "
-				"level in Sacrifice.";
+				"leader belonging to the mage's faction.";
+			if (ObjectDefs[O_BKEEP].cost > 1) {
+				*str += " Many such sacrifices will be "
+					"necessary to complete the ritual; "
+					"the caster will attempt to perform "
+					"as many sacrifices as their skill "
+					"level in Blasphemous Ritual.";
+			}
 			break;
 		case S_MANIPULATE:
 			if (!Globals->APPRENTICES_EXIST) break;

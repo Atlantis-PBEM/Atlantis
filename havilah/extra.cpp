@@ -228,7 +228,7 @@ Faction *Game::CheckVictory()
 	int d, i, count, reliccount;
 	int units, leaders, men, silver, stuff;
 	int skilldays, magicdays, skilllevels, magiclevels;
-	int dir;
+	int dir, found;
 	Quest *q;
 	Item *item;
 	ARegion *r, *start;
@@ -637,6 +637,30 @@ Faction *Game::CheckVictory()
 					// _win_ condition, did you?
 					return GetFaction(&factions, monfaction);
 				}
+				if (o->incomplete <= ObjectDefs[o->type].cost / 2) {
+					// Half done; make a quest to destroy it
+					found = 0;
+					forlist(&quests) {
+						q = (Quest *) elem;
+						if (q->type == Quest::DEMOLISH &&
+								q->target == o->num &&
+								q->regionnum == r->num) {
+							found = 1;
+							break;
+						}
+					}
+					if (!found) {
+						q = new Quest;
+						q->type = Quest::DEMOLISH;
+						item = new Item;
+						item->type = I_RELICOFGRACE;
+						item->num = 1;
+						q->rewards.Add(item);
+						q->target = o->num;
+						q->regionnum = r->num;
+						quests.Add(q);
+					}
+				}
 			}
 		}
 	}
@@ -677,6 +701,28 @@ Faction *Game::CheckVictory()
 				message += *r->name;
 				message += ".";
 				WriteTimesArticle(message);
+				break;
+			case Quest::DEMOLISH:
+				r = regions.GetRegion(q->regionnum);
+				if (r)
+					o = r->GetObject(q->target);
+				else
+					o = 0;
+				if (!r || !o) {
+					// Something has gone wrong with this quest!
+					// shouldn't ever happen, but...
+					quests.Remove(q);
+					delete q;
+				} else {
+					message = "Tear down the blasphemous ";
+					message += *o->name;
+					message += " : ";
+					message += ObjectDefs[o->type].name;
+					message += " in ";
+					message += *r->name;
+					message += "!";
+					WriteTimesArticle(message);
+				}
 				break;
 			default:
 				break;
@@ -803,7 +849,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableSkill(S_CREATE_HOLY_SYMBOL);
 	EnableSkill(S_CREATE_CENSER);
 	EnableSkill(S_TRANSMUTATION);
-	EnableSkill(S_SACRIFICE);
+	EnableSkill(S_BLASPHEMOUS_RITUAL);
 
 	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
 

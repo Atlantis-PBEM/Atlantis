@@ -3480,7 +3480,7 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
 	 NULL, NULL,
 	 {{"ARTI",1},{NULL,0},{NULL,0}}},
-	{"sacrifice","SCRF",100,
+	{"blasphemous ritual","BRTL",100,
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
 	 NULL, NULL,
 	 {{"DEMO",4},{"NECR",4},{NULL,0}}},

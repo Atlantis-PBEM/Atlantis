@@ -41,7 +41,13 @@ Quest::Quest()
 
 Quest::~Quest()
 {
-	rewards.DeleteAll();
+	Item *i;
+
+	forlist(&rewards) {
+		i = (Item *) elem;
+		rewards.Remove(i);
+		delete i;
+	}
 }
 
 int QuestList::ReadQuests(Ainfile *f)
@@ -65,6 +71,10 @@ int QuestList::ReadQuests(Ainfile *f)
 				break;
 			case Quest::HARVEST:
 				quest->objective.Readin(f);
+				quest->regionnum = f->GetInt();
+				break;
+			case Quest::DEMOLISH:
+				quest->target = f->GetInt();
 				quest->regionnum = f->GetInt();
 				break;
 			default:
@@ -108,6 +118,10 @@ void QuestList::WriteQuests(Aoutfile *f)
 				break;
 			case Quest::HARVEST:
 				q->objective.Writeout(f);
+				f->PutInt(q->regionnum);
+				break;
+			case Quest::DEMOLISH:
+				f->PutInt(q->target);
 				f->PutInt(q->regionnum);
 				break;
 			default:
@@ -157,7 +171,7 @@ int QuestList::CheckQuestKillTarget(Unit * u, ItemList *reward)
 
 int QuestList::CheckQuestHarvestTarget(ARegion *r,
 		int item, int harvested, int max,
-		ItemList *reward)
+		Unit *u)
 {
 	Quest *q;
 	Item *i;
@@ -170,12 +184,38 @@ int QuestList::CheckQuestHarvestTarget(ARegion *r,
 			if (getrandom(max) < harvested) {
 				forlist (&q->rewards) {
 					i = (Item *) elem;
-					reward->SetNum(i->type, reward->GetNum(i->type) + i->num);
+					u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
+					u->faction->DiscoverItem(i->type, 0, 1);
 				}
 				quests.Remove(q);
 				delete q;
 				return 1;
 			}
+		}
+	}
+
+	return 0;
+}
+
+int QuestList::CheckQuestDemolishTarget(ARegion *r, int building,
+		Unit *u)
+{
+	Quest *q;
+	Item *i;
+
+	forlist(this) {
+		q = (Quest *) elem;
+		if (q->type == Quest::DEMOLISH &&
+				q->regionnum == r->num &&
+				q->target == building) {
+			forlist (&q->rewards) {
+				i = (Item *) elem;
+				u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
+				u->faction->DiscoverItem(i->type, 0, 1);
+			}
+			quests.Remove(q);
+			delete q;
+			return 1;
 		}
 	}
 

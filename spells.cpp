@@ -92,7 +92,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_BOOK_OF_EXORCISM:
 			case S_CREATE_HOLY_SYMBOL:
 			case S_CREATE_CENSER:
-			case S_SACRIFICE:
+			case S_BLASPHEMOUS_RITUAL:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
@@ -806,8 +806,8 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 		case S_TRANSMUTATION:
 			val = RunTransmutation(r, u);
 			break;
-		case S_SACRIFICE:
-			val = RunSacrifice(r, u);
+		case S_BLASPHEMOUS_RITUAL:
+			val = RunBlasphemousRitual(r, u);
 			break;
 	}
 	if (val) {
@@ -1816,16 +1816,18 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	return 1;
 }
 
-int Game::RunSacrifice(ARegion *r, Unit *mage)
+int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 {
 	CastOrder *order;
-	int level, num, sactype, sacrifices, i, sac;
+	int level, num, sactype, sacrifices, i, sac, max, dir;
 	Object *o, *tower;
 	Unit *u, *victim;
 	Item *item;
+	ARegion *start;
+	AString message;
 
 	order = (CastOrder *) mage->castorders;
-	level = mage->GetSkill(S_SACRIFICE);
+	level = mage->GetSkill(S_BLASPHEMOUS_RITUAL);
 	if (level < 1) {
 		mage->Error("CAST: Unit doesn't have that skill.");
 		return 0;
@@ -1907,11 +1909,93 @@ int Game::RunSacrifice(ARegion *r, Unit *mage)
 		victim->SetMen(sac, victim->GetMen(sac) - 1);
 		sacrifices--;
 		tower->incomplete--;
+		max = ObjectDefs[tower->type].cost;
+		if (tower->incomplete == max * 9 / 10) {
+			// 10% complete
+			message = "Vile rituals are being performed in the ";
+			message += TerrainDefs[r->type].name;
+			message += " of ";
+			message += *r->name;
+			message += "!";
+			WriteTimesArticle(message);
+		}
+		if (tower->incomplete == max * 2 / 3) {
+			// 33% complete
+			dir = -1;
+			start = regions.FindNearestStartingCity(r, &dir);
+			message = "A blasphemous construction is taking shape in ";
+			if (start == r) {
+				message += *start->town->name;
+				message += ", in ";
+			}
+			message += "the ";
+			message += TerrainDefs[r->type].name;
+			message += " of ";
+			message += *r->name;
+			if (start && start != r && dir != -1) {
+				message += ", ";
+				if (r->zloc != start->zloc && dir != MOVE_IN)
+					message += "through a shaft ";
+				switch (dir) {
+					case D_NORTH:
+					case D_NORTHWEST:
+						message += "north of";
+						break;
+					case D_NORTHEAST:
+						message += "east of";
+						break;
+					case D_SOUTH:
+					case D_SOUTHEAST:
+						message += "south of";
+						break;
+					case D_SOUTHWEST:
+						message += "west of";
+						break;
+					case MOVE_IN:
+						message += "through a shaft in";
+						break;
+				}
+				message += " ";
+				message += *start->town->name;
+			}
+			message += "!";
+			WriteTimesArticle(message);
+		}
+		if (tower->incomplete == max / 3) {
+			// 66% complete
+			message = "The blasphemous tower in the ";
+			message += r->ShortPrint(&regions);
+			message += " is nearing completion!";
+			WriteTimesArticle(message);
+		}
+		if (tower->incomplete == max / 10) {
+			// 90% complete
+			message = *u->faction->name;
+			message += " have almost completed a blasphemous tower in the ";
+			message += r->ShortPrint(&regions);
+			message += ".  Their folly will doom everyone!";
+			WriteTimesArticle(message);
+		}
 		mage->Event(AString("Sacrifices ") + ItemDefs[sac].name + " from " + victim->name->Str());
 		if (!victim->GetMen())
 			r->Kill(victim);
 		if (!mage->GetMen())
 			break;
+	}
+
+	// If the player chooses to go down the dark path,
+	// then erase any progress they may have made down the light path
+	forlist_reuse(&regions) {
+		r = (ARegion *) elem;
+		forlist(&r->objects) {
+			Object * o = (Object *) elem;
+			forlist(&o->units) {
+				Unit * u = (Unit *) elem;
+				if (u->faction->num == mage->faction->num) {
+					u->items.SetNum(I_RELICOFGRACE, 0);
+				}
+			}
+		}
 	}
 
 	return 1;

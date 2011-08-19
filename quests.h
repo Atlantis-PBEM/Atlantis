@@ -64,7 +64,9 @@ class QuestList : public AList
 		int CheckQuestKillTarget(Unit *u, ItemList *reward);
 		int CheckQuestHarvestTarget(ARegion *r,
 				int item, int harvested, int max,
-				ItemList *reward);
+				Unit *u);
+		int CheckQuestDemolishTarget(ARegion *r, int building,
+				Unit *u);
 };
 
 extern QuestList quests;
