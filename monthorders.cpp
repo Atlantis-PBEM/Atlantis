@@ -68,9 +68,11 @@ void Game::RunMovementOrders()
 				error = 1;
 				if (o->IsFleet()) {
 					u = o->GetOwner();
+					if (!u)
+						continue;
 					if (u->phase >= phase)
 						continue;
-					if (u && !u->nomove &&
+					if (!u->nomove &&
 							u->monthorders &&
 							u->monthorders->type == O_SAIL)  {
 						u->phase = phase;
