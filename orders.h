@@ -183,6 +183,7 @@ class GiveOrder : public Order {
 		/* if amount == -1, transfer whole unit, -2 means all of item */
 		int amount;
 		int except;
+		int unfinished;
 
 		UnitId *target;
 };

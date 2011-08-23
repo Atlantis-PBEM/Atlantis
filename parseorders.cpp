@@ -2225,28 +2225,40 @@ void Game::ProcessExchangeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	UnitId *t = ParseUnit(o);
+	UnitId *t;
+	AString *token;
+	int unfinished, amt, item, excpt;
+
+	t = ParseUnit(o);
 	if (!t) {
 		ParseError(pCheck, unit, 0, "GIVE: Invalid target.");
 		return;
 	}
-	AString *token = o->gettoken();
+	token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, unit, 0, "GIVE: No amount given.");
 		return;
 	}
-	int amt;
 	if (*token == "unit") {
 		amt = -1;
 	} else if (*token == "all") {
 		amt = -2;
 	} else {
 		amt = token->value();
+		if (amt < 1) {
+			ParseError(pCheck, unit, 0, "GIVE: Illegal amount given.");
+			return;
+		}
 	}
 	delete token;
-	int item = -1;
+	item = -1;
+	unfinished = 0;
 	if (amt != -1) {
 		token = o->gettoken();
+		if (token && *token == "unfinished") {
+			unfinished = 1;
+			token = o->gettoken();
+		}
 		if (token) {
 			if (t->unitnum == -1)
 				item = ParseEnabledItem(token);
@@ -2311,6 +2323,13 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 				ParseError(pCheck, unit, 0, "GIVE: Invalid item.");
 				return;
 			}
+			if (unfinished &&
+					item != -IT_SHIP &&
+					!(item >= 0 &&
+					ItemDefs[item].type & IT_SHIP)) {
+				ParseError(pCheck, unit, 0, "GIVE: That item does not have an unfinished version.");
+				return;
+			}
 		} else {
 			ParseError(pCheck, unit, 0, "GIVE: No item given.");
 			return;
@@ -2319,7 +2338,7 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	}
 
 	token = o->gettoken();
-	int excpt = 0;
+	excpt = 0;
 	if (token && *token == "except") {
 		if (amt == -2) {
 			delete token;
@@ -2351,6 +2370,7 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		order->target = t;
 		order->amount = amt;
 		order->except = excpt;
+		order->unfinished = unfinished;
 		unit->giveorders.Add(order);
 	}
 	return;

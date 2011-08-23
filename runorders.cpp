@@ -2110,6 +2110,8 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 
 void Game::DoGiveOrders()
 {
+	Item *item;
+
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
 		forlist((&r->objects)) {
@@ -2124,8 +2126,23 @@ void Game::DoGiveOrders()
 							DoGiveOrder(r, u, o);
 						} else if (o->amount == -2) {
 							/* do 'give all type' command */
+							if (obj->IsFleet() && u == obj->GetOwner() &&
+									!o->unfinished &&
+									(o->item == -NITEMS || o->item == -IT_SHIP)) {
+								forlist(&obj->ships) {
+									item = (Item *) elem;
+									GiveOrder go;
+									go.amount = item->num;
+									go.except = 0;
+									go.item = item->type;
+									go.target = o->target;
+									go.type = o->type;
+									DoGiveOrder(r, u, &go);
+									go.target = NULL;
+								}
+							}
 							forlist((&u->items)) {
-								Item *item = (Item *)elem;
+								item = (Item *) elem;
 								if ((o->item == -NITEMS) ||
 									(ItemDefs[item->type].type & (-o->item))) {
 									GiveOrder go;
@@ -2134,7 +2151,22 @@ void Game::DoGiveOrders()
 									go.item = item->type;
 									go.target = o->target;
 									go.type = o->type;
-									DoGiveOrder(r, u, &go);
+									go.unfinished = o->unfinished;
+									if (ItemDefs[item->type].type & IT_SHIP) {
+										if (o->item == -NITEMS) {
+											go.unfinished = 1;
+										}
+										if (go.unfinished) {
+											go.amount = 1;
+										} else {
+											go.amount = 0;
+										}
+									} else if (o->unfinished) {
+										go.amount = 0;
+									}
+									if (go.amount) {
+										DoGiveOrder(r, u, &go);
+									}
 									go.target = NULL;
 								}
 							}
@@ -2310,17 +2342,30 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 
 int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 {
+	int hasitem, ship, num, shipcount, amt, newfleet, flying, cur;
+	int notallied, newlvl, oldlvl;
+	Item *it, *s;
+	Unit *p, *t;
+	Object *fleet;
+	AString temp;
+	Skill *skill;
+	SkillList *skills;
+
 	/* Transfer/GIVE ship items: */
 	if ((o->item >= 0) && (ItemDefs[o->item].type & IT_SHIP)) {
 		// GIVE 0
 		if (o->target->unitnum == -1) {
-			int hasitem = u->items.GetNum(o->item);
-			AString temp = "Abandons ";
+			hasitem = u->items.GetNum(o->item);
+			temp = "Abandons ";
 			// discard unfinished ships from inventory
-			if (hasitem) {
-				int ship = -1;
+			if (o->unfinished) {
+				if (!hasitem || o->amount > 1) {
+					u->Error("GIVE: not enough.");
+					return 0;
+				}
+				ship = -1;
 				forlist(&u->items) {
-					Item *it = (Item *) elem;
+					it = (Item *) elem;
 					if (it->type == o->item) {
 						u->Event(temp + it->Report(1) + ".");
 						ship = it->type;
@@ -2336,7 +2381,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			}
 
 			// Check amount
-			int num = u->object->GetNumShips(o->item);
+			num = u->object->GetNumShips(o->item);
 			if (num < 1) {
 				u->Error("GIVE: no such ship in fleet.");
 				return 0;
@@ -2348,14 +2393,14 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 			// Check we're not dumping passengers in the ocean
 			if (TerrainDefs[r->type].similar_type == R_OCEAN) {
-				int shipcount = 0;
+				shipcount = 0;
 				forlist(&(u->object->ships)) {
-					Item *s = (Item *) elem;
+					s = (Item *) elem;
 					shipcount += s->num;
 				}
 				if (shipcount <= o->amount) {
 					forlist(&(u->object->units)) {
-						Unit *p = (Unit *) elem;
+						p = (Unit *) elem;
 						if ((!p->CanSwim() || p->GetFlag(FLAG_NOCROSS_WATER))) {
 							u->Error("GIVE: Can't abandon our last ship in the ocean.");
 							return 0;
@@ -2369,7 +2414,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			return 0;
 		}
 		// GIVE to unit:	
-		Unit *t = r->GetUnitId(o->target, u->faction->num);
+		t = r->GetUnitId(o->target, u->faction->num);
 		if (!t) {
 			u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
@@ -2399,12 +2444,16 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			return 0;
 		}
 		// Check amount
-		int num = u->object->GetNumShips(o->item);
-		if (num < 1) {
-			u->Error("GIVE: no such ship in fleet.");
-			return 0;
+		if (o->unfinished) {
+			num = u->items.GetNum(o->item) > 0;
+		} else {
+			num = u->object->GetNumShips(o->item);
+			if (num < 1) {
+				u->Error("GIVE: no such ship in fleet.");
+				return 0;
+			}
 		}
-		int amt = o->amount;
+		amt = o->amount;
 		if (amt != -2 && amt > num) {
 			u->Error("GIVE: Not enough.");
 			amt = num;
@@ -2419,67 +2468,90 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				}
 			}
 		}
+		if (!amt) {
+			// giving 0 things is easy
+			return 0;
+		}
 
-		// Check we're not dumping passengers in the ocean
-		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
-			int shipcount = 0;
-			forlist(&(u->object->ships)) {
-				Item *s = (Item *) elem;
-				shipcount += s->num;
+		if (o->unfinished) {
+			if (t->items.GetNum(o->item) > 0) {
+				u->Error("GIVE: Target already has an unfinished ship of that type.");
+				return 0;
 			}
-			if (shipcount <= amt) {
-				forlist(&(u->object->units)) {
-					Unit *p = (Unit *) elem;
-					if ((!p->CanSwim() || p->GetFlag(FLAG_NOCROSS_WATER))) {
-						u->Error("GIVE: Can't give away our last ship in the ocean.");
-						return 0;
+			it = new Item();
+			it->type = o->item;
+			it->num = u->items.GetNum(o->item);
+			u->Event(AString("Gives ") + it->Report(1) +
+				" to " + *t->name + ".");
+			if (u->faction != t->faction) {
+				t->Event(AString("Receives ") + it->Report(1) +
+					" from " + *u->name + ".");
+			}
+			u->items.SetNum(o->item, 0);
+			t->items.SetNum(o->item, it->num);
+			t->faction->DiscoverItem(o->item, 0, 1);
+		} else {
+			// Check we're not dumping passengers in the ocean
+			if (TerrainDefs[r->type].similar_type == R_OCEAN) {
+				shipcount = 0;
+				forlist(&(u->object->ships)) {
+					s = (Item *) elem;
+					shipcount += s->num;
+				}
+				if (shipcount <= amt) {
+					forlist(&(u->object->units)) {
+						p = (Unit *) elem;
+						if ((!p->CanSwim() || p->GetFlag(FLAG_NOCROSS_WATER))) {
+							u->Error("GIVE: Can't give away our last ship in the ocean.");
+							return 0;
+						}
 					}
 				}
 			}
-		}
 
-		// give into existing fleet or form new fleet?
-		int newfleet = 0;
-		// target is not in fleet or not fleet owner
-		if (!(t->object->IsFleet()) ||
-			(t->num != t->object->GetOwner()->num)) newfleet = 1;
-		// or target fleet is not of compatible type
-		else {
-			int flying = u->object->flying;
-			if ((flying > 0) && (ItemDefs[o->item].fly < 1)) newfleet = 1;
-			if ((flying < 1) && (ItemDefs[o->item].fly > 0)) newfleet = 1;
-		}
-		if (newfleet == 1) {
-			// create a new fleet
-			Object * fleet = new Object(r);
-			fleet->type = O_FLEET;
-			fleet->num = shipseq++;
-			fleet->name = new AString(AString("Fleet [") + fleet->num + "]");
-			t->object->region->AddFleet(fleet);
-			t->MoveUnit(fleet);
-		}
-		if (ItemDefs[o->item].max_inventory) {
-			int cur = t->object->GetNumShips(o->item) + amt;
-			if (cur > ItemDefs[o->item].max_inventory) {
-				u->Error(AString("GIVE: Fleets cannot have more than ")+
-					ItemString(o->item, ItemDefs[o->item].max_inventory) +".");
-				return 0;
+			// give into existing fleet or form new fleet?
+			newfleet = 0;
+			// target is not in fleet or not fleet owner
+			if (!(t->object->IsFleet()) ||
+				(t->num != t->object->GetOwner()->num)) newfleet = 1;
+			// or target fleet is not of compatible type
+			else {
+				flying = u->object->flying;
+				if ((flying > 0) && (ItemDefs[o->item].fly < 1)) newfleet = 1;
+				if ((flying < 1) && (ItemDefs[o->item].fly > 0)) newfleet = 1;
 			}
+			if (newfleet == 1) {
+				// create a new fleet
+				fleet = new Object(r);
+				fleet->type = O_FLEET;
+				fleet->num = shipseq++;
+				fleet->name = new AString(AString("Fleet [") + fleet->num + "]");
+				t->object->region->AddFleet(fleet);
+				t->MoveUnit(fleet);
+			}
+			if (ItemDefs[o->item].max_inventory) {
+				cur = t->object->GetNumShips(o->item) + amt;
+				if (cur > ItemDefs[o->item].max_inventory) {
+					u->Error(AString("GIVE: Fleets cannot have more than ")+
+						ItemString(o->item, ItemDefs[o->item].max_inventory) +".");
+					return 0;
+				}
+			}
+			u->Event(AString("Transfers ") + ItemString(o->item, amt) + " to " +
+				*t->object->name + ".");
+			if (u->faction != t->faction) {
+				t->Event(AString("Receives ") + ItemString(o->item, amt) +
+					" from " + *u->object->name + ".");
+			}
+			u->object->SetNumShips(o->item, u->object->GetNumShips(o->item)-amt);
+			t->object->SetNumShips(o->item, t->object->GetNumShips(o->item)+amt);
+			t->faction->DiscoverItem(o->item, 0, 1);
 		}
-		u->Event(AString("Transfers ") + ItemString(o->item, amt) + " to " +
-			*t->object->name + ".");
-		if (u->faction != t->faction) {
-			t->Event(AString("Receives ") + ItemString(o->item, amt) +
-				" from " + *u->object->name + ".");
-		}
-		u->object->SetNumShips(o->item, u->object->GetNumShips(o->item)-amt);
-		t->object->SetNumShips(o->item, t->object->GetNumShips(o->item)+amt);
-		t->faction->DiscoverItem(o->item, 0, 1);		
 		return 0;
 	}
 	
 	// Check there is enough to give
-	int amt = o->amount;
+	amt = o->amount;
 	if (amt != -2 && amt > u->GetSharedNum(o->item)) {
 		u->Error("GIVE: Not enough.");
 		amt = u->GetSharedNum(o->item);
@@ -2507,7 +2579,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			return 0;
 		}
 
-		AString temp = "Discards ";
+		temp = "Discards ";
 		if (ItemDefs[o->item].type & IT_MAN) {
 			u->SetMen(o->item, u->GetMen(o->item) - amt);
 			r->DisbandInRegion(o->item, amt);
@@ -2535,7 +2607,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		return 0;
 	}
 
-	Unit *t = r->GetUnitId(o->target, u->faction->num);
+	t = r->GetUnitId(o->target, u->faction->num);
 	if (!t) {
 		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
@@ -2580,7 +2652,6 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
 				if (CountApprentices(t->faction) >=
 						AllowedApprentices(t->faction)){
-					AString temp;
 					temp = "GIVE: Faction has too many ";
 					temp += Globals->APPRENTICE_NAME;
 					temp += "s.";
@@ -2614,7 +2685,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			}
 		}
 
-		int notallied = 1;
+		notallied = 1;
 		if (t->faction->GetAttitude(u->faction->num) == A_ALLY) {
 			notallied = 0;
 		}
@@ -2632,9 +2703,9 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 		/* Check if any new skill reports have to be shown */
 		forlist(&(u->skills)) {
-			Skill *skill = (Skill *) elem;
-			int newlvl = u->GetRealSkill(skill->type);
-			int oldlvl = u->faction->skills.GetDays(skill->type);
+			skill = (Skill *) elem;
+			newlvl = u->GetRealSkill(skill->type);
+			oldlvl = u->faction->skills.GetDays(skill->type);
 			if (newlvl > oldlvl) {
 				for (int i=oldlvl+1; i<=newlvl; i++) {
 					u->faction->shows.Add(new ShowSkill(skill->type, i));
@@ -2645,11 +2716,9 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 		// Okay, now for each item that the unit has, tell the new faction
 		// about it in case they don't know about it yet.
-		{
-			forlist(&u->items) {
-				Item *i = (Item *)elem;
-				u->faction->DiscoverItem(i->type, 0, 1);
-			}
+		forlist_reuse(&u->items) {
+			it = (Item *)elem;
+			u->faction->DiscoverItem(it->type, 0, 1);
 		}
 
 		return notallied;
@@ -2693,9 +2762,9 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 		if (u->nomove) t->nomove = 1;
 
-		SkillList *temp = u->skills.Split(u->GetMen(), amt);
-		t->skills.Combine(temp);
-		delete temp;
+		skills = u->skills.Split(u->GetMen(), amt);
+		t->skills.Combine(skills);
+		delete skills;
 	}
 
 	if (ItemDefs[o->item].flags & ItemType::CANTGIVE) {
@@ -2704,7 +2773,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	}
 
 	if (ItemDefs[o->item].max_inventory) {
-		int cur = t->items.GetNum(o->item) + amt;
+		cur = t->items.GetNum(o->item) + amt;
 		if (cur > ItemDefs[o->item].max_inventory) {
 			u->Error(AString("GIVE: Unit cannot have more than ")+
 					ItemString(o->item, ItemDefs[o->item].max_inventory));

@@ -772,6 +772,12 @@ void ARegion::Kill(Unit *u)
 		// give u's stuff to first
 		forlist(&u->items) {
 			Item *i = (Item *) elem;
+			if (ItemDefs[i->type].type & IT_SHIP &&
+					first->items.GetNum(i->type) > 0) {
+				if (first->items.GetNum(i->type) > i->num)
+					first->items.SetNum(i->type, i->num);
+				continue;
+			}
 			if (!IsSoldier(i->type)) {
 				first->items.SetNum(i->type, first->items.GetNum(i->type) +
 									i->num);
@@ -838,7 +844,7 @@ void ARegion::CheckFleets()
 			}
 			// don't remove fleets when no living units are
 			// aboard when they're not at sea.
-			if (TerrainDefs[type].similar_type == R_OCEAN) alive = 1;
+			if (TerrainDefs[type].similar_type != R_OCEAN) alive = 1;
 			if ((alive == 0) || (bail == 1)) {
 				objects.Remove(o);
 				delete o;

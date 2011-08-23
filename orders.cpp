@@ -160,6 +160,7 @@ WithdrawOrder::~WithdrawOrder()
 GiveOrder::GiveOrder()
 {
 	type = O_GIVE;
+	unfinished = 0;
 }
 
 GiveOrder::~GiveOrder()
