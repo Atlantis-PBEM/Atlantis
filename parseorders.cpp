@@ -2183,6 +2183,10 @@ void Game::ProcessExchangeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		ParseError(pCheck, unit, 0, "EXCHANGE: Invalid item.");
 		return;
 	}
+	if (ItemDefs[itemGive].type & IT_SHIP) {
+		ParseError(pCheck, unit, 0, "EXCHANGE: Can't exchange ships.");
+		return;
+	}
 
 	token = o->gettoken();
 	if (!token) {
@@ -2209,6 +2213,10 @@ void Game::ProcessExchangeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 
 	if (itemExpected == -1) {
 		ParseError(pCheck, unit, 0, "EXCHANGE: Invalid item.");
+		return;
+	}
+	if (ItemDefs[itemExpected].type & IT_SHIP) {
+		ParseError(pCheck, unit, 0, "EXCHANGE: Can't exchange ships.");
 		return;
 	}
 
@@ -2325,6 +2333,7 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			}
 			if (unfinished &&
 					item != -IT_SHIP &&
+					item != -NITEMS &&
 					!(item >= 0 &&
 					ItemDefs[item].type & IT_SHIP)) {
 				ParseError(pCheck, unit, 0, "GIVE: That item does not have an unfinished version.");

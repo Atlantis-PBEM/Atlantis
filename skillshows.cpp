@@ -491,7 +491,7 @@ AString *ShowSkill::Report(Faction *f)
 		case S_TELEPORTATION:
 			if (level > 1) break;
 			/* XXX -- This should be cleaner somehow. */
-			*str += "A mage with this skill may teleport himself across"
+			*str += "A mage with this skill may teleport himself across "
 				"great distances, even without the use of a gate. The mage "
 				"may teleport up to 15 weight units per skill level.";
 			range = FindRange(SkillDefs[skill].range);
