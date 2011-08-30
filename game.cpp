@@ -1688,9 +1688,9 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				int losses = (i->num +
 						getrandom(ItemDefs[i->type].esc_val)) /
 					ItemDefs[i->type].esc_val;
-				u->items.SetNum(i->type,i->num - losses);
 				u->Event(ItemString(i->type, losses) +
 						" decay into nothingness.");
+				u->items.SetNum(i->type,i->num - losses);
 			} else if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
 				tmp = ItemDefs[i->type].esc_skill;
 				skill = LookupSkill(&tmp);
