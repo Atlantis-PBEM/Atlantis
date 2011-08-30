@@ -164,6 +164,8 @@ void Unit::MakeWMon(char const *monname, int mon, int num)
 
 void Unit::Writeout(Aoutfile *s)
 {
+	set<string>::iterator it;
+
 	s->PutStr(*name);
 	if (describe) {
 		s->PutStr(*describe);
@@ -193,9 +195,12 @@ void Unit::Writeout(Aoutfile *s)
 	else s->PutStr("NO_SKILL");
 	s->PutInt(savedmovement);
 	s->PutInt(savedmovedir);
-	// placeholder - this will be for storage of quest-related info,
-	// such as how far this unit has got towards completing a quest
-	s->PutInt(0);
+	s->PutInt(visited.size());
+	for (it = visited.begin();
+			it != visited.end();
+			it++) {
+		s->PutStr(it->c_str());
+	}
 }
 
 void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
@@ -245,8 +250,12 @@ void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
 	delete temp;
 	savedmovement = s->GetInt();
 	savedmovedir = s->GetInt();
-	// Placeholder for quest completion info
-	s->GetInt();
+	i = s->GetInt();
+	while (i-- > 0) {
+		temp = s->GetStr();
+		visited.insert(temp->Str());
+		delete temp;
+	}
 }
 
 AString Unit::MageReport()
@@ -497,6 +506,25 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 	if (obs == 2) {
 		temp += ReadyItem();
 		temp += StudyableSkills();
+		if (visited.size() > 0) {
+			set<string>::iterator it;
+			unsigned int count;
+
+			count = 0;
+			temp += ". Has visited ";
+			for (it = visited.begin();
+					it != visited.end();
+					it++) {
+				count++;
+				if (count > 1) {
+					if (count == visited.size())
+						temp += " and ";
+					else
+						temp += ", ";
+				}
+				temp += it->c_str();
+			}
+		}
 	}
 
 	if (describe) {
@@ -545,6 +573,25 @@ AString Unit::TemplateReport()
 	}
 	temp += ReadyItem();
 	temp += StudyableSkills();
+	if (visited.size() > 0) {
+		set<string>::iterator it;
+		unsigned int count;
+
+		count = 0;
+		temp += ". Has visited ";
+		for (it = visited.begin();
+				it != visited.end();
+				it++) {
+			count++;
+			if (count > 1) {
+				if (count == visited.size())
+					temp += " and ";
+				else
+					temp += ", ";
+			}
+			temp += it->c_str();
+		}
+	}
 
 	if (describe) {
 		temp += AString("; ") + *describe;

@@ -47,6 +47,8 @@ class UnitId;
 #include "skills.h"
 #include "items.h"
 #include "object.h"
+#include <set>
+#include <string>
 
 enum {
 	GUARD_NONE,
@@ -290,6 +292,9 @@ class Unit : public AListElem
 		int presentTaxing;
 		AList transportorders;
 		Unit *former;
+
+		// Used for tracking VISIT quests
+		set<string> visited;
 };
 
 #endif

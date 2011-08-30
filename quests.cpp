@@ -52,7 +52,7 @@ Quest::~Quest()
 
 int QuestList::ReadQuests(Ainfile *f)
 {
-        int count, rewards;
+        int count, dests, rewards;
 	Quest *quest;
 	AString *name;
 	Item *item;
@@ -73,6 +73,24 @@ int QuestList::ReadQuests(Ainfile *f)
 				quest->objective.Readin(f);
 				quest->regionnum = f->GetInt();
 				break;
+			case Quest::BUILD:
+				name = f->GetStr();
+				quest->building = LookupObject(name);
+				delete name;
+				name = f->GetStr();
+				quest->regionname = *name;
+				delete name;
+				break;
+			case Quest::VISIT:
+				name = f->GetStr();
+				quest->building = LookupObject(name);
+				delete name;
+				dests = f->GetInt();
+				while (dests-- > 0) {
+					name = f->GetStr();
+					quest->destinations.insert(name->Str());
+				}
+				break;
 			case Quest::DEMOLISH:
 				quest->target = f->GetInt();
 				quest->regionnum = f->GetInt();
@@ -87,6 +105,11 @@ int QuestList::ReadQuests(Ainfile *f)
 				name = f->GetStr();
 				quest->regionname = *name;
 				delete name;
+				dests = f->GetInt();
+				while (dests-- > 0) {
+					name = f->GetStr();
+					quest->destinations.insert(name->Str());
+				}
 				break;
 		}
 		rewards = f->GetInt();
@@ -107,6 +130,7 @@ void QuestList::WriteQuests(Aoutfile *f)
 {
 	Quest *q;
 	Item *i;
+	set<string>::iterator it;
 
         f->PutInt(quests.Num());
 	forlist(this) {
@@ -119,6 +143,25 @@ void QuestList::WriteQuests(Aoutfile *f)
 			case Quest::HARVEST:
 				q->objective.Writeout(f);
 				f->PutInt(q->regionnum);
+				break;
+			case Quest::BUILD:
+				if (q->building != -1)
+					f->PutStr(ObjectDefs[q->building].name);
+				else
+					f->PutStr("NO_OBJECT");
+				f->PutStr(q->regionname);
+				break;
+			case Quest::VISIT:
+				if (q->building != -1)
+					f->PutStr(ObjectDefs[q->building].name);
+				else
+					f->PutStr("NO_OBJECT");
+				f->PutInt(q->destinations.size());
+				for (it = q->destinations.begin();
+						it != q->destinations.end();
+						it++) {
+					f->PutStr(it->c_str());
+				}
 				break;
 			case Quest::DEMOLISH:
 				f->PutInt(q->target);
@@ -133,6 +176,12 @@ void QuestList::WriteQuests(Aoutfile *f)
 					f->PutStr("NO_OBJECT");
 				f->PutInt(q->regionnum);
 				f->PutStr(q->regionname);
+				f->PutInt(q->destinations.size());
+				for (it = q->destinations.begin();
+						it != q->destinations.end();
+						it++) {
+					f->PutStr(it->c_str());
+				}
 				break;
 		}
 		f->PutInt(q->rewards.Num());
@@ -160,7 +209,7 @@ int QuestList::CheckQuestKillTarget(Unit * u, ItemList *reward)
 				i = (Item *) elem;
 				reward->SetNum(i->type, reward->GetNum(i->type) + i->num);
 			}
-			quests.Remove(q);
+			this->Remove(q);
 			delete q;
 			return 1;
 		}
@@ -187,9 +236,82 @@ int QuestList::CheckQuestHarvestTarget(ARegion *r,
 					u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
 					u->faction->DiscoverItem(i->type, 0, 1);
 				}
-				quests.Remove(q);
+				this->Remove(q);
 				delete q;
 				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int QuestList::CheckQuestBuildTarget(ARegion *r, int building,
+		Unit *u)
+{
+	Quest *q;
+	Item *i;
+
+	forlist(this) {
+		q = (Quest *) elem;
+		if (q->type == Quest::BUILD &&
+				q->building == building &&
+				q->regionname == *r->name) {
+			forlist (&q->rewards) {
+				i = (Item *) elem;
+				u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
+				u->faction->DiscoverItem(i->type, 0, 1);
+			}
+			this->Remove(q);
+			delete q;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u)
+{
+	Quest *q;
+	Object *o;
+	Item *i;
+	set<string> intersection;
+	set<string>::iterator it;
+
+	forlist(this) {
+		q = (Quest *) elem;
+		if (q->type != Quest::VISIT)
+			continue;
+		if (!q->destinations.count(r->name->Str()))
+			continue;
+		forlist(&r->objects) {
+			o = (Object *) elem;
+			if (o->type == q->building) {
+				u->visited.insert(r->name->Str());
+				intersection.clear();
+				set_intersection(
+					q->destinations.begin(),
+					q->destinations.end(),
+					u->visited.begin(),
+					u->visited.end(),
+					inserter(intersection,
+						intersection.begin()),
+					less<string>()
+				);
+				if (intersection.size() == q->destinations.size()) {
+					// This unit has visited the
+					// required buildings in all those
+					// regions, so they win
+					forlist (&q->rewards) {
+						i = (Item *) elem;
+						u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
+						u->faction->DiscoverItem(i->type, 0, 1);
+					}
+					this->Remove(q);
+					delete q;
+					return 1;
+				}
 			}
 		}
 	}
@@ -213,7 +335,7 @@ int QuestList::CheckQuestDemolishTarget(ARegion *r, int building,
 				u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
 				u->faction->DiscoverItem(i->type, 0, 1);
 			}
-			quests.Remove(q);
+			this->Remove(q);
 			delete q;
 			return 1;
 		}

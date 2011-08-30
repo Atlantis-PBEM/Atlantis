@@ -35,6 +35,7 @@
 #define MAXIMUM_ACTIVE_QUESTS		5
 #define QUEST_SPAWN_RATE		2
 #define QUEST_SPAWN_CHANCE		60
+#define MAX_DESTINATIONS		5
 
 int Game::SetupFaction( Faction *pFac )
 {
@@ -51,19 +52,12 @@ int Game::SetupFaction( Faction *pFac )
 	pFac->DiscoverItem(I_LEADERS, 0, 1);
 	temp2->reveal = REVEAL_FACTION;
 
-/*
-	temp2->type = U_MAGE;
-	temp2->Study(S_PATTERN, 30);
-	temp2->Study(S_SPIRIT, 30);
-	temp2->Study(S_GATE_LORE, 30);
-
 	if (TurnNumber() >= 25) {
-		temp2->Study(S_PATTERN, 60);
-		temp2->Study(S_SPIRIT, 60);
-		temp2->Study(S_FORCE, 90);
-		temp2->Study(S_COMBAT, 30);
+		temp2->type = U_MAGE;
+		temp2->Study(S_PATTERN, 30);
+		temp2->Study(S_SPIRIT, 30);
+		temp2->Study(S_GATE_LORE, 30);
 	}
-*/
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
@@ -109,12 +103,19 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 {
 	Quest *q, *q2;
 	Item *item;
-	int d, count;
+	int d, count, temple, i, j, clash;
 	ARegion *r;
 	Object *o;
 	Unit *u;
 	Production *p;
 	AString rname;
+	map <string, int> temples;
+	map <string, int>::iterator it;
+	string stlstr;
+	int destprobs[MAX_DESTINATIONS] = { 0, 0, 80, 20, 0 };
+	int destinations[MAX_DESTINATIONS];
+	string destnames[MAX_DESTINATIONS];
+	set<string> intersection;
 
 	q = new Quest;
 	q->type = -1;
@@ -123,7 +124,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	item->num = 1;
 	q->rewards.Add(item);
 	d = getrandom(100);
-	if (d < 60) {
+	if (d < 40) {
 		// SLAY quest
 		q->type = Quest::SLAY;
 		count = 0;
@@ -172,7 +173,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				break;
 			}
 		}
-	} else if (d < 100) {
+	} else if (d < 70) {
 		// Create a HARVEST quest
 		count = 0;
 		forlist(regions) {
@@ -217,9 +218,115 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				}
 			}
 		}
+	} else if (d < 100) {
+		// Create a BUILD or VISIT quest
+		// Find all our current temples
+		temple = O_TEMPLE;
+		forlist(regions) {
+			r = (ARegion *) elem;
+			if (r->Population() > 0) {
+				stlstr = r->name->Str();
+				// This looks like a null operation, but
+				// actually forces the map<> element creation
+				temples[stlstr];
+				forlist(&r->objects) {
+					o = (Object *) elem;
+					if (o->type == temple) {
+						temples[stlstr]++;
+					}
+				}
+			}
+		}
+		// Work out how many destnations to use, based on destprobs[]
+		for (i = 0, count = 0; i < MAX_DESTINATIONS; i++)
+			count += destprobs[i];
+		d = getrandom(count);
+		for (count = 0; d >= destprobs[count]; count++)
+			d -= destprobs[count];
+		count++;
+		// Choose that many unique regions
+		for (i = 0; i < count; i++) {
+			do {
+				destinations[i] = getrandom(temples.size());
+				// give a slight preference to regions with temples
+				for (it = temples.begin(), j = 0;
+						j < destinations[i];
+						it++, j++)
+				// ...by rerolling (only once) if we get a
+				// templeless region first time
+				if (!it->second)
+					destinations[i] = getrandom(temples.size());
+				// make sure we haven't chosen duplicates
+				clash = 0;
+				for (j = 0; j < i; j++)
+					if (destinations[i] == destinations[j])
+						clash = 1;
+			} while (clash);
+		}
+		// Look up the names of the chosen regions
+		for (it = temples.begin(); it != temples.end(); it++) {
+			for (i = 0; i < count; i++) {
+				if (!destinations[i]--) {
+					destnames[i] = it->first;
+				}
+			}
+		}
+		// If any of them don't have a temple, then make a quest to
+		// build a temple there
+		for (i = 0; i < count; i++) {
+			if (!temples[destnames[i]]) {
+				q->type = Quest::BUILD;
+				q->building = temple;
+				q->regionname = destnames[i].c_str();
+				break;
+			}
+		}
+		if (i == count) {
+			// They all had temples, so make a VISIT quest
+			q->type = Quest::VISIT;
+			q->building = temple;
+			for (j = 0; j < count; j++) {
+				q->destinations.insert(destnames[j]);
+			}
+		}
+		if (q->type == Quest::BUILD) {
+			forlist(&quests) {
+				q2 = (Quest *) elem;
+				if (q2->type == Quest::BUILD &&
+						q->building == q2->building &&
+						q->regionname == q2->regionname) {
+					// Don't have 2 build quests
+					// active in the same region
+					q->type = -1;
+				}
+			}
+		} else if (q->type == Quest::VISIT) {
+			// Make sure that a given region is only in one
+			// pilgrimage at a time
+			forlist(&quests) {
+				q2 = (Quest *) elem;
+				if (q2->type == Quest::VISIT &&
+						q->building == q2->building) {
+					intersection.clear();
+					set_intersection(
+						q->destinations.begin(),
+						q->destinations.end(),
+						q2->destinations.begin(),
+						q2->destinations.end(),
+						inserter(intersection,
+							intersection.begin()),
+						less<string>()
+					);
+					if (intersection.size() > 0)
+						q->type = -1;
+				}
+			}
+		}
 	}
 	if (q->type != -1)
 		quests.Add(q);
+	else
+		delete q;
 }
 
 Faction *Game::CheckVictory()
@@ -229,6 +336,7 @@ Faction *Game::CheckVictory()
 	int units, leaders, men, silver, stuff;
 	int skilldays, magicdays, skilllevels, magiclevels;
 	int dir, found;
+	unsigned ucount;
 	Quest *q;
 	Item *item;
 	ARegion *r, *start;
@@ -242,13 +350,25 @@ Faction *Game::CheckVictory()
 	map <string, int> vRegions, uvRegions;
 	map <string, int>::iterator it;
 	string stlstr;
+	set<string> intersection, un;
+	set<string>::iterator it2;
 
+	forlist(&quests) {
+		q = (Quest *) elem;
+		if (q->type != Quest::VISIT)
+			continue;
+		for (it2 = q->destinations.begin();
+				it2 != q->destinations.end();
+				it2++) {
+			un.insert(*it2);
+		}
+	}
 	visited = 0;
 	unvisited = 0;
 	surfacevisited = 0;
 	surfaceunvisited = 0;
-	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
+	forlist_reuse(&regions) {
+		r = (ARegion *) elem;
 		if (r->Population() > 0) {
 			stlstr = r->name->Str();
 			if (r->visited) {
@@ -261,6 +381,22 @@ Faction *Game::CheckVictory()
 				if (r->zloc == ARegionArray::LEVEL_SURFACE)
 					surfaceunvisited++;
 				uvRegions[stlstr]++;
+			}
+		}
+		forlist(&r->objects) {
+			o = (Object *) elem;
+			forlist(&o->units) {
+				u = (Unit *) elem;
+				intersection.clear();
+				set_intersection(u->visited.begin(),
+					u->visited.end(),
+					un.begin(),
+					un.end(),
+					inserter(intersection,
+						intersection.begin()),
+					less<string>()
+				);
+				u->visited = intersection;
 			}
 		}
 	}
@@ -305,7 +441,7 @@ Faction *Game::CheckVictory()
 		} else if (d == 6) {
 			// report an incompletely explored region
 			count = 0;
-			// see how many incompletely unexplored regions we have
+			// see how many incompletely explored regions we have
 			for (it = vRegions.begin(); it != vRegions.end(); it++) {
 				if (uvRegions[it->first] > 0)
 					count++;
@@ -699,6 +835,33 @@ Faction *Game::CheckVictory()
 				message += ItemDefs[q->objective.type].names;
 				message += " of ";
 				message += *r->name;
+				message += ".";
+				WriteTimesArticle(message);
+				break;
+			case Quest::BUILD:
+				message = "Build a ";
+				message += ObjectDefs[q->building].name;
+				message += " in ";
+				message += q->regionname;
+				message += " for the glory of the Maker.";
+				WriteTimesArticle(message);
+				break;
+			case Quest::VISIT:
+				message = "Show your devotion by visiting ";
+				message += ObjectDefs[q->building].name;
+				message += "s in ";
+				ucount = 0;
+				for(it2 = q->destinations.begin();
+					it2 != q->destinations.end();
+					it2++) {
+					ucount++;
+					if (ucount == q->destinations.size()) {
+						message += " and ";
+					} else if (ucount > 1) {
+						message += ", ";
+					}
+					message += it2->c_str();
+				}
 				message += ".";
 				WriteTimesArticle(message);
 				break;

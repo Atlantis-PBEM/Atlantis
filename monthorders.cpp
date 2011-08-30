@@ -651,6 +651,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 		if (buildobj->incomplete == 0) {
 			job = "Completes construction of ";
 			buildobj->incomplete = -(ObjectDefs[type].maxMaintenance);
+			quests.CheckQuestBuildTarget(r, type, u);
 		}
 	}
 

@@ -1900,8 +1900,10 @@ void Game::AssessMaintenance()
 			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
 				Unit *u = (Unit *) elem;
-				if (!(u->faction->IsNPC()))
+				if (!(u->faction->IsNPC())) {
 					r->visited = 1;
+					quests.CheckQuestVisitTarget(r, u);
+				}
 				u->needed = u->MaintCost();
 				u->hunger = u->GetMen() * Globals->UPKEEP_MINIMUM_FOOD;
 				if (Globals->UPKEEP_MAXIMUM_FOOD < 0)

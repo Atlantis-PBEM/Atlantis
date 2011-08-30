@@ -31,6 +31,8 @@
 #include "fileio.h"
 #include "unit.h"
 #include "items.h"
+#include <set>
+#include <string>
 
 class Quest : public AListElem
 {
@@ -52,6 +54,7 @@ class Quest : public AListElem
 		int	building;
 		int	regionnum;
 		AString	regionname;
+		set<string> destinations;
 		AList	rewards;
 };
 
@@ -65,6 +68,9 @@ class QuestList : public AList
 		int CheckQuestHarvestTarget(ARegion *r,
 				int item, int harvested, int max,
 				Unit *u);
+		int CheckQuestBuildTarget(ARegion *r, int building,
+				Unit *u);
+		int CheckQuestVisitTarget(ARegion *r, Unit *u);
 		int CheckQuestDemolishTarget(ARegion *r, int building,
 				Unit *u);
 };
