@@ -1508,7 +1508,8 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 									"men.");
 							o->num = 0;
 						}
-						if (u->GetSkill(S_TACTICS) == 5) {
+						if (Globals->TACTICS_NEEDS_WAR &&
+									u->GetSkill(S_TACTICS) == 5) {
 							u->Error("BUY: Tacticians can't recruit more "
 									"men.");
 							o->num = 0;
@@ -2733,9 +2734,12 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			u->Error("GIVE: Magicians can't transfer men.");
 			return 0;
 		}
-		if (u->GetSkill(S_TACTICS) == 5 || t->GetSkill(S_TACTICS) == 5) {
-			u->Error("GIVE: Tacticians can't transfer men.");
-			return 0;
+		if (Globals->TACTICS_NEEDS_WAR) {
+			if (u->GetSkill(S_TACTICS) == 5 ||
+					t->GetSkill(S_TACTICS) == 5) {
+				u->Error("GIVE: Tacticians can't transfer men.");
+				return 0;
+			}
 		}
 		if (u->GetSkill(S_QUARTERMASTER) > 0 || t->GetSkill(S_QUARTERMASTER) > 0) {
 			u->Error("GIVE: Quartermasters can't transfer men.");
