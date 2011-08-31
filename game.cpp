@@ -1171,15 +1171,6 @@ void Game::WriteReport()
 
 	MakeFactionReportLists();
 	CountAllSpecialists();
-	/*
-	CountAllMages();
-	if (Globals->APPRENTICES_EXIST)
-		CountAllApprentices();
-	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT)
-		CountAllQuarterMasters();
-	if (Globals->TACTICS_NEEDS_WAR)
-		CountAllTacticians();
-	*/
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
 		AString str = "report.";
@@ -1383,73 +1374,6 @@ void Game::CountAllSpecialists()
 		}
 	}
 }
-
-
-/*
-void Game::CountAllMages()
-{
-	forlist(&factions) {
-		((Faction *) elem)->nummages = 0;
-	}
-
-	{
-		forlist(&regions) {
-			ARegion *r = (ARegion *) elem;
-			forlist(&r->objects) {
-				Object *o = (Object *) elem;
-				forlist(&o->units) {
-					Unit *u = (Unit *) elem;
-					if (u->type == U_MAGE) u->faction->nummages++;
-				}
-			}
-		}
-	}
-}
-
-void Game::CountAllQuarterMasters()
-{
-	forlist(&factions) {
-		((Faction *) elem)->numqms = 0;
-	}
-
-	{
-		forlist(&regions) {
-			ARegion *r = (ARegion *) elem;
-			forlist(&r->objects) {
-				Object *o = (Object *) elem;
-				forlist(&o->units) {
-					Unit *u = (Unit *) elem;
-					if (u->GetSkill(S_QUARTERMASTER))
-						u->faction->numqms++;
-				}
-			}
-		}
-	}
-}
-
-// This, along with counting apprentices, mages and quartermasters, 
-// should all be in the one function (CountSpecialists?)
-void Game::CountAllTacticians()
-{
-	forlist(&factions) {
-		((Faction *) elem)->numtacts = 0;
-	}
-
-	{
-		forlist(&regions) {
-			ARegion *r = (ARegion *) elem;
-			forlist(&r->objects) {
-				Object *o = (Object *) elem;
-				forlist(&o->units) {
-					Unit *u = (Unit *) elem;
-					if (u->GetSkill(S_TACTICS) == 5)
-						u->faction->numtacts++;
-				}
-			}
-		}
-	}
-}
-*/
 
 // LLS
 void Game::UnitFactionMap()
