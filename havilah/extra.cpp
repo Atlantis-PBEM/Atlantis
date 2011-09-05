@@ -29,6 +29,7 @@
 #include "gamedata.h"
 #include "quests.h"
 #include <string>
+#include <iterator>
 
 #define RELICS_REQUIRED_FOR_VICTORY	7
 #define MINIMUM_ACTIVE_QUESTS		2

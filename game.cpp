@@ -24,7 +24,9 @@
 // END A3HEADER
 
 #ifdef WIN32
-#include <memory.h>  // Needed for memcpy on windows
+#include <memory.h>	// Needed for memcpy on windows
+#include "io.h"		// Needed for access() on windows
+#define F_OK	0
 #endif
 
 #include <string.h>

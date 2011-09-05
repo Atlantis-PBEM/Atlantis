@@ -285,6 +285,8 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 {
 	Unit *u = GetNewUnit(fac);
 	ManType *men = FindRace(ItemDefs[mantype].abr);
+	int *fitting;
+
 	// Check skills:
 	int scomb = men->defaultlevel;
 	int sxbow = men->defaultlevel;
@@ -317,8 +319,8 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 	if (combat < level) weaponlevel += level - combat;
 	int weapon = -1;
 	int witem = -1;
+	fitting = new int[NUMWEAPONS];
 	while (weapon == -1) {
-		int fitting[NUMWEAPONS];
 		int n = 0;
 		for (int i=0; i<NUMWEAPONS; i++) {
 			fitting[i] = 0;
@@ -399,6 +401,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 			}
 		}
 	}
+	delete[] fitting;
 	// Check again which skills the weapon uses
 	AString *ws1 = new AString(WeaponDefs[weapon].baseSkill);
 	AString *ws2 = new AString(WeaponDefs[weapon].orSkill);

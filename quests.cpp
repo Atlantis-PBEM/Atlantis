@@ -25,6 +25,7 @@
 
 #include "quests.h"
 #include "object.h"
+#include <iterator>
 
 QuestList quests;
 

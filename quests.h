@@ -33,6 +33,7 @@
 #include "items.h"
 #include <set>
 #include <string>
+#include <algorithm>
 
 class Quest : public AListElem
 {
