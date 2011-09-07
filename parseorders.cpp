@@ -311,7 +311,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 					if (pCheck) {
 						if (!token->value()) {
-							pCheck->Error("Invalid unit number.");
+							ParseError(pCheck, 0, fac, "Invalid unit number.");
 						} else {
 							unit = &(pCheck->dummyUnit);
 							unit->monthorders = 0;
@@ -732,7 +732,7 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (pCheck) {
 		if (pCheck->numshows++ > 100) {
 			if (pCheck->numshows == 102) {
-				pCheck->Error("Too many SHOW orders.");
+				ParseError(pCheck, 0, 0, "Too many SHOW orders.");
 			}
 			return;
 		}
@@ -913,21 +913,21 @@ void Game::ProcessCombatOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int sk = ParseSkill(token);
 	delete token;
 
-	if (sk==-1) {
-		ParseError(pCheck, u, 0, "COMBAT: Invalid skill.");
-		return;
-	}
-	if (!(SkillDefs[sk].flags & SkillType::MAGIC)) {
-		ParseError(pCheck, u, 0, "COMBAT: That is not a magic skill.");
-		return;
-	}
-	if (!(SkillDefs[sk].flags & SkillType::COMBAT)) {
-		ParseError(pCheck, u, 0,
-				"COMBAT: That skill cannot be used in combat.");
-		return;
-	}
-
 	if (!pCheck) {
+		if (sk==-1) {
+			ParseError(pCheck, u, 0, "COMBAT: Invalid skill.");
+			return;
+		}
+		if (!(SkillDefs[sk].flags & SkillType::MAGIC)) {
+			ParseError(pCheck, u, 0, "COMBAT: That is not a magic skill.");
+			return;
+		}
+		if (!(SkillDefs[sk].flags & SkillType::COMBAT)) {
+			ParseError(pCheck, u, 0,
+					"COMBAT: That skill cannot be used in combat.");
+			return;
+		}
+
 		if (u->type != U_MAGE) {
 			u->Error("COMBAT: That unit is not a mage.");
 			return;
@@ -966,29 +966,20 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	int it = ParseEnabledItem(token);
-	if (it == -1) {
-		ParseError(pCheck, u, 0, "PREPARE: Invalid item.");
-		return;
-	}
 	BattleItemType *bt = FindBattleItem(token->Str());
 	delete token;
-
-	if (bt == NULL) {
-		ParseError(pCheck, u, 0, "PREPARE: Invalid item.");
-		return;
-	}
-
-	if (!bt->flags & BattleItemType::SPECIAL) {
-		ParseError(pCheck, u, 0, "PREPARE: That item cannot be prepared.");
-		return;
-	}
-
 	if (!pCheck) {
 		AString temp;
-		if (!u->items.GetNum(it)) {
+		if (it == -1 || !u->items.GetNum(it)) {
 			u->Error("PREPARE: Unit does not possess that item.");
 			return;
 		}
+
+		if (bt == NULL || !bt->flags & BattleItemType::SPECIAL) {
+			u->Error("PREPARE: That item cannot be prepared.");
+			return;
+		}
+
 		if ((bt->flags & BattleItemType::MAGEONLY) &&
 			!((u->type == U_MAGE) || (u->type == U_APPRENTICE) ||
 				(u->type == U_GUARDMAGE))) {
@@ -1028,23 +1019,26 @@ void Game::ProcessWeaponOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		}
 		return;
 	}
+	if (pCheck) {
+		delete token;
+		return;
+	}
 	int it;
 	int items[MAX_READY];
 	i = 0;
 	while (token && (i < MAX_READY)) {
 		it = ParseEnabledItem(token);
 		delete token;
-		if (it == -1) {
-			ParseError(pCheck, u, 0, "WEAPON: Invalid item.");
+		if (it == -1 || u->faction->items.GetNum(it) < 1) {
+			u->Error("WEAPON: Unknown item.");
 		} else if (!(ItemDefs[it].type & IT_WEAPON)) {
-			ParseError(pCheck, u, 0, "WEAPON: Item is not a weapon.");
+			u->Error("WEAPON: Item is not a weapon.");
 		} else {
 			if (!pCheck) items[i++] = it;
 		}
 		token = o->gettoken();
 	}
 	if (token) delete token;
-	if (pCheck) return;
 
 	while (i < MAX_READY) {
 		items[i++] = -1;
@@ -1078,23 +1072,26 @@ void Game::ProcessArmorOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		}
 		return;
 	}
+	if (pCheck) {
+		delete token;
+		return;
+	}
 	int it;
 	int items[MAX_READY];
 	i = 0;
 	while (token && (i < MAX_READY)) {
 		it = ParseEnabledItem(token);
 		delete token;
-		if (it == -1) {
-			ParseError(pCheck, u, 0, "ARMOR: Invalid item.");
+		if (it == -1 || u->faction->items.GetNum(it) < 1) {
+			u->Error("ARMOR: Unknown item.");
 		} else if (!(ItemDefs[it].type & IT_ARMOR)) {
-			ParseError(pCheck, u, 0, "ARMOR: Item is not armor.");
+			u->Error("ARMOR: Item is not armor.");
 		} else {
 			if (!pCheck) items[i++] = it;
 		}
 		token = o->gettoken();
 	}
 	if (token) delete token;
-	if (pCheck) return;
 
 	while (i < MAX_READY) {
 		items[i++] = -1;
@@ -1240,18 +1237,18 @@ void Game::ProcessStealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 	int i = ParseEnabledItem(token);
 	delete token;
-	if (i == -1) {
-		ParseError(pCheck, u, 0, "STEAL: Bad item given.");
-		delete id;
-		return;
-	}
-
-	if (IsSoldier(i)) {
-		ParseError(pCheck, u, 0, "STEAL: Can't steal that.");
-		delete id;
-		return;
-	}
 	if (!pCheck) {
+		if (i == -1) {
+			u->Error("STEAL: Bad item given.");
+			delete id;
+			return;
+		}
+
+		if (IsSoldier(i)) {
+			u->Error("STEAL: Can't steal that.");
+			delete id;
+			return;
+		}
 		StealOrder *ord = new StealOrder;
 		ord->target = id;
 		ord->item = i;
@@ -1388,27 +1385,26 @@ void Game::ProcessConsumeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessRevealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	if (!pCheck) {
-		AString *token = o->gettoken();
-		if (token) {
-			if (*token == "unit") {
-				u->reveal = REVEAL_UNIT;
-				delete token;
-				return;
-			}
-			if (*token == "faction") {
-				delete token;
-				u->reveal = REVEAL_FACTION;
-				return;
-			}
-			if (*token == "none") {
-				delete token;
-				u->reveal = REVEAL_NONE;
-				return;
-			}
-		} else {
-			u->reveal = REVEAL_NONE;
+	AString *token = o->gettoken();
+	if (token) {
+		if (*token == "unit") {
+			u->reveal = REVEAL_UNIT;
+			delete token;
+			return;
 		}
+		if (*token == "faction") {
+			delete token;
+			u->reveal = REVEAL_FACTION;
+			return;
+		}
+		if (*token == "none") {
+			delete token;
+			u->reveal = REVEAL_NONE;
+			return;
+		}
+		ParseError(pCheck, u, 0, "REVEAL: Invalid value.");
+	} else {
+		u->reveal = REVEAL_NONE;
 	}
 }
 
@@ -1583,10 +1579,6 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 						ParseError(pCheck, unit, 0, "BUILD: Can't build that.");
 						return;
 					}
-					if (unit->GetSkill(sk) < ObjectDefs[ot].level) {
-						ParseError(pCheck, unit, 0, "BUILD: Can't build that.");
-						return;
-					}
 					for (i = 1; i < 100; i++)
 						if (!reg->GetObject(i))
 							break;
@@ -1691,14 +1683,7 @@ void Game::ProcessSellOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 	int it = ParseGiveableItem(token);
 	delete token;
-	if (it == -1) {
-		ParseError(pCheck, u, 0, "SELL: Can't sell that.");
-		return;
-	}
-	if (ItemDefs[it].flags & ItemType::DISABLED) {
-		ParseError(pCheck, u, 0, "SELL: Can't sell that.");
-		return;
-	}
+
 	if (!pCheck) {
 		SellOrder *s = new SellOrder;
 		s->item = it;
@@ -1749,14 +1734,6 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		}
 	}
 	delete token;
-	if (it == -1) {
-		ParseError(pCheck, u, 0, "BUY: Can't buy that.");
-		return;
-	}
-	if (ItemDefs[it].flags & ItemType::DISABLED) {
-		ParseError(pCheck, u, 0, "BUY: Can't buy that.");
-		return;
-	}
 
 	if (!pCheck) {
 		BuyOrder *b = new BuyOrder;
@@ -1782,16 +1759,6 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 	int it = ParseEnabledItem(token);
 	delete token;
-
-	if (it == -1) {
-		ParseError(pCheck, u, 0, "PRODUCE: Can't produce that.");
-		return;
-	}
-	if ((ItemDefs[it].flags & ItemType::DISABLED)
-		|| (ItemDefs[it].type & IT_SHIP)) {
-		ParseError(pCheck, u, 0, "PRODUCE: Can't produce that.");
-		return;
-	}
 
 	ProduceOrder *p = new ProduceOrder;
 	p->item = it;
@@ -1879,25 +1846,18 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 	int sk = ParseSkill(token);
 	delete token;
-	if (sk==-1) {
-		ParseError(pCheck, u, 0, "STUDY: Invalid skill.");
-		return;
-	}
-
-	if (SkillDefs[sk].flags & SkillType::DISABLED) {
-		ParseError(pCheck, u, 0, "STUDY: Invalid skill.");
-		return;
-	}
-
-	if ((SkillDefs[sk].flags & SkillType::APPRENTICE) &&
-			!Globals->APPRENTICES_EXIST) {
-		ParseError(pCheck, u, 0, "STUDY: Invalid skill.");
-		return;
-	}
 
 	StudyOrder *order = new StudyOrder;
 	order->skill = sk;
 	order->days = 0;
+	// parse study level:
+	token = o->gettoken();
+	if (token) {
+		order->level = token->value();
+		delete token;
+	} else
+		order->level = -1;
+	
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&
 		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
@@ -1907,39 +1867,6 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		err += "month-long order.";
 		ParseError(pCheck, u, 0, err);
 	}
-	// parse study level:
-	token = o->gettoken();
-	if (token) {
-		order->level = token->value();
-		delete token;
-		int skmax = u->GetSkillMax(sk);
-		if (skmax == 0) skmax = 5; // hack to allow newly formed units to use this
-		if (skmax < order->level) {
-			order->level = skmax;
-			if (u->GetRealSkill(sk) >= order->level) {
-				AString err = "STUDY: cannot study ";
-				err += SkillDefs[sk].name;
-				err += " beyond level ";
-				err += order->level;
-				err += ".";
-				ParseError(pCheck, u, 0, err);
-				return;
-			} else {
-				AString err = "STUDY: set study goal for ";
-				err += SkillDefs[sk].name;
-				err += " to the maximum achievable level (";
-				err += order->level;
-				err += ").";
-				ParseError(pCheck, u, 0, err);
-			}
-		}
-	} else order->level = -1;
-	if ((order->level != -1) && (u->GetRealSkill(sk) >= order->level)) {
-		AString err = "STUDY: already reached specified level, nothing to study.";
-		ParseError(pCheck, u, 0, err);
-		return;
-	}
-	
 	if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 	u->monthorders = order;
 }

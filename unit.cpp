@@ -1122,7 +1122,7 @@ int Unit::CheckDepend(int lev, SkillDepend &dep)
 
 int Unit::CanStudy(int sk)
 {
-	if (skills.GetStudyRate(sk, GetMen()) < 0) return 0;
+	if (skills.GetStudyRate(sk, GetMen()) < 1) return 0;
 	
 	int curlev = GetRealSkill(sk);
 
@@ -1166,7 +1166,10 @@ int Unit::Study(int sk, int days)
 	}
 
 	if (!CanStudy(sk)) {
-		Error("STUDY: Doesn't have the pre-requisite skills to study that.");
+		if (GetRealSkill(sk) > 0)
+			Error("STUDY: Doesn't have the pre-requisite skills to study that.");
+		else
+			Error("STUDY: Can't study that.");
 		return 0;
 	}
 

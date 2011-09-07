@@ -1050,6 +1050,13 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 		return;
 	}
 
+	if (o->item == -1 || ItemDefs[o->item].flags & ItemType::DISABLED) {
+		u->Error("PRODUCE: Can't produce that.");
+		delete u->monthorders;
+		u->monthorders = 0;
+		return;
+	}
+
 	int input = ItemDefs[o->item].pInput[0].item;
 	if (input == -1) {
 		u->Error("PRODUCE: Can't produce that.");
@@ -1378,11 +1385,15 @@ void Game::RunIdleOrders(ARegion *r)
 void Game::Do1StudyOrder(Unit *u,Object *obj)
 {
 	StudyOrder * o = (StudyOrder *) u->monthorders;
-	int sk = o->skill;
-	int cost = SkillCost(sk) * u->GetMen();
-	int reset_man = -1;
-	if (cost > u->GetSharedMoney()) {
-		u->Error("STUDY: Not enough funds.");
+	int sk, cost, reset_man, skmax, taughtdays, days;
+	AString str;
+
+	reset_man = -1;
+	sk = o->skill;
+	if (sk == -1 || SkillDefs[sk].flags & SkillType::DISABLED ||
+			(SkillDefs[sk].flags & SkillType::APPRENTICE &&
+				!Globals->APPRENTICES_EXIST)) {
+		u->Error("STUDY: Can't study that.");
 		return;
 	}
 
@@ -1395,6 +1406,39 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	// Small patch for Ceran Mercs
 	if (u->GetMen(I_MERC)) {
 		u->Error("STUDY: Mercenaries are not allowed to study.");
+		return;
+	}
+
+	if (o->level != -1) {
+		skmax = u->GetSkillMax(sk);
+		if (skmax < o->level) {
+			o->level = skmax;
+			if (u->GetRealSkill(sk) >= o->level) {
+				str = "STUDY: Cannot study ";
+				str += SkillDefs[sk].name;
+				str += " beyond level ";
+				str += o->level;
+				str += ".";
+				u->Error(str);
+				return;
+			} else {
+				str = "STUDY: set study goal for ";
+				str += SkillDefs[sk].name;
+				str += " to the maximum achievable level (";
+				str += o->level;
+				str += ").";
+				u->Error(str);
+			}
+		}
+		if (u->GetRealSkill(sk) >= o->level) {
+			u->Error("STUDY: already reached specified level; nothing to study.");
+			return;
+		}
+	}
+
+	cost = SkillCost(sk) * u->GetMen();
+	if (cost > u->GetSharedMoney()) {
+		u->Error("STUDY: Not enough funds.");
 		return;
 	}
 
@@ -1486,9 +1530,9 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 	} // end tactics check
 	
 	// adjust teaching for study rate
-	int taughtdays = ((long int) o->days * u->skills.GetStudyRate(sk, u->GetMen()) / 30);
+	taughtdays = ((long int) o->days * u->skills.GetStudyRate(sk, u->GetMen()) / 30);
 
-	int days = u->skills.GetStudyRate(sk, u->GetMen()) * u->GetMen() + taughtdays;
+	days = u->skills.GetStudyRate(sk, u->GetMen()) * u->GetMen() + taughtdays;
 
 	if ((SkillDefs[sk].flags & SkillType::MAGIC) && u->GetSkill(sk) >= 2) {
 		if (obj->incomplete > 0 || obj->type == O_DUMMY) {
@@ -1517,7 +1561,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 
 	if (u->Study(sk,days)) {
 		u->ConsumeSharedMoney(cost);
-		AString str("Studies ");
+		str = "Studies ";
 		str += SkillDefs[sk].name;
 		taughtdays = taughtdays/u->GetMen();
 		if (taughtdays) {
