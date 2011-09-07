@@ -1736,11 +1736,12 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 		goto done_moving;
 	}
 	weight = unit->items.Weight();
-	if ((TerrainDefs[newreg->type].similar_type != R_OCEAN) &&
+	if ((TerrainDefs[region->type].similar_type == R_OCEAN) &&
+			(TerrainDefs[newreg->type].similar_type != R_OCEAN) &&
 			!unit->CanWalk(weight) &&
 			!unit->CanRide(weight) &&
 			!unit->CanFly(weight)) {
-		unit->Event("Must be able to walk to climb out of the ocean.");
+		unit->Error("Must be able to walk to climb out of the ocean.");
 		goto done_moving;
 	}
 	if (movetype == M_NONE) {
