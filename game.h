@@ -46,6 +46,7 @@ public:
 	Faction dummyFaction;
 	Order dummyOrder;
 	int numshows;
+	int numerrors;
 
 	void Error(const AString &error);
 };

@@ -35,6 +35,7 @@ OrdersCheck::OrdersCheck()
 {
 	pCheckFile = 0;
 	numshows = 0;
+	numerrors = 0;
 	dummyUnit.monthorders = 0;
 }
 
@@ -45,6 +46,7 @@ void OrdersCheck::Error(const AString &strError)
 		pCheckFile->PutStr("");
 		pCheckFile->PutStr(AString("*** Error: ") + strError + " ***");
 	}
+	numerrors++;
 }
 
 int Game::ParseDir(AString *token)
@@ -69,6 +71,8 @@ int ParseTF(AString *token)
 	if (*token == "f") return 0;
 	if (*token == "on") return 1;
 	if (*token == "off") return 0;
+	if (*token == "yes") return 1;
+	if (*token == "no") return 0;
 	if (*token == "1") return 1;
 	if (*token == "0") return 0;
 	return -1;
@@ -437,6 +441,20 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 	if (unit && pCheck) {
 		unit->ClearOrders();
 		unit = 0;
+	}
+
+	if (pCheck) {
+		pCheck->pCheckFile->PutStr("");
+		if (!pCheck->numerrors) {
+			pCheck->pCheckFile->PutStr("No errors found.");
+		} else {
+			AString str = pCheck->numerrors;
+			str += " error";
+			if (pCheck->numerrors != 1)
+				str += "s";
+			str += " found!";
+			pCheck->pCheckFile->PutStr(str);
+		}
 	}
 }
 
