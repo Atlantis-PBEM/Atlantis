@@ -210,16 +210,18 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 {
 	Faction *fac = 0;
 	Unit *unit = 0;
+	int indent = 0, code, i;
+	AString *order, prefix;
 
-	AString *order = f->GetLine();
+	order = f->GetLine();
 	while (order) {
 		AString saveorder = *order;
 		int getatsign = order->getat();
 		AString *token = order->gettoken();
 
 		if (token) {
-			int i = Parse1Order(token);
-			switch (i) {
+			code = Parse1Order(token);
+			switch (code) {
 			case -1:
 				ParseError(pCheck, unit, fac, *token+" is not a valid order.");
 				break;
@@ -276,6 +278,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				break;
 
 			case O_END:
+				indent = 0;
 				while (unit) {
 					Unit *former = unit->former;
 					if (unit->inTurnBlock)
@@ -292,6 +295,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				break;
 
 			case O_UNIT:
+				indent = 0;
 				if (fac) {
 					while (unit) {
 						Unit *former = unit->former;
@@ -404,7 +408,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 						if (!pCheck && getatsign)
 							unit->oldorders.Add(new AString(saveorder));
 
-						ProcessOrder(i, unit, order, pCheck);
+						ProcessOrder(code, unit, order, pCheck);
 					} else {
 						ParseError(pCheck, 0, fac,
 								"Order given without a unit selected.");
@@ -413,6 +417,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			}
 			SAFE_DELETE(token);
 		} else {
+			code = NORDERS;
 			if (!pCheck) {
 				if (getatsign && fac && unit)
 					unit->oldorders.Add(new AString(saveorder));
@@ -421,7 +426,13 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 		delete order;
 		if (pCheck) {
-			pCheck->pCheckFile->PutStr(saveorder);
+			if (code == O_ENDTURN || code == O_ENDFORM)
+				indent--;
+			for (i = 0, prefix = ""; i < indent; i++)
+				prefix += "  ";
+			pCheck->pCheckFile->PutStr(prefix + saveorder);
+			if (code == O_TURN || code == O_FORM)
+				indent++;
 		}
 
 		order = f->GetLine();

@@ -1501,7 +1501,8 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 void ARegion::WriteTemplate(Areport *f, Faction *fac,
 		ARegionList *pRegs, int month)
 {
-	int header = 0;
+	int header = 0, order;
+	AString temp, *token;
 
 	forlist (&objects) {
 		Object *o = (Object *) elem;
@@ -1536,29 +1537,55 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 					TurnOrder *tOrder;
 					forlist(&u->turnorders) {
 						tOrder = (TurnOrder *)elem;
-						if (first) {
-							forlist(&tOrder->turnOrders) {
-								f->PutStr(*((AString *) elem));
-							}
-							first = 0;
-						} else {
+						if (!first) {
 							if (tOrder->repeating)
 								f->PutStr(AString("@TURN"));
 							else
 								f->PutStr(AString("TURN"));
-
-							forlist(&tOrder->turnOrders) {
-								f->PutStr(*((AString *) elem));
-							}
+							f->AddTab();
+						}
+						forlist(&tOrder->turnOrders) {
+							temp = *((AString *) elem);
+							temp.getat();
+							token = temp.gettoken();
+							if (token) {
+								order = Parse1Order(token);
+								delete token;
+							} else
+								order = NORDERS;
+							if (order == O_ENDTURN || order == O_ENDFORM)
+								f->DropTab();
+							f->PutStr(*((AString *) elem));
+							if (order == O_TURN || order == O_FORM)
+								f->AddTab();
+						}
+						if (!first) {
+							f->DropTab();
 							f->PutStr(AString("ENDTURN"));
 						}
+						first = 0;
+						f->ClearTab();
 					}
 					tOrder = (TurnOrder *) u->turnorders.First();
 					if (tOrder->repeating) {
 						f->PutStr(AString("@TURN"));
+						f->AddTab();
 						forlist(&tOrder->turnOrders) {
+							temp = *((AString *) elem);
+							temp.getat();
+							token = temp.gettoken();
+							if (token) {
+								order = Parse1Order(token);
+								delete token;
+							} else
+								order = NORDERS;
+							if (order == O_ENDTURN || order == O_ENDFORM)
+								f->DropTab();
 							f->PutStr(*((AString *) elem));
+							if (order == O_TURN || order == O_FORM)
+								f->AddTab();
 						}
+						f->ClearTab();
 						f->PutStr(AString("ENDTURN"));
 					}
 				}
