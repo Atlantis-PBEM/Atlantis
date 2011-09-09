@@ -692,7 +692,10 @@ int Game::CountTaxes(ARegion *reg)
 			if (u->taxing == TAX_AUTO) u->taxing = TAX_TAX;
 
 			if (u->taxing == TAX_TAX) {
-				if (!reg->CanTax(u)) {
+				if (reg->Population() < 1) {
+					u->Error("TAX: No population to tax.");
+					u->taxing = TAX_NONE;
+				} else if (!reg->CanTax(u)) {
 					u->Error("TAX: A unit is on guard.");
 					u->taxing = TAX_NONE;
 				} else {
