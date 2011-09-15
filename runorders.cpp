@@ -43,7 +43,7 @@ void Game::RunOrders()
 	DoAutoAttacks();
 	Awrite("Running STEAL/ASSASSINATE Orders...");
 	RunStealOrders();
-	Awrite("Running GIVE/PAY/TRANSFER Orders...");
+	Awrite("Running GIVE Orders...");
 	DoGiveOrders();
 	Awrite("Running ENTER NEW Orders...");
 	RunEnterOrders(1);
