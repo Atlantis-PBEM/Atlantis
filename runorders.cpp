@@ -595,7 +595,9 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 			u->destroy = 0;
 			u->MoveUnit(dest);
 		}
-		quests.CheckQuestDemolishTarget(r, o->num, u);
+		if (quests.CheckQuestDemolishTarget(r, o->num, u)) {
+			u->Event("You have completed a quest!");
+		}
 		r->objects.Remove(o);
 		delete o;
 	} else {
@@ -1906,7 +1908,9 @@ void Game::AssessMaintenance()
 				Unit *u = (Unit *) elem;
 				if (!(u->faction->IsNPC())) {
 					r->visited = 1;
-					quests.CheckQuestVisitTarget(r, u);
+					if (quests.CheckQuestVisitTarget(r, u)) {
+						u->Event("You have completed a pilgrimage!");
+					}
 				}
 				u->needed = u->MaintCost();
 				u->hunger = u->GetMen() * Globals->UPKEEP_MINIMUM_FOOD;

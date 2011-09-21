@@ -210,7 +210,9 @@ void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
 		int numalive = u->GetSoldiers();
 		int numdead = u->losses;
 		if (!numalive) {
-			quests.CheckQuestKillTarget(u, spoils);
+			if (quests.CheckQuestKillTarget(u, spoils)) {
+				AddLine("Quest completed!");
+			}
 		}
 		forlist(&u->items) {
 			Item * i = (Item *) elem;

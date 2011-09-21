@@ -346,7 +346,7 @@ Faction *Game::CheckVictory()
 	Faction *f;
 	Skill *s;
 	Location *l;
-	AString message, filename;
+	AString message, times, temp, filename;
 	Arules wf;
 	map <string, int> vRegions, uvRegions;
 	map <string, int>::iterator it;
@@ -650,81 +650,96 @@ Faction *Game::CheckVictory()
 			f->exists = 0;
 			f->quit = QUIT_WON_GAME;
 			f->temformat = TEMPLATE_OFF;
-			message = "You have acquired ";
+			temp = " have acquired ";
 			if (reliccount == 1) {
-				message += "a ";
-				message += ItemDefs[I_RELICOFGRACE].name;
+				temp += "a ";
+				temp += ItemDefs[I_RELICOFGRACE].name;
 			} else {
-				message += reliccount;
-				message += " ";
-				message += ItemDefs[I_RELICOFGRACE].names;
+				temp += reliccount;
+				temp += " ";
+				temp += ItemDefs[I_RELICOFGRACE].names;
 			}
-			message += " and returned to the Eternal City.";
+			temp += " and returned to the Eternal City.";
+			message = AString("You") + temp;
+			times = *f->name + temp;
 			f->Event(message);
-			message = "You returned after ";
-			message += TurnNumber() - f->startturn;
-			message += " months, with ";
-			message += units;
-			message += " unit";
+			message = "You";
+			times += "\n\nThey";
+			temp = " returned after ";
+			temp += TurnNumber() - f->startturn;
+			temp += " months, with ";
+			temp += units;
+			temp += " unit";
 			if (units != 1)
-				message += "s";
-			message += " comprising ";
+				temp += "s";
+			temp += " comprising ";
 			if (leaders > 0) {
-				message += leaders;
-				message += " leader";
+				temp += leaders;
+				temp += " leader";
 				if (leaders != 1)
-					message += "s";
+					temp += "s";
 			}
 			if (leaders > 0 && men > 0)
-				message += " and ";
+				temp += " and ";
 			if (men > 0) {
-				message += men;
-				message += " other m";
+				temp += men;
+				temp += " other m";
 				if (leaders != 1)
-					message += "en";
+					temp += "en";
 				else
-					message += "an";
+					temp += "an";
 			}
+			message += temp;
+			times += temp;
 			if (silver > 0 || stuff > 0) {
 				message += ", and bringing with you ";
+				times += ", and bringing with them ";
+				temp = "";
 				if (silver > 0) {
-					message += silver;
-					message += " silver";
+					temp += silver;
+					temp += " silver";
 				}
 				if (silver > 0 && stuff > 0)
-					message += " and ";
+					temp += " and ";
 				if (stuff > 0) {
-					message += "goods worth ";
-					message += stuff;
-					message += " silver";
+					temp += "goods worth ";
+					temp += stuff;
+					temp += " silver";
 				}
-				message += ".";
+				temp += ".";
+				message += temp;
+				times += temp;
 			}
 			if (skilllevels > 0 || magiclevels > 0) {
-				message += "  You had acquired ";
+				temp = " had acquired ";
 				if (skilllevels > 0) {
-					message += skilllevels;
-					message += " level";
+					temp += skilllevels;
+					temp += " level";
 					if (skilllevels != 1)
-						message += "s";
-					message += " in mundane skills, worth ";
-					message += (int) (skilldays / 30);
-					message += " silver in tuition costs";
+						temp += "s";
+					temp += " in mundane skills, worth ";
+					temp += (int) (skilldays / 30);
+					temp += " silver in tuition costs";
 				}
 				if (skilllevels > 0 && magiclevels > 0)
-					message += ", and ";
+					temp += ", and ";
 				if (magiclevels > 0) {
-					message += magiclevels;
-					message += " level";
+					temp += magiclevels;
+					temp += " level";
 					if (magiclevels != 1)
-						message += "s";
-					message += " in magic skills, worth ";
-					message += (int) (magicdays / 30);
-					message += " silver in tuition costs";
+						temp += "s";
+					temp += " in magic skills, worth ";
+					temp += (int) (magicdays / 30);
+					temp += " silver in tuition costs";
 				}
-				message += ".";
+				temp += ".";
+				message += "  You";
+				message += temp;
+				times += "  They";
+				times += temp;
 			}
 			f->Event(message);
+			WriteTimesArticle(times);
 
 			filename = "winner.";
 			filename += f->num;
