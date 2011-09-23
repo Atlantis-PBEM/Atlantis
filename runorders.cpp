@@ -1408,6 +1408,9 @@ int Game::GetSellAmount(ARegion *r, Market *m)
 					if (o->num == -1) {
 						o->num = u->items.CanSell(o->item);
 					}
+					if (m->amount != -1 && o->num > m->amount) {
+						o->num = m->amount;
+					}
 					if (o->num < 0) o->num = 0;
 					u->items.Selling(o->item, o->num);
 					num += o->num;
@@ -1536,6 +1539,13 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 					}
 					if (o->num == -1) {
 						o->num = u->GetSharedMoney()/m->price;
+						if (m->amount != -1 && o->num > m->amount) {
+							o->num = m->amount;
+						}
+					}
+					if (m->amount != -1 && o->num > m->amount) {
+						o->num = m->amount;
+						u->Error("BUY: Unit attempted to buy more than were for sale.");
 					}
 					if (o->num * m->price > u->GetSharedMoney()) {
 						o->num = u->GetSharedMoney() / m->price;
