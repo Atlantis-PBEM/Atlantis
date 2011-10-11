@@ -1447,9 +1447,9 @@ AString *ShowSkill::Report(Faction *f)
 						temp2 += " and ";
 					temp2 += temp4;
 				}
-				if (f) {
-					f->DiscoverItem(i, 1, 1);
-				}
+			}
+			if (f) {
+				f->DiscoverItem(i, 1, 1);
 			}
 		}
 		sk2 = FindSkill(ItemDefs[i].pSkill);
