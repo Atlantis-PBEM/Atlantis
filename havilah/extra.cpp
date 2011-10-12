@@ -552,7 +552,7 @@ Faction *Game::CheckVictory()
 			count = getrandom(unvisited);
 			forlist(&regions) {
 				ARegion *r = (ARegion *)elem;
-				if (r->Population() > 0) {
+				if (r->Population() > 0 && !r->visited) {
 					if (!count--) {
 						message = "The people of the ";
 						message += r->ShortPrint(&regions);
