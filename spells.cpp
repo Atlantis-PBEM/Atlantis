@@ -1618,7 +1618,6 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 				good = 1;
 			if (order->gate == -2) {
 				good = 1;
-printf("Gate jump allowed across levels\n");
 			}
 			if (nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
 				good = 1;
