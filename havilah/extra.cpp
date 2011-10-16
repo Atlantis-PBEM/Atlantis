@@ -976,6 +976,9 @@ void Game::ModifyTablesPerRuleset(void)
 	// EnableItem(I_LANCE);
 	// EnableItem(I_JAVELIN);
 	// EnableItem(I_PIKE);
+	EnableItem(I_MSHIELD);
+	EnableItem(I_ISHIELD);
+	EnableItem(I_WSHIELD);
 	EnableItem(I_AEGIS);
 	EnableItem(I_WINDCHIME);
 	EnableItem(I_GATE_CRYSTAL);
