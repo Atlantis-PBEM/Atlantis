@@ -3190,18 +3190,26 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.LinkRef("economy_transport");
 		f.TagText("H3", "Transportation of goods");
 
-		temp = "Trade factions may train Quartermaster units.  A "
-			"Quartermaster unit, may accept ";
-		temp += f.Link("#transport", "TRANSPORT") + "ed items, from "
-			"any unit within " + Globals->LOCAL_TRANSPORT + " hexes "
-			"distance from the hex containing the quartermaster. ";
-		temp += "Quartermasters may also";
+		temp = "Trade factions may train Quartermaster units. "
+			"A Quartermaster unit may accept ";
+		temp += f.Link("#transport", "TRANSPORT") + "ed items from "
+			"any unit within " + Globals->LOCAL_TRANSPORT + " hex";
+		if (Globals->LOCAL_TRANSPORT != 1)
+			temp += "es";
+		temp +=	" distance from the hex containing the quartermaster. "
+			"Quartermasters may also ";
 		temp += f.Link("#distribute", "DISTRIBUTE") + " items to any "
-			"unit within " + Globals->LOCAL_TRANSPORT + " hexes "
-			"distance from the hex containing the quartermaster and may " +
-			f.Link("#transport", "TRANSPORT") + " items to another "
-			"quartermaster up to " + Globals->NONLOCAL_TRANSPORT +
-			" hexes distant.";
+			"unit within " + Globals->LOCAL_TRANSPORT + " hex";
+		if (Globals->LOCAL_TRANSPORT != 1)
+			temp += "es";
+		temp +=	" distance from the hex containing the quartermaster "
+			"and may ";
+		temp += f.Link("#transport", "TRANSPORT") +
+			" items to another quartermaster up to " +
+			Globals->NONLOCAL_TRANSPORT + " hex";
+		if (Globals->NONLOCAL_TRANSPORT != 1)
+			temp += "es";
+		temp += " distant.";
 		if (Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
 			temp += " The distance a quartermaster can ";
 			temp += f.Link("#transport", "TRANSPORT") + " items to "
@@ -3234,7 +3242,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 
 		if (Globals->SHIPPING_COST > 0) {
 			temp = "The cost of transport items from one quartermaster to "
-				"another is based on the weight of the items and costs $";
+				"another is based on the weight of the items and costs ";
 			temp += Globals->SHIPPING_COST;
 			temp += " silver per weight unit.";
 			if (Globals->TRANSPORT & GameDefs::QM_AFFECT_COST) {
@@ -3250,11 +3258,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += ", and a faction is limited in the number of "
 				"quartermasters it may have at any one time";
 		}
-		temp += ".  Both the ";
+		temp += ". Both the ";
 		temp += f.Link("#transport", "TRANSPORT") + " and " +
 			f.Link("#distribute", "DISTRIBUTE") + " orders count as "
 			"trade activity in the hex of the unit issuing the order. ";
-		temp += " The target unit must be at least FRIENDLY to the unit "
+		temp += "The target unit must be at least FRIENDLY to the unit "
 			"which issues the order.";
 		f.Paragraph(temp);
 	}
@@ -4632,7 +4640,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("h4", "DISTRIBUTE [unit] ALL [item]");
 		f.TagText("h4", "DISTRIBUTE [unit] ALL [item] EXCEPT [amount]");
 		temp = "Distribute the specified items to the given friendly unit. "
-			"In the second form, all of that item, are distributed.  In the "
+			"In the second form, all of that item are distributed.  In the "
 			"last form, all of that item except for the specified amount "
 			"are distributed.";
 		temp += " The unit issuing the distribute order must have the "
@@ -5579,10 +5587,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("h4", "TRANSPORT [unit] [num] [item]");
 		f.TagText("h4", "TRANSPORT [unit] ALL [item]");
 		f.TagText("h4", "TRANSPORT [unit] ALL [item] EXCEPT [amount]");
-		temp = "Transport the specified items to the given target.  In "
-			"the second form all of the specified item is transport.  In "
-			"the last form, all of the specified item except for the "
-			"specified amount is transport.";
+		temp = "Transport the specified items to the given target. "
+			"In the second form all of the specified item is "
+			"transported. "
+			"In the last form, all of the specified item except "
+			"for the specified amount is transported.";
 		if (Globals->SHIPPING_COST > 0) {
 			temp += " Long distance transportation of goods between ";
 			temp += Globals->LOCAL_TRANSPORT;
