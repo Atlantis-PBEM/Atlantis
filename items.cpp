@@ -419,8 +419,10 @@ AString ShowSpecial(char const *special, int level, int expandLevel, int fromIte
 	}
 
 	if (spd->effectflags & SpecialType::FX_SHIELD) {
-		if (!fromItem) temp += " This ability provides a shield against all ";
-		else temp += AString(" This spell provides the wielder with a defence bonus of ") + level + " against all ";
+		if (!fromItem)
+			temp += " This spell provides a shield against all ";
+		else
+			temp += AString(" This ability provides the wielder with a defence bonus of ") + level + " against all ";
 		comma = 0;
 		last = -1;
 		for (i = 0; i < 4; i++) {
@@ -436,14 +438,20 @@ AString ShowSpecial(char const *special, int level, int expandLevel, int fromIte
 		if (comma) {
 			temp += "and ";
 		}
-		if (fromItem) temp += DefType(spd->shield[last]) + " attacks.";
+		if (fromItem)
+			temp += DefType(spd->shield[last]) + " attacks.";
 		else {
-		temp += DefType(spd->shield[last]) + " attacks against the entire" +
-			" army at a level equal to the skill level of the ability.";
+			temp += DefType(spd->shield[last]) + " attacks against the entire" +
+				" army at a level equal to the skill level of the ability.";
 		}
 	}
 	if (spd->effectflags & SpecialType::FX_DEFBONUS) {
-		temp += " This ability provides ";
+		temp += " This ";
+		if (fromItem)
+			temp += "ability";
+		else
+			temp += "spell";
+		temp += " provides ";
 		comma = 0;
 		last = -1;
 		for (i = 0; i < 4; i++) {
