@@ -786,7 +786,11 @@ void Game::RunBuildHelpers(ARegion *r)
 							u->monthorders = 0;
 							continue;
 						}
-						if (target->build > 0) {
+						if (target->build == 0) {
+							// Help with whatever building the target is in
+							tarobj = target->object;
+							u->build = tarobj->num;
+						} else if (target->build > 0) {
 							u->build = target->build;
 							tarobj = r->GetObject(target->build);
 						} else {
