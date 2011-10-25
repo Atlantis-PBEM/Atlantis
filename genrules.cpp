@@ -534,12 +534,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", temp);
 		temp = "Trade (max trade regions";
 		if (qm_exist)
-			temp += "/quartermasters";
+			temp += " / quartermasters";
 		temp += ")";
 		f.TagText("th", temp);
 		temp = "Magic (max mages";
 		if (app_exist) {
-			temp += "/";
+			temp += " / ";
 			temp += Globals->APPRENTICE_NAME;
 			temp += "s";
 		}
@@ -558,19 +558,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.Enclose(1, "td align=\"center\" nowrap");
 			temp = AllowedTaxes(&fac);
 			if (Globals->TACTICS_NEEDS_WAR)
-				temp+= AString("/") + AllowedTacticians(&fac);
+				temp+= AString(" / ") + AllowedTacticians(&fac);
 			f.PutStr(temp);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\" nowrap");
 			temp = AllowedTrades(&fac);
 			if (qm_exist)
-				temp += AString("/") + AllowedQuarterMasters(&fac);
+				temp += AString(" / ") + AllowedQuarterMasters(&fac);
 			f.PutStr(temp);
 			f.Enclose(0, "td");
 			f.Enclose(1, "td align=\"center\" nowrap");
 			temp = AllowedMages(&fac);
 			if (app_exist)
-				temp += AString("/") + AllowedApprentices(&fac);
+				temp += AString(" / ") + AllowedApprentices(&fac);
 			f.PutStr(temp);
 			f.Enclose(0, "td");
 			f.Enclose(0, "tr");
@@ -652,7 +652,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if (qm_exist) {
 			temp += ", and ";
 			if (nq == 0)
-				temp += "count not possess any quartermasters";
+				temp += "could not possess any quartermasters";
 			else
 				temp += AString("could only possess ") + nq +
 					"quartermaster" + (nq == 1?"":"s");
