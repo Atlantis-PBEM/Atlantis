@@ -221,6 +221,9 @@ void Faction::Readin(Ainfile *f, ATL_VER v)
 		if (a->factionnum == num) delete a;
 		else attitudes.Add(a);
 	}
+
+	// if (skills.GetDays(S_BUILDING) > 1)
+	//	shows.Add(new ShowSkill(S_BUILDING, 2));
 }
 
 void Faction::View()
