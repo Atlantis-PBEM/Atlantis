@@ -369,6 +369,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if (has_stea)
 		f.TagText("li", f.Link("#steal", "steal"));
 	f.TagText("li", f.Link("#study", "study"));
+	f.TagText("li", f.Link("#take", "take"));
 	f.TagText("li", f.Link("#tax", "tax"));
 	f.TagText("li", f.Link("#teach", "teach"));
 	if (qm_exist)
@@ -5547,6 +5548,42 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("div", "rule", "");
+	f.LinkRef("give");
+	f.TagText("h4", "TAKE FROM [unit] [quantity] [item]");
+	f.TagText("h4", "TAKE FROM [unit] ALL [item]");
+	f.TagText("h4", "TAKE FROM [unit] ALL [item] EXCEPT [quantity]");
+	f.TagText("h4", "TAKE FROM [unit] ALL [item class]");
+	temp = "The TAKE order works just like the ";
+	temp += f.Link("#give", "GIVE");
+	temp += " order, except that the direction of transfer is reversed, "
+		"and with the extra condition that a unit may only TAKE "
+		"from another unit in the same faction. Since that makes "
+		"TAKE FROM [unit] UNIT pointless, that form of the ";
+	temp += f.Link("#give", "GIVE");
+	temp += " order is not supported.";
+	f.Paragraph(temp);
+	temp = "The TAKE order is primarily intended to make automated "
+		"delivery caravans less prone to generating errors, as "
+		"they can use TAKE to collect the appropriate goods only "
+		"when they are in the right place to collect, so the "
+		"supplying unit doesn't need to keep trying to ";
+	temp += f.Link("#give", "GIVE");
+	temp += " to a unit that is only there some of the time. "
+		"However, it can be used anywhere you wish to transfer "
+		"items, ships or men, just as ";
+	temp += f.Link("#give", "GIVE");
+	temp += " can.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "Take 10 swords from unit 4573.";
+	temp2 = "TAKE FROM 4573 10 swords";
+	f.CommandExample(temp, temp2);
+	temp = "See the ";
+	temp += f.Link("#turn", "TURN");
+	temp += " order for an example of a caravan using TAKE FROM.";
+	f.Paragraph(temp);
+
+	f.ClassTagText("div", "rule", "");
 	f.LinkRef("tax");
 	f.TagText("h4", "TAX");
 	temp = "Attempt to collect taxes from the region. ";
@@ -5655,26 +5692,27 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 += "    ADVANCE N\n";
 	temp2 += "ENDTURN";
 	f.CommandExample(temp, temp2);
-	temp = "Set up a simple cash caravan (It's assumed here that someone is "
-		"funnelling cash into this unit).";
+	temp = "Set up a simple cash caravan.";
 	temp2 = "MOVE N\n";
 	temp2 += "@TURN\n";
-	temp2 += "    GIVE 13523 1000 SILV\n";
+	temp2 += "    TAKE FROM 13794 1000 SILV\n";
 	temp2 += "    MOVE S S S\n";
 	temp2 += "ENDTURN\n";
 	temp2 += "@TURN\n";
+	temp2 += "    GIVE 13523 1000 SILV\n";
 	temp2 += "    MOVE N N N\n";
 	temp2 += "ENDTURN";
 	f.CommandExample(temp, temp2);
 	temp = "After the turn, the orders for that unit would look as "
 		"follows in the orders template:";
-	temp2 = "GIVE 13523 1000 SILV\n";
+	temp2 = "TAKE FROM 13794 1000 SILV\n";
 	temp2 += "MOVE S S S\n";
 	temp2 += "@TURN\n";
+	temp2 += "    GIVE 13523 1000 SILV\n";
 	temp2 += "    MOVE N N N\n";
 	temp2 += "ENDTURN\n";
 	temp2 += "@TURN\n";
-	temp2 += "    GIVE 13523 1000 SILV\n";
+	temp2 += "    TAKE FROM 13794 1000 SILV\n";
 	temp2 += "    MOVE S S S\n";
 	temp2 += "ENDTURN";
 	f.CommandExample(temp, temp2);

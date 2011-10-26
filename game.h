@@ -325,7 +325,7 @@ private:
 	void ProcessNameOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessDescribeOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessBehindOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessGiveOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ProcessGiveOrder(int, Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessWithdrawOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessDeclareOrder(Faction *, AString *, OrdersCheck *pCheck);
 	void ProcessStudyOrder(Unit *, AString *, OrdersCheck *pCheck);

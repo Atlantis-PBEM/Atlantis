@@ -113,6 +113,7 @@ enum {
 	O_SPOILS,
 	O_STEAL,
 	O_STUDY,
+	O_TAKE,
 	O_TAX,
 	O_TEACH,
 	O_TRANSPORT,

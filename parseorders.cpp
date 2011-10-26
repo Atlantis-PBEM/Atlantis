@@ -549,7 +549,7 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			ProcessWithdrawOrder(unit, o, pCheck);
 			break;
 		case O_GIVE:
-			ProcessGiveOrder(unit, o, pCheck);
+			ProcessGiveOrder(orderNum, unit, o, pCheck);
 			break;
 		case O_GUARD:
 			ProcessGuardOrder(unit, o, pCheck);
@@ -628,6 +628,9 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			break;
 		case O_STUDY:
 			ProcessStudyOrder(unit, o, pCheck);
+			break;
+		case O_TAKE:
+			ProcessGiveOrder(orderNum, unit, o, pCheck);
 			break;
 		case O_TAX:
 			ProcessTaxOrder(unit, pCheck);
@@ -2187,30 +2190,40 @@ void Game::ProcessExchangeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
+void Game::ProcessGiveOrder(int order, Unit *unit, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *t;
-	AString *token;
+	AString *token, ord;
 	int unfinished, amt, item, excpt;
+
+	if (order == O_TAKE) {
+		ord = "TAKE";
+		token = o->gettoken();
+		if (!token || !(*token == "from")) {
+			ParseError(pCheck, unit, 0, "TAKE: Missing FROM.");
+			return;
+		}
+	} else
+		ord = "GIVE";
 
 	t = ParseUnit(o);
 	if (!t) {
-		ParseError(pCheck, unit, 0, "GIVE: Invalid target.");
+		ParseError(pCheck, unit, 0, ord + ": Invalid target.");
 		return;
 	}
 	token = o->gettoken();
 	if (!token) {
-		ParseError(pCheck, unit, 0, "GIVE: No amount given.");
+		ParseError(pCheck, unit, 0, ord + ": No amount given.");
 		return;
 	}
-	if (*token == "unit") {
+	if (*token == "unit" && order == O_GIVE) {
 		amt = -1;
 	} else if (*token == "all") {
 		amt = -2;
 	} else {
 		amt = token->value();
 		if (amt < 1) {
-			ParseError(pCheck, unit, 0, "GIVE: Illegal amount given.");
+			ParseError(pCheck, unit, 0, ord + ": Illegal amount given.");
 			return;
 		}
 	}
@@ -2280,11 +2293,11 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 				}
 				if (!found) {
 					ParseError(pCheck, unit, 0,
-							"GIVE: Invalid item or item class.");
+							ord + ": Invalid item or item class.");
 					return;
 				}
 			} else if (item == -1) {
-				ParseError(pCheck, unit, 0, "GIVE: Invalid item.");
+				ParseError(pCheck, unit, 0, ord + ": Invalid item.");
 				return;
 			}
 			if (unfinished &&
@@ -2292,11 +2305,11 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 					item != -NITEMS &&
 					!(item >= 0 &&
 					ItemDefs[item].type & IT_SHIP)) {
-				ParseError(pCheck, unit, 0, "GIVE: That item does not have an unfinished version.");
+				ParseError(pCheck, unit, 0, ord + ": That item does not have an unfinished version.");
 				return;
 			}
 		} else {
-			ParseError(pCheck, unit, 0, "GIVE: No item given.");
+			ParseError(pCheck, unit, 0, ord + ": No item given.");
 			return;
 		}
 		delete token;
@@ -2309,34 +2322,35 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			delete token;
 			if (item < 0) {
 				ParseError(pCheck, unit, 0,
-						"GIVE: EXCEPT only valid with specific items.");
+						ord + ": EXCEPT only valid with specific items.");
 				return;
 			}
 			token = o->gettoken();
 			if (!token) {
-				ParseError(pCheck, unit, 0, "GIVE: EXCEPT requires a value.");
+				ParseError(pCheck, unit, 0, ord + ": EXCEPT requires a value.");
 				return;
 			}
 			excpt = token->value();
 			if (excpt <= 0) {
-				ParseError(pCheck, unit, 0, "GIVE: Invalid EXCEPT value.");
+				ParseError(pCheck, unit, 0, ord + ": Invalid EXCEPT value.");
 				return;
 			}
 		} else {
-			ParseError(pCheck, unit, 0, "GIVE: EXCEPT only valid with ALL");
+			ParseError(pCheck, unit, 0, ord + ": EXCEPT only valid with ALL");
 			return;
 		}
 		delete token;
 	}
 
 	if (!pCheck) {
-		GiveOrder *order = new GiveOrder;
-		order->item = item;
-		order->target = t;
-		order->amount = amt;
-		order->except = excpt;
-		order->unfinished = unfinished;
-		unit->giveorders.Add(order);
+		GiveOrder *go = new GiveOrder;
+		go->type = order;
+		go->item = item;
+		go->target = t;
+		go->amount = amt;
+		go->except = excpt;
+		go->unfinished = unfinished;
+		unit->giveorders.Add(go);
 	}
 	return;
 }

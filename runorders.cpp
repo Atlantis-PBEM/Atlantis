@@ -2131,6 +2131,8 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 void Game::DoGiveOrders()
 {
 	Item *item;
+	Unit *s;
+	Object *fleet;
 
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
@@ -2145,11 +2147,27 @@ void Game::DoGiveOrders()
 							/* do 'give X unit' command */
 							DoGiveOrder(r, u, o);
 						} else if (o->amount == -2) {
+							if (o->type == O_TAKE) {
+								s = r->GetUnitId(o->target, u->faction->num);
+								fleet = s->object;
+								if (!s || !u->CanSee(r, s)) {
+									u->Error(AString("TAKE: Nonexistant target (") +
+											o->target->Print() + ").");
+									continue;
+								} else if (u->faction != s->faction) {
+									u->Error(AString("TAKE: ") + o->target->Print() +
+											" is not a member of your faction.");
+									continue;
+								}
+							} else {
+								s = u;
+								fleet = obj;
+							}
 							/* do 'give all type' command */
-							if (obj->IsFleet() && u == obj->GetOwner() &&
+							if (fleet->IsFleet() && s == fleet->GetOwner() &&
 									!o->unfinished &&
 									(o->item == -NITEMS || o->item == -IT_SHIP)) {
-								forlist(&obj->ships) {
+								forlist(&fleet->ships) {
 									item = (Item *) elem;
 									GiveOrder go;
 									go.amount = item->num;
@@ -2161,7 +2179,7 @@ void Game::DoGiveOrders()
 									go.target = NULL;
 								}
 							}
-							forlist((&u->items)) {
+							forlist((&s->items)) {
 								item = (Item *) elem;
 								if ((o->item == -NITEMS) ||
 									(ItemDefs[item->type].type & (-o->item))) {
@@ -2191,7 +2209,10 @@ void Game::DoGiveOrders()
 								}
 							}
 						} else {
-							u->Error("GIVE: Invalid item.");
+							if (o->type == O_TAKE)
+								u->Error("TAKE: Invalid item.");
+							else
+								u->Error("GIVE: Invalid item.");
 						}
 					} else if (DoGiveOrder(r, u, o)) {
 						break;
@@ -2364,12 +2385,17 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 {
 	int hasitem, ship, num, shipcount, amt, newfleet, flying, cur;
 	int notallied, newlvl, oldlvl;
-	Item *it, *s;
-	Unit *p, *t;
+	Item *it, *sh;
+	Unit *p, *t, *s;
 	Object *fleet;
-	AString temp;
+	AString temp, ord;
 	Skill *skill;
 	SkillList *skills;
+
+	if (o->type == O_TAKE)
+		ord = "TAKE";
+	else
+		ord = "GIVE";
 
 	/* Transfer/GIVE ship items: */
 	if ((o->item >= 0) && (ItemDefs[o->item].type & IT_SHIP)) {
@@ -2415,8 +2441,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 				shipcount = 0;
 				forlist(&(u->object->ships)) {
-					s = (Item *) elem;
-					shipcount += s->num;
+					sh = (Item *) elem;
+					shipcount += sh->num;
 				}
 				if (shipcount <= o->amount) {
 					forlist(&(u->object->units)) {
@@ -2436,53 +2462,71 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		// GIVE to unit:	
 		t = r->GetUnitId(o->target, u->faction->num);
 		if (!t) {
-			u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
-				").");
+			u->Error(ord + ": Nonexistant target (" +
+				o->target->Print() + ").");
 			return 0;
-		} else if (t->faction->IsNPC()) {
-			u->Error(AString("GIVE: Can't give to non-player unit (") + o->target->Print() +
-				").");
+		} else if (o->type == O_TAKE && u->faction != t->faction) {
+			u->Error(ord + ": " + o->target->Print() +
+					" is not a member of your faction.");
+			return 0;
+		} else if (u->faction != t->faction && t->faction->IsNPC()) {
+			u->Error(ord + ": Can't give to non-player unit (" +
+				o->target->Print() + ").");
 			return 0;
 		}
 		if (u == t) {
-			u->Error(AString("GIVE: Attempt to give ")+ItemDefs[o->item].names+
-				" to self.");
+			if (o->type == O_TAKE)
+				u->Error(ord + ": Attempt to take " +
+					ItemDefs[o->item].names + " from self.");
+			else
+				u->Error(ord + ": Attempt to give " +
+					ItemDefs[o->item].names + " to self.");
 			return 0;
 		}
 		if (!u->CanSee(r, t) &&
 			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
-				u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
-					").");
+				u->Error(ord + ": Nonexistant target (" +
+					o->target->Print() + ").");
 				return 0;
 		}
 		if (t->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
-				u->Error("GIVE: Target is not a member of a friendly faction.");
+				u->Error(ord + ": Target is not a member of a friendly faction.");
 				return 0;
 		}
 		if (ItemDefs[o->item].flags & ItemType::CANTGIVE) {
-			u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".");
+			if (o->type == O_TAKE)
+				u->Error(ord + ": Can't take " +
+					ItemDefs[o->item].names + ".");
+			else
+				u->Error(ord + ": Can't give " +
+					ItemDefs[o->item].names + ".");
 			return 0;
+		}
+		s = u;
+		if (o->type == O_TAKE) {
+			s = t;
+			t = u;
 		}
 		// Check amount
 		if (o->unfinished) {
-			num = u->items.GetNum(o->item) > 0;
+			num = s->items.GetNum(o->item) > 0;
 		} else {
-			num = u->object->GetNumShips(o->item);
+			num = s->object->GetNumShips(o->item);
 			if (num < 1) {
-				u->Error("GIVE: no such ship in fleet.");
+				u->Error(ord + ": no such ship in fleet.");
 				return 0;
 			}
 		}
 		amt = o->amount;
 		if (amt != -2 && amt > num) {
-			u->Error("GIVE: Not enough.");
+			u->Error(ord + ": Not enough.");
 			amt = num;
 		} else if (amt == -2) {
 			amt = num;
 			if (o->except) {
 				if (o->except > amt) {
 					amt = 0;
-					u->Error("GIVE: EXCEPT value greater than amount on hand.");
+					u->Error(ord + ": EXCEPT value greater than amount on hand.");
 				} else {
 					amt = amt - o->except;
 				}
@@ -2495,34 +2539,42 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 		if (o->unfinished) {
 			if (t->items.GetNum(o->item) > 0) {
-				u->Error("GIVE: Target already has an unfinished ship of that type.");
+				if (o->type == O_TAKE)
+					u->Error(ord + ": Already have an unfinished ship of that type.");
+				else
+					u->Error(ord + ": Target already has an unfinished ship of that type.");
 				return 0;
 			}
 			it = new Item();
 			it->type = o->item;
-			it->num = u->items.GetNum(o->item);
-			u->Event(AString("Gives ") + it->Report(1) +
-				" to " + *t->name + ".");
-			if (u->faction != t->faction) {
-				t->Event(AString("Receives ") + it->Report(1) +
-					" from " + *u->name + ".");
+			it->num = s->items.GetNum(o->item);
+			if (o->type == O_TAKE) {
+				u->Event(AString("Takes ") + it->Report(1) +
+					" from " + *s->name + ".");
+			} else {
+				u->Event(AString("Gives ") + it->Report(1) +
+					" to " + *t->name + ".");
+				if (s->faction != t->faction) {
+					t->Event(AString("Receives ") + it->Report(1) +
+						" from " + *s->name + ".");
+				}
 			}
-			u->items.SetNum(o->item, 0);
+			s->items.SetNum(o->item, 0);
 			t->items.SetNum(o->item, it->num);
 			t->faction->DiscoverItem(o->item, 0, 1);
 		} else {
 			// Check we're not dumping passengers in the ocean
 			if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 				shipcount = 0;
-				forlist(&(u->object->ships)) {
-					s = (Item *) elem;
-					shipcount += s->num;
+				forlist(&(s->object->ships)) {
+					sh = (Item *) elem;
+					shipcount += sh->num;
 				}
 				if (shipcount <= amt) {
-					forlist(&(u->object->units)) {
+					forlist(&(s->object->units)) {
 						p = (Unit *) elem;
 						if ((!p->CanSwim() || p->GetFlag(FLAG_NOCROSS_WATER))) {
-							u->Error("GIVE: Can't give away our last ship in the ocean.");
+							u->Error(ord + ": Can't give away our last ship in the ocean.");
 							return 0;
 						}
 					}
@@ -2536,7 +2588,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				(t->num != t->object->GetOwner()->num)) newfleet = 1;
 			// or target fleet is not of compatible type
 			else {
-				flying = u->object->flying;
+				flying = t->object->flying;
 				if ((flying > 0) && (ItemDefs[o->item].fly < 1)) newfleet = 1;
 				if ((flying < 1) && (ItemDefs[o->item].fly > 0)) newfleet = 1;
 			}
@@ -2552,43 +2604,42 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			if (ItemDefs[o->item].max_inventory) {
 				cur = t->object->GetNumShips(o->item) + amt;
 				if (cur > ItemDefs[o->item].max_inventory) {
-					u->Error(AString("GIVE: Fleets cannot have more than ")+
+					u->Error(ord + ": Fleets cannot have more than "+
 						ItemString(o->item, ItemDefs[o->item].max_inventory) +".");
 					return 0;
 				}
 			}
-			u->Event(AString("Transfers ") + ItemString(o->item, amt) + " to " +
+			s->Event(AString("Transfers ") + ItemString(o->item, amt) + " to " +
 				*t->object->name + ".");
-			if (u->faction != t->faction) {
+			if (s->faction != t->faction) {
 				t->Event(AString("Receives ") + ItemString(o->item, amt) +
-					" from " + *u->object->name + ".");
+					" from " + *s->object->name + ".");
 			}
-			u->object->SetNumShips(o->item, u->object->GetNumShips(o->item)-amt);
+			s->object->SetNumShips(o->item, s->object->GetNumShips(o->item)-amt);
 			t->object->SetNumShips(o->item, t->object->GetNumShips(o->item)+amt);
 			t->faction->DiscoverItem(o->item, 0, 1);
 		}
 		return 0;
 	}
 	
-	// Check there is enough to give
-	amt = o->amount;
-	if (amt != -2 && amt > u->GetSharedNum(o->item)) {
-		u->Error("GIVE: Not enough.");
-		amt = u->GetSharedNum(o->item);
-	} else if (amt == -2) {
-		amt = u->items.GetNum(o->item);
-		if (o->except) {
-			if (o->except > amt) {
-				amt = 0;
-				u->Error("GIVE: EXCEPT value greater than amount on hand.");
-			} else {
-				amt = amt - o->except;
-			}
-		}
-	}
-
 	if (o->target->unitnum == -1) {
 		/* Give 0 */
+		// Check there is enough to give
+		amt = o->amount;
+		if (amt != -2 && amt > u->GetSharedNum(o->item)) {
+			u->Error(ord + ": Not enough.");
+			amt = u->GetSharedNum(o->item);
+		} else if (amt == -2) {
+			amt = u->items.GetNum(o->item);
+			if (o->except) {
+				if (o->except > amt) {
+					amt = 0;
+					u->Error("GIVE: EXCEPT value greater than amount on hand.");
+				} else {
+					amt = amt - o->except;
+				}
+			}
+		}
 		if (amt == -1) {
 			u->Error("Can't discard a whole unit.");
 			return 0;
@@ -2629,31 +2680,62 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 	t = r->GetUnitId(o->target, u->faction->num);
 	if (!t) {
-		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
-				").");
+		u->Error(ord + ": Nonexistant target (" +
+				o->target->Print() + ").");
 		return 0;
-	} else if (t->faction->IsNPC()) {
-		u->Error(AString("GIVE: Can't give to non-player unit (") + o->target->Print() +
-				").");
+	} else if (o->type == O_TAKE && u->faction != t->faction) {
+		u->Error(ord + ": " + o->target->Print() +
+				" is not a member of your faction.");
+		return 0;
+	} else if (u->faction != t->faction && t->faction->IsNPC()) {
+		u->Error(ord + ": Can't give to non-player unit (" +
+				o->target->Print() + ").");
 		return 0;
 	}
-
 	if (u == t) {
-		u->Error(AString("GIVE: Attempt to give ")+ItemString(o->item, amt)+
-				" to self.");
+		if (o->type == O_TAKE)
+			u->Error(ord + ": Attempt to take " + 
+					ItemString(o->item, amt) +
+					" from self.");
+		else
+			u->Error(ord + ": Attempt to give " + 
+					ItemString(o->item, amt) +
+					" to self.");
 		return 0;
 	}
-
 	// New RULE -- Must be able to see unit to give something to them!
 	if (!u->CanSee(r, t) &&
 			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
-		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
-				").");
+		u->Error(ord + ": Nonexistant target (" +
+				o->target->Print() + ").");
 		return 0;
 	}
 
+	s = u;
+	if (o->type == O_TAKE) {
+		s = t;
+		t = u;
+	}
+
+	// Check there is enough to give
+	amt = o->amount;
+	if (amt != -2 && amt > s->GetSharedNum(o->item)) {
+		u->Error(ord + ": Not enough.");
+		amt = s->GetSharedNum(o->item);
+	} else if (amt == -2) {
+		amt = s->items.GetNum(o->item);
+		if (o->except) {
+			if (o->except > amt) {
+				amt = 0;
+				u->Error(ord + ": EXCEPT value greater than amount on hand.");
+			} else {
+				amt = amt - o->except;
+			}
+		}
+	}
+
 	if (o->item != I_SILVER &&
-			t->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
+			t->faction->GetAttitude(s->faction->num) < A_FRIENDLY) {
 		u->Error("GIVE: Target is not a member of a friendly faction.");
 		return 0;
 	}
@@ -2746,29 +2828,29 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 	/* If the item to be given is a man, combine skills */
 	if (ItemDefs[o->item].type & IT_MAN) {
-		if (u->type == U_MAGE || u->type == U_APPRENTICE ||
+		if (s->type == U_MAGE || s->type == U_APPRENTICE ||
 				t->type == U_MAGE || t->type == U_APPRENTICE) {
-			u->Error("GIVE: Magicians can't transfer men.");
+			u->Error(ord + ": Magicians can't transfer men.");
 			return 0;
 		}
 		if (Globals->TACTICS_NEEDS_WAR) {
-			if (u->GetSkill(S_TACTICS) == 5 ||
+			if (s->GetSkill(S_TACTICS) == 5 ||
 					t->GetSkill(S_TACTICS) == 5) {
-				u->Error("GIVE: Tacticians can't transfer men.");
+				u->Error(ord + ": Tacticians can't transfer men.");
 				return 0;
 			}
 		}
-		if (u->GetSkill(S_QUARTERMASTER) > 0 || t->GetSkill(S_QUARTERMASTER) > 0) {
-			u->Error("GIVE: Quartermasters can't transfer men.");
+		if (s->GetSkill(S_QUARTERMASTER) > 0 || t->GetSkill(S_QUARTERMASTER) > 0) {
+			u->Error(ord + ": Quartermasters can't transfer men.");
 			return 0;
 		}
 
 		if ((ItemDefs[o->item].type & IT_LEADER) && t->IsNormal()) {
-			u->Error("GIVE: Can't mix leaders and normal men.");
+			u->Error(ord + ": Can't mix leaders and normal men.");
 			return 0;
 		} else {
 			if (!(ItemDefs[o->item].type & IT_LEADER) && t->IsLeader()) {
-				u->Error("GIVE: Can't mix leaders and normal men.");
+				u->Error(ord + ": Can't mix leaders and normal men.");
 				return 0;
 			}
 		}
@@ -2779,38 +2861,43 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		}
 
 		if (u->faction != t->faction) {
-			u->Error("GIVE: Can't give men to another faction.");
+			u->Error(ord + ": Can't give men to another faction.");
 			return 0;
 		}
 
-		if (u->nomove) t->nomove = 1;
+		if (s->nomove) t->nomove = 1;
 
-		skills = u->skills.Split(u->GetMen(), amt);
+		skills = s->skills.Split(s->GetMen(), amt);
 		t->skills.Combine(skills);
 		delete skills;
 	}
 
 	if (ItemDefs[o->item].flags & ItemType::CANTGIVE) {
-		u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".");
+		u->Error(ord + ": Can't give " + ItemDefs[o->item].names + ".");
 		return 0;
 	}
 
 	if (ItemDefs[o->item].max_inventory) {
 		cur = t->items.GetNum(o->item) + amt;
 		if (cur > ItemDefs[o->item].max_inventory) {
-			u->Error(AString("GIVE: Unit cannot have more than ")+
+			u->Error(ord + ": Unit cannot have more than "+
 					ItemString(o->item, ItemDefs[o->item].max_inventory));
 			return 0;
 		}
 	}
 
-	u->Event(AString("Gives ") + ItemString(o->item, amt) + " to " +
-			*t->name + ".");
-	if (u->faction != t->faction) {
-		t->Event(AString("Receives ") + ItemString(o->item, amt) +
-				" from " + *u->name + ".");
+	if (o->type == O_TAKE) {
+		u->Event(AString("Takes ") + ItemString(o->item, amt) +
+				" from " + *s->name + ".");
+	} else {
+		u->Event(AString("Gives ") + ItemString(o->item, amt) + " to " +
+				*t->name + ".");
+		if (s->faction != t->faction) {
+			t->Event(AString("Receives ") + ItemString(o->item, amt) +
+					" from " + *s->name + ".");
+		}
 	}
-	u->ConsumeShared(o->item, amt);
+	s->ConsumeShared(o->item, amt);
 	t->items.SetNum(o->item, t->items.GetNum(o->item) + amt);
 	t->faction->DiscoverItem(o->item, 0, 1);
 

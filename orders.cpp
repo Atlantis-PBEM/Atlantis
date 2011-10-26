@@ -82,6 +82,7 @@ char const *od[] = {
 	"spoils",
 	"steal",
 	"study",
+	"take",
 	"tax",
 	"teach",
 	"transport",
