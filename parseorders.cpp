@@ -2211,6 +2211,10 @@ void Game::ProcessGiveOrder(int order, Unit *unit, AString *o, OrdersCheck *pChe
 		ParseError(pCheck, unit, 0, ord + ": Invalid target.");
 		return;
 	}
+	if (t->unitnum == -1 && order == O_TAKE) {
+		ParseError(pCheck, unit, 0, ord + ": Invalid target.");
+		return;
+	}
 	token = o->gettoken();
 	if (!token) {
 		ParseError(pCheck, unit, 0, ord + ": No amount given.");
