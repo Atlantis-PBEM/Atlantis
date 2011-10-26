@@ -5548,7 +5548,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("div", "rule", "");
-	f.LinkRef("give");
+	f.LinkRef("take");
 	f.TagText("h4", "TAKE FROM [unit] [quantity] [item]");
 	f.TagText("h4", "TAKE FROM [unit] ALL [item]");
 	f.TagText("h4", "TAKE FROM [unit] ALL [item] EXCEPT [quantity]");
