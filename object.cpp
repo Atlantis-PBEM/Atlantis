@@ -276,9 +276,6 @@ Unit *Object::ForbiddenBy(ARegion *reg, Unit *u)
 Unit *Object::GetOwner()
 {
 	Unit *owner = (Unit *) units.First();
-	while(owner && !owner->GetMen()) {
-		owner = (Unit *) units.Next(owner);
-	}
 	return(owner);
 }
 
@@ -328,9 +325,9 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 			temp += AString(" Load: ") + FleetLoad() + "/" + FleetCapacity() + ";";
 			temp += AString(" Sailors: ") + FleetSailingSkill(1) + "/" + GetFleetSize() + ";";
 			temp += AString(" MaxSpeed: ") + GetFleetSpeed(1);
-			if (describe) {
-				temp += AString("; ") + *describe;
-			}
+		}
+		if (describe) {
+			temp += AString("; ") + *describe;
 		}
 		temp += ".";
 		f->PutStr(temp);

@@ -2510,6 +2510,10 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		// Check amount
 		if (o->unfinished) {
 			num = s->items.GetNum(o->item) > 0;
+		} else if (!(s->object->IsFleet()) || 
+			(s->num != s->object->GetOwner()->num)) {
+			u->Error(ord + ": only fleet owner can transfer ships.");
+			return 0;
 		} else {
 			num = s->object->GetNumShips(o->item);
 			if (num < 1) {
