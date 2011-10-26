@@ -5855,7 +5855,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "li");
 	f.PutStr("Give orders.");
 	f.Enclose(1, "ul");
-	temp = f.Link("#give", "GIVE") + " orders are processed.";
+	temp = f.Link("#give", "GIVE") + " and " + f.Link("#take", "TAKE") +
+		" orders are processed.";
 	f.TagText("li", temp);
 	temp = f.Link("#exchange", "EXCHANGE") + " orders are processed.";
 	f.TagText("li", temp);
