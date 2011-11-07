@@ -972,10 +972,16 @@ void Game::RunEnterOrders(int phase)
 			Object *o = (Object *) elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
-				// normal enter phase or NEW enter phase?
-				if ((((u->enter > 0) || (u->enter == -1)) && (phase == 0)) 
-					|| ((u->enter <= -2) && (phase == 1)))
+				// normal enter phase or ENTER NEW / JOIN phase?
+				if (phase == 0) {
+					if (u->enter > 0 || u->enter == -1)
 						Do1EnterOrder(r, o, u);
+				} else {
+					if (u->enter <= -2)
+						Do1EnterOrder(r, o, u);
+					if (u->joinorders)
+						Do1JoinOrder(r, o, u);
+				}
 			}
 		}
 	}
@@ -1015,6 +1021,100 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 		}
 		if (to->ForbiddenBy(r, u)) {
 			u->Error("ENTER: Is refused entry.");
+			return;
+		}
+	}
+	u->MoveUnit(to);
+}
+
+void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
+{
+	JoinOrder *jo;
+	Unit *tar, *pass;
+	Object *to, *from;
+	Item *item;
+
+	jo = (JoinOrder *) u->joinorders;
+	tar = r->GetUnitId(jo->target, u->faction->num);
+
+	if (!tar) {
+		u->Error("JOIN: No such unit.");
+		return;
+	}
+
+	to = tar->object;
+	if (!to) {
+		u->Error("JOIN: Can't enter that.");
+		return;
+	}
+
+	if (u->object == to) {
+		// We're already there!
+		return;
+	}
+
+	if (jo->merge) {
+		if (!u->object->IsFleet() ||
+				u->object->GetOwner()->num != u->num) {
+			u->Error("JOIN MERGE: Not fleet owner.");
+			return;
+		}
+		if (!to->IsFleet()) {
+			u->Error("JOIN MERGE: Target unit is not in a fleet.");
+			return;
+		}
+		forlist(&u->object->units) {
+			pass = (Unit *) elem;
+			if (to->ForbiddenBy(r, pass)) {
+				u->Error("JOIN MERGE: A unit would be refused entry.");
+				return;
+			}
+		}
+		from = u->object;
+		forlist_reuse(&from->ships) {
+			item = (Item *) elem;
+			GiveOrder go;
+			UnitId id;
+			go.amount = item->num;
+			go.except = 0;
+			go.item = item->type;
+			id.unitnum = to->GetOwner()->num;
+			id.alias = 0;
+			id.faction = 0;
+			go.target = &id;
+			go.type = O_GIVE;
+			DoGiveOrder(r, u, &go);
+			go.target = NULL;
+		}
+		forlist_reuse(&u->object->units) {
+			pass = (Unit *) elem;
+			pass->MoveUnit(to);
+		}
+
+		return;
+	}
+
+	if (to == r->GetDummy()) {
+		if ((TerrainDefs[r->type].similar_type == R_OCEAN) &&
+				(!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER))) {
+			u->Error("JOIN: Can't leave a ship in the ocean.");
+			return;
+		}
+		if (u->object->IsFleet() && u->CanSwim())
+			u->leftShip = 1;
+	} else {
+		if (!to->CanEnter(r, u)) {
+			u->Error("JOIN: Can't enter that.");
+			return;
+		}
+		if (to->ForbiddenBy(r, u)) {
+			u->Error("JOIN: Is refused entry.");
+			return;
+		}
+		if (to->IsFleet() &&
+				!jo->overload &&
+				to->FleetCapacity() < to->FleetLoad() + u->Weight()) {
+			u->Event("JOIN: Fleet would be overloaded.");
 			return;
 		}
 	}

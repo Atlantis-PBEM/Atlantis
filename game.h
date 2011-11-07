@@ -375,6 +375,7 @@ private:
 	void ProcessDistributeOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
 	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int);
+	void ProcessJoinOrder(Unit *, AString *, OrdersCheck *pCheck);
 
 	void RemoveInactiveFactions();
 
@@ -504,6 +505,7 @@ private:
 	void RemoveEmptyObjects();
 	void RunEnterOrders(int);
 	void Do1EnterOrder(ARegion *, Object *, Unit *);
+	void Do1JoinOrder(ARegion *, Object *, Unit *);
 	void RunPromoteOrders();
 	void Do1PromoteOrder(Object *, Unit *);
 	void Do1EvictOrder(Object *, Unit *);

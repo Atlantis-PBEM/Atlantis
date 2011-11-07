@@ -291,6 +291,7 @@ class Unit : public AListElem
 		Order *presentMonthOrders;
 		int presentTaxing;
 		AList transportorders;
+		Order *joinorders;
 		Unit *former;
 
 		// Used for tracking VISIT quests

@@ -334,6 +334,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#give", "give"));
 	f.TagText("li", f.Link("#guard", "guard"));
 	f.TagText("li", f.Link("#hold", "hold"));
+	f.TagText("li", f.Link("#join", "join"));
 	f.TagText("li", f.Link("#leave", "leave"));
 	f.TagText("li", f.Link("#move", "move"));
 	f.TagText("li", f.Link("#name", "name"));
@@ -4962,6 +4963,39 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("div", "rule", "");
+	f.LinkRef("join");
+	f.TagText("h4", "JOIN [unit]");
+	f.TagText("h4", "JOIN [unit] NOOVERLOAD");
+	f.TagText("h4", "JOIN [unit] MERGE");
+	temp = "Attempt to enter the building or fleet that the specified "
+		"unit is currently inside.  This is particularly useful if "
+		"you don't know what the building or fleet number will be, "
+		"as is the case when a new fleet is created.";
+	f.Paragraph(temp);
+	temp = "If the target unit is not inside a building or fleet, then "
+		"the unit issuing the JOIN command will leave any building "
+		"or fleet that they happen to be inside, to be with the "
+		"target.";
+	f.Paragraph(temp);
+	temp = "If the NOOVERLOAD flag is specified, and the target unit ends "
+		"up on board a fleet, then the unit issuing the JOIN command "
+		"will only attempt to board the fleet if the fleet would be "
+		"able to sail with the issuing units' weight loaded on board.";
+	f.Paragraph(temp);
+	temp = "The MERGE flag may only be used by the owner of a fleet, "
+		"and will cause the entire fleet they command to join the "
+		"fleet owned by the specified unit - first the units on "
+		"board will move to the other fleet, then all the ships "
+		"of the fleet will be given to the target fleet. "
+		"This command will fail if any unit in the fleet to be "
+		"merged would be denied entry to the target fleet.";
+	f.Paragraph(temp);
+	f.Paragraph("Example:");
+	temp = "Instruct the unit to enter the building or fleet that unit 17 is in.";
+	temp2 = "JOIN 17";
+	f.CommandExample(temp, temp2);
+
+	f.ClassTagText("div", "rule", "");
 	f.LinkRef("leave");
 	f.TagText("h4", "LEAVE");
 	temp = "Leave the object you are currently in.";
@@ -5857,6 +5891,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(1, "ul");
 	temp = f.Link("#give", "GIVE") + " and " + f.Link("#take", "TAKE") +
 		" orders are processed.";
+	f.TagText("li", temp);
+	temp = f.Link("#join", "JOIN") + " orders are processed.";
 	f.TagText("li", temp);
 	temp = f.Link("#exchange", "EXCHANGE") + " orders are processed.";
 	f.TagText("li", temp);

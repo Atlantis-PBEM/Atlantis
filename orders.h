@@ -91,6 +91,7 @@ enum {
 	O_GUARD,
 	O_HOLD,
 	O_IDLE,
+	O_JOIN,
 	O_LEAVE,
 	O_MOVE,
 	O_NAME,
@@ -402,6 +403,16 @@ class TransportOrder : public Order {
 		int except;
 
 		UnitId *target;
+};
+
+class JoinOrder : public Order {
+	public:
+		JoinOrder();
+		~JoinOrder();
+
+		UnitId *target;
+		int overload;
+		int merge;
 };
 
 #endif

@@ -557,6 +557,9 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_HOLD:
 			ProcessHoldOrder(unit, o, pCheck);
 			break;
+		case O_JOIN:
+			ProcessJoinOrder(unit, o, pCheck);
+			break;
 		case O_LEAVE:
 			ProcessLeaveOrder(unit, pCheck);
 			break;
@@ -3092,6 +3095,34 @@ void Game::ProcessShareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 	if (!pCheck) {
 		u->SetFlag(FLAG_SHARING, val);
+	}
+}
+
+void Game::ProcessJoinOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	int overload = 1;
+	int merge = 0;
+
+	UnitId *id = ParseUnit(o);
+	if (!id || id->unitnum == -1) {
+		ParseError(pCheck, u, 0, "JOIN: No target given.");
+		return;
+	}
+	AString *token = o->gettoken();
+	if (token) {
+		if (*token == "nooverload")
+			overload = 0;
+		else if (*token == "merge")
+			merge = 1;
+		delete token;
+	}
+	if (!pCheck) {
+		JoinOrder *ord = new JoinOrder;
+		ord->target = id;
+		ord->overload = overload;
+		ord->merge = merge;
+		if (u->joinorders) delete u->joinorders;
+		u->joinorders = ord;
 	}
 }
 

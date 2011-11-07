@@ -60,6 +60,7 @@ char const *od[] = {
 	"guard",
 	"hold",
 	"idle",
+	"join",
 	"leave",
 	"move",
 	"name",
@@ -360,5 +361,15 @@ CastTransmuteOrder::CastTransmuteOrder()
 
 CastTransmuteOrder::~CastTransmuteOrder()
 {
+}
+
+JoinOrder::JoinOrder()
+{
+	type = O_JOIN;
+}
+
+JoinOrder::~JoinOrder()
+{
+	if (target) delete target;
 }
 

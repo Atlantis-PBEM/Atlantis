@@ -83,6 +83,7 @@ Unit::Unit()
 	monthorders = NULL;
 	castorders = NULL;
 	teleportorders = NULL;
+	joinorders = NULL;
 	inTurnBlock = 0;
 	presentTaxing = 0;
 	presentMonthOrders = NULL;
