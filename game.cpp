@@ -1848,6 +1848,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		u->SetName(s);
 		u->type = U_GUARD;
 		u->guard = GUARD_GUARD;
+		u->reveal = REVEAL_FACTION;
 	} else {
 		/* non-leader guards */
 		int n = 3 * num / 4;
@@ -1860,6 +1861,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		u->SetName(s);
 		u->type = U_GUARD;
 		u->guard = GUARD_GUARD;
+		u->reveal = REVEAL_FACTION;
 		u2 = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
 			plate, 1);
 		if (IV) u2->items.SetNum(I_AMULETOFI,num);
@@ -1868,6 +1870,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		u2->SetName(un);
 		u2->type = U_GUARD;
 		u2->guard = GUARD_GUARD;
+		u2->reveal = REVEAL_FACTION;
 	}			
 	
 	if (AC) {
