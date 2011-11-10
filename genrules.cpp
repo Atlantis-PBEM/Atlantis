@@ -4665,16 +4665,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"another object, the unit will first leave the object it is "
 		"currently in.  The order will only work if the target object is "
 		"unoccupied, or is owned by a unit in your faction, or is owned by "
-		"a unit which has declared you Friendly. "
-		"Specifying NEW and an alias number will attempt to enter a new fleet "
-		"that is split off using the GIVE command. ";
+		"a faction which has declared you Friendly.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Enter fleet number 114.";
 	temp2 = "ENTER 114";
-	f.CommandExample(temp, temp2);
-	temp = "Enter the first split-off fleet.";
-	temp2 = "ENTER NEW 1";
 	f.CommandExample(temp, temp2);
 
 	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
@@ -4984,9 +4979,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	temp = "The MERGE flag may only be used by the owner of a fleet, "
 		"and will cause the entire fleet they command to join the "
-		"fleet owned by the specified unit - first the units on "
-		"board will move to the other fleet, then all the ships "
-		"of the fleet will be given to the target fleet. "
+		"fleet owned by the specified unit - the units on board "
+		"will move to the other fleet, and all the ships of the "
+		"fleet will be given to the target fleet. "
 		"This command will fail if any unit in the fleet to be "
 		"merged would be denied entry to the target fleet.";
 	f.Paragraph(temp);

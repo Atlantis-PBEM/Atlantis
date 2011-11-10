@@ -977,8 +977,6 @@ void Game::RunEnterOrders(int phase)
 					if (u->enter > 0 || u->enter == -1)
 						Do1EnterOrder(r, o, u);
 				} else {
-					if (u->enter <= -2)
-						Do1EnterOrder(r, o, u);
 					if (u->joinorders)
 						Do1JoinOrder(r, o, u);
 				}
@@ -1001,14 +999,6 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 		if (in->IsFleet() && u->CanSwim()) u->leftShip = 1;
 	} else {
 		int on = u->enter;
-		// alias?
-		if (on < 0) {
-			on = r->ResolveFleetAlias(-(on+1));
-			if (on < 1) {
-				u->Error("ENTER: NEW fleet doesn't exist.");
-				return;
-			}
-		}
 		to = r->GetObject(on);
 		u->enter = 0;
 		if (!to) {

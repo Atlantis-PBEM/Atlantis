@@ -1505,27 +1505,14 @@ void Game::ProcessLeaveOrder(Unit *u, OrdersCheck *pCheck)
 
 void Game::ProcessEnterOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	AString *token = o->gettoken();
-	if (!token) {
-		ParseError(pCheck, u, 0, "ENTER: No object specified.");
-		return;
+	AString *token;
+	int i = 0;
+
+	token = o->gettoken();
+	if (token) {
+		i = token->value();
+		delete token;
 	}
-	// enter NEW?
-	int newfleet = 0;
-	if (*token == "new") {
-		newfleet = 1;
-		token = o->gettoken();
-		if (!token) {
-			ParseError(pCheck, u, 0, "ENTER NEW: no alias specified.");
-			return;
-		}
-	}
-	int i = token->value();
-	// negative obj# for new alias
-	if (newfleet == 1) {
-		i = -(i+1);
-	}
-	delete token;
 	if (i) {
 		if (!pCheck) {
 			u->enter = i;
