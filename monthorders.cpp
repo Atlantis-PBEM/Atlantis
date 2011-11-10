@@ -153,7 +153,8 @@ void Game::RunMovementOrders()
 				u = (Unit *) elem;
 				if (!u->nomove &&
 						u->monthorders &&
-						u->monthorders->type == O_MOVE) {
+						(u->monthorders->type == O_MOVE ||
+						u->monthorders->type == O_ADVANCE)) {
 					mo = (MoveOrder *) u->monthorders;
 					d = (MoveDir *) mo->dirs.First();
 					if (u->savedmovedir != d->dir)
@@ -165,17 +166,18 @@ void Game::RunMovementOrders()
 					u->savedmovedir = -1;
 				}
 				if (u->monthorders && 
-						u->monthorders->type == O_MOVE) {
+						(u->monthorders->type == O_MOVE ||
+						u->monthorders->type == O_ADVANCE)) {
 					mo = (MoveOrder *) u->monthorders;
 					if (mo->dirs.Num() > 0) {
-						u->Event("MOVE: Unit has insufficient movement points;"
-								" remaining moves queued.");
-						tOrder = new TurnOrder;
-						tOrder->repeating = 0;
 						if (mo->advancing)
 							order = "ADVANCE";
 						else
 							order = "MOVE";
+						u->Event(order + ": Unit has insufficient movement points;"
+								" remaining moves queued.");
+						tOrder = new TurnOrder;
+						tOrder->repeating = 0;
 						forlist(&mo->dirs) {
 							d = (MoveDir *) elem;
 							order += " ";
