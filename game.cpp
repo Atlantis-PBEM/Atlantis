@@ -1901,6 +1901,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		s = new AString("City Mage");
 		u->SetName(s);
 		u->type = U_GUARDMAGE;
+		u->reveal = REVEAL_FACTION;
 		u->SetMen(I_LEADERS,1);
 		if (IV) u->items.SetNum(I_AMULETOFI,1);
 		u->SetMoney(Globals->GUARD_MONEY);
