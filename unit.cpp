@@ -124,6 +124,7 @@ Unit::Unit(int seq, Faction *f, int a)
 	monthorders = NULL;
 	castorders = NULL;
 	teleportorders = NULL;
+	joinorders = NULL;
 	inTurnBlock = 0;
 	presentTaxing = 0;
 	presentMonthOrders = NULL;
