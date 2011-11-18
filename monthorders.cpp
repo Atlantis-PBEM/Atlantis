@@ -151,11 +151,12 @@ void Game::RunMovementOrders()
 			o = (Object *) elem;
 			forlist(&o->units) {
 				u = (Unit *) elem;
+				mo = (MoveOrder *) u->monthorders;
 				if (!u->nomove &&
 						u->monthorders &&
 						(u->monthorders->type == O_MOVE ||
-						u->monthorders->type == O_ADVANCE)) {
-					mo = (MoveOrder *) u->monthorders;
+						u->monthorders->type == O_ADVANCE) &&
+						mo->dirs.Num() > 0) {
 					d = (MoveDir *) mo->dirs.First();
 					if (u->savedmovedir != d->dir)
 						u->savedmovement = 0;
