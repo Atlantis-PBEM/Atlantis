@@ -342,7 +342,9 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 							ParseError(pCheck, unit, fac, "FORM: cannot nest.");
 						}
 						else {
-							unit = ProcessFormOrder(unit, order, pCheck);
+							unit = ProcessFormOrder(unit, order, pCheck, getatsign);
+							if (!pCheck && unit && unit->former && unit->former->format)
+								unit->former->oldorders.Add(new AString(saveorder));
 							if (!pCheck) {
 								if (unit) unit->ClearOrders();
 							}
@@ -360,6 +362,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						if (unit->inTurnBlock)
 							ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
+							if (!pCheck && unit->former && unit->former->format)
+								unit->former->oldorders.Add(new AString(saveorder));
 						if (pCheck && former) delete unit;
 						unit = former;
 					} else {
@@ -376,6 +380,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					// faction is 0 if checking syntax only, not running turn.
 					if (faction != 0) {
 						AString *retval;
+						if (!pCheck && unit->former && unit->former->format)
+							unit->former->oldorders.Add(new AString(saveorder));
 						retval = ProcessTurnOrder(unit, f, pCheck, getatsign);
 						if (retval) {
 							delete order;
@@ -399,6 +405,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					unit->taxing = unit->presentTaxing;
 					unit->presentTaxing = 0;
 					unit->inTurnBlock = 0;
+					if (!pCheck && unit->former && unit->former->format)
+						unit->former->oldorders.Add(new AString(saveorder));
 				} else
 					ParseError(pCheck, unit, fac, "ENDTURN: without TURN.");
 				break;
@@ -407,6 +415,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					if (unit) {
 						if (!pCheck && getatsign)
 							unit->oldorders.Add(new AString(saveorder));
+						if (!pCheck && unit->former && unit->former->format)
+							unit->former->oldorders.Add(new AString(saveorder));
 
 						ProcessOrder(code, unit, order, pCheck);
 					} else {
@@ -2088,6 +2098,8 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 					tOrder->turnOrders.Add(new AString(saveorder));
 					break;
 			}
+			if (!pCheck && unit->former && unit->former->format)
+				unit->former->oldorders.Add(new AString(saveorder));
 			delete token;
 		}
 		delete order;
@@ -2753,7 +2765,7 @@ void Game::ProcessAvoidOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck)
+Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck, int atsign)
 {
 	AString *t = o->gettoken();
 	if (!t) {
@@ -2770,6 +2782,7 @@ Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck)
 	if (pCheck) {
 		Unit *retval = new Unit;
 		retval->former = former;
+		former->format = atsign;
 		return retval;
 	} else {
 		if (former->object->region->GetUnitAlias(an, former->faction->num)) {
@@ -2781,6 +2794,7 @@ Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck)
 		temp->DefaultOrders(former->object);
 		temp->MoveUnit(former->object);
 		temp->former = former;
+		former->format = atsign;
 		return temp;
 	}
 }

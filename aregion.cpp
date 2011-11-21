@@ -1528,8 +1528,21 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 					f->PutStr(u->TemplateReport(), 1);
 				}
 				forlist(&(u->oldorders)) {
+					temp = *((AString *) elem);
+					temp.getat();
+					token = temp.gettoken();
+					if (token) {
+						order = Parse1Order(token);
+						delete token;
+					} else
+						order = NORDERS;
+					if (order == O_ENDTURN || order == O_ENDFORM)
+						f->DropTab();
 					f->PutStr(*((AString *) elem));
+					if (order == O_TURN || order == O_FORM)
+						f->AddTab();
 				}
+				f->ClearTab();
 				u->oldorders.DeleteAll();
 
 				if (u->turnorders.First()) {

@@ -318,7 +318,7 @@ private:
 	void ProcessMoveOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessAdvanceOrder(Unit *, AString *, OrdersCheck *pCheck);
 	Unit *ProcessFormOrder(Unit *former, AString *order,
-							OrdersCheck *pCheck);
+					   OrdersCheck *pCheck, int atsign);
 	void ProcessAddressOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessAvoidOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessGuardOrder(Unit *, AString *, OrdersCheck *pCheck);

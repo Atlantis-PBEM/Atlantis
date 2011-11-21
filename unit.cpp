@@ -88,6 +88,7 @@ Unit::Unit()
 	presentTaxing = 0;
 	presentMonthOrders = NULL;
 	former = NULL;
+	format = 0;
 	free = 0;
 	practiced = 0;
 	moved = 0;
@@ -129,6 +130,7 @@ Unit::Unit(int seq, Faction *f, int a)
 	presentTaxing = 0;
 	presentMonthOrders = NULL;
 	former = NULL;
+	format = 0;
 	free = 0;
 	practiced = 0;
 	moved = 0;
@@ -2112,10 +2114,12 @@ void Unit::CopyFlags(Unit *x)
 {
 	flags = x->flags;
 	guard = GUARD_NONE;
-	if (x->Taxers(1)) {
+	if (Taxers(1)) {
 		if (x->guard != GUARD_SET && x->guard != GUARD_ADVANCE)
 			guard = x->guard;
 	} else {
+		if (guard != GUARD_AVOID)
+			guard = GUARD_NONE;
 		SetFlag(FLAG_AUTOTAX, 0);
 	}
 	reveal = x->reveal;

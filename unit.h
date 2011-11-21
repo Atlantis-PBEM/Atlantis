@@ -293,6 +293,7 @@ class Unit : public AListElem
 		AList transportorders;
 		Order *joinorders;
 		Unit *former;
+		int format;
 
 		// Used for tracking VISIT quests
 		set<string> visited;
