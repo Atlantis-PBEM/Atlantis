@@ -4788,7 +4788,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"people or items; you should, in the same month, issue orders to "
 		"transfer people into the new unit, or have it recruit members. The "
 		"new unit will inherit its flags from the unit that forms it, such "
-		"as avoiding, behind, and autotax.";
+		"as avoiding, behind, revealing and sharing, with the exception "
+		"of the guard and autotax flags.  If the new unit wants to "
+		"guard or automatically tax then those flags will have to be "
+		"explicitly set in its orders.";
 	f.Paragraph(temp);
 	temp = "The FORM order is followed by a list of orders for the newly "
 		"created unit.  This list is terminated by the END keyword, after "
@@ -5375,9 +5378,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"your password for the quit order to work; this is to provide "
 		"some safety against accidentally issuing this order.";
 	f.Paragraph(temp);
+	temp = "Note that although this order affects the faction as a whole, "
+		"it nevertheless needs to be issued by an individual unit, "
+		"and so the email containing the command to quit needs to "
+		"include both #atlantis and unit lines.";
+	f.Paragraph(temp);
 	f.Paragraph("Example:");
-	temp = "Quit the game if your password is foobar.";
-	temp2 = "QUIT \"foobar\"";
+	temp = "Quit the game for faction 27 if your password is foobar.";
+	temp2 = "#atlantis 27 \"foobar\"\n";
+	temp2 += "unit 1234\n";
+	temp2 += "QUIT \"foobar\"\n";
+	temp2 += "#end";
 	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("div", "rule", "");
@@ -5392,8 +5403,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"issuing this order.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
-	temp = "Restart as a new faction if your password is foobar.";
-	temp2 = "RESTART \"foobar\"";
+	temp = "Restart faction 27 as a new faction if your password is foobar.";
+	temp2 = "#atlantis 27 \"foobar\"\n";
+	temp2 += "unit 1234\n";
+	temp2 += "RESTART \"foobar\"\n";
+	temp2 += "#end";
 	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("div", "rule", "");
