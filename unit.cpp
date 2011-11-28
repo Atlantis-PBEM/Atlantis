@@ -2118,8 +2118,8 @@ void Unit::CopyFlags(Unit *x)
 		if (x->guard != GUARD_SET && x->guard != GUARD_ADVANCE)
 			guard = x->guard;
 	} else {
-		if (guard != GUARD_AVOID)
-			guard = GUARD_NONE;
+		if (x->guard == GUARD_AVOID)
+			guard = GUARD_AVOID;
 		SetFlag(FLAG_AUTOTAX, 0);
 	}
 	reveal = x->reveal;
