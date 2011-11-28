@@ -2570,7 +2570,8 @@ void Game::ProcessGuardOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			if (u->guard != GUARD_AVOID)
 				u->guard = GUARD_NONE;
 		} else {
-			u->guard = GUARD_SET;
+			if (u->guard != GUARD_GUARD)
+				u->guard = GUARD_SET;
 		}
 	}
 }
