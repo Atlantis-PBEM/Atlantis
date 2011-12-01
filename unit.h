@@ -96,6 +96,8 @@ enum {
 #define FLAG_WALKSPOILS			0x0400
 #define FLAG_RIDESPOILS			0x0800
 #define FLAG_SHARING			0x1000
+#define FLAG_SWIMSPOILS			0x2000
+#define FLAG_SAILSPOILS			0x4000
 
 class UnitId : public AListElem {
 	public:

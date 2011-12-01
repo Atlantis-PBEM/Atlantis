@@ -359,25 +359,58 @@ AString Unit::GetName(int obs)
 
 int Unit::CanGetSpoil(Item *i)
 {
+	int weight, load, capacity;
+
 	if (!i) return 0;
-	// units with NOSPOILS, FLYSPOILS or RIDESPOILS will
-	// NOT pick up incomplete ships, as well as those
-	// already having a ship of the same type
 	if (ItemDefs[i->type].type & IT_SHIP) {
-		if ((flags & FLAG_FLYSPOILS) || (flags & FLAG_RIDESPOILS)) return 0;
+		// Don't pick up an incomplete ship if we already have one
 		if (items.GetNum(i->type) > 0) return 0;
 	}
-	int weight = ItemDefs[i->type].weight;
+	weight = ItemDefs[i->type].weight;
 	if (!weight) return 1; // any unit can carry 0 weight spoils
 
-	int fly = ItemDefs[i->type].fly;
-	int ride = ItemDefs[i->type].ride;
-	int walk = ItemDefs[i->type].walk;
+	if (flags & FLAG_NOSPOILS)
+		return 0;
 
-	if (flags & FLAG_NOSPOILS) return 0;
-	if ((flags & FLAG_FLYSPOILS) && fly < weight) return 0; // only flying
-	if ((flags & FLAG_WALKSPOILS) && walk < weight) return 0; // only walking
-	if ((flags & FLAG_RIDESPOILS) && ride < weight) return 0; // only riding
+	load = items.Weight();
+	
+	if (flags & FLAG_FLYSPOILS) {
+		capacity = ItemDefs[i->type].fly;
+		if (FlyingCapacity() + capacity < load + weight)
+			return 0;
+	}
+
+	if (flags & FLAG_RIDESPOILS) {
+		capacity = ItemDefs[i->type].ride;
+		if (RidingCapacity() + capacity < load + weight)
+			return 0;
+	}
+
+	if (flags & FLAG_WALKSPOILS) {
+		capacity = ItemDefs[i->type].walk;
+		if (ItemDefs[i->type].hitchItem) {
+			if (items.GetNum(ItemDefs[i->type].hitchItem) >
+					items.GetNum(i->type))
+				capacity = ItemDefs[i->type].hitchwalk;
+		}
+		if (WalkingCapacity() + capacity < load + weight)
+			return 0;
+	}
+
+	if (flags & FLAG_SWIMSPOILS) {
+		capacity = ItemDefs[i->type].swim;
+		if (ItemDefs[i->type].type & IT_SHIP)
+			capacity = 0;
+		if (SwimmingCapacity() + capacity < load + weight)
+			return 0;
+	}
+
+	if ((flags & FLAG_SAILSPOILS) && object && object->IsFleet()) {
+		load = object->FleetLoad();
+		if (object->FleetCapacity() < load + weight)
+			return 0;
+	}
+
 	return 1; // all spoils
 }
 
@@ -387,6 +420,7 @@ AString Unit::SpoilsReport() {
 	else if (GetFlag(FLAG_FLYSPOILS)) temp = ", flying battle spoils";
 	else if (GetFlag(FLAG_WALKSPOILS)) temp = ", walking battle spoils";
 	else if (GetFlag(FLAG_RIDESPOILS)) temp = ", riding battle spoils";
+	else if (GetFlag(FLAG_SAILSPOILS)) temp = ", sailing battle spoils";
 	return temp;
 }
 
@@ -1560,8 +1594,6 @@ int Unit::WalkingCapacity()
 
 	return cap;
 }
-
-
 
 int Unit::CanFly(int weight)
 {

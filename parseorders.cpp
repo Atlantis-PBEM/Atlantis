@@ -2624,6 +2624,8 @@ void Game::ProcessSpoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		else if (*token == "walk") flag = FLAG_WALKSPOILS;
 		else if (*token == "ride") flag = FLAG_RIDESPOILS;
 		else if (*token == "fly") flag = FLAG_FLYSPOILS;
+		else if (*token == "swim") flag = FLAG_SWIMSPOILS;
+		else if (*token == "sail") flag = FLAG_SAILSPOILS;
 		else if (*token == "all") val = 0;
 		else ParseError(pCheck, u, 0, "SPOILS: Bad argument.");
 		delete token;
@@ -2635,6 +2637,8 @@ void Game::ProcessSpoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		u->SetFlag(FLAG_WALKSPOILS, 0);
 		u->SetFlag(FLAG_RIDESPOILS, 0);
 		u->SetFlag(FLAG_FLYSPOILS, 0);
+		u->SetFlag(FLAG_SWIMSPOILS, 0);
+		u->SetFlag(FLAG_SAILSPOILS, 0);
 
 		/* Set the flag we're trying to set */
 		if (flag) {

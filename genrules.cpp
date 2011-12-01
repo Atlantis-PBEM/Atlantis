@@ -5539,14 +5539,23 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("h4", "SPOILS");
 	temp = "The SPOILS order determines which types of spoils the unit "
 		"should take after a battle.  The valid values for type are "
-		"'NONE', 'WALK', 'RIDE', 'FLY', or 'ALL'. The second form is "
-		"equivalent to 'SPOILS ALL'.";
+		"'NONE', 'WALK', 'RIDE', 'FLY', 'SWIM', 'SAIL' or 'ALL'. "
+		"The second form is equivalent to 'SPOILS ALL'.";
 	f.Paragraph(temp);
-	temp = "When this command is issued, only spoils with 0 weight (at "
-		"level NONE) or spoils which weigh less than or equal to their "
-		"capacity in the specified movement mode (at any level other than "
-		"ALL) will be picked up.  SPOILS ALL will allow a unit to collect "
-		"any spoils which are dropped regardless of weight or capacity.";
+	temp = "When this command is issued, the unit is instructed to only "
+		"pick up combat spoils if they could use the chosen form "
+		"of movement while carrying the spoils. Thus a unit with "
+		"SPOILS FLY selected would pick up combat spoils until they "
+		"reached their flying capacity.  If the spoils provide "
+		"movement capacity themselves, this will be included in the "
+		"decision of whether or not to take the spoils - so a unit "
+		"with SPOILS RIDE would always pick up horses. "
+		"SPOILS SAIL will use the capacity of the fleet the unit is "
+		"in to determine whether to take spoils or not. "
+		"SPOILS ALL will allow a unit to collect any spoils which "
+		"are dropped regardless of weight or capacity. "
+		"SPOILS NONE will instruct the unit to only collect "
+		"weightless items, such as silver.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Set a unit to only pick up items which have flying capacity";

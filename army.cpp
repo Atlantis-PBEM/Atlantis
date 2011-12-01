@@ -833,73 +833,84 @@ void Army::Win(Battle * b,ItemList * spoils)
 
 	AList units;
 
+	for (int x = 0; x < count; x++) {
+		Soldier * s = soldiers[x];
+		if (x<NumAlive()) s->Alive(wintype);
+		else s->Dead();
+	}
+
 	forlist(spoils) {
 		Item *i = (Item *) elem;
 		if (i && na) {
 			Unit *u;
 			UnitPtr *up;
+			int ns;
 
-			// Make a list of units who can get this type of spoil
-			for (int x = 0; x < na; x++) {
-				u = soldiers[x]->unit;
-				if (u->CanGetSpoil(i)) {
-					up = new UnitPtr;
-					up->ptr = u;
-					units.Add(up);
+			do {
+				units.DeleteAll();
+				// Make a list of units who can get this type of spoil
+				for (int x = 0; x < na; x++) {
+					u = soldiers[x]->unit;
+					if (u->CanGetSpoil(i)) {
+						up = new UnitPtr;
+						up->ptr = u;
+						units.Add(up);
+					}
 				}
-			}
 
-			int ns = units.Num();
-			if (ns > 0) {
+				ns = units.Num();
 				if (ItemDefs[i->type].type & IT_SHIP) {
-					// randomly give all to one
-					int n = i->num/ns;
-					forlist(&units) {
-						up = (UnitPtr *)elem;
-						if (up->ptr->items.GetNum(i->type) != 0) continue;
-						if (getrandom(i->num) > n) continue;
+					int t = getrandom(ns);
+					up = (UnitPtr *) units.First();
+					while (t-- > 0)
+						up = (UnitPtr *) up->next;
+					if (up && up->ptr->CanGetSpoil(i)) {
 						up->ptr->items.SetNum(i->type, i->num);
-						break;
+						up->ptr->faction->DiscoverItem(i->type, 0, 1);
+						i->num = 0;
 					}
-				} else {
-					int n = i->num/ns; // Divide spoils equally
-					if (n >= 1) {
-						forlist(&units) {
-							up = (UnitPtr *)elem;
+					break;
+				}
+				while (ns > 0 && i->num >= ns) {
+					int chunk = 1;
+					if (!ItemDefs[i->type].weight) {
+						chunk = i->num / ns;
+					}
+					forlist(&units) {
+						up = (UnitPtr *) elem;
+						if (up->ptr->CanGetSpoil(i)) {
 							up->ptr->items.SetNum(i->type,
-									up->ptr->items.GetNum(i->type)+n);
+									up->ptr->items.GetNum(i->type) + chunk);
 							up->ptr->faction->DiscoverItem(i->type, 0, 1);
-						}
-					}
-					n = i->num % ns; // allocate the remainder
-					if (n) {
-						for (int x = 0; x < n; x++) {
-							int t = getrandom(ns);
-							up = (UnitPtr *)units.First();
-							if (up) {
-								UnitPtr *p;
-								while(t > 0) {
-									p = (UnitPtr *)units.Next(up);
-									if (p) up = p;
-									else break;
-									--t;
-								}
-								up->ptr->items.SetNum(i->type,
-										up->ptr->items.GetNum(i->type)+1);
-								up->ptr->faction->DiscoverItem(i->type, 0, 1);
-							}
+							i->num -= chunk;
+						} else {
+							units.Remove(up);
+							ns--;
 						}
 					}
 				}
-			}
-			units.DeleteAll();
+				while (ns > 0 && i->num > 0) {
+					int t = getrandom(ns);
+					up = (UnitPtr *)units.First();
+					while (t-- > 0)
+						up = (UnitPtr *) up->next;
+					if (up && up->ptr->CanGetSpoil(i)) {
+						up->ptr->items.SetNum(i->type,
+								up->ptr->items.GetNum(i->type) + 1);
+						up->ptr->faction->DiscoverItem(i->type, 0, 1);
+						i->num--;
+					} else {
+						units.Remove(up);
+						ns--;
+					}
+				}
+				units.DeleteAll();
+			} while (ns > 0 && i->num > 0);
 		}
 	}
 
 	for (int x = 0; x < count; x++) {
 		Soldier * s = soldiers[x];
-		if (x<NumAlive()) s->Alive(wintype);
-		else s->Dead();
 		delete s;
 	}
 }
