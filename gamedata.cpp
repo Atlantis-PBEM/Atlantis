@@ -489,7 +489,7 @@ ItemType id[] =
 	{"Cloudship","Cloudships","CLOU",
 	 ItemType::NOMARKET | ItemType::NOTRANSPORT | ItemType::DISABLED,
 	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 "SWIN",5,75, {{I_FLOATER,1}, {I_IRONWOOD,1},{-1,0},{-1,0}},
+	 "SWIN",5,20, {{I_FLOATER,75}, {I_IRONWOOD,75},{-1,0},{-1,0}},
 	 750, IT_SHIP, 12000,0,
 	 0,0,1200,0,6,
 	 -1,0,
