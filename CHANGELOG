@@ -1,3 +1,101 @@
+Changes from 5.0.0 -> 5.1.0
+--------------------------------------------------
+ Game Changes:
+   -- Made sailing and regular movement happen simultaneously, and phased
+      movement so that faster units move more often than slower ones
+   -- Added a Pause move "direction" to help coordinate movement
+   -- Allowed movement points to accumulate over multiple turns (say, when
+      walking into mountains in winter)
+   -- Parameterised boosts to fleet speed by SWIN, extra crew and low load
+   -- Moved a number of checks from the parse phase to the execution phase,
+      as circumstances can change between the two
+   -- Cleaned up Fleet handling significantly.  Ships can now provide combat
+      protection and magical study facilities again.
+   -- Added JOIN order which allows fleet mergers mid-ocean and tidied up
+      abandoning ships
+   -- Allowed apprentices to be renamed, and added a bunch of magical items
+      to make them actually worthwhile (and spells to create those items)
+   -- Added magical forts and citadels to go with the existing towers and
+      castles (although castles were called fortresses, but were castle sized)
+   -- Added Transmutation spell to create rare resources from regular ones
+   -- Allowed some items to be always or never included in spoils
+   -- Added a gamedef for icosahedral world generation
+   -- Made GetPlanarDistance use A* distance calculation
+   -- Changed save file format to support quests, visitation and partial
+      movement tracking
+   -- Made skill and item discovery more thorough
+   -- Moved production mechanics from item descriptions to skill descriptions
+   -- Cleaned up item creation spell parameterisation
+   -- Added DISPERSE_GATE_NUMBERS option to make gate numbers non-contiguous
+   -- Added a PRODUCE <n> ITEM variant to produce a target number of items
+   -- Allowed MANI as a racial specialty to cover all magical skills
+   -- Allowed building numbers to be reused if buildings are destroyed
+   -- Moved movement speed from ruleset wide values to being set on a per
+      item basis.  So now some mounts, ships or even races can be faster
+      than others
+   -- Added swimming as a distinct movement mode
+   -- Added option to disallow further attacks on a routed unit in the turn
+      that it was routed
+   -- Track what turn factions started playing
+   -- Start all new factions unfriendly to creatures
+   -- Moved secondary production to before primary, to stop IRON being
+      used the same turn it was dug up via clever use of SHARE
+   -- Made monster movement less random (no trying to drown or beach
+      themselves any more, or bump into walls)
+   -- Changed SHOW to be less abusable (now it won't tell you about items
+      or skills you shouldn't know about, for example)
+   -- Added CAST GATE RANDOM LEVEL at GATE 2 to allow cross-level random jumps
+   -- Made region editing display the region number
+   -- Allowed GIVE to give unfinished ships and all ships
+   -- Added count of errors found to end of the orders check
+   -- Made templates and order checks indent FORM and TURN blocks
+   -- Forced a description of summonable creatures when a skill is learnt
+      that allows them to be summoned
+   -- Added TAKE order to allow transport caravans to produce fewer errors
+   -- Replace ENTER NEW with JOIN, which is more deterministic and has some
+      extra options
+   -- Made city guards REVEAL FACTION
+   -- Made FORM not inherit GUARD and AUTOTAX settings (to avoid error spam)
+   -- Added SPOILS SWIM and SPOILS SAIL settings, and made spoils handling
+      more sensible (now it will pick up spoils up to the unit's capacity in
+      the specified transport mode)
+ Bug Fixes:
+   -- Fixed various things to allow compilation without errors under gcc 4,
+      Visual C++ 2010, and Debian
+   -- Many grammar and accuracy fixes to the rules, skill and item descriptions
+   -- Cleaned up BUILDing, especially in relation to building ships
+   -- Stopped units from building monster lairs
+   -- Stopped auto-work from generating errors in regions with 0 wages
+   -- Allowed non-leader units to have multiple magical skills (only) if
+      SKILL_LIMIT_NONLEADERS and MAGE_NONLEADERS are both set
+   -- Stopped riding capacity from helping in the ocean
+   -- Made OPTION TEMPLATE OFF actually turn off templates completely
+   -- Corrected that region half of the shafts generated thought they were in
+   -- Made the atlantis executable return appropriate result codes, instead
+      of always claiming success
+   -- Fixed some crash situations
+   -- Made where ships can be built match where they can move
+   -- removed duplicates from various commands that contain lists of units
+   -- Stopped EXCHANGE from swapping parts of unfinished ships
+   -- Removed limitation on TACT 5 men transferring/buying men if
+      TACTICS_NEEDS_WAR is not set
+   -- Made BUY and SELL scale more fairly when someone uses BUY/SELL ALL XXX
+   -- Stopped non-fleet-owners from giving away ships
+   -- Made GUARD 1 not reset your guard status if the unit is already on guard
+ Havilah ruleset:
+   -- Apprentices renamed to Acolytes
+   -- New apprentice items enabled
+   -- Some terrain type resources moved around (particularly WINGs => tundra)
+   -- Magical item creation made to use a base item as well as silver
+   -- Magical study facilities of non-rootstone buildings reduced greatly
+   -- Enabled all the new rootstone buildings
+   -- Created random (and somewhat terrain influenced) town and region names
+      rather than ones chosen from a predefined list
+   -- Added quests, and made it possible for a faction to win without
+      ending the game for everyone else
+   -- Added code to make sure that all the underworld is actually accessible
+   
+
 Changes from 4.0.10i -> 5.0.0
 --------------------------------------------------
    -- Fixed brokeness in conquest map generation caused by terrain patch
