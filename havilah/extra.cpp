@@ -34,6 +34,7 @@
 #define RELICS_REQUIRED_FOR_VICTORY	7
 #define MINIMUM_ACTIVE_QUESTS		2
 #define MAXIMUM_ACTIVE_QUESTS		5
+#define QUEST_EXPLORATION_PERCENT	100
 #define QUEST_SPAWN_RATE		2
 #define QUEST_SPAWN_CHANCE		60
 #define MAX_DESTINATIONS		5
@@ -134,6 +135,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			r = (ARegion *) elem;
 			if (TerrainDefs[r->type].similar_type == R_OCEAN)
 				continue;
+			if (!r->visited)
+				continue;
 			forlist(&r->objects) {
 				o = (Object *) elem;
 				forlist(&o->units) {
@@ -151,6 +154,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		forlist_reuse(regions) {
 			r = (ARegion *) elem;
 			if (TerrainDefs[r->type].similar_type == R_OCEAN)
+				continue;
+			if (!r->visited)
 				continue;
 			forlist(&r->objects) {
 				o = (Object *) elem;
@@ -182,6 +187,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			// Do allow lakes though
 			if (r->type == R_OCEAN)
 				continue;
+			if (!r->visited)
+				continue;
 			forlist(&r->products) {
 				p = (Production *) elem;
 				if (p->itemtype != I_SILVER)
@@ -193,6 +200,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			r = (ARegion *) elem;
 			// Do allow lakes though
 			if (r->type == R_OCEAN)
+				continue;
+			if (!r->visited)
 				continue;
 			forlist(&r->products) {
 				p = (Production *) elem;
@@ -225,7 +234,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		temple = O_TEMPLE;
 		forlist(regions) {
 			r = (ARegion *) elem;
-			if (r->Population() > 0) {
+			if (r->Population() > 0 && r->visited) {
 				stlstr = r->name->Str();
 				// This looks like a null operation, but
 				// actually forces the map<> element creation
@@ -245,6 +254,10 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		for (count = 0; d >= destprobs[count]; count++)
 			d -= destprobs[count];
 		count++;
+		if (count > (int) temples.size()) {
+			q->type = -1;
+			count = -1;
+		}
 		// Choose that many unique regions
 		for (i = 0; i < count; i++) {
 			do {
@@ -332,7 +345,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 
 Faction *Game::CheckVictory()
 {
-	int visited, unvisited, surfacevisited, surfaceunvisited;
+	int visited, unvisited;
 	int d, i, count, reliccount;
 	int units, leaders, men, silver, stuff;
 	int skilldays, magicdays, skilllevels, magiclevels;
@@ -366,21 +379,15 @@ Faction *Game::CheckVictory()
 	}
 	visited = 0;
 	unvisited = 0;
-	surfacevisited = 0;
-	surfaceunvisited = 0;
 	forlist_reuse(&regions) {
 		r = (ARegion *) elem;
 		if (r->Population() > 0) {
 			stlstr = r->name->Str();
 			if (r->visited) {
 				visited++;
-				if (r->zloc == ARegionArray::LEVEL_SURFACE)
-					surfacevisited++;
 				vRegions[stlstr]++;
 			} else {
 				unvisited++;
-				if (r->zloc == ARegionArray::LEVEL_SURFACE)
-					surfaceunvisited++;
 				uvRegions[stlstr]++;
 			}
 		}
@@ -404,7 +411,7 @@ Faction *Game::CheckVictory()
 
 	printf("Players have visited %d regions; %d unvisited.\n", visited, unvisited);
 
-	if (!unvisited) {
+	if (visited >= (unvisited + visited) * QUEST_EXPLORATION_PERCENT / 100) {
 		// Exploration phase complete: start creating relic quests
 		for (i = 0; i < QUEST_SPAWN_RATE; i++) {
 			if (quests.Num() < MAXIMUM_ACTIVE_QUESTS &&
@@ -414,7 +421,8 @@ Faction *Game::CheckVictory()
 		while (quests.Num() < MINIMUM_ACTIVE_QUESTS) {
 			CreateQuest(&regions, monfaction);
 		}
-	} else {
+	}
+	if (unvisited) {
 		// Tell the players to get exploring :-)
 		if (visited > 9 * unvisited) {
 			// 90% explored; specific hints

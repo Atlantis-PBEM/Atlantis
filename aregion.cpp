@@ -2431,7 +2431,7 @@ ARegion *ARegionList::FindConnectedRegions(ARegion *r, ARegion *tail, int shaft)
 ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 {
 	ARegion *r, *queue, *inner;
-	int offset, i;
+	int offset, i, valid;
         Object *o;
 
 	forlist(this) {
@@ -2445,7 +2445,19 @@ ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 	while (start) {
 		queue = FindConnectedRegions(start, queue, 1);
 		start = start->next;
-		if (start && start->IsStartingCity()) {
+		valid = 0;
+		if (start) {
+			if (Globals->START_CITIES_EXIST) {
+				if (start->IsStartingCity())
+					valid = 1;
+			} else {
+				// No starting cities?
+				// Then any explored settlement will do
+				if (start->town && start->visited)
+					valid = 1;
+			}
+		}
+		if (valid) {
 			if (dir) {
 				offset = getrandom(NDIRS);
 				for (i = 0; i < NDIRS; i++) {
