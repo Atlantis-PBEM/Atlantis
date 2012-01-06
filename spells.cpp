@@ -72,6 +72,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_DRAGON_LORE:
 			case S_WOLF_LORE:
 			case S_EARTH_LORE:
+			case S_SUMMON_WIND:
 			case S_CREATE_RING_OF_INVISIBILITY:
 			case S_CREATE_CLOAK_OF_INVULNERABILITY:
 			case S_CREATE_STAFF_OF_FIRE:
@@ -773,6 +774,9 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 		case S_CLEAR_SKIES:
 			val = RunClearSkies(r,u);
 			break;
+		case S_SUMMON_WIND:
+			val = RunCreateArtifact(r, u, sk, I_CLOUDSHIP);
+			break;
 		case S_CREATE_FOOD:
 			val = RunCreateArtifact(r, u, sk, I_FOOD);
 			break;
@@ -1106,6 +1110,10 @@ int Game::RunSummonImps(ARegion *r,Unit *u)
 int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 {
 	int level = u->GetSkill(skill);
+	if (level < ItemDefs[item].mLevel) {
+		u->Error("CAST: Skill level isn't that high.");
+		return 0;
+	}
 	unsigned int c;
 	for (c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
 		if (ItemDefs[item].mInput[c].item == -1) continue;
@@ -1128,7 +1136,12 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 
 	int num = (level * ItemDefs[item].mOut + getrandom(100))/100;
 
-	u->items.SetNum(item,u->items.GetNum(item) + num);
+	if (ItemDefs[item].type & IT_SHIP) {
+		if (num > 0)
+			CreateShip(r, u, item);
+	} else {
+		u->items.SetNum(item,u->items.GetNum(item) + num);
+	}
 	u->Event(AString("Creates ") + ItemString(item,num) + ".");
 	if (num == 0) return 0;
 	return 1;

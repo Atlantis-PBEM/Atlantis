@@ -3224,7 +3224,7 @@ static SkillType sd[] = {
 	 NULL, "rng_weather",
 	 {{"FORC",1},{"PATT",1},{NULL,0}}},
 	{"summon wind","SWIN",100,
-	 SkillType::MAGIC,
+	 SkillType::MAGIC | SkillType::CAST,
 	 NULL, NULL,
 	 {{"WEAT",1},{NULL,0},{NULL,0}}},
 	{"summon storm","SSTO",100,
