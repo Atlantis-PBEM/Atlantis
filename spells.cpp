@@ -1077,6 +1077,11 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 
 int Game::RunSummonBalrog(ARegion *r,Unit *u)
 {
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
+
 	if (u->items.GetNum(I_BALROG) >= ItemDefs[I_BALROG].max_inventory) {
 		u->Error("Can't control any more balrogs.");
 		return 0;
@@ -1093,6 +1098,11 @@ int Game::RunSummonBalrog(ARegion *r,Unit *u)
 
 int Game::RunSummonDemon(ARegion *r,Unit *u)
 {
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
+
 	u->items.SetNum(I_DEMON,u->items.GetNum(I_DEMON) + 1);
 	u->Event(AString("Summons ") + ItemString(I_DEMON,1) + ".");
 	return 1;
@@ -1100,6 +1110,11 @@ int Game::RunSummonDemon(ARegion *r,Unit *u)
 
 int Game::RunSummonImps(ARegion *r,Unit *u)
 {
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
+
 	int level = u->GetSkill(S_SUMMON_IMPS);
 
 	u->items.SetNum(I_IMP,u->items.GetNum(I_IMP) + level);
@@ -1149,6 +1164,11 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 
 int Game::RunSummonLich(ARegion *r,Unit *u)
 {
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
+
 	int level = u->GetSkill(S_SUMMON_LICH);
 
 	int num = ((2 * level * level) + getrandom(100))/100;
@@ -1161,6 +1181,11 @@ int Game::RunSummonLich(ARegion *r,Unit *u)
 
 int Game::RunRaiseUndead(ARegion *r,Unit *u)
 {
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
+
 	int level = u->GetSkill(S_RAISE_UNDEAD);
 
 	int num = ((10 * level * level) + getrandom(100))/100;
@@ -1173,6 +1198,11 @@ int Game::RunRaiseUndead(ARegion *r,Unit *u)
 
 int Game::RunSummonSkeletons(ARegion *r,Unit *u)
 {
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
+
 	int level = u->GetSkill(S_SUMMON_SKELETONS);
 
 	int num = ((40 * level * level) + getrandom(100))/100;
@@ -1185,6 +1215,11 @@ int Game::RunSummonSkeletons(ARegion *r,Unit *u)
 
 int Game::RunDragonLore(ARegion *r, Unit *u)
 {
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
+
 	int level = u->GetSkill(S_DRAGON_LORE);
 
 	int num = u->items.GetNum(I_DRAGON);
@@ -1234,6 +1269,11 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 		u->Event(AString("Sends birds to spy on ") +
 				tar->Print( &regions ) + ".");
 		return 1;
+	}
+
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
 	}
 
 	int level = u->GetSkill(S_BIRD_LORE);
@@ -1316,6 +1356,11 @@ int Game::RunPhanDemons(ARegion *r,Unit *u)
 	int level = u->GetSkill(S_CREATE_PHANTASMAL_DEMONS);
 	int create,max;
 
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
+
 	if (order->level < 3) {
 		create = I_IIMP;
 		max = level * level * 4;
@@ -1345,6 +1390,11 @@ int Game::RunPhanUndead(ARegion *r,Unit *u)
 	int level = u->GetSkill(S_CREATE_PHANTASMAL_UNDEAD);
 	int create,max;
 
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
+
 	if (order->level < 3) {
 		create = I_ISKELETON;
 		max = level * level * 4;
@@ -1373,6 +1423,11 @@ int Game::RunPhanBeasts(ARegion *r,Unit *u)
 	CastIntOrder *order = (CastIntOrder *) u->castorders;
 	int level = u->GetSkill(S_CREATE_PHANTASMAL_BEASTS);
 	int create,max;
+
+	if (r->type == R_NEXUS) {
+		u->Error("Can't summon creatures in the nexus.");
+		return 0;
+	}
 
 	if (order->level < 3) {
 		create = I_IWOLF;
