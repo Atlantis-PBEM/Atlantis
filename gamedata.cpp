@@ -2241,7 +2241,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET | ItemType::NOTRANSPORT,
 	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 "CRAG",1,20, {{I_MITHRIL,1},{I_SILVER,600},{-1,0},{-1,0}},
-	 1, IT_MAGIC | IT_MAGEONLY, 5000,0,
+	 1, IT_MAGIC | IT_MAGEONLY, 20000,0,
 	 0,0,0,0,0,
 	 -1,0,
 	 -1,0, 0,
