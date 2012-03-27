@@ -46,8 +46,7 @@ void Game::RunMovementOrders()
 	MoveOrder *mo;
 	SailOrder *so;
 	MoveDir *d;
-	TurnOrder *tOrder;
-	AString order;
+	AString order, *tOrder;
 
 	for (phase = 0; phase < Globals->MAX_SPEED; phase++) {
 		forlist(&regions) {
@@ -171,25 +170,23 @@ void Game::RunMovementOrders()
 						u->monthorders->type == O_ADVANCE)) {
 					mo = (MoveOrder *) u->monthorders;
 					if (mo->dirs.Num() > 0) {
+						tOrder = new AString;
 						if (mo->advancing)
-							order = "ADVANCE";
+							*tOrder = "ADVANCE";
 						else
-							order = "MOVE";
-						u->Event(order + ": Unit has insufficient movement points;"
+							*tOrder = "MOVE";
+						u->Event(*tOrder + ": Unit has insufficient movement points;"
 								" remaining moves queued.");
-						tOrder = new TurnOrder;
-						tOrder->repeating = 0;
 						forlist(&mo->dirs) {
 							d = (MoveDir *) elem;
-							order += " ";
-							if (d->dir < NDIRS) order += DirectionAbrs[d->dir];
-							else if (d->dir == MOVE_IN) order += "IN";
-							else if (d->dir == MOVE_OUT) order += "OUT";
-							else if (d->dir == MOVE_PAUSE) order += "P";
-							else order += d->dir - MOVE_ENTER;
+							*tOrder += " ";
+							if (d->dir < NDIRS) *tOrder += DirectionAbrs[d->dir];
+							else if (d->dir == MOVE_IN) *tOrder += "IN";
+							else if (d->dir == MOVE_OUT) *tOrder += "OUT";
+							else if (d->dir == MOVE_PAUSE) *tOrder += "P";
+							else *tOrder += d->dir - MOVE_ENTER;
 						}
-						tOrder->turnOrders.Add(new AString(order));
-						u->turnorders.Insert(tOrder);
+						u->oldorders.Insert(tOrder);
 					}
 				}
 			}
@@ -201,19 +198,16 @@ void Game::RunMovementOrders()
 				if (so->dirs.Num() > 0) {
 					u->Event("SAIL: Can't sail that far;"
 						" remaining moves queued.");
-					tOrder = new TurnOrder;
-					tOrder->repeating = 0;
-					order = "SAIL";
+					tOrder = new AString("SAIL");
 					forlist(&so->dirs) {
 						d = (MoveDir *) elem;
-						order += " ";
+						*tOrder += " ";
 						if (d->dir == MOVE_PAUSE)
-							order += "P";
+							*tOrder += "P";
 						else
-							order += DirectionAbrs[d->dir];
+							*tOrder += DirectionAbrs[d->dir];
 					}
-					tOrder->turnOrders.Add(new AString(order));
-					u->turnorders.Insert(tOrder);
+					u->oldorders.Insert(tOrder);
 				}
 			}
 		}
