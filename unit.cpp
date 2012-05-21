@@ -2408,10 +2408,14 @@ int Unit::GetAttribute(char const *attrib)
 
 	if (monbase != -1) {
 		monbase += monbonus;
-		if (ap->flags & AttribModType::USE_WORST)
-			base = (monbase < base) ? monbase : base;
+		if (GetMen() > 0) {
+			if (ap->flags & AttribModType::USE_WORST)
+				base = (monbase < base) ? monbase : base;
+			else
+				base = (monbase > base) ? monbase : base;
+		}
 		else
-			base = (monbase > base) ? monbase : base;
+			base = monbase; // monster units have no men
 	}	
 	return base;
 }
