@@ -2772,6 +2772,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		return 0;
 	}
 
+	amt = o->amount;
 	t = r->GetUnitId(o->target, u->faction->num);
 	if (!t) {
 		u->Error(ord + ": Nonexistant target (" +
@@ -2812,7 +2813,6 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	}
 
 	// Check there is enough to give
-	amt = o->amount;
 	if (amt != -2 && amt > s->GetSharedNum(o->item)) {
 		u->Error(ord + ": Not enough.");
 		amt = s->GetSharedNum(o->item);

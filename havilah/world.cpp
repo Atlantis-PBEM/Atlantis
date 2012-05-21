@@ -29,6 +29,7 @@
 //                               different base costs
 #include "game.h"
 #include "gamedata.h"
+#include <string.h>
 
 typedef struct
 {

@@ -2151,7 +2151,7 @@ void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 	}
 	// but if that fails, use the special icosahedral connections:
 	if (!r->neighbors[D_NORTH]) {
-		if (y > 0 & y < 3 * scale)
+		if (y > 0 && y < 3 * scale)
 		{
 			if (y == 2) {
 				neighX = 0;
@@ -2237,7 +2237,7 @@ void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 		r->neighbors[D_SOUTH] = ar->GetRegion(x, y + 2);
 	}
 	if (!r->neighbors[D_SOUTH]) {
-		if (y2 > 0 & y2 < 3 * scale)
+		if (y2 > 0 && y2 < 3 * scale)
 		{
 			if (y2 == 2) {
 				neighX = 10 * scale - 1;
