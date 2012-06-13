@@ -61,6 +61,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CONSTRUCT_PORTAL:
 			case S_ENCHANT_SWORDS:
 			case S_ENCHANT_ARMOR:
+			case S_ENCHANT_SHIELDS:
 			case S_CONSTRUCT_GATE:
 			case S_ENGRAVE_RUNES_OF_WARDING:
 			case S_SUMMON_IMPS:
@@ -680,6 +681,9 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			break;
 		case S_ENCHANT_SWORDS:
 			val = RunEnchant(r, u, sk, I_MSWORD);
+			break;
+		case S_ENCHANT_SHIELDS:
+			val = RunEnchant(r, u, sk, I_MSHIELD);
 			break;
 		case S_CONSTRUCT_GATE:
 			val = RunConstructGate(r,u,sk);

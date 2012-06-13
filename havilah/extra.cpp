@@ -1029,6 +1029,7 @@ void Game::ModifyTablesPerRuleset(void)
 
 	// EnableSkill(S_ARMORCRAFT);
 	// EnableSkill(S_WEAPONCRAFT);
+	EnableSkill(S_ENCHANT_SHIELDS);
 	EnableSkill(S_CREATE_AEGIS);
 	EnableSkill(S_CREATE_WINDCHIME);
 	EnableSkill(S_CREATE_GATE_CRYSTAL);

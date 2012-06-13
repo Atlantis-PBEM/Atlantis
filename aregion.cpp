@@ -1527,6 +1527,7 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 						fac->temformat == TEMPLATE_MAP) {
 					f->PutStr(u->TemplateReport(), 1);
 				}
+				int gotMonthOrder = 0;
 				forlist(&(u->oldorders)) {
 					temp = *((AString *) elem);
 					temp.getat();
@@ -1536,6 +1537,23 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 						delete token;
 					} else
 						order = NORDERS;
+					switch (order) {
+						case O_MOVE:
+						case O_SAIL:
+						case O_TEACH:
+						case O_STUDY:
+						case O_BUILD:
+						case O_PRODUCE:
+						case O_ENTERTAIN:
+						case O_WORK:
+							gotMonthOrder = 1;
+							break;
+						case O_TAX:
+						case O_PILLAGE:
+							if (Globals->TAX_PILLAGE_MONTH_LONG)
+								gotMonthOrder = 1;
+							break;
+					}
 					if (order == O_ENDTURN || order == O_ENDFORM)
 						f->DropTab();
 					f->PutStr(*((AString *) elem));
@@ -1546,11 +1564,10 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 				u->oldorders.DeleteAll();
 
 				if (u->turnorders.First()) {
-					int first = 1;
 					TurnOrder *tOrder;
 					forlist(&u->turnorders) {
 						tOrder = (TurnOrder *)elem;
-						if (!first) {
+						if (gotMonthOrder) {
 							if (tOrder->repeating)
 								f->PutStr(AString("@TURN"));
 							else
@@ -1572,11 +1589,11 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 							if (order == O_TURN || order == O_FORM)
 								f->AddTab();
 						}
-						if (!first) {
+						if (gotMonthOrder) {
 							f->DropTab();
 							f->PutStr(AString("ENDTURN"));
 						}
-						first = 0;
+						gotMonthOrder = 1;
 						f->ClearTab();
 					}
 					tOrder = (TurnOrder *) u->turnorders.First();

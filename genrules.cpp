@@ -5768,10 +5768,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 += "    MOVE S S S\n";
 	temp2 += "ENDTURN";
 	f.CommandExample(temp, temp2);
-	temp = "If the unit does not have enough movement points to cover "
-			"the full distance, the MOVE commands will automatically "
-			"be completed over multiple turns before executing the next "
-			"TURN block.";
+	temp = "The orders in a TURN block will be inserted into the unit's orders "
+			"template when there are no month-long orders remaining to "
+			"be executed.  In particular, if the unit does not have enough "
+			"movement points to cover the full distance of a MOVE or SAIL "
+			"command, the movement commands will automatically be completed "
+			"over multiple turns before executing the next TURN block.";
 	f.Paragraph(temp);
 
 	if (Globals->USE_WEAPON_ARMOR_COMMAND) {
