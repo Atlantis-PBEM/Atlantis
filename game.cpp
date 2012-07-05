@@ -1638,18 +1638,27 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 					u->items.SetNum(i->type, 0);
 				}
 			} else {
-				// ESC_LEV_SQUARED or ESC_LEV_QUAD
+				// ESC_LEV_*
 				tmp = ItemDefs[i->type].esc_skill;
 				skill = LookupSkill(&tmp);
 				int level = u->GetSkill(skill);
 				int chance;
 
-				if (!level) chance = 10000;
+				if (!level)
+					chance = 10000;
 				else {
-					int top = i->num * i->num;
+					int top;
+					if (ItemDefs[i->type].escape & ItemType::ESC_NUM_SQUARE)
+						top = i->num * i->num;
+					else
+						top = i->num;
 					int bottom = 0;
-					if (ItemDefs[i->type].escape & ItemType::ESC_LEV_SQUARE)
+					if (ItemDefs[i->type].escape & ItemType::ESC_LEV_LINEAR)
+						bottom = level;
+					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_SQUARE)
 						bottom = level * level;
+					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_CUBE)
+						bottom = level * level * level;
 					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_QUAD)
 						bottom = level * level * level * level;
 					else

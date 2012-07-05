@@ -1175,7 +1175,10 @@ int Game::RunSummonLich(ARegion *r,Unit *u)
 
 	int level = u->GetSkill(S_SUMMON_LICH);
 
-	int num = ((2 * level * level) + getrandom(100))/100;
+	int chance = level * ItemDefs[I_LICH].mOut;
+	if (chance < 1)
+		chance = level * level * 2;
+	int num = (chance + getrandom(100))/100;
 
 	u->items.SetNum(I_LICH,u->items.GetNum(I_LICH) + num);
 	u->Event(AString("Summons ") + ItemString(I_LICH,num) + ".");
@@ -1192,7 +1195,10 @@ int Game::RunRaiseUndead(ARegion *r,Unit *u)
 
 	int level = u->GetSkill(S_RAISE_UNDEAD);
 
-	int num = ((10 * level * level) + getrandom(100))/100;
+	int chance = level * ItemDefs[I_UNDEAD].mOut;
+	if (chance < 1)
+		chance = level * level * 10;
+	int num = (chance + getrandom(100))/100;
 
 	u->items.SetNum(I_UNDEAD,u->items.GetNum(I_UNDEAD) + num);
 	u->Event(AString("Raises ") + ItemString(I_UNDEAD,num) + ".");
@@ -1209,7 +1215,10 @@ int Game::RunSummonSkeletons(ARegion *r,Unit *u)
 
 	int level = u->GetSkill(S_SUMMON_SKELETONS);
 
-	int num = ((40 * level * level) + getrandom(100))/100;
+	int chance = level * ItemDefs[I_SKELETON].mOut;
+	if (chance < 1)
+		chance = level * level * 40;
+	int num = (chance + getrandom(100))/100;
 
 	u->items.SetNum(I_SKELETON,u->items.GetNum(I_SKELETON) + num);
 	u->Event(AString("Summons ") + ItemString(I_SKELETON,num) + ".");
@@ -1232,7 +1241,9 @@ int Game::RunDragonLore(ARegion *r, Unit *u)
 		return 0;
 	}
 
-	int chance = level * level * 4;
+	int chance = level * ItemDefs[I_DRAGON].mOut;
+	if (chance < 1)
+		chance = level * level * 4;
 	if (getrandom(100) < chance) {
 		u->items.SetNum(I_DRAGON,num + 1);
 		u->Event("Summons a dragon.");

@@ -129,13 +129,17 @@ class ItemType
 		int max_inventory; // if non-zero, amount allowed in inventory.
 
 		enum {
-			// LOSE_LINKED only make sense with ESC_LEV_SQUARE or ESC_LEV_QUAD
+			// LOSE_LINKED only works with ESC_LEV_*
 			LOSE_LINKED = 0x01,		// All items of same type will be lost.
 			// The rest of these are mutually exclusive
 			HAS_SKILL = 0x02,		// Check skill, if exists at level, no loss
-			ESC_LEV_SQUARE = 0x04,	// bottom of formula based on level square
-			ESC_LEV_QUAD = 0x08,	// bottom of formula based on level quad
-			LOSS_CHANCE = 0x10,		// flat chance of loss.
+			ESC_LEV_LINEAR = 0x04,		// bottom of formula based on level
+			ESC_LEV_SQUARE = 0x08,		// bottom of formula based on level squared
+			ESC_LEV_CUBE = 0x10,		// bottom of formula based on level cubed
+			ESC_LEV_QUAD = 0x20,		// bottom of formula based on level ^ 4
+			LOSS_CHANCE = 0x40,		// flat chance of escape.
+			// escape chances increase quadratically with number of monsters
+			ESC_NUM_SQUARE = 0x80,
 		};
 		int escape;
 		char const *esc_skill;

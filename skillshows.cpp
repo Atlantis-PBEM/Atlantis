@@ -40,6 +40,49 @@
 #define OBJECT_ENABLED(X) (!(ObjectDefs[(X)].flags & ObjectType::DISABLED))
 #define OBJECT_DISABLED(X) (ObjectDefs[(X)].flags & ObjectType::DISABLED)
 
+static void DescribeEscapeParameters(AString *desc, int item)
+{
+	if (item < 0 || item >= NITEMS || !ItemDefs[item].escape)
+		return;
+
+	if (ItemDefs[item].escape & ItemType::LOSS_CHANCE) {
+	}
+	else if (ItemDefs[item].escape & ItemType::HAS_SKILL) {
+	}
+	else
+	{
+		*desc += "Each ";
+		*desc += ItemDefs[item].name;
+		*desc += " has a chance to escape equal to ";
+		if (ItemDefs[item].escape & ItemType::ESC_NUM_SQUARE) {
+			*desc += "the total number of ";
+			*desc += ItemDefs[item].names;
+			*desc += " under the mage's control";
+		}
+		else
+			*desc += "1";
+		*desc += " in ";
+		if (ItemDefs[item].esc_val > 1) {
+			*desc += ItemDefs[item].esc_val;
+			*desc += " times ";
+		}
+		*desc += "the mage's skill level";
+		if (ItemDefs[item].escape & ItemType::ESC_LEV_LINEAR)
+			;
+		else if (ItemDefs[item].escape & ItemType::ESC_LEV_SQUARE)
+			*desc += " squared";
+		else if (ItemDefs[item].escape & ItemType::ESC_LEV_CUBE)
+			*desc += " cubed";
+		else if (ItemDefs[item].escape & ItemType::ESC_LEV_QUAD)
+			*desc += " to the fourth power";
+	}
+	if (ItemDefs[item].escape & ItemType::LOSE_LINKED)
+		*desc += ". If any one does escape, its first action will be "
+			"to release its companions";
+	*desc += ". ";
+
+	return;
+}
 
 AString *ShowSkill::Report(Faction *f)
 {
@@ -755,12 +798,19 @@ AString *ShowSkill::Report(Faction *f)
 			if (ITEM_DISABLED(I_DRAGON)) break;
 			*str += "A mage with Dragon Lore skill can summon dragons to "
 				"join him, to aid in battle, and provide flying "
-				"transportation. A mage at level 1 has a low chance of "
-				"successfully summoning a dragon, gradually increasing until "
-				"at level 5 he may summon one dragon per turn; the total "
-				"number of dragons that a mage may control at one time is "
-				"equal to his skill level. To attempt to summon a dragon, "
-				"CAST Dragon_Lore.";
+				"transportation. ";
+			if (ItemDefs[I_DRAGON].mOut > 0) {
+				*str += "A mage has a ";
+				*str += ItemDefs[I_DRAGON].mOut;
+				*str += "% times his skill level chance to summon a dragon";
+			}
+			else
+				*str += "A mage at level 1 has a low chance of "
+					"successfully summoning a dragon, gradually increasing "
+					"until at level 5 he may summon one dragon per turn";
+			*str += "; the total number of dragons that a mage may control at one "
+				"time is equal to his skill level. To attempt to summon a "
+				"dragon, CAST Dragon_Lore.";
 			break;
 		case S_NECROMANCY:
 			if (level > 1) break;
@@ -781,8 +831,14 @@ AString *ShowSkill::Report(Faction *f)
 				"Skeletons may be given to other units, as they follow "
 				"instructions mindlessly; however, they have a 10 percent "
 				"chance of decaying each turn. A mage can summon skeletons "
-				"at an average rate of 40 percent times his level squared. "
-				"To use the spell, use the order CAST Summon_Skeletons, "
+				"at an average rate of ";
+			if (ItemDefs[I_SKELETON].mOut > 0) {
+				*str += ItemDefs[I_SKELETON].mOut;
+				*str += " percent times his skill level.";
+			}
+			else
+				*str += "40 percent times his level squared.";
+			*str += " To use the spell, use the order CAST Summon_Skeletons, "
 				"and the mage will summon as many skeletons as he is able.";
 			break;
 		case S_RAISE_UNDEAD:
@@ -794,9 +850,15 @@ AString *ShowSkill::Report(Faction *f)
 				"given to other units, as they follow instructions "
 				"mindlessly; however, they have a 10 percent chance of "
 				"decaying each turn. A mage can summon undead at an average "
-				"rate of 10 percent times his level squared. To use the "
-				"spell, use the order CAST Raise_Undead and the mage will "
-				"summon as many undead as he is able.";
+				"rate of ";
+			if (ItemDefs[I_UNDEAD].mOut > 0) {
+				*str += ItemDefs[I_UNDEAD].mOut;
+				*str += " percent times his skill level.";
+			}
+			else
+				*str += "10 percent times his level squared.";
+			*str += " To use the spell, use the order CAST Raise_Undead and the "
+				"mage will summon as many undead as he is able.";
 			break;
 		case S_SUMMON_LICH:
 			/* XXX -- This should be cleaner somehow. */
@@ -806,8 +868,14 @@ AString *ShowSkill::Report(Faction *f)
 				"into his inventory, to aid him in battle. Liches may be "
 				"given to other units, as they follow instructions "
 				"mindlessly; however, they have a 10 percent chance of "
-				"decaying each turn. A mage has a 2 percent times his level "
-				"squared chance of summoning a lich; to summon a lich, use "
+				"decaying each turn. A mage has a ";
+			if (ItemDefs[I_LICH].mOut > 0) {
+				*str += ItemDefs[I_LICH].mOut;
+				*str += " percent times his skill level";
+			}
+			else
+				*str += "2 percent times his level squared";
+			*str += " chance of summoning a lich; to summon a lich, use "
 				"the order CAST Summon_Lich.";
 			break;
 		case S_CREATE_AURA_OF_FEAR:
@@ -836,11 +904,9 @@ AString *ShowSkill::Report(Faction *f)
 				"his inventory, to aid him in combat. A mage may summon one "
 				"imp per skill level; however, the imps have a chance of "
 				"breaking free of the mage's control at the end of each "
-				"turn. This chance is based on the number of imps in the "
-				"mage's control; if the mage has his skill level squared "
-				"times 4 imps, the chance is 5 percent; this chance goes "
-				"up or down quickly if the mage controls more or fewer imps. "
-				"To use this spell, the mage should issue the order CAST "
+				"turn. ";
+			DescribeEscapeParameters(str, I_IMP);
+			*str += "To use this spell, the mage should issue the order CAST "
 				"Summon_Imps, and the mage will summon as many imps as he "
 				"is able.";
 			break;
@@ -852,11 +918,9 @@ AString *ShowSkill::Report(Faction *f)
 				"into his inventory, to aid him in combat. A mage may summon "
 				"one demon each turn; however, the demons have a chance of "
 				"breaking free of the mage's control at the end of each "
-				"turn. This chance is based on the number of demons in the "
-				"mage's control; if the mage has a number of demons equal "
-				"to his skill level squared, the chance is 5 percent; this "
-				"chance goes up or down quickly if the mage controls more or "
-				"fewer demons. To use this spell, the mage should issue the "
+				"turn. ";
+			DescribeEscapeParameters(str, I_DEMON);
+			*str += "To use this spell, the mage should issue the "
 				"order CAST Summon_Demon.";
 			break;
 		case S_SUMMON_BALROG:
@@ -869,9 +933,9 @@ AString *ShowSkill::Report(Faction *f)
 				"but may only summon a balrog if one is not already under "
 				"his control. As with other demons, the balrog has a chance "
 				"of breaking free of the mage's control at the end of each "
-				"turn. This chance is equal to 1 over 4 times the mage's "
-				"skill level to the fourth power (or, from 1 over 4 at "
-				"level 1, to 1 over 2500 at level 5). To use this spell, "
+				"turn. ";
+			DescribeEscapeParameters(str, I_BALROG);
+			*str += "To use this spell, "
 				"the mage should issue the order CAST Summon_Balrog.";
 			break;
 		case S_BANISH_DEMONS:
