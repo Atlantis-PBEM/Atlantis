@@ -365,11 +365,6 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 			}
 		}
 		
-		AString *tmp = new AString(" (behind)");
-		if (!behind) tmp = new AString("");
-		/*
-		 * Awrite(AString("Found ") + n + " fitting weapons " + *tmp + ".");
-		*/
 		if (n < 1) {
 			weaponlevel++;
 			continue;

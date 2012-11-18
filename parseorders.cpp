@@ -2022,7 +2022,6 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 	tOrder->repeating = repeat;
 
 	AString *order, *token;
-	int atsign;
 
 	while (turnDepth) {
 		// get the next line
@@ -2032,7 +2031,6 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 			order = new AString("#end");
 		}
 		AString	saveorder = *order;
-		atsign = order->getat();
 		token = order->gettoken();
 
 		if (token) {

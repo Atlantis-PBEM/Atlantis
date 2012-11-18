@@ -1900,7 +1900,6 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 
 int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 {
-	CastOrder *order;
 	int level, num, sactype, sacrifices, i, sac, max, dir;
 	Object *o, *tower;
 	Unit *u, *victim;
@@ -1908,7 +1907,6 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 	ARegion *start;
 	AString message;
 
-	order = (CastOrder *) mage->castorders;
 	level = mage->GetSkill(S_BLASPHEMOUS_RITUAL);
 	if (level < 1) {
 		mage->Error("CAST: Unit doesn't have that skill.");
