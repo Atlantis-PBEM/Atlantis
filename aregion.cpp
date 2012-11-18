@@ -1563,11 +1563,12 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 				f->ClearTab();
 				u->oldorders.DeleteAll();
 
+				int firstMonthOrder = gotMonthOrder;
 				if (u->turnorders.First()) {
 					TurnOrder *tOrder;
 					forlist(&u->turnorders) {
 						tOrder = (TurnOrder *)elem;
-						if (gotMonthOrder) {
+						if (firstMonthOrder) {
 							if (tOrder->repeating)
 								f->PutStr(AString("@TURN"));
 							else
@@ -1589,15 +1590,15 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 							if (order == O_TURN || order == O_FORM)
 								f->AddTab();
 						}
-						if (gotMonthOrder) {
+						if (firstMonthOrder) {
 							f->DropTab();
 							f->PutStr(AString("ENDTURN"));
 						}
-						gotMonthOrder = 1;
+						firstMonthOrder = 1;
 						f->ClearTab();
 					}
 					tOrder = (TurnOrder *) u->turnorders.First();
-					if (tOrder->repeating) {
+					if (tOrder->repeating && !gotMonthOrder) {
 						f->PutStr(AString("@TURN"));
 						f->AddTab();
 						forlist(&tOrder->turnOrders) {
