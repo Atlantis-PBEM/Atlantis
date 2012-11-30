@@ -1162,6 +1162,15 @@ int Unit::CheckDepend(int lev, SkillDepend &dep)
 int Unit::CanStudy(int sk)
 {
 	if (skills.GetStudyRate(sk, GetMen()) < 1) return 0;
+
+	if (Globals->SKILL_LIMIT_NONLEADERS &&
+		IsNormal() &&
+		skills.GetDays(sk) < 1 &&
+		skills.Num() > 0) {
+		if (!Globals->MAGE_NONLEADERS ||
+			!(SkillDefs[sk].flags & SkillType::MAGIC))
+		return 0;
+	}
 	
 	int curlev = GetRealSkill(sk);
 

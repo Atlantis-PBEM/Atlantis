@@ -246,6 +246,22 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "This skill gives the unit a bonus in hand to hand "
 				"combat. Also, a unit with this skill may TAX or PILLAGE.";
 			break;
+		case S_ENDURANCE:
+			if (level == 1) {
+				*str += "A unit with this skill has begun the process of building "
+					"on their combat experience to learn how to survive wounds "
+					"that would lay low a less grizzled warrior.  This is an "
+					"arduous process, and doesn't yet provide any advantage "
+					"at this skill level.";
+			} else if (level == 3) {
+				*str += "The process of building up combat endurance is starting "
+					"to yield results.  At this level the men in the unit can "
+					"survive one extra hit in combat before being overcome.";
+			} else if (level == 5) {
+				*str += "The men of this unit are now hardened veterans, and can "
+					"survive three hits in combat before falling.";
+			}
+			break;
 		case S_RIDING:
 			if (level > 1) break;
 			*str += "A unit with this skill, if possessing a mount, may "

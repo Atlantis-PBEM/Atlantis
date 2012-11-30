@@ -1041,6 +1041,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableSkill(S_CREATE_CENSER);
 	EnableSkill(S_TRANSMUTATION);
 	EnableSkill(S_BLASPHEMOUS_RITUAL);
+	EnableSkill(S_ENDURANCE);
 
 	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
 

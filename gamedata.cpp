@@ -3488,6 +3488,10 @@ static SkillType sd[] = {
 	 SkillType::MAGIC | SkillType::CAST | SkillType::DISABLED,
 	 NULL, NULL,
 	 {{"DEMO",4},{"NECR",4},{NULL,0}}},
+	{"endurance","ENDU",50,
+	 SkillType::BATTLEREP | SkillType::DISABLED,
+	 NULL,NULL,
+	 {{"COMB",3},{NULL,0},{NULL,0}}},
 };
 
 SkillType *SkillDefs = sd;
@@ -5103,6 +5107,17 @@ static AttribModType atd[] = {
 	   "PHEN", AttribModItem::UNIT_LEVEL, 5},
 	  {AttribModItem::SKILL,
 	   "ENTE", AttribModItem::UNIT_LEVEL, 1},
+	  {0,
+	   NULL, 0, 0},
+	  {0,
+	   NULL, 0, 0},
+	  {0,
+	   NULL, 0, 0}}},
+	{"toughness", 0,
+	 {{AttribModItem::SKILL,
+	   "ENDU", AttribModItem::UNIT_LEVEL_HALF, 1},
+	  {0,
+	   NULL, 0, 0},
 	  {0,
 	   NULL, 0, 0},
 	  {0,

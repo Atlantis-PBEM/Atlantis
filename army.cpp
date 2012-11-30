@@ -68,8 +68,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	for (int i=0; i<NUM_ATTACK_TYPES; i++)
 		protection[i] = 0;
 	damage = 0;
-	hits = 1;
-	maxhits = 1;
+	hits = unit->GetAttribute("toughness");
+	if (hits < 1) hits = 1;
+	maxhits = hits;
 	amuletofi = 0;
 	battleItems = 0;
 
