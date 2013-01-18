@@ -1716,6 +1716,119 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			goto done_moving;
 		}
 		newreg = regions.GetRegion(obj->inner);
+		if (obj->type == O_GATEWAY) {
+			// Gateways should only exist in the nexus, and move the
+			// user to a semi-random instance of the target terrain
+			// type, so select where they will actually move to.
+			ARegionArray *level = regions.GetRegionArray(newreg->zloc);
+			// match levels to try for, in order:
+			// 0 - completely empty towns
+			// 1 - towns with only guardsmen
+			// 2 - towns with guardsmen and other players
+			// 3 - completely empty hexes
+			// 4 - anywhere that matches terrain (out of options)
+			int match = 0;
+			int candidates = 0;
+			while (!candidates && match < 5) {
+				for (int x = 0; x < level->x; x++)
+					for (int y = 0; y < level->y; y++) {
+						ARegion *scanReg = level->GetRegion(x, y);
+						if (!scanReg)
+							continue;
+						if (TerrainDefs[scanReg->type].similar_type != TerrainDefs[newreg->type].similar_type)
+							continue;
+						if (match < 3 && !scanReg->town)
+							continue;
+						if (match == 4) {
+							candidates++;
+							continue;
+						}
+						int guards = 0;
+						int others = 0;
+						forlist(&scanReg->objects) {
+							Object *o = (Object *) elem;
+							forlist(&o->units) {
+								Unit *u = (Unit *) elem;
+								if (u->faction->num == guardfaction)
+									guards = 1;
+								else
+									others = 1;
+							}
+						}
+						switch (match) {
+							case 0:
+								if (guards || others)
+									continue;
+								break;
+							case 1:
+								if (!guards || others)
+									continue;
+								break;
+							case 2:
+								if (!guards)
+									continue;
+								break;
+							case 3:
+								if (others)
+									continue;
+								break;
+						}
+						candidates++;
+					}
+				if (!candidates)
+					match++;
+			}
+			if (candidates) {
+				candidates = getrandom(candidates);
+				for (int x = 0; x < level->x; x++)
+					for (int y = 0; y < level->y; y++) {
+						ARegion *scanReg = level->GetRegion(x, y);
+						if (!scanReg)
+							continue;
+						if (TerrainDefs[scanReg->type].similar_type != TerrainDefs[newreg->type].similar_type)
+							continue;
+						if (match < 3 && !scanReg->town)
+							continue;
+						if (match == 4) {
+							candidates++;
+							continue;
+						}
+						int guards = 0;
+						int others = 0;
+						forlist(&scanReg->objects) {
+							Object *o = (Object *) elem;
+							forlist(&o->units) {
+								Unit *u = (Unit *) elem;
+								if (u->faction->num == guardfaction)
+									guards = 1;
+								else
+									others = 1;
+							}
+						}
+						switch (match) {
+							case 0:
+								if (guards || others)
+									continue;
+								break;
+							case 1:
+								if (!guards || others)
+									continue;
+								break;
+							case 2:
+								if (!guards)
+									continue;
+								break;
+							case 3:
+								if (others)
+									continue;
+								break;
+						}
+						if (!candidates--) {
+							newreg = scanReg;
+						}
+					}
+			}
+		}
 	} else if (x->dir == MOVE_PAUSE) {
 		newreg = region;
 	} else {
@@ -1735,7 +1848,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	cost = newreg->MoveCost(movetype, region, x->dir, &road);
 	if (x->dir == MOVE_PAUSE)
 		cost = 1;
-	if (region->type == R_NEXUS && newreg->IsStartingCity()) {
+	if (region->type == R_NEXUS) {
 		cost = 1;
 		startmove = 1;
 	}
