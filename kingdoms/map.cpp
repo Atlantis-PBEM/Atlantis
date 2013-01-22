@@ -29,6 +29,7 @@
    standard Atlantis stuff!
 */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "game.h"
