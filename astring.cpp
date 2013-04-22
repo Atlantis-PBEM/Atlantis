@@ -322,6 +322,12 @@ AString *AString::Trunc(int val, int back)
 {
 	int l=Len();
 	if (l <= val) return 0;
+	for (int i = 0; i < val; i++) {
+		if (str[i] == '\n' || str[i] == '\r') {
+			str[i] = '\0';
+			return new AString(&(str[i+1]));
+		}
+	}
 	for (int i=val; i>(val-back); i--) {
 		if (str[i] == ' ') {
 			str[i] = '\0';
