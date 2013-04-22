@@ -2462,7 +2462,6 @@ ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 	queue = start;
 	while (start) {
 		queue = FindConnectedRegions(start, queue, 1);
-		start = start->next;
 		valid = 0;
 		if (start) {
 			if (Globals->START_CITIES_EXIST) {
@@ -2500,6 +2499,7 @@ ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 			}
 			return start;
 		}
+		start = start->next;
 	}
 
 	// This should never happen!

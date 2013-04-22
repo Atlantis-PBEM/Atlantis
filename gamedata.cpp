@@ -4078,6 +4078,13 @@ static ObjectType ot[] =
 	 15, 3, 3,
 	 -1, -1,
 	 {0,0,0,0,0,0}},
+	{"Gateway",
+	 ObjectType::CANENTER | ObjectType::NEVERDECAY,
+	 0,0,0,0,
+	 -1,0,NULL,0,
+	 0,0,0,
+	 -1,-1,
+	 {0,0,0,0,0,0}},
 };
 
 ObjectType *ObjectDefs = ot;

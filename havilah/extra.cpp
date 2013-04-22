@@ -795,6 +795,10 @@ Faction *Game::CheckVictory()
 				if (!o->incomplete) {
 					// You didn't think this was a
 					// _win_ condition, did you?
+					message = "A blasphemous tower has been completed!\n\n"
+						"The connection between Havilah and the Eternal City has been severed.\n\n"
+						"The light fails; darkness falls forever, and all life perishes under endless ice.";
+					WriteTimesArticle(message);
 					return GetFaction(&factions, monfaction);
 				}
 				if (o->incomplete <= ObjectDefs[o->type].cost / 2) {

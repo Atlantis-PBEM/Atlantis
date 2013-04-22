@@ -1099,14 +1099,44 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 		for (int y = 0; y < ar->y; y++) {
 			ARegion *AC = ar->GetRegion(x, y);
 			if (!AC) continue;
-			for (int i=0; i<NDIRS; i++) {
-				if (AC->neighbors[i]) continue;
-				ARegion *pReg = GetStartingCity(AC, i, levelTo, maxX, maxY);
-				if (!pReg) continue;
-				AC->neighbors[i] = pReg;
-				pReg->MakeStartingCity();
-				if (Globals->GATES_EXIST) {
-					numberofgates++;
+			if (Globals->START_CITIES_EXIST) {
+				for (int i=0; i<NDIRS; i++) {
+					if (AC->neighbors[i]) continue;
+					ARegion *pReg = GetStartingCity(AC, i, levelTo, maxX, maxY);
+					if (!pReg) continue;
+					AC->neighbors[i] = pReg;
+					pReg->MakeStartingCity();
+					if (Globals->GATES_EXIST) {
+						numberofgates++;
+					}
+				}
+			}
+			else
+			{
+				// If we don't have starting cities, then put portals
+				// from the nexus to a variety of terrain types.
+				// These will transport the user to a randomly
+				// selected region of the chosen terrain type.
+				ARegionArray *to = GetRegionArray(levelTo);
+				for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
+					int found = 0;
+					for (int x2 = 0; !found && x2 < maxX; x2++)
+						for (int y2 = 0; !found && y2 < maxY; y2++) {
+							ARegion *reg = to->GetRegion(x2, y2);
+							if (!reg)
+								continue;
+							if (reg->type == type) {
+								found = 1;
+								Object *o = new Object(AC);
+								o->num = AC->buildingseq++;
+								o->name = new AString(AString("Gateway to ") +
+									TerrainDefs[type].name + " [" + o->num + "]");
+								o->type = O_GATEWAY;
+								o->incomplete = 0;
+								o->inner = reg->num;
+								AC->objects.Add(o);
+							}
+						}
 				}
 			}
 		}

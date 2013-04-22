@@ -1794,8 +1794,12 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	ProduceOrder *p = new ProduceOrder;
 	p->item = it;
-	AString skname = ItemDefs[it].pSkill;
-	p->skill = LookupSkill(&skname);
+	if (it != -1) {
+		AString skname = ItemDefs[it].pSkill;
+		p->skill = LookupSkill(&skname);
+	} else {
+		p->skill = -1;
+	}
 	p->target = target;
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&

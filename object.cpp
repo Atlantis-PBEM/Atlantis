@@ -263,7 +263,7 @@ int Object::CanEnter(ARegion *reg, Unit *u)
 Unit *Object::ForbiddenBy(ARegion *reg, Unit *u)
 {
 	Unit *owner = GetOwner();
-	if (!owner) {
+	if (!owner || type == O_GATEWAY) {
 		return(0);
 	}
 
