@@ -414,9 +414,9 @@ int Object::IsRoad()
  */
 int Object::CheckShip(int item)
 {
+	if (item < 0) return 0;
 	if (!IsFleet()) return 0;
-	if (!(ItemDefs[item].flags & ItemType::DISABLED)
-		&& (ItemDefs[item].type & IT_SHIP)) return 1;
+	if (ItemDefs[item].type & IT_SHIP) return 1;
 	return 0;
 }
 
@@ -436,7 +436,8 @@ void Object::ReadinFleet(Ainfile *f)
 	for (int i=0; i<nships; i++) {
 		Item *ship = new Item;
 		ship->Readin(f);
-		SetNumShips(ship->type, ship->num);
+		if (ship->type >= 0)
+			SetNumShips(ship->type, ship->num);
 		delete ship;
 	}
 }

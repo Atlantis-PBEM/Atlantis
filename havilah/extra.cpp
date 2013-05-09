@@ -1020,17 +1020,6 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_STAFFOFL);
 	DisableItem(I_GNOME);
 
-	EnableItem(I_LONGBOAT);
-	EnableItem(I_CLIPPER);
-	EnableItem(I_GALLEON);
-	EnableItem(I_AGALLEON);
-	DisableItem(I_LONGSHIP);
-	DisableItem(I_KNARR);
-	DisableItem(I_GALLEY);
-	DisableItem(I_TRIREME);
-	DisableItem(I_COG);
-	DisableItem(I_CARRACK);
-
 	// EnableSkill(S_ARMORCRAFT);
 	// EnableSkill(S_WEAPONCRAFT);
 	EnableSkill(S_ENCHANT_SHIELDS);
@@ -1091,11 +1080,6 @@ void Game::ModifyTablesPerRuleset(void)
 		ObjectDefs[O_CITADEL].capacity,
 		ObjectDefs[O_CITADEL].sailors,
 		4);
-	ModifyObjectManpower(O_AGALLEON,
-		ObjectDefs[O_AGALLEON].protect,
-		ObjectDefs[O_AGALLEON].capacity,
-		ObjectDefs[O_AGALLEON].sailors,
-		1);
 	// DisableObject(O_BKEEP);
 	ModifyObjectName(O_BKEEP, "Black Tower");
 	ModifyObjectFlags(O_BKEEP, ObjectType::CANENTER |
