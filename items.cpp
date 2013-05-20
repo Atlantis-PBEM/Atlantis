@@ -1297,7 +1297,7 @@ void ItemList::Readin(Ainfile *f)
 	for (int j=0; j<i; j++) {
 		Item *temp = new Item;
 		temp->Readin(f);
-		if (temp->type < 1 || temp->num < 1 ||
+		if (temp->type < 0 || temp->num < 1 ||
 				ItemDefs[temp->type].flags & ItemType::DISABLED)
 			delete temp;
 		else
