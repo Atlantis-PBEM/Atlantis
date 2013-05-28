@@ -780,7 +780,9 @@ AString *ShowSkill::Report(Faction *f)
 			if (ITEM_DISABLED(I_WOLF)) break;
 			*str += "A mage with Wolf Lore skill may summon wolves, who will "
 				"fight for him in combat. A mage may summon a number of "
-				"wolves equal to his skill level, and control a total number "
+				"wolves averaging ";
+			*str += ItemDefs[I_WOLF].mOut;
+			*str += " percent times his skill level, and control a total number "
 				"of his skill level squared times 4 wolves; the wolves will "
 				"be placed in the mages inventory. Note, however, that wolves "
 				"may only be summoned in mountain and forest regions. To "
@@ -802,10 +804,18 @@ AString *ShowSkill::Report(Faction *f)
 				if (ITEM_DISABLED(I_EAGLE)) break;
 				*str += "A mage with Bird Lore 3 can summon eagles to join "
 					"him, who will aid him in combat, and provide for flying "
-					"transportation. A mage may summon a number of eagles "
-					"equal to his skill level minus 2, squared; the eagles "
-					"will appear in his inventory. To summon an eagle, issue "
-					"the order CAST Bird_Lore EAGLE.";
+					"transportation. A mage may summon ";
+				if (ItemDefs[I_EAGLE].mOut > 0) {
+					*str += "an average of ";
+					*str += ItemDefs[I_SKELETON].mOut;
+					*str += " percent times his skill level minus 2 eagles";
+				}
+				else
+					*str += "one eagle";
+				*str += " per month, and may control a number equal to "
+					"his skill level minus 2, squared, times two. "
+					"To summon an eagle, issue the order CAST "
+					"Bird_Lore EAGLE; the eagles will appear in his inventory.";
 			}
 			break;
 		case S_DRAGON_LORE:
@@ -917,8 +927,14 @@ AString *ShowSkill::Report(Faction *f)
 			if (level > 1) break;
 			if (ITEM_DISABLED(I_IMP)) break;
 			*str += "A mage with the Summon Imps skill may summon imps into "
-				"his inventory, to aid him in combat. A mage may summon one "
-				"imp per skill level; however, the imps have a chance of "
+				"his inventory, to aid him in combat. A mage may summon ";
+			if (ItemDefs[I_IMP].mOut > 0) {
+				*str += ItemDefs[I_IMP].mOut;
+				*str += " percent times his skill level imps";
+			}
+			else
+				*str += "one imp per skill level";
+			*str +=	"; however, the imps have a chance of "
 				"breaking free of the mage's control at the end of each "
 				"turn. ";
 			DescribeEscapeParameters(str, I_IMP);
@@ -931,8 +947,14 @@ AString *ShowSkill::Report(Faction *f)
 			if (level > 1) break;
 			if (ITEM_DISABLED(I_DEMON)) break;
 			*str += "A mage with the Summon Demon skill may summon demons "
-				"into his inventory, to aid him in combat. A mage may summon "
-				"one demon each turn; however, the demons have a chance of "
+				"into his inventory, to aid him in combat. A mage may summon ";
+			if (ItemDefs[I_DEMON].mOut > 0) {
+				*str += ItemDefs[I_DEMON].mOut;
+				*str += " percent times his skill level demons";
+			}
+			else
+				*str += "one demon";
+			*str += " each turn; however, the demons have a chance of "
 				"breaking free of the mage's control at the end of each "
 				"turn. ";
 			DescribeEscapeParameters(str, I_DEMON);
@@ -944,8 +966,9 @@ AString *ShowSkill::Report(Faction *f)
 			if (level > 1) break;
 			if (ITEM_DISABLED(I_BALROG)) break;
 			*str += "A mage with the Summon Balrog skill may summon a balrog "
-				"into his inventory, to aid him in combat. A mage has a 20 "
-				"percent times his skill level chance of summoning a balrog, "
+				"into his inventory, to aid him in combat. A mage has a ";
+			*str += ItemDefs[I_BALROG].mOut;
+			*str += " percent times his skill level chance of summoning a balrog, "
 				"but may only summon a balrog if one is not already under "
 				"his control. As with other demons, the balrog has a chance "
 				"of breaking free of the mage's control at the end of each "
