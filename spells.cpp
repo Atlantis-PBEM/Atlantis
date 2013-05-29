@@ -25,6 +25,23 @@
 #include "game.h"
 #include "gamedata.h"
 
+static int RandomiseSummonAmount(int num)
+{
+	int retval, i;
+
+	retval = 0;
+
+	for (i = 0; i < 2 * num; i++)
+	{
+		if (getrandom(2))
+			retval++;
+	}
+	if (retval < 1 && num > 0)
+		retval = 1;
+
+	return retval;
+}
+
 void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
 	AString * token = o->gettoken();
@@ -1093,7 +1110,9 @@ int Game::RunSummonBalrog(ARegion *r,Unit *u)
 
 	int level = u->GetSkill(S_SUMMON_BALROG);
 
-	int num = (level * 20 + getrandom(100)) / 100;
+	int num = (level * ItemDefs[I_BALROG].mOut + getrandom(100)) / 100;
+	if (u->items.GetNum(I_BALROG) + num > ItemDefs[I_BALROG].max_inventory)
+		num = ItemDefs[I_BALROG].max_inventory - u->items.GetNum(I_BALROG);
 
 	u->items.SetNum(I_BALROG,u->items.GetNum(I_BALROG) + num);
 	u->Event(AString("Summons ") + ItemString(I_BALROG,num) + ".");
@@ -1107,8 +1126,13 @@ int Game::RunSummonDemon(ARegion *r,Unit *u)
 		return 0;
 	}
 
-	u->items.SetNum(I_DEMON,u->items.GetNum(I_DEMON) + 1);
-	u->Event(AString("Summons ") + ItemString(I_DEMON,1) + ".");
+	int level = u->GetSkill(S_SUMMON_DEMON);
+	int num = (level * ItemDefs[I_DEMON].mOut + getrandom(100)) / 100;
+	num = RandomiseSummonAmount(num);
+	if (num < 1)
+		num = 1;
+	u->items.SetNum(I_DEMON,u->items.GetNum(I_DEMON) + num);
+	u->Event(AString("Summons ") + ItemString(I_DEMON,num) + ".");
 	return 1;
 }
 
@@ -1120,9 +1144,11 @@ int Game::RunSummonImps(ARegion *r,Unit *u)
 	}
 
 	int level = u->GetSkill(S_SUMMON_IMPS);
+	int num = (level * ItemDefs[I_IMP].mOut + getrandom(100)) / 100;
+	num = RandomiseSummonAmount(num);
 
-	u->items.SetNum(I_IMP,u->items.GetNum(I_IMP) + level);
-	u->Event(AString("Summons ") + ItemString(I_IMP,level) + ".");
+	u->items.SetNum(I_IMP,u->items.GetNum(I_IMP) + num);
+	u->Event(AString("Summons ") + ItemString(I_IMP,num) + ".");
 	return 1;
 }
 
@@ -1199,6 +1225,7 @@ int Game::RunRaiseUndead(ARegion *r,Unit *u)
 	if (chance < 1)
 		chance = level * level * 10;
 	int num = (chance + getrandom(100))/100;
+	num = RandomiseSummonAmount(num);
 
 	u->items.SetNum(I_UNDEAD,u->items.GetNum(I_UNDEAD) + num);
 	u->Event(AString("Raises ") + ItemString(I_UNDEAD,num) + ".");
@@ -1219,6 +1246,7 @@ int Game::RunSummonSkeletons(ARegion *r,Unit *u)
 	if (chance < 1)
 		chance = level * level * 40;
 	int num = (chance + getrandom(100))/100;
+	num = RandomiseSummonAmount(num);
 
 	u->items.SetNum(I_SKELETON,u->items.GetNum(I_SKELETON) + num);
 	u->Event(AString("Summons ") + ItemString(I_SKELETON,num) + ".");
@@ -1291,16 +1319,23 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 		return 0;
 	}
 
-	int level = u->GetSkill(S_BIRD_LORE);
-	int max = (level - 2) * (level - 2);
+	int level = u->GetSkill(S_BIRD_LORE) - 2;
+	int max = level * level * 2;
+	int num = (level * ItemDefs[I_EAGLE].mOut + getrandom(100)) / 100;
+	num = RandomiseSummonAmount(num);
+	if (num < 1)
+		num = 1;
 
 	if (u->items.GetNum(I_EAGLE) >= max) {
 		u->Error("CAST: Mage can't summon more eagles.");
 		return 0;
 	}
 
-	u->items.SetNum(I_EAGLE,u->items.GetNum(I_EAGLE) + 1);
-	u->Event("Summons an eagle.");
+	if (u->items.GetNum(I_EAGLE) + num > max)
+		num = max - u->items.GetNum(I_EAGLE);
+
+	u->items.SetNum(I_EAGLE,u->items.GetNum(I_EAGLE) + num);
+	u->Event(AString("Summons ") + ItemString(I_EAGLE,num) + ".");
 	return 1;
 }
 
@@ -1316,15 +1351,18 @@ int Game::RunWolfLore(ARegion *r,Unit *u)
 	int level = u->GetSkill(S_WOLF_LORE);
 	int max = level * level * 4;
 
-	int num = u->items.GetNum(I_WOLF);
-	int summon = max - num;
-	if (summon > level) summon = level;
-	if (summon < 0) summon = 0;
+	int curr = u->items.GetNum(I_WOLF);
+	int num = (level * ItemDefs[I_WOLF].mOut + getrandom(100)) / 100;
+	num = RandomiseSummonAmount(num);
+
+	if (num + curr > max)
+		num = max - curr;
+	if (num < 0) num = 0;
 
 	u->Event(AString("Casts Wolf Lore, summoning ") +
-			ItemString(I_WOLF,summon) + ".");
-	u->items.SetNum(I_WOLF,num + summon);
-	if (summon == 0) return 0;
+			ItemString(I_WOLF,num) + ".");
+	u->items.SetNum(I_WOLF,num + curr);
+	if (num == 0) return 0;
 	return 1;
 }
 

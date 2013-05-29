@@ -454,10 +454,10 @@ void ARegion::SetupCityMarket()
 					price = ItemDefs[ i ].baseprice;
 				}
 
-				cap = (citymax / 8);
-				if (cap < citymax) cap = (citymax * 3/4);
-				Market * m = new Market (M_BUY, i, price, amt, population+cap,
-						population+6*cap, amt, amt*5);
+				cap = (citymax * 3/4) - 5000;
+				if (cap < 0) cap = citymax/2;
+				Market * m = new Market (M_BUY, i, price, amt, population,
+						population+2*cap, amt, amt*5);
 				markets.Add(m);
 			} else if (ItemDefs[i].pInput[0].item == -1) {
 				// Basic resource

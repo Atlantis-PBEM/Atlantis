@@ -1413,8 +1413,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += f.Link("#guard", "GUARD") +  " 1 order to guard a " +
 			"region after sailing.";
 		f.Paragraph(temp);
-		temp = AString("Ships get ") + NumToWord(ItemDefs[I_KNARR].speed);
-		temp += AString(" movement point") + (ItemDefs[I_KNARR].speed==1?"":"s");
+		temp = AString("Most ships get ") + NumToWord(ItemDefs[I_LONGBOAT].speed);
+		temp += AString(" movement point") + (ItemDefs[I_LONGBOAT].speed==1?"":"s");
 		temp += " per turn.";
 		if (Globals->FLEET_CREW_BOOST > 0) {
 			temp += " Ships get an extra movement point for each "
@@ -1498,6 +1498,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				}
 			}
 			if (pub == 0) continue;
+			if (ItemDefs[i].mLevel > 0) continue;
 			int slevel = ItemDefs[i].pLevel;
 			if (slevel > 3) continue;
 			f.Enclose(1, "tr");
@@ -2831,6 +2832,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				}
 			}
 			if (pub == 0) continue;
+			if (ItemDefs[i].mLevel > 0) continue;
 			int slevel = ItemDefs[i].pLevel;
 			if (slevel > 3) continue;
 			f.Enclose(1, "tr");

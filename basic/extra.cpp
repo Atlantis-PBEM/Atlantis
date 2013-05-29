@@ -166,5 +166,23 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableObject(O_CARAVANSERAI);
 	}
 
+	EnableItem(I_LONGBOAT);
+	EnableItem(I_CLIPPER);
+	EnableItem(I_GALLEON);
+	EnableItem(I_AGALLEON);
+	DisableItem(I_LONGSHIP);
+	DisableItem(I_RAFT);
+	DisableItem(I_COG);
+	DisableItem(I_GALLEY);
+	DisableItem(I_CORSAIR);
+	DisableItem(I_AIRSHIP);
+	DisableItem(I_CLOUDSHIP);
+	ModifyObjectManpower(O_GALLEON,
+			 ObjectDefs[O_GALLEON].protect,
+			 ObjectDefs[O_GALLEON].capacity,
+			 ObjectDefs[O_GALLEON].sailors,
+			 0);
+
 	return;
 }
+
