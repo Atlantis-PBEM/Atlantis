@@ -42,7 +42,7 @@ void Game::DisableSkill(int sk)
 	SkillDefs[sk].flags |= SkillType::DISABLED;
 }
 
-void Game::ModifySkillDependancy(int sk, int i, char *dep, int lev)
+void Game::ModifySkillDependancy(int sk, int i, char const *dep, int lev)
 {
 	if (sk < 0 || sk > (NSKILLS-1)) return;
 	if (i < 0 || i >= (int)(sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend)))
@@ -207,6 +207,14 @@ void Game::ModifyItemMagicInput(int it, int i, int input, int amount)
 	if (amount < 0) amount = 0;
 	ItemDefs[it].mInput[i].item = input;
 	ItemDefs[it].mInput[i].amt = amount;
+}
+
+void Game::ModifyItemEscape(int it, int escape, char const *skill, int val)
+{
+	if (it < 0 || it > (NITEMS-1)) return;
+	ItemDefs[it].escape = escape;
+	ItemDefs[it].esc_skill = skill;
+	ItemDefs[it].esc_val = val;
 }
 
 void Game::ModifyRaceSkillLevels(char const *r, int spec, int def)

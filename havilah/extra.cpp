@@ -1036,6 +1036,48 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableSkill(S_BLASPHEMOUS_RITUAL);
 	EnableSkill(S_ENDURANCE);
 
+	ModifySkillDependancy(S_RAISE_UNDEAD, 0, "SUSK", 3);
+	ModifySkillDependancy(S_SUMMON_LICH, 0, "RAIS", 3);
+	// ModifySkillDependancy(S_CREATE_AURA_OF_FEAR, 0, "DEMO", 1);
+
+	ModifyItemMagicOutput(I_SKELETON, 200);
+	ModifyItemMagicOutput(I_WOLF, 200);
+	ModifyItemMagicOutput(I_IMP, 200);
+	ModifyItemMagicOutput(I_UNDEAD, 100);
+	ModifyItemMagicOutput(I_EAGLE, 100);
+	ModifyItemMagicOutput(I_DEMON, 100);
+	ModifyItemMagicOutput(I_DRAGON, 20);
+	ModifyItemMagicOutput(I_LICH, 20);
+	ModifyItemEscape(I_IMP,
+			ItemType::ESC_LEV_LINEAR | ItemType::LOSE_LINKED,
+			"SUIM",
+			20);
+	ModifyItemEscape(I_DEMON,
+			ItemType::ESC_LEV_LINEAR | ItemType::LOSE_LINKED,
+			"SUDE",
+			20);
+	ModifyItemEscape(I_BALROG,
+			ItemType::ESC_LEV_LINEAR | ItemType::LOSE_LINKED,
+			"SUBA",
+			20);
+	ModifyMonsterSpecial("LICH", "icebreath", 4);
+	ModifyMonsterSpecial("BALR", "fear", 6);
+	ModifyMonsterAttacksAndHits("SKEL", 2, 2, 0);
+	ModifyMonsterAttacksAndHits("UNDE", 10, 10, 0);
+	ModifyMonsterAttacksAndHits("DEMO", 6, 6, 0);
+	ModifyMonsterAttackLevel("EAGL", 4);
+	ModifyMonsterDefense("EAGL", ATTACK_COMBAT, 4);
+	ModifyMonsterDefense("EAGL", ATTACK_WEATHER, 4);
+	ModifyMonsterDefense("WOLF", ATTACK_ENERGY, 2);
+	ModifyMonsterDefense("WOLF", ATTACK_WEATHER, 2);
+	ModifyMonsterAttacksAndHits("EAGL", 3, 3, 0);
+	ModifyMonsterSkills("LICH", 4, 0, 3);
+	ModifyMonsterSkills("BALR", 5, 1, 2);
+	ModifyMonsterSkills("DEMO", 2, 2, 3);
+	ModifyMonsterSkills("WOLF", 1, 2, 3);
+	ModifyMonsterSkills("EAGL", 2, 2, 4);
+	ModifyMonsterSpoils("BALR", 30000, IT_MAGIC);
+
 	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
 
 	ModifyRaceSkills("NOMA", 3, "RIDI");
@@ -1094,8 +1136,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainItems(R_DESERT, 3, I_HORSE, 25, 10);
 	ModifyTerrainItems(R_JUNGLE, 3, I_IRONWOOD, 20, 5);
 	ModifyTerrainItems(R_UFOREST, 4, I_IRONWOOD, 20, 5);
-	ModifyTerrainItems(R_MOUNTAIN, 4, I_WOOD, 10, 5);
-	ModifyTerrainItems(R_MOUNTAIN, 5, I_YEW, 10, 5);
 
 	ModifyItemMagicInput(I_RINGOFI, 0, I_MITHRIL, 1);
 	ModifyItemMagicInput(I_RINGOFI, 1, I_SILVER, 600);

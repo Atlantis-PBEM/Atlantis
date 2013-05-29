@@ -1615,6 +1615,16 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				int losses = (i->num +
 						getrandom(ItemDefs[i->type].esc_val)) /
 					ItemDefs[i->type].esc_val;
+				// LOSS_CHANCE and HAS_SKILL together mean the
+				// decay rate only applies if you don't have
+				// the required skill (this might get used if
+				// you made illusions GIVEable, for example).
+				if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
+					tmp = ItemDefs[i->type].esc_skill;
+					skill = LookupSkill(&tmp);
+					if (u->GetSkill(skill) >= ItemDefs[i->type].esc_val)
+						losses = 0;
+				}
 				if (losses) {
 					tmp = ItemString(i->type, losses);
 					tmp += " decay";
