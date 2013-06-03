@@ -231,6 +231,7 @@ static GameDefs g = {
 	1, // ALLIES_NOAID
 	0, // HARDER_ASSASSINATION
 	0, //DISPERSE_GATE_NUMBERS
+	0	// UNDEATH_CONTAGION
 };
 
 GameDefs *Globals = &g;

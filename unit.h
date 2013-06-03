@@ -299,6 +299,7 @@ class Unit : public AListElem
 
 		// Used for tracking VISIT quests
 		set<string> visited;
+		int raised;
 };
 
 #endif

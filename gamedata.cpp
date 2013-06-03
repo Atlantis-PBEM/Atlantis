@@ -2541,7 +2541,7 @@ MonType md[] = {
 	 1,1,0,
 	 0,0,0,
 	 NULL,0,
-	 50,IT_NORMAL,10,100,"Skeletons", "SKEL"},
+	 50,IT_NORMAL,10,100,"Skeleton", "SKEL"},
 	{3,{3,2,3,2,0,0},
 	 6,6,0,
 	 0,0,0,

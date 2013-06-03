@@ -576,7 +576,7 @@ private:
 	//
 	// Battle function
 	//
-	void KillDead(Location *);
+	int KillDead(Location *, Battle *);
 	int RunBattle(ARegion *, Unit *, Unit *, int = 0, int = 0);
 	void GetSides(ARegion *, AList &, AList &, AList &, AList &, Unit *, Unit *,
 				  int = 0, int = 0);

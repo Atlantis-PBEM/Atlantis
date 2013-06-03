@@ -96,6 +96,7 @@ Unit::Unit()
 	savedmovement = 0;
 	savedmovedir = -1;
 	ClearOrders();
+	raised = 0;
 }
 
 Unit::Unit(int seq, Faction *f, int a)

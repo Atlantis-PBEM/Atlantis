@@ -699,6 +699,10 @@ public:
 	// over a wider range.  This option will also turn off reporting
 	// of the total number of gates in the game
 	int DISPERSE_GATE_NUMBERS;
+
+	// Chance of men killed by undead coming back from the grave
+	// as undead themselves
+	int UNDEATH_CONTAGION;
 };
 
 extern GameDefs *Globals;

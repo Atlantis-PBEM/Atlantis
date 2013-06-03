@@ -1101,7 +1101,7 @@ int Army::RemoveEffects(int num, char const *effect)
 
 int Army::DoAnAttack(char const *special, int numAttacks, int attackType,
 		int attackLevel, int flags, int weaponClass, char const *effect,
-		int mountBonus)
+		int mountBonus, Soldier *attacker)
 {
 	/* 1. Check against Global effects (not sure how yet) */
 	/* 2. Attack shield */
@@ -1211,6 +1211,13 @@ int Army::DoAnAttack(char const *special, int numAttacks, int attackType,
 			/* 8. Seeya! */
 			Kill(tarnum);
 			ret++;
+			if ((ItemDefs[tar->race].type & IT_MAN) &&
+				(ItemDefs[attacker->race].type & IT_UNDEAD)) {
+				if (getrandom(100) < Globals->UNDEATH_CONTAGION) {
+					attacker->unit->raised++;
+					tar->canbehealed = 0;
+				}
+			}
 		} else {
 			if (tar->HasEffect(effect)) {
 				continue;

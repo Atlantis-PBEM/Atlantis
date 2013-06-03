@@ -96,7 +96,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 				num = def->DoAnAttack(pMt->mountSpecial, realtimes,
 						spd->damage[i].type, pMt->specialLev,
 						spd->damage[i].flags, spd->damage[i].dclass,
-						spd->damage[i].effect, 0);
+						spd->damage[i].effect, 0, a);
 				if (num != -1) {
 					if (tot == -1) tot = num;
 					else tot += num;
@@ -142,7 +142,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 			attackClass = pWep->weapClass;
 		}
 		def->DoAnAttack(NULL, 1, attackType, a->askill, flags, attackClass,
-				NULL, mountBonus);
+				NULL, mountBonus, a);
 		if (!def->NumAlive()) break;
 	}
 
@@ -703,15 +703,44 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 	}
 }
 
-void Game::KillDead(Location * l)
+int Game::KillDead(Location * l, Battle *b)
 {
+	int uncontrolled = 0;
+	int skel, undead;
+	AString tmp;
+
 	if (!l->unit->IsAlive()) {
 		l->region->Kill(l->unit);
+		uncontrolled += l->unit->raised;
+		l->unit->raised = 0;
 	} else {
 		if (l->unit->advancefrom) {
 			l->unit->MoveUnit( l->unit->advancefrom->GetDummy() );
 		}
+		if (l->unit->raised > 0) {
+			undead = getrandom(l->unit->raised * 2 / 3 + 1);
+			printf("Raising: %d => %d\n", l->unit->raised, l->unit->raised * 2 / 3 + 1);
+			skel = l->unit->raised - undead;
+			tmp = ItemString(I_SKELETON, skel);
+			if (undead > 0) {
+				tmp += " and ";
+				tmp += ItemString(I_UNDEAD, undead);
+			}
+			tmp += " rise";
+			if ((skel + undead) == 1)
+				tmp += "s";
+			tmp += " from the grave to join ";
+			tmp += *l->unit->name;
+			tmp += ".";
+			l->unit->items.SetNum(I_SKELETON, l->unit->items.GetNum(I_SKELETON) + skel);
+			l->unit->items.SetNum(I_UNDEAD, l->unit->items.GetNum(I_UNDEAD) + undead);
+			b->AddLine(tmp);
+			b->AddLine("");
+			l->unit->raised = 0;
+		}
 	}
+
+	return uncontrolled;
 }
 
 int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
@@ -782,15 +811,37 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 	result = b->Run(r,attacker,&atts,target,&defs,ass, &regions );
 
 	/* Remove all dead units */
+	int uncontrolled = 0;
 	{
 		forlist(&atts) {
-			KillDead((Location *) elem);
+			uncontrolled += KillDead((Location *) elem, b);
 		}
 	}
 	{
 		forlist(&defs) {
-			KillDead((Location *) elem);
+			uncontrolled += KillDead((Location *) elem, b);
 		}
+	}
+	if (uncontrolled > 0 && monfaction > 0) {
+		int undead = getrandom(uncontrolled * 2 / 3 + 1);
+		printf("Raising: %d => %d\n", uncontrolled, uncontrolled * 2 / 3 + 1);
+		int skel = uncontrolled - undead;
+		AString tmp = ItemString(I_SKELETON, skel);
+		if (undead > 0) {
+			tmp += " and ";
+			tmp += ItemString(I_UNDEAD, undead);
+		}
+		tmp += " rise";
+		if ((skel + undead) == 1)
+			tmp += "s";
+		tmp += " from the grave to seek vengeance.";
+		Faction *monfac = GetFaction(&factions, monfaction);
+		Unit *u = GetNewUnit(monfac, 0);
+		u->MakeWMon("Undead", I_SKELETON, skel);
+		u->items.SetNum(I_UNDEAD, undead);
+		u->MoveUnit(r->GetDummy());
+		b->AddLine(tmp);
+		b->AddLine("");
 	}
 	return result;
 }
