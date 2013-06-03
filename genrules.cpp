@@ -1075,7 +1075,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += ".";
 		}
 		f.Paragraph(temp);
-		if (Globals->MULTI_HEX_NEXUS) {
+		if (!Globals->START_CITIES_EXIST) {
+			temp = "The Nexus contains portals that provide one-way "
+				"transportation to various terrain types.  "
+				"A unit that enters one of these portals (by "
+				"entering the portal and moving IN) will "
+				"be transported to a region of the matching "
+				"terrain type.  The region chosen is somewhat "
+				"random, but will prefer to place players in "
+				"towns where no other players are present.  "
+				"Once a unit has passed through a portal, there "
+				"is no way to return to the Nexus.";
+		} else if (Globals->MULTI_HEX_NEXUS) {
 			temp = "From the Nexus hexes, there are exits either to other "
 				"Nexus hexes, or to starting cities in Atlantis.  Units may "
 				"move through these exits as normal, but once in a starting "
@@ -1089,81 +1100,83 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if (Globals->GATES_EXIST &&
 				(Globals->NEXUS_GATE_OUT || Globals->NEXUS_IS_CITY)) {
 			temp += " It is also possible to use Gate Lore to get out of "
-				"Nexus";
+				"the Nexus";
 			if (Globals->NEXUS_GATE_OUT && !Globals->NEXUS_IS_CITY)
 				temp += " (but not to return)";
 			temp += ".";
 		}
-		temp += " The ";
-		if (!Globals->MULTI_HEX_NEXUS)
-			temp += "six ";
-		temp += "starting cities offer much to a starting faction; ";
-		if (Globals->START_CITIES_START_UNLIMITED) {
-			if (!Globals->SAFE_START_CITIES && Globals->CITY_MONSTERS_EXIST)
-				temp += "until someone conquers the guardsmen, ";
-			temp += "there are unlimited amounts of many materials and men "
-				"(though the prices are often quite high).";
-		} else {
-			temp += "there are materials as well as a very large supply of "
-				"men (though the prices are often quite high).";
-		}
-		if (Globals->SAFE_START_CITIES || Globals->CITY_MONSTERS_EXIST)
-			temp += " In addition, ";
-		if (Globals->SAFE_START_CITIES)
-			temp += "no battles are allowed in starting cities";
-		if (Globals->CITY_MONSTERS_EXIST) {
-			if (Globals->SAFE_START_CITIES) temp += " and ";
-			temp += "the starting cities are guarded by strong guardsmen, "
-				"keeping any units within the city ";
+		if (Globals->START_CITIES_EXIST) {
+			temp += " The ";
+			if (!Globals->MULTI_HEX_NEXUS)
+				temp += "six ";
+			temp += "starting cities offer much to a starting faction; ";
+			if (Globals->START_CITIES_START_UNLIMITED) {
+				if (!Globals->SAFE_START_CITIES && Globals->CITY_MONSTERS_EXIST)
+					temp += "until someone conquers the guardsmen, ";
+				temp += "there are unlimited amounts of many materials and men "
+					"(though the prices are often quite high).";
+			} else {
+				temp += "there are materials as well as a very large supply of "
+					"men (though the prices are often quite high).";
+			}
+			if (Globals->SAFE_START_CITIES || Globals->CITY_MONSTERS_EXIST)
+				temp += " In addition, ";
+			if (Globals->SAFE_START_CITIES)
+				temp += "no battles are allowed in starting cities";
+			if (Globals->CITY_MONSTERS_EXIST) {
+				if (Globals->SAFE_START_CITIES) temp += " and ";
+				temp += "the starting cities are guarded by strong guardsmen, "
+					"keeping any units within the city ";
+				if (!Globals->SAFE_START_CITIES)
+					temp += "much safer ";
+				else
+					temp += "safe ";
+				temp += "from attack. See the section on Non-Player Units for "
+					"more information on city guardsmen";
+			}
+			temp += ". ";
+			temp += "As a drawback, these cities tend to be extremely crowded, "
+				"and most factions will wish to leave the starting cities when "
+				"possible.";
+			f.Paragraph(temp);
+			temp = "It is always possible to enter any starting city from the "
+				"nexus";
 			if (!Globals->SAFE_START_CITIES)
-				temp += "much safer ";
-			else
-				temp += "safe ";
-			temp += "from attack. See the section on Non-Player Units for "
-				"more information on city guardsmen";
-		}
-		temp += ". ";
-		temp += "As a drawback, these cities tend to be extremely crowded, "
-			"and most factions will wish to leave the starting cities when "
-			"possible.";
-		f.Paragraph(temp);
-		temp = "It is always possible to enter any starting city from the "
-			"nexus";
-		if (!Globals->SAFE_START_CITIES)
-			temp += ", even if that starting city has been taken over and "
-				"guarded by another faction";
-		temp += ". This is due to the transportation from the Nexus to the "
-			"starting city being magical in nature.";
-		if (!Globals->SAFE_START_CITIES)
-			temp += " Once in the starting city however, no guarantee of "
-				"safety is given.";
-		f.Paragraph(temp);
-		int num_methods = 1 + (Globals->GATES_EXIST?1:0) + (may_sail?1:0);
-		char const *methods[] = {"You must go ", "The first is ", "The second is "};
-		int method = 1;
-		if (num_methods == 1) method = 0;
-		temp = AString("There ") + (num_methods == 1?"is ":"are ") +
-			NumToWord(num_methods) + " method" + (num_methods == 1?" ":"s ") +
-			"of departing the starting cities. ";
-		temp += methods[method++];
-		temp += " by land, but keep in mind that the lands immediately "
-			"surrounding the starting cities will tend to be highly "
-			"populated, and possibly quite dangerous to travel.";
-		if (may_sail) {
-			temp += AString(" ") + methods[method];
-			temp += " by sea; all of the starting cities lie against an "
-				"ocean, and a faction may easily purchase wood and "
-				"construct a ship to ";
-			temp += f.Link("#sail", "SAIL");
-			temp += " away.  Be wary of pirates seeking to prey on new "
-				"factions, however!";
-		}
-		if (Globals->GATES_EXIST) {
-			temp += " And last, rumors of a magical Gate Lore suggest yet "
-				"another way to travel from the starting cities.  The rumors "
-				"are vague, but factions wishing to travel far from the "
-				"starting cities, taking only a few men with them, might "
-				"wish to pursue this method.";
+				temp += ", even if that starting city has been taken over and "
+					"guarded by another faction";
+			temp += ". This is due to the transportation from the Nexus to the "
+				"starting city being magical in nature.";
+			if (!Globals->SAFE_START_CITIES)
+				temp += " Once in the starting city however, no guarantee of "
+					"safety is given.";
+			f.Paragraph(temp);
+			int num_methods = 1 + (Globals->GATES_EXIST?1:0) + (may_sail?1:0);
+			char const *methods[] = {"You must go ", "The first is ", "The second is "};
+			int method = 1;
+			if (num_methods == 1) method = 0;
+			temp = AString("There ") + (num_methods == 1?"is ":"are ") +
+				NumToWord(num_methods) + " method" + (num_methods == 1?" ":"s ") +
+				"of departing the starting cities. ";
+			temp += methods[method++];
+			temp += " by land, but keep in mind that the lands immediately "
+				"surrounding the starting cities will tend to be highly "
+				"populated, and possibly quite dangerous to travel.";
+			if (may_sail) {
+				temp += AString(" ") + methods[method];
+				temp += " by sea; all of the starting cities lie against an "
+					"ocean, and a faction may easily purchase wood and "
+					"construct a ship to ";
+				temp += f.Link("#sail", "SAIL");
+				temp += " away.  Be wary of pirates seeking to prey on new "
+					"factions, however!";
+			}
+			if (Globals->GATES_EXIST) {
+				temp += " And last, rumors of a magical Gate Lore suggest yet "
+					"another way to travel from the starting cities.  The rumors "
+					"are vague, but factions wishing to travel far from the "
+					"starting cities, taking only a few men with them, might "
+					"wish to pursue this method.";
+			}
 		}
 		f.Paragraph(temp);
 	}
@@ -4179,16 +4192,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "if they can see the criminal. ";
 		temp += "They are on guard, and will prevent other units from "
 			"taxing or pillaging. ";
-		if (Globals->SAFE_START_CITIES)
+		if (Globals->START_CITIES_EXIST && Globals->SAFE_START_CITIES)
 			temp += "Except in the starting cities, the ";
 		else
 			temp += "The ";
 		temp += "guards may be killed by players, although they will form "
 			"again if the city is left unguarded.";
 		f.Paragraph(temp);
-		if (Globals->SAFE_START_CITIES || Globals->START_CITY_GUARDS_PLATE ||
-				Globals->START_CITY_MAGES) {
-			if (Globals->AMT_START_CITY_GUARDS) {
+		if (Globals->START_CITIES_EXIST &&
+				(Globals->SAFE_START_CITIES ||
+				Globals->START_CITY_GUARDS_PLATE ||
+				Globals->START_CITY_MAGES)) {
+			if (Globals->SAFE_START_CITIES || Globals->START_CITY_GUARDS_PLATE) {
 				temp = "Note that the city guardsmen in the starting cities "
 					"of Atlantis possess ";
 				if (Globals->SAFE_START_CITIES)
