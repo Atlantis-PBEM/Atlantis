@@ -719,7 +719,6 @@ int Game::KillDead(Location * l, Battle *b)
 		}
 		if (l->unit->raised > 0) {
 			undead = getrandom(l->unit->raised * 2 / 3 + 1);
-			printf("Raising: %d => %d\n", l->unit->raised, l->unit->raised * 2 / 3 + 1);
 			skel = l->unit->raised - undead;
 			tmp = ItemString(I_SKELETON, skel);
 			if (undead > 0) {
@@ -824,7 +823,6 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 	}
 	if (uncontrolled > 0 && monfaction > 0) {
 		int undead = getrandom(uncontrolled * 2 / 3 + 1);
-		printf("Raising: %d => %d\n", uncontrolled, uncontrolled * 2 / 3 + 1);
 		int skel = uncontrolled - undead;
 		AString tmp = ItemString(I_SKELETON, skel);
 		if (undead > 0) {
