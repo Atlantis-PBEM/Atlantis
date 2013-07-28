@@ -706,17 +706,21 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	if (*token == "showattitudes") {
 		delete token;
-		u->faction->Event("Units will now have a leading sign to show your " 
-									"attitude to them.");
-		u->faction->showunitattitudes = 1;
+		if (!pCheck) {
+			u->faction->Event("Units will now have a leading sign to show your " 
+						"attitude to them.");
+			u->faction->showunitattitudes = 1;
+		}
 		return;
 	}
 
 	if (*token == "dontshowattitudes") {
 		delete token;
-		u->faction->Event("Units will now have a leading minus sign regardless"
-									" of your attitude to them.");
-		u->faction->showunitattitudes = 0;
+		if (!pCheck) {
+			u->faction->Event("Units will now have a leading minus sign regardless"
+						" of your attitude to them.");
+			u->faction->showunitattitudes = 0;
+		}
 		return;
 	}
 
