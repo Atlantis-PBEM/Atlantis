@@ -627,6 +627,11 @@ void Game::ProcessTransmutation(Unit *u, AString *o, OrdersCheck *pCheck)
 	order->number = -1;
 
 	token = o->gettoken();
+	if (!token) {
+		u->Error("CAST: You must specify what you wish to create.");
+		delete order;
+		return;
+	}
 	if (token->value() > 0) {
 		order->number = token->value();
 		delete token;
