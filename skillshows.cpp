@@ -70,7 +70,7 @@ AString *ShowSkill::Report(Faction *f)
 		case S_LUMBERJACK:
 			if(level > 1) break;
 			*str += "This skill deals with all aspects of various wood "
-			    "production. Woods are more often found in forests, but "
+			    "production. Wood is most often found in forests, but "
 				"may also be found elsewhere.";
 			break;
 		case S_QUARRYING:

@@ -447,7 +447,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp += "and apprentices ";
 		temp += "the faction may have. (More information on all of the "
 			"faction activities is in further sections of the rules).  Here "
-			"is a chart detailing the limits on factions by Faction Points.";
+			"is a chart detailing the limits on factions by Faction Points:";
 		f.Paragraph(temp);
 		f.LinkRef("tablefactionpoints");
 		f.Enclose(1, "CENTER");
@@ -2387,7 +2387,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"construction tends to depend on the Shipbuilding skill, not "
 			"the Building skill. ";
 		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-			temp += "Only faction with at least one faction point spent on "
+			temp += "Only factions with at least one faction point spent on "
 				"trade can issue ";
 			temp += f.Link("#build", "BUILD") + " orders. ";
 		}
@@ -2469,7 +2469,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"All units may ";
 	temp += f.Link("#work", "WORK") + ", regardless of skills";
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-		temp += "or faction type";
+		temp += " or faction type";
 	temp += ".";
 	f.Paragraph(temp);
 	if(!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
@@ -4083,7 +4083,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("evict");
 	f.TagText("H4", "EVICT [unit] ...");
 	temp = "Evict the specified unit from the object of which you are "
-		"currently the owner.  If multipe EVICT orders are given, all "
+		"currently the owner.  If multiple EVICT orders are given, all "
 		"of the units will be evicted.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
@@ -4260,7 +4260,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"final form of the GIVE order gives the entire unit to the "
 		"specified unit's faction.";
 	f.Paragraph(temp);
-	temp = "The classes of items which are exceptable for the fourth form of "
+	temp = "The classes of items which are acceptable for the fourth form of "
 		"this order are, NORMAL, ADVANCED, TRADE, MAN or MEN, MONSTER or "
 		"MONSTERS, MAGIC, WEAPON OR WEAPONS, ARMOR, MOUNT or MOUNTS, BATTLE, "
 		"SPECIAL, TOOL or TOOLS, FOOD, and ITEM or ITEMS (which is the "
@@ -4970,7 +4970,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "Use unclaimed funds to aquire basic items that you need. "
 			"If you do not have sufficient unclaimed, or if you try "
 			"withdraw any other than a basic item, an error will be given. "
-			"Withdraw can NOT be used in the Nexus (to prevent building "
+			"Withdraw CANNOT be used in the Nexus (to prevent building "
 			"towers and such there).  The first form is the same as "
 			"WITHDRAW 1 [item] in the second form.";
 		f.Paragraph(temp);
