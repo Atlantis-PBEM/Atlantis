@@ -427,7 +427,7 @@ AString Unit::SpoilsReport() {
 }
 
 void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
-				int autosee, int attitude)
+				int autosee, int attitude, int showattitudes)
 {
 	int stealth = GetAttribute("stealth");
 	if (obs==-1) {
@@ -478,7 +478,7 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 	if (obs == 2) {
 		temp += AString("* ") + *name;
 	} else {
-		if (faction->showunitattitudes) {
+		if (showattitudes) {
 			switch (attitude) {
 			case A_ALLY: 
 				temp += AString("= ") +*name;

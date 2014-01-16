@@ -131,7 +131,7 @@ class Unit : public AListElem
 
 		AString SpoilsReport(void);
 		int CanGetSpoil(Item *i);
-		void WriteReport(Areport *,int,int,int,int, int);
+		void WriteReport(Areport *,int,int,int,int, int, int);
 		AString GetName(int);
 		AString MageReport();
 		AString ReadyItem();

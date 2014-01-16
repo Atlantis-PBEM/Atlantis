@@ -365,10 +365,10 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 		Unit *u = (Unit *) elem;
 		int attitude = fac->GetAttitude(u->faction->num);
 		if (u->faction == fac) {
-			u->WriteReport(f, -1, 1, 1, 1, attitude);
+			u->WriteReport(f, -1, 1, 1, 1, attitude, fac->showunitattitudes);
 		} else {
 			if (present) {
-				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY, attitude);
+				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
 			} else {
 				if (((type == O_DUMMY) &&
 					(Globals->TRANSIT_REPORT &
@@ -380,7 +380,7 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 						(Globals->TRANSIT_REPORT &
 					 	GameDefs::REPORT_SHOW_GUARDS))) {
 					u->WriteReport(f, passobs, passtrue, passdetfac,
-							type != O_DUMMY, attitude);
+							type != O_DUMMY, attitude, fac->showunitattitudes);
 				}
 			}
 		}
