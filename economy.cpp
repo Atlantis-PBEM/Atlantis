@@ -1178,27 +1178,26 @@ int ARegion::TownGrowth()
 		forlist(&markets) {
 			Market *m = (Market *) elem;
 			if (Population() > m->minpop) {
-				if (ItemDefs[m->item].type & IT_TRADE) {
-					if (m->type == M_BUY) {
+				if (m->type == M_BUY) {
+					if (ItemDefs[m->item].type & IT_TRADE) {
 						amt += 5 * m->activity;
 						tot += 5 * m->maxamt;
 						/* regional economic improvement */
 						improvement += 3 * amt;
 					}
 				} else {
-					if (m->type == M_SELL) {
-						// Only food items except fish are mandatory
-						// for town growth - other items can
-						// be used in replacement
-						if (ItemDefs[m->item].type & IT_FOOD) {
-							amt += 2 * m->activity;
-						} else amt += m->activity;
-						if ((ItemDefs[m->item].type & IT_FOOD)
-							&& (m->item != I_FISH))	tot += 2 * m->maxamt;
-						if (ItemDefs[m->item].type & IT_TRADE) {
-							/* regional economic improvement */
-							improvement += 3 * amt;
-						}
+					// Market type is M_SELL
+					// Only food items except fish are mandatory
+					// for town growth - other items can
+					// be used in replacement
+					if (ItemDefs[m->item].type & IT_FOOD) {
+						amt += 2 * m->activity;
+					} else amt += m->activity;
+					if ((ItemDefs[m->item].type & IT_FOOD)
+						&& (m->item != I_FISH))	tot += 2 * m->maxamt;
+					if (ItemDefs[m->item].type & IT_TRADE) {
+						/* regional economic improvement */
+						improvement += 3 * amt;
 					}
 				}
 			}
