@@ -1073,6 +1073,7 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 			id.faction = 0;
 			go.target = &id;
 			go.type = O_GIVE;
+			go.merge = 1;
 			DoGiveOrder(r, u, &go);
 			go.target = NULL;
 		}
@@ -2658,7 +2659,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			t->faction->DiscoverItem(o->item, 0, 1);
 		} else {
 			// Check we're not dumping passengers in the ocean
-			if (TerrainDefs[r->type].similar_type == R_OCEAN) {
+			if (TerrainDefs[r->type].similar_type == R_OCEAN &&
+					!o->merge) {
 				shipcount = 0;
 				forlist(&(s->object->ships)) {
 					sh = (Item *) elem;

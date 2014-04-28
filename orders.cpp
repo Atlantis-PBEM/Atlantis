@@ -163,6 +163,7 @@ GiveOrder::GiveOrder()
 {
 	type = O_GIVE;
 	unfinished = 0;
+	merge = 0;
 }
 
 GiveOrder::~GiveOrder()

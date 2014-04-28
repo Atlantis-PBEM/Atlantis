@@ -186,6 +186,7 @@ class GiveOrder : public Order {
 		int amount;
 		int except;
 		int unfinished;
+		int merge;
 
 		UnitId *target;
 };
