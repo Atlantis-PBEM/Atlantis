@@ -2789,6 +2789,10 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				o->target->Print() + ").");
 		return 0;
 	}
+	if (u->faction == t->faction) {
+		u->Error(ord + ": Unit already belongs to our faction!");
+		return 0;
+	}
 	if (u == t) {
 		if (o->type == O_TAKE)
 			u->Error(ord + ": Attempt to take " + 
