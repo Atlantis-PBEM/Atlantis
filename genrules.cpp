@@ -5575,7 +5575,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"weightless items, such as silver.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
-	temp = "Set a unit to only pick up items which have flying capacity";
+	temp = "Set a unit to only pick up items that it can carry and "
+			"continue to fly:";
 	temp2 = "SPOILS FLY";
 	f.CommandExample(temp, temp2);
 
