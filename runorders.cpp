@@ -2474,7 +2474,7 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 
 int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 {
-	int hasitem, ship, num, shipcount, amt, newfleet, flying, cur;
+	int hasitem, ship, num, shipcount, amt, newfleet, cur;
 	int notallied, newlvl, oldlvl;
 	Item *it, *sh;
 	Unit *p, *t, *s;
@@ -2682,12 +2682,6 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			// target is not in fleet or not fleet owner
 			if (!(t->object->IsFleet()) ||
 				(t->num != t->object->GetOwner()->num)) newfleet = 1;
-			// or target fleet is not of compatible type
-			else {
-				flying = t->object->flying;
-				if ((flying > 0) && (ItemDefs[o->item].fly < 1)) newfleet = 1;
-				if ((flying < 1) && (ItemDefs[o->item].fly > 0)) newfleet = 1;
-			}
 			if (newfleet == 1) {
 				// create a new fleet
 				fleet = new Object(r);
