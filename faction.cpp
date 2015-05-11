@@ -727,6 +727,7 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 	if (u->reveal == REVEAL_FACTION) return 2;
 	int retval = 0;
 	if (u->reveal == REVEAL_UNIT) retval = 1;
+	if (u->guard == GUARD_GUARD) retval = 1;
 	forlist((&r->objects)) {
 		Object* obj = (Object *) elem;
 		int dummy = 0;
