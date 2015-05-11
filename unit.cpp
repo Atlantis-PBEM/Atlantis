@@ -681,7 +681,6 @@ void Unit::ClearOrders()
 	routed = 0;
 	enter = 0;
 	build = 0;
-	leftShip = 0;
 	destroy = 0;
 	if (attackorders) delete attackorders;
 	attackorders = 0;

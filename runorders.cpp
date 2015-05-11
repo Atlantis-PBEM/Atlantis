@@ -72,8 +72,8 @@ void Game::RunOrders()
 	RunQuitOrders();
 	Awrite("Removing Empty Units...");
 	DeleteEmptyUnits();
-	SinkUncrewedFleets();
-	DrownUnits();
+	// SinkUncrewedFleets();
+	// DrownUnits();
 	if (Globals->ALLOW_WITHDRAW) {
 		Awrite("Running WITHDRAW Orders...");
 		DoWithdrawOrders();
@@ -478,8 +478,7 @@ void Game::DrownUnits()
 							drown = !(u->CanSwim());
 							break;
 						case GameDefs::WFLIGHT_MUST_LAND:
-							drown = !(u->CanReallySwim() || u->leftShip);
-							u->leftShip = 0;
+							drown = !u->CanReallySwim();
 							break;
 						case GameDefs::WFLIGHT_NONE:
 							drown = !(u->CanReallySwim());
@@ -996,7 +995,6 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 			u->Error("LEAVE: Can't leave a ship in the ocean.");
 			return;
 		}
-		if (in->IsFleet() && u->CanSwim()) u->leftShip = 1;
 	} else {
 		int on = u->enter;
 		to = r->GetObject(on);
@@ -1091,8 +1089,6 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 			u->Error("JOIN: Can't leave a ship in the ocean.");
 			return;
 		}
-		if (u->object->IsFleet() && u->CanSwim())
-			u->leftShip = 1;
 	} else {
 		if (!to->CanEnter(r, u)) {
 			u->Error("JOIN: Can't enter that.");
