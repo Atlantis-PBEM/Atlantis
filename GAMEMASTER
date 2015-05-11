@@ -44,24 +44,13 @@ Table of Contents
 There are two options if you want to get a copy of Atlantis: the first 
 is to download a release tarball from yahoo groups at
 <http://groups.yahoo.com/group/atlantisdev/files/Sources/>.
-At the time of writing this Guide, the most recent release was 4.1.0.
+At the time of writing this Guide, the most recent release was 5.1.0.
 
-The second option is to get a copy of the sources from SVN. Under a UNIX
+The second option is to get a copy of the sources from git. Under a UNIX
 system, issue the following commands to obtain a copy of the Atlantis 
 sources:
 
-If you want the latest updates of the stable version 4:
-svn co https://atlantis.svn.sourceforge.net/svnroot/atlantis/branches/PATCHES_410 atlantis
-
-If you want the 'dangerous' version 5:
-svn co https://atlantis.svn.sourceforge.net/svnroot/atlantis/trunk atlantis
-
-WARNING: If you are unsure about C++ and compiling from sources, or 
-this is your first try at running a game, you almost certainly want 
-to get the stable version. The SVN sources (particularly version 5) 
-contain many 'in progress' updates to the code, which may result in 
-bugs and other instabilities, and are not for the faint hearted.
-
+git clone https://github.com/Atlantis-PBEM/Atlantis.git
 
 2. Compiling Atlantis
 
@@ -72,7 +61,7 @@ compiler. You can get more information about the GNU compiler at
 http://www.gnu.org. This has been tested on Linux and FreeBSD, and 
 should work on any Unix system. Just type 'make <gamedirname>' at the 
 top level, where <gamedirname> is one of the various subdirectories, 
-such as wyreth or standard. 
+such as havilah or standard. 
 
 You may run into trouble if your system uses a non-gnu make (such as 
 FreeBSD). In that case, you need to type gmake <gamedirname> instead of 
@@ -91,32 +80,33 @@ remove object files, for reasons of disk space, perhaps) you can use
 
 2.1.1 A sample compile under UNIX
 
-bash-2.04$ gmake wyreth
-gmake GAME=wyreth
-gmake[1]: Entering directory `/usr/home/anthony/atlantis/atlantisv5/
-atlantis'
-if [ ! -d wyreth/obj ]; then mkdir wyreth/obj; fi
-g++ -g -I. -I.. -Wall -c -o wyreth/obj/extra.o wyreth/extra.cpp
-g++ -g -I. -I.. -Wall -c -o wyreth/obj/monsters.o wyreth/monsters.cpp
-g++ -g -I. -I.. -Wall -c -o wyreth/obj/rules.o wyreth/rules.cpp
-g++ -g -I. -I.. -Wall -c -o wyreth/obj/world.o wyreth/world.cpp
+[steve@kudzu atlantis]$ make havilah
+make GAME=havilah
+make[1]: Entering directory `/home/steve/atlantis'
+if [ ! -d obj ]; then mkdir obj; fi
+if [ ! -d havilah/obj ]; then mkdir havilah/obj; fi
+g++ -g -I. -I.. -Wall -c -o havilah/obj/extra.o havilah/extra.cpp
+g++ -g -I. -I.. -Wall -c -o havilah/obj/map.o havilah/map.cpp
+g++ -g -I. -I.. -Wall -c -o havilah/obj/monsters.o havilah/monsters.cpp
+g++ -g -I. -I.. -Wall -c -o havilah/obj/rules.o havilah/rules.cpp
+g++ -g -I. -I.. -Wall -c -o havilah/obj/world.o havilah/world.cpp
+g++ -g -I. -I.. -Wall -c -o obj/alist.o alist.cpp
+g++ -g -I. -I.. -Wall -c -o obj/aregion.o aregion.cpp
 .
 .
 .
-gcc -g -I. -I.. -Wall -c -o wyreth/obj/i_rand.o i_rand.c
-g++ -g -I. -I.. -Wall -o wyreth/wyreth wyreth/obj/extra.o wyreth/obj/
-monsters.o wyreth/obj/rules.o wyreth/obj/world.o wyreth/obj/alist.o 
-wyreth/obj/aregion.o wyreth/obj/army.o wyreth/obj/astring.o wyreth/obj/
-battle.o wyreth/obj/faction.o wyreth/obj/fileio.o wyreth/obj/game.o 
-wyreth/obj/gamedata.o wyreth/obj/gamedefs.o wyreth/obj/gameio.o wyreth/
-obj/genrules.o wyreth/obj/items.o wyreth/obj/main.o wyreth/obj/market.o 
-wyreth/obj/modify.o wyreth/obj/monthorders.o wyreth/obj/npc.o wyreth/obj
-/object.o wyreth/obj/orders.o wyreth/obj/parseorders.o wyreth/obj/
-production.o wyreth/obj/runorders.o wyreth/obj/shields.o wyreth/obj/
-skills.o wyreth/obj/skillshows.o wyreth/obj/specials.o wyreth/obj/
-spells.o wyreth/obj/template.o wyreth/obj/unit.o wyreth/obj/i_rand.o
-gmake[1]: Leaving directory `/usr/home/anthony/atlantis/atlantisv5/
-atlantis'
+g++ -g -I. -I.. -Wall -c -o obj/template.o template.cpp
+g++ -g -I. -I.. -Wall -c -o obj/unit.o unit.cpp
+g++ -g -I. -I.. -Wall -o havilah/havilah havilah/obj/extra.o havilah/obj/map.o
+havilah/obj/monsters.o havilah/obj/rules.o havilah/obj/world.o obj/alist.o
+obj/aregion.o obj/army.o obj/astring.o obj/battle.o obj/economy.o obj/edit.o
+obj/faction.o obj/fileio.o obj/game.o obj/gamedata.o obj/gamedefs.o
+obj/gameio.o obj/genrules.o obj/i_rand.o obj/items.o obj/main.o obj/market.o
+obj/modify.o obj/monthorders.o obj/npc.o obj/object.o obj/orders.o
+obj/parseorders.o obj/production.o obj/quests.o obj/runorders.o obj/shields.o
+obj/skills.o obj/skillshows.o obj/specials.o obj/spells.o obj/template.o
+obj/unit.o
+make[1]: Leaving directory `/home/steve/atlantis'
 
 
 2.2 Windows (copied directly from the old guide)
@@ -315,24 +305,24 @@ commands are very similar: move instead of mv, copy instead of cp, etc.
 
 Firstly, you'll need to create a game directory outside your source 
 directory, to avoid it being cluttered up with random files. Assuming 
-that you want to run a wyreth variant, and you're in the wyreth 
+that you want to run a havilah variant, and you're in the havilah 
 directory:
 
 	bash-2.04$ mkdir ../../mygame
-	bash-2.04$ cp wyreth ../../mygame
+	bash-2.04$ cp havilah ../../mygame
 	bash-2.04$ cd ../../mygame
-	bash-2.04$ ./wyreth new
+	bash-2.04$ ./havilah new
   
 At this point, you'll be asked how big the map should be. For a first 
 test game, you'll probably want a 16x16 world:
 
-	Atlantis Engine Version: 4.0.10 (beta)
-	Wyreth, Version: 1.0.5 (beta)
+	Atlantis Engine Version: 5.1.0 (beta)
+	Havilah, Version: 1.0.0 (beta)
 	
 	How wide should the map be? 
-	16
+	80
 	How tall should the map be? 
-	16
+	80
 	Making a level...
 
 	...Lots of other stuff about the world
@@ -341,9 +331,9 @@ So, what have you got now? You should have the game info for your new
 game, stored in game.out, and the player info, stored in players.out.
 
 	bash-2.04$ ls
-	game.out        players.out     wyreth
+	game.out  havilah  names.out  players.out
 
-In order to run our first turn, we need to do two things: feed wyreth 
+In order to run our first turn, we need to do two things: feed havilah 
 the game and players file, and add ourselves as a player. First, the 
 easy part:
 
@@ -355,42 +345,48 @@ Now for the second bit. Edit the players.in file with your favorite text
 editor, and make it look like this:
 
 	AtlantisPlayerStatus
-	Version: 262154
-	TurnNumber: 9
-	GameStatus: Running
+	Version: 327936
+	TurnNumber: 0
+	GameStatus: New
 	
 	Faction: 1
 	Name: The Guardsmen (1)
 	Email: NoAddress
 	Password: none
 	LastOrders: 0
+	FirstTurn: 0
 	SendTimes: 1
+	Template: long
 	Faction: 2
 	Name: Creatures (2)
 	Email: NoAddress
 	Password: none
 	LastOrders: 0
+	FirstTurn: 0
 	SendTimes: 1
+	Template: long
 	Faction: new
 	Name: Anthony
 	Email: anthony@beastie.house
 	Password: Test
-	Lastorders: 0
-	SendTimes: 1
 	
 Note: The first two factions are reserved for town guards and monsters, 
 which can cause some confusion. The first player faction will start as 
 faction number 3, the next as number 4, and so on.
 
+Only the addition of the "Faction: new" line is necessary, but adding
+yor faction name, email address and password will make your first turn
+tidier.
+
 Now when the game runs, it'll add you (well, me in this example) to the 
 game. Let's run it and see what happens:
 
-	bash-2.04$ ./wyreth run
-	Atlantis Engine Version: 4.0.10 (beta)
-	Wyreth, Version: 1.0.5 (beta)
+	bash-2.04$ ./havilah run
+	Atlantis Engine Version: 5.1.0
+	Havilah, Version: 1.0.0 (beta)
 	
-	Saved Game Engine Version: 4.0.10 (beta)
-	Saved Rule-Set Version: 1.0.5 (beta)
+	Saved Game Engine Version: 5.1.0
+	Saved Rule-Set Version: 1.0.0 (beta)
 	Reading the regions...
 	Setting up the neighbors...
 	Setting Up Turn...
@@ -404,8 +400,8 @@ game. Let's run it and see what happens:
 Now if you look in the directory, you should see the following:
 
 	bash-2.04$ ls
-	game.in         players.in      report.1        wyreth
-	game.out        players.out     report.3
+	game.in   havilah    players.in   report.1  template.3
+	game.out  names.out  players.out  report.3  times.<some number>
 
 The game has updated the world, and stored it in game.out and players.
 out. If you look at report.3, you should see your turn:
@@ -421,13 +417,13 @@ steps to the ones you just did to run your first turn. Move game.in,
 players.in and any report files out of the way:
 
 	mkdir 0
-	mv game.in players.i report.* 0
+	mv game.in players.in report.* 0
 
 And then do exactly what you did previously:
 
 	mv game.out game.in
 	mv players.out players.in
-	./wyreth run
+	./havilah run
 	
 In later turns, you'll want to move old orders out of the way too.
 
@@ -443,12 +439,12 @@ help you out. In it's simplest form, a script will look like this:
 	gameturn=$1
 	
 	mkdir $gameturn
-	mv game.in players.in report.* $gameturn
+	mv game.in players.in report.* times.* $gameturn
 	
 	mv players.out players.in
 	mv game.out game.in
 	
-	./wyreth run
+	./havilah run
 	mv orders.* $gameturn
 
 under windows, this script will look more like (this is untested):
@@ -456,12 +452,12 @@ under windows, this script will look more like (this is untested):
 set ARGUMENT=%1
 	
 	mkdir %ARGUMENT%
-	move game.in players.in report.* %ARGUMENT%
+	move game.in players.in report.* times.* %ARGUMENT%
 	
 	move players.out players.in
 	move game.out game.in
 	
-	./wyreth run
+	./havilah run
 	move orders.* %ARGUMENT%
 
 These scripts will help you run turns by hand, by automating the tedious
@@ -587,7 +583,7 @@ to tweak the rules! Welcome to the club ;)
 
 The first step is to create your own subdirectory to store your game. 
 It's easier if you base your game on an existing variant. So do 
-something like 'cp -r wyreth mywyreth', except swap 'mywyreth' for 
+something like 'cp -r havilah myhavilah', except swap 'myhavilah' for 
 something a little more original.
 
 Once you've done that, have a closer look inside the subdirectory. The 
@@ -727,7 +723,7 @@ The underworld levels are only 1/2 the size in both coordinates of the
 surface level (except the top one if there's more than one), underdeep
 levels are 1/4th the size in both coordinates (except the topmost if
 there's more than one - that will be 1/2 size), and the Abyss is just
-a tiny area with a Black Keep for the Wyreth victory conditions.
+a tiny area with a Black Keep for the standard victory conditions.
 
 
 6.2. Land Mass Distribution
