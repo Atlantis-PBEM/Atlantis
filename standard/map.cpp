@@ -484,7 +484,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			}
 			for (int i=0; i<sz; i++) {
 				int dir = getrandom(NDIRS);
-				if ((reg->yloc < yoff*2) && ((dir < 2) || (dir = NDIRS-1))
+				if ((reg->yloc < yoff*2) && ((dir < 2) || (dir == NDIRS-1))
 					&& (getrandom(4) < 3)) continue;
 				if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
 					&& (getrandom(4) < 3)) continue;				
@@ -837,7 +837,7 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
 			ARegion *reg = pArr->GetRegion(x, y);
 			if (!reg) continue;
 
-			for (int i=D_NORTH; i<= NDIRS; i++) {
+			for (int i=D_NORTH; i< NDIRS; i++) {
 				int count = 0;
 				for (int j=D_NORTH; j< NDIRS; j++)
 					if (reg->neighbors[j]) count++;
