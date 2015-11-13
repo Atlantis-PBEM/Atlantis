@@ -161,7 +161,7 @@ AString AString::operator+(const AString &s)
 		temp[i++] = s.str[j];
 	}
 	AString temp2 = AString(temp);
-	delete temp;
+	delete[] temp;
 	return temp2;
 }
 
@@ -303,7 +303,7 @@ AString *AString::getlegal()
 
 	*temp2 = '\0';
 	AString * retval = new AString(temp);
-	delete temp;
+	delete[] temp;
 	return retval;
 }
 
@@ -365,6 +365,6 @@ istream & operator >>(istream & is,AString & s)
 	s.len = strlen(buf);
 	s.str = new char[s.len + 1];
 	strcpy(s.str,buf);
-	delete buf;
+	delete[] buf;
 	return is;
 }
