@@ -1024,7 +1024,7 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			return;
 		}
 
-		if (bt == NULL || !bt->flags & BattleItemType::SPECIAL) {
+		if (bt == NULL || !(bt->flags & BattleItemType::SPECIAL)) {
 			u->Error("PREPARE: That item cannot be prepared.");
 			return;
 		}
