@@ -67,7 +67,6 @@ public:
 private:
 
 	int len;
-	int size;
 	char *str;
 	int isEqual(const char *);
 };
