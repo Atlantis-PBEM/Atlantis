@@ -1335,7 +1335,7 @@ Unit *Game::GetNewUnit(Faction *fac, int an)
 		Unit **temp = new Unit*[maxppunits+10000];
 		memcpy(temp, ppUnits, maxppunits*sizeof(Unit *));
 		maxppunits += 10000;
-		delete ppUnits;
+		delete[] ppUnits;
 		ppUnits = temp;
 	}
 
