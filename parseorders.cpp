@@ -459,11 +459,6 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 		unit = former;
 	}
 
-	if (unit && pCheck) {
-		unit->ClearOrders();
-		unit = 0;
-	}
-
 	if (pCheck) {
 		pCheck->pCheckFile->PutStr("");
 		if (!pCheck->numerrors) {
