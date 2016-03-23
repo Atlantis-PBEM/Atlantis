@@ -1,7 +1,5 @@
 ##Atlantis Source Code README
 
-[![Join the chat at https://gitter.im/Atlantis-PBEM/Atlantis](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Atlantis-PBEM/Atlantis?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 Copyright 1998-2001 Geoff Dunbar
 
 This distribution of the Atlantis source code purposefully comes with
