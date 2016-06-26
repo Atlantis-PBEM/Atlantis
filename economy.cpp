@@ -280,6 +280,11 @@ void ARegion::SetIncome()
 	int maxwages = (int) ((float) (pp * (Wages() - 10 * Globals->MAINTENANCE_COST) /50));
 	if (maxwages < 0) maxwages = 0;
 	Production * w = products.GetProd(I_SILVER,-1);
+	// In some cases (ie. after products.DeleteAll() in EditGameRegionTerrain)
+	// I_SILVER is not in ProductionList
+	if( !w ) {
+	  w = new Production;
+	}
 	w->itemtype = I_SILVER;
 	w->amount = maxwages / Globals->WORK_FRACTION;
 	w->baseamount = maxwages / Globals->WORK_FRACTION;
@@ -296,6 +301,11 @@ void ARegion::SetIncome()
 	int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 10) /50));
 	if (maxent < 0) maxent = 0;
 	Production * e = products.GetProd(I_SILVER,S_ENTERTAINMENT);
+	// In some cases (ie. after products.DeleteAll() in EditGameRegionTerrain)
+	// I_SILVER is not in ProductionList
+	if( !e ) {
+	  e = new Production;
+	}
 	e->itemtype = I_SILVER;
 	e->amount = maxent / Globals->ENTERTAIN_FRACTION;
 	e->baseamount = maxent / Globals->ENTERTAIN_FRACTION;
