@@ -284,6 +284,7 @@ void ARegion::SetIncome()
 	// I_SILVER is not in ProductionList
 	if( !w ) {
 	  w = new Production;
+	  products.Add(w);
 	}
 	w->itemtype = I_SILVER;
 	w->amount = maxwages / Globals->WORK_FRACTION;
@@ -305,6 +306,7 @@ void ARegion::SetIncome()
 	// I_SILVER is not in ProductionList
 	if( !e ) {
 	  e = new Production;
+	  products.Add(e);
 	}
 	e->itemtype = I_SILVER;
 	e->amount = maxent / Globals->ENTERTAIN_FRACTION;
