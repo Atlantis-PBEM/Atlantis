@@ -1,4 +1,5 @@
 ##Atlantis Source Code README
+[![Build Status](https://travis-ci.org/artyomtrityak/Atlantis.svg?branch=master)](https://travis-ci.org/artyomtrityak/Atlantis)
 
 Copyright 1998-2001 Geoff Dunbar
 
