@@ -1,5 +1,5 @@
 ##Atlantis Source Code README
-[![Build Status](https://travis-ci.org/Atlantis-PBEM/Atlantis.svg?branch=master)
+[![Build Status](https://travis-ci.org/Atlantis-PBEM/Atlantis.svg?branch=master)](https://travis-ci.org/Atlantis-PBEM)
 
 Copyright 1998-2001 Geoff Dunbar
 
