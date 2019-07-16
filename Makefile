@@ -1,11 +1,12 @@
-# This is the makefile for Atlantis 4.0
+# This is the makefile for Atlantis 5.0
 #
 # Copyright 1998 by Geoff Dunbar
 # MODIFICATIONS
-# Date        Person       Comments
-# ----        ------       --------
-# 2000/MAR/14 Davis Kulis  Added the template code.
-# 2004/MAR/29 Jan Rietema  Added/modified the gamesets
+# Date        Person         Comments
+# ----        ------         --------
+# 2000/MAR/14 Davis Kulis    Added the template code.
+# 2004/MAR/29 Jan Rietema    Added/modified the gamesets
+# 2019/JUL/15 Artem Trytiak  Added neworigins gameset
 
 GAME ?= standard
 
@@ -27,7 +28,7 @@ OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: basic standard fracas kingdoms havilah
+all: basic standard fracas kingdoms havilah neworigins
 
 arcadia: FORCE
 	$(MAKE) GAME=arcadia
@@ -47,11 +48,14 @@ fracas: FORCE
 havilah: FORCE
 	$(MAKE) GAME=havilah
 
+neworigins: FORCE
+	$(MAKE) GAME=neworigins
+
 $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
 
 all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
-	havilah-clean
+	havilah-clean neworigins-clean
 
 arcadia-clean:
 	$(MAKE) GAME=arcadia clean
@@ -71,6 +75,9 @@ kingdoms-clean:
 havilah-clean:
 	$(MAKE) GAME=havilah clean
 
+neworigins-clean:
+	$(MAKE) GAME=neworigins clean
+
 clean:
 	rm -f $(OBJECTS)
 	if [ -d obj ]; then rmdir obj; fi
@@ -79,7 +86,7 @@ clean:
 	rm -f $(GAME)/$(GAME)
 
 all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
-	havilah-rules
+	havilah-rules neworigins-rules
 
 arcadia-rules:
 	$(MAKE) GAME=arcadia rules
@@ -98,6 +105,9 @@ kingdoms-rules:
 
 havilah-rules:
 	$(MAKE) GAME=havilah rules
+
+neworigins-rules:
+	$(MAKE) GAME=neworigins rules
 
 rules: $(GAME)/$(GAME)
 	(cd $(GAME); \
