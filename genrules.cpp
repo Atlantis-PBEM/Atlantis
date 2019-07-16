@@ -531,7 +531,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("th", "Faction Points");
 		temp = "War (max tax regions";
 		if (Globals->TACTICS_NEEDS_WAR)
-			temp += "/tacticians";
+			temp += " / tacticians";
 		temp += ")";
 		f.TagText("th", temp);
 		temp = "Trade (max trade regions";

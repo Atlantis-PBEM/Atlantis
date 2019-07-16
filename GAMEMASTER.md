@@ -1,4 +1,4 @@
-Atlantis Gamemaster's Guide
+# Atlantis Gamemaster's Guide
 
 This document describes how to compile, setup, modify and run a game of 
 Atlantis.
@@ -12,7 +12,7 @@ Thanks to: JT Traub, "Mr. Mistofeles", "Draig" and "Iyhael" for their
 valuable feedback.
 
 
-Table of Contents
+## Table of Contents
 
 1.      Obtaining a copy of Atlantis
 
@@ -39,7 +39,7 @@ Table of Contents
 6.5	Special: Fractal Generation
 
 
-1. Obtaining a copy of Atlantis
+## 1. Obtaining a copy of Atlantis
 
 There are two options if you want to get a copy of Atlantis: the first 
 is to download a release tarball from yahoo groups at
@@ -52,9 +52,9 @@ sources:
 
 git clone https://github.com/Atlantis-PBEM/Atlantis.git
 
-2. Compiling Atlantis
+## 2. Compiling Atlantis
 
-2.1 Unix
+### 2.1 Unix
 
 A makefile is included for compilation on Unix, using the GNU gcc 
 compiler. You can get more information about the GNU compiler at 
@@ -78,7 +78,7 @@ remove object files, for reasons of disk space, perhaps) you can use
 'make <gamedir>-clean' or 'make GAME=gamedir clean'
 
 
-2.1.1 A sample compile under UNIX
+### 2.1.1 A sample compile under UNIX
 
 [steve@kudzu atlantis]$ make havilah
 make GAME=havilah
@@ -109,7 +109,7 @@ obj/unit.o
 make[1]: Leaving directory `/home/steve/atlantis'
 
 
-2.2 Windows (copied directly from the old guide)
+### 2.2 Windows (copied directly from the old guide)
 
 I am now using the GNU gcc compiler on Windows as well. This has the 
 advantage that I can use it on both Unix and Windows, and as an added 
@@ -259,7 +259,7 @@ for single user, but it is an excellent way to test out any changes that
 you may have made to your rules files.
 
 
-2.3 The gory details (for advanced users, or the terminally curious)
+### 2.3 The gory details (for advanced users, or the terminally curious)
 
 Atlantis is a standard C++ program, and is deliberately written with no 
 UI or other platform specific features. It does not handle email, 
@@ -276,7 +276,7 @@ the rule set specific files; the common Atlantis engine files live in
 the main directory. 
 
 
-3. Running a Game of Atlantis
+## 3. Running a Game of Atlantis
 
 The Atlantis program is actually very simple in terms of input and 
 output. It takes a set of files as input, runs the turn, and writes out 
@@ -298,7 +298,7 @@ based version of Atlantis is available at <http://grelth.army-of-
 darkness.it/>  
 
 
-3.1 Running a game of Atlantis by hand (the hard way)
+### 3.1 Running a game of Atlantis by hand (the hard way)
 
 I'll give this as a list of commented UNIX commands. The Windows 
 commands are very similar: move instead of mv, copy instead of cp, etc.
@@ -308,10 +308,12 @@ directory, to avoid it being cluttered up with random files. Assuming
 that you want to run a havilah variant, and you're in the havilah 
 directory:
 
+```
 	bash-2.04$ mkdir ../../mygame
 	bash-2.04$ cp havilah ../../mygame
 	bash-2.04$ cd ../../mygame
 	bash-2.04$ ./havilah new
+```
   
 At this point, you'll be asked how big the map should be. For a first 
 test game, you'll probably want a 16x16 world:
@@ -330,15 +332,19 @@ test game, you'll probably want a 16x16 world:
 So, what have you got now? You should have the game info for your new 
 game, stored in game.out, and the player info, stored in players.out.
 
+```
 	bash-2.04$ ls
-	game.out  havilah  names.out  players.out
+	game.out  havilah  names.out  players.out`
+```
 
 In order to run our first turn, we need to do two things: feed havilah 
 the game and players file, and add ourselves as a player. First, the 
 easy part:
 
+```
 	mv game.out game.in
 	mv players.out players.in
+```
 	
 Atlantis will automatically read game.in and players.in when it runs. 
 Now for the second bit. Edit the players.in file with your favorite text
@@ -381,6 +387,7 @@ tidier.
 Now when the game runs, it'll add you (well, me in this example) to the 
 game. Let's run it and see what happens:
 
+```
 	bash-2.04$ ./havilah run
 	Atlantis Engine Version: 5.1.0
 	Havilah, Version: 1.0.0 (beta)
@@ -396,44 +403,54 @@ game. Let's run it and see what happens:
 	Running the Turn...
 	Running FIND Orders...
 	Etcetera...
+```
 
 Now if you look in the directory, you should see the following:
 
+```
 	bash-2.04$ ls
 	game.in   havilah    players.in   report.1  template.3
 	game.out  names.out  players.out  report.3  times.<some number>
+```
 
 The game has updated the world, and stored it in game.out and players.
 out. If you look at report.3, you should see your turn:
 
+```
 	bash-2.04$ more report.3
 	Atlantis Report For:
 	Anthony (3) (War 1, Trade 1, Magic 1)
 	January, Year 1
+```
 
 If you want to submit orders for your first turn, you'd leave your 
 orders in a file called orders.3 in the directory, and follow similar 
 steps to the ones you just did to run your first turn. Move game.in, 
 players.in and any report files out of the way:
 
+```
 	mkdir 0
 	mv game.in players.in report.* 0
+```
 
 And then do exactly what you did previously:
 
+```
 	mv game.out game.in
 	mv players.out players.in
 	./havilah run
+```
 	
 In later turns, you'll want to move old orders out of the way too.
 
 
-3.2 Running a game the easy way (with scripts)
+### 3.2 Running a game the easy way (with scripts)
 
 Of course, this all gets very tedious, especially when running a game of
 more than four or five people. There are a number of scripts that can 
 help you out. In it's simplest form, a script will look like this:
 
+```
 	#!/bin/bash
 	#The argument tells you what turn is running
 	gameturn=$1
@@ -446,9 +463,11 @@ help you out. In it's simplest form, a script will look like this:
 	
 	./havilah run
 	mv orders.* $gameturn
+```
 
 under windows, this script will look more like (this is untested):
 
+```
 set ARGUMENT=%1
 	
 	mkdir %ARGUMENT%
@@ -459,6 +478,7 @@ set ARGUMENT=%1
 	
 	./havilah run
 	move orders.* %ARGUMENT%
+```
 
 These scripts will help you run turns by hand, by automating the tedious
 moving and copying of files. Just run it as ./runturn <gameturn> (after
@@ -476,7 +496,7 @@ will do a better job of it too, so you should ask them if you are in any
 doubt.
 
 
-4. A GM's 'Code of Conduct'
+## 4. A GM's 'Code of Conduct'
 
 Here is a list of things you should consider before running a game:
 [thanks to Antony Briggs for posting this on atlantisdev]
@@ -574,7 +594,7 @@ rerun, the subject line of everything that you send out should clearly
 state that it is a rerun, so that players don't get confused.
 
 
-5. Altering game rules
+## 5. Altering game rules
 
 There may come a time when you ask yourself "Why do War factions get so 
 much darned silver?" or "Why are Balrogs so darned powerful?" In this 
@@ -669,7 +689,7 @@ Adding the new gamedefs in will make you happy again ;)
 
 
 
-6. World Creation Guide
+## 6. World Creation Guide
 
 The following is not a technical guide but a description of the options
 involved in Atlantis world creation. None of the information here is
@@ -688,7 +708,7 @@ will be created as 'report.1' in the atlantis directory - it's an omniscient
 turn report.
 
 
-6.1. Basics: world size, land mass and levels
+### 6.1. Basics: world size, land mass and levels
 
 The most important consideration for any game is world size as this will
 determine the number of players that can comfortably join a game and the
@@ -698,12 +718,12 @@ The amount of land hexes per player will give you a good indication whether
 your game is too large or too small. You are prompted for the width and
 height of the world when you run the program to generate a new world.
 
-# of surface hexes = width * (height / 2)
+`# of surface hexes = width * (height / 2)`
 
 The gamedef OCEAN_PERCENT is a rough estimate of how much of these will be
 land mass:
 
-# of surface land hexes = width * (height / 2) * OCEAN_PERCENT / 100
+`# of surface land hexes = width * (height / 2) * OCEAN_PERCENT / 100`
 
 For instance with a default OCEAN_PERCENT of 60, a 128 x 128 map will have
 8192 surface hexes and about 4915 land hexes. In standard Atlantis, a faction
@@ -726,7 +746,7 @@ there's more than one - that will be 1/2 size), and the Abyss is just
 a tiny area with a Black Keep for the standard victory conditions.
 
 
-6.2. Land Mass Distribution
+### 6.2. Land Mass Distribution
 
 The distribution of land mass determines whether players will be able to
 expand on a large continental mass and how important ships and sailing
@@ -781,7 +801,7 @@ is emphasised. Especially if PREVENT_SAIL_THROUGH is enabled it is
 suggested that this gamedef is used as well.
 
 
-6.3. Terrain Distribution
+### 6.3. Terrain Distribution
 
 Terrain distribution is probably more a matter of style and flavor than
 the aspects discussed in previous chapters. It can become a matter of
@@ -855,7 +875,7 @@ The value of ODD_TERRAIN is the chance that this happens, per hex, in
 be the same as that of the surrounding hexes.
 
 
-6.4 Towns and Races
+### 6.4 Towns and Races
 
 Towns are always a focus of economic activities in Atlantis and are
 strategically important locations. The number and placement of towns
@@ -918,7 +938,7 @@ will spread over a wider area. Seafaring races can also spread across
 ocean hexes, so that nearby islands often have the same race type.
 
 
-6.5. Special: Fractal Generation
+### 6.5. Special: Fractal Generation
 
 This chapter addresses the code developments for an alternate world
 creation mechanism that is used by the Kingdoms gameset. The
@@ -983,4 +1003,3 @@ so you'll just find a different name for each region.
 The author of fractal world generation, Jan Rietema, would be
 grateful for your comments and suggestions and can be contacted at
 <ravanrooke@yahoo.de>.
-
