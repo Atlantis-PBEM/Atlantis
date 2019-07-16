@@ -2407,7 +2407,7 @@ ManType mt[] = {
 	 4,2,{"COMB", NULL, NULL, NULL, NULL, NULL}},
 	{"GNOM", R_CERAN_HILL,
 	 3,2,{"SHIP", "WEAP", "BUIL", "CARP", NULL, NULL}},
-	{"DGNO", R_CERAN_HILL,
+	{"DGNO", R_GROTTO,
 	 3,2,{"SHIP", "WEAP", "BUIL", "CARP", NULL, NULL}},
 	{"HILA", R_CERAN_HILL,
 	 3,2,{"COMB", "WEAP", NULL, NULL, NULL, NULL}},

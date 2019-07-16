@@ -1065,7 +1065,7 @@ void Game::ModifyTablesPerRuleset(void)
 			"SUBA",
 			20);
 	ModifyMonsterSpecial("LICH", "icebreath", 4);
-	ModifyMonsterSpecial("BALR", "fear", 6);
+	ModifyMonsterSpecial("BALR", "hellfire", 4);
 	ModifyMonsterAttacksAndHits("SKEL", 2, 2, 0);
 	ModifyMonsterAttacksAndHits("UNDE", 10, 10, 0);
 	ModifyMonsterAttacksAndHits("DEMO", 6, 6, 0);
