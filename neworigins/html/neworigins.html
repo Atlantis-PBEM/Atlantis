@@ -945,7 +945,7 @@ Exits:
       In one month, a unit can issue a single <a href="#move">MOVE</a> order,
       using one or more of its movement points. There are three modes of
       travel: walking, riding and flying. Walking units have two movement
-      points, riding units have two, and flying units have zero. A unit will
+      points, riding units have four, and flying units have six. A unit will
       automatically use the fastest mode of travel it has available. The <a
       href="#advance">ADVANCE</a> order is the same as <a
       href="#move">MOVE</a>, except that it implies attacks on units which try
@@ -1349,14 +1349,12 @@ Exits:
     </p>
     <p>
       Example: One man with a horse, sword, and chain mail wants to move
-      north, then northeast.  The capacity of the horse is -100 and the weight
-      of the man and other items is 22, so he must walk and has two movement
+      north, then northeast.  The capacity of the horse is 20 and the weight
+      of the man and other items is 12, so he can ride and has four movement
       points. He issues the order MOVE NORTH NORTHEAST. First he moves north,
-      into a plain region.  This uses one movement point. He does not have the
-      two movement points needed to move into the forest region to the
-      northeast, so the movement is halted at this point.  The remaining
-      movewill be added to his orders for the next turn, before any<a
-      href="#turn">TURN</a> orders are processed.
+      into a plain region.  This uses one movement point. Then he moves
+      northeast, into a forest region. This uses two movement points, so the
+      movement is completed with one to spare.
     </p>
     <a name="movement_sailing"></a>
     <h3>
@@ -1877,20 +1875,6 @@ Exits:
         </tr>
         <tr>
           <td align="left" nowrap>
-            vikings
-          </td>
-          <td align="left" nowrap>
-            armorer, riding, combat, mining, farming, ranching
-          </td>
-          <td align="left" nowrap>
-            4
-          </td>
-          <td align="left" nowrap>
-            2
-          </td>
-        </tr>
-        <tr>
-          <td align="left" nowrap>
             wood elves
           </td>
           <td align="left" nowrap>
@@ -1996,6 +1980,20 @@ Exits:
           </td>
           <td align="left" nowrap>
             5
+          </td>
+          <td align="left" nowrap>
+            2
+          </td>
+        </tr>
+        <tr>
+          <td align="left" nowrap>
+            men
+          </td>
+          <td align="left" nowrap>
+            armorer, riding, combat, mining, farming, ranching
+          </td>
+          <td align="left" nowrap>
+            4
           </td>
           <td align="left" nowrap>
             2
@@ -3121,7 +3119,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             mining (3)
           </td>
           <td align="left" nowrap>
-            entertainment
+            iron
           </td>
         </tr>
         <tr>
@@ -3189,7 +3187,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             building (3)
           </td>
           <td align="left" nowrap>
-            silver
+            entertainment
           </td>
         </tr>
         <tr>
@@ -3904,6 +3902,16 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       The victorious side is then awarded one free round of attacks, after
       which the battle is over.  If both sides have more than 50% losses, the
       battle is a draw, and neither side gets a free round.
+    </p>
+    <p>
+      Units with the Healing skill have a chance of being able to heal
+      casualties of the winning side, so that they recover rather than dying. 
+      Each character with this skill can attempt to heal 5 casualties per
+      skill level. Each attempt however requires one unit of Herbs, which is
+      thereby used up. Each attempt has a 50% chance of healing one casualty;
+      only one attempt at Healing may be made per casualty. Healing occurs
+      automatically, after the battle is over, by any living healers on the
+      winning side.
     </p>
     <p>
       Any items owned by dead combatants on the losing side have a 50% chance
