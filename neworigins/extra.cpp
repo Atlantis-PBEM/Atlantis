@@ -1180,7 +1180,7 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_TRIBESMAN);
 	DisableItem(I_NOMAD);
 	DisableItem(I_TRIBALELF);
-	DisableItem(I_VIKING);
+	// DisableItem(I_VIKING);
 	DisableItem(I_BARBARIAN);
 	DisableItem(I_DARKMAN);
 	DisableItem(I_DESERTDWARF);
@@ -1197,15 +1197,15 @@ void Game::ModifyTablesPerRuleset(void)
 
 	ModifyItemBasePrice(I_LEADERS, 1000);
 
-	EnableItem(I_MAN);
-	ModifyItemBasePrice(I_MAN, 40);
-	ModifyRaceSkillLevels("MAN", 4, 2);
-	ModifyRaceSkills("MAN", 0, "ARMO");
-	ModifyRaceSkills("MAN", 1, "RIDI");
-	ModifyRaceSkills("MAN", 2, "COMB");
-	ModifyRaceSkills("MAN", 3, "MINI");
-	ModifyRaceSkills("MAN", 4, "FARM");
-	ModifyRaceSkills("MAN", 5, "RANC");
+	EnableItem(I_VIKING);
+	ModifyItemBasePrice(I_VIKING, 40);
+	ModifyRaceSkillLevels("VIKI", 4, 2);
+	ModifyRaceSkills("VIKI", 0, "ARMO");
+	ModifyRaceSkills("VIKI", 1, "RIDI");
+	ModifyRaceSkills("VIKI", 2, "COMB");
+	ModifyRaceSkills("VIKI", 3, "MINI");
+	ModifyRaceSkills("VIKI", 4, "FARM");
+	ModifyRaceSkills("VIKI", 5, "RANC");
 	
 	EnableItem(I_HILLDWARF);
 	ModifyItemBasePrice(I_HILLDWARF, 40);
@@ -1319,16 +1319,16 @@ void Game::ModifyTablesPerRuleset(void)
 	//
 	// Change craft: adamantium
 	//
-	EnableItem(I_ADMANTIUM);
-	EnableItem(I_ADSWORD);
-	EnableItem(I_ADBAXE);
-	EnableItem(I_ADRING);
-	EnableItem(I_ADPLATE);
-	ModifyItemProductionSkill(I_ADMANTIUM, "MINI", 5);
-	ModifyItemProductionSkill(I_ADSWORD, "WEAP", 5);
-	ModifyItemProductionSkill(I_ADBAXE, "WEAP", 5);
-	ModifyItemProductionSkill(I_ADRING, "ARMO", 5);
-	ModifyItemProductionSkill(I_ADPLATE, "ARMO", 5);
+	// EnableItem(I_ADMANTIUM);
+	// EnableItem(I_ADSWORD);
+	// EnableItem(I_ADBAXE);
+	// EnableItem(I_ADRING);
+	// EnableItem(I_ADPLATE);
+	// ModifyItemProductionSkill(I_ADMANTIUM, "MINI", 5);
+	// ModifyItemProductionSkill(I_ADSWORD, "WEAP", 5);
+	// ModifyItemProductionSkill(I_ADBAXE, "WEAP", 5);
+	// ModifyItemProductionSkill(I_ADRING, "ARMO", 5);
+	// ModifyItemProductionSkill(I_ADPLATE, "ARMO", 5);
 
 
 	//
@@ -1341,11 +1341,11 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainRace(R_PLAIN, 0, I_HIGHELF);
 	ModifyTerrainRace(R_PLAIN, 1, I_CENTAURMAN);
 	ModifyTerrainRace(R_PLAIN, 2, I_GNOME);
-	ModifyTerrainRace(R_PLAIN, 3, I_MAN);
+	ModifyTerrainRace(R_PLAIN, 3, I_VIKING);
 	ModifyTerrainCoastRace(R_PLAIN, 0, I_HIGHELF);
 	ModifyTerrainCoastRace(R_PLAIN, 1, I_CENTAURMAN);
 	ModifyTerrainCoastRace(R_PLAIN, 2, I_GNOME);
-	ModifyTerrainCoastRace(R_PLAIN, 3, I_MAN);
+	ModifyTerrainCoastRace(R_PLAIN, 3, I_VIKING);
 
 	ClearTerrainRaces(R_FOREST);
 	ModifyTerrainRace(R_FOREST, 0, I_WOODELF);
@@ -1358,10 +1358,10 @@ void Game::ModifyTablesPerRuleset(void)
 	ClearTerrainRaces(R_MOUNTAIN);
 	ModifyTerrainRace(R_MOUNTAIN, 0, I_HILLDWARF);
 	ModifyTerrainRace(R_MOUNTAIN, 1, I_ORC);
-	ModifyTerrainRace(R_MOUNTAIN, 2, I_MAN);
+	ModifyTerrainRace(R_MOUNTAIN, 2, I_VIKING);
 	ModifyTerrainCoastRace(R_MOUNTAIN, 0, I_HILLDWARF);
 	ModifyTerrainCoastRace(R_MOUNTAIN, 1, I_ORC);
-	ModifyTerrainCoastRace(R_MOUNTAIN, 2, I_MAN);
+	ModifyTerrainCoastRace(R_MOUNTAIN, 2, I_VIKING);
 
 	ClearTerrainRaces(R_SWAMP);
 	ModifyTerrainRace(R_SWAMP, 0, I_LIZARDMAN);
@@ -1383,11 +1383,11 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainRace(R_DESERT, 0, I_GNOME);
 	ModifyTerrainRace(R_DESERT, 1, I_GNOLL);
 	ModifyTerrainRace(R_DESERT, 2, I_GOBLINMAN);
-	ModifyTerrainRace(R_DESERT, 3, I_MAN);
+	ModifyTerrainRace(R_DESERT, 3, I_VIKING);
 	ModifyTerrainCoastRace(R_DESERT, 0, I_GNOME);
 	ModifyTerrainCoastRace(R_DESERT, 1, I_GNOLL);
 	ModifyTerrainCoastRace(R_DESERT, 2, I_GOBLINMAN);
-	ModifyTerrainCoastRace(R_DESERT, 3, I_MAN);
+	ModifyTerrainCoastRace(R_DESERT, 3, I_VIKING);
 
 	ClearTerrainRaces(R_TUNDRA);
 	ModifyTerrainRace(R_TUNDRA, 0, I_ICEDWARF);
@@ -1400,11 +1400,11 @@ void Game::ModifyTablesPerRuleset(void)
 	// Underworld
 
 	ClearTerrainRaces(R_CAVERN);
-	ModifyTerrainRace(R_CAVERN, 0, I_MAN);
+	ModifyTerrainRace(R_CAVERN, 0, I_VIKING);
 	ModifyTerrainRace(R_CAVERN, 1, I_UNDERDWARF);
 	ModifyTerrainRace(R_CAVERN, 2, I_DROWMAN);
 	ModifyTerrainRace(R_CAVERN, 3, I_GNOME);
-	ModifyTerrainCoastRace(R_CAVERN, 0, I_MAN);
+	ModifyTerrainCoastRace(R_CAVERN, 0, I_VIKING);
 	ModifyTerrainCoastRace(R_CAVERN, 1, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_CAVERN, 2, I_DROWMAN);
 	ModifyTerrainCoastRace(R_CAVERN, 3, I_GNOME);
