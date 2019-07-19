@@ -1198,7 +1198,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyItemBasePrice(I_LEADERS, 1000);
 
 	EnableItem(I_MAN);
-	ModifyItemName(I_MAN, "human", "humans");
 	ModifyItemBasePrice(I_MAN, 40);
 	ModifyRaceSkillLevels("MAN", 4, 2);
 	ModifyRaceSkills("MAN", 0, "ARMO");
