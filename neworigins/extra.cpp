@@ -1199,18 +1199,18 @@ void Game::ModifyTablesPerRuleset(void)
 
 	ModifyItemBasePrice(I_LEADERS, 1000);
 
-	EnableItem(I_HUMAN);
-	ModifyItemBasePrice(I_HUMAN, 40);
-	ModifyRaceSkillLevels("HUMN", 4, 2);
-	ModifyRaceSkills("HUMN", 0, "ARMO");
-	ModifyRaceSkills("HUMN", 1, "RIDI");
-	ModifyRaceSkills("HUMN", 2, "COMB");
-	ModifyRaceSkills("HUMN", 3, "MINI");
-	ModifyRaceSkills("HUMN", 4, "FARM");
-	ModifyRaceSkills("HUMN", 5, "RANC");
+	EnableItem(I_MAN);
+	ModifyItemBasePrice(I_MAN, 40);
+	ModifyRaceSkillLevels("MAN", 4, 2);
+	ModifyRaceSkills("MAN", 0, "ARMO");
+	ModifyRaceSkills("MAN", 1, "RIDI");
+	ModifyRaceSkills("MAN", 2, "COMB");
+	ModifyRaceSkills("MAN", 3, "MINI");
+	ModifyRaceSkills("MAN", 4, "FARM");
+	ModifyRaceSkills("MAN", 5, "RANC");
 	
-	EnableItem(I_MOUNTAINDWARF);
-	ModifyItemBasePrice(I_MOUNTAINDWARF, 40);
+	EnableItem(I_HILLDWARF);
+	ModifyItemBasePrice(I_HILLDWARF, 40);
 	ModifyRaceSkillLevels("MDWA", 5, 2);
 	ModifyRaceSkills("MDWA", 0, "ARMO");
 	ModifyRaceSkills("MDWA", 1, "WEAP");
@@ -1273,15 +1273,15 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("GNOM", 4, "FARM");
 	ModifyRaceSkills("GNOM", 5, "ENTE");
 
-	EnableItem(I_DEEPGNOME);
-	ModifyItemBasePrice(I_DEEPGNOME, 30);
-	ModifyRaceSkillLevels("DGNO", 5, 2);
-	ModifyRaceSkills("DGNO", 0, "MINI");
-	ModifyRaceSkills("DGNO", 1, "XBOW");
-	ModifyRaceSkills("DGNO", 2, "QUAR");
-	ModifyRaceSkills("DGNO", 3, "WEAP");
-	ModifyRaceSkills("DGNO", 4, "RANC");
-	ModifyRaceSkills("DGNO", 5, "BUIL");
+	// EnableItem(I_DEEPGNOME);
+	// ModifyItemBasePrice(I_DEEPGNOME, 30);
+	// ModifyRaceSkillLevels("DGNO", 5, 2);
+	// ModifyRaceSkills("DGNO", 0, "MINI");
+	// ModifyRaceSkills("DGNO", 1, "XBOW");
+	// ModifyRaceSkills("DGNO", 2, "QUAR");
+	// ModifyRaceSkills("DGNO", 3, "WEAP");
+	// ModifyRaceSkills("DGNO", 4, "RANC");
+	// ModifyRaceSkills("DGNO", 5, "BUIL");
 
 	EnableItem(I_CENTAURMAN);
 	ModifyItemBasePrice(I_CENTAURMAN, 50);
@@ -1328,10 +1328,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("ORC", 2, "COMB");
 	ModifyRaceSkills("ORC", 3, "BUIL");
 
-	// TEST:
-	// ModifyRaceName(I_ORC);
-	
-
 	//
 	// Change craft: adamantium
 	//
@@ -1357,11 +1353,11 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainRace(R_PLAIN, 0, I_HIGHELF);
 	ModifyTerrainRace(R_PLAIN, 1, I_CENTAURMAN);
 	ModifyTerrainRace(R_PLAIN, 2, I_GNOME);
-	ModifyTerrainRace(R_PLAIN, 3, I_HUMAN);
+	ModifyTerrainRace(R_PLAIN, 3, I_MAN);
 	ModifyTerrainCoastRace(R_PLAIN, 0, I_HIGHELF);
 	ModifyTerrainCoastRace(R_PLAIN, 1, I_CENTAURMAN);
 	ModifyTerrainCoastRace(R_PLAIN, 2, I_GNOME);
-	ModifyTerrainCoastRace(R_PLAIN, 3, I_HUMAN);
+	ModifyTerrainCoastRace(R_PLAIN, 3, I_MAN);
 
 	ClearTerrainRaces(R_FOREST);
 	ModifyTerrainRace(R_FOREST, 0, I_WOODELF);
@@ -1372,12 +1368,12 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_FOREST, 2, I_HIGHELF);
 
 	ClearTerrainRaces(R_MOUNTAIN);
-	ModifyTerrainRace(R_MOUNTAIN, 0, I_MOUNTAINDWARF);
+	ModifyTerrainRace(R_MOUNTAIN, 0, I_HILLDWARF);
 	ModifyTerrainRace(R_MOUNTAIN, 1, I_ORC);
-	ModifyTerrainRace(R_MOUNTAIN, 2, I_HUMAN);
-	ModifyTerrainCoastRace(R_MOUNTAIN, 0, I_MOUNTAINDWARF);
+	ModifyTerrainRace(R_MOUNTAIN, 2, I_MAN);
+	ModifyTerrainCoastRace(R_MOUNTAIN, 0, I_HILLDWARF);
 	ModifyTerrainCoastRace(R_MOUNTAIN, 1, I_ORC);
-	ModifyTerrainCoastRace(R_MOUNTAIN, 2, I_HUMAN);
+	ModifyTerrainCoastRace(R_MOUNTAIN, 2, I_MAN);
 
 	ClearTerrainRaces(R_SWAMP);
 	ModifyTerrainRace(R_SWAMP, 0, I_LIZARDMAN);
@@ -1399,11 +1395,11 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainRace(R_DESERT, 0, I_GNOME);
 	ModifyTerrainRace(R_DESERT, 1, I_GNOLL);
 	ModifyTerrainRace(R_DESERT, 2, I_GOBLINMAN);
-	ModifyTerrainRace(R_DESERT, 3, I_HUMAN);
+	ModifyTerrainRace(R_DESERT, 3, I_MAN);
 	ModifyTerrainCoastRace(R_DESERT, 0, I_GNOME);
 	ModifyTerrainCoastRace(R_DESERT, 1, I_GNOLL);
 	ModifyTerrainCoastRace(R_DESERT, 2, I_GOBLINMAN);
-	ModifyTerrainCoastRace(R_DESERT, 3, I_HUMAN);
+	ModifyTerrainCoastRace(R_DESERT, 3, I_MAN);
 
 	ClearTerrainRaces(R_TUNDRA);
 	ModifyTerrainRace(R_TUNDRA, 0, I_ICEDWARF);
@@ -1416,48 +1412,48 @@ void Game::ModifyTablesPerRuleset(void)
 	// Underworld
 
 	ClearTerrainRaces(R_CAVERN);
-	ModifyTerrainRace(R_CAVERN, 0, I_HUMAN);
+	ModifyTerrainRace(R_CAVERN, 0, I_MAN);
 	ModifyTerrainRace(R_CAVERN, 1, I_UNDERDWARF);
 	ModifyTerrainRace(R_CAVERN, 2, I_DROWMAN);
-	ModifyTerrainRace(R_CAVERN, 3, I_DEEPGNOME);
-	ModifyTerrainCoastRace(R_CAVERN, 0, I_HUMAN);
+	ModifyTerrainRace(R_CAVERN, 3, I_GNOME);
+	ModifyTerrainCoastRace(R_CAVERN, 0, I_MAN);
 	ModifyTerrainCoastRace(R_CAVERN, 1, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_CAVERN, 2, I_DROWMAN);
-	ModifyTerrainCoastRace(R_CAVERN, 3, I_DEEPGNOME);
+	ModifyTerrainCoastRace(R_CAVERN, 3, I_GNOME);
 
 	ClearTerrainRaces(R_UFOREST);
 	ModifyTerrainRace(R_UFOREST, 0, I_UNDERDWARF);
 	ModifyTerrainRace(R_UFOREST, 1, I_DROWMAN);
-	ModifyTerrainRace(R_UFOREST, 2, I_DEEPGNOME);
+	ModifyTerrainRace(R_UFOREST, 2, I_GNOME);
 	ModifyTerrainCoastRace(R_UFOREST, 0, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_UFOREST, 1, I_DROWMAN);
-	ModifyTerrainCoastRace(R_UFOREST, 2, I_DEEPGNOME);
+	ModifyTerrainCoastRace(R_UFOREST, 2, I_GNOME);
 
 	// Underdeep
 
 	ClearTerrainRaces(R_CHASM);
 	ModifyTerrainRace(R_CHASM, 0, I_UNDERDWARF);
 	ModifyTerrainRace(R_CHASM, 1, I_DROWMAN);
-	ModifyTerrainRace(R_CHASM, 2, I_DEEPGNOME);
+	ModifyTerrainRace(R_CHASM, 2, I_GNOME);
 	ModifyTerrainCoastRace(R_CHASM, 0, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_CHASM, 1, I_DROWMAN);
-	ModifyTerrainCoastRace(R_CHASM, 2, I_DEEPGNOME);
+	ModifyTerrainCoastRace(R_CHASM, 2, I_GNOME);
 
 	ClearTerrainRaces(R_DFOREST);
 	ModifyTerrainRace(R_DFOREST, 0, I_UNDERDWARF);
 	ModifyTerrainRace(R_DFOREST, 1, I_DROWMAN);
-	ModifyTerrainRace(R_DFOREST, 2, I_DEEPGNOME);
+	ModifyTerrainRace(R_DFOREST, 2, I_GNOME);
 	ModifyTerrainCoastRace(R_DFOREST, 0, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_DFOREST, 1, I_DROWMAN);
-	ModifyTerrainCoastRace(R_DFOREST, 2, I_DEEPGNOME);
+	ModifyTerrainCoastRace(R_DFOREST, 2, I_GNOME);
 
 	ClearTerrainRaces(R_GROTTO);
 	ModifyTerrainRace(R_GROTTO, 0, I_UNDERDWARF);
 	ModifyTerrainRace(R_GROTTO, 1, I_DROWMAN);
-	ModifyTerrainRace(R_GROTTO, 2, I_DEEPGNOME);
+	ModifyTerrainRace(R_GROTTO, 2, I_GNOME);
 	ModifyTerrainCoastRace(R_GROTTO, 0, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_GROTTO, 1, I_DROWMAN);
-	ModifyTerrainCoastRace(R_GROTTO, 2, I_DEEPGNOME);
+	ModifyTerrainCoastRace(R_GROTTO, 2, I_GNOME);
 
 
 	if ((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
