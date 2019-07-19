@@ -951,8 +951,8 @@ void Game::ModifyTablesPerRuleset(void)
 	if (Globals->NEXUS_IS_CITY && Globals->TOWNS_EXIST) {
 		ClearTerrainRaces(R_NEXUS);
 		ModifyTerrainRace(R_NEXUS, 0, I_HIGHELF);
-		ModifyTerrainRace(R_NEXUS, 1, I_VIKING);
-		ModifyTerrainRace(R_NEXUS, 2, I_PLAINSMAN);
+		ModifyTerrainRace(R_NEXUS, 1, I_MAN);
+		ModifyTerrainRace(R_NEXUS, 2, I_HILLDWARF);
 		ClearTerrainItems(R_NEXUS);
 		ModifyTerrainItems(R_NEXUS, 0, I_IRON, 100, 10);
 		ModifyTerrainItems(R_NEXUS, 1, I_WOOD, 100, 10);
