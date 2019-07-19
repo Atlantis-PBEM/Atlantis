@@ -1042,7 +1042,7 @@ void Game::ModifyTablesPerRuleset(void)
 
 	ModifySkillDependancy(S_RAISE_UNDEAD, 0, "SUSK", 3);
 	ModifySkillDependancy(S_SUMMON_LICH, 0, "RAIS", 3);
-	// ModifySkillDependancy(S_CREATE_AURA_OF_FEAR, 0, "DEMO", 1);
+	// ModifySkillDependancy(S_SUMMON_BALROG, 0, "DEMO", 4);
 
 	ModifyItemMagicOutput(I_SKELETON, 200);
 	ModifyItemMagicOutput(I_WOLF, 200);
@@ -1183,14 +1183,12 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_VIKING);
 	DisableItem(I_BARBARIAN);
 	DisableItem(I_DARKMAN);
-	DisableItem(I_ICEDWARF);
 	DisableItem(I_DESERTDWARF);
 	DisableItem(I_PLAINSMAN);
 	DisableItem(I_SEAELF);
 	DisableItem(I_GREYELF);
 	DisableItem(I_MINOTAUR);
 	DisableItem(I_OGREMAN);
-	DisableItem(I_HILLDWARF);
 	DisableItem(I_HOBBIT);
 
 	//
@@ -1200,6 +1198,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyItemBasePrice(I_LEADERS, 1000);
 
 	EnableItem(I_MAN);
+	ModifyItemName(I_MAN, "human", "humans");
 	ModifyItemBasePrice(I_MAN, 40);
 	ModifyRaceSkillLevels("MAN", 4, 2);
 	ModifyRaceSkills("MAN", 0, "ARMO");
@@ -1211,12 +1210,12 @@ void Game::ModifyTablesPerRuleset(void)
 	
 	EnableItem(I_HILLDWARF);
 	ModifyItemBasePrice(I_HILLDWARF, 40);
-	ModifyRaceSkillLevels("MDWA", 5, 2);
-	ModifyRaceSkills("MDWA", 0, "ARMO");
-	ModifyRaceSkills("MDWA", 1, "WEAP");
-	ModifyRaceSkills("MDWA", 2, "QUAR");
-	ModifyRaceSkills("MDWA", 3, "MINI");
-	ModifyRaceSkills("MDWA", 4, "BUIL");
+	ModifyRaceSkillLevels("HDWA", 5, 2);
+	ModifyRaceSkills("HDWA", 0, "ARMO");
+	ModifyRaceSkills("HDWA", 1, "WEAP");
+	ModifyRaceSkills("HDWA", 2, "QUAR");
+	ModifyRaceSkills("HDWA", 3, "MINI");
+	ModifyRaceSkills("HDWA", 4, "BUIL");
 
 	EnableItem(I_ICEDWARF);
 	ModifyItemBasePrice(I_ICEDWARF, 40);
@@ -1243,7 +1242,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("HELF", 1, "COMB");
 	ModifyRaceSkills("HELF", 2, "LBOW");
 	ModifyRaceSkills("HELF", 3, "SHIP");
-	ModifyRaceSkills("HELF", 4, "MANI");
+	ModifyRaceSkills("HELF", 4, "SAIL");
 
 	EnableItem(I_WOODELF);
 	ModifyItemBasePrice(I_WOODELF, 40);
@@ -1261,7 +1260,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("DRLF", 1, "LBOW");
 	ModifyRaceSkills("DRLF", 2, "COMB");
 	ModifyRaceSkills("DRLF", 3, "WEAP");
-	ModifyRaceSkills("DRLF", 4, "MANI");
+	ModifyRaceSkills("DRLF", 4, "HEAL");
 
 	EnableItem(I_GNOME);
 	ModifyItemBasePrice(I_GNOME, 30);
@@ -1273,18 +1272,8 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("GNOM", 4, "FARM");
 	ModifyRaceSkills("GNOM", 5, "ENTE");
 
-	// EnableItem(I_DEEPGNOME);
-	// ModifyItemBasePrice(I_DEEPGNOME, 30);
-	// ModifyRaceSkillLevels("DGNO", 5, 2);
-	// ModifyRaceSkills("DGNO", 0, "MINI");
-	// ModifyRaceSkills("DGNO", 1, "XBOW");
-	// ModifyRaceSkills("DGNO", 2, "QUAR");
-	// ModifyRaceSkills("DGNO", 3, "WEAP");
-	// ModifyRaceSkills("DGNO", 4, "RANC");
-	// ModifyRaceSkills("DGNO", 5, "BUIL");
-
 	EnableItem(I_CENTAURMAN);
-	ModifyItemBasePrice(I_CENTAURMAN, 50);
+	ModifyItemBasePrice(I_CENTAURMAN, 60);
 	ModifyRaceSkillLevels("CTAU", 5, 2);
 	ModifyRaceSkills("CTAU", 0, "LUMB");
 	ModifyRaceSkills("CTAU", 1, "HORS");
