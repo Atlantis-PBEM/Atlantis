@@ -1329,7 +1329,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("ORC", 3, "BUIL");
 
 	// TEST:
-	ModifyRaceName(I_ORC);
+	// ModifyRaceName(I_ORC);
 	
 
 	//
