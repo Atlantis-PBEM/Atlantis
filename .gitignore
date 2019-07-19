@@ -1,4 +1,5 @@
 .DS_Store
+.vscode/
 obj
 basic/basic
 standard/obj
@@ -11,6 +12,8 @@ kingdoms/obj
 kingdoms/kingdoms
 havilah/obj
 havilah/havilah
+havilah/html/havilah.html
 neworigins/obj
 neworigins/neworigins
+neworigins/html/neworigins.html
 
