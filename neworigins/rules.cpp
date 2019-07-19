@@ -33,7 +33,7 @@
 // the html file containing the rules to correctly reflect the changes!
 //
 
-static int am[] = { 0, 1, 2, 3, 5, 6 };
+static int am[] = { 1, 2, 3, 4, 5, 6 };
 int *allowedMages = am;
 int allowedMagesSize = sizeof(am) / sizeof(am[0]);
 
