@@ -116,6 +116,7 @@ ARegion::ARegion()
 	gateopen = 1;
 	town = 0;
 	development = 0;
+	maxdevelopment = 0;
 	habitat = 0;
 	immigrants = 0;
 	emigrants = 0;
@@ -998,6 +999,7 @@ void ARegion::Writeout(Aoutfile *f)
 
 	f->PutInt(habitat);
 	f->PutInt(development);
+	f->PutInt(maxdevelopment);
 
 	if (town) {
 		f->PutInt(1);
@@ -1058,6 +1060,7 @@ void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
 
 	habitat = f->GetInt();
 	development = f->GetInt();
+	maxdevelopment = f->GetInt();
 
 	if (f->GetInt()) {
 		town = new TownInfo;

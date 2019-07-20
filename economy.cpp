@@ -58,7 +58,7 @@ int ARegion::Wages()
 	if (Population() == 0) return 0;
 	int level = 1;
 	int last = 0;
-	int dv = development + RoadDevelopment() + earthlore + clearskies;
+	int dv = development + RoadDevelopment() + (earthlore + clearskies) * 12;
 	// Note: earthlore and clearskies represent LEVEL of the spell
 	// Adjust for TownType
 	if (town) {
@@ -153,6 +153,7 @@ void ARegion::SetupPop()
 		}
 	}
 	development += getrandom(25);
+	maxdevelopment = development;
 
 	if (Globals->TOWNS_EXIST) {
 		int adjacent = 0;
@@ -865,6 +866,8 @@ void ARegion::SetTownType(int level)
 			town->dev = TownDevelopment();
 		}
 	}
+
+	maxdevelopment = development;
 }
 
 void ARegion::UpdateEditRegion()
@@ -964,6 +967,7 @@ void ARegion::SetupEditRegion()
 		}
 	}
 	development += getrandom(25);
+	maxdevelopment = development;
 
 	if (Globals->TOWNS_EXIST) {
 		int adjacent = 0;
@@ -1222,8 +1226,11 @@ void ARegion::Pillage()
 	wealth = 0;
 	int damage = development / 3;
 	development -= damage;
-	int popdensity = Globals->CITY_POP / 2000;
-	AdjustPop(- damage * getrandom(popdensity) - getrandom(5 * popdensity));
+	if (Globals->DYNAMIC_POPULATION) {
+		// Don't do population damage if population can't recover
+		int popdensity = Globals->CITY_POP / 2000;
+		AdjustPop(- damage * getrandom(popdensity) - getrandom(5 * popdensity));
+	}
 	/* Stabilise at minimal development levels */
 	while (Wages() < Globals->MAINTENANCE_COST / 20) development += getrandom(5);
 }
@@ -1515,13 +1522,35 @@ void ARegion::PostTurn(ARegionList *pRegs)
 		int progress = development - RoadDevelopment();
 		/* Three chances to improve */
 		for (int a=0; a<3; a++) if (getrandom(progress) < diff) development++;
+		if (development > maxdevelopment) maxdevelopment = development;
 	}
 	
 	/* Development increase for very poor regions */
-	int basedev = ProdDev();
+	int recoveryRounds = 1 + earthlore + clearskies;
+
+	if (wealth > 0) recoveryRounds++;
+
+	if (maxdevelopment > development) {
+		Awrite(AString("recovery: ")
+			+ development + " "
+			+ maxdevelopment + " "
+			+ ProdDev() + " "
+			+ earthlore + " "
+			+ clearskies + " "
+			+ wealth + " "
+			+ recoveryRounds);
+	}
 	
-	if (basedev > development) {
-		if (getrandom(basedev) > (basedev - development)) development++;	
+	while (recoveryRounds-- > 0) {
+		if (maxdevelopment > development) {
+			if (getrandom(maxdevelopment) > development) development++;	
+		}
+		if (maxdevelopment > development) {
+			if (getrandom(maxdevelopment) > development) development++;	
+		}
+		if (maxdevelopment > development) {
+			if (getrandom(3) == 1) development++;	
+		}
 	}
 
 	/* Check if we were a starting city and got taken over */
