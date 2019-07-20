@@ -1360,7 +1360,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_PLAIN, 0, I_HIGHELF);
 	ModifyTerrainCoastRace(R_PLAIN, 1, I_CENTAURMAN);
 	ModifyTerrainCoastRace(R_PLAIN, 2, I_GNOME);
-	ModifyTerrainCoastRace(R_PLAIN, 3, I_MAN);
 
 	ClearTerrainRaces(R_FOREST);
 	ModifyTerrainRace(R_FOREST, 0, I_WOODELF);
@@ -1402,7 +1401,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_DESERT, 0, I_GNOME);
 	ModifyTerrainCoastRace(R_DESERT, 1, I_GNOLL);
 	ModifyTerrainCoastRace(R_DESERT, 2, I_GOBLINMAN);
-	ModifyTerrainCoastRace(R_DESERT, 3, I_MAN);
 
 	ClearTerrainRaces(R_TUNDRA);
 	ModifyTerrainRace(R_TUNDRA, 0, I_ICEDWARF);
@@ -1422,7 +1420,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_CAVERN, 0, I_MAN);
 	ModifyTerrainCoastRace(R_CAVERN, 1, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_CAVERN, 2, I_DROWMAN);
-	ModifyTerrainCoastRace(R_CAVERN, 3, I_GNOME);
 
 	ClearTerrainRaces(R_UFOREST);
 	ModifyTerrainRace(R_UFOREST, 0, I_UNDERDWARF);
@@ -1432,7 +1429,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_UFOREST, 0, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_UFOREST, 1, I_DROWMAN);
 	ModifyTerrainCoastRace(R_UFOREST, 2, I_GNOME);
-	ModifyTerrainCoastRace(R_UFOREST, 3, I_MAN);
 
 	// Underdeep
 
