@@ -63,7 +63,10 @@ int Game::SetupFaction( Faction *pFac )
 	temp2->Study(S_PATTERN, 30);
 	temp2->Study(S_SPIRIT, 30);
 	temp2->Study(S_GATE_LORE, 30);
-	
+
+	// Set up health
+	temp2->Study(S_COMBAT, 180);
+	temp2->Study(S_ENDURANCE, 180);
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
