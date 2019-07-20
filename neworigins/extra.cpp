@@ -989,9 +989,9 @@ void Game::ModifyTablesPerRuleset(void)
 	// EnableItem(I_MBAXE);
 	// EnableItem(I_IMARM);
 	EnableItem(I_SUPERBOW);
-	EnableItem(I_LANCE);
+	// EnableItem(I_LANCE);
 	EnableItem(I_JAVELIN);
-	EnableItem(I_PIKE);
+	// EnableItem(I_PIKE);
 	EnableItem(I_MSHIELD);
 	EnableItem(I_ISHIELD);
 	EnableItem(I_WSHIELD);
@@ -1005,6 +1005,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_HOLYSYMBOL);
 	EnableItem(I_CENSER);
 	EnableItem(I_RELICOFGRACE);
+	ModifyItemName(I_RELICOFGRACE, "artifact of power", "artifacts of power");
 
 	// Cut down the number of trade items to improve
 	// chances of good trade routes
@@ -1022,7 +1023,6 @@ void Game::ModifyTablesPerRuleset(void)
 	// EnableSkill(S_CREATE_FOOD);
 
 	DisableItem(I_STAFFOFL);
-	DisableItem(I_GNOME);
 
 	// EnableSkill(S_ARMORCRAFT);
 	// EnableSkill(S_WEAPONCRAFT);
@@ -1098,6 +1098,8 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_MTOWER);
 	EnableObject(O_MFORTRESS);
 	EnableObject(O_MCITADEL);
+	EnableObject(O_STABLE);
+	EnableObject(O_MSTABLE);
 	ModifyObjectName(O_MFORTRESS, "Magical Fortress");
 	ModifyObjectName(O_MCASTLE, "Magical Castle");
 	ModifyObjectManpower(O_TOWER,
@@ -1166,6 +1168,10 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_OCAVE);
 	EnableObject(O_WHIRL);
 	DisableObject(O_PALACE);
+
+	//
+	// Monsters
+	//
 	EnableItem(I_PIRATES);
 	EnableItem(I_KRAKEN);
 	EnableItem(I_MERFOLK);
@@ -1174,8 +1180,6 @@ void Game::ModifyTablesPerRuleset(void)
 	//
 	// Change races
 	//
-
-	// Disable default
 	DisableItem(I_ESKIMO);
 	DisableItem(I_TRIBESMAN);
 	DisableItem(I_NOMAD);
@@ -1191,13 +1195,10 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_OGREMAN);
 	DisableItem(I_HOBBIT);
 
-	//
-	// Enable races
-	//
-
 	ModifyItemBasePrice(I_LEADERS, 700);
 
 	EnableItem(I_MAN);
+	ModifyItemName(I_MAN, "human", "humans");
 	ModifyItemBasePrice(I_MAN, 40);
 	ModifyRaceSkillLevels("MAN", 4, 2);
 	ModifyRaceSkills("MAN", 0, "ARMO");
@@ -1282,7 +1283,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("CTAU", 5, "HEAL");
 
 	EnableItem(I_LIZARDMAN);
-	ModifyItemBasePrice(I_CENTAURMAN, 40);
+	ModifyItemBasePrice(I_LIZARDMAN, 40);
 	ModifyRaceSkillLevels("LIZA", 5, 2);
 	ModifyRaceSkills("LIZA", 0, "HUNT");
 	ModifyRaceSkills("LIZA", 1, "HERB");
