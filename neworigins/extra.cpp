@@ -1195,7 +1195,7 @@ void Game::ModifyTablesPerRuleset(void)
 	// Enable races
 	//
 
-	ModifyItemBasePrice(I_LEADERS, 1000);
+	ModifyItemBasePrice(I_LEADERS, 700);
 
 	EnableItem(I_MAN);
 	ModifyItemBasePrice(I_MAN, 40);
@@ -1235,7 +1235,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("UDWA", 3, "MINI");
 	
 	EnableItem(I_HIGHELF);
-	ModifyItemBasePrice(I_HIGHELF, 50);
+	ModifyItemBasePrice(I_HIGHELF, 40);
 	ModifyRaceSkillLevels("HELF", 5, 2);
 	ModifyRaceSkills("HELF", 0, "HORS");
 	ModifyRaceSkills("HELF", 1, "COMB");
@@ -1253,7 +1253,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("WELF", 4, "ENTE");
 
 	EnableItem(I_DROWMAN);
-	ModifyItemBasePrice(I_DROWMAN, 50);
+	ModifyItemBasePrice(I_DROWMAN, 40);
 	ModifyRaceSkillLevels("DRLF", 5, 2);
 	ModifyRaceSkills("DRLF", 0, "LUMB");
 	ModifyRaceSkills("DRLF", 1, "LBOW");
@@ -1413,9 +1413,11 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainRace(R_UFOREST, 0, I_UNDERDWARF);
 	ModifyTerrainRace(R_UFOREST, 1, I_DROWMAN);
 	ModifyTerrainRace(R_UFOREST, 2, I_GNOME);
+	ModifyTerrainRace(R_UFOREST, 3, I_MAN);
 	ModifyTerrainCoastRace(R_UFOREST, 0, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_UFOREST, 1, I_DROWMAN);
 	ModifyTerrainCoastRace(R_UFOREST, 2, I_GNOME);
+	ModifyTerrainCoastRace(R_UFOREST, 3, I_MAN);
 
 	// Underdeep
 
