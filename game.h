@@ -192,7 +192,7 @@ private:
 
 	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
-	void ModifyItemName(int it, char *name, char *names);
+	void ModifyItemName(int it, char const *name, char const *names);
 	void ModifyItemFlags(int it, int flags);
 	void ModifyItemType(int it, int type);
 	void ModifyItemWeight(int it, int weight);

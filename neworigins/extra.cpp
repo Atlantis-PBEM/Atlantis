@@ -1087,12 +1087,23 @@ void Game::ModifyTablesPerRuleset(void)
 
 	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
 
+	//
+	// Roads
+	//
 	EnableObject(O_ROADN);
 	EnableObject(O_ROADNE);
 	EnableObject(O_ROADNW);
 	EnableObject(O_ROADS);
 	EnableObject(O_ROADSE);
 	EnableObject(O_ROADSW);
+	ModifyObjectConstruction(O_ROADN, I_STONE, 30, "BUIL", 2);
+	ModifyObjectConstruction(O_ROADNE, I_STONE, 30, "BUIL", 2);
+	ModifyObjectConstruction(O_ROADNW, I_STONE, 30, "BUIL", 2);
+	ModifyObjectConstruction(O_ROADS, I_STONE, 30, "BUIL", 2);
+	ModifyObjectConstruction(O_ROADSE, I_STONE, 30, "BUIL", 2);
+	ModifyObjectConstruction(O_ROADSW, I_STONE, 30, "BUIL", 2);
+
+
 	EnableObject(O_TEMPLE);
 	EnableObject(O_MQUARRY);
 	EnableObject(O_AMINE);

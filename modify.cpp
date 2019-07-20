@@ -92,7 +92,7 @@ void Game::DisableItem(int item)
 	ItemDefs[item].flags |= ItemType::DISABLED;
 }
 
-void Game::ModifyItemName(int it, char *name, char *names)
+void Game::ModifyItemName(int it, char const *name, char const *names)
 {	
 	if (it < 0 || it > (NITEMS-1)) return;	
 	ItemDefs[it].name = name;	
