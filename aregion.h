@@ -303,6 +303,7 @@ class ARegion : public AListElem
 		/* Economy */
 		int habitat;
 		int development;
+		int maxdevelopment;
 		int elevation;
 		int humidity;
 		int temperature;
