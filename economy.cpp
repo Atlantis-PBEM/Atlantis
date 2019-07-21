@@ -1542,17 +1542,6 @@ void ARegion::PostTurn(ARegionList *pRegs)
 
 	if (wealth > 0) recoveryRounds++;
 
-	if (maxdevelopment > development) {
-		Awrite(AString("recovery: ")
-			+ development + " "
-			+ maxdevelopment + " "
-			+ ProdDev() + " "
-			+ earthlore + " "
-			+ clearskies + " "
-			+ wealth + " "
-			+ recoveryRounds);
-	}
-	
 	while (recoveryRounds-- > 0) {
 		if (maxdevelopment > development) {
 			if (getrandom(maxdevelopment) > development) development++;	
