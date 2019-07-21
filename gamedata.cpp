@@ -4026,7 +4026,7 @@ ObjectType *ObjectDefs = ot;
 //
 static TerrainType td[] = {
 	//
-	// name, type_name, similar_type,
+	// name, type_name, marker, similar_type,
 	// flags,
 	// pop, wages, economy, movepoints,
 	// product array
