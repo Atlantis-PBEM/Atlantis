@@ -794,48 +794,6 @@ Faction *Game::CheckVictory()
 		}
 	}
 
-	forlist_reuse(&regions) {
-		r = (ARegion *) elem;
-		forlist(&r->objects) {
-			o = (Object *) elem;
-			if (o->type == O_BKEEP) {
-				if (!o->incomplete) {
-					// You didn't think this was a
-					// _win_ condition, did you?
-					message = "A blasphemous tower has been completed!\n\n"
-						"The connection between mortal World and the Eternal City has been severed.\n\n"
-						"The light fails; darkness falls forever, and all life perishes under endless ice.";
-					WriteTimesArticle(message);
-					return GetFaction(&factions, monfaction);
-				}
-				if (o->incomplete <= ObjectDefs[o->type].cost / 2) {
-					// Half done; make a quest to destroy it
-					found = 0;
-					forlist(&quests) {
-						q = (Quest *) elem;
-						if (q->type == Quest::DEMOLISH &&
-								q->target == o->num &&
-								q->regionnum == r->num) {
-							found = 1;
-							break;
-						}
-					}
-					if (!found) {
-						q = new Quest;
-						q->type = Quest::DEMOLISH;
-						item = new Item;
-						item->type = I_RELICOFGRACE;
-						item->num = 1;
-						q->rewards.Add(item);
-						q->target = o->num;
-						q->regionnum = r->num;
-						quests.Add(q);
-					}
-				}
-			}
-		}
-	}
-
 	forlist_reuse(&quests) {
 		q = (Quest *) elem;
 		switch(q->type) {
