@@ -76,20 +76,6 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 	}
 
 	FinalSetup(pRegionArrays[level]);
-
-	ARegion *lair = NULL;
-	do {
-		tempx = getrandom(4);
-		tempy = getrandom(4);
-		lair = pRegionArrays[level]->GetRegion(tempx, tempy);
-	} while(!lair || lair == reg);
-	Object *o = new Object(lair);
-	o->num = lair->buildingseq++;
-	o->name = new AString(AString(ObjectDefs[O_BKEEP].name)+" ["+o->num+"]");
-	o->type = O_BKEEP;
-	o->incomplete = 0;
-	o->inner = -1;
-	lair->objects.Add(o);
 }
 
 
