@@ -1138,13 +1138,15 @@ void Game::ModifyTablesPerRuleset(void)
 		ObjectDefs[O_CITADEL].capacity,
 		ObjectDefs[O_CITADEL].sailors,
 		4);
-	// DisableObject(O_BKEEP);
-	ModifyObjectName(O_BKEEP, "Black Tower");
-	ModifyObjectFlags(O_BKEEP, ObjectType::CANENTER |
-		ObjectType::NEVERDECAY |
-		ObjectType::CANMODIFY);
-	ModifyObjectMonster(O_BKEEP, -1);
-	ModifyObjectConstruction(O_BKEEP, I_ROOTSTONE, 666, NULL, 0);
+
+	// Game ending structure
+	DisableObject(O_BKEEP);
+	// ModifyObjectName(O_BKEEP, "Black Tower");
+	// ModifyObjectFlags(O_BKEEP, ObjectType::CANENTER |
+	// 	ObjectType::NEVERDECAY |
+	// 	ObjectType::CANMODIFY);
+	// ModifyObjectMonster(O_BKEEP, -1);
+	// ModifyObjectConstruction(O_BKEEP, I_ROOTSTONE, 666, NULL, 0);
 
 	ModifyTerrainItems(R_TUNDRA, 2, I_WHORSE, 25, 5);
 	ModifyTerrainItems(R_JUNGLE, 3, I_IRONWOOD, 20, 5);
