@@ -1179,7 +1179,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("MAN", 2, "COMB");
 	ModifyRaceSkills("MAN", 3, "MINI");
 	ModifyRaceSkills("MAN", 4, "FARM");
-	ModifyRaceSkills("MAN", 5, "RANC");
+	ModifyRaceSkills("MAN", 5, "CARP");
 	
 	EnableItem(I_HILLDWARF);
 	ModifyItemBasePrice(I_HILLDWARF, 40);
@@ -1207,6 +1207,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("UDWA", 1, "WEAP");
 	ModifyRaceSkills("UDWA", 2, "QUAR");
 	ModifyRaceSkills("UDWA", 3, "MINI");
+	ModifyRaceSkills("UDWA", 4, "GCUT");
 	
 	EnableItem(I_HIGHELF);
 	ModifyItemBasePrice(I_HIGHELF, 40);
@@ -1225,6 +1226,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("WELF", 2, "HERB");
 	ModifyRaceSkills("WELF", 3, "WEAP");
 	ModifyRaceSkills("WELF", 4, "ENTE");
+	ModifyRaceSkills("WELF", 5, "CARP");
 
 	EnableItem(I_DROWMAN);
 	ModifyItemBasePrice(I_DROWMAN, 40);
@@ -1246,7 +1248,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("GNOM", 5, "ENTE");
 
 	EnableItem(I_CENTAURMAN);
-	ModifyItemBasePrice(I_CENTAURMAN, 60);
+	ModifyItemBasePrice(I_CENTAURMAN, 70);
 	ModifyRaceSkillLevels("CTAU", 5, 2);
 	ModifyRaceSkills("CTAU", 0, "LUMB");
 	ModifyRaceSkills("CTAU", 1, "HORS");
@@ -1263,6 +1265,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("LIZA", 2, "LBOW");
 	ModifyRaceSkills("LIZA", 3, "SAIL");
 	ModifyRaceSkills("LIZA", 4, "HEAL");
+	ModifyRaceSkills("LIZA", 5, "CARP");
 
 	EnableItem(I_GOBLINMAN);
 	ModifyItemBasePrice(I_GOBLINMAN, 30);
@@ -1280,7 +1283,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("GNOL", 1, "HUNT");
 	ModifyRaceSkills("GNOL", 2, "COMB");
 	ModifyRaceSkills("GNOL", 3, "ARMO");
-	ModifyRaceSkills("GNOL", 4, "RANC");
+	ModifyRaceSkills("GNOL", 4, "CAME");
 
 	EnableItem(I_ORC);
 	ModifyItemBasePrice(I_ORC, 40);
@@ -1289,6 +1292,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("ORC", 1, "LUMB");
 	ModifyRaceSkills("ORC", 2, "COMB");
 	ModifyRaceSkills("ORC", 3, "BUIL");
+	ModifyRaceSkills("ORC", 4, "RANC");
 
 	//
 	// Change craft: adamantium
