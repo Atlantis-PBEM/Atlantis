@@ -663,6 +663,9 @@ void Game::ProcessTransmutation(Unit *u, AString *o, OrdersCheck *pCheck)
 		case I_WHORSE:
 			order->level = 5;
 			break;
+		case I_ADMANTIUM:
+			order->level = 5;
+			break;
 		default:
 			u->Error("CAST: Can't create that by transmutation.");
 			delete order;
@@ -1905,6 +1908,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	}
 	
 	switch(order->item) {
+		case I_ADMANTIUM:
 		case I_MITHRIL:
 			source = I_IRON;
 			break;
@@ -1924,8 +1928,8 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	}
 	
 	num = u->GetSharedNum(source);
-	if (num > level)
-		num = level;
+	if (num > level * level)
+		num = level * level;
 	if (order->number != -1 && num > order->number)
 		num = order->number;
 	if (num < order->number)
