@@ -1308,7 +1308,7 @@ AString *ShowSkill::Report(Faction *f)
 					"CAST Transmutation <material>, where <material> "
 					"is the resource you wish to create. "
 					"This spell will transmute as many resources as the "
-					"mage's skill level in Transmutation.  Should you "
+					"mage's skill level in Transmutation squared.  Should you "
 					"wish to create fewer than this, you may "
 					"CAST Transmutation [number] <material> instead.";
 			} else if (level == 2) {
@@ -1341,6 +1341,13 @@ AString *ShowSkill::Report(Faction *f)
 					*str += ItemString(I_HORSE, 1, ALWAYSPLURAL);
 					*str += " into ";
 					*str += ItemString(I_WHORSE, 1, ALWAYSPLURAL);
+					*str += ".";
+				}
+				if (ITEM_ENABLED(I_IRON) && ITEM_ENABLED(I_ADMANTIUM)) {
+					*str += "At this level the mage may transmute ";
+					*str += ItemString(I_IRON, 1, ALWAYSPLURAL);
+					*str += " into ";
+					*str += ItemString(I_ADMANTIUM, 1, ALWAYSPLURAL);
 					*str += ".";
 				}
 			}
