@@ -1928,8 +1928,8 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	}
 	
 	num = u->GetSharedNum(source);
-	if (num > level * level)
-		num = level * level;
+	if (num > ItemDefs[source].mOut * level)
+		num = ItemDefs[source].mOut * level;
 	if (order->number != -1 && num > order->number)
 		num = order->number;
 	if (num < order->number)
