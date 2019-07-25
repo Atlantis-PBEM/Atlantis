@@ -1287,9 +1287,9 @@ AString *ShowSkill::Report(Faction *f)
 						(ITEM_ENABLED(I_IRON) && ITEM_ENABLED(I_MITHRIL))) {
 					*str += "At level 1 the mage may transmute ";
 					if (ITEM_ENABLED(I_STONE) && ITEM_ENABLED(I_ROOTSTONE)) {
-						*str += ItemString(I_STONE, 1);
+						*str += ItemString(I_STONE, ItemDefs[I_ROOTSTONE].mOut);
 						*str += " into ";
-						*str += ItemString(I_ROOTSTONE, 1);
+						*str += ItemString(I_ROOTSTONE, ItemDefs[I_ROOTSTONE].mOut);
 					}
 					if (ITEM_ENABLED(I_STONE) &&
 							ITEM_ENABLED(I_ROOTSTONE) &&
@@ -1298,9 +1298,9 @@ AString *ShowSkill::Report(Faction *f)
 						*str += " or ";
 					}
 					if (ITEM_ENABLED(I_IRON) && ITEM_ENABLED(I_MITHRIL)) {
-						*str += ItemString(I_IRON, 1);
+						*str += ItemString(I_IRON, ItemDefs[I_MITHRIL].mOut);
 						*str += " into ";
-						*str += ItemString(I_MITHRIL, 1);
+						*str += ItemString(I_MITHRIL, ItemDefs[I_MITHRIL].mOut);
 					}
 					*str += ". ";
 				}
@@ -1314,40 +1314,40 @@ AString *ShowSkill::Report(Faction *f)
 			} else if (level == 2) {
 				if (ITEM_ENABLED(I_WOOD) && ITEM_ENABLED(I_IRONWOOD)) {
 					*str += "At this level the mage may transmute ";
-					*str += ItemString(I_WOOD, 1);
+					*str += ItemString(I_WOOD, ItemDefs[I_IRONWOOD].mOut);
 					*str += " into ";
-					*str += ItemString(I_IRONWOOD, 1);
+					*str += ItemString(I_IRONWOOD, ItemDefs[I_IRONWOOD].mOut);
 					*str += ".";
 				}
 			} else if (level == 3) {
 				if (ITEM_ENABLED(I_FUR) && ITEM_ENABLED(I_FLOATER)) {
 					*str += "At this level the mage may transmute ";
-					*str += ItemString(I_FUR, 1);
+					*str += ItemString(I_FUR, ItemDefs[I_FLOATER].mOut);
 					*str += " into ";
-					*str += ItemString(I_FLOATER, 1);
+					*str += ItemString(I_FLOATER, ItemDefs[I_FLOATER].mOut);
 					*str += ".";
 				}
 			} else if (level == 4) {
 				if (ITEM_ENABLED(I_WOOD) && ITEM_ENABLED(I_YEW)) {
 					*str += "At this level the mage may transmute ";
-					*str += ItemString(I_WOOD, 1);
+					*str += ItemString(I_WOOD, ItemDefs[I_YEW].mOut);
 					*str += " into ";
-					*str += ItemString(I_YEW, 1);
+					*str += ItemString(I_YEW, ItemDefs[I_YEW].mOut);
 					*str += ".";
 				}
 			} else if (level == 5) {
 				if (ITEM_ENABLED(I_HORSE) && ITEM_ENABLED(I_WHORSE)) {
 					*str += "At this level the mage may transmute ";
-					*str += ItemString(I_HORSE, 1, ALWAYSPLURAL);
+					*str += ItemString(I_HORSE, ItemDefs[I_WHORSE].mOut, ALWAYSPLURAL);
 					*str += " into ";
-					*str += ItemString(I_WHORSE, 1, ALWAYSPLURAL);
+					*str += ItemString(I_WHORSE, ItemDefs[I_WHORSE].mOut, ALWAYSPLURAL);
 					*str += ".";
 				}
 				if (ITEM_ENABLED(I_IRON) && ITEM_ENABLED(I_ADMANTIUM)) {
 					*str += "At this level the mage may transmute ";
-					*str += ItemString(I_IRON, 1, ALWAYSPLURAL);
+					*str += ItemString(I_IRON, ItemDefs[I_ADMANTIUM].mOut, ALWAYSPLURAL);
 					*str += " into ";
-					*str += ItemString(I_ADMANTIUM, 1, ALWAYSPLURAL);
+					*str += ItemString(I_ADMANTIUM, ItemDefs[I_ADMANTIUM].mOut, ALWAYSPLURAL);
 					*str += ".";
 				}
 			}
