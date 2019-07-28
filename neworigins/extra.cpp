@@ -1246,6 +1246,8 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("GNOM", 3, "XBOW");
 	ModifyRaceSkills("GNOM", 4, "FARM");
 	ModifyRaceSkills("GNOM", 5, "ENTE");
+	ModifyItemCapacities(I_GNOME,9,0,0,0);
+	ModifyItemWeight(I_GNOME, 5);
 
 	EnableItem(I_CENTAURMAN);
 	ModifyItemBasePrice(I_CENTAURMAN, 70);
@@ -1275,6 +1277,8 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("GBLN", 2, "SHIP");
 	ModifyRaceSkills("GBLN", 3, "WEAP");
 	ModifyRaceSkills("GBLN", 4, "ENTE");
+	ModifyItemCapacities(I_GOBLINMAN,9,0,0,0);
+	ModifyItemWeight(I_GOBLINMAN, 5);
 
 	EnableItem(I_GNOLL);
 	ModifyItemBasePrice(I_GNOLL, 40);
