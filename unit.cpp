@@ -1880,7 +1880,6 @@ int Unit::Taxers(int numtaxers)
 
 	forlist (&items) {
 		Item *pItem = (Item *) elem;
-		if (ItemDefs[pItem->type].type & IT_MAN) continue;
 		BattleItemType *pBat = NULL;
 
 		if ((ItemDefs[pItem->type].type & IT_BATTLE) &&
