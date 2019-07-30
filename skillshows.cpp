@@ -1313,7 +1313,7 @@ AString *ShowSkill::Report(Faction *f)
 				if (ITEM_ENABLED(I_WOOD) && ITEM_ENABLED(I_IRONWOOD)) {
 					*str += "At this level the mage may transmute ";
 					*str += ItemString(I_WOOD, ItemDefs[I_IRONWOOD].mOut);
-					*str += " times their level into ";
+					*str += " times the skill level into ";
 					*str += ItemString(I_IRONWOOD, 1);
 					*str += ".";
 				}
