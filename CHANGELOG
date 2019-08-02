@@ -1,3 +1,10 @@
+Changes from 5.1.0 -> 5.2.0
+--------------------------------------------------
+ Bug fixes:
+   -- Stored original development value for hexes in the save file to
+      allow pillaged regions to know what value to recover to
+
+
 Changes from 5.0.0 -> 5.1.0
 --------------------------------------------------
  Game Changes:
@@ -70,7 +77,7 @@ Changes from 5.0.0 -> 5.1.0
       SKILL_LIMIT_NONLEADERS and MAGE_NONLEADERS are both set
    -- Stopped riding capacity from helping in the ocean
    -- Made OPTION TEMPLATE OFF actually turn off templates completely
-   -- Corrected that region half of the shafts generated thought they were in
+   -- Corrected what region half of the shafts generated thought they were in
    -- Made the atlantis executable return appropriate result codes, instead
       of always claiming success
    -- Fixed some crash situations

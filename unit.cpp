@@ -2244,8 +2244,10 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 		Practice(sk);
 	}
 
-	// Get the mount
-	items.SetNum(item, num - 1);
+	// Remove the mount from the unit to attach it to the soldier
+	// UNLESS it IS the soldier (looking at you, Centaurs)
+	if (!(ItemDefs[item].type & IT_MAN))
+		items.SetNum(item, num - 1);
 	return item;
 }
 
