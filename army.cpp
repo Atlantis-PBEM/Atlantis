@@ -189,17 +189,31 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		// Mounts of some type _are_ allowed in this region
 		//
 		int mountType;
-		for (mountType = 1; mountType < NUMMOUNTS; mountType++) {
-			abbr = MountDefs[mountType].abbr;
+		if (ItemDefs[race].type & IT_MOUNT) {
+			// If the man is a mount (Centaurs), then the only option
+			// they have for riding is the built-in one
+			abbr = ItemDefs[race].abr;
 			item = unit->GetMount(abbr, canFly, canRide, ridingBonus);
-			if (item == -1) continue;
-			// Defer adding the combat bonus until we know if the weapon
-			// allows it.  The defense bonus for riding can be added now
-			// however.
-			dskill[ATTACK_RIDING] += ridingBonus;
-			riding = item;
-			break;
+		} else {
+			for (mountType = 1; mountType < NUMMOUNTS; mountType++) {
+				abbr = MountDefs[mountType].abbr;
+				// See if this mount is an option
+				item = unit->GetMount(abbr, canFly, canRide, ridingBonus);
+				if (item == -1) continue;
+				// No riding other men in combat
+				if (ItemDefs[item].type & IT_MAN) {
+					item = -1;
+					ridingBonus = 0;
+					continue;
+				}
+				break;
+			}
 		}
+		// Defer adding the combat bonus until we know if the weapon
+		// allows it.  The defense bonus for riding can be added now
+		// however.
+		dskill[ATTACK_RIDING] += ridingBonus;
+		riding = item;
 	}
 
 	//
@@ -458,7 +472,7 @@ void Soldier::RestoreItems()
 		unit->items.SetNum(weapon,unit->items.GetNum(weapon) + 1);
 	if (armor != -1)
 		unit->items.SetNum(armor,unit->items.GetNum(armor) + 1);
-	if (riding != -1)
+	if (riding != -1 && !(ItemDefs[riding].type & IT_MAN))
 		unit->items.SetNum(riding,unit->items.GetNum(riding) + 1);
 
 	int battleType;
