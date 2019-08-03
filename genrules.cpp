@@ -3746,10 +3746,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.LinkRef("stealthobs_stealing");
 			f.TagText("h3", "Stealing:");
 			temp = AString("The ") + f.Link("#steal", "STEAL") +
-				" order is a way to steal items from other players without "
-				"a battle. The order can only be issued by a one-man unit. "
-				"The order specifies a target unit; the thief will then "
-				"attempt to steal the specified item from the target unit.";
+				" order is a way to steal items from other player factions"
+				" without a battle. The order can only be issued by a one-man"
+				" unit. The order specifies a target unit; the thief will then"
+				" attempt to steal the specified item from the target unit.";
 			f.Paragraph(temp);
 			if (has_obse) {
 				temp = "If the thief has higher Stealth than any of the "
