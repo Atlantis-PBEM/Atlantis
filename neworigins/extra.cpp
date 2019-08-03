@@ -556,7 +556,7 @@ Faction *Game::CheckVictory()
 								message += " have";
 							else
 								message += " has";
-							message += " yet to be visited by exiles from destroyed world.";
+							message += " yet to be visited by exiles from destroyed worlds.";
 							WriteTimesArticle(message);
 						}
 					}
