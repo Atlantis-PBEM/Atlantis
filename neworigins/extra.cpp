@@ -874,7 +874,7 @@ Faction *Game::CheckVictory()
 				break;
 			case Quest::HARVEST:
 				r = regions.GetRegion(q->regionnum);
-				message = "Seek a token of the Maker's bounty amongst the ";
+				message = "Seek a token of the Ancient Ones legacy amongst the ";
 				message += ItemDefs[q->objective.type].names;
 				message += " of ";
 				message += *r->name;
@@ -886,7 +886,7 @@ Faction *Game::CheckVictory()
 				message += ObjectDefs[q->building].name;
 				message += " in ";
 				message += q->regionname;
-				message += " for the glory of the Maker.";
+				message += " for the glory of the Gods.";
 				WriteTimesArticle(message);
 				break;
 			case Quest::VISIT:
