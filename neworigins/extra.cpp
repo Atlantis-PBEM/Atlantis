@@ -447,7 +447,7 @@ Faction *Game::CheckVictory()
 			WriteTimesArticle(message);
 		} else if (d == 3) {
 			message = "Go into all the world, and tell all "
-				"people of your fall from grace.";
+				"people that The Devourer, Great Enemy is coming.";
 			WriteTimesArticle(message);
 		} else if (d == 4 || d == 5) {
 			message = "Players have visited ";
@@ -556,7 +556,7 @@ Faction *Game::CheckVictory()
 								message += " have";
 							else
 								message += " has";
-							message += " yet to be visited by exiles from the Eternal City.";
+							message += " yet to be visited by exiles from destroyed world.";
 							WriteTimesArticle(message);
 						}
 					}
@@ -576,7 +576,7 @@ Faction *Game::CheckVictory()
 								message += " have not been visited by exiles.";
 								break;
 							case 1:
-								message += " have not yet heard the news of your rebellion.";
+								message += " have not yet heard news of The Devourer.";
 								break;
 							case 2:
 								message += " have not yet been graced by your presence.";
