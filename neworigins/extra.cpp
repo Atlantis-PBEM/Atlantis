@@ -31,11 +31,12 @@
 #include <string>
 #include <iterator>
 
-#define RELICS_REQUIRED_FOR_VICTORY	7
-#define MINIMUM_ACTIVE_QUESTS		3
-#define MAXIMUM_ACTIVE_QUESTS		10
+#define RELICS_REQUIRED_FOR_VICTORY	100
+#define MINIMUM_ACTIVE_QUESTS		5
+#define MAXIMUM_ACTIVE_QUESTS		20
 #define QUEST_EXPLORATION_PERCENT	100
 #define QUEST_SPAWN_RATE		4
+#define QUEST_MAX_REWARD		5000
 #define QUEST_SPAWN_CHANCE		40
 #define MAX_DESTINATIONS		5
 
@@ -112,7 +113,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 {
 	Quest *q, *q2;
 	Item *item;
-	int d, count, temple, i, j, clash;
+	int d, count, temple, i, j, clash, numItemsReward;
 	ARegion *r;
 	Object *o;
 	Unit *u;
@@ -128,10 +129,56 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 
 	q = new Quest;
 	q->type = -1;
-	item = new Item;
-	item->type = I_RELICOFGRACE;
-	item->num = 1;
-	q->rewards.Add(item);
+
+	// Set up quest rewards
+	count = 0;
+	for (i=0; i<NITEMS; i++) {
+		if (
+				((ItemDefs[i].type & IT_ADVANCED) || (ItemDefs[i].type & IT_MAGIC)) &&
+				ItemDefs[i].baseprice < QUEST_MAX_REWARD &&
+				!(ItemDefs[i].type & IT_SPECIAL) &&
+				!(ItemDefs[i].type & IT_SHIP) &&
+				!(ItemDefs[i].flags & ItemType::DISABLED)) {
+			count ++;
+			printf("ITEM: %s .\n", ItemDefs[i].name);
+		}
+	}
+
+	// No items? Are we playing a game without items?
+	if (count == 0) return;
+
+	count = getrandom(count) + 1;
+
+	for (i=0; i<NITEMS; i++) {
+		if (
+				((ItemDefs[i].type & IT_ADVANCED) || (ItemDefs[i].type & IT_MAGIC)) &&
+				ItemDefs[i].baseprice < QUEST_MAX_REWARD &&
+				!(ItemDefs[i].type & IT_SPECIAL) &&
+				!(ItemDefs[i].type & IT_SHIP) &&
+				!(ItemDefs[i].flags & ItemType::DISABLED)) {
+			count--;
+			if (count == 0) {
+				// Quest reward is based on QUEST_MAX_REWARD silver
+				numItemsReward = QUEST_MAX_REWARD / ItemDefs[i].baseprice;
+				printf("REWARD: %s x %d.\n", ItemDefs[i].name, numItemsReward);
+				
+				// Setup reward
+				item = new Item;
+				item->type = i;
+				item->num = numItemsReward;
+
+				q->rewards.Add(item);
+				break;
+			}
+		}
+	}
+
+	// TODO: add 5% chance to drop I_RELICOFGRACE
+	// item = new Item;
+	// item->type = I_RELICOFGRACE;
+	// item->num = 1;
+	// q->rewards.Add(item);
+
 	d = getrandom(100);
 	if (d < 40) {
 		// SLAY quest
