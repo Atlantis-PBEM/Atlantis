@@ -31,7 +31,7 @@
 #include <string>
 #include <iterator>
 
-#define RELICS_REQUIRED_FOR_VICTORY	10
+#define RELICS_REQUIRED_FOR_AVATAR	10
 #define MINIMUM_ACTIVE_QUESTS		5
 #define MAXIMUM_ACTIVE_QUESTS		20
 #define QUEST_EXPLORATION_PERCENT	40
@@ -663,7 +663,7 @@ Faction *Game::CheckVictory()
 				}
 			}
 		}
-		if (reliccount >= RELICS_REQUIRED_FOR_VICTORY) {
+		if (reliccount >= RELICS_REQUIRED_FOR_AVATAR) {
 			message = "Avatar has been born!";
 			WriteTimesArticle(message);
 		}
