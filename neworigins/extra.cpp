@@ -158,7 +158,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			count--;
 			if (count == 0) {
 				// Quest reward is based on QUEST_MAX_REWARD silver
-				numItemsReward = (QUEST_MAX_REWARD + getrandom(1000)) / ItemDefs[i].baseprice;
+				numItemsReward = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
 				printf("QUEST REWARD: %s x %d.\n", ItemDefs[i].name, numItemsReward);
 				
 				// Setup reward
@@ -681,7 +681,7 @@ Faction *Game::CheckVictory()
 					delete q;
 					if (l) delete l;
 				} else {
-					message = "In the ";
+					message = "Quest: In the ";
 					message += TerrainDefs[TerrainDefs[l->region->type].similar_type].name;
 					message += " of ";
 					message += *(l->region->name);
@@ -699,7 +699,7 @@ Faction *Game::CheckVictory()
 				break;
 			case Quest::HARVEST:
 				r = regions.GetRegion(q->regionnum);
-				message = "Seek a token of the Ancient Ones legacy amongst the ";
+				message = "Quest: Seek a token of the Ancient Ones legacy amongst the ";
 				message += ItemDefs[q->objective.type].names;
 				message += " of ";
 				message += *r->name;
@@ -707,7 +707,7 @@ Faction *Game::CheckVictory()
 				WriteTimesArticle(message);
 				break;
 			case Quest::BUILD:
-				message = "Build a ";
+				message = "Quest: Build a ";
 				message += ObjectDefs[q->building].name;
 				message += " in ";
 				message += q->regionname;
@@ -715,7 +715,7 @@ Faction *Game::CheckVictory()
 				WriteTimesArticle(message);
 				break;
 			case Quest::VISIT:
-				message = "Show your devotion by visiting ";
+				message = "Quest: Show your devotion by visiting ";
 				message += ObjectDefs[q->building].name;
 				message += "s in ";
 				ucount = 0;
@@ -745,7 +745,7 @@ Faction *Game::CheckVictory()
 					quests.Remove(q);
 					delete q;
 				} else {
-					message = "Tear down the blasphemous ";
+					message = "Quest: Tear down the blasphemous ";
 					message += *o->name;
 					message += " : ";
 					message += ObjectDefs[o->type].name;
