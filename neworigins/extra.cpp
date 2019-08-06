@@ -113,7 +113,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 {
 	Quest *q, *q2;
 	Item *item;
-	int d, count, temple, i, j, clash, numItemsReward;
+	int d, count, temple, i, j, clash, reward_count;
 	ARegion *r;
 	Object *o;
 	Unit *u;
@@ -158,13 +158,13 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			count--;
 			if (count == 0) {
 				// Quest reward is based on QUEST_MAX_REWARD silver
-				numItemsReward = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
-				printf("QUEST REWARD: %s x %d.\n", ItemDefs[i].name, numItemsReward);
+				reward_count = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
+				printf("QUEST REWARD: %s x %d.\n", ItemDefs[i].name, reward_count);
 				
 				// Setup reward
 				item = new Item;
 				item->type = i;
-				item->num = numItemsReward;
+				item->num = reward_count;
 
 				q->rewards.Add(item);
 				break;
@@ -1186,11 +1186,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyItemProductionSkill(I_ADBAXE, "WEAP", 5);
 	ModifyItemProductionSkill(I_ADRING, "ARMO", 5);
 	ModifyItemProductionSkill(I_ADPLATE, "ARMO", 5);
-	ModifyItemBasePrice(I_ADMANTIUM, 200);
-	ModifyItemBasePrice(I_ADSWORD, 400);
-	ModifyItemBasePrice(I_ADBAXE, 600);
-	ModifyItemBasePrice(I_ADRING, 400);
-	ModifyItemBasePrice(I_ADPLATE, 600);
+	ModifyItemBasePrice(I_ADMANTIUM, 300);
 
 
 	//
