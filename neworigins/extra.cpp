@@ -34,7 +34,7 @@
 #define RELICS_REQUIRED_FOR_AVATAR	10
 #define MINIMUM_ACTIVE_QUESTS		5
 #define MAXIMUM_ACTIVE_QUESTS		20
-#define QUEST_EXPLORATION_PERCENT	40
+#define QUEST_EXPLORATION_PERCENT	50
 #define QUEST_SPAWN_RATE		4
 #define QUEST_MAX_REWARD		5000
 #define QUEST_SPAWN_CHANCE		40
@@ -159,7 +159,6 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			if (count == 0) {
 				// Quest reward is based on QUEST_MAX_REWARD silver
 				reward_count = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
-				printf("QUEST REWARD: %s x %d.\n", ItemDefs[i].name, reward_count);
 				
 				// Setup reward
 				item = new Item;
@@ -179,7 +178,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		item->type = I_RELICOFGRACE;
 		item->num = 1;
 		q->rewards.Add(item);	
-		printf("QUEST REWARD: RELIC !!!.\n");
+		printf("Quest reward: Relic.\n");
 	}
 
 	d = getrandom(100);
