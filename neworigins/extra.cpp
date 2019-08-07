@@ -171,9 +171,9 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		}
 	}
 
-	// 10% chance to drop I_RELICOFGRACE from quest in addition to regular reward
+	// 15% chance to drop I_RELICOFGRACE from quest in addition to regular reward
 	d = getrandom(100);
-	if (d < 11) {
+	if (d < 15) {
 		item = new Item;
 		item->type = I_RELICOFGRACE;
 		item->num = 1;
@@ -492,7 +492,7 @@ Faction *Game::CheckVictory()
 			d = getrandom(6);
 		}
 		if (d == 2) {
-			message = "Be productive and multiply; "
+			message = "Be productive and strong; "
 				"explore new land and find a way to survive.";
 			WriteTimesArticle(message);
 		} else if (d == 3) {
