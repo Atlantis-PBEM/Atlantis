@@ -31,11 +31,12 @@
 #include <string>
 #include <iterator>
 
-#define RELICS_REQUIRED_FOR_VICTORY	7
-#define MINIMUM_ACTIVE_QUESTS		3
-#define MAXIMUM_ACTIVE_QUESTS		10
-#define QUEST_EXPLORATION_PERCENT	100
-#define QUEST_SPAWN_RATE		4
+#define RELICS_REQUIRED_FOR_AVATAR	10
+#define MINIMUM_ACTIVE_QUESTS		5
+#define MAXIMUM_ACTIVE_QUESTS		20
+#define QUEST_EXPLORATION_PERCENT	50
+#define QUEST_SPAWN_RATE		5
+#define QUEST_MAX_REWARD		3000
 #define QUEST_SPAWN_CHANCE		40
 #define MAX_DESTINATIONS		5
 
@@ -112,7 +113,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 {
 	Quest *q, *q2;
 	Item *item;
-	int d, count, temple, i, j, clash;
+	int d, count, temple, i, j, clash, reward_count;
 	ARegion *r;
 	Object *o;
 	Unit *u;
@@ -128,10 +129,60 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 
 	q = new Quest;
 	q->type = -1;
-	item = new Item;
-	item->type = I_RELICOFGRACE;
-	item->num = 1;
-	q->rewards.Add(item);
+
+	// Set up quest rewards
+	count = 0;
+	for (i=0; i<NITEMS; i++) {
+		if (
+				((ItemDefs[i].type & IT_ADVANCED) || (ItemDefs[i].type & IT_MAGIC)) &&
+				ItemDefs[i].baseprice <= QUEST_MAX_REWARD &&
+				!(ItemDefs[i].type & IT_SPECIAL) &&
+				!(ItemDefs[i].type & IT_SHIP) &&
+				!(ItemDefs[i].flags & ItemType::DISABLED)) {
+			count ++;
+		}
+	}
+
+	// No items? Are we playing a game without items?
+	if (count == 0) return;
+
+	count = getrandom(count) + 1;
+
+	for (i=0; i<NITEMS; i++) {
+		if (
+				((ItemDefs[i].type & IT_ADVANCED) || (ItemDefs[i].type & IT_MAGIC)) &&
+				ItemDefs[i].baseprice <= QUEST_MAX_REWARD &&
+				!(ItemDefs[i].type & IT_SPECIAL) &&
+				!(ItemDefs[i].type & IT_SHIP) &&
+				!(ItemDefs[i].flags & ItemType::DISABLED)) {
+			count--;
+			if (count == 0) {
+				// Quest reward is based on QUEST_MAX_REWARD silver
+				reward_count = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
+
+				printf("Quest reward: %s x %d.\n", ItemDefs[i].name, reward_count);
+				
+				// Setup reward
+				item = new Item;
+				item->type = i;
+				item->num = reward_count;
+
+				q->rewards.Add(item);
+				break;
+			}
+		}
+	}
+
+	// 20% chance to drop I_RELICOFGRACE from quest in addition to regular reward
+	d = getrandom(100);
+	if (d < 20) {
+		item = new Item;
+		item->type = I_RELICOFGRACE;
+		item->num = 1;
+		q->rewards.Add(item);	
+		printf("Quest reward: Relic.\n");
+	}
+
 	d = getrandom(100);
 	if (d < 40) {
 		// SLAY quest
@@ -142,7 +193,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			r = (ARegion *) elem;
 			if (TerrainDefs[r->type].similar_type == R_OCEAN)
 				continue;
-			if (!r->visited)
+			// No need to check if quests do not require exploration
+			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0)
 				continue;
 			forlist(&r->objects) {
 				o = (Object *) elem;
@@ -162,7 +214,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			r = (ARegion *) elem;
 			if (TerrainDefs[r->type].similar_type == R_OCEAN)
 				continue;
-			if (!r->visited)
+			// No need to check if quests do not require exploration
+			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0)
 				continue;
 			forlist(&r->objects) {
 				o = (Object *) elem;
@@ -194,7 +247,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			// Do allow lakes though
 			if (r->type == R_OCEAN)
 				continue;
-			if (!r->visited)
+			// No need to check if quests do not require exploration
+			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0)
 				continue;
 			forlist(&r->products) {
 				p = (Production *) elem;
@@ -208,7 +262,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			// Do allow lakes though
 			if (r->type == R_OCEAN)
 				continue;
-			if (!r->visited)
+			// No need to check if quests do not require exploration
+			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0)
 				continue;
 			forlist(&r->products) {
 				p = (Production *) elem;
@@ -241,7 +296,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		temple = O_TEMPLE;
 		forlist(regions) {
 			r = (ARegion *) elem;
-			if (r->Population() > 0 && r->visited) {
+			// No need to check if quests do not require exploration
+			if (r->Population() > 0 && (r->visited || QUEST_EXPLORATION_PERCENT == 0)) { 
 				stlstr = r->name->Str();
 				// This looks like a null operation, but
 				// actually forces the map<> element creation
@@ -354,17 +410,13 @@ Faction *Game::CheckVictory()
 {
 	int visited, unvisited;
 	int d, i, count, reliccount;
-	int units, leaders, men, silver, stuff;
-	int skilldays, magicdays, skilllevels, magiclevels;
-	int dir, found;
+	int dir;
 	unsigned ucount;
 	Quest *q;
-	Item *item;
 	ARegion *r, *start;
 	Object *o;
 	Unit *u;
 	Faction *f;
-	Skill *s;
 	Location *l;
 	AString message, times, temp, filename;
 	Arules wf;
@@ -442,8 +494,8 @@ Faction *Game::CheckVictory()
 			d = getrandom(6);
 		}
 		if (d == 2) {
-			message = "Be productive and multiply; "
-				"fill the land and subdue it.";
+			message = "Be productive and strong; "
+				"explore new land and find a way to survive.";
 			WriteTimesArticle(message);
 		} else if (d == 3) {
 			message = "Go into all the world, and tell all "
@@ -595,8 +647,8 @@ Faction *Game::CheckVictory()
 	// See if anyone has won by collecting enough relics of grace
 	forlist_reuse(&factions) {
 		f = (Faction *) elem;
-		// No accidentally sending all the Guardsmen
-		// or Creatures to the Eternal City!
+		// No accidentally transforming Guardsmen
+		// or Creatures into Avatar!
 		if (f->IsNPC())
 			continue;
 		reliccount = 0;
@@ -612,185 +664,9 @@ Faction *Game::CheckVictory()
 				}
 			}
 		}
-		if (reliccount >= RELICS_REQUIRED_FOR_VICTORY) {
-			// This faction has earned the right to go home
-			units = 0;
-			leaders = 0;
-			men = 0;
-			silver = f->unclaimed;
-			stuff = 0;
-			skilldays = 0;
-			magicdays = 0;
-			skilllevels = 0;
-			magiclevels = 0;
-			forlist(&regions) {
-				r = (ARegion *) elem;
-				forlist(&r->objects) {
-					o = (Object *) elem;
-					forlist(&o->units) {
-						u = (Unit *) elem;
-						if (u->faction == f) {
-							units++;
-							forlist(&u->items) {
-								item = (Item *) elem;
-								if (ItemDefs[item->type].type & IT_LEADER)
-									leaders += item->num;
-								else if (ItemDefs[item->type].type & IT_MAN)
-									men += item->num;
-								else if (ItemDefs[item->type].type & IT_MONEY)
-									silver += item->num * ItemDefs[item->type].baseprice;
-								else
-									stuff += item->num * ItemDefs[item->type].baseprice;
-									
-							}
-							forlist_reuse(&u->skills) {
-								s = (Skill *) elem;
-								if (SkillDefs[s->type].flags & SkillType::MAGIC) {
-									magicdays += s->days * SkillDefs[s->type].cost;
-									magiclevels += GetLevelByDays(s->days / u->GetMen()) * u->GetMen();
-								} else {
-									skilldays += s->days * SkillDefs[s->type].cost;
-									skilllevels += GetLevelByDays(s->days / u->GetMen()) * u->GetMen();
-								}
-							}
-							// Should really move this unit somewhere they'll be cleaned up,
-							// but given that the appropriate place for that function is
-							// r->hell, this doesn't seem right given what's happened.
-							// In this case, I'm willing to leak memory :-)
-							o->units.Remove(u);
-						}
-					}
-				}
-			}
-			f->exists = 0;
-			f->quit = QUIT_WON_GAME;
-			f->temformat = TEMPLATE_OFF;
-			temp = " have acquired ";
-			if (reliccount == 1) {
-				temp += "a ";
-				temp += ItemDefs[I_RELICOFGRACE].name;
-			} else {
-				temp += reliccount;
-				temp += " ";
-				temp += ItemDefs[I_RELICOFGRACE].names;
-			}
-			temp += " and returned to the Eternal City.";
-			message = AString("You") + temp;
-			times = *f->name + temp;
-			f->Event(message);
-			message = "You";
-			times += "\n\nThey";
-			temp = " returned after ";
-			temp += TurnNumber() - f->startturn;
-			temp += " months, with ";
-			temp += units;
-			temp += " unit";
-			if (units != 1)
-				temp += "s";
-			temp += " comprising ";
-			if (leaders > 0) {
-				temp += leaders;
-				temp += " leader";
-				if (leaders != 1)
-					temp += "s";
-			}
-			if (leaders > 0 && men > 0)
-				temp += " and ";
-			if (men > 0) {
-				temp += men;
-				temp += " other m";
-				if (leaders != 1)
-					temp += "en";
-				else
-					temp += "an";
-			}
-			message += temp;
-			times += temp;
-			if (silver > 0 || stuff > 0) {
-				message += ", and bringing with you ";
-				times += ", and bringing with them ";
-				temp = "";
-				if (silver > 0) {
-					temp += silver;
-					temp += " silver";
-				}
-				if (silver > 0 && stuff > 0)
-					temp += " and ";
-				if (stuff > 0) {
-					temp += "goods worth ";
-					temp += stuff;
-					temp += " silver";
-				}
-				temp += ".";
-				message += temp;
-				times += temp;
-			}
-			if (skilllevels > 0 || magiclevels > 0) {
-				temp = " had acquired ";
-				if (skilllevels > 0) {
-					temp += skilllevels;
-					temp += " level";
-					if (skilllevels != 1)
-						temp += "s";
-					temp += " in mundane skills, worth ";
-					temp += (int) (skilldays / 30);
-					temp += " silver in tuition costs";
-				}
-				if (skilllevels > 0 && magiclevels > 0)
-					temp += ", and ";
-				if (magiclevels > 0) {
-					temp += magiclevels;
-					temp += " level";
-					if (magiclevels != 1)
-						temp += "s";
-					temp += " in magic skills, worth ";
-					temp += (int) (magicdays / 30);
-					temp += " silver in tuition costs";
-				}
-				temp += ".";
-				message += "  You";
-				message += temp;
-				times += "  They";
-				times += temp;
-			}
-			f->Event(message);
-			WriteTimesArticle(times);
-
-			filename = "winner.";
-			filename += f->num;
-			if (wf.OpenByName(filename) != -1) {
-				message = TurnNumber();
-				message += ", ";
-				message += f->startturn;
-				message += ", ";
-				message += units;
-				message += ", ";
-				message += leaders;
-				message += ", ";
-				message += men;
-				message += ", ";
-				message += silver;
-				message += ", ";
-				message += stuff;
-				message += ", ";
-				message += skilllevels;
-				message += ", ";
-				message += skilldays;
-				message += ", ";
-				message += magiclevels;
-				message += ", ";
-				message += magicdays;
-				message += ", ";
-				message += f->num;
-				message += ", ";
-				message += *f->address;
-				message += ", ";
-				message += *f->name;
-				message += "\n";
-				wf.PutNoFormat(message);
-
-				wf.Close();
-			}
+		if (reliccount >= RELICS_REQUIRED_FOR_AVATAR) {
+			message = "Avatar has been born!";
+			WriteTimesArticle(message);
 		}
 	}
 
@@ -806,7 +682,7 @@ Faction *Game::CheckVictory()
 					delete q;
 					if (l) delete l;
 				} else {
-					message = "In the ";
+					message = "Quest: In the ";
 					message += TerrainDefs[TerrainDefs[l->region->type].similar_type].name;
 					message += " of ";
 					message += *(l->region->name);
@@ -824,7 +700,7 @@ Faction *Game::CheckVictory()
 				break;
 			case Quest::HARVEST:
 				r = regions.GetRegion(q->regionnum);
-				message = "Seek a token of the Maker's bounty amongst the ";
+				message = "Quest: Seek a token of the Ancient Ones legacy amongst the ";
 				message += ItemDefs[q->objective.type].names;
 				message += " of ";
 				message += *r->name;
@@ -832,15 +708,15 @@ Faction *Game::CheckVictory()
 				WriteTimesArticle(message);
 				break;
 			case Quest::BUILD:
-				message = "Build a ";
+				message = "Quest: Build a ";
 				message += ObjectDefs[q->building].name;
 				message += " in ";
 				message += q->regionname;
-				message += " for the glory of the Maker.";
+				message += " for the glory of the Gods.";
 				WriteTimesArticle(message);
 				break;
 			case Quest::VISIT:
-				message = "Show your devotion by visiting ";
+				message = "Quest: Show your devotion by visiting ";
 				message += ObjectDefs[q->building].name;
 				message += "s in ";
 				ucount = 0;
@@ -870,7 +746,7 @@ Faction *Game::CheckVictory()
 					quests.Remove(q);
 					delete q;
 				} else {
-					message = "Tear down the blasphemous ";
+					message = "Quest: Tear down the blasphemous ";
 					message += *o->name;
 					message += " : ";
 					message += ObjectDefs[o->type].name;
@@ -1098,7 +974,7 @@ void Game::ModifyTablesPerRuleset(void)
 		4);
 
 	// Game ending structure
-	DisableObject(O_BKEEP);
+	EnableObject(O_BKEEP);
 	// ModifyObjectName(O_BKEEP, "Black Tower");
 	// ModifyObjectFlags(O_BKEEP, ObjectType::CANENTER |
 	// 	ObjectType::NEVERDECAY |
@@ -1311,6 +1187,9 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyItemProductionSkill(I_ADBAXE, "WEAP", 5);
 	ModifyItemProductionSkill(I_ADRING, "ARMO", 5);
 	ModifyItemProductionSkill(I_ADPLATE, "ARMO", 5);
+	ModifyItemBasePrice(I_ADMANTIUM, 300);
+	ModifyItemBasePrice(I_ADSWORD, 1000);
+	ModifyItemBasePrice(I_ADBAXE, 2000);
 
 
 	//
