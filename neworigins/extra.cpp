@@ -36,7 +36,7 @@
 #define MAXIMUM_ACTIVE_QUESTS		20
 #define QUEST_EXPLORATION_PERCENT	50
 #define QUEST_SPAWN_RATE		5
-#define QUEST_MAX_REWARD		5000
+#define QUEST_MAX_REWARD		3000
 #define QUEST_SPAWN_CHANCE		40
 #define MAX_DESTINATIONS		5
 
@@ -135,7 +135,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	for (i=0; i<NITEMS; i++) {
 		if (
 				((ItemDefs[i].type & IT_ADVANCED) || (ItemDefs[i].type & IT_MAGIC)) &&
-				ItemDefs[i].baseprice < QUEST_MAX_REWARD &&
+				ItemDefs[i].baseprice <= QUEST_MAX_REWARD &&
 				!(ItemDefs[i].type & IT_SPECIAL) &&
 				!(ItemDefs[i].type & IT_SHIP) &&
 				!(ItemDefs[i].flags & ItemType::DISABLED)) {
@@ -151,7 +151,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	for (i=0; i<NITEMS; i++) {
 		if (
 				((ItemDefs[i].type & IT_ADVANCED) || (ItemDefs[i].type & IT_MAGIC)) &&
-				ItemDefs[i].baseprice < QUEST_MAX_REWARD &&
+				ItemDefs[i].baseprice <= QUEST_MAX_REWARD &&
 				!(ItemDefs[i].type & IT_SPECIAL) &&
 				!(ItemDefs[i].type & IT_SHIP) &&
 				!(ItemDefs[i].flags & ItemType::DISABLED)) {
@@ -159,6 +159,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			if (count == 0) {
 				// Quest reward is based on QUEST_MAX_REWARD silver
 				reward_count = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
+
+				printf("Quest reward: %s x %d.\n", ItemDefs[i].name, reward_count);
 				
 				// Setup reward
 				item = new Item;
@@ -1186,6 +1188,8 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyItemProductionSkill(I_ADRING, "ARMO", 5);
 	ModifyItemProductionSkill(I_ADPLATE, "ARMO", 5);
 	ModifyItemBasePrice(I_ADMANTIUM, 300);
+	ModifyItemBasePrice(I_ADSWORD, 1000);
+	ModifyItemBasePrice(I_ADBAXE, 2000);
 
 
 	//
