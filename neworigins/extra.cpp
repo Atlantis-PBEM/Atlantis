@@ -173,9 +173,9 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		}
 	}
 
-	// 15% chance to drop I_RELICOFGRACE from quest in addition to regular reward
+	// 20% chance to drop I_RELICOFGRACE from quest in addition to regular reward
 	d = getrandom(100);
-	if (d < 15) {
+	if (d < 20) {
 		item = new Item;
 		item->type = I_RELICOFGRACE;
 		item->num = 1;
