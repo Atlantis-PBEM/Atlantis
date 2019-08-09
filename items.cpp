@@ -735,9 +735,9 @@ AString *ItemDescription(int item, int full)
 		if (found) {
 			*temp += AString(" to level ") + mt->speciallevel +
 				" and all other skills to level " +
-				mt->defaultlevel;
+				mt->defaultlevel + ".";
 		} else {
-			*temp += AString("all skills to level ") + mt->defaultlevel;
+			*temp += AString("all skills to level ") + mt->defaultlevel + ".";
 		}
 	}
 	if (ItemDefs[item].type & IT_MONSTER) {
