@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-18.04
     
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@GITHUB_REF
     - name: ls
       run: ls -la
     - name: make all
