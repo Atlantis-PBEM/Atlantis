@@ -1,4 +1,4 @@
-name: Atlantis C/C++ CI
+name: Atlantis C/C++ CI Master Branch
 
 on:
   push:
