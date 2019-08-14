@@ -1,0 +1,15 @@
+name: Atlantis C/C++ CI
+
+on:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+    
+    steps:
+    - name: make all
+      run: make all
