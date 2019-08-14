@@ -8,8 +8,6 @@ jobs:
     runs-on: ubuntu-18.04
     
     steps:
-    - uses: actions/checkout@${{ GITHUB_REF }}
-    - name: ls
-      run: ls -la
+    - uses: actions/checkout@master
     - name: make all
       run: make all
