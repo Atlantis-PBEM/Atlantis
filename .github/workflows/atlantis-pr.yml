@@ -1,6 +1,6 @@
 name: Atlantis C/C++ CI PR
 
-on: push
+on: [push, pull_request]
 
 jobs:
   build:
