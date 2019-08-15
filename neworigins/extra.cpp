@@ -37,7 +37,7 @@
 #define QUEST_EXPLORATION_PERCENT	50
 #define QUEST_SPAWN_RATE		5
 #define QUEST_MAX_REWARD		3000
-#define QUEST_SPAWN_CHANCE		40
+#define QUEST_SPAWN_CHANCE		70
 #define MAX_DESTINATIONS		5
 
 int Game::SetupFaction( Faction *pFac )

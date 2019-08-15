@@ -551,6 +551,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 {
 	Object *buildobj;
 	int questcomplete = 0;
+	AString quest_rewards;
 
 	if (!TradeCheck(r, u->faction)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
@@ -649,7 +650,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 		if (buildobj->incomplete == 0) {
 			job = "Completes construction of ";
 			buildobj->incomplete = -(ObjectDefs[type].maxMaintenance);
-			if (quests.CheckQuestBuildTarget(r, type, u)) {
+			if (quests.CheckQuestBuildTarget(r, type, u, &quest_rewards)) {
 				questcomplete = 1;
 			}
 		}
@@ -677,8 +678,9 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 
 	// AS
 	u->Event(job + *(buildobj->name));
-	if (questcomplete)
-		u->Event("You have completed a quest!");
+	if (questcomplete) {
+		u->Event(AString("You have completed a quest! ") + quest_rewards);
+	}
 	u->Practice(sk);
 
 	delete u->monthorders;
@@ -1266,6 +1268,8 @@ int Game::FindAttemptedProd(ARegion * r, Production * p)
 void Game::RunAProduction(ARegion * r, Production * p)
 {
 	int questcomplete;
+	AString quest_rewards;
+
 	p->activity = 0;
 	if (p->amount == 0) return;
 
@@ -1294,7 +1298,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 				double dUbucks = ((double) amt) * ((double) uatt)
 					/ ((double) attempted);
 				ubucks = (int) dUbucks;
-				questcomplete = quests.CheckQuestHarvestTarget(r, po->item, ubucks, amt, u);
+				questcomplete = quests.CheckQuestHarvestTarget(r, po->item, ubucks, amt, u, &quest_rewards);
 			}
 			else
 			{
@@ -1354,8 +1358,9 @@ void Game::RunAProduction(ARegion * r, Production * p)
 			}
 			delete u->monthorders;
 			u->monthorders = 0;
-			if (questcomplete)
-				u->Event("You have completed a quest!");
+			if (questcomplete) {
+				u->Event(AString("You have completed a quest! ") + quest_rewards);
+			}
 		}
 	}
 }
