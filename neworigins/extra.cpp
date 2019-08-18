@@ -860,6 +860,7 @@ void Game::ModifyTablesPerRuleset(void)
 	// EnableSkill(S_COOKING);
 	// EnableSkill(S_CREATE_FOOD);
 
+	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
 	DisableItem(I_STAFFOFL);
 
 	// EnableSkill(S_ARMORCRAFT);
@@ -921,8 +922,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyMonsterSkills("EAGL", 2, 2, 4);
 	ModifyMonsterSpoils("BALR", 30000, IT_MAGIC);
 
-	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
-
 	//
 	// Roads
 	//
@@ -981,6 +980,9 @@ void Game::ModifyTablesPerRuleset(void)
 	// 	ObjectType::CANMODIFY);
 	// ModifyObjectMonster(O_BKEEP, -1);
 	// ModifyObjectConstruction(O_BKEEP, I_ROOTSTONE, 666, NULL, 0);
+
+	ModifyTerrainFlags(R_OCEAN, TerrainType::BARREN | TerrainType::FLYINGMOUNTS);
+	ModifyTerrainFlags(R_LAKE, TerrainType::BARREN | TerrainType::FLYINGMOUNTS);
 
 	ModifyTerrainItems(R_TUNDRA, 2, I_WHORSE, 25, 5);
 	ModifyTerrainItems(R_JUNGLE, 3, I_IRONWOOD, 20, 5);

@@ -594,6 +594,12 @@ void Game::ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move)
 	TerrainDefs[t].movepoints = move;
 }
 
+void Game::ModifyTerrainFlags(int t, int flags)
+{
+	if (t < 0 || t > (R_NUM -1)) return;
+	TerrainDefs[t].flags = flags;
+}
+
 void Game::ModifyBattleItemFlags(char const *item, int flags)
 {
 	BattleItemType *pb = FindBattleItem(item);
