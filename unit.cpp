@@ -2045,7 +2045,7 @@ int Unit::Taxers(int numtaxers)
 			taxers += numMounts;
 		}
 		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE_AND_RIDING_SKILL) {
-			weapontax += numMounts;
+			weapontax += numUsableMounts;
 			taxers += numUsableMounts;
 		}
 
