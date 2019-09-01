@@ -1142,7 +1142,7 @@ int ARegion::RoadDevelopment()
 	for (int i=0; i<NDIRS; i++) if (HasExitRoad(i)) roads++;
 	int dbonus = 0;
 	if (roads > 0) {
-		dbonus = RoadDevelopmentBonus(8, development);
+		dbonus = RoadDevelopmentBonus(16, development);
 		if (!town) dbonus = dbonus / 2;
 	}
 	// Maximum bonus of 45 to development for roads
@@ -1254,7 +1254,7 @@ void ARegion::Grow()
 {
 	// We don't need to grow 0 pop regions
 	if (basepopulation == 0) return;
-	
+
 	// growpop is the overall population growth	
 	int growpop = 0;
 	
@@ -1367,7 +1367,7 @@ void ARegion::Grow()
 		// Ant: Not sure whether we still need the typecasts here
 		growpop += (int) (increase / limitingfactor);
 	}
-	
+
 	// Update population
 	AdjustPop(growpop);
 	

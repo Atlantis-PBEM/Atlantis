@@ -703,6 +703,11 @@ public:
 	// Chance of men killed by undead coming back from the grave
 	// as undead themselves
 	int UNDEATH_CONTAGION;
+
+	// Like DYNAMIC_POPULATION but without migration
+	// Regions population changes depends on production in region, settlements grow
+	// Enables basic economy
+	int REGIONS_ECONOMY;
 };
 
 extern GameDefs *Globals;

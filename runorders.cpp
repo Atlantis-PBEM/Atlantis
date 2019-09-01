@@ -1172,7 +1172,7 @@ void Game::MidProcessTurn()
 		ARegion *r = (ARegion *)elem;
 		// r->MidTurn(); // Not yet implemented
 		/* regional population dynamics */
-		if (Globals->DYNAMIC_POPULATION) r->Grow();
+		if (Globals->DYNAMIC_POPULATION || Globals->REGIONS_ECONOMY) r->Grow();
 		forlist(&r->objects) {
 			Object *o = (Object *)elem;
 			forlist(&o->units) {
