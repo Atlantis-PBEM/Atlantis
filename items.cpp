@@ -1127,10 +1127,16 @@ AString *ItemDescription(int item, int full)
 				"spirit skills, up to a maximum of level 3.";
 			break;
 		case I_RELICOFGRACE:
-			*temp += "  This token was given to you by the Maker in recognition "
+			*temp += " This token was given to you by the Maker in recognition "
 				"of you turning away from your rebellion.  Complete more "
 				"quests as they are offered if you wish to continue to work "
 				"toward restoring your relationship.";
+			break;
+		case I_HEALPOTION:
+			*temp += " This item allows its possessor to heal wounded units after battle."
+				" No skill is necessary to use this item; it will be used automatically"
+				" when the possessor is involved in a battle. It can heal up to 10"
+				" casualties, with a 50 percent success rate. Healing consumes an item.";
 			break;
 		default:
 			break;
