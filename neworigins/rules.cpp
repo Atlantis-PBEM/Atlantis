@@ -60,7 +60,7 @@ int allowedTacticiansSize = sizeof(ag) / sizeof(ag[0]);
 
 static GameDefs g = {
 	"NewOrigins",	// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 8 ),	// RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 9 ),	// RULESET_VERSION
 
 	8,	/* MAX_SPEED */
 	7,	/* PHASED_MOVE_OFFSET */
@@ -237,7 +237,7 @@ static GameDefs g = {
 	0,	// HARDER_ASSASSINATION
 	1,	// DISPERSE_GATE_NUMBERS
 	33,	// UNDEATH_CONTAGION
-	0   // REGIONS_ECONOMY
+	1   // REGIONS_ECONOMY
 };
 
 GameDefs *Globals = &g;

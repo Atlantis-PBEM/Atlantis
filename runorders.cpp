@@ -94,6 +94,9 @@ void Game::RunOrders()
 	RunTeachOrders();
 	Awrite("Running Month-long Orders...");
 	RunMonthOrders();
+	Awrite("Running Economics...");
+	ProcessEconomics();
+	Awrite("Running Teleport Orders...");
 	RunTeleportOrders();
 	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
 		Awrite("Running Transport Orders...");
@@ -1171,8 +1174,6 @@ void Game::MidProcessTurn()
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
 		// r->MidTurn(); // Not yet implemented
-		/* regional population dynamics */
-		if (Globals->DYNAMIC_POPULATION || Globals->REGIONS_ECONOMY) r->Grow();
 		forlist(&r->objects) {
 			Object *o = (Object *)elem;
 			forlist(&o->units) {
@@ -1180,6 +1181,19 @@ void Game::MidProcessTurn()
 				MidProcessUnit(r, u);
 			}
 		}
+	}
+}
+
+void Game::ProcessEconomics()
+{
+	if (!(Globals->DYNAMIC_POPULATION || Globals->REGIONS_ECONOMY)) return;
+
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		// Do not process not visited regions
+		if (!r->visited) continue;
+		/* regional population dynamics */
+		r->Grow();
 	}
 }
 

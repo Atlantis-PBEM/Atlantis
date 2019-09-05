@@ -34,7 +34,7 @@ class Game;
 #include "production.h"
 #include "object.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 1)
+#define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 2)
 
 class OrdersCheck
 {
@@ -470,6 +470,9 @@ private:
 	void MidProcessTurn();
 	void PostProcessUnitExtra(ARegion *, Unit *);
 	void PostProcessTurn();
+
+	// Processing regions grow after production phase
+	void ProcessEconomics();
 	
 	// Migration effects for alternate player-driven economy
 	void ProcessMigration();
