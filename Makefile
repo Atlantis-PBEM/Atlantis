@@ -21,10 +21,10 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
   npc.o object.o orders.o parseorders.o production.o quests.o runorders.o \
   shields.o skills.o skillshows.o specials.o spells.o template.o unit.o
 
-OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
-  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 
+OBJECTS = $(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)) \
+  $(ENGINE_OBJECTS)
 
-$(GAME)-m: objdir $(OBJECTS)
+$(GAME)-m: $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
 all: basic standard fracas kingdoms havilah
@@ -73,8 +73,6 @@ havilah-clean:
 
 clean:
 	rm -f $(OBJECTS)
-	if [ -d obj ]; then rmdir obj; fi
-	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
 
@@ -106,14 +104,10 @@ rules: $(GAME)/$(GAME)
 
 FORCE:
 
-objdir:
-	if [ ! -d obj ]; then mkdir obj; fi
-	if [ ! -d $(GAME)/obj ]; then mkdir $(GAME)/obj; fi
 
-
-$(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
+$(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)): $(GAME)/%.o: $(GAME)/%.cpp
 	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
-$(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
+$(patsubst %.o,%.o,$(ENGINE_OBJECTS)): %.o: %.cpp
 	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
