@@ -27,6 +27,8 @@ OBJECTS = $(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)) \
 $(GAME)-m: $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
+.PHONY: all basic standard fracas kingdoms havilah arcadia
+
 all: basic standard fracas kingdoms havilah
 
 arcadia: FORCE
@@ -49,6 +51,8 @@ havilah: FORCE
 
 $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
+
+.PHONY: all-clean basic-clean standard-clean fracas-clean kingdoms-clean havilah-clean arcadia-clean clean
 
 all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
 	havilah-clean
@@ -75,6 +79,8 @@ clean:
 	rm -f $(OBJECTS)
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
+
+.PHONY: all-rules basic-rules standard-rules fracas-rules kingdoms-rules havilah-rules arcadia-rules rules
 
 all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
 	havilah-rules
