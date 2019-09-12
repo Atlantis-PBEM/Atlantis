@@ -111,9 +111,3 @@ rules: $(GAME)/$(GAME)
 FORCE:
 
 
-$(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)): $(GAME)/%.o: $(GAME)/%.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
-
-$(patsubst %.o,%.o,$(ENGINE_OBJECTS)): %.o: %.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
-
