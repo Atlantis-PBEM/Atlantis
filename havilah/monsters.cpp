@@ -27,8 +27,8 @@
 // ----        ------            --------
 // 2001/Mar/03 Joseph Traub      Moved some of the monster stuff here
 //
-#include "gamedata.h"
-#include "game.h"
+#include "../gamedata.h"
+#include "../game.h"
 
 void Game::CreateVMons()
 {

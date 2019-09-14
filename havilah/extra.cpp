@@ -25,9 +25,9 @@
 //
 // This file contains extra game-specific functions
 //
-#include "game.h"
-#include "gamedata.h"
-#include "quests.h"
+#include "../game.h"
+#include "../gamedata.h"
+#include "../quests.h"
 #include <string>
 #include <iterator>
 
