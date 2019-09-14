@@ -9,9 +9,8 @@
 
 GAME ?= standard
 
-CPLUS = g++
-CC = gcc
-CFLAGS = -g -I. -I.. -Wall
+CXX ?= g++
+CXXFLAGS = -g -Wall
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
@@ -25,7 +24,7 @@ OBJECTS = $(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)) \
   $(ENGINE_OBJECTS)
 
 $(GAME)-m: $(OBJECTS)
-	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
 .PHONY: all basic standard fracas kingdoms havilah arcadia
 
