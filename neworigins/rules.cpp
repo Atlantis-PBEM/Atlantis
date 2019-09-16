@@ -60,7 +60,7 @@ int allowedTacticiansSize = sizeof(ag) / sizeof(ag[0]);
 
 static GameDefs g = {
 	"NewOrigins",	// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 9 ),	// RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 10 ),	// RULESET_VERSION
 
 	8,	/* MAX_SPEED */
 	7,	/* PHASED_MOVE_OFFSET */
@@ -134,7 +134,7 @@ static GameDefs g = {
 	1, 	// MORE_PROFITABLE_TRADE_GOODS
 
 	50,	// BASE_MAN_COST
-	0,	// LASTORDERS_MAINTAINED_BY_SCRIPTS
+	1,	// LASTORDERS_MAINTAINED_BY_SCRIPTS
 	10,	// MAX_INACTIVE_TURNS
 
 	1,	// EASIER_UNDERWORLD
