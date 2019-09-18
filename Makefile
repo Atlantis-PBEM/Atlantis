@@ -23,7 +23,8 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
 OBJECTS = $(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)) \
   $(ENGINE_OBJECTS)
 
-$(GAME)-m: $(OBJECTS)
+# default target
+$(GAME)/$(GAME): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
 .PHONY: all basic standard fracas kingdoms havilah arcadia
@@ -48,8 +49,6 @@ fracas: FORCE
 havilah: FORCE
 	$(MAKE) GAME=havilah
 
-$(GAME)/$(GAME): FORCE
-	$(MAKE) GAME=$(GAME)
 
 .PHONY: all-clean basic-clean standard-clean fracas-clean kingdoms-clean havilah-clean arcadia-clean clean
 
