@@ -27,12 +27,30 @@ OBJECTS = $(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)) \
 $(GAME)/$(GAME): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
+# Arcadia stuff
+ARCADIA_SOURCES = \
+		alist.cpp     astring.cpp   edit.cpp         fileio.cpp      \
+		gamedata.cpp  genrules.cpp  items.cpp        map.cpp         \
+		monsters.cpp  object.cpp    production.cpp   shields.cpp     \
+		soldier1.cpp  template.cpp  world.cpp        aregion.cpp     \
+		battle1.cpp   extra.cpp     formation1.cpp   gamedefs.cpp    \
+		hexside.cpp   magic.cpp     market.cpp       monthorders.cpp \
+		orders.cpp    rules.cpp     skills.cpp       specials.cpp    \
+		times.cpp     army1.cpp     economy.cpp      faction.cpp     \
+		game.cpp      gameio.cpp    i_rand.cpp       main.cpp        \
+		modify.cpp    npc.cpp       parseorders.cpp  runorders.cpp   \
+		skillshows.cpp  spells.cpp  unit.cpp
+
+ARCADIA_OBJECTS = $(patsubst %.cpp,arcadia/%.o,$(ARCADIA_SOURCES))
+
+arcadia/arcadia: $(ARCADIA_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
 .PHONY: all basic standard fracas kingdoms havilah arcadia
 
 all: basic standard fracas kingdoms havilah
 
-arcadia: FORCE
-	$(MAKE) GAME=arcadia
+arcadia: arcadia/arcadia
 
 basic: FORCE
 	$(MAKE) GAME=basic
