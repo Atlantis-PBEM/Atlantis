@@ -36,7 +36,7 @@ class ARegionList;
 #include "gamedefs.h"
 #include "gameio.h"
 #include "faction.h"
-#include "alist.h"
+#include "../alist.h"
 #include "unit.h"
 #include "fileio.h"
 #include "production.h"

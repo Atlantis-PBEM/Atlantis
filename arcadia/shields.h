@@ -25,7 +25,7 @@
 #ifndef SHIELD_CLASS
 #define SHIELD_CLASS
 
-#include "alist.h"
+#include "../alist.h"
 
 class Shield : public AListElem {
 public:

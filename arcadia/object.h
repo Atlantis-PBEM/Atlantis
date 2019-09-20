@@ -29,7 +29,7 @@
 class Hexside;
 class Object;
 
-#include "alist.h"
+#include "../alist.h"
 #include "fileio.h"
 #include "gamedefs.h"
 #include "faction.h"

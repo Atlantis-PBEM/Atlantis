@@ -26,7 +26,7 @@
 #define ASTRING_CLASS
 
 #include <iostream>
-#include "alist.h"
+#include "../alist.h"
 
 using namespace std;
 

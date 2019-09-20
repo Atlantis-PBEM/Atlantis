@@ -29,7 +29,7 @@
 class Game;
 
 #include "aregion.h"
-#include "alist.h"
+#include "../alist.h"
 #include "faction.h"
 #include "production.h"
 #include "object.h"

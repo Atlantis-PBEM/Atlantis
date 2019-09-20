@@ -34,10 +34,10 @@ class Formation;
 
 #include "soldier1.h"
 #include "unit.h"
-#include "alist.h"
+#include "../alist.h"
 #include "items.h"
 #include "object.h"
-#include "helper.h"
+#include "../helper.h"
 
 enum {
 	FORM_FOOT,

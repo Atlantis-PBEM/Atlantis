@@ -25,7 +25,7 @@
 #ifndef MARKET_CLASS
 #define MARKET_CLASS
 
-#include "alist.h"
+#include "../alist.h"
 #include "fileio.h"
 
 enum {

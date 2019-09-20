@@ -26,7 +26,7 @@
 #define PRODUCTION_CLASS
 
 #include "gamedefs.h"
-#include "alist.h"
+#include "../alist.h"
 #include "fileio.h"
 
 #define P_BIG 40

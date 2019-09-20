@@ -26,7 +26,7 @@
 #ifndef GAME_DEFS
 #define GAME_DEFS
 
-#include "helper.h"
+#include "../helper.h"
 
 /* Directions */
 enum {
