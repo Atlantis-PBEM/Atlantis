@@ -77,7 +77,10 @@ all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
 	havilah-clean
 
 arcadia-clean:
-	$(MAKE) GAME=arcadia clean
+	rm -f $(ARCADIA_OBJECTS)
+	rm -f arcadia/html/arcadia.html
+	rm -f arcadia/arcadia
+
 
 basic-clean:
 	$(MAKE) GAME=basic clean
