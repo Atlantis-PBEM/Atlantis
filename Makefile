@@ -107,8 +107,11 @@ clean:
 all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
 	havilah-rules
 
-arcadia-rules:
-	$(MAKE) GAME=arcadia rules
+arcadia-rules: arcadia/arcadia
+	(cd arcadia; \
+	 ./arcadia genrules arcadia_intro.html arcadia.css html/arcadia.html \
+	)
+
 
 basic-rules:
 	$(MAKE) GAME=basic rules

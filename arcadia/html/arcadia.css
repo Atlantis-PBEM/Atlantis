@@ -1,0 +1,18 @@
+BODY {
+  font-family: arial, sans-serif;
+  background: black;
+  color: #B19275;
+
+}
+
+DIV.rule {
+   background: url(bar.jpg) no-repeat top;
+   height: 23px;
+   color: white;
+}
+
+TD.fixed { font-family: monospace; }
+
+A:visited { color: white; }
+A:active { color: white; }
+A:link { color: white; }
