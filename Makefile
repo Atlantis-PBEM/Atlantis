@@ -51,7 +51,7 @@ arcadia/arcadia: $(ARCADIA_OBJECTS)
 
 .PHONY: all basic standard fracas kingdoms havilah arcadia
 
-all: basic standard fracas kingdoms havilah
+all: arcadia basic standard fracas kingdoms havilah
 
 arcadia: arcadia/arcadia
 
@@ -73,7 +73,7 @@ havilah: FORCE
 
 .PHONY: all-clean basic-clean standard-clean fracas-clean kingdoms-clean havilah-clean arcadia-clean clean
 
-all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
+all-clean: arcadia-clean basic-clean standard-clean fracas-clean kingdoms-clean \
 	havilah-clean
 
 arcadia-clean:
@@ -104,7 +104,7 @@ clean:
 
 .PHONY: all-rules basic-rules standard-rules fracas-rules kingdoms-rules havilah-rules arcadia-rules rules
 
-all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
+all-rules: arcadia-rules basic-rules standard-rules fracas-rules kingdoms-rules \
 	havilah-rules
 
 arcadia-rules: arcadia/arcadia
