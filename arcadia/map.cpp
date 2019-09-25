@@ -233,10 +233,12 @@ void ARegionList::CheckHexsides(ARegionArray *pRegs)
 			if(!reg) continue;
 			for(int i=0; i<6; i++) {
 			    if(!reg->hexside[i]) {
-                    Awrite("bugger!");
-			        system("pause");
-                } 
-            }
+				Awrite("bugger!");
+#ifdef DEBUG
+				system("pause");
+#endif
+			    }
+			}
 		}
 	}
 }
