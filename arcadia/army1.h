@@ -59,11 +59,11 @@ class Army
 		Soldier * GetAttacker(int attackernum); //attackernum should be from 0 to CanAttack()-1. 
                                       //For some reason this can't be set constant - may want to check this if problems.
         
-        int ShieldIsUseful(char *special) const;
-        int IsSpecialTarget(char *special) const;
-        int GetTarget(Army *attackers, int formation, int attackType, int *targetform, char* special, Battle *b);                                      
-		int DoAnAttack(char *special, int numAttacks, int race, int attackType, int attackLevel, 
-                  int flags, int weaponClass, char *effect, int mountBonus, Army *attackers, int formation, Battle *b,
+        int ShieldIsUseful(char const *special) const;
+        int IsSpecialTarget(char const *special) const;
+        int GetTarget(Army *attackers, int formation, int attackType, int *targetform, char const * special, Battle *b);                                      
+		int DoAnAttack(char const *special, int numAttacks, int race, int attackType, int attackLevel, 
+                  int flags, int weaponClass, char const *effect, int mountBonus, Army *attackers, int formation, Battle *b,
                   int strength = 1);
 
         AList armytext;

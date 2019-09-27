@@ -47,7 +47,7 @@ int ARegion::CheckSea(int dir, int range, int remainocean)
 }
 
 
-void ARegionList::CreateAbyssLevel(int level, char *name)
+void ARegionList::CreateAbyssLevel(int level, char const *name)
 {
 	MakeRegions(level, 4, 4);
 	pRegionArrays[level]->SetName(name);
@@ -99,7 +99,7 @@ void ARegionList::CreateAbyssLevel(int level, char *name)
 }
 
 
-void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char *name)
+void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *name)
 {
 	MakeRegions(level, xSize, ySize);
 	AddHexsides(pRegionArrays[level]);
@@ -195,7 +195,7 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char *name)
 }
 
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
-		char *name)
+		char const *name)
 {
 	MakeRegions(level, xSize, ySize);
 
@@ -244,7 +244,7 @@ void ARegionList::CheckHexsides(ARegionArray *pRegs)
 }
 
 void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
-		char *name)
+		char const *name)
 {
 	MakeRegions(level, xSize, ySize);
 

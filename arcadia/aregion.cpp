@@ -153,7 +153,7 @@ void ARegion::ZeroNeighbors()
 	}
 }
 
-void ARegion::SetName(char *c)
+void ARegion::SetName(char const *c)
 {
 	if(name) delete name;
 	name = new AString(c);
@@ -1876,7 +1876,7 @@ int ARegion::HasCityGuard()
 	return 0;
 }
 
-int ARegion::NotifySpell(Unit *caster, char *spell, ARegionList *pRegs)
+int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 {
 	AList flist;
 	unsigned int i;
@@ -2576,7 +2576,7 @@ ARegion *ARegionArray::GetRegion(int xx, int yy)
 	return(regions[xx / 2 + yy * x / 2]);
 }
 
-void ARegionArray::SetName(char *name)
+void ARegionArray::SetName(char const *name)
 {
 	if(name) {
 		strName = new AString(name);
