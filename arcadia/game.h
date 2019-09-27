@@ -245,59 +245,59 @@ private:
 	// Functions to allow enabling/disabling parts of the data tables
 	void EnableSkill(int sk); // Enabled a disabled skill
 	void DisableSkill(int sk);  // Prevents skill being studied or used
-	void ModifySkillDependancy(int sk, int i, char *dep, int lev);
+	void ModifySkillDependancy(int sk, int i, char const *dep, int lev);
 	void ModifyBaseSkills(int base, int, int = -1, int = -1, int = -1, int = -1);
 	void ModifySkillFlags(int sk, int flags);
 	void ModifySkillCost(int sk, int cost);
 	void ModifySkillSpecial(int sk, char *special);
-	void ModifySkillRange(int sk, char *range);
-	void ModifySkillName(int sk, char *name, char *abbr);	
+	void ModifySkillRange(int sk, char const *range);
+	void ModifySkillName(int sk, char const *name, char const *abbr);	
 
 	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
 	void ModifyItemFlags(int it, int flags);
 	void ModifyItemType(int it, int type);
 	void ModifyItemWeight(int it, int weight);
-	void ModifyItemName(int it, char *name, char *names, char *abr);	
+	void ModifyItemName(int it, char const *name, char const *names, char const *abr);	
 	void ModifyItemBasePrice(int it, int price);
 	void ModifyItemCapacities(int it, int walk, int ride, int fly, int swim);
 	void ModifyItemProductionBooster(int it, int item, int bonus);
 	void ModifyItemHitch(int it, int item, int bonus);
-	void ModifyItemProductionSkill(int it, char *sk, int lev);
+	void ModifyItemProductionSkill(int it, char const *sk, int lev);
 	void ModifyItemProductionOutput(int it, int months, int count);
 	void ModifyItemProductionInput(int it, int i, int input, int amount);
-	void ModifyItemMagicSkill(int it, char *sk, int lev);
+	void ModifyItemMagicSkill(int it, char const *sk, int lev);
 	void ModifyItemMagicOutput(int it, int count);
 	void ModifyItemMagicInput(int it, int i, int input, int amount);
-	void ModifyItemEscapeSkill(int it, char *sk, int val);
+	void ModifyItemEscapeSkill(int it, char const *sk, int val);
 
-	void ModifyRaceSkillLevels(char *race, int special, int def);
+	void ModifyRaceSkillLevels(char const *race, int special, int def);
 	void ModifyRaceHits(char *race, int num);
 	void ModifyRaceSkills(char *race, int i, char *sk);
-	void ModifyRaceSkills(char *r, char *sk1,
-		char *sk2 = NULL, char *sk3 = NULL, char *sk4 = NULL,
-		char *sk5 = NULL, char *sk6 = NULL);
+	void ModifyRaceSkills(char const *r, char const *sk1,
+		char const *sk2 = NULL, char const *sk3 = NULL, char const *sk4 = NULL,
+		char const *sk5 = NULL, char const *sk6 = NULL);
 
-	void ModifyMonsterAttackLevel(char *mon, int lev);
-	void ModifyMonsterDefense(char *mon, int defenseType, int level);
-	void ModifyMonsterAttacksAndHits(char *mon, int num, int hits, int regen);
-	void ModifyMonsterSkills(char *mon, int tact, int stealth, int obs);
-	void ModifyMonsterSpecial(char *mon, char *special, int lev);
-	void ModifyMonsterSpoils(char *mon, int silver, int spoilType);
-	void ModifyMonsterThreat(char *mon, int num, int hostileChance);
+	void ModifyMonsterAttackLevel(char const *mon, int lev);
+	void ModifyMonsterDefense(char const *mon, int defenseType, int level);
+	void ModifyMonsterAttacksAndHits(char const *mon, int num, int hits, int regen);
+	void ModifyMonsterSkills(char const *mon, int tact, int stealth, int obs);
+	void ModifyMonsterSpecial(char const *mon, char const *special, int lev);
+	void ModifyMonsterSpoils(char const *mon, int silver, int spoilType);
+	void ModifyMonsterThreat(char const *mon, int num, int hostileChance);
 
 	void ModifyWeaponSkills(char *weap, char *baseSkill, char *orSkill);
 	void ModifyWeaponFlags(char *weap, int flags);
-	void ModifyWeaponAttack(char *weap, int wclass, int attackType, int numAtt);
-	void ModifyWeaponBonuses(char *weap, int attack, int defense, int vsMount);
+	void ModifyWeaponAttack(char const *weap, int wclass, int attackType, int numAtt);
+	void ModifyWeaponBonuses(char const *weap, int attack, int defense, int vsMount);
 
-	void ModifyArmorFlags(char *armor, int flags);
+	void ModifyArmorFlags(char const *armor, int flags);
 	void ModifyArmorSaveFrom(char *armor, int from);
 	void ModifyArmorSaveValue(char *armor, int wclass, int val);
-	void ModifyArmorSaveAll(char *armor, int from, int, int, int);
+	void ModifyArmorSaveAll(char const *armor, int from, int, int, int);
 
 	void ModifyMountSkill(char *mount, char *skill);
-	void ModifyMountBonuses(char *mount, int min, int max, int hampered);
+	void ModifyMountBonuses(char const *mount, int min, int max, int hampered);
 	void ModifyMountSpecial(char *mount, char *special, int level);
 
 	void EnableObject(int ob); // Enables a disabled object
@@ -307,7 +307,7 @@ private:
 	void ModifyObjectDecay(int ob, int maxMaint, int maxMonthDecay, int mFact);
 	void ModifyObjectProduction(int ob, int it);
 	void ModifyObjectMonster(int ob, int monster);
-	void ModifyObjectConstruction(int ob, int it, int num, char *sk, int lev);
+	void ModifyObjectConstruction(int ob, int it, int num, char const *sk, int lev);
 	void ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages);
 	void ModifyObjectDefence(int ob, int co, int en, int sp, int we, int ri, int ra);
 
@@ -331,20 +331,20 @@ private:
 	void ModifySpecialEffectFlags(char *special, int effectflags);
 	void ModifySpecialShields(char *special, int index, int type);
 	void ModifySpecialDefenseMods(char *special, int index, int type, int val);
-	void ModifySpecialDamage(char *special, int index, int type, int min,
-			int val, int flags, int cls, char *effect);
+	void ModifySpecialDamage(char const *special, int index, int type, int min,
+			int val, int flags, int cls, char const *effect);
 
-	void ModifyEffectFlags(char *effect, int flags);
+	void ModifyEffectFlags(char const *effect, int flags);
 	void ModifyEffectAttackMod(char *effect, int val);
 	void ModifyEffectDefenseMod(char *effect, int index, int type, int val);
 	void ModifyEffectCancelEffect(char *effect, char *uneffect);
 
-	void ModifyRangeFlags(char *range, int flags);
-	void ModifyRangeClass(char *range, int rclass);
-	void ModifyRangeMultiplier(char *range, int mult);
+	void ModifyRangeFlags(char const *range, int flags);
+	void ModifyRangeClass(char const *range, int rclass);
+	void ModifyRangeMultiplier(char const *range, int mult);
 	void ModifyRangeLevelPenalty(char *range, int pen);
 
-	void ModifyAttribMod(char *mod, int index, int flags, char *ident,
+	void ModifyAttribMod(char const *mod, int index, int flags, char const *ident,
 			int type, int val);
 
 	AList factions;

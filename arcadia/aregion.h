@@ -68,8 +68,8 @@ struct Product
 class TerrainType
 {
 	public:
-		char *name;
-		char *type;
+		char const *name;
+		char const *type;
 		char marker;
 		int similar_type;
 
@@ -185,7 +185,7 @@ class ARegion : public AListElem
 		void Setup();
 
 		void ZeroNeighbors();
-		void SetName(char *);
+		void SetName(char const *);
 
 		void Writeout(Aoutfile *);
 		void Readin(Ainfile *, AList *, ATL_VER v);
@@ -468,12 +468,12 @@ class ARegionList : public AList
 		// Public world creation stuff
 		//
 		void CreateLevels(int numLevels);
-		void CreateAbyssLevel(int level, char *name);
-		void CreateNexusLevel(int level, int xSize, int ySize, char *name);
+		void CreateAbyssLevel(int level, char const *name);
+		void CreateNexusLevel(int level, int xSize, int ySize, char const *name);
 		void CreateSurfaceLevel(int level, int xSize, int ySize, char *name);
 		void CreateIslandLevel(int level, int nPlayers, char *name);
-		void CreateUnderworldLevel(int level, int xSize, int ySize, char *name);
-		void CreateUnderdeepLevel(int level, int xSize, int ySize, char *name);
+		void CreateUnderworldLevel(int level, int xSize, int ySize, char const *name);
+		void CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name);
 		void AddQuestLevel(int xSize, int ySize, char *name, int type);
 
 		void MakeShaftLinks(int levelFrom, int levelTo, int odds);

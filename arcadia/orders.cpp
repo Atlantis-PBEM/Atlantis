@@ -24,7 +24,7 @@
 // END A3HEADER
 #include "orders.h"
 
-char *od[] = {
+char const *od[] = {
 	"#atlantis",
 	"#end",
 	"unit",

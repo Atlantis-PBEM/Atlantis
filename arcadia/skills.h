@@ -59,15 +59,15 @@ class SkillList;
 
 struct SkillDepend
 {
-	char *skill;
+	char const *skill;
 	int level;
 };
 
 class SkillType
 {
 	public:
-		char * name;
-		char * abbr;
+		char const * name;
+		char const * abbr;
 		int cost;
 
 		enum {
@@ -94,10 +94,10 @@ class SkillType
 		//
 		// special for combat spells only
 		//
-		char *special;
+		char const *special;
 
 		// range class for ranged skills (-1 for all others)
-		char *range;
+		char const *range;
 
 		int baseskill;
 
@@ -125,7 +125,7 @@ extern ShowType * ShowDefs;
 
 int SkillCost(int); /* skill */
 int IsSpeciality(char *,int); /* skill, race */
-int SkillMax(char *,int); /* skill, race */
+int SkillMax(char const *,int); /* skill, race */
 int SkillExperMax(char *,int); /* skill, race */
 int GetLevelByDays(int);
 int GetLevelByDays(int, int);
@@ -187,7 +187,7 @@ class DamageType {
 		int value;
 		int flags;
 		int dclass;
-		char *effect;
+		char const *effect;
 };
 
 class ShieldType {
@@ -204,8 +204,8 @@ class DefenseMod {
 
 class SpecialType {
 	public:
-		char *key;
-		char *specialname;
+		char const *key;
+		char const *specialname;
 
 		enum {
 			HIT_BUILDINGIF		= 0x0001,	/* mutually exclusive (1) */
@@ -226,7 +226,7 @@ class SpecialType {
 
 		int buildings[3];
 		int targets[7];
-		char *effects[3];
+		char const *effects[3];
 
 		enum {
 			FX_SHIELD	=	0x001,
@@ -243,12 +243,12 @@ class SpecialType {
 
 		int shield[4];
 		DefenseMod defs[4];
-		char *shielddesc;
+		char const *shielddesc;
 
 		DamageType damage[4];
-		char *spelldesc;
-		char *spelldesc2;
-		char *spelltarget;
+		char const *spelldesc;
+		char const *spelldesc2;
+		char const *spelltarget;
 };
 extern SpecialType *SpecialDefs;
 extern int NUMSPECIALS;
@@ -258,10 +258,10 @@ extern SpecialType *FindSpecial(char *key);
 class EffectType {
 	public:
 	    int effectnum; //hack because mapping of effects in battle was not working in modified combat code - don't know why. These need to numbered sequentially from zero, and must be less or equal effects than size of effect array in soldiers.h
-		char *name;
+		char const *name;
 		int attackVal;
 		DefenseMod defMods[4];
-		char *cancelEffect;
+		char const *cancelEffect;
 
 		enum {
 			EFF_ONESHOT	= 0x001,  //gets cleared at the end of combat round (Arcadian system only)
@@ -278,7 +278,7 @@ extern EffectType *FindEffect(char *effect);
 
 class RangeType {
 	public:
-		char *key;
+		char const *key;
 		enum {
 			RNG_NEXUS_TARGET = 0x0001,	// Can cast *to* Nexus
 			RNG_NEXUS_SOURCE = 0x0002,	// Can cast *from* Nexus
@@ -317,7 +317,7 @@ class AttribModItem {
 		};
 		int flags;
 
-		char *ident;
+		char const *ident;
 
 		enum {
 			CONSTANT,
@@ -333,7 +333,7 @@ class AttribModItem {
 
 class AttribModType {
 	public:
-		char *key;
+		char const *key;
 
 		enum {
 			CHECK_MONSTERS = 0x01,

@@ -68,7 +68,7 @@ extern int NUMMAN;
 
 class GameDefs {
 public:
-	char *RULESET_NAME;
+	char const *RULESET_NAME;
 	ATL_VER RULESET_VERSION;
 
 	int FOOT_SPEED;
@@ -302,7 +302,7 @@ public:
 	int APPRENTICES_EXIST;
 
 	// What is the name of the world?
-	char *WORLD_NAME;
+	char const *WORLD_NAME;
 
 	// Does the nexus allow gating out of it
 	int NEXUS_GATE_OUT;

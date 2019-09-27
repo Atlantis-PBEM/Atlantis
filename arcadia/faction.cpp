@@ -26,7 +26,7 @@
 #include "gamedata.h"
 #include "game.h"
 
-char *as[] = {
+char const *as[] = {
 	"Hostile",
 	"Unfriendly",
 	"Neutral",
@@ -36,7 +36,7 @@ char *as[] = {
 
 char **AttitudeStrs = as;
 
-char *fs[] = {
+char const *fs[] = {
 	"War",
 	"Trade",
 	"Heroes"
@@ -45,7 +45,7 @@ char *fs[] = {
 char **FactionStrs = fs;
 
 // LLS - fix up the template strings
-char *tp[] = {
+char const *tp[] = {
 	"off",
 	"short",
 	"long",
