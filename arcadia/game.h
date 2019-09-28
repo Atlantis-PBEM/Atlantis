@@ -273,7 +273,7 @@ private:
 
 	void ModifyRaceSkillLevels(char const *race, int special, int def);
 	void ModifyRaceHits(char *race, int num);
-	void ModifyRaceSkills(char *race, int i, char *sk);
+	void ModifyRaceSkills(char const *race, int i, char const *sk);
 	void ModifyRaceSkills(char const *r, char const *sk1,
 		char const *sk2 = NULL, char const *sk3 = NULL, char const *sk4 = NULL,
 		char const *sk5 = NULL, char const *sk6 = NULL);

@@ -58,7 +58,7 @@ void Soldier::SetupHealing()
     }
 }
 
-int Army::IsSpecialTarget(char *special) const
+int Army::IsSpecialTarget(char const *special) const
 {
 	// Search All Formations
 	for(int i=0; i<NUMFORMS; i++) {
@@ -69,7 +69,7 @@ int Army::IsSpecialTarget(char *special) const
     return 0;
 }
 
-int Formation::CheckSpecialTarget(char *special, int soldiernum) const
+int Formation::CheckSpecialTarget(char const *special, int soldiernum) const
 {
 	SpecialType *spd = FindSpecial(special);
 	int i;
@@ -174,7 +174,7 @@ int Formation::CheckSpecialTarget(char *special, int soldiernum) const
     return 1;
 }
 
-int Army::ShieldIsUseful(char *special) const
+int Army::ShieldIsUseful(char const *special) const
 {
 	SpecialType *shi;
 	shi = FindSpecial(special);
