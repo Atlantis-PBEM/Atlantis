@@ -230,7 +230,7 @@ class ARegion : public AListElem
 		int CanPillage(Unit *);
 		int ForbiddenShip(Object *);
 		int HasCityGuard();
-		int NotifySpell(Unit *, char *, ARegionList *pRegs);
+		int NotifySpell(Unit *, char const *, ARegionList *pRegs);
 		void NotifyCity(Unit *, AString& oldname, AString& newname);
 
 		void DefaultOrders(int peasantfac);
@@ -379,7 +379,7 @@ class ARegionArray
 
 		void SetRegion(int, int, ARegion *);
 		ARegion *GetRegion(int, int);
-		void SetName(char *name);
+		void SetName(char const *name);
 
 		int x;
 		int y;

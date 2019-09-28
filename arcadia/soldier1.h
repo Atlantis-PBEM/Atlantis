@@ -69,9 +69,9 @@ class Soldier
 		void Alive(int);
 		void Dead();
 
-		int HasEffect(char *);
-		void SetEffect(char *, int form, Army *army);
-		void ClearEffect(char *);
+		int HasEffect(char const *);
+		void SetEffect(char const *, int form, Army *army);
+		void ClearEffect(char const *);
 		void ClearOneTimeEffects(void);
 		
 		int DoSpellCost(int round, Battle *b);
@@ -98,7 +98,7 @@ class Soldier
 		int attacktype;
 		int askill;
 		int attacks;
-		char *special;
+		char const *special;
 		int slevel;
 		int exhausted;
 		int candragontalk;

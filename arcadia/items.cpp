@@ -33,7 +33,7 @@
 //#define DEBUG
 #endif
 
-BattleItemType *FindBattleItem(char *abbr)
+BattleItemType *FindBattleItem(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMBATTLEITEMS; i++) {
@@ -319,7 +319,7 @@ AString ItemString(int type, int num, int flags, int unitclass)
 	return temp;
 }
 
-AString EffectStr(char *effect)
+AString EffectStr(char const *effect)
 {
 	AString temp, temp2;
 	int comma = 0;
@@ -364,7 +364,7 @@ AString EffectStr(char *effect)
 	return temp;
 }
 
-AString ShowSpecial(char *special, int level, int expandLevel, int fromItem)
+AString ShowSpecial(char const *special, int level, int expandLevel, int fromItem)
 {
 	AString temp;
 	int comma = 0;

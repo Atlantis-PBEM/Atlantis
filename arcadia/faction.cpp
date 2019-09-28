@@ -34,7 +34,7 @@ char const *as[] = {
 	"Ally"
 };
 
-char **AttitudeStrs = as;
+char const **AttitudeStrs = as;
 
 char const *fs[] = {
 	"War",
@@ -42,7 +42,7 @@ char const *fs[] = {
 	"Heroes"
 };
 
-char **FactionStrs = fs;
+char const **FactionStrs = fs;
 
 // LLS - fix up the template strings
 char const *tp[] = {
@@ -52,7 +52,7 @@ char const *tp[] = {
 	"map"
 };
 
-char **TemplateStrs = tp;
+char const **TemplateStrs = tp;
 
 int ParseTemplate(AString *token)
 {

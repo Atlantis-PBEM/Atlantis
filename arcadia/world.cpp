@@ -2094,7 +2094,7 @@ int AGetName(int town )
     return j;
 }
 
-char *AGetNameString( int name )
+char const *AGetNameString( int name )
 {
     return( regionnames[ name ] );
 }

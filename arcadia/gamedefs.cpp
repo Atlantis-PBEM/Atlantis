@@ -33,7 +33,7 @@ char const *dr[] = {
   "Northwest"
 };
 
-char ** DirectionStrs = dr;
+char const ** DirectionStrs = dr;
 
 char const *da[] = {
     "N",
@@ -44,7 +44,7 @@ char const *da[] = {
     "NW"
 };
 
-char ** DirectionAbrs = da;
+char const ** DirectionAbrs = da;
 
 char const *mn[] = {
   "January",
@@ -61,7 +61,7 @@ char const *mn[] = {
   "December"
 };
 
-char ** MonthNames = mn;
+char const ** MonthNames = mn;
 
 char const *weath[] = {
 	"clear",
@@ -70,4 +70,4 @@ char const *weath[] = {
 	"blizzard"
 };
 
-char ** SeasonNames = weath;
+char const ** SeasonNames = weath;

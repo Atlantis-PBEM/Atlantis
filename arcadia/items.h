@@ -344,12 +344,12 @@ extern int ParseTransportableItem(AString *);
 extern int LookupItem(AString *);
 extern int IsPrimary(int item);
 
-extern BattleItemType *FindBattleItem(char *abbr);
-extern ArmorType *FindArmor(char *abbr);
-extern WeaponType *FindWeapon(char *abbr);
-extern MountType *FindMount(char *abbr);
-extern MonType *FindMonster(char *abbr, int illusion);
-extern ManType *FindRace(char *abbr);
+extern BattleItemType *FindBattleItem(char const *abbr);
+extern ArmorType *FindArmor(char const *abbr);
+extern WeaponType *FindWeapon(char const *abbr);
+extern MountType *FindMount(char const *abbr);
+extern MonType *FindMonster(char const *abbr, int illusion);
+extern ManType *FindRace(char const *abbr);
 extern AString AttType(int atype);
 extern AString EffectStr(char *effect);
 extern AString EthnicityString(int atype);
@@ -396,7 +396,7 @@ class ItemList : public AList
 		void Selling(int, int); /* type, number */
 };
 
-extern AString ShowSpecial(char *special, int level, int expandLevel,
+extern AString ShowSpecial(char const *special, int level, int expandLevel,
 		int fromItem);
 
 #endif

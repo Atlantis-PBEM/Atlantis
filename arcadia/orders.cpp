@@ -109,7 +109,7 @@ char const *od[] = {
 	"work",
 };
 
-char **OrderStrs = od;
+char const **OrderStrs = od;
 
 int Parse1Order(AString *token)
 {

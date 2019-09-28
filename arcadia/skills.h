@@ -109,7 +109,7 @@ class SkillType
 };
 extern SkillType *SkillDefs;
 
-SkillType *FindSkill(char *skname);
+SkillType *FindSkill(char const *skname);
 int LookupSkill(AString *);
 int ParseSkill(AString *);
 AString SkillStrs(int);
@@ -124,7 +124,7 @@ class ShowType {
 extern ShowType * ShowDefs;
 
 int SkillCost(int); /* skill */
-int IsSpeciality(char *,int); /* skill, race */
+int IsSpeciality(char const *,int); /* skill, race */
 int SkillMax(char const *,int); /* skill, race */
 int SkillExperMax(char *,int); /* skill, race */
 int GetLevelByDays(int);
@@ -253,7 +253,7 @@ class SpecialType {
 extern SpecialType *SpecialDefs;
 extern int NUMSPECIALS;
 
-extern SpecialType *FindSpecial(char *key);
+extern SpecialType *FindSpecial(char const *key);
 
 class EffectType {
 	public:
@@ -274,7 +274,7 @@ class EffectType {
 extern EffectType *EffectDefs;
 extern int NUMEFFECTS;
 
-extern EffectType *FindEffect(char *effect);
+extern EffectType *FindEffect(char const *effect);
 
 class RangeType {
 	public:
@@ -303,7 +303,7 @@ class RangeType {
 extern RangeType *RangeDefs;
 extern int NUMRANGES;
 
-extern RangeType *FindRange(char *range);
+extern RangeType *FindRange(char const *range);
 
 class AttribModItem {
 	public:
@@ -347,6 +347,6 @@ class AttribModType {
 extern AttribModType *AttribDefs;
 extern int NUMATTRIBMODS;
 
-extern AttribModType *FindAttrib(char *attrib);
+extern AttribModType *FindAttrib(char const *attrib);
 
 #endif
