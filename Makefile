@@ -10,7 +10,7 @@
 GAME ?= standard
 
 CXX ?= g++
-CXXFLAGS = -g -Wall
+CXXFLAGS = -g -I. -Wall
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
