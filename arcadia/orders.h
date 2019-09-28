@@ -58,7 +58,7 @@ class TransportOrder;
 #include "unit.h"
 #include "gamedefs.h"
 #include "astring.h"
-#include "../alist.h"
+#include "alist.h"
 
 enum {
 	O_ATLANTIS,

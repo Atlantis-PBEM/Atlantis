@@ -30,7 +30,7 @@ class ItemType;
 
 #include "fileio.h"
 #include "gamedefs.h"
-#include "../alist.h"
+#include "alist.h"
 #include "astring.h"
 
 enum {

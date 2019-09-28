@@ -25,8 +25,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "../game.h"
-#include "../gamedata.h"
+#include "game.h"
+#include "gamedata.h"
 
 int ARegion::CheckSea(int dir, int range, int remainocean)
 {

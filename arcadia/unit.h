@@ -40,7 +40,7 @@ class Unit;
 class UnitId;
 
 #include "faction.h"
-#include "../alist.h"
+#include "alist.h"
 #include "gameio.h"
 #include "orders.h"
 #include "fileio.h"

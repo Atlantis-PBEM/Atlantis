@@ -32,8 +32,8 @@
  * to alter a game's data structures to suit the GM.
  */
 
-#include "../game.h"
-#include "../gamedata.h"
+#include "game.h"
+#include "gamedata.h"
 
 /// Run the initial setup for a faction
 /** This includes setting initial silver, creating your first leader, 

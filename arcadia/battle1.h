@@ -28,7 +28,7 @@
 class Battle;
 
 #include "astring.h"
-#include "../alist.h"
+#include "alist.h"
 #include "fileio.h"
 #include "army1.h"
 #include "items.h"

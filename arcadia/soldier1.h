@@ -32,11 +32,11 @@ using namespace std;
 class Soldier;
 
 #include "unit.h"
-#include "../alist.h"
+#include "alist.h"
 #include "items.h"
 #include "object.h"
 #include "shields.h"
-#include "../helper.h"
+#include "helper.h"
 
 #ifndef DEBUG
 //#define DEBUG

@@ -33,7 +33,7 @@ using namespace std;
 #include <stdio.h>
 #include <time.h>
 
-#include "../i_rand.h"
+#include "i_rand.h"
 
 static randctx isaac_ctx;
 

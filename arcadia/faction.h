@@ -40,7 +40,7 @@ class Game;
 #include "battle1.h"
 #include "skills.h"
 #include "items.h"
-#include "../alist.h"
+#include "alist.h"
 #include "astring.h"
 
 enum {

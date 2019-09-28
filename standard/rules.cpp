@@ -23,8 +23,8 @@
 //
 // END A3HEADER
 
-#include "../gamedata.h"
-#include "../gamedefs.h"
+#include "gamedata.h"
+#include "gamedefs.h"
 
 //
 // Define the various globals for this game.

@@ -27,8 +27,8 @@
 // ----        ------            --------
 // 2000/SEP/06 Joseph Traub      Added base man cost to allow races to have
 //                               different base costs
-#include "../game.h"
-#include "../gamedata.h"
+#include "game.h"
+#include "gamedata.h"
 #include <string.h>
 
 typedef struct

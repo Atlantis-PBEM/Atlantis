@@ -34,11 +34,11 @@ class Army;
 #include "soldier1.h"
 #include "formation1.h"
 #include "unit.h"
-#include "../alist.h"
+#include "alist.h"
 #include "items.h"
 #include "object.h"
 #include "shields.h"
-#include "../helper.h"
+#include "helper.h"
 
 class Army
 {

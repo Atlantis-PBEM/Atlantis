@@ -38,7 +38,7 @@ class SkillList;
 #include "fileio.h"
 #include "astring.h"
 #include "gamedefs.h"
-#include "../alist.h"
+#include "alist.h"
 
 /* For dependencies:
   A value of depend == -1 indicates no more dependencies.
