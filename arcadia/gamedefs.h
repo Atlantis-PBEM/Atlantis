@@ -39,12 +39,12 @@ enum {
 	NDIRS
 };
 
-extern char **DirectionStrs;
-extern char **DirectionAbrs;
+extern char const **DirectionStrs;
+extern char const **DirectionAbrs;
 
-extern char **MonthNames;
+extern char const **MonthNames;
 
-extern char **SeasonNames;
+extern char const **SeasonNames;
 
 extern int *allowedMages;
 extern int allowedMagesSize;

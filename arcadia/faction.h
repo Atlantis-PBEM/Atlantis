@@ -78,11 +78,11 @@ enum {
     QUIT_GAME_OVER,
 };
 
-extern char ** AttitudeStrs;
-extern char ** FactionStrs;
+extern char const ** AttitudeStrs;
+extern char const ** FactionStrs;
 
 // LLS - include strings for the template enum
-extern char **TemplateStrs;
+extern char const **TemplateStrs;
 int ParseTemplate(AString *);
 
 int ParseAttitude(AString *);
