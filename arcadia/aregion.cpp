@@ -1949,11 +1949,14 @@ int ARegion::CanTax(Unit *u)
 		Object *obj = (Object *) elem;
 		forlist ((&obj->units)) {
 			Unit *u2 = (Unit *) elem;
-			if (u2->guard == GUARD_GUARD && u2->IsReallyAlive())
-			    if(u2->type == U_GUARD || u2->type == U_GUARDMAGE) {
-			        if(town) return 0; //guards prevent taxing in towns
-			        if(u2->faction->ethnicity != u->faction->ethnicity) return 0; //guards prevent other ethnicities taxing
-				} else if (u2->GetAttitude(this, u) <= A_NEUTRAL) return 0;
+			if (u2->guard == GUARD_GUARD && u2->IsReallyAlive()) {
+				if (u2->type == U_GUARD || u2->type == U_GUARDMAGE) {
+					if (town) return 0; //guards prevent taxing in towns
+					if (u2->faction->ethnicity != u->faction->ethnicity) return 0; //guards prevent other ethnicities taxing
+				} else {
+					if (u2->GetAttitude(this, u) <= A_NEUTRAL) return 0;
+				}
+			}
 		}
 	}
 	
