@@ -9,9 +9,8 @@
 
 GAME ?= standard
 
-CPLUS = g++
-CC = gcc
-CFLAGS = -g -I. -I.. -Wall
+CXX ?= g++
+CXXFLAGS = -g -I. -Wall
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
@@ -21,16 +20,40 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
   npc.o object.o orders.o parseorders.o production.o quests.o runorders.o \
   shields.o skills.o skillshows.o specials.o spells.o template.o unit.o
 
-OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
-  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 
+OBJECTS = $(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)) \
+  $(ENGINE_OBJECTS)
 
-$(GAME)-m: objdir $(OBJECTS)
-	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
+# default target
+$(GAME)/$(GAME): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: basic standard fracas kingdoms havilah
+# Arcadia stuff
+ARCADIA_ENGINE_SOURCES = \
+		alist.cpp     i_rand.cpp
 
-arcadia: FORCE
-	$(MAKE) GAME=arcadia
+ARCADIA_SOURCES = \
+		astring.cpp   edit.cpp      fileio.cpp      \
+		gamedata.cpp  genrules.cpp  items.cpp        map.cpp         \
+		monsters.cpp  object.cpp    production.cpp   shields.cpp     \
+		soldier1.cpp  template.cpp  world.cpp        aregion.cpp     \
+		battle1.cpp   extra.cpp     formation1.cpp   gamedefs.cpp    \
+		hexside.cpp   magic.cpp     market.cpp       monthorders.cpp \
+		orders.cpp    rules.cpp     skills.cpp       specials.cpp    \
+		times.cpp     army1.cpp     economy.cpp      faction.cpp     \
+		game.cpp      gameio.cpp    main.cpp        \
+		modify.cpp    npc.cpp       parseorders.cpp  runorders.cpp   \
+		skillshows.cpp  spells.cpp  unit.cpp
+
+ARCADIA_OBJECTS = $(patsubst %.cpp,arcadia/%.o,$(ARCADIA_SOURCES)) $(patsubst %.cpp,%.o,$(ARCADIA_ENGINE_SOURCES))
+
+arcadia/arcadia: $(ARCADIA_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+.PHONY: all basic standard fracas kingdoms havilah arcadia
+
+all: arcadia basic standard fracas kingdoms havilah
+
+arcadia: arcadia/arcadia
 
 basic: FORCE
 	$(MAKE) GAME=basic
@@ -47,14 +70,17 @@ fracas: FORCE
 havilah: FORCE
 	$(MAKE) GAME=havilah
 
-$(GAME)/$(GAME): FORCE
-	$(MAKE) GAME=$(GAME)
 
-all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
+.PHONY: all-clean basic-clean standard-clean fracas-clean kingdoms-clean havilah-clean arcadia-clean clean
+
+all-clean: arcadia-clean basic-clean standard-clean fracas-clean kingdoms-clean \
 	havilah-clean
 
 arcadia-clean:
-	$(MAKE) GAME=arcadia clean
+	rm -f $(ARCADIA_OBJECTS)
+	rm -f arcadia/html/arcadia.html
+	rm -f arcadia/arcadia
+
 
 basic-clean:
 	$(MAKE) GAME=basic clean
@@ -73,16 +99,19 @@ havilah-clean:
 
 clean:
 	rm -f $(OBJECTS)
-	if [ -d obj ]; then rmdir obj; fi
-	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
 
-all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
+.PHONY: all-rules basic-rules standard-rules fracas-rules kingdoms-rules havilah-rules arcadia-rules rules
+
+all-rules: arcadia-rules basic-rules standard-rules fracas-rules kingdoms-rules \
 	havilah-rules
 
-arcadia-rules:
-	$(MAKE) GAME=arcadia rules
+arcadia-rules: arcadia/arcadia
+	(cd arcadia; \
+	 ./arcadia genrules arcadia_intro.html arcadia.css html/arcadia.html \
+	)
+
 
 basic-rules:
 	$(MAKE) GAME=basic rules
@@ -106,14 +135,4 @@ rules: $(GAME)/$(GAME)
 
 FORCE:
 
-objdir:
-	if [ ! -d obj ]; then mkdir obj; fi
-	if [ ! -d $(GAME)/obj ]; then mkdir $(GAME)/obj; fi
-
-
-$(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
-
-$(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
