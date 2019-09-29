@@ -2239,6 +2239,8 @@ void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 	scale = ar->x / 10;
 
 	r->ZeroNeighbors();
+	y = r->yloc;
+	x = r->xloc;
 	// x2 is the x-coord of this hex inside its "wedge"
 	if (y < 5 * scale)
 		x2 = x % (2 * scale);
