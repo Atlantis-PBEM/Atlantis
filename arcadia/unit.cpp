@@ -26,6 +26,9 @@
 #include "unit.h"
 #include "gamedata.h"
 
+// replace with [[maybe_unused]] when c++17 is supported
+#define MAYBE_UNUSED __attribute__ ((unused))
+
 UnitId::UnitId()
 {
 }
@@ -1601,7 +1604,7 @@ int Unit::MaintCost()
 	if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
 
 	int men = GetMen();
-	int okethnic = 0;
+	MAYBE_UNUSED int okethnic = 0;
 	
 	if(Globals->ARCADIA_MAGIC) {	    
 	    int type = GetEthnicity();

@@ -28,6 +28,9 @@
 #include "game.h"
 #include "gamedata.h"
 
+// replace with [[maybe_unused]] when c++17 is supported
+#define MAYBE_UNUSED __attribute__ ((unused))
+
 /* TownType */
 
 int TownInfo::TownType()
@@ -416,7 +419,7 @@ void ARegion::SetupCityMarket()
 				}
 			}
 		}
-		int canProduce = 0;
+		MAYBE_UNUSED int canProduce = 0;
 		// Check if the locals can produce this item
 		if(canProduceHere) canProduce = locals->CanProduce(i);
 		int isUseful = 0;

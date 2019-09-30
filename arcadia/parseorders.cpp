@@ -29,6 +29,9 @@
 #include "skills.h"
 #include "gamedata.h"
 
+// replace with [[maybe_unused]] when c++17 is supported
+#define MAYBE_UNUSED __attribute__ ((unused))
+
 OrdersCheck::OrdersCheck()
 {
 	pCheckFile = 0;
@@ -2477,7 +2480,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 	tOrder->repeating = repeat;
 
 	AString *order, *token;
-	int atsign;
+	MAYBE_UNUSED int atsign;
 
 	while (turnDepth) {
 		// get the next line

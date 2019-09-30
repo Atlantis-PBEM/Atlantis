@@ -35,6 +35,9 @@
 #include "game.h"
 #include "gamedata.h"
 
+// replace with [[maybe_unused]] when c++17 is supported
+#define MAYBE_UNUSED __attribute__ ((unused))
+
 int ARegion::CheckSea(int dir, int range, int remainocean)
 {
 	if (type != R_OCEAN) return 0;
@@ -1690,7 +1693,7 @@ void GeoMap::Generate(int spread, int smoothness)
 	while (step > 1) {
 		count++;
 		int nextstep = step/2 + step%2;
-		int showfirst = 1;
+		MAYBE_UNUSED int showfirst = 1;
 		for (int x = 0; x <= size; x += step) {
 			for (int y = 0; y <= size; y += step) {
 				int av_ele = 0;
