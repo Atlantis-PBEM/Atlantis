@@ -1248,7 +1248,8 @@ int ARegion::TownHabitat()
 	if(caravan) build++;
 	if(build > 2) build = 2;
 	
-	hab = (build++ * build + 1) * hab * hab + basepopulation / 4 + 50;
+	build++;
+	hab = (build * build + 1) * hab * hab + basepopulation / 4 + 50;
 	
 	// Lake Effect
 	if(LakeEffect()) hab += 100;
