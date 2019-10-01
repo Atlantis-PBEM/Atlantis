@@ -2543,7 +2543,7 @@ cout << " !";
     // penalties are now between 0 and 2, depending on racial fractions in the army.
     for(int i=0; i<RA_NA; i++) racecount[i] = 0;
     
-    int max = unity;
+//    int max = unity;
 #ifdef DEBUG2
 cout << "@";
 #endif
