@@ -1229,7 +1229,7 @@ int ARegion::TownHabitat()
 		if(ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_FOOD) farm++;
 		if(ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
 		if(ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
-		if(ObjectDefs[obj->type].name == "Bank") bank++;
+		if(obj->type == O_OBANK) bank++;
 		if((ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
 			&& (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_MOUNT)) caravan++;
 	}
