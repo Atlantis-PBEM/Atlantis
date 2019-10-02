@@ -4894,12 +4894,12 @@ int Game::RunSpiritOfDead(ARegion *r, Unit *u)
 	    return 0;
 	}
 	
-	if(!tar->faction->num == ghostfaction) {
+	if(!(tar->faction->num == ghostfaction)) {
 	    u->Error("CAST: That unit appears to be dead, but not a ghost. Please contact your GM.", 0);
 	    return 1;
 	}
 	
-	if(!tar->type == U_MAGE) {
+	if(!(tar->type == U_MAGE)) {
 	    u->Error("CAST: That unit appears to be dead, but not a mage. Please contact your GM.", 0);
 	    return 1;
 	}	
