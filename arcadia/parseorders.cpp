@@ -1238,7 +1238,7 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	if (!bt->flags & BattleItemType::SPECIAL) {
+	if (!(bt->flags & BattleItemType::SPECIAL)) {
 		ParseError(pCheck, u, 0, "PREPARE: That item cannot be prepared.");
 		return;
 	}
@@ -3870,7 +3870,7 @@ void Game::ProcessIdleOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet)
 {
-    if(!Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+    if(!(Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT)) {
         ParseError(pCheck, u, 0, "TRANSPORT: Invalid order.");
         return;
     }
@@ -3935,7 +3935,7 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck, int i
 
 void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet)
 {
-    if(!Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+    if(!(Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT)) {
         ParseError(pCheck, u, 0, "DISTRIBUTE: Invalid order.");
         return;
     }
