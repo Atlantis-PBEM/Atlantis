@@ -617,8 +617,8 @@ int Object::SailThroughCheck(int dir)
 
 		// fleet is not flying and it is in a land region. Check that it
 		// doesn's sail inland
-		if (TerrainDefs[region->neighbors[dir]->type].similar_type != R_OCEAN) {
-			// sailing inland
+		if (!region->neighbors[dir] || TerrainDefs[region->neighbors[dir]->type].similar_type != R_OCEAN) {
+			// sailing inland or towards null hex
 			return 0;
 		}
 
