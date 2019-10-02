@@ -2181,7 +2181,7 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isqui
 	    delete token;	
 	} else ord->level = 0; //STUDY order mod end	
 	
-	if(pCheck || u->IsMage() && Globals->ARCADIA_MAGIC) {
+	if(pCheck || (u->IsMage() && Globals->ARCADIA_MAGIC)) {
 	    if(u->herostudyorders) {
 	        delete u->herostudyorders;
             AString err = "STUDY: Overwriting previous ";
