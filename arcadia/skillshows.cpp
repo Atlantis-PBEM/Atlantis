@@ -354,16 +354,16 @@ AString *ShowSkill::Report(Faction *f)
 			if(level == 1) {
 				*str += "This skill enables the mage to magically heal units "
 					"after battle. ";
-            }
-            *str += AString("A mage at this level can heal up to ") + HealDefs[level].num + 
-					" casualties, with a " + HealDefs[level].rate + 
-                    " percent rate of success. No order "
+			}
+			*str += AString("A mage at this level can heal up to ") + HealDefs[level].num +
+					" casualties, with a " + HealDefs[level].rate +
+					" percent rate of success. No order "
 					"is necessary to use this spell, it will be used "
 					"automatically when the mage is involved in battle.";
-		    if(Globals->ARCADIA_MAGIC && level == 1 && SkillDefs[skill].combat_cost > 0)
-		        *str += AString(" A mage will require one energy for every ")
-		            + 120/SkillDefs[skill].combat_cost + " casualties he "
-		            "attempts to heal.";
+			if(Globals->ARCADIA_MAGIC && level == 1 && SkillDefs[skill].combat_cost > 0)
+				*str += AString(" A mage will require one energy for every ")
+					+ 120/SkillDefs[skill].combat_cost + " casualties he "
+					"attempts to heal.";
 			break;
 		case S_GATE_LORE:
 			/* XXX -- This should be cleaner somehow. */
