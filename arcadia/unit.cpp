@@ -1249,7 +1249,7 @@ int Unit::Study(int sk, int days, int quiet, int overflow)
 			s = (Skill *) skills.First();
 			if (s->type != sk) {
 			    //Real experience patch
-			    if(s->days >= 30*GetMen() || s->experience >= 30*GetMen()) {
+			    if(s->days >= 30*static_cast<unsigned int>(GetMen()) || s->experience >= 30*static_cast<unsigned int>(GetMen())) {
     				Error("STUDY: Can know only 1 skill.", quiet);
     				return 0;
 				}
