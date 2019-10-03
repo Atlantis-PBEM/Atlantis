@@ -1544,8 +1544,8 @@ void Unit::AdjustSkills(int overflow)
 				forlist(&skills) {
 					Skill *s = (Skill *) elem;
 					if (s->days + s->experience > max) {
-					    if(s->days >= 30 || s->experience >= 30 || maxlevel == 0) 
-						max = s->days + s->experience;
+						if(s->days >= 30 || s->experience >= 30 || maxlevel == 0)
+							max = s->days + s->experience;
 						if(s->days >= 30 || s->experience >= 30) maxlevel = 1;
 						maxskill = s;
 					}
