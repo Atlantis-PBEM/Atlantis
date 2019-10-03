@@ -2561,7 +2561,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int ocean, int &bonus,
 		if(ItemDefs[item].fly && !canFly) {
 			if(bonus > pMnt->maxHamperedBonus)
 				bonus = pMnt->maxHamperedBonus;
-				type = 2;
+			type = 2;
 		}
 
 		// Practice the mount's skill
