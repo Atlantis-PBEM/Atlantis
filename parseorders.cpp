@@ -362,8 +362,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						if (unit->inTurnBlock)
 							ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
-							if (!pCheck && unit->former && unit->former->format)
-								unit->former->oldorders.Add(new AString(saveorder));
+						if (!pCheck && unit->former && unit->former->format)
+							unit->former->oldorders.Add(new AString(saveorder));
 						if (pCheck && former) delete unit;
 						unit = former;
 					} else {
