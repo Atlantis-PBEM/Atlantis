@@ -101,9 +101,10 @@ int ARegion::TerrainFactor(int value, int average)
 {
 	int retval = 0;
 	int df = abs(value-average);
-	if (df > 9)
+	if (df > 9) {
 		if (df < 15) retval = 1;
 			else retval = df - 14;
+	}
 	return retval;
 }
 
