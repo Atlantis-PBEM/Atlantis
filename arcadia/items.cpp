@@ -44,7 +44,7 @@ BattleItemType *FindBattleItem(char const *abbr)
 	return NULL;
 }
 
-ArmorType *FindArmor(char *abbr)
+ArmorType *FindArmor(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMARMORS; i++) {
@@ -55,7 +55,7 @@ ArmorType *FindArmor(char *abbr)
 	return NULL;
 }
 
-WeaponType *FindWeapon(char *abbr)
+WeaponType *FindWeapon(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMWEAPONS; i++) {
@@ -66,7 +66,7 @@ WeaponType *FindWeapon(char *abbr)
 	return NULL;
 }
 
-MountType *FindMount(char *abbr)
+MountType *FindMount(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMMOUNTS; i++) {
@@ -77,7 +77,7 @@ MountType *FindMount(char *abbr)
 	return NULL;
 }
 
-MonType *FindMonster(char *abbr, int illusion)
+MonType *FindMonster(char const *abbr, int illusion)
 {
 	if (abbr == NULL) return NULL;
 	AString tag = (illusion ? "i" : "");
@@ -91,7 +91,7 @@ MonType *FindMonster(char *abbr, int illusion)
 	return NULL;
 }
 
-ManType *FindRace(char *abbr)
+ManType *FindRace(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
 	for (int i = 0; i < NUMMAN; i++) {
