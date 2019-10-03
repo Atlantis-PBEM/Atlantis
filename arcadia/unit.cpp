@@ -2422,12 +2422,14 @@ int Unit::Taxers(int numtaxers)
 	if (taxers > totalMen) taxers = totalMen;
 
 	// And finally for creatures
-	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES)
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES) {
 		basetax += creatures;
 		taxers += creatures;
-	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
+	}
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS) {
 		basetax += illusions;
 		taxers += illusions;
+	}
 		
 
 	if(numtaxers) return(taxers);
