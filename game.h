@@ -560,6 +560,7 @@ private:
 	void RunUnitProduce(ARegion *, Unit *);
 	void Run1BuildOrder(ARegion *, Object *, Unit *);
 	void RunBuildShipOrder(ARegion *, Object *, Unit *);
+	void AddNewBuildings(ARegion *);
 	void RunBuildHelpers(ARegion *);
 	int ShipConstruction(ARegion *, Unit *, Unit *, int, int, int);
 	void CreateShip(ARegion *, Unit *, int);

@@ -715,6 +715,50 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 	u->monthorders = 0;
 }
 
+void Game::AddNewBuildings(ARegion *r)
+{
+	int i;
+	forlist((&r->objects)) {
+		Object *obj = (Object *) elem;
+		forlist ((&obj->units)) {
+			Unit *u = (Unit *) elem;
+			if (u->monthorders) {
+				if (u->monthorders->type == O_BUILD) {
+					BuildOrder *o = (BuildOrder *)u->monthorders;
+
+					// If BUILD order was marked for creating new building
+					// in parse phase, it is time to create one now.
+					if (o->new_building != -1) {
+						for (i = 1; i < 100; i++) {
+							if (!r->GetObject(i)) {
+								break;
+							}
+						}
+						if (i < 100) {
+							Object * obj = new Object(r);
+							obj->type = o->new_building;
+							obj->incomplete = ObjectDefs[obj->type].cost;
+							obj->num = i;
+							obj->SetName(new AString("Building"));
+							u->build = obj->num;
+							r->objects.Add(obj);
+
+							// This moves unit to a new building.
+							// This unit might be processed again but from new object.
+							u->MoveUnit(obj);
+							// This why we need to unset new_building so it will not
+							// try to create new object again.
+							o->new_building = -1;
+						} else {
+							u->Error("BUILD: The region is full.");
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void Game::RunBuildHelpers(ARegion *r)
 {
 	forlist((&r->objects)) {
@@ -996,6 +1040,7 @@ void Game::RunMonthOrders()
 		ARegion * r = (ARegion *) elem;
 		RunIdleOrders(r);
 		RunStudyOrders(r);
+		AddNewBuildings(r);
 		RunBuildHelpers(r);
 		RunProduceOrders(r);
 	}
