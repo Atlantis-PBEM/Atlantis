@@ -1497,5 +1497,5 @@ void ARegionList::FinalSetupGates()
 			r->gatemonth = nmon;
 		}
 	}
-	delete used;
+	delete[] used;
 }

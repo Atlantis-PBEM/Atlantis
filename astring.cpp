@@ -297,7 +297,7 @@ AString *AString::getlegal()
 	}
 
 	if (!j) {
-		delete temp;
+		delete[] temp;
 		return 0;
 	}
 
