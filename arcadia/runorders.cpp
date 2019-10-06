@@ -3314,7 +3314,7 @@ int Game::DoSendOrder(ARegion *r, Unit *u, SendOrder *o)
 	}
 	
 	Unit *tar = NULL;
-    ARegion *reg;
+    ARegion *reg = NULL;
 	if(o->direction >= 0) {
         if(o->direction < NDIRS && r->neighbors[o->direction])
             reg = r->neighbors[o->direction];
