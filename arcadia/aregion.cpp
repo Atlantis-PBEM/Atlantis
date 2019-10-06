@@ -2875,7 +2875,7 @@ int lastocean = -1;
 // add/remove beaches.
         for(int k=0; k<6; k++) {
             if(!neighbors[k]) continue;
-            if(!TerrainDefs[neighbors[k]->type].similar_type == R_OCEAN) {
+            if(!(TerrainDefs[neighbors[k]->type].similar_type == R_OCEAN)) {
                 hexside[k]->type = H_DUMMY; //gets rid of beaches
                 continue;
             }
