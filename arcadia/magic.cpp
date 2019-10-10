@@ -308,7 +308,7 @@ void Game::DistributeFog()
 	}
 }
 
-int Unit::GetCastCost(int skill, int extracost, int multiplier, int levelpenalty)
+int Unit::GetCastCost(int skill, int, int multiplier, int levelpenalty)
 {
 //this needs to match the cost in the skillshows.cpp file.
 
@@ -594,7 +594,7 @@ void Game::SetupGuardsmenAttitudes()
 //Quest stuff
 //--------------------------
 
-void Game::ResolveExits(ARegion *reg, Unit *u)
+void Game::ResolveExits(ARegion*, Unit *u)
 {
     Awrite("Reseeding Random Number Generator");
     if(!u) return;

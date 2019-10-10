@@ -182,7 +182,7 @@ void Unit::AddCastOrder(CastOrder *order)
     castlistorders.Add(order);
 }
 
-void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
     UnitId *id = ParseUnit(o);
 
@@ -200,7 +200,7 @@ void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck, int isqui
     u->AddCastOrder(order);
 }
 
-void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
     AString *token = o->gettoken();
 
@@ -267,7 +267,7 @@ void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet 
     delete token;
 }
 
-void Game::ProcessFogSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessFogSpell(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
     AString *token = o->gettoken();
 
@@ -293,7 +293,7 @@ void Game::ProcessFogSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet 
     return;
 }
 
-void Game::ProcessUnitsSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessUnitsSpell(Unit *u,AString *o, int spell, OrdersCheck*, int isquiet )
 {
     AString *token = o->gettoken();
     
@@ -330,7 +330,7 @@ void Game::ProcessUnitsSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck,
     }
 }
 
-void Game::ProcessChangeSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessChangeSpell(Unit *u,AString *o, int spell, OrdersCheck*, int isquiet )
 {
     AString *token = o->gettoken();
 
@@ -388,7 +388,7 @@ void Game::ProcessChangeSpell(Unit *u,AString *o, int spell, OrdersCheck *pCheck
     }
 }
 
-void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
     AString *token = o->gettoken();
 
@@ -489,7 +489,7 @@ void Game::ProcessModificationSpell(Unit *u,AString *o, OrdersCheck *pCheck, int
 
 }
 
-void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
     AString *token = o->gettoken();
     if(!token) {
@@ -562,7 +562,7 @@ void Game::ProcessRejuvenationSpell(Unit *u,AString *o, OrdersCheck *pCheck, int
     u->AddCastOrder(order);
 }
 
-void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
     CastIntOrder *order = new CastIntOrder;
     order->spell = S_CREATE_PHANTASMAL_DEMONS;
@@ -610,7 +610,7 @@ void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck, int isquie
     u->AddCastOrder(order);
 }
 
-void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck*, int isquiet)
 {
 	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_UNDEAD;
@@ -658,7 +658,7 @@ void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck, int isquie
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
 	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_BEASTS;
@@ -700,7 +700,7 @@ void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck, int isquie
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessPhanCreatures(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessPhanCreatures(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
 	CastMenOrder *order = new CastMenOrder;
 	order->spell = S_ILLUSORY_CREATURES;
@@ -772,7 +772,7 @@ void Game::ProcessPhanCreatures(Unit *u,AString *o, OrdersCheck *pCheck, int isq
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck*, int isquiet )
 {
 	CastOrder *order = new CastOrder;
 	order->spell = spell;
@@ -781,7 +781,7 @@ void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck *pCheck, int isqui
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessSummonCreaturesSpell(Unit *u, AString *o, int spell, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessSummonCreaturesSpell(Unit *u, AString *o, int spell, OrdersCheck*, int isquiet )
 {
 	AString *token = o->gettoken();
 	int number = -1;
@@ -796,7 +796,7 @@ void Game::ProcessSummonCreaturesSpell(Unit *u, AString *o, int spell, OrdersChe
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessArtifactSpell(Unit *u, AString *o, int sk, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessArtifactSpell(Unit *u, AString *o, int sk, OrdersCheck*, int isquiet )
 {
     if(!Globals->ARCADIA_MAGIC) return;
 	AString *token = o->gettoken();
@@ -824,7 +824,7 @@ void Game::ProcessArtifactSpell(Unit *u, AString *o, int sk, OrdersCheck *pCheck
 
 
 void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
-		OrdersCheck *pCheck, int isquiet)
+		OrdersCheck*, int isquiet)
 {
 	AString *token = o->gettoken();
 	int x = -1;
@@ -902,7 +902,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 	}
 }
 
-void Game::ProcessSummonMen(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessSummonMen(Unit *u, AString *o, OrdersCheck*, int isquiet)
 {
 	AString *token = o->gettoken();
 	if (!token) {
@@ -951,7 +951,7 @@ void Game::ProcessSummonMen(Unit *u, AString *o, OrdersCheck *pCheck, int isquie
 	u->AddCastOrder(order);
 }
 
-void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
 	AString *token = o->gettoken();
 	if (!token) {
@@ -995,7 +995,7 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck, int is
 	}
 }
 
-void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck, int isquiet )
+void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck*, int isquiet )
 {
 	AString *token = o->gettoken();
 
@@ -1647,7 +1647,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunEnchantArmor(ARegion *r,Unit *u)
+int Game::RunEnchantArmor(ARegion*,Unit *u)
 {
 	int level = u->GetSkill(S_ENCHANT_ARMOR);
 	int max = ItemDefs[I_MPLATE].mOut * level;
@@ -1759,7 +1759,7 @@ int Game::RunEnchantArmor(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunEnchantSwords(ARegion *r,Unit *u)
+int Game::RunEnchantSwords(ARegion*,Unit *u)
 {
 	int level = u->GetSkill(S_ENCHANT_SWORDS);
 	int max = ItemDefs[I_MSWORD].mOut * level;
@@ -1858,7 +1858,7 @@ int Game::RunEnchantSwords(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunCreateFood(ARegion *r,Unit *u)
+int Game::RunCreateFood(ARegion*,Unit *u)
 //Not adjusted for item sharing
 {
 	int level = u->GetSkill(S_CREATE_FOOD);
@@ -1994,7 +1994,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell, int isquiet)
 	return 1;
 }
 
-int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u, int isquiet)
+int Game::RunEngraveRunes(ARegion*,Object *o,Unit *u, int isquiet)
 {
 	if (!o->IsBuilding()) {
 		u->Error("Runes of Warding may only be engraved on a building.", isquiet);
@@ -2103,7 +2103,7 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u, int isquiet)
 	return 1;
 }
 
-int Game::RunSummonBalrog(ARegion *r,Unit *u, int isquiet)
+int Game::RunSummonBalrog(ARegion*,Unit *u, int isquiet)
 {
 	int level = u->GetSkill(S_SUMMON_BALROG);
 	if(!Globals->ARCADIA_MAGIC) {
@@ -2125,14 +2125,14 @@ int Game::RunSummonBalrog(ARegion *r,Unit *u, int isquiet)
     return 0;
 }
 
-int Game::RunSummonDemon(ARegion *r,Unit *u)
+int Game::RunSummonDemon(ARegion*,Unit *u)
 {
 	u->items.SetNum(I_DEMON,u->items.GetNum(I_DEMON) + 1);
 	u->Event(AString("Summons ") + ItemString(I_DEMON,1) + ".");
 	return 1;
 }
 
-int Game::RunSummonImps(ARegion *r,Unit *u)
+int Game::RunSummonImps(ARegion*,Unit *u)
 {
 	int level = u->GetSkill(S_SUMMON_IMPS);
 
@@ -2141,7 +2141,7 @@ int Game::RunSummonImps(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
+int Game::RunCreateArtifact(ARegion*,Unit *u,int skill,int item)
 {
     CastOrder *order = (CastOrder *) u->activecastorder;
 
@@ -2222,7 +2222,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
     return 0;
 }
 
-int Game::RunSummonLich(ARegion *r,Unit *u)
+int Game::RunSummonLich(ARegion*,Unit *u)
 {
 	int level = u->GetSkill(S_SUMMON_LICH);
 
@@ -2234,7 +2234,7 @@ int Game::RunSummonLich(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunRaiseUndead(ARegion *r,Unit *u)
+int Game::RunRaiseUndead(ARegion*,Unit *u)
 {
 	int level = u->GetSkill(S_RAISE_UNDEAD);
 
@@ -2246,7 +2246,7 @@ int Game::RunRaiseUndead(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunSummonSkeletons(ARegion *r,Unit *u)
+int Game::RunSummonSkeletons(ARegion*,Unit *u)
 {
 	int level = u->GetSkill(S_SUMMON_SKELETONS);
 
@@ -2258,7 +2258,7 @@ int Game::RunSummonSkeletons(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunDragonLore(ARegion *r, Unit *u, int isquiet)
+int Game::RunDragonLore(ARegion*, Unit *u, int isquiet)
 {
 	int level = u->GetSkill(S_DRAGON_LORE);
 
@@ -2542,7 +2542,7 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunPhanDemons(ARegion *r,Unit *u)
+int Game::RunPhanDemons(ARegion*,Unit *u)
 {
 	CastIntOrder *order = (CastIntOrder *) u->activecastorder;
 	int level = u->GetSkill(S_CREATE_PHANTASMAL_DEMONS);
@@ -2571,7 +2571,7 @@ int Game::RunPhanDemons(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunPhanUndead(ARegion *r,Unit *u)
+int Game::RunPhanUndead(ARegion*,Unit *u)
 {
 	CastIntOrder *order = (CastIntOrder *) u->activecastorder;
 	int level = u->GetSkill(S_CREATE_PHANTASMAL_UNDEAD);
@@ -2600,7 +2600,7 @@ int Game::RunPhanUndead(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunPhanBeasts(ARegion *r,Unit *u)
+int Game::RunPhanBeasts(ARegion*,Unit *u)
 {
 	CastIntOrder *order = (CastIntOrder *) u->activecastorder;
 	int level = u->GetSkill(S_CREATE_PHANTASMAL_BEASTS);
@@ -2629,7 +2629,7 @@ int Game::RunPhanBeasts(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunPhanCreatures(ARegion *r,Unit *u)
+int Game::RunPhanCreatures(ARegion*,Unit *u)
 {
 	CastMenOrder *order = (CastMenOrder *) u->activecastorder;
 	int level = u->GetSkill(S_ILLUSORY_CREATURES);
@@ -3075,7 +3075,7 @@ int Game::RunFarsight(ARegion *r,Unit *u)
 	return 1;
 }
 
-int Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
+int Game::RunDetectGates(ARegion *r,Object*,Unit *u)
 {
 	CastOrder *order = (CastOrder *)u->activecastorder;
 	int distance = 1;
@@ -3183,7 +3183,7 @@ int Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 	return 1;
 }
 
-int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
+int Game::RunTeleport(ARegion *r,Object*,Unit *u)
 {
 	ARegion *tar;
 	int val;
@@ -3260,7 +3260,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	return 1;
 }
 
-int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
+int Game::RunGateJump(ARegion *r,Object*,Unit *u)
 {
 	int level = u->GetSkill(S_GATE_LORE);
 	int nexgate = 0;
@@ -3443,7 +3443,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	return 1;
 }
 
-int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
+int Game::RunPortalLore(ARegion *r,Object*,Unit *u)
 {
 	int level = u->GetSkill(S_PORTAL_LORE);
 	TeleportOrder *order = u->teleportorders;
@@ -4048,7 +4048,7 @@ int Game::RunSummonCreatures(ARegion *r, Unit *u, int skill, int item, int max)
 	return 1;
 }
 
-int Game::RunSummonHigherCreature(ARegion *r, Unit *u, int skill, int item)
+int Game::RunSummonHigherCreature(ARegion*, Unit *u, int skill, int item)
 //Arcadia code for summoning balrogs, gryffins, liches
 {
     CastOrder *order = (CastOrder *) u->activecastorder;
@@ -4117,7 +4117,7 @@ int Game::RunSummonHigherCreature(ARegion *r, Unit *u, int skill, int item)
 }
 
 
-int Game::RunFog(ARegion *r, Unit *u)
+int Game::RunFog(ARegion*, Unit *u)
 // Arcadia spell
 {
 	CastIntOrder *order = (CastIntOrder *)u->activecastorder;
@@ -4295,7 +4295,7 @@ int Game::RunSummonMen(ARegion *r, Unit *u)
 	return 1;
 }
 
-int Game::RunTransmutation(ARegion *r, Unit *u)
+int Game::RunTransmutation(ARegion*, Unit *u)
 // Arcadia spell
 {
 	int level = u->GetSkill(S_TRANSMUTATION);

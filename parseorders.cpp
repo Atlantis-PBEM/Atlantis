@@ -2957,7 +2957,7 @@ void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessIdleOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+void Game::ProcessIdleOrder(Unit *u, AString*, OrdersCheck *pCheck)
 {
 	if (u->monthorders || (Globals->TAX_PILLAGE_MONTH_LONG &&
 		((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {

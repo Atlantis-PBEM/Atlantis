@@ -159,7 +159,7 @@ int Game::CanAttack(ARegion * r,AList * afacs,Unit * u) {
 }
 
 void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
-		AList &defs, Unit *att, Unit *tar, int ass, int adv)
+		AList &defs, Unit *att, Unit *tar, int ass, int )
 {
     att->crossbridge = 0;
     tar->crossbridge = 0;

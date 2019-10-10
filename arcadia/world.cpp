@@ -2460,7 +2460,7 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
     }
 }
 
-int ARegion::CanBeStartingCity( ARegionArray *pRA )
+int ARegion::CanBeStartingCity( ARegionArray* )
 {
 	if(type == R_OCEAN) return 0;
     if (!IsCoastal()) return 0;

@@ -91,7 +91,7 @@ TownInfo::~TownInfo()
 	if (name) delete name;
 }
 
-void TownInfo::Readin(Ainfile *f, ATL_VER &v)
+void TownInfo::Readin(Ainfile *f, ATL_VER&)
 {
 	name = f->GetStr();
 	pop = f->GetInt();

@@ -440,7 +440,7 @@ AList *Game::CanSeeSteal(ARegion *r, Unit *u)
 	return retval;
 }
 
-void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
+void Game::Do1Assassinate(ARegion *r, Object*, Unit *u)
 {
     if(u->dead) return; //Arcadia mod because assassin orders cannot be removed.
 
@@ -548,7 +548,7 @@ cout << "Returned to Do1Assassinate" << endl;
 #endif
 }
 
-void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
+void Game::Do1Steal(ARegion *r, Object*, Unit *u)
 {
     if(u->dead) return; //Arcadia mod because assassin orders cannot be removed.
     
@@ -2450,7 +2450,7 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 	return 0;
 }
 
-int Game::DoWishdrawOrder(ARegion *r, Unit *u, WishdrawOrder *o)
+int Game::DoWishdrawOrder(ARegion*, Unit *u, WishdrawOrder *o)
 {
 	int itm = o->item;
 	int amt = o->amount;
@@ -2477,7 +2477,7 @@ int Game::DoWishdrawOrder(ARegion *r, Unit *u, WishdrawOrder *o)
 	return 0;
 }
 
-int Game::DoWishskillOrder(ARegion *r, Unit *u, WishskillOrder *o)
+int Game::DoWishskillOrder(ARegion*, Unit *u, WishskillOrder *o)
 {
 	int sk = o->skill;
 	int days = o->knowledge * u->GetMen();

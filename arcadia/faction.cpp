@@ -109,7 +109,7 @@ void Attitude::Writeout(Aoutfile *f)
 	f->PutInt(attitude);
 }
 
-void Attitude::Readin(Ainfile *f, ATL_VER v)
+void Attitude::Readin(Ainfile *f, ATL_VER)
 {
 	factionnum = f->GetInt();
 	attitude = f->GetInt();

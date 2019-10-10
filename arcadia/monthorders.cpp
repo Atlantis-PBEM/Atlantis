@@ -725,7 +725,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 }
 
 /* Hexside Patch 030825 BS */
-int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit * u)
+int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit*)
 {
     int dir = obj->hexside;
     if(dir < 0 || dir > 5) return 0;
@@ -943,7 +943,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	u->monthorders = 0;
 }
 
-void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
+void Game::Run1BuildHexsideOrder(ARegion * r,Object*,Unit * u)
 {
     int quiet = u->monthorders->quiet;
 

@@ -287,7 +287,7 @@ AList *Game::CanSeeSteal(ARegion *r, Unit *u)
 	return retval;
 }
 
-void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
+void Game::Do1Assassinate(ARegion *r, Object*, Unit *u)
 {
 	AssassinateOrder *so = (AssassinateOrder *) u->stealorders;
 	Unit *tar = r->GetUnitId(so->target, u->faction->num);
@@ -364,7 +364,7 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 	RunBattle(r, u, tar, ass);
 }
 
-void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
+void Game::Do1Steal(ARegion *r, Object*, Unit *u)
 {
 	StealOrder *so = (StealOrder *) u->stealorders;
 	Unit *tar = r->GetUnitId(so->target, u->faction->num);
@@ -984,7 +984,7 @@ void Game::RunEnterOrders(int phase)
 	}
 }
 
-void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
+void Game::Do1EnterOrder(ARegion *r, Object*, Unit *u)
 {
 	Object *to;
 	if (u->enter == -1) {
@@ -1015,7 +1015,7 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 	u->MoveUnit(to);
 }
 
-void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
+void Game::Do1JoinOrder(ARegion *r, Object*, Unit *u)
 {
 	JoinOrder *jo;
 	Unit *tar, *pass;

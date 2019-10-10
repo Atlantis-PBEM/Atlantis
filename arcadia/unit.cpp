@@ -234,7 +234,7 @@ void Unit::Writeout(Aoutfile *s)
 	else s->PutStr("NO_SKILL");
 }
 
-void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
+void Unit::Readin(Ainfile *s, AList *facs, ATL_VER)
 {
 	name = s->GetStr();
 	describe = s->GetStr();
@@ -872,7 +872,7 @@ void Unit::DefaultOrders(Object *obj, int peasantfac)
 	}
 }
 
-void Unit::PostTurn(ARegion *r)
+void Unit::PostTurn(ARegion*)
 {
 	if (type == U_WMON) {
 		forlist(&items) {

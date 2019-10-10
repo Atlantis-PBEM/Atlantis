@@ -1662,7 +1662,7 @@ GeoMap::GeoMap(int x, int y)
 	}
 }
 
-void GeoMap::Generate(int spread, int smoothness)
+void GeoMap::Generate(int, int smoothness)
 {
 	int step = size / 2;
 	while (step > 16) step = step / 2;
