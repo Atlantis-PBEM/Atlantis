@@ -525,7 +525,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 // NEW FUNCTION DK 2000.03.07,
 // converted WriteExits
 //
-void ARegion::GetMapLine(char *buffer, int line, ARegionList *pRegs)
+void ARegion::GetMapLine(char *buffer, int line, ARegionList*)
 {
 	for (int m=0; m<MAP_WIDTH; m++) {
 		buffer[m] = ' ';

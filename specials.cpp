@@ -188,8 +188,8 @@ void Battle::UpdateShields(Army *a)
 	}
 }
 
-void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
-		Army *def, int behind)
+void Battle::DoSpecialAttack(int , Soldier *a, Army*,
+		Army *def, int )
 {
 	SpecialType *spd;
 	int i, num, tot = -1;

@@ -1002,7 +1002,7 @@ void ARegion::UpdateEditRegion()
 	}
 }
 
-void ARegion::SetupEditRegion(int canmakecity)
+void ARegion::SetupEditRegion(int)
 {
 //Direct copy of SetupPop() except calls AddEditTown() instead of AddTown()
 	TerrainType *typer = &(TerrainDefs[type]);

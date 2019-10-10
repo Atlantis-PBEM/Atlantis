@@ -246,7 +246,7 @@ Unit *Object::GetUnitId(UnitId *id, int faction)
 	}
 }
 
-int Object::CanEnter(ARegion *reg, Unit *u)
+int Object::CanEnter(ARegion*, Unit *u)
 {
 	if(!(ObjectDefs[type].flags & ObjectType::CANENTER) &&
 			(u->type == U_MAGE || u->type == U_NORMAL ||

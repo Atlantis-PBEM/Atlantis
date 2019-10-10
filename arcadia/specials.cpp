@@ -304,7 +304,7 @@ void Army::DoBindingAttack(Soldier *pAtt, Battle *b)
     }    
 }
 
-void Army::DoDragonBindingAttack(Soldier *pAtt, Battle *b, Army *atts)
+void Army::DoDragonBindingAttack(Soldier *pAtt, Battle *b, Army*)
 //'this' army is the defending army
 {
     int dragons = 0;
