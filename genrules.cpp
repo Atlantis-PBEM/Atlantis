@@ -162,6 +162,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr(f.Link("#world", "The World"));
 	f.Enclose(1, "ul");
 	f.TagText("li", f.Link("#world_regions", "Regions"));
+	if (Globals->RULES_REGION_RESOURCES) {
+		f.TagText("li", f.Link("#region_resources", "Region Resources"));
+	}
 	f.TagText("li", f.Link("#world_structures", "Structures"));
 	if (Globals->NEXUS_EXISTS) {
 		temp = "Atlantis Nexus";
@@ -983,6 +986,55 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"well as moving.";
 		f.Paragraph(temp);
 	}
+
+	// Regions table
+	if (Globals->RULES_REGION_RESOURCES) {
+		f.LinkRef("region_resources");
+		f.TagText("h3", "Region resources:");
+		f.Paragraph("Here is list of resources you can find in regions:");
+		f.Enclose(1, "center");
+		f.Enclose(1, "table border=\"1\"");
+		f.Enclose(1, "tr");
+		f.Enclose(1, "td colspan=\"2\"");
+		f.PutStr("Region type");
+		f.Enclose(0, "td");
+		f.Enclose(1, "td colspan=\"4\"");
+		f.PutStr("Resources");
+		f.Enclose(0, "td");
+		f.Enclose(0, "tr");
+
+		for (int i=0; i<R_NUM; i++) {
+			int first = 1;
+			f.Enclose(1, "tr");
+			f.Enclose(1, "td colspan=\"2\"");
+			f.PutStr(TerrainDefs[i].name);
+			f.Enclose(0, "td");
+			
+			f.Enclose(1, "td colspan=\"4\"");
+			AString temp = "";
+
+			for (unsigned int c = 0; c < sizeof(TerrainDefs[i].prods)/sizeof(Product); c++) {
+				if (TerrainDefs[i].prods[c].product == -1) continue;
+
+				if (first == 0) {
+					temp = temp + AString(", ");
+				}
+				temp = temp + ItemDefs[TerrainDefs[i].prods[c].product].name;				
+				first = 0;
+			}
+			if (temp.Len() > 0) {
+				temp = temp + AString(".");
+			} else {
+				temp = AString("none.");
+			}
+			f.PutStr(temp);
+			f.Enclose(0, "td");
+			f.Enclose(0, "tr");
+		}
+		f.Enclose(0, "table");
+		f.Enclose(0, "center");
+	}
+
 	f.LinkRef("world_structures");
 	f.TagText("h3", "Structures:");
 	temp = "Regions may also contain structures, such as buildings";

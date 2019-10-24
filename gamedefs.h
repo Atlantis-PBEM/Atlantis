@@ -708,6 +708,9 @@ public:
 	// Regions population changes depends on production in region, settlements grow
 	// Enables basic economy
 	int REGIONS_ECONOMY;
+
+	// Enable to display table of resources for every region type in Rules
+	int RULES_REGION_RESOURCES;
 };
 
 extern GameDefs *Globals;
