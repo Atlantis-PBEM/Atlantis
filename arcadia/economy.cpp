@@ -416,9 +416,6 @@ void ARegion::SetupCityMarket()
 				}
 			}
 		}
-		int canProduce = 0;
-		// Check if the locals can produce this item
-		if(canProduceHere) canProduce = locals->CanProduce(i);
 		int isUseful = 0;
 		// Check if the item is useful to the locals
 		isUseful = locals->CanUse(i);
