@@ -1601,7 +1601,6 @@ int Unit::MaintCost()
 	if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
 
 	int men = GetMen();
-	int okethnic = 0;
 	
 	if(Globals->ARCADIA_MAGIC) {	    
 	    int type = GetEthnicity();
@@ -1616,7 +1615,9 @@ int Unit::MaintCost()
         		}
         	}
 	    } else if(type != faction->ethnicity) men *= 2;  //double maintenance cost for non-ethnic men.
-	    else okethnic = 1;
+	    else {
+		    // do nothing
+	    }
 	}
 	
 	if(type == U_LEADER || type == U_MAGE) {
