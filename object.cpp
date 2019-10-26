@@ -609,27 +609,41 @@ int Object::FleetLoad()
 int Object::SailThroughCheck(int dir)
 {
 	if (IsFleet()) {
+		// if target region doesn't exist, cannot be sailed into
+		if (!region->neighbors[dir]) {
+			return 0;
+		}
+		
 		// flying fleets always can sail through
-		if (flying == 1) return 1;
+		if (flying == 1) {
+			return 1;
+		}
 
 		// from ocean sailing is always possible
-		if (TerrainDefs[region->type].similar_type == R_OCEAN) return 1;
+		if (TerrainDefs[region->type].similar_type == R_OCEAN) {
+			return 1;
+		}
 
 		// fleet is not flying and it is in a land region. Check that it
 		// doesn's sail inland
-		if (!region->neighbors[dir] || TerrainDefs[region->neighbors[dir]->type].similar_type != R_OCEAN) {
-			// sailing inland or towards null hex
+		if (TerrainDefs[region->neighbors[dir]->type].similar_type != R_OCEAN) {
 			return 0;
 		}
 
 		// sailing from land into ocean. If sail through is allowed, allow it
-		if (!Globals->PREVENT_SAIL_THROUGH) return 1;
+		if (!Globals->PREVENT_SAIL_THROUGH) {
+			return 1;
+		}
 
 		// if the fleet hadn't sailed before, it can go in any direction
-		if (prevdir == -1) return 1;
+		if (prevdir == -1) {
+			return 1;
+		}
 
 		// fleet can always sail backward
-		if (prevdir == dir) return 1;
+		if (prevdir == dir) {
+			return 1;
+		}
 
 		// Now we have to check that fleet is not sailing through land
 		{
@@ -665,10 +679,12 @@ int Object::SailThroughCheck(int dir)
 					blocked2 = 1;
 			}
 
-			if ((blocked1) && (blocked2))
+			if ((blocked1) && (blocked2)) {
 				return 0;
-			else
+			}
+			else {
 				return 1;
+			}
 		}
 	}
 	return 0;
