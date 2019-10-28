@@ -60,16 +60,20 @@ void Game::GrowWMons(int rate)
 	int level;
 	for (level = 0; level < regions.numLevels; level++) {
 		ARegionArray *pArr = regions.pRegionArrays[level];
-		int xsec;
-		for (xsec=0; xsec< pArr->x / 8; xsec++) {
-			for (int ysec=0; ysec< pArr->y / 16; ysec++) {
-				/* OK, we have a sector. Count mons, and wanted */
+
+		for (int xsec=0; xsec < pArr->x; xsec+=8) {
+			for (int ysec=0; ysec < pArr->y; ysec+=16) {
 				int mons=0;
 				int wanted=0;
-				for (int x=0; x<8; x++) {
-					for (int y=0; y<16; y+=2) {
-						ARegion *reg = pArr->GetRegion(x+xsec*8, y+ysec*16+x%2);
-						if (reg && !reg->IsGuarded()) {
+
+				for (int x=0; x < 8; x++) {
+					if (x+xsec > pArr->x) break;
+
+					for (int y=0; y < 16; y+=2) {
+						if (y+ysec > pArr->y) break;
+
+						ARegion *reg = pArr->GetRegion(x+xsec, y+ysec+x%2);
+						if (reg && reg->zloc == level && !reg->IsGuarded()) {
 							mons += reg->CountWMons();
 							/*
 							 * Make sure there is at least one monster type
@@ -89,8 +93,9 @@ void Game::GrowWMons(int rate)
 								 (ItemDefs[mon].flags & ItemType::DISABLED)))
 								avail = 1;
 
-							if (avail)
+							if (avail) {
 								wanted += TerrainDefs[reg->type].wmonfreq;
+							}
 						}
 					}
 				}
@@ -98,14 +103,23 @@ void Game::GrowWMons(int rate)
 				wanted /= 10;
 				wanted -= mons;
 				wanted = (wanted*rate + getrandom(100))/100;
+
 				if (wanted > 0) {
-					for (int i=0; i< wanted;) {
-						int m=getrandom(8);
-						int n=getrandom(8)*2+m%2;
+					// TODO: instead of loop guard need to check how many available regions
+					// are there and random them
+					int loop_guard = 1000;
+					for (int i=0; i < wanted;) {
+						int m = getrandom(8);
+						int n = getrandom(16)*2+m%2;
 						ARegion *reg = pArr->GetRegion(m+xsec*8, n+ysec*16);
-						if (reg && !reg->IsGuarded() && MakeWMon(reg)) {
+						if (reg && reg->zloc == level && !reg->IsGuarded() && MakeWMon(reg)) {
 							i++;
 						}
+
+						// In worst case scenario it will randomly pick same not matching regions
+						// with potential of infinitie loop (ie dodgy RNG)
+						loop_guard--;
+						if (loop_guard == 0) break;
 					}
 				}
 			}
