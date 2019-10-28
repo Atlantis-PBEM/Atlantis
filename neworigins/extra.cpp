@@ -1193,6 +1193,11 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyItemBasePrice(I_ADSWORD, 1000);
 	ModifyItemBasePrice(I_ADBAXE, 2000);
 
+	//
+	// Events
+	//
+	EnableItem(I_HHOR);
+
 
 	//
 	// Change races per terrain

@@ -2297,6 +2297,19 @@ ItemType id[] =
 	 -1,0, 0,
 	 0, NULL, 0,
 	 "", { "", "", "", "" }, 0, 0},
+
+	 // Events
+	 // Halloween
+	{"Headless Horseman","Headless Horsemen","HHOR",
+	 ItemType::CANTGIVE | ItemType::DISABLED | ItemType::NOTRANSPORT,
+	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 10, IT_MONSTER, 50, 4,
+	 50,50,50,0,4,
+	 -1,0,
+	 -1,0, 0,
+	 0, NULL, 0,
+	 "", { "", "", "", "" }, 0, 0},
 };
 ItemType *ItemDefs = id;
 
@@ -2396,6 +2409,9 @@ int NUMMAN = sizeof(mt) / sizeof(mt[0]);
 // tactics, stealth, obs
 // special, specialLevel,
 // silver spoiltype, hostile, number, name, abbr
+// ---
+// defencearray (ATTACK_COMBAT, ATTACK_ENERGY, ATTACK_SPIRIT, 
+//						  ATTACK_WEATHER, ATTACK_RIDING and ATTACK_RANGED)
 MonType md[] = {
 	{0,{0,0,0,0,0,0},
 	 0,0,0,
@@ -2704,6 +2720,14 @@ MonType md[] = {
 	 2,0,3,
 	 "icebreath", 4,
 	 8000,IT_MAGIC,50,1,"Ice Dragon", "IDRA"},
+
+	 // Events
+	 // Halloween
+	{4,{4,0,0,0,4,4},
+	 15,15,0,
+	 4,0,0,
+	 "fear", 4,
+	 1500,IT_ADVANCED,20,1,"Headless Horseman", "HHOR"},
 };
 
 MonType *MonDefs = md;

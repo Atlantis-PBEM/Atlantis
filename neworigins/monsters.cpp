@@ -27,6 +27,7 @@
 // ----        ------            --------
 // 2001/Mar/03 Joseph Traub      Moved some of the monster stuff here
 //
+#include "ctime"
 #include "gamedata.h"
 #include "game.h"
 
@@ -40,6 +41,41 @@ void Game::CreateVMons()
 void Game::GrowVMons()
 {
 	if (!Globals->LAIR_MONSTERS_EXIST) return;
+
+  std::time_t rawtime;
+  struct tm * timeinfo;
+  char month [60];
+  char day [60];
+
+  time (&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(month, 60, "%m", timeinfo);
+  strftime(day, 60, "%d", timeinfo);
+
+  long int day_num = strtol(day, NULL, 10);
+  long int month_num = strtol(month, NULL, 10);
+	
+  // Halloween monsters
+  if (month_num == 10 && day_num > 20) {
+    int count = 0;
+    Awrite("Running Halloween monsters...");
+    forlist(&regions) {
+      ARegion * r = (ARegion *) elem;
+      if (r->type == R_OCEAN) continue;
+
+      int spawn = getrandom(100);
+      if (spawn > 15) continue;
+
+      Faction *mfac = GetFaction(&factions, monfaction);
+      Unit *u = GetNewUnit(mfac, 0);
+      u->MakeWMon("Headless Horseman", I_HHOR, 1);
+      u->MoveUnit(r->GetDummy());
+      count++;
+    }
+    if (count > 0) {
+      WriteTimesArticle("Headless Horseman has been spotted roaming around...");
+    }
+  }
 
 	return;
 }

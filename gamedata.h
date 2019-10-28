@@ -262,6 +262,8 @@ enum {
 	I_CENSER,
 	// Quest item for Havilah
 	I_RELICOFGRACE,
+	// Monsters for Events
+	I_HHOR,
 	NITEMS
 };
 
