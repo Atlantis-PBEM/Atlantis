@@ -205,7 +205,7 @@ void Unit::CrossHexside(ARegion *fromreg, ARegion *toreg)
 }
 
 
-/*
+#if 0
 void Game::SetupObjectMirrors()
 {
 	forlist(&regions) {
@@ -225,15 +225,15 @@ void Game::SetupObjectMirrors()
 	}
 
 }
-*/
+#endif
 
 
-/*
-/* Hexside Patch 030825 BS *//*
+#if 0
+/* Hexside Patch 030825 BS */
 void Game::HexsideCompatibility(ARegion *r, Object *obj)
 {
 // If building a hexside object should remove any other hexside object, do it here.
-/* Harbour Removes Beach *//*
+/* Harbour Removes Beach */
     if(obj->type==O_HARBOUR) {
         forlist(&r->objects) {
 		    Object *o = (Object *) elem;        
@@ -247,7 +247,7 @@ void Game::HexsideCompatibility(ARegion *r, Object *obj)
 
 
 
-/* Hexside Patch 030825 BS *//*
+/* Hexside Patch 030825 BS */
 int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit * u)
 {
     int dir = obj->hexside;
@@ -267,7 +267,7 @@ int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit * u)
         }   
     }
 /* Object Specific Stuff. May code into gamedata.cpp at some stage */
-/* Ship may be built on sailable hexside object of correct depth, or ocean ships on ocean edge*//*
+/* Ship may be built on sailable hexside object of correct depth, or ocean ships on ocean edge*/
     if (obj->IsBoat()) {
         if(TerrainDefs[r->neighbors[dir]->type].similar_type == R_OCEAN && ObjectDefs[obj->type].sailable > 1) return 1;
     	forlist (&r->objects) {
@@ -283,7 +283,7 @@ int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit * u)
 
 
 
-/* Bridge cannot go to ocean and must go over river or ravine *//*
+/* Bridge cannot go to ocean and must go over river or ravine */
    if (obj->type == O_BRIDGE) {
         if(TerrainDefs[r->neighbors[dir]->type].similar_type == R_OCEAN) return 0;
     	forlist (&r->objects) {
@@ -294,12 +294,12 @@ int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit * u)
         }
    return 0;
    }
-/* Road cannot go to ocean *//*
+/* Road cannot go to ocean */
    if (obj->type == O_ROAD) {
         if(TerrainDefs[r->neighbors[dir]->type].similar_type == R_OCEAN) return 0;
    return 1;
    }
-/* Wall cannot go to river edge. To do: Should not go to river mouth */   /*
+/* Wall cannot go to river edge. To do: Should not go to river mouth */
    if (obj->type == O_IWALL) {
     	forlist (&r->objects) {
     	    Object *o = (Object *) elem;
@@ -309,7 +309,7 @@ int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit * u)
         }
    return 1;
    }
-/* Harbour must go on beach */   /*
+/* Harbour must go on beach */
    if (obj->type == O_HARBOUR) {
     	forlist (&r->objects) {
     	    Object *o = (Object *) elem;
@@ -319,10 +319,10 @@ int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit * u)
         }
    return 0;
    }   
-/* Anything else should not be built */   /*
+/* Anything else should not be built */
 return 0;
 }
 
 
+#endif
 
-*/

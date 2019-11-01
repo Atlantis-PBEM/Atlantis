@@ -39,7 +39,7 @@ class Object;
 
 class HexsideType {
 	public:
-		char *name;
+		char const *name;
 		enum {
 			DISABLED	= 0x001,
 			CANMODIFY	= 0x020
@@ -48,7 +48,7 @@ class HexsideType {
 
 		int item;
 		int cost;
-		char *skill;
+		char const *skill;
 		int level;	
 
 		int sailable;
@@ -86,7 +86,7 @@ class Hexside
 
 class ObjectType {
 	public:
-		char *name;
+		char const *name;
 		enum {
 			DISABLED	= 0x001,
 			NOMONSTERGROWTH	= 0x002,
@@ -107,7 +107,7 @@ class ObjectType {
 
 		int item;
 		int cost;
-		char *skill;
+		char const *skill;
 		int level;
 
 		int maxMaintenance;

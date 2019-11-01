@@ -135,7 +135,7 @@ class Unit : public AListElem
 		~Unit();
 
 		void SetMonFlags();
-		void MakeWMon(char *,int,int);
+		void MakeWMon(char const *,int,int);
 
 		void Writeout( Aoutfile *f );
 		void Readin( Ainfile *f, AList *, ATL_VER v );
@@ -192,8 +192,8 @@ class Unit : public AListElem
 		// These are rule-set specific, in extra.cpp.
 		//
 		// LLS
-		int GetAttribute(char *ident);
-		int PracticeAttribute(char *ident);
+		int GetAttribute(char const *ident);
+		int PracticeAttribute(char const *ident);
 		int GetProductionBonus(int);
 
 /* Do study stuff so experience gets learnt after study.

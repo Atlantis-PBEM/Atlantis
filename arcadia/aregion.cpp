@@ -92,7 +92,7 @@ TownInfo::~TownInfo()
 	if (name) delete name;
 }
 
-void TownInfo::Readin(Ainfile *f, ATL_VER &v)
+void TownInfo::Readin(Ainfile *f, ATL_VER&)
 {
 	name = f->GetStr();
 	pop = f->GetInt();
@@ -153,7 +153,7 @@ void ARegion::ZeroNeighbors()
 	}
 }
 
-void ARegion::SetName(char *c)
+void ARegion::SetName(char const *c)
 {
 	if(name) delete name;
 	name = new AString(c);
@@ -1876,7 +1876,7 @@ int ARegion::HasCityGuard()
 	return 0;
 }
 
-int ARegion::NotifySpell(Unit *caster, char *spell, ARegionList *pRegs)
+int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 {
 	AList flist;
 	unsigned int i;
@@ -1949,11 +1949,14 @@ int ARegion::CanTax(Unit *u)
 		Object *obj = (Object *) elem;
 		forlist ((&obj->units)) {
 			Unit *u2 = (Unit *) elem;
-			if (u2->guard == GUARD_GUARD && u2->IsReallyAlive())
-			    if(u2->type == U_GUARD || u2->type == U_GUARDMAGE) {
-			        if(town) return 0; //guards prevent taxing in towns
-			        if(u2->faction->ethnicity != u->faction->ethnicity) return 0; //guards prevent other ethnicities taxing
-				} else if (u2->GetAttitude(this, u) <= A_NEUTRAL) return 0;
+			if (u2->guard == GUARD_GUARD && u2->IsReallyAlive()) {
+				if (u2->type == U_GUARD || u2->type == U_GUARDMAGE) {
+					if (town) return 0; //guards prevent taxing in towns
+					if (u2->faction->ethnicity != u->faction->ethnicity) return 0; //guards prevent other ethnicities taxing
+				} else {
+					if (u2->GetAttitude(this, u) <= A_NEUTRAL) return 0;
+				}
+			}
 		}
 	}
 	
@@ -2239,6 +2242,8 @@ void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 	scale = ar->x / 10;
 
 	r->ZeroNeighbors();
+	y = r->yloc;
+	x = r->xloc;
 	// x2 is the x-coord of this hex inside its "wedge"
 	if (y < 5 * scale)
 		x2 = x % (2 * scale);
@@ -2254,7 +2259,7 @@ void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 	}
 	// but if that fails, use the special icosahedral connections:
 	if (!r->neighbors[D_NORTH]) {
-		if (y > 0 & y < 3 * scale)
+		if (y > 0 && y < 3 * scale)
 		{
 			if (y == 2) {
 				neighX = 0;
@@ -2340,7 +2345,7 @@ void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 		r->neighbors[D_SOUTH] = ar->GetRegion(x, y + 2);
 	}
 	if (!r->neighbors[D_SOUTH]) {
-		if (y2 > 0 & y2 < 3 * scale)
+		if (y2 > 0 && y2 < 3 * scale)
 		{
 			if (y2 == 2) {
 				neighX = 10 * scale - 1;
@@ -2576,7 +2581,7 @@ ARegion *ARegionArray::GetRegion(int xx, int yy)
 	return(regions[xx / 2 + yy * x / 2]);
 }
 
-void ARegionArray::SetName(char *name)
+void ARegionArray::SetName(char const *name)
 {
 	if(name) {
 		strName = new AString(name);
@@ -2873,7 +2878,7 @@ int lastocean = -1;
 // add/remove beaches.
         for(int k=0; k<6; k++) {
             if(!neighbors[k]) continue;
-            if(!TerrainDefs[neighbors[k]->type].similar_type == R_OCEAN) {
+            if(!(TerrainDefs[neighbors[k]->type].similar_type == R_OCEAN)) {
                 hexside[k]->type = H_DUMMY; //gets rid of beaches
                 continue;
             }

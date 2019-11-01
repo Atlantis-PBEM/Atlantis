@@ -26,7 +26,7 @@
 #include "items.h"
 #include "gamedata.h"
 
-RangeType *FindRange(char *range)
+RangeType *FindRange(char const *range)
 {
     if (range == NULL) return NULL;
     for (int i = 0; i < NUMRANGES; i++) {
@@ -37,7 +37,7 @@ RangeType *FindRange(char *range)
     return NULL;
 }
 
-SpecialType *FindSpecial(char *key)
+SpecialType *FindSpecial(char const *key)
 {
     if (key == NULL) return NULL;
     for (int i = 0; i < NUMSPECIALS; i++) {
@@ -48,7 +48,7 @@ SpecialType *FindSpecial(char *key)
     return NULL;
 }
 
-EffectType *FindEffect(char *effect)
+EffectType *FindEffect(char const *effect)
 {
     if (effect == NULL) return NULL;
     for (int i = 0; i < NUMEFFECTS; i++) {
@@ -59,7 +59,7 @@ EffectType *FindEffect(char *effect)
     return NULL;
 }
 
-AttribModType *FindAttrib(char *attrib)
+AttribModType *FindAttrib(char const *attrib)
 {
     if (attrib == NULL) return NULL;
 	for (int i = 0; i < NUMATTRIBMODS; i++) {
@@ -70,7 +70,7 @@ AttribModType *FindAttrib(char *attrib)
 	return NULL;
 }
 
-SkillType *FindSkill(char *skname)
+SkillType *FindSkill(char const *skname)
 {
 	if (skname == NULL) return NULL;
 	for (int i = 0; i < NSKILLS; i++) {
@@ -123,7 +123,7 @@ int SkillCost(int skill)
 	return SkillDefs[skill].cost;
 }
 
-int IsSpeciality(char *skill, int race)
+int IsSpeciality(char const *skill, int race)
 {
 	ManType *mt = FindRace(ItemDefs[race].abr);
 
@@ -148,7 +148,7 @@ int IsSpeciality(char *skill, int race)
 	return 0;
 }
 
-int SkillMax(char *skill, int race)
+int SkillMax(char const *skill, int race)
 //there seems to be a lot of overlap between use of this to find unit's max skill level, and use of IsASpeciality(). Maybe combine them sometime
 {
 	ManType *mt = FindRace(ItemDefs[race].abr);

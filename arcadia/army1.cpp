@@ -267,7 +267,7 @@ Soldier * Army::GetAttacker(int attackernum)
     return 0;
 }
 
-int Army::GetTarget(Army *attackers, int attackerform, int attackType, int *targetform, char* special, Battle *b)
+int Army::GetTarget(Army *attackers, int attackerform, int attackType, int *targetform, char const * special, Battle *b)
 //this sequence gets an enemy soldier to attack.
 //"this" is the army of the defending unit.
 {
@@ -505,8 +505,8 @@ int Hits(int a,int d)
 	return 0;
 }
 
-int Army::DoAnAttack(char *special, int numAttacks, int race, int attackType, int attackLev, 
-                  int flags, int weaponClass, char *effect, int mountBonus, Army *attackers, int attackerform, Battle *b, int strength)
+int Army::DoAnAttack(char const *special, int numAttacks, int race, int attackType, int attackLev, 
+                  int flags, int weaponClass, char const *effect, int mountBonus, Army *attackers, int attackerform, Battle *b, int strength)
 		/* The army in question is the army DEFENDING!
 		   */
 
@@ -2543,7 +2543,6 @@ cout << " !";
     // penalties are now between 0 and 2, depending on racial fractions in the army.
     for(int i=0; i<RA_NA; i++) racecount[i] = 0;
     
-    int max = unity;
 #ifdef DEBUG2
 cout << "@";
 #endif

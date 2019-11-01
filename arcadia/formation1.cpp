@@ -355,7 +355,7 @@ int Formation::Engaged(Army *itsarmy) const
     return 0;
 }
 
-void Formation::Sort(Army *itsarmy, Battle *b, int regtype)
+void Formation::Sort(Army *itsarmy, Battle *b, int)
 {
     int i=0;
     int missort=0;

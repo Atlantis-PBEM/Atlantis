@@ -66,7 +66,7 @@ void Game::DisableSkill(int sk)
 \arg \c *dep The skill required in the dependency (eg. FORC, if sk is FIRE)
 \arg \c lev The level of skill required in the dependency
 */
-void Game::ModifySkillDependancy(int sk, int i, char *dep, int lev)
+void Game::ModifySkillDependancy(int sk, int i, char const *dep, int lev)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
 	if(i < 0 || i >= (int)(sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend)))
@@ -133,14 +133,14 @@ See skills.h for the full list.
 \arg \c sk One of the values from the NSKILLS enum in gamedata.h
 \arg \c cost An amount of silver
 */
-void Game::ModifySkillRange(int sk, char *range)
+void Game::ModifySkillRange(int sk, char const *range)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
 	if (range && (FindRange(range) == NULL)) return;
 	SkillDefs[sk].range = range;
 }
 
-void Game::ModifySkillName(int sk, char *name, char *abbr)
+void Game::ModifySkillName(int sk, char const *name, char const *abbr)
 {
 	if(sk < 0 || sk > (NSKILLS-1)) return;
 	SkillDefs[sk].name = name;
@@ -213,7 +213,7 @@ Prices tend to go up in cities, and down in the boonies.
 \arg \c type The base price of the object
 */
 
-void Game::ModifyItemName(int it, char *name, char *names, char *abr)
+void Game::ModifyItemName(int it, char const *name, char const *names, char const *abr)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
 	ItemDefs[it].name = name;
@@ -289,7 +289,7 @@ Set this to NULL if the item cannot be produced through normal means.
 \arg \c lev How much skill is needed to produce the item 
                 (eg. PARM requires ARMO of level 3)
 */
-void Game::ModifyItemProductionSkill(int it, char *sk, int lev)
+void Game::ModifyItemProductionSkill(int it, char const *sk, int lev)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
 	if (sk && (FindSkill(sk) == NULL)) return;
@@ -343,7 +343,7 @@ no magical skill can produce this item.
 \arg \c *sk The skill as a string, eg. "CRMA", "CRRI", etc.
 \arg \c lev How much skill is needed to produce the item
 */
-void Game::ModifyItemMagicSkill(int it, char *sk, int lev)
+void Game::ModifyItemMagicSkill(int it, char const *sk, int lev)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
 	if (sk && (FindSkill(sk) == NULL)) return;
@@ -384,7 +384,7 @@ void Game::ModifyItemMagicInput(int it, int i, int input, int amount)
 	ItemDefs[it].mInput[i].amt = amount;
 }
 
-void Game::ModifyItemEscapeSkill(int it, char *sk, int val)
+void Game::ModifyItemEscapeSkill(int it, char const *sk, int val)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
 	if (sk && (FindSkill(sk) == NULL)) return;
@@ -401,7 +401,7 @@ For orcs, it's 4 and 1; for leaders it's 5 and 5 (although it could be 0 and 5)
 \arg \c spec The level of any specialised skills that the race knows. 
 \arg \c def The default maximum level of any skill
 */
-void Game::ModifyRaceSkillLevels(char *r, int spec, int def)
+void Game::ModifyRaceSkillLevels(char const *r, int spec, int def)
 {
 	ManType *mt = FindRace(r);
 	if (mt == NULL) return;
@@ -431,7 +431,7 @@ void Game::ModifyRaceHits(char *r, int num)
 \arg \c i Which slot is being changed (there are six, from 0-5)
 \arg \c *sk The skill to be added to the race's specialised skill list, eg. "LUMB"
 */
-void Game::ModifyRaceSkills(char *r, int i, char *sk)
+void Game::ModifyRaceSkills(char const *r, int i, char const *sk)
 {
 	ManType *mt = FindRace(r);
 	if (mt == NULL) return;
@@ -440,7 +440,7 @@ void Game::ModifyRaceSkills(char *r, int i, char *sk)
 	mt->skills[i] = sk;
 }
 
-void Game::ModifyRaceSkills(char *r, char *sk1, char *sk2, char *sk3, char *sk4, char *sk5, char *sk6)
+void Game::ModifyRaceSkills(char const *r, char const *sk1, char const *sk2, char const *sk3, char const *sk4, char const *sk5, char const *sk6)
 {
 	ManType *mt = FindRace(r);
 	if (mt == NULL) return;
@@ -463,7 +463,7 @@ void Game::ModifyRaceSkills(char *r, char *sk1, char *sk2, char *sk3, char *sk4,
 \arg \c *mon The monster being changed (eg. "BALR")
 \arg \c lev The attacking level of the monster.
 */
-void Game::ModifyMonsterAttackLevel(char *mon, int lev)
+void Game::ModifyMonsterAttackLevel(char const *mon, int lev)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -477,7 +477,7 @@ void Game::ModifyMonsterAttackLevel(char *mon, int lev)
 \arg \c defenseType The type of attack being defended against (eg. ATTACK_COMBAT)
 \arg \c level The new defense level of the monster
 */
-void Game::ModifyMonsterDefense(char *mon, int defenseType, int level)
+void Game::ModifyMonsterDefense(char const *mon, int defenseType, int level)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -492,7 +492,7 @@ void Game::ModifyMonsterDefense(char *mon, int defenseType, int level)
 \arg \c hits The number of hits that the monster can take before dying
 \arg \c regen The number of hits that the monster gets back per round of combat
 */
-void Game::ModifyMonsterAttacksAndHits(char *mon, int num, int hits, int regen)
+void Game::ModifyMonsterAttacksAndHits(char const *mon, int num, int hits, int regen)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -512,7 +512,7 @@ cumulative with the unit's current score.
 \arg \c stealth The monster's stealth score
 \arg \c obs The monster's observation score
 */
-void Game::ModifyMonsterSkills(char *mon, int tact, int stealth, int obs)
+void Game::ModifyMonsterSkills(char const *mon, int tact, int stealth, int obs)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -530,7 +530,7 @@ void Game::ModifyMonsterSkills(char *mon, int tact, int stealth, int obs)
 \arg \c *special The name of the special attack (eg. "hellfire", "black_wind")
 \arg \c lev The level that the special is cast at
 */
-void Game::ModifyMonsterSpecial(char *mon, char *special, int lev)
+void Game::ModifyMonsterSpecial(char const *mon, char const *special, int lev)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -547,7 +547,7 @@ Set the item type to -1 if you don't want items given out.
 \arg \c silver The base value of the silver and items that are given out
 \arg \c spoilType The type of items that are given out as spoils
 */
-void Game::ModifyMonsterSpoils(char *mon, int silver, int spoilType)
+void Game::ModifyMonsterSpoils(char const *mon, int silver, int spoilType)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -563,7 +563,7 @@ void Game::ModifyMonsterSpoils(char *mon, int silver, int spoilType)
 \arg \c num The maximum number of monsters that will appear
 \arg \c hostileChance The percentage chance that a monster will attack someone
 */
-void Game::ModifyMonsterThreat(char *mon, int num, int hostileChance)
+void Game::ModifyMonsterThreat(char const *mon, int num, int hostileChance)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
@@ -610,7 +610,7 @@ void Game::ModifyWeaponFlags(char *weap, int flags)
 \arg \c wclass The class of the weapon, eg. ARMOR_PIERCING, SLASHING
 \arg \c attackType The type of attack, eg. ATTACK_RANGED, ATTACK_COMBAT
 */
-void Game::ModifyWeaponAttack(char *weap, int wclass, int attackType,
+void Game::ModifyWeaponAttack(char const *weap, int wclass, int attackType,
 		int numAtt)
 {
 	WeaponType *pw = FindWeapon(weap);
@@ -630,7 +630,7 @@ void Game::ModifyWeaponAttack(char *weap, int wclass, int attackType,
 \arg \c defense The weapon's bonus in defense
 \arg \c vsMount The weapon's bonus against mounted opponents
 */
-void Game::ModifyWeaponBonuses(char *weap, int attack, int defense, int vsMount)
+void Game::ModifyWeaponBonuses(char const *weap, int attack, int defense, int vsMount)
 {
 	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
@@ -644,7 +644,7 @@ void Game::ModifyWeaponBonuses(char *weap, int attack, int defense, int vsMount)
 \arg \c *armor The armor's name, eg. "CLAR"
 \arg \c flags The flags to apply to the armor.
 */
-void Game::ModifyArmorFlags(char *armor, int flags)
+void Game::ModifyArmorFlags(char const *armor, int flags)
 {
 	ArmorType *pa = FindArmor(armor);
 	if (pa == NULL) return;
@@ -682,7 +682,7 @@ void Game::ModifyArmorSaveValue(char *armor, int wclass, int val)
 }
 
 
-void Game::ModifyArmorSaveAll(char *armor, int from, int melee, int armourpiercing, int magic)
+void Game::ModifyArmorSaveAll(char const *armor, int from, int melee, int armourpiercing, int magic)
 {
 	ArmorType *pa = FindArmor(armor);
 	if (pa == NULL) return;
@@ -719,7 +719,7 @@ void Game::ModifyMountSkill(char *mount, char *skill)
 \arg \c hampered The bonus given when a mount is hampered 
 								(eg. WING horses underground/in tunnels?)
 */
-void Game::ModifyMountBonuses(char *mount, int min, int max, int hampered)
+void Game::ModifyMountBonuses(char const *mount, int min, int max, int hampered)
 {
 	MountType *pm = FindMount(mount);
 	if (pm == NULL) return;
@@ -798,7 +798,7 @@ void Game::ModifyObjectMonster(int ob, int monster)
 	ObjectDefs[ob].monster = monster;
 }
 
-void Game::ModifyObjectConstruction(int ob, int it, int num, char *sk, int lev)
+void Game::ModifyObjectConstruction(int ob, int it, int num, char const *sk, int lev)
 {
 	if(ob < 0 || ob > (NOBJECTS-1)) return;
 	if((it < -1 && it != I_WOOD_OR_STONE) || it > (NITEMS -1))
@@ -1014,8 +1014,8 @@ void Game::ModifySpecialDefenseMods(char *special, int index, int type, int val)
 	sp->defs[index].val = val;
 }
 
-void Game::ModifySpecialDamage(char *special, int index, int type, int min,
-		int val, int flags, int cls, char *effect)
+void Game::ModifySpecialDamage(char const *special, int index, int type, int min,
+		int val, int flags, int cls, char const *effect)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
@@ -1032,7 +1032,7 @@ void Game::ModifySpecialDamage(char *special, int index, int type, int min,
 	sp->damage[index].effect = effect;
 }
 
-void Game::ModifyEffectFlags(char *effect, int flags)
+void Game::ModifyEffectFlags(char const *effect, int flags)
 {
 	EffectType *ep = FindEffect(effect);
 	if (ep == NULL) return;
@@ -1064,14 +1064,14 @@ void Game::ModifyEffectCancelEffect(char *effect, char *uneffect)
 	ep->cancelEffect = uneffect;
 }
 
-void Game::ModifyRangeFlags(char *range, int flags)
+void Game::ModifyRangeFlags(char const *range, int flags)
 {
 	RangeType *rp = FindRange(range);
 	if (rp == NULL) return;
 	rp->flags = flags;
 }
 
-void Game::ModifyRangeClass(char *range, int rclass)
+void Game::ModifyRangeClass(char const *range, int rclass)
 {
 	RangeType *rp = FindRange(range);
 	if (rp == NULL) return;
@@ -1079,7 +1079,7 @@ void Game::ModifyRangeClass(char *range, int rclass)
 	rp->rangeClass = rclass;
 }
 
-void Game::ModifyRangeMultiplier(char *range, int mult)
+void Game::ModifyRangeMultiplier(char const *range, int mult)
 {
 	RangeType *rp = FindRange(range);
 	if (rp == NULL) return;
@@ -1095,7 +1095,7 @@ void Game::ModifyRangeLevelPenalty(char *range, int pen)
 	rp->crossLevelPenalty = pen;
 }
 
-void Game::ModifyAttribMod(char *mod, int index, int flags, char *ident,
+void Game::ModifyAttribMod(char const *mod, int index, int flags, char const *ident,
 		int type, int val)
 {
 	AttribModType *mp = FindAttrib(mod);

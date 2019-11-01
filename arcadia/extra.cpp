@@ -160,7 +160,7 @@ Faction *Game::CheckVictory(AString *victoryline)
 	for(int i=0; i<RA_NA; i++) {
 	    if(race_present != -1) {
 	        if(faction_present[i]) return NULL;  //two ethnicities, no winner.
-	    } else if(faction_present) race_present = i;
+	    } else if(faction_present[i]) race_present = i;
 	}
 	
 	if(race_present == -1) return GetFaction(&factions,monfaction); //there appear to be no player factions left :(

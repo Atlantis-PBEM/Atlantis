@@ -416,9 +416,6 @@ void ARegion::SetupCityMarket()
 				}
 			}
 		}
-		int canProduce = 0;
-		// Check if the locals can produce this item
-		if(canProduceHere) canProduce = locals->CanProduce(i);
 		int isUseful = 0;
 		// Check if the item is useful to the locals
 		isUseful = locals->CanUse(i);
@@ -1005,7 +1002,7 @@ void ARegion::UpdateEditRegion()
 	}
 }
 
-void ARegion::SetupEditRegion(int canmakecity)
+void ARegion::SetupEditRegion(int)
 {
 //Direct copy of SetupPop() except calls AddEditTown() instead of AddTown()
 	TerrainType *typer = &(TerrainDefs[type]);
@@ -1232,7 +1229,7 @@ int ARegion::TownHabitat()
 		if(ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_FOOD) farm++;
 		if(ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
 		if(ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
-		if(ObjectDefs[obj->type].name == "Bank") bank++;
+		if(obj->type == O_OBANK) bank++;
 		if((ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
 			&& (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_MOUNT)) caravan++;
 	}
@@ -1251,7 +1248,8 @@ int ARegion::TownHabitat()
 	if(caravan) build++;
 	if(build > 2) build = 2;
 	
-	hab = (build++ * build + 1) * hab * hab + basepopulation / 4 + 50;
+	build++;
+	hab = (build * build + 1) * hab * hab + basepopulation / 4 + 50;
 	
 	// Lake Effect
 	if(LakeEffect()) hab += 100;

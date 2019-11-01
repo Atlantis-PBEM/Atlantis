@@ -33,7 +33,7 @@
 // Make sure this is correct.   The default is 1000 towns and 1000 regions.
 #define NUMBER_OF_TOWNS 1000
 
-static char *regionnames[] =
+static char const *regionnames[] =
 {
     "A'irhin",
     "A'vespol",
@@ -2094,7 +2094,7 @@ int AGetName(int town )
     return j;
 }
 
-char *AGetNameString( int name )
+char const *AGetNameString( int name )
 {
     return( regionnames[ name ] );
 }
@@ -2460,7 +2460,7 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
     }
 }
 
-int ARegion::CanBeStartingCity( ARegionArray *pRA )
+int ARegion::CanBeStartingCity( ARegionArray* )
 {
 	if(type == R_OCEAN) return 0;
     if (!IsCoastal()) return 0;

@@ -3837,7 +3837,8 @@ static ObjectType ot[] =
 	 1250,0,0,200,
 	 -1,0,NULL,0,
 	 0,0,0,
-	 -1,-1},
+	 -1,-1,
+	 {2,2,2,2,2,2}},
 	// Added for Ceran
 	{"Dragon Cliffs",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
