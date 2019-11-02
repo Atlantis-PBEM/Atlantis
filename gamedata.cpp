@@ -2300,16 +2300,16 @@ ItemType id[] =
 
 	 // Events
 	 // Halloween
-	{"Headless Horseman","Headless Horsemen","HHOR",
-	 ItemType::CANTGIVE | ItemType::DISABLED | ItemType::NOTRANSPORT,
-	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 10, IT_MONSTER, 50, 4,
-	 50,50,50,0,4,
-	 -1,0,
-	 -1,0, 0,
-	 0, NULL, 0,
-	 "", { "", "", "", "" }, 0, 0},
+  {"Headless Horseman","Headless Horsemen","HHOR",
+    ItemType::CANTGIVE | ItemType::DISABLED | ItemType::NOTRANSPORT,
+    NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+    NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+    10, IT_MONSTER, 50, 4,
+    10,10,0,0,4,
+    -1,0,
+    -1,0, 0,
+    0, NULL, 0,
+    "", { "", "", "", "" }, 0, 0},
 };
 ItemType *ItemDefs = id;
 
@@ -2721,13 +2721,13 @@ MonType md[] = {
 	 "icebreath", 4,
 	 8000,IT_MAGIC,50,1,"Ice Dragon", "IDRA"},
 
-	 // Events
-	 // Halloween
-	{4,{4,0,0,0,4,4},
-	 15,15,0,
-	 4,0,0,
-	 "fear", 4,
-	 1500,IT_ADVANCED,20,1,"Headless Horseman", "HHOR"},
+  // Events
+  // Halloween
+  {3,{3,0,0,0,3,3},
+   15,15,0,
+   3,0,0,
+   "fear", 3,
+   1000,IT_ADVANCED,0,1,"Headless Horseman", "HHOR"},
 };
 
 MonType *MonDefs = md;

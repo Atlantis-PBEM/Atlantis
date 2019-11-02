@@ -35,8 +35,8 @@
 #define MINIMUM_ACTIVE_QUESTS		5
 #define MAXIMUM_ACTIVE_QUESTS		20
 #define QUEST_EXPLORATION_PERCENT	50
-#define QUEST_SPAWN_RATE		5
-#define QUEST_MAX_REWARD		3000
+#define QUEST_SPAWN_RATE		8
+#define QUEST_MAX_REWARD		6000
 #define QUEST_SPAWN_CHANCE		70
 #define MAX_DESTINATIONS		5
 
@@ -160,7 +160,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				// Quest reward is based on QUEST_MAX_REWARD silver
 				reward_count = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
 
-				printf("Quest reward: %s x %d.\n", ItemDefs[i].name, reward_count);
+				printf("\nQuest reward: %s x %d.\n", ItemDefs[i].name, reward_count);
 				
 				// Setup reward
 				item = new Item;
@@ -175,12 +175,12 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 
 	// 20% chance to drop I_RELICOFGRACE from quest in addition to regular reward
 	d = getrandom(100);
-	if (d < 20) {
+	if (d < 25) {
 		item = new Item;
 		item->type = I_RELICOFGRACE;
 		item->num = 1;
 		q->rewards.Add(item);	
-		printf("Quest reward: Relic.\n");
+		printf("\nQuest reward: Relic.\n");
 	}
 
 	d = getrandom(100);
@@ -1304,6 +1304,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_CHASM, 1, I_DROWMAN);
 	ModifyTerrainCoastRace(R_CHASM, 2, I_GNOME);
 	ModifyTerrainEconomy(R_CHASM, 0, 0, 0, 3);
+	ModifyTerrainWMons(R_CHASM, 3, I_DEMON, I_BALROG, I_ETTIN);
 
 	ClearTerrainRaces(R_DFOREST);
 	ModifyTerrainRace(R_DFOREST, 0, I_UNDERDWARF);

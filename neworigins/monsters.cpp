@@ -40,7 +40,7 @@ void Game::CreateVMons()
 
 void Game::GrowVMons()
 {
-	if (!Globals->LAIR_MONSTERS_EXIST) return;
+  if (!Globals->LAIR_MONSTERS_EXIST) return;
 
   std::time_t rawtime;
   struct tm * timeinfo;
@@ -54,9 +54,9 @@ void Game::GrowVMons()
 
   long int day_num = strtol(day, NULL, 10);
   long int month_num = strtol(month, NULL, 10);
-	
+
   // Halloween monsters
-  if (month_num == 10 && day_num > 20) {
+  if (month_num == 10 && day_num > 26) {
     int count = 0;
     Awrite("Running Halloween monsters...");
     forlist(&regions) {
@@ -64,7 +64,7 @@ void Game::GrowVMons()
       if (r->type == R_OCEAN) continue;
 
       int spawn = getrandom(100);
-      if (spawn > 15) continue;
+      if (spawn > 10) continue;
 
       Faction *mfac = GetFaction(&factions, monfaction);
       Unit *u = GetNewUnit(mfac, 0);
@@ -77,5 +77,35 @@ void Game::GrowVMons()
     }
   }
 
-	return;
+  // Halloween monsters cleanup
+  if (month_num == 11 && day_num < 7) {
+    int count = 0;
+    Awrite("Running Halloween monsters cleanup...");
+    forlist(&regions) {
+      ARegion *r = (ARegion *) elem;
+      forlist (&r->objects) {
+        Object *o = (Object *) elem;
+        forlist (&o->units) {
+          Unit *u = (Unit *) elem;
+          int hh = 0;
+          forlist(&u->items) {
+            Item *i = (Item *) elem;
+            if (i->type == I_HHOR) {
+              hh = 1;
+              break;
+            }
+          }
+          if (hh == 1) {
+            count++;
+            u->items.SetNum(I_HHOR, 0);
+          }
+        }
+      }
+    }
+    if (count > 0) {
+      WriteTimesArticle("Headless Horsemen had disappeared, where did they go?...");
+    }
+  }
+
+  return;
 }
