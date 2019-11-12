@@ -264,6 +264,7 @@ enum {
 	I_RELICOFGRACE,
 	// Monsters for Events
 	I_HHOR,
+	I_VFOR,
 	NITEMS
 };
 

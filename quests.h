@@ -51,6 +51,7 @@ class Quest : public AListElem
 		};
 		int	type;
 		int	target;
+		int times;
 		Item	objective;
 		int	building;
 		int	regionnum;

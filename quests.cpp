@@ -33,6 +33,7 @@ Quest::Quest()
 {
 	type = -1;
 	target = -1;
+	times = 1;
 	objective.type = -1;
 	objective.num = 0;
 	building = -1;
@@ -159,7 +160,7 @@ void QuestList::WriteQuests(Aoutfile *f)
 	Item *i;
 	set<string>::iterator it;
 
-        f->PutInt(quests.Num());
+  f->PutInt(quests.Num());
 	forlist(this) {
 		q = (Quest *) elem;
 		f->PutInt(q->type);

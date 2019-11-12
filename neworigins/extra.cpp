@@ -33,7 +33,7 @@
 
 #define RELICS_REQUIRED_FOR_AVATAR	10
 #define MINIMUM_ACTIVE_QUESTS		5
-#define MAXIMUM_ACTIVE_QUESTS		20
+#define MAXIMUM_ACTIVE_QUESTS		60
 #define QUEST_EXPLORATION_PERCENT	50
 #define QUEST_SPAWN_RATE		8
 #define QUEST_MAX_REWARD		6000
@@ -184,7 +184,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	}
 
 	d = getrandom(100);
-	if (d < 40) {
+	if (d < 60) {
 		// SLAY quest
 		q->type = Quest::SLAY;
 		count = 0;
@@ -239,7 +239,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				break;
 			}
 		}
-	} else if (d < 70) {
+	} else if (d < 80) {
 		// Create a HARVEST quest
 		count = 0;
 		forlist(regions) {
@@ -672,6 +672,8 @@ Faction *Game::CheckVictory()
 
 	forlist_reuse(&quests) {
 		q = (Quest *) elem;
+		if (q->times != 1) continue;
+
 		switch(q->type) {
 			case Quest::SLAY:
 				l = regions.FindUnit(q->target);
@@ -1197,6 +1199,7 @@ void Game::ModifyTablesPerRuleset(void)
 	// Events
 	//
 	EnableItem(I_HHOR);
+	EnableItem(I_VFOR);
 
 
 	//

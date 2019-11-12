@@ -2310,6 +2310,18 @@ ItemType id[] =
     -1,0, 0,
     0, NULL, 0,
     "", { "", "", "", "" }, 0, 0},
+   
+	 // Devourer
+	 {"Void Fortress","Void Fortresses","VFOR",
+	 ItemType::CANTGIVE | ItemType::DISABLED | ItemType::NOTRANSPORT,
+	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 50000, IT_MONSTER, 10000, 6,
+	 0,0,0,0,0,
+	 -1,0,
+	 -1,0, 0,
+	 0, NULL, 0,
+	 "", { "", "", "", "" }, 0, 0},
 };
 ItemType *ItemDefs = id;
 
@@ -2728,6 +2740,14 @@ MonType md[] = {
    3,0,0,
    "fear", 3,
    1000,IT_ADVANCED,0,1,"Headless Horseman", "HHOR"},
+
+	// Devourer
+	// Phase 1
+	{6,{6,3,3,3,6,10},
+	 0,1000,0,
+	 5,0,0,
+	 "lightning", 5,
+	 0,IT_MAGIC,0,1,"Void Fortress", "VFOR"}
 };
 
 MonType *MonDefs = md;

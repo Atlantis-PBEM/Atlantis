@@ -30,6 +30,7 @@
 #include "ctime"
 #include "gamedata.h"
 #include "game.h"
+#include "quests.h"
 
 void Game::CreateVMons()
 {
@@ -106,6 +107,59 @@ void Game::GrowVMons()
       WriteTimesArticle("Headless Horsemen had disappeared, where did they go?...");
     }
   }
+
+  if (TurnNumber() == 44) {
+    int level = 1;
+    int total = 0;
+    Quest *q;
+    Item *item;
+    ARegionArray *pArr = regions.pRegionArrays[level];
+
+		for (int xsec=0; xsec < pArr->x; xsec+=8) {
+			for (int ysec=0; ysec < pArr->y; ysec+=12) {
+        int found = 0;
+
+				for (int x=0; x < 8; x++) {
+					if (x+xsec > pArr->x || found == 1) break;
+
+					for (int y=0; y < 12; y+=2) {
+						if (y+ysec > pArr->y) break;
+
+						ARegion *reg = pArr->GetRegion(x+xsec, y+ysec+x%2);
+            int rand = getrandom(100);
+						if (reg && reg->zloc == level && !reg->town && reg->type != R_OCEAN && rand < 30) {
+              Faction *mfac = GetFaction(&factions, monfaction);
+              Unit *u = GetNewUnit(mfac, 0);
+              u->MakeWMon("Void Fortress", I_VFOR, 1);
+              u->MoveUnit(reg->GetDummy());
+
+              q = new Quest;
+	            q->type = Quest::SLAY;
+              q->times = 0;
+              item = new Item;
+              item->type = I_RELICOFGRACE;
+              item->num = 2;
+              q->rewards.Add(item);	
+              q->target = u->num;
+
+              total += 1;
+              found = 1;
+              break;
+						}
+					}
+				}
+			}
+		}
+    if (total > 0) {
+      AString tmp = "Black pyramids descended from the sky. Hovering couple feets above the ground ";
+      tmp += "they do nothing. In couple of days farmers noticed that ";
+      tmp += "land around fortresses started slowly fade and transform into dust...";
+      WriteTimesArticle(tmp);
+    }
+    printf("\n\n TOTAL VOID : %d \n\n", total);
+  }
+
+  printf("\n\n TURN : %d \n\n", TurnNumber());
 
   return;
 }
