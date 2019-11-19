@@ -2747,7 +2747,7 @@ MonType md[] = {
 	 0,1000,0,
 	 5,0,0,
 	 "lightning", 5,
-	 0,IT_MAGIC,0,1,"Void Fortress", "VFOR"}
+	 50000,IT_MAGIC,0,1,"Void Fortress", "VFOR"}
 };
 
 MonType *MonDefs = md;
