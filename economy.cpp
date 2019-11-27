@@ -1476,7 +1476,6 @@ void ARegion::Migrate()
 	int totalimm = 0;
 	forlist(&migfrom) {
 		ARegion *r = (ARegion *) elem;
-		if (!r) continue;
 		
 		// figure range
 		int xdist = r->xloc - xloc;

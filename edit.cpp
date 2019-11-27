@@ -99,7 +99,6 @@ ARegion *Game::EditGameFindRegion()
 	} while(0);
 
 	if (pStr) delete pStr;
-	if (pToken) delete pToken;
 
 	return(ret);
 }
