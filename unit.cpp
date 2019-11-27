@@ -968,11 +968,11 @@ void Unit::ConsumeShared(int item, int n)
 					continue;
 				if (u->items.GetNum(item) >= n) {
 					u->items.SetNum(item, u->items.GetNum(item) - n);
-					u->Event(*(u->name) + " shares " + ItemString(item, n) +
+					u->Event(AString("Shares ") + ItemString(item, n) +
 							" with " + *name + ".");
 					return;
 				}
-				u->Event(*(u->name) + " shares " +
+				u->Event(AString("Shares ") +
 						ItemString(item, u->items.GetNum(item)) +
 						" with " + *name + ".");
 				n -= u->items.GetNum(item);
