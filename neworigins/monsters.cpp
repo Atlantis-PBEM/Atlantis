@@ -111,7 +111,6 @@ void Game::GrowVMons()
   if (TurnNumber() == 44) {
     int level = 1;
     int total = 0;
-    Quest *q;
     Item *item;
     ARegionArray *pArr = regions.pRegionArrays[level];
 
@@ -133,15 +132,6 @@ void Game::GrowVMons()
               u->MakeWMon("Void Fortress", I_VFOR, 1);
               u->MoveUnit(reg->GetDummy());
 
-              q = new Quest;
-	            q->type = Quest::SLAY;
-              q->times = 0;
-              item = new Item;
-              item->type = I_RELICOFGRACE;
-              item->num = 2;
-              q->rewards.Add(item);	
-              q->target = u->num;
-
               total += 1;
               found = 1;
               break;
@@ -156,7 +146,45 @@ void Game::GrowVMons()
       tmp += "land around fortresses started slowly fade and transform into dust...";
       WriteTimesArticle(tmp);
     }
-    printf("\n\n TOTAL VOID : %d \n\n", total);
+  }
+
+  if (TurnNumber() >= 47) {
+    // Transform into Void
+    forlist(&regions) {
+      ARegion *r = (ARegion *) elem;
+      int d = getrandom(100) + (TurnNumber() - 47)*2;
+
+      forlist (&r->objects) {
+        Object *o = (Object *) elem;
+        forlist (&o->units) {
+          Unit *u = (Unit *) elem;
+          forlist(&u->items) {
+            Item *i = (Item *) elem;
+            if (i->type == I_VFOR) {
+              if (d > 90) {
+                // Do transform region
+                printf("\n\n TRANSFORM %d,%d,%d \n\n", r->xloc, r->yloc, r->zloc);
+                r->development = 0;
+                r->maxdevelopment = 0;
+                r->habitat = 0;
+                r->improvement = 0;
+                r->type = R_VOID;
+                r->town = NULL;
+                r->SetName("Void");
+                r->products.DeleteAll();
+                r->SetupProds();
+                r->markets.DeleteAll();
+                r->population = 0;
+                r->basepopulation = 0;
+                r->wages = 0;
+                r->maxwages = 0;
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 
   printf("\n\n TURN : %d \n\n", TurnNumber());

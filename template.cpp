@@ -292,6 +292,9 @@ static char const *ter_fill[] = {
  "  ~ ~ ",
  " ~ ~  ",
 
+ // void
+ "  + + ",
+ " + +  ",
 };
 
 // NEW FUNCTION DK 2000.03.07,

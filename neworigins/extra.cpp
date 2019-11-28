@@ -924,6 +924,9 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyMonsterSkills("EAGL", 2, 2, 4);
 	ModifyMonsterSpoils("BALR", 30000, IT_MAGIC);
 
+	EnableItem(I_NOOGLE);
+	ModifyItemName(I_NOOGLE, "Voidborn", "Voidborn");
+
 	//
 	// Roads
 	//
@@ -1307,7 +1310,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_CHASM, 1, I_DROWMAN);
 	ModifyTerrainCoastRace(R_CHASM, 2, I_GNOME);
 	ModifyTerrainEconomy(R_CHASM, 0, 0, 0, 3);
-	ModifyTerrainWMons(R_CHASM, 3, I_DEMON, I_BALROG, I_ETTIN);
+	ModifyTerrainWMons(R_CHASM, 20, I_DEMON, I_BALROG, I_ETTIN);
 
 	ClearTerrainRaces(R_DFOREST);
 	ModifyTerrainRace(R_DFOREST, 0, I_UNDERDWARF);
@@ -1318,6 +1321,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_DFOREST, 1, I_DROWMAN);
 	ModifyTerrainCoastRace(R_DFOREST, 2, I_GNOME);
 	ModifyTerrainEconomy(R_DFOREST, 300, 11, 12, 3);
+	ModifyTerrainWMons(R_DFOREST, 20, I_SANDLING, I_BALROG, I_ETTIN);
 
 	ClearTerrainRaces(R_GROTTO);
 	ModifyTerrainRace(R_GROTTO, 0, I_UNDERDWARF);
@@ -1328,6 +1332,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_GROTTO, 1, I_DROWMAN);
 	ModifyTerrainCoastRace(R_GROTTO, 2, I_GNOME);
 	ModifyTerrainEconomy(R_GROTTO, 500, 12, 14, 2);
+	ModifyTerrainWMons(R_GROTTO, 20, I_UNDEAD, I_BALROG, I_ETTIN);
 
 
 	if ((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
