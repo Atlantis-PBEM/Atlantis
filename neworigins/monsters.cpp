@@ -108,51 +108,11 @@ void Game::GrowVMons()
     }
   }
 
-  if (TurnNumber() == 44) {
-    int level = 1;
-    int total = 0;
-    Item *item;
-    ARegionArray *pArr = regions.pRegionArrays[level];
-
-		for (int xsec=0; xsec < pArr->x; xsec+=8) {
-			for (int ysec=0; ysec < pArr->y; ysec+=12) {
-        int found = 0;
-
-				for (int x=0; x < 8; x++) {
-					if (x+xsec > pArr->x || found == 1) break;
-
-					for (int y=0; y < 12; y+=2) {
-						if (y+ysec > pArr->y) break;
-
-						ARegion *reg = pArr->GetRegion(x+xsec, y+ysec+x%2);
-            int rand = getrandom(100);
-						if (reg && reg->zloc == level && !reg->town && reg->type != R_OCEAN && rand < 30) {
-              Faction *mfac = GetFaction(&factions, monfaction);
-              Unit *u = GetNewUnit(mfac, 0);
-              u->MakeWMon("Void Fortress", I_VFOR, 1);
-              u->MoveUnit(reg->GetDummy());
-
-              total += 1;
-              found = 1;
-              break;
-						}
-					}
-				}
-			}
-		}
-    if (total > 0) {
-      AString tmp = "Black pyramids descended from the sky. Hovering couple feets above the ground ";
-      tmp += "they do nothing. In couple of days farmers noticed that ";
-      tmp += "land around fortresses started slowly fade and transform into dust...";
-      WriteTimesArticle(tmp);
-    }
-  }
-
   if (TurnNumber() >= 47) {
     // Transform into Void
     forlist(&regions) {
       ARegion *r = (ARegion *) elem;
-      int d = getrandom(100) + (TurnNumber() - 47)*2;
+      int d = getrandom(100);
 
       forlist (&r->objects) {
         Object *o = (Object *) elem;
@@ -161,7 +121,7 @@ void Game::GrowVMons()
           forlist(&u->items) {
             Item *i = (Item *) elem;
             if (i->type == I_VFOR) {
-              if (d > 90) {
+              if (d > 80) {
                 // Do transform region
                 printf("\n\n TRANSFORM %d,%d,%d \n\n", r->xloc, r->yloc, r->zloc);
                 r->development = 0;
@@ -186,6 +146,104 @@ void Game::GrowVMons()
       }
     }
   }
+
+  if (TurnNumber() >= 47) {
+    Awrite("Running Spread Void...");
+    int count = 0;
+    int monsters = 0;
+
+    forlist(&regions) {
+      ARegion *r = (ARegion *) elem;
+      if (r->type != R_VOID) continue;
+
+      Awrite("Found Void...");
+
+      int d = getrandom(100);
+      if (d > 50) {
+        Faction *mfac = GetFaction(&factions, monfaction);
+        Unit *u = GetNewUnit(mfac, 0);
+        u->MakeWMon("Creatures of the Void", I_NOOGLE, 1);
+        u->MoveUnit(r->GetDummy());
+        monsters++;
+      }
+
+      for (int i=0; i<NDIRS; i++) {
+        ARegion *r2 = r->neighbors[i];
+        int d = getrandom(100);
+        if (d > 90) {
+          printf("\n\n TRANSFORM neighbor %d,%d,%d \n\n", r2->xloc, r2->yloc, r2->zloc);
+          r2->development = 0;
+          r2->maxdevelopment = 0;
+          r2->habitat = 0;
+          r2->improvement = 0;
+          r2->type = R_VOID;
+          r2->town = NULL;
+          r2->SetName("Void");
+          r2->products.DeleteAll();
+          r2->SetupProds();
+          r2->markets.DeleteAll();
+          r2->population = 0;
+          r2->basepopulation = 0;
+          r2->wages = 0;
+          r2->maxwages = 0;
+        }
+      }
+    }
+    if (count > 0) {
+      AString tmp = "Void spreads... ";
+      tmp += "There are some rumors about demigods, avatars ";
+      tmp += "who posesses power to stop this world turn into dust.";
+      WriteTimesArticle(tmp);
+    }
+    if (monsters > 0) {
+      WriteTimesArticle("Creatures appeared from the Void...");
+    }
+  }
+
+  // if (TurnNumber() == 54) {
+  //   int total = 0;
+  //   Item *item;
+
+  //   for(int level = 2; level < regions.numLevels; level++) {
+  //     ARegionArray *pArr = regions.pRegionArrays[level];
+
+  //     for (int xsec=0; xsec < pArr->x; xsec+=8) {
+  //       for (int ysec=0; ysec < pArr->y; ysec+=12) {
+  //         int found = 0;
+
+  //         for (int x=0; x < 8; x++) {
+  //           if (x+xsec > pArr->x || found == 1) break;
+
+  //           for (int y=0; y < 12; y+=2) {
+  //             if (y+ysec > pArr->y) break;
+
+  //             ARegion *reg = pArr->GetRegion(x+xsec, y+ysec+x%2);
+  //             int rand = getrandom(100);
+  //             if (reg && reg->zloc == level && !reg->town && reg->type != R_OCEAN && rand < 30) {
+  //               Faction *mfac = GetFaction(&factions, monfaction);
+  //               Unit *u = GetNewUnit(mfac, 0);
+  //               u->MakeWMon("Void Fortress", I_VFOR, 1);
+  //               u->MoveUnit(reg->GetDummy());
+
+  //               total += 1;
+  //               found = 1;
+  //               break;
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+
+
+  //   if (total > 0) {
+  //     AString tmp = "Giant portals opened undergroud and black piramids appered.";
+  //     tmp += " ";
+  //     tmp += "land around fortresses started slowly fade and transform into dust...";
+  //     WriteTimesArticle(tmp);
+  //     printf("\n TOTAL ADDED: %d \n", total);
+  //   }
+  // }
 
   printf("\n\n TURN : %d \n\n", TurnNumber());
 
