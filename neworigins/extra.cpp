@@ -664,10 +664,10 @@ Faction *Game::CheckVictory()
 				}
 			}
 		}
-		if (reliccount >= RELICS_REQUIRED_FOR_AVATAR) {
-			message = "Avatar has been born!";
-			WriteTimesArticle(message);
-		}
+		// if (reliccount >= RELICS_REQUIRED_FOR_AVATAR) {
+		// 	message = "Avatar has been born!";
+		// 	WriteTimesArticle(message);
+		// }
 	}
 
 	forlist_reuse(&quests) {

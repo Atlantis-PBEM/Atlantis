@@ -149,14 +149,12 @@ void Game::GrowVMons()
 
   if (TurnNumber() >= 47) {
     Awrite("Running Spread Void...");
-    int count = 0;
+    int transform = 0;
     int monsters = 0;
 
     forlist(&regions) {
       ARegion *r = (ARegion *) elem;
       if (r->type != R_VOID) continue;
-
-      Awrite("Found Void...");
 
       int d = getrandom(100);
       if (d > 50) {
@@ -167,10 +165,28 @@ void Game::GrowVMons()
         monsters++;
       }
 
+      int vfor = 0;
+      forlist (&r->objects) {
+        Object *o = (Object *) elem;
+        forlist (&o->units) {
+          Unit *u = (Unit *) elem;
+          forlist(&u->items) {
+            Item *i = (Item *) elem;
+            if (i->type == I_VFOR) {
+              vfor = 1;
+            }
+          }
+        }
+      }
+      if (vfor == 0) continue;
+
+      Awrite("Found Void with Fortress...");
+
       for (int i=0; i<NDIRS; i++) {
         ARegion *r2 = r->neighbors[i];
         int d = getrandom(100);
         if (d > 90) {
+          transform++;
           printf("\n\n TRANSFORM neighbor %d,%d,%d \n\n", r2->xloc, r2->yloc, r2->zloc);
           r2->development = 0;
           r2->maxdevelopment = 0;
@@ -189,9 +205,9 @@ void Game::GrowVMons()
         }
       }
     }
-    if (count > 0) {
+    if (transform > 0) {
       AString tmp = "Void spreads... ";
-      tmp += "There are some rumors about demigods, avatars ";
+      tmp += "There are rumors about demigods, avatars ";
       tmp += "who posesses power to stop this world turn into dust.";
       WriteTimesArticle(tmp);
     }
