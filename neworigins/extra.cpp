@@ -60,9 +60,9 @@ int Game::SetupFaction( Faction *pFac )
 	// Set up magic
 	//
 	temp2->type = U_MAGE;
-	temp2->Study(S_FORCE, 30);
-	temp2->Study(S_PATTERN, 30);
-	temp2->Study(S_SPIRIT, 30);
+	temp2->Study(S_FORCE, 180);
+	temp2->Study(S_PATTERN, 180);
+	temp2->Study(S_SPIRIT, 180);
 	temp2->Study(S_GATE_LORE, 30);
 
 	// Set up health
@@ -651,23 +651,43 @@ Faction *Game::CheckVictory()
 		// or Creatures into Avatar!
 		if (f->IsNPC())
 			continue;
-		reliccount = 0;
+
 		forlist(&regions) {
 			r = (ARegion *) elem;
 			forlist(&r->objects) {
 				o = (Object *) elem;
 				forlist(&o->units) {
 					u = (Unit *) elem;
-					if (u->faction == f) {
-						reliccount += u->items.GetNum(I_RELICOFGRACE);
+						if (u->items.GetNum(I_RELICOFGRACE) == RELICS_REQUIRED_FOR_AVATAR) {
+							// Remove all I_RELICOFGRACE
+							u->items.SetNum(I_RELICOFGRACE, 0);
+
+							// Remove all men
+							forlist(&u->items) {
+								Item *i = (Item *)elem;
+								if (ItemDefs[i->type].type & IT_MAN) {
+									u->items.SetNum(i->type, 0);
+								}
+							}
+
+							// Add 1 x I_AVAT
+							u->SetMen(I_AVAT, 1);
+
+							// Make all skills level 5
+							u->type = U_MAGE;
+							for (int i = 0; i < NSKILLS; i++) {
+								if (SkillDefs[i].abbr == NULL) continue;
+								if (SkillDefs[i].abbr == "BRTL") continue;
+								u->Study(i, 450);
+							}
+
+							message = "World shake as an Avatar has been born!";
+							WriteTimesArticle(message);
+							printf("\n ... Avatar has been born: Faction: %d, Unit: %d ... \n", u->faction->num, u->num);
 					}
 				}
 			}
 		}
-		// if (reliccount >= RELICS_REQUIRED_FOR_AVATAR) {
-		// 	message = "Avatar has been born!";
-		// 	WriteTimesArticle(message);
-		// }
 	}
 
 	forlist_reuse(&quests) {

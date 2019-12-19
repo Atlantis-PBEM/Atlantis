@@ -2322,6 +2322,17 @@ ItemType id[] =
 	 -1,0, 0,
 	 0, NULL, 0,
 	 "", { "", "", "", "" }, 0, 0},
+
+	{"avatar", "avatars", "AVAT",
+	 ItemType::NOTRANSPORT,
+	 NULL, 0, 0, 0, {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
+	 NULL, 0, 0, {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
+	 10, IT_MAN | IT_LEADER, 100, 1,
+	 15, 0, 0, 0, 2,
+	 -1, 0,
+	 -1, 0, 0,
+	 0, NULL, 0,
+	 "", { "", "", "", "" }, 0, 0}
 };
 ItemType *ItemDefs = id;
 
@@ -2338,6 +2349,8 @@ ManType mt[] = {
 	{"PEAS", R_NEXUS,
 	 0,0,{NULL, NULL, NULL, NULL, NULL, NULL}},	 
 	{"LEAD", R_NEXUS,
+	 5,5,{NULL, NULL, NULL, NULL, NULL, NULL}},
+	{"AVAT", R_NEXUS,
 	 5,5,{NULL, NULL, NULL, NULL, NULL, NULL}},
 	{"VIKI", R_FOREST,
 	 3,2,{"SHIP", "SAIL", "LUMB", "COMB", NULL, NULL}},

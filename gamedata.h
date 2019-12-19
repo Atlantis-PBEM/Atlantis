@@ -265,6 +265,7 @@ enum {
 	// Monsters for Events
 	I_HHOR,
 	I_VFOR,
+	I_AVAT,
 	NITEMS
 };
 
