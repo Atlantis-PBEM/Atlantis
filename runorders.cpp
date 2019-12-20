@@ -2254,7 +2254,6 @@ void Game::DoGiveOrders()
 						} else if (o->amount == -2) {
 							if (o->type == O_TAKE) {
 								s = r->GetUnitId(o->target, u->faction->num);
-								fleet = s->object;
 								if (!s || !u->CanSee(r, s)) {
 									u->Error(AString("TAKE: Nonexistant target (") +
 											o->target->Print() + ").");
@@ -2264,6 +2263,7 @@ void Game::DoGiveOrders()
 											" is not a member of your faction.");
 									continue;
 								}
+								fleet = s->object;
 							} else {
 								s = u;
 								fleet = obj;

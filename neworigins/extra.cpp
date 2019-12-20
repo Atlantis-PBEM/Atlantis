@@ -652,42 +652,42 @@ Faction *Game::CheckVictory()
 		if (f->IsNPC())
 			continue;
 
-		forlist(&regions) {
-			r = (ARegion *) elem;
-			forlist(&r->objects) {
-				o = (Object *) elem;
-				forlist(&o->units) {
-					u = (Unit *) elem;
-						if (u->items.GetNum(I_RELICOFGRACE) == RELICS_REQUIRED_FOR_AVATAR) {
-							// Remove all I_RELICOFGRACE
-							u->items.SetNum(I_RELICOFGRACE, 0);
+	// 	forlist(&regions) {
+	// 		r = (ARegion *) elem;
+	// 		forlist(&r->objects) {
+	// 			o = (Object *) elem;
+	// 			forlist(&o->units) {
+	// 				u = (Unit *) elem;
+	// 					if (u->items.GetNum(I_RELICOFGRACE) == RELICS_REQUIRED_FOR_AVATAR) {
+	// 						// Remove all I_RELICOFGRACE
+	// 						u->items.SetNum(I_RELICOFGRACE, 0);
 
-							// Remove all men
-							forlist(&u->items) {
-								Item *i = (Item *)elem;
-								if (ItemDefs[i->type].type & IT_MAN) {
-									u->items.SetNum(i->type, 0);
-								}
-							}
+	// 						// Remove all men
+	// 						forlist(&u->items) {
+	// 							Item *i = (Item *)elem;
+	// 							if (ItemDefs[i->type].type & IT_MAN) {
+	// 								u->items.SetNum(i->type, 0);
+	// 							}
+	// 						}
 
-							// Add 1 x I_AVAT
-							u->SetMen(I_AVAT, 1);
+	// 						// Add 1 x I_AVAT
+	// 						u->SetMen(I_AVAT, 1);
 
-							// Make all skills level 5
-							u->type = U_MAGE;
-							for (int i = 0; i < NSKILLS; i++) {
-								if (SkillDefs[i].abbr == NULL) continue;
-								if (SkillDefs[i].abbr == "BRTL") continue;
-								u->Study(i, 450);
-							}
+	// 						// Make all skills level 5
+	// 						u->type = U_MAGE;
+	// 						for (int i = 0; i < NSKILLS; i++) {
+	// 							if (SkillDefs[i].abbr == NULL) continue;
+	// 							if (SkillDefs[i].abbr == "BRTL") continue;
+	// 							u->Study(i, 450);
+	// 						}
 
-							message = "World shake as an Avatar has been born!";
-							WriteTimesArticle(message);
-							printf("\n ... Avatar has been born: Faction: %d, Unit: %d ... \n", u->faction->num, u->num);
-					}
-				}
-			}
-		}
+	// 						message = "World shake as an Avatar has been born!";
+	// 						WriteTimesArticle(message);
+	// 						printf("\n ... Avatar has been born: Faction: %d, Unit: %d ... \n", u->faction->num, u->num);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
 	}
 
 	forlist_reuse(&quests) {
@@ -946,6 +946,7 @@ void Game::ModifyTablesPerRuleset(void)
 
 	EnableItem(I_NOOGLE);
 	ModifyItemName(I_NOOGLE, "Voidborn", "Voidborn");
+	// EnableItem(I_AVAT);
 
 	//
 	// Roads
