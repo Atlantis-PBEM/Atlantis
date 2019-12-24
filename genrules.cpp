@@ -5877,6 +5877,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#hold", "HOLD") + ", ";
 	temp += f.Link("#name", "NAME") + ", ";
 	temp += f.Link("#noaid", "NOAID") + ", ";
+	temp += f.Link("#share", "SHARE") + ", ";
 	if (move_over_water)
 		temp += f.Link("#nocross", "NOCROSS") + ", ";
 	temp += f.Link("#option", "OPTION") + ", ";
