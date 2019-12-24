@@ -310,7 +310,7 @@ int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range, int dev
 			ARegion *r = neighbors[d];
 			if (!r) continue;
 			if (dir == r->GetRealDirComp(d)) continue;
-			if (r->HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1, dev+2);
+			if (HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1, dev+2);
 		}
 	}
 	return sum;
@@ -327,7 +327,7 @@ int ARegion::RoadDevelopmentBonus(int range, int dev)
 		if (!HasExitRoad(d)) continue;
 		ARegion *r = neighbors[d];
 		if (!r) continue;
-		if (r->HasConnectingRoad(d)) bonus = r->TraceConnectedRoad(d, bonus, con, range-1, dev);
+		if (HasConnectingRoad(d)) bonus = r->TraceConnectedRoad(d, bonus, con, range-1, dev);
 	}
 	return bonus;	
 }

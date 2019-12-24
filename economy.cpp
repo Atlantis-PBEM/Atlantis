@@ -1142,7 +1142,7 @@ int ARegion::RoadDevelopment()
 	for (int i=0; i<NDIRS; i++) if (HasExitRoad(i)) roads++;
 	int dbonus = 0;
 	if (roads > 0) {
-		dbonus = RoadDevelopmentBonus(8, development);
+		dbonus = RoadDevelopmentBonus(16, development);
 		if (!town) dbonus = dbonus / 2;
 	}
 	// Maximum bonus of 45 to development for roads
