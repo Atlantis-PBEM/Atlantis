@@ -326,6 +326,23 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 			temp += AString(" Sailors: ") + FleetSailingSkill(1) + "/" + GetFleetSize() + ";";
 			temp += AString(" MaxSpeed: ") + GetFleetSpeed(1);
 		}
+		if ((Globals->PREVENT_SAIL_THROUGH) &&
+				(!Globals->ALLOW_TRIVIAL_PORTAGE)) {
+			if ((flying < 1) &&
+					(TerrainDefs[region->type].similar_type != R_OCEAN)) {
+				int dir = 0;
+				int first = 1;
+				temp += AString("; Sail directions: ");
+				for (dir = 0; dir < NDIRS; dir++) {
+					if (SailThroughCheck(dir) == 1) {
+						if (first == 1) first = 0;
+						else            temp += AString(", ");
+
+						temp += DirectionAbrs[dir];
+					}
+				}
+			}
+		}
 		if (describe) {
 			temp += AString("; ") + *describe;
 		}
@@ -584,6 +601,78 @@ int Object::FleetLoad()
 		load = wgt;
 	}
 	return load;
+}
+
+/* Return 1 if fleet can sail to a direction without sailing through land, or
+ * 0 if it cannot
+ */
+int Object::SailThroughCheck(int dir)
+{
+	if (IsFleet()) {
+		// if target region doesn't exist, cannot be sailed into
+		if (!region->neighbors[dir]) return 0;
+		
+		// flying fleets always can sail through
+		if (flying == 1) return 1;
+
+		// from ocean sailing is always possible
+		if (TerrainDefs[region->type].similar_type == R_OCEAN) return 1;
+
+		// fleet is not flying and it is in a land region. Check that it
+		// doesn's sail inland
+		if (TerrainDefs[region->neighbors[dir]->type].similar_type != R_OCEAN)
+			return 0;
+
+		// sailing from land into ocean. If sail through is allowed, allow it
+		if (!Globals->PREVENT_SAIL_THROUGH) return 1;
+
+		// if the fleet hadn't sailed before, it can go in any direction
+		if (prevdir == -1) return 1;
+
+		// fleet can always sail backward
+		if (prevdir == dir) return 1;
+
+		// Now we have to check that fleet is not sailing through land
+		{
+			// Fleet is on land, it is not flying and comes from another region
+			// so check that the fleet goes not through land
+			int blocked1 = 0;
+			int blocked2 = 0;
+			int d1 = prevdir;
+			int d2 = dir;
+
+			if (d1 > d2) {
+				int tmp = d1;
+				d1 = d2;
+				d2 = tmp;
+			}
+
+			for (int k = d1+1; k < d2; k++) {
+				ARegion *land1 = region->neighbors[k];
+				if ((!land1) ||
+						(TerrainDefs[land1->type].similar_type !=
+						 R_OCEAN))
+					blocked1 = 1;
+			}
+
+			int sides = NDIRS - 2 - (d2 - d1 - 1);
+			for (int l = d2+1; l <= d2 + sides; l++) {
+				int dl = l;
+				if (dl >= NDIRS) dl -= NDIRS;
+				ARegion *land2 = region->neighbors[dl];
+				if ((!land2) ||
+						(TerrainDefs[land2->type].similar_type !=
+						 R_OCEAN))
+					blocked2 = 1;
+			}
+
+			if ((blocked1) && (blocked2))
+				return 0;
+			else
+				return 1;
+		}
+	}
+	return 0;
 }
 
 /* Returns the total skill level of all sailors.
