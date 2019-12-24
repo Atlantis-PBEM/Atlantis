@@ -789,6 +789,7 @@ void Unit::DefaultOrders(Object *obj)
 				order->skill = -1;
 				order->item = I_SILVER;
 				order->target = 0;
+				order->quiet = 1;
 				monthorders = order;
 			}
 		}
