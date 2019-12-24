@@ -469,6 +469,9 @@ private:
 	void PostProcessUnitExtra(ARegion *, Unit *);
 	void PostProcessTurn();
 	
+	// Processing regions grow after production phase
+	void ProcessEconomics();
+	
 	// Migration effects for alternate player-driven economy
 	void ProcessMigration();
 	

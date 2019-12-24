@@ -1355,7 +1355,13 @@ void ARegion::Grow()
 		// less growth of towns in DYNAMIC_POPULATION
 		// to balance town creation and population dynamics
 		// through migration
-		if (Globals->DYNAMIC_POPULATION) tgrowth = tgrowth / 4;
+		if (Globals->DYNAMIC_POPULATION) {
+			tgrowth = tgrowth / 4;
+		} else {
+			// With roads can increase wages we need to
+			// reduce settlement growth
+			tgrowth = tgrowth / 2;
+		}
 		// Dampen growth curve at high population levels
 		// Ant: maybe this formula could be broken up a bit?
 		//		also, is (2 * town->hab - town->pop) correct?
