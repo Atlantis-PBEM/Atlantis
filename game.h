@@ -252,6 +252,7 @@ private:
 	void ModifyTerrainLairChance(int t, int chance);
 	void ModifyTerrainLair(int t, int i, int lair);
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
+	void ModifyTerrainFlags(int t, int flags);
 
 	void ModifyBattleItemFlags(char const *item, int flags);
 	void ModifyBattleItemSpecial(char const *item, char const *special, int level);
