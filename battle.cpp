@@ -202,16 +202,18 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	b->Reset();
 }
 
-void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
+void Battle::GetSpoils(AList *losers, ItemList *spoils, int ass)
 {
 	ItemList *ships = new ItemList;
+	AString quest_rewards;
+
 	forlist(losers) {
 		Unit * u = ((Location *) elem)->unit;
 		int numalive = u->GetSoldiers();
 		int numdead = u->losses;
 		if (!numalive) {
-			if (quests.CheckQuestKillTarget(u, spoils)) {
-				AddLine("Quest completed!");
+			if (quests.CheckQuestKillTarget(u, spoils, &quest_rewards)) {
+				AddLine(AString("Quest completed! ") + quest_rewards);
 			}
 		}
 		forlist(&u->items) {

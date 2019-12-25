@@ -57,6 +57,7 @@ class Quest : public AListElem
 		AString	regionname;
 		set<string> destinations;
 		AList	rewards;
+		AString GetRewardsStr();
 };
 
 class QuestList : public AList
@@ -65,15 +66,15 @@ class QuestList : public AList
 		int ReadQuests(Ainfile *f);
 		void WriteQuests(Aoutfile *f);
 
-		int CheckQuestKillTarget(Unit *u, ItemList *reward);
+		int CheckQuestKillTarget(Unit *u, ItemList *reward, AString *quest_rewards);
 		int CheckQuestHarvestTarget(ARegion *r,
 				int item, int harvested, int max,
-				Unit *u);
+				Unit *u, AString *quest_rewards);
 		int CheckQuestBuildTarget(ARegion *r, int building,
-				Unit *u);
-		int CheckQuestVisitTarget(ARegion *r, Unit *u);
+				Unit *u, AString *quest_rewards);
+		int CheckQuestVisitTarget(ARegion *r, Unit *u, AString *quest_rewards);
 		int CheckQuestDemolishTarget(ARegion *r, int building,
-				Unit *u);
+				Unit *u, AString *quest_rewards);
 };
 
 extern QuestList quests;
