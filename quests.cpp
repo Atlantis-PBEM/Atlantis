@@ -248,7 +248,7 @@ int QuestList::CheckQuestKillTarget(Unit *u, ItemList *reward, AString *quest_re
 
 int QuestList::CheckQuestHarvestTarget(ARegion *r,
 		int item, int harvested, int max,
-		Unit *u)
+		Unit *u, AString *quest_rewards)
 {
 	Quest *q;
 	Item *i;
