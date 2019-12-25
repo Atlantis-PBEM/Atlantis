@@ -51,6 +51,32 @@ Quest::~Quest()
 	}
 }
 
+AString Quest::GetRewardsStr()
+{
+	Item *i;
+	AString quest_rewards;
+	int first_i = 1;
+
+	quest_rewards = "Quest rewards: ";
+
+	if (rewards.Num() == 0) {
+		return quest_rewards + "none.";
+	}
+
+	forlist (&rewards) {
+		i = (Item *) elem;
+		if (first_i) {
+			first_i = 0;
+		} else {
+			quest_rewards += ", ";
+		}
+		quest_rewards += ItemString(i->type, i->num);
+	}
+	quest_rewards += ".";
+
+	return quest_rewards;
+}
+
 int QuestList::ReadQuests(Ainfile *f)
 {
         int count, dests, rewards;
@@ -197,7 +223,7 @@ void QuestList::WriteQuests(Aoutfile *f)
         return;
 }
 
-int QuestList::CheckQuestKillTarget(Unit * u, ItemList *reward)
+int QuestList::CheckQuestKillTarget(Unit *u, ItemList *reward, AString *quest_rewards)
 {
 	Quest *q;
 	Item *i;
@@ -210,6 +236,7 @@ int QuestList::CheckQuestKillTarget(Unit * u, ItemList *reward)
 				i = (Item *) elem;
 				reward->SetNum(i->type, reward->GetNum(i->type) + i->num);
 			}
+			*quest_rewards = q->GetRewardsStr();
 			this->Remove(q);
 			delete q;
 			return 1;
@@ -231,12 +258,14 @@ int QuestList::CheckQuestHarvestTarget(ARegion *r,
 		if (q->type == Quest::HARVEST &&
 				q->regionnum == r->num &&
 				q->objective.type == item) {
+				
 			if (getrandom(max) < harvested) {
 				forlist (&q->rewards) {
 					i = (Item *) elem;
 					u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
 					u->faction->DiscoverItem(i->type, 0, 1);
 				}
+				*quest_rewards = q->GetRewardsStr();
 				this->Remove(q);
 				delete q;
 				return 1;
@@ -248,7 +277,7 @@ int QuestList::CheckQuestHarvestTarget(ARegion *r,
 }
 
 int QuestList::CheckQuestBuildTarget(ARegion *r, int building,
-		Unit *u)
+		Unit *u, AString *quest_rewards)
 {
 	Quest *q;
 	Item *i;
@@ -258,11 +287,13 @@ int QuestList::CheckQuestBuildTarget(ARegion *r, int building,
 		if (q->type == Quest::BUILD &&
 				q->building == building &&
 				q->regionname == *r->name) {
+				
 			forlist (&q->rewards) {
 				i = (Item *) elem;
 				u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
 				u->faction->DiscoverItem(i->type, 0, 1);
 			}
+			*quest_rewards = q->GetRewardsStr();
 			this->Remove(q);
 			delete q;
 			return 1;
@@ -272,7 +303,7 @@ int QuestList::CheckQuestBuildTarget(ARegion *r, int building,
 	return 0;
 }
 
-int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u)
+int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u, AString *quest_rewards)
 {
 	Quest *q;
 	Object *o;
@@ -303,12 +334,13 @@ int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u)
 				if (intersection.size() == q->destinations.size()) {
 					// This unit has visited the
 					// required buildings in all those
-					// regions, so they win
+					// regions, so they completed a quest
 					forlist (&q->rewards) {
 						i = (Item *) elem;
 						u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
 						u->faction->DiscoverItem(i->type, 0, 1);
 					}
+					*quest_rewards = q->GetRewardsStr();
 					this->Remove(q);
 					delete q;
 					return 1;
@@ -321,7 +353,7 @@ int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u)
 }
 
 int QuestList::CheckQuestDemolishTarget(ARegion *r, int building,
-		Unit *u)
+		Unit *u, AString *quest_rewards)
 {
 	Quest *q;
 	Item *i;
@@ -336,6 +368,7 @@ int QuestList::CheckQuestDemolishTarget(ARegion *r, int building,
 				u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
 				u->faction->DiscoverItem(i->type, 0, 1);
 			}
+			*quest_rewards = q->GetRewardsStr();
 			this->Remove(q);
 			delete q;
 			return 1;
