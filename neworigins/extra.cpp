@@ -645,12 +645,12 @@ Faction *Game::CheckVictory()
 	}
 
 	// See if anyone has won by collecting enough relics of grace
-	forlist_reuse(&factions) {
-		f = (Faction *) elem;
-		// No accidentally transforming Guardsmen
-		// or Creatures into Avatar!
-		if (f->IsNPC())
-			continue;
+	// forlist_reuse(&factions) {
+	// 	f = (Faction *) elem;
+	// 	// No accidentally transforming Guardsmen
+	// 	// or Creatures into Avatar!
+	// 	if (f->IsNPC())
+	// 		continue;
 
 	// 	forlist(&regions) {
 	// 		r = (ARegion *) elem;
@@ -677,7 +677,9 @@ Faction *Game::CheckVictory()
 	// 						u->type = U_MAGE;
 	// 						for (int i = 0; i < NSKILLS; i++) {
 	// 							if (SkillDefs[i].abbr == NULL) continue;
-	// 							if (SkillDefs[i].abbr == "BRTL") continue;
+	// 							if (SkillDefs[i].flags & SkillType::DISABLED) continue;
+
+	// 							printf("\n SKILL: %s \n", SkillDefs[i].name);
 	// 							u->Study(i, 450);
 	// 						}
 
@@ -688,7 +690,7 @@ Faction *Game::CheckVictory()
 	// 			}
 	// 		}
 	// 	}
-	}
+	// }
 
 	forlist_reuse(&quests) {
 		q = (Quest *) elem;
