@@ -644,88 +644,90 @@ void ARegion::SetupCityMarket()
 		supply[i] = 0;
 		num--;
 	}
-	/* Set up the trade items */
-	int buy1 = getrandom(numtrade);
-	int buy2 = getrandom(numtrade);
-	int sell1 = getrandom(numtrade);
-	int sell2 = getrandom(numtrade);
-	int tradebuy = 0;
-	int tradesell = 0;
-	offset = 0;
-	cap = 0;
-
-	buy1 = getrandom(numtrade);
-	while (buy1 == buy2) buy2 = getrandom(numtrade);
-	while (sell1 == buy1 || sell1 == buy2) sell1 = getrandom(numtrade);
-	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
-		sell2 = getrandom(numtrade);
-
-	for (int i=0; i<NITEMS; i++) {
-		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if (ItemDefs[i].flags & ItemType::NOMARKET) continue;
-
-		if (ItemDefs[ i ].type & IT_TRADE) {
-			int addbuy = 0;
-			int addsell = 0;
-
-			if (buy1 == 0 || buy2 == 0) {
-				addbuy = 1;
-			}
-			buy1--;
-			buy2--;
-
-			if (sell1 == 0 || sell2 == 0) {
-				addsell = 1;
-			}
-			sell1--;
-			sell2--;
-
-			if (addbuy) {
-				int amt = Globals->CITY_MARKET_TRADE_AMT;
-				int price;
-
-				if (Globals->RANDOM_ECONOMY) {
-					amt += getrandom(amt);
-					if (Globals->MORE_PROFITABLE_TRADE_GOODS) {
-						price=(ItemDefs[i].baseprice*(250+getrandom(100)))/100;
+	/* Set up the trade items. At least 4 trade items are needed */
+	if (numtrade > 3) {
+		int buy1 = getrandom(numtrade);
+		int buy2 = getrandom(numtrade);
+		int sell1 = getrandom(numtrade);
+		int sell2 = getrandom(numtrade);
+		int tradebuy = 0;
+		int tradesell = 0;
+		offset = 0;
+		cap = 0;
+	
+		buy1 = getrandom(numtrade);
+		while (buy1 == buy2) buy2 = getrandom(numtrade);
+		while (sell1 == buy1 || sell1 == buy2) sell1 = getrandom(numtrade);
+		while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
+			sell2 = getrandom(numtrade);
+	
+		for (int i=0; i<NITEMS; i++) {
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (ItemDefs[i].flags & ItemType::NOMARKET) continue;
+	
+			if (ItemDefs[ i ].type & IT_TRADE) {
+				int addbuy = 0;
+				int addsell = 0;
+	
+				if (buy1 == 0 || buy2 == 0) {
+					addbuy = 1;
+				}
+				buy1--;
+				buy2--;
+	
+				if (sell1 == 0 || sell2 == 0) {
+					addsell = 1;
+				}
+				sell1--;
+				sell2--;
+	
+				if (addbuy) {
+					int amt = Globals->CITY_MARKET_TRADE_AMT;
+					int price;
+	
+					if (Globals->RANDOM_ECONOMY) {
+						amt += getrandom(amt);
+						if (Globals->MORE_PROFITABLE_TRADE_GOODS) {
+							price=(ItemDefs[i].baseprice*(250+getrandom(100)))/100;
+						} else {
+							price=(ItemDefs[i].baseprice*(150+getrandom(50)))/100;
+						}
 					} else {
-						price=(ItemDefs[i].baseprice*(150+getrandom(50)))/100;
+						price = ItemDefs[ i ].baseprice;
 					}
-				} else {
-					price = ItemDefs[ i ].baseprice;
+					
+					cap = (citymax/2);
+					tradesell++;
+					offset = - (citymax/20) + tradesell * (tradesell * tradesell * citymax/40);
+					if (cap + offset < citymax) {
+						Market * m = new Market (M_SELL, i, price, amt/5, cap+population+offset,
+							citymax+population, 0, amt);
+						markets.Add(m);
+					}
 				}
-				
-				cap = (citymax/2);
-				tradesell++;
-				offset = - (citymax/20) + tradesell * (tradesell * tradesell * citymax/40);
-				if (cap + offset < citymax) {
-					Market * m = new Market (M_SELL, i, price, amt/5, cap+population+offset,
-						citymax+population, 0, amt);
-					markets.Add(m);
-				}
-			}
-
-			if (addsell) {
-				int amt = Globals->CITY_MARKET_TRADE_AMT;
-				int price;
-
-				if (Globals->RANDOM_ECONOMY) {
-					amt += getrandom(amt);
-					if (Globals->MORE_PROFITABLE_TRADE_GOODS) {
-						price=(ItemDefs[i].baseprice*(100+getrandom(90)))/100;
+	
+				if (addsell) {
+					int amt = Globals->CITY_MARKET_TRADE_AMT;
+					int price;
+	
+					if (Globals->RANDOM_ECONOMY) {
+						amt += getrandom(amt);
+						if (Globals->MORE_PROFITABLE_TRADE_GOODS) {
+							price=(ItemDefs[i].baseprice*(100+getrandom(90)))/100;
+						} else {
+							price=(ItemDefs[i].baseprice*(100+getrandom(50)))/100;
+						}
 					} else {
-						price=(ItemDefs[i].baseprice*(100+getrandom(50)))/100;
+						price = ItemDefs[ i ].baseprice;
 					}
-				} else {
-					price = ItemDefs[ i ].baseprice;
-				}
-
-				cap = (citymax/2);
-				offset = tradebuy++ * (citymax/6);
-				if (cap+offset < citymax) {
-					Market * m = new Market (M_BUY, i, price, amt/6, cap+population+offset,
-						citymax+population, 0, amt);
-					markets.Add(m);
+	
+					cap = (citymax/2);
+					offset = tradebuy++ * (citymax/6);
+					if (cap+offset < citymax) {
+						Market * m = new Market (M_BUY, i, price, amt/6, cap+population+offset,
+							citymax+population, 0, amt);
+						markets.Add(m);
+					}
 				}
 			}
 		}
