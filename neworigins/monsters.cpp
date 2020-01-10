@@ -238,8 +238,6 @@ void Game::GrowVMons()
     }
 
     Faction *mfac = GetFaction(&factions, monfaction);
-    mfac->SetAttitude(15, A_ALLY);
-    mfac->SetAttitude(18, A_ALLY);
     mfac->SetAttitude(30, A_ALLY);
     mfac->SetAttitude(43, A_ALLY);
     mfac->SetAttitude(44, A_ALLY);
