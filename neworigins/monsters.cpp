@@ -121,7 +121,7 @@ void Game::GrowVMons()
           forlist(&u->items) {
             Item *i = (Item *) elem;
             if (i->type == I_VFOR) {
-              if (d > 80) {
+              if (d > 90) {
                 // Do transform region
                 printf("\n\n TRANSFORM %d,%d,%d \n\n", r->xloc, r->yloc, r->zloc);
                 r->development = 0;
@@ -238,52 +238,55 @@ void Game::GrowVMons()
     }
 
     Faction *mfac = GetFaction(&factions, monfaction);
+    mfac->SetAttitude(15, A_ALLY);
+    mfac->SetAttitude(18, A_ALLY);
     mfac->SetAttitude(30, A_ALLY);
     mfac->SetAttitude(43, A_ALLY);
     mfac->SetAttitude(44, A_ALLY);
+    mfac->SetAttitude(60, A_ALLY);
 
-    {
-      int level = 2;
-      int total = 0;
-      ARegionArray *pArr = regions.pRegionArrays[level];
+    // {
+    //   int level = 2;
+    //   int total = 0;
+    //   ARegionArray *pArr = regions.pRegionArrays[level];
 
-      for (int xsec = 0; xsec < pArr->x; xsec += 8)
-      {
-        for (int ysec = 0; ysec < pArr->y; ysec += 12)
-        {
-          int found = 0;
+    //   for (int xsec = 0; xsec < pArr->x; xsec += 8)
+    //   {
+    //     for (int ysec = 0; ysec < pArr->y; ysec += 12)
+    //     {
+    //       int found = 0;
 
-          for (int x = 0; x < 8; x++)
-          {
-            if (x + xsec > pArr->x || found == 1)
-              break;
+    //       for (int x = 0; x < 8; x++)
+    //       {
+    //         if (x + xsec > pArr->x || found == 1)
+    //           break;
 
-            for (int y = 0; y < 12; y += 2)
-            {
-              if (y + ysec > pArr->y)
-                break;
+    //         for (int y = 0; y < 12; y += 2)
+    //         {
+    //           if (y + ysec > pArr->y)
+    //             break;
 
-              ARegion *reg = pArr->GetRegion(x + xsec, y + ysec + x % 2);
-              int rand = getrandom(100);
-              if (reg && reg->zloc == level && !reg->town && reg->type != R_OCEAN && rand < 30)
-              {
-                Faction *mfac = GetFaction(&factions, monfaction);
-                Unit *u = GetNewUnit(mfac, 0);
-                u->MakeWMon("Void Fortress", I_VFOR, 1);
-                u->MoveUnit(reg->GetDummy());
-                found = 1;
-                total++;
-                break;
-              }
-            }
-          }
-        }
-      }
+    //           ARegion *reg = pArr->GetRegion(x + xsec, y + ysec + x % 2);
+    //           int rand = getrandom(100);
+    //           if (reg && reg->zloc == level && !reg->town && reg->type != R_OCEAN && rand < 30)
+    //           {
+    //             Faction *mfac = GetFaction(&factions, monfaction);
+    //             Unit *u = GetNewUnit(mfac, 0);
+    //             u->MakeWMon("Void Fortress", I_VFOR, 1);
+    //             u->MoveUnit(reg->GetDummy());
+    //             found = 1;
+    //             total++;
+    //             break;
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
 
-      printf("\n TOTAL VFORT: %d \n", total);
-      AString tmp = "Giant portals opened undergroud and black piramids appered.";
-      WriteTimesArticle(tmp);
-    }
+    //   printf("\n TOTAL VFORT: %d \n", total);
+    //   AString tmp = "Giant portals opened undergroud and black piramids appered.";
+    //   WriteTimesArticle(tmp);
+    // }
 
   }
 
