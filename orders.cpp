@@ -228,6 +228,7 @@ AttackOrder::~AttackOrder()
 BuildOrder::BuildOrder()
 {
 	type = O_BUILD;
+	new_building = -1;
 }
 
 BuildOrder::~BuildOrder()

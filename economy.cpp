@@ -1142,7 +1142,7 @@ int ARegion::RoadDevelopment()
 	for (int i=0; i<NDIRS; i++) if (HasExitRoad(i)) roads++;
 	int dbonus = 0;
 	if (roads > 0) {
-		dbonus = RoadDevelopmentBonus(8, development);
+		dbonus = RoadDevelopmentBonus(16, development);
 		if (!town) dbonus = dbonus / 2;
 	}
 	// Maximum bonus of 45 to development for roads
@@ -1254,7 +1254,7 @@ void ARegion::Grow()
 {
 	// We don't need to grow 0 pop regions
 	if (basepopulation == 0) return;
-	
+
 	// growpop is the overall population growth	
 	int growpop = 0;
 	
@@ -1337,6 +1337,7 @@ void ARegion::Grow()
 	//	/ (5 * (long int) ((long int) habitat + 3 * (long int) abs(diff)));
 	if (diff < 0) growpop -= (int) dgrow;
 	if (diff > 0) growpop += (int) dgrow;
+
 	/*
 		Awrite(AString("growpop = ") + growpop);
 		Awrite(AString("grow2 = ") + (unsigned int) grow2);
@@ -1355,7 +1356,13 @@ void ARegion::Grow()
 		// less growth of towns in DYNAMIC_POPULATION
 		// to balance town creation and population dynamics
 		// through migration
-		if (Globals->DYNAMIC_POPULATION) tgrowth = tgrowth / 4;
+		if (Globals->DYNAMIC_POPULATION) {
+			tgrowth = tgrowth / 4;
+		} else {
+			// With roads can increase wages we need to
+			// reduce settlement growth
+			tgrowth = tgrowth / 2;
+		}
 		// Dampen growth curve at high population levels
 		// Ant: maybe this formula could be broken up a bit?
 		//		also, is (2 * town->hab - town->pop) correct?
@@ -1367,7 +1374,7 @@ void ARegion::Grow()
 		// Ant: Not sure whether we still need the typecasts here
 		growpop += (int) (increase / limitingfactor);
 	}
-	
+
 	// Update population
 	AdjustPop(growpop);
 	
