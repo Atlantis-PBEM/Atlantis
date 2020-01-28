@@ -4589,16 +4589,7 @@ static TerrainType td[] = {
 	 {-1,-1,-1,-1},
 	 {-1,-1,-1},
 	 1,I_PIRATES,-1,-1,
-	 5,{O_ISLE,-1,O_OCAVE,-1,-1,-1}},
-	{"void", "void", '+', R_VOID,
-	 TerrainType::BARREN | TerrainType::FLYINGMOUNTS,
-	 0,0,0,3,
-	 {{-1,0,0},{-1,0,0},{-1,0,0},{-1,0,0},
-	  {-1,0,0},{-1,0,0},{-1,0,0}},
-	 {-1,-1,-1,-1},
-	 {-1,-1,-1},
-	 50,I_DEMON,I_NOOGLE,I_ETTIN,
-	 0,{-1,-1,-1,-1,-1,-1}},
+	 5,{O_ISLE,-1,O_OCAVE,-1,-1,-1}}
 };
 
 TerrainType *TerrainDefs = td;
