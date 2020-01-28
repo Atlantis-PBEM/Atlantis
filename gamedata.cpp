@@ -2297,42 +2297,6 @@ ItemType id[] =
 	 -1,0, 0,
 	 0, NULL, 0,
 	 "", { "", "", "", "" }, 0, 0},
-
-	 // Events
-	 // Halloween
-  {"Headless Horseman","Headless Horsemen","HHOR",
-    ItemType::CANTGIVE | ItemType::DISABLED | ItemType::NOTRANSPORT,
-    NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-    NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-    10, IT_MONSTER, 50, 4,
-    10,10,0,0,4,
-    -1,0,
-    -1,0, 0,
-    0, NULL, 0,
-    "", { "", "", "", "" }, 0, 0},
-   
-	 // Devourer
-	 {"Void Fortress","Void Fortresses","VFOR",
-	 ItemType::CANTGIVE | ItemType::DISABLED | ItemType::NOTRANSPORT,
-	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 50000, IT_MONSTER, 10000, 6,
-	 0,0,0,0,0,
-	 -1,0,
-	 -1,0, 0,
-	 0, NULL, 0,
-	 "", { "", "", "", "" }, 0, 0},
-
-	{"avatar", "avatars", "AVAT",
-	 ItemType::NOTRANSPORT,
-	 NULL, 0, 0, 0, {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
-	 NULL, 0, 0, {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
-	 10, IT_MAN | IT_LEADER, 100, 1,
-	 15, 0, 0, 0, 2,
-	 -1, 0,
-	 -1, 0, 0,
-	 0, NULL, 0,
-	 "", { "", "", "", "" }, 0, 0},
 };
 ItemType *ItemDefs = id;
 
@@ -2419,8 +2383,6 @@ ManType mt[] = {
 	// Fracas
 	{"CTAU", R_PLAIN,
 	 3,2,{"HORS", "RANC", "RIDI", NULL, NULL, NULL}},
-	{"AVAT", R_NEXUS,
-	 5,5,{NULL, NULL, NULL, NULL, NULL, NULL}},
 };
 
 ManType *ManDefs = mt;
@@ -2745,22 +2707,6 @@ MonType md[] = {
 	 2,0,3,
 	 "icebreath", 4,
 	 8000,IT_MAGIC,50,1,"Ice Dragon", "IDRA"},
-
-  // Events
-  // Halloween
-  {3,{3,0,0,0,3,3},
-   15,15,0,
-   3,0,0,
-   "fear", 3,
-   1000,IT_ADVANCED,0,1,"Headless Horseman", "HHOR"},
-
-	// Devourer
-	// Phase 1
-	{6,{6,3,3,3,6,10},
-	 0,1000,0,
-	 5,0,0,
-	 "lightning", 5,
-	 50000,IT_MAGIC,0,1,"Void Fortress", "VFOR"}
 };
 
 MonType *MonDefs = md;
