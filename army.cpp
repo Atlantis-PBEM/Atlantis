@@ -69,8 +69,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		protection[i] = 0;
 	damage = 0;
 	hits = unit->GetAttribute("toughness");
-	if (u->num == 8888) { // Devourer has 10 hits
-		hits = 10;
+	if (u->num == 8888) { // Devourer has 12 hits
+		hits = 12;
 	}
 	if (hits < 1) hits = 1;
 	maxhits = hits;
