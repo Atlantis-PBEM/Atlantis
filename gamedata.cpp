@@ -2396,9 +2396,6 @@ int NUMMAN = sizeof(mt) / sizeof(mt[0]);
 // tactics, stealth, obs
 // special, specialLevel,
 // silver spoiltype, hostile, number, name, abbr
-// ---
-// defencearray (ATTACK_COMBAT, ATTACK_ENERGY, ATTACK_SPIRIT, 
-//						  ATTACK_WEATHER, ATTACK_RIDING and ATTACK_RANGED)
 MonType md[] = {
 	{0,{0,0,0,0,0,0},
 	 0,0,0,
@@ -4589,7 +4586,7 @@ static TerrainType td[] = {
 	 {-1,-1,-1,-1},
 	 {-1,-1,-1},
 	 1,I_PIRATES,-1,-1,
-	 5,{O_ISLE,-1,O_OCAVE,-1,-1,-1}}
+	 5,{O_ISLE,-1,O_OCAVE,-1,-1,-1}},
 };
 
 TerrainType *TerrainDefs = td;
