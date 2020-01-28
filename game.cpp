@@ -1453,9 +1453,7 @@ int Game::CountMages(Faction *pFac)
 			Object *o = (Object *) elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
-				if (u->faction == pFac && u->type == U_MAGE) {
-					i++;
-				} 
+				if (u->faction == pFac && u->type == U_MAGE) i++;
 			}
 		}
 	}
