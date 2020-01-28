@@ -151,6 +151,7 @@ void Game::GrowVMons()
     Awrite("Running Spread Void...");
     int transform = 0;
     int monsters = 0;
+    int avatar_found = 0;
 
     forlist(&regions) {
       ARegion *r = (ARegion *) elem;
@@ -169,6 +170,7 @@ void Game::GrowVMons()
             if (i->type == I_AVAT) {
               printf("\n\n AVATAR FOUND \n\n");
               avat = 1;
+              avatar_found = 1;
             }
           }
         }
@@ -287,6 +289,12 @@ void Game::GrowVMons()
     //   AString tmp = "Giant portals opened undergroud and black piramids appered.";
     //   WriteTimesArticle(tmp);
     // }
+
+
+    if (avatar_found == 0) {
+      AString tmp = "With final mighty blow Great Emeny, Devourer has been slain.";
+      WriteTimesArticle(tmp);
+    }
 
   }
 
