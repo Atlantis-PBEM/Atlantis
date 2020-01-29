@@ -444,7 +444,8 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 	}
 	if (x == -1) x = u->object->region->xloc;
 	if (y == -1) y = u->object->region->yloc;
-	if (z == -1) z = u->object->region->zloc;
+	// In teleport spell zloc is determined after movement
+	if (z == -1 && spell != S_TELEPORTATION) z = u->object->region->zloc;
 
 	CastRegionOrder *order;
 	if (spell == S_TELEPORTATION)
@@ -1648,6 +1649,9 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	int val;
 
 	CastRegionOrder *order = (CastRegionOrder *)u->teleportorders;
+	
+	// In teleport spell zloc is determined after movement
+	if (order->zloc == -1) order->zloc = rzloc;
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 	val = GetRegionInRange(r, tar, u, S_TELEPORTATION);
