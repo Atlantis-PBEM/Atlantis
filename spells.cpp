@@ -1651,7 +1651,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	CastRegionOrder *order = (CastRegionOrder *)u->teleportorders;
 	
 	// In teleport spell zloc is determined after movement
-	if (order->zloc == -1) order->zloc = rzloc;
+	if (order->zloc == -1) order->zloc = r->zloc;
 
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 	val = GetRegionInRange(r, tar, u, S_TELEPORTATION);
