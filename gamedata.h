@@ -262,10 +262,6 @@ enum {
 	I_CENSER,
 	// Quest item for Havilah
 	I_RELICOFGRACE,
-	// Monsters for Events
-	I_HHOR,
-	I_VFOR,
-	I_AVAT,
 	NITEMS
 };
 
@@ -541,7 +537,6 @@ enum {
 	R_CERAN_CHASM1,
 	R_VOLCANO,
 	R_LAKE,
-	R_VOID,
 	R_NUM
 };
 

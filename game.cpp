@@ -1453,20 +1453,7 @@ int Game::CountMages(Faction *pFac)
 			Object *o = (Object *) elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
-				if (u->faction == pFac && u->type == U_MAGE) {
-
-					// Avatar does not count as a mage
-					int is_avatar = 0;
-					forlist(&u->items) {
-            Item *i = (Item *) elem;
-            if (i->type == I_AVAT) {
-              is_avatar = 1;
-            }
-          }
-					if (is_avatar == 0) {
-						i++;
-					}
-				} 
+				if (u->faction == pFac && u->type == U_MAGE) i++;
 			}
 		}
 	}

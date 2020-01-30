@@ -33,7 +33,6 @@ Quest::Quest()
 {
 	type = -1;
 	target = -1;
-	times = 1;
 	objective.type = -1;
 	objective.num = 0;
 	building = -1;
@@ -80,14 +79,14 @@ AString Quest::GetRewardsStr()
 
 int QuestList::ReadQuests(Ainfile *f)
 {
-        int count, dests, rewards;
+	int count, dests, rewards;
 	Quest *quest;
 	AString *name;
 	Item *item;
 
 	quests.DeleteAll();
 
-        count = f->GetInt();
+	count = f->GetInt();
 	if (count < 0)
 		return 0;
 	while (count-- > 0) {
@@ -160,7 +159,7 @@ void QuestList::WriteQuests(Aoutfile *f)
 	Item *i;
 	set<string>::iterator it;
 
-  f->PutInt(quests.Num());
+	f->PutInt(quests.Num());
 	forlist(this) {
 		q = (Quest *) elem;
 		f->PutInt(q->type);
