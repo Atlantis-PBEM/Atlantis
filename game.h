@@ -34,7 +34,7 @@ class Game;
 #include "production.h"
 #include "object.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 0)
+#define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 4)
 
 class OrdersCheck
 {
@@ -192,6 +192,7 @@ private:
 
 	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
+	void ModifyItemName(int it, char const *name, char const *names);
 	void ModifyItemFlags(int it, int flags);
 	void ModifyItemType(int it, int type);
 	void ModifyItemWeight(int it, int weight);
@@ -252,6 +253,7 @@ private:
 	void ModifyTerrainLairChance(int t, int chance);
 	void ModifyTerrainLair(int t, int i, int lair);
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
+	void ModifyTerrainFlags(int t, int flags);
 
 	void ModifyBattleItemFlags(char const *item, int flags);
 	void ModifyBattleItemSpecial(char const *item, char const *special, int level);
@@ -468,6 +470,9 @@ private:
 	void MidProcessTurn();
 	void PostProcessUnitExtra(ARegion *, Unit *);
 	void PostProcessTurn();
+
+	// Processing regions grow after production phase
+	void ProcessEconomics();
 	
 	// Migration effects for alternate player-driven economy
 	void ProcessMigration();
@@ -555,6 +560,7 @@ private:
 	void RunUnitProduce(ARegion *, Unit *);
 	void Run1BuildOrder(ARegion *, Object *, Unit *);
 	void RunBuildShipOrder(ARegion *, Object *, Unit *);
+	void AddNewBuildings(ARegion *);
 	void RunBuildHelpers(ARegion *);
 	int ShipConstruction(ARegion *, Unit *, Unit *, int, int, int);
 	void CreateShip(ARegion *, Unit *, int);

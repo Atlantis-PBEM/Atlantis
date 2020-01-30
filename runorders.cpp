@@ -94,6 +94,9 @@ void Game::RunOrders()
 	RunTeachOrders();
 	Awrite("Running Month-long Orders...");
 	RunMonthOrders();
+	Awrite("Running Economics...");
+	ProcessEconomics();
+	Awrite("Running Teleport Orders...");
 	RunTeleportOrders();
 	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
 		Awrite("Running Transport Orders...");
@@ -570,6 +573,8 @@ void Game::RunDestroyOrders()
 }
 
 void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
+	AString quest_rewards;
+
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 		u->Error("DESTROY: Can't destroy a ship while at sea.");
 		forlist(&o->units) {
@@ -594,8 +599,8 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 			u->destroy = 0;
 			u->MoveUnit(dest);
 		}
-		if (quests.CheckQuestDemolishTarget(r, o->num, u)) {
-			u->Event("You have completed a quest!");
+		if (quests.CheckQuestDemolishTarget(r, o->num, u, &quest_rewards)) {
+			u->Event(AString("You have completed a quest!") + quest_rewards);
 		}
 		r->objects.Remove(o);
 		delete o;
@@ -1169,8 +1174,6 @@ void Game::MidProcessTurn()
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
 		// r->MidTurn(); // Not yet implemented
-		/* regional population dynamics */
-		if (Globals->DYNAMIC_POPULATION) r->Grow();
 		forlist(&r->objects) {
 			Object *o = (Object *)elem;
 			forlist(&o->units) {
@@ -1178,6 +1181,19 @@ void Game::MidProcessTurn()
 				MidProcessUnit(r, u);
 			}
 		}
+	}
+}
+
+void Game::ProcessEconomics()
+{
+	if (!(Globals->DYNAMIC_POPULATION || Globals->REGIONS_ECONOMY)) return;
+
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		// Do not process not visited regions
+		if (!r->visited) continue;
+		/* regional population dynamics */
+		r->Grow();
 	}
 }
 
@@ -1996,6 +2012,8 @@ void Game::CheckAllyHungerItem(int item, int value)
 
 void Game::AssessMaintenance()
 {
+	AString quest_rewards;
+
 	/* First pass: set needed */
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
@@ -2005,8 +2023,8 @@ void Game::AssessMaintenance()
 				Unit *u = (Unit *) elem;
 				if (!(u->faction->IsNPC())) {
 					r->visited = 1;
-					if (quests.CheckQuestVisitTarget(r, u)) {
-						u->Event("You have completed a pilgrimage!");
+					if (quests.CheckQuestVisitTarget(r, u, &quest_rewards)) {
+						u->Event(AString("You have completed a pilgrimage!") + quest_rewards);
 					}
 				}
 				u->needed = u->MaintCost();
@@ -2236,7 +2254,6 @@ void Game::DoGiveOrders()
 						} else if (o->amount == -2) {
 							if (o->type == O_TAKE) {
 								s = r->GetUnitId(o->target, u->faction->num);
-								fleet = s->object;
 								if (!s || !u->CanSee(r, s)) {
 									u->Error(AString("TAKE: Nonexistant target (") +
 											o->target->Print() + ").");
@@ -2246,6 +2263,7 @@ void Game::DoGiveOrders()
 											" is not a member of your faction.");
 									continue;
 								}
+								fleet = s->object;
 							} else {
 								s = u;
 								fleet = obj;
@@ -2675,9 +2693,12 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 			// give into existing fleet or form new fleet?
 			newfleet = 0;
+
 			// target is not in fleet or not fleet owner
 			if (!(t->object->IsFleet()) ||
 				(t->num != t->object->GetOwner()->num)) newfleet = 1;
+
+			// Set fleet variable to target fleet
 			if (newfleet == 1) {
 				// create a new fleet
 				fleet = new Object(r);
@@ -2687,14 +2708,38 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				t->object->region->AddFleet(fleet);
 				t->MoveUnit(fleet);
 			}
+			else {
+				fleet = t->object;
+			}
+
 			if (ItemDefs[o->item].max_inventory) {
 				cur = t->object->GetNumShips(o->item) + amt;
 				if (cur > ItemDefs[o->item].max_inventory) {
-					u->Error(ord + ": Fleets cannot have more than "+
-						ItemString(o->item, ItemDefs[o->item].max_inventory) +".");
+					u->Error(ord + ": Fleets cannot have more than " +
+						ItemString(o->item, ItemDefs[o->item].max_inventory) +
+						".");
 					return 0;
 				}
 			}
+
+			// Check if fleets are compatible
+			if ((Globals->PREVENT_SAIL_THROUGH) &&
+					(!Globals->ALLOW_TRIVIAL_PORTAGE) &&
+					// flying ships are always transferrable
+					(ItemDefs[o->item].fly == 0)) {
+				// if target fleet had not sailed, just copy shore from source
+				if (fleet->prevdir == -1) {
+					fleet->prevdir = s->object->prevdir;
+				} else {
+					// check that source ship is compatible with its new fleet
+					if (s->object->SailThroughCheck(fleet->prevdir) == 0) {
+						u->Error(ord +
+								": Ships cannot be transferred through land.");
+						return 0;
+					}
+				}
+			}
+
 			s->Event(AString("Transfers ") + ItemString(o->item, amt) + " to " +
 				*t->object->name + ".");
 			if (s->faction != t->faction) {

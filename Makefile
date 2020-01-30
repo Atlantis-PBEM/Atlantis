@@ -1,11 +1,11 @@
-# This is the makefile for Atlantis 4.0
+# This is the makefile for Atlantis 5.0
 #
 # Copyright 1998 by Geoff Dunbar
 # MODIFICATIONS
-# Date        Person       Comments
-# ----        ------       --------
-# 2000/MAR/14 Davis Kulis  Added the template code.
-# 2004/MAR/29 Jan Rietema  Added/modified the gamesets
+# Date        Person         Comments
+# ----        ------         --------
+# 2000/MAR/14 Davis Kulis    Added the template code.
+# 2004/MAR/29 Jan Rietema    Added/modified the gamesets
 
 GAME ?= standard
 
