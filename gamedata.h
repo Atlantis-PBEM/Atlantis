@@ -262,6 +262,7 @@ enum {
 	I_CENSER,
 	// Quest item for Havilah
 	I_RELICOFGRACE,
+	I_TURT,
 	NITEMS
 };
 

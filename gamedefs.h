@@ -708,6 +708,9 @@ public:
 	// Regions population changes depends on production in region, settlements grow
 	// Enables basic economy
 	int REGIONS_ECONOMY;
+
+	// Replaces free round by combat bonus for first rounds
+	int ADVANCED_TACTICS;
 };
 
 extern GameDefs *Globals;

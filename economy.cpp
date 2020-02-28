@@ -219,11 +219,15 @@ void ARegion::SetupPop()
 	}
 	int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 1) /50));
 	if (maxent < 0) maxent = 0;
+
+	// Casting Phantasmal Entertainment affects total entertainment amount
+	int entertainment_bonus = phantasmal_entertainment * Globals->ENTERTAIN_INCOME * 20;
 	Production * e = new Production;
 	e->itemtype = I_SILVER;
 	e->skill = S_ENTERTAINMENT;
-	e->amount = maxent / Globals->ENTERTAIN_FRACTION;
-	e->baseamount = maxent / Globals->ENTERTAIN_FRACTION;
+	e->amount = maxent / Globals->ENTERTAIN_FRACTION + entertainment_bonus;
+
+	e->baseamount = maxent / Globals->ENTERTAIN_FRACTION + entertainment_bonus;
 	// raise entertainment income by productivity factor 10
 	e->productivity = Globals->ENTERTAIN_INCOME * 10;
 	
@@ -360,6 +364,12 @@ void ARegion::AdjustPop(int adjustment)
 	// split between town and rural pop
 	int tspace = town->hab - town->pop;
 	int rspace = habitat - population;
+
+	// Region with zero room to
+	if (tspace == 0 && rspace == 0) {
+		return;
+	}
+
 	town->pop += adjustment * tspace / (tspace + rspace);
 	if (town->pop < 0) town->pop = 0;
 	population += adjustment * rspace / (tspace + rspace);
@@ -647,6 +657,10 @@ void ARegion::SetupCityMarket()
 	/* Set up the trade items */
 	int buy1 = getrandom(numtrade);
 	int buy2 = getrandom(numtrade);
+	// TODO: test Add gems from gemcutting as a buy
+	// if (getrandom(100) < 20 && buy1 != I_GEMS) {
+	// 	buy2 = I_GEMS;
+	// }
 	int sell1 = getrandom(numtrade);
 	int sell2 = getrandom(numtrade);
 	int tradebuy = 0;

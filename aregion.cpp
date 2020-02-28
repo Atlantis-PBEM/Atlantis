@@ -123,6 +123,7 @@ ARegion::ARegion()
 	improvement = 0;
 	clearskies = 0;
 	earthlore = 0;
+	phantasmal_entertainment = 0;
 	for (int i=0; i<NDIRS; i++)
 		neighbors[i] = 0;
 	visited = 0;

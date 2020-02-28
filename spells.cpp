@@ -112,6 +112,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_HOLY_SYMBOL:
 			case S_CREATE_CENSER:
 			case S_BLASPHEMOUS_RITUAL:
+			case S_PHANTASMAL_ENTERTAINMENT:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
@@ -793,6 +794,9 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			break;
 		case S_FARSIGHT:
 			val = RunFarsight(r,u);
+			break;
+		case S_PHANTASMAL_ENTERTAINMENT:
+			val = RunPhantasmalEntertainment(r,u);
 			break;
 		case S_EARTH_LORE:
 			val = RunEarthLore(r,u);
@@ -1525,6 +1529,33 @@ int Game::RunEarthLore(ARegion *r,Unit *u)
 	return 1;
 }
 
+int Game::RunPhantasmalEntertainment(ARegion *r,Unit *u)
+{
+	int level = u->GetSkill(S_PHANTASMAL_ENTERTAINMENT);
+
+	int amt = level * Globals->ENTERTAIN_INCOME * 20;
+	int max_entertainement = 0;
+
+	if (level > r->phantasmal_entertainment) r->phantasmal_entertainment = level;
+
+	forlist((&r->products)) {
+		Production *p = ((Production *) elem);
+		if (p->itemtype == I_SILVER) {
+			if (p->skill == S_ENTERTAINMENT) {
+				max_entertainement = p->amount;
+			}
+		}
+	}
+
+	if (amt > max_entertainement) {
+		amt = max_entertainement;
+	}
+
+	u->items.SetNum(I_SILVER, u->items.GetNum(I_SILVER) + amt);
+	u->Event(AString("Casts Phantasmal Entertainment, raising ") + amt + " silver.");
+	return 1;
+}
+
 int Game::RunClearSkies(ARegion *r, Unit *u)
 {
 	ARegion *tar = r;
@@ -1827,7 +1858,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		return 0;
 	}
 
-	int maxweight = 50 * level;
+	int maxweight = 300 * level;
 	r->DeduplicateUnitList(&order->units, u->faction->num);
 	int weight = 0;
 	forlist (&(order->units)) {
@@ -1852,7 +1883,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		return 0;
 	}
 
-	if (tar->unit->type != U_MAGE) {
+	if (tar->unit->type != U_MAGE && tar->unit->type != U_APPRENTICE) {
 		u->Error("CAST: Target is not a mage.");
 		return 0;
 	}

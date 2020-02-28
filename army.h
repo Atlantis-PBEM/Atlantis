@@ -127,9 +127,9 @@ class Army
 		int GetTargetNum(char const *special = NULL);
 		Soldier *GetTarget( int );
 		int RemoveEffects(int num, char const *effect);
-		int DoAnAttack(char const *special, int numAttacks, int attackType,
+		int DoAnAttack(Battle *, char const *special, int numAttacks, int attackType,
 				int attackLevel, int flags, int weaponClass, char const *effect,
-				int mountBonus, Soldier *attacker);
+				int mountBonus, Soldier *attacker, Army *attackers);
 		void Kill(int);
 		void Reset();
 
@@ -148,6 +148,8 @@ class Army
 		int notfront;
 		int notbehind;
 		int count;
+		// Used if set ADVANCED_TACTICS
+		int tactics_bonus;
 
 		int hitsalive; // current number of "living hits"
 		int hitstotal; // Number of hits at start of battle.

@@ -3547,8 +3547,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"more units on one side have the same Tactics skill, then the "
 			"one with the lower unit number is regarded as the leader of "
 			"that side.  If one side's leader has a better Tactics skill "
-			"than the other side's, then that side gets a free round of "
-			"attacks.";
+			"than the other side's,";
+		
+		if (Globals->ADVANCED_TACTICS) {
+			temp += "then that side gets a tactics difference bonus to their attack and defense.";
+		} else {
+			temp += "then that side gets a free round of attacks.";
+		}
 	}
 	f.Paragraph(temp);
 	temp = "In each combat round, the combatants each get to attack once, in "

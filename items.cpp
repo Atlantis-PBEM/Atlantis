@@ -1513,14 +1513,10 @@ int ManType::CanUse(int item)
 	if (ItemDefs[item].type & IT_MOUNT) return 1;
 
 	// Check if the item is a weapon
-	if (ItemDefs[item].type & IT_WEAPON) {
-		WeaponType *weapon = FindWeapon(ItemDefs[item].abr);
-		for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
-			if (skills[i] == NULL) continue;
-			if ((weapon->baseSkill == skills[i]) 
-				|| (weapon->orSkill == skills[i])) return 1;
-		}
-	}
+	if (ItemDefs[item].type & IT_WEAPON) return 1;
+	
+	// Check if the item is a tool
+	if (ItemDefs[item].type & IT_TOOL) return 1;
 	
 	// Check if the item is an armor
 	if (ItemDefs[item].type & IT_ARMOR) {
@@ -1552,33 +1548,5 @@ int ManType::CanUse(int item)
 		}
 	}
 	
-	// Check if the item is a tool
-	for (int i=0; i<NITEMS; i++) {
-		if ((ItemDefs[i].mult_item == item) && (CanProduce(i))) return 1;
-	}
-	
-	// Check to see if the item is a base resource
-	// for something the race can build
-	for (int b=0; b<NITEMS; b++) {
-		if (ItemDefs[b].pSkill == NULL) continue;
-		for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
-			if (skills[i] == NULL) continue;
-			if ((ItemDefs[b].pSkill == skills[i])
-				&& (ItemDefs[b].pInput[0].item == item)) return 1;
-		}
-	}
-	for (int b=0; b<NOBJECTS; b++) {
-		for (unsigned int i=0; i<(sizeof(skills)/sizeof(int)); i++) {
-			if (skills[i] == NULL) continue;
-			if (ObjectDefs[b].skill == skills[i]) {
-				if (ObjectDefs[b].item == item) return 1;
-				if (ObjectDefs[b].item == I_WOOD_OR_STONE) {
-					if ((item == I_WOOD)
-						|| (item == I_STONE)) return 1;
-				}
-			}				
-		}
-	}
-
 	return 0;
 }

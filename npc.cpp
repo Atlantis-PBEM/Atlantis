@@ -104,14 +104,25 @@ void Game::GrowWMons(int rate)
 				wanted -= mons;
 				wanted = (wanted*rate + getrandom(100))/100;
 
+				// printf("\n\n WANTED WMON at (xsec: %d, ysec: %d) : %d \n\n", xsec, ysec, wanted);
+
 				if (wanted > 0) {
 					// TODO: instead of loop guard need to check how many available regions
 					// are there and random them
 					int loop_guard = 1000;
 					for (int i=0; i < wanted;) {
-						int m = getrandom(8);
-						int n = getrandom(16)*2+m%2;
-						ARegion *reg = pArr->GetRegion(m+xsec*8, n+ysec*16);
+						int x = getrandom(8);
+						int y = getrandom(16);
+						if (y%2 == 1) {
+							if (y > 0) {
+								y -= 1;
+							} else {
+								y = 0;
+							}
+						}
+
+						ARegion *reg = pArr->GetRegion(x + xsec, y + ysec + x%2);
+
 						if (reg && reg->zloc == level && !reg->IsGuarded() && MakeWMon(reg)) {
 							i++;
 						}

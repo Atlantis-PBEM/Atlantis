@@ -93,10 +93,10 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 					times *= pMt->specialLev;
 				int realtimes = spd->damage[i].minnum + getrandom(times) +
 					getrandom(times);
-				num = def->DoAnAttack(pMt->mountSpecial, realtimes,
+				num = def->DoAnAttack(this, pMt->mountSpecial, realtimes,
 						spd->damage[i].type, pMt->specialLev,
 						spd->damage[i].flags, spd->damage[i].dclass,
-						spd->damage[i].effect, 0, a);
+						spd->damage[i].effect, 0, a, attackers);
 				if (num != -1) {
 					if (tot == -1) tot = num;
 					else tot += num;
@@ -141,8 +141,9 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 			mountBonus = pWep->mountBonus;
 			attackClass = pWep->weapClass;
 		}
-		def->DoAnAttack(NULL, 1, attackType, a->askill, flags, attackClass,
-				NULL, mountBonus, a);
+		//
+		def->DoAnAttack(this, NULL, 1, attackType, a->askill, flags, attackClass,
+				NULL, mountBonus, a, attackers);
 		if (!def->NumAlive()) break;
 	}
 
@@ -153,6 +154,13 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 {
 	/* Write round header */
 	AddLine(AString("Round ") + round + ":");
+
+	if (a->tactics_bonus > b->tactics_bonus) {
+		AddLine(*(a->leader->name) + " tactics bonus " + a->tactics_bonus + ".");	
+	}
+	if (b->tactics_bonus > a->tactics_bonus) {
+		AddLine(*(b->leader->name) + " tactics bonus " + b->tactics_bonus + ".");	
+	}
 
 	/* Update both army's shields */
 	UpdateShields(a);
@@ -183,6 +191,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 		{
 			Soldier * s = a->GetAttacker(num, behind);
 			DoAttack(a->round, s, a, b, behind);
+			// ---
 		}
 		aalive = a->NumAlive();
 		balive = b->NumAlive();
@@ -274,8 +283,22 @@ int Battle::Run( ARegion * region,
 	if (ass) {
 		FreeRound(armies[0],armies[1], ass);
 	} else {
-		if (armies[0]->tac > armies[1]->tac) FreeRound(armies[0],armies[1]);
-		if (armies[1]->tac > armies[0]->tac) FreeRound(armies[1],armies[0]);
+		if (Globals->ADVANCED_TACTICS) {
+			int tactics_bonus = 0;
+			if (armies[0]->tac > armies[1]->tac) {
+				tactics_bonus = armies[0]->tac - armies[1]->tac;
+				if (tactics_bonus > 3) tactics_bonus = 3;
+				armies[0]->tactics_bonus = tactics_bonus;
+			}
+			if (armies[1]->tac > armies[0]->tac) {
+				tactics_bonus = armies[1]->tac - armies[0]->tac;
+				if (tactics_bonus > 3) tactics_bonus = 3;
+				armies[1]->tactics_bonus = tactics_bonus;
+			}
+		} else {
+			if (armies[0]->tac > armies[1]->tac) FreeRound(armies[0],armies[1]);
+			if (armies[1]->tac > armies[0]->tac) FreeRound(armies[1],armies[0]);
+		}
 	}
 
 	int round = 1;

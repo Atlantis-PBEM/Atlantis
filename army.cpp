@@ -526,6 +526,7 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 	tac = ldr->GetAttribute("tactics");
 	count = 0;
 	hitstotal = 0;
+	tactics_bonus = 0;
 
 	if (ass) {
 		count = 1;
@@ -622,6 +623,7 @@ void Army::Reset() {
 	canfront = notfront;
 	canbehind = notbehind;
 	notfront = notbehind;
+	tactics_bonus = 0;
 }
 
 void Army::WriteLosses(Battle * b) {
@@ -684,6 +686,7 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 		if ((ItemDefs[i].type & thespoil) &&
 				!(ItemDefs[i].type & IT_SPECIAL) &&
 				!(ItemDefs[i].type & IT_SHIP) &&
+				(ItemDefs[i].baseprice <= mp->silver) &&
 				!(ItemDefs[i].flags & ItemType::DISABLED)) {
 			count ++;
 		}
@@ -695,6 +698,7 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 		if ((ItemDefs[i].type & thespoil) &&
 				!(ItemDefs[i].type & IT_SPECIAL) &&
 				!(ItemDefs[i].type & IT_SHIP) &&
+				(ItemDefs[i].baseprice <= mp->silver) &&
 				!(ItemDefs[i].flags & ItemType::DISABLED)) {
 			count--;
 			if (count == 0) {
@@ -1113,9 +1117,9 @@ int Army::RemoveEffects(int num, char const *effect)
 	return(ret);
 }
 
-int Army::DoAnAttack(char const *special, int numAttacks, int attackType,
+int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attackType,
 		int attackLevel, int flags, int weaponClass, char const *effect,
-		int mountBonus, Soldier *attacker)
+		int mountBonus, Soldier *attacker, Army *attackers)
 {
 	/* 1. Check against Global effects (not sure how yet) */
 	/* 2. Attack shield */
@@ -1198,6 +1202,10 @@ int Army::DoAnAttack(char const *special, int numAttacks, int attackType,
 		/* 4.3 Add bonuses versus mounted */
 		if (tar->riding != -1) attackLevel += mountBonus;
 
+		// TODO: debug only, remove later
+		// b->AddLine(attacker->name + AString(" attack level: ") + attackLevel + "(+" + attackers->tactics_bonus + ").");
+		// b->AddLine(tar->name + AString(" defence level: ") + tlev + "(+" + tactics_bonus + ").");
+
 		/* 5. Attack soldier */
 		if (attackType != NUM_ATTACK_TYPES) {
 			if (!(flags & WeaponType::ALWAYSREADY)) {
@@ -1210,7 +1218,8 @@ int Army::DoAnAttack(char const *special, int numAttacks, int attackType,
 				}
 			}
 
-			if (!Hits(attackLevel,tlev)) {
+			/* 4.4 Add advanced tactics bonus */
+			if (!Hits(attackLevel + attackers->tactics_bonus, tlev + tactics_bonus)) {
 				continue;
 			}
 		}

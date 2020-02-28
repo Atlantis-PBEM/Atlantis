@@ -321,6 +321,7 @@ class ARegion : public AListElem
 		/* Potential bonuses to economy */
 		int clearskies;
 		int earthlore;
+		int phantasmal_entertainment;
 
 		ARegion *neighbors[NDIRS];
 		AList objects;

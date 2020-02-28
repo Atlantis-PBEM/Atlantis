@@ -1633,13 +1633,6 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 							o->num = 0;
 						}
 					}
-					if (ItemDefs[o->item].type & IT_TRADE) {
-						if (!TradeCheck(r, u->faction)) {
-							u->Error("BUY: Can't buy trade items in that "
-									"many regions.");
-							o->num = 0;
-						}
-					}
 					if (o->num == -1) {
 						o->num = u->GetSharedMoney()/m->price;
 						if (m->amount != -1 && o->num > m->amount) {

@@ -1,0 +1,21 @@
+body {
+  font-family: arial, sans-serif;
+  background: black;
+  color: #B19275;
+}
+
+div.rule {
+  background: url(bar.jpg) no-repeat top;
+  height: 23px;
+  color: white;
+}
+
+td.fixed {
+  font-family: monospace;
+}
+
+a:visited,
+a:active,
+a:link {
+  color: white;
+}
