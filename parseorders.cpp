@@ -1373,6 +1373,10 @@ void Game::ProcessDestroyOrder(Unit *u, OrdersCheck *pCheck)
 void Game::ProcessFindOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
+	if (!Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+		ParseError(pCheck, u, 0, "FIND: This command was disabled.");
+		return;
+	}
 	if (!token) {
 		ParseError(pCheck, u, 0, "FIND: No faction number given.");
 		return;

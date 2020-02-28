@@ -328,7 +328,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#exchange", "exchange"));
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		f.TagText("li", f.Link("#faction", "faction"));
-	f.TagText("li", f.Link("#find", "find"));
+
+	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+		f.TagText("li", f.Link("#find", "find"));
+	}
+
 	f.TagText("li", f.Link("#forget", "forget"));
 	f.TagText("li", f.Link("#form", "form"));
 	f.TagText("li", f.Link("#give", "give"));
@@ -4778,17 +4782,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.CommandExample(temp, temp2);
 	}
 
-	f.ClassTagText("div", "rule", "");
-	f.LinkRef("find");
-	f.TagText("h4", "FIND [faction]");
-	f.TagText("h4", "FIND ALL");
-	temp = "Find the email address of the specified faction or of all "
-		"factions.";
-	f.Paragraph(temp);
-	f.Paragraph("Example:");
-	temp = "Find the email address of faction 4.";
-	temp2 = "FIND 4";
-	f.CommandExample(temp, temp2);
+	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+		f.ClassTagText("div", "rule", "");
+		f.LinkRef("find");
+		f.TagText("h4", "FIND [faction]");
+		f.TagText("h4", "FIND ALL");
+		temp = "Find the email address of the specified faction or of all "
+			"factions.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Find the email address of faction 4.";
+		temp2 = "FIND 4";
+		f.CommandExample(temp, temp2);
+	}
 
 	f.ClassTagText("div", "rule", "");
 	f.LinkRef("forget");

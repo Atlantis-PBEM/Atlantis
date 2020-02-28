@@ -1041,12 +1041,11 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_MAN);
 	ModifyItemBasePrice(I_MAN, 40);
 	ModifyRaceSkillLevels("HUMN", 4, 2);
-	ModifyRaceSkills("HUMN", 0, "ARMO");
+	ModifyRaceSkills("HUMN", 0, "CARP");
 	ModifyRaceSkills("HUMN", 1, "RIDI");
 	ModifyRaceSkills("HUMN", 2, "COMB");
 	ModifyRaceSkills("HUMN", 3, "MINI");
 	ModifyRaceSkills("HUMN", 4, "FARM");
-	ModifyRaceSkills("HUMN", 5, "CARP");
 	
 	EnableItem(I_HILLDWARF);
 	ModifyItemBasePrice(I_HILLDWARF, 40);
@@ -1119,19 +1118,17 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("CTAU", 0, "LUMB");
 	ModifyRaceSkills("CTAU", 1, "HORS");
 	ModifyRaceSkills("CTAU", 2, "RIDI");
-	ModifyRaceSkills("CTAU", 3, "LBOW");
+	ModifyRaceSkills("CTAU", 3, "HEAL");
 	ModifyRaceSkills("CTAU", 4, "FARM");
-	ModifyRaceSkills("CTAU", 5, "HEAL");
 
 	EnableItem(I_LIZARDMAN);
 	ModifyItemBasePrice(I_LIZARDMAN, 40);
 	ModifyRaceSkillLevels("LIZA", 5, 2);
 	ModifyRaceSkills("LIZA", 0, "HUNT");
 	ModifyRaceSkills("LIZA", 1, "HERB");
-	ModifyRaceSkills("LIZA", 2, "LBOW");
+	ModifyRaceSkills("LIZA", 2, "CARP");
 	ModifyRaceSkills("LIZA", 3, "SAIL");
 	ModifyRaceSkills("LIZA", 4, "HEAL");
-	ModifyRaceSkills("LIZA", 5, "CARP");
 
 	EnableItem(I_GOBLINMAN);
 	ModifyItemBasePrice(I_GOBLINMAN, 30);
@@ -1147,7 +1144,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_GNOLL);
 	ModifyItemBasePrice(I_GNOLL, 40);
 	ModifyRaceSkillLevels("GNOL", 5, 2);
-	ModifyRaceSkills("GNOL", 0, "LUMB");
+	ModifyRaceSkills("GNOL", 0, "HORS");
 	ModifyRaceSkills("GNOL", 1, "HUNT");
 	ModifyRaceSkills("GNOL", 2, "COMB");
 	ModifyRaceSkills("GNOL", 3, "ARMO");
