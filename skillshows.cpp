@@ -234,13 +234,21 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 		case S_TACTICS:
 			if (level > 1) break;
-			// TODO: change if ADVANCED_TACTICS
-			*str += "Tactics allows the unit, and all allies, to gain a "
-				"free round of attacks during battle. The army with the "
-				"highest level tactician in a battle will receive this free "
-				"round; if the highest levels are equal, no free round is "
-				"awarded. Only one free round total will be awarded for any "
-				"reason.";
+			if (Globals->ADVANCED_TACTICS) {
+				*str += "Tactics allows the unit, and all allies, to gain a "
+					"bonus to their attack and defense during first battle "
+					"round. Bonus equals to the difference in skills but can be "
+					"+3 at most. The army with the highest level tactician "
+					"in a battle will receive this bonus round; if the highest "
+					"levels are equal, no bonus is awarded.";
+			} else {
+				*str += "Tactics allows the unit, and all allies, to gain a "
+					"free round of attacks during battle. The army with the "
+					"highest level tactician in a battle will receive this free "
+					"round; if the highest levels are equal, no free round is "
+					"awarded. Only one free round total will be awarded for any "
+					"reason.";
+			}
 			break;
 		case S_COMBAT:
 			if (level > 1) break;
@@ -558,7 +566,7 @@ AString *ShowSkill::Report(Faction *f)
 			/* XXX -- This should be cleaner somehow. */
 			*str += "A mage with this skill may teleport himself across "
 				"great distances, even without the use of a gate. The mage "
-				"may teleport up to 15 weight units per skill level.";
+				"may teleport up to 30 weight units per skill level.";
 			range = FindRange(SkillDefs[skill].range);
 			if (range) {
 				if (range->flags & RangeType::RNG_SURFACE_ONLY) {
@@ -1157,9 +1165,15 @@ AString *ShowSkill::Report(Faction *f)
 				"the illusion. This spell does not require any order to "
 				"use; it is used automatically.";
 			if (SKILL_ENABLED(S_OBSERVATION)) {
-				*str += " In addition, a mage with the True Seeing skill "
-					"receives a bonus to his Observation skill equal to his "
-					"True Seeing skill divided by 2, rounded up.";
+				if (Globals->FULL_TRUESEEING_BONUS) {
+					*str += " In addition, a mage with the True Seeing skill "
+						"receives a bonus to his Observation skill equal to his "
+						"True Seeing skill.";
+				} else {
+					*str += " In addition, a mage with the True Seeing skill "
+						"receives a bonus to his Observation skill equal to his "
+						"True Seeing skill divided by 2, rounded up.";
+				}
 			}
 			break;
 		case S_DISPEL_ILLUSIONS:

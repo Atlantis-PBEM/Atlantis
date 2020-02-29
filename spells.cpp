@@ -1688,7 +1688,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	if (!val) return 0;
 
 	int level = u->GetSkill(S_TELEPORTATION);
-	int maxweight = level * 15;
+	int maxweight = level * 30;
 
 	if (u->Weight() > maxweight) {
 		u->Error("CAST: Can't carry that much when teleporting.");
