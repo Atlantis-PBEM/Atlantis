@@ -869,7 +869,7 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "A mage with the Summon Skeletons skill may summon "
 				"skeletons into his inventory, to aid him in battle. "
 				"Skeletons may be given to other units, as they follow "
-				"instructions mindlessly; however, they have a 10 percent "
+				"instructions mindlessly; however, they have a 8 percent "
 				"chance of decaying each turn. A mage can summon skeletons "
 				"at an average rate of ";
 			if (ItemDefs[I_SKELETON].mOut > 0) {
@@ -888,7 +888,7 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "A mage with the Raise Undead skill may summon undead "
 				"into his inventory, to aid him in battle. Undead may be "
 				"given to other units, as they follow instructions "
-				"mindlessly; however, they have a 10 percent chance of "
+				"mindlessly; however, they have a 8 percent chance of "
 				"decaying each turn. A mage can summon undead at an average "
 				"rate of ";
 			if (ItemDefs[I_UNDEAD].mOut > 0) {
@@ -907,7 +907,7 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "A mage with the Summon Lich skill may summon a lich "
 				"into his inventory, to aid him in battle. Liches may be "
 				"given to other units, as they follow instructions "
-				"mindlessly; however, they have a 10 percent chance of "
+				"mindlessly; however, they have a 8 percent chance of "
 				"decaying each turn. A mage has a ";
 			if (ItemDefs[I_LICH].mOut > 0) {
 				*str += ItemDefs[I_LICH].mOut;
@@ -1039,17 +1039,16 @@ AString *ShowSkill::Report(Faction *f)
 					"reference these items in orders, you must prepend an "
 					"'i' to the normal string. (For example: to reference "
 					"an illusionary wolf, you would use 'iwolf').";
-			} else if (level == 3) {
+			} else if (level == 2) {
 				if (ITEM_DISABLED(I_IEAGLE)) break;
-				*str += "Create Phantasmal Beasts at level 3 allows the mage "
+				*str += "Create Phantasmal Beasts at level 2 allows the mage "
 					"to summon illusionary eagles into his inventory. To "
 					"summon illusionary eagles, the mage should CAST "
 					"Create_Phantasmal_Beasts EAGLE <number>, where <number> "
 					"is the number of eagles that the mage wishes to have "
 					"appear in his inventory. The number of eagles that a "
-					"mage may have in his inventory is equal to his skill "
-					"level, minus 2, squared.";
-			} else if (level == 5) {
+					"mage may have in his inventory is equal to mage's skill squared.";
+			} else if (level == 3) {
 				if (ITEM_DISABLED(I_IDRAGON)) break;
 				*str += "Create Phantasmal Beasts at level 5 allows the "
 					"mage to summon an illusionary dragon into his "
@@ -1082,19 +1081,18 @@ AString *ShowSkill::Report(Faction *f)
 					"reference these items in orders, you must prepend an "
 					"'i' to the normal string. (Example: to reference an "
 					"illusionary skeleton, you would use 'iskeleton').";
-			} else if (level == 3) {
+			} else if (level == 2) {
 				if (ITEM_DISABLED(I_IUNDEAD)) break;
-				*str += "Create Phantasmal Undead at level 3 allows the mage "
+				*str += "Create Phantasmal Undead at level 2 allows the mage "
 					"to summon illusionary undead into his inventory. To "
 					"summon illusionary undead, the mage should CAST "
 					"Create_Phantasmal_Undead UNDEAD <number>, where <number> "
 					"is the number of undead that the mage wishes to have "
 					"appear in his inventory. The number of undead that a "
-					"mage may have in his inventory is equal to his skill "
-					"level, minus 2, squared.";
-			} else if (level == 5) {
+					"mage may have in his inventory is equal to mage's skill squared.";
+			} else if (level == 3) {
 				if (ITEM_DISABLED(I_ILICH)) break;
-				*str += "Create Phantasmal Undead at level 5 allows the mage "
+				*str += "Create Phantasmal Undead at level 3 allows the mage "
 					"to summon an illusionary lich into his inventory. To "
 					"summon an illusionary lich, the mage should CAST "
 					"Create_Phantasmal_Undead LICH; the mage can only have "
@@ -1125,19 +1123,18 @@ AString *ShowSkill::Report(Faction *f)
 					"reference these items in orders, you must prepend an "
 					"'i' to the normal string. (Example: to reference an "
 					"illusionary imp, you would use 'iimp').";
-			} else if (level == 3) {
+			} else if (level == 2) {
 				if (ITEM_DISABLED(I_IDEMON)) break;
-				*str += "Create Phantasmal Demons at level 3 allows the mage "
+				*str += "Create Phantasmal Demons at level 2 allows the mage "
 					"to summon illusionary demons into his inventory. To "
 					"summon illusionary demons, the mage should CAST "
 					"Create_Phantasmal_Demons DEMON <number>, where <number> "
 					"is the number of demons that the mage wishes to have "
 					"appear in his inventory. The number of demons that a "
-					"mage may have in his inventory is equal to his skill "
-					"level, minus 2, squared.";
-			} else if (level == 5) {
+					"mage may have in his inventory is equal to mage's skill squared.";
+			} else if (level == 3) {
 				if (ITEM_DISABLED(I_IBALROG)) break;
-				*str += "Create Phantasmal Demons at level 5 allows the mage "
+				*str += "Create Phantasmal Demons at level 3 allows the mage "
 					"to summon an illusionary balrog into his inventory. To "
 					"summon an illusionary balrog, the mage should CAST "
 					"Create_Phantasmal_Demons BALROG; the mage can only have "

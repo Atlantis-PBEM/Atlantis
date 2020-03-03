@@ -271,11 +271,11 @@ void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
 	}
 
 	if (*token == "demon" || *token == "demons") {
-		order->level = 3;
+		order->level = 2;
 	}
 
 	if (*token == "balrog" || *token == "balrogs") {
-		order->level = 5;
+		order->level = 3;
 	}
 
 	delete token;
@@ -319,11 +319,11 @@ void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
 	}
 
 	if (*token == "undead") {
-		order->level = 3;
+		order->level = 2;
 	}
 
 	if (*token == "lich" || *token == "liches") {
-		order->level = 5;
+		order->level = 3;
 	}
 
 	delete token;
@@ -366,10 +366,10 @@ void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
 		order->level = 1;
 	}
 	if (*token == "eagle" || *token == "eagles") {
-		order->level = 3;
+		order->level = 2;
 	}
 	if (*token == "dragon" || *token == "dragon") {
-		order->level = 5;
+		order->level = 3;
 	}
 
 	delete token;
@@ -1426,13 +1426,13 @@ int Game::RunPhanDemons(ARegion *r,Unit *u)
 		return 0;
 	}
 
-	if (order->level < 3) {
+	if (order->level < 2) {
 		create = I_IIMP;
 		max = level * level * 4;
 	} else {
-		if (order->level < 5) {
+		if (order->level < 3) {
 			create = I_IDEMON;
-			max = (level - 2) * (level - 2);
+			max = level * level;
 		} else {
 			create = I_IBALROG;
 			max = 1;
@@ -1460,13 +1460,13 @@ int Game::RunPhanUndead(ARegion *r,Unit *u)
 		return 0;
 	}
 
-	if (order->level < 3) {
+	if (order->level < 2) {
 		create = I_ISKELETON;
 		max = level * level * 4;
 	} else {
-		if (order->level < 5) {
+		if (order->level < 3) {
 			create = I_IUNDEAD;
-			max = (level - 2) * (level - 2);
+			max = level * level;
 		} else {
 			create = I_ILICH;
 			max = 1;
@@ -1494,13 +1494,13 @@ int Game::RunPhanBeasts(ARegion *r,Unit *u)
 		return 0;
 	}
 
-	if (order->level < 3) {
+	if (order->level < 2) {
 		create = I_IWOLF;
 		max = level * level * 4;
 	} else {
-		if (order->level < 5) {
+		if (order->level < 3) {
 			create = I_IEAGLE;
-			max = (level - 2) * (level - 2);
+			max = level * level;
 		} else {
 			create = I_IDRAGON;
 			max = 1;

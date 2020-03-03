@@ -1127,10 +1127,10 @@ AString *ItemDescription(int item, int full)
 				"spirit skills, up to a maximum of level 3.";
 			break;
 		case I_RELICOFGRACE:
-			*temp += " This token was given to you by the Maker in recognition "
-				"of you turning away from your rebellion.  Complete more "
-				"quests as they are offered if you wish to continue to work "
-				"toward restoring your relationship.";
+			*temp += " This token is one of many shattered across the world after "
+					"Devourer death. Combine 10 of them and upgrade leader to an Avatar with "
+					"any one skill to level 5. Faction with 5 Avatars wins the game. "
+					"Avatar does not count as a mage for total faction mages count.";
 			break;
 		case I_HEALPOTION:
 			*temp += " This item allows its possessor to heal wounded units after battle."

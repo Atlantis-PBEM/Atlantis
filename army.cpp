@@ -1202,10 +1202,6 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 		/* 4.3 Add bonuses versus mounted */
 		if (tar->riding != -1) attackLevel += mountBonus;
 
-		// TODO: debug only, remove later
-		// b->AddLine(attacker->name + AString(" attack level: ") + attackLevel + "(+" + attackers->tactics_bonus + ").");
-		// b->AddLine(tar->name + AString(" defence level: ") + tlev + "(+" + tactics_bonus + ").");
-
 		/* 5. Attack soldier */
 		if (attackType != NUM_ATTACK_TYPES) {
 			if (!(flags & WeaponType::ALWAYSREADY)) {
@@ -1218,9 +1214,23 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 				}
 			}
 
-			/* 4.4 Add advanced tactics bonus */
-			if (!Hits(attackLevel + attackers->tactics_bonus, tlev + tactics_bonus)) {
-				continue;
+			if (combat) {
+				// TODO: debug only
+				b->AddLine(attacker->name + AString(" attack level: ") + attackLevel + "(+" + attackers->tactics_bonus + ").");
+				b->AddLine(tar->name + AString(" defence level: ") + tlev + "(+" + tactics_bonus + ").");
+
+				/* 4.4 Add advanced tactics bonus */
+				if (!Hits(attackLevel + attackers->tactics_bonus, tlev + tactics_bonus)) {
+					continue;
+				}
+			} else {
+				// TODO: debug only
+				b->AddLine(attacker->name + AString(" magic no tactics bonus. Attack level: ") + attackLevel + ".");
+				b->AddLine(tar->name + AString(" magic no tactics bonus. Defence level: ") + tlev + ".");
+
+				if (!Hits(attackLevel, tlev)) {
+					continue;
+				}
 			}
 		}
 

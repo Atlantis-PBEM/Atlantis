@@ -939,26 +939,6 @@ void Game::ModifyTablesPerRuleset(void)
 
 	ModifyObjectName(O_MFORTRESS, "Magical Fortress");
 	ModifyObjectName(O_MCASTLE, "Magical Castle");
-	ModifyObjectManpower(O_TOWER,
-		ObjectDefs[O_TOWER].protect,
-		ObjectDefs[O_TOWER].capacity,
-		ObjectDefs[O_TOWER].sailors,
-		0);
-	ModifyObjectManpower(O_FORT,
-		ObjectDefs[O_FORT].protect,
-		ObjectDefs[O_FORT].capacity,
-		ObjectDefs[O_FORT].sailors,
-		1);
-	ModifyObjectManpower(O_CASTLE,
-		ObjectDefs[O_CASTLE].protect,
-		ObjectDefs[O_CASTLE].capacity,
-		ObjectDefs[O_CASTLE].sailors,
-		2);
-	ModifyObjectManpower(O_CITADEL,
-		ObjectDefs[O_CITADEL].protect,
-		ObjectDefs[O_CITADEL].capacity,
-		ObjectDefs[O_CITADEL].sailors,
-		4);
 
 	ModifyTerrainFlags(R_OCEAN, TerrainType::BARREN | TerrainType::FLYINGMOUNTS);
 	ModifyTerrainFlags(R_LAKE, TerrainType::BARREN | TerrainType::FLYINGMOUNTS);
@@ -1041,7 +1021,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_MAN);
 	ModifyItemBasePrice(I_MAN, 40);
 	ModifyRaceSkillLevels("HUMN", 4, 2);
-	ModifyRaceSkills("HUMN", 0, "CARP");
+	ModifyRaceSkills("HUMN", 0, "BUIL");
 	ModifyRaceSkills("HUMN", 1, "RIDI");
 	ModifyRaceSkills("HUMN", 2, "COMB");
 	ModifyRaceSkills("HUMN", 3, "MINI");
@@ -1088,7 +1068,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkillLevels("WELF", 5, 2);
 	ModifyRaceSkills("WELF", 0, "LUMB");
 	ModifyRaceSkills("WELF", 1, "LBOW");
-	ModifyRaceSkills("WELF", 2, "HERB");
+	ModifyRaceSkills("WELF", 2, "ENTE");
 	ModifyRaceSkills("WELF", 3, "CARP");
 	ModifyRaceSkills("WELF", 4, "FISH");
 
