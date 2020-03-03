@@ -4608,11 +4608,11 @@ TerrainType *TerrainDefs = td;
 
 static HealType hd[] = {
 	{0, 0},
-	{5, 30},
-	{10, 40},
-	{15, 50},
-	{15, 60},
-	{15, 70}
+	{5, 80},
+	{10, 80},
+	{15, 80},
+	{25, 80},
+	{40, 80}
 };
 HealType *HealDefs = hd;
 
