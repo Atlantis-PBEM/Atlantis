@@ -229,7 +229,9 @@ AString *ShowSkill::Report(Faction *f)
 			if (level > 1) break;
 			*str += "A unit with this skill may use the ENTERTAIN order "
 				"to generate funds. The amount of silver gained will "
-				"be 20 per man, times the level of the entertainers. "
+				"be ";
+			*str += Globals->ENTERTAIN_INCOME;
+			*str +=  " per man, times the level of the entertainers. "
 				"This amount is limited by the region that the unit is in.";
 			break;
 		case S_TACTICS:
