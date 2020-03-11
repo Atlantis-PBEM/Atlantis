@@ -3562,7 +3562,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	temp = "In each combat round, the combatants each get to attack once, in "
 		"a random order. ";
-	if (!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
+	if (!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED) && !Globals->ADVANCED_TACTICS) {
 		temp += "(In a free round of attacks, only one side's forces get to "
 			"attack.) ";
 	}

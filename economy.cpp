@@ -220,14 +220,12 @@ void ARegion::SetupPop()
 	int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 1) /50));
 	if (maxent < 0) maxent = 0;
 
-	// Casting Phantasmal Entertainment affects total entertainment amount
-	int entertainment_bonus = phantasmal_entertainment * Globals->ENTERTAIN_INCOME * 20;
 	Production * e = new Production;
 	e->itemtype = I_SILVER;
 	e->skill = S_ENTERTAINMENT;
-	e->amount = maxent / Globals->ENTERTAIN_FRACTION + entertainment_bonus;
+	e->amount = maxent / Globals->ENTERTAIN_FRACTION;
 
-	e->baseamount = maxent / Globals->ENTERTAIN_FRACTION + entertainment_bonus;
+	e->baseamount = maxent / Globals->ENTERTAIN_FRACTION;
 	// raise entertainment income by productivity factor 10
 	e->productivity = Globals->ENTERTAIN_INCOME * 10;
 	
