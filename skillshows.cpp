@@ -1051,12 +1051,11 @@ AString *ShowSkill::Report(Faction *f)
 					"mage may have in his inventory is equal to mage's skill squared.";
 			} else if (level == 3) {
 				if (ITEM_DISABLED(I_IDRAGON)) break;
-				*str += "Create Phantasmal Beasts at level 5 allows the "
+				*str += "Create Phantasmal Beasts at level 3 allows the "
 					"mage to summon an illusionary dragon into his "
 					"inventory. To summon an illusionary dragon, the mage "
-					"should CAST Create_Phantasmal_Beasts DRAGON; the mage "
-					"can only have one illusionary dragon in his inventory "
-					"at one time.";
+					"should CAST Create_Phantasmal_Beasts DRAGON. The number of dragons that a "
+					"mage may have in his inventory is equal to mage's skill level.";
 			}
 			break;
 		case S_CREATE_PHANTASMAL_UNDEAD:
