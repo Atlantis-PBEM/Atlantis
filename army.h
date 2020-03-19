@@ -112,7 +112,7 @@ class Army
 		void Tie(Battle *);
 		int CanBeHealed();
 		void DoHeal(Battle *);
-		void DoHealLevel(Battle *,int,int useItems );
+		void DoHealLevel(Battle *, int level, int rate, int useItems);
 		void Regenerate(Battle *);
 
 		void GetMonSpoils(ItemList *,int, int);

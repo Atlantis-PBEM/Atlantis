@@ -33,23 +33,22 @@ void Soldier::SetupHealing()
 		healtype = unit->GetSkill(S_MAGICAL_HEALING);
 		if (healtype > 5) healtype = 5;
 		if (healtype > 0) {
-			healing = HealDefs[healtype].num;
+			healing = MagicHealDefs[healtype].num;
 			healitem = -1;
 			return;
 		}
 	}
 
-	// TODO: set healing potion as a self healing only
-
 	if (unit->items.GetNum(I_HEALPOTION)) {
-		healtype = 1;
-		unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
-		healing = 10;
-		healitem = I_HEALPOTION;
+		// TODO: fix it
+		// healtype = 5;
+		// unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
+		// healing = 1;
+		// healitem = I_HEALPOTION;
 	} else {
-		healing = unit->GetSkill(S_HEALING) * Globals->HEALS_PER_MAN;
+		healing = HealDefs[unit->GetSkill(S_HEALING)].num * Globals->HEALS_PER_MAN;
 		if (healing) {
-			healtype = 1;
+			healtype = unit->GetSkill(S_HEALING);
 			int herbs = unit->items.GetNum(I_HERBS);
 			if (herbs < healing) healing = herbs;
 			unit->items.SetNum(I_HERBS,herbs - healing);

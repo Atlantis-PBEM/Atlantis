@@ -1951,7 +1951,7 @@ ItemType id[] =
 	 ItemType::DISABLED,
 	 "MINI",2,1,1, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 2, IT_ADVANCED, 60, 0,
+	 2, IT_ADVANCED | IT_NEVER_SPOIL, 60, 0,
 	 0,0,0,0,0,
 	 -1,0,
 	 -1, 0, 0,
@@ -2236,7 +2236,7 @@ ItemType id[] =
 	 -1,0,
 	 -1,0, 0,
 	 0, NULL, 0,
-	 "MHEA", { "MANI", "PATT", "FORC", "SPIR" }, 1, 3},
+	 "MHEA", { "MANI", "PATT", "FORC", "SPIR" }, 1, 2},
 	{"scrying orb","scrying orbs","SORB",
 	 ItemType::DISABLED | ItemType::NOMARKET | ItemType::NOTRANSPORT,
 	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
@@ -2291,7 +2291,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET | ItemType::NOTRANSPORT,
 	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 0, IT_SPECIAL | IT_NEVER_SPOIL, 0, 0,
+	 1, IT_SPECIAL | IT_NEVER_SPOIL, 0, 0,
 	 0,0,0,0,0,
 	 -1,0,
 	 -1,0, 0,
@@ -4606,15 +4606,27 @@ static TerrainType td[] = {
 
 TerrainType *TerrainDefs = td;
 
+// Regular healing
 static HealType hd[] = {
 	{0, 0},
-	{5, 80},
-	{10, 80},
-	{15, 80},
-	{25, 80},
-	{40, 80}
+	{1, 40}, // 1 * Globals->HEALS_PER_MAN ie 1*5 men with 40% of success
+	{1, 45},
+	{1, 50},
+	{1, 55},
+	{1, 60}
 };
 HealType *HealDefs = hd;
+
+// Magic healing
+static HealType mhd[] = {
+	{0, 0},
+	{5, 70},
+	{20, 75},
+	{40, 80},
+	{80, 85},
+	{160, 90}
+};
+HealType *MagicHealDefs = mhd;
 
 static SpecialType spd[] = {
 	// NONE

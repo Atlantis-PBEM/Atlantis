@@ -314,6 +314,7 @@ AString *ShowSkill::Report(Faction *f)
 			break;
 		case S_HEALING:
 			if (level > 1) break;
+			// TODO: add more description
 			*str += "A unit with this skill is able to heal units hurt in "
 				"battle.";
 			break;
@@ -372,8 +373,8 @@ AString *ShowSkill::Report(Faction *f)
 					"it will be used automatically when the mage is involved "
 					"in a battle. ";
 			}
-			if (HealDefs[level].num != HealDefs[level - 1].num ||
-					HealDefs[level].rate != HealDefs[level - 1].rate) {
+			if (MagicHealDefs[level].num != MagicHealDefs[level - 1].num ||
+					MagicHealDefs[level].rate != MagicHealDefs[level - 1].rate) {
 				*str += "A mage at this level of skill can ";
 				if (level > 4) {
 					*str += "bring soldiers back from near death, healing";
@@ -383,9 +384,9 @@ AString *ShowSkill::Report(Faction *f)
 					*str += "heal";
 				}
 				*str += " up to ";
-				*str += HealDefs[level].num;
+				*str += MagicHealDefs[level].num;
 				*str += " casualties, with a ";
-				*str += HealDefs[level].rate;
+				*str += MagicHealDefs[level].rate;
 				*str += " percent success rate.";
 			}
 			break;

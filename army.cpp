@@ -793,23 +793,29 @@ int Army::CanBeHealed()
 void Army::DoHeal(Battle * b)
 {
 	// Do magical healing
-	for (int i = 5; i > 0; --i)
-		DoHealLevel(b, i, 0);
+	for (int i = 5; i > 0; --i) {
+		int rate = MagicHealDefs[i].rate;
+		DoHealLevel(b, i, rate, 0);
+	}
+
 	// Do Normal healing
-	DoHealLevel(b, 1, 1);
+	for (int i = 5; i > 0; --i) {
+		int rate = HealDefs[i].rate;
+		DoHealLevel(b, i, rate, 1);
+	}
+
+	// TODO: HPOT
 }
 
-void Army::DoHealLevel(Battle *b, int type, int useItems)
+void Army::DoHealLevel(Battle *b, int level, int rate, int useItems)
 {
-	int rate = HealDefs[type].rate;
-
 	for (int i=0; i<NumAlive(); i++) {
 		Soldier * s = soldiers[i];
 		int n = 0;
 		if (!CanBeHealed()) break;
 		if (s->healtype <= 0) continue;
 		// This should be here.. Use the best healing first
-		if (s->healtype != type) continue;
+		if (s->healtype != level) continue;
 		if (!s->healing) continue;
 		if (useItems) {
 			if (s->healitem == -1) continue;
@@ -834,7 +840,7 @@ void Army::DoHealLevel(Battle *b, int type, int useItems)
 					temp->canbehealed = 0;
 			}
 		}
-		b->AddLine(*(s->unit->name) + " heals " + n + ".");
+		b->AddLine(*(s->unit->name) + " heals " + n + " with " + rate +  "% success chance.");
 	}
 }
 
