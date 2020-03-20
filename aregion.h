@@ -72,6 +72,7 @@ class TerrainType
 			RIDINGMOUNTS = 0x1,
 			FLYINGMOUNTS = 0x2,
 			BARREN       = 0x4,
+			SHOW_RULES   = 0x8,
 		};
 		int flags;
 

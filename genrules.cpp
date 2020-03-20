@@ -162,6 +162,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr(f.Link("#world", "The World"));
 	f.Enclose(1, "ul");
 	f.TagText("li", f.Link("#world_regions", "Regions"));
+	f.TagText("li", f.Link("#region_resources", "Region Resources"));
 	f.TagText("li", f.Link("#world_structures", "Structures"));
 	if (Globals->NEXUS_EXISTS) {
 		temp = "Atlantis Nexus";
@@ -987,6 +988,53 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"well as moving.";
 		f.Paragraph(temp);
 	}
+
+	f.LinkRef("region_resources");
+	f.TagText("h3", "Region resources:");
+	f.Paragraph("Here is list of resources you can find in regions:");
+	f.Enclose(1, "center");
+	f.Enclose(1, "table border=\"1\"");
+	f.Enclose(1, "tr");
+	f.Enclose(1, "td colspan=\"2\"");
+	f.PutStr("Region type");
+	f.Enclose(0, "td");
+	f.Enclose(1, "td colspan=\"4\"");
+	f.PutStr("Resources");
+	f.Enclose(0, "td");
+	f.Enclose(0, "tr");
+
+	for (int i=0; i<R_NUM; i++) {
+		if (!(TerrainDefs[i].flags & TerrainType::SHOW_RULES)) continue;
+		int first = 1;
+		f.Enclose(1, "tr");
+		f.Enclose(1, "td colspan=\"2\"");
+		f.PutStr(TerrainDefs[i].name);
+		f.Enclose(0, "td");
+
+		f.Enclose(1, "td colspan=\"4\"");
+		AString temp = "";
+
+		for (unsigned int c = 0; c < sizeof(TerrainDefs[i].prods)/sizeof(Product); c++) {
+			if (TerrainDefs[i].prods[c].product == -1) continue;
+
+			if (first == 0) {
+				temp = temp + AString(", ");
+			}
+			temp = temp + ItemDefs[TerrainDefs[i].prods[c].product].name + " (" + TerrainDefs[i].prods[c].chance + "%)" ;
+			first = 0;
+		}
+		if (temp.Len() > 0) {
+			temp = temp + AString(".");
+		} else {
+			temp = AString("none.");
+		}
+		f.PutStr(temp);
+		f.Enclose(0, "td");
+		f.Enclose(0, "tr");
+	}
+	f.Enclose(0, "table");
+	f.Enclose(0, "center");
+
 	f.LinkRef("world_structures");
 	f.TagText("h3", "Structures:");
 	temp = "Regions may also contain structures, such as buildings";
@@ -1227,10 +1275,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"details.";
 	f.Paragraph(temp);
 
+	temp = "Note that depending on game settings certain races might "
+		"be able to swim or fly and there are items that can enable "
+		"your units to fly or walk on water.";
+	f.Paragraph(temp);
+
 	temp = "Flying units are not initially available to starting players. "
 		"A unit can ride provided that the carrying capacity of its "
 		"horses is at least as great as the weight of its people and "
-		"all other items.  A unit can walk provided that the carrying "
+		"all other items. A unit can walk provided that the carrying "
 		"capacity of its people";
 	if (!(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
 		if (!(ItemDefs[I_WAGON].flags & ItemType::DISABLED)) temp += ", ";

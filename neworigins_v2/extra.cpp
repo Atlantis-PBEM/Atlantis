@@ -940,9 +940,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyObjectName(O_MFORTRESS, "Magical Fortress");
 	ModifyObjectName(O_MCASTLE, "Magical Castle");
 
-	ModifyTerrainFlags(R_OCEAN, TerrainType::BARREN | TerrainType::FLYINGMOUNTS);
-	ModifyTerrainFlags(R_LAKE, TerrainType::BARREN | TerrainType::FLYINGMOUNTS);
-
 	ModifyItemMagicInput(I_RINGOFI, 0, I_MITHRIL, 1);
 	ModifyItemMagicInput(I_RINGOFI, 1, I_SILVER, 600);
 	ModifyItemMagicInput(I_CLOAKOFI, 0, I_FUR, 1);

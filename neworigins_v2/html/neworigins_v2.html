@@ -26,7 +26,7 @@
         Copyright 1993 by Russell Wallace
       </h2>
       <h3>
-        Last Change: March 02, 2020
+        Last Change: March 20, 2020
       </h3>
     </center>
     <div class="rule">
@@ -74,6 +74,9 @@
         <ul>
           <li>
             <a href="#world_regions">Regions</a>
+          </li>
+          <li>
+            <a href="#region_resources">Region Resources</a>
           </li>
           <li>
             <a href="#world_structures">Structures</a>
@@ -867,6 +870,126 @@ Exits:
       will contain villages, towns, and cities. More information on these is
       available in the section on the economy.
     </p>
+    <a name="region_resources"></a>
+    <h3>
+      Region resources:
+    </h3>
+    <p>
+      Here is list of resources you can find in regions:
+    </p>
+    <center>
+      <table border="1">
+        <tr>
+          <td colspan="2">
+            Region type
+          </td>
+          <td colspan="4">
+            Resources
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            ocean
+          </td>
+          <td colspan="4">
+            fish (100%), giant turtle (30%), rough gem (30%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            plain
+          </td>
+          <td colspan="4">
+            horse (100%), winged horse (20%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            forest
+          </td>
+          <td colspan="4">
+            wood (100%), fur (100%), ironwood (20%), yew (25%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            mountain
+          </td>
+          <td colspan="4">
+            iron (100%), stone (100%), mithril (25%), rootstone (25%),
+            admantium (5%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            swamp
+          </td>
+          <td colspan="4">
+            wood (100%), floater hide (25%), herb (100%), mushroom (25%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            jungle
+          </td>
+          <td colspan="4">
+            wood (100%), herb (100%), mushroom (25%), ironwood (25%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            desert
+          </td>
+          <td colspan="4">
+            iron (100%), stone (100%), rootstone (25%), camel (80%), admantium
+            (5%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            tundra
+          </td>
+          <td colspan="4">
+            fur (100%), herb (100%), winged horse (20%), rough gem (35%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            cavern
+          </td>
+          <td colspan="4">
+            iron (100%), stone (100%), mithril (25%), rootstone (25%),
+            admantium (10%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            underforest
+          </td>
+          <td colspan="4">
+            wood (80%), stone (100%), iron (80%), mushroom (25%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            tunnels
+          </td>
+          <td colspan="4">
+            iron (100%), stone (100%), mithril (25%), rootstone (25%),
+            mushroom (10%), admantium (5%).
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            chasm
+          </td>
+          <td colspan="4">
+            rough gem (20%), stone (100%), mithril (25%), mushroom (10%),
+            rootstone (25%), admantium (10%).
+          </td>
+        </tr>
+      </table>
+    </center>
     <a name="world_structures"></a>
     <h3>
       Structures:
@@ -960,9 +1083,14 @@ Exits:
       to forbid access; see the section on combat for details.
     </p>
     <p>
+      Note that depending on game settings certain races might be able to swim
+      or fly and there are items that can enable your units to fly or walk on
+      water.
+    </p>
+    <p>
       Flying units are not initially available to starting players. A unit can
       ride provided that the carrying capacity of its horses is at least as
-      great as the weight of its people and all other items.  A unit can walk
+      great as the weight of its people and all other items. A unit can walk
       provided that the carrying capacity of its people, horses, and wagons is
       at least as great as the weight of all its other items, and provided
       that it has at least as many horses as wagons (otherwise the excess
@@ -1290,17 +1418,6 @@ Exits:
           </td>
           <td align="left" nowrap>
             20
-          </td>
-        </tr>
-        <tr>
-          <td align="left" nowrap>
-            rough gem
-          </td>
-          <td align="left" nowrap>
-            2
-          </td>
-          <td align="left" nowrap>
-            &nbsp;
           </td>
         </tr>
         <tr>
@@ -2831,26 +2948,6 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
         </tr>
         <tr>
           <td align="left" nowrap>
-            rough gem
-          </td>
-          <td align="left" nowrap>
-            mining (2)
-          </td>
-          <td align="left" nowrap>
-            
-          </td>
-          <td align="left" nowrap>
-            1 month
-          </td>
-          <td align="left" nowrap>
-            2
-          </td>
-          <td align="left">
-            
-          </td>
-        </tr>
-        <tr>
-          <td align="left" nowrap>
             javelin
           </td>
           <td align="left" nowrap>
@@ -3322,7 +3419,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
         </tr>
         <tr>
           <td align="left" nowrap>
-            Gem Appraiser
+            Oasis
           </td>
           <td align="left" nowrap>
             10
@@ -3331,10 +3428,10 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             wood or stone
           </td>
           <td align="left" nowrap>
-            mining (3)
+            horse training (3)
           </td>
           <td align="left" nowrap>
-            rough gems
+            camels
           </td>
         </tr>
       </table>
@@ -3954,9 +4051,8 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
     </p>
     <p>
       In each combat round, the combatants each get to attack once, in a
-      random order. (In a free round of attacks, only one side's forces get to
-      attack.) Each combatant will attempt to hit a randomly selected enemy.
-      If he hits, and the target has no armor, then the target is
+      random order. Each combatant will attempt to hit a randomly selected
+      enemy. If he hits, and the target has no armor, then the target is
       automatically killed.  Armor may provide extra defense against otherwise
       successful attacks.
     </p>

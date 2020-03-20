@@ -1124,7 +1124,7 @@ AString *ItemDescription(int item, int full)
 			*temp += " This item allows its possessor to magically heal "
 				"units after battle, as if their skill in Magical Healing "
 				"was the highest of their manipulation, pattern, force and "
-				"spirit skills, up to a maximum of level 3.";
+				"spirit skills, up to a maximum of level 2.";
 			break;
 		case I_RELICOFGRACE:
 			*temp += " This token is one of many shattered across the world after "
