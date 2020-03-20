@@ -313,10 +313,18 @@ AString *ShowSkill::Report(Faction *f)
 				"level.";
 			break;
 		case S_HEALING:
-			if (level > 1) break;
-			// TODO: add more description
-			*str += "A unit with this skill is able to heal units hurt in "
-				"battle.";
+			*str += "A unit with this skill is able to use herbs [HERB] to "
+				"heal units hurt in battle.";
+			if (HealDefs[level].num != HealDefs[level - 1].num ||
+					HealDefs[level].rate != HealDefs[level - 1].rate) {
+				*str += " A unit at this level of skill can ";
+				*str += "bring soldiers back from near death, healing";
+				*str += " up to ";
+				*str += HealDefs[level].num * Globals->HEALS_PER_MAN;
+				*str += " casualties, with a ";
+				*str += HealDefs[level].rate;
+				*str += " percent success rate.";
+			}
 			break;
 		case S_SAILING:
 			if (level > 1) break;
