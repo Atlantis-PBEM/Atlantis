@@ -803,8 +803,6 @@ void Army::DoHeal(Battle * b)
 		int rate = HealDefs[i].rate;
 		DoHealLevel(b, i, rate, 1);
 	}
-
-	// TODO: HPOT
 }
 
 void Army::DoHealLevel(Battle *b, int level, int rate, int useItems)
@@ -853,8 +851,12 @@ void Army::Win(Battle * b,ItemList * spoils)
 	WriteLosses(b);
 
 	int na = NumAlive();
+	int loses_percent = 100;
+	if (na != 0 && count != 0) {
+		loses_percent = 100 - ((na * 100) / count);
+	}
 
-	if (count - na) wintype = WIN_DEAD;
+	if (loses_percent >= 5) wintype = WIN_DEAD;
 	else wintype = WIN_NO_DEAD;
 
 	AList units;
@@ -1221,19 +1223,11 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 			}
 
 			if (combat) {
-				// TODO: debug only
-				b->AddLine(attacker->name + AString(" attack level: ") + attackLevel + "(+" + attackers->tactics_bonus + ").");
-				b->AddLine(tar->name + AString(" defence level: ") + tlev + "(+" + tactics_bonus + ").");
-
 				/* 4.4 Add advanced tactics bonus */
 				if (!Hits(attackLevel + attackers->tactics_bonus, tlev + tactics_bonus)) {
 					continue;
 				}
 			} else {
-				// TODO: debug only
-				b->AddLine(attacker->name + AString(" magic no tactics bonus. Attack level: ") + attackLevel + ".");
-				b->AddLine(tar->name + AString(" magic no tactics bonus. Defence level: ") + tlev + ".");
-
 				if (!Hits(attackLevel, tlev)) {
 					continue;
 				}
