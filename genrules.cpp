@@ -3739,7 +3739,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += Globals->HEALS_PER_MAN;
 		temp += " casualties per skill level. Each attempt however "
 			"requires one unit of Herbs, which is thereby used up. Each "
-			"attempt has a 50% chance of healing one casualty; only one "
+			"attempt has a some chance of healing one casualty; only one "
 			"attempt at Healing may be made per casualty. Healing occurs "
 			"automatically, after the battle is over, by any living "
 			"healers on the winning side.";
