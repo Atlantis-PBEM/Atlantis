@@ -34,7 +34,7 @@
 #define MINIMUM_ACTIVE_QUESTS		5
 #define MAXIMUM_ACTIVE_QUESTS		15
 #define QUEST_EXPLORATION_PERCENT	30
-#define QUEST_SPAWN_RATE		5
+#define QUEST_SPAWN_RATE		7
 #define QUEST_MAX_REWARD		3000
 #define QUEST_SPAWN_CHANCE		70
 #define MAX_DESTINATIONS		5
@@ -137,6 +137,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				ItemDefs[i].baseprice <= QUEST_MAX_REWARD &&
 				!(ItemDefs[i].type & IT_SPECIAL) &&
 				!(ItemDefs[i].type & IT_SHIP) &&
+				!(ItemDefs[i].type & IT_NEVER_SPOIL) &&
 				!(ItemDefs[i].flags & ItemType::DISABLED)) {
 			count ++;
 		}
@@ -153,6 +154,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				ItemDefs[i].baseprice <= QUEST_MAX_REWARD &&
 				!(ItemDefs[i].type & IT_SPECIAL) &&
 				!(ItemDefs[i].type & IT_SHIP) &&
+				!(ItemDefs[i].type & IT_NEVER_SPOIL) &&
 				!(ItemDefs[i].flags & ItemType::DISABLED)) {
 			count--;
 			if (count == 0) {
@@ -878,7 +880,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifySkillDependancy(S_RAISE_UNDEAD, 0, "SUSK", 3);
 	ModifySkillDependancy(S_SUMMON_LICH, 0, "RAIS", 3);
 	ModifySkillDependancy(S_DRAGON_LORE, 1, "WOLF", 3);
-	// ModifySkillDependancy(S_SUMMON_BALROG, 0, "DEMO", 4);
 
 	ModifyItemMagicOutput(I_SKELETON, 200);
 	ModifyItemMagicOutput(I_WOLF, 200);
