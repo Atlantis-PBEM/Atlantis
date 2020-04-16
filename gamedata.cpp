@@ -1367,7 +1367,7 @@ ItemType id[] =
 	 0, NULL, 0,
 	 "", { "", "", "", "" }, 0, 0},
 	{"spear","spears","SPEA",
-	 ItemType::DISABLED,
+	 0,
 	 "WEAP",1,1,1, {{I_WOOD,1},{-1,0},{-1,0},{-1,0}},
 	 NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 1, IT_NORMAL|IT_WEAPON|IT_TOOL,60,1,

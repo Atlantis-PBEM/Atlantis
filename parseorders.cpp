@@ -1911,7 +1911,11 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 	if (*token == "default") {
 		fac = -1;
 	} else {
-		fac = token->value();
+		fac = token->strict_value();
+		if (fac == -1) {
+			f->Error(AString("DECLARE: Non-existent faction."));
+			return;
+		}
 	}
 	delete token;
 

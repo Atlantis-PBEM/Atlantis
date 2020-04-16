@@ -40,8 +40,7 @@ void Soldier::SetupHealing()
 	}
 
 	if (unit->items.GetNum(I_HEALPOTION)) {
-		// TODO: fix it
-		// healtype = 5;
+		// healtype = 6;
 		// unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
 		// healing = 1;
 		// healitem = I_HEALPOTION;

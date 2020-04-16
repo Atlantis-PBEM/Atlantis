@@ -62,6 +62,7 @@ public:
 	AString *getlegal();
 	AString *Trunc(int, int back=30);
 	int value();
+	int strict_value();
 	AString *StripWhite();
 
 private:
