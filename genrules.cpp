@@ -2571,12 +2571,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "Trade items are bought and sold only by cities, and have "
 			"no other practical uses.  However, the profit margins on "
 			"these items are usually quite high. ";
-		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-			temp += "Buying of trade items in a region counts against a "
-				"Trade faction's quota of regions in which it may "
-				"undertake trade activity (note that buying and selling "
-				"normal items does not, nor does selling of Trade items).";
-		}
 		f.Paragraph(temp);
 	}
 	f.LinkRef("economy_buildings");

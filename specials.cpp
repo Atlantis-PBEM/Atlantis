@@ -40,10 +40,10 @@ void Soldier::SetupHealing()
 	}
 
 	if (unit->items.GetNum(I_HEALPOTION)) {
-		// healtype = 6;
-		// unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
-		// healing = 1;
-		// healitem = I_HEALPOTION;
+		healtype = 6;
+		unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
+		healing = 1;
+		healitem = I_HEALPOTION;
 	} else {
 		healing = HealDefs[unit->GetSkill(S_HEALING)].num * Globals->HEALS_PER_MAN;
 		if (healing) {

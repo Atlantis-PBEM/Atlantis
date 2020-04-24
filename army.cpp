@@ -800,6 +800,9 @@ void Army::DoHeal(Battle * b)
 		DoHealLevel(b, i, rate, 0);
 	}
 
+	// Use HPOT
+	DoHealLevel(b, 6, 70, 1);
+
 	// Do Normal healing
 	for (int i = 5; i > 0; --i) {
 		int rate = HealDefs[i].rate;
@@ -840,7 +843,11 @@ void Army::DoHealLevel(Battle *b, int level, int rate, int useItems)
 					temp->canbehealed = 0;
 			}
 		}
-		b->AddLine(*(s->unit->name) + " heals " + n + " with " + rate +  "% success chance.");
+		if (useItems && s->healitem == I_HEALPOTION) {
+			b->AddLine(*(s->unit->name) + " heals " + n + " using healing potion with " + rate + "% chance.");
+		} else {
+			b->AddLine(*(s->unit->name) + " heals " + n + " with " + rate + "% chance.");
+		}
 	}
 }
 
