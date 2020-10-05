@@ -50,7 +50,7 @@ void Soldier::SetupHealing()
 			healtype = unit->GetSkill(S_HEALING);
 			int herbs = unit->items.GetNum(I_HERBS);
 			if (herbs < healing) healing = herbs;
-			unit->items.SetNum(I_HERBS,herbs - healing);
+			unit->items.SetNum(I_HERBS, herbs - healing);
 			healitem = I_HERBS;
 		}
 	}

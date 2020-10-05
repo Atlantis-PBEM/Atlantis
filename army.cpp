@@ -465,7 +465,7 @@ void Soldier::RestoreItems()
 					unit->items.GetNum(healitem) + healing);
 		} else if (healitem == I_HEALPOTION) {
 			unit->items.SetNum(healitem,
-					unit->items.GetNum(healitem)+healing/10);
+					unit->items.GetNum(healitem)+1);
 		}
 	}
 	if (weapon != -1)
