@@ -401,7 +401,7 @@ void ARegion::SetupCityMarket()
 		if (i==I_SILVER) continue;
 		if ((ItemDefs[i].type & IT_MAN)
 			|| (ItemDefs[i].type & IT_LEADER)) continue;
-		
+
 		int canProduceHere = 0;
 		// Check if the product can be produced in the region
 		// Raw goods
@@ -655,10 +655,6 @@ void ARegion::SetupCityMarket()
 	/* Set up the trade items */
 	int buy1 = getrandom(numtrade);
 	int buy2 = getrandom(numtrade);
-	// TODO: test Add gems from gemcutting as a buy
-	// if (getrandom(100) < 20 && buy1 != I_GEMS) {
-	// 	buy2 = I_GEMS;
-	// }
 	int sell1 = getrandom(numtrade);
 	int sell2 = getrandom(numtrade);
 	int tradebuy = 0;

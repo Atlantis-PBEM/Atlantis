@@ -67,9 +67,11 @@ static GameDefs g = {
 	8, /* SHIP_SPEED */   //This is no longer used!
 	6, /* FLY_SPEED */
 	16, /* MAX_SPEED */
-	2, /* FLEET_WIND_BOOST */
-	0, /* FLEET_CREW_BOOST */
-	0, /* FLEET_LOAD_BOOST */
+
+	// BOOST settings do not exist in GameDefs
+	// 2, /* FLEET_WIND_BOOST */
+	// 0, /* FLEET_CREW_BOOST */
+	// 0, /* FLEET_LOAD_BOOST */
 
 	10, /* STUDENTS_PER_TEACHER */
 	10, /* MAINTENANCE_COST */
@@ -221,7 +223,7 @@ static GameDefs g = {
 	0,  // START_GATES_OPEN
 	1,  // SHOW_CLOSED_GATES
 	0,	// TRANSPORT               - zero with Arcadia
-	1,	// LOCAL_TRANSPORT
+	2,	// LOCAL_TRANSPORT
 	3,	// NONLOCAL_TRANSPORT
 	5,	// SHIPPING_COST
 	0,	// FRACTIONAL_WEIGHT

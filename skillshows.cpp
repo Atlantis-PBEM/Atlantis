@@ -261,12 +261,12 @@ AString *ShowSkill::Report(Faction *f)
 			if (level == 1) {
 				*str += "A unit with this skill has begun the process of building "
 					"on their combat experience to learn how to survive wounds "
-					"that would lay low a less grizzled warrior.  This is an "
+					"that would lay low a less grizzled warrior. This is an "
 					"arduous process, and doesn't yet provide any advantage "
 					"at this skill level.";
 			} else if (level == 3) {
 				*str += "The process of building up combat endurance is starting "
-					"to yield results.  At this level the men in the unit can "
+					"to yield results. At this level the men in the unit can "
 					"survive one extra hit in combat before being overcome.";
 			} else if (level == 5) {
 				*str += "The men of this unit are now hardened veterans, and can "
@@ -426,26 +426,31 @@ AString *ShowSkill::Report(Faction *f)
 					"Also at level 2 Gate Lore, the mage may perform a "
 					"random gate jump without being restricted to the same "
 					"level; use CAST Gate_Lore RANDOM LEVEL UNITS <unit> ... "
-					"to use this option.  The mage may also now carry 100 "
-					"weight units through a Gate when doing a random jump.";
-			} else if (level == 3) {
-				*str += "A mage with Gate Lore skill 3 and higher can step "
+					"to use this option; when calculating weight for multi "
+					"level jump, skill level is reduced by 1. The mage may "
+					"also now carry 500 weight units through a Gate when doing "
+					"a random jump. "
+					"A mage with Gate Lore skill 2 and higher can step "
 					"through a Gate into another region containing a specific "
 					"Gate. To use this spell, use the syntax CAST Gate_Lore "
 					"GATE <number> UNITS <unit> ... <number> specifies the "
 					"Gate that the mage will jump to. UNITS is followed by a "
 					"list of units to follow the mage through the gate (the "
-					"mage always jumps through the gate). At level 3, the "
-					"mage may carry 15 weight units through the Gate "
-					"(including the mage). Also, a level 3 or higher mage "
-					"doing a random gate jump may carry 1000 weight units "
-					"through the Gate.";
+					"mage always jumps through the gate). At level 2, the "
+					"mage may carry 15 weight units through the specific Gate "
+					"(including the mage).";
+			} else if (level == 3) {
+				*str += "A mage with Gate Lore skill 3 may carry 500 weight "
+					"units through a Gate. Also, a level 3 mage doing a random "
+					"gate jump may carry 1500 weight units through the Gate.";
 			} else if (level == 4) {
-				*str += "A mage with Gate Lore skill 4 may carry 100 weight "
-					"units through a Gate.";
+				*str += "A mage with Gate Lore skill 4 may carry 1500 weight "
+					"units through a Gate. Also, a level 4 mage doing a random "
+					"gate jump may carry 3000 weight units through the Gate.";
 			} else if (level == 5) {
-				*str += "A mage with Gate Lore skill 5 may carry 1000 weight "
-					"units through a Gate.";
+				*str += "A mage with Gate Lore skill 5 may carry 3000 weight "
+					"units through a Gate. Also, a level 5 mage doing a random "
+					"gate jump may carry 6000 weight units through the Gate.";
 			}
 			break;
 		case S_PORTAL_LORE:
@@ -462,7 +467,7 @@ AString *ShowSkill::Report(Faction *f)
 				"send units from one region to another. In order to do this, "
 				"both mages (the caster, and the target mage) must have "
 				"Portals, and the caster must be trained in Portal Lore. The "
-				"caster may teleport units weighing up to 300 weight units "
+				"caster may teleport units weighing up to 500 weight units "
 				"times his skill level, to the target mage's region. ";
 			range = FindRange(SkillDefs[skill].range);
 			if (range) {
@@ -577,7 +582,7 @@ AString *ShowSkill::Report(Faction *f)
 			/* XXX -- This should be cleaner somehow. */
 			*str += "A mage with this skill may teleport himself across "
 				"great distances, even without the use of a gate. The mage "
-				"may teleport up to 30 weight units per skill level.";
+				"may teleport up to 50 weight units per skill level.";
 			range = FindRange(SkillDefs[skill].range);
 			if (range) {
 				if (range->flags & RangeType::RNG_SURFACE_ONLY) {
@@ -1104,8 +1109,8 @@ AString *ShowSkill::Report(Faction *f)
 				*str += "Create Phantasmal Undead at level 3 allows the mage "
 					"to summon an illusionary lich into his inventory. To "
 					"summon an illusionary lich, the mage should CAST "
-					"Create_Phantasmal_Undead LICH; the mage can only have "
-					"one illusionary lich in his inventory at one time.";
+					"Create_Phantasmal_Undead LICH; The number of liches that a "
+					"mage may have in his inventory is equal to mage's skill level.";
 			}
 			break;
 		case S_CREATE_PHANTASMAL_DEMONS:

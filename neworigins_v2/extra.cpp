@@ -35,7 +35,7 @@
 #define MAXIMUM_ACTIVE_QUESTS		20
 #define QUEST_EXPLORATION_PERCENT	30
 #define QUEST_SPAWN_RATE		7
-#define QUEST_MAX_REWARD		6000
+#define QUEST_MAX_REWARD		3000
 #define QUEST_SPAWN_CHANCE		70
 #define MAX_DESTINATIONS		5
 
@@ -59,16 +59,21 @@ int Game::SetupFaction( Faction *pFac )
 	// Set up magic
 	//
 	temp2->type = U_MAGE;
-	temp2->Study(S_OBSERVATION, 180);
-	temp2->Study(S_FORCE, 90);
-	temp2->Study(S_PATTERN, 90);
-	temp2->Study(S_SPIRIT, 90);
+	temp2->Study(S_OBSERVATION, 30);
+	temp2->Study(S_FORCE, 30);
+	temp2->Study(S_PATTERN, 30);
+	temp2->Study(S_SPIRIT, 30);
 	temp2->Study(S_GATE_LORE, 30);
 	temp2->Study(S_FIRE, 30);
 
 	// Set up health
 	temp2->Study(S_COMBAT, 180);
-	temp2->Study(S_ENDURANCE, 180);
+
+	// Set up flags
+	temp2->SetFlag(FLAG_BEHIND, 1);
+	temp2->SetFlag(FLAG_NOCROSS_WATER, 0);
+	temp2->SetFlag(FLAG_HOLDING, 0);
+	temp2->SetFlag(FLAG_NOAID, 0);
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
@@ -174,16 +179,6 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				break;
 			}
 		}
-	}
-
-	// 25% chance to drop I_RELICOFGRACE from quest in addition to regular reward
-	d = getrandom(100);
-	if (d < 25) {
-		item = new Item;
-		item->type = I_RELICOFGRACE;
-		item->num = 1;
-		q->rewards.Add(item);	
-		printf("\nQuest reward: Relic.\n");
 	}
 
 	d = getrandom(100);
@@ -779,21 +774,8 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_MWAGON);
 	EnableItem(I_GLIDER);
 	EnableItem(I_LEATHERARMOR);
-	ModifyArmorFlags("LARM", ArmorType::USEINASSASSINATE);
-	ModifyWeaponAttack("DBOW",
-			ARMORPIERCING,
-			ATTACK_RANGED,
-			WeaponType::NUM_ATTACKS_HALF_SKILL);
-	ModifyWeaponAttack("RUNE",
-			SLASHING,
-			ATTACK_COMBAT,
-			WeaponType::NUM_ATTACKS_HALF_SKILL);
-	EnableItem(I_CLOTHARMOR);
-	EnableItem(I_BOOTS);
 	EnableItem(I_BAXE);
-	EnableItem(I_LANCE);
 	EnableItem(I_SPEAR);
-	EnableItem(I_PIKE);
 	EnableItem(I_JAVELIN);
 	EnableItem(I_MSHIELD);
 	EnableItem(I_ISHIELD);
@@ -810,12 +792,10 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_FSWORD);
 	EnableItem(I_MUSHROOM);
 	EnableItem(I_HEALPOTION);
-	EnableItem(I_ROUGHGEM);
 	EnableItem(I_GEMS);
 
 	// Artifacts of power
-	EnableItem(I_RELICOFGRACE);
-	ModifyItemName(I_RELICOFGRACE, "artifact of power", "artifacts of power");
+	DisableItem(I_RELICOFGRACE);
 
 	// Tools
 	EnableItem(I_PICK);
@@ -826,8 +806,10 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_BAG);
 	EnableItem(I_SPINNING);
 
-	ModifyItemProductionSkill(I_PIKE, "WEAP", 2);
-	ModifyItemProductionSkill(I_LANCE, "WEAP", 2);
+	// FMI
+	EnableItem(I_CATAPULT);
+	EnableItem(I_STEEL_DEFENDER);
+
 	//
 	// Change craft: adamantium
 	//
@@ -837,24 +819,17 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_ADPLATE);
 	ModifyItemProductionSkill(I_ADMANTIUM, "MINI", 5);
 	ModifyItemProductionSkill(I_ADSWORD, "WEAP", 5);
+	ModifyItemProductionSkill(I_ADBAXE, "WEAP", 5);
 	ModifyItemProductionSkill(I_ADRING, "ARMO", 5);
 	ModifyItemProductionSkill(I_ADPLATE, "ARMO", 5);
 
-	// Cut down the number of trade items to improve
-	// chances of good trade routes
-	DisableItem(I_FIGURINES);
-	DisableItem(I_TAROTCARDS);
-	DisableItem(I_CAVIAR);
-	DisableItem(I_CHOCOLATE);
-	DisableItem(I_ROSES);
-	DisableItem(I_VELVET);
-	DisableItem(I_CASHMERE);
-	DisableItem(I_WOOL);
-	DisableItem(I_MINK);
-	DisableItem(I_DYES);
-
 	// Disable items
 	DisableItem(I_SUPERBOW);
+	DisableItem(I_BOOTS);
+	DisableItem(I_CLOTHARMOR);
+	DisableItem(I_MBAXE);
+	DisableItem(I_ADBAXE);
+	DisableItem(I_ROUGHGEM);
 
 	// No staff of lightning
 	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
@@ -872,10 +847,14 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableSkill(S_CREATE_CENSER);
 	EnableSkill(S_CREATE_FLAMING_SWORD);
 	EnableSkill(S_TRANSMUTATION);
-	EnableSkill(S_ENDURANCE);
-	EnableSkill(S_GEMCUTTING);
+	EnableSkill(S_BLASPHEMOUS_RITUAL);
 	DisableSkill(S_CAMELTRAINING);
 	DisableSkill(S_RANCHING);
+
+	// No endurance
+	DisableSkill(S_ENDURANCE);
+
+	DisableSkill(S_GEMCUTTING);
 
 	// Magic
 
@@ -936,8 +915,8 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_ALCHEMISTLAB);
 	EnableObject(O_OASIS);
 	EnableObject(O_TRAPPINGHUT);
-	EnableObject(O_GEMAPPRAISER);
 
+	DisableObject(O_GEMAPPRAISER);
 	DisableObject(O_PALACE);
 
 	ModifyObjectName(O_MFORTRESS, "Magical Fortress");
@@ -961,8 +940,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyItemMagicInput(I_MCARPET, 1, I_SILVER, 400);
 	ModifyItemMagicInput(I_PORTAL, 0, I_ROOTSTONE, 1);
 	ModifyItemMagicInput(I_PORTAL, 1, I_SILVER, 500);
-	ModifyItemMagicInput(I_FSWORD, 0, I_MSWORD, 1);
-	ModifyItemMagicInput(I_FSWORD, 1, I_SILVER, 600);
 
 	EnableObject(O_ISLE);
 	EnableObject(O_DERELICT);
@@ -976,22 +953,20 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_KRAKEN);
 	EnableItem(I_MERFOLK);
 	EnableItem(I_ELEMENTAL);
-	
-	// New v2 Monsters
 	EnableItem(I_HYDRA);
 	EnableItem(O_BOG);
-
 	EnableItem(I_ICEDRAGON);
 	EnableItem(O_ICECAVE);
-
 	EnableItem(I_ILLYRTHID);
 	EnableItem(O_ILAIR);
-
+	EnableItem(I_DEVIL);
+	
 	EnableItem(I_STORMGIANT);
 	EnableItem(I_CLOUDGIANT);
 	EnableItem(O_GIANTCASTLE);
-
+	
 	EnableItem(I_WARRIORS);
+
 	EnableItem(I_DARKMAGE);
 	EnableItem(O_DARKTOWER);
 
@@ -1041,18 +1016,9 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkillLevels("IDWA", 5, 2);
 	ModifyRaceSkills("IDWA", 0, "COMB");
 	ModifyRaceSkills("IDWA", 1, "WEAP");
-	ModifyRaceSkills("IDWA", 2, "GCUT");
-	ModifyRaceSkills("IDWA", 3, "FARM");
+	ModifyRaceSkills("IDWA", 2, "MINI");
+	ModifyRaceSkills("IDWA", 3, "FISH");
 	ModifyRaceSkills("IDWA", 4, "ARMO");
-
-	EnableItem(I_UNDERDWARF);
-	ModifyItemBasePrice(I_UNDERDWARF, 40);
-	ModifyRaceSkillLevels("UDWA", 5, 2);
-	ModifyRaceSkills("UDWA", 0, "ARMO");
-	ModifyRaceSkills("UDWA", 1, "WEAP");
-	ModifyRaceSkills("UDWA", 2, "COMB");
-	ModifyRaceSkills("UDWA", 3, "MINI");
-	ModifyRaceSkills("UDWA", 4, "GCUT");
 	
 	EnableItem(I_HIGHELF);
 	ModifyItemBasePrice(I_HIGHELF, 40);
@@ -1072,15 +1038,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("WELF", 3, "CARP");
 	ModifyRaceSkills("WELF", 4, "FISH");
 
-	EnableItem(I_DROWMAN);
-	ModifyItemBasePrice(I_DROWMAN, 40);
-	ModifyRaceSkillLevels("DRLF", 5, 2);
-	ModifyRaceSkills("DRLF", 0, "HERB");
-	ModifyRaceSkills("DRLF", 1, "LBOW");
-	ModifyRaceSkills("DRLF", 2, "COMB");
-	ModifyRaceSkills("DRLF", 3, "WEAP");
-	ModifyRaceSkills("DRLF", 4, "HEAL");
-
 	EnableItem(I_GNOME);
 	ModifyItemBasePrice(I_GNOME, 30);
 	ModifyRaceSkillLevels("GNOM", 5, 2);
@@ -1088,7 +1045,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("GNOM", 1, "QUAR");
 	ModifyRaceSkills("GNOM", 2, "ENTE");
 	ModifyRaceSkills("GNOM", 3, "XBOW");
-	ModifyRaceSkills("GNOM", 4, "GCUT");
+	ModifyRaceSkills("GNOM", 4, "HEAL");
 	ModifyItemCapacities(I_GNOME,7,0,0,0);
 	ModifyItemWeight(I_GNOME, 5);
 
@@ -1128,7 +1085,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("GNOL", 1, "HUNT");
 	ModifyRaceSkills("GNOL", 2, "COMB");
 	ModifyRaceSkills("GNOL", 3, "ARMO");
-	ModifyRaceSkills("GNOL", 4, "FISH");
+	ModifyRaceSkills("GNOL", 4, "CARP");
 
 	EnableItem(I_ORC);
 	ModifyItemBasePrice(I_ORC, 40);
@@ -1173,7 +1130,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_MOUNTAIN, 0, I_HILLDWARF);
 	ModifyTerrainCoastRace(R_MOUNTAIN, 1, I_ORC);
 	ModifyTerrainCoastRace(R_MOUNTAIN, 2, I_MAN);
-	ModifyTerrainEconomy(R_MOUNTAIN, 600, 12, 20, 2);
+	ModifyTerrainEconomy(R_MOUNTAIN, 400, 11, 20, 2);
 
 	ClearTerrainRaces(R_SWAMP);
 	ModifyTerrainRace(R_SWAMP, 0, I_LIZARDMAN);
@@ -1213,39 +1170,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_TUNDRA, 2, I_GNOLL);
 	ModifyTerrainEconomy(R_TUNDRA, 400, 11, 10, 2);
 
-	// Underworld
-
-	ClearTerrainRaces(R_CAVERN);
-	ModifyTerrainRace(R_CAVERN, 0, I_DROWMAN);
-	ModifyTerrainRace(R_CAVERN, 1, I_UNDERDWARF);
-	ModifyTerrainRace(R_CAVERN, 2, I_MAN);
-	ModifyTerrainRace(R_CAVERN, 3, I_GNOME);
-	ModifyTerrainCoastRace(R_CAVERN, 0, I_MAN);
-	ModifyTerrainCoastRace(R_CAVERN, 1, I_UNDERDWARF);
-	ModifyTerrainCoastRace(R_CAVERN, 2, I_DROWMAN);
-	ModifyTerrainEconomy(R_CAVERN, 300, 12, 10, 1);
-
-	ClearTerrainRaces(R_UFOREST);
-	ModifyTerrainRace(R_UFOREST, 0, I_DROWMAN);
-	ModifyTerrainRace(R_UFOREST, 1, I_UNDERDWARF);
-	ModifyTerrainRace(R_UFOREST, 2, I_GOBLINMAN);
-	ModifyTerrainRace(R_UFOREST, 3, I_MAN);
-	ModifyTerrainCoastRace(R_UFOREST, 0, I_DROWMAN);
-	ModifyTerrainCoastRace(R_UFOREST, 1, I_UNDERDWARF);
-	ModifyTerrainCoastRace(R_UFOREST, 2, I_GOBLINMAN);
-	ModifyTerrainEconomy(R_UFOREST, 500, 12, 10, 2);
-
-	ClearTerrainRaces(R_CHASM);
-	ModifyTerrainRace(R_CHASM, 0, I_UNDERDWARF);
-	ModifyTerrainRace(R_CHASM, 1, I_DROWMAN);
-	ModifyTerrainRace(R_CHASM, 2, I_GOBLINMAN);
-	ModifyTerrainRace(R_CHASM, 3, I_ORC);
-	ModifyTerrainCoastRace(R_CHASM, 0, I_UNDERDWARF);
-	ModifyTerrainCoastRace(R_CHASM, 1, I_DROWMAN);
-	ModifyTerrainCoastRace(R_CHASM, 2, I_GOBLINMAN);
-	ModifyTerrainEconomy(R_CHASM, 0, 0, 0, 3);
-	// ModifyTerrainWMons(R_CHASM, 20, I_DEMON, I_BALROG, I_ETTIN);
-
 	// Modify the various spells which are allowed to cross levels
 	if (Globals->EASIER_UNDERWORLD) {
 		ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
@@ -1258,5 +1182,15 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_QUARTERMASTER);
 		EnableObject(O_CARAVANSERAI);
 	}
+
+
+	// Weapon BM example
+
+	// Make SWOR to have malus of -1 on attack and -2 on defense vs. SPEA
+	// ModifyWeaponBonusMalus("SWOR", 0, "SPEA", -1, -2);
+
+	// At the same time give SPEA bonus of 2 on attacka and 2 on defense vs. SWOR
+	// ModifyWeaponBonusMalus("SPEA", 0, "SWOR", 2, 2);
+
 	return;
 }

@@ -1886,6 +1886,20 @@ int ARegion::CanTax(Unit *u)
 	return 1;
 }
 
+int ARegion::CanGuard(Unit *u)
+{
+	forlist((&objects)) {
+		Object *obj = (Object *) elem;
+		forlist ((&obj->units)) {
+			Unit *u2 = (Unit *) elem;
+			if (u2->guard == GUARD_GUARD && u2->IsAlive())
+				if (u2->GetAttitude(this, u) < A_ALLY)
+					return 0;
+		}
+	}
+	return 1;
+}
+
 int ARegion::CanPillage(Unit *u)
 {
 	forlist(&objects) {

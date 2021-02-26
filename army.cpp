@@ -26,6 +26,149 @@
 #include "gameio.h"
 #include "gamedata.h"
 
+#include <assert.h> 
+
+void unit_stat_control::Clear(UnitStat& us) {
+	us.attackStats.clear();
+}
+
+AttackStat* unit_stat_control::FindStat(UnitStat& us, int weaponIndex, SpecialType* effect) {
+	for (auto &stat : us.attackStats) {
+		std::string effectName = effect == NULL
+			? ""
+			: effect->specialname;
+
+		if (stat.weaponIndex == weaponIndex && stat.effect == effectName) {
+			return &stat;
+		}
+	}
+
+	return NULL;
+}
+
+void unit_stat_control::TrackSoldier(UnitStat& us, int weaponIndex, SpecialType* effect, int attackType, int weaponClass) {
+	AttackStat* s = unit_stat_control::FindStat(us, weaponIndex, effect);
+	if (s == NULL) {
+		AttackStat stat;
+		if (effect != NULL) {
+			stat.effect = effect->specialname;
+		}
+		stat.weaponIndex = weaponIndex;
+		stat.attackType = attackType;
+		stat.weaponClass = weaponClass;
+		stat.soldiers = 1;
+		stat.attacks = 0;
+		stat.failed = 0;
+		stat.missed = 0;
+		stat.blocked = 0;
+		stat.hit = 0;
+		stat.damage = 0;
+		stat.killed = 0;
+
+		us.attackStats.push_back(stat);
+
+		return;
+	}
+
+	s->soldiers++;
+}
+
+void unit_stat_control::RecordAttack(UnitStat& us, int weaponIndex, SpecialType* effect) {
+	AttackStat* s = unit_stat_control::FindStat(us, weaponIndex, effect);
+	assert(s != NULL);
+
+	s->attacks++;
+}
+
+void unit_stat_control::RecordAttackFailed(UnitStat& us, int weaponIndex, SpecialType* effect) {
+	AttackStat* s = unit_stat_control::FindStat(us, weaponIndex, effect);
+	assert(s != NULL);
+
+	s->failed++;
+}
+
+void unit_stat_control::RecordAttackMissed(UnitStat& us, int weaponIndex, SpecialType* effect) {
+	AttackStat* s = unit_stat_control::FindStat(us, weaponIndex, effect);
+	assert(s != NULL);
+
+	s->missed++;
+}
+
+void unit_stat_control::RecordAttackBlocked(UnitStat& us, int weaponIndex, SpecialType* effect) {
+	AttackStat* s = unit_stat_control::FindStat(us, weaponIndex, effect);
+	assert(s != NULL);
+
+	s->blocked++;
+}
+
+void unit_stat_control::RecordHit(UnitStat& us, int weaponIndex, SpecialType* effect, int damage) {
+	AttackStat* s = unit_stat_control::FindStat(us, weaponIndex, effect);
+	assert(s != NULL);
+
+	s->hit++;
+	s->damage += damage;
+}
+
+void unit_stat_control::RecordKill(UnitStat& us, int weaponIndex, SpecialType* effect) {
+	AttackStat* s = unit_stat_control::FindStat(us, weaponIndex, effect);
+	assert(s != NULL);
+
+	s->killed++;
+}
+
+void ArmyStats::TrackUnit(Unit *unit) {
+	UnitStat roundStat;
+	roundStat.unitName = unit->name->Str();
+
+	UnitStat battleStat;
+	battleStat.unitName = unit->name->Str();
+
+	roundStats.insert(std::pair<int, UnitStat>(unit->num, roundStat));
+	battleStats.insert(std::pair<int, UnitStat>(unit->num, battleStat));
+}
+
+void ArmyStats::ClearRound() {
+	for (auto &kv : roundStats) {
+		unit_stat_control::Clear(kv.second);
+	}
+}
+
+void ArmyStats::TrackSoldier(int unitNumber, int weaponIndex, SpecialType* effect, int attackType, int weaponClass) {
+	unit_stat_control::TrackSoldier(roundStats[unitNumber],  weaponIndex, effect, attackType, weaponClass);
+	unit_stat_control::TrackSoldier(battleStats[unitNumber], weaponIndex, effect, attackType, weaponClass);
+}
+
+void ArmyStats::RecordAttack(int unitNumber, int weaponIndex, SpecialType* effect) {
+	unit_stat_control::RecordAttack(roundStats[unitNumber],  weaponIndex, effect);
+	unit_stat_control::RecordAttack(battleStats[unitNumber], weaponIndex, effect);
+}
+
+void ArmyStats::RecordAttackFailed(int unitNumber, int weaponIndex, SpecialType* effect) {
+	unit_stat_control::RecordAttackFailed(roundStats[unitNumber],  weaponIndex, effect);
+	unit_stat_control::RecordAttackFailed(battleStats[unitNumber], weaponIndex, effect);
+}
+
+void ArmyStats::RecordAttackMissed(int unitNumber, int weaponIndex, SpecialType* effect) {
+	unit_stat_control::RecordAttackMissed(roundStats[unitNumber],  weaponIndex, effect);
+	unit_stat_control::RecordAttackMissed(battleStats[unitNumber], weaponIndex, effect);
+}
+
+void ArmyStats::RecordAttackBlocked(int unitNumber, int weaponIndex, SpecialType* effect) {
+	unit_stat_control::RecordAttackBlocked(roundStats[unitNumber],  weaponIndex, effect);
+	unit_stat_control::RecordAttackBlocked(battleStats[unitNumber], weaponIndex, effect);
+}
+
+void ArmyStats::RecordHit(int unitNumber, int weaponIndex, SpecialType* effect, int damage) {
+	unit_stat_control::RecordHit(roundStats[unitNumber],  weaponIndex, effect, damage);
+	unit_stat_control::RecordHit(battleStats[unitNumber], weaponIndex, effect, damage);
+}
+
+void ArmyStats::RecordKill(int unitNumber, int weaponIndex, SpecialType* effect) {
+	unit_stat_control::RecordKill(roundStats[unitNumber],  weaponIndex, effect);
+	unit_stat_control::RecordKill(battleStats[unitNumber], weaponIndex, effect);
+}
+
+
 enum {
 	WIN_NO_DEAD,
 	WIN_DEAD,
@@ -52,6 +195,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	weapon = -1;
 
 	attacks = 1;
+	hitDamage = 1;
 	attacktype = ATTACK_COMBAT;
 
 	special = NULL;
@@ -76,6 +220,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 
 	/* Special case to allow protection from ships */
 	if (o->IsFleet() && o->capacity < 1 && o->shipno < o->ships.Num()) {
+		Awrite(AString("DEBUG: Special case to allow protection from ships."));
 		int objectno;
 
 		i = 0;
@@ -85,6 +230,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 				abbr = ItemDefs[ship->type].name;
 				objectno = LookupObject(&abbr);
 				if (objectno >= 0 && ObjectDefs[objectno].protect > 0) {
+					Awrite(AString("DEBUG: ship capacity added."));
 					o->capacity = ObjectDefs[objectno].protect * ship->num;
 					o->type = objectno;
 				}
@@ -96,18 +242,23 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	}
 	/* Building bonus */
 	if (o->capacity) {
+		Awrite(AString("DEBUG: Building bonus."));
 		building = o->type;
 		//should the runes spell be a base or a bonus?
 		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
 			if (Globals->ADVANCED_FORTS) {
 				protection[i] += ObjectDefs[o->type].defenceArray[i];
 			} else
+				Awrite(AString("DEBUG: Building bonus before: ") + dskill[i]);
+				Awrite(AString("DEBUG: Building bonus itself: ") + ObjectDefs[o->type].defenceArray[i]);
 				dskill[i] += ObjectDefs[o->type].defenceArray[i];
+				Awrite(AString("DEBUG: Building bonus together: ") + dskill[i]);
 		}
 		if (o->runes) {
 			dskill[ATTACK_ENERGY] = max(dskill[ATTACK_ENERGY], o->runes);
 			dskill[ATTACK_SPIRIT] = max(dskill[ATTACK_SPIRIT], o->runes);
 		}
+		Awrite(AString("DEBUG: Building bonus capacity: ") + o->capacity);
 		o->capacity--;
 	}
 
@@ -115,7 +266,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	if (ItemDefs[r].type & IT_MONSTER) {
 		MonType *mp = FindMonster(ItemDefs[r].abr,
 				(ItemDefs[r].type & IT_ILLUSION));
-		if (u->type == U_WMON)
+		if((u->type == U_WMON) || (ItemDefs[r].flags & ItemType::MANPRODUCE))
 			name = AString(mp->name) + " in " + *(unit->name);
 		else
 			name = AString(mp->name) + " controlled by " + *(unit->name);
@@ -137,6 +288,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		if (hits < 1) hits = 1;
 		maxhits = hits;
 		attacks = mp->numAttacks;
+		hitDamage = mp->hitDamage;
 		if (!attacks) attacks = 1;
 		special = mp->special;
 		slevel = mp->specialLevel;
@@ -223,13 +375,15 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	int attackBonus = 0;
 	int defenseBonus = 0;
 	int numAttacks = 1;
+	int numHitDamage = 1;
+	// hitDamage
 	for (i = 0; i < MAX_READY; i++) {
 		// Check the preferred weapon first.
 		item = unit->readyWeapon[i];
 		if (item == -1) break;
 		abbr = ItemDefs[item].abr;
 		item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus,
-				defenseBonus, numAttacks);
+				defenseBonus, numAttacks, numHitDamage);
 		if (item != -1) {
 			weapon = item;
 			break;
@@ -239,7 +393,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		for (weaponType = 1; weaponType < NUMWEAPONS; weaponType++) {
 			abbr = WeaponDefs[weaponType].abbr;
 			item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus,
-					defenseBonus, numAttacks);
+					defenseBonus, numAttacks, numHitDamage);
 			if (item != -1) {
 				weapon = item;
 				break;
@@ -272,6 +426,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	askill += attackBonus;
 	dskill[ATTACK_COMBAT] += defenseBonus;
 	attacks = numAttacks;
+	hitDamage = numHitDamage;
 }
 
 void Soldier::SetupSpell()
@@ -518,6 +673,8 @@ void Soldier::Dead()
 
 Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 {
+	stats = ArmyStats();
+
 	int tacspell = 0;
 	Unit * tactician = ldr;
 
@@ -560,6 +717,8 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 
 	forlist(locs) {
 		Unit * u = ((Location *) elem)->unit;
+		stats.TrackUnit(u);
+
 		Object * obj = ((Location *) elem)->obj;
 		if (ass) {
 			forlist(&u->items) {
@@ -579,8 +738,8 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			do {
 				if (IsSoldier(it->type)) {
 					for (int i = 0; i < it->num; i++) {
-						if ((ItemDefs[ it->type ].type & IT_MAN) &&
-								u->GetFlag(FLAG_BEHIND)) {
+						ItemType &item = ItemDefs[ it->type ];
+						if (((item.type & IT_MAN) || (item.flags & ItemType::MANPRODUCE)) && u->GetFlag(FLAG_BEHIND)) {
 							--y;
 							soldiers[y] = new Soldier(u, obj, regtype,
 									it->type);
@@ -678,7 +837,7 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 	int thespoil = mp->spoiltype;
 
 	if (thespoil == -1) return;
-	if (thespoil == IT_NORMAL && getrandom(2)) thespoil = IT_TRADE;
+	if (thespoil == IT_NORMAL && getrandom(2) && !Globals->SPOILS_NO_TRADE) thespoil = IT_TRADE;
 
 	int count = 0;
 	int i;
@@ -755,6 +914,10 @@ void Army::Regenerate(Battle *b)
 
 void Army::Lose(Battle *b,ItemList *spoils)
 {
+	if (Globals->HEAL_ALL) {
+		DoHeal(b);
+	}
+
 	WriteLosses(b);
 	for (int i=0; i<count; i++) {
 		Soldier * s = soldiers[i];
@@ -988,6 +1151,22 @@ int Army::NumFront()
 	return (canfront + notfront - canbehind);
 }
 
+int Army::NumBehind() {
+	return NumAlive() - NumFront();
+}
+
+int Army::NumFrontHits() {
+	int totHits = 0;
+
+	for (int i = 0; i < canfront; i++) {
+		totHits += soldiers[i]->maxhits;
+	}
+	for (int i = canbehind; i < notfront; i++) {
+		totHits += soldiers[i]->maxhits;
+	}
+	return totHits;
+}
+
 Soldier * Army::GetAttacker(int i,int &behind)
 {
 	Soldier * retval = soldiers[i];
@@ -1009,9 +1188,13 @@ Soldier * Army::GetAttacker(int i,int &behind)
 	return retval;
 }
 
-int Army::GetTargetNum(char const *special)
+int Army::GetTargetNum(char const *special, bool canAttackBehind)
 {
 	int tars = NumFront();
+	if (canAttackBehind) {
+		tars = NumAlive();
+	}
+
 	if (tars == 0) {
 		canfront = canbehind;
 		notfront = notbehind;
@@ -1041,6 +1224,7 @@ int Army::GetTargetNum(char const *special)
 		}
 		if (validtargs) {
 			int targ = getrandom(validtargs);
+
 			for (i = start; i < notfront; i++) {
 				if (i == canfront) i = canbehind;
 				if (CheckSpecialTarget(special, i)) {
@@ -1050,8 +1234,13 @@ int Army::GetTargetNum(char const *special)
 		}
 	} else {
 		int i = getrandom(tars);
-		if (i<canfront) return i;
-		return i + canbehind - canfront;
+		if (canAttackBehind) {
+			return i;
+		}
+		else {
+			if (i < canfront) return i;
+			return i + canbehind - canfront;
+		}
 	}
 
 	return -1;
@@ -1134,10 +1323,31 @@ int Army::RemoveEffects(int num, char const *effect)
 	return(ret);
 }
 
+WeaponBonusMalus* GetWeaponBonusMalus(WeaponType *weapon, WeaponType *target) {
+	for (int i = 0; i < MAX_WEAPON_BM_TARGETS; i++) {
+		WeaponBonusMalus *bm = &weapon->bonusMalus[i];
+		if (!bm->weaponAbbr) continue;
+
+		if (AString(bm->weaponAbbr) == target->abbr) {
+			return bm;
+		}
+	}
+
+	return NULL;
+}
+
 int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attackType,
 		int attackLevel, int flags, int weaponClass, char const *effect,
-		int mountBonus, Soldier *attacker, Army *attackers)
+		int mountBonus, Soldier *attacker, Army *attackers, bool attackbehind, int attackDamage)
 {
+	SpecialType *sp = special != NULL
+		? FindSpecial(special)
+		: NULL;
+
+	// if special is defined then it is magical attack and not attack by the physical weapon soldier has
+	int weaponIndex = sp == NULL ? attacker->weapon : -1;
+	attackers->stats.TrackSoldier(attacker->unit->num, weaponIndex, sp, attackType, weaponClass);
+
 	/* 1. Check against Global effects (not sure how yet) */
 	/* 2. Attack shield */
 	Shield *hi;
@@ -1182,7 +1392,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 	int ret = 0;
 	for (int i = 0; i < numAttacks; i++) {
 		/* 3. Get the target */
-		int tarnum = GetTargetNum(special);
+		int tarnum = GetTargetNum(special, attackbehind);
 		if (tarnum == -1) continue;
 		Soldier * tar = GetTarget(tarnum);
 		int tarFlags = 0;
@@ -1195,8 +1405,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 		int tlev = 0;
 		if (attackType != NUM_ATTACK_TYPES)
 			tlev = tar->dskill[ attackType ];
-		if (special != NULL) {
-			SpecialType *sp = FindSpecial(special);
+		if (sp != NULL) {
 			if ((sp->effectflags & SpecialType::FX_NOBUILDING) && tar->building)
 				tlev -= 2;
 		}
@@ -1219,25 +1428,50 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 		/* 4.3 Add bonuses versus mounted */
 		if (tar->riding != -1) attackLevel += mountBonus;
 
+		// 4.4 Check for weapon inflicted bonuses
+		if (weaponIndex != -1 && tar->weapon != -1) {
+			WeaponType *attackerWeapon = FindWeapon(ItemDefs[weaponIndex].abr);
+			WeaponType *targetWeapon = FindWeapon(ItemDefs[tar->weapon].abr);
+
+			WeaponBonusMalus *attackerBm = GetWeaponBonusMalus(attackerWeapon, targetWeapon);
+			WeaponBonusMalus *defenderBm = GetWeaponBonusMalus(targetWeapon, attackerWeapon);
+
+			// attacker will get bonus to attack if defender uses weapon to which attackers weapon has bonus
+			if (attackerBm) {
+				attackLevel += attackerBm->attackModifer;
+			}
+
+			// defender will get bonus to defense if attacker uses weapon to which defenders weapon has bonus
+			if (defenderBm) {
+				tlev += defenderBm->defenseModifer;
+			}
+		}
+
 		/* 5. Attack soldier */
 		if (attackType != NUM_ATTACK_TYPES) {
+			attackers->stats.RecordAttack(attacker->unit->num, weaponIndex, sp);
+
 			if (!(flags & WeaponType::ALWAYSREADY)) {
 				int failchance = 2;
 				if (Globals->ADVANCED_FORTS) {
 					failchance += (tar->protection[attackType]+1)/2;
 				}
+
 				if (getrandom(failchance)) {
+					attackers->stats.RecordAttackFailed(attacker->unit->num, weaponIndex, sp);
 					continue;
 				}
 			}
 
 			if (combat) {
-				/* 4.4 Add advanced tactics bonus */
+				/* 5.1 Add advanced tactics bonus */
 				if (!Hits(attackLevel + attackers->tactics_bonus, tlev + tactics_bonus)) {
+					attackers->stats.RecordAttackMissed(attacker->unit->num, weaponIndex, sp);
 					continue;
 				}
 			} else {
 				if (!Hits(attackLevel, tlev)) {
+					attackers->stats.RecordAttackMissed(attacker->unit->num, weaponIndex, sp);
 					continue;
 				}
 			}
@@ -1247,11 +1481,18 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 		if (effect == NULL) {
 			/* 7. Last chance... Check armor */
 			if (tar->ArmorProtect(weaponClass)) {
+				attackers->stats.RecordAttackBlocked(attacker->unit->num, weaponIndex, sp);
 				continue;
 			}
 
+			attackers->stats.RecordHit(attacker->unit->num, weaponIndex, sp, attackDamage);
+
 			/* 8. Seeya! */
-			Kill(tarnum);
+			Kill(tarnum, attackDamage);
+			if (tar->hits == 0) {
+				attackers->stats.RecordKill(attacker->unit->num, weaponIndex, sp);
+			}
+
 			ret++;
 			if ((ItemDefs[tar->race].type & IT_MAN) &&
 				(ItemDefs[attacker->race].type & IT_UNDEAD)) {
@@ -1267,11 +1508,15 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 			tar->SetEffect(effect);
 			ret++;
 		}
+
+		AString test1;
+		test1 = AString(attacker->name) + AString(" attacked solder from: ") + AString(tar->name);
+		b->AddLine(test1 + ".");
 	}
 	return ret;
 }
 
-void Army::Kill(int killed)
+void Army::Kill(int killed, int damage)
 {
 	Soldier *temp = soldiers[killed];
 
@@ -1279,9 +1524,12 @@ void Army::Kill(int killed)
 
 	if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_INDIVIDUAL)
 		hitsalive--;
-	temp->hits--;
-	temp->damage++;
+
+	temp->damage += min(temp->hits, damage);
+	temp->hits = max(0, temp->hits - damage);
+	
 	if (temp->hits > 0) return;
+
 	temp->unit->losses++;
 	if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_FIGURE) {
 		if (ItemDefs[temp->race].type & IT_MONSTER) {

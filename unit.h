@@ -220,7 +220,7 @@ class Unit : public AListElem
 		int GetArmor(AString &itm, int ass);
 		int GetMount(AString &itm, int canFly, int canRide, int &bonus);
 		int GetWeapon(AString &itm, int riding, int ridingBonus,
-				int &attackBonus, int &defenseBonus, int &attacks);
+				int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage);
 		int CanUseWeapon(WeaponType *pWep, int riding);
 		int CanUseWeapon(WeaponType *pWep);
 		int Taxers(int);

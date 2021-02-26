@@ -27,6 +27,7 @@
 
 #include <functional>
 #include <map>
+#include <vector>
 using namespace std;
 
 class Soldier;
@@ -38,6 +39,64 @@ class Army;
 #include "object.h"
 #include "shields.h"
 #include "helper.h"
+#include "skills.h"
+
+WeaponBonusMalus* GetWeaponBonusMalus(WeaponType *, WeaponType *);
+
+struct AttackStat {
+	std::string effect;
+	int weaponIndex;
+	int attackType;
+	int weaponClass;
+
+	int soldiers;
+
+	int attacks;
+	int failed;
+	int missed;
+	int blocked;
+	int hit;
+
+	int damage;
+	int killed;
+};
+
+
+struct UnitStat {
+	std::string unitName;
+	std::vector<AttackStat> attackStats;
+};
+
+namespace unit_stat_control {
+	void Clear(UnitStat& us);
+	AttackStat* FindStat(UnitStat& us, int weaponIndex, SpecialType* effect);
+	void TrackSoldier(UnitStat& us, int weaponIndex, SpecialType* effect, int attackType, int weaponClass);
+	void RecordAttack(UnitStat& us, int weaponIndex, SpecialType* effect);
+	void RecordAttackFailed(UnitStat& us, int weaponIndex, SpecialType* effect);
+	void RecordAttackMissed(UnitStat& us, int weaponIndex, SpecialType* effect);
+	void RecordAttackBlocked(UnitStat& us, int weaponIndex, SpecialType* effect);
+	void RecordHit(UnitStat& us, int weaponIndex, SpecialType* effect, int damage);
+	void RecordKill(UnitStat& us, int weaponIndex, SpecialType* effect);
+};
+
+class ArmyStats {
+	public:
+		// key is unit number
+		std::map<int, UnitStat> roundStats;
+		std::map<int, UnitStat> battleStats;
+
+		void ClearRound();
+
+		void TrackUnit(Unit *unit);
+
+		void TrackSoldier(int unitNumber, int weaponIndex, SpecialType* effect, int attackType, int weaponClass);
+		void RecordAttack(int unitNumber, int weaponIndex, SpecialType* effect);
+		void RecordAttackFailed(int unitNumber, int weaponIndex, SpecialType* effect);
+		void RecordAttackMissed(int unitNumber, int weaponIndex, SpecialType* effect);
+		void RecordAttackBlocked(int unitNumber, int weaponIndex, SpecialType* effect);
+		void RecordHit(int unitNumber, int weaponIndex, SpecialType* effect, int damage);
+		void RecordKill(int unitNumber, int weaponIndex, SpecialType* effect);
+};
 
 class Soldier {
 	public:
@@ -80,6 +139,7 @@ class Soldier {
 		int attacktype;
 		int askill;
 		int attacks;
+		int hitDamage;
 		char const *special;
 		int slevel;
 
@@ -119,18 +179,20 @@ class Army
 
 		int Broken();
 		int NumAlive();
+		int NumBehind();
 		int NumSpoilers();
 		int CanAttack();
 		int NumFront();
+		int NumFrontHits();
 		Soldier *GetAttacker( int, int & );
 		int GetEffectNum(char const *effect);
-		int GetTargetNum(char const *special = NULL);
+		int GetTargetNum(char const *special = NULL, bool canAttackBehind = false);
 		Soldier *GetTarget( int );
 		int RemoveEffects(int num, char const *effect);
 		int DoAnAttack(Battle *, char const *special, int numAttacks, int attackType,
 				int attackLevel, int flags, int weaponClass, char const *effect,
-				int mountBonus, Soldier *attacker, Army *attackers);
-		void Kill(int);
+				int mountBonus, Soldier *attacker, Army *attackers, bool attackbehind, int attackDamage);
+		void Kill(int killed, int damage);
 		void Reset();
 
 		//
@@ -153,6 +215,8 @@ class Army
 
 		int hitsalive; // current number of "living hits"
 		int hitstotal; // Number of hits at start of battle.
+
+		ArmyStats stats;	// battle statistics
 };
 
 #endif

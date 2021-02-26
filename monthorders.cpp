@@ -239,7 +239,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 		wgt += unit->Weight();
 		if (unit->nomove) {
 			// If any unit on-board was in a fight (and
-			// suffered casualties), then halt movement
+			// suffered > 5% casualties), then halt movement
 			nomove = 1;
 		}
 		if (unit->monthorders && unit->monthorders->type == O_SAIL) {

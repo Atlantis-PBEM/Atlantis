@@ -2316,7 +2316,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 }
 
 int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
-		int &attackBonus, int &defenseBonus, int &attacks)
+		int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage)
 {
 	int item = LookupItem(&itm);
 	WeaponType *pWep = FindWeapon(itm.Str());
@@ -2356,6 +2356,16 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 		attacks += (baseSkillLevel +1)/2 - WeaponType::NUM_ATTACKS_HALF_SKILL;
 	// Sanity check
 	if (attacks == 0) attacks = 1;
+
+	hitDamage = pWep->hitDamage;
+	// // Check if attackDamage is based on skill level
+	// // >= used in case NUM_DAMAGE_SKILL+1
+	if (hitDamage >= WeaponType::NUM_DAMAGE_SKILL) {
+		hitDamage = hitDamage - WeaponType::NUM_DAMAGE_SKILL + baseSkillLevel;
+	// >= used in case NUM_DAMAGE_HALF_SKILL+1
+	} else if (hitDamage >= WeaponType::NUM_DAMAGE_HALF_SKILL) {
+		hitDamage = hitDamage - WeaponType::NUM_DAMAGE_HALF_SKILL + (baseSkillLevel + 1)/2;
+	}
 
 	// get the weapon
 	items.SetNum(item, num-1);

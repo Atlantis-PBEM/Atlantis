@@ -239,6 +239,13 @@ static GameDefs g = {
 	33,	// UNDEATH_CONTAGION
 	0,   // REGIONS_ECONOMY
 	0, // ADVANCED_TACTICS
+	0,	// OVERWHELMING
+	0, // HEAL_ALL
+	0, // STRICT_GUARD
+	1, // OCEAN_GUARD
+	BattleLogLevel::NORMAL,	// BATTLE_LOG_LEVEL
+	0, // EXTENDED_FORT_DEFENCE
+	0, // SPOILS_NO_TRADE
 };
 
 GameDefs *Globals = &g;

@@ -32,6 +32,7 @@ class Battle;
 #include "fileio.h"
 #include "army.h"
 #include "items.h"
+#include <vector>
 
 enum {
 	ASS_NONE,
@@ -66,7 +67,7 @@ class Battle : public AListElem
 		void FreeRound(Army *,Army *, int ass = 0);
 		void NormalRound(int,Army *,Army *);
 		void DoAttack(int round, Soldier *a, Army *attackers, Army *def,
-				int behind, int ass = 0);
+				int behind, int ass = 0, bool canAttackBehind = false, bool canAttackFromBehind = false);
 
 		void GetSpoils(AList *,ItemList *, int);
 
@@ -75,10 +76,12 @@ class Battle : public AListElem
 		//
 		void UpdateShields(Army *);
 		void DoSpecialAttack( int round, Soldier *a, Army *attackers,
-				Army *def, int behind );
+				Army *def, int behind, int canattackback);
 
 		void WriteSides(ARegion *,Unit *,Unit *,AList *,AList *,int,
 				ARegionList *pRegs );
+
+		// void WriteBattleStats(ArmyStats *);
 
 		int assassination;
 		Faction * attacker; /* Only matters in the case of an assassination */

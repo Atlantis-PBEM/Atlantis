@@ -259,16 +259,18 @@ void Game::ModifyMonsterDefense(char const *mon, int defenseType, int level)
 	pM->defense[defenseType] = level;
 }
 
-void Game::ModifyMonsterAttacksAndHits(char const *mon, int num, int hits, int regen)
+void Game::ModifyMonsterAttacksAndHits(char const *mon, int num, int hits, int regen, int hitDamage)
 {
 	MonType *pM = FindMonster(mon, 0);
 	if (pM == NULL) return;
 	if (num < 0) return;
 	if (hits < 0) return;
 	if (regen < 0) return;
+	if (hitDamage < 0) return;
 	pM->numAttacks = num;
 	pM->hits = hits;
 	pM->regen = regen;
+	pM->hitDamage = hitDamage;
 }
 
 void Game::ModifyMonsterSkills(char const *mon, int tact, int stealth, int obs)
@@ -331,7 +333,7 @@ void Game::ModifyWeaponFlags(char const *weap, int flags)
 }
 
 void Game::ModifyWeaponAttack(char const *weap, int wclass, int attackType,
-		int numAtt)
+		int numAtt, int hitDamage)
 {
 	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
@@ -340,6 +342,7 @@ void Game::ModifyWeaponAttack(char const *weap, int wclass, int attackType,
 	pw->weapClass = wclass;
 	pw->attackType = attackType;
 	pw->numAttacks = numAtt;
+	pw->hitDamage = hitDamage;
 }
 
 void Game::ModifyWeaponBonuses(char const *weap, int attack, int defense, int vsMount)
@@ -349,6 +352,19 @@ void Game::ModifyWeaponBonuses(char const *weap, int attack, int defense, int vs
 	pw->attackBonus = attack;
 	pw->defenseBonus = defense;
 	pw->mountBonus = vsMount;
+}
+
+void Game::ModifyWeaponBonusMalus(char const *weap, int index, char *weaponAbbr, int attackModifer, int defenseModifer)
+{
+	WeaponType *pw = FindWeapon(weap);
+	if (pw == NULL) return;
+
+	if (pw->bonusMalus[index].weaponAbbr) {
+		delete pw->bonusMalus[index].weaponAbbr;
+	}
+	pw->bonusMalus[index].weaponAbbr = weaponAbbr;
+	pw->bonusMalus[index].attackModifer = attackModifer;
+	pw->bonusMalus[index].defenseModifer = defenseModifer;
 }
 
 void Game::ModifyArmorFlags(char const *armor, int flags)
@@ -678,7 +694,7 @@ void Game::ModifySpecialDefenseMods(char const *special, int index, int type, in
 }
 
 void Game::ModifySpecialDamage(char const *special, int index, int type, int min,
-		int val, int flags, int cls, char const *effect)
+		int val, int flags, int cls, char const *effect, int hitDamage)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
@@ -693,6 +709,7 @@ void Game::ModifySpecialDamage(char const *special, int index, int type, int min
 	sp->damage[index].flags = flags;
 	sp->damage[index].dclass = cls;
 	sp->damage[index].effect = effect;
+	sp->damage[index].hitDamage = hitDamage;
 }
 
 void Game::ModifyEffectFlags(char const *effect, int flags)
