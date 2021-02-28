@@ -792,6 +792,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_MUSHROOM);
 	EnableItem(I_HEALPOTION);
 	EnableItem(I_GEMS);
+	EnableItem(I_PIKE);
 
 	// Artifacts of power
 	DisableItem(I_RELICOFGRACE);
