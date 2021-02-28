@@ -734,10 +734,6 @@ public:
 	// or by figure count.
 	int OVERWHELMING;
 
-	// Healing for both sides - win or lose
-	// This should reduce snowballing effect of winner getting stronger exponentially.
-	int HEAL_ALL;
-
 	// Prevents non-ally factions to set guard on guarded regions.
 	int STRICT_GUARD;
 

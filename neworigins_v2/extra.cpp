@@ -774,7 +774,6 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_MWAGON);
 	EnableItem(I_GLIDER);
 	EnableItem(I_LEATHERARMOR);
-	EnableItem(I_BAXE);
 	EnableItem(I_SPEAR);
 	EnableItem(I_JAVELIN);
 	EnableItem(I_MSHIELD);
@@ -830,6 +829,7 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_MBAXE);
 	DisableItem(I_ADBAXE);
 	DisableItem(I_ROUGHGEM);
+	DisableItem(I_BAXE);
 
 	// No staff of lightning
 	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);

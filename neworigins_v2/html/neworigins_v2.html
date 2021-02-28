@@ -5,13 +5,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link type="text/css" rel="stylesheet" href="neworigins_v2.css">
     <title>
-      NewOrigins 2.0.0 Rules
+      NewOrigins 3.0.0 Rules
     </title>
   </head>
   <body>
     <center>
       <h1>
-        Rules for NewOrigins 2.0.0
+        Rules for NewOrigins 3.0.0
       </h1>
       <h1>
         Based on Atlantis v5.2.4
@@ -26,7 +26,7 @@
         Copyright 1993 by Russell Wallace
       </h2>
       <h3>
-        Last Change: March 20, 2020
+        Last Change: February 27, 2021
       </h3>
     </center>
     <div class="rule">
@@ -892,7 +892,7 @@ Exits:
             ocean
           </td>
           <td colspan="4">
-            fish (100%), giant turtle (30%), rough gem (30%).
+            fish (100%), giant turtle (30%), rootstone (5%).
           </td>
         </tr>
         <tr>
@@ -916,8 +916,8 @@ Exits:
             mountain
           </td>
           <td colspan="4">
-            iron (100%), stone (100%), mithril (25%), rootstone (25%),
-            admantium (5%).
+            iron (100%), stone (100%), mithril (35%), rootstone (35%),
+            admantium (15%).
           </td>
         </tr>
         <tr>
@@ -933,7 +933,8 @@ Exits:
             jungle
           </td>
           <td colspan="4">
-            wood (100%), herb (100%), mushroom (25%), ironwood (25%).
+            wood (100%), herb (100%), mushroom (35%), ironwood (35%), fur
+            (80%).
           </td>
         </tr>
         <tr>
@@ -941,8 +942,8 @@ Exits:
             desert
           </td>
           <td colspan="4">
-            iron (100%), stone (100%), rootstone (25%), camel (80%), admantium
-            (5%).
+            iron (100%), stone (100%), rootstone (50%), camel (80%), admantium
+            (10%).
           </td>
         </tr>
         <tr>
@@ -950,42 +951,16 @@ Exits:
             tundra
           </td>
           <td colspan="4">
-            fur (100%), herb (100%), winged horse (20%), rough gem (35%).
+            fur (100%), herb (100%), mushroom (35%), iron (30%).
           </td>
         </tr>
         <tr>
           <td colspan="2">
-            cavern
+            volcano
           </td>
           <td colspan="4">
-            iron (100%), stone (100%), mithril (25%), rootstone (25%),
-            admantium (10%).
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2">
-            underforest
-          </td>
-          <td colspan="4">
-            wood (80%), stone (100%), iron (80%), mushroom (25%).
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2">
-            tunnels
-          </td>
-          <td colspan="4">
-            iron (100%), stone (100%), mithril (25%), rootstone (25%),
-            mushroom (10%), admantium (5%).
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2">
-            chasm
-          </td>
-          <td colspan="4">
-            rough gem (20%), stone (100%), mithril (25%), mushroom (10%),
-            rootstone (25%), admantium (10%).
+            stone (100%), mithril (50%), rootstone (50%), admantium (50%),
+            iron (100%).
           </td>
         </tr>
       </table>
@@ -1076,7 +1051,7 @@ Exits:
       In one month, a unit can issue a single <a href="#move">MOVE</a> order,
       using one or more of its movement points. There are three modes of
       travel: walking, riding and flying. Walking units have two movement
-      points, riding units have four, and flying units have six. A unit will
+      points, riding units have four, and flying units have four. A unit will
       automatically use the fastest mode of travel it has available. The <a
       href="#advance">ADVANCE</a> order is the same as <a
       href="#move">MOVE</a>, except that it implies attacks on units which try
@@ -1389,28 +1364,6 @@ Exits:
         </tr>
         <tr>
           <td align="left" nowrap>
-            cloth armor
-          </td>
-          <td align="left" nowrap>
-            1
-          </td>
-          <td align="left" nowrap>
-            &nbsp;
-          </td>
-        </tr>
-        <tr>
-          <td align="left" nowrap>
-            battle axe
-          </td>
-          <td align="left" nowrap>
-            2
-          </td>
-          <td align="left" nowrap>
-            &nbsp;
-          </td>
-        </tr>
-        <tr>
-          <td align="left" nowrap>
             camel
           </td>
           <td align="left" nowrap>
@@ -1476,12 +1429,6 @@ Exits:
       href="#leave">LEAVE</a> orders to move in and out of structures, without
       issuing a <a href="#move">MOVE</a> order. The unit can also use the <a
       href="#move">MOVE</a> order to enter or leave a structure.
-    </p>
-    <p>
-      Finally, certain structures contain interior passages to other regions. 
-      The <a href="#move">MOVE</a> IN order can be used to go through these
-      passages; the movement point cost is equal to the normal cost to enter
-      the destination region.
     </p>
     <p>
       Example: One man with a horse, sword, and chain mail wants to move
@@ -1564,7 +1511,7 @@ Exits:
             Longship
           </td>
           <td align="center">
-            100
+            150
           </td>
           <td align="center">
             10
@@ -1581,7 +1528,7 @@ Exits:
             Raft
           </td>
           <td align="center">
-            300
+            450
           </td>
           <td align="center">
             10
@@ -1598,7 +1545,7 @@ Exits:
             Cog
           </td>
           <td align="center">
-            500
+            750
           </td>
           <td align="center">
             25
@@ -1615,7 +1562,7 @@ Exits:
             Galleon
           </td>
           <td align="center">
-            1800
+            2700
           </td>
           <td align="center">
             75
@@ -1961,9 +1908,9 @@ Exits:
       lumberjack, quarrying, hunting, fishing, herb lore, horse training,
       weaponsmith, armorer, carpenter, building, shipbuilding, entertainment,
       tactics, combat, riding, crossbow, longbow, stealth, observation,
-      healing, sailing, farming, gemcutting, and quartermaster. When a unit
-      possesses a skill, he also has a skill level to go with it.  Generally,
-      the effectiveness of a skill is directly proportional to the skill level
+      healing, sailing, farming, and quartermaster. When a unit possesses a
+      skill, he also has a skill level to go with it.  Generally, the
+      effectiveness of a skill is directly proportional to the skill level
       involved, so a unit with level 2 in a skill is twice as good as a unit
       with level 1 in the same skill.
     </p>
@@ -2045,7 +1992,7 @@ Exits:
             ice dwarves
           </td>
           <td align="left" nowrap>
-            combat, weaponsmith, gemcutting, farming, armorer
+            combat, weaponsmith, mining, fishing, armorer
           </td>
           <td align="left" nowrap>
             5
@@ -2073,10 +2020,10 @@ Exits:
             under dwarves
           </td>
           <td align="left" nowrap>
-            armorer, weaponsmith, combat, mining, gemcutting
+            mining, quarrying, crossbow, armorer
           </td>
           <td align="left" nowrap>
-            5
+            3
           </td>
           <td align="left" nowrap>
             2
@@ -2101,7 +2048,7 @@ Exits:
             gnomes
           </td>
           <td align="left" nowrap>
-            herb lore, quarrying, entertainment, crossbow, gemcutting
+            herb lore, quarrying, entertainment, crossbow, healing
           </td>
           <td align="left" nowrap>
             5
@@ -2171,21 +2118,7 @@ Exits:
             gnolls
           </td>
           <td align="left" nowrap>
-            horse training, hunting, combat, armorer, fishing
-          </td>
-          <td align="left" nowrap>
-            5
-          </td>
-          <td align="left" nowrap>
-            2
-          </td>
-        </tr>
-        <tr>
-          <td align="left" nowrap>
-            drow elves
-          </td>
-          <td align="left" nowrap>
-            herb lore, longbow, combat, weaponsmith, healing
+            horse training, hunting, combat, armorer, carpenter
           </td>
           <td align="left" nowrap>
             5
@@ -2601,7 +2534,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
           </td>
           <td align="left">
             Ranged weapon which gives +0 on attack and +0 on defense (needs
-            crossbow skill).<br />Gives 1 attack every 2 rounds.<br />
+            crossbow skill).<br />Gives 1 attack every 3 rounds.<br />
           </td>
         </tr>
         <tr>
@@ -2621,7 +2554,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             1
           </td>
           <td align="left">
-            Ranged weapon which gives +0 on attack and +0 on defense (needs
+            Ranged weapon which gives -1 on attack and +0 on defense (needs
             longbow skill).<br />
           </td>
         </tr>
@@ -2723,7 +2656,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             1
           </td>
           <td align="left">
-            Weapon which gives +1 on attack and +1 on defense.<br />+1 bonus
+            Weapon which gives +2 on attack and +2 on defense.<br />+1 bonus
             when producing furs.<br />
           </td>
         </tr>
@@ -2774,8 +2707,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             when producing swords.<br />+1 bonus when producing chain
             armor.<br />+1 bonus when producing plate armor.<br />+1 bonus
             when producing picks.<br />+1 bonus when producing hammers.<br
-            />+1 bonus when producing battle axes.<br />+1 bonus when
-            producing iron shields.<br />
+            />+1 bonus when producing iron shields.<br />
           </td>
         </tr>
         <tr>
@@ -2859,8 +2791,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
           <td align="left">
             +2 bonus when producing nets.<br />+2 bonus when producing
             lassoes.<br />+2 bonus when producing bags.<br />+2 bonus when
-            producing leather armor.<br />+2 bonus when producing cloth
-            armor.<br />
+            producing leather armor.<br />
           </td>
         </tr>
         <tr>
@@ -2880,50 +2811,8 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             1
           </td>
           <td align="left">
-            Gives a 25 in 100 chance to survive a normal hit.<br />May be used
+            Gives a 30 in 100 chance to survive a normal hit.<br />May be used
             during assassinations.<br />
-          </td>
-        </tr>
-        <tr>
-          <td align="left" nowrap>
-            cloth armor
-          </td>
-          <td align="left" nowrap>
-            armorer (1)
-          </td>
-          <td align="left" nowrap>
-            1 herb
-          </td>
-          <td align="left" nowrap>
-            1 month
-          </td>
-          <td align="left" nowrap>
-            1
-          </td>
-          <td align="left">
-            Gives a 16 in 100 chance to survive a normal hit.<br />May be used
-            during assassinations.<br />
-          </td>
-        </tr>
-        <tr>
-          <td align="left" nowrap>
-            battle axe
-          </td>
-          <td align="left" nowrap>
-            weaponsmith (2)
-          </td>
-          <td align="left" nowrap>
-            1 iron, 1 wood
-          </td>
-          <td align="left" nowrap>
-            2 months
-          </td>
-          <td align="left" nowrap>
-            2
-          </td>
-          <td align="left">
-            Weapon which gives +3 on attack and +3 on defense.<br />Gives 1
-            attack every 2 rounds.<br />
           </td>
         </tr>
         <tr>
@@ -3074,10 +2963,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
     <p>
       Trade items are bought and sold only by cities, and have no other
       practical uses.  However, the profit margins on these items are usually
-      quite high. Buying of trade items in a region counts against a Trade
-      faction's quota of regions in which it may undertake trade activity
-      (note that buying and selling normal items does not, nor does selling of
-      Trade items).
+      quite high. 
     </p>
     <a name="economy_buildings"></a>
     <h3>
@@ -3160,16 +3046,16 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             Castle
           </td>
           <td align="left" nowrap>
-            250
+            300
           </td>
           <td align="left" nowrap>
-            160
+            300
           </td>
           <td align="left" nowrap>
             stone
           </td>
           <td align="left" nowrap>
-            building (1)
+            building (2)
           </td>
           <td align="left" nowrap>
             2
@@ -3180,16 +3066,16 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             Citadel
           </td>
           <td align="left" nowrap>
-            1250
+            1000
           </td>
           <td align="left" nowrap>
-            640
+            800
           </td>
           <td align="left" nowrap>
             stone
           </td>
           <td align="left" nowrap>
-            building (1)
+            building (3)
           </td>
           <td align="left" nowrap>
             3
@@ -3640,7 +3526,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             Longship
           </td>
           <td align="center">
-            100
+            150
           </td>
           <td align="center">
             10
@@ -3657,7 +3543,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             Raft
           </td>
           <td align="center">
-            300
+            450
           </td>
           <td align="center">
             10
@@ -3674,7 +3560,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             Cog
           </td>
           <td align="center">
-            500
+            750
           </td>
           <td align="center">
             25
@@ -3691,7 +3577,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
             Galleon
           </td>
           <td align="center">
-            1800
+            2700
           </td>
           <td align="center">
             75
@@ -3807,12 +3693,14 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
     </H3>
     <p>
       Trade factions may train Quartermaster units. A Quartermaster unit may
-      accept <a href="#transport">TRANSPORT</a>ed items from any unit within 1
-      hex distance from the hex containing the quartermaster. Quartermasters
-      may also <a href="#distribute">DISTRIBUTE</a> items to any unit within 1
-      hex distance from the hex containing the quartermaster and may <a
+      accept <a href="#transport">TRANSPORT</a>ed items from any unit within 2
+      hexes distance from the hex containing the quartermaster. Quartermasters
+      may also <a href="#distribute">DISTRIBUTE</a> items to any unit within 2
+      hexes distance from the hex containing the quartermaster and may <a
       href="#transport">TRANSPORT</a> items to another quartermaster up to 3
-      hexes distant.
+      hexes distant. The distance a quartermaster can <a
+      href="#transport">TRANSPORT</a> items to another quartermaster will
+      increase with the level of skill possessed by the quartermaster unit.
     </p>
     <p>
       In order to accomplish this function, a quartermaster must be the owner
@@ -3821,7 +3709,10 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
     </p>
     <p>
       The cost of transport items from one quartermaster to another is based
-      on the weight of the items and costs 5 silver per weight unit.
+      on the weight of the items and costs 5 silver per weight unit. The cost
+      of shipping is increased for units with a lower quartermaster skill,
+      dropping to the minimum above when the unit is at the maximum skill
+      level.
     </p>
     <p>
       Quartermasters must be single man units, and a faction is limited in the
@@ -4163,7 +4054,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       casualties of the winning side, so that they recover rather than dying. 
       Each character with this skill can attempt to heal 5 casualties per
       skill level. Each attempt however requires one unit of Herbs, which is
-      thereby used up. Each attempt has a 50% chance of healing one casualty;
+      thereby used up. Each attempt has a some chance of healing one casualty;
       only one attempt at Healing may be made per casualty. Healing occurs
       automatically, after the battle is over, by any living healers on the
       winning side.
@@ -4259,10 +4150,10 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       the assassin and the target character.  The assassin automatically gets
       a free round of attacks; after that, the battle is handled like a normal
       fight, with the exception that neither assassin nor victim can use any
-      armor except leather armor, or cloth armor. Most armor is forbidden for
-      the assassin because it would make it too hard to sneak around, and for
-      the victim because he was caught by surprise with his armor off. If the
-      assassin wins, the target faction is told merely that the victim was
+      armor except leather armor. Most armor is forbidden for the assassin
+      because it would make it too hard to sneak around, and for the victim
+      because he was caught by surprise with his armor off. If the assassin
+      wins, the target faction is told merely that the victim was
       assassinated, but not by whom.  If the victim wins, then the target
       faction learns which unit made the attempt.  (Of course, this does not
       necessarily mean that the assassin's faction is known.)  The winner of
@@ -6049,14 +5940,6 @@ NOCROSS 1
             <table>
               <tr>
                 <td align="left" nowrap class="fixed">
-                  ####
-                </td>
-                <td align="left" nowrap>
-                  BLOCKED HEX (Underworld)
-                </td>
-              </tr>
-              <tr>
-                <td align="left" nowrap class="fixed">
                   ~~~~
                 </td>
                 <td align="left" nowrap>
@@ -6068,7 +5951,7 @@ NOCROSS 1
                       
                 </td>
                 <td align="left" nowrap>
-                  PLAINS/TUNNELS HEX
+                  PLAINS HEX
                 </td>
               </tr>
               <tr>
@@ -6076,7 +5959,7 @@ NOCROSS 1
                   ^^^^
                 </td>
                 <td align="left" nowrap>
-                  FOREST/UNDERFOREST HEX
+                  FOREST HEX
                 </td>
               </tr>
               <tr>
@@ -6108,7 +5991,7 @@ NOCROSS 1
                   ....
                 </td>
                 <td align="left" nowrap>
-                  DESERT/CAVERN HEX
+                  DESERT HEX
                 </td>
               </tr>
               <tr>
@@ -6816,14 +6699,18 @@ TEACH 510
               Transport the specified items to the given target. In the second
               form all of the specified item is transported. In the last form,
               all of the specified item except for the specified amount is
-              transported. Long distance transportation of goods between 1 and
+              transported. Long distance transportation of goods between 2 and
               3 hexes away has an associated cost.  This cost is based on the
-              weight of the items being transported. The target of the
-              transport unit must be a unit with the quartermaster skill and
-              must be the owner of a transport structure. For long distance
-              transport between quartermasters, the issuing unit must also be
-              a quartermaster and be the owner of a transport structure.  Use
-              of this order counts as trade activity in the hex.
+              weight of the items being transported. At higher skill levels of
+              the quartermaster skill, the cost for transporting goods will be
+              less. At higher skill levels of the quartermaster skill, the
+              maximum distance goods can be transported increases over the
+              above. The target of the transport unit must be a unit with the
+              quartermaster skill and must be the owner of a transport
+              structure. For long distance transport between quartermasters,
+              the issuing unit must also be a quartermaster and be the owner
+              of a transport structure.  Use of this order counts as trade
+              activity in the hex.
             </p>
             <p>
               Examples:

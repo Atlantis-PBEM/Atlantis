@@ -863,6 +863,11 @@ AString *ObjectDescription(int obj)
 				} // end if 
 			}
 		} // end for
+
+		// Capacity check prevents showing wrong details for ships
+		if (Globals->EXTENDED_FORT_DEFENCE && !o->capacity) {
+			*temp += AString(" This structure also protects in all adjacent regions.");
+		}
 	}
 
 	/*

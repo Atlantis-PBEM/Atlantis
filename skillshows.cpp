@@ -1166,6 +1166,9 @@ AString *ShowSkill::Report(Faction *f)
 				"the units that the mage wishes to render invisible. A mage "
 				"may render invisible a number of men or creatures equal to "
 				"his skill level squared.";
+			if (Globals->FULL_INVIS_ON_SELF) {
+				*str += " A mage automatically gets his Invisibility skill added to his stealth.";
+			}
 			break;
 		case S_TRUE_SEEING:
 			if (level > 1) break;

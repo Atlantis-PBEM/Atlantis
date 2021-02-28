@@ -914,10 +914,6 @@ void Army::Regenerate(Battle *b)
 
 void Army::Lose(Battle *b,ItemList *spoils)
 {
-	if (Globals->HEAL_ALL) {
-		DoHeal(b);
-	}
-
 	WriteLosses(b);
 	for (int i=0; i<count; i++) {
 		Soldier * s = soldiers[i];

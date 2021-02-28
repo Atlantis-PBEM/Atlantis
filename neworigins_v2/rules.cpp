@@ -239,7 +239,6 @@ static GameDefs g = {
 	1,   // REGIONS_ECONOMY
 	1,   // ADVANCED_TACTICS
 	0,	// OVERWHELMING
-	0, // HEAL_ALL
 	1, // STRICT_GUARD
 	0, // OCEAN_GUARD
 	BattleLogLevel::VERBOSE,	// BATTLE_LOG_LEVEL
