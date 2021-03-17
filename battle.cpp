@@ -791,18 +791,14 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 
 	int j=NDIRS;
 	int noaida = 0, noaidd = 0;
-	
-	Awrite(AString("DEBUG: Get sides."));
 
 	for (int i=-1;i<j;i++) {
 		ARegion * r2 = r;
 
 		// Check if neighbor exists and assign r2 to a neighbor
 		if (i>=0) {
-			Awrite(AString("DEBUG: neighbor 1."));
 			r2 = r->neighbors[i];
 			if (!r2) continue;
-			Awrite(AString("DEBUG: neighbor 2."));
 		}
 
 		// Define block to avoid conflicts with another forlist local created variables
@@ -818,13 +814,11 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 
 				/* Set building capacity */
 				if (o->incomplete < 1 && o->IsBuilding()) {
-					Awrite(AString("DEBUG: complete building, adding."));
 					o->capacity = ObjectDefs[o->type].protect;
 					o->shipno = 0;
 					// AddLine("Fortification bonus added for ", o->name);
 					// AddLine("");
 				} else if (o->IsFleet()) {
-					Awrite(AString("DEBUG: fleet, skipping."));
 					o->capacity = 0;
 					o->shipno = 0;
 				}
