@@ -424,7 +424,32 @@ void Battle::GetSpoils(AList *losers, ItemList *spoils, int ass)
 	}
 }
 
-int Battle::Run( ARegion * region,
+void AddBattleFact(
+	Events* events, 
+	ARegion* region,
+	Unit* attacker,
+	Unit* defender,
+	Army* attackerArmy,
+	Army* defenderArmy,
+	int outcome
+) {
+	auto battleFact = new BattleFact();
+
+	battleFact->location.Assign(region);
+	
+	battleFact->attacker.AssignUnit(attacker);
+	battleFact->attacker.AssignArmy(attackerArmy);
+	
+	battleFact->defender.AssignUnit(defender);
+	battleFact->defender.AssignArmy(defenderArmy);
+	
+	battleFact->outcome = outcome;
+
+	events->AddFact(battleFact);
+}
+
+int Battle::Run(Events* events, 
+		ARegion * region,
 		Unit * att,
 		AList * atts,
 		Unit * tar,
@@ -505,6 +530,11 @@ int Battle::Run( ARegion * region,
 		AddLine("");
 		AddLine(temp);
 		AddLine("");
+
+		if (!ass) {
+			AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_LOST);
+		}
+
 		delete spoils;
 		delete armies[0];
 		delete armies[1];
@@ -552,6 +582,11 @@ int Battle::Run( ARegion * region,
 		AddLine("");
 		AddLine(temp);
 		AddLine("");
+
+		if (!ass) {
+			AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_WON);
+		}
+
 		delete spoils;
 		delete armies[0];
 		delete armies[1];
@@ -579,6 +614,11 @@ int Battle::Run( ARegion * region,
 	AddLine("");
 	AddLine(temp);
 	AddLine("");
+
+	if (!ass) {
+		AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_DRAW);
+	}
+
 	delete armies[0];
 	delete armies[1];
 	return BATTLE_DRAW;
@@ -1044,7 +1084,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 			}
 		}
 	}
-	result = b->Run(r,attacker,&atts,target,&defs,ass, &regions );
+	result = b->Run(events, r,attacker,&atts,target,&defs,ass, &regions );
 
 	/* Remove all dead units */
 	int uncontrolled = 0;
