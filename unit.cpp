@@ -2191,7 +2191,6 @@ int Unit::Taxers(int numtaxers)
 	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES)
 		basetax += creatures;
 		taxers += creatures;
-
 	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
 		basetax += illusions;
 		taxers += illusions;

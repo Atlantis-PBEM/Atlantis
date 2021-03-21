@@ -233,7 +233,6 @@ static GameDefs g = {
 	0, // ADVANCED_TACTICS
 	0,	// OVERWHELMING
 	BattleLogLevel::NORMAL,	// BATTLE_LOG_LEVEL
-	1,	// WORLD_EVENTS
 };
 
 GameDefs *Globals = &g;

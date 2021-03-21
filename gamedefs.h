@@ -748,12 +748,6 @@ public:
 
 	// Remove trade items from spoils
 	int SPOILS_NO_TRADE;
-
-	// Write into time world events like battles, city captures, etc.
-	// THIS IS BOOL, NOT INT
-	// Use 0 - when you don't want any world events in the times
-	// Use 1 - when you want them
-	int WORLD_EVENTS;
 };
 
 extern GameDefs *Globals;

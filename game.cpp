@@ -44,13 +44,11 @@ Game::Game()
 	gameStatus = GAME_STATUS_UNINIT;
 	ppUnits = 0;
 	maxppunits = 0;
-	events = new Events();
 }
 
 Game::~Game()
 {
 	delete ppUnits;
-	delete events;
 	ppUnits = 0;
 	maxppunits = 0;
 }
@@ -1054,11 +1052,6 @@ int Game::RunGame()
 	Awrite("Running the Turn...");
 	RunOrders();
 
-	if (Globals->WORLD_EVENTS) {
-		Awrite("Writing world events...");
-		WriteWorldEvents();
-	}
-
 	Awrite("Writing the Report File...");
 	WriteReport();
 	Awrite("");
@@ -1079,17 +1072,6 @@ int Game::RunGame()
 	Awrite("done");
 
 	return(1);
-}
-
-void Game::RecordFact(FactBase* fact) {
-	this->events->AddFact(fact);
-}
-
-void Game::WriteWorldEvents() {
-	std::string text = this->events->Write(Globals->RULESET_NAME, MonthNames[this->month], this->year);
-	if (text.empty() || text.length() == 0) return;
-
-	this->WriteTimesArticle(text.c_str());
 }
 
 void Game::PreProcessTurn()

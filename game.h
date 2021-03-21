@@ -33,7 +33,6 @@ class Game;
 #include "faction.h"
 #include "production.h"
 #include "object.h"
-#include "events.h"
 
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 4)
 
@@ -119,8 +118,6 @@ public:
 	// Functions to allow enabling/disabling parts of the data tables
 	void ModifyTablesPerRuleset(void);
 
-	void RecordFact(FactBase* fact);
-	void WriteWorldEvents();
 private:
 	//
 	// Game editing functions.
@@ -309,8 +306,6 @@ private:
 	int guardfaction;
 	int monfaction;
 	int doExtraInit;
-
-	Events* events;
 	
 	//
 	// Parsing functions

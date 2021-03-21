@@ -25,7 +25,6 @@
 #ifndef BATTLE_CLASS
 #define BATTLE_CLASS
 
-
 class Battle;
 
 #include "astring.h"
@@ -33,7 +32,6 @@ class Battle;
 #include "fileio.h"
 #include "army.h"
 #include "items.h"
-#include "events.h"
 #include <vector>
 
 enum {
@@ -64,7 +62,7 @@ class Battle : public AListElem
 		void Report(Areport *,Faction *);
 		void AddLine(const AString &);
 
-		int Run(Events* events, ARegion *, Unit *, AList *, Unit *, AList *, int ass,
+		int Run(ARegion *, Unit *, AList *, Unit *, AList *, int ass,
 				ARegionList *pRegs);
 		void FreeRound(Army *,Army *, int ass = 0);
 		void NormalRound(int,Army *,Army *);
