@@ -11,7 +11,7 @@ GAME ?= standard
 
 CPLUS = g++
 CC = gcc
-CFLAGS = -g -I. -I.. -Wall
+CFLAGS = -g -I. -I.. -Wall -std=c++11
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
@@ -19,7 +19,8 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
   edit.o faction.o fileio.o game.o gamedata.o gamedefs.o gameio.o \
   genrules.o i_rand.o items.o main.o market.o modify.o monthorders.o \
   npc.o object.o orders.o parseorders.o production.o quests.o runorders.o \
-  shields.o skills.o skillshows.o specials.o spells.o template.o unit.o
+  shields.o skills.o skillshows.o specials.o spells.o template.o unit.o \
+  events.o events-battle.o
 
 OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
   $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 
