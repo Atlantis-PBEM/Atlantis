@@ -595,6 +595,10 @@ private:
 	int CanAttack(ARegion *, AList *, Unit *);
 	void GetAFacs(ARegion *, Unit *, Unit *, AList &, AList &, AList &);
 	void GetDFacs(ARegion *, Unit *, AList &);
+
+	// For faction statistics
+	void CountItems (int **);
+	int CountItem (Faction *, int);
 };
 
 #endif

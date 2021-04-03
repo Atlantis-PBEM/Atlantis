@@ -245,6 +245,7 @@ static GameDefs g = {
 	1, // EXTENDED_FORT_DEFENCE
 	1, // SPOILS_NO_TRADE
 	1,	// WORLD_EVENTS
+	1,	//FACTION_STATISTICS
 };
 
 GameDefs *Globals = &g;

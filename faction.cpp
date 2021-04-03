@@ -285,7 +285,69 @@ AString Faction::FactionTypeStr()
 	return temp;
 }
 
-void Faction::WriteReport(Areport *f, Game *pGame)
+void PadStrEnd(AString& str, int len) {
+	int size = str.Len();
+	for (int i = len; i > size; i--) str += AString(" ");
+}
+
+void Faction::WriteFactionStats(Areport *f, Game *pGame, int ** citems) {
+	f->PutStr("Treasury:                                 Rank  Max        Total");
+	f->PutStr("---------------------------------------------------------------------");
+
+	for (int i = 0; i < NITEMS; i++)
+	{
+		int num = 0;
+		forlist(&present_regions)
+		{
+			ARegionPtr *r = (ARegionPtr *)elem;
+			forlist(&r->ptr->objects)
+			{
+				Object *obj = (Object *)elem;
+				forlist(&obj->units)
+				{
+					Unit *unit = (Unit *)elem;
+					if (unit->faction == this)
+						num += unit->items.GetNum(i);
+				}
+			}
+		}
+
+		if (!num) continue;
+		
+		int place = 1;
+		int max = 0;
+		int total = 0;
+		for (int pl = 0; pl < pGame->factionseq; pl++)
+		{
+			if (citems[pl][i] > num)
+				place++;
+			if (max < citems[pl][i])
+				max = citems[pl][i];
+			total += citems[pl][i];
+		}
+		
+		AString str = AString("") + ItemString(i, num);
+		if (ItemDefs[i].type & IT_MONSTER && ItemDefs[i].type == IT_ILLUSION)
+		{
+			str += AString(" (illusion)");
+		}
+		str += AString(" ");
+		PadStrEnd(str, 42);
+
+		str += AString(place);
+		PadStrEnd(str, 48);
+		
+		str += AString(max);
+		PadStrEnd(str, 59);
+
+		str += AString(total);
+		f->PutStr(str);
+	}
+
+	f->EndLine();
+}
+
+void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 {
 	if (IsNPC() && num == 1) {
 		if (Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
@@ -467,7 +529,13 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			f->PutStr(temp);
 		}
 	}
-	f->PutStr("");
+	
+	if (Globals->FACTION_STATISTICS) {
+		this->WriteFactionStats(f, pGame, citems);
+	}
+	else {
+		f->PutStr("");
+	}
 
 	if (errors.Num()) {
 		f->PutStr("Errors during turn:");
@@ -561,7 +629,6 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		// LLS - maybe we don't want this -- I'll assume not, for now 
 	//f->PutStr("#end");
 	f->EndLine();
-
 }
 
 // LLS - write order template
