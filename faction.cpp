@@ -291,8 +291,8 @@ void PadStrEnd(AString& str, int len) {
 }
 
 void Faction::WriteFactionStats(Areport *f, Game *pGame, int ** citems) {
-	f->PutStr("Treasury:                                 Rank  Max        Total");
-	f->PutStr("---------------------------------------------------------------------");
+	f->PutStr("Item                                      Rank  Max        Total");
+	f->PutStr("=====================================================================");
 
 	for (int i = 0; i < NITEMS; i++)
 	{
@@ -529,13 +529,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			f->PutStr(temp);
 		}
 	}
-	
-	if (Globals->FACTION_STATISTICS) {
-		this->WriteFactionStats(f, pGame, citems);
-	}
-	else {
-		f->PutStr("");
-	}
+	f->EndLine();
 
 	if (errors.Num()) {
 		f->PutStr("Errors during turn:");
@@ -560,6 +554,12 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			f->PutStr(*((AString *) elem));
 		}
 		events.DeleteAll();
+		f->EndLine();
+	}
+	
+	if (Globals->FACTION_STATISTICS) {
+		f->PutStr("Treasury:");
+		this->WriteFactionStats(f, pGame, citems);
 		f->EndLine();
 	}
 
