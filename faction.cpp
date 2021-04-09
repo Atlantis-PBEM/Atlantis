@@ -291,8 +291,8 @@ void PadStrEnd(AString& str, int len) {
 }
 
 void Faction::WriteFactionStats(Areport *f, Game *pGame, int ** citems) {
-	f->PutStr("Item                                      Rank  Max        Total");
-	f->PutStr("=====================================================================");
+	f->PutStr(";Item                                      Rank  Max        Total");
+	f->PutStr(";=====================================================================");
 
 	for (int i = 0; i < NITEMS; i++)
 	{
@@ -326,25 +326,23 @@ void Faction::WriteFactionStats(Areport *f, Game *pGame, int ** citems) {
 			total += citems[pl][i];
 		}
 		
-		AString str = AString("") + ItemString(i, num);
+		AString str = AString(";") + ItemString(i, num);
 		if (ItemDefs[i].type & IT_MONSTER && ItemDefs[i].type == IT_ILLUSION)
 		{
 			str += AString(" (illusion)");
 		}
 		str += AString(" ");
-		PadStrEnd(str, 42);
+		PadStrEnd(str, 43);
 
 		str += AString(place);
-		PadStrEnd(str, 48);
+		PadStrEnd(str, 49);
 		
 		str += AString(max);
-		PadStrEnd(str, 59);
+		PadStrEnd(str, 60);
 
 		str += AString(total);
 		f->PutStr(str);
 	}
-
-	f->EndLine();
 }
 
 void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
@@ -427,6 +425,13 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 		events.DeleteAll();
 		battles.DeleteAll();
 		return;
+	}
+
+	if (Globals->FACTION_STATISTICS) {
+		f->PutStr(";Treasury:");
+		f->PutStr(";");
+		this->WriteFactionStats(f, pGame, citems);
+		f->EndLine();
 	}
 
 	f->PutStr("Atlantis Report For:");
@@ -554,12 +559,6 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			f->PutStr(*((AString *) elem));
 		}
 		events.DeleteAll();
-		f->EndLine();
-	}
-	
-	if (Globals->FACTION_STATISTICS) {
-		f->PutStr("Treasury:");
-		this->WriteFactionStats(f, pGame, citems);
 		f->EndLine();
 	}
 
