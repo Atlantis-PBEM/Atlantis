@@ -2135,6 +2135,7 @@ void Game::CountItems (int ** citems)
 			{
 				citems[i][j] = CountItem (fac, j);
 			}
+			
 			i++;
 		}
 	}
@@ -2142,6 +2143,8 @@ void Game::CountItems (int ** citems)
 
 int Game::CountItem (Faction * fac, int item)
 {
+	if (ItemDefs[item].type & IT_SHIP) return 0;
+	
 	int all = 0;
 	forlist (&(fac->present_regions))
 	{

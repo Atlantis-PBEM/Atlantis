@@ -296,6 +296,8 @@ void Faction::WriteFactionStats(Areport *f, Game *pGame, int ** citems) {
 
 	for (int i = 0; i < NITEMS; i++)
 	{
+		if (ItemDefs[i].type & IT_SHIP) continue;
+
 		int num = 0;
 		forlist(&present_regions)
 		{
