@@ -3209,7 +3209,7 @@ void Game::CheckTransportOrders()
 					if ((o->type == O_DISTRIBUTE) ||
 						((dist > Globals->LOCAL_TRANSPORT) &&
 						 (o->type == O_TRANSPORT))) {
-						if (u->GetSkill(S_QUARTERMASTER == 0)) {
+						if (u->GetSkill(S_QUARTERMASTER) == 0) {
 							u->Error(ordertype +
 									": Unit is not a quartermaster");
 							o->type = NORDERS;

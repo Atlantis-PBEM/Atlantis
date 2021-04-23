@@ -2309,7 +2309,7 @@ ItemType id[] =
 	 "", { "", "", "", "" }, 0, 0},
 
 	{"catapult","catapults","CATP",
-	ItemType::DISABLED | ItemType::MANPRODUCE,
+	ItemType::DISABLED | ItemType::MANPRODUCE | ItemType::NOTRANSPORT,
 	"CARP",4,4,1,{{I_WOOD,250},{I_IRONWOOD,30},{I_FUR,80},{-1,0}},
 	NULL,0,0,{{-1,0},{-1,0},{-1,0},{-1,0}},
 	800,IT_MONSTER,2000,1,
@@ -2320,7 +2320,7 @@ ItemType id[] =
 	"", { "", "", "", "" }, 0, 0},
 
 	{"steel defender","steel defenders","STED",
-	ItemType::DISABLED | ItemType::MANPRODUCE,
+	ItemType::DISABLED | ItemType::MANPRODUCE | ItemType::NOTRANSPORT,
 	"CARP",4,4,1, {{I_ROOTSTONE,30},{I_IRON,250},{I_FUR,50},{-1,0}},
 	NULL,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	1000,IT_MONSTER,500,1,
