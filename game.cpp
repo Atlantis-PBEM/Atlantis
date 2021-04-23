@@ -44,11 +44,13 @@ Game::Game()
 	gameStatus = GAME_STATUS_UNINIT;
 	ppUnits = 0;
 	maxppunits = 0;
+	events = new Events();
 }
 
 Game::~Game()
 {
 	delete ppUnits;
+	delete events;
 	ppUnits = 0;
 	maxppunits = 0;
 }
@@ -1052,6 +1054,11 @@ int Game::RunGame()
 	Awrite("Running the Turn...");
 	RunOrders();
 
+	if (Globals->WORLD_EVENTS) {
+		Awrite("Writing world events...");
+		WriteWorldEvents();
+	}
+
 	Awrite("Writing the Report File...");
 	WriteReport();
 	Awrite("");
@@ -1072,6 +1079,17 @@ int Game::RunGame()
 	Awrite("done");
 
 	return(1);
+}
+
+void Game::RecordFact(FactBase* fact) {
+	this->events->AddFact(fact);
+}
+
+void Game::WriteWorldEvents() {
+	std::string text = this->events->Write(Globals->RULESET_NAME, MonthNames[this->month], this->year);
+	if (text.empty() || text.length() == 0) return;
+
+	this->WriteTimesArticle(text.c_str());
 }
 
 void Game::PreProcessTurn()
@@ -1174,6 +1192,21 @@ void Game::WriteReport()
 
 	MakeFactionReportLists();
 	CountAllSpecialists();
+
+	int ** citems = new int* [factionseq];
+	
+	if (Globals->FACTION_STATISTICS) {
+		for (int i = 0; i < factionseq; i++)
+		{
+			citems [i] = new int [NITEMS];
+			for (int j = 0; j < NITEMS; j++)
+			{
+				citems [i][j] = 0;
+			}
+		}
+		CountItems(citems);
+	}
+
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
 		AString str = "report.";
@@ -1184,7 +1217,7 @@ void Game::WriteReport()
 			(fac->num == 1))) {
 			int i = f.OpenByName(str);
 			if (i != -1) {
-				fac->WriteReport(&f, this);
+				fac->WriteReport(&f, this, citems);
 				f.Close();
 			}
 		}
@@ -2073,19 +2106,60 @@ void Game::Equilibrate()
 
 void Game::WriteTimesArticle(AString article)
 {
-        AString filename;
-        int result;
-        Arules f;
+	AString filename;
+	int result;
+	Arules f;
 
-        do {
-                filename = "times.";
-                filename += getrandom(10000);
-                result = access(filename.Str(), F_OK);
-        } while (result == 0);
+	do {
+		filename = "times.";
+		filename += getrandom(10000);
+		result = access(filename.Str(), F_OK);
+	} while (result == 0);
 
-        if (f.OpenByName(filename) != -1) {
-                f.PutStr(article);
-                f.Close();
-        }
+	if (f.OpenByName(filename) != -1) {
+		f.PutStr(article);
+		f.Close();
+	}
 }
 
+
+void Game::CountItems (int ** citems)
+{
+	int i = 0;
+	forlist (&factions)
+	{
+		Faction * fac = (Faction *) elem;
+		if (!fac->IsNPC())
+		{
+			for (int j = 0; j < NITEMS; j++)
+			{
+				citems[i][j] = CountItem (fac, j);
+			}
+			
+			i++;
+		}
+	}
+}
+
+int Game::CountItem (Faction * fac, int item)
+{
+	if (ItemDefs[item].type & IT_SHIP) return 0;
+	
+	int all = 0;
+	forlist (&(fac->present_regions))
+	{
+		ARegionPtr * r = (ARegionPtr *) elem;
+		forlist (&r->ptr->objects)
+		{
+			Object * obj = (Object *) elem;
+			forlist (&obj->units)
+			{
+			Unit * unit = (Unit *) elem;
+			if (unit->faction == fac)
+				all += unit->items.GetNum (item);
+			}
+		}
+	}
+
+	return all;
+}
