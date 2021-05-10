@@ -1391,16 +1391,13 @@ AString *ShowSkill::Report(Faction *f)
 			if (level > 1) break;
 			if (OBJECT_DISABLED(O_BKEEP)) break;
 			*str += "A mage with the Blasphemous Ritual skill may "
-				"perform a blasphemous ritual to sever the "
-				"world of ";
-			*str += Globals->WORLD_NAME;
-			*str += " from the Eternal City. ";
-			*str += "This ritual requires ";
-			*str += ItemString(I_ROOTSTONE, 1);
-			*str += " and the sacrifice of a randomly selected "
+				"perform a blasphemous ritual to get a WISH power and "
+				"win the game. ";
+			*str += "This ritual requires 60";
+			*str += " sacrifice of a randomly selected "
 				"leader belonging to the mage's faction.";
 			if (ObjectDefs[O_BKEEP].cost > 1) {
-				*str += " Many such sacrifices will be "
+				*str += " 60 such sacrifices will be "
 					"necessary to complete the ritual; "
 					"the caster will attempt to perform "
 					"as many sacrifices as their skill "

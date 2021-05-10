@@ -848,7 +848,6 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableSkill(S_CREATE_CENSER);
 	EnableSkill(S_CREATE_FLAMING_SWORD);
 	EnableSkill(S_TRANSMUTATION);
-	EnableSkill(S_BLASPHEMOUS_RITUAL);
 	DisableSkill(S_CAMELTRAINING);
 	DisableSkill(S_RANCHING);
 
@@ -946,6 +945,10 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_DERELICT);
 	EnableObject(O_OCAVE);
 	EnableObject(O_WHIRL);
+
+	// WIN GAME STRUCTURE AND SPELL
+	EnableObject(O_BKEEP);
+	EnableSkill(S_BLASPHEMOUS_RITUAL);
 
 	//
 	// Monsters
