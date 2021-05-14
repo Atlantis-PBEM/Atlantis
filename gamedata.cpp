@@ -3977,7 +3977,7 @@ static ObjectType ot[] =
 	{"Sacred Grove",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_YEW,30,"LUMB",5,
+	 I_YEW,20,"LUMB",5,
 	 15,2,2,
 	 -1,I_YEW,
 	 {0,0,0,0,0,0}},

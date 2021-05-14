@@ -1397,7 +1397,8 @@ AString *ShowSkill::Report(Faction *f)
 			*str += " sacrifice of a randomly selected "
 				"leader belonging to the mage's faction.";
 			if (ObjectDefs[O_BKEEP].cost > 1) {
-				*str += " 60 such sacrifices will be "
+				*str += " Mage must be inside a Black Keep to cast this spell. "
+					"60 such sacrifices will be "
 					"necessary to complete the ritual; "
 					"the caster will attempt to perform "
 					"as many sacrifices as their skill "
