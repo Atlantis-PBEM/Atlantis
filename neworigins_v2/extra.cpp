@@ -35,7 +35,7 @@
 #define MAXIMUM_ACTIVE_QUESTS		20
 #define QUEST_EXPLORATION_PERCENT	30
 #define QUEST_SPAWN_RATE		7
-#define QUEST_MAX_REWARD		3000
+#define QUEST_MAX_REWARD		4000
 #define QUEST_SPAWN_CHANCE		70
 #define MAX_DESTINATIONS		5
 
@@ -732,6 +732,32 @@ Faction *Game::CheckVictory()
 				break;
 		}
 	}
+
+
+	// Check for BLACK KEEP
+	// {
+	// 	forlist_reuse(&regions) {
+	// 		r = (ARegion *) elem;
+	// 		forlist(&r->objects) {
+	// 			o = (Object *) elem;
+	// 			if (o->type == O_BKEEP) {
+	// 				if (!o->incomplete) {
+	// 					// message = "A blasphemous tower has been completed!\n\n"
+	// 					// 	"The connection between Havilah and the Eternal City has been severed.\n\n"
+	// 					// 	"The light fails; darkness falls forever, and all life perishes under endless ice.";
+	// 					// WriteTimesArticle(message);
+	// 					// return GetFaction(&factions, monfaction);
+	// 					message = "A blasphemous tower has been built at (x,y)!";
+	// 					WriteTimesArticle(message);
+	// 				}
+	// 				if (o->incomplete) {
+	// 					message = AString("A blasphemous tower is building at (x,y)! Progress (") + AString(ObjectDefs[o->type].cost - o->incomplete) + AString(" / ") + AString(ObjectDefs[o->type].cost) + AString(")...");
+	// 					WriteTimesArticle(message);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	return NULL;
 }
