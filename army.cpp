@@ -220,7 +220,6 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 
 	/* Special case to allow protection from ships */
 	if (o->IsFleet() && o->capacity < 1 && o->shipno < o->ships.Num()) {
-		Awrite(AString("DEBUG: Special case to allow protection from ships."));
 		int objectno;
 
 		i = 0;
@@ -230,7 +229,6 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 				abbr = ItemDefs[ship->type].name;
 				objectno = LookupObject(&abbr);
 				if (objectno >= 0 && ObjectDefs[objectno].protect > 0) {
-					Awrite(AString("DEBUG: ship capacity added."));
 					o->capacity = ObjectDefs[objectno].protect * ship->num;
 					o->type = objectno;
 				}
@@ -242,23 +240,18 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	}
 	/* Building bonus */
 	if (o->capacity) {
-		Awrite(AString("DEBUG: Building bonus."));
 		building = o->type;
 		//should the runes spell be a base or a bonus?
 		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
 			if (Globals->ADVANCED_FORTS) {
 				protection[i] += ObjectDefs[o->type].defenceArray[i];
 			} else
-				Awrite(AString("DEBUG: Building bonus before: ") + dskill[i]);
-				Awrite(AString("DEBUG: Building bonus itself: ") + ObjectDefs[o->type].defenceArray[i]);
 				dskill[i] += ObjectDefs[o->type].defenceArray[i];
-				Awrite(AString("DEBUG: Building bonus together: ") + dskill[i]);
 		}
 		if (o->runes) {
 			dskill[ATTACK_ENERGY] = max(dskill[ATTACK_ENERGY], o->runes);
 			dskill[ATTACK_SPIRIT] = max(dskill[ATTACK_SPIRIT], o->runes);
 		}
-		Awrite(AString("DEBUG: Building bonus capacity: ") + o->capacity);
 		o->capacity--;
 	}
 

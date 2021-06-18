@@ -665,6 +665,11 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 	skill = LookupSkill(&skname);
 	level = u->GetSkill(skill);
 
+	if (skill == -1) {
+		u->Error("BUILD: Can't build that.");
+		return;
+	}
+
 	// get needed to complete
 	maxbuild = 0;
 	if ((u->monthorders) && 
