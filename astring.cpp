@@ -77,6 +77,14 @@ AString::AString(char c)
 	str[1] = '\0';
 }
 
+AString::AString(const std::string & s) {
+	auto buffer = s.c_str();
+
+	len = strlen(buffer);
+	str = new char[len + 1];
+	strcpy(str, buffer);
+}
+
 AString::~AString()
 {
 	if (str) delete str;

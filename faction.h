@@ -43,6 +43,10 @@ class Game;
 #include "alist.h"
 #include "astring.h"
 
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
 enum {
 	A_HOSTILE,
 	A_UNFRIENDLY,
@@ -52,12 +56,10 @@ enum {
 	NATTITUDES
 };
 
-enum {
-	F_WAR,
-	F_TRADE,
-	F_MAGIC,
-	NFACTYPES
-};
+extern const std::string F_WAR;
+extern const std::string F_TRADE;
+extern const std::string F_MAGIC;
+extern const std::string F_MARTIAL;
 
 // DK
 // LLS - make templates cleaner for save/restore
@@ -79,7 +81,7 @@ enum {
 };
 
 extern char const ** AttitudeStrs;
-extern char const ** FactionStrs;
+extern std::vector<std::string> *FactionTypes;
 
 // LLS - include strings for the template enum
 extern char const **TemplateStrs;
@@ -112,6 +114,15 @@ public:
 	int factionnum;
 	int attitude;
 };
+
+enum FactionActivity {
+	TAX     = 1,
+	TRADE   = 2
+};
+
+inline FactionActivity operator | (FactionActivity a, FactionActivity b) {
+    return static_cast<FactionActivity>(static_cast<int>(a) | static_cast<int>(b));
+}
 
 class FactionPtr : public AListElem {
 public:
@@ -166,7 +177,7 @@ public:
 	// The type is only used if Globals->FACTION_LIMIT_TYPE ==
 	// FACLIM_FACTION_TYPES
 	//
-	int type[NFACTYPES];
+	std::unordered_map<std::string, int> type;
 
 	int lastchange;
 	int lastorders;
@@ -187,8 +198,13 @@ public:
 	int numapprentices;
 	int numqms;
 	int numtacts;
-	AList war_regions;
-	AList trade_regions;
+	// AList war_regions;
+	// AList trade_regions;
+
+	std::unordered_map<ARegion *, std::unordered_set<FactionActivity>> activity;
+	int GetActivityCost(FactionActivity type);
+	void RecordActivity(ARegion *region, FactionActivity type);
+	bool IsActivityRecorded(ARegion *region, FactionActivity type);
 
 	/* Used when writing reports */
 	AList present_regions;

@@ -29,6 +29,8 @@
 #include "gamedata.h"
 #include "fileio.h"
 
+#include <sstream>
+
 AString NumToWord(int n)
 {
 	if (n > 20) return AString(n);
@@ -66,6 +68,172 @@ int StudyRate(int days, int exp)
 	int rate = sl->GetStudyRate(1, 1);
 	delete sl;
 	return rate;
+}
+
+const std::string plural(int count, const std::string &one, const std::string &many) {
+	return count > 1 ? many : one;
+}
+
+void writeDelimetedList(std::ostringstream& buffer, const std::string &delimeter, const std::vector<std::string>& items) {
+	bool next = false;
+	for (auto &item : items) {
+		if (next) {
+			buffer << delimeter;
+		}
+
+		buffer << item;
+		next = true;
+	}
+}
+
+void writeFactionPointUsage(std::ostringstream& buffer, Faction &fac) {
+	std::vector<std::string> items;
+	for (auto &kv : fac.type) {
+		int value = kv.second;
+		if (value <= 0) {
+			continue;
+		}
+
+		items.push_back(std::to_string(value) + " " + plural(value, "point", "points") + " on " + kv.first);
+	}
+
+	writeDelimetedList(buffer, ", ", items);
+}
+
+void writeFactionDefinition(std::ostringstream& buffer, Faction &fac) {
+	std::vector<std::string> items;
+	for (auto &kv : fac.type) {
+		int value = kv.second;
+		if (value <= 0) {
+			continue;
+		}
+
+		items.push_back(kv.first + " " + std::to_string(value));
+	}
+
+	writeDelimetedList(buffer, " ", items);
+}
+
+void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac) {
+	int nm = AllowedMages(&fac);
+	int na = AllowedApprentices(&fac);
+	int nq = AllowedQuarterMasters(&fac);
+	int nt = AllowedTrades(&fac);
+	int nw = AllowedTaxes(&fac);
+	int nma = AllowedMartial(&fac);
+
+	int count = 0;
+
+	std::vector<std::string> missingTypes;
+	std::vector<std::string> types;
+	for (auto &key : *FactionTypes) {
+		int value = fac.type[key];
+		if (value > 0) {
+			types.push_back(key);
+		}
+		else {
+			missingTypes.push_back(key);
+		}
+	}
+
+	for (auto &key : types) {
+		int value = fac.type[key];
+
+		if (count > 0) {
+			if (count == types.size() - 1) {
+				buffer << ", and ";
+			}
+			else {
+				buffer << ", ";
+			}
+		}
+
+		if (key == F_WAR) {
+			buffer << "tax " + nw << " " << plural(nw, "region", "regions");
+		}
+
+		if (key == F_TRADE) {
+			buffer << "perform trade in " << nt << " " << plural(nt, "region", "regions");
+		}
+
+		if (key == F_MAGIC) {
+			buffer << "have " << nm << " " << plural(nm, "mage", "mages");
+			if (Globals->APPRENTICES_EXIST) {
+				buffer << " as well as " << na << " " << Globals->APPRENTICE_NAME;
+				if (na > 1) {
+					buffer << "s";
+				}
+			}
+		}
+
+		if (key == F_MARTIAL) {
+			if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL) {
+				buffer << "perform tax or trade in " << nma << " " << plural(nma, "region", "regions");
+			}
+			
+			if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) { 
+				buffer << "perform tax and trade in " << nma << " " << plural(nma, "region", "regions");
+			}
+		}
+
+		count++;
+	}
+
+	if (Globals->APPRENTICES_EXIST && na > 0) {
+		buffer << ", as well have " << na << " " << Globals->APPRENTICE_NAME;
+		if (na > 1) {
+			buffer << "s";
+		}
+	}
+
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT && nq > 0) {
+		buffer << ", and " << nq << " quartermaster";
+		if (nq > 1) {
+			buffer << "s";
+		}
+	}
+
+	if (missingTypes.size() > 0) {
+		buffer << ", but ";
+	}
+
+	count = 0;
+	for (auto &fp : missingTypes) {
+		if (count > 0) {
+			if (count == missingTypes.size() - 1) {
+				buffer << ", and ";
+			}
+			else {
+				buffer << ", ";
+			}
+		}
+
+		if (fp == F_WAR) {
+			buffer << "could not perform tax in any regions";
+		}
+
+		if (fp == F_TRADE) {
+			buffer << "could not perform trade in any regions";
+		}
+
+		if (fp == F_MAGIC) {
+			buffer << "could not possess any mages";
+		}
+
+		if (fp == F_MARTIAL) {
+			buffer << "could not perform tax or trade in regions";
+		}
+
+		count++;
+	}
+
+	if (Globals->APPRENTICES_EXIST && na <= 0) {
+		buffer << ", as well could not possess any" << Globals->APPRENTICE_NAME << "s";
+	}
+
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT && nq <= 0) {
+		buffer << ", and could not possess any quartermasters";
+	}
 }
 
 // LLS - converted HTML tags to lowercase
@@ -534,145 +702,172 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "table border=\"1\"");
 		f.Enclose(1, "tr");
 		f.TagText("th", "Faction Points");
-		temp = "War (max tax regions";
-		if (Globals->TACTICS_NEEDS_WAR)
-			temp += " / tacticians";
-		temp += ")";
-		f.TagText("th", temp);
-		temp = "Trade (max trade regions";
-		if (qm_exist)
-			temp += " / quartermasters";
-		temp += ")";
-		f.TagText("th", temp);
-		temp = "Magic (max mages";
-		if (app_exist) {
-			temp += " / ";
-			temp += Globals->APPRENTICE_NAME;
-			temp += "s";
+
+		for (auto &fp : *FactionTypes) {
+			if (fp == F_WAR) {
+				temp = "War (max tax regions";
+				if (Globals->TACTICS_NEEDS_WAR)
+					temp += " / tacticians";
+				temp += ")";
+				f.TagText("th", temp);
+			}
+
+			if (fp == F_TRADE) {
+				temp = "Trade (max trade regions";
+				if (qm_exist)
+					temp += " / quartermasters";
+				temp += ")";
+				f.TagText("th", temp);
+			}
+
+			if (fp == F_MARTIAL) {
+				temp = "Martial (";
+
+				if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
+					temp += "max tax and trade regions";
+				}
+
+				if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL) {
+					temp += "max tax or trade regions";
+				}
+
+				if (qm_exist) temp += " / quartermasters";
+				if (Globals->TACTICS_NEEDS_WAR) temp += " / tacticians";
+				temp += ")";
+				f.TagText("th", temp);
+			}
+
+			if (fp == F_MAGIC) {
+				temp = "Magic (max mages";
+				if (app_exist) {
+					temp += " / ";
+					temp += Globals->APPRENTICE_NAME;
+					temp += "s";
+				}
+				temp += ")";
+				f.TagText("th", temp);
+			}
 		}
-		temp += ")";
-		f.TagText("th", temp);
+		
 		f.Enclose(0, "tr");
 		int i;
 		for (i = 0; i <= Globals->FACTION_POINTS; i++) {
-			fac.type[F_WAR]=i;
-			fac.type[F_TRADE]=i;
-			fac.type[F_MAGIC]=i;
+			for (auto &fp : *FactionTypes) {
+				fac.type[fp] = i;
+			}
+
 			f.Enclose(1, "tr");
 			f.Enclose(1, "td align=\"center\" nowrap");
 			f.PutStr(i);
 			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"center\" nowrap");
-			temp = AllowedTaxes(&fac);
-			if (Globals->TACTICS_NEEDS_WAR)
-				temp+= AString(" / ") + AllowedTacticians(&fac);
-			f.PutStr(temp);
-			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"center\" nowrap");
-			temp = AllowedTrades(&fac);
-			if (qm_exist)
-				temp += AString(" / ") + AllowedQuarterMasters(&fac);
-			f.PutStr(temp);
-			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"center\" nowrap");
-			temp = AllowedMages(&fac);
-			if (app_exist)
-				temp += AString(" / ") + AllowedApprentices(&fac);
-			f.PutStr(temp);
-			f.Enclose(0, "td");
+
+			for (auto &fp : *FactionTypes) {
+				if (fp == F_WAR) {
+					f.Enclose(1, "td align=\"center\" nowrap");
+					temp = AllowedTaxes(&fac);
+					if (Globals->TACTICS_NEEDS_WAR) temp+= AString(" / ") + AllowedTacticians(&fac);
+					f.PutStr(temp);
+					f.Enclose(0, "td");
+				}
+
+				if (fp == F_TRADE) {
+					f.Enclose(1, "td align=\"center\" nowrap");
+					temp = AllowedTrades(&fac);
+					if (qm_exist) temp += AString(" / ") + AllowedQuarterMasters(&fac);
+					f.PutStr(temp);
+					f.Enclose(0, "td");
+				}
+
+				if (fp == F_MARTIAL) {
+					f.Enclose(1, "td align=\"center\" nowrap");
+					temp = AllowedMartial(&fac);
+					if (qm_exist) temp += AString(" / ") + AllowedQuarterMasters(&fac);
+					if (Globals->TACTICS_NEEDS_WAR) temp+= AString(" / ") + AllowedTacticians(&fac);
+					f.PutStr(temp);
+					f.Enclose(0, "td");
+				}
+
+				if (fp == F_MAGIC) {
+					f.Enclose(1, "td align=\"center\" nowrap");
+					temp = AllowedMages(&fac);
+					if (app_exist) temp += AString(" / ") + AllowedApprentices(&fac);
+					f.PutStr(temp);
+					f.Enclose(0, "td");
+				}
+			}
+			
 			f.Enclose(0, "tr");
 		}
 		f.Enclose(0, "table");
 		f.Enclose(0, "center");
 		f.PutStr("<P></P>");
-		int m,w,t;
-		fac.type[F_WAR] = w = (Globals->FACTION_POINTS+1)/3;
-		fac.type[F_TRADE] = t = Globals->FACTION_POINTS/3;
-		fac.type[F_MAGIC] = m = (Globals->FACTION_POINTS+2)/3;
-		int nm, na, nw, nt, nq;
-		nm = AllowedMages(&fac);
-		na = AllowedApprentices(&fac);
-		nq = AllowedQuarterMasters(&fac);
-		nt = AllowedTrades(&fac);
-		nw = AllowedTaxes(&fac);
-		temp = "For example, a well rounded faction might spend ";
-		temp += AString(w) + " point" + (w==1?"":"s") + " on War, ";
-		temp += AString(t) + " point" + (t==1?"":"s") + " on Trade, and ";
-		temp += AString(m) + " point" + (m==1?"":"s") + " on Magic.  ";
-		temp += "This faction's type would appear as \"War ";
-		temp += AString(w) + " Trade " + t + " Magic " + m;
-		temp += "\", and would be able to tax ";
-		temp += AString(nw) + " region" + (nw==1?"":"s") + ", ";
-		temp += "perform trade in ";
-		temp += AString(nt) + " region" + (nt==1?"":"s") + ", and have ";
-		temp += AString(nm) + " mage" + (nm==1?"":"s");
-		if (app_exist) {
-			temp += " as well as ";
-			temp += AString(na) + " " + Globals->APPRENTICE_NAME
-				+ (na==1?"":"s");
-		}
-		if (qm_exist) {
-			temp += " and ";
-			temp += AString(nq) + " quartermaster" + (nq==1?"":"s");
-		}
-		temp += ".";
-		f.Paragraph(temp);
 
-		fac.type[F_WAR] = w = Globals->FACTION_POINTS;
-		fac.type[F_MAGIC] = m = 0;
-		fac.type[F_TRADE] = t = 0;
-		nw = AllowedTaxes(&fac);
-		nq = AllowedQuarterMasters(&fac);
-		nt = AllowedTrades(&fac);
-		nm = AllowedMages(&fac);
-		na = AllowedApprentices(&fac);
-		temp = "As another example, a specialized faction might spend all ";
-		temp += AString(w) + " point" + (w==1?"":"s") + " on War. ";
-		temp += "This faction's type would appear as \"War ";
-		temp += AString(w) + "\", and it would be able to tax " + nw;
-		temp += AString(" region") + (nw==1?"":"s") + ", but could ";
-		if (nt == 0)
-			temp += "not perform trade in any regions";
-		else
-			temp += AString("only perform trade in ") + nt + " region" +
-				(nt == 1?"":"s");
-		temp += ", ";
-		if (!app_exist)
-			temp += "and ";
-		if (nm == 0)
-			temp += "could not possess any mages";
-		else
-			temp += AString("could only possess ") + nm + " mage" +
-				(nm == 1?"":"s");
-		if (app_exist) {
-			temp += ", and ";
-			if (na == 0) {
-				temp += "could not possess any ";
-				temp += Globals->APPRENTICE_NAME;
-				temp += "s";
-			} else {
-				temp += AString("could only possess ") + na
-					+ " " + Globals->APPRENTICE_NAME +
-					(na == 1?"":"s");
+		std::ostringstream buffer;
+
+		int count = FactionTypes->size();
+		int singleValue = Globals->FACTION_POINTS / count;
+		int reminder = Globals->FACTION_POINTS % count;
+		for (auto &fp : *FactionTypes) {
+			int value = singleValue;
+			if (reminder > 0) {
+				value += 1;
+				reminder--;
 			}
+
+			fac.type[fp] = value;
 		}
-		if (qm_exist) {
-			temp += ", and ";
-			if (nq == 0)
-				temp += "could not possess any quartermasters";
-			else
-				temp += AString("could only possess ") + nq +
-					"quartermaster" + (nq == 1?"":"s");
+
+		buffer << "For example, a well rounded faction might spend ";
+		writeFactionPointUsage(buffer, fac);
+		buffer << ".";
+
+		buffer << " ";
+
+		buffer << "This faction's type would appear as \"";
+		writeFactionDefinition(buffer, fac);
+		buffer << "\", and would be able to ";
+		WriteFactionTypeDescription(buffer, fac);
+		buffer << ".";
+
+		f.Paragraph(buffer.str());
+
+		buffer.clear();
+		buffer.str("");
+
+		if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) {
+			fac.type[F_WAR] = Globals->FACTION_POINTS;
+			fac.type[F_TRADE] = 0;
 		}
-		temp += ".";
-		f.Paragraph(temp);
+		else {
+			fac.type[F_MARTIAL] =  Globals->FACTION_POINTS;
+		}
+		fac.type[F_MAGIC] = 0;
+
+		buffer << "As another example, a specialized faction might spend all ";
+		writeFactionPointUsage(buffer, fac);
+		buffer << ".";
+
+		buffer << " ";
+
+		buffer << "This faction's type would appear as \"";
+		writeFactionDefinition(buffer, fac);
+		buffer << "\", and would be able to ";
+		WriteFactionTypeDescription(buffer, fac);
+		buffer << ".";
+
+		f.Paragraph(buffer.str());
+
 		if (Globals->FACTION_POINTS>3) {
 			int rem=Globals->FACTION_POINTS-3;
 			temp = "Note that it is possible to have a faction type with "
 				"less than ";
 			temp += Globals->FACTION_POINTS;
-			temp += " points spent. In fact, a starting faction has one "
-				"point spent on each of War, Trade, and Magic, leaving ";
+			temp += " points spent. In fact, a starting faction has one point spent on each of ";
+			for (auto &fp : *FactionTypes) {
+				temp += fp + ", ";
+			}
+			temp += "leaving ";
+			
 			temp += AString(rem) + " point" + (rem==1?"":"s") + " unspent.";
 			f.Paragraph(temp);
 		}
