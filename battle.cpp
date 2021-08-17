@@ -51,17 +51,14 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
 		? army.stats.roundStats
 		: army.stats.battleStats;
 	
+	int statLines = 0;
 	for (auto &uskv : stats) {
 		UnitStat us = uskv.second;
-
-		std::string tmp = "- " + us.unitName;
 		if (us.attackStats.empty()) {
-			tmp += " made no attacks.";
+			continue;
 		}
-		else {
-			tmp += ":";
-		}
-		battle.AddLine(AString(tmp.c_str()));
+
+		battle.AddLine(AString("- ") + us.unitName.c_str() + ":");
 
 		for (auto &att : us.attackStats) {
 			std::string s = "  - ";
@@ -117,6 +114,12 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
 
 			battle.AddLine(AString(s.c_str()));
 		}
+
+		statLines++;
+	}
+
+	if (statLines == 0) {
+		battle.AddLine(AString("Army made no attacks."));
 	}
 }
 
