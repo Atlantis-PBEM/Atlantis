@@ -3984,7 +3984,7 @@ static ObjectType ot[] =
 	// JT
 	// Added Abyss Lair
 	{"Black Keep",
-	 ObjectType::NOMONSTERGROWTH | ObjectType::NEVERDECAY,
+	 ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
 	 I_ROOTSTONE,1000,"BUIL",5,
 	 0,0,0,

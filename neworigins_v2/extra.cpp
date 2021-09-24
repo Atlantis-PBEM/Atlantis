@@ -735,29 +735,28 @@ Faction *Game::CheckVictory()
 
 
 	// Check for BLACK KEEP
-	// {
-	// 	forlist_reuse(&regions) {
-	// 		r = (ARegion *) elem;
-	// 		forlist(&r->objects) {
-	// 			o = (Object *) elem;
-	// 			if (o->type == O_BKEEP) {
-	// 				if (!o->incomplete) {
-	// 					// message = "A blasphemous tower has been completed!\n\n"
-	// 					// 	"The connection between Havilah and the Eternal City has been severed.\n\n"
-	// 					// 	"The light fails; darkness falls forever, and all life perishes under endless ice.";
-	// 					// WriteTimesArticle(message);
-	// 					// return GetFaction(&factions, monfaction);
-	// 					message = "A blasphemous tower has been built at (x,y)!";
-	// 					WriteTimesArticle(message);
-	// 				}
-	// 				if (o->incomplete) {
-	// 					message = AString("A blasphemous tower is building at (x,y)! Progress (") + AString(ObjectDefs[o->type].cost - o->incomplete) + AString(" / ") + AString(ObjectDefs[o->type].cost) + AString(")...");
-	// 					WriteTimesArticle(message);
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
+	{
+		forlist_reuse(&regions) {
+			r = (ARegion *) elem;
+			forlist(&r->objects) {
+				o = (Object *) elem;
+				if (o->type == O_BKEEP) {
+					if (!o->incomplete) {
+						message = "A Black Keep has been built at in the ";
+						message += r->ShortPrint(&regions);
+						message += "!";
+						WriteTimesArticle(message);
+					}
+					if (o->incomplete) {
+						message = AString("A Black Keep is building at ");
+						message += r->ShortPrint(&regions);
+						message += AString("! Progress ") + AString(ObjectDefs[o->type].cost - o->incomplete) + AString(" / ") + AString(ObjectDefs[o->type].cost) + AString(")...");
+						WriteTimesArticle(message);
+					}
+				}
+			}
+		}
+	}
 
 	return NULL;
 }
