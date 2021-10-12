@@ -820,7 +820,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_PIKE);
 
 	// Artifacts of power
-	DisableItem(I_RELICOFGRACE);
+	EnableItem(I_RELICOFGRACE);
 
 	// Tools
 	EnableItem(I_PICK);

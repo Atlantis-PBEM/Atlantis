@@ -2014,7 +2014,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 
 int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 {
-	int level, num, sactype, sacrifices, i, sac, max, dir;
+	int level, num, sactype, sacrifices, i, sac, max, dir, relics;
 	Object *o, *tower;
 	Unit *u, *victim;
 	Item *item;
@@ -2027,57 +2027,42 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 		return 0;
 	}
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
-		mage->Error(AString("CAST: Can't build a ") +
-			ObjectDefs[O_BKEEP].name +
-			" on water.");
+		mage->Error(AString("CAST: Can't cast Ritual on water."));
 		return 0;
 	}
-	num = mage->GetSharedNum(I_ROOTSTONE);
-	if (num > level)
-		num = level;
+	num = level;
 	tower = 0;
 	sactype = IT_LEADER;
 	sacrifices = 0;
+	
 	forlist(&r->objects) {
 		o = (Object *) elem;
-		if (o->type == O_BKEEP)
+		if (o->type == O_BKEEP && !o->incomplete) {
 			tower = o;
+		}
+			
 		forlist(&o->units) {
 			u = (Unit *) elem;
 			if (u->faction->num == mage->faction->num) {
 				forlist(&u->items) {
 					item = (Item *) elem;
-					if (ItemDefs[item->type].type & sactype)
+					if (ItemDefs[item->type].type & sactype) {
 						sacrifices += item->num;
+					}
 				}
 			}
 		}
 	}
-	if (num > sacrifices)
-		num = sacrifices;
-	if (num < 1) {
-		mage->Error("CAST: Don't have the required materials.");
+
+	if (tower == 0) {
+		mage->Error(AString("CAST: Can't cast Ritual: no Black Tower in a region."));
 		return 0;
 	}
-	if (!tower) {
-		for (i = 1; i < 100; i++)
-			if (!r->GetObject(i))
-				break;
-		if (i < 100) {
-			tower = new Object(r);
-			tower->type = O_BKEEP;
-			tower->incomplete = ObjectDefs[tower->type].cost;
-			tower->num = i;
-			tower->SetName(new AString("Building"));
-			r->objects.Add(tower);
-			WriteTimesArticle("The earth shakes as a blasphemous word is uttered.");
-		} else {
-			mage->Error("CAST: The region is full.");
-			return 0;
-		}
+
+	if (num > sacrifices) {
+		num = sacrifices;
 	}
-	if (num > tower->incomplete)
-		num = tower->incomplete;
+
 	while (num-- > 0) {
 		victim = 0;
 		i = getrandom(sacrifices);
@@ -2099,97 +2084,24 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 				}
 			}
 		}
-		mage->ConsumeShared(I_ROOTSTONE, 1);
+
 		victim->SetMen(sac, victim->GetMen(sac) - 1);
 		sacrifices--;
-		tower->incomplete--;
-		max = ObjectDefs[tower->type].cost;
-		if (tower->incomplete == max * 9 / 10) {
-			// 10% complete
-			message = "Vile rituals are being performed in the ";
-			message += TerrainDefs[r->type].name;
-			message += " of ";
-			message += *r->name;
-			message += "!";
-			WriteTimesArticle(message);
-		}
-		if (tower->incomplete == max * 2 / 3) {
-			// 33% complete
-			dir = -1;
-			start = regions.FindNearestStartingCity(r, &dir);
-			message = "A blasphemous construction is taking shape in ";
-			if (start == r) {
-				message += *start->town->name;
-				message += ", in ";
-			}
-			message += "the ";
-			message += TerrainDefs[r->type].name;
-			message += " of ";
-			message += *r->name;
-			if (start && start != r && dir != -1) {
-				message += ", ";
-				if (r->zloc != start->zloc && dir != MOVE_IN)
-					message += "through a shaft ";
-				switch (dir) {
-					case D_NORTH:
-					case D_NORTHWEST:
-						message += "north of";
-						break;
-					case D_NORTHEAST:
-						message += "east of";
-						break;
-					case D_SOUTH:
-					case D_SOUTHEAST:
-						message += "south of";
-						break;
-					case D_SOUTHWEST:
-						message += "west of";
-						break;
-					case MOVE_IN:
-						message += "through a shaft in";
-						break;
-				}
-				message += " ";
-				message += *start->town->name;
-			}
-			message += "!";
-			WriteTimesArticle(message);
-		}
-		if (tower->incomplete == max / 3) {
-			// 66% complete
-			message = "The blasphemous tower in the ";
-			message += r->ShortPrint(&regions);
-			message += " is nearing completion!";
-			WriteTimesArticle(message);
-		}
-		if (tower->incomplete == max / 10) {
-			// 90% complete
-			message = *u->faction->name;
-			message += " have almost completed a blasphemous tower in the ";
-			message += r->ShortPrint(&regions);
-			message += ".  Their folly will doom everyone!";
-			WriteTimesArticle(message);
-		}
+
+		// Write article with a details
+		message = "Vile ritual has been performed at ";
+		message += r->ShortPrint(&regions);
+		message += "!";
+		WriteTimesArticle(message);
+
 		mage->Event(AString("Sacrifices ") + ItemDefs[sac].name + " from " + victim->name->Str());
 		if (!victim->GetMen())
 			r->Kill(victim);
 		if (!mage->GetMen())
 			break;
-	}
-
-	// If the player chooses to go down the dark path,
-	// then erase any progress they may have made down the light path
-	forlist_reuse(&regions) {
-		r = (ARegion *) elem;
-		forlist(&r->objects) {
-			Object * o = (Object *) elem;
-			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
-				if (u->faction->num == mage->faction->num) {
-					u->items.SetNum(I_RELICOFGRACE, 0);
-				}
-			}
-		}
+		
+		relics = mage->items.GetNum(I_RELICOFGRACE);
+		mage->items.SetNum(I_RELICOFGRACE, relics + 1);
 	}
 
 	return 1;

@@ -1270,10 +1270,9 @@ AString *ItemDescription(int item, int full)
 				"spirit skills, up to a maximum of level 2.";
 			break;
 		case I_RELICOFGRACE:
-			*temp += " This token is one of many shattered across the world after "
-					"Devourer death. Combine 10 of them and upgrade leader to an Avatar with "
-					"any one skill to level 5. Faction with 5 Avatars wins the game. "
-					"Avatar does not count as a mage for total faction mages count.";
+			*temp += " This is a token of sacrifice, token of power. The Faction must posess "
+					"60 of them to get a WISH power and win the game. This relics can not "
+					"be given and do not drop in spoils.";
 			break;
 		case I_HEALPOTION:
 			*temp += " This item allows its possessor to heal wounded units after battle."
