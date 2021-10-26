@@ -2916,6 +2916,17 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			}
 		}
 
+		{
+			// Remove all relics when unit is given to another faction
+			forlist(&u->items) {
+				Item *i = (Item *) elem;
+
+				if (i->type == I_RELICOFGRACE) {
+					u->items.SetNum(I_RELICOFGRACE, 0);
+				}
+			}
+		}
+
 		notallied = 1;
 		if (t->faction->GetAttitude(u->faction->num) == A_ALLY) {
 			notallied = 0;
