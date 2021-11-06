@@ -1583,7 +1583,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		u->Event(str);
 		// study to level order
 		if (o->level != -1) {
-			if (u->GetSkill(sk) < o->level) {
+			if (u->GetRealSkill(sk) < o->level) {
 				TurnOrder *tOrder = new TurnOrder;
 				AString order;
 				tOrder->repeating = 0;
