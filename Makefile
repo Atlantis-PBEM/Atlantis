@@ -1,16 +1,17 @@
-# This is the makefile for Atlantis 4.0
+# This is the makefile for Atlantis 5.0
 #
 # Copyright 1998 by Geoff Dunbar
 # MODIFICATIONS
-# Date        Person       Comments
-# ----        ------       --------
-# 2000/MAR/14 Davis Kulis  Added the template code.
-# 2004/MAR/29 Jan Rietema  Added/modified the gamesets
+# Date        Person         Comments
+# ----        ------         --------
+# 2000/MAR/14 Davis Kulis    Added the template code.
+# 2004/MAR/29 Jan Rietema    Added/modified the gamesets
 
 GAME ?= standard
 
-CXX ?= g++
-CXXFLAGS = -g -I. -Wall
+CPLUS = g++
+CC = gcc
+CFLAGS = -g -I. -I.. -Wall -std=c++11
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
@@ -18,42 +19,19 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
   edit.o faction.o fileio.o game.o gamedata.o gamedefs.o gameio.o \
   genrules.o i_rand.o items.o main.o market.o modify.o monthorders.o \
   npc.o object.o orders.o parseorders.o production.o quests.o runorders.o \
-  shields.o skills.o skillshows.o specials.o spells.o template.o unit.o
+  shields.o skills.o skillshows.o specials.o spells.o template.o unit.o \
+  events.o events-battle.o
 
-OBJECTS = $(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)) \
-  $(ENGINE_OBJECTS)
+OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
+  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 
 
-# default target
-$(GAME)/$(GAME): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
+$(GAME)-m: objdir $(OBJECTS)
+	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-# Arcadia stuff
-ARCADIA_ENGINE_SOURCES = \
-		alist.cpp     i_rand.cpp
+all: basic standard fracas kingdoms havilah neworigins
 
-ARCADIA_SOURCES = \
-		astring.cpp   edit.cpp      fileio.cpp      \
-		gamedata.cpp  genrules.cpp  items.cpp        map.cpp         \
-		monsters.cpp  object.cpp    production.cpp   shields.cpp     \
-		soldier1.cpp  template.cpp  world.cpp        aregion.cpp     \
-		battle1.cpp   extra.cpp     formation1.cpp   gamedefs.cpp    \
-		hexside.cpp   magic.cpp     market.cpp       monthorders.cpp \
-		orders.cpp    rules.cpp     skills.cpp       specials.cpp    \
-		times.cpp     army1.cpp     economy.cpp      faction.cpp     \
-		game.cpp      gameio.cpp    main.cpp        \
-		modify.cpp    npc.cpp       parseorders.cpp  runorders.cpp   \
-		skillshows.cpp  spells.cpp  unit.cpp
-
-ARCADIA_OBJECTS = $(patsubst %.cpp,arcadia/%.o,$(ARCADIA_SOURCES)) $(patsubst %.cpp,%.o,$(ARCADIA_ENGINE_SOURCES))
-
-arcadia/arcadia: $(ARCADIA_OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-.PHONY: all basic standard fracas kingdoms havilah arcadia
-
-all: arcadia basic standard fracas kingdoms havilah
-
-arcadia: arcadia/arcadia
+arcadia: FORCE
+	$(MAKE) GAME=arcadia
 
 basic: FORCE
 	$(MAKE) GAME=basic
@@ -70,17 +48,17 @@ fracas: FORCE
 havilah: FORCE
 	$(MAKE) GAME=havilah
 
+neworigins: FORCE
+	$(MAKE) GAME=neworigins
 
-.PHONY: all-clean basic-clean standard-clean fracas-clean kingdoms-clean havilah-clean arcadia-clean clean
+$(GAME)/$(GAME): FORCE
+	$(MAKE) GAME=$(GAME)
 
-all-clean: arcadia-clean basic-clean standard-clean fracas-clean kingdoms-clean \
-	havilah-clean
+all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
+	havilah-clean neworigins-clean
 
 arcadia-clean:
-	rm -f $(ARCADIA_OBJECTS)
-	rm -f arcadia/html/arcadia.html
-	rm -f arcadia/arcadia
-
+	$(MAKE) GAME=arcadia clean
 
 basic-clean:
 	$(MAKE) GAME=basic clean
@@ -97,21 +75,21 @@ kingdoms-clean:
 havilah-clean:
 	$(MAKE) GAME=havilah clean
 
+neworigins-clean:
+	$(MAKE) GAME=neworigins clean
+
 clean:
 	rm -f $(OBJECTS)
+	if [ -d obj ]; then rmdir obj; fi
+	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
 
-.PHONY: all-rules basic-rules standard-rules fracas-rules kingdoms-rules havilah-rules arcadia-rules rules
+all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
+	havilah-rules neworigins-rules
 
-all-rules: arcadia-rules basic-rules standard-rules fracas-rules kingdoms-rules \
-	havilah-rules
-
-arcadia-rules: arcadia/arcadia
-	(cd arcadia; \
-	 ./arcadia genrules arcadia_intro.html arcadia.css html/arcadia.html \
-	)
-
+arcadia-rules:
+	$(MAKE) GAME=arcadia rules
 
 basic-rules:
 	$(MAKE) GAME=basic rules
@@ -128,6 +106,9 @@ kingdoms-rules:
 havilah-rules:
 	$(MAKE) GAME=havilah rules
 
+neworigins-rules:
+	$(MAKE) GAME=neworigins rules
+
 rules: $(GAME)/$(GAME)
 	(cd $(GAME); \
 	 ./$(GAME) genrules $(GAME)_intro.html $(GAME).css html/$(GAME).html \
@@ -135,4 +116,14 @@ rules: $(GAME)/$(GAME)
 
 FORCE:
 
+objdir:
+	if [ ! -d obj ]; then mkdir obj; fi
+	if [ ! -d $(GAME)/obj ]; then mkdir $(GAME)/obj; fi
+
+
+$(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
+	$(CPLUS) $(CFLAGS) -c -o $@ $<
+
+$(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
+	$(CPLUS) $(CFLAGS) -c -o $@ $<
 

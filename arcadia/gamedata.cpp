@@ -1801,7 +1801,7 @@ ItemType id[] =
 	 I_HAMMER,1, 0,
 	 0, NULL, 0},
 	{"flaming sword","flaming swords","FSWO",
-	 ItemType::DISABLED | ItemType::NOMARKET,
+	 ItemType::DISABLED | ItemType::NOMARKET | ItemType::NOTRANSPORT,
 	 NULL,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 "CFSW",1,1, {{I_SILVER,800},{-1,0},{-1,0},{-1,0}},
 	 0,IT_MAGIC | IT_WEAPON | IT_BATTLE, 5000,1,

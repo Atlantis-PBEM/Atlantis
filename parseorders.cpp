@@ -1373,6 +1373,10 @@ void Game::ProcessDestroyOrder(Unit *u, OrdersCheck *pCheck)
 void Game::ProcessFindOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
+	if (!Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+		ParseError(pCheck, u, 0, "FIND: This command was disabled.");
+		return;
+	}
 	if (!token) {
 		ParseError(pCheck, u, 0, "FIND: No faction number given.");
 		return;
@@ -1540,7 +1544,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
 	AString * token = o->gettoken();
 	BuildOrder * order = new BuildOrder;
-	int maxbuild, i;
+	int maxbuild;
 
 	// 'incomplete' for ships:
 	maxbuild = 0;
@@ -1615,22 +1619,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 						ParseError(pCheck, unit, 0, "BUILD: Can't build that.");
 						return;
 					}
-					for (i = 1; i < 100; i++)
-						if (!reg->GetObject(i))
-							break;
-					if (i < 100) {
-						Object * obj = new Object(reg);
-						obj->type = ot;
-						obj->incomplete = ObjectDefs[obj->type].cost;
-						obj->num = i;
-						obj->SetName(new AString("Building"));
-						unit->build = obj->num;
-						unit->object->region->objects.Add(obj);
-						unit->MoveUnit(obj);
-					} else {
-						unit->Error("BUILD: The region is full.");
-						return;
-					}
+					order->new_building = ot;
 				}
 			}
 			order->target = NULL; // Not helping anyone...
@@ -1922,7 +1911,11 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 	if (*token == "default") {
 		fac = -1;
 	} else {
-		fac = token->value();
+		fac = token->strict_value();
+		if (fac == -1) {
+			f->Error(AString("DECLARE: Non-existent faction."));
+			return;
+		}
 	}
 	delete token;
 

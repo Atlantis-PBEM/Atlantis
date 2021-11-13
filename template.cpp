@@ -291,7 +291,6 @@ static char const *ter_fill[] = {
  // lake
  "  ~ ~ ",
  " ~ ~  ",
-
 };
 
 // NEW FUNCTION DK 2000.03.07,

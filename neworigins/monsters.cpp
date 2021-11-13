@@ -22,54 +22,26 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef ASTRING_CLASS
-#define ASTRING_CLASS
+// MODIFICATIONS
+// Date        Person            Comments
+// ----        ------            --------
+// 2001/Mar/03 Joseph Traub      Moved some of the monster stuff here
+//
+#include "ctime"
+#include "gamedata.h"
+#include "game.h"
+#include "quests.h"
 
-#include <iostream>
-#include "alist.h"
+void Game::CreateVMons()
+{
+	if (!Globals->LAIR_MONSTERS_EXIST) return;
 
-using namespace std;
+	return;
+}
 
-class AString : public AListElem {
-	friend ostream & operator <<(ostream &os, const AString &);
-	friend istream & operator >>(istream &is, AString &);
-public:
+void Game::GrowVMons()
+{
+  if (!Globals->LAIR_MONSTERS_EXIST) return;
 
-	AString();
-	AString(char *);
-	AString(const char *);
-	AString(int);
-	AString(unsigned int);
-	AString(char);
-	AString(const AString &);
-	~AString();
-
-	int operator==(const AString &);
-	int operator==(char *);
-	int operator==(const char *);
-	int CheckPrefix(const AString &);
-	AString operator+(const AString &);
-	AString & operator+=(const AString &);
-
-	AString & operator=(const AString &);
-	AString & operator=(const char *);
-
-	char *Str();
-	int Len();
-
-	AString *gettoken();
-	int getat();
-	AString *getlegal();
-	AString *Trunc(int, int back=30);
-	int value();
-	int strict_value();
-	AString *StripWhite();
-
-private:
-
-	int len;
-	char *str;
-	int isEqual(const char *);
-};
-
-#endif
+  return;
+}

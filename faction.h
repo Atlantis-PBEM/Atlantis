@@ -138,7 +138,7 @@ public:
 	void Event(const AString &);
 	
 	AString FactionTypeStr();
-	void WriteReport( Areport *f, Game *pGame );
+	void WriteReport( Areport *f, Game *pGame, int ** citems);
 	// LLS - write order template
 	void WriteTemplate(Areport *f, Game *pGame);
 	void WriteFacInfo(Aoutfile *);
@@ -215,6 +215,8 @@ public:
 	ARegion *pStartLoc;
 	int noStartLeader;
 	int startturn;
+
+	void WriteFactionStats(Areport *f, Game *pGame, int ** citems);
 };
 
 Faction * GetFaction(AList *,int);

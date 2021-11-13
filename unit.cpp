@@ -994,7 +994,7 @@ void Unit::ConsumeSharedMoney(int n)
 
 int Unit::GetAttackRiding()
 {
-	int riding = 0;
+    int riding = 0;
 	if (type == U_WMON) {
 		forlist(&items) {
 			Item *i = (Item *) elem;
@@ -1007,9 +1007,9 @@ int Unit::GetAttackRiding()
 		}
 		return riding;
 	} else {
-		riding = GetSkill(S_RIDING);
-		int lowriding = 0;
+		int attackriding = 0;
 		int minweight = 10000;
+        AString skname;
 		forlist(&items) {
 			Item *i = (Item *)elem;
 			if (ItemDefs[i->type].type & IT_MAN)
@@ -1017,15 +1017,47 @@ int Unit::GetAttackRiding()
 					minweight = ItemDefs[i->type].weight;
 		}
 		forlist_reuse (&items) {
+            MountType *mount;
+            int skill, maxBonus;
 			Item *i = (Item *)elem;
-			if (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= minweight)
-				return riding;
-			if (ItemDefs[i->type].ride-ItemDefs[i->type].weight >= minweight) {
-				if (riding <= 3) return riding;
-				lowriding = 3;
-			}
+            if (!(ItemDefs[i->type].type & IT_MOUNT))
+                continue;
+            mount = FindMount(ItemDefs[i->type].abr);
+            if (!mount)
+                continue;
+            maxBonus = mount->maxBonus;
+            /*
+             * This code applies terrain restrictions to the attack riding
+             * calculations, but given that these have never been applied
+             * historically we probably don't want to start now.
+             * Thus: for reference only.
+            int canRide = TerrainDefs[object->region->type].flags & TerrainType::RIDINGMOUNTS;
+            int canFly = TerrainDefs[object->region->type].flags & TerrainType::FLYINGMOUNTS;
+            if (canRide && !canFly)
+                maxBonus = mount->maxHamperedBonus;
+            if (!canRide && !canFly)
+                maxBonus = 0;
+            */
+            skname = mount->skill;
+            skill = LookupSkill(&skname);
+            if (skill == -1) {
+                // This mount doesn't require skill to use.
+                // I guess the rider gets the max bonus!
+                if (attackriding < maxBonus)
+                    attackriding = maxBonus;
+            } else {
+                riding = GetSkill(skill);
+                if ((ItemDefs[i->type].type & IT_MAN)
+                        || (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= minweight)
+                        || (ItemDefs[i->type].ride - ItemDefs[i->type].weight >= minweight)) {
+                    if (riding > maxBonus)
+                        riding = maxBonus;
+                    if (attackriding < riding)
+                        attackriding = riding;
+                }
+            }
 		}
-		return lowriding;
+		return attackriding;
 	}
 }
 
@@ -1036,8 +1068,39 @@ int Unit::GetDefenseRiding()
 	int riding = 0;
 	int weight = Weight();
 
-	if (CanFly(weight)) riding = 5;
-	else if (CanRide(weight)) riding = 3;
+	if (CanFly(weight)) {
+        riding = 5;
+        // Limit riding to the slowest flying mount
+		forlist(&items) {
+			Item *i = (Item *)elem;
+			if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].fly) {
+                MountType *mount;
+                mount = FindMount(ItemDefs[i->type].abr);
+                if (mount) {
+                    // If we wanted to apply terrain restrictions,
+                    // we'd do it here
+                    if (mount->maxBonus < riding)
+                        riding = mount->maxBonus;
+                }
+            }
+        }
+	} else if (CanRide(weight)) {
+        riding = 3;
+        // Limit riding to the slowest riding mount
+		forlist(&items) {
+			Item *i = (Item *)elem;
+			if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].ride) {
+                MountType *mount;
+                mount = FindMount(ItemDefs[i->type].abr);
+                if (mount) {
+                    // If we wanted to apply terrain restrictions,
+                    // we'd also do it here
+                    if (mount->maxBonus < riding)
+                        riding = mount->maxBonus;
+                }
+            }
+        }
+    }
 
 	if (GetMen()) {
 		int manriding = GetSkill(S_RIDING);
@@ -2128,6 +2191,7 @@ int Unit::Taxers(int numtaxers)
 	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES)
 		basetax += creatures;
 		taxers += creatures;
+
 	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
 		basetax += illusions;
 		taxers += illusions;
@@ -2253,7 +2317,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 }
 
 int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
-		int &attackBonus, int &defenseBonus, int &attacks)
+		int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage)
 {
 	int item = LookupItem(&itm);
 	WeaponType *pWep = FindWeapon(itm.Str());
@@ -2293,6 +2357,16 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 		attacks += (baseSkillLevel +1)/2 - WeaponType::NUM_ATTACKS_HALF_SKILL;
 	// Sanity check
 	if (attacks == 0) attacks = 1;
+
+	hitDamage = pWep->hitDamage;
+	// // Check if attackDamage is based on skill level
+	// // >= used in case NUM_DAMAGE_SKILL+1
+	if (hitDamage >= WeaponType::NUM_DAMAGE_SKILL) {
+		hitDamage = hitDamage - WeaponType::NUM_DAMAGE_SKILL + baseSkillLevel;
+	// >= used in case NUM_DAMAGE_HALF_SKILL+1
+	} else if (hitDamage >= WeaponType::NUM_DAMAGE_HALF_SKILL) {
+		hitDamage = hitDamage - WeaponType::NUM_DAMAGE_HALF_SKILL + (baseSkillLevel + 1)/2;
+	}
 
 	// get the weapon
 	items.SetNum(item, num-1);

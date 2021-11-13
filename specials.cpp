@@ -33,24 +33,24 @@ void Soldier::SetupHealing()
 		healtype = unit->GetSkill(S_MAGICAL_HEALING);
 		if (healtype > 5) healtype = 5;
 		if (healtype > 0) {
-			healing = HealDefs[healtype].num;
+			healing = MagicHealDefs[healtype].num;
 			healitem = -1;
 			return;
 		}
 	}
 
 	if (unit->items.GetNum(I_HEALPOTION)) {
-		healtype = 1;
+		healtype = 6;
 		unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
-		healing = 10;
+		healing = 1;
 		healitem = I_HEALPOTION;
 	} else {
-		healing = unit->GetSkill(S_HEALING) * Globals->HEALS_PER_MAN;
+		healing = HealDefs[unit->GetSkill(S_HEALING)].num * Globals->HEALS_PER_MAN;
 		if (healing) {
-			healtype = 1;
+			healtype = unit->GetSkill(S_HEALING);
 			int herbs = unit->items.GetNum(I_HERBS);
 			if (herbs < healing) healing = herbs;
-			unit->items.SetNum(I_HERBS,herbs - healing);
+			unit->items.SetNum(I_HERBS, herbs - healing);
 			healitem = I_HERBS;
 		}
 	}
@@ -189,7 +189,7 @@ void Battle::UpdateShields(Army *a)
 }
 
 void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
-		Army *def, int behind)
+		Army *def, int behind, int canattackback)
 {
 	SpecialType *spd;
 	int i, num, tot = -1;
@@ -204,14 +204,17 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 	for (i = 0; i < 4; i++) {
 		if (spd->damage[i].type == -1) continue;
 		int times = spd->damage[i].value;
+		int hitDamage = spd->damage[i].hitDamage;
+
 		if (spd->effectflags & SpecialType::FX_USE_LEV)
 			times *= a->slevel;
 		int realtimes = spd->damage[i].minnum + getrandom(times) +
 			getrandom(times);
-		num = def->DoAnAttack(a->special, realtimes,
+		num = def->DoAnAttack(this, a->special, realtimes,
 				spd->damage[i].type, a->slevel,
 				spd->damage[i].flags, spd->damage[i].dclass,
-				spd->damage[i].effect, 0, a);
+				spd->damage[i].effect, 0, a, attackers,
+				canattackback, hitDamage);
 		if (spd->effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {
 			if (spd->damage[i].effect == NULL) {
 				results[dam] = AString("killing ") + num;

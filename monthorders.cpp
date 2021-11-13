@@ -239,7 +239,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 		wgt += unit->Weight();
 		if (unit->nomove) {
 			// If any unit on-board was in a fight (and
-			// suffered casualties), then halt movement
+			// suffered > 5% casualties), then halt movement
 			nomove = 1;
 		}
 		if (unit->monthorders && unit->monthorders->type == O_SAIL) {
@@ -291,47 +291,12 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			(TerrainDefs[newreg->type].similar_type != R_OCEAN)) {
 			cap->Error("SAIL: Can't sail inland.");
 			stop = 1;
-		} else if (Globals->PREVENT_SAIL_THROUGH &&
-				(TerrainDefs[reg->type].similar_type != R_OCEAN) &&
-				(fleet->flying < 1) &&
-				(fleet->prevdir != -1) &&
-				(fleet->prevdir != x->dir)) {
-			// Check to see if sailing THROUGH land!
-			// always allow retracing steps
-			int blocked1 = 0;
-			int blocked2 = 0;
-			int d1 = fleet->prevdir;
-			int d2 = x->dir;
-			if (d1 > d2) {
-				int tmp = d1;
-				d1 = d2;
-				d2 = tmp;
-			}
-			for (int k = d1+1; k < d2; k++) {
-				ARegion *land1 = reg->neighbors[k];
-				if ((!land1) ||
-						(TerrainDefs[land1->type].similar_type !=
-						 R_OCEAN))
-					blocked1 = 1;
-			}
-			int sides = NDIRS - 2 - (d2 - d1 - 1);
-			for (int l = d2+1; l <= d2 + sides; l++) {
-				int dl = l;
-				if (dl >= NDIRS) dl -= NDIRS;
-				ARegion *land2 = reg->neighbors[dl];
-				if ((!land2) ||
-						(TerrainDefs[land2->type].similar_type !=
-						 R_OCEAN))
-					blocked2 = 1;
-			}
-			if ((blocked1) && (blocked2))
-			{
-				cap->Error(AString("SAIL: Could not sail ") +
-						DirectionStrs[x->dir] + AString(" from ") +
-						reg->ShortPrint(&regions) +
-						". Cannot sail through land.");
-				stop = 1;
-			}
+		} else if (fleet->SailThroughCheck(x->dir) < 1) {
+			cap->Error(AString("SAIL: Could not sail ") +
+					DirectionStrs[x->dir] + AString(" from ") +
+					reg->ShortPrint(&regions) +
+					". Cannot sail through land.");
+			stop = 1;
 		}
 
 		if (!stop) {
@@ -551,6 +516,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 {
 	Object *buildobj;
 	int questcomplete = 0;
+	AString quest_rewards;
 
 	if (!TradeCheck(r, u->faction)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
@@ -649,7 +615,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 		if (buildobj->incomplete == 0) {
 			job = "Completes construction of ";
 			buildobj->incomplete = -(ObjectDefs[type].maxMaintenance);
-			if (quests.CheckQuestBuildTarget(r, type, u)) {
+			if (quests.CheckQuestBuildTarget(r, type, u, &quest_rewards)) {
 				questcomplete = 1;
 			}
 		}
@@ -677,8 +643,9 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 
 	// AS
 	u->Event(job + *(buildobj->name));
-	if (questcomplete)
-		u->Event("You have completed a quest!");
+	if (questcomplete) {
+		u->Event(AString("You have completed a quest! ") + quest_rewards);
+	}
 	u->Practice(sk);
 
 	delete u->monthorders;
@@ -697,6 +664,11 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 	skname = ItemDefs[ship].pSkill;
 	skill = LookupSkill(&skname);
 	level = u->GetSkill(skill);
+
+	if (skill == -1) {
+		u->Error("BUILD: Can't build that.");
+		return;
+	}
 
 	// get needed to complete
 	maxbuild = 0;
@@ -746,6 +718,50 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 
 	delete u->monthorders;
 	u->monthorders = 0;
+}
+
+void Game::AddNewBuildings(ARegion *r)
+{
+	int i;
+	forlist((&r->objects)) {
+		Object *obj = (Object *) elem;
+		forlist ((&obj->units)) {
+			Unit *u = (Unit *) elem;
+			if (u->monthorders) {
+				if (u->monthorders->type == O_BUILD) {
+					BuildOrder *o = (BuildOrder *)u->monthorders;
+
+					// If BUILD order was marked for creating new building
+					// in parse phase, it is time to create one now.
+					if (o->new_building != -1) {
+						for (i = 1; i < 100; i++) {
+							if (!r->GetObject(i)) {
+								break;
+							}
+						}
+						if (i < 100) {
+							Object * obj = new Object(r);
+							obj->type = o->new_building;
+							obj->incomplete = ObjectDefs[obj->type].cost;
+							obj->num = i;
+							obj->SetName(new AString("Building"));
+							u->build = obj->num;
+							r->objects.Add(obj);
+
+							// This moves unit to a new building.
+							// This unit might be processed again but from new object.
+							u->MoveUnit(obj);
+							// This why we need to unset new_building so it will not
+							// try to create new object again.
+							o->new_building = -1;
+						} else {
+							u->Error("BUILD: The region is full.");
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void Game::RunBuildHelpers(ARegion *r)
@@ -1029,6 +1045,7 @@ void Game::RunMonthOrders()
 		ARegion * r = (ARegion *) elem;
 		RunIdleOrders(r);
 		RunStudyOrders(r);
+		AddNewBuildings(r);
 		RunBuildHelpers(r);
 		RunProduceOrders(r);
 	}
@@ -1266,6 +1283,8 @@ int Game::FindAttemptedProd(ARegion * r, Production * p)
 void Game::RunAProduction(ARegion * r, Production * p)
 {
 	int questcomplete;
+	AString quest_rewards;
+
 	p->activity = 0;
 	if (p->amount == 0) return;
 
@@ -1294,7 +1313,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 				double dUbucks = ((double) amt) * ((double) uatt)
 					/ ((double) attempted);
 				ubucks = (int) dUbucks;
-				questcomplete = quests.CheckQuestHarvestTarget(r, po->item, ubucks, amt, u);
+				questcomplete = quests.CheckQuestHarvestTarget(r, po->item, ubucks, amt, u, &quest_rewards);
 			}
 			else
 			{
@@ -1354,8 +1373,9 @@ void Game::RunAProduction(ARegion * r, Production * p)
 			}
 			delete u->monthorders;
 			u->monthorders = 0;
-			if (questcomplete)
-				u->Event("You have completed a quest!");
+			if (questcomplete) {
+				u->Event(AString("You have completed a quest! ") + quest_rewards);
+			}
 		}
 	}
 }

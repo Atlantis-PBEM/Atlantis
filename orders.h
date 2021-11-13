@@ -252,6 +252,7 @@ class BuildOrder : public Order {
 		~BuildOrder();
 
 		UnitId * target;
+		int new_building;
 		int needtocomplete;
 };
 

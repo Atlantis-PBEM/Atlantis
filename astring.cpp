@@ -352,6 +352,26 @@ int AString::value()
 	return ret;
 }
 
+int AString::strict_value() //this cannot handle negative numbers!
+{
+	int l=Len();
+	for (int i=0; i<l; i++) {
+		if (!((str[i] >= '0') && (str[i] <= '9'))) {
+			return -1;
+		}
+	}
+
+	int place = 0;
+	int ret = 0;
+	while ((str[place] >= '0') && (str[place] <= '9')) {
+		ret *= 10;
+		// Fix bug where int could be overflowed.
+		if (ret < 0) return 0;
+		ret += (str[place++] - '0');
+	}
+	return ret;
+}
+
 ostream & operator <<(ostream & os,const AString & s)
 {
 	os << s.str;

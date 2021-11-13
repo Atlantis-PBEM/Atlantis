@@ -163,6 +163,7 @@ class HealType {
 		int rate;
 };
 extern HealType * HealDefs;
+extern HealType * MagicHealDefs;
 
 class DamageType {
 	public:
@@ -172,6 +173,7 @@ class DamageType {
 		int flags;
 		int dclass;
 		char const *effect;
+		int hitDamage;
 };
 
 class ShieldType {

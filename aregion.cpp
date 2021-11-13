@@ -123,6 +123,7 @@ ARegion::ARegion()
 	improvement = 0;
 	clearskies = 0;
 	earthlore = 0;
+	phantasmal_entertainment = 0;
 	for (int i=0; i<NDIRS; i++)
 		neighbors[i] = 0;
 	visited = 0;
@@ -310,7 +311,7 @@ int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range, int dev
 			ARegion *r = neighbors[d];
 			if (!r) continue;
 			if (dir == r->GetRealDirComp(d)) continue;
-			if (r->HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1, dev+2);
+			if (HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1, dev+2);
 		}
 	}
 	return sum;
@@ -327,7 +328,7 @@ int ARegion::RoadDevelopmentBonus(int range, int dev)
 		if (!HasExitRoad(d)) continue;
 		ARegion *r = neighbors[d];
 		if (!r) continue;
-		if (r->HasConnectingRoad(d)) bonus = r->TraceConnectedRoad(d, bonus, con, range-1, dev);
+		if (HasConnectingRoad(d)) bonus = r->TraceConnectedRoad(d, bonus, con, range-1, dev);
 	}
 	return bonus;	
 }
@@ -612,9 +613,9 @@ int ARegion::HasConnectingRoad(int realDirection)
 {
 	int opposite = GetRealDirComp(realDirection);
 
-	if (neighbors[realDirection]
-			&& neighbors[realDirection]->HasExitRoad(opposite))
+	if (neighbors[realDirection] && neighbors[realDirection]->HasExitRoad(opposite)) {
 		return 1;
+	}
 
 	return 0;
 }
@@ -1879,6 +1880,20 @@ int ARegion::CanTax(Unit *u)
 			Unit *u2 = (Unit *) elem;
 			if (u2->guard == GUARD_GUARD && u2->IsAlive())
 				if (u2->GetAttitude(this, u) <= A_NEUTRAL)
+					return 0;
+		}
+	}
+	return 1;
+}
+
+int ARegion::CanGuard(Unit *u)
+{
+	forlist((&objects)) {
+		Object *obj = (Object *) elem;
+		forlist ((&obj->units)) {
+			Unit *u2 = (Unit *) elem;
+			if (u2->guard == GUARD_GUARD && u2->IsAlive())
+				if (u2->GetAttitude(this, u) < A_ALLY)
 					return 0;
 		}
 	}

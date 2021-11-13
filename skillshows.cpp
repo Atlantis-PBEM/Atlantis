@@ -229,17 +229,28 @@ AString *ShowSkill::Report(Faction *f)
 			if (level > 1) break;
 			*str += "A unit with this skill may use the ENTERTAIN order "
 				"to generate funds. The amount of silver gained will "
-				"be 20 per man, times the level of the entertainers. "
+				"be ";
+			*str += Globals->ENTERTAIN_INCOME;
+			*str +=  " per man, times the level of the entertainers. "
 				"This amount is limited by the region that the unit is in.";
 			break;
 		case S_TACTICS:
 			if (level > 1) break;
-			*str += "Tactics allows the unit, and all allies, to gain a "
-				"free round of attacks during battle. The army with the "
-				"highest level tactician in a battle will receive this free "
-				"round; if the highest levels are equal, no free round is "
-				"awarded. Only one free round total will be awarded for any "
-				"reason.";
+			if (Globals->ADVANCED_TACTICS) {
+				*str += "Tactics allows the unit, and all allies, to gain a "
+					"bonus to their attack and defense during first battle "
+					"round. Bonus equals to the difference in skills but can be "
+					"+3 at most. The army with the highest level tactician "
+					"in a battle will receive this bonus round; if the highest "
+					"levels are equal, no bonus is awarded.";
+			} else {
+				*str += "Tactics allows the unit, and all allies, to gain a "
+					"free round of attacks during battle. The army with the "
+					"highest level tactician in a battle will receive this free "
+					"round; if the highest levels are equal, no free round is "
+					"awarded. Only one free round total will be awarded for any "
+					"reason.";
+			}
 			break;
 		case S_COMBAT:
 			if (level > 1) break;
@@ -250,12 +261,12 @@ AString *ShowSkill::Report(Faction *f)
 			if (level == 1) {
 				*str += "A unit with this skill has begun the process of building "
 					"on their combat experience to learn how to survive wounds "
-					"that would lay low a less grizzled warrior.  This is an "
+					"that would lay low a less grizzled warrior. This is an "
 					"arduous process, and doesn't yet provide any advantage "
 					"at this skill level.";
 			} else if (level == 3) {
 				*str += "The process of building up combat endurance is starting "
-					"to yield results.  At this level the men in the unit can "
+					"to yield results. At this level the men in the unit can "
 					"survive one extra hit in combat before being overcome.";
 			} else if (level == 5) {
 				*str += "The men of this unit are now hardened veterans, and can "
@@ -302,9 +313,18 @@ AString *ShowSkill::Report(Faction *f)
 				"level.";
 			break;
 		case S_HEALING:
-			if (level > 1) break;
-			*str += "A unit with this skill is able to heal units hurt in "
-				"battle.";
+			*str += "A unit with this skill is able to use herbs [HERB] to "
+				"heal units hurt in battle.";
+			if (HealDefs[level].num != HealDefs[level - 1].num ||
+					HealDefs[level].rate != HealDefs[level - 1].rate) {
+				*str += " A unit at this level of skill can ";
+				*str += "bring soldiers back from near death, healing";
+				*str += " up to ";
+				*str += HealDefs[level].num * Globals->HEALS_PER_MAN;
+				*str += " casualties, with a ";
+				*str += HealDefs[level].rate;
+				*str += " percent success rate.";
+			}
 			break;
 		case S_SAILING:
 			if (level > 1) break;
@@ -361,8 +381,8 @@ AString *ShowSkill::Report(Faction *f)
 					"it will be used automatically when the mage is involved "
 					"in a battle. ";
 			}
-			if (HealDefs[level].num != HealDefs[level - 1].num ||
-					HealDefs[level].rate != HealDefs[level - 1].rate) {
+			if (MagicHealDefs[level].num != MagicHealDefs[level - 1].num ||
+					MagicHealDefs[level].rate != MagicHealDefs[level - 1].rate) {
 				*str += "A mage at this level of skill can ";
 				if (level > 4) {
 					*str += "bring soldiers back from near death, healing";
@@ -372,9 +392,9 @@ AString *ShowSkill::Report(Faction *f)
 					*str += "heal";
 				}
 				*str += " up to ";
-				*str += HealDefs[level].num;
+				*str += MagicHealDefs[level].num;
 				*str += " casualties, with a ";
-				*str += HealDefs[level].rate;
+				*str += MagicHealDefs[level].rate;
 				*str += " percent success rate.";
 			}
 			break;
@@ -406,26 +426,31 @@ AString *ShowSkill::Report(Faction *f)
 					"Also at level 2 Gate Lore, the mage may perform a "
 					"random gate jump without being restricted to the same "
 					"level; use CAST Gate_Lore RANDOM LEVEL UNITS <unit> ... "
-					"to use this option.  The mage may also now carry 100 "
-					"weight units through a Gate when doing a random jump.";
-			} else if (level == 3) {
-				*str += "A mage with Gate Lore skill 3 and higher can step "
+					"to use this option; when calculating weight for multi "
+					"level jump, skill level is reduced by 1. The mage may "
+					"also now carry 500 weight units through a Gate when doing "
+					"a random jump. "
+					"A mage with Gate Lore skill 2 and higher can step "
 					"through a Gate into another region containing a specific "
 					"Gate. To use this spell, use the syntax CAST Gate_Lore "
 					"GATE <number> UNITS <unit> ... <number> specifies the "
 					"Gate that the mage will jump to. UNITS is followed by a "
 					"list of units to follow the mage through the gate (the "
-					"mage always jumps through the gate). At level 3, the "
-					"mage may carry 15 weight units through the Gate "
-					"(including the mage). Also, a level 3 or higher mage "
-					"doing a random gate jump may carry 1000 weight units "
-					"through the Gate.";
+					"mage always jumps through the gate). At level 2, the "
+					"mage may carry 15 weight units through the specific Gate "
+					"(including the mage).";
+			} else if (level == 3) {
+				*str += "A mage with Gate Lore skill 3 may carry 500 weight "
+					"units through a Gate. Also, a level 3 mage doing a random "
+					"gate jump may carry 1500 weight units through the Gate.";
 			} else if (level == 4) {
-				*str += "A mage with Gate Lore skill 4 may carry 100 weight "
-					"units through a Gate.";
+				*str += "A mage with Gate Lore skill 4 may carry 1500 weight "
+					"units through a Gate. Also, a level 4 mage doing a random "
+					"gate jump may carry 3000 weight units through the Gate.";
 			} else if (level == 5) {
-				*str += "A mage with Gate Lore skill 5 may carry 1000 weight "
-					"units through a Gate.";
+				*str += "A mage with Gate Lore skill 5 may carry 3000 weight "
+					"units through a Gate. Also, a level 5 mage doing a random "
+					"gate jump may carry 6000 weight units through the Gate.";
 			}
 			break;
 		case S_PORTAL_LORE:
@@ -433,11 +458,16 @@ AString *ShowSkill::Report(Faction *f)
 			/* XXX -- This should be cleaner somehow. */
 			if (ITEM_DISABLED(I_PORTAL)) break;
 			*str += "A mage with the Portal Lore skill may, with the aid of "
-				"another mage, make a temporary Gate between two regions, and "
+				"another mage";
+			if (Globals->APPRENTICES_EXIST) {
+				*str += " or ";
+				*str += Globals->APPRENTICE_NAME;
+			}				
+			*str += ", make a temporary Gate between two regions, and "
 				"send units from one region to another. In order to do this, "
 				"both mages (the caster, and the target mage) must have "
 				"Portals, and the caster must be trained in Portal Lore. The "
-				"caster may teleport units weighing up to 50 weight units "
+				"caster may teleport units weighing up to 500 weight units "
 				"times his skill level, to the target mage's region. ";
 			range = FindRange(SkillDefs[skill].range);
 			if (range) {
@@ -552,7 +582,7 @@ AString *ShowSkill::Report(Faction *f)
 			/* XXX -- This should be cleaner somehow. */
 			*str += "A mage with this skill may teleport himself across "
 				"great distances, even without the use of a gate. The mage "
-				"may teleport up to 15 weight units per skill level.";
+				"may teleport up to 50 weight units per skill level.";
 			range = FindRange(SkillDefs[skill].range);
 			if (range) {
 				if (range->flags & RangeType::RNG_SURFACE_ONLY) {
@@ -855,7 +885,7 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "A mage with the Summon Skeletons skill may summon "
 				"skeletons into his inventory, to aid him in battle. "
 				"Skeletons may be given to other units, as they follow "
-				"instructions mindlessly; however, they have a 10 percent "
+				"instructions mindlessly; however, they have a 8 percent "
 				"chance of decaying each turn. A mage can summon skeletons "
 				"at an average rate of ";
 			if (ItemDefs[I_SKELETON].mOut > 0) {
@@ -874,7 +904,7 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "A mage with the Raise Undead skill may summon undead "
 				"into his inventory, to aid him in battle. Undead may be "
 				"given to other units, as they follow instructions "
-				"mindlessly; however, they have a 10 percent chance of "
+				"mindlessly; however, they have a 8 percent chance of "
 				"decaying each turn. A mage can summon undead at an average "
 				"rate of ";
 			if (ItemDefs[I_UNDEAD].mOut > 0) {
@@ -893,7 +923,7 @@ AString *ShowSkill::Report(Faction *f)
 			*str += "A mage with the Summon Lich skill may summon a lich "
 				"into his inventory, to aid him in battle. Liches may be "
 				"given to other units, as they follow instructions "
-				"mindlessly; however, they have a 10 percent chance of "
+				"mindlessly; however, they have a 8 percent chance of "
 				"decaying each turn. A mage has a ";
 			if (ItemDefs[I_LICH].mOut > 0) {
 				*str += ItemDefs[I_LICH].mOut;
@@ -996,8 +1026,10 @@ AString *ShowSkill::Report(Faction *f)
 				"his powers of Illusion to earn money by creating "
 				"illusionary fireworks, puppet shows, etc. In effect, "
 				"Phantasmal Entertainment grants the mage Entertainment "
-				"skill equal to five times his Phantasmal Entertainment "
-				"level. To use this skill, use the ENTERTAIN order.";
+				"skill equal to ";
+			*str += Globals->ENTERTAIN_INCOME * 20;
+			*str += " silver times his Phantasmal Entertainment "
+				"level. To use this skill, the mage should CAST Phantasmal_Entertainment.";
 			break;
 		case S_CREATE_PHANTASMAL_BEASTS:
 			/* XXX -- This should be cleaner somehow. */
@@ -1022,24 +1054,22 @@ AString *ShowSkill::Report(Faction *f)
 					"reference these items in orders, you must prepend an "
 					"'i' to the normal string. (For example: to reference "
 					"an illusionary wolf, you would use 'iwolf').";
-			} else if (level == 3) {
+			} else if (level == 2) {
 				if (ITEM_DISABLED(I_IEAGLE)) break;
-				*str += "Create Phantasmal Beasts at level 3 allows the mage "
+				*str += "Create Phantasmal Beasts at level 2 allows the mage "
 					"to summon illusionary eagles into his inventory. To "
 					"summon illusionary eagles, the mage should CAST "
 					"Create_Phantasmal_Beasts EAGLE <number>, where <number> "
 					"is the number of eagles that the mage wishes to have "
 					"appear in his inventory. The number of eagles that a "
-					"mage may have in his inventory is equal to his skill "
-					"level, minus 2, squared.";
-			} else if (level == 5) {
+					"mage may have in his inventory is equal to mage's skill squared.";
+			} else if (level == 3) {
 				if (ITEM_DISABLED(I_IDRAGON)) break;
-				*str += "Create Phantasmal Beasts at level 5 allows the "
+				*str += "Create Phantasmal Beasts at level 3 allows the "
 					"mage to summon an illusionary dragon into his "
 					"inventory. To summon an illusionary dragon, the mage "
-					"should CAST Create_Phantasmal_Beasts DRAGON; the mage "
-					"can only have one illusionary dragon in his inventory "
-					"at one time.";
+					"should CAST Create_Phantasmal_Beasts DRAGON. The number of dragons that a "
+					"mage may have in his inventory is equal to mage's skill level.";
 			}
 			break;
 		case S_CREATE_PHANTASMAL_UNDEAD:
@@ -1065,23 +1095,22 @@ AString *ShowSkill::Report(Faction *f)
 					"reference these items in orders, you must prepend an "
 					"'i' to the normal string. (Example: to reference an "
 					"illusionary skeleton, you would use 'iskeleton').";
-			} else if (level == 3) {
+			} else if (level == 2) {
 				if (ITEM_DISABLED(I_IUNDEAD)) break;
-				*str += "Create Phantasmal Undead at level 3 allows the mage "
+				*str += "Create Phantasmal Undead at level 2 allows the mage "
 					"to summon illusionary undead into his inventory. To "
 					"summon illusionary undead, the mage should CAST "
 					"Create_Phantasmal_Undead UNDEAD <number>, where <number> "
 					"is the number of undead that the mage wishes to have "
 					"appear in his inventory. The number of undead that a "
-					"mage may have in his inventory is equal to his skill "
-					"level, minus 2, squared.";
-			} else if (level == 5) {
+					"mage may have in his inventory is equal to mage's skill squared.";
+			} else if (level == 3) {
 				if (ITEM_DISABLED(I_ILICH)) break;
-				*str += "Create Phantasmal Undead at level 5 allows the mage "
+				*str += "Create Phantasmal Undead at level 3 allows the mage "
 					"to summon an illusionary lich into his inventory. To "
 					"summon an illusionary lich, the mage should CAST "
-					"Create_Phantasmal_Undead LICH; the mage can only have "
-					"one illusionary lich in his inventory at one time.";
+					"Create_Phantasmal_Undead LICH; The number of liches that a "
+					"mage may have in his inventory is equal to mage's skill level.";
 			}
 			break;
 		case S_CREATE_PHANTASMAL_DEMONS:
@@ -1108,19 +1137,18 @@ AString *ShowSkill::Report(Faction *f)
 					"reference these items in orders, you must prepend an "
 					"'i' to the normal string. (Example: to reference an "
 					"illusionary imp, you would use 'iimp').";
-			} else if (level == 3) {
+			} else if (level == 2) {
 				if (ITEM_DISABLED(I_IDEMON)) break;
-				*str += "Create Phantasmal Demons at level 3 allows the mage "
+				*str += "Create Phantasmal Demons at level 2 allows the mage "
 					"to summon illusionary demons into his inventory. To "
 					"summon illusionary demons, the mage should CAST "
 					"Create_Phantasmal_Demons DEMON <number>, where <number> "
 					"is the number of demons that the mage wishes to have "
 					"appear in his inventory. The number of demons that a "
-					"mage may have in his inventory is equal to his skill "
-					"level, minus 2, squared.";
-			} else if (level == 5) {
+					"mage may have in his inventory is equal to mage's skill squared.";
+			} else if (level == 3) {
 				if (ITEM_DISABLED(I_IBALROG)) break;
-				*str += "Create Phantasmal Demons at level 5 allows the mage "
+				*str += "Create Phantasmal Demons at level 3 allows the mage "
 					"to summon an illusionary balrog into his inventory. To "
 					"summon an illusionary balrog, the mage should CAST "
 					"Create_Phantasmal_Demons BALROG; the mage can only have "
@@ -1138,6 +1166,9 @@ AString *ShowSkill::Report(Faction *f)
 				"the units that the mage wishes to render invisible. A mage "
 				"may render invisible a number of men or creatures equal to "
 				"his skill level squared.";
+			if (Globals->FULL_INVIS_ON_SELF) {
+				*str += " A mage automatically gets his Invisibility skill added to his stealth.";
+			}
 			break;
 		case S_TRUE_SEEING:
 			if (level > 1) break;
@@ -1148,9 +1179,15 @@ AString *ShowSkill::Report(Faction *f)
 				"the illusion. This spell does not require any order to "
 				"use; it is used automatically.";
 			if (SKILL_ENABLED(S_OBSERVATION)) {
-				*str += " In addition, a mage with the True Seeing skill "
-					"receives a bonus to his Observation skill equal to his "
-					"True Seeing skill divided by 2, rounded up.";
+				if (Globals->FULL_TRUESEEING_BONUS) {
+					*str += " In addition, a mage with the True Seeing skill "
+						"receives a bonus to his Observation skill equal to his "
+						"True Seeing skill.";
+				} else {
+					*str += " In addition, a mage with the True Seeing skill "
+						"receives a bonus to his Observation skill equal to his "
+						"True Seeing skill divided by 2, rounded up.";
+				}
 			}
 			break;
 		case S_DISPEL_ILLUSIONS:
@@ -1287,8 +1324,8 @@ AString *ShowSkill::Report(Faction *f)
 						(ITEM_ENABLED(I_IRON) && ITEM_ENABLED(I_MITHRIL))) {
 					*str += "At level 1 the mage may transmute ";
 					if (ITEM_ENABLED(I_STONE) && ITEM_ENABLED(I_ROOTSTONE)) {
-						*str += ItemString(I_STONE, 1);
-						*str += " into ";
+						*str += ItemString(I_STONE, ItemDefs[I_ROOTSTONE].mOut);
+						*str += " times the skill level into ";
 						*str += ItemString(I_ROOTSTONE, 1);
 					}
 					if (ITEM_ENABLED(I_STONE) &&
@@ -1298,8 +1335,8 @@ AString *ShowSkill::Report(Faction *f)
 						*str += " or ";
 					}
 					if (ITEM_ENABLED(I_IRON) && ITEM_ENABLED(I_MITHRIL)) {
-						*str += ItemString(I_IRON, 1);
-						*str += " into ";
+						*str += ItemString(I_IRON, ItemDefs[I_MITHRIL].mOut);
+						*str += " times the skill level into ";
 						*str += ItemString(I_MITHRIL, 1);
 					}
 					*str += ". ";
@@ -1307,40 +1344,45 @@ AString *ShowSkill::Report(Faction *f)
 				*str += "To use this spell, the mage should issue the order "
 					"CAST Transmutation <material>, where <material> "
 					"is the resource you wish to create. "
-					"This spell will transmute as many resources as the "
-					"mage's skill level in Transmutation.  Should you "
-					"wish to create fewer than this, you may "
-					"CAST Transmutation [number] <material> instead.";
+					"Should you wish to create fewer than maximum, "
+					"you may CAST Transmutation [number] <material> instead.";
 			} else if (level == 2) {
 				if (ITEM_ENABLED(I_WOOD) && ITEM_ENABLED(I_IRONWOOD)) {
 					*str += "At this level the mage may transmute ";
-					*str += ItemString(I_WOOD, 1);
-					*str += " into ";
+					*str += ItemString(I_WOOD, ItemDefs[I_IRONWOOD].mOut);
+					*str += " times the skill level into ";
 					*str += ItemString(I_IRONWOOD, 1);
 					*str += ".";
 				}
 			} else if (level == 3) {
 				if (ITEM_ENABLED(I_FUR) && ITEM_ENABLED(I_FLOATER)) {
 					*str += "At this level the mage may transmute ";
-					*str += ItemString(I_FUR, 1);
-					*str += " into ";
+					*str += ItemString(I_FUR, ItemDefs[I_FLOATER].mOut);
+					*str += " times the skill level into ";
 					*str += ItemString(I_FLOATER, 1);
 					*str += ".";
 				}
 			} else if (level == 4) {
 				if (ITEM_ENABLED(I_WOOD) && ITEM_ENABLED(I_YEW)) {
 					*str += "At this level the mage may transmute ";
-					*str += ItemString(I_WOOD, 1);
-					*str += " into ";
+					*str += ItemString(I_WOOD, ItemDefs[I_YEW].mOut);
+					*str += " times the skill level into ";
 					*str += ItemString(I_YEW, 1);
 					*str += ".";
 				}
 			} else if (level == 5) {
 				if (ITEM_ENABLED(I_HORSE) && ITEM_ENABLED(I_WHORSE)) {
 					*str += "At this level the mage may transmute ";
-					*str += ItemString(I_HORSE, 1, ALWAYSPLURAL);
-					*str += " into ";
+					*str += ItemString(I_HORSE, ItemDefs[I_WHORSE].mOut, ALWAYSPLURAL);
+					*str += " times the skill level into ";
 					*str += ItemString(I_WHORSE, 1, ALWAYSPLURAL);
+					*str += ".";
+				}
+				if (ITEM_ENABLED(I_IRON) && ITEM_ENABLED(I_ADMANTIUM)) {
+					*str += " At this level the mage may transmute ";
+					*str += ItemString(I_IRON, ItemDefs[I_ADMANTIUM].mOut, ALWAYSPLURAL);
+					*str += " times the skill level into ";
+					*str += ItemString(I_ADMANTIUM, 1, ALWAYSPLURAL);
 					*str += ".";
 				}
 			}
@@ -1349,16 +1391,14 @@ AString *ShowSkill::Report(Faction *f)
 			if (level > 1) break;
 			if (OBJECT_DISABLED(O_BKEEP)) break;
 			*str += "A mage with the Blasphemous Ritual skill may "
-				"perform a blasphemous ritual to sever the "
-				"world of ";
-			*str += Globals->WORLD_NAME;
-			*str += " from the Eternal City. ";
-			*str += "This ritual requires ";
-			*str += ItemString(I_ROOTSTONE, 1);
-			*str += " and the sacrifice of a randomly selected "
+				"perform a blasphemous ritual to get a WISH power and "
+				"win the game. ";
+			*str += "This ritual requires 60";
+			*str += " sacrifice of a randomly selected "
 				"leader belonging to the mage's faction.";
 			if (ObjectDefs[O_BKEEP].cost > 1) {
-				*str += " Many such sacrifices will be "
+				*str += " Mage must be inside a Black Keep to cast this spell. "
+					"60 such sacrifices will be "
 					"necessary to complete the ritual; "
 					"the caster will attempt to perform "
 					"as many sacrifices as their skill "

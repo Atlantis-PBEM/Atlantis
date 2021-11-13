@@ -112,6 +112,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_HOLY_SYMBOL:
 			case S_CREATE_CENSER:
 			case S_BLASPHEMOUS_RITUAL:
+			case S_PHANTASMAL_ENTERTAINMENT:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
 			case S_CLEAR_SKIES:
@@ -270,11 +271,11 @@ void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
 	}
 
 	if (*token == "demon" || *token == "demons") {
-		order->level = 3;
+		order->level = 2;
 	}
 
 	if (*token == "balrog" || *token == "balrogs") {
-		order->level = 5;
+		order->level = 3;
 	}
 
 	delete token;
@@ -318,11 +319,11 @@ void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
 	}
 
 	if (*token == "undead") {
-		order->level = 3;
+		order->level = 2;
 	}
 
 	if (*token == "lich" || *token == "liches") {
-		order->level = 5;
+		order->level = 3;
 	}
 
 	delete token;
@@ -365,10 +366,10 @@ void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
 		order->level = 1;
 	}
 	if (*token == "eagle" || *token == "eagles") {
-		order->level = 3;
+		order->level = 2;
 	}
 	if (*token == "dragon" || *token == "dragon") {
-		order->level = 5;
+		order->level = 3;
 	}
 
 	delete token;
@@ -663,6 +664,9 @@ void Game::ProcessTransmutation(Unit *u, AString *o, OrdersCheck *pCheck)
 		case I_WHORSE:
 			order->level = 5;
 			break;
+		case I_ADMANTIUM:
+			order->level = 5;
+			break;
 		default:
 			u->Error("CAST: Can't create that by transmutation.");
 			delete order;
@@ -790,6 +794,9 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			break;
 		case S_FARSIGHT:
 			val = RunFarsight(r,u);
+			break;
+		case S_PHANTASMAL_ENTERTAINMENT:
+			val = RunPhantasmalEntertainment(r,u);
 			break;
 		case S_EARTH_LORE:
 			val = RunEarthLore(r,u);
@@ -1419,13 +1426,13 @@ int Game::RunPhanDemons(ARegion *r,Unit *u)
 		return 0;
 	}
 
-	if (order->level < 3) {
+	if (order->level < 2) {
 		create = I_IIMP;
 		max = level * level * 4;
 	} else {
-		if (order->level < 5) {
+		if (order->level < 3) {
 			create = I_IDEMON;
-			max = (level - 2) * (level - 2);
+			max = level * level;
 		} else {
 			create = I_IBALROG;
 			max = 1;
@@ -1453,16 +1460,16 @@ int Game::RunPhanUndead(ARegion *r,Unit *u)
 		return 0;
 	}
 
-	if (order->level < 3) {
+	if (order->level < 2) {
 		create = I_ISKELETON;
 		max = level * level * 4;
 	} else {
-		if (order->level < 5) {
+		if (order->level < 3) {
 			create = I_IUNDEAD;
-			max = (level - 2) * (level - 2);
+			max = level * level;
 		} else {
 			create = I_ILICH;
-			max = 1;
+			max = order->level;
 		}
 	}
 
@@ -1487,16 +1494,16 @@ int Game::RunPhanBeasts(ARegion *r,Unit *u)
 		return 0;
 	}
 
-	if (order->level < 3) {
+	if (order->level < 2) {
 		create = I_IWOLF;
 		max = level * level * 4;
 	} else {
-		if (order->level < 5) {
+		if (order->level < 3) {
 			create = I_IEAGLE;
-			max = (level - 2) * (level - 2);
+			max = level * level;
 		} else {
 			create = I_IDRAGON;
-			max = 1;
+			max = order->level;
 		}
 	}
 
@@ -1519,6 +1526,33 @@ int Game::RunEarthLore(ARegion *r,Unit *u)
 
 	u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) + amt);
 	u->Event(AString("Casts Earth Lore, raising ") + amt + " silver.");
+	return 1;
+}
+
+int Game::RunPhantasmalEntertainment(ARegion *r,Unit *u)
+{
+	int level = u->GetSkill(S_PHANTASMAL_ENTERTAINMENT);
+
+	int amt = level * Globals->ENTERTAIN_INCOME * 20;
+	int max_entertainement = 0;
+
+	if (level > r->phantasmal_entertainment) r->phantasmal_entertainment = level;
+
+	forlist((&r->products)) {
+		Production *p = ((Production *) elem);
+		if (p->itemtype == I_SILVER) {
+			if (p->skill == S_ENTERTAINMENT) {
+				max_entertainement = p->amount;
+			}
+		}
+	}
+
+	if (amt > max_entertainement) {
+		amt = max_entertainement;
+	}
+
+	u->items.SetNum(I_SILVER, u->items.GetNum(I_SILVER) + amt);
+	u->Event(AString("Casts Phantasmal Entertainment, raising ") + amt + " silver.");
 	return 1;
 }
 
@@ -1654,7 +1688,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	if (!val) return 0;
 
 	int level = u->GetSkill(S_TELEPORTATION);
-	int maxweight = level * 15;
+	int maxweight = level * 50;
 
 	if (u->Weight() > maxweight) {
 		u->Error("CAST: Can't carry that much when teleporting.");
@@ -1684,7 +1718,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 	TeleportOrder *order = u->teleportorders;
 
-	if ((order->gate > 0 && level < 3) ||
+	if ((order->gate > 0 && level < 2) ||
 			(order->gate == -2 && level < 2)) {
 		u->Error("CAST: Unit Doesn't know Gate Lore at that level.");
 		return 0;
@@ -1703,19 +1737,52 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	}
 
 	int maxweight = 10;
-	if (order->gate != -1) level -= 2;
-	switch (level) {
-		case 1:
-			maxweight = 15;
-			break;
-		case 2:
-			maxweight = 100;
-			break;
-		case 3:
-		case 4:
-		case 5:
-			maxweight = 1000;
-			break;
+
+	// -2 means random jump between levels
+	// We need to reduce capacity by 1 level
+	if (order->gate == -2) {
+		level = level - 1;
+	}
+
+	// -1 means no gate selected - random jump
+	// -2 means random jump between levels
+	if (order->gate == -1 || order->gate == -2) {
+		switch (level) {
+			case 1:
+				maxweight = 15;
+				break;
+			case 2:
+				maxweight = 500;
+				break;
+			case 3:
+				maxweight = 1500;
+				break;
+			case 4:
+				maxweight = 3000;
+				break;
+			case 5:
+				maxweight = 6000;
+				break;
+		}
+	} else {
+		// Gate selected
+		switch (level) {
+			case 1:
+				maxweight = 0;
+				break;
+			case 2:
+				maxweight = 15;
+				break;
+			case 3:
+				maxweight = 500;
+				break;
+			case 4:
+				maxweight = 1500;
+				break;
+			case 5:
+				maxweight = 3000;
+				break;
+		}
 	}
 
 	int weight = u->Weight();
@@ -1732,6 +1799,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	}
 
 	ARegion *tar;
+	AString jump_text;
 	if (order->gate < 0) {
 		int good = 0;
 
@@ -1751,7 +1819,8 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 				good = 0;
 		} while (!good);
 
-		u->Event("Casts Random Gate Jump.");
+		jump_text = AString("Casts Random Gate Jump. Capacity: ") + AString(weight) + AString("/") + AString(maxweight) + ".";
+		u->Event(jump_text);
 	} else {
 		tar = regions.FindGate(order->gate);
 		if (!tar) {
@@ -1763,7 +1832,8 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 			return 0;
 		}
 
-		u->Event("Casts Gate Jump.");
+		jump_text = AString("Casts Gate Jump. Capacity: ") + AString(weight) + "/" + AString(maxweight) + ".";
+		u->Event(jump_text);
 	}
 
 	int comma = 0;
@@ -1824,7 +1894,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		return 0;
 	}
 
-	int maxweight = 50 * level;
+	int maxweight = 500 * level;
 	r->DeduplicateUnitList(&order->units, u->faction->num);
 	int weight = 0;
 	forlist (&(order->units)) {
@@ -1849,7 +1919,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		return 0;
 	}
 
-	if (tar->unit->type != U_MAGE) {
+	if (tar->unit->type != U_MAGE && tar->unit->type != U_APPRENTICE) {
 		u->Error("CAST: Target is not a mage.");
 		return 0;
 	}
@@ -1905,6 +1975,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	}
 	
 	switch(order->item) {
+		case I_ADMANTIUM:
 		case I_MITHRIL:
 			source = I_IRON;
 			break;
@@ -1924,8 +1995,8 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 	}
 	
 	num = u->GetSharedNum(source);
-	if (num > level)
-		num = level;
+	if (num > ItemDefs[order->item].mOut * level)
+		num = ItemDefs[order->item].mOut * level;
 	if (order->number != -1 && num > order->number)
 		num = order->number;
 	if (num < order->number)
@@ -1943,7 +2014,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 
 int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 {
-	int level, num, sactype, sacrifices, i, sac, max, dir;
+	int level, num, sactype, sacrifices, i, sac, max, dir, relics;
 	Object *o, *tower;
 	Unit *u, *victim;
 	Item *item;
@@ -1956,57 +2027,42 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 		return 0;
 	}
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
-		mage->Error(AString("CAST: Can't build a ") +
-			ObjectDefs[O_BKEEP].name +
-			" on water.");
+		mage->Error(AString("CAST: Can't cast Ritual on water."));
 		return 0;
 	}
-	num = mage->GetSharedNum(I_ROOTSTONE);
-	if (num > level)
-		num = level;
+	num = level;
 	tower = 0;
 	sactype = IT_LEADER;
 	sacrifices = 0;
+	
 	forlist(&r->objects) {
 		o = (Object *) elem;
-		if (o->type == O_BKEEP)
+		if (o->type == O_BKEEP && !o->incomplete) {
 			tower = o;
+		}
+			
 		forlist(&o->units) {
 			u = (Unit *) elem;
 			if (u->faction->num == mage->faction->num) {
 				forlist(&u->items) {
 					item = (Item *) elem;
-					if (ItemDefs[item->type].type & sactype)
+					if (ItemDefs[item->type].type & sactype) {
 						sacrifices += item->num;
+					}
 				}
 			}
 		}
 	}
-	if (num > sacrifices)
-		num = sacrifices;
-	if (num < 1) {
-		mage->Error("CAST: Don't have the required materials.");
+
+	if (tower == 0) {
+		mage->Error(AString("CAST: Can't cast Ritual: no Black Tower in a region."));
 		return 0;
 	}
-	if (!tower) {
-		for (i = 1; i < 100; i++)
-			if (!r->GetObject(i))
-				break;
-		if (i < 100) {
-			tower = new Object(r);
-			tower->type = O_BKEEP;
-			tower->incomplete = ObjectDefs[tower->type].cost;
-			tower->num = i;
-			tower->SetName(new AString("Building"));
-			r->objects.Add(tower);
-			WriteTimesArticle("The earth shakes as a blasphemous word is uttered.");
-		} else {
-			mage->Error("CAST: The region is full.");
-			return 0;
-		}
+
+	if (num > sacrifices) {
+		num = sacrifices;
 	}
-	if (num > tower->incomplete)
-		num = tower->incomplete;
+
 	while (num-- > 0) {
 		victim = 0;
 		i = getrandom(sacrifices);
@@ -2028,97 +2084,24 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 				}
 			}
 		}
-		mage->ConsumeShared(I_ROOTSTONE, 1);
+
 		victim->SetMen(sac, victim->GetMen(sac) - 1);
 		sacrifices--;
-		tower->incomplete--;
-		max = ObjectDefs[tower->type].cost;
-		if (tower->incomplete == max * 9 / 10) {
-			// 10% complete
-			message = "Vile rituals are being performed in the ";
-			message += TerrainDefs[r->type].name;
-			message += " of ";
-			message += *r->name;
-			message += "!";
-			WriteTimesArticle(message);
-		}
-		if (tower->incomplete == max * 2 / 3) {
-			// 33% complete
-			dir = -1;
-			start = regions.FindNearestStartingCity(r, &dir);
-			message = "A blasphemous construction is taking shape in ";
-			if (start == r) {
-				message += *start->town->name;
-				message += ", in ";
-			}
-			message += "the ";
-			message += TerrainDefs[r->type].name;
-			message += " of ";
-			message += *r->name;
-			if (start && start != r && dir != -1) {
-				message += ", ";
-				if (r->zloc != start->zloc && dir != MOVE_IN)
-					message += "through a shaft ";
-				switch (dir) {
-					case D_NORTH:
-					case D_NORTHWEST:
-						message += "north of";
-						break;
-					case D_NORTHEAST:
-						message += "east of";
-						break;
-					case D_SOUTH:
-					case D_SOUTHEAST:
-						message += "south of";
-						break;
-					case D_SOUTHWEST:
-						message += "west of";
-						break;
-					case MOVE_IN:
-						message += "through a shaft in";
-						break;
-				}
-				message += " ";
-				message += *start->town->name;
-			}
-			message += "!";
-			WriteTimesArticle(message);
-		}
-		if (tower->incomplete == max / 3) {
-			// 66% complete
-			message = "The blasphemous tower in the ";
-			message += r->ShortPrint(&regions);
-			message += " is nearing completion!";
-			WriteTimesArticle(message);
-		}
-		if (tower->incomplete == max / 10) {
-			// 90% complete
-			message = *u->faction->name;
-			message += " have almost completed a blasphemous tower in the ";
-			message += r->ShortPrint(&regions);
-			message += ".  Their folly will doom everyone!";
-			WriteTimesArticle(message);
-		}
+
+		// Write article with a details
+		message = "Vile ritual has been performed at ";
+		message += r->ShortPrint(&regions);
+		message += "!";
+		WriteTimesArticle(message);
+
 		mage->Event(AString("Sacrifices ") + ItemDefs[sac].name + " from " + victim->name->Str());
 		if (!victim->GetMen())
 			r->Kill(victim);
 		if (!mage->GetMen())
 			break;
-	}
-
-	// If the player chooses to go down the dark path,
-	// then erase any progress they may have made down the light path
-	forlist_reuse(&regions) {
-		r = (ARegion *) elem;
-		forlist(&r->objects) {
-			Object * o = (Object *) elem;
-			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
-				if (u->faction->num == mage->faction->num) {
-					u->items.SetNum(I_RELICOFGRACE, 0);
-				}
-			}
-		}
+		
+		relics = mage->items.GetNum(I_RELICOFGRACE);
+		mage->items.SetNum(I_RELICOFGRACE, relics + 1);
 	}
 
 	return 1;
