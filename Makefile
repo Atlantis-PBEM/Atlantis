@@ -22,16 +22,38 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
   shields.o skills.o skillshows.o specials.o spells.o template.o unit.o \
   events.o events-battle.o
 
-OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
-  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 
+OBJECTS = $(patsubst %.o,$(GAME)/%.o,$(RULESET_OBJECTS)) \
+  $(ENGINE_OBJECTS)
 
-$(GAME)-m: objdir $(OBJECTS)
-	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
+# default target
+$(GAME)/$(GAME): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: basic standard fracas kingdoms havilah neworigins_v2
+all: basic standard fracas kingdoms havilah neworigins
 
-arcadia: FORCE
-	$(MAKE) GAME=arcadia
+ARCADIA_SOURCES = \
+		astring.cpp   edit.cpp      fileio.cpp      \
+		gamedata.cpp  genrules.cpp  items.cpp        map.cpp         \
+		monsters.cpp  object.cpp    production.cpp   shields.cpp     \
+		soldier1.cpp  template.cpp  world.cpp        aregion.cpp     \
+		battle1.cpp   extra.cpp     formation1.cpp   gamedefs.cpp    \
+		hexside.cpp   magic.cpp     market.cpp       monthorders.cpp \
+		orders.cpp    rules.cpp     skills.cpp       specials.cpp    \
+		times.cpp     army1.cpp     economy.cpp      faction.cpp     \
+		game.cpp      gameio.cpp    main.cpp        \
+		modify.cpp    npc.cpp       parseorders.cpp  runorders.cpp   \
+		skillshows.cpp  spells.cpp  unit.cpp
+
+ARCADIA_OBJECTS = $(patsubst %.cpp,arcadia/%.o,$(ARCADIA_SOURCES)) $(patsubst %.cpp,%.o,$(ARCADIA_ENGINE_SOURCES))
+
+arcadia/arcadia: $(ARCADIA_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+.PHONY: all basic standard fracas kingdoms havilah arcadia
+
+all: arcadia basic standard fracas kingdoms havilah
+
+arcadia: arcadia/arcadia
 
 basic: FORCE
 	$(MAKE) GAME=basic
@@ -48,17 +70,20 @@ fracas: FORCE
 havilah: FORCE
 	$(MAKE) GAME=havilah
 
-neworigins_v2: FORCE
-	$(MAKE) GAME=neworigins_v2
+neworigins: FORCE
+	$(MAKE) GAME=neworigins
 
 $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
 
 all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
-	havilah-clean neworigins_v2-clean
+	havilah-clean neworigins-clean
 
 arcadia-clean:
-	$(MAKE) GAME=arcadia clean
+	rm -f $(ARCADIA_OBJECTS)
+	rm -f arcadia/html/arcadia.html
+	rm -f arcadia/arcadia
+
 
 basic-clean:
 	$(MAKE) GAME=basic clean
@@ -75,21 +100,22 @@ kingdoms-clean:
 havilah-clean:
 	$(MAKE) GAME=havilah clean
 
-neworigins_v2-clean:
-	$(MAKE) GAME=neworigins_v2 clean
+neworigins-clean:
+	$(MAKE) GAME=neworigins clean
 
 clean:
 	rm -f $(OBJECTS)
-	if [ -d obj ]; then rmdir obj; fi
-	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
 	rm -f $(GAME)/html/$(GAME).html
 	rm -f $(GAME)/$(GAME)
 
 all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
-	havilah-rules neworigins_v2-rules
+	havilah-rules neworigins-rules
 
-arcadia-rules:
-	$(MAKE) GAME=arcadia rules
+arcadia-rules: arcadia/arcadia
+	(cd arcadia; \
+	 ./arcadia genrules arcadia_intro.html arcadia.css html/arcadia.html \
+	)
+
 
 basic-rules:
 	$(MAKE) GAME=basic rules
@@ -106,8 +132,8 @@ kingdoms-rules:
 havilah-rules:
 	$(MAKE) GAME=havilah rules
 
-neworigins_v2-rules:
-	$(MAKE) GAME=neworigins_v2 rules
+neworigins-rules:
+	$(MAKE) GAME=neworigins rules
 
 rules: $(GAME)/$(GAME)
 	(cd $(GAME); \
@@ -116,14 +142,4 @@ rules: $(GAME)/$(GAME)
 
 FORCE:
 
-objdir:
-	if [ ! -d obj ]; then mkdir obj; fi
-	if [ ! -d $(GAME)/obj ]; then mkdir $(GAME)/obj; fi
-
-
-$(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
-
-$(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
