@@ -55,6 +55,7 @@ public:
 	AString & operator=(const char *);
 
 	char *Str();
+	const char *Str() const;
 	int Len();
 
 	AString *gettoken();

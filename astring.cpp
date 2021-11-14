@@ -182,6 +182,11 @@ AString &AString::operator+=(const AString &s)
 }
 
 
+const char *AString::Str() const
+{
+	return str;
+}
+
 char *AString::Str()
 {
 	return str;

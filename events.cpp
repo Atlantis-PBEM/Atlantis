@@ -28,6 +28,7 @@
 #include <map>
 #include <algorithm>
 #include "gamedata.h"
+#include <sstream>
 
 FactBase::~FactBase() {
 
@@ -233,3 +234,104 @@ std::string Events::Write(std::string worldName, std::string month, int year) {
 
     return text;
 }
+
+//----------------------------------------------------------------------------
+void StrEvent::writeJson(JsonReport &of, ARegionList &) const
+{
+	of.PutStr(str_.c_str());
+}
+
+//----------------------------------------------------------------------------
+TaxEvent::TaxEvent(const std::string &uname, int amt, ARegion *reg)
+: uname_(uname)
+, amt_(amt)
+, reg_(reg)
+{
+}
+
+std::string TaxEvent::str(ARegionList &regions) const
+{
+	std::ostringstream os;
+	os << uname_ << ": Collects $" << amt_ << " in taxes in ";
+	os << reg_->ShortPrint(&regions) << '.';
+	return os.str();
+}
+
+void TaxEvent::writeJson(JsonReport &of, ARegionList &regions) const
+{
+	of.StartDict(NULL);
+	of.PutPairStr("type", "Tax");
+	of.PutPairStr("name", uname_.c_str());
+	of.PutPairInt("amount", amt_);
+
+	of.StartDict("region");
+	reg_->CPrint(&of, &regions, false);
+	of.EndDict();
+
+	of.EndDict();
+}
+
+//----------------------------------------------------------------------------
+GiveEvent::GiveEvent(const std::string &gname, int inum, int amt, const std::string &tname, bool reversed)
+: gname_(gname)
+, inum_(inum)
+, amt_(amt)
+, tname_(tname)
+, reversed_(reversed)
+{
+}
+
+std::string GiveEvent::str(ARegionList &) const
+{
+	std::ostringstream os;
+	if (reversed_)
+		os << tname_ << ": Receives " << ItemString(inum_, amt_) << " from " << gname_ << '.';
+	else
+		os << gname_ << ": Gives " << ItemString(inum_, amt_) << " to " << tname_ << '.';
+
+	return os.str();
+}
+
+void GiveEvent::writeJson(JsonReport &of, ARegionList &regions) const
+{
+	of.StartDict(NULL);
+	of.PutPairStr("type", reversed_ ? "Receive" : "Give");
+	of.PutPairStr("giver", gname_.c_str());
+	of.PutPairStr("receiver", tname_.c_str());
+	of.PutPairStr("abbr", ItemDefs[inum_].abr);
+	of.PutPairInt("amount", amt_);
+	of.EndDict();
+}
+
+//----------------------------------------------------------------------------
+ProduceEvent::ProduceEvent(const std::string &uname, int inum, int amt, ARegion *reg)
+: uname_(uname)
+, inum_(inum)
+, amt_(amt)
+, reg_(reg)
+{
+}
+
+std::string ProduceEvent::str(ARegionList &regions) const
+{
+	std::ostringstream os;
+	os << uname_ << ": Produces " << ItemString(inum_, amt_) << " in " << reg_->ShortPrint(&regions) << '.';
+
+	return os.str();
+}
+
+void ProduceEvent::writeJson(JsonReport &of, ARegionList &regions) const
+{
+	of.StartDict(NULL);
+	of.PutPairStr("type", "Produce");
+	of.PutPairStr("name", uname_.c_str());
+	of.PutPairStr("abbr", ItemDefs[inum_].abr);
+	of.PutPairInt("amount", amt_);
+
+	of.StartDict("region");
+	reg_->CPrint(&of, &regions, false);
+	of.EndDict();
+
+	of.EndDict();
+}
+
