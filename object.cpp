@@ -279,9 +279,10 @@ Unit *Object::GetOwner()
 	return(owner);
 }
 
-void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
+void Object::Report(JsonReport &of, Faction *fac, int obs, int truesight,
 		int detfac, int passobs, int passtrue, int passdetfac, int present)
 {
+	Areport *f = of.PlainFile();
 	ObjectType *ob = &ObjectDefs[type];
 
 	if ((type != O_DUMMY) && !present) {
@@ -304,6 +305,7 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 
 	/* Fleet Report */
 	if (IsFleet()) {
+		of.StartDict(NULL);
 		AString temp = AString("+ ") + *name + " : " + FleetDefinition();
 		/* report ships:
 		for (int item=0; item<NITEMS; item++) {
@@ -348,8 +350,11 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 		}
 		temp += ".";
 		f->PutStr(temp);
+		of.PutPairStr("name", temp.Str());
+		of.PutPairStr("type", "fleet");
 		f->AddTab();
 	} else if (type != O_DUMMY) {
+		of.StartDict(NULL);
 		AString temp = AString("+ ") + *name + " : " + ob->name;
 		if (incomplete > 0) {
 			temp += AString(", needs ") + incomplete;
@@ -375,17 +380,20 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 		}
 		temp += ".";
 		f->PutStr(temp);
+		of.PutPairStr("name", temp.Str());
+		of.PutPairStr("type", ob->name);
 		f->AddTab();
 	}
 
+	of.StartArray("units");
 	forlist ((&units)) {
 		Unit *u = (Unit *) elem;
 		int attitude = fac->GetAttitude(u->faction->num);
 		if (u->faction == fac) {
-			u->WriteReport(f, -1, 1, 1, 1, attitude, fac->showunitattitudes);
+			u->WriteReport(of, -1, 1, 1, 1, attitude, fac->showunitattitudes);
 		} else {
 			if (present) {
-				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
+				u->WriteReport(of, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
 			} else {
 				if (((type == O_DUMMY) &&
 					(Globals->TRANSIT_REPORT &
@@ -396,14 +404,16 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 					((u->guard == GUARD_GUARD) &&
 						(Globals->TRANSIT_REPORT &
 					 	GameDefs::REPORT_SHOW_GUARDS))) {
-					u->WriteReport(f, passobs, passtrue, passdetfac,
+					u->WriteReport(of, passobs, passtrue, passdetfac,
 							type != O_DUMMY, attitude, fac->showunitattitudes);
 				}
 			}
 		}
 	}
+	of.EndArray();
 	f->EndLine();
 	if (type != O_DUMMY) {
+		of.EndDict();
 		f->DropTab();
 	}
 }

@@ -354,7 +354,7 @@ AString Unit::GetName(int obs)
 	int stealth = GetAttribute("stealth");
 	if (reveal == REVEAL_FACTION || obs > stealth) {
 		ret += ", ";
-		ret += *faction->name;
+		ret += faction->name();
 	}
 	return ret;
 }
@@ -426,9 +426,10 @@ AString Unit::SpoilsReport() {
 	return temp;
 }
 
-void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
+void Unit::WriteReport(JsonReport &of, int obs, int truesight, int detfac,
 				int autosee, int attitude, int showattitudes)
 {
+	Areport *f = of.PlainFile();
 	int stealth = GetAttribute("stealth");
 	if (obs==-1) {
 		/* The unit belongs to the Faction writing the report */
@@ -475,9 +476,12 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 
 	/* Write the report */
 	AString temp;
+	of.StartDict(NULL);
 	if (obs == 2) {
 		temp += AString("* ") + *name;
+		of.PutPairStr("report", "own");
 	} else {
+		of.PutPairStr("report", "foreign");
 		if (showattitudes) {
 			switch (attitude) {
 			case A_ALLY: 
@@ -500,29 +504,118 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 			temp += AString("- ") + *name;
 		}
 	}
-
-	if (guard == GUARD_GUARD) temp += ", on guard";
+	of.PutPairStr("name", name->Str());
 	if (obs > 0) {
-		temp += AString(", ") + *faction->name;
-		if (guard == GUARD_AVOID) temp += ", avoiding";
-		if (GetFlag(FLAG_BEHIND)) temp += ", behind";
+		of.PutPairStr("faction", faction->name().Str());
+	}
+
+	of.StartDict("flags");
+	if (guard == GUARD_GUARD)
+	{
+		temp += ", on guard";
+		of.PutPairInt("GUARD", 1);
+	}
+	else
+	{
+		of.PutPairInt("GUARD", 0);
+	}
+
+	if (obs > 0) {
+		temp += AString(", ") + faction->name();
+		if (guard == GUARD_AVOID)
+		{
+			temp += ", avoiding";
+			of.PutPairInt("AVOID", 1);
+		}
+
+		if (GetFlag(FLAG_BEHIND))
+		{
+			temp += ", behind";
+			of.PutPairInt("BEHIND", 1);
+		}
 	}
 
 	if (obs == 2) {
-		if (reveal == REVEAL_UNIT) temp += ", revealing unit";
-		if (reveal == REVEAL_FACTION) temp += ", revealing faction";
-		if (GetFlag(FLAG_HOLDING)) temp += ", holding";
-		if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
-		if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
-		if (GetFlag(FLAG_SHARING)) temp += ", sharing";
-		if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
-		if (GetFlag(FLAG_CONSUMING_FACTION))
-			temp += ", consuming faction's food";
-		if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
-		temp += SpoilsReport();
-	}
+		if (reveal == REVEAL_UNIT)
+		{
+			temp += ", revealing unit";
+			of.PutPairStr("REVEAL", "UNIT");
+		}
+		else if (reveal == REVEAL_FACTION)
+		{
+			temp += ", revealing faction";
+			of.PutPairStr("REVEAL", "FACTION");
+		}
 
-	temp += items.Report(obs, truesight, 0);
+		if (GetFlag(FLAG_HOLDING))
+		{
+			temp += ", holding";
+			of.PutPairInt("HOLD", 1);
+		}
+		if (GetFlag(FLAG_AUTOTAX))
+		{
+			temp += ", taxing";
+			of.PutPairInt("AUTOTAX", 1);
+		}
+		if (GetFlag(FLAG_NOAID))
+		{
+			temp += ", receiving no aid";
+			of.PutPairInt("NOAID", 1);
+		}
+		if (GetFlag(FLAG_SHARING))
+		{
+			temp += ", sharing";
+			of.PutPairInt("SHARE", 1);
+		}
+		if (GetFlag(FLAG_CONSUMING_UNIT))
+		{
+			temp += ", consuming unit's food";
+			of.PutPairStr("CONSUME", "UNIT");
+		}
+		else if (GetFlag(FLAG_CONSUMING_FACTION))
+		{
+			temp += ", consuming faction's food";
+			of.PutPairStr("CONSUME", "FACTION");
+		}
+		if (GetFlag(FLAG_NOCROSS_WATER))
+		{
+			temp += ", won't cross water";
+			of.PutPairInt("NOCROSS", 1);
+		}
+		temp += SpoilsReport();
+		if (GetFlag(FLAG_NOSPOILS)) of.PutPairStr("SPOILS", "NONE");
+		else if (GetFlag(FLAG_FLYSPOILS)) of.PutPairStr("SPOILS", "FLY");
+		else if (GetFlag(FLAG_WALKSPOILS)) of.PutPairStr("SPOILS", "WALK");
+		else if (GetFlag(FLAG_RIDESPOILS)) of.PutPairStr("SPOILS", "RIDE");
+		else if (GetFlag(FLAG_SAILSPOILS)) of.PutPairStr("SPOILS", "SAIL");
+	}
+	of.EndDict(); // FLAGS
+
+	AString items_str = items.Report(obs, truesight, 0);
+	temp += items_str;
+	if (items_str.Len() > 0)
+	{
+		of.StartArray("items");
+		forlist(&items)
+		{
+			const Item *const i = (Item*)elem;
+			const auto &item = ItemDefs[i->type];
+			if (obs != 2 && item.weight == 0)
+				continue;
+
+			of.StartDict(NULL);
+			of.PutPairStr("abb", item.abr);
+			of.PutPairInt("amount", i->num);
+			// TODO? unfinished ship?
+
+			if (truesight && (item.type & IT_MONSTER) && (item.type & IT_ILLUSION))
+			{
+				of.PutPairInt("illusion", 1);
+			}
+			of.EndDict();
+		}
+		of.EndArray();
+	}
 
 	if (obs == 2) {
 		temp += ". Weight: ";
@@ -535,17 +628,97 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 		temp += AString(WalkingCapacity());
 		temp += "/";
 		temp += AString(SwimmingCapacity());
+
 		temp += ". Skills: ";
 		temp += skills.Report(GetMen());
+		if (skills.Num())
+		{
+			of.StartArray("skills");
+			forlist(&skills)
+			{
+				Skill *s = (Skill*)elem;
+				of.StartDict(NULL);
+				of.PutPairStr("abbr", SkillDefs[s->type].abbr);
+				of.PutPairInt("level", GetLevelByDays(s->days/GetMen()));
+				of.PutPairInt("days", s->days/GetMen());
+				of.EndDict(); // end this skill
+			}
+			of.EndArray(); // end skills
+		}
 	}
 
 	if (obs == 2 && (type == U_MAGE || type == U_GUARDMAGE)) {
 		temp += MageReport();
+		if (combat != -1)
+			of.PutPairStr("combatSpell", SkillStrs(combat).Str());
 	}
 
 	if (obs == 2) {
 		temp += ReadyItem();
+		// JSON
+		bool first_weapon = true;
+		for (unsigned i = 0; i < MAX_READY; ++i)
+		{
+			const int ready = readyWeapon[i];
+			if (ready == -1)
+				continue;
+
+			if (first_weapon)
+			{
+				of.StartArray("readyWeapons");
+				first_weapon = false;
+			}
+			of.PutStr(ItemDefs[ready].abr);
+		}
+		if (!first_weapon)
+			of.EndArray();
+
+		bool first_armor = true;
+		for (unsigned i = 0; i < MAX_READY; ++i)
+		{
+			const int ready = readyArmor[i];
+			if (ready == -1)
+				continue;
+
+			if (first_armor)
+			{
+				of.StartArray("readyArmor");
+				first_armor = false;
+			}
+			of.PutStr(ItemDefs[ready].abr);
+		}
+		if (!first_armor)
+			of.EndArray();
+
+		// skills
 		temp += StudyableSkills();
+		of.StartArray("canStudy");
+		for (int sk = 0; sk < NSKILLS; ++sk)
+		{
+			// Magic skills without dependencies should not be skipped
+			if ((!SkillDefs[sk].depends[0].skill || SkillDefs[sk].depends[0].skill[0] == 0) && !(SkillDefs[sk].flags & SkillType::MAGIC))
+				continue;
+
+			// CanStudy() gets prereqs, does not check max level
+			if (!CanStudy(sk))
+				continue;
+
+			if (SkillDefs[sk].flags & SkillType::FOUNDATION)
+			{
+				// This is only used with mages to display studiable magic skills
+				if (type != U_MAGE)
+					continue;
+
+				// Compare current skill level to maximum level
+				// TODO find LCM man
+				//if (GetRealSkill(sk) >= SkillMax(SkillDefs[sk].abbr, first_man))
+					//continue;
+			}
+
+			of.PutStr(SkillDefs[sk].abbr);
+		}
+		of.EndArray();
+
 		if (visited.size() > 0) {
 			set<string>::iterator it;
 			unsigned int count;
@@ -569,7 +742,9 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 
 	if (describe) {
 		temp += AString("; ") + *describe;
+		of.PutPairStr("description", describe->Str());
 	}
+	of.EndDict();
 	temp += ".";
 	f->PutStr(temp);
 }
@@ -2397,7 +2572,12 @@ void Unit::DiscardUnfinishedShips() {
 void Unit::Event(const AString & s)
 {
 	AString temp = *name + ": " + s;
-	faction->Event(temp);
+	faction->LogEvent(new StrEvent(temp.Str()));
+}
+
+void Unit::LogEvent(IEvent *e)
+{
+	faction->LogEvent(e);
 }
 
 void Unit::Error(const AString & s)

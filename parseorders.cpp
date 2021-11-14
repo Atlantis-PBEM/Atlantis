@@ -671,10 +671,12 @@ void Game::ProcessPasswordOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (u->faction->password) delete u->faction->password;
 	if (token) {
 		u->faction->password = token;
-		u->faction->Event(AString("Password is now: ") + *token);
+		AString msg("Password is now: ");
+		msg += *token;
+		u->faction->LogEvent(new StrEvent(msg.Str()));
 	} else {
 		u->faction->password = new AString("none");
-		u->faction->Event("Password cleared.");
+		u->faction->LogEvent(new StrEvent("Password cleared."));
 	}
 }
 
@@ -689,7 +691,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (*token == "times") {
 		delete token;
 		if (!pCheck) {
-			u->faction->Event("Times will be sent to your faction.");
+			u->faction->LogEvent(new StrEvent("Times will be sent to your faction."));
 			u->faction->times = 1;
 		}
 		return;
@@ -698,7 +700,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (*token == "notimes") {
 		delete token;
 		if (!pCheck) {
-			u->faction->Event("Times will not be sent to your faction.");
+			u->faction->LogEvent(new StrEvent("Times will not be sent to your faction."));
 			u->faction->times = 0;
 		}
 		return;
@@ -707,8 +709,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (*token == "showattitudes") {
 		delete token;
 		if (!pCheck) {
-			u->faction->Event("Units will now have a leading sign to show your " 
-						"attitude to them.");
+			u->faction->LogEvent(new StrEvent("Units will now have a leading sign to show your attitude to them."));
 			u->faction->showunitattitudes = 1;
 		}
 		return;
@@ -717,8 +718,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (*token == "dontshowattitudes") {
 		delete token;
 		if (!pCheck) {
-			u->faction->Event("Units will now have a leading minus sign regardless"
-						" of your attitude to them.");
+			u->faction->LogEvent(new StrEvent("Units will now have a leading minus sign regardless of your attitude to them."));
 			u->faction->showunitattitudes = 0;
 		}
 		return;

@@ -175,6 +175,7 @@ void Game::RunMovementOrders()
 							*tOrder = "ADVANCE";
 						else
 							*tOrder = "MOVE";
+
 						u->Event(*tOrder + ": Unit has insufficient movement points;"
 								" remaining moves queued.");
 						forlist(&mo->dirs) {
@@ -330,19 +331,17 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
 			forlist_reuse(&facs) {
 				Faction * f = ((FactionPtr *) elem)->ptr;
+				AString msg(*fleet->name);
 				if (x->dir == MOVE_PAUSE) {
-					f->Event(*fleet->name +
-						AString(" performs maneuvers in ") +
-						reg->ShortPrint(&regions) +
-						AString("."));
+					msg += AString(" performs maneuvers in ") +
+						reg->ShortPrint(&regions);
 				} else {
-					f->Event(*fleet->name +
-						AString(" sails from ") +
-						reg->ShortPrint(&regions) +
-						AString(" to ") +
-						newreg->ShortPrint(&regions) +
-						AString("."));
+					msg += AString(" sails from ") +
+					    reg->ShortPrint(&regions) + AString(" to ") +
+					    newreg->ShortPrint(&regions);
 				}
+				msg += AString(".");
+				f->LogEvent(new StrEvent(msg.Str()));
 			}
 			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING &&
 					x->dir != MOVE_PAUSE) {
@@ -371,10 +370,10 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			}
 			reg = newreg;
 			if (newreg->ForbiddenShip(fleet)) {
-				cap->faction->Event(*fleet->name +
-					AString(" is stopped by guards in ") +
-					newreg->ShortPrint(&regions) + 
-					AString("."));
+				AString msg(*fleet->name);
+				msg += AString(" is stopped by guards in ") +
+				    newreg->ShortPrint(&regions) + AString(".");
+				cap->faction->LogEvent(new StrEvent(msg.Str()));
 				stop = 1;
 			}
 			o->dirs.Remove(x);
@@ -1179,8 +1178,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	if (ItemDefs[o->item].flags & ItemType::SKILLOUT)
 		output *= level;
 	u->items.SetNum(o->item,u->items.GetNum(o->item) + output);
-	u->Event(AString("Produces ") + ItemString(o->item,output) + " in " +
-			r->ShortPrint(&regions) + ".");
+	u->LogEvent(new ProduceEvent(u->name->Str(), o->item, output, r));
 	u->Practice(o->skill);
 	o->target -= output;
 	if (o->target > 0) {
@@ -1367,8 +1365,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 			else
 			{
 				/* Everything else */
-				u->Event(AString("Produces ") + ItemString(po->item,ubucks) +
-						 " in " + r->ShortPrint(&regions) + ".");
+				u->LogEvent(new ProduceEvent(u->name->Str(), po->item, ubucks, r));
 				u->Practice(po->skill);
 			}
 			delete u->monthorders;

@@ -693,6 +693,26 @@ void Battle::Report(Areport * f,Faction * fac) {
 	}
 }
 
+void Battle::Creport(JsonReport &f, Faction *fac)
+{
+	if (assassination == ASS_SUCC && fac != attacker)
+	{
+		f.StartArray(NULL);
+		f.PutStr(asstext->Str());
+		f.PutStr("");
+		f.EndArray();
+		return;
+	}
+
+	f.StartArray(NULL);
+	forlist(&text)
+	{
+		AString *s = (AString*)elem;
+		f.PutStr(s->Str());
+	}
+	f.EndArray();
+}
+
 void Battle::AddLine(const AString & s) {
 	AString * temp = new AString(s);
 	text.Add(temp);

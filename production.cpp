@@ -63,6 +63,11 @@ void Production::Writeout(Aoutfile *f)
 	f->PutInt(productivity);
 }
 
+void Production::Creport(JsonReport *f) const
+{
+	f->PutPairInt(ItemDefs[itemtype].abr, amount);
+}
+
 void Production::Readin(Ainfile *f)
 {
 	AString *temp;

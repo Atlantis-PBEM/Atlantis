@@ -344,7 +344,7 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 			*(tar->name) + " in " + *(r->name) + ".";
 		forlist(seers) {
 			Faction *f = ((FactionPtr *) elem)->ptr;
-			f->Event(temp);
+			f->LogEvent(new StrEvent(temp.Str()));
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
 		u->PracticeAttribute("stealth");
@@ -418,7 +418,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 			*(tar->name) + " in " + *(r->name) + ".";
 		forlist(seers) {
 			Faction *f = ((FactionPtr *) elem)->ptr;
-			f->Event(temp);
+			f->LogEvent(new StrEvent(temp.Str()));
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
 		u->PracticeAttribute("stealth");
@@ -456,7 +456,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 			ItemString(so->item, amt) + " from " + *(tar->name) + ".";
 		forlist(seers) {
 			Faction *f = ((FactionPtr *) elem)->ptr;
-			f->Event(temp);
+			f->LogEvent(new StrEvent(temp.Str()));
 		}
 	}
 
@@ -636,8 +636,9 @@ void Game::RunFindUnit(Unit *u)
 		if (!all) {
 			fac = GetFaction(&factions, f->find);
 			if (fac) {
-				u->faction->Event(AString("The address of ") + *(fac->name) +
-						" is " + *(fac->address) + ".");
+				AString msg("The address of ");
+				msg += fac->name() + " is " + *(fac->address) + ".";
+				u->faction->LogEvent(new StrEvent(msg.Str()));
 			} else {
 				u->Error(AString("FIND: ") + f->find + " is not a valid "
 						"faction number.");
@@ -646,8 +647,9 @@ void Game::RunFindUnit(Unit *u)
 			forlist(&factions) {
 				fac = (Faction *)elem;
 				if (fac) {
-					u->faction->Event(AString("The address of ") +
-							*(fac->name) + " is " + *(fac->address) + ".");
+					AString msg("The address of ");
+					msg += fac->name() + " is " + *(fac->address) + ".";
+					u->faction->LogEvent(new StrEvent(msg.Str()));
 				}
 			}
 		}
@@ -748,8 +750,7 @@ void Game::RunTaxRegion(ARegion *reg)
 				reg->wealth -= amt;
 				desired -= t;
 				u->SetMoney(u->GetMoney() + amt);
-				u->Event(AString("Collects $") + amt + " in taxes in " +
-						reg->ShortPrint(&regions) + ".");
+				u->LogEvent(new TaxEvent(u->name->Str(), amt, reg));
 				u->taxing = TAX_NONE;
 			}
 		}
@@ -841,8 +842,9 @@ void Game::RunPillageRegion(ARegion *reg)
 				forlist(facs) {
 					Faction *fp = ((FactionPtr *) elem)->ptr;
 					if (fp != u->faction) {
-						fp->Event(*(u->name) + " pillages " +
-								*(reg->name) + ".");
+						AString msg(*u->name);
+						msg += AString(" pillages ") + *(reg->name) + ".";
+						fp->LogEvent(new StrEvent(msg.Str()));
 					}
 				}
 			}
@@ -1161,9 +1163,15 @@ void Game::EndGame(Faction *pVictor)
 			pFac->quit = QUIT_GAME_OVER;
 
 		if (pVictor)
-			pFac->Event(*(pVictor->name) + " has won the game!");
+		{
+			AString msg(pVictor->name());
+			msg += " has won the game!";
+			pFac->LogEvent(new StrEvent(msg.Str()));
+		}
 		else
-			pFac->Event("The game has ended with no winner.");
+		{
+			pFac->LogEvent(new StrEvent("The game has ended with no winner."));
+		}
 	}
 
 	gameStatus = GAME_STATUS_FINISHED;
@@ -2651,9 +2659,11 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			it->type = o->item;
 			it->num = s->items.GetNum(o->item);
 			if (o->type == O_TAKE) {
+				// TODO: Json
 				u->Event(AString("Takes ") + it->Report(1) +
 					" from " + *s->name + ".");
 			} else {
+				// TODO: update GiveEvent for this style report
 				u->Event(AString("Gives ") + it->Report(1) +
 					" to " + *t->name + ".");
 				if (s->faction != t->faction) {
@@ -2932,7 +2942,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			notallied = 0;
 		}
 
-		u->Event(AString("Gives unit to ") + *(t->faction->name) + ".");
+		u->Event(AString("Gives unit to ") + t->faction->name() + ".");
 		u->faction = t->faction;
 		u->Event("Is given to your faction.");
 
@@ -3027,14 +3037,14 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	}
 
 	if (o->type == O_TAKE) {
+		// TODO JSON
 		u->Event(AString("Takes ") + ItemString(o->item, amt) +
 				" from " + *s->name + ".");
 	} else {
-		u->Event(AString("Gives ") + ItemString(o->item, amt) + " to " +
-				*t->name + ".");
+		constexpr bool RECIEVER = true;
+		u->LogEvent(new GiveEvent(u->name->Str(), o->item, amt, t->name->Str(), !RECIEVER));
 		if (s->faction != t->faction) {
-			t->Event(AString("Receives ") + ItemString(o->item, amt) +
-					" from " + *s->name + ".");
+			t->LogEvent(new GiveEvent(u->name->Str(), o->item, amt, t->name->Str(), RECIEVER));
 		}
 	}
 	s->ConsumeShared(o->item, amt);

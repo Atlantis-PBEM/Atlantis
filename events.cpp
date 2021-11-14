@@ -35,7 +35,7 @@ FactBase::~FactBase() {
 }
 
 void BattleSide::AssignUnit(Unit* unit) {
-	this->factionName = unit->faction->name->Str();
+	this->factionName = unit->faction->name().Str();
 	this->factionNum = unit->faction->num;
 	this->unitName = unit->name->Str();
 	this->unitNum = unit->num;

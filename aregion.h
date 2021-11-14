@@ -177,11 +177,11 @@ class ARegion : public AListElem
 
 		int CanMakeAdv(Faction *, int);
 		int HasItem(Faction *, int);
-		void WriteProducts(Areport *, Faction *, int);
-		void WriteMarkets(Areport *, Faction *, int);
-		void WriteEconomy(Areport *, Faction *, int);
-		void WriteExits(Areport *, ARegionList *pRegs, int *exits_seen);
-		void WriteReport(Areport *f, Faction *fac, int month,
+		void WriteProducts(JsonReport &, Faction *, int);
+		void WriteMarkets(JsonReport &, Faction *, int);
+		void WriteEconomy(JsonReport &, Faction *, int);
+		void WriteExits(JsonReport &, ARegionList *pRegs, int *exits_seen);
+		void WriteReport(JsonReport &of, Faction *fac, int month,
 				ARegionList *pRegions);
 		// DK
 		void WriteTemplate(Areport *, Faction *, ARegionList *, int);
@@ -190,6 +190,7 @@ class ARegion : public AListElem
 
 		AString ShortPrint(ARegionList *pRegs);
 		AString Print(ARegionList *pRegs);
+		void CPrint(JsonReport *f, ARegionList *pRegs, bool inc_town = true);
 
 		void Kill(Unit *);
 		void ClearHell();

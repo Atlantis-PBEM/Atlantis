@@ -89,7 +89,7 @@ class Object : public AListElem
 
 		void Readin(Ainfile *f, AList *, ATL_VER v);
 		void Writeout(Aoutfile *f);
-		void Report(Areport *, Faction *, int, int, int, int, int, int, int);
+		void Report(JsonReport &, Faction *, int, int, int, int, int, int, int);
 
 		void SetName(AString *);
 		void SetDescribe(AString *);
