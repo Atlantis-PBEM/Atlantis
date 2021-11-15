@@ -835,7 +835,7 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 						if (retval < 1) retval = 1;
 					}
 				}
-				if (temp->GetSkill(S_MIND_READING) > 2) detfac = 1;
+				if (temp->GetSkill(S_MIND_READING) > 1) detfac = 1;
 			}
 		}
 	}
