@@ -514,7 +514,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ". Faction Points spent "
 			"on Trade determine the number of regions in which a faction "
 			"may conduct trade activity. Trade activity includes producing "
-			"goods, building ships and buildings, and buying trade items. ";
+			"goods and materials";
+		if (!Globals->BUILD_NO_TRADE) {
+			temp += ", building ships and buildings";
+		}
+		temp += ".";
 		if (qm_exist) {
 			temp += "Faction points spent on Trade also determine the "
 				"of quartermaster units a trade faction can have. ";
@@ -2583,7 +2587,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"levels allow work to proceed faster (still using one unit of "
 		"the required resource per unit of work done). ";
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		temp += "Again, only Trade factions can issue ";
+		if (Globals->BUILD_NO_TRADE) {
+			temp += "Any faction can issue ";
+		} else {
+			temp += "Again, only Trade factions can issue ";
+		}
 		temp += f.Link("#build", "BUILD") + " orders. ";
 	}
 	temp += "Here is a table of the various building types:";
@@ -3665,7 +3673,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	
 	temp = "Some melee weapons may be defined as Long or Short (this is "
-		"relative to a normal weapon, e.g. the sword).  A soldier wielding "
+		"relative to a normal weapon, e.g. the sword). A soldier wielding "
 		"a longer weapon than his opponent gets a +1 bonus to his attack "
 		"skill.";
 	f.Paragraph(temp);
@@ -3688,7 +3696,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"actual Combat skill.  This is the trade off for being able to hit "
 		"from the back line of fighting.";
 	f.Paragraph(temp);
-	temp = "Being inside a building confers a +2 bonus to defense.  This "
+	temp = "Being inside a building confers a bonus to defense.  This "
 		"bonus is effective against ranged as well as melee weapons.  The "
 		"number of men that a building can protect is equal to its size. "
 		"The size of the various common buildings was listed in the ";
@@ -3703,7 +3711,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ObjectDefs[O_FORT].protect;
 		temp += "), then the first ";
 		temp += ObjectDefs[O_FORT].protect;
-		temp += " men in the unit will gain the full +2 bonus, and the other ";
+		temp += " men in the unit will gain the full bonus, and the other ";
 		temp += (200 - ObjectDefs[O_FORT].protect);
 		temp += " will gain no protection.";
 	}

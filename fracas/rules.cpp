@@ -242,6 +242,7 @@ static GameDefs g = {
 	0, // SPOILS_NO_TRADE
 	1,	// WORLD_EVENTS
 	0,	//FACTION_STATISTICS
+	0,  // BUILD_NO_TRADE
 };
 
 GameDefs *Globals = &g;

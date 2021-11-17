@@ -760,6 +760,9 @@ public:
 	// Use 0 - no stats included
 	// Use 1 - get the nice stats about your faction comparing to the world
 	int FACTION_STATISTICS;
+
+	// This flag makes build to not take trade points
+	int BUILD_NO_TRADE;
 };
 
 extern GameDefs *Globals;
