@@ -1203,7 +1203,7 @@ void Game::EditGameUnitDetails(Unit *pUnit)
 		int exit = 0;
 		Awrite(AString("Unit: ") + *(pUnit->name));		
 		Awrite(AString("Unit faction: ") +
-				*(pUnit->faction->name));
+				pUnit->faction->name());
 		AString temp = " (";
 		switch(pUnit->type) {
 			case U_NORMAL:

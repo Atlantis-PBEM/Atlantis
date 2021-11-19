@@ -370,9 +370,11 @@ void ARegion::RunDecayEvent(Object *o, ARegionList *pRegs)
 	pFactions = PresentFactions();
 	forlist (pFactions) {
 		Faction *f = ((FactionPtr *) elem)->ptr;
-		f->Event(GetDecayFlavor() + *o->name + " " +
+		AString msg(GetDecayFlavor());
+		msg += *o->name + " " +
 				ObjectDefs[o->type].name + " in " +
-				ShortPrint(pRegs));
+				ShortPrint(pRegs);
+		f->LogEvent(new StrEvent(msg.Str()));
 	}
 }
 
@@ -730,6 +732,33 @@ AString ARegion::Print(ARegionList *pRegs)
 			TownString(town->TownType()) + "]";
 	}
 	return temp;
+}
+
+void ARegion::CPrint(JsonReport *f, ARegionList *pRegs, bool inc_town)
+{
+	f->PutPairStr("terrain", TerrainDefs[type].name);
+
+	f->StartArray("location");
+	f->PutInt(xloc);
+	f->PutInt(yloc);
+	if (zloc != 1) {
+		f->PutInt(zloc);
+	}
+	f->EndArray();
+
+	ARegionArray *pArr = pRegs->pRegionArrays[ zloc ];
+	if (pArr->strName)
+		f->PutPairStr("underworld", pArr->strName->Str());
+
+	f->PutPairStr("province", name->Str());
+
+	if (inc_town && town)
+	{
+		f->StartDict("settlement");
+		f->PutPairStr("name", town->name->Str());
+		f->PutPairStr("size", TownString(town->TownType()).Str());
+		f->EndDict();
+	}
 }
 
 void ARegion::SetLoc(int x, int y, int z)
@@ -1138,10 +1167,13 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	return 0;
 }
 
-void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
+void ARegion::WriteProducts(JsonReport &of, Faction *fac, int present)
 {
+	Areport *f = of.PlainFile();
 	AString temp = "Products: ";
 	int has = 0;
+	int ent_amt = 0;
+	of.StartDict("products");
 	forlist((&products)) {
 		Production *p = ((Production *) elem);
 		if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
@@ -1152,6 +1184,7 @@ void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
 					has = 1;
 					temp += p->WriteReport();
 				}
+				p->Creport(&of);
 			}
 		} else {
 			if (p->itemtype == I_SILVER) {
@@ -1160,6 +1193,7 @@ void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
 							GameDefs::REPORT_SHOW_ENTERTAINMENT) || present) {
 						f->PutStr(AString("Entertainment available: $") +
 								p->amount + ".");
+						ent_amt = p->amount;
 					} else {
 						f->PutStr(AString("Entertainment available: $0."));
 					}
@@ -1175,11 +1209,16 @@ void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
 					has = 1;
 					temp += p->WriteReport();
 				}
+
+				p->Creport(&of);
 			}
 		}
 	}
 
 	if (has==0) temp += "none";
+	of.EndDict();
+	if (ent_amt)
+		of.PutPairInt("entertainment", ent_amt);
 	temp += ".";
 	f->PutStr(temp);
 }
@@ -1198,10 +1237,12 @@ int ARegion::HasItem(Faction *fac, int item)
 	return 0;
 }
 
-void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
+void ARegion::WriteMarkets(JsonReport &of, Faction *fac, int present)
 {
+	Areport *f = of.PlainFile();
 	AString temp = "Wanted: ";
 	int has = 0;
+	of.StartArray("forSale");
 	forlist(&markets) {
 		Market *m = (Market *) elem;
 		if (!m->amount) continue;
@@ -1222,15 +1263,23 @@ void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
 				has = 1;
 			}
 			temp += m->Report();
+			of.StartDict(NULL);
+			of.PutPairStr("abbr", ItemDefs[m->item].abr);
+			of.PutPairInt("amount", m->amount);
+			of.PutPairInt("price", m->price);
+			of.EndDict();
 		}
 	}
 	if (!has) temp += "none";
+	of.EndArray();
+
 	temp += ".";
 	f->PutStr(temp);
 
 	temp = "For Sale: ";
 	has = 0;
 	{
+		of.StartArray("wanted");
 		forlist(&markets) {
 			Market *m = (Market *) elem;
 			if (!m->amount) continue;
@@ -1244,46 +1293,79 @@ void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
 					has = 1;
 				}
 				temp += m->Report();
+				of.StartDict(NULL);
+				of.PutPairStr("abbr", ItemDefs[m->item].abr);
+				of.PutPairInt("amount", m->amount);
+				of.PutPairInt("price", m->price);
+				of.EndDict();
 			}
 		}
 	}
 	if (!has) temp += "none";
+	of.EndArray();
 	temp += ".";
 	f->PutStr(temp);
 }
 
-void ARegion::WriteEconomy(Areport *f, Faction *fac, int present)
+void ARegion::WriteEconomy(JsonReport &of, Faction *fac, int present)
 {
+	Areport *f = of.PlainFile();
 	f->AddTab();
 
+	double wages = 0;
+	int max_wages = 0;
 	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present) {
-		f->PutStr(AString("Wages: ") + WagesForReport() + ".");
+		Production *p = products.GetProd(I_SILVER, -1);
+		AString tmp;
+		if (p) {
+			wages = p->productivity / 10 + ((double)p->productivity / 10);
+			max_wages = p->amount;
+			tmp = AString("$") + (p->productivity / 10) +
+				"." + (p->productivity % 10) + " (Max: $" + p->amount + ")";
+		} else
+			tmp = AString("$") + 0;
+
+		f->PutStr(AString("Wages: ") + tmp + ".");
+		of.PutPairDbl("wages", wages);
+		of.PutPairInt("totalWages", max_wages);
 	} else {
 		f->PutStr(AString("Wages: $0."));
 	}
 
-	WriteMarkets(f, fac, present);
+	WriteMarkets(of, fac, present);
 
-	WriteProducts(f, fac, present);
+	WriteProducts(of, fac, present);
 
 	f->EndLine();
 	f->DropTab();
 }
 
-void ARegion::WriteExits(Areport *f, ARegionList *pRegs, int *exits_seen)
+void ARegion::WriteExits(JsonReport &of, ARegionList *pRegs, int *exits_seen)
 {
+	Areport *f = of.PlainFile();
 	f->PutStr("Exits:");
 	f->AddTab();
-	int y = 0;
+
+	bool seen_exits = false;
+	of.StartDict("exits");
 	for (int i=0; i<NDIRS; i++) {
 		ARegion *r = neighbors[i];
 		if (r && exits_seen[i]) {
 			f->PutStr(AString(DirectionStrs[i]) + " : " +
 					r->Print(pRegs) + ".");
-			y = 1;
+			if (!seen_exits) {
+				seen_exits = true;
+			}
+			of.StartDict(DirectionStrs[i]);
+			r->CPrint(&of, pRegs);
+			of.EndDict();
 		}
 	}
-	if (!y) f->PutStr("none");
+
+	if (!seen_exits)
+		f->PutStr("none");
+	of.EndDict();
+
 	f->DropTab();
 	f->EndLine();
 }
@@ -1293,27 +1375,35 @@ void ARegion::WriteExits(Areport *f, ARegionList *pRegs, int *exits_seen)
 "keep you safe as long as you should choose to stay. However, rumor " \
 "has it that once you have left the Nexus, you can never return."
 
-void ARegion::WriteReport(Areport *f, Faction *fac, int month,
+void ARegion::WriteReport(JsonReport &of, Faction *fac, int month,
 		ARegionList *pRegions)
 {
+	Areport *f = of.PlainFile();
 	Farsight *farsight = GetFarsight(&farsees, fac);
 	Farsight *passer = GetFarsight(&passers, fac);
 	int present = Present(fac) || fac->IsNPC();
 
 	if (farsight || passer || present) {
+		of.StartDict(NULL);
 		AString temp = Print(pRegions);
+		CPrint(&of, pRegions);
+
 		if (Population() &&
 			(present || farsight ||
 			 (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_PEASANTS))) {
 			temp += AString(", ") + Population() + " peasants";
+			of.PutPairInt("population", Population());
 			if (Globals->RACES_EXIST) {
 				temp += AString(" (") + ItemDefs[race].names + ")";
+				of.PutPairStr("race", ItemDefs[race].names);
 			}
 			if (present || farsight ||
 					Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY) {
 				temp += AString(", $") + wealth;
+				of.PutPairInt("tax", wealth);
 			} else {
 				temp += AString(", $0");
+				of.PutPairInt("tax", 0);
 			}
 		}
 		temp += ".";
@@ -1323,19 +1413,27 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 
 		f->AddTab();
 		if (Globals->WEATHER_EXISTS) {
-			temp = "It was ";
-			if (clearskies) temp += "unnaturally clear ";
+			AString last_weather;
+			if (clearskies) last_weather += "It was unnaturally clear ";
 			else {
-				if (weather == W_BLIZZARD) temp = "There was an unnatural ";
-				else if (weather == W_NORMAL) temp = "The weather was ";
-				temp += SeasonNames[weather];
+				if (weather == W_BLIZZARD) last_weather = "There was an unnatural ";
+				else if (weather == W_NORMAL) last_weather = "The weather was ";
+				else last_weather = "It was ";
+				last_weather += SeasonNames[weather];
 			}
+			temp += last_weather;
 			temp += " last month; ";
+
 			int nxtweather = pRegions->GetWeather(this, (month + 1) % 12);
 			temp += "it will be ";
 			temp += SeasonNames[nxtweather];
 			temp += " next month.";
 			f->PutStr(temp);
+
+			of.StartDict("weather");
+			of.PutPairStr("old", last_weather.Str());
+			of.PutPairStr("new", SeasonNames[nxtweather]);
+			of.EndDict();
 		}
 		
 #if 0
@@ -1361,7 +1459,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 
 		f->DropTab();
 
-		WriteEconomy(f, fac, present || farsight);
+		WriteEconomy(of, fac, present || farsight);
 
 		int exits_seen[NDIRS];
 		if (present || farsight ||
@@ -1389,7 +1487,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			}
 		}
 
-		WriteExits(f, pRegions, exits_seen);
+		WriteExits(of, pRegions, exits_seen);
 
 		if (Globals->GATES_EXIST && gate && gate != -1) {
 			int sawgate = 0;
@@ -1438,6 +1536,11 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 					temp += ").";
 					f->PutStr(temp);
 					f->PutStr("");
+
+					of.StartDict("gate");
+					of.PutPairInt("number", gate);
+					of.PutPairInt("max", pRegions->numberofgates);
+					of.EndDict();
 				} else if (Globals->SHOW_CLOSED_GATES) {
 					f->PutStr(AString("There is a closed Gate here."));
 					f->PutStr("");
@@ -1491,13 +1594,25 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		}
 
 		{
+			bool first = true;
+			of.StartArray("objects");
 			forlist (&objects) {
-				((Object *) elem)->Report(f, fac, obs, truesight, detfac,
+				Object *obj = (Object *)elem;
+				if (obj->type != O_DUMMY)
+				{
+					if (first)
+					{
+						first = false;
+					}
+				}
+				obj->Report(of, fac, obs, truesight, detfac,
 							passobs, passtrue, passdetfac,
 							present || farsight);
 			}
+			of.EndArray();
 			f->EndLine();
 		}
+		of.EndDict(); // region
 	}
 }
 
@@ -1838,10 +1953,12 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 		}
 	}
 
+	AString msg(*caster->name + " uses " + SkillStrs(sp) +
+				" in " + Print(pRegs) + ".");
+
 	forlist_reuse (&flist) {
 		FactionPtr *fp = (FactionPtr *) elem;
-		fp->ptr->Event(AString(*(caster->name)) + " uses " + SkillStrs(sp) +
-				" in " + Print(pRegs) + ".");
+		fp->ptr->LogEvent(new StrEvent(msg.Str()));
 	}
 	return 1;
 }
@@ -1864,10 +1981,12 @@ void ARegion::NotifyCity(Unit *caster, AString& oldname, AString& newname)
 		}
 	}
 	{
+		AString msg(*caster->name);
+		msg += AString(" renames ") + oldname + " to " + newname + ".";
+
 		forlist(&flist) {
 			FactionPtr *fp = (FactionPtr *) elem;
-			fp->ptr->Event(AString(*(caster->name)) + " renames " +
-					oldname + " to " + newname + ".");
+			fp->ptr->LogEvent(new StrEvent(msg.Str()));
 		}
 	}
 }

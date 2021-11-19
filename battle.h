@@ -62,6 +62,7 @@ class Battle : public AListElem
 		~Battle();
 
 		void Report(Areport *,Faction *);
+		void Creport(JsonReport &f, Faction *fac);
 		void AddLine(const AString &);
 
 		int Run(Events* events, ARegion *, Unit *, AList *, Unit *, AList *, int ass,

@@ -49,6 +49,7 @@ class UnitId;
 #include "object.h"
 #include <set>
 #include <string>
+class IEvent;
 
 enum {
 	GUARD_NONE,
@@ -131,7 +132,7 @@ class Unit : public AListElem
 
 		AString SpoilsReport(void);
 		int CanGetSpoil(Item *i);
-		void WriteReport(Areport *,int,int,int,int, int, int);
+		void WriteReport(JsonReport &,int,int,int,int, int, int);
 		AString GetName(int);
 		AString MageReport();
 		AString ReadyItem();
@@ -229,6 +230,7 @@ class Unit : public AListElem
 		void DiscardUnfinishedShips();
 
 		void Event(const AString &);
+		void LogEvent(IEvent *);
 		void Error(const AString &);
 
 		Faction *faction;

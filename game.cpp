@@ -717,9 +717,6 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 	if (*pToken == "Name:") {
 		pTemp = pLine->StripWhite();
 		if (pTemp) {
-			if (newPlayer) {
-				*pTemp += AString(" (") + (pFac->num) + ")";
-			}
 			pFac->SetNameNoChange(pTemp);
 		}
 	} else if (*pToken == "RewardTimes") {
@@ -751,7 +748,9 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 	} else if (*pToken == "Reward:") {
 		pTemp = pLine->gettoken();
 		int nAmt = pTemp->value();
-		pFac->Event(AString("Reward of ") + nAmt + " silver.");
+		AString msg("Reward of ");
+		msg += AString(nAmt) + " silver.";
+		pFac->LogEvent(new StrEvent(msg.Str()));
 		pFac->unclaimed += nAmt;
 	} else if (*pToken == "SendTimes:") {
 		// get the token, but otherwise ignore it
@@ -1188,8 +1187,6 @@ void Game::MakeFactionReportLists()
 
 void Game::WriteReport()
 {
-	Areport f;
-
 	MakeFactionReportLists();
 	CountAllSpecialists();
 
@@ -1207,18 +1204,21 @@ void Game::WriteReport()
 		CountItems(citems);
 	}
 
+	JsonReport of; // avoid loop overhead
+
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
-		AString str = "report.";
-		str = str + fac->num;
 
 		if (!fac->IsNPC() ||
 				((((month == 0) && (year == 1)) || Globals->GM_REPORT) &&
 			(fac->num == 1))) {
-			int i = f.OpenByName(str);
+			const AString str = AString("report.") + fac->num;
+			const AString cstr = AString("creport") + fac->num + ".json";
+			int i = of.OpenByName(cstr);
 			if (i != -1) {
-				fac->WriteReport(&f, this, citems);
-				f.Close();
+				of.OpenPlain(str);
+				fac->WriteReport(of, this, citems);
+				of.Close();
 			}
 		}
 		Adot();
@@ -1683,6 +1683,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 						mon->free = Globals->MONSTER_NO_SPOILS +
 							Globals->MONSTER_SPOILS_RECOVERY;
 					}
+
 					u->Event(AString("Loses control of ") +
 							ItemString(i->type, i->num) + ".");
 					u->items.SetNum(i->type, 0);
@@ -1734,6 +1735,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 						mon->free = Globals->MONSTER_NO_SPOILS +
 							Globals->MONSTER_SPOILS_RECOVERY;
 					}
+
 					u->Event(AString("Loses control of ") +
 							ItemString(i->type, i->num) + ".");
 					u->items.SetNum(i->type, 0);

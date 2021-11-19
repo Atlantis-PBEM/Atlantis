@@ -118,7 +118,7 @@ void Attitude::Readin(Ainfile *f, ATL_VER v)
 Faction::Faction()
 {
 	exists = 1;
-	name = 0;
+	name_ = nullptr;
 	for (int i=0; i<NFACTYPES; i++) {
 		type[i] = 1;
 	}
@@ -145,8 +145,8 @@ Faction::Faction(int n)
 		type[i] = 1;
 	}
 	lastchange = -6;
-	name = new AString;
-	*name = AString("Faction (") + AString(num) + AString(")");
+	name_ = new AString;
+	*name_ = AString("Faction");
 	address = new AString("NoAddress");
 	password = new AString("none");
 	times = 1;
@@ -163,7 +163,7 @@ Faction::Faction(int n)
 
 Faction::~Faction()
 {
-	if (name) delete name;
+	if (name_) delete name_;
 	if (address) delete address;
 	if (password) delete password;
 	attitudes.DeleteAll();
@@ -178,7 +178,7 @@ void Faction::Writeout(Aoutfile *f)
 	f->PutInt(lastchange);
 	f->PutInt(lastorders);
 	f->PutInt(unclaimed);
-	f->PutStr(*name);
+	f->PutStr(*name_);
 	f->PutStr(*address);
 	f->PutStr(*password);
 	f->PutInt(times);
@@ -203,7 +203,7 @@ void Faction::Readin(Ainfile *f, ATL_VER v)
 	lastorders = f->GetInt();
 	unclaimed = f->GetInt();
 
-	name = f->GetStr();
+	name_ = f->GetStr();
 	address = f->GetStr();
 	password = f->GetStr();
 	times = f->GetInt();
@@ -229,7 +229,7 @@ void Faction::Readin(Ainfile *f, ATL_VER v)
 void Faction::View()
 {
 	AString temp;
-	temp = AString("Faction ") + num + AString(" : ") + *name;
+	temp = AString("Faction ") + num + AString(" : ") + name();
 	Awrite(temp);
 }
 
@@ -239,17 +239,21 @@ void Faction::SetName(AString* s)
 		AString* newname = s->getlegal();
 		delete s;
 		if (!newname) return;
-		delete name;
-		*newname += AString(" (") + num + ")";
-		name = newname;
+		delete name_;
+		name_ = newname;
 	}
+}
+
+AString Faction::name() const
+{
+	return *name_ + AString(" (") + num + ")";
 }
 
 void Faction::SetNameNoChange(AString *s)
 {
 	if (s) {
-		delete name;
-		name = new AString(*s);
+		delete name_;
+		name_ = new AString(*s);
 	}
 }
 
@@ -347,8 +351,9 @@ void Faction::WriteFactionStats(Areport *f, Game *pGame, int ** citems) {
 	}
 }
 
-void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
+void Faction::WriteReport(JsonReport &of, Game *pGame, int ** citems)
 {
+	Areport *f = of.PlainFile();
 	if (IsNPC() && num == 1) {
 		if (Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
 			int i, j;
@@ -416,7 +421,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			}
 			{
 				forlist(&present_regions) {
-					((ARegionPtr*)elem)->ptr->WriteReport(f, this,
+					((ARegionPtr*)elem)->ptr->WriteReport(of, this,
 																pGame->month,
 																&(pGame->regions));
 				}
@@ -424,7 +429,6 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			present_regions.DeleteAll();
 		}
 		errors.DeleteAll();
-		events.DeleteAll();
 		battles.DeleteAll();
 		return;
 	}
@@ -437,42 +441,78 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 	}
 
 	f->PutStr("Atlantis Report For:");
-	if ((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
-			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED)) {
-		f->PutStr(*name);
+
+	of.StartDict("faction");
+	of.PutPairStr("name", name_->Str());
+	of.PutPairInt("number", num);
+
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED) {
+		f->PutStr(name());
+		of.PutPairStr("type", "Unlimited");
+	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
+		f->PutStr(name());
+		of.PutPairStr("type", "Normal");
 	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		f->PutStr(*name + " (" + FactionTypeStr() + ")");
+		f->PutStr(name() + " (" + FactionTypeStr() + ")");
+		of.StartDict("type");
+		for (int i = 0; i < NFACTYPES; ++i)
+		{
+			of.PutPairInt(FactionStrs[i], type[i]);
+		}
+		of.EndDict(); // faction::type
 	}
+	of.EndDict(); // faction
+
 	f->PutStr(AString(MonthNames[ pGame->month ]) + ", Year " + pGame->year);
 	f->EndLine();
+	of.StartDict("date");
+	of.PutPairStr("month", MonthNames[pGame->month]);
+	of.PutPairInt("year", pGame->year);
+	of.EndDict();
 
+	AString atl_ver_str = ATL_VER_STRING(CURRENT_ATL_VER);
 	f->PutStr(AString("Atlantis Engine Version: ") +
-			ATL_VER_STRING(CURRENT_ATL_VER));
+			atl_ver_str);
+	AString rules_ver_str = ATL_VER_STRING(Globals->RULESET_VERSION);
 	f->PutStr(AString(Globals->RULESET_NAME) + ", Version: " +
-			ATL_VER_STRING(Globals->RULESET_VERSION));
+			rules_ver_str);
 	f->EndLine();
+	of.StartDict("engine");
+	of.PutPairStr("version", atl_ver_str.Str());
+	of.StartDict("ruleset");
+	of.PutPairStr("name", Globals->RULESET_NAME);
+	of.PutPairStr("version", rules_ver_str.Str());
+	of.EndDict(); // engine::ruleset
+	of.EndDict(); // engine
 
 	if (!times) {
 		f->PutStr("Note: The Times is not being sent to you.");
 		f->EndLine();
 	}
+	of.PutPairInt("newssheet", times);
 
 	if (!password || (*password == "none")) {
 		f->PutStr("REMINDER: You have not set a password for your faction!");
 		f->EndLine();
 	}
+	of.PutPairStr("password", password->Str());
 
+	int count_down = -1;
+	const int cturn = pGame->TurnNumber() - lastorders;
 	if (Globals->MAX_INACTIVE_TURNS != -1) {
-		int cturn = pGame->TurnNumber() - lastorders;
+		if (pGame->TurnNumber() != lastorders)
+			count_down = Globals->MAX_INACTIVE_TURNS - cturn;
+
 		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
-			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
-			f->PutStr(AString("WARNING: You have ") + cturn +
+			f->PutStr(AString("WARNING: You have ") + count_down +
 					AString(" turns until your faction is automatically ")+
 					AString("removed due to inactivity!"));
 			f->EndLine();
 		}
 	}
+	of.PutPairInt("turnCountdown", count_down);
 
+	int tmp_quit = 0;
 	if (!exists) {
 		if (quit == QUIT_AND_RESTART) {
 			f->PutStr("You restarted your faction this turn. This faction "
@@ -491,13 +531,23 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 					"Gamemaster know, and you will be restarted for "
 					"the next available turn.");
 		}
+		tmp_quit = quit != 0 ? quit : QUIT_BY_ORDER;
+
 		f->PutStr("");
 	}
+	of.PutPairInt("quit", tmp_quit);
 
 	f->PutStr("Faction Status:");
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
+		of.StartArray("factionStatus");
 		f->PutStr(AString("Mages: ") + nummages + " (" +
 				pGame->AllowedMages(this) + ")");
+		of.StartDict(NULL);
+		of.PutPairStr("key", "Mages");
+		of.PutPairInt("amount", nummages);
+		of.PutPairInt("max", pGame->AllowedMages(this));
+		of.EndDict();
+
 		if (Globals->APPRENTICES_EXIST) {
 			AString temp;
 			temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
@@ -508,22 +558,59 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			temp += pGame->AllowedApprentices(this);
 			temp += ")";
 			f->PutStr(temp);
+			of.StartDict(NULL);
+			of.PutPairStr("key", "Apprentices");
+			of.PutPairInt("amount", numapprentices);
+			of.PutPairInt("max", pGame->AllowedApprentices(this));
+			of.EndDict();
 		}
+		of.EndArray();
 	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		of.StartArray("factionStatus");
 		f->PutStr(AString("Tax Regions: ") + war_regions.Num() + " (" +
 				pGame->AllowedTaxes(this) + ")");
+		of.StartDict(NULL);
+		of.PutPairStr("key", "Tax Regions");
+		of.PutPairInt("amount", war_regions.Num());
+		of.PutPairInt("max", pGame->AllowedTaxes(this));
+		of.EndDict();
+
 		f->PutStr(AString("Trade Regions: ") + trade_regions.Num() + " (" +
 				pGame->AllowedTrades(this) + ")");
+		of.StartDict(NULL);
+		of.PutPairStr("key", "Trade Regions");
+		of.PutPairInt("amount", trade_regions.Num());
+		of.PutPairInt("max", pGame->AllowedTrades(this));
+		of.EndDict();
+
 		if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
 			f->PutStr(AString("Quartermasters: ") + numqms + " (" +
 					pGame->AllowedQuarterMasters(this) + ")");
+			of.StartDict(NULL);
+			of.PutPairStr("key", "Quartermasters");
+			of.PutPairInt("amount", numqms);
+			of.PutPairInt("max", pGame->AllowedQuarterMasters(this));
+			of.EndDict();
 		}
+
 		if (Globals->TACTICS_NEEDS_WAR) {
 			f->PutStr(AString("Tacticians: ") + numtacts + " (" +
 					pGame->AllowedTacticians(this) + ")");
+			of.StartDict(NULL);
+			of.PutPairStr("key", "Tacticians");
+			of.PutPairInt("amount", numtacts);
+			of.PutPairInt("max", pGame->AllowedTacticians(this));
+			of.EndDict();
 		}
+
 		f->PutStr(AString("Mages: ") + nummages + " (" +
 				pGame->AllowedMages(this) + ")");
+		of.StartDict(NULL);
+		of.PutPairStr("key", "Mages");
+		of.PutPairInt("amount", nummages);
+		of.PutPairInt("max", pGame->AllowedMages(this));
+		of.EndDict();
+
 		if (Globals->APPRENTICES_EXIST) {
 			AString temp;
 			temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
@@ -534,66 +621,99 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			temp += pGame->AllowedApprentices(this);
 			temp += ")";
 			f->PutStr(temp);
+
+			of.StartDict(NULL);
+			of.PutPairStr("key", "Apprentices");
+			of.PutPairInt("amount", numapprentices);
+			of.PutPairInt("max", pGame->AllowedApprentices(this));
+			of.EndDict();
 		}
+		of.EndArray();
 	}
 	f->EndLine();
 
 	if (errors.Num()) {
+		// TODO: computer friendly errors
 		f->PutStr("Errors during turn:");
+		of.StartArray("errors");
 		forlist((&errors)) {
-			f->PutStr(*((AString *) elem));
+			AString *p = (AString*)elem;
+			f->PutStr(*p);
+			of.PutStr(p->Str());
 		}
+		of.EndArray();
 		errors.DeleteAll();
 		f->EndLine();
 	}
 
 	if (battles.Num()) {
 		f->PutStr("Battles during turn:");
+		of.StartArray("battles");
 		forlist(&battles) {
-			((BattlePtr *) elem)->ptr->Report(f, this);
+			BattlePtr *b = (BattlePtr*)elem;
+			b->ptr->Report(f, this);
+			b->ptr->Creport(of, this);
 		}
+		of.EndArray();
 		battles.DeleteAll();
 	}
 
-	if (events.Num()) {
+	if (!events_.empty()) {
 		f->PutStr("Events during turn:");
-		forlist((&events)) {
-			f->PutStr(*((AString *) elem));
+		of.StartArray("events");
+		for(const auto &e : events_) {
+			const std::string msg = e->str(pGame->regions);
+			f->PutStr(msg.c_str());
+			e->writeJson(of, pGame->regions);
 		}
-		events.DeleteAll();
+		of.EndArray();
 		f->EndLine();
 	}
 
 	if (shows.Num()) {
+		// TODO: computer friendly skill shows
 		f->PutStr("Skill reports:");
+		of.StartArray("skillReports");
 		forlist(&shows) {
 			AString* string = ((ShowSkill *) elem)->Report(this);
 			if (string) {
 				f->PutStr("");
 				f->PutStr(*string);
+				of.PutStr(string->Str());
 			}
 			delete string;
 		}
+		of.EndArray();
 		shows.DeleteAll();
 		f->EndLine();
 	}
 
 	if (itemshows.Num()) {
+		// TODO: computer friendly item shows
 		f->PutStr("Item reports:");
+		of.StartArray("itemReports");
 		forlist(&itemshows) {
 			f->PutStr("");
-			f->PutStr(*((AString *) elem));
+			AString *e = (AString*)elem;
+			f->PutStr(*e);
+			of.PutStr(e->Str());
 		}
+		of.EndArray();
 		itemshows.DeleteAll();
 		f->EndLine();
 	}
 
 	if (objectshows.Num()) {
+		// TODO: computer friendly object shows
 		f->PutStr("Object reports:");
+		of.StartArray("objectReports");
 		forlist(&objectshows) {
 			f->PutStr("");
-			f->PutStr(*((AString *)elem));
+			AString *e = (AString*)elem;
+			f->PutStr(*e);
+			of.PutStr(e->Str());
 		}
+		of.EndArray();
 		objectshows.DeleteAll();
 		f->EndLine();
 	}
@@ -602,34 +722,52 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 	AString temp = AString("Declared Attitudes (default ") +
 		AttitudeStrs[defaultattitude] + "):";
 	f->PutStr(temp);
+	of.StartDict("attitudes");
+	of.PutPairStr("default", AttitudeStrs[defaultattitude]);
 	for (int i=0; i<NATTITUDES; i++) {
+		bool has_this_attitude = false;
 		int j=0;
 		temp = AString(AttitudeStrs[i]) + " : ";
 		forlist((&attitudes)) {
 			Attitude* a = (Attitude *) elem;
 			if (a->attitude == i) {
 				if (j) temp += ", ";
-				temp += *(GetFaction(&(pGame->factions),
-							a->factionnum)->name);
+				AString fac_name = GetFaction(&(pGame->factions), a->factionnum)->name();
+				temp += fac_name;
 				j = 1;
+				if (!has_this_attitude) {
+					has_this_attitude = true;
+					of.StartArray(AttitudeStrs[i]);
+				}
+				of.PutStr(fac_name.Str());
 			}
+		}
+		if (has_this_attitude)
+		{
+			of.EndArray();
 		}
 		if (!j) temp += "none";
 		temp += ".";
 		f->PutStr(temp);
 	}
 	f->EndLine();
+	of.EndDict();
 
 	temp = AString("Unclaimed silver: ") + unclaimed + ".";
 	f->PutStr(temp);
 	f->PutStr("");
+	of.PutPairInt("unclaimedSilver", unclaimed);
 
+	of.StartArray("regions");
 	forlist(&present_regions) {
-		((ARegionPtr *) elem)->ptr->WriteReport(f, this, pGame->month, &(pGame->regions));
+		ARegionPtr *reg = (ARegionPtr*)elem;
+		reg->ptr->WriteReport(of, this, pGame->month, &(pGame->regions));
 	} 
-		// LLS - maybe we don't want this -- I'll assume not, for now 
+	of.EndArray();
+	// LLS - maybe we don't want this -- I'll assume not, for now 
 	//f->PutStr("#end");
 	f->EndLine();
+	of.Close();
 }
 
 // LLS - write order template
@@ -673,7 +811,7 @@ void Faction::WriteTemplate(Areport *f, Game *pGame)
 void Faction::WriteFacInfo(Aoutfile *file)
 {
 	file->PutStr(AString("Faction: ") + num);
-	file->PutStr(AString("Name: ") + *name);
+	file->PutStr(AString("Name: ") + *name_);
 	file->PutStr(AString("Email: ") + *address);
 	file->PutStr(AString("Password: ") + *password);
 	file->PutStr(AString("LastOrders: ") + lastorders);
@@ -718,11 +856,10 @@ void Faction::Error(const AString &s)
 	errors.Add(temp);
 }
 
-void Faction::Event(const AString &s)
+void Faction::LogEvent(IEvent *e)
 {
-	if (IsNPC()) return;
-	AString *temp = new AString(s);
-	events.Add(temp);
+	if (!IsNPC())
+		events_.push_back(e);
 }
 
 void Faction::RemoveAttitude(int f)
@@ -853,7 +990,9 @@ void Faction::DefaultOrders()
 void Faction::TimesReward()
 {
 	if (Globals->TIMES_REWARD) {
-		Event(AString("Times reward of ") + Globals->TIMES_REWARD + " silver.");
+		AString msg("Times reward of ");
+		msg += AString(Globals->TIMES_REWARD) + " silver.";
+		LogEvent(new StrEvent(msg.Str()));
 		unclaimed += Globals->TIMES_REWARD;
 	}
 }

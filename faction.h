@@ -31,6 +31,7 @@
 #define FACTION_CLASS
 
 class Faction;
+class IEvent;
 class Game;
 
 #include "gameio.h"
@@ -129,16 +130,17 @@ public:
 	void Writeout( Aoutfile * );
 	void View();
 	
+	AString name() const;
 	void SetName(AString *);
 	void SetNameNoChange( AString *str );
 	void SetAddress( AString &strNewAddress );
 	
 	void CheckExist(ARegionList *);
 	void Error(const AString &);
-	void Event(const AString &);
+	void LogEvent(IEvent *e);
 	
 	AString FactionTypeStr();
-	void WriteReport( Areport *f, Game *pGame, int ** citems);
+	void WriteReport(JsonReport &f, Game *pGame, int ** citems);
 	// LLS - write order template
 	void WriteTemplate(Areport *f, Game *pGame);
 	void WriteFacInfo(Aoutfile *);
@@ -173,7 +175,7 @@ public:
 	int unclaimed;
 	int bankaccount;
 	int interest; // not written to game.out
-	AString * name;
+	AString * name_;
 	AString * address;
 	AString * password;
 	int times;
@@ -203,7 +205,7 @@ public:
 	//
 	AList extraPlayers;
 	AList errors;
-	AList events;
+	std::vector<IEvent*> events_;
 	AList battles;
 	AList shows;
 	AList itemshows;

@@ -98,6 +98,44 @@ class Areport {
 		int tabs;
 };
 
+/// Json Reports are outputs
+class JsonReport : public Aoutfile {
+public:
+	JsonReport();
+	~JsonReport() { Close(); }
+
+	Areport* PlainFile() { return plain_file; }
+
+	void Open(const AString &s);
+	int OpenByName(const AString &s);
+	void OpenPlain(const AString &s);
+	void Close();
+	void AddTab();
+	void DropTab();
+
+	void PutPairStr(const char *key, const char *val);
+	void PutPairInt(const char *key, int val);
+	void PutPairDbl(const char *key, double val);
+	void StartArray(const char *key);
+	void StartDict(const char *key);
+	void EndArray();
+	void EndDict();
+
+	void PutStr(const char *val); // only valid in array
+	void PutInt(int val); // only valid in array
+
+protected: // methods
+	void PrintTabs();
+	void WriteStr(const char *str);
+
+protected:
+	Areport *plain_file = nullptr;
+	unsigned tabs = 1;
+	unsigned arr_depth = 0;
+	unsigned dict_depth = 0;
+	bool first = true;
+};
+
 class Arules {
 	public:
 		Arules();
