@@ -4252,7 +4252,7 @@ static TerrainType td[] = {
 	 TerrainType::RIDINGMOUNTS | TerrainType::FLYINGMOUNTS | TerrainType::SHOW_RULES,
 	 200,11,10,1,
 	 {{I_IRON,100,10},{I_STONE,100,10},{I_ROOTSTONE,50,5},{I_CAMEL,80,10},
-	  {I_ADMANTIUM,10,5},{-1,0,0},{-1,0,0}},
+	  {I_ADMANTIUM,35,2},{-1,0,0},{-1,0,0}},
 	 {I_NOMAD,I_DESERTDWARF,-1,-1},
 	 {I_SEAELF,I_VIKING,-1},
 	 1,I_SCORPION,I_SPHINX,I_SANDLING,

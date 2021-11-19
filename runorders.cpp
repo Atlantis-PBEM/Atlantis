@@ -3160,7 +3160,7 @@ void Game::CheckTransportOrders()
 					if (tar->unit->faction->GetAttitude(u->faction->num) <
 							A_FRIENDLY) {
 						u->Error(ordertype +
-								": Target is not a member of a friendly "
+								": Target " + AString(*tar->unit->name) + " is not a member of a friendly "
 								"faction.");
 						o->type = NORDERS;
 						continue;
@@ -3172,7 +3172,7 @@ void Game::CheckTransportOrders()
 					if (o->type == O_TRANSPORT) {
 						if (tar->unit->GetSkill(S_QUARTERMASTER) == 0) {
 							u->Error(ordertype +
-									": Target is not a quartermaster");
+									": Target " + AString(*tar->unit->name) + " is not a quartermaster");
 							o->type = NORDERS;
 							continue;
 						}
@@ -3180,7 +3180,7 @@ void Game::CheckTransportOrders()
 								!(ObjectDefs[tar->obj->type].flags &
 									ObjectType::TRANSPORT) ||
 								(tar->obj->incomplete > 0)) {
-							u->Error(ordertype + ": Target does not own "
+							u->Error(ordertype + ": Target " + AString(*tar->unit->name) + " does not own "
 									"a transport structure.");
 							o->type = NORDERS;
 							continue;
@@ -3207,7 +3207,7 @@ void Game::CheckTransportOrders()
 						// 0 maxdist represents unlimited range
 						dist = regions.GetPlanarDistance(r, tar->region, penalty, maxdist);
 						if (dist > maxdist) {
-							u->Error(ordertype + ": Recipient is too far away.");
+							u->Error(ordertype + ": Recipient " + AString(*tar->unit->name) + " is too far away.");
 							o->type = NORDERS;
 							continue;
 						}
@@ -3239,7 +3239,7 @@ void Game::CheckTransportOrders()
 
 					// make sure amount is available (all handled later)
 					if (o->amount > 0 && o->amount > u->GetSharedNum(o->item)) {
-						u->Error(ordertype + ": Not enough.");
+						u->Error(ordertype + ": Not enough " + ItemDefs[o->item].name + ".");
 						o->type = NORDERS;
 						continue;
 					}
@@ -3255,6 +3255,8 @@ void Game::CheckTransportOrders()
 							continue;
 						}
 					}
+
+					// TODO: add global
 
 					// Check if we have a trade hex
 					if (!TradeCheck(r, u->faction)) {
