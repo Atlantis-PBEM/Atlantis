@@ -763,6 +763,9 @@ public:
 
 	// This flag makes build to not take trade points
 	int BUILD_NO_TRADE;
+
+	// TRANSPORT / DISTRIBUTE orders should not use Trade point
+	int TRANSPORT_NO_TRADE;
 };
 
 extern GameDefs *Globals;

@@ -3256,10 +3256,8 @@ void Game::CheckTransportOrders()
 						}
 					}
 
-					// TODO: add global
-
 					// Check if we have a trade hex
-					if (!TradeCheck(r, u->faction)) {
+					if (!Globals->TRANSPORT_NO_TRADE && !TradeCheck(r, u->faction)) {
 						u->Error(ordertype + ": Faction cannot transport or "
 								"distribute in that many hexes.");
 						o->type = NORDERS;
