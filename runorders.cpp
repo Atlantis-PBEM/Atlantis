@@ -548,18 +548,65 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 	}
 
 	if (o->CanModify()) {
-		u->Event(AString("Destroys ") + *(o->name) + ".");
-		Object *dest = r->GetDummy();
-		forlist(&o->units) {
-			Unit *u = (Unit *) elem;
-			u->destroy = 0;
-			u->MoveUnit(dest);
+		int maxStructurePoints;	// fully built structure points (equal to cost)
+		int structurePoints;	// current structure points
+		int destroyablePoints;	// how much points can be destroyed per turn for this structure type
+		int destroyPower;		// how much unit can destroy during this turn
+		int willDestroy;		// how muh points will be destroyed this turn
+
+		maxStructurePoints = ObjectDefs[o->type].cost;
+		structurePoints = maxStructurePoints - o->incomplete;
+
+		if (Globals->DESTROY_BEHAVIOR == DestroyBehavior::INSTANT) {
+			destroyablePoints = structurePoints;
+			destroyPower = structurePoints;
 		}
-		if (quests.CheckQuestDemolishTarget(r, o->num, u, &quest_rewards)) {
-			u->Event(AString("You have completed a quest!") + quest_rewards);
+		else {
+			destroyablePoints = std::max(Globals->MIN_DESTROY_POINTS, maxStructurePoints * Globals->MAX_DESTROY_PERCENT / 100);
+			destroyablePoints = std::max(0, std::min(structurePoints, destroyablePoints) - o->destroyed);
+
+			if (Globals->DESTROY_BEHAVIOR == DestroyBehavior::PER_SKILL) {
+				destroyPower = std::max(1, u->GetSkill(S_BUILDING)) * u->GetMen();
+			}
+			else {
+				destroyPower = u->GetMen();
+			}
 		}
-		r->objects.Remove(o);
-		delete o;
+
+		willDestroy = std::min(destroyablePoints, destroyPower);
+		if (willDestroy == 0) {
+			u->Error(AString("Can't destroy ") + *(o->name) + " more.");
+			forlist(&o->units) {
+				((Unit *) elem)->destroy = 0;
+			}
+
+			return;
+		}
+
+		int remainingSP = structurePoints - willDestroy;
+		if (remainingSP > 0) {
+			o->destroyed += willDestroy;
+			o->incomplete += willDestroy;
+
+			u->Event(AString("Destroys ") + willDestroy + " structure points from the " + *(o->name) + ".");
+		}
+		else {
+			u->Event(AString("Destroys ") + *(o->name) + ".");
+	
+			Object *dest = r->GetDummy();
+			forlist(&o->units) {
+				Unit *u = (Unit *) elem;
+				u->destroy = 0;
+				u->MoveUnit(dest);
+			}
+
+			if (quests.CheckQuestDemolishTarget(r, o->num, u, &quest_rewards)) {
+				u->Event(AString("You have completed a quest!") + quest_rewards);
+			}
+
+			r->objects.Remove(o);
+			delete o;
+		}
 	} else {
 		u->Error("DESTROY: Can't destroy that.");
 		forlist(&o->units) {

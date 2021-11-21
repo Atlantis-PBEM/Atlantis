@@ -245,6 +245,9 @@ static GameDefs g = {
 	1,	// WORLD_EVENTS
 	0,	//FACTION_STATISTICS
 	FactionActivityRules::DEFAULT,	// FACTION_ACTIVITY
+	DestroyBehavior::INSTANT,	// DESTROY_BEHAVIOR
+	200,	// MIN_DESTROY_POINTS,
+	33,	// MAX_DESTROY_PERCENT
 };
 
 GameDefs *Globals = &g;
