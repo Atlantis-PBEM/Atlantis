@@ -198,6 +198,10 @@ ProduceOrder::~ProduceOrder()
 {
 }
 
+void ProduceOrder::Push(const ProduceTask &task) {
+	this->queue.push_back(task);
+}
+
 BuyOrder::BuyOrder()
 {
 	type = O_BUY;

@@ -949,10 +949,12 @@ void Game::ProcessEntertainOrder(Unit *unit, OrdersCheck *pCheck)
 		ParseError(pCheck, unit, 0, err);
 		if (unit->monthorders) delete unit->monthorders;
 	}
+
 	ProduceOrder *o = new ProduceOrder;
 	o->item = I_SILVER;
 	o->skill = S_ENTERTAINMENT;
-	o->target = 0;
+	o->amount = 0;
+
 	unit->monthorders = o;
 }
 
@@ -1773,41 +1775,65 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	int target = 0;
+	int amount = 0;
 	AString *token = o->gettoken();
 
 	if (token && token->value() > 0)
 	{
-		target = token->value();
+		amount = token->value();
 		token = o->gettoken();
 	}
 	if (!token) {
 		ParseError(pCheck, u, 0, "PRODUCE: No item given.");
 		return;
 	}
+
 	int it = ParseEnabledItem(token);
 	delete token;
 
-	ProduceOrder *p = new ProduceOrder;
-	p->item = it;
+	int skill = -1;
 	if (it != -1) {
 		AString skname = ItemDefs[it].pSkill;
-		p->skill = LookupSkill(&skname);
-	} else {
-		p->skill = -1;
+		skill = LookupSkill(&skname);
 	}
-	p->target = target;
-	if (u->monthorders ||
-		(Globals->TAX_PILLAGE_MONTH_LONG &&
-		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-		if (u->monthorders) delete u->monthorders;
-		AString err = "PRODUCE: Overwriting previous ";
-		if (u->inTurnBlock) err += "DELAYED ";
-		err += "month-long order.";
-		ParseError(pCheck, u, 0, err);
+
+	ProduceOrder *p = NULL;
+	if (u->monthorders && u->monthorders->type == O_PRODUCE) {
+		// if it is already produce order, we will just add new item to the queue
+		p = ((ProduceOrder *) u->monthorders)->item == -1
+			? (ProduceOrder *) u->monthorders
+			: NULL;
 	}
+
+	if (!p) {
+		// no month order or it is not correct PRODUCE
+		bool taxLikeActivity = u->taxing == TAX_TAX || u->taxing == TAX_PILLAGE;
+		if (u->monthorders || (Globals->TAX_PILLAGE_MONTH_LONG && taxLikeActivity)) {
+			AString err = "PRODUCE: Overwriting previous ";
+			if (u->inTurnBlock) err += "DELAYED ";
+			err += "month-long order.";
+			ParseError(pCheck, u, 0, err);
+		}
+
+		if (u->monthorders) {
+			delete u->monthorders;
+			u->monthorders = NULL;
+		}
+	}
+
+	if (!u->monthorders) {
+		p = new ProduceOrder;
+		p->item = -1;
+		u->monthorders = p;
+	}
+
+	p->Push({
+		item: it,
+		skill: skill,
+		amount: amount
+	});
+
 	if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-	u->monthorders = p;
 }
 
 void Game::ProcessWorkOrder(Unit *u, int quiet, OrdersCheck *pCheck)
@@ -1815,7 +1841,8 @@ void Game::ProcessWorkOrder(Unit *u, int quiet, OrdersCheck *pCheck)
 	ProduceOrder *order = new ProduceOrder;
 	order->skill = -1;
 	order->item = I_SILVER;
-	order->target = 0;
+	order->amount = 0;
+
 	if (quiet)
 		order->quiet = 1;
 	if (u->monthorders ||

@@ -788,7 +788,7 @@ void Unit::DefaultOrders(Object *obj)
 				ProduceOrder *order = new ProduceOrder;
 				order->skill = -1;
 				order->item = I_SILVER;
-				order->target = 0;
+				order->amount = 0;
 				order->quiet = 1;
 				monthorders = order;
 			}

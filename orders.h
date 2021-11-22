@@ -25,6 +25,8 @@
 #ifndef ORDERS_CLASS
 #define ORDERS_CLASS
 
+#include <list>
+
 class Order;
 class AttackOrder;
 class MoveOrder;
@@ -49,6 +51,8 @@ class EvictOrder;
 class BankOrder;
 class IdleOrder;
 class TransportOrder;
+
+struct ProduceTask;
 
 #include "unit.h"
 #include "gamedefs.h"
@@ -209,6 +213,12 @@ class TeachOrder : public Order {
 		AList targets;
 };
 
+struct ProduceTask {
+	int item;
+	int skill; /* -1 for none */
+	int amount;
+};
+
 class ProduceOrder : public Order {
 	public:
 		ProduceOrder();
@@ -217,7 +227,11 @@ class ProduceOrder : public Order {
 		int item;
 		int skill; /* -1 for none */
 		int productivity;
-		int target;
+		int amount;
+
+		void Push(const ProduceTask &task);
+	
+		std::list<ProduceTask> queue;
 };
 
 class BuyOrder : public Order {
