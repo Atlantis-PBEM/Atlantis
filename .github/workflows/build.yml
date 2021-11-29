@@ -11,13 +11,13 @@ on:
 jobs:
   compile:
     name: Complie code
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
       matrix:
         os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
+          - ubuntu
+          - windows
+          - macos
         ruleset:
           - basic
           - fracas
@@ -25,10 +25,13 @@ jobs:
           - kingdoms
           - neworigins
           - standard
+        include:
+           - os: windows
+             ext: .exe
     steps:
     - uses: actions/checkout@v2
     - run: make clean ${{ matrix.ruleset }} && make ${{ matrix.ruleset }}
     - uses: actions/upload-artifact@v2
       with:
-        name: ${{ matrix.ruleset }}_linux
-        path: ${{ matrix.ruleset }}/${{ matrix.ruleset }}
+        name: ${{ matrix.ruleset }}_${{ matrix.os }}
+        path: ${{ matrix.ruleset }}/${{ matrix.ruleset }}${{ matrix.ext }}
