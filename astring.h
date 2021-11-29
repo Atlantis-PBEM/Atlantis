@@ -42,6 +42,7 @@ public:
 	AString(unsigned int);
 	AString(char);
 	AString(const AString &);
+	AString(const std::string &);
 	~AString();
 
 	int operator==(const AString &);

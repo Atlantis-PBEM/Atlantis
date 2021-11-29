@@ -155,30 +155,37 @@ UnitId *Game::ParseUnit(AString *s)
 	}
 }
 
-int ParseFactionType(AString *o, int *type)
+int ParseFactionType(AString *o, std::unordered_map<std::string, int> &type)
 {
-	int i;
-	for (i=0; i<NFACTYPES; i++) type[i] = 0;
+	for (auto &ft : *FactionTypes) {
+		type[ft] = 0;
+	}
 
 	AString *token = o->gettoken();
 	if (!token) return -1;
 
 	if (*token == "generic") {
 		delete token;
-		for (i=0; i<NFACTYPES; i++) type[i] = 1;
+		int i;
+		
+		for (auto &ft : *FactionTypes) {
+			type[ft] = 1;
+		}
+
 		return 0;
 	}
 
 	while(token) {
-		int foundone = 0;
-		for (i=0; i<NFACTYPES; i++) {
-			if (*token == FactionStrs[i]) {
+		bool foundone = false;
+		
+		for (auto &ft : *FactionTypes) {
+			if (*token == ft.c_str()) {
 				delete token;
 				token = o->gettoken();
 				if (!token) return -1;
-				type[i] = token->value();
+				type[ft] = token->value();
 				delete token;
-				foundone = 1;
+				foundone = true;
 				break;
 			}
 		}
@@ -190,8 +197,8 @@ int ParseFactionType(AString *o, int *type)
 	}
 
 	int tot = 0;
-	for (i=0; i<NFACTYPES; i++) {
-		tot += type[i];
+	for (auto &kv : type) {
+		tot += kv.second;
 	}
 	if (tot > Globals->FACTION_POINTS) return -1;
 
@@ -1193,14 +1200,13 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	int oldfactype[NFACTYPES];
-	int factype[NFACTYPES];
+	std::unordered_map<std::string, int> oldfactype;
+	std::unordered_map<std::string, int> factype;
 
 	int i;
 	if (!pCheck) {
-		for (i = 0; i < NFACTYPES; i++) {
-			oldfactype[i] = u->faction->type[i];
-		}
+		// copy current values into temp variable
+		oldfactype = u->faction->type;
 	}
 
 	int retval = ParseFactionType(o, factype);
@@ -1213,14 +1219,13 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		int m = CountMages(u->faction);
 		int a = CountApprentices(u->faction);
 
-		for (i = 0; i < NFACTYPES; i++) u->faction->type[i] = factype[i];
+		u->faction->type = factype;
 
 		if (m > AllowedMages(u->faction)) {
 			u->Error(AString("FACTION: Too many mages to change to that "
 							 "faction type."));
 
-			for (i = 0; i < NFACTYPES; i++)
-				u->faction->type[i] = oldfactype[i];
+			u->faction->type = oldfactype;
 
 			return;
 		}
@@ -1231,8 +1236,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				"s to change to that "
 				 "faction type.");
 
-			for (i = 0; i < NFACTYPES; i++)
-				u->faction->type[i] = oldfactype[i];
+			u->faction->type = oldfactype;
 
 			return;
 		}
@@ -1244,8 +1248,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				u->Error(AString("FACTION: Too many quartermasters to "
 							"change to that faction type."));
 
-				for (i = 0; i < NFACTYPES; i++)
-					u->faction->type[i] = oldfactype[i];
+				u->faction->type = oldfactype;
 
 				return;
 			}

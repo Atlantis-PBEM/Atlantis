@@ -168,88 +168,44 @@ int Game::CountMages(Faction *pFac)
 }
 */
 
-int Game::TaxCheck(ARegion *pReg, Faction *pFac)
-{
-	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		if (AllowedTaxes(pFac) == -1) {
-			//
-			// No limit.
-			//
-			return(1);
-		}
-
-		forlist(&(pFac->war_regions)) {
-			ARegion *x = ((ARegionPtr *) elem)->ptr;
-			if (x == pReg) {
-				//
-				// This faction already performed a tax action in this
-				// region.
-				//
-				return 1;
-			}
-		}
-		if (pFac->war_regions.Num() >= AllowedTaxes(pFac)) {
-			//
-			// Can't tax here.
-			//
-			return 0;
-		} else {
-			//
-			// Add this region to the faction's tax list.
-			//
-			ARegionPtr *y = new ARegionPtr;
-			y->ptr = pReg;
-			pFac->war_regions.Add(y);
-			return 1;
-		}
-	} else {
-		//
-		// No limit on taxing regions in this game.
-		//
-		return(1);
+bool Game::ActivityCheck(ARegion *pReg, Faction *pFac, FactionActivity activity) {
+	if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_FACTION_TYPES) {
+		// No limit on any activity in this game.
+		return true;
 	}
-}
 
-int Game::TradeCheck(ARegion *pReg, Faction *pFac)
-{
-	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		if (AllowedTrades(pFac) == -1) {
-			//
-			// No limit on trading on this faction.
-			//
-			return(1);
-		}
-
-		forlist(&(pFac->trade_regions)) {
-			ARegion *x = ((ARegionPtr *) elem)->ptr;
-			if (x == pReg) {
-				//
-				// This faction has already performed a trade action in this
-				// region.
-				//
-				return 1;
-			}
-		}
-		if (pFac->trade_regions.Num() >= AllowedTrades(pFac)) {
-			//
-			// This faction is over its trade limit.
-			//
-			return 0;
-		} else {
-			//
-			// Add this region to the faction's trade list, and return 1.
-			//
-			ARegionPtr *y = new ARegionPtr;
-			y->ptr = pReg;
-			pFac->trade_regions.Add(y);
-			return 1;
-		}
-	} else {
-		//
-		// No limit on trade in this game.
-		//
-		return(1);
+	if (pFac->IsActivityRecorded(pReg, activity)) {
+		// this activity is already performed in region
+		return true;
 	}
+
+	int currentCost = pFac->GetActivityCost(activity);
+	int maxAllowedCost = 0;
+
+	if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) {
+		if (activity == FactionActivity::TAX) {
+			maxAllowedCost = AllowedTaxes(pFac);
+		}
+
+		if (activity == FactionActivity::TRADE) {
+			maxAllowedCost = AllowedTrades(pFac);
+		}
+	}
+	else {
+		maxAllowedCost = AllowedMartial(pFac);
+	}
+
+	if (maxAllowedCost == -1) {
+		return true;
+	}
+
+	if (currentCost >= maxAllowedCost) {
+		return false;
+	}
+
+	pFac->RecordActivity(pReg, activity);
+
+	return true;
 }
 
 void Game::RunStealOrders()
@@ -711,7 +667,7 @@ int Game::CountTaxes(ARegion *reg)
 					protect -= u->GetMen();
 					if (protect < 0) protect = 0;
 					if (men) {
-						if (!TaxCheck(reg, u->faction)) {
+						if (!ActivityCheck(reg, u->faction, FactionActivity::TAX)) {
 							u->Error("TAX: Faction can't tax that many "
 									"regions.");
 							u->taxing = TAX_NONE;
@@ -777,7 +733,7 @@ int Game::CountPillagers(ARegion *reg)
 				} else {
 					int men = u->Taxers(1);
 					if (men) {
-						if (!TaxCheck(reg, u->faction)) {
+						if (!ActivityCheck(reg, u->faction, FactionActivity::TAX)) {
 							u->Error("PILLAGE: Faction can't tax that many "
 									"regions.");
 							u->taxing = TAX_NONE;
@@ -3257,7 +3213,7 @@ void Game::CheckTransportOrders()
 					}
 
 					// Check if we have a trade hex
-					if (!Globals->TRANSPORT_NO_TRADE && !TradeCheck(r, u->faction)) {
+					if (!Globals->TRANSPORT_NO_TRADE && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 						u->Error(ordertype + ": Faction cannot transport or "
 								"distribute in that many hexes.");
 						o->type = NORDERS;

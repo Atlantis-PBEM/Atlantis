@@ -58,6 +58,8 @@ extern int *allowedQuartermasters;
 extern int allowedQuartermastersSize;
 extern int *allowedTacticians;
 extern int allowedTacticiansSize;
+extern int *allowedMartial;
+extern int allowedMartialSize;
 
 extern int NUMBATTLEITEMS;
 extern int NUMARMORS;
@@ -70,6 +72,12 @@ enum BattleLogLevel {
 	NORMAL   = 0,	// Standard battle log
 	DETAILED = 1,	// Will include detailed statistics after the battle
 	VERBOSE  = 2	// Will include additionaly statistics for each battle round
+};
+
+enum FactionActivityRules {
+	DEFAULT        = 0,	// Default behavior, War and Trade have their own points it faction is limited by the activity at all.
+	MARTIAL        = 1,	// Common point pool for War and Trade activity. War and Trade activity in the same region will take 2 points.
+	MARTIAL_MERGED = 2	// Common point pool for War and Trade activity, but counted per region - do what you want in a region.
 };
 
 class GameDefs {
@@ -766,6 +774,9 @@ public:
 
 	// TRANSPORT / DISTRIBUTE orders should not use Trade point
 	int TRANSPORT_NO_TRADE;
+
+	// How to count faction activit. See FactionActivty enum for more details.
+	FactionActivityRules FACTION_ACTIVITY;
 };
 
 extern GameDefs *Globals;
