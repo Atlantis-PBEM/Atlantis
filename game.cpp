@@ -45,6 +45,18 @@ Game::Game()
 	ppUnits = 0;
 	maxppunits = 0;
 	events = new Events();
+
+	if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT)
+	{
+		FactionTypes->push_back(F_WAR);
+		FactionTypes->push_back(F_TRADE);
+		FactionTypes->push_back(F_MAGIC);
+	}
+	else
+	{
+		FactionTypes->push_back(F_MARTIAL);
+		FactionTypes->push_back(F_MAGIC);
+	}
 }
 
 Game::~Game()
@@ -1553,7 +1565,7 @@ int Game::AllowedMages(Faction *pFac)
 
 int Game::AllowedQuarterMasters(Faction *pFac)
 {
-	int points = pFac->type[F_TRADE];
+	int points = std::max(pFac->type[F_TRADE], pFac->type[F_MARTIAL]);
 
 	if (points < 0) points = 0;
 	if (points > allowedQuartermastersSize - 1)
@@ -1564,7 +1576,7 @@ int Game::AllowedQuarterMasters(Faction *pFac)
 
 int Game::AllowedTacticians(Faction *pFac)
 {
-	int points = pFac->type[F_WAR];
+	int points = std::max(pFac->type[F_WAR], pFac->type[F_MARTIAL]);
 
 	if (points < 0) points = 0;
 	if (points > allowedTacticiansSize - 1)
@@ -1586,7 +1598,7 @@ int Game::AllowedApprentices(Faction *pFac)
 
 int Game::AllowedTaxes(Faction *pFac)
 {
-	int points = pFac->type[F_WAR];
+	int points = std::max(pFac->type[F_WAR], pFac->type[F_MARTIAL]);
 
 	if (points < 0) points = 0;
 	if (points > allowedTaxesSize - 1) points = allowedTaxesSize - 1;
@@ -1596,12 +1608,22 @@ int Game::AllowedTaxes(Faction *pFac)
 
 int Game::AllowedTrades(Faction *pFac)
 {
-	int points = pFac->type[F_TRADE];
+	int points = std::max(pFac->type[F_TRADE], pFac->type[F_MARTIAL]);
 
 	if (points < 0) points = 0;
 	if (points > allowedTradesSize - 1) points = allowedTradesSize - 1;
 
 	return allowedTrades[points];
+}
+
+int Game::AllowedMartial(Faction *pFac)
+{
+	int points = pFac->type[F_MARTIAL];
+	
+	if (points < 0) points = 0;
+	if (points > allowedMartialSize - 1) points = allowedMartialSize - 1;
+
+	return allowedMartial[points];
 }
 
 int Game::UpgradeMajorVersion(int savedVersion)

@@ -82,6 +82,7 @@ public:
 	// LLS
 	void UnitFactionMap();
 	int GenRules(const AString &, const AString &, const AString &);
+	void WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac);
 	int DoOrdersCheck(const AString &strOrders, const AString &strCheck);
 
 	Faction *AddFaction(int noleader=0, ARegion *pStart = NULL);
@@ -425,8 +426,8 @@ private:
 	int AllowedTacticians(Faction *pFact);
 	int AllowedTaxes(Faction *pFac);
 	int AllowedTrades(Faction *pFac);
-	int TaxCheck(ARegion *pReg, Faction *pFac);
-	int TradeCheck(ARegion *pReg, Faction *pFac);
+	int AllowedMartial(Faction *pFac);
+	bool ActivityCheck(ARegion *pReg, Faction *pFac, FactionActivity activity);
 
 	//
 	// The DoGiveOrder returns 0 normally, or 1 if no more GIVE orders

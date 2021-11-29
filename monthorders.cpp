@@ -518,7 +518,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	int questcomplete = 0;
 	AString quest_rewards;
 
-	if (!TradeCheck(r, u->faction)) {
+	if (!ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
 		delete u->monthorders;
 		u->monthorders = 0;
@@ -921,7 +921,7 @@ void Game::CreateShip(ARegion *r, Unit * u, int ship)
  */
 int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int needed, int ship)
 {
-	if (!TradeCheck(r, u->faction)) {
+	if (!ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
 		delete u->monthorders;
 		u->monthorders = 0;
@@ -1099,7 +1099,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	// LLS
 	int number = u->GetMen() * level + u->GetProductionBonus(o->item);
 
-	if (!TradeCheck(r, u->faction)) {
+	if (!ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 		u->Error("PRODUCE: Faction can't produce in that many regions.");
 		delete u->monthorders;
 		u->monthorders = 0;
@@ -1246,7 +1246,7 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 		// Check faction limits on production. If the item is silver, then the
 		// unit is entertaining or working, and the limit does not apply
 		//
-		if (p->itemtype != I_SILVER && !TradeCheck(r, u->faction)) {
+		if (p->itemtype != I_SILVER && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 			u->Error("PRODUCE: Faction can't produce in that many regions.");
 			delete u->monthorders;
 			u->monthorders = 0;

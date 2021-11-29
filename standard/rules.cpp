@@ -58,6 +58,11 @@ static int ag[] = { 0, 1, 2, 4, 6, 10 };
 int *allowedTacticians = ag;
 int allowedTacticiansSize = sizeof(ag) / sizeof(ag[0]);
 
+// allowed Martial activity
+static int ma[] = { 0, 10, 25, 40, 60, 90 };
+int *allowedMartial = ma;
+int allowedMartialSize = sizeof(ma) / sizeof(ma[0]);
+
 static GameDefs g = {
 	"Wyreth",				// RULESET_NAME
 	MAKE_ATL_VER( 2, 0, 0 ), // RULESET_VERSION
@@ -235,8 +240,11 @@ static GameDefs g = {
 	0, // STRICT_GUARD
 	1, // OCEAN_GUARD
 	BattleLogLevel::NORMAL,	// BATTLE_LOG_LEVEL
-	1,	// WORLD_EVENTS
+	0,	// EXTENDED_FORT_DEFENCE
+	0,	// SPOILS_NO_TRADE
+	0,	// WORLD_EVENTS
 	0,	//FACTION_STATISTICS
+	FactionActivityRules::DEFAULT,	// FACTION_ACTIVITY
 };
 
 GameDefs *Globals = &g;

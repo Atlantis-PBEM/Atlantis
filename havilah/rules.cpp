@@ -58,6 +58,11 @@ static int ag[] = { 0, 1, 2, 4, 6, 10 };
 int *allowedTacticians = ag;
 int allowedTacticiansSize = sizeof(ag) / sizeof(ag[0]);
 
+// allowed Martial activity
+static int ma[] = { 0, 10, 25, 40, 60, 90 };
+int *allowedMartial = ma;
+int allowedMartialSize = sizeof(ma) / sizeof(ma[0]);
+
 static GameDefs g = {
 	"Havilah",	// RULESET_NAME
 	MAKE_ATL_VER( 1, 0, 0 ),	// RULESET_VERSION
@@ -247,6 +252,7 @@ static GameDefs g = {
 	0, // SPOILS_NO_TRADE
 	1,	// WORLD_EVENTS
 	0,	//FACTION_STATISTICS
+	FactionActivityRules::DEFAULT,	// FACTION_ACTIVITY
 };
 
 GameDefs *Globals = &g;
