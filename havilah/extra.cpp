@@ -972,13 +972,13 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyWeaponAttack("DBOW",
 			ARMORPIERCING,
 			ATTACK_RANGED,
-			WeaponType::NUM_ATTACKS_HALF_SKILL);
+			WeaponType::NUM_ATTACKS_HALF_SKILL, 1);
 	// Make DBOWs require just LBOW, not XBOW?  And downgrade
 	// them from ARMORPIERCING to just PIERCING?
 	ModifyWeaponAttack("RUNE",
 			SLASHING,
 			ATTACK_COMBAT,
-			WeaponType::NUM_ATTACKS_HALF_SKILL);
+			WeaponType::NUM_ATTACKS_HALF_SKILL, 1);
 	// EnableItem(I_CLOTHARMOR);
 	EnableItem(I_BOOTS);
 	EnableItem(I_BAXE);
@@ -1062,15 +1062,15 @@ void Game::ModifyTablesPerRuleset(void)
 			20);
 	ModifyMonsterSpecial("LICH", "icebreath", 4);
 	ModifyMonsterSpecial("BALR", "fear", 6);
-	ModifyMonsterAttacksAndHits("SKEL", 2, 2, 0);
-	ModifyMonsterAttacksAndHits("UNDE", 10, 10, 0);
-	ModifyMonsterAttacksAndHits("DEMO", 6, 6, 0);
+	ModifyMonsterAttacksAndHits("SKEL", 2, 2, 0, 1);
+	ModifyMonsterAttacksAndHits("UNDE", 10, 10, 0, 1);
+	ModifyMonsterAttacksAndHits("DEMO", 6, 6, 0, 1);
 	ModifyMonsterAttackLevel("EAGL", 4);
 	ModifyMonsterDefense("EAGL", ATTACK_COMBAT, 4);
 	ModifyMonsterDefense("EAGL", ATTACK_WEATHER, 4);
 	ModifyMonsterDefense("WOLF", ATTACK_ENERGY, 2);
 	ModifyMonsterDefense("WOLF", ATTACK_WEATHER, 2);
-	ModifyMonsterAttacksAndHits("EAGL", 3, 3, 0);
+	ModifyMonsterAttacksAndHits("EAGL", 3, 3, 0, 1);
 	ModifyMonsterSkills("LICH", 4, 0, 3);
 	ModifyMonsterSkills("BALR", 5, 1, 2);
 	ModifyMonsterSkills("DEMO", 2, 2, 3);
