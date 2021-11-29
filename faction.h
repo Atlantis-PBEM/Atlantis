@@ -120,10 +120,6 @@ enum FactionActivity {
 	TRADE   = 2
 };
 
-inline FactionActivity operator | (FactionActivity a, FactionActivity b) {
-    return static_cast<FactionActivity>(static_cast<int>(a) | static_cast<int>(b));
-}
-
 class FactionPtr : public AListElem {
 public:
 	Faction * ptr;
@@ -201,7 +197,7 @@ public:
 	// AList war_regions;
 	// AList trade_regions;
 
-	std::unordered_map<ARegion *, std::unordered_set<FactionActivity>> activity;
+	std::unordered_map<ARegion *, std::unordered_set<FactionActivity, std::hash<int>>> activity;
 	int GetActivityCost(FactionActivity type);
 	void RecordActivity(ARegion *region, FactionActivity type);
 	bool IsActivityRecorded(ARegion *region, FactionActivity type);

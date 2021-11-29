@@ -270,7 +270,15 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *
 	}
 }
 
-void ARegionList::CreateConstrainedSurfaceLevel(int level, int xSize, int ySize, char const *name, int contients, int landMass, int maxContinentSize) {
+void ARegionList::CreateConstrainedSurfaceLevel(int level, int xSize, int ySize, char const *name, int contients,
+	int landMass, int maxContinentSize,
+		int gapMin,
+		int gapMax,
+		int volcanoesMin,
+		int volcanoesMax,
+		int lakesMin,
+		int lakesMax
+	) {
 	// not implemented for this ruleset so use default
 	CreateSurfaceLevel(level, xSize, ySize, name);
 }

@@ -275,7 +275,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_JAVELIN);
 	EnableItem(I_PIKE);
 	// Hmm, shouldn't LBOW be armour piercing?
-	ModifyWeaponAttack("LBOW", ARMORPIERCING, ATTACK_RANGED, 1);
+	ModifyWeaponAttack("LBOW", ARMORPIERCING, ATTACK_RANGED, 1, 1);
 
 	//EnableItem(I_GREYELF);
 	//EnableItem(I_MINOTAUR);
@@ -377,7 +377,7 @@ void Game::ModifyTablesPerRuleset(void)
 	
 	// And modify some of the monsters...
 	// Balrogs - weaker, less loot
-	ModifyMonsterAttacksAndHits("BALR", 100, 100, 0);
+	ModifyMonsterAttacksAndHits("BALR", 100, 100, 0, 1);
 	ModifyMonsterSkills("BALR", 4, 4, 4); // tact, obse, stea
 	ModifyMonsterSpoils("BALR", 20000, IT_MAGIC);
 	
@@ -394,10 +394,10 @@ void Game::ModifyTablesPerRuleset(void)
 	
 	// Beef up Undead and Skeletons slightly, too...
 	ModifyMonsterSpecial("SKEL", "fear", 1);
-	ModifyMonsterAttacksAndHits("SKEL", 1, 2, 0);
+	ModifyMonsterAttacksAndHits("SKEL", 1, 2, 0, 1);
 	ModifyMonsterDefense("SKEL", 5, 2); // skel resist missile attacks
 	ModifyMonsterSpecial("UNDE", "fear", 3);
-	ModifyMonsterAttacksAndHits("UNDE", 5, 10, 0);
+	ModifyMonsterAttacksAndHits("UNDE", 5, 10, 0, 1);
 	ModifyMonsterDefense("UNDE", 5, 1); // unde resist missile attacks slightly
 
 	// Reduce spoils for mermen, pirates, 
@@ -405,7 +405,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyMonsterSpoils("PIRA", 200, IT_NORMAL);
 
 	// Trolls should regenerate!
-	ModifyMonsterAttacksAndHits("TROL", 32, 32, 4);
+	ModifyMonsterAttacksAndHits("TROL", 32, 32, 4, 1);
 
 	// Living Trees (ie Ents) should resist missile attacks
 	ModifyMonsterDefense("TREN", 5, 3);
@@ -415,7 +415,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyMonsterSkills("SPHI", 4, 3, 0); // tact, obse, stea
 	
 	// Ogres aren't very tough at all!
-	ModifyMonsterAttacksAndHits("OGRE", 10, 20, 0);
+	ModifyMonsterAttacksAndHits("OGRE", 10, 20, 0, 1);
 	ModifyMonsterSkills("OGRE", 1, 0, 0); // tact, obse, stea
 	
 	// Cut out some of the crappier trade items. 

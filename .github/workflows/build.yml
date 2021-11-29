@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+      - neworigins
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  compile:
+    name: Complie code
+    runs-on: ${{ format('{0}-latest', matrix.os) }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu
+          - windows
+          - macos
+        ruleset:
+          - basic
+          - fracas
+          - havilah
+          - kingdoms
+          - neworigins
+          - standard
+        include:
+           - os: windows
+             ext: .exe
+    steps:
+    - uses: actions/checkout@v2
+    - run: make clean ${{ matrix.ruleset }} && make ${{ matrix.ruleset }}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.ruleset }}_${{ matrix.os }}
+        path: ${{ matrix.ruleset }}/${{ matrix.ruleset }}${{ matrix.ext }}
