@@ -28,9 +28,9 @@ jobs:
         with:
           name: ${{ matrix.os }}
           path: |
-              basic\basic${{ matrix.ext }}
-              fracas\fracas${{ matrix.ext }}
-              havilah\havilah${{ matrix.ext }}
-              kingdoms\kingdoms${{ matrix.ext }}
-              neworigins\neworigins${{ matrix.ext }}
-              standard\standard${{ matrix.ext }}
+              basic/basic${{ matrix.ext }}
+              fracas/fracas${{ matrix.ext }}
+              havilah/havilah${{ matrix.ext }}
+              kingdoms/kingdoms${{ matrix.ext }}
+              neworigins/neworigins${{ matrix.ext }}
+              standard/standard${{ matrix.ext }}
