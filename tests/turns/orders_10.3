@@ -1,0 +1,58 @@
+
+Orders Template (Long Format):
+
+#atlantis 3
+
+;*** plain (28,10) in Koheda, contains Thandianost [city] ***
+
+unit 152
+;Workers (152), revealing faction, won't cross water, 10 nomads [NOMA],
+;  496 silver [SILV]. Weight: 100. Capacity: 0/0/150/0. Skills: none.
+@work
+
+;*** plain (29,11) in Koheda ***
+
+unit 164
+;Scout (164), revealing faction, won't cross water, plainsman [PLAI],
+;  20 silver [SILV]. Weight: 10. Capacity: 0/0/15/0. Skills: none.
+@work
+
+unit 167
+;King's Guards (167), on guard, revealing faction, won't cross water,
+;  47 high elves [HELF], 4880 silver [SILV]. Weight: 470. Capacity:
+;  0/0/705/0. Skills: combat [COMB] 1 (30).
+@guard 1
+@tax
+@work
+
+;*** plain (28,12) in Koheda, contains Hynodale [town] ***
+
+unit 140
+;King (140), revealing faction, won't cross water, leader [LEAD].
+;  Weight: 10. Capacity: 0/0/15/0. Skills: pattern [PATT] 1 (30),
+;  spirit [SPIR] 1 (30), gate lore [GATE] 1 (30), force [FORC] 1 (60),
+;  fire [FIRE] 1 (30). Can Study: earthquake [EQUA], force shield
+;  [FSHI], energy shield [ESHI], spirit shield [SSHI], magical healing
+;  [MHEA], farsight [FARS], mind reading [MIND], weather lore [WEAT],
+;  earth lore [EART], necromancy [NECR], demon lore [DEMO], illusion
+;  [ILLU], artifact lore [ARTI].
+STUDY FORC 2
+STUDY FIRE 2
+
+unit 155
+;Ranchers (155), revealing faction, sharing, won't cross water, 10
+;  plainsmen [PLAI], 10 livestock [LIVE], 98 silver [SILV]. Weight:
+;  600. Capacity: 0/0/650/0. Skills: farming [FARM] 1 (30).
+@share 1
+@sell all LIVE
+@produce LIVE
+
+unit 156
+;Workers (156), revealing faction, sharing, won't cross water, 10
+;  plainsmen [PLAI], 147 silver [SILV]. Weight: 100. Capacity:
+;  0/0/150/0. Skills: none.
+@share 1
+@work
+
+#end
+
