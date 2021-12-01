@@ -179,7 +179,7 @@ void Unit::SetMonFlags()
 	tactics = TACTICS_AGGRESSIVE;
 }
 
-void Unit::MakeWMon(char *monname, int mon, int num)
+void Unit::MakeWMon(char const *monname, int mon, int num)
 {
 	AString *temp = new AString(monname);
 	SetName(temp);
@@ -231,7 +231,7 @@ void Unit::Writeout(Aoutfile *s)
 	else s->PutStr("NO_SKILL");
 }
 
-void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
+void Unit::Readin(Ainfile *s, AList *facs, ATL_VER)
 {
 	name = s->GetStr();
 	describe = s->GetStr();
@@ -869,7 +869,7 @@ void Unit::DefaultOrders(Object *obj, int peasantfac)
 	}
 }
 
-void Unit::PostTurn(ARegion *r)
+void Unit::PostTurn(ARegion*)
 {
 	if (type == U_WMON) {
 		forlist(&items) {
@@ -1249,7 +1249,7 @@ int Unit::Study(int sk, int days, int quiet, int overflow)
 			s = (Skill *) skills.First();
 			if (s->type != sk) {
 			    //Real experience patch
-			    if(s->days >= 30*GetMen() || s->experience >= 30*GetMen()) {
+			    if(s->days >= 30*static_cast<unsigned int>(GetMen()) || s->experience >= 30*static_cast<unsigned int>(GetMen())) {
     				Error("STUDY: Can know only 1 skill.", quiet);
     				return 0;
 				}
@@ -1544,8 +1544,8 @@ void Unit::AdjustSkills(int overflow)
 				forlist(&skills) {
 					Skill *s = (Skill *) elem;
 					if (s->days + s->experience > max) {
-					    if(s->days >= 30 || s->experience >= 30 || maxlevel == 0) 
-						max = s->days + s->experience;
+						if(s->days >= 30 || s->experience >= 30 || maxlevel == 0)
+							max = s->days + s->experience;
 						if(s->days >= 30 || s->experience >= 30) maxlevel = 1;
 						maxskill = s;
 					}
@@ -1601,7 +1601,6 @@ int Unit::MaintCost()
 	if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE) return 0;
 
 	int men = GetMen();
-	int okethnic = 0;
 	
 	if(Globals->ARCADIA_MAGIC) {	    
 	    int type = GetEthnicity();
@@ -1616,7 +1615,9 @@ int Unit::MaintCost()
         		}
         	}
 	    } else if(type != faction->ethnicity) men *= 2;  //double maintenance cost for non-ethnic men.
-	    else okethnic = 1;
+	    else {
+		    // do nothing
+	    }
 	}
 	
 	if(type == U_LEADER || type == U_MAGE) {
@@ -2421,12 +2422,14 @@ int Unit::Taxers(int numtaxers)
 	if (taxers > totalMen) taxers = totalMen;
 
 	// And finally for creatures
-	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES)
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES) {
 		basetax += creatures;
 		taxers += creatures;
-	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
+	}
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS) {
 		basetax += illusions;
 		taxers += illusions;
+	}
 		
 
 	if(numtaxers) return(taxers);
@@ -2558,7 +2561,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int ocean, int &bonus,
 		if(ItemDefs[item].fly && !canFly) {
 			if(bonus > pMnt->maxHamperedBonus)
 				bonus = pMnt->maxHamperedBonus;
-				type = 2;
+			type = 2;
 		}
 
 		// Practice the mount's skill
@@ -2647,7 +2650,7 @@ void Unit::Message(const AString & s)
 	faction->Message(s);
 }
 
-int Unit::GetAttribute(char *attrib)
+int Unit::GetAttribute(char const *attrib)
 {
 	AttribModType *ap = FindAttrib(attrib);
 	if(ap == NULL) return 0;
@@ -2750,7 +2753,7 @@ int Unit::GetAttribute(char *attrib)
 	return base;
 }
 
-int Unit::PracticeAttribute(char *attrib)
+int Unit::PracticeAttribute(char const *attrib)
 {
 	AttribModType *ap = FindAttrib(attrib);
 	if(ap == NULL) return 0;

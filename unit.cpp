@@ -209,7 +209,7 @@ void Unit::Writeout(Aoutfile *s)
 	}
 }
 
-void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
+void Unit::Readin(Ainfile *s, AList *facs, ATL_VER )
 {
 	name = s->GetStr();
 	describe = s->GetStr();
@@ -796,7 +796,7 @@ void Unit::DefaultOrders(Object *obj)
 	}
 }
 
-void Unit::PostTurn(ARegion *r)
+void Unit::PostTurn(ARegion*)
 {
 	if (type == U_WMON) {
 		forlist(&items) {
@@ -2125,12 +2125,14 @@ int Unit::Taxers(int numtaxers)
 	if (taxers > totalMen) taxers = totalMen;
 
 	// And finally for creatures
-	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES)
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES) {
 		basetax += creatures;
 		taxers += creatures;
-	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
+	}
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS) {
 		basetax += illusions;
 		taxers += illusions;
+	}
 	
 	if (numtaxers) return(taxers);
 

@@ -1154,7 +1154,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"safety is given.";
 		f.Paragraph(temp);
 		int num_methods = 1 + (Globals->GATES_EXIST?1:0) + (may_sail?1:0);
-		char *methods[] = {"You must go ", "The first is ", "The second is "};
+		char const *methods[] = {"You must go ", "The first is ", "The second is "};
 		int method = 1;
 		if (num_methods == 1) method = 0;
 		temp = AString("There ") + (num_methods == 1?"is ":"are ") +

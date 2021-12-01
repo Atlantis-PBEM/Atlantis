@@ -362,8 +362,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						if (unit->inTurnBlock)
 							ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
-							if (!pCheck && unit->former && unit->former->format)
-								unit->former->oldorders.Add(new AString(saveorder));
+						if (!pCheck && unit->former && unit->former->format)
+							unit->former->oldorders.Add(new AString(saveorder));
 						if (pCheck && former) delete unit;
 						unit = former;
 					} else {
@@ -2957,7 +2957,7 @@ void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessIdleOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+void Game::ProcessIdleOrder(Unit *u, AString*, OrdersCheck *pCheck)
 {
 	if (u->monthorders || (Globals->TAX_PILLAGE_MONTH_LONG &&
 		((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {

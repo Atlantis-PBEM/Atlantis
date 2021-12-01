@@ -1173,7 +1173,7 @@ void Game::ProcessCombatOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessCommandOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+void Game::ProcessCommandOrder(Unit *u, AString*, OrdersCheck *pCheck)
 {
 	if(!pCheck) {
 		if (u->type != U_MAGE) {
@@ -1238,7 +1238,7 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	if (!bt->flags & BattleItemType::SPECIAL) {
+	if (!(bt->flags & BattleItemType::SPECIAL)) {
 		ParseError(pCheck, u, 0, "PREPARE: That item cannot be prepared.");
 		return;
 	}
@@ -1570,7 +1570,7 @@ void Game::ProcessRestartOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessDestroyOrder(Unit *u, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessDestroyOrder(Unit *u, OrdersCheck *pCheck, int)
 {
 	if(!pCheck) {
 		u->destroy = 1;             //No easy way of keeping this quiet
@@ -1719,7 +1719,7 @@ void Game::ProcessRevealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessTaxOrder(Unit *u, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessTaxOrder(Unit *u, OrdersCheck *pCheck, int)
 {
 	if (u->taxing == TAX_PILLAGE) {
 		ParseError(pCheck, u, 0, "TAX: The unit is already pillaging.");
@@ -1737,7 +1737,7 @@ void Game::ProcessTaxOrder(Unit *u, OrdersCheck *pCheck, int isquiet)
 	u->taxing = TAX_TAX;   //no easy way to keep quiet
 }
 
-void Game::ProcessPillageOrder(Unit *u, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessPillageOrder(Unit *u, OrdersCheck *pCheck, int)
 {
 	if (u->taxing == TAX_TAX) {
 		ParseError(pCheck, u, 0, "PILLAGE: The unit is already taxing.");
@@ -1771,7 +1771,7 @@ void Game::ProcessPromoteOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isq
 	}
 }
 
-void Game::ProcessLeaveOrder(Unit *u, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessLeaveOrder(Unit *u, OrdersCheck *pCheck, int)
 {
 	if(!pCheck) {
 //		if (u->monthorders && u->monthorders->type == O_BUILD) return;
@@ -1779,7 +1779,7 @@ void Game::ProcessLeaveOrder(Unit *u, OrdersCheck *pCheck, int isquiet)
 	}
 }
 
-void Game::ProcessEnterOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessEnterOrder(Unit *u, AString *o, OrdersCheck *pCheck, int)
 {
 	AString *token = o->gettoken();
 	if (!token) {
@@ -2181,7 +2181,7 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isqui
 	    delete token;	
 	} else ord->level = 0; //STUDY order mod end	
 	
-	if(pCheck || u->IsMage() && Globals->ARCADIA_MAGIC) {
+	if(pCheck || (u->IsMage() && Globals->ARCADIA_MAGIC)) {
 	    if(u->herostudyorders) {
 	        delete u->herostudyorders;
             AString err = "STUDY: Overwriting previous ";
@@ -2317,7 +2317,7 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int
 	return;
 }
 
-void Game::ProcessMasterOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessMasterOrder(Unit *unit, AString*, OrdersCheck *pCheck, int)
 {
     //MASTER not enabled for Xanaxor
 	ParseError(pCheck, unit, 0, "MASTER is not a valid order.");
@@ -2477,7 +2477,6 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 	tOrder->repeating = repeat;
 
 	AString *order, *token;
-	int atsign;
 
 	while (turnDepth) {
 		// get the next line
@@ -2495,7 +2494,6 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 			order = new AString("#end");
 		}
 		AString	saveorder = *order;
-		atsign = order->getat();
 		token = order->gettoken();
 
 		if (token) {
@@ -3124,7 +3122,7 @@ void Game::ProcessDescribeOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int
 	ParseError(pCheck, unit, 0, "DESCRIBE: Can't describe that.");
 }
 
-void Game::ProcessLabelOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessLabelOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int)
 {
 	AString *token = o->gettoken();
 	if(!pCheck) {
@@ -3281,7 +3279,7 @@ void Game::ProcessNameOrder(Unit *unit, AString *o, OrdersCheck *pCheck, int isq
 	ParseError(pCheck, unit, 0, "NAME: Can't name that.");
 }
 
-void Game::ProcessGuardOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet)
+void Game::ProcessGuardOrder(Unit *u, AString *o, OrdersCheck *pCheck, int)
 {
 	/* This is an instant order */
 	AString *token = o->gettoken();
@@ -3855,7 +3853,7 @@ void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isqui
 	}
 }
 
-void Game::ProcessIdleOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+void Game::ProcessIdleOrder(Unit *u, AString*, OrdersCheck *pCheck)
 {
 	if (u->monthorders || (Globals->TAX_PILLAGE_MONTH_LONG &&
 		((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
@@ -3872,7 +3870,7 @@ void Game::ProcessIdleOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet)
 {
-    if(!Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+    if(!(Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT)) {
         ParseError(pCheck, u, 0, "TRANSPORT: Invalid order.");
         return;
     }
@@ -3937,7 +3935,7 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck, int i
 
 void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck, int isquiet)
 {
-    if(!Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+    if(!(Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT)) {
         ParseError(pCheck, u, 0, "DISTRIBUTE: Invalid order.");
         return;
     }

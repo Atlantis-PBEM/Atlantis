@@ -2191,17 +2191,17 @@ int Game::AllowedTrades(Faction *pFac)
 	return allowedTrades[points];
 }
 
-int Game::UpgradeMajorVersion(int savedVersion)
+int Game::UpgradeMajorVersion(int)
 {
 	return 0;
 }
 
-int Game::UpgradeMinorVersion(int savedVersion)
+int Game::UpgradeMinorVersion(int)
 {
 	return 1;
 }
 
-int Game::UpgradePatchLevel(int savedVersion)
+int Game::UpgradePatchLevel(int)
 {
 	return 1;
 }

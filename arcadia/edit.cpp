@@ -2613,7 +2613,7 @@ void Game::ImportMapFile(AString *filename, int level)
 }
 
 
-void ARegion::SetEthnicity(int ethnicity, ARegionList *pRegs)
+void ARegion::SetEthnicity(int ethnicity, ARegionList* )
 {
 Awrite(EthnicityString(ethnicity));
     int chance = getrandom(100);

@@ -688,7 +688,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 /* Alternate processing for building item-type ship
  * objects and instantiating fleets.
  */
-void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
+void Game::RunBuildShipOrder(ARegion * r,Object*,Unit * u)
 {
 	int ship, skill, level, maxbuild, unfinished, output, percent;
 	AString skname;

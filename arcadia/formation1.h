@@ -107,7 +107,7 @@ class Formation
 		void Regenerate(Battle *b) const;
 
 		//Magic Targetting:
-		int CheckSpecialTarget(char *, int soldiernum) const; //This is in specials.cpp
+		int CheckSpecialTarget(char const *, int soldiernum) const; //This is in specials.cpp
 		
 		//Formation Phase methods
 		int Engaged(Army *itsarmy) const;

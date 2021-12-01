@@ -2062,7 +2062,7 @@ void CountNames()
 	Awrite(AString("Regions ") + nregions);
 }
 
-int AGetName(int town, ARegion *reg)
+int AGetName(int town, ARegion*)
 {
 	int offset, number;
 	if (town) {
@@ -2455,7 +2455,7 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
 	}
 }
 
-int ARegion::CanBeStartingCity( ARegionArray *pRA )
+int ARegion::CanBeStartingCity( ARegionArray* )
 {
 	if (type == R_OCEAN) return 0;
 	if (!IsCoastal()) return 0;

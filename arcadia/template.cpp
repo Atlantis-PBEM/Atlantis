@@ -40,7 +40,7 @@
 
 static void TrimWrite(Areport *f, char *buffer);
 
-static char *TemplateMap[] = {
+static char const *TemplateMap[] = {
  //12345678901234567890
   "        ____        ",   // 1
   "nw     /    \\     ne",  // 2
@@ -69,7 +69,7 @@ static int dircrd[] = {
 };
 
 //this crashes if more terrain types are added!
-static char *ter_fill[] = {
+static char const *ter_fill[] = {
  // block
  " #### ",
  " #### ",
@@ -333,7 +333,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	if(Globals->WEATHER_EXISTS) {
 		GetMapLine(buffer, line, pRegs);
 
-		char* nextWeather = "";
+		char const * nextWeather = "";
 		int nxtweather = pRegs->GetWeather(this, (month + 1) % 12);
 		if (nxtweather == W_WINTER)
 			nextWeather = "winter";
@@ -525,7 +525,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 // NEW FUNCTION DK 2000.03.07,
 // converted WriteExits
 //
-void ARegion::GetMapLine(char *buffer, int line, ARegionList *pRegs)
+void ARegion::GetMapLine(char *buffer, int line, ARegionList*)
 {
 	for (int m=0; m<MAP_WIDTH; m++) {
 		buffer[m] = ' ';

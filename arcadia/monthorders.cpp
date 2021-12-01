@@ -32,6 +32,8 @@
 //#define DEBUG
 #endif
 
+// replace with [[maybe_unused]] when c++17 is supported
+#define MAYBE_UNUSED __attribute__ ((unused))
 
 #include "game.h"
 #include "gamedata.h"
@@ -649,7 +651,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 			Unit * u = reg->GetUnitId(id,unit->faction->num);
 
 			//int sk = ((StudyOrder *) u->monthorders)->skill;
-            int sk;
+            MAYBE_UNUSED int sk;
             if(Globals->ARCADIA_MAGIC && u->IsMage() && u->herostudyorders) {
                sk = ((StudyOrder *) u->herostudyorders)->skill;
             } else sk = ((StudyOrder *) u->monthorders)->skill;
@@ -695,7 +697,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
     			Unit * u = reg->GetUnitId(id,unit->faction->num);
 
     			//int sk = ((StudyOrder *) u->monthorders)->skill;
-                int sk;
+                MAYBE_UNUSED int sk;
                 if(Globals->ARCADIA_MAGIC && u->IsMage() && u->herostudyorders) {
                    sk = ((StudyOrder *) u->herostudyorders)->skill;
                 } else sk = ((StudyOrder *) u->monthorders)->skill;
@@ -723,7 +725,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 }
 
 /* Hexside Patch 030825 BS */
-int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit * u)
+int Game::HexsideCanGoThere(ARegion * r,Object * obj,Unit*)
 {
     int dir = obj->hexside;
     if(dir < 0 || dir > 5) return 0;
@@ -941,7 +943,7 @@ void Game::Run1BuildOrder(ARegion * r,Object * obj,Unit * u)
 	u->monthorders = 0;
 }
 
-void Game::Run1BuildHexsideOrder(ARegion * r,Object * obj,Unit * u)
+void Game::Run1BuildHexsideOrder(ARegion * r,Object*,Unit * u)
 {
     int quiet = u->monthorders->quiet;
 

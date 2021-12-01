@@ -561,7 +561,7 @@ void Soldier::Dead()
 	else unit->dead = unit->faction->num; //ARCADIA_MAGIC mod. Mages don't disappear, they become spirits of the dead.
 }
 
-int Soldier::HasEffect(char *eff)
+int Soldier::HasEffect(char const *eff)
 //imported direct from old code.
 {
 	if(eff == NULL) return 0;
@@ -569,7 +569,7 @@ int Soldier::HasEffect(char *eff)
 	return effects[e->effectnum];
 }
 
-void Soldier::SetEffect(char *eff, int form, Army *army)
+void Soldier::SetEffect(char const *eff, int form, Army *army)
 {
 	if(eff == NULL) return;
 	int i;
@@ -627,7 +627,7 @@ void Soldier::SetEffect(char *eff, int form, Army *army)
 	}
 }
 
-void Soldier::ClearEffect(char *eff)
+void Soldier::ClearEffect(char const *eff)
 {
 	if(eff == NULL) return;
 	int i;
