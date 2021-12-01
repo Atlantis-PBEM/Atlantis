@@ -254,6 +254,9 @@ static GameDefs g = {
 	1,  // BUILD_NO_TRADE
 	1, // TRANSPORT_NO_TRADE
 	FactionActivityRules::DEFAULT,	// FACTION_ACTIVITY
+	DestroyBehavior::PER_SKILL,	// DESTROY_BEHAVIOR
+	200,	// MIN_DESTROY_POINTS,
+	34,	// MAX_DESTROY_PERCENT
 };
 
 GameDefs *Globals = &g;

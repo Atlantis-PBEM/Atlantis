@@ -87,6 +87,7 @@ Object::Object(ARegion *reg)
 	region = reg;
 	prevdir = -1;
 	flying = 0;
+	destroyed = 0;
 	movepoints = Globals->PHASED_MOVE_OFFSET % Globals->MAX_SPEED;
 	ships.Empty();
 }

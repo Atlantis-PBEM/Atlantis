@@ -80,6 +80,12 @@ enum FactionActivityRules {
 	MARTIAL_MERGED = 2	// Common point pool for War and Trade activity, but counted per region - do what you want in a region.
 };
 
+enum DestroyBehavior {
+	INSTANT    = 0,	// default behavior,any unit can instantly destroy any building
+	PER_FIGURE = 1,	// one man will destroy one building strucure point, it is assumed that destroy power is 1
+	PER_SKILL  = 2	// use building skill as a basis how much can be destroyed. The formula is: destroy power = max(1, BUILDING skill level)
+};
+
 class GameDefs {
 public:
 	char const *RULESET_NAME;
@@ -777,6 +783,18 @@ public:
 
 	// How to count faction activit. See FactionActivty enum for more details.
 	FactionActivityRules FACTION_ACTIVITY;
+
+	// how buildings are destroyed, read more in DestroyBehavior enum
+	DestroyBehavior DESTROY_BEHAVIOR;
+
+	// set folowing value when DESTROY_BEHAVIOR is not INSTANT
+	// how much structure points can be destroyed per turn
+	// MAX_DESTROY_PERCENT accepts values from [1..100]
+	// MIN_DESTROY_POINTS accepts [0..infinity]
+	// formula:
+	//     turn destroyable points = max(MIN_DESTROY_POINTS, Max Structure Points * MAX_DESTROY_PERCENT / 100)
+	int MIN_DESTROY_POINTS;
+	int MAX_DESTROY_PERCENT;
 };
 
 extern GameDefs *Globals;

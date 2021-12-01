@@ -141,6 +141,7 @@ class Object : public AListElem
 		int mages;
 		int shipno;
 		int movepoints;
+		int destroyed;	// how much points was destroyed so far this turn
 		AList units;
 		AList ships;
 };
