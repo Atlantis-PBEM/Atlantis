@@ -565,13 +565,13 @@ AString *ShowSkill::Report(Faction *f)
 					"and determine the faction affiliation of any unit he can "
 					"see. To use the spell in this manner, CAST Mind_Reading "
 					"<unit>, where <unit> is the target unit.";
-			} else if (level == 3) {
-				*str += "A mage with Mind Reading skill 3 will automatically "
+			} else if (level == 2) {
+				*str += "A mage with Mind Reading skill 2 will automatically "
 					"determine the faction affiliation of any unit he can "
 					"see. Usage of this skill is automatic, and no order is "
 					"needed to use it.";
-			} else if (level == 5) {
-				*str += "A mage with Mind Reading skill 5 can get a full "
+			} else if (level == 3) {
+				*str += "A mage with Mind Reading skill 3 can get a full "
 					"unit report on any unit he can see. To use this skill, "
 					"CAST Mind_Reading <unit> where <unit> is the target "
 					"unit.";

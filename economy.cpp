@@ -753,15 +753,15 @@ void ARegion::SetupProds()
 			switch (foodchoice) {
 				case 0:
 					if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
-						p = new Production(I_GRAIN, typer->economy);
+						p = new Production(I_GRAIN, typer->economy * 2);
 					break;
 				case 1:
 					if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
-						p = new Production(I_LIVESTOCK, typer->economy);
+						p = new Production(I_LIVESTOCK, typer->economy * 2);
 					break;
 				case 2:
 					if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
-						p = new Production(I_FISH, typer->economy);
+						p = new Production(I_FISH, typer->economy * 2);
 					break;
 			}
 			products.Add(p);

@@ -937,7 +937,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 	AString temp = AString("Casts Mind Reading: ") + *(tar->name) + ", " +
 		*(tar->faction->name);
 
-	if (level < 4) {
+	if (level < 3) {
 		u->Event(temp + ".");
 		return 1;
 	}

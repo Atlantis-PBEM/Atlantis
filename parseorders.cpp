@@ -3051,12 +3051,14 @@ void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		ParseError(pCheck, u, 0, "DISTRIBUTE: No item given.");
 		return;
 	}
+
 	int item = ParseTransportableItem(token);
-	delete token;
 	if (item == -1) {
-		ParseError(pCheck, u, 0, "DISTRIBUTE: Invalid item.");
+		ParseError(pCheck, u, 0, AString("DISTRIBUTE: Invalid item ") + AString(*token) + ".");
+		delete token;
 		return;
 	}
+	delete token;
 
 	int except = 0;
 	token = o->gettoken();

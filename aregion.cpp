@@ -1462,7 +1462,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			Object *o = (Object *) elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
-				if (u->faction == fac && u->GetSkill(S_MIND_READING) > 2) {
+				if (u->faction == fac && u->GetSkill(S_MIND_READING) > 1) {
 					detfac = 1;
 				}
 			}
@@ -1471,7 +1471,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			forlist(&farsees) {
 				Farsight *watcher = (Farsight *)elem;
 				if (watcher && watcher->faction == fac && watcher->unit) {
-					if (watcher->unit->GetSkill(S_MIND_READING) > 2) {
+					if (watcher->unit->GetSkill(S_MIND_READING) > 1) {
 						detfac = 1;
 					}
 				}
@@ -1483,7 +1483,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			forlist(&passers) {
 				Farsight *watcher = (Farsight *)elem;
 				if (watcher && watcher->faction == fac && watcher->unit) {
-					if (watcher->unit->GetSkill(S_MIND_READING) > 2) {
+					if (watcher->unit->GetSkill(S_MIND_READING) > 1) {
 						passdetfac = 1;
 					}
 				}

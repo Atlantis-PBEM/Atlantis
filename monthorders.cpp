@@ -518,7 +518,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	int questcomplete = 0;
 	AString quest_rewards;
 
-	if (!ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
+	if (!Globals->BUILD_NO_TRADE && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
 		delete u->monthorders;
 		u->monthorders = 0;
@@ -921,7 +921,7 @@ void Game::CreateShip(ARegion *r, Unit * u, int ship)
  */
 int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int needed, int ship)
 {
-	if (!ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
+	if (!Globals->BUILD_NO_TRADE && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 		u->Error("BUILD: Faction can't produce in that many regions.");
 		delete u->monthorders;
 		u->monthorders = 0;

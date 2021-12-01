@@ -818,6 +818,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_HEALPOTION);
 	EnableItem(I_GEMS);
 	EnableItem(I_PIKE);
+	EnableItem(I_BAXE);
 
 	// Artifacts of power
 	EnableItem(I_RELICOFGRACE);
@@ -855,7 +856,6 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_MBAXE);
 	DisableItem(I_ADBAXE);
 	DisableItem(I_ROUGHGEM);
-	DisableItem(I_BAXE);
 
 	// No staff of lightning
 	DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);

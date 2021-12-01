@@ -769,6 +769,12 @@ public:
 	// Use 1 - get the nice stats about your faction comparing to the world
 	int FACTION_STATISTICS;
 
+	// This flag makes build to not take trade points
+	int BUILD_NO_TRADE;
+
+	// TRANSPORT / DISTRIBUTE orders should not use Trade point
+	int TRANSPORT_NO_TRADE;
+
 	// How to count faction activit. See FactionActivty enum for more details.
 	FactionActivityRules FACTION_ACTIVITY;
 };
