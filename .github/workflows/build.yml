@@ -10,7 +10,7 @@ on:
 
 jobs:
   compile:
-    name: Complie code
+    name: Complie
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
       matrix:
@@ -18,20 +18,19 @@ jobs:
           - ubuntu
           - windows
           - macos
-        ruleset:
-          - basic
-          - fracas
-          - havilah
-          - kingdoms
-          - neworigins
-          - standard
         include:
            - os: windows
              ext: .exe
     steps:
-    - uses: actions/checkout@v2
-    - run: make clean ${{ matrix.ruleset }} && make ${{ matrix.ruleset }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: ${{ matrix.ruleset }}_${{ matrix.os }}
-        path: ${{ matrix.ruleset }}/${{ matrix.ruleset }}${{ matrix.ext }}
+      - uses: actions/checkout@v2
+      - run: make all-clean && make all
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}
+          path: |
+              basic/basic${{ matrix.ext }}
+              fracas/fracas${{ matrix.ext }}
+              havilah/havilah${{ matrix.ext }}
+              kingdoms/kingdoms${{ matrix.ext }}
+              neworigins/neworigins${{ matrix.ext }}
+              standard/standard${{ matrix.ext }}
