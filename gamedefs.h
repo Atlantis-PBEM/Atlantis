@@ -795,6 +795,10 @@ public:
 	//     turn destroyable points = max(MIN_DESTROY_POINTS, Max Structure Points * MAX_DESTROY_PERCENT / 100)
 	int MIN_DESTROY_POINTS;
 	int MAX_DESTROY_PERCENT;
+
+	// Only uses half of the riding bonus (round up) for combat purposes
+	// For example, WING RIDI 5 will be (5 / 2) rounded up = RIDI 3. Horse (3 / 2) rounded up = 2.
+	int HALF_RIDI_BONUS;
 };
 
 extern GameDefs *Globals;

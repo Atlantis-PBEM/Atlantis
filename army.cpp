@@ -27,6 +27,7 @@
 #include "gamedata.h"
 
 #include <assert.h> 
+#include <math.h>
 
 void unit_stat_control::Clear(UnitStat& us) {
 	us.attackStats.clear();
@@ -354,6 +355,16 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 				break;
 			}
 		}
+
+		// Modify riding bonus for half bonus
+		if (Globals->HALF_RIDI_BONUS) {
+			printf("\n\n RIDING before: %d\n", ridingBonus);
+
+			ridingBonus = ceil(ridingBonus / 2);
+
+			printf("RIDING after: %d \n\n\n", ridingBonus);
+		}
+
 		// Defer adding the combat bonus until we know if the weapon
 		// allows it.  The defense bonus for riding can be added now
 		// however.
