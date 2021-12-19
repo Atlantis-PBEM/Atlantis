@@ -1,0 +1,70 @@
+
+Orders Template (Long Format):
+
+#atlantis 3
+
+;*** plain (28,10) in Koheda, contains Thandianost [city] ***
+
+unit 152
+;Workers (152), revealing faction, won't cross water, 10 nomads [NOMA],
+;  372 silver [SILV]. Weight: 100. Capacity: 0/0/150/0. Skills: none.
+@work
+
+;*** plain (29,11) in Koheda ***
+
+unit 164
+;Scout (164), revealing faction, won't cross water, plainsman [PLAI],
+;  12 silver [SILV]. Weight: 10. Capacity: 0/0/15/0. Skills: none.
+@work
+
+unit 167
+;King's Guards (167), on guard, revealing faction, won't cross water,
+;  25 high elves [HELF], 2730 silver [SILV]. Weight: 250. Capacity:
+;  0/0/375/0. Skills: combat [COMB] 1 (30).
+@guard 1
+@tax
+
+form 1
+    name unit "Reinforcement"
+
+    take from 167 2730 silv
+    buy 22 HELF
+    study comb
+    turn
+        give 167 22 HELF
+    endturn
+end
+
+;*** plain (28,12) in Koheda, contains Hynodale [town] ***
+
+unit 140
+;King (140), revealing faction, won't cross water, leader [LEAD].
+;  Weight: 10. Capacity: 0/0/15/0. Skills: pattern [PATT] 1 (30),
+;  spirit [SPIR] 1 (30), gate lore [GATE] 1 (30), force [FORC] 1 (30).
+;  Can Study: fire [FIRE], earthquake [EQUA], force shield [FSHI],
+;  energy shield [ESHI], spirit shield [SSHI], magical healing [MHEA],
+;  farsight [FARS], mind reading [MIND], weather lore [WEAT], earth
+;  lore [EART], necromancy [NECR], demon lore [DEMO], illusion [ILLU],
+;  artifact lore [ARTI].
+study fire
+turn
+    study forc 2
+endturn
+
+unit 155
+;Ranchers (155), revealing faction, won't cross water, 10 plainsmen
+;  [PLAI], 10 livestock [LIVE], 78 silver [SILV]. Weight: 600.
+;  Capacity: 0/0/650/0. Skills: farming [FARM] 1 (30).
+@share 1
+@sell all LIVE
+@produce LIVE
+
+unit 156
+;Workers (156), revealing faction, sharing, won't cross water, 10
+;  plainsmen [PLAI], 49 silver [SILV]. Weight: 100. Capacity:
+;  0/0/150/0. Skills: none.
+@share 1
+@work
+
+#end
+

@@ -1,0 +1,29 @@
+AtlantisPlayerStatus
+Version: 328196
+TurnNumber: 13
+GameStatus: Running
+
+Faction: 1
+Name: The Guardsmen (1)
+Email: NoAddress
+Password: none
+LastOrders: 0
+FirstTurn: 0
+SendTimes: 1
+Template: long
+Faction: 2
+Name: Creatures (2)
+Email: NoAddress
+Password: none
+LastOrders: 0
+FirstTurn: 0
+SendTimes: 1
+Template: long
+Faction: 3
+Name: Test (3)
+Email: NoAddress
+Password: none
+LastOrders: 13
+FirstTurn: 0
+SendTimes: 1
+Template: long
