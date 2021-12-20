@@ -27,7 +27,6 @@
 #include "gamedata.h"
 
 #include <assert.h> 
-#include <math.h>
 
 void unit_stat_control::Clear(UnitStat& us) {
 	us.attackStats.clear();
@@ -360,7 +359,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		if (Globals->HALF_RIDI_BONUS) {
 			printf("\n\n RIDING before: %d\n", ridingBonus);
 
-			ridingBonus = ceil(ridingBonus / 2);
+			ridingBonus = (ridingBonus + 1) / 2;
 
 			printf("RIDING after: %d \n\n\n", ridingBonus);
 		}
