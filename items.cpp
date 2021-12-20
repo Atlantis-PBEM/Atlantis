@@ -1146,7 +1146,6 @@ AString *ItemDescription(int item, int full)
 		*temp += AString(" This mount gives a minimum bonus of +");
 		if (Globals->HALF_RIDING_BONUS) {
 			*temp += ((pM->minBonus + 1) / 2) + " when ridden into combat.";
-			*temp += AString(" This bonus is calculated as RIDING skill divided by 2 rounded up.");
 		} else {
 			*temp += pM->minBonus + " when ridden into combat.";
 		}
@@ -1154,6 +1153,7 @@ AString *ItemDescription(int item, int full)
 		*temp += AString(" This mount gives a maximum bonus of +");
 		if (Globals->HALF_RIDING_BONUS) { 
 			*temp += ((pM->maxBonus + 1) / 2) + " when ridden into combat.";
+			*temp += AString(" This bonus is calculated as a RIDING skill divided by 2 (rounded up).");
 		} else {
 			*temp += pM->maxBonus + " when ridden into combat.";
 		}
