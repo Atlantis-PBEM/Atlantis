@@ -356,7 +356,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		}
 
 		// Modify riding bonus for half bonus
-		if (Globals->HALF_RIDI_BONUS) {
+		if (Globals->HALF_RIDING_BONUS) {
 			printf("\n\n RIDING before: %d\n", ridingBonus);
 
 			ridingBonus = (ridingBonus + 1) / 2;

@@ -1143,10 +1143,21 @@ AString *ItemDescription(int item, int full)
 					" to ride in combat.";
 			}
 		}
-		*temp += AString(" This mount gives a minimum bonus of +") +
-			pM->minBonus + " when ridden into combat.";
-		*temp += AString(" This mount gives a maximum bonus of +") +
-			pM->maxBonus + " when ridden into combat.";
+		*temp += AString(" This mount gives a minimum bonus of +");
+		if (Globals->HALF_RIDING_BONUS) {
+			*temp += ((pM->minBonus + 1) / 2) + " when ridden into combat.";
+			*temp += AString(" This bonus is calculated as RIDING skill divided by 2 rounded up.");
+		} else {
+			*temp += pM->minBonus + " when ridden into combat.";
+		}
+		
+		*temp += AString(" This mount gives a maximum bonus of +");
+		if (Globals->HALF_RIDING_BONUS) { 
+			*temp += ((pM->maxBonus + 1) / 2) + " when ridden into combat.";
+		} else {
+			*temp += pM->maxBonus + " when ridden into combat.";
+		}
+
 		if (full) {
 			if (ItemDefs[item].fly) {
 				*temp += AString(" This mount gives a maximum bonus of +") +
