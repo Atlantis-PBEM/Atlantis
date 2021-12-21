@@ -251,6 +251,7 @@ static GameDefs g = {
 	DestroyBehavior::INSTANT,	// DESTROY_BEHAVIOR
 	200,	// MIN_DESTROY_POINTS,
 	34,	// MAX_DESTROY_PERCENT
+	0, // HALF_RIDING_BONUS
 };
 
 GameDefs *Globals = &g;

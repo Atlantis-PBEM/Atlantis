@@ -1143,16 +1143,30 @@ AString *ItemDescription(int item, int full)
 					" to ride in combat.";
 			}
 		}
-		*temp += AString(" This mount gives a minimum bonus of +") +
-			pM->minBonus + " when ridden into combat.";
-		*temp += AString(" This mount gives a maximum bonus of +") +
-			pM->maxBonus + " when ridden into combat.";
+		*temp += AString(" This mount gives a minimum bonus of +");
+		if (Globals->HALF_RIDING_BONUS) {
+			*temp += AString(((pM->minBonus + 1) / 2)) + " when ridden into combat.";
+		} else {
+			*temp +=  AString(pM->minBonus) + " when ridden into combat.";
+		}
+		
+		*temp += AString(" This mount gives a maximum bonus of +");
+		if (Globals->HALF_RIDING_BONUS) {
+			*temp += AString(((pM->maxBonus + 1) / 2)) + " when ridden into combat.";
+			*temp += AString(" This bonus is calculated as a RIDING skill divided by 2 (rounded up).");
+		} else {
+			*temp +=  AString(pM->maxBonus) + " when ridden into combat.";
+		}
+
 		if (full) {
 			if (ItemDefs[item].fly) {
-				*temp += AString(" This mount gives a maximum bonus of +") +
-					pM->maxHamperedBonus + " when ridden into combat in " +
-					"terrain which allows ridden mounts but not flying "+
-					"mounts.";
+				*temp += AString(" This mount gives a maximum bonus of +");
+				if (Globals->HALF_RIDING_BONUS) {
+					*temp += AString(((pM->maxHamperedBonus + 1) / 2)) + " when ridden into combat in ";
+				} else {
+					*temp += AString(pM->maxHamperedBonus) + " when ridden into combat in ";
+				}
+				*temp += "terrain which allows ridden mounts but not flying mounts.";
 			}
 			if (pM->mountSpecial != NULL) {
 				*temp += AString(" When ridden, this mount causes ") +

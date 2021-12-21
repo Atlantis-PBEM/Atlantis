@@ -354,6 +354,12 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 				break;
 			}
 		}
+
+		// Modify riding bonus for half bonus
+		if (Globals->HALF_RIDING_BONUS) {
+			ridingBonus = (ridingBonus + 1) / 2;
+		}
+
 		// Defer adding the combat bonus until we know if the weapon
 		// allows it.  The defense bonus for riding can be added now
 		// however.
