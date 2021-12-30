@@ -1894,7 +1894,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		return 0;
 	}
 
-	int maxweight = 500 * level;
+	int maxweight = 800 * level;
 	r->DeduplicateUnitList(&order->units, u->faction->num);
 	int weight = 0;
 	forlist (&(order->units)) {

@@ -467,7 +467,7 @@ AString *ShowSkill::Report(Faction *f)
 				"send units from one region to another. In order to do this, "
 				"both mages (the caster, and the target mage) must have "
 				"Portals, and the caster must be trained in Portal Lore. The "
-				"caster may teleport units weighing up to 500 weight units "
+				"caster may teleport units weighing up to 800 weight units "
 				"times his skill level, to the target mage's region. ";
 			range = FindRange(SkillDefs[skill].range);
 			if (range) {
