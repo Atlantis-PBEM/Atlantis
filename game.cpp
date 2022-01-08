@@ -753,7 +753,8 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 			AString * pDefault = new AString("none");
 			pFac->password = pDefault;
 		}
-		
+	} else if (*pToken == "Battle:") {
+		pFac->battleLogFormat = 0;
 	} else if (*pToken == "Template:") {
 		// LLS - looked like a good place to stick the Template test
 		pTemp = pLine->gettoken();
