@@ -138,6 +138,7 @@ Faction::Faction()
 	pStartLoc = NULL;
 	noStartLeader = 0;
 	startturn = 0;
+	battleLogFormat = 0;
 }
 
 Faction::Faction(int n)
@@ -164,6 +165,7 @@ Faction::Faction(int n)
 	pStartLoc = NULL;
 	noStartLeader = 0;
 	startturn = 0;
+	battleLogFormat = 0;
 }
 
 Faction::~Faction()
@@ -705,6 +707,7 @@ void Faction::WriteFacInfo(Aoutfile *file)
 
 	// LLS - write template info to players file
 	file->PutStr(AString("Template: ") + TemplateStrs[temformat]);
+	file->PutStr(AString("Battle: na"));
 
 	forlist(&extraPlayers) {
 		AString *pStr = (AString *) elem;

@@ -186,6 +186,7 @@ public:
 	int times;
 	int showunitattitudes;
 	int temformat;
+	int battleLogFormat;
 	char exists;
 	int quit;
 	int numshows;
