@@ -700,7 +700,6 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 		while (skip > 5) {
 			f++;
 			skip -= 5;
-			if (skip < 1) skip = 1;
 		}
 		skip = 100 * ((skip+3) * f + 2) / (skip + f - 2);
 	}

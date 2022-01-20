@@ -444,7 +444,6 @@ void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
 						break;
 					}
 				}
-				if (AlliesIncluded == 1) break; // forlist(units)
 			}
 			if (AlliesIncluded == 1) break; // forlist (objects)
 		}
