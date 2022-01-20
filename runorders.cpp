@@ -570,6 +570,8 @@ void Game::RunDestroyOrders()
 }
 
 void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
+	AString quest_rewards;
+
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 		u->Error("DESTROY: Can't destroy a ship while at sea.");
 		forlist(&o->units) {
@@ -594,8 +596,8 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 			u->destroy = 0;
 			u->MoveUnit(dest);
 		}
-		if (quests.CheckQuestDemolishTarget(r, o->num, u)) {
-			u->Event("You have completed a quest!");
+		if (quests.CheckQuestDemolishTarget(r, o->num, u, &quest_rewards)) {
+			u->Event(AString("You have completed a quest!") + quest_rewards);
 		}
 		r->objects.Remove(o);
 		delete o;
@@ -1996,6 +1998,8 @@ void Game::CheckAllyHungerItem(int item, int value)
 
 void Game::AssessMaintenance()
 {
+	AString quest_rewards;
+
 	/* First pass: set needed */
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
@@ -2005,8 +2009,8 @@ void Game::AssessMaintenance()
 				Unit *u = (Unit *) elem;
 				if (!(u->faction->IsNPC())) {
 					r->visited = 1;
-					if (quests.CheckQuestVisitTarget(r, u)) {
-						u->Event("You have completed a pilgrimage!");
+					if (quests.CheckQuestVisitTarget(r, u, &quest_rewards)) {
+						u->Event(AString("You have completed a pilgrimage!") + quest_rewards);
 					}
 				}
 				u->needed = u->MaintCost();
