@@ -645,6 +645,7 @@ void ARegion::SetupCityMarket()
 		num--;
 	}
 	/* Set up the trade items */
+	if (numtrade < 4) return;
 	int buy1 = getrandom(numtrade);
 	int buy2 = getrandom(numtrade);
 	int sell1 = getrandom(numtrade);
