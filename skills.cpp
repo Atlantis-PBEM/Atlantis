@@ -179,7 +179,7 @@ int GetDaysByLevel(int level)
 int StudyRateAdjustment(int days, int exp)
 {
 	int rate = 30;
-	if (!Globals->REQUIRED_EXPERIENCE) return rate;
+	if (!Globals->REQUIRED_EXPERIENCE) return rate * Globals->STUDY_MULTIPLIER;
 	int slope = 62;
 	int inc = Globals->REQUIRED_EXPERIENCE * 10;
 	long int cdays = inc;

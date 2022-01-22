@@ -259,6 +259,7 @@ static GameDefs g = {
 	200,	// MIN_DESTROY_POINTS,
 	34,	// MAX_DESTROY_PERCENT
 	0, // HALF_RIDING_BONUS
+	1, // STUDY_MULTIPLIER
 };
 
 GameDefs *Globals = &g;

@@ -799,6 +799,9 @@ public:
 	// Only uses half of the riding bonus (round up) for combat purposes
 	// For example, WING RIDI 5 will be (5 / 2) rounded up = RIDI 3. Horse (3 / 2) rounded up = 2.
 	int HALF_RIDING_BONUS;
+
+	// Multiplier for STUDYm 30 base, i.e. 1 means default 30x1, 2 means 30x2 double study rate, etc
+	int STUDY_MULTIPLIER;
 };
 
 extern GameDefs *Globals;
