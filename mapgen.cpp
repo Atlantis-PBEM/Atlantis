@@ -1,13 +1,15 @@
 #include "mapgen.h"
 #include "simplex.h"
 
-#include <cmath>
 #include <vector>
 #include <map>
 #include <queue>
 #include <algorithm>
 #include <iostream>
 #include <string>
+
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 // #define T_UNKNOWN        0
 // #define T_LAKE           2
