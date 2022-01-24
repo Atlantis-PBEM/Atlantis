@@ -1,5 +1,5 @@
-#include "map.h"
-#include "SimplexNoise.h"
+#include "mapgen.h"
+#include "simplex.h"
 
 #include "math.h"
 #include <vector>

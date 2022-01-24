@@ -27,7 +27,7 @@
 #include <string.h>
 #include "game.h"
 #include "gamedata.h"
-#include "map.h"
+#include "mapgen.h"
 
 #include <iostream>
 #include <fstream>

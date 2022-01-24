@@ -43,7 +43,7 @@ class ARegionArray;
 #include "production.h"
 #include "market.h"
 #include "object.h"
-#include "map.h"
+#include "mapgen.h"
 #include <map>
 
 /* Weather Types */
