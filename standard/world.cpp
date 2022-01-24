@@ -2117,7 +2117,7 @@ void Game::CreateWorld()
 		nx = 1;
 	}
 
-	int xx = 0;
+	int xx = 64;
 	while (xx <= 0) {
 		Awrite("How wide should the map be? ");
 		xx = Agetint();
@@ -2126,7 +2126,7 @@ void Game::CreateWorld()
 			Awrite( "The width must be a multiple of 8." );
 		}
 	}
-	int yy = 0;
+	int yy = 64;
 	while (yy <= 0) {
 		Awrite("How tall should the map be? ");
 		yy = Agetint();
@@ -2142,7 +2142,36 @@ void Game::CreateWorld()
 	SetupNames();
 
 	regions.CreateNexusLevel( 0, nx, ny, "nexus" );
-	regions.CreateSurfaceLevel( 1, xx, yy, 0 );
+
+	Awrite("Which algorithm should be used?");
+	int alg = 0;
+	bool success=true;
+	do {
+		alg = 2;
+		while (alg <= 0) {
+			Awrite("1 - Old standard");
+			Awrite("2 - New advanced");
+			alg = Agetint();
+			if (alg < 1 || alg > 3) {
+				alg = 0;
+				Awrite( "Wrong value. Please enter `1` or `2`:" );
+			}
+		}
+
+		if (alg == 1) {
+			regions.CreateSurfaceLevel(1, xx, yy, 0);
+		}
+		else {
+			Map* map = new Map(xx * 2, yy * 2);
+			map->redistribution = 1.5;
+			map->evoparation = 0.75;
+			map->mountainPercent = 0.1;
+			map->waterPercent = 0.1;
+
+			regions.CreateNaturalSurfaceLevel(map);
+		}
+	}
+	while (!success);
 
 	// Create underworld levels
 	int i;
@@ -2222,6 +2251,8 @@ void Game::CreateWorld()
 	regions.FinalSetupGates();
 
 	regions.CalcDensities();
+
+	ARMAddAncientBuildings(1);
 	
 	regions.TownStatistics();
 }

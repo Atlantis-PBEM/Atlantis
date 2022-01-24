@@ -1032,7 +1032,7 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 					reg->wages = -1;
 			}
 
-			reg->Setup();
+			reg->Setup(1);
 		}
 	}
 }

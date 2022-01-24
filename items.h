@@ -154,6 +154,25 @@ class ItemType
 
 extern ItemType *ItemDefs;
 
+
+enum Ethnicity {
+	NONE,
+	VIKING,
+	BARBARIAN,
+	MAN,
+	ESKIMO,
+	NOMAD,
+	TRIBESMAN,
+	HIGHELF,
+	ELF,
+	DWARF,
+	ORC,
+	LIZARDMAN,
+	DROW,
+	TITAN,
+	HERO
+};
+
 class ManType
 {
 	public:
@@ -162,6 +181,7 @@ class ManType
 		int speciallevel;
 		int defaultlevel;
 		char const *skills[6];
+		Ethnicity ethnicity;
 		
 		int CanProduce(int);
 		int CanUse(int);
@@ -375,11 +395,13 @@ extern int LookupItem(AString *);
 
 extern BattleItemType *FindBattleItem(char const *abbr);
 extern ItemType *FindItem(char const *abbr);
+extern int FindItemIndex(char const *abbr);
 extern ArmorType *FindArmor(char const *abbr);
 extern WeaponType *FindWeapon(char const *abbr);
 extern MountType *FindMount(char const *abbr);
 extern MonType *FindMonster(char const *abbr, int illusion);
 extern ManType *FindRace(char const *abbr);
+extern int FindRaceItemIndex(int raceIndex);
 extern AString AttType(int atype);
 
 enum {

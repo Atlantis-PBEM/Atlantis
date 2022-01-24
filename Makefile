@@ -20,7 +20,7 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
   genrules.o i_rand.o items.o main.o market.o modify.o monthorders.o \
   npc.o object.o orders.o parseorders.o production.o quests.o runorders.o \
   shields.o skills.o skillshows.o specials.o spells.o template.o unit.o \
-  events.o events-battle.o
+  events.o events-battle.o map.o SimplexNoise.o
 
 OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
   $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 

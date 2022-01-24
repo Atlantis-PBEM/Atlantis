@@ -33,19 +33,6 @@
 #include <unordered_set>
 #include <stack>
 
-int makeRoll(int rolls, int sides) {
-	int result = 0;
-	for (int i = 0; i < rolls; i++) {
-		result += getrandom(sides) + 1;
-	}
-
-	return result;
-}
-
-int clamp(int min, int value, int max) {
-	return std::max(min, std::min(value, max));
-}
-
 enum ZoneType {
 	UNDECIDED,	// zone type not yet determined
 	OCEAN,		// no land will be generated in this zone
@@ -2713,7 +2700,7 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 					reg->wages = -1;
 			}
 
-			reg->Setup();
+			reg->Setup(1);
 		}
 	}
 }

@@ -36,6 +36,9 @@ int getrandom(int);
 void seedrandom(int);
 void seedrandomrandom();
 
+int makeRoll(int rolls, int sides);
+int clamp(int min, int value, int max);
+
 int Agetint();
 
 void Awrite(const AString &);
