@@ -1751,74 +1751,74 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 	FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateConstrainedSurfaceLevel(int level, int xSize, int ySize, char const *name, int contients,
-	int landMass, int maxContinentSize,
-		int gapMin,
-		int gapMax,
-		int volcanoesMin,
-		int volcanoesMax,
-		int lakesMin,
-		int lakesMax
-	) {
-	if (Globals->ICOSAHEDRAL_WORLD) {
-		// this is not supported
-		throw "Icosahedral maps are not supported";
-	}
+// void ARegionList::CreateConstrainedSurfaceLevel(int level, int xSize, int ySize, char const *name, int contients,
+// 	int landMass, int maxContinentSize,
+// 		int gapMin,
+// 		int gapMax,
+// 		int volcanoesMin,
+// 		int volcanoesMax,
+// 		int lakesMin,
+// 		int lakesMax
+// 	) {
+// 	if (Globals->ICOSAHEDRAL_WORLD) {
+// 		// this is not supported
+// 		throw "Icosahedral maps are not supported";
+// 	}
 
-	MakeRegions(level, xSize, ySize);
-	pRegionArrays[level]->SetName(name);
-	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
+// 	MakeRegions(level, xSize, ySize);
+// 	pRegionArrays[level]->SetName(name);
+// 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
-	int area = xSize * ySize / 2;
-	const int radius = 1;
+// 	int area = xSize * ySize / 2;
+// 	const int radius = 1;
 
-	MapBuilder* builder = new MapBuilder(pRegionArrays[level]);
-	builder->maxContinentArea = maxContinentSize;
-	builder->maxZones = EstimateMaxZones(area, radius);
-	builder->gapMin = gapMin;
-	builder->gapMax = gapMax;
-	builder->volcanoesMin = volcanoesMin;
-	builder->volcanoesMax = volcanoesMax;
-	builder->lakesMin = lakesMin;
-	builder->lakesMax = lakesMax;;
+// 	MapBuilder* builder = new MapBuilder(pRegionArrays[level]);
+// 	builder->maxContinentArea = maxContinentSize;
+// 	builder->maxZones = EstimateMaxZones(area, radius);
+// 	builder->gapMin = gapMin;
+// 	builder->gapMax = gapMax;
+// 	builder->volcanoesMin = volcanoesMin;
+// 	builder->volcanoesMax = volcanoesMax;
+// 	builder->lakesMin = lakesMin;
+// 	builder->lakesMax = lakesMax;;
 
-	builder->CreateZones(radius + 2, 1000);
-	builder->GrowZones();
-	builder->SpecializeZones(contients, landMass);
-	builder->GrowTerrain();
+// 	builder->CreateZones(radius + 2, 1000);
+// 	builder->GrowZones();
+// 	builder->SpecializeZones(contients, landMass);
+// 	builder->GrowTerrain();
 
-	// SeverLandBridges(pRegionArrays[level]);
+// 	// SeverLandBridges(pRegionArrays[level]);
 
-	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
-	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
+// 	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
+// 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
-	FinalSetup(pRegionArrays[level]);
+// 	FinalSetup(pRegionArrays[level]);
 
-	builder->SetOceanNames();
+// 	builder->SetOceanNames();
 
-	/////
+// 	/////
 
-	int continents = 0;
-	int continentArea = 0;
-	int waterArea = 0;
-	for (auto &kv : builder->zones) {
-		auto zone = kv.second;
-		if (zone->type == ZoneType::CONTINENT) {
-			continentArea += zone->regions.size();
-			continents++;
-		}
-		else {
-			waterArea += zone->regions.size();
-		}
-	}
+// 	int continents = 0;
+// 	int continentArea = 0;
+// 	int waterArea = 0;
+// 	for (auto &kv : builder->zones) {
+// 		auto zone = kv.second;
+// 		if (zone->type == ZoneType::CONTINENT) {
+// 			continentArea += zone->regions.size();
+// 			continents++;
+// 		}
+// 		else {
+// 			waterArea += zone->regions.size();
+// 		}
+// 	}
 
-	Awrite(AString("Zones: ") + (int) builder->zones.size());
-	Awrite(AString("Continents: ") + continents);
-	Awrite(AString("Contient area: ") + continentArea);
-	Awrite(AString("Water area: ") + waterArea);
+// 	Awrite(AString("Zones: ") + (int) builder->zones.size());
+// 	Awrite(AString("Continents: ") + continents);
+// 	Awrite(AString("Contient area: ") + continentArea);
+// 	Awrite(AString("Water area: ") + waterArea);
 
-	delete builder;
-}
+// 	delete builder;
+// }
 
 void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name)
 {

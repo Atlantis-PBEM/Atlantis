@@ -2751,7 +2751,7 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 
 	MakeRegions(level, w, h);
 	
-	pRegionArrays[level]->SetName("surface");
+	pRegionArrays[level]->SetName(0);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
 	map->Generate();

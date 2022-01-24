@@ -25,7 +25,7 @@
  * or copy at http://opensource.org/licenses/MIT)
  */
 
-#include "SimplexNoise.h"
+#include "simplex.h"
 
 #include "gameio.h"
 
