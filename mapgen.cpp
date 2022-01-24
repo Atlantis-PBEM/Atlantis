@@ -1,7 +1,7 @@
 #include "mapgen.h"
 #include "simplex.h"
 
-#include "math.h"
+#include <cmath>
 #include <vector>
 #include <map>
 #include <queue>
