@@ -947,33 +947,10 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyObjectName(O_MFORTRESS, "Magical Fortress");
 	ModifyObjectName(O_MCASTLE, "Magical Castle");
 
-	ModifyItemMagicInput(I_RINGOFI, 0, I_MITHRIL, 1);
-	ModifyItemMagicInput(I_RINGOFI, 1, I_SILVER, 600);
-	ModifyItemMagicInput(I_CLOAKOFI, 0, I_FUR, 1);
-	ModifyItemMagicInput(I_CLOAKOFI, 1, I_SILVER, 800);
-	ModifyItemMagicInput(I_STAFFOFF, 0, I_IRONWOOD, 1);
-	ModifyItemMagicInput(I_STAFFOFF, 1, I_SILVER, 500);
-	ModifyItemMagicInput(I_STAFFOFL, 0, I_IRONWOOD, 1);
-	ModifyItemMagicInput(I_STAFFOFL, 1, I_SILVER, 900);
-	ModifyItemMagicInput(I_AMULETOFTS, 0, I_ROOTSTONE, 1);
-	ModifyItemMagicInput(I_AMULETOFTS, 1, I_SILVER, 500);
-	ModifyItemMagicInput(I_AMULETOFP, 0, I_STONE, 1);
-	ModifyItemMagicInput(I_AMULETOFP, 1, I_SILVER, 200);
-	ModifyItemMagicInput(I_SHIELDSTONE, 0, I_STONE, 1);
-	ModifyItemMagicInput(I_SHIELDSTONE, 1, I_SILVER, 200);
-	ModifyItemMagicInput(I_MCARPET, 0, I_FUR, 1);
-	ModifyItemMagicInput(I_MCARPET, 1, I_SILVER, 400);
-	ModifyItemMagicInput(I_PORTAL, 0, I_ROOTSTONE, 1);
-	ModifyItemMagicInput(I_PORTAL, 1, I_SILVER, 500);
-
 	EnableObject(O_ISLE);
 	EnableObject(O_DERELICT);
 	EnableObject(O_OCAVE);
 	EnableObject(O_WHIRL);
-
-	// WIN GAME STRUCTURE AND SPELL
-	EnableObject(O_BKEEP);
-	EnableSkill(S_BLASPHEMOUS_RITUAL);
 
 	//
 	// Monsters
