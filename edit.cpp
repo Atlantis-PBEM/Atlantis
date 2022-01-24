@@ -651,7 +651,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 							delete p;
 						}
 					}
-					pReg->SetupProds();
+					pReg->SetupProds(1);
 				} 
 				else if (*pToken == "g") { 
 					SAFE_DELETE(pToken);
@@ -660,7 +660,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 					pReg->town = NULL;
 
 					pReg->products.DeleteAll();
-					pReg->SetupProds();
+					pReg->SetupProds(1);
 					
 					pReg->markets.DeleteAll();
 

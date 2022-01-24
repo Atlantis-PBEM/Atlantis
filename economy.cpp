@@ -740,7 +740,7 @@ void ARegion::SetupCityMarket()
 	}
 }
 
-void ARegion::SetupProds()
+void ARegion::SetupProds(int productionWeight)
 {
 	Production *p = NULL;
 	TerrainType *typer = &(TerrainDefs[type]);
@@ -770,7 +770,7 @@ void ARegion::SetupProds()
 
 	for (unsigned int c= 0; c < (sizeof(typer->prods)/sizeof(Product)); c++) {
 		int item = typer->prods[c].product;
-		int chance = typer->prods[c].chance;
+		int chance = typer->prods[c].chance * productionWeight;
 		int amt = typer->prods[c].amount;
 		if (item != -1) {
 			if (!(ItemDefs[item].flags & ItemType::DISABLED) &&

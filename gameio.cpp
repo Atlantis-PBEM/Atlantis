@@ -87,6 +87,19 @@ void seedrandomrandom()
 	seedrandom( time( 0 ) );
 }
 
+int makeRoll(int rolls, int sides) {
+	int result = 0;
+	for (int i = 0; i < rolls; i++) {
+		result += getrandom(sides) + 1;
+	}
+
+	return result;
+}
+
+int clamp(int imin, int ivalue, int imax) {
+	return max(imin, min(ivalue, imax));
+}
+
 int Agetint()
 {
 	int x;

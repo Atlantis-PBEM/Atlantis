@@ -43,6 +43,7 @@ class ARegionArray;
 #include "production.h"
 #include "market.h"
 #include "object.h"
+#include "mapgen.h"
 #include <map>
 
 /* Weather Types */
@@ -167,7 +168,7 @@ class ARegion : public AListElem
 		ARegion();
 		ARegion(int, int);
 		~ARegion();
-		void Setup();
+		void Setup(int productionWeight);
 
 		void ZeroNeighbors();
 		void SetName(char const *);
@@ -345,11 +346,10 @@ class ARegion : public AListElem
 		// Editing functions
 		void UpdateEditRegion();
 		void SetupEditRegion();
-
 	private:
 		/* Private Setup Functions */
 		void SetupPop();
-		void SetupProds();
+		void SetupProds(int productionWeight);
 		void SetIncome();
 		void Grow();
 		int GetNearestProd(int);
@@ -461,14 +461,7 @@ class ARegionList : public AList
 		void CreateAbyssLevel(int level, char const *name);
 		void CreateNexusLevel(int level, int xSize, int ySize, char const *name);
 		void CreateSurfaceLevel(int level, int xSize, int ySize, char const *name);
-		void CreateConstrainedSurfaceLevel(int level, int xSize, int ySize, char const *name, int contients, int landMass, int maxContinentSize,
-			int gapMin,
-			int gapMax,
-			int volcanoesMin,
-			int volcanoesMax,
-			int lakesMin,
-			int lakesMax
-		);
+		void CreateNaturalSurfaceLevel(Map* map);
 		void CreateIslandLevel(int level, int nPlayers, char const *name);
 		void CreateUnderworldLevel(int level, int xSize, int ySize, char const *name);
 		void CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name);

@@ -27,6 +27,10 @@
 #include <string.h>
 #include "game.h"
 #include "gamedata.h"
+#include "mapgen.h"
+
+#include <iostream>
+#include <fstream>
 
 Location *GetUnit(AList *list, int n)
 {
@@ -270,11 +274,11 @@ int ARegion::GetPoleDistance(int dir)
 	return ct;
 }
 
-void ARegion::Setup()
+void ARegion::Setup(int productionWeight)
 {
 	//
 	// type and location have been setup, do everything else
-	SetupProds();
+	SetupProds(productionWeight);
 
 	SetupPop();
 
@@ -2723,4 +2727,102 @@ int ParseTerrain(AString *token)
 	}
 	
 	return (-1);
+}
+
+int mapBiome(int biome) {
+	switch (biome) {
+		case B_TUNDRA: return R_TUNDRA;
+		case B_MOUNTAINS: return R_MOUNTAIN;
+		case B_SWAMP: return R_SWAMP;
+		case B_FOREST: return R_FOREST;
+		case B_PLAINS: return R_PLAIN;
+		case B_JUNGLE: return R_JUNGLE;
+		case B_DESERT: return R_DESERT;
+		case B_WATER: return R_OCEAN;
+		default: return -1;
+	}
+}
+
+void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
+	static const int level = 1;
+
+	const int w = map->map.width / 2;
+	const int h = map->map.height / 2;
+
+	MakeRegions(level, w, h);
+	
+	pRegionArrays[level]->SetName(0);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
+
+	map->Generate();
+
+	ofstream f;
+	f.open("map.json", ios::trunc);
+	f << "[";
+
+	int count = 0;
+	for (auto &item : map->map.items) {
+		if (count > 0) {
+			f << ",";
+		}
+
+		f << "{";
+		f << "\"x\": " << item->x << ",";
+		f << "\"y\": " << item->y << ",";
+		f << "\"biome\": " << item->biome << ",";
+		f << "\"elevation\": " << item->elevation << ",";
+		f << "\"temperature\": " << item->temperature << ",";
+		f << "\"saturation\": " << item->saturation << ",";
+		f << "\"evoparation\": " << item->evoparation << ",";
+		f << "\"rainfall\": " << item->rainfall << ",";
+		f << "\"moistureIn\": " << item->moistureIn << ",";
+		f << "\"moistureOut\": " << item->moistureOut;
+		f << "}";
+
+		count++;
+	}
+
+	f << "]";
+	f.close();
+
+	/////
+
+	ofstream hf;
+	hf.open("hexmap.json", ios::trunc);
+	hf << "[";
+
+	count = 0;
+	ARegionArray* arr = pRegionArrays[level];
+	for (int x = 0; x < w; x++) {
+    	for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+
+			Cell* cell = map->map.get(reg->xloc * 2, reg->yloc * 2);
+
+			reg->type = mapBiome(cell->biome);
+
+			// DEBUG
+			if (count > 0) {
+				hf << ",";
+			}
+
+			hf << "{";
+			hf << "\"x\": " << reg->xloc << ",";
+			hf << "\"y\": " << reg->yloc << ",";
+			hf << "\"type\": " << reg->type;
+			hf << "}";
+
+			count++;
+		}
+    }
+
+	hf << "]";
+	hf.close();
+
+	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
+	FinalSetup(pRegionArrays[level]);
 }

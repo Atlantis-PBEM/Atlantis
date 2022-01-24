@@ -74,6 +74,18 @@ ItemType *FindItem(char const *abbr)
 	return NULL;
 }
 
+int FindItemIndex(char const *abbr)
+{
+	if (abbr == NULL) return -1;
+	for (int i = 0; i < NITEMS; i++) {
+		if (ItemDefs[i].abr == NULL) continue;
+
+		if (AString(abbr) == ItemDefs[i].abr) return i;
+	}
+
+	return -1;
+}
+
 MountType *FindMount(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
@@ -108,6 +120,19 @@ ManType *FindRace(char const *abbr)
 			return &ManDefs[i];
 	}
 	return NULL;
+}
+
+int FindRaceItemIndex(int raceIndex) {
+	auto man = ManDefs[raceIndex];
+
+	for(int i = 0; i < NITEMS; i++) {
+		auto item = ItemDefs[i];
+		if (item.type == IT_MAN && AString(item.abr) == man.abbr) {
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 AString AttType(int atype)
