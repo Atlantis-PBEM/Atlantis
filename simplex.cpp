@@ -35,6 +35,13 @@
 #include <random>
 #include <ctime>
 
+#define __USE_MISC
+#include <cmath>
+
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 const double TAU = 2 * M_PI;
 
 /**
