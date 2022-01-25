@@ -103,6 +103,7 @@ const TERRAIN = {
     5: jungle.rgb().hex(), // B_JUNGLE
     6: dessert.rgb().hex(), // B_DESERT
     0: '#5dade2', // B_WATER
+    59: 'red', // R_VOLCANO
 }
 
 const COLOR = {
@@ -140,6 +141,7 @@ function drawMap(col: number, row: number, color: ColorFunction, label?: (cell: 
     const offsetX = col * (MAP_W * CELL_SZ + MAP_GAP) + 50;
     const offsetY = row * (MAP_H * CELL_SZ + MAP_GAP) + 50;
 
+    ctx.save();
     for (const item of data) {
         ctx.fillStyle = color(item);
 
@@ -177,29 +179,117 @@ function drawMap(col: number, row: number, color: ColorFunction, label?: (cell: 
             }
         }
     }
+    ctx.restore()
 }
 
 function drawHexMap(col: number, row: number) {
+    const SZ = CELL_SZ * 4
+
     const offsetX = col * (MAP_W * CELL_SZ + MAP_GAP) + 50;
     const offsetY = row * (MAP_H * CELL_SZ + MAP_GAP) + 50;
 
-    const layout = new Layout(Layout.flat, new Point(CELL_SZ * 2, CELL_SZ * 2.25), new Point(offsetX, offsetY));
+    const layout = new Layout(Layout.flat, new Point(SZ, SZ * 1.1), new Point(offsetX, offsetY));
 
+    ctx.save();
     for (const item of hexdata) {
         const p = new DoubledCoord(item.x, item.y).qdoubledToCube();
         const points = layout.polygonCorners(p);
 
+        
         ctx.fillStyle = TERRAIN[item.type];
         ctx.beginPath();
         let first = true;
         for (const n of points) {
             if (first) ctx.moveTo(n.x, n.y); else ctx.lineTo(n.x, n.y);
-
+            
             first = false;
         }
         ctx.closePath();
         ctx.fill();
     }
+    ctx.restore();
+    
+    ctx.save();
+    for (const item of hexdata) {
+        if (!item.city) continue;
+
+        const p = new DoubledCoord(item.x, item.y).qdoubledToCube();
+        const center = layout.hexToPixel(p);
+
+        const r = item.city * 2;
+
+        ctx.fillStyle = 'black';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(center.x, center.y, r, r, 0, 0, Math.PI * 2, false);
+        
+        if (item.city == 2) {
+            ctx.stroke();
+        }
+        else {
+            ctx.fill();
+        }
+    }
+    ctx.restore();
+    
+    ctx.save();
+    for (const item of hexdata) {
+        if (!item.lair) continue;
+
+        const p = new DoubledCoord(item.x, item.y).qdoubledToCube();
+        const c = layout.hexToPixel(p);
+
+        const r = 4;
+
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+        ctx.moveTo(c.x - r, c.y - r);
+        ctx.lineTo(c.x + r, c.y + r);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(c.x + r, c.y - r);
+        ctx.lineTo(c.x - r, c.y + r);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+        ctx.moveTo(c.x - r, c.y - r);
+        ctx.lineTo(c.x + r, c.y + r);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(c.x + r, c.y - r);
+        ctx.lineTo(c.x - r, c.y + r);
+        ctx.stroke();
+    }
+    ctx.restore();
+    
+    ctx.save();
+    for (const item of hexdata) {
+        if (!item.gate) continue;
+
+        const p = new DoubledCoord(item.x, item.y).qdoubledToCube();
+        const center = layout.hexToPixel(p);
+
+        const r = 2;
+
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.ellipse(center.x + 6, center.y - 6, r + 1, r + 1, 0, 0, Math.PI * 2, false);
+        ctx.fill();
+
+        ctx.fillStyle = 'blue';
+        ctx.beginPath();
+        ctx.ellipse(center.x + 6, center.y - 6, r, r, 0, 0, Math.PI * 2, false);
+        ctx.fill();
+    }
+    ctx.restore();
 }
 
 let minElevation = false
@@ -240,4 +330,4 @@ drawMap(2, 0, COLOR.biome)
 drawMap(0, 1, COLOR.evoparation)
 drawMap(1, 1, COLOR.rainfall)
 
-drawHexMap(2, 1)
+drawHexMap(0, 2)

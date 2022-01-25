@@ -88,15 +88,12 @@ AString ARegion::WagesForReport()
 		return AString("$") + 0;
 }
 
-void ARegion::SetupPop()
-{
-	TerrainType *typer = &(TerrainDefs[type]);
-	habitat = typer->pop+1;
+void ARegion::SetupHabitat(TerrainType* terrain) {
 	if (habitat > 1) habitat *= 5;
-	if ((habitat < 100) && (typer->similar_type != R_OCEAN)) habitat = 100;
+	if ((habitat < 100) && (terrain->similar_type != R_OCEAN)) habitat = 100;
 
-	int pop = typer->pop;
-	int mw = typer->wages;
+	int pop = terrain->pop;
+	int mw = terrain->wages;
 	
 	// fix economy when MAINTENANCE_COST has been adjusted
 	mw += Globals->MAINTENANCE_COST - 10;
@@ -114,23 +111,23 @@ void ARegion::SetupPop()
 	// Only select race here if it hasn't been set during Race Growth
 	// in the World Creation process.
 	if ((race == -1) || (!Globals->GROW_RACES)) {
-		int noncoastalraces = sizeof(typer->races)/sizeof(int);
+		int noncoastalraces = sizeof(terrain->races) / sizeof(int);
 		int allraces =
-			noncoastalraces + sizeof(typer->coastal_races)/sizeof(int);
+			noncoastalraces + sizeof(terrain->coastal_races) / sizeof(int);
 
 		race = -1;
 		while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
 			int n = getrandom(IsCoastal() ? allraces : noncoastalraces);
 			if (n > noncoastalraces-1) {
-				race = typer->coastal_races[n-noncoastalraces-1];
+				race = terrain->coastal_races[n-noncoastalraces-1];
 			} else
-				race = typer->races[n];
+				race = terrain->races[n];
 		}
 	}
 
-	habitat = habitat * 2/3 + getrandom(habitat/3);
+	habitat = habitat * 2 / 3 + getrandom(habitat / 3);
 	ManType *mt = FindRace(ItemDefs[race].abr);
-	if (mt->terrain == typer->similar_type) {
+	if (mt->terrain == terrain->similar_type) {
 		habitat = (habitat * 9)/8;
 	}
 	if (!IsNativeRace(race)) {
@@ -154,38 +151,9 @@ void ARegion::SetupPop()
 	}
 	development += getrandom(25);
 	maxdevelopment = development;
+}
 
-	if (Globals->TOWNS_EXIST) {
-		int adjacent = 0;
-		int prob = Globals->TOWN_PROBABILITY;
-		if (prob < 1) prob = 100;
-		int townch = (int) 80000 / prob;
-		if (Globals->TOWNS_NOT_ADJACENT) {
-				for (int d = 0; d < NDIRS; d++) {
-					ARegion *newregion = neighbors[d];
-					if ((newregion) && (newregion->town)) adjacent++;
-				}
-			}
-		if (Globals->LESS_ARCTIC_TOWNS) {
-			int dnorth = GetPoleDistance(D_NORTH);
-			int dsouth = GetPoleDistance(D_SOUTH);
-			if (dnorth < 9)
-				townch = townch + 25 * (9 - dnorth) *
-					(9 - dnorth) * Globals->LESS_ARCTIC_TOWNS;
-			if (dsouth < 9)
-				townch = townch + 25 * (9 - dsouth) *
-					(9 - dsouth) * Globals->LESS_ARCTIC_TOWNS;
-		}
-		int spread = Globals->TOWN_SPREAD;
-		if (spread > 100) spread = 100;
-		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
-			100 * spread) / 100;
-		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
-		if (getrandom(townch) < townprob) {
-			AddTown();
-		}
-	}
-
+void ARegion::SetupEconomy() {
 	/* Setup basic economy */
 	maxwages = Wages();
 
@@ -256,6 +224,50 @@ void ARegion::SetupPop()
 						Population()/125, 0, 10000, 0, 400);
 		markets.Add(m);
 	}
+}
+
+void ARegion::SetupPop()
+{
+	TerrainType *typer = &(TerrainDefs[type]);
+	habitat = typer->pop+1;
+
+	SetupHabitat(typer);
+	if (population == 0) {
+		return;
+	}
+
+	if (Globals->TOWNS_EXIST) {
+		int adjacent = 0;
+		int prob = Globals->TOWN_PROBABILITY;
+		if (prob < 1) prob = 100;
+		int townch = (int) 80000 / prob;
+		if (Globals->TOWNS_NOT_ADJACENT) {
+				for (int d = 0; d < NDIRS; d++) {
+					ARegion *newregion = neighbors[d];
+					if ((newregion) && (newregion->town)) adjacent++;
+				}
+			}
+		if (Globals->LESS_ARCTIC_TOWNS) {
+			int dnorth = GetPoleDistance(D_NORTH);
+			int dsouth = GetPoleDistance(D_SOUTH);
+			if (dnorth < 9)
+				townch = townch + 25 * (9 - dnorth) *
+					(9 - dnorth) * Globals->LESS_ARCTIC_TOWNS;
+			if (dsouth < 9)
+				townch = townch + 25 * (9 - dsouth) *
+					(9 - dsouth) * Globals->LESS_ARCTIC_TOWNS;
+		}
+		int spread = Globals->TOWN_SPREAD;
+		if (spread > 100) spread = 100;
+		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
+			100 * spread) / 100;
+		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
+		if (getrandom(townch) < townprob) {
+			AddTown();
+		}
+	}
+
+	SetupEconomy();
 }
 
 /* ONE function where the wage and entertainment income
@@ -740,7 +752,7 @@ void ARegion::SetupCityMarket()
 	}
 }
 
-void ARegion::SetupProds(int productionWeight)
+void ARegion::SetupProds(double weight)
 {
 	Production *p = NULL;
 	TerrainType *typer = &(TerrainDefs[type]);
@@ -770,7 +782,7 @@ void ARegion::SetupProds(int productionWeight)
 
 	for (unsigned int c= 0; c < (sizeof(typer->prods)/sizeof(Product)); c++) {
 		int item = typer->prods[c].product;
-		int chance = typer->prods[c].chance * productionWeight;
+		int chance = typer->prods[c].chance * weight;
 		int amt = typer->prods[c].amount;
 		if (item != -1) {
 			if (!(ItemDefs[item].flags & ItemType::DISABLED) &&

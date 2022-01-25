@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "bfs.h"
+#include "graphs.h"
 
 #include <vector>
 #include <functional>
@@ -60,6 +60,7 @@ struct Range {
 };
 
 struct Cell {
+    int index;
     int x;
     int y;
     int biome;
@@ -94,9 +95,9 @@ public:
     int height;
     std::vector<Cell*> items;
 
-    inline Cell* get(int x, int y);
-    inline int index(int x, int y);
-    inline void coords(int index, int& x, int& y);
+    Cell* get(int x, int y);
+    int index(int x, int y);
+    void coords(int index, int& x, int& y);
     bool normalize(int& x, int& y);
 };
 
@@ -109,19 +110,26 @@ struct Blob {
     void add(Blob* blob);
 };
 
+using CellInclusionFunction = std::function<bool(Cell*, Cell*)>;
 
-class FloodFill : public BFS<Cell> {
+class CellGraph : public graphs::Graph<int, Cell*> {
 public:
-    FloodFill(CellMap* map, Blob* blob, std::function<bool(Cell*)> callback);
+    CellGraph(CellMap* map);
+    ~CellGraph();
 
+    Cell* get(int id);
+    std::vector<int> neighbors(int id);
+    double cost(int current, int next);
+
+    void setInclusion(CellInclusionFunction includeFn);
+
+private:
+    CellInclusionFunction includeFn;
     CellMap* map;
-    Blob* blob;
-    std::function<bool(Cell*)> callback;
 
-protected:
-    std::vector<Cell*> next(Cell* node);
-    bool add(Cell* node, const int distance) const;
+    void addCell(Cell* current, int dx, int dy, std::vector<int>& list);
 };
+
 
 class Map {
 public:

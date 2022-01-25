@@ -520,6 +520,77 @@ void Game::CreateWorld()
 	regions.CalcDensities();
 	
 	regions.TownStatistics();
+
+	ofstream hf;
+	hf.open("hexmap.json", ios::trunc);
+	hf << "[";
+
+	int count = 0;
+	auto arr = regions.GetRegionArray(1);
+	std::unordered_map<int, int> resources;
+	for (int x = 0; x < xx; x++) {
+		for (int y = 0; y < yy; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+			
+			{
+				forlist (&reg->products) {
+					Production* p = (Production*) elem;
+					resources[p->itemtype] += p->amount;
+				}
+			}
+
+			// DEBUG
+			if (count > 0) {
+				hf << ",";
+			}
+
+			hf << "{";
+			hf << "\"x\": " << reg->xloc << ",";
+			hf << "\"y\": " << reg->yloc << ",";
+
+			int citySize = 0;
+			if (reg->town) {
+				citySize = reg->town->TownType() + 1;
+			}
+
+			bool lair = false;
+			forlist (&reg->objects) {
+				Object* obj = (Object*) elem;
+				if (ObjectDefs[obj->type].monster > 0) {
+					lair = true;
+				}
+			}
+
+			bool gate = reg->gate > 0;
+
+			hf << "\"city\": " << citySize << ",";
+			hf << "\"lair\": " << (lair ? "true" : "false") << ",";
+			hf << "\"gate\": " << (gate ? "true" : "false") << ",";
+			hf << "\"type\": " << reg->type;
+			hf << "}";
+
+			count++;
+		}
+	}
+
+	hf << "]";
+	hf.close();
+
+	std::cout << std::endl;
+	std::cout << "Resources:" << std::endl;
+	for (auto kv : resources) {
+		if (kv.first == I_SILVER || kv.first <= -1) {
+			continue;
+		}
+
+		ItemType& item = ItemDefs[kv.first];
+		std::cout << item.name << " [" << item.abr << "] " << kv.second << std::endl;
+	}
+	std::cout << std::endl << std::endl;
 }
 
 int ARegionList::GetRegType( ARegion *pReg )
