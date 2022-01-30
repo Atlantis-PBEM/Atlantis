@@ -510,6 +510,8 @@ class ARegionList : public AList
 		int GetLevelXScale(int level);
 		int GetLevelYScale(int level);
 
+		void AddHistoricalBuildings(ARegionArray* arr, const int w, const int h);
+
 	private:
 		//
 		// Private world creation stuff

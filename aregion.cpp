@@ -3578,7 +3578,26 @@ void economy(ARegionArray* arr, const int w, const int h) {
 	}
 }
 
-void history(ARegionArray* arr, const int w, const int h) {
+void addAncientStructure(ARegion* reg, uint seed, int type, double damage) {
+	ObjectType& info = ObjectDefs[type];
+
+	Object * obj = new Object(reg);
+	int num = reg->buildingseq++;
+	int needs = info.cost * damage;
+	obj->num = num;
+
+	std::string name = getObjectName(seed, type, info) + " [" + std::to_string(num) + "]";
+	std::cout << "+ " << name << " : " << info.name << ", needs " << needs << std::endl;
+
+	obj->name = new AString(name);
+
+	obj->type = type;
+	obj->incomplete = needs;
+
+	reg->objects.Add(obj);
+}
+
+void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const int h) {
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
 			if ((x + y) % 2) {
@@ -3593,11 +3612,47 @@ void history(ARegionArray* arr, const int w, const int h) {
 			}
 
 			if (reg->town) {
-				if (makeRoll(3, 6) >= 16) {
+				if (reg->town->pop > 8000) {
+					if (makeRoll(3, 6) >= 12) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_CASTLE, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				} else if (reg->town->pop > 4000) {
+					if (makeRoll(3, 6) >= 14) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_FORT, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				} else if (reg->town->pop > 2000) {
+					if (makeRoll(3, 6) >= 16) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_TOWER, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				}
+
+				int roll = makeRoll(reg->town->TownType() + 1, 6);
+				int count = ceil(roll / 6);
+				int damage = 6 - roll % 6;
+
+				for (int i = 0; i < count; i++) {
+					double damagePoints = 0;
+					if (i == count - 1) {
+						if (damage >= 3) {
+							break;
+						}
+
+						damagePoints = damage / 6.0;
+					}
+
+					addAncientStructure(reg, getrandom(w * h) + 1, O_INN, damagePoints);
 				}
 			}
 			else {
-
+				if (reg->population > 2000) {
+					if (makeRoll(3, 6) >= 16) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_FORT, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				} else if (reg->population > 1000) {
+					if (makeRoll(3, 6) >= 17) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_TOWER, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				}
 			}
 		}
 	}
@@ -3679,7 +3734,7 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 
 	economy(arr, w, h);
 
-	history(arr, w, h);
+	AddHistoricalBuildings(arr, w, h);
 }
 
 ARegionGraph::ARegionGraph(ARegionArray* regions) {
