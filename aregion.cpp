@@ -34,8 +34,6 @@
 #include <algorithm>
 #include <random>
 #include <ctime>
-#include <iostream>
-#include <fstream>
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -3670,37 +3668,6 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
 	map->Generate();
-
-	ofstream f;
-	f.open("map.json", ios::trunc);
-	f << "[";
-
-	int count = 0;
-	for (auto &item : map->map.items) {
-		if (count > 0) {
-			f << ",";
-		}
-
-		f << "{";
-		f << "\"x\": " << item->x << ",";
-		f << "\"y\": " << item->y << ",";
-		f << "\"biome\": " << item->biome << ",";
-		f << "\"elevation\": " << item->elevation << ",";
-		f << "\"temperature\": " << item->temperature << ",";
-		f << "\"saturation\": " << item->saturation << ",";
-		f << "\"evoparation\": " << item->evoparation << ",";
-		f << "\"rainfall\": " << item->rainfall << ",";
-		f << "\"moistureIn\": " << item->moistureIn << ",";
-		f << "\"moistureOut\": " << item->moistureOut;
-		f << "}";
-
-		count++;
-	}
-
-	f << "]";
-	f.close();
-
-	/////
 
 	ARegionArray* arr = pRegionArrays[level];
 	for (int x = 0; x < w; x++) {

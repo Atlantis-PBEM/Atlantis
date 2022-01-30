@@ -521,11 +521,6 @@ void Game::CreateWorld()
 	
 	regions.TownStatistics();
 
-	ofstream hf;
-	hf.open("hexmap.json", ios::trunc);
-	hf << "[";
-
-	int count = 0;
 	auto arr = regions.GetRegionArray(1);
 	std::unordered_map<int, int> resources;
 	for (int x = 0; x < xx; x++) {
@@ -542,43 +537,8 @@ void Game::CreateWorld()
 					resources[p->itemtype] += p->amount;
 				}
 			}
-
-			// DEBUG
-			if (count > 0) {
-				hf << ",";
-			}
-
-			hf << "{";
-			hf << "\"x\": " << reg->xloc << ",";
-			hf << "\"y\": " << reg->yloc << ",";
-
-			int citySize = 0;
-			if (reg->town) {
-				citySize = reg->town->TownType() + 1;
-			}
-
-			bool lair = false;
-			forlist (&reg->objects) {
-				Object* obj = (Object*) elem;
-				if (ObjectDefs[obj->type].monster > 0) {
-					lair = true;
-				}
-			}
-
-			bool gate = reg->gate > 0;
-
-			hf << "\"city\": " << citySize << ",";
-			hf << "\"lair\": " << (lair ? "true" : "false") << ",";
-			hf << "\"gate\": " << (gate ? "true" : "false") << ",";
-			hf << "\"type\": " << reg->type;
-			hf << "}";
-
-			count++;
 		}
 	}
-
-	hf << "]";
-	hf.close();
 
 	std::cout << std::endl;
 	std::cout << "Resources:" << std::endl;
