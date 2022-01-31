@@ -881,6 +881,10 @@ void Game::ModifyTablesPerRuleset(void)
 
 	DisableSkill(S_GEMCUTTING);
 
+	// Food
+	EnableSkill(S_COOKING);
+	EnableItem(I_FOOD);
+
 	// Magic
 
 	ModifySkillDependancy(S_RAISE_UNDEAD, 0, "SUSK", 3);
