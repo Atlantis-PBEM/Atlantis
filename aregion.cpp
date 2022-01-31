@@ -28,9 +28,16 @@
 #include "game.h"
 #include "gamedata.h"
 #include "mapgen.h"
+#include "namegen.h"
 
-#include <iostream>
-#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <random>
+#include <ctime>
+
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
 
 Location *GetUnit(AList *list, int n)
 {
@@ -207,12 +214,33 @@ int ARegion::GetNearestProd(int item)
 	return 5;
 }
 
+std::vector<int> ARegion::GetPossibleLairs() {
+	std::vector<int> lairs;
+	TerrainType *tt = &TerrainDefs[type];
+
+	const int sz = sizeof(tt->lairs) / sizeof(int);
+
+	for (int i = 0; i < sz; i++) {
+		int index = tt->lairs[i];
+		if (index == -1) {
+			continue;
+		}
+
+		ObjectType& lair = ObjectDefs[index];
+		if (lair.flags & ObjectType::DISABLED) {
+			continue;
+		}
+
+		lairs.push_back(index);
+	}
+
+	return lairs;
+}
 
 void ARegion::LairCheck()
 {
 	// No lair if town in region
 	if (town) return;
-
 
 	TerrainType *tt = &TerrainDefs[type];
 
@@ -221,34 +249,13 @@ void ARegion::LairCheck()
 	int check = getrandom(100);
 	if (check >= tt->lairChance) return;
 
-	int count = 0;
-	unsigned int c;
-	for (c = 0; c < sizeof(tt->lairs)/sizeof(int); c++) {
-		if (tt->lairs[c] != -1) {
-			if (!(ObjectDefs[tt->lairs[c]].flags & ObjectType::DISABLED)) {
-				count++;
-			}
-		}
-	}
-	count = getrandom(count);
-
-	int lair = -1;
-	for (c = 0; c < sizeof(tt->lairs)/sizeof(int); c++) {
-		if (tt->lairs[c] != -1) {
-			if (!(ObjectDefs[tt->lairs[c]].flags & ObjectType::DISABLED)) {
-				if (!count) {
-					lair = tt->lairs[c];
-					break;
-				}
-				count--;
-			}
-		}
-	}
-
-	if (lair != -1) {
-		MakeLair(lair);
+	auto lairs = GetPossibleLairs();
+	if (lairs.empty()) {
 		return;
 	}
+
+	int lair = lairs[getrandom(lairs.size())];
+	MakeLair(lair);
 }
 
 void ARegion::MakeLair(int t)
@@ -274,11 +281,11 @@ int ARegion::GetPoleDistance(int dir)
 	return ct;
 }
 
-void ARegion::Setup(int productionWeight)
+void ARegion::Setup()
 {
 	//
 	// type and location have been setup, do everything else
-	SetupProds(productionWeight);
+	SetupProds(1);
 
 	SetupPop();
 
@@ -288,8 +295,32 @@ void ARegion::Setup(int productionWeight)
 	Object *obj = new Object(this);
 	objects.Add(obj);
 
-	if (Globals->LAIR_MONSTERS_EXIST)
-		LairCheck();
+	if (Globals->LAIR_MONSTERS_EXIST) LairCheck();
+}
+
+void ARegion::ManualSetup(const RegionSetup& settings) {
+	SetupProds(settings.prodWeight);
+
+	habitat = settings.habitat;
+
+	SetupHabitat(settings.terrain);
+
+	if (settings.addSettlement) {
+		AString* name = new AString(settings.settlementName);
+		AddTown(settings.settlementSize, name);
+	}
+
+	SetupEconomy();
+
+	objects.Add(new Object(this));
+
+	if (Globals->LAIR_MONSTERS_EXIST && settings.addLair) {
+		auto lairs = GetPossibleLairs();
+		if (!lairs.empty()) {
+			int lair = lairs[getrandom(lairs.size())];
+			MakeLair(lair);
+		}
+	}
 }
 
 int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range, int dev)
@@ -2743,6 +2774,888 @@ int mapBiome(int biome) {
 	}
 }
 
+struct WaterBody {
+	int name;
+	std::unordered_set<graphs::Location2D> regions;
+	std::unordered_set<int> connections;
+	bool rivers;
+
+	bool includes(const graphs::Location2D key) {
+		return regions.find(key) != regions.end();
+	}
+
+	bool includes(ARegion* reg) {
+		return regions.find({ reg->xloc, reg->yloc }) != regions.end();
+	}
+
+	void add(const graphs::Location2D key) {
+		regions.insert(key);
+	}
+
+	void add(const ARegion* reg) {
+		regions.insert({ reg->xloc, reg->yloc });
+	}
+
+	void connect(WaterBody* other) {
+		connections.insert(other->name);
+	}
+
+	bool connected(WaterBody* other) {
+		return connections.find(other->name) != connections.end();
+	}
+};
+
+int findWaterBody(std::vector<WaterBody*>& waterBodies, ARegion* reg) {
+	for (auto water : waterBodies) {
+		if (water->includes(reg)) {
+			return water->name;
+		}
+	}
+
+	return -1;
+}
+
+bool isInnerWater(ARegion* reg) {
+	for (int i = 0; i < NDIRS; i++) {
+		auto n = reg->neighbors[i];
+		if (n && n->type != R_OCEAN) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool isNearWater(ARegion* reg) {
+	for (int i = 0; i < NDIRS; i++) {
+		auto n = reg->neighbors[i];
+		if (n && n->type == R_OCEAN) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool isNearWaterBody(ARegion* reg, WaterBody* wb) {
+	for (int i = 0; i < NDIRS; i++) {
+		auto n = reg->neighbors[i];
+		if (n && wb->includes(n)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool isNearWaterBody(ARegion* reg, std::vector<WaterBody*>& list) {
+	for (auto wb : list) {
+		if (isNearWaterBody(reg, wb)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::unordered_map<ARegion*, int>& rivers,
+	const int w, const int h, const int maxRiverReach) {
+	std::cout << "Let's have RIVERS!" << std::endl;
+
+	// all non-coast water regions
+	std::unordered_set<graphs::Location2D> innerWater;
+
+	ARegionGraph graph = ARegionGraph(arr);
+	graph.setInclusion([](ARegion* current, ARegion* next) {
+		return next->type == R_OCEAN;
+	});
+
+	std::cout << "Find water bodies" << std::endl;
+
+	int waterBodyName = 0;
+	for (int x = 0; x < w; x++) {
+    	for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+			if (reg->type != R_OCEAN) {
+				continue;
+			}
+
+			graphs::Location2D loc = { reg->xloc, reg->yloc };
+			if (isInnerWater(reg)) {
+				innerWater.insert(loc);
+			}
+
+			if (findWaterBody(waterBodies, reg) >= 0) {
+				continue;
+			}
+
+			auto result = graphs::breadthFirstSearch(graph, loc);
+
+			WaterBody* wb = new WaterBody();
+			wb->name = waterBodyName++;
+			waterBodies.push_back(wb);
+
+			for (auto kv : result) {
+				wb->add(kv.first);
+			}
+		}
+	}
+
+	// now we know all water bodies and know all water regions which are not in the coast
+	// we need to find distance from one water body to another water body
+
+	std::cout << "Distances from wate body to water body" << std::endl;
+
+	size_t sz = waterBodies.size();
+	int distances[sz][sz];
+	for (int i = 0; i < sz; i++) {
+		for (int j = 0; j < sz; j++) {
+			distances[i][j] = INT32_MAX;
+		}
+	}
+
+	for (auto water : waterBodies) {
+		std::cout << "WATER BODY " << water->name << std::endl;
+
+		graph.setInclusion([ water, &innerWater ](ARegion* current, ARegion* next) {
+			graphs::Location2D loc = { next->xloc, next->yloc };
+			return !water->includes(loc) && innerWater.find(loc) == innerWater.end();
+		});
+
+		for (auto loc : water->regions) {
+			if (innerWater.find(loc) != innerWater.end()) {
+				continue;
+			}
+
+			auto result = graphs::breadthFirstSearch(graph, loc);
+			for (auto kv : result) {
+				int newDist = kv.second.distance + 1;
+
+				int otherWater = findWaterBody(waterBodies, graph.get(kv.first));
+				if (otherWater < 0) {
+					continue;
+				}
+				
+				int currentDist = distances[water->name][otherWater];
+				if (newDist < currentDist ) {
+					distances[water->name][otherWater] = newDist;
+				}
+			}
+		}
+	}
+
+	// so we found shortest distance from one water body to another water body
+	// now we need to find smallest elevation cost
+	// each water body will connect up to 4 closest bodiws if they are in (min(map width, map height) / 8) range
+
+	std::cout << "Max river reach " << maxRiverReach << std::endl;
+
+	auto rng = std::default_random_engine();
+	rng.seed( time(0) );
+
+	graph.setCost([ map, &rivers ](ARegion* current, ARegion* next) {
+		int cost = std::max(1, map->map.get(next->xloc * 2, next->yloc * 2)->elevation);
+		// if (next->type == R_PLAIN || next->type == R_FOREST || next->type == R_JUNGLE) {
+		// 	cost *= 100;
+		// }
+
+		if (rivers.find(next) != rivers.end()) {
+			cost = cost / 10;
+		}
+		else if (isNearWater(next)) {
+			cost = cost * 10;
+		}
+
+		return cost;
+	});
+
+	int riverName = 0;
+	for (int i = 0; i < sz; i++) {
+		std::cout << "Connecting water body " << i << std::endl;
+
+		std::vector<std::pair<int, int>> candidates;
+		WaterBody* source = waterBodies[i];
+
+		for (int j = 0; j < sz; j++) {
+			if (i == j) {
+				continue;
+			}
+
+			int distance = distances[i][j];
+			if (distance <= maxRiverReach) {
+				candidates.push_back(std::make_pair(j, distance));
+			}
+		}
+
+		int numConnections = std::min(makeRoll(3, 4), (int) candidates.size());
+		std::cout << "There will be " << numConnections << " rivers" << std::endl;
+
+		if (numConnections > 0) {
+			std::shuffle(candidates.begin(), candidates.end(), rng);
+
+			for (int ci = 0; ci < numConnections; ci++) {
+				WaterBody* target = waterBodies[candidates[ci].first];
+				std::cout << "Planing river to " << target->name << std::endl;
+
+				if (source->connected(target)) {
+					std::cout << "Already connected, moving to next target" << std::endl;
+					continue;
+				}
+
+				graph.setInclusion([ source, target, &rivers, &waterBodies ](ARegion* current, ARegion* next) {
+					if (source->includes(next)) {
+						// river can't go through source water body
+						return false;
+					}
+
+					if (target->includes(current) && target->includes(next)) {
+						// river can't go thourh target water body, it can touch target water body edge
+						return false;
+					}
+
+					if (rivers.find(next) != rivers.end()) {
+						// rivers can cross
+						return true;
+					}
+
+					if (!target->includes(next) && next->type == R_OCEAN) {
+						// can't go through any other water
+						return false;
+					}
+
+					// if (!isNearWaterBody(next, target) && isNearWaterBody(next, waterBodies)) {
+					// 	// can't go near other water bodies
+					// 	return false;
+					// }
+
+					return true;
+				});
+
+				graphs::Location2D riverStart;
+				graphs::Location2D riverEnd;
+				int riverCost = INT32_MAX;
+
+				for (auto start : source->regions) {
+					if (innerWater.find(start) != innerWater.end()) {
+						continue;
+					}
+
+					std::unordered_map<graphs::Location2D, graphs::Location2D> cameFrom;
+					std::unordered_map<graphs::Location2D, double> costSoFar;
+					graphs::dijkstraSearch(graph, start, cameFrom, costSoFar);
+
+					int smallestCost = INT32_MAX;
+					graphs::Location2D end;
+					for (auto loc : target->regions) {
+						int cost = costSoFar[loc];
+						if (cost > 0 && cost < smallestCost) {
+							end = loc;
+							smallestCost = cost;
+						}
+					}
+
+					if (smallestCost == INT32_MAX) {
+						// path not found
+						continue;
+					}
+
+					if (smallestCost < riverCost) {
+						riverStart = start;
+						riverEnd = end;
+						riverCost = smallestCost;
+					}
+				}
+
+				if (riverCost == INT32_MAX) {
+					// path not found
+					std::cout << "No path to " << target->name << " found" << std::endl;
+					continue;
+				}
+
+				// we just found river start and end
+				source->connect(target);
+				target->connect(source);
+
+				std::unordered_map<graphs::Location2D, graphs::Location2D> cameFrom;
+				std::unordered_map<graphs::Location2D, double> costSoFar;
+				graphs::dijkstraSearch(graph, riverStart, riverEnd, cameFrom, costSoFar);
+
+				std::vector<ARegion*> path;
+				graphs::Location2D current = riverEnd;
+				while (current != riverStart) {
+					ARegion* reg = graph.get(current);
+					path.push_back(reg);
+
+					current = cameFrom[current];
+				}
+
+				int riverLen = path.size();
+				std::cout << "River length is " << riverLen << std::endl;
+
+				bool first = true;
+				int counter = 0;
+				int segmentLen = std::min(4, riverLen - 1);
+				std::cout << "River segment length is " << segmentLen << std::endl;
+
+				for (auto reg : path) {
+					if (rivers.find(reg) != rivers.end()) {
+						// we are corrsing or running across exisitng river
+						riverName++;
+						counter = 1;
+						first = false;
+						continue;
+					}
+					else {
+						rivers.insert(std::make_pair(reg, riverName));
+					}
+
+					if (first) {
+						reg->type = path.size() == 1 ? R_SWAMP : R_OCEAN;
+						first = false;
+						continue;
+					}
+
+					reg->type = (counter % segmentLen) == 0 ? R_SWAMP : R_OCEAN;
+					counter++;
+				}
+
+				riverName++;
+			}
+		}
+	}
+}
+
+void cleanupIsolatedPlaces(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::unordered_map<ARegion*, int>& rivers, int w, int h) {
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+			if (reg->type == R_OCEAN) {
+				continue;
+			}
+
+			std::vector<WaterBody*> wb;
+			std::vector<int> nearbyRivers;
+			bool clear = true;
+			for (int i = 0; i < NDIRS; i++) {
+				auto next = reg->neighbors[i];
+				if (next == NULL) {
+					continue;
+				}
+
+				if (next->type != R_OCEAN) {
+					clear = false;
+					break;
+				}
+
+				int name = findWaterBody(waterBodies, next);
+				if (name >= 0) {
+					wb.push_back(waterBodies[name]);
+				}
+
+				auto r = rivers.find(next);
+				if (r != rivers.end()) {
+					nearbyRivers.push_back(r->second);
+				}
+			}
+
+			if (clear) {
+				reg->type = R_OCEAN;
+
+				if (!wb.empty()) {
+					wb[getrandom(wb.size())]->add(reg);
+				}
+				else  {
+					rivers.insert(std::make_pair(reg, nearbyRivers[getrandom(nearbyRivers.size())]));
+				}
+			}
+		}
+	}
+}
+
+int countNeighbors(ARegionGraph& graph, ARegion* reg, int ofType, int distance) {
+	graphs::Location2D loc = { reg->xloc, reg->yloc };
+	
+	int count = 0;
+
+	auto result = graphs::breadthFirstSearch(graph, loc);
+	for (auto kv : result) {
+		int d = kv.second.distance + 1;
+		if (d > distance) {
+			continue;
+		}
+
+		ARegion* r = graph.get(kv.first);
+		if (r->type == ofType) {
+			count++;
+		}
+	}
+
+	return count;
+}
+
+void placeVolcanoes(ARegionArray* arr, const int w, const int h) {
+	ARegionGraph graph = ARegionGraph(arr);
+
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+			if (reg->type != R_MOUNTAIN) {
+				continue;
+			}
+
+			int mountains = countNeighbors(graph, reg, R_MOUNTAIN, 1);
+			int volcanoes = countNeighbors(graph, reg, R_VOLCANO, 2);
+
+			if (volcanoes == 0 && mountains >= 4) {
+				reg->type = R_VOLCANO;
+			}
+		}
+	}
+}
+
+int distance(graphs::Location2D a, graphs::Location2D b) {
+	int dX = std::abs(a.x - b.x);
+	int dY = std::abs(a.y - b.y);
+
+	return dX + std::max(0, (dY - dX) / 2);
+}
+
+int cylDistance(graphs::Location2D a, graphs::Location2D b, int w) {
+	int d0 = distance(a, b);
+	int d1 = distance(a, { b.x + w, b.y });
+	int d2 = distance(a, { b.x - w, b.y });
+
+	return std::min(d0, std::min(d1, d2));
+}
+
+std::vector<graphs::Location2D> getPoints(const int w, const int h, const int minDist, const int newPointCount) {
+	std::vector<graphs::Location2D> output;
+	std::vector<graphs::Location2D> processing;
+
+	const int cellSize = ceil(minDist / sqrt(2));
+	
+	graphs::Location2D loc = { x: getrandom(w), y: getrandom(h) };
+	
+	output.push_back(loc);
+	processing.push_back(loc);
+
+	while (!processing.empty()) {
+		int i = getrandom(processing.size());
+		auto next = processing.at(i);
+		processing.erase(processing.begin() + i);
+
+		int count = 0;
+		while (count < newPointCount) {
+			int r = getrandom(minDist) + minDist + 1;
+			double a = getrandom(360) / 360.0 * 2 * M_PI;
+
+			int x = ceil(next.x + r * cos(a));
+			int y = ceil(next.y + r * sin(a));
+			if ((x + y) % 2) {
+				continue;
+			}
+			
+			if (0 > x || x >= w) {
+				continue;
+			}
+
+			if (0 > y || y >= h) {
+				continue;
+			}
+
+			// a new point to check
+			count++;
+			graphs::Location2D candidate = { x, y };
+
+			int gridX = x / cellSize;
+			int gridY = y / cellSize;
+
+			// check against all valid points
+			bool pointValid = true;
+			for (auto p : output) {
+				int d = cylDistance(candidate, p, w);
+				if (d < minDist) {
+					// too close
+					pointValid = false;
+					break;
+				}
+
+				int gpX = p.x / cellSize;
+				int gpY = p.y / cellSize;
+				if (gridX == gpX && gridY == gpY) {
+					pointValid = false;
+					break;
+				}
+			}
+
+			if (!pointValid) {
+				continue;
+			}
+
+			output.push_back(candidate);
+			processing.push_back(candidate);
+		}
+	}
+
+	return output;
+}
+
+struct NameArea {
+	int name;
+	graphs::Location2D center;
+	std::unordered_map<int, int> usage;
+
+	int distance(const int w, ARegion* reg) {
+		return cylDistance(center, { reg->xloc, reg->yloc }, w);
+	}
+
+	int getName(int type) {
+		int u = usage[type];
+		usage[type]++;
+
+		return name + u;
+	}
+};
+
+NameArea* getNameArea(std::vector<NameArea*>& nameAnchors, const int w, ARegion* reg) {
+	NameArea* na = NULL;
+	int distance = INT32_MAX;
+
+	for (auto a : nameAnchors) {
+		int d = a->distance(w, reg);
+		if (distance > d) {
+			distance = d;
+			na = a;
+		}
+	}
+
+	return na;
+}
+
+struct River {
+	std::string name;
+	int length;
+	int nameArea;
+};
+
+Ethnicity getRegionEtnos(ARegion* reg) {
+	Ethnicity etnos = Ethnicity::NONE;
+	if (reg->race > 0) {
+		auto itemAbbr = ItemDefs[reg->race].abr;
+		auto man = FindRace(itemAbbr);
+		etnos = man->ethnicity;
+	}
+
+	return etnos;
+}
+
+void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::unordered_map<ARegion*, int>& rivers, const int w, const int h) {
+	std::unordered_set<ARegion*> named;
+
+	// generate name areas
+	std::vector<NameArea*> nameAnchors;
+	for (auto p : getPoints(w, h, 8, 16)) {
+		NameArea* na = new NameArea();
+		na->center = p;
+		na->name = getrandom(w * h) + 1;
+
+		nameAnchors.push_back(na);
+	}
+
+	// name rivers
+	int minLen = 1;
+	int maxLen = 0;
+
+	std::unordered_map<int, River> riverNames;
+	for (auto &kv : rivers) {
+		River& river = riverNames[kv.second];
+		river.length++;
+
+		if (river.nameArea == 0) {
+			auto na = getNameArea(nameAnchors, w, kv.first);
+			river.nameArea = na->getName(R_NUM);
+		}
+	}
+
+	for (auto &kv : riverNames) {
+		minLen = std::min(minLen, kv.second.length);
+		maxLen = std::max(maxLen, kv.second.length);
+	}
+
+	for (auto &kv : riverNames) {
+		River& river = kv.second;
+		river.name = getRiverName(river.nameArea, river.length, minLen, maxLen);
+		std::cout << river.name << std::endl;
+	}
+
+	for (auto &kv : rivers) {
+		River& river = riverNames[kv.second];
+		kv.first->SetName(river.name.c_str());
+		named.insert(kv.first);
+	}
+
+	// name water bodies
+	for (auto wb : waterBodies) {
+		std::string name;
+
+		for (auto loc : wb->regions) {
+			ARegion* reg = arr->GetRegion(loc.x, loc.y);
+
+			if (name.empty()) {
+				auto na = getNameArea(nameAnchors, w, reg);
+				int seed = na->getName(reg->type);
+
+				Ethnicity etnos = getRegionEtnos(reg);
+				name = getRegionName(seed, etnos, reg->type, wb->regions.size(), false);
+
+				std::cout << name << std::endl;
+			}
+
+			reg->SetName(name.c_str());
+			named.insert(reg);
+		}
+	}
+
+	ARegionGraph graph = ARegionGraph(arr);
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			graphs::Location2D loc = { x, y };
+			ARegion* reg = graph.get(loc);
+
+			if (named.find(reg) != named.end()) {
+				continue;
+			}
+
+			graph.setInclusion([ reg ](ARegion* current, ARegion* next) {
+				if (reg->type == R_MOUNTAIN || reg->type == R_VOLCANO) {
+					return next->type == R_MOUNTAIN || next->type == R_VOLCANO;
+				}
+
+				return next->type == reg->type;
+			});
+
+			std::string name;
+			auto area = graphs::breadthFirstSearch(graph, loc);
+
+			Ethnicity etnos = Ethnicity::NONE;
+			for (auto kv : area) {
+				auto r = graph.get(kv.first);
+				etnos = getRegionEtnos(r);
+
+				if (etnos != Ethnicity::NONE) {
+					break;
+				}
+			}
+
+			NameArea* na = NULL;
+			while (name.empty()) {
+				for (auto kv : area) {
+					if (getrandom(100) == 99) {
+						auto r = graph.get(kv.first);
+						int type = reg->type == R_MOUNTAIN || reg->type == R_VOLCANO ? R_MOUNTAIN : reg->type;
+
+						na = getNameArea(nameAnchors, w, reg);
+						int seed = na->getName(type);
+
+						name = getRegionName(seed, etnos, type, area.size(), false);
+						std::cout << name << std::endl;
+					}
+				}
+			}
+
+			for (auto kv : area) {
+				auto r = graph.get(kv.first);
+
+				if (r->type == R_VOLCANO) {
+					std::string volcanoName = getRegionName(na->getName(r->type), etnos, r->type, 1, false);
+					std::cout << volcanoName << std::endl;
+					r->SetName(volcanoName.c_str());
+				}
+				else {
+					r->SetName(name.c_str());
+				}
+
+				named.insert(r);
+			}
+		}
+	}
+}
+
+void economy(ARegionArray* arr, const int w, const int h) {
+	std::unordered_map<int, int> histogram;
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+			histogram[reg->type]++;
+		}
+	}
+
+	std::cout << "Setting settlements" << std::endl;
+
+	std::unordered_set<ARegion*> visited;
+	for (auto p : getPoints(w, h, 4, 16)) {
+		auto reg = arr->GetRegion(p.x, p.y);
+		if (reg == NULL) {
+			// this means we have a point outside the map bounds :(
+			// todo: fix point boundary
+			std::cout << "NO REGION FOUND!!!!" << std::endl;
+			continue;
+		}
+
+		TerrainType* terrain = &(TerrainDefs[reg->type]);
+		if (reg->type == R_OCEAN || reg->type == R_VOLCANO || terrain->flags & TerrainType::BARREN) {
+			continue;
+		}
+
+		Ethnicity etnos = getRegionEtnos(reg);
+
+		int size = getrandom(TOWN_CITY + 1);
+		std::string name = getEthnicName(getrandom(w * h) + 1, etnos);
+
+		reg->ManualSetup({
+			terrain: terrain,
+			habitat: terrain->pop + 1,
+			prodWeight: 1,
+			addLair: false,
+			addSettlement: true,
+			settlementName: name,
+			settlementSize: size
+		});
+
+		visited.insert(reg);
+		std::string sizeName = size == TOWN_VILLAGE ? "Village" : size == TOWN_TOWN ? "Town" : "City";
+		std::cout << sizeName << " " << name << std::endl;
+	}
+
+	std::cout << "Setting up other regions" << std::endl;
+
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+			if (visited.find(reg) != visited.end()) {
+				continue;
+			}
+
+			TerrainType* terrain = &(TerrainDefs[reg->type]);
+			bool addLair = getrandom(100) < terrain->lairChance;
+
+			reg->ManualSetup({
+				terrain: terrain,
+				habitat: terrain->pop + 1,
+				prodWeight: 1,
+				addLair: addLair,
+				addSettlement: false,
+				settlementName: std::string(),
+				settlementSize: 0
+			});
+		}
+	}
+}
+
+void addAncientStructure(ARegion* reg, uint seed, int type, double damage) {
+	ObjectType& info = ObjectDefs[type];
+
+	Object * obj = new Object(reg);
+	int num = reg->buildingseq++;
+	int needs = info.cost * damage;
+	obj->num = num;
+
+	std::string name = getObjectName(seed, type, info) + " [" + std::to_string(num) + "]";
+	std::cout << "+ " << name << " : " << info.name << ", needs " << needs << std::endl;
+
+	obj->name = new AString(name);
+
+	obj->type = type;
+	obj->incomplete = needs;
+
+	reg->objects.Add(obj);
+}
+
+void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const int h) {
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+			TerrainType* terrain = &(TerrainDefs[reg->type]);
+
+			if (reg->type == R_OCEAN || reg->type == R_VOLCANO || terrain->flags & TerrainType::BARREN) {
+				continue;
+			}
+
+			if (reg->town) {
+				if (reg->town->pop > 8000) {
+					if (makeRoll(3, 6) >= 12) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_CASTLE, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				} else if (reg->town->pop > 4000) {
+					if (makeRoll(3, 6) >= 14) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_FORT, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				} else if (reg->town->pop > 2000) {
+					if (makeRoll(3, 6) >= 16) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_TOWER, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				}
+
+				int roll = makeRoll(reg->town->TownType() + 1, 6);
+				int count = ceil(roll / 6);
+				int damage = 6 - roll % 6;
+
+				for (int i = 0; i < count; i++) {
+					double damagePoints = 0;
+					if (i == count - 1) {
+						if (damage >= 3) {
+							break;
+						}
+
+						damagePoints = damage / 6.0;
+					}
+
+					addAncientStructure(reg, getrandom(w * h) + 1, O_INN, damagePoints);
+				}
+			}
+			else {
+				if (reg->population > 2000) {
+					if (makeRoll(3, 6) >= 16) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_FORT, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				} else if (reg->population > 1000) {
+					if (makeRoll(3, 6) >= 17) {
+						addAncientStructure(reg, getrandom(w * h) + 1, O_TOWER, (makeRoll(2, 6) - 1) / 12.0);
+					}
+				}
+			}
+		}
+	}
+}
+
 void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 	static const int level = 1;
 
@@ -2756,42 +3669,6 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 
 	map->Generate();
 
-	ofstream f;
-	f.open("map.json", ios::trunc);
-	f << "[";
-
-	int count = 0;
-	for (auto &item : map->map.items) {
-		if (count > 0) {
-			f << ",";
-		}
-
-		f << "{";
-		f << "\"x\": " << item->x << ",";
-		f << "\"y\": " << item->y << ",";
-		f << "\"biome\": " << item->biome << ",";
-		f << "\"elevation\": " << item->elevation << ",";
-		f << "\"temperature\": " << item->temperature << ",";
-		f << "\"saturation\": " << item->saturation << ",";
-		f << "\"evoparation\": " << item->evoparation << ",";
-		f << "\"rainfall\": " << item->rainfall << ",";
-		f << "\"moistureIn\": " << item->moistureIn << ",";
-		f << "\"moistureOut\": " << item->moistureOut;
-		f << "}";
-
-		count++;
-	}
-
-	f << "]";
-	f.close();
-
-	/////
-
-	ofstream hf;
-	hf.open("hexmap.json", ios::trunc);
-	hf << "[";
-
-	count = 0;
 	ARegionArray* arr = pRegionArrays[level];
 	for (int x = 0; x < w; x++) {
     	for (int y = 0; y < h; y++) {
@@ -2800,29 +3677,75 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 			}
 
 			ARegion* reg = arr->GetRegion(x, y);
-
 			Cell* cell = map->map.get(reg->xloc * 2, reg->yloc * 2);
-
 			reg->type = mapBiome(cell->biome);
-
-			// DEBUG
-			if (count > 0) {
-				hf << ",";
-			}
-
-			hf << "{";
-			hf << "\"x\": " << reg->xloc << ",";
-			hf << "\"y\": " << reg->yloc << ",";
-			hf << "\"type\": " << reg->type;
-			hf << "}";
-
-			count++;
 		}
-    }
+	}
 
-	hf << "]";
-	hf.close();
+	// all water bodies
+	std::vector<WaterBody*> waterBodies;
 
-	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
-	FinalSetup(pRegionArrays[level]);
+	// all rivers
+	std::unordered_map<ARegion*, int> rivers;
+
+	const int maxRiverReach = std::min(w, h) / 4;
+	makeRivers(map, arr, waterBodies, rivers, w, h, maxRiverReach);
+	
+	cleanupIsolatedPlaces(arr, waterBodies, rivers, w, h);
+
+	placeVolcanoes(arr, w, h);
+
+	GrowRaces(arr);
+	
+	giveNames(arr, waterBodies, rivers, w, h);
+
+	economy(arr, w, h);
+
+	AddHistoricalBuildings(arr, w, h);
+}
+
+ARegionGraph::ARegionGraph(ARegionArray* regions) {
+	this->regions = regions;
+	this->costFn = [](ARegion* current, ARegion* next) { return 1; };
+	this->includeFn = [](ARegion* current, ARegion* next) { return true; };
+}
+
+ARegionGraph::~ARegionGraph() {
+
+}
+
+ARegion* ARegionGraph::get(graphs::Location2D id) {
+	return regions->GetRegion(id.x, id.y);
+}
+
+std::vector<graphs::Location2D> ARegionGraph::neighbors(graphs::Location2D id) {
+	ARegion* current = regions->GetRegion(id.x, id.y);
+
+	std::vector<graphs::Location2D> list;
+	for (int i = 0; i < NDIRS; i++) {
+		ARegion* next = current->neighbors[i];
+		if (next == NULL) {
+			continue;
+		}
+
+		if (!includeFn(current, next)) {
+			continue;
+		}
+
+		list.push_back({ next->xloc, next->yloc });
+	}
+
+	return list;
+}
+
+double ARegionGraph::cost(graphs::Location2D current, graphs::Location2D next) {
+	return this->costFn(get(current), get(next));
+}
+
+void ARegionGraph::setCost(ARegionCostFunction costFn) {
+	this->costFn = costFn;
+}
+
+void ARegionGraph::setInclusion(ARegionInclusionFunction includeFn) {
+	this->includeFn = includeFn;
 }

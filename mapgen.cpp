@@ -1,3 +1,28 @@
+// START A3HEADER
+//
+// This source file is part of the Atlantis PBM game program.
+// Copyright (C) 2022 Valdis Zobēla
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program, in the file license.txt. If not, write
+// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+// Boston, MA 02111-1307, USA.
+//
+// See the Atlantis Project web page for details:
+// http://www.prankster.com/project
+//
+// END A3HEADER
+
 #include "mapgen.h"
 #include "simplex.h"
 
@@ -7,8 +32,6 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
-
-#define __USE_MISC
 #include <cmath>
 
 #ifndef M_PI
@@ -87,46 +110,48 @@ bool Biome::match(const Cell* cell) const {
     return temp.in(cell->temperature) && rainfall.in(cell->rainfall);
 }
 
-FloodFill::FloodFill(CellMap* map, Blob* blob, std::function<bool(Cell*)> callback) {
-    this->map = map;
-    this->callback = callback;
-    this->blob = blob;
+CellGraph::CellGraph(CellMap* map) {
+	this->map = map;
 }
 
-void addCell(CellMap* map, int x, int y, std::vector<Cell*>& list) {
-    Cell* n = map->get(x, y);
-    if (n) {
-        list.push_back(n);
-    }
+CellGraph::~CellGraph() {
+
 }
 
-std::vector<Cell*> FloodFill::next(Cell* node) {
-    std::vector<Cell*> list;
-    list.reserve(8);
+Cell* CellGraph::get(int id) {
+    return map->items[id];
+}
 
-    const int x = node->x;
-    const int y = node->y;
+std::vector<int> CellGraph::neighbors(int id) {
+    Cell* current = map->items[id];
 
-    addCell(map, x,     y - 1, list);
-    addCell(map, x + 1, y - 1, list);
-    addCell(map, x + 1, y,     list);
-    addCell(map, x + 1, y + 1, list);
-    addCell(map, x,     y + 1, list);
-    addCell(map, x - 1, y + 1, list);
-    addCell(map, x - 1, y,     list);
-    addCell(map, x - 1, y - 1, list);
+    std::vector<int> list;
+
+    addCell(current,  0, -1, list);
+    addCell(current,  1, -1, list);
+    addCell(current,  1,  0, list);
+    addCell(current,  1,  1, list);
+    addCell(current,  0,  1, list);
+    addCell(current, -1,  1, list);
+    addCell(current, -1,  0, list);
+    addCell(current, -1, -1, list);
 
     return list;
 }
 
-bool FloodFill::add(Cell* node, const int distance) const {
-    if (!callback(node)) {
-        return false;
+double CellGraph::cost(int current, int next) {
+    return 1;
+}
+
+void CellGraph::setInclusion(CellInclusionFunction includeFn) {
+    this->includeFn = includeFn;
+}
+
+void CellGraph::addCell(Cell* current, int dx, int dy, std::vector<int>& list) {
+    Cell* n = map->get(current->x + dx, current->y + dy);
+    if (n && includeFn(current, n)) {
+        list.push_back(n->index);
     }
-
-    blob->add(node);
-
-    return true;
 }
 
 CellMap::CellMap(int width, int height) {
@@ -142,6 +167,7 @@ CellMap::CellMap(int width, int height) {
         coords(i, x, y);
 
         items.push_back(new Cell({
+            index: i,
             x: x,
             y: y,
             biome: B_UNKNOWN,
@@ -162,7 +188,7 @@ CellMap::~CellMap() {
     }
 }
 
-inline Cell* CellMap::get(int x, int y) {
+Cell* CellMap::get(int x, int y) {
     if (!normalize(x, y)) {
         return NULL;
     }
@@ -186,11 +212,11 @@ bool CellMap::normalize(int& x, int& y) {
     return true;
 }
 
-inline int CellMap::index(int x, int y) {
+int CellMap::index(int x, int y) {
     return x + y * width;
 }
 
-inline void CellMap::coords(int index, int& x, int& y) {
+void CellMap::coords(int index, int& x, int& y) {
     y = index / width;
     x = index % width;
 }
@@ -354,15 +380,41 @@ Map::Map(int width, int height) : map(CellMap(width, height)) {
     mountainPercent = 0.2;
 }
 
-Blob* fillBiome(CellMap* map, Cell* start, int biome, std::function<bool(Cell*)> condition) {
+Blob* fillByElevation(CellMap* map, Cell* start, int biome, Range elevation) {
     Blob* blob = new Blob();
     blob->biome = biome;
 
-    FloodFill ff = FloodFill(map, blob, condition);
-    ff.search(start);
+    CellGraph graph = CellGraph(map);
+    graph.setInclusion([ elevation ](Cell* current, Cell* next) {
+        return elevation.in(next->elevation) && next->biome == B_UNKNOWN;
+    });
 
-    for (auto item : blob->items) {
-        item->biome = biome;
+    auto result = graphs::breadthFirstSearch(graph, start->index);
+
+    for (auto kv : result) {
+        auto cell = graph.get(kv.first);
+        cell->biome = biome;
+        blob->add(cell);
+    }
+
+    return blob;
+}
+
+Blob* fillByBiome(CellMap* map, Cell* start, const Biome* biome) {
+    Blob* blob = new Blob();
+    blob->biome = biome->name;
+
+    CellGraph graph = CellGraph(map);
+    graph.setInclusion([ biome ](Cell* current, Cell* next) {
+        return biome->match(next) && next->biome == B_UNKNOWN;
+    });
+
+    auto result = graphs::breadthFirstSearch(graph, start->index);
+
+    for (auto kv : result) {
+        auto cell = graph.get(kv.first);
+        cell->biome = biome->name;
+        blob->add(cell);
     }
 
     return blob;
@@ -433,15 +485,11 @@ void Map::Generate() {
         }
 
         if (item->elevation <= seaLevel) {
-            auto blob = fillBiome(&map, item, B_WATER, [ seaLevel ](Cell* cell) -> bool {
-                return cell->elevation <= seaLevel;
-            });
+            auto blob = fillByElevation(&map, item, B_WATER, { minElevation, seaLevel });
             blobs.push_back(blob);
         }
         else if (item->elevation >= mountainLevel) {
-            auto blob = fillBiome(&map, item, B_MOUNTAINS, [ mountainLevel ](Cell* cell) -> bool {
-                return cell->elevation >= mountainLevel;
-            });
+            auto blob = fillByElevation(&map, item, B_MOUNTAINS, { mountainLevel, maxElevation });
             blobs.push_back(blob);
         }
     }
@@ -523,9 +571,7 @@ void Map::Generate() {
             exit(1);
         }
 
-        auto blob = fillBiome(&map, item, biome->name, [ &biome ](Cell* cell) -> bool {
-            return cell->biome == B_UNKNOWN && biome->match(cell);
-        });
+        auto blob = fillByBiome(&map, item, biome);
         blobs.push_back(blob);
     }
 

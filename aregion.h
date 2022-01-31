@@ -43,8 +43,12 @@ class ARegionArray;
 #include "production.h"
 #include "market.h"
 #include "object.h"
+#include "graphs.h"
 #include "mapgen.h"
+
 #include <map>
+#include <vector>
+#include <functional>
 
 /* Weather Types */
 enum {
@@ -159,6 +163,16 @@ class TownInfo
 		int dev;
 };
 
+struct RegionSetup {
+	TerrainType* terrain;
+	int habitat;
+	double prodWeight;
+	bool addLair;
+	bool addSettlement;
+	std::string settlementName;
+	int settlementSize;
+};
+
 class ARegion : public AListElem
 {
 	friend class Game;
@@ -168,7 +182,9 @@ class ARegion : public AListElem
 		ARegion();
 		ARegion(int, int);
 		~ARegion();
-		void Setup(int productionWeight);
+		
+		void Setup();
+		void ManualSetup(const RegionSetup& settings);
 
 		void ZeroNeighbors();
 		void SetName(char const *);
@@ -349,7 +365,7 @@ class ARegion : public AListElem
 	private:
 		/* Private Setup Functions */
 		void SetupPop();
-		void SetupProds(int productionWeight);
+		void SetupProds(double weight);
 		void SetIncome();
 		void Grow();
 		int GetNearestProd(int);
@@ -360,7 +376,9 @@ class ARegion : public AListElem
 		void AddTown(int, AString *);
 		void MakeLair(int);
 		void LairCheck();
-
+		std::vector<int> GetPossibleLairs();
+		void SetupHabitat(TerrainType* terrain);
+		void SetupEconomy();
 };
 
 class ARegionArray
@@ -492,6 +510,8 @@ class ARegionList : public AList
 		int GetLevelXScale(int level);
 		int GetLevelYScale(int level);
 
+		void AddHistoricalBuildings(ARegionArray* arr, const int w, const int h);
+
 	private:
 		//
 		// Private world creation stuff
@@ -529,5 +549,26 @@ class ARegionList : public AList
 
 int LookupRegionType(AString *);
 int ParseTerrain(AString *);
+
+using ARegionCostFunction = std::function<double(ARegion*, ARegion*)>;
+using ARegionInclusionFunction = std::function<bool(ARegion*, ARegion*)>;
+
+class ARegionGraph : public graphs::Graph<graphs::Location2D, ARegion*> {
+public:
+	ARegionGraph(ARegionArray* regions);
+	~ARegionGraph();
+
+	ARegion* get(graphs::Location2D id);
+	std::vector<graphs::Location2D> neighbors(graphs::Location2D id);
+	double cost(graphs::Location2D current, graphs::Location2D next);
+
+	void setCost(ARegionCostFunction costFn);
+	void setInclusion(ARegionInclusionFunction includeFn);
+
+private:
+	ARegionArray* regions;
+	ARegionCostFunction costFn;
+	ARegionInclusionFunction includeFn;
+};
 
 #endif

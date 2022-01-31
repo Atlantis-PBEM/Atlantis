@@ -34,8 +34,6 @@
 #include <algorithm>
 #include <random>
 #include <ctime>
-
-#define __USE_MISC
 #include <cmath>
 
 #ifndef M_PI
