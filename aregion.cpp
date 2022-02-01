@@ -3749,3 +3749,66 @@ void ARegionGraph::setCost(ARegionCostFunction costFn) {
 void ARegionGraph::setInclusion(ARegionInclusionFunction includeFn) {
 	this->includeFn = includeFn;
 }
+
+void ARegionList::ResoucesStatistics() {
+	std::unordered_map<int, int> resources;
+	std::unordered_map<int, int> forSale;
+	std::unordered_map<int, int> wanted;
+
+	forlist(this) {
+		ARegion* reg = (ARegion*) elem;
+		
+		{
+			forlist (&reg->products) {
+				Production* p = (Production*) elem;
+				resources[p->itemtype] += p->amount;
+			}
+		}
+
+		{
+			forlist (&reg->markets) {
+				Market* m = (Market*) elem;
+				if (m->type == M_BUY) {
+					forSale[m->item] += m->amount;
+				}
+				else {
+					wanted[m->item] += m->amount;
+				}
+			}
+		}
+	}
+
+	std::cout << std::endl;
+	std::cout << "Products:" << std::endl;
+	for (auto kv : resources) {
+		if (kv.first == I_SILVER || kv.first <= -1) {
+			continue;
+		}
+
+		ItemType& item = ItemDefs[kv.first];
+		std::cout << item.name << " [" << item.abr << "] " << kv.second << std::endl;
+	}
+	std::cout << std::endl << std::endl;
+
+	std::cout << "Wanted:" << std::endl;
+	for (auto kv : wanted) {
+		if (kv.first == I_SILVER || kv.first <= -1) {
+			continue;
+		}
+
+		ItemType& item = ItemDefs[kv.first];
+		std::cout << item.name << " [" << item.abr << "] " << kv.second << std::endl;
+	}
+	std::cout << std::endl << std::endl;
+
+	std::cout << "For Sale:" << std::endl;
+	for (auto kv : forSale) {
+		if (kv.first == I_SILVER || kv.first <= -1) {
+			continue;
+		}
+
+		ItemType& item = ItemDefs[kv.first];
+		std::cout << item.name << " [" << item.abr << "] " << kv.second << std::endl;
+	}
+	std::cout << std::endl << std::endl;
+}
