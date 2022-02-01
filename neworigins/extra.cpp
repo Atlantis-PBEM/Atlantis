@@ -881,6 +881,10 @@ void Game::ModifyTablesPerRuleset(void)
 
 	DisableSkill(S_GEMCUTTING);
 
+	// Food
+	EnableSkill(S_COOKING);
+	EnableItem(I_FOOD);
+
 	// Magic
 
 	ModifySkillDependancy(S_RAISE_UNDEAD, 0, "SUSK", 3);
@@ -1007,6 +1011,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("HUMN", 2, "COMB");
 	ModifyRaceSkills("HUMN", 3, "MINI");
 	ModifyRaceSkills("HUMN", 4, "FARM");
+	ModifyRaceSkills("HUMN", 5, "COOK");
 	
 	EnableItem(I_HILLDWARF);
 	ModifyItemBasePrice(I_HILLDWARF, 40);
@@ -1043,6 +1048,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("WELF", 2, "ENTE");
 	ModifyRaceSkills("WELF", 3, "CARP");
 	ModifyRaceSkills("WELF", 4, "FISH");
+	ModifyRaceSkills("WELF", 5, "COOK");
 
 	EnableItem(I_GNOME);
 	ModifyItemBasePrice(I_GNOME, 30);
@@ -1092,6 +1098,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("GNOL", 2, "COMB");
 	ModifyRaceSkills("GNOL", 3, "ARMO");
 	ModifyRaceSkills("GNOL", 4, "CARP");
+	ModifyRaceSkills("GNOL", 5, "COOK");
 
 	EnableItem(I_ORC);
 	ModifyItemBasePrice(I_ORC, 40);
