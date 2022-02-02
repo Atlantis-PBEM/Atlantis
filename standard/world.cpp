@@ -2225,6 +2225,8 @@ void Game::CreateWorld()
 	regions.CalcDensities();
 
 	regions.TownStatistics();
+
+	regions.ResoucesStatistics();
 }
 
 int ARegionList::GetRegType( ARegion *pReg )

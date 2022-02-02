@@ -505,6 +505,7 @@ class ARegionList : public AList
 		void GrowRaces(ARegionArray *pRegs);
 		
 		void TownStatistics();
+		void ResoucesStatistics();
 
 		void CalcDensities();
 		int GetLevelXScale(int level);
