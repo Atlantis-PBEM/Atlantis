@@ -2161,7 +2161,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::ORINPUTS | ItemType::NOMARKET | ItemType::SKILLOUT,
 	 "COOK",1,1,1, {{I_GRAIN,1}, {I_LIVESTOCK,1},{I_FISH,1},{-1,0}},
 	 "CRFD",1,500, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 1, IT_NORMAL | IT_FOOD, 8,0,
+	 1, IT_NORMAL | IT_FOOD | IT_NEVER_SPOIL, 8,0,
 	 0,0,0,0,0,
 	 -1,0,
 	 -1,0, 0,
