@@ -3483,7 +3483,8 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 				auto r = graph.get(kv.first);
 
 				if (r->type == R_VOLCANO) {
-					std::string volcanoName = getRegionName(na->getName(r->type), etnos, r->type, 1, false);
+					int nameArea = na->getName(r->type);
+					std::string volcanoName = getRegionName(nameArea, etnos, r->type, 1, false);
 					std::cout << volcanoName << std::endl;
 					r->SetName(volcanoName.c_str());
 				}
@@ -3576,7 +3577,7 @@ void economy(ARegionArray* arr, const int w, const int h) {
 	}
 }
 
-void addAncientStructure(ARegion* reg, uint seed, int type, double damage) {
+void addAncientStructure(ARegion* reg, int seed, int type, double damage) {
 	ObjectType& info = ObjectDefs[type];
 
 	Object * obj = new Object(reg);
