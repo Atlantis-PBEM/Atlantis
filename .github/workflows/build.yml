@@ -16,11 +16,11 @@ jobs:
       matrix:
         os:
           - ubuntu
-          # - windows
+          - windows
           - macos
-        # include:
-        #    - os: windows
-        #      ext: .exe
+        include:
+           - os: windows
+             ext: .exe
     steps:
       - uses: actions/checkout@v2
       - run: make all-clean && make all

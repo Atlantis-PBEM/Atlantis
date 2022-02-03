@@ -498,11 +498,11 @@ std::string capitalize(std::string s) {
     return s;
 }
 
-std::string oneOf(uint seed, std::string a, std::string b) {
+std::string oneOf(int seed, std::string a, std::string b) {
     return seed % 2 == 1 ? a : b;
 }
 
-std::string oneOf(uint seed, std::string a, std::string b, std::string c) {
+std::string oneOf(int seed, std::string a, std::string b, std::string c) {
     return seed % 3 == 1
         ? a
         : seed % 2 == 1
@@ -510,7 +510,7 @@ std::string oneOf(uint seed, std::string a, std::string b, std::string c) {
             : c;
 }
 
-std::string getPrefix(uint seed, std::vector<std::string>& prefixTable, std::vector<std::string>& suffixTable) {
+std::string getPrefix(int seed, std::vector<std::string>& prefixTable, std::vector<std::string>& suffixTable) {
     int w = prefixTable.size();
     int h = suffixTable.size();
     int mul = seed % (w * h);
@@ -518,7 +518,7 @@ std::string getPrefix(uint seed, std::vector<std::string>& prefixTable, std::vec
     return prefixTable[mul % w];
 }
 
-std::string getSuffix(uint seed, std::vector<std::string>& prefixTable, std::vector<std::string>& suffixTable) {
+std::string getSuffix(int seed, std::vector<std::string>& prefixTable, std::vector<std::string>& suffixTable) {
     int w = prefixTable.size();
     int h = suffixTable.size();
     int mul = seed % (w * h);
@@ -526,7 +526,7 @@ std::string getSuffix(uint seed, std::vector<std::string>& prefixTable, std::vec
     return suffixTable[mul / w];
 }
 
-std::string getEthnicPrefix(uint seed, Ethnicity etnos) {
+std::string getEthnicPrefix(int seed, Ethnicity etnos) {
     switch(etnos) {
         case Ethnicity::VIKING:    return getPrefix(seed, aPrefViking, aSufViking);
         case Ethnicity::BARBARIAN: return getPrefix(seed, aPrefScotish, aSufScotish);
@@ -545,7 +545,7 @@ std::string getEthnicPrefix(uint seed, Ethnicity etnos) {
     }
 }
 
-std::string getEthnicSuffix(uint seed, Ethnicity etnos) {
+std::string getEthnicSuffix(int seed, Ethnicity etnos) {
     switch(etnos) {
         case Ethnicity::VIKING:    return getSuffix(seed, aPrefViking, aSufViking);
         case Ethnicity::BARBARIAN: return getSuffix(seed, aPrefScotish, aSufScotish);
@@ -564,28 +564,28 @@ std::string getEthnicSuffix(uint seed, Ethnicity etnos) {
     }
 }
 
-std::string getAbstractName(uint seed) {
+std::string getAbstractName(const int seed) {
     std::string first = getPrefix(seed, aPrefAbstract, aSufAbstract);
     std::string second = getSuffix(seed, aPrefAbstract, aSufAbstract);
 
     return capitalize(first + second);
 }
 
-std::string getEthnicName(uint seed, Ethnicity etnos) {
+std::string getEthnicName(const int seed, const Ethnicity etnos) {
     std::string first = getEthnicPrefix(seed, etnos);
     std::string second = getEthnicSuffix(seed, etnos);
 
     return capitalize(first + second);
 }
 
-std::string getShipName(uint seed) {
+std::string getShipName(int seed) {
     std::string first = getPrefix(seed, aPrefShip, aSufShip);
     std::string second = getSuffix(seed, aPrefShip, aSufShip);
 
     return capitalize(first + second);
 }
 
-std::string getFortressName(uint seed, ObjectType& type) {
+std::string getFortressName(int seed, const ObjectType& type) {
     std::string first = getPrefix(seed, aPrefFort, aSufFort);
     std::string second = getSuffix(seed, aPrefFort, aSufFort);
 
@@ -596,14 +596,14 @@ std::string getFortressName(uint seed, ObjectType& type) {
     return capitalize(first + second);
 }
 
-std::string getInnName(uint seed) {
+std::string getInnName(int seed) {
     std::string first = getPrefix(seed, aPrefInn, aSufInn);
     std::string second = getSuffix(seed, aPrefInn, aSufInn);
 
     return capitalize(first + second);
 }
 
-std::string getObjectName(uint seed, int typeIndex, ObjectType& type) {
+std::string getObjectName(const int seed, const int typeIndex, const ObjectType& type) {
     switch(typeIndex)
     {
         case O_DUMMY:
@@ -715,7 +715,7 @@ std::string getObjectName(uint seed, int typeIndex, ObjectType& type) {
     return type.name;
 }
 
-std::string getForestName(std::string s, uint seed, int area) {
+std::string getForestName(std::string s, int seed, int area) {
     if (area < 15) {
         return s + oneOf(seed, " Forest", " Woods");
     }
@@ -723,7 +723,7 @@ std::string getForestName(std::string s, uint seed, int area) {
     return "Great " + s + " Forest";
 }
 
-std::string getJungleName(std::string s, uint seed, int area) {
+std::string getJungleName(std::string s, int seed, int area) {
     if (area < 15) {
         return s + oneOf(seed, " Jungle", " Woods");
     }
@@ -731,7 +731,7 @@ std::string getJungleName(std::string s, uint seed, int area) {
     return "Great " + s + " Jungle";
 }
 
-std::string getDesertName(std::string s, uint seed, int area) {
+std::string getDesertName(std::string s, int seed, int area) {
     if (area < 15) {
         return s + oneOf(seed, " Desert", " Sands");
     }
@@ -739,11 +739,11 @@ std::string getDesertName(std::string s, uint seed, int area) {
     return "Great " + s + " Desert";
 }
 
-std::string getVolcanoName(std::string s, uint seed, int area) {
+std::string getVolcanoName(std::string s, int seed, int area) {
     return s + oneOf(seed, " Volcano", " Peak");
 }
 
-std::string getMountainName(std::string s, uint seed, int area) {
+std::string getMountainName(std::string s, int seed, int area) {
     if (area == 1) {
         return s + oneOf(seed, " Mountain", " Peak");
     }
@@ -755,7 +755,7 @@ std::string getMountainName(std::string s, uint seed, int area) {
     return "Great " + s + " Mountains";
 }
 
-std::string getHillsName(std::string s, uint seed, int area) {
+std::string getHillsName(std::string s, int seed, int area) {
     if (area == 1) {
         return s + oneOf(seed, " Hill", " Barrow");
     }
@@ -767,7 +767,7 @@ std::string getHillsName(std::string s, uint seed, int area) {
     return "Great " + s + " Hills";
 }
 
-std::string getSwampName(std::string s, uint seed, int area) {
+std::string getSwampName(std::string s, int seed, int area) {
     if (area < 15) {
         return s + oneOf(seed, " Swamp", " Marshes");
     }
@@ -775,7 +775,7 @@ std::string getSwampName(std::string s, uint seed, int area) {
     return "Great " + s + " Swamp";
 }
 
-std::string getPlainName(std::string s, uint seed, int area) {
+std::string getPlainName(std::string s, int seed, int area) {
     if(area == 1) {
         return s + oneOf(seed, " Dale", " Plain");
     }
@@ -787,11 +787,11 @@ std::string getPlainName(std::string s, uint seed, int area) {
     return "Great " + s + " Plains";
 }
 
-std::string getTundraName(std::string s, uint seed, int area) {
+std::string getTundraName(std::string s, int seed, int area) {
     return s + " Tundra";
 }
 
-std::string getOceanName(std::string s, uint seed, int area) {
+std::string getOceanName(std::string s, int seed, int area) {
     if(area == 1) {
         return s + oneOf(seed, " Lake", " Pond");
     }
@@ -803,7 +803,7 @@ std::string getOceanName(std::string s, uint seed, int area) {
     return s + " Ocean";
 }
 
-std::string getRegionName(uint seed, Ethnicity etnos, int type, int size, bool island) {
+std::string getRegionName(const int seed, const Ethnicity etnos, const int type, const int size, const bool island) {
     std::string name = getEthnicName(seed * seed, etnos);
 
     if (island) {
@@ -882,7 +882,7 @@ std::string getRegionName(uint seed, Ethnicity etnos, int type, int size, bool i
     }
 }
 
-std::string getRiverName(uint seed, int size, int min, int max) {
+std::string getRiverName(const int seed, const int size, const int min, const int max) {
     std::string s = getAbstractName(seed);
 
     int d = max - min;
