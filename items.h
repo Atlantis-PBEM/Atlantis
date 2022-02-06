@@ -96,7 +96,8 @@ class ItemType
 			// This item cannot be transported.
 			NOTRANSPORT = 0x20,
 			// Produced monsters
-			MANPRODUCE = 0x40
+			MANPRODUCE = 0x40,
+			SKILLOUT_PROGRESSIVE = 0x50
 		};
 		int flags;
 
