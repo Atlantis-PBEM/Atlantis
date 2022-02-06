@@ -820,8 +820,7 @@ AString *ItemDescription(int item, int full)
 		} else {
 			*temp += AString("all skills to level ") + mt->defaultlevel + ".";
 		}
-	}
-	
+	}	
 	if ((ItemDefs[item].type & IT_MONSTER) &&
 			!(ItemDefs[item].flags & ItemType::MANPRODUCE)) {
 		*temp += " This is a monster.";

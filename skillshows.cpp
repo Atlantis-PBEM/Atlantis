@@ -1453,7 +1453,7 @@ AString *ShowSkill::Report(Faction *f)
 		case S_COOKING:
 			if (level > 1) break;
 			*str += "This skill deals with creating provisions from basic "
-					"foodstuffs.  A skilled cook can feed many more people "
+					"foodstuffs. A skilled cook can feed many more people "
 					"than a farmer alone.";
 			break;
 	}
@@ -1624,12 +1624,18 @@ AString *ShowSkill::Report(Faction *f)
 				if (ItemDefs[i].flags & ItemType::SKILLOUT) {
 					temp1 += "a number of ";
 				}
+				if (ItemDefs[i].flags & ItemType::SKILLOUT_HALF) {
+					temp1 += "a number of ";
+				}
 				temp1 += AString(illusion?"illusory ":"") + ItemDefs[i].names;
 				temp1 += " [";
 				temp1 += ItemDefs[i].abr;
 				temp1 += "]";
 				if (ItemDefs[i].flags & ItemType::SKILLOUT) {
 					temp1 += " equal to their skill level";
+				}
+				if (ItemDefs[i].flags & ItemType::SKILLOUT_HALF) {
+					temp1 += " equal to skill level divided by 2, rounded up";
 				}
 				if (!resource) {
 					temp1 += " from ";
