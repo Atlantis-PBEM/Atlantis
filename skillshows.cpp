@@ -1621,7 +1621,10 @@ AString *ShowSkill::Report(Faction *f)
 					}
 				}
 				comma1++;
-				if (ItemDefs[i].flags & ItemType::SKILLOUT || ItemDefs[i].flags & ItemType::SKILLOUT_PROGRESSIVE) {
+				if (ItemDefs[i].flags & ItemType::SKILLOUT) {
+					temp1 += "a number of ";
+				}
+				if (ItemDefs[i].flags & ItemType::SKILLOUT_HALF) {
 					temp1 += "a number of ";
 				}
 				temp1 += AString(illusion?"illusory ":"") + ItemDefs[i].names;
@@ -1631,7 +1634,7 @@ AString *ShowSkill::Report(Faction *f)
 				if (ItemDefs[i].flags & ItemType::SKILLOUT) {
 					temp1 += " equal to their skill level";
 				}
-				if (ItemDefs[i].flags & ItemType::SKILLOUT_PROGRESSIVE) {
+				if (ItemDefs[i].flags & ItemType::SKILLOUT_HALF) {
 					temp1 += " based on their skill level. Level 1 produces 1 item, ";
 					temp1 += " level 3 produces 2 items, level 5 produces 3 items";
 				}

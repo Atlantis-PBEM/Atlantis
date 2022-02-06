@@ -97,7 +97,7 @@ class ItemType
 			NOTRANSPORT = 0x20,
 			// Produced monsters
 			MANPRODUCE = 0x40,
-			SKILLOUT_PROGRESSIVE = 0x50
+			SKILLOUT_HALF = 0x80
 		};
 		int flags;
 

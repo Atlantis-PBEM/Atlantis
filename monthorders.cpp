@@ -1110,7 +1110,7 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	int maxproduced;
 	if (ItemDefs[o->item].flags & ItemType::SKILLOUT)
 		maxproduced = u->GetMen();
-	else if (ItemDefs[o->item].flags & ItemType::SKILLOUT_PROGRESSIVE)
+	else if (ItemDefs[o->item].flags & ItemType::SKILLOUT_HALF)
 		maxproduced = u->GetMen();
 	else
 		maxproduced = number/ItemDefs[o->item].pMonths;
@@ -1180,13 +1180,8 @@ void Game::RunUnitProduce(ARegion * r,Unit * u)
 	int output = maxproduced * ItemDefs[o->item].pOut;
 	if (ItemDefs[o->item].flags & ItemType::SKILLOUT)
 		output *= level;
-	if (ItemDefs[o->item].flags & ItemType::SKILLOUT_PROGRESSIVE) {
-		if (level == 3) {
-			output *= 2;
-		}
-		if (level == 5) {
-			output *= 3;
-		}
+	if (ItemDefs[o->item].flags & ItemType::SKILLOUT_HALF) {
+		output *= (level + 1) / 2;
 	}
 		
 	u->items.SetNum(o->item,u->items.GetNum(o->item) + output);
