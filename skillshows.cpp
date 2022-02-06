@@ -1635,7 +1635,7 @@ AString *ShowSkill::Report(Faction *f)
 					temp1 += " equal to their skill level";
 				}
 				if (ItemDefs[i].flags & ItemType::SKILLOUT_HALF) {
-					temp1 += " skill level divided by 2, rounded up";
+					temp1 += " equal to skill level divided by 2, rounded up";
 				}
 				if (!resource) {
 					temp1 += " from ";
