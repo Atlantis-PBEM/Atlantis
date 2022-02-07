@@ -171,21 +171,21 @@ void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac)
 				buffer << "perform tax or trade in " << nma << " " << plural(nma, "region", "regions");
 			}
 			
-			if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) { 
+			if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
 				buffer << "perform tax and trade in " << nma << " " << plural(nma, "region", "regions");
 			}
 		}
 
 		count++;
 	}
-
+/*
 	if (Globals->APPRENTICES_EXIST && na > 0) {
 		buffer << ", as well have " << na << " " << Globals->APPRENTICE_NAME;
 		if (na > 1) {
 			buffer << "s";
 		}
 	}
-
+*/
 	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT && nq > 0) {
 		buffer << ", and " << nq << " quartermaster";
 		if (nq > 1) {
@@ -217,7 +217,7 @@ void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac)
 		}
 
 		if (fp == F_MAGIC) {
-			buffer << "could not possess any mages";
+			buffer << "could not possess any mages or apprentices";
 		}
 
 		if (fp == F_MARTIAL) {
@@ -666,30 +666,44 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"produced or regions taxed.";
 		f.Paragraph(temp);
 	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		temp = "Each faction has a type; this is decided by the player, "
+		temp = "Each faction has a type which is decided by the player "
 			"and determines what the faction may do.  The faction has ";
 		temp += Globals->FACTION_POINTS;
-		temp += " Faction Points, which may be spent on any of the 3 "
-			"Faction Areas, War, Trade, and Magic.  The faction type may "
-			"be changed at the beginning of each turn, so a faction can "
-			"change and adapt to the conditions around it.  Faction Points "
-			"spent on War determine the number of regions in which factions "
+		temp += " Faction Points, which may be spent on the ";
+		if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) {
+			temp += "3 Faction Areas: War, Trade, and Magic. ";
+		}
+		else {
+			temp += "2 Faction Areas: Martial and Magic. ";
+		}
+		temp += "The faction type may be changed at the beginning of "
+			"each turn, so a faction can change and adapt to the conditions "
+			"around it.  Faction Points spent on ";
+		temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) ? "War " : "Martial ";
+		temp += "determine the number of regions in which a faction "
 			"can obtain income by taxing or pillaging";
 		if (Globals->TACTICS_NEEDS_WAR) {
 			temp += ", and also determines the number of level 5 tactics "
 				"leaders (tacticians) that a faction can train";
 		}
-		temp += ". Faction Points spent "
-			"on Trade determine the number of regions in which a faction "
-			"may conduct trade activity. Trade activity includes producing "
-			"goods and materials";
+		temp += ". Faction Points spent on ";
+		temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT)?"Trade ":"Martial also ";
+		temp += "determine the number of regions in which a faction "
+				"may conduct trade activity.  Trade activity includes producing "
+				"goods and materials";
 		if (!Globals->BUILD_NO_TRADE) {
 			temp += ", building ships and buildings";
 		}
-		temp += ".";
+		temp += ". ";
+		if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL) {
+			temp += "It is important to note that at least 2 Faction Points must be spent "
+					"on Martial if a faction wants to both tax/pillage and conduct "
+					"trade activity in a region during a turn. ";
+		}
 		if (qm_exist) {
-			temp += "Faction points spent on Trade also determine the "
-				"of quartermaster units a trade faction can have. ";
+			temp += "Faction points spent on ";
+			temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) ? "Trade " : "Martial ";
+			temp += "also determine the number of quartermaster units a faction can have. ";
 		}
 		temp += "Faction Points spent on Magic determine the number of mages ";
 		if (app_exist) {
@@ -2706,7 +2720,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"man-month of work will be.  Thus, five men at skill level one are "
 		"exactly equivalent to one guy at skill level 5 in terms of base "
 		"output. Items which require multiple man-months to produce will "
-		"take still benefit from higher skill level units, just not as "
+		"still benefit from higher skill level units, just not as "
 		"quickly.  For example, if a unit of six level one men wanted to "
 		"produce something which required three man-months per item, that "
 		"unit could produce two of them in one month.  If their skill level "
@@ -2721,7 +2735,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		temp = " Only Trade factions can issue ";
+		temp = " Only ";
+		temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) ? "Trade " : "Martial";
+		temp += "factions can issue ";
 		temp += f.Link("#produce", "PRODUCE") + " orders however, regardless "
 			"of skill levels.";
 	}
@@ -2785,7 +2801,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if (Globals->BUILD_NO_TRADE) {
 			temp += "Any faction can issue ";
 		} else {
-			temp += "Again, only Trade factions can issue ";
+			temp += "Again, only ";
+			temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) ? "Trade " : "Martial ";
+			temp += "factions can issue ";
 		}
 		temp += f.Link("#build", "BUILD") + " orders. ";
 	}
@@ -2972,7 +2990,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"If a road in the given direction is connected, units move "
 			"along that road at half cost to a minimum of 1 movement point.";
 		f.Paragraph(temp);
-		temp = "For example: If a unit is moving northwest, then hex it is "
+		temp = "For example: If a unit is moving northwest, then the hex it is "
 			"in must have a northwest road, and the hex it is moving into "
 			"must have a southeast road.";
 		f.Paragraph(temp);
@@ -3064,14 +3082,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "s while they have an unfinished ship in their "
 			"possession, the ship will be discarded and lost. ";
 		temp += "Finally, ships are never interacted with as objects "
-			"directly, but when completed are placed in Fleet "
-			"objects.  Fleets may contain one or more ships, and "
+			"directly, but when completed are placed in Fleets. "
+			"Fleets may contain one or more ships, and "
 			"may be entered like other buildings.";
 		f.Paragraph(temp);
 		temp = "";
 		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-			temp += "Only factions with at least one faction point spent on "
-				"trade can issue ";
+			if (Globals->BUILD_NO_TRADE) {
+				temp = +"Any faction ";
+			}
+			else {
+				temp += "Only factions with at lease on faction point spent on ";
+				temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) ? "Trade " : "Martial ";
+			}
+			temp += "can issue ";
 			temp += f.Link("#build", "BUILD") + " orders. ";
 		}
 		temp += "Here is a table of the various ship types:";
@@ -3161,7 +3185,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"to sail.";
 		f.Paragraph(temp);
 		temp = "When a ship is built, if its builder is already the "
-			"owner of a fleet object, then the ship will be "
+			"owner of a fleet, then the ship will be "
 			"added to that fleet; otherwise a new fleet will be "
 			"created to hold the ship.  A fleet has the combined "
 			"capacity and sailor requirement of its constituent "
@@ -3216,9 +3240,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("economy_taxingpillaging");
 	f.TagText("h3", "Taxing/Pillaging:");
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-		temp = "War factions ";
+		temp = (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) ? "War factions " : "Martial factions ";
 	else
-		temp = "Factions ";
+		temp = "Any factions ";
 	temp += "may collect taxes in a region.  This is done using the ";
 	temp += f.Link("#tax", "TAX") + " order (which is ";
 	if (!Globals->TAX_PILLAGE_MONTH_LONG) temp += "not ";
@@ -3424,9 +3448,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"income is split evenly among all taxers.";
 	f.Paragraph(temp);
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-		temp = "War factions ";
+		temp = (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) ? "War factions " : "Martial factions ";
 	else
-		temp = "Factions ";
+		temp = "All factions ";
 	temp += "may also pillage a region. To do this requires the faction to "
 		"have enough combat ready men in the region to tax half of the "
 		"available money in the region. The total amount of money that can "
@@ -3461,7 +3485,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.LinkRef("economy_transport");
 		f.TagText("H3", "Transportation of goods");
 
-		temp = "Trade factions may train Quartermaster units. "
+        temp = (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT)?"Trade ": "Martial ";
+		temp += "factions may train Quartermaster units. "
 			"A Quartermaster unit may accept ";
 		temp += f.Link("#transport", "TRANSPORT") + "ed items from "
 			"any unit within " + Globals->LOCAL_TRANSPORT + " hex";
@@ -4999,10 +5024,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.LinkRef("faction");
 		f.TagText("h4", "FACTION [type] [points] ...");
 		temp = "Attempt to change your faction's type.  In the order, you "
-			"can specify up to three faction types (WAR, TRADE, and MAGIC) "
-			"and the number of faction points to assign to each type; if "
-			"you are assigning points to only one or two types, you may "
-			"omit the types that will not have any points.";
+			"can specify up to ";
+        if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) {
+            temp += "three faction types (WAR, TRADE, and MAGIC) ";
+        } else {
+            temp += "two faction types (MARTIAL and MAGIC) ";
+        }
+        temp += "and the number of faction points to assign to each type; if "
+			"you are assigning points to ";
+        if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) {
+            temp += "only one or two types, you may "
+                "omit the types that will not have any points.";
+        } else {
+            temp += "only one type, you may omit the type that will not have"
+                "any points";
+        }
 		f.Paragraph(temp);
 		temp = "Changing the number of faction points assigned to MAGIC may "
 			"be tricky. Increasing the MAGIC points will always succeed, but "
@@ -5011,20 +5047,29 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"leaders allowed by the new number of MAGIC points BEFORE you "
 			"change your point distribution. For example, if you have 3 "
 			"mages (3 points assigned to MAGIC), but want to use one of "
-			"those points for WAR or TRADE (change to MAGIC 2), you must "
+			"those points for ";
+        temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT)? "WAR or TRADE ": "MARTIAL ";
+        temp += "(change to MAGIC 2), you must "
 			"first get rid of one of your mages by either giving it to "
 			"another faction or ordering it to ";
 		temp += f.Link("#forget", "FORGET") + " all its magic skills. ";
 		temp += "If you have too many mages for the number of points you "
 			"try to assign to MAGIC, the FACTION order will fail.";
 		if (qm_exist) {
-			temp += " Similar problems could occur with TRADE points and "
+			temp += " Similar problems could occur with ";
+            temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT)? "TRADE ": "MARTIAL ";
+            temp += "points and "
 				"the number of quartermasters controlled by the faction.";
 		}
 		f.Paragraph(temp);
 		f.Paragraph("Examples:");
-		temp = "Assign 2 faction points to WAR, 2 to TRADE, and 1 to MAGIC.";
-		temp2 = "FACTION WAR 2 TRADE 2 MAGIC 1";
+        if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) {
+            temp = "Assign 2 faction points to WAR, 2 to TRADE, and 1 to MAGIC.";
+            temp2 = "FACTION WAR 2 TRADE 2 MAGIC 1";
+        } else {
+            temp = "Assign 4 faction points to MARTIAL, and 1 to MAGIC.";
+            temp2 = "FACTION MAGIC 1 MARITAL 4";
+        }
 		f.CommandExample(temp, temp2);
 		temp = "Become a pure magic faction (assign all points to magic).";
 		temp2 = "FACTION MAGIC ";
@@ -5097,7 +5142,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "If the demand for recruits in that region that month is much "
 		"higher than the supply, it may happen that the new unit does not "
 		"gain all the recruits you ordered it to buy, or it may not gain "
-		"any recruits at all.  If the new units gains at least one recruit, "
+		"any recruits at all.  If the new units gain at least one recruit, "
 		"the unit will form possessing any unused silver and all the other "
 		"items it was given.  If no recruits are gained at all, the empty "
 		"unit will be dissolved, and the silver and any other items it was "
@@ -5161,7 +5206,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"declared you Friendly or better.  If the target unit is not a "
 		"member of your faction, then its faction must have declared you "
 		"Friendly, with a couple of exceptions. First, silver may be given "
-		"to any unit, regardless of factional affiliation. Secondly, men "
+		"to any unit, regardless of factional affiliation. Second, men "
 		"may not be given to units in other factions (you must give the "
 		"entire unit); the reason for this is to prevent highly skilled "
 		"units from being sabotaged with a ";
@@ -5295,8 +5340,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"one direction is given, the unit will move multiple times, in "
 		"the order specified by the MOVE order, until no more directions "
 		"are given, or until one of the moves fails.  A move can fail "
-		"because the units runs out of movement points, because the unit "
-		"attempts to move into the ocean, or because the units attempts "
+		"because the unit runs out of movement points, because the unit "
+		"attempts to move into the ocean, or because the unit attempts "
 		"to enter a structure, and is rejected.";
 	f.Paragraph(temp);
 	temp = "Valid directions are:";
@@ -5918,9 +5963,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("tax");
 	f.TagText("h4", "TAX");
 	temp = "Attempt to collect taxes from the region. ";
-	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-		temp += "Only War factions may collect taxes, and then ";
-	else
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		temp += "Only ";
+        temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT)?"War ":"Martial ";
+        temp += "factions may collect taxes, and then ";
+    } else
 		temp += "Taxes may be collected ";
 	temp += "only if there are no non-Friendly units on guard. Only "
 		"combat-ready units may issue this order. Note that the TAX order "
