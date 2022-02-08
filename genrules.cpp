@@ -3089,10 +3089,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "";
 		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 			if (Globals->BUILD_NO_TRADE) {
-				temp = +"Any faction ";
+				temp += "Any faction ";
 			}
 			else {
-				temp += "Only factions with at lease on faction point spent on ";
+				temp += "Only factions with at least one faction point spent on ";
 				temp += (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) ? "Trade " : "Martial ";
 			}
 			temp += "can issue ";
