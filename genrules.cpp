@@ -3707,8 +3707,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"units that attempt to deny it access.  If the advancing unit loses "
 		"the battle, it will be forced to retreat to the previous region it "
 		"moved through.  If the unit wins the battle and its army doesn't "
-		"lose any men, it is allowed to continue to move, provided that it "
-		"has enough movement points.";
+		"lose more than 5% of its men, it is allowed to continue to move, "
+		"provided that it has enough movement points.  If any units from the"
+		"defending faction survive, they may continue movement regarless of"
+		"losses.";
 	f.Paragraph(temp);
 	if (has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
 		temp = "Note that ";
