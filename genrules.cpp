@@ -137,10 +137,8 @@ void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac)
 	}
 
 	for (auto &key : types) {
-		int value = fac.type[key];
-
 		if (count > 0) {
-			if (count == types.size() - 1) {
+			if (count == (int)types.size() - 1) {
 				buffer << ", and ";
 			}
 			else {
@@ -200,7 +198,7 @@ void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac)
 	count = 0;
 	for (auto &fp : missingTypes) {
 		if (count > 0) {
-			if (count == missingTypes.size() - 1) {
+			if (count == (int)missingTypes.size() - 1) {
 				buffer << ", and ";
 			}
 			else {
