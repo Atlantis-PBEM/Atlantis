@@ -5049,8 +5049,26 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.ClassTagText("div", "rule", "");
 	f.LinkRef("forget");
 	f.TagText("h4", "FORGET [skill]");
-	temp = "Forget the given skill. This order is useful for normal units "
-		"who wish to learn a new skill, but already know a different skill.";
+	temp = "Forget the given skill. This order is useful for ";
+	if (Globals->SKILL_LIMIT_NONLEADERS) {
+		temp += "normal units who wish to learn a new skill, but already "
+			"know a different skill and for ";
+	}
+	temp += "a mage";
+	if (Globals->APPRENTICES_EXIST) {
+		if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+			temp += ", ";
+		}
+		else {
+			temp += ", or ";
+		}
+		temp += Globals->APPRENTICE_NAME;
+	}
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+		temp += ", or quartermaster";
+	}
+	temp += " who wish to become a normal "
+		"unit in order to be able to change faction points or other reasons.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Forget knowledge of Mining.";
