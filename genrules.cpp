@@ -2473,7 +2473,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_FOOD)) continue;
 			if (last != -1) {
-				if (j > 0) temp += ", ";
+				if (j > 1) temp += ", ";
 				temp += ItemDefs[last].names;
 			}
 			last = i;
@@ -2501,8 +2501,51 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "these items are worth more when sold in towns, so selling "
 			"them and using the money is more economical than using them for "
 			"maintenance.";
-	};
-	f.Paragraph(temp);
+		f.Paragraph(temp);
+
+		temp = "In summary, the order of priority for how the maintenance fee is paid "
+			"is:";
+		f.Paragraph(temp);
+		f.Enclose(1, "ol");
+		if (Globals->FOOD_ITEMS_EXIST) {
+			temp = "If the unit has the ";
+			temp += f.Link("#consume", "CONSUME UNIT");
+			temp += " or ";
+			temp += f.Link("#consume", "CONSUME FACTION");
+			temp += " flag set, use the unit's food";
+			f.TagText("li", temp);
+		}
+		if (Globals->FOOD_ITEMS_EXIST) {
+			temp = "If the unit has the ";
+			temp += f.Link("#consume", "CONSUME UNIT");
+			temp += " flag set, borrow food from your other units in the same region";
+			f.TagText("li", temp);
+		}
+		temp = "Use the unit's silver";
+		f.TagText("li", temp);
+		temp = "Borrow silver from your other units in the same region";
+		f.TagText("li", temp);
+		if (Globals->FOOD_ITEMS_EXIST) {
+			temp = "Use the unit's food";
+			f.TagText("li", temp);
+		}
+		if (Globals->FOOD_ITEMS_EXIST) {
+			temp = "Borrow food from your other units in the same region";
+			f.TagText("li", temp);
+		}
+		temp = "Use unclaimed silver";
+		f.TagText("li", temp);
+		temp = "Borrow silver from allied units in the same region";
+		f.TagText("li", temp);
+		if (Globals->FOOD_ITEMS_EXIST) {
+			temp = "Borrow food from allied units in the same region";
+			f.TagText("li", temp);
+		}
+		f.Enclose(0, "ol");
+	}
+	else {
+		f.Paragraph(temp);
+	}
 	f.LinkRef("economy_recruiting");
 	f.TagText("h3", "Recruiting:");
 	temp = "People may be recruited in a region.  The total amount of "
