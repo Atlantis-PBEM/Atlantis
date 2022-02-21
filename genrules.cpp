@@ -5052,7 +5052,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Forget the given skill. This order is useful for ";
 	if (Globals->SKILL_LIMIT_NONLEADERS) {
 		temp += "normal units who wish to learn a new skill, but already "
-			"know a different skill and for ";
+			"know a different skill. It can also be used for ";
 	}
 	temp += "a mage";
 	if (Globals->APPRENTICES_EXIST) {
@@ -5068,7 +5068,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ", or quartermaster";
 	}
 	temp += " who wish to become a normal "
-		"unit in order to be able to change faction points or other reasons.";
+		"unit. A common reason for this is to be able to change faction "
+		"points.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Forget knowledge of Mining.";
