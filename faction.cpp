@@ -963,8 +963,8 @@ int Faction::GetActivityCost(FactionActivity type) {
 			// do not care on particular activity type, but each activity consumes one point
 			count += regionActivity.size();
 		} else if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
-			// Activity array item can present due to some logic like trying guard
-			// But actual activities array empty
+			// Activity array item can be present due to some logic like trying to do
+			// activity unsuccessfully because of different reasons
 			if (regionActivity.size() > 0) {
 				count++;
 			}
