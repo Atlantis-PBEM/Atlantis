@@ -530,8 +530,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 
 			bool isMerged = Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED;
 			f->PutStr(AString(isMerged ? "Regions: " : "Activity: ") + currentCost + " (" + maxAllowedCost + ")");
-		}
-		else {
+		} else {			
 			int taxRegions = GetActivityCost(FactionActivity::TAX);
 			int tradeRegions = GetActivityCost(FactionActivity::TRADE);
 
@@ -956,11 +955,6 @@ void Faction::DiscoverItem(int item, int force, int full)
 }
 
 int Faction::GetActivityCost(FactionActivity type) {
-	if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
-		// do not care on particular activity type, just regions matter
-		return this->activity.size();
-	}
-
 	int count = 0;
 	for (auto &kv : this->activity) {
 		auto regionActivity = kv.second;
@@ -968,9 +962,14 @@ int Faction::GetActivityCost(FactionActivity type) {
 		if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL) {
 			// do not care on particular activity type, but each activity consumes one point
 			count += regionActivity.size();
-		}
-		else {
-			// standard logic, each actitivty is counted separately
+		} else if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
+			// Activity array item can be present due to some logic like trying to do
+			// activity unsuccessfully because of different reasons
+			if (regionActivity.size() > 0) {
+				count++;
+			}
+		} else {
+			// standard logic, each activity is counted separately
 			if (regionActivity.find(type) != regionActivity.end()) {
 				count++;
 			}
@@ -986,5 +985,12 @@ void Faction::RecordActivity(ARegion *region, FactionActivity type) {
 
 bool Faction::IsActivityRecorded(ARegion *region, FactionActivity type) {
 	auto regionActivity = this->activity[region];
+
+	if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
+		if (regionActivity.size() > 0) {
+			return true;
+		}
+	}
+
 	return regionActivity.find(type) != std::end(regionActivity);
 }
