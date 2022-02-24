@@ -872,10 +872,6 @@ void Faction::DefaultOrders()
 {
 	activity.clear();
 	numshows = 0;
-
-	if (num == 50) {
-		printf("\n\n DefaultOrders len %d \n", activity.size());
-	}
 }
 
 void Faction::TimesReward()
