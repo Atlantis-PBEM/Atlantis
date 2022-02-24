@@ -199,7 +199,7 @@ bool Game::ActivityCheck(ARegion *pReg, Faction *pFac, FactionActivity activity)
 		return true;
 	}
 
-	if (currentCost > maxAllowedCost) {
+	if (currentCost >= maxAllowedCost) {
 		return false;
 	}
 

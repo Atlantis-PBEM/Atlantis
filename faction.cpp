@@ -872,6 +872,10 @@ void Faction::DefaultOrders()
 {
 	activity.clear();
 	numshows = 0;
+
+	if (num == 50) {
+		printf("\n\n DefaultOrders len %d \n", activity.size());
+	}
 }
 
 void Faction::TimesReward()
@@ -955,11 +959,6 @@ void Faction::DiscoverItem(int item, int force, int full)
 }
 
 int Faction::GetActivityCost(FactionActivity type) {
-	if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
-		// do not care on particular activity type, just regions matter
-		return this->activity.size();
-	}
-
 	int count = 0;
 	for (auto &kv : this->activity) {
 		auto regionActivity = kv.second;
@@ -967,9 +966,14 @@ int Faction::GetActivityCost(FactionActivity type) {
 		if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL) {
 			// do not care on particular activity type, but each activity consumes one point
 			count += regionActivity.size();
-		}
-		else {
-			// standard logic, each actitivty is counted separately
+		} else if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
+			// Activity array item can present due to some logic like trying guard
+			// But actual activities array empty
+			if (regionActivity.size() > 0) {
+				count++;
+			}
+		} else {
+			// standard logic, each activity is counted separately
 			if (regionActivity.find(type) != regionActivity.end()) {
 				count++;
 			}
