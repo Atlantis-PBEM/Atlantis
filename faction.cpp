@@ -530,8 +530,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 
 			bool isMerged = Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED;
 			f->PutStr(AString(isMerged ? "Regions: " : "Activity: ") + currentCost + " (" + maxAllowedCost + ")");
-		}
-		else {
+		} else {			
 			int taxRegions = GetActivityCost(FactionActivity::TAX);
 			int tradeRegions = GetActivityCost(FactionActivity::TRADE);
 
@@ -986,5 +985,12 @@ void Faction::RecordActivity(ARegion *region, FactionActivity type) {
 
 bool Faction::IsActivityRecorded(ARegion *region, FactionActivity type) {
 	auto regionActivity = this->activity[region];
+
+	if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
+		if (regionActivity.size() > 0) {
+			return true;
+		}
+	}
+
 	return regionActivity.find(type) != std::end(regionActivity);
 }
