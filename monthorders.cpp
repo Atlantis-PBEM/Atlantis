@@ -1051,7 +1051,182 @@ void Game::RunMonthOrders()
 	}
 }
 
-int Game::RunUnitProduce(ARegion * r, Unit * u, const ProduceTask &task, const int productionCapacity, const int maxProductionCapacity, const bool quiet)
+bool Game::ValidateProductionTask(const ARegion * r, Unit * u, const ProduceTask &task, const bool quiet) {
+	if (task.item == -1) {
+		u->Error("PRODUCE: Can't produce that, item was not specified.");
+		return false;
+	}
+
+	const ItemType& item = ItemDefs[task.item];
+
+	if (task.item == I_SILVER) {
+		// should not happen
+		if (!quiet) {
+			u->Error("Can't do that in this region.");
+		}
+
+		return false;
+	}
+
+	if (item.flags & ItemType::DISABLED) {
+		u->Error("PRODUCE: Can't produce that, item is disabled in this game.");
+		return false;
+	}
+
+	int input = item.pInput[0].item;
+	if (input == -1) {
+		u->Error("PRODUCE: Can't produce that, item does not have input resources.");
+		return false;
+	}
+
+	int level = u->GetSkill(task.skill);
+	if (level < item.pLevel) {
+		u->Error(AString("PRODUCE: Can't produce that, item requires at least skill of level ") + item.pLevel + ", but unit knows it only on level " + level);
+		return false;
+	}
+
+	if (!ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
+		u->Error("PRODUCE: Faction can't produce in that many regions.");
+		return false;
+	}
+
+	return true;
+}
+
+ProductionEstimate Game::EstimateProduction(const ARegion * r, Unit * u, const ProduceTask &task) const {
+	const ItemType& item = ItemDefs[task.item];
+	const int level = u->GetSkill(task.skill);
+	const int input = item.pInput[0].item;
+
+	// LLS
+	int number = u->GetMen() * level + u->GetProductionBonus(task.item);
+
+	// find the max we can possibly produce based on man-months of labor
+	int maxProduction;
+	if (item.flags & ItemType::SKILLOUT) {
+		maxProduction = u->GetMen();
+	}
+	else if (item.flags & ItemType::SKILLOUT_HALF) {
+		maxProduction = u->GetMen();
+	}
+	else {
+		maxProduction = number / item.pMonths;
+	}
+
+	int usedPP = 0;
+	int availableProduction = (maxProduction * productionCapacity) / maxProductionCapacity;
+
+	int production = availableProduction;
+	if (task.amount > 0) {
+		production = std::min(task.amount, availableProduction);
+	}
+
+	if (item.flags & ItemType::ORINPUTS) {
+		const int inputCount = sizeof(ItemDefs->pInput) / sizeof(Materials);
+
+		// Figure out the max we can produce based on the inputs
+		int count = 0;
+		unsigned int c;
+		for (c = 0; c < inputCount; c++) {
+			int i = item.pInput[c].item;
+			if (i != -1) {
+				count += u->GetSharedNum(i) / item.pInput[c].amt;
+			}
+		}
+
+		count = std::min(count, production);
+		if (count > 0) {
+			usedPP = (maxProductionCapacity * count) / maxProduction;
+			if ((maxProductionCapacity * count) % maxProduction) {
+				usedPP++;
+			}
+
+			/* regional economic improvement */
+			r->improvement += count;
+
+			// Deduct the items spent
+			for (c = 0; c < inputCount; c++) {
+				int i = item.pInput[c].item;
+				int a = item.pInput[c].amt;
+				if (i != -1) {
+					int amt = u->GetSharedNum(i);
+					if (count > amt / a) {
+						count -= amt / a;
+						u->ConsumeShared(i, (amt / a) * a);
+					} else {
+						u->ConsumeShared(i, count * a);
+						count = 0;
+					}
+				}
+			}
+		}
+	}
+	else {
+		// Figure out the max we can produce based on the inputs
+		unsigned int c;
+		for (c = 0; c < sizeof(ItemDefs->pInput) / sizeof(Materials); c++) {
+			int i = item.pInput[c].item;
+			if (i != -1) {
+				int amt = u->GetSharedNum(i);
+				if (amt / item.pInput[c].amt < production) {
+					production = amt / item.pInput[c].amt;
+				}
+			}
+		}
+
+		if (production > 0) {
+			usedPP = (maxProductionCapacity * production) / maxProduction;
+			if ((maxProductionCapacity * production) % maxProduction) {
+				usedPP++;
+			}
+
+			/* regional economic improvement */
+			r->improvement += production;
+			
+			// Deduct the items spent
+			for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); c++) {
+				int i = item.pInput[c].item;
+				int a = item.pInput[c].amt;
+				if (i != -1) {
+					u->ConsumeShared(i, production * a);
+				}
+			}
+		}
+	}
+
+	// Now give the items produced
+	int output = production * item.pOut;
+	if (item.flags & ItemType::SKILLOUT) {
+		output *= level;
+	}
+	else if (item.flags & ItemType::SKILLOUT_HALF) {
+		output *= (level + 1) / 2;
+	}
+
+	u->items.SetNum(task.item, u->items.GetNum(task.item) + output);
+	u->Event(AString("Produces ") + ItemString(task.item, output) + " in " + r->ShortPrint(&regions) + ".");
+	
+	if (productionCapacity == maxProductionCapacity) {
+		u->Practice(task.skill);
+	}
+
+	int remainingAmount = task.amount - output;
+	if (remainingAmount > 0) {
+		TurnOrder *tOrder = new TurnOrder;
+		AString order;
+		tOrder->repeating = 0;
+		order = "PRODUCE ";
+		order += remainingAmount;
+		order += " ";
+		order += item.abr;
+		tOrder->turnOrders.Add(new AString(order));
+		u->turnorders.Insert(tOrder);
+	}
+
+	return usedPP;
+}
+
+int Game::RunUnitProduce(ARegion * r, Unit * u, const ProduceTask &task, const double capacity, const bool quiet)
 {
 	const Production *p;
 	const ProduceOrder *o = (ProduceOrder *) u->monthorders;

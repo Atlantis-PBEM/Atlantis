@@ -219,6 +219,12 @@ struct ProduceTask {
 	int amount;
 };
 
+struct ProductionEstimate {
+	int effortUsed;
+	int effortAvailabel;
+	int amount;
+};
+
 class ProduceOrder : public Order {
 	public:
 		ProduceOrder();
