@@ -196,41 +196,59 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 	AString results[4];
 	int dam = 0;
 
-	if (a->special == NULL) return;
+	if (a->special == NULL) {
+		return;
+	}
+
 	spd = FindSpecial(a->special);
 
-	if (!(spd->effectflags & SpecialType::FX_DAMAGE)) return;
+	if (!(spd->effectflags & SpecialType::FX_DAMAGE)) {
+		return;
+	}
 
 	for (i = 0; i < 4; i++) {
-		if (spd->damage[i].type == -1) continue;
+		if (spd->damage[i].type == -1) {
+			continue;
+		}
+
 		int times = spd->damage[i].value;
 		int hitDamage = spd->damage[i].hitDamage;
 
-		if (spd->effectflags & SpecialType::FX_USE_LEV)
+		if (spd->effectflags & SpecialType::FX_USE_LEV) {
 			times *= a->slevel;
-		int realtimes = spd->damage[i].minnum + getrandom(times) +
-			getrandom(times);
+		}
+
+		int realtimes = spd->damage[i].minnum + getrandom(times) + getrandom(times);
+
 		num = def->DoAnAttack(this, a->special, realtimes,
 				spd->damage[i].type, a->slevel,
 				spd->damage[i].flags, spd->damage[i].dclass,
 				spd->damage[i].effect, 0, a, attackers,
 				canattackback, hitDamage);
+
 		if (spd->effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {
 			if (spd->damage[i].effect == NULL) {
 				results[dam] = AString("killing ") + num;
 				dam++;
-			} else {
+			}
+			else {
 				results[dam] = AString(spd->spelldesc2) + num;
 			}
 		}
 		if (num != -1) {
-			if (tot == -1) tot = num;
-			else tot += num;
+			if (tot == -1) {
+				tot = num;
+			}
+			else {
+				tot += num;
+			}
 		}
 	}
+
 	if (tot == -1) {
 		AddLine(a->name + " " + spd->spelldesc + ", but it is deflected.");
-	} else {
+	}
+	else if (tot > 0) {
 		if (spd->effectflags & SpecialType::FX_DONT_COMBINE) {
 			AString temp = a->name + " " + spd->spelldesc;
 			for (i = 0; i < dam; i++) {
@@ -238,9 +256,11 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 				if (i == dam-1) temp += " and ";
 				temp += results[dam];
 			}
+		
 			temp += AString(spd->spelltarget) + ".";
 			AddLine(temp);
-		} else {
+		}
+		else {
 			AddLine(a->name + " " + spd->spelldesc + ", " + spd->spelldesc2 +
 					tot + spd->spelltarget + ".");
 		}
