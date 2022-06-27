@@ -137,10 +137,8 @@ void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac)
 	}
 
 	for (auto &key : types) {
-		int value = fac.type[key];
-
 		if (count > 0) {
-			if (count == types.size() - 1) {
+			if (count == (int)types.size() - 1) {
 				buffer << ", and ";
 			}
 			else {
@@ -200,7 +198,7 @@ void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac)
 	count = 0;
 	for (auto &fp : missingTypes) {
 		if (count > 0) {
-			if (count == missingTypes.size() - 1) {
+			if (count == (int)missingTypes.size() - 1) {
 				buffer << ", and ";
 			}
 			else {
@@ -3535,6 +3533,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"trade activity in the hex of the unit issuing the order. ";
 		temp += "The target unit must be at least FRIENDLY to the unit "
 			"which issues the order.";
+
+		f.Paragraph(temp);
+
+		temp = "Not all type of items can be ";
+		temp += f.Link("#transport", "TRANSPORT") + "ed to or ";
+		temp += f.Link("#distribute", "DISTRIBUTE") + "d by ";
+		temp += "a quartermaster. ";
+		temp += "Men (including Leaders), summoned creatures (including ";
+		temp += "illusionary ones), ships, mounts, war machines, and ";
+		temp += "items created using artifact lore need to be ";
+		temp += "carried/sailed from one location to another by a unit.";
+
 		f.Paragraph(temp);
 	}
 
