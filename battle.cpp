@@ -95,7 +95,7 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
 				case ATTACK_RANGED: s += " ranged"; break;
 				case ATTACK_ENERGY: s += " energy"; break;
 				case ATTACK_SPIRIT: s += " spirit"; break;
-				case ATTACK_WEATHER: s += " wather"; break;
+				case ATTACK_WEATHER: s += " weather"; break;
 				
 				default: s += " unknown"; break;
 			}

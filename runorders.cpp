@@ -1242,8 +1242,9 @@ void Game::PostProcessTurn()
 		EndGame(0);
 	else if (!(Globals->OPEN_ENDED)) {
 		Faction *pVictor = CheckVictory();
-		if (pVictor)
+		if (pVictor) {
 			EndGame(pVictor);
+		}
 	}
 
 	forlist_reuse(&regions) {

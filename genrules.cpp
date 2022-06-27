@@ -5363,7 +5363,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"the unit attempting to rename it must be the owner of a large "
 			"enough structure located in the city. It requires a tower or "
 			"better to rename a village, a fort or better to rename a town "
-			"and a castle or mystic fortress to rename a city. ";
+			"and a castle or a citadel to rename a city. ";
 		if (Globals->CITY_RENAME_COST) {
 			int c=Globals->CITY_RENAME_COST;
 			temp += AString("It also costs $") + c + " to rename a village, $";

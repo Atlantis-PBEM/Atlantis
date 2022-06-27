@@ -423,6 +423,11 @@ Faction *Game::CheckVictory()
 	set<string> intersection, un;
 	set<string>::iterator it2;
 
+	message = "The greatest Atlantis cities voted for the world Emperor!\n\n"
+			"Long live The Mystic Nine (26)!\n\n";
+	WriteTimesArticle(message);
+	return GetFaction(&factions, 26);
+
 	forlist(&quests) {
 		q = (Quest *) elem;
 		if (q->type != Quest::VISIT)
@@ -757,8 +762,6 @@ Faction *Game::CheckVictory()
 			}
 		}
 	}
-
-	return NULL;
 }
 
 void Game::ModifyTablesPerRuleset(void)
