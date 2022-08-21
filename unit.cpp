@@ -718,67 +718,136 @@ void Unit::DefaultOrders(Object *obj)
 
 	ClearOrders();
 	if (type == U_WMON) {
-		if (ObjectDefs[obj->type].monster == -1) {
-			// count starts at 2 to give a 2 / (available dirs + 2)
-			// chance of a wandering monster not moving
-			count = 2;
-			weight = items.Weight();
-			r = obj->region;
-			for (i = 0; i < NDIRS; i++) {
-				n = r->neighbors[i];
-				if (!n)
-					continue;
-				if (TerrainDefs[n->type].similar_type == R_OCEAN &&
-						!CanReallySwim() &&
-						!(CanFly(weight) &&
-							Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED))
-					continue;
-				if (TerrainDefs[n->type].similar_type != R_OCEAN &&
-						!CanWalk(weight) &&
-						!CanRide(weight) &&
-						!CanFly(weight))
-					continue;
-				count++;
 
+		// determine terrain perferences
+		std::set<int> forbidden;
+		std::set<int> perferred;
+
+		for (int i = 0; i < NUMMONSTERS; i++) {
+			MonType & monster = MonDefs[i];
+
+			int index = FindItemIndex(monster.abbr);
+			if (this->items.GetNum(index) == 0) {
+				continue;
 			}
-			count = getrandom(count);
-			for (i = 0; i < NDIRS; i++) {
-				n = r->neighbors[i];
-				if (!n)
-					continue;
-				if (TerrainDefs[n->type].similar_type == R_OCEAN &&
-						!CanReallySwim() &&
-						!(CanFly(weight) &&
-							Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED))
-					continue;
-				if (TerrainDefs[n->type].similar_type != R_OCEAN &&
-						!CanWalk(weight) &&
-						!CanRide(weight) &&
-						!CanFly(weight))
-					continue;
-				if (!count--) {
-					MoveOrder *o = new MoveOrder;
-					o->advancing = 0;
-					int aper = Hostile();
-					aper *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
-					aper /= 100;
-					if (aper < Globals->MONSTER_ADVANCE_MIN_PERCENT)
-						aper = Globals->MONSTER_ADVANCE_MIN_PERCENT;
-					if (getrandom(100) < aper)
-						o->advancing = 1;
-					MoveDir *d = new MoveDir;
-					d->dir = i;
-					o->dirs.Add(d);
-					monthorders = o;
-				}
+
+			// bad terrain is an union of all bad terrains
+			for (auto & item : monster.forbiddenTerrain) {
+				forbidden.insert(item);
+			}
+
+			// for simplicity good terrains will be union too
+			for (auto & item : monster.preferredTerrain) {
+				perferred.insert(item);
 			}
 		}
-	} else if (type == U_GUARD) {
+
+		if (ObjectDefs[obj->type].monster == -1) {
+			weight = items.Weight();
+			r = obj->region;
+
+			// this vector will contain all directions where monster can move
+			// normal move chance will contain two enteries
+			// reduced move chacne will containe one entry
+			std::vector<int> directions;
+
+			// then chance of a wandering monster not moving will be 2 / (available dirs + 2)
+			// it is why we add 4 entries (see comment above) to the directions list
+			directions.push_back(-1);
+			directions.push_back(-1);
+			directions.push_back(-1);
+			directions.push_back(-1);
+
+			for (i = 0; i < NDIRS; i++) {
+				n = r->neighbors[i];
+				if (!n) {
+					continue;
+				}
+
+				const int terrainSimilarType = TerrainDefs[n->type].similar_type;
+
+				if (terrainSimilarType == R_OCEAN && !CanReallySwim() && !(CanFly(weight) && Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED)) {
+					continue;
+				}
+
+				if (terrainSimilarType != R_OCEAN && !CanWalk(weight) && !CanRide(weight) && !CanFly(weight)) {
+					continue;
+				}
+
+				if (!forbidden.empty() && forbidden.find(terrainSimilarType) != forbidden.end()) {
+					// the direction is in a bad terrain, monster will not move there
+					continue;
+				}
+
+				if (perferred.empty() || perferred.find(terrainSimilarType) != perferred.end()) {
+					// if there are no preferred terrains at all
+					//   or target terrain is in preferred terrains list
+					// add 2 move direction entries into the list for normal hit chance
+					directions.push_back(i);
+					directions.push_back(i);
+				}
+				else {
+					// this is direction to the neutral terrain, we must check can monster move there
+					// monster will be able to move there only if target region is connected with a good terrain
+
+					bool connectedToGoodTerrain = false;
+					for (int j = 0; j < NDIRS; j++) {
+						auto region = n->neighbors[j];
+						if (!region) {
+							continue;
+						}
+
+						if (perferred.find(TerrainDefs[region->type].similar_type) != perferred.end()) {
+							connectedToGoodTerrain = true;
+							break;
+						}
+					}
+
+					if (connectedToGoodTerrain) {
+						// 2x lower chance to enter neutral region
+						directions.push_back(i);
+					}
+				}
+			}
+
+			// pick a direction where to move
+			// it will be uniform selection of all possible directions, better than previos alogrithm
+			int dirIndex = getrandom(directions.size());
+			int dir = directions[dirIndex];
+
+			if (dir >= 0) {
+				MoveOrder *o = new MoveOrder;
+				o->advancing = 0;
+
+				int aper = Hostile();
+				aper *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
+				aper /= 100;
+				if (aper < Globals->MONSTER_ADVANCE_MIN_PERCENT) {
+					aper = Globals->MONSTER_ADVANCE_MIN_PERCENT;
+				}
+
+				if (getrandom(100) < aper) {
+					o->advancing = 1;
+				}
+
+				MoveDir *d = new MoveDir;
+				d->dir = dir;
+				o->dirs.Add(d);
+				monthorders = o;
+			}
+		}
+	}	//if (type == U_WMON) {
+
+	else if (type == U_GUARD) {
 		if (guard != GUARD_GUARD)
 			guard = GUARD_SET;
-	} else if (type == U_GUARDMAGE) {
+	}
+
+	else if (type == U_GUARDMAGE) {
 		combat = S_FIRE;
-	} else{
+	}
+
+	else{
 		/* Set up default orders for factions which submit none */
 		if (obj->region->type != R_NEXUS) {
 			if (GetFlag(FLAG_AUTOTAX) &&

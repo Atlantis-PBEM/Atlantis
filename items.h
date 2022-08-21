@@ -215,6 +215,28 @@ class MonType
 		char const *abbr;
 
 		int hitDamage;
+
+		// Terrain types which monster like to be in.
+		// When the list is left empty, it will mean all terrains are possible.
+		std::vector<int> preferredTerrain;
+
+		// Terrain types into which monster will never try to enter.
+		std::vector<int> forbiddenTerrain;
+
+		/*
+		The general algorithm of the monster movement:
+
+		There are three categories of terrain: 1) what monster likes, 2) what monster is neutral, and 3) what monster dislikes.
+		
+		Monster will freely move through the terrain he likes, and there will be a standard chance to move into the terrain he likes.
+
+		The monster will never enter the terrain he dislikes and will have a 2x lower chance to enter neutral terrain.
+
+		The monster can enter into the region of neutral terrain only if that particular region has at least one neighbor of the terrain
+		he likes.
+
+		This forbids monsters from going deeper into the unusual terrain but leaves regions on borders affected by "uncommon" monsters.
+		*/
 };
 
 extern MonType *MonDefs;
