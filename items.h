@@ -32,6 +32,7 @@ class ItemType;
 #include "gamedefs.h"
 #include "alist.h"
 #include "astring.h"
+#include <vector>
 
 enum {
 	ATTACK_COMBAT,
