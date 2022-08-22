@@ -820,9 +820,9 @@ AString *ItemDescription(int item, int full)
 		} else {
 			*temp += AString("all skills to level ") + mt->defaultlevel + ".";
 		}
-	}	
-	if ((ItemDefs[item].type & IT_MONSTER) &&
-			!(ItemDefs[item].flags & ItemType::MANPRODUCE)) {
+	}
+
+	if ((ItemDefs[item].type & IT_MONSTER) && !(ItemDefs[item].flags & ItemType::MANPRODUCE)) {
 		*temp += " This is a monster.";
 		MonType *mp = FindMonster(ItemDefs[item].abr,
 				(ItemDefs[item].type & IT_ILLUSION));
@@ -831,11 +831,45 @@ AString *ItemDescription(int item, int full)
 		for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
 			*temp += AString(" ") + MonResist(c,mp->defense[c], full);
 		}
+		
 		if (mp->special && mp->special != NULL) {
 			*temp += AString(" ") +
 				"Monster can cast " +
 				ShowSpecial(mp->special, mp->specialLevel, 1, 0);
 		}
+
+		if (mp->preferredTerrain.empty() && mp->forbiddenTerrain.empty()) {
+			*temp += AString(" ") + "The monster has no terrain preferences, and it can travel through any terrain.";
+		}
+
+		if (!mp->forbiddenTerrain.empty()) {
+			*temp += AString(" ") + "Monster severely dislikes";
+
+			bool isNext = false;
+			for (auto &terrain : mp->forbiddenTerrain) {
+				*temp += AString(isNext ? ", " : " ") + TerrainDefs[terrain].name;
+				isNext = true;
+			}
+
+			*temp += AString(" ") + (mp->forbiddenTerrain.size() > 1 ? "terrains" : "terrain");
+
+			*temp += AString(" ") + "and will never try to enter them.";
+		}
+
+		if (!mp->preferredTerrain.empty()) {
+			*temp += AString(" ") + "Monster prefers to roam the";
+
+			bool isNext = false;
+			for (auto &terrain : mp->preferredTerrain) {
+				*temp += AString(isNext ? ", " : " ") + TerrainDefs[terrain].name;
+				isNext = true;
+			}
+
+			*temp += AString(" ") + (mp->preferredTerrain.size() > 1 ? "terrains" : "terrain");
+
+			*temp += AString(".") + " At the same time, the monster will enter all other terrains less likely and will not travel far away from the terrains he likes.";
+		}
+
 		if (full) {
 			int hits = mp->hits;
 			int atts = mp->numAttacks;
