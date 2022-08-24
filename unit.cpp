@@ -723,6 +723,7 @@ void Unit::DefaultOrders(Object *obj)
 			std::set<int> forbidden;
 			std::set<int> perferred;
 
+			int aggression = 0;
 			forlist(&items) {
 				Item *item = (Item *) elem;
 				ItemType &itemType = ItemDefs[item->type];
@@ -732,6 +733,7 @@ void Unit::DefaultOrders(Object *obj)
 				}
 
 				MonType *monster = FindMonster(itemType.abr, (itemType.type & IT_ILLUSION));
+				aggression = std::max(aggression, monster->getAggression());
 
 				// bad terrain is an union of all bad terrains
 				for (auto & item : monster->forbiddenTerrain) {
@@ -820,20 +822,7 @@ void Unit::DefaultOrders(Object *obj)
 				MoveOrder *o = new MoveOrder;
 				o->advancing = 0;
 
-				int aper = 0;
-				forlist(&items) {
-					Item *item = (Item *) elem;
-					ItemType &itemType = ItemDefs[item->type];
-
-					if (!(itemType.type & IT_MONSTER)) {
-						continue;
-					}
-
-					MonType *monster = FindMonster(itemType.abr, (itemType.type & IT_ILLUSION));
-					aper = std::max(aper, monster->getAggression());
-				}
-
-				if (getrandom(100) < aper) {
+				if (getrandom(100) < aggression) {
 					o->advancing = 1;
 				}
 
