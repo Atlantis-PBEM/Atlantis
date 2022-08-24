@@ -29,6 +29,17 @@
 #include "object.h"
 #include "gamedata.h"
 
+const int MonType::getAggression() {
+	int aggression = this->hostile;
+	aggression *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
+	aggression /= 100;
+	if (aggression < Globals->MONSTER_ADVANCE_MIN_PERCENT) {
+		aggression = Globals->MONSTER_ADVANCE_MIN_PERCENT;
+	}
+
+	return aggression;
+}
+
 BattleItemType *FindBattleItem(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
@@ -868,6 +879,26 @@ AString *ItemDescription(int item, int full)
 			*temp += AString(" ") + (mp->preferredTerrain.size() > 1 ? "terrains" : "terrain");
 
 			*temp += AString(".") + " At the same time, the monster will enter all other terrains less likely and will not travel far away from the terrains he likes.";
+		}
+
+		const int aggression = mp->getAggression();
+		if (aggression >= 100) {
+			*temp += AString(" ") + "Monster is unbelievably aggressive and will attack player units on sight.";
+		}
+		else if (aggression >= 75) {
+			*temp += AString(" ") + "Monster is exceptionally aggressive, and there is a slight chance he will not attack player units.";
+		}
+		else if (aggression >= 50) {
+			*temp += AString(" ") + "Monster is very aggressive, but he will not harm player units with good luck.";
+		}
+		else if (aggression >= 25) {
+			*temp += AString(" ") + "Monster is aggressive and, in most cases, will leave player units alone.";
+		}
+		else if (aggression > 0) {
+			*temp += AString(" ") + "Monster is unfriendly, and the player must be pretty unlucky to be attacked by this monster.";
+		}
+		else {
+			*temp += AString(" ") + "Monster is totally peaceful and will never attack player units.";
 		}
 
 		if (full) {
