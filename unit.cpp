@@ -718,31 +718,32 @@ void Unit::DefaultOrders(Object *obj)
 
 	ClearOrders();
 	if (type == U_WMON) {
-
-		// determine terrain perferences
-		std::set<int> forbidden;
-		std::set<int> perferred;
-
-		for (int i = 0; i < NUMMONSTERS; i++) {
-			MonType & monster = MonDefs[i];
-
-			int index = FindItemIndex(monster.abbr);
-			if (this->items.GetNum(index) == 0) {
-				continue;
-			}
-
-			// bad terrain is an union of all bad terrains
-			for (auto & item : monster.forbiddenTerrain) {
-				forbidden.insert(item);
-			}
-
-			// for simplicity good terrains will be union too
-			for (auto & item : monster.preferredTerrain) {
-				perferred.insert(item);
-			}
-		}
-
 		if (ObjectDefs[obj->type].monster == -1) {
+			// determine terrain perferences
+			std::set<int> forbidden;
+			std::set<int> perferred;
+
+			forlist(&items) {
+				Item *item = (Item *) elem;
+				ItemType &itemType = ItemDefs[item->type];
+
+				if (!(itemType.type & IT_MONSTER)) {
+					continue;
+				}
+
+				MonType *monster = FindMonster(itemType.abr, (itemType.type & IT_ILLUSION));
+
+				// bad terrain is an union of all bad terrains
+				for (auto & item : monster->forbiddenTerrain) {
+					forbidden.insert(item);
+				}
+
+				// for simplicity good terrains will be union too
+				for (auto & item : monster->preferredTerrain) {
+					perferred.insert(item);
+				}
+			}
+
 			weight = items.Weight();
 			r = obj->region;
 
@@ -819,11 +820,17 @@ void Unit::DefaultOrders(Object *obj)
 				MoveOrder *o = new MoveOrder;
 				o->advancing = 0;
 
-				int aper = Hostile();
-				aper *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
-				aper /= 100;
-				if (aper < Globals->MONSTER_ADVANCE_MIN_PERCENT) {
-					aper = Globals->MONSTER_ADVANCE_MIN_PERCENT;
+				int aper = 0;
+				forlist(&items) {
+					Item *item = (Item *) elem;
+					ItemType &itemType = ItemDefs[item->type];
+
+					if (!(itemType.type & IT_MONSTER)) {
+						continue;
+					}
+
+					MonType *monster = FindMonster(itemType.abr, (itemType.type & IT_ILLUSION));
+					aper = std::max(aper, monster->getAggression());
 				}
 
 				if (getrandom(100) < aper) {
