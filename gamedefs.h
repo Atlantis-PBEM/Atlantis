@@ -61,6 +61,7 @@ extern int allowedTacticiansSize;
 extern int *allowedMartial;
 extern int allowedMartialSize;
 
+extern int const NUMTERRAINS;
 extern int NUMBATTLEITEMS;
 extern int NUMARMORS;
 extern int NUMWEAPONS;

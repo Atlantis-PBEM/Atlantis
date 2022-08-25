@@ -827,7 +827,7 @@ AString *ObjectDescription(int obj)
 	}
 
 	if (Globals->LAIR_MONSTERS_EXIST && (o->monster != -1)) {
-		*temp += " Monsters can potentially lair in this structure.";
+		*temp += AString(" ") + capitalize(ItemDefs[o->monster].names) + " can potentially lair in this structure.";
 		if (o->flags & ObjectType::NOMONSTERGROWTH) {
 			*temp += " Monsters in this structures will never regenerate.";
 		}

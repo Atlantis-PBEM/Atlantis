@@ -489,15 +489,6 @@ std::vector<std::string> aEpithetGeneralF = { "Ruthless", "Bloody", "Mighty", "W
 
 //---------------------------------------------------------------------------
 
-std::string capitalize(std::string s) {
-    if (s.empty()) {
-        return s;
-    }
-
-    s[0] = toupper(s[0]);
-    return s;
-}
-
 std::string oneOf(int seed, std::string a, std::string b) {
     return seed % 2 == 1 ? a : b;
 }

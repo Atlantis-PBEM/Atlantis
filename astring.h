@@ -26,6 +26,8 @@
 #define ASTRING_CLASS
 
 #include <iostream>
+#include <string>
+#include <vector>
 #include "alist.h"
 
 using namespace std;
@@ -72,5 +74,12 @@ private:
 	char *str;
 	int isEqual(const char *);
 };
+
+const std::string plural(int count, const std::string &one, const std::string &many);
+const std::string join(const std::string &delimeter, const std::vector<std::string>& items);
+const std::string join(const std::string &delimeter, const std::string &lastDelimeter, const std::vector<std::string>& items);
+const bool endsWith(const std::string &str, const std::string &search);
+const bool startsWith(const std::string &str, const std::string &search);
+const std::string capitalize(const std::string &str);
 
 #endif

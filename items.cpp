@@ -849,22 +849,53 @@ AString *ItemDescription(int item, int full)
 				ShowSpecial(mp->special, mp->specialLevel, 1, 0);
 		}
 
+		{
+			std::vector<std::string> spawnIn;
+			for (int i = 0; i < NUMTERRAINS; i++) {
+				TerrainType &terrain = TerrainDefs[i];
+				if (!(terrain.flags & TerrainType::SHOW_RULES)) {
+					continue;
+				}
+
+				if (terrain.smallmon == item || terrain.bigmon == item || terrain.humanoid == item) {
+					spawnIn.push_back(terrain.plural);
+				}
+			}
+
+			if (!spawnIn.empty()) {
+				*temp += AString(" The monster can spawn in the wilderness of ") + join(", ", " and ", spawnIn) + ".";
+			}
+		}
+
+		{
+			std::vector<std::string> lairIn;
+			for (int i = 0; i < NOBJECTS; i++) {
+				ObjectType &obj = ObjectDefs[i];
+				if (obj.flags & ObjectType::DISABLED) {
+					continue;
+				}
+
+				if (obj.monster == item) {
+					lairIn.push_back(obj.name);
+				}
+			}
+
+			if (!lairIn.empty()) {
+				*temp += AString(" This monster can lair in the ") + join(", ", " and ", lairIn) + ".";
+			}
+		}
+
 		if (mp->preferredTerrain.empty() && mp->forbiddenTerrain.empty()) {
 			*temp += AString(" ") + "The monster has no terrain preferences, and it can travel through any terrain.";
 		}
 
 		if (!mp->forbiddenTerrain.empty()) {
-			*temp += AString(" ") + "Monster severely dislikes";
-
-			bool isNext = false;
+			std::vector<std::string> list;
 			for (auto &terrain : mp->forbiddenTerrain) {
-				*temp += AString(isNext ? ", " : " ") + TerrainDefs[terrain].name;
-				isNext = true;
+				list.push_back(TerrainDefs[terrain].name);
 			}
 
-			*temp += AString(" ") + (mp->forbiddenTerrain.size() > 1 ? "terrains" : "terrain");
-
-			*temp += AString(" ") + "and will never try to enter them.";
+			*temp += AString(" Monster severely dislikes ") + join(",", " and ", list) + " " + plural(mp->forbiddenTerrain.size(), "terrain", "terrains") + " and will never try to enter them.";
 		}
 
 		if (!mp->preferredTerrain.empty()) {
@@ -876,9 +907,7 @@ AString *ItemDescription(int item, int full)
 				isNext = true;
 			}
 
-			*temp += AString(" ") + (mp->preferredTerrain.size() > 1 ? "terrains" : "terrain");
-
-			*temp += AString(".") + " At the same time, the monster will enter all other terrains less likely and will not travel far away from the terrains he likes.";
+			*temp += AString(" ") + plural(mp->preferredTerrain.size(), "terrain", "terrains");
 		}
 
 		const int aggression = mp->getAggression();
@@ -892,7 +921,7 @@ AString *ItemDescription(int item, int full)
 			*temp += AString(" ") + "Monster is very aggressive, but he will not harm player units with good luck.";
 		}
 		else if (aggression >= 25) {
-			*temp += AString(" ") + "Monster is aggressive and, in most cases, will leave player units alone.";
+			*temp += AString(" ") + "Monster is aggressive but, in most cases, will leave player units alone.";
 		}
 		else if (aggression > 0) {
 			*temp += AString(" ") + "Monster is unfriendly, and the player must be pretty unlucky to be attacked by this monster.";

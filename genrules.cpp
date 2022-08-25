@@ -70,10 +70,6 @@ int StudyRate(int days, int exp)
 	return rate;
 }
 
-const std::string plural(int count, const std::string &one, const std::string &many) {
-	return count > 1 ? many : one;
-}
-
 void writeDelimetedList(std::ostringstream& buffer, const std::string &delimeter, const std::vector<std::string>& items) {
 	bool next = false;
 	for (auto &item : items) {
