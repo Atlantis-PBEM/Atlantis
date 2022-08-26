@@ -29,6 +29,17 @@
 #include "object.h"
 #include "gamedata.h"
 
+const int MonType::getAggression() {
+	int aggression = this->hostile;
+	aggression *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
+	aggression /= 100;
+	if (aggression < Globals->MONSTER_ADVANCE_MIN_PERCENT) {
+		aggression = Globals->MONSTER_ADVANCE_MIN_PERCENT;
+	}
+
+	return aggression;
+}
+
 BattleItemType *FindBattleItem(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
@@ -820,9 +831,9 @@ AString *ItemDescription(int item, int full)
 		} else {
 			*temp += AString("all skills to level ") + mt->defaultlevel + ".";
 		}
-	}	
-	if ((ItemDefs[item].type & IT_MONSTER) &&
-			!(ItemDefs[item].flags & ItemType::MANPRODUCE)) {
+	}
+
+	if ((ItemDefs[item].type & IT_MONSTER) && !(ItemDefs[item].flags & ItemType::MANPRODUCE)) {
 		*temp += " This is a monster.";
 		MonType *mp = FindMonster(ItemDefs[item].abr,
 				(ItemDefs[item].type & IT_ILLUSION));
@@ -831,11 +842,94 @@ AString *ItemDescription(int item, int full)
 		for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
 			*temp += AString(" ") + MonResist(c,mp->defense[c], full);
 		}
+		
 		if (mp->special && mp->special != NULL) {
 			*temp += AString(" ") +
 				"Monster can cast " +
 				ShowSpecial(mp->special, mp->specialLevel, 1, 0);
 		}
+
+		{
+			std::vector<std::string> spawnIn;
+			for (int i = 0; i < NUMTERRAINS; i++) {
+				TerrainType &terrain = TerrainDefs[i];
+				if (!(terrain.flags & TerrainType::SHOW_RULES)) {
+					continue;
+				}
+
+				if (terrain.smallmon == item || terrain.bigmon == item || terrain.humanoid == item) {
+					spawnIn.push_back(terrain.plural);
+				}
+			}
+
+			if (!spawnIn.empty()) {
+				*temp += AString(" The monster can spawn in the wilderness of ") + join(", ", " and ", spawnIn) + ".";
+			}
+		}
+
+		{
+			std::vector<std::string> lairIn;
+			for (int i = 0; i < NOBJECTS; i++) {
+				ObjectType &obj = ObjectDefs[i];
+				if (obj.flags & ObjectType::DISABLED) {
+					continue;
+				}
+
+				if (obj.monster == item) {
+					lairIn.push_back(obj.name);
+				}
+			}
+
+			if (!lairIn.empty()) {
+				*temp += AString(" This monster can lair in the ") + join(", ", " and ", lairIn) + ".";
+			}
+		}
+
+		if (mp->preferredTerrain.empty() && mp->forbiddenTerrain.empty()) {
+			*temp += AString(" ") + "The monster has no terrain preferences, and it can travel through any terrain.";
+		}
+
+		if (!mp->forbiddenTerrain.empty()) {
+			std::vector<std::string> list;
+			for (auto &terrain : mp->forbiddenTerrain) {
+				list.push_back(TerrainDefs[terrain].name);
+			}
+
+			*temp += AString(" Monster severely dislikes ") + join(",", " and ", list) + " " + plural(mp->forbiddenTerrain.size(), "terrain", "terrains") + " and will never try to enter them.";
+		}
+
+		if (!mp->preferredTerrain.empty()) {
+			*temp += AString(" ") + "Monster prefers to roam the";
+
+			bool isNext = false;
+			for (auto &terrain : mp->preferredTerrain) {
+				*temp += AString(isNext ? ", " : " ") + TerrainDefs[terrain].name;
+				isNext = true;
+			}
+
+			*temp += AString(" ") + plural(mp->preferredTerrain.size(), "terrain", "terrains");
+		}
+
+		const int aggression = mp->getAggression();
+		if (aggression >= 100) {
+			*temp += AString(" ") + "Monster is unbelievably aggressive and will attack player units on sight.";
+		}
+		else if (aggression >= 75) {
+			*temp += AString(" ") + "Monster is exceptionally aggressive, and there is a slight chance he will not attack player units.";
+		}
+		else if (aggression >= 50) {
+			*temp += AString(" ") + "Monster is very aggressive, but he will not harm player units with good luck.";
+		}
+		else if (aggression >= 25) {
+			*temp += AString(" ") + "Monster is aggressive but, in most cases, will leave player units alone.";
+		}
+		else if (aggression > 0) {
+			*temp += AString(" ") + "Monster is unfriendly, and the player must be pretty unlucky to be attacked by this monster.";
+		}
+		else {
+			*temp += AString(" ") + "Monster is totally peaceful and will never attack player units.";
+		}
+
 		if (full) {
 			int hits = mp->hits;
 			int atts = mp->numAttacks;

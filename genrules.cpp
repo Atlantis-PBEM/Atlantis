@@ -70,10 +70,6 @@ int StudyRate(int days, int exp)
 	return rate;
 }
 
-const std::string plural(int count, const std::string &one, const std::string &many) {
-	return count > 1 ? many : one;
-}
-
 void writeDelimetedList(std::ostringstream& buffer, const std::string &delimeter, const std::vector<std::string>& items) {
 	bool next = false;
 	for (auto &item : items) {
@@ -4511,6 +4507,79 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"Atlantis.  They will occasionally attack player units, so be "
 			"careful when wandering through the wilderness.";
 		f.Paragraph(temp);
+
+		temp = "Some monsters live in lairs, caves, and other structures players cannot enter. "
+			"Such monsters will never leave their habitat and will never wander around, "
+			"but they can attack player units present in the region. The willingness to attack is "
+			"dependent on the monster's aggression level. It is worth reminding that monsters "
+			"inside the lair will always be visible to the player regardless of their stealth score "
+			"as any other unit in the structure. Empty lairs will spawn new monsters regularly if "
+			"old ones are killed. Players can guard regions with lairs, and monsters will not spawn there.";
+		f.Paragraph(temp);
+
+		temp = "Other monsters do not live in lairs but wander freely. Wandering monsters can spawn in any "
+			"unguarded region regardless of whether there is a lair. Guarding will prevent monsters from spawning "
+			"in a particular region. Their willingness to attack depends on their aggression level, and monsters "
+			"can advance to neighboring regions while moving. Some monsters could have preferred terrains that they "
+			"like more than others, and then they will be willing to enter such regions more likely than others. At "
+			"the same time, some terrains could be so uncomfortable that monsters will never enter them. If a monster "
+			"has particular terrain preferences, he will try to be close to the habitat he likes, and he will not go "
+			"deeper into the territory that is not connected with his preferred terrain.";
+		f.Paragraph(temp);
+
+		temp = "A small tip to the players about guarding: guarding will prevent monsters from spawning and attacking "
+			"player units, but in such a way players will not get any loot from monsters too. Monster hunting is a desirable "
+			"activity because it is fun, and you can get a great reward like silver, magical items, weapons, etc.";
+		f.Paragraph(temp);
+
+		f.TagText("h4", "Monster movement probability table");
+		f.Enclose(1, "table border=\"1\"");
+
+		f.Enclose(1, "thead");
+			f.Enclose(1, "tr");
+				f.TagText("th", "Directions");
+				f.TagText("th", "Prefered");
+				f.TagText("th", "Neutral");
+				f.TagText("th", "Move Preferred");
+				f.TagText("th", "Move Neutral");
+				f.TagText("th", "Stay");
+			f.Enclose(0, "tr");
+		f.Enclose(0, "thead");
+
+		int matrix[3][2];
+		matrix[2][0] = 4;	// stay
+
+		f.Enclose(1, "tbody");
+		for (int dirs = 1; dirs <= 6; dirs++) {
+			for (int preferedDirs = dirs; preferedDirs >= 0; preferedDirs--) {
+				const int neutralDirs = dirs - preferedDirs;
+
+				matrix[0][0] = preferedDirs * 2;	// prefered
+				matrix[1][0] = neutralDirs;			// neutral
+
+				int totalCases = 0;
+				for (int i = 0; i < 3; i++) {
+					totalCases += matrix[i][0];
+				}
+
+				for (int i = 0; i < 3; i++) {
+					matrix[i][1] = matrix[i][0] * 100 / totalCases;
+				}
+
+				f.Enclose(1, "tr");
+					f.TagText("td", AString("") + dirs);
+					f.TagText("td", AString("") + preferedDirs);
+					f.TagText("td", AString("") + neutralDirs);
+
+
+					for (int i = 0; i < 3; i++) {
+						f.TagText("td", AString("") + matrix[i][1] + "%");
+					}
+				f.Enclose(0, "tr");
+			}
+		}
+		f.Enclose(0, "tbody");
+		f.Enclose(0, "table");
 	}
 	f.LinkRef("nonplayers_controlled");
 	f.TagText("h3", "Controlled Monsters:");

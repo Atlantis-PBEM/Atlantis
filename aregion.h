@@ -69,6 +69,7 @@ class TerrainType
 {
 	public:
 		char const *name;
+		char const *plural;
 		char const *type;
 		char marker;
 		int similar_type;
