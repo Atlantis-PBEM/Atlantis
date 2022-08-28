@@ -2908,7 +2908,7 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 	// now we know all water bodies and know all water regions which are not in the coast
 	// we need to find distance from one water body to another water body
 
-	std::cout << "Distances from wate body to water body" << std::endl;
+	std::cout << "Distances from water body to water body" << std::endl;
 
 	size_t sz = waterBodies.size();
 	int distances[sz][sz];
@@ -2950,7 +2950,7 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 
 	// so we found shortest distance from one water body to another water body
 	// now we need to find smallest elevation cost
-	// each water body will connect up to 4 closest bodiws if they are in (min(map width, map height) / 8) range
+	// each water body will connect up to 4 closest bodies if they are in (min(map width, map height) / 8) range
 
 	std::cout << "Max river reach " << maxRiverReach << std::endl;
 
@@ -3215,10 +3215,10 @@ void placeVolcanoes(ARegionArray* arr, const int w, const int h) {
 				continue;
 			}
 
-			int mountains = countNeighbors(graph, reg, R_MOUNTAIN, 1);
+			int mountains = countNeighbors(graph, reg, R_MOUNTAIN, makeRoll(1, 3) + 1);
 			int volcanoes = countNeighbors(graph, reg, R_VOLCANO, 2);
 
-			if (volcanoes == 0 && mountains >= 4) {
+			if (volcanoes == 0 && mountains >= (makeRoll(1, 6) + 2)) {
 				reg->type = R_VOLCANO;
 			}
 		}
@@ -3240,11 +3240,12 @@ int cylDistance(graphs::Location2D a, graphs::Location2D b, int w) {
 	return std::min(d0, std::min(d1, d2));
 }
 
-std::vector<graphs::Location2D> getPoints(const int w, const int h, const int minDist, const int newPointCount) {
+std::vector<graphs::Location2D> getPoints(const int w, const int h, const int initialMinDist, const int newPointCount, const std::function<int(graphs::Location2D)> onPoint) {
 	std::vector<graphs::Location2D> output;
 	std::vector<graphs::Location2D> processing;
 
-	const int cellSize = ceil(minDist / sqrt(2));
+	int minDist = initialMinDist;
+	int cellSize = ceil(minDist / sqrt(2));
 	
 	graphs::Location2D loc = { x: getrandom(w), y: getrandom(h) };
 	
@@ -3303,6 +3304,9 @@ std::vector<graphs::Location2D> getPoints(const int w, const int h, const int mi
 			if (!pointValid) {
 				continue;
 			}
+
+			minDist = onPoint(candidate);
+			cellSize = ceil(minDist / sqrt(2));
 
 			output.push_back(candidate);
 			processing.push_back(candidate);
@@ -3363,10 +3367,11 @@ Ethnicity getRegionEtnos(ARegion* reg) {
 
 void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::unordered_map<ARegion*, int>& rivers, const int w, const int h) {
 	std::unordered_set<ARegion*> named;
+	std::unordered_set<std::string> usedNames;
 
 	// generate name areas
 	std::vector<NameArea*> nameAnchors;
-	for (auto p : getPoints(w, h, 8, 16)) {
+	for (auto p : getPoints(w, h, 8, 16, [](graphs::Location2D p) { return 8; })) {
 		NameArea* na = new NameArea();
 		na->center = p;
 		na->name = getrandom(w * h) + 1;
@@ -3396,7 +3401,15 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 
 	for (auto &kv : riverNames) {
 		River& river = kv.second;
-		river.name = getRiverName(river.nameArea, river.length, minLen, maxLen);
+
+		std::string name = getRiverName(river.nameArea, river.length, minLen, maxLen);
+		while (usedNames.find(name) != usedNames.end()) {
+			std::cout << "Searching for better name" << std::endl;
+			name = getRiverName(getrandom(w * h), river.length, minLen, maxLen);
+		}
+		usedNames.emplace(name);
+
+		river.name = name;
 		std::cout << river.name << std::endl;
 	}
 
@@ -3418,7 +3431,13 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 				int seed = na->getName(reg->type);
 
 				Ethnicity etnos = getRegionEtnos(reg);
+
 				name = getRegionName(seed, etnos, reg->type, wb->regions.size(), false);
+				while (usedNames.find(name) != usedNames.end()) {
+					std::cout << "Searching for better name" << std::endl;
+					name = getRegionName(getrandom(w * h), etnos, reg->type, wb->regions.size(), false);
+				}
+				usedNames.emplace(name);
 
 				std::cout << name << std::endl;
 			}
@@ -3474,6 +3493,12 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 						int seed = na->getName(type);
 
 						name = getRegionName(seed, etnos, type, area.size(), false);
+						while (usedNames.find(name) != usedNames.end()) {
+							std::cout << "Searching for better name" << std::endl;
+							name = getRegionName(getrandom(w * h), etnos, type, area.size(), false);
+						}
+						usedNames.emplace(name);
+
 						std::cout << name << std::endl;
 					}
 				}
@@ -3484,7 +3509,14 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 
 				if (r->type == R_VOLCANO) {
 					int nameArea = na->getName(r->type);
+
 					std::string volcanoName = getRegionName(nameArea, etnos, r->type, 1, false);
+					while (usedNames.find(volcanoName) != usedNames.end()) {
+						std::cout << "Searching for better name" << std::endl;
+						volcanoName = getRegionName(getrandom(w * h), etnos, r->type, 1, false);
+					}
+					usedNames.emplace(volcanoName);
+					
 					std::cout << volcanoName << std::endl;
 					r->SetName(volcanoName.c_str());
 				}
@@ -3513,25 +3545,27 @@ void economy(ARegionArray* arr, const int w, const int h) {
 
 	std::cout << "Setting settlements" << std::endl;
 
+	int size = getrandom(NTOWNS);
+	int minDist = size + makeRoll(2, 2);
+
 	std::unordered_set<ARegion*> visited;
-	for (auto p : getPoints(w, h, 4, 16)) {
+	getPoints(w, h, minDist, 16, [&arr, &visited, &size, &minDist, &w, &h](graphs::Location2D p) {
 		auto reg = arr->GetRegion(p.x, p.y);
 		if (reg == NULL) {
 			// this means we have a point outside the map bounds :(
 			// todo: fix point boundary
 			std::cout << "NO REGION FOUND!!!!" << std::endl;
-			continue;
+			return minDist;
 		}
 
 		TerrainType* terrain = &(TerrainDefs[reg->type]);
 		if (reg->type == R_OCEAN || reg->type == R_VOLCANO || terrain->flags & TerrainType::BARREN) {
-			continue;
+			return minDist;
 		}
 
 		Ethnicity etnos = getRegionEtnos(reg);
 
-		int size = getrandom(TOWN_CITY + 1);
-		std::string name = getEthnicName(getrandom(w * h) + 1, etnos);
+		std::string name = getEthnicName(makeRoll(1, w * h), etnos);
 
 		reg->ManualSetup({
 			terrain: terrain,
@@ -3546,7 +3580,12 @@ void economy(ARegionArray* arr, const int w, const int h) {
 		visited.insert(reg);
 		std::string sizeName = size == TOWN_VILLAGE ? "Village" : size == TOWN_TOWN ? "Town" : "City";
 		std::cout << sizeName << " " << name << std::endl;
-	}
+
+		size = getrandom(NTOWNS);
+		minDist = size + makeRoll(2, 2);
+
+		return minDist;
+	});
 
 	std::cout << "Setting up other regions" << std::endl;
 
@@ -3577,15 +3616,15 @@ void economy(ARegionArray* arr, const int w, const int h) {
 	}
 }
 
-void addAncientStructure(ARegion* reg, int seed, int type, double damage) {
+void addAncientStructure(ARegion* reg, std::string name, int type, double damage) {
 	ObjectType& info = ObjectDefs[type];
 
 	Object * obj = new Object(reg);
 	int num = reg->buildingseq++;
-	int needs = info.cost * damage;
+	int needs = clamp(0, (int) (info.cost * damage), info.cost - 1);
 	obj->num = num;
 
-	std::string name = getObjectName(seed, type, info) + " [" + std::to_string(num) + "]";
+	name = name + " [" + std::to_string(num) + "]";
 	std::cout << "+ " << name << " : " << info.name << ", needs " << needs << std::endl;
 
 	obj->name = new AString(name);
@@ -3596,7 +3635,16 @@ void addAncientStructure(ARegion* reg, int seed, int type, double damage) {
 	reg->objects.Add(obj);
 }
 
+void addAncientStructure(ARegion* reg, int seed, int type, double damage) {
+	ObjectType& info = ObjectDefs[type];
+
+	std::string name = getObjectName(seed, type, info);
+	addAncientStructure(reg, name, type, damage);
+}
+
 void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const int h) {
+	std::vector<ARegion*> cities;
+
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
 			if ((x + y) % 2) {
@@ -3604,6 +3652,10 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 			}
 
 			ARegion* reg = arr->GetRegion(x, y);
+			if (reg->town && reg->town->TownType() == TOWN_CITY) {
+				cities.push_back(reg);
+			}
+
 			TerrainType* terrain = &(TerrainDefs[reg->type]);
 
 			if (reg->type == R_OCEAN || reg->type == R_VOLCANO || terrain->flags & TerrainType::BARREN) {
@@ -3652,6 +3704,157 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 						addAncientStructure(reg, getrandom(w * h) + 1, O_TOWER, (makeRoll(2, 6) - 1) / 12.0);
 					}
 				}
+			}
+		}
+	}
+
+	ARegionGraph graph = ARegionGraph(arr);
+	
+	graph.setInclusion([](ARegion* current, ARegion* next) {
+		return next->type != R_OCEAN && next->type != R_VOLCANO;
+	});
+
+	graph.setCost([](ARegion* current, ARegion* next) {
+		switch (next->type) {
+			case R_MOUNTAIN:
+			case R_FOREST:
+			case R_JUNGLE:
+			case R_SWAMP:
+			case R_TUNDRA:
+				return 2;
+
+			case R_PLAIN:
+			case R_DESERT:
+				return 1;
+
+			default:
+				return 0;
+		}
+	});
+
+	size_t sz = cities.size();
+	int distances[sz][sz];
+	for (int i = 0; i < sz; i++) {
+		for (int j = i + 1; j < sz; j++) {
+			if (i == j) {
+				distances[i][j] = 0;
+				continue;
+			}
+
+			auto start = cities[i];
+			auto end = cities[j];
+
+			graphs::Location2D startLoc = { x: start->xloc, y: start->yloc };
+			graphs::Location2D endLoc = { x: end->xloc, y: end->yloc };
+
+			std::unordered_map<graphs::Location2D, graphs::Location2D> cameFrom;
+			std::unordered_map<graphs::Location2D, double> costSoFar;
+			graphs::dijkstraSearch(graph, startLoc, endLoc, cameFrom, costSoFar);
+
+			int dist = 0;
+			while (endLoc != startLoc) {
+				dist++;
+				endLoc = cameFrom[endLoc];
+			}
+
+			if (dist) {
+				distances[i][j] = dist;
+				distances[j][i] = dist;
+			}
+			else {
+				distances[i][j] = 0;
+				distances[j][i] = 0;
+			}
+		}
+	}
+
+	std::unordered_set<ARegion*> connected;
+	for (int i = 0; i < sz; i++) {
+		auto start = cities[i];
+
+		if (connected.find(start) != connected.end()) {
+			continue;
+		}
+
+		for (int j = 0; j < sz; j++) {
+			auto dist = distances[i][j];
+			if (!dist || dist > 8) {
+				continue;
+			}
+
+			auto end = cities[j];
+			if (connected.find(end) != connected.end()) {
+				continue;
+			}
+
+			connected.emplace(start);
+			connected.emplace(end);
+
+			std::string name = "Road to " + std::string(end->town->name->Str());
+
+			graphs::Location2D startLoc = { x: start->xloc, y: start->yloc };
+			graphs::Location2D endLoc = { x: end->xloc, y: end->yloc };
+
+			std::unordered_map<graphs::Location2D, graphs::Location2D> cameFrom;
+			std::unordered_map<graphs::Location2D, double> costSoFar;
+			graphs::dijkstraSearch(graph, startLoc, endLoc, cameFrom, costSoFar);
+
+			ARegion* endReg = end;
+			while (endLoc != startLoc) {
+				endLoc = cameFrom[endLoc];
+
+				ARegion *current = GetRegion(endLoc.x, endLoc.y, end->zloc);
+
+				int dir;
+				for (dir = 0; dir < NDIRS; dir++) {
+					if (current->neighbors[dir] == endReg) {
+						break;
+					}
+				}
+
+				int opositeDir = (dir + 3) % NDIRS;
+
+				int ROAD_BUILDINGS[NDIRS];
+				ROAD_BUILDINGS[D_NORTH] = O_ROADN;
+				ROAD_BUILDINGS[D_NORTHEAST] = O_ROADNE;
+				ROAD_BUILDINGS[D_NORTHWEST] = O_ROADNW;
+				ROAD_BUILDINGS[D_SOUTH] = O_ROADS;
+				ROAD_BUILDINGS[D_SOUTHEAST] = O_ROADSE;
+				ROAD_BUILDINGS[D_SOUTHWEST] = O_ROADSW;
+
+				if (getrandom(3)) {
+					{
+						bool canBuild = true;
+						forlist (&current->objects) {
+							Object* o = (Object *)elem;
+							if (o->type == ROAD_BUILDINGS[dir]) {
+								canBuild = false;
+								break;
+							}
+						}
+
+						if (canBuild) {
+							addAncientStructure(current, name, ROAD_BUILDINGS[dir], (makeRoll(2, 6) - 6.0) / 6.0);
+						}
+					}
+
+					{
+						bool canBuild = true;
+						forlist (&endReg->objects) {
+							Object* o = (Object *)elem;
+							if (o->type == ROAD_BUILDINGS[opositeDir]) {
+								canBuild = false;
+								break;
+							}
+						}
+
+						if (canBuild) {
+							addAncientStructure(endReg, name, ROAD_BUILDINGS[opositeDir], (makeRoll(2, 6) - 6.0) / 6.0);
+						}
+					}
+				}
+
+				endReg = current;
 			}
 		}
 	}

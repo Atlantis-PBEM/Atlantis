@@ -171,13 +171,11 @@ CellMap::CellMap(int width, int height) {
             x: x,
             y: y,
             biome: B_UNKNOWN,
-            elevation: -1,
-            temperature: -1,
-            saturation: -1,
-            evoparation: -1,
-            rainfall: -1,
-            moistureIn: -1,
-            moistureOut: -1
+            elevation: 0,
+            temperature: 0,
+            saturation: 0,
+            evoparation: 0,
+            rainfall: 0,
         }));
     }
 }
@@ -322,49 +320,50 @@ void simulateRain(CellMap& map, Cell* target, double windAngle, const Edge* wind
     int x = target->x;
     int y = target->y;
 
-    int moistureIn = 0;
-    int rainfallIn = 0;
+    int totalMoisture = 0;
+    double rainfall = 0;
 
-    for (int i = 0; i < MOISTURE_SOURCES; i++) {
-        auto edge = windMatrix[i];
-        auto cell = map.get(x + edge.dx, y + edge.dy);
-        if (cell == NULL) {
-            continue;
+    const int RANGE = 4;
+    const double MOISTURE_FADE = 4.0;
+    const double MOISTURE_TO_MM = 20.0;
+
+    for (int dx = -RANGE; dx <= RANGE; dx++) {
+        for (int dy = -RANGE; dy <= RANGE; dy++) {
+            if (dx == 0 && dy == 0) {
+                continue;
+            }
+
+            auto cell = map.get(x + dx, y + dy);
+            if (cell == NULL) {
+                continue;
+            }
+
+            int distance = sqrt(dx * dx + dy * dy);
+            if (distance > RANGE) {
+                continue;
+            }
+
+            if (!cell->evoparation) {
+                continue;
+            }
+
+            double moisture = cell->evoparation * (MOISTURE_FADE / distance);
+
+            int dE = target->elevation <= 0
+                ? 0
+                : std::max(0, target->elevation) - std::max(0, cell->elevation);
+
+            double rain = 0;
+            if (dE > 0 && moisture > 0) {
+                rain = (dE * RAINFALL * moisture) / 500.0;
+            }
+
+            rainfall += rain;
+            totalMoisture += moisture;
         }
-
-        double m = cell->moistureOut;
-        if (m == -1) {
-            m = cell->evoparation;
-        }
-        m = m * edge.weight;
-
-        // elevation change, positive value means elevation grows
-        int dE = target->elevation <= 0
-            ? 0
-            : std::max(0, target->elevation) - std::max(0, cell->elevation);
-        
-        double r = 0;
-        if (dE > 0 && m > 0) {
-            r = (dE * RAINFALL * m) / 500.0;
-        }
-
-        moistureIn += round(m);
-        rainfallIn += round(r);
     }
 
-    int toatlMoisture = target->evoparation + moistureIn;
-    int excessMoisture = std::max(0, toatlMoisture - target->saturation - rainfallIn);
-
-    int rainfall = excessMoisture * RAINFALL * 2;
-    if (!isWater) {
-        rainfall += (toatlMoisture - excessMoisture) * (RAINFALL / 2.0);
-    }
-
-    int totalRainfall = rainfall + rainfallIn;
-
-    target->rainfall = std::min(MAX_RAINFALL, (int) round(totalRainfall / 50.0));
-    target->moistureIn = moistureIn;
-    target->moistureOut = std::max(0, (toatlMoisture - totalRainfall));
+    target->rainfall = std::min(MAX_RAINFALL, (int) round(rainfall / MOISTURE_TO_MM));
 }
 
 Map::Map(int width, int height) : map(CellMap(width, height)) {
@@ -506,7 +505,8 @@ void Map::Generate() {
         double lat = ((halfHeight - item->y) / halfHeight) * 90.0;
         int tempElevation = isWater ? 0 : item->elevation;
 
-        item->temperature = round(temperature(minTemp, maxTemp, degToRad(23.5), degToRad(lat), tempElevation));
+        
+        item->temperature = round(temperature(minTemp, maxTemp, degToRad(/* 23.5 */ 0), degToRad(lat), tempElevation));
         item->temperature = std::min(MAX_TEMP, std::max(MIN_TEMP, item->temperature));
         item->saturation = round(saturation(item->temperature));
 
