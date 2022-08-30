@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <random>
 #include <ctime>
+#include <cassert>
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -3240,15 +3241,22 @@ int cylDistance(graphs::Location2D a, graphs::Location2D b, int w) {
 	return std::min(d0, std::min(d1, d2));
 }
 
-std::vector<graphs::Location2D> getPoints(const int w, const int h, const int initialMinDist, const int newPointCount, const std::function<int(graphs::Location2D)> onPoint) {
+std::vector<graphs::Location2D> getPoints(const int w, const int h, const int initialMinDist, const int newPointCount,
+	const std::function<int(graphs::Location2D)> onPoint,
+	const std::function<bool(graphs::Location2D)> onIsIncluded) {
+
 	std::vector<graphs::Location2D> output;
 	std::vector<graphs::Location2D> processing;
 
 	int minDist = initialMinDist;
 	int cellSize = ceil(minDist / sqrt(2));
 	
-	graphs::Location2D loc = { x: getrandom(w), y: getrandom(h) };
-	
+	graphs::Location2D loc;
+	do {
+		loc = { x: getrandom(w), y: getrandom(h) };
+	}
+	while (!onIsIncluded(loc));
+
 	output.push_back(loc);
 	processing.push_back(loc);
 
@@ -3264,21 +3272,25 @@ std::vector<graphs::Location2D> getPoints(const int w, const int h, const int in
 
 			int x = ceil(next.x + r * cos(a));
 			int y = ceil(next.y + r * sin(a));
-			if ((x + y) % 2) {
-				continue;
-			}
-			
-			if (0 > x || x >= w) {
-				continue;
-			}
 
-			if (0 > y || y >= h) {
+			if (x > w) { x = x % w; }
+			if (x < 0) { x += w; }
+
+			if (y > h) { y = y % h; }
+			if (y < 0) { y += h; }
+
+			if ((x + y) % 2) {
 				continue;
 			}
 
 			// a new point to check
 			count++;
 			graphs::Location2D candidate = { x, y };
+
+			if (!onIsIncluded(candidate)) {
+				// out of bounds
+				continue;
+			}
 
 			int gridX = x / cellSize;
 			int gridY = y / cellSize;
@@ -3333,7 +3345,7 @@ struct NameArea {
 	}
 };
 
-NameArea* getNameArea(std::vector<NameArea*>& nameAnchors, const int w, ARegion* reg) {
+NameArea* getNearestNameArea(std::vector<NameArea*>& nameAnchors, const int w, ARegion* reg) {
 	NameArea* na = NULL;
 	int distance = INT32_MAX;
 
@@ -3365,16 +3377,117 @@ Ethnicity getRegionEtnos(ARegion* reg) {
 	return etnos;
 }
 
+void subdivideArea(const int width, const int height, const int distance, const std::unordered_set<graphs::Location2D> &regions, std::vector<std::vector<graphs::Location2D>> &subgraphs) {
+	std::unordered_map<graphs::Location2D, std::vector<graphs::Location2D>> centers;
+
+	getPoints(width, height, distance, 32,
+		[&distance, &centers](graphs::Location2D p) {
+			centers[p] = { };
+
+			return distance;
+		},
+		[&regions](graphs::Location2D p) {
+			return regions.find(p) != regions.end();
+		}
+	);
+
+	for (auto &reg : regions) {
+		graphs::Location2D loc;
+		int dist = 0;
+
+		for (auto &kv : centers) {
+			int d = cylDistance(kv.first, reg, width);
+
+			if (!dist || d < dist) {
+				loc = kv.first;
+				dist = d;
+			}
+		}
+
+		centers[loc].push_back(reg);
+	}
+
+	for (auto &kv : centers) {
+		subgraphs.push_back(kv.second);
+	}
+}
+
+void nameArea(int width, int height, ARegionGraph &graph, std::unordered_set<std::string> &usedNames, std::vector<NameArea*>& nameAnchors, std::vector<graphs::Location2D> &regions, std::unordered_set<ARegion*> &named) {
+	std::string name;
+	Ethnicity etnos = Ethnicity::NONE;
+
+	NameArea* na = NULL;
+	while (name.empty()) {
+		for (auto &loc : regions) {
+			if (getrandom(100) != 99) {
+				continue;
+			}
+
+			auto r = graph.get(loc);
+			na = getNearestNameArea(nameAnchors, width, r);
+			etnos = getRegionEtnos(r);
+
+			int type = r->type == R_MOUNTAIN || r->type == R_VOLCANO
+				? R_MOUNTAIN
+				: r->type;
+
+			int seed = na->getName(type);
+
+			name = getRegionName(seed, etnos, type, regions.size(), false);
+			while (usedNames.find(name) != usedNames.end()) {
+				std::cout << "Searching for better name" << std::endl;
+				name = getRegionName(getrandom(width * height), etnos, type, regions.size(), false);
+			}
+			usedNames.emplace(name);
+
+			std::cout << name << std::endl;
+
+			break;
+		}
+	}
+
+	for (auto &loc : regions) {
+		auto r = graph.get(loc);
+
+		if (r->type == R_VOLCANO) {
+			int nameArea = na->getName(r->type);
+
+			std::string volcanoName = getRegionName(nameArea, etnos, r->type, 1, false);
+			while (usedNames.find(volcanoName) != usedNames.end()) {
+				std::cout << "Searching for better name" << std::endl;
+				volcanoName = getRegionName(getrandom(width * height), etnos, r->type, 1, false);
+			}
+			usedNames.emplace(volcanoName);
+			
+			std::cout << volcanoName << std::endl;
+			r->SetName(volcanoName.c_str());
+		}
+		else {
+			r->SetName(name.c_str());
+		}
+
+		named.emplace(r);
+	}
+}
+
 void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::unordered_map<ARegion*, int>& rivers, const int w, const int h) {
 	std::unordered_set<ARegion*> named;
 	std::unordered_set<std::string> usedNames;
 
 	// generate name areas
 	std::vector<NameArea*> nameAnchors;
-	for (auto p : getPoints(w, h, 8, 16, [](graphs::Location2D p) { return 8; })) {
+	std::unordered_set<int> usedNameSeeds;
+	for (auto p : getPoints(w, h, 8, 16, [&usedNameSeeds](graphs::Location2D p) { return 8; }, [](graphs::Location2D p) { return true; })) {
+		int seed;
+		do {
+			seed = getrandom(w * h) + 1;
+		}
+		while (usedNameSeeds.find(seed) != usedNameSeeds.end());
+		usedNameSeeds.emplace(seed);
+
 		NameArea* na = new NameArea();
 		na->center = p;
-		na->name = getrandom(w * h) + 1;
+		na->name = seed;
 
 		nameAnchors.push_back(na);
 	}
@@ -3389,7 +3502,7 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 		river.length++;
 
 		if (river.nameArea == 0) {
-			auto na = getNameArea(nameAnchors, w, kv.first);
+			auto na = getNearestNameArea(nameAnchors, w, kv.first);
 			river.nameArea = na->getName(R_NUM);
 		}
 	}
@@ -3427,7 +3540,7 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 			ARegion* reg = arr->GetRegion(loc.x, loc.y);
 
 			if (name.empty()) {
-				auto na = getNameArea(nameAnchors, w, reg);
+				auto na = getNearestNameArea(nameAnchors, w, reg);
 				int seed = na->getName(reg->type);
 
 				Ethnicity etnos = getRegionEtnos(reg);
@@ -3447,6 +3560,7 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 		}
 	}
 
+	// name other regions
 	ARegionGraph graph = ARegionGraph(arr);
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
@@ -3472,59 +3586,27 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 			std::string name;
 			auto area = graphs::breadthFirstSearch(graph, loc);
 
-			Ethnicity etnos = Ethnicity::NONE;
-			for (auto kv : area) {
-				auto r = graph.get(kv.first);
-				etnos = getRegionEtnos(r);
+			if (area.size() > 16) {
+				std::unordered_set<graphs::Location2D> locations;
+				for (auto &kv : area) {
+					locations.emplace(kv.first);
+				}
 
-				if (etnos != Ethnicity::NONE) {
-					break;
+				// the are is too big, we must split it
+				std::vector<std::vector<graphs::Location2D>> subgraphs;
+				subdivideArea(w, h, clamp(4, (int) sqrt(area.size()), 8), locations, subgraphs);
+
+				for (auto &regions : subgraphs) {
+					nameArea(w, h, graph, usedNames, nameAnchors, regions, named);
 				}
 			}
-
-			NameArea* na = NULL;
-			while (name.empty()) {
-				for (auto kv : area) {
-					if (getrandom(100) == 99) {
-						auto r = graph.get(kv.first);
-						int type = reg->type == R_MOUNTAIN || reg->type == R_VOLCANO ? R_MOUNTAIN : reg->type;
-
-						na = getNameArea(nameAnchors, w, reg);
-						int seed = na->getName(type);
-
-						name = getRegionName(seed, etnos, type, area.size(), false);
-						while (usedNames.find(name) != usedNames.end()) {
-							std::cout << "Searching for better name" << std::endl;
-							name = getRegionName(getrandom(w * h), etnos, type, area.size(), false);
-						}
-						usedNames.emplace(name);
-
-						std::cout << name << std::endl;
-					}
-				}
-			}
-
-			for (auto kv : area) {
-				auto r = graph.get(kv.first);
-
-				if (r->type == R_VOLCANO) {
-					int nameArea = na->getName(r->type);
-
-					std::string volcanoName = getRegionName(nameArea, etnos, r->type, 1, false);
-					while (usedNames.find(volcanoName) != usedNames.end()) {
-						std::cout << "Searching for better name" << std::endl;
-						volcanoName = getRegionName(getrandom(w * h), etnos, r->type, 1, false);
-					}
-					usedNames.emplace(volcanoName);
-					
-					std::cout << volcanoName << std::endl;
-					r->SetName(volcanoName.c_str());
-				}
-				else {
-					r->SetName(name.c_str());
+			else {
+				std::vector<graphs::Location2D> regions;
+				for (auto &loc : area) {
+					regions.push_back(loc.first);
 				}
 
-				named.insert(r);
+				nameArea(w, h, graph, usedNames, nameAnchors, regions, named);
 			}
 		}
 	}
@@ -3585,7 +3667,7 @@ void economy(ARegionArray* arr, const int w, const int h) {
 		minDist = size + makeRoll(2, 2);
 
 		return minDist;
-	});
+	}, [](graphs::Location2D p) { return true; });
 
 	std::cout << "Setting up other regions" << std::endl;
 
@@ -3902,6 +3984,18 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 	GrowRaces(arr);
 	
 	giveNames(arr, waterBodies, rivers, w, h);
+
+	// check that all regions have a name
+	for (int x = 0; x < w; x++) {
+    	for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+			assert(reg->name && "Region must have name");
+		}
+	}
 
 	economy(arr, w, h);
 
