@@ -3241,7 +3241,8 @@ int cylDistance(graphs::Location2D a, graphs::Location2D b, int w) {
 	return std::min(d0, std::min(d1, d2));
 }
 
-std::vector<graphs::Location2D> getPoints(const int w, const int h, const int initialMinDist, const int newPointCount,
+std::vector<graphs::Location2D> getPoints(const int w, const int h,
+	const int initialMinDist, const int newPointCount,
 	const std::function<int(graphs::Location2D)> onPoint,
 	const std::function<bool(graphs::Location2D)> onIsIncluded) {
 
@@ -3328,6 +3329,54 @@ std::vector<graphs::Location2D> getPoints(const int w, const int h, const int in
 	return output;
 }
 
+std::vector<graphs::Location2D> getPointsFromList(
+	const int width,
+	const int minDist,
+	const int newPointCount,
+	const std::vector<graphs::Location2D>& points) {
+
+	std::vector<graphs::Location2D> output;
+	std::vector<graphs::Location2D> processing;
+
+	graphs::Location2D loc = points.at(getrandom(points.size()));
+
+	output.push_back(loc);
+	processing.push_back(loc);
+
+	while (!processing.empty()) {
+		int i = getrandom(processing.size());
+		auto next = processing.at(i);
+		processing.erase(processing.begin() + i);
+
+		int count = 0;
+		while (count < newPointCount) {
+			// a new point to check
+			graphs::Location2D candidate = points.at(getrandom(points.size()));
+			count++;
+
+			// check against all valid points
+			bool pointValid = true;
+			for (auto p : output) {
+				int d = cylDistance(candidate, p, width);
+				if (d < minDist) {
+					// too close
+					pointValid = false;
+					break;
+				}
+			}
+
+			if (!pointValid) {
+				continue;
+			}
+
+			output.push_back(candidate);
+			processing.push_back(candidate);
+		}
+	}
+
+	return output;
+}
+
 struct NameArea {
 	int name;
 	graphs::Location2D center;
@@ -3377,28 +3426,23 @@ Ethnicity getRegionEtnos(ARegion* reg) {
 	return etnos;
 }
 
-void subdivideArea(const int width, const int height, const int distance, const std::unordered_set<graphs::Location2D> &regions, std::vector<std::vector<graphs::Location2D>> &subgraphs) {
+void subdivideArea(const int width, const int height, const int distance, const std::vector<graphs::Location2D> &regions, std::vector<std::vector<graphs::Location2D>> &subgraphs) {
+	auto points = getPointsFromList(width, distance, 8, regions);
+
 	std::unordered_map<graphs::Location2D, std::vector<graphs::Location2D>> centers;
-
-	getPoints(width, height, distance, 32,
-		[&distance, &centers](graphs::Location2D p) {
-			centers[p] = { };
-
-			return distance;
-		},
-		[&regions](graphs::Location2D p) {
-			return regions.find(p) != regions.end();
-		}
-	);
+	for (auto &p : points) {
+		centers[p] = { };
+		cout << "{ x: " << p.x << ", y: " << p.y << " }" << std::endl;
+	}
 
 	for (auto &reg : regions) {
 		graphs::Location2D loc;
-		int dist = 0;
+		int dist = -1;
 
 		for (auto &kv : centers) {
 			int d = cylDistance(kv.first, reg, width);
 
-			if (!dist || d < dist) {
+			if (dist == -1 || d < dist) {
 				loc = kv.first;
 				dist = d;
 			}
@@ -3477,7 +3521,7 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 	// generate name areas
 	std::vector<NameArea*> nameAnchors;
 	std::unordered_set<int> usedNameSeeds;
-	for (auto p : getPoints(w, h, 8, 16, [&usedNameSeeds](graphs::Location2D p) { return 8; }, [](graphs::Location2D p) { return true; })) {
+	for (auto p : getPoints(w, h, 8, 16, [](graphs::Location2D p) { return 8; }, [](graphs::Location2D p) { return true; })) {
 		int seed;
 		do {
 			seed = getrandom(w * h) + 1;
@@ -3587,16 +3631,21 @@ void giveNames(ARegionArray* arr, std::vector<WaterBody*>& waterBodies, std::uno
 			auto area = graphs::breadthFirstSearch(graph, loc);
 
 			if (area.size() > 16) {
-				std::unordered_set<graphs::Location2D> locations;
+				cout << "Large area: " << area.size() << " regions" << std::endl;
+
+				std::vector<graphs::Location2D> locations;
 				for (auto &kv : area) {
-					locations.emplace(kv.first);
+					locations.push_back(kv.first);
 				}
 
 				// the are is too big, we must split it
 				std::vector<std::vector<graphs::Location2D>> subgraphs;
 				subdivideArea(w, h, clamp(4, (int) sqrt(area.size()), 8), locations, subgraphs);
 
+				cout << "  Subdivided into " << subgraphs.size() << " subgraphs" << std::endl;
+
 				for (auto &regions : subgraphs) {
+					cout << "    Subgraph with " << regions.size() << " regions" << std::endl;
 					nameArea(w, h, graph, usedNames, nameAnchors, regions, named);
 				}
 			}
@@ -3942,6 +3991,19 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 	}
 }
 
+void assertAllRegionsHaveName(const int w, const int h, ARegionArray* arr) {
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			if ((x + y) % 2) {
+				continue;
+			}
+
+			ARegion* reg = arr->GetRegion(x, y);
+			assert(reg->name && "Region must have name");
+		}
+	}
+}
+
 void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 	static const int level = 1;
 
@@ -3984,18 +4046,7 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 	GrowRaces(arr);
 	
 	giveNames(arr, waterBodies, rivers, w, h);
-
-	// check that all regions have a name
-	for (int x = 0; x < w; x++) {
-    	for (int y = 0; y < h; y++) {
-			if ((x + y) % 2) {
-				continue;
-			}
-
-			ARegion* reg = arr->GetRegion(x, y);
-			assert(reg->name && "Region must have name");
-		}
-	}
+	assertAllRegionsHaveName(w, h, arr);
 
 	economy(arr, w, h);
 
