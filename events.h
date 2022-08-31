@@ -34,12 +34,17 @@ class BattleFact;
 #include "unit.h"
 #include <string>
 #include <list>
+#include <vector>
+
+const std::string oneOf(const std::vector<std::string> &list);
+const std::string oneOf(const std::string &a, const std::string &b);
 
 enum EventCategory {
     EVENT_BATTLE,
     EVENT_CITY_CAPTURE,
     EVENT_MONSTER_HUNT,
-    EVENT_MONSTER_AGGRESSION
+    EVENT_MONSTER_AGGRESSION,
+    EVENT_ASSASSINATION,
 };
 
 struct Event {
@@ -53,6 +58,19 @@ class FactBase {
 public:
     virtual ~FactBase() = 0;
     virtual void GetEvents(std::list<Event> &events) = 0;
+};
+
+class Events {
+public:
+    Events();
+    ~Events();
+
+    std::string Write(std::string worldName, std::string month, int year);
+
+    void AddFact(FactBase *fact);
+
+private:
+    std::list<FactBase *> facts;
 };
 
 struct BattleSide {
@@ -89,7 +107,7 @@ struct EventLocation {
     std::string settlement;
     int settlementType;
 
-    std::string getTerrain();
+    const std::string getTerrain(const bool plural);
     void Assign(ARegion* region);
 };
 
@@ -107,17 +125,17 @@ public:
     int outcome;    // BATTLE_LOST, BATTLE_WON, BATTLE_DRAW
 };
 
-class Events {
-public:
-    Events();
-    ~Events();
+class AssassinationFact : public FactBase {
+    public:
+        AssassinationFact();
+        ~AssassinationFact();
 
-    std::string Write(std::string worldName, std::string month, int year);
+        void GetEvents(std::list<Event> &events);
 
-    void AddFact(FactBase *fact);
+        EventLocation location;
+        BattleSide victim;
 
-private:
-    std::list<FactBase *> facts;
+        int outcome;    // BATTLE_LOST, BATTLE_WON, BATTLE_DRAW
 };
 
 #endif

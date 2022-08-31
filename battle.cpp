@@ -32,10 +32,6 @@
 #include "quests.h"
 #include "items.h"
 
-std::string WithPlural(int count, std::string single, std::string plural) {
-	return count > 1 ? plural : single;
-}
-
 enum StatsCategory {
 	ROUND,
 	BATTLE
@@ -105,12 +101,12 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
 			int succeeded = att.attacks - att.failed;
 			int reachedTarget = succeeded - att.missed;
 
-			s += ", attacked " + to_string(succeeded) + " of " + to_string(att.attacks) + " " + WithPlural(att.attacks, "time", "times");
-			s += ", " + to_string(reachedTarget) + " successful " + WithPlural(reachedTarget, "attack", "attacks");
+			s += ", attacked " + to_string(succeeded) + " of " + to_string(att.attacks) + " " + plural(att.attacks, "time", "times");
+			s += ", " + to_string(reachedTarget) + " successful " + plural(reachedTarget, "attack", "attacks");
 			s += ", " + to_string(att.blocked) + " blocked by armor";
-			s += ", " + to_string(att.hit) + " " + WithPlural(att.killed, "hit", "hits");
+			s += ", " + to_string(att.hit) + " " + plural(att.killed, "hit", "hits");
 			s += ", " + to_string(att.damage) + " total damage";
-			s += ", and killed " + to_string(att.killed)  + " " + WithPlural(att.killed, "enemy", "enemies") + ".";
+			s += ", and killed " + to_string(att.killed)  + " " + plural(att.killed, "enemy", "enemies") + ".";
 
 			battle.AddLine(AString(s.c_str()));
 		}
@@ -453,6 +449,27 @@ void AddBattleFact(
 	events->AddFact(battleFact);
 }
 
+void AddAssassinationFact(
+	Events* events, 
+	ARegion* region,
+	Unit* defender,
+	Army* defenderArmy,
+	int outcome
+) {
+	if (!Globals->WORLD_EVENTS) return;
+
+	auto fact = new AssassinationFact();
+
+	fact->location.Assign(region);
+	
+	fact->victim.AssignUnit(defender);
+	fact->victim.AssignArmy(defenderArmy);
+	
+	fact->outcome = outcome;
+
+	events->AddFact(fact);
+}
+
 int Battle::Run(Events* events, 
 		ARegion * region,
 		Unit * att,
@@ -525,6 +542,9 @@ int Battle::Run(Events* events,
 		if (!ass) {
 			AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_LOST);
 		}
+		else {
+			AddAssassinationFact(events, region, tar, armies[1], BATTLE_WON);
+		}
 
 		AddLine("Total Casualties:");
 		ItemList *spoils = new ItemList;
@@ -579,6 +599,9 @@ int Battle::Run(Events* events,
 		if (!ass) {
 			AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_WON);
 		}
+		else {
+			AddAssassinationFact(events, region, tar, armies[1], BATTLE_LOST);
+		}
 
 		AddLine("Total Casualties:");
 		ItemList *spoils = new ItemList;
@@ -617,6 +640,9 @@ int Battle::Run(Events* events,
 
 	if (!ass) {
 		AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_DRAW);
+	}
+	else {
+		AddAssassinationFact(events, region, tar, armies[1], BATTLE_DRAW);
 	}
 
 	AddLine("Total Casualties:");

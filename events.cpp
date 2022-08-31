@@ -29,6 +29,15 @@
 #include <algorithm>
 #include "gamedata.h"
 
+const std::string oneOf(const std::vector<std::string> &list) {
+    int i = getrandom(list.size());
+    return list.at(i);
+}
+
+const std::string oneOf(const std::string &a, const std::string &b) {
+    return getrandom(2) ? a : b;
+}
+
 FactBase::~FactBase() {
 
 }
@@ -63,7 +72,7 @@ void BattleSide::AssignArmy(Army* army) {
             continue;
         }
 
-        if (item.type & IT_MONSTER) {
+        if (item.type & IT_MONSTER && !(item.type & IT_UNDEAD)) {
             this->monsters++;
             if (lost) this->monstersLost++;
             continue;
@@ -82,8 +91,9 @@ void BattleSide::AssignArmy(Army* army) {
     }
 }
 
-std::string EventLocation::getTerrain() {
-    auto terrainName = TerrainDefs[this->terrainType].name;
+const std::string EventLocation::getTerrain(const bool plural) {
+    TerrainType &terrain = TerrainDefs[this->terrainType];
+    auto terrainName = plural ? terrain.plural : terrain.name;
     return terrainName;
 }
 
@@ -187,7 +197,7 @@ std::string Events::Write(std::string worldName, std::string month, int year) {
         std::sort(list.begin(), list.end(), compareEvents);
         list.resize(std::min((int) list.size(), 10));
 
-        int n = std::min((int) list.size(), getrandom(3) + 1);
+        int n = std::min((int) list.size(), getrandom(3) + 3);
         while (n-- > 0) {
             int i = getrandom(list.size());
 
