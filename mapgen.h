@@ -70,8 +70,8 @@ struct Cell {
     int evoparation;
     int rainfall;
 
-    int moistureIn;
-    int moistureOut;
+    // int moistureIn;
+    // int moistureOut;
     // double saturation;
     // std::vector<Vapor> moistureIn;
     // std::vector<Vapor> moistureOut;
