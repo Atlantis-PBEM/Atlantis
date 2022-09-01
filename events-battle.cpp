@@ -545,7 +545,7 @@ const Event pvpBattle(BattleFact* fact) {
             << " " <<(mark->distance == 0 ? "of" : "near")
             ;
 
-        if (mark->type == LandmarkType::FORD) {
+        if (mark->type == events::LandmarkType::FORD) {
             buffer << " the " << mark->name << " wade";
         }
         else {

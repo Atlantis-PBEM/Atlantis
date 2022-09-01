@@ -119,7 +119,7 @@ void populateSettlementLandmark(std::vector<Landmark> &landmarks, ARegion *reg, 
     std::string title = townType(reg->town->TownType()) + " of " + name;
 
     landmarks.push_back({
-        type: LandmarkType::SETTLEMENT,
+        type: events::LandmarkType::SETTLEMENT,
         name: name,
         title: title,
         distance: distance,
@@ -140,26 +140,26 @@ void populateRegionLandmark(std::vector<Landmark> &landmarks, ARegion *source, A
     std::string title = std::string(terrain.plural) + " of " + name;
     int weight = 1;
 
-    LandmarkType type = LandmarkType::UNKNOWN;
+    events::LandmarkType type = events::LandmarkType::UNKNOWN;
     if (alias == R_MOUNTAIN) {
-        type = LandmarkType::MOUNTAIN;
+        type = events::LandmarkType::MOUNTAIN;
     }
     else if (alias == R_FOREST || alias == R_JUNGLE) {
-        type = LandmarkType::FOREST;
+        type = events::LandmarkType::FOREST;
     }
     else if (alias == R_VOLCANO) {
-        type = LandmarkType::VOLCANO;
+        type = events::LandmarkType::VOLCANO;
         weight = 2;
     }
     else if (alias == R_OCEAN) {
-        type = endsWith(name, "River") ? LandmarkType::RIVER : LandmarkType::OCEAN;
+        type = endsWith(name, "River") ? events::LandmarkType::RIVER : events::LandmarkType::OCEAN;
     }
     else if (endsWith(name, "River")) {
-        type = LandmarkType::FORD;
+        type = events::LandmarkType::FORD;
         weight = 2;
     }
 
-    if (type == LandmarkType::UNKNOWN) {
+    if (type == events::LandmarkType::UNKNOWN) {
         return;
     }
     
@@ -204,7 +204,7 @@ void populateForitifcationLandmark(std::vector<Landmark> &landmarks, ARegion *re
     std::string title = std::string(ObjectDefs[building->type].name) + " " + name;
 
     landmarks.push_back({
-        type: LandmarkType::FORTIFICATION,
+        type: events::LandmarkType::FORTIFICATION,
         name: name,
         title: title,
         distance: distance,

@@ -100,20 +100,22 @@ struct BattleSide {
     void AssignArmy(Army* army);
 };
 
-enum LandmarkType {
-    UNKNOWN,
-    SETTLEMENT,
-    FORTIFICATION,
-    MOUNTAIN,
-    FOREST,
-    VOLCANO,
-    RIVER,
-    FORD,
-    OCEAN
-};
+namespace events {
+    enum LandmarkType {
+        UNKNOWN,
+        SETTLEMENT,
+        FORTIFICATION,
+        MOUNTAIN,
+        FOREST,
+        VOLCANO,
+        RIVER,
+        FORD,
+        OCEAN
+    };
+}
 
 struct Landmark {
-    LandmarkType type;
+    events::LandmarkType type;
     std::string name;
     std::string title;
     int distance;
