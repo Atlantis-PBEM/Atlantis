@@ -423,11 +423,6 @@ Faction *Game::CheckVictory()
 	set<string> intersection, un;
 	set<string>::iterator it2;
 
-	message = "The greatest Atlantis cities voted for the world Emperor!\n\n"
-			"Long live The Mystic Nine (26)!\n\n";
-	WriteTimesArticle(message);
-	return GetFaction(&factions, 26);
-
 	forlist(&quests) {
 		q = (Quest *) elem;
 		if (q->type != Quest::VISIT)
@@ -738,30 +733,7 @@ Faction *Game::CheckVictory()
 		}
 	}
 
-
-	// Check for BLACK KEEP
-	{
-		forlist_reuse(&regions) {
-			r = (ARegion *) elem;
-			forlist(&r->objects) {
-				o = (Object *) elem;
-				if (o->type == O_BKEEP) {
-					if (!o->incomplete) {
-						message = "A Black Keep has been built at in the ";
-						message += r->ShortPrint(&regions);
-						message += "!";
-						WriteTimesArticle(message);
-					}
-					if (o->incomplete) {
-						message = AString("A Black Keep is building at ");
-						message += r->ShortPrint(&regions);
-						message += AString("! Progress ") + AString(ObjectDefs[o->type].cost - o->incomplete) + AString(" / ") + AString(ObjectDefs[o->type].cost) + AString(")...");
-						WriteTimesArticle(message);
-					}
-				}
-			}
-		}
-	}
+	return NULL;
 }
 
 void Game::ModifyTablesPerRuleset(void)
