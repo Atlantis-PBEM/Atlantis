@@ -34,7 +34,6 @@
 using namespace std;
 
 AssassinationFact::AssassinationFact() {
-    this->victim = BattleSide();
     this->location = EventLocation();
 }
 
@@ -71,22 +70,15 @@ void AssassinationFact::GetEvents(std::list<Event> &events) {
 
     buffer
         << capitalize(oneOf(SENTIMENT))
-        << " news was coming from"
+        << " news were coming from the"
+        << " " << this->location.GetTerrainName(true)
+        << " of " << this->location.province
+        << "."
         ;
 
-    if (!this->location.settlement.empty()) {
-        buffer
-            << " the " << townType(this->location.settlementType)
-            << " of " << this->location.settlement
-            << ", which lies in"
-            ;
-    }
-
     buffer
-        << " the " << this->location.GetTerrainName(true)
-        << " of " << this->location.province
-        << ". " << capitalize(oneOf(LOCALS))
-        << "were " << oneOf(FEELING)
+        << " " << capitalize(oneOf(LOCALS))
+        << " were " << oneOf(FEELING)
         << " by the assassination"
         ;
 
@@ -94,12 +86,18 @@ void AssassinationFact::GetEvents(std::list<Event> &events) {
         buffer << " attempt";
     }
 
-    if (!this->location.settlement.empty()) {
-        buffer << " in the " << townType(this->location.settlementType);
+    auto mark = this->location.GetSignificantLandmark();
+    if (mark) {
+        buffer 
+            << " " << (mark->distance == 0 ? "in" : "near")
+            << " the " << mark->title;
     }
 
     if (this->outcome == BATTLE_LOST) {
         buffer << ". The assassin escaped unnoticed.";
+    }
+    else if (this->outcome == BATTLE_DRAW) {
+        buffer << "; thankfully, the victim survived, but the assassin was able to escape unnoticed.";
     }
     else {
         buffer << "; thankfully, the victim survived.";

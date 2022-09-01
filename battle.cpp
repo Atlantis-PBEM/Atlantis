@@ -497,8 +497,8 @@ void AddAssassinationFact(
 
 	fact->location = EventLocation::Create(region);
 	
-	fact->victim.AssignUnit(defender);
-	fact->victim.AssignArmy(defenderArmy);
+	// fact->victim.AssignUnit(defender);
+	// fact->victim.AssignArmy(defenderArmy);
 	
 	fact->outcome = outcome;
 

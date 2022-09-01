@@ -164,7 +164,7 @@ class AssassinationFact : public FactBase {
         void GetEvents(std::list<Event> &events);
 
         EventLocation location;
-        BattleSide victim;
+        // BattleSide victim;
 
         int outcome;    // BATTLE_LOST, BATTLE_WON, BATTLE_DRAW
 };
