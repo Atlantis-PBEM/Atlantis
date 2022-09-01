@@ -564,7 +564,7 @@ private:
 	int ValidProd(Unit *, ARegion *, Production *);
 	int FindAttemptedProd(ARegion *, Production *);
 	void RunAProduction(ARegion *, Production *);
-	void RunUnitProduce(ARegion *, Unit *);
+	int RunUnitProduce(ARegion * r, Unit * u, const ProduceTask &task, const int productionPoints, const int maxProductionPoints, const bool quiet);
 	void Run1BuildOrder(ARegion *, Object *, Unit *);
 	void RunBuildShipOrder(ARegion *, Object *, Unit *);
 	void AddNewBuildings(ARegion *);
@@ -600,6 +600,9 @@ private:
 	// For faction statistics
 	void CountItems (int **);
 	int CountItem (Faction *, int);
+
+	bool ValidateProductionTask(const ARegion * r, Unit * u, const ProduceTask &task, const bool quiet);
+	ProductionEstimate EstimateProduction(const ARegion * r, Unit * u, const ProduceTask &task) const;
 };
 
 #endif
