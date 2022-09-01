@@ -23,8 +23,9 @@
 //
 // END A3HEADER
 
-#include "gameio.h"
 #include "events.h"
+#include "gameio.h"
+#include "astring.h"
 
 #include <memory>
 #include <stdexcept>
@@ -41,12 +42,81 @@ AssassinationFact::~AssassinationFact() {
 
 }
 
-void AssassinationFact::GetEvents(std::list<Event> &events) {
-    // std::ostringstream buffer;
+const vector<string> SENTIMENT = {
+    "fearsome",
+    "alarming",
+    "horrifying",
+    "frightening",
+    "worrisome"
+};
 
-    // events.push_back({
-    //     category: EventCategory::EVENT_ASSASSINATION,
-    //     score: 1,
-    //     text: ""
-    // });
+const vector<string> LOCALS = {
+    "citizens",
+    "inhabitants",
+    "locals",
+    "commoners"
+};
+
+const vector<string> FEELING = {
+    "shocked",
+    "stunned",
+    "horrified",
+    "terrified",
+    "afraid",
+    "scared"
+};
+
+string townType(int type) {
+    switch (type) {
+        case TOWN_VILLAGE: return "village";
+        case TOWN_TOWN:    return "town";
+        case TOWN_CITY:    return "city";
+        default:           return "unknown";
+    }
+}
+
+void AssassinationFact::GetEvents(std::list<Event> &events) {
+    std::ostringstream buffer;
+
+    buffer
+        << capitalize(oneOf(SENTIMENT))
+        << " news was coming from"
+        ;
+
+    if (!this->location.settlement.empty()) {
+        buffer
+            << " the " << townType(this->location.settlementType)
+            << " of " << this->location.settlement
+            << ", which lies in"
+            ;
+    }
+
+    buffer
+        << " the " << this->location.getTerrain(true)
+        << " of " << this->location.province
+        << ". " << capitalize(oneOf(LOCALS))
+        << "were " << oneOf(FEELING)
+        << " by the assassination"
+        ;
+
+    if (this->outcome != BATTLE_LOST) {
+        buffer << " attempt";
+    }
+
+    if (!this->location.settlement.empty()) {
+        buffer << " in the " << townType(this->location.settlementType);
+    }
+
+    if (this->outcome == BATTLE_LOST) {
+        buffer << ". The assassin escaped unnoticed.";
+    }
+    else {
+        buffer << "; thankfully, the victim survived.";
+    }
+
+    events.push_back({
+        category: EventCategory::EVENT_ASSASSINATION,
+        score: 1,
+        text: buffer.str()
+    });
 }
