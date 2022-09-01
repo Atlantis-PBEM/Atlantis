@@ -989,7 +989,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 	}
 }
 
-int Game::KillDead(Location * l, Battle *b)
+int Game::KillDead(Location * l, Battle *b, int max_susk, int max_rais)
 {
 	int uncontrolled = 0;
 	int skel, undead;
@@ -1003,8 +1003,14 @@ int Game::KillDead(Location * l, Battle *b)
 		if (l->unit->advancefrom) {
 			l->unit->MoveUnit( l->unit->advancefrom->GetDummy() );
 		}
-		if (l->unit->raised > 0) {
-			undead = getrandom(l->unit->raised * 2 / 3 + 1);
+		// Raise undead/skel if mage is in battle
+		if (l->unit->raised > 0 && max_susk > 0) {
+			// Raise UNDE only if mage has RAISE_UNDEAD skill
+			undead = 0;
+			if (max_rais > 0) {
+				undead = getrandom(l->unit->raised * 2 / 3 + 1);
+			}
+
 			skel = l->unit->raised - undead;
 			tmp = ItemString(I_SKELETON, skel);
 			if (undead > 0) {
@@ -1095,19 +1101,52 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 	}
 	result = b->Run(events, r,attacker,&atts,target,&defs,ass, &regions );
 
+	int attaker_max_susk = 0;
+	int attaker_max_rais = 0;
+	{
+		forlist(&atts) {
+			// int necr_level = ((Location *)elem)->unit->GetAttribute("necromancy");
+			int susk_level = ((Location *)elem)->unit->GetAttribute("susk");
+			int rais_level = ((Location *)elem)->unit->GetAttribute("rais");
+			if (susk_level > attaker_max_susk) {
+				attaker_max_susk = susk_level;
+			}
+			if (rais_level > attaker_max_rais) {
+				attaker_max_rais = rais_level;
+			}
+		}
+	}
+
+	int defender_max_susk = 0;
+	int defender_max_rais = 0;
+	{
+		forlist(&defs) {
+			// int necr_level = ((Location *)elem)->unit->GetAttribute("necromancy");
+			int susk_level = ((Location *)elem)->unit->GetAttribute("susk");
+			int rais_level = ((Location *)elem)->unit->GetAttribute("rais");
+			if (susk_level > defender_max_susk) {
+				defender_max_susk = susk_level;
+			}
+			if (rais_level > defender_max_rais) {
+				defender_max_rais = rais_level;
+			}
+		}
+	}
+
 	/* Remove all dead units */
 	int uncontrolled = 0;
 	{
 		forlist(&atts) {
-			uncontrolled += KillDead((Location *) elem, b);
+			uncontrolled += KillDead((Location *) elem, b, attaker_max_susk, attaker_max_rais);
 		}
 	}
 	{
 		forlist(&defs) {
-			uncontrolled += KillDead((Location *) elem, b);
+			uncontrolled += KillDead((Location *) elem, b, defender_max_susk, defender_max_rais);
 		}
 	}
 	if (uncontrolled > 0 && monfaction > 0) {
+		// Number of UNDE or SKEL raised as uncontrolled
 		int undead = getrandom(uncontrolled * 2 / 3 + 1);
 		int skel = uncontrolled - undead;
 		AString tmp = ItemString(I_SKELETON, skel);

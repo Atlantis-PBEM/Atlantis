@@ -5242,6 +5242,28 @@ static AttribModType atd[] = {
 	   NULL, 0, 0},
 	  {0,
 	   NULL, 0, 0}}},
+	{"susk", 0,
+	 {{AttribModItem::SKILL,
+	   "SUSK", AttribModItem::UNIT_LEVEL, 1},
+	  {0,
+	   NULL, 0, 0},
+	  {0,
+	   NULL, 0, 0},
+	  {0,
+	   NULL, 0, 0},
+	  {0,
+	   NULL, 0, 0}}},
+	{"rais", 0,
+	 {{AttribModItem::SKILL,
+	   "RAIS", AttribModItem::UNIT_LEVEL, 1},
+	  {0,
+	   NULL, 0, 0},
+	  {0,
+	   NULL, 0, 0},
+	  {0,
+	   NULL, 0, 0},
+	  {0,
+	   NULL, 0, 0}}}
 };
 
 AttribModType *AttribDefs = atd;
