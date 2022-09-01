@@ -27,9 +27,9 @@
 #define EVENTS_CLASS
 
 class Events;
-
 class FactBase;
 class BattleFact;
+class AssassinationFact;
 
 #include "unit.h"
 #include <string>
@@ -38,6 +38,8 @@ class BattleFact;
 
 const std::string oneOf(const std::vector<std::string> &list);
 const std::string oneOf(const std::string &a, const std::string &b);
+
+std::string townType(const int type);
 
 enum EventCategory {
     EVENT_BATTLE,
@@ -98,6 +100,26 @@ struct BattleSide {
     void AssignArmy(Army* army);
 };
 
+enum LandmarkType {
+    UNKNOWN,
+    SETTLEMENT,
+    FORTIFICATION,
+    MOUNTAIN,
+    FOREST,
+    VOLCANO,
+    RIVER,
+    FORD,
+    OCEAN
+};
+
+struct Landmark {
+    LandmarkType type;
+    std::string name;
+    std::string title;
+    int distance;
+    int weight;
+};
+
 struct EventLocation {
     int x;
     int y;
@@ -107,8 +129,12 @@ struct EventLocation {
     std::string settlement;
     int settlementType;
 
-    const std::string getTerrain(const bool plural);
-    void Assign(ARegion* region);
+    vector<Landmark> landmarks;
+
+    const std::string GetTerrainName(const bool plural);
+    const Landmark* GetSignificantLandmark();
+
+    static const EventLocation Create(ARegion* region);
 };
 
 class BattleFact : public FactBase {
@@ -121,6 +147,9 @@ public:
     EventLocation location;
     BattleSide attacker;
     BattleSide defender;
+
+    std::string fortification;
+    int fortificationType;
 
     int outcome;    // BATTLE_LOST, BATTLE_WON, BATTLE_DRAW
 };

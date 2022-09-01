@@ -36,6 +36,7 @@ BattleFact::BattleFact() {
     this->attacker = BattleSide();
     this->defender = BattleSide();
     this->location = EventLocation();
+    this->fortificationType = -1;
 }
 
 BattleFact::~BattleFact() {
@@ -154,15 +155,6 @@ string relativeSize(int size) {
     return SIZES[3];
 }
 
-string townType(int type) {
-    switch (type) {
-        case TOWN_VILLAGE: return "village";
-        case TOWN_TOWN:    return "town";
-        case TOWN_CITY:    return "city";
-        default:           return "unknown";
-    }
-}
-
 const int sizeRaiting(const int size) {
     if (size <= 100) return 1;
     if (size <= 500) return 2;
@@ -198,7 +190,7 @@ const Event cityCapture(BattleFact* fact) {
             << " " << fact->location.settlement               // Hardwood
             << " that lies in the"                            // that lies in the
             << " " << fact->location.province                 // Silver Valley
-            << " " << fact->location.getTerrain(true)         // plains
+            << " " << fact->location.GetTerrainName(true)     // plains
             << ", where"                                      //, where
             << " " << oneOf(ONE_SIDE)                         // a faction
             << " " << oneOf(ACTION_SUCCESS)                   // slew
@@ -216,7 +208,7 @@ const Event cityCapture(BattleFact* fact) {
             << " " << fact->location.settlement               // Hardwood
             << " that lies in the"                            // that lies in the
             << " " << fact->location.province                 // Silver Valley
-            << " " << fact->location.getTerrain(true)         // plains
+            << " " << fact->location.GetTerrainName(true)     // plains
             << ", where"                                      //, where
             << " " << oneOf(ONE_SIDE)                         // a faction
             << " " << oneOf(ACTION_ATTEMPT)                   // tried to cast out
@@ -234,22 +226,31 @@ const Event cityCapture(BattleFact* fact) {
 const Event monsterHunt(BattleFact* fact) {
     std::ostringstream buffer;
 
+    auto mark = fact->location.GetSignificantLandmark();
+
     if (fact->outcome == BATTLE_WON) {
         buffer
-            << oneOf(ADJECTIVE)                           // Some
-            << " " << oneOf(REPORTING)                    // merchants
-            << " " << oneOf(CHANNEL)                      // are talking
-            << " about"                                   // about
-            << " " << oneOf(HUNTERS)                      // witchers
-            << " who have"                                // who have
-            << " " << oneOf(ACTION_SUCCESS)               // slain
-            << " " << fact->defender.unitName             // Demons
-            << " freeing the"                             // freeing
-            << " the " << fact->location.getTerrain(true) // the plains
-            << " of"                                      // of
-            << " " << fact->location.province             // Cefelat
-            << " from their"                              // from their
-            << " " << oneOf(FEAR_NOUN) << "."             // terror.
+            << oneOf(ADJECTIVE)                               // Some
+            << " " << oneOf(REPORTING)                        // merchants
+            << " " << oneOf(CHANNEL)                          // are talking
+            << " about"                                       // about
+            << " " << oneOf(HUNTERS)                          // witchers
+            << " who have"                                    // who have
+            << " " << oneOf(ACTION_SUCCESS)                   // slain
+            << " " << fact->defender.unitName                 // Demons
+            ;
+        
+        if (mark) {
+            buffer << " near " << mark->title << ".";
+        }
+
+        buffer
+            << " Freeing"                                     // Freeing
+            << " the " << fact->location.GetTerrainName(true) // the plains
+            << " of"                                          // of
+            << " " << fact->location.province                 // Cefelat
+            << " from their"                                  // from their
+            << " " << oneOf(FEAR_NOUN) << "."                 // terror.
             ;
     }
     else {
@@ -263,11 +264,16 @@ const Event monsterHunt(BattleFact* fact) {
             << " " << oneOf(ACTION_SUCCESS)               // slain
             << " " << fact->defender.unitName             // Demons
             << " roaming"                                 // roaming
-            << " the " << fact->location.getTerrain(true) // the plains
+            << " the " << fact->location.GetTerrainName(true) // the plains
             << " of"                                      // of
             << " " << fact->location.province             // Cefelat
-            << " but were all slain by their prey."       // but were all slain by their prey.
             ;
+        
+        if (mark) {
+            buffer << " near " << mark->title << ".";
+        }
+
+        buffer << " But all of them were slain by their prey.";
     }
 
     return {
@@ -280,10 +286,19 @@ const Event monsterHunt(BattleFact* fact) {
 const Event monsterAggresion(BattleFact* fact) {
     std::ostringstream buffer;
 
+    auto mark = fact->location.GetSignificantLandmark();
+
     if (fact->outcome == BATTLE_WON) {
         buffer
-            << "In the " << fact->location.getTerrain(true)  // In the plains
+            << "In the " << fact->location.GetTerrainName(true)  // In the plains
             << " of " << fact->location.province             // of Cefelat
+            ;
+
+        if (mark) {
+            buffer << ", near " << mark->title << ",";
+        }
+
+        buffer
             << " " << fact->attacker.unitName                // Demons
             << " who continue to cause " << oneOf(FEAR_NOUN) // continue to cause terror
             << " to local inhabitants."                      // to local inhabitants.
@@ -296,8 +311,14 @@ const Event monsterAggresion(BattleFact* fact) {
             << " the " << fact->attacker.unitName                       // the Demons
             << " who inflicted " << oneOf(FEAR_NOUN)                    // who inflicted terror
             << " on the inhabitants of the " << fact->location.province // on the inhabitants of the Cefelat
-            << " " << fact->location.getTerrain(true) << "."            // plains.
+            << " " << fact->location.GetTerrainName(true)        // plains
             ;
+
+        if (mark) {
+            buffer << " near " << mark->title;
+        }
+        
+        buffer << ".";
     }
 
     return {
@@ -338,7 +359,7 @@ const Event pvpBattle(BattleFact* fact) {
         buffer
             << " " << oneOf(BATTLE)
             << " between " << oneOf(TWO_SIDES)
-            << " happened in the " << fact->location.getTerrain(true)
+            << " happened in the " << fact->location.GetTerrainName(true)
             << " of " << fact->location.province
             ;
 
@@ -368,7 +389,7 @@ const Event pvpBattle(BattleFact* fact) {
         buffer
             << " " << oneOf(BATTLE)                                         // a battle
             << " between " << oneOf(TWO_SIDES)                              // between hostile forces
-            << " happened in the " << fact->location.getTerrain(true)                // happened in the plains
+            << " happened in the " << fact->location.GetTerrainName(true)                // happened in the plains
             << " of " << fact->location.province                            // of Cefelat
             << " where " << lost << plural(lost, "combatant", "combatants") // where 75 combatants
             << " " << plural(lost, "was", "were") << " killed."             // were killed
@@ -423,7 +444,7 @@ const Event pvpBattle(BattleFact* fact) {
         }
 
         buffer
-            << " happened in the " << fact->location.getTerrain(true)                // happened in the plains
+            << " happened in the " << fact->location.GetTerrainName(true)                // happened in the plains
             << " of " << fact->location.province                            // of Cefelat
             << " where " << lost << plural(lost, "combatant", "combatants") // where 75 combatants
             << " " << plural(lost, "was", "were") << " killed."             // were killed
@@ -473,7 +494,7 @@ const Event pvpBattle(BattleFact* fact) {
             << " an epic battle between"
             << " " << fact->attacker.factionName
             << " and " << fact->defender.factionName
-            << " happened in the " << fact->location.getTerrain(true)                // happened in the plains
+            << " happened in the " << fact->location.GetTerrainName(true)                // happened in the plains
             << " of " << fact->location.province                            // of Cefelat
             << " where " << lost << plural(lost, "combatant", "combatants") // where 75 combatants
             << " " << plural(lost, "was", "were") << " killed."             // were killed
@@ -509,6 +530,37 @@ const Event pvpBattle(BattleFact* fact) {
                 buffer << (fact->outcome == BATTLE_WON ? " The attackers were victorious.." : " The defenders stood firm.");
             }
         }
+    }
+
+    auto mark = fact->location.GetSignificantLandmark();
+    if (!fact->fortification.empty()) {
+        buffer
+            << " This battle will known as Siege of the"
+            << " " << ObjectDefs[fact->fortificationType].name
+            << " " << fact->fortification << ".";
+    }
+    else if (mark) {
+        buffer
+            << " This battle will known as Battle"
+            << " " <<(mark->distance == 0 ? "of" : "near")
+            ;
+
+        if (mark->type == LandmarkType::FORD) {
+            buffer << " the " << mark->name << " wade";
+        }
+        else {
+            buffer << " the " << mark->title;
+        }
+
+        buffer << ".";
+    }
+    else {
+        buffer
+            << " This battle will known as Battle in the"
+            << " " << fact->location.province
+            << " " << fact->location.GetTerrainName(true)
+            << "."
+            ;
     }
 
     if (totalMages > 0) score *= 2;

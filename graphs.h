@@ -199,6 +199,34 @@ namespace graphs {
     }
 
     template <class TLocation, class TGraph>
+    std::unordered_map<TLocation, Node<TLocation>>
+    breadthFirstSearch(TGraph& graph, TLocation start, int maxDistance) {
+        std::queue<Node<TLocation>> frontier;
+        frontier.push({ start, 0 });
+
+        std::unordered_map<TLocation, Node<TLocation>> cameFrom;
+        cameFrom[start] = { start, 0 };
+
+        while (!frontier.empty()) {
+            Node<TLocation> current = frontier.front();
+            frontier.pop();
+
+            if (current.distance > maxDistance) {
+                continue;
+            }
+
+            for (TLocation next : graph.neighbors(current.key)) {
+                if (cameFrom.find(next) == cameFrom.end()) {
+                    frontier.push({ next, current.distance + 1 });
+                    cameFrom[next] = current;
+                }
+            }
+        }
+
+        return cameFrom;
+    }
+
+    template <class TLocation, class TGraph>
     void dijkstraSearch(TGraph& graph, TLocation start,
         std::unordered_map<TLocation, TLocation>& cameFrom,
         std::unordered_map<TLocation, double>& costSoFar

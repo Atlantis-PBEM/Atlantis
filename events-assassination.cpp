@@ -66,15 +66,6 @@ const vector<string> FEELING = {
     "scared"
 };
 
-string townType(int type) {
-    switch (type) {
-        case TOWN_VILLAGE: return "village";
-        case TOWN_TOWN:    return "town";
-        case TOWN_CITY:    return "city";
-        default:           return "unknown";
-    }
-}
-
 void AssassinationFact::GetEvents(std::list<Event> &events) {
     std::ostringstream buffer;
 
@@ -92,7 +83,7 @@ void AssassinationFact::GetEvents(std::list<Event> &events) {
     }
 
     buffer
-        << " the " << this->location.getTerrain(true)
+        << " the " << this->location.GetTerrainName(true)
         << " of " << this->location.province
         << ". " << capitalize(oneOf(LOCALS))
         << "were " << oneOf(FEELING)

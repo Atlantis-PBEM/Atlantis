@@ -434,19 +434,54 @@ void AddBattleFact(
 ) {
 	if (!Globals->WORLD_EVENTS) return;
 
-	auto battleFact = new BattleFact();
+	auto fact = new BattleFact();
 
-	battleFact->location.Assign(region);
+	fact->location = EventLocation::Create(region);
 	
-	battleFact->attacker.AssignUnit(attacker);
-	battleFact->attacker.AssignArmy(attackerArmy);
+	fact->attacker.AssignUnit(attacker);
+	fact->attacker.AssignArmy(attackerArmy);
 	
-	battleFact->defender.AssignUnit(defender);
-	battleFact->defender.AssignArmy(defenderArmy);
-	
-	battleFact->outcome = outcome;
+	fact->defender.AssignUnit(defender);
+	fact->defender.AssignArmy(defenderArmy);
 
-	events->AddFact(battleFact);
+	fact->outcome = outcome;
+
+	std::unordered_set<Unit *> units;
+	for (int i = 0; i < defenderArmy->count; i++) {
+		auto soldier = defenderArmy->soldiers[i];
+		units.emplace(soldier->unit);
+	}
+
+	int protect = 0;
+	int fortType = -1;
+	std::string name;
+
+	for (auto &unit : units) {
+		ObjectType& type = ObjectDefs[unit->object->type];
+		if (type.flags & ObjectType::GROUP) {
+			continue;
+		}
+
+		if (unit->object->IsFleet()) {
+			continue;
+		}
+
+		if (protect >= type.protect) {
+			continue;
+		}
+
+		protect = type.protect;
+		fortType = unit->object->type;
+		name = unit->object->name->Str();
+	}
+
+	if (!name.empty()) {
+		fact->fortification = name;
+		fact->fortificationType = fortType;
+	}
+	
+
+	events->AddFact(fact);
 }
 
 void AddAssassinationFact(
@@ -460,7 +495,7 @@ void AddAssassinationFact(
 
 	auto fact = new AssassinationFact();
 
-	fact->location.Assign(region);
+	fact->location = EventLocation::Create(region);
 	
 	fact->victim.AssignUnit(defender);
 	fact->victim.AssignArmy(defenderArmy);
