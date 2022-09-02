@@ -1353,12 +1353,12 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 
 int Game::RunWolfLore(ARegion *r,Unit *u)
 {
-	if (TerrainDefs[r->type].similar_type != R_MOUNTAIN &&
-		TerrainDefs[r->type].similar_type != R_FOREST) {
-		u->Error("CAST: Can only summon wolves in mountain and "
-				 "forest regions.");
-		return 0;
-	}
+	// if (TerrainDefs[r->type].similar_type != R_MOUNTAIN &&
+	// 	TerrainDefs[r->type].similar_type != R_FOREST) {
+	// 	u->Error("CAST: Can only summon wolves in mountain and "
+	// 			 "forest regions.");
+	// 	return 0;
+	// }
 
 	int level = u->GetSkill(S_WOLF_LORE);
 	int max = level * level * 4;

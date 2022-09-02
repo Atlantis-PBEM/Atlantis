@@ -814,10 +814,15 @@ AString *ShowSkill::Report(Faction *f)
 			*str += ItemDefs[I_WOLF].mOut;
 			*str += " percent times his skill level, and control a total number "
 				"of his skill level squared times 4 wolves; the wolves will "
-				"be placed in the mages inventory. Note, however, that wolves "
-				"may only be summoned in mountain and forest regions. To "
+				"be placed in the mages inventory. To "
 				"summon wolves, the mage should issue the order CAST "
 				"Wolf_Lore.";
+			// *str += " percent times his skill level, and control a total number "
+			// 	"of his skill level squared times 4 wolves; the wolves will "
+			// 	"be placed in the mages inventory. Note, however, that wolves "
+			// 	"may only be summoned in mountain and forest regions. To "
+			// 	"summon wolves, the mage should issue the order CAST "
+			// 	"Wolf_Lore.";
 			break;
 		case S_BIRD_LORE:
 			/* XXX -- This should be cleaner somehow. */
