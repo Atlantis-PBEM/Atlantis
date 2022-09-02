@@ -535,13 +535,13 @@ const Event pvpBattle(BattleFact* fact) {
     auto mark = fact->location.GetSignificantLandmark();
     if (!fact->fortification.empty()) {
         buffer
-            << " This battle will known as Siege of the"
+            << " This battle will be known as Siege of the"
             << " " << ObjectDefs[fact->fortificationType].name
             << " " << fact->fortification << ".";
     }
     else if (mark) {
         buffer
-            << " This battle will known as Battle"
+            << " This battle will be known as Battle"
             << " " <<(mark->distance == 0 ? "of" : "near")
             ;
 
