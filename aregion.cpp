@@ -4161,3 +4161,34 @@ void ARegionList::ResoucesStatistics() {
 	}
 	std::cout << std::endl << std::endl;
 }
+
+const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(ARegion* start, const int maxDistance) {
+    std::queue<graphs::Node<ARegion*>> frontier;
+    frontier.push({ start, 0 });
+
+    std::unordered_map<ARegion*, graphs::Node<ARegion*>> cameFrom;
+    cameFrom[start] = { start, 0 };
+
+    while (!frontier.empty()) {
+        graphs::Node<ARegion*> current = frontier.front();
+        frontier.pop();
+
+        if (current.distance > maxDistance) {
+            continue;
+        }
+
+        for (int i = 0; i < NDIRS; i++) {
+            auto next = current.key->neighbors[i];
+            if (!next) {
+                continue;
+            }
+
+            if (cameFrom.find(next) == cameFrom.end()) {
+                frontier.push({ next, current.distance + 1 });
+                cameFrom[next] = current;
+            }
+        }
+    }
+
+    return cameFrom;
+}

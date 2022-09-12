@@ -27,119 +27,127 @@
 #include "events.h"
 
 #include <memory>
-#include <string>
 #include <stdexcept>
+#include <sstream>
 
-template<typename ... Args> std::string string_format( const std::string& format, Args ... args )
-{
-    int size = std::snprintf(nullptr, 0, format.c_str(), args ... ) + 1;
-    if (size <= 0) {
-        throw std::runtime_error( "Error during formatting." );
-    }
-    
-    std::unique_ptr<char[]> buf(new char[ size ]); 
-    snprintf(buf.get(), size, format.c_str(), args ...);
-
-    return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
-}
+using namespace std;
 
 BattleFact::BattleFact() {
     this->attacker = BattleSide();
     this->defender = BattleSide();
     this->location = EventLocation();
+    this->fortificationType = -1;
 }
 
 BattleFact::~BattleFact() {
 
 }
 
-const int N_VARIANTS = 4;
-
-const char* ADJECTIVE[N_VARIANTS] = {
+const vector<string> ADJECTIVE = {
+    "A few",
+    "Handful",
     "Some",
     "Many",
+    "Numerous",
+    "Multiple",
     "Several",
     "Dozen"
 };
 
-const char* REPORTING[N_VARIANTS] = {
+const vector<string> REPORTING = {
     "traders",
+    "merchants",
     "pilgrims",
     "travelers",
-    "adventurers"
+    "wanderers",
+    "adventurers",
+    "peasants",
+    "bards",
+    "druids",
+    "scouts",
+    "dockers",
+    "refugees",
+    "locals",
+    "commoners"
 };
 
-const char* CHANNEL[N_VARIANTS] = {
-    "they have heard about",
-    "refugees are worried about",
-    "locals are rumoring about",
-    "have heard a tell about"
+const vector<string> CHANNEL = {
+    "are talking",
+    "are rumoring",
+    "are worried",
+    "have heard",
+    "are whispering",
+    "are discussing"
 };
 
-const char* SMALL_BATTLE[N_VARIANTS] = {
-    "encounter",
-    "fight",
-    "skrimish",
-    "battle"
+const vector<string> BATTLE = {
+    "an encounter",
+    "a fight",
+    "a conflict",
+    "a clash",
+    "the skirmish",
+    "the battle"
 };
 
-const char* BATTLE[N_VARIANTS] = {
-    "clash",
-    "fight",
-    "assault",
-    "battle"
-};
-
-const char* ONE_SIDE[N_VARIANTS] = {
+const vector<string> ONE_SIDE = {
     "a faction",
     "a rebels",
     "a villans",
-    "an opposition"
+    "an opposition",
+    "a partisans"
 };
 
-const char* TWO_SIDES[N_VARIANTS] = {
+const vector<string> TWO_SIDES = {
     "hostile forces",
     "enemies",
     "two armies",
     "combatants"
 };
 
-const char* HUNTERS[N_VARIANTS] = {
-    "an andventurers",
-    "a hunters",
-    "a witchers",
-    "a rangers"
+const vector<string> HUNTERS = {
+    "adventurers",
+    "hunters",
+    "daredevils",
+    "witchers",
+    "rangers"
 };
 
-const char* SIZES[N_VARIANTS] = {
+const vector<string> SIZES = {
     "couple",
     "few",
     "several",
     "many"
 };
 
-const char* ACTION_SUCCESS[N_VARIANTS] = {
-    "slain",
+const vector<string> ACTION_SUCCESS = {
+    "slew",
     "murdered",
+    "killed",
+    "extinguished",
+    "destroyed",
+    "decimated",
+    "annihilated",
+    "massacred",
     "put to the sword",
     "expelled"
 };
 
-const char* ACTION_ATTEMPT[N_VARIANTS] = {
+const vector<string> ACTION_ATTEMPT = {
     "attacked",
     "ambushed",
     "tried to cast out",
     "tried to expel"
 };
 
-const char* NOUN[N_VARIANTS] = {
+const vector<string> FEAR_NOUN = {
     "terror",
     "fear",
+    "anxiety",
     "horror",
     "dread"
 };
 
-std::string relativeSize(int size) {
+string relativeSize(int size) {
     if (size < 3) return SIZES[0];
     if (size < 12) return SIZES[1];
     if (size < 24) return SIZES[2];
@@ -147,154 +155,228 @@ std::string relativeSize(int size) {
     return SIZES[3];
 }
 
-std::string townType(int type) {
-    switch (type)
-    {
-        case TOWN_VILLAGE: return "village";
-        case TOWN_TOWN:    return "town";
-        case TOWN_CITY:    return "city";
-        default:           return "unknown";
-    }
+const int sizeRaiting(const int size) {
+    if (size <= 100) return 1;
+    if (size <= 500) return 2;
+    if (size <= 2500) return 3;
+
+    return 5;
 }
 
-void BattleFact::GetEvents(std::list<Event> &events) {
-    // Some traders are telling that they have heard about
-    // Some traders are telling that refugees are worried about
-    // Some traders are telling that locals are rumoring about
-    // Some traders are telling that have heard a tell about
-    std::string text = string_format("%s %s are telling that %s ",
-        ADJECTIVE[getrandom(N_VARIANTS)],
-        REPORTING[getrandom(N_VARIANTS)],
-        CHANNEL[getrandom(N_VARIANTS)]
-    );
+const int combinedRaiting(const int attackerSize, const int defenderSize) {
+    int att = sizeRaiting(attackerSize);
+    int def = sizeRaiting(defenderSize);
 
-    if (this->defender.factionNum == 1) {
-        // city capture
-        if (this->outcome == BATTLE_WON) {
-            // plains of Cefelat where in the Toadfield city guards were slain by a faction
-            text += string_format("%ss of %s where in the %s %s guards were %s by %s.",
-                this->location.getTerrain().c_str(),
-                this->location.province.c_str(),
-                this->location.settlement.c_str(),
-                townType(this->location.settlementType).c_str(),
-                ACTION_SUCCESS[getrandom(N_VARIANTS)],
-                ONE_SIDE[getrandom(N_VARIANTS)]
-            );
-        }
-        else {
-            // plains of Cefelat where in the Toadfield a villans attacked guards but were unsuccessful.
-            text += string_format("%ss of %s where in the %s %s %s %s guards but were unsuccessful.",
-                this->location.getTerrain().c_str(),
-                this->location.province.c_str(),
-                this->location.settlement.c_str(),
-                townType(this->location.settlementType).c_str(),
-                ONE_SIDE[getrandom(N_VARIANTS)],
-                ACTION_ATTEMPT[getrandom(N_VARIANTS)]
-            );
-        }
-
-        events.push_back({ EventCategory::EVENT_CITY_CAPTURE, this->location.settlementType + 1, text });
-
-        return;
+    int minRaiting = std::min(att, def);
+    if (minRaiting == 1) {
+        return minRaiting;
     }
 
-    if (this->defender.factionNum == 2) {
-        // monster hunt
-        if (this->outcome == BATTLE_WON) {
-            // a witchers who have slain Demons freeing the plains of Cefelat from their terror.
-            text += string_format("%s who have %s %s freeing the %ss of %s from their %s.",
-                HUNTERS[getrandom(N_VARIANTS)],
-                ACTION_SUCCESS[getrandom(N_VARIANTS)],
-                this->defender.unitName.c_str(),
-                this->location.getTerrain().c_str(),
-                this->location.province.c_str(),
-                NOUN[getrandom(N_VARIANTS)]
-            );
-        }
-        else {
-            // a witchers who tried to slain Demons in the plains of Cefelat but were all slain by their prey.
-            text += string_format("%s who tried to %s %s in the %ss of %s but were all %s by their prey.",
-                HUNTERS[getrandom(N_VARIANTS)],
-                ACTION_SUCCESS[getrandom(N_VARIANTS)],
-                this->defender.unitName.c_str(),
-                this->location.getTerrain().c_str(),
-                this->location.province.c_str(),
-                ACTION_SUCCESS[getrandom(N_VARIANTS)]
-            );
-        }
+    int delta = std::abs(att - def);
+    return delta >= 2 ? minRaiting + 1 : minRaiting;
+}
 
-        events.push_back({ EventCategory::EVENT_MONSTER_HUNT, 1, text });
-        return;
+const Event cityCapture(BattleFact* fact) {
+    std::ostringstream buffer;
+
+    if (fact->outcome == BATTLE_WON) {
+        buffer
+            << oneOf(ADJECTIVE)                               // Some
+            << " " << oneOf(REPORTING)                        // merchants
+            << " " << oneOf(CHANNEL)                          // are talking
+            << " about the"                                   // about the
+            << " " << townType(fact->location.settlementType) // city
+            << " of"                                          // of
+            << " " << fact->location.settlement               // Hardwood
+            << " that lies in the"                            // that lies in the
+            << " " << fact->location.province                 // Silver Valley
+            << " " << fact->location.GetTerrainName(true)     // plains
+            << ", where"                                      //, where
+            << " " << oneOf(ONE_SIDE)                         // a faction
+            << " " << oneOf(ACTION_SUCCESS)                   // slew
+            << " guards."                                     // guards.
+            ;
+    }
+    else {
+        buffer
+            << oneOf(ADJECTIVE)                               // Some
+            << " " << oneOf(REPORTING)                        // merchants
+            << " " << oneOf(CHANNEL)                          // are talking
+            << " about the"                                   // about the
+            << " " << townType(fact->location.settlementType) // city
+            << " of"                                          // of
+            << " " << fact->location.settlement               // Hardwood
+            << " that lies in the"                            // that lies in the
+            << " " << fact->location.province                 // Silver Valley
+            << " " << fact->location.GetTerrainName(true)     // plains
+            << ", where"                                      //, where
+            << " " << oneOf(ONE_SIDE)                         // a faction
+            << " " << oneOf(ACTION_ATTEMPT)                   // tried to cast out
+            << " guards but were unsuccessful."               // guards but were unsuccessful.
+            ;
     }
 
-    if (this->attacker.factionNum == 2) {
-        // monster aggression
-        if (this->outcome == BATTLE_WON) {
-            // Demons in the plains of Cefelat continue to cause %s on local inhabitants.
-            text += string_format("%s in the %ss of %s continue to cause %s on local inhabitants.",
-                this->attacker.unitName.c_str(),
-                this->location.getTerrain().c_str(),
-                this->location.province.c_str(),
-                NOUN[getrandom(N_VARIANTS)]
-            );
-        }
-        else {
-            // Demons tried to cause fear in the plains of Cefelat bet were slain by a witchers.
-            text += string_format("%s tried to cause %s in the %ss of %s bet were %s by %s.",
-                this->attacker.unitName.c_str(),
-                NOUN[getrandom(N_VARIANTS)],
-                this->location.getTerrain().c_str(),
-                this->location.province.c_str(),
-                ACTION_SUCCESS[getrandom(N_VARIANTS)],
-                HUNTERS[getrandom(N_VARIANTS)]
-            );
+    return {
+        category: EventCategory::EVENT_CITY_CAPTURE,
+        score: fact->location.settlementType + 2,
+        text: buffer.str()
+    };
+}
+
+const Event monsterHunt(BattleFact* fact) {
+    std::ostringstream buffer;
+
+    auto mark = fact->location.GetSignificantLandmark();
+
+    if (fact->outcome == BATTLE_WON) {
+        buffer
+            << oneOf(ADJECTIVE)                               // Some
+            << " " << oneOf(REPORTING)                        // merchants
+            << " " << oneOf(CHANNEL)                          // are talking
+            << " about"                                       // about
+            << " " << oneOf(HUNTERS)                          // witchers
+            << " who have"                                    // who have
+            << " " << oneOf(ACTION_SUCCESS)                   // slain
+            << " " << fact->defender.unitName                 // Demons
+            ;
+        
+        if (mark) {
+            buffer << " near " << mark->title << ".";
         }
 
-        events.push_back({ EventCategory::EVENT_MONSTER_AGGRESSION, 1, text });
-        return;
+        buffer
+            << " Freeing"                                     // Freeing
+            << " the " << fact->location.GetTerrainName(true) // the plains
+            << " of"                                          // of
+            << " " << fact->location.province                 // Cefelat
+            << " from their"                                  // from their
+            << " " << oneOf(FEAR_NOUN) << "."                 // terror.
+            ;
+    }
+    else {
+        buffer
+            << oneOf(ADJECTIVE)                           // Some
+            << " " << oneOf(REPORTING)                    // merchants
+            << " " << oneOf(CHANNEL)                      // are talking
+            << " about"                                   // about
+            << " " << oneOf(HUNTERS)                      // witchers
+            << " who attempted to"                        // who attempted to
+            << " " << oneOf(ACTION_SUCCESS)               // slain
+            << " " << fact->defender.unitName             // Demons
+            << " roaming"                                 // roaming
+            << " the " << fact->location.GetTerrainName(true) // the plains
+            << " of"                                      // of
+            << " " << fact->location.province             // Cefelat
+            ;
+        
+        if (mark) {
+            buffer << " near " << mark->title << ".";
+        }
+
+        buffer << " But all of them were slain by their prey.";
     }
 
-    // PvP
-    int total = this->attacker.total + this->defender.total;
-    int totalLost = this->attacker.lost + this->defender.lost;
-    int totalMages = this->attacker.mages + this->defender.mages;
-    int totalMonsters = this->attacker.monsters + this->defender.monsters;
-    int totalUndead = this->attacker.undead + this->defender.undead;
-    int totalFMI = this->attacker.fmi + this->defender.fmi;
+    return {
+        category: EventCategory::EVENT_MONSTER_HUNT,
+        score: 1,
+        text: buffer.str()
+    };
+}
 
-    int minLost = std::min(this->attacker.lost, this->defender.lost);
-    int maxLost = std::max(this->attacker.lost, this->defender.lost);
+const Event monsterAggresion(BattleFact* fact) {
+    std::ostringstream buffer;
+
+    auto mark = fact->location.GetSignificantLandmark();
+
+    if (fact->outcome == BATTLE_WON) {
+        buffer
+            << "In the " << fact->location.GetTerrainName(true)  // In the plains
+            << " of " << fact->location.province             // of Cefelat
+            ;
+
+        if (mark) {
+            buffer << ", near " << mark->title << ",";
+        }
+
+        buffer
+            << " " << fact->attacker.unitName                // Demons
+            << " who continue to cause " << oneOf(FEAR_NOUN) // continue to cause terror
+            << " to local inhabitants."                      // to local inhabitants.
+            ;
+    }
+    else {
+        buffer
+            << "A group of " << oneOf(HUNTERS)                          // A group of hunters
+            << " " << oneOf(ACTION_SUCCESS)                             // extinguished
+            << " the " << fact->attacker.unitName                       // the Demons
+            << " who inflicted " << oneOf(FEAR_NOUN)                    // who inflicted terror
+            << " on the inhabitants of the " << fact->location.province // on the inhabitants of the Cefelat
+            << " " << fact->location.GetTerrainName(true)        // plains
+            ;
+
+        if (mark) {
+            buffer << " near " << mark->title;
+        }
+        
+        buffer << ".";
+    }
+
+    return {
+        category: EventCategory::EVENT_MONSTER_AGGRESSION,
+        score: 1,
+        text: buffer.str()
+    };
+}
+
+const Event pvpBattle(BattleFact* fact) {
+    std::ostringstream buffer;
+
+    int total = fact->attacker.total + fact->defender.total;
+    int totalLost = fact->attacker.lost + fact->defender.lost;
+    int totalMages = fact->attacker.mages + fact->defender.mages;
+    int totalMonsters = fact->attacker.monsters + fact->defender.monsters;
+    int totalUndead = fact->attacker.undead + fact->defender.undead;
+    int totalFMI = fact->attacker.fmi + fact->defender.fmi;
+
+    int minLost = std::min(fact->attacker.lost, fact->defender.lost);
+    int maxLost = std::max(fact->attacker.lost, fact->defender.lost);
+
     bool isSlaughter = total > 10 && (minLost == 0 || (maxLost / minLost) > 10);
 
-    int score = 0;
+    int score = combinedRaiting(fact->attacker.total, fact->attacker.total);
+
+    buffer
+        << oneOf(ADJECTIVE)                               // Some
+        << " " << oneOf(REPORTING)                        // merchants
+        << " " << oneOf(CHANNEL)                          // are talking
+        << " about"                                   // about
+        ;
 
     if (total <= 100) {
         // encounter
         // location known
 
-        std::string result;
-        if (this->outcome == BATTLE_DRAW) {
-            result = "and neither side won";
+        buffer
+            << " " << oneOf(BATTLE)
+            << " between " << oneOf(TWO_SIDES)
+            << " happened in the " << fact->location.GetTerrainName(true)
+            << " of " << fact->location.province
+            ;
+
+        if (fact->outcome == BATTLE_DRAW) {
+            buffer << " where neither side won.";
         }
         else if (isSlaughter) {
-            result = "ended in a slaughter";
+            buffer << " where battle ended in a slaughter of one of the sides.";
         }
         else {
-            result = totalLost > total / 2
-                ? "and some men died"
-                : "and many soldiers will never fight again";
+            if (totalLost > total / 2) {
+                buffer << " where some men died.";
+            }
+            else {
+                buffer << " where many soldiers will never fight again.";
+            }
         }
-
-        // a small encounter between hostile forces in the woods of Sansaor where some men died.
-        text += string_format("a small %s between %s in the %ss of %s where %s.",
-            SMALL_BATTLE[getrandom(N_VARIANTS)],
-            TWO_SIDES[getrandom(N_VARIANTS)],
-            this->location.getTerrain().c_str(),
-            this->location.province.c_str(),
-            result.c_str()
-        );
-
-        score = 1;
     }
     else if (total <= 500) {
         // local conflict
@@ -304,28 +386,26 @@ void BattleFact::GetEvents(std::list<Event> &events) {
         int unceretanity = totalLost / 3;   // 33%
         int lost = totalLost + getrandom(unceretanity) - (unceretanity / 2);
 
-        std::string result;
-        if (this->outcome == BATTLE_DRAW) {
-            result = "and neither side won";
-        }
-        else if (isSlaughter) {
-            result = "ended in a slaughter";
+        buffer
+            << " " << oneOf(BATTLE)                                         // a battle
+            << " between " << oneOf(TWO_SIDES)                              // between hostile forces
+            << " happened in the " << fact->location.GetTerrainName(true)                // happened in the plains
+            << " of " << fact->location.province                            // of Cefelat
+            << " where " << lost << plural(lost, "combatant", "combatants") // where 75 combatants
+            << " " << plural(lost, "was", "were") << " killed."             // were killed
+            ;
+        
+        if (isSlaughter) {
+            buffer << (fact->outcome == BATTLE_WON ? " The attackers slaughtered all defenders." : " The defenders were furious and put all attackers to the sword.");
         }
         else {
-            result = "and many soldiers will never fight again";
+            if (fact->outcome == BATTLE_DRAW) {
+                buffer << " Neither side won.";
+            }
+            else {
+                buffer << (fact->outcome == BATTLE_WON ? " The attackers were victorious.." : " The defenders stood firm.");
+            }
         }
-
-        // a battle between two armies in the woods of Sansaor with .
-        text += string_format("a %s between %s in the %ss of %s with %i killed from both sides %s.",
-            SMALL_BATTLE[getrandom(N_VARIANTS)],
-            TWO_SIDES[getrandom(N_VARIANTS)],
-            this->location.getTerrain().c_str(),
-            this->location.province.c_str(),
-            lost,
-            result.c_str()
-        );
-
-        score = 2;
     }
     else if (total <= 2500) {
         // regional conflict
@@ -333,82 +413,73 @@ void BattleFact::GetEvents(std::list<Event> &events) {
         // number of looses known
         // mages, monsters, fmi
 
-        std::string specials;
-        if (totalFMI + totalMages + totalMonsters + totalUndead) {
-            specials = " with use of ";
-
-            bool second = false;
-            if (totalMages) {
-                specials += "magic";
-                second = true;
-            }
-
-            if (totalFMI) {
-                if (second) specials += ", ";
-                specials += "mechanisms";
-                second = true;
-            }
-
-            if (totalUndead) {
-                if (second) specials += ", ";
-                specials += "undead";
-                second = true;
-            }
-
-            if (totalMonsters) {
-                if (second) specials += ", ";
-                specials += "monsters";
-                second = true;
-            }
-        }
-
         int unceretanity = totalLost / 5;   // 20%
         int lost = totalLost + getrandom(unceretanity) - (unceretanity / 2);
 
-        std::string result;
-        if (this->outcome == BATTLE_DRAW) {
-            result = "and neither side won";
-        }
-        else if (isSlaughter) {
-            result = "ended in a slaughter";
-        }
-        else {
-            result = "and many soldiers will never fight again";
-        }
+        buffer
+            << " " << oneOf(BATTLE) // a battle
+            << " between"             // between
+            ;
 
-        std::string sides;
         int roll = getrandom(10);
         if (roll >= 8) {
             // 20 %
-            sides = string_format("%s and %s",
-                this->attacker.factionName.c_str(),
-                this->defender.factionName.c_str()
-            );
+            buffer
+                << " " << fact->attacker.factionName
+                << " and " << fact->defender.factionName
+                ;
         }
         else if (roll >= 6) {
             // 20%
-            sides = string_format("%s and %s",
-                (getrandom(2) >= 1 ? this->attacker.factionName.c_str() : this->defender.factionName.c_str()),
-                ONE_SIDE[getrandom(N_VARIANTS)]
-            );
+            buffer
+                << " " << (getrandom(2) ? fact->attacker.factionName : fact->defender.factionName)
+                << " and " << oneOf(ONE_SIDE)
+                ;
         }
         else {
             // 60%
-            sides = TWO_SIDES[getrandom(N_VARIANTS)];
+            buffer
+                << " " << oneOf(TWO_SIDES)
+                ;
         }
 
-        // a battle with use of magic between two armies in the woods of Sansaor with .
-        text += string_format("a %s%s between %s in the %ss of %s with %i killed from both sides %s.",
-            BATTLE[getrandom(N_VARIANTS)],
-            specials.c_str(),
-            sides.c_str(),
-            this->location.getTerrain().c_str(),
-            this->location.province.c_str(),
-            lost,
-            result.c_str()
-        );
+        buffer
+            << " happened in the " << fact->location.GetTerrainName(true)                // happened in the plains
+            << " of " << fact->location.province                            // of Cefelat
+            << " where " << lost << plural(lost, "combatant", "combatants") // where 75 combatants
+            << " " << plural(lost, "was", "were") << " killed."             // were killed
+            ;
 
-        score = 3;
+        std::string specials;
+        if (totalFMI + totalMages + totalMonsters + totalUndead) {
+            if (totalMages) {
+                buffer << " Powerful magic was used in the battle.";
+            }
+
+            if (totalFMI) {
+                buffer << " War engines were decimating the battlefield.";
+            }
+
+            if (totalUndead) {
+                buffer << " Disgusting undead caused fear in the combatants.";
+            }
+
+            if (totalMonsters) {
+                buffer << " Fearsome magical monsters were collecting their prey.";
+            }
+        }
+
+        if (isSlaughter) {
+            buffer << (fact->outcome == BATTLE_WON ? " The attackers slaughtered all defenders." : " The defenders were furious and put all attackers to the sword.");
+        }
+        else {
+            if (fact->outcome == BATTLE_DRAW) {
+                buffer << " Neither side won.";
+            }
+            else {
+                buffer << (fact->outcome == BATTLE_WON ? " The attackers were victorious.." : " The defenders stood firm.");
+            }
+        }
     }
     else {
         // continental conflict / epic conflict
@@ -416,66 +487,80 @@ void BattleFact::GetEvents(std::list<Event> &events) {
         // number of looses known
         // mages, monsters, fmi
 
-        std::string specials;
-        if (totalFMI + totalMages + totalMonsters + totalUndead) {
-            specials = " with use of ";
-
-            bool second = false;
-            if (totalMages) {
-                specials += relativeSize(totalMages) + " mages";
-                second = true;
-            }
-
-            if (totalFMI) {
-                if (second) specials += ", ";
-                specials += relativeSize(totalFMI) + " mechanisms";
-                second = true;
-            }
-
-            if (totalUndead) {
-                if (second) specials += ", ";
-                specials += relativeSize(totalUndead) + " undead";
-                second = true;
-            }
-
-            if (totalMonsters) {
-                if (second) specials += ", ";
-                specials += relativeSize(totalMonsters) + " monsters";
-                second = true;
-            }
-        }
-
         int unceretanity = totalLost / 10;   // 10%
         int lost = totalLost + getrandom(unceretanity) - (unceretanity / 2);
 
-        std::string result;
-        if (this->outcome == BATTLE_DRAW) {
-            result = "and neither side won";
+        buffer
+            << " an epic battle between"
+            << " " << fact->attacker.factionName
+            << " and " << fact->defender.factionName
+            << " happened in the " << fact->location.GetTerrainName(true)                // happened in the plains
+            << " of " << fact->location.province                            // of Cefelat
+            << " where " << lost << plural(lost, "combatant", "combatants") // where 75 combatants
+            << " " << plural(lost, "was", "were") << " killed."             // were killed
+            ;
+
+        std::string specials;
+        if (totalFMI + totalMages + totalMonsters + totalUndead) {
+            if (totalMages) {
+                buffer << " Powerful magic was used in the battle.";
+            }
+
+            if (totalFMI) {
+                buffer << " War engines were decimating the battlefield.";
+            }
+
+            if (totalUndead) {
+                buffer << " Disgusting undead caused fear in the combatants.";
+            }
+
+            if (totalMonsters) {
+                buffer << " Fearsome magical monsters were collecting their prey.";
+            }
         }
-        else if (isSlaughter) {
-            result = "ended in a slaughter";
+
+        if (isSlaughter) {
+            buffer << (fact->outcome == BATTLE_WON ? " The attackers slaughtered all defenders." : " The defenders were furious and put all attackers to the sword.");
         }
         else {
-            result = "and many soldiers will never fight again";
+            if (fact->outcome == BATTLE_DRAW) {
+                buffer << " Neither side won.";
+            }
+            else {
+                buffer << (fact->outcome == BATTLE_WON ? " The attackers were victorious.." : " The defenders stood firm.");
+            }
+        }
+    }
+
+    auto mark = fact->location.GetSignificantLandmark();
+    if (!fact->fortification.empty()) {
+        buffer
+            << " This battle will be known as Siege of the"
+            << " " << ObjectDefs[fact->fortificationType].name
+            << " " << fact->fortification << ".";
+    }
+    else if (mark) {
+        buffer
+            << " This battle will be known as Battle"
+            << " " <<(mark->distance == 0 ? "of" : "near")
+            ;
+
+        if (mark->type == events::LandmarkType::FORD) {
+            buffer << " the " << mark->name << " wade";
+        }
+        else {
+            buffer << " the " << mark->title;
         }
 
-        std::string sides = string_format("%s and %s",
-            this->attacker.factionName.c_str(),
-            this->defender.factionName.c_str()
-        );
-
-        // a battle with use of magic between two armies in the woods of Sansaor with .
-        text += string_format("a epic %s%s between %s in the %ss of %s with %i killed from both sides %s.",
-            BATTLE[getrandom(N_VARIANTS)],
-            specials.c_str(),
-            sides.c_str(),
-            this->location.getTerrain().c_str(),
-            this->location.province.c_str(),
-            lost,
-            result.c_str()
-        );
-
-        score = 5;
+        buffer << ".";
+    }
+    else {
+        buffer
+            << " This battle will known as Battle in the"
+            << " " << fact->location.province
+            << " " << fact->location.GetTerrainName(true)
+            << "."
+            ;
     }
 
     if (totalMages > 0) score *= 2;
@@ -483,5 +568,28 @@ void BattleFact::GetEvents(std::list<Event> &events) {
     if (totalUndead > 0) score += 1;
     if (totalFMI > 0) score += 1;
 
-    events.push_back({ EventCategory::EVENT_BATTLE, score, text });
+    return {
+        category: EventCategory::EVENT_BATTLE,
+        score: score,
+        text: buffer.str()
+    };
+}
+
+void BattleFact::GetEvents(std::list<Event> &events) {
+    if (this->defender.factionNum == 1) {
+        events.push_back(cityCapture(this));
+        return;
+    }
+
+    if (this->defender.factionNum == 2) {
+        events.push_back(monsterHunt(this));
+        return;
+    }
+
+    if (this->attacker.factionNum == 2) {
+        events.push_back(monsterAggresion(this));
+        return;
+    }
+
+    events.push_back(pvpBattle(this));
 }

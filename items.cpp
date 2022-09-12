@@ -907,7 +907,7 @@ AString *ItemDescription(int item, int full)
 				isNext = true;
 			}
 
-			*temp += AString(" ") + plural(mp->preferredTerrain.size(), "terrain", "terrains");
+			*temp += AString(" ") + plural(mp->preferredTerrain.size(), "terrain", "terrains") + ".";
 		}
 
 		const int aggression = mp->getAggression();

@@ -573,4 +573,6 @@ private:
 	ARegionInclusionFunction includeFn;
 };
 
+const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(ARegion* start, const int maxDistance);
+
 #endif
