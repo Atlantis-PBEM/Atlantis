@@ -1723,8 +1723,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 					u->faction->DiscoverItem(o->item, 0, 1);
 					u->ConsumeSharedMoney(temp * m->price);
 					u->buyorders.Remove(o);
-					u->Event(AString("Buys ") + ItemString(o->item, temp)
-							+ " at $" + m->price + " each.");
+					u->Event(AString("Buys ") + ItemString(o->item, temp) + " at $" + m->price + " each.");
 					delete o;
 				}
 			}
@@ -1767,6 +1766,8 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 						}
 						u->needed -= eat * value;
 						u->items.SetNum(item, amount - eat);
+
+						u->Event(AString("Consumes ") + ItemString(item, eat) + " for maintenance.");
 					}
 				}
 			}
@@ -1813,6 +1814,9 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 									}
 									u->needed -= eat * value;
 									u2->items.SetNum(item, amount - eat);
+
+									u->Event(AString("Borrows ") + ItemString(item, eat) + " from " + *u2->name + " for maintenance.");
+									u2->Event(*(u->name) + " borrows " + ItemString(item, eat) + " for maintenance.");
 								}
 							}
 						}
@@ -1864,14 +1868,9 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 									if (eat) {
 										u->needed -= eat * value;
 										u2->items.SetNum(item, amount - eat);
-										u2->Event(*(u->name) + " borrows " +
-												ItemString(item, eat) +
-												" for maintenance.");
-										u->Event(AString("Borrows ") +
-												ItemString(item, eat) +
-												" from " + *(u2->name) +
-												" for maintenance.");
-										u2->items.SetNum(item, amount - eat);
+
+										u->Event(AString("Borrows ") + ItemString(item, eat) + " from " + *(u2->name) + " for maintenance.");
+										u2->Event(*(u->name) + " borrows " + ItemString(item, eat) + " for maintenance.");
 									}
 								}
 							}
@@ -1908,6 +1907,8 @@ void Game::CheckUnitHungerItem(int item, int value)
 							u->stomach_space = 0;
 						}
 						u->items.SetNum(item, amount - eat);
+
+						u->Event(AString("Consumes ") + ItemString(item, eat) + " to fend off starvation.");
 					}
 				}
 			}
@@ -1945,6 +1946,9 @@ void Game::CheckFactionHungerItem(int item, int value)
 										u->stomach_space = 0;
 									}
 									u2->items.SetNum(item, amount - eat);
+
+									u->Event(AString("Borrows ") + ItemString(item, eat) + " from " + *(u2->name) + " to fend off starvation.");
+									u2->Event(*(u->name) + " borrows " + ItemString(item, eat) + " to fend off starvation.");
 								}
 							}
 						}
@@ -1987,14 +1991,10 @@ void Game::CheckAllyHungerItem(int item, int value)
 										u->stomach_space = 0;
 									}
 									u2->items.SetNum(item, amount - eat);
-										u2->Event(*(u->name) + " borrows " +
-												ItemString(item, eat) +
-												" to fend off starvation.");
-										u->Event(AString("Borrows ") +
-												ItemString(item, eat) +
-												" from " + *(u2->name) +
-												" to fend off starvation.");
 										u2->items.SetNum(item, amount - eat);
+
+										u->Event(AString("Borrows ") + ItemString(item, eat) + " from " + *(u2->name) + " to fend off starvation.");
+										u2->Event(*(u->name) + " borrows " + ItemString(item, eat) + " to fend off starvation.");
 								}
 							}
 						}
@@ -2026,11 +2026,12 @@ void Game::AssessMaintenance()
 				}
 				u->needed = u->MaintCost();
 				u->hunger = u->GetMen() * Globals->UPKEEP_MINIMUM_FOOD;
-				if (Globals->UPKEEP_MAXIMUM_FOOD < 0)
+				if (Globals->UPKEEP_MAXIMUM_FOOD < 0) {
 					u->stomach_space = -1;
-				else
-					u->stomach_space = u->GetMen() *
-										Globals->UPKEEP_MAXIMUM_FOOD;
+				}
+				else {
+					u->stomach_space = u->GetMen() * Globals->UPKEEP_MAXIMUM_FOOD;
+				}
 			}
 		}
 	}
@@ -2045,11 +2046,12 @@ void Game::AssessMaintenance()
 			for (int j = 0; j < NITEMS; j++) {
 				if (ItemDefs[j].flags & ItemType::DISABLED) continue;
 				if (ItemDefs[j].type & IT_FOOD) {
-					if (i == -1 ||
-							ItemDefs[i].baseprice > ItemDefs[j].baseprice)
+					if (i == -1 || ItemDefs[i].baseprice > ItemDefs[j].baseprice) {
 						i = j;
+					}
 				}
 			}
+
 			if (i > 0) {
 				cost = ItemDefs[i].baseprice * 5 / 2;
 				forlist((&regions)) {
@@ -2063,18 +2065,14 @@ void Game::AssessMaintenance()
 								int eat = (u->hunger + value - 1) / value;
 								/* Now see if faction has money */
 								if (u->faction->unclaimed >= eat * cost) {
-									u->Event(AString("Withdraws ") +
-											ItemString(i, eat) +
-											" for maintenance.");
+									u->Event(AString("Withdraws ") + ItemString(i, eat) + " for maintenance.");
 									u->faction->unclaimed -= eat * cost;
 									u->hunger -= eat * value;
 									u->stomach_space -= eat * value;
 									u->needed -= eat * value;
 								} else {
 									int amount = u->faction->unclaimed / cost;
-									u->Event(AString("Withdraws ") +
-											ItemString(i, amount) +
-											" for maintenance.");
+									u->Event(AString("Withdraws ") + ItemString(i, amount) + " for maintenance.");
 									u->faction->unclaimed -= amount * cost;
 									u->hunger -= amount * value;
 									u->stomach_space -= amount * value;
@@ -2132,14 +2130,11 @@ void Game::AssessMaintenance()
 					if (u->needed > 0 && u->faction->unclaimed) {
 						/* Now see if faction has money */
 						if (u->faction->unclaimed >= u->needed) {
-							u->Event(AString("Claims ") + u->needed +
-									 " silver for maintenance.");
+							u->Event(AString("Claims ") + u->needed + " silver for maintenance.");
 							u->faction->unclaimed -= u->needed;
 							u->needed = 0;
 						} else {
-							u->Event(AString("Claims ") +
-									u->faction->unclaimed +
-									" silver for maintenance.");
+							u->Event(AString("Claims ") + u->faction->unclaimed + " silver for maintenance.");
 							u->needed -= u->faction->unclaimed;
 							u->faction->unclaimed = 0;
 						}
