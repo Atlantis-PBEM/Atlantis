@@ -1122,11 +1122,23 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 		}
 		if (attacker->GetAttitude(r,target) == A_ALLY) {
 			attacker->Error("ATTACK: Can't attack an ally.");
+			if (adv) {
+				attacker->canattack = 0;
+				if (attacker->advancefrom) {
+					attacker->MoveUnit( attacker->advancefrom->GetDummy() );
+				}
+			}
 			return BATTLE_IMPOSSIBLE;
 		}
 		GetDFacs(r,target,dfacs);
 		if (GetFaction2(&dfacs,attacker->faction->num)) {
 			attacker->Error("ATTACK: Can't attack an ally.");
+			if (adv) {
+				attacker->canattack = 0;
+				if (attacker->advancefrom) {
+					attacker->MoveUnit( attacker->advancefrom->GetDummy() );
+				}
+			}
 			return BATTLE_IMPOSSIBLE;
 		}
 		GetAFacs(r,attacker,target,dfacs,afacs,atts);
