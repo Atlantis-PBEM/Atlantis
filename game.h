@@ -35,7 +35,7 @@ class Game;
 #include "object.h"
 #include "events.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 4)
+#define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
 
 class OrdersCheck
 {

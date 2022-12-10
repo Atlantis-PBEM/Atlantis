@@ -166,8 +166,7 @@ int ParseFactionType(AString *o, std::unordered_map<std::string, int> &type)
 
 	if (*token == "generic") {
 		delete token;
-		int i;
-		
+
 		for (auto &ft : *FactionTypes) {
 			type[ft] = 1;
 		}
@@ -1785,18 +1784,26 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		ParseError(pCheck, u, 0, "PRODUCE: No item given.");
 		return;
 	}
-	int it = ParseEnabledItem(token);
+	const int it = ParseEnabledItem(token);
 	delete token;
+
+	if (it == -1) {
+		ParseError(pCheck, u, 0, "PRODUCE: Invalid item.");
+		return;
+	}
+	const ItemType &item_def = ItemDefs[it];
+
+	if (item_def.type == IT_SHIP ) {
+		ParseError(pCheck, u, 0, "PRODUCE: Use BUILD for ships.");
+		return;
+	}
 
 	ProduceOrder *p = new ProduceOrder;
 	p->item = it;
-	if (it != -1) {
-		AString skname = ItemDefs[it].pSkill;
-		p->skill = LookupSkill(&skname);
-	} else {
-		p->skill = -1;
-	}
+	AString skname = item_def.pSkill;
+	p->skill = LookupSkill(&skname);
 	p->target = target;
+
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&
 		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
