@@ -205,7 +205,7 @@ private:
 	void ModifyItemSpeed(int it, int speed);
 	void ModifyItemProductionBooster(int it, int item, int bonus);
 	void ModifyItemHitch(int it, int item, int bonus);
-	void ModifyItemProductionSkill(int it, char *sk, int lev);
+	void ModifyItemProductionSkill(int it, char const *sk, int lev);
 	void ModifyItemProductionOutput(int it, int months, int count);
 	void ModifyItemProductionInput(int it, int i, int input, int amount);
 	void ModifyItemMagicSkill(int it, char *sk, int lev);

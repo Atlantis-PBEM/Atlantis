@@ -2913,8 +2913,8 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 
 	size_t sz = waterBodies.size();
 	int distances[sz][sz];
-	for (int i = 0; i < sz; i++) {
-		for (int j = 0; j < sz; j++) {
+	for (size_t i = 0; i < sz; i++) {
+		for (size_t j = 0; j < sz; j++) {
 			distances[i][j] = INT32_MAX;
 		}
 	}
@@ -2975,13 +2975,13 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 	});
 
 	int riverName = 0;
-	for (int i = 0; i < sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		std::cout << "Connecting water body " << i << std::endl;
 
 		std::vector<std::pair<int, int>> candidates;
 		WaterBody* source = waterBodies[i];
 
-		for (int j = 0; j < sz; j++) {
+		for (size_t j = 0; j < sz; j++) {
 			if (i == j) {
 				continue;
 			}
@@ -3345,7 +3345,6 @@ std::vector<graphs::Location2D> getPointsFromList(
 
 	while (!processing.empty()) {
 		int i = getrandom(processing.size());
-		auto next = processing.at(i);
 		processing.erase(processing.begin() + i);
 
 		int count = 0;
@@ -3865,8 +3864,8 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 
 	size_t sz = cities.size();
 	int distances[sz][sz];
-	for (int i = 0; i < sz; i++) {
-		for (int j = i + 1; j < sz; j++) {
+	for (size_t i = 0; i < sz; i++) {
+		for (size_t j = i + 1; j < sz; j++) {
 			if (i == j) {
 				distances[i][j] = 0;
 				continue;
@@ -3900,14 +3899,14 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 	}
 
 	std::unordered_set<ARegion*> connected;
-	for (int i = 0; i < sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		auto start = cities[i];
 
 		if (connected.find(start) != connected.end()) {
 			continue;
 		}
 
-		for (int j = 0; j < sz; j++) {
+		for (size_t j = 0; j < sz; j++) {
 			auto dist = distances[i][j];
 			if (!dist || dist > 8) {
 				continue;

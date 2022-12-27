@@ -140,7 +140,7 @@ std::vector<Zone *> ZoneRegion::GetNeihborZones() {
 		if (n->zone == zone) continue;
 
 		auto z = n->zone;
-		for (int j = 0; j < items.size(); j++) {
+		for (size_t j = 0; j < items.size(); j++) {
 			if (items[j] == z) {
 				z = NULL;
 				break;
@@ -509,7 +509,7 @@ public:
 	MapBuilder(ARegionArray* aregs);
 	~MapBuilder();
 
-	int maxZones;
+	size_t maxZones;
 	int gapMin;
 	int gapMax;
 	int volcanoesMin;
@@ -521,13 +521,13 @@ public:
 	int h;
 	std::map<int, Zone *> zones;
 	std::vector<ZoneRegion *> regions;
-	int maxContinentArea;
+	size_t maxContinentArea;
 
 	ZoneRegion* GetRegion(int x, int y);
 	ZoneRegion* GetRegion(Coords location);
 	void CreateZones(int minDistance, int maxAtempts);
 	void GrowZones();
-	void SpecializeZones(int continents, int continentAreaFraction);
+	void SpecializeZones(size_t continents, int continentAreaFraction);
 	void GrowTerrain();
 	void GrowLandInZone(Zone* zone);
 	void SetOceanNames();
@@ -538,7 +538,7 @@ public:
 	void ConnectZones();
 	Zone* CreateZone(ZoneType type);
 	Zone* GetNotIsland();
-	Zone* GetZoneOfMaxSize(ZoneType type, int maxSize);
+	Zone* GetZoneOfMaxSize(ZoneType type, size_t maxSize);
 	void AddVolcanoes();
 	void AddLakes();
 
@@ -579,7 +579,7 @@ Zone* MapBuilder::GetNotIsland() {
 	return NULL;
 }
 
-Zone* MapBuilder::GetZoneOfMaxSize(ZoneType type, int maxSize) {
+Zone* MapBuilder::GetZoneOfMaxSize(ZoneType type, size_t maxSize) {
 	for (auto &kv : this->zones) {
 		auto zone = kv.second;
 		if (zone->type != type) continue;
@@ -910,7 +910,7 @@ std::vector<ZoneRegion *> FindBorderRegions(Zone* zone, Zone* borderZone, const 
 	return list;
 }
 
-void MapBuilder::SpecializeZones(int continents, int continentAreaFraction) {
+void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 	Awrite("Specialize zones");
 
 	int maxArea = (this->w * this->h * continentAreaFraction) / 200;
@@ -989,8 +989,6 @@ void MapBuilder::SpecializeZones(int continents, int continentAreaFraction) {
 	while (nonIsland != NULL) {
 		Awrite("Starting border cleanup ");
 		Zone* otherZone = FindConnectedContinent(nonIsland);
-		bool removeFromA;
-		bool removeFromB;
 
 		int depthRoll = makeRoll(1, this->gapMax - this->gapMin) + this->gapMin;
 		int randomRoll = makeRoll(1, 2);
@@ -1107,12 +1105,15 @@ void MapBuilder::SpecializeZones(int continents, int continentAreaFraction) {
 			case ZoneType::STRAIT:
 				toCleanUp.push(zone);
 				break;
+			case ZoneType::UNDECIDED:
+				Awrite("An unexpected situation occured, zone was type UNDECIDED -- skipping it.");
+				break;
 		}
 	}
 
 	while (!toCleanUp.empty()) {
 		Zone* src = toCleanUp.top();
-		int size = src->regions.size();
+		size_t size = src->regions.size();
 
 		toCleanUp.pop();
 
@@ -1132,7 +1133,8 @@ void MapBuilder::SpecializeZones(int continents, int continentAreaFraction) {
 			}
 
 			case ZoneType::OCEAN: {
-				if (size > makeRoll(3, 12)) break;
+				size_t roll = makeRoll(3,12);
+				if (size > roll) break;
 
 				for (auto &kv : src->neighbors) {
 					auto n = kv.second;
@@ -1147,7 +1149,7 @@ void MapBuilder::SpecializeZones(int continents, int continentAreaFraction) {
 			}
 
 			case ZoneType::STRAIT: {
-				int maxStraitSize = 12 + makeRoll(1, 6) - 3;
+				size_t maxStraitSize = 12 + makeRoll(1, 6) - 3;
 				if (size > maxStraitSize) continue;
 
 				std::vector<Zone *> otherStraits;
@@ -1166,6 +1168,11 @@ void MapBuilder::SpecializeZones(int continents, int continentAreaFraction) {
 					MergeZoneInto(n, src);
 				}
 
+				break;
+			}
+
+			case ZoneType::UNDECIDED: {
+				Awrite("An unexpected situation occured, zone was type UNDECIDED -- skipping it.");
 				break;
 			}
 		}
@@ -1212,7 +1219,7 @@ void MapBuilder::AddVolcanoes() {
 	Awrite("Adding volcanoes");
 	// volcanos will be added anywhere
 
-	int count = makeRoll(1, this->volcanoesMax - this->volcanoesMin) + this->volcanoesMin;
+	size_t count = makeRoll(1, this->volcanoesMax - this->volcanoesMin) + this->volcanoesMin;
 	int distance = (std::min(this->w, this->h / 2) * 2) / count + 2;
 
 	int cols = count / makeRoll(1, 4) + 1;
@@ -1237,7 +1244,7 @@ void MapBuilder::AddVolcanoes() {
 				attempts = 0;
 
 				ZoneRegion* seed = this->GetRegion(x, y);
-				for (int i = 0; i < volcanoes.size(); i++) {
+				for (size_t i = 0; i < volcanoes.size(); i++) {
 					int d = volcanoes[i].Distance(seed->location);
 					if (d < distance) {
 						seed = NULL;
@@ -1275,7 +1282,7 @@ void MapBuilder::AddVolcanoes() {
 						}
 					}
 
-					int regionSize = zone->regions.size();
+					size_t regionSize = zone->regions.size();
 					for (int i = 0; regionSize == zone->regions.size(); i++) {
 						auto &next = candidates[i % candidates.size()];
 						int neigbors = next->CountNeighbors(zone);
@@ -1342,7 +1349,7 @@ void MapBuilder::AddLakes() {
 		if (!lake->IsInner()) continue;
 		if (lake->biome == R_VOLCANO || lake->biome == R_MOUNTAIN) continue;
 
-		for (int i = 0; i < lakes.size(); i++) {
+		for (size_t i = 0; i < lakes.size(); i++) {
 			int d = lakes[i].Distance(lake->location);
 			if (d < distance) {
 				lake = NULL;
@@ -1401,11 +1408,11 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 	}
 
 	// get average province size for this zone
-	int provinceSize = makeRoll(2, 4) + 6;
-	int provinceCount = zone->regions.size() / provinceSize + 1;
+	size_t provinceSize = makeRoll(2, 4) + 6;
+	size_t provinceCount = zone->regions.size() / provinceSize + 1;
 
 	// absolute size one province cannot exceed
-	int maxProvinceSize = zone->regions.size() / 2 + 2;
+	size_t maxProvinceSize = zone->regions.size() / 2 + 2;
 
 	// place province seeds so that there are at least 2 free hexes between
 	std::vector<ZoneRegion *> S;
@@ -1448,7 +1455,7 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 	while (provinces.size() > 0) {
 		int i = getrandom(provinces.size());
 		auto p = provinces[i];
-		int size = p->GetSize();
+		size_t size = p->GetSize();
 
 		if (size >= maxProvinceSize || (size >= provinceSize + getrandom(5) - 2) || !p->Grow()) {
 			provinces.erase(provinces.begin() + i);
@@ -1468,7 +1475,6 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 	while (provinces.size() > 0) {
 		int i = getrandom(provinces.size());
 		auto p = provinces[i];
-		int size = p->GetSize();
 
 		if (!p->Grow()) {
 			provinces.erase(provinces.begin() + i);

@@ -406,14 +406,13 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 Faction *Game::CheckVictory()
 {
 	int visited, unvisited;
-	int d, i, count, reliccount;
+	int d, i, count;
 	int dir;
 	unsigned ucount;
 	Quest *q;
 	ARegion *r, *start;
 	Object *o;
 	Unit *u;
-	Faction *f;
 	Location *l;
 	AString message, times, temp, filename;
 	Arules wf;

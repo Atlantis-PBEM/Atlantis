@@ -11,7 +11,7 @@ GAME ?= standard
 
 CPLUS = g++
 CC = gcc
-CFLAGS = -g -I. -I.. -Wall -std=c++11
+CFLAGS = -g -I. -I.. -Wall -std=c++20
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 

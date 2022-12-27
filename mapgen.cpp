@@ -316,7 +316,6 @@ const double RAINFALL = 0.1;
 // altitude down    | decrease
 
 void simulateRain(CellMap& map, Cell* target, double windAngle, const Edge* windMatrix) {
-    bool isWater = target->biome == B_WATER;
     int x = target->x;
     int y = target->y;
 

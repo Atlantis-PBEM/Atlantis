@@ -389,12 +389,11 @@ ostream & operator <<(ostream & os,const AString & s)
 
 istream & operator >>(istream & is,AString & s)
 {
-	char * buf = new char[256];
+	string buf;
 	is >> buf;
-	s.len = strlen(buf);
+	s.len = strlen(buf.c_str());
 	s.str = new char[s.len + 1];
-	strcpy(s.str,buf);
-	delete[] buf;
+	strcpy(s.str,buf.c_str());
 	return is;
 }
 
