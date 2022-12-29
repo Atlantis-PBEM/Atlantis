@@ -118,22 +118,22 @@ AString & AString::operator=(const char *c)
 	return *this;
 }
 
-int AString::operator==(char *s)
+int AString::operator==(char *s) const
 {
 	return isEqual(s);
 }
 
-int AString::operator==(const char *s)
+int AString::operator==(const char *s) const
 {
 	return isEqual(s);
 }
 
-int AString::operator==(const AString &s)
+int AString::operator==(const AString &s) const
 {
 	return isEqual(s.str);
 }
 
-int AString::isEqual(const char *temp2)
+int AString::isEqual(const char *temp2) const
 {
 	char *temp1 = str;
 
@@ -306,7 +306,7 @@ AString *AString::getlegal()
 	}
 
 	if (!j) {
-		delete temp;
+		delete[] temp;
 		return 0;
 	}
 

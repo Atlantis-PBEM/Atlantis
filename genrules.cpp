@@ -143,7 +143,7 @@ void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac)
 		}
 
 		if (key == F_WAR) {
-			buffer << "tax " + nw << " " << plural(nw, "region", "regions");
+			buffer << "tax " << nw << " " << plural(nw, "region", "regions");
 		}
 
 		if (key == F_TRADE) {

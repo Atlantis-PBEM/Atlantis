@@ -104,8 +104,8 @@ void AssassinationFact::GetEvents(std::list<Event> &events) {
     }
 
     events.push_back({
-        category: EventCategory::EVENT_ASSASSINATION,
-        score: 1,
-        text: buffer.str()
+        .category = EventCategory::EVENT_ASSASSINATION,
+        .score = 1,
+        .text = buffer.str()
     });
 }

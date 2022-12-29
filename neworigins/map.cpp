@@ -32,6 +32,7 @@
 #include <list>
 #include <unordered_set>
 #include <stack>
+#include <random>
 
 enum ZoneType {
 	UNDECIDED,	// zone type not yet determined
@@ -260,8 +261,8 @@ Coords Province::GetLocation() {
 	}
 
 	return {
-		x: xMin + (xMax - xMin + 1) / 2,
-		y: yMin + (yMax - yMin + 1) / 2
+		.x = xMin + (xMax - xMin + 1) / 2,
+		.y = yMin + (yMax - yMin + 1) / 2
 	};
 }
 
@@ -698,8 +699,8 @@ void MapBuilder::CreateZones(int minDistance, int maxAtempts) {
 	int attempts = 0;
 	while (this->zones.size() < this->maxZones && attempts++ < maxAtempts) {
 		Coords location = {
-			x: getrandom(this->w),
-			y: getrandom(this->h)
+			.x = getrandom(this->w),
+			.y = getrandom(this->h)
 		};
 
 		if ((location.x + location.y) % 2) continue;
@@ -1058,7 +1059,12 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 
 	Awrite("Grow oceans");
 	int oceanCores = std::max(1, (int) oceans.size() / 4);
-	std::random_shuffle(oceans.begin(), oceans.end());
+
+	// C++17 and up require different handling for shuffle
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::shuffle(oceans.begin(), oceans.end(), g);
+
 	oceans.resize(oceanCores);
 	for (auto &zone : oceans) {
 		zone->type = ZoneType::OCEAN;

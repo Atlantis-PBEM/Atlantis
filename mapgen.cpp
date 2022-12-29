@@ -54,52 +54,52 @@ const int MAX_RAINFALL = 1000;
 
 const std::vector<Biome> BIOMES = {
     // -10
-    { name: B_TUNDRA,                     feritality: 0.6, temp: { -1000,    0 }, rainfall: {   0,  200 } },
-    { name: B_DESERT,                     feritality: 1.2, temp: { -1000,    0 }, rainfall: { 201,  300 } },
-    { name: B_PLAINS,                     feritality: 0.6, temp: { -1000,    0 }, rainfall: { 301,  500 } },
-    { name: B_FOREST,                     feritality: 0.6, temp: { -1000,    0 }, rainfall: { 501, 1000 } },
+    { .name = B_TUNDRA, .feritality = 0.6, .temp = { -1000,    0 }, .rainfall = {   0,  200 } },
+    { .name = B_DESERT, .feritality = 1.2, .temp = { -1000,    0 }, .rainfall = { 201,  300 } },
+    { .name = B_PLAINS, .feritality = 0.6, .temp = { -1000,    0 }, .rainfall = { 301,  500 } },
+    { .name = B_FOREST, .feritality = 0.6, .temp = { -1000,    0 }, .rainfall = { 501, 1000 } },
 
     // 0
-    { name: B_TUNDRA,                     feritality: 0.8, temp: {     1,   10 }, rainfall: {   0,  100 } },
-    { name: B_DESERT,                     feritality: 1.2, temp: {     1,   30 }, rainfall: { 101,  200 } },
-    { name: B_PLAINS,                     feritality: 1.0, temp: {     1,   10 }, rainfall: { 201,  400 } },
-    { name: B_FOREST,                     feritality: 1.2, temp: {     1,   10 }, rainfall: { 401, 1000 } },
+    { .name = B_TUNDRA, .feritality = 0.8, .temp = {     1,   10 }, .rainfall = {   0,  100 } },
+    { .name = B_DESERT, .feritality = 1.2, .temp = {     1,   30 }, .rainfall = { 101,  200 } },
+    { .name = B_PLAINS, .feritality = 1.0, .temp = {     1,   10 }, .rainfall = { 201,  400 } },
+    { .name = B_FOREST, .feritality = 1.2, .temp = {     1,   10 }, .rainfall = { 401, 1000 } },
 
     // 10
-    { name: B_DESERT,                     feritality: 1.2, temp: {    11,   30 }, rainfall: {   0,  200 } },
-    { name: B_PLAINS,                     feritality: 1.0, temp: {    11,   20 }, rainfall: { 201,  300 } },
-    { name: B_FOREST,                     feritality: 1.0, temp: {    11,   20 }, rainfall: { 301,  500 } },
-    { name: B_SWAMP,                      feritality: 1.0, temp: {    11,   20 }, rainfall: { 501, 1000 } },
+    { .name = B_DESERT, .feritality = 1.2, .temp = {    11,   30 }, .rainfall = {   0,  200 } },
+    { .name = B_PLAINS, .feritality = 1.0, .temp = {    11,   20 }, .rainfall = { 201,  300 } },
+    { .name = B_FOREST, .feritality = 1.0, .temp = {    11,   20 }, .rainfall = { 301,  500 } },
+    { .name = B_SWAMP,  .feritality = 1.0, .temp = {    11,   20 }, .rainfall = { 501, 1000 } },
 
     // 20
-    { name: B_DESERT,                     feritality: 1.2, temp: {    21,   30 }, rainfall: {   0,  100 } },
-    { name: B_PLAINS,                     feritality: 1.0, temp: {    21,   30 }, rainfall: { 101,  200 } },
-    { name: B_FOREST,                     feritality: 1.2, temp: {    21,   30 }, rainfall: { 201,  400 } },
-    { name: B_JUNGLE,                     feritality: 0.8, temp: {    21,   30 }, rainfall: { 401,  500 } },
-    { name: B_SWAMP,                      feritality: 0.8, temp: {    21,   30 }, rainfall: { 501, 1000 } },
+    { .name = B_DESERT, .feritality = 1.2, .temp = {    21,   30 }, .rainfall = {   0,  100 } },
+    { .name = B_PLAINS, .feritality = 1.0, .temp = {    21,   30 }, .rainfall = { 101,  200 } },
+    { .name = B_FOREST, .feritality = 1.2, .temp = {    21,   30 }, .rainfall = { 201,  400 } },
+    { .name = B_JUNGLE, .feritality = 0.8, .temp = {    21,   30 }, .rainfall = { 401,  500 } },
+    { .name = B_SWAMP,  .feritality = 0.8, .temp = {    21,   30 }, .rainfall = { 501, 1000 } },
 
     // 30
-    { name: B_DESERT,                     feritality: 1.0, temp: {    31,   40 }, rainfall: {   0,  100 } },
-    { name: B_PLAINS,                     feritality: 1.2, temp: {    31,   40 }, rainfall: { 101,  300 } },
-    { name: B_FOREST,                     feritality: 1.2, temp: {    31,   40 }, rainfall: { 301,  400 } },
-    { name: B_JUNGLE,                     feritality: 1.0, temp: {    31,   40 }, rainfall: { 401,  600 } },
-    { name: B_SWAMP,                      feritality: 0.8, temp: {    31,   40 }, rainfall: { 601, 1000 } },
+    { .name = B_DESERT, .feritality = 1.0, .temp = {    31,   40 }, .rainfall = {   0,  100 } },
+    { .name = B_PLAINS, .feritality = 1.2, .temp = {    31,   40 }, .rainfall = { 101,  300 } },
+    { .name = B_FOREST, .feritality = 1.2, .temp = {    31,   40 }, .rainfall = { 301,  400 } },
+    { .name = B_JUNGLE, .feritality = 1.0, .temp = {    31,   40 }, .rainfall = { 401,  600 } },
+    { .name = B_SWAMP,  .feritality = 0.8, .temp = {    31,   40 }, .rainfall = { 601, 1000 } },
 
     // 40
-    { name: B_DESERT,                     feritality: 1.0, temp: {    41,   50 }, rainfall: {   0,  200 } },
-    { name: B_PLAINS,                     feritality: 1.2, temp: {    41,   50 }, rainfall: { 201,  300 } },
-    { name: B_FOREST,                     feritality: 1.2, temp: {    41,   50 }, rainfall: { 301,  400 } },
-    { name: B_JUNGLE,                     feritality: 1.0, temp: {    41,   50 }, rainfall: { 401, 1000 } },
+    { .name = B_DESERT, .feritality = 1.0, .temp = {    41,   50 }, .rainfall = {   0,  200 } },
+    { .name = B_PLAINS, .feritality = 1.2, .temp = {    41,   50 }, .rainfall = { 201,  300 } },
+    { .name = B_FOREST, .feritality = 1.2, .temp = {    41,   50 }, .rainfall = { 301,  400 } },
+    { .name = B_JUNGLE, .feritality = 1.0, .temp = {    41,   50 }, .rainfall = { 401, 1000 } },
 
     // 50
-    { name: B_DESERT,                     feritality: 1.0, temp: {    51,   60 }, rainfall: {   0,  300 } },
-    { name: B_PLAINS,                     feritality: 1.2, temp: {    51,   60 }, rainfall: { 301,  400 } },
-    { name: B_JUNGLE,                     feritality: 1.0, temp: {    51,   60 }, rainfall: { 401, 1000 } },
+    { .name = B_DESERT, .feritality = 1.0, .temp = {    51,   60 }, .rainfall = {   0,  300 } },
+    { .name = B_PLAINS, .feritality = 1.2, .temp = {    51,   60 }, .rainfall = { 301,  400 } },
+    { .name = B_JUNGLE, .feritality = 1.0, .temp = {    51,   60 }, .rainfall = { 401, 1000 } },
 
     // 60
-    { name: B_DESERT,                     feritality: 1.0, temp: {    61, 1000 }, rainfall: {   0,  400 } },
-    { name: B_PLAINS,                     feritality: 1.2, temp: {    61, 1000 }, rainfall: { 401,  500 } },
-    { name: B_JUNGLE,                     feritality: 1.0, temp: {    61, 1000 }, rainfall: { 501, 1000 } },
+    { .name = B_DESERT, .feritality = 1.0, .temp = {    61, 1000 }, .rainfall = {   0,  400 } },
+    { .name = B_PLAINS, .feritality = 1.2, .temp = {    61, 1000 }, .rainfall = { 401,  500 } },
+    { .name = B_JUNGLE, .feritality = 1.0, .temp = {    61, 1000 }, .rainfall = { 501, 1000 } },
 };
 
 bool Range::in(const int value) const {
@@ -167,15 +167,15 @@ CellMap::CellMap(int width, int height) {
         coords(i, x, y);
 
         items.push_back(new Cell({
-            index: i,
-            x: x,
-            y: y,
-            biome: B_UNKNOWN,
-            elevation: 0,
-            temperature: 0,
-            saturation: 0,
-            evoparation: 0,
-            rainfall: 0,
+            .index = i,
+            .x = x,
+            .y = y,
+            .biome = B_UNKNOWN,
+            .elevation = 0,
+            .temperature = 0,
+            .saturation = 0,
+            .evoparation = 0,
+            .rainfall = 0,
         }));
     }
 }
@@ -305,7 +305,6 @@ const Edge WIND[MOISTURE_SOURCES] = {
     {  1,  1, 0.05 }
 };
 
-const double SEA_EVOPARATION = 0.8;
 const double RAINFALL = 0.1;
 
 //                  | rainfall

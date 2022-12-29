@@ -47,9 +47,9 @@ public:
 	AString(const std::string &);
 	~AString();
 
-	int operator==(const AString &);
-	int operator==(char *);
-	int operator==(const char *);
+	int operator==(const AString &) const;
+	int operator==(char *) const;
+	int operator==(const char *) const;
 	int CheckPrefix(const AString &);
 	AString operator+(const AString &);
 	AString & operator+=(const AString &);
@@ -72,7 +72,7 @@ private:
 
 	int len;
 	char *str;
-	int isEqual(const char *);
+	int isEqual(const char *) const;
 };
 
 const std::string plural(int count, const std::string &one, const std::string &many);
