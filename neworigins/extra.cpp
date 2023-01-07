@@ -30,6 +30,7 @@
 #include "quests.h"
 #include <string>
 #include <iterator>
+#include <memory>
 
 #define MINIMUM_ACTIVE_QUESTS		5
 #define MAXIMUM_ACTIVE_QUESTS		20
@@ -406,14 +407,13 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 Faction *Game::CheckVictory()
 {
 	int visited, unvisited;
-	int d, i, count, reliccount;
+	int d, i, count;
 	int dir;
 	unsigned ucount;
 	Quest *q;
 	ARegion *r, *start;
 	Object *o;
 	Unit *u;
-	Faction *f;
 	Location *l;
 	AString message, times, temp, filename;
 	Arules wf;
@@ -423,6 +423,7 @@ Faction *Game::CheckVictory()
 	set<string> intersection, un;
 	set<string>::iterator it2;
 
+	// check VISIT quests
 	forlist(&quests) {
 		q = (Quest *) elem;
 		if (q->type != Quest::VISIT)
@@ -433,6 +434,8 @@ Faction *Game::CheckVictory()
 			un.insert(*it2);
 		}
 	}
+
+	// calculate visited regions
 	visited = 0;
 	unvisited = 0;
 	forlist_reuse(&regions) {
@@ -478,6 +481,7 @@ Faction *Game::CheckVictory()
 			CreateQuest(&regions, monfaction);
 		}
 	}
+
 	if (unvisited) {
 		// Tell the players to get exploring :-)
 		if (visited > 9 * unvisited) {
@@ -641,6 +645,7 @@ Faction *Game::CheckVictory()
 		}
 	}
 
+	// report current quests
 	forlist_reuse(&quests) {
 		q = (Quest *) elem;
 
@@ -733,7 +738,94 @@ Faction *Game::CheckVictory()
 		}
 	}
 
-	return NULL;
+	Faction *winner = nullptr;
+
+	constexpr bool VOTE_VICTORY = true;
+	if (VOTE_VICTORY)
+	{
+		std::map<int, int> votes; // track votes per player id
+		int possible_votes = 0;
+		//foreach region
+		forlist_reuse(&regions) {
+			ARegion *r = (ARegion *) elem;
+			// check for town
+			if (!r->town) {
+				continue;
+			}
+
+			// only cities count
+			const int town_type = r->town->TownType();
+			if (town_type != TOWN_CITY) {
+				continue;
+			}
+			++possible_votes;
+
+			// pull first word of name
+			std::unique_ptr<AString> name(new AString(*r->town->name));
+			std::unique_ptr<AString> first_word(name->gettoken());
+
+			// convert to int
+			const int first_number = first_word->strict_value();
+			if (first_number == -1) {
+				continue; // not an int
+			}
+
+			// find vote
+			auto vote_iter = votes.find(first_number);
+			if (vote_iter == votes.end())
+			{
+				// first vote!
+				votes.insert(std::make_pair(first_number, 1));
+			}
+			else
+			{
+				// add one
+				++vote_iter->second;
+			}
+		}
+
+		message = "Voting results:\n";
+		int max_vote = -1;
+		bool tie = false;
+		for (const auto &v : votes)
+		{
+			Faction *f = GetFaction(&factions, v.first);
+			if (!f) {
+				continue;
+			}
+
+			if (max_vote < v.second)
+			{
+				max_vote = v.second;
+				tie = false;
+			}
+			else if (max_vote == v.second)
+			{
+				tie = true;
+			}
+
+			message += *f->name + " got " + v.second + " vote.\n";
+		}
+
+		if (max_vote == -1)
+		{
+			message += "No votes";
+		}
+		else
+		{
+			if (tie)
+			{
+				message += AString("Max vote tied at ") + max_vote + " out of " + possible_votes + " possible.";
+			}
+			else
+			{
+				message += AString("Max vote ") + max_vote + " out of " + possible_votes + " possible.";
+			}
+		}
+		WriteTimesArticle(message);
+	}
+
+	return winner;
 }
 
 void Game::ModifyTablesPerRuleset(void)
