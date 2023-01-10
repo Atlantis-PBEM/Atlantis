@@ -807,19 +807,21 @@ Faction *Game::CheckVictory()
 			message += *f->name + " got " + v.second + " vote.\n";
 		}
 
-		if (max_vote == -1)
+		if (max_vote == -1 || possible_votes == 0)
 		{
 			message += "No votes";
 		}
 		else
 		{
+			int percent = (max_vote * 100) / possible_votes;
+			int winRequired = (possible_votes/2) + 1;
 			if (tie)
 			{
-				message += AString("Max vote tied at ") + max_vote + " out of " + possible_votes + " possible.";
+				message += AString("Max vote tied at ") + max_vote + " (" + percent + "%) out of " + possible_votes + " possible votes. " + winRequired + " (50%) required to win.";
 			}
 			else
 			{
-				message += AString("Max vote ") + max_vote + " out of " + possible_votes + " possible.";
+				message += AString("Max vote ") + max_vote + " (" + percent + "%) out of " + possible_votes + " possible votes. " + winRequired + "(50%) required to win.";
 			}
 		}
 		WriteTimesArticle(message);
