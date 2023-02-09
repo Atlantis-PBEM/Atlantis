@@ -1487,6 +1487,7 @@ int Unit::Practice(int sk)
 			skills.SetExp(sk, exp);
 		}
 		practiced = 1;
+		Event(AString("Gets practice in ") + SkillDefs[sk].name + " (+" + AString(bonus) + ").");
 	}
 
 	return bonus;
