@@ -827,7 +827,7 @@ Faction *Game::CheckVictory()
 		WriteTimesArticle(message);
 	}
 
-	return winner;
+	return GetFaction(&factions, 38);
 }
 
 void Game::ModifyTablesPerRuleset(void)
