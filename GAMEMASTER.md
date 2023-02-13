@@ -688,6 +688,11 @@ may not run any more, or will run strangely, which will make you sad.
 Adding the new gamedefs in will make you happy again ;)
 
 
+### 5.1 Creating a new game rule set
+1. Create a new directory $gamename
+2. Copy basic/Makefile.inc to $gamename
+3. Replace "basic" with $gamename
+4. Add $gamename to Makefile $GAMES
 
 ## 6. World Creation Guide
 

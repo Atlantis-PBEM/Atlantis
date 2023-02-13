@@ -6,124 +6,48 @@
 # ----        ------         --------
 # 2000/MAR/14 Davis Kulis    Added the template code.
 # 2004/MAR/29 Jan Rietema    Added/modified the gamesets
+CXX ?= g++
+CXXFLAGS += -g -I. -I.. -Wall -std=c++11 -MP -MMD -O
 
-GAME ?= standard
+# allow substitution of dependency file
+CXXBUILD = $(CXX) $(CXXFLAGS) -MF $(patsubst %.cpp,dep/%.d,$<) -c -o $@ $<
 
-CPLUS = g++
-CC = gcc
-CFLAGS = -g -I. -I.. -Wall -std=c++11
-
-RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
-
-ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
+OBJ := alist.o aregion.o army.o astring.o battle.o economy.o \
   edit.o faction.o fileio.o game.o gamedata.o gamedefs.o gameio.o \
   genrules.o i_rand.o items.o main.o market.o modify.o monthorders.o \
   npc.o object.o orders.o parseorders.o production.o quests.o runorders.o \
   shields.o skills.o skillshows.o specials.o spells.o template.o unit.o \
   events.o events-battle.o events-assassination.o mapgen.o simplex.o namegen.o
 
-OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
-  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 
+# objects per rule set
+RULESET := extra.o map.o monsters.o rules.o world.o
 
-$(GAME)-m: objdir $(OBJECTS)
-	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
+# sub games
+GAMES := basic standard fracas kingdoms havilah neworigins
+# arcadia seems different
 
-all: basic standard fracas kingdoms havilah neworigins
+DEP  := $(addprefix dep/,$(OBJ:.o=.d))
+ALL_OBJS := $(addprefix obj/,$(OBJ))
 
-arcadia: FORCE
-	$(MAKE) GAME=arcadia
+### targets
+.PHONY: all
+all: dep obj
 
-basic: FORCE
-	$(MAKE) GAME=basic
+.PHONY: all-rules
 
-standard: FORCE
-	$(MAKE) GAME=standard
-	
-kingdoms: FORCE
-	$(MAKE) GAME=kingdoms
+obj:
+	@mkdir $@
 
-fracas: FORCE
-	$(MAKE) GAME=fracas
+dep:
+	@mkdir $@
 
-havilah: FORCE
-	$(MAKE) GAME=havilah
+-include $(DEP)
+-include $(addsuffix /Makefile.inc, $(GAMES))
 
-neworigins: FORCE
-	$(MAKE) GAME=neworigins
+.PHONY: clean
+clean::
+	@rm -f $(ALL_OBJS)
 
-$(GAME)/$(GAME): FORCE
-	$(MAKE) GAME=$(GAME)
-
-all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
-	havilah-clean neworigins-clean
-
-arcadia-clean:
-	$(MAKE) GAME=arcadia clean
-
-basic-clean:
-	$(MAKE) GAME=basic clean
-
-standard-clean:
-	$(MAKE) GAME=standard clean
-
-fracas-clean:
-	$(MAKE) GAME=fracas clean
-	
-kingdoms-clean:
-	$(MAKE) GAME=kingdoms clean
-
-havilah-clean:
-	$(MAKE) GAME=havilah clean
-
-neworigins-clean:
-	$(MAKE) GAME=neworigins clean
-
-clean:
-	rm -f $(OBJECTS)
-	if [ -d obj ]; then rmdir obj; fi
-	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
-	rm -f $(GAME)/html/$(GAME).html
-	rm -f $(GAME)/$(GAME)
-
-all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
-	havilah-rules neworigins-rules
-
-arcadia-rules:
-	$(MAKE) GAME=arcadia rules
-
-basic-rules:
-	$(MAKE) GAME=basic rules
-
-standard-rules:
-	$(MAKE) GAME=standard rules
-
-fracas-rules:
-	$(MAKE) GAME=fracas rules
-	
-kingdoms-rules:
-	$(MAKE) GAME=kingdoms rules
-
-havilah-rules:
-	$(MAKE) GAME=havilah rules
-
-neworigins-rules:
-	$(MAKE) GAME=neworigins rules
-
-rules: $(GAME)/$(GAME)
-	(cd $(GAME); \
-	 ./$(GAME) genrules $(GAME)_intro.html $(GAME).css html/$(GAME).html \
-	)
-
-FORCE:
-
-objdir:
-	if [ ! -d obj ]; then mkdir obj; fi
-	if [ ! -d $(GAME)/obj ]; then mkdir $(GAME)/obj; fi
-
-
-$(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
-
-$(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
+$(ALL_OBJS): obj/%.o: %.cpp
+	@$(CXXBUILD)
 
