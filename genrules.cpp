@@ -2467,7 +2467,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_FOOD)) continue;
 			if (last != -1) {
-				if (j > 0) temp += ", ";
+				if (j > 1) temp += ", ";
 				temp += ItemDefs[last].names;
 			}
 			last = i;
@@ -2477,7 +2477,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ItemDefs[last].names;
 		temp += " for each ";
 		temp += Globals->UPKEEP_FOOD_VALUE;
-		temp += " silver of maintenance owed. ";
+		if (Globals->MAINTENANCE_COST % Globals->UPKEEP_FOOD_VALUE)
+                    temp += " silver (or fraction thereof) of maintenance owed. "
+                        "Fractional portions of food may not be shared with other units. ";
+		else
+                    temp += " silver of maintenance owed. ";
 		if (Globals->UPKEEP_MINIMUM_FOOD > 0) {
 			temp += "A unit must be given at least ";
 			temp +=	Globals->UPKEEP_MINIMUM_FOOD;
