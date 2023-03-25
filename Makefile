@@ -48,6 +48,10 @@ dep:
 clean::
 	@rm -f $(ALL_OBJS)
 
+.PHONY: all-clean
+all-clean:
+	$(MAKE) clean
+
 $(ALL_OBJS): obj/%.o: %.cpp
 	@$(CXXBUILD)
 
