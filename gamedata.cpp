@@ -4233,7 +4233,7 @@ static TerrainType td[] = {
 	{"swamp", "swamps", "swamp", 's', R_SWAMP,
 	 TerrainType::FLYINGMOUNTS | TerrainType::SHOW_RULES,
 	 200,11,10,2,
-	 {{I_WOOD,100,10},{I_FLOATER,30,10},{I_HERBS,100,10},{I_MUSHROOM,25,5},
+	 {{I_WOOD,100,10},{I_FLOATER,40,8},{I_HERBS,100,10},{I_MUSHROOM,30,5},
 	  {-1,0,0},{-1,0,0},{-1,0,0}},
 	 {I_TRIBESMAN,I_TRIBALELF,-1,-1},
 	 {I_VIKING,I_SEAELF,-1},
