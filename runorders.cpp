@@ -947,6 +947,11 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 {
 	EvictOrder *ord = u->evictorders;
 
+	if (obj->region->type == R_NEXUS) {
+		u->Error("Evict: Evict does not work in the Nexus.");
+		return;
+	}
+
 	obj->region->DeduplicateUnitList(&ord->targets, u->faction->num);
 	while (ord && ord->targets.Num()) {
 		UnitId *id = (UnitId *)ord->targets.First();

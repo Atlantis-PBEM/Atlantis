@@ -1166,7 +1166,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_DESERT, 0, I_GNOLL);
 	ModifyTerrainCoastRace(R_DESERT, 1, I_GOBLINMAN);
 	ModifyTerrainCoastRace(R_DESERT, 2, I_MAN);
-	ModifyTerrainEconomy(R_DESERT, 500, 11, 10, 1);
+	ModifyTerrainEconomy(R_DESERT, 400, 11, 10, 1);
 
 	ClearTerrainRaces(R_TUNDRA);
 	ModifyTerrainRace(R_TUNDRA, 0, I_ICEDWARF);
@@ -1195,7 +1195,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_UFOREST, 0, I_DROWMAN);
 	ModifyTerrainCoastRace(R_UFOREST, 1, I_GNOME);
 	ModifyTerrainCoastRace(R_UFOREST, 2, I_GOBLINMAN);
-	ModifyTerrainEconomy(R_UFOREST, 400, 11, 10, 3);
+	ModifyTerrainEconomy(R_UFOREST, 400, 11, 10, 2);
 
 	ClearTerrainRaces(R_CHASM);
 	ModifyTerrainRace(R_CHASM, 0, I_DROWMAN);
@@ -1204,10 +1204,10 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_CHASM, 0, I_UNDERDWARF);
 	ModifyTerrainCoastRace(R_CHASM, 1, I_DROWMAN);
 	ModifyTerrainCoastRace(R_CHASM, 2, I_GOBLINMAN);
-	ModifyTerrainEconomy(R_CHASM, 600, 11, 10, 4);
+	ModifyTerrainEconomy(R_CHASM, 200, 11, 10, 4);
 
 	ClearTerrainRaces(R_TUNNELS);
-	ModifyTerrainEconomy(R_TUNNELS, 0, 0, 0, 3);
+	ModifyTerrainEconomy(R_TUNNELS, 0, 0, 0, 2);
 
 
 	// Modify the various spells which are allowed to cross levels
