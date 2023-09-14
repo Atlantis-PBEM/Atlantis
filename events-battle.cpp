@@ -446,7 +446,7 @@ const Event pvpBattle(BattleFact* fact) {
         buffer
             << " happened in the " << fact->location.GetTerrainName(true)                // happened in the plains
             << " of " << fact->location.province                            // of Cefelat
-            << " where " << lost << plural(lost, "combatant", "combatants") // where 75 combatants
+            << " where " << lost << " " << plural(lost, "combatant", "combatants") // where 75 combatants
             << " " << plural(lost, "was", "were") << " killed."             // were killed
             ;
 
@@ -496,7 +496,7 @@ const Event pvpBattle(BattleFact* fact) {
             << " and " << fact->defender.factionName
             << " happened in the " << fact->location.GetTerrainName(true)                // happened in the plains
             << " of " << fact->location.province                            // of Cefelat
-            << " where " << lost << plural(lost, "combatant", "combatants") // where 75 combatants
+            << " where " << lost << " " << plural(lost, "combatant", "combatants") // where 75 combatants
             << " " << plural(lost, "was", "were") << " killed."             // were killed
             ;
 
