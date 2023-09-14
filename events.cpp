@@ -277,7 +277,8 @@ void Events::AddFact(FactBase *fact) {
 }
 
 bool compareEvents(const Event &first, const Event &second) {
-    return first.score < second.score;
+    // return true if first should go before second
+    return first.score > second.score;
 }
 
 std::list<string> wrapText(std::string input, std::size_t width) {
