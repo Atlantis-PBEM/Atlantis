@@ -391,7 +391,7 @@ const Event pvpBattle(BattleFact* fact) {
             << " between " << oneOf(TWO_SIDES)                              // between hostile forces
             << " happened in the " << fact->location.GetTerrainName(true)                // happened in the plains
             << " of " << fact->location.province                            // of Cefelat
-            << " where " << lost << plural(lost, "combatant", "combatants") // where 75 combatants
+            << " where " << lost << " " << plural(lost, "combatant", "combatants") // where 75 combatants
             << " " << plural(lost, "was", "were") << " killed."             // were killed
             ;
         
