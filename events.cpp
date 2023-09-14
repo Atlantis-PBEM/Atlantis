@@ -277,7 +277,8 @@ void Events::AddFact(FactBase *fact) {
 }
 
 bool compareEvents(const Event &first, const Event &second) {
-    return first.score < second.score;
+    // return true if first should go before second
+    return first.score > second.score;
 }
 
 std::list<string> wrapText(std::string input, std::size_t width) {
@@ -383,10 +384,10 @@ std::string Events::Write(std::string worldName, std::string month, int year) {
     }
 
     text += "(__       _       _       _       _       _       _       _       _       __)\n";
-    text += "    `-._.-' (___ _) `-._.-' `-._.-' )     ( `-._.-' `-._.-' (__ _ ) `-._.-'\n";
+    text += "    '-._.-' (___ _) '-._.-' '-._.-' )     ( '-._.-' '-._.-' (__ _ ) '-._.-'\n";
     text += "            ( _ __)                (_     _)                (_ ___)\n";
-    text += "            (__  _)                 `-._.-'                 (___ _)\n";
-    text += "            `-._.-'                                         `-._.-'\n";
+    text += "            (__  _)                 '-._.-'                 (___ _)\n";
+    text += "            '-._.-'                                         '-._.-'\n";
 
     return text;
 }
