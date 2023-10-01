@@ -1597,8 +1597,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 
 	if (u->Study(sk,days)) {
 		u->ConsumeSharedMoney(cost);
-		str = "Studies ";
-		str += SkillDefs[sk].name;
+		str = AString("Studies ") + (SkillDefs[sk].name) + " for $" + cost;
 		taughtdays = taughtdays/u->GetMen();
 		if (taughtdays) {
 			str += " and was taught for ";
