@@ -2042,6 +2042,8 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 			order = new AString("#end");
 		}
 		AString	saveorder = *order;
+		// In order to allow @endturn to work the same as endturn we need to check for and eat the possible @
+		int getatsign = order->getat();
 		token = order->gettoken();
 
 		if (token) {
