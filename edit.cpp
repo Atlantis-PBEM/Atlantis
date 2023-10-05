@@ -612,7 +612,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 						pReg->gate = getrandom(ngates);
 						while (used[pReg->gate])
 							pReg->gate = getrandom(ngates);
-						delete used;
+						delete[] used;
 						pReg->gate++;
 					} else {
 						int gatenum = getrandom(regions.numberofgates) + 1;

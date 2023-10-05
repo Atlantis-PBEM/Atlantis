@@ -1387,5 +1387,5 @@ void ARegionList::FinalSetupGates()
 			r->gatemonth = getrandom(12);
 		}
 	}
-	delete used;
+	delete[] used;
 }

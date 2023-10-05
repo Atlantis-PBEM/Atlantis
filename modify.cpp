@@ -162,7 +162,7 @@ void Game::ModifyItemHitch(int it, int item, int capacity)
 	ItemDefs[it].hitchwalk = capacity;
 }
 
-void Game::ModifyItemProductionSkill(int it, char *sk, int lev)
+void Game::ModifyItemProductionSkill(int it, char const *sk, int lev)
 {
 	if (it < 0 || it > (NITEMS-1)) return;
 	if (sk && (FindSkill(sk) == NULL)) return;

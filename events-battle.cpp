@@ -217,9 +217,9 @@ const Event cityCapture(BattleFact* fact) {
     }
 
     return {
-        category: EventCategory::EVENT_CITY_CAPTURE,
-        score: fact->location.settlementType + 2,
-        text: buffer.str()
+        .category = EventCategory::EVENT_CITY_CAPTURE,
+        .score = fact->location.settlementType + 2,
+        .text = buffer.str()
     };
 }
 
@@ -277,9 +277,9 @@ const Event monsterHunt(BattleFact* fact) {
     }
 
     return {
-        category: EventCategory::EVENT_MONSTER_HUNT,
-        score: 1,
-        text: buffer.str()
+        .category = EventCategory::EVENT_MONSTER_HUNT,
+        .score = 1,
+        .text = buffer.str()
     };
 }
 
@@ -322,9 +322,9 @@ const Event monsterAggresion(BattleFact* fact) {
     }
 
     return {
-        category: EventCategory::EVENT_MONSTER_AGGRESSION,
-        score: 1,
-        text: buffer.str()
+        .category = EventCategory::EVENT_MONSTER_AGGRESSION,
+        .score = 1,
+        .text = buffer.str()
     };
 }
 
@@ -569,9 +569,9 @@ const Event pvpBattle(BattleFact* fact) {
     if (totalFMI > 0) score += 1;
 
     return {
-        category: EventCategory::EVENT_BATTLE,
-        score: score,
-        text: buffer.str()
+        .category = EventCategory::EVENT_BATTLE,
+        .score = score,
+        .text = buffer.str()
     };
 }
 

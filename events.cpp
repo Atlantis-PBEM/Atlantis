@@ -119,11 +119,11 @@ void populateSettlementLandmark(std::vector<Landmark> &landmarks, ARegion *reg, 
     std::string title = townType(reg->town->TownType()) + " of " + name;
 
     landmarks.push_back({
-        type: events::LandmarkType::SETTLEMENT,
-        name: name,
-        title: title,
-        distance: distance,
-        weight: 10
+        .type = events::LandmarkType::SETTLEMENT,
+        .name = name,
+        .title = title,
+        .distance = distance,
+        .weight = 10
     });
 }
 
@@ -164,11 +164,11 @@ void populateRegionLandmark(std::vector<Landmark> &landmarks, ARegion *source, A
     }
     
     landmarks.push_back({
-        type: type,
-        name: name,
-        title: title,
-        distance: distance,
-        weight: weight
+        .type = type,
+        .name = name,
+        .title = title,
+        .distance = distance,
+        .weight = weight
     });
 }
 
@@ -204,11 +204,11 @@ void populateForitifcationLandmark(std::vector<Landmark> &landmarks, ARegion *re
     std::string title = std::string(ObjectDefs[building->type].name) + " " + name;
 
     landmarks.push_back({
-        type: events::LandmarkType::FORTIFICATION,
-        name: name,
-        title: title,
-        distance: distance,
-        weight: 5
+        .type = events::LandmarkType::FORTIFICATION,
+        .name = name,
+        .title = title,
+        .distance = distance,
+        .weight = 5
     });
 }
 

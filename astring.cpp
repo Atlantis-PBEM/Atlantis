@@ -55,7 +55,7 @@ AString::AString(const char *s)
 AString::AString(int l)
 {
 	char buf[16];
-	sprintf(buf,"%d",l);
+	snprintf(buf, 16, "%d", l);
 	len = strlen(buf);
 	str = new char[len+1];
 	strcpy(str,buf);
@@ -64,7 +64,7 @@ AString::AString(int l)
 AString::AString(unsigned int l)
 {
 	char buf[16];
-	sprintf(buf,"%u",l);
+	snprintf(buf, 16, "%u", l);
 	len = strlen(buf);
 	str = new char[len+1];
 	strcpy(str,buf);
@@ -118,22 +118,22 @@ AString & AString::operator=(const char *c)
 	return *this;
 }
 
-int AString::operator==(char *s)
+int AString::operator==(char *s) const
 {
 	return isEqual(s);
 }
 
-int AString::operator==(const char *s)
+int AString::operator==(const char *s) const
 {
 	return isEqual(s);
 }
 
-int AString::operator==(const AString &s)
+int AString::operator==(const AString &s) const
 {
 	return isEqual(s.str);
 }
 
-int AString::isEqual(const char *temp2)
+int AString::isEqual(const char *temp2) const
 {
 	char *temp1 = str;
 
@@ -306,7 +306,7 @@ AString *AString::getlegal()
 	}
 
 	if (!j) {
-		delete temp;
+		delete[] temp;
 		return 0;
 	}
 

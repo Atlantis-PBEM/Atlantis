@@ -1387,7 +1387,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 		if (type == R_NEXUS) {
 			int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
 			char *nexus_desc = new char[len];
-			sprintf(nexus_desc, AC_STRING, Globals->WORLD_NAME,
+			snprintf(nexus_desc, len, AC_STRING, Globals->WORLD_NAME,
 					Globals->WORLD_NAME);
 			f->PutStr("");
 			f->PutStr(nexus_desc);
@@ -2913,8 +2913,8 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 
 	size_t sz = waterBodies.size();
 	int distances[sz][sz];
-	for (int i = 0; i < sz; i++) {
-		for (int j = 0; j < sz; j++) {
+	for (size_t i = 0; i < sz; i++) {
+		for (size_t j = 0; j < sz; j++) {
 			distances[i][j] = INT32_MAX;
 		}
 	}
@@ -2975,13 +2975,13 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 	});
 
 	int riverName = 0;
-	for (int i = 0; i < sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		std::cout << "Connecting water body " << i << std::endl;
 
 		std::vector<std::pair<int, int>> candidates;
 		WaterBody* source = waterBodies[i];
 
-		for (int j = 0; j < sz; j++) {
+		for (size_t j = 0; j < sz; j++) {
 			if (i == j) {
 				continue;
 			}
@@ -3007,7 +3007,9 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 					continue;
 				}
 
-				graph.setInclusion([ source, target, &rivers, &waterBodies ](ARegion* current, ARegion* next) {
+				// Commented out waterBodies to match that it's not used currently due to that if statement
+				// in the lambda being commented out.
+				graph.setInclusion([ source, target, &rivers/*, &waterBodies*/ ](ARegion* current, ARegion* next) {
 					if (source->includes(next)) {
 						// river can't go through source water body
 						return false;
@@ -3254,7 +3256,7 @@ std::vector<graphs::Location2D> getPoints(const int w, const int h,
 	
 	graphs::Location2D loc;
 	do {
-		loc = { x: getrandom(w), y: getrandom(h) };
+		loc = { .x = getrandom(w), .y = getrandom(h) };
 	}
 	while (!onIsIncluded(loc));
 
@@ -3345,7 +3347,6 @@ std::vector<graphs::Location2D> getPointsFromList(
 
 	while (!processing.empty()) {
 		int i = getrandom(processing.size());
-		auto next = processing.at(i);
 		processing.erase(processing.begin() + i);
 
 		int count = 0;
@@ -3699,13 +3700,13 @@ void economy(ARegionArray* arr, const int w, const int h) {
 		std::string name = getEthnicName(makeRoll(1, w * h), etnos);
 
 		reg->ManualSetup({
-			terrain: terrain,
-			habitat: terrain->pop + 1,
-			prodWeight: 1,
-			addLair: false,
-			addSettlement: true,
-			settlementName: name,
-			settlementSize: size
+			.terrain = terrain,
+			.habitat = terrain->pop + 1,
+			.prodWeight = 1,
+			.addLair = false,
+			.addSettlement = true,
+			.settlementName = name,
+			.settlementSize = size
 		});
 
 		visited.insert(reg);
@@ -3735,13 +3736,13 @@ void economy(ARegionArray* arr, const int w, const int h) {
 			bool addLair = getrandom(100) < terrain->lairChance;
 
 			reg->ManualSetup({
-				terrain: terrain,
-				habitat: terrain->pop + 1,
-				prodWeight: 1,
-				addLair: addLair,
-				addSettlement: false,
-				settlementName: std::string(),
-				settlementSize: 0
+				.terrain = terrain,
+				.habitat = terrain->pop + 1,
+				.prodWeight = 1,
+				.addLair = addLair,
+				.addSettlement = false,
+				.settlementName = std::string(),
+				.settlementSize = 0
 			});
 		}
 	}
@@ -3865,8 +3866,8 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 
 	size_t sz = cities.size();
 	int distances[sz][sz];
-	for (int i = 0; i < sz; i++) {
-		for (int j = i + 1; j < sz; j++) {
+	for (size_t i = 0; i < sz; i++) {
+		for (size_t j = i + 1; j < sz; j++) {
 			if (i == j) {
 				distances[i][j] = 0;
 				continue;
@@ -3875,8 +3876,8 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 			auto start = cities[i];
 			auto end = cities[j];
 
-			graphs::Location2D startLoc = { x: start->xloc, y: start->yloc };
-			graphs::Location2D endLoc = { x: end->xloc, y: end->yloc };
+			graphs::Location2D startLoc = { .x = start->xloc, .y = start->yloc };
+			graphs::Location2D endLoc = { .x = end->xloc, .y = end->yloc };
 
 			std::unordered_map<graphs::Location2D, graphs::Location2D> cameFrom;
 			std::unordered_map<graphs::Location2D, double> costSoFar;
@@ -3900,14 +3901,14 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 	}
 
 	std::unordered_set<ARegion*> connected;
-	for (int i = 0; i < sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		auto start = cities[i];
 
 		if (connected.find(start) != connected.end()) {
 			continue;
 		}
 
-		for (int j = 0; j < sz; j++) {
+		for (size_t j = 0; j < sz; j++) {
 			auto dist = distances[i][j];
 			if (!dist || dist > 8) {
 				continue;
@@ -3923,8 +3924,8 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 
 			std::string name = "Road to " + std::string(end->town->name->Str());
 
-			graphs::Location2D startLoc = { x: start->xloc, y: start->yloc };
-			graphs::Location2D endLoc = { x: end->xloc, y: end->yloc };
+			graphs::Location2D startLoc = { .x = start->xloc, .y = start->yloc };
+			graphs::Location2D endLoc = { .x = end->xloc, .y = end->yloc };
 
 			std::unordered_map<graphs::Location2D, graphs::Location2D> cameFrom;
 			std::unordered_map<graphs::Location2D, double> costSoFar;
