@@ -5,6 +5,8 @@ on:
     branches:
       - master
       - neworigins
+      - neworigins-v6
+      - jt-*
   workflow_dispatch:
   pull_request:
 
