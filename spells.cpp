@@ -1038,7 +1038,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 		r->gate = getrandom(ngates);
 		while (used[r->gate])
 			r->gate = getrandom(ngates);
-		delete used;
+		delete[] used;
 		r->gate++;
 	} else {
 		r->gate = regions.numberofgates;
@@ -2014,11 +2014,10 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 
 int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 {
-	int level, num, sactype, sacrifices, i, sac, max, dir, relics;
+	int level, num, sactype, sacrifices, i, sac, relics;
 	Object *o, *tower;
 	Unit *u, *victim;
 	Item *item;
-	ARegion *start;
 	AString message;
 
 	level = mage->GetSkill(S_BLASPHEMOUS_RITUAL);

@@ -368,8 +368,10 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						if (unit->inTurnBlock)
 							ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
-							if (!pCheck && unit->former && unit->former->format)
-								unit->former->oldorders.Add(new AString(saveorder));
+
+						if (!pCheck && unit->former && unit->former->format)
+							unit->former->oldorders.Add(new AString(saveorder));
+
 						if (pCheck && former) delete unit;
 						unit = former;
 					} else {
@@ -1202,7 +1204,6 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	std::unordered_map<std::string, int> oldfactype;
 	std::unordered_map<std::string, int> factype;
 
-	int i;
 	if (!pCheck) {
 		// copy current values into temp variable
 		oldfactype = u->faction->type;
@@ -2043,7 +2044,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 		}
 		AString	saveorder = *order;
 		// In order to allow @endturn to work the same as endturn we need to check for and eat the possible @
-		int getatsign = order->getat();
+		std::ignore = order->getat(); // we don't care about whether it was set or not, so just ignore the return value
 		token = order->gettoken();
 
 		if (token) {

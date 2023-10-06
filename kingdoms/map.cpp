@@ -101,9 +101,10 @@ int ARegion::TerrainFactor(int value, int average)
 {
 	int retval = 0;
 	int df = abs(value-average);
-	if (df > 9)
+	if (df > 9) {
 		if (df < 15) retval = 1;
-			else retval = df - 14;
+		else retval = df - 14;
+	}
 	return retval;
 }
 
@@ -1643,7 +1644,7 @@ void ARegionList::FinalSetupGates()
 			r->gatemonth = getrandom(12);;
 		}
 	}
-	delete used;
+	delete[] used;
 }
 
 GeoMap::GeoMap(int x, int y)
@@ -1702,7 +1703,6 @@ void GeoMap::Generate(int spread, int smoothness)
 	while (step > 1) {
 		count++;
 		int nextstep = step/2 + step%2;
-		int showfirst = 1;
 		for (int x = 0; x <= size; x += step) {
 			for (int y = 0; y <= size; y += step) {
 				int av_ele = 0;
@@ -1773,7 +1773,6 @@ void GeoMap::Generate(int spread, int smoothness)
 			}
 		}
 		Adot();
-		showfirst = 1;
 		for (int x = 0; x <= size; x += step) {
 			for (int y = 0; y <= size; y += step) {
 				for (int i = 0; i < 2; i++) {

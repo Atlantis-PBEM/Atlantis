@@ -333,7 +333,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 			nextWeather = "monsoon";
 		if (nxtweather == W_NORMAL)
 			nextWeather = "clear";
-		sprintf(data, "Next %s", nextWeather);
+		snprintf(data, LINE_WIDTH - MAP_WIDTH, "Next %s", nextWeather);
 
 		TrimWrite(f, buffer);
 		line++;
@@ -341,7 +341,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 
 	// ----------------------------------------------------------------
 	GetMapLine(buffer, line, pRegs);
-	sprintf(data, "Tax  %5i", wealth);
+	snprintf(data, LINE_WIDTH - MAP_WIDTH, "Tax  %5i", wealth);
 	TrimWrite(f, buffer);
 	line++;
 
@@ -349,7 +349,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	prod = products.GetProd(I_SILVER, S_ENTERTAINMENT);
 	if (prod) {
 		GetMapLine(buffer, line, pRegs);
-		sprintf(data, "Ente %5i", prod->amount);
+		snprintf(data, LINE_WIDTH - MAP_WIDTH, "Ente %5i", prod->amount);
 		TrimWrite(f, buffer);
 		line++;
 	}
@@ -358,7 +358,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	prod = products.GetProd(I_SILVER, -1);
 	if (prod) {
 		GetMapLine(buffer, line, pRegs);
-		sprintf(data, "Wage %5i.%1i (max %i)", (prod->productivity/10), (prod->productivity%10), prod->amount);
+		snprintf(data, LINE_WIDTH - MAP_WIDTH, "Wage %5i.%1i (max %i)", (prod->productivity/10), (prod->productivity%10), prod->amount);
 		TrimWrite(f, buffer);
 		line++;
 	}
@@ -386,12 +386,12 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 				GetMapLine(buffer, line, pRegs);
 
 				if (m->amount == -1) {
-					sprintf(data, "%s unlim %4s @ %3i",
+					snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s @ %3i",
 						(any ? "    " : "Want"),
 						ItemDefs[m->item].abr,
 						m->price);
 				} else {
-					sprintf(data, "%s %5i %4s @ %3i",
+					snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s @ %3i",
 						(any ? "    " : "Want"),
 						m->amount,
 						ItemDefs[m->item].abr,
@@ -422,12 +422,12 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 				GetMapLine(buffer, line, pRegs);
 
 				if (m->amount == -1) {
-					sprintf(data, "%s unlim %4s @ %3i",
+					snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s @ %3i",
 						(any ? "    " : "Sell"),
 						ItemDefs[m->item].abr,
 						m->price);
 				} else {
-					sprintf(data, "%s %5i %4s @ %3i",
+					snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s @ %3i",
 						(any ? "    " : "Sell"),
 						m->amount,
 						ItemDefs[m->item].abr,
@@ -465,11 +465,11 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 			 GetMapLine(buffer, line, pRegs);
 
 			 if (p->amount == -1) {
-				 sprintf(data, "%s unlim %4s",
+				 snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s",
 					 (any ? "    " : "Prod"),
 					 ItemDefs[p->itemtype].abr);
 			 } else {
-				 sprintf(data, "%s %5i %4s",
+				 snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s",
 					 (any ? "    " : "Prod"),
 					 p->amount,
 					 ItemDefs[p->itemtype].abr);
@@ -497,7 +497,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 					line++;
 
 					GetMapLine(buffer, line, pRegs);
-					sprintf(data, "Gate %4i", gate);
+					snprintf(data, LINE_WIDTH - MAP_WIDTH, "Gate %4i", gate);
 					TrimWrite(f, buffer);
 					line++;
 
