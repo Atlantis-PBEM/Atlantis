@@ -12,7 +12,7 @@ on:
 
 jobs:
   compile:
-    name: Complie
+    name: Compile
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
       matrix:
@@ -24,9 +24,9 @@ jobs:
            - os: windows
              ext: .exe
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: make all-clean && make all
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}
           path: |
@@ -42,9 +42,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: compile
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
         with:
           name: ubuntu
       - run: ./run-snapshots.sh
         working-directory: snapshot-tests
+
+  unittest:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make unittest
+      - run: ./unittest
+        working-directory: unittest

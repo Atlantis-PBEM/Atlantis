@@ -2529,7 +2529,7 @@ int Unit::GetAttribute(char const *attrib)
 					// Ignore mage only items for non-mages
 				} else if (ap->mods[index].flags & AttribModItem::PERMAN) {
 					int men = GetMen();
-					if (men <= items.GetNum(item))
+					if (men > 0 && men <= items.GetNum(item))
 						val = ap->mods[index].val;
 				} else {
 					if (items.GetNum(item) > 0)
