@@ -46,5 +46,5 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: ubuntu
-      - run: ./run-tests.sh
-        working-directory: tests
+      - run: ./run-snapshots.sh
+        working-directory: snapshot-tests
