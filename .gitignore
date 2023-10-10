@@ -23,6 +23,8 @@ neworigins_v2/neworigins_v2
 neworigins_v2/html/neworigins.html
 snapshot-tests/standard
 snapshot-tests/output
+unittest/obj
+unittest/unittest
 times.*
 report.*
 template.*

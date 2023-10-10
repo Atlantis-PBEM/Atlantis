@@ -32,6 +32,7 @@
 #include <list>
 #include <unordered_set>
 #include <stack>
+#include <random>
 
 enum ZoneType {
 	UNDECIDED,	// zone type not yet determined
@@ -1058,7 +1059,12 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 
 	Awrite("Grow oceans");
 	int oceanCores = std::max(1, (int) oceans.size() / 4);
-	std::random_shuffle(oceans.begin(), oceans.end());
+
+	// C++17 technically no longer has std::random_shuffle.  It's been replaced with std::shuffle and some boilerplate
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::shuffle(oceans.begin(), oceans.end(), g);
+
 	oceans.resize(oceanCores);
 	for (auto &zone : oceans) {
 		zone->type = ZoneType::OCEAN;

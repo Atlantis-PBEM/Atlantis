@@ -11,7 +11,7 @@ GAME ?= standard
 
 CPLUS = g++
 CC = gcc
-CFLAGS = -g -I. -I.. -Wall -Werror -std=c++11
+CFLAGS = -g -I. -I.. -Wall -Werror -std=c++20
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
@@ -22,8 +22,10 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
   shields.o skills.o skillshows.o specials.o spells.o template.o unit.o \
   events.o events-battle.o events-assassination.o mapgen.o simplex.o namegen.o
 
-OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
-  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) 
+UNITTEST_SRC = unittest/main.cpp $(wildcard unittest/*_test.cpp)
+UNITTEST_OBJECTS = $(patsubst unittest/%.cpp,unittest/obj/%.o,$(UNITTEST_SRC))
+
+OBJECTS =  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS))
 
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
@@ -72,8 +74,12 @@ havilah-clean:
 neworigins-clean:
 	$(MAKE) GAME=neworigins clean
 
+unittest-clean:
+	$(MAKE) GAME=unittest clean
+
 clean:
 	rm -f $(OBJECTS)
+	rm -f $(UNITTEST_OBJECTS)
 	if [ -d obj ]; then rmdir obj; fi
 	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
 	rm -f $(GAME)/html/$(GAME).html
@@ -105,7 +111,17 @@ rules: $(GAME)/$(GAME)
 	 ./$(GAME) genrules $(GAME)_intro.html $(GAME).css html/$(GAME).html \
 	)
 
+.PHONY: unittest
+unittest:
+	$(MAKE) GAME=unittest unittest-build
+
+unittest-build: unittest-objdir $(filter-out obj/main.o,$(OBJECTS)) $(UNITTEST_OBJECTS)
+	$(CPLUS) $(CFLAGS) -o unittest/unittest $(filter-out obj/main.o,$(OBJECTS)) $(UNITTEST_OBJECTS) 
+
 FORCE:
+
+unittest-objdir: objdir
+	if [ ! -d unittest/obj ]; then mkdir unittest/obj; fi
 
 objdir:
 	if [ ! -d obj ]; then mkdir obj; fi
@@ -116,5 +132,9 @@ $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.c
 	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
 $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
+	$(CPLUS) $(CFLAGS) -c -o $@ $<
+
+# If the boost.hpp file is updated, we need to rebuild the unit test files that include it.
+$(UNITTEST_OBJECTS): unittest/obj/%.o: unittest/%.cpp external/boost/ut.hpp
 	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
