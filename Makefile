@@ -30,9 +30,6 @@ $(GAME)-m: objdir $(OBJECTS)
 
 all: basic standard fracas kingdoms havilah neworigins
 
-arcadia: FORCE
-	$(MAKE) GAME=arcadia
-
 basic: FORCE
 	$(MAKE) GAME=basic
 
@@ -56,9 +53,6 @@ $(GAME)/$(GAME): FORCE
 
 all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
 	havilah-clean neworigins-clean
-
-arcadia-clean:
-	$(MAKE) GAME=arcadia clean
 
 basic-clean:
 	$(MAKE) GAME=basic clean
@@ -87,9 +81,6 @@ clean:
 
 all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
 	havilah-rules neworigins-rules
-
-arcadia-rules:
-	$(MAKE) GAME=arcadia rules
 
 basic-rules:
 	$(MAKE) GAME=basic rules
