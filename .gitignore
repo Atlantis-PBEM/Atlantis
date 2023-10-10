@@ -21,6 +21,8 @@ neworigins/html/neworigins.html
 neworigins_v2/obj
 neworigins_v2/neworigins_v2
 neworigins_v2/html/neworigins.html
+snapshot-tests/standard
+snapshot-tests/output
 times.*
 report.*
 template.*
