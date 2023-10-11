@@ -136,7 +136,16 @@ int main(int argc, char *argv[])
 				break;
 			}
 
-			game.DummyGame();
+			if ( !game.OpenGame() ) {
+				Awrite( "Couldn't open the game file!" );
+				break;
+			}
+
+			if ( !game.ReadPlayers() ) {
+				Awrite( "Couldn't read the players file!" );
+				break;
+			}
+
 			if ( !game.DoOrdersCheck( argv[ 2 ], argv[ 3 ] )) {
 				Awrite( "Couldn't check the orders!" );
 				break;
