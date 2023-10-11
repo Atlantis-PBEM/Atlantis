@@ -120,7 +120,12 @@ struct Landmark {
     std::string title;
     int distance;
     int weight;
+    int x;
+    int y;
+    int z;
 };
+
+bool compareLandmarks(const Landmark &a, const Landmark &b);
 
 struct EventLocation {
     int x;
