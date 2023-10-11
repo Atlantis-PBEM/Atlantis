@@ -212,18 +212,18 @@ void Game::ParseError(OrdersCheck *pCheck, Unit *pUnit, Faction *pFaction,
 	else if (pFaction) pFaction->Error(strError);
 }
 
-void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
+void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 {
 	Faction *fac = 0;
 	Unit *unit = 0;
 	int indent = 0, code, i;
-	AString *order, prefix;
+	AString order, prefix;
 
-	order = f->GetLine();
-	while (order) {
-		AString saveorder = *order;
-		int getatsign = order->getat();
-		AString *token = order->gettoken();
+	f >> ws >> order;
+	while (!f.eof()) {
+		AString saveorder = order;
+		int getatsign = order.getat();
+		AString *token = order.gettoken();
 
 		if (token) {
 			code = Parse1Order(token);
@@ -235,7 +235,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				if (fac)
 					ParseError(pCheck, 0, fac, "No #END statement given.");
 				delete token;
-				token = order->gettoken();
+				token = order.gettoken();
 				if (!token) {
 					ParseError(pCheck, 0, 0,
 							"No faction number given on #atlantis line.");
@@ -252,7 +252,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				if (!fac) break;
 
 				delete token;
-				token = order->gettoken();
+				token = order.gettoken();
 
 				if (pCheck) {
 					if (!token) {
@@ -316,7 +316,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					unit = 0;
 					delete token;
 
-					token = order->gettoken();
+					token = order.gettoken();
 					if (!token) {
 						ParseError(pCheck, 0, fac, "UNIT without unit number.");
 						unit = 0;
@@ -348,7 +348,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 							ParseError(pCheck, unit, fac, "FORM: cannot nest.");
 						}
 						else {
-							unit = ProcessFormOrder(unit, order, pCheck, getatsign);
+							unit = ProcessFormOrder(unit, &order, pCheck, getatsign);
 							if (!pCheck && unit && unit->former && unit->former->format)
 								unit->former->oldorders.Add(new AString(saveorder));
 							if (!pCheck) {
@@ -392,8 +392,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 							unit->former->oldorders.Add(new AString(saveorder));
 						retval = ProcessTurnOrder(unit, f, pCheck, getatsign);
 						if (retval) {
-							delete order;
-							order = retval;
+							order = *retval;
 							continue;
 						}
 					} else {
@@ -426,7 +425,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 						if (!pCheck && unit->former && unit->former->format)
 							unit->former->oldorders.Add(new AString(saveorder));
 
-						ProcessOrder(code, unit, order, pCheck);
+						ProcessOrder(code, unit, &order, pCheck);
 					} else {
 						ParseError(pCheck, 0, fac,
 								"Order given without a unit selected.");
@@ -442,7 +441,6 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			}
 		}
 
-		delete order;
 		if (pCheck) {
 			if (code == O_ENDTURN || code == O_ENDFORM)
 				indent--;
@@ -452,8 +450,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			if (code == O_TURN || code == O_FORM)
 				indent++;
 		}
-
-		order = f->GetLine();
+		f >> ws >> order;
 	}
 
 	while (unit) {
@@ -2024,8 +2021,7 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	return;
 }
 
-AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
-		int repeat)
+AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int repeat)
 {
 	int turnDepth = 1;
 	int turnLast = 1;
@@ -2033,19 +2029,20 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 	TurnOrder *tOrder = new TurnOrder;
 	tOrder->repeating = repeat;
 
-	AString *order, *token;
+	AString order, *token;
 
 	while (turnDepth) {
 		// get the next line
-		order = f->GetLine();
-		if (!order) {
+		f >> ws >> order;
+		if (f.eof()) {
 			// Fake end of commands to invoke appropriate processing
-			order = new AString("#end");
+			order = AString("#end");
 		}
-		AString	saveorder = *order;
+
+		AString	saveorder = order;
 		// In order to allow @endturn to work the same as endturn we need to check for and eat the possible @
-		std::ignore = order->getat(); // we don't care about whether it was set or not, so just ignore the return value
-		token = order->gettoken();
+		std::ignore = order.getat(); // we don't care about whether it was set or not, so just ignore the return value
+		token = order.gettoken();
 
 		if (token) {
 			int i = Parse1Order(token);
@@ -2114,11 +2111,9 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 				unit->former->oldorders.Add(new AString(saveorder));
 			delete token;
 		}
-		delete order;
 	}
 
 	unit->turnorders.Add(tOrder);
-
 	return NULL;
 }
 

@@ -196,6 +196,12 @@ char *AString::Str()
 	return str;
 }
 
+
+const char *AString::const_str() const
+{
+	return str;
+}
+
 int AString::Len()
 {
 	return len;
@@ -381,16 +387,17 @@ int AString::strict_value() //this cannot handle negative numbers!
 	return ret;
 }
 
-ostream & operator <<(ostream & os,const AString & s)
+ostream& operator<<(ostream &os,const AString &s)
 {
 	os << s.str;
 	return os;
 }
 
-istream & operator >>(istream & is,AString & s)
+istream& operator>>(istream &is,AString &s)
 {
+	// We expect to read a line at a time from the file, not a string at a time since we do tokenization internally.
 	string buf;
-	is >> buf;
+	getline(is, buf);
 	s.len = strlen(buf.c_str());
 	s.str = new char[s.len + 1];
 	strcpy(s.str,buf.c_str());

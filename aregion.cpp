@@ -103,11 +103,13 @@ TownInfo::~TownInfo()
 	if (name) delete name;
 }
 
-void TownInfo::Readin(Ainfile *f, ATL_VER &v)
+void TownInfo::Readin(istream &f)
 {
-	name = f->GetStr();
-	pop = f->GetInt();
-	hab = f->GetInt();
+	AString temp;
+	f >> ws >> temp;
+	name = new AString(temp);
+	f >> pop;
+	f >> hab;
 }
 
 void TownInfo::Writeout(Aoutfile *f)
@@ -1065,61 +1067,65 @@ int LookupRegionType(AString *token)
 	return -1;
 }
 
-void ARegion::Readin(Ainfile *f, AList *facs, ATL_VER v)
+void ARegion::Readin(istream &f, AList *facs)
 {
-	AString *temp;
+	AString temp;
 
-	name = f->GetStr();
+	f >> ws >> temp;
+	name = new AString(temp);
 
-	num = f->GetInt();
-	temp = f->GetStr();
-	type = LookupRegionType(temp);
-	delete temp;
-	buildingseq = f->GetInt();
-	gate = f->GetInt();
-	if (gate > 0) gatemonth = f->GetInt();
+	f >> num;
+	f >> ws >> temp;
+	type = LookupRegionType(&temp);
 
-	temp = f->GetStr();
-	race = LookupItem(temp);
-	delete temp;
+	f >> buildingseq;
+	f >> gate;
+	if (gate > 0) f >> gatemonth;
 
-	population = f->GetInt();
-	basepopulation = f->GetInt();
-	wages = f->GetInt();
-	maxwages = f->GetInt();
-	wealth = f->GetInt();
-	
-	elevation = f->GetInt();
-	humidity = f->GetInt();
-	temperature = f->GetInt();
-	vegetation = f->GetInt();
-	culture = f->GetInt();
+	f >> ws >> temp;
+	race = LookupItem(&temp);
 
-	habitat = f->GetInt();
-	development = f->GetInt();
-	maxdevelopment = f->GetInt();
+	f >> population;
+	f >> basepopulation;
+	f >> wages;
+	f >> maxwages;
+	f >> wealth;
 
-	if (f->GetInt()) {
+	f >> elevation;
+	f >> humidity;
+	f >> temperature;
+	f >> vegetation;
+	f >> culture;
+
+	f >> habitat;
+	f >> development;
+	f >> maxdevelopment;
+
+	int n;
+	f >> n;
+	if (n) {
 		town = new TownInfo;
-		town->Readin(f, v);
+		town->Readin(f);
 		town->dev = TownDevelopment();
 	} else {
 		town = 0;
 	}
 
-	xloc = f->GetInt();
-	yloc = f->GetInt();
-	zloc = f->GetInt();
-	visited = f->GetInt();
+	f >> xloc;
+	f >> yloc;
+	f >> zloc;
+	f >> visited;
 
 	products.Readin(f);
 	markets.Readin(f);
 
-	int i = f->GetInt();
+	int i;
+	f >> i;
+
 	buildingseq = 1;
-	for (int j=0; j<i; j++) {
+	for (int j = 0; j < i; j++) {
 		Object *temp = new Object(this);
-		temp->Readin(f, facs, v);
+		temp->Readin(f, facs);
 		if (temp->num >= buildingseq)
 			buildingseq = temp->num + 1;
 		objects.Add(temp);
@@ -2081,36 +2087,37 @@ void ARegionList::WriteRegions(Aoutfile *f)
 	}
 }
 
-int ARegionList::ReadRegions(Ainfile *f, AList *factions, ATL_VER v)
+int ARegionList::ReadRegions(istream &f, AList *factions)
 {
-	int num = f->GetInt();
+	int num;
+	f >> num;
 
-	numLevels = f->GetInt();
+	f >> numLevels;
 	CreateLevels(numLevels);
 	int i;
 	for (i = 0; i < numLevels; i++) {
-		int curX = f->GetInt();
-		int curY = f->GetInt();
-		AString *name = f->GetStr();
+		int curX, curY;
+		f >> curX >> curY;
+		AString name;
+		f >> ws >> name;
 		ARegionArray *pRegs = new ARegionArray(curX, curY);
-		if (*name == "none") {
+		if (name == "none") {
 			pRegs->strName = 0;
-			delete name;
 		} else {
-			pRegs->strName = name;
+			pRegs->strName = new AString(name);
 		}
-		pRegs->levelType = f->GetInt();
+		f >> pRegs->levelType;
 		pRegionArrays[i] = pRegs;
 	}
 
-	numberofgates = f->GetInt();
+	f >> numberofgates;
 
 	ARegionFlatArray fa(num);
 
 	Awrite("Reading the regions...");
 	for (i = 0; i < num; i++) {
 		ARegion *temp = new ARegion;
-		temp->Readin(f, factions, v);
+		temp->Readin(f, factions);
 		fa.SetRegion(temp->num, temp);
 		Add(temp);
 
@@ -2120,11 +2127,13 @@ int ARegionList::ReadRegions(Ainfile *f, AList *factions, ATL_VER v)
 
 	Awrite("Setting up the neighbors...");
 	{
-		delete f->GetStr();
+		AString temp;
+		f >> ws >> temp; // eat the "Neighbors" line
 		forlist(this) {
 			ARegion *reg = (ARegion *) elem;
 			for (i = 0; i < NDIRS; i++) {
-				int j = f->GetInt();
+				int j;
+				f >> j;
 				if (j != -1) {
 					reg->neighbors[i] = fa.GetRegion(j);
 				} else {

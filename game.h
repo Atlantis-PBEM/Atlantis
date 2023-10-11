@@ -59,6 +59,7 @@ I can see what the Item.cpp docs look like.
 class Game
 {
 	friend class Faction;
+
 public:
 	Game();
 	~Game();
@@ -75,17 +76,17 @@ public:
 	int WritePlayers();
 	int ReadPlayers();
 	int ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
-						 int newPlayer);
+						int newPlayer);
 	void WriteNewFac(Faction *pFac);
 
 	int ViewMap(const AString &, const AString &);
 	// LLS
 	void UnitFactionMap();
 	int GenRules(const AString &, const AString &, const AString &);
-	void WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac);
+	void WriteFactionTypeDescription(std::ostringstream &buffer, Faction &fac);
 	int DoOrdersCheck(const AString &strOrders, const AString &strCheck);
 
-	Faction *AddFaction(int noleader=0, ARegion *pStart = NULL);
+	Faction *AddFaction(int noleader = 0, ARegion *pStart = NULL);
 
 	//
 	// Give this particular game a chance to set up the faction. This is in
@@ -120,8 +121,9 @@ public:
 	// Functions to allow enabling/disabling parts of the data tables
 	void ModifyTablesPerRuleset(void);
 
-	void RecordFact(FactBase* fact);
+	void RecordFact(FactBase *fact);
 	void WriteWorldEvents();
+
 private:
 	//
 	// Game editing functions.
@@ -131,24 +133,24 @@ private:
 	void EditGameCreateUnit();
 	void EditGameRegion(ARegion *pReg);
 	void EditGameRegionObjects(ARegion *pReg);
-	void EditGameRegionTerrain(ARegion *pReg );
-	void EditGameRegionMarkets(ARegion *pReg );
+	void EditGameRegionTerrain(ARegion *pReg);
+	void EditGameRegionMarkets(ARegion *pReg);
 	void EditGameUnit(Unit *pUnit);
 	void EditGameUnitItems(Unit *pUnit);
 	void EditGameUnitSkills(Unit *pUnit);
 	void EditGameUnitMove(Unit *pUnit);
 	void EditGameUnitDetails(Unit *pUnit);
-	
+
 	void PreProcessTurn();
 	void ReadOrders();
 	void RunOrders();
 	void ClearOrders(Faction *);
 	void MakeFactionReportLists();
 	void CountAllSpecialists();
-	//void CountAllMages();
-	//void CountAllApprentices();
-	//void CountAllQuarterMasters();
-	//void CountAllTacticians();
+	// void CountAllMages();
+	// void CountAllApprentices();
+	// void CountAllQuarterMasters();
+	// void CountAllTacticians();
 	void WriteReport();
 	// LLS - write order templates
 	void WriteTemplates();
@@ -162,7 +164,7 @@ private:
 	void CreateWMons();
 	void CreateLMons();
 	void CreateVMons();
-	Unit *MakeManUnit(Faction*, int, int, int, int, int, int);
+	Unit *MakeManUnit(Faction *, int, int, int, int, int, int);
 
 	//
 	// Game-specific creation functions (see world.cpp).
@@ -186,15 +188,15 @@ private:
 
 	// JLT
 	// Functions to allow enabling/disabling parts of the data tables
-	void EnableSkill(int sk); // Enabled a disabled skill
-	void DisableSkill(int sk);  // Prevents skill being studied or used
+	void EnableSkill(int sk);  // Enabled a disabled skill
+	void DisableSkill(int sk); // Prevents skill being studied or used
 	void ModifySkillDependancy(int sk, int i, char const *dep, int lev);
 	void ModifySkillFlags(int sk, int flags);
 	void ModifySkillCost(int sk, int cost);
 	void ModifySkillSpecial(int sk, char const *special);
 	void ModifySkillRange(int sk, char const *range);
 
-	void EnableItem(int it); // Enables a disabled item
+	void EnableItem(int it);  // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
 	void ModifyItemName(int it, char const *name, char const *names);
 	void ModifyItemFlags(int it, int flags);
@@ -238,7 +240,7 @@ private:
 	void ModifyMountBonuses(char const *mount, int min, int max, int hampered);
 	void ModifyMountSpecial(char const *mount, char const *special, int level);
 
-	void EnableObject(int ob); // Enables a disabled object
+	void EnableObject(int ob);	// Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built
 	void ModifyObjectFlags(int ob, int flags);
 	void ModifyObjectDecay(int ob, int maxMaint, int maxMonthDecay, int mFact);
@@ -271,7 +273,7 @@ private:
 	void ModifySpecialShields(char const *special, int index, int type);
 	void ModifySpecialDefenseMods(char const *special, int index, int type, int val);
 	void ModifySpecialDamage(char const *special, int index, int type, int min,
-			int val, int flags, int cls, char const *effect, int hitDamage);
+							 int val, int flags, int cls, char const *effect, int hitDamage);
 
 	void ModifyEffectFlags(char const *effect, int flags);
 	void ModifyEffectAttackMod(char const *effect, int val);
@@ -284,7 +286,7 @@ private:
 	void ModifyRangeLevelPenalty(char const *range, int pen);
 
 	void ModifyAttribMod(char const *mod, int index, int flags, char const *ident,
-			int type, int val);
+						 int type, int val);
 	void ModifyHealing(int level, int patients, int success);
 
 	AList factions;
@@ -299,7 +301,8 @@ private:
 	int year;
 	int month;
 
-	enum {
+	enum
+	{
 		GAME_STATUS_UNINIT,
 		GAME_STATUS_NEW,
 		GAME_STATUS_RUNNING,
@@ -311,24 +314,23 @@ private:
 	int monfaction;
 	int doExtraInit;
 
-	Events* events;
-	
+	Events *events;
+
 	//
 	// Parsing functions
 	//
 	void ParseError(OrdersCheck *pCheck, Unit *pUnit, Faction *pFac,
-					 const AString &strError);
+					const AString &strError);
 	UnitId *ParseUnit(AString *s);
 	int ParseDir(AString *token);
 
-
-	void ParseOrders(int faction, Aorders *ordersFile, OrdersCheck *pCheck);
+	void ParseOrders(int faction, istream& ordersFile, OrdersCheck *pCheck);
 	void ProcessOrder(int orderNum, Unit *unit, AString *order,
-					   OrdersCheck *pCheck);
+					  OrdersCheck *pCheck);
 	void ProcessMoveOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessAdvanceOrder(Unit *, AString *, OrdersCheck *pCheck);
 	Unit *ProcessFormOrder(Unit *former, AString *order,
-					   OrdersCheck *pCheck, int atsign);
+						   OrdersCheck *pCheck, int atsign);
 	void ProcessAddressOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessAvoidOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessGuardOrder(Unit *, AString *, OrdersCheck *pCheck);
@@ -384,7 +386,7 @@ private:
 	void ProcessTransportOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessDistributeOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
-	AString *ProcessTurnOrder(Unit *, Aorders *, OrdersCheck *pCheck, int);
+	AString *ProcessTurnOrder(Unit *, istream& f, OrdersCheck *pCheck, int);
 	void ProcessJoinOrder(Unit *, AString *, OrdersCheck *pCheck);
 
 	void RemoveInactiveFactions();
@@ -400,7 +402,7 @@ private:
 	int CountApprentices(Faction *);
 	int CountQuarterMasters(Faction *);
 	int CountTacticians(Faction *);
-	
+
 	void FindDeadFactions();
 	void DeleteEmptyUnits();
 	void DeleteEmptyInRegion(ARegion *);
@@ -480,10 +482,10 @@ private:
 
 	// Processing regions grow after production phase
 	void ProcessEconomics();
-	
+
 	// Migration effects for alternate player-driven economy
 	void ProcessMigration();
-	
+
 	// Run setup and equilibration turns (econ-only) at start
 	void DevelopTowns();
 	void Equilibrate();
@@ -508,7 +510,7 @@ private:
 	void CheckWMonAttack(ARegion *, Unit *);
 	Unit *GetWMonTar(ARegion *, int, Unit *);
 	int CountWMonTars(ARegion *, Unit *);
-	void AttemptAttack(ARegion *, Unit *, Unit *, int, int=0);
+	void AttemptAttack(ARegion *, Unit *, Unit *, int, int = 0);
 	void DoAutoAttacks();
 	void DoAdvanceAttack(ARegion *, Unit *);
 	void DoAutoAttack(ARegion *, Unit *);
@@ -598,8 +600,8 @@ private:
 	void GetDFacs(ARegion *, Unit *, AList &);
 
 	// For faction statistics
-	void CountItems (int **);
-	int CountItem (Faction *, int);
+	void CountItems(int **);
+	int CountItem(Faction *, int);
 };
 
 #endif

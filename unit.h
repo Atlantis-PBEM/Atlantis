@@ -127,7 +127,7 @@ class Unit : public AListElem
 		void MakeWMon(char const *,int,int);
 
 		void Writeout( Aoutfile *f );
-		void Readin( Ainfile *f, AList *, ATL_VER v );
+		void Readin(istream& f, AList *);
 
 		AString SpoilsReport(void);
 		int CanGetSpoil(Item *i);

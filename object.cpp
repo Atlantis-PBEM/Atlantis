@@ -124,36 +124,39 @@ void Object::Writeout(Aoutfile *f)
 	WriteoutFleet(f);
 }
 
-void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
+void Object::Readin(istream& f, AList *facs)
 {
-	AString *temp;
+	AString temp;
 
-	num = f->GetInt();
+	f >> num;
 
-	temp = f->GetStr();
-	type = LookupObject(temp);
-	delete temp;
+	f >> ws >> temp;
+	type = LookupObject(&temp);
 
-	incomplete = f->GetInt();
+	f >> incomplete;
 
 	if (name) delete name;
-	name = f->GetStr();
-	describe = f->GetStr();
+	f >> ws >> temp;
+	name = new AString(temp);
+
+	f >> ws >> temp;
+	describe = new AString(temp);
 	if (*describe == "none") {
 		delete describe;
 		describe = 0;
 	}
-	inner = f->GetInt();
-	prevdir = f->GetInt();
-	runes = f->GetInt();
+	f >> inner;
+	f >> prevdir;
+	f >> runes;
 
 	// Now, fix up a save file if ALLOW_TRIVIAL_PORTAGE is allowed, just
 	// in case it wasn't when the save file was made.
 	if (Globals->ALLOW_TRIVIAL_PORTAGE) prevdir = -1;
-	int i = f->GetInt();
-	for (int j=0; j<i; j++) {
+	int i;
+	f >> i;
+	for (int j = 0; j < i; j++) {
 		Unit *temp = new Unit;
-		temp->Readin(f, facs, v);
+		temp->Readin(f, facs);
 		if (!temp->faction)
 			continue;
 		temp->MoveUnit(this);
@@ -447,11 +450,12 @@ void Object::WriteoutFleet(Aoutfile *f)
 		((Item *) elem)->Writeout(f);
 }
 
-void Object::ReadinFleet(Ainfile *f)
+void Object::ReadinFleet(istream &f)
 {
 	if (type != O_FLEET) return;
-	int nships = f->GetInt();
-	for (int i=0; i<nships; i++) {
+	int nships;
+	f >> nships;
+	for (int i = 0; i < nships; i++) {
 		Item *ship = new Item;
 		ship->Readin(f);
 		if (ship->type >= 0)

@@ -31,22 +31,6 @@
 #include <fstream>
 using namespace std;
 
-class Ainfile {
-	public:
-		Ainfile();
-		~Ainfile();
-
-		void Open(const AString &);
-		int OpenByName(const AString &);
-		void Close();
-
-		AString *GetStr();
-		AString *GetStrNoSkip();
-		int GetInt();
-
-		ifstream *file;
-};
-
 class Aoutfile {
 	public:
 		Aoutfile();
@@ -61,20 +45,6 @@ class Aoutfile {
 		void PutInt(int);
 
 		ofstream *file;
-};
-
-class Aorders {
-	public:
-		Aorders();
-		~Aorders();
-
-		void Open(const AString &);
-		int OpenByName(const AString &);
-		void Close();
-
-		AString *GetLine();
-
-		ifstream *file;
 };
 
 class Areport {

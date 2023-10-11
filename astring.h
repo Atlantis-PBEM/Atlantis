@@ -35,6 +35,7 @@ using namespace std;
 class AString : public AListElem {
 	friend ostream & operator <<(ostream &os, const AString &);
 	friend istream & operator >>(istream &is, AString &);
+
 public:
 
 	AString();
@@ -58,6 +59,7 @@ public:
 	AString & operator=(const char *);
 
 	char *Str();
+	const char *const_str() const;
 	int Len();
 
 	AString *gettoken();
@@ -69,7 +71,6 @@ public:
 	AString *StripWhite();
 
 private:
-
 	int len;
 	char *str;
 	int isEqual(const char *) const;
