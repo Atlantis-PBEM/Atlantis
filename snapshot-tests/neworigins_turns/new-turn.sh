@@ -3,8 +3,8 @@
 curTurn=$(< ./turn)
 nextTurn=$((curTurn + 1))
 
-if [[ ! -f ../../standard/standard ]]; then
-  echo "Please build the standard executable before trying to create a new snapshot turn."
+if [[ ! -f ../../neworigins/neworigins ]]; then
+  echo "Please build the neworigins executable before trying to create a new snapshot turn."
   exit 1
 fi
 
@@ -27,7 +27,7 @@ fi
 
 echo "Running turn to produce new output"
 cd turn_$nextTurn
-../../../standard/standard run &> engine-output.txt
+../../../neworigins/neworigins run > engine-output.txt
 
 if [[ $? != 0 ]]; then
    echo "Game engine crashed while generating turn. Turn not generated."

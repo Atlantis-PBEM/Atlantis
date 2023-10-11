@@ -1,0 +1,117 @@
+
+Orders Template (Long Format):
+
+#atlantis 3
+
+;*** swamp (14,0) in Nema River ***
+
+unit 5
+;Unit (5), behind, revealing faction, sharing, gnoll [GNOL]. Weight:
+;  10. Capacity: 0/0/15/0. Skills: none.
+@work
+
+;*** forest (14,2) in Philagotuspolisus Woods ***
+
+unit 63
+;Unit (63), revealing faction, gnoll [GNOL]. Weight: 10. Capacity:
+;  0/0/15/0. Skills: none.
+move s
+
+;*** swamp (13,3) in Philagotuspolisus Marshes, contains Hymnoalotos
+;  [village] ***
+
+unit 51
+;Unit (51), on guard, revealing faction, sharing, 8 gnolls [GNOL], 14
+;  swords [SWOR], 267 silver [SILV]. Weight: 94. Capacity: 0/0/120/0.
+;  Skills: combat [COMB] 2 (95).
+@tax
+form 5
+   buy 1 gnol
+   move ne
+end
+form 6
+   buy 1 gnol
+   move se
+end
+
+unit 52
+;Unit (52), on guard, behind, revealing faction, sharing, leader
+;  [LEAD], longbow [LBOW], 2 swords [SWOR]. Weight: 13. Capacity:
+;  0/0/15/0. Skills: tactics [TACT] 1 (35), longbow [LBOW] 1 (30).
+@study lbow
+
+unit 57
+;Unit (57), on guard, revealing faction, 10 gnolls [GNOL], 15 swords
+;  [SWOR], 319 silver [SILV]. Weight: 115. Capacity: 0/0/150/0. Skills:
+;  combat [COMB] 2 (95).
+@tax
+
+unit 60
+;Unit (60), on guard, revealing faction, 9 gnolls [GNOL], 14 swords
+;  [SWOR], 245 silver [SILV]. Weight: 104. Capacity: 0/0/135/0. Skills:
+;  combat [COMB] 2 (95).
+@tax
+
+unit 61
+;Unit (61), on guard, revealing faction, 9 gnolls [GNOL], 15 swords
+;  [SWOR], 244 silver [SILV]. Weight: 105. Capacity: 0/0/135/0. Skills:
+;  combat [COMB] 2 (95).
+@tax
+
+;*** plain (14,4) in Maranarenos Dale ***
+
+unit 64
+;Unit (64), revealing faction, gnoll [GNOL]. Weight: 10. Capacity:
+;  0/0/15/0. Skills: none.
+move se
+
+;*** jungle (3,5) in Kleptoatres Jungle ***
+
+unit 38
+;Unit (38), behind, revealing faction, leader [LEAD], 1150 silver
+;  [SILV]. Weight: 10. Capacity: 0/0/15/0. Skills: observation [OBSE] 1
+;  (30), force [FORC] 2 (100), pattern [PATT] 1 (45), spirit [SPIR] 1
+;  (30), gate lore [GATE] 1 (30), fire [FIRE] 1 (30), combat [COMB] 3
+;  (200), stealth [STEA] 1 (60), illusion [ILLU] 1 (30), phantasmal
+;  entertainment [PHEN] 1 (30). Combat spell: fire [FIRE]. Can Study:
+;  fire [FIRE], earthquake [EQUA], force shield [FSHI], energy shield
+;  [ESHI], spirit shield [SSHI], magical healing [MHEA], farsight
+;  [FARS], mind reading [MIND], weather lore [WEAT], earth lore [EART],
+;  necromancy [NECR], demon lore [DEMO], create phantasmal beasts
+;  [PHBE], create phantasmal demons [PHDE], dispel illusions [DISP],
+;  artifact lore [ARTI].
+claim 150
+study patt 2
+TURN
+  study spir 2
+ENDTURN
+form 1
+   take from 38 40 silv
+   buy 1 welf
+   move n
+end
+form 2
+   take from 38 40 silv
+   buy 1 welf
+   move s
+end
+form 3
+   take from 38 40 silv
+   buy 1 welf
+   move sw
+end
+form 4
+   take from 38 40 silv
+   buy 1 welf
+   move nw
+end
+cast gate random
+
+;*** swamp (15,5) in Aoratalotos Swamp ***
+
+unit 62
+;Unit (62), behind, revealing faction, sharing, gnoll [GNOL]. Weight:
+;  10. Capacity: 0/0/15/0. Skills: none.
+move ne
+#end
+
