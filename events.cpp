@@ -123,7 +123,10 @@ void populateSettlementLandmark(std::vector<Landmark> &landmarks, ARegion *reg, 
         .name = name,
         .title = title,
         .distance = distance,
-        .weight = 10
+        .weight = 10,
+        .x = reg->xloc,
+        .y = reg->yloc,
+        .z = reg->zloc
     });
 }
 
@@ -168,7 +171,10 @@ void populateRegionLandmark(std::vector<Landmark> &landmarks, ARegion *source, A
         .name = name,
         .title = title,
         .distance = distance,
-        .weight = weight
+        .weight = weight,
+        .x = reg->xloc,
+        .y = reg->yloc,
+        .z = reg->zloc
     });
 }
 
@@ -208,14 +214,33 @@ void populateForitifcationLandmark(std::vector<Landmark> &landmarks, ARegion *re
         .name = name,
         .title = title,
         .distance = distance,
-        .weight = 5
+        .weight = 5,
+        .x = reg->xloc,
+        .y = reg->yloc,
+        .z = reg->zloc
     });
 }
 
 bool compareLandmarks(const Landmark &first, const Landmark &second) {
-    return first.weight == second.weight
-        ? first.distance < second.distance
-        : first.weight < second.weight;
+    // Making this a bit more explicit since if you end up with 2 equidistant, equal weight landmarks, then
+    // it will be arbitary which landmark is chosen based on the initial ordering in the vector being sorted,
+    // which is based solely on an *unordered* map, which means the ordering is not guaranteed to be the same
+    // across runs even with identical input since it's based on memory layout on the executing machine.
+
+    // prefer shorter distances.
+    if (first.distance != second.distance) {
+        return first.distance < second.distance;
+    }
+    // prefer more weighty locales (citys > fortifications > volcano/river > other terrains)
+    if (first.weight != second.weight) {
+        return first.weight > second.weight;
+    }
+    // if everything else is equal, prefer one with the lower x coordinate
+    if (first.x != second.x) {
+        return first.x < second.x;
+    }
+    // If they are *still* equal, prefer the smaller y coordinate
+    return first.y < second.y;
 }
 
 const EventLocation EventLocation::Create(ARegion* region) {
