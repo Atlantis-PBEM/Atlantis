@@ -94,6 +94,9 @@ void Game::RunOrders()
 	RunTeachOrders();
 	Awrite("Running Month-long Orders...");
 	RunMonthOrders();
+	Awrite("Running Economics...");
+	ProcessEconomics();
+	Awrite("Running Teleport Orders...");
 	RunTeleportOrders();
 	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
 		Awrite("Running Transport Orders...");
@@ -165,88 +168,44 @@ int Game::CountMages(Faction *pFac)
 }
 */
 
-int Game::TaxCheck(ARegion *pReg, Faction *pFac)
-{
-	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		if (AllowedTaxes(pFac) == -1) {
-			//
-			// No limit.
-			//
-			return(1);
-		}
-
-		forlist(&(pFac->war_regions)) {
-			ARegion *x = ((ARegionPtr *) elem)->ptr;
-			if (x == pReg) {
-				//
-				// This faction already performed a tax action in this
-				// region.
-				//
-				return 1;
-			}
-		}
-		if (pFac->war_regions.Num() >= AllowedTaxes(pFac)) {
-			//
-			// Can't tax here.
-			//
-			return 0;
-		} else {
-			//
-			// Add this region to the faction's tax list.
-			//
-			ARegionPtr *y = new ARegionPtr;
-			y->ptr = pReg;
-			pFac->war_regions.Add(y);
-			return 1;
-		}
-	} else {
-		//
-		// No limit on taxing regions in this game.
-		//
-		return(1);
+bool Game::ActivityCheck(ARegion *pReg, Faction *pFac, FactionActivity activity) {
+	if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_FACTION_TYPES) {
+		// No limit on any activity in this game.
+		return true;
 	}
-}
 
-int Game::TradeCheck(ARegion *pReg, Faction *pFac)
-{
-	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		if (AllowedTrades(pFac) == -1) {
-			//
-			// No limit on trading on this faction.
-			//
-			return(1);
-		}
-
-		forlist(&(pFac->trade_regions)) {
-			ARegion *x = ((ARegionPtr *) elem)->ptr;
-			if (x == pReg) {
-				//
-				// This faction has already performed a trade action in this
-				// region.
-				//
-				return 1;
-			}
-		}
-		if (pFac->trade_regions.Num() >= AllowedTrades(pFac)) {
-			//
-			// This faction is over its trade limit.
-			//
-			return 0;
-		} else {
-			//
-			// Add this region to the faction's trade list, and return 1.
-			//
-			ARegionPtr *y = new ARegionPtr;
-			y->ptr = pReg;
-			pFac->trade_regions.Add(y);
-			return 1;
-		}
-	} else {
-		//
-		// No limit on trade in this game.
-		//
-		return(1);
+	if (pFac->IsActivityRecorded(pReg, activity)) {
+		// this activity is already performed in region
+		return true;
 	}
+
+	int currentCost = pFac->GetActivityCost(activity);
+	int maxAllowedCost = 0;
+
+	if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) {
+		if (activity == FactionActivity::TAX) {
+			maxAllowedCost = AllowedTaxes(pFac);
+		}
+
+		if (activity == FactionActivity::TRADE) {
+			maxAllowedCost = AllowedTrades(pFac);
+		}
+	}
+	else {
+		maxAllowedCost = AllowedMartial(pFac);
+	}
+
+	if (maxAllowedCost == -1) {
+		return true;
+	}
+
+	if (currentCost >= maxAllowedCost) {
+		return false;
+	}
+
+	pFac->RecordActivity(pReg, activity);
+
+	return true;
 }
 
 void Game::RunStealOrders()
@@ -570,6 +529,8 @@ void Game::RunDestroyOrders()
 }
 
 void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
+	AString quest_rewards;
+
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 		u->Error("DESTROY: Can't destroy a ship while at sea.");
 		forlist(&o->units) {
@@ -587,18 +548,65 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 	}
 
 	if (o->CanModify()) {
-		u->Event(AString("Destroys ") + *(o->name) + ".");
-		Object *dest = r->GetDummy();
-		forlist(&o->units) {
-			Unit *u = (Unit *) elem;
-			u->destroy = 0;
-			u->MoveUnit(dest);
+		int maxStructurePoints;	// fully built structure points (equal to cost)
+		int structurePoints;	// current structure points
+		int destroyablePoints;	// how much points can be destroyed per turn for this structure type
+		int destroyPower;		// how much unit can destroy during this turn
+		int willDestroy;		// how muh points will be destroyed this turn
+
+		maxStructurePoints = ObjectDefs[o->type].cost;
+		structurePoints = maxStructurePoints - o->incomplete;
+
+		if (Globals->DESTROY_BEHAVIOR == DestroyBehavior::INSTANT) {
+			destroyablePoints = structurePoints;
+			destroyPower = structurePoints;
 		}
-		if (quests.CheckQuestDemolishTarget(r, o->num, u)) {
-			u->Event("You have completed a quest!");
+		else {
+			destroyablePoints = std::max(Globals->MIN_DESTROY_POINTS, maxStructurePoints * Globals->MAX_DESTROY_PERCENT / 100);
+			destroyablePoints = std::max(0, std::min(structurePoints, destroyablePoints) - o->destroyed);
+
+			if (Globals->DESTROY_BEHAVIOR == DestroyBehavior::PER_SKILL) {
+				destroyPower = std::max(1, u->GetSkill(S_BUILDING)) * u->GetMen();
+			}
+			else {
+				destroyPower = u->GetMen();
+			}
 		}
-		r->objects.Remove(o);
-		delete o;
+
+		willDestroy = std::min(destroyablePoints, destroyPower);
+		if (willDestroy == 0) {
+			u->Error(AString("Can't destroy ") + *(o->name) + " more.");
+			forlist(&o->units) {
+				((Unit *) elem)->destroy = 0;
+			}
+
+			return;
+		}
+
+		int remainingSP = structurePoints - willDestroy;
+		if (remainingSP > 0) {
+			o->destroyed += willDestroy;
+			o->incomplete += willDestroy;
+
+			u->Event(AString("Destroys ") + willDestroy + " structure points from the " + *(o->name) + ".");
+		}
+		else {
+			u->Event(AString("Destroys ") + *(o->name) + ".");
+	
+			Object *dest = r->GetDummy();
+			forlist(&o->units) {
+				Unit *u = (Unit *) elem;
+				u->destroy = 0;
+				u->MoveUnit(dest);
+			}
+
+			if (quests.CheckQuestDemolishTarget(r, o->num, u, &quest_rewards)) {
+				u->Event(AString("You have completed a quest!") + quest_rewards);
+			}
+
+			r->objects.Remove(o);
+			delete o;
+		}
 	} else {
 		u->Error("DESTROY: Can't destroy that.");
 		forlist(&o->units) {
@@ -706,7 +714,7 @@ int Game::CountTaxes(ARegion *reg)
 					protect -= u->GetMen();
 					if (protect < 0) protect = 0;
 					if (men) {
-						if (!TaxCheck(reg, u->faction)) {
+						if (!ActivityCheck(reg, u->faction, FactionActivity::TAX)) {
 							u->Error("TAX: Faction can't tax that many "
 									"regions.");
 							u->taxing = TAX_NONE;
@@ -772,7 +780,7 @@ int Game::CountPillagers(ARegion *reg)
 				} else {
 					int men = u->Taxers(1);
 					if (men) {
-						if (!TaxCheck(reg, u->faction)) {
+						if (!ActivityCheck(reg, u->faction, FactionActivity::TAX)) {
 							u->Error("PILLAGE: Faction can't tax that many "
 									"regions.");
 							u->taxing = TAX_NONE;
@@ -938,6 +946,11 @@ void Game::Do1PromoteOrder(Object *obj, Unit *u)
 void Game::Do1EvictOrder(Object *obj, Unit *u)
 {
 	EvictOrder *ord = u->evictorders;
+
+	if (obj->region->type == R_NEXUS) {
+		u->Error("Evict: Evict does not work in the Nexus.");
+		return;
+	}
 
 	obj->region->DeduplicateUnitList(&ord->targets, u->faction->num);
 	while (ord && ord->targets.Num()) {
@@ -1169,8 +1182,6 @@ void Game::MidProcessTurn()
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
 		// r->MidTurn(); // Not yet implemented
-		/* regional population dynamics */
-		if (Globals->DYNAMIC_POPULATION) r->Grow();
 		forlist(&r->objects) {
 			Object *o = (Object *)elem;
 			forlist(&o->units) {
@@ -1178,6 +1189,19 @@ void Game::MidProcessTurn()
 				MidProcessUnit(r, u);
 			}
 		}
+	}
+}
+
+void Game::ProcessEconomics()
+{
+	if (!(Globals->DYNAMIC_POPULATION || Globals->REGIONS_ECONOMY)) return;
+
+	forlist(&regions) {
+		ARegion *r = (ARegion *)elem;
+		// Do not process not visited regions
+		if (!r->visited) continue;
+		/* regional population dynamics */
+		r->Grow();
 	}
 }
 
@@ -1223,8 +1247,9 @@ void Game::PostProcessTurn()
 		EndGame(0);
 	else if (!(Globals->OPEN_ENDED)) {
 		Faction *pVictor = CheckVictory();
-		if (pVictor)
+		if (pVictor) {
 			EndGame(pVictor);
+		}
 	}
 
 	forlist_reuse(&regions) {
@@ -1617,13 +1642,6 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 							o->num = 0;
 						}
 					}
-					if (ItemDefs[o->item].type & IT_TRADE) {
-						if (!TradeCheck(r, u->faction)) {
-							u->Error("BUY: Can't buy trade items in that "
-									"many regions.");
-							o->num = 0;
-						}
-					}
 					if (o->num == -1) {
 						o->num = u->GetSharedMoney()/m->price;
 						if (m->amount != -1 && o->num > m->amount) {
@@ -1996,6 +2014,8 @@ void Game::CheckAllyHungerItem(int item, int value)
 
 void Game::AssessMaintenance()
 {
+	AString quest_rewards;
+
 	/* First pass: set needed */
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
@@ -2005,8 +2025,8 @@ void Game::AssessMaintenance()
 				Unit *u = (Unit *) elem;
 				if (!(u->faction->IsNPC())) {
 					r->visited = 1;
-					if (quests.CheckQuestVisitTarget(r, u)) {
-						u->Event("You have completed a pilgrimage!");
+					if (quests.CheckQuestVisitTarget(r, u, &quest_rewards)) {
+						u->Event(AString("You have completed a pilgrimage!") + quest_rewards);
 					}
 				}
 				u->needed = u->MaintCost();
@@ -2236,7 +2256,6 @@ void Game::DoGiveOrders()
 						} else if (o->amount == -2) {
 							if (o->type == O_TAKE) {
 								s = r->GetUnitId(o->target, u->faction->num);
-								fleet = s->object;
 								if (!s || !u->CanSee(r, s)) {
 									u->Error(AString("TAKE: Nonexistant target (") +
 											o->target->Print() + ").");
@@ -2246,6 +2265,7 @@ void Game::DoGiveOrders()
 											" is not a member of your faction.");
 									continue;
 								}
+								fleet = s->object;
 							} else {
 								s = u;
 								fleet = obj;
@@ -2675,9 +2695,12 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 			// give into existing fleet or form new fleet?
 			newfleet = 0;
+
 			// target is not in fleet or not fleet owner
 			if (!(t->object->IsFleet()) ||
 				(t->num != t->object->GetOwner()->num)) newfleet = 1;
+
+			// Set fleet variable to target fleet
 			if (newfleet == 1) {
 				// create a new fleet
 				fleet = new Object(r);
@@ -2687,14 +2710,38 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				t->object->region->AddFleet(fleet);
 				t->MoveUnit(fleet);
 			}
+			else {
+				fleet = t->object;
+			}
+
 			if (ItemDefs[o->item].max_inventory) {
 				cur = t->object->GetNumShips(o->item) + amt;
 				if (cur > ItemDefs[o->item].max_inventory) {
-					u->Error(ord + ": Fleets cannot have more than "+
-						ItemString(o->item, ItemDefs[o->item].max_inventory) +".");
+					u->Error(ord + ": Fleets cannot have more than " +
+						ItemString(o->item, ItemDefs[o->item].max_inventory) +
+						".");
 					return 0;
 				}
 			}
+
+			// Check if fleets are compatible
+			if ((Globals->PREVENT_SAIL_THROUGH) &&
+					(!Globals->ALLOW_TRIVIAL_PORTAGE) &&
+					// flying ships are always transferrable
+					(ItemDefs[o->item].fly == 0)) {
+				// if target fleet had not sailed, just copy shore from source
+				if (fleet->prevdir == -1) {
+					fleet->prevdir = s->object->prevdir;
+				} else {
+					// check that source ship is compatible with its new fleet
+					if (s->object->SailThroughCheck(fleet->prevdir) == 0) {
+						u->Error(ord +
+								": Ships cannot be transferred through land.");
+						return 0;
+					}
+				}
+			}
+
 			s->Event(AString("Transfers ") + ItemString(o->item, amt) + " to " +
 				*t->object->name + ".");
 			if (s->faction != t->faction) {
@@ -2742,7 +2789,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			r->DisbandInRegion(o->item, amt);
 			temp = "Disbands ";
 		} else if (Globals->RELEASE_MONSTERS &&
-				(ItemDefs[o->item].type & IT_MONSTER)) {
+				(ItemDefs[o->item].type & IT_MONSTER) &&
+					!(ItemDefs[o->item].flags & ItemType::MANPRODUCE)) {
 			temp = "Releases ";
 			u->items.SetNum(o->item, u->items.GetNum(o->item) - amt);
 			if (Globals->WANDERING_MONSTERS_EXIST) {
@@ -2877,6 +2925,17 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			}
 		}
 
+		{
+			// Remove all relics when unit is given to another faction
+			forlist(&u->items) {
+				Item *i = (Item *) elem;
+
+				if (i->type == I_RELICOFGRACE) {
+					u->items.SetNum(I_RELICOFGRACE, 0);
+				}
+			}
+		}
+
 		notallied = 1;
 		if (t->faction->GetAttitude(u->faction->num) == A_ALLY) {
 			notallied = 0;
@@ -3005,6 +3064,22 @@ void Game::DoGuard1Orders()
 			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
 				Unit *u = (Unit *) elem;
+
+				if (!Globals->OCEAN_GUARD &&
+					(u->guard == GUARD_SET || u->guard == GUARD_GUARD) &&
+					TerrainDefs[r->type].similar_type == R_OCEAN) {
+					u->guard = GUARD_NONE;
+					u->Error("Can not guard in oceans.");
+					continue;
+				}
+
+				// Only one faction and it's allies can be on guard at the same time
+				if (Globals->STRICT_GUARD && u->guard == GUARD_SET && !r->CanGuard(u)) {
+					u->guard = GUARD_NONE;
+					u->Error("Is prevented from guarding by another unit.");
+					continue;
+				}
+
 				if (u->guard == GUARD_SET || u->guard == GUARD_GUARD) {
 					if (!u->Taxers(1)) {
 						u->guard = GUARD_NONE;
@@ -3094,7 +3169,7 @@ void Game::CheckTransportOrders()
 					if (tar->unit->faction->GetAttitude(u->faction->num) <
 							A_FRIENDLY) {
 						u->Error(ordertype +
-								": Target is not a member of a friendly "
+								": Target " + AString(*tar->unit->name) + " is not a member of a friendly "
 								"faction.");
 						o->type = NORDERS;
 						continue;
@@ -3106,7 +3181,7 @@ void Game::CheckTransportOrders()
 					if (o->type == O_TRANSPORT) {
 						if (tar->unit->GetSkill(S_QUARTERMASTER) == 0) {
 							u->Error(ordertype +
-									": Target is not a quartermaster");
+									": Target " + AString(*tar->unit->name) + " is not a quartermaster");
 							o->type = NORDERS;
 							continue;
 						}
@@ -3114,7 +3189,7 @@ void Game::CheckTransportOrders()
 								!(ObjectDefs[tar->obj->type].flags &
 									ObjectType::TRANSPORT) ||
 								(tar->obj->incomplete > 0)) {
-							u->Error(ordertype + ": Target does not own "
+							u->Error(ordertype + ": Target " + AString(*tar->unit->name) + " does not own "
 									"a transport structure.");
 							o->type = NORDERS;
 							continue;
@@ -3141,7 +3216,7 @@ void Game::CheckTransportOrders()
 						// 0 maxdist represents unlimited range
 						dist = regions.GetPlanarDistance(r, tar->region, penalty, maxdist);
 						if (dist > maxdist) {
-							u->Error(ordertype + ": Recipient is too far away.");
+							u->Error(ordertype + ": Recipient " + AString(*tar->unit->name) + " is too far away.");
 							o->type = NORDERS;
 							continue;
 						}
@@ -3154,7 +3229,7 @@ void Game::CheckTransportOrders()
 					if ((o->type == O_DISTRIBUTE) ||
 						((dist > Globals->LOCAL_TRANSPORT) &&
 						 (o->type == O_TRANSPORT))) {
-						if (u->GetSkill(S_QUARTERMASTER == 0)) {
+						if (u->GetSkill(S_QUARTERMASTER) == 0) {
 							u->Error(ordertype +
 									": Unit is not a quartermaster");
 							o->type = NORDERS;
@@ -3173,7 +3248,7 @@ void Game::CheckTransportOrders()
 
 					// make sure amount is available (all handled later)
 					if (o->amount > 0 && o->amount > u->GetSharedNum(o->item)) {
-						u->Error(ordertype + ": Not enough.");
+						u->Error(ordertype + ": Not enough " + ItemDefs[o->item].name + ".");
 						o->type = NORDERS;
 						continue;
 					}
@@ -3191,7 +3266,7 @@ void Game::CheckTransportOrders()
 					}
 
 					// Check if we have a trade hex
-					if (!TradeCheck(r, u->faction)) {
+					if (!Globals->TRANSPORT_NO_TRADE && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 						u->Error(ordertype + ": Faction cannot transport or "
 								"distribute in that many hexes.");
 						o->type = NORDERS;
@@ -3281,7 +3356,7 @@ void Game::RunTransportOrders()
 					u->Event(ordertype + ItemString(t->item, amt) + " to " +
 							*tar->unit->name + " for $" + cost + ".");
 					if (u->faction != tar->unit->faction) {
-						tar->unit->Event(AString("Recieves ") +
+						tar->unit->Event(AString("Receives ") +
 								ItemString(t->item, amt) + " from " +
 								*u->name + ".");
 					}

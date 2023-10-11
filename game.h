@@ -33,8 +33,9 @@ class Game;
 #include "faction.h"
 #include "production.h"
 #include "object.h"
+#include "events.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 0)
+#define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
 
 class OrdersCheck
 {
@@ -53,7 +54,7 @@ public:
 
 /// The main game class
 /** Currently this doc is here to switch on the class so that
-I can see what the modify.cpp docs look like.
+I can see what the Item.cpp docs look like.
 */
 class Game
 {
@@ -81,6 +82,7 @@ public:
 	// LLS
 	void UnitFactionMap();
 	int GenRules(const AString &, const AString &, const AString &);
+	void WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac);
 	int DoOrdersCheck(const AString &strOrders, const AString &strCheck);
 
 	Faction *AddFaction(int noleader=0, ARegion *pStart = NULL);
@@ -118,6 +120,8 @@ public:
 	// Functions to allow enabling/disabling parts of the data tables
 	void ModifyTablesPerRuleset(void);
 
+	void RecordFact(FactBase* fact);
+	void WriteWorldEvents();
 private:
 	//
 	// Game editing functions.
@@ -192,6 +196,7 @@ private:
 
 	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
+	void ModifyItemName(int it, char const *name, char const *names);
 	void ModifyItemFlags(int it, int flags);
 	void ModifyItemType(int it, int type);
 	void ModifyItemWeight(int it, int weight);
@@ -200,7 +205,7 @@ private:
 	void ModifyItemSpeed(int it, int speed);
 	void ModifyItemProductionBooster(int it, int item, int bonus);
 	void ModifyItemHitch(int it, int item, int bonus);
-	void ModifyItemProductionSkill(int it, char *sk, int lev);
+	void ModifyItemProductionSkill(int it, char const *sk, int lev);
 	void ModifyItemProductionOutput(int it, int months, int count);
 	void ModifyItemProductionInput(int it, int i, int input, int amount);
 	void ModifyItemMagicSkill(int it, char *sk, int lev);
@@ -213,7 +218,7 @@ private:
 
 	void ModifyMonsterAttackLevel(char const *mon, int lev);
 	void ModifyMonsterDefense(char const *mon, int defenseType, int level);
-	void ModifyMonsterAttacksAndHits(char const *mon, int num, int hits, int regen);
+	void ModifyMonsterAttacksAndHits(char const *mon, int num, int hits, int regen, int hitDamage);
 	void ModifyMonsterSkills(char const *mon, int tact, int stealth, int obs);
 	void ModifyMonsterSpecial(char const *mon, char const *special, int lev);
 	void ModifyMonsterSpoils(char const *mon, int silver, int spoilType);
@@ -221,8 +226,9 @@ private:
 
 	void ModifyWeaponSkills(char const *weap, char *baseSkill, char *orSkill);
 	void ModifyWeaponFlags(char const *weap, int flags);
-	void ModifyWeaponAttack(char const *weap, int wclass, int attackType, int numAtt);
+	void ModifyWeaponAttack(char const *weap, int wclass, int attackType, int numAtt, int hitDamage);
 	void ModifyWeaponBonuses(char const *weap, int attack, int defense, int vsMount);
+	void ModifyWeaponBonusMalus(char const *weap, int index, char *weaponAbbr, int attackModifer, int defenseModifer);
 
 	void ModifyArmorFlags(char const *armor, int flags);
 	void ModifyArmorSaveFrom(char const *armor, int from);
@@ -252,6 +258,7 @@ private:
 	void ModifyTerrainLairChance(int t, int chance);
 	void ModifyTerrainLair(int t, int i, int lair);
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
+	void ModifyTerrainFlags(int t, int flags);
 
 	void ModifyBattleItemFlags(char const *item, int flags);
 	void ModifyBattleItemSpecial(char const *item, char const *special, int level);
@@ -264,7 +271,7 @@ private:
 	void ModifySpecialShields(char const *special, int index, int type);
 	void ModifySpecialDefenseMods(char const *special, int index, int type, int val);
 	void ModifySpecialDamage(char const *special, int index, int type, int min,
-			int val, int flags, int cls, char const *effect);
+			int val, int flags, int cls, char const *effect, int hitDamage);
 
 	void ModifyEffectFlags(char const *effect, int flags);
 	void ModifyEffectAttackMod(char const *effect, int val);
@@ -303,6 +310,8 @@ private:
 	int guardfaction;
 	int monfaction;
 	int doExtraInit;
+
+	Events* events;
 	
 	//
 	// Parsing functions
@@ -417,8 +426,8 @@ private:
 	int AllowedTacticians(Faction *pFact);
 	int AllowedTaxes(Faction *pFac);
 	int AllowedTrades(Faction *pFac);
-	int TaxCheck(ARegion *pReg, Faction *pFac);
-	int TradeCheck(ARegion *pReg, Faction *pFac);
+	int AllowedMartial(Faction *pFac);
+	bool ActivityCheck(ARegion *pReg, Faction *pFac, FactionActivity activity);
 
 	//
 	// The DoGiveOrder returns 0 normally, or 1 if no more GIVE orders
@@ -468,6 +477,9 @@ private:
 	void MidProcessTurn();
 	void PostProcessUnitExtra(ARegion *, Unit *);
 	void PostProcessTurn();
+
+	// Processing regions grow after production phase
+	void ProcessEconomics();
 	
 	// Migration effects for alternate player-driven economy
 	void ProcessMigration();
@@ -555,6 +567,7 @@ private:
 	void RunUnitProduce(ARegion *, Unit *);
 	void Run1BuildOrder(ARegion *, Object *, Unit *);
 	void RunBuildShipOrder(ARegion *, Object *, Unit *);
+	void AddNewBuildings(ARegion *);
 	void RunBuildHelpers(ARegion *);
 	int ShipConstruction(ARegion *, Unit *, Unit *, int, int, int);
 	void CreateShip(ARegion *, Unit *, int);
@@ -576,13 +589,17 @@ private:
 	//
 	// Battle function
 	//
-	int KillDead(Location *, Battle *);
+	int KillDead(Location *, Battle *, int, int);
 	int RunBattle(ARegion *, Unit *, Unit *, int = 0, int = 0);
 	void GetSides(ARegion *, AList &, AList &, AList &, AList &, Unit *, Unit *,
 				  int = 0, int = 0);
 	int CanAttack(ARegion *, AList *, Unit *);
 	void GetAFacs(ARegion *, Unit *, Unit *, AList &, AList &, AList &);
 	void GetDFacs(ARegion *, Unit *, AList &);
+
+	// For faction statistics
+	void CountItems (int **);
+	int CountItem (Faction *, int);
 };
 
 #endif

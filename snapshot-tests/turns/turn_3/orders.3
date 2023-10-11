@@ -1,0 +1,43 @@
+
+Orders Template (Long Format):
+
+#atlantis 3
+
+;*** plain (28,10) in Koheda, contains Thandianost [city] ***
+
+unit 152
+;Workers (152), revealing faction, won't cross water, 10 nomads [NOMA],
+;  62 silver [SILV]. Weight: 100. Capacity: 0/0/150/0. Skills: none.
+@work
+
+;*** plain (28,12) in Koheda, contains Hynodale [town] ***
+
+unit 140
+;Unit (140), revealing faction, won't cross water, leader [LEAD].
+;  Weight: 10. Capacity: 0/0/15/0. Skills: pattern [PATT] 1 (30),
+;  spirit [SPIR] 1 (30), gate lore [GATE] 1 (30). Can Study: magical
+;  healing [MHEA], farsight [FARS], mind reading [MIND].
+name unit "King"
+
+form 1
+    name unit "Ranchers"
+    claim 790
+    buy 10 PLAI
+    study RANC
+    turn
+        @produce LIVE
+    endturn
+end
+
+form 2
+    name unit "Workers"
+    claim 590
+    buy 10 PLAI
+    @work
+end
+
+claim 100
+study forc
+
+#end
+

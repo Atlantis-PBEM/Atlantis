@@ -22,12 +22,102 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+
+
 #include "game.h"
 #include "battle.h"
 #include "army.h"
 #include "gamedefs.h"
 #include "gamedata.h"
 #include "quests.h"
+#include "items.h"
+
+enum StatsCategory {
+	ROUND,
+	BATTLE
+};
+
+void WriteStats(Battle &battle, Army &army, StatsCategory category) {
+	auto leaderName = std::string(army.leader->name->Str());
+	std::string header = std::string(army.leader->name->Str()) + " army:";
+	
+	battle.AddLine(AString(header.c_str()));
+
+	auto stats = category == StatsCategory::ROUND
+		? army.stats.roundStats
+		: army.stats.battleStats;
+	
+	int statLines = 0;
+	for (auto &uskv : stats) {
+		UnitStat us = uskv.second;
+		if (us.attackStats.empty()) {
+			continue;
+		}
+
+		battle.AddLine(AString("- ") + us.unitName.c_str() + ":");
+
+		for (auto &att : us.attackStats) {
+			std::string s = "  - ";
+
+			if (att.weaponIndex != -1) {
+				ItemType &weapon = ItemDefs[att.weaponIndex];
+				s += std::string(weapon.name) + " [" + weapon.abr + "]";
+			}
+			else if (att.effect != "") {
+				 s += att.effect;
+			}
+			else {
+				 s += "without weapon";
+			}
+
+			s += " (";
+
+			switch (att.weaponClass)  {
+				case SLASHING: s += "slashing"; break;
+				case PIERCING: s += "piercing"; break;
+				case CRUSHING: s += "cruhsing"; break;
+				case CLEAVING: s += "cleaving"; break;
+				case ARMORPIERCING: s += "armor piercing"; break;
+				case MAGIC_ENERGY: s += "magic"; break;
+				case MAGIC_SPIRIT: s += "magic"; break;
+				case MAGIC_WEATHER: s += "magic"; break;
+				
+				default: s += "unknown"; break;
+			}
+
+			switch (att.attackType) {
+				case ATTACK_COMBAT: s += " melee"; break;
+				case ATTACK_RIDING: s += " riding"; break;
+				case ATTACK_RANGED: s += " ranged"; break;
+				case ATTACK_ENERGY: s += " energy"; break;
+				case ATTACK_SPIRIT: s += " spirit"; break;
+				case ATTACK_WEATHER: s += " weather"; break;
+				
+				default: s += " unknown"; break;
+			}
+
+			s += " attack)";
+
+			int succeeded = att.attacks - att.failed;
+			int reachedTarget = succeeded - att.missed;
+
+			s += ", attacked " + to_string(succeeded) + " of " + to_string(att.attacks) + " " + plural(att.attacks, "time", "times");
+			s += ", " + to_string(reachedTarget) + " successful " + plural(reachedTarget, "attack", "attacks");
+			s += ", " + to_string(att.blocked) + " blocked by armor";
+			s += ", " + to_string(att.hit) + " " + plural(att.killed, "hit", "hits");
+			s += ", " + to_string(att.damage) + " total damage";
+			s += ", and killed " + to_string(att.killed)  + " " + plural(att.killed, "enemy", "enemies") + ".";
+
+			battle.AddLine(AString(s.c_str()));
+		}
+
+		statLines++;
+	}
+
+	if (statLines == 0) {
+		battle.AddLine(AString("Army made no attacks."));
+	}
+}
 
 Battle::Battle()
 {
@@ -40,6 +130,24 @@ Battle::~Battle()
 	{
 		delete asstext;
 	}
+}
+
+// Checks if army A is overwhelmed by army B
+bool IsArmyOverwhelmedBy(Army * a, Army * b) {
+	if (!Globals->OVERWHELMING) return false;
+
+	int aPower;
+	int bPower;
+	if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_FIGURES) {
+		aPower = Globals->OVERWHELMING * a->NumFront();
+		bPower = b->NumFront();
+	}
+	else {
+		aPower = Globals->OVERWHELMING * a->NumFrontHits();
+		bPower = b->NumFrontHits();
+	}
+
+	return bPower > aPower;
 }
 
 void Battle::FreeRound(Army * att,Army * def, int ass)
@@ -59,27 +167,47 @@ void Battle::FreeRound(Army * att,Army * def, int ass)
 	//
 	att->round++;
 
+	bool attOverwhelm = IsArmyOverwhelmedBy(def, att);
+	if (attOverwhelm) {
+		AddLine(*(def->leader->name) + " is overwhelmed.");
+	}
+
 	/* Run attacks until done */
 	int alv = def->NumAlive();
 	while (att->CanAttack() && def->NumAlive()) {
 		int num = getrandom(att->CanAttack());
 		int behind;
 		Soldier * a = att->GetAttacker(num, behind);
-		DoAttack(att->round, a, att, def, behind, ass);
+		DoAttack(att->round, a, att, def, behind, ass, attOverwhelm, false);
 	}
+	AddLine("");
 
 	/* Write losses */
 	def->Regenerate(this);
 	alv -= def->NumAlive();
 	AddLine(*(def->leader->name) + " loses " + alv + ".");
 	AddLine("");
+
+	if (Globals->BATTLE_LOG_LEVEL == BattleLogLevel::VERBOSE) {
+		AddLine("Free round statistics:");
+		AddLine("");
+
+		WriteStats(*this, *att, StatsCategory::ROUND);
+		AddLine("");
+
+		WriteStats(*this, *def, StatsCategory::ROUND);
+		AddLine("");
+	}
+
 	att->Reset();
+	att->stats.ClearRound();
+	def->stats.ClearRound();
 }
 
 void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
-		int behind, int ass)
+		int behind, int ass, bool canAttackBehind, bool canAttackFromBehind)
 {
-	DoSpecialAttack(round, a, attackers, def, behind);
+	DoSpecialAttack(round, a, attackers, def, behind, canAttackBehind);
 	if (!def->NumAlive()) return;
 
 	if (!behind && (a->riding != -1)) {
@@ -89,14 +217,17 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 			SpecialType *spd = FindSpecial(pMt->mountSpecial);
 			for (i = 0; i < 4; i++) {
 				int times = spd->damage[i].value;
+				int hitDamage =  spd->damage[i].hitDamage;
+
 				if (spd->effectflags & SpecialType::FX_USE_LEV)
 					times *= pMt->specialLev;
 				int realtimes = spd->damage[i].minnum + getrandom(times) +
 					getrandom(times);
-				num = def->DoAnAttack(pMt->mountSpecial, realtimes,
+				num = def->DoAnAttack(this, pMt->mountSpecial, realtimes,
 						spd->damage[i].type, pMt->specialLev,
 						spd->damage[i].flags, spd->damage[i].dclass,
-						spd->damage[i].effect, 0, a);
+						spd->damage[i].effect, 0, a, attackers,
+						canAttackBehind, hitDamage);
 				if (num != -1) {
 					if (tot == -1) tot = num;
 					else tot += num;
@@ -126,7 +257,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 		if (a->weapon != -1)
 			pWep = FindWeapon(ItemDefs[a->weapon].abr);
 
-		if (behind) {
+		if (behind && !canAttackFromBehind) {
 			if (!pWep) break;
 			if (!( pWep->flags & WeaponType::RANGED)) break;
 		}
@@ -135,14 +266,16 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 		int attackType = ATTACK_COMBAT;
 		int mountBonus = 0;
 		int attackClass = SLASHING;
+		int hitDamage = a->hitDamage;
+
 		if (pWep) {
 			flags = pWep->flags;
 			attackType = pWep->attackType;
 			mountBonus = pWep->mountBonus;
 			attackClass = pWep->weapClass;
 		}
-		def->DoAnAttack(NULL, 1, attackType, a->askill, flags, attackClass,
-				NULL, mountBonus, a);
+		def->DoAnAttack(this, NULL, 1, attackType, a->askill, flags, attackClass,
+				NULL, mountBonus, a, attackers, canAttackBehind, hitDamage);
 		if (!def->NumAlive()) break;
 	}
 
@@ -153,6 +286,13 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 {
 	/* Write round header */
 	AddLine(AString("Round ") + round + ":");
+
+	if (a->tactics_bonus > b->tactics_bonus) {
+		AddLine(*(a->leader->name) + " tactics bonus " + a->tactics_bonus + ".");	
+	}
+	if (b->tactics_bonus > a->tactics_bonus) {
+		AddLine(*(b->leader->name) + " tactics bonus " + b->tactics_bonus + ".");	
+	}
 
 	/* Update both army's shields */
 	UpdateShields(a);
@@ -168,6 +308,16 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	int aatt = a->CanAttack();
 	int batt = b->CanAttack();
 
+	bool aOverwhelm = IsArmyOverwhelmedBy(b, a);
+	if (aOverwhelm) {
+		AddLine(*(b->leader->name) + " is overwhelmed.");
+	}
+
+	bool bOverwhelm = IsArmyOverwhelmedBy(a, b);
+	if (bOverwhelm) {
+		AddLine(*(a->leader->name) + " is overwhelmed.");
+	}
+
 	/* Run attacks until done */
 	while (aalive && balive && (aatt || batt))
 	{
@@ -176,19 +326,22 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 		if (num >= aatt)
 		{
 			num -= aatt;
+
 			Soldier * s = b->GetAttacker(num, behind);
-			DoAttack(b->round, s, b, a, behind);
+			DoAttack(b->round, s, b, a, behind, 0, bOverwhelm, aOverwhelm);
 		}
 		else
 		{
 			Soldier * s = a->GetAttacker(num, behind);
-			DoAttack(a->round, s, a, b, behind);
+			DoAttack(a->round, s, a, b, behind, 0, aOverwhelm, bOverwhelm);
+			// ---
 		}
 		aalive = a->NumAlive();
 		balive = b->NumAlive();
 		aatt = a->CanAttack();
 		batt = b->CanAttack();
 	}
+	AddLine("");
 
 	/* Finish round */
 	a->Regenerate(this);
@@ -198,20 +351,37 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	bialive -= balive;
 	AddLine(*(b->leader->name) + " loses " + bialive + ".");
 	AddLine("");
+
+	if (Globals->BATTLE_LOG_LEVEL == BattleLogLevel::VERBOSE) {
+		AddLine(AString("Round ") + round + " statistics:");
+		AddLine("");
+
+		WriteStats(*this, *a, StatsCategory::ROUND);
+		AddLine("");
+
+		WriteStats(*this, *b, StatsCategory::ROUND);
+		AddLine("");
+	}
+
 	a->Reset();
+	a->stats.ClearRound();
+	
 	b->Reset();
+	b->stats.ClearRound();
 }
 
-void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
+void Battle::GetSpoils(AList *losers, ItemList *spoils, int ass)
 {
 	ItemList *ships = new ItemList;
+	AString quest_rewards;
+
 	forlist(losers) {
 		Unit * u = ((Location *) elem)->unit;
 		int numalive = u->GetSoldiers();
 		int numdead = u->losses;
 		if (!numalive) {
-			if (quests.CheckQuestKillTarget(u, spoils)) {
-				AddLine("Quest completed!");
+			if (quests.CheckQuestKillTarget(u, spoils, &quest_rewards)) {
+				AddLine(AString("Quest completed! ") + quest_rewards);
 			}
 		}
 		forlist(&u->items) {
@@ -253,7 +423,90 @@ void Battle::GetSpoils(AList * losers, ItemList *spoils, int ass)
 	}
 }
 
-int Battle::Run( ARegion * region,
+void AddBattleFact(
+	Events* events, 
+	ARegion* region,
+	Unit* attacker,
+	Unit* defender,
+	Army* attackerArmy,
+	Army* defenderArmy,
+	int outcome
+) {
+	if (!Globals->WORLD_EVENTS) return;
+
+	auto fact = new BattleFact();
+
+	fact->location = EventLocation::Create(region);
+	
+	fact->attacker.AssignUnit(attacker);
+	fact->attacker.AssignArmy(attackerArmy);
+	
+	fact->defender.AssignUnit(defender);
+	fact->defender.AssignArmy(defenderArmy);
+
+	fact->outcome = outcome;
+
+	std::unordered_set<Unit *> units;
+	for (int i = 0; i < defenderArmy->count; i++) {
+		auto soldier = defenderArmy->soldiers[i];
+		units.emplace(soldier->unit);
+	}
+
+	int protect = 0;
+	int fortType = -1;
+	std::string name;
+
+	for (auto &unit : units) {
+		ObjectType& type = ObjectDefs[unit->object->type];
+		if (type.flags & ObjectType::GROUP) {
+			continue;
+		}
+
+		if (unit->object->IsFleet()) {
+			continue;
+		}
+
+		if (protect >= type.protect) {
+			continue;
+		}
+
+		protect = type.protect;
+		fortType = unit->object->type;
+		name = unit->object->name->Str();
+	}
+
+	if (!name.empty()) {
+		fact->fortification = name;
+		fact->fortificationType = fortType;
+	}
+	
+
+	events->AddFact(fact);
+}
+
+void AddAssassinationFact(
+	Events* events, 
+	ARegion* region,
+	Unit* defender,
+	Army* defenderArmy,
+	int outcome
+) {
+	if (!Globals->WORLD_EVENTS) return;
+
+	auto fact = new AssassinationFact();
+
+	fact->location = EventLocation::Create(region);
+	
+	// fact->victim.AssignUnit(defender);
+	// fact->victim.AssignArmy(defenderArmy);
+	
+	fact->outcome = outcome;
+
+	events->AddFact(fact);
+}
+
+int Battle::Run(Events* events, 
+		ARegion * region,
 		Unit * att,
 		AList * atts,
 		Unit * tar,
@@ -272,12 +525,29 @@ int Battle::Run( ARegion * region,
 	if (ass) {
 		FreeRound(armies[0],armies[1], ass);
 	} else {
-		if (armies[0]->tac > armies[1]->tac) FreeRound(armies[0],armies[1]);
-		if (armies[1]->tac > armies[0]->tac) FreeRound(armies[1],armies[0]);
+		if (Globals->ADVANCED_TACTICS) {
+			int tactics_bonus = 0;
+			if (armies[0]->tac > armies[1]->tac) {
+				tactics_bonus = armies[0]->tac - armies[1]->tac;
+				if (tactics_bonus > 3) tactics_bonus = 3;
+				armies[0]->tactics_bonus = tactics_bonus;
+			}
+			if (armies[1]->tac > armies[0]->tac) {
+				tactics_bonus = armies[1]->tac - armies[0]->tac;
+				if (tactics_bonus > 3) tactics_bonus = 3;
+				armies[1]->tactics_bonus = tactics_bonus;
+			}
+		} else {
+			if (armies[0]->tac > armies[1]->tac) FreeRound(armies[0],armies[1]);
+			if (armies[1]->tac > armies[0]->tac) FreeRound(armies[1],armies[0]);
+		}
 	}
 
 	int round = 1;
 	while (!armies[0]->Broken() && !armies[1]->Broken() && round < 101) {
+		armies[0]->stats.ClearRound();
+		armies[1]->stats.ClearRound();
+
 		NormalRound(round++,armies[0],armies[1]);
 	}
 
@@ -291,6 +561,26 @@ int Battle::Run( ARegion * region,
 		} else {
 			AddLine(*(armies[0]->leader->name) + " is destroyed!");
 		}
+		AddLine("");
+
+		if (Globals->BATTLE_LOG_LEVEL >= BattleLogLevel::DETAILED) {
+			AddLine("Battle statistics:");
+			AddLine("");
+
+			WriteStats(*this, *armies[0], StatsCategory::BATTLE);
+			AddLine("");
+
+			WriteStats(*this, *armies[1], StatsCategory::BATTLE);
+			AddLine("");
+		}
+
+		if (!ass) {
+			AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_LOST);
+		}
+		else {
+			AddAssassinationFact(events, region, tar, armies[1], BATTLE_WON);
+		}
+
 		AddLine("Total Casualties:");
 		ItemList *spoils = new ItemList;
 		armies[0]->Lose(this, spoils);
@@ -300,10 +590,13 @@ int Battle::Run( ARegion * region,
 		} else {
 			temp = "Spoils: none.";
 		}
+
 		armies[1]->Win(this, spoils);
+		
 		AddLine("");
 		AddLine(temp);
 		AddLine("");
+
 		delete spoils;
 		delete armies[0];
 		delete armies[1];
@@ -325,6 +618,26 @@ int Battle::Run( ARegion * region,
 		} else {
 			AddLine(*(armies[1]->leader->name) + " is destroyed!");
 		}
+		AddLine("");
+
+		if (Globals->BATTLE_LOG_LEVEL >= BattleLogLevel::DETAILED) {
+			AddLine("Battle statistics:");
+			AddLine("");
+
+			WriteStats(*this, *armies[0], StatsCategory::BATTLE);
+			AddLine("");
+
+			WriteStats(*this, *armies[1], StatsCategory::BATTLE);
+			AddLine("");
+		}
+
+		if (!ass) {
+			AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_WON);
+		}
+		else {
+			AddAssassinationFact(events, region, tar, armies[1], BATTLE_LOST);
+		}
+
 		AddLine("Total Casualties:");
 		ItemList *spoils = new ItemList;
 		armies[1]->Lose(this, spoils);
@@ -334,10 +647,12 @@ int Battle::Run( ARegion * region,
 		} else {
 			temp = "Spoils: none.";
 		}
+
 		armies[0]->Win(this, spoils);
 		AddLine("");
 		AddLine(temp);
 		AddLine("");
+
 		delete spoils;
 		delete armies[0];
 		delete armies[1];
@@ -346,13 +661,34 @@ int Battle::Run( ARegion * region,
 
 	AddLine("The battle ends indecisively.");
 	AddLine("");
+
+	if (Globals->BATTLE_LOG_LEVEL >= BattleLogLevel::DETAILED) {
+		AddLine("Battle statistics:");
+		AddLine("");
+
+		WriteStats(*this, *armies[0], StatsCategory::BATTLE);
+		AddLine("");
+
+		WriteStats(*this, *armies[1], StatsCategory::BATTLE);
+		AddLine("");
+	}
+
+	if (!ass) {
+		AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_DRAW);
+	}
+	else {
+		AddAssassinationFact(events, region, tar, armies[1], BATTLE_DRAW);
+	}
+
 	AddLine("Total Casualties:");
+	
 	armies[0]->Tie(this);
 	armies[1]->Tie(this);
 	temp = "Spoils: none.";
 	AddLine("");
 	AddLine(temp);
 	AddLine("");
+
 	delete armies[0];
 	delete armies[1];
 	return BATTLE_DRAW;
@@ -565,29 +901,40 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 
 	int j=NDIRS;
 	int noaida = 0, noaidd = 0;
+
 	for (int i=-1;i<j;i++) {
 		ARegion * r2 = r;
+
+		// Check if neighbor exists and assign r2 to a neighbor
 		if (i>=0) {
 			r2 = r->neighbors[i];
 			if (!r2) continue;
-			forlist(&r2->objects) {
-				/* Can't get building bonus in another region */
-				((Object *) elem)->capacity = 0;
-				((Object *) elem)->shipno = ((Object *) elem)->ships.Num();
-			}
-		} else {
+		}
+
+		// Define block to avoid conflicts with another forlist local created variables
+		{
 			forlist(&r2->objects) {
 				Object * o = (Object *) elem;
+				// Can't get building bonus in another region without EXTENDED_FORT_DEFENCE
+				if (i>=0 && !Globals->EXTENDED_FORT_DEFENCE) {
+					((Object *) elem)->capacity = 0;
+					((Object *) elem)->shipno = ((Object *) elem)->ships.Num();
+					continue;
+				}
+
 				/* Set building capacity */
 				if (o->incomplete < 1 && o->IsBuilding()) {
 					o->capacity = ObjectDefs[o->type].protect;
 					o->shipno = 0;
+					// AddLine("Fortification bonus added for ", o->name);
+					// AddLine("");
 				} else if (o->IsFleet()) {
 					o->capacity = 0;
 					o->shipno = 0;
 				}
 			}
 		}
+
 		forlist (&r2->objects) {
 			Object * o = (Object *) elem;
 			forlist (&o->units) {
@@ -703,7 +1050,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 	}
 }
 
-int Game::KillDead(Location * l, Battle *b)
+int Game::KillDead(Location * l, Battle *b, int max_susk, int max_rais)
 {
 	int uncontrolled = 0;
 	int skel, undead;
@@ -717,8 +1064,14 @@ int Game::KillDead(Location * l, Battle *b)
 		if (l->unit->advancefrom) {
 			l->unit->MoveUnit( l->unit->advancefrom->GetDummy() );
 		}
-		if (l->unit->raised > 0) {
-			undead = getrandom(l->unit->raised * 2 / 3 + 1);
+		// Raise undead/skel if mage is in battle
+		if (l->unit->raised > 0 && max_susk > 0) {
+			// Raise UNDE only if mage has RAISE_UNDEAD skill
+			undead = 0;
+			if (max_rais > 0) {
+				undead = getrandom(l->unit->raised * 2 / 3 + 1);
+			}
+
 			skel = l->unit->raised - undead;
 			tmp = ItemString(I_SKELETON, skel);
 			if (undead > 0) {
@@ -769,11 +1122,23 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 		}
 		if (attacker->GetAttitude(r,target) == A_ALLY) {
 			attacker->Error("ATTACK: Can't attack an ally.");
+			if (adv) {
+				attacker->canattack = 0;
+				if (attacker->advancefrom) {
+					attacker->MoveUnit( attacker->advancefrom->GetDummy() );
+				}
+			}
 			return BATTLE_IMPOSSIBLE;
 		}
 		GetDFacs(r,target,dfacs);
 		if (GetFaction2(&dfacs,attacker->faction->num)) {
 			attacker->Error("ATTACK: Can't attack an ally.");
+			if (adv) {
+				attacker->canattack = 0;
+				if (attacker->advancefrom) {
+					attacker->MoveUnit( attacker->advancefrom->GetDummy() );
+				}
+			}
 			return BATTLE_IMPOSSIBLE;
 		}
 		GetAFacs(r,attacker,target,dfacs,afacs,atts);
@@ -807,21 +1172,54 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 			}
 		}
 	}
-	result = b->Run(r,attacker,&atts,target,&defs,ass, &regions );
+	result = b->Run(events, r,attacker,&atts,target,&defs,ass, &regions );
+
+	int attaker_max_susk = 0;
+	int attaker_max_rais = 0;
+	{
+		forlist(&atts) {
+			// int necr_level = ((Location *)elem)->unit->GetAttribute("necromancy");
+			int susk_level = ((Location *)elem)->unit->GetAttribute("susk");
+			int rais_level = ((Location *)elem)->unit->GetAttribute("rais");
+			if (susk_level > attaker_max_susk) {
+				attaker_max_susk = susk_level;
+			}
+			if (rais_level > attaker_max_rais) {
+				attaker_max_rais = rais_level;
+			}
+		}
+	}
+
+	int defender_max_susk = 0;
+	int defender_max_rais = 0;
+	{
+		forlist(&defs) {
+			// int necr_level = ((Location *)elem)->unit->GetAttribute("necromancy");
+			int susk_level = ((Location *)elem)->unit->GetAttribute("susk");
+			int rais_level = ((Location *)elem)->unit->GetAttribute("rais");
+			if (susk_level > defender_max_susk) {
+				defender_max_susk = susk_level;
+			}
+			if (rais_level > defender_max_rais) {
+				defender_max_rais = rais_level;
+			}
+		}
+	}
 
 	/* Remove all dead units */
 	int uncontrolled = 0;
 	{
 		forlist(&atts) {
-			uncontrolled += KillDead((Location *) elem, b);
+			uncontrolled += KillDead((Location *) elem, b, attaker_max_susk, attaker_max_rais);
 		}
 	}
 	{
 		forlist(&defs) {
-			uncontrolled += KillDead((Location *) elem, b);
+			uncontrolled += KillDead((Location *) elem, b, defender_max_susk, defender_max_rais);
 		}
 	}
 	if (uncontrolled > 0 && monfaction > 0) {
+		// Number of UNDE or SKEL raised as uncontrolled
 		int undead = getrandom(uncontrolled * 2 / 3 + 1);
 		int skel = uncontrolled - undead;
 		AString tmp = ItemString(I_SKELETON, skel);

@@ -25,6 +25,7 @@
 #include "astring.h"
 #include <string.h>
 #include <stdio.h>
+#include <sstream>
 
 AString::AString()
 {
@@ -54,7 +55,7 @@ AString::AString(const char *s)
 AString::AString(int l)
 {
 	char buf[16];
-	sprintf(buf,"%d",l);
+	snprintf(buf, 16, "%d", l);
 	len = strlen(buf);
 	str = new char[len+1];
 	strcpy(str,buf);
@@ -63,7 +64,7 @@ AString::AString(int l)
 AString::AString(unsigned int l)
 {
 	char buf[16];
-	sprintf(buf,"%u",l);
+	snprintf(buf, 16, "%u", l);
 	len = strlen(buf);
 	str = new char[len+1];
 	strcpy(str,buf);
@@ -75,6 +76,14 @@ AString::AString(char c)
 	str = new char[2];
 	str[0] = c;
 	str[1] = '\0';
+}
+
+AString::AString(const std::string & s) {
+	auto buffer = s.c_str();
+
+	len = strlen(buffer);
+	str = new char[len + 1];
+	strcpy(str, buffer);
 }
 
 AString::~AString()
@@ -109,22 +118,22 @@ AString & AString::operator=(const char *c)
 	return *this;
 }
 
-int AString::operator==(char *s)
+int AString::operator==(char *s) const
 {
 	return isEqual(s);
 }
 
-int AString::operator==(const char *s)
+int AString::operator==(const char *s) const
 {
 	return isEqual(s);
 }
 
-int AString::operator==(const AString &s)
+int AString::operator==(const AString &s) const
 {
 	return isEqual(s.str);
 }
 
-int AString::isEqual(const char *temp2)
+int AString::isEqual(const char *temp2) const
 {
 	char *temp1 = str;
 
@@ -297,7 +306,7 @@ AString *AString::getlegal()
 	}
 
 	if (!j) {
-		delete temp;
+		delete[] temp;
 		return 0;
 	}
 
@@ -352,6 +361,26 @@ int AString::value()
 	return ret;
 }
 
+int AString::strict_value() //this cannot handle negative numbers!
+{
+	int l=Len();
+	for (int i=0; i<l; i++) {
+		if (!((str[i] >= '0') && (str[i] <= '9'))) {
+			return -1;
+		}
+	}
+
+	int place = 0;
+	int ret = 0;
+	while ((str[place] >= '0') && (str[place] <= '9')) {
+		ret *= 10;
+		// Fix bug where int could be overflowed.
+		if (ret < 0) return 0;
+		ret += (str[place++] - '0');
+	}
+	return ret;
+}
+
 ostream & operator <<(ostream & os,const AString & s)
 {
 	os << s.str;
@@ -360,11 +389,77 @@ ostream & operator <<(ostream & os,const AString & s)
 
 istream & operator >>(istream & is,AString & s)
 {
-	char * buf = new char[256];
+	string buf;
 	is >> buf;
-	s.len = strlen(buf);
+	s.len = strlen(buf.c_str());
 	s.str = new char[s.len + 1];
-	strcpy(s.str,buf);
-	delete[] buf;
+	strcpy(s.str,buf.c_str());
 	return is;
+}
+
+const std::string plural(int count, const std::string &one, const std::string &many) {
+	return count > 1 ? many : one;
+}
+
+const std::string join(const std::string &delimeter, const std::vector<std::string>& items) {
+	std::ostringstream buffer;
+
+	bool next = false;
+	for (auto &item : items) {
+		if (next) {
+			buffer << delimeter;
+		}
+
+		buffer << item;
+		next = true;
+	}
+
+	const std::string result = buffer.str();
+	return result;
+}
+
+const std::string join(const std::string &delimeter, const std::string &lastDelimeter, const std::vector<std::string>& items) {
+	std::ostringstream buffer;
+
+	std::size_t size = items.size();
+	std::size_t i = 0;
+
+	for (auto &item : items) {
+		if (i > 0) {
+			buffer << (i == size - 1 ? lastDelimeter : delimeter);
+		}
+
+		buffer << item;
+		i++;
+	}
+
+	const std::string result = buffer.str();
+	return result;
+}
+
+const bool endsWith(const std::string &str, const std::string &search) {
+    if (str.length() < search.length()) {
+        return false;
+    }
+
+	return std::equal(search.rbegin(), search.rend(), str.rbegin());
+}
+
+const bool startsWith(const std::string &str, const std::string &search) {
+    if (search.length() > str.length()) {
+        return false;
+    }
+
+	return std::equal(search.begin(), search.end(), str.begin());
+}
+
+const std::string capitalize(const std::string &str) {
+	if (str.empty()) {
+		return str;
+	}
+
+	std::string s = str;
+	s[0] = toupper(str[0]);
+
+	return s;
 }

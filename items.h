@@ -32,6 +32,7 @@ class ItemType;
 #include "gamedefs.h"
 #include "alist.h"
 #include "astring.h"
+#include <vector>
 
 enum {
 	ATTACK_COMBAT,
@@ -40,7 +41,7 @@ enum {
 	ATTACK_WEATHER,
 	ATTACK_RIDING,
 	ATTACK_RANGED,
-	NUM_ATTACK_TYPES
+	NUM_ATTACK_TYPES	// non resistable attack
 };
 
 enum {
@@ -94,7 +95,10 @@ class ItemType
 			// inputs
 			SKILLOUT = 0x10,
 			// This item cannot be transported.
-			NOTRANSPORT = 0x20
+			NOTRANSPORT = 0x20,
+			// Produced monsters
+			MANPRODUCE = 0x40,
+			SKILLOUT_HALF = 0x80
 		};
 		int flags;
 
@@ -152,6 +156,25 @@ class ItemType
 
 extern ItemType *ItemDefs;
 
+
+enum Ethnicity {
+	NONE,
+	VIKING,
+	BARBARIAN,
+	MAN,
+	ESKIMO,
+	NOMAD,
+	TRIBESMAN,
+	HIGHELF,
+	ELF,
+	DWARF,
+	ORC,
+	LIZARDMAN,
+	DROW,
+	TITAN,
+	HERO
+};
+
 class ManType
 {
 	public:
@@ -160,6 +183,7 @@ class ManType
 		int speciallevel;
 		int defaultlevel;
 		char const *skills[6];
+		Ethnicity ethnicity;
 		
 		int CanProduce(int);
 		int CanUse(int);
@@ -190,6 +214,32 @@ class MonType
 		int number;
 		char const *name;
 		char const *abbr;
+
+		int hitDamage;
+
+		// Terrain types which monster like to be in.
+		// When the list is left empty, it will mean all terrains are possible.
+		std::vector<int> preferredTerrain;
+
+		// Terrain types into which monster will never try to enter.
+		std::vector<int> forbiddenTerrain;
+
+		/*
+		The general algorithm of the monster movement:
+
+		There are three categories of terrain: 1) what monster likes, 2) what monster is neutral, and 3) what monster dislikes.
+		
+		Monster will freely move through the terrain he likes, and there will be a standard chance to move into the terrain he likes.
+
+		The monster will never enter the terrain he dislikes and will have a 2x lower chance to enter neutral terrain.
+
+		The monster can enter into the region of neutral terrain only if that particular region has at least one neighbor of the terrain
+		he likes.
+
+		This forbids monsters from going deeper into the unusual terrain but leaves regions on borders affected by "uncommon" monsters.
+		*/
+
+		const int getAggression();
 };
 
 extern MonType *MonDefs;
@@ -206,6 +256,16 @@ enum {
 	NUM_WEAPON_CLASSES
 };
 
+
+#define MAX_WEAPON_BM_TARGETS	4
+
+// Describes bonus/mauls against another weapon
+class WeaponBonusMalus {
+	public:
+		char const *weaponAbbr;	// weapon abbreviation
+		int attackModifer;		// how much increase/decrase attack versus this weapon
+		int defenseModifer;		// how much increase/decrase defense versus this weapon
+};
 
 class WeaponType
 {
@@ -230,8 +290,8 @@ class WeaponType
 		char const *baseSkill;
 		char const *orSkill;
 
-		int weapClass;
-		int attackType;
+		int weapClass;	// SLASHING, PIERCING, CRUSHING, CLEAVING, ARMORPIERCING, MAGIC_ENERGY, MAGIC_SPIRIT, MAGIC_WEATHER
+		int attackType;	// ATTACK_COMBAT, ATTACK_ENERGY, ATTACK_SPIRIT, ATTACK_WEATHER, ATTACK_RIDING, ATTACK_RANGED, NUM_ATTACK_TYPES (non resistable attack)
 		//
 		// For numAttacks:
 		// - A positive number is the number of attacks per round.
@@ -254,6 +314,27 @@ class WeaponType
 		int attackBonus;
 		int defenseBonus;
 		int mountBonus;
+
+		//
+		// For hitDamage:
+		// - A positive number is the number of damage per attack.
+		// - A negative number is the number of rounds per attack.
+		// - NUM_DAMAGE_HALF_SKILL indicates that the weapon gives as many
+		//   damage as the skill of the user divided by 2, rounded up.
+		// - NUM_DAMAGE_HALF_SKILL+1 indicates that the weapon gives an extra
+		//   damage above that, etc.
+		// - NUM_DAMAGE_SKILL indicates the the weapon gives as many damage
+		//   as the skill of the user.
+		// - NUM_DAMAGE_SKILL+1 indicates the the weapon gives as many
+		//   damage as the skill of the user + 1, etc.
+		//
+		enum {
+			NUM_DAMAGE_HALF_SKILL = 500,
+			NUM_DAMAGE_SKILL = 1000,
+		};
+		int hitDamage;
+
+		WeaponBonusMalus bonusMalus[MAX_WEAPON_BM_TARGETS];
 };
 
 extern WeaponType *WeaponDefs;
@@ -326,6 +407,8 @@ class BattleItemType
 		int flags;
 		char const *special;
 		int skillLevel;
+
+		int hitDamage;
 };
 
 extern BattleItemType *BattleItemDefs;
@@ -337,11 +420,14 @@ extern int ParseTransportableItem(AString *);
 extern int LookupItem(AString *);
 
 extern BattleItemType *FindBattleItem(char const *abbr);
+extern ItemType *FindItem(char const *abbr);
+extern int FindItemIndex(char const *abbr);
 extern ArmorType *FindArmor(char const *abbr);
 extern WeaponType *FindWeapon(char const *abbr);
 extern MountType *FindMount(char const *abbr);
 extern MonType *FindMonster(char const *abbr, int illusion);
 extern ManType *FindRace(char const *abbr);
+extern int FindRaceItemIndex(int raceIndex);
 extern AString AttType(int atype);
 
 enum {

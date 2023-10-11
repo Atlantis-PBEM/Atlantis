@@ -2117,7 +2117,7 @@ void Game::CreateWorld()
 		nx = 1;
 	}
 
-	int xx = 0;
+	int xx = 64;
 	while (xx <= 0) {
 		Awrite("How wide should the map be? ");
 		xx = Agetint();
@@ -2126,7 +2126,7 @@ void Game::CreateWorld()
 			Awrite( "The width must be a multiple of 8." );
 		}
 	}
-	int yy = 0;
+	int yy = 64;
 	while (yy <= 0) {
 		Awrite("How tall should the map be? ");
 		yy = Agetint();
@@ -2142,7 +2142,8 @@ void Game::CreateWorld()
 	SetupNames();
 
 	regions.CreateNexusLevel( 0, nx, ny, "nexus" );
-	regions.CreateSurfaceLevel( 1, xx, yy, 0 );
+	
+	regions.CreateSurfaceLevel(1, xx, yy, 0);
 
 	// Create underworld levels
 	int i;
@@ -2222,8 +2223,10 @@ void Game::CreateWorld()
 	regions.FinalSetupGates();
 
 	regions.CalcDensities();
-	
+
 	regions.TownStatistics();
+
+	regions.ResoucesStatistics();
 }
 
 int ARegionList::GetRegType( ARegion *pReg )

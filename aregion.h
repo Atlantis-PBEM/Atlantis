@@ -43,7 +43,12 @@ class ARegionArray;
 #include "production.h"
 #include "market.h"
 #include "object.h"
+#include "graphs.h"
+#include "mapgen.h"
+
 #include <map>
+#include <vector>
+#include <functional>
 
 /* Weather Types */
 enum {
@@ -64,6 +69,7 @@ class TerrainType
 {
 	public:
 		char const *name;
+		char const *plural;
 		char const *type;
 		char marker;
 		int similar_type;
@@ -72,6 +78,7 @@ class TerrainType
 			RIDINGMOUNTS = 0x1,
 			FLYINGMOUNTS = 0x2,
 			BARREN       = 0x4,
+			SHOW_RULES   = 0x8,
 		};
 		int flags;
 
@@ -157,6 +164,16 @@ class TownInfo
 		int dev;
 };
 
+struct RegionSetup {
+	TerrainType* terrain;
+	int habitat;
+	double prodWeight;
+	bool addLair;
+	bool addSettlement;
+	std::string settlementName;
+	int settlementSize;
+};
+
 class ARegion : public AListElem
 {
 	friend class Game;
@@ -166,7 +183,9 @@ class ARegion : public AListElem
 		ARegion();
 		ARegion(int, int);
 		~ARegion();
+		
 		void Setup();
+		void ManualSetup(const RegionSetup& settings);
 
 		void ZeroNeighbors();
 		void SetName(char const *);
@@ -213,6 +232,7 @@ class ARegion : public AListElem
 		Unit *Forbidden(Unit *); /* Returns unit that is forbidding */
 		Unit *ForbiddenByAlly(Unit *); /* Returns unit that is forbidding */
 		int CanTax(Unit *);
+		int CanGuard(Unit *);
 		int CanPillage(Unit *);
 		void Pillage();
 		int ForbiddenShip(Object *);
@@ -321,6 +341,7 @@ class ARegion : public AListElem
 		/* Potential bonuses to economy */
 		int clearskies;
 		int earthlore;
+		int phantasmal_entertainment;
 
 		ARegion *neighbors[NDIRS];
 		AList objects;
@@ -342,11 +363,10 @@ class ARegion : public AListElem
 		// Editing functions
 		void UpdateEditRegion();
 		void SetupEditRegion();
-
 	private:
 		/* Private Setup Functions */
 		void SetupPop();
-		void SetupProds();
+		void SetupProds(double weight);
 		void SetIncome();
 		void Grow();
 		int GetNearestProd(int);
@@ -357,7 +377,9 @@ class ARegion : public AListElem
 		void AddTown(int, AString *);
 		void MakeLair(int);
 		void LairCheck();
-
+		std::vector<int> GetPossibleLairs();
+		void SetupHabitat(TerrainType* terrain);
+		void SetupEconomy();
 };
 
 class ARegionArray
@@ -458,6 +480,7 @@ class ARegionList : public AList
 		void CreateAbyssLevel(int level, char const *name);
 		void CreateNexusLevel(int level, int xSize, int ySize, char const *name);
 		void CreateSurfaceLevel(int level, int xSize, int ySize, char const *name);
+		void CreateNaturalSurfaceLevel(Map* map);
 		void CreateIslandLevel(int level, int nPlayers, char const *name);
 		void CreateUnderworldLevel(int level, int xSize, int ySize, char const *name);
 		void CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name);
@@ -483,10 +506,13 @@ class ARegionList : public AList
 		void GrowRaces(ARegionArray *pRegs);
 		
 		void TownStatistics();
+		void ResoucesStatistics();
 
 		void CalcDensities();
 		int GetLevelXScale(int level);
 		int GetLevelYScale(int level);
+
+		void AddHistoricalBuildings(ARegionArray* arr, const int w, const int h);
 
 	private:
 		//
@@ -525,5 +551,28 @@ class ARegionList : public AList
 
 int LookupRegionType(AString *);
 int ParseTerrain(AString *);
+
+using ARegionCostFunction = std::function<double(ARegion*, ARegion*)>;
+using ARegionInclusionFunction = std::function<bool(ARegion*, ARegion*)>;
+
+class ARegionGraph : public graphs::Graph<graphs::Location2D, ARegion*> {
+public:
+	ARegionGraph(ARegionArray* regions);
+	~ARegionGraph();
+
+	ARegion* get(graphs::Location2D id);
+	std::vector<graphs::Location2D> neighbors(graphs::Location2D id);
+	double cost(graphs::Location2D current, graphs::Location2D next);
+
+	void setCost(ARegionCostFunction costFn);
+	void setInclusion(ARegionInclusionFunction includeFn);
+
+private:
+	ARegionArray* regions;
+	ARegionCostFunction costFn;
+	ARegionInclusionFunction includeFn;
+};
+
+const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(ARegion* start, const int maxDistance);
 
 #endif

@@ -58,6 +58,11 @@ static int ag[] = { 0, 1, 2, 4, 6, 10 };
 int *allowedTacticians = ag;
 int allowedTacticiansSize = sizeof(ag) / sizeof(ag[0]);
 
+// allowed Martial activity
+static int ma[] = { 0, 10, 25, 40, 60, 90 };
+int *allowedMartial = ma;
+int allowedMartialSize = sizeof(ma) / sizeof(ma[0]);
+
 static GameDefs g = {
 	"Wyreth",				// RULESET_NAME
 	MAKE_ATL_VER( 2, 0, 0 ), // RULESET_VERSION
@@ -160,9 +165,9 @@ static GameDefs g = {
 	0,	// CITY_RENAME_COST
 	0,	// MULTI_HEX_NEXUS
 	0,	// ICOSAHEDRAL_WORLD
-	1,	// UNDERWORLD_LEVELS
+	0,	// UNDERWORLD_LEVELS
 	0,	// UNDERDEEP_LEVELS
-	1,	// ABYSS_LEVEL
+	0,	// ABYSS_LEVEL
 	100,	  // TOWN_PROBABILITY
 	0,	// TOWN_SPREAD
 	0,	// TOWNS_NOT_ADJACENT
@@ -228,7 +233,24 @@ static GameDefs g = {
 	0, // ALLIES_NOAID
 	0, // HARDER_ASSASSINATION
 	0, //DISPERSE_GATE_NUMBERS
-	0	// UNDEATH_CONTAGION
+	0,	// UNDEATH_CONTAGION
+	0,   // REGIONS_ECONOMY
+	0, // ADVANCED_TACTICS
+	0,	// OVERWHELMING
+	0, // STRICT_GUARD
+	1, // OCEAN_GUARD
+	BattleLogLevel::NORMAL,	// BATTLE_LOG_LEVEL
+	0,	// EXTENDED_FORT_DEFENCE
+	0,	// SPOILS_NO_TRADE
+	0,	// WORLD_EVENTS
+	0,	//FACTION_STATISTICS
+	0,  // BUILD_NO_TRADE
+	0, // TRANSPORT_NO_TRADE
+	FactionActivityRules::DEFAULT,	// FACTION_ACTIVITY
+	DestroyBehavior::INSTANT,	// DESTROY_BEHAVIOR
+	200,	// MIN_DESTROY_POINTS,
+	34,	// MAX_DESTROY_PERCENT
+	0, // HALF_RIDING_BONUS
 };
 
 GameDefs *Globals = &g;

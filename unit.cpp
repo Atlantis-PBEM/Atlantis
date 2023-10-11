@@ -713,72 +713,137 @@ void Unit::ClearCastOrders()
 
 void Unit::DefaultOrders(Object *obj)
 {
-	int count, weight, i;
+	int weight, i;
 	ARegion *r, *n;
 
 	ClearOrders();
 	if (type == U_WMON) {
 		if (ObjectDefs[obj->type].monster == -1) {
-			// count starts at 2 to give a 2 / (available dirs + 2)
-			// chance of a wandering monster not moving
-			count = 2;
-			weight = items.Weight();
-			r = obj->region;
-			for (i = 0; i < NDIRS; i++) {
-				n = r->neighbors[i];
-				if (!n)
-					continue;
-				if (TerrainDefs[n->type].similar_type == R_OCEAN &&
-						!CanReallySwim() &&
-						!(CanFly(weight) &&
-							Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED))
-					continue;
-				if (TerrainDefs[n->type].similar_type != R_OCEAN &&
-						!CanWalk(weight) &&
-						!CanRide(weight) &&
-						!CanFly(weight))
-					continue;
-				count++;
+			// determine terrain perferences
+			std::set<int> forbidden;
+			std::set<int> perferred;
 
-			}
-			count = getrandom(count);
-			for (i = 0; i < NDIRS; i++) {
-				n = r->neighbors[i];
-				if (!n)
+			int aggression = 0;
+			forlist(&items) {
+				Item *item = (Item *) elem;
+				ItemType &itemType = ItemDefs[item->type];
+
+				if (!(itemType.type & IT_MONSTER)) {
 					continue;
-				if (TerrainDefs[n->type].similar_type == R_OCEAN &&
-						!CanReallySwim() &&
-						!(CanFly(weight) &&
-							Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED))
-					continue;
-				if (TerrainDefs[n->type].similar_type != R_OCEAN &&
-						!CanWalk(weight) &&
-						!CanRide(weight) &&
-						!CanFly(weight))
-					continue;
-				if (!count--) {
-					MoveOrder *o = new MoveOrder;
-					o->advancing = 0;
-					int aper = Hostile();
-					aper *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
-					aper /= 100;
-					if (aper < Globals->MONSTER_ADVANCE_MIN_PERCENT)
-						aper = Globals->MONSTER_ADVANCE_MIN_PERCENT;
-					if (getrandom(100) < aper)
-						o->advancing = 1;
-					MoveDir *d = new MoveDir;
-					d->dir = i;
-					o->dirs.Add(d);
-					monthorders = o;
+				}
+
+				MonType *monster = FindMonster(itemType.abr, (itemType.type & IT_ILLUSION));
+				aggression = std::max(aggression, monster->getAggression());
+
+				// bad terrain is an union of all bad terrains
+				for (auto & item : monster->forbiddenTerrain) {
+					forbidden.insert(item);
+				}
+
+				// for simplicity good terrains will be union too
+				for (auto & item : monster->preferredTerrain) {
+					perferred.insert(item);
 				}
 			}
+
+			weight = items.Weight();
+			r = obj->region;
+
+			// this vector will contain all directions where monster can move
+			// normal move chance will contain two enteries
+			// reduced move chacne will containe one entry
+			std::vector<int> directions;
+
+			// then chance of a wandering monster not moving will be 2 / (available dirs + 2)
+			// it is why we add 4 entries (see comment above) to the directions list
+			directions.push_back(-1);
+			directions.push_back(-1);
+			directions.push_back(-1);
+			directions.push_back(-1);
+
+			for (i = 0; i < NDIRS; i++) {
+				n = r->neighbors[i];
+				if (!n) {
+					continue;
+				}
+
+				const int terrainSimilarType = TerrainDefs[n->type].similar_type;
+
+				if (terrainSimilarType == R_OCEAN && !CanReallySwim() && !(CanFly(weight) && Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED)) {
+					continue;
+				}
+
+				if (terrainSimilarType != R_OCEAN && !CanWalk(weight) && !CanRide(weight) && !CanFly(weight)) {
+					continue;
+				}
+
+				if (!forbidden.empty() && forbidden.find(terrainSimilarType) != forbidden.end()) {
+					// the direction is in a bad terrain, monster will not move there
+					continue;
+				}
+
+				if (perferred.empty() || perferred.find(terrainSimilarType) != perferred.end()) {
+					// if there are no preferred terrains at all
+					//   or target terrain is in preferred terrains list
+					// add 2 move direction entries into the list for normal hit chance
+					directions.push_back(i);
+					directions.push_back(i);
+				}
+				else {
+					// this is direction to the neutral terrain, we must check can monster move there
+					// monster will be able to move there only if target region is connected with a good terrain
+
+					bool connectedToGoodTerrain = false;
+					for (int j = 0; j < NDIRS; j++) {
+						auto region = n->neighbors[j];
+						if (!region) {
+							continue;
+						}
+
+						if (perferred.find(TerrainDefs[region->type].similar_type) != perferred.end()) {
+							connectedToGoodTerrain = true;
+							break;
+						}
+					}
+
+					if (connectedToGoodTerrain) {
+						// 2x lower chance to enter neutral region
+						directions.push_back(i);
+					}
+				}
+			}
+
+			// pick a direction where to move
+			// it will be uniform selection of all possible directions, better than previos alogrithm
+			int dirIndex = getrandom(directions.size());
+			int dir = directions[dirIndex];
+
+			if (dir >= 0) {
+				MoveOrder *o = new MoveOrder;
+				o->advancing = 0;
+
+				if (getrandom(100) < aggression) {
+					o->advancing = 1;
+				}
+
+				MoveDir *d = new MoveDir;
+				d->dir = dir;
+				o->dirs.Add(d);
+				monthorders = o;
+			}
 		}
-	} else if (type == U_GUARD) {
+	}	//if (type == U_WMON) {
+
+	else if (type == U_GUARD) {
 		if (guard != GUARD_GUARD)
 			guard = GUARD_SET;
-	} else if (type == U_GUARDMAGE) {
+	}
+
+	else if (type == U_GUARDMAGE) {
 		combat = S_FIRE;
-	} else{
+	}
+
+	else{
 		/* Set up default orders for factions which submit none */
 		if (obj->region->type != R_NEXUS) {
 			if (GetFlag(FLAG_AUTOTAX) &&
@@ -994,7 +1059,7 @@ void Unit::ConsumeSharedMoney(int n)
 
 int Unit::GetAttackRiding()
 {
-	int riding = 0;
+    int riding = 0;
 	if (type == U_WMON) {
 		forlist(&items) {
 			Item *i = (Item *) elem;
@@ -1007,9 +1072,9 @@ int Unit::GetAttackRiding()
 		}
 		return riding;
 	} else {
-		riding = GetSkill(S_RIDING);
-		int lowriding = 0;
+		int attackriding = 0;
 		int minweight = 10000;
+        AString skname;
 		forlist(&items) {
 			Item *i = (Item *)elem;
 			if (ItemDefs[i->type].type & IT_MAN)
@@ -1017,15 +1082,47 @@ int Unit::GetAttackRiding()
 					minweight = ItemDefs[i->type].weight;
 		}
 		forlist_reuse (&items) {
+            MountType *mount;
+            int skill, maxBonus;
 			Item *i = (Item *)elem;
-			if (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= minweight)
-				return riding;
-			if (ItemDefs[i->type].ride-ItemDefs[i->type].weight >= minweight) {
-				if (riding <= 3) return riding;
-				lowriding = 3;
-			}
+            if (!(ItemDefs[i->type].type & IT_MOUNT))
+                continue;
+            mount = FindMount(ItemDefs[i->type].abr);
+            if (!mount)
+                continue;
+            maxBonus = mount->maxBonus;
+            /*
+             * This code applies terrain restrictions to the attack riding
+             * calculations, but given that these have never been applied
+             * historically we probably don't want to start now.
+             * Thus: for reference only.
+            int canRide = TerrainDefs[object->region->type].flags & TerrainType::RIDINGMOUNTS;
+            int canFly = TerrainDefs[object->region->type].flags & TerrainType::FLYINGMOUNTS;
+            if (canRide && !canFly)
+                maxBonus = mount->maxHamperedBonus;
+            if (!canRide && !canFly)
+                maxBonus = 0;
+            */
+            skname = mount->skill;
+            skill = LookupSkill(&skname);
+            if (skill == -1) {
+                // This mount doesn't require skill to use.
+                // I guess the rider gets the max bonus!
+                if (attackriding < maxBonus)
+                    attackriding = maxBonus;
+            } else {
+                riding = GetSkill(skill);
+                if ((ItemDefs[i->type].type & IT_MAN)
+                        || (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= minweight)
+                        || (ItemDefs[i->type].ride - ItemDefs[i->type].weight >= minweight)) {
+                    if (riding > maxBonus)
+                        riding = maxBonus;
+                    if (attackriding < riding)
+                        attackriding = riding;
+                }
+            }
 		}
-		return lowriding;
+		return attackriding;
 	}
 }
 
@@ -1036,8 +1133,39 @@ int Unit::GetDefenseRiding()
 	int riding = 0;
 	int weight = Weight();
 
-	if (CanFly(weight)) riding = 5;
-	else if (CanRide(weight)) riding = 3;
+	if (CanFly(weight)) {
+        riding = 5;
+        // Limit riding to the slowest flying mount
+		forlist(&items) {
+			Item *i = (Item *)elem;
+			if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].fly) {
+                MountType *mount;
+                mount = FindMount(ItemDefs[i->type].abr);
+                if (mount) {
+                    // If we wanted to apply terrain restrictions,
+                    // we'd do it here
+                    if (mount->maxBonus < riding)
+                        riding = mount->maxBonus;
+                }
+            }
+        }
+	} else if (CanRide(weight)) {
+        riding = 3;
+        // Limit riding to the slowest riding mount
+		forlist(&items) {
+			Item *i = (Item *)elem;
+			if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].ride) {
+                MountType *mount;
+                mount = FindMount(ItemDefs[i->type].abr);
+                if (mount) {
+                    // If we wanted to apply terrain restrictions,
+                    // we'd also do it here
+                    if (mount->maxBonus < riding)
+                        riding = mount->maxBonus;
+                }
+            }
+        }
+    }
 
 	if (GetMen()) {
 		int manriding = GetSkill(S_RIDING);
@@ -2125,12 +2253,15 @@ int Unit::Taxers(int numtaxers)
 	if (taxers > totalMen) taxers = totalMen;
 
 	// And finally for creatures
-	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES)
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_CREATURES) {
 		basetax += creatures;
 		taxers += creatures;
-	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS)
+	}
+
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ILLUSIONS) {
 		basetax += illusions;
 		taxers += illusions;
+	}
 	
 	if (numtaxers) return(taxers);
 
@@ -2253,7 +2384,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 }
 
 int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
-		int &attackBonus, int &defenseBonus, int &attacks)
+		int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage)
 {
 	int item = LookupItem(&itm);
 	WeaponType *pWep = FindWeapon(itm.Str());
@@ -2293,6 +2424,16 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 		attacks += (baseSkillLevel +1)/2 - WeaponType::NUM_ATTACKS_HALF_SKILL;
 	// Sanity check
 	if (attacks == 0) attacks = 1;
+
+	hitDamage = pWep->hitDamage;
+	// // Check if attackDamage is based on skill level
+	// // >= used in case NUM_DAMAGE_SKILL+1
+	if (hitDamage >= WeaponType::NUM_DAMAGE_SKILL) {
+		hitDamage = hitDamage - WeaponType::NUM_DAMAGE_SKILL + baseSkillLevel;
+	// >= used in case NUM_DAMAGE_HALF_SKILL+1
+	} else if (hitDamage >= WeaponType::NUM_DAMAGE_HALF_SKILL) {
+		hitDamage = hitDamage - WeaponType::NUM_DAMAGE_HALF_SKILL + (baseSkillLevel + 1)/2;
+	}
 
 	// get the weapon
 	items.SetNum(item, num-1);
@@ -2388,7 +2529,7 @@ int Unit::GetAttribute(char const *attrib)
 					// Ignore mage only items for non-mages
 				} else if (ap->mods[index].flags & AttribModItem::PERMAN) {
 					int men = GetMen();
-					if (men <= items.GetNum(item))
+					if (men > 0 && men <= items.GetNum(item))
 						val = ap->mods[index].val;
 				} else {
 					if (items.GetNum(item) > 0)

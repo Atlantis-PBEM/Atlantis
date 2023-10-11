@@ -29,6 +29,17 @@
 #include "object.h"
 #include "gamedata.h"
 
+const int MonType::getAggression() {
+	int aggression = this->hostile;
+	aggression *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
+	aggression /= 100;
+	if (aggression < Globals->MONSTER_ADVANCE_MIN_PERCENT) {
+		aggression = Globals->MONSTER_ADVANCE_MIN_PERCENT;
+	}
+
+	return aggression;
+}
+
 BattleItemType *FindBattleItem(char const *abbr)
 {
 	if (abbr == NULL) return NULL;
@@ -60,6 +71,30 @@ WeaponType *FindWeapon(char const *abbr)
 			return &WeaponDefs[i];
 	}
 	return NULL;
+}
+
+ItemType *FindItem(char const *abbr)
+{
+	if (abbr == NULL) return NULL;
+	for (int i = 0; i < NITEMS; i++) {
+		if (ItemDefs[i].abr == NULL) continue;
+
+		if (AString(abbr) == ItemDefs[i].abr) return &ItemDefs[i];
+	}
+
+	return NULL;
+}
+
+int FindItemIndex(char const *abbr)
+{
+	if (abbr == NULL) return -1;
+	for (int i = 0; i < NITEMS; i++) {
+		if (ItemDefs[i].abr == NULL) continue;
+
+		if (AString(abbr) == ItemDefs[i].abr) return i;
+	}
+
+	return -1;
 }
 
 MountType *FindMount(char const *abbr)
@@ -96,6 +131,19 @@ ManType *FindRace(char const *abbr)
 			return &ManDefs[i];
 	}
 	return NULL;
+}
+
+int FindRaceItemIndex(int raceIndex) {
+	auto man = ManDefs[raceIndex];
+
+	for(int i = 0; i < NITEMS; i++) {
+		auto item = ItemDefs[i];
+		if (item.type == IT_MAN && AString(item.abr) == man.abbr) {
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 AString AttType(int atype)
@@ -304,6 +352,31 @@ static AString EffectStr(char const *effect)
 	return temp;
 }
 
+static AString AttackDamageDescription(const int damage) {
+	AString temp;
+
+	if (damage <= 0) {
+		temp = "attack deals no damage";
+		return temp;
+	}
+
+	// Full skill level damage
+	if (damage >= WeaponType::NUM_DAMAGE_SKILL) {
+		temp = "attack deals the skill level points of damage";
+		return temp;
+	}
+
+	// Half skill damage
+	if (damage >= WeaponType::NUM_DAMAGE_HALF_SKILL) {
+		temp = "attack deals does half the skill level (rounded up) points of damage";
+		return temp;
+	}
+
+	// Just damage
+	temp = AString("attack deals ") + damage + " damage";
+	return temp;
+}
+
 AString ShowSpecial(char const *special, int level, int expandLevel, int fromItem)
 {
 	AString temp;
@@ -506,7 +579,7 @@ AString ShowSpecial(char const *special, int level, int expandLevel, int fromIte
 		if (!expandLevel) {
 			temp += " times the skill level of the mage";
 		}
-		temp += AString(" ") + AttType(spd->damage[i].type) + " attacks.";
+		temp += AString(" ") + AttType(spd->damage[i].type) + " attacks and each " + AttackDamageDescription(spd->damage[i].hitDamage) + ".";
 		if (spd->damage[i].effect) {
 			temp += " Each attack causes the target to be effected by ";
 			temp += EffectStr(spd->damage[i].effect);
@@ -519,6 +592,25 @@ AString ShowSpecial(char const *special, int level, int expandLevel, int fromIte
 static AString MonResist(int type, int val, int full)
 {
 	AString temp = "This monster ";
+	if (full) {
+		temp += AString("has a resistance of ") + val;
+	} else {
+		temp += "is ";
+		if (val < 1) temp += "very susceptible";
+		else if (val == 1) temp += "susceptible";
+		else if (val > 1 && val < 3) temp += "typically resistant";
+		else if (val > 2 && val < 5) temp += "slightly resistant";
+		else temp += "very resistant";
+	}
+	temp += " to ";
+	temp += AttType(type);
+	temp += " attacks.";
+	return temp;
+}
+
+static AString FMIResist(int type, int val, int full)
+{
+	AString temp = "This FMI ";
 	if (full) {
 		temp += AString("has a resistance of ") + val;
 	} else {
@@ -735,25 +827,109 @@ AString *ItemDescription(int item, int full)
 		if (found) {
 			*temp += AString(" to level ") + mt->speciallevel +
 				" and all other skills to level " +
-				mt->defaultlevel;
+				mt->defaultlevel + ".";
 		} else {
-			*temp += AString("all skills to level ") + mt->defaultlevel;
+			*temp += AString("all skills to level ") + mt->defaultlevel + ".";
 		}
 	}
-	if (ItemDefs[item].type & IT_MONSTER) {
+
+	if ((ItemDefs[item].type & IT_MONSTER) && !(ItemDefs[item].flags & ItemType::MANPRODUCE)) {
 		*temp += " This is a monster.";
 		MonType *mp = FindMonster(ItemDefs[item].abr,
 				(ItemDefs[item].type & IT_ILLUSION));
-		*temp += AString(" This monster attacks with a combat skill of ") +
-			mp->attackLevel + ".";
+		*temp += AString(" This monster attacks with a combat skill of ") + mp->attackLevel;
+
 		for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
 			*temp += AString(" ") + MonResist(c,mp->defense[c], full);
 		}
+		
 		if (mp->special && mp->special != NULL) {
 			*temp += AString(" ") +
 				"Monster can cast " +
 				ShowSpecial(mp->special, mp->specialLevel, 1, 0);
 		}
+
+		{
+			std::vector<std::string> spawnIn;
+			for (int i = 0; i < NUMTERRAINS; i++) {
+				TerrainType &terrain = TerrainDefs[i];
+				if (!(terrain.flags & TerrainType::SHOW_RULES)) {
+					continue;
+				}
+
+				if (terrain.smallmon == item || terrain.bigmon == item || terrain.humanoid == item) {
+					spawnIn.push_back(terrain.plural);
+				}
+			}
+
+			if (!spawnIn.empty()) {
+				*temp += AString(" The monster can spawn in the wilderness of ") + join(", ", " and ", spawnIn) + ".";
+			}
+		}
+
+		{
+			std::vector<std::string> lairIn;
+			for (int i = 0; i < NOBJECTS; i++) {
+				ObjectType &obj = ObjectDefs[i];
+				if (obj.flags & ObjectType::DISABLED) {
+					continue;
+				}
+
+				if (obj.monster == item) {
+					lairIn.push_back(obj.name);
+				}
+			}
+
+			if (!lairIn.empty()) {
+				*temp += AString(" This monster can lair in the ") + join(", ", " and ", lairIn) + ".";
+			}
+		}
+
+		if (mp->preferredTerrain.empty() && mp->forbiddenTerrain.empty()) {
+			*temp += AString(" ") + "The monster has no terrain preferences, and it can travel through any terrain.";
+		}
+
+		if (!mp->forbiddenTerrain.empty()) {
+			std::vector<std::string> list;
+			for (auto &terrain : mp->forbiddenTerrain) {
+				list.push_back(TerrainDefs[terrain].name);
+			}
+
+			*temp += AString(" Monster severely dislikes ") + join(",", " and ", list) + " " + plural(mp->forbiddenTerrain.size(), "terrain", "terrains") + " and will never try to enter them.";
+		}
+
+		if (!mp->preferredTerrain.empty()) {
+			*temp += AString(" ") + "Monster prefers to roam the";
+
+			bool isNext = false;
+			for (auto &terrain : mp->preferredTerrain) {
+				*temp += AString(isNext ? ", " : " ") + TerrainDefs[terrain].name;
+				isNext = true;
+			}
+
+			*temp += AString(" ") + plural(mp->preferredTerrain.size(), "terrain", "terrains") + ".";
+		}
+
+		const int aggression = mp->getAggression();
+		if (aggression >= 100) {
+			*temp += AString(" ") + "Monster is unbelievably aggressive and will attack player units on sight.";
+		}
+		else if (aggression >= 75) {
+			*temp += AString(" ") + "Monster is exceptionally aggressive, and there is a slight chance he will not attack player units.";
+		}
+		else if (aggression >= 50) {
+			*temp += AString(" ") + "Monster is very aggressive, but he will not harm player units with good luck.";
+		}
+		else if (aggression >= 25) {
+			*temp += AString(" ") + "Monster is aggressive but, in most cases, will leave player units alone.";
+		}
+		else if (aggression > 0) {
+			*temp += AString(" ") + "Monster is unfriendly, and the player must be pretty unlucky to be attacked by this monster.";
+		}
+		else {
+			*temp += AString(" ") + "Monster is totally peaceful and will never attack player units.";
+		}
+
 		if (full) {
 			int hits = mp->hits;
 			int atts = mp->numAttacks;
@@ -762,7 +938,14 @@ AString *ItemDescription(int item, int full)
 			if (!atts) atts = 1;
 			*temp += AString(" This monster has ") + atts + " melee " +
 				((atts > 1)?"attacks":"attack") + " per round and takes " +
-				hits + " " + ((hits > 1)?"hits":"hit") + " to kill.";
+				hits + " " + ((hits > 1)?"hits":"hit") + " to kill";
+
+			if (atts > 0) {
+				*temp += AString(" and each ") + AttackDamageDescription(mp->hitDamage);
+			}
+
+			*temp += AString(".");
+
 			if (regen > 0) {
 				*temp += AString(" This monsters regenerates ") + regen +
 					" hits per round of battle.";
@@ -784,10 +967,64 @@ AString *ItemDescription(int item, int full)
 		*temp += "silver as treasure.";
 	}
 
+	if(ItemDefs[item].flags & ItemType::MANPRODUCE) {
+		*temp += " This is a free-moving-item (FMI).";
+		MonType *mp = FindMonster(ItemDefs[item].abr, (ItemDefs[item].type & IT_ILLUSION));
+		*temp += AString(" This FMI attacks with a combat skill of ") + mp->attackLevel + ".";
+		
+		for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
+			*temp += AString(" ") + FMIResist(c,mp->defense[c], full);
+		}
+		
+		if (mp->special && mp->special != NULL) {
+			*temp += AString(" ") +
+				"FMI can cast " +
+				ShowSpecial(mp->special, mp->specialLevel, 1, 0);
+		}
+
+		if (full) {
+			int hits = mp->hits;
+			int atts = mp->numAttacks;
+			int regen = mp->regen;
+			if (!hits) hits = 1;
+			if (!atts) atts = 1;
+			*temp += AString(" This FMI has ") + atts + " melee " +
+				((atts > 1)?"attacks":"attack") + " per round and takes " +
+				hits + " " + ((hits > 1)?"hits":"hit") + " to kill";
+
+			if (atts > 0) {
+				*temp += AString(" and each ") + AttackDamageDescription(mp->hitDamage);
+			}
+
+			*temp += AString(".");
+
+			if (regen > 0) {
+				*temp += AString(" This FMI regenerates ") + regen + " hits per round of battle.";
+			}
+			*temp += AString(" This FMI has a tactics score of ") +
+				mp->tactics + ", a stealth score of " + mp->stealth +
+				", and an observation score of " + mp->obs + ".";
+		}
+
+		if (mp->spoiltype != -1) {
+			*temp += " This FMI might have ";
+
+			if (mp->spoiltype & IT_MAGIC) {
+				*temp += "magic items and ";
+			} else if (mp->spoiltype & IT_ADVANCED) {
+				*temp += "advanced items and ";
+			} else if (mp->spoiltype & IT_NORMAL) {
+				*temp += "normal or trade items and ";
+			}
+
+			*temp += "silver as treasure.";
+		}
+	}
+
 	if (ItemDefs[item].type & IT_WEAPON) {
 		WeaponType *pW = FindWeapon(ItemDefs[item].abr);
 		*temp += " This is a ";
-		*temp += WeapType(pW->flags, pW->weapClass) + " weapon.";
+		*temp += WeapType(pW->flags, pW->weapClass) + " weapon and each " + AttackDamageDescription(pW->hitDamage) + ".";
 		if (pW->flags & WeaponType::NEEDSKILL) {
 			pS = FindSkill(pW->baseSkill);
 			if (pS) {
@@ -896,6 +1133,30 @@ AString *ItemDescription(int item, int full)
 				if (atts == 1) *temp += "round .";
 				else *temp += AString(atts) + " rounds.";
 			}
+
+			for (int i = 0; i < MAX_WEAPON_BM_TARGETS; i++) {
+				WeaponBonusMalus *bm = &pW->bonusMalus[i];
+				if (!bm->weaponAbbr) continue;
+				if (bm->attackModifer == 0 && bm->defenseModifer == 0) continue;
+
+				ItemType *target =  FindItem(bm->weaponAbbr);
+
+				*temp += AString(" Wielders of this weapon will get ");
+
+				if (bm->attackModifer != 0) {
+					*temp += AString((bm->attackModifer > 0) ? "bonus of ":"penalty of ") + abs(bm->attackModifer) + " on combat attack";
+				}
+
+				if (bm->defenseModifer != 0) {
+					if (bm->attackModifer != 0) {
+						*temp += AString(" and ");
+					}
+
+					*temp += AString((bm->defenseModifer > 0) ? "bonus of ":"penalty of ") + abs(bm->defenseModifer) + " on combat defense";
+				}
+
+				*temp += AString(" against ") + target->name + " [" + target->abr + "].";
+			}
 		}
 	}
 
@@ -1000,16 +1261,30 @@ AString *ItemDescription(int item, int full)
 					" to ride in combat.";
 			}
 		}
-		*temp += AString(" This mount gives a minimum bonus of +") +
-			pM->minBonus + " when ridden into combat.";
-		*temp += AString(" This mount gives a maximum bonus of +") +
-			pM->maxBonus + " when ridden into combat.";
+		*temp += AString(" This mount gives a minimum bonus of +");
+		if (Globals->HALF_RIDING_BONUS) {
+			*temp += AString(((pM->minBonus + 1) / 2)) + " when ridden into combat.";
+		} else {
+			*temp +=  AString(pM->minBonus) + " when ridden into combat.";
+		}
+		
+		*temp += AString(" This mount gives a maximum bonus of +");
+		if (Globals->HALF_RIDING_BONUS) {
+			*temp += AString(((pM->maxBonus + 1) / 2)) + " when ridden into combat.";
+			*temp += AString(" This bonus is calculated as a RIDING skill divided by 2 (rounded up).");
+		} else {
+			*temp +=  AString(pM->maxBonus) + " when ridden into combat.";
+		}
+
 		if (full) {
 			if (ItemDefs[item].fly) {
-				*temp += AString(" This mount gives a maximum bonus of +") +
-					pM->maxHamperedBonus + " when ridden into combat in " +
-					"terrain which allows ridden mounts but not flying "+
-					"mounts.";
+				*temp += AString(" This mount gives a maximum bonus of +");
+				if (Globals->HALF_RIDING_BONUS) {
+					*temp += AString(((pM->maxHamperedBonus + 1) / 2)) + " when ridden into combat in ";
+				} else {
+					*temp += AString(pM->maxHamperedBonus) + " when ridden into combat in ";
+				}
+				*temp += "terrain which allows ridden mounts but not flying mounts.";
 			}
 			if (pM->mountSpecial != NULL) {
 				*temp += AString(" When ridden, this mount causes ") +
@@ -1124,19 +1399,18 @@ AString *ItemDescription(int item, int full)
 			*temp += " This item allows its possessor to magically heal "
 				"units after battle, as if their skill in Magical Healing "
 				"was the highest of their manipulation, pattern, force and "
-				"spirit skills, up to a maximum of level 3.";
+				"spirit skills, up to a maximum of level 2.";
 			break;
 		case I_RELICOFGRACE:
-			*temp += " This token was given to you by the Maker in recognition "
-				"of you turning away from your rebellion.  Complete more "
-				"quests as they are offered if you wish to continue to work "
-				"toward restoring your relationship.";
+			*temp += " This is a token of sacrifice, token of power. The Faction must posess "
+					"60 of them to get a WISH power and win the game. This relics can not "
+					"be given and do not drop in spoils.";
 			break;
 		case I_HEALPOTION:
 			*temp += " This item allows its possessor to heal wounded units after battle."
 				" No skill is necessary to use this item; it will be used automatically"
-				" when the possessor is involved in a battle. It can heal up to 10"
-				" casualties, with a 50 percent success rate. Healing consumes an item.";
+				" when the possessor is involved in a battle. It can heal up to 1"
+				" casualties, with a 70 percent success rate. Healing consumes an item.";
 			break;
 		default:
 			break;
@@ -1513,14 +1787,10 @@ int ManType::CanUse(int item)
 	if (ItemDefs[item].type & IT_MOUNT) return 1;
 
 	// Check if the item is a weapon
-	if (ItemDefs[item].type & IT_WEAPON) {
-		WeaponType *weapon = FindWeapon(ItemDefs[item].abr);
-		for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
-			if (skills[i] == NULL) continue;
-			if ((weapon->baseSkill == skills[i]) 
-				|| (weapon->orSkill == skills[i])) return 1;
-		}
-	}
+	if (ItemDefs[item].type & IT_WEAPON) return 1;
+	
+	// Check if the item is a tool
+	if (ItemDefs[item].type & IT_TOOL) return 1;
 	
 	// Check if the item is an armor
 	if (ItemDefs[item].type & IT_ARMOR) {
@@ -1552,33 +1822,5 @@ int ManType::CanUse(int item)
 		}
 	}
 	
-	// Check if the item is a tool
-	for (int i=0; i<NITEMS; i++) {
-		if ((ItemDefs[i].mult_item == item) && (CanProduce(i))) return 1;
-	}
-	
-	// Check to see if the item is a base resource
-	// for something the race can build
-	for (int b=0; b<NITEMS; b++) {
-		if (ItemDefs[b].pSkill == NULL) continue;
-		for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
-			if (skills[i] == NULL) continue;
-			if ((ItemDefs[b].pSkill == skills[i])
-				&& (ItemDefs[b].pInput[0].item == item)) return 1;
-		}
-	}
-	for (int b=0; b<NOBJECTS; b++) {
-		for (unsigned int i=0; i<(sizeof(skills)/sizeof(int)); i++) {
-			if (skills[i] == NULL) continue;
-			if (ObjectDefs[b].skill == skills[i]) {
-				if (ObjectDefs[b].item == item) return 1;
-				if (ObjectDefs[b].item == I_WOOD_OR_STONE) {
-					if ((item == I_WOOD)
-						|| (item == I_STONE)) return 1;
-				}
-			}				
-		}
-	}
-
 	return 0;
 }

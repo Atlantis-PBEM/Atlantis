@@ -155,30 +155,36 @@ UnitId *Game::ParseUnit(AString *s)
 	}
 }
 
-int ParseFactionType(AString *o, int *type)
+int ParseFactionType(AString *o, std::unordered_map<std::string, int> &type)
 {
-	int i;
-	for (i=0; i<NFACTYPES; i++) type[i] = 0;
+	for (auto &ft : *FactionTypes) {
+		type[ft] = 0;
+	}
 
 	AString *token = o->gettoken();
 	if (!token) return -1;
 
 	if (*token == "generic") {
 		delete token;
-		for (i=0; i<NFACTYPES; i++) type[i] = 1;
+
+		for (auto &ft : *FactionTypes) {
+			type[ft] = 1;
+		}
+
 		return 0;
 	}
 
 	while(token) {
-		int foundone = 0;
-		for (i=0; i<NFACTYPES; i++) {
-			if (*token == FactionStrs[i]) {
+		bool foundone = false;
+		
+		for (auto &ft : *FactionTypes) {
+			if (*token == ft.c_str()) {
 				delete token;
 				token = o->gettoken();
 				if (!token) return -1;
-				type[i] = token->value();
+				type[ft] = token->value();
 				delete token;
-				foundone = 1;
+				foundone = true;
 				break;
 			}
 		}
@@ -190,8 +196,8 @@ int ParseFactionType(AString *o, int *type)
 	}
 
 	int tot = 0;
-	for (i=0; i<NFACTYPES; i++) {
-		tot += type[i];
+	for (auto &kv : type) {
+		tot += kv.second;
 	}
 	if (tot > Globals->FACTION_POINTS) return -1;
 
@@ -362,8 +368,10 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 
 						if (unit->inTurnBlock)
 							ParseError(pCheck, unit, fac, "TURN: without ENDTURN");
-							if (!pCheck && unit->former && unit->former->format)
-								unit->former->oldorders.Add(new AString(saveorder));
+
+						if (!pCheck && unit->former && unit->former->format)
+							unit->former->oldorders.Add(new AString(saveorder));
+
 						if (pCheck && former) delete unit;
 						unit = former;
 					} else {
@@ -1193,14 +1201,12 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	int oldfactype[NFACTYPES];
-	int factype[NFACTYPES];
+	std::unordered_map<std::string, int> oldfactype;
+	std::unordered_map<std::string, int> factype;
 
-	int i;
 	if (!pCheck) {
-		for (i = 0; i < NFACTYPES; i++) {
-			oldfactype[i] = u->faction->type[i];
-		}
+		// copy current values into temp variable
+		oldfactype = u->faction->type;
 	}
 
 	int retval = ParseFactionType(o, factype);
@@ -1213,14 +1219,13 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		int m = CountMages(u->faction);
 		int a = CountApprentices(u->faction);
 
-		for (i = 0; i < NFACTYPES; i++) u->faction->type[i] = factype[i];
+		u->faction->type = factype;
 
 		if (m > AllowedMages(u->faction)) {
 			u->Error(AString("FACTION: Too many mages to change to that "
 							 "faction type."));
 
-			for (i = 0; i < NFACTYPES; i++)
-				u->faction->type[i] = oldfactype[i];
+			u->faction->type = oldfactype;
 
 			return;
 		}
@@ -1231,8 +1236,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				"s to change to that "
 				 "faction type.");
 
-			for (i = 0; i < NFACTYPES; i++)
-				u->faction->type[i] = oldfactype[i];
+			u->faction->type = oldfactype;
 
 			return;
 		}
@@ -1244,8 +1248,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				u->Error(AString("FACTION: Too many quartermasters to "
 							"change to that faction type."));
 
-				for (i = 0; i < NFACTYPES; i++)
-					u->faction->type[i] = oldfactype[i];
+				u->faction->type = oldfactype;
 
 				return;
 			}
@@ -1373,6 +1376,10 @@ void Game::ProcessDestroyOrder(Unit *u, OrdersCheck *pCheck)
 void Game::ProcessFindOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
+	if (!Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+		ParseError(pCheck, u, 0, "FIND: This command was disabled.");
+		return;
+	}
 	if (!token) {
 		ParseError(pCheck, u, 0, "FIND: No faction number given.");
 		return;
@@ -1540,7 +1547,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
 	AString * token = o->gettoken();
 	BuildOrder * order = new BuildOrder;
-	int maxbuild, i;
+	int maxbuild;
 
 	// 'incomplete' for ships:
 	maxbuild = 0;
@@ -1615,22 +1622,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 						ParseError(pCheck, unit, 0, "BUILD: Can't build that.");
 						return;
 					}
-					for (i = 1; i < 100; i++)
-						if (!reg->GetObject(i))
-							break;
-					if (i < 100) {
-						Object * obj = new Object(reg);
-						obj->type = ot;
-						obj->incomplete = ObjectDefs[obj->type].cost;
-						obj->num = i;
-						obj->SetName(new AString("Building"));
-						unit->build = obj->num;
-						unit->object->region->objects.Add(obj);
-						unit->MoveUnit(obj);
-					} else {
-						unit->Error("BUILD: The region is full.");
-						return;
-					}
+					order->new_building = ot;
 				}
 			}
 			order->target = NULL; // Not helping anyone...
@@ -1793,18 +1785,26 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		ParseError(pCheck, u, 0, "PRODUCE: No item given.");
 		return;
 	}
-	int it = ParseEnabledItem(token);
+	const int it = ParseEnabledItem(token);
 	delete token;
+
+	if (it == -1) {
+		ParseError(pCheck, u, 0, "PRODUCE: Invalid item.");
+		return;
+	}
+	const ItemType &item_def = ItemDefs[it];
+
+	if (item_def.type == IT_SHIP ) {
+		ParseError(pCheck, u, 0, "PRODUCE: Use BUILD for ships.");
+		return;
+	}
 
 	ProduceOrder *p = new ProduceOrder;
 	p->item = it;
-	if (it != -1) {
-		AString skname = ItemDefs[it].pSkill;
-		p->skill = LookupSkill(&skname);
-	} else {
-		p->skill = -1;
-	}
+	AString skname = item_def.pSkill;
+	p->skill = LookupSkill(&skname);
 	p->target = target;
+
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&
 		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
@@ -1922,7 +1922,11 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 	if (*token == "default") {
 		fac = -1;
 	} else {
-		fac = token->value();
+		fac = token->strict_value();
+		if (fac == -1) {
+			f->Error(AString("DECLARE: Non-existent faction."));
+			return;
+		}
 	}
 	delete token;
 
@@ -2039,6 +2043,8 @@ AString *Game::ProcessTurnOrder(Unit *unit, Aorders *f, OrdersCheck *pCheck,
 			order = new AString("#end");
 		}
 		AString	saveorder = *order;
+		// In order to allow @endturn to work the same as endturn we need to check for and eat the possible @
+		std::ignore = order->getat(); // we don't care about whether it was set or not, so just ignore the return value
 		token = order->gettoken();
 
 		if (token) {
@@ -3055,12 +3061,14 @@ void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		ParseError(pCheck, u, 0, "DISTRIBUTE: No item given.");
 		return;
 	}
+
 	int item = ParseTransportableItem(token);
-	delete token;
 	if (item == -1) {
-		ParseError(pCheck, u, 0, "DISTRIBUTE: Invalid item.");
+		ParseError(pCheck, u, 0, AString("DISTRIBUTE: Invalid item ") + AString(*token) + ".");
+		delete token;
 		return;
 	}
+	delete token;
 
 	int except = 0;
 	token = o->gettoken();

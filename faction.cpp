@@ -25,6 +25,7 @@
 
 #include "gamedata.h"
 #include "game.h"
+#include <algorithm>
 
 char const *as[] = {
 	"Hostile",
@@ -36,13 +37,13 @@ char const *as[] = {
 
 char const **AttitudeStrs = as;
 
-char const *fs[] = {
-	"War",
-	"Trade",
-	"Magic"
-};
+const std::string F_WAR = "War";
+const std::string F_TRADE = "Trade";
+const std::string F_MAGIC = "Magic";
+const std::string F_MARTIAL = "Martial";
 
-char const **FactionStrs = fs;
+std::vector<std::string> ft { };
+std::vector<std::string> *FactionTypes = &ft;
 
 // LLS - fix up the template strings
 char const *tp[] = {
@@ -119,9 +120,11 @@ Faction::Faction()
 {
 	exists = 1;
 	name = 0;
-	for (int i=0; i<NFACTYPES; i++) {
-		type[i] = 1;
+	
+	for (auto &ft : *FactionTypes) {
+		type[ft] = 1;
 	}
+	
 	lastchange = -6;
 	address = 0;
 	password = 0;
@@ -135,15 +138,18 @@ Faction::Faction()
 	pStartLoc = NULL;
 	noStartLeader = 0;
 	startturn = 0;
+	battleLogFormat = 0;
 }
 
 Faction::Faction(int n)
 {
 	exists = 1;
 	num = n;
-	for (int i=0; i<NFACTYPES; i++) {
-		type[i] = 1;
+	
+	for (auto &ft : *FactionTypes) {
+		type[ft] = 1;
 	}
+
 	lastchange = -6;
 	name = new AString;
 	*name = AString("Faction (") + AString(num) + AString(")");
@@ -159,6 +165,7 @@ Faction::Faction(int n)
 	pStartLoc = NULL;
 	noStartLeader = 0;
 	startturn = 0;
+	battleLogFormat = 0;
 }
 
 Faction::~Faction()
@@ -173,7 +180,9 @@ void Faction::Writeout(Aoutfile *f)
 {
 	f->PutInt(num);
 
-	for (int i=0; i<NFACTYPES; i++) f->PutInt(type[i]);
+	for (auto &ft : *FactionTypes) {
+		f->PutInt(type[ft]);
+	}
 
 	f->PutInt(lastchange);
 	f->PutInt(lastorders);
@@ -197,7 +206,9 @@ void Faction::Readin(Ainfile *f, ATL_VER v)
 	num = f->GetInt();
 	int i;
 
-	for (i=0; i<NFACTYPES; i++) type[i] = f->GetInt();
+	for (auto &ft : *FactionTypes) {
+		type[ft] = f->GetInt();
+	}
 
 	lastchange = f->GetInt();
 	lastorders = f->GetInt();
@@ -269,15 +280,17 @@ AString Faction::FactionTypeStr()
 	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		return(AString("Normal"));
 	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		int comma = 0;
-		for (int i=0; i<NFACTYPES; i++) {
-			if (type[i]) {
+		bool comma = false;
+
+		for (auto &ft : *FactionTypes) {
+			auto value = type[ft];
+			if (value) {
 				if (comma) {
 					temp += ", ";
 				} else {
-					comma = 1;
+					comma = true;
 				}
-				temp += AString(FactionStrs[i]) + " " + type[i];
+				temp += AString(ft) + " " + value;
 			}
 		}
 		if (!comma) return AString("none");
@@ -285,7 +298,69 @@ AString Faction::FactionTypeStr()
 	return temp;
 }
 
-void Faction::WriteReport(Areport *f, Game *pGame)
+void PadStrEnd(AString& str, int len) {
+	int size = str.Len();
+	for (int i = len; i > size; i--) str += AString(" ");
+}
+
+void Faction::WriteFactionStats(Areport *f, Game *pGame, int ** citems) {
+	f->PutStr(";Item                                      Rank  Max        Total");
+	f->PutStr(";=====================================================================");
+
+	for (int i = 0; i < NITEMS; i++)
+	{
+		if (ItemDefs[i].type & IT_SHIP) continue;
+
+		int num = 0;
+		forlist(&present_regions)
+		{
+			ARegionPtr *r = (ARegionPtr *)elem;
+			forlist(&r->ptr->objects)
+			{
+				Object *obj = (Object *)elem;
+				forlist(&obj->units)
+				{
+					Unit *unit = (Unit *)elem;
+					if (unit->faction == this)
+						num += unit->items.GetNum(i);
+				}
+			}
+		}
+
+		if (!num) continue;
+		
+		int place = 1;
+		int max = 0;
+		int total = 0;
+		for (int pl = 0; pl < pGame->factionseq; pl++)
+		{
+			if (citems[pl][i] > num)
+				place++;
+			if (max < citems[pl][i])
+				max = citems[pl][i];
+			total += citems[pl][i];
+		}
+		
+		AString str = AString(";") + ItemString(i, num);
+		if (ItemDefs[i].type & IT_MONSTER && ItemDefs[i].type == IT_ILLUSION)
+		{
+			str += AString(" (illusion)");
+		}
+		str += AString(" ");
+		PadStrEnd(str, 43);
+
+		str += AString(place);
+		PadStrEnd(str, 49);
+		
+		str += AString(max);
+		PadStrEnd(str, 60);
+
+		str += AString(total);
+		f->PutStr(str);
+	}
+}
+
+void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 {
 	if (IsNPC() && num == 1) {
 		if (Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
@@ -367,6 +442,13 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		return;
 	}
 
+	if (Globals->FACTION_STATISTICS) {
+		f->PutStr(";Treasury:");
+		f->PutStr(";");
+		this->WriteFactionStats(f, pGame, citems);
+		f->EndLine();
+	}
+
 	f->PutStr("Atlantis Report For:");
 	if ((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
 			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED)) {
@@ -427,34 +509,8 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 
 	f->PutStr("Faction Status:");
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
-		f->PutStr(AString("Mages: ") + nummages + " (" +
-				pGame->AllowedMages(this) + ")");
-		if (Globals->APPRENTICES_EXIST) {
-			AString temp;
-			temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
-			temp += Globals->APPRENTICE_NAME + 1;
-			temp += "s: ";
-			temp += numapprentices;
-			temp += " (";
-			temp += pGame->AllowedApprentices(this);
-			temp += ")";
-			f->PutStr(temp);
-		}
-	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		f->PutStr(AString("Tax Regions: ") + war_regions.Num() + " (" +
-				pGame->AllowedTaxes(this) + ")");
-		f->PutStr(AString("Trade Regions: ") + trade_regions.Num() + " (" +
-				pGame->AllowedTrades(this) + ")");
-		if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
-			f->PutStr(AString("Quartermasters: ") + numqms + " (" +
-					pGame->AllowedQuarterMasters(this) + ")");
-		}
-		if (Globals->TACTICS_NEEDS_WAR) {
-			f->PutStr(AString("Tacticians: ") + numtacts + " (" +
-					pGame->AllowedTacticians(this) + ")");
-		}
-		f->PutStr(AString("Mages: ") + nummages + " (" +
-				pGame->AllowedMages(this) + ")");
+		f->PutStr(AString("Mages: ") + nummages + " (" + pGame->AllowedMages(this) + ")");
+		
 		if (Globals->APPRENTICES_EXIST) {
 			AString temp;
 			temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
@@ -467,7 +523,44 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			f->PutStr(temp);
 		}
 	}
-	f->PutStr("");
+	else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if (Globals->FACTION_ACTIVITY != FactionActivityRules::DEFAULT) {
+			int currentCost = GetActivityCost(FactionActivity::TAX);
+			int maxAllowedCost = pGame->AllowedMartial(this);
+
+			bool isMerged = Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED;
+			f->PutStr(AString(isMerged ? "Regions: " : "Activity: ") + currentCost + " (" + maxAllowedCost + ")");
+		} else {			
+			int taxRegions = GetActivityCost(FactionActivity::TAX);
+			int tradeRegions = GetActivityCost(FactionActivity::TRADE);
+
+			f->PutStr(AString("Tax Regions: ") + taxRegions + " (" + pGame->AllowedTaxes(this) + ")");
+			f->PutStr(AString("Trade Regions: ") + tradeRegions + " (" + pGame->AllowedTrades(this) + ")");
+		}
+
+		if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+			f->PutStr(AString("Quartermasters: ") + numqms + " (" + pGame->AllowedQuarterMasters(this) + ")");
+		}
+
+		if (Globals->TACTICS_NEEDS_WAR) {
+			f->PutStr(AString("Tacticians: ") + numtacts + " (" + pGame->AllowedTacticians(this) + ")");
+		}
+
+		f->PutStr(AString("Mages: ") + nummages + " (" + pGame->AllowedMages(this) + ")");
+
+		if (Globals->APPRENTICES_EXIST) {
+			AString temp;
+			temp = (char) toupper(Globals->APPRENTICE_NAME[0]);
+			temp += Globals->APPRENTICE_NAME + 1;
+			temp += "s: ";
+			temp += numapprentices;
+			temp += " (";
+			temp += pGame->AllowedApprentices(this);
+			temp += ")";
+			f->PutStr(temp);
+		}
+	}
+	f->EndLine();
 
 	if (errors.Num()) {
 		f->PutStr("Errors during turn:");
@@ -561,7 +654,6 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 		// LLS - maybe we don't want this -- I'll assume not, for now 
 	//f->PutStr("#end");
 	f->EndLine();
-
 }
 
 // LLS - write order template
@@ -614,6 +706,7 @@ void Faction::WriteFacInfo(Aoutfile *file)
 
 	// LLS - write template info to players file
 	file->PutStr(AString("Template: ") + TemplateStrs[temformat]);
+	file->PutStr(AString("Battle: na"));
 
 	forlist(&extraPlayers) {
 		AString *pStr = (AString *) elem;
@@ -767,7 +860,7 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 						if (retval < 1) retval = 1;
 					}
 				}
-				if (temp->GetSkill(S_MIND_READING) > 2) detfac = 1;
+				if (temp->GetSkill(S_MIND_READING) > 1) detfac = 1;
 			}
 		}
 	}
@@ -777,8 +870,7 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 
 void Faction::DefaultOrders()
 {
-	war_regions.DeleteAll();
-	trade_regions.DeleteAll();
+	activity.clear();
 	numshows = 0;
 }
 
@@ -792,12 +884,14 @@ void Faction::TimesReward()
 
 void Faction::SetNPC()
 {
-	for (int i=0; i<NFACTYPES; i++) type[i] = -1;
+	for (auto &ft : *FactionTypes) {
+		type[ft] = -1;
+	}
 }
 
 int Faction::IsNPC()
 {
-	if (type[F_WAR] == -1) return 1;
+	if (type[F_WAR] == -1 || type[F_MARTIAL] == -1) return 1;
 	return 0;
 }
 
@@ -858,4 +952,45 @@ void Faction::DiscoverItem(int item, int force, int full)
 			}
 		}
 	}
+}
+
+int Faction::GetActivityCost(FactionActivity type) {
+	int count = 0;
+	for (auto &kv : this->activity) {
+		auto regionActivity = kv.second;
+
+		if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL) {
+			// do not care on particular activity type, but each activity consumes one point
+			count += regionActivity.size();
+		} else if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
+			// Activity array item can be present due to some logic like trying to do
+			// activity unsuccessfully because of different reasons
+			if (regionActivity.size() > 0) {
+				count++;
+			}
+		} else {
+			// standard logic, each activity is counted separately
+			if (regionActivity.find(type) != regionActivity.end()) {
+				count++;
+			}
+		}
+	}
+
+	return count;
+}
+
+void Faction::RecordActivity(ARegion *region, FactionActivity type) {
+	this->activity[region].insert(type);
+}
+
+bool Faction::IsActivityRecorded(ARegion *region, FactionActivity type) {
+	auto regionActivity = this->activity[region];
+
+	if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
+		if (regionActivity.size() > 0) {
+			return true;
+		}
+	}
+
+	return regionActivity.find(type) != std::end(regionActivity);
 }

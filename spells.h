@@ -63,6 +63,7 @@ int RunTeleport(ARegion *,Object *,Unit *);
 int RunLacandonTeleport(ARegion *, Object *, Unit *);
 int RunPortalLore(ARegion *,Object *,Unit *);
 int RunEarthLore(ARegion *,Unit *);
+int RunPhantasmalEntertainment(ARegion *,Unit *);
 int RunWeatherLore(ARegion *, Unit *);
 int RunClearSkies(ARegion *,Unit *);
 int RunPhanBeasts(ARegion *,Unit *);

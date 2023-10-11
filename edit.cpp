@@ -612,7 +612,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 						pReg->gate = getrandom(ngates);
 						while (used[pReg->gate])
 							pReg->gate = getrandom(ngates);
-						delete used;
+						delete[] used;
 						pReg->gate++;
 					} else {
 						int gatenum = getrandom(regions.numberofgates) + 1;
@@ -651,7 +651,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 							delete p;
 						}
 					}
-					pReg->SetupProds();
+					pReg->SetupProds(1);
 				} 
 				else if (*pToken == "g") { 
 					SAFE_DELETE(pToken);
@@ -660,7 +660,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 					pReg->town = NULL;
 
 					pReg->products.DeleteAll();
-					pReg->SetupProds();
+					pReg->SetupProds(1);
 					
 					pReg->markets.DeleteAll();
 

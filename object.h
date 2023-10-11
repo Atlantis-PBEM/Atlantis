@@ -121,6 +121,7 @@ class Object : public AListElem
 		AString FleetDefinition();
 		int FleetCapacity();
 		int FleetLoad();
+		int SailThroughCheck(int dir);
 		int FleetSailingSkill(int);
 		int GetFleetSize();
 		int GetFleetSpeed(int);
@@ -140,6 +141,7 @@ class Object : public AListElem
 		int mages;
 		int shipno;
 		int movepoints;
+		int destroyed;	// how much points was destroyed so far this turn
 		AList units;
 		AList ships;
 };

@@ -29,6 +29,8 @@
 #include "gamedata.h"
 #include "fileio.h"
 
+#include <sstream>
+
 AString NumToWord(int n)
 {
 	if (n > 20) return AString(n);
@@ -66,6 +68,166 @@ int StudyRate(int days, int exp)
 	int rate = sl->GetStudyRate(1, 1);
 	delete sl;
 	return rate;
+}
+
+void writeDelimetedList(std::ostringstream& buffer, const std::string &delimeter, const std::vector<std::string>& items) {
+	bool next = false;
+	for (auto &item : items) {
+		if (next) {
+			buffer << delimeter;
+		}
+
+		buffer << item;
+		next = true;
+	}
+}
+
+void writeFactionPointUsage(std::ostringstream& buffer, Faction &fac) {
+	std::vector<std::string> items;
+	for (auto &kv : fac.type) {
+		int value = kv.second;
+		if (value <= 0) {
+			continue;
+		}
+
+		items.push_back(std::to_string(value) + " " + plural(value, "point", "points") + " on " + kv.first);
+	}
+
+	writeDelimetedList(buffer, ", ", items);
+}
+
+void writeFactionDefinition(std::ostringstream& buffer, Faction &fac) {
+	std::vector<std::string> items;
+	for (auto &kv : fac.type) {
+		int value = kv.second;
+		if (value <= 0) {
+			continue;
+		}
+
+		items.push_back(kv.first + " " + std::to_string(value));
+	}
+
+	writeDelimetedList(buffer, " ", items);
+}
+
+void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac) {
+	int nm = AllowedMages(&fac);
+	int na = AllowedApprentices(&fac);
+	int nq = AllowedQuarterMasters(&fac);
+	int nt = AllowedTrades(&fac);
+	int nw = AllowedTaxes(&fac);
+	int nma = AllowedMartial(&fac);
+
+	int count = 0;
+
+	std::vector<std::string> missingTypes;
+	std::vector<std::string> types;
+	for (auto &key : *FactionTypes) {
+		int value = fac.type[key];
+		if (value > 0) {
+			types.push_back(key);
+		}
+		else {
+			missingTypes.push_back(key);
+		}
+	}
+
+	for (auto &key : types) {
+		if (count > 0) {
+			if (count == (int)types.size() - 1) {
+				buffer << ", and ";
+			}
+			else {
+				buffer << ", ";
+			}
+		}
+
+		if (key == F_WAR) {
+			buffer << "tax " << nw << " " << plural(nw, "region", "regions");
+		}
+
+		if (key == F_TRADE) {
+			buffer << "perform trade in " << nt << " " << plural(nt, "region", "regions");
+		}
+
+		if (key == F_MAGIC) {
+			buffer << "have " << nm << " " << plural(nm, "mage", "mages");
+			if (Globals->APPRENTICES_EXIST) {
+				buffer << " as well as " << na << " " << Globals->APPRENTICE_NAME;
+				if (na > 1) {
+					buffer << "s";
+				}
+			}
+		}
+
+		if (key == F_MARTIAL) {
+			if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL) {
+				buffer << "perform tax or trade in " << nma << " " << plural(nma, "region", "regions");
+			}
+			
+			if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) { 
+				buffer << "perform tax and trade in " << nma << " " << plural(nma, "region", "regions");
+			}
+		}
+
+		count++;
+	}
+
+	if (Globals->APPRENTICES_EXIST && na > 0) {
+		buffer << ", as well have " << na << " " << Globals->APPRENTICE_NAME;
+		if (na > 1) {
+			buffer << "s";
+		}
+	}
+
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT && nq > 0) {
+		buffer << ", and " << nq << " quartermaster";
+		if (nq > 1) {
+			buffer << "s";
+		}
+	}
+
+	if (missingTypes.size() > 0) {
+		buffer << ", but ";
+	}
+
+	count = 0;
+	for (auto &fp : missingTypes) {
+		if (count > 0) {
+			if (count == (int)missingTypes.size() - 1) {
+				buffer << ", and ";
+			}
+			else {
+				buffer << ", ";
+			}
+		}
+
+		if (fp == F_WAR) {
+			buffer << "could not perform tax in any regions";
+		}
+
+		if (fp == F_TRADE) {
+			buffer << "could not perform trade in any regions";
+		}
+
+		if (fp == F_MAGIC) {
+			buffer << "could not possess any mages";
+		}
+
+		if (fp == F_MARTIAL) {
+			buffer << "could not perform tax or trade in regions";
+		}
+
+		count++;
+	}
+
+	if (Globals->APPRENTICES_EXIST && na <= 0) {
+		buffer << ", as well could not possess any" << Globals->APPRENTICE_NAME << "s";
+	}
+
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT && nq <= 0) {
+		buffer << ", and could not possess any quartermasters";
+	}
 }
 
 // LLS - converted HTML tags to lowercase
@@ -162,6 +324,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.PutStr(f.Link("#world", "The World"));
 	f.Enclose(1, "ul");
 	f.TagText("li", f.Link("#world_regions", "Regions"));
+	f.TagText("li", f.Link("#region_resources", "Region Resources"));
 	f.TagText("li", f.Link("#world_structures", "Structures"));
 	if (Globals->NEXUS_EXISTS) {
 		temp = "Atlantis Nexus";
@@ -328,7 +491,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("li", f.Link("#exchange", "exchange"));
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		f.TagText("li", f.Link("#faction", "faction"));
-	f.TagText("li", f.Link("#find", "find"));
+
+	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+		f.TagText("li", f.Link("#find", "find"));
+	}
+
 	f.TagText("li", f.Link("#forget", "forget"));
 	f.TagText("li", f.Link("#form", "form"));
 	f.TagText("li", f.Link("#give", "give"));
@@ -509,7 +676,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ". Faction Points spent "
 			"on Trade determine the number of regions in which a faction "
 			"may conduct trade activity. Trade activity includes producing "
-			"goods, building ships and buildings, and buying trade items. ";
+			"goods and materials";
+		if (!Globals->BUILD_NO_TRADE) {
+			temp += ", building ships and buildings";
+		}
+		temp += ".";
 		if (qm_exist) {
 			temp += "Faction points spent on Trade also determine the "
 				"of quartermaster units a trade faction can have. ";
@@ -529,145 +700,172 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "table border=\"1\"");
 		f.Enclose(1, "tr");
 		f.TagText("th", "Faction Points");
-		temp = "War (max tax regions";
-		if (Globals->TACTICS_NEEDS_WAR)
-			temp += "/tacticians";
-		temp += ")";
-		f.TagText("th", temp);
-		temp = "Trade (max trade regions";
-		if (qm_exist)
-			temp += " / quartermasters";
-		temp += ")";
-		f.TagText("th", temp);
-		temp = "Magic (max mages";
-		if (app_exist) {
-			temp += " / ";
-			temp += Globals->APPRENTICE_NAME;
-			temp += "s";
+
+		for (auto &fp : *FactionTypes) {
+			if (fp == F_WAR) {
+				temp = "War (max tax regions";
+				if (Globals->TACTICS_NEEDS_WAR)
+					temp += " / tacticians";
+				temp += ")";
+				f.TagText("th", temp);
+			}
+
+			if (fp == F_TRADE) {
+				temp = "Trade (max trade regions";
+				if (qm_exist)
+					temp += " / quartermasters";
+				temp += ")";
+				f.TagText("th", temp);
+			}
+
+			if (fp == F_MARTIAL) {
+				temp = "Martial (";
+
+				if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED) {
+					temp += "max tax and trade regions";
+				}
+
+				if (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL) {
+					temp += "max tax or trade regions";
+				}
+
+				if (qm_exist) temp += " / quartermasters";
+				if (Globals->TACTICS_NEEDS_WAR) temp += " / tacticians";
+				temp += ")";
+				f.TagText("th", temp);
+			}
+
+			if (fp == F_MAGIC) {
+				temp = "Magic (max mages";
+				if (app_exist) {
+					temp += " / ";
+					temp += Globals->APPRENTICE_NAME;
+					temp += "s";
+				}
+				temp += ")";
+				f.TagText("th", temp);
+			}
 		}
-		temp += ")";
-		f.TagText("th", temp);
+		
 		f.Enclose(0, "tr");
 		int i;
 		for (i = 0; i <= Globals->FACTION_POINTS; i++) {
-			fac.type[F_WAR]=i;
-			fac.type[F_TRADE]=i;
-			fac.type[F_MAGIC]=i;
+			for (auto &fp : *FactionTypes) {
+				fac.type[fp] = i;
+			}
+
 			f.Enclose(1, "tr");
 			f.Enclose(1, "td align=\"center\" nowrap");
 			f.PutStr(i);
 			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"center\" nowrap");
-			temp = AllowedTaxes(&fac);
-			if (Globals->TACTICS_NEEDS_WAR)
-				temp+= AString(" / ") + AllowedTacticians(&fac);
-			f.PutStr(temp);
-			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"center\" nowrap");
-			temp = AllowedTrades(&fac);
-			if (qm_exist)
-				temp += AString(" / ") + AllowedQuarterMasters(&fac);
-			f.PutStr(temp);
-			f.Enclose(0, "td");
-			f.Enclose(1, "td align=\"center\" nowrap");
-			temp = AllowedMages(&fac);
-			if (app_exist)
-				temp += AString(" / ") + AllowedApprentices(&fac);
-			f.PutStr(temp);
-			f.Enclose(0, "td");
+
+			for (auto &fp : *FactionTypes) {
+				if (fp == F_WAR) {
+					f.Enclose(1, "td align=\"center\" nowrap");
+					temp = AllowedTaxes(&fac);
+					if (Globals->TACTICS_NEEDS_WAR) temp+= AString(" / ") + AllowedTacticians(&fac);
+					f.PutStr(temp);
+					f.Enclose(0, "td");
+				}
+
+				if (fp == F_TRADE) {
+					f.Enclose(1, "td align=\"center\" nowrap");
+					temp = AllowedTrades(&fac);
+					if (qm_exist) temp += AString(" / ") + AllowedQuarterMasters(&fac);
+					f.PutStr(temp);
+					f.Enclose(0, "td");
+				}
+
+				if (fp == F_MARTIAL) {
+					f.Enclose(1, "td align=\"center\" nowrap");
+					temp = AllowedMartial(&fac);
+					if (qm_exist) temp += AString(" / ") + AllowedQuarterMasters(&fac);
+					if (Globals->TACTICS_NEEDS_WAR) temp+= AString(" / ") + AllowedTacticians(&fac);
+					f.PutStr(temp);
+					f.Enclose(0, "td");
+				}
+
+				if (fp == F_MAGIC) {
+					f.Enclose(1, "td align=\"center\" nowrap");
+					temp = AllowedMages(&fac);
+					if (app_exist) temp += AString(" / ") + AllowedApprentices(&fac);
+					f.PutStr(temp);
+					f.Enclose(0, "td");
+				}
+			}
+			
 			f.Enclose(0, "tr");
 		}
 		f.Enclose(0, "table");
 		f.Enclose(0, "center");
 		f.PutStr("<P></P>");
-		int m,w,t;
-		fac.type[F_WAR] = w = (Globals->FACTION_POINTS+1)/3;
-		fac.type[F_TRADE] = t = Globals->FACTION_POINTS/3;
-		fac.type[F_MAGIC] = m = (Globals->FACTION_POINTS+2)/3;
-		int nm, na, nw, nt, nq;
-		nm = AllowedMages(&fac);
-		na = AllowedApprentices(&fac);
-		nq = AllowedQuarterMasters(&fac);
-		nt = AllowedTrades(&fac);
-		nw = AllowedTaxes(&fac);
-		temp = "For example, a well rounded faction might spend ";
-		temp += AString(w) + " point" + (w==1?"":"s") + " on War, ";
-		temp += AString(t) + " point" + (t==1?"":"s") + " on Trade, and ";
-		temp += AString(m) + " point" + (m==1?"":"s") + " on Magic.  ";
-		temp += "This faction's type would appear as \"War ";
-		temp += AString(w) + " Trade " + t + " Magic " + m;
-		temp += "\", and would be able to tax ";
-		temp += AString(nw) + " region" + (nw==1?"":"s") + ", ";
-		temp += "perform trade in ";
-		temp += AString(nt) + " region" + (nt==1?"":"s") + ", and have ";
-		temp += AString(nm) + " mage" + (nm==1?"":"s");
-		if (app_exist) {
-			temp += " as well as ";
-			temp += AString(na) + " " + Globals->APPRENTICE_NAME
-				+ (na==1?"":"s");
-		}
-		if (qm_exist) {
-			temp += " and ";
-			temp += AString(nq) + " quartermaster" + (nq==1?"":"s");
-		}
-		temp += ".";
-		f.Paragraph(temp);
 
-		fac.type[F_WAR] = w = Globals->FACTION_POINTS;
-		fac.type[F_MAGIC] = m = 0;
-		fac.type[F_TRADE] = t = 0;
-		nw = AllowedTaxes(&fac);
-		nq = AllowedQuarterMasters(&fac);
-		nt = AllowedTrades(&fac);
-		nm = AllowedMages(&fac);
-		na = AllowedApprentices(&fac);
-		temp = "As another example, a specialized faction might spend all ";
-		temp += AString(w) + " point" + (w==1?"":"s") + " on War. ";
-		temp += "This faction's type would appear as \"War ";
-		temp += AString(w) + "\", and it would be able to tax " + nw;
-		temp += AString(" region") + (nw==1?"":"s") + ", but could ";
-		if (nt == 0)
-			temp += "not perform trade in any regions";
-		else
-			temp += AString("only perform trade in ") + nt + " region" +
-				(nt == 1?"":"s");
-		temp += ", ";
-		if (!app_exist)
-			temp += "and ";
-		if (nm == 0)
-			temp += "could not possess any mages";
-		else
-			temp += AString("could only possess ") + nm + " mage" +
-				(nm == 1?"":"s");
-		if (app_exist) {
-			temp += ", and ";
-			if (na == 0) {
-				temp += "could not possess any ";
-				temp += Globals->APPRENTICE_NAME;
-				temp += "s";
-			} else {
-				temp += AString("could only possess ") + na
-					+ " " + Globals->APPRENTICE_NAME +
-					(na == 1?"":"s");
+		std::ostringstream buffer;
+
+		int count = FactionTypes->size();
+		int singleValue = Globals->FACTION_POINTS / count;
+		int reminder = Globals->FACTION_POINTS % count;
+		for (auto &fp : *FactionTypes) {
+			int value = singleValue;
+			if (reminder > 0) {
+				value += 1;
+				reminder--;
 			}
+
+			fac.type[fp] = value;
 		}
-		if (qm_exist) {
-			temp += ", and ";
-			if (nq == 0)
-				temp += "could not possess any quartermasters";
-			else
-				temp += AString("could only possess ") + nq +
-					"quartermaster" + (nq == 1?"":"s");
+
+		buffer << "For example, a well rounded faction might spend ";
+		writeFactionPointUsage(buffer, fac);
+		buffer << ".";
+
+		buffer << " ";
+
+		buffer << "This faction's type would appear as \"";
+		writeFactionDefinition(buffer, fac);
+		buffer << "\", and would be able to ";
+		WriteFactionTypeDescription(buffer, fac);
+		buffer << ".";
+
+		f.Paragraph(buffer.str());
+
+		buffer.clear();
+		buffer.str("");
+
+		if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT) {
+			fac.type[F_WAR] = Globals->FACTION_POINTS;
+			fac.type[F_TRADE] = 0;
 		}
-		temp += ".";
-		f.Paragraph(temp);
+		else {
+			fac.type[F_MARTIAL] =  Globals->FACTION_POINTS;
+		}
+		fac.type[F_MAGIC] = 0;
+
+		buffer << "As another example, a specialized faction might spend all ";
+		writeFactionPointUsage(buffer, fac);
+		buffer << ".";
+
+		buffer << " ";
+
+		buffer << "This faction's type would appear as \"";
+		writeFactionDefinition(buffer, fac);
+		buffer << "\", and would be able to ";
+		WriteFactionTypeDescription(buffer, fac);
+		buffer << ".";
+
+		f.Paragraph(buffer.str());
+
 		if (Globals->FACTION_POINTS>3) {
 			int rem=Globals->FACTION_POINTS-3;
 			temp = "Note that it is possible to have a faction type with "
 				"less than ";
 			temp += Globals->FACTION_POINTS;
-			temp += " points spent. In fact, a starting faction has one "
-				"point spent on each of War, Trade, and Magic, leaving ";
+			temp += " points spent. In fact, a starting faction has one point spent on each of ";
+			for (auto &fp : *FactionTypes) {
+				temp += fp + ", ";
+			}
+			temp += "leaving ";
+			
 			temp += AString(rem) + " point" + (rem==1?"":"s") + " unspent.";
 			f.Paragraph(temp);
 		}
@@ -983,6 +1181,53 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"well as moving.";
 		f.Paragraph(temp);
 	}
+
+	f.LinkRef("region_resources");
+	f.TagText("h3", "Region resources:");
+	f.Paragraph("Here is list of resources you can find in regions:");
+	f.Enclose(1, "center");
+	f.Enclose(1, "table border=\"1\"");
+	f.Enclose(1, "tr");
+	f.Enclose(1, "td colspan=\"2\"");
+	f.PutStr("Region type");
+	f.Enclose(0, "td");
+	f.Enclose(1, "td colspan=\"4\"");
+	f.PutStr("Resources");
+	f.Enclose(0, "td");
+	f.Enclose(0, "tr");
+
+	for (int i=0; i<R_NUM; i++) {
+		if (!(TerrainDefs[i].flags & TerrainType::SHOW_RULES)) continue;
+		int first = 1;
+		f.Enclose(1, "tr");
+		f.Enclose(1, "td colspan=\"2\"");
+		f.PutStr(TerrainDefs[i].name);
+		f.Enclose(0, "td");
+
+		f.Enclose(1, "td colspan=\"4\"");
+		AString temp = "";
+
+		for (unsigned int c = 0; c < sizeof(TerrainDefs[i].prods)/sizeof(Product); c++) {
+			if (TerrainDefs[i].prods[c].product == -1) continue;
+
+			if (first == 0) {
+				temp = temp + AString(", ");
+			}
+			temp = temp + ItemDefs[TerrainDefs[i].prods[c].product].name + " (" + TerrainDefs[i].prods[c].chance + "%)" ;
+			first = 0;
+		}
+		if (temp.Len() > 0) {
+			temp = temp + AString(".");
+		} else {
+			temp = AString("none.");
+		}
+		f.PutStr(temp);
+		f.Enclose(0, "td");
+		f.Enclose(0, "tr");
+	}
+	f.Enclose(0, "table");
+	f.Enclose(0, "center");
+
 	f.LinkRef("world_structures");
 	f.TagText("h3", "Structures:");
 	temp = "Regions may also contain structures, such as buildings";
@@ -1223,10 +1468,15 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"details.";
 	f.Paragraph(temp);
 
+	temp = "Note that depending on game settings certain races might "
+		"be able to swim or fly and there are items that can enable "
+		"your units to fly or walk on water.";
+	f.Paragraph(temp);
+
 	temp = "Flying units are not initially available to starting players. "
 		"A unit can ride provided that the carrying capacity of its "
 		"horses is at least as great as the weight of its people and "
-		"all other items.  A unit can walk provided that the carrying "
+		"all other items. A unit can walk provided that the carrying "
 		"capacity of its people";
 	if (!(ItemDefs[I_HORSE].flags & ItemType::DISABLED)) {
 		if (!(ItemDefs[I_WAGON].flags & ItemType::DISABLED)) temp += ", ";
@@ -2514,12 +2764,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp = "Trade items are bought and sold only by cities, and have "
 			"no other practical uses.  However, the profit margins on "
 			"these items are usually quite high. ";
-		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-			temp += "Buying of trade items in a region counts against a "
-				"Trade faction's quota of regions in which it may "
-				"undertake trade activity (note that buying and selling "
-				"normal items does not, nor does selling of Trade items).";
-		}
 		f.Paragraph(temp);
 	}
 	f.LinkRef("economy_buildings");
@@ -2532,7 +2776,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"levels allow work to proceed faster (still using one unit of "
 		"the required resource per unit of work done). ";
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		temp += "Again, only Trade factions can issue ";
+		if (Globals->BUILD_NO_TRADE) {
+			temp += "Any faction can issue ";
+		} else {
+			temp += "Again, only Trade factions can issue ";
+		}
 		temp += f.Link("#build", "BUILD") + " orders. ";
 	}
 	temp += "Here is a table of the various building types:";
@@ -3281,6 +3529,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"trade activity in the hex of the unit issuing the order. ";
 		temp += "The target unit must be at least FRIENDLY to the unit "
 			"which issues the order.";
+
+		f.Paragraph(temp);
+
+		temp = "Not all type of items can be ";
+		temp += f.Link("#transport", "TRANSPORT") + "ed to or ";
+		temp += f.Link("#distribute", "DISTRIBUTE") + "d by ";
+		temp += "a quartermaster. ";
+		temp += "Men (including Leaders), summoned creatures (including ";
+		temp += "illusionary ones), ships, mounts, war machines, and ";
+		temp += "items created using artifact lore need to be ";
+		temp += "carried/sailed from one location to another by a unit.";
+
 		f.Paragraph(temp);
 	}
 
@@ -3547,13 +3807,18 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"more units on one side have the same Tactics skill, then the "
 			"one with the lower unit number is regarded as the leader of "
 			"that side.  If one side's leader has a better Tactics skill "
-			"than the other side's, then that side gets a free round of "
-			"attacks.";
+			"than the other side's,";
+		
+		if (Globals->ADVANCED_TACTICS) {
+			temp += "then that side gets a tactics difference bonus to their attack and defense.";
+		} else {
+			temp += "then that side gets a free round of attacks.";
+		}
 	}
 	f.Paragraph(temp);
 	temp = "In each combat round, the combatants each get to attack once, in "
 		"a random order. ";
-	if (!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
+	if (!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED) && !Globals->ADVANCED_TACTICS) {
 		temp += "(In a free round of attacks, only one side's forces get to "
 			"attack.) ";
 	}
@@ -3609,7 +3874,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 	
 	temp = "Some melee weapons may be defined as Long or Short (this is "
-		"relative to a normal weapon, e.g. the sword).  A soldier wielding "
+		"relative to a normal weapon, e.g. the sword). A soldier wielding "
 		"a longer weapon than his opponent gets a +1 bonus to his attack "
 		"skill.";
 	f.Paragraph(temp);
@@ -3632,7 +3897,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"actual Combat skill.  This is the trade off for being able to hit "
 		"from the back line of fighting.";
 	f.Paragraph(temp);
-	temp = "Being inside a building confers a +2 bonus to defense.  This "
+	temp = "Being inside a building confers a bonus to defense.  This "
 		"bonus is effective against ranged as well as melee weapons.  The "
 		"number of men that a building can protect is equal to its size. "
 		"The size of the various common buildings was listed in the ";
@@ -3647,7 +3912,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ObjectDefs[O_FORT].protect;
 		temp += "), then the first ";
 		temp += ObjectDefs[O_FORT].protect;
-		temp += " men in the unit will gain the full +2 bonus, and the other ";
+		temp += " men in the unit will gain the full bonus, and the other ";
 		temp += (200 - ObjectDefs[O_FORT].protect);
 		temp += " will gain no protection.";
 	}
@@ -3677,7 +3942,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += Globals->HEALS_PER_MAN;
 		temp += " casualties per skill level. Each attempt however "
 			"requires one unit of Herbs, which is thereby used up. Each "
-			"attempt has a 50% chance of healing one casualty; only one "
+			"attempt has a some chance of healing one casualty; only one "
 			"attempt at Healing may be made per casualty. Healing occurs "
 			"automatically, after the battle is over, by any living "
 			"healers on the winning side.";
@@ -3746,10 +4011,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 			f.LinkRef("stealthobs_stealing");
 			f.TagText("h3", "Stealing:");
 			temp = AString("The ") + f.Link("#steal", "STEAL") +
-				" order is a way to steal items from other factions without "
-				"a battle.  The order can only be issued by a one-man unit. "
-				"The order specifies a target unit; the thief will then "
-				"attempt to steal the specified item from the target unit.";
+				" order is a way to steal items from other player factions"
+				" without a battle. The order can only be issued by a one-man"
+				" unit. The order specifies a target unit; the thief will then"
+				" attempt to steal the specified item from the target unit.";
 			f.Paragraph(temp);
 			if (has_obse) {
 				temp = "If the thief has higher Stealth than any of the "
@@ -4242,6 +4507,79 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"Atlantis.  They will occasionally attack player units, so be "
 			"careful when wandering through the wilderness.";
 		f.Paragraph(temp);
+
+		temp = "Some monsters live in lairs, caves, and other structures players cannot enter. "
+			"Such monsters will never leave their habitat and will never wander around, "
+			"but they can attack player units present in the region. The willingness to attack is "
+			"dependent on the monster's aggression level. It is worth reminding that monsters "
+			"inside the lair will always be visible to the player regardless of their stealth score "
+			"as any other unit in the structure. Empty lairs will spawn new monsters regularly if "
+			"old ones are killed. Players can guard regions with lairs, and monsters will not spawn there.";
+		f.Paragraph(temp);
+
+		temp = "Other monsters do not live in lairs but wander freely. Wandering monsters can spawn in any "
+			"unguarded region regardless of whether there is a lair. Guarding will prevent monsters from spawning "
+			"in a particular region. Their willingness to attack depends on their aggression level, and monsters "
+			"can advance to neighboring regions while moving. Some monsters could have preferred terrains that they "
+			"like more than others, and then they will be willing to enter such regions more likely than others. At "
+			"the same time, some terrains could be so uncomfortable that monsters will never enter them. If a monster "
+			"has particular terrain preferences, he will try to be close to the habitat he likes, and he will not go "
+			"deeper into the territory that is not connected with his preferred terrain.";
+		f.Paragraph(temp);
+
+		temp = "A small tip to the players about guarding: guarding will prevent monsters from spawning and attacking "
+			"player units, but in such a way players will not get any loot from monsters too. Monster hunting is a desirable "
+			"activity because it is fun, and you can get a great reward like silver, magical items, weapons, etc.";
+		f.Paragraph(temp);
+
+		f.TagText("h4", "Monster movement probability table");
+		f.Enclose(1, "table border=\"1\"");
+
+		f.Enclose(1, "thead");
+			f.Enclose(1, "tr");
+				f.TagText("th", "Directions");
+				f.TagText("th", "Prefered");
+				f.TagText("th", "Neutral");
+				f.TagText("th", "Move Preferred");
+				f.TagText("th", "Move Neutral");
+				f.TagText("th", "Stay");
+			f.Enclose(0, "tr");
+		f.Enclose(0, "thead");
+
+		int matrix[3][2];
+		matrix[2][0] = 4;	// stay
+
+		f.Enclose(1, "tbody");
+		for (int dirs = 1; dirs <= 6; dirs++) {
+			for (int preferedDirs = dirs; preferedDirs >= 0; preferedDirs--) {
+				const int neutralDirs = dirs - preferedDirs;
+
+				matrix[0][0] = preferedDirs * 2;	// prefered
+				matrix[1][0] = neutralDirs;			// neutral
+
+				int totalCases = 0;
+				for (int i = 0; i < 3; i++) {
+					totalCases += matrix[i][0];
+				}
+
+				for (int i = 0; i < 3; i++) {
+					matrix[i][1] = matrix[i][0] * 100 / totalCases;
+				}
+
+				f.Enclose(1, "tr");
+					f.TagText("td", AString("") + dirs);
+					f.TagText("td", AString("") + preferedDirs);
+					f.TagText("td", AString("") + neutralDirs);
+
+
+					for (int i = 0; i < 3; i++) {
+						f.TagText("td", AString("") + matrix[i][1] + "%");
+					}
+				f.Enclose(0, "tr");
+			}
+		}
+		f.Enclose(0, "tbody");
+		f.Enclose(0, "table");
 	}
 	f.LinkRef("nonplayers_controlled");
 	f.TagText("h3", "Controlled Monsters:");
@@ -4773,23 +5111,44 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.CommandExample(temp, temp2);
 	}
 
-	f.ClassTagText("div", "rule", "");
-	f.LinkRef("find");
-	f.TagText("h4", "FIND [faction]");
-	f.TagText("h4", "FIND ALL");
-	temp = "Find the email address of the specified faction or of all "
-		"factions.";
-	f.Paragraph(temp);
-	f.Paragraph("Example:");
-	temp = "Find the email address of faction 4.";
-	temp2 = "FIND 4";
-	f.CommandExample(temp, temp2);
+	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
+		f.ClassTagText("div", "rule", "");
+		f.LinkRef("find");
+		f.TagText("h4", "FIND [faction]");
+		f.TagText("h4", "FIND ALL");
+		temp = "Find the email address of the specified faction or of all "
+			"factions.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Find the email address of faction 4.";
+		temp2 = "FIND 4";
+		f.CommandExample(temp, temp2);
+	}
 
 	f.ClassTagText("div", "rule", "");
 	f.LinkRef("forget");
 	f.TagText("h4", "FORGET [skill]");
-	temp = "Forget the given skill. This order is useful for normal units "
-		"who wish to learn a new skill, but already know a different skill.";
+	temp = "Forget the given skill. This order is useful for ";
+	if (Globals->SKILL_LIMIT_NONLEADERS) {
+		temp += "normal units who wish to learn a new skill, but already "
+			"know a different skill. It can also be used for ";
+	}
+	temp += "a mage";
+	if (Globals->APPRENTICES_EXIST) {
+		if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+			temp += ", ";
+		}
+		else {
+			temp += ", or ";
+		}
+		temp += Globals->APPRENTICE_NAME;
+	}
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+		temp += ", or quartermaster";
+	}
+	temp += " who wish to become a normal "
+		"unit. A common reason for this is to be able to change faction "
+		"points.";
 	f.Paragraph(temp);
 	f.Paragraph("Example:");
 	temp = "Forget knowledge of Mining.";
@@ -5102,7 +5461,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"the unit attempting to rename it must be the owner of a large "
 			"enough structure located in the city. It requires a tower or "
 			"better to rename a village, a fort or better to rename a town "
-			"and a castle or mystic fortress to rename a city. ";
+			"and a castle or a citadel to rename a city. ";
 		if (Globals->CITY_RENAME_COST) {
 			int c=Globals->CITY_RENAME_COST;
 			temp += AString("It also costs $") + c + " to rename a village, $";

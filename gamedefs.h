@@ -58,13 +58,34 @@ extern int *allowedQuartermasters;
 extern int allowedQuartermastersSize;
 extern int *allowedTacticians;
 extern int allowedTacticiansSize;
+extern int *allowedMartial;
+extern int allowedMartialSize;
 
+extern int const NUMTERRAINS;
 extern int NUMBATTLEITEMS;
 extern int NUMARMORS;
 extern int NUMWEAPONS;
 extern int NUMMOUNTS;
 extern int NUMMONSTERS;
 extern int NUMMAN;
+
+enum BattleLogLevel {
+	NORMAL   = 0,	// Standard battle log
+	DETAILED = 1,	// Will include detailed statistics after the battle
+	VERBOSE  = 2	// Will include additionaly statistics for each battle round
+};
+
+enum FactionActivityRules {
+	DEFAULT        = 0,	// Default behavior, War and Trade have their own points it faction is limited by the activity at all.
+	MARTIAL        = 1,	// Common point pool for War and Trade activity. War and Trade activity in the same region will take 2 points.
+	MARTIAL_MERGED = 2	// Common point pool for War and Trade activity, but counted per region - do what you want in a region.
+};
+
+enum DestroyBehavior {
+	INSTANT    = 0,	// default behavior,any unit can instantly destroy any building
+	PER_FIGURE = 1,	// one man will destroy one building strucure point, it is assumed that destroy power is 1
+	PER_SKILL  = 2	// use building skill as a basis how much can be destroyed. The formula is: destroy power = max(1, BUILDING skill level)
+};
 
 class GameDefs {
 public:
@@ -703,6 +724,82 @@ public:
 	// Chance of men killed by undead coming back from the grave
 	// as undead themselves
 	int UNDEATH_CONTAGION;
+
+	// Like DYNAMIC_POPULATION but without migration
+	// Regions population changes depends on production in region, settlements grow
+	// Enables basic economy
+	int REGIONS_ECONOMY;
+
+	// Replaces free round by combat bonus for first rounds
+	int ADVANCED_TACTICS;
+
+	// Combat overwhelming.
+	//
+	// It limits the BEHIND flag as too few front line troops won' t be able to defend the combatants
+	// in the back line if the attacker is remarkably larger. There will be a message in the battle
+	// report teeling you if one side is overwhelmed. After this has happened all units of the
+	// overwhelmed side fight as if they were in the front line.
+	//
+	// You need as many times the number of front line troops to overwhelm an enemy as you have set
+	// in OVERWHELMING varaible. Setting 0 effectively turns this featur off, but settining it to 2
+	// will mean that one army front line must be 2X larger than other army front line to achieve
+	// overwhelming.
+	// 
+	// This feature uses ARMY_ROUT setting to determine how size of the army is determined, by hits
+	// or by figure count.
+	int OVERWHELMING;
+
+	// Prevents non-ally factions to set guard on guarded regions.
+	int STRICT_GUARD;
+
+	// Allows guarding in ocean
+	int OCEAN_GUARD;
+
+	// Controls how detailed battle logs are, see BattleLogLevel for more details
+	BattleLogLevel BATTLE_LOG_LEVEL;
+
+	// Extends fortifications defenses into adjacent regions
+	int EXTENDED_FORT_DEFENCE;
+
+	// Remove trade items from spoils
+	int SPOILS_NO_TRADE;
+
+	// Write into time world events like battles, city captures, etc.
+	// THIS IS BOOL, NOT INT
+	// Use 0 - when you don't want any world events in the times
+	// Use 1 - when you want them
+	int WORLD_EVENTS;
+	
+	// Include faction statistics and ranking on items faction own into the report.
+	// THIS IS BOOL, NOT INT
+	// Use 0 - no stats included
+	// Use 1 - get the nice stats about your faction comparing to the world
+	int FACTION_STATISTICS;
+
+	// This flag makes build to not take trade points
+	int BUILD_NO_TRADE;
+
+	// TRANSPORT / DISTRIBUTE orders should not use Trade point
+	int TRANSPORT_NO_TRADE;
+
+	// How to count faction activit. See FactionActivty enum for more details.
+	FactionActivityRules FACTION_ACTIVITY;
+
+	// how buildings are destroyed, read more in DestroyBehavior enum
+	DestroyBehavior DESTROY_BEHAVIOR;
+
+	// set folowing value when DESTROY_BEHAVIOR is not INSTANT
+	// how much structure points can be destroyed per turn
+	// MAX_DESTROY_PERCENT accepts values from [1..100]
+	// MIN_DESTROY_POINTS accepts [0..infinity]
+	// formula:
+	//     turn destroyable points = max(MIN_DESTROY_POINTS, Max Structure Points * MAX_DESTROY_PERCENT / 100)
+	int MIN_DESTROY_POINTS;
+	int MAX_DESTROY_PERCENT;
+
+	// Only uses half of the riding bonus (round up) for combat purposes
+	// For example, WING RIDI 5 will be (5 / 2) rounded up = RIDI 3. Horse (3 / 2) rounded up = 2.
+	int HALF_RIDING_BONUS;
 };
 
 extern GameDefs *Globals;

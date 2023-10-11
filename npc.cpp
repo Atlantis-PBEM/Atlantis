@@ -60,16 +60,20 @@ void Game::GrowWMons(int rate)
 	int level;
 	for (level = 0; level < regions.numLevels; level++) {
 		ARegionArray *pArr = regions.pRegionArrays[level];
-		int xsec;
-		for (xsec=0; xsec< pArr->x / 8; xsec++) {
-			for (int ysec=0; ysec< pArr->y / 16; ysec++) {
-				/* OK, we have a sector. Count mons, and wanted */
+
+		for (int xsec=0; xsec < pArr->x; xsec+=8) {
+			for (int ysec=0; ysec < pArr->y; ysec+=16) {
 				int mons=0;
 				int wanted=0;
-				for (int x=0; x<8; x++) {
-					for (int y=0; y<16; y+=2) {
-						ARegion *reg = pArr->GetRegion(x+xsec*8, y+ysec*16+x%2);
-						if (reg && !reg->IsGuarded()) {
+
+				for (int x=0; x < 8; x++) {
+					if (x+xsec > pArr->x) break;
+
+					for (int y=0; y < 16; y+=2) {
+						if (y+ysec > pArr->y) break;
+
+						ARegion *reg = pArr->GetRegion(x+xsec, y+ysec+x%2);
+						if (reg && reg->zloc == level && !reg->IsGuarded()) {
 							mons += reg->CountWMons();
 							/*
 							 * Make sure there is at least one monster type
@@ -89,8 +93,9 @@ void Game::GrowWMons(int rate)
 								 (ItemDefs[mon].flags & ItemType::DISABLED)))
 								avail = 1;
 
-							if (avail)
+							if (avail) {
 								wanted += TerrainDefs[reg->type].wmonfreq;
+							}
 						}
 					}
 				}
@@ -98,14 +103,34 @@ void Game::GrowWMons(int rate)
 				wanted /= 10;
 				wanted -= mons;
 				wanted = (wanted*rate + getrandom(100))/100;
+
+				// printf("\n\n WANTED WMON at (xsec: %d, ysec: %d) : %d \n\n", xsec, ysec, wanted);
+
 				if (wanted > 0) {
-					for (int i=0; i< wanted;) {
-						int m=getrandom(8);
-						int n=getrandom(8)*2+m%2;
-						ARegion *reg = pArr->GetRegion(m+xsec*8, n+ysec*16);
-						if (reg && !reg->IsGuarded() && MakeWMon(reg)) {
+					// TODO: instead of loop guard need to check how many available regions
+					// are there and random them
+					int loop_guard = 1000;
+					for (int i=0; i < wanted;) {
+						int x = getrandom(8);
+						int y = getrandom(16);
+						if (y%2 == 1) {
+							if (y > 0) {
+								y -= 1;
+							} else {
+								y = 0;
+							}
+						}
+
+						ARegion *reg = pArr->GetRegion(x + xsec, y + ysec + x%2);
+
+						if (reg && reg->zloc == level && !reg->IsGuarded() && MakeWMon(reg)) {
 							i++;
 						}
+
+						// In worst case scenario it will randomly pick same not matching regions
+						// with potential of infinitie loop (ie dodgy RNG)
+						loop_guard--;
+						if (loop_guard == 0) break;
 					}
 				}
 			}
@@ -188,9 +213,9 @@ void Game::MakeLMon(Object *pObj)
 					(ItemDefs[I_DEMON].type & IT_ILLUSION));
 			u->items.SetNum(I_DEMON, getrandom(mp->number + 1));
 
-			mp = FindMonster(ItemDefs[I_BALROG].abr,
-					(ItemDefs[I_BALROG].type & IT_ILLUSION));
-			u->items.SetNum(I_BALROG, getrandom(mp->number + 1));
+			mp = FindMonster(ItemDefs[I_DEVIL].abr,
+					(ItemDefs[I_DEVIL].type & IT_ILLUSION));
+			u->items.SetNum(I_DEVIL, getrandom(mp->number + 1));
 			break;
 		case I_SKELETON:
 			u->MakeWMon("Undead", I_SKELETON, getrandom(mp->number + 1));
@@ -212,6 +237,7 @@ void Game::MakeLMon(Object *pObj)
 			u->items.SetNum(I_SORCERERS,
 					getrandom(mp->number + 1));
 			u->SetFlag(FLAG_BEHIND, 1);
+			u->guard = GUARD_NONE;
 			u->MoveUnit(pObj);
 
 			u = GetNewUnit(monfac, 0);
@@ -220,6 +246,7 @@ void Game::MakeLMon(Object *pObj)
 					(ItemDefs[I_WARRIORS].type & IT_ILLUSION));
 			u->MakeWMon(mp->name, I_WARRIORS,
 					(mp->number + getrandom(mp->number) + 1) / 2);
+			u->guard = GUARD_NONE;
 
 			break;
 		case I_DARKMAGE:
@@ -238,6 +265,7 @@ void Game::MakeLMon(Object *pObj)
 					(ItemDefs[I_DARKMAGE].type & IT_ILLUSION));
 			u->items.SetNum(I_DARKMAGE, getrandom(mp->number + 1));
 			u->SetFlag(FLAG_BEHIND, 1);
+			u->guard = GUARD_NONE;
 			u->MoveUnit(pObj);
 
 			u = GetNewUnit(monfac, 0);
@@ -246,12 +274,14 @@ void Game::MakeLMon(Object *pObj)
 					(ItemDefs[I_DROW].type & IT_ILLUSION));
 			u->MakeWMon(mp->name, I_DROW,
 					(mp->number + getrandom(mp->number) + 1) / 2);
+			u->guard = GUARD_NONE;
 
 			break;
 		case I_ILLYRTHID:
 			u->MakeWMon(mp->name, I_ILLYRTHID,
 					(mp->number + getrandom(mp->number) + 1) / 2);
 			u->SetFlag(FLAG_BEHIND, 1);
+			u->guard = GUARD_NONE;
 			u->MoveUnit(pObj);
 
 			u = GetNewUnit(monfac, 0);
@@ -263,6 +293,7 @@ void Game::MakeLMon(Object *pObj)
 			mp = FindMonster(ItemDefs[I_UNDEAD].abr,
 					(ItemDefs[I_UNDEAD].type & IT_ILLUSION));
 			u->items.SetNum(I_UNDEAD, getrandom(mp->number + 1));
+			u->guard = GUARD_NONE;
 			break;
 		case I_STORMGIANT:
 			if (getrandom(3) < 1) {

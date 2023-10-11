@@ -44,11 +44,25 @@ Game::Game()
 	gameStatus = GAME_STATUS_UNINIT;
 	ppUnits = 0;
 	maxppunits = 0;
+	events = new Events();
+
+	if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT)
+	{
+		FactionTypes->push_back(F_WAR);
+		FactionTypes->push_back(F_TRADE);
+		FactionTypes->push_back(F_MAGIC);
+	}
+	else
+	{
+		FactionTypes->push_back(F_MARTIAL);
+		FactionTypes->push_back(F_MAGIC);
+	}
 }
 
 Game::~Game()
 {
 	delete ppUnits;
+	delete events;
 	ppUnits = 0;
 	maxppunits = 0;
 }
@@ -739,7 +753,8 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 			AString * pDefault = new AString("none");
 			pFac->password = pDefault;
 		}
-		
+	} else if (*pToken == "Battle:") {
+		pFac->battleLogFormat = 0;
 	} else if (*pToken == "Template:") {
 		// LLS - looked like a good place to stick the Template test
 		pTemp = pLine->gettoken();
@@ -1052,6 +1067,11 @@ int Game::RunGame()
 	Awrite("Running the Turn...");
 	RunOrders();
 
+	if (Globals->WORLD_EVENTS) {
+		Awrite("Writing world events...");
+		WriteWorldEvents();
+	}
+
 	Awrite("Writing the Report File...");
 	WriteReport();
 	Awrite("");
@@ -1072,6 +1092,17 @@ int Game::RunGame()
 	Awrite("done");
 
 	return(1);
+}
+
+void Game::RecordFact(FactBase* fact) {
+	this->events->AddFact(fact);
+}
+
+void Game::WriteWorldEvents() {
+	std::string text = this->events->Write(Globals->RULESET_NAME, MonthNames[this->month], this->year);
+	if (text.empty() || text.length() == 0) return;
+
+	this->WriteTimesArticle(text.c_str());
 }
 
 void Game::PreProcessTurn()
@@ -1174,6 +1205,21 @@ void Game::WriteReport()
 
 	MakeFactionReportLists();
 	CountAllSpecialists();
+
+	int ** citems = new int* [factionseq];
+	
+	if (Globals->FACTION_STATISTICS) {
+		for (int i = 0; i < factionseq; i++)
+		{
+			citems [i] = new int [NITEMS];
+			for (int j = 0; j < NITEMS; j++)
+			{
+				citems [i][j] = 0;
+			}
+		}
+		CountItems(citems);
+	}
+
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
 		AString str = "report.";
@@ -1184,7 +1230,7 @@ void Game::WriteReport()
 			(fac->num == 1))) {
 			int i = f.OpenByName(str);
 			if (i != -1) {
-				fac->WriteReport(&f, this);
+				fac->WriteReport(&f, this, citems);
 				f.Close();
 			}
 		}
@@ -1520,7 +1566,7 @@ int Game::AllowedMages(Faction *pFac)
 
 int Game::AllowedQuarterMasters(Faction *pFac)
 {
-	int points = pFac->type[F_TRADE];
+	int points = std::max(pFac->type[F_TRADE], pFac->type[F_MARTIAL]);
 
 	if (points < 0) points = 0;
 	if (points > allowedQuartermastersSize - 1)
@@ -1531,7 +1577,7 @@ int Game::AllowedQuarterMasters(Faction *pFac)
 
 int Game::AllowedTacticians(Faction *pFac)
 {
-	int points = pFac->type[F_WAR];
+	int points = std::max(pFac->type[F_WAR], pFac->type[F_MARTIAL]);
 
 	if (points < 0) points = 0;
 	if (points > allowedTacticiansSize - 1)
@@ -1553,7 +1599,7 @@ int Game::AllowedApprentices(Faction *pFac)
 
 int Game::AllowedTaxes(Faction *pFac)
 {
-	int points = pFac->type[F_WAR];
+	int points = std::max(pFac->type[F_WAR], pFac->type[F_MARTIAL]);
 
 	if (points < 0) points = 0;
 	if (points > allowedTaxesSize - 1) points = allowedTaxesSize - 1;
@@ -1563,12 +1609,22 @@ int Game::AllowedTaxes(Faction *pFac)
 
 int Game::AllowedTrades(Faction *pFac)
 {
-	int points = pFac->type[F_TRADE];
+	int points = std::max(pFac->type[F_TRADE], pFac->type[F_MARTIAL]);
 
 	if (points < 0) points = 0;
 	if (points > allowedTradesSize - 1) points = allowedTradesSize - 1;
 
 	return allowedTrades[points];
+}
+
+int Game::AllowedMartial(Faction *pFac)
+{
+	int points = pFac->type[F_MARTIAL];
+	
+	if (points < 0) points = 0;
+	if (points > allowedMartialSize - 1) points = allowedMartialSize - 1;
+
+	return allowedMartial[points];
 }
 
 int Game::UpgradeMajorVersion(int savedVersion)
@@ -2073,19 +2129,60 @@ void Game::Equilibrate()
 
 void Game::WriteTimesArticle(AString article)
 {
-        AString filename;
-        int result;
-        Arules f;
+	AString filename;
+	int result;
+	Arules f;
 
-        do {
-                filename = "times.";
-                filename += getrandom(10000);
-                result = access(filename.Str(), F_OK);
-        } while (result == 0);
+	do {
+		filename = "times.";
+		filename += getrandom(10000);
+		result = access(filename.Str(), F_OK);
+	} while (result == 0);
 
-        if (f.OpenByName(filename) != -1) {
-                f.PutStr(article);
-                f.Close();
-        }
+	if (f.OpenByName(filename) != -1) {
+		f.PutStr(article);
+		f.Close();
+	}
 }
 
+
+void Game::CountItems (int ** citems)
+{
+	int i = 0;
+	forlist (&factions)
+	{
+		Faction * fac = (Faction *) elem;
+		if (!fac->IsNPC())
+		{
+			for (int j = 0; j < NITEMS; j++)
+			{
+				citems[i][j] = CountItem (fac, j);
+			}
+			
+			i++;
+		}
+	}
+}
+
+int Game::CountItem (Faction * fac, int item)
+{
+	if (ItemDefs[item].type & IT_SHIP) return 0;
+	
+	int all = 0;
+	forlist (&(fac->present_regions))
+	{
+		ARegionPtr * r = (ARegionPtr *) elem;
+		forlist (&r->ptr->objects)
+		{
+			Object * obj = (Object *) elem;
+			forlist (&obj->units)
+			{
+			Unit * unit = (Unit *) elem;
+			if (unit->faction == fac)
+				all += unit->items.GetNum (item);
+			}
+		}
+	}
+
+	return all;
+}

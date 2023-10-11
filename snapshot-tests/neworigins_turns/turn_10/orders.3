@@ -1,0 +1,93 @@
+
+Orders Template (Long Format):
+
+#atlantis 3
+
+;*** forest (14,2) in Philagotuspolisus Woods ***
+
+unit 5
+;Unit (5), behind, revealing faction, sharing, gnoll [GNOL]. Weight:
+;  10. Capacity: 0/0/15/0. Skills: none.
+move n
+
+;*** swamp (13,3) in Philagotuspolisus Marshes, contains Hymnoalotos
+;  [village] ***
+
+unit 38
+;Unit (38), behind, revealing faction, leader [LEAD]. Weight: 10.
+;  Capacity: 0/0/15/0. Skills: observation [OBSE] 1 (30), force [FORC]
+;  1 (70), pattern [PATT] 1 (40), spirit [SPIR] 1 (30), gate lore
+;  [GATE] 1 (30), fire [FIRE] 1 (30), combat [COMB] 3 (200), stealth
+;  [STEA] 1 (60), illusion [ILLU] 1 (30), phantasmal entertainment
+;  [PHEN] 1 (30). Combat spell: fire [FIRE]. Can Study: earthquake
+;  [EQUA], force shield [FSHI], energy shield [ESHI], spirit shield
+;  [SSHI], magical healing [MHEA], farsight [FARS], mind reading
+;  [MIND], weather lore [WEAT], earth lore [EART], necromancy [NECR],
+;  demon lore [DEMO], create phantasmal beasts [PHBE], create
+;  phantasmal demons [PHDE], dispel illusions [DISP], artifact lore
+;  [ARTI].
+cast gate random
+claim 100
+STUDY FORC 2
+TURN
+  study patt 2
+ENDTURN
+TURN
+  study spir 2
+ENDTURN
+
+unit 51
+;Unit (51), on guard, revealing faction, sharing, 8 gnolls [GNOL], 14
+;  swords [SWOR], 193 silver [SILV]. Weight: 94. Capacity: 0/0/120/0.
+;  Skills: combat [COMB] 2 (95).
+@tax
+
+unit 52
+;Unit (52), behind, revealing faction, sharing, leader [LEAD], longbow
+;  [LBOW], 2 swords [SWOR]. Weight: 13. Capacity: 0/0/15/0. Skills:
+;  tactics [TACT] 1 (35), longbow [LBOW] 1 (30).
+guard 1
+@study lbow
+@tax
+
+unit 57
+;Unit (57), revealing faction, 10 gnolls [GNOL], 15 swords [SWOR], 504
+;  silver [SILV]. Weight: 115. Capacity: 0/0/150/0. Skills: combat
+;  [COMB] 2 (95).
+guard 1
+@tax
+give 38 400 silv
+form 1
+  buy 1 gnol
+  move ne
+end
+form 2
+  buy 1 gnol
+  move se
+end
+
+unit 60
+;Unit (60), revealing faction, 9 gnolls [GNOL], 14 swords [SWOR], 452
+;  silver [SILV]. Weight: 104. Capacity: 0/0/135/0. Skills: combat
+;  [COMB] 2 (95).
+guard 1
+@tax
+give 38 400 silv
+
+unit 61
+;Unit (61), revealing faction, 9 gnolls [GNOL], 15 swords [SWOR], 450
+;  silver [SILV]. Weight: 105. Capacity: 0/0/135/0. Skills: combat
+;  [COMB] 2 (95).
+guard 1
+@tax
+give 38 400 silv
+
+;*** plain (14,4) in Maranarenos Dale ***
+
+unit 62
+;Unit (62), behind, revealing faction, sharing, gnoll [GNOL]. Weight:
+;  10. Capacity: 0/0/15/0. Skills: none.
+move se
+
+#end
+

@@ -43,6 +43,10 @@ class Game;
 #include "alist.h"
 #include "astring.h"
 
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
 enum {
 	A_HOSTILE,
 	A_UNFRIENDLY,
@@ -52,12 +56,10 @@ enum {
 	NATTITUDES
 };
 
-enum {
-	F_WAR,
-	F_TRADE,
-	F_MAGIC,
-	NFACTYPES
-};
+extern const std::string F_WAR;
+extern const std::string F_TRADE;
+extern const std::string F_MAGIC;
+extern const std::string F_MARTIAL;
 
 // DK
 // LLS - make templates cleaner for save/restore
@@ -79,7 +81,7 @@ enum {
 };
 
 extern char const ** AttitudeStrs;
-extern char const ** FactionStrs;
+extern std::vector<std::string> *FactionTypes;
 
 // LLS - include strings for the template enum
 extern char const **TemplateStrs;
@@ -113,6 +115,11 @@ public:
 	int attitude;
 };
 
+enum FactionActivity {
+	TAX     = 1,
+	TRADE   = 2
+};
+
 class FactionPtr : public AListElem {
 public:
 	Faction * ptr;
@@ -138,7 +145,7 @@ public:
 	void Event(const AString &);
 	
 	AString FactionTypeStr();
-	void WriteReport( Areport *f, Game *pGame );
+	void WriteReport( Areport *f, Game *pGame, int ** citems);
 	// LLS - write order template
 	void WriteTemplate(Areport *f, Game *pGame);
 	void WriteFacInfo(Aoutfile *);
@@ -166,7 +173,7 @@ public:
 	// The type is only used if Globals->FACTION_LIMIT_TYPE ==
 	// FACLIM_FACTION_TYPES
 	//
-	int type[NFACTYPES];
+	std::unordered_map<std::string, int> type;
 
 	int lastchange;
 	int lastorders;
@@ -179,6 +186,7 @@ public:
 	int times;
 	int showunitattitudes;
 	int temformat;
+	int battleLogFormat;
 	char exists;
 	int quit;
 	int numshows;
@@ -187,8 +195,13 @@ public:
 	int numapprentices;
 	int numqms;
 	int numtacts;
-	AList war_regions;
-	AList trade_regions;
+	// AList war_regions;
+	// AList trade_regions;
+
+	std::unordered_map<ARegion *, std::unordered_set<FactionActivity, std::hash<int>>> activity;
+	int GetActivityCost(FactionActivity type);
+	void RecordActivity(ARegion *region, FactionActivity type);
+	bool IsActivityRecorded(ARegion *region, FactionActivity type);
 
 	/* Used when writing reports */
 	AList present_regions;
@@ -215,6 +228,8 @@ public:
 	ARegion *pStartLoc;
 	int noStartLeader;
 	int startturn;
+
+	void WriteFactionStats(Areport *f, Game *pGame, int ** citems);
 };
 
 Faction * GetFaction(AList *,int);
