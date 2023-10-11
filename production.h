@@ -38,7 +38,7 @@ public:
 	Production();
 	
 	void Writeout(Aoutfile *);
-	void Readin(Ainfile *);
+	void Readin(istream& f);
 	AString WriteReport();
 	
 	int itemtype;
@@ -55,7 +55,7 @@ public:
 	void AddProd(Production *);
 	
 	void Writeout(Aoutfile *);
-	void Readin(Ainfile *);
+	void Readin(istream& f);
 };
 
 #endif

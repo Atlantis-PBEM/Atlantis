@@ -318,27 +318,26 @@ int Game::OpenGame()
 	//
 	// The order here must match the order in SaveGame
 	//
-	Ainfile f;
-	if (f.OpenByName("game.in") == -1) return(0);
-
+	ifstream f;
+	f.open("game.in", ios::in);
+	if (!f.is_open()) return(0);
 	//
 	// Read in Globals
-	//
-	AString *s1 = f.GetStr();
-	if (!s1) return(0);
+	AString s1;
+	f >> ws >> s1;
+	if (f.eof()) return(0);
 
-	AString *s2 = s1->gettoken();
-	delete s1;
+	AString *s2 = s1.gettoken();
 	if (!s2) return(0);
 
 	if (!(*s2 == "atlantis_game")) {
 		delete s2;
-		f.Close();
 		return(0);
 	}
 	delete s2;
 
-	ATL_VER eVersion = f.GetInt();
+	ATL_VER eVersion;
+	f >> eVersion;
 	Awrite(AString("Saved Game Engine Version: ") + ATL_VER_STRING(eVersion));
 	if (ATL_VER_MAJOR(eVersion) != ATL_VER_MAJOR(CURRENT_ATL_VER) ||
 			ATL_VER_MINOR(eVersion) != ATL_VER_MINOR(CURRENT_ATL_VER)) {
@@ -350,15 +349,17 @@ int Game::OpenGame()
 		return(0);
 	}
 
-	AString *gameName = f.GetStr();
-	if (!gameName) return(0);
+	AString gameName;
+	f >> ws >> gameName;
+	if (f.eof()) return(0);
 
-	if (!(*gameName == Globals->RULESET_NAME)) {
+	if (!(gameName == Globals->RULESET_NAME)) {
 		Awrite("Incompatible rule-set!");
 		return(0);
 	}
 
-	ATL_VER gVersion = f.GetInt();
+	ATL_VER gVersion;
+	f >> gVersion;
 	Awrite(AString("Saved Rule-Set Version: ") + ATL_VER_STRING(gVersion));
 
 	if (ATL_VER_MAJOR(gVersion) < ATL_VER_MAJOR(Globals->RULESET_VERSION)) {
@@ -395,39 +396,43 @@ int Game::OpenGame()
 				ATL_VER_PATCH(Globals->RULESET_VERSION));
 	}
 
-	year = f.GetInt();
-	month = f.GetInt();
-	seedrandom(f.GetInt());
-	factionseq = f.GetInt();
-	unitseq = f.GetInt();
-	shipseq = f.GetInt();
-	guardfaction = f.GetInt();
-	monfaction = f.GetInt();
+	f >> year;
+	f >> month;
+
+	int seed;
+	f >> seed;
+	seedrandom(seed);
+
+	f >> factionseq;
+	f >> unitseq;
+	f >> shipseq;
+	f >> guardfaction;
+	f >> monfaction;
 
 	//
 	// Read in the Factions
 	//
-	int i = f.GetInt();
+	int i;
+	f >> i;
 
-	for (int j=0; j<i; j++) {
+	for (int j = 0; j < i; j++) {
 		Faction *temp = new Faction;
-		temp->Readin(&f, eVersion);
+		temp->Readin(f);
 		factions.Add(temp);
 	}
 
 	//
 	// Read in the ARegions
 	//
-	i = regions.ReadRegions(&f, &factions, eVersion);
+	i = regions.ReadRegions(f, &factions);
 	if (!i) return 0;
 
 	// read in quests
-	if (!quests.ReadQuests(&f))
+	if (!quests.ReadQuests(f))
 		return 0;
 
 	SetupUnitNums();
 
-	f.Close();
 	return(1);
 }
 
@@ -514,10 +519,11 @@ int Game::WritePlayers()
 
 int Game::ReadPlayers()
 {
-	Aorders f;
-	if (f.OpenByName("players.in") == -1) return(0);
+	ifstream f;
+	f.open("players.in", ios::in);
+	if (!f.is_open()) return(0);
 
-	AString *pLine = 0;
+	AString pLine;
 	AString *pToken = 0;
 
 	//
@@ -529,19 +535,18 @@ int Game::ReadPlayers()
 		//
 		// The first line of the file should match.
 		//
-		pLine = f.GetLine();
-		if (!(*pLine == PLAYERS_FIRST_LINE)) break;
-		SAFE_DELETE(pLine);
+		f >> ws >> pLine;
+		if (!(pLine == PLAYERS_FIRST_LINE)) break;
 
 		//
 		// Get the file version number.
 		//
-		pLine = f.GetLine();
-		pToken = pLine->gettoken();
+		f >> ws >> pLine;
+		pToken = pLine.gettoken();
 		if (!pToken || !(*pToken == "Version:")) break;
 		SAFE_DELETE(pToken);
 
-		pToken = pLine->gettoken();
+		pToken = pLine.gettoken();
 		if (!pToken) break;
 
 		int nVer = pToken->value();
@@ -553,23 +558,21 @@ int Game::ReadPlayers()
 			break;
 		}
 		SAFE_DELETE(pToken);
-		SAFE_DELETE(pLine);
 
 		//
 		// Ignore the turn number line.
 		//
-		pLine = f.GetLine();
-		SAFE_DELETE(pLine);
+		f >> ws >> pLine;
 
 		//
 		// Next, the game status.
 		//
-		pLine = f.GetLine();
-		pToken = pLine->gettoken();
+		f >> ws >> pLine;
+		pToken = pLine.gettoken();
 		if (!pToken || !(*pToken == "GameStatus:")) break;
 		SAFE_DELETE(pToken);
 
-		pToken = pLine->gettoken();
+		pToken = pLine.gettoken();
 		if (!pToken) break;
 
 		if (*pToken == "New")
@@ -589,7 +592,7 @@ int Game::ReadPlayers()
 		//
 		// Now, we should have a list of factions.
 		//
-		pLine = f.GetLine();
+		f >> ws >> pLine;
 		Faction *pFac = 0;
 
 		int lastWasNew = 0;
@@ -600,11 +603,10 @@ int Game::ReadPlayers()
 		//
 		rc = 1;
 
-		while(pLine) {
-			pToken = pLine->gettoken();
+		while(!f.eof()) {
+			pToken = pLine.gettoken();
 			if (!pToken) {
-				SAFE_DELETE(pLine);
-				pLine = f.GetLine();
+				f >> ws >> pLine;
 				continue;
 			}
 
@@ -613,25 +615,25 @@ int Game::ReadPlayers()
 				// Get the new faction
 				//
 				SAFE_DELETE(pToken);
-				pToken = pLine->gettoken();
+				pToken = pLine.gettoken();
 				if (!pToken) {
 					rc = 0;
 					break;
 				}
 
 				if (*pToken == "new") {
-					AString save = *pLine;
+					AString save = pLine;
 					int noleader = 0;
 					int x, y, z;
 					ARegion *pReg = NULL;
 
 					/* Check for the noleader flag */
 					SAFE_DELETE(pToken);
-					pToken = pLine->gettoken();
+					pToken = pLine.gettoken();
 					if (pToken && *pToken == "noleader") {
 						noleader = 1;
 						SAFE_DELETE(pToken);
-						pToken = pLine->gettoken();
+						pToken = pLine.gettoken();
 						/* Initialize pReg to something useful */
 						pReg = regions.GetRegion(0, 0, 0);
 					}
@@ -640,11 +642,11 @@ int Game::ReadPlayers()
 						y = -1;
 						z = -1;
 						SAFE_DELETE(pToken);
-						pToken = pLine->gettoken();
+						pToken = pLine.gettoken();
 						if (pToken) {
 							y = pToken->value();
 							SAFE_DELETE(pToken);
-							pToken = pLine->gettoken();
+							pToken = pLine.gettoken();
 							if (pToken) {
 								z = pToken->value();
 								pReg = regions.GetRegion(x, y, z);
@@ -673,24 +675,21 @@ int Game::ReadPlayers()
 					lastWasNew = 0;
 				}
 			} else if (pFac) {
-				if (!ReadPlayersLine(pToken, pLine, pFac, lastWasNew)) {
+				if (!ReadPlayersLine(pToken, &pLine, pFac, lastWasNew)) {
 					rc = 0;
 					break;
 				}
 			}
 
 			SAFE_DELETE(pToken);
-			SAFE_DELETE(pLine);
-			pLine = f.GetLine();
+			f >> ws >> pLine;
 		}
 		if (pFac && lastWasNew) {
 			WriteNewFac(pFac);
 		}
 	} while(0);
 
-	SAFE_DELETE(pLine);
 	SAFE_DELETE(pToken);
-	f.Close();
 
 	return(rc);
 }
@@ -1019,8 +1018,9 @@ void Game::WriteNewFac(Faction *pFac)
 
 int Game::DoOrdersCheck(const AString &strOrders, const AString &strCheck)
 {
-	Aorders ordersFile;
-	if (ordersFile.OpenByName(strOrders) == -1) {
+	ifstream ordersFile;
+	ordersFile.open(strOrders.const_str(), ios::in);
+	if (!ordersFile.is_open()) {
 		Awrite("No such orders file!");
 		return(0);
 	}
@@ -1034,9 +1034,9 @@ int Game::DoOrdersCheck(const AString &strOrders, const AString &strCheck)
 	OrdersCheck check;
 	check.pCheckFile = &checkFile;
 
-	ParseOrders(0, &ordersFile, &check);
+	ParseOrders(0, ordersFile, &check);
 
-	ordersFile.Close();
+	ordersFile.close();
 	checkFile.Close();
 
 	return(1);
@@ -1150,10 +1150,11 @@ void Game::ReadOrders()
 			AString str = "orders.";
 			str += fac->num;
 
-			Aorders file;
-			if (file.OpenByName(str) != -1) {
-				ParseOrders(fac->num, &file, 0);
-				file.Close();
+			ifstream file;
+			file.open(str.const_str(), ios::in);
+			if(file.is_open()) {
+				ParseOrders(fac->num, file, 0);
+				file.close();
 			}
 			DefaultWorkOrder();
 		}

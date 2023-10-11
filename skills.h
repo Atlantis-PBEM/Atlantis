@@ -133,7 +133,7 @@ class ShowSkill : public AListElem {
 
 class Skill : public AListElem {
 	public:
-		void Readin(Ainfile *);
+		void Readin(istream& f);
 		void Writeout(Aoutfile *);
 
 		Skill * Split(int,int); /* total num, num leaving */
@@ -153,7 +153,7 @@ class SkillList : public AList {
 		int GetStudyRate(int, int); /* Skill, num of men */
 		SkillList * Split(int,int); /* total men, num to split */
 		AString Report(int); /* Number of men */
-		void Readin(Ainfile *);
+		void Readin(istream& f);
 		void Writeout(Aoutfile *);
 };
 

@@ -110,10 +110,10 @@ void Attitude::Writeout(Aoutfile *f)
 	f->PutInt(attitude);
 }
 
-void Attitude::Readin(Ainfile *f, ATL_VER v)
+void Attitude::Readin(istream &f)
 {
-	factionnum = f->GetInt();
-	attitude = f->GetInt();
+	f >> factionnum;
+	f >> attitude;
 }
 
 Faction::Faction()
@@ -201,40 +201,41 @@ void Faction::Writeout(Aoutfile *f)
 	forlist((&attitudes)) ((Attitude *) elem)->Writeout(f);
 }
 
-void Faction::Readin(Ainfile *f, ATL_VER v)
+void Faction::Readin(istream& f)
 {
-	num = f->GetInt();
-	int i;
+	f >> num;
 
 	for (auto &ft : *FactionTypes) {
-		type[ft] = f->GetInt();
+		f >> type[ft];
 	}
 
-	lastchange = f->GetInt();
-	lastorders = f->GetInt();
-	unclaimed = f->GetInt();
+	f >> lastchange;
+	f >> lastorders;
+	f >> unclaimed;
 
-	name = f->GetStr();
-	address = f->GetStr();
-	password = f->GetStr();
-	times = f->GetInt();
-	showunitattitudes = f->GetInt();
-	temformat = f->GetInt();
+	AString tmp;
+	f >> ws >> tmp;
+	name = new AString(tmp);
+	f >> ws >> tmp;
+	address = new AString(tmp);
+	f >> ws >> tmp;
+	password = new AString(tmp);
+	f >> times;
+	f >> showunitattitudes;
+	f >> temformat;
 
 	skills.Readin(f);
 	items.Readin(f);
 
-	defaultattitude = f->GetInt();
-	int n = f->GetInt();
-	for (i=0; i<n; i++) {
+	f >> defaultattitude;
+	int n;
+	f >> n;
+	for (int i = 0; i < n; i++) {
 		Attitude* a = new Attitude;
-		a->Readin(f, v);
+		a->Readin(f);
 		if (a->factionnum == num) delete a;
 		else attitudes.Add(a);
 	}
-
-	// if (skills.GetDays(S_BUILDING) > 1)
-	//	shows.Add(new ShowSkill(S_BUILDING, 2));
 }
 
 void Faction::View()

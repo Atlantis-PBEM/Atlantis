@@ -234,7 +234,7 @@ void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac)
 int Game::GenRules(const AString &rules, const AString &css,
 		const AString &intro)
 {
-	Ainfile introf;
+	ifstream introf;
 	Arules f;
 	AString temp, temp2;
 	int cap;
@@ -247,7 +247,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		return 0;
 	}
 
-	if (introf.OpenByName(intro) == -1) {
+	introf.open(intro.const_str(), ios::in);
+	if (!introf.is_open()) {
 		return 0;
 	}
 
@@ -599,11 +600,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("intro");
 	f.ClassTagText("div", "rule", "");
 	f.TagText("h2", "Introduction");
-	AString *in;
-	while((in = introf.GetStr()) != NULL) {
-		f.PutStr(*in);
-		delete in;
+	AString in;
+	while (!introf.eof()) {
+		introf >> ws >> in;
+		f.PutStr(in);
 	}
+
 	f.LinkRef("playing");
 	f.ClassTagText("div", "rule", "");
 	f.TagText("h2", "Playing Atlantis");

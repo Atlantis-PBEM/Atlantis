@@ -151,7 +151,7 @@ class TownInfo
 		TownInfo();
 		~TownInfo();
 
-		void Readin(Ainfile *, ATL_VER &);
+		void Readin(istream &f);
 		void Writeout(Aoutfile *);
 		int TownType();
 
@@ -191,7 +191,7 @@ class ARegion : public AListElem
 		void SetName(char const *);
 
 		void Writeout(Aoutfile *);
-		void Readin(Ainfile *, AList *, ATL_VER v);
+		void Readin(istream &f, AList *);
 
 		int CanMakeAdv(Faction *, int);
 		int HasItem(Faction *, int);
@@ -453,7 +453,7 @@ class ARegionList : public AList
 
 		ARegion *GetRegion(int);
 		ARegion *GetRegion(int, int, int);
-		int ReadRegions(Ainfile *f, AList *, ATL_VER v);
+		int ReadRegions(istream &f, AList *);
 		void WriteRegions(Aoutfile *f);
 		Location *FindUnit(int);
 		Location *GetUnitId(UnitId *id, int faction, ARegion *cur);

@@ -63,7 +63,7 @@ class Quest : public AListElem
 class QuestList : public AList
 {
 	public:
-		int ReadQuests(Ainfile *f);
+		int ReadQuests(istream& f);
 		void WriteQuests(Aoutfile *f);
 
 		int CheckQuestKillTarget(Unit *u, ItemList *reward, AString *quest_rewards);

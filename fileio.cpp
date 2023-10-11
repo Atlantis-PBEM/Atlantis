@@ -33,34 +33,12 @@ using namespace std;
 
 extern long _ftype,_fcreator;
 
-static char buf[1024];
-
 Aoutfile::Aoutfile()
 {
 	file = new ofstream;
 }
 
 Aoutfile::~Aoutfile()
-{
-	delete file;
-}
-
-Ainfile::Ainfile()
-{
-	file = new ifstream;
-}
-
-Ainfile::~Ainfile()
-{
-	delete file;
-}
-
-Aorders::Aorders()
-{
-	file = new ifstream;
-}
-
-Aorders::~Aorders()
 {
 	delete file;
 }
@@ -111,34 +89,7 @@ int Aoutfile::OpenByName(const AString &s)
 	return 0;
 }
 
-void Ainfile::Open(const AString &s)
-{
-	while (!(file->rdbuf()->is_open())) {
-		AString *name = getfilename(s);
-		file->open(name->Str(),ios::in);
-		delete name;
-	}
-}
-
-int Ainfile::OpenByName(const AString &s)
-{
-	AString temp = s;
-	file->open(temp.Str(),ios::in);
-	if (!(file->rdbuf()->is_open())) return -1;
-	return 0;
-}
-
 void Aoutfile::Close()
-{
-	file->close();
-}
-
-void Ainfile::Close()
-{
-	file->close();
-}
-
-void Aorders::Close()
 {
 	file->close();
 }
@@ -153,7 +104,7 @@ void Arules::Close()
 	file->close();
 }
 
-void skipwhite(ifstream *f)
+void skipwhite(istream *f)
 {
 	if (f->eof()) return;
 	int ch = f->peek();
@@ -163,30 +114,6 @@ void skipwhite(ifstream *f)
 		if (f->eof()) return;
 		ch = f->peek();
 	}
-}
-
-AString * Ainfile::GetStr()
-{
-	skipwhite(file);
-	if (file->peek() == -1 || file->eof()) return 0;
-	file->getline(buf,1023,F_ENDLINE);
-	AString * s = new AString((char *) &(buf[0]));
-	return s;
-}
-
-AString * Ainfile::GetStrNoSkip()
-{
-	if (file->peek() == -1 || file->eof()) return 0;
-	file->getline(buf,1023,F_ENDLINE);
-	AString * s = new AString((char *) &(buf[0]));
-	return s;
-}
-
-int Ainfile::GetInt()
-{
-	int x;
-	*file >> x;
-	return x;
 }
 
 void Aoutfile::PutInt(int x)
@@ -203,33 +130,6 @@ void Aoutfile::PutStr(char const *s)
 void Aoutfile::PutStr(const AString &s)
 {
 	*file << s << F_ENDLINE;
-}
-
-void Aorders::Open(const AString &s)
-{
-	while (!(file->rdbuf()->is_open())) {
-		AString *name = getfilename(s);
-		file->open(name->Str(),ios::in);
-		delete name;
-	}
-}
-
-int Aorders::OpenByName(const AString &s)
-{
-	AString temp = s;
-	file->open(temp.Str(),ios::in);
-	if (!(file->rdbuf()->is_open())) return -1;
-	return 0;
-}
-
-AString * Aorders::GetLine()
-{
-	skipwhite(file);
-	if (file->eof()) return 0;
-	if (file->peek() == -1) return 0;
-	file->getline(buf,1023,F_ENDLINE);
-	AString *s = new AString((char *) &(buf[0]));
-	return s;
 }
 
 void Areport::Open(const AString &s)

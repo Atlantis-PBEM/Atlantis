@@ -1553,16 +1553,16 @@ void Item::Writeout(Aoutfile *f)
 	f->PutStr(temp);
 }
 
-void Item::Readin(Ainfile *f)
+void Item::Readin(istream &f)
 {
-	AString *temp = f->GetStr();
-	AString *token = temp->gettoken();
+	AString temp;
+	f >> ws >> temp;
+	AString *token = temp.gettoken();
 	num = token->value();
 	delete token;
-	token = temp->gettoken();
+	token = temp.gettoken();
 	type = LookupItem(token);
 	delete token;
-	delete temp;
 }
 
 void ItemList::Writeout(Aoutfile *f)
@@ -1571,10 +1571,11 @@ void ItemList::Writeout(Aoutfile *f)
 	forlist (this) ((Item *) elem)->Writeout(f);
 }
 
-void ItemList::Readin(Ainfile *f)
+void ItemList::Readin(istream &f)
 {
-	int i = f->GetInt();
-	for (int j=0; j<i; j++) {
+	int i;
+	f >> i;
+	for (int j = 0; j < i; j++) {
 		Item *temp = new Item;
 		temp->Readin(f);
 		if (temp->type < 0 || temp->num < 1 ||
