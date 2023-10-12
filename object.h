@@ -87,7 +87,7 @@ class Object : public AListElem
 		Object(ARegion *region);
 		~Object();
 
-		void Readin(Ainfile *f, AList *, ATL_VER v);
+		void Readin(istream& f, AList *);
 		void Writeout(Aoutfile *f);
 		void Report(Areport *, Faction *, int, int, int, int, int, int, int);
 
@@ -112,7 +112,7 @@ class Object : public AListElem
 		void MoveObject(ARegion *toreg);
 		
 		// Fleets
-		void ReadinFleet(Ainfile *f);
+		void ReadinFleet(istream &f);
 		void WriteoutFleet(Aoutfile *f);
 		int CheckShip(int);
 		int GetNumShips(int);

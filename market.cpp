@@ -106,22 +106,21 @@ void Market::Writeout(Aoutfile *f)
 	f->PutInt(baseprice);
 }
 
-void Market::Readin(Ainfile *f)
+void Market::Readin(istream& f)
 {
-	AString *temp;
-	type = f->GetInt();
+	AString temp;
+	f >> type;
 
-	temp = f->GetStr();
-	item = LookupItem(temp);
-	delete temp;
+	f >> ws >> temp;
+	item = LookupItem(&temp);
 
-	price = f->GetInt();
-	amount = f->GetInt();
-	minpop = f->GetInt();
-	maxpop = f->GetInt();
-	minamt = f->GetInt();
-	maxamt = f->GetInt();
-	baseprice = f->GetInt();
+	f >> price;
+	f >> amount;
+	f >> minpop;
+	f >> maxpop;
+	f >> minamt;
+	f >> maxamt;
+	f >> baseprice;
 }
 
 AString Market::Report()
@@ -144,10 +143,11 @@ void MarketList::Writeout(Aoutfile *f)
 	forlist (this) ((Market *) elem)->Writeout(f);
 }
 
-void MarketList::Readin(Ainfile *f)
+void MarketList::Readin(istream& f)
 {
-	int n = f->GetInt();
-	for (int i=0; i<n; i++) {
+	int n;
+	f >> n;;
+	for (int i = 0; i < n; i++) {
 		Market *m = new Market;
 		m->Readin(f);
 		Add(m);

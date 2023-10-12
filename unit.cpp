@@ -209,22 +209,31 @@ void Unit::Writeout(Aoutfile *s)
 	}
 }
 
-void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
+void Unit::Readin(istream& f, AList *facs)
 {
-	name = s->GetStr();
-	describe = s->GetStr();
+	AString temp;
+	f >> ws >> temp;
+	name = new AString(temp);
+
+	f >> ws >> temp;
+	describe = new AString(temp);
 	if (*describe == "none") {
 		delete describe;
 		describe = 0;
 	}
-	num = s->GetInt();
-	type = s->GetInt();
-	int i = s->GetInt();
+
+	f >> num;
+	f >> type;
+
+	int i;
+	f >> i;
+
 	faction = GetFaction(facs, i);
-	guard = s->GetInt();
+	f >> guard;
 	if (guard == GUARD_ADVANCE) guard = GUARD_NONE;
 	if (guard == GUARD_SET) guard = GUARD_GUARD;
-	reveal = s->GetInt();
+
+	f >> reveal;
 
 	/* Handle the new 'ready item', ready weapons/armor, and free */
 	free = 0;
@@ -234,33 +243,32 @@ void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
 		readyArmor[i] = -1;
 	}
 
-	free = s->GetInt();
-	AString *temp;
-	temp = s->GetStr();
-	readyItem = LookupItem(temp);
-	delete temp;
-	for (i = 0; i < MAX_READY; i++) {
-		temp = s->GetStr();
-		readyWeapon[i] = LookupItem(temp);
-		delete temp;
-		temp = s->GetStr();
-		readyArmor[i] = LookupItem(temp);
-		delete temp;
-	}
-	flags = s->GetInt();
+	f >> free;
 
-	items.Readin(s);
-	skills.Readin(s);
-	temp = s->GetStr();
-	combat = LookupSkill(temp);
-	delete temp;
-	savedmovement = s->GetInt();
-	savedmovedir = s->GetInt();
-	i = s->GetInt();
+	f >> ws >> temp;
+	readyItem = LookupItem(&temp);
+	for (i = 0; i < MAX_READY; i++) {
+		f >> ws >> temp;
+		readyWeapon[i] = LookupItem(&temp);
+		f >> ws >> temp;
+		readyArmor[i] = LookupItem(&temp);
+	}
+
+	f >> flags;
+
+	items.Readin(f);
+	skills.Readin(f);
+
+	f >> ws >> temp;
+	combat = LookupSkill(&temp);
+
+	f >> savedmovement;
+	f >> savedmovedir;
+
+	f >> i;
 	while (i-- > 0) {
-		temp = s->GetStr();
-		visited.insert(temp->Str());
-		delete temp;
+		f >> ws >> temp;
+		visited.insert(temp.Str());
 	}
 }
 

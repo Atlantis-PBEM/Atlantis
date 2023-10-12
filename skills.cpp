@@ -227,27 +227,25 @@ ShowSkill::ShowSkill(int s, int l)
 	level = l;
 }
 
-void Skill::Readin(Ainfile *f)
+void Skill::Readin(istream &f)
 {
-	AString *temp, *token;
+	AString temp, *token;
 
-	temp = f->GetStr();
-	token = temp->gettoken();
+	f >> ws >> temp;
+	token = temp.gettoken();
 	type = LookupSkill(token);
 	delete token;
 
-	token = temp->gettoken();
+	token = temp.gettoken();
 	days = token->value();
 	delete token;
 	
 	exp = 0;
 	if (Globals->REQUIRED_EXPERIENCE) {
-		token = temp->gettoken();
+		token = temp.gettoken();
 		exp = token->value();
 		delete token;
 	}
-	
-	delete temp;
 }
 
 void Skill::Writeout(Aoutfile *f)
@@ -429,10 +427,11 @@ AString SkillList::Report(int nummen)
 	return temp;
 }
 
-void SkillList::Readin(Ainfile *f)
+void SkillList::Readin(istream& f)
 {
-	int n = f->GetInt();
-	for (int i=0; i<n; i++) {
+	int n;
+	f >> n;
+	for (int i = 0; i < n; i++) {
 		Skill *s = new Skill;
 		s->Readin(f);
 		if ((s->days == 0) && (s->exp==0)) delete s;

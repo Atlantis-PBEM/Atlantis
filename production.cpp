@@ -63,23 +63,24 @@ void Production::Writeout(Aoutfile *f)
 	f->PutInt(productivity);
 }
 
-void Production::Readin(Ainfile *f)
+void Production::Readin(istream& f)
 {
-	AString *temp;
+	AString temp;
 
-	temp = f->GetStr();
-	itemtype = LookupItem(temp);
-	delete temp;
+	f >> ws >> temp;
+	itemtype = LookupItem(&temp);
 
-	amount = f->GetInt();
-	baseamount = f->GetInt();
+	f >> amount;
+	f >> baseamount;
 
-	if (itemtype == I_SILVER) temp = f->GetStr();
-	else temp = new AString(ItemDefs[itemtype].pSkill);
-	skill = LookupSkill(temp);
-	delete temp;
+	if (itemtype == I_SILVER)
+		f >> ws >> temp;
+	else
+		temp = AString(ItemDefs[itemtype].pSkill);
 
-	productivity = f->GetInt();
+	skill = LookupSkill(&temp);
+
+	f >> productivity;
 }
 
 AString Production::WriteReport()
@@ -94,10 +95,11 @@ void ProductionList::Writeout(Aoutfile *f)
 	forlist(this) ((Production *) elem)->Writeout(f);
 }
 
-void ProductionList::Readin(Ainfile *f)
+void ProductionList::Readin(istream& f)
 {
-	int n = f->GetInt();
-	for (int i=0; i<n; i++) {
+	int n;
+	f >> n;
+	for (int i = 0; i < n; i++) {
 		Production *p = new Production;
 		p->Readin(f);
 		Add(p);

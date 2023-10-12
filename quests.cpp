@@ -77,69 +77,62 @@ AString Quest::GetRewardsStr()
 	return quest_rewards;
 }
 
-int QuestList::ReadQuests(Ainfile *f)
+int QuestList::ReadQuests(istream& f)
 {
 	int count, dests, rewards;
 	Quest *quest;
-	AString *name;
+	AString name;
 	Item *item;
 
 	quests.DeleteAll();
 
-	count = f->GetInt();
+	f >> count;
 	if (count < 0)
 		return 0;
 	while (count-- > 0) {
 		quest = new Quest();
-		quest->type = f->GetInt();
+		f >> quest->type;
 		switch (quest->type) {
 			case Quest::SLAY:
-				quest->target = f->GetInt();
+				f >> quest->target;
 				break;
 			case Quest::HARVEST:
 				quest->objective.Readin(f);
-				quest->regionnum = f->GetInt();
+				f >> quest->regionnum;
 				break;
 			case Quest::BUILD:
-				name = f->GetStr();
-				quest->building = LookupObject(name);
-				delete name;
-				name = f->GetStr();
-				quest->regionname = *name;
-				delete name;
+				f >> ws >> name;
+				quest->building = LookupObject(&name);
+				f >> ws >> quest->regionname;
 				break;
 			case Quest::VISIT:
-				name = f->GetStr();
-				quest->building = LookupObject(name);
-				delete name;
-				dests = f->GetInt();
+				f >> ws >> name;
+				quest->building = LookupObject(&name);
+				f >> dests;
 				while (dests-- > 0) {
-					name = f->GetStr();
-					quest->destinations.insert(name->Str());
+					f >> ws  >> name;
+					quest->destinations.insert(name.Str());
 				}
 				break;
 			case Quest::DEMOLISH:
-				quest->target = f->GetInt();
-				quest->regionnum = f->GetInt();
+				f >> quest->target;
+				f >> quest->regionnum;
 				break;
 			default:
-				quest->target = f->GetInt();
+				f >> quest->target;
 				quest->objective.Readin(f);
-				name = f->GetStr();
-				quest->building = LookupObject(name);
-				delete name;
-				quest->regionnum = f->GetInt();
-				name = f->GetStr();
-				quest->regionname = *name;
-				delete name;
-				dests = f->GetInt();
+				f >> ws >> name;
+				quest->building = LookupObject(&name);
+				f >> quest->regionnum;
+				f >> ws >> quest->regionname;
+				f >> dests;
 				while (dests-- > 0) {
-					name = f->GetStr();
-					quest->destinations.insert(name->Str());
+					f >> ws >> name;
+					quest->destinations.insert(name.Str());
 				}
 				break;
 		}
-		rewards = f->GetInt();
+		f >> rewards;
 		while (rewards-- > 0) {
 			item = new Item();
 			item->Readin(f);
@@ -150,7 +143,7 @@ int QuestList::ReadQuests(Ainfile *f)
 		quests.Add(quest);
 	}
 
-        return 1;
+    return 1;
 }
 
 void QuestList::WriteQuests(Aoutfile *f)

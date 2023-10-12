@@ -109,7 +109,7 @@ public:
 	Attitude();
 	~Attitude();
 	void Writeout(Aoutfile * );
-	void Readin( Ainfile *, ATL_VER version );
+	void Readin(istream &f);
 	
 	int factionnum;
 	int attitude;
@@ -132,7 +132,7 @@ public:
 	Faction(int);
 	~Faction();
 	
-	void Readin( Ainfile *, ATL_VER version );
+	void Readin(istream &f);
 	void Writeout( Aoutfile * );
 	void View();
 	

@@ -55,7 +55,7 @@ public:
 
 	void PostTurn(int,int);
 	void Writeout(Aoutfile * f);
-	void Readin(Ainfile * f);
+	void Readin(istream& f);
 	AString Report();
 };
 
@@ -63,7 +63,7 @@ class MarketList : public AList {
 public:
 	void PostTurn(int,int);
 	void Writeout(Aoutfile * f);
-	void Readin(Ainfile * f);
+	void Readin(istream& f);
 };
 
 #endif
