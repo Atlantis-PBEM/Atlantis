@@ -92,18 +92,17 @@ void Market::PostTurn(int population, int wages)
 	}
 }
 
-void Market::Writeout(Aoutfile *f)
+void Market::Writeout(ostream& f)
 {
-	f->PutInt(type);
-	if (item != -1) f->PutStr(ItemDefs[item].abr);
-	else f->PutStr("NO_ITEM");
-	f->PutInt(price);
-	f->PutInt(amount);
-	f->PutInt(minpop);
-	f->PutInt(maxpop);
-	f->PutInt(minamt);
-	f->PutInt(maxamt);
-	f->PutInt(baseprice);
+	f << type << '\n';
+	f << (item == -1 ? "NO_ITEM" : ItemDefs[item].abr) << '\n';
+	f << price << '\n';
+	f << amount << '\n';
+	f << minpop << '\n';
+	f << maxpop << '\n';
+	f << minamt << '\n';
+	f << maxamt << '\n';
+	f << baseprice << '\n';
 }
 
 void Market::Readin(istream& f)
@@ -137,9 +136,9 @@ void MarketList::PostTurn(int population, int wages)
 	}
 }
 
-void MarketList::Writeout(Aoutfile *f)
+void MarketList::Writeout(ostream& f)
 {
-	f->PutInt(Num());
+	f << Num() << '\n';
 	forlist (this) ((Market *) elem)->Writeout(f);
 }
 

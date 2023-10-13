@@ -61,7 +61,7 @@ class Battle : public AListElem
 		Battle();
 		~Battle();
 
-		void Report(Areport *,Faction *);
+		void Report(ostream& f,Faction *fac);
 		void AddLine(const AString &);
 
 		int Run(Events* events, ARegion *, Unit *, AList *, Unit *, AList *, int ass,

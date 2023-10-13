@@ -50,17 +50,15 @@ Production::Production(int it, int maxamt)
 	skill = LookupSkill(&skname);
 }
 
-void Production::Writeout(Aoutfile *f)
+void Production::Writeout(ostream& f)
 {
-	if (itemtype != -1) f->PutStr(ItemDefs[itemtype].abr);
-	else f->PutStr("NO_ITEM");
-	f->PutInt(amount);
-	f->PutInt(baseamount);
+	f << (itemtype == -1 ? "NO_ITEM" : ItemDefs[itemtype].abr) << '\n';	
+	f << amount << '\n';
+	f << baseamount << '\n';
 	if (itemtype == I_SILVER) {
-		if (skill != -1) f->PutStr(SkillDefs[skill].abbr);
-		else f->PutStr("NO_SKILL");
+		f << (skill == -1 ? "NO_SKILL" : SkillDefs[skill].abbr) << '\n';
 	}
-	f->PutInt(productivity);
+	f << productivity << '\n';
 }
 
 void Production::Readin(istream& f)
@@ -89,9 +87,9 @@ AString Production::WriteReport()
 	return temp;
 }
 
-void ProductionList::Writeout(Aoutfile *f)
+void ProductionList::Writeout(ostream& f)
 {
-	f->PutInt(Num());
+	f << Num() << '\n';
 	forlist(this) ((Production *) elem)->Writeout(f);
 }
 

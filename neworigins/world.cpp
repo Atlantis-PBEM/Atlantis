@@ -223,20 +223,15 @@ void SetupNames()
 
 void CountNames()
 {
-	Aoutfile names;
-	AString *name;
-
 	Awrite(AString("Regions ") + nregions);
 
 	// Dump all the names we created to a file so the GM can scan
 	// them easily (to check for randomly generated rude words,
 	// for example)
-	names.OpenByName("names.out");
+	ofstream names("names.out", ios::out|ios::ate);
 	forlist(&regionnames) {
-		name = (AString *) elem;
-		names.PutStr(*name);
+		names << ((AString *) elem)->const_str() << '\n';
 	}
-	names.Close();
 }
 
 int AGetName(int town, ARegion *reg)

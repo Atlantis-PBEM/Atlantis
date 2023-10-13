@@ -25,6 +25,7 @@
 
 #include "game.h"
 #include "gamedata.h"
+#include "indenter.hpp"
 #include <stdio.h>
 #ifdef WIN32
 #include <memory.h>
@@ -37,8 +38,6 @@
 #define TMPL_MAP_OFS 1
 #define FILL_SIZE 6
 #define TEMPLATE_MAX_LINES 13
-
-static void TrimWrite(Areport *f, char *buffer);
 
 static char const *TemplateMap[] = {
  //12345678901234567890
@@ -296,19 +295,17 @@ static char const *ter_fill[] = {
 // NEW FUNCTION DK 2000.03.07,
 // converted WriteReport
 //
-void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
+void ARegion::WriteTemplateHeader(ostream& f, Faction *fac,
 		ARegionList *pRegs, int month)
 {
 
-	f->PutStr("");
-
-	f->PutStr("-------------------------------------------------"
-			"----------", 1);
+	f << '\n' << indent::comment << "-----------------------------------------------------------\n";
 
 	// plain (X,Y) in Blah, contains Blah
-	f->PutStr(Print(pRegs), 1);
+	f << indent::comment << Print(pRegs) << '\n';
 
 	char buffer[LINE_WIDTH+1];
+	string temp;
 	char *data = buffer + MAP_WIDTH;
 	int line = 0;
 
@@ -317,7 +314,9 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 
 	// ----------------------------------------------------------------
 	GetMapLine(buffer, line, pRegs);
-	TrimWrite(f, buffer);
+	temp = buffer;
+	temp.erase(temp.find_last_not_of(' ') + 1);
+	f << indent::comment << temp << '\n';
 	line++;
 
 	// ----------------------------------------------------------------
@@ -325,7 +324,7 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	if (Globals->WEATHER_EXISTS) {
 		GetMapLine(buffer, line, pRegs);
 
-		char const * nextWeather = "";
+		char const *nextWeather = "";
 		int nxtweather = pRegs->GetWeather(this, (month + 1) % 12);
 		if (nxtweather == W_WINTER)
 			nextWeather = "winter";
@@ -334,15 +333,18 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 		if (nxtweather == W_NORMAL)
 			nextWeather = "clear";
 		snprintf(data, LINE_WIDTH - MAP_WIDTH, "Next %s", nextWeather);
-
-		TrimWrite(f, buffer);
+		temp = buffer;
+		temp.erase(temp.find_last_not_of(' ') + 1);
+		f << indent::comment << temp << '\n';
 		line++;
 	}
 
 	// ----------------------------------------------------------------
 	GetMapLine(buffer, line, pRegs);
 	snprintf(data, LINE_WIDTH - MAP_WIDTH, "Tax  %5i", wealth);
-	TrimWrite(f, buffer);
+	temp = buffer;
+	temp.erase(temp.find_last_not_of(' ') + 1);
+	f << indent::comment << temp << '\n';
 	line++;
 
 	// ----------------------------------------------------------------
@@ -350,7 +352,9 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	if (prod) {
 		GetMapLine(buffer, line, pRegs);
 		snprintf(data, LINE_WIDTH - MAP_WIDTH, "Ente %5i", prod->amount);
-		TrimWrite(f, buffer);
+		temp = buffer;
+		temp.erase(temp.find_last_not_of(' ') + 1);
+		f << indent::comment << temp << '\n';
 		line++;
 	}
 
@@ -359,7 +363,9 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	if (prod) {
 		GetMapLine(buffer, line, pRegs);
 		snprintf(data, LINE_WIDTH - MAP_WIDTH, "Wage %5i.%1i (max %i)", (prod->productivity/10), (prod->productivity%10), prod->amount);
-		TrimWrite(f, buffer);
+		temp = buffer;
+		temp.erase(temp.find_last_not_of(' ') + 1);
+		f << indent::comment << temp << '\n';
 		line++;
 	}
 
@@ -379,7 +385,9 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 
 				if (!any) {
 					GetMapLine(buffer, line, pRegs);
-					TrimWrite(f, buffer);
+					temp = buffer;
+					temp.erase(temp.find_last_not_of(' ') + 1);
+					f << indent::comment << temp << '\n';
 					line++;
 				}
 
@@ -397,9 +405,10 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 						ItemDefs[m->item].abr,
 						m->price);
 				}
-				TrimWrite(f, buffer);
+				temp = buffer;
+				temp.erase(temp.find_last_not_of(' ') + 1);
+				f << indent::comment << temp << '\n';
 				line++;
-
 				any = 1;
 			}
 		}
@@ -415,7 +424,9 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 
 				if (!any) {
 					GetMapLine(buffer, line, pRegs);
-					TrimWrite(f, buffer);
+					temp = buffer;
+					temp.erase(temp.find_last_not_of(' ') + 1);
+					f << indent::comment << temp << '\n';
 					line++;
 				}
 
@@ -433,8 +444,9 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 						ItemDefs[m->item].abr,
 						m->price);
 				}
-
-				TrimWrite(f, buffer);
+				temp = buffer;
+				temp.erase(temp.find_last_not_of(' ') + 1);
+				f << indent::comment << temp << '\n';
 				line++;
 				any = 1;
 			}
@@ -444,42 +456,44 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	// ----------------------------------------------------------------
 	any = 0;
 	{
-		 forlist((&products)) {
-			 Production *p = ((Production *) elem);
-			 if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
-				 if (!CanMakeAdv(fac, p->itemtype)) {
-					 continue;
-				 }
-			 } else {
-				 if (p->itemtype == I_SILVER) {
-					 continue;
-				 }
-			 }
+		forlist((&products)) {
+			Production *p = ((Production *) elem);
+			if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
+				if (!CanMakeAdv(fac, p->itemtype)) {
+					continue;
+				}
+			} else {
+				if (p->itemtype == I_SILVER) {
+					continue;
+				}
+			}
 
-			 if (!any) {
-				 GetMapLine(buffer, line, pRegs);
-				 TrimWrite(f, buffer);
-				 line++;
-			 }
+			if (!any) {
+				GetMapLine(buffer, line, pRegs);
+				temp = buffer;
+				temp.erase(temp.find_last_not_of(' ') + 1);
+				f << indent::comment << temp << '\n';
+				line++;
+			}
 
-			 GetMapLine(buffer, line, pRegs);
+			GetMapLine(buffer, line, pRegs);
 
-			 if (p->amount == -1) {
-				 snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s",
-					 (any ? "    " : "Prod"),
-					 ItemDefs[p->itemtype].abr);
-			 } else {
-				 snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s",
-					 (any ? "    " : "Prod"),
-					 p->amount,
-					 ItemDefs[p->itemtype].abr);
-			 }
-
-			 TrimWrite(f, buffer);
-			 line++;
-			 any = 1;
-
-		 }
+			if (p->amount == -1) {
+				snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s",
+					(any ? "    " : "Prod"),
+					ItemDefs[p->itemtype].abr);
+			} else {
+				snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s",
+					(any ? "    " : "Prod"),
+					p->amount,
+					ItemDefs[p->itemtype].abr);
+			}
+			temp = buffer;
+			temp.erase(temp.find_last_not_of(' ') + 1);
+			f << indent::comment << temp << '\n';
+			line++;
+			any = 1;
+		}
 	}
 
 	// ----------------------------------------------------------------
@@ -493,12 +507,16 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 				if (!sawgate && u->faction == fac &&
 					u->GetSkill(S_GATE_LORE)) {
 					GetMapLine(buffer, line, pRegs);
-					TrimWrite(f, buffer);
+					temp = buffer;
+					temp.erase(temp.find_last_not_of(' ') + 1);
+					f << indent::comment << temp << '\n';
 					line++;
 
 					GetMapLine(buffer, line, pRegs);
 					snprintf(data, LINE_WIDTH - MAP_WIDTH, "Gate %4i", gate);
-					TrimWrite(f, buffer);
+					temp = buffer;
+					temp.erase(temp.find_last_not_of(' ') + 1);
+					f << indent::comment << temp << '\n';
 					line++;
 
 					sawgate = 1;
@@ -510,7 +528,9 @@ void ARegion::WriteTemplateHeader(Areport *f, Faction *fac,
 	// ----------------------------------------------------------------
 	while (line < TEMPLATE_MAX_LINES) {
 		GetMapLine(buffer, line, pRegs);
-		TrimWrite(f, buffer);
+		temp = buffer;
+		temp.erase(temp.find_last_not_of(' ') + 1);
+		f << indent::comment << temp << '\n';
 		line++;
 	}
 }
@@ -573,19 +593,4 @@ void ARegion::GetMapLine(char *buffer, int line, ARegionList *pRegs)
 
 		i++;
 	}
-}
-
-static void TrimWrite(Areport *f, char *buffer) {
-
-	char *p = buffer + strlen(buffer) - 1;
-	while (p > buffer) {
-		if (*p == ' ') {
-			p--;
-		} else {
-			break;
-		}
-	}
-	p[1] = 0;
-
-	f->PutStr(buffer, 1);
 }

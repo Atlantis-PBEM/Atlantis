@@ -151,8 +151,8 @@ class TownInfo
 		TownInfo();
 		~TownInfo();
 
-		void Readin(istream &f);
-		void Writeout(Aoutfile *);
+		void Readin(istream& f);
+		void Writeout(ostream& f);
 		int TownType();
 
 		AString *name;
@@ -190,20 +190,19 @@ class ARegion : public AListElem
 		void ZeroNeighbors();
 		void SetName(char const *);
 
-		void Writeout(Aoutfile *);
-		void Readin(istream &f, AList *);
+		void Writeout(ostream& f);
+		void Readin(istream& f, AList *);
 
 		int CanMakeAdv(Faction *, int);
 		int HasItem(Faction *, int);
-		void WriteProducts(Areport *, Faction *, int);
-		void WriteMarkets(Areport *, Faction *, int);
-		void WriteEconomy(Areport *, Faction *, int);
-		void WriteExits(Areport *, ARegionList *pRegs, int *exits_seen);
-		void WriteReport(Areport *f, Faction *fac, int month,
-				ARegionList *pRegions);
+		void WriteProducts(ostream& f, Faction *, int);
+		void WriteMarkets(ostream& f, Faction *, int);
+		void WriteEconomy(ostream& f, Faction *, int);
+		void WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen);
+		void WriteReport(ostream& f, Faction *fac, int month, ARegionList *pRegions);
 		// DK
-		void WriteTemplate(Areport *, Faction *, ARegionList *, int);
-		void WriteTemplateHeader(Areport *, Faction *, ARegionList *, int);
+		void WriteTemplate(ostream&  f, Faction *, ARegionList *, int);
+		void WriteTemplateHeader(ostream& f, Faction *, ARegionList *, int);
 		void GetMapLine(char *, int, ARegionList *);
 
 		AString ShortPrint(ARegionList *pRegs);
@@ -454,7 +453,7 @@ class ARegionList : public AList
 		ARegion *GetRegion(int);
 		ARegion *GetRegion(int, int, int);
 		int ReadRegions(istream &f, AList *);
-		void WriteRegions(Aoutfile *f);
+		void WriteRegions(ostream&  f);
 		Location *FindUnit(int);
 		Location *GetUnitId(UnitId *id, int faction, ARegion *cur);
 

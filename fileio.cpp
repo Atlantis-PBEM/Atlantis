@@ -33,26 +33,6 @@ using namespace std;
 
 extern long _ftype,_fcreator;
 
-Aoutfile::Aoutfile()
-{
-	file = new ofstream;
-}
-
-Aoutfile::~Aoutfile()
-{
-	delete file;
-}
-
-Areport::Areport()
-{
-	file = new ofstream;
-}
-
-Areport::~Areport()
-{
-	delete file;
-}
-
 Arules::Arules()
 {
 	file = new ofstream;
@@ -61,42 +41,6 @@ Arules::Arules()
 Arules::~Arules()
 {
 	delete file;
-}
-
-void Aoutfile::Open(const AString &s)
-{
-	while(!(file->rdbuf()->is_open())) {
-		AString *name = getfilename(s);
-		file->open(name->Str(), ios::out|ios::ate);
-		delete name;
-		// Handle a broke ios::ate implementation on some boxes
-		file->seekp(0, ios::end);
-		if ((int)file->tellp()!= 0) file->close();
-	}
-}
-
-int Aoutfile::OpenByName(const AString &s)
-{
-	AString temp = s;
-	file->open(temp.Str(), ios::out|ios::ate);
-	if (!file->rdbuf()->is_open()) return -1;
-	// Handle a broke ios::ate implementation on some boxes
-	file->seekp(0, ios::end);
-	if ((int)file->tellp() != 0) {
-		file->close();
-		return -1;
-	}
-	return 0;
-}
-
-void Aoutfile::Close()
-{
-	file->close();
-}
-
-void Areport::Close()
-{
-	file->close();
 }
 
 void Arules::Close()
@@ -114,94 +58,6 @@ void skipwhite(istream *f)
 		if (f->eof()) return;
 		ch = f->peek();
 	}
-}
-
-void Aoutfile::PutInt(int x)
-{
-	*file << x;
-	*file << F_ENDLINE;
-}
-
-void Aoutfile::PutStr(char const *s)
-{
-	*file << s << F_ENDLINE;
-}
-
-void Aoutfile::PutStr(const AString &s)
-{
-	*file << s << F_ENDLINE;
-}
-
-void Areport::Open(const AString &s)
-{
-	while(!(file->rdbuf()->is_open())) {
-		AString *name = getfilename(s);
-		file->open(name->Str(),ios::out|ios::ate);
-		delete name;
-		// Handle a broke ios::ate implementation on some boxes
-		file->seekp(0, ios::end);
-		if ((int)file->tellp()!=0) file->close();
-	}
-	tabs = 0;
-}
-
-int Areport::OpenByName(const AString &s)
-{
-	AString temp = s;
-	file->open(temp.Str(), ios::out|ios::ate);
-	if (!file->rdbuf()->is_open()) return -1;
-	// Handle a broke ios::ate implementation on some boxes
-	file->seekp(0, ios::end);
-	if ((int)file->tellp() != 0) {
-		file->close();
-		return -1;
-	}
-	tabs = 0;
-	return 0;
-}
-
-void Areport::AddTab()
-{
-	tabs++;
-}
-
-void Areport::DropTab()
-{
-	if (tabs > 0) tabs--;
-}
-
-void Areport::ClearTab()
-{
-	tabs = 0;
-}
-
-void Areport::PutStr(const AString &s,int comment)
-{
-	AString temp;
-	for (int i=0; i<tabs; i++) temp += "  ";
-	temp += s;
-	AString *temp2 = temp.Trunc(70);
-	if (comment) *file << ";";
-	*file << temp << F_ENDLINE;
-	while (temp2) {
-		temp = "  ";
-		for (int i=0; i<tabs; i++) temp += "  ";
-		temp += *temp2;
-		delete temp2;
-		temp2 = temp.Trunc(70);
-		if (comment) *file << ";";
-		*file << temp << F_ENDLINE;
-	}
-}
-
-void Areport::PutNoFormat(const AString &s)
-{
-	*file << s << F_ENDLINE;
-}
-
-void Areport::EndLine()
-{
-	*file << F_ENDLINE;
 }
 
 void Arules::Open(const AString &s)

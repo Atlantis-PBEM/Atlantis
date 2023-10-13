@@ -234,7 +234,6 @@ void Game::WriteFactionTypeDescription(std::ostringstream& buffer, Faction &fac)
 int Game::GenRules(const AString &rules, const AString &css,
 		const AString &intro)
 {
-	ifstream introf;
 	Arules f;
 	AString temp, temp2;
 	int cap;
@@ -247,10 +246,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		return 0;
 	}
 
-	introf.open(intro.const_str(), ios::in);
-	if (!introf.is_open()) {
-		return 0;
-	}
+	ifstream introf(intro.const_str(), ios::in);
+	if (!introf.is_open()) return 0;
 
 	int qm_exist = (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT);
 	if (qm_exist) {
@@ -600,10 +597,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.LinkRef("intro");
 	f.ClassTagText("div", "rule", "");
 	f.TagText("h2", "Introduction");
-	AString in;
 	while (!introf.eof()) {
-		introf >> ws >> in;
-		f.PutStr(in);
+		string in;
+		getline(introf >> ws, in);
+		AString temp(in);
+		f.PutStr(temp);
 	}
 
 	f.LinkRef("playing");

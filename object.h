@@ -88,8 +88,8 @@ class Object : public AListElem
 		~Object();
 
 		void Readin(istream& f, AList *);
-		void Writeout(Aoutfile *f);
-		void Report(Areport *, Faction *, int, int, int, int, int, int, int);
+		void Writeout(ostream& f);
+		void Report(ostream& f, Faction *, int, int, int, int, int, int, int);
 
 		void SetName(AString *);
 		void SetDescribe(AString *);
@@ -113,7 +113,7 @@ class Object : public AListElem
 		
 		// Fleets
 		void ReadinFleet(istream &f);
-		void WriteoutFleet(Aoutfile *f);
+		void WriteoutFleet(ostream &f);
 		int CheckShip(int);
 		int GetNumShips(int);
 		void SetNumShips(int, int);

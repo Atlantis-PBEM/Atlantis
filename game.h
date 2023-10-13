@@ -40,9 +40,9 @@ class Game;
 class OrdersCheck
 {
 public:
-	OrdersCheck();
+	OrdersCheck(ostream& f) : pCheckFile(f), numshows(0), numerrors(0) { }
 
-	Aoutfile *pCheckFile;
+	ostream& pCheckFile;
 	Unit dummyUnit;
 	Faction dummyFaction;
 	Order dummyOrder;
@@ -175,8 +175,8 @@ private:
 	int MakeWMon(ARegion *pReg);
 	void MakeLMon(Object *pObj);
 
-	void WriteSurfaceMap(Aoutfile *f, ARegionArray *pArr, int type);
-	void WriteUnderworldMap(Aoutfile *f, ARegionArray *pArr, int type);
+	void WriteSurfaceMap(ostream& f, ARegionArray *pArr, int type);
+	void WriteUnderworldMap(ostream& f, ARegionArray *pArr, int type);
 	char GetRChar(ARegion *r);
 	AString GetXtraMap(ARegion *, int);
 

@@ -134,7 +134,7 @@ class ShowSkill : public AListElem {
 class Skill : public AListElem {
 	public:
 		void Readin(istream& f);
-		void Writeout(Aoutfile *);
+		void Writeout(ostream &f);
 
 		Skill * Split(int,int); /* total num, num leaving */
 
@@ -154,7 +154,7 @@ class SkillList : public AList {
 		SkillList * Split(int,int); /* total men, num to split */
 		AString Report(int); /* Number of men */
 		void Readin(istream& f);
-		void Writeout(Aoutfile *);
+		void Writeout(ostream& f);
 };
 
 class HealType {

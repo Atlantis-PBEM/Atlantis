@@ -742,15 +742,13 @@ void Battle::WriteSides(ARegion * r,
 	AddLine("");
 }
 
-void Battle::Report(Areport * f,Faction * fac) {
+void Battle::Report(ostream& f,Faction * fac) {
 	if (assassination == ASS_SUCC && fac != attacker) {
-		f->PutStr(*asstext);
-		f->PutStr("");
+		f << asstext->const_str() << "\n";
 		return;
 	}
 	forlist(&text) {
-		AString * s = (AString *) elem;
-		f->PutStr(*s);
+		f << ((AString *)elem)->const_str() << '\n';
 	}
 }
 

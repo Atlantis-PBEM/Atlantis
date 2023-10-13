@@ -29,6 +29,7 @@
 #include "gamedata.h"
 #include "mapgen.h"
 #include "namegen.h"
+#include "indenter.hpp"
 
 #include <vector>
 #include <algorithm>
@@ -112,11 +113,9 @@ void TownInfo::Readin(istream &f)
 	f >> hab;
 }
 
-void TownInfo::Writeout(Aoutfile *f)
+void TownInfo::Writeout(ostream& f)
 {
-	f->PutStr(*name);
-	f->PutInt(pop);
-	f->PutInt(hab);
+	f << name->const_str() << '\n' << pop << '\n' << hab << '\n';
 }
 
 ARegion::ARegion()
@@ -1013,49 +1012,44 @@ AList *ARegion::PresentFactions()
 	return facs;
 }
 
-void ARegion::Writeout(Aoutfile *f)
+void ARegion::Writeout(ostream& f)
 {
-	f->PutStr(*name);
-	f->PutInt(num);
-	if (type != -1) f->PutStr(TerrainDefs[type].type);
-	else f->PutStr("NO_TERRAIN");
-	f->PutInt(buildingseq);
-	f->PutInt(gate);
-	if (gate > 0) f->PutInt(gatemonth);
-	if (race != -1) f->PutStr(ItemDefs[race].abr);
-	else f->PutStr("NO_RACE");
-	f->PutInt(population);
-	f->PutInt(basepopulation);
-	f->PutInt(wages);
-	f->PutInt(maxwages);
-	f->PutInt(wealth);
+	f << *name << '\n';
+	f << num << '\n';
 
-	f->PutInt(elevation);
-	f->PutInt(humidity);
-	f->PutInt(temperature);
-	f->PutInt(vegetation);
-	f->PutInt(culture);
+	f << (type != -1 ? TerrainDefs[type].type : "NO_TERRAIN") << '\n';
 
-	f->PutInt(habitat);
-	f->PutInt(development);
-	f->PutInt(maxdevelopment);
+	f << buildingseq << '\n';
+	f << gate << '\n';
+	if (gate > 0) f << gatemonth << '\n';
 
-	if (town) {
-		f->PutInt(1);
-		town->Writeout(f);
-	} else {
-		f->PutInt(0);
-	}
+	f << (race != -1 ? ItemDefs[race].abr : "NO_RACE") << '\n';
+	f << population << '\n';
+	f << basepopulation << '\n';
+	f << wages << '\n';
+	f << maxwages << '\n';
+	f << wealth << '\n';
 
-	f->PutInt(xloc);
-	f->PutInt(yloc);
-	f->PutInt(zloc);
-	f->PutInt(visited);
+	f << elevation << '\n';
+	f << humidity << '\n';
+	f << temperature << '\n';
+	f << vegetation << '\n';
+	f << culture << '\n';
+
+	f << habitat << '\n';
+	f << development << '\n';
+	f << maxdevelopment << '\n';
+
+	f << (town ? 1 : 0) << '\n';
+	if (town) town->Writeout(f);
+
+	f << xloc << '\n' << yloc << '\n' << zloc << '\n';
+	f << visited << '\n';
 
 	products.Writeout(f);
 	markets.Writeout(f);
 
-	f->PutInt(objects.Num());
+	f << objects.Num() << '\n';
 	forlist ((&objects)) ((Object *) elem)->Writeout(f);
 }
 
@@ -1180,7 +1174,7 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	return 0;
 }
 
-void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
+void ARegion::WriteProducts(ostream& f, Faction *fac, int present)
 {
 	AString temp = "Products: ";
 	int has = 0;
@@ -1200,10 +1194,9 @@ void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
 				if (p->skill == S_ENTERTAINMENT) {
 					if ((Globals->TRANSIT_REPORT &
 							GameDefs::REPORT_SHOW_ENTERTAINMENT) || present) {
-						f->PutStr(AString("Entertainment available: $") +
-								p->amount + ".");
+						f << "Entertainment available: $" << p->amount << ".\n";
 					} else {
-						f->PutStr(AString("Entertainment available: $0."));
+						f << "Entertainment available: $0.\n";
 					}
 				}
 			} else {
@@ -1223,7 +1216,7 @@ void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
 
 	if (has==0) temp += "none";
 	temp += ".";
-	f->PutStr(temp);
+	f << temp.const_str() << "\n";
 }
 
 int ARegion::HasItem(Faction *fac, int item)
@@ -1240,9 +1233,9 @@ int ARegion::HasItem(Faction *fac, int item)
 	return 0;
 }
 
-void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
+void ARegion::WriteMarkets(ostream &f, Faction *fac, int present)
 {
-	AString temp = "Wanted: ";
+	f << "Wanted: ";
 	int has = 0;
 	forlist(&markets) {
 		Market *m = (Market *) elem;
@@ -1259,18 +1252,17 @@ void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
 				}
 			}
 			if (has) {
-				temp += ", ";
+				f << ", ";
 			} else {
 				has = 1;
 			}
-			temp += m->Report();
+			f << m->Report().const_str();
 		}
 	}
-	if (!has) temp += "none";
-	temp += ".";
-	f->PutStr(temp);
+	if (!has) f << "none";
+	f << ".\n";
 
-	temp = "For Sale: ";
+	f << "For Sale: ";
 	has = 0;
 	{
 		forlist(&markets) {
@@ -1281,62 +1273,53 @@ void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
 				continue;
 			if (m->type == M_BUY) {
 				if (has) {
-					temp += ", ";
+					f << ", ";
 				} else {
 					has = 1;
 				}
-				temp += m->Report();
+				f << m->Report().const_str();
 			}
 		}
 	}
-	if (!has) temp += "none";
-	temp += ".";
-	f->PutStr(temp);
+	if (!has) f << "none";
+	f << ".\n";
 }
 
-void ARegion::WriteEconomy(Areport *f, Faction *fac, int present)
+void ARegion::WriteEconomy(ostream& f, Faction *fac, int present)
 {
-	f->AddTab();
+	f << indent::incr;
 
 	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present) {
-		f->PutStr(AString("Wages: ") + WagesForReport() + ".");
+		f << "Wages: " << WagesForReport().const_str() << ".\n";
 	} else {
-		f->PutStr(AString("Wages: $0."));
+		f << "Wages: $0.\n";
 	}
 
 	WriteMarkets(f, fac, present);
 
 	WriteProducts(f, fac, present);
 
-	f->EndLine();
-	f->DropTab();
+	f << indent::decr << '\n';
 }
 
-void ARegion::WriteExits(Areport *f, ARegionList *pRegs, int *exits_seen)
+void ARegion::WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen)
 {
-	f->PutStr("Exits:");
-	f->AddTab();
+	f << "Exits:\n";
+	f << indent::incr;
 	int y = 0;
 	for (int i=0; i<NDIRS; i++) {
 		ARegion *r = neighbors[i];
 		if (r && exits_seen[i]) {
-			f->PutStr(AString(DirectionStrs[i]) + " : " +
-					r->Print(pRegs) + ".");
+			f << DirectionStrs[i] << " : " << r->Print(pRegs) << ".\n";
 			y = 1;
 		}
 	}
-	if (!y) f->PutStr("none");
-	f->DropTab();
-	f->EndLine();
+	if (!y) f << "none\n";
+	f << indent::decr;
+	f << '\n';
 }
 
-#define AC_STRING "%s Nexus is a magical place: the entryway " \
-"to the world of %s. Enjoy your stay; the city guards should " \
-"keep you safe as long as you should choose to stay. However, rumor " \
-"has it that once you have left the Nexus, you can never return."
-
-void ARegion::WriteReport(Areport *f, Faction *fac, int month,
-		ARegionList *pRegions)
+void ARegion::WriteReport(ostream &f, Faction *fac, int month, ARegionList *pRegions)
 {
 	Farsight *farsight = GetFarsight(&farsees, fac);
 	Farsight *passer = GetFarsight(&passers, fac);
@@ -1359,11 +1342,10 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			}
 		}
 		temp += ".";
-		f->PutStr(temp);
-		f->PutStr("-------------------------------------------------"
-				"-----------");
+		f << temp.const_str() << "\n";
+		f << "------------------------------------------------------------\n";
 
-		f->AddTab();
+		f << indent::incr;
 		if (Globals->WEATHER_EXISTS) {
 			temp = "It was ";
 			if (clearskies) temp += "unnaturally clear ";
@@ -1377,31 +1359,24 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			temp += "it will be ";
 			temp += SeasonNames[nxtweather];
 			temp += " next month.";
-			f->PutStr(temp);
+			f << temp.const_str() << "\n";
 		}
 		
 #if 0
-		f->PutStr("");
-		temp = "Elevation is ";
-		f->PutStr(temp + elevation);
-		temp = "Humidity is ";
-		f->PutStr(temp + humidity);
-		temp = "Temperature is ";
-		f->PutStr(temp + temperature);
+		f << "\nElevation is " << elevation << ".\n";
+		f << "Humidity is " << humidity << ".\n";
+		f << "Temperature is " << temperature << ".\n";
 #endif
 
 		if (type == R_NEXUS) {
-			int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
-			char *nexus_desc = new char[len];
-			snprintf(nexus_desc, len, AC_STRING, Globals->WORLD_NAME,
-					Globals->WORLD_NAME);
-			f->PutStr("");
-			f->PutStr(nexus_desc);
-			f->PutStr("");
-			delete [] nexus_desc;
+			f << '\n' << Globals->WORLD_NAME << " Nexus is a magical place: the entryway " 
+			  << "to the world of " << Globals->WORLD_NAME << ". Enjoy your stay; "
+			  << "the city guards should keep you safe as long as you should choose "
+			  << "to stay. However, rumor has it that once you have left the Nexus, "
+			  << "you can never return.\n\n";
 		}
 
-		f->DropTab();
+		f << indent::decr;
 
 		WriteEconomy(f, fac, present || farsight);
 
@@ -1470,19 +1445,13 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			}
 			if (sawgate) {
 				if (gateopen) {
-					AString temp;
-					temp = "There is a Gate here (Gate ";
-					temp += gate;
+					f << "There is a Gate here (Gate " << gate;
 					if (!Globals->DISPERSE_GATE_NUMBERS) {
-						temp += " of ";
-						temp += pRegions->numberofgates;
+						f << " of " << pRegions->numberofgates;
 					}
-					temp += ").";
-					f->PutStr(temp);
-					f->PutStr("");
+					f << ").\n\n";
 				} else if (Globals->SHOW_CLOSED_GATES) {
-					f->PutStr(AString("There is a closed Gate here."));
-					f->PutStr("");
+					f << "There is a closed Gate here.\n\n";
 				}
 			}
 		}
@@ -1538,14 +1507,13 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 							passobs, passtrue, passdetfac,
 							present || farsight);
 			}
-			f->EndLine();
+			f << '\n';
 		}
 	}
 }
 
 // DK
-void ARegion::WriteTemplate(Areport *f, Faction *fac,
-		ARegionList *pRegs, int month)
+void ARegion::WriteTemplate(ostream& f, Faction *fac, ARegionList *pRegs, int month)
 {
 	int header = 0, order;
 	AString temp, *token;
@@ -1560,18 +1528,18 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 					if (fac->temformat == TEMPLATE_MAP) {
 						WriteTemplateHeader(f, fac, pRegs, month);
 					} else {
-						f->PutStr("");
-						f->PutStr(AString("*** ") + Print(pRegs) + " ***", 1);
+						temp = AString("*** ") + Print(pRegs) + AString(" ***");
+						f << '\n';
+						f << indent::comment << temp.const_str() << '\n';
 					}
 					header = 1;
 				}
 
-				f->PutStr("");
-				f->PutStr(AString("unit ") + u->num);
+				f << "\nunit " << u->num << '\n';
 				// DK
 				if (fac->temformat == TEMPLATE_LONG ||
 						fac->temformat == TEMPLATE_MAP) {
-					f->PutStr(u->TemplateReport(), 1);
+					f << indent::comment << u->TemplateReport() << '\n';
 				}
 				int gotMonthOrder = 0;
 				forlist(&(u->oldorders)) {
@@ -1601,12 +1569,12 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 							break;
 					}
 					if (order == O_ENDTURN || order == O_ENDFORM)
-						f->DropTab();
-					f->PutStr(*((AString *) elem));
+						f << indent::decr;
+					f << *((AString *) elem) << '\n';
 					if (order == O_TURN || order == O_FORM)
-						f->AddTab();
+						f << indent::incr;
 				}
-				f->ClearTab();
+				f << indent::set_indent(0);
 				u->oldorders.DeleteAll();
 
 				int firstMonthOrder = gotMonthOrder;
@@ -1615,11 +1583,8 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 					forlist(&u->turnorders) {
 						tOrder = (TurnOrder *)elem;
 						if (firstMonthOrder) {
-							if (tOrder->repeating)
-								f->PutStr(AString("@TURN"));
-							else
-								f->PutStr(AString("TURN"));
-							f->AddTab();
+							f << (tOrder->repeating ? "@" : "") << "TURN\n";
+							f << indent::incr;
 						}
 						forlist(&tOrder->turnOrders) {
 							temp = *((AString *) elem);
@@ -1631,22 +1596,21 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 							} else
 								order = NORDERS;
 							if (order == O_ENDTURN || order == O_ENDFORM)
-								f->DropTab();
-							f->PutStr(*((AString *) elem));
+								f << indent::decr;
+							f << *((AString *) elem) << '\n';
 							if (order == O_TURN || order == O_FORM)
-								f->AddTab();
+								f << indent::incr;
 						}
 						if (firstMonthOrder) {
-							f->DropTab();
-							f->PutStr(AString("ENDTURN"));
+							f << indent::decr << "ENDTURN\n";
 						}
 						firstMonthOrder = 1;
-						f->ClearTab();
+						f << indent::set_indent(0);
 					}
 					tOrder = (TurnOrder *) u->turnorders.First();
 					if (tOrder->repeating && !gotMonthOrder) {
-						f->PutStr(AString("@TURN"));
-						f->AddTab();
+						f << "@TURN\n";
+						f << indent::incr;
 						forlist(&tOrder->turnOrders) {
 							temp = *((AString *) elem);
 							temp.getat();
@@ -1657,13 +1621,12 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac,
 							} else
 								order = NORDERS;
 							if (order == O_ENDTURN || order == O_ENDFORM)
-								f->DropTab();
-							f->PutStr(*((AString *) elem));
+								f << indent::decr;
+							f << *((AString *) elem) << '\n';
 							if (order == O_TURN || order == O_FORM)
-								f->AddTab();
+								f << indent::incr;
 						}
-						f->ClearTab();
-						f->PutStr(AString("ENDTURN"));
+						f << indent::set_indent(0) << "ENDTURN\n";
 					}
 				}
 				u->turnorders.DeleteAll();
@@ -2052,36 +2015,27 @@ ARegionList::~ARegionList()
 	}
 }
 
-void ARegionList::WriteRegions(Aoutfile *f)
+void ARegionList::WriteRegions(ostream& f)
 {
-	f->PutInt(Num());
-
-	f->PutInt(numLevels);
-	int i;
-	for (i = 0; i < numLevels; i++) {
+	f << Num() << "\n";
+	f << numLevels << "\n";
+	for (int i = 0; i < numLevels; i++) {
 		ARegionArray *pRegs = pRegionArrays[i];
-		f->PutInt(pRegs->x);
-		f->PutInt(pRegs->y);
-		if (pRegs->strName) {
-			f->PutStr(*pRegs->strName);
-		} else {
-			f->PutStr("none");
-		}
-		f->PutInt(pRegs->levelType);
+		f << pRegs->x << "\n" << pRegs->y << "\n";
+		f << (pRegs->strName ? pRegs->strName->const_str() : "none") << "\n";
+		f << pRegs->levelType << "\n";
 	}
 
-	f->PutInt(numberofgates);
+	f << numberofgates << "\n";
 	forlist(this) ((ARegion *) elem)->Writeout(f);
+
 	{
-		f->PutStr("Neighbors");
+		// because forlist is a macro we need this extra block for now.
+		f << "Neighbors\n";
 		forlist(this) {
 			ARegion *reg = (ARegion *) elem;
-			for (i = 0; i < NDIRS; i++) {
-				if (reg->neighbors[i]) {
-					f->PutInt(reg->neighbors[i]->num);
-				} else {
-					f->PutInt(-1);
-				}
+			for (int i = 0; i < NDIRS; i++) {
+				f  << (reg->neighbors[i] ? reg->neighbors[i]->num : -1) << '\n';
 			}
 		}
 	}

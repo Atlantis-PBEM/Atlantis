@@ -64,7 +64,7 @@ class QuestList : public AList
 {
 	public:
 		int ReadQuests(istream& f);
-		void WriteQuests(Aoutfile *f);
+		void WriteQuests(ostream& f);
 
 		int CheckQuestKillTarget(Unit *u, ItemList *reward, AString *quest_rewards);
 		int CheckQuestHarvestTarget(ARegion *r,
