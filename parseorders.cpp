@@ -242,6 +242,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 					fac = 0;
 					break;
 				}
+                                Faction *truefac; // used only to check password
+                                truefac = GetFaction(&factions, token->value());
 				if (pCheck) {
 					fac = &(pCheck->dummyFaction);
 					pCheck->numshows = 0;
@@ -262,6 +264,9 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 								"If this is your first turn, ignore this "
 								"error.");
 					}
+                                        if (!((truefac->password) == "none") && (!token || !((truefac->password) == *token))) {
+                                            ParseError(pCheck, 0, fac, "Incorrect password on #atlantis line.");
+                                        } // truefac is never again used
 				} else {
 					if (!(*(fac->password) == "none")) {
 						if (!token || !(*(fac->password) == *token)) {
