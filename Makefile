@@ -16,7 +16,7 @@ CFLAGS = -g -I. -I.. -Wall -Werror -std=c++20
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
 
 ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
-  edit.o faction.o fileio.o game.o gamedata.o gamedefs.o gameio.o \
+  edit.o faction.o game.o gamedata.o gamedefs.o gameio.o \
   genrules.o i_rand.o items.o main.o market.o modify.o monthorders.o \
   npc.o object.o orders.o parseorders.o production.o quests.o runorders.o \
   shields.o skills.o skillshows.o specials.o spells.o template.o unit.o \
@@ -31,7 +31,7 @@ OBJECTS =  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) $(patsubst %.o,$(GAME)/obj/
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: basic standard fracas kingdoms havilah neworigins
+all: basic standard fracas kingdoms havilah neworigins unittest
 
 basic: FORCE
 	$(MAKE) GAME=basic
@@ -55,7 +55,7 @@ $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
 
 all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
-	havilah-clean neworigins-clean
+	havilah-clean neworigins-clean unittest-clean
 
 basic-clean:
 	$(MAKE) GAME=basic clean

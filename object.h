@@ -29,7 +29,6 @@
 class Object;
 
 #include "alist.h"
-#include "fileio.h"
 #include "gamedefs.h"
 #include "faction.h"
 #include "items.h"

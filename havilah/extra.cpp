@@ -28,8 +28,13 @@
 #include "game.h"
 #include "gamedata.h"
 #include "quests.h"
+#include "indenter.hpp"
+#include <iostream>
+#include <fstream>
 #include <string>
 #include <iterator>
+
+using namespace std;
 
 #define RELICS_REQUIRED_FOR_VICTORY	7
 #define MINIMUM_ACTIVE_QUESTS		3
@@ -359,8 +364,7 @@ Faction *Game::CheckVictory()
 	Faction *f;
 	Skill *s;
 	Location *l;
-	AString message, times, temp, filename;
-	Arules wf;
+	AString message, times, temp;
 	map <string, int> vRegions, uvRegions;
 	map <string, int>::iterator it;
 	string stlstr;
@@ -749,9 +753,10 @@ Faction *Game::CheckVictory()
 			f->Event(message);
 			WriteTimesArticle(times);
 
-			filename = "winner.";
-			filename += f->num;
-			if (wf.OpenByName(filename) != -1) {
+			string filename = "winner." + to_string(f->num);
+			ofstream wf(filename, ios::out | ios::ate);
+
+			if (wf.is_open()) {
 				message = TurnNumber();
 				message += ", ";
 				message += f->startturn;
@@ -780,9 +785,7 @@ Faction *Game::CheckVictory()
 				message += ", ";
 				message += *f->name;
 				message += "\n";
-				wf.PutNoFormat(message);
-
-				wf.Close();
+				wf << message;
 			}
 		}
 	}

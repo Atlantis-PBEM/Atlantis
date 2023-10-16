@@ -30,14 +30,18 @@
 #endif
 
 #include <string.h>
-#include <unistd.h>
 
 #include "game.h"
 #include "unit.h"
-#include "fileio.h"
 #include "astring.h"
 #include "gamedata.h"
 #include "quests.h"
+#include "indenter.hpp"
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+
+using namespace std;
 
 Game::Game()
 {
@@ -2100,19 +2104,12 @@ void Game::Equilibrate()
 
 void Game::WriteTimesArticle(AString article)
 {
-	AString filename;
-	int result;
-	Arules f;
+	string fname;
 
-	do {
-		filename = "times.";
-		filename += getrandom(10000);
-		result = access(filename.Str(), F_OK);
-	} while (result == 0);
-
-	if (f.OpenByName(filename) != -1) {
-		f.PutStr(article);
-		f.Close();
+	do { fname = "times." + to_string(getrandom(10000)); } while (filesystem::exists(fname));
+	ofstream f(fname, ios::out | ios::trunc);
+	if (f.is_open()) {
+		f << indent::wrap(78,70,0) << article << '\n';
 	}
 }
 

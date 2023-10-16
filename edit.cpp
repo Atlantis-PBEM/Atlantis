@@ -6,7 +6,6 @@
 
 #include "game.h"
 #include "unit.h"
-#include "fileio.h"
 #include "astring.h"
 #include "gamedata.h"
 

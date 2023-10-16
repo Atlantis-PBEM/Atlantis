@@ -35,7 +35,6 @@ class Game;
 
 #include "gameio.h"
 #include "aregion.h"
-#include "fileio.h"
 #include "unit.h"
 #include "battle.h"
 #include "skills.h"

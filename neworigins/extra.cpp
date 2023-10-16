@@ -414,8 +414,7 @@ Faction *Game::CheckVictory()
 	Object *o;
 	Unit *u;
 	Location *l;
-	AString message, times, temp, filename;
-	Arules wf;
+	AString message, times, temp;
 	map <string, int> vRegions, uvRegions;
 	map <string, int>::iterator it;
 	string stlstr;

@@ -30,6 +30,10 @@
 #include "game.h"
 #include "gamedata.h"
 #include <string.h>
+#include <iostream>
+#include <fstream>
+
+using namespace std;
 
 typedef struct
 {
