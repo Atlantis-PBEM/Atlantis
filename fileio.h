@@ -31,43 +31,6 @@
 #include <fstream>
 using namespace std;
 
-class Aoutfile {
-	public:
-		Aoutfile();
-		~Aoutfile();
-
-		void Open(const AString &);
-		int OpenByName(const AString &);
-		void Close();
-
-		void PutStr(char const *);
-		void PutStr(const AString &);
-		void PutInt(int);
-
-		ofstream *file;
-};
-
-class Areport {
-	public:
-		Areport();
-		~Areport();
-
-		void Open(const AString &);
-		int OpenByName(const AString &);
-		void Close();
-
-		void AddTab();
-		void DropTab();
-		void ClearTab();
-
-		void PutStr(const AString &,int = 0);
-		void PutNoFormat(const AString &);
-		void EndLine();
-
-		ofstream *file;
-		int tabs;
-};
-
 class Arules {
 	public:
 		Arules();

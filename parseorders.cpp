@@ -31,21 +31,9 @@
 #include "skills.h"
 #include "gamedata.h"
 
-OrdersCheck::OrdersCheck()
-{
-	pCheckFile = 0;
-	numshows = 0;
-	numerrors = 0;
-	dummyUnit.monthorders = 0;
-}
-
 void OrdersCheck::Error(const AString &strError)
 {
-	if (pCheckFile) {
-		pCheckFile->PutStr("");
-		pCheckFile->PutStr("");
-		pCheckFile->PutStr(AString("*** Error: ") + strError + " ***");
-	}
+	pCheckFile << "\n\n*** Error: " << strError << " ***\n";
 	numerrors++;
 }
 
@@ -446,7 +434,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 				indent--;
 			for (i = 0, prefix = ""; i < indent; i++)
 				prefix += "  ";
-			pCheck->pCheckFile->PutStr(prefix + saveorder);
+			pCheck->pCheckFile << prefix << saveorder << "\n";
 			if (code == O_TURN || code == O_FORM)
 				indent++;
 		}
@@ -470,16 +458,11 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 	}
 
 	if (pCheck) {
-		pCheck->pCheckFile->PutStr("");
+		pCheck->pCheckFile << "\n";
 		if (!pCheck->numerrors) {
-			pCheck->pCheckFile->PutStr("No errors found.");
+			pCheck->pCheckFile << "No errors found.\n";
 		} else {
-			AString str = pCheck->numerrors;
-			str += " error";
-			if (pCheck->numerrors != 1)
-				str += "s";
-			str += " found!";
-			pCheck->pCheckFile->PutStr(str);
+			pCheck->pCheckFile << pCheck->numerrors << " error" << (pCheck->numerrors == 1 ? "" : "s") << " found!\n";
 		}
 	}
 }

@@ -29,6 +29,7 @@
 #include "skills.h"
 #include "gamedata.h"
 #include "unit.h"
+#include "indenter.hpp"
 
 int LookupObject(AString *token)
 {
@@ -99,26 +100,21 @@ Object::~Object()
 	region = (ARegion *)NULL;
 }
 
-void Object::Writeout(Aoutfile *f)
+void Object::Writeout(ostream& f)
 {
-	f->PutInt(num);
-	if (IsFleet()) f->PutStr(ObjectDefs[O_FLEET].name);
-	else if (type != -1) f->PutStr(ObjectDefs[type].name);
-	else f->PutStr("NO_OBJECT");
-	f->PutInt(incomplete);
-	f->PutStr(*name);
-	if (describe) {
-		f->PutStr(*describe);
-	} else {
-		f->PutStr("none");
-	}
-	f->PutInt(inner);
-	if (Globals->PREVENT_SAIL_THROUGH && !Globals->ALLOW_TRIVIAL_PORTAGE)
-		f->PutInt(prevdir);
-	else
-		f->PutInt(-1);
-	f->PutInt(runes);
-	f->PutInt(units.Num());
+	f << num << '\n';
+	f << (type == -1
+	 ? "NO_OBJECT"
+	 : (IsFleet() ? ObjectDefs[O_FLEET].name : ObjectDefs[type].name)
+	) << '\n';
+
+	f << incomplete << '\n';
+	f << name->const_str() << '\n';
+	f << (describe ? describe->const_str() : "none") << '\n';
+	f << inner << '\n';
+	f << (Globals->PREVENT_SAIL_THROUGH && !Globals->ALLOW_TRIVIAL_PORTAGE ? prevdir : -1) << '\n';
+	f << runes << '\n';
+	f << units.Num() << '\n';
 	forlist ((&units))
 		((Unit *) elem)->Writeout(f);
 	WriteoutFleet(f);
@@ -283,7 +279,7 @@ Unit *Object::GetOwner()
 	return(owner);
 }
 
-void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
+void Object::Report(ostream& f, Faction *fac, int obs, int truesight,
 		int detfac, int passobs, int passtrue, int passdetfac, int present)
 {
 	ObjectType *ob = &ObjectDefs[type];
@@ -351,8 +347,8 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 			temp += AString("; ") + *describe;
 		}
 		temp += ".";
-		f->PutStr(temp);
-		f->AddTab();
+		f << temp << '\n';
+		f << indent::incr;
 	} else if (type != O_DUMMY) {
 		AString temp = AString("+ ") + *name + " : " + ob->name;
 		if (incomplete > 0) {
@@ -378,8 +374,8 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 			temp += ", closed to player units";
 		}
 		temp += ".";
-		f->PutStr(temp);
-		f->AddTab();
+		f << temp << '\n';
+		f << indent::incr;
 	}
 
 	forlist ((&units)) {
@@ -406,10 +402,10 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 			}
 		}
 	}
-	f->EndLine();
 	if (type != O_DUMMY) {
-		f->DropTab();
+		f << indent::decr;
 	}
+	f << '\n';
 }
 
 void Object::SetPrevDir(int newdir)
@@ -441,11 +437,10 @@ int Object::CheckShip(int item)
 	return 0;
 }
 
-void Object::WriteoutFleet(Aoutfile *f)
+void Object::WriteoutFleet(ostream& f)
 {
 	if (!IsFleet()) return;
-	int nships = (int) ships.Num();
-	f->PutInt(nships);
+	f << ships.Num() << "\n";
 	forlist(&ships)
 		((Item *) elem)->Writeout(f);
 }
@@ -456,11 +451,10 @@ void Object::ReadinFleet(istream &f)
 	int nships;
 	f >> nships;
 	for (int i = 0; i < nships; i++) {
-		Item *ship = new Item;
-		ship->Readin(f);
-		if (ship->type >= 0)
-			SetNumShips(ship->type, ship->num);
-		delete ship;
+		Item ship;
+		ship.Readin(f);
+		if (ship.type >= 0)
+			SetNumShips(ship.type, ship.num);
 	}
 }
 

@@ -248,24 +248,20 @@ void Skill::Readin(istream &f)
 	}
 }
 
-void Skill::Writeout(Aoutfile *f)
+void Skill::Writeout(ostream& f)
 {
-	AString temp;
-
 	if (type != -1) {
+		f << SkillDefs[type].abbr << " " << days;
 		if (Globals->REQUIRED_EXPERIENCE) {
-			temp = AString(SkillDefs[type].abbr) + " " + days + " " + exp;
-		} else {
-			temp = AString(SkillDefs[type].abbr) + " " + days;
+			f << " " << exp;
 		}
 	} else {
+		f << "NO_SKILL 0";
 		if (Globals->REQUIRED_EXPERIENCE) {
-			temp = AString("NO_SKILL 0 0");
-		} else {
-			temp = AString("NO_SKILL 0");
+			f << " 0";
 		}
 	}
-	f->PutStr(temp);
+	f << '\n';
 }
 
 Skill *Skill::Split(int total, int leave)
@@ -439,8 +435,8 @@ void SkillList::Readin(istream& f)
 	}
 }
 
-void SkillList::Writeout(Aoutfile *f)
+void SkillList::Writeout(ostream& f)
 {
-	f->PutInt(Num());
+	f << Num() << '\n';
 	forlist(this) ((Skill *) elem)->Writeout(f);
 }

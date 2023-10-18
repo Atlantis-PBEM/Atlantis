@@ -1541,16 +1541,15 @@ AString Item::Report(int seeillusions)
 	return ret;
 }
 
-void Item::Writeout(Aoutfile *f)
+void Item::Writeout(ostream& f)
 {
 	AString temp;
 	if (type != -1) {
-		temp = AString(num) + " ";
-		if (ItemDefs[type].type & IT_ILLUSION) temp += "i";
-		temp += ItemDefs[type].abr;
-	}
-	else temp = "-1 NO_ITEM";
-	f->PutStr(temp);
+		f << num << " ";
+		if (ItemDefs[type].type & IT_ILLUSION) f << "i";
+		f << ItemDefs[type].abr << '\n';
+	} else
+		f << "-1 NO_ITEM\n";
 }
 
 void Item::Readin(istream &f)
@@ -1565,9 +1564,9 @@ void Item::Readin(istream &f)
 	delete token;
 }
 
-void ItemList::Writeout(Aoutfile *f)
+void ItemList::Writeout(ostream& f)
 {
-	f->PutInt(Num());
+	f << Num() << "\n";
 	forlist (this) ((Item *) elem)->Writeout(f);
 }
 

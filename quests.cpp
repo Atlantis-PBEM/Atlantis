@@ -146,74 +146,58 @@ int QuestList::ReadQuests(istream& f)
     return 1;
 }
 
-void QuestList::WriteQuests(Aoutfile *f)
+void QuestList::WriteQuests(ostream& f)
 {
 	Quest *q;
 	Item *i;
 	set<string>::iterator it;
 
-	f->PutInt(quests.Num());
+	f << quests.Num() << '\n';
 	forlist(this) {
 		q = (Quest *) elem;
-		f->PutInt(q->type);
+		f << q->type << '\n';
 		switch(q->type) {
 			case Quest::SLAY:
-				f->PutInt(q->target);
+				f << q->target << '\n';
 				break;
 			case Quest::HARVEST:
 				q->objective.Writeout(f);
-				f->PutInt(q->regionnum);
+				f << q->regionnum << '\n';
 				break;
 			case Quest::BUILD:
-				if (q->building != -1)
-					f->PutStr(ObjectDefs[q->building].name);
-				else
-					f->PutStr("NO_OBJECT");
-				f->PutStr(q->regionname);
+				f << (q->building == -1 ? "NO_OBJECT" : ObjectDefs[q->building].name) << '\n';
+				f << q->regionname << '\n';
 				break;
 			case Quest::VISIT:
-				if (q->building != -1)
-					f->PutStr(ObjectDefs[q->building].name);
-				else
-					f->PutStr("NO_OBJECT");
-				f->PutInt(q->destinations.size());
-				for (it = q->destinations.begin();
-						it != q->destinations.end();
-						it++) {
-					f->PutStr(it->c_str());
+				f << (q->building == -1 ? "NO_OBJECT" : ObjectDefs[q->building].name) << '\n';
+				f << q->destinations.size() << '\n';
+				for (it = q->destinations.begin(); it != q->destinations.end();	it++) {
+					f << *it << '\n';
 				}
 				break;
 			case Quest::DEMOLISH:
-				f->PutInt(q->target);
-				f->PutInt(q->regionnum);
+				f << q->target << '\n';
+				f << q->regionnum << '\n';
 				break;
 			default:
-				f->PutInt(q->target);
+				f << q->target << '\n';
 				q->objective.Writeout(f);
-				if (q->building != -1)
-					f->PutStr(ObjectDefs[q->building].name);
-				else
-					f->PutStr("NO_OBJECT");
-				f->PutInt(q->regionnum);
-				f->PutStr(q->regionname);
-				f->PutInt(q->destinations.size());
-				for (it = q->destinations.begin();
-						it != q->destinations.end();
-						it++) {
-					f->PutStr(it->c_str());
+				f << (q->building == -1 ? "NO_OBJECT" : ObjectDefs[q->building].name) << '\n';
+				f << q->regionnum << '\n';
+				f << q->regionname << '\n';
+				f << q->destinations.size() << '\n';
+				for (it = q->destinations.begin(); it != q->destinations.end();	it++) {
+					f << *it << '\n';
 				}
 				break;
 		}
-		f->PutInt(q->rewards.Num());
+		f << q->rewards.Num() << '\n';
 		forlist(&q->rewards) {
 			i = (Item *) elem;
 			i->Writeout(f);
 		}
 	}
-
-	f->PutInt(0);
-
-        return;
+	f << 0 << '\n';
 }
 
 int QuestList::CheckQuestKillTarget(Unit *u, ItemList *reward, AString *quest_rewards)

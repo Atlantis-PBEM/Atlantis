@@ -131,13 +131,13 @@ AString Game::GetXtraMap(ARegion *reg,int type)
 	return(" ");
 }
 
-void Game::WriteSurfaceMap(Aoutfile *f, ARegionArray *pArr, int type)
+void Game::WriteSurfaceMap(ostream& f, ARegionArray *pArr, int type)
 {
 	ARegion *reg;
 	int yy = 0;
 	int xx = 0;
 
-	f->PutStr(AString("Map (") + xx*32 + "," + yy*16 + ")");
+	f << "Map (" << xx*32 << "," << yy*16 << ")\n";
 	for (int y=0; y < pArr->y; y+=2) {
 		AString temp;
 		int x;
@@ -147,7 +147,7 @@ void Game::WriteSurfaceMap(Aoutfile *f, ARegionArray *pArr, int type)
 			temp += GetXtraMap(reg,type);
 			temp += "  ";
 		}
-		f->PutStr(temp);
+		f << temp << "\n";
 		temp = "  ";
 		for (x=1; x< pArr->x; x+=2) {
 			reg = pArr->GetRegion(x+xx*32,y+yy*16+1);
@@ -155,17 +155,17 @@ void Game::WriteSurfaceMap(Aoutfile *f, ARegionArray *pArr, int type)
 			temp += GetXtraMap(reg,type);
 			temp += "  ";
 		}
-		f->PutStr(temp);
+		f << temp << "\n";
 	}
-	f->PutStr("");
+	f << "\n";
 }
 
-void Game::WriteUnderworldMap(Aoutfile *f, ARegionArray *pArr, int type)
+void Game::WriteUnderworldMap(ostream& f, ARegionArray *pArr, int type)
 {
 	ARegion *reg, *reg2;
 	int xx = 0;
 	int yy = 0;
-	f->PutStr(AString("Map (") + xx*32 + "," + yy*16 + ")");
+	f << "Map (" << xx*32 << "," << yy*16 << ")\n";
 	for (int y=0; y< pArr->y; y+=2) {
 		AString temp = " ";
 		AString temp2;
@@ -188,8 +188,7 @@ void Game::WriteUnderworldMap(Aoutfile *f, ARegionArray *pArr, int type)
 
 			temp2 += " ";
 		}
-		f->PutStr(temp);
-		f->PutStr(temp2);
+		f << temp << "\n" << temp2 << "\n";
 
 		temp = " ";
 		temp2 = "  ";
@@ -213,10 +212,9 @@ void Game::WriteUnderworldMap(Aoutfile *f, ARegionArray *pArr, int type)
 
 			temp2 += " ";
 		}
-		f->PutStr(temp);
-		f->PutStr(temp2);
+		f << temp << "\n" << temp2 << "\n";
 	}
-	f->PutStr("");
+	f << "\n";
 }
 
 int Game::ViewMap(const AString & typestr,const AString & mapfile)
@@ -226,49 +224,46 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 	if (AString(typestr) == "lair") type = 2;
 	if (AString(typestr) == "gate") type = 3;
 
-	Aoutfile f;
-	if (f.OpenByName(mapfile) == -1) return(0);
+	ofstream f(mapfile.const_str(), ios::out|ios::ate);
+	if (!f.is_open()) return(0);
 
 	switch (type) {
 		case 0:
-			f.PutStr("Geographical Map");
+			f << "Geographical Map\n";
 			break;
 		case 1:
-			f.PutStr("Wandering Monster Map");
+			f << "Wandering Monster Map\n";
 			break;
 		case 2:
-			f.PutStr("Lair Map");
+			f << "Lair Map\n";
 			break;
 		case 3:
-			f.PutStr("Gate Map");
+			f << "Gate Map\n";
 			break;
 	}
 
 	int i;
 	for (i = 0; i < regions.numLevels; i++) {
-		f.PutStr("");
+		f << '\n';
 		ARegionArray *pArr = regions.pRegionArrays[i];
 		switch(pArr->levelType) {
 			case ARegionArray::LEVEL_NEXUS:
-				f.PutStr(AString("Level ") + i + ": Nexus");
+				f << "Level " << i << ": Nexus\n";
 				break;
 			case ARegionArray::LEVEL_SURFACE:
-				f.PutStr(AString("Level ") + i + ": Surface");
-				WriteSurfaceMap(&f, pArr, type);
+				f << "Level " << i << ": Surface\n";
+				WriteSurfaceMap(f, pArr, type);
 				break;
 			case ARegionArray::LEVEL_UNDERWORLD:
-				f.PutStr(AString("Level ") + i + ": Underworld");
-				WriteUnderworldMap(&f, pArr, type);
+				f << "Level " << i << ": Underworld\n";
+				WriteUnderworldMap(f, pArr, type);
 				break;
 			case ARegionArray::LEVEL_UNDERDEEP:
-				f.PutStr(AString("Level ") + i + ": Underdeep");
-				WriteUnderworldMap(&f, pArr, type);
+				f << "Level " << i << ": Underdeep\n";
+				WriteUnderworldMap(f, pArr, type);
 				break;
 		}
 	}
-
-	f.Close();
-
 	return(1);
 }
 
@@ -318,8 +313,7 @@ int Game::OpenGame()
 	//
 	// The order here must match the order in SaveGame
 	//
-	ifstream f;
-	f.open("game.in", ios::in);
+	ifstream f("game.in", ios::in);
 	if (!f.is_open()) return(0);
 	//
 	// Read in Globals
@@ -438,44 +432,41 @@ int Game::OpenGame()
 
 int Game::SaveGame()
 {
-	Aoutfile f;
-	if (f.OpenByName("game.out") == -1) return(0);
+	ofstream f("game.out", ios::out|ios::ate);
+	if (!f.is_open()) return(0);
 
 	//
 	// Write out Globals
 	//
-	f.PutStr("atlantis_game");
-	f.PutInt(CURRENT_ATL_VER);
-	f.PutStr(Globals->RULESET_NAME);
-	f.PutInt(Globals->RULESET_VERSION);
+	f << "atlantis_game\n";
+	f << CURRENT_ATL_VER << "\n";
+	f << Globals->RULESET_NAME << "\n";
+	f << Globals->RULESET_VERSION << "\n";
 
-	f.PutInt(year);
-	f.PutInt(month);
-	f.PutInt(getrandom(10000));
-	f.PutInt(factionseq);
-	f.PutInt(unitseq);
-	f.PutInt(shipseq);
-	f.PutInt(guardfaction);
-	f.PutInt(monfaction);
-
+	f << year << "\n";
+	f << month << "\n";
+	f << getrandom(10000) << "\n";
+	f << factionseq << "\n";
+	f << unitseq << "\n";
+	f << shipseq << "\n";
+	f << guardfaction << "\n";
+	f << monfaction << "\n";
 	//
 	// Write out the Factions
 	//
-	f.PutInt(factions.Num());
-
+	f << factions.Num() << "\n";
 	forlist(&factions) {
-		((Faction *) elem)->Writeout(&f);
+		((Faction *) elem)->Writeout(f);
 	}
 
 	//
 	// Write out the ARegions
 	//
-	regions.WriteRegions(&f);
+	regions.WriteRegions(f);
 
 	// Write out quests
-	quests.WriteQuests(&f);
+	quests.WriteQuests(f);
 
-	f.Close();
 	return(1);
 }
 
@@ -490,37 +481,33 @@ void Game::DummyGame()
 
 int Game::WritePlayers()
 {
-	Aoutfile f;
-	if (f.OpenByName("players.out") == -1) return(0);
+	ofstream f("players.out", ios::out|ios::ate);
+	if (!f.is_open()) return(0);
 
-	f.PutStr(PLAYERS_FIRST_LINE);
-	f.PutStr(AString("Version: ") + CURRENT_ATL_VER);
-	f.PutStr(AString("TurnNumber: ") + TurnNumber());
-
+	f << PLAYERS_FIRST_LINE << "\n";
+	f << "Version: " << CURRENT_ATL_VER << "\n";
+	f << "TurnNumber: " << TurnNumber() << "\n";
 	if (gameStatus == GAME_STATUS_UNINIT)
 		return(0);
-	else if (gameStatus == GAME_STATUS_NEW)
-		f.PutStr(AString("GameStatus: New"));
+	
+	if (gameStatus == GAME_STATUS_NEW)
+		f << "GameStatus: New\n\n";
 	else if (gameStatus == GAME_STATUS_RUNNING)
-		f.PutStr(AString("GameStatus: Running"));
+		f << "GameStatus: Running\n\n";
 	else if (gameStatus == GAME_STATUS_FINISHED)
-		f.PutStr(AString("GameStatus: Finished"));
-
-	f.PutStr("");
+		f << "GameStatus: Finished\n\n";
 
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
-		fac->WriteFacInfo(&f);
+		fac->WriteFacInfo(f);
 	}
 
-	f.Close();
 	return(1);
 }
 
 int Game::ReadPlayers()
 {
-	ifstream f;
-	f.open("players.in", ios::in);
+	ifstream f("players.in", ios::in);
 	if (!f.is_open()) return(0);
 
 	AString pLine;
@@ -1018,26 +1005,20 @@ void Game::WriteNewFac(Faction *pFac)
 
 int Game::DoOrdersCheck(const AString &strOrders, const AString &strCheck)
 {
-	ifstream ordersFile;
-	ordersFile.open(strOrders.const_str(), ios::in);
+	ifstream ordersFile(strOrders.const_str(), ios::in);
 	if (!ordersFile.is_open()) {
 		Awrite("No such orders file!");
 		return(0);
 	}
 
-	Aoutfile checkFile;
-	if (checkFile.OpenByName(strCheck) == -1) {
+	ofstream checkFile(strCheck.const_str(), ios::out|ios::ate);
+	if (!checkFile.is_open()) {
 		Awrite("Couldn't open the orders check file!");
 		return(0);
 	}
 
-	OrdersCheck check;
-	check.pCheckFile = &checkFile;
-
+	OrdersCheck check(checkFile);
 	ParseOrders(0, ordersFile, &check);
-
-	ordersFile.close();
-	checkFile.Close();
 
 	return(1);
 }
@@ -1150,8 +1131,7 @@ void Game::ReadOrders()
 			AString str = "orders.";
 			str += fac->num;
 
-			ifstream file;
-			file.open(str.const_str(), ios::in);
+			ifstream file(str.const_str(), ios::in);
 			if(file.is_open()) {
 				ParseOrders(fac->num, file, 0);
 				file.close();
@@ -1202,8 +1182,6 @@ void Game::MakeFactionReportLists()
 
 void Game::WriteReport()
 {
-	Areport f;
-
 	MakeFactionReportLists();
 	CountAllSpecialists();
 
@@ -1229,10 +1207,9 @@ void Game::WriteReport()
 		if (!fac->IsNPC() ||
 				((((month == 0) && (year == 1)) || Globals->GM_REPORT) &&
 			(fac->num == 1))) {
-			int i = f.OpenByName(str);
-			if (i != -1) {
-				fac->WriteReport(&f, this, citems);
-				f.Close();
+			ofstream f(str.const_str(), ios::out|ios::ate);
+			if (f.is_open()) {
+				fac->WriteReport(f, this, citems);
 			}
 		}
 		Adot();
@@ -1242,18 +1219,13 @@ void Game::WriteReport()
 // LLS - write order templates for factions
 void Game::WriteTemplates()
 {
-	Areport f;
-
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
-		AString str = "template.";
-		str = str + fac->num;
-
 		if (!fac->IsNPC()) {
-			int i = f.OpenByName(str);
-			if (i != -1) {
-				fac->WriteTemplate(&f, this);
-				f.Close();
+			string str = "template." + to_string(fac->num);
+			ofstream f(str.c_str(), ios::out|ios::ate);
+			if (f.is_open()) {
+				fac->WriteTemplate(f, this);
 			}
 			fac->present_regions.DeleteAll();
 		}
@@ -1428,28 +1400,26 @@ void Game::CountAllSpecialists()
 // LLS
 void Game::UnitFactionMap()
 {
-	Aoutfile f;
 	unsigned int i;
 	Unit *u;
 
 	Awrite("Opening units.txt");
-	if (f.OpenByName("units.txt") == -1) {
+	ofstream f("units.txt", ios::out|ios::ate);
+	if (!f.is_open()) {
 		Awrite("Couldn't open file!");
-	} else {
-		Awrite(AString("Writing ") + unitseq + " units");
-		for (i = 1; i < unitseq; i++) {
-			u = GetUnit(i);
-			if (!u) {
-				Awrite("doesn't exist");
-			} else {
-				Awrite(AString(i) + ":" + u->faction->num);
-				f.PutStr(AString(i) + ":" + u->faction->num);
-			}
+		return;
+	}
+	Awrite(AString("Writing ") + unitseq + " units");
+	for (i = 1; i < unitseq; i++) {
+		u = GetUnit(i);
+		if (!u) {
+			Awrite("doesn't exist");
+		} else {
+			Awrite(AString(i) + ":" + u->faction->num);
+			f << i << ":" << u->faction->num << endl;
 		}
 	}
-	f.Close();
 }
-
 
 //The following function added by Creative PBM February 2000
 void Game::RemoveInactiveFactions()

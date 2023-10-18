@@ -445,8 +445,8 @@ class Item : public AListElem
 		Item();
 		~Item();
 
-		void Readin(istream &f);
-		void Writeout(Aoutfile *);
+		void Readin(istream& f);
+		void Writeout(ostream& f);
 		
 		AString Report(int);
 
@@ -459,8 +459,8 @@ class Item : public AListElem
 class ItemList : public AList
 {
 	public:
-		void Readin(istream &f);
-		void Writeout(Aoutfile *);
+		void Readin(istream& f);
+		void Writeout(ostream& f);
 
 		AString Report(int, int, int);
 		AString BattleReport();

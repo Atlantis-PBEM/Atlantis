@@ -108,8 +108,8 @@ class Attitude : public AListElem {
 public:
 	Attitude();
 	~Attitude();
-	void Writeout(Aoutfile * );
-	void Readin(istream &f);
+	void Writeout(ostream& f);
+	void Readin(istream& f);
 	
 	int factionnum;
 	int attitude;
@@ -132,8 +132,8 @@ public:
 	Faction(int);
 	~Faction();
 	
-	void Readin(istream &f);
-	void Writeout( Aoutfile * );
+	void Readin(istream& f);
+	void Writeout(ostream& f);
 	void View();
 	
 	void SetName(AString *);
@@ -145,10 +145,10 @@ public:
 	void Event(const AString &);
 	
 	AString FactionTypeStr();
-	void WriteReport( Areport *f, Game *pGame, int ** citems);
+	void WriteReport(ostream& f, Game *pGame, int ** citems);
 	// LLS - write order template
-	void WriteTemplate(Areport *f, Game *pGame);
-	void WriteFacInfo(Aoutfile *);
+	void WriteTemplate(ostream& f, Game *pGame);
+	void WriteFacInfo(ostream& f);
 	
 	void SetAttitude(int,int); /* faction num, attitude */
 	/* if attitude == -1, clear it */
@@ -229,7 +229,7 @@ public:
 	int noStartLeader;
 	int startturn;
 
-	void WriteFactionStats(Areport *f, Game *pGame, int ** citems);
+	void WriteFactionStats(ostream& f, Game *pGame, int ** citems);
 };
 
 Faction * GetFaction(AList *,int);

@@ -168,44 +168,34 @@ void Unit::MakeWMon(char const *monname, int mon, int num)
 	SetMonFlags();
 }
 
-void Unit::Writeout(Aoutfile *s)
+void Unit::Writeout(ostream& f)
 {
 	set<string>::iterator it;
 
-	s->PutStr(*name);
-	if (describe) {
-		s->PutStr(*describe);
-	} else {
-		s->PutStr("none");
-	}
-	s->PutInt(num);
-	s->PutInt(type);
-	s->PutInt(faction->num);
-	s->PutInt(guard);
-	s->PutInt(reveal);
-	s->PutInt(free);
-	if (readyItem != -1) s->PutStr(ItemDefs[readyItem].abr);
-	else s->PutStr("NO_ITEM");
+	f << name->const_str() << '\n';
+	f << (describe ? describe->const_str() : "none") << '\n';
+	f << num << '\n';
+	f << type << '\n';
+	f << faction->num << '\n';
+	f << guard << '\n';
+	f << reveal << '\n';
+	f << free << '\n';
+	f << (readyItem != -1 ? ItemDefs[readyItem].abr : "NO_ITEM") << '\n';
+
 	for (int i = 0; i < MAX_READY; ++i) {
-		if (readyWeapon[i] != -1)
-			s->PutStr(ItemDefs[readyWeapon[i]].abr);
-		else s->PutStr("NO_ITEM");
-		if (readyArmor[i] != -1)
-			s->PutStr(ItemDefs[readyArmor[i]].abr);
-		else s->PutStr("NO_ITEM");
+		f << (readyWeapon[i] != -1 ? ItemDefs[readyWeapon[i]].abr : "NO_ITEM") << '\n';
+		f << (readyArmor[i] != -1 ? ItemDefs[readyArmor[i]].abr : "NO_ITEM") << '\n';
 	}
-	s->PutInt(flags);
-	items.Writeout(s);
-	skills.Writeout(s);
-	if (combat != -1) s->PutStr(SkillDefs[combat].abbr);
-	else s->PutStr("NO_SKILL");
-	s->PutInt(savedmovement);
-	s->PutInt(savedmovedir);
-	s->PutInt(visited.size());
-	for (it = visited.begin();
-			it != visited.end();
-			it++) {
-		s->PutStr(it->c_str());
+
+	f << flags << '\n';
+	items.Writeout(f);
+	skills.Writeout(f);
+	f << (combat != -1 ? SkillDefs[combat].abbr : "NO_SKILL") << '\n';
+	f << savedmovement << '\n';
+	f << savedmovedir << '\n';
+	f << visited.size() << '\n';
+	for (it = visited.begin(); it != visited.end();	it++) {
+		f << it->c_str() << '\n';
 	}
 }
 
@@ -267,8 +257,9 @@ void Unit::Readin(istream& f, AList *facs)
 
 	f >> i;
 	while (i-- > 0) {
-		f >> ws >> temp;
-		visited.insert(temp.Str());
+		string s;
+		getline(f >> ws, s);
+		visited.insert(s);
 	}
 }
 
@@ -434,7 +425,7 @@ AString Unit::SpoilsReport() {
 	return temp;
 }
 
-void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
+void Unit::WriteReport(ostream& f, int obs, int truesight, int detfac,
 				int autosee, int attitude, int showattitudes)
 {
 	int stealth = GetAttribute("stealth");
@@ -579,7 +570,7 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 		temp += AString("; ") + *describe;
 	}
 	temp += ".";
-	f->PutStr(temp);
+	f << temp << '\n';
 }
 
 AString Unit::TemplateReport()

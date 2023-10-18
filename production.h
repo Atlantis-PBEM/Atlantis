@@ -35,9 +35,9 @@
 class Production : public AListElem {
 public:
 	Production(int,int); /* item type, amt max */
-	Production();
-	
-	void Writeout(Aoutfile *);
+    Production();
+
+    void Writeout(ostream& f);
 	void Readin(istream& f);
 	AString WriteReport();
 	
@@ -54,7 +54,7 @@ public:
 	Production * GetProd(int,int); /* item type, skill */
 	void AddProd(Production *);
 	
-	void Writeout(Aoutfile *);
+	void Writeout(ostream& f);
 	void Readin(istream& f);
 };
 
