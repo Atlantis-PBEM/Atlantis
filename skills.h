@@ -120,14 +120,11 @@ int GetLevelByDays(int);
 int GetDaysByLevel(int);
 int StudyRateAdjustment(int, int); /* days, exp */
 
-class ShowSkill : public AListElem {
-	public:
-		ShowSkill(int,int);
+struct ShowSkill {
+	int skill;
+	int level;
 
-		AString * Report(Faction *);
-
-		int skill;
-		int level;
+	AString * Report(Faction *);
 };
 
 class Skill : public AListElem {

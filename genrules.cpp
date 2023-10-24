@@ -64,8 +64,8 @@ static inline basic_ostream<_CharT, _Traits>& operator<<(basic_ostream<_CharT, _
 }
 
 static inline string class_tag(string tag, string css_class) { return tag + " class=\"" + css_class + "\""; }
-static inline string link_ref(string name) { return "<a name=\"" + name + "\"></a>"; }
-static inline string link(string href, string text) { return "<a href=\"" + href + "\">" + text + "</a>"; }
+static inline string anchor(string name) { return "<a name=\"" + name + "\"></a>"; }
+static inline string url(string href, string text) { return "<a href=\"" + href + "\">" + text + "</a>"; }
 
 struct example_data { string header; bool start; };
 static inline example_data example_start(string header) { return { header, true }; }
@@ -447,103 +447,103 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("p", true) << "Note: This document is subject to change, as errors are found and corrected, and "
 	  << "rules sometimes change. Be sure you have the latest available copy.\n" << enclose("p", false);
 
-	f << link_ref("table_of_contents") << '\n';
+	f << anchor("table_of_contents") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 
 	f << enclose("h2", true) << "Table of Contents\n" << enclose("h2", false);
-	f << enclose("p", true) << "Thanks to " << link("mailto:ken@satori.gso.uri.edu", "Kenneth Casey")
+	f << enclose("p", true) << "Thanks to " << url("mailto:ken@satori.gso.uri.edu", "Kenneth Casey")
 	  << " for putting together this table of contents.\n" << enclose("p", false);
 	f << enclose("p", true) << '\n' << enclose("p", false);
 
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#intro", "Introduction") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#intro", "Introduction") << '\n' << enclose("li", false);
 	
 	f << enclose("li", true);
-	f << link("#playing", "Playing Atlantis") << '\n';
+	f << url("#playing", "Playing Atlantis") << '\n';
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#playing_factions", "Factions") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#playing_units", "Units") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#playing_turns", "Turns") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#playing_factions", "Factions") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#playing_units", "Units") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#playing_turns", "Turns") << '\n' << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
 	f << enclose("li", true);
-	f << link("#world", "The World") << '\n';
+	f << url("#world", "The World") << '\n';
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#world_regions", "Regions") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#region_resources", "Region Resources") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#world_structures", "Structures") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#world_regions", "Regions") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#region_resources", "Region Resources") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#world_structures", "Structures") << '\n' << enclose("li", false);
 	if (Globals->NEXUS_EXISTS) {
-		f << enclose("li", true) << link("#world_nexus", "Atlantis Nexus") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#world_nexus", "Atlantis Nexus") << '\n' << enclose("li", false);
 	}
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
 	f << enclose("li", true);
-	f << link("#movement", "Movement") << '\n';
+	f << url("#movement", "Movement") << '\n';
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#movement_normal", "Normal Movement") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#movement_normal", "Normal Movement") << '\n' << enclose("li", false);
 	if (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
-		f << enclose("li", true) << link("#movement_sailing", "Sailing") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#movement_order", "Order of Movement") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#movement_sailing", "Sailing") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#movement_order", "Order of Movement") << '\n' << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
 	f << enclose("li", true);
-	f << link("#skills", "Skills") << '\n';
+	f << url("#skills", "Skills") << '\n';
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#skills_limitations", "Limitations") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#skills_studying", "Studying") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#skills_teaching", "Teaching") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#skills_skillreports", "Skill Reports") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#skills_limitations", "Limitations") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#skills_studying", "Studying") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#skills_teaching", "Teaching") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#skills_skillreports", "Skill Reports") << '\n' << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
 	f << enclose("li", true);
-	f << link("#economy", "The Economy") << '\n';
+	f << url("#economy", "The Economy") << '\n';
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#economy_maintenance", "Maintenance Costs") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#economy_recruiting", "Recruiting") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#economy_items", "Items") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#economy_maintenance", "Maintenance Costs") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#economy_recruiting", "Recruiting") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#economy_items", "Items") << '\n' << enclose("li", false);
 	if (Globals->TOWNS_EXIST)
-		f << enclose("li", true) << link("#economy_towns", "Villages, Towns, Cities") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#economy_towns", "Villages, Towns, Cities") << '\n' << enclose("li", false);
 	f << enclose("li", true)
-	  << link("#economy_buildings", "Buildings and Trade Structures") << '\n'
+	  << url("#economy_buildings", "Buildings and Trade Structures") << '\n'
 	  << enclose("li", false);
 	if (!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED))
-		f << enclose("li", true) << link("#economy_roads", "Roads") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#economy_roads", "Roads") << '\n' << enclose("li", false);
 	if (Globals->DECAY)
-		f << enclose("li", true) << link("#economy_builddecay", "Building Decay") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#economy_builddecay", "Building Decay") << '\n' << enclose("li", false);
 	if (may_sail)
-		f << enclose("li", true) << link("#economy_ships", "Ships") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#economy_advanceditems", "Advanced Items") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#economy_income", "Income") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#economy_ships", "Ships") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#economy_advanceditems", "Advanced Items") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#economy_income", "Income") << '\n' << enclose("li", false);
 	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
-		f << enclose("li", true) << link("#economy_entertainment", "Entertainment") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#economy_taxingpillaging", "Taxing/Pillaging") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#economy_entertainment", "Entertainment") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#economy_taxingpillaging", "Taxing/Pillaging") << '\n' << enclose("li", false);
 	if (qm_exist)
-		f << enclose("li", true) << link("#economy_transport", "Transporting goods") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#economy_transport", "Transporting goods") << '\n' << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
 	f << enclose("li", true);
-	f << link("#com", "Combat") << '\n';
+	f << url("#com", "Combat") << '\n';
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#com_attitudes", "Attitudes") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#com_attacking", "Attacking") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#com_muster", "The Muster") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#com_thebattle", "The Battle") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#com_victory", "Victory!") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#com_attitudes", "Attitudes") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#com_attacking", "Attacking") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#com_muster", "The Muster") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#com_thebattle", "The Battle") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#com_victory", "Victory!") << '\n' << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
 	if (has_stea || has_obse) {
 		f << enclose("li", true);
-		f << link("#stealthobs", has_stea ? (has_obse ? "Stealth and Observation" : "Stealth") : "Observation") + '\n';
+		f << url("#stealthobs", has_stea ? (has_obse ? "Stealth and Observation" : "Stealth") : "Observation") + '\n';
 		if (has_stea) {
 			f << enclose("ul", true);
-			f << enclose("li", true) << link("#stealthobs_stealing", "Stealing") << '\n' << enclose("li", false);
-			f << enclose("li", true) << link("#stealthobs_assassination", "Assassination") << '\n'
+			f << enclose("li", true) << url("#stealthobs_stealing", "Stealing") << '\n' << enclose("li", false);
+			f << enclose("li", true) << url("#stealthobs_assassination", "Assassination") << '\n'
 			  << enclose("li", false);
 			f << enclose("ul", false);
 		}
@@ -551,174 +551,174 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose("li", true);
-	f << link("#magic", "Magic") << '\n';
+	f << url("#magic", "Magic") << '\n';
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#magic_skills", "Magic Skills") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#magic_foundations", "Foundations") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#magic_furtherstudy", "Further Magic Study") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#magic_usingmagic", "Using Magic") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#magic_incombat", "Mages In Combat") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#magic_skills", "Magic Skills") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#magic_foundations", "Foundations") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#magic_furtherstudy", "Further Magic Study") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#magic_usingmagic", "Using Magic") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#magic_incombat", "Mages In Combat") << '\n' << enclose("li", false);
 	if (app_exist) {
 		string ref = "#magic_" + string(Globals->APPRENTICE_NAME) + "s";
 		string text = string(Globals->APPRENTICE_NAME) + "s";
 		text[0] = toupper(text[0]);
-		f << enclose("li", true) << link(ref, text) << '\n' << enclose("li", false);
+		f << enclose("li", true) << url(ref, text) << '\n' << enclose("li", false);
 	}
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
 	f << enclose("li", true);
-	f << link("#nonplayers", "Non-Player Units") << '\n';
+	f << url("#nonplayers", "Non-Player Units") << '\n';
 	f << enclose("ul", true);
 	if (Globals->TOWNS_EXIST && Globals->CITY_MONSTERS_EXIST) {
-		f << enclose("li", true) << link("#nonplayers_guards", "City and Town Guardsmen") << '\n'
+		f << enclose("li", true) << url("#nonplayers_guards", "City and Town Guardsmen") << '\n'
 		  << enclose("li", false);
 	}
 	if (Globals->WANDERING_MONSTERS_EXIST) {
-		f << enclose("li", true) << link("#nonplayers_monsters", "Wandering Monsters") << '\n'
+		f << enclose("li", true) << url("#nonplayers_monsters", "Wandering Monsters") << '\n'
 		  << enclose("li", false);
 	}
-	f << enclose("li", true) << link("#nonplayers_controlled", "Controlled Monsters") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#nonplayers_controlled", "Controlled Monsters") << '\n' << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
 	f << enclose("li", true);
-	f << link("#orders", "Orders") << '\n';
+	f << url("#orders", "Orders") << '\n';
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#orders_abbreviations", "Abbreviations") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#orders_abbreviations", "Abbreviations") << '\n' << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
 	f << enclose("li", true);
-	f << link("#ordersummary", "Order Summary") << '\n';
+	f << url("#ordersummary", "Order Summary") << '\n';
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#address", "address") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#advance", "advance") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#address", "address") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#advance", "advance") << '\n' << enclose("li", false);
 	if (Globals->USE_WEAPON_ARMOR_COMMAND)
-		f << enclose("li", true) << link("#armor", "armor") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#armor", "armor") << '\n' << enclose("li", false);
 	if (has_stea)
-		f << enclose("li", true) << link("#assassinate", "assassinate") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#attack", "attack") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#autotax", "autotax") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#avoid", "avoid") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#behind", "behind") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#build", "build") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#buy", "buy") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#cast", "cast") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#claim", "claim") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#combat", "combat") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#assassinate", "assassinate") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#attack", "attack") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#autotax", "autotax") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#avoid", "avoid") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#behind", "behind") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#build", "build") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#buy", "buy") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#cast", "cast") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#claim", "claim") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#combat", "combat") << '\n' << enclose("li", false);
 	if (Globals->FOOD_ITEMS_EXIST)
-		f << enclose("li", true) << link("#consume", "consume") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#declare", "declare") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#describe", "describe") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#destroy", "destroy") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#consume", "consume") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#declare", "declare") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#describe", "describe") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#destroy", "destroy") << '\n' << enclose("li", false);
 	if (qm_exist)
-		f << enclose("li", true) << link("#distribute", "distribute") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#enter", "enter") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#distribute", "distribute") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#enter", "enter") << '\n' << enclose("li", false);
 	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
-		f << enclose("li", true) << link("#entertain", "entertain") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#evict", "evict") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#exchange", "exchange") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#entertain", "entertain") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#evict", "evict") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#exchange", "exchange") << '\n' << enclose("li", false);
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-		f << enclose("li", true) << link("#faction", "faction") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#faction", "faction") << '\n' << enclose("li", false);
 	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS)
-		f << enclose("li", true) << link("#find", "find") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#forget", "forget") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#form", "form") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#give", "give") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#guard", "guard") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#hold", "hold") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#join", "join") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#leave", "leave") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#move", "move") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#name", "name") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#noaid", "noaid") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#find", "find") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#forget", "forget") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#form", "form") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#give", "give") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#guard", "guard") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#hold", "hold") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#join", "join") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#leave", "leave") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#move", "move") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#name", "name") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#noaid", "noaid") << '\n' << enclose("li", false);
 	if (move_over_water)
-		f << enclose("li", true) << link("#nocross", "nocross") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#option", "option") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#password", "password") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#pillage", "pillage") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#nocross", "nocross") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#option", "option") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#password", "password") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#pillage", "pillage") << '\n' << enclose("li", false);
 	if (Globals->USE_PREPARE_COMMAND)
-		f << enclose("li", true) << link("#prepare", "prepare") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#produce", "produce") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#promote", "promote") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#quit", "quit") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#restart", "restart") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#reveal", "reveal") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#prepare", "prepare") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#produce", "produce") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#promote", "promote") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#quit", "quit") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#restart", "restart") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#reveal", "reveal") << '\n' << enclose("li", false);
 	if (may_sail)
-		f << enclose("li", true) << link("#sail", "sail") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#sail", "sail") << '\n' << enclose("li", false);
 	if (Globals->TOWNS_EXIST)
-		f << enclose("li", true) << link("#sell", "sell") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#share", "share") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#show", "show") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#spoils", "spoils") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#sell", "sell") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#share", "share") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#show", "show") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#spoils", "spoils") << '\n' << enclose("li", false);
 	if (has_stea)
-		f << enclose("li", true) << link("#steal", "steal") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#study", "study") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#take", "take") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#tax", "tax") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#teach", "teach") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#steal", "steal") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#study", "study") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#take", "take") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#tax", "tax") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#teach", "teach") << '\n' << enclose("li", false);
 	if (qm_exist)
-		f << enclose("li", true) << link("#transport", "transport") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#turn", "turn") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#transport", "transport") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#turn", "turn") << '\n' << enclose("li", false);
 	if (Globals->USE_WEAPON_ARMOR_COMMAND)
-		f << enclose("li", true) << link("#weapon", "weapon") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#weapon", "weapon") << '\n' << enclose("li", false);
 	if (Globals->ALLOW_WITHDRAW)
-		f << enclose("li", true) << link("#withdraw", "withdraw") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#work", "work") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#withdraw", "withdraw") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#work", "work") << '\n' << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 
-	f << enclose("li", true) << link("#sequenceofevents", "Sequence of Events") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#reportformat", "Report Format") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#hintsfornew", "Hints for New Players") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#sequenceofevents", "Sequence of Events") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#reportformat", "Report Format") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#hintsfornew", "Hints for New Players") << '\n' << enclose("li", false);
 	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
 		f << enclose("li", true);
-		f << link("#specialcommands", "Special Commands") << '\n';
+		f << url("#specialcommands", "Special Commands") << '\n';
 		f << enclose("ul", true);
-		f << enclose("li", true) << link("#_create", "#Create") << '\n' << enclose("li", false);
-		f << enclose("li", true) << link("#_resend", "#Resend") << '\n' << enclose("li", false);
-		f << enclose("li", true) << link("#_times", "#Times") << '\n' << enclose("li", false);
-		f << enclose("li", true) << link("#_rumor", "#Rumor") << '\n' << enclose("li", false);
-		f << enclose("li", true) << link("#_remind", "#Remind") << '\n' << enclose("li", false);
-		f << enclose("li", true) << link("#_email", "#Email") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#_create", "#Create") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#_resend", "#Resend") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#_times", "#Times") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#_rumor", "#Rumor") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#_remind", "#Remind") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#_email", "#Email") << '\n' << enclose("li", false);
 		f << enclose("ul", false);
 		f << enclose("li", false);
 	}
-	f << enclose("li", true) << link("#credits", "Credits") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#credits", "Credits") << '\n' << enclose("li", false);
 	f << enclose("ul", false);
 
 	f << enclose("p", true) << "Index of Tables\n" << enclose("p", false);
 	f << enclose("p", true) << '\n' << enclose("p", false);
 	f << enclose("ul", true);
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-		f << enclose("li", true) << link("#tablefactionpoints", "Table of Faction Points") << '\n'
+		f << enclose("li", true) << url("#tablefactionpoints", "Table of Faction Points") << '\n'
 		  << enclose("li", false);
-	f << enclose("li", true) << link("#tableitemweights", "Table of Item Weights") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#tableitemweights", "Table of Item Weights") << '\n' << enclose("li", false);
 	if (may_sail)
-		f << enclose("li", true) << link("#tableshipcapacities", "Table of Ship Capacities") << '\n'
+		f << enclose("li", true) << url("#tableshipcapacities", "Table of Ship Capacities") << '\n'
 		  << enclose("li", false);
 	if (Globals->RACES_EXIST)
-		f << enclose("li", true) << link("#tableraces", "Table of Races") << '\n' << enclose("li", false);
+		f << enclose("li", true) << url("#tableraces", "Table of Races") << '\n' << enclose("li", false);
 	if (Globals->REQUIRED_EXPERIENCE)
-		f << enclose("li", true) << link("#studyprogress", "Table of Study Progress") << '\n'
+		f << enclose("li", true) << url("#studyprogress", "Table of Study Progress") << '\n'
 		  << enclose("li", false);
-	f << enclose("li", true) << link("#tableiteminfo", "Table of Item Information") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#tablebuildings", "Table of Buildings") << '\n' << enclose("li", false);
-	f << enclose("li", true) << link("#tabletradestructures", "Table of Trade Structures") << '\n'
+	f << enclose("li", true) << url("#tableiteminfo", "Table of Item Information") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#tablebuildings", "Table of Buildings") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#tabletradestructures", "Table of Trade Structures") << '\n'
 	  << enclose("li", false);
 	if (!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED))
-		f << enclose("li", true) << link("#tableroadstructures", "Table of Road Structures") << '\n'
+		f << enclose("li", true) << url("#tableroadstructures", "Table of Road Structures") << '\n'
 		  << enclose("li", false);
 	if (may_sail)
-		f << enclose("li", true) << link("#tableshipinfo", "Table of Ship Information") << '\n'
+		f << enclose("li", true) << url("#tableshipinfo", "Table of Ship Information") << '\n'
 		  << enclose("li", false);
 	if (Globals->LIMITED_MAGES_PER_BUILDING)
-		f << enclose("li", true) << link("#tablemagebuildings", "Table of Mages/Building") << '\n'
+		f << enclose("li", true) << url("#tablemagebuildings", "Table of Mages/Building") << '\n'
 		  << enclose("li", false);
 	f << enclose("ul", false);
 
-	f << link_ref("intro") << '\n';
+	f << anchor("intro") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Introduction\n" << enclose("h2", false);
 	while (!introf.eof()) {
@@ -727,7 +727,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << in << '\n';
 	}
 
-	f << link_ref("playing") << '\n';
+	f << anchor("playing") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Playing Atlantis\n" << enclose("h2", false);
 	f << enclose("p", true) << "Atlantis (as you undoubtedly already know) is a play by email game.  When you "
@@ -738,7 +738,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "orders, runs another turn (covering one month in game time), and sends all the players another report.\n"
 	  << enclose("p", false);
 
-	f << link_ref("playing_factions") << '\n';
+	f << anchor("playing_factions") << '\n';
 	f << enclose("h3", true) << "Factions:\n" << enclose("h3", false);
 	f << enclose("p", true) << "A player's position is called a \"faction\".  Each faction has a name and a "
 	  << "number (the number is assigned by the computer, and used for entering orders). Each player is allowed "
@@ -793,7 +793,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "rules). Here is a chart detailing the limits on factions by Faction Points:\n"
 		  << enclose("p", false);
 
-		f << link_ref("tablefactionpoints") << '\n';
+		f << anchor("tablefactionpoints") << '\n';
 		f << enclose("center", true);
 		f << enclose("table border=\"1\"", true);
 		f << enclose("tr", true);
@@ -926,11 +926,11 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << Globals->START_MONEY << " silver in unclaimed money.  Unclaimed money is cash that your "
 	  << "whole faction has access to, but cannot be taken away in battle (silver in a unit's possessions can be "
 	  << "taken in battle).  This allows a faction to get started without presenting an enticing target for other "
-	  << "factions. Units in your faction may use the " << link("#claim", "CLAIM") << " order to take this silver, "
+	  << "factions. Units in your faction may use the " << url("#claim", "CLAIM") << " order to take this silver, "
 	  << "and use it to buy goods or recruit men";
 
 	if (Globals->ALLOW_WITHDRAW)
-		f << ", or use the " << link("#withdraw", "WITHDRAW") << " order to withdraw goods directly";
+		f << ", or use the " << url("#withdraw", "WITHDRAW") << " order to withdraw goods directly";
 	f << ".\n" << enclose("p", false);
 
 	f << enclose("p", true) << "An example faction is shown below, consisting of a starting character, Merlin the "
@@ -954,7 +954,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << "* Merlin's Workers (34), Merlin (27), 50 men [MAN].  Skills: none.\n";
 	}
 	f << pre(false);
-	f << link_ref("playing_units") << '\n';
+	f << anchor("playing_units") << '\n';
 	f << enclose("h3", true) << "Units:\n" << enclose("h3", false);
 	f << enclose("p", true) << "A unit is a grouping together of people, all loyal to the same faction. The people in "
 	  << "a unit share skills and possessions, and execute the same orders each month. The reason for having units of "
@@ -991,7 +991,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "of either race.";
 	}
 	f << "\n" << enclose("p", false);
-	f << link_ref("playing_turns") << '\n';
+	f << anchor("playing_turns") << '\n';
 	f << enclose("h3", true) << "Turns:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Each turn, the Atlantis server takes the orders file that you mailed to it, and "
 	  << "assigns the orders to the respective units. All units in your faction are completely loyal to you, and will "
@@ -1002,21 +1002,21 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "month, that only take a matter of hours, such as buying and selling commodities, or fighting an opposing "
 	  << "faction.  Each unit can also do exactly one action that takes up the entire month, such as harvesting "
 	  << "resources or moving from one region to another.  The orders which take an entire month are "
-	  << link("#advance", "ADVANCE") << ", " << link("#build", "BUILD") << ", ";
+	  << url("#advance", "ADVANCE") << ", " << url("#build", "BUILD") << ", ";
 	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
-		f << link("#entertain", "ENTERTAIN") << ", ";
-	f << link("#move", "MOVE") << ", ";
+		f << url("#entertain", "ENTERTAIN") << ", ";
+	f << url("#move", "MOVE") << ", ";
 	if (Globals->TAX_PILLAGE_MONTH_LONG)
-		f << link("#pillage", "PILLAGE") << ", ";
-	f << link("#produce", "PRODUCE") << ", ";
+		f << url("#pillage", "PILLAGE") << ", ";
+	f << url("#produce", "PRODUCE") << ", ";
 	if (may_sail)
-		f << link("#sail", "SAIL") << ", ";
-	f << link("#study", "STUDY") << ", ";
+		f << url("#sail", "SAIL") << ", ";
+	f << url("#study", "STUDY") << ", ";
 	if (Globals->TAX_PILLAGE_MONTH_LONG)
-		f << link("#tax", "TAX") << ", ";
-	f << link("#teach", "TEACH") << " and " << link("#work", "WORK") << ".\n" << enclose("p", false);
+		f << url("#tax", "TAX") << ", ";
+	f << url("#teach", "TEACH") << " and " << url("#work", "WORK") << ".\n" << enclose("p", false);
 
-	f << link_ref("world") << '\n';
+	f << anchor("world") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "The World\n" << enclose("h2", false);
 	f << enclose("p", true) << "The Atlantis world is divided for game purposes into hexagonal regions.  Each region "
@@ -1028,7 +1028,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << ". Two units in the same region can normally interact, unless one of them is concealed in some way.  Two "
 	  << "units in different regions cannot normally interact.  NOTE: Combat is an exception to this.\n"
 	  << enclose("p", false);
-	f << link_ref("world_regions") << '\n';
+	f << anchor("world_regions") << '\n';
 	f << enclose("h3", true) << "Regions:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Here is a sample region, as it might appear on your turn report:\n"
 	  << enclose("p", false);
@@ -1150,7 +1150,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << enclose("p", false);
 	}
 
-	f << link_ref("region_resources") << '\n';
+	f << anchor("region_resources") << '\n';
 	f << enclose("h3", true) << "Region resources:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Here is list of resources you can find in regions:\n" << enclose("p", false);
 	f << enclose("center", true);
@@ -1181,7 +1181,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("table", false);
 	f << enclose("center", false);
 
-	f << link_ref("world_structures") << '\n';
+	f << anchor("world_structures") << '\n';
 	f << enclose("h3", true) << "Structures:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Regions may also contain structures, such as buildings"
 	  << (may_sail ? " or fleets" : "") << ". These will appear directly below the list of units.  "
@@ -1213,7 +1213,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "them can be structure owners, so newly created units cannot own a structure until they contain men.\n"
 	  << enclose("p", false);
 	if (Globals->NEXUS_EXISTS) {
-		f << link_ref("world_nexus") << '\n';
+		f << anchor("world_nexus") << '\n';
 		f << enclose("h3", true) << "Atlantis Nexus:\n" << enclose("h3", false);
 		f << enclose("p", true) << "Note: the following section contains some details that you may wish to skip "
 		  << "over until you have had a chance to read the rest of the rules, and understand the mechanics of "
@@ -1307,7 +1307,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			if (may_sail) {
 				f << " " << methods[method] << " by sea; all of the starting cities lie against an "
 				  << "ocean, and a faction may easily purchase wood and construct a ship to "
-				  << link("#sail", "SAIL") << " away.  Be wary of pirates seeking to prey on new "
+				  << url("#sail", "SAIL") << " away.  Be wary of pirates seeking to prey on new "
 				  << "factions, however!";
 			}
 			if (Globals->GATES_EXIST) {
@@ -1319,31 +1319,31 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << '\n' << enclose("p", false);
 	}
 
-	f << link_ref("movement") << '\n';
+	f << anchor("movement") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Movement\n" << enclose("h2", false);
 	f << enclose("p", true)
 	  << (may_sail
 	      ? "There are two main methods of movement in Atlantis.  The first "
 		  : "The main method of movement in Atlantis ")
-	  << "is done using the " << link("#move", "MOVE") << " order (or the " << link("#advance", "ADVANCE")
+	  << "is done using the " << url("#move", "MOVE") << " order (or the " << url("#advance", "ADVANCE")
 	  << " order), and moves units individually from one region to another. ";
 	if (may_sail)
-		f << "The other method is done using the " << link("#sail", "SAIL") << " order, which can sail a "
+		f << "The other method is done using the " << url("#sail", "SAIL") << " order, which can sail a "
 		  << "fleet, including all of its occupants from one region to another. ";
 	f << "Certain powerful mages may also teleport themselves, or even other units, but the knowledge of the "
 	  << "workings of this magic is carefully guarded.\n"
 	  << enclose("p", false);
 
-	f << link_ref("movement_normal") << '\n';
+	f << anchor("movement_normal") << '\n';
 	f << enclose("h3", true) << "Normal Movement:\n" << enclose("h3", false);
-	f << enclose("p", true) << "In one month, a unit can issue a single " << link("#move", "MOVE")
+	f << enclose("p", true) << "In one month, a unit can issue a single " << url("#move", "MOVE")
 	  << " order, using one or more of its movement points. There are three modes of travel: walking, riding "
 	  << "and flying. Walking units have " << num_to_word(ItemDefs[I_LEADERS].speed) << " movement "
 	  << plural(ItemDefs[I_LEADERS].speed, "point", "points") << ", riding units have "
 	  << num_to_word(ItemDefs[I_HORSE].speed) << ", and flying units have " << num_to_word(ItemDefs[I_WHORSE].speed)
 	  << ". A unit will automatically use the fastest mode of travel it has available. The "
-	  << link("#advance", "ADVANCE") << " order is the same as " << link("#move", "MOVE") << ", except that it "
+	  << url("#advance", "ADVANCE") << " order is the same as " << url("#move", "MOVE") << ", except that it "
 	  << "implies attacks on units which try to forbid access; see the section on combat for details.\n"
 	  << enclose("p", false);
 
@@ -1363,9 +1363,9 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << ", and provided that it has at least as many horses as wagons (otherwise the excess wagons count as "
 		  << "weight, not capacity)";
 	}
-	f << ". Otherwise the unit cannot issue a " << link("#move", "MOVE") << " order. Most people weigh 10 units "
+	f << ". Otherwise the unit cannot issue a " << url("#move", "MOVE") << " order. Most people weigh 10 units "
 	  << "and have a capacity of 5 units; data for items is as follows:\n" << enclose("p", false);
-	f << link_ref("tableitemweights") << '\n';
+	f << anchor("tableitemweights") << '\n';
 	f << enclose("center", true);
 	f << enclose("table border=\"1\"", true);
 	f << enclose("tr", true);
@@ -1428,7 +1428,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 	f << " Units may not move through ocean regions ";
 	if (may_sail) {
-		f << "without using the " << link("#sail", "SAIL") << " order";
+		f << "without using the " << url("#sail", "SAIL") << " order";
 	}
 	if (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
 		f << " unless they are capable of flight"
@@ -1440,13 +1440,13 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f  << ".\n" << enclose("p", false);
 	f << enclose("p", true) << "Units may also enter or exit structures while moving.  Moving "
 	  << "into or out of a structure does not use any movement points at all.  Note that a unit can also use the "
-	  << link("#enter", "ENTER") << " and " << link("#leave", "LEAVE") << " orders to move in and out of "
-	  << "structures, without issuing a " << link("#move", "MOVE") << " order." << " The unit can also use the "
-	  << link("#move", "MOVE") << " order to enter or leave a structure.\n"
+	  << url("#enter", "ENTER") << " and " << url("#leave", "LEAVE") << " orders to move in and out of "
+	  << "structures, without issuing a " << url("#move", "MOVE") << " order." << " The unit can also use the "
+	  << url("#move", "MOVE") << " order to enter or leave a structure.\n"
 	  << enclose("p", false);
 	if (Globals->UNDERWORLD_LEVELS || Globals->UNDERDEEP_LEVELS) {
 		f << enclose("p", true) << "Finally, certain structures contain interior passages to "
-		  << "other regions.  The " << link("#move", "MOVE") << " IN order can be used to go "
+		  << "other regions.  The " << url("#move", "MOVE") << " IN order can be used to go "
 		  << "through these passages; the movement point cost is equal to the normal cost to enter the destination "
 		  << "region.\n" << enclose("p", false);
 	}
@@ -1475,26 +1475,26 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << " movement " << plural(TerrainDefs[R_FOREST].movepoints, "point", "points")
 		  << " needed to move into the forest region to the northeast, so the movement is halted at this point.  "
 		  << "The remaining move will be added to his orders for the next turn, before any "
-		  << link("#turn", "TURN") << " orders are processed.";
+		  << url("#turn", "TURN") << " orders are processed.";
 	}
 	f << '\n' << enclose("p", false);
 
 	if (may_sail) {
-		f << link_ref("movement_sailing") << '\n';
+		f << anchor("movement_sailing") << '\n';
 		f << enclose("h3", true) << "Sailing:\n" << enclose("h3", false);
 		f << enclose("p", true) << "Movement by sea is in some ways similar. It does not use the "
-		  << link("#move", "MOVE") << " order however.  Instead, the owner of a fleet must issue the "
-		  << link("#sail", "SAIL") << " order, and other units wishing to help sail the fleet must also issue the "
-		  << link("#sail", "SAIL") << " order. The fleet will then, if possible, make the indicated movement, "
+		  << url("#move", "MOVE") << " order however.  Instead, the owner of a fleet must issue the "
+		  << url("#sail", "SAIL") << " order, and other units wishing to help sail the fleet must also issue the "
+		  << url("#sail", "SAIL") << " order. The fleet will then, if possible, make the indicated movement, "
 		  << "carrying all units on the fleet with it.  Units on board the fleet, but not aiding in the sailing of "
 		  << "the fleet, may execute other orders while the fleet is sailing.  A unit which does not wish to travel "
-		  << "with the fleet should leave the fleet in a coastal region, before the " << link("#sail", "SAIL")
+		  << "with the fleet should leave the fleet in a coastal region, before the " << url("#sail", "SAIL")
 		  << " order is processed.  (A coastal region is defined as a non-ocean region with at least one adjacent "
 		  << "ocean region.)\n" << enclose("p", false);
 		f << enclose("p", true) << "Note that a unit on board a fleet while it is sailing may not "
-		  << link("#move", "MOVE") << " later in the turn, even if he doesn't issue the " << link("#sail", "SAIL")
+		  << url("#move", "MOVE") << " later in the turn, even if he doesn't issue the " << url("#sail", "SAIL")
 		  << " order; sailing is considered to take the whole month. Also, units may not remain on guard while "
-		  << "on board a sailing fleet; they will have to reissue the " << link("#guard", "GUARD")
+		  << "on board a sailing fleet; they will have to reissue the " << url("#guard", "GUARD")
 		  << " 1 order to guard a region after sailing.\n"
 		  << enclose("p", false);
 		f << enclose("p", true) << "Most ships get " << num_to_word(ItemDefs[I_LONGBOAT].speed)
@@ -1531,14 +1531,14 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << '\n' << enclose("p", false);
 		f << enclose("p", true) << "A fleet can only move if the total weight of everything aboard does not "
 		  << "exceed the fleet's capacity (the rules do not prevent an overloaded fleet from staying afloat, only "
-		  << "from moving).  Also, there must be enough sailors aboard (using the " << link("#sail", "SAIL")
+		  << "from moving).  Also, there must be enough sailors aboard (using the " << url("#sail", "SAIL")
 		  << " order), to sail the fleet, or it will not go anywhere.  Note that the sailing skill increases the "
 		  << "usefulness of a unit proportionally; thus, a 1 man unit with level 5 sailing skill can sail a longboat "
 		  << "alone.  (See the section on skills for further details on skills.)  The capacities (and costs in "
 		  << "labor units) of the various basic ship types are as follows:\n"
 		  << enclose("p", false);
 
-		f << link_ref("tableshipcapacities") << '\n';
+		f << anchor("tableshipcapacities") << '\n';
 		f << enclose("center", true);
 		f << enclose("table border=\"1\"", true);
 		f << enclose("tr", true);
@@ -1593,7 +1593,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << enclose("p", true) << "The skill column is the level of shipbuilding skill required "
 		  << "to build that ship type.\n" << enclose("p", false);
 	}
-	f << link_ref("movement_order") << '\n';
+	f << anchor("movement_order") << '\n';
 	f << enclose("h3", true) << "Order of Movement:\n" << enclose("h3", false);
 	f << enclose("p", true) << "This section is probably unimportant to beginning players, but "
 	  << "it can be helpful for more experienced players.\n" << enclose("p", false);
@@ -1622,7 +1622,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("p", true) << "The following table shows when exactly units will move, given their base "
 	  << "movement speed.  The \"x\"s mark the phases in which a unit of that speed will move. If you wish to "
 	  << "make units of different speeds move together (for example, to coordinate an attack), you may need to "
-	  << "tell the faster units to PAUSE in their movement.  See the " << link("#move", "MOVE")
+	  << "tell the faster units to PAUSE in their movement.  See the " << url("#move", "MOVE")
 	  << " order for details.\n"
 	  << enclose("p", false);
 
@@ -1660,7 +1660,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("table", false);
 	f << enclose("center", false);
 
-	f << link_ref("skills") << '\n';
+	f << anchor("skills") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Skills\n" << enclose("h2", false);
 	f << enclose("p", true) << "The most important thing distinguishing one character from another in Atlantis "
@@ -1697,7 +1697,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "a skill is directly proportional to the skill level involved, so a unit with level 2 in a skill is twice "
 	  << "as good as a unit with level 1 in the same skill.\n"
 	  << enclose("p", false);
-	f << link_ref("skills_limitations") << '\n';
+	f << anchor("skills_limitations") << '\n';
 	f << enclose("h3", true) << "Limitations:\n" << enclose("h3", false);
 	if (Globals->LEADERS_EXIST && Globals->SKILL_LIMIT_NONLEADERS) {
 		f << enclose("p", true) << "A unit made up of leaders may know one or more skills; for the rest of this "
@@ -1725,7 +1725,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		}
 		f << "Here is a list of the races (including leaders) and the information on normal skill levels "
 		  << "and specialized skills.\n" << enclose("p", false);
-		f << link_ref("tableraces") << '\n';
+		f << anchor("tableraces") << '\n';
 		f << enclose("center", true);
 		f << enclose("table border=\"1\"", true);
 		f << enclose("tr", true);
@@ -1775,10 +1775,10 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "in the unit; but no months are ever lost.\n"
 	  << enclose("p", false);
 
-	f << link_ref("skills_studying") << '\n';
+	f << anchor("skills_studying") << '\n';
 	f << enclose("h3", true) << "Studying:\n" << enclose("h3", false);
 	f << enclose("p", true) << "For a unit to gain level 1 of a skill, they must gain one "
-	  << "months worth of training in that skill by issuing the " << link("#study", "STUDY") << " order. ";
+	  << "months worth of training in that skill by issuing the " << url("#study", "STUDY") << " order. ";
 	if (Globals->REQUIRED_EXPERIENCE) {
 		f << "Initially, a unit will gain a full months worth of training (30 day equivalents). However, high "
 		  << "levels of skill also require experience, which is gained by performing actions making use of the "
@@ -1833,7 +1833,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << (months5 > 36 ? "although it is hardly feasible without any experience at all, " : "")
 		  << "taking " << num_to_word(months5) << " months of studying to achieve. "
 		  << "Note that this assumes that the unit type is allowed to achieve this level at all "
-		  << link("#skills_limitations", "(see skill limitations)") + ". ";
+		  << url("#skills_limitations", "(see skill limitations)") + ". ";
 
 		/* Example with 30 experience */
 		months2 = 0;
@@ -1864,7 +1864,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		}
 		f << "The study progress is shown in the following table:\n" << enclose("p", false);
 
-		f << link_ref("studyprogress") << '\n';
+		f << anchor("studyprogress") << '\n';
 		f << enclose("center", true);
 		f << enclose("table border=\"1\"", true);
 		f << enclose("tr", true);
@@ -1939,7 +1939,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << "To raise this skill level to 2, the unit must add an additional two months worth of training.  Then, "
 		  << "to raise this to skill level 3 requires another three months worth of training, and so forth. ";
 	}
-	f << "A month of training is gained when a unit uses the " << link("#study", "STUDY") << " order.  Note that "
+	f << "A month of training is gained when a unit uses the " << url("#study", "STUDY") << " order.  Note that "
 	  << "study months do not need to be consecutive; for a unit to go from level 1 to level 2, he can study for "
 	  << "a month, do something else for a month, and then go back and complete the rest of his studies.";
 	if (Globals->SKILL_PRACTICE_AMOUNT > 0) {
@@ -1973,14 +1973,14 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	if (!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED))
 		f << ", and Tactics (which costs $" << SkillDefs[S_TACTICS].cost << ")";
 	f << ".\n" << enclose("p", false);
-	f << link_ref("skills_teaching") << '\n';
+	f << anchor("skills_teaching") << '\n';
 	f << enclose("h3", true) << "Teaching:\n" << enclose("h3", false);
 	f << enclose("p", true) << "A unit with a teacher can learn up to twice as fast as normal. The "
-	  << link("#teach", "TEACH") << " order is used to spend the month teaching one or more other units (your own or "
+	  << url("#teach", "TEACH") << " order is used to spend the month teaching one or more other units (your own or "
 	  << "another factions).  The unit doing the teaching must have a skill level greater than the unit doing the "
 	  << "studying.  (Note: for all skill uses, it is skill level, not number of months of training, that counts. "
 	  << "Thus, a unit with 1 month of training is effectively the same as a unit with 2 months of training, "
-	  << "since both have a skill level of 1.)  The units being taught simply issue the " << link("#study", "STUDY")
+	  << "since both have a skill level of 1.)  The units being taught simply issue the " << url("#study", "STUDY")
 	  << " order normally (also, his faction must be declared Friendly by the teaching faction).  Each person can "
 	  << "only teach up to " << Globals->STUDENTS_PER_TEACHER << " "
 	  << plural(Globals->STUDENTS_PER_TEACHER, "student", "students") << " in a month; additional students dilute "
@@ -1995,14 +1995,14 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << " per teacher.\n" << enclose("p", false);
 
 	if (Globals->LEADERS_EXIST) {
-		f << enclose("p", true) << "Note: Only leaders may use the " << link("#teach", "TEACH") << " order.\n"
+		f << enclose("p", true) << "Note: Only leaders may use the " << url("#teach", "TEACH") << " order.\n"
 		  << enclose("p", false);
 	}
-	f << link_ref("skills_skillreports") << '\n';
+	f << anchor("skills_skillreports") << '\n';
 	f << enclose("h3", true) << "Skill Reports:\n" << enclose("h3", false);
 	f << enclose("p", true) << "When a faction learns a new skill level for this first time, it will be given a "
 	  << "report on special abilities that a unit with this skill level has. This report can be shown again at "
-	  << "any time (once a faction knows the skill), using the " << link("#show", "SHOW") << " order. For "
+	  << "any time (once a faction knows the skill), using the " << url("#show", "SHOW") << " order. For "
 	  << "example, when a faction learned the skill Shoemaking level 3 for the first time, it might receive the "
 	  << "following (obviously farcical) report:\n"
 	  << enclose("p", false);
@@ -2011,14 +2011,14 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << "Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper Air Max Winged Sandals.\n";
 	f << pre(false);
 
-	f << link_ref("economy") << '\n';
+	f << anchor("economy") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "The Economy\n" << enclose("h2", false);
 	f << enclose("p", true) << "The unit of currency in Atlantis is the silver piece. Silver is a normal item, "
 	  << "with zero weight, appearing in your unit's reports. Silver is used for such things as buying items, and "
 	  << "unit's maintenance.\n" << enclose("p", false);
 
-	f << link_ref("economy_maintenance") << '\n';
+	f << anchor("economy_maintenance") << '\n';
 	f << enclose("h3", true) << "Maintenance Costs:\n" << enclose("h3", false);
 	f << enclose("p", true) << "IMPORTANT:  Each and every character in Atlantis requires a maintenance fee each "
 	  << "month. Anyone who ends the month without this maintenance cost has a " << Globals->STARVE_PERCENT
@@ -2052,7 +2052,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "applies only for maintenance costs, and does not occur for other purposes). If you have silver in your "
 	  << "unclaimed fund, then that silver will be automatically claimed by units that would otherwise starve. ";
 	if (Globals->UPKEEP_MINIMUM_FOOD && Globals->ALLOW_WITHDRAW) {
-		f << "Similarly, food will automatically be " << link("#withdraw", "withdraw") << "n if needed and "
+		f << "Similarly, food will automatically be " << url("#withdraw", "withdraw") << "n if needed and "
 		  << "unclaimed funds are available. ";
 	}
 	f << "Lastly, if a faction is allied to yours, their units will provide surplus cash "
@@ -2109,30 +2109,30 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			f << "At most " << Globals->UPKEEP_MAXIMUM_FOOD << " silver worth of food can be counted against each "
 			  << "man's maintenance. ";
 		}
-		f << "A unit may use the " << link("#consume", "CONSUME") << " order to specify that it wishes to use food "
+		f << "A unit may use the " << url("#consume", "CONSUME") << " order to specify that it wishes to use food "
 		  << "items in preference to silver.  Note that these items are worth more when sold in towns, so selling "
 		  << "them and using the money is more economical than using them for maintenance.";
 	};
 	f << '\n' << enclose("p", false);
 
-	f << link_ref("economy_recruiting") << '\n';
+	f << anchor("economy_recruiting") << '\n';
 	f << enclose("h3", true) << "Recruiting:\n" << enclose("h3", false);
 	f << enclose("p", true) << "People may be recruited in a region.  The total amount of recruits available per "
 	  << "month in a region, and the amount that must be paid per person recruited, are shown in the region "
-	  << "description. The " << link("#buy", "BUY") << " order is used to recruit new people. New recruits will "
+	  << "description. The " << url("#buy", "BUY") << " order is used to recruit new people. New recruits will "
 	  << "not have any skills or items.  Note that the process of recruiting a new unit is somewhat counter-"
-	  << "intuitive; it is necessary to " << link("#form", "FORM") << " an empty unit, " << link("#give", "GIVE")
-	  << " the empty unit some money, and have it " << link("#buy", "BUY") << " people; see the description of the "
-	  << link("#form", "FORM") << " order for further details.\n"
+	  << "intuitive; it is necessary to " << url("#form", "FORM") << " an empty unit, " << url("#give", "GIVE")
+	  << " the empty unit some money, and have it " << url("#buy", "BUY") << " people; see the description of the "
+	  << url("#form", "FORM") << " order for further details.\n"
 	  << enclose("p", false);
-	f << link_ref("economy_items") << '\n';
+	f << anchor("economy_items") << '\n';
 	f << enclose("h3", true) << "Items:\n" << enclose("h3", false);
 	f << enclose("p", true) << "A unit may have a number of possessions, referred to as \"items\".  Some details "
 	  << "were given above in the section on Movement, but many things were left out. Here is a table "
 	  << "giving some information about common items in Atlantis:\n"
 	  << enclose("p", false);
 	
-	f << link_ref("tableiteminfo") << '\n';
+	f << anchor("tableiteminfo") << '\n';
 	f << enclose("center", true);
 	f << enclose("table border=\"1\"", true);
 	f << enclose("tr", true);
@@ -2268,7 +2268,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("center", false);
 
 	f << enclose("p", true) << "All items except silver and trade goods are produced with the "
-	  << link("#produce", "PRODUCE") << " order. Producing items will always produce as many items as "
+	  << url("#produce", "PRODUCE") << " order. Producing items will always produce as many items as "
 	  << "during a month up to the limit of the supplies carried by the producing unit. The required skills "
 	  << "and raw materials required to produce one output item are in the table above.\n"
 	  << enclose("p", false);
@@ -2288,7 +2288,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "description of the item.\n" << enclose("p", false);
 
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		f << enclose("p", true) << " Only Trade factions can issue " << link("#produce", "PRODUCE")
+		f << enclose("p", true) << " Only Trade factions can issue " << url("#produce", "PRODUCE")
 		  << " orders however, regardless of skill levels.\n"
 		  << enclose("p", false);
 	}
@@ -2307,7 +2307,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << enclose("p", false);
 
 	if (Globals->TOWNS_EXIST) {
-		f << link_ref("economy_towns") << '\n';
+		f << anchor("economy_towns") << '\n';
 		f << enclose("h3", true) << "Villages, Towns, and Cities:\n" << enclose("h3", false);
 		f << enclose("p", true) << "Some regions in Atlantis contain villages, towns, and cities.  Villages add to "
 		  << "the wages, population, and tax income of the region they are in. "
@@ -2325,7 +2325,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "However, the profit margins on these items are usually quite high. \n"
 		  << enclose("p", false);
 	}
-	f << link_ref("economy_buildings") << '\n';
+	f << anchor("economy_buildings") << '\n';
 	f << enclose("h3", true) << "Buildings and Trade Structures:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Construction of buildings " << (may_sail ? "and ships " : "")
 	  << "goes as follows: each unit of work on a building requires a unit of the required resource and a "
@@ -2333,12 +2333,12 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "work to proceed faster (still using one unit of the required resource per unit of work done). ";
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		f << (Globals->BUILD_NO_TRADE ? "Any faction can issue " : "Again, only Trade factions can issue ")
-		  << link("#build", "BUILD") << " orders. ";
+		  << url("#build", "BUILD") << " orders. ";
 	}
 	f << "Here is a table of the various building types:\n"
 	  << enclose("p", false);
 
-	f << link_ref("tablebuildings") << '\n';
+	f << anchor("tablebuildings") << '\n';
 	f << enclose("center", true);
 	f << enclose("table border=\"1\"", true);
 	f << enclose("tr", true);
@@ -2408,7 +2408,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "structures may not add _any_ to the production level).\n"
 	  << enclose("p", false);
 
-	f << link_ref("tabletradestructures") << '\n';
+	f << anchor("tabletradestructures") << '\n';
 	f << enclose("center", true);
 	f << enclose("table border=\"1\"", true);
 	f << enclose("tr", true);
@@ -2467,7 +2467,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << enclose("p", false);
 
 	if (!(ObjectDefs[O_ROADN].flags & ObjectType::DISABLED)) {
-		f << link_ref("economy_roads") << '\n';
+		f << anchor("economy_roads") << '\n';
 		f << enclose("h3", true) << "Roads:\n" << enclose("h3", false);
 		f << enclose("p", true) << "There is a another type of structure called roads.  They do not protect units, "
 		  << "nor aid in the production of resources, but do aid movement, and can improve the economy of a hex.\n"
@@ -2488,7 +2488,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "region by 1 point.\n"
 		  << enclose("p", false);
 
-		f << link_ref("tableroadstructures") << '\n';
+		f << anchor("tableroadstructures") << '\n';
 		f << enclose("center", true);
 		f << enclose("table border=\"1\"", true);
 		f << enclose("tr", true);
@@ -2525,7 +2525,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << enclose("center", false);
 	}
 	if (Globals->DECAY) {
-		f << link_ref("economy_builddecay") << '\n';
+		f << anchor("economy_builddecay") << '\n';
 		f << enclose("h3", true) << "Building Decay:\n" << enclose("h3", false);
 		f << enclose("p", true) << "Some structures will decay over time if they are not maintained. "
 			<< "Difficult terrain and bad weather will speed up this decay. Maintnenance involves having units "
@@ -2538,7 +2538,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			<< enclose("p", false);
 	}
 	if (may_sail) {
-		f << link_ref("economy_ships") << '\n';
+		f << anchor("economy_ships") << '\n';
 		f << enclose("h3", true) << "Ships:\n" << enclose("h3", false);
 		f << enclose("p", true)
 			<< "Ships are constructed similarly to buildings, with a few small differences. "
@@ -2546,8 +2546,8 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			<< "construction tends to depend on the Shipbuilding skill, not the Building skill. "
 			<< "Thirdly, while unfinished buildings appear in the region, and may be entered by "
 			<< "other units, unfinished ships appear only in their builder's inventory until "
-			<< "they are complete.  If the builder " << link("#move", "MOVE") << "s or they are in "
-			<< "a fleet that " << link("#sail", "SAIL") << "s while they have an unfinished ship "
+			<< "they are complete.  If the builder " << url("#move", "MOVE") << "s or they are in "
+			<< "a fleet that " << url("#sail", "SAIL") << "s while they have an unfinished ship "
 			<< "in their possession, the ship will be discarded and lost. Finally, ships are "
 			<< "never interacted with as objects directly, but when completed are placed in Fleet "
 			<< "objects.  Fleets may contain one or more ships, and may be entered like other buildings.\n"
@@ -2555,12 +2555,12 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << enclose("p", true);
 		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 			f << "Only factions with at least one faction point spent on "
-				"trade can issue " << link("#build", "BUILD") << " orders. ";
+				"trade can issue " << url("#build", "BUILD") << " orders. ";
 		}
 		f << "Here is a table of the various ship types:\n"
 		  << enclose("p", false);
 
-		f << link_ref("tableshipinfo") << '\n';
+		f << anchor("tableshipinfo") << '\n';
 		f << enclose("center", true);
 		f << enclose("table border=\"1\"", true);
 		f << enclose("tr", true);
@@ -2616,7 +2616,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << enclose("p", true) << "The capacity of a ship is the maximum weight that the ship may have aboard "
 		  << "and still move. The cost is both the man-months of labor and the number of units of material required "
 		  << "to complete the ship. The sailors are the number of skill levels of the Sailing skill that must be "
-		  << "aboard the ship (and issuing the " << link("#sail", "SAIL") << " order) in order for the ship to sail.\n"
+		  << "aboard the ship (and issuing the " << url("#sail", "SAIL") << " order) in order for the ship to sail.\n"
 		  << enclose("p", false);
 		
 		f << enclose("p", true) << "When a ship is built, if its builder is already the owner of a fleet object, then "
@@ -2624,30 +2624,30 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "has the combined capacity and sailor requirement of its constituent vessels, and moves at the speed of "
 		  << "its slowest ship. \n" << enclose("p", false);
 	}
-	f << link_ref("economy_advanceditems") << '\n';
+	f << anchor("economy_advanceditems") << '\n';
 	f << enclose("h3", true) << "Advanced Items:\n" << enclose("h3", false);
 	f << enclose("p", true) << "There are also certain advanced items that highly skilled units can produce. "
 	  << "These are not available to starting players, but can be discovered through study.  When a unit is skilled "
 	  << "enough to produce one of these items, he will receive a skill report describing the production of this "
 	  << "item. Production of advanced items is generally done in a manner similar to the normal items.\n"
 	  << enclose("p", false);
-	f << link_ref("economy_income") << '\n';
+	f << anchor("economy_income") << '\n';
 	f << enclose("h3", true) << "Income:\n" << enclose("h3", false);
-	f << enclose("p", true) << "Units can earn money with the " << link("#work", "WORK") << " order.  This means "
+	f << enclose("p", true) << "Units can earn money with the " << url("#work", "WORK") << " order.  This means "
 	  << "that the unit spends the month performing manual work for wages. The amount to be earned from this is "
 	  << "usually not very high, so it is generally a last resort to be used if one is running out of money. The "
-	  << "current wages are shown in the region description for each region. All units may " << link("#work", "WORK")
+	  << "current wages are shown in the region description for each region. All units may " << url("#work", "WORK")
 	  << ", regardless of skills"
 	  << (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES ? " or faction type" : "")
 	  << ".\n" << enclose("p", false);
 
 	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
-		f << link_ref("economy_entertainment") << '\n';
+		f << anchor("economy_entertainment") << '\n';
 		f << enclose("h3", true) << "Entertainment:\n" << enclose("h3", false);
 		f << enclose("p", true)
 		  << "Units with the Entertainment skill can use it to earn money.  A unit with Entertainment level 1 will "
 		  << "earn " << Globals->ENTERTAIN_INCOME << " silver per man by issuing the "
-		  << link("#entertain", "ENTERTAIN") << " order.  The total amount of money that can be earned this way "
+		  << url("#entertain", "ENTERTAIN") << " order.  The total amount of money that can be earned this way "
 		  << "is shown in the region descriptions.  Higher levels of Entertainment skill can earn more, so a "
 		  << "character with Entertainment skill 2 can earn twice as much money as one with skill 1 (and uses "
 		  << "twice as much of the demand for entertainment in the region). Note that entertainment income is "
@@ -2658,17 +2658,17 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << '\n' << enclose("p", false);
 	}
 
-	f << link_ref("economy_taxingpillaging") << '\n';
+	f << anchor("economy_taxingpillaging") << '\n';
 	f << enclose("h3", true) << "Taxing/Pillaging:\n" << enclose("h3", false);
 	f << enclose("p", true)
 	  << (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES ? "War factions " : "Factions ")
-	  <<  "may collect taxes in a region.  This is done using the " << link("#tax", "TAX") << " order (which is "
+	  <<  "may collect taxes in a region.  This is done using the " << url("#tax", "TAX") << " order (which is "
 	  << (Globals->TAX_PILLAGE_MONTH_LONG ? "" : "not ") << "a full month order). The amount of tax money that can be "
 	  << "collected each month in a region is shown in the region description. ";
 	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE) {
-		f << "Any unit may " << link("#tax", "TAX");
+		f << "Any unit may " << url("#tax", "TAX");
 	} else {
-		f << "A unit may " << link("#tax", "TAX") << " if it " << unit_tax_description();
+		f << "A unit may " << url("#tax", "TAX") << " if it " << unit_tax_description();
 	}
 	if (Globals->WHO_CAN_TAX &
 			(GameDefs::TAX_CREATURES | GameDefs::TAX_ILLUSIONS)) {
@@ -2686,17 +2686,17 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES ? "War factions " : "Factions ")
 	  << "may also pillage a region. To do this requires the faction to have enough combat ready men in the region "
 	  << "to tax half of the available money in the region. The total amount of money that can be pillaged will then "
-	  << "be shared out between every combat ready unit that issues the " << link("#pillage", "PILLAGE")
+	  << "be shared out between every combat ready unit that issues the " << url("#pillage", "PILLAGE")
 	  << " order. The amount of money collected is equal to twice the available tax money. However, the economy of "
 	  << "the region will be seriously damaged by pillaging, and will only slowly recover over time.  Note that "
-	  << link("#pillage", "PILLAGE") << " comes before " << link("#tax", "TAX") << ", so a unit performing "
-	  << link("#tax", "TAX") << " will collect no money in that region that month.\n"
+	  << url("#pillage", "PILLAGE") << " comes before " << url("#tax", "TAX") << ", so a unit performing "
+	  << url("#tax", "TAX") << " will collect no money in that region that month.\n"
 	  << enclose("p", false);
 
 	f << enclose("p", true) << "It is possible to safeguard one's tax income in regions one controls.  Units"
-	  << " which have the Guard flag set (using the " << link("#guard", "GUARD") << " order) will block "
-	  << link("#tax", "TAX") << " orders issued by other factions in the same region, unless you have declared "
-	  << "the faction in question Friendly. Units on guard will also block " << link("#pillage", "PILLAGE")
+	  << " which have the Guard flag set (using the " << url("#guard", "GUARD") << " order) will block "
+	  << url("#tax", "TAX") << " orders issued by other factions in the same region, unless you have declared "
+	  << "the faction in question Friendly. Units on guard will also block " << url("#pillage", "PILLAGE")
 	  << " orders issued by other factions in the same region, regardless of your attitude towards the faction "
 	  << "in question, and they will attempt to prevent Unfriendly units from entering the region.  Only units "
 	  << "which are able to tax may be on guard.  Units on guard " 
@@ -2705,18 +2705,18 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << enclose("p", false);
 
 	if (qm_exist) {
-		f << link_ref("economy_transport") << '\n';
+		f << anchor("economy_transport") << '\n';
 		f << enclose("H3", true) << "Transportation of goods\n" << enclose("H3", false);
 		f << enclose("p", true) << "Trade factions may train Quartermaster units. "
-		  << "A Quartermaster unit may accept " << link("#transport", "TRANSPORT") << "ed items from "
+		  << "A Quartermaster unit may accept " << url("#transport", "TRANSPORT") << "ed items from "
 		  << "any unit within " << Globals->LOCAL_TRANSPORT << ' ' << plural(Globals->LOCAL_TRANSPORT, "hex", "hexes")
 		  << " distance from the hex containing the quartermaster. Quartermasters may also "
-		  << link("#distribute", "DISTRIBUTE") << " items to any unit within " << Globals->LOCAL_TRANSPORT
+		  << url("#distribute", "DISTRIBUTE") << " items to any unit within " << Globals->LOCAL_TRANSPORT
 		  << ' ' <<  plural(Globals->LOCAL_TRANSPORT, "hex", "hexes") << " distance from the hex containing the "
-		  << "quartermaster and may " << link("#transport", "TRANSPORT") << " items to another quartermaster up to "
+		  << "quartermaster and may " << url("#transport", "TRANSPORT") << " items to another quartermaster up to "
 		  << Globals->NONLOCAL_TRANSPORT << ' ' << plural(Globals->NONLOCAL_TRANSPORT, "hex", "hexes") << " distant.";
 		if (Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
-			f << " The distance a quartermaster can " << link("#transport", "TRANSPORT") << " items to "
+			f << " The distance a quartermaster can " << url("#transport", "TRANSPORT") << " items to "
 			  << "another quartermaster will increase with the level of "
 			  << "skill possessed by the quartermaster unit.";
 		}
@@ -2756,33 +2756,33 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES
 		      ? ", and a faction is limited in the number of quartermasters it may have at any one time"
 			  : "")
-		  << ". Both the " << link("#transport", "TRANSPORT") << " and " << link("#distribute", "DISTRIBUTE")
+		  << ". Both the " << url("#transport", "TRANSPORT") << " and " << url("#distribute", "DISTRIBUTE")
 		  << " orders count as trade activity in the hex of the unit issuing the order. The target unit must be at "
 		  << "least FRIENDLY to the unit which issues the order.\n"
 		  << enclose("p", false);
 
-		f << enclose("p", true) << "Not all type of items can be " << link("#transport", "TRANSPORT") << "ed to "
-		  << "or " << link("#distribute", "DISTRIBUTE") << "d by a quartermaster. Men (including Leaders), "
+		f << enclose("p", true) << "Not all type of items can be " << url("#transport", "TRANSPORT") << "ed to "
+		  << "or " << url("#distribute", "DISTRIBUTE") << "d by a quartermaster. Men (including Leaders), "
 		  << "summoned creatures (including illusionary ones), ships, mounts, war machines, and items created "
 		  << "using artifact lore need to be carried/sailed from one location to another by a unit.\n"
 		  << enclose("p", false);
 	}
 
-	f << link_ref("com") << '\n';
+	f << anchor("com") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Combat\n" << enclose("h2", false);
 	f << enclose("p", true) << "Combat occurs when one unit attacks another.  The computer then gathers together "
 	  << "all the units on the attacking side, and all the units on the defending side, and the two sides fight "
 	  << "until an outcome is reached.\n" << enclose("p", false);
 
-	f << link_ref("com_attitudes") << '\n';
+	f << anchor("com_attitudes") << '\n';
 	f << enclose("h3", true) << "Attitudes:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Which side a faction's units will fight on depends on declared attitudes.  "
 	  << "A faction can have one of the following attitudes towards another faction:  Ally, Friendly, Neutral, "
 	  << "Unfriendly or Hostile.  Each faction has a general attitude, called the \"Default Attitude\", that it "
 	  << "normally takes towards other factions; this is initially Neutral, but can be changed.  It is also "
-	  << "possible to " << link("#declare", "DECLARE") << " attitudes to specific factions, e.g. "
-	  << link("#declare", "DECLARE") << " 27 ALLY will declare the Ally attitude to faction 27.  (Note that this "
+	  << "possible to " << url("#declare", "DECLARE") << " attitudes to specific factions, e.g. "
+	  << url("#declare", "DECLARE") << " 27 ALLY will declare the Ally attitude to faction 27.  (Note that this "
 	  << "does not necessarily mean that faction 27 has decided to treat you as an ally.)\n" << enclose("p", false);
 	f << enclose("p", true) << "Ally means that you will fight to defend units of that faction whenever they come "
 	  << "under attack, if you have non-avoiding units in the region where the attack occurs. ";
@@ -2803,7 +2803,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "where you have units on guard.  You will not, however, automatically attack unfriendly units which are "
 	  << "already present.\n" << enclose("p", false);
 	f << enclose("p", true) << "Hostile means that any of your units which do not have the Avoid Combat flag set "
-	  << "(using the " << link("#avoid", "AVOID") << " order) will attack any units of that faction wherever they "
+	  << "(using the " << url("#avoid", "AVOID") << " order) will attack any units of that faction wherever they "
 	  << "find them.\n" << enclose("p", false);
 	f << enclose("p", true) << "If a unit can see another unit, but "
 	  << (has_obse
@@ -2821,13 +2821,13 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << (has_stea ? " Units which cannot be seen at all cannot be directly blocked or attacked, of course." : "")
 	  << '\n' << enclose("p", false);
 
-	f << link_ref("com_attacking") << '\n';
+	f << anchor("com_attacking") << '\n';
 	f << enclose("h3", true) << "Attacking:\n" << enclose("h3", false);
-	f << enclose("p", true) << "A unit can attack another by issuing an " << link("#attack", "ATTACK")
+	f << enclose("p", true) << "A unit can attack another by issuing an " << url("#attack", "ATTACK")
 	  << " order. A unit that does not have Avoid Combat set will automatically attack any Hostile units it "
 	  << "identifies as such.";
 	if (has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
-		f << " When a unit issues the " << link("#attack", "ATTACK") << " order, or otherwise decides to attack "
+		f << " When a unit issues the " << url("#attack", "ATTACK") << " order, or otherwise decides to attack "
 		  << "another unit, it must first be able to attack the unit. "
 		  << (has_stea && !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)
 		      ? "There are two conditions for this; the first is that the"
@@ -2858,12 +2858,12 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 	f << '\n' << enclose("p", false);
 	f << enclose("p", true) << "A unit which is on guard, and is Unfriendly towards a unit, will deny access to "
-	  << "units using the " << link("#move", "MOVE") << " order to enter its region. ";
+	  << "units using the " << url("#move", "MOVE") << " order to enter its region. ";
 	if (has_stea || !(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
 		f << "Note that to deny access to a unit, at least one unit from the same faction as the unit guarding the "
 		  << "hex must satisfy the above requirements. ";
 	}
-	f << "A unit using " << link("#advance", "ADVANCE") << " instead of " << link("#move", "MOVE")
+	f << "A unit using " << url("#advance", "ADVANCE") << " instead of " << url("#move", "MOVE")
 	  << " to enter a region, will attack any units that attempt to deny it access.  If the advancing unit loses "
 	  << "the battle, it will be forced to retreat to the previous region it moved through.  If the unit wins the "
 	  << "battle and its army doesn't lose any men, it is allowed to continue to move, provided that it has "
@@ -2882,17 +2882,17 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << ".\n" << enclose("p", false);
 	}
 
-	f << link_ref("com_muster") << '\n';
+	f << anchor("com_muster") << '\n';
 	f << enclose("h3", true) << "The Muster:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Once the attack has been made, the sides are gathered.  Although "
-	  << "the " << link("#attack", "ATTACK") << " order takes a unit rather than "
+	  << "the " << url("#attack", "ATTACK") << " order takes a unit rather than "
 	  << "a faction as its parameter (mainly so that unidentified units can "
 	  << "be attacked), an attack is basically considered to be by an entire "
 	  << "faction, against an entire faction and its allies.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "On the attacking side are all units of the attacking faction in the region where "
 	  << "the fight is taking place, except those with Avoid Combat set.  A unit which has explicitly (or "
-	  << "implicitly via " << link("#advance", "ADVANCE") << ") issued an " << link("#attack", "ATTACK")
+	  << "implicitly via " << url("#advance", "ADVANCE") << ") issued an " << url("#attack", "ATTACK")
 	  << " order will join the fight anyway, regardless of whether Avoid Combat is set.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Also on the attacking side are all units of other factions that attacked the target "
@@ -2916,14 +2916,14 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("p", true) << "If a faction has at least one unit involved in the initial region, then any units "
 	  << "in adjacent regions will join the fight, if they could reach the region and do not have Avoid Combat set. "
 	  << "There are a few flags that units may set to affect this; a unit with the Hold flag (set using the "
-	  << link("#hold", "HOLD") << " order) will not join battles in adjacent regions.  This flag applies to both "
-	  << "attacking and defending factions.  A unit with the Noaid flag (set using the " << link("#noaid", "NOAID")
+	  << url("#hold", "HOLD") << " order) will not join battles in adjacent regions.  This flag applies to both "
+	  << "attacking and defending factions.  A unit with the Noaid flag (set using the " << url("#noaid", "NOAID")
 	  << " order) will receive no aid from adjacent hexes when attacked, or when it issues an attack.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Example:  A fight starts in region A, in the initial combat phase (before any "
 	  << "movement has occurred).  The defender has a unit of soldiers in adjacent region B.  They have 2 movement "
 	  << "points at this stage. They will buy horses later in the turn, so that when they execute their "
-	  << link("#move", "MOVE") << " order they will have 4 movement points, but right now they have 2. "
+	  << url("#move", "MOVE") << " order they will have 4 movement points, but right now they have 2. "
 	  << (Globals->WEATHER_EXISTS ? "Region A is forest, but fortunately it is summer, " : "Region A is forest, ")
 	  << "so the soldiers can join the fight.\n"
 	  << enclose("p", false);
@@ -2933,15 +2933,15 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "The computer checks for weight allowances and terrain types when determining whether a unit could reach "
 	  << "the scene of the battle. Note that the use of fleets is not allowed in this virtual movement.\n"
 	  << enclose("p", false);
-	f << enclose("p", true) << "If you order an attack on an ally (either with the " << link("#attack", "ATTACK")
-	  << " order, or if your ally has declared you Unfriendly, by attempting to " << link("#advance", "ADVANCE")
+	f << enclose("p", true) << "If you order an attack on an ally (either with the " << url("#attack", "ATTACK")
+	  << " order, or if your ally has declared you Unfriendly, by attempting to " << url("#advance", "ADVANCE")
 	  << " into a region which he is guarding), then your commander will decide that a mistake has occurred "
 	  << "somewhere, and withdraw your troops from the fighting altogether.  Thus, your units will not attack "
 	  << "that faction in that region. Note that you will always defend an ally against attack, even if it means "
 	  << "that you fight against other factions that you are allied with.\n"
 	  << enclose("p", false);
 
-	f << link_ref("com_thebattle") << '\n';
+	f << anchor("com_thebattle") << '\n';
 	f << enclose("h3", true) << "The Battle:\n" << enclose("h3", false);
 	f << enclose("p", true) << "The troops having lined up, the fight begins.";
 	if (!(SkillDefs[S_TACTICS].flags & SkillType::DISABLED)) {
@@ -3016,7 +3016,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("p", true) << "Being inside a building confers a bonus to defense.  This bonus is effective "
 	  << "against ranged as well as melee weapons.  The number of men that a building can protect is equal to "
 	  << "its size. The size of the various common buildings was listed in the "
-	  << link("#tablebuildings", "Table of Buildings") + " earlier. \n"
+	  << url("#tablebuildings", "Table of Buildings") + " earlier. \n"
 	  << enclose("p", false);
 
 	f << enclose("p", true) << "If there are too many units in a building to all gain protection from it, then "
@@ -3034,7 +3034,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "any means until all non-Behind units have been wiped out.  On the other hand, neither can they attack "
 	  << "with melee weapons, but only with ranged weapons or magic.  Once all front-line units have been wiped "
 	  << "out, then the Behind flag no longer has any effect.\n" << enclose("p", false);
-	f << link_ref("com_victory") << '\n';
+	f << anchor("com_victory") << '\n';
 	f << enclose("h3", true) << "Victory!\n" << enclose("h3", false);
 	f << enclose("p", true) << "Combat rounds continue until one side has accrued 50% losses (or more). The "
 	  << "victorious side is then awarded one free round of attacks, after which the battle is over.  If both sides "
@@ -3054,18 +3054,18 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	
 	f << enclose("p", true) << "Any items owned by dead combatants on the losing side have a 50% chance of being "
 	  << "found and collected by the winning side. Each item which is recovered is picked up by one of the "
-	  << "survivors able to carry it (see the " << link("#spoils", "SPOILS") << " command) at random, so the "
+	  << "survivors able to carry it (see the " << url("#spoils", "SPOILS") << " command) at random, so the "
 	  << "winners generally collect loot in proportion to their number of surviving men.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "If you are expecting to fight an enemy who is carrying so much equipment that "
 	  << "you would not be able to move after picking it up, and you want to move to another region later that "
-	  << "month, it may be worth issuing some orders to drop items (with the " << link("#give", "GIVE")
-	  << " 0 order) or to prevent yourself picking up certain types of spoils (with the " << link("#spoils", "SPOILS")
+	  << "month, it may be worth issuing some orders to drop items (with the " << url("#give", "GIVE")
+	  << " 0 order) or to prevent yourself picking up certain types of spoils (with the " << url("#spoils", "SPOILS")
 	  << " order) in case you win the battle! Also, note that if the winning side took any losses in the battle, "
 	  << "any units on this side will not be allowed to move, or attack again for the rest of the turn.\n"
 	  << enclose("p", false);
 	if (has_stea || has_obse) {
-		f << link_ref("stealthobs") << '\n';
+		f << anchor("stealthobs") << '\n';
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << enclose("h2", true)
 		  << (has_stea ? "Stealth" : "")
@@ -3097,9 +3097,9 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 				  << "Observation skill than the unit's Stealth skill.";
 			}
 			f << '\n' << enclose("p", false);
-			f << link_ref("stealthobs_stealing") << '\n';
+			f << anchor("stealthobs_stealing") << '\n';
 			f << enclose("h3", true) << "Stealing:\n" << enclose("h3", false);
-			f << enclose("p", true) << "The " << link("#steal", "STEAL") << " order is a way to steal items from "
+			f << enclose("p", true) << "The " << url("#steal", "STEAL") << " order is a way to steal items from "
 			  << "other player factions without a battle. The order can only be issued by a one-man unit. The "
 			  << "order specifies a target unit; the thief will then attempt to steal the specified item from "
 			  << "the target unit.\n" << enclose("p", false);
@@ -3124,9 +3124,9 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 				  << enclose("p", false);
 			}
 
-			f << link_ref("stealthobs_assassination") << '\n';
+			f << anchor("stealthobs_assassination") << '\n';
 			f << enclose("h3", true) << "Assassination:\n" << enclose("h3", false);
-			f << enclose("p", true) << "The " << link("#assassinate", "ASSASSINATE") << " order is a way to kill "
+			f << enclose("p", true) << "The " << url("#assassinate", "ASSASSINATE") << " order is a way to kill "
 			  << "another person without attacking and going through an entire battle. This order can only be "
 			  << "issued by a one-man unit, and specifies a target unit.  If the target unit contains more than one "
 			  << "person, then one will be singled out at random.\n"
@@ -3189,15 +3189,15 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			  << "made the attempt.  (Of course, this does not necessarily mean that the assassin's faction is "
 			  << "known.)  The winner of the fight gets 50% of the loser's property as usual.\n"
 			  << enclose("p", false);
-			f << enclose("p", true) << link("#steal", "STEAL") << " and " << link("#assassinate", "ASSASSINATE")
+			f << enclose("p", true) << url("#steal", "STEAL") << " and " << url("#assassinate", "ASSASSINATE")
 			  << " are not full month orders, and do not interfere with other activities, but a unit can only issue "
-			  << "one " << link("#steal", "STEAL") << " order or one " << link("#assassinate", "ASSASSINATE")
+			  << "one " << url("#steal", "STEAL") << " order or one " << url("#assassinate", "ASSASSINATE")
 			  << " order in a month.\n"
 			  << enclose("p", false);
 		}
 	}
 
-	f << link_ref("magic") << '\n';
+	f << anchor("magic") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Magic\n" << enclose("h2", false);
 	f << enclose("p", 2) << "A character enters the world of magic in Atlantis by beginning study on one "
@@ -3214,11 +3214,11 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	} else {
 		f << "Mages ";
 	}
-	f << "may not " << link("#give", "GIVE") << " men at all; once a unit becomes a mage (by studying one of the "
+	f << "may not " << url("#give", "GIVE") << " men at all; once a unit becomes a mage (by studying one of the "
 	  << "Foundations), the unit number is fixed. (The mage may be given to another faction using the "
-	  << link("#give", "GIVE") << " UNIT order.)\n"
+	  << url("#give", "GIVE") << " UNIT order.)\n"
 	  << enclose("p", false);
-	f << link_ref("magic_skills") << '\n';
+	f << anchor("magic_skills") << '\n';
 	f << enclose("h3", true) << "Magic Skills:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Magic skills are the same as normal skills, with a few differences.  The basic "
 	  << "magic skills, called Foundations, are ";
@@ -3265,7 +3265,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "can support mages.  The description of a building will tell you for certain.  The common buildings "
 		  << "and the mages a building of that type can support follows:\n"
 		  << enclose("p", false);
-		f << link_ref("tablemagebuildings") << '\n';
+		f << anchor("tablemagebuildings") << '\n';
 		f << enclose("center", true);
 		f << enclose("table border=\"1\"", true);
 		f << enclose("tr", true);
@@ -3293,7 +3293,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << enclose("center", false);
 	}
 
-	f << link_ref("magic_foundations") << '\n';
+	f << anchor("magic_foundations") << '\n';
 	f << enclose("h3", true) << "Foundations:\n" << enclose("h3", false);
 	f << enclose("p", true) << "The " << num_to_word(j) << " Foundation skills are called ";
 	last = -1;
@@ -3325,30 +3325,30 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 	f << '\n' << enclose("p", false);
 
-	f << link_ref("magic_furtherstudy") << '\n';
+	f << anchor("magic_furtherstudy") << '\n';
 	f << enclose("h3", true) << "Further Magic Study:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Once a mage has begun study of one or more Foundations, more skills that he may "
 	  << "study will begin to show up on his report. These skills are the skills that give a mage his power.  As "
 	  << "with normal skills, when a mage achieves a new level of a magic skill, he will be given a skill report, "
-	  << "describing the new powers (if any) that the new skill confers.  The " << link("#show", "SHOW")
+	  << "describing the new powers (if any) that the new skill confers.  The " << url("#show", "SHOW")
 	  << " order may be used to show this information on future reports.\n"
 	  << enclose("p", false);
 
-	f << link_ref("magic_usingmagic") << '\n';
+	f << anchor("magic_usingmagic") << '\n';
 	f << enclose("h3", true) << "Using Magic:\n" << enclose("h3", false);
 	f << enclose("p", true) << "A mage may use his magical power in three different ways, depending on the type "
 	  << "of spell he wants to use.  Some spells, once learned, take effect automatically and are considered always "
 	  << "to be in use; these spells do not require any order to take effect.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Secondly, some spells are for use in combat. A mage may specify that he wishes to "
-	  << "use a spell in combat by issuing the " << link("#combat", "COMBAT") << " order.  A combat spell specified "
+	  << "use a spell in combat by issuing the " << url("#combat", "COMBAT") << " order.  A combat spell specified "
 	  << "in this way will only be used if the mage finds himself taking part in a battle.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "The third type of spell use is for spells that take an entire month to cast.  "
-	  << "These spells are cast by the mage issuing the " << link("#cast", "CAST") << " order. Because "
-	  << link("#cast", "CAST") << " takes an entire month, a mage may use only one of this type of spell each "
-	  << "turn. Note, however, that a " << link("#cast", "CAST") << " order is not a full month order; a mage may "
-	  << "still " << link("#move", "MOVE") << ", " << link("#study", "STUDY") << ", or use any other month long "
+	  << "These spells are cast by the mage issuing the " << url("#cast", "CAST") << " order. Because "
+	  << url("#cast", "CAST") << " takes an entire month, a mage may use only one of this type of spell each "
+	  << "turn. Note, however, that a " << url("#cast", "CAST") << " order is not a full month order; a mage may "
+	  << "still " << url("#move", "MOVE") << ", " << url("#study", "STUDY") << ", or use any other month long "
 	  << "order. The justification for this (as well as being for game balance) is that a spell drains a mage of "
 	  << "his magic power for the month, but does not actually take the entire month to cast.\n"
 	  << enclose("p", false);
@@ -3356,7 +3356,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "manner in which the spell is used (automatic, in combat, or by casting).\n"
 	  << enclose("p", false);
 
-	f << link_ref("magic_incombat") << '\n';
+	f << anchor("magic_incombat") << '\n';
 	f << enclose("h3", true) << "Magic in Combat:\n" << enclose("h3", false);
 	f << enclose("p", true) << "NOTE: This section is rather vague, and quite advanced.  You may want to wait "
 	  << "until you have figured out other parts of Atlantis before trying to understand exactly all of the rules "
@@ -3398,7 +3398,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	if (app_exist) {
 		string app_name(Globals->APPRENTICE_NAME);
 		app_name.append("s");
-		f << link_ref("magic_"+app_name) << '\n';
+		f << anchor("magic_"+app_name) << '\n';
 		app_name[0] = toupper(app_name[0]);
 		f << enclose("h3", true) << app_name << ":\n" << enclose("h3", false);
 		f << enclose("p", true) << app_name << " may be created by having a unit study ";
@@ -3422,7 +3422,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << enclose("p", false);
 	}
 
-	f << link_ref("nonplayers") << '\n';
+	f << anchor("nonplayers") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Non-Player Units\n" << enclose("h2", false);
 	f << enclose("p", true) << "There are a number of units that are not controlled by players that may be "
@@ -3430,7 +3430,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "game, but a few basics are below.\n"
 	  << enclose("p", false);
 	if (Globals->TOWNS_EXIST && Globals->CITY_MONSTERS_EXIST) {
-		f << link_ref("nonplayers_guards") << '\n';
+		f << anchor("nonplayers_guards") << '\n';
 		f << enclose("h3", true) << "City and Town Guardsmen:\n" << enclose("h3", false);
 		f << enclose("p", true) << "All cities and towns begin with guardsmen in them.  These units will defend "
 		  << "any units that are attacked in the city or town, and will also prevent theft and assassination "
@@ -3466,7 +3466,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	if (Globals->WANDERING_MONSTERS_EXIST) {
-		f << link_ref("nonplayers_monsters") << '\n';
+		f << anchor("nonplayers_monsters") << '\n';
 		f << enclose("h3", true) << "Wandering Monsters:\n" << enclose("h3", false);
 		f << enclose("p", true) << "There are a number of monsters who wander free throughout Atlantis.  They "
 		  << "will occasionally attack player units, so be careful when wandering through the wilderness.\n"
@@ -3535,23 +3535,23 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << enclose("tbody", false);
 		f << enclose("table", false);
 	}
-	f << link_ref("nonplayers_controlled") << '\n';
+	f << anchor("nonplayers_controlled") << '\n';
 	f << enclose("h3", true) << "Controlled Monsters:\n" << enclose("h3", false);
 	f << enclose("p", true) << "Through various magical methods, you may gain control of certain types of "
 	  << "monsters. These monsters are just another item in a unit's inventory, with a few special rules. Monsters "
-	  << "will be able to carry things at their speed of movement; use the " << link("#show", "SHOW") << " ITEM "
+	  << "will be able to carry things at their speed of movement; use the " << url("#show", "SHOW") << " ITEM "
 	  << "order to determine the carrying capacity and movement speed of a monster. Monsters will also fight for "
 	  << "the controlling unit in combat; their strength can only be determined in battle. Also, note that a "
 	  << "monster will always fight from the front rank, even if the controlling unit has the behind flag set. "
 	  << "Whether or not you are allowed to give a monster to other units depends on the type of monster; some may "
 	  << "be given freely, while others must remain with the controlling unit.";
 	if (Globals->RELEASE_MONSTERS) {
-		f << " All monsters may be released completely by using the " << link("#give", "GIVE")
+		f << " All monsters may be released completely by using the " << url("#give", "GIVE")
 		  << " order targetting unit 0.  When this is done, the monster will become a wandering monster.";
 	}
 	f << '\n' << enclose("p", false);
 
-	f << link_ref("orders") << '\n';
+	f << anchor("orders") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Orders\n" << enclose("h2", false);
 	f << enclose("p", true) << "To enter orders for Atlantis, you should send a mail message to the Atlantis "
@@ -3587,7 +3587,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "ignored.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "If you have a password set, you must specify it on you #atlantis line, or the "
-	  << "game will reject your orders.  See the " << link("#password", "PASSWORD") << " order for more details.\n"
+	  << "game will reject your orders.  See the " << url("#password", "PASSWORD") << " order for more details.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Each type of order is designated by giving a keyword as the first non-blank item "
 	  << "on a line.  Parameters are given after this, separated by spaces or tabs. Blank lines are permitted, as "
@@ -3603,19 +3603,19 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "the Template at the bottom of your report.  This is useful for orders which your units repeat for several "
 	  << "months in a row.\n"
 	  << enclose("p", false);
-	f << link_ref("orders_abbreviations") << '\n';
+	f << anchor("orders_abbreviations") << '\n';
 	f << enclose("h3", true) << "Abbreviations:\n" << enclose("h3", false);
 	f << enclose("p", true) << "All common items and skills have abbreviations that can be used when giving "
 	  << "orders, for brevity.  Any time you see the item on your report, it will be followed by the abbreviation.  "
 	  << "Please be careful using these, as they can easily be confused.\n"
 	  << enclose("p", false);
 
-	f << link_ref("ordersummary") << '\n';
+	f << anchor("ordersummary") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Order Summary\n" << enclose("h2", false);
 	f << enclose("p", true) << "To specify a [unit], use the unit number.  If specifying a unit that will "
 	  << "be created this turn, use the form \"NEW #\" if the unit belongs to your faction, or \"FACTION # NEW #\" "
-	  << "if the unit belongs to a different faction.  See the " << link("#form", "FORM") << " order for a more "
+	  << "if the unit belongs to a different faction.  See the " << url("#form", "FORM") << " order for a more "
 	  << "complete description.  [faction] means that a faction number is required; [object] means that an object "
 	  << "number (generally the number of a building or fleet) is required. [item] means an item (like wood or "
 	  << "longbow) that a unit can have in its possession. [flag] is an argument taken by several orders, that sets "
@@ -3630,7 +3630,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << enclose("p", false);
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("address") << '\n';
+	f << anchor("address") << '\n';
 	f << enclose("h4", true) << "ADDRESS [new address]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Change the email address to which your reports are sent.\n"
 	  << enclose("p", false);
@@ -3640,10 +3640,10 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 	
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("advance") << '\n';
+	f << anchor("advance") << '\n';
 	f << enclose("h4", true) << "ADVANCE [dir] ...\n" << enclose("h4", false);
-	f << enclose("p", true) << "This is the same as the " << link("#move", "MOVE") << " order, except that it "
-	  << "implies attacks on units which attempt to forbid access.  See the " << link("#move", "MOVE") << " order "
+	f << enclose("p", true) << "This is the same as the " << url("#move", "MOVE") << " order, except that it "
+	  << "implies attacks on units which attempt to forbid access.  See the " << url("#move", "MOVE") << " order "
 	  << "for details.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Examples:\n" << enclose("p", false);
@@ -3659,7 +3659,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (Globals->USE_WEAPON_ARMOR_COMMAND) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("armor") << '\n';
+		f << anchor("armor") << '\n';
 		f << enclose("h4", true) << "ARMOR [item1] [item2] [item3] [item4]\n" << enclose("h4", false);
 		f << enclose("h4", true) << "ARMOR\n" << enclose("h4", false);
 		f << enclose("p", true) << "This command allows you to set a list of preferred armor for a unit.  After "
@@ -3677,7 +3677,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (has_stea) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("assassinate") << '\n';
+		f << anchor("assassinate") << '\n';
 		f << enclose("h4", true) << "ASSASSINATE [unit]\n" << enclose("h4", false);
 		f << enclose("p", true) << "Attempt to assassinate the specified unit, or one of the unit's "
 		  << "people if the unit contains more than one person.  The order may only be issued by a one-man unit.\n"
@@ -3691,7 +3691,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("attack") << '\n';
+	f << anchor("attack") << '\n';
 	f << enclose("h4", true) << "ATTACK [unit] ... \n" << enclose("h4", false);
 	f << enclose("p", true) << "Attack a target unit.  If multiple ATTACK orders are given, all of the targets "
 	  << "will be attacked.\n"
@@ -3706,7 +3706,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("autotax") << '\n';
+	f << anchor("autotax") << '\n';
 	f << enclose("h4", true) << "AUTOTAX [flag]\n" << enclose("h4", false);
 	f << enclose("p", true) << "AUTOTAX 1 causes the unit to attempt to tax every turn (without requiring the "
 	  << "TAX order) until the flag is unset. AUTOTAX 0 unsets the flag.\n"
@@ -3717,7 +3717,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("avoid") << '\n';
+	f << anchor("avoid") << '\n';
 	f << enclose("h4", true) << "AVOID [flag]\n" << enclose("h4", false);
 	f << enclose("p", true) << "AVOID 1 instructs the unit to avoid combat wherever possible. The unit will "
 	  << "not enter combat unless it issues an ATTACK order, or the unit's faction is attacked in the unit's "
@@ -3732,7 +3732,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("behind") << '\n';
+	f << anchor("behind") << '\n';
 	f << enclose("h4", true) << "BEHIND [flag]\n" << enclose("h4", false);
 	f << enclose("p", true) << "BEHIND 1 sets the unit to be behind other units in combat.  BEHIND 0 cancels this.\n"
 	  << enclose("p", false);
@@ -3742,7 +3742,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("build") << '\n';
+	f << anchor("build") << '\n';
 	f << enclose("h4", true) << "BUILD\n" << enclose("h4", false);
 	f << enclose("h4", true) << "BUILD [object type]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "BUILD HELP [unit]\n" << enclose("h4", false);
@@ -3762,7 +3762,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 	
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("buy") << '\n';
+	f << anchor("buy") << '\n';
 	f << enclose("h4", true) << "BUY [quantity] [item]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "BUY ALL [item]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Attempt to buy a number of the given item from a city or town "
@@ -3792,7 +3792,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 	
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("cast") << '\n';
+	f << anchor("cast") << '\n';
 	f << enclose("h4", true) << "CAST [skill] [arguments]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Cast the given spell.  Note that most spell names contain spaces; be sure to "
 	  << "enclose the name in quotes!  [arguments] depends on which spell you are casting; when you are able to cast "
@@ -3807,7 +3807,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("claim") << '\n';
+	f << anchor("claim") << '\n';
 	f << enclose("h4", true) << "CLAIM [amount]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Claim an amount of the faction's unclaimed silver, and give it to the unit issuing "
 	  << "the order.  The claiming unit may then spend the silver or give it to another unit.\n"
@@ -3818,7 +3818,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("combat") << '\n';
+	f << anchor("combat") << '\n';
 	f << enclose("h4", true) << "COMBAT [spell]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Set the given spell as the spell that the unit will cast in combat.  This order "
 	  << "may only be given if the unit can cast the spell in question.\n"
@@ -3830,7 +3830,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (Globals->FOOD_ITEMS_EXIST) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("consume") << '\n';
+		f << anchor("consume") << '\n';
 		f << enclose("h4", true) << "CONSUME UNIT\n" << enclose("h4", false);
 		f << enclose("h4", true) << "CONSUME FACTION\n" << enclose("h4", false);
 		f << enclose("h4", true) << "CONSUME\n" << enclose("h4", false);
@@ -3847,7 +3847,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("declare") << '\n';
+	f << anchor("declare") << '\n';
 	f << enclose("h4", true) << "DECLARE [faction] [attitude]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "DECLARE [faction]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "DECLARE DEFAULT [attitude]\n" << enclose("h4", false);
@@ -3867,7 +3867,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("describe") << '\n';
+	f << anchor("describe") << '\n';
 	f << enclose("h4", true) << "DESCRIBE UNIT [new description]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "DESCRIBE SHIP [new description]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "DESCRIBE BUILDING [new description]\n" << enclose("h4", false);
@@ -3885,7 +3885,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("destroy") << '\n';
+	f << anchor("destroy") << '\n';
 	f << enclose("h4", true) << "DESTROY\n" << enclose("h4", false);
 	f << enclose("p", true) << "Destroy the object you are in (of which you must be the owner). The order cannot "
 	  << "be used at sea.\n"
@@ -3897,7 +3897,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (qm_exist) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("distribute") << '\n';
+		f << anchor("distribute") << '\n';
 		f << enclose("h4", true) << "DISTRIBUTE [unit] [num] [item]\n" << enclose("h4", false);
 		f << enclose("h4", true) << "DISTRIBUTE [unit] ALL [item]\n" << enclose("h4", false);
 		f << enclose("h4", true) << "DISTRIBUTE [unit] ALL [item] EXCEPT [amount]\n" << enclose("h4", false);
@@ -3913,7 +3913,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("enter") << '\n';
+	f << anchor("enter") << '\n';
 	f << enclose("h4", true) << "ENTER [object]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Attempt to enter the specified object.  If issued from inside another object, the "
 	  << "unit will first leave the object it is currently in.  The order will only work if the target object is "
@@ -3927,7 +3927,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("entertain") << '\n';
+		f << anchor("entertain") << '\n';
 		f << enclose("h4", true) << "ENTERTAIN\n" << enclose("h4", false);
 		f << enclose("p", true) << "Spend the month entertaining the populace to earn money.\n"
 		  << enclose("p", false);
@@ -3938,7 +3938,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("evict") << '\n';
+	f << anchor("evict") << '\n';
 	f << enclose("h4", true) << "EVICT [unit] ...\n" << enclose("h4", false);
 	f << enclose("p", true) << "Evict the specified unit from the object of which you are currently the owner.  If "
 	  << "multiple EVICT orders are given, all of the units will be evicted.\n"
@@ -3953,7 +3953,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("exchange") << '\n';
+	f << anchor("exchange") << '\n';
 	f << enclose("h4", true) << "EXCHANGE [unit] [quantity given] [item given] [quantity expected] [item expected]\n"
 	  << enclose("h4", false);
 	f << enclose("p", true) << "This order allows any two units that can see each other, to trade items regardless "
@@ -3971,7 +3971,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("faction") << '\n';
+		f << anchor("faction") << '\n';
 		f << enclose("h4", true) << "FACTION [type] [points] ...\n" << enclose("h4", false);
 		f << enclose("p", true) << "Attempt to change your faction's type.  In the order, you can specify up to "
 		  << "three faction types (WAR, TRADE, and MAGIC) and the number of faction points to assign to each type; "
@@ -3984,7 +3984,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "new number of MAGIC points BEFORE you change your point distribution. For example, if you have 3 "
 		  << "mages (3 points assigned to MAGIC), but want to use one of those points for WAR or TRADE (change to "
 		  << "MAGIC 2), you must first get rid of one of your mages by either giving it to another faction or "
-		  << "ordering it to " << link("#forget", "FORGET") << " all its magic skills. If you have too many mages "
+		  << "ordering it to " << url("#forget", "FORGET") << " all its magic skills. If you have too many mages "
 		  << "for the number of points you try to assign to MAGIC, the FACTION order will fail.";
 		  if (qm_exist)
 		  	f << " Similar problems could occur with TRADE points and the number of quartermasters controlled by "
@@ -4002,7 +4002,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("find") << '\n';
+		f << anchor("find") << '\n';
 		f << enclose("h4", true) << "FIND [faction]\n" << enclose("h4", false);
 		f << enclose("h4", true) << "FIND ALL\n" << enclose("h4", false);
 		f << enclose("p", true) << "Find the email address of the specified faction or of all factions.\n"
@@ -4014,7 +4014,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("forget") << '\n';
+	f << anchor("forget") << '\n';
 	f << enclose("h4", true) << "FORGET [skill]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Forget the given skill. This order is useful for "
 	  << (Globals->SKILL_LIMIT_NONLEADERS
@@ -4031,7 +4031,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("form") << '\n';
+	f << anchor("form") << '\n';
 	f << enclose("h4", true) << "FORM [alias]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Form a new unit.  The newly created unit will be in your faction, in the same "
 	  << "region as the unit which formed it, and in the same structure if any.  It will start off, however, with "
@@ -4053,7 +4053,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "alias number they are, e.g. FACTION 15 NEW 2 will refer to faction 15's newly created unit with alias 2.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Note: If a unit moves out of the region in which it was formed (by the "
-	  << link("#move", "MOVE") << " order, or otherwise), the alias will no longer work. This is to prevent conflicts "
+	  << url("#move", "MOVE") << " order, or otherwise), the alias will no longer work. This is to prevent conflicts "
 	  << "with other units that may have the same alias in other regions.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "If the demand for recruits in that region that month is much higher than the supply, "
@@ -4068,7 +4068,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  "This set of orders for unit 17 would create two new units with alias numbers 1 and 2, name them Merlin's "
 		  "Guards and Merlin's Workers, set the description for Merlin's Workers, have both units recruit men, and "
 		  "have Merlin's Guards study combat.  Merlin's Workers will have the default order "
-		  + link("#work", "WORK") + ", as all newly created units do. The unit that created these two then pays them "
+		  + url("#work", "WORK") + ", as all newly created units do. The unit that created these two then pays them "
 		  "enough money (using the NEW keyword to refer to them by alias numbers) to cover the costs of recruitment "
 		  "and the month's maintenance."
 	    )
@@ -4089,7 +4089,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("give") << '\n';
+	f << anchor("give") << '\n';
 	f << enclose("h4", true) << "GIVE [unit] [quantity] [item]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "GIVE [unit] ALL [item]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "GIVE [unit] ALL [item] EXCEPT [quantity]\n" << enclose("h4", false);
@@ -4111,20 +4111,20 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "member of your faction, then its faction must have declared you Friendly, with a couple of exceptions. "
 	  << "First, silver may be given to any unit, regardless of factional affiliation. Secondly, men may not be "
 	  << "given to units in other factions (you must give the entire unit); the reason for this is to prevent highly "
-	  << "skilled units from being sabotaged with a " << link("#give", "GIVE") << " order.\n"
+	  << "skilled units from being sabotaged with a " << url("#give", "GIVE") << " order.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Unfinished ships are given like other items, although a unit may only have one "
 	  << "unfinished ship of a given type at a time. To give unfinished ships, add the \"UNFINISHED\" keyword to the "
 	  << "beginning of the [item] specifier.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Completed ships which are part of a fleet may be given too; the owner of the fleet "
-	  << "they are currently in must issue the " << link("#give", "GIVE") << " order, and give the ships to the "
+	  << "they are currently in must issue the " << url("#give", "GIVE") << " order, and give the ships to the "
 	  << "owner of the fleet that should receive the ships.  If the recipient is not the owner of a fleet, then a "
 	  << "new fleet will be created owned by the recipient.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "There are also a few restrictions on orders given by units who been given to another "
 	  << "faction. If the receiving faction is not allied to the giving faction, the unit may not issue the "
-	  << link("#advance", "ADVANCE") << " order, or issue any more " << link("#give", "GIVE") << " orders.  Both of "
+	  << url("#advance", "ADVANCE") << " order, or issue any more " << url("#give", "GIVE") << " orders.  Both of "
 	  << "these rules are to prevent unfair sabotage tactics.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "If 0 is specified as the unit number, then the items are discarded.\n"
@@ -4147,7 +4147,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("guard") << '\n';
+	f << anchor("guard") << '\n';
 	f << enclose("h4", true) << "GUARD [flag]\n" << enclose("h4", false);
 	f << enclose("p", true) << "GUARD 1 sets the unit issuing the order to prevent non-Friendly units from collecting "
 	  << "taxes in the region, and to prevent any units not your own from pillaging the region.  Guarding units will "
@@ -4162,7 +4162,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("hold") << '\n';
+	f << anchor("hold") << '\n';
 	f << enclose("h4", true) << "HOLD [flag]\n" << enclose("h4", false);
 	f << enclose("p", true) << "HOLD 1 instructs the issuing unit to never join a battle in regions the unit is not "
 	  << "in.  This can be useful if the unit is in a building, and doesn't want to leave the building to join combat. "
@@ -4174,7 +4174,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("join") << '\n';
+	f << anchor("join") << '\n';
 	f << enclose("h4", true) << "JOIN [unit]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "JOIN [unit] NOOVERLOAD\n" << enclose("h4", false);
 	f << enclose("h4", true) << "JOIN [unit] MERGE\n" << enclose("h4", false);
@@ -4200,7 +4200,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("leave") << '\n';
+	f << anchor("leave") << '\n';
 	f << enclose("h4", true) << "LEAVE\n" << enclose("h4", false);
 	f << enclose("p", true) << "Leave the object you are currently in.";
 	if (move_over_water) {
@@ -4216,7 +4216,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("move") << '\n';
+	f << anchor("move") << '\n';
 	f << enclose("h4", true) << "MOVE [dir] ...\n" << enclose("h4", false);
 	f << enclose("p", true) << "Attempt to move in the direction(s) specified.  If more than one direction is given, "
 	  << "the unit will move multiple times, in the order specified by the MOVE order, until no more directions are "
@@ -4265,7 +4265,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("name") << '\n';
+	f << anchor("name") << '\n';
 	f << enclose("h4", true) << "NAME UNIT [new name]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "NAME FACTION [new name]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "NAME OBJECT [new name]\n" << enclose("h4", false);
@@ -4294,7 +4294,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("noaid") << '\n';
+	f << anchor("noaid") << '\n';
 	f << enclose("h4", true) << "NOAID [flag]\n" << enclose("h4", false);
 	f << enclose("p", true) << "NOAID 1 indicates that if the unit attacks, or is attacked, it is not to be aided by "
 	  << "units in other hexes. NOAID status is very useful for scouts or probing units, who do not wish to drag "
@@ -4310,7 +4310,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (move_over_water) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("nocross") << '\n';
+		f << anchor("nocross") << '\n';
 		f << enclose("h4", true) << "NOCROSS [flag]\n" << enclose("h4", false);
 		f << enclose("p", true) << "NOCROSS 1 indicates that if a unit attempts to cross a body of water then that "
 		  << "unit should instead not cross it, regardless of whether the unit otherwise could do so. "
@@ -4327,7 +4327,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("option") << '\n';
+	f << anchor("option") << '\n';
 	f << enclose("h4", true) << "OPTION TIMES\n" << enclose("h4", false);
 	f << enclose("h4", true) << "OPTION NOTIMES\n" << enclose("h4", false);
 	f << enclose("h4", true) << "OPTION SHOWATTITUDES\n" << enclose("h4", false);
@@ -4408,7 +4408,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("password") << '\n';
+	f << anchor("password") << '\n';
 	f << enclose("h4", true) << "PASSWORD [password]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "PASSWORD\n" << enclose("h4", false);
 	f << enclose("p", true) << "The PASSWORD order is used to set your faction's password. If you have a password set, "
@@ -4426,10 +4426,10 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("pillage") << '\n';
+	f << anchor("pillage") << '\n';
 	f << enclose("h4", true) << "PILLAGE\n" << enclose("h4", false);
 	f << enclose("p", true) << "Use force to extort as much money as possible from the region. Note that the "
-	  << link("#tax", "TAX") << " order and the PILLAGE order are mutually exclusive; a unit may only attempt "
+	  << url("#tax", "TAX") << " order and the PILLAGE order are mutually exclusive; a unit may only attempt "
 	  << "to do one in a turn.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Example:\n" << enclose("p", false);
@@ -4439,7 +4439,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (Globals->USE_PREPARE_COMMAND) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("prepare") << '\n';
+		f << anchor("prepare") << '\n';
 		f << enclose("h4", true) << "PREPARE [item]\n" << enclose("h4", false);
 		f << enclose("p", true) << "This command allows a mage"
 		  << (app_exist ? " or " : "")
@@ -4448,7 +4448,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << (Globals->USE_PREPARE_COMMAND == GameDefs::PREPARE_STRICT
 		  	  ? "This selects the battle item which will be used, "
 			  : "This allows the unit to override the usual selection of battle items, ")
-		  << "and also cancels any spells set via the " << link("#combat", "COMBAT") << " order.\n"	
+		  << "and also cancels any spells set via the " << url("#combat", "COMBAT") << " order.\n"
 		  << enclose("p", false);
 		f << enclose("p", true) << "Example:\n" << enclose("p", false);
 		f << example_start(
@@ -4460,7 +4460,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("produce") << '\n';
+	f << anchor("produce") << '\n';
 	f << enclose("h4", true) << "PRODUCE [item]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "PRODUCE [number] [item]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Spend the month producing the specified item.  If a number is given then the unit "
@@ -4477,7 +4477,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("promote") << '\n';
+	f << anchor("promote") << '\n';
 	f << enclose("h4", true) << "PROMOTE [unit]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Promote the specified unit to owner of the object of which you are currently the "
 	  << "owner.  The target unit must have declared you Friendly.\n"
@@ -4488,7 +4488,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("quit") << '\n';
+	f << anchor("quit") << '\n';
 	f << enclose("h4", true) << "QUIT [password]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Quit the game.  On issuing this order, your faction will be completely and "
 	  << "permanently destroyed. Note that you must give your password for the quit order to work; this is to "
@@ -4507,9 +4507,9 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("restart") << '\n';
+	f << anchor("restart") << '\n';
 	f << enclose("h4", true) << "RESTART [password]\n" << enclose("h4", false);
-	f << enclose("p", true) << "Similar to the " << link("#quit", "QUIT") << " order, this order will completely "
+	f << enclose("p", true) << "Similar to the " << url("#quit", "QUIT") << " order, this order will completely "
 	  << "and permanently destroy your faction. However, it will begin a brand new faction for you (you will get a "
 	  << "separate turn report for the new faction). Note that you must give your password for this order to work, "
 	  << "to provide some protection against accidentally issuing this order.\n"
@@ -4523,7 +4523,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("reveal") << '\n';
+	f << anchor("reveal") << '\n';
 	f << enclose("h4", true) << "REVEAL\n" << enclose("h4", false);
 	f << enclose("h4", true) << "REVEAL UNIT\n" << enclose("h4", false);
 	f << enclose("h4", true) << "REVEAL FACTION\n" << enclose("h4", false);
@@ -4545,7 +4545,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (may_sail) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("sail") << '\n';
+		f << anchor("sail") << '\n';
 		f << enclose("h4", true) << "SAIL [dir] ...\n" << enclose("h4", false);
 		f << enclose("h4", true) << "SAIL\n" << enclose("h4", false);
 		f << enclose("p", true) << "The first form will sail the fleet, which the unit must be the owner of, in the "
@@ -4564,7 +4564,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (Globals->TOWNS_EXIST) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("sell") << '\n';
+		f << anchor("sell") << '\n';
 		f << enclose("h4", true) << "SELL [quantity] [item]\n" << enclose("h4", false);
 		f << enclose("h4", true) << "SELL ALL [item]\n" << enclose("h4", false);
 		f << enclose("p", true) << "Attempt to sell the amount given of the item given.  If the unit does not have as "
@@ -4580,12 +4580,12 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("share") << '\n';
+	f << anchor("share") << '\n';
 	f << enclose("h4", true) << "SHARE [flag]\n" << enclose("h4", false);
 	f << enclose("p", true) << "SHARE 1 instructs the unit to share its possessions with any other unit of your "
 	  << "faction that needs them.  Thus a unit with a supply of silver could automatically provide silver if any of "
 	  << "your other units in the same region does not have enough to perform an action, such as "
-	  << link("#study", "studying") << ", " << link("#buy", "buying") << " or " << link("#produce", "producing")
+	  << url("#study", "studying") << ", " << url("#buy", "buying") << " or " << url("#produce", "producing")
 	  << ".  SHARE 0 returns a unit to its default selfish state.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "This sharing does not extend to the heat of battle, only to economic actions.  So a "
@@ -4605,7 +4605,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("show") << '\n';
+	f << anchor("show") << '\n';
 	f << enclose("h4", true) << "SHOW SKILL [skill] [level]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "SHOW ITEM [item]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "SHOW OBJECT [object]\n" << enclose("h4", false);
@@ -4626,7 +4626,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("spoils") << '\n';
+	f << anchor("spoils") << '\n';
 	f << enclose("h4", true) << "SPOILS [type]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "SPOILS\n" << enclose("h4", false);
 	f << enclose("p", true) << "The SPOILS order determines which types of spoils the unit should take after a battle.  "
@@ -4649,7 +4649,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (has_stea) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("steal") << '\n';
+		f << anchor("steal") << '\n';
 		f << enclose("h4", true) << "STEAL [unit] [item]\n" << enclose("h4", false);
 		f << enclose("p", true) << "Attempt to steal as much as possible of the specified item from "
 		  << "the specified unit. The order may only be issued by a one-man unit.\n"
@@ -4666,7 +4666,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("study") << '\n';
+	f << anchor("study") << '\n';
 	f << enclose("h4", true) << "STUDY [skill]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "STUDY [skill] [level]\n" << enclose("h4", false);
 	f << enclose("p", true) << "Spend the month studying the specified skill. A level may be specified which means "
@@ -4681,39 +4681,39 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("take") << '\n';
+	f << anchor("take") << '\n';
 	f << enclose("h4", true) << "TAKE FROM [unit] [quantity] [item]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "TAKE FROM [unit] ALL [item]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "TAKE FROM [unit] ALL [item] EXCEPT [quantity]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "TAKE FROM [unit] ALL [item class]\n" << enclose("h4", false);
-	f << enclose("p", true) << "The TAKE order works just like the " << link("#give", "GIVE") << " order, except that "
+	f << enclose("p", true) << "The TAKE order works just like the " << url("#give", "GIVE") << " order, except that "
 	  << "the direction of transfer is reversed, and with the extra condition that a unit may only TAKE from another "
 	  << "unit in the same faction. Since that makes TAKE FROM [unit] UNIT pointless, that form of the "
-	  << link("#give", "GIVE") << " order is not supported.\n"
+	  << url("#give", "GIVE") << " order is not supported.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "The TAKE order is primarily intended to make automated delivery caravans less "
 	  << "prone to generating errors, as they can use TAKE to collect the appropriate goods only when they are "
 	  << "in the right place to collect, so the supplying unit doesn't need to keep trying to "
-	  << link("#give", "GIVE") << " to a unit that is only there some of the time. However, it can be used "
-	  << "anywhere you wish to transfer items, ships or men, just as " << link("#give", "GIVE") << " can.\n"
+	  << url("#give", "GIVE") << " to a unit that is only there some of the time. However, it can be used "
+	  << "anywhere you wish to transfer items, ships or men, just as " << url("#give", "GIVE") << " can.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Examples:\n" << enclose("p", false);
 	f << example_start("Take 10 swords from unit 4573.")
 	  << "TAKE FROM 4573 10 swords\n"
 	  << example_end();
-	f << enclose("p", true) << "See the " << link("#turn", "TURN")
+	f << enclose("p", true) << "See the " << url("#turn", "TURN")
 	  << " order for an example of a caravan using TAKE FROM.\n"
 	  << enclose("p", false);
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("tax") << '\n';
+	f << anchor("tax") << '\n';
 	f << enclose("h4", true) << "TAX\n" << enclose("h4", false);
 	f << enclose("p", true) << "Attempt to collect taxes from the region. "
 	  << (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES
 	  	  ? "Only War factions may collect taxes, and then "
 		  : "Taxes may be collected ")
 	  << "only if there are no non-Friendly units on guard. Only combat-ready units may issue this order. Note "
-	  << "that the TAX order and the " << link("#pillage", "PILLAGE") << " order are mutually exclusive; "
+	  << "that the TAX order and the " << url("#pillage", "PILLAGE") << " order are mutually exclusive; "
 	  << "a unit may only attempt to do one in a turn.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Example:\n" << enclose("p", false);
@@ -4722,7 +4722,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("teach") << '\n';
+	f << anchor("teach") << '\n';
 	f << enclose("h4", true) << "TEACH [unit] ...\n" << enclose("h4", false);
 	f << enclose("p", true) << "Attempt to teach the specified units whatever skill they are studying that month.  "
 	  << "A list of several units may be specified. All units to be taught must have declared you Friendly. "
@@ -4739,7 +4739,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (qm_exist) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("transport") << '\n';
+		f << anchor("transport") << '\n';
 		f << enclose("h4", true) << "TRANSPORT [unit] [num] [item]\n" << enclose("h4", false);
 		f << enclose("h4", true) << "TRANSPORT [unit] ALL [item]\n" << enclose("h4", false);
 		f << enclose("h4", true) << "TRANSPORT [unit] ALL [item] EXCEPT [amount]\n" << enclose("h4", false);
@@ -4773,7 +4773,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("turn") << '\n';
+	f << anchor("turn") << '\n';
 	f << enclose("h4", true) << "TURN\n" << enclose("h4", false);
 	f << enclose("p", true) << "The TURN order may be used to delay orders by one (or more) turns. By making "
 	  << "the TURN order repeating (via '@'), orders inside the TURN/ENDTURN construct will repeat.  Multiple "
@@ -4831,7 +4831,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (Globals->USE_WEAPON_ARMOR_COMMAND) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("weapon") << '\n';
+		f << anchor("weapon") << '\n';
 		f << enclose("h4", true) << "WEAPON [item] ...\n" << enclose("h4", false);
 		f << enclose("h4", true) << "WEAPON\n" << enclose("h4", false);
 		f << enclose("p", true) << "This command allows you to set a list of preferred weapons for a unit.  After "
@@ -4849,7 +4849,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	if (Globals->ALLOW_WITHDRAW) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << link_ref("withdraw") << '\n';
+		f << anchor("withdraw") << '\n';
 		f << enclose("h4", true) << "WITHDRAW [item]\n" << enclose("h4", false);
 		f << enclose("h4", true) << "WITHDRAW [quantity] [item]\n" << enclose("h4", false);
 		f << enclose("p", true) << "Use unclaimed funds to acquire basic items that you need. If you do not have "
@@ -4867,7 +4867,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-	f << link_ref("work") << '\n';
+	f << anchor("work") << '\n';
 	f << enclose("h4", true) << "WORK\n" << enclose("h4", false);
 	f << enclose("p", true) << "Spend the month performing manual work for wages.\n"
 	  << enclose("p", false);
@@ -4876,7 +4876,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "WORK\n"
 	  << example_end();
 
-	f << link_ref("sequenceofevents") << '\n';
+	f << anchor("sequenceofevents") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Sequence of Events\n" << enclose("h2", false);
 	f << enclose("p", true) << "Each turn, the following sequence of events occurs:\n"
@@ -4884,113 +4884,113 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("OL", true);
 	f << enclose("li", true) << "Instant orders.\n";
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#turn", "TURN") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#form", "FORM") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#address", "ADDRESS") << ", "
-	  << (Globals->USE_WEAPON_ARMOR_COMMAND ? link("#armor", "ARMOR") + ", " : "")
-	  << link("#autotax", "AUTOTAX") << ", " << link("#avoid", "AVOID") << ", " << link("#behind", "BEHIND")
-	  << ", " << link("#claim", "CLAIM") << ", " << link("#combat", "COMBAT") << ", "
-	  << (Globals->FOOD_ITEMS_EXIST ? link("#consume", "CONSUME") + ", " : "") << link("#declare", "DECLARE")
-	  << ", " << link("#describe", "DESCRIBE") << ", "
-	  << (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES ? link("#faction", "FACTION") + ", " : "")
-	  << link("#guard", "GUARD") << " 0, " << link("#hold", "HOLD") << ", " << link("#name", "NAME") << ", "
-	  << link("#noaid", "NOAID") << ", " << link("#share", "SHARE") << ", "
-	  << (move_over_water ? link("#nocross", "NOCROSS") + ", " : "") << link("#option", "OPTION") << ", "
-	  << link("#password", "PASSWORD") << ", "
-	  << (Globals->USE_PREPARE_COMMAND ? link("#prepare", "PREPARE") + ", " : "") << link("#reveal", "REVEAL")
-	  << ", " << link("#show", "SHOW") << ", " << (!Globals->USE_WEAPON_ARMOR_COMMAND ? "and " : "")
-	  << link("#spoils", "SPOILS")
-	  << (Globals->USE_WEAPON_ARMOR_COMMAND ? ", and " + link("#weapon", "WEAPON") : "")
+	f << enclose("li", true) << url("#turn", "TURN") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#form", "FORM") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#address", "ADDRESS") << ", "
+	  << (Globals->USE_WEAPON_ARMOR_COMMAND ? url("#armor", "ARMOR") + ", " : "")
+	  << url("#autotax", "AUTOTAX") << ", " << url("#avoid", "AVOID") << ", " << url("#behind", "BEHIND")
+	  << ", " << url("#claim", "CLAIM") << ", " << url("#combat", "COMBAT") << ", "
+	  << (Globals->FOOD_ITEMS_EXIST ? url("#consume", "CONSUME") + ", " : "") << url("#declare", "DECLARE")
+	  << ", " << url("#describe", "DESCRIBE") << ", "
+	  << (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES ? url("#faction", "FACTION") + ", " : "")
+	  << url("#guard", "GUARD") << " 0, " << url("#hold", "HOLD") << ", " << url("#name", "NAME") << ", "
+	  << url("#noaid", "NOAID") << ", " << url("#share", "SHARE") << ", "
+	  << (move_over_water ? url("#nocross", "NOCROSS") + ", " : "") << url("#option", "OPTION") << ", "
+	  << url("#password", "PASSWORD") << ", "
+	  << (Globals->USE_PREPARE_COMMAND ? url("#prepare", "PREPARE") + ", " : "") << url("#reveal", "REVEAL")
+	  << ", " << url("#show", "SHOW") << ", " << (!Globals->USE_WEAPON_ARMOR_COMMAND ? "and " : "")
+	  << url("#spoils", "SPOILS")
+	  << (Globals->USE_WEAPON_ARMOR_COMMAND ? ", and " + url("#weapon", "WEAPON") : "")
 	  << " orders are processed.\n"
 	  << enclose("li", false);
-	f << enclose("li", true) << link("#find", "FIND") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#leave", "LEAVE") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#enter", "ENTER") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#promote", "PROMOTE") << " and " << link("#evict", "EVICT")
+	f << enclose("li", true) << url("#find", "FIND") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#leave", "LEAVE") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#enter", "ENTER") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#promote", "PROMOTE") << " and " << url("#evict", "EVICT")
 	  << " orders are processed.\n" << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 	f << enclose("li", true) << "Combat is processed.\n";
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#attack", "ATTACK") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#attack", "ATTACK") << " orders are processed.\n" << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 	if (has_stea) {
 		f << enclose("li", true) << "Subterfuge orders.\n";
 		f << enclose("ul", true);
-		f << enclose("li", true) << link("#steal", "STEAL") << " and " << link("#assassinate", "ASSASSINATE")
+		f << enclose("li", true) << url("#steal", "STEAL") << " and " << url("#assassinate", "ASSASSINATE")
 		  << " orders are processed.\n" << enclose("li", false);
 		f << enclose("ul", false);
 		f << enclose("li", false);
 	}
 	f << enclose("li", true) << "Give orders.\n";
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#give", "GIVE") << " and " << link("#take", "TAKE")
+	f << enclose("li", true) << url("#give", "GIVE") << " and " << url("#take", "TAKE")
 	  << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#join", "JOIN") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#exchange", "EXCHANGE") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#join", "JOIN") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#exchange", "EXCHANGE") << " orders are processed.\n" << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 	f << enclose("li", true) << "Tax orders.\n";
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#destroy", "DESTROY") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#pillage", "PILLAGE") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#tax", "TAX") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#guard", "GUARD") << " 1 orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#destroy", "DESTROY") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#pillage", "PILLAGE") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#tax", "TAX") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#guard", "GUARD") << " 1 orders are processed.\n" << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 	f << enclose("li", true) << "Instant Magic\n";
 	f << enclose("ul", true);
 	f << enclose("li", true) << "Old spells are cancelled.\n" << enclose("li", false);
-	f << enclose("li", true) << "Spells are " << link("#cast", "CAST") << " (except for Teleportation spells).\n"
+	f << enclose("li", true) << "Spells are " << url("#cast", "CAST") << " (except for Teleportation spells).\n"
 	  << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 	f << enclose("li", true) << "Market orders.\n";
 	f << enclose("ul", true);
 	if (Globals->TOWNS_EXIST) {
-		f << enclose("li", true) << link("#sell", "SELL") << " orders are processed.\n" << enclose("li", false);
+		f << enclose("li", true) << url("#sell", "SELL") << " orders are processed.\n" << enclose("li", false);
 	}
-	f << enclose("li", true) << link("#buy", "BUY") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#forget", "FORGET") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#quit", "QUIT") << " and " << link("#restart", "RESTART")
+	f << enclose("li", true) << url("#buy", "BUY") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#forget", "FORGET") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#quit", "QUIT") << " and " << url("#restart", "RESTART")
 	  << " orders are processed.\n" << enclose("li", false);
 	if (Globals->ALLOW_WITHDRAW) {
-		f << enclose("li", true) << link("#withdraw", "WITHDRAW") << " orders are processed.\n"
+		f << enclose("li", true) << url("#withdraw", "WITHDRAW") << " orders are processed.\n"
 		  << enclose("li", false);
 	}
 	f << enclose("ul", false);
 	f << enclose("li", false);
 	f << enclose("li", true) << "Movement orders.\n";
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#advance", "ADVANCE") << (may_sail ? ", " : " and ") << link("#move", "MOVE")
-	  << (may_sail ? " and " + link("#sail", "SAIL") : "") << " orders are processed phase by phase "
+	f << enclose("li", true) << url("#advance", "ADVANCE") << (may_sail ? ", " : " and ") << url("#move", "MOVE")
+	  << (may_sail ? " and " + url("#sail", "SAIL") : "") << " orders are processed phase by phase "
 	  << "(including any combat resulting from these orders).\n"
 	  << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
 	f << enclose("li", true) << "Month long orders.\n";
 	f << enclose("ul", true);
-	f << enclose("li", true) << link("#teach", "TEACH") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#study", "STUDY") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << "Manufacturing " << link("#produce", "PRODUCE")
+	f << enclose("li", true) << url("#teach", "TEACH") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#study", "STUDY") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << "Manufacturing " << url("#produce", "PRODUCE")
 	  << " orders (those that produce items from other items, such as using the weaponsmith skill to make swords out "
 	  << "of iron) are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << link("#build", "BUILD") << " orders are processed.\n" << enclose("li", false);
-	f << enclose("li", true) << "Primary " << link("#produce", "PRODUCE")
+	f << enclose("li", true) << url("#build", "BUILD") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << "Primary " << url("#produce", "PRODUCE")
 	  << " orders (those that produce items from region resources, such as using the mining skill to produce iron) "
 	  << "are processed.\n" << enclose("li", false);
 	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED)) {
-		f << enclose("li", true) << link("#entertain", "ENTERTAIN") << " orders are processed.\n"
+		f << enclose("li", true) << url("#entertain", "ENTERTAIN") << " orders are processed.\n"
 		  << enclose("li", false);
 	}
-	f << enclose("li", true) << link("#work", "WORK") << " orders are processed.\n" << enclose("li", false);
+	f << enclose("li", true) << url("#work", "WORK") << " orders are processed.\n" << enclose("li", false);
 	f << enclose("ul", false);
 	f << enclose("li", false);
-	f << enclose("li", true) << "Teleportation spells are " << link("#cast", "CAST") << ".\n" << enclose("li", false);
+	f << enclose("li", true) << "Teleportation spells are " << url("#cast", "CAST") << ".\n" << enclose("li", false);
 
 	if (qm_exist) {
-		f << enclose("li", true) << link("#transport", "TRANSPORT") << " and " << link("#distribute", "DISTRIBUTE")
+		f << enclose("li", true) << url("#transport", "TRANSPORT") << " and " << url("#distribute", "DISTRIBUTE")
 		  << " orders are processed.\n"
 		  << enclose("li", false);
 	}
@@ -5000,7 +5000,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "within a phase, units that appear higher on the report get precedence.\n"
 	  << enclose("p", false);
 
-	f << link_ref("reportformat") << '\n';
+	f << anchor("reportformat") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Report Format\n" << enclose("h2", false);
 	f << enclose("p", true) << "The most important sections of the turn report are the \"Events During Turn\" "
@@ -5022,11 +5022,11 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << enclose("p", false);
 	f << enclose("p", true) << "At the bottom of your turn report is an Orders Template.  This template gives you "
 	  << "a formatted orders form, with all of your units listed. You may use this to fill in your orders, or write "
-	  << "them on your own. The " << link("#option", "OPTION") << " order gives you the option of giving more or "
+	  << "them on your own. The " << url("#option", "OPTION") << " order gives you the option of giving more or "
 	  << "less information in this template, or turning it off altogether. You can precede orders with an '@' sign "
 	  << "in your orders, in which case they will appear in your template on the next turn's report.\n"
 	  << enclose("p", false);
-	f << link_ref("hintsfornew") << '\n';
+	f << anchor("hintsfornew") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Hints for New Players\n" << enclose("h2", false);
 	f << enclose("p", true) << "Make sure to use the correct #ATLANTIS and UNIT lines in your orders.\n"
@@ -5039,9 +5039,9 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("p", true) << "Be conservative with your money. ";
 	if (Globals->LEADERS_EXIST) {
 		f << "Leaders especially are very hard to maintain, as they cannot usually earn enough by "
-		  << link("#work", "WORK") << "ing to pay their maintenance fee. ";
+		  << url("#work", "WORK") << "ing to pay their maintenance fee. ";
 	}
-	f << "Even once you have recruited men, notice that it is expensive for them to " << link("#study", "STUDY")
+	f << "Even once you have recruited men, notice that it is expensive for them to " << url("#study", "STUDY")
 	  << " (and become productive units), so be sure to save money to that end.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Don't leave it until the last minute to send orders.  If there is a delay in the "
@@ -5052,7 +5052,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << enclose("p", false);
 
 	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
-		f << link_ref("specialcommands") << '\n';
+		f << anchor("specialcommands") << '\n';
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << enclose("h2", true) << "Special Commands\n" << enclose("h2", false);
 		f << enclose("p", true) << "These special commands have been added via the scripts processing the email "
@@ -5061,7 +5061,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "submissions, so if you have a problem, or if you attempt to abuse the system, it will get noticed and "
 		  << "it will be tracked down.\n"
 		  << enclose("p", false);
-		f << link_ref("_create") << '\n';
+		f << anchor("_create") << '\n';
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << enclose("h4", true) << "#create \"faction name\" \"password\"\n" << enclose("h4", false);
 		f << enclose("p", true) << "This will create a new faction with the desired name and password, and it will "
@@ -5076,7 +5076,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "#create \"Mighty Ducks\" \"quack\"\n"
 		  << example_end();
 
-		f << link_ref("_resend") << '\n';
+		f << anchor("_resend") << '\n';
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << enclose("h4", true) << "#resend [faction] \"password\"\n" << enclose("h4", false);
 		f << enclose("p", true) << "The faction number and your current password (if you have one) are required. "
@@ -5089,7 +5089,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "#resend 999 \"quack\"\n"
 		  << example_end();
 
-		f << link_ref("_times") << '\n';
+		f << anchor("_times") << '\n';
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << enclose("h4", true) << "#times [faction] \"password\"\n" << enclose("h4", false)
 		  << "[body of article]\n"
@@ -5115,7 +5115,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "---------------------------------\n"
 		  << example_end();
 
-		f << link_ref("_rumor") << '\n';
+		f << anchor("_rumor") << '\n';
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << enclose("h4", true) << "#rumor [faction] \"password\"\n" << enclose("h4", false)
 		  << "[body of rumor]\n"
@@ -5131,7 +5131,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "#end\n"
 		  << example_end();
 
-		f << link_ref("_remind") << '\n';
+		f << anchor("_remind") << '\n';
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << enclose("h4", true) << "#remind [faction] \"password\"\n" << enclose("h4", false);
 		f << enclose("p", true) << "This order will have the server find the most recent set of orders you have "
@@ -5142,7 +5142,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "#remind 999 \"quack\"\n"
 		  << example_end();
 
-		f << link_ref("_email") << '\n';
+		f << anchor("_email") << '\n';
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << enclose("h4", true) << "#email [unit]\n" << enclose("h4", false)
 		  << "[text of email]\n";
@@ -5174,9 +5174,9 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << example_end();
 	}
 
-	// Thise needs updating post 4.0.5 (with whomever did 5.0 and now with Artem).. Also should link to the 
-	// github repo and NOT link to the yahoo group which is, I believe, dead.
-	f << link_ref("credits") << '\n';
+	// This needs updating post 4.0.5 (with whomever did 5.0 and now with Artem).. Also should url to the
+	// github repo and NOT url to the yahoo group which is, I believe, dead.
+	f << anchor("credits") << '\n';
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << enclose("h2", true) << "Credits\n" << enclose("h2", false);
 	f << enclose("p", true) << "Atlantis was originally created and programmed by Russell Wallace. Russell Wallace "
@@ -5187,12 +5187,12 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << enclose("p", false);
 	f << enclose("p", true) << "Larry Stanbery created the Atlantis 4.0.4+ derivative.\n"
 	  << enclose("p", false);
-	f << enclose("p", true) << link("mailto:jtraub@dragoncat.net", "JT Traub") << " took over the source code "
+	f << enclose("p", true) << url("mailto:jtraub@dragoncat.net", "JT Traub") << " took over the source code "
 	  << "and merged the then forking versions of 4.0.4c and 4.0.4+ back into 4.0.5 along with modifications of his "
 	  << "own and has been maintaining the code.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "Development of the code is open and there is a egroup devoted to it located at "
-	  << link("http://groups.yahoo.com/group/atlantisdev", "The YahooGroups AtlantisDev egroup")
+	  << url("http://groups.yahoo.com/group/atlantisdev", "The YahooGroups AtlantisDev egroup")
 	  << ". Please join this egroup if you work on the code and share your changes back into the codebase as a "
 	  << "whole\n"
 	  << enclose("p", false);

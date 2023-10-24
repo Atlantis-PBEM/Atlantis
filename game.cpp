@@ -41,6 +41,9 @@
 #include <fstream>
 #include <filesystem>
 
+#include "external/nlohmann/json.hpp"
+using json = nlohmann::json;
+
 using namespace std;
 
 Game::Game()
@@ -69,6 +72,8 @@ Game::~Game()
 	delete events;
 	ppUnits = 0;
 	maxppunits = 0;
+  	// Return the global array to it's original state. (needed for unit tests)
+  	FactionTypes->clear();
 }
 
 int Game::TurnNumber()
@@ -915,7 +920,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 									int lvl = u->GetRealSkill(sk);
 									if (lvl > pFac->skills.GetDays(sk)) {
 										pFac->skills.SetDays(sk, lvl);
-										pFac->shows.Add(new ShowSkill(sk,lvl));
+										pFac->shows.push_back({ .skill = sk, .level = lvl });
 									}
 									if (!u->gm_alias) {
 										u->Event(AString("Is taught ") +
@@ -1189,12 +1194,13 @@ void Game::WriteReport()
 	MakeFactionReportLists();
 	CountAllSpecialists();
 
-	int ** citems = new int* [factionseq];
+	size_t ** citems = nullptr;
 	
 	if (Globals->FACTION_STATISTICS) {
+		citems = new size_t * [factionseq];
 		for (int i = 0; i < factionseq; i++)
 		{
-			citems [i] = new int [NITEMS];
+			citems [i] = new size_t [NITEMS];
 			for (int j = 0; j < NITEMS; j++)
 			{
 				citems [i][j] = 0;
@@ -1205,18 +1211,31 @@ void Game::WriteReport()
 
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
-		AString str = "report.";
-		str = str + fac->num;
+		string str = "report." + to_string(fac->num);
 
-		if (!fac->IsNPC() ||
-				((((month == 0) && (year == 1)) || Globals->GM_REPORT) &&
-			(fac->num == 1))) {
-			ofstream f(str.const_str(), ios::out|ios::ate);
-			if (f.is_open()) {
-				fac->WriteReport(f, this, citems);
+		if (!fac->IsNPC() || fac->gets_gm_report(this)) {
+			if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_TEXT) {
+				ofstream f(str, ios::out|ios::ate);
+				if (f.is_open()) {
+					fac->write_text_report(f, this, citems);
+				}
+			}
+			if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_JSON) {
+				ofstream jsonf(str + ".json", ios::out | ios::ate);
+				if (jsonf.is_open()) {
+					json json_obj;
+					fac->write_json_report(json_obj, this, citems);
+					jsonf << json_obj.dump(2);
+				}
 			}
 		}
 		Adot();
+	}
+
+	// stop leaking memory
+	if (Globals->FACTION_STATISTICS) {
+		for (auto i = 0; i < factionseq; i++) delete [] citems [i];
+		delete [] citems;
 	}
 }
 
@@ -2114,7 +2133,7 @@ void Game::WriteTimesArticle(AString article)
 }
 
 
-void Game::CountItems (int ** citems)
+void Game::CountItems(size_t ** citems)
 {
 	int i = 0;
 	forlist (&factions)
@@ -2126,9 +2145,8 @@ void Game::CountItems (int ** citems)
 			{
 				citems[i][j] = CountItem (fac, j);
 			}
-			
-			i++;
 		}
+		i++;
 	}
 }
 
@@ -2136,7 +2154,7 @@ int Game::CountItem (Faction * fac, int item)
 {
 	if (ItemDefs[item].type & IT_SHIP) return 0;
 	
-	int all = 0;
+	size_t all = 0;
 	forlist (&(fac->present_regions))
 	{
 		ARegionPtr * r = (ARegionPtr *) elem;

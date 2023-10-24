@@ -1793,7 +1793,11 @@ AString *ShowSkill::Report(Faction *f)
 					temp2 += "]";
 			}
 			if (f) {
-				f->objectshows.Add(ObjectDescription(i));
+				AString *desc = ObjectDescription(i);
+				if (desc) {
+					f->objectshows.push_back(desc->const_str());
+					delete desc;
+				}
 			}
 		}
 	}

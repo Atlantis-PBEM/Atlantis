@@ -59,6 +59,10 @@ I can see what the Item.cpp docs look like.
 class Game
 {
 	friend class Faction;
+	// Rather than making all of the functions & variables public, we can allow this special class to access them.
+	// This class won't be defined except in the unit test code, though it could be used in other places if there
+	// were a good reason to do so.
+	friend class UnitTestHelper;
 
 public:
 	Game();
@@ -600,7 +604,7 @@ private:
 	void GetDFacs(ARegion *, Unit *, AList &);
 
 	// For faction statistics
-	void CountItems(int **);
+	void CountItems(size_t **citems);
 	int CountItem(Faction *, int);
 };
 

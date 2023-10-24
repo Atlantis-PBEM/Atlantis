@@ -2959,7 +2959,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			oldlvl = u->faction->skills.GetDays(skill->type);
 			if (newlvl > oldlvl) {
 				for (int i=oldlvl+1; i<=newlvl; i++) {
-					u->faction->shows.Add(new ShowSkill(skill->type, i));
+					u->faction->shows.push_back({ .skill = skill->type, .level = i });
 				}
 				u->faction->skills.SetDays(skill->type, newlvl);
 			}

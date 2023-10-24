@@ -23,7 +23,7 @@ ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
   events.o events-battle.o events-assassination.o mapgen.o simplex.o namegen.o \
   indenter.o
 
-UNITTEST_SRC = unittest/main.cpp $(wildcard unittest/*_test.cpp)
+UNITTEST_SRC = unittest/main.cpp unittest/testhelper.cpp $(wildcard unittest/*_test.cpp)
 UNITTEST_OBJECTS = $(patsubst unittest/%.cpp,unittest/obj/%.o,$(UNITTEST_SRC))
 
 OBJECTS =  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS))

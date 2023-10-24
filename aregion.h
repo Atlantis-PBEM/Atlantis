@@ -45,6 +45,9 @@ class ARegionArray;
 #include "graphs.h"
 #include "mapgen.h"
 
+#include "external/nlohmann/json.hpp"
+using json = nlohmann::json;
+
 #include <map>
 #include <vector>
 #include <functional>
@@ -199,6 +202,7 @@ class ARegion : public AListElem
 		void WriteEconomy(ostream& f, Faction *, int);
 		void WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen);
 		void WriteReport(ostream& f, Faction *fac, int month, ARegionList *pRegions);
+		void write_json_report(json& j, Faction *fac, int month, ARegionList *pRegions);
 		// DK
 		void WriteTemplate(ostream&  f, Faction *, ARegionList *, int);
 		void WriteTemplateHeader(ostream& f, Faction *, ARegionList *, int);

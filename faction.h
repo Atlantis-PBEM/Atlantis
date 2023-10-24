@@ -42,9 +42,16 @@ class Game;
 #include "alist.h"
 #include "astring.h"
 
+#include "external/nlohmann/json.hpp"
+using json = nlohmann::json;
+
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <iostream>
+#include <sstream>
+
+using namespace std;
 
 enum {
 	A_HOSTILE,
@@ -124,6 +131,27 @@ public:
 	Faction * ptr;
 };
 
+// Collect the faction statistics for display in the report
+struct FactionStatistic {
+	string item_name;
+	size_t rank;
+	size_t max;
+	size_t total;
+
+	// This needs to be a friend function so that the json library can call it.  This can only work for simple
+	// objects/structs that require no additional parameters to be passed in.  On the other hand, for simple
+	// structures this is nice, and works with things like STL containers of structs to make the entire container
+	// serializable to json.
+	friend void to_json(json& j, const FactionStatistic& s) {
+		j = json{{"item_name", s.item_name}, {"rank", s.rank }, {"max", s.max }, {"total", s.total}};
+	};
+
+	friend ostream& operator <<(ostream& os, const FactionStatistic& s) {
+		os << left << setw(42) << s.item_name << setw(6) << s.rank << setw(11) << s.max << s.total << right;
+		return os;
+	};
+};
+
 class Faction : public AListElem
 {
 public:
@@ -144,7 +172,9 @@ public:
 	void Event(const AString &);
 	
 	AString FactionTypeStr();
-	void WriteReport(ostream& f, Game *pGame, int ** citems);
+	void write_text_report(ostream& f, Game *pGame, size_t **citems);
+	void write_json_report(json& j, Game *pGame, size_t **citems);
+
 	// LLS - write order template
 	void WriteTemplate(ostream& f, Game *pGame);
 	void WriteFacInfo(ostream& f);
@@ -202,6 +232,8 @@ public:
 	void RecordActivity(ARegion *region, FactionActivity type);
 	bool IsActivityRecorded(ARegion *region, FactionActivity type);
 
+	bool gets_gm_report(Game *game);
+
 	/* Used when writing reports */
 	AList present_regions;
 	
@@ -217,9 +249,10 @@ public:
 	AList errors;
 	AList events;
 	AList battles;
-	AList shows;
-	AList itemshows;
-	AList objectshows;
+
+	vector<ShowSkill> shows;
+	vector<string> itemshows;
+	vector<string> objectshows;
 
 	// These are used for 'granting' units to a faction via the players.in
 	// file
@@ -228,7 +261,14 @@ public:
 	int noStartLeader;
 	int startturn;
 
-	void WriteFactionStats(ostream& f, Game *pGame, int ** citems);
+private:
+	vector<FactionStatistic> compute_faction_statistics(Game *game, size_t **citems);
+	void gm_report_setup(Game *game);
+	
+	// Split the gm report from the normal report to make the code more readable.
+	void write_text_gm_report(ostream& f, Game *game);
+	void write_json_gm_report(json& j, Game *game);
+
 };
 
 Faction * GetFaction(AList *,int);

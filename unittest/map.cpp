@@ -37,7 +37,15 @@ void ARegionList::CreateAbyssLevel(int level, char const *name) { }
 /// For unit testing do nothing.
 void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *name) { }
 
-void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const *name) { }
+void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const *name) {
+	// For the test world, make a very very small 2x2 world with 1 town in the plains
+	// and 1 hex of each of forest, mountains, and desert.
+	MakeRegions(level, xSize, ySize);
+	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
+	AssignTypes(pRegionArrays[level]);
+	FinalSetup(pRegionArrays[level]);
+}
 
 void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name) { }
 
@@ -70,6 +78,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				
 				Add(reg);
 				arr->SetRegion(x, y, reg);
+				Adot();
 			}
 		}
 	}
@@ -117,7 +126,26 @@ void ARegionList::RandomTerrain(ARegionArray *pArr) { }
 
 void ARegionList::MakeUWMaze(ARegionArray *pArr) { }
 
-void ARegionList::AssignTypes(ARegionArray *pArr) { }
+void ARegionList::AssignTypes(ARegionArray *pArr) {
+	// we have a fixed world, so just assign the types.
+	int terrains[] = { R_PLAIN, R_FOREST, R_MOUNTAIN, R_DESERT };
+	int loc = 0;
+
+	for (auto x = 0; x < pArr->x; x++) {
+		for (auto y = 0; y < pArr->y; y++) {
+			ARegion *reg = pArr->GetRegion(x, y);
+			if (!reg) continue;
+
+			// Add a town at the first loc (the plains)
+			if (loc == 0) {
+				reg->MakeStartingCity();
+			}
+
+			reg->type = terrains[loc++];
+			reg->race = TerrainDefs[reg->type].races[0];
+		}
+	}
+}
 
 void ARegionList::UnsetRace(ARegionArray *pArr) { }
 
@@ -125,7 +153,16 @@ void ARegionList::RaceAnchors(ARegionArray *pArr) { }
 
 void ARegionList::GrowRaces(ARegionArray *pArr) { }
 
-void ARegionList::FinalSetup(ARegionArray *pArr) { }
+void ARegionList::FinalSetup(ARegionArray *pArr) {
+	for (auto x = 0; x < pArr->x; x++) {
+		for (auto y = 0; y < pArr->y; y++) {
+			ARegion *reg = pArr->GetRegion(x, y);
+			if (!reg) continue;
+			reg->SetName(AGetNameString(0));
+			reg->Setup();
+		}
+	}
+ }
 
 void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo) { }
 
