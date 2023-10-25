@@ -27,7 +27,10 @@
 
 #include "gamedefs.h"
 #include "alist.h"
-#include "fileio.h"
+#include "astring.h"
+#include <iostream>
+
+using namespace std;
 
 #define P_BIG 40
 #define P_SMALL 20

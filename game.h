@@ -83,7 +83,7 @@ public:
 	// LLS
 	void UnitFactionMap();
 	int GenRules(const AString &, const AString &, const AString &);
-	void WriteFactionTypeDescription(std::ostringstream &buffer, Faction &fac);
+	string FactionTypeDescription(Faction &fac);
 	int DoOrdersCheck(const AString &strOrders, const AString &strCheck);
 
 	Faction *AddFaction(int noleader = 0, ARegion *pStart = NULL);

@@ -33,6 +33,13 @@ ut::suite<"Indent Formatter"> indent_formatter_suite = []
     expect(eq(ss.str(), string("  test\n    test\n  test\n")));
   };
 
+  "decreasing indent when it's already 0 leaves it at 0"_test = []
+  {
+    stringstream ss;
+    ss << indent::wrap(20, 5, 0) << indent::decr << "test\n";
+    expect(eq(ss.str(), string("test\n")));
+  };
+
   "clear removes formatter"_test = []
   {
     stringstream ss;
@@ -79,6 +86,13 @@ ut::suite<"Indent Formatter"> indent_formatter_suite = []
     expect(eq(ss.str(), string("t est\n  tes\n  tba\n  r\n")));
   };
 
+  "wrap with different wrapped line indent works"_test = []
+  {
+    stringstream ss;
+    ss << indent::wrap(5, 2, 1) << "t esttestbar\n";
+    expect(eq(ss.str(), string("t est\n test\n bar\n")));
+  };
+
   "comment prefixes line with semicolon"_test = []
   {
     stringstream ss;
@@ -99,5 +113,14 @@ ut::suite<"Indent Formatter"> indent_formatter_suite = []
     ss << indent::incr << "test";
     ss.flush();
     expect(eq(ss.str(), string("  test")));
+  };
+
+  "push and pop indent works"_test = []
+  {
+    stringstream ss;
+    ss << indent::incr << "test\n";
+    ss << indent::push_indent(0) << "test\n";
+    ss << indent::pop_indent() << "test\n";
+    expect(eq(ss.str(), string("  test\ntest\n  test\n")));
   };
 };

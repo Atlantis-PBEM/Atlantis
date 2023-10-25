@@ -30,7 +30,6 @@ class Battle;
 
 #include "astring.h"
 #include "alist.h"
-#include "fileio.h"
 #include "army.h"
 #include "items.h"
 #include "events.h"

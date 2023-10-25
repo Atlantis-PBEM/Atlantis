@@ -39,7 +39,6 @@ class ARegionArray;
 #include "faction.h"
 #include "alist.h"
 #include "unit.h"
-#include "fileio.h"
 #include "production.h"
 #include "market.h"
 #include "object.h"

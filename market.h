@@ -26,7 +26,10 @@
 #define MARKET_CLASS
 
 #include "alist.h"
-#include "fileio.h"
+#include "astring.h"
+#include <iostream>
+
+using namespace std;
 
 enum {
 	M_BUY,

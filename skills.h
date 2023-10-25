@@ -35,7 +35,6 @@ class Faction;
 class Skill;
 class SkillList;
 
-#include "fileio.h"
 #include "astring.h"
 #include "gamedefs.h"
 #include "alist.h"

@@ -43,7 +43,6 @@ class UnitId;
 #include "alist.h"
 #include "gameio.h"
 #include "orders.h"
-#include "fileio.h"
 #include "skills.h"
 #include "items.h"
 #include "object.h"

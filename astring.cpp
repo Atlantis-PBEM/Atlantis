@@ -404,8 +404,8 @@ istream& operator>>(istream &is,AString &s)
 	return is;
 }
 
-const std::string plural(int count, const std::string &one, const std::string &many) {
-	return count > 1 ? many : one;
+const string plural(int count, const std::string &one, const std::string &many) {
+	return count != 1 ? many : one;
 }
 
 const std::string join(const std::string &delimeter, const std::vector<std::string>& items) {
