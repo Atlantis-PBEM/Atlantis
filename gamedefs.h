@@ -800,6 +800,17 @@ public:
 	// Only uses half of the riding bonus (round up) for combat purposes
 	// For example, WING RIDI 5 will be (5 / 2) rounded up = RIDI 3. Horse (3 / 2) rounded up = 2.
 	int HALF_RIDING_BONUS;
+
+	// New Report output formats
+	enum {
+		// No report (bad idea)
+		REPORT_FORMAT_NONE = 0x0,
+		// Text format, old-school
+		REPORT_FORMAT_TEXT = 0x1,
+		// json format, for machine parsing
+		REPORT_FORMAT_JSON = 0x2,
+	};
+	int REPORT_FORMAT;
 };
 
 extern GameDefs *Globals;

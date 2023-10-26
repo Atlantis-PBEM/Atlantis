@@ -36,7 +36,6 @@ char const *as[] = {
 	"Friendly",
 	"Ally"
 };
-
 char const **AttitudeStrs = as;
 
 const std::string F_WAR = "War";
@@ -54,8 +53,18 @@ char const *tp[] = {
 	"long",
 	"map"
 };
-
 char const **TemplateStrs = tp;
+
+// Quit states
+const string qs[] = {
+	"none",
+	"quit order",
+	"quit by gm"
+	"quit and restart",
+	"won game"
+	"game over",
+};
+const string *QuitStrs = qs;
 
 int ParseTemplate(AString *token)
 {
@@ -301,144 +310,366 @@ AString Faction::FactionTypeStr()
 	return temp;
 }
 
-void PadStrEnd(AString& str, int len) {
-	int size = str.Len();
-	for (int i = len; i > size; i--) str += AString(" ");
-}
+vector<FactionStatistic> Faction::compute_faction_statistics(Game *game, size_t **citems) {
+	vector<FactionStatistic> stats;
+	// To allow testing, just return an empty vector if we don't have any item arrays inbound
+	if (!citems) return stats;
 
-void Faction::WriteFactionStats(ostream& f, Game *pGame, int ** citems) {
-	f << ";Item                                      Rank  Max        Total\n";
-	f << ";=====================================================================\n";
-	for (int i = 0; i < NITEMS; i++)
-	{
+	auto myfaction = this->num - 1; // offset by 1 since the citems array are 0-based and factions are 1-based.
+
+	for (auto i = 0; i < NITEMS; i++) {
 		if (ItemDefs[i].type & IT_SHIP) continue;
+		if(citems[myfaction][i] == 0) continue;
+		size_t place = 1;
+		size_t max = 0;
+		size_t total = 0;
 
-		int num = 0;
-		forlist(&present_regions)
-		{
-			ARegionPtr *r = (ARegionPtr *)elem;
-			forlist(&r->ptr->objects)
-			{
-				Object *obj = (Object *)elem;
-				forlist(&obj->units)
-				{
-					Unit *unit = (Unit *)elem;
-					if (unit->faction == this)
-						num += unit->items.GetNum(i);
-				}
-			}
-		}
-
-		if (!num) continue;
-		
-		int place = 1;
-		int max = 0;
-		int total = 0;
-		for (int pl = 0; pl < pGame->factionseq; pl++)
-		{
-			if (citems[pl][i] > num)
-				place++;
-			if (max < citems[pl][i])
-				max = citems[pl][i];
+		for (int pl = 0; pl < game->factionseq; pl++) {
+			if (citems[pl][i] > citems[myfaction][i]) place++;
+			if (max < citems[pl][i]) max = citems[pl][i];
 			total += citems[pl][i];
 		}
-		
-		string name = ItemString(i, num).const_str();
-		string str = ";" + name;
+
+		string name = ItemString(i, citems[myfaction][i]).const_str();
 		if (ItemDefs[i].type & IT_MONSTER && ItemDefs[i].type == IT_ILLUSION) {
-			str += " (illusion)";
+			name += " (illusion)";
 		}
-		f << left << setw(43) << str;
-		f << setw(6) << place;
-		f << setw(11) << max;
-		f << total << right << '\n';
+		stats.push_back({ .item_name = name, .rank = place, .max = max, .total = total });
 	}
+	return stats;
 }
 
-void Faction::WriteReport(ostream& f, Game *pGame, int ** citems)
+inline bool Faction::gets_gm_report(Game *game) {
+	return IsNPC() && num == 1 && (Globals->GM_REPORT || (game->month == 0 && game->year == 1));
+}
+
+struct GmData {
+	vector<ShowSkill> skills;
+	vector<string> items;
+	vector<string> objects;
+};
+
+static inline GmData collect_gm_data() {
+	GmData data;
+	for (auto i = 0; i < NSKILLS; i++)
+		for (auto j = 1; j < 6; j++)
+			data.skills.push_back({ .skill = i, .level = j });
+
+	for (auto i = 0; i < NITEMS; i++) {
+		AString *show = ItemDescription(i, 1);
+		if (show) {
+			data.items.push_back(show->const_str());
+			delete show;
+		}
+	}
+
+	for (auto i = 0; i < NOBJECTS; i++) {
+		AString *show = ObjectDescription(i);
+		if (show) {
+			data.objects.push_back(show->const_str());
+			delete show;
+		}
+	}
+	return data;
+}
+
+void Faction::write_text_gm_report(ostream& f, Game *game) {
+	GmData data = collect_gm_data();
+
+	bool need_header = true;
+	for (auto &skillshow : data.skills) {
+		if(need_header) { f << "Skill reports:\n"; need_header = false; }
+		AString *string = skillshow.Report(this);
+		if (string) {
+			f << '\n' << string->const_str() << '\n';
+			delete string;
+		}
+	}
+	if(!need_header) f << '\n';
+
+	need_header = true;
+	for(auto &itemshow : data.items) {
+		if(need_header) { f << "Item reports:\n"; need_header = false; }
+			f << '\n' << itemshow << '\n';
+	}
+	if (!need_header) f << '\n';
+
+	need_header = true;
+	for(auto &objectshow : data.objects) {
+		if(need_header) { f << "Object reports:\n"; need_header = false; }
+		f << '\n' << objectshow << '\n';
+	}
+	if (!need_header) f << '\n';
+
+	present_regions.DeleteAll();
+	forlist(&(game->regions)) {
+		ARegion *reg = (ARegion *)elem;
+		ARegionPtr *ptr = new ARegionPtr;
+		ptr->ptr = reg;
+		present_regions.Add(ptr);
+	}
+	{
+		// extra block because of foreach macro.
+		forlist(&present_regions) {
+			((ARegionPtr*)elem)->ptr->WriteReport(f, this, game->month, &(game->regions));
+		}
+	}
+	present_regions.DeleteAll();
+
+	errors.DeleteAll();
+	events.DeleteAll();
+	battles.DeleteAll();
+}
+
+void Faction::write_json_gm_report(json& j, Game *game) {
+	GmData data = collect_gm_data();
+
+	json skills = json::array();
+	for (auto &skillshow : data.skills) {
+		AString *string = skillshow.Report(this);
+		if (string) {
+			skills.push_back(string->const_str());
+			delete string;
+		}
+	}
+	j["skill_reports"] = skills;
+
+	// These two are easier since we already have a vector of strings, we can just auto-convert to a json array.
+	j["item_reports"] = data.items;
+	j["object_reports"] = data.objects;
+
+	present_regions.DeleteAll();
+	forlist(&(game->regions)) {
+		ARegion *reg = (ARegion *)elem;
+		ARegionPtr *ptr = new ARegionPtr;
+		ptr->ptr = reg;
+		present_regions.Add(ptr);
+	}
+	json regions = json::array();
+	{
+		// extra block because of foreach macro.
+		forlist(&present_regions) {
+			json region;
+			((ARegionPtr*)elem)->ptr->write_json_report(region, this, game->month, &(game->regions));
+			regions.push_back(region);
+		}
+	}
+	j["regions"] = regions;
+	present_regions.DeleteAll();
+
+	errors.DeleteAll();
+	events.DeleteAll();
+	battles.DeleteAll();
+}
+
+void Faction::write_json_report(json& j, Game *game, size_t **citems) {
+	if (gets_gm_report(game)) {
+		write_json_gm_report(j, game);
+		return;
+	}
+
+	if (Globals->FACTION_STATISTICS) {
+		j["statistics"] = compute_faction_statistics(game, citems);
+	}
+
+	// This can be better, but for now..
+	AString engine_ver = ATL_VER_STRING(CURRENT_ATL_VER);
+	AString rules_ver = ATL_VER_STRING(Globals->RULESET_VERSION);
+	j["engine"] = {
+		{ "version", engine_ver.const_str() },
+		{ "ruleset", Globals->RULESET_NAME },
+		{ "ruleset_version", rules_ver.const_str() }
+	};
+
+	string s = name->const_str();
+	j["name"] = s.substr(0, s.find(" (")); // remove the faction number from the name for json output
+	j["number"] = num;
+	j["email"] = address->const_str();
+	j["password"] = password->const_str();
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		j["type"] = json::object();
+		for (auto &ft : *FactionTypes) {
+			string factype = ft;
+			transform(factype.begin(), factype.end(), factype.begin(), ::tolower);
+			if (type[ft]) j["type"][factype] = type[ft];
+		}
+	}
+	j["times_sent"] = (times != 0);
+	j["password_unset"] = (!password || *password == "none");
+	if(Globals->MAX_INACTIVE_TURNS) {
+		int cturn = game->TurnNumber() - lastorders;
+		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
+			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
+			j["administrative"]["inactivity_deletion_turns"] = cturn;
+		}
+	}
+	if(!exists) {
+		j["administrative"]["quit"] = QuitStrs[quit ? quit : QUIT_BY_ORDER];
+	}
+	j["date"] = {
+		{ "month", MonthNames[game->month] },
+		{ "year", game->year }
+	};
+
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
+		j["status"]["mages"] = {
+			{ "current", nummages },
+			{ "allowed", game->AllowedMages(this) }
+		};
+
+		if (Globals->APPRENTICES_EXIST) {
+			j["status"]["apprentices"] = {
+				{ "current", numapprentices },
+				{ "allowed", game->AllowedApprentices(this) }
+			};
+		}
+	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if (Globals->FACTION_ACTIVITY != FactionActivityRules::DEFAULT) {
+			int currentCost = GetActivityCost(FactionActivity::TAX);
+			int maxAllowedCost = game->AllowedMartial(this);
+			bool isMerged = Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED;
+			j["status"][(isMerged ? "regions" : "activity")] = {
+				{ "current", currentCost },
+				{ "allowed", maxAllowedCost }
+			};
+		} else {
+			j["status"]["tax_regions"] = {
+				{ "current", GetActivityCost(FactionActivity::TAX) },
+				{ "allowed", game->AllowedTaxes(this) }
+			};
+			j["status"]["trade_regions"] = {
+				{ "current", GetActivityCost(FactionActivity::TRADE) },
+				{ "allowed", game->AllowedTrades(this) }
+			};
+		}
+		if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+			j["status"]["quartermasters"] = {
+				{ "current", numqms },
+				{ "allowed", game->AllowedQuarterMasters(this) }
+			};
+		}
+		if (Globals->TACTICS_NEEDS_WAR) {
+			j["status"]["tacticians"] = {
+				{ "current", numtacts },
+				{ "allowed", game->AllowedTacticians(this) }
+			};
+		}
+		j["status"]["mages"] = {
+			{ "current", nummages },
+			{ "allowed", game->AllowedMages(this) }
+		};
+		if (Globals->APPRENTICES_EXIST) {
+			j["status"]["apprentices"] = {
+				{ "current", numapprentices },
+				{ "allowed", game->AllowedApprentices(this) }
+			};
+		}
+	}
+
+	// Handle errors, battles, events etc in the next cuts.
+	/*
+	if (errors.Num()) {
+		// Handle errors better.  For now, just put them into an 'errors' vector.
+		// We could give nice json'y output like which unit, which region, etc.
+		j["errors"] = json::array();
+		forlist((&errors)) {
+			j["errors"].push_back(((AString *)elem)->const_str());
+		}
+		errors.DeleteAll();
+	}
+
+	if (battles.Num()) {
+		json jbattles = json::array();
+		forlist(&battles) {
+			json jbattle = json::object();
+			// we will obviously want to make this into json-y output
+			((BattlePtr *) elem)->ptr->report_json(jbattle, this);
+			jbattles.push_back(jbattle);
+		}
+		j["battles"] = jbattles;
+		battles.DeleteAll();
+	}
+
+	if (events.Num()) {
+		// events can also be handled as json objects rather than just strings.
+		f << "Events during turn:\n";
+		forlist((&events)) {
+			f << ((AString *) elem)->const_str() << '\n';
+		}
+		events.DeleteAll();
+		f << '\n';
+	}
+	*/
+
+	/* Attitudes */
+	j["attitudes"] = json::object();
+	string defattitude = AttitudeStrs[defaultattitude];
+	transform(defattitude.begin(), defattitude.end(), defattitude.begin(), ::tolower);
+	j["attitudes"]["default"] = defattitude;
+	for (int i=0; i<NATTITUDES; i++) {
+		string attitude = AttitudeStrs[i];
+		// how annoying that this is the easiest way to do this.
+		transform(attitude.begin(), attitude.end(), attitude.begin(), ::tolower);
+		j["attitudes"][attitude] = json::array(); // [] = json::array();
+		forlist((&attitudes)) {
+			Attitude* a = (Attitude *) elem;
+			if (a->attitude == i) {
+				// Grab that faction so we can get it's number and name, and strip the " (num)" from the name for json
+				Faction *fac = GetFaction(&(game->factions), a->factionnum);
+				string facname = fac->name->const_str();
+				facname = facname.substr(0, facname.find(" ("));
+				j["attitudes"][attitude].push_back({ { "name", facname }, { "number", a->factionnum } });
+			}
+		}
+		// the array will be empty if this faction has declared no other factions with that specific attitude.
+	}
+	j["unclaimed_silver"] = unclaimed;
+
+	json skills = json::array();
+	for (auto &skillshow : shows) {
+		AString *string = skillshow.Report(this);
+		if (string) {
+			skills.push_back(string->const_str());
+			delete string;
+		}
+	}
+	j["skill_reports"] = skills;
+
+	// These two are easier since we already have a vector of strings, we can just auto-convert to a json array.
+	j["item_reports"] = itemshows;
+	j["object_reports"] = objectshows;
+
+	// regions
+	json regions = json::array();
+	{
+		// extra block because of foreach macro.
+		forlist(&present_regions) {
+			json region;
+			((ARegionPtr*)elem)->ptr->write_json_report(region, this, game->month, &(game->regions));
+			regions.push_back(region);
+		}
+	}
+	j["regions"] = regions;
+}
+
+void Faction::write_text_report(ostream& f, Game *pGame, size_t ** citems)
 {
 	// make the output automatically wrap at 70 characters
 	f << indent::wrap;
 
-	if (IsNPC() && num == 1) {
-		if (Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
-			int i, j;
-			// Put all skills, items and objects in the GM report
-			shows.DeleteAll();
-			for (i = 0; i < NSKILLS; i++) {
-				for (j = 1; j < 6; j++) {
-					shows.Add(new ShowSkill(i, j));
-				}
-			}
-			if (shows.Num()) {
-				f << "Skill reports:\n";
-				forlist(&shows) {
-					AString *string = ((ShowSkill *)elem)->Report(this);
-					if (string) {
-						f << '\n' << string->const_str() << '\n';
-						delete string;
-					}
-				}
-				shows.DeleteAll();
-				f << '\n';
-			}
-
-			itemshows.DeleteAll();
-			for (i = 0; i < NITEMS; i++) {
-				AString *show = ItemDescription(i, 1);
-				if (show) {
-					itemshows.Add(show);
-				}
-			}
-			if (itemshows.Num()) {
-				f << "Item reports:\n";
-				forlist(&itemshows) {
-					f << '\n' << ((AString *)elem)->const_str() << '\n';
-				}
-				itemshows.DeleteAll();
-				f << '\n';
-			}
-
-			objectshows.DeleteAll();
-			for (i = 0; i < NOBJECTS; i++) {
-				AString *show = ObjectDescription(i);
-				if (show) {
-					objectshows.Add(show);
-				}
-			}
-			if (objectshows.Num()) {
-				f << "Object reports:\n";
-				forlist(&objectshows) {
-					f << '\n' << ((AString *)elem)->const_str() << '\n';
-				}
-				objectshows.DeleteAll();
-				f << '\n';
-			}
-
-			present_regions.DeleteAll();
-			forlist(&(pGame->regions)) {
-				ARegion *reg = (ARegion *)elem;
-				ARegionPtr *ptr = new ARegionPtr;
-				ptr->ptr = reg;
-				present_regions.Add(ptr);
-			}
-			{
-				forlist(&present_regions) {
-					((ARegionPtr*)elem)->ptr->WriteReport(f, this, pGame->month, &(pGame->regions));
-				}
-			}
-			present_regions.DeleteAll();
-		}
-		errors.DeleteAll();
-		events.DeleteAll();
-		battles.DeleteAll();
+	if(gets_gm_report(pGame)) {
+		write_text_gm_report(f, pGame);
 		return;
 	}
 
 	if (Globals->FACTION_STATISTICS) {
 		f << ";Treasury:\n";
 		f << ";\n";
-		this->WriteFactionStats(f, pGame, citems);
+		f << ";Item                                      Rank  Max        Total\n";
+		f << ";=====================================================================\n";
+		for(auto &stat : compute_faction_statistics(pGame, citems)) {
+			f << ';' << stat << '\n';
+		}
 		f << '\n';
 	}
 
@@ -559,34 +790,27 @@ void Faction::WriteReport(ostream& f, Game *pGame, int ** citems)
 		f << '\n';
 	}
 
-	if (shows.Num()) {
+	if (!shows.empty()) {
 		f << "Skill reports:\n";
-		forlist(&shows) {
-			AString* string = ((ShowSkill *) elem)->Report(this);
+		for(auto &skillshow : shows) {
+			AString *string = skillshow.Report(this);
 			if (string) {
 				f << '\n' << string->const_str() << '\n';
+				delete string;
 			}
-			delete string;
 		}
-		shows.DeleteAll();
 		f << '\n';
 	}
 
-	if (itemshows.Num()) {
+	if (!itemshows.empty()) {
 		f << "Item reports:\n";
-		forlist(&itemshows) {
-			f << '\n' << ((AString *) elem)->const_str() << '\n';
-		}
-		itemshows.DeleteAll();
+		for(auto &itemshow : itemshows) f << '\n' << itemshow << '\n';
 		f << '\n';
 	}
 
-	if (objectshows.Num()) {
+	if (!objectshows.empty()) {
 		f << "Object reports:\n";
-		forlist(&objectshows) {
-			f << '\n' << ((AString *) elem)->const_str() << '\n';
-		}
-		objectshows.DeleteAll();
+		for(auto &objectshow : objectshows) f << '\n' << objectshow << '\n';
 		f << '\n';
 	}
 
@@ -886,7 +1110,11 @@ void Faction::DiscoverItem(int item, int force, int full)
 		}
 	}
 	if (force) {
-		itemshows.Add(ItemDescription(item, full));
+		AString *desc = ItemDescription(item, full);
+		if (desc) {
+			itemshows.push_back(desc->const_str());
+			delete desc;
+		}
 		if (!full)
 			return;
 		// If we've found an item that grants a skill, give a
@@ -898,7 +1126,7 @@ void Faction::DiscoverItem(int item, int force, int full)
 			for (i = 1; i <= ItemDefs[item].maxGrant; i++) {
 				if (i > skills.GetDays(skill)) {
 					skills.SetDays(skill, i);
-					shows.Add(new ShowSkill(skill, i));
+					shows.push_back({ .skill = skill, .level = i });
 				}
 			}
 		}

@@ -62,4 +62,10 @@ ut::suite<"Faction"> faction_suite = []
     string expected = "War 2, Magic 3";
     expect(eq(current, expected));
   };
+
+  // No memory leaks.
+  delete faction;
+
+  // Return the global array to it's original state.
+  FactionTypes->clear();
 };

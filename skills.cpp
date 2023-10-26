@@ -221,12 +221,6 @@ int StudyRateAdjustment(int days, int exp)
 	return rate;
 }
 
-ShowSkill::ShowSkill(int s, int l)
-{
-	skill = s;
-	level = l;
-}
-
 void Skill::Readin(istream &f)
 {
 	AString temp, *token;

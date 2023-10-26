@@ -87,4 +87,8 @@ ut::suite<"Unit"> unit_suite = []
     expected = "Test Unit (500), Faction (1)";
     expect(eq(current, expected));
   };
+
+  // No memory leaks.
+  delete unit;
+  delete faction;
 };

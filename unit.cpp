@@ -1359,7 +1359,7 @@ int Unit::Study(int sk, int days)
 	while (lvl > shown) {
 		shown++;
 		faction->skills.SetDays(sk, shown);
-		faction->shows.Add(new ShowSkill(sk, shown));
+		faction->shows.push_back({.skill = sk, .level = shown});
 	}
 	return 1;
 }

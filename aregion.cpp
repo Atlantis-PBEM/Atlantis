@@ -1319,6 +1319,14 @@ void ARegion::WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen)
 	f << '\n';
 }
 
+void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *pRegions) {
+	// for now, just set a name which would be the name of the region from a text report.
+	// ie "Alioth Plains (1, 2) in Alioth contains Alioth City [City]."
+	// This will get broken down and become more json-y when I flesh this code out.
+	j["name"] = Print(pRegions).const_str();
+	return;
+}
+
 void ARegion::WriteReport(ostream &f, Faction *fac, int month, ARegionList *pRegions)
 {
 	Farsight *farsight = GetFarsight(&farsees, fac);

@@ -258,6 +258,7 @@ static GameDefs g = {
 	200,	// MIN_DESTROY_POINTS,
 	34,	// MAX_DESTROY_PERCENT
 	1, // HALF_RIDING_BONUS
+	GameDefs::REPORT_FORMAT_TEXT, // REPORT_FORMAT
 };
 
 GameDefs *Globals = &g;

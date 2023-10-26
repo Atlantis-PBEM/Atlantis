@@ -31,9 +31,14 @@
 #include "gamedata.h"
 
 int AGetName(int town, ARegion *reg) { return town != 0 ? 1 : 0; }
-char const *AGetNameString( int name ) { return (name == 0) ? "region" : "town"; }
+char const *AGetNameString( int name ) { return (name == 0) ? "Testing Wilds" : "Basictown"; }
 
-void Game::CreateWorld() { }
+void Game::CreateWorld() {
+    Awrite("Creating world");
+    regions.CreateLevels(1);    
+    // because of the way regions are numbered, if you want 4 hexes you need a height of 4 and a width of 2.
+    regions.CreateSurfaceLevel(0, 2, 4, "Surface");
+ }
 
 int ARegionList::GetRegType( ARegion *pReg ) { return 0; }
 
@@ -50,9 +55,62 @@ int ARegionList::GetWeather( ARegion *pReg, int month ) { return W_NORMAL; }
 
 int ARegion::CanBeStartingCity( ARegionArray *pRA ) { return 1; }
 
-void ARegion::MakeStartingCity() { }
+void ARegion::MakeStartingCity() {
+    if (!Globals->TOWNS_EXIST) return;
+	if (town) delete town;
+	
+	AddTown(TOWN_CITY);
 
-int ARegion::IsStartingCity() { return 0; }
+	if (!Globals->START_CITIES_EXIST) return;
+
+	town->hab = 125 * Globals->CITY_POP / 100;
+	while (town->pop < town->hab) town->pop += getrandom(200)+200;
+	town->dev = TownDevelopment();
+
+	float ratio;
+	Market *m;
+	markets.DeleteAll();
+	if (Globals->START_CITIES_START_UNLIMITED) {
+		for (int i=0; i<NITEMS; i++) {
+			if ( ItemDefs[i].flags & ItemType::DISABLED ) continue;
+			if ( ItemDefs[ i ].type & IT_NORMAL ) {
+				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
+					continue;
+				m = new Market(M_BUY,i,(ItemDefs[i].baseprice*5/2),-1,
+						5000,5000,-1,-1);
+				markets.Add(m);
+			}
+		}
+		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+		// hack: include wage factor of 10 in float calculation above
+		m=new Market(M_BUY,race,(int)(Wages()*4*ratio),-1, 5000,5000,-1,-1);
+		markets.Add(m);
+		if (Globals->LEADERS_EXIST) {
+			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
+			// hack: include wage factor of 10 in float calculation above
+			m = new Market(M_BUY,I_LEADERS,(int)(Wages()*4*ratio),
+					-1,5000,5000,-1,-1);
+			markets.Add(m);
+		}
+	} else {
+		SetupCityMarket();
+		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+		// hack: include wage factor of 10 in float calculation above
+		/* Setup Recruiting */
+		m = new Market( M_BUY, race, (int)(Wages()*4*ratio),
+				Population()/5, 0, 10000, 0, 2000 );
+		markets.Add(m);
+		if ( Globals->LEADERS_EXIST ) {
+			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
+			// hack: include wage factor of 10 in float calculation above
+			m = new Market( M_BUY, I_LEADERS, (int)(Wages()*4*ratio),
+					Population()/25, 0, 10000, 0, 400 );
+			markets.Add(m);
+		}
+	}
+}
+
+int ARegion::IsStartingCity() { return town != nullptr; }
 
 int ARegion::IsSafeRegion() { return 0; }
 

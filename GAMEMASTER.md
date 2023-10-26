@@ -672,7 +672,7 @@ If you wanted to switch on quartermasters, and have their level affect
 shipping costs, but not distance, you would set the variable in rules.cpp 
 like so:
 
-	Gamedefs::ALLOW_TRANSPORT | GameDefs::QM_AFFECT_COST, // TRANSPORT
+	GameDefs::ALLOW_TRANSPORT | GameDefs::QM_AFFECT_COST, // TRANSPORT
 
 Note that the different values are set using a boolean OR |, not a 
 logical OR ||.

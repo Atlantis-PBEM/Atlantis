@@ -811,7 +811,7 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				return;
 			}
 
-			u->faction->shows.Add(new ShowSkill(sk, lvl));
+			u->faction->shows.push_back({ .skill = sk, .level = lvl });
 		}
 		return;
 	}
@@ -835,7 +835,11 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				u->Error("SHOW: No such object.");
 				return;
 			}
-			u->faction->objectshows.Add(ObjectDescription(obj));
+			AString *desc = ObjectDescription(obj);
+			if (desc) {
+				u->faction->objectshows.push_back(desc->const_str());
+				delete desc;
+			}
 		}
 		if (obj >= -1)
 			return;
