@@ -296,11 +296,12 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 		}
 	}
 	if (!succ) {
-		AString temp = *(u->name) + " is caught attempting to assassinate " +
-			*(tar->name) + " in " + *(r->name) + ".";
+		stringstream temp;
+		temp << u->name << " is caught attempting to assassinate " << tar->name << " in " << r->name << ".";
+		string temp2 = temp.str();
 		forlist(seers) {
 			Faction *f = ((FactionPtr *) elem)->ptr;
-			f->Event(temp);
+			f->event(temp2);
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
 		u->PracticeAttribute("stealth");
@@ -370,11 +371,12 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	}
 
 	if (!succ) {
-		AString temp = *(u->name) + " is caught attempting to steal from " +
-			*(tar->name) + " in " + *(r->name) + ".";
+		stringstream temp;
+		temp << u->name << " is caught attempting to steal from " << tar->name << " in " << r->name << ".";
+		string temp2 = temp.str();
 		forlist(seers) {
 			Faction *f = ((FactionPtr *) elem)->ptr;
-			f->Event(temp);
+			f->event(temp2);
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
 		u->PracticeAttribute("stealth");
@@ -408,11 +410,12 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	tar->items.SetNum(so->item, tar->items.GetNum(so->item) - amt);
 
 	{
-		AString temp = *(u->name) + " steals " +
-			ItemString(so->item, amt) + " from " + *(tar->name) + ".";
+		stringstream temp;
+		temp << u->name << " steals " << ItemString(so->item, amt) << " from " << tar->name << ".";
+		string temp2 = temp.str();
 		forlist(seers) {
 			Faction *f = ((FactionPtr *) elem)->ptr;
-			f->Event(temp);
+			f->event(temp2);
 		}
 	}
 
@@ -639,8 +642,9 @@ void Game::RunFindUnit(Unit *u)
 		if (!all) {
 			fac = GetFaction(&factions, f->find);
 			if (fac) {
-				u->faction->Event(AString("The address of ") + *(fac->name) +
-						" is " + *(fac->address) + ".");
+				stringstream temp;
+				temp << "The address of " << fac->name << " is " << fac->address << ".";
+				u->faction->event(temp.str());
 			} else {
 				u->Error(AString("FIND: ") + f->find + " is not a valid "
 						"faction number.");
@@ -649,8 +653,9 @@ void Game::RunFindUnit(Unit *u)
 			forlist(&factions) {
 				fac = (Faction *)elem;
 				if (fac) {
-					u->faction->Event(AString("The address of ") +
-							*(fac->name) + " is " + *(fac->address) + ".");
+					stringstream temp;
+					temp << "The address of " << fac->name << " is " << fac->address << ".";
+					u->faction->event(temp.str());
 				}
 			}
 		}
@@ -844,8 +849,9 @@ void Game::RunPillageRegion(ARegion *reg)
 				forlist(facs) {
 					Faction *fp = ((FactionPtr *) elem)->ptr;
 					if (fp != u->faction) {
-						fp->Event(*(u->name) + " pillages " +
-								*(reg->name) + ".");
+						stringstream temp;
+						temp << u->name << " pillages " << reg->name << ".";
+						fp->event(temp.str());
 					}
 				}
 			}
@@ -1168,10 +1174,11 @@ void Game::EndGame(Faction *pVictor)
 		else
 			pFac->quit = QUIT_GAME_OVER;
 
-		if (pVictor)
-			pFac->Event(*(pVictor->name) + " has won the game!");
-		else
-			pFac->Event("The game has ended with no winner.");
+		if (pVictor) {
+			string temp(pVictor->name->const_str());
+			pFac->event(temp + " has won the game!");
+		} else
+			pFac->event("The game has ended with no winner.");
 	}
 
 	gameStatus = GAME_STATUS_FINISHED;
@@ -2023,7 +2030,7 @@ void Game::AssessMaintenance()
 			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
 				Unit *u = (Unit *) elem;
-				if (!(u->faction->IsNPC())) {
+				if (!(u->faction->is_npc)) {
 					r->visited = 1;
 					if (quests.CheckQuestVisitTarget(r, u, &quest_rewards)) {
 						u->Event(AString("You have completed a pilgrimage!") + quest_rewards);
@@ -2576,7 +2583,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			u->Error(ord + ": " + o->target->Print() +
 					" is not a member of your faction.");
 			return 0;
-		} else if (u->faction != t->faction && t->faction->IsNPC()) {
+		} else if (u->faction != t->faction && t->faction->is_npc) {
 			u->Error(ord + ": Can't give to non-player unit (" +
 				o->target->Print() + ").");
 			return 0;
@@ -2822,7 +2829,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		u->Error(ord + ": " + o->target->Print() +
 				" is not a member of your faction.");
 		return 0;
-	} else if (u->faction != t->faction && t->faction->IsNPC()) {
+	} else if (u->faction != t->faction && t->faction->is_npc) {
 		u->Error(ord + ": Can't give to non-player unit (" +
 				o->target->Print() + ").");
 		return 0;

@@ -168,8 +168,8 @@ public:
 	void SetAddress( AString &strNewAddress );
 	
 	void CheckExist(ARegionList *);
-	void Error(const AString &);
-	void Event(const AString &);
+	void error(const string& s);
+	void event(const string& s);
 	
 	AString FactionTypeStr();
 	void write_text_report(ostream& f, Game *pGame, size_t **citems);
@@ -191,8 +191,7 @@ public:
 	void DefaultOrders();
 	void TimesReward();
 	
-	void SetNPC();
-	int IsNPC();
+	bool is_npc = false; // by default factions are not NPCs
 
 	void DiscoverItem(int item, int force, int full);
 
@@ -238,6 +237,7 @@ public:
 	AList present_regions;
 	
 	int defaultattitude;
+	// TODO: Convert this to a hashmap of <attitude, vector<factionid>>
 	AList attitudes;
 	SkillList skills;
 	ItemList items;
@@ -246,10 +246,10 @@ public:
 	// Both are lists of AStrings
 	//
 	AList extraPlayers;
-	AList errors;
-	AList events;
-	AList battles;
+	vector<string> errors;
+	vector<string> events;
 
+	vector<Battle *> battles;
 	vector<ShowSkill> shows;
 	vector<string> itemshows;
 	vector<string> objectshows;

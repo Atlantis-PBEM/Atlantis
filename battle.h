@@ -35,6 +35,9 @@ class Battle;
 #include "events.h"
 #include <vector>
 
+#include "external/nlohmann/json.hpp"
+using json = nlohmann::json;
+
 enum {
 	ASS_NONE,
 	ASS_SUCC,
@@ -48,19 +51,14 @@ enum {
 	BATTLE_DRAW
 };
 
-class BattlePtr : public AListElem
-{
-	public:
-		Battle * ptr;
-};
-
 class Battle : public AListElem
 {
 	public:
 		Battle();
 		~Battle();
 
-		void Report(ostream& f,Faction *fac);
+		void write_text_report(ostream& f, Faction *fac);
+		void write_json_report(json &j, Faction *fac);
 		void AddLine(const AString &);
 
 		int Run(Events* events, ARegion *, Unit *, AList *, Unit *, AList *, int ass,
@@ -86,8 +84,8 @@ class Battle : public AListElem
 
 		int assassination;
 		Faction * attacker; /* Only matters in the case of an assassination */
-		AString * asstext;
-		AList text;
+		std::string asstext;
+		std::vector<std::string> text;
 };
 
 #endif

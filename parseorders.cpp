@@ -197,7 +197,7 @@ void Game::ParseError(OrdersCheck *pCheck, Unit *pUnit, Faction *pFaction,
 {
 	if (pCheck) pCheck->Error(strError);
 	else if (pUnit) pUnit->Error(strError);
-	else if (pFaction) pFaction->Error(strError);
+	else if (pFaction) pFaction->error(strError.const_str());
 }
 
 void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
@@ -321,7 +321,9 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 					} else {
 						unit = GetUnit(token->value());
 						if (!unit || unit->faction != fac) {
-							fac->Error(*token + " is not your unit.");
+							// as we get rid of more uses of astring, these will become unnecessary
+							string tmp(token->const_str());
+							fac->error(tmp + " is not your unit.");
 							unit = 0;
 						} else {
 							unit->ClearOrders();
@@ -659,10 +661,12 @@ void Game::ProcessPasswordOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (u->faction->password) delete u->faction->password;
 	if (token) {
 		u->faction->password = token;
-		u->faction->Event(AString("Password is now: ") + *token);
+		string tmp = "Password is now: ";
+		tmp += token->const_str();
+		u->faction->event(tmp);
 	} else {
 		u->faction->password = new AString("none");
-		u->faction->Event("Password cleared.");
+		u->faction->event("Password cleared.");
 	}
 }
 
@@ -677,7 +681,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (*token == "times") {
 		delete token;
 		if (!pCheck) {
-			u->faction->Event("Times will be sent to your faction.");
+			u->faction->event("Times will be sent to your faction.");
 			u->faction->times = 1;
 		}
 		return;
@@ -686,7 +690,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (*token == "notimes") {
 		delete token;
 		if (!pCheck) {
-			u->faction->Event("Times will not be sent to your faction.");
+			u->faction->event("Times will not be sent to your faction.");
 			u->faction->times = 0;
 		}
 		return;
@@ -695,8 +699,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (*token == "showattitudes") {
 		delete token;
 		if (!pCheck) {
-			u->faction->Event("Units will now have a leading sign to show your " 
-						"attitude to them.");
+			u->faction->event("Units will now have a leading sign to show your attitude to them.");
 			u->faction->showunitattitudes = 1;
 		}
 		return;
@@ -705,8 +708,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (*token == "dontshowattitudes") {
 		delete token;
 		if (!pCheck) {
-			u->faction->Event("Units will now have a leading minus sign regardless"
-						" of your attitude to them.");
+			u->faction->event("Units will now have a leading minus sign regardless of your attitude to them.");
 			u->faction->showunitattitudes = 0;
 		}
 		return;
@@ -1299,13 +1301,13 @@ void Game::ProcessQuitOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		if (u->faction->password && !(*(u->faction->password) == "none")) {
 			AString *token = o->gettoken();
 			if (!token) {
-				u->faction->Error("QUIT: Must give the correct password.");
+				u->faction->error("QUIT: Must give the correct password.");
 				return;
 			}
 
 			if (!(*token == *(u->faction->password))) {
 				delete token;
-				u->faction->Error("QUIT: Must give the correct password.");
+				u->faction->error("QUIT: Must give the correct password.");
 				return;
 			}
 
@@ -1324,13 +1326,13 @@ void Game::ProcessRestartOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		if (u->faction->password && !(*(u->faction->password) == "none")) {
 			AString *token = o->gettoken();
 			if (!token) {
-				u->faction->Error("RESTART: Must give the correct password.");
+				u->faction->error("RESTART: Must give the correct password.");
 				return;
 			}
 
 			if (!(*token == *(u->faction->password))) {
 				delete token;
-				u->faction->Error("RESTART: Must give the correct password.");
+				u->faction->error("RESTART: Must give the correct password.");
 				return;
 			}
 
@@ -1908,7 +1910,7 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 	} else {
 		fac = token->strict_value();
 		if (fac == -1) {
-			f->Error(AString("DECLARE: Non-existent faction."));
+			f->error("DECLARE: Non-existent faction.");
 			return;
 		}
 	}
@@ -1919,12 +1921,11 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 		if (fac != -1) {
 			target = GetFaction(&factions, fac);
 			if (!target) {
-				f->Error(AString("DECLARE: Non-existent faction ")+fac+".");
+				f->error("DECLARE: Non-existent faction " + to_string(fac) + ".");
 				return;
 			}
 			if (target == f) {
-				f->Error(AString("DECLARE: Can't declare towards your own "
-								 "faction."));
+				f->error("DECLARE: Can't declare towards your own faction.");
 				return;
 			}
 		}

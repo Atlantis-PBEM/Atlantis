@@ -119,18 +119,8 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
 	}
 }
 
-Battle::Battle()
-{
-	asstext = 0;
-}
-
-Battle::~Battle()
-{
-	if (asstext)
-	{
-		delete asstext;
-	}
-}
+Battle::Battle() { }
+Battle::~Battle() { }
 
 // Checks if army A is overwhelmed by army B
 bool IsArmyOverwhelmedBy(Army * a, Army * b) {
@@ -607,10 +597,10 @@ int Battle::Run(Events* events,
 		(!armies[1]->NumAlive() && armies[0]->NumAlive())) {
 		if (ass) {
 			assassination = ASS_SUCC;
-			asstext = new AString(*(armies[1]->leader->name) +
-						" is assassinated in " +
-						region->ShortPrint( pRegs ) +
-						"!");
+			asstext = armies[1]->leader->name->const_str();
+			asstext += " is assassinated in ";
+			asstext += region->ShortPrint(pRegs).const_str();
+			asstext += "!";
 		}
 		if (armies[1]->NumAlive()) {
 			AddLine(*(armies[1]->leader->name) + " is routed!");
@@ -742,19 +732,28 @@ void Battle::WriteSides(ARegion * r,
 	AddLine("");
 }
 
-void Battle::Report(ostream& f,Faction * fac) {
-	if (assassination == ASS_SUCC && fac != attacker) {
-		f << asstext->const_str() << "\n";
+void Battle::write_json_report(json& j, Faction *fac) {
+	if(assassination == ASS_SUCC && fac != attacker) {
+		j["type"] = "assassination";
+		j["report"] = asstext;
 		return;
 	}
-	forlist(&text) {
-		f << ((AString *)elem)->const_str() << '\n';
+	j["type"] = "battle";
+	j["report"] = text; 
+}
+
+void Battle::write_text_report(ostream& f,Faction * fac) {
+	if (assassination == ASS_SUCC && fac != attacker) {
+		f << asstext << "\n";
+		return;
+	}
+	for(auto line: text) {
+		f << line << '\n';
 	}
 }
 
 void Battle::AddLine(const AString & s) {
-	AString * temp = new AString(s);
-	text.Add(temp);
+	text.push_back(s.const_str());
 }
 
 void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
@@ -1158,15 +1157,12 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 	Battle * b = new Battle;
 	b->WriteSides(r,attacker,target,&atts,&defs,ass, &regions );
 
-	battles.Add(b);
+	battles.push_back(b);
 	{
 		forlist(&factions) {
 			Faction * f = (Faction *) elem;
-			if (GetFaction2(&afacs,f->num) || GetFaction2(&dfacs,f->num) ||
-					r->Present(f)) {
-				BattlePtr * p = new BattlePtr;
-				p->ptr = b;
-				f->battles.Add(p);
+			if (GetFaction2(&afacs,f->num) || GetFaction2(&dfacs,f->num) ||	r->Present(f)) {
+				f->battles.push_back(b);
 			}
 		}
 	}

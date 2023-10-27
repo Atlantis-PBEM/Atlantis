@@ -37,7 +37,7 @@ void Game::CreateWorld() {
     Awrite("Creating world");
     regions.CreateLevels(1);    
     // because of the way regions are numbered, if you want 4 hexes you need a height of 4 and a width of 2.
-    regions.CreateSurfaceLevel(0, 2, 4, "Surface");
+    regions.CreateSurfaceLevel(0, 2, 4, nullptr);
  }
 
 int ARegionList::GetRegType( ARegion *pReg ) { return 0; }

@@ -1588,7 +1588,7 @@ void Unit::Short(int needed, int hunger)
 {
 	int i, n = 0, levels;
 
-	if (faction->IsNPC())
+	if (faction->is_npc)
 		return; // Don't starve monsters and the city guard!
 
 	if (needed < 1 && hunger < 1) return;
@@ -2462,14 +2462,14 @@ void Unit::DiscardUnfinishedShips() {
 
 void Unit::Event(const AString & s)
 {
-	AString temp = *name + ": " + s;
-	faction->Event(temp);
+	string temp(name->const_str());
+	faction->event(temp + ": " + s.const_str());
 }
 
 void Unit::Error(const AString & s)
 {
-	AString temp = *name + ": " + s;
-	faction->Error(temp);
+	string temp(name->const_str());
+	faction->error(temp + ": " + s.const_str());
 }
 
 int Unit::GetAttribute(char const *attrib)

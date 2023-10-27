@@ -27,7 +27,10 @@
 #include "game.h"
 #include "indenter.hpp"
 #include <algorithm>
+#include <sstream>
 #include <iomanip>
+
+using namespace std;
 
 char const *as[] = {
 	"Hostile",
@@ -191,8 +194,12 @@ void Faction::Writeout(ostream& f)
 {
 	f << num << '\n';
 
+	// Right now, the faction type data in the file is what determines npc/non-npc with -1 in the types
+	// signifying NPCs. We should eventually persist the is_npc flag directly, but for now, let's just
+	// not break things. Having it based on the faction type data is pretty bogus, but it's what we
+	// have for now so if this is an NPC faction, right out -1 for all types.
 	for (auto &ft : *FactionTypes) {
-		f << type[ft] << '\n';
+		f << (is_npc ? -1 : type[ft]) << '\n';
 	}
 
 	f << lastchange << '\n';
@@ -219,6 +226,11 @@ void Faction::Readin(istream& f)
 	for (auto &ft : *FactionTypes) {
 		f >> type[ft];
 	}
+	// Right now, the faction type data in the file is what determines npc/non-npc.
+	// We should eventually persist this flag directly, but for now, let's just not break things.
+	// Having it based on the faction type data is pretty bogus, but it's what we have for now.
+	// A faction is an NPC if it has -1 for either MARTIAL or WAR (NPCs will actually have -1 for all types)
+	is_npc = ((type[F_WAR] == -1) || (type[F_MARTIAL] == -1));
 
 	f >> lastchange;
 	f >> lastorders;
@@ -285,7 +297,7 @@ void Faction::SetAddress(AString &strNewAddress)
 AString Faction::FactionTypeStr()
 {
 	AString temp;
-	if (IsNPC()) return AString("NPC");
+	if (is_npc) return AString("NPC");
 
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED) {
 		return (AString("Unlimited"));
@@ -340,7 +352,7 @@ vector<FactionStatistic> Faction::compute_faction_statistics(Game *game, size_t 
 }
 
 inline bool Faction::gets_gm_report(Game *game) {
-	return IsNPC() && num == 1 && (Globals->GM_REPORT || (game->month == 0 && game->year == 1));
+	return is_npc && num == 1 && (Globals->GM_REPORT || (game->month == 0 && game->year == 1));
 }
 
 struct GmData {
@@ -411,14 +423,14 @@ void Faction::write_text_gm_report(ostream& f, Game *game) {
 	{
 		// extra block because of foreach macro.
 		forlist(&present_regions) {
-			((ARegionPtr*)elem)->ptr->WriteReport(f, this, game->month, &(game->regions));
+			((ARegionPtr*)elem)->ptr->write_text_report(f, this, game->month, &(game->regions));
 		}
 	}
 	present_regions.DeleteAll();
 
-	errors.DeleteAll();
-	events.DeleteAll();
-	battles.DeleteAll();
+	errors.clear();
+	events.clear();
+	battles.clear();
 }
 
 void Faction::write_json_gm_report(json& j, Game *game) {
@@ -457,9 +469,9 @@ void Faction::write_json_gm_report(json& j, Game *game) {
 	j["regions"] = regions;
 	present_regions.DeleteAll();
 
-	errors.DeleteAll();
-	events.DeleteAll();
-	battles.DeleteAll();
+	errors.clear();
+	events.clear();
+	battles.clear();
 }
 
 void Faction::write_json_report(json& j, Game *game, size_t **citems) {
@@ -473,12 +485,10 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 	}
 
 	// This can be better, but for now..
-	AString engine_ver = ATL_VER_STRING(CURRENT_ATL_VER);
-	AString rules_ver = ATL_VER_STRING(Globals->RULESET_VERSION);
 	j["engine"] = {
-		{ "version", engine_ver.const_str() },
+		{ "version", (ATL_VER_STRING(CURRENT_ATL_VER)).const_str() },
 		{ "ruleset", Globals->RULESET_NAME },
-		{ "ruleset_version", rules_ver.const_str() }
+		{ "ruleset_version", (ATL_VER_STRING(Globals->RULESET_VERSION)).const_str() }
 	};
 
 	string s = name->const_str();
@@ -498,7 +508,7 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 	j["password_unset"] = (!password || *password == "none");
 	if(Globals->MAX_INACTIVE_TURNS) {
 		int cturn = game->TurnNumber() - lastorders;
-		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
+		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !is_npc) {
 			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
 			j["administrative"]["inactivity_deletion_turns"] = cturn;
 		}
@@ -566,40 +576,27 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 		}
 	}
 
-	// Handle errors, battles, events etc in the next cuts.
-	/*
-	if (errors.Num()) {
+	if (!errors.empty()) {
 		// Handle errors better.  For now, just put them into an 'errors' vector.
 		// We could give nice json'y output like which unit, which region, etc.
-		j["errors"] = json::array();
-		forlist((&errors)) {
-			j["errors"].push_back(((AString *)elem)->const_str());
-		}
-		errors.DeleteAll();
+		j["errors"] = errors;
 	}
 
-	if (battles.Num()) {
+	if (!battles.empty()) {
 		json jbattles = json::array();
-		forlist(&battles) {
+		for(auto battle: battles) {
 			json jbattle = json::object();
 			// we will obviously want to make this into json-y output
-			((BattlePtr *) elem)->ptr->report_json(jbattle, this);
+			battle->write_json_report(jbattle, this);
 			jbattles.push_back(jbattle);
 		}
 		j["battles"] = jbattles;
-		battles.DeleteAll();
 	}
 
-	if (events.Num()) {
+	if (!events.empty()) {
 		// events can also be handled as json objects rather than just strings.
-		f << "Events during turn:\n";
-		forlist((&events)) {
-			f << ((AString *) elem)->const_str() << '\n';
-		}
-		events.DeleteAll();
-		f << '\n';
+		j["events"] = events;
 	}
-	*/
 
 	/* Attitudes */
 	j["attitudes"] = json::object();
@@ -695,7 +692,7 @@ void Faction::write_text_report(ostream& f, Game *pGame, size_t ** citems)
 
 	if (Globals->MAX_INACTIVE_TURNS != -1) {
 		int cturn = pGame->TurnNumber() - lastorders;
-		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
+		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !is_npc) {
 			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
 			f << "WARNING: You have " << cturn
 			  << " turns until your faction is automatically removed due to inactivity!\n\n";
@@ -764,29 +761,22 @@ void Faction::write_text_report(ostream& f, Game *pGame, size_t ** citems)
 	}
 	f << '\n';
 
-	if (errors.Num()) {
+	if (!errors.empty()) {
 		f << "Errors during turn:\n";
-		forlist((&errors)) {
-			f << ((AString *)elem)->const_str() << '\n';
-		}
-		errors.DeleteAll();
+		for(auto &error : errors) f << error << '\n';
 		f << '\n';
 	}
 
-	if (battles.Num()) {
+	if (!battles.empty()) {
 		f << "Battles during turn:\n";
-		forlist(&battles) {
-			((BattlePtr *) elem)->ptr->Report(f, this);
+		for(auto battle: battles) {
+			battle->write_text_report(f, this);
 		}
-		battles.DeleteAll();
 	}
 
-	if (events.Num()) {
+	if (!events.empty()) {
 		f << "Events during turn:\n";
-		forlist((&events)) {
-			f << ((AString *) elem)->const_str() << '\n';
-		}
-		events.DeleteAll();
+		for(auto &event: events) f << event << '\n';
 		f << '\n';
 	}
 
@@ -835,7 +825,7 @@ void Faction::write_text_report(ostream& f, Game *pGame, size_t ** citems)
 	f << "Unclaimed silver: " << unclaimed << ".\n\n";
 
 	forlist(&present_regions) {
-		((ARegionPtr *) elem)->ptr->WriteReport(f, this, pGame->month, &(pGame->regions));
+		((ARegionPtr *) elem)->ptr->write_text_report(f, this, pGame->month, &(pGame->regions));
 	} 
 	f << '\n';
 }
@@ -845,7 +835,7 @@ void Faction::WriteTemplate(ostream& f, Game *pGame)
 {
 	AString temp;
 	if (temformat == TEMPLATE_OFF) return;
-	if (IsNPC()) return;
+	if (is_npc) return;
 
 	f << indent::wrap;
 	f << '\n';
@@ -893,7 +883,7 @@ void Faction::WriteFacInfo(ostream &f)
 
 void Faction::CheckExist(ARegionList* regs)
 {
-	if (IsNPC()) return;
+	if (is_npc) return;
 	exists = 0;
 	forlist(regs) {
 		ARegion* reg = (ARegion *) elem;
@@ -904,25 +894,17 @@ void Faction::CheckExist(ARegionList* regs)
 	}
 }
 
-void Faction::Error(const AString &s)
-{
-	if (IsNPC()) return;
-	if (errors.Num() > 1000) {
-		if (errors.Num() == 1001) {
-			errors.Add(new AString("Too many errors!"));
-		}
-		return;
-	}
-
-	AString *temp = new AString(s);
-	errors.Add(temp);
+void Faction::error(const string& s) {
+	if (is_npc) return;
+	auto count = errors.size();
+	if (count == 1000) errors.push_back("Too many errors!");
+	if (count < 1000) errors.push_back(s);
 }
 
-void Faction::Event(const AString &s)
+void Faction::event(const string& s)
 {
-	if (IsNPC()) return;
-	AString *temp = new AString(s);
-	events.Add(temp);
+	if (is_npc) return;
+	events.push_back(s);
 }
 
 void Faction::RemoveAttitude(int f)
@@ -1052,22 +1034,9 @@ void Faction::DefaultOrders()
 void Faction::TimesReward()
 {
 	if (Globals->TIMES_REWARD) {
-		Event(AString("Times reward of ") + Globals->TIMES_REWARD + " silver.");
+		event("Times reward of " + to_string(Globals->TIMES_REWARD) + " silver.");
 		unclaimed += Globals->TIMES_REWARD;
 	}
-}
-
-void Faction::SetNPC()
-{
-	for (auto &ft : *FactionTypes) {
-		type[ft] = -1;
-	}
-}
-
-int Faction::IsNPC()
-{
-	if (type[F_WAR] == -1 || type[F_MARTIAL] == -1) return 1;
-	return 0;
 }
 
 Faction *GetFaction(AList *facs, int n)

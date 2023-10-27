@@ -201,7 +201,7 @@ class ARegion : public AListElem
 		void WriteMarkets(ostream& f, Faction *, int);
 		void WriteEconomy(ostream& f, Faction *, int);
 		void WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen);
-		void WriteReport(ostream& f, Faction *fac, int month, ARegionList *pRegions);
+		void write_text_report(ostream& f, Faction *fac, int month, ARegionList *pRegions);
 		void write_json_report(json& j, Faction *fac, int month, ARegionList *pRegions);
 		// DK
 		void WriteTemplate(ostream&  f, Faction *, ARegionList *, int);

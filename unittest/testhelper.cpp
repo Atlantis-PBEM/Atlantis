@@ -39,6 +39,11 @@ Faction *UnitTestHelper::create_faction(string name) {
     return fac;
 }
 
+ARegion *UnitTestHelper::get_region(int x, int y, int z) {
+    ARegionArray *level = game.regions.pRegionArrays[z];
+    return level->GetRegion(x, y);
+}
+
 string UnitTestHelper::cout_data() {
     return cout_buffer.str();
 }

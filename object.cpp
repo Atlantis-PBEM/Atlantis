@@ -156,7 +156,7 @@ void Object::Readin(istream& f, AList *facs)
 		if (!temp->faction)
 			continue;
 		temp->MoveUnit(this);
-		if (!(temp->faction->IsNPC())) region->visited = 1;
+		if (!(temp->faction->is_npc)) region->visited = 1;
 	}
 	mages = ObjectDefs[type].maxMages;
 	ReadinFleet(f);

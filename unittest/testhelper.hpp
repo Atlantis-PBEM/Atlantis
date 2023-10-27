@@ -33,6 +33,12 @@ public:
     int get_region_count();
     // Create a faction that we can use for testing.
     Faction *create_faction(string name);
+    // Get a region by coordinates
+    ARegion *get_region(int x, int y, int level);
+    // Get all regions
+    ARegionList *get_regions() { return &game.regions; }
+    // get the game month 
+    int get_month() { return game.month; }
 
     // Get the contents of cout as a string.
     string cout_data();

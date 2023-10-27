@@ -594,7 +594,7 @@ Faction *Game::CheckVictory()
 		f = (Faction *) elem;
 		// No accidentally sending all the Guardsmen
 		// or Creatures to the Eternal City!
-		if (f->IsNPC())
+		if (f->is_npc)
 			continue;
 		reliccount = 0;
 		forlist(&regions) {
@@ -674,7 +674,7 @@ Faction *Game::CheckVictory()
 			temp += " and returned to the Eternal City.";
 			message = AString("You") + temp;
 			times = *f->name + temp;
-			f->Event(message);
+			f->event(message.const_str());
 			message = "You";
 			times += "\n\nThey";
 			temp = " returned after ";
@@ -750,7 +750,7 @@ Faction *Game::CheckVictory()
 				times += "  They";
 				times += temp;
 			}
-			f->Event(message);
+			f->event(message.const_str());
 			WriteTimesArticle(times);
 
 			string filename = "winner." + to_string(f->num);
