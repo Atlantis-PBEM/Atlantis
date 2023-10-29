@@ -92,7 +92,7 @@ void Game::DefaultWorkOrder()
 			Object *o = (Object *) elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
-				if (u->monthorders || u->faction->IsNPC() ||
+				if (u->monthorders || u->faction->is_npc ||
 						(Globals->TAX_PILLAGE_MONTH_LONG &&
 						 u->taxing != TAX_NONE))
 					continue;
@@ -759,7 +759,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 	} else if (*pToken == "Reward:") {
 		pTemp = pLine->gettoken();
 		int nAmt = pTemp->value();
-		pFac->Event(AString("Reward of ") + nAmt + " silver.");
+		pFac->event("Reward of " + to_string(nAmt) + " silver.");
 		pFac->unclaimed += nAmt;
 	} else if (*pToken == "SendTimes:") {
 		// get the token, but otherwise ignore it
@@ -1069,7 +1069,7 @@ int Game::RunGame()
 	Awrite("Writing order templates...");
 	WriteTemplates();
 	Awrite("");
-	battles.DeleteAll();
+	battles.clear();
 
 	EmptyHell();
 
@@ -1136,7 +1136,7 @@ void Game::ReadOrders()
 {
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
-		if (!fac->IsNPC()) {
+		if (!fac->is_npc) {
 			AString str = "orders.";
 			str += fac->num;
 
@@ -1213,7 +1213,7 @@ void Game::WriteReport()
 		Faction *fac = (Faction *) elem;
 		string str = "report." + to_string(fac->num);
 
-		if (!fac->IsNPC() || fac->gets_gm_report(this)) {
+		if (!fac->is_npc || fac->gets_gm_report(this)) {
 			if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_TEXT) {
 				ofstream f(str, ios::out|ios::ate);
 				if (f.is_open()) {
@@ -1244,7 +1244,7 @@ void Game::WriteTemplates()
 {
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
-		if (!fac->IsNPC()) {
+		if (!fac->is_npc) {
 			string str = "template." + to_string(fac->num);
 			ofstream f(str.c_str(), ios::out|ios::ate);
 			if (f.is_open()) {
@@ -1261,7 +1261,7 @@ void Game::DeleteDeadFactions()
 {
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
-		if (!fac->IsNPC() && !fac->exists) {
+		if (!fac->is_npc && !fac->exists) {
 			factions.Remove(fac);
 			forlist((&factions))
 				((Faction *) elem)->RemoveAttitude(fac->num);
@@ -1453,8 +1453,7 @@ void Game::RemoveInactiveFactions()
 	cturn = TurnNumber();
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
-		if ((cturn - fac->lastorders) >= Globals->MAX_INACTIVE_TURNS &&
-				!fac->IsNPC()) {
+		if ((cturn - fac->lastorders) >= Globals->MAX_INACTIVE_TURNS &&	!fac->is_npc) {
 			fac->quit = QUIT_BY_GM;
 		}
 	}
@@ -1863,7 +1862,7 @@ void Game::CreateNPCFactions()
 		guardfaction = f->num;
 		temp = new AString("The Guardsmen");
 		f->SetName(temp);
-		f->SetNPC();
+		f->is_npc = true;
 		f->lastorders = 0;
 		factions.Add(f);
 	} else
@@ -1875,7 +1874,7 @@ void Game::CreateNPCFactions()
 		monfaction = f->num;
 		temp = new AString("Creatures");
 		f->SetName(temp);
-		f->SetNPC();
+		f->is_npc = true;
 		f->lastorders = 0;
 		factions.Add(f);
 	} else
@@ -2139,7 +2138,7 @@ void Game::CountItems(size_t ** citems)
 	forlist (&factions)
 	{
 		Faction * fac = (Faction *) elem;
-		if (!fac->IsNPC())
+		if (!fac->is_npc)
 		{
 			for (int j = 0; j < NITEMS; j++)
 			{

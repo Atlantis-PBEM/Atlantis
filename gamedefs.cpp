@@ -23,6 +23,7 @@
 //
 // END A3HEADER
 #include "gamedefs.h"
+#include <string>
 
 char const *dr[] = {
 	"North",
@@ -63,11 +64,9 @@ char const *mn[] = {
 
 char const ** MonthNames = mn;
 
-char const *weath[] = {
+std::string SeasonNames[] = {
 	"clear",
 	"winter",
 	"monsoon season",
 	"blizzard"
 };
-
-char const ** SeasonNames = weath;

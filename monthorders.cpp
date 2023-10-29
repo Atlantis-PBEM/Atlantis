@@ -330,23 +330,18 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
 			forlist_reuse(&facs) {
 				Faction * f = ((FactionPtr *) elem)->ptr;
-				if (x->dir == MOVE_PAUSE) {
-					f->Event(*fleet->name +
-						AString(" performs maneuvers in ") +
-						reg->ShortPrint(&regions) +
-						AString("."));
-				} else {
-					f->Event(*fleet->name +
-						AString(" sails from ") +
-						reg->ShortPrint(&regions) +
-						AString(" to ") +
-						newreg->ShortPrint(&regions) +
-						AString("."));
+				stringstream tmp;
+				tmp << fleet->name << (x->dir == MOVE_PAUSE ? " performs maneuvers in " : " sails from ")
+				    << reg->ShortPrint(&regions);
+				if(x->dir != MOVE_PAUSE) {
+					tmp << " to " << newreg->ShortPrint(&regions);
 				}
+				tmp << ".";
+				f->event(tmp.str());
 			}
 			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING &&
 					x->dir != MOVE_PAUSE) {
-				if (!(cap->faction->IsNPC())) newreg->visited = 1;
+				if (!(cap->faction->is_npc)) newreg->visited = 1;
 				forlist(&fleet->units) {
 					// Everyone onboard gets to see the sights
 					unit = (Unit *) elem;
@@ -371,10 +366,9 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			}
 			reg = newreg;
 			if (newreg->ForbiddenShip(fleet)) {
-				cap->faction->Event(*fleet->name +
-					AString(" is stopped by guards in ") +
-					newreg->ShortPrint(&regions) + 
-					AString("."));
+				stringstream tmp;
+				tmp << fleet->name << " is stopped by guards in " << newreg->ShortPrint(&regions) << ".";
+				cap->faction->event(tmp.str());
 				stop = 1;
 			}
 			o->dirs.Remove(x);
@@ -2000,7 +1994,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 
 	// TODO: Should we get a transit report on the starting region?
 	if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
-		if (!(unit->faction->IsNPC())) newreg->visited = 1;
+		if (!(unit->faction->is_npc)) newreg->visited = 1;
 		// Update our visit record in the region we are leaving.
 		Farsight *f;
 		forlist(&region->passers) {

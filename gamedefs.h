@@ -26,6 +26,7 @@
 #ifndef GAME_DEFS
 #define GAME_DEFS
 
+#include <string>
 #include "helper.h"
 
 /* Directions */
@@ -44,7 +45,7 @@ extern char const **DirectionAbrs;
 
 extern char const **MonthNames;
 
-extern char const **SeasonNames;
+extern std::string SeasonNames[];
 
 extern int *allowedMages;
 extern int allowedMagesSize;

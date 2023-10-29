@@ -407,9 +407,9 @@ void ARegion::RunDecayEvent(Object *o, ARegionList *pRegs)
 	pFactions = PresentFactions();
 	forlist (pFactions) {
 		Faction *f = ((FactionPtr *) elem)->ptr;
-		f->Event(GetDecayFlavor() + *o->name + " " +
-				ObjectDefs[o->type].name + " in " +
-				ShortPrint(pRegs));
+		stringstream tmp;
+		tmp << GetDecayFlavor() << o->name << " " << ObjectDefs[o->type].name << " in " << ShortPrint(pRegs);
+		f->event(tmp.str());
 	}
 }
 
@@ -1181,7 +1181,7 @@ void ARegion::WriteProducts(ostream& f, Faction *fac, int present)
 	forlist((&products)) {
 		Production *p = ((Production *) elem);
 		if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
-			if (CanMakeAdv(fac, p->itemtype) || (fac->IsNPC())) {
+			if (CanMakeAdv(fac, p->itemtype) || fac->is_npc) {
 				if (has) {
 					temp += AString(", ") + p->WriteReport();
 				} else {
@@ -1319,19 +1319,191 @@ void ARegion::WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen)
 	f << '\n';
 }
 
-void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *pRegions) {
-	// for now, just set a name which would be the name of the region from a text report.
-	// ie "Alioth Plains (1, 2) in Alioth contains Alioth City [City]."
-	// This will get broken down and become more json-y when I flesh this code out.
-	j["name"] = Print(pRegions).const_str();
-	return;
+void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *regions) {
+	Farsight *farsight = GetFarsight(&farsees, fac);
+	Farsight *passer = GetFarsight(&passers, fac);
+	int present = Present(fac) || fac->is_npc;
+
+	// this faction cannot see this region, why are we even here?
+	if (!farsight && !passer && !present) return;
+
+	// The region is visible to the faction
+	j["terrain"] = TerrainDefs[type].name;
+
+	ARegionArray *level = regions->pRegionArrays[zloc];
+	string label = (level->strName ? level->strName->const_str() : "surface");
+ 	j["coordinates"] = { { "x", xloc }, { "y", yloc }, { "z", zloc }, { "label", label } };
+
+	j["province"] = name->const_str();
+	if (town) {
+		j["settlement"] = { { "name", town->name->const_str() }, { "size", TownString(town->TownType()).const_str() } };
+	}
+
+	if (Population() &&	(present || farsight || (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_PEASANTS))) {
+		j["population"] = { { "amount", Population() } };
+		if (Globals->RACES_EXIST) {
+			j["population"]["race"] = ItemDefs[race].names;
+		} else {
+			j["population"]["race"] = "men";
+		}
+		j["tax"] = (present || farsight || Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY) ? wealth : 0;
+	}
+
+	if (Globals->WEATHER_EXISTS) {
+		string weather_name = clearskies ? "unnaturally clear" : SeasonNames[weather];
+		j["weather"] = { { "current", weather_name }, { "next", SeasonNames[regions->GetWeather(this, (month + 1) % 12)] } };
+	}
+
+	if (type == R_NEXUS) {
+		stringstream desc;
+		desc << Globals->WORLD_NAME << " Nexus is a magical place: the entryway to the world of "
+		     << Globals->WORLD_NAME << ". Enjoy your stay; the city guards should keep you safe as long "
+			 << "as you should choose to stay. However, rumor has it that once you have left the Nexus, "
+			 << "you can never return.";
+		j["description"] = desc.str();
+	}
+
+	// hold off on writing out other stuff for now.. Just the top level region info.
+	/*
+	WriteEconomy(f, fac, present || farsight);
+
+	int exits_seen[NDIRS];
+	if (present || farsight ||
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ALL_EXITS)) {
+		for (int i = 0; i < NDIRS; i++)
+			exits_seen[i] = 1;
+	} else {
+		// This is just a transit report and we're not showing all
+		// exits.   See if we are showing used exits.
+
+		// Show none by default.
+		int i;
+		for (i = 0; i < NDIRS; i++)
+			exits_seen[i] = 0;
+		// Now, if we should, show the ones actually used.
+		if (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_USED_EXITS) {
+			forlist(&passers) {
+				Farsight *p = (Farsight *)elem;
+				if (p->faction == fac) {
+					for (i = 0; i < NDIRS; i++) {
+						exits_seen[i] |= p->exits_used[i];
+					}
+				}
+			}
+		}
+	}
+
+	WriteExits(f, pRegions, exits_seen);
+
+	if (Globals->GATES_EXIST && gate && gate != -1) {
+		int sawgate = 0;
+		if (fac->is_npc)
+			sawgate = 1;
+		if (Globals->IMPROVED_FARSIGHT && farsight) {
+			forlist(&farsees) {
+				Farsight *watcher = (Farsight *)elem;
+				if (watcher && watcher->faction == fac && watcher->unit) {
+					if (watcher->unit->GetSkill(S_GATE_LORE)) {
+						sawgate = 1;
+					}
+				}
+			}
+		}
+		if (Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) {
+			forlist(&passers) {
+				Farsight *watcher = (Farsight *)elem;
+				if (watcher && watcher->faction == fac && watcher->unit) {
+					if (watcher->unit->GetSkill(S_GATE_LORE)) {
+						sawgate = 1;
+					}
+				}
+			}
+		}
+		forlist(&objects) {
+			Object *o = (Object *) elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *) elem;
+				if (!sawgate &&
+						((u->faction == fac) &&
+							u->GetSkill(S_GATE_LORE))) {
+					sawgate = 1;
+				}
+			}
+		}
+		if (sawgate) {
+			if (gateopen) {
+				f << "There is a Gate here (Gate " << gate;
+				if (!Globals->DISPERSE_GATE_NUMBERS) {
+					f << " of " << pRegions->numberofgates;
+				}
+				f << ").\n\n";
+			} else if (Globals->SHOW_CLOSED_GATES) {
+				f << "There is a closed Gate here.\n\n";
+			}
+		}
+	}
+
+	int obs = GetObservation(fac, 0);
+	int truesight = GetTrueSight(fac, 0);
+	int detfac = 0;
+
+	int passobs = GetObservation(fac, 1);
+	int passtrue = GetTrueSight(fac, 1);
+	int passdetfac = detfac;
+
+	if (fac->is_npc) {
+		obs = 10;
+		passobs = 10;
+	}
+
+	forlist (&objects) {
+		Object *o = (Object *) elem;
+		forlist(&o->units) {
+			Unit *u = (Unit *) elem;
+			if (u->faction == fac && u->GetSkill(S_MIND_READING) > 1) {
+				detfac = 1;
+			}
+		}
+	}
+	if (Globals->IMPROVED_FARSIGHT && farsight) {
+		forlist(&farsees) {
+			Farsight *watcher = (Farsight *)elem;
+			if (watcher && watcher->faction == fac && watcher->unit) {
+				if (watcher->unit->GetSkill(S_MIND_READING) > 1) {
+					detfac = 1;
+				}
+			}
+		}
+	}
+
+	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
+		forlist(&passers) {
+			Farsight *watcher = (Farsight *)elem;
+			if (watcher && watcher->faction == fac && watcher->unit) {
+				if (watcher->unit->GetSkill(S_MIND_READING) > 1) {
+					passdetfac = 1;
+				}
+			}
+		}
+	}
+
+	{
+		forlist (&objects) {
+			((Object *) elem)->Report(f, fac, obs, truesight, detfac,
+						passobs, passtrue, passdetfac,
+						present || farsight);
+		}
+		f << '\n';
+	}
+	*/
 }
 
-void ARegion::WriteReport(ostream &f, Faction *fac, int month, ARegionList *pRegions)
+void ARegion::write_text_report(ostream &f, Faction *fac, int month, ARegionList *pRegions)
 {
 	Farsight *farsight = GetFarsight(&farsees, fac);
 	Farsight *passer = GetFarsight(&passers, fac);
-	int present = Present(fac) || fac->IsNPC();
+	int present = Present(fac) || fac->is_npc;
 
 	if (farsight || passer || present) {
 		AString temp = Print(pRegions);
@@ -1418,7 +1590,7 @@ void ARegion::WriteReport(ostream &f, Faction *fac, int month, ARegionList *pReg
 
 		if (Globals->GATES_EXIST && gate && gate != -1) {
 			int sawgate = 0;
-			if (fac->IsNPC())
+			if (fac->is_npc)
 				sawgate = 1;
 			if (Globals->IMPROVED_FARSIGHT && farsight) {
 				forlist(&farsees) {
@@ -1472,7 +1644,7 @@ void ARegion::WriteReport(ostream &f, Faction *fac, int month, ARegionList *pReg
 		int passtrue = GetTrueSight(fac, 1);
 		int passdetfac = detfac;
 
-		if (fac->IsNPC()) {
+		if (fac->is_npc) {
 			obs = 10;
 			passobs = 10;
 		}
@@ -1853,8 +2025,9 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 
 	forlist_reuse (&flist) {
 		FactionPtr *fp = (FactionPtr *) elem;
-		fp->ptr->Event(AString(*(caster->name)) + " uses " + SkillStrs(sp) +
-				" in " + Print(pRegs) + ".");
+		stringstream tmp;
+		tmp << caster->name << " uses " << SkillStrs(sp) << " in " << Print(pRegs) << ".";
+		fp->ptr->event(tmp.str());
 	}
 	return 1;
 }
@@ -1879,8 +2052,9 @@ void ARegion::NotifyCity(Unit *caster, AString& oldname, AString& newname)
 	{
 		forlist(&flist) {
 			FactionPtr *fp = (FactionPtr *) elem;
-			fp->ptr->Event(AString(*(caster->name)) + " renames " +
-					oldname + " to " + newname + ".");
+			stringstream tmp;
+			tmp << caster->name << " renames " << oldname << " to " << newname << ".";
+			fp->ptr->event(tmp.str());
 		}
 	}
 }

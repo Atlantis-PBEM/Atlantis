@@ -295,7 +295,7 @@ private:
 
 	AList factions;
 	AList newfactions; /* List of strings */
-	AList battles;
+	vector<Battle *> battles;
 	ARegionList regions;
 	int factionseq;
 	unsigned int unitseq;
