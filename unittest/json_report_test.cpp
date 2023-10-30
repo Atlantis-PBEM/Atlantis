@@ -37,7 +37,7 @@ ut::suite<"JSON Report"> json_report_suite = []
 
     // pick some of the data out of the report for checking
     string data_name = json_report["name"];
-    int data_num = json_report["number"];
+    auto data_num = json_report["number"];
     auto new_items = json_report["item_reports"].size();
     auto new_skills = json_report["skill_reports"].size();
     auto regions = json_report["regions"].size();
@@ -82,7 +82,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     helper.setup_turn();
 
     Faction *faction = helper.create_faction("Test Faction");
-    for(auto i = 0; i < 1003; i++) faction->error("This is error #" + to_string(i+1));
+    for (auto i = 0; i < 1003; i++) faction->error("This is error #" + to_string(i+1));
 
     json json_report;
     faction->write_json_report(json_report, &helper.game_object(), nullptr);
@@ -167,6 +167,92 @@ ut::suite<"JSON Report"> json_report_suite = []
     string settlement_size = json_report["settlement"]["size"];
     string expected_settlement_size("city");
     expect(settlement_size == expected_settlement_size);
+
+    auto wages = json_report["wages"];
+    auto expected_wages = json{ {"amount", 15.2}, {"max", 1935} };
+    expect(wages == expected_wages);
+    auto entertainment = json_report["entertainment"];
+    expect(entertainment == 141_i);
+
+    // verify the products and the markets
+    auto products = json_report["products"].size();
+    expect(products == 1_ul);
+    auto expected_product = json{ {"abbr", "HORS"}, {"name", "horse"}, {"plural", "horses"}, {"amount", 21 } };
+    auto first_product = json_report["products"][0];
+    expect(first_product == expected_product);
+
+    auto for_sale = json_report["markets"]["for_sale"].size();
+    expect(for_sale == 4_ul);
+  
+    auto expected_sale = json{
+      {"abbr", "IVOR"}, {"name", "ivory"}, {"plural", "ivory"}, {"amount", 13 }, { "price", 81 }
+    };
+    auto first_sale = json_report["markets"]["for_sale"][0];
+    expect(first_sale == expected_sale);
+
+    auto wanted = json_report["markets"]["wanted"].size();
+    expect(wanted == 9_ul);
+    auto expected_wanted = json{
+      {"abbr", "GRAI"}, {"name", "grain"}, {"plural", "grain"}, {"amount", 51 }, { "price", 16 }
+    };
+    auto first_wanted = json_report["markets"]["wanted"][0];
+    expect(first_wanted == expected_wanted);
+
+    auto exits = json_report["exits"].size();
+    expect(exits == 3_ul);  // for our 4 hex world, from this hex, it'll be se, s, and sw.
+    auto expected_exit_s = json{
+      {"direction", "South" },
+      { "region",
+        {
+          { "coordinates", { {"x", 0}, {"y", 2}, {"z", 0}, {"label", "surface"} } },
+          { "province", "Testing Wilds" },
+          { "terrain", "forest" }
+        }
+      }
+    };
+    auto exit_s = json_report["exits"][1];
+    expect(exit_s == expected_exit_s);
+    // The other 2 exits point to the same region due to wrapping.
+    auto exit_se_region = json_report["exits"][0]["region"];
+    auto exit_sw_region = json_report["exits"][2]["region"];
+    expect(exit_se_region == exit_sw_region);
   };
 
+  "Region contains object data which includes correct details"_test = []
+  {
+    UnitTestHelper helper;
+    helper.initialize_game();
+    helper.setup_turn();
+
+    helper.setup_reports();
+
+    // Generate just this single regions json object.
+    Faction *faction = helper.create_faction("Test Faction");
+    Faction *faction2 = helper.create_faction("Test Faction 2");
+    ARegion *region = helper.get_region(0, 0, 0);
+    ARegionList *regions = helper.get_regions();
+    Unit *leader = helper.get_first_unit(faction);
+    // Create a fleet in the region for the faction.  **THIS MOVES THE UNIT INTO THE FLEET**
+    helper.create_fleet(region, leader, I_GALLEON, 3); // 3 galleons
+    helper.create_fleet(region, leader, I_LONGSHIP, 2); // 2 longships
+
+    // Get a report for each region so we can verify that fleet data is correct for owners and non-owners.
+    json json_report_1;
+    json json_report_2;
+    region->write_json_report(json_report_1, faction, helper.get_month(), regions);
+    region->write_json_report(json_report_2, faction2, helper.get_month(), regions);
+
+    // Verify that owner sees additional data
+    auto capacity = json_report_1["structures"][0]["capacity"];
+    expect(capacity == 8400_ul);
+
+    // Verify that non-owner does not see additional data
+    auto capacity2 = json_report_2["structures"][0]["capacity"];
+    expect(capacity2 == nullptr);
+
+    // Verify they both see the same ships
+    auto ships = json_report_1["structures"][0]["ships"];
+    auto ships2 = json_report_2["structures"][0]["ships"];
+    expect(ships == ships2);
+  };
 };

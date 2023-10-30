@@ -291,7 +291,9 @@ int Game::NewGame()
 	//
 	// Seed the random number generator with a different value each time.
 	//
-	seedrandomrandom();
+	// init_random_seed() is a function reference that can be overwritten by the test suites to control the random seed
+	// so that tests are repeatable.
+	init_random_seed();
 
 	CreateWorld();
 	CreateNPCFactions();
@@ -997,9 +999,8 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 			}
 		}
 	} else {
-		pTemp = new AString(*pToken + *pLine);
-		pFac->extraPlayers.Add(pTemp);
-		pTemp = 0;
+		string temp = string(pToken->const_str()) + pLine->const_str();
+		pFac->extra_player_data.push_back(temp);
 	}
 
 	if (pTemp) delete pTemp;
@@ -1152,20 +1153,21 @@ void Game::ReadOrders()
 
 void Game::MakeFactionReportLists()
 {
-	FactionVector vector(factionseq);
+	vector<Faction *> facs (factionseq, nullptr);
 
 	forlist(&regions) {
-		vector.ClearVector();
+		// clear the temporary
+		fill(facs.begin(), facs.end(), nullptr);
 
 		ARegion *reg = (ARegion *) elem;
 		forlist(&reg->farsees) {
 			Faction *fac = ((Farsight *) elem)->faction;
-			vector.SetFaction(fac->num, fac);
+			facs[fac->num] = fac;
 		}
 		{
 			forlist(&reg->passers) {
 				Faction *fac = ((Farsight *)elem)->faction;
-				vector.SetFaction(fac->num, fac);
+				facs[fac->num] = fac;
 			}
 		}
 		{
@@ -1174,17 +1176,13 @@ void Game::MakeFactionReportLists()
 
 				forlist(&obj->units) {
 					Unit *unit = (Unit *) elem;
-					vector.SetFaction(unit->faction->num, unit->faction);
+					facs[unit->faction->num] = unit->faction;
 				}
 			}
 		}
 
-		for (int i=0; i<vector.vectorsize; i++) {
-			if (vector.GetFaction(i)) {
-				ARegionPtr *ptr = new ARegionPtr;
-				ptr->ptr = reg;
-				vector.GetFaction(i)->present_regions.Add(ptr);
-			}
+		for(const auto& fac: facs) {
+			if (fac) fac->present_regions.push_back(reg);
 		}
 	}
 }
@@ -1250,7 +1248,7 @@ void Game::WriteTemplates()
 			if (f.is_open()) {
 				fac->WriteTemplate(f, this);
 			}
-			fac->present_regions.DeleteAll();
+			fac->present_regions.clear();
 		}
 		Adot();
 	}
@@ -1264,7 +1262,7 @@ void Game::DeleteDeadFactions()
 		if (!fac->is_npc && !fac->exists) {
 			factions.Remove(fac);
 			forlist((&factions))
-				((Faction *) elem)->RemoveAttitude(fac->num);
+				((Faction *) elem)->remove_attitude(fac->num);
 			delete fac;
 		}
 	}
@@ -2154,20 +2152,15 @@ int Game::CountItem (Faction * fac, int item)
 	if (ItemDefs[item].type & IT_SHIP) return 0;
 	
 	size_t all = 0;
-	forlist (&(fac->present_regions))
-	{
-		ARegionPtr * r = (ARegionPtr *) elem;
-		forlist (&r->ptr->objects)
-		{
+	for (const auto& r : fac->present_regions) {
+		forlist(&r->objects) {
 			Object * obj = (Object *) elem;
-			forlist (&obj->units)
-			{
-			Unit * unit = (Unit *) elem;
-			if (unit->faction == fac)
-				all += unit->items.GetNum (item);
+			forlist(&obj->units) {
+				Unit * unit = (Unit *) elem;
+				if (unit->faction == fac)
+					all += unit->items.GetNum (item);
 			}
 		}
 	}
-
 	return all;
 }

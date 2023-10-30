@@ -35,4 +35,17 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
     string expected = "Creating world\n....";
     expect(current == expected);
   };
+
+  "UnitTestHelper overrides random number generation"_test = []
+  {
+    // Create a game helper which will create a minimal game and provide us the ability to manipulate it for testing.
+    // We do this per-test so that we have independance between tests.
+    UnitTestHelper helper;
+
+    // initialize the game which will generate a small bit of output
+    helper.initialize_game();
+    auto seed = helper.get_seed();
+    // As long as we keep the isaac rng (for now) this will always be the same.
+    expect(seed == 299_i);
+  };
 };

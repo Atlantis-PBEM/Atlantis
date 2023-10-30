@@ -34,6 +34,9 @@ class Object;
 #include "items.h"
 #include <map>
 
+#include "external/nlohmann/json.hpp"
+using json = nlohmann::json;
+
 #define I_WOOD_OR_STONE -2
 
 class ObjectType {
@@ -88,7 +91,8 @@ class Object : public AListElem
 
 		void Readin(istream& f, AList *);
 		void Writeout(ostream& f);
-		void Report(ostream& f, Faction *, int, int, int, int, int, int, int);
+		void write_text_report(ostream& f, Faction *, int, int, int, int, int, int, int);
+		void write_json_report(json& j, Faction *, int, int, int, int, int, int, int);
 
 		void SetName(AString *);
 		void SetDescribe(AString *);

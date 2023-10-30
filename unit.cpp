@@ -1944,7 +1944,7 @@ int Unit::AmtsPreventCrime(Unit *u)
 int Unit::GetAttitude(ARegion *r, Unit *u)
 {
 	if (faction == u->faction) return A_ALLY;
-	int att = faction->GetAttitude(u->faction->num);
+	int att = faction->get_attitude(u->faction->num);
 	if (att >= A_FRIENDLY && att >= faction->defaultattitude) return att;
 
 	if (CanSee(r, u) == 2)

@@ -305,6 +305,16 @@ private:
 	int year;
 	int month;
 
+
+	// These hooks are meant to allow the game engine for a custom game to override some basic functions.
+	// For our existing case, these are going to be used by the unit test framework to ensure a consistent
+	// run (by overriding the seeding of the random number generator).  In general, there should be *very*
+	// few of these hooks and they should exist for a very explicit purpose and be used with extreme care.
+	
+	// control the random number seed used for new game generation (by default it uses the existing
+	// seedrandomrandom function) which uses the current time.
+	std::function<void()> init_random_seed = seedrandomrandom; 
+
 	enum
 	{
 		GAME_STATUS_UNINIT,

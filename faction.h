@@ -53,7 +53,8 @@ using json = nlohmann::json;
 
 using namespace std;
 
-enum {
+enum
+{
 	A_HOSTILE,
 	A_UNFRIENDLY,
 	A_NEUTRAL,
@@ -69,7 +70,8 @@ extern const std::string F_MARTIAL;
 
 // DK
 // LLS - make templates cleaner for save/restore
-enum {
+enum
+{
 	TEMPLATE_OFF,
 	TEMPLATE_SHORT,
 	TEMPLATE_LONG,
@@ -77,7 +79,8 @@ enum {
 	NTEMPLATES
 };
 
-enum {
+enum
+{
 	QUIT_NONE,
 	QUIT_BY_ORDER,
 	QUIT_BY_GM,
@@ -86,7 +89,7 @@ enum {
 	QUIT_GAME_OVER,
 };
 
-extern char const ** AttitudeStrs;
+extern char const **AttitudeStrs;
 extern std::vector<std::string> *FactionTypes;
 
 // LLS - include strings for the template enum
@@ -97,42 +100,27 @@ int ParseAttitude(AString *);
 
 int MagesByFacType(int);
 
-class FactionVector {
-public:
-	FactionVector(int);
-	~FactionVector();
-
-	void ClearVector();
-	void SetFaction(int, Faction *);
-	Faction *GetFaction(int);
-
-	Faction **vector;
-	int vectorsize;
-};
-	
-class Attitude : public AListElem {
-public:
-	Attitude();
-	~Attitude();
-	void Writeout(ostream& f);
-	void Readin(istream& f);
-	
+struct Attitude
+{
 	int factionnum;
 	int attitude;
 };
 
-enum FactionActivity {
-	TAX     = 1,
-	TRADE   = 2
+enum FactionActivity
+{
+	TAX = 1,
+	TRADE = 2
 };
 
-class FactionPtr : public AListElem {
+class FactionPtr : public AListElem
+{
 public:
-	Faction * ptr;
+	Faction *ptr;
 };
 
 // Collect the faction statistics for display in the report
-struct FactionStatistic {
+struct FactionStatistic
+{
 	string item_name;
 	size_t rank;
 	size_t max;
@@ -142,11 +130,13 @@ struct FactionStatistic {
 	// objects/structs that require no additional parameters to be passed in.  On the other hand, for simple
 	// structures this is nice, and works with things like STL containers of structs to make the entire container
 	// serializable to json.
-	friend void to_json(json& j, const FactionStatistic& s) {
-		j = json{{"item_name", s.item_name}, {"rank", s.rank }, {"max", s.max }, {"total", s.total}};
+	friend void to_json(json &j, const FactionStatistic &s)
+	{
+		j = json{{"item_name", s.item_name}, {"rank", s.rank}, {"max", s.max}, {"total", s.total}};
 	};
 
-	friend ostream& operator <<(ostream& os, const FactionStatistic& s) {
+	friend ostream &operator<<(ostream &os, const FactionStatistic &s)
+	{
 		os << left << setw(42) << s.item_name << setw(6) << s.rank << setw(11) << s.max << s.total << right;
 		return os;
 	};
@@ -158,39 +148,38 @@ public:
 	Faction();
 	Faction(int);
 	~Faction();
-	
-	void Readin(istream& f);
-	void Writeout(ostream& f);
+
+	void Readin(istream &f);
+	void Writeout(ostream &f);
 	void View();
-	
+
 	void SetName(AString *);
-	void SetNameNoChange( AString *str );
-	void SetAddress( AString &strNewAddress );
-	
+	void SetNameNoChange(AString *str);
+	void SetAddress(AString &strNewAddress);
+
 	void CheckExist(ARegionList *);
-	void error(const string& s);
-	void event(const string& s);
-	
+	void error(const string &s);
+	void event(const string &s);
+
 	AString FactionTypeStr();
-	void write_text_report(ostream& f, Game *pGame, size_t **citems);
-	void write_json_report(json& j, Game *pGame, size_t **citems);
+	void write_text_report(ostream &f, Game *pGame, size_t **citems);
+	void write_json_report(json &j, Game *pGame, size_t **citems);
 
 	// LLS - write order template
-	void WriteTemplate(ostream& f, Game *pGame);
-	void WriteFacInfo(ostream& f);
-	
-	void SetAttitude(int,int); /* faction num, attitude */
-	/* if attitude == -1, clear it */
-	int GetAttitude(int);
-	void RemoveAttitude(int);
-	
-	int CanCatch(ARegion *,Unit *);
+	void WriteTemplate(ostream &f, Game *pGame);
+	void WriteFacInfo(ostream &f);
+
+	void set_attitude(int faction_id, int attitude); // attitude -1 clears it
+	int get_attitude(int faction_id);
+	void remove_attitude(int faction_id);
+
+	int CanCatch(ARegion *, Unit *);
 	/* Return 1 if can see, 2 if can see faction */
-	int CanSee(ARegion *,Unit *, int practice = 0);
-	
+	int CanSee(ARegion *, Unit *, int practice = 0);
+
 	void DefaultOrders();
 	void TimesReward();
-	
+
 	bool is_npc = false; // by default factions are not NPCs
 
 	void DiscoverItem(int item, int force, int full);
@@ -208,9 +197,9 @@ public:
 	int unclaimed;
 	int bankaccount;
 	int interest; // not written to game.out
-	AString * name;
-	AString * address;
-	AString * password;
+	AString *name;
+	AString *address;
+	AString *password;
 	int times;
 	int showunitattitudes;
 	int temformat;
@@ -218,7 +207,7 @@ public:
 	char exists;
 	int quit;
 	int numshows;
-	
+
 	int nummages;
 	int numapprentices;
 	int numqms;
@@ -234,18 +223,21 @@ public:
 	bool gets_gm_report(Game *game);
 
 	/* Used when writing reports */
-	AList present_regions;
-	
+	vector<ARegion *> present_regions;
+
 	int defaultattitude;
 	// TODO: Convert this to a hashmap of <attitude, vector<factionid>>
-	AList attitudes;
+	// For now, just making it a vector of attitudes.  More will come later.
+	vector<Attitude> attitudes;
+
+	// These need to not be ALists wrapped with extra behavior at some point.
 	SkillList skills;
 	ItemList items;
-	
-	//
-	// Both are lists of AStrings
-	//
-	AList extraPlayers;
+
+	// Extra lines/data from the players.in file for this faction.  Stored and dumped, not used.
+	vector<string> extra_player_data;
+
+	// Errors and events during turn processing
 	vector<string> errors;
 	vector<string> events;
 
@@ -264,14 +256,13 @@ public:
 private:
 	vector<FactionStatistic> compute_faction_statistics(Game *game, size_t **citems);
 	void gm_report_setup(Game *game);
-	
-	// Split the gm report from the normal report to make the code more readable.
-	void write_text_gm_report(ostream& f, Game *game);
-	void write_json_gm_report(json& j, Game *game);
 
+	// Split the gm report from the normal report to make the code more readable.
+	void write_text_gm_report(ostream &f, Game *game);
+	void write_json_gm_report(json &j, Game *game);
 };
 
-Faction * GetFaction(AList *,int);
-Faction * GetFaction2(AList *,int); /*This AList is a list of FactionPtr*/
+Faction *GetFaction(AList *, int);
+Faction *GetFaction2(AList *, int); /*This AList is a list of FactionPtr*/
 
 #endif

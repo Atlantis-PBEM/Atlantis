@@ -39,6 +39,14 @@ public:
     ARegionList *get_regions() { return &game.regions; }
     // get the game month 
     int get_month() { return game.month; }
+    // Find the first unit for a given faction
+    Unit *get_first_unit(Faction *faction);
+    // Create a fleet in the given region.
+    void create_fleet(ARegion *region, Unit *owner, int ship_type, int ship_count);
+
+
+    // dummy
+    int get_seed() { return getrandom(10000); };
 
     // Get the contents of cout as a string.
     string cout_data();

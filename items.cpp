@@ -136,7 +136,7 @@ ManType *FindRace(char const *abbr)
 int FindRaceItemIndex(int raceIndex) {
 	auto man = ManDefs[raceIndex];
 
-	for(int i = 0; i < NITEMS; i++) {
+	for (int i = 0; i < NITEMS; i++) {
 		auto item = ItemDefs[i];
 		if (item.type == IT_MAN && AString(item.abr) == man.abbr) {
 			return i;

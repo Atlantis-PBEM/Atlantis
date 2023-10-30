@@ -1538,13 +1538,9 @@ int Game::RunPhantasmalEntertainment(ARegion *r,Unit *u)
 
 	if (level > r->phantasmal_entertainment) r->phantasmal_entertainment = level;
 
-	forlist((&r->products)) {
-		Production *p = ((Production *) elem);
-		if (p->itemtype == I_SILVER) {
-			if (p->skill == S_ENTERTAINMENT) {
-				max_entertainement = p->amount;
-			}
-		}
+	Production *p = r->get_production_for_skill(I_SILVER, S_ENTERTAINMENT);
+	if (p != NULL) {
+		max_entertainement = p->amount;
 	}
 
 	if (amt > max_entertainement) {
@@ -1914,7 +1910,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		return 0;
 	}
 
-	if (tar->unit->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
+	if (tar->unit->faction->get_attitude(u->faction->num) < A_FRIENDLY) {
 		u->Error("CAST: Target mage is not friendly.");
 		return 0;
 	}

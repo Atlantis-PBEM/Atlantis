@@ -62,8 +62,13 @@ public:
 	AString Report();
 };
 
-class MarketList : public AList {
+class MarketList : std::vector<Market*> {
 public:
+	// expose just the function on vector that we need.
+	using std::vector<Market*>::push_back;
+	using std::vector<Market*>::begin;
+	using std::vector<Market*>::end;
+
 	void PostTurn(int, int);
 	void Writeout(ostream&  f);
 	void Readin(istream& f);

@@ -348,7 +348,7 @@ void ARegion::WriteTemplateHeader(ostream& f, Faction *fac,
 	line++;
 
 	// ----------------------------------------------------------------
-	prod = products.GetProd(I_SILVER, S_ENTERTAINMENT);
+	prod = get_production_for_skill(I_SILVER, S_ENTERTAINMENT);
 	if (prod) {
 		GetMapLine(buffer, line, pRegs);
 		snprintf(data, LINE_WIDTH - MAP_WIDTH, "Ente %5i", prod->amount);
@@ -359,7 +359,7 @@ void ARegion::WriteTemplateHeader(ostream& f, Faction *fac,
 	}
 
 	// ----------------------------------------------------------------
-	prod = products.GetProd(I_SILVER, -1);
+	prod = get_production_for_skill(I_SILVER, -1);
 	if (prod) {
 		GetMapLine(buffer, line, pRegs);
 		snprintf(data, LINE_WIDTH - MAP_WIDTH, "Wage %5i.%1i (max %i)", (prod->productivity/10), (prod->productivity%10), prod->amount);
@@ -371,99 +371,12 @@ void ARegion::WriteTemplateHeader(ostream& f, Faction *fac,
 
 	// ----------------------------------------------------------------
 	any = 0;
-	{
-		forlist(&markets) {
-			Market *m = (Market *) elem;
-			if (!m->amount) continue;
-			if (m->type == M_SELL) {
+	for (const auto& m : markets) {
+		if (!m->amount) continue;
+		if (m->type == M_SELL) {
 
-				if (ItemDefs[m->item].type & IT_ADVANCED) {
-					if (!HasItem(fac, m->item)) {
-						continue;
-					}
-				}
-
-				if (!any) {
-					GetMapLine(buffer, line, pRegs);
-					temp = buffer;
-					temp.erase(temp.find_last_not_of(' ') + 1);
-					f << indent::comment << temp << '\n';
-					line++;
-				}
-
-				GetMapLine(buffer, line, pRegs);
-
-				if (m->amount == -1) {
-					snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s @ %3i",
-						(any ? "    " : "Want"),
-						ItemDefs[m->item].abr,
-						m->price);
-				} else {
-					snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s @ %3i",
-						(any ? "    " : "Want"),
-						m->amount,
-						ItemDefs[m->item].abr,
-						m->price);
-				}
-				temp = buffer;
-				temp.erase(temp.find_last_not_of(' ') + 1);
-				f << indent::comment << temp << '\n';
-				line++;
-				any = 1;
-			}
-		}
-	}
-
-	// ----------------------------------------------------------------
-	any = 0;
-	{
-		forlist(&markets) {
-			Market *m = (Market *) elem;
-			if (!m->amount) continue;
-			if (m->type == M_BUY) {
-
-				if (!any) {
-					GetMapLine(buffer, line, pRegs);
-					temp = buffer;
-					temp.erase(temp.find_last_not_of(' ') + 1);
-					f << indent::comment << temp << '\n';
-					line++;
-				}
-
-				GetMapLine(buffer, line, pRegs);
-
-				if (m->amount == -1) {
-					snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s @ %3i",
-						(any ? "    " : "Sell"),
-						ItemDefs[m->item].abr,
-						m->price);
-				} else {
-					snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s @ %3i",
-						(any ? "    " : "Sell"),
-						m->amount,
-						ItemDefs[m->item].abr,
-						m->price);
-				}
-				temp = buffer;
-				temp.erase(temp.find_last_not_of(' ') + 1);
-				f << indent::comment << temp << '\n';
-				line++;
-				any = 1;
-			}
-		}
-	}
-
-	// ----------------------------------------------------------------
-	any = 0;
-	{
-		forlist((&products)) {
-			Production *p = ((Production *) elem);
-			if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
-				if (!CanMakeAdv(fac, p->itemtype)) {
-					continue;
-				}
-			} else {
-				if (p->itemtype == I_SILVER) {
+			if (ItemDefs[m->item].type & IT_ADVANCED) {
+				if (!HasItem(fac, m->item)) {
 					continue;
 				}
 			}
@@ -478,15 +391,17 @@ void ARegion::WriteTemplateHeader(ostream& f, Faction *fac,
 
 			GetMapLine(buffer, line, pRegs);
 
-			if (p->amount == -1) {
-				snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s",
-					(any ? "    " : "Prod"),
-					ItemDefs[p->itemtype].abr);
+			if (m->amount == -1) {
+				snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s @ %3i",
+					(any ? "    " : "Want"),
+					ItemDefs[m->item].abr,
+					m->price);
 			} else {
-				snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s",
-					(any ? "    " : "Prod"),
-					p->amount,
-					ItemDefs[p->itemtype].abr);
+				snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s @ %3i",
+					(any ? "    " : "Want"),
+					m->amount,
+					ItemDefs[m->item].abr,
+					m->price);
 			}
 			temp = buffer;
 			temp.erase(temp.find_last_not_of(' ') + 1);
@@ -494,6 +409,82 @@ void ARegion::WriteTemplateHeader(ostream& f, Faction *fac,
 			line++;
 			any = 1;
 		}
+	}
+
+	// ----------------------------------------------------------------
+	any = 0;
+	for (const auto& m : markets) {
+		if (!m->amount) continue;
+		if (m->type == M_BUY) {
+
+			if (!any) {
+				GetMapLine(buffer, line, pRegs);
+				temp = buffer;
+				temp.erase(temp.find_last_not_of(' ') + 1);
+				f << indent::comment << temp << '\n';
+				line++;
+			}
+
+			GetMapLine(buffer, line, pRegs);
+
+			if (m->amount == -1) {
+				snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s @ %3i",
+					(any ? "    " : "Sell"),
+					ItemDefs[m->item].abr,
+					m->price);
+			} else {
+				snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s @ %3i",
+					(any ? "    " : "Sell"),
+					m->amount,
+					ItemDefs[m->item].abr,
+					m->price);
+			}
+			temp = buffer;
+			temp.erase(temp.find_last_not_of(' ') + 1);
+			f << indent::comment << temp << '\n';
+			line++;
+			any = 1;
+		}
+	}
+
+	// ----------------------------------------------------------------
+	any = 0;
+	for (const auto& p : products) {
+		if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
+			if (!CanMakeAdv(fac, p->itemtype)) {
+				continue;
+			}
+		} else {
+			if (p->itemtype == I_SILVER) {
+				continue;
+			}
+		}
+
+		if (!any) {
+			GetMapLine(buffer, line, pRegs);
+			temp = buffer;
+			temp.erase(temp.find_last_not_of(' ') + 1);
+			f << indent::comment << temp << '\n';
+			line++;
+		}
+
+		GetMapLine(buffer, line, pRegs);
+
+		if (p->amount == -1) {
+			snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s unlim %4s",
+				(any ? "    " : "Prod"),
+				ItemDefs[p->itemtype].abr);
+		} else {
+			snprintf(data, LINE_WIDTH - MAP_WIDTH, "%s %5i %4s",
+				(any ? "    " : "Prod"),
+				p->amount,
+				ItemDefs[p->itemtype].abr);
+		}
+		temp = buffer;
+		temp.erase(temp.find_last_not_of(' ') + 1);
+		f << indent::comment << temp << '\n';
+		line++;
+		any = 1;
 	}
 
 	// ----------------------------------------------------------------
