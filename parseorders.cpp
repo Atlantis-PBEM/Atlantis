@@ -1910,7 +1910,7 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 	} else {
 		fac = token->strict_value();
 		if (fac == -1) {
-			f->error("DECLARE: Non-existent faction.");
+			ParseError(pCheck, 0, f, "DECLARE: Non-existent faction.");
 			return;
 		}
 	}
