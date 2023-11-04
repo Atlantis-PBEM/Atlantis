@@ -747,7 +747,7 @@ void Battle::write_text_report(ostream& f,Faction * fac) {
 		f << asstext << "\n";
 		return;
 	}
-	for(auto line: text) {
+	for (const auto& line: text) {
 		f << line << '\n';
 	}
 }

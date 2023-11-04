@@ -52,13 +52,4 @@ public:
 	int activity;
 };
 
-class ProductionList : public AList {
-public:
-	Production * GetProd(int,int); /* item type, skill */
-	void AddProd(Production *);
-	
-	void Writeout(ostream& f);
-	void Readin(istream& f);
-};
-
 #endif

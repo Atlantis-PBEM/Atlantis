@@ -1,7 +1,12 @@
 #include "game.h"
 #include "testhelper.hpp"
 
+static void seed_random() { seedrandom(0xdeadbeef); }
+
 UnitTestHelper::UnitTestHelper() {
+    // install our own random seed function
+    game.init_random_seed = seed_random;
+
     // Set up the output streams to capture the output.
     cout_streambuf = cout.rdbuf();
     cout.rdbuf(cout_buffer.rdbuf());
@@ -37,6 +42,20 @@ Faction *UnitTestHelper::create_faction(string name) {
     AString *tmp = new AString(name); // because the guts of SetName frees the string passed in. :/
     fac->SetName(tmp);
     return fac;
+}
+
+Unit *UnitTestHelper::get_first_unit(Faction *faction) {
+    // This is pretty gross.. a faction should have a link to it's own units, but it doesn't.
+    for (size_t i = 0; i < game.maxppunits; i++) {
+        if (game.ppUnits[i] && game.ppUnits[i]->faction == faction) return game.ppUnits[i];
+    }
+    return nullptr;
+}
+
+void UnitTestHelper::create_fleet(ARegion *region, Unit *owner, int ship_type, int ship_count) {
+    for (auto i = 0; i < ship_count; i++)
+        game.CreateShip(region, owner, ship_type);
+ 
 }
 
 ARegion *UnitTestHelper::get_region(int x, int y, int z) {

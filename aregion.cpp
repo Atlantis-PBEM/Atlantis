@@ -161,6 +161,15 @@ void ARegion::SetName(char const *c)
 	name = new AString(c);
 }
 
+Production *ARegion::get_production_for_skill(int item, int skill) { 
+	if (products.size() == 0) return nullptr;
+	auto p = find_if(
+		products.begin(),
+		products.end(),
+		[item, skill](Production *p) { return p->itemtype == item && p->skill == skill; }
+	);
+	return (p != products.end()) ? *p : nullptr;
+}
 
 int ARegion::IsNativeRace(int item)
 {
@@ -193,7 +202,7 @@ int ARegion::GetNearestProd(int item)
 			ARegion *r = ((ARegionPtr *) elem)->ptr;
 			AString skname = ItemDefs[item].pSkill;
 			int sk = LookupSkill(&skname);
-			if (r->products.GetProd(item, sk)) {
+			if (r->get_production_for_skill(item, sk)) {
 				regs.DeleteAll();
 				regs2.DeleteAll();
 				return i;
@@ -1046,8 +1055,10 @@ void ARegion::Writeout(ostream& f)
 	f << xloc << '\n' << yloc << '\n' << zloc << '\n';
 	f << visited << '\n';
 
-	products.Writeout(f);
-	markets.Writeout(f);
+	f << products.size() << '\n';
+	for (const auto& product : products) product->Writeout(f);
+	f << markets.size() << '\n';
+	for (const auto& market : markets) market->Writeout(f);	
 
 	f << objects.Num() << '\n';
 	forlist ((&objects)) ((Object *) elem)->Writeout(f);
@@ -1110,14 +1121,25 @@ void ARegion::Readin(istream &f, AList *facs)
 	f >> zloc;
 	f >> visited;
 
-	products.Readin(f);
-	markets.Readin(f);
+	f >> n;
+	products.reserve(n);
+	for (int i = 0; i < n; i++) {
+		Production *p = new Production();
+		p->Readin(f);
+		products.push_back(p);
+	}
 
-	int i;
-	f >> i;
+	f >> n;
+	markets.reserve(n);
+	for (int i = 0; i < n; i++) {
+		Market *m = new Market();
+		m->Readin(f);
+		markets.push_back(m);
+	}
 
+	f >> n;
 	buildingseq = 1;
-	for (int j = 0; j < i; j++) {
+	for (int j = 0; j < n; j++) {
 		Object *temp = new Object(this);
 		temp->Readin(f, facs);
 		if (temp->num >= buildingseq)
@@ -1176,47 +1198,25 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 
 void ARegion::WriteProducts(ostream& f, Faction *fac, int present)
 {
-	AString temp = "Products: ";
-	int has = 0;
-	forlist((&products)) {
-		Production *p = ((Production *) elem);
-		if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
-			if (CanMakeAdv(fac, p->itemtype) || fac->is_npc) {
-				if (has) {
-					temp += AString(", ") + p->WriteReport();
-				} else {
-					has = 1;
-					temp += p->WriteReport();
-				}
-			}
-		} else {
-			if (p->itemtype == I_SILVER) {
-				if (p->skill == S_ENTERTAINMENT) {
-					if ((Globals->TRANSIT_REPORT &
-							GameDefs::REPORT_SHOW_ENTERTAINMENT) || present) {
-						f << "Entertainment available: $" << p->amount << ".\n";
-					} else {
-						f << "Entertainment available: $0.\n";
-					}
-				}
-			} else {
-				if (!present &&
-						!(Globals->TRANSIT_REPORT &
-						GameDefs::REPORT_SHOW_RESOURCES))
-					continue;
-				if (has) {
-					temp += AString(", ") + p->WriteReport();
-				} else {
-					has = 1;
-					temp += p->WriteReport();
-				}
-			}
-		}
+	Production *p = get_production_for_skill(I_SILVER, S_ENTERTAINMENT);
+	if (p) {
+		f << "Entertainment available: $"
+		<< (((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ENTERTAINMENT) || present) ? p->amount : 0)
+		<< ".\n";
 	}
 
-	if (has==0) temp += "none";
-	temp += ".";
-	f << temp.const_str() << "\n";
+	f << "Products: ";
+	bool has = false;
+	for (const auto& p : products) {
+		if (p->itemtype == I_SILVER) continue;
+		// Advanced items are special.. Skip unless we are allowed to see them.
+		if (ItemDefs[p->itemtype].type & IT_ADVANCED && !(CanMakeAdv(fac, p->itemtype) || fac->is_npc)) continue;
+		// For normal items, skip if we aren't allowed to see them.
+		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) continue;
+		f << (has ? ", " : "") << p->WriteReport();
+		has = true;
+	}
+	f << (has ? "." : "none.") << '\n';
 }
 
 int ARegion::HasItem(Faction *fac, int item)
@@ -1237,12 +1237,9 @@ void ARegion::WriteMarkets(ostream &f, Faction *fac, int present)
 {
 	f << "Wanted: ";
 	int has = 0;
-	forlist(&markets) {
-		Market *m = (Market *) elem;
+	for (const auto& m : markets) {
 		if (!m->amount) continue;
-		if (!present &&
-				!(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS))
-			continue;
+		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS)) continue;
 		if (m->type == M_SELL) {
 			if (ItemDefs[m->item].type & IT_ADVANCED) {
 				if (!Globals->MARKETS_SHOW_ADVANCED_ITEMS) {
@@ -1251,38 +1248,23 @@ void ARegion::WriteMarkets(ostream &f, Faction *fac, int present)
 					}
 				}
 			}
-			if (has) {
-				f << ", ";
-			} else {
-				has = 1;
-			}
-			f << m->Report().const_str();
+			f << (has ? ", " : "") << m->Report().const_str();
+			has = 1;
 		}
 	}
-	if (!has) f << "none";
-	f << ".\n";
+	f << (has ? "." : "none.") << '\n';
 
 	f << "For Sale: ";
 	has = 0;
-	{
-		forlist(&markets) {
-			Market *m = (Market *) elem;
-			if (!m->amount) continue;
-			if (!present &&
-					!(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS))
-				continue;
-			if (m->type == M_BUY) {
-				if (has) {
-					f << ", ";
-				} else {
-					has = 1;
-				}
-				f << m->Report().const_str();
-			}
+	for (const auto& m : markets) {
+		if (!m->amount) continue;
+		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS)) continue;
+		if (m->type == M_BUY) {
+			f << (has ? ", " : "") << m->Report().const_str();
+			has = 1;
 		}
 	}
-	if (!has) f << "none";
-	f << ".\n";
+	f << (has ? "." : "none.") << '\n';
 }
 
 void ARegion::WriteEconomy(ostream& f, Faction *fac, int present)
@@ -1319,15 +1301,8 @@ void ARegion::WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen)
 	f << '\n';
 }
 
-void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *regions) {
-	Farsight *farsight = GetFarsight(&farsees, fac);
-	Farsight *passer = GetFarsight(&passers, fac);
-	int present = Present(fac) || fac->is_npc;
-
-	// this faction cannot see this region, why are we even here?
-	if (!farsight && !passer && !present) return;
-
-	// The region is visible to the faction
+json ARegion::basic_json_data(ARegionList *regions) {
+	json j;
 	j["terrain"] = TerrainDefs[type].name;
 
 	ARegionArray *level = regions->pRegionArrays[zloc];
@@ -1338,6 +1313,18 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 	if (town) {
 		j["settlement"] = { { "name", town->name->const_str() }, { "size", TownString(town->TownType()).const_str() } };
 	}
+	return j;
+}
+
+void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *regions) {
+	Farsight *farsight = GetFarsight(&farsees, fac);
+	Farsight *passer = GetFarsight(&passers, fac);
+	int present = Present(fac) || fac->is_npc;
+
+	// this faction cannot see this region, why are we even here?
+	if (!farsight && !passer && !present) return;
+
+	j = basic_json_data(regions);
 
 	if (Population() &&	(present || farsight || (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_PEASANTS))) {
 		j["population"] = { { "amount", Population() } };
@@ -1363,49 +1350,92 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 		j["description"] = desc.str();
 	}
 
-	// hold off on writing out other stuff for now.. Just the top level region info.
-	/*
-	WriteEconomy(f, fac, present || farsight);
+	Production *p = get_production_for_skill(I_SILVER, -1);
+	double wages = p ? p->productivity / 10.0 : 0;
+	auto max_wages = p ? p->amount : 0;
+	j["wages"] = (p && ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present))
+		? json{ { "amount", wages }, { "max", max_wages } }
+		: json{ { "amount", 0 } };
 
-	int exits_seen[NDIRS];
-	if (present || farsight ||
-			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ALL_EXITS)) {
-		for (int i = 0; i < NDIRS; i++)
-			exits_seen[i] = 1;
-	} else {
-		// This is just a transit report and we're not showing all
-		// exits.   See if we are showing used exits.
+	json wanted = json::array();
+	json for_sale = json::array();
+	for (const auto& m : markets) {
+		if (!m->amount) continue;
+		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS)) continue;
 
-		// Show none by default.
-		int i;
-		for (i = 0; i < NDIRS; i++)
-			exits_seen[i] = 0;
-		// Now, if we should, show the ones actually used.
-		if (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_USED_EXITS) {
-			forlist(&passers) {
-				Farsight *p = (Farsight *)elem;
-				if (p->faction == fac) {
-					for (i = 0; i < NDIRS; i++) {
-						exits_seen[i] |= p->exits_used[i];
-					}
+		ItemType itemdef = ItemDefs[m->item];
+		json item = {
+			{ "name", itemdef.name }, { "plural", itemdef.names }, { "abbr", itemdef.abr }, { "price", m->price }
+		};
+		if (m->amount != -1) item["amount"] = m->amount;
+		else item["unlimited"] = true;
+
+		if (m->type == M_SELL) {
+			if (ItemDefs[m->item].type & IT_ADVANCED) {
+				if (!Globals->MARKETS_SHOW_ADVANCED_ITEMS) {
+					if (!HasItem(fac, m->item)) continue;
+				}
+			}
+			wanted.push_back(item);
+		} else {
+			for_sale.push_back(item);
+		}
+	}
+	j["markets"] = { { "wanted", wanted }, { "for_sale", for_sale } };
+
+	p = get_production_for_skill(I_SILVER, S_ENTERTAINMENT);
+	j["entertainment"] = p && (present || (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ENTERTAINMENT))
+		? p->amount : 0;
+
+	j["products"] = json::array();
+	for (const auto& p : products) {
+		ItemType itemdef = ItemDefs[p->itemtype];
+		if (p->itemtype == I_SILVER) continue; // wages and entertainment handled seperately.
+		// Advanced items have slightly different rules, so call CanMakeAdv (poorly named) to see if we can see them.
+		if (itemdef.type & IT_ADVANCED && !(CanMakeAdv(fac, p->itemtype) || fac->is_npc)) continue;
+		// If it's a normal resource, and we aren't here or not showing it, skip it.
+		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) continue;
+		json item = {
+			{ "name", itemdef.name }, { "plural", itemdef.names }, { "abbr", itemdef.abr },
+	 	};
+		// I don't think resources can be unlimited, but just in case, we will handle it.
+		if (p->amount != -1) item["amount"] = p->amount;
+		else item["unlimited"] = true;
+		j["products"].push_back(item);
+	}
+
+	bool default_state = (present || farsight || (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ALL_EXITS));
+	bool exits_seen[NDIRS];
+	std::fill_n(exits_seen, NDIRS, default_state);
+	// If we are only showing used exits, we need to walk the list of whomever passed through and update it with ones
+	// our units used.
+	if (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_USED_EXITS) {
+		forlist(&passers) {
+			Farsight *p = (Farsight *)elem;
+			if (p->faction == fac) {
+				for (auto i = 0; i < NDIRS; i++) {
+					exits_seen[i] |= (bool)p->exits_used[i];
 				}
 			}
 		}
 	}
 
-	WriteExits(f, pRegions, exits_seen);
+	j["exits"] = json::array();
+	for (int i=0; i<NDIRS; i++) {
+		if (!exits_seen[i] || !neighbors[i]) continue; 
+		j["exits"].push_back(
+			{ { "direction", DirectionStrs[i] }, { "region", neighbors[i]->basic_json_data(regions) } }
+		);
+	}
 
 	if (Globals->GATES_EXIST && gate && gate != -1) {
-		int sawgate = 0;
-		if (fac->is_npc)
-			sawgate = 1;
+		bool can_see_gate = false;
+		if (fac->is_npc) can_see_gate = true;
 		if (Globals->IMPROVED_FARSIGHT && farsight) {
 			forlist(&farsees) {
 				Farsight *watcher = (Farsight *)elem;
 				if (watcher && watcher->faction == fac && watcher->unit) {
-					if (watcher->unit->GetSkill(S_GATE_LORE)) {
-						sawgate = 1;
-					}
+					if (watcher->unit->GetSkill(S_GATE_LORE)) can_see_gate = true;
 				}
 			}
 		}
@@ -1413,9 +1443,7 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 			forlist(&passers) {
 				Farsight *watcher = (Farsight *)elem;
 				if (watcher && watcher->faction == fac && watcher->unit) {
-					if (watcher->unit->GetSkill(S_GATE_LORE)) {
-						sawgate = 1;
-					}
+					if (watcher->unit->GetSkill(S_GATE_LORE)) can_see_gate = true;
 				}
 			}
 		}
@@ -1423,22 +1451,18 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 			Object *o = (Object *) elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
-				if (!sawgate &&
-						((u->faction == fac) &&
-							u->GetSkill(S_GATE_LORE))) {
-					sawgate = 1;
-				}
+				if ((u->faction == fac) && u->GetSkill(S_GATE_LORE)) can_see_gate = true;
 			}
 		}
-		if (sawgate) {
+
+		// Ok, someone from this faction can see the gate.
+		if (can_see_gate) {
+			j["gate"]["open"] = gateopen;
 			if (gateopen) {
-				f << "There is a Gate here (Gate " << gate;
+				j["gate"]["number"] = gate;
 				if (!Globals->DISPERSE_GATE_NUMBERS) {
-					f << " of " << pRegions->numberofgates;
+					j["gate"]["total"] = regions->numberofgates;
 				}
-				f << ").\n\n";
-			} else if (Globals->SHOW_CLOSED_GATES) {
-				f << "There is a closed Gate here.\n\n";
 			}
 		}
 	}
@@ -1488,15 +1512,13 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 		}
 	}
 
+	// extra block because of freaking AList.
 	{
 		forlist (&objects) {
-			((Object *) elem)->Report(f, fac, obs, truesight, detfac,
-						passobs, passtrue, passdetfac,
-						present || farsight);
+			Object *o = (Object *) elem;
+			o->write_json_report(j, fac, obs, truesight, detfac, passobs, passtrue, passdetfac, present || farsight);
 		}
-		f << '\n';
 	}
-	*/
 }
 
 void ARegion::write_text_report(ostream &f, Faction *fac, int month, ARegionList *pRegions)
@@ -1683,7 +1705,7 @@ void ARegion::write_text_report(ostream &f, Faction *fac, int month, ARegionList
 
 		{
 			forlist (&objects) {
-				((Object *) elem)->Report(f, fac, obs, truesight, detfac,
+				((Object *) elem)->write_text_report(f, fac, obs, truesight, detfac,
 							passobs, passtrue, passdetfac,
 							present || farsight);
 			}
@@ -1968,8 +1990,7 @@ Unit *ARegion::ForbiddenByAlly(Unit *u)
 		Object *obj = (Object *) elem;
 		forlist ((&obj->units)) {
 			Unit *u2 = (Unit *) elem;
-			if (u->faction->GetAttitude(u2->faction->num) == A_ALLY &&
-				u2->Forbids(this, u)) return u2;
+			if (u->faction->get_attitude(u2->faction->num) == A_ALLY && u2->Forbids(this, u)) return u2;
 		}
 	}
 	return 0;
@@ -2952,7 +2973,7 @@ struct WaterBody {
 };
 
 int findWaterBody(std::vector<WaterBody*>& waterBodies, ARegion* reg) {
-	for (auto water : waterBodies) {
+	for (const auto& water : waterBodies) {
 		if (water->includes(reg)) {
 			return water->name;
 		}
@@ -2995,7 +3016,7 @@ bool isNearWaterBody(ARegion* reg, WaterBody* wb) {
 }
 
 bool isNearWaterBody(ARegion* reg, std::vector<WaterBody*>& list) {
-	for (auto wb : list) {
+	for (const auto& wb : list) {
 		if (isNearWaterBody(reg, wb)) {
 			return true;
 		}
@@ -3045,7 +3066,7 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 			wb->name = waterBodyName++;
 			waterBodies.push_back(wb);
 
-			for (auto kv : result) {
+			for (const auto& kv : result) {
 				wb->add(kv.first);
 			}
 		}
@@ -3064,7 +3085,7 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 		}
 	}
 
-	for (auto water : waterBodies) {
+	for (const auto& water : waterBodies) {
 		std::cout << "WATER BODY " << water->name << std::endl;
 
 		graph.setInclusion([ water, &innerWater ](ARegion* current, ARegion* next) {
@@ -3072,13 +3093,13 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 			return !water->includes(loc) && innerWater.find(loc) == innerWater.end();
 		});
 
-		for (auto loc : water->regions) {
+		for (const auto& loc : water->regions) {
 			if (innerWater.find(loc) != innerWater.end()) {
 				continue;
 			}
 
 			auto result = graphs::breadthFirstSearch(graph, loc);
-			for (auto kv : result) {
+			for (const auto& kv : result) {
 				int newDist = kv.second.distance + 1;
 
 				int otherWater = findWaterBody(waterBodies, graph.get(kv.first));
@@ -3187,7 +3208,7 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 				graphs::Location2D riverEnd;
 				int riverCost = INT32_MAX;
 
-				for (auto start : source->regions) {
+				for (const auto& start : source->regions) {
 					if (innerWater.find(start) != innerWater.end()) {
 						continue;
 					}
@@ -4253,22 +4274,16 @@ void ARegionList::ResoucesStatistics() {
 	forlist(this) {
 		ARegion* reg = (ARegion*) elem;
 		
-		{
-			forlist (&reg->products) {
-				Production* p = (Production*) elem;
-				resources[p->itemtype] += p->amount;
-			}
+		for (const auto& p : reg->products) {
+			resources[p->itemtype] += p->amount;
 		}
 
-		{
-			forlist (&reg->markets) {
-				Market* m = (Market*) elem;
-				if (m->type == M_BUY) {
-					forSale[m->item] += m->amount;
-				}
-				else {
-					wanted[m->item] += m->amount;
-				}
+		for (const auto& m : reg->markets) {
+			if (m->type == M_BUY) {
+				forSale[m->item] += m->amount;
+			}
+			else {
+				wanted[m->item] += m->amount;
 			}
 		}
 	}

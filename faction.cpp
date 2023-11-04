@@ -83,53 +83,6 @@ int ParseAttitude(AString *token)
 	return -1;
 }
 
-FactionVector::FactionVector(int size)
-{
-	vector = new Faction *[size];
-	vectorsize = size;
-	ClearVector();
-}
-
-FactionVector::~FactionVector()
-{
-	delete vector;
-}
-
-void FactionVector::ClearVector()
-{
-	for (int i=0; i<vectorsize; i++) vector[i] = 0;
-}
-
-void FactionVector::SetFaction(int x, Faction *fac)
-{
-	vector[x] = fac;
-}
-
-Faction *FactionVector::GetFaction(int x)
-{
-	return vector[x];
-}
-
-Attitude::Attitude()
-{
-}
-
-Attitude::~Attitude()
-{
-}
-
-void Attitude::Writeout(ostream& f)
-{
-	f << factionnum << '\n';
-	f << attitude << '\n';
-}
-
-void Attitude::Readin(istream &f)
-{
-	f >> factionnum;
-	f >> attitude;
-}
-
 Faction::Faction()
 {
 	exists = 1;
@@ -187,7 +140,7 @@ Faction::~Faction()
 	if (name) delete name;
 	if (address) delete address;
 	if (password) delete password;
-	attitudes.DeleteAll();
+	attitudes.clear();
 }
 
 void Faction::Writeout(ostream& f)
@@ -215,8 +168,8 @@ void Faction::Writeout(ostream& f)
 	skills.Writeout(f);
 	items.Writeout(f);
 	f << defaultattitude << '\n';
-	f << attitudes.Num() << '\n';
-	forlist((&attitudes)) ((Attitude *) elem)->Writeout(f);
+	f << attitudes.size() << '\n';
+	for (const auto& attitude: attitudes) f << attitude.factionnum << '\n' << attitude.attitude << '\n';
 }
 
 void Faction::Readin(istream& f)
@@ -254,10 +207,11 @@ void Faction::Readin(istream& f)
 	int n;
 	f >> n;
 	for (int i = 0; i < n; i++) {
-		Attitude* a = new Attitude;
-		a->Readin(f);
-		if (a->factionnum == num) delete a;
-		else attitudes.Add(a);
+		int fnum, fattitude;
+		f >> fnum >> fattitude;
+		if (fnum == num) continue;
+		Attitude a = { .factionnum = fnum, .attitude = fattitude };
+		attitudes.push_back(a);
 	}
 }
 
@@ -400,33 +354,28 @@ void Faction::write_text_gm_report(ostream& f, Game *game) {
 	if(!need_header) f << '\n';
 
 	need_header = true;
-	for(auto &itemshow : data.items) {
+	for (const auto& itemshow : data.items) {
 		if(need_header) { f << "Item reports:\n"; need_header = false; }
 			f << '\n' << itemshow << '\n';
 	}
 	if (!need_header) f << '\n';
 
 	need_header = true;
-	for(auto &objectshow : data.objects) {
+	for (const auto& objectshow : data.objects) {
 		if(need_header) { f << "Object reports:\n"; need_header = false; }
 		f << '\n' << objectshow << '\n';
 	}
 	if (!need_header) f << '\n';
 
-	present_regions.DeleteAll();
+	present_regions.clear();
 	forlist(&(game->regions)) {
 		ARegion *reg = (ARegion *)elem;
-		ARegionPtr *ptr = new ARegionPtr;
-		ptr->ptr = reg;
-		present_regions.Add(ptr);
+		present_regions.push_back(reg);
 	}
-	{
-		// extra block because of foreach macro.
-		forlist(&present_regions) {
-			((ARegionPtr*)elem)->ptr->write_text_report(f, this, game->month, &(game->regions));
-		}
+	for (const auto& reg: present_regions) {
+		reg->write_text_report(f, this, game->month, &(game->regions));
 	}
-	present_regions.DeleteAll();
+	present_regions.clear();
 
 	errors.clear();
 	events.clear();
@@ -450,24 +399,19 @@ void Faction::write_json_gm_report(json& j, Game *game) {
 	j["item_reports"] = data.items;
 	j["object_reports"] = data.objects;
 
-	present_regions.DeleteAll();
+	present_regions.clear();
 	forlist(&(game->regions)) {
 		ARegion *reg = (ARegion *)elem;
-		ARegionPtr *ptr = new ARegionPtr;
-		ptr->ptr = reg;
-		present_regions.Add(ptr);
+		present_regions.push_back(reg);
 	}
 	json regions = json::array();
-	{
-		// extra block because of foreach macro.
-		forlist(&present_regions) {
-			json region;
-			((ARegionPtr*)elem)->ptr->write_json_report(region, this, game->month, &(game->regions));
-			regions.push_back(region);
-		}
+	for (const auto& reg: present_regions) {
+		json region;
+		reg->write_json_report(region, this, game->month, &(game->regions));
+		regions.push_back(region);
 	}
 	j["regions"] = regions;
-	present_regions.DeleteAll();
+	present_regions.clear();
 
 	errors.clear();
 	events.clear();
@@ -584,7 +528,7 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 
 	if (!battles.empty()) {
 		json jbattles = json::array();
-		for(auto battle: battles) {
+		for (const auto& battle: battles) {
 			json jbattle = json::object();
 			// we will obviously want to make this into json-y output
 			battle->write_json_report(jbattle, this);
@@ -608,14 +552,13 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 		// how annoying that this is the easiest way to do this.
 		transform(attitude.begin(), attitude.end(), attitude.begin(), ::tolower);
 		j["attitudes"][attitude] = json::array(); // [] = json::array();
-		forlist((&attitudes)) {
-			Attitude* a = (Attitude *) elem;
-			if (a->attitude == i) {
+		for (const auto& a: attitudes) {
+			if (a.attitude == i) {
 				// Grab that faction so we can get it's number and name, and strip the " (num)" from the name for json
-				Faction *fac = GetFaction(&(game->factions), a->factionnum);
+				Faction *fac = GetFaction(&(game->factions), a.factionnum);
 				string facname = fac->name->const_str();
 				facname = facname.substr(0, facname.find(" ("));
-				j["attitudes"][attitude].push_back({ { "name", facname }, { "number", a->factionnum } });
+				j["attitudes"][attitude].push_back({ { "name", facname }, { "number", a.factionnum } });
 			}
 		}
 		// the array will be empty if this faction has declared no other factions with that specific attitude.
@@ -638,13 +581,10 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 
 	// regions
 	json regions = json::array();
-	{
-		// extra block because of foreach macro.
-		forlist(&present_regions) {
-			json region;
-			((ARegionPtr*)elem)->ptr->write_json_report(region, this, game->month, &(game->regions));
-			regions.push_back(region);
-		}
+	for (const auto& reg: present_regions) {
+		json region;
+		reg->write_json_report(region, this, game->month, &(game->regions));
+		regions.push_back(region);
 	}
 	j["regions"] = regions;
 }
@@ -664,7 +604,7 @@ void Faction::write_text_report(ostream& f, Game *pGame, size_t ** citems)
 		f << ";\n";
 		f << ";Item                                      Rank  Max        Total\n";
 		f << ";=====================================================================\n";
-		for(auto &stat : compute_faction_statistics(pGame, citems)) {
+		for (const auto& stat : compute_faction_statistics(pGame, citems)) {
 			f << ';' << stat << '\n';
 		}
 		f << '\n';
@@ -763,26 +703,26 @@ void Faction::write_text_report(ostream& f, Game *pGame, size_t ** citems)
 
 	if (!errors.empty()) {
 		f << "Errors during turn:\n";
-		for(auto &error : errors) f << error << '\n';
+		for (const auto& error : errors) f << error << '\n';
 		f << '\n';
 	}
 
 	if (!battles.empty()) {
 		f << "Battles during turn:\n";
-		for(auto battle: battles) {
+		for (const auto& battle: battles) {
 			battle->write_text_report(f, this);
 		}
 	}
 
 	if (!events.empty()) {
 		f << "Events during turn:\n";
-		for(auto &event: events) f << event << '\n';
+		for (const auto& event: events) f << event << '\n';
 		f << '\n';
 	}
 
 	if (!shows.empty()) {
 		f << "Skill reports:\n";
-		for(auto &skillshow : shows) {
+		for (const auto& skillshow : shows) {
 			AString *string = skillshow.Report(this);
 			if (string) {
 				f << '\n' << string->const_str() << '\n';
@@ -794,26 +734,25 @@ void Faction::write_text_report(ostream& f, Game *pGame, size_t ** citems)
 
 	if (!itemshows.empty()) {
 		f << "Item reports:\n";
-		for(auto &itemshow : itemshows) f << '\n' << itemshow << '\n';
+		for (const auto& itemshow : itemshows) f << '\n' << itemshow << '\n';
 		f << '\n';
 	}
 
 	if (!objectshows.empty()) {
 		f << "Object reports:\n";
-		for(auto &objectshow : objectshows) f << '\n' << objectshow << '\n';
+		for (const auto& objectshow : objectshows) f << '\n' << objectshow << '\n';
 		f << '\n';
 	}
 
 	/* Attitudes */
 	f << "Declared Attitudes (default " << AttitudeStrs[defaultattitude] << "):\n";
-	for (int i=0; i<NATTITUDES; i++) {
-		int j=0;
+	for (int i = 0; i < NATTITUDES; i++) {
+		int j = 0;
 		f << AttitudeStrs[i] << " : ";
-		forlist((&attitudes)) {
-			Attitude* a = (Attitude *) elem;
-			if (a->attitude == i) {
+		for (const auto& attitude: attitudes) {
+			if (attitude.attitude == i) {
 				if (j) f << ", ";
-				f << GetFaction(&(pGame->factions), a->factionnum)->name->const_str();
+				f << GetFaction(&(pGame->factions), attitude.factionnum)->name->const_str();
 				j = 1;
 			}
 		}
@@ -824,9 +763,9 @@ void Faction::write_text_report(ostream& f, Game *pGame, size_t ** citems)
 
 	f << "Unclaimed silver: " << unclaimed << ".\n\n";
 
-	forlist(&present_regions) {
-		((ARegionPtr *) elem)->ptr->write_text_report(f, this, pGame->month, &(pGame->regions));
-	} 
+	for (const auto& reg: present_regions) {
+		reg->write_text_report(f, this, pGame->month, &(pGame->regions));
+	}
 	f << '\n';
 }
 
@@ -857,8 +796,8 @@ void Faction::WriteTemplate(ostream& f, Game *pGame)
 	}
 	f << '\n';
 
-	forlist((&present_regions)) {
-		((ARegionPtr *) elem)->ptr->WriteTemplate(f, this, &(pGame->regions), pGame->month);
+	for (const auto& reg: present_regions) {
+		reg->WriteTemplate(f, this, &(pGame->regions), pGame->month);
 	}
 
 	f << "\n#end\n\n";
@@ -875,10 +814,10 @@ void Faction::WriteFacInfo(ostream &f)
 	f << "SendTimes: " << times << '\n';
 	f << "Template: " << TemplateStrs[temformat] << '\n';
 	f << "Battle: na\n";
-	forlist(&extraPlayers) {
-		f << ((AString *) elem)->const_str() << '\n';
+	for (const auto& s: extra_player_data) {
+		f << s << '\n';
 	}
-	extraPlayers.DeleteAll();
+	extra_player_data.clear();
 }
 
 void Faction::CheckExist(ARegionList* regs)
@@ -907,50 +846,34 @@ void Faction::event(const string& s)
 	events.push_back(s);
 }
 
-void Faction::RemoveAttitude(int f)
-{
-	forlist((&attitudes)) {
-		Attitude *a = (Attitude *) elem;
-		if (a->factionnum == f) {
-			attitudes.Remove(a);
-			delete a;
-			return;
-		}
-	}
+void Faction::remove_attitude(int f) {
+	attitudes.erase(
+		remove_if(attitudes.begin(), attitudes.end(), [f](const Attitude& a) { return a.factionnum == f; }),
+		attitudes.end()
+	);
 }
 
-int Faction::GetAttitude(int n)
+int Faction::get_attitude(int n)
 {
 	if (n == num) return A_ALLY;
-	forlist((&attitudes)) {
-		Attitude *a = (Attitude *) elem;
-		if (a->factionnum == n)
-			return a->attitude;
+	for (const auto& attitude: attitudes) {
+		if (attitude.factionnum == n) return attitude.attitude;
 	}
 	return defaultattitude;
 }
 
-void Faction::SetAttitude(int num, int att)
+void Faction::set_attitude(int faction_id, int attitude)
 {
-	forlist((&attitudes)) {
-		Attitude *a = (Attitude *) elem;
-		if (a->factionnum == num) {
-			if (att == -1) {
-				attitudes.Remove(a);
-				delete a;
-				return;
-			} else {
-				a->attitude = att;
-				return;
-			}
-		}
+	auto place = find_if(
+		attitudes.begin(), attitudes.end(), [faction_id](const Attitude& a) { return a.factionnum == faction_id; }
+	);
+	if (place != attitudes.end()) {
+		place->attitude = attitude;
+		return;
 	}
-	if (att != -1) {
-		Attitude *a = new Attitude;
-		a->factionnum = num;
-		a->attitude = att;
-		attitudes.Add(a);
-	}
+	// we didn't find it.
+	Attitude a = { .factionnum = faction_id, .attitude = attitude };
+	attitudes.push_back(a);
 }
 
 int Faction::CanCatch(ARegion *r, Unit *t)

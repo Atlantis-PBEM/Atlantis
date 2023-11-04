@@ -202,6 +202,7 @@ class ARegion : public AListElem
 		void WriteEconomy(ostream& f, Faction *, int);
 		void WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen);
 		void write_text_report(ostream& f, Faction *fac, int month, ARegionList *pRegions);
+		json basic_json_data(ARegionList *pRegions);
 		void write_json_report(json& j, Faction *fac, int month, ARegionList *pRegions);
 		// DK
 		void WriteTemplate(ostream&  f, Faction *, ARegionList *, int);
@@ -353,8 +354,8 @@ class ARegion : public AListElem
 		AList farsees;
 		// List of units which passed through the region
 		AList passers;
-		ProductionList products;
-		MarketList markets;
+		std::vector<Production *> products;
+		std::vector<Market*> markets;
 		int xloc, yloc, zloc;
 		int visited;
 
@@ -362,6 +363,8 @@ class ARegion : public AListElem
 		int distance;
 		ARegion *next;
 
+		// find a production for a certain skill.
+		Production *get_production_for_skill(int item, int skill);
 		// Editing functions
 		void UpdateEditRegion();
 		void SetupEditRegion();

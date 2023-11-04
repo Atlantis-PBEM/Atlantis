@@ -136,11 +136,6 @@ void ARegionList::AssignTypes(ARegionArray *pArr) {
 			ARegion *reg = pArr->GetRegion(x, y);
 			if (!reg) continue;
 
-			// Add a town at the first loc (the plains)
-			if (loc == 0) {
-				reg->MakeStartingCity();
-			}
-
 			reg->type = terrains[loc++];
 			reg->race = TerrainDefs[reg->type].races[0];
 		}

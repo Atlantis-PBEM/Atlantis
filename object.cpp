@@ -279,7 +279,105 @@ Unit *Object::GetOwner()
 	return(owner);
 }
 
-void Object::Report(ostream& f, Faction *fac, int obs, int truesight,
+void Object::write_json_report(json& j, Faction *fac, int obs, int truesight,
+	int detfac, int passobs, int passtrue, int passdetfac, int present)
+{
+	// Exit early if no observable.
+	if ((type != O_DUMMY) && !present) {
+		if (IsFleet() && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_SHIPS)) return;
+		if (IsBuilding() && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_BUILDINGS)) return;
+		if (IsRoad() && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ROADS)) return;
+	}
+
+	json container = json::object();
+	if (type != O_DUMMY) {
+		ObjectType& ob = ObjectDefs[type];
+
+		string s = name->const_str();
+		container["name"] = s.substr(0, s.find(" [")); // remove the object number.
+		container["number"] = num;
+		container["type"] = ob.name;
+		if (describe) container["description"] = describe->const_str();
+
+		if (IsFleet()) {
+			if((GetOwner() && fac == GetOwner()->faction) || (obs > 9)){
+				container["load"] = FleetLoad();
+				container["capacity"] = FleetCapacity();
+				container["sailors"] = FleetSailingSkill(1);
+				container["fleetsize"] = GetFleetSize();
+				container["max_speed"] = GetFleetSpeed(1);
+				container["damage_percent"] = incomplete;
+			}
+			if (
+				Globals->PREVENT_SAIL_THROUGH && !Globals->ALLOW_TRIVIAL_PORTAGE
+				&& (flying < 1) && (TerrainDefs[region->type].similar_type != R_OCEAN)
+			) {
+				for (int dir = 0; dir < NDIRS; dir++) {
+					if (SailThroughCheck(dir) == 1) container["sail_directions"][DirectionAbrs[dir]] = true;
+				}
+			}
+			forlist(&ships) {
+				Item *ship = (Item *) elem;
+				if (ship->type != -1 && ship->num > 0) {
+					ItemType item_def = ItemDefs[ship->type];
+					if (item_def.flags & ItemType::DISABLED) continue;
+					if (!(item_def.type & IT_SHIP)) continue;
+					container["ships"].push_back(
+						{ {"name", item_def.name}, {"number", ship->num}, { "plural", item_def.names } }
+					);
+				}
+			}
+		} else {
+			if (incomplete) container["incomplete"] = incomplete;
+			container["inner_location"] = inner != -1;
+			if (runes) container["warding_runes"] = true;
+			if (!(ob.flags & ObjectType::CANENTER)) container["closed"] = true;
+			if (Globals->DECAY && !(ob.flags & ObjectType::NEVERDECAY) && incomplete < 1) {
+				if (incomplete > (0 - ob.maxMonthlyDecay)) {
+					container["decaying"] = true;
+				} else if (incomplete > (0 - ob.maxMaintenance/2)) {
+					container["needs_maintainence"] = true;
+				}
+			}
+		}
+	}
+
+	//json& unit_container = (type == O_DUMMY) ? j["units"] : container["units"];
+
+	// Add units to container
+	/* 
+	forlist ((&units)) {
+		Unit *u = (Unit *) elem;
+		int attitude = fac->get_attitude(u->faction->num);
+		if (u->faction == fac) {
+			u->WriteReport(f, -1, 1, 1, 1, attitude, fac->showunitattitudes);
+		} else {
+			if (present) {
+				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
+			} else {
+				if (((type == O_DUMMY) &&
+					(Globals->TRANSIT_REPORT &
+					 GameDefs::REPORT_SHOW_OUTDOOR_UNITS)) ||
+					((type != O_DUMMY) &&
+						(Globals->TRANSIT_REPORT &
+					 	GameDefs::REPORT_SHOW_INDOOR_UNITS)) ||
+					((u->guard == GUARD_GUARD) &&
+						(Globals->TRANSIT_REPORT &
+					 	GameDefs::REPORT_SHOW_GUARDS))) {
+					u->WriteReport(f, passobs, passtrue, passdetfac,
+							type != O_DUMMY, attitude, fac->showunitattitudes);
+				}
+			}
+		}
+	}
+	*/
+
+	if (type != O_DUMMY) {
+		j["structures"].push_back(container);
+	}
+}
+
+void Object::write_text_report(ostream& f, Faction *fac, int obs, int truesight,
 		int detfac, int passobs, int passtrue, int passdetfac, int present)
 {
 	ObjectType *ob = &ObjectDefs[type];
@@ -380,7 +478,7 @@ void Object::Report(ostream& f, Faction *fac, int obs, int truesight,
 
 	forlist ((&units)) {
 		Unit *u = (Unit *) elem;
-		int attitude = fac->GetAttitude(u->faction->num);
+		int attitude = fac->get_attitude(u->faction->num);
 		if (u->faction == fac) {
 			u->WriteReport(f, -1, 1, 1, 1, attitude, fac->showunitattitudes);
 		} else {

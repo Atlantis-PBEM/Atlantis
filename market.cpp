@@ -128,27 +128,3 @@ AString Market::Report()
 	temp += ItemString(item, amount) + " at $" + price;
 	return temp;
 }
-
-void MarketList::PostTurn(int population, int wages)
-{
-	forlist(this) {
-		((Market *) elem)->PostTurn(population, wages);
-	}
-}
-
-void MarketList::Writeout(ostream& f)
-{
-	f << Num() << '\n';
-	forlist (this) ((Market *) elem)->Writeout(f);
-}
-
-void MarketList::Readin(istream& f)
-{
-	int n;
-	f >> n;;
-	for (int i = 0; i < n; i++) {
-		Market *m = new Market;
-		m->Readin(f);
-		Add(m);
-	}
-}

@@ -84,7 +84,7 @@ static void DescribeEscapeParameters(AString *desc, int item)
 	return;
 }
 
-AString *ShowSkill::Report(Faction *f)
+AString *ShowSkill::Report(Faction *f) const
 {
 	if (SkillDefs[skill].flags & SkillType::DISABLED) return NULL;
 

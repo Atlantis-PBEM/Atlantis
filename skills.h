@@ -124,7 +124,7 @@ struct ShowSkill {
 	int skill;
 	int level;
 
-	AString * Report(Faction *);
+	AString * Report(Faction *) const;
 };
 
 class Skill : public AListElem {

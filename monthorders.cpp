@@ -440,7 +440,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 			unit->Error("TEACH: No such unit.");
 			delete id;
 		} else {
-			if (target->faction->GetAttitude(unit->faction->num) < A_FRIENDLY) {
+			if (target->faction->get_attitude(unit->faction->num) < A_FRIENDLY) {
 				unit->Error(AString("TEACH: ") + *(target->name) +
 							" is not a member of a friendly faction.");
 				order->targets.Remove(id);
@@ -785,8 +785,7 @@ void Game::RunBuildHelpers(ARegion *r)
 							continue;
 						}
 						// Make sure that unit considers you friendly!
-						if (target->faction->GetAttitude(u->faction->num) <
-								A_FRIENDLY) {
+						if (target->faction->get_attitude(u->faction->num) < A_FRIENDLY) {
 							u->Error("BUILD: Unit you are helping rejects "
 									"your help.");
 							delete u->monthorders;
@@ -1045,13 +1044,11 @@ void Game::RunMonthOrders()
 	}
 }
 
-void Game::RunUnitProduce(ARegion * r,Unit * u)
+void Game::RunUnitProduce(ARegion *r, Unit *u)
 {
-	Production *p;
 	ProduceOrder *o = (ProduceOrder *) u->monthorders;
 
-	forlist(&r->products) {
-		p = (Production *) elem;
+	for (const auto& p : r->products) {
 		// PRODUCE orders for producing goods from the land
 		// are shared among factions, and therefore handled
 		// specially by the RunAProduction() function
@@ -1219,8 +1216,7 @@ void Game::RunProduceOrders(ARegion * r)
 			}
 		}
 	}
-	forlist_reuse(&r->products)
-		RunAProduction(r,(Production *) elem);
+	for (const auto& p : r->products) RunAProduction(r, p);
 }
 
 int Game::ValidProd(Unit * u,ARegion * r, Production * p)

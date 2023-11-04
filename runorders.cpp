@@ -286,7 +286,7 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 			succ = 0;
 			break;
 		}
-		if (f->GetAttitude(tar->faction->num) == A_ALLY) {
+		if (f->get_attitude(tar->faction->num) == A_ALLY) {
 			succ = 0;
 			break;
 		}
@@ -360,7 +360,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 			succ = 0;
 			break;
 		}
-		if (f->GetAttitude(tar->faction->num) == A_ALLY) {
+		if (f->get_attitude(tar->faction->num) == A_ALLY) {
 			succ = 0;
 			break;
 		}
@@ -1494,21 +1494,17 @@ void Game::RunSellOrders()
 {
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
-		forlist((&r->markets)) {
-			Market *m = (Market *) elem;
-			if (m->type == M_SELL)
-				DoSell(r, m);
+		for (const auto& m : r->markets) {
+			if (m->type == M_SELL) DoSell(r, m);
 		}
-		{
-			forlist((&r->objects)) {
-				Object *obj = (Object *) elem;
-				forlist((&obj->units)) {
-					Unit *u = (Unit *) elem;
-					forlist((&u->sellorders)) {
-						u->Error("SELL: Can't sell that.");
-					}
-					u->sellorders.DeleteAll();
+		forlist((&r->objects)) {
+			Object *obj = (Object *) elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *) elem;
+				forlist((&u->sellorders)) {
+					u->Error("SELL: Can't sell that.");
 				}
+				u->sellorders.DeleteAll();
 			}
 		}
 	}
@@ -1586,21 +1582,17 @@ void Game::RunBuyOrders()
 {
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
-		forlist((&r->markets)) {
-			Market *m = (Market *) elem;
-			if (m->type == M_BUY)
-				DoBuy(r, m);
-		}
-		{
-			forlist((&r->objects)) {
-				Object *obj = (Object *) elem;
-				forlist((&obj->units)) {
-					Unit *u = (Unit *) elem;
-					forlist((&u->buyorders)) {
-						u->Error("BUY: Can't buy that.");
-					}
-					u->buyorders.DeleteAll();
+		for (const auto& m : r->markets) {
+			if (m->type == M_BUY) DoBuy(r, m);
+		}	
+		forlist((&r->objects)) {
+			Object *obj = (Object *) elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *) elem;
+				forlist((&u->buyorders)) {
+					u->Error("BUY: Can't buy that.");
 				}
+				u->buyorders.DeleteAll();
 			}
 		}
 	}
@@ -2598,12 +2590,12 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			return 0;
 		}
 		if (!u->CanSee(r, t) &&
-			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
+			(t->faction->get_attitude(u->faction->num) < A_FRIENDLY)) {
 				u->Error(ord + ": Nonexistant target (" +
 					o->target->Print() + ").");
 				return 0;
 		}
-		if (t->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
+		if (t->faction->get_attitude(u->faction->num) < A_FRIENDLY) {
 				u->Error(ord + ": Target is not a member of a friendly faction.");
 				return 0;
 		}
@@ -2851,7 +2843,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	}
 	// New RULE -- Must be able to see unit to give something to them!
 	if (!u->CanSee(r, t) &&
-			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
+			(t->faction->get_attitude(u->faction->num) < A_FRIENDLY)) {
 		u->Error(ord + ": Nonexistant target (" +
 				o->target->Print() + ").");
 		return 0;
@@ -2880,7 +2872,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	}
 
 	if (o->item != I_SILVER &&
-			t->faction->GetAttitude(s->faction->num) < A_FRIENDLY) {
+			t->faction->get_attitude(s->faction->num) < A_FRIENDLY) {
 		u->Error("GIVE: Target is not a member of a friendly faction.");
 		return 0;
 	}
@@ -2944,7 +2936,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		}
 
 		notallied = 1;
-		if (t->faction->GetAttitude(u->faction->num) == A_ALLY) {
+		if (t->faction->get_attitude(u->faction->num) == A_ALLY) {
 			notallied = 0;
 		}
 
@@ -3173,8 +3165,7 @@ void Game::CheckTransportOrders()
 					}
 
 					// Make sure the target and unit are at least friendly
-					if (tar->unit->faction->GetAttitude(u->faction->num) <
-							A_FRIENDLY) {
+					if (tar->unit->faction->get_attitude(u->faction->num) <	A_FRIENDLY) {
 						u->Error(ordertype +
 								": Target " + AString(*tar->unit->name) + " is not a member of a friendly "
 								"faction.");

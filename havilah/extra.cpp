@@ -100,7 +100,7 @@ int Game::SetupFaction( Faction *pFac )
 	if (Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
 		// Try to auto-declare all player factions unfriendly
 		// to Creatures, since all they do is attack you.
-		pFac->SetAttitude(monfaction, A_UNFRIENDLY);
+		pFac->set_attitude(monfaction, A_UNFRIENDLY);
 	}
 
 	return( 1 );
@@ -114,7 +114,6 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	ARegion *r;
 	Object *o;
 	Unit *u;
-	Production *p;
 	AString rname;
 	map <string, int> temples;
 	map <string, int>::iterator it;
@@ -194,8 +193,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				continue;
 			if (!r->visited)
 				continue;
-			forlist(&r->products) {
-				p = (Production *) elem;
+			for (const auto& p : r->products) {
 				if (p->itemtype != I_SILVER)
 					count++;
 			}
@@ -208,8 +206,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				continue;
 			if (!r->visited)
 				continue;
-			forlist(&r->products) {
-				p = (Production *) elem;
+			for (const auto& p : r->products) {
 				if (p->itemtype != I_SILVER) {
 					if (!count--) {
 						q->type = Quest::HARVEST;
@@ -882,7 +879,7 @@ Faction *Game::CheckVictory()
 				message += ObjectDefs[q->building].name;
 				message += "s in ";
 				ucount = 0;
-				for(it2 = q->destinations.begin();
+				for (it2 = q->destinations.begin();
 					it2 != q->destinations.end();
 					it2++) {
 					ucount++;
