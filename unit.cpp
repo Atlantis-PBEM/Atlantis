@@ -25,6 +25,7 @@
 
 #include "unit.h"
 #include "gamedata.h"
+#include <stack>
 
 UnitId::UnitId()
 {
@@ -422,10 +423,319 @@ AString Unit::SpoilsReport() {
 	else if (GetFlag(FLAG_WALKSPOILS)) temp = ", walking battle spoils";
 	else if (GetFlag(FLAG_RIDESPOILS)) temp = ", riding battle spoils";
 	else if (GetFlag(FLAG_SAILSPOILS)) temp = ", sailing battle spoils";
+	else if (GetFlag(FLAG_SWIMSPOILS)) temp = ", swimming battle spoils";
 	return temp;
 }
 
-void Unit::WriteReport(ostream& f, int obs, int truesight, int detfac,
+// TODO: Move this somewhere more global.  For now it's only used here.
+static inline void trim(string& s) {
+    s.erase(s.begin(), find_if_not(s.begin(), s.end(), [](char c){ return isspace(c); }));
+    s.erase(find_if_not(s.rbegin(), s.rend(), [](char c){ return isspace(c); }).base(), s.end());
+}
+
+json Unit::write_json_orders()
+{
+	stack<json> parent_stack;
+	json container = json::array();
+
+	bool has_continuing_month_order = false;
+
+	forlist(&(oldorders)) {
+		string order = ((AString *)elem)->const_str();
+		AString temp = order;
+		temp.getat();
+		AString *token = temp.gettoken();
+		int order_val = token ? Parse1Order(token) : NORDERS;
+		if (token) delete token;
+
+		set<int> month_orders = { O_MOVE, O_SAIL, O_TEACH, O_STUDY, O_BUILD, O_PRODUCE, O_ENTERTAIN, O_WORK };
+		if (Globals->TAX_PILLAGE_MONTH_LONG) {
+			month_orders.emplace(O_TAX);
+			month_orders.emplace(O_PILLAGE);
+		}
+
+		if (month_orders.contains(order_val)) has_continuing_month_order = true;
+
+		// Okay, if we are at the end of a form/turn block, we need to move back up the stack.
+		if (order_val == O_ENDTURN || order_val == O_ENDFORM) {
+			json parent = parent_stack.top();
+			parent_stack.pop();
+			// Get the last element of the parent array which is what contains the nested orders
+			parent.back()["nested"] = container;
+			container = parent;
+		}
+		trim(order);
+		container.push_back( { { "order", order } } );
+
+		// Okay, if the order we currently have is the start of a form/turn block, we need to push it on the stack.
+		if (order_val == O_TURN || order_val == O_FORM) {
+			parent_stack.push(container);
+			container = json::array();
+		}
+	}
+
+	// now write out any turn orders that were part of previous turn blocks.
+	// If we had a continuing month order, or a previous turn block, the turn block will be deferred (and so wrapped).
+	// If we had no month long order, the first turn block will not be wrapped (and so become the upcoming turn orders)
+	// and then re-added to the end of the list if it was a repeating turn order.  wrapping here uses the same stack as
+	// above in the same way.
+	bool wrap_turn_block = has_continuing_month_order;
+	if (turnorders.First()) {
+		TurnOrder *tOrder;
+		forlist(&turnorders) {
+			tOrder = (TurnOrder *)elem;
+			if (wrap_turn_block) {
+				container.push_back( { { "order", (tOrder->repeating ? "@TURN" : "TURN") } } );
+				parent_stack.push(container);
+				container = json::array();
+			}
+			forlist(&tOrder->turnOrders) {
+				string order = ((AString *)elem)->const_str();
+				AString temp = order;
+				temp.getat();
+				AString *token = temp.gettoken();
+				int order_val = token ? Parse1Order(token) : NORDERS;
+				if (token) delete token;
+				if (order_val == O_ENDTURN || order_val == O_ENDFORM) {
+					json parent = parent_stack.top();
+					parent_stack.pop();
+					// Get the last element of the parent array which is what contains the nested orders
+					parent.back()["nested"] = container;
+					container = parent;
+				}
+				trim(order);
+				container.push_back( { { "order", order } } );
+				if (order_val == O_TURN || order_val == O_FORM) {
+					parent_stack.push(container);
+					container = json::array();
+				}
+			}
+			if (wrap_turn_block) {
+				json parent = parent_stack.top();
+				parent_stack.pop();
+				// Get the last element of the parent array which is what contains the nested orders
+				parent.back()["nested"] = container;
+				container = parent;
+				container.push_back( { { "order", "ENDTURN" } } );
+			}
+			wrap_turn_block = true; // All future turn blocks get wrapped.
+		}
+		// Now, move the container back to the end of the list if it was a repeating turn order and it got unwrapped
+		tOrder = (TurnOrder *) turnorders.First();
+		if (tOrder->repeating && !has_continuing_month_order) {
+			container.push_back( { { "order", "@TURN" } } );
+			parent_stack.push(container);
+			container = json::array();
+			forlist(&tOrder->turnOrders) {
+				string order = ((AString *)elem)->const_str();
+				AString temp = order;
+				temp.getat();
+				AString *token = temp.gettoken();
+				int order_val = token ? Parse1Order(token) : NORDERS;
+				if (token) delete token;
+				if (order_val == O_ENDTURN || order_val == O_ENDFORM) {
+					json parent = parent_stack.top();
+					parent_stack.pop();
+					// Get the last element of the parent array which is what contains the nested orders
+					parent.back()["nested"] = container;
+					container = parent;
+				}
+				trim(order);
+				container.push_back( { { "order", order } } );
+				if (order_val == O_TURN || order_val == O_FORM) {
+					parent_stack.push(container);
+					container = json::array();
+				}
+			}
+			json parent = parent_stack.top();
+			parent_stack.pop();
+			// Get the last element of the parent array which is what contains the nested orders
+			parent.back()["nested"] = container;
+			container = parent;
+			container.push_back( { { "order", "ENDTURN" } } );
+		}
+	}
+	return container;
+}
+
+void Unit::write_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes)
+{
+	int stealth = GetAttribute("stealth");
+	bool my_unit = (obs == -1);
+	bool see_faction = (my_unit || (detfac != 0));
+	bool see_illusion = (my_unit || (GetSkill(S_ILLUSION) <= truesight));
+
+	if(!my_unit) {
+		// exit early if we cannot see the unit
+		if ((obs < stealth) && (reveal == REVEAL_NONE) && (guard != GUARD_GUARD) && !autosee) return;
+		// ensure we can see the faction if able.
+		if (obs > stealth || reveal == REVEAL_FACTION) see_faction = true;
+	}
+
+	// Strip off the unit number from the name for the json report
+	string s = name->const_str();
+	j["name"] = s.substr(0, s.find(" (")); // remove the unit number from the name for json output
+	j["number"] = num;
+
+	if (!my_unit) {
+		string att = AttitudeStrs[attitude];
+		transform(att.begin(), att.end(), att.begin(), ::tolower);
+		j["attitude"] = att;
+	} else {
+		j["own_unit"] = true;
+	}
+
+	if (describe) j["description"] = describe->const_str();
+
+	j["flags"]["guard"] = (guard == GUARD_GUARD);
+
+	if (see_faction) {
+		string faction_name = faction->name->const_str();
+		j["faction"] = {
+			{ "name", faction_name.substr(0, faction_name.find(" (")) }, // Remove the faction number
+			{ "number", faction->num }
+		};
+		j["flags"]["avoid"] = (guard == GUARD_AVOID);
+		if (GetFlag(FLAG_BEHIND)) j["flags"]["behind"] = true;
+	}
+
+	if (my_unit) {
+		if (reveal == REVEAL_UNIT) j["flags"]["reveal"] = "unit";
+		if (reveal == REVEAL_FACTION) j["flags"]["reveal"] = "faction";
+		j["flags"]["holding"] = (GetFlag(FLAG_HOLDING) ? true : false);
+		j["flags"]["taxing"] = (GetFlag(FLAG_AUTOTAX) ? true : false);
+		j["flags"]["no_aid"] = (GetFlag(FLAG_NOAID) ? true : false);
+		j["flags"]["sharing"] = (GetFlag(FLAG_SHARING) ? true : false);
+		if (GetFlag(FLAG_CONSUMING_UNIT)) j["flags"]["consume"] = "unit";
+		if (GetFlag(FLAG_CONSUMING_FACTION)) j["flags"]["consume"] = "faction";
+		j["flags"]["cross_water"] = (GetFlag(FLAG_NOCROSS_WATER) ? true : false);
+
+		// Only one of these is allowed to be true at a time.
+		if (GetFlag(FLAG_NOSPOILS)) j["flags"]["spoils"] = "weightless";
+		else if (GetFlag(FLAG_FLYSPOILS)) j["flags"]["spoils"] = "flying";
+		else if (GetFlag(FLAG_WALKSPOILS)) j["flags"]["spoils"] = "walking";
+		else if (GetFlag(FLAG_RIDESPOILS)) j["flags"]["spoils"] = "riding";
+		else if (GetFlag(FLAG_SAILSPOILS)) j["flags"]["spoils"] = "sailing";
+		else if (GetFlag(FLAG_SWIMSPOILS)) j["flags"]["spoils"] = "swimming";
+		else j["flags"]["spoils"] = "all";
+
+		j["weight"] = items.Weight();
+		j["capacity"]["flying"] = FlyingCapacity();
+		j["capacity"]["riding"] = RidingCapacity();
+		j["capacity"]["walking"] = WalkingCapacity();
+		j["capacity"]["swimming"] = SwimmingCapacity();
+
+		j["skills"]["known"] = json::array();
+		int men = GetMen();
+		forlist(&skills) {
+			Skill *s = (Skill *) elem;
+			if (s->days == 0) continue;
+			int man_days = s->days/men;
+			json skill = json{
+				{ "name", SkillDefs[s->type].name },
+				{ "tag", SkillDefs[s->type].abbr },
+				{ "level", GetLevelByDays(s->days/men) },
+				{ "skill_days", s->days/men },
+			};
+			if (Globals->REQUIRED_EXPERIENCE) {
+				int exp = s->exp/men;
+				int rate = StudyRateAdjustment(man_days, exp);
+				skill["study_rate"] = rate;
+			}
+		}
+		for (auto i = 0; i < NSKILLS; i++) {
+			if (SkillDefs[i].depends[0].skill != NULL) {
+				if (CanStudy(i)) {
+					j["skills"]["can_study"].push_back({
+						{ "name", SkillDefs[i].name },
+						{ "tag", SkillDefs[i].abbr }
+					});
+				}
+			}
+		}
+		
+		if ((type == U_MAGE || type == U_GUARDMAGE) && combat != -1) {
+			j["combat_spell"] = { { "name", SkillDefs[combat].name }, { "tag", SkillDefs[combat].abbr } };
+		}
+
+		for (auto i = 0; i < MAX_READY; ++i) {
+			if (readyWeapon[i] != -1) {
+				// TODO: go back and clean this to report items better.
+				j["readied"]["weapons"].push_back({
+					{ "name", ItemDefs[readyWeapon[i]].name },
+					{ "tag", ItemDefs[readyWeapon[i]].abr },
+					{ "plural", ItemDefs[readyWeapon[i]].names }
+				});
+			}
+		}
+
+		for (auto i = 0; i < MAX_READY; ++i) {
+			if (readyArmor[i] != -1) {
+				j["readied"]["armor"].push_back({
+					{ "name", ItemDefs[readyArmor[i]].name },
+					{ "tag", ItemDefs[readyArmor[i]].abr },
+					{ "plural", ItemDefs[readyArmor[i]].names }
+				});
+			}
+		}
+
+		if (readyItem != -1) {
+			j["readied"]["item"] = { { "name", ItemDefs[readyItem].name }, { "tag", ItemDefs[readyItem].abr } };
+		}
+
+		// this is just a list of strings, so we can just copy it over
+		j["visited"] = visited;
+
+		// For the JSON report, the best location for order information is on the unit itself.
+		j["orders"] = write_json_orders();
+		
+	}
+
+	// Clear any marks on the item list since we want to report items in a specific order.
+	// Not sure this is necessary with json output, but we are going to hold it for now so that the array in json
+	// is in the same order the items would be listed in the normal report.
+	forlist(&items) { ((Item *)elem)->checked = 0; }
+
+	// now, report the items in the specific order (men, monsters, weapons, mounts, wagons, other, silver)
+	// items will be marked when they are reported to make sure they don't get reported twice if they fit
+	// multiple categories.
+	for (auto type = 0; type < 7; type++) {
+		forlist(&items) {
+			Item *item = (Item *)elem;
+			if (item->checked) continue;
+
+			ItemType def = ItemDefs[item->type];
+			bool combat_item = (def.type & (IT_WEAPON | IT_BATTLE | IT_ARMOR | IT_MAGIC));
+			bool item_reported_in_other_phase = (
+				(def.type & (IT_WEAPON | IT_BATTLE | IT_ARMOR | IT_MAGIC | IT_MOUNT | IT_MAN | IT_MONSTER)) ||
+				(item->type == I_WAGON) || (item->type == I_MWAGON) || (item->type == I_SILVER)
+			);
+
+			if (phase == 0 && !(def.type & IT_MAN)) continue;
+			if (phase == 1 && !(def.type & IT_MONSTER)) continue;
+			if (phase == 2 && !combat_item) continue;
+			if (phase == 3 && !(def.type & IT_MOUNT)) continue;
+			if (phase == 4 && !((item->type == I_WAGON) || (item->type == I_MWAGON))) continue;
+			if (phase == 5 && item_reported_in_other_phase) continue;
+			if (phase == 6 && !(item->type == I_SILVER)) continue;
+
+			item->checked = 1;
+			if (my_unit || (def.weight != 0)) {
+				json item_obj = json{ { "name", def.name }, { "tag", def.abr }, { "plural", def.names } };
+				if (def.type & IT_SHIP) {
+					item_obj["unfinished"] = true;
+					item_obj["needs"] = item->num;
+				} else {
+					item_obj["amount"] = item->num;
+				}
+				if (see_illusion && (def.type & IT_ILLUSION)) item_obj["illusion"] = true;
+				j["items"].push_back(item_obj);
+			}
+		}
+	}
+}
+
+void Unit::write_text_report(ostream& f, int obs, int truesight, int detfac,
 				int autosee, int attitude, int showattitudes)
 {
 	int stealth = GetAttribute("stealth");

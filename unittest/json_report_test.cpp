@@ -177,7 +177,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     // verify the products and the markets
     auto products = json_report["products"].size();
     expect(products == 1_ul);
-    auto expected_product = json{ {"abbr", "HORS"}, {"name", "horse"}, {"plural", "horses"}, {"amount", 21 } };
+    auto expected_product = json{ {"tag", "HORS"}, {"name", "horse"}, {"plural", "horses"}, {"amount", 21 } };
     auto first_product = json_report["products"][0];
     expect(first_product == expected_product);
 
@@ -185,7 +185,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(for_sale == 4_ul);
   
     auto expected_sale = json{
-      {"abbr", "IVOR"}, {"name", "ivory"}, {"plural", "ivory"}, {"amount", 13 }, { "price", 81 }
+      {"tag", "IVOR"}, {"name", "ivory"}, {"plural", "ivory"}, {"amount", 13 }, { "price", 81 }
     };
     auto first_sale = json_report["markets"]["for_sale"][0];
     expect(first_sale == expected_sale);
@@ -193,7 +193,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     auto wanted = json_report["markets"]["wanted"].size();
     expect(wanted == 9_ul);
     auto expected_wanted = json{
-      {"abbr", "GRAI"}, {"name", "grain"}, {"plural", "grain"}, {"amount", 51 }, { "price", 16 }
+      {"tag", "GRAI"}, {"name", "grain"}, {"plural", "grain"}, {"amount", 51 }, { "price", 16 }
     };
     auto first_wanted = json_report["markets"]["wanted"][0];
     expect(first_wanted == expected_wanted);
@@ -254,5 +254,93 @@ ut::suite<"JSON Report"> json_report_suite = []
     auto ships = json_report_1["structures"][0]["ships"];
     auto ships2 = json_report_2["structures"][0]["ships"];
     expect(ships == ships2);
+  };
+
+  "Unit json contains the right data"_test = []
+  {
+    UnitTestHelper helper;
+    helper.initialize_game();
+    helper.setup_turn();
+
+    helper.setup_reports();
+
+    // Generate just this single regions json object.
+    Faction *faction = helper.create_faction("Test Faction");
+    Unit *leader = helper.get_first_unit(faction);
+    AString *tmp_name = new AString("My Leader");
+    leader->SetName(tmp_name);
+    stringstream ss;
+    ss << "#atlantis 3\n";
+    ss << "unit 2\n";
+    ss << "@work\n";
+    ss << "turn\n";
+    ss << "  form 1\n";
+    ss << "    buy 1 lead\n";
+    ss << "  end\n";
+    ss << "endturn\n";
+    helper.parse_orders(faction->num, ss);
+
+    // Get a report for each region so we can verify that fleet data is correct for owners and non-owners.
+    json json_unit_report;
+    leader->write_json_report(json_unit_report, -1, 1, 1, 1, A_ALLY, 1);
+
+    string name = json_unit_report["name"];
+    string expected_name = "My Leader";
+    expect(name == expected_name);
+
+    auto id = json_unit_report["number"];
+    expect(id == 2_i);
+
+    string faction_name = json_unit_report["faction"]["name"];
+    string expected_faction_name = "Test Faction";
+    expect(faction_name == expected_faction_name);
+
+    auto faction_id = json_unit_report["faction"]["number"];
+    expect(faction_id == 3_i);
+
+    auto guard = json_unit_report["flags"]["guard"];
+    expect(guard == _b(false));
+
+    auto items_count = json_unit_report["items"].size();
+    expect(items_count == 1_ul);
+
+    auto item = json_unit_report["items"][0];
+    auto expected_item = json{ {"tag", "LEAD"}, {"name", "leader"}, {"plural", "leaders"}, {"amount", 1 } };
+    expect(item == expected_item);
+
+    auto orders_count = json_unit_report["orders"].size();
+    // top level orders are the work order, the turn, and the endturn
+    expect(orders_count == 3_ul);
+
+    // verify the work order
+    auto work_order = json_unit_report["orders"][0];
+    auto expected_work_order = json{ {"order", "@work"} };
+    expect(work_order == expected_work_order);
+
+    // verify the turn order
+    string turn_order = json_unit_report["orders"][1]["order"];
+    string expected_turn_order = "TURN";
+    expect(turn_order == expected_turn_order);
+    auto turn_orders_count = json_unit_report["orders"][1]["nested"].size();
+    expect(turn_orders_count == 2_ul);
+
+    auto turn_orders = json_unit_report["orders"][1]["nested"];
+    string form_order = turn_orders[0]["order"];
+    string expected_form_order = "form 1";
+    expect(form_order == expected_form_order);
+    auto form_orders_count = turn_orders[0]["nested"].size();
+    expect(form_orders_count == 1_ul);
+
+    auto form_orders = turn_orders[0]["nested"];
+    auto buy_order = json{ {"order", "buy 1 lead"} };
+    expect(form_orders[0] == buy_order);
+
+    // verify the endform
+    auto endform_order = json{ {"order", "end"} };
+    expect(turn_orders[1] == endform_order);
+
+    // verify the endturn
+    auto endturn_order = json{ {"order", "ENDTURN"} };
+    expect(json_unit_report["orders"][2] == endturn_order);
   };
 };

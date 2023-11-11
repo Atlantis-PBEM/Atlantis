@@ -342,35 +342,29 @@ void Object::write_json_report(json& j, Faction *fac, int obs, int truesight,
 		}
 	}
 
-	//json& unit_container = (type == O_DUMMY) ? j["units"] : container["units"];
+	json& unit_container = (type == O_DUMMY) ? j["units"] : container["units"];
 
 	// Add units to container
-	/* 
 	forlist ((&units)) {
 		Unit *u = (Unit *) elem;
+		json unit = json::object();
 		int attitude = fac->get_attitude(u->faction->num);
 		if (u->faction == fac) {
-			u->WriteReport(f, -1, 1, 1, 1, attitude, fac->showunitattitudes);
+			u->write_json_report(unit, -1, 1, 1, 1, attitude, fac->showunitattitudes);
 		} else {
 			if (present) {
-				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
+				u->write_json_report(unit, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
 			} else {
-				if (((type == O_DUMMY) &&
-					(Globals->TRANSIT_REPORT &
-					 GameDefs::REPORT_SHOW_OUTDOOR_UNITS)) ||
-					((type != O_DUMMY) &&
-						(Globals->TRANSIT_REPORT &
-					 	GameDefs::REPORT_SHOW_INDOOR_UNITS)) ||
-					((u->guard == GUARD_GUARD) &&
-						(Globals->TRANSIT_REPORT &
-					 	GameDefs::REPORT_SHOW_GUARDS))) {
-					u->WriteReport(f, passobs, passtrue, passdetfac,
-							type != O_DUMMY, attitude, fac->showunitattitudes);
+				if (((type == O_DUMMY) && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_OUTDOOR_UNITS)) ||
+					((type != O_DUMMY) && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_INDOOR_UNITS)) ||
+					((u->guard == GUARD_GUARD) && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_GUARDS))) {
+					u->write_json_report(unit, passobs, passtrue, passdetfac, type != O_DUMMY, attitude, fac->showunitattitudes);
 				}
 			}
 		}
+		if (unit.empty()) continue;
+		unit_container.push_back(unit);
 	}
-	*/
 
 	if (type != O_DUMMY) {
 		j["structures"].push_back(container);
@@ -480,10 +474,10 @@ void Object::write_text_report(ostream& f, Faction *fac, int obs, int truesight,
 		Unit *u = (Unit *) elem;
 		int attitude = fac->get_attitude(u->faction->num);
 		if (u->faction == fac) {
-			u->WriteReport(f, -1, 1, 1, 1, attitude, fac->showunitattitudes);
+			u->write_text_report(f, -1, 1, 1, 1, attitude, fac->showunitattitudes);
 		} else {
 			if (present) {
-				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
+				u->write_text_report(f, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
 			} else {
 				if (((type == O_DUMMY) &&
 					(Globals->TRANSIT_REPORT &
@@ -494,7 +488,7 @@ void Object::write_text_report(ostream& f, Faction *fac, int obs, int truesight,
 					((u->guard == GUARD_GUARD) &&
 						(Globals->TRANSIT_REPORT &
 					 	GameDefs::REPORT_SHOW_GUARDS))) {
-					u->WriteReport(f, passobs, passtrue, passdetfac,
+					u->write_text_report(f, passobs, passtrue, passdetfac,
 							type != O_DUMMY, attitude, fac->showunitattitudes);
 				}
 			}

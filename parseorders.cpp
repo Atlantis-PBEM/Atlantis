@@ -2656,7 +2656,7 @@ void Game::ProcessNospoilsOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int val = ParseTF(token);
 	delete token;
 	if (val==-1) {
-		ParseError(pCheck, u, 0, "NOSPILS: Invalid value.");
+		ParseError(pCheck, u, 0, "NOSPOILS: Invalid value.");
 		return;
 	}
 	if (!pCheck) {

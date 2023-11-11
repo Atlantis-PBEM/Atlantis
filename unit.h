@@ -49,6 +49,9 @@ class UnitId;
 #include <set>
 #include <string>
 
+#include "external/nlohmann/json.hpp"
+using json = nlohmann::json;
+
 enum {
 	GUARD_NONE,
 	GUARD_GUARD,
@@ -130,7 +133,9 @@ class Unit : public AListElem
 
 		AString SpoilsReport(void);
 		int CanGetSpoil(Item *i);
-		void WriteReport(ostream& f,int,int,int,int, int, int);
+		void write_text_report(ostream& f, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes);
+		void write_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes);
+		json write_json_orders();
 		AString GetName(int);
 		AString MageReport();
 		AString ReadyItem();

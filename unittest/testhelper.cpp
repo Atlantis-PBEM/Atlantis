@@ -67,3 +67,6 @@ string UnitTestHelper::cout_data() {
     return cout_buffer.str();
 }
 
+void UnitTestHelper::parse_orders(int faction_id, istream& orders) {
+    game.ParseOrders(faction_id, orders, nullptr);
+}
