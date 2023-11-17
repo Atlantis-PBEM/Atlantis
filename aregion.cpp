@@ -1365,7 +1365,7 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 
 		ItemType itemdef = ItemDefs[m->item];
 		json item = {
-			{ "name", itemdef.name }, { "plural", itemdef.names }, { "abbr", itemdef.abr }, { "price", m->price }
+			{ "name", itemdef.name }, { "plural", itemdef.names }, { "tag", itemdef.abr }, { "price", m->price }
 		};
 		if (m->amount != -1) item["amount"] = m->amount;
 		else item["unlimited"] = true;
@@ -1396,7 +1396,7 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 		// If it's a normal resource, and we aren't here or not showing it, skip it.
 		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) continue;
 		json item = {
-			{ "name", itemdef.name }, { "plural", itemdef.names }, { "abbr", itemdef.abr },
+			{ "name", itemdef.name }, { "plural", itemdef.names }, { "tag", itemdef.abr },
 	 	};
 		// I don't think resources can be unlimited, but just in case, we will handle it.
 		if (p->amount != -1) item["amount"] = p->amount;

@@ -43,7 +43,8 @@ public:
     Unit *get_first_unit(Faction *faction);
     // Create a fleet in the given region.
     void create_fleet(ARegion *region, Unit *owner, int ship_type, int ship_count);
-
+    // Parse the orders contained in the input stream.
+    void parse_orders(int faction_id, istream& orders);
 
     // dummy
     int get_seed() { return getrandom(10000); };
