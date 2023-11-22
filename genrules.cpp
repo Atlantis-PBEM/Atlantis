@@ -5187,17 +5187,23 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << enclose("p", false);
 	f << enclose("p", true) << "Larry Stanbery created the Atlantis 4.0.4+ derivative.\n"
 	  << enclose("p", false);
-	f << enclose("p", true) << url("mailto:jtraub@dragoncat.net", "JT Traub") << " took over the source code "
-	  << "and merged the then forking versions of 4.0.4c and 4.0.4+ back into 4.0.5 along with modifications of his "
-	  << "own and has been maintaining the code.\n"
+	f << enclose("p", true) << "JT Traub took over the source code and merged the then forking versions of 4.0.4c "
+	  << "and 4.0.4+ back into 4.0.5 along with modifications of his own and maintained the code until v5.0\n"
 	  << enclose("p", false);
-	f << enclose("p", true) << "Development of the code is open and there is a egroup devoted to it located at "
-	  << url("http://groups.yahoo.com/group/atlantisdev", "The YahooGroups AtlantisDev egroup")
-	  << ". Please join this egroup if you work on the code and share your changes back into the codebase as a "
-	  << "whole\n"
+	f << enclose("p", true) << "After that, Stephen Baillie took over the code and maintained it until "
+	  << "the v5.2.3-v5.2.5 time frame.\n"
 	  << enclose("p", false);
-	f << enclose("p", true) << "Please see the CREDITS file in the source distribution for a complete (hopefully) "
-	  << "list of all contributors.\n"
+	f << enclose("p", true) << "Artem Trytiak took over the code maintainence at that point and has maintained it "
+	  << "since along with a number of other contrubutors to the github project.\n"
+	  << enclose("p", false);
+	f << enclose("p", true) << "The Atlantis source code is now hosted on github at the "
+	  << url("https://github.com/Atlantis-PBEM/Atlantis", "Atlantis") << " github project. "
+	  << "Additionally, Artem runs the " << url("https://atlantis-pbem.com", "New Origins")
+	  << " website which hosts the New Origins games and the related " << url("https://discord.gg/HusGETf", "Discord")
+	  << "server, which serves as a de-facto development community.\n"
+	  << enclose("p", false);
+	f << enclose("p", true) << "Please see the CREDITS file in the source distribution for a more complete, "
+	  << "but still inadequate, list of contributors.\n"
 	  << enclose("p", false);
 
 	f << enclose("body", false);
