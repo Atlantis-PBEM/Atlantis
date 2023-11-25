@@ -3969,35 +3969,58 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "EXCHANGE 3453 10 SWOR 10 LBOW\n"
 	  << example_end();
 
-	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	{
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << anchor("faction") << '\n';
+
+		const bool martial_faction = Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED;
 		f << enclose("h4", true) << "FACTION [type] [points] ...\n" << enclose("h4", false);
-		f << enclose("p", true) << "Attempt to change your faction's type.  In the order, you can specify up to "
-		  << "three faction types (WAR, TRADE, and MAGIC) and the number of faction points to assign to each type; "
+		f << enclose("p", true) << "Attempt to change your faction's type.  In the order, you can specify up to ";
+		if (martial_faction) {
+			f << "two faction types (MARTIAL, and MAGIC)";
+		}
+		else {
+			f << "three faction types (WAR, TRADE, and MAGIC)";
+		}
+		f << " and the number of faction points to assign to each type; "
 		  << "if you are assigning points to only one or two types, you may omit the types that will not have any "
 		  << "points.\n"
 		  << enclose("p", false);
+
 		f << enclose("p", true) << "Changing the number of faction points assigned to MAGIC may be tricky. "
 		  << "Increasing the MAGIC points will always succeed, but if you decrease the number of points assigned "
 		  << "to MAGIC, you must make sure that you have only the number of magic-skilled leaders allowed by the "
 		  << "new number of MAGIC points BEFORE you change your point distribution. For example, if you have 3 "
-		  << "mages (3 points assigned to MAGIC), but want to use one of those points for WAR or TRADE (change to "
+		  << "mages (3 points assigned to MAGIC), but want to use one of those points for something else (change to "
 		  << "MAGIC 2), you must first get rid of one of your mages by either giving it to another faction or "
 		  << "ordering it to " << url("#forget", "FORGET") << " all its magic skills. If you have too many mages "
 		  << "for the number of points you try to assign to MAGIC, the FACTION order will fail.";
-		  if (qm_exist)
-		  	f << " Similar problems could occur with TRADE points and the number of quartermasters controlled by "
-			  << "the faction.";
+
+		  if (qm_exist) {
+		  	f << " Similar problems could occur with TRADE/MARTIAL points and the"
+			  << " number of quartermasters controlled by the faction.";
+		  }
 		f << '\n' << enclose("p", false);
+
 		f << enclose("p", true) << "Examples:\n" << enclose("p", false);
-		f << example_start("Assign 2 faction points to WAR, 2 to TRADE, and 1 to MAGIC.")
-		  << "FACTION WAR 2 TRADE 2 MAGIC 1\n"
-		  << example_end();
+
+		if (martial_faction)
+		{
+			f << example_start("Assign 4 faction points to MARTIAL, and 1 to MAGIC.")
+		  	  << "FACTION MARTIAL 4 MAGIC 1\n"
+		  	  << example_end();
+		}
+		else
+		{
+			f << example_start("Assign 2 faction points to WAR, 2 to TRADE, and 1 to MAGIC.")
+		  	  << "FACTION WAR 2 TRADE 2 MAGIC 1\n"
+		  	  << example_end();
+		}
+
 		f << example_start("Become a pure magic faction (assign all points to magic).")
 		  << "FACTION MAGIC " << Globals->FACTION_POINTS << '\n'
 		  << example_end();
-		// Update this to deal with martial/martial merged!
 	}
 
 	if (Globals->HAVE_EMAIL_SPECIAL_COMMANDS) {
