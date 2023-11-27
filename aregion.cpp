@@ -1962,9 +1962,10 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 		cost = 2;
 		if (weather == W_NORMAL || clearskies) {
 			cost = 1;
-		} else if (weather == W_BLIZZARD) {
-			return 4;
 		}
+	}
+	if (weather == W_BLIZZARD && !clearskies) {
+		return 4;
 	}
 	if (movetype == M_SWIM) {
 		cost = (TerrainDefs[type].movepoints * cost);
