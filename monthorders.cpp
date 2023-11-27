@@ -266,6 +266,12 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			newreg = reg->neighbors[x->dir];
 		}
 		cost = 1;
+
+		// Blizzard effect
+		if (newreg && newreg->weather == W_BLIZZARD && !newreg->clearskies) {
+			cost = 4;
+		}
+
 		if (Globals->WEATHER_EXISTS) {
 			if (newreg && newreg->weather != W_NORMAL &&
 					!newreg->clearskies)
