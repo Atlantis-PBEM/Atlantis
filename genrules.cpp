@@ -2726,10 +2726,8 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "structure which allows transportation of items.  The structures which allow this are: ";
 		last = -1;
 		comma = 0;
-		int j = 0;
 		for (int i = 0; i < NOBJECTS; i++) {
 			if (!(ObjectDefs[i].flags & ObjectType::TRANSPORT)) continue;
-			j++;
 			if (last == -1) {
 				last = i;
 				continue;

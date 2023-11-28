@@ -1564,6 +1564,12 @@ void ARegion::write_text_report(ostream &f, Faction *fac, int month, ARegionList
 			f << temp.const_str() << "\n";
 		}
 		
+		// Freezing effect
+		if (weather == W_BLIZZARD && !clearskies) {
+			temp = "There was an unnatural freezing last month.";
+			f << temp.const_str() << "\n";
+		}
+
 #if 0
 		f << "\nElevation is " << elevation << ".\n";
 		f << "Humidity is " << humidity << ".\n";
@@ -1954,8 +1960,12 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 	int cost = 1;
 	if (Globals->WEATHER_EXISTS) {
 		cost = 2;
-		if (weather == W_BLIZZARD) return 10;
-		if (weather == W_NORMAL || clearskies) cost = 1;
+		if (weather == W_NORMAL || clearskies) {
+			cost = 1;
+		}
+	}
+	if (weather == W_BLIZZARD && !clearskies) {
+		return 4;
 	}
 	if (movetype == M_SWIM) {
 		cost = (TerrainDefs[type].movepoints * cost);
