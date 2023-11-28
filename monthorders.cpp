@@ -271,6 +271,10 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 					!newreg->clearskies)
 				cost = 2;
 		}
+		// Blizzard effect
+		if (newreg && newreg->weather == W_BLIZZARD && !newreg->clearskies) {
+			cost = 4;
+		}
 		if (x->dir == MOVE_PAUSE) {
 			cost = 1;
 		}

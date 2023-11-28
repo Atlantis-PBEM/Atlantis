@@ -1362,8 +1362,7 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			temp = "It was ";
 			if (clearskies) temp += "unnaturally clear ";
 			else {
-				if (weather == W_BLIZZARD) temp = "There was an unnatural ";
-				else if (weather == W_NORMAL) temp = "The weather was ";
+				if (weather == W_NORMAL) temp = "The weather was ";
 				temp += SeasonNames[weather];
 			}
 			temp += " last month; ";
@@ -1371,6 +1370,11 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 			temp += "it will be ";
 			temp += SeasonNames[nxtweather];
 			temp += " next month.";
+			f->PutStr(temp);
+		}
+		// Freezing effect
+		if (weather == W_BLIZZARD && !clearskies) {
+			temp = "There was an unnatural freezing last month.";
 			f->PutStr(temp);
 		}
 		
@@ -1783,8 +1787,10 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 	int cost = 1;
 	if (Globals->WEATHER_EXISTS) {
 		cost = 2;
-		if (weather == W_BLIZZARD) return 10;
 		if (weather == W_NORMAL || clearskies) cost = 1;
+	}
+	if (weather == W_BLIZZARD && !clearskies) {
+		return 4;
 	}
 	if (movetype == M_SWIM) {
 		cost = (TerrainDefs[type].movepoints * cost);

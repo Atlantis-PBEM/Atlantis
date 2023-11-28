@@ -733,6 +733,29 @@ Faction *Game::CheckVictory()
 		}
 	}
 
+	if (TurnNumber() >= 20) { // 20 is just a number to avoid breaking snapshots
+		// Freezing effect
+		forlist_reuse(&regions) {
+			ARegion *r = (ARegion *) elem;
+
+			// No effect for regions with clear skies
+			if (r->clearskies) {
+				continue;
+			}
+
+			// Check if regions in freezing zome in surface
+			if (r->zloc == ARegionArray::LEVEL_SURFACE && (r->yloc <= 0 || r->yloc >= 71)) {
+				r->Pillage();
+				r->SetWeather(W_BLIZZARD);
+				printf("Freeze (%d,%d) region in %s of %s\n",
+					r->xloc, r->yloc, r->name->Str(), TerrainDefs[TerrainDefs[r->type].similar_type].name
+				);
+			}
+
+			// TODO: Check if regions in freezing zome in UW
+		}
+	}
+
 	return NULL;
 }
 
