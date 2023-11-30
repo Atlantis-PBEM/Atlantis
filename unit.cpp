@@ -212,12 +212,19 @@ void Unit::Writeout(Aoutfile *s)
 void Unit::Readin(Ainfile *s, AList *facs, ATL_VER v)
 {
 	name = s->GetStr();
-	describe = s->GetStr();
+	AString *tmp = s->GetStr();
+	describe = tmp->getlegal();
+	delete tmp;
+	// sanitize the description too
 	if (*describe == "none") {
 		delete describe;
 		describe = 0;
 	}
 	num = s->GetInt();
+	// Now we have the number so we can rebuild the name
+	tmp = name->stripnumber();
+	SetName(tmp);
+
 	type = s->GetInt();
 	int i = s->GetInt();
 	faction = GetFaction(facs, i);
