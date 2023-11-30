@@ -204,16 +204,17 @@ void Unit::Readin(istream& f, AList *facs)
 {
 	AString temp;
 	f >> ws >> temp;
-	name = new AString(temp);
+	name = temp.stripnumber();
 
 	f >> ws >> temp;
-	describe = new AString(temp);
+	describe = temp.getlegal();
 	if (*describe == "none") {
 		delete describe;
 		describe = 0;
 	}
 
 	f >> num;
+	SetName(new AString(*name));
 	f >> type;
 
 	int i;
