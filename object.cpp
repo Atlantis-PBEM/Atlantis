@@ -134,9 +134,11 @@ void Object::Readin(istream& f, AList *facs)
 	if (name) delete name;
 	f >> ws >> temp;
 	name = new AString(temp);
+	AString *tmp = name->stripnumber();
+	SetName(tmp);
 
 	f >> ws >> temp;
-	describe = new AString(temp);
+	describe = temp.getlegal();
 	if (*describe == "none") {
 		delete describe;
 		describe = 0;

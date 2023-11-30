@@ -192,6 +192,9 @@ void Faction::Readin(istream& f)
 	AString tmp;
 	f >> ws >> tmp;
 	name = new AString(tmp);
+	AString *temp = name->stripnumber();
+	SetName(temp);
+	
 	f >> ws >> tmp;
 	address = new AString(tmp);
 	f >> ws >> tmp;
