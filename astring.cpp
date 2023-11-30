@@ -283,10 +283,10 @@ int AString::getat()
 char islegal(char c)
 {
 	if ((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') ||
-			c=='!' || c=='[' || c==']' || c==',' || c=='.' || c==' ' ||
+			c=='!' || c==',' || c=='.' || c==' ' ||
 			c=='{' || c=='}' || c=='@' || c=='#' || c=='$' || c=='%' ||
 			c=='^' || c=='&' || c=='*' || c=='-' || c=='_' || c=='+' ||
-			c=='=' || c==';' || c==':' || c=='<' || c=='>' || c=='?' ||
+			c=='=' || c==':' || c=='<' || c=='>' || c=='?' ||
 			c=='/' || c=='~' || c=='\'' || c== '\\' || c=='`')
 		return 1;
 	return 0;
@@ -311,6 +311,25 @@ AString *AString::getlegal()
 	}
 
 	*temp2 = '\0';
+	AString * retval = new AString(temp);
+	delete[] temp;
+	return retval;
+}
+
+AString *AString::stripnumber()
+{
+	char *temp = new char[len+1];
+	int i = len  - 1;
+
+	// walk back until we find either a [ or a a ( which will be the unit/faction or object identifier
+	while (i > 0 && (str[i] != '[' && str[i] != '(')) {
+		i--;
+	}
+	// walk back one more step to get rid of the space;
+	if (i > 0) i--;
+	// copy the string up to that point
+	strncpy(temp, str, i);
+	temp[i] = '\0';
 	AString * retval = new AString(temp);
 	delete[] temp;
 	return retval;

@@ -63,6 +63,7 @@ public:
 	AString *gettoken();
 	int getat();
 	AString *getlegal();
+	AString *stripnumber();
 	AString *Trunc(int, int back=30);
 	int value();
 	int strict_value();

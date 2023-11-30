@@ -137,8 +137,14 @@ void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	incomplete = f->GetInt();
 
 	if (name) delete name;
+	// sanitize the name if needed [ ] and re-add it;
 	name = f->GetStr();
-	describe = f->GetStr();
+	temp = name->stripnumber();
+	SetName(temp);
+	// sanitize the description as well
+	temp = f->GetStr();
+	describe = temp->getlegal();
+	delete temp;
 	if (*describe == "none") {
 		delete describe;
 		describe = 0;
