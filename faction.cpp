@@ -215,6 +215,10 @@ void Faction::Readin(Ainfile *f, ATL_VER v)
 	unclaimed = f->GetInt();
 
 	name = f->GetStr();
+	// sanitize the name
+	AString *temp = name->stripnumber();
+	SetName(temp);
+
 	address = f->GetStr();
 	password = f->GetStr();
 	times = f->GetInt();
