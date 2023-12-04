@@ -33,7 +33,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     // Generate just this single factions json object.
     Game &game = helper.game_object();
     json json_report;
-    faction->write_json_report(json_report, &game, nullptr);
+    faction->build_json_report(json_report, &game, nullptr);
 
     // pick some of the data out of the report for checking
     string data_name = json_report["name"];
@@ -66,7 +66,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     faction->error("This is an error");
 
     json json_report;
-    faction->write_json_report(json_report, &helper.game_object(), nullptr);
+    faction->build_json_report(json_report, &helper.game_object(), nullptr);
 
     auto count = json_report["errors"].size();
     expect(count == 1_ul);
@@ -85,7 +85,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     for (auto i = 0; i < 1003; i++) faction->error("This is error #" + to_string(i+1));
 
     json json_report;
-    faction->write_json_report(json_report, &helper.game_object(), nullptr);
+    faction->build_json_report(json_report, &helper.game_object(), nullptr);
 
     auto count = json_report["errors"].size();
     expect(count == 1001_ul);
@@ -109,7 +109,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     faction->event("This is event 2");
 
     json json_report;
-    faction->write_json_report(json_report, &helper.game_object(), nullptr);
+    faction->build_json_report(json_report, &helper.game_object(), nullptr);
 
     auto count = json_report["events"].size();
     expect(count == 2_ul);
@@ -139,7 +139,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     ARegionList *regions = helper.get_regions();
 
     json json_report;
-    region->write_json_report(json_report, faction, helper.get_month(), regions);
+    region->build_json_report(json_report, faction, helper.get_month(), regions);
 
     string expected_provice("Testing Wilds"); // name given in the unit test setup
     string province = json_report["province"];
@@ -239,8 +239,8 @@ ut::suite<"JSON Report"> json_report_suite = []
     // Get a report for each region so we can verify that fleet data is correct for owners and non-owners.
     json json_report_1;
     json json_report_2;
-    region->write_json_report(json_report_1, faction, helper.get_month(), regions);
-    region->write_json_report(json_report_2, faction2, helper.get_month(), regions);
+    region->build_json_report(json_report_1, faction, helper.get_month(), regions);
+    region->build_json_report(json_report_2, faction2, helper.get_month(), regions);
 
     // Verify that owner sees additional data
     auto capacity = json_report_1["structures"][0]["capacity"];
@@ -282,7 +282,7 @@ ut::suite<"JSON Report"> json_report_suite = []
 
     // Get a report for each region so we can verify that fleet data is correct for owners and non-owners.
     json json_unit_report;
-    leader->write_json_report(json_unit_report, -1, 1, 1, 1, A_ALLY, 1);
+    leader->build_json_report(json_unit_report, -1, 1, 1, 1, A_ALLY, 1);
 
     string name = json_unit_report["name"];
     string expected_name = "My Leader";

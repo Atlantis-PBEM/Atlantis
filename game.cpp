@@ -29,17 +29,18 @@
 #define F_OK	0
 #endif
 
-#include <string.h>
-
-#include "game.h"
-#include "unit.h"
-#include "astring.h"
-#include "gamedata.h"
-#include "quests.h"
-#include "indenter.hpp"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <string.h>
+
+#include "astring.h"
+#include "game.h"
+#include "gamedata.h"
+#include "indenter.hpp"
+#include "text_report_generator.hpp"
+#include "quests.h"
+#include "unit.h"
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -1066,10 +1067,7 @@ int Game::RunGame()
 	Awrite("Writing the Report File...");
 	WriteReport();
 	Awrite("");
-	// LLS - write order templates
-	Awrite("Writing order templates...");
-	WriteTemplates();
-	Awrite("");
+
 	battles.clear();
 
 	EmptyHell();
@@ -1209,21 +1207,35 @@ void Game::WriteReport()
 
 	forlist(&factions) {
 		Faction *fac = (Faction *) elem;
-		string str = "report." + to_string(fac->num);
+		string report_file = "report." + to_string(fac->num);
+		string template_file = "template." + to_string(fac->num);
 
 		if (!fac->is_npc || fac->gets_gm_report(this)) {
+			// Generate the report in JSON format and then write it to whatever formats we want
+			json json_report;
+			bool show_region_depth = Globals->EASIER_UNDERWORLD
+				&& (Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS > 1);
+			fac->build_json_report(json_report, this, citems);
+
 			if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_TEXT) {
-				ofstream f(str, ios::out|ios::ate);
+				TextReportGenerator text_report;
+				ofstream f(report_file, ios::out | ios::ate);
 				if (f.is_open()) {
-					fac->write_text_report(f, this, citems);
+					text_report.output(f, json_report, show_region_depth);
+				}
+				if (!fac->is_npc && fac->temformat != TEMPLATE_OFF) {
+					// even factions which get a gm report do not get a template.
+					ofstream f(template_file, ios::out | ios::ate);
+					if (f.is_open()) {
+						text_report.output_template(f, json_report, fac->temformat, show_region_depth);
+					}
 				}
 			}
+
 			if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_JSON) {
-				ofstream jsonf(str + ".json", ios::out | ios::ate);
+				ofstream jsonf(report_file + ".json", ios::out | ios::ate);
 				if (jsonf.is_open()) {
-					json json_obj;
-					fac->write_json_report(json_obj, this, citems);
-					jsonf << json_obj.dump(2);
+					jsonf << json_report.dump(2);
 				}
 			}
 		}
@@ -1236,24 +1248,6 @@ void Game::WriteReport()
 		delete [] citems;
 	}
 }
-
-// LLS - write order templates for factions
-void Game::WriteTemplates()
-{
-	forlist(&factions) {
-		Faction *fac = (Faction *) elem;
-		if (!fac->is_npc) {
-			string str = "template." + to_string(fac->num);
-			ofstream f(str.c_str(), ios::out|ios::ate);
-			if (f.is_open()) {
-				fac->WriteTemplate(f, this);
-			}
-			fac->present_regions.clear();
-		}
-		Adot();
-	}
-}
-
 
 void Game::DeleteDeadFactions()
 {
@@ -1958,15 +1952,9 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	}
 	u->SetFlag(FLAG_HOLDING,1);
 	u->MoveUnit(pReg->GetDummy());
-	/*
-	Awrite(AString(*u->BattleReport(3)));
-	*/
 	if ((!Globals->LEADERS_EXIST) && (pReg->type != R_NEXUS)) {
 		u2->SetFlag(FLAG_HOLDING,1);
 		u2->MoveUnit(pReg->GetDummy());
-		/*
-		Awrite(AString(*u2->BattleReport(3)));
-		*/
 	}
 
 	if (AC && Globals->START_CITY_MAGES && needmage) {

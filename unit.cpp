@@ -559,7 +559,7 @@ json Unit::write_json_orders()
 	return container;
 }
 
-void Unit::write_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes)
+void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes)
 {
 	int stealth = GetAttribute("stealth");
 	bool my_unit = (obs == -1);
@@ -609,7 +609,7 @@ void Unit::write_json_report(json& j, int obs, int truesight, int detfac, int au
 		j["flags"]["sharing"] = (GetFlag(FLAG_SHARING) ? true : false);
 		if (GetFlag(FLAG_CONSUMING_UNIT)) j["flags"]["consume"] = "unit";
 		if (GetFlag(FLAG_CONSUMING_FACTION)) j["flags"]["consume"] = "faction";
-		j["flags"]["cross_water"] = (GetFlag(FLAG_NOCROSS_WATER) ? true : false);
+		j["flags"]["no_cross_water"] = GetFlag(FLAG_NOCROSS_WATER) ? true : false;
 
 		// Only one of these is allowed to be true at a time.
 		if (GetFlag(FLAG_NOSPOILS)) j["flags"]["spoils"] = "weightless";
@@ -643,6 +643,7 @@ void Unit::write_json_report(json& j, int obs, int truesight, int detfac, int au
 				int rate = StudyRateAdjustment(man_days, exp);
 				skill["study_rate"] = rate;
 			}
+			j["skills"]["known"].push_back(skill);
 		}
 		for (auto i = 0; i < NSKILLS; i++) {
 			if (SkillDefs[i].depends[0].skill != NULL) {
@@ -692,6 +693,8 @@ void Unit::write_json_report(json& j, int obs, int truesight, int detfac, int au
 		
 	}
 
+	j["items"] = json::array();
+
 	// Clear any marks on the item list since we want to report items in a specific order.
 	// Not sure this is necessary with json output, but we are going to hold it for now so that the array in json
 	// is in the same order the items would be listed in the normal report.
@@ -700,7 +703,7 @@ void Unit::write_json_report(json& j, int obs, int truesight, int detfac, int au
 	// now, report the items in the specific order (men, monsters, weapons, mounts, wagons, other, silver)
 	// items will be marked when they are reported to make sure they don't get reported twice if they fit
 	// multiple categories.
-	for (auto type = 0; type < 7; type++) {
+	for (auto output_phase = 0; output_phase < 7; output_phase++) {
 		forlist(&items) {
 			Item *item = (Item *)elem;
 			if (item->checked) continue;
@@ -712,13 +715,13 @@ void Unit::write_json_report(json& j, int obs, int truesight, int detfac, int au
 				(item->type == I_WAGON) || (item->type == I_MWAGON) || (item->type == I_SILVER)
 			);
 
-			if (phase == 0 && !(def.type & IT_MAN)) continue;
-			if (phase == 1 && !(def.type & IT_MONSTER)) continue;
-			if (phase == 2 && !combat_item) continue;
-			if (phase == 3 && !(def.type & IT_MOUNT)) continue;
-			if (phase == 4 && !((item->type == I_WAGON) || (item->type == I_MWAGON))) continue;
-			if (phase == 5 && item_reported_in_other_phase) continue;
-			if (phase == 6 && !(item->type == I_SILVER)) continue;
+			if (output_phase == 0 && !(def.type & IT_MAN)) continue;
+			if (output_phase == 1 && !(def.type & IT_MONSTER)) continue;
+			if (output_phase == 2 && !combat_item) continue;
+			if (output_phase == 3 && !(def.type & IT_MOUNT)) continue;
+			if (output_phase == 4 && !((item->type == I_WAGON) || (item->type == I_MWAGON))) continue;
+			if (output_phase == 5 && item_reported_in_other_phase) continue;
+			if (output_phase == 6 && !(item->type == I_SILVER)) continue;
 
 			item->checked = 1;
 			if (my_unit || (def.weight != 0)) {
@@ -734,220 +737,6 @@ void Unit::write_json_report(json& j, int obs, int truesight, int detfac, int au
 			}
 		}
 	}
-}
-
-void Unit::write_text_report(ostream& f, int obs, int truesight, int detfac,
-				int autosee, int attitude, int showattitudes)
-{
-	int stealth = GetAttribute("stealth");
-	if (obs==-1) {
-		/* The unit belongs to the Faction writing the report */
-		obs = 2;
-	} else {
-		if (obs < stealth) {
-			/* The unit cannot be seen */
-			if (reveal == REVEAL_FACTION) {
-				obs = 1;
-			} else {
-				if (guard == GUARD_GUARD || reveal == REVEAL_UNIT || autosee) {
-					obs = 0;
-				} else {
-					return;
-				}
-			}
-		} else {
-			if (obs == stealth) {
-				/* Can see unit, but not Faction */
-				if (reveal == REVEAL_FACTION) {
-					obs = 1;
-				} else {
-					obs = 0;
-				}
-			} else {
-				/* Can see unit and Faction */
-				obs = 1;
-			}
-		}
-	}
-
-	/* Setup True Sight */
-	if (obs == 2) {
-		truesight = 1;
-	} else {
-		if (GetSkill(S_ILLUSION) > truesight) {
-			truesight = 0;
-		} else {
-			truesight = 1;
-		}
-	}
-
-	if (detfac && obs != 2) obs = 1;
-
-	/* Write the report */
-	AString temp;
-	if (obs == 2) {
-		temp += AString("* ") + *name;
-	} else {
-		if (showattitudes) {
-			switch (attitude) {
-			case A_ALLY: 
-				temp += AString("= ") +*name;
-				break;
-			case A_FRIENDLY: 
-				temp += AString(": ") +*name;
-				break;
-			case A_NEUTRAL: 
-				temp += AString("- ") +*name;
-				break;
-			case A_UNFRIENDLY: 
-				temp += AString("% ") +*name;
-				break;
-			case A_HOSTILE: 
-				temp += AString("! ") +*name;
-				break;
-			}
-		} else {
-			temp += AString("- ") + *name;
-		}
-	}
-
-	if (guard == GUARD_GUARD) temp += ", on guard";
-	if (obs > 0) {
-		temp += AString(", ") + *faction->name;
-		if (guard == GUARD_AVOID) temp += ", avoiding";
-		if (GetFlag(FLAG_BEHIND)) temp += ", behind";
-	}
-
-	if (obs == 2) {
-		if (reveal == REVEAL_UNIT) temp += ", revealing unit";
-		if (reveal == REVEAL_FACTION) temp += ", revealing faction";
-		if (GetFlag(FLAG_HOLDING)) temp += ", holding";
-		if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
-		if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
-		if (GetFlag(FLAG_SHARING)) temp += ", sharing";
-		if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
-		if (GetFlag(FLAG_CONSUMING_FACTION))
-			temp += ", consuming faction's food";
-		if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
-		temp += SpoilsReport();
-	}
-
-	temp += items.Report(obs, truesight, 0);
-
-	if (obs == 2) {
-		temp += ". Weight: ";
-		temp += AString(items.Weight());
-		temp += ". Capacity: ";
-		temp += AString(FlyingCapacity());
-		temp += "/";
-		temp += AString(RidingCapacity());
-		temp += "/";
-		temp += AString(WalkingCapacity());
-		temp += "/";
-		temp += AString(SwimmingCapacity());
-		temp += ". Skills: ";
-		temp += skills.Report(GetMen());
-	}
-
-	if (obs == 2 && (type == U_MAGE || type == U_GUARDMAGE)) {
-		temp += MageReport();
-	}
-
-	if (obs == 2) {
-		temp += ReadyItem();
-		temp += StudyableSkills();
-		if (visited.size() > 0) {
-			set<string>::iterator it;
-			unsigned int count;
-
-			count = 0;
-			temp += ". Has visited ";
-			for (it = visited.begin();
-					it != visited.end();
-					it++) {
-				count++;
-				if (count > 1) {
-					if (count == visited.size())
-						temp += " and ";
-					else
-						temp += ", ";
-				}
-				temp += it->c_str();
-			}
-		}
-	}
-
-	if (describe) {
-		temp += AString("; ") + *describe;
-	}
-	temp += ".";
-	f << temp << '\n';
-}
-
-AString Unit::TemplateReport()
-{
-	/* Write the report */
-	AString temp;
-	temp = *name;
-
-	if (guard == GUARD_GUARD) temp += ", on guard";
-	if (guard == GUARD_AVOID) temp += ", avoiding";
-	if (GetFlag(FLAG_BEHIND)) temp += ", behind";
-	if (reveal == REVEAL_UNIT) temp += ", revealing unit";
-	if (reveal == REVEAL_FACTION) temp += ", revealing faction";
-	if (GetFlag(FLAG_HOLDING)) temp += ", holding";
-	if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
-	if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
-	if (GetFlag(FLAG_SHARING)) temp += ", sharing";
-	if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
-	if (GetFlag(FLAG_CONSUMING_FACTION)) temp += ", consuming faction's food";
-	if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
-	temp += SpoilsReport();
-
-	temp += items.Report(2, 1, 0);
-	temp += ". Weight: ";
-	temp += AString(items.Weight());
-	temp += ". Capacity: ";
-	temp += AString(FlyingCapacity());
-	temp += "/";
-	temp += AString(RidingCapacity());
-	temp += "/";
-	temp += AString(WalkingCapacity());
-	temp += "/";
-	temp += AString(SwimmingCapacity());
-	temp += ". Skills: ";
-	temp += skills.Report(GetMen());
-
-	if (type == U_MAGE || type == U_GUARDMAGE) {
-		temp += MageReport();
-	}
-	temp += ReadyItem();
-	temp += StudyableSkills();
-	if (visited.size() > 0) {
-		set<string>::iterator it;
-		unsigned int count;
-
-		count = 0;
-		temp += ". Has visited ";
-		for (it = visited.begin();
-				it != visited.end();
-				it++) {
-			count++;
-			if (count > 1) {
-				if (count == visited.size())
-					temp += " and ";
-				else
-					temp += ", ";
-			}
-			temp += it->c_str();
-		}
-	}
-
-	if (describe) {
-		temp += AString("; ") + *describe;
-	}
-	temp += ".";
-	return temp;
 }
 
 AString *Unit::BattleReport(int obs)

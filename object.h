@@ -91,8 +91,7 @@ class Object : public AListElem
 
 		void Readin(istream& f, AList *);
 		void Writeout(ostream& f);
-		void write_text_report(ostream& f, Faction *, int, int, int, int, int, int, int);
-		void write_json_report(json& j, Faction *, int, int, int, int, int, int, int);
+		void build_json_report(json& j, Faction *, int, int, int, int, int, int, int);
 
 		void SetName(AString *);
 		void SetDescribe(AString *);

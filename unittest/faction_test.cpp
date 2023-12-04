@@ -51,18 +51,6 @@ ut::suite<"Faction"> faction_suite = []
     expect(eq(current, expected));
   };
 
-  "FactionTypeStr returns correct string"_test = [faction]
-  {
-    // Mock up that a faction had set their types to 2 war and 3 magic.
-    faction->type[F_WAR] = 2;
-    faction->type[F_TRADE] = 0;
-    faction->type[F_MAGIC] = 3;
-
-    string current = faction->FactionTypeStr().Str();
-    string expected = "War 2, Magic 3";
-    expect(eq(current, expected));
-  };
-
   // No memory leaks.
   delete faction;
 

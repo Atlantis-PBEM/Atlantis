@@ -161,12 +161,8 @@ public:
 	void error(const string &s);
 	void event(const string &s);
 
-	AString FactionTypeStr();
-	void write_text_report(ostream &f, Game *pGame, size_t **citems);
-	void write_json_report(json &j, Game *pGame, size_t **citems);
+	void build_json_report(json& j, Game *pGame, size_t **citems);
 
-	// LLS - write order template
-	void WriteTemplate(ostream &f, Game *pGame);
 	void WriteFacInfo(ostream &f);
 
 	void set_attitude(int faction_id, int attitude); // attitude -1 clears it
@@ -256,10 +252,7 @@ public:
 private:
 	vector<FactionStatistic> compute_faction_statistics(Game *game, size_t **citems);
 	void gm_report_setup(Game *game);
-
-	// Split the gm report from the normal report to make the code more readable.
-	void write_text_gm_report(ostream &f, Game *game);
-	void write_json_gm_report(json &j, Game *game);
+	void build_gm_json_report(json& j, Game *game);
 };
 
 Faction *GetFaction(AList *, int);

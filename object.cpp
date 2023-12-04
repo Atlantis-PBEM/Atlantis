@@ -281,7 +281,7 @@ Unit *Object::GetOwner()
 	return(owner);
 }
 
-void Object::write_json_report(json& j, Faction *fac, int obs, int truesight,
+void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
 	int detfac, int passobs, int passtrue, int passdetfac, int present)
 {
 	// Exit early if no observable.
@@ -302,11 +302,12 @@ void Object::write_json_report(json& j, Faction *fac, int obs, int truesight,
 		if (describe) container["description"] = describe->const_str();
 
 		if (IsFleet()) {
+			container["fleet"] = true;
 			if((GetOwner() && fac == GetOwner()->faction) || (obs > 9)){
 				container["load"] = FleetLoad();
 				container["capacity"] = FleetCapacity();
 				container["sailors"] = FleetSailingSkill(1);
-				container["fleetsize"] = GetFleetSize();
+				container["fleet_size"] = GetFleetSize();
 				container["max_speed"] = GetFleetSpeed(1);
 				container["damage_percent"] = incomplete;
 			}
@@ -330,8 +331,8 @@ void Object::write_json_report(json& j, Faction *fac, int obs, int truesight,
 				}
 			}
 		} else {
-			if (incomplete) container["incomplete"] = incomplete;
-			container["inner_location"] = inner != -1;
+			if (incomplete > 0) container["incomplete"] = incomplete;
+			if (inner != -1) container["inner_location"] = true;
 			if (runes) container["warding_runes"] = true;
 			if (!(ob.flags & ObjectType::CANENTER)) container["closed"] = true;
 			if (Globals->DECAY && !(ob.flags & ObjectType::NEVERDECAY) && incomplete < 1) {
@@ -352,15 +353,15 @@ void Object::write_json_report(json& j, Faction *fac, int obs, int truesight,
 		json unit = json::object();
 		int attitude = fac->get_attitude(u->faction->num);
 		if (u->faction == fac) {
-			u->write_json_report(unit, -1, 1, 1, 1, attitude, fac->showunitattitudes);
+			u->build_json_report(unit, -1, 1, 1, 1, attitude, fac->showunitattitudes);
 		} else {
 			if (present) {
-				u->write_json_report(unit, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
+				u->build_json_report(unit, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
 			} else {
 				if (((type == O_DUMMY) && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_OUTDOOR_UNITS)) ||
 					((type != O_DUMMY) && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_INDOOR_UNITS)) ||
 					((u->guard == GUARD_GUARD) && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_GUARDS))) {
-					u->write_json_report(unit, passobs, passtrue, passdetfac, type != O_DUMMY, attitude, fac->showunitattitudes);
+					u->build_json_report(unit, passobs, passtrue, passdetfac, type != O_DUMMY, attitude, fac->showunitattitudes);
 				}
 			}
 		}
@@ -373,134 +374,6 @@ void Object::write_json_report(json& j, Faction *fac, int obs, int truesight,
 	}
 }
 
-void Object::write_text_report(ostream& f, Faction *fac, int obs, int truesight,
-		int detfac, int passobs, int passtrue, int passdetfac, int present)
-{
-	ObjectType *ob = &ObjectDefs[type];
-
-	if ((type != O_DUMMY) && !present) {
-		if (IsFleet() &&
-				!(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_SHIPS)) {
-			// This is a ship and we don't see ships in transit
-			return;
-		}
-		if (IsBuilding() &&
-				!(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_BUILDINGS)) {
-			// This is a building and we don't see buildings in transit
-			return;
-		}
-		if (IsRoad() &&
-				!(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ROADS)) {
-			// This is a road and we don't see roads in transit
-			return;
-		}
-	}
-
-	/* Fleet Report */
-	if (IsFleet()) {
-		AString temp = AString("+ ") + *name + " : " + FleetDefinition();
-		/* report ships:
-		for (int item=0; item<NITEMS; item++) {
-			int num = GetNumShips(item);
-			if (num > 0) {
-				if (num > 1) {
-					temp += AString(", ") + num + " " + ItemDefs[item].names;
-				} else {
-					temp += AString(", ") + num + " " +ItemDefs[item].name;
-				}
-			}
-		}
-		*/
-		if ((GetOwner() && fac == GetOwner()->faction) || (obs > 9)){
-			temp += ";";
-			if (incomplete > 0) {
-				temp += AString(" ") + incomplete + "% damaged;";
-			}
-			temp += AString(" Load: ") + FleetLoad() + "/" + FleetCapacity() + ";";
-			temp += AString(" Sailors: ") + FleetSailingSkill(1) + "/" + GetFleetSize() + ";";
-			temp += AString(" MaxSpeed: ") + GetFleetSpeed(1);
-		}
-		if ((Globals->PREVENT_SAIL_THROUGH) &&
-				(!Globals->ALLOW_TRIVIAL_PORTAGE)) {
-			if ((flying < 1) &&
-					(TerrainDefs[region->type].similar_type != R_OCEAN)) {
-				int dir = 0;
-				int first = 1;
-				temp += AString("; Sail directions: ");
-				for (dir = 0; dir < NDIRS; dir++) {
-					if (SailThroughCheck(dir) == 1) {
-						if (first == 1) first = 0;
-						else            temp += AString(", ");
-
-						temp += DirectionAbrs[dir];
-					}
-				}
-			}
-		}
-		if (describe) {
-			temp += AString("; ") + *describe;
-		}
-		temp += ".";
-		f << temp << '\n';
-		f << indent::incr;
-	} else if (type != O_DUMMY) {
-		AString temp = AString("+ ") + *name + " : " + ob->name;
-		if (incomplete > 0) {
-			temp += AString(", needs ") + incomplete;
-		} else if (Globals->DECAY &&
-				!(ob->flags & ObjectType::NEVERDECAY) && incomplete < 1) {
-			if (incomplete > (0 - ob->maxMonthlyDecay)) {
-				temp += ", about to decay";
-			} else if (incomplete > (0 - ob->maxMaintenance/2)) {
-				temp += ", needs maintenance";
-			}
-		}
-		if (inner != -1) {
-			temp += ", contains an inner location";
-		}
-		if (runes) {
-			temp += ", engraved with Runes of Warding";
-		}
-		if (describe) {
-			temp += AString("; ") + *describe;
-		}
-		if (!(ob->flags & ObjectType::CANENTER)) {
-			temp += ", closed to player units";
-		}
-		temp += ".";
-		f << temp << '\n';
-		f << indent::incr;
-	}
-
-	forlist ((&units)) {
-		Unit *u = (Unit *) elem;
-		int attitude = fac->get_attitude(u->faction->num);
-		if (u->faction == fac) {
-			u->write_text_report(f, -1, 1, 1, 1, attitude, fac->showunitattitudes);
-		} else {
-			if (present) {
-				u->write_text_report(f, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
-			} else {
-				if (((type == O_DUMMY) &&
-					(Globals->TRANSIT_REPORT &
-					 GameDefs::REPORT_SHOW_OUTDOOR_UNITS)) ||
-					((type != O_DUMMY) &&
-						(Globals->TRANSIT_REPORT &
-					 	GameDefs::REPORT_SHOW_INDOOR_UNITS)) ||
-					((u->guard == GUARD_GUARD) &&
-						(Globals->TRANSIT_REPORT &
-					 	GameDefs::REPORT_SHOW_GUARDS))) {
-					u->write_text_report(f, passobs, passtrue, passdetfac,
-							type != O_DUMMY, attitude, fac->showunitattitudes);
-				}
-			}
-		}
-	}
-	if (type != O_DUMMY) {
-		f << indent::decr;
-	}
-	f << '\n';
-}
 
 void Object::SetPrevDir(int newdir)
 {

@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef __INDENTER_HPP__
+#define __INDENTER_HPP__
+
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -210,3 +215,5 @@ namespace indent {
     return os;
   }
 }
+
+#endif

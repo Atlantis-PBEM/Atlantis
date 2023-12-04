@@ -1196,29 +1196,6 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	return 0;
 }
 
-void ARegion::WriteProducts(ostream& f, Faction *fac, int present)
-{
-	Production *p = get_production_for_skill(I_SILVER, S_ENTERTAINMENT);
-	if (p) {
-		f << "Entertainment available: $"
-		<< (((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ENTERTAINMENT) || present) ? p->amount : 0)
-		<< ".\n";
-	}
-
-	f << "Products: ";
-	bool has = false;
-	for (const auto& p : products) {
-		if (p->itemtype == I_SILVER) continue;
-		// Advanced items are special.. Skip unless we are allowed to see them.
-		if (ItemDefs[p->itemtype].type & IT_ADVANCED && !(CanMakeAdv(fac, p->itemtype) || fac->is_npc)) continue;
-		// For normal items, skip if we aren't allowed to see them.
-		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) continue;
-		f << (has ? ", " : "") << p->WriteReport();
-		has = true;
-	}
-	f << (has ? "." : "none.") << '\n';
-}
-
 int ARegion::HasItem(Faction *fac, int item)
 {
 	forlist(&objects) {
@@ -1233,74 +1210,6 @@ int ARegion::HasItem(Faction *fac, int item)
 	return 0;
 }
 
-void ARegion::WriteMarkets(ostream &f, Faction *fac, int present)
-{
-	f << "Wanted: ";
-	int has = 0;
-	for (const auto& m : markets) {
-		if (!m->amount) continue;
-		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS)) continue;
-		if (m->type == M_SELL) {
-			if (ItemDefs[m->item].type & IT_ADVANCED) {
-				if (!Globals->MARKETS_SHOW_ADVANCED_ITEMS) {
-					if (!HasItem(fac, m->item)) {
-						continue;
-					}
-				}
-			}
-			f << (has ? ", " : "") << m->Report().const_str();
-			has = 1;
-		}
-	}
-	f << (has ? "." : "none.") << '\n';
-
-	f << "For Sale: ";
-	has = 0;
-	for (const auto& m : markets) {
-		if (!m->amount) continue;
-		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS)) continue;
-		if (m->type == M_BUY) {
-			f << (has ? ", " : "") << m->Report().const_str();
-			has = 1;
-		}
-	}
-	f << (has ? "." : "none.") << '\n';
-}
-
-void ARegion::WriteEconomy(ostream& f, Faction *fac, int present)
-{
-	f << indent::incr;
-
-	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present) {
-		f << "Wages: " << WagesForReport().const_str() << ".\n";
-	} else {
-		f << "Wages: $0.\n";
-	}
-
-	WriteMarkets(f, fac, present);
-
-	WriteProducts(f, fac, present);
-
-	f << indent::decr << '\n';
-}
-
-void ARegion::WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen)
-{
-	f << "Exits:\n";
-	f << indent::incr;
-	int y = 0;
-	for (int i=0; i<NDIRS; i++) {
-		ARegion *r = neighbors[i];
-		if (r && exits_seen[i]) {
-			f << DirectionStrs[i] << " : " << r->Print(pRegs) << ".\n";
-			y = 1;
-		}
-	}
-	if (!y) f << "none\n";
-	f << indent::decr;
-	f << '\n';
-}
-
 json ARegion::basic_json_data(ARegionList *regions) {
 	json j;
 	j["terrain"] = TerrainDefs[type].name;
@@ -1309,6 +1218,26 @@ json ARegion::basic_json_data(ARegionList *regions) {
 	string label = (level->strName ? level->strName->const_str() : "surface");
  	j["coordinates"] = { { "x", xloc }, { "y", yloc }, { "z", zloc }, { "label", label } };
 
+	// in order to support games with different UW settings, we need to put a bit more information in the JSON to
+	// make the text report easier.. exact depth being hidden is really stupid, but that's the way the text report is.
+	if (!Globals->EASIER_UNDERWORLD) {
+		string z_prefix = "";
+		if (zloc >= 2 && zloc < Globals->UNDERWORLD_LEVELS + 2) {
+			for (int i = zloc; i > 3; i--) {
+				z_prefix += "very ";
+			}
+			z_prefix += "deep ";
+		} else if ((zloc > Globals->UNDERWORLD_LEVELS + 2) &&
+					(zloc < Globals->UNDERWORLD_LEVELS +
+					Globals->UNDERDEEP_LEVELS + 2)) {
+			for (int i = zloc; i > Globals->UNDERWORLD_LEVELS + 3; i--) {
+				z_prefix += "very ";
+			}
+			z_prefix += "deep ";
+		}
+		if (!z_prefix.empty()) j["coordinates"]["depth_prefix"] = z_prefix;
+	}
+
 	j["province"] = name->const_str();
 	if (town) {
 		j["settlement"] = { { "name", town->name->const_str() }, { "size", TownString(town->TownType()).const_str() } };
@@ -1316,15 +1245,16 @@ json ARegion::basic_json_data(ARegionList *regions) {
 	return j;
 }
 
-void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *regions) {
+void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *regions) {
 	Farsight *farsight = GetFarsight(&farsees, fac);
 	Farsight *passer = GetFarsight(&passers, fac);
-	int present = Present(fac) || fac->is_npc;
+	bool present = (Present(fac) == 1) || fac->is_npc;
 
 	// this faction cannot see this region, why are we even here?
 	if (!farsight && !passer && !present) return;
 
 	j = basic_json_data(regions);
+	j["present"] = present && !fac->is_npc;
 
 	if (Population() &&	(present || farsight || (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_PEASANTS))) {
 		j["population"] = { { "amount", Population() } };
@@ -1353,7 +1283,7 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 	Production *p = get_production_for_skill(I_SILVER, -1);
 	double wages = p ? p->productivity / 10.0 : 0;
 	auto max_wages = p ? p->amount : 0;
-	j["wages"] = (p && ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present))
+	j["wages"] = (p && ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present || farsight))
 		? json{ { "amount", wages }, { "max", max_wages } }
 		: json{ { "amount", 0 } };
 
@@ -1361,7 +1291,7 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 	json for_sale = json::array();
 	for (const auto& m : markets) {
 		if (!m->amount) continue;
-		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS)) continue;
+		if (!present && !farsight && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS)) continue;
 
 		ItemType itemdef = ItemDefs[m->item];
 		json item = {
@@ -1384,8 +1314,10 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 	j["markets"] = { { "wanted", wanted }, { "for_sale", for_sale } };
 
 	p = get_production_for_skill(I_SILVER, S_ENTERTAINMENT);
-	j["entertainment"] = p && (present || (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ENTERTAINMENT))
-		? p->amount : 0;
+	if (p) {
+		j["entertainment"] =
+			(present || farsight || (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ENTERTAINMENT)) ? p->amount : 0;
+	}
 
 	j["products"] = json::array();
 	for (const auto& p : products) {
@@ -1394,7 +1326,7 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 		// Advanced items have slightly different rules, so call CanMakeAdv (poorly named) to see if we can see them.
 		if (itemdef.type & IT_ADVANCED && !(CanMakeAdv(fac, p->itemtype) || fac->is_npc)) continue;
 		// If it's a normal resource, and we aren't here or not showing it, skip it.
-		if (!present && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) continue;
+		if (!present && !farsight && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) continue;
 		json item = {
 			{ "name", itemdef.name }, { "plural", itemdef.names }, { "tag", itemdef.abr },
 	 	};
@@ -1516,329 +1448,7 @@ void ARegion::write_json_report(json& j, Faction *fac, int month, ARegionList *r
 	{
 		forlist (&objects) {
 			Object *o = (Object *) elem;
-			o->write_json_report(j, fac, obs, truesight, detfac, passobs, passtrue, passdetfac, present || farsight);
-		}
-	}
-}
-
-void ARegion::write_text_report(ostream &f, Faction *fac, int month, ARegionList *pRegions)
-{
-	Farsight *farsight = GetFarsight(&farsees, fac);
-	Farsight *passer = GetFarsight(&passers, fac);
-	int present = Present(fac) || fac->is_npc;
-
-	if (farsight || passer || present) {
-		AString temp = Print(pRegions);
-		if (Population() &&
-			(present || farsight ||
-			 (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_PEASANTS))) {
-			temp += AString(", ") + Population() + " peasants";
-			if (Globals->RACES_EXIST) {
-				temp += AString(" (") + ItemDefs[race].names + ")";
-			}
-			if (present || farsight ||
-					Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY) {
-				temp += AString(", $") + wealth;
-			} else {
-				temp += AString(", $0");
-			}
-		}
-		temp += ".";
-		f << temp.const_str() << "\n";
-		f << "------------------------------------------------------------\n";
-
-		f << indent::incr;
-		if (Globals->WEATHER_EXISTS) {
-			temp = "It was ";
-			if (clearskies) temp += "unnaturally clear ";
-			else {
-				if (weather == W_BLIZZARD) temp = "There was an unnatural ";
-				else if (weather == W_NORMAL) temp = "The weather was ";
-				temp += SeasonNames[weather];
-			}
-			temp += " last month; ";
-			int nxtweather = pRegions->GetWeather(this, (month + 1) % 12);
-			temp += "it will be ";
-			temp += SeasonNames[nxtweather];
-			temp += " next month.";
-			f << temp.const_str() << "\n";
-		}
-		
-		// Freezing effect
-		if (weather == W_BLIZZARD && !clearskies) {
-			temp = "There was an unnatural freezing last month.";
-			f << temp.const_str() << "\n";
-		}
-
-#if 0
-		f << "\nElevation is " << elevation << ".\n";
-		f << "Humidity is " << humidity << ".\n";
-		f << "Temperature is " << temperature << ".\n";
-#endif
-
-		if (type == R_NEXUS) {
-			f << '\n' << Globals->WORLD_NAME << " Nexus is a magical place: the entryway " 
-			  << "to the world of " << Globals->WORLD_NAME << ". Enjoy your stay; "
-			  << "the city guards should keep you safe as long as you should choose "
-			  << "to stay. However, rumor has it that once you have left the Nexus, "
-			  << "you can never return.\n\n";
-		}
-
-		f << indent::decr;
-
-		WriteEconomy(f, fac, present || farsight);
-
-		int exits_seen[NDIRS];
-		if (present || farsight ||
-				(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ALL_EXITS)) {
-			for (int i = 0; i < NDIRS; i++)
-				exits_seen[i] = 1;
-		} else {
-			// This is just a transit report and we're not showing all
-			// exits.   See if we are showing used exits.
-
-			// Show none by default.
-			int i;
-			for (i = 0; i < NDIRS; i++)
-				exits_seen[i] = 0;
-			// Now, if we should, show the ones actually used.
-			if (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_USED_EXITS) {
-				forlist(&passers) {
-					Farsight *p = (Farsight *)elem;
-					if (p->faction == fac) {
-						for (i = 0; i < NDIRS; i++) {
-							exits_seen[i] |= p->exits_used[i];
-						}
-					}
-				}
-			}
-		}
-
-		WriteExits(f, pRegions, exits_seen);
-
-		if (Globals->GATES_EXIST && gate && gate != -1) {
-			int sawgate = 0;
-			if (fac->is_npc)
-				sawgate = 1;
-			if (Globals->IMPROVED_FARSIGHT && farsight) {
-				forlist(&farsees) {
-					Farsight *watcher = (Farsight *)elem;
-					if (watcher && watcher->faction == fac && watcher->unit) {
-						if (watcher->unit->GetSkill(S_GATE_LORE)) {
-							sawgate = 1;
-						}
-					}
-				}
-			}
-			if (Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) {
-				forlist(&passers) {
-					Farsight *watcher = (Farsight *)elem;
-					if (watcher && watcher->faction == fac && watcher->unit) {
-						if (watcher->unit->GetSkill(S_GATE_LORE)) {
-							sawgate = 1;
-						}
-					}
-				}
-			}
-			forlist(&objects) {
-				Object *o = (Object *) elem;
-				forlist(&o->units) {
-					Unit *u = (Unit *) elem;
-					if (!sawgate &&
-							((u->faction == fac) &&
-							 u->GetSkill(S_GATE_LORE))) {
-						sawgate = 1;
-					}
-				}
-			}
-			if (sawgate) {
-				if (gateopen) {
-					f << "There is a Gate here (Gate " << gate;
-					if (!Globals->DISPERSE_GATE_NUMBERS) {
-						f << " of " << pRegions->numberofgates;
-					}
-					f << ").\n\n";
-				} else if (Globals->SHOW_CLOSED_GATES) {
-					f << "There is a closed Gate here.\n\n";
-				}
-			}
-		}
-
-		int obs = GetObservation(fac, 0);
-		int truesight = GetTrueSight(fac, 0);
-		int detfac = 0;
-
-		int passobs = GetObservation(fac, 1);
-		int passtrue = GetTrueSight(fac, 1);
-		int passdetfac = detfac;
-
-		if (fac->is_npc) {
-			obs = 10;
-			passobs = 10;
-		}
-
-		forlist (&objects) {
-			Object *o = (Object *) elem;
-			forlist(&o->units) {
-				Unit *u = (Unit *) elem;
-				if (u->faction == fac && u->GetSkill(S_MIND_READING) > 1) {
-					detfac = 1;
-				}
-			}
-		}
-		if (Globals->IMPROVED_FARSIGHT && farsight) {
-			forlist(&farsees) {
-				Farsight *watcher = (Farsight *)elem;
-				if (watcher && watcher->faction == fac && watcher->unit) {
-					if (watcher->unit->GetSkill(S_MIND_READING) > 1) {
-						detfac = 1;
-					}
-				}
-			}
-		}
-
-		if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
-				(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
-			forlist(&passers) {
-				Farsight *watcher = (Farsight *)elem;
-				if (watcher && watcher->faction == fac && watcher->unit) {
-					if (watcher->unit->GetSkill(S_MIND_READING) > 1) {
-						passdetfac = 1;
-					}
-				}
-			}
-		}
-
-		{
-			forlist (&objects) {
-				((Object *) elem)->write_text_report(f, fac, obs, truesight, detfac,
-							passobs, passtrue, passdetfac,
-							present || farsight);
-			}
-			f << '\n';
-		}
-	}
-}
-
-// DK
-void ARegion::WriteTemplate(ostream& f, Faction *fac, ARegionList *pRegs, int month)
-{
-	int header = 0, order;
-	AString temp, *token;
-
-	forlist (&objects) {
-		Object *o = (Object *) elem;
-		forlist(&o->units) {
-			Unit *u = (Unit *) elem;
-			if (u->faction == fac) {
-				if (!header) {
-					// DK
-					if (fac->temformat == TEMPLATE_MAP) {
-						WriteTemplateHeader(f, fac, pRegs, month);
-					} else {
-						temp = AString("*** ") + Print(pRegs) + AString(" ***");
-						f << '\n';
-						f << indent::comment << temp.const_str() << '\n';
-					}
-					header = 1;
-				}
-
-				f << "\nunit " << u->num << '\n';
-				// DK
-				if (fac->temformat == TEMPLATE_LONG ||
-						fac->temformat == TEMPLATE_MAP) {
-					f << indent::comment << u->TemplateReport() << '\n';
-				}
-				int gotMonthOrder = 0;
-				forlist(&(u->oldorders)) {
-					temp = *((AString *) elem);
-					temp.getat();
-					token = temp.gettoken();
-					if (token) {
-						order = Parse1Order(token);
-						delete token;
-					} else
-						order = NORDERS;
-					switch (order) {
-						case O_MOVE:
-						case O_SAIL:
-						case O_TEACH:
-						case O_STUDY:
-						case O_BUILD:
-						case O_PRODUCE:
-						case O_ENTERTAIN:
-						case O_WORK:
-							gotMonthOrder = 1;
-							break;
-						case O_TAX:
-						case O_PILLAGE:
-							if (Globals->TAX_PILLAGE_MONTH_LONG)
-								gotMonthOrder = 1;
-							break;
-					}
-					if (order == O_ENDTURN || order == O_ENDFORM)
-						f << indent::decr;
-					f << *((AString *) elem) << '\n';
-					if (order == O_TURN || order == O_FORM)
-						f << indent::incr;
-				}
-				f << indent::set_indent(0);
-				u->oldorders.DeleteAll();
-
-				int firstMonthOrder = gotMonthOrder;
-				if (u->turnorders.First()) {
-					TurnOrder *tOrder;
-					forlist(&u->turnorders) {
-						tOrder = (TurnOrder *)elem;
-						if (firstMonthOrder) {
-							f << (tOrder->repeating ? "@" : "") << "TURN\n";
-							f << indent::incr;
-						}
-						forlist(&tOrder->turnOrders) {
-							temp = *((AString *) elem);
-							temp.getat();
-							token = temp.gettoken();
-							if (token) {
-								order = Parse1Order(token);
-								delete token;
-							} else
-								order = NORDERS;
-							if (order == O_ENDTURN || order == O_ENDFORM)
-								f << indent::decr;
-							f << *((AString *) elem) << '\n';
-							if (order == O_TURN || order == O_FORM)
-								f << indent::incr;
-						}
-						if (firstMonthOrder) {
-							f << indent::decr << "ENDTURN\n";
-						}
-						firstMonthOrder = 1;
-						f << indent::set_indent(0);
-					}
-					tOrder = (TurnOrder *) u->turnorders.First();
-					if (tOrder->repeating && !gotMonthOrder) {
-						f << "@TURN\n";
-						f << indent::incr;
-						forlist(&tOrder->turnOrders) {
-							temp = *((AString *) elem);
-							temp.getat();
-							token = temp.gettoken();
-							if (token) {
-								order = Parse1Order(token);
-								delete token;
-							} else
-								order = NORDERS;
-							if (order == O_ENDTURN || order == O_ENDFORM)
-								f << indent::decr;
-							f << *((AString *) elem) << '\n';
-							if (order == O_TURN || order == O_FORM)
-								f << indent::incr;
-						}
-						f << indent::set_indent(0) << "ENDTURN\n";
-					}
-				}
-				u->turnorders.DeleteAll();
-			}
+			o->build_json_report(j, fac, obs, truesight, detfac, passobs, passtrue, passdetfac, present || farsight);
 		}
 	}
 }

@@ -151,13 +151,8 @@ private:
 	void ClearOrders(Faction *);
 	void MakeFactionReportLists();
 	void CountAllSpecialists();
-	// void CountAllMages();
-	// void CountAllApprentices();
-	// void CountAllQuarterMasters();
-	// void CountAllTacticians();
+
 	void WriteReport();
-	// LLS - write order templates
-	void WriteTemplates();
 
 	void DeleteDeadFactions();
 
