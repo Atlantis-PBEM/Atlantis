@@ -57,8 +57,7 @@ class Battle : public AListElem
 		Battle();
 		~Battle();
 
-		void write_text_report(ostream& f, Faction *fac);
-		void write_json_report(json &j, Faction *fac);
+		void build_json_report(json &j, Faction *fac);
 		void AddLine(const AString &);
 
 		int Run(Events* events, ARegion *, Unit *, AList *, Unit *, AList *, int ass,

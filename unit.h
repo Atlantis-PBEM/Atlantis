@@ -133,16 +133,14 @@ class Unit : public AListElem
 
 		AString SpoilsReport(void);
 		int CanGetSpoil(Item *i);
-		void write_text_report(ostream& f, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes);
-		void write_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes);
+		void build_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes);
 		json write_json_orders();
 		AString GetName(int);
 		AString MageReport();
 		AString ReadyItem();
 		AString StudyableSkills();
 		AString * BattleReport(int);
-		AString TemplateReport();
-
+		
 		void ClearOrders();
 		void ClearCastOrders();
 		void DefaultOrders(Object *);

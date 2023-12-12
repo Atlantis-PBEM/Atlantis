@@ -732,24 +732,15 @@ void Battle::WriteSides(ARegion * r,
 	AddLine("");
 }
 
-void Battle::write_json_report(json& j, Faction *fac) {
+void Battle::build_json_report(json& j, Faction *fac) {
 	if(assassination == ASS_SUCC && fac != attacker) {
 		j["type"] = "assassination";
-		j["report"] = asstext;
+		j["report"] = json::array();
+		j["report"].push_back(asstext);
 		return;
 	}
 	j["type"] = "battle";
 	j["report"] = text; 
-}
-
-void Battle::write_text_report(ostream& f,Faction * fac) {
-	if (assassination == ASS_SUCC && fac != attacker) {
-		f << asstext << "\n";
-		return;
-	}
-	for (const auto& line: text) {
-		f << line << '\n';
-	}
 }
 
 void Battle::AddLine(const AString & s) {

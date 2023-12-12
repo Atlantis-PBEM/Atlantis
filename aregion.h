@@ -197,17 +197,7 @@ class ARegion : public AListElem
 
 		int CanMakeAdv(Faction *, int);
 		int HasItem(Faction *, int);
-		void WriteProducts(ostream& f, Faction *, int);
-		void WriteMarkets(ostream& f, Faction *, int);
-		void WriteEconomy(ostream& f, Faction *, int);
-		void WriteExits(ostream& f, ARegionList *pRegs, int *exits_seen);
-		void write_text_report(ostream& f, Faction *fac, int month, ARegionList *pRegions);
-		json basic_json_data(ARegionList *pRegions);
-		void write_json_report(json& j, Faction *fac, int month, ARegionList *pRegions);
-		// DK
-		void WriteTemplate(ostream&  f, Faction *, ARegionList *, int);
-		void WriteTemplateHeader(ostream& f, Faction *, ARegionList *, int);
-		void GetMapLine(char *, int, ARegionList *);
+		void build_json_report(json& j, Faction *fac, int month, ARegionList *pRegions);
 
 		AString ShortPrint(ARegionList *pRegs);
 		AString Print(ARegionList *pRegs);
@@ -385,6 +375,8 @@ class ARegion : public AListElem
 		std::vector<int> GetPossibleLairs();
 		void SetupHabitat(TerrainType* terrain);
 		void SetupEconomy();
+
+		json basic_json_data(ARegionList *pRegions);
 };
 
 class ARegionArray

@@ -251,34 +251,6 @@ void Faction::SetAddress(AString &strNewAddress)
 	address = new AString(strNewAddress);
 }
 
-AString Faction::FactionTypeStr()
-{
-	AString temp;
-	if (is_npc) return AString("NPC");
-
-	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED) {
-		return (AString("Unlimited"));
-	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
-		return(AString("Normal"));
-	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		bool comma = false;
-
-		for (auto &ft : *FactionTypes) {
-			auto value = type[ft];
-			if (value) {
-				if (comma) {
-					temp += ", ";
-				} else {
-					comma = true;
-				}
-				temp += AString(ft) + " " + value;
-			}
-		}
-		if (!comma) return AString("none");
-	}
-	return temp;
-}
-
 vector<FactionStatistic> Faction::compute_faction_statistics(Game *game, size_t **citems) {
 	vector<FactionStatistic> stats;
 	// To allow testing, just return an empty vector if we don't have any item arrays inbound
@@ -342,50 +314,7 @@ static inline GmData collect_gm_data() {
 	return data;
 }
 
-void Faction::write_text_gm_report(ostream& f, Game *game) {
-	GmData data = collect_gm_data();
-
-	bool need_header = true;
-	for (auto &skillshow : data.skills) {
-		if(need_header) { f << "Skill reports:\n"; need_header = false; }
-		AString *string = skillshow.Report(this);
-		if (string) {
-			f << '\n' << string->const_str() << '\n';
-			delete string;
-		}
-	}
-	if(!need_header) f << '\n';
-
-	need_header = true;
-	for (const auto& itemshow : data.items) {
-		if(need_header) { f << "Item reports:\n"; need_header = false; }
-			f << '\n' << itemshow << '\n';
-	}
-	if (!need_header) f << '\n';
-
-	need_header = true;
-	for (const auto& objectshow : data.objects) {
-		if(need_header) { f << "Object reports:\n"; need_header = false; }
-		f << '\n' << objectshow << '\n';
-	}
-	if (!need_header) f << '\n';
-
-	present_regions.clear();
-	forlist(&(game->regions)) {
-		ARegion *reg = (ARegion *)elem;
-		present_regions.push_back(reg);
-	}
-	for (const auto& reg: present_regions) {
-		reg->write_text_report(f, this, game->month, &(game->regions));
-	}
-	present_regions.clear();
-
-	errors.clear();
-	events.clear();
-	battles.clear();
-}
-
-void Faction::write_json_gm_report(json& j, Game *game) {
+void Faction::build_gm_json_report(json& j, Game *game) {
 	GmData data = collect_gm_data();
 
 	json skills = json::array();
@@ -410,7 +339,7 @@ void Faction::write_json_gm_report(json& j, Game *game) {
 	json regions = json::array();
 	for (const auto& reg: present_regions) {
 		json region;
-		reg->write_json_report(region, this, game->month, &(game->regions));
+		reg->build_json_report(region, this, game->month, &(game->regions));
 		regions.push_back(region);
 	}
 	j["regions"] = regions;
@@ -421,9 +350,9 @@ void Faction::write_json_gm_report(json& j, Game *game) {
 	battles.clear();
 }
 
-void Faction::write_json_report(json& j, Game *game, size_t **citems) {
+void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 	if (gets_gm_report(game)) {
-		write_json_gm_report(j, game);
+		build_gm_json_report(j, game);
 		return;
 	}
 
@@ -441,18 +370,21 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 	string s = name->const_str();
 	j["name"] = s.substr(0, s.find(" (")); // remove the faction number from the name for json output
 	j["number"] = num;
-	j["email"] = address->const_str();
-	j["password"] = password->const_str();
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		j["type"] = json::object();
 		for (auto &ft : *FactionTypes) {
 			string factype = ft;
-			transform(factype.begin(), factype.end(), factype.begin(), ::tolower);
+			std::transform(factype.begin(), factype.end(), factype.begin(), ::tolower);
 			if (type[ft]) j["type"][factype] = type[ft];
 		}
 	}
-	j["times_sent"] = (times != 0);
-	j["password_unset"] = (!password || *password == "none");
+	j["administrative"]["times_sent"] = (times != 0);
+	bool password_unset = (!password || *password == "none");
+	j["administrative"]["password_unset"] = password_unset;
+	j["administrative"]["email"] = address->const_str();
+	j["administrative"]["show_unit_attitudes"] = (showunitattitudes != 0);
+
+	if(!password_unset) j["administrative"]["password"] = password->const_str();
 	if(Globals->MAX_INACTIVE_TURNS) {
 		int cturn = game->TurnNumber() - lastorders;
 		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !is_npc) {
@@ -468,19 +400,24 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 		{ "year", game->year }
 	};
 
-	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
+	if ((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
+		|| (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)) {
 		j["status"]["mages"] = {
 			{ "current", nummages },
 			{ "allowed", game->AllowedMages(this) }
 		};
 
 		if (Globals->APPRENTICES_EXIST) {
+			string name = Globals->APPRENTICE_NAME;
+			name[0] = toupper(name[0]);
 			j["status"]["apprentices"] = {
 				{ "current", numapprentices },
-				{ "allowed", game->AllowedApprentices(this) }
+				{ "allowed", game->AllowedApprentices(this) },
+				{ "name", name }
 			};
 		}
-	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	}
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		if (Globals->FACTION_ACTIVITY != FactionActivityRules::DEFAULT) {
 			int currentCost = GetActivityCost(FactionActivity::TAX);
 			int maxAllowedCost = game->AllowedMartial(this);
@@ -511,16 +448,6 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 				{ "allowed", game->AllowedTacticians(this) }
 			};
 		}
-		j["status"]["mages"] = {
-			{ "current", nummages },
-			{ "allowed", game->AllowedMages(this) }
-		};
-		if (Globals->APPRENTICES_EXIST) {
-			j["status"]["apprentices"] = {
-				{ "current", numapprentices },
-				{ "allowed", game->AllowedApprentices(this) }
-			};
-		}
 	}
 
 	if (!errors.empty()) {
@@ -534,7 +461,7 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 		for (const auto& battle: battles) {
 			json jbattle = json::object();
 			// we will obviously want to make this into json-y output
-			battle->write_json_report(jbattle, this);
+			battle->build_json_report(jbattle, this);
 			jbattles.push_back(jbattle);
 		}
 		j["battles"] = jbattles;
@@ -548,12 +475,12 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 	/* Attitudes */
 	j["attitudes"] = json::object();
 	string defattitude = AttitudeStrs[defaultattitude];
-	transform(defattitude.begin(), defattitude.end(), defattitude.begin(), ::tolower);
+	std::transform(defattitude.begin(), defattitude.end(), defattitude.begin(), ::tolower);
 	j["attitudes"]["default"] = defattitude;
 	for (int i=0; i<NATTITUDES; i++) {
 		string attitude = AttitudeStrs[i];
 		// how annoying that this is the easiest way to do this.
-		transform(attitude.begin(), attitude.end(), attitude.begin(), ::tolower);
+		std::transform(attitude.begin(), attitude.end(), attitude.begin(), ::tolower);
 		j["attitudes"][attitude] = json::array(); // [] = json::array();
 		for (const auto& a: attitudes) {
 			if (a.attitude == i) {
@@ -566,6 +493,7 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 		}
 		// the array will be empty if this faction has declared no other factions with that specific attitude.
 	}
+
 	j["unclaimed_silver"] = unclaimed;
 
 	json skills = json::array();
@@ -586,224 +514,10 @@ void Faction::write_json_report(json& j, Game *game, size_t **citems) {
 	json regions = json::array();
 	for (const auto& reg: present_regions) {
 		json region;
-		reg->write_json_report(region, this, game->month, &(game->regions));
+		reg->build_json_report(region, this, game->month, &(game->regions));
 		regions.push_back(region);
 	}
 	j["regions"] = regions;
-}
-
-void Faction::write_text_report(ostream& f, Game *pGame, size_t ** citems)
-{
-	// make the output automatically wrap at 70 characters
-	f << indent::wrap;
-
-	if(gets_gm_report(pGame)) {
-		write_text_gm_report(f, pGame);
-		return;
-	}
-
-	if (Globals->FACTION_STATISTICS) {
-		f << ";Treasury:\n";
-		f << ";\n";
-		f << ";Item                                      Rank  Max        Total\n";
-		f << ";=====================================================================\n";
-		for (const auto& stat : compute_faction_statistics(pGame, citems)) {
-			f << ';' << stat << '\n';
-		}
-		f << '\n';
-	}
-
-	f << "Atlantis Report For:\n";
-	if ((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
-			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED)) {
-		f << name->const_str() << '\n';
-	} else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		f << name->const_str() << " (" << FactionTypeStr().const_str() << ")\n";
-	}
-	f << MonthNames[pGame->month] << ", Year " << pGame->year << "\n\n";
-
-	f << "Atlantis Engine Version: " <<	ATL_VER_STRING(CURRENT_ATL_VER) << '\n';
-	f << Globals->RULESET_NAME << ", Version: " << ATL_VER_STRING(Globals->RULESET_VERSION) << "\n\n";
-
-	if (!times) {
-		f << "Note: The Times is not being sent to you.\n\n";
-	}
-
-	if (!password || (*password == "none")) {
-		f << "REMINDER: You have not set a password for your faction!\n\n";
-	}
-
-	if (Globals->MAX_INACTIVE_TURNS != -1) {
-		int cturn = pGame->TurnNumber() - lastorders;
-		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !is_npc) {
-			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
-			f << "WARNING: You have " << cturn
-			  << " turns until your faction is automatically removed due to inactivity!\n\n";
-		}
-	}
-
-	if (!exists) {
-		if (quit == QUIT_AND_RESTART) {
-			f << "You restarted your faction this turn. This faction "
-			  << "has been removed, and a new faction has been started "
-			  << "for you. (Your new faction report will come in a "
-			  << "separate message.)\n";
-		} else if (quit == QUIT_GAME_OVER) {
-			f << "I'm sorry, the game has ended. Better luck in "
-			  << "the next game you play!\n";
-		} else if (quit == QUIT_WON_GAME) {
-			f << "Congratulations, you have won the game!\n";
-		} else {
-			f << "I'm sorry, your faction has been eliminated.\n"
-			  << "If you wish to restart, please let the "
-			  << "Gamemaster know, and you will be restarted for "
-			  << "the next available turn.\n";
-		}
-		f << '\n';
-	}
-
-	f << "Faction Status:\n";
-	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
-		f << "Mages: " << nummages << " (" << pGame->AllowedMages(this) << ")\n";
-		
-		if (Globals->APPRENTICES_EXIST) {
-			string name = Globals->APPRENTICE_NAME;
-			name[0] = toupper(name[0]);
-			f << name << "s: " << numapprentices << " (" << pGame->AllowedApprentices(this) << ")\n";
-		}
-	}
-	else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
-		if (Globals->FACTION_ACTIVITY != FactionActivityRules::DEFAULT) {
-			int currentCost = GetActivityCost(FactionActivity::TAX);
-			int maxAllowedCost = pGame->AllowedMartial(this);
-
-			bool isMerged = Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED;
-			f << (isMerged ? "Regions: " : "Activity: ") << currentCost << " (" << maxAllowedCost << ")\n";
-		} else {			
-			int taxRegions = GetActivityCost(FactionActivity::TAX);
-			int tradeRegions = GetActivityCost(FactionActivity::TRADE);
-			f << "Tax Regions: " << taxRegions << " (" << pGame->AllowedTaxes(this) << ")\n";
-			f << "Trade Regions: " << tradeRegions << " (" << pGame->AllowedTrades(this) << ")\n";
-		}
-
-		if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
-			f << "Quartermasters: " << numqms << " (" << pGame->AllowedQuarterMasters(this) << ")\n";
-		}
-
-		if (Globals->TACTICS_NEEDS_WAR) {
-			f << "Tacticians: " << numtacts << " (" << pGame->AllowedTacticians(this) << ")\n";
-		}
-
-		f << "Mages: " << nummages << " (" << pGame->AllowedMages(this) << ")\n";
-
-		if (Globals->APPRENTICES_EXIST) {
-			string name = Globals->APPRENTICE_NAME;
-			name[0] = toupper(name[0]);
-			f << name << "s: " << numapprentices << " (" << pGame->AllowedApprentices(this) << ")\n";
-		}
-	}
-	f << '\n';
-
-	if (!errors.empty()) {
-		f << "Errors during turn:\n";
-		for (const auto& error : errors) f << error << '\n';
-		f << '\n';
-	}
-
-	if (!battles.empty()) {
-		f << "Battles during turn:\n";
-		for (const auto& battle: battles) {
-			battle->write_text_report(f, this);
-		}
-	}
-
-	if (!events.empty()) {
-		f << "Events during turn:\n";
-		for (const auto& event: events) f << event << '\n';
-		f << '\n';
-	}
-
-	if (!shows.empty()) {
-		f << "Skill reports:\n";
-		for (const auto& skillshow : shows) {
-			AString *string = skillshow.Report(this);
-			if (string) {
-				f << '\n' << string->const_str() << '\n';
-				delete string;
-			}
-		}
-		f << '\n';
-	}
-
-	if (!itemshows.empty()) {
-		f << "Item reports:\n";
-		for (const auto& itemshow : itemshows) f << '\n' << itemshow << '\n';
-		f << '\n';
-	}
-
-	if (!objectshows.empty()) {
-		f << "Object reports:\n";
-		for (const auto& objectshow : objectshows) f << '\n' << objectshow << '\n';
-		f << '\n';
-	}
-
-	/* Attitudes */
-	f << "Declared Attitudes (default " << AttitudeStrs[defaultattitude] << "):\n";
-	for (int i = 0; i < NATTITUDES; i++) {
-		int j = 0;
-		f << AttitudeStrs[i] << " : ";
-		for (const auto& attitude: attitudes) {
-			if (attitude.attitude == i) {
-				if (j) f << ", ";
-				f << GetFaction(&(pGame->factions), attitude.factionnum)->name->const_str();
-				j = 1;
-			}
-		}
-		if (!j) f << "none";
-		f << ".\n";
-	}
-	f << '\n';
-
-	f << "Unclaimed silver: " << unclaimed << ".\n\n";
-
-	for (const auto& reg: present_regions) {
-		reg->write_text_report(f, this, pGame->month, &(pGame->regions));
-	}
-	f << '\n';
-}
-
-// LLS - write order template
-void Faction::WriteTemplate(ostream& f, Game *pGame)
-{
-	AString temp;
-	if (temformat == TEMPLATE_OFF) return;
-	if (is_npc) return;
-
-	f << indent::wrap;
-	f << '\n';
-	switch (temformat) {
-		case TEMPLATE_SHORT:
-			f << "Orders Template (Short Format):\n";
-			break;
-		case TEMPLATE_LONG:
-			f << "Orders Template (Long Format):\n";
-			break;
-		case TEMPLATE_MAP:
-			f << "Orders Template (Map Format):\n";
-			break;
-	}
-	f << '\n';
-	f << "#atlantis " << num;
-	if (!(*password == "none")) {
-		f << " \"" << *password << "\"";
-	}
-	f << '\n';
-
-	for (const auto& reg: present_regions) {
-		reg->WriteTemplate(f, this, &(pGame->regions), pGame->month);
-	}
-
-	f << "\n#end\n\n";
 }
 
 void Faction::WriteFacInfo(ostream &f)
