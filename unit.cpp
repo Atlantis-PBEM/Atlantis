@@ -27,6 +27,11 @@
 #include "gamedata.h"
 #include <stack>
 
+#include "external/nlohmann/json.hpp"
+using json = nlohmann::json;
+
+using namespace std;
+
 UnitId::UnitId()
 {
 }
@@ -35,16 +40,15 @@ UnitId::~UnitId()
 {
 }
 
-AString UnitId::Print()
+string UnitId::Print()
 {
 	if (unitnum) {
-		return AString(unitnum);
+		return to_string(unitnum);
 	} else {
 		if (faction) {
-			return AString("faction ") + AString(faction) + " new " +
-				AString(alias);
+			return string("faction ") + to_string(faction) + " new " + to_string(alias);
 		} else {
-			return AString("new ") + AString(alias);
+			return string("new ") + to_string(alias);
 		}
 	}
 }
@@ -559,6 +563,14 @@ json Unit::write_json_orders()
 	return container;
 }
 
+json Unit::build_json_descriptor() {
+	json j = json::object();
+	string s = name->const_str();
+	j["name"] = s.substr(0, s.find(" (")); // remove the unit number from the name for json output
+	j["number"] = num;
+	return j;
+}
+
 void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes)
 {
 	int stealth = GetAttribute("stealth");
@@ -573,10 +585,7 @@ void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int au
 		if (obs > stealth || reveal == REVEAL_FACTION) see_faction = true;
 	}
 
-	// Strip off the unit number from the name for the json report
-	string s = name->const_str();
-	j["name"] = s.substr(0, s.find(" (")); // remove the unit number from the name for json output
-	j["number"] = num;
+	j = build_json_descriptor();
 
 	if (!my_unit) {
 		string att = AttitudeStrs[attitude];
@@ -1111,36 +1120,32 @@ int Unit::GetSharedNum(int item)
 	return count;
 }
 
-void Unit::ConsumeShared(int item, int n)
+void Unit::ConsumeShared(int item, int needed)
 {
-	if (items.GetNum(item) >= n) {
-		// This unit doesn't need to use shared resources
-		items.SetNum(item, items.GetNum(item) - n);
-		return;
-	}
-
 	// Use up items carried by the using unit first
-	n -= items.GetNum(item);
-	items.SetNum(item, 0);
+	int amount = items.GetNum(item);
+	int used = min(amount, needed);
+	needed -= used;
+	items.SetNum(item, amount - used);
+	// If we had enough, we are done
+	if (needed == 0) return;
 
+	// We still need more, so look for whomever is able to share with us
 	forlist((&object->region->objects)) {
 		Object *obj = (Object *) elem;
 		forlist((&obj->units)) {
 			Unit *u = (Unit *) elem;
 			if (u->faction == faction && u->GetFlag(FLAG_SHARING)) {
-				if (u->items.GetNum(item) < 1)
-					continue;
-				if (u->items.GetNum(item) >= n) {
-					u->items.SetNum(item, u->items.GetNum(item) - n);
-					u->Event(*(u->name) + " shares " + ItemString(item, n) +
-							" with " + *name + ".");
-					return;
-				}
-				u->Event(*(u->name) + " shares " +
-						ItemString(item, u->items.GetNum(item)) +
-						" with " + *name + ".");
-				n -= u->items.GetNum(item);
-				u->items.SetNum(item, 0);
+				amount = u->items.GetNum(item);
+				if (amount < 1) continue;
+				used = min(needed, amount);
+				u->items.SetNum(item, amount - used);
+				needed -= used;
+				string temp = string(u->name->const_str()) + " shares " + ItemString(item, used) +
+					" with " + name->const_str() + ".";
+				u->event(temp, "share");
+				// If the need has been filled, then we are done
+				if (needed == 0) return;
 			}
 		}
 	}
@@ -1424,29 +1429,29 @@ int Unit::Study(int sk, int days)
 			forlist(&skills) {
 				s = (Skill *) elem;
 				if (!(SkillDefs[s->type].flags & SkillType::MAGIC)) {
-					Error("STUDY: Non-leader mages cannot possess non-magical skills.");
+					error("STUDY: Non-leader mages cannot possess non-magical skills.");
 					return 0;
 				}
 			}
 		} else if (skills.Num()) {
 			s = (Skill *) skills.First();
 			if ((s->type != sk) && (s->days > 0)) {
-				Error("STUDY: Can know only 1 skill.");
+				error("STUDY: Can know only 1 skill.");
 				return 0;
 			}
 		}
 	}
 	int max = GetSkillMax(sk);
 	if (GetRealSkill(sk) >= max) {
-		Error("STUDY: Maximum level for skill reached.");
+		error("STUDY: Maximum level for skill reached.");
 		return 0;
 	}
 
 	if (!CanStudy(sk)) {
 		if (GetRealSkill(sk) > 0)
-			Error("STUDY: Doesn't have the pre-requisite skills to study that.");
+			error("STUDY: Doesn't have the pre-requisite skills to study that.");
 		else
-			Error("STUDY: Can't study that.");
+			error("STUDY: Can't study that.");
 		return 0;
 	}
 
@@ -1731,7 +1736,7 @@ void Unit::Short(int needed, int hunger)
 				needed -= Globals->MAINTENANCE_COST;
 			hunger -= Globals->UPKEEP_MINIMUM_FOOD;
 			if (needed < 1 && hunger < 1) {
-				if (n) Error(AString(n) + " starve to death.");
+				if (n) error(to_string(n) + " starve to death.");
 				return;
 			}
 		}
@@ -1764,7 +1769,7 @@ void Unit::Short(int needed, int hunger)
 				needed -= Globals->LEADER_COST;
 			hunger -= Globals->UPKEEP_MINIMUM_FOOD;
 			if (needed < 1 && hunger < 1) {
-				if (n) Error(AString(n) + " starve to death.");
+				if (n) error(to_string(n) + " starve to death.");
 				return;
 			}
 		}
@@ -2557,19 +2562,16 @@ void Unit::DiscardUnfinishedShips() {
 			items.SetNum(i,0);
 		}
 	}
-	if (discard > 0) Event("discards all unfinished ships.");	
+	if (discard > 0) event("discards all unfinished ships.", "discard");	
 }
 
-void Unit::Event(const AString & s)
+void Unit::event(const string& message, const string& category, ARegion *r)
 {
-	string temp(name->const_str());
-	faction->event(temp + ": " + s.const_str());
+	faction->event(message, category, r, this);
 }
 
-void Unit::Error(const AString & s)
-{
-	string temp(name->const_str());
-	faction->error(temp + ": " + s.const_str());
+void Unit::error(const string& s) {
+	faction->error(s, this);
 }
 
 int Unit::GetAttribute(char const *attrib)
@@ -2766,8 +2768,7 @@ void Unit::SkillStarvation()
 				items.SetNum(i->type, 0);
 			}
 		}
-		AString temp = AString(count) + " starve to death.";
-		Error(temp);
+		error(to_string(count) + " starve to death.");
 		return;
 	}
 	count = getrandom(count)+1;
@@ -2775,9 +2776,7 @@ void Unit::SkillStarvation()
 		if (can_forget[i]) {
 			if (--count == 0) {
 				Skill *s = GetSkillObject(i);
-				AString temp = AString("Starves and forgets one level of ")+
-					SkillDefs[i].name + ".";
-				Error(temp);
+				error(string("Starves and forgets one level of ") + SkillDefs[i].name + ".");
 				switch(GetLevelByDays(s->days)) {
 					case 1:
 						s->days -= 30;

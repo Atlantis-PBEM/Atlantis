@@ -51,10 +51,10 @@ Quest::~Quest()
 	}
 }
 
-AString Quest::GetRewardsStr()
+string Quest::GetRewardsStr()
 {
 	Item *i;
-	AString quest_rewards;
+	string quest_rewards;
 	int first_i = 1;
 
 	quest_rewards = "Quest rewards: ";
@@ -200,7 +200,7 @@ void QuestList::WriteQuests(ostream& f)
 	f << 0 << '\n';
 }
 
-int QuestList::CheckQuestKillTarget(Unit *u, ItemList *reward, AString *quest_rewards)
+int QuestList::CheckQuestKillTarget(Unit *u, ItemList *reward, string *quest_rewards)
 {
 	Quest *q;
 	Item *i;
@@ -223,9 +223,7 @@ int QuestList::CheckQuestKillTarget(Unit *u, ItemList *reward, AString *quest_re
 	return 0;
 }
 
-int QuestList::CheckQuestHarvestTarget(ARegion *r,
-		int item, int harvested, int max,
-		Unit *u, AString *quest_rewards)
+int QuestList::CheckQuestHarvestTarget(ARegion *r, int item, int harvested, int max, Unit *u, string *quest_rewards)
 {
 	Quest *q;
 	Item *i;
@@ -253,8 +251,7 @@ int QuestList::CheckQuestHarvestTarget(ARegion *r,
 	return 0;
 }
 
-int QuestList::CheckQuestBuildTarget(ARegion *r, int building,
-		Unit *u, AString *quest_rewards)
+int QuestList::CheckQuestBuildTarget(ARegion *r, int building, Unit *u, string *quest_rewards)
 {
 	Quest *q;
 	Item *i;
@@ -280,7 +277,7 @@ int QuestList::CheckQuestBuildTarget(ARegion *r, int building,
 	return 0;
 }
 
-int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u, AString *quest_rewards)
+int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u, string *quest_rewards)
 {
 	Quest *q;
 	Object *o;
@@ -329,8 +326,7 @@ int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u, AString *quest_rewards
 	return 0;
 }
 
-int QuestList::CheckQuestDemolishTarget(ARegion *r, int building,
-		Unit *u, AString *quest_rewards)
+int QuestList::CheckQuestDemolishTarget(ARegion *r, int building, Unit *u, string *quest_rewards)
 {
 	Quest *q;
 	Item *i;

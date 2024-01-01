@@ -762,7 +762,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 	} else if (*pToken == "Reward:") {
 		pTemp = pLine->gettoken();
 		int nAmt = pTemp->value();
-		pFac->event("Reward of " + to_string(nAmt) + " silver.");
+		pFac->event("Reward of " + to_string(nAmt) + " silver.", "reward");
 		pFac->unclaimed += nAmt;
 	} else if (*pToken == "SendTimes:") {
 		// get the token, but otherwise ignore it
@@ -821,7 +821,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 					Unit *u = GetNewUnit(pFac);
 					u->gm_alias = val;
 					u->MoveUnit(pFac->pReg->GetDummy());
-					u->Event("Is given to your faction.");
+					u->event("Is given to your faction.", "gm_gift");
 				}
 			}
 		}
@@ -868,9 +868,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 									int has = u->items.GetNum(it);
 									u->items.SetNum(it, has + v);
 									if (!u->gm_alias) {
-										u->Event(AString("Is given ") +
-												ItemString(it, v) +
-												" by the gods.");
+										u->event("Is given " + ItemString(it, v) + " by the gods.", "gm_gift");
 									}
 									u->faction->DiscoverItem(it, 0, 1);
 								}
@@ -926,10 +924,8 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 										pFac->shows.push_back({ .skill = sk, .level = lvl });
 									}
 									if (!u->gm_alias) {
-										u->Event(AString("Is taught ") +
-												days + " days of " +
-												SkillStrs(sk) +
-												" by the gods.");
+										u->event("Is taught " + to_string(days) + " days of " +
+											SkillStrs(sk).const_str() + " by the gods.", "gm_gift");
 									}
 									/*
 									 * This is NOT quite the same, but the gods
@@ -1667,12 +1663,9 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 						losses = 0;
 				}
 				if (losses) {
-					tmp = ItemString(i->type, losses);
-					tmp += " decay";
-					if (losses == 1)
-						tmp += "s";
-					tmp += " into nothingness.";
-					u->Event(tmp);
+					string temp = ItemString(i->type, losses) + plural(losses, " decay", " decays") +
+						" into nothingness.";
+					u->event(temp, "decay");
 					u->items.SetNum(i->type,i->num - losses);
 				}
 			} else if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
@@ -1691,8 +1684,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 						mon->free = Globals->MONSTER_NO_SPOILS +
 							Globals->MONSTER_SPOILS_RECOVERY;
 					}
-					u->Event(AString("Loses control of ") +
-							ItemString(i->type, i->num) + ".");
+					u->event("Loses control of " + ItemString(i->type, i->num) + ".", "escape");
 					u->items.SetNum(i->type, 0);
 				}
 			} else {
@@ -1742,8 +1734,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 						mon->free = Globals->MONSTER_NO_SPOILS +
 							Globals->MONSTER_SPOILS_RECOVERY;
 					}
-					u->Event(AString("Loses control of ") +
-							ItemString(i->type, i->num) + ".");
+					u->event("Loses control of " + ItemString(i->type, i->num) + ".", "escape");
 					u->items.SetNum(i->type, 0);
 				}
 			}
@@ -1771,8 +1762,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 							mon->free = Globals->MONSTER_NO_SPOILS +
 								Globals->MONSTER_SPOILS_RECOVERY;
 						}
-						u->Event(AString("Loses control of ") +
-								ItemString(it->type, it->num) + ".");
+						u->event("Loses control of " + ItemString(it->type, it->num) + ".", "escape");
 						u->items.SetNum(it->type, 0);
 					}
 				}

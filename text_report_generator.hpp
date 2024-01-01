@@ -13,6 +13,8 @@ public:
     void output(std::ostream& f, const json& report, bool show_region_depth);
     void output_template(std::ostream& f, const json& report, int template_type, bool show_region_depth);
 private:
+    void output_error(std::ostream& f, const json& error);
+    void output_event(std::ostream& f, const json& event);
     void output_region(std::ostream& f, const json& region, bool show_unit_attitudes, bool show_region_depth);
     void output_region_header(std::ostream& f, const json& region, bool show_region_depth);
     void output_item_list(std::ostream& f, const json& item_list, string header);
@@ -25,6 +27,7 @@ private:
     void output_region_map_header(std::ostream& f, const json& region, bool show_region_depth);
     void output_region_map_header_line(std::ostream& f, std::string line);
     std::string next_map_header_line(int line, const json& region);
+    std::string map_header_item(const string& header, const json& item);
     void output_unit_template(std::ostream& f, const json& unit, int template_type);
     void output_unit_orders(std::ostream& f, const json& orders);
 

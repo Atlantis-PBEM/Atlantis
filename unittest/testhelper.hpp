@@ -2,7 +2,7 @@
 #ifndef __UNIT_TEST_HELPER_HPP__
 #define __UNIT_TEST_HELPER_HPP__
 
-#include "game.h"
+#include "../game.h"
 
 #include <iostream>
 #include <sstream>

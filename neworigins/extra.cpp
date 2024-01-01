@@ -167,7 +167,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				// Quest reward is based on QUEST_MAX_REWARD silver
 				reward_count = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
 
-				printf("\nQuest reward: %s x %d.\n", ItemDefs[i].name, reward_count);
+				printf("\nQuest reward: %s x %d.\n", ItemDefs[i].name.c_str(), reward_count);
 				
 				// Setup reward
 				item = new Item;

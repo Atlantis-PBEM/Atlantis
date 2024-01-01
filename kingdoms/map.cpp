@@ -404,7 +404,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				reg->population = -1; // initially used as flag
 				reg->elevation = -1;
 				
-
+				reg->level = arr;
 				Add(reg);
 				arr->SetRegion(x, y, reg);
 			}

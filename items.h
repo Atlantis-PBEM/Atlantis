@@ -78,8 +78,8 @@ struct Materials
 class ItemType
 {
 	public:
-		char const *name;
-		char const *names;
+		std::string name;
+		std::string names;
 		char const *abr;
 
 		enum {
@@ -433,7 +433,7 @@ enum {
 	FULLNUM = 0x01,
 	ALWAYSPLURAL = 0x02
 };
-extern AString ItemString(int type, int num, int flags=0);
+extern std::string ItemString(int type, int num, int flags = 0);
 extern AString *ItemDescription(int item, int full);
 
 extern int IsSoldier(int);

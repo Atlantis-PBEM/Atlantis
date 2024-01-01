@@ -748,7 +748,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 		Awrite("Wanted: ");
 		for (const auto &m : pReg->markets) {
 			if (m->type == M_SELL) {
-				AString temp = ItemString(m->item, m->amount) + " at $" + m->price + "(" + m->baseprice + ").";
+				AString temp = AString(ItemString(m->item, m->amount)) + " at $" + m->price + "(" + m->baseprice + ").";
 				temp += AString(" Pop: ") + m->minpop + "/" + m->maxpop + ".";
 				temp += AString(" Amount: ") + m->minamt + "/" + m->maxamt + ".";
 				Awrite(temp);
@@ -757,7 +757,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 		Awrite("For Sale: ");
 		for (const auto &m : pReg->markets) {
 			if (m->type == M_BUY) {
-				AString temp = ItemString(m->item, m->amount) + " at $" + m->price + "(" + m->baseprice + ").";
+				AString temp = AString(ItemString(m->item, m->amount)) + " at $" + m->price + "(" + m->baseprice + ").";
 				temp += AString(" Pop: ") + m->minpop + "/" + m->maxpop + ".";
 				temp += AString(" Amount: ") + m->minamt + "/" + m->maxamt + ".";
 				Awrite(temp);

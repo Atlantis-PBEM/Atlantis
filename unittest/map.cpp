@@ -25,8 +25,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "game.h"
-#include "gamedata.h"
+#include "../game.h"
+#include "../gamedata.h"
 
 /// For unit testing, just do nothing.
 int ARegion::CheckSea(int dir, int range, int remainocean) { return 1; }
@@ -76,6 +76,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				reg->race = -1;  
 				reg->wages = -1; 
 				
+				reg->level = arr;
 				Add(reg);
 				arr->SetRegion(x, y, reg);
 				Adot();

@@ -40,7 +40,7 @@ enum {
 	NDIRS
 };
 
-extern char const **DirectionStrs;
+extern const std::string DirectionStrs[];
 extern char const **DirectionAbrs;
 
 extern char const **MonthNames;

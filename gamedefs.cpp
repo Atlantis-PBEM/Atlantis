@@ -25,7 +25,7 @@
 #include "gamedefs.h"
 #include <string>
 
-char const *dr[] = {
+const std::string DirectionStrs[] = {
 	"North",
 	"Northeast",
 	"Southeast",
@@ -33,8 +33,6 @@ char const *dr[] = {
 	"Southwest",
 	"Northwest"
 };
-
-char const ** DirectionStrs = dr;
 
 char const *da[] = {
 	"N",

@@ -105,7 +105,7 @@ class UnitId : public AListElem {
 	public:
 		UnitId();
 		~UnitId();
-		AString Print();
+		std::string Print();
 
 		int unitnum; /* if 0, it is a new unit */
 		int alias;
@@ -133,6 +133,7 @@ class Unit : public AListElem
 
 		AString SpoilsReport(void);
 		int CanGetSpoil(Item *i);
+		json build_json_descriptor();
 		void build_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes);
 		json write_json_orders();
 		AString GetName(int);
@@ -230,8 +231,8 @@ class Unit : public AListElem
 		void MoveUnit( Object *newobj );
 		void DiscardUnfinishedShips();
 
-		void Event(const AString &);
-		void Error(const AString &);
+		void event(const std::string& message, const std::string& category, ARegion *r = nullptr);
+		void error(const std::string& message);
 
 		Faction *faction;
 		Faction *formfaction;

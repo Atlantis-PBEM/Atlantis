@@ -1,4 +1,4 @@
-#include "game.h"
+#include "../game.h"
 #include "testhelper.hpp"
 
 static void seed_random() { seedrandom(0xdeadbeef); }

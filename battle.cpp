@@ -363,7 +363,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 void Battle::GetSpoils(AList *losers, ItemList *spoils, int ass)
 {
 	ItemList *ships = new ItemList;
-	AString quest_rewards;
+	string quest_rewards;
 
 	forlist(losers) {
 		Unit * u = ((Location *) elem)->unit;
@@ -371,6 +371,7 @@ void Battle::GetSpoils(AList *losers, ItemList *spoils, int ass)
 		int numdead = u->losses;
 		if (!numalive) {
 			if (quests.CheckQuestKillTarget(u, spoils, &quest_rewards)) {
+				// TODO why doesn't the unit get an event here?
 				AddLine(AString("Quest completed! ") + quest_rewards);
 			}
 		}
@@ -1093,7 +1094,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 
 	if (ass) {
 		if (attacker->GetAttitude(r,target) == A_ALLY) {
-			attacker->Error("ASSASSINATE: Can't assassinate an ally.");
+			attacker->error("ASSASSINATE: Can't assassinate an ally.");
 			return BATTLE_IMPOSSIBLE;
 		}
 		/* Assassination attempt */
@@ -1105,11 +1106,11 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 		dfacs.Add(p);
 	} else {
 		if ( r->IsSafeRegion() ) {
-			attacker->Error("ATTACK: No battles allowed in safe regions.");
+			attacker->error("ATTACK: No battles allowed in safe regions.");
 			return BATTLE_IMPOSSIBLE;
 		}
 		if (attacker->GetAttitude(r,target) == A_ALLY) {
-			attacker->Error("ATTACK: Can't attack an ally.");
+			attacker->error("ATTACK: Can't attack an ally.");
 			if (adv) {
 				attacker->canattack = 0;
 				if (attacker->advancefrom) {
@@ -1120,7 +1121,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 		}
 		GetDFacs(r,target,dfacs);
 		if (GetFaction2(&dfacs,attacker->faction->num)) {
-			attacker->Error("ATTACK: Can't attack an ally.");
+			attacker->error("ATTACK: Can't attack an ally.");
 			if (adv) {
 				attacker->canattack = 0;
 				if (attacker->advancefrom) {

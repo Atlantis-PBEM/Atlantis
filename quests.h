@@ -54,9 +54,9 @@ class Quest : public AListElem
 		int	building;
 		int	regionnum;
 		AString	regionname;
-		set<string> destinations;
+		set<std::string> destinations;
 		AList	rewards;
-		AString GetRewardsStr();
+		std::string GetRewardsStr();
 };
 
 class QuestList : public AList
@@ -65,15 +65,11 @@ class QuestList : public AList
 		int ReadQuests(istream& f);
 		void WriteQuests(ostream& f);
 
-		int CheckQuestKillTarget(Unit *u, ItemList *reward, AString *quest_rewards);
-		int CheckQuestHarvestTarget(ARegion *r,
-				int item, int harvested, int max,
-				Unit *u, AString *quest_rewards);
-		int CheckQuestBuildTarget(ARegion *r, int building,
-				Unit *u, AString *quest_rewards);
-		int CheckQuestVisitTarget(ARegion *r, Unit *u, AString *quest_rewards);
-		int CheckQuestDemolishTarget(ARegion *r, int building,
-				Unit *u, AString *quest_rewards);
+		int CheckQuestKillTarget(Unit *u, ItemList *reward, std::string *quest_rewards);
+		int CheckQuestHarvestTarget(ARegion *r,	int item, int harvested, int max, Unit *u, std::string *quest_rewards);
+		int CheckQuestBuildTarget(ARegion *r, int building, Unit *u, std::string *quest_rewards);
+		int CheckQuestVisitTarget(ARegion *r, Unit *u, std::string *quest_rewards);
+		int CheckQuestDemolishTarget(ARegion *r, int building, Unit *u, std::string *quest_rewards);
 };
 
 extern QuestList quests;

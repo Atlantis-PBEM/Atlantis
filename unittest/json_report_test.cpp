@@ -1,10 +1,10 @@
-#include "external/boost/ut.hpp"
-#include "external/nlohmann/json.hpp"
+#include "../external/boost/ut.hpp"
+#include "../external/nlohmann/json.hpp"
 
 using json = nlohmann::json;
 
-#include "game.h"
-#include "gamedata.h"
+#include "../game.h"
+#include "../gamedata.h"
 #include "testhelper.hpp"
 
 // Because boost::ut has it's own concept of events, as does Game, we cannot just use do
@@ -70,7 +70,7 @@ ut::suite<"JSON Report"> json_report_suite = []
 
     auto count = json_report["errors"].size();
     expect(count == 1_ul);
-    string error = json_report["errors"][0];
+    string error = json_report["errors"][0]["message"];
     string expected = "This is an error";
     expect(error == expected);
   };
@@ -89,11 +89,11 @@ ut::suite<"JSON Report"> json_report_suite = []
 
     auto count = json_report["errors"].size();
     expect(count == 1001_ul);
-    string error = json_report["errors"][1000];
+    string error = json_report["errors"][1000]["message"];
     string expected = "Too many errors!";
     expect(error == expected);
 
-    error = json_report["errors"][999];
+    error = json_report["errors"][999]["message"];
     expected = "This is error #1000";
     expect(error == expected);
   };
@@ -105,8 +105,8 @@ ut::suite<"JSON Report"> json_report_suite = []
     helper.setup_turn();
 
     Faction *faction = helper.create_faction("Test Faction");
-    faction->event("This is event 1");
-    faction->event("This is event 2");
+    faction->event("This is event 1", "type1");
+    faction->event("This is event 2", "type2");
 
     json json_report;
     faction->build_json_report(json_report, &helper.game_object(), nullptr);
@@ -115,13 +115,19 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(count == 2_ul);
 
     // make sure they are in the right order
-    string event = json_report["events"][0];
+    string event = json_report["events"][0]["message"];
+    string type = json_report["events"][0]["category"];
     string expected = "This is event 1";
+    string expected_type = "type1";
     expect(event == expected);
+    expect(type == expected_type);
 
-    event = json_report["events"][1];
+    event = json_report["events"][1]["message"];
+    type = json_report["events"][1]["category"];
     expected = "This is event 2";
+    expected_type = "type2";
     expect(event == expected);
+    expect(type == expected_type);
   };
 
 
