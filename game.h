@@ -49,7 +49,7 @@ public:
 	int numshows;
 	int numerrors;
 
-	void Error(const AString &error);
+	void error(const std::string& err);
 };
 
 /// The main game class
@@ -328,8 +328,7 @@ private:
 	//
 	// Parsing functions
 	//
-	void ParseError(OrdersCheck *pCheck, Unit *pUnit, Faction *pFac,
-					const AString &strError);
+	void parse_error(OrdersCheck *order_chec, Unit *unit, Faction *faction, const std::string &error);
 	UnitId *ParseUnit(AString *s);
 	int ParseDir(AString *token);
 

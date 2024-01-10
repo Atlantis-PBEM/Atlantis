@@ -280,6 +280,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				reg->race = -1;  
 				reg->wages = -1; 
 				
+				reg->level = arr;
 				Add(reg);
 				arr->SetRegion(x, y, reg);
 			}

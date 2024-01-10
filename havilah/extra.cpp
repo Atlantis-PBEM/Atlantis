@@ -671,7 +671,7 @@ Faction *Game::CheckVictory()
 			temp += " and returned to the Eternal City.";
 			message = AString("You") + temp;
 			times = *f->name + temp;
-			f->event(message.const_str());
+			f->event(message.const_str(), "gameover");
 			message = "You";
 			times += "\n\nThey";
 			temp = " returned after ";
@@ -747,7 +747,7 @@ Faction *Game::CheckVictory()
 				times += "  They";
 				times += temp;
 			}
-			f->event(message.const_str());
+			f->event(message.const_str(), "gameover");
 			WriteTimesArticle(times);
 
 			string filename = "winner." + to_string(f->num);

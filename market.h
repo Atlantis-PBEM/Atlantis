@@ -59,7 +59,7 @@ public:
 	void PostTurn(int, int);
 	void Writeout(ostream& f);
 	void Readin(istream& f);
-	AString Report();
+	//AString Report();
 };
 
 class MarketList : std::vector<Market*> {

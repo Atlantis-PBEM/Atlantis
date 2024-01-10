@@ -51,8 +51,6 @@ using json = nlohmann::json;
 #include <iostream>
 #include <sstream>
 
-using namespace std;
-
 enum
 {
 	A_HOSTILE,
@@ -119,9 +117,8 @@ public:
 };
 
 // Collect the faction statistics for display in the report
-struct FactionStatistic
-{
-	string item_name;
+struct FactionStatistic {
+	std::string item_name;
 	size_t rank;
 	size_t max;
 	size_t total;
@@ -130,16 +127,25 @@ struct FactionStatistic
 	// objects/structs that require no additional parameters to be passed in.  On the other hand, for simple
 	// structures this is nice, and works with things like STL containers of structs to make the entire container
 	// serializable to json.
-	friend void to_json(json &j, const FactionStatistic &s)
-	{
+	friend void to_json(json &j, const FactionStatistic &s) {
 		j = json{{"item_name", s.item_name}, {"rank", s.rank}, {"max", s.max}, {"total", s.total}};
 	};
+};
 
-	friend ostream &operator<<(ostream &os, const FactionStatistic &s)
-	{
-		os << left << setw(42) << s.item_name << setw(6) << s.rank << setw(11) << s.max << s.total << right;
-		return os;
-	};
+struct FactionError {
+	std::string message;
+	Unit *unit;
+
+	friend void to_json(json &j, const FactionError &e);
+};
+
+struct FactionEvent {
+	std::string message;
+	std::string category;
+	Unit *unit;
+	ARegion *region;
+
+	friend void to_json(json &j, const FactionEvent &e);
 };
 
 class Faction : public AListElem
@@ -149,8 +155,8 @@ public:
 	Faction(int);
 	~Faction();
 
-	void Readin(istream &f);
-	void Writeout(ostream &f);
+	void Readin(std::istream &f);
+	void Writeout(std::ostream &f);
 	void View();
 
 	void SetName(AString *);
@@ -158,12 +164,12 @@ public:
 	void SetAddress(AString &strNewAddress);
 
 	void CheckExist(ARegionList *);
-	void error(const string &s);
-	void event(const string &s);
+	void error(const std::string& s, Unit *u = nullptr);
+	void event(const std::string& message, const std::string& category, ARegion *r = nullptr, Unit *u = nullptr);
 
 	void build_json_report(json& j, Game *pGame, size_t **citems);
 
-	void WriteFacInfo(ostream &f);
+	void WriteFacInfo(std::ostream &f);
 
 	void set_attitude(int faction_id, int attitude); // attitude -1 clears it
 	int get_attitude(int faction_id);
@@ -219,28 +225,28 @@ public:
 	bool gets_gm_report(Game *game);
 
 	/* Used when writing reports */
-	vector<ARegion *> present_regions;
+	std::vector<ARegion *> present_regions;
 
 	int defaultattitude;
 	// TODO: Convert this to a hashmap of <attitude, vector<factionid>>
 	// For now, just making it a vector of attitudes.  More will come later.
-	vector<Attitude> attitudes;
+	std::vector<Attitude> attitudes;
 
 	// These need to not be ALists wrapped with extra behavior at some point.
 	SkillList skills;
 	ItemList items;
 
 	// Extra lines/data from the players.in file for this faction.  Stored and dumped, not used.
-	vector<string> extra_player_data;
+	std::vector<std::string> extra_player_data;
 
 	// Errors and events during turn processing
-	vector<string> errors;
-	vector<string> events;
+	std::vector<FactionError> errors;
+	std::vector<FactionEvent> events;
 
-	vector<Battle *> battles;
-	vector<ShowSkill> shows;
-	vector<string> itemshows;
-	vector<string> objectshows;
+	std::vector<Battle *> battles;
+	std::vector<ShowSkill> shows;
+	std::vector<std::string> itemshows;
+	std::vector<std::string> objectshows;
 
 	// These are used for 'granting' units to a faction via the players.in
 	// file

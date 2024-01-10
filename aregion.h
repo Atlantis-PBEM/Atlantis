@@ -183,7 +183,7 @@ class ARegion : public AListElem
 
 	public:
 		ARegion();
-		ARegion(int, int);
+		//ARegion(int, int);
 		~ARegion();
 		
 		void Setup();
@@ -197,6 +197,7 @@ class ARegion : public AListElem
 
 		int CanMakeAdv(Faction *, int);
 		int HasItem(Faction *, int);
+		json basic_region_data();
 		void build_json_report(json& j, Faction *fac, int month, ARegionList *pRegions);
 
 		AString ShortPrint(ARegionList *pRegs);
@@ -221,7 +222,7 @@ class ARegion : public AListElem
 		Object *GetDummy();
 		void CheckFleets();
 
-		int MoveCost(int, ARegion *, int, AString *road);
+		int MoveCost(int, ARegion *, int, std::string *road);
 		Unit *Forbidden(Unit *); /* Returns unit that is forbidding */
 		Unit *ForbiddenByAlly(Unit *); /* Returns unit that is forbidding */
 		int CanTax(Unit *);
@@ -353,6 +354,9 @@ class ARegion : public AListElem
 		int distance;
 		ARegion *next;
 
+		// A link to the region's level to make some things easier.
+		ARegionArray *level;
+
 		// find a production for a certain skill.
 		Production *get_production_for_skill(int item, int skill);
 		// Editing functions
@@ -375,8 +379,6 @@ class ARegion : public AListElem
 		std::vector<int> GetPossibleLairs();
 		void SetupHabitat(TerrainType* terrain);
 		void SetupEconomy();
-
-		json basic_json_data(ARegionList *pRegions);
 };
 
 class ARegionArray

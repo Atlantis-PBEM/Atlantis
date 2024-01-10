@@ -69,6 +69,23 @@ const string qs[] = {
 };
 const string *QuitStrs = qs;
 
+void to_json(json &j, const FactionEvent &e) {
+	j = json{{"message", e.message}, {"category", e.category}};
+	if (e.unit != nullptr) {
+		j["unit"] = e.unit->build_json_descriptor();
+	}
+	if (e.region != nullptr) {
+		j["region"] = e.region->basic_region_data();
+	}
+};
+
+void to_json(json &j, const FactionError &e) {
+	j = json{{"message", e.message}};
+	if (e.unit != nullptr) {
+		j["unit"] = e.unit->build_json_descriptor();
+	}
+};
+
 int ParseTemplate(AString *token)
 {
 	for (int i = 0; i < NTEMPLATES; i++)
@@ -271,7 +288,7 @@ vector<FactionStatistic> Faction::compute_faction_statistics(Game *game, size_t 
 			total += citems[pl][i];
 		}
 
-		string name = ItemString(i, citems[myfaction][i]).const_str();
+		string name = ItemString(i, citems[myfaction][i]);
 		if (ItemDefs[i].type & IT_MONSTER && ItemDefs[i].type == IT_ILLUSION) {
 			name += " (illusion)";
 		}
@@ -550,17 +567,17 @@ void Faction::CheckExist(ARegionList* regs)
 	}
 }
 
-void Faction::error(const string& s) {
+void Faction::error(const string& s, Unit* u) {
 	if (is_npc) return;
 	auto count = errors.size();
-	if (count == 1000) errors.push_back("Too many errors!");
-	if (count < 1000) errors.push_back(s);
+	if (count == 1000) errors.push_back({.message = "Too many errors!", .unit = u});
+	if (count < 1000) errors.push_back({.message = s, .unit = u});
 }
 
-void Faction::event(const string& s)
+void Faction::event(const string& message, const string& category, ARegion* r,  Unit *u)
 {
 	if (is_npc) return;
-	events.push_back(s);
+	events.push_back({.message = message, .category = category, .unit = u, .region = r});
 }
 
 void Faction::remove_attitude(int f) {
@@ -674,7 +691,7 @@ void Faction::DefaultOrders()
 void Faction::TimesReward()
 {
 	if (Globals->TIMES_REWARD) {
-		event("Times reward of " + to_string(Globals->TIMES_REWARD) + " silver.");
+		event("Times reward of " + to_string(Globals->TIMES_REWARD) + " silver.", "reward");
 		unclaimed += Globals->TIMES_REWARD;
 	}
 }

@@ -285,23 +285,19 @@ int ParseTransportableItem(AString *token)
 	return r;
 }
 
-AString ItemString(int type, int num, int flags)
+string ItemString(int type, int num, int flags)
 {
-	AString temp;
+	string temp;
 	if (num == 1) {
 		if (flags & FULLNUM)
-			temp += AString(num) + " ";
-		temp +=
-			AString((flags & ALWAYSPLURAL) ?
-				ItemDefs[type].names: ItemDefs[type].name) +
+			temp += to_string(num) + " ";
+		temp += string((flags & ALWAYSPLURAL) ? ItemDefs[type].names : ItemDefs[type].name) +
 			" [" + ItemDefs[type].abr + "]";
 	} else {
 		if (num == -1) {
-			temp += AString("unlimited ") + ItemDefs[type].names + " [" +
-				ItemDefs[type].abr + "]";
+			temp += string("unlimited ") + ItemDefs[type].names + " [" + ItemDefs[type].abr + "]";
 		} else {
-			temp += AString(num) + " " + ItemDefs[type].names + " [" +
-				ItemDefs[type].abr + "]";
+			temp += to_string(num) + " " + ItemDefs[type].names + " [" + ItemDefs[type].abr + "]";
 		}
 	}
 	return temp;

@@ -416,9 +416,9 @@ void ARegion::RunDecayEvent(Object *o, ARegionList *pRegs)
 	pFactions = PresentFactions();
 	forlist (pFactions) {
 		Faction *f = ((FactionPtr *) elem)->ptr;
-		stringstream tmp;
-		tmp << GetDecayFlavor() << o->name << " " << ObjectDefs[o->type].name << " in " << ShortPrint(pRegs);
-		f->event(tmp.str());
+		string tmp = string(GetDecayFlavor().const_str()) + " " + ObjectDefs[o->type].name +
+			" in " + ShortPrint(pRegs).const_str() + ".";
+		f->event(tmp, "decay");
 	}
 }
 
@@ -1210,12 +1210,11 @@ int ARegion::HasItem(Faction *fac, int item)
 	return 0;
 }
 
-json ARegion::basic_json_data(ARegionList *regions) {
+json ARegion::basic_region_data() {
 	json j;
 	j["terrain"] = TerrainDefs[type].name;
 
-	ARegionArray *level = regions->pRegionArrays[zloc];
-	string label = (level->strName ? level->strName->const_str() : "surface");
+	string label = (this->level->strName ? this->level->strName->const_str() : "surface");
  	j["coordinates"] = { { "x", xloc }, { "y", yloc }, { "z", zloc }, { "label", label } };
 
 	// in order to support games with different UW settings, we need to put a bit more information in the JSON to
@@ -1253,7 +1252,7 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 	// this faction cannot see this region, why are we even here?
 	if (!farsight && !passer && !present) return;
 
-	j = basic_json_data(regions);
+	j = basic_region_data();
 	j["present"] = present && !fac->is_npc;
 
 	if (Population() &&	(present || farsight || (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_PEASANTS))) {
@@ -1356,7 +1355,7 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 	for (int i=0; i<NDIRS; i++) {
 		if (!exits_seen[i] || !neighbors[i]) continue; 
 		j["exits"].push_back(
-			{ { "direction", DirectionStrs[i] }, { "region", neighbors[i]->basic_json_data(regions) } }
+			{ { "direction", DirectionStrs[i] }, { "region", neighbors[i]->basic_region_data() } }
 		);
 	}
 
@@ -1565,7 +1564,7 @@ int ARegion::IsCoastalOrLakeside()
 	return seacount;
 }
 
-int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
+int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, string *road)
 {
 	int cost = 1;
 	if (Globals->WEATHER_EXISTS) {
@@ -1666,9 +1665,9 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 
 	forlist_reuse (&flist) {
 		FactionPtr *fp = (FactionPtr *) elem;
-		stringstream tmp;
-		tmp << caster->name << " uses " << SkillStrs(sp) << " in " << Print(pRegs) << ".";
-		fp->ptr->event(tmp.str());
+		string tmp = string(caster->name->const_str()) + " uses " + SkillStrs(sp).const_str() +
+				" in " + Print(pRegs).const_str() + ".";
+		fp->ptr->event(tmp, "cast");
 	}
 	return 1;
 }
@@ -1693,9 +1692,9 @@ void ARegion::NotifyCity(Unit *caster, AString& oldname, AString& newname)
 	{
 		forlist(&flist) {
 			FactionPtr *fp = (FactionPtr *) elem;
-			stringstream tmp;
-			tmp << caster->name << " renames " << oldname << " to " << newname << ".";
-			fp->ptr->event(tmp.str());
+			string tmp = string(caster->name->const_str()) + " renames " + oldname.const_str() +
+				" to " + newname.const_str() + ".";
+			fp->ptr->event(tmp, "rename");
 		}
 	}
 }
@@ -1898,8 +1897,8 @@ int ARegionList::ReadRegions(istream &f, AList *factions)
 		fa.SetRegion(temp->num, temp);
 		Add(temp);
 
-		pRegionArrays[temp->zloc]->SetRegion(temp->xloc, temp->yloc,
-												temp);
+		pRegionArrays[temp->zloc]->SetRegion(temp->xloc, temp->yloc, temp);
+		temp->level = pRegionArrays[temp->zloc];
 	}
 
 	Awrite("Setting up the neighbors...");

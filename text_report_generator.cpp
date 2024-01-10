@@ -198,6 +198,20 @@ void TextReportGenerator::output_item_list(ostream& f, const json& item_list, st
     f << ".\n";
 }
 
+void TextReportGenerator::output_error(ostream& f, const json& error) {
+    if (error.contains("unit")) {
+        f << to_s(error["unit"]["name"]) << " (" << error["unit"]["number"] << "): ";
+    }
+    f << to_s(error["message"]) << '\n';
+}
+
+void TextReportGenerator::output_event(ostream& f, const json& event) {
+    if (event.contains("unit")) {
+        f << to_s(event["unit"]["name"]) << " (" << event["unit"]["number"] << "): ";
+    }
+    f << to_s(event["message"]) << '\n';
+}
+
 void TextReportGenerator::output_unit_summary(ostream& f, const json& unit, bool show_faction) {
     f << to_s(unit["name"]) << " (" << unit["number"] << ")";
     // display guard flag *before* the faction
@@ -568,7 +582,7 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
 
     if (report.contains("errors") && !report["errors"].empty()) {
         f << "Errors during turn:\n";
-        for (const auto& error : report["errors"]) f << to_s(error) << '\n';
+        for (const auto& error : report["errors"]) output_error(f, error);
         f << '\n';
     }
 
@@ -583,7 +597,7 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
 
     if (report.contains("events") && !report["events"].empty()) {
         f << "Events during turn:\n";
-        for (const auto& event: report["events"]) f << to_s(event) << '\n';
+        for (const auto& event: report["events"]) output_event(f, event);
         f << '\n';
     }
 
@@ -711,6 +725,16 @@ void TextReportGenerator::output_region_map_header_line(ostream& f, string line)
     f << indent::comment << out << '\n';
 }
 
+string TextReportGenerator::map_header_item(const string& header, const json& item) {
+    stringstream ss;
+    ss << header;
+    if (item.value("unlimited", false)) ss << "unlim";
+    else ss << setw(5) << right << item.value("amount", 0);
+    ss << " " << setw(4) << to_s(item["tag"]);
+    if (item.contains("price")) ss << " @ " << setw(3) << right << item.value("price", 0);
+    return ss.str();
+}
+
 void TextReportGenerator::output_region_map_header(ostream& f, const json& region, bool show_region_depth) {
     f << '\n' << indent::comment << "-----------------------------------------------------------\n";
     f << indent::comment;
@@ -730,43 +754,34 @@ void TextReportGenerator::output_region_map_header(ostream& f, const json& regio
     stringstream ss;
     ss << "Tax  " << setw(5) << right << region.value("tax", 0);
     output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
-    stringstream().swap(ss);
 
     if (region.contains("entertainment")) {
+        stringstream ss;
         ss << "Ente " << setw(5) << right << region.value("entertainment", 0);
         output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
-        stringstream().swap(ss);
     }
 
     if (region.contains("wages")) {
+        stringstream ss;
         ss << "Wage " << setprecision(1) << fixed << setw(7) << right << region["wages"].value("amount", 0.0)
            << " (max " << region["wages"]["max"] << ")";
         output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
-        stringstream().swap(ss);
     }
 
     bool first = true;
     if (region.contains("markets")) {
         for (const auto& item : region["markets"]["wanted"]) {
             if (first) output_region_map_header_line(f, next_map_header_line(line++, region));
-            ss << (first ? "Want " : "     ");
-            if (item.value("unlimited", false)) ss << "unlim";
-            else ss << setw(5) << right << item.value("amount", 0);
-            ss << " " << setw(4) << to_s(item["tag"]) << " @ " << setw(3) << right << item.value("price", 0);
-            output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
-            stringstream().swap(ss);
+            string s = map_header_item((first ? "Want " : "     "), item);
+            output_region_map_header_line(f, next_map_header_line(line++, region) + s);
             first = false;
         }
 
         first = true;
         for (const auto& item : region["markets"]["for_sale"]) {
             if (first) output_region_map_header_line(f, next_map_header_line(line++, region));
-            ss << (first ? "Sell " : "     ");
-            if (item.value("unlimited", false)) ss << "unlim";
-            else ss << setw(5) << right << item.value("amount", 0);
-            ss << " " << setw(4) << to_s(item["tag"]) << " @ " << setw(3) << right << item.value("price", 0);
-            output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
-            stringstream().swap(ss);
+            string s = map_header_item((first ? "Sell " : "     "), item);
+            output_region_map_header_line(f, next_map_header_line(line++, region) + s);
             first = false;
         }
     }
@@ -774,20 +789,16 @@ void TextReportGenerator::output_region_map_header(ostream& f, const json& regio
     first = true;
     for (const auto& item : region["products"]) {
         if (first) output_region_map_header_line(f, next_map_header_line(line++, region));
-        ss << (first ? "Prod " : "     ");
-        if (item.value("unlimited", false)) ss << "unlim";
-        else ss << setw(5) << right << item.value("amount", 0);
-        ss << " " << setw(4) << to_s(item["tag"]);
-        output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
-        stringstream().swap(ss);
+        string s = map_header_item((first ? "Prod " : "     "), item);
+        output_region_map_header_line(f, next_map_header_line(line++, region) + s);
         first = false;
     }
 
     if (region.contains("gate")) {
         if (region["gate"].contains("open")) {
+            stringstream ss;
             ss << "Gate " << setw(4) << right << region["gate"].value("number", 0);
             output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
-            stringstream().swap(ss);
         } else {
             output_region_map_header_line(f, next_map_header_line(line++, region) + "Gate closed");
         }

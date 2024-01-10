@@ -65,7 +65,7 @@ struct SkillDepend
 class SkillType
 {
 	public:
-		char const * name;
+		std::string name;
 		char const * abbr;
 		int cost;
 
