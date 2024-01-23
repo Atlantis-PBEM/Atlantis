@@ -744,7 +744,7 @@ Faction *Game::CheckVictory()
 			}
 
 			// Check if regions in freezing zome in surface
-			if (r->zloc == ARegionArray::LEVEL_SURFACE && (r->yloc <= 1 || r->yloc >= 70)) {
+			if (r->zloc == ARegionArray::LEVEL_SURFACE && (r->yloc <= 8 || r->yloc >= 63)) {
 				r->Pillage();
 				r->SetWeather(W_BLIZZARD);
 				printf("Freeze (%d,%d) region in %s of %s\n",
@@ -754,6 +754,7 @@ Faction *Game::CheckVictory()
 
 			// TODO: Check if regions in freezing zome in UW
 		}
+		WriteTimesArticle("More regions on north and south are freezing...");
 	}
 
 	return NULL;
