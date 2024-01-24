@@ -613,4 +613,7 @@ private:
 	int CountItem(Faction *, int);
 };
 
+int get_structure_health(const Object *o);
+int get_structure_points(const Object *o, int min_destroy, int max_destroy_pct);
+
 #endif
