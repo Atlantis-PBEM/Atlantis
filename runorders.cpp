@@ -528,6 +528,25 @@ void Game::RunDestroyOrders()
 	}
 }
 
+int get_structure_health(const Object *o) {
+	int cost = ObjectDefs[o->type].cost;
+	int health = cost - o->incomplete;
+
+	return health;
+}
+
+int get_structure_points(const Object *o, int min_destroy, int max_destroy_pct) {
+	// total cost or maxium HP of the building
+	int cost = ObjectDefs[o->type].cost;
+	int health = get_structure_health(o);
+
+	// points that can be destroyed, they are reduced by already destroyed points this turn
+	int points = std::max(0, std::max(min_destroy, cost * max_destroy_pct / 100) - o->destroyed);
+
+	// amount avaiable for destruction, but no more than there are HP of the building itself
+	return std::min(health, points);
+}
+
 void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 	AString quest_rewards;
 
@@ -547,71 +566,71 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 		return;
 	}
 
-	if (o->CanModify()) {
-		int maxStructurePoints;	// fully built structure points (equal to cost)
-		int structurePoints;	// current structure points
-		int destroyablePoints;	// how much points can be destroyed per turn for this structure type
-		int destroyPower;		// how much unit can destroy during this turn
-		int willDestroy;		// how muh points will be destroyed this turn
-
-		maxStructurePoints = ObjectDefs[o->type].cost;
-		structurePoints = maxStructurePoints - o->incomplete;
-
-		if (Globals->DESTROY_BEHAVIOR == DestroyBehavior::INSTANT) {
-			destroyablePoints = structurePoints;
-			destroyPower = structurePoints;
-		}
-		else {
-			destroyablePoints = std::max(Globals->MIN_DESTROY_POINTS, maxStructurePoints * Globals->MAX_DESTROY_PERCENT / 100);
-			destroyablePoints = std::max(0, std::min(structurePoints, destroyablePoints) - o->destroyed);
-
-			if (Globals->DESTROY_BEHAVIOR == DestroyBehavior::PER_SKILL) {
-				destroyPower = std::max(1, u->GetSkill(S_BUILDING)) * u->GetMen();
-			}
-			else {
-				destroyPower = u->GetMen();
-			}
-		}
-
-		willDestroy = std::min(destroyablePoints, destroyPower);
-		if (willDestroy == 0) {
-			u->Error(AString("Can't destroy ") + *(o->name) + " more.");
-			forlist(&o->units) {
-				((Unit *) elem)->destroy = 0;
-			}
-
-			return;
-		}
-
-		int remainingSP = structurePoints - willDestroy;
-		if (remainingSP > 0) {
-			o->destroyed += willDestroy;
-			o->incomplete += willDestroy;
-
-			u->Event(AString("Destroys ") + willDestroy + " structure points from the " + *(o->name) + ".");
-		}
-		else {
-			u->Event(AString("Destroys ") + *(o->name) + ".");
-	
-			Object *dest = r->GetDummy();
-			forlist(&o->units) {
-				Unit *u = (Unit *) elem;
-				u->destroy = 0;
-				u->MoveUnit(dest);
-			}
-
-			if (quests.CheckQuestDemolishTarget(r, o->num, u, &quest_rewards)) {
-				u->Event(AString("You have completed a quest!") + quest_rewards);
-			}
-
-			r->objects.Remove(o);
-			delete o;
-		}
-	} else {
+	if (!o->CanModify()) {
 		u->Error("DESTROY: Can't destroy that.");
 		forlist(&o->units) {
 			((Unit *) elem)->destroy = 0;
 		}
+
+		return;
+	}
+
+	// ships can be destroyed in instant
+	DestroyBehavior behavior = o->IsFleet()
+		? DestroyBehavior::INSTANT
+		: Globals->DESTROY_BEHAVIOR;
+
+	int structurePoints = behavior == DestroyBehavior::INSTANT
+		? get_structure_points(o, 0, 100)
+		: get_structure_points(o, Globals->MIN_DESTROY_POINTS, Globals->MAX_DESTROY_PERCENT);
+
+	int destroyPower;
+	switch (behavior) {
+		case DestroyBehavior::PER_SKILL:
+			destroyPower = u->GetMen() * std::max(1, u->GetSkill(S_BUILDING));
+			break;
+
+		case DestroyBehavior::PER_FIGURE:
+			destroyPower = u->GetMen();
+			break;
+
+		default:
+			destroyPower = structurePoints;
+	}
+
+	int willDestroy = std::min(structurePoints, destroyPower);
+	if (willDestroy == 0) {
+		u->Error(AString("Can't destroy ") + *(o->name) + " more.");
+		forlist(&o->units) {
+			((Unit *) elem)->destroy = 0;
+		}
+
+		return;
+	}
+
+	int hpLeft = std::max(0, get_structure_health(o) - willDestroy);
+	if (hpLeft > 0) {
+		o->destroyed += willDestroy;
+		o->incomplete += willDestroy;
+
+		u->Event(AString("Destroys ") + willDestroy + " structure points from the " + *(o->name) + ".");
+	}
+	else {
+		u->Event(AString("Destroys ") + *(o->name) + ".");
+
+		Object *dest = r->GetDummy();
+		forlist(&o->units) {
+			Unit *u = (Unit *) elem;
+			u->destroy = 0;
+			u->MoveUnit(dest);
+		}
+
+		if (quests.CheckQuestDemolishTarget(r, o->num, u, &quest_rewards)) {
+			u->Event(AString("You have completed a quest!") + quest_rewards);
+		}
+
+		r->objects.Remove(o);
+		delete o;
 	}
 }
 
