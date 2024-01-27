@@ -337,7 +337,14 @@ void TextReportGenerator::output_unit(ostream& f, const json& unit, bool show_un
 void TextReportGenerator::output_structure(ostream& f, const json& structure, bool show_unit_attitudes) {
     f << "+ " << to_s(structure["name"]) << " [" << structure["number"] << "] : ";
     if (structure.contains("ships")) {
-        output_items(f, structure["ships"], false, true);
+        // Fleets are wierd. If you have a fleet of a single ship, the structure type is just the ships item name.
+        // If you have a fleet of ships, then the structure name if the name of the fleet type, and the ships are listed.
+        if (structure["ships"].size() == 1) {
+            output_item(f, structure["ships"][0], false, false);
+        } else {
+            f << to_s(structure["type"]) << ", ";
+            output_items(f, structure["ships"], false, true);
+        }
         if (structure.contains("damage_percent")) f << "; " << structure["damage_percent"] << "% damaged; ";
         if (structure.contains("load"))
             f << "; " << "Load: " << structure["load"] << "/" << structure["capacity"] << "; ";
