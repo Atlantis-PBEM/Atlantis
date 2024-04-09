@@ -225,6 +225,7 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 	if (AString(typestr) == "wmon") type = 1;
 	if (AString(typestr) == "lair") type = 2;
 	if (AString(typestr) == "gate") type = 3;
+	if (AString(typestr) == "cities") type = 4;
 
 	Aoutfile f;
 	if (f.OpenByName(mapfile) == -1) return(0);
@@ -242,6 +243,24 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 		case 3:
 			f.PutStr("Gate Map");
 			break;
+		case 4:
+			f.PutStr("Cities Map");
+			break;
+	}
+
+	if (type == 4) {
+		forlist(&regions) {
+			ARegion *reg = (ARegion *)elem;
+			if(!reg->town) continue;
+
+			if (reg->zloc == 1) {
+				if (reg->town->TownType() == TOWN_CITY) {
+					f.PutStr(AString("") + reg->town->name->Str());
+				}
+			}
+		}
+		f.Close();
+		return(1);
 	}
 
 	int i;
