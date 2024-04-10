@@ -86,7 +86,7 @@ static void DescribeEscapeParameters(AString *desc, int item)
 
 AString *ShowSkill::Report(Faction *f) const
 {
-	if (SkillDefs[skill].flags & SkillType::DISABLED) return NULL;
+	if (SkillDefs[skill].flags & SkillType::DISABLED) return new AString("");
 
 	AString *str = new AString;
 	RangeType *range = NULL;
@@ -1793,11 +1793,7 @@ AString *ShowSkill::Report(Faction *f) const
 					temp2 += "]";
 			}
 			if (f) {
-				AString *desc = ObjectDescription(i);
-				if (desc) {
-					f->objectshows.push_back(desc->const_str());
-					delete desc;
-				}
+				f->objectshows.push_back({.obj = i});
 			}
 		}
 	}
@@ -1875,11 +1871,8 @@ AString *ShowSkill::Report(Faction *f) const
 		*str += "This skill cannot be increased through experience.";
 	}
 
-	temp1 = SkillStrs(skill) + " " + level + ": ";
 	if (*str == "") {
-		*str = temp1 + "No skill report.";
-	} else {
-		*str = temp1 + *str;
+		return(new AString("No skill report."));
 	}
 
 	return str;

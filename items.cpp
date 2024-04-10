@@ -648,6 +648,22 @@ static AString WeapType(int flags, int wclass)
 	return type;
 }
 
+string ShowItem::display_name()
+{
+	if (ItemDefs[item].type & IT_ILLUSION) {
+		return "illusory " + ItemDefs[item].name;
+	}
+	return ItemDefs[item].name;
+}
+
+string ShowItem::display_tag() {
+	if (ItemDefs[item].type & IT_ILLUSION) {
+		return "I" + string(ItemDefs[item].abr);
+	}
+	return ItemDefs[item].abr;
+
+}
+
 AString *ItemDescription(int item, int full)
 {
 	int i;
@@ -655,7 +671,7 @@ AString *ItemDescription(int item, int full)
 	SkillType *pS;
 
 	if (ItemDefs[item].flags & ItemType::DISABLED)
-		return NULL;
+		return new AString("");
 
 	AString *temp = new AString;
 	int illusion = (ItemDefs[item].type & IT_ILLUSION);

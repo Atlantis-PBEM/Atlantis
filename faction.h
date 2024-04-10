@@ -32,6 +32,7 @@
 
 class Faction;
 class Game;
+struct ShowObject;
 
 #include "gameio.h"
 #include "aregion.h"
@@ -245,8 +246,8 @@ public:
 
 	std::vector<Battle *> battles;
 	std::vector<ShowSkill> shows;
-	std::vector<std::string> itemshows;
-	std::vector<std::string> objectshows;
+	std::vector<ShowItem> itemshows;
+	std::vector<ShowObject> objectshows;
 
 	// These are used for 'granting' units to a faction via the players.in
 	// file

@@ -75,6 +75,14 @@ struct Materials
 	int amt;
 };
 
+struct ShowItem {
+	int item;
+	bool full;
+
+	std::string display_name();
+    std::string display_tag();
+};
+
 class ItemType
 {
 	public:

@@ -83,6 +83,10 @@ int ParseObject(AString *, int ships);
 
 int ObjectIsShip(int);
 
+struct ShowObject {
+	int obj;
+};
+
 class Object : public AListElem
 {
 	public:

@@ -610,19 +610,26 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
 
     if(report.contains("skill_reports") && !report["skill_reports"].empty()) {
         f << "Skill reports:\n";
-        for (const auto& skillshow : report["skill_reports"]) f << '\n' << to_s(skillshow) << '\n';
+        for (const auto& skillshow : report["skill_reports"]) {
+            f << '\n' << to_s(skillshow["name"]) << " [" << to_s(skillshow["tag"]) << "] "
+              << skillshow["level"] << ": " << to_s(skillshow["description"]) << '\n';
+        }
         f << '\n';
     }
 
     if (report.contains("item_reports") && !report["item_reports"].empty()) {
         f << "Item reports:\n";
-        for (const auto& itemshow : report["item_reports"]) f << '\n' << to_s(itemshow) << '\n';
+        for (const auto& itemshow : report["item_reports"]) {
+            f << '\n' << to_s(itemshow["description"]) << '\n';
+        }
         f << '\n';
     }
 
     if (report.contains("object_reports") && !report["object_reports"].empty()) {
         f << "Object reports:\n";
-        for (const auto& objectshow : report["object_reports"]) f << '\n' << to_s(objectshow) << '\n';
+        for (const auto& objectshow : report["object_reports"]) {
+            f << '\n' << to_s(objectshow["name"]) << ": " << to_s(objectshow["description"]) << '\n';
+        }
         f << '\n';
     }
 
