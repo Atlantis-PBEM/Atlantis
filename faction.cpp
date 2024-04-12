@@ -303,8 +303,8 @@ inline bool Faction::gets_gm_report(Game *game) {
 
 struct GmData {
 	vector<ShowSkill> skills;
-	vector<string> items;
-	vector<string> objects;
+	vector<ShowItem> items;
+	vector<ShowObject> objects;
 };
 
 static inline GmData collect_gm_data() {
@@ -314,20 +314,10 @@ static inline GmData collect_gm_data() {
 			data.skills.push_back({ .skill = i, .level = j });
 
 	for (auto i = 0; i < NITEMS; i++) {
-		AString *show = ItemDescription(i, 1);
-		if (show) {
-			data.items.push_back(show->const_str());
-			delete show;
-		}
+		data.items.push_back({.item = i, .full = true});
 	}
 
-	for (auto i = 0; i < NOBJECTS; i++) {
-		AString *show = ObjectDescription(i);
-		if (show) {
-			data.objects.push_back(show->const_str());
-			delete show;
-		}
-	}
+	for (auto i = 0; i < NOBJECTS; i++) data.objects.push_back({.obj = i });
 	return data;
 }
 
@@ -336,17 +326,34 @@ void Faction::build_gm_json_report(json& j, Game *game) {
 
 	json skills = json::array();
 	for (auto &skillshow : data.skills) {
-		AString *string = skillshow.Report(this);
-		if (string) {
-			skills.push_back(string->const_str());
-			delete string;
-		}
+		string skill_name = SkillDefs[skillshow.skill].name;
+		string abbr = SkillDefs[skillshow.skill].abbr;
+		string description = skillshow.Report(this)->const_str();
+		if (description.empty()) continue;
+		skills.push_back({
+			{ "name", skill_name }, { "tag", abbr }, { "level", skillshow.level }, { "description", description }
+		});
 	}
 	j["skill_reports"] = skills;
 
-	// These two are easier since we already have a vector of strings, we can just auto-convert to a json array.
-	j["item_reports"] = data.items;
-	j["object_reports"] = data.objects;
+	json items = json::array();
+	for (auto &itemshow : data.items) {
+		string item_name = itemshow.display_name();
+		string tag = itemshow.display_tag();
+		string description = ItemDescription(itemshow.item, itemshow.full)->const_str();
+		if (description.empty()) continue;
+		items.push_back({ { "name", item_name }, {"tag", tag }, { "description", description } });
+	}
+	j["item_reports"] = items;
+
+	json objects = json::array();
+	for (auto &objectshow : data.objects) {
+		string obj_name = ObjectDefs[objectshow.obj].name;
+		string description = ObjectDescription(objectshow.obj)->const_str();
+		if(description.empty()) continue;
+		objects.push_back({ { "name", obj_name }, { "description", description } });
+	}
+	j["object_reports"] = objects;
 
 	present_regions.clear();
 	forlist(&(game->regions)) {
@@ -515,17 +522,34 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 
 	json skills = json::array();
 	for (auto &skillshow : shows) {
-		AString *string = skillshow.Report(this);
-		if (string) {
-			skills.push_back(string->const_str());
-			delete string;
-		}
+		string skill_name = SkillDefs[skillshow.skill].name;
+		string abbr = SkillDefs[skillshow.skill].abbr;
+		string description = skillshow.Report(this)->const_str();
+		if (description.empty()) continue;
+		skills.push_back({
+			{ "name", skill_name }, { "tag", abbr }, { "level", skillshow.level }, { "description", description }
+		});
 	}
 	j["skill_reports"] = skills;
 
-	// These two are easier since we already have a vector of strings, we can just auto-convert to a json array.
-	j["item_reports"] = itemshows;
-	j["object_reports"] = objectshows;
+	json items = json::array();
+	for (auto &itemshow : itemshows) {
+		string item_name = itemshow.display_name();
+		string tag = itemshow.display_tag();
+		string description = ItemDescription(itemshow.item, itemshow.full)->const_str();
+		if (description.empty()) continue;
+		items.push_back({ { "name", item_name }, {"tag", tag }, { "description", description } });
+	}
+	j["item_reports"] = items;
+
+	json objects = json::array();
+	for(auto &objectshow : objectshows) {
+		string obj_name = ObjectDefs[objectshow.obj].name;
+		string description = ObjectDescription(objectshow.obj)->const_str();
+		if(description.empty()) continue;
+		objects.push_back({ { "name", obj_name }, { "description", description } });
+	}
+	j["object_reports"] = objects;
 
 	// regions
 	json regions = json::array();
@@ -736,11 +760,9 @@ void Faction::DiscoverItem(int item, int force, int full)
 		}
 	}
 	if (force) {
-		AString *desc = ItemDescription(item, full);
-		if (desc) {
-			itemshows.push_back(desc->const_str());
-			delete desc;
-		}
+		// This really should be a boolean coming in and just passed through for the full flag.  For now we'll just
+		// convert it.
+		itemshows.push_back({.item = item, .full = (full != 0) });
 		if (!full)
 			return;
 		// If we've found an item that grants a skill, give a

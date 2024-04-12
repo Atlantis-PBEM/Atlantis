@@ -106,14 +106,6 @@ int ParseSkill(AString *);
 AString SkillStrs(int);
 AString SkillStrs(SkillType *);
 
-class ShowType {
-	public:
-		int skill;
-		int level;
-		char const * desc;
-};
-extern ShowType * ShowDefs;
-
 int SkillCost(int);
 int SkillMax(char const *,int); /* skill, race */
 int GetLevelByDays(int);

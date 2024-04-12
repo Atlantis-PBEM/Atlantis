@@ -822,11 +822,7 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				u->error("SHOW: No such object.");
 				return;
 			}
-			AString *desc = ObjectDescription(obj);
-			if (desc) {
-				u->faction->objectshows.push_back(desc->const_str());
-				delete desc;
-			}
+			u->faction->objectshows.push_back({.obj = obj});
 		}
 		if (obj >= -1)
 			return;

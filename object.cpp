@@ -778,11 +778,10 @@ int Object::GetFleetSpeed(int report)
 AString *ObjectDescription(int obj)
 {
 	if (ObjectDefs[obj].flags & ObjectType::DISABLED)
-		return NULL;
+		return new AString("");
 
 	ObjectType *o = &ObjectDefs[obj];
 	AString *temp = new AString;
-	*temp += AString(o->name) + ": ";
 	if (ObjectDefs[obj].flags & ObjectType::GROUP) {
 		*temp += "This is a group of ships.";
 	} else if (o->capacity) {
