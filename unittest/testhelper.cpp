@@ -1,4 +1,5 @@
 #include "../game.h"
+#include "gamedata.h"
 #include "testhelper.hpp"
 
 static void seed_random() { seedrandom(0xdeadbeef); }
@@ -70,3 +71,17 @@ string UnitTestHelper::cout_data() {
 void UnitTestHelper::parse_orders(int faction_id, istream& orders) {
     game.ParseOrders(faction_id, orders, nullptr);
 }
+
+void UnitTestHelper::activate_spell(int spell, SpellTestHelper helper) {
+    // This is a bit of a hack, but it's the easiest way to get the game object to run the spell, especially since
+    // C++ doesn't have actual introspection/reflection and the spell executors take different arguments.   The intent
+    // is that you add the spell you want to test here as you need it by adding a case statement to call the appropriate
+    // Run<Spell> function based on the skill associated with the spell.  This assumes that orders for the unit have
+    // already been set up so that the unit is ready to cast the spell.
+    switch(spell) {
+        case S_CREATE_PHANTASMAL_BEASTS:
+            game.RunPhanBeasts(helper.region, helper.unit);
+            break;
+    }
+}
+

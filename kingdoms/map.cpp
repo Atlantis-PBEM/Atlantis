@@ -1062,17 +1062,13 @@ void ARegionList::SetFractalTerrain(ARegionArray *pArr)
 
 void ARegionList::NameRegions(ARegionArray *pArr)
 {
-	int seed = 0;
-	int grown = 0;
 	Awrite("Naming Regions");
 	int unnamed = 1;
-	int toname = 0;
 	for (int x = 0; x < pArr->x; x++) {
 		for (int y = 0; y < pArr->y; y++) {
 			ARegion *r = pArr->GetRegion(x,y);
 			if (!r) continue;
 			r->wages = -1;
-			if (r->type != R_OCEAN) toname++;
 			// r->wages = AGetName(0, reg);
 			r->population = 1;
 		}
@@ -1115,7 +1111,6 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 					if (r1->yloc > ymin)
 						tnamedy[TerrainDefs[r1->type].similar_type] = r1->yloc;
 					unnamed = 1;	
-					seed++;
 				}
 			}
 		}
@@ -1157,7 +1152,6 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 							if (npop > (nw1 / nc1)) npop = nw1 / nc1;
 							reg->population = (int) npop;
 							named_a_reg = 1;
-							grown++;
 						} else {
 							reg->wages = name2;
 							float npop = (nc2 * (nw2 + nc2) / (nc2 + 1 + nn))
@@ -1165,7 +1159,6 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 							if (npop > (nw2 / nc2)) npop = nw2 / nc2;
 							reg->population = (int) npop;
 							named_a_reg = 1;
-							grown++;
 						}
 					}
 				}
@@ -1699,9 +1692,7 @@ void GeoMap::Generate(int spread, int smoothness)
 		}
 	}
 	int frac = 25;
-	int count = 0;
 	while (step > 1) {
-		count++;
 		int nextstep = step/2 + step%2;
 		for (int x = 0; x <= size; x += step) {
 			for (int y = 0; y <= size; y += step) {

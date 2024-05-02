@@ -1463,7 +1463,7 @@ int Game::RunPhanUndead(ARegion *r,Unit *u)
 			max = level * level;
 		} else {
 			create = I_ILICH;
-			max = order->level;
+			max = level;
 		}
 	}
 
@@ -1497,7 +1497,7 @@ int Game::RunPhanBeasts(ARegion *r,Unit *u)
 			max = level * level;
 		} else {
 			create = I_IDRAGON;
-			max = order->level;
+			max = level;
 		}
 	}
 
