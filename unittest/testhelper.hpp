@@ -7,6 +7,16 @@
 #include <iostream>
 #include <sstream>
 
+// In order to allow testing spells, this is a generic structure to capture the Run<Spell> possible arguments.
+// Each spell takes a different number of arguments, though most of them take just the region and the unit.
+// However, some take an object and one or two integer values as well.
+struct SpellTestHelper {
+    ARegion *region;
+    Unit *unit;
+    Object *object;
+    int val1;
+    int val2;
+};
 
 // This class is used to access private members of Game for testing.
 // It also provides utilities to capture the output of cout into a string, as well as provide
@@ -18,7 +28,6 @@
 // framework, but a much more involved helper class to allow interception of those sorts of inputs/outputs
 // in the future if needed.
 class UnitTestHelper {
-
 public:
     UnitTestHelper();
     ~UnitTestHelper();
@@ -55,6 +64,10 @@ public:
 
     // Get the contents of cout as a string.
     string cout_data();
+
+    // Activate a specific spell for testing.   Since the spells can have different arguments, we use a helper struct
+    // to pass in the arguments and call the appropriate Run<Spell> function based on the skill associate with the spell.
+    void activate_spell(int spell, SpellTestHelper helper);
 
 private:
     stringstream cout_buffer;

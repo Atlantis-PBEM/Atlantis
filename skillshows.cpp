@@ -842,7 +842,7 @@ AString *ShowSkill::Report(Faction *f) const
 					"transportation. A mage may summon ";
 				if (ItemDefs[I_EAGLE].mOut > 0) {
 					*str += "an average of ";
-					*str += ItemDefs[I_SKELETON].mOut;
+					*str += ItemDefs[I_EAGLE].mOut;
 					*str += " percent times his skill level minus 2 eagles";
 				}
 				else
@@ -1071,9 +1071,9 @@ AString *ShowSkill::Report(Faction *f) const
 			} else if (level == 3) {
 				if (ITEM_DISABLED(I_IDRAGON)) break;
 				*str += "Create Phantasmal Beasts at level 3 allows the "
-					"mage to summon an illusionary dragon into his "
-					"inventory. To summon an illusionary dragon, the mage "
-					"should CAST Create_Phantasmal_Beasts DRAGON. The number of dragons that a "
+					"mage to summon illusionary dragons into his "
+					"inventory. To summon illusionary dragons, the mage "
+					"should CAST Create_Phantasmal_Beasts DRAGON <number>. The number of dragons that a "
 					"mage may have in his inventory is equal to mage's skill level.";
 			}
 			break;
@@ -1112,9 +1112,9 @@ AString *ShowSkill::Report(Faction *f) const
 			} else if (level == 3) {
 				if (ITEM_DISABLED(I_ILICH)) break;
 				*str += "Create Phantasmal Undead at level 3 allows the mage "
-					"to summon an illusionary lich into his inventory. To "
-					"summon an illusionary lich, the mage should CAST "
-					"Create_Phantasmal_Undead LICH; The number of liches that a "
+					"to summon illusionary liches into his inventory. To "
+					"summon illusionary liches, the mage should CAST "
+					"Create_Phantasmal_Undead LICH <number>; The number of liches that a "
 					"mage may have in his inventory is equal to mage's skill level.";
 			}
 			break;
