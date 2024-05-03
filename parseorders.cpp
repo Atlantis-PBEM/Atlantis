@@ -638,10 +638,8 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			ProcessWorkOrder(unit, 0, pCheck);
 			break;
 		case O_TRANSPORT:
-			ProcessTransportOrder(unit, o, pCheck);
-			break;
 		case O_DISTRIBUTE:
-			ProcessDistributeOrder(unit, o, pCheck);
+			ProcessTransportOrder(unit, o, pCheck);
 			break;
 	}
 }
@@ -2904,6 +2902,7 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	else
 		amt = token->value();
 	delete token;
+
 	token = o->gettoken();
 	if (!token) {
 		parse_error(pCheck, u, 0, "TRANSPORT: No item given.");
@@ -2911,6 +2910,7 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 	int item = ParseTransportableItem(token);
 	delete token;
+
 	if (item == -1) {
 		parse_error(pCheck, u, 0, "TRANSPORT: Invalid item.");
 		return;
@@ -2920,13 +2920,16 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	token = o->gettoken();
 	if (token && *token == "except") {
 		delete token;
+
 		token = o->gettoken();
 		if (!token) {
 			parse_error(pCheck, u, 0, "TRANSPORT: EXCEPT requires a value.");
 			return;
 		}
+
 		except = token->value();
 		delete token;
+
 		if (except <= 0) {
 			parse_error(pCheck, u, 0, "TRANSPORT: Invalid except value.");
 			return;
@@ -2935,68 +2938,8 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	if (!pCheck) {
 		TransportOrder *order = new TransportOrder;
-		order->item = item;
-		order->target = tar;
-		order->amount = amt;
-		order->except = except;
-		u->transportorders.Add(order);
-	}
-	return;
-}
-
-void Game::ProcessDistributeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
-{
-	UnitId *tar = ParseUnit(o);
-	if (!tar) {
-		parse_error(pCheck, u, 0, "DISTRIBUTE: Invalid target.");
-		return;
-	}
-	AString *token = o->gettoken();
-	if (!token) {
-		parse_error(pCheck, u, 0, "DISTRIBUTE: No amount given.");
-		return;
-	}
-
-	int amt;
-	if (*token == "all")
-		amt = -1;
-	else
-		amt = token->value();
-	delete token;
-	token = o->gettoken();
-	if (!token) {
-		parse_error(pCheck, u, 0, "DISTRIBUTE: No item given.");
-		return;
-	}
-
-	int item = ParseTransportableItem(token);
-	if (item == -1) {
-		parse_error(pCheck, u, 0, string("DISTRIBUTE: Invalid item ") + token->const_str() + ".");
-		delete token;
-		return;
-	}
-	delete token;
-
-	int except = 0;
-	token = o->gettoken();
-	if (token && *token == "except") {
-		delete token;
-		token = o->gettoken();
-		if (!token) {
-			parse_error(pCheck, u, 0, "DISTRIBUTE: EXCEPT requires a value.");
-			return;
-		}
-		except = token->value();
-		delete token;
-		if (except <= 0) {
-			parse_error(pCheck, u, 0, "DISTRIBUTE: Invalid except value.");
-			return;
-		}
-	}
-
-	if (!pCheck) {
-		TransportOrder *order = new TransportOrder;
-		order->type = O_DISTRIBUTE;
+		// At this point we don't know that transport phase for the order but 
+		// we will set that later.
 		order->item = item;
 		order->target = tar;
 		order->amount = amt;

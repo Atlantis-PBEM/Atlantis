@@ -401,8 +401,16 @@ class TransportOrder : public Order {
 
 		int item;
 		// amount == -1 means all available at transport time
+		// any other amount is also checked at transport time
 		int amount;
 		int except;
+
+		enum TransportPhase {
+			SHIP_TO_QM,
+			INTER_QM_TRANSPORT,
+			DISTRIBUTE_FROM_QM
+		};
+		TransportPhase phase;
 
 		UnitId *target;
 };

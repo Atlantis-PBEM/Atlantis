@@ -54,10 +54,20 @@ public:
     int get_month() { return game.month; }
     // Find the first unit for a given faction
     Unit *get_first_unit(Faction *faction);
+    // Create a unit for the given faction in the given region.
+    Unit *create_unit(Faction *faction, ARegion *region);
     // Create a fleet in the given region.
     void create_fleet(ARegion *region, Unit *owner, int ship_type, int ship_count);
+    // Create a building in the given region.
+    void create_building(ARegion *region, Unit *owner, int building_type);
     // Parse the orders contained in the input stream.
     void parse_orders(int faction_id, istream& orders);
+    // Run the transport order checks
+    void check_transport_orders();
+    // Run one phase of the transport orders
+    void transport_phase(TransportOrder::TransportPhase phase);
+    // Collect the transported goods from the quartermasters
+    void collect_transported_goods();
 
     // dummy
     int get_seed() { return getrandom(10000); };

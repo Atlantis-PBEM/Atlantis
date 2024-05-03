@@ -253,6 +253,7 @@ class Unit : public AListElem
 		int routed;
 		SkillList skills;
 		ItemList items;
+		ItemList transport_items;
 		int combat;
 		int readyItem;
 		int readyWeapon[MAX_READY];

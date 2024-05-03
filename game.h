@@ -392,7 +392,6 @@ private:
 	void ProcessExchangeOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessIdleOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessTransportOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessDistributeOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
 	AString *ProcessTurnOrder(Unit *, istream& f, OrdersCheck *pCheck, int);
 	void ProcessJoinOrder(Unit *, AString *, OrdersCheck *pCheck);
@@ -551,6 +550,8 @@ private:
 	void DrownUnits();
 	void RunStealOrders();
 	void RunTransportOrders();
+	void RunTransportPhase(TransportOrder::TransportPhase phase);
+	void CollectInterQMTransportItems();
 	void CheckTransportOrders();
 	AList *CanSeeSteal(ARegion *, Unit *);
 	void Do1Steal(ARegion *, Object *, Unit *);
