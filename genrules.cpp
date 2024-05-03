@@ -2711,7 +2711,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "A Quartermaster unit may accept " << url("#transport", "TRANSPORT") << "ed items from "
 		  << "any unit within " << Globals->LOCAL_TRANSPORT << ' ' << plural(Globals->LOCAL_TRANSPORT, "hex", "hexes")
 		  << " distance from the hex containing the quartermaster. Quartermasters may also "
-		  << url("#distribute", "DISTRIBUTE") << " items to any unit within " << Globals->LOCAL_TRANSPORT
+		  << url("#transport", "TRANSPORT") << " items to any unit within " << Globals->LOCAL_TRANSPORT
 		  << ' ' <<  plural(Globals->LOCAL_TRANSPORT, "hex", "hexes") << " distance from the hex containing the "
 		  << "quartermaster and may " << url("#transport", "TRANSPORT") << " items to another quartermaster up to "
 		  << Globals->NONLOCAL_TRANSPORT << ' ' << plural(Globals->NONLOCAL_TRANSPORT, "hex", "hexes") << " distant.";
@@ -2754,13 +2754,13 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES
 		      ? ", and a faction is limited in the number of quartermasters it may have at any one time"
 			  : "")
-		  << ". Both the " << url("#transport", "TRANSPORT") << " and " << url("#distribute", "DISTRIBUTE")
-		  << " orders count as trade activity in the hex of the unit issuing the order. The target unit must be at "
-		  << "least FRIENDLY to the unit which issues the order.\n"
+		  << ". The " << url("#transport", "TRANSPORT") << " order counts as trade activity in "
+		  << "the hex of the unit issuing the order. The target unit must be at least FRIENDLY "
+		  << "to the unit which issues the order.\n"
 		  << enclose("p", false);
 
 		f << enclose("p", true) << "Not all type of items can be " << url("#transport", "TRANSPORT") << "ed to "
-		  << "or " << url("#distribute", "DISTRIBUTE") << "d by a quartermaster. Men (including Leaders), "
+		  << "or " << url("#transport", "TRANSPORT") << "ed by a quartermaster. Men (including Leaders), "
 		  << "summoned creatures (including illusionary ones), ships, mounts, war machines, and items created "
 		  << "using artifact lore need to be carried/sailed from one location to another by a unit.\n"
 		  << enclose("p", false);
@@ -3893,23 +3893,6 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "DESTROY\n"
 	  << example_end();
 
-	if (qm_exist) {
-		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
-		f << anchor("distribute") << '\n';
-		f << enclose("h4", true) << "DISTRIBUTE [unit] [num] [item]\n" << enclose("h4", false);
-		f << enclose("h4", true) << "DISTRIBUTE [unit] ALL [item]\n" << enclose("h4", false);
-		f << enclose("h4", true) << "DISTRIBUTE [unit] ALL [item] EXCEPT [amount]\n" << enclose("h4", false);
-		f << enclose("p", true) << "Distribute the specified items to the given friendly unit. In the second form, "
-		  << "all of that item are distributed.  In the last form, all of that item except for the specified amount "
-		  << "are distributed. The unit issuing the distribute order must have the quartermaster skill, and be the "
-		  << "owner of a transport structure. Use of this order counts as trade activity in the hex.\n"
-		  << enclose("p", false);
-		f << enclose("p", true) << "Examples:\n" << enclose("p", false);
-		f << example_start("Distribute 10 STON to unit 1234")
-		  << "DISTRIBUTE 1234 10 STON\n"
-		  << example_end();
-	}
-
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << anchor("enter") << '\n';
 	f << enclose("h4", true) << "ENTER [object]\n" << enclose("h4", false);
@@ -4761,6 +4744,9 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "unit must also be a quartermaster and be the owner of a transport structure.  Use of this order "
 		  << "counts as trade activity in the hex.\n"
 		  << enclose("p", false);
+		f << enclose("p", true) << "For historical reasons, the order DISTRIBUTE can be "
+		  << "used in place of TRANSPORT and has the same meaning and syntax.\n"
+		  << enclose("p", false);
 		f << enclose("p", true) << "Examples:\n" << enclose("p", false);
 		f << example_start("Transport 10 STON to unit 1234")
 		  << "TRANSPORT 1234 10 STON\n"
@@ -4988,9 +4974,18 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("li", true) << "Teleportation spells are " << url("#cast", "CAST") << ".\n" << enclose("li", false);
 
 	if (qm_exist) {
-		f << enclose("li", true) << url("#transport", "TRANSPORT") << " and " << url("#distribute", "DISTRIBUTE")
-		  << " orders are processed.\n"
-		  << enclose("li", false);
+		f << enclose("li", true) << url("#transport", "TRANSPORT") << " orders are processed "
+		  << "in multiple phases. In each phase all units in all hexes are processed before "
+		  << "starting the next phase.  Items may move in each of the phases but only once in each phase.\n";
+		f << enclose("ol", true);
+		f << enclose("li", true) << "Items are sent from non-quartermaster units to "
+		  << "quartermaster units.\n" << enclose("li", false);
+		f << enclose("li", true) << "Items are sent from one quartermaster unit to "
+		  << "another quartermaster units.\n" << enclose("li", false);
+		f << enclose("li", true) << "Items are sent a quartermaster unit to "
+		  << "non-quartermaster units.\n" << enclose("li", false);
+		f << enclose("ol", false);
+		f << enclose("li", false);
 	}
 	f << enclose("li", true) << "Maintenance costs are assessed.\n" << enclose("li", false);
 	f << enclose("OL", false);
