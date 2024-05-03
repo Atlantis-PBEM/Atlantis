@@ -3755,7 +3755,7 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       Trade factions may train Quartermaster units. A Quartermaster unit may
       accept <a href="#transport">TRANSPORT</a>ed items from any unit within 2
       hexes distance from the hex containing the quartermaster. Quartermasters
-      may also <a href="#distribute">DISTRIBUTE</a> items to any unit within 2
+      may also <a href="#transport">TRANSPORT</a> items to any unit within 2
       hexes distance from the hex containing the quartermaster and may <a
       href="#transport">TRANSPORT</a> items to another quartermaster up to 3
       hexes distant. The distance a quartermaster can <a
@@ -3776,15 +3776,14 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
     </p>
     <p>
       Quartermasters must be single man units, and a faction is limited in the
-      number of quartermasters it may have at any one time. Both the <a
-      href="#transport">TRANSPORT</a> and <a href="#distribute">DISTRIBUTE</a>
-      orders count as trade activity in the hex of the unit issuing the order.
-      The target unit must be at least FRIENDLY to the unit which issues the
-      order.
+      number of quartermasters it may have at any one time. The <a
+      href="#transport">TRANSPORT</a> order counts as trade activity in the
+      hex of the unit issuing the order. The target unit must be at least
+      FRIENDLY to the unit which issues the order.
     </p>
     <p>
       Not all type of items can be <a href="#transport">TRANSPORT</a>ed to or
-      <a href="#distribute">DISTRIBUTE</a>d by a quartermaster. Men (including
+      <a href="#transport">TRANSPORT</a>ed by a quartermaster. Men (including
       Leaders), summoned creatures (including illusionary ones), ships,
       mounts, war machines, and items created using artifact lore need to be
       carried/sailed from one location to another by a unit.
@@ -5779,39 +5778,6 @@ DESTROY
     <div class="rule">
       
     </div>
-    <a name="distribute"></a>
-    <h4>
-      DISTRIBUTE [unit] [num] [item]
-    </h4>
-    <h4>
-      DISTRIBUTE [unit] ALL [item]
-    </h4>
-    <h4>
-      DISTRIBUTE [unit] ALL [item] EXCEPT [amount]
-    </h4>
-    <p>
-      Distribute the specified items to the given friendly unit. In the second
-      form, all of that item are distributed.  In the last form, all of that
-      item except for the specified amount are distributed. The unit issuing
-      the distribute order must have the quartermaster skill, and be the owner
-      of a transport structure. Use of this order counts as trade activity in
-      the hex.
-    </p>
-    <p>
-      Examples:
-    </p>
-    <p>
-      Distribute 10 STON to unit 1234
-    </p>
-    <p>
-      
-    </p>
-    <pre>
-DISTRIBUTE 1234 10 STON
-    </pre>
-    <div class="rule">
-      
-    </div>
     <a name="enter"></a>
     <h4>
       ENTER [object]
@@ -7330,6 +7296,10 @@ TEACH 510
       hex.
     </p>
     <p>
+      For historical reasons, the order DISTRIBUTE can be used in place of
+      TRANSPORT and has the same meaning and syntax.
+    </p>
+    <p>
       Examples:
     </p>
     <p>
@@ -7715,8 +7685,23 @@ WORK
         Teleportation spells are <a href="#cast">CAST</a>.
       </li>
       <li>
-        <a href="#transport">TRANSPORT</a> and <a
-        href="#distribute">DISTRIBUTE</a> orders are processed.
+        <a href="#transport">TRANSPORT</a> orders are processed in multiple
+        phases. In each phase all units in all hexes are processed before
+        starting the next phase.  Items may move in each of the phases but
+        only once in each phase.
+        <ol>
+          <li>
+            Items are sent from non-quartermaster units to quartermaster
+            units.
+          </li>
+          <li>
+            Items are sent from one quartermaster unit to another
+            quartermaster units.
+          </li>
+          <li>
+            Items are sent a quartermaster unit to non-quartermaster units.
+          </li>
+        </ol>
       </li>
       <li>
         Maintenance costs are assessed.

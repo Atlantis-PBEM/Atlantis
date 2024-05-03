@@ -35,7 +35,7 @@ rm -f ./engine-output.txt
 # Clean up the Last Change: timestamp line so that comparisons can work
 sed -e 's/Last Change:.*$/Last Change: __STRIPPED_FOR_COMPARISON__/' ${game}.html > ${game}.html.strip
 
-diff -ur ${game}.html.strip rules/${game}.html &> rules-difference.txt
+diff -ur rules/${game}.html ${game}.html.strip &> rules-difference.txt
 if [[ $? != 0 ]]; then
   echo "output differed. -- Test failed."
   cat rules-difference.txt

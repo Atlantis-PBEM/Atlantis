@@ -67,4 +67,9 @@ int Game::SetupFaction( Faction *pFac ) {
 Faction *Game::CheckVictory() { return NULL; }
 
 /// Modify certain starting statistics of the world's data structures.
-void Game::ModifyTablesPerRuleset(void) { }
+void Game::ModifyTablesPerRuleset(void) {
+	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+		EnableSkill(S_QUARTERMASTER);
+		EnableObject(O_CARAVANSERAI);
+	}
+}

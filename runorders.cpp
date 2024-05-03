@@ -3047,70 +3047,82 @@ void Game::CheckTransportOrders()
 				forlist ((&u->transportorders)) {
 					// make sure target exists
 					TransportOrder *o = (TransportOrder *)elem;
-					string ordertype = (o->type == O_DISTRIBUTE) ? "DISTRIBUTE" : "TRANSPORT";
 					if (!o->target || o->target->unitnum == -1) {
-						u->error(ordertype + ": Target does not exist.");
+						u->error("TRANSPORT: Target does not exist.");
 						o->type = NORDERS;
 						continue;
 					}
 
-					Location *tar = regions.GetUnitId(o->target,
-							u->faction->num, r);
+					Location *tar = regions.GetUnitId(o->target, u->faction->num, r);
 					if (!tar) {
-						u->error(ordertype + ": Target does not exist.");
+						u->error("TRANSPORT: Target does not exist.");
 						o->type = NORDERS;
 						continue;
 					}
 
 					// Make sure target isn't self
 					if (tar->unit == u) {
-						u->error(ordertype + ": Target is self.");
+						u->error("TRANSPORT: Target is self.");
 						o->type = NORDERS;
 						continue;
 					}
 
 					// Make sure the target and unit are at least friendly
 					if (tar->unit->faction->get_attitude(u->faction->num) <	A_FRIENDLY) {
-						u->error(ordertype + ": Target " + tar->unit->name->const_str() +
+						u->error("TRANSPORT: Target " + string(tar->unit->name->const_str()) +
 							" is not a member of a friendly faction.");
 						o->type = NORDERS;
 						continue;
 					}
 
-					// Make sure the target of a transport order is a unit
-					// with the quartermaster skill who owns a transport
-					// structure
-					if (o->type == O_TRANSPORT) {
-						if (tar->unit->GetSkill(S_QUARTERMASTER) == 0) {
-							u->error(ordertype + ": Target " + tar->unit->name->const_str() +
-								" is not a quartermaster");
+					// Determine the phase of the order
+					bool sender_has_qm_skill = u->GetSkill(S_QUARTERMASTER) > 0;
+					bool target_has_qm_skill = tar->unit->GetSkill(S_QUARTERMASTER) > 0;
+					bool sender_owns_qm_building = (
+						u == obj->GetOwner() &&
+						obj->incomplete == 0 &&
+						(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
+					);
+					bool target_owns_qm_building = (
+						tar->unit == tar->obj->GetOwner() &&
+						tar->obj->incomplete == 0 &&
+						(ObjectDefs[tar->obj->type].flags & ObjectType::TRANSPORT)
+					);
+
+					bool sender_is_valid_qm = sender_has_qm_skill && sender_owns_qm_building;
+					bool target_is_valid_qm = target_has_qm_skill && target_owns_qm_building;
+					if (sender_is_valid_qm) {
+						o->phase = target_is_valid_qm ?
+							TransportOrder::INTER_QM_TRANSPORT :  // both sender and target are valid QM
+							TransportOrder::DISTRIBUTE_FROM_QM; // sender is a valid QM, target isn't
+					} else { // sender isn't a valid QM
+						if (!target_is_valid_qm) { // Non-qms or invalid qms can only send to valid QMs
+							// Give a specific error message depending on why they aren't considered a quartermaster
+							string temp = "TRANSPORT: Target " + string(tar->unit->name->const_str()); 
+							temp += (
+								target_owns_qm_building ?
+								" does not own a transport structure." :
+								" is not a quartermaster."
+							);
+							u->error(temp);
 							o->type = NORDERS;
 							continue;
 						}
-						if ((tar->obj->GetOwner() != tar->unit) ||
-								!(ObjectDefs[tar->obj->type].flags &
-									ObjectType::TRANSPORT) ||
-								(tar->obj->incomplete > 0)) {
-							u->error(ordertype + ": Target " + tar->unit->name->const_str() +
-								" does not own a transport structure.");
-							o->type = NORDERS;
-							continue;
-						}
+						// the target is a valid QM so the send is legal
+						o->phase = TransportOrder::SHIP_TO_QM;
 					}
 
-					// make sure target is in range.
-					int dist, maxdist;
-					if ((o->type == O_TRANSPORT) &&
-						(u == obj->GetOwner()) &&
-						(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)) {
+					int maxdist = Globals->LOCAL_TRANSPORT;
+					if (o->phase == TransportOrder::INTER_QM_TRANSPORT) {
 						maxdist = Globals->NONLOCAL_TRANSPORT;
-						if (maxdist > 0 &&
-							Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
+						// 0 max distance represents unlimited range
+						if (maxdist > 0 && Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
 							int level = u->GetSkill(S_QUARTERMASTER);
 							maxdist += ((level + 1)/3);
 						}
-					} else
-						maxdist = Globals->LOCAL_TRANSPORT;
+					}
+
+					int dist;
 					int penalty = 10000000;
 					RangeType *rt = FindRange("rng_transport");
 					if (rt) penalty = rt->crossLevelPenalty;
@@ -3118,7 +3130,7 @@ void Game::CheckTransportOrders()
 						// 0 maxdist represents unlimited range
 						dist = regions.GetPlanarDistance(r, tar->region, penalty, maxdist);
 						if (dist > maxdist) {
-							u->error(ordertype + ": Recipient " + tar->unit->name->const_str() + " is too far away.");
+							u->error("TRANSPORT: Recipient " + string(tar->unit->name->const_str()) + " is too far away.");
 							o->type = NORDERS;
 							continue;
 						}
@@ -3126,47 +3138,13 @@ void Game::CheckTransportOrders()
 						dist = regions.GetPlanarDistance(r, tar->region, penalty, Globals->LOCAL_TRANSPORT);
 					}
 
-					// On long range transport or distribute, make sure the
-					// issuer is a quartermaster and is owner of a structure
-					if ((o->type == O_DISTRIBUTE) ||
-						((dist > Globals->LOCAL_TRANSPORT) &&
-						 (o->type == O_TRANSPORT))) {
-						if (u->GetSkill(S_QUARTERMASTER) == 0) {
-							u->error(ordertype + ": Unit is not a quartermaster");
-							o->type = NORDERS;
-							continue;
-						}
-						if ((u != obj->GetOwner()) ||
-							!(ObjectDefs[obj->type].flags &
-								ObjectType::TRANSPORT) ||
-							(obj->incomplete > 0)) {
-						u->error(ordertype +
-								": Unit does not own transport structure.");
-						o->type = NORDERS;
-						continue;
-						}
-					}
+					// We will check the amount at transport time so that if you receive items in you can tranport them
+					// out without using 'all/except'
+					// We will also check max inventory at the actual time of transport since things might move
 
-					// make sure amount is available (all handled later)
-					if (o->amount > 0 && o->amount > u->GetSharedNum(o->item)) {
-						u->error(ordertype + ": Not enough " + ItemDefs[o->item].name + ".");
-						o->type = NORDERS;
-						continue;
-					}
-
-					if (o->amount > 0 && ItemDefs[o->item].max_inventory) {
-						int cur = tar->unit->items.GetNum(o->item) + o->amount;
-						if (cur > ItemDefs[o->item].max_inventory) {
-							u->error(ordertype + ": Target cannot have more than " +
-								ItemString(o->item, ItemDefs[o->item].max_inventory));
-							o->type = NORDERS;
-							continue;
-						}
-					}
-
-					// Check if we have a trade hex
+					// Check if we have a trade hex available
 					if (!Globals->TRANSPORT_NO_TRADE && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
-						u->error(ordertype + ": Faction cannot transport or distribute in that many hexes.");
+						u->error("TRANSPORT: Faction cannot transport or distribute in that many hexes.");
 						o->type = NORDERS;
 						continue;
 					}
@@ -3176,10 +3154,65 @@ void Game::CheckTransportOrders()
 	}
 }
 
-void Game::RunTransportOrders()
-{
+void Game::CollectInterQMTransportItems() {
+	forlist((&regions)) {
+		ARegion *r = (ARegion *)elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *)elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *)elem;
+				// Move the items from the transport_items list to the unit's items list
+				forlist((&u->transport_items)) {
+					Item *it = (Item *)elem;
+					u->items.SetNum(it->type, u->items.GetNum(it->type) + it->num);
+				}
+				u->transport_items.DeleteAll();
+			}
+		}
+	}
+}
+
+void Game::RunTransportOrders() {
 	if (!(Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT))
 		return;
+
+	// Make sure there are no transport items on the units (shouldn't be, but just in case)
+	forlist((&regions)) {
+		ARegion *r = (ARegion *)elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *)elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *)elem;
+				u->transport_items.Empty();
+			}
+		}
+	}
+
+	// Send all items in to QMs from non-QMs
+	RunTransportPhase(TransportOrder::SHIP_TO_QM);
+	// Ship items between QMs
+	RunTransportPhase(TransportOrder::INTER_QM_TRANSPORT);
+	// Move items from tempororary transport storage to the QM for distribution
+	CollectInterQMTransportItems();
+	// Send all items out from QMs to non-QMs
+	RunTransportPhase(TransportOrder::DISTRIBUTE_FROM_QM);
+
+	// erase all transport orders
+	forlist_reuse((&regions)) {
+		ARegion *r = (ARegion *)elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *)elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *)elem;
+				u->transportorders.DeleteAll();
+			}
+		}
+	}
+
+}
+
+void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
+
 	forlist ((&regions)) {
 		ARegion *r = (ARegion *)elem;
 		forlist((&r->objects)) {
@@ -3188,12 +3221,11 @@ void Game::RunTransportOrders()
 				Unit *u = (Unit *)elem;
 				forlist ((&u->transportorders)) {
 					TransportOrder *t = (TransportOrder *)elem;
-					if (t->type != O_TRANSPORT && t->type != O_DISTRIBUTE)
-						continue;
-					Location *tar = regions.GetUnitId(t->target,
-							u->faction->num, r);
+					if (t->type != O_TRANSPORT) continue;
+					if (t->phase != phase) continue;
+
+					Location *tar = regions.GetUnitId(t->target, u->faction->num, r);
 					if (!tar) continue;
-					string ordertype = (t->type == O_TRANSPORT) ? "TRANSPORT" : "DISTRIBUTE";
 
 					int amt = t->amount;
 					if (amt < 0) {
@@ -3201,26 +3233,31 @@ void Game::RunTransportOrders()
 						if (t->except) {
 							if (t->except > amt) {
 								amt = 0;
-								u->error(ordertype + ": EXCEPT value greater than amount on hand.");
+								u->error("TRANSPORT: EXCEPT value greater than amount on hand.");
 							} else {
 								amt = amt - t->except;
 							}
 						}
 					} else if (amt > u->GetSharedNum(t->item)) {
-						u->error(ordertype + ": Not enough.");
 						amt = u->GetSharedNum(t->item);
+						if (amt) {
+							u->error("TRANSPORT: Do not have " + ItemString(t->item, t->amount) +
+								". Transporting " + ItemString(t->item, amt) + " instead.");
+						} else {
+							u->error("TRANSPORT: Unable to transport. Have " + ItemString(t->item, 0) + ".");
+							continue;
+						}
 					}
 
 					if (ItemDefs[t->item].max_inventory) {
 						int cur = tar->unit->items.GetNum(t->item) + amt;
 						if (cur > ItemDefs[t->item].max_inventory) {
-							u->error(ordertype + ": Target cannot have more than " +
-									ItemString(t->item, ItemDefs[t->item].max_inventory));
+							u->error("TRANSPORT: Target cannot have more than " +
+									ItemString(t->item, ItemDefs[t->item].max_inventory) + ".");
 							continue;
 						}
 					}
 
-					u->ConsumeShared(t->item, amt);
 					// now see if the unit can pay for shipping
 					int penalty = 10000000;
 					RangeType *rt = FindRange("rng_transport");
@@ -3236,30 +3273,31 @@ void Game::RunTransportOrders()
 							cost *= (4 - ((u->GetSkill(S_QUARTERMASTER)+1)/2));
 					}
 
-					// if not, give it back
+					// if not, don't ship
 					if (cost > u->GetSharedMoney()) {
-						u->error(ordertype + ": Cannot afford shipping cost.");
-						u->items.SetNum(t->item, u->items.GetNum(t->item)+amt);
+						u->error("TRANSPORT: Cannot afford shipping cost for " + ItemString(t->item, amt) + ".");
 						continue;
 					}
 					u->ConsumeSharedMoney(cost);
 
-					string orderverb = (t->type == O_TRANSPORT) ? "Transports " : "Distributes ";
-					u->event(orderverb + ItemString(t->item, amt) + " to " + tar->unit->name->const_str() +
+					u->ConsumeShared(t->item, amt);
+					u->event("Transports " + ItemString(t->item, amt) + " to " + tar->unit->name->const_str() +
 						" for $" + to_string(cost) + ".", "transport");
 					if (u->faction != tar->unit->faction) {
 						tar->unit->event("Receives " + ItemString(t->item, amt) + " from " +
 							u->name->const_str() + ".", "transport");
 					}
 
-					tar->unit->items.SetNum(t->item,
-							tar->unit->items.GetNum(t->item) + amt);
+					if (phase == TransportOrder::INTER_QM_TRANSPORT) {
+						tar->unit->transport_items.SetNum(t->item, amt);
+					} else {
+						tar->unit->items.SetNum(t->item, tar->unit->items.GetNum(t->item) + amt);
+					}
 					tar->unit->faction->DiscoverItem(t->item, 0, 1);
 
 					u->Practice(S_QUARTERMASTER);
 
 				}
-				u->transportorders.DeleteAll();
 			}
 		}
 	}

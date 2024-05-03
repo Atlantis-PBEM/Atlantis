@@ -23,6 +23,7 @@ int UnitTestHelper::initialize_game() {
 }
 
 void UnitTestHelper::setup_turn() {
+    game.ModifyTablesPerRuleset();
     game.PreProcessTurn();
 }
 
@@ -53,10 +54,26 @@ Unit *UnitTestHelper::get_first_unit(Faction *faction) {
     return nullptr;
 }
 
+Unit *UnitTestHelper::create_unit(Faction *faction, ARegion *region) {
+    Unit *temp2 = game.GetNewUnit(faction);
+	temp2->SetMen(I_LEADERS, 1);
+    temp2->MoveUnit(region->GetDummy());
+    return temp2;
+}
+
 void UnitTestHelper::create_fleet(ARegion *region, Unit *owner, int ship_type, int ship_count) {
     for (auto i = 0; i < ship_count; i++)
         game.CreateShip(region, owner, ship_type);
  
+}
+
+void UnitTestHelper::create_building(ARegion *region, Unit *owner, int building_type) {
+    Object * obj = new Object(region);
+    obj->type = building_type;
+    obj->num = region->buildingseq++;
+    obj->SetName(new AString("Building"));
+    region->objects.Add(obj);
+    owner->MoveUnit(obj);
 }
 
 ARegion *UnitTestHelper::get_region(int x, int y, int z) {
@@ -70,6 +87,18 @@ string UnitTestHelper::cout_data() {
 
 void UnitTestHelper::parse_orders(int faction_id, istream& orders) {
     game.ParseOrders(faction_id, orders, nullptr);
+}
+
+void UnitTestHelper::check_transport_orders() {
+    game.CheckTransportOrders();
+}
+
+void UnitTestHelper::transport_phase(TransportOrder::TransportPhase phase) {
+    game.RunTransportPhase(phase);
+}
+
+void UnitTestHelper::collect_transported_goods() {
+    game.CollectInterQMTransportItems();
 }
 
 void UnitTestHelper::activate_spell(int spell, SpellTestHelper helper) {

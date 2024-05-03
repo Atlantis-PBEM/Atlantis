@@ -2348,8 +2348,8 @@ ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two,
 		int penalty, int maxdist)
 {
-	if (one->zloc == ARegionArray::LEVEL_NEXUS ||
-			two->zloc == ARegionArray::LEVEL_NEXUS)
+	// make sure you cannot teleport into or from the nexus
+	if (Globals->NEXUS_EXISTS && (one->zloc == ARegionArray::LEVEL_NEXUS ||	two->zloc == ARegionArray::LEVEL_NEXUS))
 		return 10000000;
 
 	if (Globals->ABYSS_LEVEL) {
@@ -2362,7 +2362,7 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two,
 
 	int one_x, one_y, two_x, two_y;
 	int maxy;
-	ARegionArray *pArr=pRegionArrays[ARegionArray::LEVEL_SURFACE];
+	ARegionArray *pArr = (Globals->NEXUS_EXISTS ? pRegionArrays[ARegionArray::LEVEL_SURFACE] : pRegionArrays[0]);
 
 	one_x = one->xloc * GetLevelXScale(one->zloc);
 	one_y = one->yloc * GetLevelYScale(one->zloc);
