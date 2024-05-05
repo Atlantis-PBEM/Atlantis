@@ -28,8 +28,11 @@
 #include "game.h"
 #include "gamedata.h"
 #include "quests.h"
+#include <cmath>
 #include <string>
 #include <iterator>
+
+using namespace std;
 
 #define MINIMUM_ACTIVE_QUESTS		5
 #define MAXIMUM_ACTIVE_QUESTS		20
@@ -38,6 +41,10 @@
 #define QUEST_MAX_REWARD		3000
 #define QUEST_SPAWN_CHANCE		70
 #define MAX_DESTINATIONS		5
+
+// If this is set to true, then the game will end if a faction has > 50% of all cities in the game with their id
+// in the name.
+#define CITY_VOTE_WIN false
 
 int Game::SetupFaction( Faction *pFac )
 {
@@ -417,17 +424,17 @@ Faction *Game::CheckVictory()
 	string stlstr;
 	set<string> intersection, un;
 	set<string>::iterator it2;
+	Faction *winner = nullptr;
 
 	forlist(&quests) {
 		q = (Quest *) elem;
 		if (q->type != Quest::VISIT)
 			continue;
-		for (it2 = q->destinations.begin();
-				it2 != q->destinations.end();
-				it2++) {
+		for (it2 = q->destinations.begin(); it2 != q->destinations.end(); it2++) {
 			un.insert(*it2);
 		}
 	}
+
 	visited = 0;
 	unvisited = 0;
 	forlist_reuse(&regions) {
@@ -465,14 +472,14 @@ Faction *Game::CheckVictory()
 	if (visited >= (unvisited + visited) * QUEST_EXPLORATION_PERCENT / 100) {
 		// Exploration phase complete: start creating relic quests
 		for (i = 0; i < QUEST_SPAWN_RATE; i++) {
-			if (quests.Num() < MAXIMUM_ACTIVE_QUESTS &&
-					getrandom(100) < QUEST_SPAWN_CHANCE)
+			if (quests.Num() < MAXIMUM_ACTIVE_QUESTS && getrandom(100) < QUEST_SPAWN_CHANCE)
 				CreateQuest(&regions, monfaction);
 		}
 		while (quests.Num() < MINIMUM_ACTIVE_QUESTS) {
 			CreateQuest(&regions, monfaction);
 		}
 	}
+
 	if (unvisited) {
 		// Tell the players to get exploring :-)
 		if (visited > 9 * unvisited) {
@@ -728,30 +735,82 @@ Faction *Game::CheckVictory()
 		}
 	}
 
-	if (TurnNumber() >= 29) { // 29 is just a number to avoid breaking snapshots
-		// Freezing effect
-		forlist_reuse(&regions) {
-			ARegion *r = (ARegion *) elem;
+	// Check for victory conditions based on the current game
+	if (CITY_VOTE_WIN) {
+		std::map <int, int> votes; // track votes per faction id
+		int total_cities = 0; // total cities possible for vote count
 
-			// No effect for regions with clear skies
-			if (r->clearskies) {
-				continue;
+		forlist(&regions) {
+			ARegion *r = (ARegion *)elem;
+			// Ignore anything but the surface
+			if (r->level->levelType != ARegionArray::LEVEL_SURFACE) continue;
+			if (!r->town || (r->town->TownType() != TOWN_CITY)) continue;
+
+			total_cities++;
+
+			string name = r->town->name->const_str();
+			string possible_faction = name.substr(0, name.find_first_of(" \t\n"));
+			// The first word of the name was not all numeric, don't count for anyone
+			if (!all_of(
+				possible_faction.begin(),
+				possible_faction.end(),
+				[](unsigned char ch){ return std::isdigit(ch); }
+			)) continue;
+			// Now that we know it's all numeric, convert it to an int
+			int faction_id = stoi(possible_faction);
+
+			// Make sure it's a valid faction
+			Faction *f = GetFaction(&factions, faction_id);
+			if (!f || f->is_npc) continue;
+
+			auto vote = votes.find(faction_id);
+			if (vote == votes.end()) {
+				votes[faction_id] = 1;
+			} else {
+				vote->second++;
 			}
+		}
 
-			// Check if regions in freezing zome in surface
-			if (r->zloc == ARegionArray::LEVEL_SURFACE && (r->yloc <= 0 || r->yloc >= 71)) {
-				r->Pillage();
-				r->SetWeather(W_BLIZZARD);
-				printf("Freeze (%d,%d) region in %s of %s\n",
-					r->xloc, r->yloc, r->name->Str(), TerrainDefs[TerrainDefs[r->type].similar_type].name
-				);
+		// Set up the voting result to be reported if we are far enough in
+		string message = "Voting results: \n";
+
+		int max_vote = -1;
+		bool tie = false;
+		Faction *maxFaction = nullptr;
+		for (const auto& vote : votes) {
+			Faction *f = GetFaction(&factions, vote.first);
+			if (vote.second > max_vote) {
+				max_vote = vote.second;
+				maxFaction = f;
+				tie = false;
+			} else if (vote.second == max_vote) {
+				tie = true;
+				maxFaction = nullptr;
 			}
+			message += "Faction " + string(f->name->const_str()) + " has " + to_string(vote.second) + " votes.\n";
+		}
 
-			// TODO: Check if regions in freezing zome in UW
+		// See if we have enough votes to even report the info.  Since a win requires 50% + 1, we can start reporting
+		// once someone has more than 25% of the cities.
+		if (max_vote > (total_cities / 4)) {
+			// Now see if we have a winner at all
+			if (max_vote > ((total_cities / 2) + 1)) {
+				winner = maxFaction;
+				message += "\n" + string(winner->name->const_str()) + " has enough votes and has won the game!";
+			} else {
+				int percent = floor((max_vote * 100) / total_cities);
+				if (tie) {
+					message += "\nThere is a tie for the most votes with multiple factions having ";
+				} else {
+					message += string("\n") + "The current leader is " + string(maxFaction->name->const_str()) + " with ";
+				}
+				message += to_string(max_vote) + "/" + to_string(total_cities) + " votes (" + to_string(percent) + "%).";
+			}
+			WriteTimesArticle(message);
 		}
 	}
 
-	return NULL;
+	return winner;
 }
 
 void Game::ModifyTablesPerRuleset(void)

@@ -200,7 +200,8 @@ void Game::parse_error(OrdersCheck *order_check, Unit *unit, Faction *faction, c
 
 void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 {
-	Faction *fac = 0;
+	Faction *fac = nullptr;
+	Faction *passFac = nullptr;
 	Unit *unit = 0;
 	int indent = 0, code, i;
 	AString order, prefix;
@@ -230,6 +231,8 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 				if (pCheck) {
 					fac = &(pCheck->dummyFaction);
 					pCheck->numshows = 0;
+					// Even though we don't use the real faction for other things, we do want it for the password check.
+					passFac = GetFaction(&factions, token->value());
 				} else {
 					fac = GetFaction(&factions, token->value());
 				}
@@ -243,6 +246,18 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 					if (!token) {
 						parse_error(pCheck, 0, fac, "Warning: No password on #atlantis line.");
 						parse_error(pCheck, 0, fac, "If this is your first turn, ignore this error.");
+					} else {
+						// If we found their real faction above (we should have but let's not assume), then we
+						// can check if they gave us the correct password.
+						if (passFac) {
+							bool has_password = !(*(passFac->password) == "none");
+							bool wrong_password = !(*(passFac->password) == *token);
+							if (has_password && wrong_password) {
+								parse_error(pCheck, 0, fac, "Incorrect password on #atlantis line.");
+								fac = 0;
+								break;
+							}
+						}
 					}
 				} else {
 					if (!(*(fac->password) == "none")) {
@@ -1538,8 +1553,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 					}
 					int flying = ItemDefs[st].fly;
 					if (!reg->IsCoastalOrLakeside() && (flying <= 0)) {
-						unit->error("BUILD: Can't build ship in "
-								"non-coastal or lakeside region.");
+						unit->error("BUILD: Can't build ship in non-coastal or lakeside region.");
 						return;
 					}
 					unit->build = -st;
@@ -2909,12 +2923,13 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	int item = ParseTransportableItem(token);
-	delete token;
 
 	if (item == -1) {
-		parse_error(pCheck, u, 0, "TRANSPORT: Invalid item.");
+		parse_error(pCheck, u, 0, "TRANSPORT: Invalid item" + string(token->const_str()) + ".");
+		delete token;
 		return;
 	}
+	delete token;
 
 	int except = 0;
 	token = o->gettoken();

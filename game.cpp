@@ -230,9 +230,10 @@ void Game::WriteUnderworldMap(ostream& f, ARegionArray *pArr, int type)
 int Game::ViewMap(const AString & typestr,const AString & mapfile)
 {
 	int type = 0;
-	if (AString(typestr) == "wmon") type = 1;
-	if (AString(typestr) == "lair") type = 2;
-	if (AString(typestr) == "gate") type = 3;
+	if (typestr == "wmon") type = 1;
+	if (typestr == "lair") type = 2;
+	if (typestr == "gate") type = 3;
+	if (typestr == "cities") type = 4;
 
 	ofstream f(mapfile.const_str(), ios::out|ios::ate);
 	if (!f.is_open()) return(0);
@@ -250,6 +251,23 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 		case 3:
 			f << "Gate Map\n";
 			break;
+		case 4:
+			f << "Cities Map\n";
+			break;
+	}
+
+	// Cities map is a bit special since it is really just a list of all the cities in that region
+	if (type == 4) {
+		forlist(&regions) {
+			ARegion *reg = (ARegion *)elem;
+			// Ignore anything that isn't the surface
+			if (reg->level->levelType != ARegionArray::LEVEL_SURFACE) continue;
+			// Ignore anything with no city
+			if (!reg->town || (reg->town->TownType() != TOWN_CITY)) continue;
+
+			f << "(" << reg->xloc << "," << reg->yloc << "): " << reg->town->name << "\n";
+		}
+		return(1);
 	}
 
 	int i;
