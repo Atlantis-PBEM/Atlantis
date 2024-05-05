@@ -28,6 +28,7 @@
 #include "game.h"
 #include "gamedata.h"
 #include "quests.h"
+#include <cmath>
 #include <string>
 #include <iterator>
 
@@ -748,7 +749,7 @@ Faction *Game::CheckVictory()
 			total_cities++;
 
 			string name = r->town->name->const_str();
-			string possible_faction = name.substr(0, s.find_first_of(" \t\n"));
+			string possible_faction = name.substr(0, name.find_first_of(" \t\n"));
 			// The first word of the name was not all numeric, don't count for anyone
 			if (!all_of(
 				possible_faction.begin(),
@@ -797,11 +798,11 @@ Faction *Game::CheckVictory()
 				winner = maxFaction;
 				message += "\n" + string(winner->name->const_str()) + " has enough votes and has won the game!";
 			} else {
-				percent = (max_vote * 100) / total_cities;
+				int percent = floor((max_vote * 100) / total_cities);
 				if (tie) {
 					message += "\nThere is a tie for the most votes with multiple factions having ";
 				} else {
-					message += "\n" + "The current leader is " + string(maxFaction->name->const_str()) + " with ";
+					message += string("\n") + "The current leader is " + string(maxFaction->name->const_str()) + " with ";
 				}
 				message += to_string(max_vote) + "/" + to_string(total_cities) + " votes (" + to_string(percent) + "%).";
 			}

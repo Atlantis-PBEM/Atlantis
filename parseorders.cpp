@@ -200,7 +200,8 @@ void Game::parse_error(OrdersCheck *order_check, Unit *unit, Faction *faction, c
 
 void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 {
-	Faction *fac = 0;
+	Faction *fac = nullptr;
+	Faction *passFac = nullptr;
 	Unit *unit = 0;
 	int indent = 0, code, i;
 	AString order, prefix;
@@ -227,7 +228,6 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 					fac = 0;
 					break;
 				}
-				Faction *passFac = nullptr;
 				if (pCheck) {
 					fac = &(pCheck->dummyFaction);
 					pCheck->numshows = 0;

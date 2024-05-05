@@ -61,7 +61,7 @@ public:
     // Create a building in the given region.
     void create_building(ARegion *region, Unit *owner, int building_type);
     // Parse the orders contained in the input stream.
-    void parse_orders(int faction_id, istream& orders);
+    void parse_orders(int faction_id, istream& orders, OrdersCheck *check = nullptr);
     // Run the transport order checks
     void check_transport_orders();
     // Run one phase of the transport orders
