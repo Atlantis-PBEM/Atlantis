@@ -1591,6 +1591,7 @@ int Unit::Practice(int sk)
 			skills.SetExp(sk, exp);
 		}
 		practiced = 1;
+		event("Gets " + to_string(bonus) +" days of practice with " + SkillDefs[sk].name + ".", "practice");
 	}
 
 	return bonus;

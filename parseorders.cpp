@@ -1553,8 +1553,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 					}
 					int flying = ItemDefs[st].fly;
 					if (!reg->IsCoastalOrLakeside() && (flying <= 0)) {
-						unit->error("BUILD: Can't build ship in "
-								"non-coastal or lakeside region.");
+						unit->error("BUILD: Can't build ship in non-coastal or lakeside region.");
 						return;
 					}
 					unit->build = -st;
@@ -2924,12 +2923,13 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	int item = ParseTransportableItem(token);
-	delete token;
 
 	if (item == -1) {
-		parse_error(pCheck, u, 0, "TRANSPORT: Invalid item.");
+		parse_error(pCheck, u, 0, "TRANSPORT: Invalid item" + string(token->const_str()) + ".");
+		delete token;
 		return;
 	}
+	delete token;
 
 	int except = 0;
 	token = o->gettoken();
