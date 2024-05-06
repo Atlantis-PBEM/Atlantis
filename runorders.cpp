@@ -1731,31 +1731,30 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
 				Unit *u = (Unit *) elem;
-				if (u->needed > 0 && ((!consume) ||
-								(u->GetFlag(FLAG_CONSUMING_UNIT) ||
-								u->GetFlag(FLAG_CONSUMING_FACTION)))) {
+				if (u->needed > 0 &&
+					((!consume) || (u->GetFlag(FLAG_CONSUMING_UNIT) || u->GetFlag(FLAG_CONSUMING_FACTION)))) {
 					int amount = u->items.GetNum(item);
 					if (amount) {
 						int eat = (u->needed + value - 1) / value;
-						if (eat > amount)
-							eat = amount;
+						if (eat > amount) eat = amount;
 						if (ItemDefs[item].type & IT_FOOD) {
-							if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-								eat * value > u->stomach_space) {
+							if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 && eat * value > u->stomach_space) {
 								eat = (u->stomach_space + value - 1) / value;
-								if (eat < 0)
-									eat = 0;
+								if (eat < 0) eat = 0;
 							}
 							u->hunger -= eat * value;
 							u->stomach_space -= eat * value;
-							if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-								u->stomach_space < 0) {
+							if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 && u->stomach_space < 0) {
 								u->needed -= u->stomach_space;
 								u->stomach_space = 0;
 							}
 						}
-						u->needed -= eat * value;
-						u->items.SetNum(item, amount - eat);
+						if (eat) {
+							u->needed -= eat * value;
+							u->items.SetNum(item, amount - eat);
+
+							u->event("Consumes " + ItemString(item, eat) + " for maintenance.", "maintenance");
+						}
 					}
 				}
 			}
@@ -1771,8 +1770,7 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
 				Unit *u = (Unit *) elem;
-				if (u->needed > 0 && ((!consume) ||
-						u->GetFlag(FLAG_CONSUMING_FACTION))) {
+				if (u->needed > 0 && ((!consume) || u->GetFlag(FLAG_CONSUMING_FACTION))) {
 					/* Go through all units again */
 					forlist((&r->objects)) {
 						Object *obj2 = (Object *) elem;
@@ -1783,25 +1781,28 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 								int amount = u2->items.GetNum(item);
 								if (amount) {
 									int eat = (u->needed + value - 1) / value;
-									if (eat > amount)
-										eat = amount;
+									if (eat > amount) eat = amount;
 									if (ItemDefs[item].type & IT_FOOD) {
-										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-											eat * value > u->stomach_space) {
+										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 && eat * value > u->stomach_space) {
 											eat = (u->stomach_space + value - 1) / value;
-											if (eat < 0)
-												eat = 0;
+											if (eat < 0) eat = 0;
 										}
 										u->hunger -= eat * value;
 										u->stomach_space -= eat * value;
-										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-											u->stomach_space < 0) {
+										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 && u->stomach_space < 0) {
 											u->needed -= u->stomach_space;
 											u->stomach_space = 0;
 										}
 									}
-									u->needed -= eat * value;
-									u2->items.SetNum(item, amount - eat);
+									if (eat) {
+										u->needed -= eat * value;
+										u2->items.SetNum(item, amount - eat);
+
+										u->event("Borrows " + ItemString(item, eat) + " from " + u2->name->const_str() +
+											" for maintenance.", "maintenance");
+										u2->event(string(u->name->const_str()) + " borrows " + ItemString(item, eat) +
+											" for maintenance.", "maintenance");
+									}
 								}
 							}
 						}
@@ -1828,24 +1829,19 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 						Object *obj2 = (Object *) elem;
 						forlist((&obj2->units)) {
 							Unit *u2 = (Unit *) elem;
-							if (u->faction != u2->faction &&
-								u2->GetAttitude(r, u) == A_ALLY) {
+							if (u->faction != u2->faction && u2->GetAttitude(r, u) == A_ALLY) {
 								int amount = u2->items.GetNum(item);
 								if (amount) {
 									int eat = (u->needed + value - 1) / value;
-									if (eat > amount)
-										eat = amount;
+									if (eat > amount) eat = amount;
 									if (ItemDefs[item].type & IT_FOOD) {
-										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-											eat * value > u->stomach_space) {
+										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 && eat * value > u->stomach_space) {
 											eat = (u->stomach_space + value - 1) / value;
-											if (eat < 0)
-												eat = 0;
+											if (eat < 0) eat = 0;
 										}
 										u->hunger -= eat * value;
 										u->stomach_space -= eat * value;
-										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-											u->stomach_space < 0) {
+										if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 && u->stomach_space < 0) {
 											u->needed -= u->stomach_space;
 											u->stomach_space = 0;
 										}
@@ -1854,10 +1850,9 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 										u->needed -= eat * value;
 										u2->items.SetNum(item, amount - eat);
 										u2->event(string(u->name->const_str()) + " borrows " +
-											ItemString(item, eat) + " for maintenance.", "maintainence");
+											ItemString(item, eat) + " for maintenance.", "maintenance");
 										u->event("Borrows " + ItemString(item, eat) + " from " +
-											u2->name->const_str() + " for maintenance.", "maintainence");
-										u2->items.SetNum(item, amount - eat);
+											u2->name->const_str() + " for maintenance.", "maintenance");
 									}
 								}
 							}
@@ -1883,17 +1878,18 @@ void Game::CheckUnitHungerItem(int item, int value)
 					int amount = u->items.GetNum(item);
 					if (amount) {
 						int eat = (u->hunger + value - 1) / value;
-						if (eat > amount)
-							eat = amount;
+						if (eat > amount) eat = amount;
 						u->hunger -= eat * value;
 						u->stomach_space -= eat * value;
 						u->needed -= eat * value;
-						if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-							u->stomach_space < 0) {
+						if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 && u->stomach_space < 0) {
 							u->needed -= u->stomach_space;
 							u->stomach_space = 0;
 						}
-						u->items.SetNum(item, amount - eat);
+						if(eat) {
+							u->items.SetNum(item, amount - eat);
+							u->event("Consumes " + ItemString(item, eat) + " to fend off starvation.", "maintenance");
+						}
 					}
 				}
 			}
@@ -1920,17 +1916,21 @@ void Game::CheckFactionHungerItem(int item, int value)
 								int amount = u2->items.GetNum(item);
 								if (amount) {
 									int eat = (u->hunger + value - 1) / value;
-									if (eat > amount)
-										eat = amount;
+									if (eat > amount) eat = amount;
 									u->hunger -= eat * value;
 									u->stomach_space -= eat * value;
 									u->needed -= eat * value;
-									if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-										u->stomach_space < 0) {
+									if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 && u->stomach_space < 0) {
 										u->needed -= u->stomach_space;
 										u->stomach_space = 0;
 									}
-									u2->items.SetNum(item, amount - eat);
+									if (eat) {
+										u2->items.SetNum(item, amount - eat);
+										u->event("Borrows " + ItemString(item, eat) + " from " + u2->name->const_str() +
+											" to fend off starvation.", "maintenance");
+										u2->event(string(u->name->const_str()) + " borrows " + ItemString(item, eat) +
+											" to fend off starvation.", "maintenance");
+									}
 								}
 							}
 						}
@@ -1962,22 +1962,21 @@ void Game::CheckAllyHungerItem(int item, int value)
 								int amount = u2->items.GetNum(item);
 								if (amount) {
 									int eat = (u->hunger + value - 1) / value;
-									if (eat > amount)
-										eat = amount;
+									if (eat > amount) eat = amount;
 									u->hunger -= eat * value;
 									u->stomach_space -= eat * value;
 									u->needed -= eat * value;
-									if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 &&
-										u->stomach_space < 0) {
+									if (Globals->UPKEEP_MAXIMUM_FOOD >= 0 && u->stomach_space < 0) {
 										u->needed -= u->stomach_space;
 										u->stomach_space = 0;
 									}
-									u2->items.SetNum(item, amount - eat);
-										u2->event(string(u->name->const_str()) + " borrows " +
-											ItemString(item, eat) + " to fend off starvation.", "maintainence");
-										u->event("Borrows " + ItemString(item, eat) + " from " +
-											u2->name->const_str() + " to fend off starvation.", "maintainence");
+									if (eat) {
 										u2->items.SetNum(item, amount - eat);
+										u2->event(string(u->name->const_str()) + " borrows " +
+											ItemString(item, eat) + " to fend off starvation.", "maintenance");
+										u->event("Borrows " + ItemString(item, eat) + " from " +
+											u2->name->const_str() + " to fend off starvation.", "maintenance");
+									}
 								}
 							}
 						}
@@ -2027,11 +2026,12 @@ void Game::AssessMaintenance()
 			for (int j = 0; j < NITEMS; j++) {
 				if (ItemDefs[j].flags & ItemType::DISABLED) continue;
 				if (ItemDefs[j].type & IT_FOOD) {
-					if (i == -1 ||
-							ItemDefs[i].baseprice > ItemDefs[j].baseprice)
+					if (i == -1 || ItemDefs[i].baseprice > ItemDefs[j].baseprice) {
 						i = j;
+					}
 				}
 			}
+
 			if (i > 0) {
 				cost = ItemDefs[i].baseprice * 5 / 2;
 				forlist((&regions)) {
@@ -2045,14 +2045,14 @@ void Game::AssessMaintenance()
 								int eat = (u->hunger + value - 1) / value;
 								/* Now see if faction has money */
 								if (u->faction->unclaimed >= eat * cost) {
-									u->event("Withdraws " + ItemString(i, eat) + " for maintenance.", "maintainence");
+									u->event("Withdraws " + ItemString(i, eat) + " for maintenance.", "maintenance");
 									u->faction->unclaimed -= eat * cost;
 									u->hunger -= eat * value;
 									u->stomach_space -= eat * value;
 									u->needed -= eat * value;
 								} else {
 									int amount = u->faction->unclaimed / cost;
-									u->event("Withdraws " + ItemString(i, amount) + " for maintenance.", "maintainence");
+									u->event("Withdraws " + ItemString(i, amount) + " for maintenance.", "maintenance");
 									u->faction->unclaimed -= amount * cost;
 									u->hunger -= amount * value;
 									u->stomach_space -= amount * value;
@@ -2110,12 +2110,12 @@ void Game::AssessMaintenance()
 					if (u->needed > 0 && u->faction->unclaimed) {
 						/* Now see if faction has money */
 						if (u->faction->unclaimed >= u->needed) {
-							u->event("Claims " + to_string(u->needed) + " silver for maintenance.", "maintainence");
+							u->event("Claims " + to_string(u->needed) + " silver for maintenance.", "maintenance");
 							u->faction->unclaimed -= u->needed;
 							u->needed = 0;
 						} else {
-							u->event("Claims " + to_string(u->faction->unclaimed) +
-								" silver for maintenance.", "maintainence");
+							u->event("Claims " + to_string(u->faction->unclaimed) +	" silver for maintenance.",
+								"maintenance");
 							u->needed -= u->faction->unclaimed;
 							u->faction->unclaimed = 0;
 						}

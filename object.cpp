@@ -339,7 +339,7 @@ void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
 				if (incomplete > (0 - ob.maxMonthlyDecay)) {
 					container["decaying"] = true;
 				} else if (incomplete > (0 - ob.maxMaintenance/2)) {
-					container["needs_maintainence"] = true;
+					container["needs_maintenance"] = true;
 				}
 			}
 		}
