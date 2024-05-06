@@ -582,7 +582,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	string job;
 	if (needed < 1) {
 		// This looks wrong, but isn't.
-		// If a building has a maxMaintainence of 75 and the road is at
+		// If a building has a maxMaintenance of 75 and the road is at
 		// -70 (ie, 5 from max) then we want the value of maintMax to be
 		// 5 here.  Then we divide by maintFactor (some things are easier
 		// to refix than others) to get how many items we need to fix it.
@@ -1564,7 +1564,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		if (taughtdays) {
 			str += " and was taught for " + to_string(taughtdays) + " days";
 		}
-		str += ".";
+		str += " at a cost of " + ItemString(I_SILVER, cost) + ".";
 		u->event(str, "study");
 		// study to level order
 		if (o->level != -1) {

@@ -5209,7 +5209,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("p", true) << "After that, Stephen Baillie took over the code and maintained it until "
 	  << "the v5.2.3-v5.2.5 time frame.\n"
 	  << enclose("p", false);
-	f << enclose("p", true) << "Artem Trytiak took over the code maintainence at that point and has maintained it "
+	f << enclose("p", true) << "Artem Trytiak took over the code maintenance at that point and has maintained it "
 	  << "since along with a number of other contrubutors to the github project.\n"
 	  << enclose("p", false);
 	f << enclose("p", true) << "The Atlantis source code is now hosted on github at the "

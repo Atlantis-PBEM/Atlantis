@@ -34,7 +34,7 @@ Changes from 4.0.10g -> 4.0.10h
       prevented from further moves or attacks.  Full healing should mean
       no penalties.
    -- Fixed a bug in output of rules when dealing with skill-based
-      maintainence.
+      maintenance.
    -- Fixed a bug dealing with the cost of non-skilled units versus skilled
       units when in a maintenance mode which requires skill based upkeep.
       Units will now pay the maximum of the skill based upkeep or the normal
