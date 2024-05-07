@@ -2085,22 +2085,29 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		}
 	}
 	f << ".";
-	if (Globals->FOOD_ITEMS_EXIST) {
+	if (Globals->FOOD_ITEMS_EXIST && Globals->UPKEEP_FOOD_VALUE > 0) {
 		f << " Units may substitute one unit of ";
-		int j = 0;
+		bool first = true;
 		int last = -1;
 		for (int i = 0; i < NITEMS; i++) {
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_FOOD)) continue;
 			if (last != -1) {
-				if (j > 0) f << ", ";
+				if (!first) f << ", ";
 				f << ItemDefs[last].names;
+				first = false;
 			}
 			last = i;
-			j++;
 		}
-		if (j > 0) f << " or ";
-		f << ItemDefs[last].names << " for each " << Globals->UPKEEP_FOOD_VALUE << " silver of maintenance owed. ";
+		if (!first) f << " or ";
+		f << ItemDefs[last].names << " for each " << Globals->UPKEEP_FOOD_VALUE << " silver ";
+		bool evenly_divisible = Globals->MAINTENANCE_COST % Globals->UPKEEP_FOOD_VALUE == 0;
+		if (!evenly_divisible) f << " (or fraction thereof) ";
+		f << "of maintenance owed. ";
+		if (!evenly_divisible) {
+			f << "Food value for a fractional maintenance cost still consumes the entire unit of food. ";
+		}
+		
 		if (Globals->UPKEEP_MINIMUM_FOOD > 0) {
 			f << "A unit must be given at least " << Globals->UPKEEP_MINIMUM_FOOD
 			  << " maintenance per man in the form of food. ";
