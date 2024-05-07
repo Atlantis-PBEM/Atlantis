@@ -655,6 +655,10 @@ void ARegion::SetupCityMarket()
 		supply[i] = 0;
 		num--;
 	}
+
+	// If we don't have at least 4 trade items don't set up trade markets
+	if (numtrade < 4) return;
+
 	/* Set up the trade items */
 	int buy1 = getrandom(numtrade);
 	int buy2 = getrandom(numtrade);
@@ -668,8 +672,7 @@ void ARegion::SetupCityMarket()
 	buy1 = getrandom(numtrade);
 	while (buy1 == buy2) buy2 = getrandom(numtrade);
 	while (sell1 == buy1 || sell1 == buy2) sell1 = getrandom(numtrade);
-	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
-		sell2 = getrandom(numtrade);
+	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1) sell2 = getrandom(numtrade);
 
 	for (int i=0; i<NITEMS; i++) {
 		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
