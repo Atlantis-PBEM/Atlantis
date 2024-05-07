@@ -2121,6 +2121,28 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "them and using the money is more economical than using them for maintenance.";
 	};
 	f << '\n' << enclose("p", false);
+	f << enclose("p", true);
+	f << "Maintenance costs are paid in the following order:";
+	f << enclose("ol", true);
+	if (Globals->FOOD_ITEMS_EXIST && Globals->UPKEEP_FOOD_VALUE > 0) {
+		f << enclose("li", true) << "Food items the unit owns if the unit is set " << url("#consume", "CONSUME UNIT")
+		  << "or " << url("#consume", "CONSUME FACTION") << "\n" << enclose("li", false);
+		f << enclose("li", true) << "Food items from faction units in the same region if the unit is set "
+		  << url("#consume", "CONSUME FACTION") << "\n" << enclose("li", false);
+	}
+	f << enclose("li", true) << "Silver in the unit's possession\n" << enclose("li", false);
+	f << enclose("li", true) << "Silver from other faction units in the same region.\n" << enclose("li", false);
+	if (Globals->FOOD_ITEMS_EXIST && Globals->UPKEEP_FOOD_VALUE > 0) {
+		f << enclose("li", true) << "Food items in the unit's possession.\n" << enclose("li", false);
+		f << enclose("li", true) << "Food items from faction units in the same region.\n" << enclose("li", false);
+	}
+	f << enclose("li", true) << "Unclaimed silver.\n" << enclose("li", false);
+	f << enclose("li", true) << "Silver from allied units in the same region.\n" << enclose("li", false);
+	if (Globals->FOOD_ITEMS_EXIST && Globals->UPKEEP_FOOD_VALUE > 0) {
+		f << enclose("li", true) << "Food items from allied units in the same region.\n" << enclose("li", false);
+	}
+	f << enclose("ol", false);
+	f << enclose("p", false);
 
 	f << anchor("economy_recruiting") << '\n';
 	f << enclose("h3", true) << "Recruiting:\n" << enclose("h3", false);
