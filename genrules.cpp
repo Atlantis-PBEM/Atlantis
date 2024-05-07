@@ -2102,7 +2102,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		if (!first) f << " or ";
 		f << ItemDefs[last].names << " for each " << Globals->UPKEEP_FOOD_VALUE << " silver ";
 		bool evenly_divisible = Globals->MAINTENANCE_COST % Globals->UPKEEP_FOOD_VALUE == 0;
-		if (!evenly_divisible) f << " (or fraction thereof) ";
+		if (!evenly_divisible) f << "(or fraction thereof) ";
 		f << "of maintenance owed. ";
 		if (!evenly_divisible) {
 			f << "Food value for a fractional maintenance cost still consumes the entire unit of food. ";
