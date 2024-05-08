@@ -2418,12 +2418,46 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
     </p>
     <p>
       This fee is generally 10 silver for a normal character. Units may
-      substitute one unit of , grain, livestock or fish for each 10 silver of
+      substitute one unit of grain, livestock or fish for each 10 silver of
       maintenance owed. A unit may use the <a href="#consume">CONSUME</a>
       order to specify that it wishes to use food items in preference to
       silver.  Note that these items are worth more when sold in towns, so
       selling them and using the money is more economical than using them for
       maintenance.
+    </p>
+    <p>
+      Maintenance costs are paid in the following order:<ol>
+        <li>
+          Food items the unit owns if the unit is set <a
+          href="#consume">CONSUME UNIT</a>or <a href="#consume">CONSUME
+          FACTION</a>
+        </li>
+        <li>
+          Food items from faction units in the same region if the unit is set
+          <a href="#consume">CONSUME FACTION</a>
+        </li>
+        <li>
+          Silver in the unit's possession
+        </li>
+        <li>
+          Silver from other faction units in the same region.
+        </li>
+        <li>
+          Food items in the unit's possession.
+        </li>
+        <li>
+          Food items from faction units in the same region.
+        </li>
+        <li>
+          Unclaimed silver.
+        </li>
+        <li>
+          Silver from allied units in the same region.
+        </li>
+        <li>
+          Food items from allied units in the same region.
+        </li>
+      </ol>
     </p>
     <a name="economy_recruiting"></a>
     <h3>

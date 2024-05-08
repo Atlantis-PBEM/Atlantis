@@ -655,6 +655,10 @@ void ARegion::SetupCityMarket()
 		supply[i] = 0;
 		num--;
 	}
+
+	// If we don't have at least 4 trade items don't set up trade markets
+	if (numtrade < 4) return;
+
 	/* Set up the trade items */
 	int buy1 = getrandom(numtrade);
 	int buy2 = getrandom(numtrade);
@@ -668,8 +672,7 @@ void ARegion::SetupCityMarket()
 	buy1 = getrandom(numtrade);
 	while (buy1 == buy2) buy2 = getrandom(numtrade);
 	while (sell1 == buy1 || sell1 == buy2) sell1 = getrandom(numtrade);
-	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
-		sell2 = getrandom(numtrade);
+	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1) sell2 = getrandom(numtrade);
 
 	for (int i=0; i<NITEMS; i++) {
 		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
@@ -1192,27 +1195,25 @@ int ARegion::TownGrowth()
 		int tot = 0;
 		for (const auto& m : markets) {
 			if (Population() > m->minpop) {
-				if (ItemDefs[m->item].type & IT_TRADE) {
-					if (m->type == M_BUY) {
+				if (m->type == M_BUY) {
+					if (ItemDefs[m->item].type & IT_TRADE) {
 						amt += 5 * m->activity;
 						tot += 5 * m->maxamt;
 						/* regional economic improvement */
 						improvement += 3 * amt;
 					}
-				} else {
-					if (m->type == M_SELL) {
-						// Only food items except fish are mandatory
-						// for town growth - other items can
-						// be used in replacement
-						if (ItemDefs[m->item].type & IT_FOOD) {
-							amt += 2 * m->activity;
-						} else amt += m->activity;
-						if ((ItemDefs[m->item].type & IT_FOOD)
-							&& (m->item != I_FISH))	tot += 2 * m->maxamt;
-						if (ItemDefs[m->item].type & IT_TRADE) {
-							/* regional economic improvement */
-							improvement += 3 * amt;
-						}
+				} else { // m->type == M_SELL
+					// Only food items except fish are mandatory
+					// for town growth - other items can
+					// be used in replacement
+					if (ItemDefs[m->item].type & IT_FOOD) {
+						amt += 2 * m->activity;
+					} else amt += m->activity;
+					if ((ItemDefs[m->item].type & IT_FOOD) && (m->item != I_FISH))
+						tot += 2 * m->maxamt;
+					if (ItemDefs[m->item].type & IT_TRADE) {
+						/* regional economic improvement */
+						improvement += 3 * amt;
 					}
 				}
 			}
