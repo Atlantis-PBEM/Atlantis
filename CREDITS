@@ -13,14 +13,12 @@ Stefan Morrell
     The patch for Apprentices/revamping Lacandon Conquest
 Karl Castle
     Implementation of alternate army rout methods.
-    Patch for bug with losing items other than prepared items when in game
-      with USE_PREPARED_COMMAND
+    Patch for bug with losing items other than prepared items when in game with USE_PREPARED_COMMAND
 Jon Bagshaw
     Working with Stefan on Lacandon Conquest
 Tom Alsen (aka Tzarg)
     Implementation of the FIND ALL order, and a new combat system
-    Implementation of the SPOILS code which allows saner battle spoils
-      selection.
+    Implementation of the SPOILS code which allows saner battle spoils selection.
     Implmented a GIVE ALL <category> option.
     Multiple other code enhancements.
 Ben Lloyd
@@ -32,25 +30,21 @@ Andrew Zhilenko
 Terho Uotila
     A couple of ideas and items
 Paul Mehrer
-    Submitted patch to allow limiting the number of mages which can study
-      in any give building type.
+    Submitted patch to allow limiting the number of mages which can study in any give building type.
 Stephen Baillie
-    Submitted a patch to allow units passing through a region (but not
-      stopping) to generate a partial, slightly innacurate hex report.
-    Pointed out bugs in the easier underworld code, the improved
-      farsight code and other places.
+    Submitted a patch to allow units passing through a region (but not stopping) to generate a partial,
+        slightly innacurate hex report.
+    Pointed out bugs in the easier underworld code, the improved farsight code and other places.
     Implemented multiple taxation options controlling who could tax.
     Implemented skill improvement through practice code.
-    Changed MOVE and SAIL to queue moves that failed because of lack
-      of movement points, so that @TURN caravans can cope with weather.
+    Changed MOVE and SAIL to queue moves that failed because of lack of movement points, so that
+        @TURN caravans can cope with weather.
     Cleaned up TURN processing significantly.
-    Added code to generate icosahedral (ie, approximately spherical)
-      levels.
+    Added code to generate icosahedral (ie, approximately spherical) levels.
     Various small changes and fixes
 Nick Hoggard
     Implementation of the EXCHANGE order.
-    Implementation of the TURN order which allows pre-doing turn orders as
-      well as cyclical orders.
+    Implementation of the TURN order which allows pre-doing turn orders as well as cyclical orders.
 Peter Rayner
     Patch for 'EVICT' command.
 Vitauts Stochka
@@ -63,21 +57,34 @@ Jan Rietema
 Michael Scalet
     Implemented BANKs, Banking skill and BANK order.
 Sergey Budnevitch
-    Fixed integer overflow bug which allowed creating items via bogus
-      give orders.
+    Fixed integer overflow bug which allowed creating items via bogus give orders.
 Anthony Briggs
     Coastal fish patch
     New Gamemaster guide
     Smoke testing script
-	Added a patch to limit tact-5 leaders based on points spent in war.
-	The Fracas variant
-	Different bullets for units based on your attitude to them
-	The NOSTUDY, NOTEACH and NOEXP flags for skills.
+    Added a patch to limit tact-5 leaders based on points spent in war.
+    The Fracas variant
+    Different bullets for units based on your attitude to them
+    The NOSTUDY, NOTEACH and NOEXP flags for skills.
 Joseph Traub
     Changes, updates, and merging a few disparate branches
     Maintaining and extending the 4.0.X code.
-	Implemented quartermasters and TRANSPORT/DISTRIBUTE
+    Implemented quartermasters and TRANSPORT/DISTRIBUTE
 Peter Christie
-	Added coracles (a boat smaller than a longboat)
+    Added coracles (a boat smaller than a longboat)
 Bradley "Starstrike"
-	Updated the editing code
+    Updated the editing code
+Valdis Zobēla
+    Many updates and patches to the New Origins sourcecode over time.
+Artem Trytiak
+    Maintenance, ownership and improvements for the entire life of the New Origins code.
+Edward Brekelbaum
+    Various bugfixes.
+    Maintainer of the True Atlanteans client.
+David Lozano Ruiz
+    Various bug fixes.
+Henrik Kurelid
+    Various bug fixes.
+Enno Rehling
+    Some bug fixes.
+    Maintainer of the Eressea offshoot of Atlantis
