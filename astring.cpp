@@ -88,7 +88,7 @@ AString::AString(const std::string & s) {
 
 AString::~AString()
 {
-	if (str) delete str;
+	if (str) delete[] str;
 	str = NULL;
 }
 
@@ -102,7 +102,7 @@ AString::AString(const AString &s)
 AString & AString::operator=(const AString &s)
 {
 	len = s.len;
-	if (str) delete str;
+	if (str) delete[] str;
 	str = new char[len + 1];
 	strcpy(str,s.str);
 	return *this;
@@ -112,7 +112,7 @@ AString & AString::operator=(const char *c)
 {
 	len = 0;
 	if (c) len = strlen(c);
-	if (str) delete str;
+	if (str) delete[] str;
 	str = new char[len + 1];
 	if (c) strcpy(str,c);
 	return *this;
@@ -184,7 +184,7 @@ AString &AString::operator+=(const AString &s)
 	for (int j=0; j<s.len+1; j++) {
 		temp[i++] = s.str[j];
 	}
-	delete str;
+	delete[] str;
 	str = temp;
 	len = len + s.len;
 	return *this;
@@ -227,7 +227,7 @@ AString *AString::gettoken()
 			place++;
 		} else {
 			/* Unmatched "" return 0 */
-			delete str;
+			delete[] str;
 			str = new char[1];
 			len = 0;
 			str[0] = '\0';
@@ -241,7 +241,7 @@ AString *AString::gettoken()
 	}
 	buf[place2] = '\0';
 	if (place == len || str[place] == ';') {
-		delete str;
+		delete[] str;
 		str = new char[1];
 		len = 0;
 		str[0] = '\0';
@@ -256,7 +256,7 @@ AString *AString::gettoken()
 	}
 	buf2[place2] = '\0';
 	len = newlen;
-	delete str;
+	delete[] str;
 	str = buf2;
 	return new AString(buf);
 }
