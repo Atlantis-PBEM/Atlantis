@@ -498,7 +498,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			}
 			for (int i=0; i<sz; i++) {
 				int dir = getrandom(NDIRS);
-				if ((reg->yloc < yoff*2) && ((dir < 2) || (dir = NDIRS-1))
+				if ((reg->yloc < yoff*2) && ((dir < 2) || (dir == (NDIRS-1)))
 					&& (getrandom(4) < 3)) continue;
 				if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
 					&& (getrandom(4) < 3)) continue;				
