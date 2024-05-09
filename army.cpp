@@ -1023,7 +1023,7 @@ void Army::Win(Battle * b,ItemList * spoils)
 		loses_percent = 100 - ((na * 100) / count);
 	}
 
-	if (loses_percent >= 5) wintype = WIN_DEAD;
+	if (loses_percent > 0 && loses_percent >= Globals->BATTLE_STOP_MOVE_PERCENT) wintype = WIN_DEAD;
 	else wintype = WIN_NO_DEAD;
 
 	AList units;

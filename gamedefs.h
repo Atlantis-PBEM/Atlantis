@@ -812,6 +812,10 @@ public:
 		REPORT_FORMAT_JSON = 0x2,
 	};
 	int REPORT_FORMAT;
+
+	// BATTLE_STOP_MOVE_PERCENT is the percent of losses a unit can take and still move and attack.
+	// 0 means any losses will stop you from moving and attacking.
+	int BATTLE_STOP_MOVE_PERCENT;
 };
 
 extern GameDefs *Globals;
