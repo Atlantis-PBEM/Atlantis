@@ -3885,7 +3885,7 @@ void ARegionGraph::setInclusion(ARegionInclusionFunction includeFn) {
 	this->includeFn = includeFn;
 }
 
-void ARegionList::ResoucesStatistics() {
+void ARegionList::ResourcesStatistics() {
 	std::unordered_map<int, int> resources;
 	std::unordered_map<int, int> forSale;
 	std::unordered_map<int, int> wanted;

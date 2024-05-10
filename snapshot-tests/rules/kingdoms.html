@@ -538,15 +538,15 @@
       character.)
     </p>
     <p>
-      Each faction has a type; this is decided by the player, and determines
+      Each faction has a type which is decided by the player, and determines
       what the faction may do.  The faction has 5 Faction Points, which may be
-      spent on any of the 3 Faction Areas, War, Trade, and Magic.  The faction
-      type may be changed at the beginning of each turn, so a faction can
-      change and adapt to the conditions around it.  Faction Points spent on
-      War determine the number of regions in which factions can obtain income
-      by taxing or pillaging. Faction Points spent on Trade determine the
-      number of regions in which a faction may conduct trade activity. Trade
-      activity includes producing goods and materials, building ships and
+      spent on the Faction Areas of War, Trade, and Magic.  The faction type
+      may be changed at the beginning of each turn, so a faction can change
+      and adapt to the conditions around it.  Faction Points spent on War
+      determine the number of regions in which factions can obtain income by
+      taxing or pillaging. Faction Points spent on Trade determine the number
+      of regions in which a faction may conduct trade activity. Trade activity
+      includes producing goods and materials and constructing ships and
       buildings. Faction Points spent on Magic determine the number of mages
       the faction may have (more information on all of the faction activities
       is in further sections of the rules). Here is a chart detailing the
@@ -3122,13 +3122,13 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       If an item requires raw materials, then the specified amount of each
       material is consumed for each item produced. The higher the skill of the
       unit, the more productive each man-month of work will be.  Thus, five
-      men at skill level one are exactly equivalent to one guy at skill level
+      men at skill level one are exactly equivalent to one man at skill level
       5 in terms of base output. Items which require multiple man-months to
-      produce will take still benefit from higher skill level units, just not
-      as quickly.  For example, if a unit of six level one men wanted to
-      produce something which required three man-months per item, that unit
-      could produce two of them in one month.  If their skill level was raised
-      to two, then they could produce four of them in a month. At level three,
+      produce will still benefit from higher skill level units, just not as
+      quickly.  For example, if a unit of six level one men wanted to produce
+      something which required three man-months per item, that unit could
+      produce two of them in one month.  If their skill level was raised to
+      two, then they could produce four of them in a month. At level three,
       they could then produce 6 per month.
     </p>
     <p>
@@ -3187,8 +3187,8 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       on a building requires a unit of the required resource and a man-month
       of work by a character with the appropriate skill and level; higher
       skill levels allow work to proceed faster (still using one unit of the
-      required resource per unit of work done). Again, only Trade factions can
-      issue <a href="#build">BUILD</a> orders. Here is a table of the various
+      required resource per unit of work done). Only Trade factions can issue
+      <a href="#build">BUILD</a> orders. Here is a table of the various
       building types:
     </p>
     <a name="tablebuildings"></a>
@@ -3514,9 +3514,9 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       move along that road at half cost to a minimum of 1 movement point.
     </p>
     <p>
-      For example: If a unit is moving northwest, then hex it is in must have
-      a northwest road, and the hex it is moving into must have a southeast
-      road.
+      For example: If a unit is moving northwest, then the hex it is in must
+      have a northwest road, and the hex it is moving into must have a
+      southeast road.
     </p>
     <p>
       To gain an economy bonus, a hex must have roads that connect to roads in
@@ -3641,13 +3641,12 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       href="#sail">SAIL</a>s while they have an unfinished ship in their
       possession, the ship will be discarded and lost. Finally, ships are
       never interacted with as objects directly, but when completed are placed
-      in Fleet objects.  Fleets may contain one or more ships, and may be
-      entered like other buildings.
+      in fleets. Fleets may contain one or more ships, and may be entered like
+      other buildings.
     </p>
     <p>
-      Only factions with at least one faction point spent on trade can issue
-      <a href="#build">BUILD</a> orders. Here is a table of the various ship
-      types:
+      Only Trade factions can issue can issue <a href="#build">BUILD</a>
+      orders. Here is a table of the various ship types:
     </p>
     <a name="tableshipinfo"></a>
     <center>
@@ -3748,11 +3747,11 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       the ship to sail.
     </p>
     <p>
-      When a ship is built, if its builder is already the owner of a fleet
-      object, then the ship will be added to that fleet; otherwise a new fleet
-      will be created to hold the ship.  A fleet has the combined capacity and
-      sailor requirement of its constituent vessels, and moves at the speed of
-      its slowest ship. 
+      When a ship is built, if its builder is already the owner of a fleet,
+      then the ship will be added to that fleet; otherwise a new fleet will be
+      created to hold the ship.  A fleet has the combined capacity and sailor
+      requirement of its constituent vessels, and moves at the speed of its
+      slowest ship.
     </p>
     <a name="economy_advanceditems"></a>
     <h3>
@@ -4187,9 +4186,9 @@ Shoemaking [SHOE] 3: A unit with this skill may PRODUCE Sooper Dooper
       orders to drop items (with the <a href="#give">GIVE</a> 0 order) or to
       prevent yourself picking up certain types of spoils (with the <a
       href="#spoils">SPOILS</a> order) in case you win the battle! Also, note
-      that if the winning side took any losses in the battle, any units on
-      this side will not be allowed to move, or attack again for the rest of
-      the turn.
+      that if the winning side took at least 5% casualties in the battle, any
+      units on this side will not be allowed to move, or attack again for the 
+      rest of the turn.
     </p>
     <a name="stealthobs"></a>
     <div class="rule">
@@ -6078,11 +6077,11 @@ FORGET Mining
       If the demand for recruits in that region that month is much higher than
       the supply, it may happen that the new unit does not gain all the
       recruits you ordered it to buy, or it may not gain any recruits at all. 
-      If the new units gains at least one recruit, the unit will form
-      possessing any unused silver and all the other items it was given.  If
-      no recruits are gained at all, the empty unit will be dissolved, and the
-      silver and any other items it was given will revert to the first unit
-      you have in that region.
+      If a new unit gains at least one recruit, the unit will form possessing
+      any unused silver and all the other items it was given.  If no recruits
+      are gained at all, the empty unit will be dissolved, and the silver and
+      any other items it was given will revert to the first unit you have in
+      that region.
     </p>
     <p>
       Example:
@@ -6157,7 +6156,7 @@ GIVE NEW 2 2000 silver
       or better.  If the target unit is not a member of your faction, then its
       faction must have declared you Friendly, with a couple of exceptions.
       First, silver may be given to any unit, regardless of factional
-      affiliation. Secondly, men may not be given to units in other factions
+      affiliation. Second, men may not be given to units in other factions
       (you must give the entire unit); the reason for this is to prevent
       highly skilled units from being sabotaged with a <a
       href="#give">GIVE</a> order.
@@ -6373,10 +6372,9 @@ LEAVE
       Attempt to move in the direction(s) specified.  If more than one
       direction is given, the unit will move multiple times, in the order
       specified by the MOVE order, until no more directions are given, or
-      until one of the moves fails.  A move can fail because the units runs
-      out of movement points, because the unit attempts to move into the
-      ocean, or because the units attempts to enter a structure, and is
-      rejected.
+      until one of the moves fails.  A move can fail because the unit runs out
+      of movement points, because the unit attempts to move into the ocean, or
+      because the unit attempts to enter a structure, and is rejected.
     </p>
     <p>
       Valid directions are:
@@ -7246,7 +7244,7 @@ TAKE FROM 4573 10 swords
     </h4>
     <p>
       Attempt to collect taxes from the region. Only War factions may collect
-      taxes, and then only if there are no non-Friendly units on guard. Only
+      taxes, but only if there are no non-Friendly units on guard. Only
       combat-ready units may issue this order. Note that the TAX order and the
       <a href="#pillage">PILLAGE</a> order are mutually exclusive; a unit may
       only attempt to do one in a turn.

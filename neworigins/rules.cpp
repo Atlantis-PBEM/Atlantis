@@ -259,6 +259,7 @@ static GameDefs g = {
 	34,	// MAX_DESTROY_PERCENT
 	1, // HALF_RIDING_BONUS
 	GameDefs::REPORT_FORMAT_TEXT, // REPORT_FORMAT
+	5, // BATTLE_STOP_MOVE_PERCENT
 };
 
 GameDefs *Globals = &g;

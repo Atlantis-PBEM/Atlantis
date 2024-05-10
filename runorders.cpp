@@ -716,8 +716,7 @@ int Game::CountTaxes(ARegion *reg)
 					if (protect < 0) protect = 0;
 					if (men) {
 						if (!ActivityCheck(reg, u->faction, FactionActivity::TAX)) {
-							u->error("TAX: Faction can't tax that many "
-									"regions.");
+							u->error("TAX: Faction can't tax that many regions.");
 							u->taxing = TAX_NONE;
 						} else {
 							t += men + fortbonus * Globals->TAX_BONUS_FORT;
@@ -782,8 +781,7 @@ int Game::CountPillagers(ARegion *reg)
 					int men = u->Taxers(1);
 					if (men) {
 						if (!ActivityCheck(reg, u->faction, FactionActivity::TAX)) {
-							u->error("PILLAGE: Faction can't tax that many "
-									"regions.");
+							u->error("PILLAGE: Faction can't tax that many regions.");
 							u->taxing = TAX_NONE;
 						} else {
 							p += men;
