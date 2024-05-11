@@ -277,7 +277,8 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 		return;
 	}
 
-	AList *seers = CanSeeSteal(r, u);
+	// Make sure we dispose of the allocated AList properly until we get rid of ALists entirely
+	std::unique_ptr<AList> seers(CanSeeSteal(r, u));
 	int succ = 1;
 	forlist(seers) {
 		Faction *f = ((FactionPtr *) elem)->ptr;
@@ -350,7 +351,8 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 		return;
 	}
 
-	AList *seers = CanSeeSteal(r, u);
+	// Make sure we dispose of the allocated AList properly until we get rid of alists entirely.
+	std::unique_ptr<AList> seers(CanSeeSteal(r, u)); 
 	int succ = 1;
 	forlist(seers) {
 		Faction *f = ((FactionPtr *) elem)->ptr;
