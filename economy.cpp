@@ -1105,11 +1105,11 @@ int ARegion::TownHabitat()
 	forlist(&objects) {
 		Object *obj = (Object *) elem;
 		if (ObjectDefs[obj->type].protect > fort) fort = ObjectDefs[obj->type].protect;
-		if (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_FOOD) farm++;
+		if (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_FOOD) farm++;
 		if (ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
 		if (ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
 		if ((ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
-			&& (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_MOUNT)) caravan++;
+			&& (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_MOUNT)) caravan++;
 	}
 	int hab = 2;
 	int step = 0;
