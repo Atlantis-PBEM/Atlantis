@@ -1696,8 +1696,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 							int exp = mt->speciallevel - mt->defaultlevel;
 							if (exp > 0) {
 								exp = exp * temp * GetDaysByLevel(1);
-								for (int ms = 0; ms < ((int) sizeof(mt->skills))/((int) sizeof(int)); ms++)
-								{
+								for (int ms = 0; ms < (int)(sizeof(mt->skills)/sizeof(mt->skills[0])); ms++) {
 									AString sname = mt->skills[ms];
 									int skill = LookupSkill(&sname);
 									if (skill == -1) continue;

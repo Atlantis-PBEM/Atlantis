@@ -45,7 +45,7 @@ void Game::DisableSkill(int sk)
 void Game::ModifySkillDependancy(int sk, int i, char const *dep, int lev)
 {
 	if (sk < 0 || sk > (NSKILLS-1)) return;
-	if (i < 0 || i >= (int)(sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend)))
+	if (i < 0 || i >= (int)(sizeof(SkillDefs[sk].depends)/sizeof(SkillDefs[sk].depends[0])))
 		return;
 	if (dep && (FindSkill(dep) == NULL)) return;
 	if (lev < 0) return;
@@ -182,7 +182,7 @@ void Game::ModifyItemProductionOutput(int it, int months, int count)
 void Game::ModifyItemProductionInput(int it, int i, int input, int amount)
 {
 	if (it < 0 || it > (NITEMS-1)) return;
-	if (i < 0 || i >= (int)(sizeof(ItemDefs[it].pInput)/sizeof(Materials)))
+	if (i < 0 || i >= (int)(sizeof(ItemDefs[it].pInput)/sizeof(ItemDefs[it].pInput[0])))
 		return;
 	if (input < -1 || input > (NITEMS-1)) return;
 	if (amount < 0) amount = 0;
@@ -208,7 +208,7 @@ void Game::ModifyItemMagicOutput(int it, int count)
 void Game::ModifyItemMagicInput(int it, int i, int input, int amount)
 {
 	if (it < 0 || it > (NITEMS-1)) return;
-	if (i < 0 || i >= (int)(sizeof(ItemDefs[it].mInput)/sizeof(Materials)))
+	if (i < 0 || i >= (int)(sizeof(ItemDefs[it].mInput)/sizeof(ItemDefs[it].mInput[0])))
 		return;
 	if (input < -1 || input > (NITEMS-1)) return;
 	if (amount < 0) amount = 0;
@@ -515,10 +515,10 @@ void Game::ClearTerrainRaces(int t)
 {
 	if (t < 0 || t > R_NUM-1) return;
 	unsigned int c;
-	for (c = 0; c < sizeof(TerrainDefs[t].races)/sizeof(int); c++) {
+	for (c = 0; c < sizeof(TerrainDefs[t].races)/sizeof(TerrainDefs[t].races[0]); c++) {
 		TerrainDefs[t].races[c] = -1;
 	}
-	for (c = 0; c < sizeof(TerrainDefs[t].coastal_races)/sizeof(int); c++) {
+	for (c = 0; c < sizeof(TerrainDefs[t].coastal_races)/sizeof(TerrainDefs[t].coastal_races[0]); c++) {
 		TerrainDefs[t].coastal_races[c] = -1;
 	}
 }
@@ -526,7 +526,7 @@ void Game::ClearTerrainRaces(int t)
 void Game::ModifyTerrainRace(int t, int i, int r)
 {
 	if (t < 0 || t > (R_NUM -1)) return;
-	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].races)/sizeof(int))) return;
+	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].races)/sizeof(TerrainDefs[t].races[0]))) return;
 	if (r < -1 || r > NITEMS-1) r = -1;
 	if (r != -1 && !(ItemDefs[r].type & IT_MAN)) r = -1;
 	TerrainDefs[t].races[i] = r;
@@ -535,7 +535,7 @@ void Game::ModifyTerrainRace(int t, int i, int r)
 void Game::ModifyTerrainCoastRace(int t, int i, int r)
 {
 	if (t < 0 || t > (R_NUM -1)) return;
-	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].coastal_races)/sizeof(int)))
+	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].coastal_races)/sizeof(TerrainDefs[t].coastal_races[0])))
 		return;
 	if (r < -1 || r > NITEMS-1) r = -1;
 	if (r != -1 && !(ItemDefs[r].type & IT_MAN)) r = -1;
@@ -547,7 +547,7 @@ void Game::ClearTerrainItems(int terrain)
 	if (terrain < 0 || terrain > R_NUM-1) return;
 
 	for (unsigned int c = 0;
-			c < sizeof(TerrainDefs[terrain].prods)/sizeof(Product);
+			c < sizeof(TerrainDefs[terrain].prods)/sizeof(TerrainDefs[terrain].prods[0]);
 			c++) {
 		TerrainDefs[terrain].prods[c].product = -1;
 		TerrainDefs[terrain].prods[c].chance = 0;
@@ -558,7 +558,7 @@ void Game::ClearTerrainItems(int terrain)
 void Game::ModifyTerrainItems(int terrain, int i, int p, int c, int a)
 {
 	if (terrain < 0 || terrain > (R_NUM -1)) return;
-	if (i < 0 || i >= (int)(sizeof(TerrainDefs[terrain].prods)/sizeof(Product)))
+	if (i < 0 || i >= (int)(sizeof(TerrainDefs[terrain].prods)/sizeof(TerrainDefs[terrain].prods[0])))
 		return;
 	if (p < -1 || p > NITEMS-1) p = -1;
 	if (c < 0 || c > 100) c = 0;
@@ -592,7 +592,7 @@ void Game::ModifyTerrainLairChance(int t, int chance)
 void Game::ModifyTerrainLair(int t, int i, int l)
 {
 	if (t < 0 || t > (R_NUM -1)) return;
-	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].lairs)/sizeof(int))) return;
+	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].lairs)/sizeof(TerrainDefs[t].lairs[0]))) return;
 	if (l < -1 || l > NOBJECTS-1) l = -1;
 	TerrainDefs[t].lairs[i] = l;
 }
