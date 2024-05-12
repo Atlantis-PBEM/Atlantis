@@ -909,8 +909,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			ARegion *reg = pArr->GetRegion(xoff, y);
 			if (!reg) continue;
 			
-			if ((reg->type == R_LAKE) && (!Globals->LAKESIDE_IS_COASTAL))
-				continue;
+			if ((reg->type == R_LAKE) && (!Globals->LAKESIDE_IS_COASTAL)) continue;
 			if (TerrainDefs[reg->type].flags & TerrainType::BARREN) continue;
 			
 			reg->race = -1;
@@ -924,14 +923,11 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 				if (!nreg) continue;
 				while((ctr++ < 20) && (reg->race == -1)) {
 					if (TerrainDefs[nreg->type].similar_type != R_OCEAN) {
-						int rnum =
-							sizeof(TerrainDefs[nreg->type].coastal_races) /
-							sizeof(int);
+						int rnum = sizeof(TerrainDefs[nreg->type].coastal_races) /
+							sizeof(TerrainDefs[nreg->type].coastal_races[0]);
 						
-						while ( reg->race == -1 || 
-								(ItemDefs[reg->race].flags & ItemType::DISABLED)) {
-							reg->race = 
-								TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
+						while ( reg->race == -1 || (ItemDefs[reg->race].flags & ItemType::DISABLED)) {
+							reg->race = TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
 							if (++wigout > 100) break;
 						}
 					} else {
@@ -943,7 +939,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 				}
 			} else {
 				// setup noncoastal race here
-				int rnum = sizeof(TerrainDefs[reg->type].races)/sizeof(int);
+				int rnum = sizeof(TerrainDefs[reg->type].races)/sizeof(TerrainDefs[reg->type].races[0]);
 				
 				while ( reg->race == -1 || 
 						(ItemDefs[reg->race].flags & ItemType::DISABLED)) {
@@ -986,16 +982,13 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
 					if ((!nreg) || (nreg->race != -1)) continue;
 					int iscoastal = 0;
 					int cnum = sizeof(TerrainDefs[reg->type].coastal_races) /
-						sizeof(int);
-					for (int i=0; i<cnum; i++) {
-						if (reg->race ==
-								TerrainDefs[reg->type].coastal_races[i])
+						sizeof(TerrainDefs[reg->type].coastal_races[0]);
+					for (int i = 0; i < cnum; i++) {
+						if (reg->race == TerrainDefs[reg->type].coastal_races[i])
 							iscoastal = 1;
 					}
 					// Only coastal races may pass from sea to land
-					if ((TerrainDefs[nreg->type].similar_type == R_OCEAN) &&
-							(!iscoastal))
-						continue;
+					if ((TerrainDefs[nreg->type].similar_type == R_OCEAN) && (!iscoastal)) continue;
 
 					int ch = getrandom(5);
 					if (iscoastal) {
@@ -1005,8 +998,7 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
 						ManType *mt = FindRace(ItemDefs[reg->race].abr);
 						if (mt->terrain==TerrainDefs[nreg->type].similar_type)
 							ch += 2;
-						int rnum = sizeof(TerrainDefs[nreg->type].races) /
-							sizeof(int);
+						int rnum = sizeof(TerrainDefs[nreg->type].races) / sizeof(TerrainDefs[nreg->type].races[0]);
 						for (int i=0; i<rnum; i++) {
 							if (TerrainDefs[nreg->type].races[i] == reg->race)
 								ch++;

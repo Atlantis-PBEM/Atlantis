@@ -1178,7 +1178,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << enclose("tr", true);
 		f << enclose("td colspan=\"2\"", true) << TerrainDefs[i].name << '\n' << enclose("td", false);
 		f << enclose("td colspan=\"4\"", true);
-		for (unsigned int c = 0; c < sizeof(TerrainDefs[i].prods)/sizeof(Product); c++) {
+		for (unsigned int c = 0; c < sizeof(TerrainDefs[i].prods)/sizeof(TerrainDefs[i].prods[0]); c++) {
 			if (TerrainDefs[i].prods[c].product == -1) continue;
 			if (!first) {
 				f << ", ";
@@ -1392,8 +1392,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		pS = FindSkill(ItemDefs[i].pSkill);
 		if (pS && (pS->flags & SkillType::DISABLED)) continue;
 		int last = 0;
-		for (int j = 0; j < (int) (sizeof(ItemDefs->pInput) /
-				sizeof(ItemDefs->pInput[0])); j++) {
+		for (int j = 0; j < (int) (sizeof(ItemDefs->pInput) / sizeof(ItemDefs->pInput[0])); j++) {
 			int k = ItemDefs[i].pInput[j].item;
 			if (k != -1 && (ItemDefs[k].flags & ItemType::DISABLED))
 				last = 1;
@@ -1564,7 +1563,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_SHIP)) continue;
 			int pub = 1;
-			for (int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(Materials); c++) {
+			for (int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(ItemDefs->pInput[0]); c++) {
 				int m = ItemDefs[i].pInput[c].item;
 				if (m != -1) {
 					if (ItemDefs[m].flags & ItemType::DISABLED) pub = 0;
@@ -2190,8 +2189,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		pS = FindSkill(ItemDefs[i].pSkill);
 		if (pS && (pS->flags & SkillType::DISABLED)) continue;
 		last = 0;
-		for (int j = 0; j < (int) (sizeof(ItemDefs->pInput) /
-						sizeof(ItemDefs->pInput[0])); j++) {
+		for (int j = 0; j < (int) (sizeof(ItemDefs->pInput) / sizeof(ItemDefs->pInput[0])); j++) {
 			int k = ItemDefs[i].pInput[j].item;
 			if (k != -1 &&
 					!(ItemDefs[k].flags & ItemType::DISABLED) &&
@@ -2289,8 +2287,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 				pS = FindSkill(ItemDefs[j].pSkill);
 				if (!pS || (pS->flags & SkillType::DISABLED)) continue;
 				last = 0;
-				for (int k = 0; k < (int) (sizeof(ItemDefs->pInput) /
-						sizeof(ItemDefs->pInput[0])); k++) {
+				for (int k = 0; k < (int) (sizeof(ItemDefs->pInput) / sizeof(ItemDefs->pInput[0])); k++) {
 					int l = ItemDefs[j].pInput[k].item;
 					if (l != -1 &&
 							!(ItemDefs[l].flags & ItemType::DISABLED) &&
@@ -2624,7 +2621,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_SHIP)) continue;
 			int pub = 1;
-			for (int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(Materials); c++) {
+			for (int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(ItemDefs->pInput[0]); c++) {
 				int m = ItemDefs[i].pInput[c].item;
 				if (m != -1) {
 					if (ItemDefs[m].flags & ItemType::DISABLED) pub = 0;

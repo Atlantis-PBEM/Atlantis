@@ -45,8 +45,7 @@ void Game::DisableSkill(int sk)
 void Game::ModifySkillDependancy(int sk, int i, char const *dep, int lev)
 {
 	if (sk < 0 || sk > (NSKILLS-1)) return;
-	if (i < 0 || i >= (int)(sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend)))
-		return;
+	if (i < 0 || i >= (int)(sizeof(SkillDefs[sk].depends)/sizeof(SkillDefs[sk].depends[0]))) return;
 	if (dep && (FindSkill(dep) == NULL)) return;
 	if (lev < 0) return;
 	SkillDefs[sk].depends[i].skill = dep;
@@ -182,8 +181,7 @@ void Game::ModifyItemProductionOutput(int it, int months, int count)
 void Game::ModifyItemProductionInput(int it, int i, int input, int amount)
 {
 	if (it < 0 || it > (NITEMS-1)) return;
-	if (i < 0 || i >= (int)(sizeof(ItemDefs[it].pInput)/sizeof(Materials)))
-		return;
+	if (i < 0 || i >= (int)(sizeof(ItemDefs[it].pInput)/sizeof(ItemDefs[it].pInput[0]))) return;
 	if (input < -1 || input > (NITEMS-1)) return;
 	if (amount < 0) amount = 0;
 	ItemDefs[it].pInput[i].item = input;
@@ -208,8 +206,7 @@ void Game::ModifyItemMagicOutput(int it, int count)
 void Game::ModifyItemMagicInput(int it, int i, int input, int amount)
 {
 	if (it < 0 || it > (NITEMS-1)) return;
-	if (i < 0 || i >= (int)(sizeof(ItemDefs[it].mInput)/sizeof(Materials)))
-		return;
+	if (i < 0 || i >= (int)(sizeof(ItemDefs[it].mInput)/sizeof(ItemDefs[it].mInput[0]))) return;
 	if (input < -1 || input > (NITEMS-1)) return;
 	if (amount < 0) amount = 0;
 	ItemDefs[it].mInput[i].item = input;
@@ -358,7 +355,7 @@ void Game::ModifyWeaponBonusMalus(char const *weap, int index, char *weaponAbbr,
 {
 	WeaponType *pw = FindWeapon(weap);
 	if (pw == NULL) return;
-
+	if (index < 0 || index >= (int)(sizeof(pw->bonusMalus)/sizeof(pw->bonusMalus[0]))) return;
 	if (pw->bonusMalus[index].weaponAbbr) {
 		delete pw->bonusMalus[index].weaponAbbr;
 	}
@@ -468,8 +465,7 @@ void Game::ModifyObjectMonster(int ob, int monster)
 void Game::ModifyObjectConstruction(int ob, int it, int num, char const *sk, int lev)
 {
 	if (ob < 0 || ob > (NOBJECTS-1)) return;
-	if ((it < -1 && it != I_WOOD_OR_STONE) || it > (NITEMS -1))
-		return;
+	if ((it < -1 && it != I_WOOD_OR_STONE) || it > (NITEMS -1)) return;
 	if (num < 0) return;
 	if (sk && FindSkill(sk) == NULL) return;
 	if (lev < 0) return;
@@ -515,10 +511,10 @@ void Game::ClearTerrainRaces(int t)
 {
 	if (t < 0 || t > R_NUM-1) return;
 	unsigned int c;
-	for (c = 0; c < sizeof(TerrainDefs[t].races)/sizeof(int); c++) {
+	for (c = 0; c < sizeof(TerrainDefs[t].races)/sizeof(TerrainDefs[t].races[0]); c++) {
 		TerrainDefs[t].races[c] = -1;
 	}
-	for (c = 0; c < sizeof(TerrainDefs[t].coastal_races)/sizeof(int); c++) {
+	for (c = 0; c < sizeof(TerrainDefs[t].coastal_races)/sizeof(TerrainDefs[t].coastal_races[0]); c++) {
 		TerrainDefs[t].coastal_races[c] = -1;
 	}
 }
@@ -526,7 +522,7 @@ void Game::ClearTerrainRaces(int t)
 void Game::ModifyTerrainRace(int t, int i, int r)
 {
 	if (t < 0 || t > (R_NUM -1)) return;
-	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].races)/sizeof(int))) return;
+	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].races)/sizeof(TerrainDefs[t].races[0]))) return;
 	if (r < -1 || r > NITEMS-1) r = -1;
 	if (r != -1 && !(ItemDefs[r].type & IT_MAN)) r = -1;
 	TerrainDefs[t].races[i] = r;
@@ -535,8 +531,7 @@ void Game::ModifyTerrainRace(int t, int i, int r)
 void Game::ModifyTerrainCoastRace(int t, int i, int r)
 {
 	if (t < 0 || t > (R_NUM -1)) return;
-	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].coastal_races)/sizeof(int)))
-		return;
+	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].coastal_races)/sizeof(TerrainDefs[t].coastal_races[0]))) return;
 	if (r < -1 || r > NITEMS-1) r = -1;
 	if (r != -1 && !(ItemDefs[r].type & IT_MAN)) r = -1;
 	TerrainDefs[t].coastal_races[i] = r;
@@ -546,9 +541,7 @@ void Game::ClearTerrainItems(int terrain)
 {
 	if (terrain < 0 || terrain > R_NUM-1) return;
 
-	for (unsigned int c = 0;
-			c < sizeof(TerrainDefs[terrain].prods)/sizeof(Product);
-			c++) {
+	for (unsigned int c = 0; c < sizeof(TerrainDefs[terrain].prods)/sizeof(TerrainDefs[terrain].prods[0]); c++) {
 		TerrainDefs[terrain].prods[c].product = -1;
 		TerrainDefs[terrain].prods[c].chance = 0;
 		TerrainDefs[terrain].prods[c].amount = 0;
@@ -558,8 +551,7 @@ void Game::ClearTerrainItems(int terrain)
 void Game::ModifyTerrainItems(int terrain, int i, int p, int c, int a)
 {
 	if (terrain < 0 || terrain > (R_NUM -1)) return;
-	if (i < 0 || i >= (int)(sizeof(TerrainDefs[terrain].prods)/sizeof(Product)))
-		return;
+	if (i < 0 || i >= (int)(sizeof(TerrainDefs[terrain].prods)/sizeof(TerrainDefs[terrain].prods[0]))) return;
 	if (p < -1 || p > NITEMS-1) p = -1;
 	if (c < 0 || c > 100) c = 0;
 	if (a < 0) a = 0;
@@ -592,7 +584,7 @@ void Game::ModifyTerrainLairChance(int t, int chance)
 void Game::ModifyTerrainLair(int t, int i, int l)
 {
 	if (t < 0 || t > (R_NUM -1)) return;
-	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].lairs)/sizeof(int))) return;
+	if (i < 0 || i >= (int)(sizeof(TerrainDefs[t].lairs)/sizeof(TerrainDefs[t].lairs[0]))) return;
 	if (l < -1 || l > NOBJECTS-1) l = -1;
 	TerrainDefs[t].lairs[i] = l;
 }
@@ -644,7 +636,7 @@ void Game::ModifySpecialTargetObjects(char const *special, int index, int obj)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
-	if (index < 0 || index > 3) return;
+	if (index < 0 || index >= (int)(sizeof(sp->buildings) / sizeof(sp->buildings[0]))) return;
 	if ((obj != -1 && obj < 1) || (obj > (NOBJECTS-1))) return;
 	sp->buildings[index] = obj;
 }
@@ -653,7 +645,7 @@ void Game::ModifySpecialTargetItems(char const *special, int index, int item)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
-	if (index < 0 || index > 7) return;
+	if (index < 0 || index >= (int)(sizeof(sp->targets) / sizeof(sp->targets[0]))) return;
 	if (item < -1 || item > (NITEMS-1)) return;
 	sp->targets[index] = item;
 }
@@ -662,7 +654,7 @@ void Game::ModifySpecialTargetEffects(char const *special, int index, char const
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
-	if (index < 0 || index > 3) return;
+	if (index < 0 || index >= (int)(sizeof(sp->effects) / sizeof(sp->effects[0]))) return;
 	if (effect && (FindEffect(effect) == NULL)) return;
 	sp->effects[index] = effect;
 }
@@ -678,7 +670,7 @@ void Game::ModifySpecialShields(char const *special, int index, int type)
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
-	if (index < 0 || index > 4) return;
+	if (index < 0 || index >= (int)(sizeof(sp->shield) / sizeof(sp->shield[0]))) return;
 	if (type < -1 || type > (NUM_ATTACK_TYPES)) return;
 	sp->shield[index] = type;
 }
@@ -687,7 +679,7 @@ void Game::ModifySpecialDefenseMods(char const *special, int index, int type, in
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
-	if (index < 0 || index > 4) return;
+	if (index < 0 || index >= (int)(sizeof(sp->defs) / sizeof(sp->defs[0]))) return;
 	if (type < -1 || type > (NUM_ATTACK_TYPES)) return;
 	sp->defs[index].type = type;
 	sp->defs[index].val = val;
@@ -698,7 +690,7 @@ void Game::ModifySpecialDamage(char const *special, int index, int type, int min
 {
 	SpecialType *sp = FindSpecial(special);
 	if (sp == NULL) return;
-	if (index < 0 || index > 4) return;
+	if (index < 0 || index >= (int)(sizeof(sp->damage) / sizeof(sp->damage[0]))) return;
 	if (effect && (FindEffect(effect) == NULL)) return;
 	if (type < -1 || type > NUM_ATTACK_TYPES) return;
 	if (cls < -1 || cls > (NUM_WEAPON_CLASSES-1)) return;
@@ -731,7 +723,7 @@ void Game::ModifyEffectDefenseMod(char const *effect, int index, int type, int v
 	EffectType *ep = FindEffect(effect);
 	if (ep == NULL) return;
 	if (type < 0 || type > NUM_ATTACK_TYPES) return;
-	if (index < 0 || index > 4) return;
+	if (index < 0 || index >= (int)(sizeof(ep->defMods) / sizeof(ep->defMods[0]))) return;
 	ep->defMods[index].type = type;
 	ep->defMods[index].val = val;
 }
@@ -775,12 +767,11 @@ void Game::ModifyRangeLevelPenalty(char const *range, int pen)
 	rp->crossLevelPenalty = pen;
 }
 
-void Game::ModifyAttribMod(char const *mod, int index, int flags, char const *ident,
-		int type, int val)
+void Game::ModifyAttribMod(char const *mod, int index, int flags, char const *ident, int type, int val)
 {
 	AttribModType *mp = FindAttrib(mod);
 	if (mp == NULL) return;
-	if (index < 0 || index > 5) return;
+	if (index < 0 || index >= (int)(sizeof(mp->mods) / sizeof(mp->mods[0]))) return;
 	if (!ident) return;
 	if (type < 0 || type > AttribModItem::NUMMODTYPE-1) return;
 

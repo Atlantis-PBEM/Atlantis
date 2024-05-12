@@ -958,7 +958,7 @@ int Game::RunEnchant(ARegion *r,Unit *u, int skill, int item)
 	num = max;
 
 	// Figure out how many we can make based on available resources
-	for (c=0; c<sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
+	for (c=0; c<sizeof(ItemDefs[item].mInput)/sizeof(ItemDefs[item].mInput[0]); c++) {
 		if (ItemDefs[item].mInput[c].item == -1)
 			continue;
 		i = ItemDefs[item].mInput[c].item;
@@ -969,7 +969,7 @@ int Game::RunEnchant(ARegion *r,Unit *u, int skill, int item)
 	}
 
 	// collect all the materials
-	for (c=0; c<sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
+	for (c=0; c<sizeof(ItemDefs[item].mInput)/sizeof(ItemDefs[item].mInput[0]); c++) {
 		if (ItemDefs[item].mInput[c].item == -1)
 			continue;
 		i = ItemDefs[item].mInput[c].item;
@@ -1171,7 +1171,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 		return 0;
 	}
 	unsigned int c;
-	for (c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
+	for (c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(ItemDefs[item].mInput[0]); c++) {
 		if (ItemDefs[item].mInput[c].item == -1) continue;
 		int amt = u->GetSharedNum(ItemDefs[item].mInput[c].item);
 		int cost = ItemDefs[item].mInput[c].amt;
@@ -1182,7 +1182,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 	}
 
 	// Deduct the costs
-	for (c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
+	for (c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(ItemDefs[item].mInput[0]); c++) {
 		if (ItemDefs[item].mInput[c].item == -1) continue;
 		int cost = ItemDefs[item].mInput[c].amt;
 		u->ConsumeShared(ItemDefs[item].mInput[c].item, cost);

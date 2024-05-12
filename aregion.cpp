@@ -174,8 +174,8 @@ Production *ARegion::get_production_for_skill(int item, int skill) {
 int ARegion::IsNativeRace(int item)
 {
 	TerrainType *typer = &(TerrainDefs[type]);
-	int coastal = sizeof(typer->coastal_races)/sizeof(int);
-	int noncoastal = sizeof(typer->races)/sizeof(int);
+	int coastal = sizeof(typer->coastal_races)/sizeof(typer->coastal_races[0]);
+	int noncoastal = sizeof(typer->races)/sizeof(typer->races[0]);
 	if (IsCoastal()) {
 		for (int i=0; i<coastal; i++) {
 			if (item == typer->coastal_races[i]) return 1;
@@ -229,7 +229,7 @@ std::vector<int> ARegion::GetPossibleLairs() {
 	std::vector<int> lairs;
 	TerrainType *tt = &TerrainDefs[type];
 
-	const int sz = sizeof(tt->lairs) / sizeof(int);
+	const int sz = sizeof(tt->lairs) / sizeof(tt->lairs[0]);
 
 	for (int i = 0; i < sz; i++) {
 		int index = tt->lairs[i];
@@ -1639,7 +1639,7 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 
 	if (!(pS->flags & SkillType::NOTIFY)) {
 		// Okay, we aren't notifyable, check our prerequisites
-		for (i = 0; i < sizeof(pS->depends)/sizeof(SkillDepend); i++) {
+		for (i = 0; i < sizeof(pS->depends)/sizeof(pS->depends[0]); i++) {
 			if (pS->depends[i].skill == NULL) break;
 			if (NotifySpell(caster, pS->depends[i].skill, pRegs)) return 1;
 		}

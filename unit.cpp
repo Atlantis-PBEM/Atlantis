@@ -1318,8 +1318,7 @@ int Unit::GetAvailSkill(int sk)
 		str = ItemDefs[i->type].grantSkill;
 		if (ItemDefs[i->type].grantSkill && LookupSkill(&str) == sk) {
 			int grant = 0;
-			for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills)
-								 / sizeof(ItemDefs[0].fromSkills[0]); j++) {
+			for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills) / sizeof(ItemDefs[0].fromSkills[0]); j++) {
 				if (ItemDefs[i->type].fromSkills[j]) {
 					int fromSkill;
 
@@ -1411,7 +1410,7 @@ int Unit::CanStudy(int sk)
 	if (SkillDefs[sk].flags & SkillType::DISABLED) return 0;
 
 	unsigned int c;
-	for (c = 0; c < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); c++) {
+	for (c = 0; c < sizeof(SkillDefs[sk].depends)/sizeof(SkillDefs[sk].depends[0]); c++) {
 		if (SkillDefs[sk].depends[c].skill == NULL) return 1;
 		SkillType *pS = FindSkill(SkillDefs[sk].depends[c].skill);
 		if (pS && (pS->flags & SkillType::DISABLED)) continue;
@@ -1520,8 +1519,7 @@ int Unit::Practice(int sk)
 				continue;
 			str = ItemDefs[it->type].grantSkill;
 			if (ItemDefs[it->type].grantSkill && LookupSkill(&str) == sk) {
-				for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills)
-									 / sizeof(ItemDefs[0].fromSkills[0]); j++) {
+				for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills) / sizeof(ItemDefs[0].fromSkills[0]); j++) {
 					if (ItemDefs[it->type].fromSkills[j]) {
 						int fromSkill;
 
@@ -1551,7 +1549,7 @@ int Unit::Practice(int sk)
 	curlev = GetRealSkill(sk);
 	if (curlev >= max) return 0;
 
-	for (i = 0; i < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); i++) {
+	for (i = 0; i < sizeof(SkillDefs[sk].depends)/sizeof(SkillDefs[sk].depends[0]); i++) {
 		AString skname = SkillDefs[sk].depends[i].skill;
 		reqsk = LookupSkill(&skname);
 		if (reqsk == -1) break;
@@ -2746,7 +2744,7 @@ void Unit::SkillStarvation()
 			Skill *sj = GetSkillObject(j);
 			int dependancy_level = 0;
 			unsigned int c;
-			for (c=0;c < sizeof(SkillDefs[i].depends)/sizeof(SkillDepend);c++) {
+			for (c=0;c < sizeof(SkillDefs[i].depends)/sizeof(SkillDefs[i].depends[0]);c++) {
 				AString skname = SkillDefs[i].depends[c].skill;
 				if (skname == SkillDefs[j].abbr) {
 					dependancy_level = SkillDefs[i].depends[c].level;

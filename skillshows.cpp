@@ -1501,7 +1501,7 @@ AString *ShowSkill::Report(Faction *f) const
 		if (sk1 == sk2 && ItemDefs[i].pLevel == level) {
 			int canmake = 1;
 			int resource = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); c++) {
+			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(ItemDefs[i].pInput[0]); c++) {
 				if (ItemDefs[i].pInput[c].item == -1) continue;
 				resource = 0;
 				if (ITEM_DISABLED(ItemDefs[i].pInput[c].item)) {
@@ -1523,7 +1523,7 @@ AString *ShowSkill::Report(Faction *f) const
 		sk2 = FindSkill(ItemDefs[i].mSkill);
 		if (sk1 == sk2 && ItemDefs[i].mLevel == level) {
 			int canmagic = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
+			for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(ItemDefs[i].mInput[0]); c++) {
 				if (ItemDefs[i].mInput[c].item == -1) continue;
 				if (ITEM_DISABLED(ItemDefs[i].mInput[c].item)) {
 					canmagic = 0;
@@ -1572,7 +1572,7 @@ AString *ShowSkill::Report(Faction *f) const
 				temp2 += ItemDefs[i].abr;
 				temp2 += "] via magic";
 				count = 0;
-				for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
+				for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(ItemDefs[i].mInput[0]); c++) {
 					if (ItemDefs[i].mInput[c].item == -1) continue;	
 					count++;
 				}
@@ -1580,7 +1580,7 @@ AString *ShowSkill::Report(Faction *f) const
 					temp2 += " at a cost of ";
 					temp4 = "";
 					count = 0;
-					for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
+					for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(ItemDefs[i].mInput[0]); c++) {
 						if (ItemDefs[i].mInput[c].item == -1) continue;	
 						if (!(temp4 == "")) {
 							if (count > 0)
@@ -1588,8 +1588,7 @@ AString *ShowSkill::Report(Faction *f) const
 							temp2 += temp4;
 							count++;
 						}
-						temp4 = ItemString(ItemDefs[i].mInput[c].item,
-								ItemDefs[i].mInput[c].amt);
+						temp4 = ItemString(ItemDefs[i].mInput[c].item, ItemDefs[i].mInput[c].amt);
 					}
 					if (count > 0)
 						temp2 += " and ";
@@ -1604,7 +1603,7 @@ AString *ShowSkill::Report(Faction *f) const
 		if (sk1 == sk2 && ItemDefs[i].pLevel == level) {
 			int canmake = 1;
 			int resource = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); c++) {
+			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(ItemDefs[i].pInput[0]); c++) {
 				if (ItemDefs[i].pInput[c].item == -1) continue;
 				resource = 0;
 				if (ITEM_DISABLED(ItemDefs[i].pInput[c].item)) {
@@ -1648,7 +1647,7 @@ AString *ShowSkill::Report(Faction *f) const
 						temp1 += "any of ";
 					temp4 = "";
 					count = 0;
-					for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); c++) {
+					for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(ItemDefs[i].pInput[0]); c++) {
 						if (ItemDefs[i].pInput[c].item == -1) continue;	
 						if (!(temp4 == "")) {
 							if (count > 0)
@@ -1814,7 +1813,7 @@ AString *ShowSkill::Report(Faction *f) const
 		comma = 0;
 		int found = 0;
 		temp = "This skill requires ";
-		for (c=0; c<sizeof(SkillDefs[skill].depends)/sizeof(SkillDepend); c++) {
+		for (c=0; c<sizeof(SkillDefs[skill].depends)/sizeof(SkillDefs[skill].depends[0]); c++) {
 			SkillType *pS = FindSkill(SkillDefs[skill].depends[c].skill);
 			if (!pS || (pS->flags & SkillType::DISABLED)) continue;
 			found = 1;

@@ -322,16 +322,14 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 	int scomb = men->defaultlevel;
 	int sxbow = men->defaultlevel;
 	int slbow = men->defaultlevel;
-	for (unsigned int i=0;
-		i<(sizeof(men->skills)/sizeof(men->skills[0]));
-			i++) {
-				if (men->skills[i] == NULL) continue;
-				if (FindSkill(men->skills[i]) == FindSkill("COMB"))
-					scomb = men->speciallevel;
-				if (FindSkill(men->skills[i]) == FindSkill("XBOW"))
-					sxbow = men->speciallevel;
-				if (FindSkill(men->skills[i]) == FindSkill("LBOW"))
-					slbow = men->speciallevel;
+	for (unsigned int i=0; i<(sizeof(men->skills)/sizeof(men->skills[0])); i++) {
+		if (men->skills[i] == NULL) continue;
+		if (FindSkill(men->skills[i]) == FindSkill("COMB"))
+			scomb = men->speciallevel;
+		if (FindSkill(men->skills[i]) == FindSkill("XBOW"))
+			sxbow = men->speciallevel;
+		if (FindSkill(men->skills[i]) == FindSkill("LBOW"))
+			slbow = men->speciallevel;
 	}
 	int combat = scomb;
 	AString *s = new AString("COMB");
@@ -435,9 +433,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 		sk = LookupSkill(ws1);
 	int maxskill = men->defaultlevel;
 	int special = 0;
-	for (unsigned int i=0;
-		i<(sizeof(men->skills)/sizeof(men->skills[0]));
-		i++) {
+	for (unsigned int i=0; i<(sizeof(men->skills)/sizeof(men->skills[0])); i++) {
 		if (FindSkill(men->skills[i]) == FindSkill(SkillDefs[sk].abbr)) {
 			special = 1;
 		}		

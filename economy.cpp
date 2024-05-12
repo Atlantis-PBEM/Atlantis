@@ -111,9 +111,9 @@ void ARegion::SetupHabitat(TerrainType* terrain) {
 	// Only select race here if it hasn't been set during Race Growth
 	// in the World Creation process.
 	if ((race == -1) || (!Globals->GROW_RACES)) {
-		int noncoastalraces = sizeof(terrain->races) / sizeof(int);
+		int noncoastalraces = sizeof(terrain->races) / sizeof(terrain->races[0]);
 		int allraces =
-			noncoastalraces + sizeof(terrain->coastal_races) / sizeof(int);
+			noncoastalraces + sizeof(terrain->coastal_races) / sizeof(terrain->coastal_races[0]);
 
 		race = -1;
 		while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
@@ -417,7 +417,7 @@ void ARegion::SetupCityMarket()
 		// Raw goods
 		if (ItemDefs[i].pInput[0].item == -1) {
 			for (unsigned int c = 0;
-				c<(sizeof(TerrainDefs[type].prods)/sizeof(Product));
+				c<(sizeof(TerrainDefs[type].prods)/sizeof(TerrainDefs[type].prods[0]));
 				c++) {
 				int resource = TerrainDefs[type].prods[c].product;
 				if (i == resource) {
@@ -430,12 +430,12 @@ void ARegion::SetupCityMarket()
 		else {
 			canProduceHere = 1;
 			for (unsigned int c = 0;
-				c<(sizeof(ItemDefs[i].pInput)/sizeof(Materials));
+				c<(sizeof(ItemDefs[i].pInput)/sizeof(ItemDefs[i].pInput[0]));
 				c++) {
 				int match = 0;
 				int need = ItemDefs[i].pInput[c].item;
 				for (unsigned int r=0;
-					r<(sizeof(TerrainDefs[type].prods)/sizeof(Product));
+					r<(sizeof(TerrainDefs[type].prods)/sizeof(TerrainDefs[type].prods[0]));
 					r++) {
 					if (TerrainDefs[type].prods[r].product == need)
 						match = 1;
@@ -772,7 +772,7 @@ void ARegion::SetupProds(double weight)
 		}
 	}
 
-	for (unsigned int c= 0; c < (sizeof(typer->prods)/sizeof(Product)); c++) {
+	for (unsigned int c= 0; c < (sizeof(typer->prods)/sizeof(typer->prods[0])); c++) {
 		int item = typer->prods[c].product;
 		int chance = typer->prods[c].chance * weight;
 		int amt = typer->prods[c].amount;
@@ -947,9 +947,9 @@ void ARegion::SetupEditRegion()
 	// Only select race here if it hasn't been set during Race Growth
 	// in the World Creation process.
 	if ((race == -1) || (!Globals->GROW_RACES)) {
-		int noncoastalraces = sizeof(typer->races)/sizeof(int);
+		int noncoastalraces = sizeof(typer->races)/sizeof(typer->races[0]);
 		int allraces =
-			noncoastalraces + sizeof(typer->coastal_races)/sizeof(int);
+			noncoastalraces + sizeof(typer->coastal_races)/sizeof(typer->coastal_races[0]);
 
 		race = -1;
 		while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
@@ -1105,11 +1105,11 @@ int ARegion::TownHabitat()
 	forlist(&objects) {
 		Object *obj = (Object *) elem;
 		if (ObjectDefs[obj->type].protect > fort) fort = ObjectDefs[obj->type].protect;
-		if (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_FOOD) farm++;
+		if (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_FOOD) farm++;
 		if (ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
 		if (ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
 		if ((ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
-			&& (ItemDefs[ObjectDefs[obj->type].productionAided].flags & IT_MOUNT)) caravan++;
+			&& (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_MOUNT)) caravan++;
 	}
 	int hab = 2;
 	int step = 0;
