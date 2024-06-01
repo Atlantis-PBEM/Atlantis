@@ -1,0 +1,428 @@
+{
+  "administrative": {
+    "email": "NoAddress",
+    "password_unset": true,
+    "show_unit_attitudes": false,
+    "times_sent": true
+  },
+  "attitudes": {
+    "ally": [],
+    "default": "neutral",
+    "friendly": [],
+    "hostile": [],
+    "neutral": [],
+    "unfriendly": [
+      {
+        "name": "Creatures",
+        "number": 2
+      }
+    ]
+  },
+  "date": {
+    "month": "February",
+    "year": 1
+  },
+  "engine": {
+    "ruleset": "NewOrigins",
+    "ruleset_version": "3.0.0 (beta)",
+    "version": "5.2.5 (beta)"
+  },
+  "events": [
+    {
+      "category": "claim",
+      "message": "Claims $100.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "study",
+      "message": "Studies stealth at a cost of 50 silver [SILV].",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "spell",
+      "message": "Casts Random Gate Jump. Capacity: 10/15.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "spell",
+      "message": "Jumps through a Gate to jungle (3,5) in Kleptoatres Jungle.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "practice",
+      "message": "Gets 5 days of practice with pattern [PATT].",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 50 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    }
+  ],
+  "item_reports": [
+    {
+      "description": "silver [SILV], weight 0. This is the currency of Atlantis.",
+      "name": "silver",
+      "tag": "SILV"
+    }
+  ],
+  "name": "Test",
+  "number": 3,
+  "object_reports": [],
+  "regions": [
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 3,
+        "y": 5,
+        "z": 1
+      },
+      "entertainment": 45,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Cylith Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Cylith Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        }
+      ],
+      "gate": {
+        "number": 68,
+        "open": 1
+      },
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 65,
+            "name": "wood elf",
+            "plural": "wood elves",
+            "price": 40,
+            "tag": "WELF"
+          },
+          {
+            "amount": 13,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 705,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1640,
+        "race": "wood elves"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 35,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 19,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 31,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        },
+        {
+          "amount": 14,
+          "name": "fur",
+          "plural": "furs",
+          "tag": "FUR"
+        }
+      ],
+      "province": "Kleptoatres Jungle",
+      "tax": 852,
+      "terrain": "jungle",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            }
+          ],
+          "name": "Unit",
+          "number": 38,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "can_study": [
+              {
+                "name": "earthquake",
+                "tag": "EQUA"
+              },
+              {
+                "name": "force shield",
+                "tag": "FSHI"
+              },
+              {
+                "name": "energy shield",
+                "tag": "ESHI"
+              },
+              {
+                "name": "spirit shield",
+                "tag": "SSHI"
+              },
+              {
+                "name": "magical healing",
+                "tag": "MHEA"
+              },
+              {
+                "name": "farsight",
+                "tag": "FARS"
+              },
+              {
+                "name": "mind reading",
+                "tag": "MIND"
+              },
+              {
+                "name": "weather lore",
+                "tag": "WEAT"
+              },
+              {
+                "name": "earth lore",
+                "tag": "EART"
+              },
+              {
+                "name": "necromancy",
+                "tag": "NECR"
+              },
+              {
+                "name": "demon lore",
+                "tag": "DEMO"
+              },
+              {
+                "name": "illusion",
+                "tag": "ILLU"
+              },
+              {
+                "name": "artifact lore",
+                "tag": "ARTI"
+              }
+            ],
+            "known": [
+              {
+                "level": 1,
+                "name": "observation",
+                "skill_days": 30,
+                "tag": "OBSE"
+              },
+              {
+                "level": 1,
+                "name": "force",
+                "skill_days": 30,
+                "tag": "FORC"
+              },
+              {
+                "level": 1,
+                "name": "pattern",
+                "skill_days": 35,
+                "tag": "PATT"
+              },
+              {
+                "level": 1,
+                "name": "spirit",
+                "skill_days": 30,
+                "tag": "SPIR"
+              },
+              {
+                "level": 1,
+                "name": "gate lore",
+                "skill_days": 30,
+                "tag": "GATE"
+              },
+              {
+                "level": 1,
+                "name": "fire",
+                "skill_days": 30,
+                "tag": "FIRE"
+              },
+              {
+                "level": 3,
+                "name": "combat",
+                "skill_days": 180,
+                "tag": "COMB"
+              },
+              {
+                "level": 1,
+                "name": "stealth",
+                "skill_days": 30,
+                "tag": "STEA"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.6,
+        "max": 369
+      }
+    }
+  ],
+  "skill_reports": [
+    {
+      "description": "A unit with this skill is concealed from being seen, except by units with an Observation skill greater than or equal to the stealthy unit's Stealth level. This skill costs 50 silver per month of study.",
+      "level": 1,
+      "name": "stealth",
+      "tag": "STEA"
+    }
+  ],
+  "statistics": [
+    {
+      "item_name": "leader [LEAD]",
+      "max": 1,
+      "rank": 1,
+      "total": 1
+    }
+  ],
+  "status": {
+    "apprentices": {
+      "allowed": 3,
+      "current": 0,
+      "name": "Apprentice"
+    },
+    "mages": {
+      "allowed": 2,
+      "current": 1
+    },
+    "quartermasters": {
+      "allowed": 2,
+      "current": 0
+    },
+    "regions": {
+      "allowed": 10,
+      "current": 0
+    }
+  },
+  "type": {
+    "magic": 1,
+    "martial": 1
+  },
+  "unclaimed_silver": 10150
+}
