@@ -524,9 +524,9 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
 
     bool show_unit_attitudes = false;
     if (report.contains("administrative")) {
-        if (!report["administrative"].contains("times_sent"))
+        if (!report["administrative"].contains("times_sent") || !report["administrative"]["times_sent"])
             f << "Note: The Times is not being sent to you.\n\n";
-        if (report["administrative"].contains("password_unset"))
+        if (report["administrative"].contains("password_unset") && report["administrative"]["password_unset"])
             f << "REMINDER: You have not set a password for your faction!\n\n";
         if (report["administrative"].contains("inactivity_deletion_turns")) {
             f << "WARNING: You have " << report["administrative"]["inactivity_deletion_turns"]
