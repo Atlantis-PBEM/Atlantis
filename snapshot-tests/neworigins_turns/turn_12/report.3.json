@@ -1,0 +1,6055 @@
+{
+  "administrative": {
+    "email": "NoAddress",
+    "password_unset": true,
+    "show_unit_attitudes": false,
+    "times_sent": true
+  },
+  "attitudes": {
+    "ally": [],
+    "default": "neutral",
+    "friendly": [],
+    "hostile": [],
+    "neutral": [],
+    "unfriendly": [
+      {
+        "name": "Creatures",
+        "number": 2
+      }
+    ]
+  },
+  "date": {
+    "month": "January",
+    "year": 2
+  },
+  "engine": {
+    "ruleset": "NewOrigins",
+    "ruleset_version": "3.0.0 (beta)",
+    "version": "5.2.5 (beta)"
+  },
+  "events": [
+    {
+      "category": "claim",
+      "message": "Claims $41.",
+      "unit": {
+        "name": "Unit",
+        "number": 71
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $41.",
+      "unit": {
+        "name": "Unit",
+        "number": 72
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $41.",
+      "unit": {
+        "name": "Unit",
+        "number": 73
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $36.",
+      "unit": {
+        "name": "Unit",
+        "number": 74
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $36.",
+      "unit": {
+        "name": "Unit",
+        "number": 75
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $36.",
+      "unit": {
+        "name": "Unit",
+        "number": 76
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $39.",
+      "unit": {
+        "name": "Unit",
+        "number": 77
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $39.",
+      "unit": {
+        "name": "Unit",
+        "number": 78
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $1000.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $36.",
+      "unit": {
+        "name": "Unit",
+        "number": 79
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $36.",
+      "unit": {
+        "name": "Unit",
+        "number": 80
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $36.",
+      "unit": {
+        "name": "Unit",
+        "number": 81
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $36.",
+      "unit": {
+        "name": "Unit",
+        "number": 82
+      }
+    },
+    {
+      "category": "tax",
+      "message": "Collects $257 in taxes in swamp (13,3) in Philagotuspolisus Marshes.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 13,
+          "y": 3,
+          "z": 1
+        },
+        "province": "Philagotuspolisus Marshes",
+        "settlement": {
+          "name": "Hymnoalotos",
+          "size": "village"
+        },
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 51
+      }
+    },
+    {
+      "category": "tax",
+      "message": "Collects $321 in taxes in swamp (13,3) in Philagotuspolisus Marshes.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 13,
+          "y": 3,
+          "z": 1
+        },
+        "province": "Philagotuspolisus Marshes",
+        "settlement": {
+          "name": "Hymnoalotos",
+          "size": "village"
+        },
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 57
+      }
+    },
+    {
+      "category": "tax",
+      "message": "Collects $290 in taxes in swamp (13,3) in Philagotuspolisus Marshes.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 13,
+          "y": 3,
+          "z": 1
+        },
+        "province": "Philagotuspolisus Marshes",
+        "settlement": {
+          "name": "Hymnoalotos",
+          "size": "village"
+        },
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 60
+      }
+    },
+    {
+      "category": "tax",
+      "message": "Collects $290 in taxes in swamp (13,3) in Philagotuspolisus Marshes.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 13,
+          "y": 3,
+          "z": 1
+        },
+        "province": "Philagotuspolisus Marshes",
+        "settlement": {
+          "name": "Hymnoalotos",
+          "size": "village"
+        },
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 61
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys wood elf [WELF] at $41 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 71
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys wood elf [WELF] at $41 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 72
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys wood elf [WELF] at $41 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 73
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys lizardman [LIZA] at $36 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 74
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys lizardman [LIZA] at $36 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 75
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys lizardman [LIZA] at $36 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 76
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys orc [ORC] at $39 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 77
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys orc [ORC] at $39 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 78
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys lizardman [LIZA] at $36 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 79
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys lizardman [LIZA] at $36 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 80
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys lizardman [LIZA] at $36 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 81
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys lizardman [LIZA] at $36 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 82
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (0,4) in Aoratalotos Swamp to ocean (0,6) in Great Nena River.",
+      "unit": {
+        "name": "Unit",
+        "number": 75
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (0,4) in Aoratalotos Swamp to ocean (15,3) in Great Nena River.",
+      "unit": {
+        "name": "Unit",
+        "number": 76
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (3,7) in Dogmoeryx Marshes to ocean (4,6) in Cylith Sea.",
+      "unit": {
+        "name": "Unit",
+        "number": 79
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (3,7) in Dogmoeryx Marshes to desert (3,9) in Dunham Sands.",
+      "unit": {
+        "name": "Unit",
+        "number": 81
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (3,7) in Dogmoeryx Marshes to ocean (2,8) in Great Nena River.",
+      "unit": {
+        "name": "Unit",
+        "number": 82
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from forest (3,3) in Aoratalotos Forest to mountain (3,1) in Kynal Rocks.",
+      "unit": {
+        "name": "Unit",
+        "number": 71
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from forest (3,3) in Aoratalotos Forest to mountain (4,2) in Kynal Rocks.",
+      "unit": {
+        "name": "Unit",
+        "number": 72
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from forest (3,3) in Aoratalotos Forest to forest (2,2) in Aoratalotos Forest.",
+      "unit": {
+        "name": "Unit",
+        "number": 73
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (0,4) in Aoratalotos Swamp to forest (0,2) in Aoratalotos Forest.",
+      "unit": {
+        "name": "Unit",
+        "number": 74
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (2,4) in Dogmoeryx Marshes to forest (1,3) in Aoratalotos Forest.",
+      "unit": {
+        "name": "Unit",
+        "number": 77
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (2,4) in Dogmoeryx Marshes to jungle (1,5) in Aoratalotos Jungle.",
+      "unit": {
+        "name": "Unit",
+        "number": 78
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from plain (14,4) in Maranarenos Dale to swamp (15,5) in Aoratalotos Swamp.",
+      "unit": {
+        "name": "Unit",
+        "number": 66
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (15,5) in Aoratalotos Swamp to jungle (15,7) in Heteraskalos Woods.",
+      "unit": {
+        "name": "Unit",
+        "number": 64
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from swamp (3,7) in Dogmoeryx Marshes to swamp (4,8) in Dogmoeryx Marshes.",
+      "unit": {
+        "name": "Unit",
+        "number": 80
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 11 silver working in swamp (14,0) in Nema River.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 14,
+          "y": 0,
+          "z": 1
+        },
+        "province": "Nema River",
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 5
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 13 silver working in forest (14,2) in Philagotuspolisus Woods.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 14,
+          "y": 2,
+          "z": 1
+        },
+        "province": "Philagotuspolisus Woods",
+        "terrain": "forest"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 65
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 12 silver working in forest (3,3) in Aoratalotos Forest.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 3,
+          "y": 3,
+          "z": 1
+        },
+        "province": "Aoratalotos Forest",
+        "terrain": "forest"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 67
+      }
+    },
+    {
+      "category": "share",
+      "message": "Unit (51) shares 10 silver [SILV] with Unit (52).",
+      "unit": {
+        "name": "Unit",
+        "number": 51
+      }
+    },
+    {
+      "category": "study",
+      "message": "Studies longbow at a cost of 10 silver [SILV].",
+      "unit": {
+        "name": "Unit",
+        "number": 52
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 11 silver working in swamp (0,4) in Aoratalotos Swamp.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 0,
+          "y": 4,
+          "z": 1
+        },
+        "province": "Aoratalotos Swamp",
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 62
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 12 silver working in swamp (2,4) in Dogmoeryx Marshes.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 2,
+          "y": 4,
+          "z": 1
+        },
+        "province": "Dogmoeryx Marshes",
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 70
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 12 silver working in plain (14,4) in Maranarenos Dale.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 14,
+          "y": 4,
+          "z": 1
+        },
+        "province": "Maranarenos Dale",
+        "terrain": "plain"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 63
+      }
+    },
+    {
+      "category": "study",
+      "message": "Studies pattern at a cost of 100 silver [SILV].",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "study",
+      "message": "Completes study to level 2 in pattern.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 12 silver working in swamp (2,6) in Dogmoeryx Marshes.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 2,
+          "y": 6,
+          "z": 1
+        },
+        "province": "Dogmoeryx Marshes",
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 69
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 11 silver working in swamp (3,7) in Dogmoeryx Marshes.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 3,
+          "y": 7,
+          "z": 1
+        },
+        "province": "Dogmoeryx Marshes",
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 68
+      }
+    },
+    {
+      "category": "spell",
+      "message": "Casts Random Gate Jump. Capacity: 10/15.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "spell",
+      "message": "Jumps through a Gate to jungle (3,5) in Kleptoatres Jungle.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "practice",
+      "message": "Gets 5 days of practice with spirit [SPIR].",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 10 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 5
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 10 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 65
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 10 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 67
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 80 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 51
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 100 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 57
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 90 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 60
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 90 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 61
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 10 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 62
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 10 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 70
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 10 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 63
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 50 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 10 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 69
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 10 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 68
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Borrows 50 silver [SILV] from Unit (51) for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 52
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Unit (52) borrows 50 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 51
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 71
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 74
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 73
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 72
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 77
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 76
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 78
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 66
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 75
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 79
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 64
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 82
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 80
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 81
+      }
+    }
+  ],
+  "item_reports": [
+    {
+      "description": "lizardman [LIZA], weight 10, walking capacity 5, swimming capacity 5, moves 2 hexes per month. This race may study hunting [HUNT], herb lore [HERB], carpenter [CARP], sailing [SAIL] and healing [HEAL] to level 5 and all other skills to level 2.",
+      "name": "lizardman",
+      "tag": "LIZA"
+    },
+    {
+      "description": "orc [ORC], weight 10, walking capacity 5, moves 2 hexes per month. This race may study mining [MINI], lumberjack [LUMB], combat [COMB], building [BUIL] and shipbuilding [SHIP] to level 5 and all other skills to level 2.",
+      "name": "orc",
+      "tag": "ORC"
+    }
+  ],
+  "name": "Test",
+  "number": 3,
+  "object_reports": [],
+  "regions": [
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 14,
+        "y": 0,
+        "z": 1
+      },
+      "entertainment": 17,
+      "exits": [
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Woods",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Burmere Sea",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 50,
+            "name": "goblin",
+            "plural": "goblins",
+            "price": 26,
+            "tag": "GBLN"
+          },
+          {
+            "amount": 10,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 616,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1267,
+        "race": "goblins"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 17,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 17,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 11,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Nema River",
+      "tax": 253,
+      "terrain": "swamp",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 2,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 5,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 11.0,
+        "max": 118
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 3,
+        "y": 1,
+        "z": 1
+      },
+      "entertainment": 27,
+      "exits": [
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 0,
+              "z": 1
+            },
+            "province": "Durbador Lake",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Kynal Rocks",
+            "terrain": "mountain"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 0,
+              "z": 1
+            },
+            "province": "Dunham Plain",
+            "terrain": "plain"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 54,
+            "name": "orc",
+            "plural": "orcs",
+            "price": 37,
+            "tag": "ORC"
+          },
+          {
+            "amount": 10,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 660,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1371,
+        "race": "orcs"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 26,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 39,
+          "name": "iron",
+          "plural": "iron",
+          "tag": "IRON"
+        },
+        {
+          "amount": 14,
+          "name": "stone",
+          "plural": "stone",
+          "tag": "STON"
+        }
+      ],
+      "province": "Kynal Rocks",
+      "tax": 493,
+      "terrain": "mountain",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "wood elf",
+              "plural": "wood elves",
+              "tag": "WELF"
+            }
+          ],
+          "name": "Unit",
+          "number": 71,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 11.8,
+        "max": 226
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 0,
+        "y": 2,
+        "z": 1
+      },
+      "entertainment": 732,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Hornwood Lake",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 42,
+            "name": "ivory",
+            "plural": "ivory",
+            "price": 65,
+            "tag": "IVOR"
+          },
+          {
+            "amount": 64,
+            "name": "truffles",
+            "plural": "truffles",
+            "price": 79,
+            "tag": "TRUF"
+          },
+          {
+            "amount": 412,
+            "name": "centaur",
+            "plural": "centaurs",
+            "price": 90,
+            "tag": "CTAU"
+          },
+          {
+            "amount": 82,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 901,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": [
+          {
+            "amount": 162,
+            "name": "grain",
+            "plural": "grain",
+            "price": 29,
+            "tag": "GRAI"
+          },
+          {
+            "amount": 132,
+            "name": "livestock",
+            "plural": "livestock",
+            "price": 24,
+            "tag": "LIVE"
+          },
+          {
+            "amount": 162,
+            "name": "fish",
+            "plural": "fish",
+            "price": 53,
+            "tag": "FISH"
+          },
+          {
+            "amount": 22,
+            "name": "lasso",
+            "plural": "lassoes",
+            "price": 102,
+            "tag": "LASS"
+          },
+          {
+            "amount": 29,
+            "name": "chain armor",
+            "plural": "chain armor",
+            "price": 96,
+            "tag": "CARM"
+          },
+          {
+            "amount": 35,
+            "name": "net",
+            "plural": "nets",
+            "price": 158,
+            "tag": "NET"
+          },
+          {
+            "amount": 20,
+            "name": "plate armor",
+            "plural": "plate armor",
+            "price": 428,
+            "tag": "PARM"
+          },
+          {
+            "amount": 69,
+            "name": "pearls",
+            "plural": "pearls",
+            "price": 497,
+            "tag": "PEAR"
+          },
+          {
+            "amount": 45,
+            "name": "perfume",
+            "plural": "perfume",
+            "price": 432,
+            "tag": "PERF"
+          }
+        ]
+      },
+      "population": {
+        "amount": 10310,
+        "race": "centaurs"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 25,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 31,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 12,
+          "name": "fur",
+          "plural": "furs",
+          "tag": "FUR"
+        }
+      ],
+      "province": "Aoratalotos Forest",
+      "settlement": {
+        "name": "Epikataralotos",
+        "size": "city"
+      },
+      "structures": [
+        {
+          "incomplete": 1,
+          "name": "Golden Belly",
+          "number": 1,
+          "type": "Inn",
+          "units": null
+        },
+        {
+          "name": "Road to Araia",
+          "number": 2,
+          "type": "Road S",
+          "units": null
+        }
+      ],
+      "tax": 12578,
+      "terrain": "forest",
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "The Guardsmen",
+            "number": 1
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true
+          },
+          "items": [
+            {
+              "amount": 120,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            },
+            {
+              "amount": 120,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            }
+          ],
+          "name": "City Guard",
+          "number": 4
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 15,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "lizardman",
+              "plural": "lizardmen",
+              "tag": "LIZA"
+            }
+          ],
+          "name": "Unit",
+          "number": 74,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 16.1,
+        "max": 2515
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 2,
+        "y": 2,
+        "z": 1
+      },
+      "entertainment": 69,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 0,
+              "z": 1
+            },
+            "province": "Dunham Plain",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Kynal Rocks",
+            "terrain": "mountain"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Hornwood Lake",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 75,
+            "name": "centaur",
+            "plural": "centaurs",
+            "price": 75,
+            "tag": "CTAU"
+          },
+          {
+            "amount": 15,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 756,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1899,
+        "race": "centaurs"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 22,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 33,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 16,
+          "name": "fur",
+          "plural": "furs",
+          "tag": "FUR"
+        }
+      ],
+      "province": "Aoratalotos Forest",
+      "structures": [
+        {
+          "closed": true,
+          "name": "Crypt",
+          "number": 1,
+          "type": "Crypt",
+          "units": [
+            {
+              "attitude": "unfriendly",
+              "flags": {
+                "guard": false
+              },
+              "items": [
+                {
+                  "amount": 41,
+                  "name": "skeleton",
+                  "plural": "skeletons",
+                  "tag": "SKEL"
+                },
+                {
+                  "amount": 8,
+                  "name": "undead",
+                  "plural": "undead",
+                  "tag": "UNDE"
+                },
+                {
+                  "amount": 1,
+                  "name": "lich",
+                  "plural": "liches",
+                  "tag": "LICH"
+                }
+              ],
+              "name": "Undead",
+              "number": 50
+            }
+          ]
+        }
+      ],
+      "tax": 1329,
+      "terrain": "forest",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "wood elf",
+              "plural": "wood elves",
+              "tag": "WELF"
+            }
+          ],
+          "name": "Unit",
+          "number": 73,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 13.5,
+        "max": 557
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 4,
+        "y": 2,
+        "z": 1
+      },
+      "entertainment": 34,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 0,
+              "z": 1
+            },
+            "province": "Durbador Lake",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 5,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Nela River",
+            "settlement": {
+              "name": "Ogwaz",
+              "size": "town"
+            },
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 5,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Nela River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Cylith Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Kynal Rocks",
+            "terrain": "mountain"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 57,
+            "name": "orc",
+            "plural": "orcs",
+            "price": 39,
+            "tag": "ORC"
+          },
+          {
+            "amount": 11,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 683,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1449,
+        "race": "orcs"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 29,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 35,
+          "name": "iron",
+          "plural": "iron",
+          "tag": "IRON"
+        },
+        {
+          "amount": 12,
+          "name": "stone",
+          "plural": "stone",
+          "tag": "STON"
+        }
+      ],
+      "province": "Kynal Rocks",
+      "tax": 637,
+      "terrain": "mountain",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "wood elf",
+              "plural": "wood elves",
+              "tag": "WELF"
+            }
+          ],
+          "name": "Unit",
+          "number": 72,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.2,
+        "max": 289
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 14,
+        "y": 2,
+        "z": 1
+      },
+      "entertainment": 60,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 0,
+              "z": 1
+            },
+            "province": "Nema River",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Maranarenos Dale",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Marshes",
+            "settlement": {
+              "name": "Hymnoalotos",
+              "size": "village"
+            },
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Burmere Sea",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 70,
+            "name": "wood elf",
+            "plural": "wood elves",
+            "price": 42,
+            "tag": "WELF"
+          },
+          {
+            "amount": 14,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 750,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1750,
+        "race": "wood elves"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 28,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 31,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 12,
+          "name": "fur",
+          "plural": "furs",
+          "tag": "FUR"
+        }
+      ],
+      "province": "Philagotuspolisus Woods",
+      "tax": 1190,
+      "terrain": "forest",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 3,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 65,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 13.4,
+        "max": 510
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 1,
+        "y": 3,
+        "z": 1
+      },
+      "entertainment": 81,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Hornwood Lake",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "settlement": {
+              "name": "Epikataralotos",
+              "size": "city"
+            },
+            "terrain": "forest"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 82,
+            "name": "wood elf",
+            "plural": "wood elves",
+            "price": 43,
+            "tag": "WELF"
+          },
+          {
+            "amount": 16,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 767,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 2053,
+        "race": "wood elves"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 31,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 29,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 15,
+          "name": "fur",
+          "plural": "furs",
+          "tag": "FUR"
+        }
+      ],
+      "province": "Aoratalotos Forest",
+      "structures": [
+        {
+          "incomplete": 23,
+          "name": "Ice Rose",
+          "number": 1,
+          "type": "Fort",
+          "units": null
+        }
+      ],
+      "tax": 1519,
+      "terrain": "forest",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "orc",
+              "plural": "orcs",
+              "tag": "ORC"
+            }
+          ],
+          "name": "Unit",
+          "number": 77,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 13.7,
+        "max": 627
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 3,
+        "y": 3,
+        "z": 1
+      },
+      "entertainment": 44,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Kynal Rocks",
+            "terrain": "mountain"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Kynal Rocks",
+            "terrain": "mountain"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Cylith Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Kleptoatres Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 60,
+            "name": "wood elf",
+            "plural": "wood elves",
+            "price": 41,
+            "tag": "WELF"
+          },
+          {
+            "amount": 12,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 722,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1506,
+        "race": "wood elves"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 35,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 27,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 13,
+          "name": "fur",
+          "plural": "furs",
+          "tag": "FUR"
+        }
+      ],
+      "province": "Aoratalotos Forest",
+      "tax": 873,
+      "terrain": "forest",
+      "units": [
+        {
+          "attitude": "unfriendly",
+          "flags": {
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "ogre",
+              "plural": "ogres",
+              "tag": "OGRE"
+            }
+          ],
+          "name": "Family of Ogres",
+          "number": 15
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "wood elf",
+              "plural": "wood elves",
+              "tag": "WELF"
+            },
+            {
+              "amount": 2,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 67,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.9,
+        "max": 392
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 13,
+        "y": 3,
+        "z": 1
+      },
+      "entertainment": 75,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Burmere Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Woods",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Maranarenos Dale",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Kleptoatres Volcano",
+            "terrain": "volcano"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 12,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Mila River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 12,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Burmere Sea",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 100,
+            "name": "gnoll",
+            "plural": "gnolls",
+            "price": 39,
+            "tag": "GNOL"
+          },
+          {
+            "amount": 20,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 688,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": [
+          {
+            "amount": 83,
+            "name": "grain",
+            "plural": "grain",
+            "price": 18,
+            "tag": "GRAI"
+          },
+          {
+            "amount": 129,
+            "name": "livestock",
+            "plural": "livestock",
+            "price": 29,
+            "tag": "LIVE"
+          },
+          {
+            "amount": 141,
+            "name": "fish",
+            "plural": "fish",
+            "price": 50,
+            "tag": "FISH"
+          }
+        ]
+      },
+      "population": {
+        "amount": 2513,
+        "race": "gnolls"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 16,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 13,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 14,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Philagotuspolisus Marshes",
+      "settlement": {
+        "name": "Hymnoalotos",
+        "size": "village"
+      },
+      "tax": 1155,
+      "terrain": "swamp",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 120
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 8,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 14,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            },
+            {
+              "amount": 424,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 51,
+          "orders": [
+            {
+              "order": "@tax"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 2,
+                "name": "combat",
+                "skill_days": 95,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 94
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": true,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            },
+            {
+              "amount": 1,
+              "name": "longbow",
+              "plural": "longbows",
+              "tag": "LBOW"
+            },
+            {
+              "amount": 2,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            }
+          ],
+          "name": "Unit",
+          "number": 52,
+          "orders": [
+            {
+              "order": "@study lbow"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 1,
+                "name": "tactics",
+                "skill_days": 35,
+                "tag": "TACT"
+              },
+              {
+                "level": 2,
+                "name": "longbow",
+                "skill_days": 90,
+                "tag": "LBOW"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 13
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 150
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 10,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 15,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            },
+            {
+              "amount": 762,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 57,
+          "orders": [
+            {
+              "order": "@tax"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 2,
+                "name": "combat",
+                "skill_days": 95,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 115
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 135
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 9,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 14,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            },
+            {
+              "amount": 645,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 60,
+          "orders": [
+            {
+              "order": "@tax"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 2,
+                "name": "combat",
+                "skill_days": 95,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 104
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 135
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 9,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 15,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            },
+            {
+              "amount": 645,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 61,
+          "orders": [
+            {
+              "order": "@tax"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 2,
+                "name": "combat",
+                "skill_days": 95,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 105
+        }
+      ],
+      "wages": {
+        "amount": 12.3,
+        "max": 466
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 15,
+        "y": 3,
+        "z": 1
+      },
+      "entertainment": 0,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "settlement": {
+              "name": "Epikataralotos",
+              "size": "city"
+            },
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Maranarenos Dale",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Woods",
+            "terrain": "forest"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [],
+        "wanted": []
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 49,
+          "name": "fish",
+          "plural": "fish",
+          "tag": "FISH"
+        }
+      ],
+      "province": "Great Nena River",
+      "terrain": "ocean",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 15,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "lizardman",
+              "plural": "lizardmen",
+              "tag": "LIZA"
+            }
+          ],
+          "name": "Unit",
+          "number": 76,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 0.0,
+        "max": 0
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 0,
+        "y": 4,
+        "z": 1
+      },
+      "entertainment": 20,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "settlement": {
+              "name": "Epikataralotos",
+              "size": "city"
+            },
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 51,
+            "name": "lizardman",
+            "plural": "lizardmen",
+            "price": 36,
+            "tag": "LIZA"
+          },
+          {
+            "amount": 10,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 632,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1281,
+        "race": "lizardmen"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 10,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 16,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 13,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Aoratalotos Swamp",
+      "structures": [
+        {
+          "incomplete": 25,
+          "name": "Road to Araia",
+          "number": 1,
+          "type": "Road SW",
+          "units": null
+        },
+        {
+          "incomplete": 15,
+          "name": "Road to Araia",
+          "number": 2,
+          "type": "Road N",
+          "units": null
+        }
+      ],
+      "tax": 333,
+      "terrain": "swamp",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 1,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 62,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 11.3,
+        "max": 155
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 2,
+        "y": 4,
+        "z": 1
+      },
+      "entertainment": 38,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Kleptoatres Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 62,
+            "name": "orc",
+            "plural": "orcs",
+            "price": 39,
+            "tag": "ORC"
+          },
+          {
+            "amount": 12,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 688,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1553,
+        "race": "orcs"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 15,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 10,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 10,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Dogmoeryx Marshes",
+      "tax": 714,
+      "terrain": "swamp",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "wood elf",
+              "plural": "wood elves",
+              "tag": "WELF"
+            },
+            {
+              "amount": 2,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 70,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.3,
+        "max": 312
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 14,
+        "y": 4,
+        "z": 1
+      },
+      "entertainment": 62,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Woods",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Airalotos Pond",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Kleptoatres Volcano",
+            "terrain": "volcano"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Marshes",
+            "settlement": {
+              "name": "Hymnoalotos",
+              "size": "village"
+            },
+            "terrain": "swamp"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 87,
+            "name": "centaur",
+            "plural": "centaurs",
+            "price": 68,
+            "tag": "CTAU"
+          },
+          {
+            "amount": 17,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 688,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 2191,
+        "race": "centaurs"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 57,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 30,
+          "name": "horse",
+          "plural": "horses",
+          "tag": "HORS"
+        }
+      ],
+      "province": "Maranarenos Dale",
+      "tax": 1007,
+      "terrain": "plain",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 2,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 63,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.3,
+        "max": 413
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 1,
+        "y": 5,
+        "z": 1
+      },
+      "entertainment": 30,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 63,
+            "name": "lizardman",
+            "plural": "lizardmen",
+            "price": 36,
+            "tag": "LIZA"
+          },
+          {
+            "amount": 12,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 644,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1581,
+        "race": "lizardmen"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 25,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 17,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 22,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Aoratalotos Jungle",
+      "tax": 474,
+      "terrain": "jungle",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "orc",
+              "plural": "orcs",
+              "tag": "ORC"
+            }
+          ],
+          "name": "Unit",
+          "number": 78,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 11.5,
+        "max": 206
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 3,
+        "y": 5,
+        "z": 1
+      },
+      "entertainment": 43,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Cylith Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Cylith Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        }
+      ],
+      "gate": {
+        "number": 68,
+        "open": 1
+      },
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 63,
+            "name": "wood elf",
+            "plural": "wood elves",
+            "price": 40,
+            "tag": "WELF"
+          },
+          {
+            "amount": 12,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 705,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1587,
+        "race": "wood elves"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 35,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 19,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 31,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        },
+        {
+          "amount": 14,
+          "name": "fur",
+          "plural": "furs",
+          "tag": "FUR"
+        }
+      ],
+      "province": "Kleptoatres Jungle",
+      "tax": 825,
+      "terrain": "jungle",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "combat_spell": {
+            "name": "fire",
+            "tag": "FIRE"
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            },
+            {
+              "amount": 1840,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 38,
+          "orders": [
+            {
+              "order": "study spir 2"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "can_study": [
+              {
+                "name": "fire",
+                "tag": "FIRE"
+              },
+              {
+                "name": "earthquake",
+                "tag": "EQUA"
+              },
+              {
+                "name": "force shield",
+                "tag": "FSHI"
+              },
+              {
+                "name": "energy shield",
+                "tag": "ESHI"
+              },
+              {
+                "name": "spirit shield",
+                "tag": "SSHI"
+              },
+              {
+                "name": "magical healing",
+                "tag": "MHEA"
+              },
+              {
+                "name": "farsight",
+                "tag": "FARS"
+              },
+              {
+                "name": "mind reading",
+                "tag": "MIND"
+              },
+              {
+                "name": "weather lore",
+                "tag": "WEAT"
+              },
+              {
+                "name": "earth lore",
+                "tag": "EART"
+              },
+              {
+                "name": "necromancy",
+                "tag": "NECR"
+              },
+              {
+                "name": "demon lore",
+                "tag": "DEMO"
+              },
+              {
+                "name": "illusion",
+                "tag": "ILLU"
+              },
+              {
+                "name": "create phantasmal beasts",
+                "tag": "PHBE"
+              },
+              {
+                "name": "create phantasmal demons",
+                "tag": "PHDE"
+              },
+              {
+                "name": "dispel illusions",
+                "tag": "DISP"
+              },
+              {
+                "name": "artifact lore",
+                "tag": "ARTI"
+              }
+            ],
+            "known": [
+              {
+                "level": 1,
+                "name": "observation",
+                "skill_days": 30,
+                "tag": "OBSE"
+              },
+              {
+                "level": 2,
+                "name": "force",
+                "skill_days": 100,
+                "tag": "FORC"
+              },
+              {
+                "level": 2,
+                "name": "pattern",
+                "skill_days": 110,
+                "tag": "PATT"
+              },
+              {
+                "level": 1,
+                "name": "spirit",
+                "skill_days": 35,
+                "tag": "SPIR"
+              },
+              {
+                "level": 1,
+                "name": "gate lore",
+                "skill_days": 30,
+                "tag": "GATE"
+              },
+              {
+                "level": 1,
+                "name": "fire",
+                "skill_days": 30,
+                "tag": "FIRE"
+              },
+              {
+                "level": 3,
+                "name": "combat",
+                "skill_days": 200,
+                "tag": "COMB"
+              },
+              {
+                "level": 1,
+                "name": "stealth",
+                "skill_days": 60,
+                "tag": "STEA"
+              },
+              {
+                "level": 1,
+                "name": "illusion",
+                "skill_days": 30,
+                "tag": "ILLU"
+              },
+              {
+                "level": 1,
+                "name": "phantasmal entertainment",
+                "skill_days": 30,
+                "tag": "PHEN"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.6,
+        "max": 359
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 15,
+        "y": 5,
+        "z": 1
+      },
+      "entertainment": 26,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Heteraskalos Woods",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Airalotos Pond",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Maranarenos Dale",
+            "terrain": "plain"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 62,
+            "name": "orc",
+            "plural": "orcs",
+            "price": 35,
+            "tag": "ORC"
+          },
+          {
+            "amount": 12,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 627,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1561,
+        "race": "orcs"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 18,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 12,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 15,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Aoratalotos Swamp",
+      "structures": [
+        {
+          "name": "Road to Araia",
+          "number": 1,
+          "type": "Road NE",
+          "units": null
+        }
+      ],
+      "tax": 374,
+      "terrain": "swamp",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            }
+          ],
+          "name": "Unit",
+          "number": 66,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 11.2,
+        "max": 163
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 0,
+        "y": 6,
+        "z": 1
+      },
+      "entertainment": 0,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Morubal Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Heteraskalos Woods",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [],
+        "wanted": []
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 69,
+          "name": "fish",
+          "plural": "fish",
+          "tag": "FISH"
+        }
+      ],
+      "province": "Great Nena River",
+      "terrain": "ocean",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 15,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "lizardman",
+              "plural": "lizardmen",
+              "tag": "LIZA"
+            }
+          ],
+          "name": "Unit",
+          "number": 75,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 0.0,
+        "max": 0
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 2,
+        "y": 6,
+        "z": 1
+      },
+      "entertainment": 39,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Kleptoatres Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Jungle",
+            "terrain": "jungle"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 57,
+            "name": "lizardman",
+            "plural": "lizardmen",
+            "price": 40,
+            "tag": "LIZA"
+          },
+          {
+            "amount": 11,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 711,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1444,
+        "race": "lizardmen"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 11,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 18,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 17,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Dogmoeryx Marshes",
+      "tax": 779,
+      "terrain": "swamp",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "wood elf",
+              "plural": "wood elves",
+              "tag": "WELF"
+            },
+            {
+              "amount": 2,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 69,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.7,
+        "max": 353
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 4,
+        "y": 6,
+        "z": 1
+      },
+      "entertainment": 0,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Cylith Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 5,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Nela River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 5,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Dregrod Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Kleptoatres Jungle",
+            "terrain": "jungle"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [],
+        "wanted": []
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 43,
+          "name": "fish",
+          "plural": "fish",
+          "tag": "FISH"
+        }
+      ],
+      "province": "Cylith Sea",
+      "terrain": "ocean",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 15,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "lizardman",
+              "plural": "lizardmen",
+              "tag": "LIZA"
+            }
+          ],
+          "name": "Unit",
+          "number": 79,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 0.0,
+        "max": 0
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 3,
+        "y": 7,
+        "z": 1
+      },
+      "entertainment": 33,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Kleptoatres Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Cylith Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 9,
+              "z": 1
+            },
+            "province": "Dunham Sands",
+            "settlement": {
+              "name": "Chestergrove",
+              "size": "town"
+            },
+            "terrain": "desert"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 68,
+            "name": "lizardman",
+            "plural": "lizardmen",
+            "price": 36,
+            "tag": "LIZA"
+          },
+          {
+            "amount": 13,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 644,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1723,
+        "race": "lizardmen"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 11,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 11,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 13,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Dogmoeryx Marshes",
+      "tax": 516,
+      "terrain": "swamp",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "wood elf",
+              "plural": "wood elves",
+              "tag": "WELF"
+            },
+            {
+              "amount": 1,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 68,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 11.5,
+        "max": 222
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 15,
+        "y": 7,
+        "z": 1
+      },
+      "entertainment": 35,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Morubal Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 9,
+              "z": 1
+            },
+            "province": "Heteraskalos Valley",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Heteraskalos Valley",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Airalotos Pond",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 51,
+            "name": "gnome",
+            "plural": "gnomes",
+            "price": 30,
+            "tag": "GNOM"
+          },
+          {
+            "amount": 10,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 722,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1290,
+        "race": "gnomes"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 37,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 16,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 23,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Heteraskalos Woods",
+      "tax": 748,
+      "terrain": "jungle",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            }
+          ],
+          "name": "Unit",
+          "number": 64,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.9,
+        "max": 348
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 2,
+        "y": 8,
+        "z": 1
+      },
+      "entertainment": 0,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 9,
+              "z": 1
+            },
+            "province": "Dunham Sands",
+            "settlement": {
+              "name": "Chestergrove",
+              "size": "town"
+            },
+            "terrain": "desert"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 10,
+              "z": 1
+            },
+            "province": "Hornwood Mountain",
+            "terrain": "mountain"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 9,
+              "z": 1
+            },
+            "province": "Aoratalotos Dale",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [],
+        "wanted": []
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 56,
+          "name": "fish",
+          "plural": "fish",
+          "tag": "FISH"
+        }
+      ],
+      "province": "Great Nena River",
+      "terrain": "ocean",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 15,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "lizardman",
+              "plural": "lizardmen",
+              "tag": "LIZA"
+            }
+          ],
+          "name": "Unit",
+          "number": 82,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 0.0,
+        "max": 0
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 4,
+        "y": 8,
+        "z": 1
+      },
+      "entertainment": 39,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Cylith Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 5,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Dregrod Jungle",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 5,
+              "y": 9,
+              "z": 1
+            },
+            "province": "Durbador Desert",
+            "terrain": "desert"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 10,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 9,
+              "z": 1
+            },
+            "province": "Dunham Sands",
+            "settlement": {
+              "name": "Chestergrove",
+              "size": "town"
+            },
+            "terrain": "desert"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 58,
+            "name": "lizardman",
+            "plural": "lizardmen",
+            "price": 40,
+            "tag": "LIZA"
+          },
+          {
+            "amount": 11,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 705,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1469,
+        "race": "lizardmen"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 15,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 12,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 10,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Dogmoeryx Marshes",
+      "tax": 763,
+      "terrain": "swamp",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 15,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "lizardman",
+              "plural": "lizardmen",
+              "tag": "LIZA"
+            }
+          ],
+          "name": "Unit",
+          "number": 80,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.6,
+        "max": 345
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 3,
+        "y": 9,
+        "z": 1
+      },
+      "entertainment": 276,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 7,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 4,
+              "y": 10,
+              "z": 1
+            },
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 3,
+              "y": 11,
+              "z": 1
+            },
+            "province": "Nyra River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 10,
+              "z": 1
+            },
+            "province": "Hornwood Mountain",
+            "terrain": "mountain"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 2,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 11,
+            "name": "spices",
+            "plural": "spices",
+            "price": 72,
+            "tag": "SPIC"
+          },
+          {
+            "amount": 270,
+            "name": "goblin",
+            "plural": "goblins",
+            "price": 31,
+            "tag": "GBLN"
+          },
+          {
+            "amount": 54,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 733,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": [
+          {
+            "amount": 178,
+            "name": "grain",
+            "plural": "grain",
+            "price": 26,
+            "tag": "GRAI"
+          },
+          {
+            "amount": 142,
+            "name": "livestock",
+            "plural": "livestock",
+            "price": 29,
+            "tag": "LIVE"
+          },
+          {
+            "amount": 102,
+            "name": "fish",
+            "plural": "fish",
+            "price": 60,
+            "tag": "FISH"
+          },
+          {
+            "amount": 18,
+            "name": "lasso",
+            "plural": "lassoes",
+            "price": 122,
+            "tag": "LASS"
+          },
+          {
+            "amount": 10,
+            "name": "bag",
+            "plural": "bags",
+            "price": 114,
+            "tag": "BAG"
+          },
+          {
+            "amount": 8,
+            "name": "spear",
+            "plural": "spears",
+            "price": 117,
+            "tag": "SPEA"
+          },
+          {
+            "amount": 5,
+            "name": "pike",
+            "plural": "pikes",
+            "price": 179,
+            "tag": "PIKE"
+          },
+          {
+            "amount": 12,
+            "name": "pearls",
+            "plural": "pearls",
+            "price": 440,
+            "tag": "PEAR"
+          }
+        ]
+      },
+      "population": {
+        "amount": 6753,
+        "race": "goblins"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 12,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 12,
+          "name": "iron",
+          "plural": "iron",
+          "tag": "IRON"
+        },
+        {
+          "amount": 14,
+          "name": "stone",
+          "plural": "stone",
+          "tag": "STON"
+        }
+      ],
+      "province": "Dunham Sands",
+      "settlement": {
+        "name": "Chestergrove",
+        "size": "town"
+      },
+      "tax": 4186,
+      "terrain": "desert",
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "The Guardsmen",
+            "number": 1
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true
+          },
+          "items": [
+            {
+              "amount": 80,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            },
+            {
+              "amount": 80,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            }
+          ],
+          "name": "City Guard",
+          "number": 6
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 15,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "lizardman",
+              "plural": "lizardmen",
+              "tag": "LIZA"
+            }
+          ],
+          "name": "Unit",
+          "number": 81,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 13.1,
+        "max": 837
+      }
+    }
+  ],
+  "skill_reports": [
+    {
+      "description": "No skill report.",
+      "level": 2,
+      "name": "longbow",
+      "tag": "LBOW"
+    },
+    {
+      "description": "No skill report.",
+      "level": 2,
+      "name": "pattern",
+      "tag": "PATT"
+    }
+  ],
+  "statistics": [
+    {
+      "item_name": "2 leaders [LEAD]",
+      "max": 2,
+      "rank": 1,
+      "total": 2
+    },
+    {
+      "item_name": "7 wood elves [WELF]",
+      "max": 7,
+      "rank": 1,
+      "total": 7
+    },
+    {
+      "item_name": "2 orcs [ORC]",
+      "max": 2,
+      "rank": 1,
+      "total": 2
+    },
+    {
+      "item_name": "4331 silver [SILV]",
+      "max": 4331,
+      "rank": 1,
+      "total": 4331
+    },
+    {
+      "item_name": "60 swords [SWOR]",
+      "max": 60,
+      "rank": 1,
+      "total": 60
+    },
+    {
+      "item_name": "longbow [LBOW]",
+      "max": 1,
+      "rank": 1,
+      "total": 1
+    },
+    {
+      "item_name": "7 lizardmen [LIZA]",
+      "max": 7,
+      "rank": 1,
+      "total": 7
+    },
+    {
+      "item_name": "42 gnolls [GNOL]",
+      "max": 42,
+      "rank": 1,
+      "total": 42
+    }
+  ],
+  "status": {
+    "apprentices": {
+      "allowed": 3,
+      "current": 0,
+      "name": "Apprentice"
+    },
+    "mages": {
+      "allowed": 2,
+      "current": 1
+    },
+    "quartermasters": {
+      "allowed": 2,
+      "current": 0
+    },
+    "regions": {
+      "allowed": 10,
+      "current": 1
+    }
+  },
+  "type": {
+    "magic": 1,
+    "martial": 1
+  },
+  "unclaimed_silver": 7323
+}

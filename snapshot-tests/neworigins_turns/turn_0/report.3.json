@@ -1,0 +1,407 @@
+{
+  "administrative": {
+    "email": "NoAddress",
+    "password_unset": true,
+    "show_unit_attitudes": false,
+    "times_sent": true
+  },
+  "attitudes": {
+    "ally": [],
+    "default": "neutral",
+    "friendly": [],
+    "hostile": [],
+    "neutral": [],
+    "unfriendly": [
+      {
+        "name": "Creatures",
+        "number": 2
+      }
+    ]
+  },
+  "date": {
+    "month": "January",
+    "year": 1
+  },
+  "engine": {
+    "ruleset": "NewOrigins",
+    "ruleset_version": "3.0.0 (beta)",
+    "version": "5.2.5 (beta)"
+  },
+  "events": [
+    {
+      "category": "maintenance",
+      "message": "Claims 50 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    }
+  ],
+  "item_reports": [
+    {
+      "description": "leader [LEAD], weight 10, walking capacity 5, moves 2 hexes per month. This race may study all skills to level 5.",
+      "name": "leader",
+      "tag": "LEAD"
+    }
+  ],
+  "name": "Test",
+  "number": 3,
+  "object_reports": [],
+  "regions": [
+    {
+      "coordinates": {
+        "label": "nexus",
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "description": "Atlantis Nexus is a magical place: the entryway to the world of Atlantis. Enjoy your stay; the city guards should keep you safe as long as you should choose to stay. However, rumor has it that once you have left the Nexus, you can never return.",
+      "exits": [],
+      "markets": {
+        "for_sale": [],
+        "wanted": []
+      },
+      "present": true,
+      "products": [],
+      "province": "The Void",
+      "structures": [
+        {
+          "inner_location": true,
+          "name": "Gateway to plain",
+          "number": 1,
+          "type": "Gateway",
+          "units": null
+        },
+        {
+          "inner_location": true,
+          "name": "Gateway to forest",
+          "number": 2,
+          "type": "Gateway",
+          "units": null
+        },
+        {
+          "inner_location": true,
+          "name": "Gateway to mountain",
+          "number": 3,
+          "type": "Gateway",
+          "units": null
+        },
+        {
+          "inner_location": true,
+          "name": "Gateway to swamp",
+          "number": 4,
+          "type": "Gateway",
+          "units": null
+        },
+        {
+          "inner_location": true,
+          "name": "Gateway to jungle",
+          "number": 5,
+          "type": "Gateway",
+          "units": null
+        },
+        {
+          "inner_location": true,
+          "name": "Gateway to desert",
+          "number": 6,
+          "type": "Gateway",
+          "units": null
+        },
+        {
+          "inner_location": true,
+          "name": "Gateway to tundra",
+          "number": 7,
+          "type": "Gateway",
+          "units": null
+        }
+      ],
+      "terrain": "nexus",
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "The Guardsmen",
+            "number": 1
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true
+          },
+          "items": [
+            {
+              "amount": 500,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            },
+            {
+              "amount": 500,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            },
+            {
+              "amount": 500,
+              "name": "plate armor",
+              "plural": "plate armor",
+              "tag": "PARM"
+            }
+          ],
+          "name": "City Guard",
+          "number": 1
+        },
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "The Guardsmen",
+            "number": 1
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            }
+          ],
+          "name": "City Mage",
+          "number": 2
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            }
+          ],
+          "name": "Unit",
+          "number": 38,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "can_study": [
+              {
+                "name": "earthquake",
+                "tag": "EQUA"
+              },
+              {
+                "name": "force shield",
+                "tag": "FSHI"
+              },
+              {
+                "name": "energy shield",
+                "tag": "ESHI"
+              },
+              {
+                "name": "spirit shield",
+                "tag": "SSHI"
+              },
+              {
+                "name": "magical healing",
+                "tag": "MHEA"
+              },
+              {
+                "name": "farsight",
+                "tag": "FARS"
+              },
+              {
+                "name": "mind reading",
+                "tag": "MIND"
+              },
+              {
+                "name": "weather lore",
+                "tag": "WEAT"
+              },
+              {
+                "name": "earth lore",
+                "tag": "EART"
+              },
+              {
+                "name": "necromancy",
+                "tag": "NECR"
+              },
+              {
+                "name": "demon lore",
+                "tag": "DEMO"
+              },
+              {
+                "name": "illusion",
+                "tag": "ILLU"
+              },
+              {
+                "name": "artifact lore",
+                "tag": "ARTI"
+              }
+            ],
+            "known": [
+              {
+                "level": 1,
+                "name": "observation",
+                "skill_days": 30,
+                "tag": "OBSE"
+              },
+              {
+                "level": 1,
+                "name": "force",
+                "skill_days": 30,
+                "tag": "FORC"
+              },
+              {
+                "level": 1,
+                "name": "pattern",
+                "skill_days": 30,
+                "tag": "PATT"
+              },
+              {
+                "level": 1,
+                "name": "spirit",
+                "skill_days": 30,
+                "tag": "SPIR"
+              },
+              {
+                "level": 1,
+                "name": "gate lore",
+                "skill_days": 30,
+                "tag": "GATE"
+              },
+              {
+                "level": 1,
+                "name": "fire",
+                "skill_days": 30,
+                "tag": "FIRE"
+              },
+              {
+                "level": 3,
+                "name": "combat",
+                "skill_days": 180,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 0
+      }
+    }
+  ],
+  "skill_reports": [
+    {
+      "description": "A unit with this skill can see stealthy units or monsters whose stealth rating is less than or equal to the observing unit's Observation level. The unit can also determine the faction owning a unit, provided its Observation level is higher than the other unit's Stealth level. This skill costs 50 silver per month of study.",
+      "level": 1,
+      "name": "observation",
+      "tag": "OBSE"
+    },
+    {
+      "description": "The Force skill is not directly useful to a mage, but is rather one of the Foundation skills on which other magical skills are based. The Force skill determines the power of the magical energy that a mage is able to use. Note that a Force skill level of 0 does not indicate that a mage cannot use magical energy, but rather can only perform magical acts that do not require great amounts of power. This skill costs 100 silver per month of study.",
+      "level": 1,
+      "name": "force",
+      "tag": "FORC"
+    },
+    {
+      "description": "The Pattern skill is not directly useful to a mage, but is rather one of the Foundation skills on which other magical skills are based. A mage's Pattern skill indicates the ability to handle complex magical patterns, and is important for complicated tasks such as healing and controlling nature. This skill costs 100 silver per month of study.",
+      "level": 1,
+      "name": "pattern",
+      "tag": "PATT"
+    },
+    {
+      "description": "The Spirit skill is not directly useful to a mage, but is rather one of the Foundation skills on which other magical skills are based. Spirit skill indicates the mage's ability to control and affect magic and other powers beyond the material world. This skill costs 100 silver per month of study.",
+      "level": 1,
+      "name": "spirit",
+      "tag": "SPIR"
+    },
+    {
+      "description": "Gate Lore is the art of detecting and using magical Gates, which are spread through the world. The Gates are spread out randomly, so there is no correlation between the Gate number and the Gate's location. A mage with skill 1 in Gate Lore can see a Gate if one exists in the same region as the mage. This detection is automatic; the Gate will appear in the region report. A mage with skill 1 in Gate Lore may also jump through a Gate into another region on the same level containing a gate, selected at random. To use Gate Lore in this manner, use the syntax CAST Gate_Lore RANDOM UNITS <unit> ... UNITS is followed by a list of units to follow the mage through the Gate (the mage always jumps through the Gate). At level 1, the mage may carry 15 weight units through the Gate (including the weight of the mage). This skill requires pattern [PATT] 1 and spirit [SPIR] 1 to begin to study. This skill costs 100 silver per month of study.",
+      "level": 1,
+      "name": "gate lore",
+      "tag": "GATE"
+    },
+    {
+      "description": " A mage with this skill can cast a fireball in battle. This ability does between 2 and 10 times the skill level of the mage energy attacks and each attack deals 1 damage. In order to use this spell in combat, the mage should use the COMBAT order to set it as his combat spell. This skill requires force [FORC] 1 to begin to study. This skill costs 100 silver per month of study.",
+      "level": 1,
+      "name": "fire",
+      "tag": "FIRE"
+    },
+    {
+      "description": "This skill gives the unit a bonus in hand to hand combat. Also, a unit with this skill may TAX or PILLAGE. This skill costs 10 silver per month of study.",
+      "level": 1,
+      "name": "combat",
+      "tag": "COMB"
+    },
+    {
+      "description": "No skill report.",
+      "level": 2,
+      "name": "combat",
+      "tag": "COMB"
+    },
+    {
+      "description": "No skill report.",
+      "level": 3,
+      "name": "combat",
+      "tag": "COMB"
+    }
+  ],
+  "statistics": [
+    {
+      "item_name": "leader [LEAD]",
+      "max": 1,
+      "rank": 1,
+      "total": 1
+    }
+  ],
+  "status": {
+    "apprentices": {
+      "allowed": 3,
+      "current": 0,
+      "name": "Apprentice"
+    },
+    "mages": {
+      "allowed": 2,
+      "current": 1
+    },
+    "quartermasters": {
+      "allowed": 2,
+      "current": 0
+    },
+    "regions": {
+      "allowed": 10,
+      "current": 0
+    }
+  },
+  "type": {
+    "magic": 1,
+    "martial": 1
+  },
+  "unclaimed_silver": 10250
+}

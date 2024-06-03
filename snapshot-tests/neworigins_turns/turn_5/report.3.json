@@ -1,0 +1,874 @@
+{
+  "administrative": {
+    "email": "NoAddress",
+    "password_unset": true,
+    "show_unit_attitudes": false,
+    "times_sent": true
+  },
+  "attitudes": {
+    "ally": [],
+    "default": "neutral",
+    "friendly": [],
+    "hostile": [],
+    "neutral": [],
+    "unfriendly": [
+      {
+        "name": "Creatures",
+        "number": 2
+      }
+    ]
+  },
+  "date": {
+    "month": "June",
+    "year": 1
+  },
+  "engine": {
+    "ruleset": "NewOrigins",
+    "ruleset_version": "3.0.0 (beta)",
+    "version": "5.2.5 (beta)"
+  },
+  "events": [
+    {
+      "category": "claim",
+      "message": "Claims $490.",
+      "unit": {
+        "name": "Unit",
+        "number": 60
+      }
+    },
+    {
+      "category": "claim",
+      "message": "Claims $100.",
+      "unit": {
+        "name": "Unit",
+        "number": 57
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys 10 gnolls [GNOL] at $39 each.",
+      "unit": {
+        "name": "Unit",
+        "number": 60
+      }
+    },
+    {
+      "category": "withdraw",
+      "message": "Withdraws 10 swords [SWOR].",
+      "unit": {
+        "name": "Unit",
+        "number": 60
+      }
+    },
+    {
+      "category": "teach",
+      "message": "Teaches combat to Unit (60).",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "practice",
+      "message": "Gets 5 days of practice with combat [COMB].",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "study",
+      "message": "Studies combat at a cost of 100 silver [SILV].",
+      "unit": {
+        "name": "Unit",
+        "number": 57
+      }
+    },
+    {
+      "category": "study",
+      "message": "Completes study to level 2 in combat.",
+      "unit": {
+        "name": "Unit",
+        "number": 57
+      }
+    },
+    {
+      "category": "study",
+      "message": "Studies combat and was taught for 30 days at a cost of 100 silver [SILV].",
+      "unit": {
+        "name": "Unit",
+        "number": 60
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 123 silver working in swamp (13,3) in Philagotuspolisus Marshes.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 13,
+          "y": 3,
+          "z": 1
+        },
+        "province": "Philagotuspolisus Marshes",
+        "settlement": {
+          "name": "Hymnoalotos",
+          "size": "village"
+        },
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 51
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 12 silver working in swamp (13,3) in Philagotuspolisus Marshes.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 13,
+          "y": 3,
+          "z": 1
+        },
+        "province": "Philagotuspolisus Marshes",
+        "settlement": {
+          "name": "Hymnoalotos",
+          "size": "village"
+        },
+        "terrain": "swamp"
+      },
+      "unit": {
+        "name": "Unit",
+        "number": 52
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 100 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 51
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 12 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 52
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Borrows 23 silver [SILV] from Unit (51) for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Unit (38) borrows 23 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 51
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 27 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 38
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 38 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 52
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 100 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 57
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 100 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 60
+      }
+    }
+  ],
+  "item_reports": [],
+  "name": "Test",
+  "number": 3,
+  "object_reports": [],
+  "regions": [
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 13,
+        "y": 3,
+        "z": 1
+      },
+      "entertainment": 78,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Burmere Sea",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Woods",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Maranarenos Dale",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Kleptoatres Volcano",
+            "terrain": "volcano"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 12,
+              "y": 4,
+              "z": 1
+            },
+            "province": "Mila River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 12,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Burmere Sea",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "gate": {
+        "number": 74,
+        "open": 1
+      },
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 102,
+            "name": "gnoll",
+            "plural": "gnolls",
+            "price": 39,
+            "tag": "GNOL"
+          },
+          {
+            "amount": 20,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 688,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": [
+          {
+            "amount": 84,
+            "name": "grain",
+            "plural": "grain",
+            "price": 18,
+            "tag": "GRAI"
+          },
+          {
+            "amount": 131,
+            "name": "livestock",
+            "plural": "livestock",
+            "price": 29,
+            "tag": "LIVE"
+          },
+          {
+            "amount": 143,
+            "name": "fish",
+            "plural": "fish",
+            "price": 48,
+            "tag": "FISH"
+          }
+        ]
+      },
+      "population": {
+        "amount": 2570,
+        "race": "gnolls"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 16,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 13,
+          "name": "wood",
+          "plural": "wood",
+          "tag": "WOOD"
+        },
+        {
+          "amount": 14,
+          "name": "herb",
+          "plural": "herbs",
+          "tag": "HERB"
+        }
+      ],
+      "province": "Philagotuspolisus Marshes",
+      "settlement": {
+        "name": "Hymnoalotos",
+        "size": "village"
+      },
+      "tax": 1182,
+      "terrain": "swamp",
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "The Guardsmen",
+            "number": 1
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true
+          },
+          "items": [
+            {
+              "amount": 40,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            },
+            {
+              "amount": 40,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            }
+          ],
+          "name": "City Guard",
+          "number": 5
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "combat_spell": {
+            "name": "fire",
+            "tag": "FIRE"
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            }
+          ],
+          "name": "Unit",
+          "number": 38,
+          "orders": [
+            {
+              "nested": [
+                {
+                  "order": "behind 0"
+                },
+                {
+                  "order": "claim 490"
+                },
+                {
+                  "order": "buy 10 gnoll"
+                },
+                {
+                  "order": "study comb 2"
+                },
+                {
+                  "order": "withdraw 10 swor"
+                }
+              ],
+              "order": "@form 1"
+            },
+            {
+              "order": "end"
+            },
+            {
+              "order": "@teach new 1"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "can_study": [
+              {
+                "name": "earthquake",
+                "tag": "EQUA"
+              },
+              {
+                "name": "force shield",
+                "tag": "FSHI"
+              },
+              {
+                "name": "energy shield",
+                "tag": "ESHI"
+              },
+              {
+                "name": "spirit shield",
+                "tag": "SSHI"
+              },
+              {
+                "name": "magical healing",
+                "tag": "MHEA"
+              },
+              {
+                "name": "farsight",
+                "tag": "FARS"
+              },
+              {
+                "name": "mind reading",
+                "tag": "MIND"
+              },
+              {
+                "name": "weather lore",
+                "tag": "WEAT"
+              },
+              {
+                "name": "earth lore",
+                "tag": "EART"
+              },
+              {
+                "name": "necromancy",
+                "tag": "NECR"
+              },
+              {
+                "name": "demon lore",
+                "tag": "DEMO"
+              },
+              {
+                "name": "illusion",
+                "tag": "ILLU"
+              },
+              {
+                "name": "artifact lore",
+                "tag": "ARTI"
+              }
+            ],
+            "known": [
+              {
+                "level": 1,
+                "name": "observation",
+                "skill_days": 30,
+                "tag": "OBSE"
+              },
+              {
+                "level": 1,
+                "name": "force",
+                "skill_days": 30,
+                "tag": "FORC"
+              },
+              {
+                "level": 1,
+                "name": "pattern",
+                "skill_days": 40,
+                "tag": "PATT"
+              },
+              {
+                "level": 1,
+                "name": "spirit",
+                "skill_days": 30,
+                "tag": "SPIR"
+              },
+              {
+                "level": 1,
+                "name": "gate lore",
+                "skill_days": 30,
+                "tag": "GATE"
+              },
+              {
+                "level": 1,
+                "name": "fire",
+                "skill_days": 30,
+                "tag": "FIRE"
+              },
+              {
+                "level": 3,
+                "name": "combat",
+                "skill_days": 195,
+                "tag": "COMB"
+              },
+              {
+                "level": 1,
+                "name": "stealth",
+                "skill_days": 60,
+                "tag": "STEA"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 10
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 150
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 10,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 10,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            }
+          ],
+          "name": "Unit",
+          "number": 51,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 2,
+                "name": "combat",
+                "skill_days": 90,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 110
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            },
+            {
+              "amount": 1,
+              "name": "longbow",
+              "plural": "longbows",
+              "tag": "LBOW"
+            }
+          ],
+          "name": "Unit",
+          "number": 52,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 1,
+                "name": "tactics",
+                "skill_days": 30,
+                "tag": "TACT"
+              },
+              {
+                "level": 1,
+                "name": "longbow",
+                "skill_days": 30,
+                "tag": "LBOW"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 11
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 150
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 10,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 10,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            }
+          ],
+          "name": "Unit",
+          "number": 57,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 2,
+                "name": "combat",
+                "skill_days": 90,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 110
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 150
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 10,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 10,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            }
+          ],
+          "name": "Unit",
+          "number": 60,
+          "orders": [
+            {
+              "order": "STUDY COMB 2"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 1,
+                "name": "combat",
+                "skill_days": 60,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "visited": [],
+          "weight": 110
+        }
+      ],
+      "wages": {
+        "amount": 12.3,
+        "max": 475
+      }
+    }
+  ],
+  "skill_reports": [],
+  "statistics": [
+    {
+      "item_name": "2 leaders [LEAD]",
+      "max": 2,
+      "rank": 1,
+      "total": 2
+    },
+    {
+      "item_name": "30 swords [SWOR]",
+      "max": 30,
+      "rank": 1,
+      "total": 30
+    },
+    {
+      "item_name": "longbow [LBOW]",
+      "max": 1,
+      "rank": 1,
+      "total": 1
+    },
+    {
+      "item_name": "30 gnolls [GNOL]",
+      "max": 30,
+      "rank": 1,
+      "total": 30
+    }
+  ],
+  "status": {
+    "apprentices": {
+      "allowed": 3,
+      "current": 0,
+      "name": "Apprentice"
+    },
+    "mages": {
+      "allowed": 2,
+      "current": 1
+    },
+    "quartermasters": {
+      "allowed": 2,
+      "current": 0
+    },
+    "regions": {
+      "allowed": 10,
+      "current": 0
+    }
+  },
+  "type": {
+    "magic": 1,
+    "martial": 1
+  },
+  "unclaimed_silver": 2067
+}

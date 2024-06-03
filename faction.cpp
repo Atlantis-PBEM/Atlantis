@@ -409,7 +409,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 	j["administrative"]["show_unit_attitudes"] = (showunitattitudes != 0);
 
 	if(!password_unset) j["administrative"]["password"] = password->const_str();
-	if(Globals->MAX_INACTIVE_TURNS) {
+	if(Globals->MAX_INACTIVE_TURNS != -1) {
 		int cturn = game->TurnNumber() - lastorders;
 		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !is_npc) {
 			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
