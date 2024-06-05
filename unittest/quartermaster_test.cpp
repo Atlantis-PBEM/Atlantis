@@ -77,7 +77,7 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
 
   "Quartermasters cannot chain with other quartermasters"_test = []
   {
-        UnitTestHelper helper;
+    UnitTestHelper helper;
     helper.initialize_game();
     helper.setup_turn();
 
@@ -150,5 +150,28 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
     expect(unit2->items.GetNum(I_STONE) == 0_i);
     expect(faction->errors[1].message == "TRANSPORT: Unable to transport. Have 0 stone [STON].");
     expect(faction->errors[1].unit == qm3);
+  };
+
+  "Connected distance function computes correctly"_test = []
+  {
+    UnitTestHelper helper;
+    helper.initialize_game();
+    helper.setup_turn();
+    ARegion *region1 = helper.get_region(0, 0, 0);
+    ARegion *region2 = helper.get_region(0, 0, 1);
+    ARegion *region3 = helper.get_region(1, 1, 0);
+
+    // going cross level from location to an inner location is just the penalty cost
+    int d = helper.connected_distance(region1, region2, 4, 10);
+    expect(d == 4_i);
+    // adjacent locations are 1
+    int d2 = helper.connected_distance(region1, region3, 4, 10);
+    expect(d2 == 1_i);
+    // inner location of an adjacent hex is 1 + penalty
+    int d3 = helper.connected_distance(region2, region3, 8, 10);
+    expect(d3 == 9_i);
+    // locations that are too far away are a huge number signifying not connected within range
+    int d4 = helper.connected_distance(region2, region3, 4, 0);
+    expect(d4 == 10000000_i);
   };
 };

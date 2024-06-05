@@ -38,6 +38,10 @@ void Game::CreateWorld() {
     regions.CreateLevels(1);    
     // because of the way regions are numbered, if you want 4 hexes you need a height of 4 and a width of 2.
     regions.CreateSurfaceLevel(0, 2, 4, nullptr);
+	// Make an underworld level
+	regions.CreateUnderworldLevel(1, 1, 2, "underworld");
+	// Make a shaft
+	regions.MakeShaftLinks(0, 1, 100);
 	
 	ARegion *reg = regions.GetRegion(0,0,0);
 	reg->MakeStartingCity();

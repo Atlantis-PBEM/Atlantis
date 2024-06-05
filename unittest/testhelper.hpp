@@ -68,6 +68,8 @@ public:
     void transport_phase(TransportOrder::TransportPhase phase);
     // Collect the transported goods from the quartermasters
     void collect_transported_goods();
+    // connected distance
+    int connected_distance(ARegion *reg1, ARegion *reg2, int penalty, int max);
 
     // dummy
     int get_seed() { return getrandom(10000); };

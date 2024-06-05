@@ -81,6 +81,10 @@ ARegion *UnitTestHelper::get_region(int x, int y, int z) {
     return level->GetRegion(x, y);
 }
 
+int UnitTestHelper::connected_distance(ARegion *reg1, ARegion *reg2, int penalty, int max) {
+    return game.regions.get_connected_distance(reg1, reg2, penalty, max);
+}
+
 string UnitTestHelper::cout_data() {
     return cout_buffer.str();
 }

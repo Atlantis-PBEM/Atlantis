@@ -49,7 +49,13 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 
 void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name) { }
 
-void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char const *name) { }
+void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char const *name) {
+	MakeRegions(level, xSize, ySize);
+	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERWORLD;
+	AssignTypes(pRegionArrays[level]);
+	FinalSetup(pRegionArrays[level]);
+}
 
 void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name) { }
 
@@ -130,14 +136,17 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr) { }
 void ARegionList::AssignTypes(ARegionArray *pArr) {
 	// we have a fixed world, so just assign the types.
 	int terrains[] = { R_PLAIN, R_FOREST, R_MOUNTAIN, R_DESERT };
+	int uwterrains[] = { R_CAVERN };
 	int loc = 0;
+
+	int *t_array = (pArr->levelType == ARegionArray::LEVEL_UNDERWORLD) ? uwterrains : terrains;
 
 	for (auto x = 0; x < pArr->x; x++) {
 		for (auto y = 0; y < pArr->y; y++) {
 			ARegion *reg = pArr->GetRegion(x, y);
 			if (!reg) continue;
 
-			reg->type = terrains[loc++];
+			reg->type = t_array[loc++];
 			reg->race = TerrainDefs[reg->type].races[0];
 		}
 	}
@@ -160,9 +169,35 @@ void ARegionList::FinalSetup(ARegionArray *pArr) {
 	}
  }
 
-void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo) { }
+void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo) {
+	ARegion *toReg = pTo->GetRegion(0, 0);
+	if (!toReg) return;
 
-void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds) { }
+	Object *o = new Object(reg);
+	o->num = reg->buildingseq++;
+	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->type = O_SHAFT;
+	o->incomplete = 0;
+	o->inner = toReg->num;
+	reg->objects.Add(o);
+
+	o = new Object(toReg);
+	o->num = toReg->buildingseq++;
+	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->type = O_SHAFT;
+	o->incomplete = 0;
+	o->inner = reg->num;
+	toReg->objects.Add(o);
+}
+
+void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds) {
+	ARegionArray *pFrom = pRegionArrays[levelFrom];
+	ARegionArray *pTo = pRegionArrays[levelTo];
+
+	if (!pFrom || !pTo) return;
+	// we are ignoring the odds and always creating the shaft
+	MakeShaft(pFrom->GetRegion(0, 0), pFrom, pTo);
+}
 
 void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY) { }
 

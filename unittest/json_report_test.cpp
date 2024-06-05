@@ -191,7 +191,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(for_sale == 4_ul);
   
     auto expected_sale = json{
-      {"tag", "IVOR"}, {"name", "ivory"}, {"plural", "ivory"}, {"amount", 13 }, { "price", 81 }
+      {"tag", "PEAR"}, {"name", "pearls"}, {"plural", "pearls"}, {"amount", 9 }, { "price", 148 }
     };
     auto first_sale = json_report["markets"]["for_sale"][0];
     expect(first_sale == expected_sale);
@@ -199,7 +199,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     auto wanted = json_report["markets"]["wanted"].size();
     expect(wanted == 9_ul);
     auto expected_wanted = json{
-      {"tag", "GRAI"}, {"name", "grain"}, {"plural", "grain"}, {"amount", 51 }, { "price", 16 }
+      {"tag", "GRAI"}, {"name", "grain"}, {"plural", "grain"}, {"amount", 87 }, { "price", 20 }
     };
     auto first_wanted = json_report["markets"]["wanted"][0];
     expect(first_wanted == expected_wanted);
@@ -249,16 +249,16 @@ ut::suite<"JSON Report"> json_report_suite = []
     region->build_json_report(json_report_2, faction2, helper.get_month(), regions);
 
     // Verify that owner sees additional data
-    auto capacity = json_report_1["structures"][0]["capacity"];
+    auto capacity = json_report_1["structures"][1]["capacity"];
     expect(capacity == 8400_ul);
 
     // Verify that non-owner does not see additional data
-    auto capacity2 = json_report_2["structures"][0]["capacity"];
+    auto capacity2 = json_report_2["structures"][1]["capacity"];
     expect(capacity2 == nullptr);
 
     // Verify they both see the same ships
-    auto ships = json_report_1["structures"][0]["ships"];
-    auto ships2 = json_report_2["structures"][0]["ships"];
+    auto ships = json_report_1["structures"][1]["ships"];
+    auto ships2 = json_report_2["structures"][1]["ships"];
     expect(ships == ships2);
   };
 

@@ -19,7 +19,7 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
     expect(helper.get_region_count() == 0_i);
     // This will call Game::NewGame() which will set up the dummy game with 4 surface regions.
     helper.initialize_game();
-    expect(helper.get_region_count() == 4_i);
+    expect(helper.get_region_count() == 5_i);
   };
 
   "UnitTestHelper captures cout correctly"_test = []
@@ -32,7 +32,7 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
     helper.initialize_game();
     // The output will have the fact that it created the world and 1 '.' for each region.
     string current = helper.cout_data();
-    string expected = "Creating world\n....";
+    string expected = "Creating world\n.....";
     expect(current == expected);
   };
 
@@ -45,7 +45,7 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
     // initialize the game which will generate a small bit of output
     helper.initialize_game();
     auto seed = helper.get_seed();
-    // As long as we keep the isaac rng (for now) this will always be the same.
-    expect(seed == 299_i);
+    // As long as we keep the isaac rng (for now) and do not alter world set up this will always be the same.
+    expect(seed == 8652_i);
   };
 };
