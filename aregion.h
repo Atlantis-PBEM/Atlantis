@@ -462,7 +462,8 @@ class ARegionList : public AList
 				int maxY);
 
 		ARegion *FindGate(int);
-		int GetPlanarDistance(ARegion *, ARegion *, int penalty, int maxdist = -1);
+		int GetPlanarDistance(ARegion *one, ARegion *two, int penalty, int maxdist = -1);
+		int get_connected_distance(ARegion *start, ARegion *target, int penalty, int maxdist = -1);
 		int GetWeather(ARegion *pReg, int month);
 
 		ARegionArray *GetRegionArray(int level);

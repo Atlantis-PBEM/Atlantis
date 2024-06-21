@@ -3125,16 +3125,21 @@ void Game::CheckTransportOrders()
 					int penalty = 10000000;
 					RangeType *rt = FindRange("rng_transport");
 					if (rt) penalty = rt->crossLevelPenalty;
+					o->distance = Globals->LOCAL_TRANSPORT;  // default to local max distance
 					if (maxdist > 0) {
-						// 0 maxdist represents unlimited range
-						dist = regions.GetPlanarDistance(r, tar->region, penalty, maxdist);
+						// 0 maxdist represents unlimited range for QM->QM transport
+						if (Globals->TRANSPORT & GameDefs::USE_CONNECTED_DISTANCES) {
+							dist = regions.get_connected_distance(r, tar->region, penalty, maxdist);
+						} else {
+							dist = regions.GetPlanarDistance(r, tar->region, penalty, maxdist);
+						}
 						if (dist > maxdist) {
 							u->error("TRANSPORT: Recipient " + string(tar->unit->name->const_str()) + " is too far away.");
 							o->type = NORDERS;
 							continue;
 						}
-					} else {
-						dist = regions.GetPlanarDistance(r, tar->region, penalty, Globals->LOCAL_TRANSPORT);
+						// Store off the distance for later use so we don't need to recompute it.
+						o->distance = dist;
 					}
 
 					// We will check the amount at transport time so that if you receive items in you can tranport them
@@ -3258,10 +3263,7 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 					}
 
 					// now see if the unit can pay for shipping
-					int penalty = 10000000;
-					RangeType *rt = FindRange("rng_transport");
-					if (rt) penalty = rt->crossLevelPenalty;
-					int dist = regions.GetPlanarDistance(r, tar->region, penalty, Globals->LOCAL_TRANSPORT);
+					int dist = t->distance;
 					int weight = ItemDefs[t->item].weight * amt;
 					if (weight == 0 && Globals->FRACTIONAL_WEIGHT > 0)
 						weight = (amt/Globals->FRACTIONAL_WEIGHT) + 1;

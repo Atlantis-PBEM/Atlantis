@@ -404,6 +404,7 @@ class TransportOrder : public Order {
 		// any other amount is also checked at transport time
 		int amount;
 		int except;
+		int distance;
 
 		enum TransportPhase {
 			SHIP_TO_QM,

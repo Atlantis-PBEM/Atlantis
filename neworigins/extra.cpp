@@ -1298,6 +1298,7 @@ void Game::ModifyTablesPerRuleset(void)
 	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
 		EnableSkill(S_QUARTERMASTER);
 		EnableObject(O_CARAVANSERAI);
+		if (Globals->EASIER_UNDERWORLD) ModifyRangeLevelPenalty("rng_transport", 4);
 	}
 
 

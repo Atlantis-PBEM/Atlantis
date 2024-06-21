@@ -667,6 +667,7 @@ public:
 		QM_AFFECT_COST = 0x02, // QM level affect shipping cost?
 		// actual distance will be NONLOCAL_TRANSPORT + ((level + 1)/3)
 		QM_AFFECT_DIST = 0x04, // QM level affect longrange dist?
+		USE_CONNECTED_DISTANCES = 0x08, // Use connected distance instead of planar distance
 	};
 	int TRANSPORT;
 

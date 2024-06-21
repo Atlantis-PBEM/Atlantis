@@ -36,6 +36,10 @@
 #include <random>
 #include <ctime>
 #include <cassert>
+#include <unordered_set>
+#include <queue>
+
+using namespace std;
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -2345,8 +2349,81 @@ ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 	return 0;
 }
 
-int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two,
-		int penalty, int maxdist)
+// Some structures for the get_connected_distance function
+// structures to allow us to do an efficient search
+struct RegionVisited {
+	int x, y, z;
+	bool operator==(const RegionVisited &v) const { return x == v.x && y == v.y && z == v.z; }
+ };
+class RegionVisitHash {
+public:
+	size_t operator()(const RegionVisited v) const {
+		return std::hash<uint32_t>()(v.x) ^ std::hash<uint32_t>()(v.y) ^ std::hash<uint32_t>()(v.z);
+	}
+};
+struct QEntry { ARegion *r; int dist; };
+class QEntryCompare {
+public:
+	// We want to sort by min distance
+	bool operator()(const QEntry &below, const QEntry &above) const { return above.dist < below.dist; }
+};
+
+// This doesn't really need to be on the ARegionList but, it's okay for now.
+int ARegionList::get_connected_distance(ARegion *start, ARegion *target, int penalty, int maxdist) {
+	unordered_set<RegionVisited, RegionVisitHash> visited_regions;
+	// We want to search the closest regions first so that as soon as we find one that is too far we know *all* the
+	// rest will be too far as well.
+	priority_queue<QEntry, vector<QEntry>, QEntryCompare> q;
+
+	if (start == 0 || target == 0) {
+		// We were given some unusual (nonexistant) regions
+		return 10000000;
+	}
+	ARegion *cur = start;
+	int cur_dist = 0;
+
+	while (maxdist == -1 || cur_dist <= maxdist) {
+		// If we have hit our target, we are done
+		if (cur == target) {
+			// found our target within range
+			return cur_dist;
+		}
+
+		// Add my current region to the visited set to make sure we don't loop
+		visited_regions.insert({cur->xloc, cur->yloc, cur->zloc});
+
+		// Add all neighbors to the queue as long as we haven't visited them yet
+		for (int i = 0; i < NDIRS; i++) {
+			ARegion *n = cur->neighbors[i];
+			if (n == nullptr) continue; // edge of map has missing neighbors
+			// cur and n *should* have the same zloc, but ... let's just future-proof in case that changes sometime
+			int cost = (cur->zloc == n->zloc ? 1 : penalty);
+			if (n && visited_regions.insert({n->xloc, n->yloc, n->zloc}).second) {
+				q.push({n, cur_dist + cost });
+			}
+		}
+		// Add any inner regions to the queue as long as we haven't visited them yet
+		forlist(&cur->objects) {
+			Object *o = (Object *) elem;
+			if (o->inner != -1) {
+				ARegion *inner = GetRegion(o->inner);
+				int cost = (cur->zloc == inner->zloc ? 1 : penalty);
+				if (visited_regions.insert({inner->xloc, inner->yloc, inner->zloc}).second) {
+					q.push({inner, cur_dist + cost});
+				}
+			}
+		}
+
+		cur = q.top().r;
+		cur_dist = q.top().dist;
+		q.pop();
+	}
+
+	// Should only be hit if the target is > maxdist from the start location
+	return 10000000;
+}
+
+int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty, int maxdist)
 {
 	// make sure you cannot teleport into or from the nexus
 	if (Globals->NEXUS_EXISTS && (one->zloc == ARegionArray::LEVEL_NEXUS ||	two->zloc == ARegionArray::LEVEL_NEXUS))
