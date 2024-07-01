@@ -48,6 +48,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 }
 
 void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name) { }
+void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char const *name) {}
 
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char const *name) {
 	MakeRegions(level, xSize, ySize);
@@ -110,6 +111,8 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize) { }
 void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs) { }
 
 void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean, int continentSize) { }
+
+void ARegionList::MakeRingLand(ARegionArray *pReg, int minDistance, int maxDistance) { }
 
 void ARegionList::MakeCentralLand(ARegionArray *pRegs) { }
 

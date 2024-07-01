@@ -1853,6 +1853,20 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name)
 	FinalSetup(pRegionArrays[level]);
 }
 
+void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char const *name)
+{
+	MakeRegions(level, xSize, ySize);
+	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
+
+	MakeRingLand(pRegionArrays[level], 30, 70);
+	RandomTerrain(pRegionArrays[level]);
+
+	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
+	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
+	FinalSetup(pRegionArrays[level]);
+}
+
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 		char const *name)
 {
@@ -2185,6 +2199,34 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 
 	// At this point, go back through and set all the rest to ocean
 	SetRegTypes(pRegs, R_OCEAN);
+	Awrite("");
+}
+
+void ARegionList::MakeRingLand(ARegionArray *pRegs, int minDistance, int maxDistance) {
+	ARegion *center = pRegs->GetRegion(pRegs->x / 2, pRegs->y / 2);
+	if (!center) { throw "Center region not found"; }
+
+	Awrite("Making land in ring");
+	for (int i = 0; i < pRegs->x; i++) {
+		for (int j = 0; j < pRegs->y; j++) {
+			ARegion *reg = pRegs->GetRegion(i, j);
+			if (!reg) continue;
+			// By default, everything is ocean
+			reg->type = R_OCEAN;
+
+			// If the regions is between minDistance and maxDistance from the center, default it to land.
+			int distance = GetPlanarDistance(center, reg, 1000, -1);
+			if (distance >= minDistance && distance <= maxDistance) {
+				reg->type = R_NUM;
+			} else if (distance >= maxDistance && (i > 4 || i <= pRegs->x - 4 || j > 4 || j <= pRegs->y - 4)) {
+				// If the distance is outside the ring but not too close to the edge, it has a 50% chance of being land.
+				if (getrandom(100) > 50) reg->type = R_NUM;
+			} else if (distance < minDistance && distance > 4) {
+				// If the distance is inside the ring, and not too close to the center, it has a 15% chance of being land.
+				if (getrandom(100) < 15) reg->type = R_NUM;
+			}
+		}
+	}
 	Awrite("");
 }
 
