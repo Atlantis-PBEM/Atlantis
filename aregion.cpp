@@ -165,7 +165,14 @@ void ARegion::SetName(char const *c)
 	name = new AString(c);
 }
 
-Production *ARegion::get_production_for_skill(int item, int skill) { 
+int ARegion::produces_item(int item)
+{
+	if(products.size() == 0) return 0;
+	auto p = find_if(products.begin(), products.end(), [item](Production *p) { return p->itemtype == item; });
+	return (p != products.end()) ? (*p)->amount : 0;
+}
+
+Production *ARegion::get_production_for_skill(int item, int skill) {
 	if (products.size() == 0) return nullptr;
 	auto p = find_if(
 		products.begin(),
