@@ -359,6 +359,8 @@ class ARegion : public AListElem
 
 		// find a production for a certain skill.
 		Production *get_production_for_skill(int item, int skill);
+		int produces_item(int item);
+
 		// Editing functions
 		void UpdateEditRegion();
 		void SetupEditRegion();

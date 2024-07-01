@@ -234,6 +234,7 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 	if (typestr == "lair") type = 2;
 	if (typestr == "gate") type = 3;
 	if (typestr == "cities") type = 4;
+	if (typestr == "hex") type = 5;
 
 	ofstream f(mapfile.const_str(), ios::out|ios::ate);
 	if (!f.is_open()) return(0);
@@ -267,6 +268,40 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 
 			f << "(" << reg->xloc << "," << reg->yloc << "): " << reg->town->name << "\n";
 		}
+		return(1);
+	}
+
+	if (type == 5) {
+		json worldmap;
+
+		for (auto i = 0; i < regions.numLevels; i++) {
+			ARegionArray *pArr = regions.pRegionArrays[i];
+			if (pArr->levelType == ARegionArray::LEVEL_NEXUS) continue;
+			string label = (pArr->strName ? (pArr->strName->const_str() + to_string(i-1)) : "surface");
+			worldmap[label] = json::array();
+
+			for (int y = 0; y < pArr->y; y++) {
+				for (int x = 0; x < pArr->x; x++) {
+					ARegion *reg = pArr->GetRegion(x, y);
+					if (!reg) continue;
+					json data = reg->basic_region_data();
+					json hexout = {
+						{ "x", x },	{ "y", y },	{ "z", i },
+						{ "terrain", data["terrain"] },
+						{ "yew", reg->produces_item(I_YEW) },
+						{ "mithril", reg->produces_item(I_MITHRIL) },
+						{ "admantium", reg->produces_item(I_ADMANTIUM) },
+						{ "floater", reg->produces_item(I_FLOATER) }
+
+					};
+					if (reg->town) {
+						hexout["town"] = data["settlement"]["size"];
+					}
+					worldmap[label].push_back(hexout);
+				}
+			}
+		}
+		f << worldmap.dump(2);
 		return(1);
 	}
 
