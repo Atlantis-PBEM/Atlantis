@@ -17,14 +17,14 @@ const grassland = Color('#91e069');
 const desert = Color('#f0d735');
 
 const TERRAIN = {
-  'ocean': '#2b65ec',
-  'plain': '#fff380',
+  'ocean': '#00008b',
+  'plain': '#bfb370',
   'forest': '#228B22',
   'mountain': '#704214',
   'swamp': '#667c26',
   'jungle': '#254117',
   'desert': '#c58917',
-  'tundra': '#c9dfec',
+  'tundra': '#99afbc',
   'volcano': '#622f22',
   'lake': '#6698ff',
 }
