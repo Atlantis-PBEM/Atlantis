@@ -483,6 +483,7 @@ class ARegionList : public AList
 		void CreateNexusLevel(int level, int xSize, int ySize, char const *name);
 		void CreateSurfaceLevel(int level, int xSize, int ySize, char const *name);
 		void CreateNaturalSurfaceLevel(Map* map);
+		void CreateIslandRingLevel(int level, int xSize, int ySize, char const *name);
 		void CreateIslandLevel(int level, int nPlayers, char const *name);
 		void CreateUnderworldLevel(int level, int xSize, int ySize, char const *name);
 		void CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name);
@@ -530,11 +531,13 @@ class ARegionList : public AList
 		void SetRegTypes(ARegionArray *pRegs, int newType);
 		void MakeLand(ARegionArray *pRegs, int percentOcean, int continentSize);
 		void MakeCentralLand(ARegionArray *pRegs);
+		void MakeRingLand(ARegionArray *pRegs, int minDistance, int maxDistance);
 
 		void SetupAnchors(ARegionArray *pArr);
 		void GrowTerrain(ARegionArray *pArr, int growOcean);
 		void RandomTerrain(ARegionArray *pArr);
 		void MakeUWMaze(ARegionArray *pArr);
+		void PlaceVolcanos(ARegionArray *pArr);
 		void MakeIslands(ARegionArray *pArr, int nPlayers);
 		void MakeOneIsland(ARegionArray *pRegs, int xx, int yy);
 

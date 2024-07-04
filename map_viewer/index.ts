@@ -27,6 +27,7 @@ const TERRAIN = {
   'tundra': '#99afbc',
   'volcano': '#622f22',
   'lake': '#6698ff',
+  'barren': '#302020',
 }
 
 const CELL_SZ = 5

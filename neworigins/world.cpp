@@ -393,8 +393,8 @@ void Game::CreateWorld()
 	}
 
 	int generator = -1;
-	while (generator != 1 && generator != 2) {
-		Awrite("Selected surface land generator? [Origianl - 1, Parametrical - 2]");
+	while (generator < 1 || generator > 3) {
+		Awrite("Selected surface land generator? [Origianl - 1, Parametrical - 2, Island Ring - 3]");
 		generator = Agetint();
 	}
 
@@ -417,16 +417,14 @@ void Game::CreateWorld()
 		}
 	}
 
-	regions.CreateLevels(2 + Globals->UNDERWORLD_LEVELS +
-			Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL);
+	regions.CreateLevels(2 + Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL);
 
 	SetupNames();
 
 	regions.CreateNexusLevel( 0, nx, ny, "nexus" );
 	if (generator == 1) {
 		regions.CreateSurfaceLevel( 1, xx, yy, 0 );
-	}
-	else {
+	} else if (generator == 2) {
 		Map* map = new Map(xx * 2, yy * 2);
 		map->redistribution = 1.5;
 		map->evoparation = 0.75;
@@ -434,6 +432,8 @@ void Game::CreateWorld()
 		map->waterPercent = 0.1;
 
 		regions.CreateNaturalSurfaceLevel(map);
+	} else if (generator == 3) {
+		regions.CreateIslandRingLevel(1, xx, yy, 0);
 	}
 
 	// Create underworld levels

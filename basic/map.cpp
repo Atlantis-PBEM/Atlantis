@@ -195,6 +195,11 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name)
 	FinalSetup(pRegionArrays[level]);
 }
 
+void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char const *name)
+{
+	throw "CreateIslandRingLevel not implemented for this game ruleset";
+}
+
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 		char const *name)
 {
@@ -523,6 +528,8 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 	SetRegTypes(pRegs, R_OCEAN);
 	Awrite("");
 }
+
+void ARegionList::MakeRingLand(ARegionArray *pReg, int minDistance, int maxDistance) { }
 
 void ARegionList::MakeCentralLand(ARegionArray *pRegs)
 {
