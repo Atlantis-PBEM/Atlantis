@@ -1859,8 +1859,19 @@ void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char co
 	pRegionArrays[level]->SetName(name);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
-	MakeRingLand(pRegionArrays[level], 30, 70);
-	RandomTerrain(pRegionArrays[level]);
+	MakeRingLand(pRegionArrays[level], 12, 20);
+
+	CleanUpWater(pRegionArrays[level]);
+
+	SetupAnchors(pRegionArrays[level]);
+
+	GrowTerrain(pRegionArrays[level], 0);
+
+	AssignTypes(pRegionArrays[level]);
+
+	PlaceVolcanos(pRegionArrays[level]);
+
+	SeverLandBridges(pRegionArrays[level]);
 
 	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
@@ -2214,19 +2225,68 @@ void ARegionList::MakeRingLand(ARegionArray *pRegs, int minDistance, int maxDist
 			// By default, everything is ocean
 			reg->type = R_OCEAN;
 
-			// If the regions is between minDistance and maxDistance from the center, default it to land.
+			// If the regions is between minDistance and maxDistance from the center, 65% chance of being land.
 			int distance = GetPlanarDistance(center, reg, 1000, -1);
-			if (distance >= minDistance && distance <= maxDistance) {
+			bool awayFromEdge = i >= 4 && i <= pRegs->x - 4 && j >= 4 && j <= pRegs->y - 4;
+			if (distance >= minDistance && distance <= maxDistance && getrandom(100) < 60) {
 				reg->type = R_NUM;
-			} else if (distance >= maxDistance && (i > 4 || i <= pRegs->x - 4 || j > 4 || j <= pRegs->y - 4)) {
-				// If the distance is outside the ring but not too close to the edge, it has a 50% chance of being land.
-				if (getrandom(100) > 50) reg->type = R_NUM;
-			} else if (distance < minDistance && distance > 4) {
-				// If the distance is inside the ring, and not too close to the center, it has a 15% chance of being land.
-				if (getrandom(100) < 15) reg->type = R_NUM;
+			} else if (distance >= maxDistance && awayFromEdge && getrandom(100) < 20) {
+				MakeOneIsland(pRegs, i, j);
+			} else if (distance < minDistance && distance > 4 && getrandom(100) < 15) {
+				MakeOneIsland(pRegs, i, j);
 			}
 		}
 	}
+
+	Awrite("Perturbing the coastlines");
+	for (int iter = 0; iter < 10; iter++) {
+		for (int i = 0; i < pRegs->x; i++) {
+			for (int j = 0; j < pRegs->y; j++) {
+				ARegion *reg = pRegs->GetRegion(i, j);
+				if (!reg) continue;
+				int distance = GetPlanarDistance(center, reg, 1000, -1);
+				int different = 0;
+				for (int d = 0; d < NDIRS; d++) {
+					ARegion *newreg = reg->neighbors[d];
+					if (!newreg) continue;
+					if (newreg->type != reg->type) different++;
+				}
+
+				if (distance <= minDistance + 2 && distance > 3) {
+					// inner coastline.  High chance of land becoming ocean, low chance of ocean becoming land.
+					// Chance is proportional to neighbors that are different.
+					if (getrandom(100) < (different * (reg->type == R_NUM ? 2 : 1))) {
+						reg->wages = -2;
+					}
+				} else if (distance >= maxDistance - 1 && i >= 2 && i <= pRegs->x - 2 && j >= 2 && j <= pRegs->y - 2) {
+					// outer coastline. Moderate chance of ocean becoming land, lower chance of land becoming ocean.
+					// Chance is proportional to neighbors that are different.
+					if (getrandom(100) < (different * (reg->type != R_NUM ? 3 : 2))) {
+						reg->wages = -2;
+					}
+				}
+			}
+		}
+		// Apply the changes
+		for (int i = 0; i < pRegs->x; i++) {
+			for (int j = 0; j < pRegs->y; j++) {
+				ARegion *reg = pRegs->GetRegion(i, j);
+				if (!reg) continue;
+				// If the region changed type, swap it to the new type and clear the flag.
+				if (reg->wages == -2) reg->type = (reg->type == R_OCEAN ? R_NUM : R_OCEAN);
+				reg->wages = -1;
+			}
+		}
+	}
+
+	Awrite("Adding the barrens");
+	center->type = R_BARREN;
+	for (int d = 0; d < NDIRS; d++) {
+		ARegion *newreg = center->neighbors[d];
+		if (!newreg) continue;
+		newreg->type = R_BARREN;
+	}
+
 	Awrite("");
 }
 

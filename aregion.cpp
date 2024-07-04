@@ -3097,6 +3097,10 @@ void placeVolcanoes(ARegionArray* arr, const int w, const int h) {
 	}
 }
 
+void ARegionList::PlaceVolcanos(ARegionArray *arr) {
+	placeVolcanoes(arr, arr->x, arr->y);
+}
+
 int distance(graphs::Location2D a, graphs::Location2D b) {
 	int dX = std::abs(a.x - b.x);
 	int dY = std::abs(a.y - b.y);

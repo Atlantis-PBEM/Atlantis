@@ -537,6 +537,7 @@ class ARegionList : public AList
 		void GrowTerrain(ARegionArray *pArr, int growOcean);
 		void RandomTerrain(ARegionArray *pArr);
 		void MakeUWMaze(ARegionArray *pArr);
+		void PlaceVolcanos(ARegionArray *pArr);
 		void MakeIslands(ARegionArray *pArr, int nPlayers);
 		void MakeOneIsland(ARegionArray *pRegs, int xx, int yy);
 
