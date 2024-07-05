@@ -441,7 +441,11 @@ void Game::CreateWorld()
 	for (i = 2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
 		int xs = regions.GetLevelXScale(i);
 		int ys = regions.GetLevelYScale(i);
-		regions.CreateUnderworldLevel(i, xx/xs, yy/ys, "underworld");
+		if (generator == 3 && i == 2) {
+			regions.CreateUnderworldRingLevel(i, xx/xs, yy/ys, "underworld");
+		} else {
+			regions.CreateUnderworldLevel(i, xx/xs, yy/ys, "underworld");
+		}
 	}
 	// Underdeep levels
 	for (i=Globals->UNDERWORLD_LEVELS+2;
