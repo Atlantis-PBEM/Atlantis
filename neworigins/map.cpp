@@ -1878,8 +1878,67 @@ void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char co
 	FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
-		char const *name)
+void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, char const *name)
+{
+	if (Globals->ICOSAHEDRAL_WORLD) {
+		MakeIcosahedralRegions(level, xSize, ySize);
+	} else {
+		MakeRegions(level, xSize, ySize);
+	}
+
+	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERWORLD;
+
+	ARegion *reg = pRegionArrays[level]->GetRegion(xSize/2, ySize/2);
+	reg->type = R_BARREN;
+
+	// Break all connections between barrens and surrounding hexes
+	for (int i = 0; i < NDIRS; i++) {
+		ARegion *n = reg->neighbors[i];
+		if (n) {
+			reg->neighbors[i] = nullptr;
+			n->neighbors[reg->GetRealDirComp(i)] = nullptr;
+		}
+	}
+
+	SetRegTypes(pRegionArrays[level], R_NUM);
+
+	SetupAnchors(pRegionArrays[level]);
+
+	GrowTerrain(pRegionArrays[level], 1);
+
+	AssignTypes(pRegionArrays[level]);
+
+	MakeUWMaze(pRegionArrays[level]);
+
+	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
+
+	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
+
+	// Connect the center region to the surface via a shaft
+	ARegionArray *surface = pRegionArrays[level-1];
+	ARegion *center = surface->GetRegion(surface->x/2, surface->y/2);
+	Object *o = new Object(reg);
+	o->num = reg->buildingseq++;
+	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->type = O_SHAFT;
+	o->incomplete = 0;
+	o->inner = center->num;
+	reg->objects.Add(o);
+
+	o = new Object(reg);
+	o->num = center->buildingseq++;
+	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->type = O_SHAFT;
+	o->incomplete = 0;
+	o->inner = reg->num;
+	center->objects.Add(o);
+
+	FinalSetup(pRegionArrays[level]);
+
+}
+
+void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char const *name)
 {
 	if (Globals->ICOSAHEDRAL_WORLD) {
 		MakeIcosahedralRegions(level, xSize, ySize);
@@ -2549,7 +2608,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 						ARegion *t = reg->neighbors[(i+init) % NDIRS];
 						if (t) {
 							if (t->population < 1) continue;
-							if (t->type != R_NUM &&
+							if (t->type != R_NUM && t->type != R_BARREN &&
 								(TerrainDefs[t->type].similar_type!=R_OCEAN ||
 								 (growOcean && (t->type != R_LAKE)))) {
 								if (j==0) t->population = 0;
@@ -2616,6 +2675,7 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
 		for (y = 0; y < pArr->y; y++) {
 			ARegion *reg = pArr->GetRegion(x, y);
 			if (!reg) continue;
+			if (reg->type == R_BARREN) continue;
 
 			for (int i=D_NORTH; i<= NDIRS; i++) {
 				int count = 0;
@@ -2625,6 +2685,7 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
 
 				ARegion *n = reg->neighbors[i];
 				if (n) {
+					if (n->type == R_BARREN) continue;
 					if (n->xloc < x || (n->xloc == x && n->yloc < y))
 						continue;
 					if (!CheckRegionExit(reg, n)) {
@@ -2811,24 +2872,22 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 	}
 }
 
-void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
-		ARegionArray *pTo)
+void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo)
 {
 	if (TerrainDefs[reg->type].similar_type == R_OCEAN) return;
+	if (reg->type == R_BARREN) return;
 
-	int tempx = reg->xloc * pTo->x / pFrom->x +
-		getrandom(pTo->x / pFrom->x);
-	int tempy = reg->yloc * pTo->y / pFrom->y +
-		getrandom(pTo->y / pFrom->y);
+	int tempx = reg->xloc * pTo->x / pFrom->x + getrandom(pTo->x / pFrom->x);
+	int tempy = reg->yloc * pTo->y / pFrom->y + getrandom(pTo->y / pFrom->y);
 	//
 	// Make sure we get a valid region.
 	//
 	tempy += (tempx + tempy) % 2;
 
 	ARegion *temp = pTo->GetRegion(tempx, tempy);
-	if (!temp)
-		return;
+	if (!temp) return;
 	if (TerrainDefs[temp->type].similar_type == R_OCEAN) return;
+	if (temp->type == R_BARREN) return;
 
 	Object *o = new Object(reg);
 	o->num = reg->buildingseq++;
@@ -2887,30 +2946,112 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 			}
 			else
 			{
-				// If we don't have starting cities, then put portals
-				// from the nexus to a variety of terrain types.
-				// These will transport the user to a randomly
-				// selected region of the chosen terrain type.
+				// The previous code would *always* choose the northernmost and westernmost location
+				// of the specific terrain.  The new algorithm is going to be to
+				//
+				// 1. collect all the candidates of each terrain type
+				//    a. a hex is a candidate if it is close (within 2hex) of a hex containing each of the following
+				//       1. wood
+				//       2. iron
+				//	     3. stone
+				//       4. food (grain or livestock)
+				//       5. mounts (horse or camel)
+				// 2. choose a random candidate from each set of valid candidates.
+				// Hopefully we won't have a situation where the is no viable candidate.  If we do, we will error out.
+
+				// First, we need to find the candidates
 				ARegionArray *to = GetRegionArray(levelTo);
+				ARegionGraph graph = ARegionGraph(to);
+				graph.setInclusion([](ARegion *current, ARegion *next) { return next->type != R_OCEAN; });
+
+				std::map<int, std::vector<ARegion *> > candidates;
 				for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
-					int found = 0;
-					for (int x2 = 0; !found && x2 < maxX; x2++)
-						for (int y2 = 0; !found && y2 < maxY; y2++) {
+					for (int x2 = 0; x2 < maxX; x2++) {
+						for (int y2 = 0; y2 < maxY; y2++) {
 							ARegion *reg = to->GetRegion(x2, y2);
-							if (!reg)
-								continue;
+							if (!reg) continue;
 							if (reg->type == type) {
-								found = 1;
-								Object *o = new Object(AC);
-								o->num = AC->buildingseq++;
-								o->name = new AString(AString("Gateway to ") + 
-									TerrainDefs[type].name + " [" + o->num + "]");
-								o->type = O_GATEWAY;
-								o->incomplete = 0;
-								o->inner = reg->num;
-								AC->objects.Add(o);
+								graphs::Location2D loc = { reg->xloc, reg->yloc };
+								auto result = graphs::breadthFirstSearch(graph, loc, 2);
+								// if hex is part of a landmass smaller than 10 hexes within 3 moves, skip it
+								if (result.size() < 10) continue;
+								// Now, check for the required items
+								std::map<int, bool> requiredItems = {
+									{I_WOOD, false},
+									{I_IRON, false},
+									{I_STONE, false},
+									{I_GRAIN, false},
+									{I_LIVESTOCK, false},
+									{I_HORSE, false},
+									{I_CAMEL, false}
+								};
+								for (auto &kv : result) {
+									ARegion *tReg = graph.get(kv.first);
+									if (tReg->produces_item(I_WOOD)) requiredItems[I_WOOD] = true;
+									if (tReg->produces_item(I_IRON)) requiredItems[I_IRON] = true;
+									if (tReg->produces_item(I_STONE)) requiredItems[I_STONE] = true;
+									if (tReg->produces_item(I_GRAIN)) requiredItems[I_GRAIN] = true;
+									if (tReg->produces_item(I_LIVESTOCK)) requiredItems[I_LIVESTOCK] = true;
+									if (tReg->produces_item(I_HORSE)) requiredItems[I_HORSE] = true;
+									if (tReg->produces_item(I_CAMEL)) requiredItems[I_CAMEL] = true;
+								}
+								if (requiredItems[I_WOOD] == false) continue;
+								if (requiredItems[I_IRON] == false) continue;
+								if (requiredItems[I_STONE] == false) continue;
+								if (requiredItems[I_GRAIN] == false && requiredItems[I_LIVESTOCK] == false) continue;
+								if (requiredItems[I_HORSE] == false && requiredItems[I_CAMEL] == false) continue;
+
+								candidates[type].push_back(reg);
 							}
 						}
+					}
+				}
+				// Now for each type, choose a random candidate
+				std::mt19937 gen{std::random_device{}()}; // generates random numbers
+				std::map<int, ARegion *> dests;
+				for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
+					if (candidates[type].size() == 0) {
+						cout << "Error: No valid candidate found for gateway to " << TerrainDefs[type].name << "\n";
+						exit(1);
+					}
+					Awrite("Found " + to_string(candidates[type].size()) + " candidates for " +
+						TerrainDefs[type].name + " gateway");
+					std::uniform_int_distribution<std::size_t> dist(0, candidates[type].size() - 1);
+					int index = dist(gen);
+					ARegion *dest = candidates[type][index];
+					ARegion *best = dest;
+					int tries = 50;
+					int maxMin = -1;
+					while(tries--) {
+						// See if it's too close to any existing dest
+						int minDist = 1000;
+						for (int otherTypes = R_PLAIN; otherTypes < type; otherTypes++) {
+							ARegion *otherDest = dests[otherTypes];
+							int curDist = GetPlanarDistance(dest, otherDest, 0);
+							if (curDist < minDist) minDist = curDist;
+						}
+						if (minDist > 20) break;
+						if (minDist > maxMin) {
+							maxMin = minDist;
+							best = dest;
+						}
+						// too close, try again
+						index = dist(gen);
+						dest = candidates[type][index];
+					}
+					// store the best we have so far
+					Awrite("Best distance of " + to_string(maxMin) + " for " + TerrainDefs[type].name);
+					dests[type] = best;
+				}
+
+				for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
+					Object *o = new Object(AC);
+					o->num = AC->buildingseq++;
+					o->name = new AString(AString("Gateway to ") + TerrainDefs[type].name + " [" + o->num + "]");
+					o->type = O_GATEWAY;
+					o->incomplete = 0;
+					o->inner = dests[type]->num;
+					AC->objects.Add(o);
 				}
 			}
 		}
@@ -2932,7 +3073,7 @@ void ARegionList::InitSetupGates(int level)
 				int tempy = j*16 + getrandom(8)*2 + tempx%2;
 				ARegion *temp = pArr->GetRegion(tempx, tempy);
 				if (temp && TerrainDefs[temp->type].similar_type != R_OCEAN &&
-						temp->type != R_VOLCANO &&
+						temp->type != R_VOLCANO && temp->type != R_BARREN &&
 						temp->gate != -1) {
 					numberofgates++;
 					temp->gate = -1;

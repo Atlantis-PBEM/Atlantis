@@ -49,6 +49,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 
 void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name) { }
 void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char const *name) {}
+void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, char const *name) {}
 
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char const *name) {
 	MakeRegions(level, xSize, ySize);

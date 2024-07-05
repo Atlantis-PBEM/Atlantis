@@ -486,6 +486,7 @@ class ARegionList : public AList
 		void CreateIslandRingLevel(int level, int xSize, int ySize, char const *name);
 		void CreateIslandLevel(int level, int nPlayers, char const *name);
 		void CreateUnderworldLevel(int level, int xSize, int ySize, char const *name);
+		void CreateUnderworldRingLevel(int level, int xSize, int ySize, char const *name);
 		void CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name);
 
 		void MakeShaftLinks(int levelFrom, int levelTo, int odds);

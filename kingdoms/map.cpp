@@ -183,8 +183,6 @@ int ARegion::TerrainProbability(int terrain)
 	return retval;
 }
 
-
-
 void ARegionList::CreateAbyssLevel(int level, char const *name)
 {
 	MakeRegions(level, 4, 4);
@@ -321,6 +319,16 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
+}
+
+void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char const *name)
+{
+	throw "CreateIslandRingLevel not implemented for this game ruleset";
+}
+
+void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, char const *name)
+{
+	throw "CreateUnderworldRingLevel not implemented for this game ruleset";
 }
 
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,

@@ -5,26 +5,28 @@
     <body>
         <div class="toolbar">
             <div class="panel">
-                <h4 class="panel__title">Resources</h4>
+                <h4 class="panel__title">Options</h4>
                 <div class="panel__body" x-data>
-                    <template x-for="item in $store.resources">
+                    <template x-for="item in $store.global.features">
                         <label>
-                            <input type="checkbox" x-model="item.checked">
                             <span x-text="item.title"></span>
+                            <input type="checkbox" x-model="item.checked">
                         </label>
                     </template>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h4 class="panel__title">Other Panel</h4>
-                <div class="panel__body">
+                    <span> &nbsp; &nbsp;</span>
+                    <label>
+                        <span>Resource</span>
+                        <select x-model="$store.global.resource">
+                            <template x-for="item in $store.global.resources">
+                                <option x-text="item.title" x-bind:value="item.value"></option>
+                            </template>
+                        </select>
+                    </label>
                 </div>
             </div>
         </div>
 
         <canvas id="map" width="2048" height="2048"></canvas>
-        
         <script type="module" src="./index.ts"></script>
     </body>
 </html>

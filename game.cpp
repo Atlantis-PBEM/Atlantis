@@ -274,9 +274,21 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 	if (type == 5) {
 		json worldmap;
 
+		std::vector<ARegion *> start_regions;
 		for (auto i = 0; i < regions.numLevels; i++) {
 			ARegionArray *pArr = regions.pRegionArrays[i];
-			if (pArr->levelType == ARegionArray::LEVEL_NEXUS) continue;
+			if (pArr->levelType == ARegionArray::LEVEL_NEXUS) {
+				if (!Globals->START_CITIES_EXIST) {
+					ARegion *nexus = pArr->GetRegion(0, 0);
+					forlist(&nexus->objects) {
+						Object *o = (Object *) elem;
+						if (o->inner != -1) {
+							start_regions.push_back(regions.GetRegion(o->inner));
+						}
+					}
+				}
+				continue;
+			};
 			string label = (pArr->strName ? (pArr->strName->const_str() + to_string(i-1)) : "surface");
 			worldmap[label] = json::array();
 
@@ -291,9 +303,20 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 						{ "yew", reg->produces_item(I_YEW) },
 						{ "mithril", reg->produces_item(I_MITHRIL) },
 						{ "admantium", reg->produces_item(I_ADMANTIUM) },
-						{ "floater", reg->produces_item(I_FLOATER) }
-
+						{ "floater", reg->produces_item(I_FLOATER) },
+						{ "wing", reg->produces_item(I_WHORSE) },
+						{ "gate", reg->gate != 0 },
+						{ "exits", json::array() },
+						{ "shaft", reg->HasShaft() },
+						{ "starting",
+						  (start_regions.end() != std::find(start_regions.begin(), start_regions.end(), reg)) ||
+						  reg->IsStartingCity()
+						}
 					};
+					// Fill in the exits
+					for (auto d = 0; d < NDIRS; d++) {
+						hexout["exits"].push_back(reg->neighbors[d] != nullptr);
+					}
 					if (reg->town) {
 						hexout["town"] = data["settlement"]["size"];
 					}

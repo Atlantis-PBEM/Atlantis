@@ -200,6 +200,11 @@ void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char co
 	throw "CreateIslandRingLevel not implemented for this game ruleset";
 }
 
+void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, char const *name)
+{
+	throw "CreateUnderworldRingLevel not implemented for this game ruleset";
+}
+
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 		char const *name)
 {
