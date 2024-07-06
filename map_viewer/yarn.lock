@@ -1170,6 +1170,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/alpinejs@npm:^3.13.10":
+  version: 3.13.10
+  resolution: "@types/alpinejs@npm:3.13.10"
+  checksum: 10c0/dbf285b68a746fd02e8f5cc07faeaade3ffe4fae149c46274302e5e3126b09e31936d047dc8418460b66216182542420cda46ecf35fd73a46a691049d15dd535
+  languageName: node
+  linkType: hard
+
 "@types/color-convert@npm:*":
   version: 2.0.3
   resolution: "@types/color-convert@npm:2.0.3"
@@ -1192,6 +1199,22 @@ __metadata:
   dependencies:
     "@types/color-convert": "npm:*"
   checksum: 10c0/79267eeb67f9d11761aecee36bb1503fb8daa699b9ae7e036fc23a74380e5b130c5c0f6d7adafabba89256e46f36ee4d3e28e0ac7e107e8258550eae7d091acf
+  languageName: node
+  linkType: hard
+
+"@vue/reactivity@npm:~3.1.1":
+  version: 3.1.5
+  resolution: "@vue/reactivity@npm:3.1.5"
+  dependencies:
+    "@vue/shared": "npm:3.1.5"
+  checksum: 10c0/1c38aeb73725b3825bea793194334b232388236f0b06b04471508a77cb55d71841e3eb2f345ab6812c76569918aa8f019e4cdf59ec9cefbab7625bb2bc26eb58
+  languageName: node
+  linkType: hard
+
+"@vue/shared@npm:3.1.5":
+  version: 3.1.5
+  resolution: "@vue/shared@npm:3.1.5"
+  checksum: 10c0/197aa5bdd370177d26ca7a178bb3d3d2332cee2c8e67000bd2bb91b1ffc571d5489fab3a65f38a32e941dc8182d1cd6c6af6e294bb9ea13e01eafdde475319ea
   languageName: node
   linkType: hard
 
@@ -1225,6 +1248,15 @@ __metadata:
     clean-stack: "npm:^2.0.0"
     indent-string: "npm:^4.0.0"
   checksum: 10c0/a42f67faa79e3e6687a4923050e7c9807db3848a037076f791d10e092677d65c1d2d863b7848560699f40fc0502c19f40963fb1cd1fb3d338a7423df8e45e039
+  languageName: node
+  linkType: hard
+
+"alpinejs@npm:^3.14.1":
+  version: 3.14.1
+  resolution: "alpinejs@npm:3.14.1"
+  dependencies:
+    "@vue/reactivity": "npm:~3.1.1"
+  checksum: 10c0/121be09a8e4e068b7ca1a85d9a0f986650f2b32f86640063cb40ea7bd3b1face1562626b1f6e01868f10ea2f6cd4e0c5f308ad0f938f07020107c2312932ea1a
   languageName: node
   linkType: hard
 
@@ -2222,10 +2254,13 @@ __metadata:
   resolution: "map@workspace:."
   dependencies:
     "@parcel/core": "npm:^2.2.0"
+    "@types/alpinejs": "npm:^3.13.10"
     "@types/color": "npm:^3.0.2"
+    alpinejs: "npm:^3.14.1"
     color: "npm:^4.2.0"
     parcel: "npm:^2.2.0"
     rainbowvis.js: "npm:^1.0.1"
+    typescript: "npm:^5.5.3"
   languageName: unknown
   linkType: soft
 
@@ -2955,6 +2990,26 @@ __metadata:
   version: 0.20.2
   resolution: "type-fest@npm:0.20.2"
   checksum: 10c0/dea9df45ea1f0aaa4e2d3bed3f9a0bfe9e5b2592bddb92eb1bf06e50bcf98dbb78189668cd8bc31a0511d3fc25539b4cd5c704497e53e93e2d40ca764b10bfc3
+  languageName: node
+  linkType: hard
+
+"typescript@npm:^5.5.3":
+  version: 5.5.3
+  resolution: "typescript@npm:5.5.3"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/f52c71ccbc7080b034b9d3b72051d563601a4815bf3e39ded188e6ce60813f75dbedf11ad15dd4d32a12996a9ed8c7155b46c93a9b9c9bad1049766fe614bbdd
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^5.5.3#optional!builtin<compat/typescript>":
+  version: 5.5.3
+  resolution: "typescript@patch:typescript@npm%3A5.5.3#optional!builtin<compat/typescript>::version=5.5.3&hash=379a07"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/911c7811d61f57f07df79c4a35f56a0f426a65426a020e5fcd792f66559f399017205f5f10255329ab5a3d8c2d1f1d19530aeceffda70758a521fae1d469432e
   languageName: node
   linkType: hard
 
