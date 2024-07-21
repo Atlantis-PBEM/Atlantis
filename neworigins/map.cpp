@@ -2961,50 +2961,9 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 
 				// First, we need to find the candidates
 				ARegionArray *to = GetRegionArray(levelTo);
-				ARegionGraph graph = ARegionGraph(to);
-				graph.setInclusion([](ARegion *current, ARegion *next) { return next->type != R_OCEAN; });
-
 				std::map<int, std::vector<ARegion *> > candidates;
 				for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
-					for (int x2 = 0; x2 < maxX; x2++) {
-						for (int y2 = 0; y2 < maxY; y2++) {
-							ARegion *reg = to->GetRegion(x2, y2);
-							if (!reg) continue;
-							if (reg->type == type) {
-								graphs::Location2D loc = { reg->xloc, reg->yloc };
-								auto result = graphs::breadthFirstSearch(graph, loc, 2);
-								// if hex is part of a landmass smaller than 10 hexes within 3 moves, skip it
-								if (result.size() < 10) continue;
-								// Now, check for the required items
-								std::map<int, bool> requiredItems = {
-									{I_WOOD, false},
-									{I_IRON, false},
-									{I_STONE, false},
-									{I_GRAIN, false},
-									{I_LIVESTOCK, false},
-									{I_HORSE, false},
-									{I_CAMEL, false}
-								};
-								for (auto &kv : result) {
-									ARegion *tReg = graph.get(kv.first);
-									if (tReg->produces_item(I_WOOD)) requiredItems[I_WOOD] = true;
-									if (tReg->produces_item(I_IRON)) requiredItems[I_IRON] = true;
-									if (tReg->produces_item(I_STONE)) requiredItems[I_STONE] = true;
-									if (tReg->produces_item(I_GRAIN)) requiredItems[I_GRAIN] = true;
-									if (tReg->produces_item(I_LIVESTOCK)) requiredItems[I_LIVESTOCK] = true;
-									if (tReg->produces_item(I_HORSE)) requiredItems[I_HORSE] = true;
-									if (tReg->produces_item(I_CAMEL)) requiredItems[I_CAMEL] = true;
-								}
-								if (requiredItems[I_WOOD] == false) continue;
-								if (requiredItems[I_IRON] == false) continue;
-								if (requiredItems[I_STONE] == false) continue;
-								if (requiredItems[I_GRAIN] == false && requiredItems[I_LIVESTOCK] == false) continue;
-								if (requiredItems[I_HORSE] == false && requiredItems[I_CAMEL] == false) continue;
-
-								candidates[type].push_back(reg);
-							}
-						}
-					}
+					candidates[type] = to->get_starting_region_candidates(type);
 				}
 				// Now for each type, choose a random candidate
 				std::mt19937 gen{std::random_device{}()}; // generates random numbers

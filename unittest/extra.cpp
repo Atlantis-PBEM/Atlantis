@@ -73,3 +73,5 @@ void Game::ModifyTablesPerRuleset(void) {
 		EnableObject(O_CARAVANSERAI);
 	}
 }
+
+bool ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin) { return false; }

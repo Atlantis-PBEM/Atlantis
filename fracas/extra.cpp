@@ -569,3 +569,5 @@ void Game::ModifyTablesPerRuleset(void)
 
 	return;
 }
+
+bool ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin) { return false; }

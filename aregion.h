@@ -297,6 +297,9 @@ class ARegion : public AListElem
 		AString WagesForReport();
 		int Population();
 
+		// ruleset specific movment checks
+		bool movement_forbidden_by_ruleset(Unit *unit, ARegion *origin);
+
 		AString *name;
 		int num;
 		int type;
@@ -392,6 +395,8 @@ class ARegionArray
 		void SetRegion(int, int, ARegion *);
 		ARegion *GetRegion(int, int);
 		void SetName(char const *name);
+
+		std::vector<ARegion *> get_starting_region_candidates(int terrain);
 
 		int x;
 		int y;
