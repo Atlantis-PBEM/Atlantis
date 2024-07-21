@@ -30,6 +30,7 @@
 // 2001/Feb/21	Joseph Traub		Added FACLIM_UNLIMITED
 
 #include <stdlib.h>
+#include <random>
 
 #include "game.h"
 #include "gamedata.h"
@@ -1701,6 +1702,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			// user to a semi-random instance of the target terrain
 			// type, so select where they will actually move to.
 			ARegionArray *level = regions.GetRegionArray(newreg->zloc);
+			std::vector<ARegion *> start_locations = level->get_starting_region_candidates(newreg->type);
+
 			// match levels to try for, in order:
 			// 0 - completely empty towns
 			// 1 - towns with only guardsmen
@@ -1708,105 +1711,40 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			// 3 - completely empty hexes
 			// 4 - anywhere that matches terrain (out of options)
 			int match = 0;
-			int candidates = 0;
-			while (!candidates && match < 5) {
-				for (int x = 0; x < level->x; x++)
-					for (int y = 0; y < level->y; y++) {
-						ARegion *scanReg = level->GetRegion(x, y);
-						if (!scanReg)
-							continue;
-						if (TerrainDefs[scanReg->type].similar_type != TerrainDefs[newreg->type].similar_type)
-							continue;
-						if (match < 3 && !scanReg->town)
-							continue;
-						if (match == 4) {
-							candidates++;
-							continue;
+			std::vector<ARegion *> candidates = {};
+			while (candidates.empty() && match < 5) {
+				for(auto scanReg : start_locations) {
+					// ignore any region that isn't a town before match level 3
+					if (match < 3 && !scanReg->town) continue;
+					int guards = 0;
+					int others = 0;
+					forlist(&scanReg->objects) {
+						Object *o = (Object *) elem;
+						forlist(&o->units) {
+							Unit *u = (Unit *) elem;
+							if (u->faction->num == guardfaction) guards = 1;
+							else others = 1;
 						}
-						int guards = 0;
-						int others = 0;
-						forlist(&scanReg->objects) {
-							Object *o = (Object *) elem;
-							forlist(&o->units) {
-								Unit *u = (Unit *) elem;
-								if (u->faction->num == guardfaction)
-									guards = 1;
-								else
-									others = 1;
-							}
-						}
-						switch (match) {
-							case 0:
-								if (guards || others)
-									continue;
-								break;
-							case 1:
-								if (!guards || others)
-									continue;
-								break;
-							case 2:
-								if (!guards)
-									continue;
-								break;
-							case 3:
-								if (others)
-									continue;
-								break;
-						}
-						candidates++;
 					}
-				if (!candidates)
-					match++;
+					// match level 0 - ignore anything that isn't completely empty
+					if (match == 0 && (guards || others)) continue;
+					// match level 1 - ignore anything that has other players
+					if (match == 1 && (!guards || others)) continue;
+					// match level 2 - ignore anything that doesn't have guards
+					if (match == 2 && !guards) continue;
+					// match level 3 - ignore anything that has guards or others
+					if (match == 3 && (guards || others)) continue;
+					// match level 4 or we were legal by the above rules
+					candidates.push_back(scanReg);
+				}
+				// increment match level.  If we found anything above, we'll break at the top of the while
+				match++;
 			}
-			if (candidates) {
-				candidates = getrandom(candidates);
-				for (int x = 0; x < level->x; x++)
-					for (int y = 0; y < level->y; y++) {
-						ARegion *scanReg = level->GetRegion(x, y);
-						if (!scanReg)
-							continue;
-						if (TerrainDefs[scanReg->type].similar_type != TerrainDefs[newreg->type].similar_type)
-							continue;
-						if (match < 3 && !scanReg->town)
-							continue;
-						if (match == 4) {
-							candidates++;
-							continue;
-						}
-						int guards = 0;
-						int others = 0;
-						forlist(&scanReg->objects) {
-							Object *o = (Object *) elem;
-							forlist(&o->units) {
-								Unit *u = (Unit *) elem;
-								if (u->faction->num == guardfaction)
-									guards = 1;
-								else
-									others = 1;
-							}
-						}
-						switch (match) {
-							case 0:
-								if (guards || others)
-									continue;
-								break;
-							case 1:
-								if (!guards || others)
-									continue;
-								break;
-							case 2:
-								if (!guards)
-									continue;
-								break;
-							case 3:
-								if (others)
-									continue;
-								break;
-						}
-						if (!candidates--) {
-							newreg = scanReg;
-						}
-					}
+			if (!candidates.empty()) {
+				std::mt19937 gen{std::random_device{}()}; // generates random numbers
+				std::uniform_int_distribution<std::size_t> dist(0, candidates.size() - 1);
+				int index = dist(gen);
+				newreg = candidates[index];
 			}
 		}
 	} else if (x->dir == MOVE_PAUSE) {
@@ -1816,6 +1754,12 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	}
 
 	if (!newreg) {
+		unit->error("MOVE: Can't move that direction.");
+		goto done_moving;
+	}
+
+	if (newreg->movement_forbidden_by_ruleset(unit, region)) {
+		// the ruleset specific code should provide the error message
 		unit->error("MOVE: Can't move that direction.");
 		goto done_moving;
 	}

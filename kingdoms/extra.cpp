@@ -191,3 +191,5 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyItemProductionBooster(I_AXE, I_HAMMER, 1);
 	return;
 }
+
+bool ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin) { return false; }
