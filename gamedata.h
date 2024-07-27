@@ -266,6 +266,8 @@ enum {
 	I_CATAPULT,
 	I_STEEL_DEFENDER,
 	I_DEVIL,
+	// NO 7 victory condition items
+	I_IMPRISONED_ENTITY,
 	NITEMS
 };
 
@@ -472,6 +474,11 @@ enum {
 	O_HPTOWER,
 	O_CARAVANSERAI,
 	O_GATEWAY,
+	// NO 7 victory condition objects
+	O_RITUAL_ALTAR,
+	O_EMPOWERED_ALTAR,
+	O_ENTITY_CAGE,
+	O_MONOLITH,
 	NOBJECTS
 };
 

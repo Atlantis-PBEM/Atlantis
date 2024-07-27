@@ -849,6 +849,11 @@
       "description": "devil [DEVL], weight 250, walking capacity 50, riding capacity 50, flying capacity 50, moves 4 hexes per month. This is a monster. This monster attacks with a combat skill of 8 This monster has a resistance of 8 to melee attacks. This monster has a resistance of 6 to energy attacks. This monster has a resistance of 6 to spirit attacks. This monster has a resistance of 6 to weather attacks. This monster has a resistance of 6 to riding attacks. This monster has a resistance of 6 to ranged attacks. Monster can cast hellfire in battle at a skill level of 5. This ability does between 2 and 250 energy attacks and each attack deals 1 damage. The monster can spawn in the wilderness of volcanoes. The monster has no terrain preferences, and it can travel through any terrain. Monster is unbelievably aggressive and will attack player units on sight. This monster has 250 melee attacks per round and takes 250 hits to kill and each attack deals 1 damage. This monster has a tactics score of 5, a stealth score of 1, and an observation score of 5. This monster might have magic items and silver as treasure. A unit may have at most 1 devil [DEVL].",
       "name": "devil",
       "tag": "DEVL"
+    },
+    {
+      "description": "imprisoned entity [IENT], weight 3000, can walk, can ride, moves 2 hexes per month. This item cannot be given to other units.",
+      "name": "imprisoned entity",
+      "tag": "IENT"
     }
   ],
   "object_reports": [
@@ -1071,6 +1076,22 @@
     {
       "description": "This is a building. Units may enter this structure. This structure cannot be built by players.",
       "name": "Gateway"
+    },
+    {
+      "description": "This is a building. This structure cannot be built by players.",
+      "name": "Ritual Altar"
+    },
+    {
+      "description": "This is a building. This structure cannot be built by players.",
+      "name": "Empowered Altar"
+    },
+    {
+      "description": "This is a building. This structure cannot be built by players.",
+      "name": "Mystical Anomaly"
+    },
+    {
+      "description": "This is a building. This structure cannot be built by players.",
+      "name": "Blood-soaked Monolith"
     }
   ],
   "regions": [

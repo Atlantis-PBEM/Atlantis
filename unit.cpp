@@ -102,6 +102,7 @@ Unit::Unit()
 	savedmovedir = -1;
 	ClearOrders();
 	raised = 0;
+	initial_region = nullptr;
 }
 
 Unit::Unit(int seq, Faction *f, int a)
@@ -145,6 +146,7 @@ Unit::Unit(int seq, Faction *f, int a)
 	savedmovedir = -1;
 	ClearOrders();
 	raised = 0;
+	initial_region = nullptr;
 }
 
 Unit::~Unit()
