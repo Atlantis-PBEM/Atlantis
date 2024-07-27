@@ -105,7 +105,8 @@ class ItemType
 			NOTRANSPORT = 0x20,
 			// Produced monsters
 			MANPRODUCE = 0x40,
-			SKILLOUT_HALF = 0x80
+			SKILLOUT_HALF = 0x80,
+			NOSTEALTH = 0x100, // this item makes the unit non-stealthy
 		};
 		int flags;
 

@@ -656,10 +656,17 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 	int detfac = 0;
 	if (u->faction == this) return 2;
 	if (u->reveal == REVEAL_FACTION) return 2;
+
+	// If the unit has any items which prevent stealth, then we can see them.
+	forlist((&u->items)) {
+		Item* item = (Item *) elem;
+		if (ItemDefs[item->type].flags & ItemType::NOSTEALTH) return 2;
+	}
+
 	int retval = 0;
 	if (u->reveal == REVEAL_UNIT) retval = 1;
 	if (u->guard == GUARD_GUARD) retval = 1;
-	forlist((&r->objects)) {
+	forlist_reuse((&r->objects)) {
 		Object* obj = (Object *) elem;
 		int dummy = 0;
 		if (obj->type == O_DUMMY) dummy = 1;

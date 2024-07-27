@@ -303,6 +303,9 @@ class Unit : public AListElem
 		// Used for tracking VISIT quests
 		set<string> visited;
 		int raised;
+
+		// Used for tracking movement for NO7 victory condition
+		ARegion *initial_region;
 };
 
 #endif

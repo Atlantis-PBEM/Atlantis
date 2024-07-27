@@ -1868,6 +1868,11 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	unit->MoveUnit(newreg->GetDummy());
 	unit->DiscardUnfinishedShips();
 
+	// Track the initial region the unit started from for part of NO7 victory handling
+	if (unit->initial_region == nullptr) {
+		unit->initial_region = region;
+	}
+
 	switch (movetype) {
 		case M_WALK:
 		default:

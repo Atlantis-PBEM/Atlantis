@@ -1301,6 +1301,12 @@ void Game::ModifyTablesPerRuleset(void)
 		if (Globals->EASIER_UNDERWORLD) ModifyRangeLevelPenalty("rng_transport", 4);
 	}
 
+	// NO7 - Enable the various parts of the victory conditions
+	EnableObject(O_RITUAL_ALTAR);
+	EnableObject(O_EMPOWERED_ALTAR);
+	EnableObject(O_ENTITY_CAGE);
+	EnableObject(O_MONOLITH);
+	EnableItem(I_IMPRISONED_ENTITY);
 
 	// Weapon BM example
 

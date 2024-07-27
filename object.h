@@ -49,7 +49,8 @@ class ObjectType {
 			CANENTER	= 0x008,
 			CANMODIFY	= 0x020,
 			TRANSPORT	= 0x040,
-			GROUP		= 0x080
+			GROUP		= 0x080,
+			KEYBARRIER  = 0x100,  // Prevents entry to region except to unit with key
 		};
 		int flags;
 
@@ -58,7 +59,7 @@ class ObjectType {
 		int sailors;
 		int maxMages;
 
-		int item;
+		int item;  // item to construct object OR key item for KEYBARRIER objects
 		int cost;
 		char const *skill;
 		int level;
