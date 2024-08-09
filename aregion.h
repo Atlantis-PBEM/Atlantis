@@ -498,6 +498,7 @@ class ARegionList : public AList
 		void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);
 		ARegion *FindConnectedRegions(ARegion *r, ARegion *tail, int shaft);
 		ARegion *FindNearestStartingCity(ARegion *r, int *dir);
+		int FindDistanceToNearestObject(int object, ARegion *r);
 		void FixUnconnectedRegions();
 		void InitSetupGates(int level);
 		void FinalSetupGates();

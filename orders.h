@@ -49,6 +49,8 @@ class EvictOrder;
 class BankOrder;
 class IdleOrder;
 class TransportOrder;
+class AnnihilateOrder;
+class SacrificeOrder;
 
 #include "unit.h"
 #include "gamedefs.h"
@@ -61,6 +63,7 @@ enum {
 	O_UNIT,
 	O_ADDRESS,
 	O_ADVANCE,
+	O_ANNIHILATE,
 	O_ARMOR,
 	O_ASSASSINATE,
 	O_ATTACK,
@@ -107,6 +110,7 @@ enum {
 	O_QUIT,
 	O_RESTART,
 	O_REVEAL,
+	O_SACRIFICE,
 	O_SAIL,
 	O_SELL,
 	O_SHARE,
@@ -424,6 +428,23 @@ class JoinOrder : public Order {
 		UnitId *target;
 		int overload;
 		int merge;
+};
+
+class AnnihilateOrder : public Order {
+	public:
+		AnnihilateOrder();
+		~AnnihilateOrder();
+
+		int xloc, yloc, zloc;
+};
+
+class SacrificeOrder : public Order {
+	public:
+		SacrificeOrder();
+		~SacrificeOrder();
+
+		int item;
+		int amount;
 };
 
 #endif

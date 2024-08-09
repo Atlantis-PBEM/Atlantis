@@ -4108,3 +4108,33 @@ const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(AR
 
     return cameFrom;
 }
+
+int ARegionList::FindDistanceToNearestObject(int object_type, ARegion *start)
+{
+	std::vector<ARegion *> targets;
+	ARegion *r;
+	// Just find all regions which contain the object, then compute the smallest distance.  I contemplated using
+	// the breadth first and dijkstra search, but this is actually simpler and should be faster.
+	forlist(this) {
+		r = (ARegion *) elem;
+		// For now, we only care about regions on the same zloc
+		if (r->zloc != start->zloc) continue;
+		forlist(&r->objects) {
+			Object *o = (Object *) elem;
+			if (o->type == object_type) {
+				targets.push_back(r);
+				break;
+			}
+		}
+	}
+	// compute the nearest linear cylindrical distance to the targets
+	int min_dist = 100000000;
+	int w = pRegionArrays[start->zloc]->x;
+	graphs::Location2D initial = { start->xloc, start->yloc };
+	for(auto target: targets) {
+		graphs::Location2D candidate = { target->xloc, target->yloc };
+		int dist = cylDistance(initial, candidate, w);
+		if (dist < min_dist) min_dist = dist;
+	}
+	return min_dist;
+}

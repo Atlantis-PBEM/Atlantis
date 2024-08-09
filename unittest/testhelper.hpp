@@ -64,6 +64,8 @@ public:
     void parse_orders(int faction_id, istream& orders, OrdersCheck *check = nullptr);
     // Run the transport order checks
     void check_transport_orders();
+    // Execute movement orders
+    void move_units();
     // Run one phase of the transport orders
     void transport_phase(TransportOrder::TransportPhase phase);
     // Collect the transported goods from the quartermasters
@@ -80,6 +82,10 @@ public:
     // Activate a specific spell for testing.   Since the spells can have different arguments, we use a helper struct
     // to pass in the arguments and call the appropriate Run<Spell> function based on the skill associate with the spell.
     void activate_spell(int spell, SpellTestHelper helper);
+
+    enum Type { SKILL, ITEM, OBJECT};
+    // enable or disable items, objects etc
+    void enable(Type type, int id, bool enable);
 
 private:
     stringstream cout_buffer;

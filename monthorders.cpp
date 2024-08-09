@@ -1696,6 +1696,16 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			unit->error("MOVE: Can't move IN there.");
 			goto done_moving;
 		}
+
+		// Make sure that items which cannot go through a shaft don't
+		forlist(&unit->items) {
+			Item *i = (Item *) elem;
+			if (ItemDefs[i->type].flags & ItemType::NO_SHAFT) {
+				unit->error("MOVE: Unable to fit through the shaft.");
+				goto done_moving;
+			}
+		}
+
 		newreg = regions.GetRegion(obj->inner);
 		if (obj->type == O_GATEWAY) {
 			// Gateways should only exist in the nexus, and move the
@@ -1758,9 +1768,19 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 		goto done_moving;
 	}
 
+	// Check for any keybarrier objects in the target region
+	forlist(&newreg->objects) {
+		Object *o = (Object *) elem;
+		if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
+			if (unit->items.GetNum(ObjectDefs[o->type].key_item) < 1) {
+				unit->error("MOVE: A mystical barrier prevents movement in that direction.");
+				goto done_moving;
+			}
+		}
+	}
+
 	if (newreg->movement_forbidden_by_ruleset(unit, region)) {
 		// the ruleset specific code should provide the error message
-		unit->error("MOVE: Can't move that direction.");
 		goto done_moving;
 	}
 
@@ -1867,6 +1887,11 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	unit->moved += cost;
 	unit->MoveUnit(newreg->GetDummy());
 	unit->DiscardUnfinishedShips();
+
+	// Track the initial region the unit started from for part of NO7 victory handling
+	if (unit->initial_region == nullptr) {
+		unit->initial_region = region;
+	}
 
 	switch (movetype) {
 		case M_WALK:

@@ -849,6 +849,11 @@
       "description": "devil [DEVL], weight 250, walking capacity 50, riding capacity 50, flying capacity 50, moves 4 hexes per month. This is a monster. This monster attacks with a combat skill of 8 This monster has a resistance of 8 to melee attacks. This monster has a resistance of 6 to energy attacks. This monster has a resistance of 6 to spirit attacks. This monster has a resistance of 6 to weather attacks. This monster has a resistance of 6 to riding attacks. This monster has a resistance of 6 to ranged attacks. Monster can cast hellfire in battle at a skill level of 5. This ability does between 2 and 250 energy attacks and each attack deals 1 damage. The monster can spawn in the wilderness of volcanoes. The monster has no terrain preferences, and it can travel through any terrain. Monster is unbelievably aggressive and will attack player units on sight. This monster has 250 melee attacks per round and takes 250 hits to kill and each attack deals 1 damage. This monster has a tactics score of 5, a stealth score of 1, and an observation score of 5. This monster might have magic items and silver as treasure. A unit may have at most 1 devil [DEVL].",
       "name": "devil",
       "tag": "DEVL"
+    },
+    {
+      "description": "imprisoned entity [IENT], weight 3000, can walk, can ride, moves 2 hexes per month. This item prevents the unit it is with from being stealthy. This item prevents the unit it is with from entering a shaft. This item desires to move toward the nearest Ritual Altar. This item requires maintenance each turn of 1000 silver. Moving toward the altar will reduce the maintenance cost in half. Moving away from the altar will multiply the maintenance cost 5 time. This item cannot be given to other units.",
+      "name": "imprisoned entity",
+      "tag": "IENT"
     }
   ],
   "object_reports": [
@@ -1071,6 +1076,26 @@
     {
       "description": "This is a building. Units may enter this structure. This structure cannot be built by players.",
       "name": "Gateway"
+    },
+    {
+      "description": "This is a building. This structure requires a sacrifice of 1 imprisoned entity [IENT]. This structure cannot be built by players.",
+      "name": "Ritual Altar"
+    },
+    {
+      "description": "This is a building. This structure cannot be built by players.",
+      "name": "Empowered Altar"
+    },
+    {
+      "description": "This is a building. This structure requires a sacrifice of 10 leaders [LEAD]. This structure cannot be built by players.",
+      "name": "Mystical Anomaly"
+    },
+    {
+      "description": "This is a building. This structure requires a sacrifice of 50 leaders [LEAD]. This structure cannot be built by players.",
+      "name": "Dormant Monolith"
+    },
+    {
+      "description": "This is a building. This structure grants the owner the skill annihilation [ANNI] at a skill level of 1. Units may enter this structure. This structure cannot be built by players.",
+      "name": "World-breaker Monolith"
     }
   ],
   "regions": [
@@ -26228,6 +26253,36 @@
       "level": 5,
       "name": "transmutation",
       "tag": "TRNS"
+    },
+    {
+      "description": "A unit with access to the Annihilation skill may destroy a region and all surrounding regions.  Regions destroyed in this way will become barren.  All units and structures in the region and the surrounding regions will be destroyed as will production and cities.  This skill is only available to the unit which controls the World-breaker Monolith.  To use this skill, the owner of the World-breaker Monolith must issue the order ANNIHILATE REGION <x> <y> <z>.   If the z coordinate is not specified, it will default to the same z coordinate as the region containing the World-breaker Monolith. This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 1,
+      "name": "annihilation",
+      "tag": "ANNI"
+    },
+    {
+      "description": "This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 2,
+      "name": "annihilation",
+      "tag": "ANNI"
+    },
+    {
+      "description": "This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 3,
+      "name": "annihilation",
+      "tag": "ANNI"
+    },
+    {
+      "description": "This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 4,
+      "name": "annihilation",
+      "tag": "ANNI"
+    },
+    {
+      "description": "This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 5,
+      "name": "annihilation",
+      "tag": "ANNI"
     }
   ]
 }

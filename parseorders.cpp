@@ -656,6 +656,13 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_DISTRIBUTE:
 			ProcessTransportOrder(unit, o, pCheck);
 			break;
+		// NO7 victory condition orders
+		case O_ANNIHILATE:
+			ProcessAnnihilateOrder(unit, o, pCheck);
+			break;
+		case O_SACRIFICE:
+			ProcessSacrificeOrder(unit, o, pCheck);
+			break;
 	}
 }
 
@@ -3011,3 +3018,119 @@ void Game::ProcessJoinOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
+void Game::ProcessSacrificeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
+{
+	// See if we have a sacrifice enabled object
+	bool can_sacrifice = false;
+	for(auto o = 0; o < NOBJECTS; o++) {
+		ObjectType ob = ObjectDefs[o];
+		if (!(ob.flags & ObjectType::DISABLED) && (ob.flags & ObjectType::SACRIFICE)) {
+			can_sacrifice = true;
+			break;
+		}
+	}
+	if (!can_sacrifice) {
+		parse_error(pCheck, unit, 0, "SACRIFICE is not a valid order.");
+		return;
+	}
+
+	AString *token = o->gettoken();
+	if (!token) {
+		parse_error (pCheck, unit, 0, "SACRIFICE: No amount given.");
+		return;
+	}
+	int amt = token->value();
+	if (amt < 1) {
+		parse_error (pCheck, unit, 0, "SACRIFICE: No amount given.");
+		return;
+	}
+	delete token;
+	token = o->gettoken();
+	if (!token) {
+		parse_error(pCheck, unit, 0, "SACRIFICE: No item given.");
+		return;
+	}
+
+	int item = ParseEnabledItem(token);
+	delete token;
+
+	if (item == -1) {
+		parse_error(pCheck, unit, 0, "SACRIFICE: Invalid item.");
+		return;
+	}
+	if (ItemDefs[item].flags & ItemType::DISABLED) {
+		parse_error(pCheck, unit, 0, "SACRIFICE: Invalid item.");
+		return;
+	}
+	if (!pCheck) {
+		SacrificeOrder *order = new SacrificeOrder;
+		order->item = item;
+		order->amount = amt;
+		if (unit->sacrificeorders) delete unit->sacrificeorders;
+		unit->sacrificeorders = order;
+	}
+	return;
+}
+
+void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
+{
+	// Make sure the ANNIHILATE skill is enabled.
+	if (SkillDefs[S_ANNIHILATION].flags & SkillType::DISABLED) {
+		parse_error(pCheck, unit, 0, "ANNIHILATE is not a valid order.");
+		return;
+	}
+
+	AString *token = o->gettoken();
+	int x = -1;
+	int y = -1;
+	int z = unit->object->region->zloc;
+	RangeType *range = FindRange(SkillDefs[S_ANNIHILATION].range);
+
+	if (!token) {
+		parse_error(pCheck, unit, 0, "ANNIHILATE: No region specified.");
+		return;
+	}
+	if (!(*token == "region")) {
+		delete token;
+		parse_error(pCheck, unit, 0, "ANNIHILATE: No region specified.");
+		return;
+	}
+	delete token;
+
+	token = o->gettoken();
+	if (!token) {
+		unit->error("ANNIHILATE: Region X coordinate not specified.");
+		return;
+	}
+	x = token->value();
+	delete token;
+
+	token = o->gettoken();
+	if (!token) {
+		unit->error("ANNIHILATE: Region Y coordinate not specified.");
+		return;
+	}
+	y = token->value();
+	delete token;
+
+	if (range && (range->flags & RangeType::RNG_CROSS_LEVELS)) {
+		token = o->gettoken();
+		if (token) {
+			z = token->value();
+			delete token;
+			if (z < 0 || z >= (Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL + 2)) {
+				unit->error("ANNIHILATE: Invalid Z coordinate specified.");
+				return;
+			}
+		}
+	}
+
+	if (!pCheck) {
+		AnnihilateOrder *order = new AnnihilateOrder;
+		order->xloc = x;
+		order->yloc = y;
+		order->zloc = z;
+		if (unit->annihilateorders) delete unit->annihilateorders;
+		unit->annihilateorders = order;
+	}
+}

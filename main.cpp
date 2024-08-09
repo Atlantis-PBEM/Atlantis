@@ -38,7 +38,7 @@ void usage()
 	Awrite("atlantis run");
 	Awrite("atlantis edit");
 	Awrite("");
-	Awrite("atlantis map <geo|wmon|lair|gate> <mapfile>");
+	Awrite("atlantis map <geo|wmon|lair|gate|hex> <mapfile>");
 	Awrite("atlantis mapunits");
 	Awrite("atlantis genrules <introfile> <cssfile> <rules-outputfile>");
 	Awrite("");

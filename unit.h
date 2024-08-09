@@ -165,7 +165,7 @@ class Unit : public AListElem
 		void ConsumeSharedMoney(int);
 		int IsAlive();
 
-		int MaintCost();
+		int MaintCost(ARegionList *regions, ARegion *current_region);
 		void Short(int, int);
 		int SkillLevels();
 		void SkillStarvation();
@@ -288,6 +288,8 @@ class Unit : public AListElem
 		Order *monthorders;
 		AttackOrder *attackorders;
 		EvictOrder *evictorders;
+		SacrificeOrder *sacrificeorders;
+		AnnihilateOrder *annihilateorders;
 		ARegion *advancefrom;
 
 		AList exchangeorders;
@@ -303,6 +305,9 @@ class Unit : public AListElem
 		// Used for tracking VISIT quests
 		set<string> visited;
 		int raised;
+
+		// Used for tracking movement for NO7 victory condition
+		ARegion *initial_region;
 };
 
 #endif

@@ -1461,6 +1461,17 @@ AString *ShowSkill::Report(Faction *f) const
 					"foodstuffs. A skilled cook can feed many more people "
 					"than a farmer alone.";
 			break;
+		case S_ANNIHILATION:
+			if (level > 1) break;
+			*str += "A unit with access to the Annihilation skill may destroy a region and all "
+				"surrounding regions.  Regions destroyed in this way will become barren.  All units "
+				"and structures in the region and the surrounding regions will be destroyed as will "
+				"production and cities.  This skill is only available to the unit which controls the "
+				"World-breaker Monolith.  To use this skill, the owner of the World-breaker Monolith "
+				"must issue the order ANNIHILATE REGION <x> <y> <z>.   If the z coordinate is not "
+				"specified, it will default to the same z coordinate as the region containing the "
+				"World-breaker Monolith.";
+			break;
 	}
 
 	AString temp;
