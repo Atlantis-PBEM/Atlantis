@@ -1654,7 +1654,7 @@ void Unit::AdjustSkills()
 	}
 }
 
-int Unit::MaintCost()
+int Unit::MaintCost(ARegionList *regions, ARegion *current_region)
 {
 	int retval = 0;
 	int i;
@@ -1686,6 +1686,30 @@ int Unit::MaintCost()
 	} else
 		i = nonleaders * Globals->MAINTENANCE_COST;
 	retval += i;
+
+	// Check for any items which require item specific maintenance and handling
+	forlist(&items) {
+		Item *it = (Item *) elem;
+		if (!(ItemDefs[it->type].flags & ItemType::MAINTENANCE)) continue;
+		int cost = ItemDefs[it->type].baseprice * it->num;
+		// Now, do a special check for NO7 victory work based on the flags.  Ideally the structure to seek
+		// would be a field on the item, but that would require a ton of changes to all hundreds of item defs.
+		if (ItemDefs[it->type].flags & ItemType::SEEK_ALTAR) {
+			// Find the nearest O_RITUAL_ALTAR from the start of turn location (initial_region)
+			int start_distance =  regions->FindDistanceToNearestObject(O_RITUAL_ALTAR, initial_region);
+			// Find the nearest O_RITUAL_ALTAR from the current location
+			int final_distance = regions->FindDistanceToNearestObject(O_RITUAL_ALTAR, current_region);
+			// compute the difference.
+			if (final_distance < start_distance) {
+				// If the final distance is less than the start distance, then we've moved closer, so halve the cost
+				cost /= 2;
+			} else if (final_distance > start_distance) {
+				// We have moved away, charge 5 times as much.
+				cost *= 5;
+			}
+		}
+		retval += cost;
+	}
 
 	return retval;
 }
@@ -2551,6 +2575,13 @@ void Unit::MoveUnit(Object *toobj)
 	object = toobj;
 	if (object) {
 		object->units.Add(this);
+		ObjectType& ob = ObjectDefs[object->type];
+		if (object->GetOwner() == this  && ob.flags & ObjectType::GRANTSKILL) {
+			if (faction->skills.GetDays(ob.granted_skill) < ob.granted_level) {
+				faction->shows.push_back({ .skill = ob.granted_skill, .level = ob.granted_level });
+				faction->skills.SetDays(ob.granted_skill, ob.granted_level);
+			}
+		}
 	}
 }
 

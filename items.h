@@ -107,6 +107,9 @@ class ItemType
 			MANPRODUCE = 0x40,
 			SKILLOUT_HALF = 0x80,
 			NOSTEALTH = 0x100, // this item makes the unit non-stealthy
+			MAINTENANCE = 0x200, // this item has a maintenance cost (it uses the items base cost)
+			SEEK_ALTAR = 0x400, // this item wants to move towards the nearest O_RITUAL_ALTAR (NO7 specific)
+			NO_SHAFT = 0x800, // the unit carrying this item transit a shaft
 		};
 		int flags;
 

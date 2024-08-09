@@ -792,6 +792,26 @@ AString *ItemDescription(int item, int full)
 		}
 	}
 
+	if (ItemDefs[item].flags & ItemType::NOSTEALTH) {
+		*temp += ". This item prevents the unit it is with from being stealthy";
+	}
+	if (ItemDefs[item].flags & ItemType::NO_SHAFT) {
+		*temp += ". This item prevents the unit it is with from entering a shaft";
+	}
+	if (ItemDefs[item].flags & ItemType::SEEK_ALTAR) {
+		*temp += ". This item desires to move toward the nearest Ritual Altar";
+	}
+	if (ItemDefs[item].flags & ItemType::MAINTENANCE) {
+		*temp += ". This item requires maintenance each turn of ";
+		*temp += ItemDefs[item].baseprice;
+		*temp += " silver";
+		if (ItemDefs[item].flags & ItemType::SEEK_ALTAR) {
+			*temp += ". Moving toward the altar will reduce the maintenance cost in half";
+			*temp += ". Moving away from the altar will multiply the maintenance cost 5 time";
+		}
+	}
+
+
 	if (Globals->ALLOW_WITHDRAW) {
 		if (ItemDefs[item].type & IT_NORMAL && item != I_SILVER) {
 			*temp += AString(", costs ") + (ItemDefs[item].baseprice*5/2) +

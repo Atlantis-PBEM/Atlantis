@@ -371,6 +371,16 @@ void TextReportGenerator::output_structure(ostream& f, const json& structure, bo
         if (structure.contains("runes")) f << ", engraved with Runes of Warding";
         if (structure.contains("description")) f << "; " << to_s(structure["description"]);
         if (structure.contains("closed")) f << ", closed to player units";
+        if (structure.contains("sacrifice")) {
+            int amount = structure["sacrifice"]["amount"];
+            f << ", requires sacrifice of " << structure["sacrifice"]["amount"] << " "
+              <<  plural(amount, structure["sacrifice"]["name"], structure["sacrifice"]["plural"]) << " ["
+              << structure["sacrifice"]["tag"] << "]";
+        }
+        if (structure.contains("grantskill")) {
+            f << ", grants owner " << to_s(structure["grantskill"]["name"]) << " ["
+              << to_s(structure["grantskill"]["tag"]) << "]" << " " << structure["grantskill"]["level"];
+        }
         f << ".\n";
     }
 	f << indent::incr;

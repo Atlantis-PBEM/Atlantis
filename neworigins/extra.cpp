@@ -1305,8 +1305,10 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_RITUAL_ALTAR);
 	EnableObject(O_EMPOWERED_ALTAR);
 	EnableObject(O_ENTITY_CAGE);
-	EnableObject(O_MONOLITH);
+	EnableObject(O_DORMANT_MONOLITH);
+	EnableObject(O_ACTIVE_MONOLITH);
 	EnableItem(I_IMPRISONED_ENTITY);
+	EnableSkill(S_ANNIHILATION);
 
 	// Weapon BM example
 
@@ -1321,5 +1323,28 @@ void Game::ModifyTablesPerRuleset(void)
 
 
 bool ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin) {
+	if (this->level->levelType == ARegionArray::LEVEL_SURFACE) {
+		ARegionArray *pRegs = this->level;
+		ARegion *center = pRegs->GetRegion(pRegs->x / 2, pRegs->y / 2);
+		if (center == this) {
+			// This is the center region.  You can only enter here if all the adjacent altars have been empowered.
+
+			int count = 0;
+			for (int i = 0; i < 6; i++) {
+				ARegion *r = center->neighbors[i];
+				// search that region for an altar
+				forlist(&r->objects) {
+					Object *o = (Object *)elem;
+					if (o->type == O_EMPOWERED_ALTAR) {
+						count++;
+					}
+				}
+			}
+			if (count < 6) {
+				u->error("MOVE: There is a mystical barrier preventing you moving that direction.");
+				return true; // not all empowered, cannot enter
+			}
+		}
+	}
 	return false;
 }

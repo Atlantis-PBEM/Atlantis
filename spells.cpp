@@ -1674,6 +1674,17 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 		return 0;
 	}
 
+	// Check for any keybarrier objects in the target region
+	forlist(&tar->objects) {
+		Object *o = (Object *) elem;
+		if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
+			if (u->items.GetNum(ObjectDefs[o->type].key_item) < 1) {
+				u->error("CAST: A mystical barrier prevents teleporting to that location.");
+				return 0;
+			}
+		}
+	}
+
 	// Presume they had to open the portal to see if target is ocean
 	if (TerrainDefs[tar->type].similar_type == R_OCEAN) {
 		u->error(string("CAST: ") + tar->Print(&regions).const_str() + " is an ocean.");
@@ -1902,6 +1913,17 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	}
 
 	if (!GetRegionInRange(r, tar->region, u, S_PORTAL_LORE)) return 0;
+
+	// Check for any keybarrier objects in the target region
+	forlist_reuse(&tar->region->objects) {
+		Object *o = (Object *) elem;
+		if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
+			if (u->items.GetNum(ObjectDefs[o->type].key_item) < 1) {
+				u->error("CAST: A mystical barrier prevents portalling to that location.");
+				return 0;
+			}
+		}
+	}
 
 	u->event("Casts Portal Jump.", "spell");
 

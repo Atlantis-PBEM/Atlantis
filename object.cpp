@@ -342,6 +342,19 @@ void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
 					container["needs_maintenance"] = true;
 				}
 			}
+			if (ob.flags & ObjectType::SACRIFICE && (incomplete < 0)) {
+				ItemType& def = ItemDefs[ob.sacrifice_item];
+				json item_obj = json{ { "name", def.name }, { "tag", def.abr }, { "plural", def.names } };
+				item_obj["amount"] = -incomplete;
+				container["sacrifice"] = item_obj;
+			}
+			if (ob.flags & ObjectType::GRANTSKILL) {
+				container["grantskill"] = {
+					{ "name", SkillDefs[ob.granted_skill].name },
+					{ "tag", SkillDefs[ob.granted_skill].abbr },
+					{ "level", ob.granted_level }
+				};
+			}
 		}
 	}
 
@@ -788,6 +801,21 @@ AString *ObjectDescription(int obj)
 		*temp += "This is a ship.";
 	} else {
 		*temp += "This is a building.";
+	}
+
+	if (o->flags & ObjectType::SACRIFICE) {
+		*temp += " This structure requires a sacrifice of ";
+		*temp += AString(o->sacrifice_amount) + " ";
+		*temp += plural(o->sacrifice_amount, ItemDefs[o->sacrifice_item].name, ItemDefs[o->sacrifice_item].names);
+		*temp += " [";
+		*temp += ItemDefs[o->sacrifice_item].abr;
+		*temp += "].";
+	}
+
+	if (o->flags & ObjectType::GRANTSKILL) {
+		*temp += " This structure grants the owner the skill " + SkillDefs[o->granted_skill].name + " [" +
+			SkillDefs[o->granted_skill].abbr + "] at a skill level of ";
+		*temp += AString(o->granted_level) + ".";
 	}
 
 	if (Globals->LAIR_MONSTERS_EXIST && (o->monster != -1)) {
