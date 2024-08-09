@@ -72,6 +72,8 @@ public:
     void collect_transported_goods();
     // connected distance
     int connected_distance(ARegion *reg1, ARegion *reg2, int penalty, int max);
+    // Run the maintenance phase
+    void maintain_units();
 
     // dummy
     int get_seed() { return getrandom(10000); };

@@ -300,6 +300,30 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			stop = 1;
 		}
 
+		// Check the new region for barriers and the fleet units for keys to the barriers
+		int needed_key = -1;
+		forlist_reuse(&newreg->objects) {
+			Object *o = (Object *) elem;
+			if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
+				needed_key = ObjectDefs[o->type].key_item;
+			}
+		}
+		if (needed_key != -1) { // we found a barrier
+			bool has_key = false;
+			forlist_reuse(&fleet->units) {
+				Unit *u = (Unit *) elem;
+				if (u->items.GetNum(needed_key) > 0) {
+					has_key = true;
+					break;
+				}
+			}
+			if (!has_key) {
+				cap->error("SAIL: Can't sail " + DirectionStrs[x->dir] + " from " +
+					reg->ShortPrint(&regions).const_str() + " due to mystical barrier.");
+				stop = 1;
+			}
+		}
+
 		if (!stop) {
 			fleet->movepoints -= cost * Globals->MAX_SPEED;
 			if (x->dir != MOVE_PAUSE) {

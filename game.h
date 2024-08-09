@@ -560,6 +560,7 @@ private:
 	AList *CanSeeSteal(ARegion *, Unit *);
 	void Do1Steal(ARegion *, Object *, Unit *);
 	void Do1Assassinate(ARegion *, Object *, Unit *);
+	void Do1Annihilate(ARegion *reg);
 	void AdjustCityMons(ARegion *pReg);
 	void AdjustCityMon(ARegion *pReg, Unit *u);
 

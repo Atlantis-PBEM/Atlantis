@@ -3729,12 +3729,12 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << anchor("annihilate") << '\n';
 		f << enclose("h4", true) << "ANNIHILATE REGION [x] [y] [z]\n" << enclose("h4", false);
 		f << enclose("p", true) << "Annihilate a region and the neighboring regions.  An annihilated region will be "
-		  << "converted into barren land, and all structures and units in the regions will be destroyed.  The "
-		  << "neighboring regions will also be annihilated.  The region to be annihilated must be specified by "
-		  << "coordinates.  If the Z coordinate is not specified, it is assumed to be on the same level as the "
-		  << "unit issuing the order. This order may only be issued by a unit which has access to the "
-		  << "ANNIHILATE [ANNI] skill. This skill cannot target regions which are already barren, nor can it "
-		  << "target the Nexus.\n";
+		  << "converted into barren land, and all units and all structures except for shafts and anomalies in the "
+		  << "regions will be destroyed.  The neighboring regions will also be annihilated.  The region to be "
+		  << "annihilated must be specified by coordinates.  If the Z coordinate is not specified, it is assumed "
+		  << "to be on the same level as the unit issuing the order. This order may only be issued by a unit which "
+		  << "has access to the ANNIHILATE [ANNI] skill. This skill cannot target or affect regions which are "
+		  << "already barren, nor can it target the Nexus.\n";
 		f << enclose("p", false);
 		f << enclose("p", true) << "Example:\n" << enclose("p", false);
 		f << example_start("Annihilate the region located at coordinates <5, 5> on the surface.")

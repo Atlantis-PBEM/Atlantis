@@ -3102,12 +3102,12 @@ void Game::CheckTransportOrders()
 					bool target_has_qm_skill = tar->unit->GetSkill(S_QUARTERMASTER) > 0;
 					bool sender_owns_qm_building = (
 						u == obj->GetOwner() &&
-						obj->incomplete == 0 &&
+						!(obj->incomplete > 0) &&
 						(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
 					);
 					bool target_owns_qm_building = (
 						tar->unit == tar->obj->GetOwner() &&
-						tar->obj->incomplete == 0 &&
+						!(tar->obj->incomplete > 0) &&
 						(ObjectDefs[tar->obj->type].flags & ObjectType::TRANSPORT)
 					);
 
@@ -3325,4 +3325,21 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 			}
 		}
 	}
+}
+
+void Game::RunSacrificeOrders() {
+	// Check all units for sacrifice orders.  Only allow a sacrifice if there is an object in the hex which accepts
+	// the item they are sacrificing.  If the sacrifice is successful, the item(s) are removed and the object is
+	// destroyed/transformed/provides a reward as appropriate.
+}
+
+void Game::Do1Annihilate(ARegion *reg) {
+	// converts the type of the region to a barren type (either wasteland or barren ocean).   When a region is 
+	// annihilated all units, and any city/markets/production in the region are destroyed. Shafts and anomalies are
+	// unaffected.
+}
+
+void Game::RunAnnihilateOrders() {
+	// Check all units for annihilate orders.  A unit my only annihilate if they have access to the annihilate skill.
+	// Annihilate will destroy the target hex and all surrounding hexes.  Barren regions cannot be annihilated.
 }

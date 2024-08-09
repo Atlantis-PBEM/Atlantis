@@ -1289,6 +1289,13 @@ void Game::WriteReport()
 				&& (Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS > 1);
 			fac->build_json_report(json_report, this, citems);
 
+			if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_JSON) {
+				ofstream jsonf(report_file + ".json", ios::out | ios::ate);
+				if (jsonf.is_open()) {
+					jsonf << json_report.dump(2);
+				}
+			}
+
 			if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_TEXT) {
 				TextReportGenerator text_report;
 				ofstream f(report_file, ios::out | ios::ate);
@@ -1301,13 +1308,6 @@ void Game::WriteReport()
 					if (f.is_open()) {
 						text_report.output_template(f, json_report, fac->temformat, show_region_depth);
 					}
-				}
-			}
-
-			if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_JSON) {
-				ofstream jsonf(report_file + ".json", ios::out | ios::ate);
-				if (jsonf.is_open()) {
-					jsonf << json_report.dump(2);
 				}
 			}
 		}
