@@ -149,5 +149,146 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     json event = events[0];
     expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to mountain (1,1) in Testing Wilds.");
     expect(event["unit"]["number"] == 2_i);
-  };                                                                                                                                                                                                                                                                 
+  };
+
+"Unit with entity gets 'standard' entity maintainence with no movement"_test = []
+  {
+    UnitTestHelper helper;
+    helper.enable(UnitTestHelper::Type::ITEM, I_IMPRISONED_ENTITY, true);
+    helper.enable(UnitTestHelper::Type::OBJECT, O_RITUAL_ALTAR, true);
+    helper.initialize_game();
+    helper.setup_turn();
+
+    string name("Test Faction");
+    Faction *faction = helper.create_faction(name);
+    // Since this is such a tightly defined world, we know this is legal
+    ARegion *region = helper.get_region(1, 1, 0);
+    Unit *leader = helper.get_first_unit(faction);
+    AString *tmp_name = new AString("My Leader");
+    leader->SetName(tmp_name);
+    leader->items.SetNum(I_IMPRISONED_ENTITY, 1);
+
+    helper.create_building(region, nullptr, O_RITUAL_ALTAR);
+
+    helper.maintain_units();
+
+    expect(faction->errors.size() == 0_ul);
+    expect(faction->events.size() == 1_ul);
+
+    helper.setup_reports();
+
+    // Generate just this single factions json object.
+    Game &game = helper.game_object();
+    json json_report;
+    faction->build_json_report(json_report, &game, nullptr);
+
+    // Expect that we get a maintenance event in the report.
+    json events = json_report["events"];
+    expect(events.size() == 1_ul);
+    json event = events[0];
+    expect(event["message"] == "Claims 1020 silver for maintenance."); // 20 for leader, 1000 for entity
+    expect(event["unit"]["number"] == 2_i);
+  };
+
+  "Unit with entity gets 'less' entity maintainence with moving toward altar"_test = []
+  {
+    UnitTestHelper helper;
+    helper.enable(UnitTestHelper::Type::ITEM, I_IMPRISONED_ENTITY, true);
+    helper.enable(UnitTestHelper::Type::OBJECT, O_RITUAL_ALTAR, true);
+    helper.initialize_game();
+    helper.setup_turn();
+
+    string name("Test Faction");
+    Faction *faction = helper.create_faction(name);
+    // Since this is such a tightly defined world, we know this is legal
+    ARegion *region = helper.get_region(1, 1, 0);
+    Unit *leader = helper.get_first_unit(faction);
+    AString *tmp_name = new AString("My Leader");
+    leader->SetName(tmp_name);
+    leader->items.SetNum(I_IMPRISONED_ENTITY, 1);
+
+    helper.create_building(region, nullptr, O_RITUAL_ALTAR);
+
+    // Try to move the unit into the region with the ritual altar.
+    stringstream ss;
+    ss << "#atlantis 3\n";
+    ss << "unit 2\n";
+    ss << "move SE\n";
+    helper.parse_orders(faction->num, ss);
+    helper.move_units();
+
+    helper.maintain_units();
+
+    expect(faction->errors.size() == 0_ul);
+    expect(faction->events.size() == 2_ul);
+
+    helper.setup_reports();
+
+    // Generate just this single factions json object.
+    Game &game = helper.game_object();
+    json json_report;
+    faction->build_json_report(json_report, &game, nullptr);
+
+    // Expect that we get a maintenance event in the report.
+    json events = json_report["events"];
+    expect(events.size() == 2_ul);
+    json event = events[0];
+    expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to mountain (1,1) in Testing Wilds.");
+    expect(event["unit"]["number"] == 2_i);
+
+    event = events[1];
+    expect(event["message"] == "Claims 520 silver for maintenance."); // 20 for leader, 500 for entity
+    expect(event["unit"]["number"] == 2_i);
+  };
+
+  "Unit with entity gets 'more' entity maintainence with moving away from altar"_test = []
+  {
+    UnitTestHelper helper;
+    helper.enable(UnitTestHelper::Type::ITEM, I_IMPRISONED_ENTITY, true);
+    helper.enable(UnitTestHelper::Type::OBJECT, O_RITUAL_ALTAR, true);
+    helper.initialize_game();
+    helper.setup_turn();
+
+    string name("Test Faction");
+    Faction *faction = helper.create_faction(name);
+    // Since this is such a tightly defined world, we know this is legal
+    ARegion *region = helper.get_region(0, 0, 0);
+    Unit *leader = helper.get_first_unit(faction);
+    AString *tmp_name = new AString("My Leader");
+    leader->SetName(tmp_name);
+    leader->items.SetNum(I_IMPRISONED_ENTITY, 1);
+
+    helper.create_building(region, nullptr, O_RITUAL_ALTAR);
+
+    // Try to move the unit into the region with the ritual altar.
+    stringstream ss;
+    ss << "#atlantis 3\n";
+    ss << "unit 2\n";
+    ss << "move SE\n";
+    helper.parse_orders(faction->num, ss);
+    helper.move_units();
+
+    helper.maintain_units();
+
+    expect(faction->errors.size() == 0_ul);
+    expect(faction->events.size() == 2_ul);
+
+    helper.setup_reports();
+
+    // Generate just this single factions json object.
+    Game &game = helper.game_object();
+    json json_report;
+    faction->build_json_report(json_report, &game, nullptr);
+
+    // Expect that we get a maintenance event in the report.
+    json events = json_report["events"];
+    expect(events.size() == 2_ul);
+    json event = events[0];
+    expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to mountain (1,1) in Testing Wilds.");
+    expect(event["unit"]["number"] == 2_i);
+
+    event = events[1];
+    expect(event["message"] == "Claims 5020 silver for maintenance."); // 20 for leader, 5000 for entity
+    expect(event["unit"]["number"] == 2_i);
+  };
 };

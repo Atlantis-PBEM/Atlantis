@@ -20,6 +20,7 @@ private:
     void output_item_list(std::ostream& f, const json& item_list, string header);
     void output_items(std::ostream& f, const json& item_list, bool assume_singular = false, bool show_single_amt = false);
     void output_item(std::ostream& f, const json& item, bool assume_singular = false, bool show_single_amt = false);
+    void output_ships(std::ostream& f, const json& ships);
     void output_structure(std::ostream& f, const json& structure, bool show_unit_attitudes);
     void output_unit(std::ostream& f, const json& unit, bool show_unit_attitudes);
     void output_unit_summary(std::ostream& f, const json& unit, bool show_faction = true);

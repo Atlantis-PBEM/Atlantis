@@ -143,3 +143,7 @@ void UnitTestHelper::enable(Type type, int id, bool enable) {
             break;
     }
 }
+
+void UnitTestHelper::maintain_units() {
+    game.AssessMaintenance();
+}

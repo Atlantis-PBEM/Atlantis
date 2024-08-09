@@ -521,6 +521,9 @@ void Game::CreateWorld()
 
 	regions.FinalSetupGates();
 
+	// do final modifications to add in the victory objects (the ritual altars and the deactivated monolith)
+	
+
 	regions.CalcDensities();
 	
 	regions.TownStatistics();

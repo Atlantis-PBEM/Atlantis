@@ -164,11 +164,15 @@ void TextReportGenerator::output_item(ostream& f, const json& item, bool assume_
     } else {
         int amount = item.value("amount", 0);
         if ((amount > 1) || (show_single_amt && (amount == 1))) f << amount << " ";
-        if (item.contains("unfinished")) f << "unfinished ";
+        if (item.contains("unfinished")) {
+            f << "unfinished ";
+            // If we are dealing with an unfinished item, we always display the singular name.
+            assume_singular = true;
+        }
         if (assume_singular) {
             f << to_s(item["name"]);
         } else {
-            f << plural(item["amount"], item["name"], item["plural"]);
+            f << plural(amount, item["name"], item["plural"]);
         }
     }
 
@@ -196,6 +200,19 @@ void TextReportGenerator::output_item_list(ostream& f, const json& item_list, st
     }
     output_items(f, item_list);
     f << ".\n";
+}
+
+void TextReportGenerator::output_ships(ostream& f, const json& ships) {
+    if (ships.empty()) return;
+    int count = ships.size();
+    bool comma = false;
+    for (const auto& ship : ships) {
+        if (comma) f << ", ";
+        int number = ship["number"];
+        if (count > 1 || number > 1) f << number << " ";
+        f << plural(number, ship["name"], ship["plural"]);
+        comma = true;
+    }
 }
 
 void TextReportGenerator::output_error(ostream& f, const json& error) {
@@ -237,7 +254,7 @@ void TextReportGenerator::output_unit_summary(ostream& f, const json& unit, bool
     if (unit["flags"].contains("no_cross_water") && unit["flags"]["no_cross_water"]) f << ", won't cross water";
     // All spoils is the default, so we don't need to output it.
     if (unit["flags"].contains("spoils") && unit["flags"]["spoils"] != "all") {
-        f << ", " << unit["flags"]["spoils"] << " battle spoils";
+        f << ", " << to_s(unit["flags"]["spoils"]) << " battle spoils";
     }
 
     f << ", ";
@@ -339,18 +356,15 @@ void TextReportGenerator::output_structure(ostream& f, const json& structure, bo
     if (structure.contains("ships")) {
         // Fleets are wierd. If you have a fleet of a single ship, the structure type is just the ships item name.
         // If you have a fleet of ships, then the structure name if the name of the fleet type, and the ships are listed.
-        if (structure["ships"].size() == 1) {
-            output_item(f, structure["ships"][0], false, false);
-        } else {
-            f << to_s(structure["type"]) << ", ";
-            output_items(f, structure["ships"], false, true);
-        }
-        if (structure.contains("damage_percent")) f << "; " << structure["damage_percent"] << "% damaged; ";
+        if (structure["ships"].size() > 1) f << to_s(structure["type"]) << ", ";
+        output_ships(f, structure["ships"]);
+
+        if (structure.contains("damage_percent")) f << "; " << structure["damage_percent"] << "% damaged";
         if (structure.contains("load"))
-            f << "; " << "Load: " << structure["load"] << "/" << structure["capacity"] << "; ";
+            f << "; " << "Load: " << structure["load"] << "/" << structure["capacity"];
         if (structure.contains("sailors"))
-            f << "; " << "Sailors: " << structure["sailors"] << "/" << structure["fleet_size"] << "; ";
-        if (structure.contains("max_speed")) f << "; " << "MaxSpeed: " << structure["max_speed"] << "; ";
+            f << "; " << "Sailors: " << structure["sailors"] << "/" << structure["fleet_size"];
+        if (structure.contains("max_speed")) f << "; " << "MaxSpeed: " << structure["max_speed"];
         if (structure.contains("sail_directions")) {
             f << "; " << "Sail directions: ";
             bool comma = false;

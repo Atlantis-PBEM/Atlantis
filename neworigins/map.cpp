@@ -1875,6 +1875,20 @@ void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char co
 
 	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
+
+	// Put the altars in the ring around the center
+	ARegion *center = pRegionArrays[level]->GetRegion(xSize/2, ySize/2);
+	for (int i = 0; i < NDIRS; i++) {
+		ARegion *n = center->neighbors[i];
+		if (n) {
+			Object *o = new Object(n);
+			o->num = n->buildingseq++;
+			string altar_name = string(ObjectDefs[O_RITUAL_ALTAR].name) + " [" + to_string(o->num) + "]";
+			o->name = new AString(altar_name);
+			o->type = O_RITUAL_ALTAR;
+			n->objects.Add(o);
+		}
+	}
 	FinalSetup(pRegionArrays[level]);
 }
 
@@ -1926,13 +1940,21 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 	o->inner = center->num;
 	reg->objects.Add(o);
 
-	o = new Object(reg);
+	o = new Object(center);
 	o->num = center->buildingseq++;
 	o->name = new AString(AString("Shaft [") + o->num + "]");
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = reg->num;
 	center->objects.Add(o);
+
+	// Put the monolith in the underworld center
+	o = new Object(reg);
+	o->num = reg->buildingseq++;
+	string monolith_name = string(ObjectDefs[O_DORMANT_MONOLITH].name) + " [" + to_string(o->num) + "]";
+	o->name = new AString(monolith_name);
+	o->type = O_DORMANT_MONOLITH;
+	reg->objects.Add(o);
 
 	FinalSetup(pRegionArrays[level]);
 
