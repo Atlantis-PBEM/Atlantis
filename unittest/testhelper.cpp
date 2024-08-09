@@ -73,7 +73,7 @@ void UnitTestHelper::create_building(ARegion *region, Unit *owner, int building_
     obj->num = region->buildingseq++;
     obj->SetName(new AString("Building"));
     region->objects.Add(obj);
-    owner->MoveUnit(obj);
+    if (owner) owner->MoveUnit(obj);
 }
 
 ARegion *UnitTestHelper::get_region(int x, int y, int z) {
@@ -97,6 +97,10 @@ void UnitTestHelper::check_transport_orders() {
     game.CheckTransportOrders();
 }
 
+void UnitTestHelper::move_units() {
+    game.RunMovementOrders();
+}
+
 void UnitTestHelper::transport_phase(TransportOrder::TransportPhase phase) {
     game.RunTransportPhase(phase);
 }
@@ -115,6 +119,27 @@ void UnitTestHelper::activate_spell(int spell, SpellTestHelper helper) {
         case S_CREATE_PHANTASMAL_BEASTS:
             game.RunPhanBeasts(helper.region, helper.unit);
             break;
+        case S_TELEPORTATION:
+            game.RunTeleport(helper.region, helper.object, helper.unit);
+            break;
     }
 }
 
+void UnitTestHelper::enable(Type type, int id, bool enable) {
+    switch(type) {
+        case SKILL:
+            if (enable) game.EnableSkill(id);
+            else game.DisableSkill(id);
+            break;
+        case ITEM:
+            if (enable) game.EnableItem(id);
+            else game.DisableItem(id);
+            break;
+        case OBJECT:
+            if (enable) game.EnableObject(id);
+            else game.DisableObject(id);
+            break;
+        default:
+            break;
+    }
+}

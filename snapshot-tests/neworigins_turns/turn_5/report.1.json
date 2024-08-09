@@ -851,7 +851,7 @@
       "tag": "DEVL"
     },
     {
-      "description": "imprisoned entity [IENT], weight 3000, can walk, can ride, moves 2 hexes per month. This item cannot be given to other units.",
+      "description": "imprisoned entity [IENT], weight 3000, can walk, can ride, moves 2 hexes per month. This item prevents the unit it is with from being stealthy. This item prevents the unit it is with from entering a shaft. This item desires to move toward the nearest Ritual Altar. This item requires maintenance each turn of 1000 silver. Moving toward the altar will reduce the maintenance cost in half. Moving away from the altar will multiply the maintenance cost 5 time. This item cannot be given to other units.",
       "name": "imprisoned entity",
       "tag": "IENT"
     }
@@ -1078,7 +1078,7 @@
       "name": "Gateway"
     },
     {
-      "description": "This is a building. This structure cannot be built by players.",
+      "description": "This is a building. This structure requires a sacrifice of 1 imprisoned entity [IENT]. This structure cannot be built by players.",
       "name": "Ritual Altar"
     },
     {
@@ -1086,12 +1086,16 @@
       "name": "Empowered Altar"
     },
     {
-      "description": "This is a building. This structure cannot be built by players.",
+      "description": "This is a building. This structure requires a sacrifice of 10 leaders [LEAD]. This structure cannot be built by players.",
       "name": "Mystical Anomaly"
     },
     {
-      "description": "This is a building. This structure cannot be built by players.",
-      "name": "Blood-soaked Monolith"
+      "description": "This is a building. This structure requires a sacrifice of 50 leaders [LEAD]. This structure cannot be built by players.",
+      "name": "Dormant Monolith"
+    },
+    {
+      "description": "This is a building. This structure grants the owner the skill annihilation [ANNI] at a skill level of 1. Units may enter this structure. This structure cannot be built by players.",
+      "name": "World-breaker Monolith"
     }
   ],
   "regions": [
@@ -26249,6 +26253,36 @@
       "level": 5,
       "name": "transmutation",
       "tag": "TRNS"
+    },
+    {
+      "description": "A unit with access to the Annihilation skill may destroy a region and all surrounding regions.  Regions destroyed in this way will become barren.  All units and structures in the region and the surrounding regions will be destroyed as will production and cities.  This skill is only available to the unit which controls the World-breaker Monolith.  To use this skill, the owner of the World-breaker Monolith must issue the order ANNIHILATE REGION <x> <y> <z>.   If the z coordinate is not specified, it will default to the same z coordinate as the region containing the World-breaker Monolith. This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 1,
+      "name": "annihilation",
+      "tag": "ANNI"
+    },
+    {
+      "description": "This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 2,
+      "name": "annihilation",
+      "tag": "ANNI"
+    },
+    {
+      "description": "This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 3,
+      "name": "annihilation",
+      "tag": "ANNI"
+    },
+    {
+      "description": "This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 4,
+      "name": "annihilation",
+      "tag": "ANNI"
+    },
+    {
+      "description": "This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "level": 5,
+      "name": "annihilation",
+      "tag": "ANNI"
     }
   ]
 }

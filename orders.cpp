@@ -30,6 +30,7 @@ char const *od[] = {
 	"unit",
 	"address",
 	"advance",
+	"annihilate",
 	"armor",
 	"assassinate",
 	"attack",
@@ -76,6 +77,7 @@ char const *od[] = {
 	"quit",
 	"restart",
 	"reveal",
+	"sacrifice",
 	"sail",
 	"sell",
 	"share",
@@ -375,3 +377,20 @@ JoinOrder::~JoinOrder()
 	if (target) delete target;
 }
 
+AnnihilateOrder::AnnihilateOrder()
+{
+	type = O_ANNIHILATE;
+}
+
+AnnihilateOrder::~AnnihilateOrder()
+{
+}
+
+SacrificeOrder::SacrificeOrder()
+{
+	type = O_SACRIFICE;
+}
+
+SacrificeOrder::~SacrificeOrder()
+{
+}

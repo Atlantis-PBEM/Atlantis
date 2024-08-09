@@ -78,6 +78,16 @@ void Game::RunOrders()
 		Awrite("Running WITHDRAW Orders...");
 		DoWithdrawOrders();
 	}
+
+	// Make sure we have a sacrifice enabled object before we run the orders
+	for (auto ob = 0; ob < NOBJECTS; ob++) {
+		ObjectType& obj = ObjectDefs[ob];
+		if (obj.flags & ObjectType::DISABLED) continue;
+		if (!(obj.flags & ObjectType::SACRIFICE)) continue;
+		Awrite("Running SACRIFICE Orders...");
+		//RunSacrificeOrders();
+		break;
+	}
 /*
 	Awrite("Running Sail Orders...");
 	RunSailOrders();
@@ -103,6 +113,12 @@ void Game::RunOrders()
 		CheckTransportOrders();
 		RunTransportOrders();
 	}
+
+	if (!(SkillDefs[S_ANNIHILATION].flags & SkillType::DISABLED)) {
+		Awrite("Running Annihilation Orders...");
+		//RunAnnihilateOrders();
+	}
+
 	Awrite("Assessing Maintenance costs...");
 	AssessMaintenance();
 	if (Globals->DYNAMIC_POPULATION) {
@@ -942,6 +958,13 @@ void Game::Do1PromoteOrder(Object *obj, Unit *u)
 	}
 	obj->units.Remove(tar);
 	obj->units.Insert(tar);
+	ObjectType& ob = ObjectDefs[obj->type];
+	if (ob.flags & ObjectType::GRANTSKILL) {
+		if (tar->faction->skills.GetDays(ob.granted_skill) < ob.granted_level) {
+			tar->faction->shows.push_back({ .skill = ob.granted_skill, .level = ob.granted_level });
+			tar->faction->skills.SetDays(ob.granted_skill, ob.granted_level);
+		}
+	}
 }
 
 void Game::Do1EvictOrder(Object *obj, Unit *u)
@@ -2005,7 +2028,7 @@ void Game::AssessMaintenance()
 						u->event("You have completed a pilgrimage!" + quest_rewards, "quest");
 					}
 				}
-				u->needed = u->MaintCost();
+				u->needed = u->MaintCost(&this->regions, r);
 				u->hunger = u->GetMen() * Globals->UPKEEP_MINIMUM_FOOD;
 				if (Globals->UPKEEP_MAXIMUM_FOOD < 0)
 					u->stomach_space = -1;

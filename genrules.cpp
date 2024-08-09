@@ -374,6 +374,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	bool move_over_water = (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE);
 	bool has_stea = !(SkillDefs[S_STEALTH].flags & SkillType::DISABLED);
 	bool has_obse = !(SkillDefs[S_OBSERVATION].flags & SkillType::DISABLED);
+	bool has_annihilate = !(SkillDefs[S_ANNIHILATION].flags & SkillType::DISABLED);
 
 	bool app_exist = (Globals->APPRENTICES_EXIST);
 	bool qm_exist = (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT);
@@ -383,18 +384,22 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		if (SkillDefs[S_QUARTERMASTER].flags & SkillType::DISABLED)
 			qm_exist = false;
 	}
-	if (qm_exist) {
-		found = false;
-		/* Make there is an enabled building with transport set */
-		for (int i = 0; i < NOBJECTS; i++) {
-			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
-			if (ObjectDefs[i].flags & ObjectType::TRANSPORT) {
-				found = true;
-				break;
-			}
+	bool found_qm_building = false;
+	bool has_sacrifice = false;
+
+	for (int i = 0; i < NOBJECTS; i++) {
+		if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+		// for QM we need at least one building with the TRANSPORT flag
+		if (ObjectDefs[i].flags & ObjectType::TRANSPORT) {
+			found_qm_building = true;
 		}
-		qm_exist = found;
+		// for SACRIFICE we need at least one building with the SACRIFICE flag
+		if (ObjectDefs[i].flags & ObjectType::SACRIFICE) {
+			has_sacrifice = true;
+		}
 	}
+	if (qm_exist && !found_qm_building) qm_exist = false;
+
 	if (app_exist) {
 		found = false;
 		/* Make sure we have a skill with the APPRENTICE flag */
@@ -593,6 +598,8 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("ul", true);
 	f << enclose("li", true) << url("#address", "address") << '\n' << enclose("li", false);
 	f << enclose("li", true) << url("#advance", "advance") << '\n' << enclose("li", false);
+	if (has_annihilate)
+		f << enclose("li", true) << url("#annihilate", "annihilate") << '\n' << enclose("li", false);
 	if (Globals->USE_WEAPON_ARMOR_COMMAND)
 		f << enclose("li", true) << url("#armor", "armor") << '\n' << enclose("li", false);
 	if (has_stea)
@@ -644,6 +651,8 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("li", true) << url("#quit", "quit") << '\n' << enclose("li", false);
 	f << enclose("li", true) << url("#restart", "restart") << '\n' << enclose("li", false);
 	f << enclose("li", true) << url("#reveal", "reveal") << '\n' << enclose("li", false);
+	if (has_sacrifice)
+		f << enclose("li", true) << url("#sacrifice", "sacrifice") << '\n' << enclose("li", false);
 	if (may_sail)
 		f << enclose("li", true) << url("#sail", "sail") << '\n' << enclose("li", false);
 	if (Globals->TOWNS_EXIST)
@@ -3715,6 +3724,24 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "ADVANCE N 1 IN SE\n"
 	  << example_end();
 
+	if (has_annihilate) {
+		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
+		f << anchor("annihilate") << '\n';
+		f << enclose("h4", true) << "ANNIHILATE REGION [x] [y] [z]\n" << enclose("h4", false);
+		f << enclose("p", true) << "Annihilate a region and the neighboring regions.  An annihilated region will be "
+		  << "converted into barren land, and all structures and units in the regions will be destroyed.  The "
+		  << "neighboring regions will also be annihilated.  The region to be annihilated must be specified by "
+		  << "coordinates.  If the Z coordinate is not specified, it is assumed to be on the same level as the "
+		  << "unit issuing the order. This order may only be issued by a unit which has access to the "
+		  << "ANNIHILATE [ANNI] skill. This skill cannot target regions which are already barren, nor can it "
+		  << "target the Nexus.\n";
+		f << enclose("p", false);
+		f << enclose("p", true) << "Example:\n" << enclose("p", false);
+		f << example_start("Annihilate the region located at coordinates <5, 5> on the surface.")
+		  << "ANNIHILATE REGION 5 5 1\n"
+		  << example_end();
+	}
+
 	if (Globals->USE_WEAPON_ARMOR_COMMAND) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << anchor("armor") << '\n';
@@ -4607,6 +4634,20 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "REVEAL\n"
 	  << example_end();
 
+	if (has_sacrifice) {
+		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
+		f << anchor("sacrifice") << '\n';
+		f << enclose("h4", true) << "SACRIFICE [quantity] [item]\n" << enclose("h4", false);
+		f << enclose("p", true) << "Sacrifice the given quantity of the given item.   A sacrifice will only succeed "
+		  << "if there is a structure in the same region as the unit which can accept the sacrifice.  Attempting to "
+		  << "sacrifice when it's not valid will have no effect.\n";
+		f << enclose("p", false);
+		f << enclose("p", true) << "Example:\n" << enclose("p", false);
+		f << example_start("Sacrifice 15 Jewelry.")
+		  << "SACRIFICE 15 JEWE\n"
+		  << example_end();
+	}
+
 	if (may_sail) {
 		f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 		f << anchor("sail") << '\n';
@@ -5028,6 +5069,10 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 	f << enclose("ul", false);
 	f << enclose("li", false);
+	if (has_sacrifice) {
+		f << enclose("li", true) << url("#sacrifice", "SACRIFICE") << " orders are processed.\n"
+		  << enclose("li", false);
+	}
 	f << enclose("li", true) << "Movement orders.\n";
 	f << enclose("ul", true);
 	f << enclose("li", true) << url("#advance", "ADVANCE") << (may_sail ? ", " : " and ") << url("#move", "MOVE")
@@ -5069,6 +5114,10 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "non-quartermaster units.\n" << enclose("li", false);
 		f << enclose("ol", false);
 		f << enclose("li", false);
+	}
+	if (has_annihilate) {
+		f << enclose("li", true) << url("#annihilate", "ANNIHILATE") << " orders are processed.\n"
+		  << enclose("li", false);
 	}
 	f << enclose("li", true) << "Maintenance costs are assessed.\n" << enclose("li", false);
 	f << enclose("OL", false);

@@ -50,7 +50,9 @@ class ObjectType {
 			CANMODIFY	= 0x020,
 			TRANSPORT	= 0x040,
 			GROUP		= 0x080,
-			KEYBARRIER  = 0x100,  // Prevents entry to region except to unit with key
+			KEYBARRIER	= 0x100,  // Prevents entry to region except to unit with key
+			SACRIFICE	= 0x200,  // This object requires the sacrifice command
+			GRANTSKILL	= 0x400,  // This object grants a skill to the owner
 		};
 		int flags;
 
@@ -59,10 +61,16 @@ class ObjectType {
 		int sailors;
 		int maxMages;
 
-		int item;  // item to construct object OR key item for KEYBARRIER objects
+		int item;
 		int cost;
 		char const *skill;
 		int level;
+
+		int key_item; // item needed to enter region containing this object if it's a key barrier
+		int sacrifice_item; // item needed to sacrice to this object if it's a sacrifice object
+		int sacrifice_amount; // amount of item needed to sacrifice to this object if it's a sacrifice object
+		int granted_skill; // skill granted by this object to the owner
+		int granted_level; // level of skill granted by this object to the owner
 
 		int maxMaintenance;
 		int maxMonthlyDecay;

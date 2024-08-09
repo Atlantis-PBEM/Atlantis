@@ -85,6 +85,7 @@ class SkillType
 			NOSTUDY=0x1000,
 			NOTEACH=0x2000,
 			NOEXP=0x4000,
+			GRANTED=0x8000,
 		};
 		int flags;
 
