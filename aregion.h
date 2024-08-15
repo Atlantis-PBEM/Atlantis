@@ -299,7 +299,7 @@ class ARegion : public AListElem
 		int Population();
 
 		// ruleset specific movment checks
-		bool movement_forbidden_by_ruleset(Unit *unit, ARegion *origin);
+		const char *movement_forbidden_by_ruleset(Unit *unit, ARegion *origin, ARegionList *regions);
 
 		AString *name;
 		int num;

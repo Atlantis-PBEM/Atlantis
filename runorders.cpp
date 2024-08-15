@@ -3331,15 +3331,115 @@ void Game::RunSacrificeOrders() {
 	// Check all units for sacrifice orders.  Only allow a sacrifice if there is an object in the hex which accepts
 	// the item they are sacrificing.  If the sacrifice is successful, the item(s) are removed and the object is
 	// destroyed/transformed/provides a reward as appropriate.
+	forlist((&regions)) {
+		ARegion *r = (ARegion *) elem;
+		std::vector<Object *> destroyed_objects;
+		forlist((&r->objects)) {
+			Object *obj = (Object *) elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *) elem;
+				SacrificeOrder *o = u->sacrificeorders;
+				if (o == nullptr) continue;
+
+				bool succeeded = false;
+
+				// Okay, this unit has a sacrifice order
+				// check all objects in this region to see if any of them accept this sacfrifice
+				forlist((&r->objects)) {
+					Object *sacrifice_object = (Object *) elem;
+					ObjectType sacrifice_type = ObjectDefs[sacrifice_object->type];
+					if (!(sacrifice_type.flags & ObjectType::SACRIFICE)) continue;
+					if (sacrifice_type.sacrifice_item != o->item) continue;
+					if (sacrifice_object->incomplete >= 0) continue;
+
+					// Make sure any sacrifice rewards are valid -- there must be at least one of an item or replaced
+					// object reward.
+					int reward_item = sacrifice_type.sacrifice_effect.granted_item;
+					int reward_amt = sacrifice_type.sacrifice_effect.granted_amount;
+					int reward_obj = sacrifice_type.sacrifice_effect.replace_object;
+					bool destroy = sacrifice_type.sacrifice_effect.destroyed;
+
+					// cannot reward a disabled item
+					if (reward_item != -1 && (ItemDefs[reward_item].flags & ItemType::DISABLED)) continue;
+					// Must reward at least 1 of an item if it rewards an item.
+					if (reward_item != -1 && reward_amt == 0) continue;
+					// Cannot be replaced by a disabled object.
+					if (reward_obj != -1 && (ObjectDefs[reward_obj].flags & ObjectType::DISABLED)) continue;
+
+					// Ok this sacrifice will be valid
+					succeeded = true;
+
+					// Okay we have a valid sacrifice.  Do it.
+					int required = -sacrifice_object->incomplete;
+					int used = min(required, o->amount);
+					sacrifice_object->incomplete += used;
+					u->items.SetNum(o->item, u->items.GetNum(o->item) - used);
+					u->event("Sacrifices " + ItemString(o->item, used) + ".", "sacrifice");
+					// sacrifice objects store the remaining needed sacrifices as negative numbers in incomplete
+					if (sacrifice_object->incomplete >= 0) {
+						// was the reward an item
+						if (reward_item != -1) {
+							bool done = false;
+							forlist((&r->objects)) {
+								Object *ob = (Object *)elem;
+								forlist((&ob->units)) {
+									Unit *recip = (Unit *)elem;
+									if (u->faction == recip->faction && u->GetMen() != 0) {
+										done = true;
+										recip->items.SetNum(reward_item, recip->items.GetNum(reward_item) + reward_amt);
+										recip->event("Gains " + ItemString(reward_item, reward_amt) +
+											" from sacrifice.", "sacrifice");
+
+										// close out the quest?
+										break;
+									}
+								}
+								// if we already found a reward target stop looking.
+								if (done) break;
+							}
+						}
+
+						if (reward_obj != -1 ) {
+							sacrifice_object->type = reward_obj;
+							string name = string(ObjectDefs[reward_obj].name) + " [" + to_string(sacrifice_object->num) + "]";
+							sacrifice_object->name = new AString(name);
+							// Notify all factions in region and show the object
+						}
+						if (destroy) {
+							// mark the object for destruction
+							destroyed_objects.push_back(sacrifice_object);
+						}
+					}
+				}
+
+				// If we didn't succeed, log the error
+				if (!succeeded) {
+					u->error("SACRIFICE: Unable to sacrifice " + ItemString(o->item, o->amount));
+				}
+			}
+		}
+
+		// destroy any pending objects in this region.
+		for (auto obj: destroyed_objects) {
+			forlist((&obj->units)) {
+				Unit *u = (Unit *)elem;
+				// ideally these objects should be empty, but, just in case.
+				u->MoveUnit(r->GetDummy());
+				u->event("Moved out of a sacrificed structure.", "sacrifice");
+			}
+			r->objects.Remove(obj);
+			// Notify all factions in region that the object is destroyed
+		}
+	}
 }
 
 void Game::Do1Annihilate(ARegion *reg) {
-	// converts the type of the region to a barren type (either wasteland or barren ocean).   When a region is 
+	// converts the type of the region to a barren type (either barrens or barren ocean).   When a region is
 	// annihilated all units, and any city/markets/production in the region are destroyed. Shafts and anomalies are
 	// unaffected.
 }
 
 void Game::RunAnnihilateOrders() {
 	// Check all units for annihilate orders.  A unit my only annihilate if they have access to the annihilate skill.
-	// Annihilate will destroy the target hex and all surrounding hexes.  Barren regions cannot be annihilated.
+	// Annihilate will destroy the target hex and all surrounding hexes.  Barren regions cannot be annihilated again.
 }

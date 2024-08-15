@@ -1886,6 +1886,7 @@ void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char co
 			string altar_name = string(ObjectDefs[O_RITUAL_ALTAR].name) + " [" + to_string(o->num) + "]";
 			o->name = new AString(altar_name);
 			o->type = O_RITUAL_ALTAR;
+			o->incomplete = -(ObjectDefs[O_RITUAL_ALTAR].sacrifice_amount);
 			n->objects.Add(o);
 		}
 	}
@@ -1954,6 +1955,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 	string monolith_name = string(ObjectDefs[O_DORMANT_MONOLITH].name) + " [" + to_string(o->num) + "]";
 	o->name = new AString(monolith_name);
 	o->type = O_DORMANT_MONOLITH;
+	o->incomplete = -(ObjectDefs[O_DORMANT_MONOLITH].sacrifice_amount);
 	reg->objects.Add(o);
 
 	FinalSetup(pRegionArrays[level]);

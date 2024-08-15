@@ -130,6 +130,10 @@ const map<const string, const array<string, 2>> TextReportGenerator::terrain_fil
         " /\\/\\ ",
         "/  \\ \\" }
     },
+    { "barren", {
+        "  * * ",
+        " * *  " }
+    }
 };
 
 string TextReportGenerator::to_s(const json& j) {
@@ -389,7 +393,7 @@ void TextReportGenerator::output_structure(ostream& f, const json& structure, bo
             int amount = structure["sacrifice"]["amount"];
             f << ", requires sacrifice of " << structure["sacrifice"]["amount"] << " "
               <<  plural(amount, structure["sacrifice"]["name"], structure["sacrifice"]["plural"]) << " ["
-              << structure["sacrifice"]["tag"] << "]";
+              << to_s(structure["sacrifice"]["tag"]) << "]";
         }
         if (structure.contains("grantskill")) {
             f << ", grants owner " << to_s(structure["grantskill"]["name"]) << " ["
@@ -802,7 +806,7 @@ void TextReportGenerator::output_region_map_header(ostream& f, const json& regio
     if (region.contains("wages")) {
         stringstream ss;
         ss << "Wage " << setprecision(1) << fixed << setw(7) << right << region["wages"].value("amount", 0.0)
-           << " (max " << region["wages"]["max"] << ")";
+           << " (max " << region["wages"].value("max", 0) << ")";
         output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
     }
 
@@ -879,7 +883,8 @@ void TextReportGenerator::output_template(ostream& f, const json& report, int te
     f << (template_type == TEMPLATE_SHORT ? "Short" : (template_type == TEMPLATE_LONG ? "Long" : "Map"));
     f << " Format):\n\n";
     f << "#atlantis " << report["number"];
-    if (!report["administrative"].contains("password_unset")) {
+
+    if (!report["administrative"].value("password_unset", true)) {
         // Since the json output will quote for strings, just use it as is
         f << " " << report["administrative"]["password"];
     }

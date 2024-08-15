@@ -1706,6 +1706,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	int movetype, cost, startmove, weight;
 	Unit *ally, *forbid;
 	Location *loc;
+	const char *prevented = nullptr;
 
 	if (!o->dirs.Num()) {
 		delete o;
@@ -1803,8 +1804,9 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 		}
 	}
 
-	if (newreg->movement_forbidden_by_ruleset(unit, region)) {
-		// the ruleset specific code should provide the error message
+	prevented = newreg->movement_forbidden_by_ruleset(unit, region, &regions);
+	if (prevented != nullptr) {
+		unit->error("MOVE: " + string(prevented) + " prevents movement in that direction.");
 		goto done_moving;
 	}
 

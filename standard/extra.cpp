@@ -227,4 +227,4 @@ void Game::ModifyTablesPerRuleset(void)
 	return;
 }
 
-bool ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin) { return false; }
+const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList *regs) { return nullptr; }
