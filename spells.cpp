@@ -1685,6 +1685,12 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 		}
 	}
 
+	const char *prevented = tar->movement_forbidden_by_ruleset(u, r, &regions);
+	if (prevented != nullptr) {
+		u->error("CAST: " + string(prevented) + " prevents teleporting to that location.");
+		return 0;
+	}
+
 	// Presume they had to open the portal to see if target is ocean
 	if (TerrainDefs[tar->type].similar_type == R_OCEAN) {
 		u->error(string("CAST: ") + tar->Print(&regions).const_str() + " is an ocean.");
@@ -1923,6 +1929,12 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 				return 0;
 			}
 		}
+	}
+
+	const char *prevented = tar->region->movement_forbidden_by_ruleset(u, r, &regions);
+	if (prevented != nullptr) {
+		u->error("CAST: " + string(prevented) + " prevents portalling to that location.");
+		return 0;
 	}
 
 	u->event("Casts Portal Jump.", "spell");

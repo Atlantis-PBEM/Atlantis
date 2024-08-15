@@ -39,6 +39,13 @@ using json = nlohmann::json;
 
 #define I_WOOD_OR_STONE -2
 
+struct SacrificeEffect {
+	int granted_item;
+	int granted_amount;
+	int replace_object;
+	bool destroyed;
+};
+
 class ObjectType {
 	public:
 		char const *name;
@@ -53,6 +60,7 @@ class ObjectType {
 			KEYBARRIER	= 0x100,  // Prevents entry to region except to unit with key
 			SACRIFICE	= 0x200,  // This object requires the sacrifice command
 			GRANTSKILL	= 0x400,  // This object grants a skill to the owner
+			NOANNIHILATE = 0x800, // This object cannot be annihilated
 		};
 		int flags;
 
@@ -71,6 +79,7 @@ class ObjectType {
 		int sacrifice_amount; // amount of item needed to sacrifice to this object if it's a sacrifice object
 		int granted_skill; // skill granted by this object to the owner
 		int granted_level; // level of skill granted by this object to the owner
+		SacrificeEffect sacrifice_effect; // effect of sacrificing to this object
 
 		int maxMaintenance;
 		int maxMonthlyDecay;

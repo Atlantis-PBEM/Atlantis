@@ -551,6 +551,7 @@ enum {
 	R_VOLCANO,
 	R_LAKE,
 	R_BARREN,
+	R_BARRENOCEAN,
 	R_NUM
 };
 
