@@ -621,7 +621,7 @@ Faction *Game::CheckVictory()
 				if (r->Population() > 0 && !r->visited) {
 					if (!count--) {
 						message = "The people of the ";
-						message += r->ShortPrint(&regions);
+						message += r->ShortPrint();
 						switch (getrandom(4)) {
 							case 0:
 								message += " have not been visited by exiles.";

@@ -600,7 +600,7 @@ int Battle::Run(Events* events,
 			assassination = ASS_SUCC;
 			asstext = armies[1]->leader->name->const_str();
 			asstext += " is assassinated in ";
-			asstext += region->ShortPrint(pRegs).const_str();
+			asstext += region->ShortPrint().const_str();
 			asstext += "!";
 		}
 		if (armies[1]->NumAlive()) {
@@ -695,10 +695,10 @@ void Battle::WriteSides(ARegion * r,
 {
 	if (ass) {
 		AddLine(*att->name + " attempts to assassinate " + *tar->name
-				+ " in " + r->ShortPrint( pRegs ) + "!");
+				+ " in " + r->ShortPrint() + "!");
 	} else {
 		AddLine(*att->name + " attacks " + *tar->name + " in " +
-				r->ShortPrint( pRegs ) + "!");
+				r->ShortPrint() + "!");
 	}
 	AddLine("");
 

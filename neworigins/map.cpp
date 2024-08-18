@@ -2882,6 +2882,8 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 					ocean_name += " Ocean";
 					reg->SetName(ocean_name.Str());
 				}
+			} else if (TerrainDefs[reg->type].similar_type == R_BARREN) {
+				reg->SetName("The Barrens");
 			} else {
 				if (reg->wages == -1)
 					reg->SetName("The Void");

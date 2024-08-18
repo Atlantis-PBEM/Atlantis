@@ -123,7 +123,7 @@ void Game::EditGameRegion(ARegion *pReg)
 { 
 	do {
 		Awrite( AString("Region ") + pReg->num + ": " +
-			pReg->Print( &regions ) ); 
+			pReg->Print() ); 
 		Awrite( " 1) Edit objects..." ); 
 		Awrite( " 2) Edit terrain..." );
 		Awrite( " q) Return to previous menu." ); 
@@ -157,7 +157,7 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 //template copied from AtlantisDev 030730 post. Modified option a, added option h, m.
 { 
 	do {
-		Awrite( AString( "Region: " ) + pReg->ShortPrint( &regions ) ); 
+		Awrite( AString( "Region: " ) + pReg->ShortPrint() ); 
 		Awrite( "" ); 
 		int i = 0; 
 		AString temp = AString("");
@@ -439,7 +439,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 { 
 	do {
 		Awrite("");	
-		Awrite( AString( "Region: " ) + pReg->Print( &regions ) ); 
+		Awrite( AString( "Region: " ) + pReg->Print() ); 
 		Awrite( "" ); 
 // write pop stuff
 		Awrite( AString("") + pReg->population + " " + ItemDefs[pReg->race].names + " basepop");
@@ -737,7 +737,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 /* This only gets called if pReg->town exists! */
 	do {
 		Awrite("");	
-		Awrite( AString( "Region: " ) + pReg->Print( &regions ) );
+		Awrite( AString( "Region: " ) + pReg->Print() );
 		Awrite( "" ); 
 // write pop stuff
 		Awrite( AString("") + pReg->town->pop + " " + ItemDefs[pReg->race].names + " townpop");
@@ -1047,7 +1047,7 @@ void Game::EditGameUnit(Unit *pUnit)
 		Awrite(AString("Unit: ") + *(pUnit->name));
 		Awrite(AString("Faction: ") + pUnit->faction->num);
 		Awrite(AString("  in ") +
-				pUnit->object->region->ShortPrint(&regions));
+				pUnit->object->region->ShortPrint());
 		Awrite("  1) Edit items...");
 		Awrite("  2) Edit skills...");
 		Awrite("  3) Move unit...");

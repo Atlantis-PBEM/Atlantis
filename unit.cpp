@@ -87,6 +87,8 @@ Unit::Unit()
 	stealorders = NULL;
 	monthorders = NULL;
 	castorders = NULL;
+	sacrificeorders = nullptr;
+	annihilateorders = nullptr;
 	teleportorders = NULL;
 	joinorders = NULL;
 	inTurnBlock = 0;
@@ -133,6 +135,8 @@ Unit::Unit(int seq, Faction *f, int a)
 	castorders = NULL;
 	teleportorders = NULL;
 	joinorders = NULL;
+	sacrificeorders = nullptr;
+	annihilateorders = nullptr;
 	inTurnBlock = 0;
 	presentTaxing = 0;
 	presentMonthOrders = NULL;
@@ -811,6 +815,8 @@ void Unit::ClearOrders()
 	castorders = 0;
 	if (teleportorders) delete teleportorders;
 	teleportorders = 0;
+	if (sacrificeorders) delete sacrificeorders;
+	sacrificeorders = 0;
 }
 
 void Unit::ClearCastOrders()
@@ -1345,6 +1351,17 @@ int Unit::GetAvailSkill(int sk)
 			
 			if (grant > retval)
 				retval = grant;
+		}
+	}
+
+	// Check for a skill granted by a structure
+	if (object && object->type != O_DUMMY) {
+		ObjectType ob = ObjectDefs[object->type];
+		if (ob.flags & ObjectType::GRANTSKILL && object->GetOwner() == this) {
+			if (ob.granted_skill == sk) {
+				int grant = ob.granted_level;
+				if (grant > retval) retval = grant;
+			}
 		}
 	}
 

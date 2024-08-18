@@ -296,7 +296,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			stop = 1;
 		} else if (fleet->SailThroughCheck(x->dir) < 1) {
 			cap->error("SAIL: Could not sail " + DirectionStrs[x->dir] + " from " +
-				reg->ShortPrint(&regions).const_str() +	". Cannot sail through land.");
+				reg->ShortPrint().const_str() +	". Cannot sail through land.");
 			stop = 1;
 		}
 
@@ -319,7 +319,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			}
 			if (!has_key) {
 				cap->error("SAIL: Can't sail " + DirectionStrs[x->dir] + " from " +
-					reg->ShortPrint(&regions).const_str() + " due to mystical barrier.");
+					reg->ShortPrint().const_str() + " due to mystical barrier.");
 				stop = 1;
 			}
 		}
@@ -357,9 +357,9 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 				Faction * f = ((FactionPtr *) elem)->ptr;
 				string temp = fleet->name->const_str();
 				temp += (x->dir == MOVE_PAUSE ? " performs maneuvers in " : " sails from ") +
-					string(reg->ShortPrint(&regions).const_str());
+					string(reg->ShortPrint().const_str());
 				if(x->dir != MOVE_PAUSE) {
-					temp  += " to " + string(newreg->ShortPrint(&regions).const_str());
+					temp  += " to " + string(newreg->ShortPrint().const_str());
 				}
 				f->event(temp, "sail");
 			}
@@ -391,7 +391,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			reg = newreg;
 			if (newreg->ForbiddenShip(fleet)) {
 				string temp = string(fleet->name->const_str()) + " is stopped by guards in " +
-					newreg->ShortPrint(&regions).const_str() + ".";
+					newreg->ShortPrint().const_str() + ".";
 				cap->faction->event(temp, "sail");
 				stop = 1;
 			}
@@ -720,12 +720,12 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 
 	if (unfinished == 0) {
 		u->event("Finishes building a " + ItemDefs[ship].name + " in " +
-			r->ShortPrint(&regions).const_str() + ".", "build");
+			r->ShortPrint().const_str() + ".", "build");
 		CreateShip(r, u, ship);
 	} else {
 		percent = 100 * output / ItemDefs[ship].pMonths;
 		u->event("Performs construction work on a " + ItemDefs[ship].name + " (" + to_string(percent) +
-			"%) in " +	r->ShortPrint(&regions).const_str() + ".", "build", r);
+			"%) in " +	r->ShortPrint().const_str() + ".", "build", r);
 	}
 
 	delete u->monthorders;
@@ -869,7 +869,7 @@ void Game::RunBuildHelpers(ARegion *r)
 							int percent = 100 * output / ItemDefs[ship].pMonths;
 							u->event("Helps " + string(target->name->const_str()) + " with construction of a " + 
 								ItemDefs[ship].name + " (" + to_string(percent) + "%) in " +
-								r->ShortPrint(&regions).const_str() + ".", "build", r);							
+								r->ShortPrint().const_str() + ".", "build", r);							
 						}
 						// no need to move unit if item-type ships
 						// are being built. (leave this commented out)
@@ -1193,7 +1193,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 	}
 		
 	u->items.SetNum(o->item,u->items.GetNum(o->item) + output);
-	u->event("Produces " + ItemString(o->item,output) + " in " + r->ShortPrint(&regions).const_str() + ".",
+	u->event("Produces " + ItemString(o->item,output) + " in " + r->ShortPrint().const_str() + ".",
 		"produce", r);
 	u->Practice(o->skill);
 	o->target -= output;
@@ -1360,13 +1360,13 @@ void Game::RunAProduction(ARegion * r, Production * p)
 				//
 				if (po->skill == -1) {
 					u->event("Earns " + to_string(ubucks) + " silver working in " +
-						r->ShortPrint(&regions).const_str() + ".", "work", r);
+						r->ShortPrint().const_str() + ".", "work", r);
 				} else {
 					//
 					// ENTERTAIN
 					//
 					u->event("Earns " + to_string(ubucks) + " silver entertaining in " +
-							 r->ShortPrint(&regions).const_str() + ".", "entertain", r);
+							 r->ShortPrint().const_str() + ".", "entertain", r);
 					// If they don't have PHEN, then this will fail safely
 					u->Practice(S_PHANTASMAL_ENTERTAINMENT);
 					u->Practice(S_ENTERTAINMENT);
@@ -1376,7 +1376,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 			{
 				/* Everything else */
 				u->event("Produces " + ItemString(po->item,ubucks) + " in " +
-					r->ShortPrint(&regions).const_str() + ".", "produce", r);
+					r->ShortPrint().const_str() + ".", "produce", r);
 				u->Practice(po->skill);
 			}
 			delete u->monthorders;
@@ -1863,7 +1863,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 		return 0;
 
 	if (x->dir == MOVE_PAUSE) {
-		unit->event("Pauses to admire the scenery in " + string(region->ShortPrint(&regions).const_str()) +
+		unit->event("Pauses to admire the scenery in " + string(region->ShortPrint().const_str()) +
 			".", "movement");
 		unit->movepoints -= cost * Globals->MAX_SPEED;
 		unit->moved += cost;
@@ -1875,7 +1875,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	if ((TerrainDefs[newreg->type].similar_type == R_OCEAN) &&
 			(!unit->CanSwim() ||
 			unit->GetFlag(FLAG_NOCROSS_WATER))) {
-		unit->event("Discovers that " + string(newreg->ShortPrint(&regions).const_str()) + " is " +
+		unit->event("Discovers that " + string(newreg->ShortPrint().const_str()) + " is " +
 			TerrainDefs[newreg->type].name + ".", "movement");
 		goto done_moving;
 	}
@@ -1899,7 +1899,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	forbid = newreg->Forbidden(unit);
 	if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
 		int obs = unit->GetAttribute("observation");
-		unit->event("Is forbidden entry to " + string(newreg->ShortPrint(&regions).const_str()) + " by " +
+		unit->event("Is forbidden entry to " + string(newreg->ShortPrint().const_str()) + " by " +
 			forbid->GetName(obs).const_str() + ".", "movement");
 		obs = forbid->GetAttribute("observation");
 		forbid->event("Forbids entry to " + string(unit->GetName(obs).const_str()) + ".", "guarding");
@@ -1937,8 +1937,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			temp = "Swims ";
 			break;
 	}
-	unit->event(temp + "from " + string(region->ShortPrint(&regions).const_str()) + " to " +
-		newreg->ShortPrint(&regions).const_str() + ".", "movement");
+	unit->event(temp + "from " + string(region->ShortPrint().const_str()) + " to " +
+		newreg->ShortPrint().const_str() + ".", "movement");
 
 	if (forbid) {
 		unit->advancefrom = region;
