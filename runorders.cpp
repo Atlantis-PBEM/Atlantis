@@ -85,7 +85,7 @@ void Game::RunOrders()
 		if (obj.flags & ObjectType::DISABLED) continue;
 		if (!(obj.flags & ObjectType::SACRIFICE)) continue;
 		Awrite("Running SACRIFICE Orders...");
-		//RunSacrificeOrders();
+		RunSacrificeOrders();
 		break;
 	}
 /*
@@ -116,7 +116,7 @@ void Game::RunOrders()
 
 	if (!(SkillDefs[S_ANNIHILATION].flags & SkillType::DISABLED)) {
 		Awrite("Running Annihilation Orders...");
-		//RunAnnihilateOrders();
+		RunAnnihilateOrders();
 	}
 
 	Awrite("Assessing Maintenance costs...");
@@ -770,7 +770,7 @@ void Game::RunTaxRegion(ARegion *reg)
 				desired -= t;
 				u->SetMoney(u->GetMoney() + amt);
 				u->event("Collects $" + to_string(amt) + " in taxes in " +
-					reg->ShortPrint(&regions).const_str() + ".", "tax", reg);
+					reg->ShortPrint().const_str() + ".", "tax", reg);
 				u->taxing = TAX_NONE;
 			}
 		}
@@ -857,7 +857,7 @@ void Game::RunPillageRegion(ARegion *reg)
 				pillagers -= num;
 				u->SetMoney(u->GetMoney() + temp);
 				u->event("Pillages $" + to_string(temp) + " from " +
-					reg->ShortPrint(&regions).const_str() + ".", "tax", reg);
+					reg->ShortPrint().const_str() + ".", "tax", reg);
 				forlist(facs) {
 					Faction *fp = ((FactionPtr *) elem)->ptr;
 					if (fp != u->faction) {
@@ -3369,11 +3369,18 @@ void Game::RunSacrificeOrders() {
 					// Ok this sacrifice will be valid
 					succeeded = true;
 
-					// Okay we have a valid sacrifice.  Do it.
+					int current = u->items.GetNum(o->item);
+					if (current < o->amount) {
+						u->error("SACRIFICE: You can only sacrifice up to " + ItemString(o->item, current) + ".");
+						o->amount = current;
+					}
+
 					int required = -sacrifice_object->incomplete;
 					int used = min(required, o->amount);
+
+					// Okay we have a valid sacrifice.  Do it.
 					sacrifice_object->incomplete += used;
-					u->items.SetNum(o->item, u->items.GetNum(o->item) - used);
+					u->items.SetNum(o->item, current - used);
 					u->event("Sacrifices " + ItemString(o->item, used) + ".", "sacrifice");
 					// sacrifice objects store the remaining needed sacrifices as negative numbers in incomplete
 					if (sacrifice_object->incomplete >= 0) {
@@ -3384,13 +3391,13 @@ void Game::RunSacrificeOrders() {
 								Object *ob = (Object *)elem;
 								forlist((&ob->units)) {
 									Unit *recip = (Unit *)elem;
-									if (u->faction == recip->faction && u->GetMen() != 0) {
+									if (recip->faction == u->faction && recip->GetMen() != 0) {
 										done = true;
 										recip->items.SetNum(reward_item, recip->items.GetNum(reward_item) + reward_amt);
 										recip->event("Gains " + ItemString(reward_item, reward_amt) +
 											" from sacrifice.", "sacrifice");
+										recip->faction->DiscoverItem(reward_item, 0, 1);
 
-										// close out the quest?
 										break;
 									}
 								}
@@ -3403,7 +3410,7 @@ void Game::RunSacrificeOrders() {
 							sacrifice_object->type = reward_obj;
 							string name = string(ObjectDefs[reward_obj].name) + " [" + to_string(sacrifice_object->num) + "]";
 							sacrifice_object->name = new AString(name);
-							// Notify all factions in region and show the object
+							u->faction->objectshows.push_back({.obj = reward_obj});
 						}
 						if (destroy) {
 							// mark the object for destruction
@@ -3421,14 +3428,13 @@ void Game::RunSacrificeOrders() {
 
 		// destroy any pending objects in this region.
 		for (auto obj: destroyed_objects) {
+			// This shouldn't happen, as the sacrifice objects are not enterable, but.. just in case.
 			forlist((&obj->units)) {
 				Unit *u = (Unit *)elem;
-				// ideally these objects should be empty, but, just in case.
 				u->MoveUnit(r->GetDummy());
 				u->event("Moved out of a sacrificed structure.", "sacrifice");
 			}
 			r->objects.Remove(obj);
-			// Notify all factions in region that the object is destroyed
 		}
 	}
 }
@@ -3437,9 +3443,112 @@ void Game::Do1Annihilate(ARegion *reg) {
 	// converts the type of the region to a barren type (either barrens or barren ocean).   When a region is
 	// annihilated all units, and any city/markets/production in the region are destroyed. Shafts and anomalies are
 	// unaffected.
+	if (TerrainDefs[reg->type].flags & TerrainType::ANNIHILATED) return; // just a double check
+
+	// put the annihilation in the news and tell every faction.
+	string message = string(reg->Print().const_str()) + " has been utterly annihilated.";
+	AnnihilationFact *fact = new AnnihilationFact();
+	fact->message = message;
+	events->AddFact(fact);
+
+	// tell all factions too
+	forlist((&factions)) {
+		Faction *f = (Faction *) elem;
+		f->event(message, "annihilate");
+	}
+
+	if (TerrainDefs[reg->type].similar_type == R_OCEAN) {
+		reg->type = R_BARRENOCEAN;
+	} else {
+		reg->type = R_BARREN;
+	}
+	// destroy all units in the region
+	std::vector<Object *> destroyed_objects;
+	forlist_reuse(&reg->objects) {
+		Object *obj = (Object *)elem;
+		forlist(&obj->units) {
+			Unit *u = (Unit *)elem;
+			u->items.DeleteAll(); // throw away all the items
+			u->event("Is annihilated.", "annihilate");
+			reg->Kill(u);
+		}
+		// add the object to the list to be destroyed if it is able to be annihlated
+		if (ObjectDefs[obj->type].flags & ObjectType::NOANNIHILATE) continue;
+		destroyed_objects.push_back(obj);
+	}
+
+	// Okay, now we need to destroy all the destroyed objects
+	for (auto obj: destroyed_objects) {
+		reg->objects.Remove(obj);
+	}
+
+	// Okay, now we clear out towns, markets, production, etc.
+	for (auto& p : reg->products) delete p; // Free the allocated object
+	for (auto& m : reg->markets) delete m; // Free the allocated object
+	reg->markets.clear();
+	reg->products.clear();
+	reg->development = 0;
+	reg->wages = 0;
+	reg->race = -1;
+	reg->population = 0;
+	reg->basepopulation = 0;
+	reg->maxdevelopment = 0;
+	reg->maxwages = 0;
+	reg->wealth = 0;
+	delete reg->town;
+	reg->town = nullptr;
 }
 
 void Game::RunAnnihilateOrders() {
 	// Check all units for annihilate orders.  A unit my only annihilate if they have access to the annihilate skill.
-	// Annihilate will destroy the target hex and all surrounding hexes.  Barren regions cannot be annihilated again.
+	// Annihilate will destroy the target hex and all surrounding hexes.  Already annihilated regions cannot be
+	// annihilated again.
+
+	forlist((&regions)) {
+		ARegion *r = (ARegion *) elem;
+		forlist((&r->objects)) {
+			Object *obj = (Object *) elem;
+			forlist((&obj->units)) {
+				Unit *u = (Unit *) elem;
+				AnnihilateOrder *o = u->annihilateorders;
+				if (o == nullptr) continue;
+
+				// Check if the unit has access to the annihilate skill
+				if (u->GetSkill(S_ANNIHILATION) <= 0) {
+					u->error("ANNIHILATE: Unit does not have access to the annihilate skill.");
+					continue;
+				}
+
+				// Ok we have a unit doing a valid annihilate order.
+				ARegion *target = regions.GetRegion(o->xloc, o->yloc, o->zloc);
+				if (target == nullptr) {
+					u->error("ANNIHILATE: Target region does not exist.");
+					continue;
+				}
+				// Check if the target is in range
+				RangeType *rt = FindRange("rng_annihilate");
+				// If the range for annihilation is changed, this code will need to be updated.  This really should
+				// be made better, but not today. (right now this has a range of 1000 and a cross level penalty of 0)
+				int dist = regions.GetPlanarDistance(r, target, rt->crossLevelPenalty, rt->rangeMult);
+				if (dist > rt->rangeMult) {
+					u->error("ANNIHILATE: Target region is out of range.");
+					continue;
+				}
+
+				// Make sure the target isn't already annihilated
+				if (TerrainDefs[target->type].flags & TerrainType::ANNIHILATED) {
+					u->error("ANNIHILATE: Target region is already annihilated.");
+					continue;
+				}
+
+				// annihilate our neigbors
+				for (auto n = 0; n < NDIRS; n++) {
+					ARegion *neigh = r->neighbors[n];		
+					if (neigh == nullptr) continue;
+					Do1Annihilate(neigh);
+				}
+				Do1Annihilate(r);
+			}
+		}
+	}
 }

@@ -416,3 +416,40 @@ std::string Events::Write(std::string worldName, std::string month, int year) {
 
     return text;
 }
+
+AnnihilationFact::AnnihilationFact() {
+    this->message = "";
+}
+
+AnnihilationFact::~AnnihilationFact() {
+}
+
+void AnnihilationFact::GetEvents(std::list<Event> &events) {
+    events.push_back({
+        .category = EventCategory::EVENT_ANNIHILATION,
+        .score = 1000,
+        .text = this->message
+    });
+}
+
+AnomalyFact::AnomalyFact() {
+    this->location = nullptr;
+}
+
+AnomalyFact::~AnomalyFact() {
+}
+
+void AnomalyFact::GetEvents(std::list<Event> &events) {
+    std::ostringstream buffer;
+
+    buffer
+        << "A strange anomaly was detected in regions "
+        << location->Print()
+        << ".";
+
+    events.push_back({
+        .category = EventCategory::EVENT_ANOMALY,
+        .score = 100,
+        .text = buffer.str()
+    });
+}

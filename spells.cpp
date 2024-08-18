@@ -1012,7 +1012,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 		return 0;
 	}
 
-	u->event("Constructs a Gate in " + string(r->ShortPrint( &regions).const_str()) + ".", "spell");
+	u->event("Constructs a Gate in " + string(r->ShortPrint().const_str()) + ".", "spell");
 	regions.numberofgates++;
 	if (Globals->DISPERSE_GATE_NUMBERS) {
 		log10 = 0;
@@ -1318,7 +1318,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 		f->faction = u->faction;
 		f->level = u->GetSkill(S_BIRD_LORE);
 		tar->farsees.Add(f);
-		u->event("Sends birds to spy on " + string(tar->Print(&regions).const_str()) + ".", "spell");
+		u->event("Sends birds to spy on " + string(tar->Print().const_str()) + ".", "spell");
 		return 1;
 	}
 
@@ -1559,7 +1559,7 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
 		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 		val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES);
 		if (!val) return 0;
-		temp += " on " + string(tar->ShortPrint(&regions).const_str());
+		temp += " on " + string(tar->ShortPrint().const_str());
 	}
 	temp += ".";
 	int level = u->GetSkill(S_CLEAR_SKIES);
@@ -1584,7 +1584,7 @@ int Game::RunWeatherLore(ARegion *r, Unit *u)
 	if (level >= 5) months = 12;
 	else if (level >= 3) months = 6;
 
-	string temp = "Casts Weather Lore on " + string(tar->ShortPrint(&regions).const_str()) + ". It will be ";
+	string temp = "Casts Weather Lore on " + string(tar->ShortPrint().const_str()) + ". It will be ";
 	int weather, futuremonth;
 	for (i = 0; i <= months; i++) {
 		futuremonth = (month + i)%12;
@@ -1618,7 +1618,7 @@ int Game::RunFarsight(ARegion *r,Unit *u)
 	f->unit = u;
 	f->observation = u->GetAttribute("observation");
 	tar->farsees.Add(f);
-	u->event("Casts Farsight on " + string(tar->ShortPrint(&regions).const_str()) + ".", "spell");
+	u->event("Casts Farsight on " + string(tar->ShortPrint().const_str()) + ".", "spell");
 	return 1;
 }
 
@@ -1635,17 +1635,17 @@ int Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 	int found = 0;
 	if ((r->gate) && (!r->gateopen)) {
 		u->event("Identified local gate number " + to_string(r->gate) + " in " +
-			string(r->ShortPrint(&regions).const_str()) + ".", "spell");
+			string(r->ShortPrint().const_str()) + ".", "spell");
 	}
 	for (int i=0; i<NDIRS; i++) {
 		ARegion *tar = r->neighbors[i];
 		if (tar) {
 			if (tar->gate) {
 				if (Globals->DETECT_GATE_NUMBERS) {
-					u->event(string(tar->Print(&regions).const_str()) +	" contains Gate " +
+					u->event(string(tar->Print().const_str()) +	" contains Gate " +
 						to_string(tar->gate) + ".", "spell");
 				} else {
-					u->event(string(tar->Print(&regions).const_str()) +	" contains a Gate.", "spell");
+					u->event(string(tar->Print().const_str()) +	" contains a Gate.", "spell");
 				}
 				found = 1;
 			}
@@ -1693,11 +1693,11 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 
 	// Presume they had to open the portal to see if target is ocean
 	if (TerrainDefs[tar->type].similar_type == R_OCEAN) {
-		u->error(string("CAST: ") + tar->Print(&regions).const_str() + " is an ocean.");
+		u->error(string("CAST: ") + tar->Print().const_str() + " is an ocean.");
 		return 1;
 	}
 	u->DiscardUnfinishedShips();
-	u->event("Teleports to " + string(tar->Print(&regions).const_str()) + ".", "spell");
+	u->event("Teleports to " + string(tar->Print().const_str()) + ".", "spell");
 	u->MoveUnit(tar->GetDummy());
 	return 1;
 }
@@ -1848,7 +1848,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 					unitlist += (comma ? ", " : "") + to_string(loc->unit->num);
 					comma = 1;
 					loc->unit->DiscardUnfinishedShips();
-					loc->unit->event("Is teleported through a Gate to " + string(tar->Print(&regions).const_str()) +
+					loc->unit->event("Is teleported through a Gate to " + string(tar->Print().const_str()) +
 						" by " + string(u->name->const_str()) + ".", "spell");
 					loc->unit->MoveUnit( tar->GetDummy() );
 					if (loc->unit != u) loc->unit->ClearCastOrders();
@@ -1860,7 +1860,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 		}
 	}
 	u->DiscardUnfinishedShips();
-	u->event("Jumps through a Gate to " + string(tar->Print(&regions).const_str()) + ".", "spell");
+	u->event("Jumps through a Gate to " + string(tar->Print().const_str()) + ".", "spell");
 	if (comma) {
 		u->event(unitlist + " follow through the Gate.", "spell");
 	}
@@ -1947,7 +1947,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 					u->error("CAST: Unit is not allied.");
 				} else {
 					loc->unit->DiscardUnfinishedShips();
-					loc->unit->event("Is teleported to " + string(tar->region->Print(&regions).const_str()) +
+					loc->unit->event("Is teleported to " + string(tar->region->Print().const_str()) +
 						" by " + string(u->name->const_str()) + ".", "spell");
 					loc->unit->MoveUnit( tar->obj );
 					if (loc->unit != u) loc->unit->ClearCastOrders();
@@ -2090,7 +2090,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 
 		// Write article with a details
 		message = "Vile ritual has been performed at ";
-		message += r->ShortPrint(&regions);
+		message += r->ShortPrint();
 		message += "!";
 		WriteTimesArticle(message);
 

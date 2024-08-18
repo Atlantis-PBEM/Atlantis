@@ -3650,7 +3650,7 @@ static ObjectType ot[] =
 	// defencearray (ATTACK_COMBAT, ATTACK_ENERGY, ATTACK_SPIRIT, ATTACK_WEATHER, ATTACK_RIDING and ATTACK_RANGED)
 	//
 	{"None",
-	 ObjectType::NEVERDECAY,
+	 ObjectType::NEVERDECAY | ObjectType::NOANNIHILATE,
 	 0,0,0,0,
 	 -1,0,NULL,0,
 	 -1, -1, 0, -1, 0,
@@ -4968,7 +4968,7 @@ static TerrainType td[] = {
 	 1,I_PIRATES,-1,-1,
 	 5,{O_ISLE,-1,O_OCAVE,-1,-1,-1}},
 
-	 // Terrain for NO7 (barren)
+	// Terrain for NO7 (barren)
 	{"barren", "barrens", "barren", '*', R_BARREN,
 	 TerrainType::BARREN | TerrainType::RIDINGMOUNTS | TerrainType::FLYINGMOUNTS | TerrainType::ANNIHILATED,
 	 0,0,0,1,
@@ -5391,7 +5391,7 @@ EffectType *EffectDefs = efd;
 int NUMEFFECTS = sizeof(efd) / sizeof(efd[0]);
 
 // Range definitions
-// flags, rangeclass, rangemult, crosslevelpenalty
+// key, flags, rangeclass, rangemult, crosslevelpenalty
 static RangeType rtd[] = {
 	{"rng_teleport", 0, RangeType::RNG_LEVEL2, 2, 4},
 	{"rng_portal", 0, RangeType::RNG_LEVEL2, 2, 4},

@@ -46,6 +46,15 @@ Faction *UnitTestHelper::create_faction(string name) {
     return fac;
 }
 
+Faction *UnitTestHelper::get_faction(int id) {
+    forlist(&game.factions) {
+        Faction *f = (Faction *)elem;
+        if (f->num != id) continue;
+        return f;
+    }
+    return nullptr;
+}
+
 Unit *UnitTestHelper::get_first_unit(Faction *faction) {
     // This is pretty gross.. a faction should have a link to it's own units, but it doesn't.
     for (size_t i = 0; i < game.maxppunits; i++) {
@@ -71,8 +80,14 @@ void UnitTestHelper::create_building(ARegion *region, Unit *owner, int building_
     Object * obj = new Object(region);
     obj->type = building_type;
     obj->num = region->buildingseq++;
-    obj->SetName(new AString("Building"));
+    string name = "Building [" + to_string(obj->num) + "]";
+    obj->name = new AString(name);
     region->objects.Add(obj);
+    ObjectType ob = ObjectDefs[building_type];
+    if (ob.flags & ObjectType::SACRIFICE) {
+        // set up the items sacrifice needed
+        obj->incomplete = -(ob.sacrifice_amount);
+    }
     if (owner) owner->MoveUnit(obj);
 }
 
@@ -99,6 +114,14 @@ void UnitTestHelper::check_transport_orders() {
 
 void UnitTestHelper::move_units() {
     game.RunMovementOrders();
+}
+
+void UnitTestHelper::run_sacrifice() {
+    game.RunSacrificeOrders();
+}
+
+void UnitTestHelper::run_annihilation() {
+    game.RunAnnihilateOrders();
 }
 
 void UnitTestHelper::transport_phase(TransportOrder::TransportPhase phase) {

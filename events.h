@@ -47,6 +47,8 @@ enum EventCategory {
     EVENT_MONSTER_HUNT,
     EVENT_MONSTER_AGGRESSION,
     EVENT_ASSASSINATION,
+    EVENT_ANNIHILATION,
+    EVENT_ANOMALY,
 };
 
 struct Event {
@@ -172,6 +174,26 @@ class AssassinationFact : public FactBase {
         // BattleSide victim;
 
         int outcome;    // BATTLE_LOST, BATTLE_WON, BATTLE_DRAW
+};
+
+class AnnihilationFact : public FactBase {
+    public:
+        AnnihilationFact();
+        ~AnnihilationFact();
+
+        void GetEvents(std::list<Event> &events);
+
+        string message;
+};
+
+class AnomalyFact : public FactBase {
+    public:
+        AnomalyFact();
+        ~AnomalyFact();
+
+        void GetEvents(std::list<Event> &events);
+
+        ARegion *location;
 };
 
 #endif

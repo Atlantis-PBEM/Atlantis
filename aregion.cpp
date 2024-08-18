@@ -428,7 +428,7 @@ void ARegion::RunDecayEvent(Object *o, ARegionList *pRegs)
 	forlist (pFactions) {
 		Faction *f = ((FactionPtr *) elem)->ptr;
 		string tmp = string(GetDecayFlavor().const_str()) + " " + ObjectDefs[o->type].name +
-			" in " + ShortPrint(pRegs).const_str() + ".";
+			" in " + ShortPrint().const_str() + ".";
 		f->event(tmp, "decay");
 	}
 }
@@ -739,13 +739,13 @@ int ARegion::GetRealDirComp(int realDirection)
 	return complementDirection;
 }
 
-AString ARegion::ShortPrint(ARegionList *pRegs)
+AString ARegion::ShortPrint()
 {
 	AString temp = TerrainDefs[type].name;
 
 	temp += AString(" (") + xloc + "," + yloc;
 
-	ARegionArray *pArr = pRegs->pRegionArrays[zloc];
+	ARegionArray *pArr = this->level;
 	if (pArr->strName) {
 		temp += ",";
 		if (Globals->EASIER_UNDERWORLD &&
@@ -779,9 +779,9 @@ AString ARegion::ShortPrint(ARegionList *pRegs)
 	return temp;
 }
 
-AString ARegion::Print(ARegionList *pRegs)
+AString ARegion::Print()
 {
-	AString temp = ShortPrint(pRegs);
+	AString temp = ShortPrint();
 	if (town) {
 		temp += AString(", contains ") + *(town->name) + " [" +
 			TownString(town->TownType()) + "]";
@@ -1677,7 +1677,7 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 	forlist_reuse (&flist) {
 		FactionPtr *fp = (FactionPtr *) elem;
 		string tmp = string(caster->name->const_str()) + " uses " + SkillStrs(sp).const_str() +
-				" in " + Print(pRegs).const_str() + ".";
+				" in " + Print().const_str() + ".";
 		fp->ptr->event(tmp, "cast");
 	}
 	return 1;

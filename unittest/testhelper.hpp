@@ -46,6 +46,8 @@ public:
     int get_region_count();
     // Create a faction that we can use for testing.
     Faction *create_faction(string name);
+    // Get any existing faction
+    Faction *get_faction(int id);
     // Get a region by coordinates
     ARegion *get_region(int x, int y, int level);
     // Get all regions
@@ -74,6 +76,10 @@ public:
     int connected_distance(ARegion *reg1, ARegion *reg2, int penalty, int max);
     // Run the maintenance phase
     void maintain_units();
+    // Run sacrifice orders
+    void run_sacrifice();
+    // Run annihilation orders
+    void run_annihilation();
 
     // dummy
     int get_seed() { return getrandom(10000); };

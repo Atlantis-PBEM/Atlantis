@@ -201,8 +201,8 @@ class ARegion : public AListElem
 		json basic_region_data();
 		void build_json_report(json& j, Faction *fac, int month, ARegionList *pRegions);
 
-		AString ShortPrint(ARegionList *pRegs);
-		AString Print(ARegionList *pRegs);
+		AString ShortPrint();
+		AString Print();
 
 		void Kill(Unit *);
 		void ClearHell();
