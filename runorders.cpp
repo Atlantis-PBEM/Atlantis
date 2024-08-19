@@ -3454,6 +3454,7 @@ void Game::Do1Annihilate(ARegion *reg) {
 	// tell all factions too
 	forlist((&factions)) {
 		Faction *f = (Faction *) elem;
+		if (f->is_npc) continue;
 		f->event(message, "annihilate");
 	}
 
