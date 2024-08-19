@@ -165,3 +165,13 @@ int AList::NextLive(AListElem **copy, int size, int pos)
 	}
 	return pos;
 }
+
+AList::iterator AList::begin() const
+{
+    return AList::iterator(this->list);
+}
+
+AList::iterator AList::end() const
+{
+    return AList::iterator();
+}
