@@ -45,9 +45,28 @@ using namespace std;
 // If this is set to true, then the game will end if a faction has > 50% of all cities in the game with their id
 // in the name.
 #define CITY_VOTE_WIN false
+// If this is true, then anomolies will be spawned after turn 50.  Game will end when all living factions are aligned
+// with the owner of the world-breaker monolith or all land has been destroyed.
+#define ANNIHILATION_WIN true
 
 int Game::SetupFaction( Faction *pFac )
 {
+
+	// Check if a faction can be started due to end game conditions
+	if (ANNIHILATION_WIN) {
+		// Find the center of the underworld
+		ARegionArray *underworld = regions.GetRegionArray(ARegionArray::LEVEL_UNDERWORLD);
+		ARegion *center = underworld->GetRegion(underworld->x / 2, underworld->y / 2);
+		// See if the monolith is active and owned.
+		forlist(&center->objects) {
+			Object *o = (Object *)elem;
+			if (o->type != O_ACTIVE_MONOLITH) continue;
+			if (o->GetOwner() != nullptr) {
+				return 0;
+			}
+		}
+	}
+
 	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 300;
 
 	if (pFac->noStartLeader) {
@@ -405,6 +424,46 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		quests.Add(q);
 	else
 		delete q;
+}
+
+int report_and_count_anomalies(ARegionList *regions, AList *factions) {
+	int count = 0;
+	forlist(regions) {
+		ARegion *r = (ARegion *)elem;
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			if (o->type == O_ENTITY_CAGE) {
+				count++;
+				forlist(factions) {
+					Faction *f = (Faction *)elem;
+					if (f->is_npc) continue;
+					f->event("A strange anomaly has been seen in " + string(r->ShortPrint().const_str()) + ".",
+						"anomaly", r);
+				}
+			}
+		}
+	}
+	return count;
+}
+
+int count_entities(ARegionList *regions) {
+	int count = 0;
+	forlist(regions) {
+		ARegion *r = (ARegion *)elem;
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			if (o->type == O_EMPOWERED_ALTAR) {
+				count++;
+			}
+			forlist(&o->units) {
+				Unit *u = (Unit *)elem;
+				if (u->items.GetNum(I_IMPRISONED_ENTITY) > 0) {
+					count += u->items.GetNum(I_IMPRISONED_ENTITY);
+				}
+			}
+		}
+	}
+	return count;
 }
 
 Faction *Game::CheckVictory()
@@ -808,6 +867,124 @@ Faction *Game::CheckVictory()
 			}
 			WriteTimesArticle(message);
 		}
+	}
+
+	// Check for victory conditions for the annihilation win
+	if (ANNIHILATION_WIN) {
+		// before turn 50 none of the end game code will be active.
+		if (TurnNumber() < 50) return nullptr;
+
+		// This function will count the number of entities in the game + number of activated altars.
+		// If this number is < 6, then we have a chance of spawning a new anomaly.  This chance starts at 10%
+		// for the first anomaly after turn 50 and then increases by 12% for each entity or active altar already
+		// existing.
+		int completed_entities = count_entities(&regions);
+		if (completed_entities < 6) {
+			int chance = 10 + (completed_entities * 12);
+			if (getrandom(100) < chance) {
+				// Okay, let's see if we can spawn a new entity
+				// If we can, see if we already have those anomalies and report them to all factions if so.
+				int anomalies = report_and_count_anomalies(&regions, &factions);
+				if (anomalies + completed_entities >= 6) {
+					// We have all the anomalies that we can have still, so cannot spawn any more.
+					return nullptr;
+				}
+
+				// Ok, we can spawn a new anomaly.  Let's do it.
+				// We want a random land hex that is not a city and that does not have an anomaly and is not guarded.
+				ARegion *r = nullptr;
+				ARegionArray *surface = regions.GetRegionArray(ARegionArray::LEVEL_SURFACE);
+				while (r == nullptr) {
+					r = (ARegion *)surface->GetRegion(getrandom(surface->x), getrandom(surface->y));
+					if (r == nullptr) continue;
+
+					// An anomaly won't spawn in the ocean or in a barren region or in a city or a guarded region.
+					TerrainType type = TerrainDefs[r->type];
+					if (type.similar_type == R_OCEAN || type.similar_type == R_BARREN || r->town || r->IsGuarded()) {
+						r = nullptr;
+						continue;
+					}
+					// Make sure it doesn't already have an anomaly
+					forlist(&r->objects) {
+						Object *o = (Object *)elem;
+						if (o->type == O_ENTITY_CAGE) {
+							r = nullptr;
+							break;
+						}
+					}
+					if(!r) continue;
+				}
+
+				// Okay, we have a new region to spawn an anomaly in.  Let's do it.
+				Object *o = new Object(r);
+				ObjectType ob = ObjectDefs[O_ENTITY_CAGE];
+				o->type = O_ENTITY_CAGE;
+				o->num = r->buildingseq++;
+				o->name = new AString(AString(ob.name) + " [" + o->num + "]");
+				if (ob.flags & ObjectType::SACRIFICE) {
+					o->incomplete = -(ob.sacrifice_amount);
+				}
+				r->objects.Add(o);
+				// Now tell all the factions about it.
+				forlist(&factions) {
+					Faction *f = (Faction *)elem;
+					if (f->is_npc) continue;
+					f->event("A strange anomaly has appeared in " + string(r->ShortPrint().const_str()) + ".",
+						"anomaly", r);
+				}
+			}
+
+			// If we haven't completed all the entities, then noone can win yet.
+			return nullptr;
+		}
+
+		// Ok we have completed all entities, so we can check for if a faction has won.
+		// the winner will be the owner of the world breaker monolith if and only if either
+		// 1) all living factions are allied with the owner of the monolith
+		// or
+		// 2) the entire surface has been annihilated.
+
+		// FInd the owner of the monolith.
+		ARegionArray *underworld = regions.GetRegionArray(ARegionArray::LEVEL_UNDERWORLD);
+		ARegion *center = underworld->GetRegion(underworld->x / 2, underworld->y / 2);
+		forlist(&center->objects) {
+			Object *o = (Object *)elem;
+			if (o->type == O_ACTIVE_MONOLITH) {
+				Unit *owner = o->GetOwner();
+				// If noone owns the monolith, then noone can win.
+				if (!owner) return nullptr;
+
+				winner = owner->faction;
+				break;
+			}
+		}
+
+		// Ok, we have a possible winner, check for all alive factions being allied with the winner and vice-versa.
+		bool all_allied = true;
+		forlist_reuse(&factions) {
+			Faction *f = (Faction *)elem;
+			if (f->is_npc) continue;
+			if (f == winner) continue;
+			// This faction doesn't have the winner as an ally, so no win by allies
+			if (f->get_attitude(winner->num) != A_ALLY) { all_allied = false; break; }
+			// The winner doesn't have this faction as an ally, so no win by allies
+			if (winner->get_attitude(f->num) != A_ALLY) { all_allied = false; break; }
+		}
+		// We had everyone allied to the monolith owner, so they win.
+		if (all_allied) return winner;
+
+		// No winner yet, so check if the surface has been completely destroyed.
+		int total_surface = 0;
+		int total_annihilated = 0;
+		forlist_reuse(&regions) {
+			ARegion *r = (ARegion *)elem;
+			if (r->level->levelType != ARegionArray::LEVEL_SURFACE) continue;
+			total_surface++;
+			if (TerrainDefs[r->type].flags & TerrainType::ANNIHILATED) total_annihilated++;
+		}
+		// The entire surface has not been destroyed, so no winner yet.
+		if (total_surface != total_annihilated) winner = nullptr;
+		return winner;
 	}
 
 	return winner;
