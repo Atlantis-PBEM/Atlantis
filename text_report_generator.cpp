@@ -133,6 +133,10 @@ const map<const string, const array<string, 2>> TextReportGenerator::terrain_fil
     { "barren", {
         "  * * ",
         " * *  " }
+    },
+    { "deadwater", {
+        "  ~ ~ ",
+        " ~ ~  " }
     }
 };
 
