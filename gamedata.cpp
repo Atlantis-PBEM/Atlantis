@@ -4978,7 +4978,7 @@ static TerrainType td[] = {
 	 {-1,-1,-1},
 	 0,-1,-1,-1,
 	 0,{-1,-1,-1,-1,-1,-1}},
-	{"ocean", "ocean", "barrenocean", '-', R_OCEAN,
+	{"deadwater", "deadwater", "barrenocean", '-', R_OCEAN,
 	 TerrainType::BARREN | TerrainType::FLYINGMOUNTS | TerrainType::ANNIHILATED,
 	 0,0,0,1,
 	 {{-1,0,0},{-1,0,0},{-1,0,0},{-1,0,0},
