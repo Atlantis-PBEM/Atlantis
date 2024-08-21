@@ -142,6 +142,8 @@ ARegion::ARegion()
 	earthlore = 0;
 	phantasmal_entertainment = 0;
 	visited = 0;
+
+    edges = RegionEdges(this);
 }
 
 ARegion::~ARegion()
@@ -1821,7 +1823,7 @@ int ARegion::ResolveFleetAlias(int alias)
 }
 
 ARegion* ARegion::neighbors(const int dir) {
-    return this->edges.get_neighbor(this, dir);
+    return this->edges.get_neighbor(dir);
 }
 
 ARegionList::ARegionList()
@@ -1829,6 +1831,7 @@ ARegionList::ARegionList()
 	pRegionArrays = 0;
 	numLevels = 0;
 	numberofgates = 0;
+    last_edge_id = 1000;
 }
 
 ARegionList::~ARegionList()
@@ -1855,18 +1858,24 @@ void ARegionList::WriteRegions(ostream& f)
 	}
 
 	f << numberofgates << "\n";
-	forlist(this) ((ARegion *) elem)->Writeout(f);
 
-	{
-		// because forlist is a macro we need this extra block for now.
-		f << "Neighbors\n";
-		forlist(this) {
-			ARegion *reg = (ARegion *) elem;
-			for (int i = 0; i < NDIRS; i++) {
-				f  << (reg->neighbors(i) ? reg->neighbors(i)->num : -1) << '\n';
-			}
-		}
-	}
+    for (auto reg : this->iter<ARegion>()) {
+        reg->Writeout(f);
+    }
+
+    f << "Edges\n";
+    f << this->last_edge_id << '\n';
+    f << this->edges.size() << '\n';
+
+    for (auto kv : this->edges) {
+        auto edge = kv.second;
+
+        f << edge->get_id() << '\n';
+        f << edge->get_left()->num << '\n';
+        f << edge->get_right()->num << '\n';
+        f << edge->get_left_dir() << '\n';
+        f << edge->get_right_dir() << '\n';
+    }
 }
 
 int ARegionList::ReadRegions(istream &f, AList *factions)
@@ -1908,23 +1917,29 @@ int ARegionList::ReadRegions(istream &f, AList *factions)
 	}
 
 	Awrite("Setting up the neighbors...");
-	{
-		AString temp;
-		f >> ws >> temp; // eat the "Neighbors" line
-		forlist(this) {
-			ARegion *reg = (ARegion *) elem;
-			for (i = 0; i < NDIRS; i++) {
-				int j;
-				f >> j;
-				if (j != -1) {
-					reg->neighbors(i) = fa.GetRegion(j);
-				} else {
-					reg->neighbors(i) = 0;
-				}
-			}
-		}
-	}
-	return 1;
+
+    AString temp;
+    int numfOfEdges;
+
+	f >> ws >> temp; // eat the "Edges" line
+    f >> this->last_edge_id;
+    f >> numfOfEdges;
+
+    // Load all edges
+    for (int i = 0; i < numfOfEdges; i++) {
+        int edge_id, left_num, left_dir, right_num, right_dir;
+        f >> edge_id >> left_num >> right_num >> left_dir >> right_dir;
+
+        RegionEdge* edge = RegionEdge::create(edge_id, fa.GetRegion(left_num), fa.GetRegion(right_num), left_dir, right_dir);
+
+        this->edges.insert({ edge->get_id(), edge });
+
+        // Assign edge to the regions
+        edge->get_left()->edges.add(edge);
+        edge->get_right()->edges.add(edge);
+    }
+
+    return 1;
 }
 
 ARegion *ARegionList::GetRegion(int n)
@@ -1969,24 +1984,24 @@ Location *ARegionList::FindUnit(int i)
 	return 0;
 }
 
-void ARegionList::NeighSetup(ARegion *r, ARegionArray *ar)
-{
-	r->ZeroNeighbors();
+void ARegionList::NeighSetup(ARegion *r, ARegionArray *ar) {
+    if (r->yloc != 0 && r->yloc != 1) {
+        this->create_edge(r, ar->GetRegion(r->xloc, r->yloc - 2), D_NORTH, D_SOUTH);
+    }
 
-	if (r->yloc != 0 && r->yloc != 1) {
-		r->neighbors[D_NORTH] = ar->GetRegion(r->xloc, r->yloc - 2);
-	}
-	if (r->yloc != 0) {
-		r->neighbors[D_NORTHEAST] = ar->GetRegion(r->xloc + 1, r->yloc - 1);
-		r->neighbors[D_NORTHWEST] = ar->GetRegion(r->xloc - 1, r->yloc - 1);
-	}
-	if (r->yloc != ar->y - 1) {
-		r->neighbors[D_SOUTHEAST] = ar->GetRegion(r->xloc + 1, r->yloc + 1);
-		r->neighbors[D_SOUTHWEST] = ar->GetRegion(r->xloc - 1, r->yloc + 1);
-	}
-	if (r->yloc != ar->y - 1 && r->yloc != ar->y - 2) {
-		r->neighbors[D_SOUTH] = ar->GetRegion(r->xloc, r->yloc + 2);
-	}
+    if (r->yloc != 0) {
+        this->create_edge(r, ar->GetRegion(r->xloc + 1, r->yloc - 1), D_NORTHEAST, D_SOUTHWEST);
+        this->create_edge(r, ar->GetRegion(r->xloc - 1, r->yloc - 1), D_NORTHWEST, D_SOUTHEAST);
+    }
+
+    if (r->yloc != ar->y - 1) {
+        this->create_edge(r, ar->GetRegion(r->xloc + 1, r->yloc + 1), D_SOUTHEAST, D_NORTHWEST);
+        this->create_edge(r, ar->GetRegion(r->xloc - 1, r->yloc + 1), D_SOUTHWEST, D_NORTHEAST);
+    }
+
+    if (r->yloc != ar->y - 1 && r->yloc != ar->y - 2) {
+        this->create_edge(r, ar->GetRegion(r->xloc, r->yloc + 2), D_SOUTH, D_NORTH);
+    }
 }
 
 [[deprecated("Icosahedral world is no longer supported")]]
@@ -2324,7 +2339,7 @@ ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 			if (dir) {
 				offset = getrandom(NDIRS);
 				for (i = 0; i < NDIRS; i++) {
-					r = start->neighbors[(i + offset) % NDIRS];
+					r = start->neighbors((i + offset) % NDIRS);
 					if (!r)
 						continue;
 					if (r->distance + 1 == start->distance) {
@@ -4133,4 +4148,55 @@ int ARegionList::FindDistanceToNearestObject(int object_type, ARegion *start)
 		if (dist < min_dist) min_dist = dist;
 	}
 	return min_dist;
+}
+
+int ARegionList::next_edge_id() {
+    return ++this->last_edge_id;
+}
+
+void ARegionList::create_edge(ARegion *left, ARegion *right, const int left_dir, const int right_dir) {
+    if (has_edge(left, right)) {
+        return;
+    }
+
+    RegionEdge *edge = RegionEdge::create(this->next_edge_id(), left, right, left_dir, right_dir);
+
+    this->edges.insert({ edge->get_id(), edge });
+
+    left->edges.add(edge);
+    right->edges.add(edge);
+}
+
+const bool ARegionList::has_edge(const ARegion *left, const ARegion *right) const {
+    for (const auto& kv : this->edges) {
+        auto edge = kv.second;
+
+        if (edge->get_left() == left && edge->get_right() == right) {
+            return true;
+        }
+
+        if (edge->get_left() == right && edge->get_right() == left) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void ARegionList::remove_edge(const int id) {
+    auto kv = this->edges.find(id);
+    if (kv == this->edges.end()) {
+        return;
+    }
+
+    auto edge = kv->second;
+    auto left = edge->get_left();
+    auto right = edge->get_right();
+
+    left->edges.remove(edge->get_id());
+    right->edges.remove(edge->get_id());
+
+    this->edges.erase(kv);
+
+    delete edge;
 }

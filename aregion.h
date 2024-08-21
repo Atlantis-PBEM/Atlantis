@@ -195,27 +195,27 @@ public:
 	 * Also MOVE order can use this id to specify the destination of the movement.
      *
      */
-    const int get_id();
+    int get_id() const;
 
     /**
      * @brief The left region of the edge.
      */
-    ARegion* get_left();
+    ARegion* get_left() const;
 
     /**
      * @brief The right region of the edge.
      */
-    ARegion* get_right();
+    ARegion* get_right() const;
 
     /**
      * @brief Direction of the edge from the left region to the right region.
      */
-    const int get_left_dir();
+    int get_left_dir() const;
 
     /**
      * @brief Direction of the edge from the right region to the left region.
      */
-    const int get_right_dir();
+    int get_right_dir() const;
 
     /**
      * @brief Creates a new edge between two regions.
@@ -229,7 +229,7 @@ public:
      * @param right_dir The direction of the edge from the right region to the left region.
      * @return const Edge* The new edge.
      */
-    static const RegionEdge* create(const int id, ARegion *left, ARegion *right, const int left_dir, const int right_dir);
+    static RegionEdge* create(const int id, ARegion *left, ARegion *right, const int left_dir, const int right_dir);
 
 private:
     RegionEdge(const int id, ARegion* left, ARegion* right, const int left_dir, const int right_dir)
@@ -243,36 +243,48 @@ private:
 };
 
 /**
- * @brief Represents connections to other regions and locations.
+ * @brief Represents connections to other regions and locations from a region.
  */
 class RegionEdges {
+friend class ARegion;
+private:
+    RegionEdges();
+
 public:
-    using itemType = RegionEdge *;
-    using itemsMapType = std::unordered_map<int, const itemType>;
+    using itemType = const RegionEdge *;
     using regionType = ARegion *;
     using regionArrayType = std::array<regionType, NDIRS>;
-    using cacheType = std::unordered_map<regionType, regionArrayType>;
-    using iterator = itemsMapType::iterator;
 
-    const int size() const { return items.size(); }
+    RegionEdges(regionType owner);
 
     /**
-     * @brief Adds a new edge to the list of edges.
+     * @brief Returns the number of connections to other regions and locations.
+     *
+     * @return const int The number of connections.
+     */
+    const int size() const;
+
+    /**
+     * @brief Returns the edge with the given id.
+     *
+     * @param id The id of the edge to get.
+     * @return itemType The edge with the given id or nullptr if there is no such edge.
+     */
+    itemType get(const int id) const;
+
+    /**
+     * @brief Adds a new edge to the local list of edges.
      *
      * @param edge The edge to add.
      */
-    void add(const itemType edge);
+    void add(itemType edge);
 
     /**
-     * @brief Returns the neighbors of a region.
+     * @brief Removes an edge from the local list of edges of the region.
      *
-     * This function is for the compatibility with the old code.
-     * Missing directions will be set to nullptr.
-     *
-     * @param region The region to get the neighbors of.
-     * @return const std::array<const ARegion*, NDIRS> The neighbors of the region.
+     * @param id The id of the edge to remove.
      */
-    const regionArrayType& neighbors(const regionType region);
+    void remove(const int id);
 
     /**
      * @brief Returns the neighboring region in the given direction.
@@ -282,14 +294,12 @@ public:
      * @param dir The direction to get the neighbor of.
      * @return ARegion* The neighboring region in the given direction or nullptr if there is no neighbor.
      */
-    regionType get_neighbor(const RegionEdges::regionType region, const int dir);
-
-    iterator begin();
-    iterator end();
+    regionType get_neighbor(const int dir);
 
 private:
-    itemsMapType items;
-    cacheType neighborsCache;
+    regionType owner;
+    std::unordered_map<int, itemType> items;
+    regionArrayType neighbors;
 };
 
 class ARegion : public AListElem
@@ -693,6 +703,13 @@ class ARegionList : public AList
 		int GetRegType(ARegion *pReg);
 		int CheckRegionExit(ARegion *pFrom, ARegion *pTo);
 
+        // Region Edges
+        std::unordered_map<int, const RegionEdge*> edges;
+        int last_edge_id;
+        int next_edge_id();
+        void create_edge(ARegion *left, ARegion *right, const int left_dir, const int right_dir);
+        const bool has_edge(const ARegion *left, const ARegion *right) const;
+        void remove_edge(const int id);
 };
 
 int LookupRegionType(AString *);

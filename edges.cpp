@@ -25,76 +25,86 @@
 
 #include "aregion.h"
 
-const RegionEdge* RegionEdge::create(const int id, ARegion* left, ARegion* right, const int left_dir, const int right_dir) {
-    RegionEdge *edge = new RegionEdge(id, left, right, left_dir, right_dir);
-    return edge;
+////////////////////
+///// RegionEdge
+
+RegionEdge* RegionEdge::create(const int id, ARegion* left, ARegion* right, const int left_dir, const int right_dir) {
+    return new RegionEdge(id, left, right, left_dir, right_dir);
 }
 
-const int RegionEdge::get_id() {
+int RegionEdge::get_id() const {
     return this->id;
 }
 
-ARegion* RegionEdge::get_left() {
+ARegion* RegionEdge::get_left() const {
     return this->left;
 }
 
-ARegion* RegionEdge::get_right() {
+ARegion* RegionEdge::get_right() const {
     return this->right;
 }
 
-const int RegionEdge::get_left_dir() {
+int RegionEdge::get_left_dir() const {
     return this->left_dir;
 }
 
-const int RegionEdge::get_right_dir() {
+int RegionEdge::get_right_dir() const {
     return this->right_dir;
+}
+
+
+////////////////////
+///// RegionEdges
+
+RegionEdges::RegionEdges() {
+    this->owner = nullptr;
+    std::fill(neighbors.begin(), neighbors.end(), nullptr);
+}
+
+RegionEdges::RegionEdges(RegionEdges::regionType owner) {
+    this->owner = owner;
+    std::fill(neighbors.begin(), neighbors.end(), nullptr);
 }
 
 void RegionEdges::add(const RegionEdges::itemType edge) {
     this->items.insert({ edge->get_id(), edge });
 
-    add_to_cache(this->neighborsCache, edge->get_left(), edge->get_right(), edge->get_left_dir());
-    add_to_cache(this->neighborsCache, edge->get_right(), edge->get_left(), edge->get_right_dir());
+    if (edge->get_left() == this->owner) {
+        this->neighbors[edge->get_left_dir()] = edge->get_right();
+    } else {
+        this->neighbors[edge->get_right_dir()] = edge->get_left();
+    }
 }
 
-void add_to_cache(RegionEdges::cacheType& cache, const RegionEdges::regionType source, RegionEdges::regionType target, const int dir) {
-    auto rec = cache.find(source);
-    if (rec == cache.end()) {
-        RegionEdges::regionArrayType neighbors;
-        std::fill(neighbors.begin(), neighbors.end(), nullptr);
-
-        cache.insert({ source, neighbors });
-        rec = cache.find(source);
+void RegionEdges::remove(const int id) {
+    auto rec = this->items.find(id);
+    if (rec == this->items.end()) {
+        return;
     }
 
-    rec->second[dir] = target;
-}
-
-const RegionEdges::regionArrayType& RegionEdges::neighbors(const RegionEdges::regionType region) {
-    auto rec = this->neighborsCache.find(region);
-    if (rec == this->neighborsCache.end()) {
-        RegionEdges::regionArrayType neighbors;
-        std::fill(neighbors.begin(), neighbors.end(), nullptr);
-
-        return neighbors;
+    auto edge = rec->second;
+    if (edge->get_left() == this->owner) {
+        this->neighbors[edge->get_left_dir()] = nullptr;
+    } else {
+        this->neighbors[edge->get_right_dir()] = nullptr;
     }
 
-    return rec->second;
+    this->items.erase(rec);
 }
 
-RegionEdges::iterator RegionEdges::begin() {
-    return this->items.begin();
+RegionEdges::regionType RegionEdges::get_neighbor(const int dir) {
+    return this->neighbors[dir];
 }
 
-RegionEdges::iterator RegionEdges::end() {
-    return this->items.end();
+const int RegionEdges::size() const {
+    return items.size();
 }
 
-RegionEdges::regionType RegionEdges::get_neighbor(const RegionEdges::regionType region, const int dir) {
-    auto rec = this->neighborsCache.find(region);
-    if (rec == this->neighborsCache.end()) {
+RegionEdges::itemType RegionEdges::get(const int id) const {
+    auto rec = this->items.find(id);
+    if (rec == this->items.end()) {
         return nullptr;
     }
 
-    return rec->second[dir];
+    return rec->second;
 }
