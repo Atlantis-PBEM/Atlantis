@@ -1308,7 +1308,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 
 	if (order->level < 3) {
 		int dir = order->target;
-		ARegion *tar = r->neighbors[dir];
+		ARegion *tar = r->neighbors(dir);
 		if (!tar) {
 			u->error("CAST: No such region.");
 			return 0;
@@ -1638,7 +1638,7 @@ int Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
 			string(r->ShortPrint().const_str()) + ".", "spell");
 	}
 	for (int i=0; i<NDIRS; i++) {
-		ARegion *tar = r->neighbors[i];
+		ARegion *tar = r->neighbors(i);
 		if (tar) {
 			if (tar->gate) {
 				if (Globals->DETECT_GATE_NUMBERS) {
@@ -1978,7 +1978,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 		u->error("CAST: Can't create that by transmutation.");
 		return 0;
 	}
-	
+
 	switch(order->item) {
 		case I_ADMANTIUM:
 		case I_MITHRIL:
@@ -1998,7 +1998,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 			source = I_HORSE;
 			break;
 	}
-	
+
 	num = u->GetSharedNum(source);
 	if (num > ItemDefs[order->item].mOut * level)
 		num = ItemDefs[order->item].mOut * level;
@@ -2034,13 +2034,13 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 	tower = 0;
 	sactype = IT_LEADER;
 	sacrifices = 0;
-	
+
 	forlist(&r->objects) {
 		o = (Object *) elem;
 		if (o->type == O_BKEEP && !o->incomplete) {
 			tower = o;
 		}
-			
+
 		forlist(&o->units) {
 			u = (Unit *) elem;
 			if (u->faction->num == mage->faction->num) {
@@ -2099,7 +2099,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 			r->Kill(victim);
 		if (!mage->GetMen())
 			break;
-		
+
 		relics = mage->items.GetNum(I_RELICOFGRACE);
 		mage->items.SetNum(I_RELICOFGRACE, relics + 1);
 	}

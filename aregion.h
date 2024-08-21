@@ -177,6 +177,121 @@ struct RegionSetup {
 	int settlementSize;
 };
 
+/**
+ * @brief Represents a connection between two regions.
+ *
+ * This is a tuple of two regions; an edge in the region graph.
+ * The edge is bidirectional, it is not important which region is the left and which is the right.
+ *
+ * Edge allows to add additional information to the connection between the regions.
+ *
+ */
+class RegionEdge {
+public:
+    /**
+     * @brief A unique identifier for this connection.
+	 *
+	 * This is used to identify the edge in the edges list of the region graph.
+	 * Also MOVE order can use this id to specify the destination of the movement.
+     *
+     */
+    const int get_id();
+
+    /**
+     * @brief The left region of the edge.
+     */
+    ARegion* get_left();
+
+    /**
+     * @brief The right region of the edge.
+     */
+    ARegion* get_right();
+
+    /**
+     * @brief Direction of the edge from the left region to the right region.
+     */
+    const int get_left_dir();
+
+    /**
+     * @brief Direction of the edge from the right region to the left region.
+     */
+    const int get_right_dir();
+
+    /**
+     * @brief Creates a new edge between two regions.
+     *
+     * This is the only way to create a new edge.
+     *
+     * @param id A unique identifier for the edge.
+     * @param left The left region of the edge.
+     * @param right The right region of the edge.
+     * @param left_dir The direction of the edge from the left region to the right region.
+     * @param right_dir The direction of the edge from the right region to the left region.
+     * @return const Edge* The new edge.
+     */
+    static const RegionEdge* create(const int id, ARegion *left, ARegion *right, const int left_dir, const int right_dir);
+
+private:
+    RegionEdge(const int id, ARegion* left, ARegion* right, const int left_dir, const int right_dir)
+        : id(id), left(left), right(right), left_dir(left_dir), right_dir(right_dir) {}
+
+    int id;
+    ARegion* left;
+    ARegion* right;
+    int left_dir;
+    int right_dir;
+};
+
+/**
+ * @brief Represents connections to other regions and locations.
+ */
+class RegionEdges {
+public:
+    using itemType = RegionEdge *;
+    using itemsMapType = std::unordered_map<int, const itemType>;
+    using regionType = ARegion *;
+    using regionArrayType = std::array<regionType, NDIRS>;
+    using cacheType = std::unordered_map<regionType, regionArrayType>;
+    using iterator = itemsMapType::iterator;
+
+    const int size() const { return items.size(); }
+
+    /**
+     * @brief Adds a new edge to the list of edges.
+     *
+     * @param edge The edge to add.
+     */
+    void add(const itemType edge);
+
+    /**
+     * @brief Returns the neighbors of a region.
+     *
+     * This function is for the compatibility with the old code.
+     * Missing directions will be set to nullptr.
+     *
+     * @param region The region to get the neighbors of.
+     * @return const std::array<const ARegion*, NDIRS> The neighbors of the region.
+     */
+    const regionArrayType& neighbors(const regionType region);
+
+    /**
+     * @brief Returns the neighboring region in the given direction.
+     *
+     * This function is for the compatibility with the old code.
+     *
+     * @param dir The direction to get the neighbor of.
+     * @return ARegion* The neighboring region in the given direction or nullptr if there is no neighbor.
+     */
+    regionType get_neighbor(const RegionEdges::regionType region, const int dir);
+
+    iterator begin();
+    iterator end();
+
+private:
+    itemsMapType items;
+    cacheType neighborsCache;
+};
+
 class ARegion : public AListElem
 {
 	friend class Game;
@@ -186,11 +301,10 @@ class ARegion : public AListElem
 		ARegion();
 		//ARegion(int, int);
 		~ARegion();
-		
+
 		void Setup();
 		void ManualSetup(const RegionSetup& settings);
 
-		void ZeroNeighbors();
 		void SetName(char const *);
 
 		void Writeout(ostream& f);
@@ -317,7 +431,7 @@ class ARegion : public AListElem
 		int wages;
 		int maxwages;
 		int wealth;
-		
+
 		/* Economy */
 		int habitat;
 		int development;
@@ -335,14 +449,28 @@ class ARegion : public AListElem
 		int emigrants;
 		// economic improvement
 		int improvement;
-		
+
 		/* Potential bonuses to economy */
 		int clearskies;
 		int earthlore;
 		int phantasmal_entertainment;
 
-		ARegion *neighbors[NDIRS];
-		AList objects;
+        /**
+         * The edges of the region graph that connect this region to other regions and locations.
+         */
+        RegionEdges edges;
+
+        /**
+         * @brief Returns the neighboring region in the given direction.
+         *
+         * This function is for the compatibility with the old code.
+         *
+         * @param dir The direction to get the neighbor of.
+         * @return ARegion* The neighboring region in the given direction or nullptr if there is no neighbor.
+         */
+        ARegion* neighbors(const int dir);
+
+        AList objects;
 		map<int,int> newfleets;
 		int fleetalias;
 		AList hell; /* Where dead units go */
@@ -446,10 +574,10 @@ class GeoMap
 		int GetVegetation(int, int);
 		int GetCulture(int, int);
 		void ApplyGeography(ARegionArray *pArr);
-		
+
 		int size, xscale, yscale, xoff, yoff;
 		map<long int,Geography> geomap;
-		
+
 };
 
 class ARegionList : public AList
@@ -481,6 +609,8 @@ class ARegionList : public AList
 		ARegionArray **pRegionArrays;
 
 	public:
+        using iterator = AListIterator<ARegion>;
+
 		//
 		// Public world creation stuff
 		//
@@ -515,7 +645,7 @@ class ARegionList : public AList
 		void UnsetRace(ARegionArray *pRegs);
 		void RaceAnchors(ARegionArray *pRegs);
 		void GrowRaces(ARegionArray *pRegs);
-		
+
 		void TownStatistics();
 		void ResourcesStatistics();
 
@@ -524,6 +654,9 @@ class ARegionList : public AList
 		int GetLevelYScale(int level);
 
 		void AddHistoricalBuildings(ARegionArray* arr, const int w, const int h);
+
+        iterator begin() { return iterator((ARegion *) this->First()); }
+        iterator end() { return iterator(); }
 
 	private:
 		//

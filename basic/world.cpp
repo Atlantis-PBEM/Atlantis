@@ -2481,7 +2481,7 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
 		ARegionPtr * reg = (ARegionPtr *) inlist.First();
 		for (int i=0; i<NDIRS; i++)
 		{
-			ARegion * r2 = reg->ptr->neighbors[i];
+			ARegion * r2 = reg->ptr->neighbors(i);
 			if (!r2) continue;
 			if (r2->type == R_OCEAN) continue;
 			if (GetRegion(&inlist,r2->num)) continue;
@@ -2503,9 +2503,9 @@ void ARegion::MakeStartingCity()
 	if (!Globals->TOWNS_EXIST) return;
 
 	if (Globals->GATES_EXIST) gate = -1;
-	
+
 	if (town) delete town;
-	
+
 	AddTown(TOWN_CITY);
 
 	if (!Globals->START_CITIES_EXIST) return;
@@ -2597,8 +2597,8 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 		}
 
 		for (int j=0; j<i; j++) {
-			if (!AC->neighbors[j]) continue;
-			if (GetPlanarDistance(reg,AC->neighbors[j], 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
+			if (!AC->neighbors(j)) continue;
+			if (GetPlanarDistance(reg,AC->neighbors(j), 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
 				reg = 0;
 				tries++;
 				break;
@@ -2624,8 +2624,8 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 		}
 
 		for (int j=0; j<i; j++) {
-			if (!AC->neighbors[j]) continue;
-			if (GetPlanarDistance(reg,AC->neighbors[j], 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
+			if (!AC->neighbors(j)) continue;
+			if (GetPlanarDistance(reg,AC->neighbors(j), 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
 				reg = 0;
 				tries++;
 				break;

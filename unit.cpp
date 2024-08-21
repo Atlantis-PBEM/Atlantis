@@ -386,7 +386,7 @@ int Unit::CanGetSpoil(Item *i)
 		return 0;
 
 	load = items.Weight();
-	
+
 	if (flags & FLAG_FLYSPOILS) {
 		capacity = ItemDefs[i->type].fly;
 		if (FlyingCapacity() + capacity < load + weight)
@@ -670,7 +670,7 @@ void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int au
 				}
 			}
 		}
-		
+
 		if ((type == U_MAGE || type == U_GUARDMAGE) && combat != -1) {
 			j["combat_spell"] = { { "name", SkillDefs[combat].name }, { "tag", SkillDefs[combat].abbr } };
 		}
@@ -705,7 +705,7 @@ void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int au
 
 		// For the JSON report, the best location for order information is on the unit itself.
 		j["orders"] = write_json_orders();
-		
+
 	}
 
 	j["items"] = json::array();
@@ -878,7 +878,7 @@ void Unit::DefaultOrders(Object *obj)
 			directions.push_back(-1);
 
 			for (i = 0; i < NDIRS; i++) {
-				n = r->neighbors[i];
+				n = r->neighbors(i);
 				if (!n) {
 					continue;
 				}
@@ -911,7 +911,7 @@ void Unit::DefaultOrders(Object *obj)
 
 					bool connectedToGoodTerrain = false;
 					for (int j = 0; j < NDIRS; j++) {
-						auto region = n->neighbors[j];
+						auto region = n->neighbors(j);
 						if (!region) {
 							continue;
 						}
@@ -1119,7 +1119,7 @@ int Unit::GetSharedNum(int item)
 		Object *obj = (Object *) elem;
 		forlist((&obj->units)) {
 			Unit *u = (Unit *) elem;
-			if ((u->num == num) || 
+			if ((u->num == num) ||
 			(u->faction == faction && u->GetFlag(FLAG_SHARING)))
 				count += u->items.GetNum(item);
 		}
@@ -1348,7 +1348,7 @@ int Unit::GetAvailSkill(int sk)
 				grant = ItemDefs[i->type].minGrant;
 			if (grant > ItemDefs[i->type].maxGrant)
 				grant = ItemDefs[i->type].maxGrant;
-			
+
 			if (grant > retval)
 				retval = grant;
 		}
@@ -1423,7 +1423,7 @@ int Unit::CanStudy(int sk)
 			!(SkillDefs[sk].flags & SkillType::MAGIC))
 		return 0;
 	}
-	
+
 	int curlev = GetRealSkill(sk);
 
 	if (SkillDefs[sk].flags & SkillType::DISABLED) return 0;
@@ -1974,7 +1974,7 @@ static int ContributesToMovement(int movetype, int item)
 				return ItemDefs[item].swim;
 			break;
 	}
-	
+
 	return 0;
 }
 
@@ -2042,7 +2042,7 @@ int Unit::CanMoveTo(ARegion *r1, ARegion *r2)
 	int dir;
 
 	for (i=0; i<NDIRS; i++) {
-		if (r1->neighbors[i] == r2) {
+		if (r1->neighbors(i) == r2) {
 			exit = 0;
 			dir = i;
 			break;
@@ -2051,7 +2051,7 @@ int Unit::CanMoveTo(ARegion *r1, ARegion *r2)
 	if (exit) return 0;
 	exit = 1;
 	for (i=0; i<NDIRS; i++) {
-		if (r2->neighbors[i] == r1) {
+		if (r2->neighbors(i) == r1) {
 			exit = 0;
 			break;
 		}
@@ -2142,7 +2142,7 @@ int Unit::Taxers(int numtaxers)
 	int basetax = 0;
 	int weapontax = 0;
 	int armortax = 0;
-	
+
 	// check out items
 	int numMelee= 0;
 	int numUsableMelee = 0;
@@ -2232,7 +2232,7 @@ int Unit::Taxers(int numtaxers)
 			else
 				creatures += pItem->num;
 		}
-		
+
 		if (ItemDefs[pItem->type].type & IT_ARMOR) {
 			numArmor += pItem->num;
 		}
@@ -2251,7 +2251,7 @@ int Unit::Taxers(int numtaxers)
 		 GetSkill(S_STEALTH))) {
 		basetax = totalMen;
 		taxers = totalMen;
-		
+
 		// Weapon tax bonus
 		if ((Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE) ||
 		((Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL) &&
@@ -2265,7 +2265,7 @@ int Unit::Taxers(int numtaxers)
 		 	}
 		 	weapontax += numMelee;
 		 }
-		 
+
 		if (((Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL) &&
 		 (GetSkill(S_CROSSBOW) || GetSkill(S_LONGBOW)))) {
 		 	weapontax += numUsableBows;
@@ -2274,7 +2274,7 @@ int Unit::Taxers(int numtaxers)
 		 GetSkill(S_RIDING)) {
 		 	if (weapontax < numUsableMounts) weapontax = numUsableMounts;
 		 }
-		
+
 	} else {
 
 		if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_WEAPON) {
@@ -2335,7 +2335,7 @@ int Unit::Taxers(int numtaxers)
 			weapontax += numUsableBattle;
 			taxers += numUsableBattle;
 		}
-		
+
 	}
 
 	// Ok, all the items categories done - check for mages taxing
@@ -2388,13 +2388,13 @@ int Unit::Taxers(int numtaxers)
 			}
 		}
 	}
-	
+
 	armortax = numArmor;
-	
+
 	// Check for overabundance
 	if (weapontax > totalMen) weapontax = totalMen;
 	if (armortax > weapontax) armortax = weapontax;
-	
+
 	// Adjust basetax in case of weapon taxation
 	if (basetax < weapontax) basetax = weapontax;
 
@@ -2411,7 +2411,7 @@ int Unit::Taxers(int numtaxers)
 		basetax += illusions;
 		taxers += illusions;
 	}
-	
+
 	if (numtaxers) return(taxers);
 
 	int taxes = Globals->TAX_BASE_INCOME * basetax
@@ -2614,7 +2614,7 @@ void Unit::DiscardUnfinishedShips() {
 			items.SetNum(i,0);
 		}
 	}
-	if (discard > 0) event("discards all unfinished ships.", "discard");	
+	if (discard > 0) event("discards all unfinished ships.", "discard");
 }
 
 void Unit::event(const string& message, const string& category, ARegion *r)
@@ -2722,7 +2722,7 @@ int Unit::GetAttribute(char const *attrib)
 		}
 		else
 			base = monbase; // monster units have no men
-	}	
+	}
 	return base;
 }
 

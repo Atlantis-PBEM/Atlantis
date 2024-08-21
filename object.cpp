@@ -491,11 +491,11 @@ void Object::SetNumShips(int type, int num)
 /* Adds one ship of the given type.
  */
 void Object::AddShip(int type)
-{	
+{
 	if (CheckShip(type) == 0) return;
 	int num = GetNumShips(type);
 	num++;
-	SetNumShips(type, num);	
+	SetNumShips(type, num);
 }
 
 /* Returns the String 'Fleet' for multi-ship fleets
@@ -589,10 +589,10 @@ int Object::SailThroughCheck(int dir)
 {
 	if (IsFleet()) {
 		// if target region doesn't exist, cannot be sailed into
-		if (!region->neighbors[dir]) {
+		if (!region->neighbors(dir)) {
 			return 0;
 		}
-		
+
 		// flying fleets always can sail through
 		if (flying == 1) {
 			return 1;
@@ -605,7 +605,7 @@ int Object::SailThroughCheck(int dir)
 
 		// fleet is not flying and it is in a land region. Check that it
 		// doesn's sail inland
-		if (TerrainDefs[region->neighbors[dir]->type].similar_type != R_OCEAN) {
+		if (TerrainDefs[region->neighbors(dir)->type].similar_type != R_OCEAN) {
 			return 0;
 		}
 
@@ -640,7 +640,7 @@ int Object::SailThroughCheck(int dir)
 			}
 
 			for (int k = d1+1; k < d2; k++) {
-				ARegion *land1 = region->neighbors[k];
+				ARegion *land1 = region->neighbors(k);
 				if ((!land1) ||
 						(TerrainDefs[land1->type].similar_type !=
 						 R_OCEAN))
@@ -651,7 +651,7 @@ int Object::SailThroughCheck(int dir)
 			for (int l = d2+1; l <= d2 + sides; l++) {
 				int dl = l;
 				if (dl >= NDIRS) dl -= NDIRS;
-				ARegion *land2 = region->neighbors[dl];
+				ARegion *land2 = region->neighbors(dl);
 				if ((!land2) ||
 						(TerrainDefs[land2->type].similar_type !=
 						 R_OCEAN))
@@ -743,7 +743,7 @@ int Object::GetFleetSpeed(int report)
 
 	// check for sufficient sailing skill!
 	if (tskill < (weight / 50)) return 0;
-	
+
 	// count wind mages
 	forlist(&units) {
 		Unit * unit = (Unit *) elem;
@@ -770,7 +770,7 @@ int Object::GetFleetSpeed(int report)
 
 	// check for being overloaded
 	if (FleetLoad() > capacity) return 0;
-	
+
 	// speed bonus due to low load:
 	int loadfactor = (capacity / FleetLoad());
 	bonus = 0;
@@ -833,7 +833,7 @@ AString *ObjectDescription(int obj)
 		*temp += AString(" This structure provides defense to the first ") +
 			o->protect + " men inside it.";
 		// Now do the defences. First, figure out how many to do.
-		int totaldef = 0; 
+		int totaldef = 0;
 		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
 			totaldef += (o->defenceArray[i] != 0);
 		}
@@ -844,7 +844,7 @@ AString *ObjectDescription(int obj)
 				totaldef--;
 				*temp += AString(o->defenceArray[i]) + " against " +
 					AttType(i) + AString(" attacks");
-				
+
 				if (totaldef >= 2) {
 					*temp += AString(", ");
 				} else {
@@ -853,7 +853,7 @@ AString *ObjectDescription(int obj)
 					} else {	// last bonus
 						*temp += AString(".");
 					}
-				} // end if 
+				} // end if
 			}
 		} // end for
 

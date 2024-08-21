@@ -141,8 +141,6 @@ ARegion::ARegion()
 	clearskies = 0;
 	earthlore = 0;
 	phantasmal_entertainment = 0;
-	for (int i=0; i<NDIRS; i++)
-		neighbors[i] = 0;
 	visited = 0;
 }
 
@@ -150,13 +148,6 @@ ARegion::~ARegion()
 {
 	if (name) delete name;
 	if (town) delete town;
-}
-
-void ARegion::ZeroNeighbors()
-{
-	for (int i=0; i<NDIRS; i++) {
-		neighbors[i] = 0;
-	}
 }
 
 void ARegion::SetName(char const *c)
@@ -219,9 +210,9 @@ int ARegion::GetNearestProd(int item)
 				return i;
 			}
 			for (int j=0; j<NDIRS; j++) {
-				if (neighbors[j]) {
+				if (neighbors(j)) {
 					p = new ARegionPtr;
-					p->ptr = neighbors[j];
+					p->ptr = neighbors(j);
 					r2ptr->Add(p);
 				}
 			}
@@ -295,10 +286,10 @@ void ARegion::MakeLair(int t)
 int ARegion::GetPoleDistance(int dir)
 {
 	int ct = 1;
-	ARegion *nreg = neighbors[dir];
+	ARegion *nreg = neighbors(dir);
 	while (nreg) {
 		ct++;
-		nreg = nreg->neighbors[dir];
+		nreg = nreg->neighbors(dir);
 	}
 	return ct;
 }
@@ -365,7 +356,7 @@ int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range, int dev
 	if (range > 0) {
 		for (int d=0; d<NDIRS; d++) {
 			if (!HasExitRoad(d)) continue;
-			ARegion *r = neighbors[d];
+			ARegion *r = neighbors(d);
 			if (!r) continue;
 			if (dir == r->GetRealDirComp(d)) continue;
 			if (HasConnectingRoad(d)) sum = r->TraceConnectedRoad(d, sum, con, range-1, dev+2);
@@ -383,11 +374,11 @@ int ARegion::RoadDevelopmentBonus(int range, int dev)
 	con->Add(rp);
 	for (int d=0; d<NDIRS; d++) {
 		if (!HasExitRoad(d)) continue;
-		ARegion *r = neighbors[d];
+		ARegion *r = neighbors(d);
 		if (!r) continue;
 		if (HasConnectingRoad(d)) bonus = r->TraceConnectedRoad(d, bonus, con, range-1, dev);
 	}
-	return bonus;	
+	return bonus;
 }
 
 // AS
@@ -658,7 +649,7 @@ int ARegion::CountConnectingRoads()
 {
 	int connections = 0;
 	for (int i = 0; i < NDIRS; i++) {
-		if (HasExitRoad(i) && neighbors[i] &&
+		if (HasExitRoad(i) && neighbors(i) &&
 				HasConnectingRoad(i))
 			connections ++;
 	}
@@ -670,7 +661,7 @@ int ARegion::HasConnectingRoad(int realDirection)
 {
 	int opposite = GetRealDirComp(realDirection);
 
-	if (neighbors[realDirection] && neighbors[realDirection]->HasExitRoad(opposite)) {
+	if (neighbors(realDirection) && neighbors(realDirection)->HasExitRoad(opposite)) {
 		return 1;
 	}
 
@@ -709,10 +700,10 @@ int ARegion::GetRealDirComp(int realDirection)
 {
 	int complementDirection = 0;
 
-	if (neighbors[realDirection]) {
-		ARegion *n = neighbors[realDirection];
+	if (neighbors(realDirection)) {
+		ARegion *n = neighbors(realDirection);
 		for (int i = 0; i < NDIRS; i++)
-			if (n->neighbors[i] == this)
+			if (n->neighbors(i) == this)
 				return i;
 	}
 
@@ -1069,7 +1060,7 @@ void ARegion::Writeout(ostream& f)
 	f << products.size() << '\n';
 	for (const auto& product : products) product->Writeout(f);
 	f << markets.size() << '\n';
-	for (const auto& market : markets) market->Writeout(f);	
+	for (const auto& market : markets) market->Writeout(f);
 
 	f << objects.Num() << '\n';
 	forlist ((&objects)) ((Object *) elem)->Writeout(f);
@@ -1364,9 +1355,9 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 
 	j["exits"] = json::array();
 	for (int i=0; i<NDIRS; i++) {
-		if (!exits_seen[i] || !neighbors[i]) continue; 
+		if (!exits_seen[i] || !neighbors(i)) continue;
 		j["exits"].push_back(
-			{ { "direction", DirectionStrs[i] }, { "region", neighbors[i]->basic_region_data() } }
+			{ { "direction", DirectionStrs[i] }, { "region", neighbors(i)->basic_region_data() } }
 		);
 	}
 
@@ -1555,8 +1546,8 @@ int ARegion::IsCoastal()
 		return 1;
 	int seacount = 0;
 	for (int i=0; i<NDIRS; i++) {
-		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {
-			if (!Globals->LAKESIDE_IS_COASTAL && neighbors[i]->type == R_LAKE) continue;
+		if (neighbors(i) && TerrainDefs[neighbors(i)->type].similar_type == R_OCEAN) {
+			if (!Globals->LAKESIDE_IS_COASTAL && neighbors(i)->type == R_LAKE) continue;
 			seacount++;
 		}
 	}
@@ -1568,7 +1559,7 @@ int ARegion::IsCoastalOrLakeside()
 	if (TerrainDefs[type].similar_type == R_OCEAN) return 1;
 	int seacount = 0;
 	for (int i=0; i<NDIRS; i++) {
-		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {
+		if (neighbors(i) && TerrainDefs[neighbors(i)->type].similar_type == R_OCEAN) {
 			seacount++;
 		}
 	}
@@ -1817,7 +1808,7 @@ void ARegion::AddFleet(Object * fleet)
 	objects.Add(fleet);
 	//Awrite(AString("Setting up fleet alias #") + fleetalias + ": " + fleet->num);
 	newfleets.insert(make_pair(fleetalias++, fleet->num));
-	
+
 }
 
 int ARegion::ResolveFleetAlias(int alias)
@@ -1827,6 +1818,10 @@ int ARegion::ResolveFleetAlias(int alias)
 	//Awrite(AString("Resolving Fleet Alias #") + alias + ": " + f->second);
 	if (f == newfleets.end()) return -1;
 	return f->second;
+}
+
+ARegion* ARegion::neighbors(const int dir) {
+    return this->edges.get_neighbor(this, dir);
 }
 
 ARegionList::ARegionList()
@@ -1868,7 +1863,7 @@ void ARegionList::WriteRegions(ostream& f)
 		forlist(this) {
 			ARegion *reg = (ARegion *) elem;
 			for (int i = 0; i < NDIRS; i++) {
-				f  << (reg->neighbors[i] ? reg->neighbors[i]->num : -1) << '\n';
+				f  << (reg->neighbors(i) ? reg->neighbors(i)->num : -1) << '\n';
 			}
 		}
 	}
@@ -1922,9 +1917,9 @@ int ARegionList::ReadRegions(istream &f, AList *factions)
 				int j;
 				f >> j;
 				if (j != -1) {
-					reg->neighbors[i] = fa.GetRegion(j);
+					reg->neighbors(i) = fa.GetRegion(j);
 				} else {
-					reg->neighbors[i] = 0;
+					reg->neighbors(i) = 0;
 				}
 			}
 		}
@@ -1994,199 +1989,200 @@ void ARegionList::NeighSetup(ARegion *r, ARegionArray *ar)
 	}
 }
 
+[[deprecated("Icosahedral world is no longer supported")]]
 void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 {
-	int scale, x, y, x2, y2, x3, neighX, neighY;
+	// int scale, x, y, x2, y2, x3, neighX, neighY;
 
-	scale = ar->x / 10;
+	// scale = ar->x / 10;
 
-	r->ZeroNeighbors();
+	// r->ZeroNeighbors();
 
-	y = r->yloc;
-	x = r->xloc;
-	// x2 is the x-coord of this hex inside its "wedge"
-	if (y < 5 * scale)
-		x2 = x % (2 * scale);
-	else
-		x2 = (x + 1) % (2 * scale);
-	// x3 is the distance of this hex from the right side of its "wedge"
-	x3 = (2 * scale - x2) % (2 * scale);
-	// y2 is the distance from the SOUTH pole
-	y2 = 10 * scale - 1 - y;
-	// Always try to connect in the standard way...
-	if (y > 1) {
-		r->neighbors[D_NORTH] = ar->GetRegion(x, y - 2);
-	}
-	// but if that fails, use the special icosahedral connections:
-	if (!r->neighbors[D_NORTH]) {
-		if (y > 0 && y < 3 * scale)
-		{
-			if (y == 2) {
-				neighX = 0;
-				neighY = 0;
-			}
-			else if (y == 3 * x2) {
-				neighX = x + 2 * (scale - x2) + 1;
-				neighY = y - 1;
-			}
-			else {
-				neighX = x + 2 * (scale - x2);
-				neighY = y - 2;
-			}
-			neighX %= (scale * 10);
-			r->neighbors[D_NORTH] = ar->GetRegion(neighX, neighY);
-		}
-	}
-	if (y > 0) {
-		neighX = x + 1;
-		neighY = y - 1;
-		neighX %= (scale * 10);
-		r->neighbors[D_NORTHEAST] = ar->GetRegion(neighX, neighY);
-	}
-	if (!r->neighbors[D_NORTHEAST]) {
-		if (y == 0) {
-			neighX = 4 * scale;
-			neighY = 2;
-		}
-		else if (y < 3 * scale) {
-			if (y == 3 * x2) {
-				neighX = x + 2 * (scale - x2) + 1;
-				neighY = y + 1;
-			}
-			else {
-				neighX = x + 2 * (scale - x2);
-				neighY = y;
-			}
-		}
-		else if (y2 < 1) {
-			neighX = x + 2 * scale;
-			neighY = y - 2;
-		}
-		else if (y2 < 3 * scale) {
-			neighX = x + 2 * (scale - x2);
-			neighY = y - 2;
-		}
-		neighX %= (scale * 10);
-		r->neighbors[D_NORTHEAST] = ar->GetRegion(neighX, neighY);
-	}
-	if (y2 > 0) {
-		neighX = x + 1;
-		neighY = y + 1;
-		neighX %= (scale * 10);
-		r->neighbors[D_SOUTHEAST] = ar->GetRegion(neighX, neighY);
-	}
-	if (!r->neighbors[D_SOUTHEAST]) {
-		if (y == 0) {
-			neighX = 2 * scale;
-			neighY = 2;
-		}
-		else if (y2 < 1) {
-			neighX = x + 4 * scale;
-			neighY = y - 2;
-		}
-		else if (y2 < 3 * scale) {
-			if (y2 == 3 * x2) {
-				neighX = x + 2 * (scale - x2) + 1;
-				neighY = y - 1;
-			}
-			else {
-				neighX = x + 2 * (scale - x2);
-				neighY = y;
-			}
-		}
-		else if (y < 3 * scale) {
-			neighX = x + 2 * (scale - x2);
-			neighY = y + 2;
-		}
-		neighX %= (scale * 10);
-		r->neighbors[D_SOUTHEAST] = ar->GetRegion(neighX, neighY);
-	}
-	if (y2 > 1) {
-		r->neighbors[D_SOUTH] = ar->GetRegion(x, y + 2);
-	}
-	if (!r->neighbors[D_SOUTH]) {
-		if (y2 > 0 && y2 < 3 * scale)
-		{
-			if (y2 == 2) {
-				neighX = 10 * scale - 1;
-				neighY = y + 2;
-			}
-			else if (y2 == 3 * x2) {
-				neighX = x + 2 * (scale - x2) + 1;
-				neighY = y + 1;
-			}
-			else {
-				neighX = x + 2 * (scale - x2);
-				neighY = y + 2;
-			}
-			neighX = (neighX + scale * 10) % (scale * 10);
-			r->neighbors[D_SOUTH] = ar->GetRegion(neighX, neighY);
-		}
-	}
-	if (y2 > 0) {
-		neighX = x - 1;
-		neighY = y + 1;
-		neighX = (neighX + scale * 10) % (scale * 10);
-		r->neighbors[D_SOUTHWEST] = ar->GetRegion(neighX, neighY);
-	}
-	if (!r->neighbors[D_SOUTHWEST]) {
-		if (y == 0) {
-			neighX = 8 * scale;
-			neighY = 2;
-		}
-		else if (y2 < 1) {
-			neighX = x + 6 * scale;
-			neighY = y - 2;
-		}
-		else if (y2 < 3 * scale) {
-			if (y2 == 3 * x3 + 4) {
-				neighX = x + 2 * (x3 - scale) + 1;
-				neighY = y + 1;
-			}
-			else {
-				neighX = x + 2 * (x3 - scale);
-				neighY = y;
-			}
-		}
-		else if (y < 3 * scale) {
-			neighX = x - 2 * (scale - x3) + 1;
-			neighY = y + 1;
-		}
-		neighX = (neighX + scale * 10) % (scale * 10);
-		r->neighbors[D_SOUTHWEST] = ar->GetRegion(neighX, neighY);
-	}
-	if (y > 0) {
-		neighX = x - 1;
-		neighY = y - 1;
-		neighX = (neighX + scale * 10) % (scale * 10);
-		r->neighbors[D_NORTHWEST] = ar->GetRegion(neighX, neighY);
-	}
-	if (!r->neighbors[D_NORTHWEST]) {
-		if (y == 0) {
-			neighX = 6 * scale;
-			neighY = 2;
-		}
-		else if (y < 3 * scale) {
-			if (y == 3 * x3 + 4) {
-				neighX = x + 2 * (x3 - scale) + 1;
-				neighY = y - 1;
-			}
-			else {
-				neighX = x + 2 * (x3 - scale);
-				neighY = y;
-			}
-		}
-		else if (y2 < 1) {
-			neighX = x + 8 * scale;
-			neighY = y - 2;
-		}
-		else if (y2 < 3 * scale) {
-			neighX = x - 2 * (scale - x3) + 1;
-			neighY = y - 1;
-		}
-		neighX = (neighX + scale * 10) % (scale * 10);
-		r->neighbors[D_NORTHWEST] = ar->GetRegion(neighX, neighY);
-	}
+	// y = r->yloc;
+	// x = r->xloc;
+	// // x2 is the x-coord of this hex inside its "wedge"
+	// if (y < 5 * scale)
+	// 	x2 = x % (2 * scale);
+	// else
+	// 	x2 = (x + 1) % (2 * scale);
+	// // x3 is the distance of this hex from the right side of its "wedge"
+	// x3 = (2 * scale - x2) % (2 * scale);
+	// // y2 is the distance from the SOUTH pole
+	// y2 = 10 * scale - 1 - y;
+	// // Always try to connect in the standard way...
+	// if (y > 1) {
+	// 	r->neighbors[D_NORTH] = ar->GetRegion(x, y - 2);
+	// }
+	// // but if that fails, use the special icosahedral connections:
+	// if (!r->neighbors[D_NORTH]) {
+	// 	if (y > 0 && y < 3 * scale)
+	// 	{
+	// 		if (y == 2) {
+	// 			neighX = 0;
+	// 			neighY = 0;
+	// 		}
+	// 		else if (y == 3 * x2) {
+	// 			neighX = x + 2 * (scale - x2) + 1;
+	// 			neighY = y - 1;
+	// 		}
+	// 		else {
+	// 			neighX = x + 2 * (scale - x2);
+	// 			neighY = y - 2;
+	// 		}
+	// 		neighX %= (scale * 10);
+	// 		r->neighbors[D_NORTH] = ar->GetRegion(neighX, neighY);
+	// 	}
+	// }
+	// if (y > 0) {
+	// 	neighX = x + 1;
+	// 	neighY = y - 1;
+	// 	neighX %= (scale * 10);
+	// 	r->neighbors[D_NORTHEAST] = ar->GetRegion(neighX, neighY);
+	// }
+	// if (!r->neighbors[D_NORTHEAST]) {
+	// 	if (y == 0) {
+	// 		neighX = 4 * scale;
+	// 		neighY = 2;
+	// 	}
+	// 	else if (y < 3 * scale) {
+	// 		if (y == 3 * x2) {
+	// 			neighX = x + 2 * (scale - x2) + 1;
+	// 			neighY = y + 1;
+	// 		}
+	// 		else {
+	// 			neighX = x + 2 * (scale - x2);
+	// 			neighY = y;
+	// 		}
+	// 	}
+	// 	else if (y2 < 1) {
+	// 		neighX = x + 2 * scale;
+	// 		neighY = y - 2;
+	// 	}
+	// 	else if (y2 < 3 * scale) {
+	// 		neighX = x + 2 * (scale - x2);
+	// 		neighY = y - 2;
+	// 	}
+	// 	neighX %= (scale * 10);
+	// 	r->neighbors[D_NORTHEAST] = ar->GetRegion(neighX, neighY);
+	// }
+	// if (y2 > 0) {
+	// 	neighX = x + 1;
+	// 	neighY = y + 1;
+	// 	neighX %= (scale * 10);
+	// 	r->neighbors[D_SOUTHEAST] = ar->GetRegion(neighX, neighY);
+	// }
+	// if (!r->neighbors[D_SOUTHEAST]) {
+	// 	if (y == 0) {
+	// 		neighX = 2 * scale;
+	// 		neighY = 2;
+	// 	}
+	// 	else if (y2 < 1) {
+	// 		neighX = x + 4 * scale;
+	// 		neighY = y - 2;
+	// 	}
+	// 	else if (y2 < 3 * scale) {
+	// 		if (y2 == 3 * x2) {
+	// 			neighX = x + 2 * (scale - x2) + 1;
+	// 			neighY = y - 1;
+	// 		}
+	// 		else {
+	// 			neighX = x + 2 * (scale - x2);
+	// 			neighY = y;
+	// 		}
+	// 	}
+	// 	else if (y < 3 * scale) {
+	// 		neighX = x + 2 * (scale - x2);
+	// 		neighY = y + 2;
+	// 	}
+	// 	neighX %= (scale * 10);
+	// 	r->neighbors[D_SOUTHEAST] = ar->GetRegion(neighX, neighY);
+	// }
+	// if (y2 > 1) {
+	// 	r->neighbors[D_SOUTH] = ar->GetRegion(x, y + 2);
+	// }
+	// if (!r->neighbors[D_SOUTH]) {
+	// 	if (y2 > 0 && y2 < 3 * scale)
+	// 	{
+	// 		if (y2 == 2) {
+	// 			neighX = 10 * scale - 1;
+	// 			neighY = y + 2;
+	// 		}
+	// 		else if (y2 == 3 * x2) {
+	// 			neighX = x + 2 * (scale - x2) + 1;
+	// 			neighY = y + 1;
+	// 		}
+	// 		else {
+	// 			neighX = x + 2 * (scale - x2);
+	// 			neighY = y + 2;
+	// 		}
+	// 		neighX = (neighX + scale * 10) % (scale * 10);
+	// 		r->neighbors[D_SOUTH] = ar->GetRegion(neighX, neighY);
+	// 	}
+	// }
+	// if (y2 > 0) {
+	// 	neighX = x - 1;
+	// 	neighY = y + 1;
+	// 	neighX = (neighX + scale * 10) % (scale * 10);
+	// 	r->neighbors[D_SOUTHWEST] = ar->GetRegion(neighX, neighY);
+	// }
+	// if (!r->neighbors[D_SOUTHWEST]) {
+	// 	if (y == 0) {
+	// 		neighX = 8 * scale;
+	// 		neighY = 2;
+	// 	}
+	// 	else if (y2 < 1) {
+	// 		neighX = x + 6 * scale;
+	// 		neighY = y - 2;
+	// 	}
+	// 	else if (y2 < 3 * scale) {
+	// 		if (y2 == 3 * x3 + 4) {
+	// 			neighX = x + 2 * (x3 - scale) + 1;
+	// 			neighY = y + 1;
+	// 		}
+	// 		else {
+	// 			neighX = x + 2 * (x3 - scale);
+	// 			neighY = y;
+	// 		}
+	// 	}
+	// 	else if (y < 3 * scale) {
+	// 		neighX = x - 2 * (scale - x3) + 1;
+	// 		neighY = y + 1;
+	// 	}
+	// 	neighX = (neighX + scale * 10) % (scale * 10);
+	// 	r->neighbors[D_SOUTHWEST] = ar->GetRegion(neighX, neighY);
+	// }
+	// if (y > 0) {
+	// 	neighX = x - 1;
+	// 	neighY = y - 1;
+	// 	neighX = (neighX + scale * 10) % (scale * 10);
+	// 	r->neighbors[D_NORTHWEST] = ar->GetRegion(neighX, neighY);
+	// }
+	// if (!r->neighbors[D_NORTHWEST]) {
+	// 	if (y == 0) {
+	// 		neighX = 6 * scale;
+	// 		neighY = 2;
+	// 	}
+	// 	else if (y < 3 * scale) {
+	// 		if (y == 3 * x3 + 4) {
+	// 			neighX = x + 2 * (x3 - scale) + 1;
+	// 			neighY = y - 1;
+	// 		}
+	// 		else {
+	// 			neighX = x + 2 * (x3 - scale);
+	// 			neighY = y;
+	// 		}
+	// 	}
+	// 	else if (y2 < 1) {
+	// 		neighX = x + 8 * scale;
+	// 		neighY = y - 2;
+	// 	}
+	// 	else if (y2 < 3 * scale) {
+	// 		neighX = x - 2 * (scale - x3) + 1;
+	// 		neighY = y - 1;
+	// 	}
+	// 	neighX = (neighX + scale * 10) % (scale * 10);
+	// 	r->neighbors[D_NORTHWEST] = ar->GetRegion(neighX, neighY);
+	// }
 }
 
 void ARegionList::CalcDensities()
@@ -2223,7 +2219,7 @@ void ARegionList::TownStatistics()
 					break;
 				case TOWN_CITY:
 					cities++;
-			}	
+			}
 		}
 	}
 	int tot = villages + towns + cities;
@@ -2273,8 +2269,8 @@ ARegion *ARegionList::FindConnectedRegions(ARegion *r, ARegion *tail, int shaft)
         ARegion *inner;
 
         for (i = 0; i < NDIRS; i++) {
-                if (r->neighbors[i] && r->neighbors[i]->distance == -1) {
-                        tail->next = r->neighbors[i];
+                if (r->neighbors(i) && r->neighbors(i)->distance == -1) {
+                        tail->next = r->neighbors(i);
                         tail = tail->next;
                         tail->distance = r->distance + 1;
                 }
@@ -2401,7 +2397,7 @@ int ARegionList::get_connected_distance(ARegion *start, ARegion *target, int pen
 
 		// Add all neighbors to the queue as long as we haven't visited them yet
 		for (int i = 0; i < NDIRS; i++) {
-			ARegion *n = cur->neighbors[i];
+			ARegion *n = cur->neighbors(i);
 			if (n == nullptr) continue; // edge of map has missing neighbors
 			// cur and n *should* have the same zloc, but ... let's just future-proof in case that changes sometime
 			int cost = (cur->zloc == n->zloc ? 1 : penalty);
@@ -2490,7 +2486,7 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty, int 
 			r->distance = -1;
 			r->next = 0;
 		}
-		
+
 		zdist = (one->zloc - two->zloc);
 		if (zdist < 0) zdist = -zdist;
 		start->distance = zdist * penalty;
@@ -2670,11 +2666,11 @@ int ParseTerrain(AString *token)
 	for (int i = 0; i < R_NUM; i++) {
 		if (*token == TerrainDefs[i].type) return i;
 	}
-	
+
 	for (int i = 0; i < R_NUM; i++) {
 		if (*token == TerrainDefs[i].name) return i;
 	}
-	
+
 	return (-1);
 }
 
@@ -2735,7 +2731,7 @@ int findWaterBody(std::vector<WaterBody*>& waterBodies, ARegion* reg) {
 
 bool isInnerWater(ARegion* reg) {
 	for (int i = 0; i < NDIRS; i++) {
-		auto n = reg->neighbors[i];
+		auto n = reg->neighbors(i);
 		if (n && n->type != R_OCEAN) {
 			return false;
 		}
@@ -2746,7 +2742,7 @@ bool isInnerWater(ARegion* reg) {
 
 bool isNearWater(ARegion* reg) {
 	for (int i = 0; i < NDIRS; i++) {
-		auto n = reg->neighbors[i];
+		auto n = reg->neighbors(i);
 		if (n && n->type == R_OCEAN) {
 			return true;
 		}
@@ -2757,7 +2753,7 @@ bool isNearWater(ARegion* reg) {
 
 bool isNearWaterBody(ARegion* reg, WaterBody* wb) {
 	for (int i = 0; i < NDIRS; i++) {
-		auto n = reg->neighbors[i];
+		auto n = reg->neighbors(i);
 		if (n && wb->includes(n)) {
 			return true;
 		}
@@ -2857,7 +2853,7 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 				if (otherWater < 0) {
 					continue;
 				}
-				
+
 				int currentDist = distances[water->name][otherWater];
 				if (newDist < currentDist ) {
 					distances[water->name][otherWater] = newDist;
@@ -3065,7 +3061,7 @@ void cleanupIsolatedPlaces(ARegionArray* arr, std::vector<WaterBody*>& waterBodi
 			std::vector<int> nearbyRivers;
 			bool clear = true;
 			for (int i = 0; i < NDIRS; i++) {
-				auto next = reg->neighbors[i];
+				auto next = reg->neighbors(i);
 				if (next == NULL) {
 					continue;
 				}
@@ -3102,7 +3098,7 @@ void cleanupIsolatedPlaces(ARegionArray* arr, std::vector<WaterBody*>& waterBodi
 
 int countNeighbors(ARegionGraph& graph, ARegion* reg, int ofType, int distance) {
 	graphs::Location2D loc = { reg->xloc, reg->yloc };
-	
+
 	int count = 0;
 
 	auto result = graphs::breadthFirstSearch(graph, loc);
@@ -3174,7 +3170,7 @@ std::vector<graphs::Location2D> getPoints(const int w, const int h,
 
 	int minDist = initialMinDist;
 	int cellSize = ceil(minDist / sqrt(2));
-	
+
 	graphs::Location2D loc;
 	do {
 		loc = { .x = getrandom(w), .y = getrandom(h) };
@@ -3424,7 +3420,7 @@ void nameArea(int width, int height, ARegionGraph &graph, std::unordered_set<std
 				volcanoName = getRegionName(getrandom(width * height), etnos, r->type, 1, false);
 			}
 			usedNames.emplace(volcanoName);
-			
+
 			std::cout << volcanoName << std::endl;
 			r->SetName(volcanoName.c_str());
 		}
@@ -3762,7 +3758,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 	}
 
 	ARegionGraph graph = ARegionGraph(arr);
-	
+
 	graph.setInclusion([](ARegion* current, ARegion* next) {
 		return next->type != R_OCEAN && next->type != R_VOLCANO;
 	});
@@ -3860,7 +3856,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 
 				int dir;
 				for (dir = 0; dir < NDIRS; dir++) {
-					if (current->neighbors[dir] == endReg) {
+					if (current->neighbors(dir) == endReg) {
 						break;
 					}
 				}
@@ -3933,7 +3929,7 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 	const int h = map->map.height / 2;
 
 	MakeRegions(level, w, h);
-	
+
 	pRegionArrays[level]->SetName(0);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
@@ -3960,13 +3956,13 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 
 	const int maxRiverReach = std::min(w, h) / 4;
 	makeRivers(map, arr, waterBodies, rivers, w, h, maxRiverReach);
-	
+
 	cleanupIsolatedPlaces(arr, waterBodies, rivers, w, h);
 
 	placeVolcanoes(arr, w, h);
 
 	GrowRaces(arr);
-	
+
 	giveNames(arr, waterBodies, rivers, w, h);
 	assertAllRegionsHaveName(w, h, arr);
 
@@ -3994,7 +3990,7 @@ std::vector<graphs::Location2D> ARegionGraph::neighbors(graphs::Location2D id) {
 
 	std::vector<graphs::Location2D> list;
 	for (int i = 0; i < NDIRS; i++) {
-		ARegion* next = current->neighbors[i];
+		ARegion* next = current->neighbors(i);
 		if (next == NULL) {
 			continue;
 		}
@@ -4028,7 +4024,7 @@ void ARegionList::ResourcesStatistics() {
 
 	forlist(this) {
 		ARegion* reg = (ARegion*) elem;
-		
+
 		for (const auto& p : reg->products) {
 			resources[p->itemtype] += p->amount;
 		}
@@ -4094,7 +4090,7 @@ const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(AR
         }
 
         for (int i = 0; i < NDIRS; i++) {
-            auto next = current.key->neighbors[i];
+            auto next = current.key->neighbors(i);
             if (!next) {
                 continue;
             }
