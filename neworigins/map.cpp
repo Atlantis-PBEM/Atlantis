@@ -626,7 +626,7 @@ MapBuilder::MapBuilder(ARegionArray* aregs) {
 		for (int i = 0; i < NDIRS; i++) {
 			ARegion* nreg = areg->neighbors(i);
 
-			item->neighbors(i) = nreg == NULL
+			item->neighbors[i] = nreg == NULL
 				? NULL
 				: this->GetRegion(nreg->xloc, nreg->yloc);
 		}
@@ -1909,10 +1909,9 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 
 	// Break all connections between barrens and surrounding hexes
 	for (int i = 0; i < NDIRS; i++) {
-		ARegion *n = reg->neighbors(i);
-		if (n) {
-			reg->neighbors(i) = nullptr;
-			n->neighbors(reg->GetRealDirComp(i)) = nullptr;
+		auto e = reg->edges.get_edge(i);
+		if (e) {
+            edges.remove(e);
 		}
 	}
 
@@ -2718,8 +2717,8 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
 							if (n->neighbors(k)) count++;
 						}
 						if (count <= 1) break;
-						n->neighbors(reg->GetRealDirComp(i)) = 0;
-						reg->neighbors(i) = 0;
+
+                        edges.remove(reg->edges.get_edge(i));
 					}
 				}
 			}
@@ -2963,8 +2962,14 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 					if (AC->neighbors(i)) continue;
 					ARegion *pReg = GetStartingCity(AC, i, levelTo, maxX, maxY);
 					if (!pReg) continue;
-					AC->neighbors(i) = pReg;
-					pReg->MakeStartingCity();
+
+                    auto edge = AC->edges.get_edge(i);
+                    if (edge) {
+                        edges.remove(edge);
+                    }
+                    edges.create_directed(AC, pReg, i);
+
+                    pReg->MakeStartingCity();
 					if (Globals->GATES_EXIST) {
 						numberofgates++;
 					}
@@ -3071,95 +3076,175 @@ void ARegionList::InitSetupGates(int level)
 
 void ARegionList::FixUnconnectedRegions()
 {
-	ARegion *r, *head, *tail, *neighbors[NDIRS], *n;
-	int attempts, max, i, j, count, offset, x, y, xscale, yscale;
-	Object *o;
+    ARegion *r, *head, *tail, *neighbors[NDIRS], *n;
+    int attempts, max, i, j, count, offset, x, y, xscale, yscale;
+    Object *o;
 
-	forlist(this) {
-		r = (ARegion *) elem;
-		r->distance = -1;
-		r->next = 0;
-	}
+    RegionGraph graph = RegionGraph(this);
+    graph.follow_gates = true;
+    graph.follow_nexus_gate = true;
+    graph.follow_inner_location = true;
 
-	// Build a list of all the regions we know we can get to:
-	// The nexus and anywhere that has a gate
-	head = 0;
-	tail = 0;
-	forlist_reuse(this) {
-		r = (ARegion *) elem;
-		if (r->zloc == ARegionArray::LEVEL_NEXUS || r->gate == -1) {
-			r->distance = 0;
-			r->next = head;
-			head = r;
-			if (!tail)
-				tail = r;
-		}
-	}
+    // iterator for all regions
+    auto regions = this->iter<ARegion>();
+
+
+    for (auto r : regions) {
+        r->distance = -1;
+        r->next = nullptr;
+    }
+
+    // The region we start from
+    ARegion *startRegion = nullptr;
+
+    // Start from nexus
+    std::find_if(regions.begin(), regions.end(), [&startRegion](ARegion *r) {
+        if (r->zloc == ARegionArray::LEVEL_NEXUS) {
+            startRegion = r;
+            return true;
+        }
+
+        return false;
+    });
+
+
+    if (!startRegion) {
+        // Nexus not found, start from a gate
+        std::find_if(regions.begin(), regions.end(), [&startRegion](ARegion *r) {
+            if (r->gate) {
+                startRegion = r;
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    if (!startRegion) {
+        // No nexus or gate found, start from the first region
+        startRegion = this->GetRegion(0);
+    }
+
+    if (!startRegion) {
+        // No start region found, throw an error
+        throw std::runtime_error("No start region found");
+    }
+
+    // Get distances from the start region
+    auto distances = graphs::breadthFirstSearch(graph, startRegion);
+
+    // Find all the regions that we couldn't reach
+    std::vector<ARegion *> unconnected;
+    for (auto r : regions) {
+        if (distances.find(r) == distances.end()) {
+            unconnected.push_back(r);
+        }
+    }
+
+    // Now we have a list of all the unconnected regions
+    // We need to connect them to the rest of the world somehow
+    std::shuffle(unconnected.begin(), unconnected.end(), std::default_random_engine());
+    for (auto r : unconnected) {
+
+    }
+
+    // Build a list of all the regions we know we can get to:
+    // The nexus and anywhere that has a gate
+    head = nullptr;
+    tail = nullptr;
+    for (auto r : this->iter<ARegion>()) {
+        if (r->zloc == ARegionArray::LEVEL_NEXUS || r->gate == -1) {
+            r->distance = 0;
+            r->next = head;
+            head = r;
+            if (!tail) {
+                tail = r;
+            }
+        }
+    }
+
 	while (head) {
 		tail = FindConnectedRegions(head, tail, 1);
 		head = head->next;
 	}
-	attempts = 0;
+
+    attempts = 0;
 	do {
 		max = 0;
 		count = 0;
-		forlist(this) {
-			r = (ARegion *) elem;
+
+		for (auto r : this->iter<ARegion>()) {
 			if (r->distance == -1) {
 				count++;
 			}
-			if (r->distance > max)
-				max = r->distance;
+
+            max = std::max(max, r->distance);
 		}
+
 		if (count > 0) {
 			i = getrandom(count);
-			forlist(this) {
-				r = (ARegion *) elem;
+
+			for (auto r : this->iter<ARegion>()) {
 				if (r->distance == -1) {
-					if (!i)
+					if (!i) {
 						break;
+                    }
+
 					i--;
 				}
 			}
+
 			// Found an unconnected region
 			// Try to link it in
 			n = 0;
+
 			// first, see if we can knock down a wall
 			// sadly we can only knock down all the walls at once
-			for (i = 0; i < NDIRS; i++)
-				neighbors(i) = r->neighbors(i);
-			if (Globals->ICOSAHEDRAL_WORLD) {
+			for (i = 0; i < NDIRS; i++) {
+			    neighbors[i] = r->neighbors(i);
+            }
+
+            if (Globals->ICOSAHEDRAL_WORLD) {
 				IcosahedralNeighSetup(r, pRegionArrays[r->zloc]);
 			} else {
 				NeighSetup(r, pRegionArrays[r->zloc]);
 			}
-			offset = getrandom(NDIRS);
+
+            offset = getrandom(NDIRS);
 			for (i = 0; i < NDIRS; i++) {
-				if (r->neighbors((i + offset) % NDIRS) &&
-						r->neighbors((i + offset) % NDIRS)->distance != -1) {
+				if (r->neighbors((i + offset) % NDIRS) && r->neighbors((i + offset) % NDIRS)->distance != -1) {
 					break;
 				}
 			}
-			for (j = 0; j < NDIRS; j++) {
+
+            for (j = 0; j < NDIRS; j++) {
 				// restore all the walls other than the one
 				// we meant to break
-				if (i != j)
-					r->neighbors((j + offset) % NDIRS) = neighbors((j + offset) % NDIRS);
+				if (i != j) {
+					r->neighbors((j + offset) % NDIRS) = neighbors[(j + offset) % NDIRS];
+                }
 			}
-			if (i < NDIRS) {
+
+            if (i < NDIRS) {
 				// also restore the link on the other side
 				n = r->neighbors((i + offset) % NDIRS);
-				for (j = 0; j < NDIRS; j++)
-					neighbors(j) = n->neighbors(j);
+				for (j = 0; j < NDIRS; j++) {
+					neighbors[j] = n->neighbors(j);
+                }
+
 				if (Globals->ICOSAHEDRAL_WORLD) {
 					IcosahedralNeighSetup(n, pRegionArrays[r->zloc]);
 				} else {
 					NeighSetup(n, pRegionArrays[n->zloc]);
 				}
-				for (j = 0; j < NDIRS; j++)
-					if (n->neighbors(j) != r)
-						n->neighbors(j) = neighbors(j);
-			} else if (TerrainDefs[r->type].similar_type != R_OCEAN) {
+
+				for (j = 0; j < NDIRS; j++) {
+					if (n->neighbors(j) != r) {
+						n->neighbors(j) = neighbors[j];
+                    }
+                }
+			}
+            else if (TerrainDefs[r->type].similar_type != R_OCEAN) {
 				// couldn't break a wall
 				// so try to put in a shaft
 				if (r->zloc > ARegionArray::LEVEL_SURFACE) {
@@ -3167,12 +3252,17 @@ void ARegionList::FixUnconnectedRegions()
 					y = r->yloc * GetLevelYScale(r->zloc) / GetLevelYScale(r->zloc - 1);
 					xscale = GetLevelXScale(r->zloc) / GetLevelXScale(r->zloc - 1);
 					yscale = 2 * GetLevelYScale(r->zloc) / GetLevelYScale(r->zloc - 1);
-					for (i = 0; !n && i < xscale; i++)
+
+					for (i = 0; !n && i < xscale; i++) {
 						for (j = 0; !n && j < yscale; j++) {
 							n = pRegionArrays[r->zloc - 1]->GetRegion(x + i, y + j);
-							if (n && TerrainDefs[n->type].similar_type == R_OCEAN)
+
+							if (n && TerrainDefs[n->type].similar_type == R_OCEAN) {
 								n = 0;
+                            }
 						}
+                    }
+
 					if (n) {
 						o = new Object(n);
 						o->num = n->buildingseq++;
@@ -3191,34 +3281,40 @@ void ARegionList::FixUnconnectedRegions()
 						r->objects.Add(o);
 					}
 				}
+
 				if (!n) {
 					// None of that worked
 					// can we put in a gate?
-					if (Globals->GATES_EXIST &&
-							!getrandom(10)) {
+					if (Globals->GATES_EXIST && !getrandom(10)) {
 						r->gate = -1;
 						r->distance = 0;
 						n = r;
 					}
 				}
 			}
+
 			if (n) {
 				head = n;
 				head->next = 0;
 				tail = head;
+
 				while (head) {
 					tail = FindConnectedRegions(head, tail, 1);
 					head = head->next;
 				}
-				attempts = 0;
+
+                attempts = 0;
 			}
 		}
+
 		attempts++;
-	} while (count > 0 && attempts < 1000);
+	}
+    while (count > 0 && attempts < 1000);
 
 	if (count > 0) {
 		printf("Unable to link up %d hexes!\n", count);
 	}
+
 	printf("Maximum distance from the Nexus: %d.\n", max);
 }
 

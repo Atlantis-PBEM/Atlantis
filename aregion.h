@@ -181,13 +181,37 @@ struct RegionSetup {
  * @brief Represents a connection between two regions.
  *
  * This is a tuple of two regions; an edge in the region graph.
- * The edge is bidirectional, it is not important which region is the left and which is the right.
+ * If the edge is bidirectional, it is not important which region is the left and which is the right.
  *
  * Edge allows to add additional information to the connection between the regions.
  *
  */
 class RegionEdge {
+private:
+    RegionEdge(const bool undirected, const int id, ARegion* left, ARegion* right, const int left_dir, const int right_dir)
+        : left(left), right(right), is_undirected(undirected), id(id), left_dir(left_dir), right_dir(right_dir) {}
+
+    ARegion* left;
+    ARegion* right;
+
 public:
+    using regionType = ARegion *;
+
+    /**
+     * @brief Represents the other side of the edge.
+     */
+    struct side {
+        regionType region;
+        int direction;
+    };
+
+    /**
+     * @brief True if the edge is bidirectional, false if it is directed.
+     *
+     *        If the edge is directed, the left region is the source and the right region is the destination.
+     */
+    const bool is_undirected;
+
     /**
      * @brief A unique identifier for this connection.
 	 *
@@ -195,7 +219,17 @@ public:
 	 * Also MOVE order can use this id to specify the destination of the movement.
      *
      */
-    int get_id() const;
+    const int id;
+
+    /**
+     * @brief Direction of the edge from the left region to the right region.
+     */
+    const int left_dir;
+
+    /**
+     * @brief Direction of the edge from the right region to the left region.
+     */
+    const int right_dir;
 
     /**
      * @brief The left region of the edge.
@@ -208,14 +242,14 @@ public:
     ARegion* get_right() const;
 
     /**
-     * @brief Direction of the edge from the left region to the right region.
+     * @brief Returns the other side of the edge connected to the source region.
+     *
+     * @param source The region to get the other side of.
+     * @param side The other side of the edge and the direction from the source to the other side.
+     * @return const bool True if the source region is connected to the other side of the edge,
+     *                    false otherwise.
      */
-    int get_left_dir() const;
-
-    /**
-     * @brief Direction of the edge from the right region to the left region.
-     */
-    int get_right_dir() const;
+    const bool other_side(const regionType source, side &side) const;
 
     /**
      * @brief Creates a new edge between two regions.
@@ -229,17 +263,9 @@ public:
      * @param right_dir The direction of the edge from the right region to the left region.
      * @return const Edge* The new edge.
      */
-    static RegionEdge* create(const int id, ARegion *left, ARegion *right, const int left_dir, const int right_dir);
+    static RegionEdge* create(const int id, regionType left, regionType right, const int dir);
 
-private:
-    RegionEdge(const int id, ARegion* left, ARegion* right, const int left_dir, const int right_dir)
-        : id(id), left(left), right(right), left_dir(left_dir), right_dir(right_dir) {}
-
-    int id;
-    ARegion* left;
-    ARegion* right;
-    int left_dir;
-    int right_dir;
+    static RegionEdge* create_directed(const int id, regionType left, regionType right, const int dir);
 };
 
 /**
@@ -251,11 +277,37 @@ private:
     RegionEdges();
 
 public:
-    using itemType = const RegionEdge *;
-    using regionType = ARegion *;
-    using regionArrayType = std::array<regionType, NDIRS>;
+    using id_type = unsigned int;
+    using value_type = const RegionEdge *;
+    using map_type = std::unordered_map<id_type, value_type>;
+    using region_type = ARegion *;
+    using region_array_type = std::array<region_type, NDIRS>;
 
-    RegionEdges(regionType owner);
+    class iterator
+    {
+    public:
+        using iterator_category = std::forward_iterator_tag ;
+        using value_type = RegionEdges::value_type;
+        using pointer = const value_type *;
+        using reference = const value_type &;
+        using difference_type = map_type::iterator::difference_type;
+
+        reference operator*() const;
+        pointer operator&() const;
+        iterator& operator++ ();
+        iterator operator++(int);
+        bool operator==(const iterator &that) const noexcept;
+        bool operator!=(const iterator &that) const noexcept;
+
+    private:
+        map_type::const_iterator internal_iterator;
+
+        iterator( map_type::const_iterator iter ) : internal_iterator(iter) {}
+
+        friend RegionEdges;
+    };
+
+    RegionEdges(region_type owner);
 
     /**
      * @brief Returns the number of connections to other regions and locations.
@@ -270,21 +322,21 @@ public:
      * @param id The id of the edge to get.
      * @return itemType The edge with the given id or nullptr if there is no such edge.
      */
-    itemType get(const int id) const;
+    value_type get(const id_type id) const;
 
     /**
      * @brief Adds a new edge to the local list of edges.
      *
      * @param edge The edge to add.
      */
-    void add(itemType edge);
+    void add(value_type edge);
 
     /**
      * @brief Removes an edge from the local list of edges of the region.
      *
      * @param id The id of the edge to remove.
      */
-    void remove(const int id);
+    void remove(const id_type id);
 
     /**
      * @brief Returns the neighboring region in the given direction.
@@ -294,12 +346,80 @@ public:
      * @param dir The direction to get the neighbor of.
      * @return ARegion* The neighboring region in the given direction or nullptr if there is no neighbor.
      */
-    regionType get_neighbor(const int dir);
+    region_type get_neighbor(const int dir) const;
+
+    /**
+     * @brief Returns the edge in the given direction.
+     *
+     * @param dir The direction to get the edge of.
+     * @return itemType The edge in the given direction or nullptr if there is no edge.
+     */
+    value_type get_edge(const int dir) const;
+
+    iterator begin() const noexcept;
+    iterator end() const noexcept;
 
 private:
-    regionType owner;
-    std::unordered_map<int, itemType> items;
-    regionArrayType neighbors;
+    region_type owner;
+    map_type _edges;
+    region_array_type neighbors;
+};
+
+class GameEdges {
+public:
+    using id_type = unsigned int;
+    using value_type = const RegionEdge *;
+    using map_type = std::unordered_map<id_type, value_type>;
+
+    class iterator
+    {
+    public:
+        using iterator_category = std::forward_iterator_tag ;
+        using value_type = GameEdges::value_type;
+        using pointer = const value_type *;
+        using reference = const value_type &;
+        using difference_type = map_type::iterator::difference_type;
+
+        reference operator*() const;
+        pointer operator&() const;
+        iterator& operator++ ();
+        iterator operator++(int);
+        bool operator==(const iterator &that) const noexcept;
+        bool operator!=(const iterator &that) const noexcept;
+
+    private:
+        map_type::const_iterator internal_iterator;
+
+        iterator( map_type::const_iterator iter ) : internal_iterator(iter) {}
+
+        friend GameEdges;
+    };
+
+    iterator begin() const noexcept;
+    iterator end() const noexcept;
+
+    ~GameEdges();
+
+    const std::size_t size() const;
+
+    const id_type get_last_edge_id() const;
+    void set_last_edge_id(const id_type id);
+
+    value_type get(const id_type id) const;
+    value_type create(ARegion *left, ARegion *right, const int dir);
+    value_type create_directed(ARegion *left, ARegion *right, const int dir);
+    void add(value_type edge);
+    value_type find(const ARegion *left, const ARegion *right) const;
+    const bool has(const ARegion *left, const ARegion *right) const;
+    const bool has(const id_type id) const;
+    const bool remove(const id_type id);
+    const bool remove(value_type edge);
+
+private:
+    id_type _last_edge_id;
+    map_type _edges;
+
+    const id_type next_edge_id();
 };
 
 class ARegion : public AListElem
@@ -406,12 +526,15 @@ class ARegion : public AListElem
 		int RoadDevelopment();
 		int TownDevelopment();
 		int CheckSea(int, int, int);
+
+        // TODO: Functions below should be belong to the map generator not the Region class.
 		int Slope();
 		int SurfaceWater();
 		int Soil();
 		int Winds();
 		int TerrainFactor(int, int);
 		int TerrainProbability(int);
+
 		void AddFleet(Object *);
 		int ResolveFleetAlias(int);
 
@@ -488,15 +611,18 @@ class ARegion : public AListElem
 		// List of units which passed through the region
 		AList passers;
 		std::vector<Production *> products;
-		std::vector<Market*> markets;
+		std::vector<Market *> markets;
 		int xloc, yloc, zloc;
 		int visited;
 
 		// Used for calculating distances using an A* search
+        // TODO: Remove this! A* distance calculation should be done outside of the region class.
 		int distance;
 		ARegion *next;
 
-		// A link to the region's level to make some things easier.
+		/**
+		 * @brief A link to the region's level to make some things easier.
+		 */
 		ARegionArray *level;
 
 		// find a production for a certain skill.
@@ -704,12 +830,7 @@ class ARegionList : public AList
 		int CheckRegionExit(ARegion *pFrom, ARegion *pTo);
 
         // Region Edges
-        std::unordered_map<int, const RegionEdge*> edges;
-        int last_edge_id;
-        int next_edge_id();
-        void create_edge(ARegion *left, ARegion *right, const int left_dir, const int right_dir);
-        const bool has_edge(const ARegion *left, const ARegion *right) const;
-        void remove_edge(const int id);
+        GameEdges edges;
 };
 
 int LookupRegionType(AString *);
@@ -717,6 +838,89 @@ int ParseTerrain(AString *);
 
 using ARegionCostFunction = std::function<double(ARegion*, ARegion*)>;
 using ARegionInclusionFunction = std::function<bool(ARegion*, ARegion*)>;
+
+template <class TLoc, class TContainer>
+class BaseRegionGraph : public graphs::Graph<TLoc, ARegion*> {
+public:
+    BaseRegionGraph(TContainer* regions) : regions(regions) {
+        this->costFn = [](ARegion* current, ARegion* next) { return 1; };
+        this->includeFn = [](ARegion* current, ARegion* next) { return true; };
+    }
+
+    virtual double cost(TLoc current, TLoc next) {
+        return this->costFn(get(current), get(next));
+    }
+
+    virtual void setCost(ARegionCostFunction costFn) {
+        this->costFn = costFn;
+    }
+
+    virtual void setInclusion(ARegionInclusionFunction includeFn) {
+        this->includeFn = includeFn;
+    }
+
+protected:
+    TContainer* regions;
+    ARegionCostFunction costFn;
+    ARegionInclusionFunction includeFn;
+};
+
+class RegionGraph : public BaseRegionGraph<graphs::Location3D, ARegionList> {
+public:
+    RegionGraph(ARegionList* regions) :
+        BaseRegionGraph(regions),
+        follow_inner_location(false),
+        follow_gates(false),
+        follow_nexus_gate(true),
+        stay_in_same_level(false),
+        ignore_objects({})
+        { }
+
+    ARegion* get(graphs::Location3D id);
+    std::vector<graphs::Location3D> neighbors(graphs::Location3D id);
+
+    /**
+     * @brief If true, the graph will follow the inner location of the region.
+     *
+     *        Default is `false`.
+     */
+    bool follow_inner_location;
+
+    /**
+     * @brief If true, the graph will follow the gates of the region.
+     *
+     *         Default is `false`.
+     */
+    bool follow_gates;
+
+    /**
+     * @brief If true, the graph will follow the Nexus gate and connect
+     *        the regions in the Nexus level to all other regions with a gate.
+     *
+     *        Default is `true`.
+     */
+    bool follow_nexus_gate;
+
+    /**
+     * @brief If true, the graph will stay in the same level when following the gates.
+     *
+     *        Default is `false`.
+     */
+    bool stay_in_same_level;
+
+    /**
+     * @brief List of object types to ignore when following the inner locations.
+     */
+    std::vector<int> ignore_objects;
+};
+
+class SingleLayerRegionGraph : public BaseRegionGraph<graphs::Location2D, ARegionArray> {
+public:
+    SingleLayerRegionGraph(ARegionArray* regions) : BaseRegionGraph(regions) { }
+
+    ARegion* get(graphs::Location2D id);
+	std::vector<graphs::Location2D> neighbors(graphs::Location2D id);
+};
 
 class ARegionGraph : public graphs::Graph<graphs::Location2D, ARegion*> {
 public:
@@ -736,6 +940,13 @@ private:
 	ARegionInclusionFunction includeFn;
 };
 
-const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(ARegion* start, const int maxDistance);
+/**
+ * @brief Performs a breadth-first search from the start region.
+ *
+ * @param start The region to start the search from.
+ * @param maxDistance The maximum distance to search. -1 means no limit.
+ * @return const std::unordered_map<ARegion*, graphs::Node<ARegion*>>& Distance map from the start region.
+ */
+const std::unordered_map<ARegion*, graphs::Node<ARegion*>> &breadthFirstSearch(ARegion* start, const int maxDistance);
 
 #endif

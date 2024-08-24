@@ -1831,7 +1831,7 @@ ARegionList::ARegionList()
 	pRegionArrays = 0;
 	numLevels = 0;
 	numberofgates = 0;
-    last_edge_id = 1000;
+    edges.set_last_edge_id(1000);
 }
 
 ARegionList::~ARegionList()
@@ -1864,17 +1864,15 @@ void ARegionList::WriteRegions(ostream& f)
     }
 
     f << "Edges\n";
-    f << this->last_edge_id << '\n';
+    f << this->edges.get_last_edge_id() << '\n';
     f << this->edges.size() << '\n';
 
-    for (auto kv : this->edges) {
-        auto edge = kv.second;
-
-        f << edge->get_id() << '\n';
+    for (auto edge : this->edges) {
+        f << edge->id << '\n';
+        f << edge->is_undirected << '\n';
         f << edge->get_left()->num << '\n';
         f << edge->get_right()->num << '\n';
-        f << edge->get_left_dir() << '\n';
-        f << edge->get_right_dir() << '\n';
+        f << edge->left_dir << '\n';
     }
 }
 
@@ -1920,23 +1918,26 @@ int ARegionList::ReadRegions(istream &f, AList *factions)
 
     AString temp;
     int numfOfEdges;
+    GameEdges::id_type last_edge_id;
 
 	f >> ws >> temp; // eat the "Edges" line
-    f >> this->last_edge_id;
+    f >> last_edge_id;
     f >> numfOfEdges;
+
+    this->edges.set_last_edge_id(last_edge_id);
 
     // Load all edges
     for (int i = 0; i < numfOfEdges; i++) {
-        int edge_id, left_num, left_dir, right_num, right_dir;
-        f >> edge_id >> left_num >> right_num >> left_dir >> right_dir;
+        int edge_id, left_num, right_num, dir;
+        bool is_undirected;
 
-        RegionEdge* edge = RegionEdge::create(edge_id, fa.GetRegion(left_num), fa.GetRegion(right_num), left_dir, right_dir);
+        f >> edge_id >> is_undirected >> left_num >> right_num >> dir;
 
-        this->edges.insert({ edge->get_id(), edge });
+        RegionEdge *edge = is_undirected
+            ? RegionEdge::create(edge_id, fa.GetRegion(left_num), fa.GetRegion(right_num), dir)
+            : RegionEdge::create_directed(edge_id, fa.GetRegion(left_num), fa.GetRegion(right_num), dir);
 
-        // Assign edge to the regions
-        edge->get_left()->edges.add(edge);
-        edge->get_right()->edges.add(edge);
+        edges.add(edge);
     }
 
     return 1;
@@ -1986,21 +1987,21 @@ Location *ARegionList::FindUnit(int i)
 
 void ARegionList::NeighSetup(ARegion *r, ARegionArray *ar) {
     if (r->yloc != 0 && r->yloc != 1) {
-        this->create_edge(r, ar->GetRegion(r->xloc, r->yloc - 2), D_NORTH, D_SOUTH);
+        edges.create(r, ar->GetRegion(r->xloc, r->yloc - 2), D_NORTH);
     }
 
     if (r->yloc != 0) {
-        this->create_edge(r, ar->GetRegion(r->xloc + 1, r->yloc - 1), D_NORTHEAST, D_SOUTHWEST);
-        this->create_edge(r, ar->GetRegion(r->xloc - 1, r->yloc - 1), D_NORTHWEST, D_SOUTHEAST);
+        edges.create(r, ar->GetRegion(r->xloc + 1, r->yloc - 1), D_NORTHEAST);
+        edges.create(r, ar->GetRegion(r->xloc - 1, r->yloc - 1), D_NORTHWEST);
     }
 
     if (r->yloc != ar->y - 1) {
-        this->create_edge(r, ar->GetRegion(r->xloc + 1, r->yloc + 1), D_SOUTHEAST, D_NORTHWEST);
-        this->create_edge(r, ar->GetRegion(r->xloc - 1, r->yloc + 1), D_SOUTHWEST, D_NORTHEAST);
+        edges.create(r, ar->GetRegion(r->xloc + 1, r->yloc + 1), D_SOUTHEAST);
+        edges.create(r, ar->GetRegion(r->xloc - 1, r->yloc + 1), D_SOUTHWEST);
     }
 
     if (r->yloc != ar->y - 1 && r->yloc != ar->y - 2) {
-        this->create_edge(r, ar->GetRegion(r->xloc, r->yloc + 2), D_SOUTH, D_NORTH);
+        edges.create(r, ar->GetRegion(r->xloc, r->yloc + 2), D_SOUTH);
     }
 }
 
@@ -2279,32 +2280,35 @@ ARegion *ARegionList::FindGate(int x)
 
 ARegion *ARegionList::FindConnectedRegions(ARegion *r, ARegion *tail, int shaft)
 {
-        int i;
-        Object *o;
-        ARegion *inner;
+    int i;
+    Object *o;
+    ARegion *inner;
 
-        for (i = 0; i < NDIRS; i++) {
-                if (r->neighbors(i) && r->neighbors(i)->distance == -1) {
-                        tail->next = r->neighbors(i);
-                        tail = tail->next;
-                        tail->distance = r->distance + 1;
-                }
+    for (i = 0; i < NDIRS; i++) {
+        if (r->neighbors(i) && r->neighbors(i)->distance == -1) {
+            tail->next = r->neighbors(i);
+            tail = tail->next;
+            tail->distance = r->distance + 1;
         }
-	if (shaft) {
-		forlist(&r->objects) {
-			o = (Object *) elem;
-			if (o->inner != -1) {
-				inner = GetRegion(o->inner);
-				if (inner && inner->distance == -1) {
-					tail->next = inner;
-					tail = tail->next;
-					tail->distance = r->distance + 1;
-				}
-			}
-		}
-	}
+    }
 
-        return tail;
+    if (shaft) {
+        forlist(&r->objects) {
+            o = (Object *) elem;
+
+            if (o->inner != -1) {
+                inner = GetRegion(o->inner);
+
+                if (inner && inner->distance == -1) {
+                    tail->next = inner;
+                    tail = tail->next;
+                    tail->distance = r->distance + 1;
+                }
+            }
+        }
+    }
+
+    return tail;
 }
 
 ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
@@ -4001,23 +4005,42 @@ ARegion* ARegionGraph::get(graphs::Location2D id) {
 }
 
 std::vector<graphs::Location2D> ARegionGraph::neighbors(graphs::Location2D id) {
-	ARegion* current = regions->GetRegion(id.x, id.y);
+    std::vector<graphs::Location2D> list;
+    list.reserve(NDIRS);
 
-	std::vector<graphs::Location2D> list;
-	for (int i = 0; i < NDIRS; i++) {
-		ARegion* next = current->neighbors(i);
-		if (next == NULL) {
-			continue;
-		}
+    ARegion* current = regions->GetRegion(id.x, id.y);
 
-		if (!includeFn(current, next)) {
-			continue;
-		}
+    // go through all edges
+    for (auto &edge : current->edges) {
+        auto [next, _] = edge->other_side(current);
 
-		list.push_back({ next->xloc, next->yloc });
-	}
+        if (!includeFn(current, next)) {
+            continue;
+        }
 
-	return list;
+        list.push_back({ next->xloc, next->yloc });
+    }
+
+    ///// 3D vesion will require the code below to go through all shafts and other objects that link to regions
+    // // go through all shafts and other objects that link to regions
+    // for (auto &obj : current->objects.iter<Object>()) {
+    //     if (obj->inner == -1) {
+    //         continue;
+    //     }
+
+    //     ARegion *next = obj->region;
+    //     if (!next) {
+    //         continue;
+    //     }
+
+    //     if (!includeFn(current, next)) {
+    //         continue;
+    //     }
+
+    //     list.push_back({ next->xloc, next->yloc });
+    // }
+
+    return list;
 }
 
 double ARegionGraph::cost(graphs::Location2D current, graphs::Location2D next) {
@@ -4031,6 +4054,107 @@ void ARegionGraph::setCost(ARegionCostFunction costFn) {
 void ARegionGraph::setInclusion(ARegionInclusionFunction includeFn) {
 	this->includeFn = includeFn;
 }
+
+ARegion* RegionGraph::get(graphs::Location3D id) {
+    return regions->GetRegion(id.x, id.y, id.z);
+}
+
+std::vector<graphs::Location3D> RegionGraph::neighbors(graphs::Location3D id) {
+    ARegion* current = get(id);
+
+    // prepare a list of candidate neighbors
+    std::vector<ARegion *> candidates;
+    candidates.reserve(NDIRS);
+
+    // go through all edges
+    for (auto &edge : current->edges) {
+        auto [next, _] = edge->other_side(current);
+        candidates.push_back(next);
+    }
+
+    // go through all shafts and other objects that link to regions
+    if (follow_inner_location) {
+        for (auto &obj : current->objects.iter<Object>()) {
+            if (obj->inner == -1) {
+                continue;
+            }
+
+            if (std::find(ignore_objects.begin(), ignore_objects.end(), obj->type) != ignore_objects.end()) {
+                continue;
+            }
+
+            ARegion *next = obj->region;
+            if (!next) {
+                continue;
+            }
+
+            candidates.push_back(next);
+        }
+    }
+
+    // go through all gates
+    if (follow_gates) {
+        bool hasGate = current->gate > 0
+            || (
+                    follow_nexus_gate
+                && Globals->NEXUS_GATE_OUT
+                && TerrainDefs[current->type].similar_type == R_NEXUS
+            );
+
+        if (hasGate) {
+            for (auto &next : regions->iter<ARegion>()) {
+                if (!next->gate) {
+                    continue;
+                }
+
+                candidates.push_back(next);
+            }
+        }
+    }
+
+    // filter all candidates based on the inclusion function
+    std::vector<graphs::Location3D> list;
+    list.reserve(candidates.size());
+
+    for (auto &next : candidates) {
+        if (stay_in_same_level && next->zloc != current->zloc) {
+            continue;
+        }
+
+        if (!includeFn(current, next)) {
+            continue;
+        }
+
+        list.push_back({ next->xloc, next->yloc, next->zloc });
+    }
+
+    return list;
+}
+
+ARegion* SingleLayerRegionGraph::get(graphs::Location2D id) {
+    return regions->GetRegion(id.x, id.y);
+}
+
+std::vector<graphs::Location2D> SingleLayerRegionGraph::neighbors(graphs::Location2D id) {
+    std::vector<graphs::Location2D> list;
+    list.reserve(NDIRS);
+
+    ARegion* current = get(id);
+
+    // go through all edges
+    for (auto &edge : current->edges) {
+        auto [next, _] = edge->other_side(current);
+
+        if (!includeFn(current, next)) {
+            continue;
+        }
+
+        list.push_back({ next->xloc, next->yloc });
+    }
+
+    return list;
+}
+
 
 void ARegionList::ResourcesStatistics() {
 	std::unordered_map<int, int> resources;
@@ -4089,7 +4213,7 @@ void ARegionList::ResourcesStatistics() {
 	std::cout << std::endl << std::endl;
 }
 
-const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(ARegion* start, const int maxDistance) {
+const std::unordered_map<ARegion*, graphs::Node<ARegion*>> &breadthFirstSearch(ARegion* start, const int maxDistance) {
     std::queue<graphs::Node<ARegion*>> frontier;
     frontier.push({ start, 0 });
 
@@ -4100,7 +4224,7 @@ const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(AR
         graphs::Node<ARegion*> current = frontier.front();
         frontier.pop();
 
-        if (current.distance > maxDistance) {
+        if (maxDistance >= 0 && current.distance > maxDistance) {
             continue;
         }
 
@@ -4148,55 +4272,4 @@ int ARegionList::FindDistanceToNearestObject(int object_type, ARegion *start)
 		if (dist < min_dist) min_dist = dist;
 	}
 	return min_dist;
-}
-
-int ARegionList::next_edge_id() {
-    return ++this->last_edge_id;
-}
-
-void ARegionList::create_edge(ARegion *left, ARegion *right, const int left_dir, const int right_dir) {
-    if (has_edge(left, right)) {
-        return;
-    }
-
-    RegionEdge *edge = RegionEdge::create(this->next_edge_id(), left, right, left_dir, right_dir);
-
-    this->edges.insert({ edge->get_id(), edge });
-
-    left->edges.add(edge);
-    right->edges.add(edge);
-}
-
-const bool ARegionList::has_edge(const ARegion *left, const ARegion *right) const {
-    for (const auto& kv : this->edges) {
-        auto edge = kv.second;
-
-        if (edge->get_left() == left && edge->get_right() == right) {
-            return true;
-        }
-
-        if (edge->get_left() == right && edge->get_right() == left) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void ARegionList::remove_edge(const int id) {
-    auto kv = this->edges.find(id);
-    if (kv == this->edges.end()) {
-        return;
-    }
-
-    auto edge = kv->second;
-    auto left = edge->get_left();
-    auto right = edge->get_right();
-
-    left->edges.remove(edge->get_id());
-    right->edges.remove(edge->get_id());
-
-    this->edges.erase(kv);
-
-    delete edge;
 }
