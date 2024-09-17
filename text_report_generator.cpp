@@ -897,7 +897,7 @@ void TextReportGenerator::output_template(ostream& f, const json& report, int te
     if (report.contains("regions") && !report["regions"].empty()) {
         for(const auto& region : report["regions"]) {
             // Only output the region template if you have actual units in the region.
-            if (region.contains("present")) output_region_template(f, region, template_type, show_region_depth);
+            if (region.value("present", false)) output_region_template(f, region, template_type, show_region_depth);
         }
     }
     f << "\n#end\n\n";
