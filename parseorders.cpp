@@ -2724,10 +2724,14 @@ Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck, int 
 		return 0;
 	}
 
-	int an = t->value();
+	int an = t->strict_value();
 	delete t;
 	if (!an) {
 		parse_error(pCheck, former, 0, "Must give alias in FORM order.");
+		return 0;
+	}
+	if (an == -1) {
+		parse_error(pCheck, former, 0, "Invalid alias in FORM order.");
 		return 0;
 	}
 	if (pCheck) {
