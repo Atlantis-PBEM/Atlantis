@@ -2186,18 +2186,17 @@ void Game::WriteTimesArticle(AString article)
 
 void Game::CountItems(size_t ** citems)
 {
-	int i = 0;
 	forlist (&factions)
 	{
 		Faction * fac = (Faction *) elem;
 		if (!fac->is_npc)
 		{
+			int i = fac->num - 1; // faction numbers are 1-based
 			for (int j = 0; j < NITEMS; j++)
 			{
 				citems[i][j] = CountItem (fac, j);
 			}
 		}
-		i++;
 	}
 }
 
