@@ -129,7 +129,7 @@ enum {
 	NORDERS
 };
 
-enum {
+enum MovementType {
 	M_NONE,
 	M_WALK,
 	M_RIDE,

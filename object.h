@@ -134,7 +134,7 @@ class Object : public AListElem
 
 		void SetPrevDir(int);
 		void MoveObject(ARegion *toreg);
-		
+
 		// Fleets
 		void ReadinFleet(istream &f);
 		void WriteoutFleet(ostream &f);
@@ -149,7 +149,7 @@ class Object : public AListElem
 		int FleetSailingSkill(int);
 		int GetFleetSize();
 		int GetFleetSpeed(int);
-		
+
 		AString *name;
 		AString *describe;
 		ARegion *region;
@@ -165,7 +165,12 @@ class Object : public AListElem
 		int mages;
 		int shipno;
 		int movepoints;
-		int destroyed;	// how much points was destroyed so far this turn
+
+        /**
+         * @brief how much points was destroyed so far this turn
+         */
+        int destroyed;
+
 		AList units;
 		AList ships;
 };
