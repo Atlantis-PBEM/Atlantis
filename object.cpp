@@ -114,9 +114,8 @@ void Object::Writeout(ostream& f)
 	f << inner << '\n';
 	f << (Globals->PREVENT_SAIL_THROUGH && !Globals->ALLOW_TRIVIAL_PORTAGE ? prevdir : -1) << '\n';
 	f << runes << '\n';
-	f << units.Num() << '\n';
-	forlist ((&units))
-		((Unit *) elem)->Writeout(f);
+	f << units.size() << '\n';
+	for(auto u: units) u->Writeout(f);
 	WriteoutFleet(f);
 }
 
@@ -213,41 +212,37 @@ int Object::CanModify()
 
 Unit *Object::GetUnit(int num)
 {
-	forlist((&units))
-		if (((Unit *) elem)->num == num)
-			return ((Unit *) elem);
+	for(auto u: units)
+		if (u->num == num)
+			return u;
 	return 0;
 }
 
 Unit *Object::GetUnitAlias(int alias, int faction)
 {
 	// First search for units with the 'formfaction'
-	forlist((&units)) {
-		if (((Unit *)elem)->alias == alias &&
-				((Unit *)elem)->formfaction->num == faction)
-			return ((Unit *)elem);
+	for(auto u: units) {
+		if (u->alias == alias && u->formfaction->num == faction)
+			return u;
 	}
 	// Now search against their current faction
-	{
-		forlist((&units)) {
-			if (((Unit *) elem)->alias == alias &&
-					((Unit *) elem)->faction->num == faction)
-				return ((Unit *) elem);
-		}
+	for(auto u: units) {
+		if (u->alias == alias && u->faction->num == faction)
+			return u;
 	}
 	return 0;
 }
 
-Unit *Object::GetUnitId(UnitId *id, int faction)
+Unit *Object::get_unit_id(UnitId *unitid, int faction)
 {
-	if (id == 0) return 0;
-	if (id->unitnum) {
-		return GetUnit(id->unitnum);
+	if (unitid == 0) return 0;
+	if (unitid->unitnum) {
+		return GetUnit(unitid->unitnum);
 	} else {
-		if (id->faction) {
-			return GetUnitAlias(id->alias, id->faction);
+		if (unitid->faction) {
+			return GetUnitAlias(unitid->alias, unitid->faction);
 		} else {
-			return GetUnitAlias(id->alias, faction);
+			return GetUnitAlias(unitid->alias, faction);
 		}
 	}
 }
@@ -277,7 +272,8 @@ Unit *Object::ForbiddenBy(ARegion *reg, Unit *u)
 
 Unit *Object::GetOwner()
 {
-	Unit *owner = (Unit *) units.First();
+	Unit *owner = nullptr;
+	if (units.size() > 0) owner = units[0];
 	return(owner);
 }
 
@@ -361,8 +357,7 @@ void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
 	json& unit_container = (type == O_DUMMY) ? j["units"] : container["units"];
 
 	// Add units to container
-	forlist ((&units)) {
-		Unit *u = (Unit *) elem;
+	for(auto u: units) {
 		json unit = json::object();
 		int attitude = fac->get_attitude(u->faction->num);
 		if (u->faction == fac) {
@@ -573,8 +568,7 @@ int Object::FleetLoad()
 	int load = -1;
 	int wgt = 0;
 	if (IsFleet()) {
-		forlist(&units) {
-			Unit * unit = (Unit *) elem;
+		for(auto unit: units) {
 			wgt += unit->Weight();
 		}
 		load = wgt;
@@ -679,8 +673,7 @@ int Object::FleetSailingSkill(int report)
 	int skill = -1;
 	int slvl = 0;
 	if (IsFleet()) {
-		forlist(&units) {
-			Unit * unit = (Unit *) elem;
+		for(auto unit: units) {
 			if ((report != 0) ||
 				(unit->monthorders && unit->monthorders->type == O_SAIL)) {
 				slvl += unit->GetSkill(S_SAILING) * unit->GetMen();
@@ -745,8 +738,7 @@ int Object::GetFleetSpeed(int report)
 	if (tskill < (weight / 50)) return 0;
 	
 	// count wind mages
-	forlist(&units) {
-		Unit * unit = (Unit *) elem;
+	for(auto unit: units) {
 		int wb = unit->GetAttribute("wind");
 		if (wb > 0) {
 			windbonus += wb * 12 * Globals->FLEET_WIND_BOOST;

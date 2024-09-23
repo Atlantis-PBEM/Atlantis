@@ -760,8 +760,7 @@ void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
 		// units aren't set to noaid
 		forlist((&r->objects)) {
 			Object * obj = (Object *) elem;
-			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+			for(auto u: obj->units) {
 				if (u->IsAlive()) {
 					if (u->faction == t->faction &&
 						(u->GetFlag(FLAG_NOAID) == 0)) {
@@ -779,8 +778,7 @@ void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
 	
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
-		forlist((&obj->units)) {
-			Unit * u = (Unit *) elem;
+		for(auto u: obj->units) {
 			if (u->IsAlive()) {
 				if (u->faction == t->faction ||
 					(AlliesIncluded == 1 && 
@@ -803,8 +801,7 @@ void Game::GetAFacs(ARegion *r, Unit *att, Unit *tar, AList &dfacs,
 {
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
-		forlist((&obj->units)) {
-			Unit * u = (Unit *) elem;
+		for(auto u: obj->units) {
 			if (u->canattack && u->IsAlive()) {
 				int add = 0;
 				if ((u->faction == att->faction ||
@@ -817,13 +814,11 @@ void Game::GetAFacs(ARegion *r, Unit *att, Unit *tar, AList &dfacs,
 						add = 1;
 					} else {
 						if (u->attackorders) {
-							forlist(&(u->attackorders->targets)) {
-								UnitId * id = (UnitId *) elem;
-								Unit *t = r->GetUnitId(id, u->faction->num);
+							for (auto id = u->attackorders->targets.begin(); id != u->attackorders->targets.end();) {
+								Unit *t = r->get_unit_id(*id, u->faction->num);
 								if (!t) continue;
 								if (t == tar) {
-									u->attackorders->targets.Remove(id);
-									delete id;
+									id = u->attackorders->targets.erase(id);
 								}
 								if (t->faction == tar->faction) add = 1;
 							}
@@ -926,8 +921,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 
 		forlist (&r2->objects) {
 			Object * o = (Object *) elem;
-			forlist (&o->units) {
-				Unit * u = (Unit *) elem;
+			for(auto u: o->units) {
 				int add = 0;
 
 #define ADD_ATTACK 1

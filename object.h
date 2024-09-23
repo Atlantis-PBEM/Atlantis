@@ -120,7 +120,7 @@ class Object : public AListElem
 
 		Unit *GetUnit(int);
 		Unit *GetUnitAlias(int, int); /* alias, faction number */
-		Unit *GetUnitId(UnitId *, int);
+		Unit *get_unit_id(UnitId *unitid, int);
 
 		// AS
 		int IsRoad();
@@ -166,7 +166,7 @@ class Object : public AListElem
 		int shipno;
 		int movepoints;
 		int destroyed;	// how much points was destroyed so far this turn
-		AList units;
+		std::vector<Unit *> units;
 		AList ships;
 };
 

@@ -821,10 +821,9 @@ void ARegion::AddTown(int size, AString * name)
 	forlist(&objects) {
 		Object *obj = (Object *) elem;
 		if (obj->type == O_DUMMY) continue;
-		if ((ObjectDefs[obj->type].monster != -1)
-			&& (!(ObjectDefs[obj->type].flags & ObjectType::CANENTER))) {
-				obj->units.Empty();
-				objects.Remove(obj);
+		if ((ObjectDefs[obj->type].monster != -1) && (!(ObjectDefs[obj->type].flags & ObjectType::CANENTER))) {
+			obj->units.clear();
+			objects.Remove(obj);
 		}
 	}
 }
@@ -1602,8 +1601,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 
 	forlist(&objects) {
 		Object *o = (Object *) elem;
-		forlist(&o->units) {
-			Unit *u = (Unit *) elem;
+		for(auto u: o->units) {
 			u->PostTurn(this);
 		}
 	}

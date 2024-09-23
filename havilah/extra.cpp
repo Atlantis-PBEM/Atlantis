@@ -113,7 +113,6 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	int d, count, temple, i, j, clash;
 	ARegion *r;
 	Object *o;
-	Unit *u;
 	AString rname;
 	map <string, int> temples;
 	map <string, int>::iterator it;
@@ -143,8 +142,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				continue;
 			forlist(&r->objects) {
 				o = (Object *) elem;
-				forlist(&o->units) {
-					u = (Unit *) elem;
+				for(auto u: o->units) {
 					if (u->faction->num == monfaction) {
 						count++;
 					}
@@ -163,8 +161,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				continue;
 			forlist(&r->objects) {
 				o = (Object *) elem;
-				forlist(&o->units) {
-					u = (Unit *) elem;
+				for(auto u: o->units) {
 					if (u->faction->num == monfaction) {
 						if (!d--) {
 							q->target = u->num;
@@ -357,7 +354,6 @@ Faction *Game::CheckVictory()
 	Item *item;
 	ARegion *r, *start;
 	Object *o;
-	Unit *u;
 	Faction *f;
 	Skill *s;
 	Location *l;
@@ -394,8 +390,7 @@ Faction *Game::CheckVictory()
 		}
 		forlist(&r->objects) {
 			o = (Object *) elem;
-			forlist(&o->units) {
-				u = (Unit *) elem;
+			for(auto u: o->units) {
 				intersection.clear();
 				set_intersection(u->visited.begin(),
 					u->visited.end(),
@@ -598,8 +593,7 @@ Faction *Game::CheckVictory()
 			r = (ARegion *) elem;
 			forlist(&r->objects) {
 				o = (Object *) elem;
-				forlist(&o->units) {
-					u = (Unit *) elem;
+				for(auto u: o->units) {
 					if (u->faction == f) {
 						reliccount += u->items.GetNum(I_RELICOFGRACE);
 					}
@@ -621,8 +615,7 @@ Faction *Game::CheckVictory()
 				r = (ARegion *) elem;
 				forlist(&r->objects) {
 					o = (Object *) elem;
-					forlist(&o->units) {
-						u = (Unit *) elem;
+					for(auto u: o->units) {
 						if (u->faction == f) {
 							units++;
 							forlist(&u->items) {
@@ -651,7 +644,7 @@ Faction *Game::CheckVictory()
 							// but given that the appropriate place for that function is
 							// r->hell, this doesn't seem right given what's happened.
 							// In this case, I'm willing to leak memory :-)
-							o->units.Remove(u);
+							std::erase(o->units, u);
 						}
 					}
 				}

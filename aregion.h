@@ -50,6 +50,7 @@ using json = nlohmann::json;
 
 #include <map>
 #include <vector>
+#include <list>
 #include <functional>
 
 /* Weather Types */
@@ -209,8 +210,8 @@ class ARegion : public AListElem
 
 		Unit *GetUnit(int);
 		Unit *GetUnitAlias(int, int); /* alias, faction number */
-		Unit *GetUnitId(UnitId *, int);
-		void DeduplicateUnitList(AList *, int);
+		Unit *get_unit_id(UnitId unitid, int faction);
+		void deduplicate_unit_list(std::list<UnitId>& list, int);
 		Location *GetLocation(UnitId *, int);
 
 		void SetLoc(int, int, int);
@@ -345,7 +346,7 @@ class ARegion : public AListElem
 		AList objects;
 		map<int,int> newfleets;
 		int fleetalias;
-		AList hell; /* Where dead units go */
+		std::vector<Unit *>hell; /* Where dead units go */
 		AList farsees;
 		// List of units which passed through the region
 		AList passers;

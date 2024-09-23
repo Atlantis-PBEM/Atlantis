@@ -246,7 +246,8 @@ void Game::ProcessInvisibility(Unit *u,AString *o, OrdersCheck *pCheck )
 
 	UnitId *id = ParseUnit(o);
 	while (id) {
-		order->units.Add(id);
+		order->units.push_back(*id);
+		delete id;
 		id = ParseUnit(o);
 	}
 }
@@ -504,7 +505,8 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 
 	UnitId *id = ParseUnit(o);
 	while(id) {
-		order->units.Add(id);
+		order->units.push_back(*id);
+		delete id;
 		id = ParseUnit(o);
 	}
 }
@@ -554,7 +556,8 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 
 		UnitId *id = ParseUnit(o);
 		while(id) {
-			order->units.Add(id);
+			order->units.push_back(*id);
+			delete id;
 			id = ParseUnit(o);
 		}
 		return;
@@ -596,7 +599,8 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 
 		UnitId *id = ParseUnit(o);
 		while(id) {
-			order->units.Add(id);
+			order->units.push_back(*id);
+			delete id;
 			id = ParseUnit(o);
 		}
 		return;
@@ -928,7 +932,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 	CastMindOrder *order = (CastMindOrder *) u->castorders;
 	int level = u->GetSkill(S_MIND_READING);
 
-	Unit *tar = r->GetUnitId(order->id,u->faction->num);
+	Unit *tar = r->get_unit_id(*order->id,u->faction->num);
 	if (!tar) {
 		u->error("No such unit.");
 		return 0;
@@ -1380,9 +1384,9 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
 	max = max * max;
 
 	int num = 0;
-	r->DeduplicateUnitList(&order->units, u->faction->num);
-	forlist (&(order->units)) {
-		Unit *tar = r->GetUnitId((UnitId *) elem,u->faction->num);
+	r->deduplicate_unit_list(order->units, u->faction->num);
+	for(auto elem : order->units) {
+		Unit *tar = r->get_unit_id(elem, u->faction->num);
 		if (!tar) continue;
 		if (tar->GetAttitude(r,u) < A_FRIENDLY) continue;
 		num += tar->GetSoldiers();
@@ -1397,8 +1401,8 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
 		u->error("CAST: No valid targets to turn invisible.");
 		return 0;
 	}
-	forlist_reuse (&(order->units)) {
-		Unit *tar = r->GetUnitId((UnitId *) elem,u->faction->num);
+	for(auto elem: order->units) {
+		Unit *tar = r->get_unit_id(elem, u->faction->num);
 		if (!tar) continue;
 		if (tar->GetAttitude(r,u) < A_FRIENDLY) continue;
 		tar->SetFlag(FLAG_INVIS,1);
@@ -1782,9 +1786,9 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 	int weight = u->Weight();
 
-	r->DeduplicateUnitList(&order->units, u->faction->num);
-	forlist (&(order->units)) {
-		Unit *taru = r->GetUnitId((UnitId *) elem,u->faction->num);
+	r->deduplicate_unit_list(order->units, u->faction->num);
+	for(auto elem: order->units) {
+		Unit *taru = r->get_unit_id(elem, u->faction->num);
 		if (taru && taru != u) weight += taru->Weight();
 	}
 
@@ -1832,31 +1836,29 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 	int comma = 0;
 	string unitlist;
-	{
-		forlist(&(order->units)) {
-			Location *loc = r->GetLocation((UnitId *) elem,u->faction->num);
-			if (loc) {
-				/* Don't do the casting unit yet */
-				if (loc->unit == u) {
-					delete loc;
-					continue;
-				}
-
-				if (loc->unit->GetAttitude(r,u) < A_ALLY) {
-					u->error("CAST: Unit is not allied.");
-				} else {
-					unitlist += (comma ? ", " : "") + to_string(loc->unit->num);
-					comma = 1;
-					loc->unit->DiscardUnfinishedShips();
-					loc->unit->event("Is teleported through a Gate to " + string(tar->Print().const_str()) +
-						" by " + string(u->name->const_str()) + ".", "spell");
-					loc->unit->MoveUnit( tar->GetDummy() );
-					if (loc->unit != u) loc->unit->ClearCastOrders();
-				}
+	for(auto elem: order->units) {
+		Location *loc = r->GetLocation(&elem, u->faction->num);
+		if (loc) {
+			/* Don't do the casting unit yet */
+			if (loc->unit == u) {
 				delete loc;
-			} else {
-				u->error("CAST: No such unit.");
+				continue;
 			}
+
+			if (loc->unit->GetAttitude(r,u) < A_ALLY) {
+				u->error("CAST: Unit is not allied.");
+			} else {
+				unitlist += (comma ? ", " : "") + to_string(loc->unit->num);
+				comma = 1;
+				loc->unit->DiscardUnfinishedShips();
+				loc->unit->event("Is teleported through a Gate to " + string(tar->Print().const_str()) +
+					" by " + string(u->name->const_str()) + ".", "spell");
+				loc->unit->MoveUnit( tar->GetDummy() );
+				if (loc->unit != u) loc->unit->ClearCastOrders();
+			}
+			delete loc;
+		} else {
+			u->error("CAST: No such unit.");
 		}
 	}
 	u->DiscardUnfinishedShips();
@@ -1884,10 +1886,10 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	}
 
 	int maxweight = 800 * level;
-	r->DeduplicateUnitList(&order->units, u->faction->num);
+	r->deduplicate_unit_list(order->units, u->faction->num);
 	int weight = 0;
-	forlist (&(order->units)) {
-		Unit *taru = r->GetUnitId((UnitId *) elem,u->faction->num);
+	for (auto elem: order->units) {
+		Unit *taru = r->get_unit_id(elem,u->faction->num);
 		if (taru) weight += taru->Weight();
 	}
 
@@ -1921,7 +1923,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	if (!GetRegionInRange(r, tar->region, u, S_PORTAL_LORE)) return 0;
 
 	// Check for any keybarrier objects in the target region
-	forlist_reuse(&tar->region->objects) {
+	forlist(&tar->region->objects) {
 		Object *o = (Object *) elem;
 		if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
 			if (u->items.GetNum(ObjectDefs[o->type].key_item) < 1) {
@@ -1939,23 +1941,21 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 
 	u->event("Casts Portal Jump.", "spell");
 
-	{
-		forlist(&(order->units)) {
-			Location *loc = r->GetLocation((UnitId *) elem,u->faction->num);
-			if (loc) {
-				if (loc->unit->GetAttitude(r,u) < A_ALLY) {
-					u->error("CAST: Unit is not allied.");
-				} else {
-					loc->unit->DiscardUnfinishedShips();
-					loc->unit->event("Is teleported to " + string(tar->region->Print().const_str()) +
-						" by " + string(u->name->const_str()) + ".", "spell");
-					loc->unit->MoveUnit( tar->obj );
-					if (loc->unit != u) loc->unit->ClearCastOrders();
-				}
-				delete loc;
+	for (auto elem: order->units) {
+		Location *loc = r->GetLocation(&elem, u->faction->num);
+		if (loc) {
+			if (loc->unit->GetAttitude(r,u) < A_ALLY) {
+				u->error("CAST: Unit is not allied.");
 			} else {
-				u->error("CAST: No such unit.");
+				loc->unit->DiscardUnfinishedShips();
+				loc->unit->event("Is teleported to " + string(tar->region->Print().const_str()) +
+					" by " + string(u->name->const_str()) + ".", "spell");
+				loc->unit->MoveUnit( tar->obj );
+				if (loc->unit != u) loc->unit->ClearCastOrders();
 			}
+			delete loc;
+		} else {
+			u->error("CAST: No such unit.");
 		}
 	}
 
@@ -2017,7 +2017,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 {
 	int level, num, sactype, sacrifices, i, sac, relics;
 	Object *o, *tower;
-	Unit *u, *victim;
+	Unit *victim;
 	Item *item;
 	AString message;
 
@@ -2041,8 +2041,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 			tower = o;
 		}
 			
-		forlist(&o->units) {
-			u = (Unit *) elem;
+		for(auto u: o->units) {
 			if (u->faction->num == mage->faction->num) {
 				forlist(&u->items) {
 					item = (Item *) elem;
@@ -2068,8 +2067,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 		i = getrandom(sacrifices);
 		forlist(&r->objects) {
 			o = (Object *) elem;
-			forlist(&o->units) {
-				u = (Unit *) elem;
+			for(auto u: o->units) {
 				if (u->faction->num == mage->faction->num) {
 					forlist(&u->items) {
 						item = (Item *) elem;
@@ -2117,8 +2115,7 @@ void Game::RunTeleportOrders()
 			int foundone = 1;
 			while (foundone) {
 				foundone = 0;
-				forlist(&o->units) {
-					Unit * u = (Unit *) elem;
+				for(auto u: o->units) {
 					if (u->teleportorders) {
 						foundone = 1;
 						switch (u->teleportorders->spell) {

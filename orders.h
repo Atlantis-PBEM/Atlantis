@@ -56,6 +56,7 @@ class SacrificeOrder;
 #include "gamedefs.h"
 #include "astring.h"
 #include "alist.h"
+#include <list>
 
 enum {
 	O_ATLANTIS,
@@ -210,7 +211,7 @@ class TeachOrder : public Order {
 		TeachOrder();
 		~TeachOrder();
 
-		AList targets;
+		std::list<UnitId> targets;
 };
 
 class ProduceOrder : public Order {
@@ -247,7 +248,7 @@ class AttackOrder : public Order {
 		AttackOrder();
 		~AttackOrder();
 
-		AList targets;
+		std::list<UnitId> targets;
 };
 
 class BuildOrder : public Order {
@@ -255,7 +256,7 @@ class BuildOrder : public Order {
 		BuildOrder();
 		~BuildOrder();
 
-		UnitId * target;
+		UnitId *target;
 		int new_building;
 		int needtocomplete;
 };
@@ -356,7 +357,7 @@ class TeleportOrder : public CastRegionOrder {
 		~TeleportOrder();
 
 		int gate;
-		AList units;
+		std::list<UnitId> units;
 };
 
 class CastIntOrder : public CastOrder {
@@ -372,7 +373,7 @@ class CastUnitsOrder : public CastOrder {
 		CastUnitsOrder();
 		~CastUnitsOrder();
 
-		AList units;
+		std::list<UnitId> units;
 };
 
 class CastTransmuteOrder : public CastOrder {
@@ -389,7 +390,7 @@ class EvictOrder : public Order {
 		EvictOrder();
 		~EvictOrder();
 
-		AList targets;
+		std::list<UnitId> targets;
 };
 
 class IdleOrder : public Order {

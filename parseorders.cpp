@@ -1642,7 +1642,8 @@ void Game::ProcessAttackOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	while (id && id->unitnum != -1) {
 		if (!pCheck) {
 			if (!u->attackorders) u->attackorders = new AttackOrder;
-			u->attackorders->targets.Add(id);
+			u->attackorders->targets.push_back(*id);
+			delete id;
 		}
 		id = ParseUnit(o);
 	}
@@ -1812,7 +1813,8 @@ void Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	while (id && id->unitnum != -1) {
 		students++;
 		if (order) {
-			order->targets.Add(id);
+			order->targets.push_back(*id);
+			delete id;
 		}
 		id = ParseUnit(o);
 	}
@@ -2889,7 +2891,8 @@ void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	while (id && id->unitnum != -1) {
 		if (!pCheck) {
 			if (!u->evictorders) u->evictorders = new EvictOrder;
-			u->evictorders->targets.Add(id);
+			u->evictorders->targets.push_back(*id);
+			delete id;
 		}
 		id = ParseUnit(o);
 	}

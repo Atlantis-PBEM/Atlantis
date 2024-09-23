@@ -53,15 +53,6 @@ string UnitId::Print()
 	}
 }
 
-UnitPtr *GetUnitList(AList *list, Unit *u)
-{
-	forlist (list) {
-		UnitPtr *p = (UnitPtr *) elem;
-		if (p->ptr == u) return p;
-	}
-	return 0;
-}
-
 Unit::Unit()
 {
 	name = 0;
@@ -1117,8 +1108,7 @@ int Unit::GetSharedNum(int item)
 
 	forlist((&object->region->objects)) {
 		Object *obj = (Object *) elem;
-		forlist((&obj->units)) {
-			Unit *u = (Unit *) elem;
+		for(auto u: obj->units) {
 			if ((u->num == num) || 
 			(u->faction == faction && u->GetFlag(FLAG_SHARING)))
 				count += u->items.GetNum(item);
@@ -1141,8 +1131,7 @@ void Unit::ConsumeShared(int item, int needed)
 	// We still need more, so look for whomever is able to share with us
 	forlist((&object->region->objects)) {
 		Object *obj = (Object *) elem;
-		forlist((&obj->units)) {
-			Unit *u = (Unit *) elem;
+		for(auto u: obj->units) {
 			if (u->faction == faction && u->GetFlag(FLAG_SHARING)) {
 				amount = u->items.GetNum(item);
 				if (amount < 1) continue;
@@ -2591,10 +2580,10 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 
 void Unit::MoveUnit(Object *toobj)
 {
-	if (object) object->units.Remove(this);
+	if (object) std::erase(object->units, this);
 	object = toobj;
 	if (object) {
-		object->units.Add(this);
+		object->units.push_back(this);
 		ObjectType& ob = ObjectDefs[object->type];
 		if (object->GetOwner() == this  && ob.flags & ObjectType::GRANTSKILL) {
 			if (faction->skills.GetDays(ob.granted_skill) < ob.granted_level) {

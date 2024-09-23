@@ -101,7 +101,7 @@ enum {
 #define FLAG_SWIMSPOILS			0x2000
 #define FLAG_SAILSPOILS			0x4000
 
-class UnitId : public AListElem {
+class UnitId {
 	public:
 		UnitId();
 		~UnitId();
@@ -112,13 +112,7 @@ class UnitId : public AListElem {
 		int faction;
 };
 
-class UnitPtr : public AListElem {
-	public:
-		Unit * ptr;
-};
-UnitPtr *GetUnitList(AList *, Unit *);
-
-class Unit : public AListElem
+class Unit
 {
 	public:
 		Unit();

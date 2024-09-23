@@ -148,7 +148,6 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	int d, count, temple, i, j, clash, reward_count;
 	ARegion *r;
 	Object *o;
-	Unit *u;
 	AString rname;
 	map <string, int> temples;
 	map <string, int>::iterator it;
@@ -221,8 +220,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				continue;
 			forlist(&r->objects) {
 				o = (Object *) elem;
-				forlist(&o->units) {
-					u = (Unit *) elem;
+				for(auto u: o->units) {
 					if (u->faction->num == monfaction) {
 						count++;
 					}
@@ -242,8 +240,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				continue;
 			forlist(&r->objects) {
 				o = (Object *) elem;
-				forlist(&o->units) {
-					u = (Unit *) elem;
+				for(auto u: o->units) {
 					if (u->faction->num == monfaction) {
 						if (!d--) {
 							q->target = u->num;
@@ -455,8 +452,7 @@ int count_entities(ARegionList *regions) {
 			if (o->type == O_EMPOWERED_ALTAR) {
 				count++;
 			}
-			forlist(&o->units) {
-				Unit *u = (Unit *)elem;
+			for(auto u: o->units) {
 				if (u->items.GetNum(I_IMPRISONED_ENTITY) > 0) {
 					count += u->items.GetNum(I_IMPRISONED_ENTITY);
 				}
@@ -475,7 +471,6 @@ Faction *Game::CheckVictory()
 	Quest *q;
 	ARegion *r, *start;
 	Object *o;
-	Unit *u;
 	Location *l;
 	AString message, times, temp;
 	map <string, int> vRegions, uvRegions;
@@ -510,8 +505,7 @@ Faction *Game::CheckVictory()
 		}
 		forlist(&r->objects) {
 			o = (Object *) elem;
-			forlist(&o->units) {
-				u = (Unit *) elem;
+			for(auto u: o->units) {
 				intersection.clear();
 				set_intersection(u->visited.begin(),
 					u->visited.end(),
