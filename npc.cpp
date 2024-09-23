@@ -149,7 +149,7 @@ void Game::GrowLMons(int rate)
 		
 		forlist(&r->objects) {
 			Object *obj = (Object *) elem;
-			if (obj->units.Num()) continue;
+			if (obj->units.size()) continue;
 			int montype = ObjectDefs[obj->type].monster;
 			int grow=!(ObjectDefs[obj->type].flags&ObjectType::NOMONSTERGROWTH);
 			if ((montype != -1) && grow) {

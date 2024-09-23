@@ -56,8 +56,7 @@ void Game::GrowVMons()
 		forlist(&r->objects) {
 			Object *obj = (Object *)elem;
 			if (obj->type != O_BKEEP) continue;
-			forlist(&obj->units) {
-				Unit *u = (Unit *)elem;
+			for(auto u: obj->units) {
 				int men = u->GetMen(I_BALROG) + 2;
 				if (men > 200) men = 200;
 				u->items.SetNum(I_BALROG, men);

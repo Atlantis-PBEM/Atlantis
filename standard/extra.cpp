@@ -104,14 +104,13 @@ Faction *Game::CheckVictory()
 			if (obj->type != O_BKEEP){
 				continue;
 			}
-			if (obj->units.Num()){
+			if (obj->units.size()){
 				return NULL;
 			}
 			// Now see find the first faction guarding the region
 			forlist(&region->objects) {
 				Object *o = region->GetDummy();
-				forlist(&o->units) {
-					Unit *u = (Unit *)elem;
+				for(auto u: o->units) {
 					if (u->guard == GUARD_GUARD){
 						return u->faction;
 					}

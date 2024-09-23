@@ -41,7 +41,6 @@ void Game::RunMovementOrders()
 	int phase, error;
 	ARegion *r;
 	Object *o;
-	Unit *u;
 	AList locs;
 	Location *l;
 	MoveOrder *mo;
@@ -54,8 +53,10 @@ void Game::RunMovementOrders()
 			r = (ARegion *) elem;
 			forlist(&r->objects) {
 				o = (Object *) elem;
-				forlist(&o->units) {
-					u = (Unit *) elem;
+				// Entering an object removes the unit from the container of units in this object, so we need to
+				// iterate on a copy so avoid errors.
+				auto unitsCopy(o->units);
+				for(auto u: unitsCopy) {
 					Object *tempobj = o;
 					DoMoveEnter(u, r, &tempobj);
 				}
@@ -67,7 +68,7 @@ void Game::RunMovementOrders()
 				o = (Object *) elem;
 				error = 1;
 				if (o->IsFleet()) {
-					u = o->GetOwner();
+					Unit *u = o->GetOwner();
 					if (!u)
 						continue;
 					if (u->phase >= phase)
@@ -86,8 +87,7 @@ void Game::RunMovementOrders()
 						error = 2;
 				}
 				if (error > 0) {
-					forlist(&o->units) {
-						u = (Unit *) elem;
+					for(auto u: o->units) {
 						if (u && u->monthorders &&
 								u->monthorders->type == O_SAIL) {
 							switch (error) {
@@ -112,8 +112,12 @@ void Game::RunMovementOrders()
 			r = (ARegion *) elem;
 			forlist(&r->objects) {
 				o = (Object *) elem;
-				forlist(&o->units) {
-					u = (Unit *) elem;
+				// Since movement (in DoAMoveOrder) is based on accumulated move points, and when it reaches
+				// the cost needed, will move the unit, modifying the container we are iterating, we make a copy of
+				// the list here, which is what we iterate.   This means that when a unit moves, we don't miss
+				// the unit which follows it in the container.
+				auto unitsCopy(o->units);
+				for(auto u: unitsCopy) {
 					if (u->phase >= phase)
 						continue;
 					u->phase = phase;
@@ -136,8 +140,10 @@ void Game::RunMovementOrders()
 		r = (ARegion *) elem;
 		forlist(&r->objects) {
 			o = (Object *) elem;
-			forlist(&o->units) {
-				u = (Unit *) elem;
+			// Entering an object removes the unit from the container of units in this object, so we need to
+			// iterate on a copy so avoid errors.
+			auto unitsCopy(o->units);
+			for(auto u: unitsCopy) {
 				Object *tempobj = o;
 				DoMoveEnter(u, r, &tempobj);
 			}
@@ -149,8 +155,7 @@ void Game::RunMovementOrders()
 		r = (ARegion *) elem;
 		forlist(&r->objects) {
 			o = (Object *) elem;
-			forlist(&o->units) {
-				u = (Unit *) elem;
+			for(auto u: o->units) {
 				mo = (MoveOrder *) u->monthorders;
 				if (!u->nomove &&
 						u->monthorders &&
@@ -188,7 +193,7 @@ void Game::RunMovementOrders()
 					}
 				}
 			}
-			u = o->GetOwner();
+			Unit *u = o->GetOwner();
 			if (o->IsFleet() && u && !u->nomove &&
 					u->monthorders && 
 					u->monthorders->type == O_SAIL) {
@@ -218,7 +223,6 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 	AList facs;
 	ARegion *newreg;
 	MoveDir *x;
-	Unit *unit;
 	Location *loc;
 
 	fleet->movepoints += fleet->GetFleetSpeed(0);
@@ -226,8 +230,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 	wgt = 0;
 	slr = 0;
 	nomove = 0;
-	forlist(&fleet->units) {
-		unit = (Unit *) elem;
+	for(auto unit: fleet->units) {
 		if (!GetFaction2(&facs,unit->faction->num)) {
 			FactionPtr * p = new FactionPtr;
 			p->ptr = unit->faction;
@@ -302,7 +305,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
 		// Check the new region for barriers and the fleet units for keys to the barriers
 		int needed_key = -1;
-		forlist_reuse(&newreg->objects) {
+		forlist(&newreg->objects) {
 			Object *o = (Object *) elem;
 			if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
 				needed_key = ObjectDefs[o->type].key_item;
@@ -310,8 +313,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 		}
 		if (needed_key != -1) { // we found a barrier
 			bool has_key = false;
-			forlist_reuse(&fleet->units) {
-				Unit *u = (Unit *) elem;
+			for(auto u: fleet->units) {
 				if (u->items.GetNum(needed_key) > 0) {
 					has_key = true;
 					break;
@@ -330,8 +332,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 				fleet->MoveObject(newreg);
 				fleet->SetPrevDir(reg->GetRealDirComp(x->dir));
 			}
-			forlist(&fleet->units) {
-				unit = (Unit *) elem;
+			for(auto unit: fleet->units) {
 				unit->moved += cost;
 				if (unit->guard == GUARD_GUARD)
 					unit->guard = GUARD_NONE;
@@ -366,10 +367,8 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING &&
 					x->dir != MOVE_PAUSE) {
 				if (!(cap->faction->is_npc)) newreg->visited = 1;
-				forlist(&fleet->units) {
+				for(auto unit: fleet->units) {
 					// Everyone onboard gets to see the sights
-					unit = (Unit *) elem;
-					
 					Farsight *f;
 					// Note the hex being left
 					forlist(&reg->passers) {
@@ -402,9 +401,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
 	if (stop) {
 		// Clear out everyone's orders
-		forlist(&fleet->units) {
-			Unit *unit = (Unit *) elem;
-
+		for(auto unit: fleet->units) {
 			if (unit->monthorders &&
 					unit->monthorders->type == O_SAIL) {
 				delete unit->monthorders;
@@ -426,8 +423,7 @@ void Game::RunTeachOrders()
 		ARegion * r = (ARegion *) elem;
 		forlist((&r->objects)) {
 			Object * obj = (Object *) elem;
-			forlist((&obj->units)) {
-				Unit * u = (Unit *) elem;
+			for(auto u: obj->units) {
 				if (u->monthorders) {
 					if (u->monthorders->type == O_TEACH) {
 						Do1TeachOrder(r,u);
@@ -455,73 +451,62 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 
 	int students = 0;
 	TeachOrder * order = (TeachOrder *) unit->monthorders;
-	reg->DeduplicateUnitList(&order->targets, unit->faction->num);
-	forlist(&order->targets) {
-		UnitId * id = (UnitId *) elem;
-		Unit * target = reg->GetUnitId(id,unit->faction->num);
+	reg->deduplicate_unit_list(order->targets, unit->faction->num);
+	for (auto unitid = order->targets.begin(); unitid != order->targets.end(); ) {
+		Unit *target = reg->get_unit_id(*unitid, unit->faction->num);
 		if (!target) {
-			order->targets.Remove(id);
 			unit->error("TEACH: No such unit.");
-			delete id;
-		} else {
-			if (target->faction->get_attitude(unit->faction->num) < A_FRIENDLY) {
-				unit->error(string("TEACH: ") + target->name->const_str() +
-							" is not a member of a friendly faction.");
-				order->targets.Remove(id);
-				delete id;
-			} else {
-				if (!target->monthorders ||
-					target->monthorders->type != O_STUDY) {
-					unit->error(string("TEACH: ") + target->name->const_str() + " is not studying.");
-					order->targets.Remove(id);
-					delete id;
-				} else {
-					int sk = ((StudyOrder *) target->monthorders)->skill;
-					if (unit->GetRealSkill(sk) <= target->GetRealSkill(sk)) {
-						unit->error(string("TEACH: ") + target->name->const_str() +
-							" is not studying a skill you can teach.");
-						order->targets.Remove(id);
-						delete id;
-					} else {
-						// Check whether it's a valid skill to teach
-						if (SkillDefs[sk].flags & SkillType::NOTEACH) {
-							unit->error(string("TEACH: ") + SkillDefs[sk].name + " cannot be taught.");
-							return;
-						} else {
-							students += target->GetMen();
-						}
-					}
-				}
-			}
+			unitid = order->targets.erase(unitid);
+			continue;
 		}
+		if (target->faction->get_attitude(unit->faction->num) < A_FRIENDLY) {
+			unit->error(string("TEACH: ") + target->name->const_str() + " is not a member of a friendly faction.");
+			unitid = order->targets.erase(unitid);
+			continue;
+		}
+		if (!target->monthorders|| target->monthorders->type != O_STUDY) {
+			unit->error(string("TEACH: ") + target->name->const_str() + " is not studying.");
+			unitid = order->targets.erase(unitid);
+			continue;
+		}
+		int sk = ((StudyOrder *) target->monthorders)->skill;
+		if (unit->GetRealSkill(sk) <= target->GetRealSkill(sk)) {
+			unit->error(string("TEACH: ") + target->name->const_str() + " is not studying a skill you can teach.");
+			unitid = order->targets.erase(unitid);
+			continue;
+		}
+		// Check whether it's a valid skill to teach
+		if (SkillDefs[sk].flags & SkillType::NOTEACH) {
+			unit->error(string("TEACH: ") + SkillDefs[sk].name + " cannot be taught.");
+			unitid = order->targets.erase(unitid);
+			continue;
+		}
+		students += target->GetMen();
+		++unitid;
 	}
 	if (!students) return;
 
 	int days = (30 * unit->GetMen() * Globals->STUDENTS_PER_TEACHER);
 
 	/* We now have a list of valid targets */
-	{
-		forlist(&order->targets) {
-			UnitId * id = (UnitId *) elem;
-			Unit * u = reg->GetUnitId(id,unit->faction->num);
+	for(auto unitid: order->targets) {
+		Unit * u = reg->get_unit_id(unitid, unit->faction->num);
 
-			int umen = u->GetMen();
-			int tempdays = (umen * days) / students;
-			if (tempdays > 30 * umen) tempdays = 30 * umen;
-			days -= tempdays;
-			students -= umen;
+		int umen = u->GetMen();
+		int tempdays = (umen * days) / students;
+		if (tempdays > 30 * umen) tempdays = 30 * umen;
+		days -= tempdays;
+		students -= umen;
 
-			StudyOrder * o = (StudyOrder *) u->monthorders;
-			o->days += tempdays;
-			if (o->days > 30 * umen)
-			{
-				days += o->days - 30 * umen;
-				o->days = 30 * umen;
-			}
-			unit->event("Teaches " + SkillDefs[o->skill].name +	" to " + u->name->const_str() + ".", "teach");
-			// The TEACHER may learn something in this process!
-			unit->Practice(o->skill);
+		StudyOrder * o = (StudyOrder *) u->monthorders;
+		o->days += tempdays;
+		if (o->days > 30 * umen) {
+			days += o->days - 30 * umen;
+			o->days = 30 * umen;
 		}
+		unit->event("Teaches " + SkillDefs[o->skill].name +	" to " + u->name->const_str() + ".", "teach");
+		// The TEACHER may learn something in this process!
+		unit->Practice(o->skill);
 	}
 }
 
@@ -737,8 +722,7 @@ void Game::AddNewBuildings(ARegion *r)
 	int i;
 	forlist((&r->objects)) {
 		Object *obj = (Object *) elem;
-		forlist ((&obj->units)) {
-			Unit *u = (Unit *) elem;
+		for(auto u: obj->units) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_BUILD) {
 					BuildOrder *o = (BuildOrder *)u->monthorders;
@@ -780,14 +764,13 @@ void Game::RunBuildHelpers(ARegion *r)
 {
 	forlist((&r->objects)) {
 		Object *obj = (Object *) elem;
-		forlist ((&obj->units)) {
-			Unit *u = (Unit *) elem;
+		for(auto u: obj->units) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_BUILD) {
 					BuildOrder *o = (BuildOrder *)u->monthorders;
 					Object *tarobj = NULL;
 					if (o->target) {
-						Unit *target = r->GetUnitId(o->target,u->faction->num);
+						Unit *target = r->get_unit_id(*(o->target),u->faction->num);
 						if (!target) {
 							u->error("BUILD: No such unit to help.");
 							delete u->monthorders;
@@ -1216,8 +1199,7 @@ void Game::RunProduceOrders(ARegion * r)
 {
 	forlist(&r->objects) {
 		Object * obj = (Object *) elem;
-		forlist ((&obj->units)) {
-			Unit * u = (Unit *) elem;
+		for(auto u: obj->units) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_PRODUCE) {
 					RunUnitProduce(r,u);
@@ -1283,8 +1265,7 @@ int Game::FindAttemptedProd(ARegion * r, Production * p)
 	int attempted = 0;
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
-		forlist((&obj->units)) {
-			Unit * u = (Unit *) elem;
+		for(auto u: obj->units) {
 			if ((u->monthorders) && (u->monthorders->type == O_PRODUCE)) {
 				attempted += ValidProd(u,r,p);
 			}
@@ -1307,8 +1288,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 	if (attempted < amt) attempted = amt;
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
-		forlist((&obj->units)) {
-			Unit * u = (Unit *) elem;
+		for(auto u: obj->units) {
 			questcomplete = 0;
 			if (!u->monthorders || u->monthorders->type != O_PRODUCE)
 				continue;
@@ -1392,8 +1372,7 @@ void Game::RunStudyOrders(ARegion * r)
 {
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
-		forlist((&obj->units)) {
-			Unit * u = (Unit *) elem;
+		for(auto u: obj->units) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_STUDY) {
 					Do1StudyOrder(u,obj);
@@ -1409,8 +1388,7 @@ void Game::RunIdleOrders(ARegion *r)
 {
 	forlist((&r->objects)) {
 		Object *obj = (Object *)elem;
-		forlist((&obj->units)) {
-			Unit *u = (Unit *)elem;
+		for(auto u: obj->units) {
 			if (u->monthorders && u->monthorders->type == O_IDLE) {
 				u->event("Sits idle.", "idle");
 				delete u->monthorders;
@@ -1755,8 +1733,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 					int others = 0;
 					forlist(&scanReg->objects) {
 						Object *o = (Object *) elem;
-						forlist(&o->units) {
-							Unit *u = (Unit *) elem;
+						for(auto u: o->units) {
 							if (u->faction->num == guardfaction) guards = 1;
 							else others = 1;
 						}
