@@ -189,7 +189,7 @@ void Game::RunMovementOrders()
 							else if (d->dir == MOVE_PAUSE) *tOrder += "P";
 							else *tOrder += d->dir - MOVE_ENTER;
 						}
-						u->oldorders.Insert(tOrder);
+						u->oldorders.push_front(tOrder->const_str());
 					}
 				}
 			}
@@ -209,7 +209,7 @@ void Game::RunMovementOrders()
 						else
 							*tOrder += DirectionAbrs[d->dir];
 					}
-					u->oldorders.Insert(tOrder);
+					u->oldorders.push_front(tOrder->const_str());
 				}
 			}
 		}
@@ -1188,7 +1188,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 		order += o->target;
 		order += " ";
 		order += ItemDefs[o->item].abr;
-		tOrder->turnOrders.Add(new AString(order));
+		tOrder->turnOrders.push_back(order.const_str());
 		u->turnorders.Insert(tOrder);
 	}
 	delete u->monthorders;
@@ -1328,7 +1328,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 				order += po->target;
 				order += " ";
 				order += ItemDefs[po->item].abr;
-				tOrder->turnOrders.Add(new AString(order));
+				tOrder->turnOrders.push_back(order.const_str());
 				u->turnorders.Insert(tOrder);
 			}
 
@@ -1576,7 +1576,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 				AString order;
 				tOrder->repeating = 0;
 				order = AString("STUDY ") + SkillDefs[sk].abbr + " " + o->level;
-				tOrder->turnOrders.Add(new AString(order));
+				tOrder->turnOrders.push_back(order.const_str());
 				u->turnorders.Insert(tOrder);
 			} else {
 				string msg = "Completes study to level " + to_string(o->level) + " in " + SkillDefs[sk].name + ".";

@@ -348,7 +348,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 						else {
 							unit = ProcessFormOrder(unit, &order, pCheck, getatsign);
 							if (!pCheck && unit && unit->former && unit->former->format)
-								unit->former->oldorders.Add(new AString(saveorder));
+								unit->former->oldorders.push_back(saveorder.const_str());
 							if (!pCheck) {
 								if (unit) unit->ClearOrders();
 							}
@@ -368,7 +368,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 							parse_error(pCheck, unit, fac, "TURN: without ENDTURN");
 
 						if (!pCheck && unit->former && unit->former->format)
-							unit->former->oldorders.Add(new AString(saveorder));
+							unit->former->oldorders.push_back(saveorder.const_str());
 
 						if (pCheck && former) delete unit;
 						unit = former;
@@ -387,7 +387,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 					if (faction != 0) {
 						AString *retval;
 						if (!pCheck && unit->former && unit->former->format)
-							unit->former->oldorders.Add(new AString(saveorder));
+							unit->former->oldorders.push_back(saveorder.const_str());
 						retval = ProcessTurnOrder(unit, f, pCheck, getatsign);
 						if (retval) {
 							order = *retval;
@@ -411,7 +411,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 					unit->presentTaxing = 0;
 					unit->inTurnBlock = 0;
 					if (!pCheck && unit->former && unit->former->format)
-						unit->former->oldorders.Add(new AString(saveorder));
+						unit->former->oldorders.push_back(saveorder.const_str());
 				} else
 					parse_error(pCheck, unit, fac, "ENDTURN: without TURN.");
 				break;
@@ -419,9 +419,9 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 				if (fac) {
 					if (unit) {
 						if (!pCheck && getatsign)
-							unit->oldorders.Add(new AString(saveorder));
+							unit->oldorders.push_back(saveorder.const_str());
 						if (!pCheck && unit->former && unit->former->format)
-							unit->former->oldorders.Add(new AString(saveorder));
+							unit->former->oldorders.push_back(saveorder.const_str());
 
 						ProcessOrder(code, unit, &order, pCheck);
 					} else {
@@ -435,7 +435,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 			code = NORDERS;
 			if (!pCheck) {
 				if (getatsign && fac && unit)
-					unit->oldorders.Add(new AString(saveorder));
+					unit->oldorders.push_back(saveorder.const_str());
 			}
 		}
 
@@ -1328,9 +1328,8 @@ void Game::ProcessRestartOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			pFac->SetAddress(*(u->faction->address));
 			AString *pass = new AString(*(u->faction->password));
 			pFac->password = pass;
-			AString *facstr = new AString(AString("Restarting ")
-					+ *(pFac->address) + ".");
-			newfactions.Add(facstr);
+			string facstr = string("Restarting ") + pFac->address->const_str() + ".";
+			newfactions.push_back(facstr);
 		}
 	}
 }
@@ -2011,7 +2010,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 						break;
 					}
 					turnDepth++;
-					tOrder->turnOrders.Add(new AString(saveorder));
+					tOrder->turnOrders.push_back(saveorder.const_str());
 					turnLast = 1;
 					break;
 				case O_FORM:
@@ -2021,7 +2020,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 					}
 					turnLast = 0;
 					formDepth++;
-					tOrder->turnOrders.Add(new AString(saveorder));
+					tOrder->turnOrders.push_back(saveorder.const_str());
 					break;
 				case O_ENDFORM:
 					if (turnLast) {
@@ -2037,7 +2036,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 						}
 					}
 					formDepth--;
-					tOrder->turnOrders.Add(new AString(saveorder));
+					tOrder->turnOrders.push_back(saveorder.const_str());
 					turnLast = 1;
 					break;
 				case O_UNIT:
@@ -2057,16 +2056,16 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 						parse_error(pCheck, unit, 0, "ENDTURN: without TURN.");
 					} else {
 						if (--turnDepth) 
-							tOrder->turnOrders.Add(new AString(saveorder));
+							tOrder->turnOrders.push_back(saveorder.const_str());
 						turnLast = 0;
 					}
 					break;
 				default:
-					tOrder->turnOrders.Add(new AString(saveorder));
+					tOrder->turnOrders.push_back(saveorder.const_str());
 					break;
 			}
 			if (!pCheck && unit->former && unit->former->format)
-				unit->former->oldorders.Add(new AString(saveorder));
+				unit->former->oldorders.push_back(saveorder.const_str());
 			delete token;
 		}
 	}

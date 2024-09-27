@@ -289,7 +289,7 @@ private:
 	void ModifyHealing(int level, int patients, int success);
 
 	AList factions;
-	AList newfactions; /* List of strings */
+	std::vector<std::string> newfactions; /* List of strings */
 	vector<Battle *> battles;
 	ARegionList regions;
 	int factionseq;

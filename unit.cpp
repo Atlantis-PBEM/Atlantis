@@ -442,8 +442,7 @@ json Unit::write_json_orders()
 
 	bool has_continuing_month_order = false;
 
-	forlist(&(oldorders)) {
-		string order = ((AString *)elem)->const_str();
+	for(auto order: oldorders) {
 		AString temp = order;
 		temp.getat();
 		AString *token = temp.gettoken();
@@ -491,8 +490,7 @@ json Unit::write_json_orders()
 				parent_stack.push(container);
 				container = json::array();
 			}
-			forlist(&tOrder->turnOrders) {
-				string order = ((AString *)elem)->const_str();
+			for(auto order: tOrder->turnOrders) {
 				AString temp = order;
 				temp.getat();
 				AString *token = temp.gettoken();
@@ -528,8 +526,7 @@ json Unit::write_json_orders()
 			container.push_back( { { "order", "@TURN" } } );
 			parent_stack.push(container);
 			container = json::array();
-			forlist(&tOrder->turnOrders) {
-				string order = ((AString *)elem)->const_str();
+			for(auto order: tOrder->turnOrders) {
 				AString temp = order;
 				temp.getat();
 				AString *token = temp.gettoken();
