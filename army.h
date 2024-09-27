@@ -37,7 +37,6 @@ class Army;
 #include "alist.h"
 #include "items.h"
 #include "object.h"
-#include "shields.h"
 #include "helper.h"
 #include "skills.h"
 
@@ -160,6 +159,13 @@ class Soldier {
 
 typedef Soldier * SoldierPtr;
 
+class Shield {
+public:
+	int shieldtype;
+	int shieldskill;
+	Shield(int type, int skill) : shieldtype(type), shieldskill(skill) {}
+};
+
 class Army
 {
 	public:
@@ -202,7 +208,7 @@ class Army
 
 		SoldierPtr * soldiers;
 		Unit * leader;
-		ShieldList shields;
+		std::vector<shared_ptr<Shield>> shields;
 		int round;
 		int tac;
 		int canfront;
