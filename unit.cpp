@@ -631,8 +631,7 @@ void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int au
 
 		j["skills"]["known"] = json::array();
 		int men = GetMen();
-		forlist(&skills) {
-			Skill *s = (Skill *) elem;
+		for(auto s: skills) {
 			if (s->days == 0) continue;
 			int man_days = s->days/men;
 			json skill = json{
@@ -754,8 +753,7 @@ AString *Unit::BattleReport(int obs)
 
 	*temp += items.BattleReport();
 
-	forlist (&skills) {
-		Skill *s = (Skill *)elem;
+	for(auto s: skills) {
 		if (SkillDefs[s->type].flags & SkillType::BATTLEREP) {
 			int lvl = GetAvailSkill(s->type);
 			if (lvl) {
@@ -1367,8 +1365,7 @@ void Unit::ForgetSkill(int sk)
 {
 	skills.SetDays(sk, 0);
 	if (type == U_MAGE) {
-		forlist(&skills) {
-			Skill *s = (Skill *) elem;
+		for(auto s: skills) {
 			if (SkillDefs[s->type].flags & SkillType::MAGIC) {
 				return;
 			}
@@ -1376,8 +1373,7 @@ void Unit::ForgetSkill(int sk)
 		type = U_NORMAL;
 	}
 	if (type == U_APPRENTICE) {
-		forlist(&skills) {
-			Skill *s = (Skill *) elem;
+		for(auto s: skills) {
 			if (SkillDefs[s->type].flags & SkillType::APPRENTICE) {
 				return;
 			}
@@ -1401,12 +1397,8 @@ int Unit::CanStudy(int sk)
 {
 	if (skills.GetStudyRate(sk, GetMen()) < 1) return 0;
 
-	if (Globals->SKILL_LIMIT_NONLEADERS &&
-		IsNormal() &&
-		skills.GetDays(sk) < 1 &&
-		skills.Num() > 0) {
-		if (!Globals->MAGE_NONLEADERS ||
-			!(SkillDefs[sk].flags & SkillType::MAGIC))
+	if (Globals->SKILL_LIMIT_NONLEADERS && IsNormal() && skills.GetDays(sk) < 1 && skills.size() > 0) {
+		if (!Globals->MAGE_NONLEADERS || !(SkillDefs[sk].flags & SkillType::MAGIC))
 		return 0;
 	}
 	
@@ -1426,19 +1418,16 @@ int Unit::CanStudy(int sk)
 
 int Unit::Study(int sk, int days)
 {
-	Skill *s;
-
 	if (Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
 		if (SkillDefs[sk].flags & SkillType::MAGIC) {
-			forlist(&skills) {
-				s = (Skill *) elem;
+			for(auto s: skills) {
 				if (!(SkillDefs[s->type].flags & SkillType::MAGIC)) {
 					error("STUDY: Non-leader mages cannot possess non-magical skills.");
 					return 0;
 				}
 			}
-		} else if (skills.Num()) {
-			s = (Skill *) skills.First();
+		} else if (skills.size()) {
+			Skill *s = skills.front();
 			if ((s->type != sk) && (s->days > 0)) {
 				error("STUDY: Can know only 1 skill.");
 				return 0;
@@ -1574,12 +1563,10 @@ int Unit::Practice(int sk)
 		if (!Globals->REQUIRED_EXPERIENCE) {
 			Study(sk, men * bonus);
 		} else {
-			Skill *s;
 			// check if it's a nonleader and this is not it's
 			// only skill
 			if (Globals->SKILL_LIMIT_NONLEADERS && !IsLeader()) {
-				forlist(&skills) {
-					s = (Skill *) elem;
+				for(auto s: skills) {
 					if ((s->days > 0) && (s->type != sk)) {
 						return 0;
 					}
@@ -1618,21 +1605,23 @@ void Unit::AdjustSkills()
 		//
 		// Not a leader: can only know 1 skill
 		//
-		if (skills.Num() > 1) {
+		if (skills.size() > 1) {
 			//
 			// Find highest skill, eliminate others
 			//
 			unsigned int max = 0;
 			Skill *maxskill = 0;
-			forlist(&skills) {
-				Skill *s = (Skill *) elem;
+			for(auto s: skills) {
 				if (s->days > max) {
 					max = s->days;
 					maxskill = s;
 				}
 			}
-			forlist_reuse(&skills) {
-				Skill *s = (Skill *) elem;
+
+			// In order to avoid modifying the container while iterating, we will collect the skills to remove and
+			// then remove them after
+			std::vector<Skill *> skillsToRemove;
+			for(auto s: skills) {
 				if (s != maxskill) {
 					// Allow multiple skills if they're all
 					// magical ones
@@ -1640,7 +1629,12 @@ void Unit::AdjustSkills()
 							(SkillDefs[s->type].flags & SkillType::MAGIC) )
 						continue;
 					if ((Globals->REQUIRED_EXPERIENCE) && (s->exp > 0)) continue;
-					skills.Remove(s);
+					skillsToRemove.push_back(s);
+				}
+			}
+			if (!skillsToRemove.empty()) {
+				for(auto s: skillsToRemove) {
+					skills.erase(s);
 					delete s;
 				}
 			}
@@ -1648,8 +1642,7 @@ void Unit::AdjustSkills()
 	}
 
 	// Everyone: limit all skills to their maximum level
-	forlist(&skills) {
-		Skill *theskill = (Skill *) elem;
+	for(auto theskill: skills) {
 		int max = GetSkillMax(theskill->type);
 		if (GetRealSkill(theskill->type) >= max) {
 			theskill->days = GetDaysByLevel(max) * GetMen();
@@ -2350,8 +2343,7 @@ int Unit::Taxers(int numtaxers)
 					taxers = totalMen;
 				}
 			} else {
-				forlist(&skills) {
-					Skill *s = (Skill *)elem;
+				for(auto s: skills) {
 					if ((Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) &&
 							SkillDefs[s->type].flags & SkillType::DAMAGE) {
 						basetax = totalMen;
@@ -2741,8 +2733,7 @@ int Unit::GetProductionBonus(int item)
 int Unit::SkillLevels()
 {
 	int levels = 0;
-	forlist(&skills) {
-		Skill *s = (Skill *)elem;
+	for(auto s: skills) {
 		levels += GetLevelByDays(s->days/GetMen());
 	}
 	return levels;
@@ -2750,8 +2741,7 @@ int Unit::SkillLevels()
 
 Skill *Unit::GetSkillObject(int sk)
 {
-	forlist(&skills) {
-		Skill *s = (Skill *)elem;
+	for(auto s: skills) {
 		if (s->type == sk)
 			return s;
 	}

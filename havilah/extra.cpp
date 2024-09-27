@@ -355,7 +355,6 @@ Faction *Game::CheckVictory()
 	ARegion *r, *start;
 	Object *o;
 	Faction *f;
-	Skill *s;
 	Location *l;
 	AString message, times, temp;
 	map <string, int> vRegions, uvRegions;
@@ -615,6 +614,9 @@ Faction *Game::CheckVictory()
 				r = (ARegion *) elem;
 				forlist(&r->objects) {
 					o = (Object *) elem;
+					// To avoid invalidating the iterator, we'll collect the units that would get removed
+					// and then remove them at the end.
+					std::vector<Unit *> unitsToErase;
 					for(auto u: o->units) {
 						if (u->faction == f) {
 							units++;
@@ -630,8 +632,7 @@ Faction *Game::CheckVictory()
 									stuff += item->num * ItemDefs[item->type].baseprice;
 									
 							}
-							forlist_reuse(&u->skills) {
-								s = (Skill *) elem;
+							for(auto s: u->skills) {
 								if (SkillDefs[s->type].flags & SkillType::MAGIC) {
 									magicdays += s->days * SkillDefs[s->type].cost;
 									magiclevels += GetLevelByDays(s->days / u->GetMen()) * u->GetMen();
@@ -644,8 +645,11 @@ Faction *Game::CheckVictory()
 							// but given that the appropriate place for that function is
 							// r->hell, this doesn't seem right given what's happened.
 							// In this case, I'm willing to leak memory :-)
-							std::erase(o->units, u);
+							unitsToErase.push_back(u);
 						}
+					}
+					for (auto u : unitsToErase) {
+						std::erase(o->units, u);
 					}
 				}
 			}

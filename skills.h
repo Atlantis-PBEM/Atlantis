@@ -37,7 +37,7 @@ class SkillList;
 
 #include "astring.h"
 #include "gamedefs.h"
-#include "alist.h"
+#include <list>
 
 /* For dependencies:
   A value of depend == -1 indicates no more dependencies.
@@ -120,30 +120,39 @@ struct ShowSkill {
 	AString * Report(Faction *) const;
 };
 
-class Skill : public AListElem {
-	public:
-		void Readin(istream& f);
-		void Writeout(ostream &f);
+class Skill {
+public:
+	void Readin(istream& f);
+	void Writeout(ostream &f);
+	Skill *Split(int total, int split);
 
-		Skill * Split(int,int); /* total num, num leaving */
-
-		int type;
-		unsigned int days;
-		unsigned int exp;
+	int type;
+	unsigned int days;
+	unsigned int exp;
 };
 
-class SkillList : public AList {
-	public:
-		int GetDays(int); /* Skill */
-		int GetExp(int); /* Skill */
-		void SetDays(int,int); /* Skill, days */
-		void SetExp(int,int); /* Skill, exp */
-		void Combine(SkillList *);
-		int GetStudyRate(int, int); /* Skill, num of men */
-		SkillList * Split(int,int); /* total men, num to split */
-		AString Report(int); /* Number of men */
-		void Readin(istream& f);
-		void Writeout(ostream& f);
+class SkillList {
+	std::list<Skill *> skills;
+
+public:
+	using iterator = typename std::list<Skill *>::iterator;
+
+	int GetDays(int sk);
+	int GetExp(int sk);
+	void SetDays(int sk, int days);
+	void SetExp(int sk,int exp);
+	void Combine(SkillList *skl);
+	int GetStudyRate(int sk, int men);
+	SkillList *Split(int total, int split);
+	AString Report(int men);
+	void Readin(istream& f);
+	void Writeout(ostream& f);
+	inline int size() { return skills.size(); }
+	inline Skill *front() { return skills.front(); }
+
+	inline iterator begin(){ return skills.begin(); }
+	inline iterator end(){ return skills.end(); }
+	inline size_t erase(Skill *s) { return std::erase(skills, s); }
 };
 
 class HealType {

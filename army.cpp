@@ -702,7 +702,7 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 	// If TACTICS_NEEDS_WAR is enabled, we don't want to push leaders 
 	// from tact-4 to tact-5! Also check that we have skills, otherwise
 	// we get a nasty core dump ;)
-	if (Globals->TACTICS_NEEDS_WAR && (tactician->skills.Num() != 0)) {
+	if (Globals->TACTICS_NEEDS_WAR && (tactician->skills.size() != 0)) {
 		int currskill = tactician->skills.GetDays(S_TACTICS)/tactician->GetMen();
 		if (currskill < 450 - Globals->SKILL_PRACTICE_AMOUNT) {
 			tactician->PracticeAttribute("tactics");
