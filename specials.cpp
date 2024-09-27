@@ -24,6 +24,7 @@
 // END A3HEADER
 #include "battle.h"
 #include "gamedata.h"
+#include <memory>
 
 void Soldier::SetupHealing()
 {
@@ -166,10 +167,7 @@ void Battle::UpdateShields(Army *a)
 		if (spd->effectflags & SpecialType::FX_SHIELD) {
 			for (shtype = 0; shtype < 4; shtype++) {
 				if (spd->shield[shtype] == -1) continue;
-				Shield *sh = new Shield;
-				sh->shieldtype = spd->shield[shtype];
-				sh->shieldskill = a->soldiers[i]->slevel;
-				a->shields.Add(sh);
+				a->shields.emplace_back(std::make_shared<Shield>(spd->shield[shtype], a->soldiers[i]->slevel));
 			}
 		}
 

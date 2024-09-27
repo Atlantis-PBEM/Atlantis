@@ -1334,7 +1334,6 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 
 	/* 1. Check against Global effects (not sure how yet) */
 	/* 2. Attack shield */
-	Shield *hi;
 	int combat = 0;
 	int canShield = 0;
 	switch(attackType) {
@@ -1353,9 +1352,12 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 	}
 
 	if (canShield) {
-		int shieldType = attackType;
+    	auto correctShield = [&attackType](shared_ptr<Shield> sh) { return sh->shieldtype == attackType; };
+    	auto compareShield = [](shared_ptr<Shield> s1, shared_ptr<Shield> s2) { return s1->shieldskill < s2->shieldskill; };
+    	auto validShields = shields | std::views::filter(correctShield);
+    	auto maxShield = std::max_element(validShields.begin(), validShields.end(), compareShield);
 
-		hi = shields.GetHighShield(shieldType);
+		auto hi = (maxShield != validShields.end()) ? *maxShield : nullptr;
 		if (hi) {
 			/* Check if we get through shield */
 			if (!Hits(attackLevel, hi->shieldskill)) {
@@ -1364,8 +1366,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 
 			if (effect != NULL && !combat) {
 				/* We got through shield... if killing spell, destroy shield */
-				shields.Remove(hi);
-				delete hi;
+				std::erase(shields, hi);
 			}
 		}
 	}
