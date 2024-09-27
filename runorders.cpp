@@ -2401,7 +2401,6 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	Item *it, *sh;
 	Unit *t, *s;
 	Object *fleet;
-	Skill *skill;
 	SkillList *skills;
 
 	string ord = (o->type == O_TAKE) ? "TAKE" : "GIVE";
@@ -2822,8 +2821,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		}
 
 		/* Check if any new skill reports have to be shown */
-		forlist(&(u->skills)) {
-			skill = (Skill *) elem;
+		for(auto skill: u->skills) {
 			newlvl = u->GetRealSkill(skill->type);
 			oldlvl = u->faction->skills.GetDays(skill->type);
 			if (newlvl > oldlvl) {
@@ -2836,7 +2834,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 		// Okay, now for each item that the unit has, tell the new faction
 		// about it in case they don't know about it yet.
-		forlist_reuse(&u->items) {
+		forlist(&u->items) {
 			it = (Item *)elem;
 			u->faction->DiscoverItem(it->type, 0, 1);
 		}

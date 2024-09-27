@@ -271,8 +271,7 @@ Skill *Skill::Split(int total, int leave)
 
 int SkillList::GetDays(int skill)
 {
-	forlist(this) {
-		Skill *s = (Skill *) elem;
+	for(auto s: skills) {
 		if (s->type == skill) {
 			return s->days;
 		}
@@ -282,11 +281,10 @@ int SkillList::GetDays(int skill)
 
 void SkillList::SetDays(int skill, int days)
 {
-	forlist(this) {
-		Skill *s = (Skill *) elem;
+	for(auto s: skills) {
 		if (s->type == skill) {
 			if ((days == 0) && (s->exp <= 0)) {
-				Remove(s);
+				std::erase(skills, s); // this is safe because we are not continuing to use the list iterator
 				delete s;
 				return;
 			} else {
@@ -300,13 +298,12 @@ void SkillList::SetDays(int skill, int days)
 	s->type = skill;
 	s->days = days;
 	s->exp = 0;
-	Add(s);
+	skills.push_back(s);
 }
 
 int SkillList::GetExp(int skill)
 {
-	forlist(this) {
-		Skill *s = (Skill *) elem;
+	for(auto s: skills) {
 		if (s->type == skill) {
 			return s->exp;
 		}
@@ -316,8 +313,7 @@ int SkillList::GetExp(int skill)
 
 void SkillList::SetExp(int skill, int exp)
 {
-	forlist(this) {
-		Skill *s = (Skill *) elem;
+	for(auto s: skills) {
 		if (s->type == skill) {
 			s->exp = exp;
 			return;
@@ -328,28 +324,29 @@ void SkillList::SetExp(int skill, int exp)
 	s->type = skill;
 	s->days = 0;
 	s->exp = exp;
-	Add(s);
+	skills.push_back(s);
 }
 
 SkillList *SkillList::Split(int total, int leave)
 {
 	SkillList *ret = new SkillList;
-	forlist (this) {
-		Skill *s = (Skill *) elem;
+	for(auto siter = skills.begin(); siter != skills.end();) {
+		Skill *s = *siter;
 		Skill *n = s->Split(total, leave);
 		if ((s->days == 0) && (s->exp == 0)) {
-			Remove(s);
+			siter = skills.erase(siter);
 			delete s;
+		} else {
+			++siter;
 		}
-		ret->Add(n);
+		ret->skills.push_back(n);
 	}
 	return ret;
 }
 
 void SkillList::Combine(SkillList *b)
 {
-	forlist(b) {
-		Skill *s = (Skill *) elem;
+	for(auto s: *b) {
 		SetDays(s->type, GetDays(s->type) + s->days);
 		SetExp(s->type, GetExp(s->type) + s->exp);
 	}
@@ -363,8 +360,7 @@ int SkillList::GetStudyRate(int skill, int nummen)
 	int days = 0;
 	int exp = 0;
 	if (nummen < 1) return 0;
-	forlist(this) {
-		Skill *s = (Skill *) elem;
+	for(auto s: skills) {
 		if (s->type == skill) {
 			days = s->days / nummen;
 			if (Globals->REQUIRED_EXPERIENCE)
@@ -372,32 +368,19 @@ int SkillList::GetStudyRate(int skill, int nummen)
 		}
 	}
 	
-	int rate = StudyRateAdjustment(days, exp);
-	
-	/*
-	 * if (nummen == 10) {
-		AString temp = "Studying ";
-		temp += SkillDefs[skill].abbr;
-		temp += " with ";
-		temp += exp + "XP at a rate of ";
-		temp += rate + ".";
-		Awrite(temp);
-	}
-	*/
-	return rate;
+	return StudyRateAdjustment(days, exp);
 }
 
 AString SkillList::Report(int nummen)
 {
 	AString temp;
-	if (!Num()) {
+	if (!size()) {
 		temp += "none";
 		return temp;
 	}
 	int i = 0;
 	int displayed = 0;
-	forlist (this) {
-		Skill *s = (Skill *) elem;
+	for(auto s: skills) {
 		if (s->days == 0) continue;
 		displayed++;
 		if (i) {
@@ -425,12 +408,12 @@ void SkillList::Readin(istream& f)
 		Skill *s = new Skill;
 		s->Readin(f);
 		if ((s->days == 0) && (s->exp==0)) delete s;
-		else Add(s);
+		else skills.push_back(s);
 	}
 }
 
 void SkillList::Writeout(ostream& f)
 {
-	f << Num() << '\n';
-	forlist(this) ((Skill *) elem)->Writeout(f);
+	f << size() << '\n';
+	for(auto s: skills) s->Writeout(f);
 }
