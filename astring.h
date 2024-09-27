@@ -28,11 +28,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "alist.h"
 
 using namespace std;
 
-class AString : public AListElem {
+class AString {
 	friend ostream & operator <<(ostream &os, const AString &);
 	friend istream & operator >>(istream &is, AString &);
 

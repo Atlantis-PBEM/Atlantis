@@ -1060,7 +1060,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 										"for faction "+pFac->num);
 							} else {
 								if (getatsign) {
-									u->oldorders.Add(new AString(saveorder));
+									u->oldorders.push_back(string(saveorder.const_str()));
 								}
 								ProcessOrder(o, u, pLine, NULL);
 							}
@@ -1080,8 +1080,8 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 
 void Game::WriteNewFac(Faction *pFac)
 {
-	AString *strFac = new AString(AString("Adding ") + *(pFac->address) + ".");
-	newfactions.Add(strFac);
+	string strFac = string("Adding ") + pFac->address->const_str() + ".";
+	newfactions.push_back(strFac);
 }
 
 int Game::DoOrdersCheck(const AString &strOrders, const AString &strCheck)

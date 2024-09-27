@@ -323,7 +323,7 @@ class TurnOrder : public Order {
 		TurnOrder();
 		~TurnOrder();
 		int repeating;
-		AList turnOrders;
+		std::vector<std::string> turnOrders;
 };
 
 class CastOrder : public Order {

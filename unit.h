@@ -252,7 +252,7 @@ class Unit
 		int readyItem;
 		int readyWeapon[MAX_READY];
 		int readyArmor[MAX_READY];
-		AList oldorders;
+		std::list<std::string> oldorders;
 		int needed; /* For assessing maintenance */
 		int hunger;
 		int stomach_space;

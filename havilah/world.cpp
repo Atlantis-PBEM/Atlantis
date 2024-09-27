@@ -201,7 +201,7 @@ int syllprob[] = { 0, 60, 40, 0 };
 // world generation
 //
 
-static AList regionnames;
+static std::vector<std::string> regionnames;
 static int nnames;
 static int ntowns;
 static int nregions;
@@ -233,8 +233,8 @@ void CountNames()
 	// them easily (to check for randomly generated rude words,
 	// for example)
 	ofstream names("names.out", ios::out|ios::ate);
-	forlist(&regionnames) {
-		names << ((AString *) elem)->const_str() << '\n';
+	for(auto name: regionnames) {
+		names << name << '\n';
 	}
 }
 
@@ -243,7 +243,6 @@ int AGetName(int town, ARegion *reg)
 	int unique, rnd, syllables, i, trail, port, similar;
 	unsigned int u;
 	char temp[80];
-	AString *name;
 
 	port = 0;
 	if (town) {
@@ -333,9 +332,8 @@ int AGetName(int town, ARegion *reg)
 		}
 		temp[0] = toupper(temp[0]);
 		unique = 1;
-		forlist(&regionnames) {
-			name = (AString *) elem;
-			if (*name == temp) {
+		for(auto name: regionnames) {
+			if (name == temp) {
 				unique = 0;
 				break;
 			}
@@ -350,26 +348,16 @@ int AGetName(int town, ARegion *reg)
 	else
 		nregions++;
 
-	name = new AString(temp);
-	regionnames.Add(name);
+	regionnames.push_back(temp);
 
-	return regionnames.Num();
+	return regionnames.size();
 }
 
 const char *AGetNameString(int name)
 {
-	AString *str;
-
-	forlist(&regionnames) {
-		name--;
-		if (!name) {
-			str = (AString *) elem;
-			return str->Str();
-		}
-	}
-
-	// This should never happen
-	return "Error";
+	if (name <= 0 || name > (int) regionnames.size())
+		return "Error";
+	return regionnames[name-1].c_str();
 }
 
 void Game::CreateWorld()
