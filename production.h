@@ -25,24 +25,16 @@
 #ifndef PRODUCTION_CLASS
 #define PRODUCTION_CLASS
 
-#include "gamedefs.h"
-#include "alist.h"
-#include "astring.h"
 #include <iostream>
 
-using namespace std;
-
-#define P_BIG 40
-#define P_SMALL 20
-
-class Production : public AListElem {
+class Production {
 public:
-	Production(int,int); /* item type, amt max */
+	Production(int type, int max);
     Production();
 
-    void Writeout(ostream& f);
-	void Readin(istream& f);
-	AString WriteReport();
+    void write_out(std::ostream& f);
+	void read_in(std::istream& f);
+	std::string write_report();
 	
 	int itemtype;
 	int baseamount;
