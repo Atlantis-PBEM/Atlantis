@@ -1052,7 +1052,7 @@ void ARegion::Writeout(ostream& f)
 	f << products.size() << '\n';
 	for (const auto& product : products) product->write_out(f);
 	f << markets.size() << '\n';
-	for (const auto& market : markets) market->Writeout(f);	
+	for (const auto& market : markets) market->write_out(f);	
 
 	f << objects.Num() << '\n';
 	forlist ((&objects)) ((Object *) elem)->Writeout(f);
@@ -1127,7 +1127,7 @@ void ARegion::Readin(istream &f, AList *facs)
 	markets.reserve(n);
 	for (int i = 0; i < n; i++) {
 		Market *m = new Market();
-		m->Readin(f);
+		m->read_in(f);
 		markets.push_back(m);
 	}
 
@@ -1291,7 +1291,7 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 		if (m->amount != -1) item["amount"] = m->amount;
 		else item["unlimited"] = true;
 
-		if (m->type == M_SELL) {
+		if (m->type == Market::M_SELL) {
 			if (ItemDefs[m->item].type & IT_ADVANCED) {
 				if (!Globals->MARKETS_SHOW_ADVANCED_ITEMS) {
 					if (!HasItem(fac, m->item)) continue;
@@ -3999,7 +3999,7 @@ void ARegionList::ResourcesStatistics() {
 		}
 
 		for (const auto& m : reg->markets) {
-			if (m->type == M_BUY) {
+			if (m->type == Market::M_BUY) {
 				forSale[m->item] += m->amount;
 			}
 			else {

@@ -213,13 +213,13 @@ void ARegion::SetupEconomy() {
 	float ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 	// hack: include wage factor of 10 in float assignment above
 	// Setup Recruiting
-	Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),	Population()/25, 0, 10000, 0, 2000);
+	Market *m = new Market(Market::M_BUY, race, (int)(Wages() * 4 * ratio), Population() / 25, 0, 10000, 0, 2000);
 	markets.push_back(m);
 
 	if (Globals->LEADERS_EXIST) {
 		ratio = ItemDefs[I_LEADERS].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 		// hack: include wage factor of 10 in float assignment above
-		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio), Population()/125, 0, 10000, 0, 400);
+		m = new Market(Market::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), Population() / 125, 0, 10000, 0, 400);
 		markets.push_back(m);
 	}
 }
@@ -470,7 +470,7 @@ void ARegion::SetupCityMarket()
 
 				cap = (citymax * 3/4) - 5000;
 				if (cap < 0) cap = citymax/2;
-				Market * m = new Market (M_SELL, i, price, amt, population,	population+cap, amt, amt*2);
+				Market * m = new Market(Market::M_SELL, i, price, amt, population,	population + cap, amt, amt * 2);
 				markets.push_back(m);
 			} else if (i == I_FOOD) {
 				// Add foodstuffs directly to market
@@ -486,7 +486,7 @@ void ARegion::SetupCityMarket()
 
 				cap = (citymax * 3/4) - 5000;
 				if (cap < 0) cap = citymax/2;
-				Market * m = new Market (M_BUY, i, price, amt, population, population+2*cap, amt, amt*5);
+				Market * m = new Market(Market::M_BUY, i, price, amt, population, population + 2 * cap, amt, amt * 5);
 				markets.push_back(m);
 			} else if (ItemDefs[i].pInput[0].item == -1) {
 				// Basic resource
@@ -549,7 +549,9 @@ void ARegion::SetupCityMarket()
 			if (cap < citymax/2) cap = citymax / 2;
 			offset = citymax / 8;
 			if (cap+offset < citymax) {
-				Market * m = new Market (M_SELL, i, price, amt/6, population+cap+offset, population+citymax, 0, amt);
+				Market * m = new Market(
+					Market::M_SELL, i, price, amt / 6, population + cap + offset, population + citymax, 0, amt
+				);
 				markets.push_back(m);
 			}
 		}
@@ -580,7 +582,7 @@ void ARegion::SetupCityMarket()
 			cap = (citymax *3/4) - 5000;
 			if (cap < citymax/2) cap = citymax / 2;
 			offset = (citymax/20) + ((citymax/5) * 2);
-			Market * m = new Market (M_SELL, i, price, amt/6, population+cap, population+citymax, 0, amt);
+			Market * m = new Market(Market::M_SELL, i, price, amt / 6, population + cap, population + citymax, 0, amt);
 			markets.push_back(m);
 		}
 	}
@@ -614,7 +616,9 @@ void ARegion::SetupCityMarket()
 							
 		cap = (citymax/4);
 		offset = - (citymax/20) + ((5-num) * citymax * 3/40);
-		Market * m = new Market (M_SELL, i, price, amt/6, population+cap+offset, population+citymax, 0, amt);
+		Market * m = new Market(
+			Market::M_SELL, i, price, amt / 6, population + cap + offset, population + citymax, 0, amt
+		);
 		markets.push_back(m);
 		demand[i] = 0;
 		num--;	
@@ -650,7 +654,7 @@ void ARegion::SetupCityMarket()
 		cap = (citymax/4);
 		offset = ((3-num) * citymax * 3 / 40);
 		if (supply[i] < 4) offset += citymax / 20;
-		Market * m = new Market (M_BUY, i, price, 0, population+cap+offset, population+citymax,	0, amt);
+		Market * m = new Market(Market::M_BUY, i, price, 0, population + cap + offset, population + citymax, 0, amt);
 		markets.push_back(m);
 		supply[i] = 0;
 		num--;
@@ -713,7 +717,9 @@ void ARegion::SetupCityMarket()
 				tradesell++;
 				offset = - (citymax/20) + tradesell * (tradesell * tradesell * citymax/40);
 				if (cap + offset < citymax) {
-					Market * m = new Market (M_SELL, i, price, amt/5, cap+population+offset, citymax+population, 0, amt);
+					Market * m = new Market(
+						Market::M_SELL, i, price, amt / 5, cap + population + offset, citymax + population, 0, amt
+					);
 					markets.push_back(m);
 				}
 			}
@@ -736,7 +742,9 @@ void ARegion::SetupCityMarket()
 				cap = (citymax/2);
 				offset = tradebuy++ * (citymax/6);
 				if (cap+offset < citymax) {
-					Market * m = new Market (M_BUY, i, price, amt/6, cap+population+offset,	citymax+population, 0, amt);
+					Market * m = new Market(
+						Market::M_BUY, i, price, amt / 6, cap + population + offset, citymax + population, 0, amt
+					);
 					markets.push_back(m);
 				}
 			}
@@ -897,7 +905,7 @@ void ARegion::UpdateEditRegion()
 {
 	// redo markets and entertainment/tax income for extra people.
 	SetIncome();
-	for (auto& m : markets) m->PostTurn(Population(), Wages());
+	for (auto& m : markets) m->post_turn(Population(), Wages());
 	
 	//Replace man selling
 	markets.erase(
@@ -907,13 +915,13 @@ void ARegion::UpdateEditRegion()
 
 	float ratio = ItemDefs[race].baseprice / (float) (Globals->BASE_MAN_COST * 10);
 	// hack: include wage factor of 10 in float calculation above
-	Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),	Population()/25, 0, 10000, 0, 2000);
+	Market *m = new Market(Market::M_BUY, race, (int)(Wages() * 4 * ratio), Population()/ 25, 0, 10000, 0, 2000);
 	markets.push_back(m);
 
 	if (Globals->LEADERS_EXIST) {
 		ratio = ItemDefs[I_LEADERS].baseprice / (float) (Globals->BASE_MAN_COST * 10);
 		// hack: include wage factor of 10 in float calculation above
-		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio), Population()/125, 0, 10000, 0, 400);
+		m = new Market(Market::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), Population() / 125, 0, 10000, 0, 400);
 		markets.push_back(m);
 	}	
 }
@@ -1025,13 +1033,13 @@ void ARegion::SetupEditRegion()
 	float ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 	// hack: include wage factor of 10 in float assignment above
 	// Setup Recruiting
-	Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio),	Population()/25, 0, 10000, 0, 2000);
+	Market *m = new Market(Market::M_BUY, race, (int)(Wages() * 4 * ratio), Population() / 25, 0, 10000, 0, 2000);
 	markets.push_back(m);
 
 	if (Globals->LEADERS_EXIST) {
 		ratio = ItemDefs[I_LEADERS].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 		// hack: include wage factor of 10 in float assignment above
-		m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio), Population()/125, 0, 10000, 0, 400);
+		m = new Market(Market::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), Population() / 125, 0, 10000, 0, 400);
 		markets.push_back(m);
 	}
 }
@@ -1194,7 +1202,7 @@ int ARegion::TownGrowth()
 		int tot = 0;
 		for (const auto& m : markets) {
 			if (Population() > m->minpop) {
-				if (m->type == M_BUY) {
+				if (m->type == Market::M_BUY) {
 					if (ItemDefs[m->item].type & IT_TRADE) {
 						amt += 5 * m->activity;
 						tot += 5 * m->maxamt;
@@ -1574,11 +1582,15 @@ void ARegion::PostTurn(ARegionList *pRegs)
 			SetupCityMarket();
 			float ratio = ItemDefs[race].baseprice / (float) (Globals->BASE_MAN_COST * 10);
 			// Setup Recruiting
-			Market *m = new Market(M_BUY, race, (int)(Wages()*4*ratio), Population()/25, 0, 10000, 0, 2000);
+			Market *m = new Market(
+				Market::M_BUY, race, (int)(Wages() * 4 * ratio), Population() / 25, 0, 10000, 0, 2000
+			);
 			markets.push_back(m);
 			if (Globals->LEADERS_EXIST) {
 				ratio = ItemDefs[I_LEADERS].baseprice /	(float)Globals->BASE_MAN_COST;
-				m = new Market(M_BUY, I_LEADERS, (int)(Wages()*4*ratio), Population()/125, 0, 10000, 0, 400);
+				m = new Market(
+					Market::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), Population() / 125, 0, 10000, 0, 400
+				);
 				markets.push_back(m);
 			}
 		}
@@ -1590,7 +1602,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	}
 	
 	/* update markets */
-	for (auto& m : markets) m->PostTurn(Population(), Wages());
+	for (auto& m : markets) m->post_turn(Population(), Wages());
 
  	/* update resources */
 	UpdateProducts();
