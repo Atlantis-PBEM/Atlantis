@@ -6,14 +6,13 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-using namespace std;
 
 namespace indent {
-  class indentbuf: public streambuf {
+  class indentbuf: public std::streambuf {
   public:
     static const int idx;
 
-    indentbuf(ostream& orig, size_t indent)
+    indentbuf(std::ostream& orig, size_t indent)
     : orig(orig),
       orig_buf(orig.rdbuf()),
       comment_on(false),
@@ -84,7 +83,7 @@ namespace indent {
       if (traits_type::eq_int_type(ch, traits_type::eof())) {
         return traits_type::not_eof(ch);
       }
-      
+
       if (suppress) {
         return orig_buf->sputc(ch);
       }
@@ -98,7 +97,7 @@ namespace indent {
           size_t wrap_pos = buffer.find_last_of("\n ", wrap);
           size_t extra = 1;
           // If we didn't find a space, just wrap at the wrap point.
-          if (wrap_pos == string::npos || (wrap - wrap_pos > lookback)) { wrap_pos = wrap; extra = 0; }
+          if (wrap_pos == std::string::npos || (wrap - wrap_pos > lookback)) { wrap_pos = wrap; extra = 0; }
           if (comment_on) orig_buf->sputc(';');
           orig_buf->sputn(buffer.c_str(), wrap_pos);
           orig_buf->sputc('\n');
@@ -106,7 +105,7 @@ namespace indent {
           // If the remaining buffer is just a newline, clear it
           if (buffer == "\n") buffer.clear();
           if (buffer.size() > 0) {
-            buffer = prefix + string(string_wrap_indent, ' ') + buffer;
+            buffer = prefix + std::string(string_wrap_indent, ' ') + buffer;
           }
         }
         if (buffer.size() > 0) {
@@ -134,35 +133,35 @@ namespace indent {
       if (line_indent < 0) line_indent = 0;
       // Just make sure we never get a huge indent.
       if (line_indent > 30) line_indent = 30;
-      if (line_indent) prefix = string(line_indent, ' ');
+      if (line_indent) prefix = std::string(line_indent, ' ');
       else prefix.clear();
     }
 
-    ostream& orig;
-    streambuf *orig_buf;
+    std::ostream& orig;
+    std::streambuf *orig_buf;
     bool comment_on;
     bool suppress;
     int_type line_indent;
     size_t wrap;
     size_t lookback;
     size_t string_wrap_indent;
-    string buffer;
-    string prefix;
-    vector<int_type> line_indent_stack;
+    std::string buffer;
+    std::string prefix;
+    std::vector<int_type> line_indent_stack;
   };
 
-  ostream &wrap(ostream &os);
-  ostream &comment(ostream &os);
-  ostream &incr(ostream &os);
-  ostream &decr(ostream &os);
-  ostream &clear(ostream &os);
+  std::ostream &wrap(std::ostream &os);
+  std::ostream &comment(std::ostream &os);
+  std::ostream &incr(std::ostream &os);
+  std::ostream &decr(std::ostream &os);
+  std::ostream &clear(std::ostream &os);
 
   struct wrap_data { size_t wrap; size_t lookback; size_t string_wrap_indent; };
   inline wrap_data wrap(size_t wrap=70, size_t lookback=30, size_t string_wrap_indent=2) {
     return { wrap, lookback, string_wrap_indent };
   }
   template<typename _CharT, typename _Traits>
-  inline basic_ostream<_CharT, _Traits>& operator<<(basic_ostream<_CharT, _Traits>& os, wrap_data data) {
+  inline std::basic_ostream<_CharT, _Traits>& operator<<(std::basic_ostream<_CharT, _Traits>& os, wrap_data data) {
     if(os.pword(indentbuf::idx) == nullptr) {
       indentbuf *newbuf = new indentbuf(os, 0);
       newbuf->set_wrap(data.wrap, data.lookback, data.string_wrap_indent);
@@ -177,7 +176,7 @@ namespace indent {
   struct indent_data { size_t indent; };
   inline indent_data set_indent(size_t indent=2) { return { indent }; }
   template<typename _CharT, typename _Traits>
-  inline basic_ostream<_CharT, _Traits>& operator<<(basic_ostream<_CharT, _Traits>& os, indent_data data) {
+  inline std::basic_ostream<_CharT, _Traits>& operator<<(std::basic_ostream<_CharT, _Traits>& os, indent_data data) {
     if(os.pword(indentbuf::idx) == nullptr) {
       indentbuf *newbuf = new indentbuf(os, data.indent);
       os.pword(indentbuf::idx) = newbuf;
@@ -191,7 +190,7 @@ namespace indent {
   struct suppress_data { bool suppress; };
   inline suppress_data suppress_format(bool suppress) { return { suppress }; }
   template<typename _CharT, typename _Traits>
-  inline basic_ostream<_CharT, _Traits>&operator<<(basic_ostream<_CharT, _Traits>& os, suppress_data data) {
+  inline std::basic_ostream<_CharT, _Traits>&operator<<(std::basic_ostream<_CharT, _Traits>& os, suppress_data data) {
     if(os.pword(indentbuf::idx) == nullptr) {
       indentbuf *newbuf = new indentbuf(os, 0);
       os.pword(indentbuf::idx) = newbuf;
@@ -205,7 +204,9 @@ namespace indent {
   inline push_indent_data push_indent(size_t indent) { return { indent, true }; }
   inline push_indent_data pop_indent() { return { 0, false }; }
   template<typename _CharT, typename _Traits>
-  inline basic_ostream<_CharT, _Traits>& operator<<(basic_ostream<_CharT, _Traits>& os, push_indent_data data) {
+  inline std::basic_ostream<_CharT, _Traits>& operator<<(
+    std::basic_ostream<_CharT, _Traits>& os, push_indent_data data
+  ) {
     if(os.pword(indentbuf::idx) == nullptr) {
       indentbuf *newbuf = new indentbuf(os, 0);
       os.pword(indentbuf::idx) = newbuf;

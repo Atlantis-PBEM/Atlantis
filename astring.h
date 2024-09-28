@@ -29,11 +29,9 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 class AString {
-	friend ostream & operator <<(ostream &os, const AString &);
-	friend istream & operator >>(istream &is, AString &);
+	friend std::ostream & operator <<(std::ostream &os, const AString &);
+	friend std::istream & operator >>(std::istream &is, AString &);
 
 public:
 

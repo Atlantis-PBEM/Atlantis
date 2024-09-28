@@ -195,7 +195,7 @@ class ManType
 		int defaultlevel;
 		char const *skills[6];
 		Ethnicity ethnicity;
-		
+
 		int CanProduce(int);
 		int CanUse(int);
 };
@@ -239,7 +239,7 @@ class MonType
 		The general algorithm of the monster movement:
 
 		There are three categories of terrain: 1) what monster likes, 2) what monster is neutral, and 3) what monster dislikes.
-		
+
 		Monster will freely move through the terrain he likes, and there will be a standard chance to move into the terrain he likes.
 
 		The monster will never enter the terrain he dislikes and will have a 2x lower chance to enter neutral terrain.
@@ -456,9 +456,9 @@ class Item : public AListElem
 		Item();
 		~Item();
 
-		void Readin(istream& f);
-		void Writeout(ostream& f);
-		
+		void Readin(std::istream& f);
+		void Writeout(std::ostream& f);
+
 		AString Report(int);
 
 		int type;
@@ -470,8 +470,8 @@ class Item : public AListElem
 class ItemList : public AList
 {
 	public:
-		void Readin(istream& f);
-		void Writeout(ostream& f);
+		void Readin(std::istream& f);
+		void Writeout(std::ostream& f);
 
 		AString Report(int, int, int);
 		AString BattleReport();

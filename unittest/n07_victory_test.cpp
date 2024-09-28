@@ -8,6 +8,7 @@
 // using namespace boost::ut; here. Instead, we alias it, and then use the alias inside the
 // closure to make the user defined literals and all the other niceness available.
 namespace ut = boost::ut;
+using namespace std;
 
 // This suite will test various aspects of the Faction class in isolation.
 ut::suite<"NO7 Victory Conditions"> no7victory_suite = []

@@ -111,8 +111,8 @@ class Object : public AListElem
 		Object(ARegion *region);
 		~Object();
 
-		void Readin(istream& f, AList *);
-		void Writeout(ostream& f);
+		void Readin(std::istream& f, AList *);
+		void Writeout(std::ostream& f);
 		void build_json_report(json& j, Faction *, int, int, int, int, int, int, int);
 
 		void SetName(AString *);
@@ -134,10 +134,10 @@ class Object : public AListElem
 
 		void SetPrevDir(int);
 		void MoveObject(ARegion *toreg);
-		
+
 		// Fleets
-		void ReadinFleet(istream &f);
-		void WriteoutFleet(ostream &f);
+		void ReadinFleet(std::istream &f);
+		void WriteoutFleet(std::ostream &f);
 		int CheckShip(int);
 		int GetNumShips(int);
 		void SetNumShips(int, int);
@@ -149,7 +149,7 @@ class Object : public AListElem
 		int FleetSailingSkill(int);
 		int GetFleetSize();
 		int GetFleetSpeed(int);
-		
+
 		AString *name;
 		AString *describe;
 		ARegion *region;

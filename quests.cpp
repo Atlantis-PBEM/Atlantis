@@ -46,9 +46,9 @@ Quest::~Quest()
 	rewards.clear();
 }
 
-string Quest::get_rewards()
+std::string Quest::get_rewards()
 {
-	string quest_rewards;
+	std::string quest_rewards;
 	bool first = true;
 
 	quest_rewards = "Quest rewards: ";
@@ -67,7 +67,7 @@ string Quest::get_rewards()
 	return quest_rewards;
 }
 
-int QuestList::read_quests(istream& f)
+int QuestList::read_quests(std::istream& f)
 {
 	int count, dests, rewards;
 	std::shared_ptr<Quest> quest;
@@ -90,16 +90,16 @@ int QuestList::read_quests(istream& f)
 				f >> quest->regionnum;
 				break;
 			case Quest::BUILD:
-				f >> ws >> name;
+				f >> std::ws >> name;
 				quest->building = LookupObject(&name);
-				f >> ws >> quest->regionname;
+				f >> std::ws >> quest->regionname;
 				break;
 			case Quest::VISIT:
-				f >> ws >> name;
+				f >> std::ws >> name;
 				quest->building = LookupObject(&name);
 				f >> dests;
 				while (dests-- > 0) {
-					f >> ws  >> name;
+					f >> std::ws  >> name;
 					quest->destinations.insert(name.Str());
 				}
 				break;
@@ -110,13 +110,13 @@ int QuestList::read_quests(istream& f)
 			default:
 				f >> quest->target;
 				quest->objective.Readin(f);
-				f >> ws >> name;
+				f >> std::ws >> name;
 				quest->building = LookupObject(&name);
 				f >> quest->regionnum;
-				f >> ws >> quest->regionname;
+				f >> std::ws >> quest->regionname;
 				f >> dests;
 				while (dests-- > 0) {
-					f >> ws >> name;
+					f >> std::ws >> name;
 					quest->destinations.insert(name.Str());
 				}
 				break;
@@ -135,7 +135,7 @@ int QuestList::read_quests(istream& f)
     return 1;
 }
 
-void QuestList::write_quests(ostream& f)
+void QuestList::write_quests(std::ostream& f)
 {
 	f << quests.size() << '\n';
 	for(auto q: quests) {
@@ -183,7 +183,7 @@ void QuestList::write_quests(ostream& f)
 	f << 0 << '\n';
 }
 
-string QuestList::distribute_rewards(Unit *u, shared_ptr<Quest> q)
+std::string QuestList::distribute_rewards(Unit *u, std::shared_ptr<Quest> q)
 {
 	for(auto i: q->rewards) {
 		u->items.SetNum(i.type, u->items.GetNum(i.type) + i.num);
@@ -192,7 +192,7 @@ string QuestList::distribute_rewards(Unit *u, shared_ptr<Quest> q)
 	return q->get_rewards();
 }
 
-int QuestList::check_kill_target(Unit *u, ItemList *reward, string *quest_rewards)
+int QuestList::check_kill_target(Unit *u, ItemList *reward, std::string *quest_rewards)
 {
 	for(auto q: quests) {
 		if (q->type == Quest::SLAY && q->target == u->num) {
@@ -208,7 +208,7 @@ int QuestList::check_kill_target(Unit *u, ItemList *reward, string *quest_reward
 	return 0;
 }
 
-int QuestList::check_harvest_target(ARegion *r, int item, int harvested, int max, Unit *u, string *quest_rewards)
+int QuestList::check_harvest_target(ARegion *r, int item, int harvested, int max, Unit *u, std::string *quest_rewards)
 {
 	for(auto q: quests) {
 		if (q->type == Quest::HARVEST && q->regionnum == r->num && q->objective.type == item) {
@@ -222,7 +222,7 @@ int QuestList::check_harvest_target(ARegion *r, int item, int harvested, int max
 	return 0;
 }
 
-int QuestList::check_build_target(ARegion *r, int building, Unit *u, string *quest_rewards)
+int QuestList::check_build_target(ARegion *r, int building, Unit *u, std::string *quest_rewards)
 {
 	for(auto q: quests) {
 		if (q->type == Quest::BUILD && q->building == building && q->regionname == *r->name) {
@@ -234,9 +234,9 @@ int QuestList::check_build_target(ARegion *r, int building, Unit *u, string *que
 	return 0;
 }
 
-int QuestList::check_visit_target(ARegion *r, Unit *u, string *quest_rewards)
+int QuestList::check_visit_target(ARegion *r, Unit *u, std::string *quest_rewards)
 {
-	set<string> intersection;
+	std::set<std::string> intersection;
 
 	for(auto q: quests) {
 		if (q->type != Quest::VISIT) continue;
@@ -252,7 +252,7 @@ int QuestList::check_visit_target(ARegion *r, Unit *u, string *quest_rewards)
 					u->visited.begin(),
 					u->visited.end(),
 					inserter(intersection, intersection.begin()),
-					less<string>()
+					std::less<std::string>()
 				);
 				if (intersection.size() == q->destinations.size()) {
 					// This unit has visited the required buildings in all those regions, so they completed a quest
@@ -266,7 +266,7 @@ int QuestList::check_visit_target(ARegion *r, Unit *u, string *quest_rewards)
 	return 0;
 }
 
-int QuestList::check_demolish_target(ARegion *r, int building, Unit *u, string *quest_rewards)
+int QuestList::check_demolish_target(ARegion *r, int building, Unit *u, std::string *quest_rewards)
 {
 	for(auto q: quests) {
 		if (q->type == Quest::DEMOLISH && q->regionnum == r->num && q->target == building) {

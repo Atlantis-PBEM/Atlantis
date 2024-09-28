@@ -38,16 +38,16 @@ ut::suite<"Faction"> faction_suite = []
     // It groks strings, so we'll just compare the string values.  We could compare char * but then we would
     // get just a 'true' or 'false' in the compare, rather than the nice verbose output we get in this case
     // if the strings don't match.
-    string current = faction->name->Str();
-    string expected = "Test Faction (1)";
+    std::string current = faction->name->Str();
+    std::string expected = "Test Faction (1)";
     expect(eq(current, expected));
   };
 
   "SetName filters illegal characters"_test = [faction]
   {
     faction->SetName(new AString("Test Faction || bar"));
-    string current = faction->name->Str();
-    string expected = "Test Faction  bar (1)";
+    std::string current = faction->name->Str();
+    std::string expected = "Test Faction  bar (1)";
     expect(eq(current, expected));
   };
 

@@ -9,13 +9,13 @@ UnitTestHelper::UnitTestHelper() {
     game.init_random_seed = seed_random;
 
     // Set up the output streams to capture the output.
-    cout_streambuf = cout.rdbuf();
-    cout.rdbuf(cout_buffer.rdbuf());
+    cout_streambuf = std::cout.rdbuf();
+    std::cout.rdbuf(cout_buffer.rdbuf());
 }
 
 UnitTestHelper::~UnitTestHelper() {
     // Restore the output streams.
-    cout.rdbuf(cout_streambuf);
+    std::cout.rdbuf(cout_streambuf);
 }
 
 int UnitTestHelper::initialize_game() {
@@ -39,7 +39,7 @@ Game& UnitTestHelper::game_object() {
     return game;
 }
 
-Faction *UnitTestHelper::create_faction(string name) {
+Faction *UnitTestHelper::create_faction(std::string name) {
     auto fac = game.AddFaction(0, nullptr);
     AString *tmp = new AString(name); // because the guts of SetName frees the string passed in. :/
     fac->SetName(tmp);
@@ -73,14 +73,14 @@ Unit *UnitTestHelper::create_unit(Faction *faction, ARegion *region) {
 void UnitTestHelper::create_fleet(ARegion *region, Unit *owner, int ship_type, int ship_count) {
     for (auto i = 0; i < ship_count; i++)
         game.CreateShip(region, owner, ship_type);
- 
+
 }
 
 void UnitTestHelper::create_building(ARegion *region, Unit *owner, int building_type) {
     Object * obj = new Object(region);
     obj->type = building_type;
     obj->num = region->buildingseq++;
-    string name = "Building [" + to_string(obj->num) + "]";
+    std::string name = "Building [" + std::to_string(obj->num) + "]";
     obj->name = new AString(name);
     region->objects.Add(obj);
     ObjectType ob = ObjectDefs[building_type];
@@ -100,11 +100,11 @@ int UnitTestHelper::connected_distance(ARegion *reg1, ARegion *reg2, int penalty
     return game.regions.get_connected_distance(reg1, reg2, penalty, max);
 }
 
-string UnitTestHelper::cout_data() {
+std::string UnitTestHelper::cout_data() {
     return cout_buffer.str();
 }
 
-void UnitTestHelper::parse_orders(int faction_id, istream& orders, OrdersCheck *check) {
+void UnitTestHelper::parse_orders(int faction_id, std::istream& orders, OrdersCheck *check) {
     game.ParseOrders(faction_id, orders, check);
 }
 

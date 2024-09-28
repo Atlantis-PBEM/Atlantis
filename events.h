@@ -90,9 +90,9 @@ struct BattleSide {
     int monsters;
     int undead;
     int fmi;
-    
+
     int lost;
-    
+
     int magesLost;
     int fmiLost;
     int undeadLost;
@@ -138,7 +138,7 @@ struct EventLocation {
     std::string settlement;
     int settlementType;
 
-    vector<Landmark> landmarks;
+    std::vector<Landmark> landmarks;
 
     const std::string GetTerrainName(const bool plural);
     const Landmark* GetSignificantLandmark();
@@ -150,7 +150,7 @@ class BattleFact : public FactBase {
 public:
     BattleFact();
     ~BattleFact();
-    
+
     void GetEvents(std::list<Event> &events);
 
     EventLocation location;
@@ -183,7 +183,7 @@ class AnnihilationFact : public FactBase {
 
         void GetEvents(std::list<Event> &events);
 
-        string message;
+        std::string message;
 };
 
 class AnomalyFact : public FactBase {

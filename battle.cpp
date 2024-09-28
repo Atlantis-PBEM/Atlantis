@@ -32,6 +32,8 @@
 #include "quests.h"
 #include "items.h"
 
+using namespace std;
+
 enum StatsCategory {
 	ROUND,
 	BATTLE
@@ -40,13 +42,13 @@ enum StatsCategory {
 void WriteStats(Battle &battle, Army &army, StatsCategory category) {
 	auto leaderName = std::string(army.leader->name->Str());
 	std::string header = std::string(army.leader->name->Str()) + " army:";
-	
+
 	battle.AddLine(AString(header.c_str()));
 
 	auto stats = category == StatsCategory::ROUND
 		? army.stats.roundStats
 		: army.stats.battleStats;
-	
+
 	int statLines = 0;
 	for (auto &uskv : stats) {
 		UnitStat us = uskv.second;
@@ -81,7 +83,7 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
 				case MAGIC_ENERGY: s += "magic"; break;
 				case MAGIC_SPIRIT: s += "magic"; break;
 				case MAGIC_WEATHER: s += "magic"; break;
-				
+
 				default: s += "unknown"; break;
 			}
 
@@ -92,7 +94,7 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
 				case ATTACK_ENERGY: s += " energy"; break;
 				case ATTACK_SPIRIT: s += " spirit"; break;
 				case ATTACK_WEATHER: s += " weather"; break;
-				
+
 				default: s += " unknown"; break;
 			}
 
@@ -278,10 +280,10 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	AddLine(AString("Round ") + round + ":");
 
 	if (a->tactics_bonus > b->tactics_bonus) {
-		AddLine(*(a->leader->name) + " tactics bonus " + a->tactics_bonus + ".");	
+		AddLine(*(a->leader->name) + " tactics bonus " + a->tactics_bonus + ".");
 	}
 	if (b->tactics_bonus > a->tactics_bonus) {
-		AddLine(*(b->leader->name) + " tactics bonus " + b->tactics_bonus + ".");	
+		AddLine(*(b->leader->name) + " tactics bonus " + b->tactics_bonus + ".");
 	}
 
 	/* Update both army's shields */
@@ -355,7 +357,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 
 	a->Reset();
 	a->stats.ClearRound();
-	
+
 	b->Reset();
 	b->stats.ClearRound();
 }
@@ -415,7 +417,7 @@ void Battle::GetSpoils(AList *losers, ItemList *spoils, int ass)
 }
 
 void AddBattleFact(
-	Events* events, 
+	Events* events,
 	ARegion* region,
 	Unit* attacker,
 	Unit* defender,
@@ -428,10 +430,10 @@ void AddBattleFact(
 	auto fact = new BattleFact();
 
 	fact->location = EventLocation::Create(region);
-	
+
 	fact->attacker.AssignUnit(attacker);
 	fact->attacker.AssignArmy(attackerArmy);
-	
+
 	fact->defender.AssignUnit(defender);
 	fact->defender.AssignArmy(defenderArmy);
 
@@ -470,13 +472,13 @@ void AddBattleFact(
 		fact->fortification = name;
 		fact->fortificationType = fortType;
 	}
-	
+
 
 	events->AddFact(fact);
 }
 
 void AddAssassinationFact(
-	Events* events, 
+	Events* events,
 	ARegion* region,
 	Unit* defender,
 	Army* defenderArmy,
@@ -487,16 +489,16 @@ void AddAssassinationFact(
 	auto fact = new AssassinationFact();
 
 	fact->location = EventLocation::Create(region);
-	
+
 	// fact->victim.AssignUnit(defender);
 	// fact->victim.AssignArmy(defenderArmy);
-	
+
 	fact->outcome = outcome;
 
 	events->AddFact(fact);
 }
 
-int Battle::Run(Events* events, 
+int Battle::Run(Events* events,
 		ARegion * region,
 		Unit * att,
 		AList * atts,
@@ -583,7 +585,7 @@ int Battle::Run(Events* events,
 		}
 
 		armies[1]->Win(this, spoils);
-		
+
 		AddLine("");
 		AddLine(temp);
 		AddLine("");
@@ -672,7 +674,7 @@ int Battle::Run(Events* events,
 	}
 
 	AddLine("Total Casualties:");
-	
+
 	armies[0]->Tie(this);
 	armies[1]->Tie(this);
 	temp = "Spoils: none.";
@@ -741,7 +743,7 @@ void Battle::build_json_report(json& j, Faction *fac) {
 		return;
 	}
 	j["type"] = "battle";
-	j["report"] = text; 
+	j["report"] = text;
 }
 
 void Battle::AddLine(const AString & s) {
@@ -751,7 +753,7 @@ void Battle::AddLine(const AString & s) {
 void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
 {
 	int AlliesIncluded = 0;
-	
+
 	// First, check whether allies should assist in this combat
 	if (Globals->ALLIES_NOAID == 0) {
 		AlliesIncluded = 1;
@@ -775,13 +777,13 @@ void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
 		//delete obj;
 		//delete u;
 	}
-	
+
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
 		for(auto u: obj->units) {
 			if (u->IsAlive()) {
 				if (u->faction == t->faction ||
-					(AlliesIncluded == 1 && 
+					(AlliesIncluded == 1 &&
 					 u->guard != GUARD_AVOID &&
 					 u->GetAttitude(r,t) == A_ALLY) ) {
 

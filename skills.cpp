@@ -204,7 +204,7 @@ int StudyRateAdjustment(int days, int exp)
 			if ((clevel > level)	&& (rate > 5)) {
 				level = clevel;
 				switch(level) {
-					case 1: slope = 80;	
+					case 1: slope = 80;
 						prevd += cdays /slope;
 						ctr += cdays;
 						cdays = 0;
@@ -214,18 +214,18 @@ int StudyRateAdjustment(int days, int exp)
 						ctr += cdays;
 						cdays = 0;
 						break;
-				}	
+				}
 			}
 		}
 	}
 	return rate;
 }
 
-void Skill::Readin(istream &f)
+void Skill::Readin(std::istream &f)
 {
 	AString temp, *token;
 
-	f >> ws >> temp;
+	f >> std::ws >> temp;
 	token = temp.gettoken();
 	type = LookupSkill(token);
 	delete token;
@@ -233,7 +233,7 @@ void Skill::Readin(istream &f)
 	token = temp.gettoken();
 	days = token->value();
 	delete token;
-	
+
 	exp = 0;
 	if (Globals->REQUIRED_EXPERIENCE) {
 		token = temp.gettoken();
@@ -242,7 +242,7 @@ void Skill::Readin(istream &f)
 	}
 }
 
-void Skill::Writeout(ostream& f)
+void Skill::Writeout(std::ostream& f)
 {
 	if (type != -1) {
 		f << SkillDefs[type].abbr << " " << days;
@@ -367,7 +367,7 @@ int SkillList::GetStudyRate(int skill, int nummen)
 				exp = s->exp / nummen;
 		}
 	}
-	
+
 	return StudyRateAdjustment(days, exp);
 }
 
@@ -400,7 +400,7 @@ AString SkillList::Report(int nummen)
 	return temp;
 }
 
-void SkillList::Readin(istream& f)
+void SkillList::Readin(std::istream& f)
 {
 	int n;
 	f >> n;
@@ -412,7 +412,7 @@ void SkillList::Readin(istream& f)
 	}
 }
 
-void SkillList::Writeout(ostream& f)
+void SkillList::Writeout(std::ostream& f)
 {
 	f << size() << '\n';
 	for(auto s: skills) s->Writeout(f);

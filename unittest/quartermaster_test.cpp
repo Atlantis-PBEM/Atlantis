@@ -20,7 +20,7 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name = "Test Faction";
     Faction *faction = helper.create_faction(name);
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *unit1 = helper.get_first_unit(faction);
@@ -37,7 +37,7 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
 
     // We have two quartermasters, each with a caravanserai, and two units, so we will use transport to move 50
     // stone from unit1 to unit2.
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "transport 3 50 stone\n";  // unit 1 -> QM 1
@@ -81,7 +81,7 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name = "Test Faction";
     Faction *faction = helper.create_faction(name);
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *unit1 = helper.get_first_unit(faction);
@@ -102,7 +102,7 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
 
     // We have three quartermasters, each with a caravanserai, and two units, and we will try to chain transport
     // through multiple quartermasters.  This should fail, as quartermasters cannot chain.
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "transport 3 50 stone\n";  // unit 1 -> QM 1

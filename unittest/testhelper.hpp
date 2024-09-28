@@ -45,14 +45,14 @@ public:
     // Just get a total count of regions so we can make sure we got the world we exepected.
     int get_region_count();
     // Create a faction that we can use for testing.
-    Faction *create_faction(string name);
+    Faction *create_faction(std::string name);
     // Get any existing faction
     Faction *get_faction(int id);
     // Get a region by coordinates
     ARegion *get_region(int x, int y, int level);
     // Get all regions
     ARegionList *get_regions() { return &game.regions; }
-    // get the game month 
+    // get the game month
     int get_month() { return game.month; }
     // Find the first unit for a given faction
     Unit *get_first_unit(Faction *faction);
@@ -63,7 +63,7 @@ public:
     // Create a building in the given region.
     void create_building(ARegion *region, Unit *owner, int building_type);
     // Parse the orders contained in the input stream.
-    void parse_orders(int faction_id, istream& orders, OrdersCheck *check = nullptr);
+    void parse_orders(int faction_id, std::istream& orders, OrdersCheck *check = nullptr);
     // Run the transport order checks
     void check_transport_orders();
     // Execute movement orders
@@ -85,7 +85,7 @@ public:
     int get_seed() { return getrandom(10000); };
 
     // Get the contents of cout as a string.
-    string cout_data();
+    std::string cout_data();
 
     // Activate a specific spell for testing.   Since the spells can have different arguments, we use a helper struct
     // to pass in the arguments and call the appropriate Run<Spell> function based on the skill associate with the spell.
@@ -96,8 +96,8 @@ public:
     void enable(Type type, int id, bool enable);
 
 private:
-    stringstream cout_buffer;
-    streambuf *cout_streambuf;
+    std::stringstream cout_buffer;
+    std::streambuf *cout_streambuf;
     Game game;
 };
 

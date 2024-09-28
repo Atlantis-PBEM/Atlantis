@@ -257,7 +257,7 @@ public:
 	int startturn;
 
 private:
-	vector<FactionStatistic> compute_faction_statistics(Game *game, size_t **citems);
+	std::vector<FactionStatistic> compute_faction_statistics(Game *game, size_t **citems);
 	void gm_report_setup(Game *game);
 	void build_gm_json_report(json& j, Game *game);
 };

@@ -122,8 +122,8 @@ struct ShowSkill {
 
 class Skill {
 public:
-	void Readin(istream& f);
-	void Writeout(ostream &f);
+	void Readin(std::istream& f);
+	void Writeout(std::ostream &f);
 	Skill *Split(int total, int split);
 
 	int type;
@@ -145,8 +145,8 @@ public:
 	int GetStudyRate(int sk, int men);
 	SkillList *Split(int total, int split);
 	AString Report(int men);
-	void Readin(istream& f);
-	void Writeout(ostream& f);
+	void Readin(std::istream& f);
+	void Writeout(std::ostream& f);
 	inline int size() { return skills.size(); }
 	inline Skill *front() { return skills.front(); }
 

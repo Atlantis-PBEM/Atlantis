@@ -192,7 +192,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				reward_count = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
 
 				printf("\nQuest reward: %s x %d.\n", ItemDefs[i].name.c_str(), reward_count);
-				
+
 				// Setup reward
 				Item item;
 				item.type = i;
@@ -310,7 +310,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		forlist(regions) {
 			r = (ARegion *) elem;
 			// No need to check if quests do not require exploration
-			if (r->Population() > 0 && (r->visited || QUEST_EXPLORATION_PERCENT == 0)) { 
+			if (r->Population() > 0 && (r->visited || QUEST_EXPLORATION_PERCENT == 0)) {
 				stlstr = r->name->Str();
 				// This looks like a null operation, but
 				// actually forces the map<> element creation
@@ -1177,11 +1177,11 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_ILLYRTHID);
 	EnableItem(O_ILAIR);
 	EnableItem(I_DEVIL);
-	
+
 	EnableItem(I_STORMGIANT);
 	EnableItem(I_CLOUDGIANT);
 	EnableItem(O_GIANTCASTLE);
-	
+
 	EnableItem(I_WARRIORS);
 
 	EnableItem(I_DARKMAGE);
@@ -1219,7 +1219,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("HUMN", 3, "MINI");
 	ModifyRaceSkills("HUMN", 4, "FARM");
 	ModifyRaceSkills("HUMN", 5, "COOK");
-	
+
 	EnableItem(I_HILLDWARF);
 	ModifyItemBasePrice(I_HILLDWARF, 40);
 	ModifyRaceSkillLevels("HDWA", 5, 2);
@@ -1237,7 +1237,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("IDWA", 2, "MINI");
 	ModifyRaceSkills("IDWA", 3, "FISH");
 	ModifyRaceSkills("IDWA", 4, "ARMO");
-	
+
 	EnableItem(I_HIGHELF);
 	ModifyItemBasePrice(I_HIGHELF, 40);
 	ModifyRaceSkillLevels("HELF", 5, 2);
@@ -1390,7 +1390,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_JUNGLE, 1, I_WOODELF);
 	ModifyTerrainCoastRace(R_JUNGLE, 2, I_LIZARDMAN);
 	ModifyTerrainEconomy(R_JUNGLE, 500, 11, 20, 2);
-	
+
 	ClearTerrainRaces(R_DESERT);
 	ModifyTerrainRace(R_DESERT, 0, I_GNOLL);
 	ModifyTerrainRace(R_DESERT, 1, I_GOBLINMAN);

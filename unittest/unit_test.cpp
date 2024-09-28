@@ -35,16 +35,16 @@ ut::suite<"Unit"> unit_suite = []
     // It groks strings, so we'll just compare the string values.  We could compare char * but then we would
     // get just a 'true' or 'false' in the compare, rather than the nice verbose output we get in this case
     // if the strings don't match.
-    string current = unit->name->Str();
-    string expected = "Test Unit (500)";
+    std::string current = unit->name->Str();
+    std::string expected = "Test Unit (500)";
     expect(eq(current, expected));
   };
 
   "SetName filters illegal characters"_test = [unit]
   {
     unit->SetName(new AString("Test Unit || bar"));
-    string current = unit->name->Str();
-    string expected = "Test Unit  bar (500)";
+    std::string current = unit->name->Str();
+    std::string expected = "Test Unit  bar (500)";
     expect(eq(current, expected));
   };
 
@@ -73,8 +73,8 @@ ut::suite<"Unit"> unit_suite = []
     // Someone with no observation should not see the unit's faction, since it's not revealing.
     // Technically they shouldn't even see the unit, but that's handled in the region code, NOT in the unit code.
     // This function is only called if something asserts the unit is visible before calling this.
-    string current = unit->GetName(0).Str();
-    string expected = "Test Unit (500)";
+    std::string current = unit->GetName(0).Str();
+    std::string expected = "Test Unit (500)";
     expect(eq(current, expected));
 
     // Someone with observation 2 should not see the unit's faction.

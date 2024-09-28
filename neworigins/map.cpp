@@ -134,7 +134,7 @@ int ZoneRegion::CountNeighbors(Province* province) {
 std::vector<Zone *> ZoneRegion::GetNeihborZones() {
 	std::vector<Zone *> items;
 	items.reserve(NDIRS);
-	
+
 	for (int i = 0; i < NDIRS; i++) {
 		auto n = this->neighbors[i];
 		if (n == NULL) continue;
@@ -227,7 +227,7 @@ std::unordered_set<Province *> Province::GetNeighbors() {
 
 std::unordered_set<int> Province::GetNeighborBiomes() {
 	std::unordered_set<int> biomes;
-	
+
 	auto tmp = this->GetNeighbors();
 	for (auto &n : tmp) {
 		if (n->biome != -1) biomes.insert(n->biome);
@@ -253,7 +253,7 @@ Coords Province::GetLocation() {
 
 			continue;
 		}
-		
+
 		xMin = std::min(xMin, reg->location.x);
 		yMin = std::min(yMin, reg->location.y);
 		xMax = std::max(xMax, reg->location.x);
@@ -441,7 +441,7 @@ void Zone::AddNeighbor(Zone* zone) {
 
 void Zone::SetConnections() {
 	std::unordered_set<Zone *> visited;
-	
+
 	for (auto &region : this->regions) {
 		for (auto &n : region.second->neighbors) {
 			if (n == NULL) continue;
@@ -557,7 +557,7 @@ int EstimateMaxZones(int area, int radius) {
 int GetRegionIndex(const int x, const int y, const int w, const int h) {
 	int xx = (x + w) % w;
 	int yy = (y + h) % h;
-	
+
 	if ((xx + yy) % 2) {
 		return -1;
 	}
@@ -781,14 +781,14 @@ void MapBuilder::GrowZones() {
 
 	ClearEmptyZones();
 	ConnectZones();
-} 
+}
 
 void MapBuilder::MergeZoneInto(Zone* src, Zone* dest) {
 	if (src == NULL) {
 		Awrite("src cannot be null");
 		exit(1);
 	}
-	
+
 	if (dest == NULL) {
 		Awrite("dest cannot be null");
 		exit(1);
@@ -829,7 +829,7 @@ void MapBuilder::SplitZone(Zone* zone) {
 	auto blob = zone->TraverseRegions();
 	while (zone->regions.size() != blob.size()) {
 		Zone* newZone = CreateZone(zone->type);
-		
+
 		for (auto &region : blob) {
 			zone->RemoveRegion(region);
 			newZone->AddRegion(region);
@@ -874,7 +874,7 @@ std::vector<ZoneRegion *> FindBorderRegions(Zone* zone, Zone* borderZone, const 
 					int roll = makeRoll(1, 5);
 					if (roll < diff) continue;
 				}
-				
+
 				visited.insert(region);
 			}
 
@@ -892,7 +892,7 @@ std::vector<ZoneRegion *> FindBorderRegions(Zone* zone, Zone* borderZone, const 
 					int roll = makeRoll(1, 5);
 					if (roll < diff) continue;
 				}
-				
+
 				v.push_back(region);
 			}
 		}
@@ -1011,11 +1011,11 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 		if (depthRoll == 1) {
 			if (sideADepth == 0) {
 				sideADepth = 1;
-				sideARandom = true;	
+				sideARandom = true;
 			}
 			else {
 				sideBDepth = 1;
-				sideBRandom = true;	
+				sideBRandom = true;
 			}
 		}
 		else if (depthRoll == 2) {
@@ -1045,7 +1045,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 			otherZone->RemoveRegion(r);
 			strait->AddRegion(r);
 		}
-		
+
 		SplitZone(strait);
 
 		if (sideADepth > 0) SplitZone(nonIsland);
@@ -1275,7 +1275,7 @@ void MapBuilder::AddVolcanoes() {
 					candidates.clear();
 					for (auto &kv : zone->regions) {
 						auto region = kv.second;
-						
+
 						if (region->IsInner()) continue;
 
 						for (int i = 0; i < NDIRS; i++) {
@@ -1450,7 +1450,7 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 		while (attempts++ < 1000) {
 			ZoneRegion* next = candidates[getrandom(candidates.size())];
 			if (next->province != NULL) continue;
-			
+
 			provinces.push_back(zone->CreateProvince(next, this->h));
 			break;
 		}
@@ -1525,7 +1525,7 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 		while (small != NULL);
 	}
 
-	// set biomes for provinces	
+	// set biomes for provinces
 	std::unordered_set<int> biomes;
 	for (auto &kv : zone->provinces) {
 		auto p = kv.second;
@@ -1742,21 +1742,21 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 	int sea = Globals->OCEAN;
 	if (Globals->SEA_LIMIT)
 		sea = sea * (100 + 2 * Globals->SEA_LIMIT) / 100;
-			
+
 	MakeLand(pRegionArrays[level], sea, Globals->CONTINENT_SIZE);
-	
+
 	CleanUpWater(pRegionArrays[level]);
 
 	SetupAnchors(pRegionArrays[level]);
-	
+
 	GrowTerrain(pRegionArrays[level], 0);
-	
+
 	AssignTypes(pRegionArrays[level]);
 
 	SeverLandBridges(pRegionArrays[level]);
 
 	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
-	
+
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
@@ -1847,7 +1847,7 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name)
 	RandomTerrain(pRegionArrays[level]);
 
 	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
-	
+
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
@@ -1883,7 +1883,7 @@ void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char co
 		if (n) {
 			Object *o = new Object(n);
 			o->num = n->buildingseq++;
-			string altar_name = string(ObjectDefs[O_RITUAL_ALTAR].name) + " [" + to_string(o->num) + "]";
+			std::string altar_name = std::string(ObjectDefs[O_RITUAL_ALTAR].name) + " [" + std::to_string(o->num) + "]";
 			o->name = new AString(altar_name);
 			o->type = O_RITUAL_ALTAR;
 			o->incomplete = -(ObjectDefs[O_RITUAL_ALTAR].sacrifice_amount);
@@ -1952,7 +1952,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 	// Put the monolith in the underworld center
 	o = new Object(reg);
 	o->num = reg->buildingseq++;
-	string monolith_name = string(ObjectDefs[O_DORMANT_MONOLITH].name) + " [" + to_string(o->num) + "]";
+	std::string monolith_name = std::string(ObjectDefs[O_DORMANT_MONOLITH].name) + " [" + std::to_string(o->num) + "]";
 	o->name = new AString(monolith_name);
 	o->type = O_DORMANT_MONOLITH;
 	o->incomplete = -(ObjectDefs[O_DORMANT_MONOLITH].sacrifice_amount);
@@ -1984,7 +1984,7 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char co
 	MakeUWMaze(pRegionArrays[level]);
 
 	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
-	
+
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
@@ -2013,7 +2013,7 @@ void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
 	MakeUWMaze(pRegionArrays[level]);
 
 	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
-	
+
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
 
 	FinalSetup(pRegionArrays[level]);
@@ -2041,9 +2041,9 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				// Some initial values; these will get reset
 				//
 				reg->type = -1;
-				reg->race = -1;  
-				reg->wages = -1; 
-				
+				reg->race = -1;
+				reg->wages = -1;
+
 				reg->level = arr;
 				Add(reg);
 				arr->SetRegion(x, y, reg);
@@ -2136,7 +2136,7 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 				// Some initial values; these will get reset
 				//
 				reg->type = -1;
-				reg->race = -1; // 
+				reg->race = -1; //
 				reg->wages = -1; // initially store: name
 				reg->population = -1; // initially used as flag
 				reg->elevation = -1;
@@ -2191,7 +2191,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 		if (!reg) continue;
 		ARegion *newreg = reg;
 		ARegion *seareg = reg;
-		
+
 		// Archipelago or Continent?
 		if (getrandom(100) < Globals->ARCHIPELAGO) {
 			// Make an Archipelago:
@@ -2273,7 +2273,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 				if ((reg->yloc < yoff*2) && ((dir < 2) || (dir == (NDIRS-1)))
 					&& (getrandom(4) < 3)) continue;
 				if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
-					&& (getrandom(4) < 3)) continue;				
+					&& (getrandom(4) < 3)) continue;
 				ARegion *newreg = reg->neighbors[dir];
 				if (!newreg) break;
 				int polecheck = 0;
@@ -2611,7 +2611,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 				if (!reg) continue;
 				if ((j > 0) && (j < 21) && (getrandom(3) < 2)) continue;
 				if (reg->type == R_NUM) {
-				
+
 					// Check for Lakes
 					if (Globals->LAKES &&
 						(getrandom(100) < (Globals->LAKES/10 + 1))) {
@@ -2625,7 +2625,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 							reg->wages = AGetName(0, reg);
 						break;
 					}
-					
+
 
 					int init = getrandom(6);
 					for (int i=0; i<NDIRS; i++) {
@@ -2759,14 +2759,14 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			int xoff = x + 2 - getrandom(3) - getrandom(3);
 			ARegion *reg = pArr->GetRegion(xoff, y);
 			if (!reg) continue;
-			
+
 			if ((reg->type == R_LAKE) && (!Globals->LAKESIDE_IS_COASTAL))
 				continue;
 			if (TerrainDefs[reg->type].flags & TerrainType::BARREN) continue;
-			
+
 			reg->race = -1;
 			wigout = 0; // reset sanity
-			
+
 			if (TerrainDefs[reg->type].similar_type == R_OCEAN) {
 				// setup near coastal race here
 				int d = getrandom(NDIRS);
@@ -2777,7 +2777,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 					if (TerrainDefs[nreg->type].similar_type != R_OCEAN) {
 						int rnum = sizeof(TerrainDefs[nreg->type].coastal_races) /
 							sizeof(TerrainDefs[nreg->type].coastal_races[0]);
-						
+
 						while (reg->race == -1 || (ItemDefs[reg->race].flags & ItemType::DISABLED)) {
 							reg->race = TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
 							if (++wigout > 100) break;
@@ -2792,13 +2792,13 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			} else {
 				// setup noncoastal race here
 				int rnum = sizeof(TerrainDefs[reg->type].races)/sizeof(TerrainDefs[reg->type].races[0]);
-				
+
 				while ( reg->race == -1 || (ItemDefs[reg->race].flags & ItemType::DISABLED)) {
 					reg->race = TerrainDefs[reg->type].races[getrandom(rnum)];
 					if (++wigout > 100) break;
 				}
 			}
-			
+
 			/* leave out this sort of check for the moment
 			if (wigout > 100) {
 				// do something!
@@ -2807,10 +2807,10 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 				Awrite(" region type");
 			}
 			*/
-			
+
 			if (reg->race == -1) {
-				cout << "Hey! No race anchor got assigned to the " 
-					<< TerrainDefs[reg->type].name 
+				std::cout << "Hey! No race anchor got assigned to the "
+					<< TerrainDefs[reg->type].name
 					<< " at " << x << "," << y << "\n";
 			}
 		}
@@ -2996,10 +2996,10 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 				std::map<int, ARegion *> dests;
 				for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
 					if (candidates[type].size() == 0) {
-						cout << "Error: No valid candidate found for gateway to " << TerrainDefs[type].name << "\n";
+						std::cout << "Error: No valid candidate found for gateway to " << TerrainDefs[type].name << "\n";
 						exit(1);
 					}
-					Awrite("Found " + to_string(candidates[type].size()) + " candidates for " +
+					Awrite("Found " + std::to_string(candidates[type].size()) + " candidates for " +
 						TerrainDefs[type].name + " gateway");
 					std::uniform_int_distribution<std::size_t> dist(0, candidates[type].size() - 1);
 					int index = dist(gen);
@@ -3025,7 +3025,7 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 						dest = candidates[type][index];
 					}
 					// store the best we have so far
-					Awrite("Best distance of " + to_string(maxMin) + " for " + TerrainDefs[type].name);
+					Awrite("Best distance of " + std::to_string(maxMin) + " for " + TerrainDefs[type].name);
 					dests[type] = best;
 				}
 

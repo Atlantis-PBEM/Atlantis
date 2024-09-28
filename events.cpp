@@ -78,7 +78,7 @@ void BattleSide::AssignArmy(Army* army) {
             if (lost) this->fmiLost++;
             continue;
         }
-        
+
         if (item.type & IT_UNDEAD) {
             this->undead++;
             if (lost) this->undeadLost++;
@@ -165,7 +165,7 @@ void populateRegionLandmark(std::vector<Landmark> &landmarks, ARegion *source, A
     if (type == events::LandmarkType::UNKNOWN) {
         return;
     }
-    
+
     landmarks.push_back({
         .type = type,
         .name = name,
@@ -251,7 +251,7 @@ const EventLocation EventLocation::Create(ARegion* region) {
     loc.z = region->zloc;
     loc.terrainType = region->type;
     loc.province = region->name->Str();
-    
+
     if (region->town) {
         loc.settlement = region->town->name->Str();
         loc.settlementType = region->town->TownType();
@@ -306,7 +306,7 @@ bool compareEvents(const Event &first, const Event &second) {
     return first.score > second.score;
 }
 
-std::list<string> wrapText(std::string input, std::size_t width) {
+std::list<std::string> wrapText(std::string input, std::size_t width) {
     std::size_t curpos = 0;
     std::size_t nextpos = 0;
 
@@ -315,7 +315,7 @@ std::list<string> wrapText(std::string input, std::size_t width) {
 
     while (substr.length() == width + 1 && (nextpos = substr.rfind(' ')) != input.npos) {
         lines.push_back(input.substr(curpos, nextpos));
-        
+
         curpos += nextpos + 1;
         substr = input.substr(curpos, width + 1);
     }

@@ -122,8 +122,8 @@ class Unit
 		void SetMonFlags();
 		void MakeWMon(char const *,int,int);
 
-		void Writeout(ostream& f);
-		void Readin(istream& f, AList *);
+		void Writeout(std::ostream& f);
+		void Readin(std::istream& f, AList *);
 
 		AString SpoilsReport(void);
 		int CanGetSpoil(Item *i);
@@ -135,7 +135,7 @@ class Unit
 		AString ReadyItem();
 		AString StudyableSkills();
 		AString * BattleReport(int);
-		
+
 		void ClearOrders();
 		void ClearCastOrders();
 		void DefaultOrders(Object *);
@@ -297,7 +297,7 @@ class Unit
 		int format;
 
 		// Used for tracking VISIT quests
-		set<string> visited;
+		std::set<std::string> visited;
 		int raised;
 
 		// Used for tracking movement for NO7 victory condition

@@ -155,8 +155,8 @@ class TownInfo
 		TownInfo();
 		~TownInfo();
 
-		void Readin(istream& f);
-		void Writeout(ostream& f);
+		void Readin(std::istream& f);
+		void Writeout(std::ostream& f);
 		int TownType();
 
 		AString *name;
@@ -187,15 +187,15 @@ class ARegion : public AListElem
 		ARegion();
 		//ARegion(int, int);
 		~ARegion();
-		
+
 		void Setup();
 		void ManualSetup(const RegionSetup& settings);
 
 		void ZeroNeighbors();
 		void SetName(char const *);
 
-		void Writeout(ostream& f);
-		void Readin(istream& f, AList *);
+		void Writeout(std::ostream& f);
+		void Readin(std::istream& f, AList *);
 
 		int CanMakeAdv(Faction *, int);
 		int HasItem(Faction *, int);
@@ -318,7 +318,7 @@ class ARegion : public AListElem
 		int wages;
 		int maxwages;
 		int wealth;
-		
+
 		/* Economy */
 		int habitat;
 		int development;
@@ -336,7 +336,7 @@ class ARegion : public AListElem
 		int emigrants;
 		// economic improvement
 		int improvement;
-		
+
 		/* Potential bonuses to economy */
 		int clearskies;
 		int earthlore;
@@ -344,7 +344,7 @@ class ARegion : public AListElem
 
 		ARegion *neighbors[NDIRS];
 		AList objects;
-		map<int,int> newfleets;
+		std::map<int,int> newfleets;
 		int fleetalias;
 		std::vector<Unit *>hell; /* Where dead units go */
 		AList farsees;
@@ -447,10 +447,10 @@ class GeoMap
 		int GetVegetation(int, int);
 		int GetCulture(int, int);
 		void ApplyGeography(ARegionArray *pArr);
-		
+
 		int size, xscale, yscale, xoff, yoff;
-		map<long int,Geography> geomap;
-		
+		std::map<long int, Geography> geomap;
+
 };
 
 class ARegionList : public AList
@@ -461,8 +461,8 @@ class ARegionList : public AList
 
 		ARegion *GetRegion(int);
 		ARegion *GetRegion(int, int, int);
-		int ReadRegions(istream &f, AList *);
-		void WriteRegions(ostream&  f);
+		int ReadRegions(std::istream &f, AList *);
+		void WriteRegions(std::ostream&  f);
 		Location *FindUnit(int);
 		Location *GetUnitId(UnitId *id, int faction, ARegion *cur);
 
@@ -516,7 +516,7 @@ class ARegionList : public AList
 		void UnsetRace(ARegionArray *pRegs);
 		void RaceAnchors(ARegionArray *pRegs);
 		void GrowRaces(ARegionArray *pRegs);
-		
+
 		void TownStatistics();
 		void ResourcesStatistics();
 
