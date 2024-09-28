@@ -26,7 +26,7 @@
 #include "gameio.h"
 #include "gamedata.h"
 
-#include <assert.h> 
+#include <assert.h>
 
 void unit_stat_control::Clear(UnitStat& us) {
 	us.attackStats.clear();
@@ -249,8 +249,8 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 				dskill[i] += ObjectDefs[o->type].defenceArray[i];
 		}
 		if (o->runes) {
-			dskill[ATTACK_ENERGY] = max(dskill[ATTACK_ENERGY], o->runes);
-			dskill[ATTACK_SPIRIT] = max(dskill[ATTACK_SPIRIT], o->runes);
+			dskill[ATTACK_ENERGY] = std::max(dskill[ATTACK_ENERGY], o->runes);
+			dskill[ATTACK_SPIRIT] = std::max(dskill[ATTACK_SPIRIT], o->runes);
 		}
 		o->capacity--;
 	}
@@ -699,7 +699,7 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			}
 		}
 	}
-	// If TACTICS_NEEDS_WAR is enabled, we don't want to push leaders 
+	// If TACTICS_NEEDS_WAR is enabled, we don't want to push leaders
 	// from tact-4 to tact-5! Also check that we have skills, otherwise
 	// we get a nasty core dump ;)
 	if (Globals->TACTICS_NEEDS_WAR && (tactician->skills.size() != 0)) {
@@ -1352,8 +1352,10 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 	}
 
 	if (canShield) {
-    	auto correctShield = [&attackType](shared_ptr<Shield> sh) { return sh->shieldtype == attackType; };
-    	auto compareShield = [](shared_ptr<Shield> s1, shared_ptr<Shield> s2) { return s1->shieldskill < s2->shieldskill; };
+    	auto correctShield = [&attackType](std::shared_ptr<Shield> sh) { return sh->shieldtype == attackType; };
+    	auto compareShield = [](std::shared_ptr<Shield> s1, std::shared_ptr<Shield> s2) {
+			return s1->shieldskill < s2->shieldskill;
+		};
     	auto validShields = shields | std::views::filter(correctShield);
     	auto maxShield = std::max_element(validShields.begin(), validShields.end(), compareShield);
 
@@ -1506,9 +1508,9 @@ void Army::Kill(int killed, int damage)
 	if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_INDIVIDUAL)
 		hitsalive--;
 
-	temp->damage += min(temp->hits, damage);
-	temp->hits = max(0, temp->hits - damage);
-	
+	temp->damage += std::min(temp->hits, damage);
+	temp->hits = std::max(0, temp->hits - damage);
+
 	if (temp->hits > 0) return;
 
 	temp->unit->losses++;

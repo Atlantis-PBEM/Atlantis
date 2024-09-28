@@ -27,8 +27,6 @@
 
 #include <iostream>
 
-using namespace std;
-
 class Market {
 public:
 	enum MarketType : int {
@@ -52,7 +50,7 @@ public:
 	int item;
 	int price;
 	int amount;
-	
+
 	int minpop;
 	int maxpop;
 	int minamt;

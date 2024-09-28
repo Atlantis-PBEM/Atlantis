@@ -31,8 +31,8 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
     // initialize the game which will generate a small bit of output
     helper.initialize_game();
     // The output will have the fact that it created the world and 1 '.' for each region.
-    string current = helper.cout_data();
-    string expected = "Creating world\n.....";
+    std::string current = helper.cout_data();
+    std::string expected = "Creating world\n.....";
     expect(current == expected);
   };
 

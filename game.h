@@ -40,9 +40,9 @@ class Game;
 class OrdersCheck
 {
 public:
-	OrdersCheck(ostream& f) : pCheckFile(f), numshows(0), numerrors(0) { }
+	OrdersCheck(std::ostream& f) : pCheckFile(f), numshows(0), numerrors(0) { }
 
-	ostream& pCheckFile;
+	std::ostream& pCheckFile;
 	Unit dummyUnit;
 	Faction dummyFaction;
 	Order dummyOrder;
@@ -87,7 +87,7 @@ public:
 	// LLS
 	void UnitFactionMap();
 	int GenRules(const AString &, const AString &, const AString &);
-	string FactionTypeDescription(Faction &fac);
+	std::string FactionTypeDescription(Faction &fac);
 	int DoOrdersCheck(const AString &strOrders, const AString &strCheck);
 
 	Faction *AddFaction(int noleader = 0, ARegion *pStart = NULL);
@@ -174,8 +174,8 @@ private:
 	int MakeWMon(ARegion *pReg);
 	void MakeLMon(Object *pObj);
 
-	void WriteSurfaceMap(ostream& f, ARegionArray *pArr, int type);
-	void WriteUnderworldMap(ostream& f, ARegionArray *pArr, int type);
+	void WriteSurfaceMap(std::ostream& f, ARegionArray *pArr, int type);
+	void WriteUnderworldMap(std::ostream& f, ARegionArray *pArr, int type);
 	char GetRChar(ARegion *r);
 	AString GetXtraMap(ARegion *, int);
 
@@ -290,7 +290,7 @@ private:
 
 	AList factions;
 	std::vector<std::string> newfactions; /* List of strings */
-	vector<Battle *> battles;
+	std::vector<Battle *> battles;
 	ARegionList regions;
 	int factionseq;
 	unsigned int unitseq;
@@ -305,10 +305,10 @@ private:
 	// For our existing case, these are going to be used by the unit test framework to ensure a consistent
 	// run (by overriding the seeding of the random number generator).  In general, there should be *very*
 	// few of these hooks and they should exist for a very explicit purpose and be used with extreme care.
-	
+
 	// control the random number seed used for new game generation (by default it uses the existing
 	// seedrandomrandom function) which uses the current time.
-	std::function<void()> init_random_seed = seedrandomrandom; 
+	std::function<void()> init_random_seed = seedrandomrandom;
 
 	enum
 	{
@@ -332,7 +332,7 @@ private:
 	UnitId *ParseUnit(AString *s);
 	int ParseDir(AString *token);
 
-	void ParseOrders(int faction, istream& ordersFile, OrdersCheck *pCheck);
+	void ParseOrders(int faction, std::istream& ordersFile, OrdersCheck *pCheck);
 	void ProcessOrder(int orderNum, Unit *unit, AString *order,
 					  OrdersCheck *pCheck);
 	void ProcessMoveOrder(Unit *, AString *, OrdersCheck *pCheck);
@@ -393,7 +393,7 @@ private:
 	void ProcessIdleOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessTransportOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
-	AString *ProcessTurnOrder(Unit *, istream& f, OrdersCheck *pCheck, int);
+	AString *ProcessTurnOrder(Unit *, std::istream& f, OrdersCheck *pCheck, int);
 	void ProcessJoinOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessAnnihilateOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessSacrificeOrder(Unit *, AString *, OrdersCheck *pCheck);

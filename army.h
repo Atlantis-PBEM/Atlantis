@@ -28,7 +28,6 @@
 #include <functional>
 #include <map>
 #include <vector>
-using namespace std;
 
 class Soldier;
 class Army;
@@ -154,7 +153,7 @@ class Soldier {
 		int amuletofi;
 
 		/* Effects */
-		map< char const *, int > effects;
+		std::map<char const *, int> effects;
 };
 
 typedef Soldier * SoldierPtr;
@@ -208,7 +207,7 @@ class Army
 
 		SoldierPtr * soldiers;
 		Unit * leader;
-		std::vector<shared_ptr<Shield>> shields;
+		std::vector<std::shared_ptr<Shield>> shields;
 		int round;
 		int tac;
 		int canfront;

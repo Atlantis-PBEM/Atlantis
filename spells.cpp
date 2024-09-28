@@ -25,6 +25,8 @@
 #include "game.h"
 #include "gamedata.h"
 
+using namespace std;
+
 static int RandomiseSummonAmount(int num)
 {
 	int retval, i;
@@ -1978,7 +1980,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 		u->error("CAST: Can't create that by transmutation.");
 		return 0;
 	}
-	
+
 	switch(order->item) {
 		case I_ADMANTIUM:
 		case I_MITHRIL:
@@ -1998,7 +2000,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 			source = I_HORSE;
 			break;
 	}
-	
+
 	num = u->GetSharedNum(source);
 	if (num > ItemDefs[order->item].mOut * level)
 		num = ItemDefs[order->item].mOut * level;
@@ -2034,13 +2036,13 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 	tower = 0;
 	sactype = IT_LEADER;
 	sacrifices = 0;
-	
+
 	forlist(&r->objects) {
 		o = (Object *) elem;
 		if (o->type == O_BKEEP && !o->incomplete) {
 			tower = o;
 		}
-			
+
 		for(auto u: o->units) {
 			if (u->faction->num == mage->faction->num) {
 				forlist(&u->items) {
@@ -2097,7 +2099,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 			r->Kill(victim);
 		if (!mage->GetMen())
 			break;
-		
+
 		relics = mage->items.GetNum(I_RELICOFGRACE);
 		mage->items.SetNum(I_RELICOFGRACE, relics + 1);
 	}

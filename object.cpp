@@ -100,7 +100,7 @@ Object::~Object()
 	region = (ARegion *)NULL;
 }
 
-void Object::Writeout(ostream& f)
+void Object::Writeout(std::ostream& f)
 {
 	f << num << '\n';
 	f << (type == -1
@@ -119,24 +119,24 @@ void Object::Writeout(ostream& f)
 	WriteoutFleet(f);
 }
 
-void Object::Readin(istream& f, AList *facs)
+void Object::Readin(std::istream& f, AList *facs)
 {
 	AString temp;
 
 	f >> num;
 
-	f >> ws >> temp;
+	f >> std::ws >> temp;
 	type = LookupObject(&temp);
 
 	f >> incomplete;
 
 	if (name) delete name;
-	f >> ws >> temp;
+	f >> std::ws >> temp;
 	name = new AString(temp);
 	AString *tmp = name->stripnumber();
 	SetName(tmp);
 
-	f >> ws >> temp;
+	f >> std::ws >> temp;
 	describe = temp.getlegal();
 	if (*describe == "none") {
 		delete describe;
@@ -291,7 +291,7 @@ void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
 	if (type != O_DUMMY) {
 		ObjectType& ob = ObjectDefs[type];
 
-		string s = name->const_str();
+		std::string s = name->const_str();
 		container["name"] = s.substr(0, s.find(" [")); // remove the object number.
 		container["number"] = num;
 		container["type"] = ob.name;
@@ -412,7 +412,7 @@ int Object::CheckShip(int item)
 	return 0;
 }
 
-void Object::WriteoutFleet(ostream& f)
+void Object::WriteoutFleet(std::ostream& f)
 {
 	if (!IsFleet()) return;
 	f << ships.Num() << "\n";
@@ -420,7 +420,7 @@ void Object::WriteoutFleet(ostream& f)
 		((Item *) elem)->Writeout(f);
 }
 
-void Object::ReadinFleet(istream &f)
+void Object::ReadinFleet(std::istream &f)
 {
 	if (type != O_FLEET) return;
 	int nships;
@@ -486,11 +486,11 @@ void Object::SetNumShips(int type, int num)
 /* Adds one ship of the given type.
  */
 void Object::AddShip(int type)
-{	
+{
 	if (CheckShip(type) == 0) return;
 	int num = GetNumShips(type);
 	num++;
-	SetNumShips(type, num);	
+	SetNumShips(type, num);
 }
 
 /* Returns the String 'Fleet' for multi-ship fleets
@@ -586,7 +586,7 @@ int Object::SailThroughCheck(int dir)
 		if (!region->neighbors[dir]) {
 			return 0;
 		}
-		
+
 		// flying fleets always can sail through
 		if (flying == 1) {
 			return 1;
@@ -736,7 +736,7 @@ int Object::GetFleetSpeed(int report)
 
 	// check for sufficient sailing skill!
 	if (tskill < (weight / 50)) return 0;
-	
+
 	// count wind mages
 	for(auto unit: units) {
 		int wb = unit->GetAttribute("wind");
@@ -762,7 +762,7 @@ int Object::GetFleetSpeed(int report)
 
 	// check for being overloaded
 	if (FleetLoad() > capacity) return 0;
-	
+
 	// speed bonus due to low load:
 	int loadfactor = (capacity / FleetLoad());
 	bonus = 0;
@@ -825,7 +825,7 @@ AString *ObjectDescription(int obj)
 		*temp += AString(" This structure provides defense to the first ") +
 			o->protect + " men inside it.";
 		// Now do the defences. First, figure out how many to do.
-		int totaldef = 0; 
+		int totaldef = 0;
 		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
 			totaldef += (o->defenceArray[i] != 0);
 		}
@@ -836,7 +836,7 @@ AString *ObjectDescription(int obj)
 				totaldef--;
 				*temp += AString(o->defenceArray[i]) + " against " +
 					AttType(i) + AString(" attacks");
-				
+
 				if (totaldef >= 2) {
 					*temp += AString(", ");
 				} else {
@@ -845,7 +845,7 @@ AString *ObjectDescription(int obj)
 					} else {	// last bonus
 						*temp += AString(".");
 					}
-				} // end if 
+				} // end if
 			}
 		} // end for
 

@@ -20,7 +20,7 @@ ut::suite<"Spells"> spell_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name = "Test Faction";
     Faction *faction = helper.create_faction(name);
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *leader = helper.get_first_unit(faction);
@@ -31,7 +31,7 @@ ut::suite<"Spells"> spell_suite = []
     leader->Study(S_ILLUSION, 450);
     leader->Study(S_CREATE_PHANTASMAL_BEASTS, 180);
 
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "cast create_phantasmal_beasts DRAGON 4\n";
@@ -64,7 +64,7 @@ ut::suite<"Spells"> spell_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name ="Test Faction";
     Faction *faction = helper.create_faction(name);
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *leader = helper.get_first_unit(faction);
@@ -75,7 +75,7 @@ ut::suite<"Spells"> spell_suite = []
     leader->Study(S_ILLUSION, 450);
     leader->Study(S_CREATE_PHANTASMAL_BEASTS, 300);
 
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "cast create_phantasmal_beasts DRAGON 4\n";

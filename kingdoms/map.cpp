@@ -295,25 +295,25 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 	int sea = Globals->OCEAN;
 	if (Globals->SEA_LIMIT)
 		sea = sea * (100 + 2 * Globals->SEA_LIMIT) / 100;
-	
+
 	InitGeographicMap(pRegionArrays[level]);
-		
+
 	MakeLand(pRegionArrays[level], sea, Globals->CONTINENT_SIZE);
-	
+
 	RescaleFractalParameters(pRegionArrays[level]);
 
 	CleanUpWater(pRegionArrays[level]);
 
-	SetFractalTerrain(pRegionArrays[level]);	
-	
+	SetFractalTerrain(pRegionArrays[level]);
+
 	GrowTerrain(pRegionArrays[level], 0);
-	
+
 	AssignTypes(pRegionArrays[level]);
 
 	SeverLandBridges(pRegionArrays[level]);
 
 	if (Globals->LAKES) RemoveCoastalLakes(pRegionArrays[level]);
-	
+
 	NameRegions(pRegionArrays[level]);
 
 	if (Globals->GROW_RACES) GrowRaces(pRegionArrays[level]);
@@ -407,18 +407,18 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				// Some initial values; these will get reset
 				//
 				reg->type = -1;
-				reg->race = -1; // 
+				reg->race = -1; //
 				reg->wages = -1; // initially store: name
 				reg->population = -1; // initially used as flag
 				reg->elevation = -1;
-				
+
 				reg->level = arr;
 				Add(reg);
 				arr->SetRegion(x, y, reg);
 			}
 		}
 	}
-	
+
 	SetupNeighbors(arr);
 
 	Awrite("");
@@ -504,7 +504,7 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 				// Some initial values; these will get reset
 				//
 				reg->type = -1;
-				reg->race = -1; // 
+				reg->race = -1; //
 				reg->wages = -1; // initially store: name
 				reg->population = -1; // initially used as flag
 				reg->elevation = -1;
@@ -551,7 +551,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 		for (int y=0; y < pRegs->y; y++) {
 			ARegion *r = pRegs->GetRegion(x,y);
 			if (!r) continue;
-			total++;				
+			total++;
 		}
 	}
 	ocean = total;
@@ -573,7 +573,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			if (!reg) continue;
 			ARegion *newreg = reg;
 			ARegion *seareg = reg;
-		
+
 			// Archipelago or Continent?
 			if (getrandom(100) < Globals->ARCHIPELAGO) {
 				// Make an Archipelago:
@@ -644,7 +644,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 				}
 			} else {
 				// make a continent
-				
+
 				if (reg->type == -1) {
 					reg->type = R_NUM;
 					ocean--;
@@ -654,7 +654,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 					if ((reg->yloc < yoff*2) && ((dir < 2) || (dir == (NDIRS-1)))
 						&& (getrandom(4) < 3)) continue;
 					if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
-						&& (getrandom(4) < 3)) continue;				
+						&& (getrandom(4) < 3)) continue;
 					ARegion *newreg = reg->neighbors[dir];
 					if (!newreg) break;
 					int polecheck = 0;
@@ -668,7 +668,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 						reg->type = R_NUM;
 						ocean--;
 					}
-				}	
+				}
 			}
 		}
 	} else {
@@ -707,14 +707,14 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 						reg->type = R_NUM;
 						ocean--;
 					}
-				}				
+				}
 			}
 		}
 		sealevel--;
 		Adot();
 	}
 	Awrite("");
-	
+
 	Awrite("Add further land");
 	int coast = sealevel;
 	int dotter = 0;
@@ -743,7 +743,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			sealevel--;
 			margin = getrandom(sealevel/10 + 2) + 2;
 		}
-		
+
 		int cont = 0;
 		for (int i=0; i<NDIRS; i++) {
 			ARegion *nr = reg->neighbors[i];
@@ -751,7 +751,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			if (nr->elevation >= reg->elevation-3) cont++;
 		}
 		if (cont < 3) continue;
-	
+
 		if (dotter%50 == 0) Adot();
 		// make a continent
 		if (reg->type == -1) {
@@ -776,11 +776,11 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			}
 			if (d1 >= 0) dir = d1;
 				else dir = getrandom(NDIRS);
-			
+
 			if ((reg->yloc < yoff*2) && ((dir < 2) || (dir = NDIRS-1))
 				&& (getrandom(4) < 3)) continue;
 			if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
-				&& (getrandom(4) < 3)) continue;				
+				&& (getrandom(4) < 3)) continue;
 			ARegion *newreg = reg->neighbors[dir];
 			if (!newreg) break;
 			int polecheck = 0;
@@ -797,7 +797,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 		}
 	}
 	}
-	
+
 	// At this point, go back through and set all the rest to ocean
 	SetRegTypes(pRegs, R_OCEAN);
 	Awrite("");
@@ -969,7 +969,7 @@ void ARegionList::RescaleFractalParameters(ARegionArray *pArr)
 				reg->culture = 100 * (old - cult_min) / (cult_max - cult_min);
 				if (getrandom(cult_max - cult_min) < (100 * (old - cult_min) % (cult_max - cult_min)))
 					reg->culture++;
-				
+
 			}
 		}
 	}
@@ -989,7 +989,7 @@ void ARegionList::SetFractalTerrain(ARegionArray *pArr)
 	for (int l=0; l < 2; l++) {
 		int set = 0;
 		//Awrite(AString("Fractal Terrain: run #") + (l+1) + ".");
-		
+
 		int skip = 250;
 		int f = 2;
 		if (Globals->TERRAIN_GRANULARITY) {
@@ -1113,12 +1113,12 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 					r1->wages = AGetName(0, r1);
 					r1->population = (getrandom(2) + sz / 2)
 						* (getrandom(2) + sz);
-					
+
 					if (r1->xloc > xmin)
 						tnamedx[TerrainDefs[r1->type].similar_type] = r1->xloc;
 					if (r1->yloc > ymin)
 						tnamedy[TerrainDefs[r1->type].similar_type] = r1->yloc;
-					unnamed = 1;	
+					unnamed = 1;
 				}
 			}
 		}
@@ -1128,7 +1128,7 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 			for (int x = 0; x < pArr->x; x++) {
 				for (int y = 0; y < pArr->y; y++) {
 					ARegion *reg = pArr->GetRegion(x,y);
-					if ((!reg) || (reg->type == R_OCEAN) 
+					if ((!reg) || (reg->type == R_OCEAN)
 						|| (reg->wages >= 0) || (reg->type == R_NUM)) continue;
 					int name1 = -99, name2 = -99;
 					int nw1 = 0, nw2 = 0, nc1 = 0, nc2 = 0, nn = 0;
@@ -1236,7 +1236,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 				if (!reg) continue;
 				if ((j > 0) && (j < 21) && (getrandom(3) < 2)) continue;
 				if (reg->type == R_NUM) {
-				
+
 					// Check for Lakes
 					if (Globals->LAKES &&
 						(getrandom(100) < (Globals->LAKES/10 + 1))) {
@@ -1250,7 +1250,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 						//	reg->wages = AGetName(0, reg);
 						break;
 					}
-					
+
 
 					int init = getrandom(6);
 					for (int i=0; i<NDIRS; i++) {
@@ -1663,7 +1663,7 @@ GeoMap::GeoMap(int x, int y)
 	for (int a=0; a<x; a++) {
 		for (int b=0; b<y; b++) {
 			long int coords = (size+1)*a + b;
-			geomap.insert(make_pair(coords, g));
+			geomap.insert(std::make_pair(coords, g));
 		}
 	}
 }
@@ -1691,7 +1691,7 @@ void GeoMap::Generate(int spread, int smoothness)
 				g.culture = GetCulture((x-size), y);
 			}
 			geomap.erase(coords);
-			geomap.insert(make_pair(coords, g));
+			geomap.insert(std::make_pair(coords, g));
 		}
 	}
 	int frac = 25;
@@ -1762,8 +1762,8 @@ void GeoMap::Generate(int spread, int smoothness)
 				if (g.humidity > 100) g.humidity = 100 - getrandom(4);
 				long int coords = (size+1) * xcoor + ycoor;
 				geomap.erase(coords);
-				geomap.insert(make_pair(coords, g));
-				
+				geomap.insert(std::make_pair(coords, g));
+
 			}
 		}
 		Adot();
@@ -1833,7 +1833,7 @@ void GeoMap::Generate(int spread, int smoothness)
 							nb++;
 						}
 					}
-					
+
 					Geography g;
 					int r1 = getrandom(2*frac) - frac;
 					int r2 = getrandom(2*frac) - frac;
@@ -1857,11 +1857,11 @@ void GeoMap::Generate(int spread, int smoothness)
 						g.temperature = 100 - getrandom(4);
 					}
 					if (g.humidity < 1) g.humidity = getrandom(5);
-					if (g.humidity > 100) g.humidity = 100 - getrandom(4);	
+					if (g.humidity > 100) g.humidity = 100 - getrandom(4);
 					long int coords = (size+1) * dx + dy;
 					geomap.erase(coords);
-					geomap.insert(make_pair(coords, g));
-					
+					geomap.insert(std::make_pair(coords, g));
+
 				}
 			}
 		}
@@ -1874,7 +1874,7 @@ void GeoMap::Generate(int spread, int smoothness)
 int GeoMap::GetElevation(int x, int y)
 {
 	long int coords = (size+1)*x + y;
-	map<long int,Geography>::iterator it = geomap.find(coords);
+	std::map<long int,Geography>::iterator it = geomap.find(coords);
 	if (it != geomap.end()) {
 		Geography g = it->second;
 		return g.elevation;
@@ -1885,7 +1885,7 @@ int GeoMap::GetElevation(int x, int y)
 int GeoMap::GetHumidity(int x, int y)
 {
 	long int coords = (size+1)*x + y;
-	map<long int,Geography>::iterator it = geomap.find(coords);
+	std::map<long int,Geography>::iterator it = geomap.find(coords);
 	if (it != geomap.end()) {
 		Geography g = it->second;
 		return g.humidity;
@@ -1896,7 +1896,7 @@ int GeoMap::GetHumidity(int x, int y)
 int GeoMap::GetTemperature(int x, int y)
 {
 	long int coords = (size+1)*x + y;
-	map<long int,Geography>::iterator it = geomap.find(coords);
+	std::map<long int,Geography>::iterator it = geomap.find(coords);
 	if (it != geomap.end()) {
 		Geography g = it->second;
 		return g.temperature;
@@ -1907,7 +1907,7 @@ int GeoMap::GetTemperature(int x, int y)
 int GeoMap::GetVegetation(int x, int y)
 {
 	long int coords = (size+1)*x + y;
-	map<long int,Geography>::iterator it = geomap.find(coords);
+	std::map<long int,Geography>::iterator it = geomap.find(coords);
 	if (it != geomap.end()) {
 		Geography g = it->second;
 		return g.vegetation;
@@ -1918,7 +1918,7 @@ int GeoMap::GetVegetation(int x, int y)
 int GeoMap::GetCulture(int x, int y)
 {
 	long int coords = (size+1)*x + y;
-	map<long int,Geography>::iterator it = geomap.find(coords);
+	std::map<long int,Geography>::iterator it = geomap.find(coords);
 	if (it != geomap.end()) {
 		Geography g = it->second;
 		return g.culture;
@@ -1926,7 +1926,7 @@ int GeoMap::GetCulture(int x, int y)
 	return 0;
 }
 
-void GeoMap::ApplyGeography(ARegionArray *pArr) 
+void GeoMap::ApplyGeography(ARegionArray *pArr)
 {
 	int x, y;
 	int hmin = 100;
@@ -1958,7 +1958,7 @@ void GeoMap::ApplyGeography(ARegionArray *pArr)
 			reg->humidity = reg->humidity / ctr;
 			reg->temperature = reg->temperature / ctr;
 			reg->vegetation = reg->vegetation / ctr;
-			reg->culture = reg->culture / ctr;	
+			reg->culture = reg->culture / ctr;
 			if (reg->humidity > hmax) hmax = reg->humidity;
 			if (reg->humidity < hmin) hmin = reg->humidity;
 		}

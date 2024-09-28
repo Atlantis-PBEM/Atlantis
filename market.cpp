@@ -68,7 +68,7 @@ void Market::post_turn(int population, int wages)
 	}
 }
 
-void Market::write_out(ostream& f)
+void Market::write_out(std::ostream& f)
 {
 	f << type << '\n';
 	f << (item == -1 ? "NO_ITEM" : ItemDefs[item].abr) << '\n';
@@ -81,7 +81,7 @@ void Market::write_out(ostream& f)
 	f << baseprice << '\n';
 }
 
-void Market::read_in(istream& f)
+void Market::read_in(std::istream& f)
 {
 	AString temp;
 
@@ -90,7 +90,7 @@ void Market::read_in(istream& f)
 
 	type = MarketType{t};
 
-	f >> ws >> temp;
+	f >> std::ws >> temp;
 	item = LookupItem(&temp);
 
 	f >> price;

@@ -406,16 +406,16 @@ int AString::strict_value() //this cannot handle negative numbers!
 	return ret;
 }
 
-ostream& operator<<(ostream &os,const AString &s)
+std::ostream& operator<<(std::ostream &os,const AString &s)
 {
 	os << s.str;
 	return os;
 }
 
-istream& operator>>(istream &is,AString &s)
+std::istream& operator>>(std::istream &is,AString &s)
 {
 	// We expect to read a line at a time from the file, not a string at a time since we do tokenization internally.
-	string buf;
+	std::string buf;
 	getline(is, buf);
 	s.len = strlen(buf.c_str());
 	s.str = new char[s.len + 1];
@@ -423,7 +423,7 @@ istream& operator>>(istream &is,AString &s)
 	return is;
 }
 
-const string plural(int count, const std::string &one, const std::string &many) {
+const std::string plural(int count, const std::string &one, const std::string &many) {
 	return count != 1 ? many : one;
 }
 

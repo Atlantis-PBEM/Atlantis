@@ -29,6 +29,8 @@
 #include "object.h"
 #include "gamedata.h"
 
+using namespace std;
+
 const int MonType::getAggression() {
 	int aggression = this->hostile;
 	aggression *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
@@ -675,10 +677,10 @@ AString *ItemDescription(int item, int full)
 
 	AString *temp = new AString;
 	int illusion = (ItemDefs[item].type & IT_ILLUSION);
-	
+
 	*temp += AString(illusion?"illusory ":"")+ ItemDefs[item].name + " [" +
 			(illusion?"I":"") + ItemDefs[item].abr + "]";
-		
+
 	/* new ship items */
 	if (ItemDefs[item].type & IT_SHIP) {
 		if (ItemDefs[item].swim > 0) {
@@ -737,7 +739,7 @@ AString *ItemDescription(int item, int full)
 			}
 		}
 	} else {
-		
+
 		*temp += AString(", weight ") + ItemDefs[item].weight;
 
 		if (ItemDefs[item].walk) {
@@ -874,7 +876,7 @@ AString *ItemDescription(int item, int full)
 		for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
 			*temp += AString(" ") + MonResist(c,mp->defense[c], full);
 		}
-		
+
 		if (mp->special && mp->special != NULL) {
 			*temp += AString(" ") +
 				"Monster can cast " +
@@ -1003,11 +1005,11 @@ AString *ItemDescription(int item, int full)
 		*temp += " This is a free-moving-item (FMI).";
 		MonType *mp = FindMonster(ItemDefs[item].abr, (ItemDefs[item].type & IT_ILLUSION));
 		*temp += AString(" This FMI attacks with a combat skill of ") + mp->attackLevel + ".";
-		
+
 		for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
 			*temp += AString(" ") + FMIResist(c,mp->defense[c], full);
 		}
-		
+
 		if (mp->special && mp->special != NULL) {
 			*temp += AString(" ") +
 				"FMI can cast " +
@@ -1299,7 +1301,7 @@ AString *ItemDescription(int item, int full)
 		} else {
 			*temp +=  AString(pM->minBonus) + " when ridden into combat.";
 		}
-		
+
 		*temp += AString(" This mount gives a maximum bonus of +");
 		if (Globals->HALF_RIDING_BONUS) {
 			*temp += AString(((pM->maxBonus + 1) / 2)) + " when ridden into combat.";
@@ -1814,16 +1816,16 @@ int ManType::CanProduce(int item)
 int ManType::CanUse(int item)
 {
 	if (ItemDefs[item].flags & ItemType::DISABLED) return 0;
-	
+
 	// Check if the item is a mount
 	if (ItemDefs[item].type & IT_MOUNT) return 1;
 
 	// Check if the item is a weapon
 	if (ItemDefs[item].type & IT_WEAPON) return 1;
-	
+
 	// Check if the item is a tool
 	if (ItemDefs[item].type & IT_TOOL) return 1;
-	
+
 	// Check if the item is an armor
 	if (ItemDefs[item].type & IT_ARMOR) {
 		ArmorType *armor = FindArmor(ItemDefs[item].abr);
@@ -1853,6 +1855,6 @@ int ManType::CanUse(int item)
 			if (mayWearArmor) return 1;
 		}
 	}
-	
+
 	return 0;
 }
