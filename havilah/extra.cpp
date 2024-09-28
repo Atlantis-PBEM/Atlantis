@@ -33,6 +33,7 @@
 #include <fstream>
 #include <string>
 #include <iterator>
+#include <memory>
 
 using namespace std;
 
@@ -108,8 +109,6 @@ int Game::SetupFaction( Faction *pFac )
 
 static void CreateQuest(ARegionList *regions, int monfaction)
 {
-	Quest *q, *q2;
-	Item *item;
 	int d, count, temple, i, j, clash;
 	ARegion *r;
 	Object *o;
@@ -122,12 +121,12 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	string destnames[MAX_DESTINATIONS];
 	set<string> intersection;
 
-	q = new Quest;
+	std::shared_ptr<Quest> q = std::make_shared<Quest>();
 	q->type = -1;
-	item = new Item;
-	item->type = I_RELICOFGRACE;
-	item->num = 1;
-	q->rewards.Add(item);
+	Item item;
+	item.type = I_RELICOFGRACE;
+	item.num = 1;
+	q->rewards.push_back(item);
 	d = getrandom(100);
 	if (d < 40) {
 		// SLAY quest
@@ -171,10 +170,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				}
 			}
 		}
-		forlist_reuse(&quests) {
-			q2 = (Quest *) elem;
-			if (q2->type == Quest::SLAY &&
-					q2->target == q->target) {
+		for(auto q2: quests) {
+			if (q2->type == Quest::SLAY && q2->target == q->target) {
 				// Don't hunt the same monster twice
 				q->type = -1;
 				break;
@@ -216,8 +213,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		}
 		r = regions->GetRegion(q->regionnum);
 		rname = *r->name;
-		forlist_reuse(&quests) {
-			q2 = (Quest *) elem;
+		for(auto q2: quests) {
 			if (q2->type == Quest::HARVEST) {
 				r = regions->GetRegion(q2->regionnum);
 				if (rname == *r->name) {
@@ -303,11 +299,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			}
 		}
 		if (q->type == Quest::BUILD) {
-			forlist(&quests) {
-				q2 = (Quest *) elem;
-				if (q2->type == Quest::BUILD &&
-						q->building == q2->building &&
-						q->regionname == q2->regionname) {
+			for(auto q2: quests) {
+				if (q2->type == Quest::BUILD && q->building == q2->building && q->regionname == q2->regionname) {
 					// Don't have 2 build quests
 					// active in the same region
 					q->type = -1;
@@ -316,18 +309,15 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		} else if (q->type == Quest::VISIT) {
 			// Make sure that a given region is only in one
 			// pilgrimage at a time
-			forlist(&quests) {
-				q2 = (Quest *) elem;
-				if (q2->type == Quest::VISIT &&
-						q->building == q2->building) {
+			for(auto q2: quests) {
+				if (q2->type == Quest::VISIT && q->building == q2->building) {
 					intersection.clear();
 					set_intersection(
 						q->destinations.begin(),
 						q->destinations.end(),
 						q2->destinations.begin(),
 						q2->destinations.end(),
-						inserter(intersection,
-							intersection.begin()),
+						inserter(intersection, intersection.begin()),
 						less<string>()
 					);
 					if (intersection.size() > 0)
@@ -337,9 +327,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		}
 	}
 	if (q->type != -1)
-		quests.Add(q);
-	else
-		delete q;
+		quests.push_back(q);
 }
 
 Faction *Game::CheckVictory()
@@ -350,7 +338,6 @@ Faction *Game::CheckVictory()
 	int skilldays, magicdays, skilllevels, magiclevels;
 	int dir, found;
 	unsigned ucount;
-	Quest *q;
 	Item *item;
 	ARegion *r, *start;
 	Object *o;
@@ -363,19 +350,15 @@ Faction *Game::CheckVictory()
 	set<string> intersection, un;
 	set<string>::iterator it2;
 
-	forlist(&quests) {
-		q = (Quest *) elem;
-		if (q->type != Quest::VISIT)
-			continue;
-		for (it2 = q->destinations.begin();
-				it2 != q->destinations.end();
-				it2++) {
-			un.insert(*it2);
+	for(auto q: quests) {
+		if (q->type != Quest::VISIT) continue;
+		for (auto dest: q->destinations) {
+			un.insert(dest);
 		}
 	}
 	visited = 0;
 	unvisited = 0;
-	forlist_reuse(&regions) {
+	forlist(&regions) {
 		r = (ARegion *) elem;
 		if (r->Population() > 0) {
 			stlstr = r->name->Str();
@@ -409,11 +392,10 @@ Faction *Game::CheckVictory()
 	if (visited >= (unvisited + visited) * QUEST_EXPLORATION_PERCENT / 100) {
 		// Exploration phase complete: start creating relic quests
 		for (i = 0; i < QUEST_SPAWN_RATE; i++) {
-			if (quests.Num() < MAXIMUM_ACTIVE_QUESTS &&
-					getrandom(100) < QUEST_SPAWN_CHANCE)
+			if (quests.size() < MAXIMUM_ACTIVE_QUESTS && getrandom(100) < QUEST_SPAWN_CHANCE)
 				CreateQuest(&regions, monfaction);
 		}
-		while (quests.Num() < MINIMUM_ACTIVE_QUESTS) {
+		while (quests.size() < MINIMUM_ACTIVE_QUESTS) {
 			CreateQuest(&regions, monfaction);
 		}
 	}
@@ -801,41 +783,37 @@ Faction *Game::CheckVictory()
 				if (o->incomplete <= ObjectDefs[o->type].cost / 2) {
 					// Half done; make a quest to destroy it
 					found = 0;
-					forlist(&quests) {
-						q = (Quest *) elem;
-						if (q->type == Quest::DEMOLISH &&
-								q->target == o->num &&
-								q->regionnum == r->num) {
+					for(auto q: quests) {
+						if (q->type == Quest::DEMOLISH && q->target == o->num && q->regionnum == r->num) {
 							found = 1;
 							break;
 						}
 					}
 					if (!found) {
-						q = new Quest;
+						std::shared_ptr<Quest> q = std::make_shared<Quest>();
 						q->type = Quest::DEMOLISH;
-						item = new Item;
-						item->type = I_RELICOFGRACE;
-						item->num = 1;
-						q->rewards.Add(item);
+						Item item;
+						item.type = I_RELICOFGRACE;
+						item.num = 1;
+						q->rewards.push_back(item);
 						q->target = o->num;
 						q->regionnum = r->num;
-						quests.Add(q);
+						quests.push_back(q);
 					}
 				}
 			}
 		}
 	}
 
-	forlist_reuse(&quests) {
-		q = (Quest *) elem;
+	std::vector<shared_ptr<Quest>> questsWithProblems;
+	for(auto q: quests) {
 		switch(q->type) {
 			case Quest::SLAY:
 				l = regions.FindUnit(q->target);
 				if (!l || l->unit->faction->num != monfaction) {
 					// Something has gone wrong with this quest!
 					// shouldn't ever happen, but...
-					quests.Remove(q);
-					delete q;
+					questsWithProblems.push_back(q);
 					if (l) delete l;
 				} else {
 					message = "In the ";
@@ -899,8 +877,7 @@ Faction *Game::CheckVictory()
 				if (!r || !o) {
 					// Something has gone wrong with this quest!
 					// shouldn't ever happen, but...
-					quests.Remove(q);
-					delete q;
+					questsWithProblems.push_back(q);
 				} else {
 					message = "Tear down the blasphemous ";
 					message += *o->name;
@@ -917,6 +894,7 @@ Faction *Game::CheckVictory()
 		}
 	}
 
+	for(auto q: questsWithProblems) quests.erase(q);
 	return NULL;
 }
 

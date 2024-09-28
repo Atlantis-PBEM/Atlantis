@@ -370,7 +370,7 @@ void Battle::GetSpoils(AList *losers, ItemList *spoils, int ass)
 		int numalive = u->GetSoldiers();
 		int numdead = u->losses;
 		if (!numalive) {
-			if (quests.CheckQuestKillTarget(u, spoils, &quest_rewards)) {
+			if (quests.check_kill_target(u, spoils, &quest_rewards)) {
 				// TODO why doesn't the unit get an event here?
 				AddLine(AString("Quest completed! ") + quest_rewards);
 			}

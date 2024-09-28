@@ -608,7 +608,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 				u->MoveUnit(dest);
 			}
 
-			if (quests.CheckQuestDemolishTarget(r, o->num, u, &quest_rewards)) {
+			if (quests.check_demolish_target(r, o->num, u, &quest_rewards)) {
 				u->event("You have completed a quest!" + quest_rewards, "quest");
 			}
 
@@ -1969,7 +1969,7 @@ void Game::AssessMaintenance()
 			for(auto u: obj->units) {
 				if (!(u->faction->is_npc)) {
 					r->visited = 1;
-					if (quests.CheckQuestVisitTarget(r, u, &quest_rewards)) {
+					if (quests.check_visit_target(r, u, &quest_rewards)) {
 						u->event("You have completed a pilgrimage!" + quest_rewards, "quest");
 					}
 				}
