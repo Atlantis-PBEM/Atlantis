@@ -1050,7 +1050,7 @@ void ARegion::Writeout(ostream& f)
 	f << visited << '\n';
 
 	f << products.size() << '\n';
-	for (const auto& product : products) product->Writeout(f);
+	for (const auto& product : products) product->write_out(f);
 	f << markets.size() << '\n';
 	for (const auto& market : markets) market->Writeout(f);	
 
@@ -1119,7 +1119,7 @@ void ARegion::Readin(istream &f, AList *facs)
 	products.reserve(n);
 	for (int i = 0; i < n; i++) {
 		Production *p = new Production();
-		p->Readin(f);
+		p->read_in(f);
 		products.push_back(p);
 	}
 

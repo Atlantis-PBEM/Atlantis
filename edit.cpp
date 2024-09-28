@@ -456,10 +456,10 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 		for (const auto& p : pReg->products) {
 			if (ItemDefs[p->itemtype].type & IT_ADVANCED) {
 				if (has) {
-					temp += AString(", ") + p->WriteReport();
+					temp += AString(", ") + p->write_report();
 				} else {
 					has = 1;
-					temp += p->WriteReport();
+					temp += p->write_report();
 				}
 			} else {
 				if (p->itemtype == I_SILVER) {
@@ -469,10 +469,10 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 					}
 				} else {
 					if (has) {
-						temp += AString(", ") + p->WriteReport();
+						temp += AString(", ") + p->write_report();
 					} else {
 						has = 1;
-						temp += p->WriteReport();
+						temp += p->write_report();
 					}
 				}
 			}

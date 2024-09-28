@@ -29,6 +29,8 @@
 #include "skills.h"
 #include "gamedata.h"
 
+using namespace std;
+
 Production::Production()
 {
 	itemtype = -1;
@@ -50,7 +52,7 @@ Production::Production(int it, int maxamt)
 	skill = LookupSkill(&skname);
 }
 
-void Production::Writeout(ostream& f)
+void Production::write_out(ostream& f)
 {
 	f << (itemtype == -1 ? "NO_ITEM" : ItemDefs[itemtype].abr) << '\n';	
 	f << amount << '\n';
@@ -61,7 +63,7 @@ void Production::Writeout(ostream& f)
 	f << productivity << '\n';
 }
 
-void Production::Readin(istream& f)
+void Production::read_in(istream& f)
 {
 	AString temp;
 
@@ -81,8 +83,6 @@ void Production::Readin(istream& f)
 	f >> productivity;
 }
 
-AString Production::WriteReport()
-{
-	AString temp = ItemString(itemtype, amount);
-	return temp;
+string Production::write_report() {
+	return ItemString(itemtype, amount);
 }
