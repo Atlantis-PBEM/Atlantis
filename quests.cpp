@@ -26,6 +26,7 @@
 #include "quests.h"
 #include "object.h"
 #include <iterator>
+#include <memory>
 
 QuestList quests;
 
@@ -42,55 +43,43 @@ Quest::Quest()
 
 Quest::~Quest()
 {
-	Item *i;
-
-	forlist(&rewards) {
-		i = (Item *) elem;
-		rewards.Remove(i);
-		delete i;
-	}
+	rewards.clear();
 }
 
-string Quest::GetRewardsStr()
+string Quest::get_rewards()
 {
-	Item *i;
 	string quest_rewards;
-	int first_i = 1;
+	bool first = true;
 
 	quest_rewards = "Quest rewards: ";
 
-	if (rewards.Num() == 0) {
+	if (rewards.size() == 0) {
 		return quest_rewards + "none.";
 	}
 
-	forlist (&rewards) {
-		i = (Item *) elem;
-		if (first_i) {
-			first_i = 0;
-		} else {
-			quest_rewards += ", ";
-		}
-		quest_rewards += ItemString(i->type, i->num);
+	for(auto i: rewards) {
+		if (!first) quest_rewards += ", ";
+		first = false;
+		quest_rewards += ItemString(i.type, i.num);
 	}
 	quest_rewards += ".";
 
 	return quest_rewards;
 }
 
-int QuestList::ReadQuests(istream& f)
+int QuestList::read_quests(istream& f)
 {
 	int count, dests, rewards;
-	Quest *quest;
+	std::shared_ptr<Quest> quest;
 	AString name;
-	Item *item;
 
-	quests.DeleteAll();
+	quests.clear();
 
 	f >> count;
 	if (count < 0)
 		return 0;
 	while (count-- > 0) {
-		quest = new Quest();
+		quest = std::make_shared<Quest>();
 		f >> quest->type;
 		switch (quest->type) {
 			case Quest::SLAY:
@@ -134,27 +123,22 @@ int QuestList::ReadQuests(istream& f)
 		}
 		f >> rewards;
 		while (rewards-- > 0) {
-			item = new Item();
-			item->Readin(f);
-			if (-1 == item->type)
+			Item item;
+			item.Readin(f);
+			if (-1 == item.type)
 				return 0;
-			quest->rewards.Add(item);
+			quest->rewards.push_back(item);
 		}
-		quests.Add(quest);
+		quests.push_back(quest);
 	}
 
     return 1;
 }
 
-void QuestList::WriteQuests(ostream& f)
+void QuestList::write_quests(ostream& f)
 {
-	Quest *q;
-	Item *i;
-	set<string>::iterator it;
-
-	f << quests.Num() << '\n';
-	forlist(this) {
-		q = (Quest *) elem;
+	f << quests.size() << '\n';
+	for(auto q: quests) {
 		f << q->type << '\n';
 		switch(q->type) {
 			case Quest::SLAY:
@@ -171,8 +155,8 @@ void QuestList::WriteQuests(ostream& f)
 			case Quest::VISIT:
 				f << (q->building == -1 ? "NO_OBJECT" : ObjectDefs[q->building].name) << '\n';
 				f << q->destinations.size() << '\n';
-				for (it = q->destinations.begin(); it != q->destinations.end();	it++) {
-					f << *it << '\n';
+				for (auto dest: q->destinations) {
+					f << dest << '\n';
 				}
 				break;
 			case Quest::DEMOLISH:
@@ -186,113 +170,79 @@ void QuestList::WriteQuests(ostream& f)
 				f << q->regionnum << '\n';
 				f << q->regionname << '\n';
 				f << q->destinations.size() << '\n';
-				for (it = q->destinations.begin(); it != q->destinations.end();	it++) {
-					f << *it << '\n';
+				for(auto dest: q->destinations) {
+					f << dest << '\n';
 				}
 				break;
 		}
-		f << q->rewards.Num() << '\n';
-		forlist(&q->rewards) {
-			i = (Item *) elem;
-			i->Writeout(f);
+		f << q->rewards.size() << '\n';
+		for(auto i: q->rewards) {
+			i.Writeout(f);
 		}
 	}
 	f << 0 << '\n';
 }
 
-int QuestList::CheckQuestKillTarget(Unit *u, ItemList *reward, string *quest_rewards)
+string QuestList::distribute_rewards(Unit *u, shared_ptr<Quest> q)
 {
-	Quest *q;
-	Item *i;
+	for(auto i: q->rewards) {
+		u->items.SetNum(i.type, u->items.GetNum(i.type) + i.num);
+		u->faction->DiscoverItem(i.type, 0, 1);
+	}
+	return q->get_rewards();
+}
 
-	forlist(this) {
-		q = (Quest *) elem;
+int QuestList::check_kill_target(Unit *u, ItemList *reward, string *quest_rewards)
+{
+	for(auto q: quests) {
 		if (q->type == Quest::SLAY && q->target == u->num) {
 			// This dead thing was the target of a quest!
-			forlist (&q->rewards) {
-				i = (Item *) elem;
-				reward->SetNum(i->type, reward->GetNum(i->type) + i->num);
+			for(auto i: q->rewards) {
+				reward->SetNum(i.type, reward->GetNum(i.type) + i.num);
 			}
-			*quest_rewards = q->GetRewardsStr();
-			this->Remove(q);
-			delete q;
+			*quest_rewards = q->get_rewards();
+			erase(q); // this is safe since we immediately return and don't use the iterator again
 			return 1;
 		}
 	}
-
 	return 0;
 }
 
-int QuestList::CheckQuestHarvestTarget(ARegion *r, int item, int harvested, int max, Unit *u, string *quest_rewards)
+int QuestList::check_harvest_target(ARegion *r, int item, int harvested, int max, Unit *u, string *quest_rewards)
 {
-	Quest *q;
-	Item *i;
-
-	forlist(this) {
-		q = (Quest *) elem;
-		if (q->type == Quest::HARVEST &&
-				q->regionnum == r->num &&
-				q->objective.type == item) {
-			
+	for(auto q: quests) {
+		if (q->type == Quest::HARVEST && q->regionnum == r->num && q->objective.type == item) {
 			if (getrandom(max) < harvested) {
-				forlist (&q->rewards) {
-					i = (Item *) elem;
-					u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
-					u->faction->DiscoverItem(i->type, 0, 1);
-				}
-				*quest_rewards = q->GetRewardsStr();
-				this->Remove(q);
-				delete q;
+				*quest_rewards = distribute_rewards(u, q);
+				erase(q); // this is safe since we immediately return and don't use the iterator again
 				return 1;
 			}
 		}
 	}
-
 	return 0;
 }
 
-int QuestList::CheckQuestBuildTarget(ARegion *r, int building, Unit *u, string *quest_rewards)
+int QuestList::check_build_target(ARegion *r, int building, Unit *u, string *quest_rewards)
 {
-	Quest *q;
-	Item *i;
-
-	forlist(this) {
-		q = (Quest *) elem;
-		if (q->type == Quest::BUILD &&
-				q->building == building &&
-				q->regionname == *r->name) {
-
-			forlist (&q->rewards) {
-				i = (Item *) elem;
-				u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
-				u->faction->DiscoverItem(i->type, 0, 1);
-			}
-			*quest_rewards = q->GetRewardsStr();
-			this->Remove(q);
-			delete q;
+	for(auto q: quests) {
+		if (q->type == Quest::BUILD && q->building == building && q->regionname == *r->name) {
+			*quest_rewards = distribute_rewards(u, q);
+			erase(q); // this is safe since we immediately return and don't use the iterator again
 			return 1;
 		}
 	}
-
 	return 0;
 }
 
-int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u, string *quest_rewards)
+int QuestList::check_visit_target(ARegion *r, Unit *u, string *quest_rewards)
 {
-	Quest *q;
-	Object *o;
-	Item *i;
 	set<string> intersection;
-	set<string>::iterator it;
 
-	forlist(this) {
-		q = (Quest *) elem;
-		if (q->type != Quest::VISIT)
-			continue;
-		if (!q->destinations.count(r->name->Str()))
-			continue;
+	for(auto q: quests) {
+		if (q->type != Quest::VISIT) continue;
+		if (!q->destinations.count(r->name->Str())) continue;
 		forlist(&r->objects) {
-			o = (Object *) elem;
+			Object *o = (Object *) elem;
 			if (o->type == q->building) {
 				u->visited.insert(r->name->Str());
 				intersection.clear();
@@ -301,53 +251,30 @@ int QuestList::CheckQuestVisitTarget(ARegion *r, Unit *u, string *quest_rewards)
 					q->destinations.end(),
 					u->visited.begin(),
 					u->visited.end(),
-					inserter(intersection,
-						intersection.begin()),
+					inserter(intersection, intersection.begin()),
 					less<string>()
 				);
 				if (intersection.size() == q->destinations.size()) {
-					// This unit has visited the
-					// required buildings in all those
-					// regions, so they completed a quest
-					forlist (&q->rewards) {
-						i = (Item *) elem;
-						u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
-						u->faction->DiscoverItem(i->type, 0, 1);
-					}
-					*quest_rewards = q->GetRewardsStr();
-					this->Remove(q);
-					delete q;
+					// This unit has visited the required buildings in all those regions, so they completed a quest
+					*quest_rewards = distribute_rewards(u, q);
+					erase(q); // this is safe since we immediately return and don't use the iterator again
 					return 1;
 				}
 			}
 		}
 	}
-
 	return 0;
 }
 
-int QuestList::CheckQuestDemolishTarget(ARegion *r, int building, Unit *u, string *quest_rewards)
+int QuestList::check_demolish_target(ARegion *r, int building, Unit *u, string *quest_rewards)
 {
-	Quest *q;
-	Item *i;
-
-	forlist(this) {
-		q = (Quest *) elem;
-		if (q->type == Quest::DEMOLISH &&
-				q->regionnum == r->num &&
-				q->target == building) {
-			forlist (&q->rewards) {
-				i = (Item *) elem;
-				u->items.SetNum(i->type, u->items.GetNum(i->type) + i->num);
-				u->faction->DiscoverItem(i->type, 0, 1);
-			}
-			*quest_rewards = q->GetRewardsStr();
-			this->Remove(q);
-			delete q;
+	for(auto q: quests) {
+		if (q->type == Quest::DEMOLISH && q->regionnum == r->num && q->target == building) {
+			*quest_rewards = distribute_rewards(u, q);
+			erase(q); // this is safe since we immediately return and don't use the iterator again
 			return 1;
 		}
 	}
-
 	return 0;
 }
 

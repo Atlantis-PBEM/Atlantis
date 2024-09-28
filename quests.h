@@ -34,7 +34,7 @@
 #include <string>
 #include <algorithm>
 
-class Quest : public AListElem
+class Quest
 {
 	public:
 		Quest();
@@ -50,26 +50,37 @@ class Quest : public AListElem
 		};
 		int	type;
 		int	target;
-		Item	objective;
+		Item objective;
 		int	building;
 		int	regionnum;
 		AString	regionname;
 		set<std::string> destinations;
-		AList	rewards;
-		std::string GetRewardsStr();
+		std::vector<Item> rewards;
+		std::string get_rewards();
 };
 
-class QuestList : public AList
+class QuestList
 {
-	public:
-		int ReadQuests(istream& f);
-		void WriteQuests(ostream& f);
+	std::list<std::shared_ptr<Quest>> quests;
+public:
+	using iterator = typename std::list<std::shared_ptr<Quest>>::iterator;
 
-		int CheckQuestKillTarget(Unit *u, ItemList *reward, std::string *quest_rewards);
-		int CheckQuestHarvestTarget(ARegion *r,	int item, int harvested, int max, Unit *u, std::string *quest_rewards);
-		int CheckQuestBuildTarget(ARegion *r, int building, Unit *u, std::string *quest_rewards);
-		int CheckQuestVisitTarget(ARegion *r, Unit *u, std::string *quest_rewards);
-		int CheckQuestDemolishTarget(ARegion *r, int building, Unit *u, std::string *quest_rewards);
+	int read_quests(istream& f);
+	void write_quests(ostream& f);
+
+	int check_kill_target(Unit *u, ItemList *reward, std::string *quest_rewards);
+	int check_harvest_target(ARegion *r,	int item, int harvested, int max, Unit *u, std::string *quest_rewards);
+	int check_build_target(ARegion *r, int building, Unit *u, std::string *quest_rewards);
+	int check_visit_target(ARegion *r, Unit *u, std::string *quest_rewards);
+	int check_demolish_target(ARegion *r, int building, Unit *u, std::string *quest_rewards);
+
+	inline void push_back(std::shared_ptr<Quest> q) { quests.push_back(q); }
+	inline iterator begin() { return quests.begin(); }
+	inline iterator end() { return quests.end(); }
+	inline size_t erase(shared_ptr<Quest> q) { return std::erase(quests, q); }
+	inline size_t size() { return quests.size(); }
+
+	std::string distribute_rewards(Unit *u, std::shared_ptr<Quest> q);
 };
 
 extern QuestList quests;

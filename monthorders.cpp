@@ -613,7 +613,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 		if (buildobj->incomplete == 0) {
 			job = "Completes construction of ";
 			buildobj->incomplete = -(ObjectDefs[type].maxMaintenance);
-			if (quests.CheckQuestBuildTarget(r, type, u, &quest_rewards)) {
+			if (quests.check_build_target(r, type, u, &quest_rewards)) {
 				questcomplete = 1;
 			}
 		}
@@ -1306,7 +1306,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 				double dUbucks = ((double) amt) * ((double) uatt)
 					/ ((double) attempted);
 				ubucks = (int) dUbucks;
-				questcomplete = quests.CheckQuestHarvestTarget(r, po->item, ubucks, amt, u, &quest_rewards);
+				questcomplete = quests.check_harvest_target(r, po->item, ubucks, amt, u, &quest_rewards);
 			}
 			else
 			{

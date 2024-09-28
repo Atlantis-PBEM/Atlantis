@@ -509,7 +509,7 @@ int Game::OpenGame()
 	if (!i) return 0;
 
 	// read in quests
-	if (!quests.ReadQuests(f))
+	if (!quests.read_quests(f))
 		return 0;
 
 	SetupUnitNums();
@@ -552,7 +552,7 @@ int Game::SaveGame()
 	regions.WriteRegions(f);
 
 	// Write out quests
-	quests.WriteQuests(f);
+	quests.write_quests(f);
 
 	return(1);
 }
