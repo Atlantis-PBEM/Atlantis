@@ -747,7 +747,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 
 		Awrite("Wanted: ");
 		for (const auto &m : pReg->markets) {
-			if (m->type == M_SELL) {
+			if (m->type == Market::M_SELL) {
 				AString temp = AString(ItemString(m->item, m->amount)) + " at $" + m->price + "(" + m->baseprice + ").";
 				temp += AString(" Pop: ") + m->minpop + "/" + m->maxpop + ".";
 				temp += AString(" Amount: ") + m->minamt + "/" + m->maxamt + ".";
@@ -756,7 +756,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 		}
 		Awrite("For Sale: ");
 		for (const auto &m : pReg->markets) {
-			if (m->type == M_BUY) {
+			if (m->type == Market::M_BUY) {
 				AString temp = AString(ItemString(m->item, m->amount)) + " at $" + m->price + "(" + m->baseprice + ").";
 				temp += AString(" Pop: ") + m->minpop + "/" + m->maxpop + ".";
 				temp += AString(" Amount: ") + m->minamt + "/" + m->maxamt + ".";
@@ -770,7 +770,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 		Awrite( " [p] [item] [minpop] [maxpop] to add/modify market population" );			
 		Awrite( " [a] [item] [minamt] [maxamt] to add/modify market amounts" );
 		Awrite( " [c] [item] [price] [baseprice] to add/modify item prices" );
-		Awrite( " [s] [item] to swop an item between wanted and sold" );
+		Awrite( " [s] [item] to swap an item between wanted and sold" );
 		Awrite( " [d] [item] to delete an item from the market" );
 		Awrite( " q) Return to previous menu." ); 
 
@@ -851,7 +851,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 
 					if (!done) {
 						int price = (ItemDefs[mitem].baseprice * (100 + getrandom(50))) / 100;
-						Market *m = new Market(M_SELL, mitem, price, 0, minimum, maximum, 0, 0);
+						Market *m = new Market(Market::M_SELL, mitem, price, 0, minimum, maximum, 0, 0);
 						pReg->markets.push_back(m);
 					}
 
@@ -910,8 +910,8 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 
 					if (!done) {
 						int price = (ItemDefs[mitem].baseprice * (100 + getrandom(50))) / 100;
-						int mamount = minimum + ( maximum * population / 5000 );
-						Market *m = new Market(M_SELL, mitem, price, mamount, 0, 5000, minimum, maximum);
+						int mamount = minimum + (maximum * population / 5000);
+						Market *m = new Market(Market::M_SELL, mitem, price, mamount, 0, 5000, minimum, maximum);
 						pReg->markets.push_back(m);
 					}
 
@@ -954,7 +954,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 					}
 
 					if (!done) {
-						Market *m = new Market(M_SELL, mitem, price, 0, 0, 5000, 0, 0);
+						Market *m = new Market(Market::M_SELL, mitem, price, 0, 0, 5000, 0, 0);
 						m->baseprice = baseprice;
 						pReg->markets.push_back(m);
 					}
@@ -990,7 +990,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 						[mitem](const Market *m) { return m->item == mitem; }
 					);
 					if (m != pReg->markets.end()) {
-						(*m)->type = (*m)->type == M_SELL ? M_BUY : M_SELL;
+						(*m)->type = (*m)->type == Market::M_SELL ? Market::M_BUY : Market::M_SELL;
 					} else {
 						Awrite("No such market");				
 					}

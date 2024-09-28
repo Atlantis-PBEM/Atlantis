@@ -1477,7 +1477,7 @@ void Game::RunSellOrders()
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
 		for (const auto& m : r->markets) {
-			if (m->type == M_SELL) DoSell(r, m);
+			if (m->type == Market::M_SELL) DoSell(r, m);
 		}
 		forlist((&r->objects)) {
 			Object *obj = (Object *) elem;
@@ -1560,7 +1560,7 @@ void Game::RunBuyOrders()
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
 		for (const auto& m : r->markets) {
-			if (m->type == M_BUY) DoBuy(r, m);
+			if (m->type == Market::M_BUY) DoBuy(r, m);
 		}	
 		forlist((&r->objects)) {
 			Object *obj = (Object *) elem;

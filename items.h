@@ -80,7 +80,7 @@ struct ShowItem {
 	bool full;
 
 	std::string display_name();
-    std::string display_tag();
+	std::string display_tag();
 };
 
 class ItemType
@@ -485,7 +485,6 @@ class ItemList : public AList
 		void UncheckAll(); // re-set checked flag for all
 };
 
-extern AString ShowSpecial(char const *special, int level, int expandLevel,
-		int fromItem);
+extern AString ShowSpecial(char const *special, int level, int expandLevel, int fromItem);
 
 #endif

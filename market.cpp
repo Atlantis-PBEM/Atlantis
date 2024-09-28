@@ -28,26 +28,7 @@
 #include "gameio.h"
 #include "gamedata.h"
 
-Market::Market()
-{
-	activity = 0;
-}
-
-Market::Market(int a, int b, int c, int d, int e, int f, int g, int h)
-{
-	type = a;
-	item = b;
-	price = c;
-	amount = d;
-	minpop = e;
-	maxpop = f;
-	minamt = g;
-	maxamt = h;
-	baseprice = price;
-	activity = 0;
-}
-
-void Market::PostTurn(int population, int wages)
+void Market::post_turn(int population, int wages)
 {
 	// Nothing to do to the markets.
 	if (!(Globals->VARIABLE_ECONOMY)) return;
@@ -58,8 +39,7 @@ void Market::PostTurn(int population, int wages)
 	if (amount == -1) return;
 
 	if (ItemDefs[item].type & IT_MAN) {
-		float ratio = ItemDefs[item].baseprice /
-			(10 * (float)Globals->BASE_MAN_COST);
+		float ratio = ItemDefs[item].baseprice / (10 * (float)Globals->BASE_MAN_COST);
 		// hack: included new wage factor of ten in float assignment above
 		price = (int)((float) wages * 4 * ratio);
 		if (ItemDefs[item].type & IT_LEADER)
@@ -81,18 +61,14 @@ void Market::PostTurn(int population, int wages)
 
 	if (population <= minpop)
 		amount = minamt;
+	else if (population >= maxpop)
+		amount = maxamt;
 	else {
-		if (population >= maxpop)
-			amount = maxamt;
-		else {
-			amount = minamt + ((maxamt - minamt) *
-					(population - minpop)) /
-				(maxpop - minpop);
-		}
+		amount = minamt + ((maxamt - minamt) * (population - minpop)) / (maxpop - minpop);
 	}
 }
 
-void Market::Writeout(ostream& f)
+void Market::write_out(ostream& f)
 {
 	f << type << '\n';
 	f << (item == -1 ? "NO_ITEM" : ItemDefs[item].abr) << '\n';
@@ -105,10 +81,14 @@ void Market::Writeout(ostream& f)
 	f << baseprice << '\n';
 }
 
-void Market::Readin(istream& f)
+void Market::read_in(istream& f)
 {
 	AString temp;
-	f >> type;
+
+	int t;
+	f >> t;
+
+	type = MarketType{t};
 
 	f >> ws >> temp;
 	item = LookupItem(&temp);
@@ -121,12 +101,3 @@ void Market::Readin(istream& f)
 	f >> maxamt;
 	f >> baseprice;
 }
-
-/*
-AString Market::Report()
-{
-	AString temp;
-	temp += ItemString(item, amount) + " at $" + price;
-	return temp;
-}
-*/

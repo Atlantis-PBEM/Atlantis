@@ -25,25 +25,30 @@
 #ifndef MARKET_CLASS
 #define MARKET_CLASS
 
-#include "alist.h"
-#include "astring.h"
 #include <iostream>
 
 using namespace std;
 
-enum {
-	M_BUY,
-	M_SELL
-};
-
-class Market : public AListElem {
+class Market {
 public:
-	Market();
+	enum MarketType : int {
+		M_BUY,
+		M_SELL
+	};
+
+	Market() :
+		type(MarketType::M_BUY), item(0), price(0), amount(0),
+		minpop(0), maxpop(0), minamt(0), maxamt(0), baseprice(0), activity(0)
+	{}
 
 	/* type, item, price, amount, minpop, maxpop, minamt, maxamt */
-	Market(int,int,int,int,int,int,int,int);
+	Market(MarketType type, int item, int price, int amount, int minpop, int maxpop, int minamt, int maxamt) :
+		type(type), item(item), price(price), amount(amount),
+		minpop(minpop), maxpop(maxpop), minamt(minamt), maxamt(maxamt),
+		baseprice(price), activity(0)
+	{}
 
-	int type;
+	MarketType type;
 	int item;
 	int price;
 	int amount;
@@ -56,22 +61,8 @@ public:
 	int baseprice;
 	int activity;
 
-	void PostTurn(int, int);
-	void Writeout(ostream& f);
-	void Readin(istream& f);
-	//AString Report();
+	void post_turn(int population, int wages);
+	void write_out(std::ostream& f);
+	void read_in(std::istream& f);
 };
-
-class MarketList : std::vector<Market*> {
-public:
-	// expose just the function on vector that we need.
-	using std::vector<Market*>::push_back;
-	using std::vector<Market*>::begin;
-	using std::vector<Market*>::end;
-
-	void PostTurn(int, int);
-	void Writeout(ostream&  f);
-	void Readin(istream& f);
-};
-
 #endif
