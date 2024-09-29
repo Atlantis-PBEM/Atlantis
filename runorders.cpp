@@ -544,7 +544,9 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 			destroyPower = structurePoints;
 		}
 		else {
-			destroyablePoints = std::max(Globals->MIN_DESTROY_POINTS, maxStructurePoints * Globals->MAX_DESTROY_PERCENT / 100);
+			destroyablePoints = std::max(
+				Globals->MIN_DESTROY_POINTS, maxStructurePoints * Globals->MAX_DESTROY_PERCENT / 100
+			);
 			destroyablePoints = std::max(0, std::min(structurePoints, destroyablePoints) - o->destroyed);
 
 			if (Globals->DESTROY_BEHAVIOR == DestroyBehavior::PER_SKILL) {
@@ -1451,7 +1453,7 @@ void Game::RunSellOrders()
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
 		for (const auto& m : r->markets) {
-			if (m->type == Market::M_SELL) DoSell(r, m);
+			if (m->type == Market::MarketType::M_SELL) DoSell(r, m);
 		}
 		forlist((&r->objects)) {
 			Object *obj = (Object *) elem;
@@ -1534,7 +1536,7 @@ void Game::RunBuyOrders()
 	forlist((&regions)) {
 		ARegion *r = (ARegion *) elem;
 		for (const auto& m : r->markets) {
-			if (m->type == Market::M_BUY) DoBuy(r, m);
+			if (m->type == Market::MarketType::M_BUY) DoBuy(r, m);
 		}
 		forlist((&r->objects)) {
 			Object *obj = (Object *) elem;
@@ -3062,7 +3064,9 @@ void Game::CheckTransportOrders()
 							dist = regions.GetPlanarDistance(r, tar->region, penalty, maxdist);
 						}
 						if (dist > maxdist) {
-							u->error("TRANSPORT: Recipient " + string(tar->unit->name->const_str()) + " is too far away.");
+							u->error(
+								"TRANSPORT: Recipient " + string(tar->unit->name->const_str()) + " is too far away."
+							);
 							o->type = NORDERS;
 							continue;
 						}
@@ -3307,7 +3311,8 @@ void Game::RunSacrificeOrders() {
 
 						if (reward_obj != -1 ) {
 							sacrifice_object->type = reward_obj;
-							string name = string(ObjectDefs[reward_obj].name) + " [" + to_string(sacrifice_object->num) + "]";
+							string name = string(ObjectDefs[reward_obj].name) + " [" +
+								 to_string(sacrifice_object->num) + "]";
 							sacrifice_object->name = new AString(name);
 							u->faction->objectshows.push_back({.obj = reward_obj});
 						}

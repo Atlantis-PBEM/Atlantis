@@ -29,7 +29,7 @@
 
 class Market {
 public:
-	enum MarketType : int {
+	enum struct MarketType : int {
 		M_BUY,
 		M_SELL
 	};

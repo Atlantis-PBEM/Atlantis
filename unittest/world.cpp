@@ -35,14 +35,14 @@ char const *AGetNameString( int name ) { return (name == 0) ? "Testing Wilds" : 
 
 void Game::CreateWorld() {
     Awrite("Creating world");
-    regions.CreateLevels(1);    
+    regions.CreateLevels(1);
     // because of the way regions are numbered, if you want 4 hexes you need a height of 4 and a width of 2.
     regions.CreateSurfaceLevel(0, 2, 4, nullptr);
 	// Make an underworld level
 	regions.CreateUnderworldLevel(1, 1, 2, "underworld");
 	// Make a shaft
 	regions.MakeShaftLinks(0, 1, 100);
-	
+
 	ARegion *reg = regions.GetRegion(0,0,0);
 	reg->MakeStartingCity();
  }
@@ -65,7 +65,7 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA ) { return 1; }
 void ARegion::MakeStartingCity() {
     if (!Globals->TOWNS_EXIST) return;
 	if (town) delete town;
-	
+
 	AddTown(TOWN_CITY);
 
 	if (!Globals->START_CITIES_EXIST) return;
@@ -85,18 +85,18 @@ void ARegion::MakeStartingCity() {
 			if ( ItemDefs[ i ].type & IT_NORMAL ) {
 				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
 					continue;
-				m = new Market(Market::M_BUY, i, (ItemDefs[i].baseprice * 5 / 2), -1, 5000, 5000, -1, -1);
+				m = new Market(Market::MarketType::M_BUY, i, (ItemDefs[i].baseprice * 5 / 2), -1, 5000, 5000, -1, -1);
 				markets.push_back(m);
 			}
 		}
 		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 		// hack: include wage factor of 10 in float calculation above
-		m = new Market(Market::M_BUY, race, (int)(Wages() * 4 * ratio), -1, 5000, 5000, -1, -1);
+		m = new Market(Market::MarketType::M_BUY, race, (int)(Wages() * 4 * ratio), -1, 5000, 5000, -1, -1);
 		markets.push_back(m);
 		if (Globals->LEADERS_EXIST) {
 			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
 			// hack: include wage factor of 10 in float calculation above
-			m = new Market(Market::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), -1, 5000, 5000, -1, -1);
+			m = new Market(Market::MarketType::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), -1, 5000, 5000, -1, -1);
 			markets.push_back(m);
 		}
 	} else {
@@ -104,12 +104,16 @@ void ARegion::MakeStartingCity() {
 		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
 		// hack: include wage factor of 10 in float calculation above
 		/* Setup Recruiting */
-		m = new Market(Market::M_BUY, race, (int)(Wages() * 4 * ratio), Population() / 5, 0, 10000, 0, 2000);
+		m = new Market(
+			Market::MarketType::M_BUY, race, (int)(Wages() * 4 * ratio), Population() / 5, 0, 10000, 0, 2000
+		);
 		markets.push_back(m);
 		if ( Globals->LEADERS_EXIST ) {
 			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
 			// hack: include wage factor of 10 in float calculation above
-			m = new Market(Market::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), Population() / 25, 0, 10000, 0, 400);
+			m = new Market(
+				Market::MarketType::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), Population() / 25, 0, 10000, 0, 400
+			);
 			markets.push_back(m);
 		}
 	}
