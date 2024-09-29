@@ -27,6 +27,7 @@
 #include "items.h"
 #include "gameio.h"
 #include "gamedata.h"
+#include <utility>
 
 void Market::post_turn(int population, int wages)
 {
@@ -52,7 +53,7 @@ void Market::post_turn(int population, int wages)
 	int tarprice = price;
 	if (amount) {
 		int fluctuation = (baseprice * activity)/amount;
-		if (type == M_BUY)
+		if (type == MarketType::M_BUY)
 			tarprice = (2 * baseprice + fluctuation) / 2;
 		else
 			tarprice = (3 * baseprice - fluctuation) / 2;
@@ -70,7 +71,7 @@ void Market::post_turn(int population, int wages)
 
 void Market::write_out(std::ostream& f)
 {
-	f << type << '\n';
+	f << static_cast<std::underlying_type_t<MarketType>>(type) << '\n';
 	f << (item == -1 ? "NO_ITEM" : ItemDefs[item].abr) << '\n';
 	f << price << '\n';
 	f << amount << '\n';
