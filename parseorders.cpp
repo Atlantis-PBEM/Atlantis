@@ -24,6 +24,7 @@
 // END A3HEADER
 
 #include <stdlib.h>
+#include <memory>
 
 #include "game.h"
 #include "gameio.h"
@@ -406,7 +407,6 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 				break;
 			case O_ENDTURN:
 				if (unit && unit->inTurnBlock) {
-					if (unit->monthorders) delete unit->monthorders;
 					unit->monthorders = unit->presentMonthOrders;
 					unit->presentMonthOrders = 0;
 					unit->taxing = unit->presentTaxing;
@@ -921,9 +921,9 @@ void Game::ProcessForgetOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 
 	if (!pCheck) {
-		ForgetOrder *ord = new ForgetOrder;
+		std::shared_ptr<ForgetOrder> ord = std::make_shared<ForgetOrder>();
 		ord->skill = sk;
-		u->forgetorders.Add(ord);
+		u->forgetorders.push_back(ord);
 	}
 }
 
@@ -936,9 +936,8 @@ void Game::ProcessEntertainOrder(Unit *unit, OrdersCheck *pCheck)
 		string err = string("ENTERTAIN: Overwriting previous ") +
 			(unit->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, unit, 0, err);
-		if (unit->monthorders) delete unit->monthorders;
 	}
-	ProduceOrder *o = new ProduceOrder;
+	std::shared_ptr<ProduceOrder> o = std::make_shared<ProduceOrder>();
 	o->item = I_SILVER;
 	o->skill = S_ENTERTAINMENT;
 	o->target = 0;
@@ -1238,10 +1237,9 @@ void Game::ProcessAssassinateOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	if (!pCheck) {
-		if (u->stealorders) delete u->stealorders;
-		AssassinateOrder *ord = new AssassinateOrder;
+		std::shared_ptr<AssassinateOrder> ord = std::make_shared<AssassinateOrder>();
 		ord->target = id;
-		u->stealorders = ord;
+		u->stealthorders = ord;
 	}
 }
 
@@ -1272,11 +1270,10 @@ void Game::ProcessStealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			delete id;
 			return;
 		}
-		StealOrder *ord = new StealOrder;
+		std::shared_ptr<StealOrder> ord = std::make_shared<StealOrder>();
 		ord->target = id;
 		ord->item = i;
-		if (u->stealorders) delete u->stealorders;
-		u->stealorders = ord;
+		u->stealthorders = ord;
 	}
 }
 
@@ -1362,9 +1359,9 @@ void Game::ProcessFindOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	if (!pCheck) {
-		FindOrder *f = new FindOrder;
+		std::shared_ptr<FindOrder> f = std::make_shared<FindOrder>();
 		f->find = n;
-		u->findorders.Add(f);
+		u->findorders.push_back(f);
 	}
 }
 
@@ -1441,8 +1438,7 @@ void Game::ProcessTaxOrder(Unit *u, OrdersCheck *pCheck)
 		return;
 	}
 	if (Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
-		delete u->monthorders;
-		u->monthorders = NULL;
+		u->monthorders = nullptr;
 		string err = string("TAX: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
 	}
@@ -1457,8 +1453,7 @@ void Game::ProcessPillageOrder(Unit *u, OrdersCheck *pCheck)
 		return;
 	}
 	if (Globals->TAX_PILLAGE_MONTH_LONG && u->monthorders) {
-		delete u->monthorders;
-		u->monthorders = NULL;
+		u->monthorders = nullptr;
 		string err = string("PILLAGE: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
 	}
@@ -1512,7 +1507,7 @@ void Game::ProcessEnterOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
 	AString * token = o->gettoken();
-	BuildOrder * order = new BuildOrder;
+	std::shared_ptr<BuildOrder> order = std::make_shared<BuildOrder>();
 	int maxbuild;
 
 	// 'incomplete' for ships:
@@ -1623,12 +1618,10 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 
 	// Now do all of the generic bits...
 	// Check that the unit isn't doing anything else important
-	if (unit->monthorders ||
-			(Globals->TAX_PILLAGE_MONTH_LONG &&
-				((unit->taxing == TAX_TAX) ||
-					(unit->taxing == TAX_PILLAGE)))) {
-		if (unit->monthorders) delete unit->monthorders;
-		string err = string("BUILD: Overwriting previous ") + (unit->inTurnBlock ? "DELAYED " : "") + "month-long order.";
+	if (unit->monthorders || (Globals->TAX_PILLAGE_MONTH_LONG &&
+			((unit->taxing == TAX_TAX) || (unit->taxing == TAX_PILLAGE)))) {
+		string err = string("BUILD: Overwriting previous ") +
+			(unit->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, unit, 0, err);
 	}
 
@@ -1642,7 +1635,7 @@ void Game::ProcessAttackOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	UnitId *id = ParseUnit(o);
 	while (id && id->unitnum != -1) {
 		if (!pCheck) {
-			if (!u->attackorders) u->attackorders = new AttackOrder;
+			if (!u->attackorders) u->attackorders = std::make_shared<AttackOrder>();
 			u->attackorders->targets.push_back(*id);
 			delete id;
 		}
@@ -1677,10 +1670,10 @@ void Game::ProcessSellOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	delete token;
 
 	if (!pCheck) {
-		SellOrder *s = new SellOrder;
+		std::shared_ptr<SellOrder> s = std::make_shared<SellOrder>();
 		s->item = it;
 		s->num = num;
-		u->sellorders.Add(s);
+		u->sellorders.push_back(s);
 	}
 }
 
@@ -1728,10 +1721,10 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	delete token;
 
 	if (!pCheck) {
-		BuyOrder *b = new BuyOrder;
+		std::shared_ptr<BuyOrder> b = std::make_shared<BuyOrder>();
 		b->item = it;
 		b->num = num;
-		u->buyorders.Add(b);
+		u->buyorders.push_back(b);
 	}
 }
 
@@ -1763,16 +1756,14 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	ProduceOrder *p = new ProduceOrder;
+	std::shared_ptr<ProduceOrder> p = std::make_shared<ProduceOrder>();
 	p->item = it;
 	AString skname = item_def.pSkill;
 	p->skill = LookupSkill(&skname);
 	p->target = target;
 
 	if (u->monthorders ||
-		(Globals->TAX_PILLAGE_MONTH_LONG &&
-		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-		if (u->monthorders) delete u->monthorders;
+			(Globals->TAX_PILLAGE_MONTH_LONG && ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
 		string err = string("PRODUCE: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
 	}
@@ -1782,16 +1773,13 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessWorkOrder(Unit *u, int quiet, OrdersCheck *pCheck)
 {
-	ProduceOrder *order = new ProduceOrder;
+	std::shared_ptr<ProduceOrder> order = std::make_shared<ProduceOrder>();
 	order->skill = -1;
 	order->item = I_SILVER;
 	order->target = 0;
 	if (quiet)
 		order->quiet = 1;
-	if (u->monthorders ||
-		(Globals->TAX_PILLAGE_MONTH_LONG &&
-		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-		if (u->monthorders) delete u->monthorders;
+	if (u->monthorders || (Globals->TAX_PILLAGE_MONTH_LONG && ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
 		string err = string("WORK: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
 	}
@@ -1801,12 +1789,12 @@ void Game::ProcessWorkOrder(Unit *u, int quiet, OrdersCheck *pCheck)
 
 void Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	TeachOrder *order = 0;
+	std::shared_ptr<TeachOrder> order = nullptr;
 
 	if (u->monthorders && u->monthorders->type == O_TEACH) {
-		order = (TeachOrder *) u->monthorders;
+		order = std::dynamic_pointer_cast<TeachOrder>(u->monthorders);
 	} else {
-		order = new TeachOrder;
+		order = std::make_shared<TeachOrder>();
 	}
 
 	int students = 0;
@@ -1826,9 +1814,7 @@ void Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 
 	if ((u->monthorders && u->monthorders->type != O_TEACH) ||
-		(Globals->TAX_PILLAGE_MONTH_LONG &&
-		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-		if (u->monthorders) delete u->monthorders;
+			(Globals->TAX_PILLAGE_MONTH_LONG && ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
 		string err = string("TEACH: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
 	}
@@ -1846,7 +1832,7 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int sk = ParseSkill(token);
 	delete token;
 
-	StudyOrder *order = new StudyOrder;
+	std::shared_ptr<StudyOrder> order = std::make_shared<StudyOrder>();
 	order->skill = sk;
 	order->days = 0;
 	// parse study level:
@@ -1858,9 +1844,7 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		order->level = -1;
 
 	if (u->monthorders ||
-		(Globals->TAX_PILLAGE_MONTH_LONG &&
-		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-		if (u->monthorders) delete u->monthorders;
+			(Globals->TAX_PILLAGE_MONTH_LONG && ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
 		string err = string("STUDY: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
 	}
@@ -1972,10 +1956,10 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	}
 
 	if (!pCheck) {
-		WithdrawOrder *order = new WithdrawOrder;
+		std::shared_ptr<WithdrawOrder> order = std::make_shared<WithdrawOrder>();
 		order->item = item;
 		order->amount = amt;
-		unit->withdraworders.Add(order);
+		unit->withdraworders.push_back(order);
 	}
 	return;
 }
@@ -1985,7 +1969,8 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 	int turnDepth = 1;
 	int turnLast = 1;
 	int formDepth = 0;
-	TurnOrder *tOrder = new TurnOrder;
+
+	std::shared_ptr<TurnOrder> tOrder = std::make_shared<TurnOrder>();
 	tOrder->repeating = repeat;
 
 	AString order, *token;
@@ -1998,7 +1983,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 			order = AString("#end");
 		}
 
-		AString	saveorder = order;
+		std::string saveorder = order.const_str();
 		// In order to allow @endturn to work the same as endturn we need to check for and eat the possible @
 		std::ignore = order.getat(); // we don't care about whether it was set or not, so just ignore the return value
 		token = order.gettoken();
@@ -2012,7 +1997,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 						break;
 					}
 					turnDepth++;
-					tOrder->turnOrders.push_back(saveorder.const_str());
+					tOrder->turnOrders.push_back(saveorder);
 					turnLast = 1;
 					break;
 				case O_FORM:
@@ -2022,7 +2007,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 					}
 					turnLast = 0;
 					formDepth++;
-					tOrder->turnOrders.push_back(saveorder.const_str());
+					tOrder->turnOrders.push_back(saveorder);
 					break;
 				case O_ENDFORM:
 					if (turnLast) {
@@ -2032,13 +2017,13 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 						} else {
 							parse_error(pCheck, unit, 0, "TURN: without ENDTURN.");
 							if (!--turnDepth) {
-								unit->turnorders.Add(tOrder);
+								unit->turnorders.push_back(tOrder);
 								return new AString(saveorder);
 							}
 						}
 					}
 					formDepth--;
-					tOrder->turnOrders.push_back(saveorder.const_str());
+					tOrder->turnOrders.push_back(saveorder);
 					turnLast = 1;
 					break;
 				case O_UNIT:
@@ -2050,7 +2035,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 						parse_error(pCheck, unit, 0, "FORM: without END.");
 					}
 					parse_error(pCheck, unit, 0, "TURN: without ENDTURN.");
-					unit->turnorders.Add(tOrder);
+					unit->turnorders.push_back(tOrder);
 					return new AString(saveorder);
 					break;
 				case O_ENDTURN:
@@ -2058,21 +2043,21 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 						parse_error(pCheck, unit, 0, "ENDTURN: without TURN.");
 					} else {
 						if (--turnDepth)
-							tOrder->turnOrders.push_back(saveorder.const_str());
+							tOrder->turnOrders.push_back(saveorder);
 						turnLast = 0;
 					}
 					break;
 				default:
-					tOrder->turnOrders.push_back(saveorder.const_str());
+					tOrder->turnOrders.push_back(saveorder);
 					break;
 			}
 			if (!pCheck && unit->former && unit->former->format)
-				unit->former->oldorders.push_back(saveorder.const_str());
+				unit->former->oldorders.push_back(saveorder);
 			delete token;
 		}
 	}
 
-	unit->turnorders.Add(tOrder);
+	unit->turnorders.push_back(tOrder);
 	return NULL;
 }
 
@@ -2148,13 +2133,13 @@ void Game::ProcessExchangeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	}
 
 	if (!pCheck) {
-		ExchangeOrder *order = new ExchangeOrder;
+		std::shared_ptr<ExchangeOrder> order = std::make_shared<ExchangeOrder>();
 		order->giveItem = itemGive;
 		order->giveAmount = amtGive;
 		order->expectAmount = amtExpected;
 		order->expectItem = itemExpected;
 		order->target = t;
-		unit->exchangeorders.Add(order);
+		unit->exchangeorders.push_back(order);
 	}
 }
 
@@ -2315,14 +2300,14 @@ void Game::ProcessGiveOrder(int order, Unit *unit, AString *o, OrdersCheck *pChe
 	}
 
 	if (!pCheck) {
-		GiveOrder *go = new GiveOrder;
+		std::shared_ptr<GiveOrder> go = std::make_shared<GiveOrder>();
 		go->type = order;
 		go->item = item;
 		go->target = t;
 		go->amount = amt;
 		go->except = excpt;
 		go->unfinished = unfinished;
-		unit->giveorders.Add(go);
+		unit->giveorders.push_back(go);
 	}
 	return;
 }
@@ -2772,22 +2757,19 @@ void Game::ProcessAddressOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessAdvanceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	MoveOrder *m = 0;
-
 	if ((u->monthorders && u->monthorders->type != O_ADVANCE) ||
-		(Globals->TAX_PILLAGE_MONTH_LONG &&
-		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+			(Globals->TAX_PILLAGE_MONTH_LONG && ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
 		string err = string("ADVANCE: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
-		if (u->monthorders) delete u->monthorders;
-		u->monthorders = 0;
+		u->monthorders = nullptr;
 	}
 	if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 	if (!u->monthorders) {
-		u->monthorders = new MoveOrder;
+		u->monthorders = std::make_shared<MoveOrder>();
 		u->monthorders->type = O_ADVANCE;
 	}
-	m = (MoveOrder *) u->monthorders;
+
+	std::shared_ptr<MoveOrder> m = std::dynamic_pointer_cast<MoveOrder>(u->monthorders);
 	m->advancing = 1;
 
 	for (;;) {
@@ -2797,9 +2779,8 @@ void Game::ProcessAdvanceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		delete t;
 		if (d!=-1) {
 			if (!pCheck) {
-				MoveDir *x = new MoveDir;
-				x->dir = d;
-				m->dirs.Add(x);
+				MoveDir x(d);
+				m->dirs.push_back(x);
 			}
 		} else {
 			parse_error(pCheck, u, 0, "ADVANCE: Warning, bad direction.");
@@ -2810,21 +2791,18 @@ void Game::ProcessAdvanceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessMoveOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	MoveOrder *m = 0;
-
 	if ((u->monthorders && u->monthorders->type != O_MOVE) ||
-		(Globals->TAX_PILLAGE_MONTH_LONG &&
-		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+			(Globals->TAX_PILLAGE_MONTH_LONG && ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
 		string err = string("MOVE: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
-		if (u->monthorders) delete u->monthorders;
-		u->monthorders = 0;
+		u->monthorders = nullptr;
 	}
 	if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 	if (!u->monthorders) {
-		u->monthorders = new MoveOrder;
+		u->monthorders = std::make_shared<MoveOrder>();
 	}
-	m = (MoveOrder *) u->monthorders;
+
+	std::shared_ptr<MoveOrder> m = std::dynamic_pointer_cast<MoveOrder>(u->monthorders);
 	m->advancing = 0;
 
 	for (;;) {
@@ -2834,9 +2812,8 @@ void Game::ProcessMoveOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		delete t;
 		if (d!=-1) {
 			if (!pCheck) {
-				MoveDir *x = new MoveDir;
-				x->dir = d;
-				m->dirs.Add(x);
+				MoveDir x(d);
+				m->dirs.push_back(x);
 			}
 		} else {
 			parse_error(pCheck, u, 0, "MOVE: Warning, bad direction.");
@@ -2847,21 +2824,18 @@ void Game::ProcessMoveOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessSailOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	SailOrder *m = 0;
-
 	if ((u->monthorders && u->monthorders->type != O_SAIL) ||
-		(Globals->TAX_PILLAGE_MONTH_LONG &&
-		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
+			(Globals->TAX_PILLAGE_MONTH_LONG && ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
 		string err = string("SAIL: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
-		if (u->monthorders) delete u->monthorders;
-		u->monthorders = 0;
+		u->monthorders = nullptr;
 	}
 	if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 	if (!u->monthorders) {
-		u->monthorders = new SailOrder;
+		u->monthorders = std::make_shared<SailOrder>();
 	}
-	m = (SailOrder *) u->monthorders;
+
+	std::shared_ptr<SailOrder> m = std::dynamic_pointer_cast<SailOrder>(u->monthorders);
 
 	for (;;) {
 		AString *t = o->gettoken();
@@ -2874,9 +2848,8 @@ void Game::ProcessSailOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		} else {
 			if (d < NDIRS || d == MOVE_PAUSE) {
 				if (!pCheck) {
-					MoveDir *x = new MoveDir;
-					x->dir = d;
-					m->dirs.Add(x);
+					MoveDir x(d);
+					m->dirs.push_back(x);
 				}
 			} else {
 				parse_error(pCheck, u, 0, "SAIL: Warning, bad direction.");
@@ -2891,7 +2864,7 @@ void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	UnitId *id = ParseUnit(o);
 	while (id && id->unitnum != -1) {
 		if (!pCheck) {
-			if (!u->evictorders) u->evictorders = new EvictOrder;
+			if (!u->evictorders) u->evictorders = std::make_shared<EvictOrder>();
 			u->evictorders->targets.push_back(*id);
 			delete id;
 		}
@@ -2901,15 +2874,13 @@ void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessIdleOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	if (u->monthorders || (Globals->TAX_PILLAGE_MONTH_LONG &&
-		((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
-		if (u->monthorders) delete u->monthorders;
+	if (u->monthorders ||
+			(Globals->TAX_PILLAGE_MONTH_LONG && ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
 		string err = string("IDLE: Overwriting previous ") + (u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, u, 0, err);
 	}
 	if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-	IdleOrder *i = new IdleOrder;
-	u->monthorders = i;
+	u->monthorders = std::make_shared<IdleOrder>();
 }
 
 void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
@@ -2967,14 +2938,14 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 
 	if (!pCheck) {
-		TransportOrder *order = new TransportOrder;
+		std::shared_ptr<TransportOrder> order = std::make_shared<TransportOrder>();
 		// At this point we don't know that transport phase for the order but
 		// we will set that later.
 		order->item = item;
 		order->target = tar;
 		order->amount = amt;
 		order->except = except;
-		u->transportorders.Add(order);
+		u->transportorders.push_back(order);
 	}
 	return;
 }
@@ -3017,11 +2988,10 @@ void Game::ProcessJoinOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		delete token;
 	}
 	if (!pCheck) {
-		JoinOrder *ord = new JoinOrder;
+		std::shared_ptr<JoinOrder> ord = std::make_shared<JoinOrder>();
 		ord->target = id;
 		ord->overload = overload;
 		ord->merge = merge;
-		if (u->joinorders) delete u->joinorders;
 		u->joinorders = ord;
 	}
 }
@@ -3071,11 +3041,9 @@ void Game::ProcessSacrificeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	if (!pCheck) {
-		SacrificeOrder *order = new SacrificeOrder;
-		order->item = item;
-		order->amount = amt;
-		if (unit->sacrificeorders) delete unit->sacrificeorders;
-		unit->sacrificeorders = order;
+		unit->sacrificeorders = std::make_shared<SacrificeOrder>();
+		unit->sacrificeorders->item = item;
+		unit->sacrificeorders->amount = amt;
 	}
 	return;
 }
@@ -3134,11 +3102,9 @@ void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	}
 
 	if (!pCheck) {
-		AnnihilateOrder *order = new AnnihilateOrder;
-		order->xloc = x;
-		order->yloc = y;
-		order->zloc = z;
-		if (unit->annihilateorders) delete unit->annihilateorders;
-		unit->annihilateorders = order;
+		unit->annihilateorders = std::make_shared<AnnihilateOrder>();
+		unit->annihilateorders->xloc = x;
+		unit->annihilateorders->yloc = y;
+		unit->annihilateorders->zloc = z;
 	}
 }

@@ -31,6 +31,7 @@
 
 #include <stdlib.h>
 #include <random>
+#include <memory>
 
 #include "game.h"
 #include "gamedata.h"
@@ -45,9 +46,6 @@ void Game::RunMovementOrders()
 	Object *o;
 	AList locs;
 	Location *l;
-	MoveOrder *mo;
-	SailOrder *so;
-	MoveDir *d;
 	AString order, *tOrder;
 
 	for (phase = 0; phase < Globals->MAX_SPEED; phase++) {
@@ -103,8 +101,7 @@ void Game::RunMovementOrders()
 									u->error("SAIL: Fleet is too damaged to sail.");
 									break;
 							}
-							delete u->monthorders;
-							u->monthorders = 0;
+							u->monthorders = nullptr;
 						}
 					}
 				}
@@ -158,58 +155,53 @@ void Game::RunMovementOrders()
 		forlist(&r->objects) {
 			o = (Object *) elem;
 			for(auto u: o->units) {
-				mo = (MoveOrder *) u->monthorders;
-				if (!u->nomove &&
-						u->monthorders &&
-						(u->monthorders->type == O_MOVE ||
-						u->monthorders->type == O_ADVANCE) &&
-						mo->dirs.Num() > 0) {
-					d = (MoveDir *) mo->dirs.First();
-					if (u->savedmovedir != d->dir)
-						u->savedmovement = 0;
-					u->savedmovement += u->movepoints / Globals->MAX_SPEED;
-					u->savedmovedir = d->dir;
-				} else {
-					u->savedmovement = 0;
+				if (!u->monthorders || (u->monthorders->type != O_MOVE && u->monthorders->type != O_ADVANCE)) {
 					u->savedmovedir = -1;
+					u->savedmovement = 0;
+					continue;
 				}
-				if (u->monthorders &&
-						(u->monthorders->type == O_MOVE ||
-						u->monthorders->type == O_ADVANCE)) {
-					mo = (MoveOrder *) u->monthorders;
-					if (mo->dirs.Num() > 0) {
-						string type = (mo->advancing ? "ADVANCE" : "MOVE");
-						string temp = type + ": Unit has insufficient movement points; remaining moves queued.";
-						u->event(temp, "movement");
-						tOrder = new AString(type);
-						forlist(&mo->dirs) {
-							d = (MoveDir *) elem;
-							*tOrder += " ";
-							if (d->dir < NDIRS) *tOrder += DirectionAbrs[d->dir];
-							else if (d->dir == MOVE_IN) *tOrder += "IN";
-							else if (d->dir == MOVE_OUT) *tOrder += "OUT";
-							else if (d->dir == MOVE_PAUSE) *tOrder += "P";
-							else *tOrder += d->dir - MOVE_ENTER;
-						}
-						u->oldorders.push_front(tOrder->const_str());
+
+				std::shared_ptr<MoveOrder> mo = std::dynamic_pointer_cast<MoveOrder>(u->monthorders);
+				if (mo->dirs.size() > 0) {
+					if (!u->nomove) {
+						MoveDir d = mo->dirs[0];
+						if (u->savedmovedir != d.dir)
+							u->savedmovement = 0;
+						u->savedmovement += u->movepoints / Globals->MAX_SPEED;
+						u->savedmovedir = d.dir;
+					} else {
+						u->savedmovement = 0;
+						u->savedmovedir = -1;
 					}
+
+					string type = (mo->advancing ? "ADVANCE" : "MOVE");
+					string temp = type + ": Unit has insufficient movement points; remaining moves queued.";
+					u->event(temp, "movement");
+					tOrder = new AString(type);
+					for(auto d: mo->dirs) {
+						*tOrder += " ";
+						if (d.dir < NDIRS) *tOrder += DirectionAbrs[d.dir];
+						else if (d.dir == MOVE_IN) *tOrder += "IN";
+						else if (d.dir == MOVE_OUT) *tOrder += "OUT";
+						else if (d.dir == MOVE_PAUSE) *tOrder += "P";
+						else *tOrder += d.dir - MOVE_ENTER;
+					}
+					u->oldorders.push_front(tOrder->const_str());
 				}
 			}
+
 			Unit *u = o->GetOwner();
-			if (o->IsFleet() && u && !u->nomove &&
-					u->monthorders &&
-					u->monthorders->type == O_SAIL) {
-				so = (SailOrder *) u->monthorders;
-				if (so->dirs.Num() > 0) {
+			if (o->IsFleet() && u && !u->nomove && u->monthorders && u->monthorders->type == O_SAIL) {
+				std::shared_ptr<SailOrder> so = std::dynamic_pointer_cast<SailOrder>(u->monthorders);
+				if (so->dirs.size() > 0) {
 					u->event("SAIL: Can't sail that far; remaining moves queued.", "movement");
 					tOrder = new AString("SAIL");
-					forlist(&so->dirs) {
-						d = (MoveDir *) elem;
+					for(auto d: so->dirs) {
 						*tOrder += " ";
-						if (d->dir == MOVE_PAUSE)
+						if (d.dir == MOVE_PAUSE)
 							*tOrder += "P";
 						else
-							*tOrder += DirectionAbrs[d->dir];
+							*tOrder += DirectionAbrs[d.dir];
 					}
 					u->oldorders.push_front(tOrder->const_str());
 				}
@@ -220,11 +212,10 @@ void Game::RunMovementOrders()
 
 Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 {
-	SailOrder *o = (SailOrder *) cap->monthorders;
+	std::shared_ptr<SailOrder> o = std::dynamic_pointer_cast<SailOrder>(cap->monthorders);
 	int stop, wgt, slr, nomove, cost;
 	AList facs;
 	ARegion *newreg;
-	MoveDir *x;
 	Location *loc;
 
 	fleet->movepoints += fleet->GetFleetSpeed(0);
@@ -257,15 +248,15 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 	} else if (slr < fleet->GetFleetSize()) {
 		cap->error("SAIL: Not enough sailors.");
 		stop = 1;
-	} else if (!o->dirs.Num()) {
+	} else if (!o->dirs.size()) {
 		// no more moves?
 		stop = 1;
 	} else {
-		x = (MoveDir *) o->dirs.First();
-		if (x->dir == MOVE_PAUSE) {
+		MoveDir x = o->dirs[0];
+		if (x.dir == MOVE_PAUSE) {
 			newreg = reg;
 		} else {
-			newreg = reg->neighbors[x->dir];
+			newreg = reg->neighbors[x.dir];
 		}
 		cost = 1;
 
@@ -279,7 +270,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 					!newreg->clearskies)
 				cost = 2;
 		}
-		if (x->dir == MOVE_PAUSE) {
+		if (x.dir == MOVE_PAUSE) {
 			cost = 1;
 		}
 		// We probably shouldn't see terrain-based errors until
@@ -289,7 +280,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 		if (!newreg) {
 			cap->error("SAIL: Can't sail that way.");
 			stop = 1;
-		} else if (x->dir == MOVE_PAUSE) {
+		} else if (x.dir == MOVE_PAUSE) {
 			// Can always do maneuvers
 		} else if (fleet->flying < 1 && !newreg->IsCoastalOrLakeside()) {
 			cap->error("SAIL: Can't sail inland.");
@@ -299,8 +290,8 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			(TerrainDefs[newreg->type].similar_type != R_OCEAN)) {
 			cap->error("SAIL: Can't sail inland.");
 			stop = 1;
-		} else if (fleet->SailThroughCheck(x->dir) < 1) {
-			cap->error("SAIL: Could not sail " + DirectionStrs[x->dir] + " from " +
+		} else if (fleet->SailThroughCheck(x.dir) < 1) {
+			cap->error("SAIL: Could not sail " + DirectionStrs[x.dir] + " from " +
 				reg->ShortPrint().const_str() +	". Cannot sail through land.");
 			stop = 1;
 		}
@@ -322,7 +313,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 				}
 			}
 			if (!has_key) {
-				cap->error("SAIL: Can't sail " + DirectionStrs[x->dir] + " from " +
+				cap->error("SAIL: Can't sail " + DirectionStrs[x.dir] + " from " +
 					reg->ShortPrint().const_str() + " due to mystical barrier.");
 				stop = 1;
 			}
@@ -330,9 +321,9 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
 		if (!stop) {
 			fleet->movepoints -= cost * Globals->MAX_SPEED;
-			if (x->dir != MOVE_PAUSE) {
+			if (x.dir != MOVE_PAUSE) {
 				fleet->MoveObject(newreg);
-				fleet->SetPrevDir(reg->GetRealDirComp(x->dir));
+				fleet->SetPrevDir(reg->GetRealDirComp(x.dir));
 			}
 			for(auto unit: fleet->units) {
 				unit->moved += cost;
@@ -344,8 +335,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 					if (unit->monthorders->type == O_SAIL)
 						unit->Practice(S_SAILING);
 					if (unit->monthorders->type == O_MOVE) {
-						delete unit->monthorders;
-						unit->monthorders = 0;
+						unit->monthorders = nullptr;
 					}
 				}
 				unit->DiscardUnfinishedShips();
@@ -359,15 +349,14 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			forlist_reuse(&facs) {
 				Faction * f = ((FactionPtr *) elem)->ptr;
 				string temp = fleet->name->const_str();
-				temp += (x->dir == MOVE_PAUSE ? " performs maneuvers in " : " sails from ") +
+				temp += (x.dir == MOVE_PAUSE ? " performs maneuvers in " : " sails from ") +
 					string(reg->ShortPrint().const_str());
-				if(x->dir != MOVE_PAUSE) {
+				if(x.dir != MOVE_PAUSE) {
 					temp  += " to " + string(newreg->ShortPrint().const_str());
 				}
 				f->event(temp, "sail");
 			}
-			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING &&
-					x->dir != MOVE_PAUSE) {
+			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING && x.dir != MOVE_PAUSE) {
 				if (!(cap->faction->is_npc)) newreg->visited = 1;
 				for(auto unit: fleet->units) {
 					// Everyone onboard gets to see the sights
@@ -377,7 +366,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 						f = (Farsight *)elem;
 						if (f->unit == unit) {
 							// We moved into here this turn
-							f->exits_used[x->dir] = 1;
+							f->exits_used[x.dir] = 1;
 						}
 					}
 					// And mark the hex being entered
@@ -385,7 +374,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 					f->faction = unit->faction;
 					f->level = 0;
 					f->unit = unit;
-					f->exits_used[reg->GetRealDirComp(x->dir)] = 1;
+					f->exits_used[reg->GetRealDirComp(x.dir)] = 1;
 					newreg->passers.Add(f);
 				}
 			}
@@ -396,18 +385,15 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 				cap->faction->event(temp, "sail");
 				stop = 1;
 			}
-			o->dirs.Remove(x);
-			delete x;
+			std::erase(o->dirs, x);
 		}
 	}
 
 	if (stop) {
 		// Clear out everyone's orders
 		for(auto unit: fleet->units) {
-			if (unit->monthorders &&
-					unit->monthorders->type == O_SAIL) {
-				delete unit->monthorders;
-				unit->monthorders = 0;
+			if (unit->monthorders && unit->monthorders->type == O_SAIL) {
+				unit->monthorders = nullptr;
 			}
 		}
 	}
@@ -429,8 +415,7 @@ void Game::RunTeachOrders()
 				if (u->monthorders) {
 					if (u->monthorders->type == O_TEACH) {
 						Do1TeachOrder(r,u);
-						delete u->monthorders;
-						u->monthorders = 0;
+						u->monthorders = nullptr;
 					}
 				}
 			}
@@ -438,7 +423,7 @@ void Game::RunTeachOrders()
 	}
 }
 
-void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
+void Game::Do1TeachOrder(ARegion * reg, Unit * unit)
 {
 	/* First pass, find how many to teach */
 	if (Globals->LEADERS_EXIST && !unit->IsLeader()) {
@@ -452,7 +437,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 	}
 
 	int students = 0;
-	TeachOrder * order = (TeachOrder *) unit->monthorders;
+	std::shared_ptr<TeachOrder> order = std::dynamic_pointer_cast<TeachOrder>(unit->monthorders);
 	reg->deduplicate_unit_list(order->targets, unit->faction->num);
 	for (auto unitid = order->targets.begin(); unitid != order->targets.end(); ) {
 		Unit *target = reg->get_unit_id(*unitid, unit->faction->num);
@@ -471,7 +456,8 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 			unitid = order->targets.erase(unitid);
 			continue;
 		}
-		int sk = ((StudyOrder *) target->monthorders)->skill;
+		std::shared_ptr<StudyOrder> o = std::dynamic_pointer_cast<StudyOrder>(target->monthorders);
+		int sk = o->skill;
 		if (unit->GetRealSkill(sk) <= target->GetRealSkill(sk)) {
 			unit->error(string("TEACH: ") + target->name->const_str() + " is not studying a skill you can teach.");
 			unitid = order->targets.erase(unitid);
@@ -500,7 +486,7 @@ void Game::Do1TeachOrder(ARegion * reg,Unit * unit)
 		days -= tempdays;
 		students -= umen;
 
-		StudyOrder * o = (StudyOrder *) u->monthorders;
+		std::shared_ptr<StudyOrder> o = std::dynamic_pointer_cast<StudyOrder>(u->monthorders);
 		o->days += tempdays;
 		if (o->days > 30 * umen) {
 			days += o->days - 30 * umen;
@@ -520,8 +506,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 
 	if (!Globals->BUILD_NO_TRADE && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 		u->error("BUILD: Faction can't produce in that many regions.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->monthorders = nullptr;
 		return;
 	}
 
@@ -533,43 +518,38 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	}
 	if (!buildobj || buildobj->type == O_DUMMY) {
 		u->error("BUILD: Nothing to build.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->monthorders = nullptr;
 		return;
 	}
-	AString skname = ObjectDefs[buildobj->type].skill;
+
+	int type = buildobj->type;
+	AString skname = ObjectDefs[type].skill;
 	int sk = LookupSkill(&skname);
 	if (sk == -1) {
-		u->error("BUILD: Can't build that.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->error("BUILD: Can't build " + string(ObjectDefs[type].name) + ".");
+		u->monthorders = nullptr;
 		return;
 	}
 
 	int usk = u->GetSkill(sk);
 	if (usk < ObjectDefs[buildobj->type].level) {
-		u->error("BUILD: Can't build that.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->error("BUILD: Can't build " + string(ObjectDefs[type].name) + ".");
+		u->monthorders = nullptr;
 		return;
 	}
 
 	int needed = buildobj->incomplete;
-	int type = buildobj->type;
 	// AS
-	if (((ObjectDefs[type].flags & ObjectType::NEVERDECAY) || !Globals->DECAY) &&
-			needed < 1) {
-		u->error("BUILD: Object is finished.");
-		delete u->monthorders;
-		u->monthorders = 0;
+	if (((ObjectDefs[type].flags & ObjectType::NEVERDECAY) || !Globals->DECAY) && needed < 1) {
+		u->error("BUILD: " + string(ObjectDefs[type].name) + " is finished.");
+		u->monthorders = nullptr;
 		return;
 	}
 
 	// AS
 	if (needed <= -(ObjectDefs[type].maxMaintenance)) {
-		u->error("BUILD: Object does not yet require maintenance.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->error("BUILD: " + string(ObjectDefs[type].name) + " does not yet require maintenance.");
+		u->monthorders = nullptr;
 		return;
 	}
 
@@ -583,8 +563,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 
 	if (itn == 0) {
 		u->error("BUILD: Don't have the required materials.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->monthorders = nullptr;
 		return;
 	}
 
@@ -648,8 +627,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	}
 	u->Practice(sk);
 
-	delete u->monthorders;
-	u->monthorders = 0;
+	u->monthorders = nullptr;
 }
 
 /* Alternate processing for building item-type ship
@@ -672,10 +650,9 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 
 	// get needed to complete
 	maxbuild = 0;
-	if ((u->monthorders) &&
-		(u->monthorders->type == O_BUILD)) {
-			BuildOrder *border = (BuildOrder *) u->monthorders;
-			maxbuild = border->needtocomplete;
+	if ((u->monthorders) && (u->monthorders->type == O_BUILD)) {
+		std::shared_ptr<BuildOrder> border = std::dynamic_pointer_cast<BuildOrder>(u->monthorders);
+		maxbuild = border->needtocomplete;
 	}
 	if (maxbuild < 1) {
 		// Our helpers have already finished the hard work, so
@@ -715,8 +692,7 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 			"%) in " +	r->ShortPrint().const_str() + ".", "build", r);
 	}
 
-	delete u->monthorders;
-	u->monthorders = 0;
+	u->monthorders = nullptr;
 }
 
 void Game::AddNewBuildings(ARegion *r)
@@ -727,7 +703,7 @@ void Game::AddNewBuildings(ARegion *r)
 		for(auto u: obj->units) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_BUILD) {
-					BuildOrder *o = (BuildOrder *)u->monthorders;
+					std::shared_ptr<BuildOrder> o = std::dynamic_pointer_cast<BuildOrder>(u->monthorders);
 
 					// If BUILD order was marked for creating new building
 					// in parse phase, it is time to create one now.
@@ -769,30 +745,26 @@ void Game::RunBuildHelpers(ARegion *r)
 		for(auto u: obj->units) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_BUILD) {
-					BuildOrder *o = (BuildOrder *)u->monthorders;
+					std::shared_ptr<BuildOrder> o = std::dynamic_pointer_cast<BuildOrder>(u->monthorders);
 					Object *tarobj = NULL;
 					if (o->target) {
 						Unit *target = r->get_unit_id(*(o->target),u->faction->num);
 						if (!target) {
 							u->error("BUILD: No such unit to help.");
-							delete u->monthorders;
-							u->monthorders = 0;
+							u->monthorders = nullptr;
 							continue;
 						}
 						// Make sure that unit is building
 						if (!target->monthorders ||
 								target->monthorders->type != O_BUILD) {
 							u->error("BUILD: Unit isn't building.");
-							delete u->monthorders;
-							u->monthorders = 0;
+							u->monthorders = nullptr;
 							continue;
 						}
 						// Make sure that unit considers you friendly!
 						if (target->faction->get_attitude(u->faction->num) < A_FRIENDLY) {
-							u->error("BUILD: Unit you are helping rejects "
-									"your help.");
-							delete u->monthorders;
-							u->monthorders = 0;
+							u->error("BUILD: Unit you are helping rejects your help.");
+							u->monthorders = nullptr;
 							continue;
 						}
 						if (target->build == 0) {
@@ -809,15 +781,14 @@ void Game::RunBuildHelpers(ARegion *r)
 							int skill = LookupSkill(&skname);
 							int level = u->GetSkill(skill);
 							int needed = 0;
-							if ((target->monthorders) &&
-									(target->monthorders->type == O_BUILD)) {
-										BuildOrder *border = (BuildOrder *) target->monthorders;
-										needed = border->needtocomplete;
+							if ((target->monthorders) && (target->monthorders->type == O_BUILD)) {
+								std::shared_ptr<BuildOrder> border =
+									std::dynamic_pointer_cast<BuildOrder>(target->monthorders);
+								needed = border->needtocomplete;
 							}
 							if (needed < 1) {
 								u->error("BUILD: Construction is already complete.");
-								delete u->monthorders;
-								u->monthorders = 0;
+								u->monthorders = nullptr;
 								continue;
 							}
 							int output = ShipConstruction(r, u, target, level, needed, ship);
@@ -836,19 +807,19 @@ void Game::RunBuildHelpers(ARegion *r)
 
 							if (unfinished > 0) {
 								target->items.SetNum(ship, unfinished);
-								if ((target->monthorders) &&
-									(target->monthorders->type == O_BUILD)) {
-										BuildOrder *border = (BuildOrder *) target->monthorders;
-										border->needtocomplete = unfinished;
+								if ((target->monthorders) && (target->monthorders->type == O_BUILD)) {
+									std::shared_ptr<BuildOrder> border =
+										std::dynamic_pointer_cast<BuildOrder>(target->monthorders);
+									border->needtocomplete = unfinished;
 								}
 							} else {
 								// CreateShip(r, target, ship);
 								// don't create the ship yet; leave that for the unit we're helping
 								target->items.SetNum(ship, 1);
-								if ((target->monthorders) &&
-									(target->monthorders->type == O_BUILD)) {
-										BuildOrder *border = (BuildOrder *) target->monthorders;
-										border->needtocomplete = 0;
+								if ((target->monthorders) && (target->monthorders->type == O_BUILD)) {
+									std::shared_ptr<BuildOrder> border =
+										std::dynamic_pointer_cast<BuildOrder>(target->monthorders);
+									border->needtocomplete = 0;
 								}
 							}
 							int percent = 100 * output / ItemDefs[ship].pMonths;
@@ -862,13 +833,9 @@ void Game::RunBuildHelpers(ARegion *r)
 						if ((tarobj != NULL) && (u->object != tarobj))
 							u->MoveUnit(tarobj);
 					} else {
-						Object *buildobj;
 						if (u->build > 0) {
-							buildobj = r->GetObject(u->build);
-							if (buildobj &&
-									buildobj != r->GetDummy() &&
-									buildobj != u->object)
-							{
+							Object *buildobj = r->GetObject(u->build);
+							if (buildobj && buildobj != r->GetDummy() && buildobj != u->object) {
 								u->MoveUnit(buildobj);
 							}
 						}
@@ -918,15 +885,13 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 {
 	if (!Globals->BUILD_NO_TRADE && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 		u->error("BUILD: Faction can't produce in that many regions.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->monthorders = nullptr;
 		return 0;
 	}
 
 	if (level < ItemDefs[ship].pLevel) {
 		u->error("BUILD: Can't build that.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->monthorders = nullptr;
 		return 0;
 	}
 
@@ -936,13 +901,7 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 	int number = u->GetMen() * level + u->GetProductionBonus(ship);
 
 	// find the max we can possibly produce based on man-months of labor
-	int maxproduced;
-	if (ItemDefs[ship].flags & ItemType::SKILLOUT)
-		maxproduced = u->GetMen();
-	else
-		// don't adjust for pMonths
-		// - pMonths represents total requirement
-		maxproduced = number;
+	int maxproduced = (ItemDefs[ship].flags & ItemType::SKILLOUT) ? u->GetMen() : number;
 
 	// adjust maxproduced for items needed until completion
 	if (needed < maxproduced) maxproduced = needed;
@@ -967,8 +926,7 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 		// no required materials?
 		if (count < 1) {
 			u->error("BUILD: Don't have the required materials.");
-			delete u->monthorders;
-			u->monthorders = 0;
+			u->monthorders = nullptr;
 			return 0;
 		}
 
@@ -1007,8 +965,7 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 		// no required materials?
 		if (maxproduced < 1) {
 			u->error("BUILD: Don't have the required materials.");
-			delete u->monthorders;
-			u->monthorders = 0;
+			u->monthorders = nullptr;
 			return 0;
 		}
 
@@ -1028,8 +985,7 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 	if (ItemDefs[ship].flags & ItemType::SKILLOUT)
 		output *= level;
 
-	delete u->monthorders;
-	u->monthorders = 0;
+	u->monthorders = nullptr;
 
 	return output;
 }
@@ -1048,7 +1004,7 @@ void Game::RunMonthOrders()
 
 void Game::RunUnitProduce(ARegion *r, Unit *u)
 {
-	ProduceOrder *o = (ProduceOrder *) u->monthorders;
+	std::shared_ptr<ProduceOrder> o = std::dynamic_pointer_cast<ProduceOrder>(u->monthorders);
 
 	for (const auto& p : r->products) {
 		// PRODUCE orders for producing goods from the land
@@ -1059,33 +1015,29 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 	}
 
 	if (o->item == I_SILVER) {
-		if (!o->quiet)
-			u->error("Can't do that in this region.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		if (!o->quiet) u->error("Can't do that in this region.");
+		u->monthorders = nullptr;
 		return;
 	}
 
 	if (o->item == -1 || ItemDefs[o->item].flags & ItemType::DISABLED) {
-		u->error("PRODUCE: Can't produce that.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		string itemname = o->item == -1 ? "that" : ItemString(o->item, 1, ALWAYSPLURAL);
+		u->error("PRODUCE: Can't produce " + itemname + ".");
+		u->monthorders =nullptr;
 		return;
 	}
 
 	int input = ItemDefs[o->item].pInput[0].item;
 	if (input == -1) {
-		u->error("PRODUCE: Can't produce that.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->error("PRODUCE: Can't produce " + string(ItemString(o->item, 1, ALWAYSPLURAL)) + ".");
+		u->monthorders = nullptr;
 		return;
 	}
 
 	int level = u->GetSkill(o->skill);
 	if (level < ItemDefs[o->item].pLevel) {
-		u->error("PRODUCE: Can't produce that.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->error("PRODUCE: Can't produce " + string(ItemString(o->item, 1, ALWAYSPLURAL)) + ".");
+		u->monthorders = nullptr;
 		return;
 	}
 
@@ -1094,8 +1046,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 
 	if (!ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 		u->error("PRODUCE: Faction can't produce in that many regions.");
-		delete u->monthorders;
-		u->monthorders = 0;
+		u->monthorders = nullptr;
 		return;
 	}
 
@@ -1183,18 +1134,13 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 	u->Practice(o->skill);
 	o->target -= output;
 	if (o->target > 0) {
-		TurnOrder *tOrder = new TurnOrder;
-		AString order;
+		std::shared_ptr<TurnOrder> tOrder = std::make_shared<TurnOrder>();
+		string order = "PRODUCE " + to_string(o->target) + " " + ItemDefs[o->item].abr;
 		tOrder->repeating = 0;
-		order = "PRODUCE ";
-		order += o->target;
-		order += " ";
-		order += ItemDefs[o->item].abr;
-		tOrder->turnOrders.push_back(order.const_str());
-		u->turnorders.Insert(tOrder);
+		tOrder->turnOrders.push_back(order);
+		u->turnorders.push_back(tOrder);
 	}
-	delete u->monthorders;
-	u->monthorders = 0;
+	u->monthorders = nullptr;
 }
 
 void Game::RunProduceOrders(ARegion * r)
@@ -1224,7 +1170,7 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 {
 	if (u->monthorders->type != O_PRODUCE) return 0;
 
-	ProduceOrder * po = (ProduceOrder *) u->monthorders;
+	std::shared_ptr<ProduceOrder> po = std::dynamic_pointer_cast<ProduceOrder>(u->monthorders);
 	if (p->itemtype == po->item && p->skill == po->skill) {
 		if (p->skill == -1) {
 			/* Factor for fractional productivity: 10 */
@@ -1234,8 +1180,7 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 		int level = u->GetSkill(p->skill);
 		if (level < ItemDefs[p->itemtype].pLevel) {
 			u->error("PRODUCE: Unit isn't skilled enough.");
-			delete u->monthorders;
-			u->monthorders = 0;
+			u->monthorders = nullptr;
 			return 0;
 		}
 
@@ -1245,8 +1190,7 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 		//
 		if (p->itemtype != I_SILVER && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
 			u->error("PRODUCE: Faction can't produce in that many regions.");
-			delete u->monthorders;
-			u->monthorders = 0;
+			u->monthorders = nullptr;
 			return 0;
 		}
 
@@ -1295,7 +1239,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 			if (!u->monthorders || u->monthorders->type != O_PRODUCE)
 				continue;
 
-			ProduceOrder * po = (ProduceOrder *) u->monthorders;
+			std::shared_ptr<ProduceOrder> po = std::dynamic_pointer_cast<ProduceOrder>(u->monthorders);
 			if (po->skill != p->skill || po->item != p->itemtype)
 				continue;
 
@@ -1323,15 +1267,11 @@ void Game::RunAProduction(ARegion * r, Production * p)
 			p->activity += ubucks;
 			po->target -= ubucks;
 			if (po->target > 0) {
-				TurnOrder *tOrder = new TurnOrder;
-				AString order;
+				std::shared_ptr<TurnOrder> tOrder = std::make_shared<TurnOrder>();
 				tOrder->repeating = 0;
-				order = "PRODUCE ";
-				order += po->target;
-				order += " ";
-				order += ItemDefs[po->item].abr;
-				tOrder->turnOrders.push_back(order.const_str());
-				u->turnorders.Insert(tOrder);
+				string order = "PRODUCE " + to_string(po->target) + " " + ItemDefs[po->item].abr;
+				tOrder->turnOrders.push_back(order);
+				u->turnorders.push_back(tOrder);
 			}
 
 			/* Show in unit's events section */
@@ -1361,8 +1301,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 					r->ShortPrint().const_str() + ".", "produce", r);
 				u->Practice(po->skill);
 			}
-			delete u->monthorders;
-			u->monthorders = 0;
+			u->monthorders = nullptr;
 			if (questcomplete) {
 				u->event("You have completed a quest! " + quest_rewards, "quest");
 			}
@@ -1378,8 +1317,7 @@ void Game::RunStudyOrders(ARegion * r)
 			if (u->monthorders) {
 				if (u->monthorders->type == O_STUDY) {
 					Do1StudyOrder(u,obj);
-					delete u->monthorders;
-					u->monthorders = 0;
+					u->monthorders = nullptr;
 				}
 			}
 		}
@@ -1393,8 +1331,7 @@ void Game::RunIdleOrders(ARegion *r)
 		for(auto u: obj->units) {
 			if (u->monthorders && u->monthorders->type == O_IDLE) {
 				u->event("Sits idle.", "idle");
-				delete u->monthorders;
-				u->monthorders = 0;
+				u->monthorders = nullptr;
 			}
 		}
 	}
@@ -1402,16 +1339,16 @@ void Game::RunIdleOrders(ARegion *r)
 
 void Game::Do1StudyOrder(Unit *u,Object *obj)
 {
-	StudyOrder * o = (StudyOrder *) u->monthorders;
+	std::shared_ptr<StudyOrder> o = std::dynamic_pointer_cast<StudyOrder>(u->monthorders);
 	int sk, cost, reset_man, skmax, taughtdays, days;
 	string str;
 
 	reset_man = -1;
 	sk = o->skill;
 	if (sk == -1 || SkillDefs[sk].flags & SkillType::DISABLED ||
-			(SkillDefs[sk].flags & SkillType::APPRENTICE &&
-				!Globals->APPRENTICES_EXIST)) {
-		u->error("STUDY: Can't study that.");
+			(SkillDefs[sk].flags & SkillType::APPRENTICE && !Globals->APPRENTICES_EXIST)) {
+		string skname = (sk == -1) ? "that" : SkillDefs[sk].name;
+		u->error("STUDY: Can't study " + skname + ".");
 		return;
 	}
 
@@ -1574,12 +1511,11 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		// study to level order
 		if (o->level != -1) {
 			if (u->GetRealSkill(sk) < o->level) {
-				TurnOrder *tOrder = new TurnOrder;
-				AString order;
+				std::shared_ptr<TurnOrder> tOrder = std::make_shared<TurnOrder>();
 				tOrder->repeating = 0;
-				order = AString("STUDY ") + SkillDefs[sk].abbr + " " + o->level;
-				tOrder->turnOrders.push_back(order.const_str());
-				u->turnorders.Insert(tOrder);
+				string order = "STUDY " + string(SkillDefs[sk].abbr) + " " + to_string(o->level);
+				tOrder->turnOrders.push_back(order);
+				u->turnorders.push_front(tOrder);
 			} else {
 				string msg = "Completes study to level " + to_string(o->level) + " in " + SkillDefs[sk].name + ".";
 				u->event(msg, "study");
@@ -1595,19 +1531,15 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 
 void Game::DoMoveEnter(Unit *unit,ARegion *region,Object **obj)
 {
-	MoveOrder * o;
-	if (!unit->monthorders ||
-			((unit->monthorders->type != O_MOVE) &&
-			 (unit->monthorders->type != O_ADVANCE)))
+	if (!unit->monthorders || ((unit->monthorders->type != O_MOVE) && (unit->monthorders->type != O_ADVANCE)))
 		return;
-	o = (MoveOrder *) unit->monthorders;
 
-	while (o->dirs.Num()) {
-		MoveDir * x = (MoveDir *) o->dirs.First();
-		int i = x->dir;
+	std::shared_ptr<MoveOrder> o = std::dynamic_pointer_cast<MoveOrder>(unit->monthorders);
+	while (o->dirs.size()) {
+		MoveDir x = o->dirs[0];
+		int i = x.dir;
 		if (i != MOVE_OUT && i < MOVE_ENTER) return;
-		o->dirs.Remove(x);
-		delete x;
+		std::erase(o->dirs, x);
 
 		if (i >= MOVE_ENTER) {
 			Object * to = region->GetObject(i - MOVE_ENTER);
@@ -1627,8 +1559,7 @@ void Game::DoMoveEnter(Unit *unit,ARegion *region,Object **obj)
 				continue;
 			}
 
-			if (forbid && region->IsSafeRegion())
-			{
+			if (forbid && region->IsSafeRegion()) {
 				unit->error("ENTER: No battles allowed in safe regions.");
 				continue;
 			}
@@ -1639,8 +1570,7 @@ void Game::DoMoveEnter(Unit *unit,ARegion *region,Object **obj)
 			}
 
 			int done = 0;
-			while (forbid)
-			{
+			while (forbid) {
 				int result = RunBattle(region, unit, forbid, 0, 0);
 				if (result == BATTLE_IMPOSSIBLE) {
 					unit->error(string("ENTER: Unable to attack ") + forbid->name->const_str());
@@ -1661,8 +1591,7 @@ void Game::DoMoveEnter(Unit *unit,ARegion *region,Object **obj)
 		} else {
 			if (i == MOVE_OUT) {
 				if (TerrainDefs[region->type].similar_type == R_OCEAN &&
-						(!unit->CanSwim() ||
-						 unit->GetFlag(FLAG_NOCROSS_WATER)))
+					(!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)))
 				{
 					unit->error("MOVE: Can't leave ship.");
 					continue;
@@ -1678,8 +1607,6 @@ void Game::DoMoveEnter(Unit *unit,ARegion *region,Object **obj)
 
 Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 {
-	MoveOrder *o = (MoveOrder *) unit->monthorders;
-	MoveDir *x;
 	ARegion *newreg;
 	string road, temp;
 
@@ -1688,15 +1615,15 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	Location *loc;
 	const char *prevented = nullptr;
 
-	if (!o->dirs.Num()) {
-		delete o;
-		unit->monthorders = 0;
+	std::shared_ptr<MoveOrder> o = std::dynamic_pointer_cast<MoveOrder>(unit->monthorders);
+	if (!o->dirs.size()) {
+		unit->monthorders = nullptr;
 		return 0;
 	}
 
-	x = (MoveDir *) o->dirs.First();
+	MoveDir x = o->dirs[0];
 
-	if (x->dir == MOVE_IN) {
+	if (x.dir == MOVE_IN) {
 		if (obj->inner == -1) {
 			unit->error("MOVE: Can't move IN there.");
 			goto done_moving;
@@ -1761,10 +1688,10 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 				newreg = candidates[index];
 			}
 		}
-	} else if (x->dir == MOVE_PAUSE) {
+	} else if (x.dir == MOVE_PAUSE) {
 		newreg = region;
 	} else {
-		newreg = region->neighbors[x->dir];
+		newreg = region->neighbors[x.dir];
 	}
 
 	if (!newreg) {
@@ -1794,8 +1721,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	road = "";
 	startmove = 0;
 	movetype = unit->MoveType(region);
-	cost = newreg->MoveCost(movetype, region, x->dir, &road);
-	if (x->dir == MOVE_PAUSE)
+	cost = newreg->MoveCost(movetype, region, x.dir, &road);
+	if (x.dir == MOVE_PAUSE)
 		cost = 1;
 	if (region->type == R_NEXUS) {
 		cost = 1;
@@ -1825,12 +1752,9 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	// have stored movement points, then add in those stored
 	// movement points, but make sure that these are only used
 	// towards entering the hex we were trying to enter
-	if (!unit->moved &&
-			unit->movepoints >= Globals->MAX_SPEED &&
-			unit->movepoints < cost * Globals->MAX_SPEED &&
-			x->dir == unit->savedmovedir) {
-		while (unit->savedmovement > 0 &&
-				unit->movepoints < cost * Globals->MAX_SPEED) {
+	if (!unit->moved && (unit->movepoints >= Globals->MAX_SPEED) &&
+			(unit->movepoints < cost * Globals->MAX_SPEED) && x.dir == unit->savedmovedir) {
+		while ((unit->savedmovement > 0) && (unit->movepoints < cost * Globals->MAX_SPEED)) {
 			unit->movepoints += Globals->MAX_SPEED;
 			unit->savedmovement--;
 		}
@@ -1841,19 +1765,16 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	if (unit->movepoints < cost * Globals->MAX_SPEED)
 		return 0;
 
-	if (x->dir == MOVE_PAUSE) {
-		unit->event("Pauses to admire the scenery in " + string(region->ShortPrint().const_str()) +
-			".", "movement");
+	if (x.dir == MOVE_PAUSE) {
+		unit->event("Pauses to admire the scenery in " + string(region->ShortPrint().const_str()) +	".", "movement");
 		unit->movepoints -= cost * Globals->MAX_SPEED;
 		unit->moved += cost;
-		o->dirs.Remove(x);
-		delete x;
+		std::erase(o->dirs, x);
 		return 0;
 	}
 
 	if ((TerrainDefs[newreg->type].similar_type == R_OCEAN) &&
-			(!unit->CanSwim() ||
-			unit->GetFlag(FLAG_NOCROSS_WATER))) {
+			(!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))) {
 		unit->event("Discovers that " + string(newreg->ShortPrint().const_str()) + " is " +
 			TerrainDefs[newreg->type].name + ".", "movement");
 		goto done_moving;
@@ -1932,8 +1853,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			f = (Farsight *)elem;
 			if (f->unit == unit) {
 				// We moved into here this turn
-				if (x->dir < MOVE_IN) {
-					f->exits_used[x->dir] = 1;
+				if (x.dir < MOVE_IN) {
+					f->exits_used[x.dir] = 1;
 				}
 			}
 		}
@@ -1942,16 +1863,15 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 		f->faction = unit->faction;
 		f->level = 0;
 		f->unit = unit;
-		if (x->dir < MOVE_IN) {
-			f->exits_used[region->GetRealDirComp(x->dir)] = 1;
+		if (x.dir < MOVE_IN) {
+			f->exits_used[region->GetRealDirComp(x.dir)] = 1;
 		}
 		newreg->passers.Add(f);
 	}
 
 	region = newreg;
 
-	o->dirs.Remove(x);
-	delete x;
+	std::erase(o->dirs, x);
 
 	loc = new Location;
 	loc->unit = unit;
@@ -1960,7 +1880,6 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	return loc;
 
 done_moving:
-	delete o;
-	unit->monthorders = 0;
-	return 0;
+	unit->monthorders = nullptr;
+	return nullptr;
 }

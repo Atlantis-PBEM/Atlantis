@@ -73,19 +73,19 @@ Unit::Unit()
 	}
 	readyItem = -1;
 	object = 0;
-	attackorders = NULL;
-	evictorders = NULL;
-	stealorders = NULL;
-	monthorders = NULL;
-	castorders = NULL;
+	attackorders = nullptr;
+	evictorders = nullptr;
+	stealthorders = nullptr;
+	monthorders = nullptr;
+	castorders = nullptr;
 	sacrificeorders = nullptr;
 	annihilateorders = nullptr;
-	teleportorders = NULL;
-	joinorders = NULL;
+	teleportorders = nullptr;
+	joinorders = nullptr;
 	inTurnBlock = 0;
 	presentTaxing = 0;
-	presentMonthOrders = NULL;
-	former = NULL;
+	presentMonthOrders = nullptr;
+	former = nullptr;
 	format = 0;
 	free = 0;
 	practiced = 0;
@@ -119,19 +119,19 @@ Unit::Unit(int seq, Faction *f, int a)
 	}
 	readyItem = -1;
 	object = 0;
-	attackorders = NULL;
-	evictorders = NULL;
-	stealorders = NULL;
-	monthorders = NULL;
-	castorders = NULL;
-	teleportorders = NULL;
-	joinorders = NULL;
+	attackorders = nullptr;
+	evictorders = nullptr;
+	stealthorders = nullptr;
+	monthorders = nullptr;
+	castorders = nullptr;
+	teleportorders = nullptr;
+	joinorders = nullptr;
 	sacrificeorders = nullptr;
 	annihilateorders = nullptr;
 	inTurnBlock = 0;
 	presentTaxing = 0;
-	presentMonthOrders = NULL;
-	former = NULL;
+	presentMonthOrders = nullptr;
+	former = nullptr;
 	format = 0;
 	free = 0;
 	practiced = 0;
@@ -146,10 +146,6 @@ Unit::Unit(int seq, Faction *f, int a)
 
 Unit::~Unit()
 {
-	if (monthorders) delete monthorders;
-	if (presentMonthOrders) delete presentMonthOrders;
-	if (attackorders) delete attackorders;
-	if (stealorders) delete stealorders;
 	if (name) delete name;
 	if (describe) delete describe;
 }
@@ -377,7 +373,7 @@ int Unit::CanGetSpoil(Item *i)
 		return 0;
 
 	load = items.Weight();
-	
+
 	if (flags & FLAG_FLYSPOILS) {
 		capacity = ItemDefs[i->type].fly;
 		if (FlyingCapacity() + capacity < load + weight)
@@ -481,10 +477,8 @@ json Unit::write_json_orders()
 	// and then re-added to the end of the list if it was a repeating turn order.  wrapping here uses the same stack as
 	// above in the same way.
 	bool wrap_turn_block = has_continuing_month_order;
-	if (turnorders.First()) {
-		TurnOrder *tOrder;
-		forlist(&turnorders) {
-			tOrder = (TurnOrder *)elem;
+	if (turnorders.size()) {
+		for(auto tOrder: turnorders) {
 			if (wrap_turn_block) {
 				container.push_back( { { "order", (tOrder->repeating ? "@TURN" : "TURN") } } );
 				parent_stack.push(container);
@@ -521,7 +515,7 @@ json Unit::write_json_orders()
 			wrap_turn_block = true; // All future turn blocks get wrapped.
 		}
 		// Now, move the container back to the end of the list if it was a repeating turn order and it got unwrapped
-		tOrder = (TurnOrder *) turnorders.First();
+		std::shared_ptr<TurnOrder> tOrder = turnorders.front();
 		if (tOrder->repeating && !has_continuing_month_order) {
 			container.push_back( { { "order", "@TURN" } } );
 			parent_stack.push(container);
@@ -657,7 +651,7 @@ void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int au
 				}
 			}
 		}
-		
+
 		if ((type == U_MAGE || type == U_GUARDMAGE) && combat != -1) {
 			j["combat_spell"] = { { "name", SkillDefs[combat].name }, { "tag", SkillDefs[combat].abbr } };
 		}
@@ -692,7 +686,7 @@ void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int au
 
 		// For the JSON report, the best location for order information is on the unit itself.
 		j["orders"] = write_json_orders();
-		
+
 	}
 
 	j["items"] = json::array();
@@ -782,35 +776,25 @@ void Unit::ClearOrders()
 	enter = 0;
 	build = 0;
 	destroy = 0;
-	if (attackorders) delete attackorders;
-	attackorders = 0;
-	if (evictorders) delete evictorders;
-	evictorders = 0;
-	if (stealorders) delete stealorders;
-	stealorders = 0;
-	promote = 0;
+	attackorders = nullptr;
+	evictorders = nullptr;
+	stealthorders = nullptr;
+	promote = nullptr;
 	taxing = TAX_NONE;
-	advancefrom = 0;
-	if (monthorders) delete monthorders;
-	monthorders = 0;
+	advancefrom = nullptr;
+	monthorders = nullptr;
 	inTurnBlock = 0;
 	presentTaxing = 0;
-	if (presentMonthOrders) delete presentMonthOrders;
-	presentMonthOrders = 0;
-	if (castorders) delete castorders;
-	castorders = 0;
-	if (teleportorders) delete teleportorders;
-	teleportorders = 0;
-	if (sacrificeorders) delete sacrificeorders;
-	sacrificeorders = 0;
+	presentMonthOrders = nullptr;
+	castorders = nullptr;
+	teleportorders = nullptr;
+	sacrificeorders = nullptr;
 }
 
 void Unit::ClearCastOrders()
 {
-	if (castorders) delete castorders;
-	castorders = 0;
-	if (teleportorders) delete teleportorders;
-	teleportorders = 0;
+	castorders = nullptr;
+	teleportorders = nullptr;
 }
 
 void Unit::DefaultOrders(Object *obj)
@@ -921,16 +905,15 @@ void Unit::DefaultOrders(Object *obj)
 			int dir = directions[dirIndex];
 
 			if (dir >= 0) {
-				MoveOrder *o = new MoveOrder;
+				std::shared_ptr<MoveOrder> o = std::make_shared<MoveOrder>();
 				o->advancing = 0;
 
 				if (getrandom(100) < aggression) {
 					o->advancing = 1;
 				}
 
-				MoveDir *d = new MoveDir;
-				d->dir = dir;
-				o->dirs.Add(d);
+				MoveDir d(dir);
+				o->dirs.push_back(d);
 				monthorders = o;
 			}
 		}
@@ -952,7 +935,7 @@ void Unit::DefaultOrders(Object *obj)
 					Globals->TAX_PILLAGE_MONTH_LONG && Taxers(1)) {
 				taxing = TAX_AUTO;
 			} else {
-				ProduceOrder *order = new ProduceOrder;
+				std::shared_ptr<ProduceOrder> order = std::make_shared<ProduceOrder>();
 				order->skill = -1;
 				order->item = I_SILVER;
 				order->target = 0;
@@ -1104,7 +1087,7 @@ int Unit::GetSharedNum(int item)
 	forlist((&object->region->objects)) {
 		Object *obj = (Object *) elem;
 		for(auto u: obj->units) {
-			if ((u->num == num) || 
+			if ((u->num == num) ||
 			(u->faction == faction && u->GetFlag(FLAG_SHARING)))
 				count += u->items.GetNum(item);
 		}
@@ -1332,7 +1315,7 @@ int Unit::GetAvailSkill(int sk)
 				grant = ItemDefs[i->type].minGrant;
 			if (grant > ItemDefs[i->type].maxGrant)
 				grant = ItemDefs[i->type].maxGrant;
-			
+
 			if (grant > retval)
 				retval = grant;
 		}
@@ -1401,7 +1384,7 @@ int Unit::CanStudy(int sk)
 		if (!Globals->MAGE_NONLEADERS || !(SkillDefs[sk].flags & SkillType::MAGIC))
 		return 0;
 	}
-	
+
 	int curlev = GetRealSkill(sk);
 
 	if (SkillDefs[sk].flags & SkillType::DISABLED) return 0;
@@ -1953,7 +1936,7 @@ static int ContributesToMovement(int movetype, int item)
 				return ItemDefs[item].swim;
 			break;
 	}
-	
+
 	return 0;
 }
 
@@ -2121,7 +2104,7 @@ int Unit::Taxers(int numtaxers)
 	int basetax = 0;
 	int weapontax = 0;
 	int armortax = 0;
-	
+
 	// check out items
 	int numMelee= 0;
 	int numUsableMelee = 0;
@@ -2211,7 +2194,7 @@ int Unit::Taxers(int numtaxers)
 			else
 				creatures += pItem->num;
 		}
-		
+
 		if (ItemDefs[pItem->type].type & IT_ARMOR) {
 			numArmor += pItem->num;
 		}
@@ -2230,7 +2213,7 @@ int Unit::Taxers(int numtaxers)
 		 GetSkill(S_STEALTH))) {
 		basetax = totalMen;
 		taxers = totalMen;
-		
+
 		// Weapon tax bonus
 		if ((Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE) ||
 		((Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL) &&
@@ -2244,7 +2227,7 @@ int Unit::Taxers(int numtaxers)
 		 	}
 		 	weapontax += numMelee;
 		 }
-		 
+
 		if (((Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL) &&
 		 (GetSkill(S_CROSSBOW) || GetSkill(S_LONGBOW)))) {
 		 	weapontax += numUsableBows;
@@ -2253,7 +2236,7 @@ int Unit::Taxers(int numtaxers)
 		 GetSkill(S_RIDING)) {
 		 	if (weapontax < numUsableMounts) weapontax = numUsableMounts;
 		 }
-		
+
 	} else {
 
 		if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_WEAPON) {
@@ -2314,7 +2297,7 @@ int Unit::Taxers(int numtaxers)
 			weapontax += numUsableBattle;
 			taxers += numUsableBattle;
 		}
-		
+
 	}
 
 	// Ok, all the items categories done - check for mages taxing
@@ -2366,13 +2349,13 @@ int Unit::Taxers(int numtaxers)
 			}
 		}
 	}
-	
+
 	armortax = numArmor;
-	
+
 	// Check for overabundance
 	if (weapontax > totalMen) weapontax = totalMen;
 	if (armortax > weapontax) armortax = weapontax;
-	
+
 	// Adjust basetax in case of weapon taxation
 	if (basetax < weapontax) basetax = weapontax;
 
@@ -2389,7 +2372,7 @@ int Unit::Taxers(int numtaxers)
 		basetax += illusions;
 		taxers += illusions;
 	}
-	
+
 	if (numtaxers) return(taxers);
 
 	int taxes = Globals->TAX_BASE_INCOME * basetax
@@ -2592,7 +2575,7 @@ void Unit::DiscardUnfinishedShips() {
 			items.SetNum(i,0);
 		}
 	}
-	if (discard > 0) event("discards all unfinished ships.", "discard");	
+	if (discard > 0) event("discards all unfinished ships.", "discard");
 }
 
 void Unit::event(const string& message, const string& category, ARegion *r)
@@ -2700,7 +2683,7 @@ int Unit::GetAttribute(char const *attrib)
 		}
 		else
 			base = monbase; // monster units have no men
-	}	
+	}
 	return base;
 }
 
