@@ -25,38 +25,12 @@
 #ifndef ORDERS_CLASS
 #define ORDERS_CLASS
 
-class Order;
-class AttackOrder;
-class MoveOrder;
-class WithdrawOrder;
-class GiveOrder;
-class StudyOrder;
-class TeachOrder;
-class SellOrder;
-class BuyOrder;
-class ProduceOrder;
-class BuildOrder;
-class SailOrder;
-class FindOrder;
-class StealOrder;
-class AssassinateOrder;
-class CastOrder;
-class CastMindOrder;
-class CastRegionOrder;
-class TeleportOrder;
-class ForgetOrder;
-class EvictOrder;
-class BankOrder;
-class IdleOrder;
-class TransportOrder;
-class AnnihilateOrder;
-class SacrificeOrder;
-
-#include "unit.h"
 #include "gamedefs.h"
 #include "astring.h"
-#include "alist.h"
 #include <list>
+
+// Forward declarations
+class UnitId;
 
 enum {
 	O_ATLANTIS,
@@ -145,11 +119,12 @@ enum {
 /* Enter is MOVE_ENTER + num of object */
 #define MOVE_ENTER 100
 
+
 extern char const ** OrderStrs;
 
 int Parse1Order(AString *);
 
-class Order : public AListElem {
+class Order {
 	public:
 		Order();
 		virtual ~Order();
@@ -158,9 +133,13 @@ class Order : public AListElem {
 		int quiet;
 };
 
-class MoveDir : public AListElem {
-	public:
-		int dir;
+class MoveDir {
+public:
+	MoveDir(int d) : dir(d) {}
+	~MoveDir() {}
+	inline int operator==(const MoveDir &d) { return dir == d.dir; }
+
+	int dir;
 };
 
 class MoveOrder : public Order {
@@ -169,7 +148,7 @@ class MoveOrder : public Order {
 		~MoveOrder();
 
 		int advancing;
-		AList dirs;
+		std::vector<MoveDir> dirs;
 };
 
 class WithdrawOrder : public Order {
@@ -266,7 +245,7 @@ class SailOrder : public Order {
 		SailOrder();
 		~SailOrder();
 
-		AList dirs;
+		std::vector<MoveDir> dirs;
 };
 
 class FindOrder : public Order {
@@ -277,16 +256,23 @@ class FindOrder : public Order {
 		int find;
 };
 
-class StealOrder : public Order {
+class StealthOrder : public Order {
+	public:
+		StealthOrder();
+		virtual ~StealthOrder();
+
+		UnitId *target;
+};
+
+class StealOrder : public StealthOrder {
 	public:
 		StealOrder();
 		~StealOrder();
 
-		UnitId *target;
 		int item;
 };
 
-class AssassinateOrder : public Order {
+class AssassinateOrder : public StealthOrder {
 	public:
 		AssassinateOrder();
 		~AssassinateOrder();
@@ -329,7 +315,7 @@ class TurnOrder : public Order {
 class CastOrder : public Order {
 	public:
 		CastOrder();
-		~CastOrder();
+		virtual ~CastOrder();
 
 		int spell;
 		int level;
@@ -346,7 +332,7 @@ class CastMindOrder : public CastOrder {
 class CastRegionOrder : public CastOrder {
 	public:
 		CastRegionOrder();
-		~CastRegionOrder();
+		virtual ~CastRegionOrder();
 
 		int xloc, yloc, zloc;
 };
@@ -411,7 +397,7 @@ class TransportOrder : public Order {
 		int except;
 		int distance;
 
-		enum TransportPhase {
+		enum class TransportPhase {
 			SHIP_TO_QM,
 			INTER_QM_TRANSPORT,
 			DISTRIBUTE_FROM_QM

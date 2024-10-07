@@ -423,7 +423,7 @@ private:
 	void WriteTimesArticle(AString);
 
 	void DoExchangeOrders();
-	void DoExchangeOrder(ARegion *, Unit *, ExchangeOrder *);
+	void DoExchangeOrder(ARegion *r, Unit *u, std::shared_ptr<ExchangeOrder> o);
 
 	//
 	// Faction limit functions.
@@ -444,12 +444,12 @@ private:
 	// The DoGiveOrder returns 0 normally, or 1 if no more GIVE orders
 	// should be allowed
 	//
-	int DoGiveOrder(ARegion *, Unit *, GiveOrder *);
+	int DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o);
 	//
 	// The DoWithdrawOrder returns 0 normally, or 1 if no more WITHDRAW
 	// orders should be allowed
 	//
-	int DoWithdrawOrder(ARegion *, Unit *, WithdrawOrder *);
+	int DoWithdrawOrder(ARegion *r, Unit *u, std::shared_ptr<WithdrawOrder> o);
 
 	//
 	// These are game specific, and can be found in extra.cpp
@@ -557,7 +557,7 @@ private:
 	void RunSacrificeOrders();
 	void CollectInterQMTransportItems();
 	void CheckTransportOrders();
-	AList *CanSeeSteal(ARegion *, Unit *);
+	std::vector<std::shared_ptr<Faction>> CanSeeSteal(ARegion *, Unit *);
 	void Do1Steal(ARegion *, Object *, Unit *);
 	void Do1Assassinate(ARegion *, Object *, Unit *);
 	void Do1Annihilate(ARegion *reg);

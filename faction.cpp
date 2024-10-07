@@ -104,11 +104,11 @@ Faction::Faction()
 {
 	exists = 1;
 	name = 0;
-	
+
 	for (auto &ft : *FactionTypes) {
 		type[ft] = 1;
 	}
-	
+
 	lastchange = -6;
 	address = 0;
 	password = 0;
@@ -129,7 +129,7 @@ Faction::Faction(int n)
 {
 	exists = 1;
 	num = n;
-	
+
 	for (auto &ft : *FactionTypes) {
 		type[ft] = 1;
 	}
@@ -211,7 +211,7 @@ void Faction::Readin(istream& f)
 	name = new AString(tmp);
 	AString *temp = name->stripnumber();
 	SetName(temp);
-	
+
 	f >> ws >> tmp;
 	address = new AString(tmp);
 	f >> ws >> tmp;
@@ -675,10 +675,10 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 			// penalty of 2 to stealth if assassinating and 1 if stealing
 			// TODO: not sure about the reasoning behind the IMPROVED_AMTS part
 			int stealpenalty = 0;
-			if (Globals->HARDER_ASSASSINATION && u->stealorders){
-				if (u->stealorders->type == O_STEAL) {
+			if (Globals->HARDER_ASSASSINATION && u->stealthorders){
+				if (u->stealthorders->type == O_STEAL) {
 					stealpenalty = 1;
-				} else if (u->stealorders->type == O_ASSASSINATE) {
+				} else if (u->stealthorders->type == O_ASSASSINATE) {
 					if (Globals->IMPROVED_AMTS){
 						stealpenalty = 1;
 					} else {

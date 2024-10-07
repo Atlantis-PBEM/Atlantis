@@ -48,13 +48,13 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
     helper.parse_orders(faction->num, ss);
     helper.check_transport_orders();
 
-    helper.transport_phase(TransportOrder::SHIP_TO_QM);
+    helper.transport_phase(TransportOrder::TransportPhase::SHIP_TO_QM);
     expect(unit1->items.GetNum(I_STONE) == 50_i);
     expect(qm1->items.GetNum(I_STONE) == 50_i);
     expect(qm2->items.GetNum(I_STONE) == 0_i);
     expect(unit2->items.GetNum(I_STONE) == 0_i);
 
-    helper.transport_phase(TransportOrder::INTER_QM_TRANSPORT);
+    helper.transport_phase(TransportOrder::TransportPhase::INTER_QM_TRANSPORT);
     expect(unit1->items.GetNum(I_STONE) == 50_i);
     expect(qm1->items.GetNum(I_STONE) == 0_i);
     expect(qm2->transport_items.GetNum(I_STONE) == 50_i);
@@ -68,7 +68,7 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
     expect(qm2->items.GetNum(I_STONE) == 50_i);
     expect(unit2->items.GetNum(I_STONE) == 0_i);
 
-    helper.transport_phase(TransportOrder::DISTRIBUTE_FROM_QM);
+    helper.transport_phase(TransportOrder::TransportPhase::DISTRIBUTE_FROM_QM);
     expect(unit1->items.GetNum(I_STONE) == 50_i);
     expect(qm1->items.GetNum(I_STONE) == 0_i);
     expect(qm2->items.GetNum(I_STONE) == 0_i);
@@ -116,14 +116,14 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
     helper.parse_orders(faction->num, ss);
     helper.check_transport_orders();
 
-    helper.transport_phase(TransportOrder::SHIP_TO_QM);
+    helper.transport_phase(TransportOrder::TransportPhase::SHIP_TO_QM);
     expect(unit1->items.GetNum(I_STONE) == 50_i);
     expect(qm1->items.GetNum(I_STONE) == 50_i);
     expect(qm2->items.GetNum(I_STONE) == 0_i);
     expect(qm3->items.GetNum(I_STONE) == 0_i);
     expect(unit2->items.GetNum(I_STONE) == 0_i);
 
-    helper.transport_phase(TransportOrder::INTER_QM_TRANSPORT);
+    helper.transport_phase(TransportOrder::TransportPhase::INTER_QM_TRANSPORT);
     expect(unit1->items.GetNum(I_STONE) == 50_i);
     expect(qm1->items.GetNum(I_STONE) == 0_i);
     expect(qm2->transport_items.GetNum(I_STONE) == 50_i);
@@ -142,7 +142,7 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
     expect(qm3->items.GetNum(I_STONE) == 0_i);
     expect(unit2->items.GetNum(I_STONE) == 0_i);
 
-    helper.transport_phase(TransportOrder::DISTRIBUTE_FROM_QM);
+    helper.transport_phase(TransportOrder::TransportPhase::DISTRIBUTE_FROM_QM);
     expect(unit1->items.GetNum(I_STONE) == 50_i);
     expect(qm1->items.GetNum(I_STONE) == 0_i);
     expect(qm2->items.GetNum(I_STONE) == 50_i);

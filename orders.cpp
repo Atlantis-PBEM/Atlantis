@@ -23,6 +23,7 @@
 //
 // END A3HEADER
 #include "orders.h"
+#include "unit.h"
 
 char const *od[] = {
 	"#atlantis",
@@ -253,6 +254,14 @@ FindOrder::FindOrder()
 }
 
 FindOrder::~FindOrder()
+{
+}
+
+StealthOrder::StealthOrder()
+{
+}
+
+StealthOrder::~StealthOrder()
 {
 }
 
