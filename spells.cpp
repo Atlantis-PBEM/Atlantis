@@ -923,7 +923,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 		return 1;
 	}
 
-	temp += string(tar->items.Report(2,5,0).const_str()) + ". Skills: ";
+	temp += string(tar->items.Report(2, 5, 0)) + ". Skills: ";
 	temp += string(tar->skills.Report(tar->GetMen()).const_str()) + ".";
 
 	u->event(temp, "spell");
@@ -1982,7 +1982,6 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 	int level, num, sactype, sacrifices, i, sac, relics;
 	Object *o, *tower;
 	Unit *victim;
-	Item *item;
 	AString message;
 
 	level = mage->GetSkill(S_BLASPHEMOUS_RITUAL);
@@ -2007,10 +2006,9 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 
 		for(auto u: o->units) {
 			if (u->faction->num == mage->faction->num) {
-				forlist(&u->items) {
-					item = (Item *) elem;
-					if (ItemDefs[item->type].type & sactype) {
-						sacrifices += item->num;
+				for(auto item: u->items) {
+					if (ItemDefs[item.type].type & sactype) {
+						sacrifices += item.num;
 					}
 				}
 			}
@@ -2033,14 +2031,13 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 			o = (Object *) elem;
 			for(auto u: o->units) {
 				if (u->faction->num == mage->faction->num) {
-					forlist(&u->items) {
-						item = (Item *) elem;
-						if (ItemDefs[item->type].type & sactype) {
-							if (!victim && i < item->num) {
+					for(auto item: u->items) {
+						if (ItemDefs[item.type].type & sactype) {
+							if (!victim && i < item.num) {
 								victim = u;
-								sac = item->type;
+								sac = item.type;
 							}
-							i -= item->num;
+							i -= item.num;
 						}
 					}
 				}

@@ -68,7 +68,7 @@ public:
 	int read_quests(std::istream& f);
 	void write_quests(std::ostream& f);
 
-	int check_kill_target(Unit *u, ItemList *reward, std::string *quest_rewards);
+	int check_kill_target(Unit *u, ItemList& reward, std::string *quest_rewards);
 	int check_harvest_target(ARegion *r,	int item, int harvested, int max, Unit *u, std::string *quest_rewards);
 	int check_build_target(ARegion *r, int building, Unit *u, std::string *quest_rewards);
 	int check_visit_target(ARegion *r, Unit *u, std::string *quest_rewards);

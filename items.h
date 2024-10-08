@@ -32,6 +32,7 @@ class ItemType;
 #include "alist.h"
 #include "astring.h"
 #include <vector>
+#include <string>
 
 enum {
 	ATTACK_COMBAT,
@@ -450,7 +451,7 @@ extern AString *ItemDescription(int item, int full);
 
 extern int IsSoldier(int);
 
-class Item : public AListElem
+class Item
 {
 	public:
 		Item();
@@ -467,15 +468,19 @@ class Item : public AListElem
 		int checked; // flag whether item has been reported, counted etc.
 };
 
-class ItemList : public AList
+class ItemList
 {
+	std::vector<Item> items;
+
 	public:
+		using iterator = typename std::vector<Item>::iterator;
+
 		void Readin(std::istream& f);
 		void Writeout(std::ostream& f);
 
-		AString Report(int, int, int);
-		AString BattleReport();
-		AString ReportByType(int, int, int, int);
+		std::string Report(int obs, int seeillusions, int nofirstcomma);
+		std::string BattleReport();
+		std::string ReportByType(int, int, int, int);
 
 		int Weight();
 		int GetNum(int);
@@ -483,6 +488,12 @@ class ItemList : public AList
 		int CanSell(int);
 		void Selling(int, int); /* type, number */
 		void UncheckAll(); // re-set checked flag for all
+
+		iterator begin() { return items.begin(); }
+		iterator end() { return items.end(); }
+		iterator erase(iterator i) { return items.erase(i); }
+		inline size_t size() { return items.size(); }
+		inline void clear() { items.clear(); }
 };
 
 extern AString ShowSpecial(char const *special, int level, int expandLevel, int fromItem);

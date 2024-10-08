@@ -827,18 +827,16 @@ void ARegion::Kill(Unit *u)
 	}
 
 	if (first) {
-		// give u's stuff to first
-		forlist(&u->items) {
-			Item *i = (Item *) elem;
-			if (ItemDefs[i->type].type & IT_SHIP &&
-					first->items.GetNum(i->type) > 0) {
-				if (first->items.GetNum(i->type) > i->num)
-					first->items.SetNum(i->type, i->num);
+		// give u's stuff to first.  Since this can modify the list via SetNum, copy thelist
+		ItemList itemCopy = u->items;
+		for(auto i: itemCopy) {
+			if (ItemDefs[i.type].type & IT_SHIP && first->items.GetNum(i.type) > 0) {
+				if (first->items.GetNum(i.type) > i.num)
+					first->items.SetNum(i.type, i.num);
 				continue;
 			}
-			if (!IsSoldier(i->type)) {
-				first->items.SetNum(i->type, first->items.GetNum(i->type) +
-									i->num);
+			if (!IsSoldier(i.type)) {
+				first->items.SetNum(i.type, first->items.GetNum(i.type) + i.num);
 				// If we're in ocean and not in a structure, make sure that
 				// the first unit can actually hold the stuff and not drown
 				// If the item would cause them to drown then they won't
@@ -846,13 +844,12 @@ void ARegion::Kill(Unit *u)
 				if (TerrainDefs[type].similar_type == R_OCEAN) {
 					if (first->object->type == O_DUMMY) {
 						if (!first->CanReallySwim()) {
-							first->items.SetNum(i->type,
-									first->items.GetNum(i->type) - i->num);
+							first->items.SetNum(i.type, first->items.GetNum(i.type) - i.num);
 						}
 					}
 				}
 			}
-			u->items.SetNum(i->type, 0);
+			u->items.SetNum(i.type, 0);
 		}
 	}
 

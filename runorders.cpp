@@ -994,7 +994,6 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 {
 	Unit *tar;
 	Object *to, *from;
-	Item *item;
 
 	tar = r->get_unit_id(*u->joinorders->target, u->faction->num);
 
@@ -1030,13 +1029,14 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 			}
 		}
 		from = u->object;
-		forlist(&from->ships) {
-			item = (Item *) elem;
+
+		ItemList shipsCopy = from->ships;
+		for(auto ship: shipsCopy) {
 			GiveOrder go;
 			UnitId id;
-			go.amount = item->num;
+			go.amount = ship.num;
 			go.except = 0;
-			go.item = item->type;
+			go.item = ship.type;
 			id.unitnum = to->GetOwner()->num;
 			id.alias = 0;
 			id.faction = 0;
@@ -2124,7 +2124,6 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, std::shared_ptr<WithdrawOrder> o)
 
 void Game::DoGiveOrders()
 {
-	Item *item;
 	Unit *s;
 	Object *fleet;
 
@@ -2154,32 +2153,31 @@ void Game::DoGiveOrders()
 								fleet = obj;
 							}
 							/* do 'give all type' command */
-							if (fleet->IsFleet() && s == fleet->GetOwner() &&
-									!o->unfinished &&
+							if (fleet->IsFleet() && s == fleet->GetOwner() && !o->unfinished &&
 									(o->item == -NITEMS || o->item == -IT_SHIP)) {
-								forlist(&fleet->ships) {
-									item = (Item *) elem;
+								ItemList shipsCopy = fleet->ships;
+								for(auto ship: shipsCopy) {
 									GiveOrder go;
-									go.amount = item->num;
+									go.amount = ship.num;
 									go.except = 0;
-									go.item = item->type;
+									go.item = ship.type;
 									go.target = o->target;
 									go.type = o->type;
 									DoGiveOrder(r, u, std::make_shared<GiveOrder>(go));
 								}
 							}
-							forlist((&s->items)) {
-								item = (Item *) elem;
-								if ((o->item == -NITEMS) ||
-									(ItemDefs[item->type].type & (-o->item))) {
+
+							ItemList itemsCopy = s->items;
+							for(auto item: itemsCopy) {
+								if ((o->item == -NITEMS) || (ItemDefs[item.type].type & (-o->item))) {
 									GiveOrder go;
-									go.amount = item->num;
+									go.amount = item.num;
 									go.except = 0;
-									go.item = item->type;
+									go.item = item.type;
 									go.target = o->target;
 									go.type = o->type;
 									go.unfinished = o->unfinished;
-									if (ItemDefs[item->type].type & IT_SHIP) {
+									if (ItemDefs[item.type].type & IT_SHIP) {
 										if (o->item == -NITEMS) {
 											go.unfinished = 1;
 										}
@@ -2326,7 +2324,6 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 {
 	int hasitem, ship, num, shipcount, amt, newfleet, cur;
 	int notallied, newlvl, oldlvl;
-	Item *it, *sh;
 	Unit *t, *s;
 	Object *fleet;
 	SkillList *skills;
@@ -2346,11 +2343,10 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 					return 0;
 				}
 				ship = -1;
-				forlist(&u->items) {
-					it = (Item *) elem;
-					if (it->type == o->item) {
-						u->event("Abandons " + string(it->Report(1).const_str()) + ".", event_type);
-						ship = it->type;
+				for(auto it: u->items) {
+					if (it.type == o->item) {
+						u->event("Abandons " + string(it.Report(1).const_str()) + ".", event_type);
+						ship = it.type;
 					}
 				}
 				if (ship > 0) u->items.SetNum(ship,0);
@@ -2376,9 +2372,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 			// Check we're not dumping passengers in the ocean
 			if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 				shipcount = 0;
-				forlist(&(u->object->ships)) {
-					sh = (Item *) elem;
-					shipcount += sh->num;
+				for(auto sh: u->object->ships) {
+					shipcount += sh.num;
 				}
 				if (shipcount <= o->amount) {
 					for(auto p: u->object->units) {
@@ -2475,31 +2470,31 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 					u->error(ord + ": Target already has an unfinished ship of that type.");
 				return 0;
 			}
-			it = new Item();
-			it->type = o->item;
-			it->num = s->items.GetNum(o->item);
+
+			Item it;
+			it.type = o->item;
+			it.num = s->items.GetNum(o->item);
 			if (o->type == O_TAKE) {
-				u->event("Takes " + string(it->Report(1).const_str()) + " from " + s->name->const_str() +
+				u->event("Takes " + string(it.Report(1).const_str()) + " from " + s->name->const_str() +
 					".", event_type);
 			} else {
-				u->event("Gives " + string(it->Report(1).const_str()) + " to " + t->name->const_str() + ".",
+				u->event("Gives " + string(it.Report(1).const_str()) + " to " + t->name->const_str() + ".",
 					event_type);
 				if (s->faction != t->faction) {
-					t->event("Receives " + string(it->Report(1).const_str()) + " from " + s->name->const_str() +
+					t->event("Receives " + string(it.Report(1).const_str()) + " from " + s->name->const_str() +
 						".", event_type);
 				}
 			}
 			s->items.SetNum(o->item, 0);
-			t->items.SetNum(o->item, it->num);
+			t->items.SetNum(o->item, it.num);
 			t->faction->DiscoverItem(o->item, 0, 1);
 		} else {
 			// Check we're not dumping passengers in the ocean
 			if (TerrainDefs[r->type].similar_type == R_OCEAN &&
 					!o->merge) {
 				shipcount = 0;
-				forlist(&(s->object->ships)) {
-					sh = (Item *) elem;
-					shipcount += sh->num;
+				for(auto sh: s->object->ships) {
+					shipcount += sh.num;
 				}
 				if (shipcount <= amt) {
 					for(auto p: s->object->units) {
@@ -2721,16 +2716,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 			}
 		}
 
-		{
-			// Remove all relics when unit is given to another faction
-			forlist(&u->items) {
-				Item *i = (Item *) elem;
-
-				if (i->type == I_RELICOFGRACE) {
-					u->items.SetNum(I_RELICOFGRACE, 0);
-				}
-			}
-		}
+		// Remove all relics when unit is given to another faction
+		u->items.SetNum(I_RELICOFGRACE, 0);
 
 		notallied = 1;
 		if (t->faction->get_attitude(u->faction->num) == A_ALLY) {
@@ -2763,9 +2750,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 
 		// Okay, now for each item that the unit has, tell the new faction
 		// about it in case they don't know about it yet.
-		forlist(&u->items) {
-			it = (Item *)elem;
-			u->faction->DiscoverItem(it->type, 0, 1);
+		for(auto it: u->items) {
+			u->faction->DiscoverItem(it.type, 0, 1);
 		}
 
 		return notallied;
@@ -3049,11 +3035,10 @@ void Game::CollectInterQMTransportItems() {
 			Object *obj = (Object *)elem;
 			for(auto u: obj->units) {
 				// Move the items from the transport_items list to the unit's items list
-				forlist((&u->transport_items)) {
-					Item *it = (Item *)elem;
-					u->items.SetNum(it->type, u->items.GetNum(it->type) + it->num);
+				for(auto it: u->transport_items) {
+					u->items.SetNum(it.type, u->items.GetNum(it.type) + it.num);
 				}
-				u->transport_items.DeleteAll();
+				u->transport_items.clear();
 			}
 		}
 	}
@@ -3069,7 +3054,7 @@ void Game::RunTransportOrders() {
 		forlist((&r->objects)) {
 			Object *obj = (Object *)elem;
 			for(auto u: obj->units) {
-				u->transport_items.Empty();
+				u->transport_items.clear();
 			}
 		}
 	}
@@ -3322,7 +3307,7 @@ void Game::Do1Annihilate(ARegion *reg) {
 	forlist_reuse(&reg->objects) {
 		Object *obj = (Object *)elem;
 		for(auto u: obj->units) {
-			u->items.DeleteAll(); // throw away all the items
+			u->items.clear(); // throw away all the items
 			u->event("Is annihilated.", "annihilate");
 			reg->Kill(u);
 		}

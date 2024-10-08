@@ -219,17 +219,16 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	battleItems = 0;
 
 	/* Special case to allow protection from ships */
-	if (o->IsFleet() && o->capacity < 1 && o->shipno < o->ships.Num()) {
+	if (o->IsFleet() && o->capacity < 1 && o->shipno < static_cast<int>(o->ships.size())) {
 		int objectno;
 
 		i = 0;
-		forlist(&o->ships) {
-			Item *ship = (Item *) elem;
+		for(auto ship: o->ships) {
 			if (o->shipno == i) {
-				abbr = ItemDefs[ship->type].name;
+				abbr = ItemDefs[ship.type].name;
 				objectno = LookupObject(&abbr);
 				if (objectno >= 0 && ObjectDefs[objectno].protect > 0) {
-					o->capacity = ObjectDefs[objectno].protect * ship->num;
+					o->capacity = ObjectDefs[objectno].protect * ship.num;
 					o->type = objectno;
 				}
 				o->shipno++;
@@ -615,11 +614,9 @@ void Soldier::RestoreItems()
 {
 	if (healing && healitem != -1) {
 		if (healitem == I_HERBS) {
-			unit->items.SetNum(healitem,
-					unit->items.GetNum(healitem) + healing);
+			unit->items.SetNum(healitem, unit->items.GetNum(healitem) + healing);
 		} else if (healitem == I_HEALPOTION) {
-			unit->items.SetNum(healitem,
-					unit->items.GetNum(healitem)+1);
+			unit->items.SetNum(healitem, unit->items.GetNum(healitem)+1);
 		}
 	}
 	if (weapon != -1)
@@ -670,7 +667,7 @@ void Soldier::Dead()
 	unit->SetMen(race,unit->GetMen(race) - 1);
 }
 
-Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
+Army::Army(Unit *ldr, AList *locs, int regtype, int ass)
 {
 	stats = ArmyStats();
 
@@ -720,39 +717,31 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 
 		Object * obj = ((Location *) elem)->obj;
 		if (ass) {
-			forlist(&u->items) {
-				Item * it = (Item *) elem;
-				if (it) {
-					if (ItemDefs[ it->type ].type & IT_MAN) {
-							soldiers[x] = new Soldier(u, obj, regtype,
-									it->type, ass);
-							hitstotal = soldiers[x]->hits;
-							++x;
-							goto finished_army;
-					}
+			for(auto it: u->items) {
+				if (ItemDefs[it.type ].type & IT_MAN) {
+					soldiers[x] = new Soldier(u, obj, regtype, it.type, ass);
+					hitstotal = soldiers[x]->hits;
+					++x;
+					goto finished_army;
 				}
 			}
 		} else {
-			Item *it = (Item *) u->items.First();
-			do {
-				if (IsSoldier(it->type)) {
-					for (int i = 0; i < it->num; i++) {
-						ItemType &item = ItemDefs[ it->type ];
+			for (auto it: u->items) {
+				if (IsSoldier(it.type)) {
+					for (int i = 0; i < it.num; i++) {
+						ItemType& item = ItemDefs[it.type];
 						if (((item.type & IT_MAN) || (item.flags & ItemType::MANPRODUCE)) && u->GetFlag(FLAG_BEHIND)) {
 							--y;
-							soldiers[y] = new Soldier(u, obj, regtype,
-									it->type);
+							soldiers[y] = new Soldier(u, obj, regtype, it.type);
 							hitstotal += soldiers[y]->hits;
 						} else {
-							soldiers[x] = new Soldier(u, obj, regtype,
-									it->type);
+							soldiers[x] = new Soldier(u, obj, regtype, it.type);
 							hitstotal += soldiers[x]->hits;
 							++x;
 						}
 					}
 				}
-				it = (Item *) u->items.Next(it);
-			} while(it);
+			}
 		}
 	}
 
@@ -811,7 +800,7 @@ void Army::WriteLosses(Battle * b) {
 	}
 }
 
-void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
+void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 {
 	if ((Globals->MONSTER_NO_SPOILS > 0) &&
 			(free >= Globals->MONSTER_SPOILS_RECOVERY)) {
@@ -828,42 +817,26 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 		silv *= (Globals->MONSTER_SPOILS_RECOVERY-free);
 		silv /= Globals->MONSTER_SPOILS_RECOVERY;
 	}
-	spoils->SetNum(I_SILVER,spoils->GetNum(I_SILVER) + getrandom(silv));
+	spoils.SetNum(I_SILVER, spoils.GetNum(I_SILVER) + getrandom(silv));
 
 	int thespoil = mp->spoiltype;
 
 	if (thespoil == -1) return;
 	if (thespoil == IT_NORMAL && getrandom(2) && !Globals->SPOILS_NO_TRADE) thespoil = IT_TRADE;
 
-	int count = 0;
-	int i;
-	for (i=0; i<NITEMS; i++) {
-		if ((ItemDefs[i].type & thespoil) &&
-				!(ItemDefs[i].type & IT_SPECIAL) &&
-				!(ItemDefs[i].type & IT_SHIP) &&
-				!(ItemDefs[i].type & IT_NEVER_SPOIL) &&
-				(ItemDefs[i].baseprice <= mp->silver) &&
+	// collect all viable items from which we will pick one
+	std::vector<int> viableItems;
+	for (int i=0; i<NITEMS; i++) {
+		if ((ItemDefs[i].type & thespoil) && !(ItemDefs[i].type & IT_SPECIAL) && !(ItemDefs[i].type & IT_SHIP) &&
+				!(ItemDefs[i].type & IT_NEVER_SPOIL) && (ItemDefs[i].baseprice <= mp->silver) &&
 				!(ItemDefs[i].flags & ItemType::DISABLED)) {
-			count ++;
+			viableItems.push_back(i);
 		}
 	}
-	if (count == 0) return;
-	count = getrandom(count) + 1;
 
-	for (i=0; i<NITEMS; i++) {
-		if ((ItemDefs[i].type & thespoil) &&
-				!(ItemDefs[i].type & IT_SPECIAL) &&
-				!(ItemDefs[i].type & IT_SHIP) &&
-				!(ItemDefs[i].type & IT_NEVER_SPOIL) &&
-				(ItemDefs[i].baseprice <= mp->silver) &&
-				!(ItemDefs[i].flags & ItemType::DISABLED)) {
-			count--;
-			if (count == 0) {
-				thespoil = i;
-				break;
-			}
-		}
-	}
+	if (viableItems.empty()) return;
+	int count = getrandom(viableItems.size());
+	thespoil = viableItems[count];
 
 	int val = getrandom(mp->silver * 2);
 	if ((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
@@ -872,9 +845,8 @@ void Army::GetMonSpoils(ItemList *spoils,int monitem, int free)
 		val /= Globals->MONSTER_SPOILS_RECOVERY;
 	}
 
-	spoils->SetNum(thespoil,spoils->GetNum(thespoil) +
-			(val + getrandom(ItemDefs[thespoil].baseprice)) /
-			ItemDefs[thespoil].baseprice);
+	spoils.SetNum(thespoil, spoils.GetNum(thespoil) +
+		(val + getrandom(ItemDefs[thespoil].baseprice)) / ItemDefs[thespoil].baseprice);
 }
 
 void Army::Regenerate(Battle *b)
@@ -908,7 +880,7 @@ void Army::Regenerate(Battle *b)
 	}
 }
 
-void Army::Lose(Battle *b,ItemList *spoils)
+void Army::Lose(Battle *b, ItemList& spoils)
 {
 	WriteLosses(b);
 	for (int i=0; i<count; i++) {
@@ -1006,7 +978,7 @@ void Army::DoHealLevel(Battle *b, int level, int rate, int useItems)
 	}
 }
 
-void Army::Win(Battle * b,ItemList * spoils)
+void Army::Win(Battle *b, ItemList& spoils)
 {
 	int wintype;
 
@@ -1031,9 +1003,8 @@ void Army::Win(Battle * b,ItemList * spoils)
 		else s->Dead();
 	}
 
-	forlist(spoils) {
-		Item *i = (Item *) elem;
-		if (i && na) {
+	for(auto& i: spoils) {
+		if (na) {
 			Unit *u;
 			int ns;
 
@@ -1048,27 +1019,27 @@ void Army::Win(Battle * b,ItemList * spoils)
 				}
 
 				ns = units.size();
-				if (ItemDefs[i->type].type & IT_SHIP) {
+				if (ItemDefs[i.type].type & IT_SHIP) {
 					int t = getrandom(ns);
 					Unit *u = units[t];
 					if (u && u->CanGetSpoil(i)) {
-						u->items.SetNum(i->type, i->num);
-						u->faction->DiscoverItem(i->type, 0, 1);
-						i->num = 0;
+						u->items.SetNum(i.type, i.num);
+						u->faction->DiscoverItem(i.type, 0, 1);
+						i.num = 0;
 					}
 					break;
 				}
-				while (ns > 0 && i->num >= ns) {
+				while (ns > 0 && i.num >= ns) {
 					int chunk = 1;
-					if (!ItemDefs[i->type].weight) {
-						chunk = i->num / ns;
+					if (!ItemDefs[i.type].weight) {
+						chunk = i.num / ns;
 					}
 					for (auto iter = units.begin(); iter != units.end();) {
 						auto u = *iter;
 						if (u->CanGetSpoil(i)) {
-							u->items.SetNum(i->type, u->items.GetNum(i->type) + chunk);
-							u->faction->DiscoverItem(i->type, 0, 1);
-							i->num -= chunk;
+							u->items.SetNum(i.type, u->items.GetNum(i.type) + chunk);
+							u->faction->DiscoverItem(i.type, 0, 1);
+							i.num -= chunk;
 							++iter;
 						} else {
 							iter = units.erase(iter);
@@ -1076,20 +1047,20 @@ void Army::Win(Battle * b,ItemList * spoils)
 						}
 					}
 				}
-				while (ns > 0 && i->num > 0) {
+				while (ns > 0 && i.num > 0) {
 					int t = getrandom(ns);
 					u = units[t];
 					if (u && u->CanGetSpoil(i)) {
-						u->items.SetNum(i->type, u->items.GetNum(i->type) + 1);
-						u->faction->DiscoverItem(i->type, 0, 1);
-						i->num--;
+						u->items.SetNum(i.type, u->items.GetNum(i.type) + 1);
+						u->faction->DiscoverItem(i.type, 0, 1);
+						i.num--;
 					} else {
 						std::erase(units, u);
 						ns = units.size();
 					}
 				}
 				units.clear();
-			} while (ns > 0 && i->num > 0);
+			} while (ns > 0 && i.num > 0);
 		}
 	}
 

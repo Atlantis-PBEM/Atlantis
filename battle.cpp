@@ -362,9 +362,9 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	b->stats.ClearRound();
 }
 
-void Battle::GetSpoils(AList *losers, ItemList *spoils, int ass)
+void Battle::GetSpoils(AList *losers, ItemList& spoils, int assassination)
 {
-	ItemList *ships = new ItemList;
+	ItemList ships;
 	string quest_rewards;
 
 	forlist(losers) {
@@ -377,41 +377,42 @@ void Battle::GetSpoils(AList *losers, ItemList *spoils, int ass)
 				AddLine(AString("Quest completed! ") + quest_rewards);
 			}
 		}
-		forlist(&u->items) {
-			Item * i = (Item *) elem;
-			if (IsSoldier(i->type)) continue;
+		// Since the code below can modify the item list, iterate a copy
+		ItemList itemsCopy = u->items;
+		for(auto i: itemsCopy) {
+			if (IsSoldier(i.type)) continue;
 			// ignore incomplete ships
-			if (ItemDefs[i->type].type & IT_SHIP) continue;
+			if (ItemDefs[i.type].type & IT_SHIP) continue;
 			// New rule:  Assassins with RINGS cannot get AMTS in spoils
 			// This rule is only meaningful with Proportional AMTS usage
 			// is enabled, otherwise it has no effect.
-			if ((ass == 2) && (i->type == I_AMULETOFTS)) continue;
+			if ((assassination == 2) && (i.type == I_AMULETOFTS)) continue;
 			float percent = (float)numdead/(float)(numalive+numdead);
 			// incomplete ships:
-			if (ItemDefs[i->type].type & IT_SHIP) {
+			if (ItemDefs[i.type].type & IT_SHIP) {
 				if (getrandom(100) < percent) {
-					u->items.SetNum(i->type, 0);
-					if (i->num < ships->GetNum(i->type))
-						ships->SetNum(i->type, i->num);
+					u->items.SetNum(i.type, 0);
+					if (i.num < ships.GetNum(i.type))
+						ships.SetNum(i.type, i.num);
 				}
 			} else {
-				int num = (int)(i->num * percent);
+				int num = (int)(i.num * percent);
 				int num2 = (num + getrandom(2))/2;
-				if (ItemDefs[i->type].type & IT_ALWAYS_SPOIL) {
+				if (ItemDefs[i.type].type & IT_ALWAYS_SPOIL) {
 					num2 = num;
 				}
-				if (ItemDefs[i->type].type & IT_NEVER_SPOIL) {
+				if (ItemDefs[i.type].type & IT_NEVER_SPOIL) {
 					num2 = 0;
 				}
-				spoils->SetNum(i->type, spoils->GetNum(i->type) + num2);
-				u->items.SetNum(i->type, i->num - num);
+				spoils.SetNum(i.type, spoils.GetNum(i.type) + num2);
+				u->items.SetNum(i.type, i.num - num);
 			}
 		}
 	}
 	// add incomplete ships to spoils...
 	for (int sh = 0; sh < NITEMS; sh++) {
 		if (ItemDefs[sh].type & IT_SHIP) {
-			spoils->SetNum(sh, ships->GetNum(sh));
+			spoils.SetNum(sh, ships.GetNum(sh));
 		}
 	}
 }
@@ -575,11 +576,11 @@ int Battle::Run(Events* events,
 		}
 
 		AddLine("Total Casualties:");
-		ItemList *spoils = new ItemList;
+		ItemList spoils;
 		armies[0]->Lose(this, spoils);
 		GetSpoils(atts, spoils, ass);
-		if (spoils->Num()) {
-			temp = AString("Spoils: ") + spoils->Report(2,0,1) + ".";
+		if (spoils.size()) {
+			temp = AString("Spoils: ") + spoils.Report(2,0,1) + ".";
 		} else {
 			temp = "Spoils: none.";
 		}
@@ -590,7 +591,6 @@ int Battle::Run(Events* events,
 		AddLine(temp);
 		AddLine("");
 
-		delete spoils;
 		delete armies[0];
 		delete armies[1];
 		return BATTLE_LOST;
@@ -632,11 +632,11 @@ int Battle::Run(Events* events,
 		}
 
 		AddLine("Total Casualties:");
-		ItemList *spoils = new ItemList;
+		ItemList spoils;
 		armies[1]->Lose(this, spoils);
 		GetSpoils(defs, spoils, ass);
-		if (spoils->Num()) {
-			temp = AString("Spoils: ") + spoils->Report(2,0,1) + ".";
+		if (spoils.size()) {
+			temp = AString("Spoils: ") + spoils.Report(2,0,1) + ".";
 		} else {
 			temp = "Spoils: none.";
 		}
@@ -646,7 +646,6 @@ int Battle::Run(Events* events,
 		AddLine(temp);
 		AddLine("");
 
-		delete spoils;
 		delete armies[0];
 		delete armies[1];
 		return BATTLE_WON;
@@ -904,7 +903,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 				// Can't get building bonus in another region without EXTENDED_FORT_DEFENCE
 				if (i>=0 && !Globals->EXTENDED_FORT_DEFENCE) {
 					((Object *) elem)->capacity = 0;
-					((Object *) elem)->shipno = ((Object *) elem)->ships.Num();
+					((Object *) elem)->shipno = ((Object *) elem)->ships.size();
 					continue;
 				}
 

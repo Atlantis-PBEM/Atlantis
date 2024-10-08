@@ -357,16 +357,15 @@ AString Unit::GetName(int obs)
 	return ret;
 }
 
-int Unit::CanGetSpoil(Item *i)
+int Unit::CanGetSpoil(Item& i)
 {
 	int weight, load, capacity;
 
-	if (!i) return 0;
-	if (ItemDefs[i->type].type & IT_SHIP) {
+	if (ItemDefs[i.type].type & IT_SHIP) {
 		// Don't pick up an incomplete ship if we already have one
-		if (items.GetNum(i->type) > 0) return 0;
+		if (items.GetNum(i.type) > 0) return 0;
 	}
-	weight = ItemDefs[i->type].weight;
+	weight = ItemDefs[i.type].weight;
 	if (!weight) return 1; // any unit can carry 0 weight spoils
 
 	if (flags & FLAG_NOSPOILS)
@@ -375,31 +374,30 @@ int Unit::CanGetSpoil(Item *i)
 	load = items.Weight();
 
 	if (flags & FLAG_FLYSPOILS) {
-		capacity = ItemDefs[i->type].fly;
+		capacity = ItemDefs[i.type].fly;
 		if (FlyingCapacity() + capacity < load + weight)
 			return 0;
 	}
 
 	if (flags & FLAG_RIDESPOILS) {
-		capacity = ItemDefs[i->type].ride;
+		capacity = ItemDefs[i.type].ride;
 		if (RidingCapacity() + capacity < load + weight)
 			return 0;
 	}
 
 	if (flags & FLAG_WALKSPOILS) {
-		capacity = ItemDefs[i->type].walk;
-		if (ItemDefs[i->type].hitchItem) {
-			if (items.GetNum(ItemDefs[i->type].hitchItem) >
-					items.GetNum(i->type))
-				capacity = ItemDefs[i->type].hitchwalk;
+		capacity = ItemDefs[i.type].walk;
+		if (ItemDefs[i.type].hitchItem) {
+			if (items.GetNum(ItemDefs[i.type].hitchItem) > items.GetNum(i.type))
+				capacity = ItemDefs[i.type].hitchwalk;
 		}
 		if (WalkingCapacity() + capacity < load + weight)
 			return 0;
 	}
 
 	if (flags & FLAG_SWIMSPOILS) {
-		capacity = ItemDefs[i->type].swim;
-		if (ItemDefs[i->type].type & IT_SHIP)
+		capacity = ItemDefs[i.type].swim;
+		if (ItemDefs[i.type].type & IT_SHIP)
 			capacity = 0;
 		if (SwimmingCapacity() + capacity < load + weight)
 			return 0;
@@ -694,39 +692,38 @@ void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int au
 	// Clear any marks on the item list since we want to report items in a specific order.
 	// Not sure this is necessary with json output, but we are going to hold it for now so that the array in json
 	// is in the same order the items would be listed in the normal report.
-	forlist(&items) { ((Item *)elem)->checked = 0; }
+	for(auto& i: items) { i.checked = 0; }
 
 	// now, report the items in the specific order (men, monsters, weapons, mounts, wagons, other, silver)
 	// items will be marked when they are reported to make sure they don't get reported twice if they fit
 	// multiple categories.
 	for (auto output_phase = 0; output_phase < 7; output_phase++) {
-		forlist(&items) {
-			Item *item = (Item *)elem;
-			if (item->checked) continue;
+		for(auto& item: items) {
+			if (item.checked) continue;
 
-			ItemType def = ItemDefs[item->type];
+			ItemType def = ItemDefs[item.type];
 			bool combat_item = (def.type & (IT_WEAPON | IT_BATTLE | IT_ARMOR | IT_MAGIC));
 			bool item_reported_in_other_phase = (
 				(def.type & (IT_WEAPON | IT_BATTLE | IT_ARMOR | IT_MAGIC | IT_MOUNT | IT_MAN | IT_MONSTER)) ||
-				(item->type == I_WAGON) || (item->type == I_MWAGON) || (item->type == I_SILVER)
+				(item.type == I_WAGON) || (item.type == I_MWAGON) || (item.type == I_SILVER)
 			);
 
 			if (output_phase == 0 && !(def.type & IT_MAN)) continue;
 			if (output_phase == 1 && !(def.type & IT_MONSTER)) continue;
 			if (output_phase == 2 && !combat_item) continue;
 			if (output_phase == 3 && !(def.type & IT_MOUNT)) continue;
-			if (output_phase == 4 && !((item->type == I_WAGON) || (item->type == I_MWAGON))) continue;
+			if (output_phase == 4 && !((item.type == I_WAGON) || (item.type == I_MWAGON))) continue;
 			if (output_phase == 5 && item_reported_in_other_phase) continue;
-			if (output_phase == 6 && !(item->type == I_SILVER)) continue;
+			if (output_phase == 6 && !(item.type == I_SILVER)) continue;
 
-			item->checked = 1;
+			item.checked = 1;
 			if (my_unit || (def.weight != 0)) {
 				json item_obj = json{ { "name", def.name }, { "tag", def.abr }, { "plural", def.names } };
 				if (def.type & IT_SHIP) {
 					item_obj["unfinished"] = true;
-					item_obj["needs"] = item->num;
+					item_obj["needs"] = item.num;
 				} else {
-					item_obj["amount"] = item->num;
+					item_obj["amount"] = item.num;
 				}
 				if (see_illusion && (def.type & IT_ILLUSION)) item_obj["illusion"] = true;
 				j["items"].push_back(item_obj);
@@ -810,9 +807,8 @@ void Unit::DefaultOrders(Object *obj)
 			std::set<int> perferred;
 
 			int aggression = 0;
-			forlist(&items) {
-				Item *item = (Item *) elem;
-				ItemType &itemType = ItemDefs[item->type];
+			for(auto it: items) {
+				ItemType &itemType = ItemDefs[it.type];
 
 				if (!(itemType.type & IT_MONSTER)) {
 					continue;
@@ -855,7 +851,8 @@ void Unit::DefaultOrders(Object *obj)
 
 				const int terrainSimilarType = TerrainDefs[n->type].similar_type;
 
-				if (terrainSimilarType == R_OCEAN && !CanReallySwim() && !(CanFly(weight) && Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED)) {
+				if (terrainSimilarType == R_OCEAN && !CanReallySwim() &&
+						!(CanFly(weight) && Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_UNLIMITED)) {
 					continue;
 				}
 
@@ -949,11 +946,10 @@ void Unit::DefaultOrders(Object *obj)
 void Unit::PostTurn(ARegion *r)
 {
 	if (type == U_WMON) {
-		forlist(&items) {
-			Item *i = (Item *) elem;
-			if (!(ItemDefs[i->type].type & IT_MONSTER)) {
-				items.Remove(i);
-				delete i;
+		for(auto it = items.begin(); it != items.end(); ++it) {
+			if (!(ItemDefs[it->type].type & IT_MONSTER)) {
+				it = items.erase(it);
+				it--;
 			}
 		}
 		if (free > 0) --free;
@@ -991,9 +987,8 @@ int Unit::IsAlive()
 	if (type == U_MAGE || type == U_APPRENTICE) {
 		return(GetMen());
 	} else {
-		forlist(&items) {
-			Item *i = (Item *) elem;
-			if (IsSoldier(i->type) && i->num > 0)
+		for(auto i: items) {
+			if (IsSoldier(i.type) && i.num > 0)
 				return 1;
 		}
 	}
@@ -1023,10 +1018,9 @@ int Unit::GetMen(int t)
 int Unit::GetMons()
 {
 	int n=0;
-	forlist(&items) {
-		Item *i = (Item *) elem;
-		if (ItemDefs[i->type].type & IT_MONSTER) {
-			n += i->num;
+	for(auto i: items) {
+		if (ItemDefs[i.type].type & IT_MONSTER) {
+			n += i.num;
 		}
 	}
 	return n;
@@ -1035,10 +1029,9 @@ int Unit::GetMons()
 int Unit::GetMen()
 {
 	int n = 0;
-	forlist(&items) {
-		Item *i = (Item *) elem;
-		if (ItemDefs[i->type].type & IT_MAN) {
-			n += i->num;
+	for(auto i: items) {
+		if (ItemDefs[i.type].type & IT_MAN) {
+			n += i.num;
 		}
 	}
 	return n;
@@ -1047,10 +1040,9 @@ int Unit::GetMen()
 int Unit::GetLeaders()
 {
 	int n = 0;
-	forlist (&items) {
-		Item *i = (Item *)elem;
-		if (ItemDefs[i->type].type & IT_LEADER) {
-			n += i->num;
+	for(auto i: items) {
+		if (ItemDefs[i.type].type & IT_LEADER) {
+			n += i.num;
 		}
 	}
 	return n;
@@ -1059,9 +1051,8 @@ int Unit::GetLeaders()
 int Unit::GetSoldiers()
 {
 	int n = 0;
-	forlist(&items) {
-		Item *i = (Item *) elem;
-		if (IsSoldier(i->type)) n+=i->num;
+	for(auto i: items) {
+		if (IsSoldier(i.type)) n += i.num;
 	}
 
 	return n;
@@ -1140,13 +1131,12 @@ int Unit::GetAttackRiding()
 {
     int riding = 0;
 	if (type == U_WMON) {
-		forlist(&items) {
-			Item *i = (Item *) elem;
-			if (ItemDefs[i->type].type & IT_MONSTER) {
-				if (ItemDefs[i->type].fly) {
+		for(auto i: items) {
+			if (ItemDefs[i.type].type & IT_MONSTER) {
+				if (ItemDefs[i.type].fly) {
 					return 5;
 				}
-				if (ItemDefs[i->type].ride) riding = 3;
+				if (ItemDefs[i.type].ride) riding = 3;
 			}
 		}
 		return riding;
@@ -1154,22 +1144,18 @@ int Unit::GetAttackRiding()
 		int attackriding = 0;
 		int minweight = 10000;
         AString skname;
-		forlist(&items) {
-			Item *i = (Item *)elem;
-			if (ItemDefs[i->type].type & IT_MAN)
-				if (ItemDefs[i->type].weight < minweight)
-					minweight = ItemDefs[i->type].weight;
+		for(auto i: items) {
+			if (ItemDefs[i.type].type & IT_MAN)
+				if (ItemDefs[i.type].weight < minweight)
+					minweight = ItemDefs[i.type].weight;
 		}
-		forlist_reuse (&items) {
-            MountType *mount;
-            int skill, maxBonus;
-			Item *i = (Item *)elem;
-            if (!(ItemDefs[i->type].type & IT_MOUNT))
-                continue;
-            mount = FindMount(ItemDefs[i->type].abr);
-            if (!mount)
-                continue;
-            maxBonus = mount->maxBonus;
+		for(auto i: items) {
+            if (!(ItemDefs[i.type].type & IT_MOUNT)) continue;
+
+            MountType *mount = FindMount(ItemDefs[i.type].abr);
+            if (!mount) continue;
+
+            int maxBonus = mount->maxBonus;
             /*
              * This code applies terrain restrictions to the attack riding
              * calculations, but given that these have never been applied
@@ -1183,7 +1169,7 @@ int Unit::GetAttackRiding()
                 maxBonus = 0;
             */
             skname = mount->skill;
-            skill = LookupSkill(&skname);
+            int skill = LookupSkill(&skname);
             if (skill == -1) {
                 // This mount doesn't require skill to use.
                 // I guess the rider gets the max bonus!
@@ -1191,9 +1177,9 @@ int Unit::GetAttackRiding()
                     attackriding = maxBonus;
             } else {
                 riding = GetSkill(skill);
-                if ((ItemDefs[i->type].type & IT_MAN)
-                        || (ItemDefs[i->type].fly - ItemDefs[i->type].weight >= minweight)
-                        || (ItemDefs[i->type].ride - ItemDefs[i->type].weight >= minweight)) {
+                if ((ItemDefs[i.type].type & IT_MAN) ||
+						(ItemDefs[i.type].fly - ItemDefs[i.type].weight >= minweight)||
+						(ItemDefs[i.type].ride - ItemDefs[i.type].weight >= minweight)) {
                     if (riding > maxBonus)
                         riding = maxBonus;
                     if (attackriding < riding)
@@ -1215,11 +1201,9 @@ int Unit::GetDefenseRiding()
 	if (CanFly(weight)) {
         riding = 5;
         // Limit riding to the slowest flying mount
-		forlist(&items) {
-			Item *i = (Item *)elem;
-			if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].fly) {
-                MountType *mount;
-                mount = FindMount(ItemDefs[i->type].abr);
+		for(auto i: items) {
+			if (ItemDefs[i.type].type & IT_MOUNT && ItemDefs[i.type].fly) {
+                MountType *mount = FindMount(ItemDefs[i.type].abr);
                 if (mount) {
                     // If we wanted to apply terrain restrictions,
                     // we'd do it here
@@ -1231,11 +1215,9 @@ int Unit::GetDefenseRiding()
 	} else if (CanRide(weight)) {
         riding = 3;
         // Limit riding to the slowest riding mount
-		forlist(&items) {
-			Item *i = (Item *)elem;
-			if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].ride) {
-                MountType *mount;
-                mount = FindMount(ItemDefs[i->type].abr);
+		for(auto i: items) {
+			if (ItemDefs[i.type].type & IT_MOUNT && ItemDefs[i.type].ride) {
+                MountType *mount = FindMount(ItemDefs[i.type].abr);
                 if (mount) {
                     // If we wanted to apply terrain restrictions,
                     // we'd also do it here
@@ -1275,31 +1257,21 @@ int Unit::GetAvailSkill(int sk)
 	AString str;
 	int retval = GetRealSkill(sk);
 
-	forlist (&items) {
-		Item *i = (Item *)elem;
-		if (ItemDefs[i->type].flags & ItemType::DISABLED) continue;
-		if (ItemDefs[i->type].type & IT_MAGEONLY
-				&& type != U_MAGE
-				&& type != U_APPRENTICE
-				&& type != U_GUARDMAGE)
+	for(auto i: items) {
+		if (ItemDefs[i.type].flags & ItemType::DISABLED) continue;
+		if ((ItemDefs[i.type].type & IT_MAGEONLY) && type != U_MAGE && type != U_APPRENTICE && type != U_GUARDMAGE)
 			continue;
-		if ((SkillDefs[sk].flags & SkillType::MAGIC)
-				&& type != U_MAGE
-				&& type != U_APPRENTICE
-				&& type != U_GUARDMAGE)
+		if ((SkillDefs[sk].flags & SkillType::MAGIC) && type != U_MAGE && type != U_APPRENTICE && type != U_GUARDMAGE)
 			continue;
-		if (i->num < GetMen())
-			continue;
-		str = ItemDefs[i->type].grantSkill;
-		if (ItemDefs[i->type].grantSkill && LookupSkill(&str) == sk) {
+		if (i.num < GetMen()) continue;
+		str = ItemDefs[i.type].grantSkill;
+		if (ItemDefs[i.type].grantSkill && LookupSkill(&str) == sk) {
 			int grant = 0;
 			for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills) / sizeof(ItemDefs[0].fromSkills[0]); j++) {
-				if (ItemDefs[i->type].fromSkills[j]) {
-					int fromSkill;
+				if (ItemDefs[i.type].fromSkills[j]) {
+					str = ItemDefs[i.type].fromSkills[j];
 
-					str = ItemDefs[i->type].fromSkills[j];
-
-					fromSkill = LookupSkill(&str);
+					int fromSkill = LookupSkill(&str);
 					if (fromSkill != -1) {
 						/*
 							Should this use GetRealSkill or GetAvailSkill?
@@ -1311,10 +1283,10 @@ int Unit::GetAvailSkill(int sk)
 					}
 				}
 			}
-			if (grant < ItemDefs[i->type].minGrant)
-				grant = ItemDefs[i->type].minGrant;
-			if (grant > ItemDefs[i->type].maxGrant)
-				grant = ItemDefs[i->type].maxGrant;
+			if (grant < ItemDefs[i.type].minGrant)
+				grant = ItemDefs[i.type].minGrant;
+			if (grant > ItemDefs[i.type].maxGrant)
+				grant = ItemDefs[i.type].maxGrant;
 
 			if (grant > retval)
 				retval = grant;
@@ -1451,11 +1423,10 @@ int Unit::GetSkillMax(int sk)
 
 	if (SkillDefs[sk].flags & SkillType::DISABLED) return 0;
 
-	forlist (&items) {
-		Item *i = (Item *)elem;
-		if (ItemDefs[i->type].flags & ItemType::DISABLED) continue;
-		if (!(ItemDefs[i->type].type & IT_MAN)) continue;
-		int m = SkillMax(SkillDefs[sk].abbr, i->type);
+	for(auto i: items) {
+		if (ItemDefs[i.type].flags & ItemType::DISABLED) continue;
+		if (!(ItemDefs[i.type].type & IT_MAN)) continue;
+		int m = SkillMax(SkillDefs[sk].abbr, i.type);
 		if ((max == 0 && m > max) || (m < max)) max = m;
 	}
 	return max;
@@ -1479,28 +1450,21 @@ int Unit::Practice(int sk)
 
 		reqlev = 0;
 
-		forlist (&items) {
-			Item *it = (Item *)elem;
-			if (ItemDefs[it->type].flags & ItemType::DISABLED) continue;
-			if (ItemDefs[it->type].type & IT_MAGEONLY
-					&& type != U_MAGE
-					&& type != U_APPRENTICE
-					&& type != U_GUARDMAGE)
+		for(auto it: items) {
+			if (ItemDefs[it.type].flags & ItemType::DISABLED) continue;
+			if ((ItemDefs[it.type].type & IT_MAGEONLY) && type != U_MAGE && type != U_APPRENTICE && type != U_GUARDMAGE)
 				continue;
-			if ((SkillDefs[sk].flags & SkillType::MAGIC)
-					&& type != U_MAGE
-					&& type != U_APPRENTICE
-					&& type != U_GUARDMAGE)
+			if ((SkillDefs[sk].flags & SkillType::MAGIC) && type != U_MAGE && type != U_APPRENTICE && type != U_GUARDMAGE)
 				continue;
-			if (it->num < GetMen())
+			if (it.num < GetMen())
 				continue;
-			str = ItemDefs[it->type].grantSkill;
-			if (ItemDefs[it->type].grantSkill && LookupSkill(&str) == sk) {
+			str = ItemDefs[it.type].grantSkill;
+			if (ItemDefs[it.type].grantSkill && LookupSkill(&str) == sk) {
 				for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills) / sizeof(ItemDefs[0].fromSkills[0]); j++) {
-					if (ItemDefs[it->type].fromSkills[j]) {
+					if (ItemDefs[it.type].fromSkills[j]) {
 						int fromSkill;
 
-						str = ItemDefs[it->type].fromSkills[j];
+						str = ItemDefs[it.type].fromSkills[j];
 
 						fromSkill = LookupSkill(&str);
 						if (fromSkill != -1 && GetRealSkill(fromSkill) > reqlev) {
@@ -1667,13 +1631,12 @@ int Unit::MaintCost(ARegionList *regions, ARegion *current_region)
 	retval += i;
 
 	// Check for any items which require item specific maintenance and handling
-	forlist(&items) {
-		Item *it = (Item *) elem;
-		if (!(ItemDefs[it->type].flags & ItemType::MAINTENANCE)) continue;
-		int cost = ItemDefs[it->type].baseprice * it->num;
+	for(auto it: items) {
+		if (!(ItemDefs[it.type].flags & ItemType::MAINTENANCE)) continue;
+		int cost = ItemDefs[it.type].baseprice * it.num;
 		// Now, do a special check for NO7 victory work based on the flags.  Ideally the structure to seek
 		// would be a field on the item, but that would require a ton of changes to all hundreds of item defs.
-		if (ItemDefs[it->type].flags & ItemType::SEEK_ALTAR) {
+		if (ItemDefs[it.type].flags & ItemType::SEEK_ALTAR) {
 			// if the unit moved, figure out if it moved toward or away from an altar
 			if (initial_region) {
 				// Find the nearest O_RITUAL_ALTAR from the start of turn location (initial_region)
@@ -1792,11 +1755,10 @@ int Unit::Weight()
 int Unit::FlyingCapacity()
 {
 	int cap = 0;
-	forlist(&items) {
-		Item *i = (Item *) elem;
+	for(auto i: items) {
 		// except ship items
-		if (ItemDefs[i->type].type & IT_SHIP) continue;
-		cap += ItemDefs[i->type].fly * i->num;
+		if (ItemDefs[i.type].type & IT_SHIP) continue;
+		cap += ItemDefs[i.type].fly * i.num;
 	}
 
 	return cap;
@@ -1805,9 +1767,8 @@ int Unit::FlyingCapacity()
 int Unit::RidingCapacity()
 {
 	int cap = 0;
-	forlist(&items) {
-		Item *i = (Item *) elem;
-		cap += ItemDefs[i->type].ride * i->num;
+	for(auto i: items) {
+		cap += ItemDefs[i.type].ride * i.num;
 	}
 
 	return cap;
@@ -1816,11 +1777,10 @@ int Unit::RidingCapacity()
 int Unit::SwimmingCapacity()
 {
 	int cap = 0;
-	forlist(&items) {
-		Item *i = (Item *) elem;
+	for(auto i: items) {
 		// except ship items
-		if (ItemDefs[i->type].type & IT_SHIP) continue;
-		cap += ItemDefs[i->type].swim * i->num;
+		if (ItemDefs[i.type].type & IT_SHIP) continue;
+		cap += ItemDefs[i.type].swim * i.num;
 	}
 
 	return cap;
@@ -1829,16 +1789,15 @@ int Unit::SwimmingCapacity()
 int Unit::WalkingCapacity()
 {
 	int cap = 0;
-	forlist(&items) {
-		Item *i = (Item *) elem;
-		cap += ItemDefs[i->type].walk * i->num;
-		if (ItemDefs[i->type].hitchItem != -1) {
-			int hitch = ItemDefs[i->type].hitchItem;
+	for(auto i: items) {
+		cap += ItemDefs[i.type].walk * i.num;
+		if (ItemDefs[i.type].hitchItem != -1) {
+			int hitch = ItemDefs[i.type].hitchItem;
 			if (!(ItemDefs[hitch].flags & ItemType::DISABLED)) {
 				int hitches = items.GetNum(hitch);
-				int hitched = i->num;
+				int hitched = i.num;
 				if (hitched > hitches) hitched = hitches;
-				cap += hitched * ItemDefs[i->type].hitchwalk;
+				cap += hitched * ItemDefs[i.type].hitchwalk;
 			}
 		}
 	}
@@ -1943,33 +1902,30 @@ static int ContributesToMovement(int movetype, int item)
 int Unit::CalcMovePoints(ARegion *r)
 {
 	int movetype, speed, weight, cap, hitches;
-	Item *i;
 
 	movetype = MoveType(r);
 	speed = 0;
 	if (movetype == M_NONE)
 		return 0;
 
-	forlist(&items) {
-		i = (Item *) elem;
-		if (ContributesToMovement(movetype, i->type)) {
-			if (ItemDefs[i->type].speed > speed)
-				speed = ItemDefs[i->type].speed;
+	for(auto i: items) {
+		if (ContributesToMovement(movetype, i.type)) {
+			if (ItemDefs[i.type].speed > speed)
+				speed = ItemDefs[i.type].speed;
 		}
 	}
 	weight = items.Weight();
 	while (weight > 0 && speed > 0) {
-		forlist(&items) {
-			i = (Item *) elem;
-			cap = ContributesToMovement(movetype, i->type);
-			if (ItemDefs[i->type].speed == speed) {
+		for(auto i: items) {
+			cap = ContributesToMovement(movetype, i.type);
+			if (ItemDefs[i.type].speed == speed) {
 				if (cap > 0)
-					weight -= cap * i->num;
-				else if (ItemDefs[i->type].hitchItem != -1) {
-					hitches = items.GetNum(ItemDefs[i->type].hitchItem);
-					if (i->num < hitches)
-						hitches = i->num;
-					weight -= hitches * ItemDefs[i->type].hitchwalk;
+					weight -= cap * i.num;
+				else if (ItemDefs[i.type].hitchItem != -1) {
+					hitches = items.GetNum(ItemDefs[i.type].hitchItem);
+					if (i.num < hitches)
+						hitches = i.num;
+					weight -= hitches * ItemDefs[i.type].hitchwalk;
 				}
 			}
 		}
@@ -2069,11 +2025,9 @@ int Unit::Hostile()
 {
 	if (type != U_WMON) return 0;
 	int retval = 0;
-	forlist(&items) {
-		Item *i = (Item *) elem;
-		if (ItemDefs[i->type].type & IT_MONSTER) {
-			MonType *mp = FindMonster(ItemDefs[i->type].abr,
-					(ItemDefs[i->type].type & IT_ILLUSION));
+	for(auto i: items) {
+		if (ItemDefs[i.type].type & IT_MONSTER) {
+			MonType *mp = FindMonster(ItemDefs[i.type].abr, (ItemDefs[i.type].type & IT_ILLUSION));
 			int hos = mp->hostile;
 			if (hos > retval) retval = hos;
 		}
@@ -2118,30 +2072,29 @@ int Unit::Taxers(int numtaxers)
 	int numUsableBattle = 0;
 	int numArmor = 0;
 
-	forlist (&items) {
-		Item *pItem = (Item *) elem;
+	for(auto item: items) {
 		BattleItemType *pBat = NULL;
 
-		if ((ItemDefs[pItem->type].type & IT_BATTLE) &&
-		((pBat = FindBattleItem(ItemDefs[pItem->type].abr)) != NULL) &&
+		if ((ItemDefs[item.type].type & IT_BATTLE) &&
+		((pBat = FindBattleItem(ItemDefs[item.type].abr)) != NULL) &&
 		(pBat->flags & BattleItemType::SPECIAL)) {
 		// Only consider offensive items
 			if ((Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM) &&
 			(!(pBat->flags & BattleItemType::MAGEONLY) ||
 			 type == U_MAGE || type == U_APPRENTICE)) {
-				numUsableBattle += pItem->num;
-				numBattle += pItem->num;
+				numUsableBattle += item.num;
+				numBattle += item.num;
 				continue; // Don't count this as a weapon as well!
 			}
 			if (Globals->WHO_CAN_TAX & GameDefs::TAX_BATTLE_ITEM) {
-				numBattle += pItem->num;
+				numBattle += item.num;
 				continue; // Don't count this as a weapon as well!
 			}
 		}
 
-		if (ItemDefs[pItem->type].type & IT_WEAPON) {
-			WeaponType *pWep = FindWeapon(ItemDefs[pItem->type].abr);
-			int num = pItem->num;
+		if (ItemDefs[item.type].type & IT_WEAPON) {
+			WeaponType *pWep = FindWeapon(ItemDefs[item.type].abr);
+			int num = item.num;
 			int basesk = 0;
 			AString skname = pWep->baseSkill;
 			int sk = LookupSkill(&skname);
@@ -2176,27 +2129,27 @@ int Unit::Taxers(int numtaxers)
 			}
 		}
 
-		if (ItemDefs[pItem->type].type & IT_MOUNT) {
-			MountType *pm = FindMount(ItemDefs[pItem->type].abr);
+		if (ItemDefs[item.type].type & IT_MOUNT) {
+			MountType *pm = FindMount(ItemDefs[item.type].abr);
 			if (pm->skill) {
 				AString skname = pm->skill;
 				int sk = LookupSkill(&skname);
 				if (pm->minBonus <= GetSkill(sk))
-					numUsableMounts += pItem->num;
+					numUsableMounts += item.num;
 			} else
-				numUsableMounts += pItem->num;
-			numMounts += pItem->num;
+				numUsableMounts += item.num;
+			numMounts += item.num;
 		}
 
-		if (ItemDefs[pItem->type].type & IT_MONSTER) {
-			if (ItemDefs[pItem->type].type & IT_ILLUSION)
-				illusions += pItem->num;
+		if (ItemDefs[item.type].type & IT_MONSTER) {
+			if (ItemDefs[item.type].type & IT_ILLUSION)
+				illusions += item.num;
 			else
-				creatures += pItem->num;
+				creatures += item.num;
 		}
 
-		if (ItemDefs[pItem->type].type & IT_ARMOR) {
-			numArmor += pItem->num;
+		if (ItemDefs[item.type].type & IT_ARMOR) {
+			numArmor += item.num;
 		}
 	}
 
@@ -2598,11 +2551,9 @@ int Unit::GetAttribute(char const *attrib)
 	int monbonus = 0;
 
 	if (ap->flags & AttribModType::CHECK_MONSTERS) {
-		forlist (&items) {
-			Item *i = (Item *) elem;
-			if (ItemDefs[i->type].type & IT_MONSTER) {
-				MonType *mp = FindMonster(ItemDefs[i->type].abr,
-						(ItemDefs[i->type].type & IT_ILLUSION));
+		for(auto i: items) {
+			if (ItemDefs[i.type].type & IT_MONSTER) {
+				MonType *mp = FindMonster(ItemDefs[i.type].abr, (ItemDefs[i.type].type & IT_ILLUSION));
 				int val = 0;
 				temp = attrib;
 				if (temp == "observation") val = mp->obs;
@@ -2772,11 +2723,11 @@ void Unit::SkillStarvation()
 		}
 	}
 	if (!count) {
-		forlist(&items) {
-			Item *i = (Item *)elem;
-			if (ItemDefs[i->type].type & IT_MAN) {
-				count += items.GetNum(i->type);
-				items.SetNum(i->type, 0);
+		ItemList itemsCopy = items;  // Since we can remove men below, which could remove the item, iterate the copy.
+		for(auto i: itemsCopy) {
+			if (ItemDefs[i.type].type & IT_MAN) {
+				count += items.GetNum(i.type);
+				items.SetNum(i.type, 0);
 			}
 		}
 		error(to_string(count) + " starve to death.");

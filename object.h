@@ -167,7 +167,7 @@ class Object : public AListElem
 		int movepoints;
 		int destroyed;	// how much points was destroyed so far this turn
 		std::vector<Unit *> units;
-		AList ships;
+		ItemList ships;
 };
 
 #endif

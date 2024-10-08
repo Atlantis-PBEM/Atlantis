@@ -1593,11 +1593,10 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		if (!pCheck) {
 			// look for an incomplete ship type in inventory
 			int st = O_DUMMY;
-			forlist(&unit->items) {
-				Item * it = (Item *) elem;
-				if ((ItemDefs[it->type].type & IT_SHIP)
-					&& (!(ItemDefs[it->type].flags & ItemType::DISABLED))) {
-						st = -(it->type);
+			for(auto it: unit->items) {
+				if ((ItemDefs[it.type].type & IT_SHIP)
+					&& (!(ItemDefs[it.type].flags & ItemType::DISABLED))) {
+						st = -(it.type);
 						break;
 				}
 			}
