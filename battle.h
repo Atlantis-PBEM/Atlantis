@@ -67,7 +67,7 @@ class Battle : public AListElem
 		void DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 				int behind, int ass = 0, bool canAttackBehind = false, bool canAttackFromBehind = false);
 
-		void GetSpoils(AList *,ItemList *, int);
+		void GetSpoils(AList *loser, ItemList& spoils, int assasination);
 
 		//
 		// These functions should be implemented in specials.cpp

@@ -192,13 +192,13 @@ std::string QuestList::distribute_rewards(Unit *u, std::shared_ptr<Quest> q)
 	return q->get_rewards();
 }
 
-int QuestList::check_kill_target(Unit *u, ItemList *reward, std::string *quest_rewards)
+int QuestList::check_kill_target(Unit *u, ItemList& reward, std::string *quest_rewards)
 {
 	for(auto q: quests) {
 		if (q->type == Quest::SLAY && q->target == u->num) {
 			// This dead thing was the target of a quest!
 			for(auto i: q->rewards) {
-				reward->SetNum(i.type, reward->GetNum(i.type) + i.num);
+				reward.SetNum(i.type, reward.GetNum(i.type) + i.num);
 			}
 			*quest_rewards = q->get_rewards();
 			erase(q); // this is safe since we immediately return and don't use the iterator again

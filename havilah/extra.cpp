@@ -164,7 +164,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 					if (u->faction->num == monfaction) {
 						if (!d--) {
 							q->target = u->num;
-							
+
 						}
 					}
 				}
@@ -338,7 +338,6 @@ Faction *Game::CheckVictory()
 	int skilldays, magicdays, skilllevels, magiclevels;
 	int dir, found;
 	unsigned ucount;
-	Item *item;
 	ARegion *r, *start;
 	Object *o;
 	Faction *f;
@@ -602,17 +601,16 @@ Faction *Game::CheckVictory()
 					for(auto u: o->units) {
 						if (u->faction == f) {
 							units++;
-							forlist(&u->items) {
-								item = (Item *) elem;
-								if (ItemDefs[item->type].type & IT_LEADER)
-									leaders += item->num;
-								else if (ItemDefs[item->type].type & IT_MAN)
-									men += item->num;
-								else if (ItemDefs[item->type].type & IT_MONEY)
-									silver += item->num * ItemDefs[item->type].baseprice;
+							for(auto item: u->items) {
+								if (ItemDefs[item.type].type & IT_LEADER)
+									leaders += item.num;
+								else if (ItemDefs[item.type].type & IT_MAN)
+									men += item.num;
+								else if (ItemDefs[item.type].type & IT_MONEY)
+									silver += item.num * ItemDefs[item.type].baseprice;
 								else
-									stuff += item->num * ItemDefs[item->type].baseprice;
-									
+									stuff += item.num * ItemDefs[item.type].baseprice;
+
 							}
 							for(auto s: u->skills) {
 								if (SkillDefs[s->type].flags & SkillType::MAGIC) {

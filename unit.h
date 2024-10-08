@@ -126,7 +126,7 @@ class Unit
 		void Readin(std::istream& f, AList *);
 
 		AString SpoilsReport(void);
-		int CanGetSpoil(Item *i);
+		int CanGetSpoil(Item& i);
 		json build_json_descriptor();
 		void build_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes);
 		json write_json_orders();
@@ -154,9 +154,9 @@ class Unit
 		int GetMoney();
 		void SetMoney(int);
 		int GetSharedNum(int);
-		void ConsumeShared(int,int);
+		void ConsumeShared(int item, int needed);
 		int GetSharedMoney();
-		void ConsumeSharedMoney(int);
+		void ConsumeSharedMoney(int needed);
 		int IsAlive();
 
 		int MaintCost(ARegionList *regions, ARegion *current_region);

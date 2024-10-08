@@ -90,7 +90,7 @@ Object::Object(ARegion *reg)
 	flying = 0;
 	destroyed = 0;
 	movepoints = Globals->PHASED_MOVE_OFFSET % Globals->MAX_SPEED;
-	ships.Empty();
+	ships.clear();
 }
 
 Object::~Object()
@@ -194,7 +194,7 @@ int Object::IsFleet()
 {
 	if (type == O_FLEET) return 1;
 	if (ObjectDefs[type].sailors > 0) return 1;
-	if (ships.Num() > 0) return 1;
+	if (ships.size() > 0) return 1;
 	return 0;
 }
 
@@ -315,14 +315,13 @@ void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
 					if (SailThroughCheck(dir) == 1) container["sail_directions"][DirectionAbrs[dir]] = true;
 				}
 			}
-			forlist(&ships) {
-				Item *ship = (Item *) elem;
-				if (ship->type != -1 && ship->num > 0) {
-					ItemType item_def = ItemDefs[ship->type];
+			for(auto ship: ships) {
+				if (ship.type != -1 && ship.num > 0) {
+					ItemType item_def = ItemDefs[ship.type];
 					if (item_def.flags & ItemType::DISABLED) continue;
 					if (!(item_def.type & IT_SHIP)) continue;
 					container["ships"].push_back(
-						{ {"name", item_def.name}, {"number", ship->num}, { "plural", item_def.names } }
+						{ {"name", item_def.name}, {"number", ship.num}, { "plural", item_def.names } }
 					);
 				}
 			}
@@ -415,9 +414,8 @@ int Object::CheckShip(int item)
 void Object::WriteoutFleet(std::ostream& f)
 {
 	if (!IsFleet()) return;
-	f << ships.Num() << "\n";
-	forlist(&ships)
-		((Item *) elem)->Writeout(f);
+	f << ships.size() << "\n";
+	for(auto ship: ships) ship.Writeout(f);
 }
 
 void Object::ReadinFleet(std::istream &f)
@@ -439,10 +437,9 @@ void Object::ReadinFleet(std::istream &f)
 int Object::GetNumShips(int type)
 {
 	if (CheckShip(type) != 0) {
-		forlist(&ships) {
-			Item *ship = (Item *) elem;
-			if (ship->type == type) {
-				return ship->num;
+		for(auto ship: ships) {
+			if (ship.type == type) {
+				return ship.num;
 			}
 		}
 	}
@@ -455,32 +452,10 @@ int Object::GetNumShips(int type)
 void Object::SetNumShips(int type, int num)
 {
 	if (CheckShip(type) != 0) {
-		if (num > 0) {
-			forlist(&ships) {
-				Item *ship = (Item *) elem;
-				if (ship->type == type) {
-					ship->num = num;
-					FleetCapacity();
-					return;
-				}
-			}
-			Item *ship = new Item;
-			ship->type = type;
-			ship->num = num;
-			ships.Add(ship);
-			FleetCapacity();
-		} else {
-			forlist(&ships) {
-				Item *ship = (Item *) elem;
-				if (ship->type == type) {
-					ships.Remove(ship);
-					delete ship;
-					FleetCapacity();
-					return;
-				}
-			}
-		}
+		ships.SetNum(type, num);
+		FleetCapacity();
 	}
+	return;
 }
 
 /* Adds one ship of the given type.

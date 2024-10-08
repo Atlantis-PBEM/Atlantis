@@ -171,16 +171,16 @@ class Army
 		Army(Unit *,AList *,int,int = 0);
 		~Army();
 
-		void WriteLosses(Battle *);
-		void Lose(Battle *,ItemList *);
-		void Win(Battle *,ItemList *);
-		void Tie(Battle *);
+		void WriteLosses(Battle *b);
+		void Lose(Battle *b,ItemList &spoils);
+		void Win(Battle *b,ItemList& spoils);
+		void Tie(Battle *b);
 		int CanBeHealed();
-		void DoHeal(Battle *);
-		void DoHealLevel(Battle *, int level, int rate, int useItems);
-		void Regenerate(Battle *);
+		void DoHeal(Battle *b);
+		void DoHealLevel(Battle *b, int level, int rate, int useItems);
+		void Regenerate(Battle *b);
 
-		void GetMonSpoils(ItemList *,int, int);
+		void GetMonSpoils(ItemList& spoils, int monitem, int free);
 
 		int Broken();
 		int NumAlive();

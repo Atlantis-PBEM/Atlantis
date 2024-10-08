@@ -755,8 +755,7 @@ void Game::RunBuildHelpers(ARegion *r)
 							continue;
 						}
 						// Make sure that unit is building
-						if (!target->monthorders ||
-								target->monthorders->type != O_BUILD) {
+						if (!target->monthorders || target->monthorders->type != O_BUILD) {
 							u->error("BUILD: Unit isn't building.");
 							u->monthorders = nullptr;
 							continue;
@@ -1261,8 +1260,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 
 			amt -= ubucks;
 			attempted -= uatt;
-			u->items.SetNum(po->item,u->items.GetNum(po->item)
-							+ ubucks);
+			u->items.SetNum(po->item,u->items.GetNum(po->item) + ubucks);
 			u->faction->DiscoverItem(po->item, 0, 1);
 			p->activity += ubucks;
 			po->target -= ubucks;
@@ -1630,9 +1628,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 		}
 
 		// Make sure that items which cannot go through a shaft don't
-		forlist(&unit->items) {
-			Item *i = (Item *) elem;
-			if (ItemDefs[i->type].flags & ItemType::NO_SHAFT) {
+		for(auto i: unit->items) {
+			if (ItemDefs[i.type].flags & ItemType::NO_SHAFT) {
 				unit->error("MOVE: Unable to fit through the shaft.");
 				goto done_moving;
 			}

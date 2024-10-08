@@ -383,14 +383,14 @@ int Game::NewGame()
 
 	if (Globals->LAIR_MONSTERS_EXIST)
 		CreateVMons();
-	
-	/*	
+
+	/*
 	if (Globals->PLAYER_ECONOMY) {
 		Equilibrate();
 	}
 	*/
-	
-	
+
+
 
 	return(1);
 }
@@ -576,7 +576,7 @@ int Game::WritePlayers()
 	f << "TurnNumber: " << TurnNumber() << "\n";
 	if (gameStatus == GAME_STATUS_UNINIT)
 		return(0);
-	
+
 	if (gameStatus == GAME_STATUS_NEW)
 		f << "GameStatus: New\n\n";
 	else if (gameStatus == GAME_STATUS_RUNNING)
@@ -1259,7 +1259,7 @@ void Game::WriteReport()
 	CountAllSpecialists();
 
 	size_t ** citems = nullptr;
-	
+
 	if (Globals->FACTION_STATISTICS) {
 		citems = new size_t * [factionseq];
 		for (int i = 0; i < factionseq; i++)
@@ -1666,7 +1666,7 @@ int Game::AllowedTrades(Faction *pFac)
 int Game::AllowedMartial(Faction *pFac)
 {
 	int points = pFac->type[F_MARTIAL];
-	
+
 	if (points < 0) points = 0;
 	if (points > allowedMartialSize - 1) points = allowedMartialSize - 1;
 
@@ -1706,55 +1706,51 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 	map< int, int > chances;
 
 	if (u->type != U_WMON) {
-
-		forlist (&u->items) {
-			Item *i = (Item *) elem;
-			if (!i->num) continue;
-			if (!ItemDefs[i->type].escape) continue;
+		// Make a copy since we can lose items to escape
+		ItemList itemCopy = u->items;
+		for(auto i: itemCopy) {
+			if (!i.num) continue;
+			if (!ItemDefs[i.type].escape) continue;
 
 			// Okay, check flat loss.
-			if (ItemDefs[i->type].escape & ItemType::LOSS_CHANCE) {
-				int losses = (i->num +
-						getrandom(ItemDefs[i->type].esc_val)) /
-					ItemDefs[i->type].esc_val;
+			if (ItemDefs[i.type].escape & ItemType::LOSS_CHANCE) {
+				int losses = (i.num + getrandom(ItemDefs[i.type].esc_val)) / ItemDefs[i.type].esc_val;
 				// LOSS_CHANCE and HAS_SKILL together mean the
 				// decay rate only applies if you don't have
 				// the required skill (this might get used if
 				// you made illusions GIVEable, for example).
-				if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
-					tmp = ItemDefs[i->type].esc_skill;
+				if (ItemDefs[i.type].escape & ItemType::HAS_SKILL) {
+					tmp = ItemDefs[i.type].esc_skill;
 					skill = LookupSkill(&tmp);
-					if (u->GetSkill(skill) >= ItemDefs[i->type].esc_val)
+					if (u->GetSkill(skill) >= ItemDefs[i.type].esc_val)
 						losses = 0;
 				}
 				if (losses) {
-					string temp = ItemString(i->type, losses) + plural(losses, " decay", " decays") +
+					string temp = ItemString(i.type, losses) + plural(losses, " decay", " decays") +
 						" into nothingness.";
 					u->event(temp, "decay");
-					u->items.SetNum(i->type,i->num - losses);
+					u->items.SetNum(i.type, i.num - losses);
 				}
-			} else if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
-				tmp = ItemDefs[i->type].esc_skill;
+			} else if (ItemDefs[i.type].escape & ItemType::HAS_SKILL) {
+				tmp = ItemDefs[i.type].esc_skill;
 				skill = LookupSkill(&tmp);
-				if (u->GetSkill(skill) < ItemDefs[i->type].esc_val) {
+				if (u->GetSkill(skill) < ItemDefs[i.type].esc_val) {
 					if (Globals->WANDERING_MONSTERS_EXIST) {
 						Faction *mfac = GetFaction(&factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
-						MonType *mp = FindMonster(ItemDefs[i->type].abr,
-								(ItemDefs[i->type].type & IT_ILLUSION));
-						mon->MakeWMon(mp->name, i->type, i->num);
+						MonType *mp = FindMonster(ItemDefs[i.type].abr, (ItemDefs[i.type].type & IT_ILLUSION));
+						mon->MakeWMon(mp->name, i.type, i.num);
 						mon->MoveUnit(r->GetDummy());
 						// This will be zero unless these are set. (0 means
 						// full spoils)
-						mon->free = Globals->MONSTER_NO_SPOILS +
-							Globals->MONSTER_SPOILS_RECOVERY;
+						mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
 					}
-					u->event("Loses control of " + ItemString(i->type, i->num) + ".", "escape");
-					u->items.SetNum(i->type, 0);
+					u->event("Loses control of " + ItemString(i.type, i.num) + ".", "escape");
+					u->items.SetNum(i.type, 0);
 				}
 			} else {
 				// ESC_LEV_*
-				tmp = ItemDefs[i->type].esc_skill;
+				tmp = ItemDefs[i.type].esc_skill;
 				skill = LookupSkill(&tmp);
 				int level = u->GetSkill(skill);
 				int chance;
@@ -1763,72 +1759,68 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 					chance = 10000;
 				else {
 					int top;
-					if (ItemDefs[i->type].escape & ItemType::ESC_NUM_SQUARE)
-						top = i->num * i->num;
+					if (ItemDefs[i.type].escape & ItemType::ESC_NUM_SQUARE)
+						top = i.num * i.num;
 					else
-						top = i->num;
+						top = i.num;
 					int bottom = 0;
-					if (ItemDefs[i->type].escape & ItemType::ESC_LEV_LINEAR)
+					if (ItemDefs[i.type].escape & ItemType::ESC_LEV_LINEAR)
 						bottom = level;
-					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_SQUARE)
+					else if (ItemDefs[i.type].escape & ItemType::ESC_LEV_SQUARE)
 						bottom = level * level;
-					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_CUBE)
+					else if (ItemDefs[i.type].escape & ItemType::ESC_LEV_CUBE)
 						bottom = level * level * level;
-					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_QUAD)
+					else if (ItemDefs[i.type].escape & ItemType::ESC_LEV_QUAD)
 						bottom = level * level * level * level;
 					else
 						bottom = 1;
-					bottom = bottom * ItemDefs[i->type].esc_val;
+					bottom = bottom * ItemDefs[i.type].esc_val;
 					chance = (top * 10000)/bottom;
 				}
 
-				if (ItemDefs[i->type].escape & ItemType::LOSE_LINKED) {
-					if (chance > chances[ItemDefs[i->type].type])
-						chances[ItemDefs[i->type].type] = chance;
+				if (ItemDefs[i.type].escape & ItemType::LOSE_LINKED) {
+					if (chance > chances[ItemDefs[i.type].type])
+						chances[ItemDefs[i.type].type] = chance;
 					linked = 1;
 				} else if (chance > getrandom(10000)) {
 					if (Globals->WANDERING_MONSTERS_EXIST) {
 						Faction *mfac = GetFaction(&factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
-						MonType *mp = FindMonster(ItemDefs[i->type].abr,
-								(ItemDefs[i->type].type & IT_ILLUSION));
-						mon->MakeWMon(mp->name, i->type, i->num);
+						MonType *mp = FindMonster(ItemDefs[i.type].abr, (ItemDefs[i.type].type & IT_ILLUSION));
+						mon->MakeWMon(mp->name, i.type, i.num);
 						mon->MoveUnit(r->GetDummy());
 						// This will be zero unless these are set. (0 means
 						// full spoils)
-						mon->free = Globals->MONSTER_NO_SPOILS +
-							Globals->MONSTER_SPOILS_RECOVERY;
+						mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
 					}
-					u->event("Loses control of " + ItemString(i->type, i->num) + ".", "escape");
-					u->items.SetNum(i->type, 0);
+					u->event("Loses control of " + ItemString(i.type, i.num) + ".", "escape");
+					u->items.SetNum(i.type, 0);
 				}
 			}
 		}
 
 		if (linked) {
 			map < int, int >::iterator i;
-			for (i = chances.begin(); i != chances.end(); i++) {
+			for (auto i: chances) {
 				// walk the chances list and for each chance, see if
 				// escape happens and if escape happens then walk all items
 				// and everything that is that type, get rid of it.
-				if ((*i).second < getrandom(10000)) continue;
-				forlist (&u->items) {
-					Item *it = (Item *)elem;
-					if (ItemDefs[it->type].type == (*i).first) {
+				if (i.second < getrandom(10000)) continue;
+				ItemList itemCopy = u->items;
+				for(auto it: itemCopy) {
+					if (ItemDefs[it.type].type == i.first) {
 						if (Globals->WANDERING_MONSTERS_EXIST) {
 							Faction *mfac = GetFaction(&factions, monfaction);
 							Unit *mon = GetNewUnit(mfac, 0);
-							MonType *mp = FindMonster(ItemDefs[it->type].abr,
-									(ItemDefs[it->type].type & IT_ILLUSION));
-							mon->MakeWMon(mp->name, it->type, it->num);
+							MonType *mp = FindMonster(ItemDefs[it.type].abr, (ItemDefs[it.type].type & IT_ILLUSION));
+							mon->MakeWMon(mp->name, it.type, it.num);
 							mon->MoveUnit(r->GetDummy());
 							// This will be zero unless these are set. (0 means
 							// full spoils)
-							mon->free = Globals->MONSTER_NO_SPOILS +
-								Globals->MONSTER_SPOILS_RECOVERY;
+							mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
 						}
-						u->event("Loses control of " + ItemString(it->type, it->num) + ".", "escape");
-						u->items.SetNum(it->type, 0);
+						u->event("Loses control of " + ItemString(it.type, it.num) + ".", "escape");
+						u->items.SetNum(it.type, 0);
 					}
 				}
 			}
@@ -1949,17 +1941,17 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	Unit *u = GetNewUnit(pFac);
 	Unit *u2;
 	AString *s = new AString("City Guard");
-	
+
 	/*
 	Awrite(AString("Begin setting up city guard in..."));
-		
+
 	AString temp = TerrainDefs[pReg->type].name;
 	temp += AString(" (") + pReg->xloc + "," + pReg->yloc;
 	temp += ")";
 	temp += AString(" in ") + *pReg->name;
 	Awrite(temp);
 	*/
-	
+
 	if ((Globals->LEADERS_EXIST) || (pReg->type == R_NEXUS)) {
 		/* standard Leader-type guards */
 		u->SetMen(I_LEADERS,num);
@@ -1993,8 +1985,8 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		u2->type = U_GUARD;
 		u2->guard = GUARD_GUARD;
 		u2->reveal = REVEAL_FACTION;
-	}			
-	
+	}
+
 	if (AC) {
 		if (Globals->START_CITY_GUARDS_PLATE) {
 			if (Globals->LEADERS_EXIST) u->items.SetNum(I_PLATEARMOR, num);
@@ -2078,20 +2070,20 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 		}
 		if ((ItemDefs[i].type & IT_ARMOR)
 			&& (num > maxarmor)) {
-			armor = i;	
+			armor = i;
 			maxarmor = num;
 		}
 	}
 	int skill = S_COMBAT;
-	
+
 	if (weapon != -1) {
 		WeaponType *wp = FindWeapon(ItemDefs[weapon].abr);
 		if (FindSkill(wp->baseSkill) == FindSkill("XBOW")) skill = S_CROSSBOW;
 		if (FindSkill(wp->baseSkill) == FindSkill("LBOW")) skill = S_LONGBOW;
 	}
-	
+
 	int sl = u->GetRealSkill(skill);
-		
+
 	if (r->type == R_NEXUS || r->IsStartingCity()) {
 		towntype = TOWN_CITY;
 		AC = 1;
@@ -2191,7 +2183,7 @@ void Game::CountItems(size_t ** citems)
 int Game::CountItem (Faction * fac, int item)
 {
 	if (ItemDefs[item].type & IT_SHIP) return 0;
-	
+
 	size_t all = 0;
 	for (const auto& r : fac->present_regions) {
 		forlist(&r->objects) {
