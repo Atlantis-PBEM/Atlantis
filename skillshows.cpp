@@ -241,7 +241,7 @@ AString *ShowSkill::Report(Faction *f) const
 					"bonus to their attack and defense during first battle "
 					"round. Bonus equals to the difference in skills but can be "
 					"+3 at most. The army with the highest level tactician "
-					"in a battle will receive this bonus round; if the highest "
+					"in a battle will receive this bonus; if the highest "
 					"levels are equal, no bonus is awarded.";
 			} else {
 				*str += "Tactics allows the unit, and all allies, to gain a "
@@ -462,7 +462,7 @@ AString *ShowSkill::Report(Faction *f) const
 			if (Globals->APPRENTICES_EXIST) {
 				*str += " or ";
 				*str += Globals->APPRENTICE_NAME;
-			}				
+			}
 			*str += ", make a temporary Gate between two regions, and "
 				"send units from one region to another. In order to do this, "
 				"both mages (the caster, and the target mage) must have "
@@ -708,12 +708,12 @@ AString *ShowSkill::Report(Faction *f) const
 						"12 sailing skill points per skill level "
 						"of Summon Wind. ";
 				}
-					 
+
 				/*
 				*str += " If the mage is flying, he will receive 2 extra "
 					"movement points.";
 				*/
-				*str += "The effects of all such mages in a fleet are cumulative. ";	
+				*str += "The effects of all such mages in a fleet are cumulative. ";
 			}
 			break;
 		case S_SUMMON_STORM:
@@ -1584,7 +1584,7 @@ AString *ShowSkill::Report(Faction *f) const
 				temp2 += "] via magic";
 				count = 0;
 				for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(ItemDefs[i].mInput[0]); c++) {
-					if (ItemDefs[i].mInput[c].item == -1) continue;	
+					if (ItemDefs[i].mInput[c].item == -1) continue;
 					count++;
 				}
 				if (count > 0) {
@@ -1592,7 +1592,7 @@ AString *ShowSkill::Report(Faction *f) const
 					temp4 = "";
 					count = 0;
 					for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(ItemDefs[i].mInput[0]); c++) {
-						if (ItemDefs[i].mInput[c].item == -1) continue;	
+						if (ItemDefs[i].mInput[c].item == -1) continue;
 						if (!(temp4 == "")) {
 							if (count > 0)
 								temp2 += ", ";
@@ -1659,7 +1659,7 @@ AString *ShowSkill::Report(Faction *f) const
 					temp4 = "";
 					count = 0;
 					for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(ItemDefs[i].pInput[0]); c++) {
-						if (ItemDefs[i].pInput[c].item == -1) continue;	
+						if (ItemDefs[i].pInput[c].item == -1) continue;
 						if (!(temp4 == "")) {
 							if (count > 0)
 								temp1 += ", ";
@@ -1875,7 +1875,7 @@ AString *ShowSkill::Report(Faction *f) const
 		if (!(*str == "")) *str += " ";
 		*str += "This skill cannot be taught to other units.";
 	}
-	if ((Globals->SKILL_PRACTICE_AMOUNT > 0) && 
+	if ((Globals->SKILL_PRACTICE_AMOUNT > 0) &&
 			(SkillDefs[skill].flags & SkillType::NOEXP)) {
 		if (!(*str == "")) *str += " ";
 		*str += "This skill cannot be increased through experience.";

@@ -23761,7 +23761,7 @@
       "tag": "ENTE"
     },
     {
-      "description": "Tactics allows the unit, and all allies, to gain a bonus to their attack and defense during first battle round. Bonus equals to the difference in skills but can be +3 at most. The army with the highest level tactician in a battle will receive this bonus round; if the highest levels are equal, no bonus is awarded. This skill costs 200 silver per month of study.",
+      "description": "Tactics allows the unit, and all allies, to gain a bonus to their attack and defense during first battle round. Bonus equals to the difference in skills but can be +3 at most. The army with the highest level tactician in a battle will receive this bonus; if the highest levels are equal, no bonus is awarded. This skill costs 200 silver per month of study.",
       "level": 1,
       "name": "tactics",
       "tag": "TACT"
