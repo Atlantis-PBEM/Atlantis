@@ -461,7 +461,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 
 	f << enclose("ul", true);
 	f << enclose("li", true) << url("#intro", "Introduction") << '\n' << enclose("li", false);
-	
+
 	f << enclose("li", true);
 	f << url("#playing", "Playing Atlantis") << '\n';
 	f << enclose("ul", true);
@@ -1251,7 +1251,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			  << "as the magical entry into Atlantis.";
 
 		} else {
-			f << "inside of the normal world of Atlantis, but " 
+			f << "inside of the normal world of Atlantis, but "
 			  << (Globals->MULTI_HEX_NEXUS ? "each contains " : "contains ")
 			  << "a starting city with all its benefits"
 			  << (Globals->GATES_EXIST ? ", including a gate" : "") << ". "
@@ -1285,7 +1285,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			if (Globals->START_CITIES_START_UNLIMITED) {
 				f << (!Globals->SAFE_START_CITIES && Globals->CITY_MONSTERS_EXIST
 				      ? "until someone conquers the guardsmen, "
-				      : "") 
+				      : "")
 				  << "there are unlimited amounts of many materials and men (though the prices are often quite high).";
 			} else {
 				f << "there are materials as well as a very large supply of men (though the prices are often quite high).";
@@ -1591,7 +1591,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			f << enclose("td align=\"center\"", true) << ItemDefs[i].weight/50 << '\n'  << enclose("td", false);
 			f << enclose("td align=\"center\"", true) << slevel << '\n'  << enclose("td", false);
 			f << enclose("tr", false);
-		}					
+		}
 		for (int i = 0; i < NOBJECTS; i++) {
 			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 			if (!ObjectIsShip(i)) continue;
@@ -1835,8 +1835,8 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			rate = study_rate(days, 0);
 			days += rate;
 			months5++;
-		}		
-		mlevel = GetLevelByDays(days);	
+		}
+		mlevel = GetLevelByDays(days);
 
 		f << enclose("p", true);
 		f << "To illustrate this, a unit would have to spend " << num_to_word(months2)
@@ -1849,7 +1849,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			  << "skill level 3 by studying without experience. ";
 		}
 		f << "The maximum skill level that is possible through continuous study only (i.e. no experience "
-		  << "involved) is " << num_to_word(mlevel) + ", " 
+		  << "involved) is " << num_to_word(mlevel) + ", "
 		  << (months5 > 36 ? "although it is hardly feasible without any experience at all, " : "")
 		  << "taking " << num_to_word(months5) << " months of studying to achieve. "
 		  << "Note that this assumes that the unit type is allowed to achieve this level at all "
@@ -1906,7 +1906,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		int level = 0;
 		int plevel = 0;
 		int next = study_rate(days, 0);
-		f << enclose("td", true) << "&nbsp;" << level << "&nbsp;<font size='-1'>(" << days << "+" << next 
+		f << enclose("td", true) << "&nbsp;" << level << "&nbsp;<font size='-1'>(" << days << "+" << next
 		  << ")</font>\n" << enclose("td", false);
 		for (int m = 0; m < 9; m++) {
 			days += study_rate(days, 0);
@@ -1928,7 +1928,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		level = 0;
 		plevel = 0;
 		next = study_rate(days, 30);
-		f << enclose("td", true) << "&nbsp;" << level << "&nbsp;<font size='-1'>(" << days << "+" << next 
+		f << enclose("td", true) << "&nbsp;" << level << "&nbsp;<font size='-1'>(" << days << "+" << next
 		  << ")</font>\n" << enclose("td", false);
 		for (int m = 0; m < 9; m++) {
 			days += study_rate(days, 30);
@@ -1984,7 +1984,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	// a table of all skills/costs.
 	f << enclose("p", true) << "Most skills cost $" << SkillDefs[S_COMBAT].cost
 	  << " per person per month to study (in addition to normal maintenance costs).  The exceptions are ";
-	if (has_stea || has_obse) {		
+	if (has_stea || has_obse) {
 		f << (has_stea ? "Stealth" : "") << (has_stea && has_obse ? " and " : "") << (has_obse ? "Observation" : "")
 		  << " (" << (has_stea && has_obse ? "both of which cost $" : "which costs $") << SkillDefs[S_STEALTH].cost
 		  << "), ";
@@ -2127,7 +2127,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		if (!evenly_divisible) {
 			f << "Food value for a fractional maintenance cost still consumes the entire unit of food. ";
 		}
-		
+
 		if (Globals->UPKEEP_MINIMUM_FOOD > 0) {
 			f << "A unit must be given at least " << Globals->UPKEEP_MINIMUM_FOOD
 			  << " maintenance per man in the form of food. ";
@@ -2180,7 +2180,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "were given above in the section on Movement, but many things were left out. Here is a table "
 	  << "giving some information about common items in Atlantis:\n"
 	  << enclose("p", false);
-	
+
 	f << anchor("tableiteminfo") << '\n';
 	f << enclose("center", true);
 	f << enclose("table border=\"1\"", true);
@@ -2252,7 +2252,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 					(wp->flags & WeaponType::RANGED) ||
 					(wp->flags & WeaponType::NEEDSKILL)) {
 				if (wp->flags & WeaponType::RANGED)
-					f << "Ranged weapon";			 			
+					f << "Ranged weapon";
 				else
 					f << "Weapon";
 				f << " which gives " << (wp->attackBonus > -1 ? "+" : "")
@@ -2340,7 +2340,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << " factions can issue " << url("#produce", "PRODUCE") << " orders however, regardless of skill levels.\n"
 		  << enclose("p", false);
 	}
-	
+
 	f << enclose("p", true) << "Items which increase production may increase production of advanced items in "
 	  << "addition to the basic items listed.  Some of them also increase production of other tools.  Read the skill "
 	  << "descriptions for details on which tools aid which production when not noted above.\n"
@@ -2431,7 +2431,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	}
 	f << enclose("table", false);
 	f << enclose("center", false);
-	
+
 	f << enclose("p", true) << "Size is the number of people that the building can shelter. Cost is both "
 	  << "the number of man-months of labor and the number of units of material required to complete the building.  ";
 	if (Globals->LIMITED_MAGES_PER_BUILDING) {
@@ -2648,7 +2648,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			f << enclose("td align=\"center\"", true) << ItemDefs[i].weight/50 << '\n' << enclose("td", false);
 			f << enclose("td align=\"center\"", true) << slevel << '\n' << enclose("td", false);
 			f << enclose("tr", false);
-		}					
+		}
 		for (int i = 0; i < NOBJECTS; i++) {
 			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 			if (!ObjectIsShip(i)) continue;
@@ -2674,7 +2674,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "to complete the ship. The sailors are the number of skill levels of the Sailing skill that must be "
 		  << "aboard the ship (and issuing the " << url("#sail", "SAIL") << " order) in order for the ship to sail.\n"
 		  << enclose("p", false);
-		
+
 		f << enclose("p", true) << "When a ship is built, if its builder is already the owner of a fleet, then "
 		  << "the ship will be added to that fleet; otherwise a new fleet will be created to hold the ship.  A fleet "
 		  << "has the combined capacity and sailor requirement of its constituent vessels, and moves at the speed of "
@@ -2759,7 +2759,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "the faction in question Friendly. Units on guard will also block " << url("#pillage", "PILLAGE")
 	  << " orders issued by other factions in the same region, regardless of your attitude towards the faction "
 	  << "in question, and they will attempt to prevent Unfriendly units from entering the region.  Only units "
-	  << "which are able to tax may be on guard.  Units on guard " 
+	  << "which are able to tax may be on guard.  Units on guard "
 	  << (has_stea ? " are always visible regardless of Stealth skill, and " : "")
 	  << "will be marked as being \"on guard\" in the region description.\n"
 	  << enclose("p", false);
@@ -2936,7 +2936,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 			  ? "these restrictions do "
 			  : "this restriction does ")
 		  << "not apply for sea combat, as "
-		  << (has_stea ? "units within a fleet are always visible" : "");		  
+		  << (has_stea ? "units within a fleet are always visible" : "");
 		if (!(SkillDefs[S_RIDING].flags & SkillType::DISABLED)) {
 			f << (has_stea ? ", and" : "") << " Riding does not play a part in combat on board fleets";
 		}
@@ -3009,10 +3009,10 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << " The computer selects the best tactician from each side; that unit is regarded as the leader of "
 		  << "its side.  If two or more units on one side have the same Tactics skill, then the one with the lower "
 		  << "unit number is regarded as the leader of that side.  If one side's leader has a better Tactics skill "
-		  << "than the other side's,"
+		  << "than the other side's, then that side gets a "
 		  << (Globals->ADVANCED_TACTICS
-		      ? "then that side gets a tactics difference bonus to their attack and defense."
-			  : "then that side gets a free round of attacks.");
+		      ? "tactics difference bonus to their attack and defense for the first round of combat."
+			  : "free round of attacks.");
 	}
 	f << '\n' << enclose("p", false);
 	f << enclose("p", true) << "In each combat round, the combatants each get to attack once, in "
@@ -3112,7 +3112,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "the battle is over, by any living healers on the winning side.\n"
 		  << enclose("p", false);
 	}
-	
+
 	f << enclose("p", true) << "Any items owned by dead combatants on the losing side have a 50% chance of being "
 	  << "found and collected by the winning side. Each item which is recovered is picked up by one of the "
 	  << "survivors able to carry it (see the " << url("#spoils", "SPOILS") << " command) at random, so the "
@@ -3705,7 +3705,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << example_start("Change your faction's email address to atlantis@rahul.net.")
 	  << "ADDRESS atlantis@rahul.net\n"
 	  << example_end();
-	
+
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << anchor("advance") << '\n';
 	f << enclose("h4", true) << "ADVANCE [dir] ...\n" << enclose("h4", false);
@@ -3845,7 +3845,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << example_start("To help unit 5789 build a structure.")
 	  << "BUILD HELP 5789\n"
 	  << example_end();
-	
+
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << anchor("buy") << '\n';
 	f << enclose("h4", true) << "BUY [quantity] [item]\n" << enclose("h4", false);
@@ -3875,7 +3875,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		  << "BUY 5 barbarians\n"
 		  << example_end();
 	}
-	
+
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << anchor("cast") << '\n';
 	f << enclose("h4", true) << "CAST [skill] [arguments]\n" << enclose("h4", false);
@@ -4127,7 +4127,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("p", true) << "Form a new unit.  The newly created unit will be in your faction, in the same "
 	  << "region as the unit which formed it, and in the same structure if any.  It will start off, however, with "
 	  << "no people or items; you should, in the same month, issue orders to transfer people into the new unit, or "
-	  << "have it recruit members. The new unit will inherit its flags from the unit that forms it, such as "	
+	  << "have it recruit members. The new unit will inherit its flags from the unit that forms it, such as "
 	  << "avoiding, behind, revealing and sharing, with the exception of the guard and autotax flags.  If the new "
 	  << "unit wants to guard or automatically tax then those flags will have to be explicitly set in its orders.\n"
 	  << enclose("p", false);
@@ -4394,7 +4394,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("p", true) << "If multiple units are on one side in a battle, they must all have the NOAID flag on, "
 	  << "or they will receive aid from other hexes.\n"
 	  << enclose("p", false);
-	f << enclose("p", true) << "Example:\n" << enclose("p", false);	
+	f << enclose("p", true) << "Example:\n" << enclose("p", false);
 	f << example_start("Set a unit to receive no aid in battle.")
 	  << "NOAID 1\n"
 	  << example_end();
@@ -4588,7 +4588,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("p", true) << "Note that although this order affects the faction as a whole, it nevertheless needs "
 	  << "to be issued by an individual unit, and so the email containing the command to quit needs to include both "
 	  << "#atlantis and unit lines.\n"
-	  << enclose("p", false);	
+	  << enclose("p", false);
 	f << enclose("p", true) << "Example:\n" << enclose("p", false);
 	f << example_start("Quit the game for faction 27 if your password is foobar.")
 	  << "#atlantis 27 \"foobar\"\n"
@@ -4622,7 +4622,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "affiliation (REVEAL FACTION), in the turn report, to all other factions in the region. "
 	  << (has_stea ? "Used to reveal high stealth scouts, should there be some reason to. " : "")
 	  << "REVEAL is used to cancel this.\n"
-	  << enclose("p", false);	
+	  << enclose("p", false);
 	f << enclose("p", true) << "Examples:\n" << enclose("p", false);
 	f << example_start("Show the unit to all factions.")
 	  << "REVEAL UNIT\n"
