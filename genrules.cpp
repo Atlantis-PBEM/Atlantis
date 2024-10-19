@@ -4865,8 +4865,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		// Note this is slightly wrong for the neworgins case.  cost only applies QM -> QM.
 		f << " The target of the transport unit must be a unit with the quartermaster skill and must be the "
 		  << "owner of a transport structure. For long distance transport between quartermasters, the issuing "
-		  << "unit must also be a quartermaster and be the owner of a transport structure.  Use of this order "
-		  << "counts as trade activity in the hex.\n"
+		  << "unit must also be a quartermaster and be the owner of a transport structure.\n"
 		  << enclose("p", false);
 		f << enclose("p", true) << "For historical reasons, the order DISTRIBUTE can be "
 		  << "used in place of TRANSPORT and has the same meaning and syntax.\n"
