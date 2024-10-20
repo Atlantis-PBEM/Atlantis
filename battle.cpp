@@ -739,6 +739,7 @@ void Battle::build_json_report(json& j, Faction *fac) {
 		j["type"] = "assassination";
 		j["report"] = json::array();
 		j["report"].push_back(asstext);
+		j["report"].push_back(""); // All battle reports end with a new line.  Pre-json code added the line here.
 		return;
 	}
 	j["type"] = "battle";
