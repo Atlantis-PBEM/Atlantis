@@ -368,7 +368,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	}
 
 	// Make sure we dispose of the allocated AList properly until we get rid of alists entirely.
-	std::unique_ptr<AList> seers(CanSeeSteal(r, u)); 
+	std::unique_ptr<AList> seers(CanSeeSteal(r, u));
 	int succ = 1;
 	forlist(seers) {
 		Faction *f = ((FactionPtr *) elem)->ptr;
@@ -610,7 +610,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 		}
 		else {
 			u->event("Destroys " + string(o->name->const_str()) + ".", "destroy");
-	
+
 			Object *dest = r->GetDummy();
 			forlist(&o->units) {
 				Unit *u = (Unit *) elem;
@@ -702,7 +702,7 @@ int Game::FortTaxBonus(Object *o, Unit *u)
 			}
 		}
 		protect -= men;
-		if (protect < 0) protect = 0;	
+		if (protect < 0) protect = 0;
 	}
 	return(fortbonus);
 }
@@ -1151,7 +1151,7 @@ void Game::RemoveEmptyObjects()
 		ARegion *r = (ARegion *) elem;
 		forlist(&r->objects) {
 			Object *o = (Object *) elem;
-			if ((o->IsFleet()) && 
+			if ((o->IsFleet()) &&
 				(TerrainDefs[r->type].similar_type != R_OCEAN)) continue;
 			if (ObjectDefs[o->type].cost &&
 					o->incomplete >= ObjectDefs[o->type].cost) {
@@ -1600,7 +1600,7 @@ void Game::RunBuyOrders()
 		ARegion *r = (ARegion *) elem;
 		for (const auto& m : r->markets) {
 			if (m->type == M_BUY) DoBuy(r, m);
-		}	
+		}
 		forlist((&r->objects)) {
 			Object *obj = (Object *) elem;
 			forlist((&obj->units)) {
@@ -1725,8 +1725,8 @@ void Game::DoBuy(ARegion *r, Market *m)
 									if (skill == -1) continue;
 									int curxp = u->skills.GetExp(skill);
 									u->skills.SetExp(skill,exp+curxp);
-								} 
-							}	
+								}
+							}
 						}
 						/* region economy effects */
 						r->Recruit(temp);
@@ -2490,7 +2490,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				if (ship > 0) u->items.SetNum(ship,0);
 				return 0;
 			// abandon fleet ships
-			} else if (!(u->object->IsFleet()) || 
+			} else if (!(u->object->IsFleet()) ||
 				(u->num != u->object->GetOwner()->num)) {
 				u->error(ord + ": only fleet owner can give ships.");
 				return 0;
@@ -2529,7 +2529,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			u->event("Abandons " + ItemString(o->item, num - o->amount) + ".", event_type);
 			return 0;
 		}
-		// GIVE to unit:	
+		// GIVE to unit:
 		t = r->GetUnitId(o->target, u->faction->num);
 		if (!t) {
 			u->error(ord + ": Nonexistant target (" + o->target->Print() + ").");
@@ -2704,7 +2704,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		}
 		return 0;
 	}
-	
+
 	if (o->target->unitnum == -1) {
 		/* Give 0 */
 		// Check there is enough to give
@@ -3120,7 +3120,7 @@ void Game::CheckTransportOrders()
 					} else { // sender isn't a valid QM
 						if (!target_is_valid_qm) { // Non-qms or invalid qms can only send to valid QMs
 							// Give a specific error message depending on why they aren't considered a quartermaster
-							string temp = "TRANSPORT: Target " + string(tar->unit->name->const_str()); 
+							string temp = "TRANSPORT: Target " + string(tar->unit->name->const_str());
 							temp += (
 								target_owns_qm_building ?
 								" does not own a transport structure." :
@@ -3313,7 +3313,7 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 					}
 
 					if (phase == TransportOrder::INTER_QM_TRANSPORT) {
-						tar->unit->transport_items.SetNum(t->item, amt);
+						tar->unit->transport_items.SetNum(t->item, tar->unit->transport_items.GetNum(t->item) + amt);
 					} else {
 						tar->unit->items.SetNum(t->item, tar->unit->items.GetNum(t->item) + amt);
 					}
@@ -3544,7 +3544,7 @@ void Game::RunAnnihilateOrders() {
 
 				// annihilate our neigbors
 				for (auto n = 0; n < NDIRS; n++) {
-					ARegion *neigh = r->neighbors[n];		
+					ARegion *neigh = r->neighbors[n];
 					if (neigh == nullptr) continue;
 					Do1Annihilate(neigh);
 				}
