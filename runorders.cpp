@@ -3154,7 +3154,7 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 					}
 
 					if (phase == TransportOrder::TransportPhase::INTER_QM_TRANSPORT) {
-						tar->unit->transport_items.SetNum(t->item, amt);
+						tar->unit->transport_items.SetNum(t->item, tar->unit->transport_items.GetNum(t->item) + amt);
 					} else {
 						tar->unit->items.SetNum(t->item, tar->unit->items.GetNum(t->item) + amt);
 					}

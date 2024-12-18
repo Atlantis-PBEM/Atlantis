@@ -40,38 +40,39 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
     std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
-    ss << "transport 3 50 stone\n";  // unit 1 -> QM 1
+    ss << "transport 3 70 stone\n";  // unit 1 -> QM 1
     ss << "unit 3\n";
     ss << "transport 4 50 stone\n"; // QM 1 -> QM 2
+    ss << "transport 4 20 stone\n"; // QM 1 -> QM 2 (should make 70 stone total, not 20 as in reported bug)
     ss << "unit 4\n";
     ss << "transport 5 50 stone\n"; // QM 2 -> unit 2
     helper.parse_orders(faction->num, ss);
     helper.check_transport_orders();
 
     helper.transport_phase(TransportOrder::TransportPhase::SHIP_TO_QM);
-    expect(unit1->items.GetNum(I_STONE) == 50_i);
-    expect(qm1->items.GetNum(I_STONE) == 50_i);
+    expect(unit1->items.GetNum(I_STONE) == 30_i);
+    expect(qm1->items.GetNum(I_STONE) == 70_i);
     expect(qm2->items.GetNum(I_STONE) == 0_i);
     expect(unit2->items.GetNum(I_STONE) == 0_i);
 
     helper.transport_phase(TransportOrder::TransportPhase::INTER_QM_TRANSPORT);
-    expect(unit1->items.GetNum(I_STONE) == 50_i);
+    expect(unit1->items.GetNum(I_STONE) == 30_i);
     expect(qm1->items.GetNum(I_STONE) == 0_i);
-    expect(qm2->transport_items.GetNum(I_STONE) == 50_i);
+    expect(qm2->transport_items.GetNum(I_STONE) == 70_i);
     expect(qm2->items.GetNum(I_STONE) == 0_i);
     expect(unit2->items.GetNum(I_STONE) == 0_i);
 
     helper.collect_transported_goods();
-    expect(unit1->items.GetNum(I_STONE) == 50_i);
+    expect(unit1->items.GetNum(I_STONE) == 30_i);
     expect(qm1->items.GetNum(I_STONE) == 0_i);
     expect(qm2->transport_items.GetNum(I_STONE) == 0_i);
-    expect(qm2->items.GetNum(I_STONE) == 50_i);
+    expect(qm2->items.GetNum(I_STONE) == 70_i);
     expect(unit2->items.GetNum(I_STONE) == 0_i);
 
     helper.transport_phase(TransportOrder::TransportPhase::DISTRIBUTE_FROM_QM);
-    expect(unit1->items.GetNum(I_STONE) == 50_i);
+    expect(unit1->items.GetNum(I_STONE) == 30_i);
     expect(qm1->items.GetNum(I_STONE) == 0_i);
-    expect(qm2->items.GetNum(I_STONE) == 0_i);
+    expect(qm2->items.GetNum(I_STONE) == 20_i);
     expect(unit2->items.GetNum(I_STONE) == 50_i);
   };
 
