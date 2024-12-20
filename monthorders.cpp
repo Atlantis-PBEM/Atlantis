@@ -166,7 +166,7 @@ void Game::RunMovementOrders()
 					u->savedmovement = 0;
 					u->savedmovedir = -1;
 				}
-				if (u->monthorders && 
+				if (u->monthorders &&
 						(u->monthorders->type == O_MOVE ||
 						u->monthorders->type == O_ADVANCE)) {
 					mo = (MoveOrder *) u->monthorders;
@@ -190,7 +190,7 @@ void Game::RunMovementOrders()
 			}
 			u = o->GetOwner();
 			if (o->IsFleet() && u && !u->nomove &&
-					u->monthorders && 
+					u->monthorders &&
 					u->monthorders->type == O_SAIL) {
 				so = (SailOrder *) u->monthorders;
 				if (so->dirs.Num() > 0) {
@@ -300,31 +300,31 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 			stop = 1;
 		}
 
-		// Check the new region for barriers and the fleet units for keys to the barriers
-		int needed_key = -1;
-		forlist_reuse(&newreg->objects) {
-			Object *o = (Object *) elem;
-			if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
-				needed_key = ObjectDefs[o->type].key_item;
-			}
-		}
-		if (needed_key != -1) { // we found a barrier
-			bool has_key = false;
-			forlist_reuse(&fleet->units) {
-				Unit *u = (Unit *) elem;
-				if (u->items.GetNum(needed_key) > 0) {
-					has_key = true;
-					break;
+		if (!stop) {
+			// Check the new region for barriers and the fleet units for keys to the barriers
+			int needed_key = -1;
+			forlist_reuse(&newreg->objects) {
+				Object *o = (Object *) elem;
+				if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
+					needed_key = ObjectDefs[o->type].key_item;
 				}
 			}
-			if (!has_key) {
-				cap->error("SAIL: Can't sail " + DirectionStrs[x->dir] + " from " +
-					reg->ShortPrint().const_str() + " due to mystical barrier.");
-				stop = 1;
+			if (needed_key != -1) { // we found a barrier
+				bool has_key = false;
+				forlist_reuse(&fleet->units) {
+					Unit *u = (Unit *) elem;
+					if (u->items.GetNum(needed_key) > 0) {
+						has_key = true;
+						break;
+					}
+				}
+				if (!has_key) {
+					cap->error("SAIL: Can't sail " + DirectionStrs[x->dir] + " from " +
+						reg->ShortPrint().const_str() + " due to mystical barrier.");
+					stop = 1;
+				}
 			}
-		}
 
-		if (!stop) {
 			fleet->movepoints -= cost * Globals->MAX_SPEED;
 			if (x->dir != MOVE_PAUSE) {
 				fleet->MoveObject(newreg);
@@ -369,7 +369,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 				forlist(&fleet->units) {
 					// Everyone onboard gets to see the sights
 					unit = (Unit *) elem;
-					
+
 					Farsight *f;
 					// Note the hex being left
 					forlist(&reg->passers) {
@@ -566,7 +566,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 		u->monthorders = 0;
 		return;
 	}
-	
+
 	int needed = buildobj->incomplete;
 	int type = buildobj->type;
 	// AS
@@ -635,7 +635,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	}
 
 	/* Perform the build */
-	
+
 	if (obj != buildobj)
 		u->MoveUnit(buildobj);
 
@@ -650,7 +650,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	} else {
 		u->ConsumeShared(it, num);
 	}
-	
+
 	/* Regional economic improvement */
 	r->improvement += num;
 
@@ -685,7 +685,7 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 
 	// get needed to complete
 	maxbuild = 0;
-	if ((u->monthorders) && 
+	if ((u->monthorders) &&
 		(u->monthorders->type == O_BUILD)) {
 			BuildOrder *border = (BuildOrder *) u->monthorders;
 			maxbuild = border->needtocomplete;
@@ -696,16 +696,16 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 		unfinished = 0;
 	} else {
 		output = ShipConstruction(r, u, u, level, maxbuild, ship);
-		
+
 		if (output < 1) return;
-		
+
 		// are there unfinished ship items of the given type?
 		unfinished = u->items.GetNum(ship);
-		
+
 		if (unfinished == 0) {
 			// Start a new ship's construction from scratch
 			unfinished = ItemDefs[ship].pMonths;
-			u->items.SetNum(ship, unfinished);	
+			u->items.SetNum(ship, unfinished);
 		}
 
 		// Now reduce unfinished by produced amount
@@ -824,7 +824,7 @@ void Game::RunBuildHelpers(ARegion *r)
 							int skill = LookupSkill(&skname);
 							int level = u->GetSkill(skill);
 							int needed = 0;
-							if ((target->monthorders) && 
+							if ((target->monthorders) &&
 									(target->monthorders->type == O_BUILD)) {
 										BuildOrder *border = (BuildOrder *) target->monthorders;
 										needed = border->needtocomplete;
@@ -837,21 +837,21 @@ void Game::RunBuildHelpers(ARegion *r)
 							}
 							int output = ShipConstruction(r, u, target, level, needed, ship);
 							if (output < 1) continue;
-							
+
 							int unfinished = target->items.GetNum(ship);
 							if (unfinished == 0) {
 								// Start construction on a new ship
 								unfinished = ItemDefs[ship].pMonths;
-								target->items.SetNum(ship, unfinished);	
+								target->items.SetNum(ship, unfinished);
 							}
 							unfinished -= output;
-							
+
 							// practice
 							u->Practice(skill);
-							
+
 							if (unfinished > 0) {
 								target->items.SetNum(ship, unfinished);
-								if ((target->monthorders) && 
+								if ((target->monthorders) &&
 									(target->monthorders->type == O_BUILD)) {
 										BuildOrder *border = (BuildOrder *) target->monthorders;
 										border->needtocomplete = unfinished;
@@ -860,16 +860,16 @@ void Game::RunBuildHelpers(ARegion *r)
 								// CreateShip(r, target, ship);
 								// don't create the ship yet; leave that for the unit we're helping
 								target->items.SetNum(ship, 1);
-								if ((target->monthorders) && 
+								if ((target->monthorders) &&
 									(target->monthorders->type == O_BUILD)) {
 										BuildOrder *border = (BuildOrder *) target->monthorders;
 										border->needtocomplete = 0;
 								}
-							} 
+							}
 							int percent = 100 * output / ItemDefs[ship].pMonths;
-							u->event("Helps " + string(target->name->const_str()) + " with construction of a " + 
+							u->event("Helps " + string(target->name->const_str()) + " with construction of a " +
 								ItemDefs[ship].name + " (" + to_string(percent) + "%) in " +
-								r->ShortPrint().const_str() + ".", "build", r);							
+								r->ShortPrint().const_str() + ".", "build", r);
 						}
 						// no need to move unit if item-type ships
 						// are being built. (leave this commented out)
@@ -880,7 +880,7 @@ void Game::RunBuildHelpers(ARegion *r)
 						Object *buildobj;
 						if (u->build > 0) {
 							buildobj = r->GetObject(u->build);
-							if (buildobj && 
+							if (buildobj &&
 									buildobj != r->GetDummy() &&
 									buildobj != u->object)
 							{
@@ -894,7 +894,7 @@ void Game::RunBuildHelpers(ARegion *r)
 	}
 }
 
-/* Creates a new ship - either by adding it to a 
+/* Creates a new ship - either by adding it to a
  * compatible fleet object or creating a new fleet
  * object with Unit u as owner consisting of exactly
  * ONE ship of the given type.
@@ -958,10 +958,10 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 		// don't adjust for pMonths
 		// - pMonths represents total requirement
 		maxproduced = number;
-	
+
 	// adjust maxproduced for items needed until completion
 	if (needed < maxproduced) maxproduced = needed;
-		
+
 	// adjust maxproduced for unfinished ships
 	if ((unfinished > 0) && (maxproduced > unfinished))
 		maxproduced = unfinished;
@@ -978,7 +978,7 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 		if (maxproduced > count)
 			maxproduced = count;
 		count = maxproduced;
-		
+
 		// no required materials?
 		if (count < 1) {
 			u->error("BUILD: Don't have the required materials.");
@@ -986,7 +986,7 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 			u->monthorders = 0;
 			return 0;
 		}
-		
+
 		/* regional economic improvement */
 		r->improvement += count;
 
@@ -1018,7 +1018,7 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 				}
 			}
 		}
-		
+
 		// no required materials?
 		if (maxproduced < 1) {
 			u->error("BUILD: Don't have the required materials.");
@@ -1026,10 +1026,10 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 			u->monthorders = 0;
 			return 0;
 		}
-		
+
 		/* regional economic improvement */
 		r->improvement += maxproduced;
-		
+
 		// Deduct the items spent
 		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
 			int i = ItemDefs[ship].pInput[c].item;
@@ -1045,7 +1045,7 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 
 	delete u->monthorders;
 	u->monthorders = 0;
-	
+
 	return output;
 }
 
@@ -1138,7 +1138,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 		if (maxproduced > count)
 			maxproduced = count;
 		count = maxproduced;
-		
+
 		/* regional economic improvement */
 		r->improvement += count;
 
@@ -1170,10 +1170,10 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 				}
 			}
 		}
-		
+
 		/* regional economic improvement */
 		r->improvement += maxproduced;
-		
+
 		// Deduct the items spent
 		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
 			int i = ItemDefs[o->item].pInput[c].item;
@@ -1191,7 +1191,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 	if (ItemDefs[o->item].flags & ItemType::SKILLOUT_HALF) {
 		output *= (level + 1) / 2;
 	}
-		
+
 	u->items.SetNum(o->item,u->items.GetNum(o->item) + output);
 	u->event("Produces " + ItemString(o->item,output) + " in " + r->ShortPrint().const_str() + ".",
 		"produce", r);
@@ -1440,7 +1440,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 		u->error("STUDY: " + SkillDefs[sk].name + " cannot be studied.");
 		return;
 	}
-	
+
 	// Small patch for Ceran Mercs
 	if (u->GetMen(I_MERC)) {
 		u->error("STUDY: Mercenaries are not allowed to study.");
@@ -1539,7 +1539,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 
 	// If TACTICS_NEEDS_WAR is enabled, and the unit is trying to study to tact-5,
 	// check that there's still space...
-	if (Globals->TACTICS_NEEDS_WAR && sk == S_TACTICS && 
+	if (Globals->TACTICS_NEEDS_WAR && sk == S_TACTICS &&
 			u->GetSkill(sk) == 4 && u->skills.GetDays(sk)/u->GetMen() >= 300) {
 		if (CountTacticians(u->faction) >=
 				AllowedTacticians(u->faction)) {
@@ -1550,9 +1550,9 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 			u->error("STUDY: Only 1-man units can study to level 5 in tactics.");
 			return;
 		}
-		
+
 	} // end tactics check
-	
+
 	// adjust teaching for study rate
 	taughtdays = ((long int) o->days * u->skills.GetStudyRate(sk, u->GetMen()) / 30);
 
@@ -1603,7 +1603,7 @@ void Game::Do1StudyOrder(Unit *u,Object *obj)
 			} else {
 				string msg = "Completes study to level " + to_string(o->level) + " in " + SkillDefs[sk].name + ".";
 				u->event(msg, "study");
-			}	
+			}
 		}
 	} else {
 		// if we just tried to become a mage or apprentice, but
