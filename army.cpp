@@ -718,7 +718,19 @@ Army::Army(Unit *ldr, AList *locs, int regtype, int ass)
 		Object * obj = ((Location *) elem)->obj;
 		if (ass) {
 			for(auto it: u->items) {
-				if (ItemDefs[it.type ].type & IT_MAN) {
+				ItemType& item = ItemDefs[it.type];
+
+				// Bug when assassinating STED/CATA if they are the only type in the unit
+				// Should they be able to be assassinted? Unknown, but for now, allow it and preference
+				// men first, but if the unit only has sted or cata, choose 1 of them
+				if (item.type & IT_MAN) {
+					soldiers[x] = new Soldier(u, obj, regtype, it.type, ass);
+					hitstotal = soldiers[x]->hits;
+					++x;
+					goto finished_army;
+				}
+				// No men, so chose a manproduce item.
+				if (item.flags & ItemType::MANPRODUCE) {
 					soldiers[x] = new Soldier(u, obj, regtype, it.type, ass);
 					hitstotal = soldiers[x]->hits;
 					++x;
