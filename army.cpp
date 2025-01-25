@@ -26,7 +26,7 @@
 #include "gameio.h"
 #include "gamedata.h"
 
-#include <assert.h> 
+#include <assert.h>
 
 void unit_stat_control::Clear(UnitStat& us) {
 	us.attackStats.clear();
@@ -699,7 +699,7 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 			}
 		}
 	}
-	// If TACTICS_NEEDS_WAR is enabled, we don't want to push leaders 
+	// If TACTICS_NEEDS_WAR is enabled, we don't want to push leaders
 	// from tact-4 to tact-5! Also check that we have skills, otherwise
 	// we get a nasty core dump ;)
 	if (Globals->TACTICS_NEEDS_WAR && (tactician->skills.Num() != 0)) {
@@ -722,14 +722,24 @@ Army::Army(Unit * ldr,AList * locs,int regtype,int ass)
 		if (ass) {
 			forlist(&u->items) {
 				Item * it = (Item *) elem;
-				if (it) {
-					if (ItemDefs[ it->type ].type & IT_MAN) {
-							soldiers[x] = new Soldier(u, obj, regtype,
-									it->type, ass);
-							hitstotal = soldiers[x]->hits;
-							++x;
-							goto finished_army;
-					}
+				if (!it) continue;
+
+				ItemType &item = ItemDefs[it->type];
+				// Bug when assassinating STED/CATA if they are the only type in the unit
+				// Should they be able to be assassinted? Unknown, but for now, allow it and preference
+				// men first, but if the unit only has sted or cata, choose 1.
+				if (item.type & IT_MAN) {
+					soldiers[x] = new Soldier(u, obj, regtype, it->type, ass);
+					hitstotal = soldiers[x]->hits;
+					++x;
+					goto finished_army;
+				}
+				// If we get here we didn't find a man, so.. choose a MANPRODUCE item
+				if (item.flags & ItemType::MANPRODUCE) {
+					soldiers[x] = new Soldier(u, obj, regtype, it->type, ass);
+					hitstotal = soldiers[x]->hits;
+					++x;
+					goto finished_army;
 				}
 			}
 		} else {
@@ -1518,7 +1528,7 @@ void Army::Kill(int killed, int damage)
 
 	temp->damage += min(temp->hits, damage);
 	temp->hits = max(0, temp->hits - damage);
-	
+
 	if (temp->hits > 0) return;
 
 	temp->unit->losses++;
