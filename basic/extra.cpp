@@ -28,7 +28,7 @@
 
 /** \file
  * Extra parts added to the game for a particular version.
- * extra.cpp contains all of the version-specific functions necessary 
+ * extra.cpp contains all of the version-specific functions necessary
  * to alter a game's data structures to suit the GM.
  */
 
@@ -36,7 +36,7 @@
 #include "gamedata.h"
 
 /// Run the initial setup for a faction
-/** This includes setting initial silver, creating your first leader, 
+/** This includes setting initial silver, creating your first leader,
 adding any starting skills (eg. gate) and sticking him in the world.
 */
 int Game::SetupFaction( Faction *pFac )
@@ -156,6 +156,7 @@ void Game::ModifyTablesPerRuleset(void)
 	// Modify the various spells which are allowed to cross levels
 	if (Globals->EASIER_UNDERWORLD) {
 		ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags("rng_portal", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_weather", RangeType::RNG_CROSS_LEVELS);
