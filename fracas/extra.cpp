@@ -34,7 +34,7 @@ int Game::SetupFaction( Faction *pFac )
 
 	if (pFac->noStartLeader)
 		return 1;
-	
+
 	AString *name;
 	//
 	// Set up first unit.
@@ -64,7 +64,7 @@ int Game::SetupFaction( Faction *pFac )
 		leader->Study(S_FORCE, 90);
 		leader->Study(S_COMBAT, 30);
 	}
-	
+
 	//
 	// Set up other supporting units
 	//
@@ -81,8 +81,8 @@ int Game::SetupFaction( Faction *pFac )
 	pFac->DiscoverItem(I_CHAINARMOR, 0, 1);
 	army->Study(S_COMBAT, 1800);
 	army->Study(S_RIDING, 1800);
-	
-	
+
+
 	Unit *archers = GetNewUnit(pFac);
 	archers->SetMen(I_LEADERS, 10);
 	archers->reveal = REVEAL_FACTION;
@@ -97,8 +97,8 @@ int Game::SetupFaction( Faction *pFac )
 	pFac->DiscoverItem(I_CHAINARMOR, 0, 1);
 	archers->Study(S_CROSSBOW, 1800);
 	archers->Study(S_RIDING, 1800);
-	
-	
+
+
 	Unit *sneak = GetNewUnit(pFac);
 	sneak->SetMen(I_LEADERS, 1);
 	sneak->reveal = REVEAL_NONE;
@@ -113,8 +113,8 @@ int Game::SetupFaction( Faction *pFac )
 	sneak->Study(S_STEALTH, 180);
 	sneak->Study(S_OBSERVATION, 180);
 	sneak->Study(S_HUNTING, 180);
-	
-	
+
+
 	Unit *quartermaster = GetNewUnit(pFac);
 	quartermaster->SetMen(I_LEADERS, 1);
 	quartermaster->reveal = REVEAL_FACTION;
@@ -128,8 +128,8 @@ int Game::SetupFaction( Faction *pFac )
 	pFac->DiscoverItem(I_STONE, 0, 1);
 	quartermaster->Study(S_QUARTERMASTER, 180);
 	quartermaster->Study(S_OBSERVATION, 180);
-	
-	
+
+
 	Unit *retainer = GetNewUnit(pFac);
 	retainer->SetMen(I_LEADERS, 1);
 	retainer->reveal = REVEAL_FACTION;
@@ -139,9 +139,9 @@ int Game::SetupFaction( Faction *pFac )
 	retainer->SetName(name);
 	retainer->Study(S_FARMING, 180);
 	retainer->Study(S_RANCHING, 180);
-	retainer->Study(S_FISHING, 180);	
-	
-	
+	retainer->Study(S_FISHING, 180);
+
+
 	Unit *merchant = GetNewUnit(pFac);
 	merchant->SetMen(I_LEADERS, 1);
 	merchant->reveal = REVEAL_FACTION;
@@ -155,7 +155,7 @@ int Game::SetupFaction( Faction *pFac )
 	merchant->Study(S_LUMBERJACK, 180);
 	merchant->Study(S_BUILDING, 180);
 	merchant->Study(S_SHIPBUILDING, 180);
-	
+
 
 	Unit *smith = GetNewUnit(pFac);
 	smith->SetMen(I_LEADERS, 1);
@@ -171,7 +171,7 @@ int Game::SetupFaction( Faction *pFac )
 	smith->Study(S_ARMORER, 180);
 	smith->Study(S_QUARRYING, 180);
 
-	
+
 	/* Food is stoopid! (IMHO, of course)
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
@@ -186,7 +186,7 @@ int Game::SetupFaction( Faction *pFac )
 		leader->items.SetNum(I_SILVER, 10);
 	}
 	*/
-	
+
 	ARegion *reg = NULL;
 	if (pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
@@ -215,7 +215,7 @@ int Game::SetupFaction( Faction *pFac )
 			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
 		}
 	}
-	
+
 	leader->MoveUnit( reg->GetDummy() );
 	army->MoveUnit( reg->GetDummy() );
 	archers->MoveUnit( reg->GetDummy() );
@@ -280,7 +280,7 @@ void Game::ModifyTablesPerRuleset(void)
 	//EnableItem(I_GREYELF);
 	//EnableItem(I_MINOTAUR);
 	//EnableItem(I_DROWMAN);
-	
+
 	// Racial skills are modified too - but that
 	// bit's at the bottom
 	DisableItem(I_GNOME);
@@ -312,7 +312,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_SACGROVE);
 	DisableObject(O_BKEEP);
 	DisableObject(O_PALACE);
-	
+
 	EnableObject(O_ISLE);
 	EnableObject(O_DERELICT);
 	EnableObject(O_OCAVE);
@@ -333,6 +333,7 @@ void Game::ModifyTablesPerRuleset(void)
 	// Modify the various spells which are allowed to cross levels
 	if (Globals->EASIER_UNDERWORLD) {
 		ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags("rng_portal", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags("rng_weather", RangeType::RNG_CROSS_LEVELS);
@@ -345,7 +346,7 @@ void Game::ModifyTablesPerRuleset(void)
 	}
 	// XXX -- This is just here to preserve existing behavior
 	//ModifyItemProductionBooster(I_AXE, I_HAMMER, 1);
-	
+
 	// I reckon you should be able to transport LIVE and HORSES
 	ModifyItemFlags(I_LIVESTOCK, 0);
 	ModifyItemFlags(I_HORSE, 0);
@@ -374,24 +375,24 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyObjectConstruction(O_ROADS, I_STONE, 40, "BUIL", 3);
 	ModifyObjectConstruction(O_ROADSE, I_STONE, 40, "BUIL", 3);
 	ModifyObjectConstruction(O_ROADSW, I_STONE, 40, "BUIL", 3);
-	
+
 	// And modify some of the monsters...
 	// Balrogs - weaker, less loot
 	ModifyMonsterAttacksAndHits("BALR", 100, 100, 0, 1);
 	ModifyMonsterSkills("BALR", 4, 4, 4); // tact, obse, stea
 	ModifyMonsterSpoils("BALR", 20000, IT_MAGIC);
-	
+
 	// Dragons - tougher, more loot
 	ModifyMonsterSpoils("DRAG", 20000, IT_MAGIC);
 	ModifyMonsterSkills("DRAG", 4, 1, 4); // tact, obse, stea
-	
+
 	// Liches - tougher, more loot
 	ModifyMonsterSpoils("LICH", 20000, IT_MAGIC);
 	ModifyMonsterSkills("LICH", 4, 4, 5); // tact, obse, stea
 	ModifyMonsterSpecial("LICH", "black_wind", 1);
 	ModifyMonsterDefense("LICH", 5, 4);
 	ModifyMonsterDefense("LICH", 0, 5);
-	
+
 	// Beef up Undead and Skeletons slightly, too...
 	ModifyMonsterSpecial("SKEL", "fear", 1);
 	ModifyMonsterAttacksAndHits("SKEL", 1, 2, 0, 1);
@@ -400,7 +401,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyMonsterAttacksAndHits("UNDE", 5, 10, 0, 1);
 	ModifyMonsterDefense("UNDE", 5, 1); // unde resist missile attacks slightly
 
-	// Reduce spoils for mermen, pirates, 
+	// Reduce spoils for mermen, pirates,
 	ModifyMonsterSpoils("MERF", 100, IT_NORMAL);
 	ModifyMonsterSpoils("PIRA", 200, IT_NORMAL);
 
@@ -410,15 +411,15 @@ void Game::ModifyTablesPerRuleset(void)
 	// Living Trees (ie Ents) should resist missile attacks
 	ModifyMonsterDefense("TREN", 5, 3);
 	ModifyMonsterDefense("TREN", 2, 5);
-	
+
 	// Why doesn't the sphinx have tact?
 	ModifyMonsterSkills("SPHI", 4, 3, 0); // tact, obse, stea
-	
+
 	// Ogres aren't very tough at all!
 	ModifyMonsterAttacksAndHits("OGRE", 10, 20, 0, 1);
 	ModifyMonsterSkills("OGRE", 1, 0, 0); // tact, obse, stea
-	
-	// Cut out some of the crappier trade items. 
+
+	// Cut out some of the crappier trade items.
 	// With fewer trade items, the chance of good trade routes goes up.
 	//DisableItem(I_IVORY);
 	DisableItem(I_PEARL);
@@ -440,7 +441,7 @@ void Game::ModifyTablesPerRuleset(void)
 	DisableItem(I_COTTON);
 	//DisableItem(I_DYES);
 	DisableItem(I_WOOL);
-	
+
 	// Now modify the building defences
 	// ModifyObjectDefence(int ob, int co, int en, int sp, int we, int ri, int ra)
 	ModifyObjectDefence(O_TOWER, 1,0,0,0,1,1);
@@ -526,18 +527,18 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainItems(R_CERAN_HILL, 2, I_MITHRIL, 10, 5);
 	ModifyTerrainItems(R_CERAN_HILL, 3, I_ROOTSTONE, 25, 5);
 	ModifyTerrainItems(R_CERAN_HILL, 4, I_HERBS, 10, 10);
-	
+
 	// Ok, now for the rest of the racial stuff...
 	ModifyItemBasePrice(I_GOBLINMAN, 40);
 	ModifyItemBasePrice(I_HIGHELF, 75);
 	ModifyItemBasePrice(I_CENTAURMAN, 75);
 	ModifyItemBasePrice(I_HILLDWARF, 75);
-	
+
 	//ModifyRaceSkillLevels(char *r, int spec, int def);
 	//ModifyRaceSkills(char *r, int i, char *sk);
-	
+
 	ModifyRaceSkills("GBLN", 0, "XBOW");
-	
+
 	ModifyRaceSkills("HELF", 0, "COMB");
 	ModifyRaceSkills("HELF", 1, "LBOW");
 	ModifyRaceSkills("HELF", 2, "LUMB");
