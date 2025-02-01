@@ -387,7 +387,7 @@ int ARegion::RoadDevelopmentBonus(int range, int dev)
 		if (!r) continue;
 		if (HasConnectingRoad(d)) bonus = r->TraceConnectedRoad(d, bonus, con, range-1, dev);
 	}
-	return bonus;	
+	return bonus;
 }
 
 // AS
@@ -971,7 +971,7 @@ void ARegion::DeduplicateUnitList(AList *list, int faction)
 	Unit *outer, *inner;
 
 	i = 0;
-	forlist(list) {
+	forlist_safe(list) {
 		id = (UnitId *) elem;
 		outer = GetUnitId(id, faction);
 		if (!outer)
@@ -1069,7 +1069,7 @@ void ARegion::Writeout(ostream& f)
 	f << products.size() << '\n';
 	for (const auto& product : products) product->Writeout(f);
 	f << markets.size() << '\n';
-	for (const auto& market : markets) market->Writeout(f);	
+	for (const auto& market : markets) market->Writeout(f);
 
 	f << objects.Num() << '\n';
 	forlist ((&objects)) ((Object *) elem)->Writeout(f);
@@ -1364,7 +1364,7 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 
 	j["exits"] = json::array();
 	for (int i=0; i<NDIRS; i++) {
-		if (!exits_seen[i] || !neighbors[i]) continue; 
+		if (!exits_seen[i] || !neighbors[i]) continue;
 		j["exits"].push_back(
 			{ { "direction", DirectionStrs[i] }, { "region", neighbors[i]->basic_region_data() } }
 		);
@@ -1817,7 +1817,7 @@ void ARegion::AddFleet(Object * fleet)
 	objects.Add(fleet);
 	//Awrite(AString("Setting up fleet alias #") + fleetalias + ": " + fleet->num);
 	newfleets.insert(make_pair(fleetalias++, fleet->num));
-	
+
 }
 
 int ARegion::ResolveFleetAlias(int alias)
@@ -2223,7 +2223,7 @@ void ARegionList::TownStatistics()
 					break;
 				case TOWN_CITY:
 					cities++;
-			}	
+			}
 		}
 	}
 	int tot = villages + towns + cities;
@@ -2490,7 +2490,7 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty, int 
 			r->distance = -1;
 			r->next = 0;
 		}
-		
+
 		zdist = (one->zloc - two->zloc);
 		if (zdist < 0) zdist = -zdist;
 		start->distance = zdist * penalty;
@@ -2670,11 +2670,11 @@ int ParseTerrain(AString *token)
 	for (int i = 0; i < R_NUM; i++) {
 		if (*token == TerrainDefs[i].type) return i;
 	}
-	
+
 	for (int i = 0; i < R_NUM; i++) {
 		if (*token == TerrainDefs[i].name) return i;
 	}
-	
+
 	return (-1);
 }
 
@@ -2857,7 +2857,7 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 				if (otherWater < 0) {
 					continue;
 				}
-				
+
 				int currentDist = distances[water->name][otherWater];
 				if (newDist < currentDist ) {
 					distances[water->name][otherWater] = newDist;
@@ -3102,7 +3102,7 @@ void cleanupIsolatedPlaces(ARegionArray* arr, std::vector<WaterBody*>& waterBodi
 
 int countNeighbors(ARegionGraph& graph, ARegion* reg, int ofType, int distance) {
 	graphs::Location2D loc = { reg->xloc, reg->yloc };
-	
+
 	int count = 0;
 
 	auto result = graphs::breadthFirstSearch(graph, loc);
@@ -3174,7 +3174,7 @@ std::vector<graphs::Location2D> getPoints(const int w, const int h,
 
 	int minDist = initialMinDist;
 	int cellSize = ceil(minDist / sqrt(2));
-	
+
 	graphs::Location2D loc;
 	do {
 		loc = { .x = getrandom(w), .y = getrandom(h) };
@@ -3424,7 +3424,7 @@ void nameArea(int width, int height, ARegionGraph &graph, std::unordered_set<std
 				volcanoName = getRegionName(getrandom(width * height), etnos, r->type, 1, false);
 			}
 			usedNames.emplace(volcanoName);
-			
+
 			std::cout << volcanoName << std::endl;
 			r->SetName(volcanoName.c_str());
 		}
@@ -3762,7 +3762,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 	}
 
 	ARegionGraph graph = ARegionGraph(arr);
-	
+
 	graph.setInclusion([](ARegion* current, ARegion* next) {
 		return next->type != R_OCEAN && next->type != R_VOLCANO;
 	});
@@ -3933,7 +3933,7 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 	const int h = map->map.height / 2;
 
 	MakeRegions(level, w, h);
-	
+
 	pRegionArrays[level]->SetName(0);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
@@ -3960,13 +3960,13 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 
 	const int maxRiverReach = std::min(w, h) / 4;
 	makeRivers(map, arr, waterBodies, rivers, w, h, maxRiverReach);
-	
+
 	cleanupIsolatedPlaces(arr, waterBodies, rivers, w, h);
 
 	placeVolcanoes(arr, w, h);
 
 	GrowRaces(arr);
-	
+
 	giveNames(arr, waterBodies, rivers, w, h);
 	assertAllRegionsHaveName(w, h, arr);
 
@@ -4028,7 +4028,7 @@ void ARegionList::ResourcesStatistics() {
 
 	forlist(this) {
 		ARegion* reg = (ARegion*) elem;
-		
+
 		for (const auto& p : reg->products) {
 			resources[p->itemtype] += p->amount;
 		}
