@@ -40,7 +40,6 @@ struct ShowObject;
 #include "battle.h"
 #include "skills.h"
 #include "items.h"
-#include "alist.h"
 #include "astring.h"
 
 #include "external/nlohmann/json.hpp"
@@ -51,6 +50,7 @@ using json = nlohmann::json;
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 enum
 {
@@ -111,12 +111,6 @@ enum FactionActivity
 	TRADE = 2
 };
 
-class FactionPtr : public AListElem
-{
-public:
-	Faction *ptr;
-};
-
 // Collect the faction statistics for display in the report
 struct FactionStatistic {
 	std::string item_name;
@@ -149,7 +143,7 @@ struct FactionEvent {
 	friend void to_json(json &j, const FactionEvent &e);
 };
 
-class Faction : public AListElem
+class Faction
 {
 public:
 	Faction();
@@ -215,8 +209,6 @@ public:
 	int numapprentices;
 	int numqms;
 	int numtacts;
-	// AList war_regions;
-	// AList trade_regions;
 
 	std::unordered_map<ARegion *, std::unordered_set<FactionActivity, std::hash<int>>> activity;
 	int GetActivityCost(FactionActivity type);
@@ -233,7 +225,6 @@ public:
 	// For now, just making it a vector of attitudes.  More will come later.
 	std::vector<Attitude> attitudes;
 
-	// These need to not be ALists wrapped with extra behavior at some point.
 	SkillList skills;
 	ItemList items;
 
@@ -262,7 +253,6 @@ private:
 	void build_gm_json_report(json& j, Game *game);
 };
 
-Faction *GetFaction(AList *, int);
-Faction *GetFaction2(AList *, int); /*This AList is a list of FactionPtr*/
+Faction *get_faction(const std::vector<std::unique_ptr<Faction>>& factions, int faction_id);
 
 #endif

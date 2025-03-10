@@ -146,7 +146,7 @@ void Game::GrowLMons(int rate)
 		// Don't make lmons in guarded regions
 		//
 		if (r->IsGuarded()) continue;
-		
+
 		forlist(&r->objects) {
 			Object *obj = (Object *) elem;
 			if (obj->units.size()) continue;
@@ -178,7 +178,7 @@ int Game::MakeWMon(ARegion *pReg)
 
 	MonType *mp = FindMonster(ItemDefs[montype].abr,
 			(ItemDefs[montype].type & IT_ILLUSION));
-	Faction *monfac = GetFaction(&factions, monfaction);
+	Faction *monfac = get_faction(factions, monfaction);
 	Unit *u = GetNewUnit(monfac, 0);
 	u->MakeWMon(mp->name, montype, (mp->number+getrandom(mp->number)+1)/2);
 	u->MoveUnit(pReg->GetDummy());
@@ -203,7 +203,7 @@ void Game::MakeLMon(Object *pObj)
 
 	MonType *mp = FindMonster(ItemDefs[montype].abr,
 			(ItemDefs[montype].type & IT_ILLUSION));
-	Faction *monfac = GetFaction(&factions, monfaction);
+	Faction *monfac = get_faction(factions, monfaction);
 	Unit *u = GetNewUnit(monfac, 0);
 	switch(montype) {
 		case I_IMP:
@@ -358,13 +358,13 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 			// disregard picks!
 			AString *ps = new AString("PICK");
 			if (LookupItem(it) == LookupItem(ps)) continue;
-			
+
 			// Sort out the more exotic weapons!
 			int producelevel = ItemDefs[LookupItem(it)].pLevel;
 			if (ItemDefs[LookupItem(it)].pSkill != FindSkill("WEAP")->abbr) continue;
 
 			AString *s1 = new AString(WeaponDefs[i].baseSkill);
-			AString *s2 = new AString(WeaponDefs[i].orSkill);			
+			AString *s2 = new AString(WeaponDefs[i].orSkill);
 			if ((WeaponDefs[i].flags & WeaponType::RANGED)
 				&& (!behind)) continue;
 			int attack = WeaponDefs[i].attackBonus;
@@ -393,7 +393,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 				}
 			}
 		}
-		
+
 		if (n < 1) {
 			weaponlevel++;
 			continue;
@@ -436,7 +436,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 	for (unsigned int i=0; i<(sizeof(men->skills)/sizeof(men->skills[0])); i++) {
 		if (FindSkill(men->skills[i]) == FindSkill(SkillDefs[sk].abbr)) {
 			special = 1;
-		}		
+		}
 	}
 	if (special) maxskill = men->speciallevel;
 	if (level > maxskill) level = maxskill;

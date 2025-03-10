@@ -48,6 +48,8 @@ class UnitId;
 #include "object.h"
 #include <set>
 #include <string>
+#include <vector>
+#include <memory>
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -123,7 +125,7 @@ class Unit
 		void MakeWMon(char const *,int,int);
 
 		void Writeout(std::ostream& f);
-		void Readin(std::istream& f, AList *);
+		void Readin(std::istream& f, const std::vector<std::unique_ptr<Faction>>& factions);
 
 		AString SpoilsReport(void);
 		int CanGetSpoil(Item& i);

@@ -235,9 +235,9 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 					fac = &(pCheck->dummyFaction);
 					pCheck->numshows = 0;
 					// Even though we don't use the real faction for other things, we do want it for the password check.
-					passFac = GetFaction(&factions, token->value());
+					passFac = get_faction(factions, token->value());
 				} else {
-					fac = GetFaction(&factions, token->value());
+					fac = get_faction(factions, token->value());
 				}
 
 				if (!fac) break;
@@ -1322,13 +1322,18 @@ void Game::ProcessRestartOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		}
 
 		if (u->faction->quit != QUIT_AND_RESTART) {
+			int oldquit = u->faction->quit;
 			u->faction->quit = QUIT_AND_RESTART;
 			Faction *pFac = AddFaction(0, NULL);
+			if (!pFac) {
+				u->faction->quit = oldquit;
+				u->faction->error("RESTART: Unable to create new faction.");
+				return;
+			}
 			pFac->SetAddress(*(u->faction->address));
 			AString *pass = new AString(*(u->faction->password));
 			pFac->password = pass;
 			string facstr = string("Restarting ") + pFac->address->const_str() + ".";
-			newfactions.push_back(facstr);
 		}
 	}
 }
@@ -1873,7 +1878,7 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 	if (!pCheck) {
 		Faction *target;
 		if (fac != -1) {
-			target = GetFaction(&factions, fac);
+			target = get_faction(factions, fac);
 			if (!target) {
 				f->error("DECLARE: Non-existent faction " + to_string(fac) + ".");
 				return;

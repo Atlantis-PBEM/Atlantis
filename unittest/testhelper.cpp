@@ -47,12 +47,8 @@ Faction *UnitTestHelper::create_faction(std::string name) {
 }
 
 Faction *UnitTestHelper::get_faction(int id) {
-    forlist(&game.factions) {
-        Faction *f = (Faction *)elem;
-        if (f->num != id) continue;
-        return f;
-    }
-    return nullptr;
+    // pass this on to the globally defined get_faction function
+    return ::get_faction(game.factions, id);
 }
 
 Unit *UnitTestHelper::get_first_unit(Faction *faction) {

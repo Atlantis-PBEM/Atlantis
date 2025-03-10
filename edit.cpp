@@ -1270,7 +1270,7 @@ void Game::EditGameUnitDetails(Unit *pUnit)
 						break;
 					}
 
-					Faction *fac = GetFaction(&factions, fnum);
+					Faction *fac = get_faction(factions, fnum);
 					if (fac) pUnit->faction = fac;
 					else Awrite("Cannot Find Faction");
 				}
@@ -1303,7 +1303,7 @@ void Game::EditGameUnitDetails(Unit *pUnit)
 
 void Game::EditGameCreateUnit()
 {
-	Faction *fac = GetFaction(&factions, 1);
+	Faction *fac = get_faction(factions, 1);
 	Unit *newunit = GetNewUnit(fac);
 	newunit->SetMen(I_LEADERS, 1);
 	newunit->reveal = REVEAL_FACTION;

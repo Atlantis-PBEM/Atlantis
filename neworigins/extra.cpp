@@ -412,7 +412,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		quests.push_back(q);
 }
 
-int report_and_count_anomalies(ARegionList *regions, AList *factions) {
+int report_and_count_anomalies(ARegionList *regions, const std::vector<std::unique_ptr<Faction>>& factions) {
 	int count = 0;
 	forlist(regions) {
 		ARegion *r = (ARegion *)elem;
@@ -420,8 +420,7 @@ int report_and_count_anomalies(ARegionList *regions, AList *factions) {
 			Object *o = (Object *)elem;
 			if (o->type == O_ENTITY_CAGE) {
 				count++;
-				forlist(factions) {
-					Faction *f = (Faction *)elem;
+				for(const auto& f : factions) {
 					if (f->is_npc) continue;
 					f->event("A strange anomaly has been seen in " + string(r->ShortPrint().const_str()) + ".",
 						"anomaly", r);
@@ -797,7 +796,7 @@ Faction *Game::CheckVictory()
 			int faction_id = stoi(possible_faction);
 
 			// Make sure it's a valid faction
-			Faction *f = GetFaction(&factions, faction_id);
+			Faction *f = get_faction(factions, faction_id);
 			if (!f || f->is_npc) continue;
 
 			auto vote = votes.find(faction_id);
@@ -815,7 +814,7 @@ Faction *Game::CheckVictory()
 		bool tie = false;
 		Faction *maxFaction = nullptr;
 		for (const auto& vote : votes) {
-			Faction *f = GetFaction(&factions, vote.first);
+			Faction *f = get_faction(factions, vote.first);
 			if (vote.second > max_vote) {
 				max_vote = vote.second;
 				maxFaction = f;
@@ -862,7 +861,7 @@ Faction *Game::CheckVictory()
 			if (getrandom(100) < chance) {
 				// Okay, let's see if we can spawn a new entity
 				// If we can, see if we already have those anomalies and report them to all factions if so.
-				int anomalies = report_and_count_anomalies(&regions, &factions);
+				int anomalies = report_and_count_anomalies(&regions, factions);
 				if (anomalies + completed_entities >= 6) {
 					// We have all the anomalies that we can have still, so cannot spawn any more.
 					return nullptr;
@@ -904,8 +903,7 @@ Faction *Game::CheckVictory()
 				}
 				r->objects.Add(o);
 				// Now tell all the factions about it.
-				forlist(&factions) {
-					Faction *f = (Faction *)elem;
+				for(const auto& f : factions) {
 					if (f->is_npc) continue;
 					f->event("A strange anomaly has appeared in " + string(r->ShortPrint().const_str()) + ".",
 						"anomaly", r);
@@ -939,10 +937,9 @@ Faction *Game::CheckVictory()
 
 		// Ok, we have a possible winner, check for all alive factions being allied with the winner and vice-versa.
 		bool all_allied = true;
-		forlist_reuse(&factions) {
-			Faction *f = (Faction *)elem;
+		for(const auto& f : factions) {
 			if (f->is_npc) continue;
-			if (f == winner) continue;
+			if (f.get() == winner) continue;
 			// This faction doesn't have the winner as an ally, so no win by allies
 			if (f->get_attitude(winner->num) != A_ALLY) { all_allied = false; break; }
 			// The winner doesn't have this faction as an ally, so no win by allies

@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <random>
 #include <memory>
+#include <set>
 
 #include "game.h"
 #include "gamedata.h"
@@ -214,7 +215,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 {
 	std::shared_ptr<SailOrder> o = std::dynamic_pointer_cast<SailOrder>(cap->monthorders);
 	int stop, wgt, slr, nomove, cost;
-	AList facs;
+	std::set<Faction *> facs;
 	ARegion *newreg;
 	Location *loc;
 
@@ -224,11 +225,8 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 	slr = 0;
 	nomove = 0;
 	for(auto unit: fleet->units) {
-		if (!GetFaction2(&facs,unit->faction->num)) {
-			FactionPtr * p = new FactionPtr;
-			p->ptr = unit->faction;
-			facs.Add(p);
-		}
+		facs.insert(unit->faction);
+
 		wgt += unit->Weight();
 		if (unit->nomove) {
 			// If any unit on-board was in a fight (and
@@ -339,15 +337,10 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 					}
 				}
 				unit->DiscardUnfinishedShips();
-				if (!GetFaction2(&facs, unit->faction->num)) {
-					FactionPtr *p = new FactionPtr;
-					p->ptr = unit->faction;
-					facs.Add(p);
-				}
+				facs.insert(unit->faction);
 			}
 
-			forlist_reuse(&facs) {
-				Faction * f = ((FactionPtr *) elem)->ptr;
+			for(auto& f: facs) {
 				string temp = fleet->name->const_str();
 				temp += (x.dir == MOVE_PAUSE ? " performs maneuvers in " : " sails from ") +
 					string(reg->ShortPrint().const_str());

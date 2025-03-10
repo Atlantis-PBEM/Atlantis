@@ -51,7 +51,9 @@ using json = nlohmann::json;
 #include <map>
 #include <vector>
 #include <list>
+#include <set>
 #include <functional>
+#include <memory>
 
 /* Weather Types */
 enum {
@@ -195,7 +197,7 @@ class ARegion : public AListElem
 		void SetName(char const *);
 
 		void Writeout(std::ostream& f);
-		void Readin(std::istream& f, AList *);
+		void Readin(std::istream& f, const std::vector<std::unique_ptr<Faction>>& factions);
 
 		int CanMakeAdv(Faction *, int);
 		int HasItem(Faction *, int);
@@ -216,7 +218,7 @@ class ARegion : public AListElem
 
 		void SetLoc(int, int, int);
 		int Present(Faction *);
-		AList *PresentFactions();
+		std::set<Faction *> PresentFactions();
 		int GetObservation(Faction *, int);
 		int GetTrueSight(Faction *, int);
 
@@ -461,7 +463,7 @@ class ARegionList : public AList
 
 		ARegion *GetRegion(int);
 		ARegion *GetRegion(int, int, int);
-		int ReadRegions(std::istream &f, AList *);
+		int ReadRegions(std::istream &f, const std::vector<std::unique_ptr<Faction>>& factions);
 		void WriteRegions(std::ostream&  f);
 		Location *FindUnit(int);
 		Location *GetUnitId(UnitId *id, int faction, ARegion *cur);

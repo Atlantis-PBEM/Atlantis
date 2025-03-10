@@ -30,6 +30,8 @@
 #include "gamedata.h"
 #include "unit.h"
 #include "indenter.hpp"
+#include <vector>
+#include <memory>
 
 int LookupObject(AString *token)
 {
@@ -119,7 +121,7 @@ void Object::Writeout(std::ostream& f)
 	WriteoutFleet(f);
 }
 
-void Object::Readin(std::istream& f, AList *facs)
+void Object::Readin(std::istream& f, const std::vector<std::unique_ptr<Faction>>& factions)
 {
 	AString temp;
 
@@ -153,7 +155,7 @@ void Object::Readin(std::istream& f, AList *facs)
 	f >> i;
 	for (int j = 0; j < i; j++) {
 		Unit *temp = new Unit;
-		temp->Readin(f, facs);
+		temp->Readin(f, factions);
 		if (!temp->faction)
 			continue;
 		temp->MoveUnit(this);

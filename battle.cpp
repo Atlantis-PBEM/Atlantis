@@ -750,70 +750,61 @@ void Battle::AddLine(const AString & s) {
 	text.push_back(s.const_str());
 }
 
-void Game::GetDFacs(ARegion * r,Unit * t,AList & facs)
+void Game::GetDFacs(ARegion *r, Unit *t, std::set<Faction *>& facs)
 {
-	int AlliesIncluded = 0;
+	bool allies_allowed = false;
 
 	// First, check whether allies should assist in this combat
 	if (Globals->ALLIES_NOAID == 0) {
-		AlliesIncluded = 1;
+		allies_allowed = true;
 	} else {
 		// Check whether any of the target faction's
 		// units aren't set to noaid
 		forlist((&r->objects)) {
 			Object * obj = (Object *) elem;
 			for(auto u: obj->units) {
-				if (u->IsAlive()) {
-					if (u->faction == t->faction &&
-						(u->GetFlag(FLAG_NOAID) == 0)) {
-						AlliesIncluded = 1;
-						break;
-					}
+				if (u->IsAlive() && (u->faction == t->faction) && !(u->GetFlag(FLAG_NOAID))) {
+					allies_allowed = true;
+					break;
 				}
-				if (AlliesIncluded == 1) break; // forlist(units)
 			}
-			if (AlliesIncluded == 1) break; // forlist (objects)
+			if (allies_allowed) break; // forlist (objects)
 		}
-		//delete obj;
-		//delete u;
 	}
 
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
 		for(auto u: obj->units) {
-			if (u->IsAlive()) {
-				if (u->faction == t->faction ||
-					(AlliesIncluded == 1 &&
-					 u->guard != GUARD_AVOID &&
-					 u->GetAttitude(r,t) == A_ALLY) ) {
-
-					if (!GetFaction2(&facs,u->faction->num)) {
-						FactionPtr * p = new FactionPtr;
-						p->ptr = u->faction;
-						facs.Add(p);
-					}
-				}
+			if (
+				u->IsAlive() &&
+				(
+					u->faction == t->faction ||
+					(allies_allowed && u->guard != GUARD_AVOID && u->GetAttitude(r,t) == A_ALLY)
+				)
+			) {
+				facs.insert(u->faction);
 			}
 		}
 	}
 }
 
-void Game::GetAFacs(ARegion *r, Unit *att, Unit *tar, AList &dfacs,
-		AList &afacs, AList &atts)
+void Game::GetAFacs(
+	ARegion *r, Unit *att, Unit *tar, std::set<Faction *>& dfacs, std::set<Faction *>& afacs, AList& atts
+)
 {
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
 		for(auto u: obj->units) {
 			if (u->canattack && u->IsAlive()) {
-				int add = 0;
-				if ((u->faction == att->faction ||
-							u->GetAttitude(r,tar) == A_HOSTILE) &&
-						(u->guard != GUARD_AVOID || u == att)) {
-					add = 1;
+				bool add = false;
+				if (
+					(u->faction == att->faction || u->GetAttitude(r,tar) == A_HOSTILE) &&
+					(u->guard != GUARD_AVOID || u == att)
+				) {
+					add = true;
 				} else {
-					if (u->guard == GUARD_ADVANCE &&
-							u->GetAttitude(r,tar) != A_ALLY) {
-						add = 1;
+					if (u->guard == GUARD_ADVANCE && u->GetAttitude(r,tar) != A_ALLY) {
+						add = true;
 					} else {
 						if (u->attackorders) {
 							for (auto id = u->attackorders->targets.begin(); id != u->attackorders->targets.end();) {
@@ -822,51 +813,46 @@ void Game::GetAFacs(ARegion *r, Unit *att, Unit *tar, AList &dfacs,
 								if (t == tar) {
 									id = u->attackorders->targets.erase(id);
 								}
-								if (t->faction == tar->faction) add = 1;
+								if (t->faction == tar->faction) add = true;
 							}
 						}
 					}
 				}
 
-				if (add) {
-					if (!GetFaction2(&dfacs,u->faction->num)) {
-						Location * l = new Location;
-						l->unit = u;
-						l->obj = obj;
-						l->region = r;
-						atts.Add(l);
-						if (!GetFaction2(&afacs,u->faction->num)) {
-							FactionPtr * p = new FactionPtr;
-							p->ptr = u->faction;
-							afacs.Add(p);
-						}
-					}
+				if (add && (dfacs.find(u->faction) == dfacs.end())) {
+					Location * l = new Location;
+					l->unit = u;
+					l->obj = obj;
+					l->region = r;
+					atts.Add(l);
+					afacs.insert(u->faction);
 				}
 			}
 		}
 	}
 }
 
-int Game::CanAttack(ARegion * r,AList * afacs,Unit * u)
+bool Game::CanAttack(ARegion *r, std::set<Faction *> afacs, Unit * u)
 {
-	int see = 0;
-	int ride = 0;
-	forlist(afacs) {
-		FactionPtr * f = (FactionPtr *) elem;
-		if (f->ptr->CanSee(r,u) == 2) {
-			if (ride == 1) return 1;
-			see = 1;
+	bool see = false;
+	bool ride = false;
+	for(auto f: afacs) {
+		if (f->CanSee(r, u) == 2) {
+			if (ride) return true;
+			see = true;
 		}
-		if (f->ptr->CanCatch(r,u)) {
-			if (see == 1) return 1;
-			ride = 1;
+		if (f->CanCatch(r, u)) {
+			if (see) return true;
+			ride = true;
 		}
 	}
-	return 0;
+	return false;
 }
 
-void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
-		AList &defs, Unit *att, Unit *tar, int ass, int adv)
+void Game::GetSides(
+	ARegion *r, std::set<Faction *> afacs, std::set<Faction *>dfacs, AList &atts,
+	AList &defs, Unit *att, Unit *tar, bool ass, bool adv
+)
 {
 	if (ass) {
 		/* Assassination attempt */
@@ -930,7 +916,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 #define ADD_DEFENSE 2
 				/* First, can the unit be involved in the battle at all? */
 				if ((i==-1 || u->GetFlag(FLAG_HOLDING) == 0) && u->IsAlive()) {
-					if (GetFaction2(&afacs,u->faction->num)) {
+					if (afacs.find(u->faction) != afacs.end()) {
 						/*
 						 * The unit is on the attacking side, check if the
 						 * unit should be in the battle
@@ -964,7 +950,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 								 * The unit is not a city guardsman, check if
 								 * the unit is on the defensive side
 								 */
-								if (GetFaction2(&dfacs,u->faction->num)) {
+								if (dfacs.find(u->faction) != dfacs.end()) {
 									if (u->guard == GUARD_AVOID) {
 										/*
 										 * The unit is avoiding, and doesn't
@@ -974,7 +960,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 										if (u == tar ||
 												(u->faction == tar->faction &&
 												 i==-1 &&
-												 CanAttack(r,&afacs,u))) {
+												 CanAttack(r, afacs, u))) {
 											add = ADD_DEFENSE;
 										}
 									} else {
@@ -1080,12 +1066,10 @@ int Game::KillDead(Location * l, Battle *b, int max_susk, int max_rais)
 	return uncontrolled;
 }
 
-int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
-					 int adv)
+int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass, bool adv)
 {
-	AList afacs,dfacs;
-	AList atts,defs;
-	FactionPtr * p;
+	std::set<Faction *> afacs, dfacs;
+	AList atts, defs;
 	int result;
 
 	if (ass) {
@@ -1094,12 +1078,8 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 			return BATTLE_IMPOSSIBLE;
 		}
 		/* Assassination attempt */
-		p = new FactionPtr;
-		p->ptr = attacker->faction;
-		afacs.Add(p);
-		p = new FactionPtr;
-		p->ptr = target->faction;
-		dfacs.Add(p);
+		afacs.insert(attacker->faction);
+		dfacs.insert(target->faction);
 	} else {
 		if ( r->IsSafeRegion() ) {
 			attacker->error("ATTACK: No battles allowed in safe regions.");
@@ -1116,7 +1096,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 			return BATTLE_IMPOSSIBLE;
 		}
 		GetDFacs(r,target,dfacs);
-		if (GetFaction2(&dfacs,attacker->faction->num)) {
+		if (dfacs.find(attacker->faction) != dfacs.end()) {
 			attacker->error("ATTACK: Can't attack an ally.");
 			if (adv) {
 				attacker->canattack = 0;
@@ -1126,10 +1106,10 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 			}
 			return BATTLE_IMPOSSIBLE;
 		}
-		GetAFacs(r,attacker,target,dfacs,afacs,atts);
+		GetAFacs(r, attacker, target, dfacs, afacs, atts);
 	}
 
-	GetSides(r,afacs,dfacs,atts,defs,attacker,target,ass,adv);
+	GetSides(r, afacs, dfacs, atts, defs, attacker, target, ass, adv);
 
 	if (atts.Num() <= 0) {
 		// This shouldn't happen, but just in case
@@ -1143,15 +1123,13 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 	}
 
 	Battle * b = new Battle;
-	b->WriteSides(r,attacker,target,&atts,&defs,ass, &regions );
+	b->WriteSides(r, attacker, target, &atts, &defs, ass, &regions);
 
 	battles.push_back(b);
-	{
-		forlist(&factions) {
-			Faction * f = (Faction *) elem;
-			if (GetFaction2(&afacs,f->num) || GetFaction2(&dfacs,f->num) ||	r->Present(f)) {
-				f->battles.push_back(b);
-			}
+	for(const auto& fac: factions) {
+		Faction *f = fac.get();
+		if ((afacs.find(f) != afacs.end()) || (dfacs.find(f) != dfacs.end()) || r->Present(f)) {
+			f->battles.push_back(b);
 		}
 	}
 	result = b->Run(events, r,attacker,&atts,target,&defs,ass, &regions );
@@ -1213,7 +1191,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 		if ((skel + undead) == 1)
 			tmp += "s";
 		tmp += " from the grave to seek vengeance.";
-		Faction *monfac = GetFaction(&factions, monfaction);
+		Faction *monfac = get_faction(factions, monfaction);
 		Unit *u = GetNewUnit(monfac, 0);
 		u->MakeWMon("Undead", I_SKELETON, skel);
 		u->items.SetNum(I_UNDEAD, undead);

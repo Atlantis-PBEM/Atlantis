@@ -37,7 +37,9 @@
 #include <ctime>
 #include <cassert>
 #include <unordered_set>
+#include <set>
 #include <queue>
+#include <memory>
 
 using namespace std;
 
@@ -423,10 +425,9 @@ void ARegion::DoDecayClicks(Object *o, ARegionList *pRegs)
 // AS
 void ARegion::RunDecayEvent(Object *o, ARegionList *pRegs)
 {
-	AList *pFactions;
+	std::set<Faction*> pFactions;
 	pFactions = PresentFactions();
-	forlist (pFactions) {
-		Faction *f = ((FactionPtr *) elem)->ptr;
+	for (auto& f: pFactions) {
 		string tmp = string(GetDecayFlavor().const_str()) + " " + ObjectDefs[o->type].name +
 			" in " + ShortPrint().const_str() + ".";
 		f->event(tmp, "decay");
@@ -996,17 +997,13 @@ int ARegion::Present(Faction *f)
 	return 0;
 }
 
-AList *ARegion::PresentFactions()
+std::set<Faction *> ARegion::PresentFactions()
 {
-	AList *facs = new AList;
+	std::set<Faction *> facs;
 	forlist((&objects)) {
 		Object *obj = (Object *) elem;
-		for(auto u: obj->units) {
-			if (!GetFaction2(facs, u->faction->num)) {
-				FactionPtr *p = new FactionPtr;
-				p->ptr = u->faction;
-				facs->Add(p);
-			}
+		for(auto unit: obj->units) {
+			facs.insert(unit->faction);
 		}
 	}
 	return facs;
@@ -1063,7 +1060,7 @@ int LookupRegionType(AString *token)
 	return -1;
 }
 
-void ARegion::Readin(istream &f, AList *facs)
+void ARegion::Readin(istream &f, const std::vector<std::unique_ptr<Faction>>& factions)
 {
 	AString temp;
 
@@ -1132,7 +1129,7 @@ void ARegion::Readin(istream &f, AList *facs)
 	buildingseq = 1;
 	for (int j = 0; j < n; j++) {
 		Object *temp = new Object(this);
-		temp->Readin(f, facs);
+		temp->Readin(f, factions);
 		if (temp->num >= buildingseq)
 			buildingseq = temp->num + 1;
 		objects.Add(temp);
@@ -1614,7 +1611,7 @@ int ARegion::HasCityGuard()
 
 int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 {
-	AList flist;
+	std::set<Faction *> flist;
 	unsigned int i;
 
 	SkillType *pS = FindSkill(spell);
@@ -1635,20 +1632,15 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 		for(auto u: o->units) {
 			if (u->faction == caster->faction) continue;
 			if (u->GetSkill(sp)) {
-				if (!GetFaction2(&flist, u->faction->num)) {
-					FactionPtr *fp = new FactionPtr;
-					fp->ptr = u->faction;
-					flist.Add(fp);
-				}
+				flist.insert(u->faction);
 			}
 		}
 	}
 
-	forlist_reuse (&flist) {
-		FactionPtr *fp = (FactionPtr *) elem;
+	for(auto& f: flist) {
 		string tmp = string(caster->name->const_str()) + " uses " + SkillStrs(sp).const_str() +
 				" in " + Print().const_str() + ".";
-		fp->ptr->event(tmp, "cast");
+		f->event(tmp, "cast");
 	}
 	return 1;
 }
@@ -1657,25 +1649,18 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 // Procedure to notify all units in city about city name change
 void ARegion::NotifyCity(Unit *caster, AString& oldname, AString& newname)
 {
-	AList flist;
+	std::set<Faction *> flist;
 	forlist((&objects)) {
 		Object *o = (Object *) elem;
 		for(auto u: o->units) {
 			if (u->faction == caster->faction) continue;
-			if (!GetFaction2(&flist, u->faction->num)) {
-				FactionPtr *fp = new FactionPtr;
-				fp->ptr = u->faction;
-				flist.Add(fp);
-			}
+			flist.insert(u->faction);
 		}
 	}
-	{
-		forlist(&flist) {
-			FactionPtr *fp = (FactionPtr *) elem;
-			string tmp = string(caster->name->const_str()) + " renames " + oldname.const_str() +
-				" to " + newname.const_str() + ".";
-			fp->ptr->event(tmp, "rename");
-		}
+	for(auto& f: flist) {
+		string tmp = string(caster->name->const_str()) + " renames " + oldname.const_str() +
+			" to " + newname.const_str() + ".";
+		f->event(tmp, "rename");
 	}
 }
 
@@ -1836,7 +1821,7 @@ void ARegionList::WriteRegions(ostream& f)
 	}
 }
 
-int ARegionList::ReadRegions(istream &f, AList *factions)
+int ARegionList::ReadRegions(istream& f, const std::vector<std::unique_ptr<Faction>>& factions)
 {
 	int num;
 	f >> num;
@@ -2338,10 +2323,10 @@ public:
 
 // This doesn't really need to be on the ARegionList but, it's okay for now.
 int ARegionList::get_connected_distance(ARegion *start, ARegion *target, int penalty, int maxdist) {
-	unordered_set<RegionVisited, RegionVisitHash> visited_regions;
+	std::unordered_set<RegionVisited, RegionVisitHash> visited_regions;
 	// We want to search the closest regions first so that as soon as we find one that is too far we know *all* the
 	// rest will be too far as well.
-	priority_queue<QEntry, vector<QEntry>, QEntryCompare> q;
+	std::priority_queue<QEntry, vector<QEntry>, QEntryCompare> q;
 
 	if (start == 0 || target == 0) {
 		// We were given some unusual (nonexistant) regions

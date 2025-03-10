@@ -42,6 +42,10 @@
 #include "quests.h"
 #include "unit.h"
 
+#include <vector>
+#include <memory>
+#include <set>
+
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
@@ -497,15 +501,15 @@ int Game::OpenGame()
 	f >> i;
 
 	for (int j = 0; j < i; j++) {
-		Faction *temp = new Faction;
+		auto temp = std::make_unique<Faction>();
 		temp->Readin(f);
-		factions.Add(temp);
+		factions.push_back(std::move(temp));
 	}
 
 	//
 	// Read in the ARegions
 	//
-	i = regions.ReadRegions(f, &factions);
+	i = regions.ReadRegions(f, factions);
 	if (!i) return 0;
 
 	// read in quests
@@ -541,10 +545,8 @@ int Game::SaveGame()
 	//
 	// Write out the Factions
 	//
-	f << factions.Num() << "\n";
-	forlist(&factions) {
-		((Faction *) elem)->Writeout(f);
-	}
+	f << factions.size() << "\n";
+	for(auto& fac: factions) fac->Writeout(f);
 
 	//
 	// Write out the ARegions
@@ -584,8 +586,7 @@ int Game::WritePlayers()
 	else if (gameStatus == GAME_STATUS_FINISHED)
 		f << "GameStatus: Finished\n\n";
 
-	forlist(&factions) {
-		Faction *fac = (Faction *) elem;
+	for(auto& fac: factions) {
 		fac->WriteFacInfo(f);
 	}
 
@@ -739,11 +740,8 @@ int Game::ReadPlayers()
 
 					lastWasNew = 1;
 				} else {
-					if (pFac && lastWasNew) {
-						WriteNewFac(pFac);
-					}
 					int nFacNum = pToken->value();
-					pFac = GetFaction(&factions, nFacNum);
+					pFac = get_faction(factions, nFacNum);
 					if (pFac)
 						pFac->startturn = TurnNumber();
 					lastWasNew = 0;
@@ -757,9 +755,6 @@ int Game::ReadPlayers()
 
 			SAFE_DELETE(pToken);
 			f >> ws >> pLine;
-		}
-		if (pFac && lastWasNew) {
-			WriteNewFac(pFac);
 		}
 	} while(0);
 
@@ -1078,12 +1073,6 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 	return(1);
 }
 
-void Game::WriteNewFac(Faction *pFac)
-{
-	string strFac = string("Adding ") + pFac->address->const_str() + ".";
-	newfactions.push_back(strFac);
-}
-
 int Game::DoOrdersCheck(const AString &strOrders, const AString &strCheck)
 {
 	ifstream ordersFile(strOrders.const_str(), ios::in);
@@ -1172,15 +1161,12 @@ void Game::PreProcessTurn()
 		year++;
 	}
 	SetupUnitNums();
-	forlist(&factions) {
-		((Faction *) elem)->DefaultOrders();
-	}
-	forlist_reuse(&regions) {
+	for(auto& fac: factions) fac->DefaultOrders();
+
+	forlist(&regions) {
 		ARegion *pReg = (ARegion *) elem;
-		if (Globals->WEATHER_EXISTS)
-			pReg->SetWeather(regions.GetWeather(pReg, month));
-		if (Globals->GATES_NOT_PERENNIAL)
-			pReg->SetGateStatus(month);
+		if (Globals->WEATHER_EXISTS) pReg->SetWeather(regions.GetWeather(pReg, month));
+		if (Globals->GATES_NOT_PERENNIAL) pReg->SetGateStatus(month);
 		pReg->DefaultOrders();
 	}
 }
@@ -1202,13 +1188,11 @@ void Game::ClearOrders(Faction *f)
 
 void Game::ReadOrders()
 {
-	forlist(&factions) {
-		Faction *fac = (Faction *) elem;
+	for(auto& fac: factions) {
 		if (!fac->is_npc) {
-			AString str = "orders.";
-			str += fac->num;
+			std::string str = "orders." + std::to_string(fac->num);
 
-			ifstream file(str.const_str(), ios::in);
+			ifstream file(str, ios::in);
 			if(file.is_open()) {
 				ParseOrders(fac->num, file, 0);
 				file.close();
@@ -1273,8 +1257,7 @@ void Game::WriteReport()
 		CountItems(citems);
 	}
 
-	forlist(&factions) {
-		Faction *fac = (Faction *) elem;
+	for(auto& fac: factions) {
 		string report_file = "report." + to_string(fac->num);
 		string template_file = "template." + to_string(fac->num);
 
@@ -1319,13 +1302,21 @@ void Game::WriteReport()
 
 void Game::DeleteDeadFactions()
 {
-	forlist(&factions) {
-		Faction *fac = (Faction *) elem;
-		if (!fac->is_npc && !fac->exists) {
-			factions.Remove(fac);
-			forlist((&factions))
-				((Faction *) elem)->remove_attitude(fac->num);
-			delete fac;
+	std::set<int> deadFactionIds;
+	// Remove the faction from the list of factions and keep track of ids to clean up attitudes later
+	for(auto it = factions.begin(); it != factions.end();) {
+		if (!((*it)->is_npc) && !((*it)->exists)) {
+			deadFactionIds.insert((*it)->num);
+			it = factions.erase(it);
+		} else {
+			++it;
+		}
+	}
+
+	// Make sure all other factions remove attitudes towards dead factions
+	for (auto facId: deadFactionIds) {
+		for(auto& fac: factions) {
+			fac->remove_attitude(facId);
 		}
 	}
 }
@@ -1335,7 +1326,7 @@ Faction *Game::AddFaction(int noleader, ARegion *pStart)
 	//
 	// set up faction
 	//
-	Faction *temp = new Faction(factionseq);
+	auto temp = std::make_unique<Faction>(factionseq);
 	AString x("NoAddress");
 	temp->SetAddress(x);
 	temp->lastorders = TurnNumber();
@@ -1344,19 +1335,18 @@ Faction *Game::AddFaction(int noleader, ARegion *pStart)
 	temp->pReg = pStart;
 	temp->noStartLeader = noleader;
 
-	if (!SetupFaction(temp)) {
-		delete temp;
-		return 0;
+	Faction *f = temp.get();
+	if (!SetupFaction(f)) {
+		return nullptr;
 	}
-	factions.Add(temp);
+	factions.push_back(std::move(temp));
 	factionseq++;
-	return temp;
+	return f;
 }
 
 void Game::ViewFactions()
 {
-	forlist((&factions))
-		((Faction *) elem)->View();
+	for(auto& fac : factions) fac->View();
 }
 
 void Game::SetupUnitSeq()
@@ -1451,27 +1441,21 @@ Unit *Game::GetUnit(int num)
 
 void Game::CountAllSpecialists()
 {
-	forlist(&factions) {
-		((Faction *) elem)->nummages = 0;
-		((Faction *) elem)->numqms = 0;
-		((Faction *) elem)->numtacts = 0;
-		((Faction *) elem)->numapprentices = 0;
+	for(auto& fac: factions) {
+		fac->nummages = 0;
+		fac->numqms = 0;
+		fac->numtacts = 0;
+		fac->numapprentices = 0;
 	}
-
-	{
-		forlist(&regions) {
-			ARegion *r = (ARegion *) elem;
-			forlist(&r->objects) {
-				Object *o = (Object *) elem;
-				for(auto u: o->units) {
-					if (u->type == U_MAGE) u->faction->nummages++;
-					if (u->GetSkill(S_QUARTERMASTER))
-						u->faction->numqms++;
-					if (u->GetSkill(S_TACTICS) == 5)
-						u->faction->numtacts++;
-					if (u->type == U_APPRENTICE)
-						u->faction->numapprentices++;
-				}
+	forlist(&regions) {
+		ARegion *r = (ARegion *) elem;
+		forlist(&r->objects) {
+			Object *o = (Object *) elem;
+			for(auto u: o->units) {
+				if (u->type == U_MAGE) u->faction->nummages++;
+				if (u->GetSkill(S_QUARTERMASTER)) u->faction->numqms++;
+				if (u->GetSkill(S_TACTICS) == 5) u->faction->numtacts++;
+				if (u->type == U_APPRENTICE) u->faction->numapprentices++;
 			}
 		}
 	}
@@ -1508,37 +1492,12 @@ void Game::RemoveInactiveFactions()
 
 	int cturn;
 	cturn = TurnNumber();
-	forlist(&factions) {
-		Faction *fac = (Faction *) elem;
+	for(auto& fac: factions) {
 		if ((cturn - fac->lastorders) >= Globals->MAX_INACTIVE_TURNS &&	!fac->is_npc) {
 			fac->quit = QUIT_BY_GM;
 		}
 	}
 }
-
-/*
-void Game::CountAllApprentices()
-{
-	if (!Globals->APPRENTICES_EXIST) return;
-
-	forlist(&factions) {
-		((Faction *)elem)->numapprentices = 0;
-	}
-	{
-		forlist(&regions) {
-			ARegion *r = (ARegion *)elem;
-			forlist(&r->objects) {
-				Object *o = (Object *)elem;
-				forlist(&o->units) {
-					Unit *u = (Unit *)elem;
-					if (u->type == U_APPRENTICE)
-						u->faction->numapprentices++;
-				}
-			}
-		}
-	}
-}
-*/
 
 int Game::CountMages(Faction *pFac)
 {
@@ -1736,7 +1695,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				skill = LookupSkill(&tmp);
 				if (u->GetSkill(skill) < ItemDefs[i.type].esc_val) {
 					if (Globals->WANDERING_MONSTERS_EXIST) {
-						Faction *mfac = GetFaction(&factions, monfaction);
+						Faction *mfac = get_faction(factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
 						MonType *mp = FindMonster(ItemDefs[i.type].abr, (ItemDefs[i.type].type & IT_ILLUSION));
 						mon->MakeWMon(mp->name, i.type, i.num);
@@ -1784,7 +1743,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 					linked = 1;
 				} else if (chance > getrandom(10000)) {
 					if (Globals->WANDERING_MONSTERS_EXIST) {
-						Faction *mfac = GetFaction(&factions, monfaction);
+						Faction *mfac = get_faction(factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
 						MonType *mp = FindMonster(ItemDefs[i.type].abr, (ItemDefs[i.type].type & IT_ILLUSION));
 						mon->MakeWMon(mp->name, i.type, i.num);
@@ -1810,7 +1769,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				for(auto it: itemCopy) {
 					if (ItemDefs[it.type].type == i.first) {
 						if (Globals->WANDERING_MONSTERS_EXIST) {
-							Faction *mfac = GetFaction(&factions, monfaction);
+							Faction *mfac = get_faction(factions, monfaction);
 							Unit *mon = GetNewUnit(mfac, 0);
 							MonType *mp = FindMonster(ItemDefs[it.type].abr, (ItemDefs[it.type].type & IT_ILLUSION));
 							mon->MakeWMon(mp->name, it.type, it.num);
@@ -1894,28 +1853,28 @@ char Game::GetRChar(ARegion *r)
 
 void Game::CreateNPCFactions()
 {
-	Faction *f;
+	std::unique_ptr<Faction> f;
 	AString *temp;
 	if (Globals->CITY_MONSTERS_EXIST) {
-		f = new Faction(factionseq++);
+		f = std::make_unique<Faction>(factionseq++);
 		guardfaction = f->num;
 		temp = new AString("The Guardsmen");
 		f->SetName(temp);
 		f->is_npc = true;
 		f->lastorders = 0;
-		factions.Add(f);
+		factions.push_back(std::move(f));
 	} else
 		guardfaction = 0;
 	// Only create the monster faction if wandering monsters or lair
 	// monsters exist.
 	if (Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
-		f = new Faction(factionseq++);
+		f = std::make_unique<Faction>(factionseq++);
 		monfaction = f->num;
 		temp = new AString("Creatures");
 		f->SetName(temp);
 		f->is_npc = true;
 		f->lastorders = 0;
-		factions.Add(f);
+		factions.push_back(std::move(f));
 	} else
 		monfaction = 0;
 }
@@ -1937,7 +1896,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		num = Globals->CITY_GUARD * skilllevel;
 	}
 	num = num * percent / 100;
-	Faction *pFac = GetFaction(&factions, guardfaction);
+	Faction *pFac = get_faction(factions, guardfaction);
 	Unit *u = GetNewUnit(pFac);
 	Unit *u2;
 	AString *s = new AString("City Guard");
@@ -2166,21 +2125,17 @@ void Game::WriteTimesArticle(AString article)
 
 void Game::CountItems(size_t ** citems)
 {
-	forlist (&factions)
-	{
-		Faction * fac = (Faction *) elem;
-		if (!fac->is_npc)
-		{
+	for(auto& fac: factions) {
+		if (!fac->is_npc) {
 			int i = fac->num - 1; // faction numbers are 1-based
-			for (int j = 0; j < NITEMS; j++)
-			{
-				citems[i][j] = CountItem (fac, j);
+			for (int j = 0; j < NITEMS; j++){
+				citems[i][j] = CountItem(fac.get(), j);
 			}
 		}
 	}
 }
 
-int Game::CountItem (Faction * fac, int item)
+int Game::CountItem(const Faction *fac, int item)
 {
 	if (ItemDefs[item].type & IT_SHIP) return 0;
 
@@ -2190,7 +2145,7 @@ int Game::CountItem (Faction * fac, int item)
 			Object * obj = (Object *) elem;
 			for(auto unit: obj->units) {
 				if (unit->faction == fac)
-					all += unit->items.GetNum (item);
+					all += unit->items.GetNum(item);
 			}
 		}
 	}

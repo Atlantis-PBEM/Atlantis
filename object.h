@@ -33,6 +33,7 @@ class Object;
 #include "faction.h"
 #include "items.h"
 #include <map>
+#include <memory>
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -111,7 +112,7 @@ class Object : public AListElem
 		Object(ARegion *region);
 		~Object();
 
-		void Readin(std::istream& f, AList *);
+		void Readin(std::istream& f, const std::vector<std::unique_ptr<Faction>>& factions);
 		void Writeout(std::ostream& f);
 		void build_json_report(json& j, Faction *, int, int, int, int, int, int, int);
 
