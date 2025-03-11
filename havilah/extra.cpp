@@ -340,7 +340,6 @@ Faction *Game::CheckVictory()
 	unsigned ucount;
 	ARegion *r, *start;
 	Object *o;
-	Faction *f;
 	Location *l;
 	AString message, times, temp;
 	map <string, int> vRegions, uvRegions;
@@ -562,8 +561,7 @@ Faction *Game::CheckVictory()
 	}
 
 	// See if anyone has won by collecting enough relics of grace
-	forlist_reuse(&factions) {
-		f = (Faction *) elem;
+	for(auto& f : factions) {
 		// No accidentally sending all the Guardsmen
 		// or Creatures to the Eternal City!
 		if (f->is_npc)
@@ -574,7 +572,7 @@ Faction *Game::CheckVictory()
 			forlist(&r->objects) {
 				o = (Object *) elem;
 				for(auto u: o->units) {
-					if (u->faction == f) {
+					if (u->faction == f.get()) {
 						reliccount += u->items.GetNum(I_RELICOFGRACE);
 					}
 				}
@@ -599,7 +597,7 @@ Faction *Game::CheckVictory()
 					// and then remove them at the end.
 					std::vector<Unit *> unitsToErase;
 					for(auto u: o->units) {
-						if (u->faction == f) {
+						if (u->faction == f.get()) {
 							units++;
 							for(auto item: u->items) {
 								if (ItemDefs[item.type].type & IT_LEADER)
@@ -776,7 +774,7 @@ Faction *Game::CheckVictory()
 						"The connection between Havilah and the Eternal City has been severed.\n\n"
 						"The light fails; darkness falls forever, and all life perishes under endless ice.";
 					WriteTimesArticle(message);
-					return GetFaction(&factions, monfaction);
+					return get_faction(factions, monfaction);
 				}
 				if (o->incomplete <= ObjectDefs[o->type].cost / 2) {
 					// Half done; make a quest to destroy it

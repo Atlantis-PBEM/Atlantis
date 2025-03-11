@@ -39,7 +39,7 @@ void Game::CreateVMons()
 		forlist(&r->objects) {
 			Object * obj = (Object *) elem;
 			if (obj->type != O_BKEEP) continue;
-			Faction *monfac = GetFaction( &factions, 2 );
+			Faction *monfac = get_faction(factions, 2);
 			Unit *u = GetNewUnit( monfac, 0 );
 			u->MakeWMon( "Elder Demons", I_BALROG, 200);
 			u->MoveUnit(obj);

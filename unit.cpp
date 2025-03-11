@@ -26,6 +26,8 @@
 #include "unit.h"
 #include "gamedata.h"
 #include <stack>
+#include <vector>
+#include <memory>
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -197,7 +199,7 @@ void Unit::Writeout(ostream& f)
 	}
 }
 
-void Unit::Readin(istream& f, AList *facs)
+void Unit::Readin(istream& f, const std::vector<std::unique_ptr<Faction>>& factions)
 {
 	AString temp;
 	f >> ws >> temp;
@@ -217,7 +219,7 @@ void Unit::Readin(istream& f, AList *facs)
 	int i;
 	f >> i;
 
-	faction = GetFaction(facs, i);
+	faction = get_faction(factions, i);
 	f >> guard;
 	if (guard == GUARD_ADVANCE) guard = GUARD_NONE;
 	if (guard == GUARD_SET) guard = GUARD_GUARD;

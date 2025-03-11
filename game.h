@@ -35,6 +35,10 @@ class Game;
 #include "object.h"
 #include "events.h"
 
+#include <set>
+#include <vector>
+#include <memory>
+
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
 
 class OrdersCheck
@@ -81,7 +85,6 @@ public:
 	int ReadPlayers();
 	int ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 						int newPlayer);
-	void WriteNewFac(Faction *pFac);
 
 	int ViewMap(const AString &, const AString &);
 	// LLS
@@ -288,8 +291,7 @@ private:
 						 int type, int val);
 	void ModifyHealing(int level, int patients, int success);
 
-	AList factions;
-	std::vector<std::string> newfactions; /* List of strings */
+	std::vector<std::unique_ptr<Faction>> factions;
 	std::vector<Battle *> battles;
 	ARegionList regions;
 	int factionseq;
@@ -557,7 +559,7 @@ private:
 	void RunSacrificeOrders();
 	void CollectInterQMTransportItems();
 	void CheckTransportOrders();
-	std::vector<std::shared_ptr<Faction>> CanSeeSteal(ARegion *, Unit *);
+	std::vector<Faction *> CanSeeSteal(ARegion *, Unit *);
 	void Do1Steal(ARegion *, Object *, Unit *);
 	void Do1Assassinate(ARegion *, Object *, Unit *);
 	void Do1Annihilate(ARegion *reg);
@@ -606,16 +608,20 @@ private:
 	// Battle function
 	//
 	int KillDead(Location *, Battle *, int, int);
-	int RunBattle(ARegion *, Unit *, Unit *, int = 0, int = 0);
-	void GetSides(ARegion *, AList &, AList &, AList &, AList &, Unit *, Unit *,
-				  int = 0, int = 0);
-	int CanAttack(ARegion *, AList *, Unit *);
-	void GetAFacs(ARegion *, Unit *, Unit *, AList &, AList &, AList &);
-	void GetDFacs(ARegion *, Unit *, AList &);
+	int RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass = false, bool adv = false);
+	void GetSides(
+		ARegion *r, std::set<Faction *> afacs, std::set<Faction *> dfacs, AList& atts,
+		AList& defs, Unit *att, Unit *tar, bool ass = false, bool adv = false
+	);
+	bool CanAttack(ARegion *r, std::set<Faction *> afacs, Unit *u);
+	void GetAFacs(
+		ARegion *r, Unit *att, Unit *tar, std::set<Faction *>& dfacs, std::set<Faction *>& afacs, AList &atts
+	);
+	void GetDFacs(ARegion *r, Unit *t, std::set<Faction *>& facs);
 
 	// For faction statistics
 	void CountItems(size_t **citems);
-	int CountItem(Faction *, int);
+	int CountItem(const Faction* fac, int item);
 };
 
 #endif

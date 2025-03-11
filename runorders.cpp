@@ -28,6 +28,7 @@
 #include "quests.h"
 #include <vector>
 #include <memory>
+#include <set>
 
 using namespace std;
 
@@ -217,14 +218,13 @@ void Game::RunStealOrders()
 	}
 }
 
-std::vector<std::shared_ptr<Faction>>Game::CanSeeSteal(ARegion *r, Unit *u)
+std::vector<Faction *>Game::CanSeeSteal(ARegion *r, Unit *u)
 {
-	std::vector<std::shared_ptr<Faction>>retval;
-	forlist(&factions) {
-		Faction *f = (Faction *) elem;
-		if (r->Present(f)) {
+	std::vector<Faction *>retval;
+	for(const auto& f: factions) {
+		if (r->Present(f.get())) {
 			if (f->CanSee(r, u, Globals->SKILL_PRACTICE_AMOUNT > 0)) {
-				retval.push_back(std::shared_ptr<Faction>(f));
+				retval.push_back(f.get());
 			}
 		}
 	}
@@ -262,7 +262,7 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 		return;
 	}
 
-	std::vector<std::shared_ptr<Faction>> seers(CanSeeSteal(r, u));
+	std::vector<Faction *> seers(CanSeeSteal(r, u));
 	int succ = 1;
 	for(auto f: seers) {
 		if (f->num == tar->faction->num) {
@@ -333,7 +333,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 		return;
 	}
 
-	std::vector<std::shared_ptr<Faction>> seers(CanSeeSteal(r, u));
+	std::vector<Faction *> seers(CanSeeSteal(r, u));
 	int succ = 1;
 	for(auto f: seers) {
 		if (f->num == tar->faction->num) {
@@ -459,10 +459,8 @@ void Game::RunForgetOrders()
 
 void Game::RunQuitOrders()
 {
-	forlist(&factions) {
-		Faction *f = (Faction *) elem;
-		if (f->quit)
-			Do1Quit(f);
+	for(auto& f: factions) {
+		if (f->quit) Do1Quit(f.get());
 	}
 }
 
@@ -607,7 +605,7 @@ void Game::RunFindUnit(Unit *u)
 	for(auto f: u->findorders) {
 		if (f->find == 0) all = 1;
 		if (!all) {
-			fac = GetFaction(&factions, f->find);
+			fac = get_faction(factions, f->find);
 			if (fac) {
 				string temp = string("The address of ") + fac->name->const_str() + " is " +
 					fac->address->const_str() + ".";
@@ -616,13 +614,10 @@ void Game::RunFindUnit(Unit *u)
 				u->error(string("FIND: ") + to_string(f->find) + " is not a valid faction number.");
 			}
 		} else {
-			forlist(&factions) {
-				fac = (Faction *)elem;
-				if (fac) {
-					string temp = string("The address of ") + fac->name->const_str() + " is " +
-						fac->address->const_str() + ".";
-					u->faction->event(temp, "find");
-				}
+			for(auto& fac : factions) {
+				string temp = string("The address of ") + fac->name->const_str() + " is " +
+					fac->address->const_str() + ".";
+				u->faction->event(temp, "find");
 			}
 		}
 	}
@@ -790,7 +785,7 @@ void Game::RunPillageRegion(ARegion *reg)
 		return;
 	}
 
-	AList *facs = reg->PresentFactions();
+	std::set<Faction *> facs = reg->PresentFactions();
 	int amt = reg->wealth * 2;
 	forlist(&reg->objects) {
 		Object *o = (Object *) elem;
@@ -804,17 +799,15 @@ void Game::RunPillageRegion(ARegion *reg)
 				u->SetMoney(u->GetMoney() + temp);
 				u->event("Pillages $" + to_string(temp) + " from " +
 					reg->ShortPrint().const_str() + ".", "tax", reg);
-				forlist(facs) {
-					Faction *fp = ((FactionPtr *) elem)->ptr;
-					if (fp != u->faction) {
+				for (auto& f: facs) {
+					if (f != u->faction) {
 						string temp = string(u->name->const_str()) + " pillages " + reg->name->const_str() + ".";
-						fp->event(temp, "tax");
+						f->event(temp, "tax");
 					}
 				}
 			}
 		}
 	}
-	delete facs;
 
 	/* Destroy economy */
 	reg->Pillage();
@@ -1111,21 +1104,20 @@ void Game::PostProcessUnit(ARegion *r, Unit *u)
 	PostProcessUnitExtra(r, u);
 }
 
-void Game::EndGame(Faction *pVictor)
+void Game::EndGame(Faction *victor)
 {
-	forlist(&factions) {
-		Faction *pFac = (Faction *) elem;
-		pFac->exists = 0;
-		if (pFac == pVictor)
-			pFac->quit = QUIT_WON_GAME;
+	for(auto& fac: factions) {
+		fac->exists = 0;
+		if (fac.get() == victor)
+			fac->quit = QUIT_WON_GAME;
 		else
-			pFac->quit = QUIT_GAME_OVER;
+			fac->quit = QUIT_GAME_OVER;
 
-		if (pVictor) {
-			string temp(pVictor->name->const_str());
-			pFac->event(temp + " has won the game!", "gameover");
+		if (victor) {
+			string temp(victor->name->const_str());
+			fac->event(temp + " has won the game!", "gameover");
 		} else
-			pFac->event("The game has ended with no winner.", "gameover");
+			fac->event("The game has ended with no winner.", "gameover");
 	}
 
 	gameStatus = GAME_STATUS_FINISHED;
@@ -1188,24 +1180,23 @@ void Game::PostProcessTurn()
 	// Check if there are any factions left.
 	//
 	int livingFacs = 0;
-	forlist(&factions) {
-		Faction *pFac = (Faction *) elem;
-		if (pFac->exists) {
+	for(auto& fac : factions) {
+		if (fac->exists) {
 			livingFacs = 1;
 			break;
 		}
 	}
 
-	if (!livingFacs)
+	if (!livingFacs) {
 		EndGame(0);
-	else if (!(Globals->OPEN_ENDED)) {
-		Faction *pVictor = CheckVictory();
-		if (pVictor) {
-			EndGame(pVictor);
+	} else if (!(Globals->OPEN_ENDED)) {
+		Faction *victor = CheckVictory();
+		if (victor) {
+			EndGame(victor);
 		}
 	}
 
-	forlist_reuse(&regions) {
+	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
 		r->PostTurn(&regions);
 
@@ -2603,7 +2594,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 			temp = "Releases ";
 			u->items.SetNum(o->item, u->items.GetNum(o->item) - amt);
 			if (Globals->WANDERING_MONSTERS_EXIST) {
-				Faction *mfac = GetFaction(&factions, monfaction);
+				Faction *mfac = get_faction(factions, monfaction);
 				Unit *mon = GetNewUnit(mfac, 0);
 				MonType *mp = FindMonster(ItemDefs[o->item].abr,
 						(ItemDefs[o->item].type & IT_ILLUSION));
@@ -2877,9 +2868,7 @@ void Game::DoGuard1Orders()
 
 void Game::FindDeadFactions()
 {
-	forlist((&factions)) {
-		((Faction *) elem)->CheckExist(&regions);
-	}
+	for(auto& fac: factions) fac->CheckExist(&regions);
 }
 
 void Game::DeleteEmptyUnits()
@@ -3291,8 +3280,7 @@ void Game::Do1Annihilate(ARegion *reg) {
 	events->AddFact(fact);
 
 	// tell all factions too
-	forlist((&factions)) {
-		Faction *f = (Faction *) elem;
+	for(auto& f : factions) {
 		if (f->is_npc) continue;
 		f->event(message, "annihilate");
 	}
@@ -3304,7 +3292,7 @@ void Game::Do1Annihilate(ARegion *reg) {
 	}
 	// destroy all units in the region
 	std::vector<Object *> destroyed_objects;
-	forlist_reuse(&reg->objects) {
+	forlist(&reg->objects) {
 		Object *obj = (Object *)elem;
 		for(auto u: obj->units) {
 			u->items.clear(); // throw away all the items

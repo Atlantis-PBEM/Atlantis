@@ -29,6 +29,8 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -509,7 +511,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 		for (const auto& a: attitudes) {
 			if (a.attitude == i) {
 				// Grab that faction so we can get it's number and name, and strip the " (num)" from the name for json
-				Faction *fac = GetFaction(&(game->factions), a.factionnum);
+				Faction *fac = get_faction(game->factions, a.factionnum);
 				string facname = fac->name->const_str();
 				facname = facname.substr(0, facname.find(" ("));
 				j["attitudes"][attitude].push_back({ { "name", facname }, { "number", a.factionnum } });
@@ -724,20 +726,12 @@ void Faction::TimesReward()
 	}
 }
 
-Faction *GetFaction(AList *facs, int n)
+Faction *get_faction(const std::vector<std::unique_ptr<Faction>>& factions, int faction_id)
 {
-	forlist(facs)
-		if (((Faction *) elem)->num == n)
-			return (Faction *) elem;
-	return 0;
-}
-
-Faction *GetFaction2(AList *facs, int n)
-{
-	forlist(facs)
-		if (((FactionPtr *) elem)->ptr->num == n)
-			return ((FactionPtr *) elem)->ptr;
-	return 0;
+	for (auto& faction : factions) {
+		if (faction->num == faction_id) return faction.get();
+	}
+	return nullptr;
 }
 
 void Faction::DiscoverItem(int item, int force, int full)
