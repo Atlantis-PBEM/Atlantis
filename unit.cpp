@@ -1077,11 +1077,9 @@ int Unit::GetSharedNum(int item)
 	if (ItemDefs[item].type & IT_MAN)
 		return items.GetNum(item);
 
-	forlist((&object->region->objects)) {
-		Object *obj = (Object *) elem;
-		for(auto u: obj->units) {
-			if ((u->num == num) ||
-			(u->faction == faction && u->GetFlag(FLAG_SHARING)))
+	for(const auto obj : object->region->objects) {
+		for(const auto u: obj->units) {
+			if ((u->num == num) || (u->faction == faction && u->GetFlag(FLAG_SHARING)))
 				count += u->items.GetNum(item);
 		}
 	}
@@ -1100,9 +1098,8 @@ void Unit::ConsumeShared(int item, int needed)
 	if (needed == 0) return;
 
 	// We still need more, so look for whomever is able to share with us
-	forlist((&object->region->objects)) {
-		Object *obj = (Object *) elem;
-		for(auto u: obj->units) {
+	for(const auto obj : object->region->objects) {
+		for(const auto u: obj->units) {
 			if (u->faction == faction && u->GetFlag(FLAG_SHARING)) {
 				amount = u->items.GetNum(item);
 				if (amount < 1) continue;

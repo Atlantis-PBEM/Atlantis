@@ -89,7 +89,7 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 	o->type = O_BKEEP;
 	o->incomplete = 0;
 	o->inner = -1;
-	lair->objects.Add(o);
+	lair->objects.push_back(o);
 }
 
 
@@ -1088,7 +1088,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = temp->num;
-	reg->objects.Add(o);
+	reg->objects.push_back(o);
 
 	o = new Object(temp);
 	o->num = temp->buildingseq++;
@@ -1096,7 +1096,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = reg->num;
-	temp->objects.Add(o);
+	temp->objects.push_back(o);
 }
 
 void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds)
@@ -1160,7 +1160,7 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 								o->type = O_GATEWAY;
 								o->incomplete = 0;
 								o->inner = reg->num;
-								AC->objects.Add(o);
+								AC->objects.push_back(o);
 							}
 						}
 				}
@@ -1305,7 +1305,7 @@ void ARegionList::FixUnconnectedRegions()
 						o->type = O_SHAFT;
 						o->incomplete = 0;
 						o->inner = r->num;
-						n->objects.Add(o);
+						n->objects.push_back(o);
 
 						o = new Object(r);
 						o->num = r->buildingseq++;
@@ -1313,7 +1313,7 @@ void ARegionList::FixUnconnectedRegions()
 						o->type = O_SHAFT;
 						o->incomplete = 0;
 						o->inner = n->num;
-						r->objects.Add(o);
+						r->objects.push_back(o);
 					}
 				}
 				if (!n) {

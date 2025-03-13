@@ -39,6 +39,9 @@ class Army;
 #include "helper.h"
 #include "skills.h"
 
+// external declaration of Location
+class Location;
+
 WeaponBonusMalus* GetWeaponBonusMalus(WeaponType *, WeaponType *);
 
 struct AttackStat {
@@ -168,7 +171,7 @@ public:
 class Army
 {
 	public:
-		Army(Unit *,AList *,int,int = 0);
+		Army(Unit *ldr, std::vector<Location *>& locs, int regtype, int ass = 0);
 		~Army();
 
 		void WriteLosses(Battle *b);

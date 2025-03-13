@@ -147,8 +147,7 @@ void Game::GrowLMons(int rate)
 		//
 		if (r->IsGuarded()) continue;
 
-		forlist(&r->objects) {
-			Object *obj = (Object *) elem;
+		for(const auto obj : r->objects) {
 			if (obj->units.size()) continue;
 			int montype = ObjectDefs[obj->type].monster;
 			int grow=!(ObjectDefs[obj->type].flags&ObjectType::NOMONSTERGROWTH);

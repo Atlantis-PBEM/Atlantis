@@ -99,27 +99,18 @@ Faction *Game::CheckVictory()
 {
 	forlist(&regions) {
 		ARegion *region = (ARegion *)elem;
-		forlist(&region->objects) {
-			Object *obj = (Object *)elem;
-			if (obj->type != O_BKEEP){
-				continue;
-			}
-			if (obj->units.size()){
-				return NULL;
-			}
+		for(const auto obj : region->objects) {
+			if (obj->type != O_BKEEP) continue;
+			if (obj->units.size()) return nullptr;
 			// Now see find the first faction guarding the region
-			forlist(&region->objects) {
-				Object *o = region->GetDummy();
-				for(auto u: o->units) {
-					if (u->guard == GUARD_GUARD){
-						return u->faction;
-					}
-				}
+			Object *o = region->GetDummy();
+			for(const auto u: o->units) {
+				if (u->guard == GUARD_GUARD) return u->faction;
 			}
 			break;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void Game::ModifyTablesPerRuleset(void)

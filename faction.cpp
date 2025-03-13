@@ -642,9 +642,8 @@ int Faction::CanCatch(ARegion *r, Unit *t)
 
 	int def = t->GetDefenseRiding();
 
-	forlist(&r->objects) {
-		Object *o = (Object *) elem;
-		for(auto u: o->units) {
+	for(const auto o : r->objects) {
+		for(const auto u: o->units) {
 			if (u == t && o->type != O_DUMMY) return 1;
 			if (u->faction == this && u->GetAttackRiding() >= def) return 1;
 		}
@@ -666,11 +665,10 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 	int retval = 0;
 	if (u->reveal == REVEAL_UNIT) retval = 1;
 	if (u->guard == GUARD_GUARD) retval = 1;
-	forlist((&r->objects)) {
-		Object* obj = (Object *) elem;
+	for(const auto obj : r->objects) {
 		int dummy = 0;
 		if (obj->type == O_DUMMY) dummy = 1;
-		for(auto temp: obj->units) {
+		for(const auto temp: obj->units) {
 			if (u == temp && dummy == 0) retval = 1;
 
 			// penalty of 2 to stealth if assassinating and 1 if stealing

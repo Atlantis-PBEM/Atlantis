@@ -36,8 +36,7 @@ void Game::CreateVMons()
 
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;
-		forlist(&r->objects) {
-			Object * obj = (Object *) elem;
+		for(const auto obj : r->objects) {
 			if (obj->type != O_BKEEP) continue;
 			Faction *monfac = get_faction(factions, 2);
 			Unit *u = GetNewUnit( monfac, 0 );
@@ -53,10 +52,9 @@ void Game::GrowVMons()
 
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
-		forlist(&r->objects) {
-			Object *obj = (Object *)elem;
+		for(const auto obj : r->objects) {
 			if (obj->type != O_BKEEP) continue;
-			for(auto u: obj->units) {
+			for(const auto u: obj->units) {
 				int men = u->GetMen(I_BALROG) + 2;
 				if (men > 200) men = 200;
 				u->items.SetNum(I_BALROG, men);

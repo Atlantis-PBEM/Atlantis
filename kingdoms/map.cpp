@@ -229,7 +229,7 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 	o->type = O_BKEEP;
 	o->incomplete = 0;
 	o->inner = -1;
-	lair->objects.Add(o);
+	lair->objects.push_back(o);
 }
 
 
@@ -1515,7 +1515,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = temp->num;
-	reg->objects.Add(o);
+	reg->objects.push_back(o);
 
 	o = new Object(reg);
 	o->num = temp->buildingseq++;
@@ -1523,7 +1523,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = reg->num;
-	temp->objects.Add(o);
+	temp->objects.push_back(o);
 }
 
 void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds)

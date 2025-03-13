@@ -391,9 +391,9 @@ void Object::SetPrevDir(int newdir)
 
 void Object::MoveObject(ARegion *toreg)
 {
-	region->objects.Remove(this);
+	std::erase(region->objects, this);
 	region = toreg;
-	toreg->objects.Add(this);
+	toreg->objects.push_back(this);
 }
 
 int Object::IsRoad()

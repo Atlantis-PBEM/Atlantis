@@ -29,7 +29,6 @@ class Item;
 class ItemType;
 
 #include "gamedefs.h"
-#include "alist.h"
 #include "astring.h"
 #include <vector>
 #include <string>

@@ -840,13 +840,19 @@ void ARegion::AddTown(int size, AString * name)
 	SetTownType(size);
 	SetupCityMarket();
 	/* remove all lairs */
-	forlist(&objects) {
-		Object *obj = (Object *) elem;
-		if (obj->type == O_DUMMY) continue;
+	for(auto it = objects.begin(); it != objects.end(); ) {
+		Object *obj = *it;
+		if (obj->type == O_DUMMY) {
+			++it;
+			continue;
+		}
 		if ((ObjectDefs[obj->type].monster != -1) && (!(ObjectDefs[obj->type].flags & ObjectType::CANENTER))) {
 			obj->units.clear();
-			objects.Remove(obj);
+			it = objects.erase(it);
+			delete obj;
+			continue;
 		}
+		++it;
 	}
 }
 
@@ -1074,8 +1080,7 @@ void ARegion::UpdateProducts()
 
 		if (prod->itemtype == I_SILVER && prod->skill == -1) continue;
 
-		forlist (&objects) {
-			Object *o = (Object *) elem;
+		for(const auto o : objects) {
 			if (o->incomplete < 1 &&
 					ObjectDefs[o->type].productionAided == prod->itemtype) {
 				lastbonus /= 2;
@@ -1131,8 +1136,7 @@ int ARegion::TownHabitat()
 	int temple = 0;
 	int caravan = 0;
 	int fort = 0;
-	forlist(&objects) {
-		Object *obj = (Object *) elem;
+	for(const auto obj : objects) {
 		if (ObjectDefs[obj->type].protect > fort) fort = ObjectDefs[obj->type].protect;
 		if (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_FOOD) farm++;
 		if (ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
@@ -1634,9 +1638,8 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	earthlore = 0;
 	clearskies = 0;
 
-	forlist(&objects) {
-		Object *o = (Object *) elem;
-		for(auto u: o->units) {
+	for(const auto o : objects) {
+		for(const auto u: o->units) {
 			u->PostTurn(this);
 		}
 	}

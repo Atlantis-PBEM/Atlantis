@@ -40,7 +40,6 @@ class Unit;
 class UnitId;
 
 #include "faction.h"
-#include "alist.h"
 #include "gameio.h"
 #include "orders.h"
 #include "skills.h"
@@ -112,6 +111,10 @@ class UnitId {
 		int unitnum; /* if 0, it is a new unit */
 		int alias;
 		int faction;
+
+		inline bool operator==(const UnitId& other) const {
+			return (this->unitnum == other.unitnum && this->alias == other.alias && this->faction == other.faction);
+		}
 };
 
 class Unit

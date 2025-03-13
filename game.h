@@ -525,7 +525,7 @@ private:
 	void DoAutoAttacks();
 	void DoAdvanceAttack(ARegion *, Unit *);
 	void DoAutoAttack(ARegion *, Unit *);
-	void DoMovementAttacks(AList *);
+	void DoMovementAttacks(std::vector<Location *>& locs);
 	void DoMovementAttack(ARegion *, Unit *);
 	void DoAutoAttackOn(ARegion *, Unit *);
 	void RemoveEmptyObjects();
@@ -610,12 +610,14 @@ private:
 	int KillDead(Location *, Battle *, int, int);
 	int RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass = false, bool adv = false);
 	void GetSides(
-		ARegion *r, std::set<Faction *> afacs, std::set<Faction *> dfacs, AList& atts,
-		AList& defs, Unit *att, Unit *tar, bool ass = false, bool adv = false
+		ARegion *r, std::set<Faction *> afacs, std::set<Faction *> dfacs,
+		std::vector<Location *>& atts,
+		std::vector<Location *>& defs, Unit *att, Unit *tar, bool ass = false, bool adv = false
 	);
 	bool CanAttack(ARegion *r, std::set<Faction *> afacs, Unit *u);
 	void GetAFacs(
-		ARegion *r, Unit *att, Unit *tar, std::set<Faction *>& dfacs, std::set<Faction *>& afacs, AList &atts
+		ARegion *r, Unit *att, Unit *tar, std::set<Faction *>& dfacs,
+		std::set<Faction *>& afacs, std::vector<Location *> &atts
 	);
 	void GetDFacs(ARegion *r, Unit *t, std::set<Faction *>& facs);
 

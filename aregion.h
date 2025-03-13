@@ -109,7 +109,7 @@ class TerrainType
 
 extern TerrainType *TerrainDefs;
 
-class Location : public AListElem
+class Location
 {
 	public:
 		Unit *unit;
@@ -117,7 +117,7 @@ class Location : public AListElem
 		ARegion *region;
 };
 
-Location *GetUnit(AList *, int);
+Location *GetUnit(const std::vector<Location *>& list, int unit_id);
 
 int AGetName(int town, ARegion *r);
 char const *AGetNameString(int name);
@@ -130,7 +130,7 @@ class ARegionPtr : public AListElem
 
 ARegionPtr *GetRegion(AList *, int);
 
-class Farsight : public AListElem
+class Farsight
 {
 	public:
 		Farsight();
@@ -142,7 +142,7 @@ class Farsight : public AListElem
 		int exits_used[NDIRS];
 };
 
-Farsight *GetFarsight(AList *, Faction *);
+Farsight *GetFarsight(std::vector<Farsight *>& l, Faction *f);
 
 enum {
 	TOWN_VILLAGE,
@@ -217,7 +217,7 @@ class ARegion : public AListElem
 		Location *GetLocation(UnitId *, int);
 
 		void SetLoc(int, int, int);
-		int Present(Faction *);
+		bool Present(Faction *f);
 		std::set<Faction *> PresentFactions();
 		int GetObservation(Faction *, int);
 		int GetTrueSight(Faction *, int);
@@ -345,13 +345,13 @@ class ARegion : public AListElem
 		int phantasmal_entertainment;
 
 		ARegion *neighbors[NDIRS];
-		AList objects;
+		std::vector<Object *>objects;
 		std::map<int,int> newfleets;
 		int fleetalias;
 		std::vector<Unit *>hell; /* Where dead units go */
-		AList farsees;
+		std::vector<Farsight *> farsees;
 		// List of units which passed through the region
-		AList passers;
+		std::vector<Farsight *> passers;
 		std::vector<Production *> products;
 		std::vector<Market*> markets;
 		int xloc, yloc, zloc;

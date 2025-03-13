@@ -8,6 +8,7 @@
 #include "unit.h"
 #include "astring.h"
 #include "gamedata.h"
+#include <type_traits>
 
 int Game::EditGame(int *pSaveGame)
 {
@@ -161,8 +162,7 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 		Awrite( "" );
 		int i = 0;
 		AString temp = AString("");
-		forlist (&(pReg->objects)) {
-			Object * obj = (Object *)elem;
+		for(const auto obj : pReg->objects) {
 			temp = AString ((AString(i) + ". " + *obj->name + " : " + ObjectDefs[obj->type].name));
 //			if (Globals->HEXSIDE_TERRAIN && obj->hexside>-1) temp += AString( AString(" (side:") + DirectionAbrs[obj->hexside] + ").");
 			Awrite(temp);
@@ -237,7 +237,7 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 						o->num = pReg->buildingseq++;
 						o->name = new AString(AString("Building") + " [" + o->num + "]");
 					}
-					pReg->objects.Add(o);
+					pReg->objects.push_back(o);
 				}
 				// delete object
 				else if (*pToken == "d") {
@@ -249,17 +249,14 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 						break;
 					}
 
-					int index = pToken->value();
-					if ( (index < 0) || (index >= pReg->objects.Num()) ) { //modified minimum to <0 to allow deleting object 0. 030824 BS
+					size_t index = pToken->value();
+					if ( (index < 0) || (index >= pReg->objects.size()) ) { //modified minimum to <0 to allow deleting object 0. 030824 BS
 						Awrite( "Incorrect index." );
 						break;
 					}
 					SAFE_DELETE( pToken );
 
-					int i = 0;
-					AListElem *tmp = pReg->objects.First();
-					for (i = 0; i < index; i++) tmp = pReg->objects.Next(tmp);
-					pReg->objects.Remove(tmp);
+					pReg->objects.erase(pReg->objects.begin() + index);
 				}
 	//hexside change
 	/*			else if (*pToken == "h") {
@@ -397,8 +394,8 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 						break;
 					}
 
-					int index = pToken->value();
-					if ( (index < 1) || (index >= pReg->objects.Num()) ) {
+					size_t index = pToken->value();
+					if ( (index < 1) || (index >= pReg->objects.size()) ) {
 						Awrite( "Incorrect index." );
 						break;
 					}
@@ -410,10 +407,7 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 						break;
 					}
 
-					int i = 0;
-					Object *tmp = (Object *)pReg->objects.First();
-					for (i = 0; i < index; i++) tmp = (Object *)pReg->objects.Next(tmp);
-
+					Object *tmp = pReg->objects[index];
 					AString * newname = pToken->getlegal();
 					SAFE_DELETE(pToken);
 					if (newname) {

@@ -81,9 +81,9 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				// Some initial values; these will get reset
 				//
 				reg->type = -1;
-				reg->race = -1;  
-				reg->wages = -1; 
-				
+				reg->race = -1;
+				reg->wages = -1;
+
 				reg->level = arr;
 				Add(reg);
 				arr->SetRegion(x, y, reg);
@@ -183,7 +183,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = toReg->num;
-	reg->objects.Add(o);
+	reg->objects.push_back(o);
 
 	o = new Object(toReg);
 	o->num = toReg->buildingseq++;
@@ -191,7 +191,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = reg->num;
-	toReg->objects.Add(o);
+	toReg->objects.push_back(o);
 }
 
 void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds) {

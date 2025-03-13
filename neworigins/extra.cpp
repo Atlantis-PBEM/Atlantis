@@ -59,8 +59,7 @@ int Game::SetupFaction( Faction *pFac )
 		ARegionArray *underworld = regions.GetRegionArray(ARegionArray::LEVEL_UNDERWORLD);
 		ARegion *center = underworld->GetRegion(underworld->x / 2, underworld->y / 2);
 		// See if the monolith is active and owned.
-		forlist(&center->objects) {
-			Object *o = (Object *)elem;
+		for(const auto o : center->objects) {
 			if (o->type != O_ACTIVE_MONOLITH) continue;
 			if (o->GetOwner() != nullptr) {
 				return 0;
@@ -146,7 +145,6 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 {
 	int d, count, temple, i, j, clash, reward_count;
 	ARegion *r;
-	Object *o;
 	AString rname;
 	map <string, int> temples;
 	map <string, int>::iterator it;
@@ -217,9 +215,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			// No need to check if quests do not require exploration
 			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0)
 				continue;
-			forlist(&r->objects) {
-				o = (Object *) elem;
-				for(auto u: o->units) {
+			for(const auto o : r->objects) {
+				for(const auto u: o->units) {
 					if (u->faction->num == monfaction) {
 						count++;
 					}
@@ -237,9 +234,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			// No need to check if quests do not require exploration
 			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0)
 				continue;
-			forlist(&r->objects) {
-				o = (Object *) elem;
-				for(auto u: o->units) {
+			for(const auto o : r->objects) {
+				for(const auto u: o->units) {
 					if (u->faction->num == monfaction) {
 						if (!d--) {
 							q->target = u->num;
@@ -315,8 +311,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				// This looks like a null operation, but
 				// actually forces the map<> element creation
 				temples[stlstr];
-				forlist(&r->objects) {
-					o = (Object *) elem;
+				for(const auto o : r->objects) {
 					if (o->type == temple) {
 						temples[stlstr]++;
 					}
@@ -416,8 +411,7 @@ int report_and_count_anomalies(ARegionList *regions, const std::vector<std::uniq
 	int count = 0;
 	forlist(regions) {
 		ARegion *r = (ARegion *)elem;
-		forlist(&r->objects) {
-			Object *o = (Object *)elem;
+		for(const auto o : r->objects) {
 			if (o->type == O_ENTITY_CAGE) {
 				count++;
 				for(const auto& f : factions) {
@@ -435,12 +429,11 @@ int count_entities(ARegionList *regions) {
 	int count = 0;
 	forlist(regions) {
 		ARegion *r = (ARegion *)elem;
-		forlist(&r->objects) {
-			Object *o = (Object *)elem;
+		for(const auto o : r->objects) {
 			if (o->type == O_EMPOWERED_ALTAR) {
 				count++;
 			}
-			for(auto u: o->units) {
+			for(const auto u: o->units) {
 				if (u->items.GetNum(I_IMPRISONED_ENTITY) > 0) {
 					count += u->items.GetNum(I_IMPRISONED_ENTITY);
 				}
@@ -488,9 +481,8 @@ Faction *Game::CheckVictory()
 				uvRegions[stlstr]++;
 			}
 		}
-		forlist(&r->objects) {
-			o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				intersection.clear();
 				set_intersection(u->visited.begin(),
 					u->visited.end(),
@@ -882,8 +874,7 @@ Faction *Game::CheckVictory()
 						continue;
 					}
 					// Make sure it doesn't already have an anomaly
-					forlist(&r->objects) {
-						Object *o = (Object *)elem;
+					for(const auto o : r->objects) {
 						if (o->type == O_ENTITY_CAGE) {
 							r = nullptr;
 							break;
@@ -901,7 +892,7 @@ Faction *Game::CheckVictory()
 				if (ob.flags & ObjectType::SACRIFICE) {
 					o->incomplete = -(ob.sacrifice_amount);
 				}
-				r->objects.Add(o);
+				r->objects.push_back(o);
 				// Now tell all the factions about it.
 				for(const auto& f : factions) {
 					if (f->is_npc) continue;
@@ -923,8 +914,7 @@ Faction *Game::CheckVictory()
 		// FInd the owner of the monolith.
 		ARegionArray *underworld = regions.GetRegionArray(ARegionArray::LEVEL_UNDERWORLD);
 		ARegion *center = underworld->GetRegion(underworld->x / 2, underworld->y / 2);
-		forlist(&center->objects) {
-			Object *o = (Object *)elem;
+		for(const auto o : center->objects) {
 			if (o->type == O_ACTIVE_MONOLITH) {
 				Unit *owner = o->GetOwner();
 				// If noone owns the monolith, then noone can win.
@@ -1488,8 +1478,7 @@ const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARe
 		for (int i = 0; i < 6; i++) {
 			ARegion *r = surface_center->neighbors[i];
 			// search that region for an altar
-			forlist(&r->objects) {
-				Object *o = (Object *)elem;
+			for(const auto o : r->objects) {
 				if (o->type == O_EMPOWERED_ALTAR) {
 					count++;
 				}
