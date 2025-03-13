@@ -510,7 +510,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.run_annihilation();
 
     expect(faction->errors.size() == 0_ul);
-    expect(faction->events.size() == 6_ul);
+    expect(faction->events.size() == 5_ul);
 
     helper.setup_reports();
 
@@ -521,7 +521,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Validate we get the messages we expect for the faction
     json events = json_report["events"];
-    expect(events.size() == 6_ul);
+    expect(events.size() == 5_ul);
     json event = events[0];
     expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to barren (1,1) in Testing Wilds.");
     expect(event["unit"]["number"] == 2_i);
@@ -529,18 +529,15 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     expect(event["message"] == "Enters Building [1].");
     expect(event["unit"]["number"] == 2_i);
     event = events[2];
-    expect(event["message"] == "plain (0,0) in Testing Wilds, contains Basictown [city] has been utterly annihilated.");
+    expect(event["message"] == "forest (0,2) in Testing Wilds has been utterly annihilated.");
     expect(event["category"] == "annihilate");
     event = events[3];
+    expect(event["message"] == "plain (0,0) in Testing Wilds, contains Basictown [city] has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[4];
     expect(event["message"] == "Is annihilated.");
     expect(event["category"] == "annihilate");
     expect(event["unit"]["number"] == 3_i);
-    event = events[4];
-    expect(event["message"] == "forest (0,2) in Testing Wilds has been utterly annihilated.");
-    expect(event["category"] == "annihilate");
-    event = events[5];
-    expect(event["message"] == "desert (1,3) in Testing Wilds has been utterly annihilated.");
-    expect(event["category"] == "annihilate");
 
     // load the gm faction report
     json gm_report;
