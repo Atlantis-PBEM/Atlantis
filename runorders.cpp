@@ -3544,11 +3544,11 @@ void Game::RunAnnihilateOrders() {
 
 				// annihilate our neigbors
 				for (auto n = 0; n < NDIRS; n++) {
-					ARegion *neigh = r->neighbors[n];
+					ARegion *neigh = target->neighbors[n];
 					if (neigh == nullptr) continue;
 					Do1Annihilate(neigh);
 				}
-				Do1Annihilate(r);
+				Do1Annihilate(target);
 			}
 		}
 	}
