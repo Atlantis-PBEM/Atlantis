@@ -241,8 +241,7 @@ int QuestList::check_visit_target(ARegion *r, Unit *u, std::string *quest_reward
 	for(auto q: quests) {
 		if (q->type != Quest::VISIT) continue;
 		if (!q->destinations.count(r->name->Str())) continue;
-		forlist(&r->objects) {
-			Object *o = (Object *) elem;
+		for(const auto o : r->objects) {
 			if (o->type == q->building) {
 				u->visited.insert(r->name->Str());
 				intersection.clear();

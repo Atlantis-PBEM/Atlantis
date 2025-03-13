@@ -1689,7 +1689,7 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 	o->type = O_BKEEP;
 	o->incomplete = 0;
 	o->inner = -1;
-	lair->objects.Add(o);
+	lair->objects.push_back(o);
 }
 
 
@@ -1887,7 +1887,7 @@ void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char co
 			o->name = new AString(altar_name);
 			o->type = O_RITUAL_ALTAR;
 			o->incomplete = -(ObjectDefs[O_RITUAL_ALTAR].sacrifice_amount);
-			n->objects.Add(o);
+			n->objects.push_back(o);
 		}
 	}
 	FinalSetup(pRegionArrays[level]);
@@ -1939,7 +1939,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = center->num;
-	reg->objects.Add(o);
+	reg->objects.push_back(o);
 
 	o = new Object(center);
 	o->num = center->buildingseq++;
@@ -1947,7 +1947,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = reg->num;
-	center->objects.Add(o);
+	center->objects.push_back(o);
 
 	// Put the monolith in the underworld center
 	o = new Object(reg);
@@ -1956,7 +1956,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 	o->name = new AString(monolith_name);
 	o->type = O_DORMANT_MONOLITH;
 	o->incomplete = -(ObjectDefs[O_DORMANT_MONOLITH].sacrifice_amount);
-	reg->objects.Add(o);
+	reg->objects.push_back(o);
 
 	FinalSetup(pRegionArrays[level]);
 
@@ -2921,7 +2921,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = temp->num;
-	reg->objects.Add(o);
+	reg->objects.push_back(o);
 
 	o = new Object(temp);
 	o->num = temp->buildingseq++;
@@ -2929,7 +2929,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = reg->num;
-	temp->objects.Add(o);
+	temp->objects.push_back(o);
 }
 
 void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds)
@@ -3036,7 +3036,7 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 					o->type = O_GATEWAY;
 					o->incomplete = 0;
 					o->inner = dests[type]->num;
-					AC->objects.Add(o);
+					AC->objects.push_back(o);
 				}
 			}
 		}
@@ -3180,7 +3180,7 @@ void ARegionList::FixUnconnectedRegions()
 						o->type = O_SHAFT;
 						o->incomplete = 0;
 						o->inner = r->num;
-						n->objects.Add(o);
+						n->objects.push_back(o);
 
 						o = new Object(r);
 						o->num = r->buildingseq++;
@@ -3188,7 +3188,7 @@ void ARegionList::FixUnconnectedRegions()
 						o->type = O_SHAFT;
 						o->incomplete = 0;
 						o->inner = n->num;
-						r->objects.Add(o);
+						r->objects.push_back(o);
 					}
 				}
 				if (!n) {

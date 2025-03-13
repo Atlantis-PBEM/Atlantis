@@ -26,7 +26,6 @@
 #ifndef QUEST_CLASS
 #define QUEST_CLASS
 
-#include "alist.h"
 #include "astring.h"
 #include "unit.h"
 #include "items.h"

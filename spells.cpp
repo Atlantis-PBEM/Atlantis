@@ -1299,7 +1299,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 		Farsight *f = new Farsight;
 		f->faction = u->faction;
 		f->level = u->GetSkill(S_BIRD_LORE);
-		tar->farsees.Add(f);
+		tar->farsees.push_back(f);
 		u->event("Sends birds to spy on " + string(tar->Print().const_str()) + ".", "spell");
 		return 1;
 	}
@@ -1589,7 +1589,7 @@ int Game::RunFarsight(ARegion *r,Unit *u)
 	f->level = u->GetSkill(S_FARSIGHT);
 	f->unit = u;
 	f->observation = u->GetAttribute("observation");
-	tar->farsees.Add(f);
+	tar->farsees.push_back(f);
 	u->event("Casts Farsight on " + string(tar->ShortPrint().const_str()) + ".", "spell");
 	return 1;
 }
@@ -1646,8 +1646,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	}
 
 	// Check for any keybarrier objects in the target region
-	forlist(&tar->objects) {
-		Object *o = (Object *) elem;
+	for(const auto o : tar->objects) {
 		if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
 			if (u->items.GetNum(ObjectDefs[o->type].key_item) < 1) {
 				u->error("CAST: A mystical barrier prevents teleporting to that location.");
@@ -1888,8 +1887,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	if (!GetRegionInRange(r, tar->region, u, S_PORTAL_LORE)) return 0;
 
 	// Check for any keybarrier objects in the target region
-	forlist(&tar->region->objects) {
-		Object *o = (Object *) elem;
+	for(const auto o : tar->region->objects) {
 		if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
 			if (u->items.GetNum(ObjectDefs[o->type].key_item) < 1) {
 				u->error("CAST: A mystical barrier prevents portalling to that location.");
@@ -1980,7 +1978,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 {
 	int level, num, sactype, sacrifices, i, sac, relics;
-	Object *o, *tower;
+	Object *tower;
 	Unit *victim;
 	AString message;
 
@@ -1998,13 +1996,12 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 	sactype = IT_LEADER;
 	sacrifices = 0;
 
-	forlist(&r->objects) {
-		o = (Object *) elem;
+	for(const auto o : r->objects) {
 		if (o->type == O_BKEEP && !o->incomplete) {
 			tower = o;
 		}
 
-		for(auto u: o->units) {
+		for(const auto u: o->units) {
 			if (u->faction->num == mage->faction->num) {
 				for(auto item: u->items) {
 					if (ItemDefs[item.type].type & sactype) {
@@ -2027,9 +2024,8 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 	while (num-- > 0) {
 		victim = 0;
 		i = getrandom(sacrifices);
-		forlist(&r->objects) {
-			o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				if (u->faction->num == mage->faction->num) {
 					for(auto item: u->items) {
 						if (ItemDefs[item.type].type & sactype) {
@@ -2071,12 +2067,13 @@ void Game::RunTeleportOrders()
 	int val = 1;
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;
-		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+		for(const auto o: r->objects) {
 			int foundone = 1;
 			while (foundone) {
 				foundone = 0;
-				for(auto u: o->units) {
+				// Teleport can move units out of the region, so we need to copy the list
+				auto unitCopy(o->units);
+				for(const auto u: unitCopy) {
 					if (u->teleportorders) {
 						foundone = 1;
 						switch (u->teleportorders->spell) {

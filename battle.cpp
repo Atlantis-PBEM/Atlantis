@@ -362,13 +362,13 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	b->stats.ClearRound();
 }
 
-void Battle::GetSpoils(AList *losers, ItemList& spoils, int assassination)
+void Battle::GetSpoils(std::vector<Location *>& losers, ItemList& spoils, int assassination)
 {
 	ItemList ships;
 	string quest_rewards;
 
-	forlist(losers) {
-		Unit * u = ((Location *) elem)->unit;
+	for(const auto l : losers) {
+		Unit * u = l->unit;
 		int numalive = u->GetSoldiers();
 		int numdead = u->losses;
 		if (!numalive) {
@@ -499,14 +499,16 @@ void AddAssassinationFact(
 	events->AddFact(fact);
 }
 
-int Battle::Run(Events* events,
-		ARegion * region,
-		Unit * att,
-		AList * atts,
-		Unit * tar,
-		AList * defs,
-		int ass,
-		ARegionList *pRegs )
+int Battle::Run(
+	Events *events,
+	ARegion *region,
+	Unit *att,
+	std::vector<Location *>& atts,
+	Unit *tar,
+	std::vector<Location *>& defs,
+	int ass,
+	ARegionList *pRegs
+)
 {
 	Army * armies[2];
 	AString temp;
@@ -686,13 +688,15 @@ int Battle::Run(Events* events,
 	return BATTLE_DRAW;
 }
 
-void Battle::WriteSides(ARegion * r,
-			Unit * att,
-			Unit * tar,
-			AList * atts,
-			AList * defs,
-			int ass,
-			ARegionList *pRegs )
+void Battle::WriteSides(
+	ARegion *r,
+	Unit *att,
+	Unit *tar,
+	std::vector<Location *>& atts,
+	std::vector<Location *>& defs,
+	int ass,
+	ARegionList *pRegs
+)
 {
 	if (ass) {
 		AddLine(*att->name + " attempts to assassinate " + *tar->name
@@ -705,31 +709,23 @@ void Battle::WriteSides(ARegion * r,
 
 	int dobs = 0;
 	int aobs = 0;
-	{
-		forlist(defs) {
-			int a = ((Location *)elem)->unit->GetAttribute("observation");
-			if (a > dobs) dobs = a;
-		}
+	for(const auto l : defs) {
+		int a = l->unit->GetAttribute("observation");
+		if (a > dobs) dobs = a;
 	}
 
 	AddLine("Attackers:");
-	{
-		forlist(atts) {
-			int a = ((Location *)elem)->unit->GetAttribute("observation");
-			if (a > aobs) aobs = a;
-			AString * temp = ((Location *) elem)->unit->BattleReport(dobs);
-			AddLine(*temp);
-			delete temp;
-		}
+	for(const auto l : atts) {
+		int a = l->unit->GetAttribute("observation");
+		if (a > aobs) aobs = a;
+		string temp = l->unit->BattleReport(dobs)->const_str();
+		AddLine(temp);
 	}
 	AddLine("");
 	AddLine("Defenders:");
-	{
-		forlist(defs) {
-			AString * temp = ((Location *) elem)->unit->BattleReport(aobs);
-			AddLine(*temp);
-			delete temp;
-		}
+	for(const auto l : defs) {
+		string temp = l->unit->BattleReport(aobs)->const_str();
+		AddLine(temp);
 	}
 	AddLine("");
 }
@@ -760,9 +756,8 @@ void Game::GetDFacs(ARegion *r, Unit *t, std::set<Faction *>& facs)
 	} else {
 		// Check whether any of the target faction's
 		// units aren't set to noaid
-		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
-			for(auto u: obj->units) {
+		for(const auto obj : r->objects) {
+			for(const auto u: obj->units) {
 				if (u->IsAlive() && (u->faction == t->faction) && !(u->GetFlag(FLAG_NOAID))) {
 					allies_allowed = true;
 					break;
@@ -772,9 +767,8 @@ void Game::GetDFacs(ARegion *r, Unit *t, std::set<Faction *>& facs)
 		}
 	}
 
-	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
-		for(auto u: obj->units) {
+	for(const auto obj : r->objects) {
+		for(const auto u: obj->units) {
 			if (
 				u->IsAlive() &&
 				(
@@ -789,12 +783,12 @@ void Game::GetDFacs(ARegion *r, Unit *t, std::set<Faction *>& facs)
 }
 
 void Game::GetAFacs(
-	ARegion *r, Unit *att, Unit *tar, std::set<Faction *>& dfacs, std::set<Faction *>& afacs, AList& atts
+	ARegion *r, Unit *att, Unit *tar, std::set<Faction *>& dfacs, std::set<Faction *>& afacs,
+	std::vector<Location *>& atts
 )
 {
-	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
-		for(auto u: obj->units) {
+	for(const auto obj : r->objects) {
+		for(const auto u: obj->units) {
 			if (u->canattack && u->IsAlive()) {
 				bool add = false;
 				if (
@@ -807,14 +801,19 @@ void Game::GetAFacs(
 						add = true;
 					} else {
 						if (u->attackorders) {
-							for (auto id = u->attackorders->targets.begin(); id != u->attackorders->targets.end();) {
-								Unit *t = r->get_unit_id(*id, u->faction->num);
+							UnitId tid;
+							bool found_target = false;
+							Unit *t;
+							for (auto id : u->attackorders->targets) {
+								t = r->get_unit_id(id, u->faction->num);
 								if (!t) continue;
 								if (t == tar) {
-									id = u->attackorders->targets.erase(id);
+									found_target = true;
+									tid = id;
 								}
 								if (t->faction == tar->faction) add = true;
 							}
+							if (found_target) std::erase(u->attackorders->targets, tid);
 						}
 					}
 				}
@@ -824,7 +823,7 @@ void Game::GetAFacs(
 					l->unit = u;
 					l->obj = obj;
 					l->region = r;
-					atts.Add(l);
+					atts.push_back(l);
 					afacs.insert(u->faction);
 				}
 			}
@@ -850,8 +849,9 @@ bool Game::CanAttack(ARegion *r, std::set<Faction *> afacs, Unit * u)
 }
 
 void Game::GetSides(
-	ARegion *r, std::set<Faction *> afacs, std::set<Faction *>dfacs, AList &atts,
-	AList &defs, Unit *att, Unit *tar, bool ass, bool adv
+	ARegion *r, std::set<Faction *> afacs, std::set<Faction *>dfacs,
+	std::vector<Location *>& atts, std::vector<Location *>& defs,
+	Unit *att, Unit *tar, bool ass, bool adv
 )
 {
 	if (ass) {
@@ -860,13 +860,13 @@ void Game::GetSides(
 		l->unit = att;
 		l->obj = r->GetDummy();
 		l->region = r;
-		atts.Add(l);
+		atts.push_back(l);
 
 		l = new Location;
 		l->unit = tar;
 		l->obj = r->GetDummy();
 		l->region = r;
-		defs.Add(l);
+		defs.push_back(l);
 
 		return;
 	}
@@ -884,32 +884,28 @@ void Game::GetSides(
 		}
 
 		// Define block to avoid conflicts with another forlist local created variables
-		{
-			forlist(&r2->objects) {
-				Object * o = (Object *) elem;
-				// Can't get building bonus in another region without EXTENDED_FORT_DEFENCE
-				if (i>=0 && !Globals->EXTENDED_FORT_DEFENCE) {
-					((Object *) elem)->capacity = 0;
-					((Object *) elem)->shipno = ((Object *) elem)->ships.size();
-					continue;
-				}
+		for(const auto o : r2->objects) {
+			// Can't get building bonus in another region without EXTENDED_FORT_DEFENCE
+			if (i>=0 && !Globals->EXTENDED_FORT_DEFENCE) {
+				o->capacity = 0;
+				o->shipno = o->ships.size();
+				continue;
+			}
 
-				/* Set building capacity */
-				if (o->incomplete < 1 && o->IsBuilding()) {
-					o->capacity = ObjectDefs[o->type].protect;
-					o->shipno = 0;
-					// AddLine("Fortification bonus added for ", o->name);
-					// AddLine("");
-				} else if (o->IsFleet()) {
-					o->capacity = 0;
-					o->shipno = 0;
-				}
+			/* Set building capacity */
+			if (o->incomplete < 1 && o->IsBuilding()) {
+				o->capacity = ObjectDefs[o->type].protect;
+				o->shipno = 0;
+				// AddLine("Fortification bonus added for ", o->name);
+				// AddLine("");
+			} else if (o->IsFleet()) {
+				o->capacity = 0;
+				o->shipno = 0;
 			}
 		}
 
-		forlist (&r2->objects) {
-			Object * o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r2->objects) {
+			for(const auto u: o->units) {
 				int add = 0;
 
 #define ADD_ATTACK 1
@@ -925,7 +921,7 @@ void Game::GetSides(
 							if (u->canattack &&
 									(u->guard != GUARD_AVOID || u==att) &&
 									u->CanMoveTo(r2,r) &&
-									!::GetUnit(&atts,u->num)) {
+									!::GetUnit(atts, u->num)) {
 								add = ADD_ATTACK;
 							}
 						}
@@ -983,13 +979,13 @@ void Game::GetSides(
 					l->unit = u;
 					l->obj = o;
 					l->region = r2;
-					atts.Add(l);
+					atts.push_back(l);
 				} else if (add == ADD_DEFENSE) {
 						Location * l = new Location;
 						l->unit = u;
 						l->obj = o;
 						l->region = r2;
-						defs.Add(l);
+						defs.push_back(l);
 				}
 			}
 		}
@@ -999,8 +995,7 @@ void Game::GetSides(
 		//
 		if (i == -1) {
 			noaida = 1;
-			forlist (&atts) {
-				Location *l = (Location *) elem;
+			for(const auto l : atts) {
 				if (!l->unit->GetFlag(FLAG_NOAID)) {
 					noaida = 0;
 					break;
@@ -1010,8 +1005,7 @@ void Game::GetSides(
 
 		noaidd = 1;
 		{
-			forlist (&defs) {
-				Location *l = (Location *) elem;
+			for(const auto l : defs) {
 				if (!l->unit->GetFlag(FLAG_NOAID)) {
 					noaidd = 0;
 					break;
@@ -1069,7 +1063,7 @@ int Game::KillDead(Location * l, Battle *b, int max_susk, int max_rais)
 int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass, bool adv)
 {
 	std::set<Faction *> afacs, dfacs;
-	AList atts, defs;
+	std::vector<Location *> atts, defs;
 	int result;
 
 	if (ass) {
@@ -1111,19 +1105,19 @@ int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass, bool adv
 
 	GetSides(r, afacs, dfacs, atts, defs, attacker, target, ass, adv);
 
-	if (atts.Num() <= 0) {
+	if (atts.size() <= 0) {
 		// This shouldn't happen, but just in case
 		Awrite(AString("Cannot find any attackers!"));
 		return BATTLE_IMPOSSIBLE;
 	}
-	if (defs.Num() <= 0) {
+	if (defs.size() <= 0) {
 		// This shouldn't happen, but just in case
 		Awrite(AString("Cannot find any defenders!"));
 		return BATTLE_IMPOSSIBLE;
 	}
 
 	Battle * b = new Battle;
-	b->WriteSides(r, attacker, target, &atts, &defs, ass, &regions);
+	b->WriteSides(r, attacker, target, atts, defs, ass, &regions);
 
 	battles.push_back(b);
 	for(const auto& fac: factions) {
@@ -1132,15 +1126,15 @@ int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass, bool adv
 			f->battles.push_back(b);
 		}
 	}
-	result = b->Run(events, r,attacker,&atts,target,&defs,ass, &regions );
+	result = b->Run(events, r,attacker, atts, target, defs, ass, &regions );
 
 	int attaker_max_susk = 0;
 	int attaker_max_rais = 0;
 	{
-		forlist(&atts) {
+		for(const auto l : atts) {
 			// int necr_level = ((Location *)elem)->unit->GetAttribute("necromancy");
-			int susk_level = ((Location *)elem)->unit->GetAttribute("susk");
-			int rais_level = ((Location *)elem)->unit->GetAttribute("rais");
+			int susk_level = l->unit->GetAttribute("susk");
+			int rais_level = l->unit->GetAttribute("rais");
 			if (susk_level > attaker_max_susk) {
 				attaker_max_susk = susk_level;
 			}
@@ -1152,31 +1146,25 @@ int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass, bool adv
 
 	int defender_max_susk = 0;
 	int defender_max_rais = 0;
-	{
-		forlist(&defs) {
-			// int necr_level = ((Location *)elem)->unit->GetAttribute("necromancy");
-			int susk_level = ((Location *)elem)->unit->GetAttribute("susk");
-			int rais_level = ((Location *)elem)->unit->GetAttribute("rais");
-			if (susk_level > defender_max_susk) {
-				defender_max_susk = susk_level;
-			}
-			if (rais_level > defender_max_rais) {
-				defender_max_rais = rais_level;
-			}
+	for(const auto l : defs) {
+		// int necr_level = ((Location *)elem)->unit->GetAttribute("necromancy");
+		int susk_level = l->unit->GetAttribute("susk");
+		int rais_level = l->unit->GetAttribute("rais");
+		if (susk_level > defender_max_susk) {
+			defender_max_susk = susk_level;
+		}
+		if (rais_level > defender_max_rais) {
+			defender_max_rais = rais_level;
 		}
 	}
 
 	/* Remove all dead units */
 	int uncontrolled = 0;
-	{
-		forlist(&atts) {
-			uncontrolled += KillDead((Location *) elem, b, attaker_max_susk, attaker_max_rais);
-		}
+	for(const auto l : atts) {
+		uncontrolled += KillDead(l, b, attaker_max_susk, attaker_max_rais);
 	}
-	{
-		forlist(&defs) {
-			uncontrolled += KillDead((Location *) elem, b, defender_max_susk, defender_max_rais);
-		}
+	for(const auto l : defs) {
+		uncontrolled += KillDead(l, b, defender_max_susk, defender_max_rais);
 	}
 	if (uncontrolled > 0 && monfaction > 0) {
 		// Number of UNDE or SKEL raised as uncontrolled

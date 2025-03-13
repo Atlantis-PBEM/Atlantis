@@ -28,7 +28,6 @@
 
 class Object;
 
-#include "alist.h"
 #include "gamedefs.h"
 #include "faction.h"
 #include "items.h"
@@ -106,7 +105,7 @@ struct ShowObject {
 	int obj;
 };
 
-class Object : public AListElem
+class Object
 {
 	public:
 		Object(ARegion *region);

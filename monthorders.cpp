@@ -44,16 +44,14 @@ void Game::RunMovementOrders()
 {
 	int phase, error;
 	ARegion *r;
-	Object *o;
-	AList locs;
+	std::vector<Location *> locs;
 	Location *l;
 	AString order, *tOrder;
 
 	for (phase = 0; phase < Globals->MAX_SPEED; phase++) {
 		forlist(&regions) {
 			r = (ARegion *) elem;
-			forlist(&r->objects) {
-				o = (Object *) elem;
+			for(const auto o : r->objects) {
 				// Entering an object removes the unit from the container of units in this object, so we need to
 				// iterate on a copy so avoid errors.
 				auto unitsCopy(o->units);
@@ -65,22 +63,19 @@ void Game::RunMovementOrders()
 		}
 		forlist_reuse(&regions) {
 			r = (ARegion *) elem;
-			forlist(&r->objects) {
-				o = (Object *) elem;
+			// Sailing can move an object from one region to another, so iterate on a copy.
+			auto objectsCopy(r->objects);
+			for(const auto o : objectsCopy) {
 				error = 1;
 				if (o->IsFleet()) {
 					Unit *u = o->GetOwner();
-					if (!u)
-						continue;
-					if (u->phase >= phase)
-						continue;
-					if (!u->nomove &&
-							u->monthorders &&
-							u->monthorders->type == O_SAIL)  {
+					if (!u) continue;
+					if (u->phase >= phase) continue;
+					if (!u->nomove && u->monthorders && u->monthorders->type == O_SAIL)  {
 						u->phase = phase;
 						if (o->incomplete < 50) {
 							l = Do1SailOrder(r, o, u);
-							if (l) locs.Add(l);
+							if (l) locs.push_back(l);
 							error = 0;
 						} else
 							error = 3;
@@ -89,8 +84,7 @@ void Game::RunMovementOrders()
 				}
 				if (error > 0) {
 					for(auto u: o->units) {
-						if (u && u->monthorders &&
-								u->monthorders->type == O_SAIL) {
+						if (u && u->monthorders && u->monthorders->type == O_SAIL) {
 							switch (error) {
 								case 1:
 									u->error("SAIL: Must be on a ship.");
@@ -110,36 +104,34 @@ void Game::RunMovementOrders()
 		}
 		forlist_reuse(&regions) {
 			r = (ARegion *) elem;
-			forlist(&r->objects) {
-				o = (Object *) elem;
+			for(const auto o : r->objects) {
 				// Since movement (in DoAMoveOrder) is based on accumulated move points, and when it reaches
 				// the cost needed, will move the unit, modifying the container we are iterating, we make a copy of
 				// the list here, which is what we iterate.   This means that when a unit moves, we don't miss
 				// the unit which follows it in the container.
 				auto unitsCopy(o->units);
 				for(auto u: unitsCopy) {
-					if (u->phase >= phase)
-						continue;
+					if (u->phase >= phase) continue;
 					u->phase = phase;
 					if (u && !u->nomove && u->monthorders &&
 							(u->monthorders->type == O_MOVE ||
 							u->monthorders->type == O_ADVANCE)) {
 						l = DoAMoveOrder(u, r, o);
-						if (l) locs.Add(l);
+						if (l) locs.push_back(l);
 					}
 				}
 			}
 		}
-		DoMovementAttacks(&locs);
-		locs.DeleteAll();
+		DoMovementAttacks(locs);
+		for (auto l : locs) delete l;
+		locs.clear();
 	}
 
 	// Do a final round of Enters after the phased movement is done,
 	// in case such a thing is at the end of a move chain
 	forlist(&regions) {
 		r = (ARegion *) elem;
-		forlist(&r->objects) {
-			o = (Object *) elem;
+		for(const auto o : r->objects) {
 			// Entering an object removes the unit from the container of units in this object, so we need to
 			// iterate on a copy so avoid errors.
 			auto unitsCopy(o->units);
@@ -153,9 +145,8 @@ void Game::RunMovementOrders()
 	// Queue remaining moves
 	forlist_reuse(&regions) {
 		r = (ARegion *) elem;
-		forlist(&r->objects) {
-			o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				if (!u->monthorders || (u->monthorders->type != O_MOVE && u->monthorders->type != O_ADVANCE)) {
 					u->savedmovedir = -1;
 					u->savedmovement = 0;
@@ -217,7 +208,6 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 	int stop, wgt, slr, nomove, cost;
 	std::set<Faction *> facs;
 	ARegion *newreg;
-	Location *loc;
 
 	fleet->movepoints += fleet->GetFleetSpeed(0);
 	stop = 0;
@@ -297,8 +287,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 		if (!stop) {
 			// Check the new region for barriers and the fleet units for keys to the barriers
 			int needed_key = -1;
-			forlist(&newreg->objects) {
-				Object *o = (Object *) elem;
+			for(const auto o : newreg->objects) {
 				if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
 					needed_key = ObjectDefs[o->type].key_item;
 				}
@@ -353,22 +342,20 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 				if (!(cap->faction->is_npc)) newreg->visited = 1;
 				for(auto unit: fleet->units) {
 					// Everyone onboard gets to see the sights
-					Farsight *f;
 					// Note the hex being left
-					forlist(&reg->passers) {
-						f = (Farsight *)elem;
+					for(const auto f : reg->passers) {
 						if (f->unit == unit) {
 							// We moved into here this turn
 							f->exits_used[x.dir] = 1;
 						}
 					}
 					// And mark the hex being entered
-					f = new Farsight;
+					Farsight *f = new Farsight;
 					f->faction = unit->faction;
 					f->level = 0;
 					f->unit = unit;
 					f->exits_used[reg->GetRealDirComp(x.dir)] = 1;
-					newreg->passers.Add(f);
+					newreg->passers.push_back(f);
 				}
 			}
 			reg = newreg;
@@ -391,7 +378,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 		}
 	}
 
-	loc = new Location;
+	Location *loc = new Location;
 	loc->unit = cap;
 	loc->region = reg;
 	loc->obj = fleet;
@@ -402,9 +389,8 @@ void Game::RunTeachOrders()
 {
 	forlist((&regions)) {
 		ARegion * r = (ARegion *) elem;
-		forlist((&r->objects)) {
-			Object * obj = (Object *) elem;
-			for(auto u: obj->units) {
+		for(const auto obj : r->objects) {
+			for(const auto u: obj->units) {
 				if (u->monthorders) {
 					if (u->monthorders->type == O_TEACH) {
 						Do1TeachOrder(r,u);
@@ -691,9 +677,12 @@ void Game::RunBuildShipOrder(ARegion * r,Object * obj,Unit * u)
 void Game::AddNewBuildings(ARegion *r)
 {
 	int i;
-	forlist((&r->objects)) {
-		Object *obj = (Object *) elem;
-		for(auto u: obj->units) {
+	// Since a unit might add a new building, that can invalidate the iterator, so iterate a copy.
+	auto objCopy(r->objects);
+	for(const auto obj : objCopy) {
+		// a building unit starting a new building will leave the current building mucking with the iterator.
+		auto unitCopy (obj->units);
+		for(const auto u: unitCopy) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_BUILD) {
 					std::shared_ptr<BuildOrder> o = std::dynamic_pointer_cast<BuildOrder>(u->monthorders);
@@ -707,17 +696,17 @@ void Game::AddNewBuildings(ARegion *r)
 							}
 						}
 						if (i < 100) {
-							Object * obj = new Object(r);
-							obj->type = o->new_building;
-							obj->incomplete = ObjectDefs[obj->type].cost;
-							obj->num = i;
-							obj->SetName(new AString("Building"));
-							u->build = obj->num;
-							r->objects.Add(obj);
+							Object *obj2 = new Object(r);
+							obj2->type = o->new_building;
+							obj2->incomplete = ObjectDefs[obj->type].cost;
+							obj2->num = i;
+							obj2->SetName(new AString("Building"));
+							u->build = obj2->num;
+							r->objects.push_back(obj2);
 
 							// This moves unit to a new building.
 							// This unit might be processed again but from new object.
-							u->MoveUnit(obj);
+							u->MoveUnit(obj2);
 							// This why we need to unset new_building so it will not
 							// try to create new object again.
 							o->new_building = -1;
@@ -733,9 +722,10 @@ void Game::AddNewBuildings(ARegion *r)
 
 void Game::RunBuildHelpers(ARegion *r)
 {
-	forlist((&r->objects)) {
-		Object *obj = (Object *) elem;
-		for(auto u: obj->units) {
+	for(const auto obj : r->objects) {
+		// Helping to build a structure can move the unit, so we need to iterate a copy.
+		auto unitCopy(obj->units);
+		for(auto u: unitCopy) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_BUILD) {
 					std::shared_ptr<BuildOrder> o = std::dynamic_pointer_cast<BuildOrder>(u->monthorders);
@@ -862,7 +852,7 @@ void Game::CreateShip(ARegion *r, Unit * u, int ship)
 		fleet->num = shipseq++;
 		fleet->name = new AString(AString("Ship [") + fleet->num + "]");
 		fleet->AddShip(ship);
-		u->object->region->objects.Add(fleet);
+		u->object->region->objects.push_back(fleet);
 		u->MoveUnit(fleet);
 	} else {
 		obj->AddShip(ship);
@@ -1137,18 +1127,21 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 
 void Game::RunProduceOrders(ARegion * r)
 {
-	forlist(&r->objects) {
-		Object * obj = (Object *) elem;
-		for(auto u: obj->units) {
+	// Building a new building can create a new object invalidating the iterator, so we need to iterate a copy.
+	auto objCopy(r->objects);
+	for(const auto obj: objCopy) {
+		// A unit producing a ship can move into it when it completes, so again we need a copy
+		auto unitCopy(obj->units);
+		for(auto u: unitCopy) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_PRODUCE) {
-					RunUnitProduce(r,u);
+					RunUnitProduce(r, u);
 				} else {
 					if (u->monthorders->type == O_BUILD) {
 						if (u->build >= 0) {
-							Run1BuildOrder(r,obj,u);
+							Run1BuildOrder(r, obj, u);
 						} else {
-							RunBuildShipOrder(r,obj,u);
+							RunBuildShipOrder(r, obj, u);
 						}
 					}
 				}
@@ -1201,9 +1194,8 @@ int Game::ValidProd(Unit * u,ARegion * r, Production * p)
 int Game::FindAttemptedProd(ARegion * r, Production * p)
 {
 	int attempted = 0;
-	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
-		for(auto u: obj->units) {
+	for(const auto obj: r->objects) {
+		for(const auto u: obj->units) {
 			if ((u->monthorders) && (u->monthorders->type == O_PRODUCE)) {
 				attempted += ValidProd(u,r,p);
 			}
@@ -1224,30 +1216,23 @@ void Game::RunAProduction(ARegion * r, Production * p)
 	int attempted = FindAttemptedProd(r,p);
 	int amt = p->amount;
 	if (attempted < amt) attempted = amt;
-	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
-		for(auto u: obj->units) {
+	for(const auto obj : r->objects) {
+		for(const auto u: obj->units) {
 			questcomplete = 0;
-			if (!u->monthorders || u->monthorders->type != O_PRODUCE)
-				continue;
+			if (!u->monthorders || u->monthorders->type != O_PRODUCE) continue;
 
 			std::shared_ptr<ProduceOrder> po = std::dynamic_pointer_cast<ProduceOrder>(u->monthorders);
-			if (po->skill != p->skill || po->item != p->itemtype)
-				continue;
+			if (po->skill != p->skill || po->item != p->itemtype) continue;
 
 			/* We need to implement a hack to avoid overflowing */
 			int uatt, ubucks;
 
 			uatt = po->productivity;
-			if (uatt && amt && attempted)
-			{
-				double dUbucks = ((double) amt) * ((double) uatt)
-					/ ((double) attempted);
+			if (uatt && amt && attempted) {
+				double dUbucks = ((double) amt) * ((double) uatt) / ((double) attempted);
 				ubucks = (int) dUbucks;
 				questcomplete = quests.check_harvest_target(r, po->item, ubucks, amt, u, &quest_rewards);
-			}
-			else
-			{
+			} else {
 				ubucks = 0;
 			}
 
@@ -1266,8 +1251,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 			}
 
 			/* Show in unit's events section */
-			if (po->item == I_SILVER)
-			{
+			if (po->item == I_SILVER) {
 				//
 				// WORK
 				//
@@ -1284,9 +1268,7 @@ void Game::RunAProduction(ARegion * r, Production * p)
 					u->Practice(S_PHANTASMAL_ENTERTAINMENT);
 					u->Practice(S_ENTERTAINMENT);
 				}
-			}
-			else
-			{
+			} else {
 				/* Everything else */
 				u->event("Produces " + ItemString(po->item,ubucks) + " in " +
 					r->ShortPrint().const_str() + ".", "produce", r);
@@ -1302,9 +1284,8 @@ void Game::RunAProduction(ARegion * r, Production * p)
 
 void Game::RunStudyOrders(ARegion * r)
 {
-	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
-		for(auto u: obj->units) {
+	for(const auto obj : r->objects) {
+		for(const auto u: obj->units) {
 			if (u->monthorders) {
 				if (u->monthorders->type == O_STUDY) {
 					Do1StudyOrder(u,obj);
@@ -1317,9 +1298,8 @@ void Game::RunStudyOrders(ARegion * r)
 
 void Game::RunIdleOrders(ARegion *r)
 {
-	forlist((&r->objects)) {
-		Object *obj = (Object *)elem;
-		for(auto u: obj->units) {
+	for(const auto obj : r->objects) {
+		for(const auto u: obj->units) {
 			if (u->monthorders && u->monthorders->type == O_IDLE) {
 				u->event("Sits idle.", "idle");
 				u->monthorders = nullptr;
@@ -1650,9 +1630,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 					if (match < 3 && !scanReg->town) continue;
 					int guards = 0;
 					int others = 0;
-					forlist(&scanReg->objects) {
-						Object *o = (Object *) elem;
-						for(auto u: o->units) {
+					for(const auto o : scanReg->objects) {
+						for(const auto u: o->units) {
 							if (u->faction->num == guardfaction) guards = 1;
 							else others = 1;
 						}
@@ -1690,8 +1669,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	}
 
 	// Check for any keybarrier objects in the target region
-	forlist(&newreg->objects) {
-		Object *o = (Object *) elem;
+	for(const auto o : newreg->objects) {
 		if (ObjectDefs[o->type].flags & ObjectType::KEYBARRIER) {
 			if (unit->items.GetNum(ObjectDefs[o->type].key_item) < 1) {
 				unit->error("MOVE: A mystical barrier prevents movement in that direction.");
@@ -1838,9 +1816,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 	if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING) {
 		if (!(unit->faction->is_npc)) newreg->visited = 1;
 		// Update our visit record in the region we are leaving.
-		Farsight *f;
-		forlist(&region->passers) {
-			f = (Farsight *)elem;
+		for(const auto f : region->passers) {
 			if (f->unit == unit) {
 				// We moved into here this turn
 				if (x.dir < MOVE_IN) {
@@ -1849,14 +1825,14 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			}
 		}
 		// And mark the hex being entered
-		f = new Farsight;
+		Farsight *f = new Farsight;
 		f->faction = unit->faction;
 		f->level = 0;
 		f->unit = unit;
 		if (x.dir < MOVE_IN) {
 			f->exits_used[region->GetRealDirComp(x.dir)] = 1;
 		}
-		newreg->passers.Add(f);
+		newreg->passers.push_back(f);
 	}
 
 	region = newreg;

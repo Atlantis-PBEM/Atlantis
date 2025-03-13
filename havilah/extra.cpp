@@ -111,7 +111,6 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 {
 	int d, count, temple, i, j, clash;
 	ARegion *r;
-	Object *o;
 	AString rname;
 	map <string, int> temples;
 	map <string, int>::iterator it;
@@ -139,9 +138,8 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				continue;
 			if (!r->visited)
 				continue;
-			forlist(&r->objects) {
-				o = (Object *) elem;
-				for(auto u: o->units) {
+			for(const auto o : r->objects) {
+				for(const auto u: o->units) {
 					if (u->faction->num == monfaction) {
 						count++;
 					}
@@ -158,13 +156,11 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				continue;
 			if (!r->visited)
 				continue;
-			forlist(&r->objects) {
-				o = (Object *) elem;
-				for(auto u: o->units) {
+			for(const auto o : r->objects) {
+				for(const auto u: o->units) {
 					if (u->faction->num == monfaction) {
 						if (!d--) {
 							q->target = u->num;
-
 						}
 					}
 				}
@@ -234,8 +230,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				// This looks like a null operation, but
 				// actually forces the map<> element creation
 				temples[stlstr];
-				forlist(&r->objects) {
-					o = (Object *) elem;
+				for(const auto o : r->objects) {
 					if (o->type == temple) {
 						temples[stlstr]++;
 					}
@@ -368,9 +363,8 @@ Faction *Game::CheckVictory()
 				uvRegions[stlstr]++;
 			}
 		}
-		forlist(&r->objects) {
-			o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				intersection.clear();
 				set_intersection(u->visited.begin(),
 					u->visited.end(),
@@ -569,9 +563,8 @@ Faction *Game::CheckVictory()
 		reliccount = 0;
 		forlist(&regions) {
 			r = (ARegion *) elem;
-			forlist(&r->objects) {
-				o = (Object *) elem;
-				for(auto u: o->units) {
+			for(const auto o : r->objects) {
+				for(const auto u: o->units) {
 					if (u->faction == f.get()) {
 						reliccount += u->items.GetNum(I_RELICOFGRACE);
 					}
@@ -591,12 +584,11 @@ Faction *Game::CheckVictory()
 			magiclevels = 0;
 			forlist(&regions) {
 				r = (ARegion *) elem;
-				forlist(&r->objects) {
-					o = (Object *) elem;
+				for(const auto o : r->objects) {
 					// To avoid invalidating the iterator, we'll collect the units that would get removed
 					// and then remove them at the end.
 					std::vector<Unit *> unitsToErase;
-					for(auto u: o->units) {
+					for(const auto u: o->units) {
 						if (u->faction == f.get()) {
 							units++;
 							for(auto item: u->items) {
@@ -764,8 +756,7 @@ Faction *Game::CheckVictory()
 
 	forlist_reuse(&regions) {
 		r = (ARegion *) elem;
-		forlist(&r->objects) {
-			o = (Object *) elem;
+		for(const auto o : r->objects) {
 			if (o->type == O_BKEEP) {
 				if (!o->incomplete) {
 					// You didn't think this was a

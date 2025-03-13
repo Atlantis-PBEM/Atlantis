@@ -78,7 +78,7 @@ void UnitTestHelper::create_building(ARegion *region, Unit *owner, int building_
     obj->num = region->buildingseq++;
     std::string name = "Building [" + std::to_string(obj->num) + "]";
     obj->name = new AString(name);
-    region->objects.Add(obj);
+    region->objects.push_back(obj);
     ObjectType ob = ObjectDefs[building_type];
     if (ob.flags & ObjectType::SACRIFICE) {
         // set up the items sacrifice needed

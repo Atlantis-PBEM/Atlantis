@@ -93,9 +93,8 @@ void Game::DefaultWorkOrder()
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
 		if (r->type == R_NEXUS) continue;
-		forlist(&r->objects) {
-			Object *o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				if (u->monthorders || u->faction->is_npc ||
 						(Globals->TAX_PILLAGE_MONTH_LONG &&
 						 u->taxing != TAX_NONE))
@@ -126,8 +125,7 @@ AString Game::GetXtraMap(ARegion *reg,int type)
 			i = reg->CountWMons();
 			return (i ? ((AString) i) : (AString(" ")));
 		case 2:
-			forlist(&reg->objects) {
-				Object *o = (Object *) elem;
+			for(const auto o : reg->objects) {
 				if (!(ObjectDefs[o->type].flags & ObjectType::CANENTER)) {
 					if (o->units.size() > 0) {
 						return "*";
@@ -283,8 +281,7 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 			if (pArr->levelType == ARegionArray::LEVEL_NEXUS) {
 				if (!Globals->START_CITIES_EXIST) {
 					ARegion *nexus = pArr->GetRegion(0, 0);
-					forlist(&nexus->objects) {
-						Object *o = (Object *) elem;
+					for(const auto o : nexus->objects) {
 						if (o->inner != -1) {
 							start_regions.push_back(regions.GetRegion(o->inner));
 						}
@@ -771,9 +768,8 @@ Unit *Game::ParseGMUnit(AString *tag, Faction *pFac)
 		int gma = p.value();
 		forlist(&regions) {
 			ARegion *reg = (ARegion *)elem;
-			forlist(&reg->objects) {
-				Object *obj = (Object *)elem;
-				for(auto u: obj->units) {
+			for(const auto obj : reg->objects) {
+				for(const auto u: obj->units) {
 					if (u->faction->num == pFac->num && u->gm_alias == gma) {
 						return u;
 					}
@@ -1175,9 +1171,8 @@ void Game::ClearOrders(Faction *f)
 {
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
-		forlist(&r->objects) {
-			Object *o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				if (u->faction == f) {
 					u->ClearOrders();
 				}
@@ -1211,23 +1206,17 @@ void Game::MakeFactionReportLists()
 		fill(facs.begin(), facs.end(), nullptr);
 
 		ARegion *reg = (ARegion *) elem;
-		forlist(&reg->farsees) {
-			Faction *fac = ((Farsight *) elem)->faction;
+		for(const auto far : reg->farsees) {
+			Faction *fac = far->faction;
 			facs[fac->num] = fac;
 		}
-		{
-			forlist(&reg->passers) {
-				Faction *fac = ((Farsight *)elem)->faction;
-				facs[fac->num] = fac;
-			}
+		for(const auto pass: reg->passers) {
+			Faction *fac = pass->faction;
+			facs[fac->num] = fac;
 		}
-		{
-			forlist(&reg->objects) {
-				Object *obj = (Object *) elem;
-
-				for(auto unit: obj->units) {
-					facs[unit->faction->num] = unit->faction;
-				}
+		for(const auto obj : reg->objects) {
+			for(const auto unit: obj->units) {
+				facs[unit->faction->num] = unit->faction;
 			}
 		}
 
@@ -1308,9 +1297,9 @@ void Game::DeleteDeadFactions()
 		if (!((*it)->is_npc) && !((*it)->exists)) {
 			deadFactionIds.insert((*it)->num);
 			it = factions.erase(it);
-		} else {
-			++it;
+			continue;
 		}
+		++it;
 	}
 
 	// Make sure all other factions remove attitudes towards dead factions
@@ -1354,9 +1343,8 @@ void Game::SetupUnitSeq()
 	int max = 0;
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
-		forlist(&r->objects) {
-			Object *o = (Object *)elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				if (u && u->num > max) max = u->num;
 			}
 		}
@@ -1379,9 +1367,8 @@ void Game::SetupUnitNums()
 
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
-		forlist(&r->objects) {
-			Object *o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				i = u->num;
 				if ((i > 0) && (i < maxppunits)) {
 					if (!ppUnits[i])
@@ -1449,9 +1436,8 @@ void Game::CountAllSpecialists()
 	}
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
-		forlist(&r->objects) {
-			Object *o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				if (u->type == U_MAGE) u->faction->nummages++;
 				if (u->GetSkill(S_QUARTERMASTER)) u->faction->numqms++;
 				if (u->GetSkill(S_TACTICS) == 5) u->faction->numtacts++;
@@ -1504,9 +1490,8 @@ int Game::CountMages(Faction *pFac)
 	int i = 0;
 	forlist(&regions) {
 		ARegion *r = (ARegion *) elem;
-		forlist(&r->objects) {
-			Object *o = (Object *) elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				if (u->faction == pFac && u->type == U_MAGE) i++;
 			}
 		}
@@ -1519,9 +1504,8 @@ int Game::CountQuarterMasters(Faction *pFac)
 	int i = 0;
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
-		forlist(&r->objects) {
-			Object *o = (Object *)elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				if (u->faction == pFac && u->GetSkill(S_QUARTERMASTER)) i++;
 			}
 		}
@@ -1534,9 +1518,8 @@ int Game::CountTacticians(Faction *pFac)
 	int i = 0;
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
-		forlist(&r->objects) {
-			Object *o = (Object *)elem;
-			for(auto u: o->units) {
+		for(const auto o : r->objects) {
+			for(const auto u: o->units) {
 				if (u->faction == pFac && u->GetSkill(S_TACTICS) == 5) i++;
 			}
 		}
@@ -1549,8 +1532,7 @@ int Game::CountApprentices(Faction *pFac)
 	int i = 0;
 	forlist(&regions) {
 		ARegion *r = (ARegion *)elem;
-		forlist(&r->objects) {
-			Object *o = (Object *)elem;
+		for(const auto o : r->objects) {
 			for(auto u: o->units) {
 				if (u->faction == pFac && u->type == U_APPRENTICE) i++;
 			}
@@ -1987,9 +1969,8 @@ void Game::AdjustCityMons(ARegion *r)
 {
 	int needguard = 1;
 	int needmage = 1;
-	forlist(&r->objects) {
-		Object *o = (Object *) elem;
-		for(auto u: o->units) {
+	for(const auto o : r->objects) {
+		for(const auto u: o->units) {
 			if (u->type == U_GUARD || u->type == U_GUARDMAGE) {
 				AdjustCityMon(r, u);
 				/* Don't create new city guards if we have some */
@@ -2140,10 +2121,9 @@ int Game::CountItem(const Faction *fac, int item)
 	if (ItemDefs[item].type & IT_SHIP) return 0;
 
 	size_t all = 0;
-	for (const auto& r : fac->present_regions) {
-		forlist(&r->objects) {
-			Object * obj = (Object *) elem;
-			for(auto unit: obj->units) {
+	for (const auto r : fac->present_regions) {
+		for(const auto obj : r->objects) {
+			for(const auto unit: obj->units) {
 				if (unit->faction == fac)
 					all += unit->items.GetNum(item);
 			}

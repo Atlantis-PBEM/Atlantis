@@ -29,7 +29,6 @@
 class Battle;
 
 #include "astring.h"
-#include "alist.h"
 #include "army.h"
 #include "items.h"
 #include "events.h"
@@ -37,6 +36,9 @@ class Battle;
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
+
+// External decl of Location
+class Location;
 
 enum {
 	ASS_NONE,
@@ -51,7 +53,7 @@ enum {
 	BATTLE_DRAW
 };
 
-class Battle : public AListElem
+class Battle
 {
 	public:
 		Battle();
@@ -60,26 +62,27 @@ class Battle : public AListElem
 		void build_json_report(json &j, Faction *fac);
 		void AddLine(const AString &);
 
-		int Run(Events* events, ARegion *, Unit *, AList *, Unit *, AList *, int ass,
-				ARegionList *pRegs);
+		int Run(
+			Events *events, ARegion *region, Unit *att, std::vector<Location *>& atts, Unit *tar,
+			std::vector<Location *>& defs, int ass, ARegionList *pRegs
+		);
 		void FreeRound(Army *,Army *, int ass = 0);
 		void NormalRound(int,Army *,Army *);
 		void DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 				int behind, int ass = 0, bool canAttackBehind = false, bool canAttackFromBehind = false);
 
-		void GetSpoils(AList *loser, ItemList& spoils, int assasination);
+		void GetSpoils(std::vector<Location *>& losers, ItemList& spoils, int assasination);
 
 		//
 		// These functions should be implemented in specials.cpp
 		//
 		void UpdateShields(Army *);
-		void DoSpecialAttack( int round, Soldier *a, Army *attackers,
-				Army *def, int behind, int canattackback);
+		void DoSpecialAttack(int round, Soldier *a, Army *attackers, Army *def, int behind, int canattackback);
 
-		void WriteSides(ARegion *,Unit *,Unit *,AList *,AList *,int,
-				ARegionList *pRegs );
-
-		// void WriteBattleStats(ArmyStats *);
+		void WriteSides(
+			ARegion *r, Unit *att, Unit *tar, std::vector<Location *>& atts,
+			std::vector<Location *>& defs, int ass, ARegionList *pRegs
+		);
 
 		int assassination;
 		Faction * attacker; /* Only matters in the case of an assassination */

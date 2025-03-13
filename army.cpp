@@ -667,7 +667,7 @@ void Soldier::Dead()
 	unit->SetMen(race,unit->GetMen(race) - 1);
 }
 
-Army::Army(Unit *ldr, AList *locs, int regtype, int ass)
+Army::Army(Unit *ldr, std::vector<Location *>& locs, int regtype, int ass)
 {
 	stats = ArmyStats();
 
@@ -685,8 +685,8 @@ Army::Army(Unit *ldr, AList *locs, int regtype, int ass)
 		count = 1;
 		ldr->losses = 0;
 	} else {
-		forlist(locs) {
-			Unit * u = ((Location *) elem)->unit;
+		for(const auto l : locs) {
+			Unit * u = l->unit;
 			count += u->GetSoldiers();
 			u->losses = 0;
 			int temp = u->GetAttribute("tactics");
@@ -711,11 +711,11 @@ Army::Army(Unit *ldr, AList *locs, int regtype, int ass)
 	int x = 0;
 	int y = count;
 
-	forlist(locs) {
-		Unit * u = ((Location *) elem)->unit;
+	for(const auto l : locs) {
+		Unit * u = l->unit;
 		stats.TrackUnit(u);
 
-		Object * obj = ((Location *) elem)->obj;
+		Object * obj = l->obj;
 		if (ass) {
 			for(auto it: u->items) {
 				ItemType& item = ItemDefs[it.type];
