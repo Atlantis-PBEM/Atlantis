@@ -1,14 +1,14 @@
 # Atlantis Gamemaster's Guide
 
-This document describes how to compile, setup, modify and run a game of 
+This document describes how to compile, setup, modify and run a game of
 Atlantis.
 
-The maintainer is Anthony Briggs, who can be contacted at 
-<abriggs@iinet.net.au>. Send any feedback, suggestions, comments, etc. 
-to him. This document is heavily based on the previous gamemaster guide, 
+The maintainer is Anthony Briggs, who can be contacted at
+<abriggs@iinet.net.au>. Send any feedback, suggestions, comments, etc.
+to him. This document is heavily based on the previous gamemaster guide,
 which was written by JT Traub.
 
-Thanks to: JT Traub, "Mr. Mistofeles", "Draig" and "Iyhael" for their 
+Thanks to: JT Traub, "Mr. Mistofeles", "Draig" and "Iyhael" for their
 valuable feedback.
 
 
@@ -41,13 +41,13 @@ valuable feedback.
 
 ## 1. Obtaining a copy of Atlantis
 
-There are two options if you want to get a copy of Atlantis: the first 
+There are two options if you want to get a copy of Atlantis: the first
 is to download a release tarball from yahoo groups at
 <http://groups.yahoo.com/group/atlantisdev/files/Sources/>.
 At the time of writing this Guide, the most recent release was 5.1.0.
 
 The second option is to get a copy of the sources from git. Under a UNIX
-system, issue the following commands to obtain a copy of the Atlantis 
+system, issue the following commands to obtain a copy of the Atlantis
 sources:
 
 git clone https://github.com/Atlantis-PBEM/Atlantis.git
@@ -56,25 +56,25 @@ git clone https://github.com/Atlantis-PBEM/Atlantis.git
 
 ### 2.1 Unix
 
-A makefile is included for compilation on Unix, using the GNU gcc 
-compiler. You can get more information about the GNU compiler at 
-http://www.gnu.org. This has been tested on Linux and FreeBSD, and 
-should work on any Unix system. Just type 'make <gamedirname>' at the 
-top level, where <gamedirname> is one of the various subdirectories, 
-such as havilah or standard. 
+A makefile is included for compilation on Unix, using the GNU gcc
+compiler. You can get more information about the GNU compiler at
+http://www.gnu.org. This has been tested on Linux and FreeBSD, and
+should work on any Unix system. Just type 'make <gamedirname>' at the
+top level, where <gamedirname> is one of the various subdirectories,
+such as havilah or standard.
 
-You may run into trouble if your system uses a non-gnu make (such as 
-FreeBSD). In that case, you need to type gmake <gamedirname> instead of 
-make. The specific error is something like: gcc: No input files 
+You may run into trouble if your system uses a non-gnu make (such as
+FreeBSD). In that case, you need to type gmake <gamedirname> instead of
+make. The specific error is something like: gcc: No input files
 specified, followed by *** Error code 1, and make quitting.
 
-Once the compile has completed, you should find the game specific files 
-within the game's subdirectory. The main one is the game binary, which 
+Once the compile has completed, you should find the game specific files
+within the game's subdirectory. The main one is the game binary, which
 should be named after the game. There will also be a html directory with
 the rules in it, if you've also done a 'make <gamedirname>-rules'.
 
-If for some reason you want to clean up the sources afterwards (ie. 
-remove object files, for reasons of disk space, perhaps) you can use 
+If for some reason you want to clean up the sources afterwards (ie.
+remove object files, for reasons of disk space, perhaps) you can use
 'make <gamedir>-clean' or 'make GAME=gamedir clean'
 
 
@@ -90,7 +90,6 @@ g++ -g -I. -I.. -Wall -c -o havilah/obj/map.o havilah/map.cpp
 g++ -g -I. -I.. -Wall -c -o havilah/obj/monsters.o havilah/monsters.cpp
 g++ -g -I. -I.. -Wall -c -o havilah/obj/rules.o havilah/rules.cpp
 g++ -g -I. -I.. -Wall -c -o havilah/obj/world.o havilah/world.cpp
-g++ -g -I. -I.. -Wall -c -o obj/alist.o alist.cpp
 g++ -g -I. -I.. -Wall -c -o obj/aregion.o aregion.cpp
 .
 .
@@ -98,7 +97,7 @@ g++ -g -I. -I.. -Wall -c -o obj/aregion.o aregion.cpp
 g++ -g -I. -I.. -Wall -c -o obj/template.o template.cpp
 g++ -g -I. -I.. -Wall -c -o obj/unit.o unit.cpp
 g++ -g -I. -I.. -Wall -o havilah/havilah havilah/obj/extra.o havilah/obj/map.o
-havilah/obj/monsters.o havilah/obj/rules.o havilah/obj/world.o obj/alist.o
+havilah/obj/monsters.o havilah/obj/rules.o havilah/obj/world.o
 obj/aregion.o obj/army.o obj/astring.o obj/battle.o obj/economy.o obj/edit.o
 obj/faction.o obj/fileio.o obj/game.o obj/gamedata.o obj/gamedefs.o
 obj/gameio.o obj/genrules.o obj/i_rand.o obj/items.o obj/main.o obj/market.o
@@ -111,16 +110,16 @@ make[1]: Leaving directory `/home/steve/atlantis'
 
 ### 2.2 Windows (copied directly from the old guide)
 
-I am now using the GNU gcc compiler on Windows as well. This has the 
-advantage that I can use it on both Unix and Windows, and as an added 
-bonus the compiler is freely available. As above, just switch into the 
-rule-set subdirectory and type 'make'. The Win32 port of gcc can be 
+I am now using the GNU gcc compiler on Windows as well. This has the
+advantage that I can use it on both Unix and Windows, and as an added
+bonus the compiler is freely available. As above, just switch into the
+rule-set subdirectory and type 'make'. The Win32 port of gcc can be
 found at <http://www.cygwin.com/>.
-   
-I'm no longer using Visual C++, so I don't include a Visual C++ 
-makefile. If someone wants to create a makefile for others to use, I'll 
+
+I'm no longer using Visual C++, so I don't include a Visual C++
+makefile. If someone wants to create a makefile for others to use, I'll
 be happy to put it on the download page.
-   
+
 However, it is very easy to make a VC project to compile Atlantis:
 1. Choose a rule-set that you want to compile. For instance, the
    Atlantis Conquest rule-set is in the subdirectory conquest.
@@ -136,124 +135,124 @@ However, it is very easy to make a VC project to compile Atlantis:
    You'll probably want to compile the 'Checked' version in case you
    want to debug.
 
-2.2.1 Compiling Atlantis with Dev-C++ on Windows 
+2.2.1 Compiling Atlantis with Dev-C++ on Windows
       (Submitted by malakh@subdimension.com)
       (Added to by gmfangs@asmrb.org)
 
-First, you need to have the open source compiler Dev-C++ version 5 
-installed (homepage: <http://www.bloodshed.net/dev/devcpp.html>, this 
-howto tested with the version "Dev-C++ 5.0 beta 9 (4.9.9.1) (7.6 MB) 
+First, you need to have the open source compiler Dev-C++ version 5
+installed (homepage: <http://www.bloodshed.net/dev/devcpp.html>, this
+howto tested with the version "Dev-C++ 5.0 beta 9 (4.9.9.1) (7.6 MB)
 with Mingw/GCC 3.3.1").
 
-I recommend installing it to "C:\Dev-Cpp\" if you are using anything 
-prior to Windows XP -- this will help from running into a limitation on 
-the length of commands in DOS that may prevent the linker from working. 
+I recommend installing it to "C:\Dev-Cpp\" if you are using anything
+prior to Windows XP -- this will help from running into a limitation on
+the length of commands in DOS that may prevent the linker from working.
 Otherwise it may be installed anywhere.
 
-Next, you'll need to download the Atlantis source code. One of the best 
-ways to do this is to use open source Tortoise CVS (homepage: 
-<http://www.tortoisecvs.org/>, current version: 
-<http://prdownloads.sourceforge.net/tortoisecvs/TortoiseCVS-1.8.11.exe>). 
+Next, you'll need to download the Atlantis source code. One of the best
+ways to do this is to use open source Tortoise CVS (homepage:
+<http://www.tortoisecvs.org/>, current version:
+<http://prdownloads.sourceforge.net/tortoisecvs/TortoiseCVS-1.8.11.exe>).
 
 Once Tortoise CVS is installed, select the "C:\Dev-Cpp\" folder, right-
-click and select the "CVS Checkout..." menu item. In the checkout 
-dialog, select for the Protocol: "Password server (:pserver)", for the 
-Server: enter "cvs.dragoncat.net", for the Repository folder: enter 
-"/data/cvs", for the User name: enter "guest", for the Module: enter 
-"atlantis", and leave the port blank. If you want the Atlantis 4 stable 
-branch, click on the Revision tab, select "Choose branch or tag", and 
-enter "RELEASE_410" for the Branch. Then click "Ok" and the current 
-version of Atlantis 5, (or Atlantis 4.10 if you selected that branch) 
+click and select the "CVS Checkout..." menu item. In the checkout
+dialog, select for the Protocol: "Password server (:pserver)", for the
+Server: enter "cvs.dragoncat.net", for the Repository folder: enter
+"/data/cvs", for the User name: enter "guest", for the Module: enter
+"atlantis", and leave the port blank. If you want the Atlantis 4 stable
+branch, click on the Revision tab, select "Choose branch or tag", and
+enter "RELEASE_410" for the Branch. Then click "Ok" and the current
+version of Atlantis 5, (or Atlantis 4.10 if you selected that branch)
 will be downloaded into the folder "C:\Dev-Cpp\atlantis\".
 
-If you don't want to use Tortoise CVS, you can downloaded the Atlantis 
-source code, decompressed it (remembering to preserve the files as unix 
+If you don't want to use Tortoise CVS, you can downloaded the Atlantis
+source code, decompressed it (remembering to preserve the files as unix
 files), and then copy the atlantis folder inside "C:\Dev-Cpp\".
 
-To compile Atlantis, you must first change some compiler options. Open 
-Dev-C++, and select the menu Tools -> Compiler Options, and then click 
-on the "Directories" tab. Make sure that there is a path to your 
-binaries at "C:\Dev-Cpp\bin" (they should be set there by default, but 
+To compile Atlantis, you must first change some compiler options. Open
+Dev-C++, and select the menu Tools -> Compiler Options, and then click
+on the "Directories" tab. Make sure that there is a path to your
+binaries at "C:\Dev-Cpp\bin" (they should be set there by default, but
 I've run into cases where the Dev-C++ beta installer leaves this empty).
 
 Next click on the "C++ Includes" tab, and add the path to the
-"C:\Dev-Cpp\include\c++\3.3.1\mingw32\bits" folder. Now you can close 
+"C:\Dev-Cpp\include\c++\3.3.1\mingw32\bits" folder. Now you can close
 the compiler options.
 
-If you are compiling Atlantis 5.0 project, start a new C++ console 
-project. Save the *.dev in the same folder as the *.cpp source files for 
-Atlantis if you are using anything prior to Windows XP (again this keeps 
-the paths short.) Otherwise, you can create a folder anywhere, for 
+If you are compiling Atlantis 5.0 project, start a new C++ console
+project. Save the *.dev in the same folder as the *.cpp source files for
+Atlantis if you are using anything prior to Windows XP (again this keeps
+the paths short.) Otherwise, you can create a folder anywhere, for
 example "C:\Dev-Cpp\standard"
 
-When you first create a project, it starts with a pre-generated main.cpp 
+When you first create a project, it starts with a pre-generated main.cpp
 file. Close it without saving it. You should now have an empty project.
 
-Next go to Project -> Add to Project, and click on the popup "Files of 
-Type" so that you see only C++ sources. Then click to select the first 
-c++ source file in the "C:\Dev-Cpp\atlantis" folder (normally 
-alist.cpp), and then shift-click on the last file (normally unit.h). 
+Next go to Project -> Add to Project, and click on the popup "Files of
+Type" so that you see only C++ sources. Then click to select the first
+c++ source file in the "C:\Dev-Cpp\atlantis" folder (normally
+aregion.cpp), and then shift-click on the last file (normally unit.h).
 Then click "Open" to add all of these files to your project.
 
-Next go to Project -> Add to Project, and now select all the .cpp files 
-that are in the sub-folder for the rules variant you plan to use, for 
-"C:\Dev-Cpp\atlantis\standard", and click on "Open" to add all of these 
+Next go to Project -> Add to Project, and now select all the .cpp files
+that are in the sub-folder for the rules variant you plan to use, for
+"C:\Dev-Cpp\atlantis\standard", and click on "Open" to add all of these
 files to the project.
 
-Now go to Project -> Project Options menu, and click on "Directories" 
-tab then click on the "Include Directories" sub-tab and add in the 
-paths for your atlantis sources (i.e. "C:\Dev-Cpp\atlantis") and also a 
-path to your rules set sub-folder (i.e. "C:\Dev-Cpp\atlantis\standard"). 
+Now go to Project -> Project Options menu, and click on "Directories"
+tab then click on the "Include Directories" sub-tab and add in the
+paths for your atlantis sources (i.e. "C:\Dev-Cpp\atlantis") and also a
+path to your rules set sub-folder (i.e. "C:\Dev-Cpp\atlantis\standard").
 Then click OK.
 
-Finally go to Execute -> Compile. Be patient, this will take some time to 
-complete. You will know it is done compiling when the Compile Log 
+Finally go to Execute -> Compile. Be patient, this will take some time to
+complete. You will know it is done compiling when the Compile Log
 minimizes.
 
 You should now have an .exe of your project inside "C:\Dev-Cpp\standard".
 
-If you are compiling an Atlantis 4.0 project, there is one file that you 
-will have to separately prepare in advance. First, select File -> 
-Project and start a Static Library C project. Make sure you select C as 
-the language or it will not work. Then name the project "i_rand" and 
-save the project in a new folder "C:\Dev-Cpp\i_rand" with the name 
+If you are compiling an Atlantis 4.0 project, there is one file that you
+will have to separately prepare in advance. First, select File ->
+Project and start a Static Library C project. Make sure you select C as
+the language or it will not work. Then name the project "i_rand" and
+save the project in a new folder "C:\Dev-Cpp\i_rand" with the name
 "i_rand.dev".
 
-Now go to Project -> Add to Project, show all files, and add i_rand.c 
-and i_rand.h from your atlantis sources. Now go to Execute -> Compile. 
+Now go to Project -> Add to Project, show all files, and add i_rand.c
+and i_rand.h from your atlantis sources. Now go to Execute -> Compile.
 It should compile and may tell you this is not executable. This is fine.
 
-Next follow the instructions for compiling Atlantis 5.0, except before 
-compiling you need to go to Project -> Project Options, in there at the 
-bottom where it says 'Linker Options/Optional Libs or Object files:' 
-click the "Add Library or Object" button and find i_rand.a. Then click OK. 
-Now you can run Execute -> Compile to generate an .exe of your Atlantis 
+Next follow the instructions for compiling Atlantis 5.0, except before
+compiling you need to go to Project -> Project Options, in there at the
+bottom where it says 'Linker Options/Optional Libs or Object files:'
+click the "Add Library or Object" button and find i_rand.a. Then click OK.
+Now you can run Execute -> Compile to generate an .exe of your Atlantis
 4.0 project.
 
-You can quickly test your .exe build by creating a shortcut to the .exe 
-file, then right-click to select file properties, and append to the 
+You can quickly test your .exe build by creating a shortcut to the .exe
+file, then right-click to select file properties, and append to the
 "Target:" field the text " new", i.e. "C:\Dev-Cpp\test-build\atlantis-
 standard.exe new". Then rename this shortcut "new". When you double-
-click on the shortcut, you should be asked how wide the map should be, 
-and how tall the map should be. If there are no errors, there should be 
+click on the shortcut, you should be asked how wide the map should be,
+and how tall the map should be. If there are no errors, there should be
 a game.out and a players.out file in your test folder.
 
-If you want to test further, you can now copy this shortcut and change 
-the appended Target parameter from " new" to " edit" and you can now 
-edit your generated world (if you make changes a new game.out file will 
+If you want to test further, you can now copy this shortcut and change
+the appended Target parameter from " new" to " edit" and you can now
+edit your generated world (if you make changes a new game.out file will
 be created with the changes.)
 
 I like to use Atlantis Advisor (home page
-<http://gnawer.byte-force.yar.ru/advisor/>, announcements at 
-<http://games.groups.yahoo.com/group/atlantis_advisor_en>, and current 
-version at <http://atlantis.chol.ru/advisor_3.24.00.exe>) to test new 
+<http://gnawer.byte-force.yar.ru/advisor/>, announcements at
+<http://games.groups.yahoo.com/group/atlantis_advisor_en>, and current
+version at <http://atlantis.chol.ru/advisor_3.24.00.exe>) to test new
 builds.
 
-Atlantis Advisor allows you to run a local copy of the Atlantis 
-completely inside Windows. Run Atlantis Advisor, and select "Options" 
-and add the path to your .exe file, and then select "New Game" and click 
-on the "Local game" box. Atlantis Advisor will create a new world, allow 
-you to enter orders for a single faction, then you can select "Run next 
+Atlantis Advisor allows you to run a local copy of the Atlantis
+completely inside Windows. Run Atlantis Advisor, and select "Options"
+and add the path to your .exe file, and then select "New Game" and click
+on the "Local game" box. Atlantis Advisor will create a new world, allow
+you to enter orders for a single faction, then you can select "Run next
 local turn" from the file menu to run your commands. It only runs turns
 for single user, but it is an excellent way to test out any changes that
 you may have made to your rules files.
@@ -261,51 +260,51 @@ you may have made to your rules files.
 
 ### 2.3 The gory details (for advanced users, or the terminally curious)
 
-Atlantis is a standard C++ program, and is deliberately written with no 
-UI or other platform specific features. It does not handle email, 
+Atlantis is a standard C++ program, and is deliberately written with no
+UI or other platform specific features. It does not handle email,
 running turns, or adding players, which is all left up to the GM.
 
-If you are building from your own project or makefile, you will need to 
-include both sets of source files in the makefile.  As such, simply 
+If you are building from your own project or makefile, you will need to
+include both sets of source files in the makefile.  As such, simply
 putting all of the source files into a project or makefile and compiling
-it as a command-line application is about all there is to it. 
+it as a command-line application is about all there is to it.
 
-Atlantis has a number of variant games, with different races, monsters 
+Atlantis has a number of variant games, with different races, monsters
 and features. For each of these games there is a subdirectory for all of
-the rule set specific files; the common Atlantis engine files live in 
-the main directory. 
+the rule set specific files; the common Atlantis engine files live in
+the main directory.
 
 
 ## 3. Running a Game of Atlantis
 
-The Atlantis program is actually very simple in terms of input and 
-output. It takes a set of files as input, runs the turn, and writes out 
-a set of files to the same directory. The Atlantis program does not do 
-anything in terms of scanning for email, sending email, or anything of 
-that nature. It is up to the gamemaster to either make sure the files 
-are in the right place, and the right emails get sent out, or he must 
-find or write a program to do that.  
+The Atlantis program is actually very simple in terms of input and
+output. It takes a set of files as input, runs the turn, and writes out
+a set of files to the same directory. The Atlantis program does not do
+anything in terms of scanning for email, sending email, or anything of
+that nature. It is up to the gamemaster to either make sure the files
+are in the right place, and the right emails get sent out, or he must
+find or write a program to do that.
 
-Explanation: Atlantis is designed to be a very generic program, that 
-will run on many computer systems, and in different ways. Different 
-computer systems handle email in different ways; making Atlantis work   
-on all of these different systems would be quite a task, and in my 
+Explanation: Atlantis is designed to be a very generic program, that
+will run on many computer systems, and in different ways. Different
+computer systems handle email in different ways; making Atlantis work
+on all of these different systems would be quite a task, and in my
 opinion one that is best separated from the actual game-running program.
 
-Further, nothing about Atlantis requires that it be an email game at 
-all; the engine can be used in many different ways. For example, a web 
+Further, nothing about Atlantis requires that it be an email game at
+all; the engine can be used in many different ways. For example, a web
 based version of Atlantis is available at <http://grelth.army-of-
-darkness.it/>  
+darkness.it/>
 
 
 ### 3.1 Running a game of Atlantis by hand (the hard way)
 
-I'll give this as a list of commented UNIX commands. The Windows 
+I'll give this as a list of commented UNIX commands. The Windows
 commands are very similar: move instead of mv, copy instead of cp, etc.
 
-Firstly, you'll need to create a game directory outside your source 
-directory, to avoid it being cluttered up with random files. Assuming 
-that you want to run a havilah variant, and you're in the havilah 
+Firstly, you'll need to create a game directory outside your source
+directory, to avoid it being cluttered up with random files. Assuming
+that you want to run a havilah variant, and you're in the havilah
 directory:
 
 ```
@@ -314,22 +313,22 @@ directory:
 	bash-2.04$ cd ../../mygame
 	bash-2.04$ ./havilah new
 ```
-  
-At this point, you'll be asked how big the map should be. For a first 
+
+At this point, you'll be asked how big the map should be. For a first
 test game, you'll probably want a 16x16 world:
 
 	Atlantis Engine Version: 5.1.0 (beta)
 	Havilah, Version: 1.0.0 (beta)
-	
-	How wide should the map be? 
+
+	How wide should the map be?
 	80
-	How tall should the map be? 
+	How tall should the map be?
 	80
 	Making a level...
 
 	...Lots of other stuff about the world
 
-So, what have you got now? You should have the game info for your new 
+So, what have you got now? You should have the game info for your new
 game, stored in game.out, and the player info, stored in players.out.
 
 ```
@@ -337,16 +336,16 @@ game, stored in game.out, and the player info, stored in players.out.
 	game.out  havilah  names.out  players.out`
 ```
 
-In order to run our first turn, we need to do two things: feed havilah 
-the game and players file, and add ourselves as a player. First, the 
+In order to run our first turn, we need to do two things: feed havilah
+the game and players file, and add ourselves as a player. First, the
 easy part:
 
 ```
 	mv game.out game.in
 	mv players.out players.in
 ```
-	
-Atlantis will automatically read game.in and players.in when it runs. 
+
+Atlantis will automatically read game.in and players.in when it runs.
 Now for the second bit. Edit the players.in file with your favorite text
 editor, and make it look like this:
 
@@ -354,7 +353,7 @@ editor, and make it look like this:
 	Version: 327936
 	TurnNumber: 0
 	GameStatus: New
-	
+
 	Faction: 1
 	Name: The Guardsmen (1)
 	Email: NoAddress
@@ -375,23 +374,23 @@ editor, and make it look like this:
 	Name: Anthony
 	Email: anthony@beastie.house
 	Password: Test
-	
-Note: The first two factions are reserved for town guards and monsters, 
-which can cause some confusion. The first player faction will start as 
+
+Note: The first two factions are reserved for town guards and monsters,
+which can cause some confusion. The first player faction will start as
 faction number 3, the next as number 4, and so on.
 
 Only the addition of the "Faction: new" line is necessary, but adding
 yor faction name, email address and password will make your first turn
 tidier.
 
-Now when the game runs, it'll add you (well, me in this example) to the 
+Now when the game runs, it'll add you (well, me in this example) to the
 game. Let's run it and see what happens:
 
 ```
 	bash-2.04$ ./havilah run
 	Atlantis Engine Version: 5.1.0
 	Havilah, Version: 1.0.0 (beta)
-	
+
 	Saved Game Engine Version: 5.1.0
 	Saved Rule-Set Version: 1.0.0 (beta)
 	Reading the regions...
@@ -423,9 +422,9 @@ out. If you look at report.3, you should see your turn:
 	January, Year 1
 ```
 
-If you want to submit orders for your first turn, you'd leave your 
-orders in a file called orders.3 in the directory, and follow similar 
-steps to the ones you just did to run your first turn. Move game.in, 
+If you want to submit orders for your first turn, you'd leave your
+orders in a file called orders.3 in the directory, and follow similar
+steps to the ones you just did to run your first turn. Move game.in,
 players.in and any report files out of the way:
 
 ```
@@ -440,27 +439,27 @@ And then do exactly what you did previously:
 	mv players.out players.in
 	./havilah run
 ```
-	
+
 In later turns, you'll want to move old orders out of the way too.
 
 
 ### 3.2 Running a game the easy way (with scripts)
 
 Of course, this all gets very tedious, especially when running a game of
-more than four or five people. There are a number of scripts that can 
+more than four or five people. There are a number of scripts that can
 help you out. In it's simplest form, a script will look like this:
 
 ```
 	#!/bin/bash
 	#The argument tells you what turn is running
 	gameturn=$1
-	
+
 	mkdir $gameturn
 	mv game.in players.in report.* times.* $gameturn
-	
+
 	mv players.out players.in
 	mv game.out game.in
-	
+
 	./havilah run
 	mv orders.* $gameturn
 ```
@@ -469,13 +468,13 @@ under windows, this script will look more like (this is untested):
 
 ```
 set ARGUMENT=%1
-	
+
 	mkdir %ARGUMENT%
 	move game.in players.in report.* times.* %ARGUMENT%
-	
+
 	move players.out players.in
 	move game.out game.in
-	
+
 	./havilah run
 	move orders.* %ARGUMENT%
 ```
@@ -484,14 +483,14 @@ These scripts will help you run turns by hand, by automating the tedious
 moving and copying of files. Just run it as ./runturn <gameturn> (after
 doing a chmod u+x runturn, of course).
 
-Once you've got a handle on that, there are a number of scripts 
-available to help you automate most, if not all of the email side of 
-things too, which is how the 'big boys' run games of several hundred 
-players. 
+Once you've got a handle on that, there are a number of scripts
+available to help you automate most, if not all of the email side of
+things too, which is how the 'big boys' run games of several hundred
+players.
 
-There are many scripts in the files/GMTools section of yahoo groups: 
-<http://groups.yahoo.com/group/atlantisdev/files/GM%20Tools/>. Getting 
-them up and running is outside the scope of this FAQ, and the authors 
+There are many scripts in the files/GMTools section of yahoo groups:
+<http://groups.yahoo.com/group/atlantisdev/files/GM%20Tools/>. Getting
+them up and running is outside the scope of this FAQ, and the authors
 will do a better job of it too, so you should ask them if you are in any
 doubt.
 
@@ -502,38 +501,38 @@ Here is a list of things you should consider before running a game:
 [thanks to Antony Briggs for posting this on atlantisdev]
 
 Backups
-The GM should keep backups of the game, preferably on a separate machine 
-or hard drive. Offsite backups are even better. Oh yeah, and they should 
-be automated if at all possible. If you don't know how to make backups, 
+The GM should keep backups of the game, preferably on a separate machine
+or hard drive. Offsite backups are even better. Oh yeah, and they should
+be automated if at all possible. If you don't know how to make backups,
 or even what backups are, you shouldn't be running a game.
 
-Back up *everything* - source code, executables, log files and your 
-scripts, as well as the game files, turn reports, etc. If you do have a 
-mishap, you don't want to have to remember your changes and then 
+Back up *everything* - source code, executables, log files and your
+scripts, as well as the game files, turn reports, etc. If you do have a
+mishap, you don't want to have to remember your changes and then
 recompile all of your code.
 
 Automation
-While it is possible to run an Atlantis game manually, it is far better 
-to use an automated script to respond to order submissions, and running 
-turns in general. Humans are fallible - you *will* send the wrong orders 
+While it is possible to run an Atlantis game manually, it is far better
+to use an automated script to respond to order submissions, and running
+turns in general. Humans are fallible - you *will* send the wrong orders
 out at 1AM. Computers won't, unless you mistakenly tell them to.
 
 Email
-Every effort should be made to make the game as accessible as possible, 
-but the GM is *not* responsible for the vagaries of email. Not even 
-slightly. If you're trying to get your turn in 5 minutes before the 
+Every effort should be made to make the game as accessible as possible,
+but the GM is *not* responsible for the vagaries of email. Not even
+slightly. If you're trying to get your turn in 5 minutes before the
 deadline, and its mysteriously delayed, I am not going to rerun the turn.
 
 Impartiality
-The GM should make an effort to appear impartial, particularly when 
-handling disuptes between players. Playing in your own game, while 
-possible to do fairly, is generally frowned upon, and it makes it much 
+The GM should make an effort to appear impartial, particularly when
+handling disuptes between players. Playing in your own game, while
+possible to do fairly, is generally frowned upon, and it makes it much
 harder to punish people who are rude to you or your friends.
 
 Communication
-Generally it's a good idea to keep players in the loop. Group mailing 
-lists such as yahoogroups (and others) are ideal for this. You can just 
-maintain a list of email addresses for people who are playing, but this 
+Generally it's a good idea to keep players in the loop. Group mailing
+lists such as yahoogroups (and others) are ideal for this. You can just
+maintain a list of email addresses for people who are playing, but this
 requires effort on your part, which is always to be avoided.
 
 You should always inform your players if:
@@ -544,74 +543,74 @@ You should always inform your players if:
    a bug is discovered that affects play, or
    you need to ban someone.
 
-It's generally considered good manners to inform the other players when 
-someone is banned, so that they can avoid a similar fate. Plus it helps 
+It's generally considered good manners to inform the other players when
+someone is banned, so that they can avoid a similar fate. Plus it helps
 to keep them on their toes...
 
 Finding bugs and bug reports
-Bugs are generally difficult to avoid, and crop up even in well tested 
-code. There's always some player who wants to do things differently, and 
-when they do, they'll usually tickle some bug or other. When they give 
-you a bug report, make sure that you verify that the bug exists as they 
+Bugs are generally difficult to avoid, and crop up even in well tested
+code. There's always some player who wants to do things differently, and
+when they do, they'll usually tickle some bug or other. When they give
+you a bug report, make sure that you verify that the bug exists as they
 have reported it - don't just take their word for it!
 
 Fixing bugs
-Once you know that it's definitely a bug, take steps to fix it. In a 
-test game it's normally straightforward, but in a running game you 
-should make the *minimum* change necessary to fix the problem. Don't be 
-tempted to 'fix' anything else - you'll introduce more problems. Also 
-don't be tempted to rush in a quick fix to get the game going again. 
+Once you know that it's definitely a bug, take steps to fix it. In a
+test game it's normally straightforward, but in a running game you
+should make the *minimum* change necessary to fix the problem. Don't be
+tempted to 'fix' anything else - you'll introduce more problems. Also
+don't be tempted to rush in a quick fix to get the game going again.
 You're just as likely to create two more bugs if you do that.
 
 Test your bug fixes
-Above all, once you think that you've fixed the bug, test your fix 
-thoroughly to make sure that it all works. This normally means rerunning 
-the turn locally and verifying it before you set the turns going, as 
+Above all, once you think that you've fixed the bug, test your fix
+thoroughly to make sure that it all works. This normally means rerunning
+the turn locally and verifying it before you set the turns going, as
 well as checking the other turns too.
 
-Don't just check the fix itself, either - check that you haven't broken 
-something else in the process of fixing the first bug. Nothing annoys 
-players more than having to rerun the turn three times because you 
-didn't test stuff - or worse, you fixed the bug but broke something 
+Don't just check the fix itself, either - check that you haven't broken
+something else in the process of fixing the first bug. Nothing annoys
+players more than having to rerun the turn three times because you
+didn't test stuff - or worse, you fixed the bug but broke something
 else, or fixed the wrong bug.
 
-A final point - any bug fix that affects game play should be reported to 
+A final point - any bug fix that affects game play should be reported to
 the players, so that they don't get caught out.
 
 Rerunning turns
-A rerun takes a lot of effort, inconveniences players and uses up 
-valuable network bandwidth. It should only be done as a last resort when 
-all other options, such as replacing units or skills, or compensation 
+A rerun takes a lot of effort, inconveniences players and uses up
+valuable network bandwidth. It should only be done as a last resort when
+all other options, such as replacing units or skills, or compensation
 paid into a player's unclaimed silver, have been exhausted.
 
-A player messing up their orders, or not getting their turn in on time, 
+A player messing up their orders, or not getting their turn in on time,
 or misreading the rules is not grounds for a rerun.
 
-All of the players should be informed as soon as humanly possible of the 
-rerun, the reason for the rerun, and if necessary, the revised deadline 
-for turn submissions (a really good idea). When the turn is actually 
-rerun, the subject line of everything that you send out should clearly 
+All of the players should be informed as soon as humanly possible of the
+rerun, the reason for the rerun, and if necessary, the revised deadline
+for turn submissions (a really good idea). When the turn is actually
+rerun, the subject line of everything that you send out should clearly
 state that it is a rerun, so that players don't get confused.
 
 
 ## 5. Altering game rules
 
-There may come a time when you ask yourself "Why do War factions get so 
-much darned silver?" or "Why are Balrogs so darned powerful?" In this 
-case, you've probably played and run a couple of games, and are looking 
+There may come a time when you ask yourself "Why do War factions get so
+much darned silver?" or "Why are Balrogs so darned powerful?" In this
+case, you've probably played and run a couple of games, and are looking
 to tweak the rules! Welcome to the club ;)
 
-The first step is to create your own subdirectory to store your game. 
-It's easier if you base your game on an existing variant. So do 
-something like 'cp -r havilah myhavilah', except swap 'myhavilah' for 
+The first step is to create your own subdirectory to store your game.
+It's easier if you base your game on an existing variant. So do
+something like 'cp -r havilah myhavilah', except swap 'myhavilah' for
 something a little more original.
 
-Once you've done that, have a closer look inside the subdirectory. The 
-two files that will interest you are extra.cpp and rules.cpp. They 
-contain all of the goodies that you'll want to tamper with. Don't worry 
+Once you've done that, have a closer look inside the subdirectory. The
+two files that will interest you are extra.cpp and rules.cpp. They
+contain all of the goodies that you'll want to tamper with. Don't worry
 about tampering with forces beyond your ken. That's all part of the fun.
 
-Assume that you wanted to make the two changes above. First, change the 
+Assume that you wanted to make the two changes above. First, change the
 default tax amount for war factions. Edit rules.cpp, and change this:
 
         50, /* TAX_INCOME */
@@ -622,7 +621,7 @@ to this:
 
 Hah! That'll learn those pesky war factions!
 
-Balrogs are a little more tricky. You could add the following line to 
+Balrogs are a little more tricky. You could add the following line to
 the end of the ModifyTablesPerRuleset function in extra.cpp:
 
 	DisableItem(I_BALROG);
@@ -634,7 +633,7 @@ so we'd better do something a little more sensible. How about:
 	ModifyMonsterAttacksAndHits(MONSTER_BALROG, 100, 100, 0);
 
 Now any balrogs will have 100 hits, and do 100 melee attacks, instead of
-200. That's pretty cool, but now they're just easier to harvest. D'oh! 
+200. That's pretty cool, but now they're just easier to harvest. D'oh!
 Well, we can do something about that, too. Just add the following line:
 
 	ModifyMonsterSpoils(MONSTER_BALROG, 20000, IT_ADVANCED);
@@ -642,23 +641,23 @@ Well, we can do something about that, too. Just add the following line:
 Cool - now Balrogs will only give out advanced spoils, in addition to
 being wussier. It's important to balance these sorts of things out. A
 wussy creature that explodes with treasure is just asking for some sort
-of abuse ;) 
+of abuse ;)
 
-Note also that we're using different 'values' for these functions - 
-DisableItem uses I_BALROG, but ModifyMonster uses MONSTER_BALROG instead. 
-The difference is which table it's indexing into.  The I_ values affect 
-things in the ItemDefs table. The spoils and treasure type of the 
-monster are in the MonDefs table. Enable/DisableItem work on Items 
-(and thus I_ is correct there). 
+Note also that we're using different 'values' for these functions -
+DisableItem uses I_BALROG, but ModifyMonster uses MONSTER_BALROG instead.
+The difference is which table it's indexing into.  The I_ values affect
+things in the ItemDefs table. The spoils and treasure type of the
+monster are in the MonDefs table. Enable/DisableItem work on Items
+(and thus I_ is correct there).
 
-Similarly, if you were modifying weapon characteristics, you would use 
-WEAPON_ for things like weapon class, etc. The name of the function tells 
-you which table you are working with. If you're in doubt, check out the 
+Similarly, if you were modifying weapon characteristics, you would use
+WEAPON_ for things like weapon class, etc. The name of the function tells
+you which table you are working with. If you're in doubt, check out the
 gamedata.h file in the main source tree.
 
-Most settings in the game will either be boolean (ie true/false) or 
+Most settings in the game will either be boolean (ie true/false) or
 integer values, but some will be enum types. What this means is that you
-can set individual bits of a value. A good example is the new TRANSPORT 
+can set individual bits of a value. A good example is the new TRANSPORT
 variable, used to set the behaviour of quartermasters:
 
 	enum {
@@ -668,20 +667,20 @@ variable, used to set the behaviour of quartermasters:
 	};
 	int TRANSPORT;
 
-If you wanted to switch on quartermasters, and have their level affect 
-shipping costs, but not distance, you would set the variable in rules.cpp 
+If you wanted to switch on quartermasters, and have their level affect
+shipping costs, but not distance, you would set the variable in rules.cpp
 like so:
 
 	GameDefs::ALLOW_TRANSPORT | GameDefs::QM_AFFECT_COST, // TRANSPORT
 
-Note that the different values are set using a boolean OR |, not a 
+Note that the different values are set using a boolean OR |, not a
 logical OR ||.
 
-Once you've finished twisting the game to your own evil purposes, be sure 
-to let your players know of all the wonderful modifications you've made 
-to the game, so they can plan their tactics accordingly. 
+Once you've finished twisting the game to your own evil purposes, be sure
+to let your players know of all the wonderful modifications you've made
+to the game, so they can plan their tactics accordingly.
 
-One final note on modifying Atlantis games: from time to time, Gamedefs 
+One final note on modifying Atlantis games: from time to time, Gamedefs
 will be added to the source, usually in gamedefs.h and rules.cpp. If you
 update your source, but not your custom game's rules.cpp file, your game
 may not run any more, or will run strangely, which will make you sad.
@@ -770,7 +769,7 @@ both solid continents and islands at the same time. The value of
 ARCHIPELAGO is treated as a percent chance that any attempt at creating
 new land mass will end up forming an archipelago. Note that because
 archipelagos are much smaller than continents, the overall land mass
-allocated to them will be smaller than this gamedef value (i.e. an 
+allocated to them will be smaller than this gamedef value (i.e. an
 ARCHIPELAGO setting of 50% might only allocate 30% of total land mass
 to archipelagos).
 
@@ -971,7 +970,7 @@ method of map generation is still under construction and I found
 the standard method of generating the coastline more customisable and
 more useful for the game. This might be due to change as the code
 develops. You can test the fractal land mass distribution by doing
-the following: In 'map.cpp', near the top of the 
+the following: In 'map.cpp', near the top of the
 ARegionList::MakeLand(..) function set the variable 'fractal' to 1.
 
 Terrain distribution works by assigning each hex a probability value

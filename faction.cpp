@@ -358,8 +358,7 @@ void Faction::build_gm_json_report(json& j, Game *game) {
 	j["object_reports"] = objects;
 
 	present_regions.clear();
-	forlist(&(game->regions)) {
-		ARegion *reg = (ARegion *)elem;
+	for(const auto reg : game->regions) {
 		present_regions.push_back(reg);
 	}
 	json regions = json::array();
@@ -580,12 +579,11 @@ void Faction::WriteFacInfo(ostream &f)
 	extra_player_data.clear();
 }
 
-void Faction::CheckExist(ARegionList* regs)
+void Faction::CheckExist(ARegionList& regs)
 {
 	if (is_npc) return;
 	exists = 0;
-	forlist(regs) {
-		ARegion* reg = (ARegion *) elem;
+	for(const auto reg : regs) {
 		if (reg->Present(this)) {
 			exists = 1;
 			return;

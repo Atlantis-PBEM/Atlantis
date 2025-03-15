@@ -13,9 +13,9 @@ CPLUS = g++
 CC = gcc
 CFLAGS = -g -I. -I.. -Wall -Werror -std=c++20
 
-RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o 
+RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o
 
-ENGINE_OBJECTS = alist.o aregion.o army.o astring.o battle.o economy.o \
+ENGINE_OBJECTS = aregion.o army.o astring.o battle.o economy.o \
   edit.o faction.o game.o gamedata.o gamedefs.o gameio.o \
   genrules.o i_rand.o items.o main.o market.o modify.o monthorders.o \
   npc.o object.o orders.o parseorders.o production.o quests.o runorders.o \
@@ -38,7 +38,7 @@ basic: FORCE
 
 standard: FORCE
 	$(MAKE) GAME=standard
-	
+
 kingdoms: FORCE
 	$(MAKE) GAME=kingdoms
 
@@ -65,7 +65,7 @@ standard-clean:
 
 fracas-clean:
 	$(MAKE) GAME=fracas clean
-	
+
 kingdoms-clean:
 	$(MAKE) GAME=kingdoms clean
 
@@ -97,7 +97,7 @@ standard-rules:
 
 fracas-rules:
 	$(MAKE) GAME=fracas rules
-	
+
 kingdoms-rules:
 	$(MAKE) GAME=kingdoms rules
 
@@ -117,7 +117,7 @@ unittest:
 	$(MAKE) GAME=unittest unittest-build
 
 unittest-build: unittest-objdir $(filter-out obj/main.o,$(OBJECTS)) $(UNITTEST_OBJECTS)
-	$(CPLUS) $(CFLAGS) -o unittest/unittest $(filter-out obj/main.o,$(OBJECTS)) $(UNITTEST_OBJECTS) 
+	$(CPLUS) $(CFLAGS) -o unittest/unittest $(filter-out obj/main.o,$(OBJECTS)) $(UNITTEST_OBJECTS)
 
 FORCE:
 

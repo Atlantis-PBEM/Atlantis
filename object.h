@@ -120,7 +120,7 @@ class Object
 
 		Unit *GetUnit(int);
 		Unit *GetUnitAlias(int, int); /* alias, faction number */
-		Unit *get_unit_id(UnitId *unitid, int);
+		Unit *get_unit_id(std::shared_ptr<UnitId> unitid, int);
 
 		// AS
 		int IsRoad();

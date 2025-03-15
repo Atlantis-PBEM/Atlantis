@@ -2465,29 +2465,25 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
 	if (town && town->pop == 5000) return 0;
 
 	int regs = 0;
-	AList inlist;
-	AList donelist;
+	std::list<ARegion *> toconsider;
+	std::unordered_set<ARegion *> seen;
 
-	ARegionPtr * temp = new ARegionPtr;
-	temp->ptr = this;
-	inlist.Add(temp);
+	toconsider.push_back(this);
+	seen.insert(this);
 
-	while(inlist.Num()) {
-		ARegionPtr * reg = (ARegionPtr *) inlist.First();
-		for (int i=0; i<NDIRS; i++) {
-			ARegion * r2 = reg->ptr->neighbors[i];
-			if (!r2) continue;
-			if (r2->type == R_OCEAN) continue;
-			if (GetRegion(&inlist,r2->num)) continue;
-			if (GetRegion(&donelist,r2->num)) continue;
+	while(!toconsider.empty()) {
+		ARegion *r = toconsider.front();
+		toconsider.pop_front();
+		for (int i = 0; i < NDIRS; i++) {
+			ARegion *n = r->neighbors[i];
+			if (!n) continue;
+			if (n->type == R_OCEAN) continue;
+			if (seen.end() != seen.find(n)) continue;
 			regs++;
 			if (regs>20) return 1;
-			ARegionPtr * temp = new ARegionPtr;
-			temp->ptr = r2;
-			inlist.Add(temp);
+			seen.insert(n);
+			toconsider.push_back(n);
 		}
-		inlist.Remove(reg);
-		donelist.Add(reg);
 	}
 	return 0;
 }

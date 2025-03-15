@@ -401,7 +401,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 			if (!((x + y) % 2)) {
 				ARegion *reg = new ARegion;
 				reg->SetLoc(x, y, level);
-				reg->num = Num();
+				reg->num = regions.size();
 
 				//
 				// Some initial values; these will get reset
@@ -413,7 +413,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				reg->elevation = -1;
 
 				reg->level = arr;
-				Add(reg);
+				regions.push_back(reg);
 				arr->SetRegion(x, y, reg);
 			}
 		}
@@ -498,7 +498,7 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 
 				ARegion *reg = new ARegion;
 				reg->SetLoc(x, y, level);
-				reg->num = Num();
+				reg->num = regions.size();
 
 				//
 				// Some initial values; these will get reset
@@ -509,7 +509,7 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 				reg->population = -1; // initially used as flag
 				reg->elevation = -1;
 
-				Add(reg);
+				regions.push_back(reg);
 				arr->SetRegion(x, y, reg);
 			}
 		}
@@ -1621,9 +1621,7 @@ void ARegionList::FinalSetupGates()
 	for (i = 0; i < ngates; i++)
 		used[i] = 0;
 
-	forlist(this) {
-		ARegion *r = (ARegion *) elem;
-
+	for(const auto r : regions) {
 		if (r->gate == -1) {
 			int index = getrandom(ngates);
 			while (used[index]) {

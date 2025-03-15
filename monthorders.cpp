@@ -43,14 +43,12 @@ using namespace std;
 void Game::RunMovementOrders()
 {
 	int phase, error;
-	ARegion *r;
 	std::vector<Location *> locs;
 	Location *l;
 	AString order, *tOrder;
 
 	for (phase = 0; phase < Globals->MAX_SPEED; phase++) {
-		forlist(&regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			for(const auto o : r->objects) {
 				// Entering an object removes the unit from the container of units in this object, so we need to
 				// iterate on a copy so avoid errors.
@@ -61,8 +59,7 @@ void Game::RunMovementOrders()
 				}
 			}
 		}
-		forlist_reuse(&regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			// Sailing can move an object from one region to another, so iterate on a copy.
 			auto objectsCopy(r->objects);
 			for(const auto o : objectsCopy) {
@@ -102,8 +99,7 @@ void Game::RunMovementOrders()
 				}
 			}
 		}
-		forlist_reuse(&regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			for(const auto o : r->objects) {
 				// Since movement (in DoAMoveOrder) is based on accumulated move points, and when it reaches
 				// the cost needed, will move the unit, modifying the container we are iterating, we make a copy of
@@ -129,8 +125,7 @@ void Game::RunMovementOrders()
 
 	// Do a final round of Enters after the phased movement is done,
 	// in case such a thing is at the end of a move chain
-	forlist(&regions) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			// Entering an object removes the unit from the container of units in this object, so we need to
 			// iterate on a copy so avoid errors.
@@ -143,8 +138,7 @@ void Game::RunMovementOrders()
 	}
 
 	// Queue remaining moves
-	forlist_reuse(&regions) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				if (!u->monthorders || (u->monthorders->type != O_MOVE && u->monthorders->type != O_ADVANCE)) {
@@ -387,8 +381,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
 void Game::RunTeachOrders()
 {
-	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (u->monthorders) {
@@ -974,8 +967,7 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 
 void Game::RunMonthOrders()
 {
-	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+	for(const auto r : regions) {
 		RunIdleOrders(r);
 		RunStudyOrders(r);
 		AddNewBuildings(r);

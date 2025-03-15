@@ -563,8 +563,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 					} else {
 						if (pReg->gate > 0) {
 							int numgates = regions.numberofgates;
-							forlist(&regions) {
-								ARegion *reg = (ARegion *) elem;
+							for(const auto reg : regions) {
 								if (reg->gate == numgates) {
 									reg->gate = pReg->gate;
 									pReg->gate = 0;
@@ -596,8 +595,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 						used = new int[ngates];
 						for (i = 0; i < ngates; i++)
 							used[i] = 0;
-						forlist(&regions) {
-							ARegion *reg = (ARegion *) elem;
+						for(const auto reg : regions) {
 							if (reg->gate)
 								used[reg->gate - 1] = 1;
 						}
@@ -609,8 +607,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 					} else {
 						int gatenum = getrandom(regions.numberofgates) + 1;
 						if (gatenum != regions.numberofgates) {
-							forlist(&regions) {
-								ARegion *reg = (ARegion *) elem;
+							for(const auto reg : regions) {
 								if (reg->gate == gatenum) reg->gate = regions.numberofgates;
 							}
 						}
@@ -1301,7 +1298,7 @@ void Game::EditGameCreateUnit()
 	Unit *newunit = GetNewUnit(fac);
 	newunit->SetMen(I_LEADERS, 1);
 	newunit->reveal = REVEAL_FACTION;
-	newunit->MoveUnit(((ARegion *) regions.First())->GetDummy());
+	newunit->MoveUnit((*regions.begin())->GetDummy());
 
 	EditGameUnit(newunit);
 }

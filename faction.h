@@ -158,7 +158,7 @@ public:
 	void SetNameNoChange(AString *str);
 	void SetAddress(AString &strNewAddress);
 
-	void CheckExist(ARegionList *);
+	void CheckExist(ARegionList &);
 	void error(const std::string& s, Unit *u = nullptr);
 	void event(const std::string& message, const std::string& category, ARegion *r = nullptr, Unit *u = nullptr);
 

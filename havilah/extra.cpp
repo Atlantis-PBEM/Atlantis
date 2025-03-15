@@ -89,7 +89,7 @@ int Game::SetupFaction( Faction *pFac )
 	if (pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
 	} else if (!Globals->MULTI_HEX_NEXUS) {
-		reg = (ARegion *)(regions.First());
+		reg = *(regions.begin());
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
@@ -107,10 +107,9 @@ int Game::SetupFaction( Faction *pFac )
 	return( 1 );
 }
 
-static void CreateQuest(ARegionList *regions, int monfaction)
+static void CreateQuest(ARegionList& regions, int monfaction)
 {
 	int d, count, temple, i, j, clash;
-	ARegion *r;
 	AString rname;
 	map <string, int> temples;
 	map <string, int>::iterator it;
@@ -130,42 +129,26 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	if (d < 40) {
 		// SLAY quest
 		q->type = Quest::SLAY;
+		std::vector<Unit *>targets;
 		count = 0;
 		// Count our current monsters
-		forlist(regions) {
-			r = (ARegion *) elem;
-			if (TerrainDefs[r->type].similar_type == R_OCEAN)
-				continue;
-			if (!r->visited)
-				continue;
+		for(const auto r : regions) {
+			if (TerrainDefs[r->type].similar_type == R_OCEAN) continue;
+			if (!r->visited) continue;
 			for(const auto o : r->objects) {
 				for(const auto u: o->units) {
 					if (u->faction->num == monfaction) {
 						count++;
+						targets.push_back(u);
 					}
 				}
 			}
 		}
-		if (!count)
-			return;
+		if (!count) return;
+
 		// pick one as the object of the quest
 		d = getrandom(count);
-		forlist_reuse(regions) {
-			r = (ARegion *) elem;
-			if (TerrainDefs[r->type].similar_type == R_OCEAN)
-				continue;
-			if (!r->visited)
-				continue;
-			for(const auto o : r->objects) {
-				for(const auto u: o->units) {
-					if (u->faction->num == monfaction) {
-						if (!d--) {
-							q->target = u->num;
-						}
-					}
-				}
-			}
-		}
+		q->target = targets[d]->num;
 		for(auto q2: quests) {
 			if (q2->type == Quest::SLAY && q2->target == q->target) {
 				// Don't hunt the same monster twice
@@ -176,26 +159,20 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	} else if (d < 70) {
 		// Create a HARVEST quest
 		count = 0;
-		forlist(regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			// Do allow lakes though
-			if (r->type == R_OCEAN)
-				continue;
-			if (!r->visited)
-				continue;
+			if (r->type == R_OCEAN) continue;
+			if (!r->visited) continue;
 			for (const auto& p : r->products) {
 				if (p->itemtype != I_SILVER)
 					count++;
 			}
 		}
 		count = getrandom(count);
-		forlist_reuse(regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			// Do allow lakes though
-			if (r->type == R_OCEAN)
-				continue;
-			if (!r->visited)
-				continue;
+			if (r->type == R_OCEAN) continue;
+			if (!r->visited) continue;
 			for (const auto& p : r->products) {
 				if (p->itemtype != I_SILVER) {
 					if (!count--) {
@@ -207,11 +184,11 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				}
 			}
 		}
-		r = regions->GetRegion(q->regionnum);
+		ARegion *r = regions.GetRegion(q->regionnum);
 		rname = *r->name;
 		for(auto q2: quests) {
 			if (q2->type == Quest::HARVEST) {
-				r = regions->GetRegion(q2->regionnum);
+				r = regions.GetRegion(q2->regionnum);
 				if (rname == *r->name) {
 					// Don't have 2 harvest quests
 					// active in the same region
@@ -223,8 +200,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		// Create a BUILD or VISIT quest
 		// Find all our current temples
 		temple = O_TEMPLE;
-		forlist(regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			if (r->Population() > 0 && r->visited) {
 				stlstr = r->name->Str();
 				// This looks like a null operation, but
@@ -351,8 +327,7 @@ Faction *Game::CheckVictory()
 	}
 	visited = 0;
 	unvisited = 0;
-	forlist(&regions) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		if (r->Population() > 0) {
 			stlstr = r->name->Str();
 			if (r->visited) {
@@ -385,10 +360,10 @@ Faction *Game::CheckVictory()
 		// Exploration phase complete: start creating relic quests
 		for (i = 0; i < QUEST_SPAWN_RATE; i++) {
 			if (quests.size() < MAXIMUM_ACTIVE_QUESTS && getrandom(100) < QUEST_SPAWN_CHANCE)
-				CreateQuest(&regions, monfaction);
+				CreateQuest(regions, monfaction);
 		}
 		while (quests.size() < MINIMUM_ACTIVE_QUESTS) {
-			CreateQuest(&regions, monfaction);
+			CreateQuest(regions, monfaction);
 		}
 	}
 	if (unvisited) {
@@ -434,8 +409,7 @@ Faction *Game::CheckVictory()
 				}
 				// pick a hex within that region, and find it
 				count = getrandom(it->second);
-				forlist(&regions) {
-					r = (ARegion *) elem;
+				for(const auto r : regions) {
 					if (it->first == r->name->Str()) {
 						if (!count--) {
 							// report this hex
@@ -472,8 +446,7 @@ Faction *Game::CheckVictory()
 				}
 				// pick a hex within that region, and find it
 				count = getrandom(it->second);
-				forlist(&regions) {
-					r = (ARegion *) elem;
+				for(const auto r : regions) {
 					if (it->first == r->name->Str()) {
 						if (!count--) {
 							// report this hex
@@ -527,8 +500,7 @@ Faction *Game::CheckVictory()
 		} else if (d > 7) {
 			// report exact coords of an unexplored hex
 			count = getrandom(unvisited);
-			forlist(&regions) {
-				ARegion *r = (ARegion *)elem;
+			for(const auto r : regions) {
 				if (r->Population() > 0 && !r->visited) {
 					if (!count--) {
 						message = "The people of the ";
@@ -561,8 +533,7 @@ Faction *Game::CheckVictory()
 		if (f->is_npc)
 			continue;
 		reliccount = 0;
-		forlist(&regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			for(const auto o : r->objects) {
 				for(const auto u: o->units) {
 					if (u->faction == f.get()) {
@@ -582,8 +553,7 @@ Faction *Game::CheckVictory()
 			magicdays = 0;
 			skilllevels = 0;
 			magiclevels = 0;
-			forlist(&regions) {
-				r = (ARegion *) elem;
+			for(const auto r : regions) {
 				for(const auto o : r->objects) {
 					// To avoid invalidating the iterator, we'll collect the units that would get removed
 					// and then remove them at the end.
@@ -754,8 +724,7 @@ Faction *Game::CheckVictory()
 		}
 	}
 
-	forlist_reuse(&regions) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			if (o->type == O_BKEEP) {
 				if (!o->incomplete) {

@@ -1410,7 +1410,7 @@ void ARegion::Grow()
 
 	/* Initialise the migration variables */
 	migdev = 0;
-	migfrom.DeleteAll();
+	migfrom.clear();
 }
 
 
@@ -1457,8 +1457,7 @@ void ARegion::FindMigrationDestination(int round)
 	if (target == this) return;
 
 	// then add this region to the target's migfrom list
-	ARegion *self = this;
-	target->migfrom.Add(self);
+	target->migfrom.push_back(this);
 }
 
 /* Attractiveness of the region as a destination for migrants */
@@ -1492,15 +1491,14 @@ int ARegion::MigrationAttractiveness(int homedev, int range, int round)
 }
 
 /* Performs migration for each region with a migration
- * route pointing to the region (i.e. element of migfrom AList),
+ * route pointing to the region (i.e. element of migfrom),
  * adjusting population for hex of origin and itself */
 void ARegion::Migrate()
 {
 	// calculate total potential migrants
 	int totalmig = 0;
-	if (migfrom.First()) {
-		forlist(&migfrom) {
-			ARegion *r = (ARegion *) elem;
+	if(!migfrom.empty()) {
+		for(const auto r : migfrom) {
 			if (!r) continue;
 			totalmig += r->emigrants;
 		}
@@ -1511,8 +1509,7 @@ void ARegion::Migrate()
 
 	// do each migration
 	int totalimm = 0;
-	forlist(&migfrom) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : migfrom) {
 		if (!r) continue;
 
 		// figure range
@@ -1548,7 +1545,7 @@ void ARegion::Migrate()
 	// reduce possible immigrants
 	immigrants -= totalimm;
 	// clear migfrom
-	migfrom.DeleteAll();
+	migfrom.clear();
 }
 
 void ARegion::PostTurn(ARegionList *pRegs)
