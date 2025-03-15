@@ -1011,8 +1011,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 		used = new int[ngates];
 		for (i = 0; i < ngates; i++)
 			used[i] = 0;
-		forlist(&regions) {
-			ARegion *reg = (ARegion *) elem;
+		for(const auto reg : regions) {
 			if (reg->gate)
 				used[reg->gate - 1] = 1;
 		}
@@ -2065,8 +2064,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 void Game::RunTeleportOrders()
 {
 	int val = 1;
-	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o: r->objects) {
 			int foundone = 1;
 			while (foundone) {

@@ -281,7 +281,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 			if (!((x + y) % 2)) {
 				ARegion *reg = new ARegion;
 				reg->SetLoc(x, y, level);
-				reg->num = Num();
+				reg->num = regions.size();
 
 				//
 				// Some initial values; these will get reset
@@ -291,7 +291,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				reg->wages = -1;
 
 				reg->level = arr;
-				Add(reg);
+				regions.push_back(reg);
 				arr->SetRegion(x, y, reg);
 			}
 		}
@@ -376,7 +376,7 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 
 				ARegion *reg = new ARegion;
 				reg->SetLoc(x, y, level);
-				reg->num = Num();
+				reg->num = regions.size();
 
 				//
 				// Some initial values; these will get reset
@@ -387,7 +387,7 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 				reg->population = -1; // initially used as flag
 				reg->elevation = -1;
 
-				Add(reg);
+				regions.push_back(reg);
 				arr->SetRegion(x, y, reg);
 			}
 		}
@@ -1196,12 +1196,11 @@ void ARegionList::InitSetupGates(int level)
 
 void ARegionList::FixUnconnectedRegions()
 {
-	ARegion *r, *head, *tail, *neighbors[NDIRS], *n;
+	ARegion *head, *tail, *neighbors[NDIRS], *n;
 	int attempts, max, i, j, count, offset, x, y, xscale, yscale;
 	Object *o;
 
-	forlist(this) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		r->distance = -1;
 		r->next = 0;
 	}
@@ -1210,8 +1209,7 @@ void ARegionList::FixUnconnectedRegions()
 	// The nexus and anywhere that has a gate
 	head = 0;
 	tail = 0;
-	forlist_reuse(this) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		if (r->zloc == ARegionArray::LEVEL_NEXUS || r->gate == -1) {
 			r->distance = 0;
 			r->next = head;
@@ -1228,8 +1226,7 @@ void ARegionList::FixUnconnectedRegions()
 	do {
 		max = 0;
 		count = 0;
-		forlist(this) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			if (r->distance == -1) {
 				count++;
 			}
@@ -1237,12 +1234,14 @@ void ARegionList::FixUnconnectedRegions()
 				max = r->distance;
 		}
 		if (count > 0) {
+			ARegion *target = nullptr;
 			i = getrandom(count);
-			forlist(this) {
-				r = (ARegion *) elem;
+			for(const auto r : regions) {
 				if (r->distance == -1) {
-					if (!i)
+					if (!i) {
+						target = r;
 						break;
+					}
 					i--;
 				}
 			}
@@ -1252,16 +1251,16 @@ void ARegionList::FixUnconnectedRegions()
 			// first, see if we can knock down a wall
 			// sadly we can only knock down all the walls at once
 			for (i = 0; i < NDIRS; i++)
-				neighbors[i] = r->neighbors[i];
+				neighbors[i] = target->neighbors[i];
 			if (Globals->ICOSAHEDRAL_WORLD) {
-				IcosahedralNeighSetup(r, pRegionArrays[r->zloc]);
+				IcosahedralNeighSetup(target, pRegionArrays[target->zloc]);
 			} else {
-				NeighSetup(r, pRegionArrays[r->zloc]);
+				NeighSetup(target, pRegionArrays[target->zloc]);
 			}
 			offset = getrandom(NDIRS);
 			for (i = 0; i < NDIRS; i++) {
-				if (r->neighbors[(i + offset) % NDIRS] &&
-						r->neighbors[(i + offset) % NDIRS]->distance != -1) {
+				if (target->neighbors[(i + offset) % NDIRS] &&
+						target->neighbors[(i + offset) % NDIRS]->distance != -1) {
 					break;
 				}
 			}
@@ -1269,32 +1268,32 @@ void ARegionList::FixUnconnectedRegions()
 				// restore all the walls other than the one
 				// we meant to break
 				if (i != j)
-					r->neighbors[(j + offset) % NDIRS] = neighbors[(j + offset) % NDIRS];
+					target->neighbors[(j + offset) % NDIRS] = neighbors[(j + offset) % NDIRS];
 			}
 			if (i < NDIRS) {
 				// also restore the link on the other side
-				n = r->neighbors[(i + offset) % NDIRS];
+				n = target->neighbors[(i + offset) % NDIRS];
 				for (j = 0; j < NDIRS; j++)
 					neighbors[j] = n->neighbors[j];
 				if (Globals->ICOSAHEDRAL_WORLD) {
-					IcosahedralNeighSetup(n, pRegionArrays[r->zloc]);
+					IcosahedralNeighSetup(n, pRegionArrays[target->zloc]);
 				} else {
 					NeighSetup(n, pRegionArrays[n->zloc]);
 				}
 				for (j = 0; j < NDIRS; j++)
-					if (n->neighbors[j] != r)
+					if (n->neighbors[j] != target)
 						n->neighbors[j] = neighbors[j];
-			} else if (TerrainDefs[r->type].similar_type != R_OCEAN) {
+			} else if (TerrainDefs[target->type].similar_type != R_OCEAN) {
 				// couldn't break a wall
 				// so try to put in a shaft
-				if (r->zloc > ARegionArray::LEVEL_SURFACE) {
-					x = r->xloc * GetLevelXScale(r->zloc) / GetLevelXScale(r->zloc - 1);
-					y = r->yloc * GetLevelYScale(r->zloc) / GetLevelYScale(r->zloc - 1);
-					xscale = GetLevelXScale(r->zloc) / GetLevelXScale(r->zloc - 1);
-					yscale = 2 * GetLevelYScale(r->zloc) / GetLevelYScale(r->zloc - 1);
+				if (target->zloc > ARegionArray::LEVEL_SURFACE) {
+					x = target->xloc * GetLevelXScale(target->zloc) / GetLevelXScale(target->zloc - 1);
+					y = target->yloc * GetLevelYScale(target->zloc) / GetLevelYScale(target->zloc - 1);
+					xscale = GetLevelXScale(target->zloc) / GetLevelXScale(target->zloc - 1);
+					yscale = 2 * GetLevelYScale(target->zloc) / GetLevelYScale(target->zloc - 1);
 					for (i = 0; !n && i < xscale; i++)
 						for (j = 0; !n && j < yscale; j++) {
-							n = pRegionArrays[r->zloc - 1]->GetRegion(x + i, y + j);
+							n = pRegionArrays[target->zloc - 1]->GetRegion(x + i, y + j);
 							if (n && TerrainDefs[n->type].similar_type == R_OCEAN)
 								n = 0;
 						}
@@ -1304,16 +1303,16 @@ void ARegionList::FixUnconnectedRegions()
 						o->name = new AString(AString("Shaft [") + o->num + "]");
 						o->type = O_SHAFT;
 						o->incomplete = 0;
-						o->inner = r->num;
+						o->inner = target->num;
 						n->objects.push_back(o);
 
-						o = new Object(r);
-						o->num = r->buildingseq++;
+						o = new Object(target);
+						o->num = target->buildingseq++;
 						o->name = new AString(AString("Shaft [") + o->num + "]");
 						o->type = O_SHAFT;
 						o->incomplete = 0;
 						o->inner = n->num;
-						r->objects.push_back(o);
+						target->objects.push_back(o);
 					}
 				}
 				if (!n) {
@@ -1321,9 +1320,9 @@ void ARegionList::FixUnconnectedRegions()
 					// can we put in a gate?
 					if (Globals->GATES_EXIST &&
 							!getrandom(10)) {
-						r->gate = -1;
-						r->distance = 0;
-						n = r;
+						target->gate = -1;
+						target->distance = 0;
+						n = target;
 					}
 				}
 			}
@@ -1373,9 +1372,7 @@ void ARegionList::FinalSetupGates()
 	for (i = 0; i < ngates; i++)
 		used[i] = 0;
 
-	forlist(this) {
-		ARegion *r = (ARegion *) elem;
-
+	for(const auto r : regions) {
 		if (r->gate == -1) {
 			int index = getrandom(ngates);
 			while (used[index]) {

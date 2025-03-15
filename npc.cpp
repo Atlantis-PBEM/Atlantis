@@ -29,8 +29,7 @@ void Game::CreateCityMons()
 {
 	if (!Globals->CITY_MONSTERS_EXIST) return;
 
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		if ((r->type == R_NEXUS) || r->IsStartingCity() || r->town) {
 			CreateCityMon(r, 100, 1);
 		}
@@ -140,8 +139,7 @@ void Game::GrowWMons(int rate)
 
 void Game::GrowLMons(int rate)
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		//
 		// Don't make lmons in guarded regions
 		//

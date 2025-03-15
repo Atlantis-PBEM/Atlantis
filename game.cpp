@@ -90,8 +90,7 @@ int Game::TurnNumber()
 // Default work order procedure
 void Game::DefaultWorkOrder()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		if (r->type == R_NEXUS) continue;
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
@@ -260,8 +259,7 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 
 	// Cities map is a bit special since it is really just a list of all the cities in that region
 	if (type == 4) {
-		forlist(&regions) {
-			ARegion *reg = (ARegion *)elem;
+		for(const auto reg : regions) {
 			// Ignore anything that isn't the surface
 			if (reg->level->levelType != ARegionArray::LEVEL_SURFACE) continue;
 			// Ignore anything with no city
@@ -766,8 +764,7 @@ Unit *Game::ParseGMUnit(AString *tag, Faction *pFac)
 	if (*str == 'g' && *(str+1) == 'm') {
 		AString p = AString(str+2);
 		int gma = p.value();
-		forlist(&regions) {
-			ARegion *reg = (ARegion *)elem;
+		for(const auto reg : regions) {
 			for(const auto obj : reg->objects) {
 				for(const auto u: obj->units) {
 					if (u->faction->num == pFac->num && u->gm_alias == gma) {
@@ -1159,18 +1156,16 @@ void Game::PreProcessTurn()
 	SetupUnitNums();
 	for(auto& fac: factions) fac->DefaultOrders();
 
-	forlist(&regions) {
-		ARegion *pReg = (ARegion *) elem;
-		if (Globals->WEATHER_EXISTS) pReg->SetWeather(regions.GetWeather(pReg, month));
-		if (Globals->GATES_NOT_PERENNIAL) pReg->SetGateStatus(month);
-		pReg->DefaultOrders();
+	for(const auto reg : regions) {
+		if (Globals->WEATHER_EXISTS) reg->SetWeather(regions.GetWeather(reg, month));
+		if (Globals->GATES_NOT_PERENNIAL) reg->SetGateStatus(month);
+		reg->DefaultOrders();
 	}
 }
 
 void Game::ClearOrders(Faction *f)
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				if (u->faction == f) {
@@ -1201,11 +1196,10 @@ void Game::MakeFactionReportLists()
 {
 	vector<Faction *> facs (factionseq, nullptr);
 
-	forlist(&regions) {
+	for(const auto reg : regions) {
 		// clear the temporary
 		fill(facs.begin(), facs.end(), nullptr);
 
-		ARegion *reg = (ARegion *) elem;
 		for(const auto far : reg->farsees) {
 			Faction *fac = far->faction;
 			facs[fac->num] = fac;
@@ -1341,8 +1335,7 @@ void Game::ViewFactions()
 void Game::SetupUnitSeq()
 {
 	int max = 0;
-	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				if (u && u->num > max) max = u->num;
@@ -1365,8 +1358,7 @@ void Game::SetupUnitNums()
 	unsigned int i;
 	for (i = 0; i < maxppunits ; i++) ppUnits[i] = 0;
 
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				i = u->num;
@@ -1434,8 +1426,7 @@ void Game::CountAllSpecialists()
 		fac->numtacts = 0;
 		fac->numapprentices = 0;
 	}
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				if (u->type == U_MAGE) u->faction->nummages++;
@@ -1488,8 +1479,7 @@ void Game::RemoveInactiveFactions()
 int Game::CountMages(Faction *pFac)
 {
 	int i = 0;
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				if (u->faction == pFac && u->type == U_MAGE) i++;
@@ -1502,8 +1492,7 @@ int Game::CountMages(Faction *pFac)
 int Game::CountQuarterMasters(Faction *pFac)
 {
 	int i = 0;
-	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				if (u->faction == pFac && u->GetSkill(S_QUARTERMASTER)) i++;
@@ -1516,8 +1505,7 @@ int Game::CountQuarterMasters(Faction *pFac)
 int Game::CountTacticians(Faction *pFac)
 {
 	int i = 0;
-	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				if (u->faction == pFac && u->GetSkill(S_TACTICS) == 5) i++;
@@ -1530,8 +1518,7 @@ int Game::CountTacticians(Faction *pFac)
 int Game::CountApprentices(Faction *pFac)
 {
 	int i = 0;
-	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(auto u: o->units) {
 				if (u->faction == pFac && u->type == U_APPRENTICE) i++;
@@ -2084,10 +2071,7 @@ void Game::Equilibrate()
 	for (int a=0; a<25; a++) {
 		Adot();
 		ProcessMigration();
-		forlist(&regions) {
-			ARegion *r = (ARegion *) elem;
-			r->PostTurn(&regions);
-		}
+		for(const auto r : regions) r->PostTurn(&regions);
 	}
 	Awrite("");
 }

@@ -131,8 +131,7 @@ void Game::RunOrders()
 
 void Game::ClearCastEffects()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r: regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				u->SetFlag(FLAG_INVIS, 0);
@@ -143,8 +142,7 @@ void Game::ClearCastEffects()
 
 void Game::RunCastOrders()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				if (u->castorders) {
@@ -198,8 +196,7 @@ bool Game::ActivityCheck(ARegion *pReg, Faction *pFac, FactionActivity activity)
 
 void Game::RunStealOrders()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			// Since assassinate can trigger a battle which can cause a dead unit to get moved out of an object
 			// we need to iterate a copy
@@ -400,8 +397,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 
 void Game::DrownUnits()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 			for(const auto o: r->objects) {
 				if (o->type != O_DUMMY) continue;
@@ -435,16 +431,14 @@ void Game::DrownUnits()
 
 void Game::SinkUncrewedFleets()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		r->CheckFleets();
 	}
 }
 
 void Game::RunForgetOrders()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o: r->objects) {
 			for(const auto u: o->units) {
 				for(auto fo : u->forgetorders) {
@@ -466,8 +460,7 @@ void Game::RunQuitOrders()
 
 void Game::Do1Quit(Faction *f)
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			// Killing moves a unit out of the object
 			auto unitCopy(o->units);
@@ -482,8 +475,7 @@ void Game::Do1Quit(Faction *f)
 
 void Game::RunDestroyOrders()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		// Destroying can remove an object from a region, so we need to iterate a copy
 		auto objectCopy(r->objects);
 		for(const auto o : objectCopy) {
@@ -584,8 +576,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 
 void Game::RunFindOrders()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				RunFindUnit(u);
@@ -622,9 +613,7 @@ void Game::RunFindUnit(Unit *u)
 
 void Game::RunTaxOrders()
 {
-	forlist(&regions) {
-		RunTaxRegion((ARegion *) elem);
-	}
+	for(const auto r : regions) RunTaxRegion(r);
 }
 
 int Game::FortTaxBonus(Object *o, Unit *u)
@@ -716,9 +705,7 @@ void Game::RunTaxRegion(ARegion *reg)
 
 void Game::RunPillageOrders()
 {
-	forlist (&regions) {
-		RunPillageRegion((ARegion *) elem);
-	}
+	for(const auto r : regions) RunPillageRegion(r);
 }
 
 int Game::CountPillagers(ARegion *reg)
@@ -805,12 +792,10 @@ void Game::RunPillageRegion(ARegion *reg)
 
 void Game::RunPromoteOrders()
 {
-	ARegion *r;
 	Unit *u;
 
 	/* First, do any promote orders */
-	forlist(&regions) {
-		r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			if (o->type != O_DUMMY) {
 				u = o->GetOwner();
@@ -822,8 +807,7 @@ void Game::RunPromoteOrders()
 			}
 		}
 	}
-	forlist_reuse(&regions) {
-		r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			if (o->type != O_DUMMY) {
 				u = o->GetOwner();
@@ -835,8 +819,7 @@ void Game::RunPromoteOrders()
 		}
 	}
 
-	forlist_reuse(&regions) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
 				if (u->promote) {
@@ -911,8 +894,7 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
  */
 void Game::RunEnterOrders(int phase)
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			// Entering/joining can change unit lists in an object, so use a copy
 			auto unitCopy(o->units);
@@ -1049,10 +1031,9 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 
 void Game::RemoveEmptyObjects()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(auto it = r->objects.begin(); it != r->objects.end(); ) {
-			Object *o = (Object *) elem;
+			Object *o = *it;
 			if ((o->IsFleet()) && (TerrainDefs[r->type].similar_type != R_OCEAN)) {
 				++it;
 				continue;
@@ -1073,8 +1054,7 @@ void Game::RemoveEmptyObjects()
 
 void Game::EmptyHell()
 {
-	forlist(&regions)
-		((ARegion *) elem)->ClearHell();
+	for(const auto r : regions) r->ClearHell();
 }
 
 void Game::MidProcessUnit(ARegion *r, Unit *u)
@@ -1108,8 +1088,7 @@ void Game::EndGame(Faction *victor)
 
 void Game::MidProcessTurn()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		// r->MidTurn(); // Not yet implemented
 		for(const auto o : r->objects) {
 			for(const auto u: o->units) {
@@ -1123,8 +1102,7 @@ void Game::ProcessEconomics()
 {
 	if (!(Globals->DYNAMIC_POPULATION || Globals->REGIONS_ECONOMY)) return;
 
-	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		// Do not process not visited regions
 		if (!r->visited) continue;
 		/* regional population dynamics */
@@ -1141,17 +1119,11 @@ void Game::ProcessMigration()
 	 * allowing a region to spread it's migration
 	 * between different destinations. */
 	for (int phase = 1; phase <=2; phase++) {
-		forlist(&regions) {
-			ARegion *r = (ARegion *) elem;
+		for(const auto r : regions) {
 			r->FindMigrationDestination(phase);
 		}
-		/* should always be true, but we need a
-		 * different scope for AList handling, anyway */
-		if (Globals->DYNAMIC_POPULATION) {
-			forlist(&regions) {
-				ARegion *r = (ARegion *) elem;
-				r->Migrate();
-			}
+		for (const auto r : regions) {
+			r->Migrate();
 		}
 	}
 }
@@ -1178,8 +1150,7 @@ void Game::PostProcessTurn()
 		}
 	}
 
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		r->PostTurn(&regions);
 
 		if (Globals->CITY_MONSTERS_EXIST && (r->town || r->type == R_NEXUS))
@@ -1201,8 +1172,7 @@ void Game::PostProcessTurn()
 
 void Game::DoAutoAttacks()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			auto unitCopy(o->units);
 			for(auto u: unitCopy) {
@@ -1327,8 +1297,7 @@ void Game::CheckWMonAttack(ARegion *r, Unit *u) {
 
 void Game::DoAttackOrders()
 {
-	forlist(&regions) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			auto unitCopy(o->units);
 			for(auto u: unitCopy) {
@@ -1390,8 +1359,7 @@ void Game::AttemptAttack(ARegion *r, Unit *u, Unit *t, int silent, int adv)
 
 void Game::RunSellOrders()
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for (const auto& m : r->markets) {
 			if (m->type == Market::MarketType::M_SELL) DoSell(r, m);
 		}
@@ -1472,8 +1440,7 @@ void Game::DoSell(ARegion *r, Market *m)
 
 void Game::RunBuyOrders()
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for (const auto& m : r->markets) {
 			if (m->type == Market::MarketType::M_BUY) DoBuy(r, m);
 		}
@@ -1622,8 +1589,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 
 void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (u->needed > 0 &&
@@ -1659,8 +1625,7 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 
 void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (u->needed > 0 && ((!consume) || u->GetFlag(FLAG_CONSUMING_FACTION))) {
@@ -1707,8 +1672,7 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 
 void Game::CheckAllyMaintenanceItem(int item, int value)
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (u->needed > 0) {
@@ -1754,8 +1718,7 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 
 void Game::CheckUnitHungerItem(int item, int value)
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (u->hunger > 0) {
@@ -1783,8 +1746,7 @@ void Game::CheckUnitHungerItem(int item, int value)
 
 void Game::CheckFactionHungerItem(int item, int value)
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (u->hunger > 0) {
@@ -1824,8 +1786,7 @@ void Game::CheckFactionHungerItem(int item, int value)
 
 void Game::CheckAllyHungerItem(int item, int value)
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (u->hunger > 0) {
@@ -1869,8 +1830,7 @@ void Game::AssessMaintenance()
 	string quest_rewards;
 
 	/* First pass: set needed */
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (!(u->faction->is_npc)) {
@@ -1907,8 +1867,7 @@ void Game::AssessMaintenance()
 
 			if (i > 0) {
 				cost = ItemDefs[i].baseprice * 5 / 2;
-				forlist((&regions)) {
-					ARegion *r = (ARegion *) elem;
+				for(const auto r : regions) {
 					for(const auto obj : r->objects) {
 						for(const auto u: obj->units) {
 							if (u->hunger > 0 && u->faction->unclaimed > cost) {
@@ -1971,8 +1930,7 @@ void Game::AssessMaintenance()
 	//
 	// Check unclaimed money.
 	//
-	forlist_reuse((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u : obj->units) {
 				if (u->needed > 0 && u->faction->unclaimed) {
@@ -2007,8 +1965,7 @@ void Game::AssessMaintenance()
 	//
 	// Last, if the unit still needs money, starve some men.
 	//
-	forlist_reuse((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (u->needed > 0 || u->hunger > 0)
@@ -2020,8 +1977,7 @@ void Game::AssessMaintenance()
 
 void Game::DoWithdrawOrders()
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(auto u: obj->units) {
 				for(auto o: u->withdraworders) {
@@ -2069,8 +2025,7 @@ void Game::DoGiveOrders()
 	Unit *s;
 	Object *fleet;
 
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				for(auto o: u->giveorders) {
@@ -2149,8 +2104,7 @@ void Game::DoGiveOrders()
 
 void Game::DoExchangeOrders()
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				for(auto o: u->exchangeorders) {
@@ -2780,8 +2734,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 
 void Game::DoGuard1Orders()
 {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				if (!Globals->OCEAN_GUARD &&
@@ -2819,15 +2772,12 @@ void Game::DoGuard1Orders()
 
 void Game::FindDeadFactions()
 {
-	for(const auto& fac: factions) fac->CheckExist(&regions);
+	for(const auto& fac: factions) fac->CheckExist(regions);
 }
 
 void Game::DeleteEmptyUnits()
 {
-	forlist((&regions)) {
-		ARegion *region = (ARegion *) elem;
-		DeleteEmptyInRegion(region);
-	}
+	for(const auto r: regions) DeleteEmptyInRegion(r);
 }
 
 void Game::DeleteEmptyInRegion(ARegion *region)
@@ -2847,8 +2797,7 @@ void Game::CheckTransportOrders()
 	if (!(Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT))
 		return;
 
-	forlist ((&regions)) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				for(auto o: u->transportorders) {
@@ -2968,8 +2917,7 @@ void Game::CheckTransportOrders()
 }
 
 void Game::CollectInterQMTransportItems() {
-	forlist((&regions)) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				// Move the items from the transport_items list to the unit's items list
@@ -2987,8 +2935,7 @@ void Game::RunTransportOrders() {
 		return;
 
 	// Make sure there are no transport items on the units (shouldn't be, but just in case)
-	forlist((&regions)) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				u->transport_items.clear();
@@ -3006,8 +2953,7 @@ void Game::RunTransportOrders() {
 	RunTransportPhase(TransportOrder::TransportPhase::DISTRIBUTE_FROM_QM);
 
 	// erase all transport orders
-	forlist_reuse((&regions)) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u : obj->units) {
 				u->transportorders.clear();
@@ -3018,8 +2964,7 @@ void Game::RunTransportOrders() {
 
 void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 
-	forlist ((&regions)) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
 				for (auto t: u->transportorders) {
@@ -3105,8 +3050,7 @@ void Game::RunSacrificeOrders() {
 	// Check all units for sacrifice orders.  Only allow a sacrifice if there is an object in the hex which accepts
 	// the item they are sacrificing.  If the sacrifice is successful, the item(s) are removed and the object is
 	// destroyed/transformed/provides a reward as appropriate.
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		std::vector<Object *> destroyed_objects;
 		for(const auto obj : r->objects) {
 			for(const auto u: obj->units) {
@@ -3276,8 +3220,7 @@ void Game::RunAnnihilateOrders() {
 	// Annihilate will destroy the target hex and all surrounding hexes.  Already annihilated regions cannot be
 	// annihilated again.
 
-	forlist((&regions)) {
-		ARegion *r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(auto u: obj->units) {
 				if (u->annihilateorders == nullptr) continue;

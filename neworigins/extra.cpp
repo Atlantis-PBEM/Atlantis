@@ -123,7 +123,7 @@ int Game::SetupFaction( Faction *pFac )
 	if (pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
 	} else if (!Globals->MULTI_HEX_NEXUS) {
-		reg = (ARegion *)(regions.First());
+		reg = *(regions.begin());
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
@@ -141,10 +141,9 @@ int Game::SetupFaction( Faction *pFac )
 	return( 1 );
 }
 
-static void CreateQuest(ARegionList *regions, int monfaction)
+static void CreateQuest(ARegionList& regions, int monfaction)
 {
 	int d, count, temple, i, j, clash, reward_count;
-	ARegion *r;
 	AString rname;
 	map <string, int> temples;
 	map <string, int>::iterator it;
@@ -208,8 +207,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		q->type = Quest::SLAY;
 		count = 0;
 		// Count our current monsters
-		forlist(regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			if (TerrainDefs[r->type].similar_type == R_OCEAN)
 				continue;
 			// No need to check if quests do not require exploration
@@ -227,8 +225,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			return;
 		// pick one as the object of the quest
 		d = getrandom(count);
-		forlist_reuse(regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			if (TerrainDefs[r->type].similar_type == R_OCEAN)
 				continue;
 			// No need to check if quests do not require exploration
@@ -254,8 +251,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 	} else if (d < 80) {
 		// Create a HARVEST quest
 		count = 0;
-		forlist(regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			// Do allow lakes though
 			if (r->type == R_OCEAN)
 				continue;
@@ -268,8 +264,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 			}
 		}
 		count = getrandom(count);
-		forlist_reuse(regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			// Do allow lakes though
 			if (r->type == R_OCEAN)
 				continue;
@@ -287,11 +282,11 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				}
 			}
 		}
-		r = regions->GetRegion(q->regionnum);
+		ARegion *r = regions.GetRegion(q->regionnum);
 		rname = *r->name;
 		for(auto q2: quests) {
 			if (q2->type == Quest::HARVEST) {
-				r = regions->GetRegion(q2->regionnum);
+				r = regions.GetRegion(q2->regionnum);
 				if (rname == *r->name) {
 					// Don't have 2 harvest quests
 					// active in the same region
@@ -303,8 +298,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		// Create a BUILD or VISIT quest
 		// Find all our current temples
 		temple = O_TEMPLE;
-		forlist(regions) {
-			r = (ARegion *) elem;
+		for(const auto r : regions) {
 			// No need to check if quests do not require exploration
 			if (r->Population() > 0 && (r->visited || QUEST_EXPLORATION_PERCENT == 0)) {
 				stlstr = r->name->Str();
@@ -407,10 +401,9 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		quests.push_back(q);
 }
 
-int report_and_count_anomalies(ARegionList *regions, const std::vector<std::unique_ptr<Faction>>& factions) {
+int report_and_count_anomalies(ARegionList& regions, const std::vector<std::unique_ptr<Faction>>& factions) {
 	int count = 0;
-	forlist(regions) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			if (o->type == O_ENTITY_CAGE) {
 				count++;
@@ -425,10 +418,9 @@ int report_and_count_anomalies(ARegionList *regions, const std::vector<std::uniq
 	return count;
 }
 
-int count_entities(ARegionList *regions) {
+int count_entities(ARegionList& regions) {
 	int count = 0;
-	forlist(regions) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			if (o->type == O_EMPOWERED_ALTAR) {
 				count++;
@@ -469,8 +461,7 @@ Faction *Game::CheckVictory()
 
 	visited = 0;
 	unvisited = 0;
-	forlist(&regions) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		if (r->Population() > 0) {
 			stlstr = r->name->Str();
 			if (r->visited) {
@@ -503,10 +494,10 @@ Faction *Game::CheckVictory()
 		// Exploration phase complete: start creating relic quests
 		for (i = 0; i < QUEST_SPAWN_RATE; i++) {
 			if (quests.size() < MAXIMUM_ACTIVE_QUESTS && getrandom(100) < QUEST_SPAWN_CHANCE)
-				CreateQuest(&regions, monfaction);
+				CreateQuest(regions, monfaction);
 		}
 		while (quests.size() < MINIMUM_ACTIVE_QUESTS) {
-			CreateQuest(&regions, monfaction);
+			CreateQuest(regions, monfaction);
 		}
 	}
 
@@ -553,8 +544,7 @@ Faction *Game::CheckVictory()
 				}
 				// pick a hex within that region, and find it
 				count = getrandom(it->second);
-				forlist(&regions) {
-					r = (ARegion *) elem;
+				for(const auto r : regions) {
 					if (it->first == r->name->Str()) {
 						if (!count--) {
 							// report this hex
@@ -591,8 +581,7 @@ Faction *Game::CheckVictory()
 				}
 				// pick a hex within that region, and find it
 				count = getrandom(it->second);
-				forlist(&regions) {
-					r = (ARegion *) elem;
+				for(const auto r : regions) {
 					if (it->first == r->name->Str()) {
 						if (!count--) {
 							// report this hex
@@ -646,8 +635,7 @@ Faction *Game::CheckVictory()
 		} else if (d > 7) {
 			// report exact coords of an unexplored hex
 			count = getrandom(unvisited);
-			forlist(&regions) {
-				ARegion *r = (ARegion *)elem;
+			for(const auto r : regions) {
 				if (r->Population() > 0 && !r->visited) {
 					if (!count--) {
 						message = "The people of the ";
@@ -768,8 +756,7 @@ Faction *Game::CheckVictory()
 		std::map <int, int> votes; // track votes per faction id
 		int total_cities = 0; // total cities possible for vote count
 
-		forlist(&regions) {
-			ARegion *r = (ARegion *)elem;
+		for(const auto r : regions) {
 			// Ignore anything but the surface
 			if (r->level->levelType != ARegionArray::LEVEL_SURFACE) continue;
 			if (!r->town || (r->town->TownType() != TOWN_CITY)) continue;
@@ -847,13 +834,13 @@ Faction *Game::CheckVictory()
 		// If this number is < 6, then we have a chance of spawning a new anomaly.  This chance starts at 10%
 		// for the first anomaly after turn 50 and then increases by 12% for each entity or active altar already
 		// existing.
-		int completed_entities = count_entities(&regions);
+		int completed_entities = count_entities(regions);
 		if (completed_entities < 6) {
 			int chance = 10 + (completed_entities * 12);
 			if (getrandom(100) < chance) {
 				// Okay, let's see if we can spawn a new entity
 				// If we can, see if we already have those anomalies and report them to all factions if so.
-				int anomalies = report_and_count_anomalies(&regions, factions);
+				int anomalies = report_and_count_anomalies(regions, factions);
 				if (anomalies + completed_entities >= 6) {
 					// We have all the anomalies that we can have still, so cannot spawn any more.
 					return nullptr;
@@ -941,8 +928,7 @@ Faction *Game::CheckVictory()
 		// No winner yet, so check if the surface has been completely destroyed.
 		int total_surface = 0;
 		int total_annihilated = 0;
-		forlist_reuse(&regions) {
-			ARegion *r = (ARegion *)elem;
+		for(const auto r : regions) {
 			if (r->level->levelType != ARegionArray::LEVEL_SURFACE) continue;
 			total_surface++;
 			if (TerrainDefs[r->type].flags & TerrainType::ANNIHILATED) total_annihilated++;

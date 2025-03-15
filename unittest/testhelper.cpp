@@ -32,7 +32,7 @@ void UnitTestHelper::setup_reports() {
 }
 
 int UnitTestHelper::get_region_count() {
-    return game.regions.Num();
+    return game.regions.size();
 }
 
 Game& UnitTestHelper::game_object() {
