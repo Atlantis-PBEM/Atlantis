@@ -860,7 +860,7 @@ Unit *ARegion::GetUnit(int num)
 	return nullptr;
 }
 
-Location *ARegion::GetLocation(UnitId *id, int faction)
+Location *ARegion::GetLocation(std::shared_ptr<UnitId> id, int faction)
 {
 	Unit *retval = nullptr;
 	for(const auto o : objects) {
@@ -889,7 +889,7 @@ Unit *ARegion::get_unit_id(UnitId id, int faction)
 {
 	Unit *retval = nullptr;
 	for(const auto o : objects) {
-		retval = o->get_unit_id(&id, faction);
+		retval = o->get_unit_id(std::make_shared<UnitId>(id), faction);
 		if (retval) return retval;
 	}
 	return retval;
@@ -909,7 +909,7 @@ void ARegion::deduplicate_unit_list(std::list<UnitId>& list, int faction)
 	}
 }
 
-Location *ARegionList::GetUnitId(UnitId *id, int faction, ARegion *cur)
+Location *ARegionList::GetUnitId(std::shared_ptr<UnitId>& id, int faction, ARegion *cur)
 {
 	Location *retval = NULL;
 	// Check current region first

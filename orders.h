@@ -28,6 +28,7 @@
 #include "gamedefs.h"
 #include "astring.h"
 #include <list>
+#include <memory>
 
 // Forward declarations
 class UnitId;
@@ -172,7 +173,9 @@ class GiveOrder : public Order {
 		int unfinished;
 		int merge;
 
-		UnitId *target;
+		// This needs special handling because we sometimes make copies of give orders for fleets
+		// and without doing this, we can end up with double frees.
+		std::shared_ptr<UnitId> target;
 };
 
 class StudyOrder : public Order {
@@ -235,7 +238,7 @@ class BuildOrder : public Order {
 		BuildOrder();
 		~BuildOrder();
 
-		UnitId *target;
+		std::shared_ptr<UnitId> target;
 		int new_building;
 		int needtocomplete;
 };
@@ -261,7 +264,7 @@ class StealthOrder : public Order {
 		StealthOrder();
 		virtual ~StealthOrder();
 
-		UnitId *target;
+		std::shared_ptr<UnitId> target;
 };
 
 class StealOrder : public StealthOrder {
@@ -277,7 +280,7 @@ class AssassinateOrder : public StealthOrder {
 		AssassinateOrder();
 		~AssassinateOrder();
 
-		UnitId *target;
+		std::shared_ptr<UnitId> target;
 };
 
 class ForgetOrder : public Order {
@@ -301,7 +304,7 @@ class ExchangeOrder : public Order {
 
 		int exchangeStatus;
 
-		UnitId *target;
+		std::shared_ptr<UnitId> target;
 };
 
 class TurnOrder : public Order {
@@ -326,7 +329,7 @@ class CastMindOrder : public CastOrder {
 		CastMindOrder();
 		~CastMindOrder();
 
-		UnitId *id;
+		std::shared_ptr<UnitId> id;
 };
 
 class CastRegionOrder : public CastOrder {
@@ -404,7 +407,7 @@ class TransportOrder : public Order {
 		};
 		TransportPhase phase;
 
-		UnitId *target;
+		std::shared_ptr<UnitId> target;
 };
 
 class JoinOrder : public Order {
@@ -412,7 +415,7 @@ class JoinOrder : public Order {
 		JoinOrder();
 		~JoinOrder();
 
-		UnitId *target;
+		std::shared_ptr<UnitId> target;
 		int overload;
 		int merge;
 };

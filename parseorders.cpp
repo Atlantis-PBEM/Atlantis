@@ -69,14 +69,14 @@ int ParseTF(AString *token)
 	return -1;
 }
 
-UnitId *Game::ParseUnit(AString *s)
+std::shared_ptr<UnitId> Game::ParseUnit(AString *s)
 {
 	AString *token = s->gettoken();
 	if (!token) return 0;
 
 	if (*token == "0") {
 		delete token;
-		UnitId *id = new UnitId;
+		auto id = std::make_shared<UnitId>();
 		id->unitnum = -1;
 		id->alias = 0;
 		id->faction = 0;
@@ -112,7 +112,7 @@ UnitId *Game::ParseUnit(AString *s)
 		if (!un) return 0;
 
 		/* Return UnitId */
-		UnitId *id = new UnitId;
+		auto id = std::make_shared<UnitId>();
 		id->unitnum = 0;
 		id->alias = un;
 		id->faction = fn;
@@ -128,7 +128,7 @@ UnitId *Game::ParseUnit(AString *s)
 		delete token;
 		if (!un) return 0;
 
-		UnitId *id = new UnitId;
+		auto id = std::make_shared<UnitId>();
 		id->unitnum = 0;
 		id->alias = un;
 		id->faction = 0;
@@ -138,7 +138,7 @@ UnitId *Game::ParseUnit(AString *s)
 		delete token;
 		if (!un) return 0;
 
-		UnitId *id = new UnitId;
+		auto id = std::make_shared<UnitId>();
 		id->unitnum = un;
 		id->alias = 0;
 		id->faction = 0;
@@ -1231,7 +1231,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessAssassinateOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 	if (!id || id->unitnum == -1) {
 		parse_error(pCheck, u, 0, "ASSASSINATE: No target given.");
 		return;
@@ -1245,7 +1245,7 @@ void Game::ProcessAssassinateOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessStealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 	if (!id || id->unitnum == -1) {
 		parse_error(pCheck, u, 0, "STEAL: No target given.");
 		return;
@@ -1253,7 +1253,6 @@ void Game::ProcessStealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	AString *token = o->gettoken();
 	if (!token) {
 		parse_error(pCheck, u, 0, "STEAL: No item given.");
-		delete id;
 		return;
 	}
 	int i = ParseEnabledItem(token);
@@ -1261,13 +1260,11 @@ void Game::ProcessStealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (!pCheck) {
 		if (i == -1) {
 			u->error("STEAL: Bad item given.");
-			delete id;
 			return;
 		}
 
 		if (IsSoldier(i)) {
 			u->error("STEAL: Can't steal that.");
-			delete id;
 			return;
 		}
 		std::shared_ptr<StealOrder> ord = std::make_shared<StealOrder>();
@@ -1468,15 +1465,12 @@ void Game::ProcessPillageOrder(Unit *u, OrdersCheck *pCheck)
 
 void Game::ProcessPromoteOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 	if (!id || id->unitnum == -1) {
 		parse_error(pCheck, u, 0, "PROMOTE: No target given.");
 		return;
 	}
 	if (!pCheck) {
-		if (u->promote) {
-			delete u->promote;
-		}
 		u->promote = id;
 	}
 }
@@ -1522,10 +1516,9 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	if (token) {
 		if (*token == "help") {
 			// "build help unitnum"
-			UnitId *targ = 0;
 			delete token;
+			auto targ = ParseUnit(o);
 			if (!pCheck) {
-				targ = ParseUnit(o);
 				if (!targ) {
 					unit->error("BUILD: Non-existent unit to help.");
 					return;
@@ -1636,12 +1629,11 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessAttackOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 	while (id && id->unitnum != -1) {
 		if (!pCheck) {
 			if (!u->attackorders) u->attackorders = std::make_shared<AttackOrder>();
 			u->attackorders->targets.push_back(*id);
-			delete id;
 		}
 		id = ParseUnit(o);
 	}
@@ -1802,12 +1794,11 @@ void Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 
 	int students = 0;
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 	while (id && id->unitnum != -1) {
 		students++;
 		if (order) {
 			order->targets.push_back(*id);
-			delete id;
 		}
 		id = ParseUnit(o);
 	}
@@ -2067,7 +2058,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 
 void Game::ProcessExchangeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	UnitId *t = ParseUnit(o);
+	auto t = ParseUnit(o);
 	if (!t) {
 		parse_error(pCheck, unit, 0, "EXCHANGE: Invalid target.");
 		return;
@@ -2149,7 +2140,6 @@ void Game::ProcessExchangeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessGiveOrder(int order, Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	UnitId *t;
 	AString *token;
 	int unfinished, amt, item, excpt;
 
@@ -2163,7 +2153,7 @@ void Game::ProcessGiveOrder(int order, Unit *unit, AString *o, OrdersCheck *pChe
 		}
 	}
 
-	t = ParseUnit(o);
+	auto t = ParseUnit(o);
 	if (!t) {
 		parse_error(pCheck, unit, 0, ord + ": Invalid target.");
 		return;
@@ -2865,12 +2855,11 @@ void Game::ProcessSailOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 	while (id && id->unitnum != -1) {
 		if (!pCheck) {
 			if (!u->evictorders) u->evictorders = std::make_shared<EvictOrder>();
 			u->evictorders->targets.push_back(*id);
-			delete id;
 		}
 		id = ParseUnit(o);
 	}
@@ -2889,7 +2878,7 @@ void Game::ProcessIdleOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
-	UnitId *tar = ParseUnit(o);
+	auto tar = ParseUnit(o);
 	if (!tar) {
 		parse_error(pCheck, u, 0, "TRANSPORT: Invalid target.");
 		return;
@@ -2978,7 +2967,7 @@ void Game::ProcessJoinOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int overload = 1;
 	int merge = 0;
 
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 	if (!id || id->unitnum == -1) {
 		parse_error(pCheck, u, 0, "JOIN: No target given.");
 		return;

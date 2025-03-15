@@ -801,7 +801,6 @@ void Game::RunPromoteOrders()
 				u = o->GetOwner();
 				if (u && u->promote) {
 					Do1PromoteOrder(o, u);
-					delete u->promote;
 					u->promote = nullptr;
 				}
 			}
@@ -828,7 +827,6 @@ void Game::RunPromoteOrders()
 					} else {
 						u->error("PROMOTE: Can only promote inside structures.");
 					}
-					delete u->promote;
 					u->promote = nullptr;
 				}
 				if (u->evictorders) {
@@ -872,7 +870,7 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 	obj->region->deduplicate_unit_list(u->evictorders->targets, u->faction->num);
 
 	for(auto id: u->evictorders->targets) {
-		Unit *tar = obj->get_unit_id(&id, u->faction->num);
+		Unit *tar = obj->get_unit_id(std::make_shared<UnitId>(id), u->faction->num);
 		if (!tar) continue;
 		if (obj->IsFleet() &&
 			(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
@@ -986,14 +984,14 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 		ItemList shipsCopy = from->ships;
 		for(auto ship: shipsCopy) {
 			GiveOrder go;
-			UnitId id;
+			auto id = std::make_shared<UnitId>();
 			go.amount = ship.num;
 			go.except = 0;
 			go.item = ship.type;
-			id.unitnum = to->GetOwner()->num;
-			id.alias = 0;
-			id.faction = 0;
-			go.target = &id;
+			id->unitnum = to->GetOwner()->num;
+			id->alias = 0;
+			id->faction = 0;
+			go.target = id;
 			go.type = O_GIVE;
 			go.merge = 1;
 			DoGiveOrder(r, u, std::make_shared<GiveOrder>(go));

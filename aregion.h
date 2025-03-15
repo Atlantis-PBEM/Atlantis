@@ -205,7 +205,7 @@ class ARegion
 		Unit *GetUnitAlias(int, int); /* alias, faction number */
 		Unit *get_unit_id(UnitId unitid, int faction);
 		void deduplicate_unit_list(std::list<UnitId>& list, int);
-		Location *GetLocation(UnitId *, int);
+		Location *GetLocation(std::shared_ptr<UnitId> id, int);
 
 		void SetLoc(int, int, int);
 		bool Present(Faction *f);
@@ -460,7 +460,7 @@ class ARegionList
 		int ReadRegions(std::istream &f, const std::vector<std::unique_ptr<Faction>>& factions);
 		void WriteRegions(std::ostream&  f);
 		Location *FindUnit(int);
-		Location *GetUnitId(UnitId *id, int faction, ARegion *cur);
+		Location *GetUnitId(std::shared_ptr<UnitId>& id, int faction, ARegion *cur);
 
 		void ChangeStartingCity(ARegion *, int);
 		ARegion *GetStartingCity(ARegion *AC, int num, int level, int maxX,

@@ -159,7 +159,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 
 void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck )
 {
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 
 	if (!id) {
 		u->error("CAST: No unit specified.");
@@ -244,10 +244,9 @@ void Game::ProcessInvisibility(Unit *u,AString *o, OrdersCheck *pCheck )
 		u->castorders = order;
 	}
 
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 	while (id) {
 		order->units.push_back(*id);
-		delete id;
 		id = ParseUnit(o);
 	}
 }
@@ -493,10 +492,9 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	order->spell = S_PORTAL_LORE;
 	order->level = 1;
 
-	UnitId *id = ParseUnit(o);
+	auto id = ParseUnit(o);
 	while(id) {
 		order->units.push_back(*id);
-		delete id;
 		id = ParseUnit(o);
 	}
 }
@@ -541,10 +539,9 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 			return;
 		}
 
-		UnitId *id = ParseUnit(o);
+		auto id = ParseUnit(o);
 		while(id) {
 			order->units.push_back(*id);
-			delete id;
 			id = ParseUnit(o);
 		}
 		return;
@@ -579,10 +576,9 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 			return;
 		}
 
-		UnitId *id = ParseUnit(o);
+		auto id = ParseUnit(o);
 		while(id) {
 			order->units.push_back(*id);
-			delete id;
 			id = ParseUnit(o);
 		}
 		return;
@@ -1801,7 +1797,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	int comma = 0;
 	string unitlist;
 	for(auto elem: order->units) {
-		Location *loc = r->GetLocation(&elem, u->faction->num);
+		Location *loc = r->GetLocation(std::make_shared<UnitId>(elem), u->faction->num);
 		if (loc) {
 			/* Don't do the casting unit yet */
 			if (loc->unit == u) {
@@ -1904,7 +1900,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	u->event("Casts Portal Jump.", "spell");
 
 	for (auto elem: order->units) {
-		Location *loc = r->GetLocation(&elem, u->faction->num);
+		Location *loc = r->GetLocation(std::make_shared<UnitId>(elem), u->faction->num);
 		if (loc) {
 			if (loc->unit->GetAttitude(r,u) < A_ALLY) {
 				u->error("CAST: Unit is not allied.");
