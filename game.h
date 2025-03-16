@@ -29,7 +29,6 @@
 class Game;
 
 #include "aregion.h"
-#include "alist.h"
 #include "faction.h"
 #include "production.h"
 #include "object.h"
@@ -331,7 +330,7 @@ private:
 	// Parsing functions
 	//
 	void parse_error(OrdersCheck *order_chec, Unit *unit, Faction *faction, const std::string &error);
-	UnitId *ParseUnit(AString *s);
+	std::shared_ptr<UnitId> ParseUnit(AString *s);
 	int ParseDir(AString *token);
 
 	void ParseOrders(int faction, std::istream& ordersFile, OrdersCheck *pCheck);

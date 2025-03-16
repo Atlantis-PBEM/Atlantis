@@ -192,7 +192,7 @@ int Game::SetupFaction( Faction *pFac )
 		reg = pFac->pStartLoc;
 	} else if (!Globals->MULTI_HEX_NEXUS) {
 		if (Globals->NEXUS_EXISTS) {
-			reg = (ARegion *)(regions.First());
+			reg = *(regions.begin());
 		} else {
 			// Get the surface
 			ARegionArray *pArr = regions.GetRegionArray(1);

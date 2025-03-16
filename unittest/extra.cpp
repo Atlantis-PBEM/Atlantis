@@ -28,7 +28,7 @@
 
 /** \file
  * Extra parts added to the game for a particular version.
- * extra.cpp contains all of the version-specific functions necessary 
+ * extra.cpp contains all of the version-specific functions necessary
  * to alter a game's data structures to suit the GM.
  */
 
@@ -56,7 +56,7 @@ int Game::SetupFaction( Faction *pFac ) {
 	temp2->SetFlag(FLAG_BEHIND, 1);
 
     // Put the unit in the first region (which will be the one city for the test game)
-	ARegion *reg = (ARegion *)(regions.First());
+	ARegion *reg = *(regions.begin());
 	temp2->MoveUnit(reg->GetDummy());
 
     return 1;

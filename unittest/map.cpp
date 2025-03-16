@@ -75,7 +75,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 			if (!((x + y) % 2)) {
 				ARegion *reg = new ARegion;
 				reg->SetLoc(x, y, level);
-				reg->num = Num();
+				reg->num = regions.size();
 
 				//
 				// Some initial values; these will get reset
@@ -85,7 +85,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
 				reg->wages = -1;
 
 				reg->level = arr;
-				Add(reg);
+				regions.push_back(reg);
 				arr->SetRegion(x, y, reg);
 				Adot();
 			}

@@ -235,7 +235,7 @@ Unit *Object::GetUnitAlias(int alias, int faction)
 	return 0;
 }
 
-Unit *Object::get_unit_id(UnitId *unitid, int faction)
+Unit *Object::get_unit_id(std::shared_ptr<UnitId> unitid, int faction)
 {
 	if (unitid == 0) return 0;
 	if (unitid->unitnum) {

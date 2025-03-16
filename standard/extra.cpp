@@ -77,7 +77,7 @@ int Game::SetupFaction( Faction *pFac )
 	if (pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
 	} else if (!Globals->MULTI_HEX_NEXUS) {
-		reg = (ARegion *)(regions.First());
+		reg = *(regions.begin());
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
@@ -97,13 +97,12 @@ int Game::SetupFaction( Faction *pFac )
 
 Faction *Game::CheckVictory()
 {
-	forlist(&regions) {
-		ARegion *region = (ARegion *)elem;
-		for(const auto obj : region->objects) {
+	for(const auto r : regions) {
+		for(const auto obj : r->objects) {
 			if (obj->type != O_BKEEP) continue;
 			if (obj->units.size()) return nullptr;
 			// Now see find the first faction guarding the region
-			Object *o = region->GetDummy();
+			Object *o = r->GetDummy();
 			for(const auto u: o->units) {
 				if (u->guard == GUARD_GUARD) return u->faction;
 			}

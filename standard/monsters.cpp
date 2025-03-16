@@ -34,8 +34,7 @@ void Game::CreateVMons()
 {
 	if (!Globals->LAIR_MONSTERS_EXIST) return;
 
-	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			if (obj->type != O_BKEEP) continue;
 			Faction *monfac = get_faction(factions, 2);
@@ -50,8 +49,7 @@ void Game::GrowVMons()
 {
 	if (!Globals->LAIR_MONSTERS_EXIST) return;
 
-	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
+	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			if (obj->type != O_BKEEP) continue;
 			for(const auto u: obj->units) {

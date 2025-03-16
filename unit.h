@@ -273,7 +273,7 @@ class Unit
 		int destroy;
 		int enter;
 		int build;
-		UnitId *promote;
+		std::shared_ptr<UnitId> promote;
 		std::vector<std::shared_ptr<FindOrder>> findorders;
 		std::vector<std::shared_ptr<GiveOrder>> giveorders;
 		std::vector<std::shared_ptr<WithdrawOrder>> withdraworders;

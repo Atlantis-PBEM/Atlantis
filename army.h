@@ -33,7 +33,6 @@ class Soldier;
 class Army;
 
 #include "unit.h"
-#include "alist.h"
 #include "items.h"
 #include "object.h"
 #include "helper.h"

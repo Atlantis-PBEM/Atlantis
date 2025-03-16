@@ -37,7 +37,6 @@ class ARegionArray;
 #include "gamedefs.h"
 #include "gameio.h"
 #include "faction.h"
-#include "alist.h"
 #include "unit.h"
 #include "production.h"
 #include "market.h"
@@ -122,14 +121,6 @@ Location *GetUnit(const std::vector<Location *>& list, int unit_id);
 int AGetName(int town, ARegion *r);
 char const *AGetNameString(int name);
 
-class ARegionPtr : public AListElem
-{
-	public:
-		ARegion *ptr;
-};
-
-ARegionPtr *GetRegion(AList *, int);
-
 class Farsight
 {
 	public:
@@ -180,7 +171,7 @@ struct RegionSetup {
 	int settlementSize;
 };
 
-class ARegion : public AListElem
+class ARegion
 {
 	friend class Game;
 	friend class ARegionArray;
@@ -214,7 +205,7 @@ class ARegion : public AListElem
 		Unit *GetUnitAlias(int, int); /* alias, faction number */
 		Unit *get_unit_id(UnitId unitid, int faction);
 		void deduplicate_unit_list(std::list<UnitId>& list, int);
-		Location *GetLocation(UnitId *, int);
+		Location *GetLocation(std::shared_ptr<UnitId> id, int);
 
 		void SetLoc(int, int, int);
 		bool Present(Faction *f);
@@ -277,7 +268,7 @@ class ARegion : public AListElem
 		void Migrate();
 		void SetTownType(int);
 		int DetermineTownSize();
-		int TraceConnectedRoad(int, int, AList *, int, int);
+		int TraceConnectedRoad(int dir, int sum, std::vector<ARegion *>& con, int range, int dev);
 		int RoadDevelopmentBonus(int, int);
 		int BaseDev();
 		int ProdDev();
@@ -331,7 +322,7 @@ class ARegion : public AListElem
 		int vegetation;
 		int culture;
 		// migration origins
-		AList migfrom;
+		std::vector<ARegion *> migfrom;
 		// mid-way migration development
 		int migdev;
 		int immigrants;
@@ -377,7 +368,6 @@ class ARegion : public AListElem
 		void SetupProds(double weight);
 		void SetIncome();
 		void Grow();
-		int GetNearestProd(int);
 		void SetupCityMarket();
 		void AddTown();
 		void AddTown(int);
@@ -455,9 +445,13 @@ class GeoMap
 
 };
 
-class ARegionList : public AList
+class ARegionList
 {
+	std::vector <ARegion *> regions;
+
 	public:
+		using iterator = typename std::vector<ARegion *>::iterator;
+
 		ARegionList();
 		~ARegionList();
 
@@ -466,7 +460,7 @@ class ARegionList : public AList
 		int ReadRegions(std::istream &f, const std::vector<std::unique_ptr<Faction>>& factions);
 		void WriteRegions(std::ostream&  f);
 		Location *FindUnit(int);
-		Location *GetUnitId(UnitId *id, int faction, ARegion *cur);
+		Location *GetUnitId(std::shared_ptr<UnitId>& id, int faction, ARegion *cur);
 
 		void ChangeStartingCity(ARegion *, int);
 		ARegion *GetStartingCity(ARegion *AC, int num, int level, int maxX,
@@ -482,6 +476,12 @@ class ARegionList : public AList
 		int numberofgates;
 		int numLevels;
 		ARegionArray **pRegionArrays;
+
+		iterator begin() { return regions.begin(); }
+		iterator end() { return regions.end(); }
+		iterator erase(iterator i) { return regions.erase(i); }
+		inline size_t size() { return regions.size(); }
+		inline void clear() { regions.clear(); }
 
 	public:
 		//

@@ -55,15 +55,6 @@ Location *GetUnit(const std::vector<Location *>& list, int unit_id)
 	return 0;
 }
 
-ARegionPtr *GetRegion(AList *l, int n)
-{
-	forlist(l) {
-		ARegionPtr *p = (ARegionPtr *) elem;
-		if (p->ptr->num == n) return p;
-	}
-	return 0;
-}
-
 Farsight::Farsight()
 {
 	faction = 0;
@@ -198,44 +189,6 @@ int ARegion::IsNativeRace(int item)
 	return 0;
 }
 
-int ARegion::GetNearestProd(int item)
-{
-	AList regs, regs2;
-	AList *rptr = &regs;
-	AList *r2ptr = &regs2;
-	AList *temp;
-	ARegionPtr *p = new ARegionPtr;
-	p->ptr = this;
-	regs.Add(p);
-
-	for (int i=0; i<5; i++) {
-		forlist(rptr) {
-			ARegion *r = ((ARegionPtr *) elem)->ptr;
-			AString skname = ItemDefs[item].pSkill;
-			int sk = LookupSkill(&skname);
-			if (r->get_production_for_skill(item, sk)) {
-				regs.DeleteAll();
-				regs2.DeleteAll();
-				return i;
-			}
-			for (int j=0; j<NDIRS; j++) {
-				if (neighbors[j]) {
-					p = new ARegionPtr;
-					p->ptr = neighbors[j];
-					r2ptr->Add(p);
-				}
-			}
-			rptr->DeleteAll();
-			temp = rptr;
-			rptr = r2ptr;
-			r2ptr = temp;
-		}
-	}
-	regs.DeleteAll();
-	regs2.DeleteAll();
-	return 5;
-}
-
 std::vector<int> ARegion::GetPossibleLairs() {
 	std::vector<int> lairs;
 	TerrainType *tt = &TerrainDefs[type];
@@ -345,17 +298,14 @@ void ARegion::ManualSetup(const RegionSetup& settings) {
 	}
 }
 
-int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range, int dev)
+int ARegion::TraceConnectedRoad(int dir, int sum, std::vector<ARegion *>& con, int range, int dev)
 {
-	ARegionPtr *rn = new ARegionPtr();
-	rn->ptr = this;
 	int isnew = 1;
-	forlist(con) {
-		ARegionPtr *reg = (ARegionPtr *) elem;
-		if ((reg) && (reg->ptr)) if (reg->ptr == this) isnew = 0;
+	for(const auto reg : con) {
+		if (reg == this) isnew = 0;
 	}
 	if (isnew == 0) return sum;
-	con->Add(rn);
+	con.push_back(this);
 	// Add bonus for connecting town
 	if (town) sum++;
 	// Add bonus if development is higher
@@ -377,10 +327,8 @@ int ARegion::TraceConnectedRoad(int dir, int sum, AList *con, int range, int dev
 int ARegion::RoadDevelopmentBonus(int range, int dev)
 {
 	int bonus = 0;
-	AList *con = new AList();
-	ARegionPtr *rp = new ARegionPtr();
-	rp->ptr = this;
-	con->Add(rp);
+	std::vector<ARegion *> con;
+	con.push_back(this);
 	for (int d=0; d<NDIRS; d++) {
 		if (!HasExitRoad(d)) continue;
 		ARegion *r = neighbors[d];
@@ -912,7 +860,7 @@ Unit *ARegion::GetUnit(int num)
 	return nullptr;
 }
 
-Location *ARegion::GetLocation(UnitId *id, int faction)
+Location *ARegion::GetLocation(std::shared_ptr<UnitId> id, int faction)
 {
 	Unit *retval = nullptr;
 	for(const auto o : objects) {
@@ -941,7 +889,7 @@ Unit *ARegion::get_unit_id(UnitId id, int faction)
 {
 	Unit *retval = nullptr;
 	for(const auto o : objects) {
-		retval = o->get_unit_id(&id, faction);
+		retval = o->get_unit_id(std::make_shared<UnitId>(id), faction);
 		if (retval) return retval;
 	}
 	return retval;
@@ -961,7 +909,7 @@ void ARegion::deduplicate_unit_list(std::list<UnitId>& list, int faction)
 	}
 }
 
-Location *ARegionList::GetUnitId(UnitId *id, int faction, ARegion *cur)
+Location *ARegionList::GetUnitId(std::shared_ptr<UnitId>& id, int faction, ARegion *cur)
 {
 	Location *retval = NULL;
 	// Check current region first
@@ -1400,7 +1348,6 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 		}
 	}
 
-	// extra block because of freaking AList.
 	for(const auto o : objects) {
 		o->build_json_report(j, fac, obs, truesight, detfac, passobs, passtrue, passdetfac, present || farsight);
 	}
@@ -1749,7 +1696,7 @@ ARegionList::~ARegionList()
 
 void ARegionList::WriteRegions(ostream& f)
 {
-	f << Num() << "\n";
+	f << regions.size() << "\n";
 	f << numLevels << "\n";
 	for (int i = 0; i < numLevels; i++) {
 		ARegionArray *pRegs = pRegionArrays[i];
@@ -1759,16 +1706,12 @@ void ARegionList::WriteRegions(ostream& f)
 	}
 
 	f << numberofgates << "\n";
-	forlist(this) ((ARegion *) elem)->Writeout(f);
+	for(const auto reg : regions) reg->Writeout(f);
 
-	{
-		// because forlist is a macro we need this extra block for now.
-		f << "Neighbors\n";
-		forlist(this) {
-			ARegion *reg = (ARegion *) elem;
-			for (int i = 0; i < NDIRS; i++) {
-				f  << (reg->neighbors[i] ? reg->neighbors[i]->num : -1) << '\n';
-			}
+	f << "Neighbors\n";
+	for(const auto reg: regions) {
+		for (int i = 0; i < NDIRS; i++) {
+			f << (reg->neighbors[i] ? reg->neighbors[i]->num : -1) << '\n';
 		}
 	}
 }
@@ -1798,14 +1741,11 @@ int ARegionList::ReadRegions(istream& f, const std::vector<std::unique_ptr<Facti
 
 	f >> numberofgates;
 
-	ARegionFlatArray fa(num);
-
 	Awrite("Reading the regions...");
 	for (i = 0; i < num; i++) {
 		ARegion *temp = new ARegion;
 		temp->Readin(f, factions);
-		fa.SetRegion(temp->num, temp);
-		Add(temp);
+		regions.push_back(temp);
 
 		pRegionArrays[temp->zloc]->SetRegion(temp->xloc, temp->yloc, temp);
 		temp->level = pRegionArrays[temp->zloc];
@@ -1815,15 +1755,14 @@ int ARegionList::ReadRegions(istream& f, const std::vector<std::unique_ptr<Facti
 	{
 		AString temp;
 		f >> ws >> temp; // eat the "Neighbors" line
-		forlist(this) {
-			ARegion *reg = (ARegion *) elem;
+		for(const auto reg : regions) {
 			for (i = 0; i < NDIRS; i++) {
 				int j;
 				f >> j;
 				if (j != -1) {
-					reg->neighbors[i] = fa.GetRegion(j);
+					reg->neighbors[i] = regions.at(j);
 				} else {
-					reg->neighbors[i] = 0;
+					reg->neighbors[i] = nullptr;
 				}
 			}
 		}
@@ -1833,10 +1772,7 @@ int ARegionList::ReadRegions(istream& f, const std::vector<std::unique_ptr<Facti
 
 ARegion *ARegionList::GetRegion(int n)
 {
-	forlist(this) {
-		if (((ARegion *) elem)->num == n) return ((ARegion *) elem);
-	}
-	return 0;
+	return regions.at(n);
 }
 
 ARegion *ARegionList::GetRegion(int x, int y, int z)
@@ -1854,8 +1790,7 @@ ARegion *ARegionList::GetRegion(int x, int y, int z)
 
 Location *ARegionList::FindUnit(int i)
 {
-	forlist(this) {
-		ARegion *reg = (ARegion *) elem;
+	for(const auto reg : regions) {
 		for(const auto obj : reg->objects) {
 			for(const auto u: obj->units) {
 				if (u->num == i) {
@@ -2093,8 +2028,7 @@ void ARegionList::CalcDensities()
 	int i;
 	for (i=0; i<R_NUM; i++)
 		arr[i] = 0;
-	forlist(this) {
-		ARegion *reg = ((ARegion *) elem);
+	for(const auto reg : regions) {
 		arr[reg->type]++;
 	}
 	for (i=0; i<R_NUM; i++)
@@ -2108,8 +2042,7 @@ void ARegionList::TownStatistics()
 	int villages = 0;
 	int towns = 0;
 	int cities = 0;
-	forlist(this) {
-		ARegion *reg = ((ARegion *) elem);
+	for(const auto reg : regions) {
 		if (reg->town) {
 			switch(reg->town->TownType()) {
 				case TOWN_VILLAGE:
@@ -2137,27 +2070,22 @@ void ARegionList::TownStatistics()
 ARegion *ARegionList::FindGate(int x)
 {
 	if (x == -1) {
+		std::vector<ARegion *> allgates;
 		int count = 0;
 
-		forlist(this) {
-			ARegion *r = (ARegion *) elem;
-			if (r->gate)
-				count++;
-		}
-		count = getrandom(count);
-		forlist_reuse(this) {
-			ARegion *r = (ARegion *) elem;
-			if (r->gate) {
-				if (!count)
-					return r;
-				count--;
-			}
+		for(const auto r : regions) {
+			if (r->gate) allgates.push_back(r);
 		}
 
-		return 0;
+		if (allgates.empty()) {
+			return 0;
+		}
+
+		count = getrandom(allgates.size());
+		return allgates[count];
 	}
-	forlist(this) {
-		ARegion *r = (ARegion *) elem;
+
+	for(const auto r : regions) {
 		if (r->gate == x) return r;
 	}
 	return 0;
@@ -2196,8 +2124,7 @@ ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 	ARegion *r, *queue, *inner;
 	int offset, i, valid;
 
-	forlist(this) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		r->distance = -1;
 		r->next = 0;
 	}
@@ -2377,8 +2304,7 @@ int ARegionList::GetPlanarDistance(ARegion *one, ARegion *two, int penalty, int 
 			return 10000000;
 		}
 
-		forlist(this) {
-			ARegion *r = (ARegion *) elem;
+		for(const auto r : regions) {
 			r->distance = -1;
 			r->next = 0;
 		}
@@ -3933,9 +3859,7 @@ void ARegionList::ResourcesStatistics() {
 	std::unordered_map<int, int> forSale;
 	std::unordered_map<int, int> wanted;
 
-	forlist(this) {
-		ARegion* reg = (ARegion*) elem;
-
+	for(const auto reg : regions) {
 		for (const auto& p : reg->products) {
 			resources[p->itemtype] += p->amount;
 		}
@@ -4019,11 +3943,9 @@ const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(AR
 int ARegionList::FindDistanceToNearestObject(int object_type, ARegion *start)
 {
 	std::vector<ARegion *> targets;
-	ARegion *r;
 	// Just find all regions which contain the object, then compute the smallest distance.  I contemplated using
 	// the breadth first and dijkstra search, but this is actually simpler and should be faster.
-	forlist(this) {
-		r = (ARegion *) elem;
+	for(const auto r : regions) {
 		// For now, we only care about regions on the same zloc
 		if (r->zloc != start->zloc) continue;
 		for(const auto o : r->objects) {
