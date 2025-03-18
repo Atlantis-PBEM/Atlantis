@@ -881,10 +881,11 @@ Faction *Game::CheckVictory()
 		int completed_entities = count_entities(&regions);
 		if (completed_entities < 6) {
 			int chance = 10 + (completed_entities * 12);
+			int anomalies = report_and_count_anomalies(&regions, &factions);
+			Awrite(AString("Endgame: entities: ") + completed_entities + ", anomalies: " + anomalies + ", chance: " + chance + "%");
 			if (getrandom(100) < chance) {
 				// Okay, let's see if we can spawn a new entity
 				// If we can, see if we already have those anomalies and report them to all factions if so.
-				int anomalies = report_and_count_anomalies(&regions, &factions);
 				if (anomalies + completed_entities >= 6) {
 					// We have all the anomalies that we can have still, so cannot spawn any more.
 					return nullptr;
@@ -932,6 +933,7 @@ Faction *Game::CheckVictory()
 					f->event("A strange anomaly has appeared in " + string(r->ShortPrint().const_str()) + ".",
 						"anomaly", r);
 				}
+				Awrite(AString("Spawned new anomaly at ") + r->ShortPrint() + ".");
 			}
 
 			// If we haven't completed all the entities, then noone can win yet.
