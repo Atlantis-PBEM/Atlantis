@@ -418,16 +418,27 @@ int report_and_count_anomalies(ARegionList& regions, const std::vector<std::uniq
 	return count;
 }
 
-int count_entities(ARegionList& regions) {
+int report_and_count_entities(ARegionList &regions, const std::vector<std::unique_ptr<Faction>>& factions) {
 	int count = 0;
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			if (o->type == O_EMPOWERED_ALTAR) {
 				count++;
+				for (const auto& f : factions) {
+					if (f->is_npc) continue;
+					f->event("The altar in " + string(r->ShortPrint().const_str()) + " is fully empowered.",
+						"anomaly", r);
+				}
 			}
 			for(const auto u: o->units) {
 				if (u->items.GetNum(I_IMPRISONED_ENTITY) > 0) {
 					count += u->items.GetNum(I_IMPRISONED_ENTITY);
+					for(const auto& f : factions) {
+						if (f->is_npc) continue;
+						f->event("An imprisoned entity has been spotted in " + string(r->ShortPrint().const_str()) +
+							" in the possession of " + string(u->GetName(0).const_str()) + ".",
+							"anomaly", r);
+					}
 				}
 			}
 		}
@@ -834,7 +845,7 @@ Faction *Game::CheckVictory()
 		// If this number is < 6, then we have a chance of spawning a new anomaly.  This chance starts at 10%
 		// for the first anomaly after turn 50 and then increases by 12% for each entity or active altar already
 		// existing.
-		int completed_entities = count_entities(regions);
+		int completed_entities = report_and_count_entities(regions, factions);
 		if (completed_entities < 6) {
 			int chance = 10 + (completed_entities * 12);
 			if (getrandom(100) < chance) {
