@@ -194,7 +194,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 				reward_count = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
 
 				printf("\nQuest reward: %s x %d.\n", ItemDefs[i].name.c_str(), reward_count);
-				
+
 				// Setup reward
 				item = new Item;
 				item->type = i;
@@ -317,7 +317,7 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		forlist(regions) {
 			r = (ARegion *) elem;
 			// No need to check if quests do not require exploration
-			if (r->Population() > 0 && (r->visited || QUEST_EXPLORATION_PERCENT == 0)) { 
+			if (r->Population() > 0 && (r->visited || QUEST_EXPLORATION_PERCENT == 0)) {
 				stlstr = r->name->Str();
 				// This looks like a null operation, but
 				// actually forces the map<> element creation
@@ -446,7 +446,7 @@ int report_and_count_anomalies(ARegionList *regions, AList *factions) {
 	return count;
 }
 
-int count_entities(ARegionList *regions) {
+int report_and_count_entities(ARegionList *regions, AList *factions) {
 	int count = 0;
 	forlist(regions) {
 		ARegion *r = (ARegion *)elem;
@@ -454,11 +454,24 @@ int count_entities(ARegionList *regions) {
 			Object *o = (Object *)elem;
 			if (o->type == O_EMPOWERED_ALTAR) {
 				count++;
+				forlist(factions) {
+					Faction *f = (Faction *)elem;
+					if (f->is_npc) continue;
+					f->event("The altar in " + string(r->ShortPrint().const_str()) + " is fully empowered.",
+						"anomaly", r);
+				}
 			}
 			forlist(&o->units) {
 				Unit *u = (Unit *)elem;
 				if (u->items.GetNum(I_IMPRISONED_ENTITY) > 0) {
 					count += u->items.GetNum(I_IMPRISONED_ENTITY);
+					forlist(factions) {
+						Faction *f = (Faction *)elem;
+						if (f->is_npc) continue;
+						f->event("An imprisoned entity has been spotted in " + string(r->ShortPrint().const_str()) +
+							" in the possession of " + string(u->GetName(0).const_str()) + ".",
+							"anomaly", r);
+					}
 				}
 			}
 		}
@@ -878,7 +891,7 @@ Faction *Game::CheckVictory()
 		// If this number is < 6, then we have a chance of spawning a new anomaly.  This chance starts at 10%
 		// for the first anomaly after turn 50 and then increases by 12% for each entity or active altar already
 		// existing.
-		int completed_entities = count_entities(&regions);
+		int completed_entities = report_and_count_entities(&regions, &factions);
 		if (completed_entities < 6) {
 			int chance = 10 + (completed_entities * 12);
 			int anomalies = report_and_count_anomalies(&regions, &factions);
@@ -1201,11 +1214,11 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_ILLYRTHID);
 	EnableItem(O_ILAIR);
 	EnableItem(I_DEVIL);
-	
+
 	EnableItem(I_STORMGIANT);
 	EnableItem(I_CLOUDGIANT);
 	EnableItem(O_GIANTCASTLE);
-	
+
 	EnableItem(I_WARRIORS);
 
 	EnableItem(I_DARKMAGE);
@@ -1243,7 +1256,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("HUMN", 3, "MINI");
 	ModifyRaceSkills("HUMN", 4, "FARM");
 	ModifyRaceSkills("HUMN", 5, "COOK");
-	
+
 	EnableItem(I_HILLDWARF);
 	ModifyItemBasePrice(I_HILLDWARF, 40);
 	ModifyRaceSkillLevels("HDWA", 5, 2);
@@ -1261,7 +1274,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyRaceSkills("IDWA", 2, "MINI");
 	ModifyRaceSkills("IDWA", 3, "FISH");
 	ModifyRaceSkills("IDWA", 4, "ARMO");
-	
+
 	EnableItem(I_HIGHELF);
 	ModifyItemBasePrice(I_HIGHELF, 40);
 	ModifyRaceSkillLevels("HELF", 5, 2);
@@ -1414,7 +1427,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_JUNGLE, 1, I_WOODELF);
 	ModifyTerrainCoastRace(R_JUNGLE, 2, I_LIZARDMAN);
 	ModifyTerrainEconomy(R_JUNGLE, 500, 11, 20, 2);
-	
+
 	ClearTerrainRaces(R_DESERT);
 	ModifyTerrainRace(R_DESERT, 0, I_GNOLL);
 	ModifyTerrainRace(R_DESERT, 1, I_GOBLINMAN);
