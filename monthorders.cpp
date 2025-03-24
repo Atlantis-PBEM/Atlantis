@@ -324,7 +324,10 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 					stop = 1;
 				}
 			}
+		}
 
+		// We could have been stopped by not having the key above.
+		if (!stop) {
 			fleet->movepoints -= cost * Globals->MAX_SPEED;
 			if (x->dir != MOVE_PAUSE) {
 				fleet->MoveObject(newreg);
