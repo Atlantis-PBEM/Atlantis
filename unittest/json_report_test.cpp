@@ -142,7 +142,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     // Generate just this single regions json object.
     Faction *faction = helper.create_faction("Test Faction");
     ARegion *region = helper.get_region(0, 0, 0);
-    ARegionList *regions = helper.get_regions();
+    ARegionList& regions = helper.get_regions();
 
     json json_report;
     region->build_json_report(json_report, faction, helper.get_month(), regions);
@@ -189,7 +189,7 @@ ut::suite<"JSON Report"> json_report_suite = []
 
     auto for_sale = json_report["markets"]["for_sale"].size();
     expect(for_sale == 4_ul);
-  
+
     auto expected_sale = json{
       {"tag", "PEAR"}, {"name", "pearls"}, {"plural", "pearls"}, {"amount", 9 }, { "price", 148 }
     };
@@ -236,7 +236,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     Faction *faction = helper.create_faction("Test Faction");
     Faction *faction2 = helper.create_faction("Test Faction 2");
     ARegion *region = helper.get_region(0, 0, 0);
-    ARegionList *regions = helper.get_regions();
+    ARegionList& regions = helper.get_regions();
     Unit *leader = helper.get_first_unit(faction);
     // Create a fleet in the region for the faction.  **THIS MOVES THE UNIT INTO THE FLEET**
     helper.create_fleet(region, leader, I_GALLEON, 3); // 3 galleons

@@ -30,8 +30,6 @@
 #include "gamedata.h"
 #include "unit.h"
 #include "indenter.hpp"
-#include <vector>
-#include <memory>
 
 int LookupObject(AString *token)
 {
@@ -100,6 +98,8 @@ Object::~Object()
 	if (name) delete name;
 	if (describe) delete describe;
 	region = (ARegion *)NULL;
+	std::for_each(units.begin(), units.end(), [](Unit *unit) { delete unit; });
+	units.clear();
 }
 
 void Object::Writeout(std::ostream& f)
@@ -117,11 +117,11 @@ void Object::Writeout(std::ostream& f)
 	f << (Globals->PREVENT_SAIL_THROUGH && !Globals->ALLOW_TRIVIAL_PORTAGE ? prevdir : -1) << '\n';
 	f << runes << '\n';
 	f << units.size() << '\n';
-	for(auto u: units) u->Writeout(f);
+	for(const auto u : units) u->Writeout(f);
 	WriteoutFleet(f);
 }
 
-void Object::Readin(std::istream& f, const std::vector<std::unique_ptr<Faction>>& factions)
+void Object::Readin(std::istream& f, std::list<Faction *>& facs)
 {
 	AString temp;
 
@@ -155,7 +155,7 @@ void Object::Readin(std::istream& f, const std::vector<std::unique_ptr<Faction>>
 	f >> i;
 	for (int j = 0; j < i; j++) {
 		Unit *temp = new Unit;
-		temp->Readin(f, factions);
+		temp->Readin(f, facs);
 		if (!temp->faction)
 			continue;
 		temp->MoveUnit(this);
@@ -214,37 +214,32 @@ int Object::CanModify()
 
 Unit *Object::GetUnit(int num)
 {
-	for(auto u: units)
-		if (u->num == num)
-			return u;
-	return 0;
+	for(const auto u : units)
+		if (u->num == num) return u;
+	return nullptr;
 }
 
 Unit *Object::GetUnitAlias(int alias, int faction)
 {
 	// First search for units with the 'formfaction'
-	for(auto u: units) {
-		if (u->alias == alias && u->formfaction->num == faction)
-			return u;
-	}
-	// Now search against their current faction
-	for(auto u: units) {
-		if (u->alias == alias && u->faction->num == faction)
-			return u;
-	}
-	return 0;
+	for(const auto u : units)
+		if (u->alias == alias && u->formfaction->num == faction) return u;
+
+	for(const auto u : units)
+		if (u->alias == alias && u->faction->num == faction) return u;
+	return nullptr;
 }
 
-Unit *Object::get_unit_id(std::shared_ptr<UnitId> unitid, int faction)
+Unit *Object::GetUnitId(UnitId *id, int faction)
 {
-	if (unitid == 0) return 0;
-	if (unitid->unitnum) {
-		return GetUnit(unitid->unitnum);
+	if (id == 0) return 0;
+	if (id->unitnum) {
+		return GetUnit(id->unitnum);
 	} else {
-		if (unitid->faction) {
-			return GetUnitAlias(unitid->alias, unitid->faction);
+		if (id->faction) {
+			return GetUnitAlias(id->alias, id->faction);
 		} else {
-			return GetUnitAlias(unitid->alias, faction);
+			return GetUnitAlias(id->alias, faction);
 		}
 	}
 }
@@ -274,9 +269,8 @@ Unit *Object::ForbiddenBy(ARegion *reg, Unit *u)
 
 Unit *Object::GetOwner()
 {
-	Unit *owner = nullptr;
-	if (units.size() > 0) owner = units[0];
-	return(owner);
+	if(units.empty()) return nullptr;
+	return units.front();
 }
 
 void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
@@ -317,13 +311,13 @@ void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
 					if (SailThroughCheck(dir) == 1) container["sail_directions"][DirectionAbrs[dir]] = true;
 				}
 			}
-			for(auto ship: ships) {
-				if (ship.type != -1 && ship.num > 0) {
-					ItemType item_def = ItemDefs[ship.type];
+			for(auto ship : ships) {
+				if (ship->type != -1 && ship->num > 0) {
+					ItemType item_def = ItemDefs[ship->type];
 					if (item_def.flags & ItemType::DISABLED) continue;
 					if (!(item_def.type & IT_SHIP)) continue;
 					container["ships"].push_back(
-						{ {"name", item_def.name}, {"number", ship.num}, { "plural", item_def.names } }
+						{ {"name", item_def.name}, {"number", ship->num}, { "plural", item_def.names } }
 					);
 				}
 			}
@@ -358,7 +352,7 @@ void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
 	json& unit_container = (type == O_DUMMY) ? j["units"] : container["units"];
 
 	// Add units to container
-	for(auto u: units) {
+	for(const auto u : units) {
 		json unit = json::object();
 		int attitude = fac->get_attitude(u->faction->num);
 		if (u->faction == fac) {
@@ -391,7 +385,7 @@ void Object::SetPrevDir(int newdir)
 
 void Object::MoveObject(ARegion *toreg)
 {
-	std::erase(region->objects, this);
+	region->objects.remove(this);
 	region = toreg;
 	toreg->objects.push_back(this);
 }
@@ -417,7 +411,7 @@ void Object::WriteoutFleet(std::ostream& f)
 {
 	if (!IsFleet()) return;
 	f << ships.size() << "\n";
-	for(auto ship: ships) ship.Writeout(f);
+	for(auto sh : ships) sh->Writeout(f);
 }
 
 void Object::ReadinFleet(std::istream &f)
@@ -439,9 +433,9 @@ void Object::ReadinFleet(std::istream &f)
 int Object::GetNumShips(int type)
 {
 	if (CheckShip(type) != 0) {
-		for(auto ship: ships) {
-			if (ship.type == type) {
-				return ship.num;
+		for(auto ship : ships) {
+			if (ship->type == type) {
+				return ship->num;
 			}
 		}
 	}
@@ -454,10 +448,22 @@ int Object::GetNumShips(int type)
 void Object::SetNumShips(int type, int num)
 {
 	if (CheckShip(type) != 0) {
-		ships.SetNum(type, num);
-		FleetCapacity();
+		if (num > 0) {
+			for(auto ship : ships) {
+				if (ship->type == type) {
+					ship->num = num;
+					FleetCapacity();
+					return;
+				}
+			}
+			ships.SetNum(type, num);
+			FleetCapacity();
+		} else {
+			ships.SetNum(type, 0);
+			FleetCapacity();
+			return;
+		}
 	}
-	return;
 }
 
 /* Adds one ship of the given type.
@@ -545,9 +551,7 @@ int Object::FleetLoad()
 	int load = -1;
 	int wgt = 0;
 	if (IsFleet()) {
-		for(auto unit: units) {
-			wgt += unit->Weight();
-		}
+		for(const auto unit : units) wgt += unit->Weight();
 		load = wgt;
 	}
 	return load;
@@ -650,9 +654,8 @@ int Object::FleetSailingSkill(int report)
 	int skill = -1;
 	int slvl = 0;
 	if (IsFleet()) {
-		for(auto unit: units) {
-			if ((report != 0) ||
-				(unit->monthorders && unit->monthorders->type == O_SAIL)) {
+		for(const auto unit : units) {
+			if ((report != 0) || (unit->monthorders && unit->monthorders->type == O_SAIL)) {
 				slvl += unit->GetSkill(S_SAILING) * unit->GetMen();
 			}
 		}
@@ -715,7 +718,7 @@ int Object::GetFleetSpeed(int report)
 	if (tskill < (weight / 50)) return 0;
 
 	// count wind mages
-	for(auto unit: units) {
+	for(const auto unit : units) {
 		int wb = unit->GetAttribute("wind");
 		if (wb > 0) {
 			windbonus += wb * 12 * Globals->FLEET_WIND_BOOST;

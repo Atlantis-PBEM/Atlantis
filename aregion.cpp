@@ -37,9 +37,7 @@
 #include <ctime>
 #include <cassert>
 #include <unordered_set>
-#include <set>
 #include <queue>
-#include <memory>
 
 using namespace std;
 
@@ -47,12 +45,12 @@ using namespace std;
     #define M_PI 3.14159265358979323846
 #endif
 
-Location *GetUnit(const std::vector<Location *>& list, int unit_id)
+Location *GetUnit(std::list<Location *>& locs, int unitid)
 {
-	for(const auto l : list) {
-		if (l->unit->num == unit_id) return l;
+	for(const auto l : locs) {
+		if (l->unit->num == unitid) return l;
 	}
-	return 0;
+	return nullptr;
 }
 
 Farsight::Farsight()
@@ -65,9 +63,9 @@ Farsight::Farsight()
 		exits_used[i] = 0;
 }
 
-Farsight *GetFarsight(std::vector<Farsight *>& l, Faction *fac)
+Farsight *GetFarsight(std::list<Farsight *>& farsees, Faction *fac)
 {
-	for(auto f: l) {
+	for(const auto f : farsees) {
 		if (f->faction == fac) return f;
 	}
 	return nullptr;
@@ -141,6 +139,8 @@ ARegion::~ARegion()
 {
 	if (name) delete name;
 	if (town) delete town;
+	std::for_each(objects.begin(), objects.end(), [](Object *o) { delete o; });
+	objects.clear();
 }
 
 void ARegion::ZeroNeighbors()
@@ -298,13 +298,13 @@ void ARegion::ManualSetup(const RegionSetup& settings) {
 	}
 }
 
-int ARegion::TraceConnectedRoad(int dir, int sum, std::vector<ARegion *>& con, int range, int dev)
+int ARegion::TraceConnectedRoad(int dir, int sum, std::list<ARegion *>& con, int range, int dev)
 {
-	int isnew = 1;
+	bool isnew = true;
 	for(const auto reg : con) {
-		if (reg == this) isnew = 0;
+		if (reg == this) isnew = false;
 	}
-	if (isnew == 0) return sum;
+	if (!isnew) return sum;
 	con.push_back(this);
 	// Add bonus for connecting town
 	if (town) sum++;
@@ -327,7 +327,7 @@ int ARegion::TraceConnectedRoad(int dir, int sum, std::vector<ARegion *>& con, i
 int ARegion::RoadDevelopmentBonus(int range, int dev)
 {
 	int bonus = 0;
-	std::vector<ARegion *> con;
+	std::list<ARegion *> con;
 	con.push_back(this);
 	for (int d=0; d<NDIRS; d++) {
 		if (!HasExitRoad(d)) continue;
@@ -339,40 +339,38 @@ int ARegion::RoadDevelopmentBonus(int range, int dev)
 }
 
 // AS
-void ARegion::DoDecayCheck(ARegionList *pRegs)
+void ARegion::DoDecayCheck()
 {
-	for (const auto o: objects) {
+	for(auto o : objects) {
 		if (!(ObjectDefs[o->type].flags & ObjectType::NEVERDECAY)) {
-			DoDecayClicks(o, pRegs);
+			DoDecayClicks(o);
 		}
 	}
 }
 
 // AS
-void ARegion::DoDecayClicks(Object *o, ARegionList *pRegs)
+void ARegion::DoDecayClicks(Object *o)
 {
 	if (ObjectDefs[o->type].flags & ObjectType::NEVERDECAY) return;
 
 	int clicks = getrandom(GetMaxClicks());
 	clicks += PillageCheck();
 
-	if (clicks > ObjectDefs[o->type].maxMonthlyDecay)
-		clicks = ObjectDefs[o->type].maxMonthlyDecay;
+	if (clicks > ObjectDefs[o->type].maxMonthlyDecay) clicks = ObjectDefs[o->type].maxMonthlyDecay;
 
 	o->incomplete += clicks;
 
 	if (o->incomplete > 0) {
 		// trigger decay event
-		RunDecayEvent(o, pRegs);
+		RunDecayEvent(o);
 	}
 }
 
 // AS
-void ARegion::RunDecayEvent(Object *o, ARegionList *pRegs)
+void ARegion::RunDecayEvent(Object *o)
 {
-	std::set<Faction*> pFactions;
-	pFactions = PresentFactions();
-	for (auto& f: pFactions) {
+	std::set<Faction *>factions = PresentFactions();
+	for(const auto f : factions) {
 		string tmp = string(GetDecayFlavor().const_str()) + " " + ObjectDefs[o->type].name +
 			" in " + ShortPrint().const_str() + ".";
 		f->event(tmp, "decay");
@@ -580,7 +578,7 @@ int ARegion::PillageCheck()
 // AS
 int ARegion::HasRoad()
 {
-	for(const auto o: objects) {
+	for(const auto o : objects) {
 		if (o->IsRoad() && o->incomplete < 1) return 1;
 	}
 	return 0;
@@ -756,12 +754,12 @@ void ARegion::SetGateStatus(int month)
 
 void ARegion::Kill(Unit *u)
 {
-	Unit *first = 0;
+	Unit *first = nullptr;
 	for(const auto obj : objects) {
 		if (obj) {
-			for (auto u1: obj->units) {
-				if (u1->faction->num == u->faction->num && u1 != u) {
-					first = u1;
+			for(const auto unit : obj->units) {
+				if (unit->faction->num == u->faction->num && unit != u) {
+					first = unit;
 					break;
 				}
 			}
@@ -770,16 +768,15 @@ void ARegion::Kill(Unit *u)
 	}
 
 	if (first) {
-		// give u's stuff to first.  Since this can modify the list via SetNum, copy thelist
-		ItemList itemCopy = u->items;
-		for(auto i: itemCopy) {
-			if (ItemDefs[i.type].type & IT_SHIP && first->items.GetNum(i.type) > 0) {
-				if (first->items.GetNum(i.type) > i.num)
-					first->items.SetNum(i.type, i.num);
+		// give u's stuff to first
+		for(auto i : u->items) {
+			if (ItemDefs[i->type].type & IT_SHIP && first->items.GetNum(i->type) > 0) {
+				if (first->items.GetNum(i->type) > i->num)
+					first->items.SetNum(i->type, i->num);
 				continue;
 			}
-			if (!IsSoldier(i.type)) {
-				first->items.SetNum(i.type, first->items.GetNum(i.type) + i.num);
+			if (!IsSoldier(i->type)) {
+				first->items.SetNum(i->type, first->items.GetNum(i->type) + i->num);
 				// If we're in ocean and not in a structure, make sure that
 				// the first unit can actually hold the stuff and not drown
 				// If the item would cause them to drown then they won't
@@ -787,13 +784,15 @@ void ARegion::Kill(Unit *u)
 				if (TerrainDefs[type].similar_type == R_OCEAN) {
 					if (first->object->type == O_DUMMY) {
 						if (!first->CanReallySwim()) {
-							first->items.SetNum(i.type, first->items.GetNum(i.type) - i.num);
+							first->items.SetNum(i->type, first->items.GetNum(i->type) - i->num);
 						}
 					}
 				}
 			}
-			u->items.SetNum(i.type, 0);
 		}
+		// clean up the item list
+		std::for_each(u->items.begin(), u->items.end(), [](Item *item) { delete item; });
+		u->items.clear();
 	}
 
 	u->MoveUnit(0);
@@ -802,6 +801,7 @@ void ARegion::Kill(Unit *u)
 
 void ARegion::ClearHell()
 {
+	std::for_each(hell.begin(), hell.end(), [](Unit *unit) { delete unit; });
 	hell.clear();
 }
 
@@ -810,7 +810,7 @@ Object *ARegion::GetObject(int num)
 	for(const auto o : objects) {
 		if (o->num == num) return o;
 	}
-	return nullptr;
+	return 0;
 }
 
 Object *ARegion::GetDummy()
@@ -818,7 +818,7 @@ Object *ARegion::GetDummy()
 	for(const auto o : objects) {
 		if (o->type == O_DUMMY) return o;
 	}
-	return nullptr;
+	return 0;
 }
 
 /* Checks all fleets to see if they are empty.
@@ -827,27 +827,23 @@ Object *ARegion::GetDummy()
  */
 void ARegion::CheckFleets()
 {
-	for(auto it = objects.begin(); it != objects.end(); ) {
-		Object *o = *it;
+	for(const auto o : objects) {
 		if (o->IsFleet()) {
-			bool sinking = false;
-			bool alive = false; // I am not sure this check is needed, but left it for now.
-			if (o->FleetCapacity() < 1) sinking = true;
-			auto unitCopy(o->units);
-			for(auto unit: unitCopy) {
-				if (unit->IsAlive()) alive = true;
-				if (sinking) unit->MoveUnit(GetDummy());
+			int bail = 0;
+			if (o->FleetCapacity() < 1) bail = 1;
+			int alive = 0;
+			for(const auto unit : o->units) {
+				if (unit->IsAlive()) alive = 1;
+				if (bail > 0) unit->MoveUnit(GetDummy());
 			}
 			// don't remove fleets when no living units are
 			// aboard when they're not at sea.
-			if (TerrainDefs[type].similar_type != R_OCEAN) alive = true;
-			if (!alive || sinking) {
-				it = objects.erase(it);
+			if (TerrainDefs[type].similar_type != R_OCEAN) alive = 1;
+			if ((alive == 0) || (bail == 1)) {
+				std::erase(objects, o);
 				delete o;
-				continue;
 			}
 		}
-		++it;
 	}
 }
 
@@ -860,16 +856,15 @@ Unit *ARegion::GetUnit(int num)
 	return nullptr;
 }
 
-Location *ARegion::GetLocation(std::shared_ptr<UnitId> id, int faction)
+Location *ARegion::GetLocation(UnitId *id, int faction)
 {
-	Unit *retval = nullptr;
 	for(const auto o : objects) {
-		retval = o->get_unit_id(id, faction);
-		if (retval) {
+		Unit *unit = o->GetUnitId(id, faction);
+		if (unit) {
 			Location *l = new Location;
 			l->region = this;
 			l->obj = o;
-			l->unit = retval;
+			l->unit = unit;
 			return l;
 		}
 	}
@@ -885,31 +880,37 @@ Unit *ARegion::GetUnitAlias(int alias, int faction)
 	return nullptr;
 }
 
-Unit *ARegion::get_unit_id(UnitId id, int faction)
+Unit *ARegion::GetUnitId(UnitId *id, int faction)
 {
-	Unit *retval = nullptr;
 	for(const auto o : objects) {
-		retval = o->get_unit_id(std::make_shared<UnitId>(id), faction);
-		if (retval) return retval;
+		Unit *unit = o->GetUnitId(id, faction);
+		if (unit) return unit;
 	}
-	return retval;
+	return nullptr;
 }
 
-void ARegion::deduplicate_unit_list(std::list<UnitId>& list, int faction)
+void ARegion::deduplicate_unit_list(std::list<UnitId *>& list, int factionid)
 {
-	std::unordered_set<Unit *>seen;
-	for (auto id = list.begin(); id != list.end();) {
-		Unit *u = get_unit_id(*id, faction);
-		if (u && seen.find(u) != seen.end()) {
-			id = list.erase(id);
+	std::unordered_set<Unit *> seen;
+	std::unordered_set<UnitId> seen_ids;
+
+	for(auto it = list.begin(); it != list.end();) {
+		UnitId *id = *it;
+		Unit *unit = GetUnitId(id, factionid);
+		if (!unit) { ++it; continue; }
+		// now, if we have already seen this unit *or* this exact unit id, skip it.
+		if (seen.find(unit) == seen.end() && seen_ids.find(*id) == seen_ids.end()) {
+			seen.insert(unit);
+			seen_ids.insert(*id);
+			++it;
 		} else {
-			seen.insert(u);
-			++id;
+			it = list.erase(it);
+			delete id;
 		}
 	}
 }
 
-Location *ARegionList::GetUnitId(std::shared_ptr<UnitId>& id, int faction, ARegion *cur)
+Location *ARegionList::GetUnitId(UnitId *id, int faction, ARegion *cur)
 {
 	Location *retval = NULL;
 	// Check current region first
@@ -925,18 +926,18 @@ Location *ARegionList::GetUnitId(std::shared_ptr<UnitId>& id, int faction, ARegi
 bool ARegion::Present(Faction *f)
 {
 	for(const auto obj : objects) {
-		for(auto unit: obj->units)
-			if (unit->faction == f) return true;
+		for(const auto u : obj->units)
+			if (u->faction == f) return true;
 	}
 	return false;
 }
 
-std::set<Faction *> ARegion::PresentFactions()
+std::set<Faction *>ARegion::PresentFactions()
 {
 	std::set<Faction *> facs;
 	for(const auto obj : objects) {
-		for(auto unit: obj->units) {
-			facs.insert(unit->faction);
+		for(const auto u : obj->units) {
+			facs.insert(u->faction);
 		}
 	}
 	return facs;
@@ -982,7 +983,7 @@ void ARegion::Writeout(ostream& f)
 	for (const auto& market : markets) market->write_out(f);
 
 	f << objects.size() << '\n';
-	for (const auto o : objects) o->Writeout(f);
+	for(const auto o : objects) o->Writeout(f);
 }
 
 int LookupRegionType(AString *token)
@@ -993,7 +994,7 @@ int LookupRegionType(AString *token)
 	return -1;
 }
 
-void ARegion::Readin(istream &f, const std::vector<std::unique_ptr<Faction>>& factions)
+void ARegion::Readin(istream &f, std::list<Faction *>& facs)
 {
 	AString temp;
 
@@ -1062,7 +1063,7 @@ void ARegion::Readin(istream &f, const std::vector<std::unique_ptr<Faction>>& fa
 	buildingseq = 1;
 	for (int j = 0; j < n; j++) {
 		Object *temp = new Object(this);
-		temp->Readin(f, factions);
+		temp->Readin(f, facs);
 		if (temp->num >= buildingseq)
 			buildingseq = temp->num + 1;
 		objects.push_back(temp);
@@ -1100,12 +1101,11 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	}
 
 	for(const auto o : objects) {
-		for(auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->faction == fac) {
 				skname = ItemDefs[item].pSkill;
 				sk = LookupSkill(&skname);
-				if (u->GetSkill(sk) >= ItemDefs[item].pLevel)
-					return 1;
+				if (u->GetSkill(sk) >= ItemDefs[item].pLevel) return 1;
 			}
 		}
 	}
@@ -1115,7 +1115,7 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 int ARegion::HasItem(Faction *fac, int item)
 {
 	for(const auto o : objects) {
-		for(const auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->faction == fac) {
 				if (u->items.GetNum(item)) return 1;
 			}
@@ -1158,7 +1158,7 @@ json ARegion::basic_region_data() {
 	return j;
 }
 
-void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *regions) {
+void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList& regions) {
 	Farsight *farsight = GetFarsight(farsees, fac);
 	Farsight *passer = GetFarsight(passers, fac);
 	bool present = (Present(fac) == 1) || fac->is_npc;
@@ -1181,7 +1181,9 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 
 	if (Globals->WEATHER_EXISTS) {
 		string weather_name = clearskies ? "unnaturally clear" : SeasonNames[weather];
-		j["weather"] = { { "current", weather_name }, { "next", SeasonNames[regions->GetWeather(this, (month + 1) % 12)] } };
+		j["weather"] = {
+			{ "current", weather_name }, { "next", SeasonNames[regions.GetWeather(this, (month + 1) % 12)] }
+		};
 	}
 
 	if (type == R_NEXUS) {
@@ -1276,7 +1278,7 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 		bool can_see_gate = false;
 		if (fac->is_npc) can_see_gate = true;
 		if (Globals->IMPROVED_FARSIGHT && farsight) {
-			for(const auto watcher: farsees) {
+			for(const auto watcher : farsees) {
 				if (watcher && watcher->faction == fac && watcher->unit) {
 					if (watcher->unit->GetSkill(S_GATE_LORE)) can_see_gate = true;
 				}
@@ -1290,7 +1292,7 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 			}
 		}
 		for(const auto o : objects) {
-			for(auto u: o->units) {
+			for(const auto u : o->units) {
 				if ((u->faction == fac) && u->GetSkill(S_GATE_LORE)) can_see_gate = true;
 			}
 		}
@@ -1301,7 +1303,7 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 			if (gateopen) {
 				j["gate"]["number"] = gate;
 				if (!Globals->DISPERSE_GATE_NUMBERS) {
-					j["gate"]["total"] = regions->numberofgates;
+					j["gate"]["total"] = regions.numberofgates;
 				}
 			}
 		}
@@ -1321,7 +1323,7 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList *r
 	}
 
 	for(const auto o : objects) {
-		for(auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->faction == fac && u->GetSkill(S_MIND_READING) > 1) {
 				detfac = 1;
 			}
@@ -1378,7 +1380,7 @@ int ARegion::GetTrueSight(Faction *f, int usepassers)
 	}
 
 	for(const auto obj : objects) {
-		for(auto u: obj->units) {
+		for(const auto u : obj->units) {
 			if (u->faction == f) {
 				int temp = u->GetSkill(S_TRUE_SEEING);
 				if (temp>truesight) truesight = temp;
@@ -1413,7 +1415,7 @@ int ARegion::GetObservation(Faction *f, int usepassers)
 	}
 
 	for(const auto obj : objects) {
-		for(const auto u: obj->units) {
+		for(const auto u : obj->units) {
 			if (u->faction == f) {
 				int temp = u->GetAttribute("observation");
 				if (temp>obs) obs = temp;
@@ -1487,7 +1489,7 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, string *road)
 Unit *ARegion::Forbidden(Unit *u)
 {
 	for(const auto obj : objects) {
-		for(const auto u2: obj->units) {
+		for(const auto u2 : obj->units) {
 			if (u2->Forbids(this, u)) return u2;
 		}
 	}
@@ -1496,8 +1498,8 @@ Unit *ARegion::Forbidden(Unit *u)
 
 Unit *ARegion::ForbiddenByAlly(Unit *u)
 {
-	for(const auto obj: objects) {
-		for(const auto u2: obj->units) {
+	for(const auto obj : objects) {
+		for(const auto u2 : obj->units) {
 			if (u->faction->get_attitude(u2->faction->num) == A_ALLY && u2->Forbids(this, u)) return u2;
 		}
 	}
@@ -1507,9 +1509,8 @@ Unit *ARegion::ForbiddenByAlly(Unit *u)
 int ARegion::HasCityGuard()
 {
 	for(const auto obj : objects) {
-		for(const auto u: obj->units) {
-			if (u->type == U_GUARD && u->GetSoldiers() &&
-				u->guard == GUARD_GUARD) {
+		for(const auto u : obj->units) {
+			if (u->type == U_GUARD && u->GetSoldiers() && u->guard == GUARD_GUARD) {
 				return 1;
 			}
 		}
@@ -1517,9 +1518,8 @@ int ARegion::HasCityGuard()
 	return 0;
 }
 
-int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
+int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList& regs)
 {
-	std::set<Faction *> flist;
 	unsigned int i;
 
 	SkillType *pS = FindSkill(spell);
@@ -1528,23 +1528,22 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList *pRegs)
 		// Okay, we aren't notifyable, check our prerequisites
 		for (i = 0; i < sizeof(pS->depends)/sizeof(pS->depends[0]); i++) {
 			if (pS->depends[i].skill == NULL) break;
-			if (NotifySpell(caster, pS->depends[i].skill, pRegs)) return 1;
+			if (NotifySpell(caster, pS->depends[i].skill, regs)) return 1;
 		}
 		return 0;
 	}
 
 	AString skname = spell;
 	int sp = LookupSkill(&skname);
+	std::set<Faction *> facs;
 	for(const auto o : objects) {
-		for(const auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->faction == caster->faction) continue;
-			if (u->GetSkill(sp)) {
-				flist.insert(u->faction);
-			}
+			if (u->GetSkill(sp)) facs.insert(u->faction);
 		}
 	}
 
-	for(const auto f: flist) {
+	for(const auto f : facs) {
 		string tmp = string(caster->name->const_str()) + " uses " + SkillStrs(sp).const_str() +
 				" in " + Print().const_str() + ".";
 		f->event(tmp, "cast");
@@ -1558,12 +1557,12 @@ void ARegion::NotifyCity(Unit *caster, AString& oldname, AString& newname)
 {
 	std::set<Faction *> flist;
 	for(const auto o : objects) {
-		for(auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->faction == caster->faction) continue;
 			flist.insert(u->faction);
 		}
 	}
-	for(const auto f: flist) {
+	for(const auto f : flist) {
 		string tmp = string(caster->name->const_str()) + " renames " + oldname.const_str() +
 			" to " + newname.const_str() + ".";
 		f->event(tmp, "rename");
@@ -1573,10 +1572,9 @@ void ARegion::NotifyCity(Unit *caster, AString& oldname, AString& newname)
 int ARegion::CanTax(Unit *u)
 {
 	for(const auto obj : objects) {
-		for(const auto u2: obj->units) {
+		for(const auto u2 : obj->units) {
 			if (u2->guard == GUARD_GUARD && u2->IsAlive())
-				if (u2->GetAttitude(this, u) <= A_NEUTRAL)
-					return 0;
+				if(u2->GetAttitude(this, u) <= A_NEUTRAL) return 0;
 		}
 	}
 	return 1;
@@ -1585,10 +1583,9 @@ int ARegion::CanTax(Unit *u)
 int ARegion::CanGuard(Unit *u)
 {
 	for(const auto obj : objects) {
-		for(const auto u2: obj->units) {
+		for(const auto u2 : obj->units) {
 			if (u2->guard == GUARD_GUARD && u2->IsAlive())
-				if (u2->GetAttitude(this, u) < A_ALLY)
-					return 0;
+				if (u2->GetAttitude(this, u) < A_ALLY) return 0;
 		}
 	}
 	return 1;
@@ -1597,9 +1594,8 @@ int ARegion::CanGuard(Unit *u)
 int ARegion::CanPillage(Unit *u)
 {
 	for(const auto obj : objects) {
-		for(const auto u2: obj->units) {
-			if (u2->guard == GUARD_GUARD && u2->IsAlive() && u2->faction != u->faction)
-				return 0;
+		for(const auto u2 : obj->units) {
+			if (u2->guard == GUARD_GUARD && u2->IsAlive() && u2->faction != u->faction) return 0;
 		}
 	}
 	return 1;
@@ -1607,7 +1603,7 @@ int ARegion::CanPillage(Unit *u)
 
 int ARegion::ForbiddenShip(Object *ship)
 {
-	for(const auto u: ship->units) {
+	for(const auto u : ship->units) {
 		if (Forbidden(u)) return 1;
 	}
 	return 0;
@@ -1616,9 +1612,7 @@ int ARegion::ForbiddenShip(Object *ship)
 void ARegion::DefaultOrders()
 {
 	for(const auto obj : objects) {
-		for(const auto u: obj->units) {
-			u->DefaultOrders(obj);
-		}
+		for(const auto u : obj->units) u->DefaultOrders(obj);
 	}
 }
 
@@ -1636,7 +1630,7 @@ int ARegion::HasShaft()
 int ARegion::IsGuarded()
 {
 	for(const auto o : objects) {
-		for(auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->guard == GUARD_GUARD) return 1;
 		}
 	}
@@ -1647,10 +1641,8 @@ int ARegion::CountWMons()
 {
 	int count = 0;
 	for(const auto o : objects) {
-		for(auto u: o->units) {
-			if (u->type == U_WMON) {
-				count ++;
-			}
+		for(const auto u : o->units) {
+			if (u->type == U_WMON) count ++;
 		}
 	}
 	return count;
@@ -1659,7 +1651,7 @@ int ARegion::CountWMons()
 /* New Fleet objects are stored in the newfleets
  * map for resolving aliases in the Enter NEW phase.
  */
-void ARegion::AddFleet(Object * fleet)
+void ARegion::AddFleet(Object *fleet)
 {
 	objects.push_back(fleet);
 	//Awrite(AString("Setting up fleet alias #") + fleetalias + ": " + fleet->num);
@@ -1692,6 +1684,8 @@ ARegionList::~ARegionList()
 
 		delete pRegionArrays;
 	}
+	std::for_each(regions.begin(), regions.end(), [](ARegion *r) { delete r; });
+	regions.clear();
 }
 
 void ARegionList::WriteRegions(ostream& f)
@@ -1706,17 +1700,17 @@ void ARegionList::WriteRegions(ostream& f)
 	}
 
 	f << numberofgates << "\n";
-	for(const auto reg : regions) reg->Writeout(f);
+	for(const auto r : regions) r->Writeout(f);
 
 	f << "Neighbors\n";
-	for(const auto reg: regions) {
+	for(const auto reg : regions) {
 		for (int i = 0; i < NDIRS; i++) {
-			f << (reg->neighbors[i] ? reg->neighbors[i]->num : -1) << '\n';
+			f  << (reg->neighbors[i] ? reg->neighbors[i]->num : -1) << '\n';
 		}
 	}
 }
 
-int ARegionList::ReadRegions(istream& f, const std::vector<std::unique_ptr<Faction>>& factions)
+int ARegionList::ReadRegions(istream &f, std::list<Faction *>& factions)
 {
 	int num;
 	f >> num;
@@ -1752,18 +1746,16 @@ int ARegionList::ReadRegions(istream& f, const std::vector<std::unique_ptr<Facti
 	}
 
 	Awrite("Setting up the neighbors...");
-	{
-		AString temp;
-		f >> ws >> temp; // eat the "Neighbors" line
-		for(const auto reg : regions) {
-			for (i = 0; i < NDIRS; i++) {
-				int j;
-				f >> j;
-				if (j != -1) {
-					reg->neighbors[i] = regions.at(j);
-				} else {
-					reg->neighbors[i] = nullptr;
-				}
+	AString temp;
+	f >> ws >> temp;
+	for(const auto reg : regions) {
+		for (i = 0; i < NDIRS; i++) {
+			int j;
+			f >> j;
+			if (j != -1) {
+				reg->neighbors[i] = regions.at(j);
+			} else {
+				reg->neighbors[i] = nullptr;
 			}
 		}
 	}
@@ -1792,7 +1784,7 @@ Location *ARegionList::FindUnit(int i)
 {
 	for(const auto reg : regions) {
 		for(const auto obj : reg->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				if (u->num == i) {
 					Location *retval = new Location;
 					retval->unit = u;
@@ -2070,39 +2062,36 @@ void ARegionList::TownStatistics()
 ARegion *ARegionList::FindGate(int x)
 {
 	if (x == -1) {
-		std::vector<ARegion *> allgates;
+		std::vector<ARegion *> gates;
 		int count = 0;
 
 		for(const auto r : regions) {
-			if (r->gate) allgates.push_back(r);
+			if (r->gate) gates.push_back(r);
 		}
+		if(gates.empty()) return nullptr;
 
-		if (allgates.empty()) {
-			return 0;
-		}
-
-		count = getrandom(allgates.size());
-		return allgates[count];
+		count = getrandom(gates.size());
+		return gates[count];
 	}
-
 	for(const auto r : regions) {
 		if (r->gate == x) return r;
 	}
-	return 0;
+	return nullptr;
 }
 
 ARegion *ARegionList::FindConnectedRegions(ARegion *r, ARegion *tail, int shaft)
 {
-        int i;
-        ARegion *inner;
+	int i;
+	ARegion *inner;
 
-        for (i = 0; i < NDIRS; i++) {
-                if (r->neighbors[i] && r->neighbors[i]->distance == -1) {
-                        tail->next = r->neighbors[i];
-                        tail = tail->next;
-                        tail->distance = r->distance + 1;
-                }
-        }
+	for (i = 0; i < NDIRS; i++) {
+			if (r->neighbors[i] && r->neighbors[i]->distance == -1) {
+					tail->next = r->neighbors[i];
+					tail = tail->next;
+					tail->distance = r->distance + 1;
+			}
+	}
+
 	if (shaft) {
 		for(const auto o : r->objects) {
 			if (o->inner != -1) {
@@ -2116,7 +2105,7 @@ ARegion *ARegionList::FindConnectedRegions(ARegion *r, ARegion *tail, int shaft)
 		}
 	}
 
-        return tail;
+    return tail;
 }
 
 ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
@@ -2126,7 +2115,7 @@ ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 
 	for(const auto r : regions) {
 		r->distance = -1;
-		r->next = 0;
+		r->next = nullptr;
 	}
 
 	start->distance = 0;
@@ -2197,10 +2186,10 @@ public:
 
 // This doesn't really need to be on the ARegionList but, it's okay for now.
 int ARegionList::get_connected_distance(ARegion *start, ARegion *target, int penalty, int maxdist) {
-	std::unordered_set<RegionVisited, RegionVisitHash> visited_regions;
+	unordered_set<RegionVisited, RegionVisitHash> visited_regions;
 	// We want to search the closest regions first so that as soon as we find one that is too far we know *all* the
 	// rest will be too far as well.
-	std::priority_queue<QEntry, vector<QEntry>, QEntryCompare> q;
+	priority_queue<QEntry, vector<QEntry>, QEntryCompare> q;
 
 	if (start == 0 || target == 0) {
 		// We were given some unusual (nonexistant) regions
@@ -2431,7 +2420,7 @@ std::vector<ARegion *> ARegionArray::get_starting_region_candidates(int terrain)
 				{I_HORSE, false},
 				{I_CAMEL, false}
 			};
-			for (auto &kv : result) {
+			for(const auto &kv : result) {
 				ARegion *tReg = graph.get(kv.first);
 				if (tReg->produces_item(I_WOOD)) requiredItems[I_WOOD] = true;
 				if (tReg->produces_item(I_IRON)) requiredItems[I_IRON] = true;
@@ -2791,7 +2780,7 @@ void makeRivers(
 
 					int smallestCost = INT32_MAX;
 					graphs::Location2D end;
-					for (auto loc : target->regions) {
+					for(const auto loc : target->regions) {
 						int cost = costSoFar[loc];
 						if (cost > 0 && cost < smallestCost) {
 							end = loc;
@@ -3711,32 +3700,28 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 				ROAD_BUILDINGS[D_SOUTHWEST] = O_ROADSW;
 
 				if (getrandom(3)) {
-					{
-						bool canBuild = true;
-						for(const auto o : current->objects) {
-							if (o->type == ROAD_BUILDINGS[dir]) {
-								canBuild = false;
-								break;
-							}
-						}
-
-						if (canBuild) {
-							addAncientStructure(current, name, ROAD_BUILDINGS[dir], (makeRoll(2, 6) - 6.0) / 6.0);
+					bool canBuild = true;
+					for(const auto o : current->objects) {
+						if (o->type == ROAD_BUILDINGS[dir]) {
+							canBuild = false;
+							break;
 						}
 					}
 
-					{
-						bool canBuild = true;
-						for(const auto o : endReg->objects) {
-							if (o->type == ROAD_BUILDINGS[opositeDir]) {
-								canBuild = false;
-								break;
-							}
-						}
+					if (canBuild) {
+						addAncientStructure(current, name, ROAD_BUILDINGS[dir], (makeRoll(2, 6) - 6.0) / 6.0);
+					}
 
-						if (canBuild) {
-							addAncientStructure(endReg, name, ROAD_BUILDINGS[opositeDir], (makeRoll(2, 6) - 6.0) / 6.0);
+					canBuild = true;
+					for(const auto o : endReg->objects) {
+						if (o->type == ROAD_BUILDINGS[opositeDir]) {
+							canBuild = false;
+							break;
 						}
+					}
+
+					if (canBuild) {
+						addAncientStructure(endReg, name, ROAD_BUILDINGS[opositeDir], (makeRoll(2, 6) - 6.0) / 6.0);
 					}
 				}
 
@@ -3959,7 +3944,7 @@ int ARegionList::FindDistanceToNearestObject(int object_type, ARegion *start)
 	int min_dist = 100000000;
 	int w = pRegionArrays[start->zloc]->x;
 	graphs::Location2D initial = { start->xloc, start->yloc };
-	for(auto target: targets) {
+	for(const auto target: targets) {
 		graphs::Location2D candidate = { target->xloc, target->yloc };
 		int dist = cylDistance(initial, candidate, w);
 		if (dist < min_dist) min_dist = dist;

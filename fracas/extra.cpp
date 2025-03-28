@@ -192,7 +192,7 @@ int Game::SetupFaction( Faction *pFac )
 		reg = pFac->pStartLoc;
 	} else if (!Globals->MULTI_HEX_NEXUS) {
 		if (Globals->NEXUS_EXISTS) {
-			reg = *(regions.begin());
+			reg = regions.front();
 		} else {
 			// Get the surface
 			ARegionArray *pArr = regions.GetRegionArray(1);
@@ -571,4 +571,4 @@ void Game::ModifyTablesPerRuleset(void)
 	return;
 }
 
-const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList *regs) { return nullptr; }
+const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList& regs) { return nullptr; }

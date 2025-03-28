@@ -56,7 +56,7 @@ int Game::SetupFaction( Faction *pFac ) {
 	temp2->SetFlag(FLAG_BEHIND, 1);
 
     // Put the unit in the first region (which will be the one city for the test game)
-	ARegion *reg = *(regions.begin());
+	ARegion *reg = regions.front();
 	temp2->MoveUnit(reg->GetDummy());
 
     return 1;
@@ -74,4 +74,4 @@ void Game::ModifyTablesPerRuleset(void) {
 	}
 }
 
-const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList *regs) { return nullptr; }
+const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList& regs) { return nullptr; }

@@ -42,10 +42,6 @@
 #include "quests.h"
 #include "unit.h"
 
-#include <vector>
-#include <memory>
-#include <set>
-
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
@@ -93,13 +89,10 @@ void Game::DefaultWorkOrder()
 	for(const auto r : regions) {
 		if (r->type == R_NEXUS) continue;
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
-				if (u->monthorders || u->faction->is_npc ||
-						(Globals->TAX_PILLAGE_MONTH_LONG &&
-						 u->taxing != TAX_NONE))
+			for(const auto u : o->units) {
+				if (u->monthorders || u->faction->is_npc || (Globals->TAX_PILLAGE_MONTH_LONG && u->taxing != TAX_NONE))
 					continue;
-				if (u->GetFlag(FLAG_AUTOTAX) &&
-						(Globals->TAX_PILLAGE_MONTH_LONG && u->Taxers(1))) {
+				if (u->GetFlag(FLAG_AUTOTAX) && (Globals->TAX_PILLAGE_MONTH_LONG && u->Taxers(1))) {
 					u->taxing = TAX_AUTO;
 				} else if (Globals->DEFAULT_WORK_ORDER) {
 					ProcessWorkOrder(u, 1, 0);
@@ -126,7 +119,7 @@ AString Game::GetXtraMap(ARegion *reg,int type)
 		case 2:
 			for(const auto o : reg->objects) {
 				if (!(ObjectDefs[o->type].flags & ObjectType::CANENTER)) {
-					if (o->units.size() > 0) {
+					if (o->units.front()) {
 						return "*";
 					} else {
 						return ".";
@@ -496,9 +489,9 @@ int Game::OpenGame()
 	f >> i;
 
 	for (int j = 0; j < i; j++) {
-		auto temp = std::make_unique<Faction>();
+		Faction *temp = new Faction;
 		temp->Readin(f);
-		factions.push_back(std::move(temp));
+		factions.push_back(temp);
 	}
 
 	//
@@ -541,7 +534,9 @@ int Game::SaveGame()
 	// Write out the Factions
 	//
 	f << factions.size() << "\n";
-	for(auto& fac: factions) fac->Writeout(f);
+	for(const auto fac : factions) {
+		fac->Writeout(f);
+	}
 
 	//
 	// Write out the ARegions
@@ -581,7 +576,7 @@ int Game::WritePlayers()
 	else if (gameStatus == GAME_STATUS_FINISHED)
 		f << "GameStatus: Finished\n\n";
 
-	for(auto& fac: factions) {
+	for(const auto fac : factions) {
 		fac->WriteFacInfo(f);
 	}
 
@@ -736,7 +731,7 @@ int Game::ReadPlayers()
 					lastWasNew = 1;
 				} else {
 					int nFacNum = pToken->value();
-					pFac = get_faction(factions, nFacNum);
+					pFac = GetFaction(factions, nFacNum);
 					if (pFac)
 						pFac->startturn = TurnNumber();
 					lastWasNew = 0;
@@ -766,7 +761,7 @@ Unit *Game::ParseGMUnit(AString *tag, Faction *pFac)
 		int gma = p.value();
 		for(const auto reg : regions) {
 			for(const auto obj : reg->objects) {
-				for(const auto u: obj->units) {
+				for(const auto u : obj->units) {
 					if (u->faction->num == pFac->num && u->gm_alias == gma) {
 						return u;
 					}
@@ -1154,11 +1149,13 @@ void Game::PreProcessTurn()
 		year++;
 	}
 	SetupUnitNums();
-	for(auto& fac: factions) fac->DefaultOrders();
+	for(const auto f : factions) f->DefaultOrders();
 
 	for(const auto reg : regions) {
-		if (Globals->WEATHER_EXISTS) reg->SetWeather(regions.GetWeather(reg, month));
-		if (Globals->GATES_NOT_PERENNIAL) reg->SetGateStatus(month);
+		if (Globals->WEATHER_EXISTS)
+			reg->SetWeather(regions.GetWeather(reg, month));
+		if (Globals->GATES_NOT_PERENNIAL)
+			reg->SetGateStatus(month);
 		reg->DefaultOrders();
 	}
 }
@@ -1167,7 +1164,7 @@ void Game::ClearOrders(Faction *f)
 {
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u->faction == f) {
 					u->ClearOrders();
 				}
@@ -1178,11 +1175,12 @@ void Game::ClearOrders(Faction *f)
 
 void Game::ReadOrders()
 {
-	for(auto& fac: factions) {
+	for(const auto fac : factions) {
 		if (!fac->is_npc) {
-			std::string str = "orders." + std::to_string(fac->num);
+			AString str = "orders.";
+			str += fac->num;
 
-			ifstream file(str, ios::in);
+			ifstream file(str.const_str(), ios::in);
 			if(file.is_open()) {
 				ParseOrders(fac->num, file, 0);
 				file.close();
@@ -1194,22 +1192,20 @@ void Game::ReadOrders()
 
 void Game::MakeFactionReportLists()
 {
-	vector<Faction *> facs (factionseq, nullptr);
+	std::vector<Faction *> facs(factionseq, nullptr);
 
 	for(const auto reg : regions) {
 		// clear the temporary
-		fill(facs.begin(), facs.end(), nullptr);
+		std::fill(facs.begin(), facs.end(), nullptr);
 
 		for(const auto far : reg->farsees) {
-			Faction *fac = far->faction;
-			facs[fac->num] = fac;
+			facs[far->faction->num] = far->faction;
 		}
-		for(const auto pass: reg->passers) {
-			Faction *fac = pass->faction;
-			facs[fac->num] = fac;
+		for(const auto pass : reg->passers) {
+			facs[pass->faction->num] = pass->faction;
 		}
 		for(const auto obj : reg->objects) {
-			for(const auto unit: obj->units) {
+			for(const auto unit : obj->units) {
 				facs[unit->faction->num] = unit->faction;
 			}
 		}
@@ -1240,7 +1236,7 @@ void Game::WriteReport()
 		CountItems(citems);
 	}
 
-	for(auto& fac: factions) {
+	for(const auto fac : factions) {
 		string report_file = "report." + to_string(fac->num);
 		string template_file = "template." + to_string(fac->num);
 
@@ -1285,22 +1281,15 @@ void Game::WriteReport()
 
 void Game::DeleteDeadFactions()
 {
-	std::set<int> deadFactionIds;
-	// Remove the faction from the list of factions and keep track of ids to clean up attitudes later
 	for(auto it = factions.begin(); it != factions.end();) {
-		if (!((*it)->is_npc) && !((*it)->exists)) {
-			deadFactionIds.insert((*it)->num);
+		auto fac = *it;
+		if (!fac->is_npc && !fac->exists) {
 			it = factions.erase(it);
+			for(const auto fac2 : factions) fac2->remove_attitude(fac->num);
+			delete fac;
 			continue;
 		}
 		++it;
-	}
-
-	// Make sure all other factions remove attitudes towards dead factions
-	for (auto facId: deadFactionIds) {
-		for(auto& fac: factions) {
-			fac->remove_attitude(facId);
-		}
 	}
 }
 
@@ -1309,7 +1298,7 @@ Faction *Game::AddFaction(int noleader, ARegion *pStart)
 	//
 	// set up faction
 	//
-	auto temp = std::make_unique<Faction>(factionseq);
+	Faction *temp = new Faction(factionseq);
 	AString x("NoAddress");
 	temp->SetAddress(x);
 	temp->lastorders = TurnNumber();
@@ -1318,18 +1307,18 @@ Faction *Game::AddFaction(int noleader, ARegion *pStart)
 	temp->pReg = pStart;
 	temp->noStartLeader = noleader;
 
-	Faction *f = temp.get();
-	if (!SetupFaction(f)) {
-		return nullptr;
+	if (!SetupFaction(temp)) {
+		delete temp;
+		return 0;
 	}
-	factions.push_back(std::move(temp));
+	factions.push_back(temp);
 	factionseq++;
-	return f;
+	return temp;
 }
 
 void Game::ViewFactions()
 {
-	for(auto& fac : factions) fac->View();
+	for(const auto f : factions) f->View();
 }
 
 void Game::SetupUnitSeq()
@@ -1337,7 +1326,7 @@ void Game::SetupUnitSeq()
 	int max = 0;
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u && u->num > max) max = u->num;
 			}
 		}
@@ -1360,7 +1349,7 @@ void Game::SetupUnitNums()
 
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				i = u->num;
 				if ((i > 0) && (i < maxppunits)) {
 					if (!ppUnits[i])
@@ -1420,15 +1409,15 @@ Unit *Game::GetUnit(int num)
 
 void Game::CountAllSpecialists()
 {
-	for(auto& fac: factions) {
-		fac->nummages = 0;
-		fac->numqms = 0;
-		fac->numtacts = 0;
-		fac->numapprentices = 0;
+	for(const auto f : factions) {
+		f->nummages = 0;
+		f->numqms = 0;
+		f->numtacts = 0;
+		f->numapprentices = 0;
 	}
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u->type == U_MAGE) u->faction->nummages++;
 				if (u->GetSkill(S_QUARTERMASTER)) u->faction->numqms++;
 				if (u->GetSkill(S_TACTICS) == 5) u->faction->numtacts++;
@@ -1469,7 +1458,7 @@ void Game::RemoveInactiveFactions()
 
 	int cturn;
 	cturn = TurnNumber();
-	for(auto& fac: factions) {
+	for(const auto fac : factions) {
 		if ((cturn - fac->lastorders) >= Globals->MAX_INACTIVE_TURNS &&	!fac->is_npc) {
 			fac->quit = QUIT_BY_GM;
 		}
@@ -1481,7 +1470,7 @@ int Game::CountMages(Faction *pFac)
 	int i = 0;
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u :o->units) {
 				if (u->faction == pFac && u->type == U_MAGE) i++;
 			}
 		}
@@ -1494,7 +1483,7 @@ int Game::CountQuarterMasters(Faction *pFac)
 	int i = 0;
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u->faction == pFac && u->GetSkill(S_QUARTERMASTER)) i++;
 			}
 		}
@@ -1507,7 +1496,7 @@ int Game::CountTacticians(Faction *pFac)
 	int i = 0;
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u->faction == pFac && u->GetSkill(S_TACTICS) == 5) i++;
 			}
 		}
@@ -1520,7 +1509,7 @@ int Game::CountApprentices(Faction *pFac)
 	int i = 0;
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u->faction == pFac && u->type == U_APPRENTICE) i++;
 			}
 		}
@@ -1634,121 +1623,112 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 	map< int, int > chances;
 
 	if (u->type != U_WMON) {
-		// Make a copy since we can lose items to escape
-		ItemList itemCopy = u->items;
-		for(auto i: itemCopy) {
-			if (!i.num) continue;
-			if (!ItemDefs[i.type].escape) continue;
+
+		for(auto it = u->items.begin(); it != u->items.end();) {
+			Item *i = *it;
+			// Since items can be removed below, we will increment the iterator here
+			it++;
+
+			if (!i->num) continue;
+			if (!ItemDefs[i->type].escape) continue;
 
 			// Okay, check flat loss.
-			if (ItemDefs[i.type].escape & ItemType::LOSS_CHANCE) {
-				int losses = (i.num + getrandom(ItemDefs[i.type].esc_val)) / ItemDefs[i.type].esc_val;
+			if (ItemDefs[i->type].escape & ItemType::LOSS_CHANCE) {
+				int losses = (i->num + getrandom(ItemDefs[i->type].esc_val)) / ItemDefs[i->type].esc_val;
 				// LOSS_CHANCE and HAS_SKILL together mean the
 				// decay rate only applies if you don't have
 				// the required skill (this might get used if
 				// you made illusions GIVEable, for example).
-				if (ItemDefs[i.type].escape & ItemType::HAS_SKILL) {
-					tmp = ItemDefs[i.type].esc_skill;
+				if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
+					tmp = ItemDefs[i->type].esc_skill;
 					skill = LookupSkill(&tmp);
-					if (u->GetSkill(skill) >= ItemDefs[i.type].esc_val)
-						losses = 0;
+					if (u->GetSkill(skill) >= ItemDefs[i->type].esc_val) losses = 0;
 				}
 				if (losses) {
-					string temp = ItemString(i.type, losses) + plural(losses, " decay", " decays") +
+					string temp = ItemString(i->type, losses) + plural(losses, " decay", " decays") +
 						" into nothingness.";
 					u->event(temp, "decay");
-					u->items.SetNum(i.type, i.num - losses);
+					u->items.SetNum(i->type,i->num - losses);
 				}
-			} else if (ItemDefs[i.type].escape & ItemType::HAS_SKILL) {
-				tmp = ItemDefs[i.type].esc_skill;
+			} else if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
+				tmp = ItemDefs[i->type].esc_skill;
 				skill = LookupSkill(&tmp);
-				if (u->GetSkill(skill) < ItemDefs[i.type].esc_val) {
+				if (u->GetSkill(skill) < ItemDefs[i->type].esc_val) {
 					if (Globals->WANDERING_MONSTERS_EXIST) {
-						Faction *mfac = get_faction(factions, monfaction);
+						Faction *mfac = GetFaction(factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
-						MonType *mp = FindMonster(ItemDefs[i.type].abr, (ItemDefs[i.type].type & IT_ILLUSION));
-						mon->MakeWMon(mp->name, i.type, i.num);
+						MonType *mp = FindMonster(ItemDefs[i->type].abr,
+								(ItemDefs[i->type].type & IT_ILLUSION));
+						mon->MakeWMon(mp->name, i->type, i->num);
 						mon->MoveUnit(r->GetDummy());
 						// This will be zero unless these are set. (0 means
 						// full spoils)
 						mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
 					}
-					u->event("Loses control of " + ItemString(i.type, i.num) + ".", "escape");
-					u->items.SetNum(i.type, 0);
+					u->event("Loses control of " + ItemString(i->type, i->num) + ".", "escape");
+					u->items.SetNum(i->type, 0);
 				}
 			} else {
 				// ESC_LEV_*
-				tmp = ItemDefs[i.type].esc_skill;
+				tmp = ItemDefs[i->type].esc_skill;
 				skill = LookupSkill(&tmp);
 				int level = u->GetSkill(skill);
 				int chance;
 
-				if (!level)
-					chance = 10000;
+				if (!level) chance = 10000;
 				else {
-					int top;
-					if (ItemDefs[i.type].escape & ItemType::ESC_NUM_SQUARE)
-						top = i.num * i.num;
-					else
-						top = i.num;
+					int top = (ItemDefs[i->type].escape & ItemType::ESC_NUM_SQUARE) ? i->num * i->num : i->num;
 					int bottom = 0;
-					if (ItemDefs[i.type].escape & ItemType::ESC_LEV_LINEAR)
-						bottom = level;
-					else if (ItemDefs[i.type].escape & ItemType::ESC_LEV_SQUARE)
-						bottom = level * level;
-					else if (ItemDefs[i.type].escape & ItemType::ESC_LEV_CUBE)
-						bottom = level * level * level;
-					else if (ItemDefs[i.type].escape & ItemType::ESC_LEV_QUAD)
-						bottom = level * level * level * level;
-					else
-						bottom = 1;
-					bottom = bottom * ItemDefs[i.type].esc_val;
+					if (ItemDefs[i->type].escape & ItemType::ESC_LEV_LINEAR) bottom = level;
+					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_SQUARE) bottom = level * level;
+					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_CUBE) bottom = level * level * level;
+					else if (ItemDefs[i->type].escape & ItemType::ESC_LEV_QUAD) bottom = level * level * level * level;
+					else bottom = 1;
+					bottom = bottom * ItemDefs[i->type].esc_val;
 					chance = (top * 10000)/bottom;
 				}
 
-				if (ItemDefs[i.type].escape & ItemType::LOSE_LINKED) {
-					if (chance > chances[ItemDefs[i.type].type])
-						chances[ItemDefs[i.type].type] = chance;
+				if (ItemDefs[i->type].escape & ItemType::LOSE_LINKED) {
+					if (chance > chances[ItemDefs[i->type].type]) chances[ItemDefs[i->type].type] = chance;
 					linked = 1;
 				} else if (chance > getrandom(10000)) {
 					if (Globals->WANDERING_MONSTERS_EXIST) {
-						Faction *mfac = get_faction(factions, monfaction);
+						Faction *mfac = GetFaction(factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
-						MonType *mp = FindMonster(ItemDefs[i.type].abr, (ItemDefs[i.type].type & IT_ILLUSION));
-						mon->MakeWMon(mp->name, i.type, i.num);
+						MonType *mp = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION));
+						mon->MakeWMon(mp->name, i->type, i->num);
 						mon->MoveUnit(r->GetDummy());
-						// This will be zero unless these are set. (0 means
-						// full spoils)
+						// This will be zero unless these are set. (0 means full spoils)
 						mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
 					}
-					u->event("Loses control of " + ItemString(i.type, i.num) + ".", "escape");
-					u->items.SetNum(i.type, 0);
+					u->event("Loses control of " + ItemString(i->type, i->num) + ".", "escape");
+					u->items.SetNum(i->type, 0);
 				}
 			}
 		}
 
 		if (linked) {
-			map < int, int >::iterator i;
-			for (auto i: chances) {
+			for (auto i = chances.begin(); i != chances.end(); i++) {
 				// walk the chances list and for each chance, see if
 				// escape happens and if escape happens then walk all items
 				// and everything that is that type, get rid of it.
-				if (i.second < getrandom(10000)) continue;
-				ItemList itemCopy = u->items;
-				for(auto it: itemCopy) {
-					if (ItemDefs[it.type].type == i.first) {
+				if (i->second < getrandom(10000)) continue;
+				for(auto iter = u->items.begin(); iter != u->items.end();) {
+					Item *it = *iter;
+					// Since items can be removed below, we will increment the iterator here
+					iter++;
+					if (ItemDefs[it->type].type == i->first) {
 						if (Globals->WANDERING_MONSTERS_EXIST) {
-							Faction *mfac = get_faction(factions, monfaction);
+							Faction *mfac = GetFaction(factions, monfaction);
 							Unit *mon = GetNewUnit(mfac, 0);
-							MonType *mp = FindMonster(ItemDefs[it.type].abr, (ItemDefs[it.type].type & IT_ILLUSION));
-							mon->MakeWMon(mp->name, it.type, it.num);
+							MonType *mp = FindMonster(ItemDefs[it->type].abr, (ItemDefs[it->type].type & IT_ILLUSION));
+							mon->MakeWMon(mp->name, it->type, it->num);
 							mon->MoveUnit(r->GetDummy());
-							// This will be zero unless these are set. (0 means
-							// full spoils)
+							// This will be zero unless these are set. (0 means full spoils)
 							mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
 						}
-						u->event("Loses control of " + ItemString(it.type, it.num) + ".", "escape");
-						u->items.SetNum(it.type, 0);
+						u->event("Loses control of " + ItemString(it->type, it->num) + ".", "escape");
+						u->items.SetNum(it->type, 0);
 					}
 				}
 			}
@@ -1822,28 +1802,28 @@ char Game::GetRChar(ARegion *r)
 
 void Game::CreateNPCFactions()
 {
-	std::unique_ptr<Faction> f;
+	Faction *f;
 	AString *temp;
 	if (Globals->CITY_MONSTERS_EXIST) {
-		f = std::make_unique<Faction>(factionseq++);
+		f = new Faction(factionseq++);
 		guardfaction = f->num;
 		temp = new AString("The Guardsmen");
 		f->SetName(temp);
 		f->is_npc = true;
 		f->lastorders = 0;
-		factions.push_back(std::move(f));
+		factions.push_back(f);
 	} else
 		guardfaction = 0;
 	// Only create the monster faction if wandering monsters or lair
 	// monsters exist.
 	if (Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
-		f = std::make_unique<Faction>(factionseq++);
+		f = new Faction(factionseq++);
 		monfaction = f->num;
 		temp = new AString("Creatures");
 		f->SetName(temp);
 		f->is_npc = true;
 		f->lastorders = 0;
-		factions.push_back(std::move(f));
+		factions.push_back(f);
 	} else
 		monfaction = 0;
 }
@@ -1865,7 +1845,7 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		num = Globals->CITY_GUARD * skilllevel;
 	}
 	num = num * percent / 100;
-	Faction *pFac = get_faction(factions, guardfaction);
+	Faction *pFac = GetFaction(factions, guardfaction);
 	Unit *u = GetNewUnit(pFac);
 	Unit *u2;
 	AString *s = new AString("City Guard");
@@ -1957,7 +1937,7 @@ void Game::AdjustCityMons(ARegion *r)
 	int needguard = 1;
 	int needmage = 1;
 	for(const auto o : r->objects) {
-		for(const auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->type == U_GUARD || u->type == U_GUARDMAGE) {
 				AdjustCityMon(r, u);
 				/* Don't create new city guards if we have some */
@@ -2071,7 +2051,9 @@ void Game::Equilibrate()
 	for (int a=0; a<25; a++) {
 		Adot();
 		ProcessMigration();
-		for(const auto r : regions) r->PostTurn(&regions);
+		for(const auto r : regions) {
+			r->PostTurn();
+		}
 	}
 	Awrite("");
 }
@@ -2090,26 +2072,25 @@ void Game::WriteTimesArticle(AString article)
 
 void Game::CountItems(size_t ** citems)
 {
-	for(auto& fac: factions) {
+	for(const auto fac : factions) {
 		if (!fac->is_npc) {
 			int i = fac->num - 1; // faction numbers are 1-based
 			for (int j = 0; j < NITEMS; j++){
-				citems[i][j] = CountItem(fac.get(), j);
+				citems[i][j] = CountItem (fac, j);
 			}
 		}
 	}
 }
 
-int Game::CountItem(const Faction *fac, int item)
+int Game::CountItem (Faction *fac, int item)
 {
 	if (ItemDefs[item].type & IT_SHIP) return 0;
 
 	size_t all = 0;
-	for (const auto r : fac->present_regions) {
+	for (const auto& r : fac->present_regions) {
 		for(const auto obj : r->objects) {
-			for(const auto unit: obj->units) {
-				if (unit->faction == fac)
-					all += unit->items.GetNum(item);
+			for(const auto unit : obj->units) {
+				if (unit->faction == fac) all += unit->items.GetNum(item);
 			}
 		}
 	}

@@ -34,10 +34,6 @@ class Game;
 #include "object.h"
 #include "events.h"
 
-#include <set>
-#include <vector>
-#include <memory>
-
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
 
 class OrdersCheck
@@ -290,7 +286,7 @@ private:
 						 int type, int val);
 	void ModifyHealing(int level, int patients, int success);
 
-	std::vector<std::unique_ptr<Faction>> factions;
+	std::list<Faction *> factions;
 	std::vector<Battle *> battles;
 	ARegionList regions;
 	int factionseq;
@@ -330,7 +326,7 @@ private:
 	// Parsing functions
 	//
 	void parse_error(OrdersCheck *order_chec, Unit *unit, Faction *faction, const std::string &error);
-	std::shared_ptr<UnitId> ParseUnit(AString *s);
+	UnitId *ParseUnit(AString *s);
 	int ParseDir(AString *token);
 
 	void ParseOrders(int faction, std::istream& ordersFile, OrdersCheck *pCheck);
@@ -424,7 +420,7 @@ private:
 	void WriteTimesArticle(AString);
 
 	void DoExchangeOrders();
-	void DoExchangeOrder(ARegion *r, Unit *u, std::shared_ptr<ExchangeOrder> o);
+	void DoExchangeOrder(ARegion *, Unit *, ExchangeOrder *);
 
 	//
 	// Faction limit functions.
@@ -445,12 +441,12 @@ private:
 	// The DoGiveOrder returns 0 normally, or 1 if no more GIVE orders
 	// should be allowed
 	//
-	int DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o);
+	int DoGiveOrder(ARegion *, Unit *, GiveOrder *);
 	//
 	// The DoWithdrawOrder returns 0 normally, or 1 if no more WITHDRAW
 	// orders should be allowed
 	//
-	int DoWithdrawOrder(ARegion *r, Unit *u, std::shared_ptr<WithdrawOrder> o);
+	int DoWithdrawOrder(ARegion *, Unit *, WithdrawOrder *);
 
 	//
 	// These are game specific, and can be found in extra.cpp
@@ -524,7 +520,7 @@ private:
 	void DoAutoAttacks();
 	void DoAdvanceAttack(ARegion *, Unit *);
 	void DoAutoAttack(ARegion *, Unit *);
-	void DoMovementAttacks(std::vector<Location *>& locs);
+	void DoMovementAttacks(std::list<Location *>& locs);
 	void DoMovementAttack(ARegion *, Unit *);
 	void DoAutoAttackOn(ARegion *, Unit *);
 	void RemoveEmptyObjects();
@@ -551,14 +547,14 @@ private:
 	void Do1Quit(Faction *);
 	void SinkUncrewedFleets();
 	void DrownUnits();
-	void RunStealOrders();
+	void RunStealthOrders();
 	void RunTransportOrders();
 	void RunTransportPhase(TransportOrder::TransportPhase phase);
 	void RunAnnihilateOrders();
 	void RunSacrificeOrders();
 	void CollectInterQMTransportItems();
 	void CheckTransportOrders();
-	std::vector<Faction *> CanSeeSteal(ARegion *, Unit *);
+	std::list<Faction *>CanSeeSteal(ARegion *r, Unit *u);
 	void Do1Steal(ARegion *, Object *, Unit *);
 	void Do1Assassinate(ARegion *, Object *, Unit *);
 	void Do1Annihilate(ARegion *reg);
@@ -570,7 +566,7 @@ private:
 	//
 	void RunMoveOrders();
 	Location *DoAMoveOrder(Unit *, ARegion *, Object *);
-	void DoMoveEnter(Unit *, ARegion *, Object **);
+	void DoMoveEnter(Unit *unit, ARegion *region);
 	void RunMonthOrders();
 	void RunStudyOrders(ARegion *);
 	void Do1StudyOrder(Unit *, Object *);
@@ -607,22 +603,21 @@ private:
 	// Battle function
 	//
 	int KillDead(Location *, Battle *, int, int);
-	int RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass = false, bool adv = false);
+	int RunBattle(ARegion *, Unit *, Unit *, int = 0, int = 0);
 	void GetSides(
-		ARegion *r, std::set<Faction *> afacs, std::set<Faction *> dfacs,
-		std::vector<Location *>& atts,
-		std::vector<Location *>& defs, Unit *att, Unit *tar, bool ass = false, bool adv = false
+		ARegion *r, std::set<Faction *>& afacs, std::set<Faction *>& dfacs, std::list<Location *>& atts,
+		std::list<Location *>& defs, Unit *att, Unit *tar, int ass = 0, int adv = 0
 	);
-	bool CanAttack(ARegion *r, std::set<Faction *> afacs, Unit *u);
+	int CanAttack(ARegion *r, std::set<Faction *>& afacs, Unit * u);
 	void GetAFacs(
-		ARegion *r, Unit *att, Unit *tar, std::set<Faction *>& dfacs,
-		std::set<Faction *>& afacs, std::vector<Location *> &atts
+		ARegion *f, Unit *att, Unit *tar, std::set<Faction *>& dfacs,
+		std::set<Faction *>& afacs, std::list<Location *> &atts
 	);
-	void GetDFacs(ARegion *r, Unit *t, std::set<Faction *>& facs);
+	void GetDFacs(ARegion *r, Unit *t, std::set<Faction*>& facs);
 
 	// For faction statistics
 	void CountItems(size_t **citems);
-	int CountItem(const Faction* fac, int item);
+	int CountItem(Faction *, int);
 };
 
 #endif

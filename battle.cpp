@@ -362,13 +362,12 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	b->stats.ClearRound();
 }
 
-void Battle::GetSpoils(std::vector<Location *>& losers, ItemList& spoils, int assassination)
+void Battle::GetSpoils(std::list<Location *>& losers, ItemList& spoils, int ass)
 {
-	ItemList ships;
 	string quest_rewards;
 
 	for(const auto l : losers) {
-		Unit * u = l->unit;
+		Unit *u = l->unit;
 		int numalive = u->GetSoldiers();
 		int numdead = u->losses;
 		if (!numalive) {
@@ -377,42 +376,33 @@ void Battle::GetSpoils(std::vector<Location *>& losers, ItemList& spoils, int as
 				AddLine(AString("Quest completed! ") + quest_rewards);
 			}
 		}
-		// Since the code below can modify the item list, iterate a copy
-		ItemList itemsCopy = u->items;
-		for(auto i: itemsCopy) {
-			if (IsSoldier(i.type)) continue;
+		for(auto it = u->items.begin(); it != u->items.end();) {
+			Item *i = *it;
+			// We are going to advance the iterator here so that even if the item under the current iterator
+			// gets deleted by setting it's amount to 0, the iterator is still good.
+			++it;
+			if (IsSoldier(i->type)) continue;
 			// ignore incomplete ships
-			if (ItemDefs[i.type].type & IT_SHIP) continue;
+			if (ItemDefs[i->type].type & IT_SHIP) continue;
 			// New rule:  Assassins with RINGS cannot get AMTS in spoils
 			// This rule is only meaningful with Proportional AMTS usage
 			// is enabled, otherwise it has no effect.
-			if ((assassination == 2) && (i.type == I_AMULETOFTS)) continue;
-			float percent = (float)numdead/(float)(numalive+numdead);
+			if ((ass == 2) && (i->type == I_AMULETOFTS)) continue;
+			float percent = (float)numdead/(float)(numalive + numdead);
 			// incomplete ships:
-			if (ItemDefs[i.type].type & IT_SHIP) {
+			if (ItemDefs[i->type].type & IT_SHIP) {
 				if (getrandom(100) < percent) {
-					u->items.SetNum(i.type, 0);
-					if (i.num < ships.GetNum(i.type))
-						ships.SetNum(i.type, i.num);
+					u->items.SetNum(i->type, 0);
+					if (i->num < spoils.GetNum(i->type)) spoils.SetNum(i->type, i->num);
 				}
 			} else {
-				int num = (int)(i.num * percent);
+				int num = (int)(i->num * percent);
 				int num2 = (num + getrandom(2))/2;
-				if (ItemDefs[i.type].type & IT_ALWAYS_SPOIL) {
-					num2 = num;
-				}
-				if (ItemDefs[i.type].type & IT_NEVER_SPOIL) {
-					num2 = 0;
-				}
-				spoils.SetNum(i.type, spoils.GetNum(i.type) + num2);
-				u->items.SetNum(i.type, i.num - num);
+				if (ItemDefs[i->type].type & IT_ALWAYS_SPOIL) num2 = num;
+				if (ItemDefs[i->type].type & IT_NEVER_SPOIL) num2 = 0;
+				spoils.SetNum(i->type, spoils.GetNum(i->type) + num2);
+				u->items.SetNum(i->type, i->num - num);
 			}
-		}
-	}
-	// add incomplete ships to spoils...
-	for (int sh = 0; sh < NITEMS; sh++) {
-		if (ItemDefs[sh].type & IT_SHIP) {
-			spoils.SetNum(sh, ships.GetNum(sh));
 		}
 	}
 }
@@ -500,14 +490,8 @@ void AddAssassinationFact(
 }
 
 int Battle::Run(
-	Events *events,
-	ARegion *region,
-	Unit *att,
-	std::vector<Location *>& atts,
-	Unit *tar,
-	std::vector<Location *>& defs,
-	int ass,
-	ARegionList *pRegs
+	Events* events, ARegion *region, Unit *att, std::list<Location *>& atts,
+	Unit *tar, std::list<Location *>& defs, int ass
 )
 {
 	Army * armies[2];
@@ -515,8 +499,8 @@ int Battle::Run(
 	assassination = ASS_NONE;
 	attacker = att->faction;
 
-	armies[0] = new Army(att,atts,region->type,ass);
-	armies[1] = new Army(tar,defs,region->type,ass);
+	armies[0] = new Army(att, atts, region->type, ass);
+	armies[1] = new Army(tar, defs, region->type, ass);
 
 	if (ass) {
 		FreeRound(armies[0],armies[1], ass);
@@ -689,13 +673,7 @@ int Battle::Run(
 }
 
 void Battle::WriteSides(
-	ARegion *r,
-	Unit *att,
-	Unit *tar,
-	std::vector<Location *>& atts,
-	std::vector<Location *>& defs,
-	int ass,
-	ARegionList *pRegs
+	ARegion * r, Unit * att, Unit * tar, std::list<Location *>& atts, std::list<Location *>& defs, int ass
 )
 {
 	if (ass) {
@@ -709,23 +687,26 @@ void Battle::WriteSides(
 
 	int dobs = 0;
 	int aobs = 0;
-	for(const auto l : defs) {
-		int a = l->unit->GetAttribute("observation");
+	for(const auto d : defs) {
+		int a = d->unit->GetAttribute("observation");
 		if (a > dobs) dobs = a;
 	}
 
 	AddLine("Attackers:");
-	for(const auto l : atts) {
-		int a = l->unit->GetAttribute("observation");
+	for(const auto at : atts) {
+		int a = at->unit->GetAttribute("observation");
 		if (a > aobs) aobs = a;
-		string temp = l->unit->BattleReport(dobs)->const_str();
-		AddLine(temp);
+		AString * temp = at->unit->BattleReport(dobs);
+		AddLine(*temp);
+		delete temp;
 	}
+
 	AddLine("");
 	AddLine("Defenders:");
-	for(const auto l : defs) {
-		string temp = l->unit->BattleReport(aobs)->const_str();
-		AddLine(temp);
+	for(const auto de : defs) {
+		AString * temp = de->unit->BattleReport(aobs);
+		AddLine(*temp);
+		delete temp;
 	}
 	AddLine("");
 }
@@ -746,34 +727,33 @@ void Battle::AddLine(const AString & s) {
 	text.push_back(s.const_str());
 }
 
-void Game::GetDFacs(ARegion *r, Unit *t, std::set<Faction *>& facs)
+void Game::GetDFacs(ARegion * r, Unit * t, std::set<Faction *>& facs)
 {
-	bool allies_allowed = false;
+	int AlliesIncluded = 0;
 
 	// First, check whether allies should assist in this combat
 	if (Globals->ALLIES_NOAID == 0) {
-		allies_allowed = true;
+		AlliesIncluded = 1;
 	} else {
 		// Check whether any of the target faction's
 		// units aren't set to noaid
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
-				if (u->IsAlive() && (u->faction == t->faction) && !(u->GetFlag(FLAG_NOAID))) {
-					allies_allowed = true;
+			for(const auto u : obj->units) {
+				if (u->IsAlive() && u->faction == t->faction && u->GetFlag(FLAG_NOAID) == 0) {
+					AlliesIncluded = 1;
 					break;
 				}
+				if (AlliesIncluded == 1) break; // forlist(units)
 			}
-			if (allies_allowed) break; // forlist (objects)
+			if (AlliesIncluded == 1) break; // forlist (objects)
 		}
 	}
 
 	for(const auto obj : r->objects) {
-		for(const auto u: obj->units) {
-			if (
-				u->IsAlive() &&
-				(
-					u->faction == t->faction ||
-					(allies_allowed && u->guard != GUARD_AVOID && u->GetAttitude(r,t) == A_ALLY)
+		for(const auto u : obj->units) {
+			if (u->IsAlive() &&
+				(u->faction == t->faction ||
+					(AlliesIncluded == 1 && u->guard != GUARD_AVOID && u->GetAttitude(r,t) == A_ALLY)
 				)
 			) {
 				facs.insert(u->faction);
@@ -783,42 +763,36 @@ void Game::GetDFacs(ARegion *r, Unit *t, std::set<Faction *>& facs)
 }
 
 void Game::GetAFacs(
-	ARegion *r, Unit *att, Unit *tar, std::set<Faction *>& dfacs, std::set<Faction *>& afacs,
-	std::vector<Location *>& atts
+	ARegion *r, Unit *att, Unit *tar, std::set<Faction *>& dfacs,
+	std::set<Faction *>& afacs, std::list<Location *>& atts
 )
 {
 	for(const auto obj : r->objects) {
-		for(const auto u: obj->units) {
+		for(const auto u : obj->units) {
 			if (u->canattack && u->IsAlive()) {
-				bool add = false;
-				if (
-					(u->faction == att->faction || u->GetAttitude(r,tar) == A_HOSTILE) &&
+				int add = 0;
+				if ((u->faction == att->faction || u->GetAttitude(r,tar) == A_HOSTILE) &&
 					(u->guard != GUARD_AVOID || u == att)
 				) {
-					add = true;
-				} else {
-					if (u->guard == GUARD_ADVANCE && u->GetAttitude(r,tar) != A_ALLY) {
-						add = true;
-					} else {
-						if (u->attackorders) {
-							UnitId tid;
-							bool found_target = false;
-							Unit *t;
-							for (auto id : u->attackorders->targets) {
-								t = r->get_unit_id(id, u->faction->num);
-								if (!t) continue;
-								if (t == tar) {
-									found_target = true;
-									tid = id;
-								}
-								if (t->faction == tar->faction) add = true;
-							}
-							if (found_target) std::erase(u->attackorders->targets, tid);
+					add = 1;
+				} else if (u->guard == GUARD_ADVANCE && u->GetAttitude(r,tar) != A_ALLY) {
+					add = 1;
+				} else if (u->attackorders) {
+					for(auto it = u->attackorders->targets.begin(); it != u->attackorders->targets.end();) {
+						UnitId *id = *it;
+						Unit *t = r->GetUnitId(id, u->faction->num);
+						if (!t) { ++it; continue; }
+						if (t == tar) {
+							it = u->attackorders->targets.erase(it);
+							delete id;
+						} else {
+							++it;
 						}
+						if (t->faction == tar->faction) add = 1;
 					}
 				}
 
-				if (add && (dfacs.find(u->faction) == dfacs.end())) {
+				if (add && dfacs.find(u->faction) == dfacs.end()) {
 					Location * l = new Location;
 					l->unit = u;
 					l->obj = obj;
@@ -831,27 +805,26 @@ void Game::GetAFacs(
 	}
 }
 
-bool Game::CanAttack(ARegion *r, std::set<Faction *> afacs, Unit * u)
+int Game::CanAttack(ARegion *r, std::set<Faction *>& afacs, Unit * u)
 {
-	bool see = false;
-	bool ride = false;
-	for(auto f: afacs) {
+	int see = 0;
+	int ride = 0;
+	for(const auto f : afacs) {
 		if (f->CanSee(r, u) == 2) {
-			if (ride) return true;
-			see = true;
+			if (ride == 1) return 1;
+			see = 1;
 		}
 		if (f->CanCatch(r, u)) {
-			if (see) return true;
-			ride = true;
+			if (see == 1) return 1;
+			ride = 1;
 		}
 	}
-	return false;
+	return 0;
 }
 
 void Game::GetSides(
-	ARegion *r, std::set<Faction *> afacs, std::set<Faction *>dfacs,
-	std::vector<Location *>& atts, std::vector<Location *>& defs,
-	Unit *att, Unit *tar, bool ass, bool adv
+	ARegion *r, std::set<Faction *>& afacs, std::set<Faction *>& dfacs, std::list<Location *>& atts,
+	std::list<Location *>& defs, Unit *att, Unit *tar, int ass, int adv
 )
 {
 	if (ass) {
@@ -884,44 +857,45 @@ void Game::GetSides(
 		}
 
 		// Define block to avoid conflicts with another forlist local created variables
-		for(const auto o : r2->objects) {
-			// Can't get building bonus in another region without EXTENDED_FORT_DEFENCE
-			if (i>=0 && !Globals->EXTENDED_FORT_DEFENCE) {
-				o->capacity = 0;
-				o->shipno = o->ships.size();
-				continue;
-			}
+		{
+			for(const auto o : r2->objects) {
+				// Can't get building bonus in another region without EXTENDED_FORT_DEFENCE
+				if (i>=0 && !Globals->EXTENDED_FORT_DEFENCE) {
+					o->capacity = 0;
+					o->shipno = o->ships.size();
+					continue;
+				}
 
-			/* Set building capacity */
-			if (o->incomplete < 1 && o->IsBuilding()) {
-				o->capacity = ObjectDefs[o->type].protect;
-				o->shipno = 0;
-				// AddLine("Fortification bonus added for ", o->name);
-				// AddLine("");
-			} else if (o->IsFleet()) {
-				o->capacity = 0;
-				o->shipno = 0;
+				/* Set building capacity */
+				if (o->incomplete < 1 && o->IsBuilding()) {
+					o->capacity = ObjectDefs[o->type].protect;
+					o->shipno = 0;
+					// AddLine("Fortification bonus added for ", o->name);
+					// AddLine("");
+				} else if (o->IsFleet()) {
+					o->capacity = 0;
+					o->shipno = 0;
+				}
 			}
 		}
 
 		for(const auto o : r2->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				int add = 0;
 
 #define ADD_ATTACK 1
 #define ADD_DEFENSE 2
 				/* First, can the unit be involved in the battle at all? */
 				if ((i==-1 || u->GetFlag(FLAG_HOLDING) == 0) && u->IsAlive()) {
-					if (afacs.find(u->faction) != afacs.end()) {
+					if(afacs.find(u->faction) != afacs.end()) {
 						/*
 						 * The unit is on the attacking side, check if the
 						 * unit should be in the battle
 						 */
 						if (i == -1 || (!noaida)) {
 							if (u->canattack &&
-									(u->guard != GUARD_AVOID || u==att) &&
-									u->CanMoveTo(r2,r) &&
-									!::GetUnit(atts, u->num)) {
+								(u->guard != GUARD_AVOID || u==att) && u->CanMoveTo(r2,r) && !::GetUnit(atts, u->num)
+							) {
 								add = ADD_ATTACK;
 							}
 						}
@@ -935,12 +909,10 @@ void Game::GetSides(
 						if (!(i != -1 && noaidd)) {
 							if (u->type == U_GUARD) {
 								/* The unit is a city guardsman */
-								if (i == -1 && adv == 0)
-									add = ADD_DEFENSE;
+								if (i == -1 && adv == 0) add = ADD_DEFENSE;
 							} else if (u->type == U_GUARDMAGE) {
 								/* the unit is a city guard support mage */
-								if (i == -1 && adv == 0)
-									add = ADD_DEFENSE;
+								if (i == -1 && adv == 0) add = ADD_DEFENSE;
 							} else {
 								/*
 								 * The unit is not a city guardsman, check if
@@ -953,10 +925,7 @@ void Game::GetSides(
 										 * want to be in the battle if he can
 										 * avoid it
 										 */
-										if (u == tar ||
-												(u->faction == tar->faction &&
-												 i==-1 &&
-												 CanAttack(r, afacs, u))) {
+										if (u == tar || (u->faction == tar->faction && i==-1 && CanAttack(r, afacs,u))) {
 											add = ADD_DEFENSE;
 										}
 									} else {
@@ -1004,12 +973,10 @@ void Game::GetSides(
 		}
 
 		noaidd = 1;
-		{
-			for(const auto l : defs) {
-				if (!l->unit->GetFlag(FLAG_NOAID)) {
-					noaidd = 0;
-					break;
-				}
+		for(const auto l : defs) {
+			if (!l->unit->GetFlag(FLAG_NOAID)) {
+				noaidd = 0;
+				break;
 			}
 		}
 	}
@@ -1060,10 +1027,11 @@ int Game::KillDead(Location * l, Battle *b, int max_susk, int max_rais)
 	return uncontrolled;
 }
 
-int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass, bool adv)
+int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
+					 int adv)
 {
 	std::set<Faction *> afacs, dfacs;
-	std::vector<Location *> atts, defs;
+	std::list<Location *> atts, defs;
 	int result;
 
 	if (ass) {
@@ -1089,7 +1057,7 @@ int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass, bool adv
 			}
 			return BATTLE_IMPOSSIBLE;
 		}
-		GetDFacs(r,target,dfacs);
+		GetDFacs(r, target, dfacs);
 		if (dfacs.find(attacker->faction) != dfacs.end()) {
 			attacker->error("ATTACK: Can't attack an ally.");
 			if (adv) {
@@ -1116,38 +1084,35 @@ int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass, bool adv
 		return BATTLE_IMPOSSIBLE;
 	}
 
-	Battle * b = new Battle;
-	b->WriteSides(r, attacker, target, atts, defs, ass, &regions);
+	Battle *b = new Battle;
+	b->WriteSides(r, attacker, target, atts, defs, ass);
 
 	battles.push_back(b);
-	for(const auto& fac: factions) {
-		Faction *f = fac.get();
-		if ((afacs.find(f) != afacs.end()) || (dfacs.find(f) != dfacs.end()) || r->Present(f)) {
-			f->battles.push_back(b);
+	{
+		for(const auto f : factions) {
+			if(afacs.find(f) != afacs.end() || dfacs.find(f) != dfacs.end() || r->Present(f)) {
+				f->battles.push_back(b);
+			}
 		}
 	}
-	result = b->Run(events, r,attacker, atts, target, defs, ass, &regions );
+	result = b->Run(events, r, attacker, atts, target, defs,ass);
 
 	int attaker_max_susk = 0;
 	int attaker_max_rais = 0;
-	{
-		for(const auto l : atts) {
-			// int necr_level = ((Location *)elem)->unit->GetAttribute("necromancy");
-			int susk_level = l->unit->GetAttribute("susk");
-			int rais_level = l->unit->GetAttribute("rais");
-			if (susk_level > attaker_max_susk) {
-				attaker_max_susk = susk_level;
-			}
-			if (rais_level > attaker_max_rais) {
-				attaker_max_rais = rais_level;
-			}
+	for(const auto l : atts) {
+		int susk_level = l->unit->GetAttribute("susk");
+		int rais_level = l->unit->GetAttribute("rais");
+		if (susk_level > attaker_max_susk) {
+			attaker_max_susk = susk_level;
+		}
+		if (rais_level > attaker_max_rais) {
+			attaker_max_rais = rais_level;
 		}
 	}
 
 	int defender_max_susk = 0;
 	int defender_max_rais = 0;
 	for(const auto l : defs) {
-		// int necr_level = ((Location *)elem)->unit->GetAttribute("necromancy");
 		int susk_level = l->unit->GetAttribute("susk");
 		int rais_level = l->unit->GetAttribute("rais");
 		if (susk_level > defender_max_susk) {
@@ -1179,7 +1144,7 @@ int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, bool ass, bool adv
 		if ((skel + undead) == 1)
 			tmp += "s";
 		tmp += " from the grave to seek vengeance.";
-		Faction *monfac = get_faction(factions, monfaction);
+		Faction *monfac = GetFaction(factions, monfaction);
 		Unit *u = GetNewUnit(monfac, 0);
 		u->MakeWMon("Undead", I_SKELETON, skel);
 		u->items.SetNum(I_UNDEAD, undead);

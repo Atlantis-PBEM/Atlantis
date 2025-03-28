@@ -31,15 +31,13 @@
 
 class Soldier;
 class Army;
+class Location;
 
 #include "unit.h"
 #include "items.h"
 #include "object.h"
 #include "helper.h"
 #include "skills.h"
-
-// external declaration of Location
-class Location;
 
 WeaponBonusMalus* GetWeaponBonusMalus(WeaponType *, WeaponType *);
 
@@ -170,12 +168,12 @@ public:
 class Army
 {
 	public:
-		Army(Unit *ldr, std::vector<Location *>& locs, int regtype, int ass = 0);
+		Army(Unit *ldr, std::list<Location *>& list, int regtype, int ass = 0);
 		~Army();
 
 		void WriteLosses(Battle *b);
-		void Lose(Battle *b,ItemList &spoils);
-		void Win(Battle *b,ItemList& spoils);
+		void Lose(Battle *b, ItemList& spoils);
+		void Win(Battle *b, ItemList& spoils);
 		void Tie(Battle *b);
 		int CanBeHealed();
 		void DoHeal(Battle *b);
@@ -191,14 +189,16 @@ class Army
 		int CanAttack();
 		int NumFront();
 		int NumFrontHits();
-		Soldier *GetAttacker( int, int & );
+		Soldier *GetAttacker(int, int &);
 		int GetEffectNum(char const *effect);
 		int GetTargetNum(char const *special = NULL, bool canAttackBehind = false);
-		Soldier *GetTarget( int );
+		Soldier *GetTarget(int);
 		int RemoveEffects(int num, char const *effect);
-		int DoAnAttack(Battle *, char const *special, int numAttacks, int attackType,
-				int attackLevel, int flags, int weaponClass, char const *effect,
-				int mountBonus, Soldier *attacker, Army *attackers, bool attackbehind, int attackDamage);
+		int DoAnAttack(
+			Battle *, char const *special, int numAttacks, int attackType,
+			int attackLevel, int flags, int weaponClass, char const *effect,
+			int mountBonus, Soldier *attacker, Army *attackers, bool attackbehind, int attackDamage
+		);
 		void Kill(int killed, int damage);
 		void Reset();
 
@@ -207,8 +207,8 @@ class Army
 		//
 		int CheckSpecialTarget(char const *,int);
 
-		SoldierPtr * soldiers;
-		Unit * leader;
+		SoldierPtr *soldiers;
+		Unit *leader;
 		std::vector<std::shared_ptr<Shield>> shields;
 		int round;
 		int tac;

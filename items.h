@@ -31,7 +31,7 @@ class ItemType;
 #include "gamedefs.h"
 #include "astring.h"
 #include <vector>
-#include <string>
+#include <list>
 
 enum {
 	ATTACK_COMBAT,
@@ -469,17 +469,17 @@ class Item
 
 class ItemList
 {
-	std::vector<Item> items;
+	std::list<Item *> items;
 
 	public:
-		using iterator = typename std::vector<Item>::iterator;
+		using iterator = typename std::list<Item *>::iterator;
 
 		void Readin(std::istream& f);
 		void Writeout(std::ostream& f);
 
-		std::string Report(int obs, int seeillusions, int nofirstcomma);
-		std::string BattleReport();
-		std::string ReportByType(int, int, int, int);
+		AString Report(int, int, int);
+		AString BattleReport();
+		AString ReportByType(int, int, int, int);
 
 		int Weight();
 		int GetNum(int);
@@ -488,11 +488,13 @@ class ItemList
 		void Selling(int, int); /* type, number */
 		void UncheckAll(); // re-set checked flag for all
 
-		iterator begin() { return items.begin(); }
-		iterator end() { return items.end(); }
-		iterator erase(iterator i) { return items.erase(i); }
+		inline iterator begin() { return items.begin(); }
+		inline iterator end() { return items.end(); }
+		inline iterator erase(iterator it) { return items.erase(it); }
 		inline size_t size() { return items.size(); }
 		inline void clear() { items.clear(); }
+		inline Item *front() { return items.front(); }
+
 };
 
 extern AString ShowSpecial(char const *special, int level, int expandLevel, int fromItem);

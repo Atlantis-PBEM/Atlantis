@@ -28,7 +28,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     Unit *leader = helper.get_first_unit(faction);
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *sac1 = helper.create_unit(faction, region);
-    AString *tmp_name = new AString("My Leader");
+    AString *tmp_name= new AString("My Leader");
     leader->SetName(tmp_name);
     tmp_name = new AString("My Sacrifice 1");
     sac1->SetName(tmp_name);
@@ -78,7 +78,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     Unit *leader = helper.get_first_unit(faction);
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *sac1 = helper.create_unit(faction, region);
-    AString *tmp_name = new AString("My Leader");
+    AString *tmp_name= new AString("My Leader");
     leader->SetName(tmp_name);
     tmp_name = new AString("My Sacrifice 1");
     sac1->SetName(tmp_name);
@@ -183,7 +183,9 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ss << "unit 2\n";
     ss << "cast Teleportation REGION 1 1\n";
     helper.parse_orders(faction->num, ss);
-    helper.activate_spell(S_TELEPORTATION, {.region = region, .unit = leader, .object = nullptr, .val1 = 0, .val2 = 0});
+    helper.activate_spell(S_TELEPORTATION, {
+        .region = region, .unit = leader, .object = nullptr, .val1 = 0, .val2 = 0
+    });
 
     expect(faction->errors.size() == 1_ul);
 
@@ -248,7 +250,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     expect(event["unit"]["number"] == 2_i);
   };
 
-  "Unit with entity gets 'standard' entity maintainence with no movement"_test = []
+"Unit with entity gets 'standard' entity maintainence with no movement"_test = []
   {
     UnitTestHelper helper;
     helper.enable(UnitTestHelper::Type::ITEM, I_IMPRISONED_ENTITY, true);
@@ -400,7 +402,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
-    // ARegion *region = helper.get_region(0, 0, 0);
+    //ARegion *region = helper.get_region(0, 0, 0);
     Unit *leader = helper.get_first_unit(faction);
     AString *tmp_name = new AString("My Leader");
     leader->SetName(tmp_name);
@@ -561,4 +563,5 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     expect(region_rep["population"].empty());
     expect(region_rep.value("tax", 0) == 0_i);
   };
+
 };

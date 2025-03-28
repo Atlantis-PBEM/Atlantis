@@ -182,18 +182,28 @@ void populateForitifcationLandmark(std::vector<Landmark> &landmarks, ARegion *re
     int protect = 0;
     Object *building = NULL;
 
-    for(const auto obj: reg->objects) {
+    for(const auto obj : reg->objects) {
         ObjectType& type = ObjectDefs[obj->type];
 
-		if (type.flags & ObjectType::GROUP) continue;
-		if (obj->IsFleet()) continue;
-        if (protect >= type.protect) continue;
+		if (type.flags & ObjectType::GROUP) {
+			continue;
+		}
+
+		if (obj->IsFleet()) {
+			continue;
+		}
+
+        if (protect >= type.protect) {
+            continue;
+        }
 
         protect = type.protect;
         building = obj;
     }
 
-    if (!building) return;
+    if (!building) {
+        return;
+    }
 
     std::string name = building->name->Str();
     std::string title = std::string(ObjectDefs[building->type].name) + " " + name;

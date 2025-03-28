@@ -175,7 +175,7 @@ int Game::MakeWMon(ARegion *pReg)
 
 	MonType *mp = FindMonster(ItemDefs[montype].abr,
 			(ItemDefs[montype].type & IT_ILLUSION));
-	Faction *monfac = get_faction(factions, monfaction);
+	Faction *monfac = GetFaction(factions, monfaction);
 	Unit *u = GetNewUnit(monfac, 0);
 	u->MakeWMon(mp->name, montype, (mp->number+getrandom(mp->number)+1)/2);
 	u->MoveUnit(pReg->GetDummy());
@@ -200,7 +200,7 @@ void Game::MakeLMon(Object *pObj)
 
 	MonType *mp = FindMonster(ItemDefs[montype].abr,
 			(ItemDefs[montype].type & IT_ILLUSION));
-	Faction *monfac = get_faction(factions, monfaction);
+	Faction *monfac = GetFaction(factions, monfaction);
 	Unit *u = GetNewUnit(monfac, 0);
 	switch(montype) {
 		case I_IMP:

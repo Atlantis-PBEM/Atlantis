@@ -34,11 +34,10 @@ class Battle;
 #include "events.h"
 #include <vector>
 
+class Location;
+
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
-
-// External decl of Location
-class Location;
 
 enum {
 	ASS_NONE,
@@ -63,26 +62,28 @@ class Battle
 		void AddLine(const AString &);
 
 		int Run(
-			Events *events, ARegion *region, Unit *att, std::vector<Location *>& atts, Unit *tar,
-			std::vector<Location *>& defs, int ass, ARegionList *pRegs
+			Events* events, ARegion *region, Unit *att, std::list<Location *>& atts,
+			Unit *tar, std::list<Location *>& defs, int ass
 		);
 		void FreeRound(Army *,Army *, int ass = 0);
 		void NormalRound(int,Army *,Army *);
 		void DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 				int behind, int ass = 0, bool canAttackBehind = false, bool canAttackFromBehind = false);
 
-		void GetSpoils(std::vector<Location *>& losers, ItemList& spoils, int assasination);
+		void GetSpoils(std::list<Location *>& losers, ItemList& spoils, int ass);
 
 		//
 		// These functions should be implemented in specials.cpp
 		//
 		void UpdateShields(Army *);
-		void DoSpecialAttack(int round, Soldier *a, Army *attackers, Army *def, int behind, int canattackback);
+		void DoSpecialAttack( int round, Soldier *a, Army *attackers,
+				Army *def, int behind, int canattackback);
 
 		void WriteSides(
-			ARegion *r, Unit *att, Unit *tar, std::vector<Location *>& atts,
-			std::vector<Location *>& defs, int ass, ARegionList *pRegs
+			ARegion * r, Unit * att, Unit * tar, std::list<Location *>& atts, std::list<Location *>& defs, int ass
 		);
+
+		// void WriteBattleStats(ArmyStats *);
 
 		int assassination;
 		Faction * attacker; /* Only matters in the case of an assassination */
