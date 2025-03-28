@@ -234,7 +234,7 @@ void CountNames()
 	// them easily (to check for randomly generated rude words,
 	// for example)
 	ofstream names("names.out", ios::out|ios::ate);
-	for(auto name: regionnames) {
+	for(const auto& name: regionnames) {
 		names << name << '\n';
 	}
 }
@@ -333,7 +333,7 @@ int AGetName(int town, ARegion *reg)
 		}
 		temp[0] = toupper(temp[0]);
 		unique = 1;
-		for(auto name: regionnames) {
+		for(const auto& name: regionnames) {
 			if (name == temp) {
 				unique = 0;
 				break;
@@ -774,18 +774,18 @@ int ARegion::CanBeStartingCity( ARegionArray *pRA )
 	toconsider.push_back(this);
 	seen.insert(this);
 
-	while(!toconsider.empty()) {
-		ARegion *r = toconsider.front();
+	while (!toconsider.empty()) {
+		ARegion *reg = toconsider.front();
 		toconsider.pop_front();
-		for (int i = 0; i < NDIRS; i++) {
-			ARegion *n = r->neighbors[i];
-			if (!n) continue;
-			if (n->type == R_OCEAN) continue;
-			if (seen.end() != seen.find(n)) continue;
+		for (int i=0; i<NDIRS; i++) {
+			ARegion * r2 = reg->neighbors[i];
+			if (!r2) continue;
+			if (r2->type == R_OCEAN) continue;
+			if (seen.find(r2) != seen.end()) continue;
 			regs++;
-			if (regs>20) return 1;
-			seen.insert(n);
-			toconsider.push_back(n);
+			if (regs > 20) return 1;
+			toconsider.push_back(r2);
+			seen.insert(r2);
 		}
 	}
 	return 0;

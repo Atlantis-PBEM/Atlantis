@@ -50,7 +50,6 @@ using json = nlohmann::json;
 #include <vector>
 #include <iostream>
 #include <sstream>
-#include <memory>
 
 enum
 {
@@ -158,7 +157,7 @@ public:
 	void SetNameNoChange(AString *str);
 	void SetAddress(AString &strNewAddress);
 
-	void CheckExist(ARegionList &);
+	void CheckExist(ARegionList& regs);
 	void error(const std::string& s, Unit *u = nullptr);
 	void event(const std::string& message, const std::string& category, ARegion *r = nullptr, Unit *u = nullptr);
 
@@ -192,8 +191,6 @@ public:
 	int lastchange;
 	int lastorders;
 	int unclaimed;
-	int bankaccount;
-	int interest; // not written to game.out
 	AString *name;
 	AString *address;
 	AString *password;
@@ -253,6 +250,6 @@ private:
 	void build_gm_json_report(json& j, Game *game);
 };
 
-Faction *get_faction(const std::vector<std::unique_ptr<Faction>>& factions, int faction_id);
+Faction *GetFaction(std::list<Faction *>& factions, int factionid);
 
 #endif

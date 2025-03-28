@@ -840,19 +840,14 @@ void ARegion::AddTown(int size, AString * name)
 	SetTownType(size);
 	SetupCityMarket();
 	/* remove all lairs */
-	for(auto it = objects.begin(); it != objects.end(); ) {
-		Object *obj = *it;
-		if (obj->type == O_DUMMY) {
-			++it;
-			continue;
-		}
+	for(const auto obj : objects) {
+		if (obj->type == O_DUMMY) continue;
 		if ((ObjectDefs[obj->type].monster != -1) && (!(ObjectDefs[obj->type].flags & ObjectType::CANENTER))) {
+			std::for_each(obj->units.begin(), obj->units.end(), [](Unit *u) { delete u; });
 			obj->units.clear();
-			it = objects.erase(it);
+			std::erase(objects, obj);
 			delete obj;
-			continue;
 		}
-		++it;
 	}
 }
 
@@ -1081,8 +1076,7 @@ void ARegion::UpdateProducts()
 		if (prod->itemtype == I_SILVER && prod->skill == -1) continue;
 
 		for(const auto o : objects) {
-			if (o->incomplete < 1 &&
-					ObjectDefs[o->type].productionAided == prod->itemtype) {
+			if (o->incomplete < 1 && ObjectDefs[o->type].productionAided == prod->itemtype) {
 				lastbonus /= 2;
 				bonus += lastbonus;
 			}
@@ -1141,8 +1135,12 @@ int ARegion::TownHabitat()
 		if (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_FOOD) farm++;
 		if (ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
 		if (ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
-		if ((ObjectDefs[obj->type].flags & ObjectType::TRANSPORT)
-			&& (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_MOUNT)) caravan++;
+		if (
+			(ObjectDefs[obj->type].flags & ObjectType::TRANSPORT) &&
+			(ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_MOUNT)
+		) {
+			caravan++;
+		}
 	}
 	int hab = 2;
 	int step = 0;
@@ -1457,7 +1455,8 @@ void ARegion::FindMigrationDestination(int round)
 	if (target == this) return;
 
 	// then add this region to the target's migfrom list
-	target->migfrom.push_back(this);
+	ARegion *self = this;
+	target->migfrom.push_back(self);
 }
 
 /* Attractiveness of the region as a destination for migrants */
@@ -1491,17 +1490,15 @@ int ARegion::MigrationAttractiveness(int homedev, int range, int round)
 }
 
 /* Performs migration for each region with a migration
- * route pointing to the region (i.e. element of migfrom),
+ * route pointing to the region (i.e. element of migfrom list),
  * adjusting population for hex of origin and itself */
 void ARegion::Migrate()
 {
 	// calculate total potential migrants
 	int totalmig = 0;
-	if(!migfrom.empty()) {
-		for(const auto r : migfrom) {
-			if (!r) continue;
-			totalmig += r->emigrants;
-		}
+	for(const auto r : migfrom) {
+		if (!r) continue;
+		totalmig += r->emigrants;
 	}
 
 	// is there any migration to perform?
@@ -1509,7 +1506,7 @@ void ARegion::Migrate()
 
 	// do each migration
 	int totalimm = 0;
-	for(const auto r : migfrom) {
+	for (auto r : migfrom) {
 		if (!r) continue;
 
 		// figure range
@@ -1548,13 +1545,11 @@ void ARegion::Migrate()
 	migfrom.clear();
 }
 
-void ARegion::PostTurn(ARegionList *pRegs)
+void ARegion::PostTurn()
 {
 
 	/* Check decay */
-	if (Globals->DECAY) {
-		DoDecayCheck(pRegs);
-	}
+	if (Globals->DECAY) DoDecayCheck();
 
 	/* Development increase due to player activity */
 	// scale improvement
@@ -1636,7 +1631,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	clearskies = 0;
 
 	for(const auto o : objects) {
-		for(const auto u: o->units) {
+		for(const auto u : o->units) {
 			u->PostTurn(this);
 		}
 	}

@@ -89,7 +89,7 @@ int Game::SetupFaction( Faction *pFac )
 	if (pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
 	} else if (!Globals->MULTI_HEX_NEXUS) {
-		reg = *(regions.begin());
+		reg = regions.front();
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
@@ -110,6 +110,7 @@ int Game::SetupFaction( Faction *pFac )
 static void CreateQuest(ARegionList& regions, int monfaction)
 {
 	int d, count, temple, i, j, clash;
+	ARegion *r;
 	AString rname;
 	map <string, int> temples;
 	map <string, int>::iterator it;
@@ -129,27 +130,32 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 	if (d < 40) {
 		// SLAY quest
 		q->type = Quest::SLAY;
-		std::vector<Unit *>targets;
 		count = 0;
 		// Count our current monsters
 		for(const auto r : regions) {
 			if (TerrainDefs[r->type].similar_type == R_OCEAN) continue;
 			if (!r->visited) continue;
 			for(const auto o : r->objects) {
-				for(const auto u: o->units) {
-					if (u->faction->num == monfaction) {
-						count++;
-						targets.push_back(u);
-					}
+				for(const auto u : o->units) {
+					if (u->faction->num == monfaction) count++;
 				}
 			}
 		}
 		if (!count) return;
-
 		// pick one as the object of the quest
 		d = getrandom(count);
-		q->target = targets[d]->num;
-		for(auto q2: quests) {
+		for(const auto r : regions) {
+			if (TerrainDefs[r->type].similar_type == R_OCEAN) continue;
+			if (!r->visited) continue;
+			for(const auto o : r->objects) {
+				for(const auto u : o->units) {
+					if (u->faction->num == monfaction) {
+						if (!d--) q->target = u->num;
+					}
+				}
+			}
+		}
+		for(const auto& q2 : quests) {
 			if (q2->type == Quest::SLAY && q2->target == q->target) {
 				// Don't hunt the same monster twice
 				q->type = -1;
@@ -164,8 +170,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 			if (r->type == R_OCEAN) continue;
 			if (!r->visited) continue;
 			for (const auto& p : r->products) {
-				if (p->itemtype != I_SILVER)
-					count++;
+				if (p->itemtype != I_SILVER) count++;
 			}
 		}
 		count = getrandom(count);
@@ -184,9 +189,9 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 				}
 			}
 		}
-		ARegion *r = regions.GetRegion(q->regionnum);
+		r = regions.GetRegion(q->regionnum);
 		rname = *r->name;
-		for(auto q2: quests) {
+		for(const auto& q2: quests) {
 			if (q2->type == Quest::HARVEST) {
 				r = regions.GetRegion(q2->regionnum);
 				if (rname == *r->name) {
@@ -270,7 +275,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 			}
 		}
 		if (q->type == Quest::BUILD) {
-			for(auto q2: quests) {
+			for(const auto& q2: quests) {
 				if (q2->type == Quest::BUILD && q->building == q2->building && q->regionname == q2->regionname) {
 					// Don't have 2 build quests
 					// active in the same region
@@ -280,7 +285,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		} else if (q->type == Quest::VISIT) {
 			// Make sure that a given region is only in one
 			// pilgrimage at a time
-			for(auto q2: quests) {
+			for(const auto& q2: quests) {
 				if (q2->type == Quest::VISIT && q->building == q2->building) {
 					intersection.clear();
 					set_intersection(
@@ -319,7 +324,7 @@ Faction *Game::CheckVictory()
 	set<string> intersection, un;
 	set<string>::iterator it2;
 
-	for(auto q: quests) {
+	for(const auto& q: quests) {
 		if (q->type != Quest::VISIT) continue;
 		for (auto dest: q->destinations) {
 			un.insert(dest);
@@ -339,14 +344,12 @@ Faction *Game::CheckVictory()
 			}
 		}
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				intersection.clear();
-				set_intersection(u->visited.begin(),
-					u->visited.end(),
-					un.begin(),
-					un.end(),
-					inserter(intersection,
-						intersection.begin()),
+				set_intersection(
+					u->visited.begin(), u->visited.end(),
+					un.begin(), un.end(),
+					inserter(intersection, intersection.begin()),
 					less<string>()
 				);
 				u->visited = intersection;
@@ -527,16 +530,15 @@ Faction *Game::CheckVictory()
 	}
 
 	// See if anyone has won by collecting enough relics of grace
-	for(auto& f : factions) {
+	for(const auto f : factions) {
 		// No accidentally sending all the Guardsmen
 		// or Creatures to the Eternal City!
-		if (f->is_npc)
-			continue;
+		if (f->is_npc) continue;
 		reliccount = 0;
 		for(const auto r : regions) {
 			for(const auto o : r->objects) {
-				for(const auto u: o->units) {
-					if (u->faction == f.get()) {
+				for(const auto u : o->units) {
+					if (u->faction == f) {
 						reliccount += u->items.GetNum(I_RELICOFGRACE);
 					}
 				}
@@ -555,24 +557,18 @@ Faction *Game::CheckVictory()
 			magiclevels = 0;
 			for(const auto r : regions) {
 				for(const auto o : r->objects) {
-					// To avoid invalidating the iterator, we'll collect the units that would get removed
-					// and then remove them at the end.
-					std::vector<Unit *> unitsToErase;
-					for(const auto u: o->units) {
-						if (u->faction == f.get()) {
+					for(const auto u : o->units) {
+						if (u->faction == f) {
 							units++;
-							for(auto item: u->items) {
-								if (ItemDefs[item.type].type & IT_LEADER)
-									leaders += item.num;
-								else if (ItemDefs[item.type].type & IT_MAN)
-									men += item.num;
-								else if (ItemDefs[item.type].type & IT_MONEY)
-									silver += item.num * ItemDefs[item.type].baseprice;
-								else
-									stuff += item.num * ItemDefs[item.type].baseprice;
+							for(auto item : u->items) {
+								if (ItemDefs[item->type].type & IT_LEADER) leaders += item->num;
+								else if (ItemDefs[item->type].type & IT_MAN) men += item->num;
+								else if (ItemDefs[item->type].type & IT_MONEY)
+									silver += item->num * ItemDefs[item->type].baseprice;
+								else stuff += item->num * ItemDefs[item->type].baseprice;
 
 							}
-							for(auto s: u->skills) {
+							for(const auto s: u->skills) {
 								if (SkillDefs[s->type].flags & SkillType::MAGIC) {
 									magicdays += s->days * SkillDefs[s->type].cost;
 									magiclevels += GetLevelByDays(s->days / u->GetMen()) * u->GetMen();
@@ -584,12 +580,9 @@ Faction *Game::CheckVictory()
 							// Should really move this unit somewhere they'll be cleaned up,
 							// but given that the appropriate place for that function is
 							// r->hell, this doesn't seem right given what's happened.
-							// In this case, I'm willing to leak memory :-)
-							unitsToErase.push_back(u);
+							std::erase(o->units, u);
+							delete u;
 						}
-					}
-					for (auto u : unitsToErase) {
-						std::erase(o->units, u);
 					}
 				}
 			}
@@ -734,12 +727,12 @@ Faction *Game::CheckVictory()
 						"The connection between Havilah and the Eternal City has been severed.\n\n"
 						"The light fails; darkness falls forever, and all life perishes under endless ice.";
 					WriteTimesArticle(message);
-					return get_faction(factions, monfaction);
+					return GetFaction(factions, monfaction);
 				}
 				if (o->incomplete <= ObjectDefs[o->type].cost / 2) {
 					// Half done; make a quest to destroy it
 					found = 0;
-					for(auto q: quests) {
+					for(const auto& q: quests) {
 						if (q->type == Quest::DEMOLISH && q->target == o->num && q->regionnum == r->num) {
 							found = 1;
 							break;
@@ -762,7 +755,7 @@ Faction *Game::CheckVictory()
 	}
 
 	std::vector<shared_ptr<Quest>> questsWithProblems;
-	for(auto q: quests) {
+	for(const auto& q: quests) {
 		switch(q->type) {
 			case Quest::SLAY:
 				l = regions.FindUnit(q->target);
@@ -850,7 +843,7 @@ Faction *Game::CheckVictory()
 		}
 	}
 
-	for(auto q: questsWithProblems) quests.erase(q);
+	for(const auto& q: questsWithProblems) quests.erase(q);
 	return NULL;
 }
 
@@ -1128,5 +1121,5 @@ void Game::ModifyTablesPerRuleset(void)
 	return;
 }
 
-const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList *regs) { return nullptr; }
+const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList &regs) { return nullptr; }
 

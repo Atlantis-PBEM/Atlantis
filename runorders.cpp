@@ -26,9 +26,6 @@
 #include "game.h"
 #include "gamedata.h"
 #include "quests.h"
-#include <vector>
-#include <memory>
-#include <set>
 
 using namespace std;
 
@@ -47,7 +44,7 @@ void Game::RunOrders()
 	DoAttackOrders();
 	DoAutoAttacks();
 	Awrite("Running STEAL/ASSASSINATE Orders...");
-	RunStealOrders();
+	RunStealthOrders();
 	Awrite("Running GIVE Orders...");
 	DoGiveOrders();
 	Awrite("Running ENTER NEW Orders...");
@@ -131,11 +128,9 @@ void Game::RunOrders()
 
 void Game::ClearCastEffects()
 {
-	for(const auto r: regions) {
+	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
-				u->SetFlag(FLAG_INVIS, 0);
-			}
+			for(const auto u : o->units) u->SetFlag(FLAG_INVIS, 0);
 		}
 	}
 }
@@ -144,9 +139,10 @@ void Game::RunCastOrders()
 {
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u->castorders) {
 					RunACastOrder(r, o, u);
+					delete u->castorders;
 					u->castorders = nullptr;
 				}
 			}
@@ -194,35 +190,32 @@ bool Game::ActivityCheck(ARegion *pReg, Faction *pFac, FactionActivity activity)
 	return true;
 }
 
-void Game::RunStealOrders()
+void Game::RunStealthOrders()
 {
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			// Since assassinate can trigger a battle which can cause a dead unit to get moved out of an object
-			// we need to iterate a copy
-			auto unitCopy(o->units);
-			for(const auto u: unitCopy) {
-				if (u->stealthorders) {
-					if (u->stealthorders->type == O_STEAL) {
-						Do1Steal(r, o, u);
-					} else if (u->stealthorders->type == O_ASSASSINATE) {
-						Do1Assassinate(r, o, u);
-					}
-					u->stealthorders = nullptr;
+			// used to be a safe_list so a copy here.. consider doing that again, but we shouldn't need to.
+			for(const auto u : o->units) {
+				if (!u->stealthorders) continue;
+				if (u->stealthorders->type == O_STEAL) {
+					Do1Steal(r, o, u);
 				}
+				if (u->stealthorders->type == O_ASSASSINATE) {
+					Do1Assassinate(r, o, u);
+				}
+				delete u->stealthorders;
+				u->stealthorders = nullptr;
 			}
 		}
 	}
 }
 
-std::vector<Faction *>Game::CanSeeSteal(ARegion *r, Unit *u)
+std::list<Faction *> Game::CanSeeSteal(ARegion *r, Unit *u)
 {
-	std::vector<Faction *>retval;
-	for(const auto& f: factions) {
-		if (r->Present(f.get())) {
-			if (f->CanSee(r, u, Globals->SKILL_PRACTICE_AMOUNT > 0)) {
-				retval.push_back(f.get());
-			}
+	std::list<Faction *> retval;
+	for(const auto f :factions) {
+		if (r->Present(f) && f->CanSee(r, u, Globals->SKILL_PRACTICE_AMOUNT > 0)) {
+			retval.push_back(f);
 		}
 	}
 	return retval;
@@ -230,8 +223,8 @@ std::vector<Faction *>Game::CanSeeSteal(ARegion *r, Unit *u)
 
 void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 {
-	std::shared_ptr<AssassinateOrder> so = std::dynamic_pointer_cast<AssassinateOrder>(u->stealthorders);
-	Unit *tar = r->get_unit_id(*(so->target), u->faction->num);
+	AssassinateOrder *so = dynamic_cast<AssassinateOrder *>(u->stealthorders);
+	Unit *tar = r->GetUnitId(so->target, u->faction->num);
 
 	if (!tar) {
 		u->error("ASSASSINATE: Invalid unit given.");
@@ -248,8 +241,7 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 		return;
 	}
 
-	if (tar->type == U_GUARD || tar->type == U_WMON ||
-			tar->type == U_GUARDMAGE) {
+	if (tar->type == U_GUARD || tar->type == U_WMON || tar->type == U_GUARDMAGE) {
 		u->error("ASSASSINATE: Can only assassinate other player's units.");
 		return;
 	}
@@ -259,14 +251,14 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 		return;
 	}
 
-	std::vector<Faction *> seers(CanSeeSteal(r, u));
+	std::list<Faction *> seers(CanSeeSteal(r, u));
 	int succ = 1;
-	for(auto f: seers) {
-		if (f->num == tar->faction->num) {
+	for(const auto f : seers) {
+		if (f == tar->faction) {
 			succ = 0;
 			break;
 		}
-		if ((f->get_attitude(tar->faction->num)) == A_ALLY) {
+		if (f->get_attitude(tar->faction->num) == A_ALLY) {
 			succ = 0;
 			break;
 		}
@@ -278,7 +270,7 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 	if (!succ) {
 		string temp = string(u->name->const_str()) + " is caught attempting to assassinate " +
 			tar->name->const_str() + " in " + r->name->const_str() + ".";
-		for(auto f: seers) {
+		for(const auto f : seers) {
 			f->event(temp, "combat");
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
@@ -304,8 +296,8 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 
 void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 {
-	std::shared_ptr<StealOrder> so = std::dynamic_pointer_cast<StealOrder>(u->stealthorders);
-	Unit *tar = r->get_unit_id(*so->target, u->faction->num);
+	StealOrder *so = dynamic_cast<StealOrder *>(u->stealthorders);
+	Unit *tar = r->GetUnitId(so->target, u->faction->num);
 
 	if (!tar) {
 		u->error("STEAL: Invalid unit given.");
@@ -330,10 +322,10 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 		return;
 	}
 
-	std::vector<Faction *> seers(CanSeeSteal(r, u));
+	std::list<Faction *> seers(CanSeeSteal(r, u));
 	int succ = 1;
-	for(auto f: seers) {
-		if (f->num == tar->faction->num) {
+	for(const auto f : seers) {
+		if (f == tar->faction) {
 			succ = 0;
 			break;
 		}
@@ -350,7 +342,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	if (!succ) {
 		string temp = string(u->name->const_str()) + " is caught attempting to steal from " +
 			tar->name->const_str() + " in " + r->name->const_str() + ".";
-		for(auto f: seers) {
+		for(const auto f : seers) {
 			f->event(temp, "theft");
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
@@ -384,9 +376,9 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	u->items.SetNum(so->item, u->items.GetNum(so->item) + amt);
 	tar->items.SetNum(so->item, tar->items.GetNum(so->item) - amt);
 
-	string temp = string(u->name->const_str()) + " steals " +
-	ItemString(so->item, amt) + " from "+  tar->name->const_str() + ".";
-	for(auto f: seers) {
+	string temp = string(u->name->const_str()) + " steals " + ItemString(so->item, amt) + " from " +
+		tar->name->const_str() + ".";
+	for(const auto f : seers) {
 		f->event(temp, "theft");
 	}
 
@@ -399,11 +391,9 @@ void Game::DrownUnits()
 {
 	for(const auto r : regions) {
 		if (TerrainDefs[r->type].similar_type == R_OCEAN) {
-			for(const auto o: r->objects) {
+			for(const auto o : r->objects) {
 				if (o->type != O_DUMMY) continue;
-				// Drowing will move a unit out of one object into another.
-				auto unitCopy(o->units);
-				for(const auto u: unitCopy) {
+				for(const auto u : o->units) {
 					int drown = 0;
 					switch(Globals->FLIGHT_OVER_WATER) {
 						case GameDefs::WFLIGHT_UNLIMITED:
@@ -439,12 +429,13 @@ void Game::SinkUncrewedFleets()
 void Game::RunForgetOrders()
 {
 	for(const auto r : regions) {
-		for(const auto o: r->objects) {
-			for(const auto u: o->units) {
-				for(auto fo : u->forgetorders) {
+		for(const auto o : r->objects) {
+			for(const auto u : o->units) {
+				for(const auto fo : u->forgetorders) {
 					u->ForgetSkill(fo->skill);
 					u->event("Forgets " + string(SkillStrs(fo->skill).const_str()) + ".", "forget");
 				}
+				std::for_each(u->forgetorders.begin(), u->forgetorders.end(), [](ForgetOrder *fo) { delete fo; });
 				u->forgetorders.clear();
 			}
 		}
@@ -453,8 +444,8 @@ void Game::RunForgetOrders()
 
 void Game::RunQuitOrders()
 {
-	for(const auto& f: factions) {
-		if (f->quit) Do1Quit(f.get());
+	for(const auto f : factions) {
+		if (f->quit) Do1Quit(f);
 	}
 }
 
@@ -462,9 +453,7 @@ void Game::Do1Quit(Faction *f)
 {
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			// Killing moves a unit out of the object
-			auto unitCopy(o->units);
-			for(const auto u: unitCopy) {
+			for(const auto u : o->units) {
 				if (u->faction == f) {
 					r->Kill(u);
 				}
@@ -476,16 +465,14 @@ void Game::Do1Quit(Faction *f)
 void Game::RunDestroyOrders()
 {
 	for(const auto r : regions) {
-		// Destroying can remove an object from a region, so we need to iterate a copy
-		auto objectCopy(r->objects);
-		for(const auto o : objectCopy) {
+		for(const auto o : r->objects) {
 			Unit *u = o->GetOwner();
 			if (u) {
 				if (u->destroy) {
 					Do1Destroy(r, o, u);
 					continue;
 				} else {
-					for(const auto u: o->units) u->destroy = 0;
+					for (const auto u2 : o->units) u2->destroy = 0;
 				}
 			}
 		}
@@ -497,13 +484,13 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 		u->error("DESTROY: Can't destroy a ship while at sea.");
-		for(auto u1: o->units) u1->destroy = 0;
+		for (const auto u2 : o->units) u2->destroy = 0;
 		return;
 	}
 
 	if (!u->GetMen()) {
 		u->error("DESTROY: Empty units cannot destroy structures.");
-		for(const auto u1: o->units) u1->destroy = 0;
+		for (const auto u2 : o->units) u2->destroy = 0;
 		return;
 	}
 
@@ -520,8 +507,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 		if (Globals->DESTROY_BEHAVIOR == DestroyBehavior::INSTANT) {
 			destroyablePoints = structurePoints;
 			destroyPower = structurePoints;
-		}
-		else {
+		} else {
 			destroyablePoints = std::max(
 				Globals->MIN_DESTROY_POINTS, maxStructurePoints * Globals->MAX_DESTROY_PERCENT / 100
 			);
@@ -529,17 +515,15 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 
 			if (Globals->DESTROY_BEHAVIOR == DestroyBehavior::PER_SKILL) {
 				destroyPower = std::max(1, u->GetSkill(S_BUILDING)) * u->GetMen();
-			}
-			else {
+			} else {
 				destroyPower = u->GetMen();
 			}
 		}
 
 		willDestroy = std::min(destroyablePoints, destroyPower);
 		if (willDestroy == 0) {
-			u->error(string("Can't destroy ") + o->name->const_str() + " more.");
-			for(const auto u1: o->units) u1->destroy = 0;
-
+			u->error(string("DESTROY: Can't destroy ") + o->name->const_str() + " more.");
+			for (const auto u2 : o->units) u2->destroy = 0;
 			return;
 		}
 
@@ -548,39 +532,38 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 			o->destroyed += willDestroy;
 			o->incomplete += willDestroy;
 
-			u->event("Destroys " + to_string(willDestroy) + " structure points from the " +
-				o->name->const_str() + ".", "destroy");
-		}
-		else {
+			u->event("Destroys " + to_string(willDestroy) + " structure points from the " + o->name->const_str() + ".", "destroy");
+		} else {
 			u->event("Destroys " + string(o->name->const_str()) + ".", "destroy");
 
 			Object *dest = r->GetDummy();
-			auto unitCopy(o->units);
-			for(const auto u: unitCopy) {
-				u->destroy = 0;
-				u->MoveUnit(dest);
+			for(const auto u2 : o->units) {
+				u2->destroy = 0;
+				u2->MoveUnit(dest);
 			}
 
 			if (quests.check_demolish_target(r, o->num, u, &quest_rewards)) {
 				u->event("You have completed a quest!" + quest_rewards, "quest");
 			}
-
-			std::erase(r->objects, o);
+			r->objects.remove(o);
 			delete o;
 		}
 	} else {
-		u->error("DESTROY: Can't destroy that.");
-		for(auto u1: o->units) u1->destroy = 0;
+		if (o->type == O_DUMMY) {
+			u->error("DESTROY: Not inside a structure.");
+		} else {
+			u->error(string("DESTROY: Can't destroy ") + o->name->const_str() + ".");
+		}
+		for (const auto u2 : o->units) u2->destroy = 0;
+		return;
 	}
 }
 
 void Game::RunFindOrders()
 {
 	for(const auto r : regions) {
-		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
-				RunFindUnit(u);
-			}
+		for(auto o : r->objects) {
+			for(const auto u : o->units) RunFindUnit(u);
 		}
 	}
 }
@@ -589,10 +572,10 @@ void Game::RunFindUnit(Unit *u)
 {
 	int all = 0;
 	Faction *fac;
-	for(auto f: u->findorders) {
+	for(const auto f : u->findorders) {
 		if (f->find == 0) all = 1;
 		if (!all) {
-			fac = get_faction(factions, f->find);
+			fac = GetFaction(factions, f->find);
 			if (fac) {
 				string temp = string("The address of ") + fac->name->const_str() + " is " +
 					fac->address->const_str() + ".";
@@ -601,13 +584,14 @@ void Game::RunFindUnit(Unit *u)
 				u->error(string("FIND: ") + to_string(f->find) + " is not a valid faction number.");
 			}
 		} else {
-			for(const auto& fac : factions) {
+			for(const auto fac : factions) {
 				string temp = string("The address of ") + fac->name->const_str() + " is " +
 					fac->address->const_str() + ".";
 				u->faction->event(temp, "find");
 			}
 		}
 	}
+	std::for_each(u->findorders.begin(), u->findorders.end(), [](FindOrder *f) { delete f; });
 	u->findorders.clear();
 }
 
@@ -620,7 +604,7 @@ int Game::FortTaxBonus(Object *o, Unit *u)
 {
 	int protect = ObjectDefs[o->type].protect;
 	int fortbonus = 0;
-	for(const auto unit: o->units) {
+	for(const auto unit : o->units) {
 		int men = unit->GetMen();
 		if (unit->num == u->num) {
 			if (unit->taxing == TAX_TAX) {
@@ -643,7 +627,7 @@ int Game::CountTaxes(ARegion *reg)
 	int t = 0;
 	for(const auto o : reg->objects) {
 		int protect = ObjectDefs[o->type].protect;
-		for(auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->GetFlag(FLAG_AUTOTAX) && !Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_TAX;
 			if (u->taxing == TAX_AUTO) u->taxing = TAX_TAX;
 
@@ -685,18 +669,16 @@ void Game::RunTaxRegion(ARegion *reg)
 	if (desired < reg->wealth) desired = reg->wealth;
 
 	for(const auto o : reg->objects) {
-		for(const auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->taxing == TAX_TAX) {
 				int t = u->Taxers(0);
 				t += FortTaxBonus(o, u);
-				double fAmt = ((double) t) *
-					((double) reg->wealth) / ((double) desired);
+				double fAmt = ((double) t) * ((double) reg->wealth) / ((double) desired);
 				int amt = (int) fAmt;
 				reg->wealth -= amt;
 				desired -= t;
 				u->SetMoney(u->GetMoney() + amt);
-				u->event("Collects $" + to_string(amt) + " in taxes in " +
-					reg->ShortPrint().const_str() + ".", "tax", reg);
+				u->event("Collects $" + to_string(amt) + " in taxes in " + reg->ShortPrint().const_str() + ".", "tax", reg);
 				u->taxing = TAX_NONE;
 			}
 		}
@@ -712,7 +694,7 @@ int Game::CountPillagers(ARegion *reg)
 {
 	int p = 0;
 	for(const auto o : reg->objects) {
-		for(auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->taxing == TAX_PILLAGE) {
 				if (!reg->CanPillage(u)) {
 					u->error("PILLAGE: A unit is on guard.");
@@ -740,7 +722,7 @@ int Game::CountPillagers(ARegion *reg)
 void Game::ClearPillagers(ARegion *reg)
 {
 	for(const auto o : reg->objects) {
-		for(const auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->taxing == TAX_PILLAGE) {
 				u->error("PILLAGE: Not enough men to pillage.");
 				u->taxing = TAX_NONE;
@@ -766,7 +748,7 @@ void Game::RunPillageRegion(ARegion *reg)
 	std::set<Faction *> facs = reg->PresentFactions();
 	int amt = reg->wealth * 2;
 	for(const auto o : reg->objects) {
-		for(const auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->taxing == TAX_PILLAGE) {
 				u->taxing = TAX_NONE;
 				int num = u->Taxers(1);
@@ -774,9 +756,8 @@ void Game::RunPillageRegion(ARegion *reg)
 				amt -= temp;
 				pillagers -= num;
 				u->SetMoney(u->GetMoney() + temp);
-				u->event("Pillages $" + to_string(temp) + " from " +
-					reg->ShortPrint().const_str() + ".", "tax", reg);
-				for (auto& f: facs) {
+				u->event("Pillages $" + to_string(temp) + " from " + reg->ShortPrint().const_str() + ".", "tax", reg);
+				for(const auto f : facs) {
 					if (f != u->faction) {
 						string temp = string(u->name->const_str()) + " pillages " + reg->name->const_str() + ".";
 						f->event(temp, "tax");
@@ -801,7 +782,8 @@ void Game::RunPromoteOrders()
 				u = o->GetOwner();
 				if (u && u->promote) {
 					Do1PromoteOrder(o, u);
-					u->promote = nullptr;
+					delete u->promote;
+					u->promote = 0;
 				}
 			}
 		}
@@ -812,30 +794,38 @@ void Game::RunPromoteOrders()
 				u = o->GetOwner();
 				if (u && u->evictorders) {
 					Do1EvictOrder(o, u);
-					u->evictorders = nullptr;
+					delete u->evictorders;
+					u->evictorders = 0;
 				}
 			}
 		}
 	}
 
+	/* Then, clear out other promote/evict orders */
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u->promote) {
 					if (o->type != O_DUMMY) {
 						u->error("PROMOTE: Must be owner");
+						delete u->promote;
+						u->promote = 0;
 					} else {
 						u->error("PROMOTE: Can only promote inside structures.");
+						delete u->promote;
+						u->promote = 0;
 					}
-					u->promote = nullptr;
 				}
 				if (u->evictorders) {
 					if (o->type != O_DUMMY) {
 						u->error("EVICT: Must be owner");
+						delete u->evictorders;
+						u->evictorders = 0;
 					} else {
 						u->error("EVICT: Can only evict inside structures.");
+						delete u->evictorders;
+						u->evictorders = 0;
 					}
-					u->evictorders = nullptr;
 				}
 			}
 		}
@@ -844,13 +834,14 @@ void Game::RunPromoteOrders()
 
 void Game::Do1PromoteOrder(Object *obj, Unit *u)
 {
-	Unit *tar = obj->get_unit_id(u->promote, u->faction->num);
+	Unit *tar = obj->GetUnitId(u->promote, u->faction->num);
 	if (!tar) {
 		u->error("PROMOTE: Can't find target.");
 		return;
 	}
+
 	std::erase(obj->units, tar);
-	obj->units.insert(obj->units.begin(), tar);
+	obj->units.push_front(tar);
 	ObjectType& ob = ObjectDefs[obj->type];
 	if (ob.flags & ObjectType::GRANTSKILL) {
 		if (tar->faction->skills.GetDays(ob.granted_skill) < ob.granted_level) {
@@ -862,15 +853,19 @@ void Game::Do1PromoteOrder(Object *obj, Unit *u)
 
 void Game::Do1EvictOrder(Object *obj, Unit *u)
 {
+	EvictOrder *ord = u->evictorders;
+
 	if (obj->region->type == R_NEXUS) {
 		u->error("Evict: Evict does not work in the Nexus.");
 		return;
 	}
 
-	obj->region->deduplicate_unit_list(u->evictorders->targets, u->faction->num);
-
-	for(auto id: u->evictorders->targets) {
-		Unit *tar = obj->get_unit_id(std::make_shared<UnitId>(id), u->faction->num);
+	obj->region->deduplicate_unit_list(ord->targets, u->faction->num);
+	while (ord && ord->targets.size()) {
+		UnitId *id = ord->targets.front();
+		std::erase(ord->targets, id);
+		Unit *tar = obj->GetUnitId(id, u->faction->num);
+		delete id;
 		if (!tar) continue;
 		if (obj->IsFleet() &&
 			(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
@@ -883,7 +878,6 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 		tar->event("Evicted from " + string(obj->name->const_str()) + " by " + u->name->const_str(), "evict");
 		u->event("Evicted " + string(tar->name->const_str()) + " from " + obj->name->const_str(), "evict");
 	}
-	u->evictorders->targets.clear();
 }
 
 /* RunEnterOrders is performed in TWO phases: one in the
@@ -894,9 +888,7 @@ void Game::RunEnterOrders(int phase)
 {
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			// Entering/joining can change unit lists in an object, so use a copy
-			auto unitCopy(o->units);
-			for(auto u: unitCopy) {
+			for(const auto u: o->units) {
 				// normal enter phase or ENTER NEW / JOIN phase?
 				if (phase == 0) {
 					if (u->enter > 0 || u->enter == -1)
@@ -943,10 +935,12 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
 
 void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 {
+	JoinOrder *jo;
 	Unit *tar;
 	Object *to, *from;
 
-	tar = r->get_unit_id(*u->joinorders->target, u->faction->num);
+	jo = (JoinOrder *) u->joinorders;
+	tar = r->GetUnitId(jo->target, u->faction->num);
 
 	if (!tar) {
 		u->error("JOIN: No such unit.");
@@ -964,7 +958,7 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 		return;
 	}
 
-	if (u->joinorders->merge) {
+	if (jo->merge) {
 		if (!u->object->IsFleet() || u->object->GetOwner()->num != u->num) {
 			u->error("JOIN MERGE: Not fleet owner.");
 			return;
@@ -973,31 +967,32 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 			u->error("JOIN MERGE: Target unit is not in a fleet.");
 			return;
 		}
-		for(auto pass: u->object->units) {
+		for(const auto pass : u->object->units) {
 			if (to->ForbiddenBy(r, pass)) {
 				u->error("JOIN MERGE: A unit would be refused entry.");
 				return;
 			}
 		}
 		from = u->object;
-
-		ItemList shipsCopy = from->ships;
-		for(auto ship: shipsCopy) {
+		for(auto it = from->ships.begin(); it != from->ships.end();) {
+			auto item = *it;
+			// DoGiveOrder can modify the item list if the last of an item is given, so increment here.
+			it++;
 			GiveOrder go;
-			auto id = std::make_shared<UnitId>();
-			go.amount = ship.num;
+			UnitId id;
+			go.amount = item->num;
 			go.except = 0;
-			go.item = ship.type;
-			id->unitnum = to->GetOwner()->num;
-			id->alias = 0;
-			id->faction = 0;
-			go.target = id;
+			go.item = item->type;
+			id.unitnum = to->GetOwner()->num;
+			id.alias = 0;
+			id.faction = 0;
+			go.target = &id;
 			go.type = O_GIVE;
 			go.merge = 1;
-			DoGiveOrder(r, u, std::make_shared<GiveOrder>(go));
+			DoGiveOrder(r, u, &go);
+			go.target = NULL;
 		}
-		auto unitsCopy(u->object->units);
-		for(const auto pass: unitsCopy) {
+		for(const auto pass : u->object->units) {
 			pass->MoveUnit(to);
 		}
 
@@ -1019,7 +1014,9 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 			u->error("JOIN: Is refused entry.");
 			return;
 		}
-		if (to->IsFleet() && !u->joinorders->overload && to->FleetCapacity() < to->FleetLoad() + u->Weight()) {
+		if (to->IsFleet() &&
+				!jo->overload &&
+				to->FleetCapacity() < to->FleetLoad() + u->Weight()) {
 			u->event("JOIN: Fleet would be overloaded.", "join");
 			return;
 		}
@@ -1030,22 +1027,15 @@ void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
 void Game::RemoveEmptyObjects()
 {
 	for(const auto r : regions) {
-		for(auto it = r->objects.begin(); it != r->objects.end(); ) {
-			Object *o = *it;
-			if ((o->IsFleet()) && (TerrainDefs[r->type].similar_type != R_OCEAN)) {
-				++it;
-				continue;
-			};
+		for(const auto o : r->objects) {
+			if ((o->IsFleet()) && (TerrainDefs[r->type].similar_type != R_OCEAN)) continue;
 			if (ObjectDefs[o->type].cost && o->incomplete >= ObjectDefs[o->type].cost) {
-				auto unitCopy(o->units);
-				for(const auto u: unitCopy) {
+				for(const auto u : o->units) {
 					u->MoveUnit(r->GetDummy());
 				}
-				it = r->objects.erase(it);
+				std::erase(r->objects, o);
 				delete o;
-				continue;
 			}
-			++it;
 		}
 	}
 }
@@ -1067,9 +1057,9 @@ void Game::PostProcessUnit(ARegion *r, Unit *u)
 
 void Game::EndGame(Faction *victor)
 {
-	for(const auto& fac: factions) {
+	for(const auto fac : factions) {
 		fac->exists = 0;
-		if (fac.get() == victor)
+		if (fac == victor)
 			fac->quit = QUIT_WON_GAME;
 		else
 			fac->quit = QUIT_GAME_OVER;
@@ -1089,7 +1079,7 @@ void Game::MidProcessTurn()
 	for(const auto r : regions) {
 		// r->MidTurn(); // Not yet implemented
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				MidProcessUnit(r, u);
 			}
 		}
@@ -1120,7 +1110,7 @@ void Game::ProcessMigration()
 		for(const auto r : regions) {
 			r->FindMigrationDestination(phase);
 		}
-		for (const auto r : regions) {
+		for(const auto r : regions) {
 			r->Migrate();
 		}
 	}
@@ -1132,30 +1122,27 @@ void Game::PostProcessTurn()
 	// Check if there are any factions left.
 	//
 	int livingFacs = 0;
-	for(auto& fac : factions) {
+	for(const auto fac : factions) {
 		if (fac->exists) {
 			livingFacs = 1;
 			break;
 		}
 	}
 
-	if (!livingFacs) {
-		EndGame(0);
-	} else if (!(Globals->OPEN_ENDED)) {
+	if (!livingFacs) EndGame(0);
+	else if (!(Globals->OPEN_ENDED)) {
 		Faction *victor = CheckVictory();
-		if (victor) {
-			EndGame(victor);
-		}
+		if (victor) EndGame(victor);
 	}
 
 	for(const auto r : regions) {
-		r->PostTurn(&regions);
+		r->PostTurn();
 
 		if (Globals->CITY_MONSTERS_EXIST && (r->town || r->type == R_NEXUS))
 			AdjustCityMons(r);
 
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				PostProcessUnit(r, u);
 			}
 		}
@@ -1172,21 +1159,20 @@ void Game::DoAutoAttacks()
 {
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			auto unitCopy(o->units);
-			for(auto u: unitCopy) {
-				if (u->canattack && u->IsAlive())
+			for(const auto u : o->units) {
+				if (u->canattack && u->IsAlive()) {
 					DoAutoAttack(r, u);
+				}
 			}
 		}
 	}
 }
 
-void Game::DoMovementAttacks(std::vector<Location *>& locs)
+void Game::DoMovementAttacks(std::list<Location *>& locs)
 {
 	for(const auto l : locs) {
 		if (l->obj) {
-			auto unitCopy(l->obj->units);
-			for(const auto u: unitCopy) {
+			for(const auto u : l->obj->units) {
 				DoMovementAttack(l->region, u);
 			}
 		} else {
@@ -1218,10 +1204,10 @@ void Game::DoMovementAttack(ARegion *r, Unit *u)
 void Game::DoAutoAttackOn(ARegion *r, Unit *t)
 {
 	for(const auto o : r->objects) {
-		auto unitCopy(o->units);
-		for(auto u: unitCopy) {
-			if (u->guard != GUARD_AVOID && (u->GetAttitude(r, t) == A_HOSTILE) && u->IsAlive() && u->canattack)
+		for(const auto u : o->units) {
+			if (u->guard != GUARD_AVOID && (u->GetAttitude(r, t) == A_HOSTILE) && u->IsAlive() && u->canattack) {
 				AttemptAttack(r, u, t, 1);
+			}
 			if (!t->IsAlive()) return;
 		}
 	}
@@ -1236,16 +1222,13 @@ void Game::DoAdvanceAttack(ARegion *r, Unit *u) {
 }
 
 void Game::DoAutoAttack(ARegion *r, Unit *u) {
-	if (u->guard == GUARD_AVOID)
-		return;
+	if (u->guard == GUARD_AVOID) return;
 	for(const auto o : r->objects) {
-		auto unitCopy(o->units);
-		for(auto t: unitCopy) {
+		for(const auto t : o->units) {
 			if (u->GetAttitude(r, t) == A_HOSTILE) {
 				AttemptAttack(r, u, t, 1);
 			}
-			if (u->canattack == 0 || u->IsAlive() == 0)
-				return;
+			if (u->canattack == 0 || u->IsAlive() == 0) return;
 		}
 	}
 }
@@ -1253,9 +1236,8 @@ void Game::DoAutoAttack(ARegion *r, Unit *u) {
 int Game::CountWMonTars(ARegion *r, Unit *mon) {
 	int retval = 0;
 	for(const auto o : r->objects) {
-		for(const auto u: o->units) {
-			if (u->type == U_NORMAL || u->type == U_MAGE ||
-					u->type == U_APPRENTICE) {
+		for(const auto u : o->units) {
+			if (u->type == U_NORMAL || u->type == U_MAGE || u->type == U_APPRENTICE) {
 				if (mon->CanSee(r, u) && mon->CanCatch(r, u)) {
 					retval += u->GetMen();
 				}
@@ -1267,9 +1249,8 @@ int Game::CountWMonTars(ARegion *r, Unit *mon) {
 
 Unit *Game::GetWMonTar(ARegion *r, int tarnum, Unit *mon) {
 	for(const auto o : r->objects) {
-		for(const auto u: o->units) {
-			if (u->type == U_NORMAL || u->type == U_MAGE ||
-					u->type == U_APPRENTICE) {
+		for(const auto u : o->units) {
+			if (u->type == U_NORMAL || u->type == U_MAGE || u->type == U_APPRENTICE) {
 				if (mon->CanSee(r, u) && mon->CanCatch(r, u)) {
 					int num = u->GetMen();
 					if (num && tarnum < num) return u;
@@ -1297,17 +1278,20 @@ void Game::DoAttackOrders()
 {
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
-			auto unitCopy(o->units);
-			for(auto u: unitCopy) {
+			for(const auto u : o->units) {
 				if (u->type == U_WMON) {
 					if (u->canattack && u->IsAlive()) {
 						CheckWMonAttack(r, u);
 					}
 				} else {
 					if (u->attackorders && u->IsAlive()) {
-						r->deduplicate_unit_list(u->attackorders->targets, u->faction->num);
-						for (auto id: u->attackorders->targets) {
-							Unit *t = r->get_unit_id(id, u->faction->num);
+						AttackOrder *ord = u->attackorders;
+						r->deduplicate_unit_list(ord->targets, u->faction->num);
+						while (ord->targets.size()) {
+							UnitId *id = ord->targets.front();
+							std::erase(ord->targets, id);
+							Unit *t = r->GetUnitId(id, u->faction->num);
+							delete id;
 							if (u->canattack && u->IsAlive()) {
 								if (t) {
 									AttemptAttack(r, u, t, 0);
@@ -1316,6 +1300,7 @@ void Game::DoAttackOrders()
 								}
 							}
 						}
+						delete ord;
 						u->attackorders = 0;
 					}
 				}
@@ -1362,13 +1347,11 @@ void Game::RunSellOrders()
 			if (m->type == Market::MarketType::M_SELL) DoSell(r, m);
 		}
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
-				std::for_each(
-					u->sellorders.begin(), u->sellorders.end(),
-					[&u](std::shared_ptr<SellOrder> o) {
-						u->error("SELL: Can't sell " + ItemString(o->item, o->num, FULLNUM) + ".");
-					}
-				);
+			for(const auto u : obj->units) {
+				std::for_each(u->sellorders.begin(), u->sellorders.end(), [u](SellOrder* o) {
+					u->error("SELL: Can't sell " + ItemString(o->item, o->num, FULLNUM) + ".");
+					delete o;
+				});
 				u->sellorders.clear();
 			}
 		}
@@ -1379,8 +1362,8 @@ int Game::GetSellAmount(ARegion *r, Market *m)
 {
 	int num = 0;
 	for(const auto obj : r->objects) {
-		for(const auto u: obj->units) {
-			for(auto o: u->sellorders) {
+		for(const auto u : obj->units) {
+			for(const auto o: u->sellorders) {
 				if (o->item == m->item) {
 					if (o->num == -1) {
 						o->num = u->items.CanSell(o->item);
@@ -1407,9 +1390,9 @@ void Game::DoSell(ARegion *r, Market *m)
 	m->activity = 0;
 	int oldamount = m->amount;
 	for(const auto obj : r->objects) {
-		for(const auto u: obj->units) {
+		for(const auto u : obj->units) {
 			for(auto oit = u->sellorders.begin(); oit != u->sellorders.end();) {
-				std::shared_ptr<SellOrder> o = *oit;
+				auto o = *oit;
 				if (o->item == m->item) {
 					int temp = 0;
 					if (o->num > u->GetSharedNum(o->item)) {
@@ -1427,6 +1410,7 @@ void Game::DoSell(ARegion *r, Market *m)
 					u->SetMoney(u->GetMoney() + temp * m->price);
 					oit = u->sellorders.erase(oit);
 					u->event("Sells " + ItemString(o->item, temp) + " at $" + to_string(m->price) + " each.", "sell");
+					delete o;
 					continue;
 				}
 				++oit;
@@ -1443,13 +1427,11 @@ void Game::RunBuyOrders()
 			if (m->type == Market::MarketType::M_BUY) DoBuy(r, m);
 		}
 		for(const auto obj : r->objects) {
-			for(auto u: obj->units) {
-				std::for_each(
-					u->buyorders.begin(), u->buyorders.end(),
-					[&u](std::shared_ptr<BuyOrder> o) {
-						u->error("BUY: Can't buy " + ItemString(o->item, o->num, FULLNUM) + ".");
-					}
-				);
+			for(const auto u : obj->units) {
+				std::for_each(u->buyorders.begin(), u->buyorders.end(), [u](BuyOrder* o) {
+					u->error("BUY: Can't buy " + ItemString(o->item, o->num, FULLNUM) + ".");
+					delete o;
+				});
 				u->buyorders.clear();
 			}
 		}
@@ -1459,10 +1441,10 @@ void Game::RunBuyOrders()
 int Game::GetBuyAmount(ARegion *r, Market *m)
 {
 	int num = 0;
-	for(const auto obj : r->objects) {
-		for(const auto u: obj->units) {
+	for(const auto obj: r->objects) {
+		for(const auto u : obj->units) {
 			for(auto oit = u->buyorders.begin(); oit != u->buyorders.end();) {
-				std::shared_ptr<BuyOrder> o = *oit;
+				auto o = *oit;
 				if (o->item == m->item) {
 					if (ItemDefs[o->item].type & IT_MAN) {
 						if (u->type == U_MAGE) {
@@ -1509,7 +1491,7 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
 				}
 				if (o->num < 1 && o->num != -1) {
 					oit = u->buyorders.erase(oit);
-					// back up the iterator so that the for loop will put us at the right place after the delete
+					delete o;
 					continue;
 				}
 				++oit;
@@ -1530,9 +1512,9 @@ void Game::DoBuy(ARegion *r, Market *m)
 	m->activity = 0;
 	int oldamount = m->amount;
 	for(const auto obj : r->objects) {
-		for(const auto u: obj->units) {
+		for(const auto u : obj->units) {
 			for(auto oit = u->buyorders.begin(); oit != u->buyorders.end();) {
-				std::shared_ptr<BuyOrder> o = *oit;
+				auto o = *oit;
 				if (o->item == m->item) {
 					int temp = 0;
 					if (m->amount == -1) {
@@ -1540,7 +1522,8 @@ void Game::DoBuy(ARegion *r, Market *m)
 						temp = o->num;
 					} else {
 						if (attempted) {
-							temp = (m->amount * o->num + getrandom(attempted)) / attempted;
+							temp = (m->amount * o->num +
+									getrandom(attempted)) / attempted;
 							if (temp < 0) temp = 0;
 						}
 						attempted -= o->num;
@@ -1575,6 +1558,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 					u->ConsumeSharedMoney(temp * m->price);
 					oit = u->buyorders.erase(oit);
 					u->event("Buys " + ItemString(o->item, temp) + " at $" + to_string(m->price) + " each.", "buy");
+					delete o;
 					continue;
 				}
 				++oit;
@@ -1589,7 +1573,7 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
 {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				if (u->needed > 0 &&
 					((!consume) || (u->GetFlag(FLAG_CONSUMING_UNIT) || u->GetFlag(FLAG_CONSUMING_FACTION)))) {
 					int amount = u->items.GetNum(item);
@@ -1625,11 +1609,11 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				if (u->needed > 0 && ((!consume) || u->GetFlag(FLAG_CONSUMING_FACTION))) {
 					/* Go through all units again */
 					for(const auto obj2 : r->objects) {
-						for(const auto u2: obj2->units) {
+						for(const auto u2 : obj2->units) {
 							if (u->faction == u2->faction && u != u2) {
 								int amount = u2->items.GetNum(item);
 								if (amount) {
@@ -1672,11 +1656,11 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				if (u->needed > 0) {
 					/* Go through all units again */
 					for(const auto obj2 : r->objects) {
-						for(const auto u2: obj2->units) {
+						for(const auto u2 : obj2->units) {
 							if (u->faction != u2->faction && u2->GetAttitude(r, u) == A_ALLY) {
 								int amount = u2->items.GetNum(item);
 								if (amount) {
@@ -1718,7 +1702,7 @@ void Game::CheckUnitHungerItem(int item, int value)
 {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				if (u->hunger > 0) {
 					int amount = u->items.GetNum(item);
 					if (amount) {
@@ -1746,11 +1730,11 @@ void Game::CheckFactionHungerItem(int item, int value)
 {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				if (u->hunger > 0) {
 					/* Go through all units again */
 					for(const auto obj2 : r->objects) {
-						for(const auto u2: obj2->units) {
+						for(const auto u2 : obj2->units) {
 							if (u->faction == u2->faction && u != u2) {
 								int amount = u2->items.GetNum(item);
 								if (amount) {
@@ -1773,7 +1757,6 @@ void Game::CheckFactionHungerItem(int item, int value)
 								}
 							}
 						}
-
 						if (u->hunger < 1) break;
 					}
 				}
@@ -1786,11 +1769,11 @@ void Game::CheckAllyHungerItem(int item, int value)
 {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				if (u->hunger > 0) {
 					/* Go through all units again */
 					for(const auto obj2 : r->objects) {
-						for(auto u2: obj2->units) {
+						for(const auto u2 : obj2->units) {
 							if (u->faction != u2->faction &&
 								u2->GetAttitude(r, u) == A_ALLY) {
 								int amount = u2->items.GetNum(item);
@@ -1814,7 +1797,6 @@ void Game::CheckAllyHungerItem(int item, int value)
 								}
 							}
 						}
-
 						if (u->hunger < 1) break;
 					}
 				}
@@ -1829,15 +1811,15 @@ void Game::AssessMaintenance()
 
 	/* First pass: set needed */
 	for(const auto r : regions) {
-		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+		for(const auto obj: r->objects) {
+			for(const auto u : obj->units) {
 				if (!(u->faction->is_npc)) {
 					r->visited = 1;
 					if (quests.check_visit_target(r, u, &quest_rewards)) {
 						u->event("You have completed a pilgrimage!" + quest_rewards, "quest");
 					}
 				}
-				u->needed = u->MaintCost(&this->regions, r);
+				u->needed = u->MaintCost(regions, r);
 				u->hunger = u->GetMen() * Globals->UPKEEP_MINIMUM_FOOD;
 				if (Globals->UPKEEP_MAXIMUM_FOOD < 0)
 					u->stomach_space = -1;
@@ -1867,7 +1849,7 @@ void Game::AssessMaintenance()
 				cost = ItemDefs[i].baseprice * 5 / 2;
 				for(const auto r : regions) {
 					for(const auto obj : r->objects) {
-						for(const auto u: obj->units) {
+						for(const auto u : obj->units) {
 							if (u->hunger > 0 && u->faction->unclaimed > cost) {
 								int value = Globals->UPKEEP_FOOD_VALUE;
 								int eat = (u->hunger + value - 1) / value;
@@ -1965,7 +1947,7 @@ void Game::AssessMaintenance()
 	//
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				if (u->needed > 0 || u->hunger > 0)
 					u->Short(u->needed, u->hunger);
 			}
@@ -1977,17 +1959,18 @@ void Game::DoWithdrawOrders()
 {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(auto u: obj->units) {
-				for(auto o: u->withdraworders) {
+			for(const auto u : obj->units) {
+				for(const auto o : u->withdraworders) {
 					if (DoWithdrawOrder(r, u, o)) break;
 				}
+				std::for_each(u->withdraworders.begin(), u->withdraworders.end(), [](WithdrawOrder *o) { delete o; });
 				u->withdraworders.clear();
 			}
 		}
 	}
 }
 
-int Game::DoWithdrawOrder(ARegion *r, Unit *u, std::shared_ptr<WithdrawOrder> o)
+int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 {
 	int itm = o->item;
 	int amt = o->amount;
@@ -2020,20 +2003,21 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, std::shared_ptr<WithdrawOrder> o)
 
 void Game::DoGiveOrders()
 {
+	Item *item;
 	Unit *s;
 	Object *fleet;
 
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
-				for(auto o: u->giveorders) {
+			for(const auto u : obj->units) {
+				for(const auto o : u->giveorders) {
 					if (o->item < 0) {
 						if (o->amount == -1) {
 							/* do 'give X unit' command */
 							DoGiveOrder(r, u, o);
 						} else if (o->amount == -2) {
 							if (o->type == O_TAKE) {
-								s = r->get_unit_id(*o->target, u->faction->num);
+								s = r->GetUnitId(o->target, u->faction->num);
 								if (!s || !u->CanSee(r, s)) {
 									u->error("TAKE: Nonexistant target (" +	o->target->Print() + ").");
 									continue;
@@ -2047,41 +2031,51 @@ void Game::DoGiveOrders()
 								fleet = obj;
 							}
 							/* do 'give all type' command */
-							if (fleet->IsFleet() && s == fleet->GetOwner() && !o->unfinished &&
-									(o->item == -NITEMS || o->item == -IT_SHIP)) {
-								ItemList shipsCopy = fleet->ships;
-								for(auto ship: shipsCopy) {
+							if (
+								fleet->IsFleet() && s == fleet->GetOwner() && !o->unfinished &&
+								(o->item == -NITEMS || o->item == -IT_SHIP)
+							) {
+								for(auto it = fleet->ships.begin(); it != fleet->ships.end();) {
+									item = *it;
+									// DoGiveOrder will delete the item
+									it++;
 									GiveOrder go;
-									go.amount = ship.num;
+									go.amount = item->num;
 									go.except = 0;
-									go.item = ship.type;
+									go.item = item->type;
 									go.target = o->target;
 									go.type = o->type;
-									DoGiveOrder(r, u, std::make_shared<GiveOrder>(go));
+									DoGiveOrder(r, u, &go);
+									go.target = NULL;
 								}
 							}
-
-							ItemList itemsCopy = s->items;
-							for(auto item: itemsCopy) {
-								if ((o->item == -NITEMS) || (ItemDefs[item.type].type & (-o->item))) {
+							for(auto it = s->items.begin(); it != s->items.end();) {
+								item = *it;
+								it++;
+								if ((o->item == -NITEMS) || (ItemDefs[item->type].type & (-o->item))) {
 									GiveOrder go;
-									go.amount = item.num;
+									go.amount = item->num;
 									go.except = 0;
-									go.item = item.type;
+									go.item = item->type;
 									go.target = o->target;
 									go.type = o->type;
 									go.unfinished = o->unfinished;
-									if (ItemDefs[item.type].type & IT_SHIP) {
+									if (ItemDefs[item->type].type & IT_SHIP) {
 										if (o->item == -NITEMS) {
 											go.unfinished = 1;
 										}
-										go.amount = (go.unfinished ? 1 : 0);
+										if (go.unfinished) {
+											go.amount = 1;
+										} else {
+											go.amount = 0;
+										}
 									} else if (o->unfinished) {
 										go.amount = 0;
 									}
 									if (go.amount) {
-										DoGiveOrder(r, u, std::make_shared<GiveOrder>(go));
+										DoGiveOrder(r, u, &go);
 									}
+									go.target = NULL;
 								}
 							}
 						} else {
@@ -2094,6 +2088,7 @@ void Game::DoGiveOrders()
 						break;
 					}
 				}
+				std::for_each(u->giveorders.begin(), u->giveorders.end(), [](GiveOrder *o) { delete o; });
 				u->giveorders.clear();
 			}
 		}
@@ -2104,28 +2099,23 @@ void Game::DoExchangeOrders()
 {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
-				for(auto o: u->exchangeorders) {
-					DoExchangeOrder(r, u, o);
+			for(const auto u : obj->units) {
+				for(const auto o : u->exchangeorders) {
+					DoExchangeOrder(r, u, (ExchangeOrder *) o);
 				}
+				std::for_each(u->exchangeorders.begin(), u->exchangeorders.end(), [](ExchangeOrder *o) { delete o; });
 				u->exchangeorders.clear();
 			}
 		}
 	}
 }
 
-void Game::DoExchangeOrder(ARegion *r, Unit *u, std::shared_ptr<ExchangeOrder> o)
+void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 {
 	// Check if the destination unit exists
-	Unit *t = r->get_unit_id(*o->target, u->faction->num);
+	Unit *t = r->GetUnitId(o->target, u->faction->num);
 	if (!t) {
 		u->error("EXCHANGE: Nonexistant target (" + o->target->Print() + ").");
-		return;
-	}
-
-	// Make sure you aren't trying to trade with yourself
-	if (t == u) {
-		u->error("EXCHANGE: Can't trade with yourself.");
 		return;
 	}
 
@@ -2164,62 +2154,62 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, std::shared_ptr<ExchangeOrder> o
 		return;
 	}
 
-	int exchangeOrderFound = 0;
+	bool exchangeOrderFound = false;
 	// Check if other unit has a reciprocal exchange order
-	for(auto tOrder: t->exchangeorders) {
-		Unit *ptrUnitTemp = r->get_unit_id(*tOrder->target, t->faction->num);
-		if (ptrUnitTemp == u) {
-			if (tOrder->expectItem == o->giveItem) {
-				if (tOrder->giveItem == o->expectItem) {
-					exchangeOrderFound = 1;
-					if (tOrder->giveAmount < o->expectAmount) {
-						t->error(string("EXCHANGE: Not giving enough. Expecting ") +
-							ItemString(o->expectItem, o->expectAmount) + ".");
-						u->error(string("EXCHANGE: Exchange aborted. Not enough recieved. Expecting ") +
-							ItemString(o->expectItem, o->expectAmount) + ".");
-						tOrder->exchangeStatus = 0;
-						o->exchangeStatus = 0;
-						return;
-					} else if (tOrder->giveAmount > o->expectAmount) {
-						t->error(string("EXCHANGE: Exchange aborted. Too much given. Expecting ") +
-							ItemString(o->expectItem, o->expectAmount) + ".");
-						u->error(string("EXCHANGE: Exchange aborted. Too much offered. Expecting ") +
-							ItemString(o->expectItem, o->expectAmount) + ".");
-						tOrder->exchangeStatus = 0;
-						o->exchangeStatus = 0;
-					} else if (tOrder->giveAmount == o->expectAmount)
-						o->exchangeStatus = 1;
-
-					if ((o->exchangeStatus == 1) &&	(tOrder->exchangeStatus == 1)) {
-						u->event("Exchanges " + ItemString(o->giveItem, o->giveAmount) + " with " +
-							t->name->const_str() + " for " + ItemString(tOrder->giveItem, tOrder->giveAmount) +	".",
-							"exchange");
-						t->event("Exchanges " + ItemString(tOrder->giveItem, tOrder->giveAmount) + " with " +
-							u->name->const_str() + " for " + ItemString(o->giveItem, o->giveAmount) + ".", "exchange");
-						u->ConsumeShared(o->giveItem, o->giveAmount);
-						t->items.SetNum(o->giveItem, t->items.GetNum(o->giveItem) + o->giveAmount);
-						t->ConsumeShared(tOrder->giveItem, tOrder->giveAmount);
-						u->items.SetNum(tOrder->giveItem, u->items.GetNum(tOrder->giveItem) + tOrder->giveAmount);
-						u->faction->DiscoverItem(tOrder->giveItem, 0, 1);
-						t->faction->DiscoverItem(o->giveItem, 0, 1);
-						std::erase(t->exchangeorders, tOrder); // safe because we immediately return.
-						return;
-					}
-				}
+	for (auto tOrder: t->exchangeorders) {
+		Unit *ptrUnitTemp = r->GetUnitId(tOrder->target, t->faction->num);
+		if (ptrUnitTemp == u && tOrder->expectItem == o->giveItem && tOrder->giveItem == o->expectItem) {
+			exchangeOrderFound = true;
+			if (tOrder->giveAmount < o->expectAmount) {
+				t->error(string("EXCHANGE: Not giving enough. Expecting ") +
+					ItemString(o->expectItem, o->expectAmount) + ".");
+				u->error(string("EXCHANGE: Exchange aborted. Not enough recieved. Expecting ") +
+					ItemString(o->expectItem, o->expectAmount) + ".");
+				tOrder->exchangeStatus = 0;
+				o->exchangeStatus = 0;
+				return;
+			}
+			if (tOrder->giveAmount > o->expectAmount) {
+				t->error(string("EXCHANGE: Exchange aborted. Too much given. Expecting ") +
+					ItemString(o->expectItem, o->expectAmount) + ".");
+				u->error(string("EXCHANGE: Exchange aborted. Too much offered. Expecting ") +
+					ItemString(o->expectItem, o->expectAmount) + ".");
+				tOrder->exchangeStatus = 0;
+				o->exchangeStatus = 0;
+			}
+			if (tOrder->giveAmount == o->expectAmount) o->exchangeStatus = 1;
+			if (o->exchangeStatus == 1 && tOrder->exchangeStatus == 1) {
+				u->event("Exchanges " + ItemString(o->giveItem, o->giveAmount) + " with " +	t->name->const_str() +
+					" for " + ItemString(tOrder->giveItem, tOrder->giveAmount) +	".", "exchange");
+				t->event("Exchanges " + ItemString(tOrder->giveItem, tOrder->giveAmount) + " with " +
+					u->name->const_str() + " for " + ItemString(o->giveItem, o->giveAmount) + ".", "exchange");
+				u->ConsumeShared(o->giveItem, o->giveAmount);
+				t->items.SetNum(o->giveItem, t->items.GetNum(o->giveItem) + o->giveAmount);
+				t->ConsumeShared(tOrder->giveItem, tOrder->giveAmount);
+				u->items.SetNum(tOrder->giveItem, u->items.GetNum(tOrder->giveItem) + tOrder->giveAmount);
+				u->faction->DiscoverItem(tOrder->giveItem, 0, 1);
+				t->faction->DiscoverItem(o->giveItem, 0, 1);
+				std::erase(t->exchangeorders, tOrder);
+				return;
+			}
+			if (o->exchangeStatus >= 0 && tOrder->exchangeStatus >= 0) {
+				std::erase(t->exchangeorders, tOrder);
+				return;
 			}
 		}
 	}
+
 	if (!exchangeOrderFound) {
-		// since we already checked ability to see above, we can only get here if the target unit didn't issue
-		// a matching exchange order.
 		u->error("EXCHANGE: target unit did not issue a matching exchange order.");
+		return;
 	}
 }
 
-int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
+int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 {
 	int hasitem, ship, num, shipcount, amt, newfleet, cur;
 	int notallied, newlvl, oldlvl;
+	Item *it;
 	Unit *t, *s;
 	Object *fleet;
 	SkillList *skills;
@@ -2239,17 +2229,16 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 					return 0;
 				}
 				ship = -1;
-				for(auto it: u->items) {
-					if (it.type == o->item) {
-						u->event("Abandons " + string(it.Report(1).const_str()) + ".", event_type);
-						ship = it.type;
+				for(auto it : u->items) {
+					if (it->type == o->item) {
+						u->event("Abandons " + string(it->Report(1).const_str()) + ".", event_type);
+						ship = it->type;
 					}
 				}
-				if (ship > 0) u->items.SetNum(ship,0);
+				if (ship > 0) u->items.SetNum(ship, 0);
 				return 0;
 			// abandon fleet ships
-			} else if (!(u->object->IsFleet()) ||
-				(u->num != u->object->GetOwner()->num)) {
+			} else if (!(u->object->IsFleet()) || (u->num != u->object->GetOwner()->num)) {
 				u->error(ord + ": only fleet owner can give ships.");
 				return 0;
 			}
@@ -2268,11 +2257,11 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 			// Check we're not dumping passengers in the ocean
 			if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 				shipcount = 0;
-				for(auto sh: u->object->ships) {
-					shipcount += sh.num;
+				for(auto sh : u->object->ships) {
+					shipcount += sh->num;
 				}
 				if (shipcount <= o->amount) {
-					for(auto p: u->object->units) {
+					for(const auto p : u->object->units) {
 						if ((!p->CanSwim() || p->GetFlag(FLAG_NOCROSS_WATER))) {
 							u->error(ord + ": Can't abandon our last ship in the ocean.");
 							return 0;
@@ -2286,7 +2275,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 			return 0;
 		}
 		// GIVE to unit:
-		t = r->get_unit_id(*o->target, u->faction->num);
+		t = r->GetUnitId(o->target, u->faction->num);
 		if (!t) {
 			u->error(ord + ": Nonexistant target (" + o->target->Print() + ").");
 			return 0;
@@ -2366,34 +2355,33 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 					u->error(ord + ": Target already has an unfinished ship of that type.");
 				return 0;
 			}
-
-			Item it;
-			it.type = o->item;
-			it.num = s->items.GetNum(o->item);
+			it = new Item();
+			it->type = o->item;
+			it->num = s->items.GetNum(o->item);
 			if (o->type == O_TAKE) {
-				u->event("Takes " + string(it.Report(1).const_str()) + " from " + s->name->const_str() +
+				u->event("Takes " + string(it->Report(1).const_str()) + " from " + s->name->const_str() +
 					".", event_type);
 			} else {
-				u->event("Gives " + string(it.Report(1).const_str()) + " to " + t->name->const_str() + ".",
+				u->event("Gives " + string(it->Report(1).const_str()) + " to " + t->name->const_str() + ".",
 					event_type);
 				if (s->faction != t->faction) {
-					t->event("Receives " + string(it.Report(1).const_str()) + " from " + s->name->const_str() +
+					t->event("Receives " + string(it->Report(1).const_str()) + " from " + s->name->const_str() +
 						".", event_type);
 				}
 			}
 			s->items.SetNum(o->item, 0);
-			t->items.SetNum(o->item, it.num);
+			t->items.SetNum(o->item, it->num);
 			t->faction->DiscoverItem(o->item, 0, 1);
 		} else {
 			// Check we're not dumping passengers in the ocean
 			if (TerrainDefs[r->type].similar_type == R_OCEAN &&
 					!o->merge) {
 				shipcount = 0;
-				for(auto sh: s->object->ships) {
-					shipcount += sh.num;
+				for(auto sh : s->object->ships) {
+					shipcount += sh->num;
 				}
 				if (shipcount <= amt) {
-					for(auto p: s->object->units) {
+					for(const auto p : s->object->units) {
 						if ((!p->CanSwim() || p->GetFlag(FLAG_NOCROSS_WATER))) {
 							u->error(ord + ": Can't give away our last ship in the ocean.");
 							return 0;
@@ -2406,8 +2394,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 			newfleet = 0;
 
 			// target is not in fleet or not fleet owner
-			if (!(t->object->IsFleet()) ||
-				(t->num != t->object->GetOwner()->num)) newfleet = 1;
+			if (!(t->object->IsFleet()) || (t->num != t->object->GetOwner()->num)) newfleet = 1;
 
 			// Set fleet variable to target fleet
 			if (newfleet == 1) {
@@ -2432,11 +2419,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 				}
 			}
 
-			// Check if fleets are compatible
-			if ((Globals->PREVENT_SAIL_THROUGH) &&
-					(!Globals->ALLOW_TRIVIAL_PORTAGE) &&
-					// flying ships are always transferrable
-					(ItemDefs[o->item].fly == 0)) {
+			// Check if fleets are compatible; flying ships are always transferable.
+			if ((Globals->PREVENT_SAIL_THROUGH) && (!Globals->ALLOW_TRIVIAL_PORTAGE) && (ItemDefs[o->item].fly == 0)) {
 				// if target fleet had not sailed, just copy shore from source
 				if (fleet->prevdir == -1) {
 					fleet->prevdir = s->object->prevdir;
@@ -2453,8 +2437,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 			if (s->faction != t->faction) {
 				t->event("Receives " + ItemString(o->item, amt) + " from " + s->object->name->const_str() + ".", ord);
 			}
-			s->object->SetNumShips(o->item, s->object->GetNumShips(o->item)-amt);
-			t->object->SetNumShips(o->item, t->object->GetNumShips(o->item)+amt);
+			s->object->SetNumShips(o->item, s->object->GetNumShips(o->item) - amt);
+			t->object->SetNumShips(o->item, t->object->GetNumShips(o->item) + amt);
 			t->faction->DiscoverItem(o->item, 0, 1);
 		}
 		return 0;
@@ -2499,7 +2483,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 			temp = "Releases ";
 			u->items.SetNum(o->item, u->items.GetNum(o->item) - amt);
 			if (Globals->WANDERING_MONSTERS_EXIST) {
-				Faction *mfac = get_faction(factions, monfaction);
+				Faction *mfac = GetFaction(factions, monfaction);
 				Unit *mon = GetNewUnit(mfac, 0);
 				MonType *mp = FindMonster(ItemDefs[o->item].abr,
 						(ItemDefs[o->item].type & IT_ILLUSION));
@@ -2518,7 +2502,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 	}
 
 	amt = o->amount;
-	t = r->get_unit_id(*o->target, u->faction->num);
+	t = r->GetUnitId(o->target, u->faction->num);
 	if (!t) {
 		u->error(ord + ": Nonexistant target (" + o->target->Print() + ").");
 		return 0;
@@ -2612,7 +2596,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 			}
 		}
 
-		// Remove all relics when unit is given to another faction
+		// Throw away any relics when the unit is given away
 		u->items.SetNum(I_RELICOFGRACE, 0);
 
 		notallied = 1;
@@ -2625,15 +2609,16 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 		u->event("Is given to your faction.", event_type);
 
 		if (notallied && u->monthorders && u->monthorders->type == O_MOVE) {
-			std::shared_ptr<MoveOrder> mo = std::dynamic_pointer_cast<MoveOrder>(u->monthorders);
+			MoveOrder *mo = dynamic_cast<MoveOrder *>(u->monthorders);
 			if (mo->advancing) {
 				u->error("Unit cannot advance after being given.");
+				delete u->monthorders;
 				u->monthorders = nullptr;
 			}
 		}
 
 		/* Check if any new skill reports have to be shown */
-		for(auto skill: u->skills) {
+		for(const auto skill: u->skills) {
 			newlvl = u->GetRealSkill(skill->type);
 			oldlvl = u->faction->skills.GetDays(skill->type);
 			if (newlvl > oldlvl) {
@@ -2646,8 +2631,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 
 		// Okay, now for each item that the unit has, tell the new faction
 		// about it in case they don't know about it yet.
-		for(auto it: u->items) {
-			u->faction->DiscoverItem(it.type, 0, 1);
+		for(auto it : u->items) {
+			u->faction->DiscoverItem(it->type, 0, 1);
 		}
 
 		return notallied;
@@ -2655,14 +2640,12 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, std::shared_ptr<GiveOrder> o)
 
 	/* If the item to be given is a man, combine skills */
 	if (ItemDefs[o->item].type & IT_MAN) {
-		if (s->type == U_MAGE || s->type == U_APPRENTICE ||
-				t->type == U_MAGE || t->type == U_APPRENTICE) {
+		if (s->type == U_MAGE || s->type == U_APPRENTICE || t->type == U_MAGE || t->type == U_APPRENTICE) {
 			u->error(ord + ": Magicians can't transfer men.");
 			return 0;
 		}
 		if (Globals->TACTICS_NEEDS_WAR) {
-			if (s->GetSkill(S_TACTICS) == 5 ||
-					t->GetSkill(S_TACTICS) == 5) {
+			if (s->GetSkill(S_TACTICS) == 5 || t->GetSkill(S_TACTICS) == 5) {
 				u->error(ord + ": Tacticians can't transfer men.");
 				return 0;
 			}
@@ -2734,7 +2717,7 @@ void Game::DoGuard1Orders()
 {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				if (!Globals->OCEAN_GUARD &&
 					(u->guard == GUARD_SET || u->guard == GUARD_GUARD) &&
 					TerrainDefs[r->type].similar_type == R_OCEAN) {
@@ -2758,7 +2741,8 @@ void Game::DoGuard1Orders()
 					}
 					if (u->type != U_GUARD && r->HasCityGuard()) {
 						u->guard = GUARD_NONE;
-						u->error("Is prevented from guarding by the Guardsmen.");
+						u->error("Is prevented from guarding by the "
+								"Guardsmen.");
 						continue;
 					}
 					u->guard = GUARD_GUARD;
@@ -2770,19 +2754,20 @@ void Game::DoGuard1Orders()
 
 void Game::FindDeadFactions()
 {
-	for(const auto& fac: factions) fac->CheckExist(regions);
+	for(const auto f : factions) {
+		f->CheckExist(regions);
+	}
 }
 
 void Game::DeleteEmptyUnits()
 {
-	for(const auto r: regions) DeleteEmptyInRegion(r);
+	for(const auto r : regions) DeleteEmptyInRegion(r);
 }
 
 void Game::DeleteEmptyInRegion(ARegion *region)
 {
 	for(const auto obj : region->objects) {
-		auto unitCopy(obj->units);
-		for(auto unit: unitCopy) {
+		for(const auto unit : obj->units) {
 			if (unit->IsAlive() == 0) {
 				region->Kill(unit);
 			}
@@ -2797,9 +2782,8 @@ void Game::CheckTransportOrders()
 
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
-				for(auto o: u->transportorders) {
-					// make sure target exists
+			for(const auto u : obj->units) {
+				for(const auto o : u->transportorders) {
 					if (!o->target || o->target->unitnum == -1) {
 						u->error("TRANSPORT: Target does not exist.");
 						o->type = NORDERS;
@@ -2845,9 +2829,9 @@ void Game::CheckTransportOrders()
 					bool sender_is_valid_qm = sender_has_qm_skill && sender_owns_qm_building;
 					bool target_is_valid_qm = target_has_qm_skill && target_owns_qm_building;
 					if (sender_is_valid_qm) {
-						o->phase = target_is_valid_qm
-							? TransportOrder::TransportPhase::INTER_QM_TRANSPORT // sender and target are valid QM
-							: TransportOrder::TransportPhase::DISTRIBUTE_FROM_QM; // sender is valid QM, target isn't
+						o->phase = target_is_valid_qm ?
+							TransportOrder::TransportPhase::INTER_QM_TRANSPORT :  // both sender and target are valid QM
+							TransportOrder::TransportPhase::DISTRIBUTE_FROM_QM; // sender is a valid QM, target isn't
 					} else { // sender isn't a valid QM
 						if (!target_is_valid_qm) { // Non-qms or invalid qms can only send to valid QMs
 							// Give a specific error message depending on why they aren't considered a quartermaster
@@ -2917,11 +2901,12 @@ void Game::CheckTransportOrders()
 void Game::CollectInterQMTransportItems() {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				// Move the items from the transport_items list to the unit's items list
-				for(auto it: u->transport_items) {
-					u->items.SetNum(it.type, u->items.GetNum(it.type) + it.num);
+				for(auto it : u->transport_items) {
+					u->items.SetNum(it->type, u->items.GetNum(it->type) + it->num);
 				}
+				std::for_each(u->transport_items.begin(), u->transport_items.end(), [](Item *it) { delete it; });
 				u->transport_items.clear();
 			}
 		}
@@ -2935,7 +2920,7 @@ void Game::RunTransportOrders() {
 	// Make sure there are no transport items on the units (shouldn't be, but just in case)
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				u->transport_items.clear();
 			}
 		}
@@ -2954,18 +2939,22 @@ void Game::RunTransportOrders() {
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u : obj->units) {
+				std::for_each(u->transportorders.begin(), u->transportorders.end(), [](TransportOrder *o) {
+					delete o;
+				});
 				u->transportorders.clear();
 			}
 		}
 	}
+
 }
 
 void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
-				for (auto t: u->transportorders) {
+			for(const auto u : obj->units) {
+				for(const auto t : u->transportorders) {
 					if (t->type != O_TRANSPORT) continue;
 					if (t->phase != phase) continue;
 
@@ -3038,6 +3027,7 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 					tar->unit->faction->DiscoverItem(t->item, 0, 1);
 
 					u->Practice(S_QUARTERMASTER);
+
 				}
 			}
 		}
@@ -3051,8 +3041,9 @@ void Game::RunSacrificeOrders() {
 	for(const auto r : regions) {
 		std::vector<Object *> destroyed_objects;
 		for(const auto obj : r->objects) {
-			for(const auto u: obj->units) {
-				if (u->sacrificeorders == nullptr) continue;
+			for(const auto u : obj->units) {
+				SacrificeOrder *o = u->sacrificeorders;
+				if (o == nullptr) continue;
 
 				bool succeeded = false;
 
@@ -3061,7 +3052,7 @@ void Game::RunSacrificeOrders() {
 				for(const auto sacrifice_object : r->objects) {
 					ObjectType sacrifice_type = ObjectDefs[sacrifice_object->type];
 					if (!(sacrifice_type.flags & ObjectType::SACRIFICE)) continue;
-					if (sacrifice_type.sacrifice_item != u->sacrificeorders->item) continue;
+					if (sacrifice_type.sacrifice_item != o->item) continue;
 					if (sacrifice_object->incomplete >= 0) continue;
 
 					// Make sure any sacrifice rewards are valid -- there must be at least one of an item or replaced
@@ -3081,27 +3072,26 @@ void Game::RunSacrificeOrders() {
 					// Ok this sacrifice will be valid
 					succeeded = true;
 
-					int current = u->items.GetNum(u->sacrificeorders->item);
-					if (current < u->sacrificeorders->amount) {
-						u->error("SACRIFICE: You can only sacrifice up to " +
-							ItemString(u->sacrificeorders->item, current) + ".");
-						u->sacrificeorders->amount = current;
+					int current = u->items.GetNum(o->item);
+					if (current < o->amount) {
+						u->error("SACRIFICE: You can only sacrifice up to " + ItemString(o->item, current) + ".");
+						o->amount = current;
 					}
 
 					int required = -sacrifice_object->incomplete;
-					int used = min(required, u->sacrificeorders->amount);
+					int used = min(required, o->amount);
 
 					// Okay we have a valid sacrifice.  Do it.
 					sacrifice_object->incomplete += used;
-					u->items.SetNum(u->sacrificeorders->item, current - used);
-					u->event("Sacrifices " + ItemString(u->sacrificeorders->item, used) + ".", "sacrifice");
+					u->items.SetNum(o->item, current - used);
+					u->event("Sacrifices " + ItemString(o->item, used) + ".", "sacrifice");
 					// sacrifice objects store the remaining needed sacrifices as negative numbers in incomplete
 					if (sacrifice_object->incomplete >= 0) {
 						// was the reward an item
 						if (reward_item != -1) {
 							bool done = false;
 							for(const auto ob : r->objects) {
-								for(const auto recip: ob->units) {
+								for(const auto recip : ob->units) {
 									if (recip->faction == u->faction && recip->GetMen() != 0) {
 										done = true;
 										recip->items.SetNum(reward_item, recip->items.GetNum(reward_item) + reward_amt);
@@ -3133,21 +3123,19 @@ void Game::RunSacrificeOrders() {
 
 				// If we didn't succeed, log the error
 				if (!succeeded) {
-					u->error("SACRIFICE: Unable to sacrifice " +
-						ItemString(u->sacrificeorders->item, u->sacrificeorders->amount));
+					u->error("SACRIFICE: Unable to sacrifice " + ItemString(o->item, o->amount));
 				}
 			}
 		}
 
 		// destroy any pending objects in this region.
-		for (auto obj: destroyed_objects) {
+		for(const auto obj: destroyed_objects) {
 			// This shouldn't happen, as the sacrifice objects are not enterable, but.. just in case.
-			auto unitCopy(obj->units);
-			for(auto u: unitCopy) {
+			for(const auto u : obj->units) {
 				u->MoveUnit(r->GetDummy());
 				u->event("Moved out of a sacrificed structure.", "sacrifice");
 			}
-			std::erase(r->objects, obj);
+			r->objects.remove(obj);
 			delete obj;
 		}
 	}
@@ -3166,7 +3154,7 @@ void Game::Do1Annihilate(ARegion *reg) {
 	events->AddFact(fact);
 
 	// tell all factions too
-	for(auto& f : factions) {
+	for(const auto f : factions) {
 		if (f->is_npc) continue;
 		f->event(message, "annihilate");
 	}
@@ -3179,9 +3167,9 @@ void Game::Do1Annihilate(ARegion *reg) {
 	// destroy all units in the region
 	std::vector<Object *> destroyed_objects;
 	for(const auto obj : reg->objects) {
-		auto unitCopy(obj->units);
-		for(auto u: unitCopy) {
-			u->items.clear(); // throw away all the items
+		for(const auto u : obj->units) {
+			std::for_each(u->items.begin(), u->items.end(), [](Item *it) { delete it; });
+			u->items.clear();
 			u->event("Is annihilated.", "annihilate");
 			reg->Kill(u);
 		}
@@ -3192,13 +3180,13 @@ void Game::Do1Annihilate(ARegion *reg) {
 
 	// Okay, now we need to destroy all the destroyed objects
 	for (const auto obj: destroyed_objects) {
-		std::erase(reg->objects, obj);
+		reg->objects.remove(obj);
 		delete obj;
 	}
 
 	// Okay, now we clear out towns, markets, production, etc.
-	for (const auto p : reg->products) delete p; // Free the allocated object
-	for (const auto m : reg->markets) delete m; // Free the allocated object
+	for (auto& p : reg->products) delete p; // Free the allocated object
+	for (auto& m : reg->markets) delete m; // Free the allocated object
 	reg->markets.clear();
 	reg->products.clear();
 	reg->development = 0;
@@ -3220,8 +3208,9 @@ void Game::RunAnnihilateOrders() {
 
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
-			for(auto u: obj->units) {
-				if (u->annihilateorders == nullptr) continue;
+			for(const auto u : obj->units) {
+				AnnihilateOrder *o = u->annihilateorders;
+				if (o == nullptr) continue;
 
 				// Check if the unit has access to the annihilate skill
 				if (u->GetSkill(S_ANNIHILATION) <= 0) {
@@ -3230,9 +3219,7 @@ void Game::RunAnnihilateOrders() {
 				}
 
 				// Ok we have a unit doing a valid annihilate order.
-				ARegion *target = regions.GetRegion(
-					u->annihilateorders->xloc, u->annihilateorders->yloc, u->annihilateorders->zloc
-				);
+				ARegion *target = regions.GetRegion(o->xloc, o->yloc, o->zloc);
 				if (target == nullptr) {
 					u->error("ANNIHILATE: Target region does not exist.");
 					continue;

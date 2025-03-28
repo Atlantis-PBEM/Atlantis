@@ -43,6 +43,7 @@ class ARegionArray;
 #include "object.h"
 #include "graphs.h"
 #include "mapgen.h"
+#include "safe_list.h"
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -52,7 +53,6 @@ using json = nlohmann::json;
 #include <list>
 #include <set>
 #include <functional>
-#include <memory>
 
 /* Weather Types */
 enum {
@@ -116,7 +116,7 @@ class Location
 		ARegion *region;
 };
 
-Location *GetUnit(const std::vector<Location *>& list, int unit_id);
+Location *GetUnit(std::list<Location *>& locs, int unitid);
 
 int AGetName(int town, ARegion *r);
 char const *AGetNameString(int name);
@@ -133,7 +133,7 @@ class Farsight
 		int exits_used[NDIRS];
 };
 
-Farsight *GetFarsight(std::vector<Farsight *>& l, Faction *f);
+Farsight *GetFarsight(std::list<Farsight *>& farsees, Faction *);
 
 enum {
 	TOWN_VILLAGE,
@@ -188,12 +188,12 @@ class ARegion
 		void SetName(char const *);
 
 		void Writeout(std::ostream& f);
-		void Readin(std::istream& f, const std::vector<std::unique_ptr<Faction>>& factions);
+		void Readin(std::istream& f, std::list<Faction *>& factions);
 
 		int CanMakeAdv(Faction *, int);
 		int HasItem(Faction *, int);
 		json basic_region_data();
-		void build_json_report(json& j, Faction *fac, int month, ARegionList *pRegions);
+		void build_json_report(json& j, Faction *fac, int month, ARegionList& regions);
 
 		AString ShortPrint();
 		AString Print();
@@ -203,9 +203,9 @@ class ARegion
 
 		Unit *GetUnit(int);
 		Unit *GetUnitAlias(int, int); /* alias, faction number */
-		Unit *get_unit_id(UnitId unitid, int faction);
-		void deduplicate_unit_list(std::list<UnitId>& list, int);
-		Location *GetLocation(std::shared_ptr<UnitId> id, int);
+		Unit *GetUnitId(UnitId *, int);
+		void deduplicate_unit_list(std::list<UnitId *>& list, int factionid);
+		Location *GetLocation(UnitId *, int);
 
 		void SetLoc(int, int, int);
 		bool Present(Faction *f);
@@ -226,12 +226,12 @@ class ARegion
 		void Pillage();
 		int ForbiddenShip(Object *);
 		int HasCityGuard();
-		int NotifySpell(Unit *, char const *, ARegionList *pRegs);
+		int NotifySpell(Unit *, char const *, ARegionList& regs);
 		void NotifyCity(Unit *, AString& oldname, AString& newname);
 
 		void DefaultOrders();
 		int TownGrowth();
-		void PostTurn(ARegionList *pRegs);
+		void PostTurn();
 		void UpdateProducts();
 		void SetWeather(int newWeather);
 		int IsCoastal();
@@ -249,9 +249,9 @@ class ARegion
 		int HasConnectingRoad(int realDirection);
 		int GetRoadDirection(int realDirection);
 		int GetRealDirComp(int realDirection);
-		void DoDecayCheck(ARegionList *pRegs);
-		void DoDecayClicks(Object *o, ARegionList *pRegs);
-		void RunDecayEvent(Object *o, ARegionList *pRegs);
+		void DoDecayCheck();
+		void DoDecayClicks(Object *o);
+		void RunDecayEvent(Object *o);
 		AString GetDecayFlavor();
 		int GetMaxClicks();
 		int PillageCheck();
@@ -268,7 +268,7 @@ class ARegion
 		void Migrate();
 		void SetTownType(int);
 		int DetermineTownSize();
-		int TraceConnectedRoad(int dir, int sum, std::vector<ARegion *>& con, int range, int dev);
+		int TraceConnectedRoad(int dir, int sum, std::list<ARegion *>& con, int range, int dev);
 		int RoadDevelopmentBonus(int, int);
 		int BaseDev();
 		int ProdDev();
@@ -293,7 +293,7 @@ class ARegion
 		int Population();
 
 		// ruleset specific movment checks
-		const char *movement_forbidden_by_ruleset(Unit *unit, ARegion *origin, ARegionList *regions);
+		const char *movement_forbidden_by_ruleset(Unit *unit, ARegion *origin, ARegionList& regions);
 
 		AString *name;
 		int num;
@@ -322,7 +322,7 @@ class ARegion
 		int vegetation;
 		int culture;
 		// migration origins
-		std::vector<ARegion *> migfrom;
+		std::list<ARegion *> migfrom;
 		// mid-way migration development
 		int migdev;
 		int immigrants;
@@ -336,13 +336,13 @@ class ARegion
 		int phantasmal_entertainment;
 
 		ARegion *neighbors[NDIRS];
-		std::vector<Object *>objects;
+		safe::list<Object *> objects;
 		std::map<int,int> newfleets;
 		int fleetalias;
-		std::vector<Unit *>hell; /* Where dead units go */
-		std::vector<Farsight *> farsees;
+		std::list<Unit *> hell; /* Where dead units go */
+		std::list<Farsight *> farsees;
 		// List of units which passed through the region
-		std::vector<Farsight *> passers;
+		std::list<Farsight *>passers;
 		std::vector<Production *> products;
 		std::vector<Market*> markets;
 		int xloc, yloc, zloc;
@@ -447,7 +447,7 @@ class GeoMap
 
 class ARegionList
 {
-	std::vector <ARegion *> regions;
+	std::vector<ARegion *> regions;
 
 	public:
 		using iterator = typename std::vector<ARegion *>::iterator;
@@ -457,10 +457,10 @@ class ARegionList
 
 		ARegion *GetRegion(int);
 		ARegion *GetRegion(int, int, int);
-		int ReadRegions(std::istream &f, const std::vector<std::unique_ptr<Faction>>& factions);
+		int ReadRegions(std::istream &f, std::list<Faction *>& facs);
 		void WriteRegions(std::ostream&  f);
 		Location *FindUnit(int);
-		Location *GetUnitId(std::shared_ptr<UnitId>& id, int faction, ARegion *cur);
+		Location *GetUnitId(UnitId *id, int faction, ARegion *cur);
 
 		void ChangeStartingCity(ARegion *, int);
 		ARegion *GetStartingCity(ARegion *AC, int num, int level, int maxX,
@@ -477,13 +477,13 @@ class ARegionList
 		int numLevels;
 		ARegionArray **pRegionArrays;
 
-		iterator begin() { return regions.begin(); }
-		iterator end() { return regions.end(); }
-		iterator erase(iterator i) { return regions.erase(i); }
+		inline iterator begin() { return regions.begin(); }
+		inline iterator end() { return regions.end(); }
+		inline iterator erase(iterator it) { return regions.erase(it); }
 		inline size_t size() { return regions.size(); }
 		inline void clear() { regions.clear(); }
+		inline ARegion *front() { return regions.front(); }
 
-	public:
 		//
 		// Public world creation stuff
 		//

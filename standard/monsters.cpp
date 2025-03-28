@@ -37,7 +37,7 @@ void Game::CreateVMons()
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			if (obj->type != O_BKEEP) continue;
-			Faction *monfac = get_faction(factions, 2);
+			Faction *monfac = GetFaction(factions, 2);
 			Unit *u = GetNewUnit( monfac, 0 );
 			u->MakeWMon( "Elder Demons", I_BALROG, 200);
 			u->MoveUnit(obj);
@@ -52,7 +52,7 @@ void Game::GrowVMons()
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			if (obj->type != O_BKEEP) continue;
-			for(const auto u: obj->units) {
+			for(const auto u : obj->units) {
 				int men = u->GetMen(I_BALROG) + 2;
 				if (men > 200) men = 200;
 				u->items.SetNum(I_BALROG, men);

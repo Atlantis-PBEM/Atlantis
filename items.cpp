@@ -1600,8 +1600,8 @@ void Item::Readin(istream &f)
 
 void ItemList::Writeout(ostream& f)
 {
-	f << items.size() << "\n";
-	for(auto item: items) item.Writeout(f);
+	f << size() << "\n";
+	for(auto i : items) i->Writeout(f);
 }
 
 void ItemList::Readin(istream &f)
@@ -1609,18 +1609,20 @@ void ItemList::Readin(istream &f)
 	int i;
 	f >> i;
 	for (int j = 0; j < i; j++) {
-		Item temp;
-		temp.Readin(f);
-		if (temp.type < 0 || temp.num < 1 || ItemDefs[temp.type].flags & ItemType::DISABLED)
+		Item *temp = new Item;
+		temp->Readin(f);
+		if (temp->type < 0 || temp->num < 1 || ItemDefs[temp->type].flags & ItemType::DISABLED) {
+			delete temp;
 			continue;
+		}
 		items.push_back(temp);
 	}
 }
 
 int ItemList::GetNum(int t)
 {
-	for(auto i: items) {
-		if (i.type == t) return i.num;
+	for(auto i : items) {
+		if (i->type == t) return i->num;
 	}
 	return 0;
 }
@@ -1629,130 +1631,121 @@ int ItemList::Weight()
 {
 	int wt = 0;
 	int frac = 0;
-	for(auto i: items) {
-		// Except unfinished ships from weight calculations:
-		// these just get removed when the unit moves.
-		if (ItemDefs[i.type].type & IT_SHIP) continue;
-		if (ItemDefs[i.type].weight == 0) frac += i.num;
-		else wt += ItemDefs[i.type].weight * i.num;
+	for(auto i : items) {
+		// Exempt unfinished ships from weight calculations: these just get removed when the unit moves.
+		if (ItemDefs[i->type].type & IT_SHIP) continue;
+		if (ItemDefs[i->type].weight == 0) frac += i->num;
+		else wt += ItemDefs[i->type].weight * i->num;
 	}
-	if (Globals->FRACTIONAL_WEIGHT > 0 && frac != 0)
-		wt += (frac/Globals->FRACTIONAL_WEIGHT);
+	if (Globals->FRACTIONAL_WEIGHT > 0 && frac != 0) wt += (frac/Globals->FRACTIONAL_WEIGHT);
 	return wt;
 }
 
 int ItemList::CanSell(int t)
 {
-	for(auto i: items) {
-		if (i.type == t) return i.num - i.selling;
+	for(auto i : items) {
+		if (i->type == t) return i->num - i->selling;
 	}
 	return 0;
 }
 
 void ItemList::Selling(int t, int n)
 {
-	for(auto& i: items) {
-		if (i.type == t) i.selling += n;
+	for(auto i : items) {
+		if (i->type == t) i->selling += n;
 	}
 }
 
 void ItemList::UncheckAll()
 {
-	for(auto &i: items) {
-		i.checked = 0;
-	}
+	for(auto i : items) i->checked = 0;
 }
 
-std::string ItemList::Report(int obs, int seeillusions, int nofirstcomma)
+AString ItemList::Report(int obs,int seeillusions,int nofirstcomma)
 {
 	UncheckAll();
-	std::string temp;
+	AString temp;
 	for (int s = 0; s < 7; s++) {
 		temp += ReportByType(s, obs, seeillusions, nofirstcomma);
-		if (temp.size()) nofirstcomma = 0;
+		if (temp.Len()) nofirstcomma = 0;
 	}
 	return temp;
 }
 
-std::string ItemList::BattleReport()
+AString ItemList::BattleReport()
 {
-	std::string temp;
-	for(auto i: items) {
-		if (ItemDefs[i.type].combat) {
+	AString temp;
+	for(auto i : items) {
+		if (ItemDefs[i->type].combat) {
 			temp += ", ";
-			temp += i.Report(0).const_str();
-			if (ItemDefs[i.type].type & IT_MONSTER) {
-				MonType *mp = FindMonster(ItemDefs[i.type].abr, (ItemDefs[i.type].type & IT_ILLUSION));
-				temp += " (Combat " + to_string(mp->attackLevel) + "/" + to_string(mp->defense[ATTACK_COMBAT]) +
-					", Attacks " + to_string(mp->numAttacks) + ", Hits " + to_string(mp->hits) +
-					", Tactics " + to_string(mp->tactics) + ")";
+			temp += i->Report(0);
+			if (ItemDefs[i->type].type & IT_MONSTER) {
+				MonType *mp = FindMonster(ItemDefs[i->type].abr,
+						(ItemDefs[i->type].type & IT_ILLUSION));
+				temp += AString(" (Combat ") + mp->attackLevel +
+					"/" + mp->defense[ATTACK_COMBAT] + ", Attacks " +
+					mp->numAttacks + ", Hits " + mp->hits +
+					", Tactics " + mp->tactics + ")";
 			}
 		}
 	}
 	return temp;
 }
 
-std::string ItemList::ReportByType(int type, int obs, int seeillusions, int nofirstcomma)
+AString ItemList::ReportByType(int type, int obs, int seeillusions,
+		int nofirstcomma)
 {
-	std::string temp;
-	for(auto& i: items) {
+	AString temp;
+	for(auto i : items) {
 		int report = 0;
-		if (i.checked) continue;
+		if (i->checked) continue;
+
+		bool battle_item = (
+			(ItemDefs[i->type].type & IT_WEAPON) || (ItemDefs[i->type].type & IT_BATTLE) ||
+			(ItemDefs[i->type].type & IT_ARMOR) || (ItemDefs[i->type].type & IT_MAGIC)
+		);
+
 		switch (type) {
 			case 0:
-				if (ItemDefs[i.type].type & IT_MAN)
-					report = 1;
+				if (ItemDefs[i->type].type & IT_MAN) report = 1;
 				break;
 			case 1:
-				if (ItemDefs[i.type].type & IT_MONSTER)
-					report = 1;
+				if (ItemDefs[i->type].type & IT_MONSTER) report = 1;
 				break;
 			case 2:
-				if ((ItemDefs[i.type].type & IT_WEAPON) || (ItemDefs[i.type].type & IT_BATTLE) ||
-						(ItemDefs[i.type].type & IT_ARMOR) || (ItemDefs[i.type].type & IT_MAGIC))
-					report = 1;
+				if (battle_item) report = 1;
 				break;
 			case 3:
-				if (ItemDefs[i.type].type & IT_MOUNT)
-					report = 1;
+				if (ItemDefs[i->type].type & IT_MOUNT) report = 1;
 				break;
 			case 4:
-				if ((i.type == I_WAGON) || (i.type == I_MWAGON))
-					report = 1;
+				if ((i->type == I_WAGON) || (i->type == I_MWAGON)) report = 1;
 				break;
 			case 5:
 				report = 1;
-				if (ItemDefs[i.type].type & IT_MAN)
-					report = 0;
-				if (ItemDefs[i.type].type & IT_MONSTER)
-					report = 0;
-				if (i.type == I_SILVER)
-					report = 0;
-				if ((ItemDefs[i.type].type & IT_WEAPON) || (ItemDefs[i.type].type & IT_BATTLE) ||
-						(ItemDefs[i.type].type & IT_ARMOR) || (ItemDefs[i.type].type & IT_MAGIC))
-					report = 0;
-				if (ItemDefs[i.type].type & IT_MOUNT)
-					report = 0;
-				if ((i.type == I_WAGON) || (i.type == I_MWAGON))
-					report = 0;
+				if (ItemDefs[i->type].type & IT_MAN) report = 0;
+				if (ItemDefs[i->type].type & IT_MONSTER) report = 0;
+				if (i->type == I_SILVER) report = 0;
+				if (battle_item) report = 0;
+				if (ItemDefs[i->type].type & IT_MOUNT) report = 0;
+				if ((i->type == I_WAGON) || (i->type == I_MWAGON)) report = 0;
 				break;
 			case 6:
-				if (i.type == I_SILVER)
-					report = 1;
+				if (i->type == I_SILVER) report = 1;
 		}
 		if (report) {
 			if (obs == 2) {
 				if (nofirstcomma) nofirstcomma = 0;
 				else temp += ", ";
-				temp += i.Report(seeillusions).const_str();
+				temp += i->Report(seeillusions);
 			} else {
-				if (ItemDefs[i.type].weight) {
+				if (ItemDefs[i->type].weight) {
 					if (nofirstcomma) nofirstcomma = 0;
 					else temp += ", ";
-					temp += i.Report(seeillusions).const_str();
+					temp += i->Report(seeillusions);
 				}
 			}
-			i.checked = 1;
+			i->checked = 1;
 		}
 	}
 	return temp;
@@ -1763,20 +1756,22 @@ void ItemList::SetNum(int t,int n)
 	// sanity check: does this item type exist?
 	if ((t<0) || (t>=NITEMS)) return;
 	if (n) {
-		for(auto& i: items) {
-			if (i.type == t) {
-				i.num = n;
+		for(auto i : items) {
+			if (i->type == t) {
+				i->num = n;
 				return;
 			}
 		}
-		Item i;
-		i.type = t;
-		i.num = n;
+		Item *i = new Item;
+		i->type = t;
+		i->num = n;
 		items.push_back(i);
 	} else {
-		for(auto i = items.begin(); i != items.end(); i++) {
+		// this is safe *only* because we return
+		for(auto i : items) {
 			if (i->type == t) {
-				items.erase(i);
+				std::erase(items, i);
+				delete i;
 				return;
 			}
 		}

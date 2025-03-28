@@ -123,7 +123,7 @@ struct ShowSkill {
 class Skill {
 public:
 	void Readin(std::istream& f);
-	void Writeout(std::ostream &f);
+	void Writeout(std::ostream &f) const;
 	Skill *Split(int total, int split);
 
 	int type;

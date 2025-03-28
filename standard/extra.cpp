@@ -77,7 +77,7 @@ int Game::SetupFaction( Faction *pFac )
 	if (pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
 	} else if (!Globals->MULTI_HEX_NEXUS) {
-		reg = *(regions.begin());
+		reg = regions.front();
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
@@ -97,13 +97,16 @@ int Game::SetupFaction( Faction *pFac )
 
 Faction *Game::CheckVictory()
 {
-	for(const auto r : regions) {
-		for(const auto obj : r->objects) {
+	for(const auto region : regions) {
+		for(const auto obj : region->objects) {
 			if (obj->type != O_BKEEP) continue;
-			if (obj->units.size()) return nullptr;
+			if (obj->units.size()) {
+				return nullptr;
+			}
+
 			// Now see find the first faction guarding the region
-			Object *o = r->GetDummy();
-			for(const auto u: o->units) {
+			Object *o = region->GetDummy();
+			for(const auto u : o->units) {
 				if (u->guard == GUARD_GUARD) return u->faction;
 			}
 			break;
@@ -217,4 +220,4 @@ void Game::ModifyTablesPerRuleset(void)
 	return;
 }
 
-const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList *regs) { return nullptr; }
+const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList& regs) { return nullptr; }

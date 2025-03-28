@@ -123,7 +123,7 @@ int Game::SetupFaction( Faction *pFac )
 	if (pFac->pStartLoc) {
 		reg = pFac->pStartLoc;
 	} else if (!Globals->MULTI_HEX_NEXUS) {
-		reg = *(regions.begin());
+		reg = regions.front();
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
@@ -144,6 +144,7 @@ int Game::SetupFaction( Faction *pFac )
 static void CreateQuest(ARegionList& regions, int monfaction)
 {
 	int d, count, temple, i, j, clash, reward_count;
+	ARegion *r;
 	AString rname;
 	map <string, int> temples;
 	map <string, int>::iterator it;
@@ -208,40 +209,31 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		count = 0;
 		// Count our current monsters
 		for(const auto r : regions) {
-			if (TerrainDefs[r->type].similar_type == R_OCEAN)
-				continue;
+			if (TerrainDefs[r->type].similar_type == R_OCEAN) continue;
 			// No need to check if quests do not require exploration
-			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0)
-				continue;
+			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0) continue;
 			for(const auto o : r->objects) {
-				for(const auto u: o->units) {
-					if (u->faction->num == monfaction) {
-						count++;
-					}
+				for(const auto u : o->units) {
+					if (u->faction->num == monfaction) count++;
 				}
 			}
 		}
-		if (!count)
-			return;
+		if (!count) return;
 		// pick one as the object of the quest
 		d = getrandom(count);
 		for(const auto r : regions) {
-			if (TerrainDefs[r->type].similar_type == R_OCEAN)
-				continue;
+			if (TerrainDefs[r->type].similar_type == R_OCEAN) continue;
 			// No need to check if quests do not require exploration
-			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0)
-				continue;
+			if (!r->visited && QUEST_EXPLORATION_PERCENT != 0) continue;
 			for(const auto o : r->objects) {
-				for(const auto u: o->units) {
+				for(const auto u : o->units) {
 					if (u->faction->num == monfaction) {
-						if (!d--) {
-							q->target = u->num;
-						}
+						if (!d--) q->target = u->num;
 					}
 				}
 			}
 		}
-		for(auto q2: quests) {
+		for(const auto& q2 : quests) {
 			if (q2->type == Quest::SLAY && q2->target == q->target) {
 				// Don't hunt the same monster twice
 				q->type = -1;
@@ -282,9 +274,9 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 				}
 			}
 		}
-		ARegion *r = regions.GetRegion(q->regionnum);
+		r = regions.GetRegion(q->regionnum);
 		rname = *r->name;
-		for(auto q2: quests) {
+		for(const auto& q2: quests) {
 			if (q2->type == Quest::HARVEST) {
 				r = regions.GetRegion(q2->regionnum);
 				if (rname == *r->name) {
@@ -369,7 +361,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 			}
 		}
 		if (q->type == Quest::BUILD) {
-			for(auto q2: quests) {
+			for(const auto& q2: quests) {
 				if (q2->type == Quest::BUILD && q->building == q2->building && q->regionname == q2->regionname) {
 					// Don't have 2 build quests
 					// active in the same region
@@ -379,7 +371,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		} else if (q->type == Quest::VISIT) {
 			// Make sure that a given region is only in one
 			// pilgrimage at a time
-			for(auto q2: quests) {
+			for(const auto& q2: quests) {
 				if (q2->type == Quest::VISIT && q->building == q2->building) {
 					intersection.clear();
 					set_intersection(
@@ -401,13 +393,13 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		quests.push_back(q);
 }
 
-int report_and_count_anomalies(ARegionList& regions, const std::vector<std::unique_ptr<Faction>>& factions) {
+int report_and_count_anomalies(ARegionList& regions, std::list<Faction *>& factions) {
 	int count = 0;
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			if (o->type == O_ENTITY_CAGE) {
 				count++;
-				for(const auto& f : factions) {
+				for(const auto f : factions) {
 					if (f->is_npc) continue;
 					f->event("A strange anomaly has been seen in " + string(r->ShortPrint().const_str()) + ".",
 						"anomaly", r);
@@ -418,16 +410,27 @@ int report_and_count_anomalies(ARegionList& regions, const std::vector<std::uniq
 	return count;
 }
 
-int count_entities(ARegionList& regions) {
+int report_and_count_entities(ARegionList& regions, std::list<Faction *>& factions) {
 	int count = 0;
 	for(const auto r : regions) {
 		for(const auto o : r->objects) {
 			if (o->type == O_EMPOWERED_ALTAR) {
 				count++;
+				for(const auto f : factions) {
+					if (f->is_npc) continue;
+					f->event("The altar in " + string(r->ShortPrint().const_str()) + " is fully empowered.",
+						"anomaly", r);
+				}
 			}
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u->items.GetNum(I_IMPRISONED_ENTITY) > 0) {
 					count += u->items.GetNum(I_IMPRISONED_ENTITY);
+					for(const auto f : factions) {
+						if (f->is_npc) continue;
+						f->event("An imprisoned entity has been spotted in " + string(r->ShortPrint().const_str()) +
+							" in the possession of " + string(u->GetName(0).const_str()) + ".",
+							"anomaly", r);
+					}
 				}
 			}
 		}
@@ -452,7 +455,7 @@ Faction *Game::CheckVictory()
 	set<string>::iterator it2;
 	Faction *winner = nullptr;
 
-	for(auto q: quests) {
+	for(const auto& q: quests) {
 		if (q->type != Quest::VISIT) continue;
 		for (auto dest: q->destinations) {
 			un.insert(dest);
@@ -473,14 +476,12 @@ Faction *Game::CheckVictory()
 			}
 		}
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				intersection.clear();
-				set_intersection(u->visited.begin(),
-					u->visited.end(),
-					un.begin(),
-					un.end(),
-					inserter(intersection,
-						intersection.begin()),
+				set_intersection(
+					u->visited.begin(), u->visited.end(),
+					un.begin(), un.end(),
+					inserter(intersection, intersection.begin()),
 					less<string>()
 				);
 				u->visited = intersection;
@@ -662,7 +663,7 @@ Faction *Game::CheckVictory()
 	}
 
 	std::vector<std::shared_ptr<Quest>> questsWithProblems;
-	for(auto q: quests) {
+	for(const auto& q: quests) {
 		switch(q->type) {
 			case Quest::SLAY:
 				l = regions.FindUnit(q->target);
@@ -749,7 +750,7 @@ Faction *Game::CheckVictory()
 				break;
 		}
 	}
-	for(auto q: questsWithProblems) quests.erase(q);
+	for(const auto& q: questsWithProblems) quests.erase(q);
 
 	// Check for victory conditions based on the current game
 	if (CITY_VOTE_WIN) {
@@ -775,7 +776,7 @@ Faction *Game::CheckVictory()
 			int faction_id = stoi(possible_faction);
 
 			// Make sure it's a valid faction
-			Faction *f = get_faction(factions, faction_id);
+			Faction *f = GetFaction(factions, faction_id);
 			if (!f || f->is_npc) continue;
 
 			auto vote = votes.find(faction_id);
@@ -793,7 +794,7 @@ Faction *Game::CheckVictory()
 		bool tie = false;
 		Faction *maxFaction = nullptr;
 		for (const auto& vote : votes) {
-			Faction *f = get_faction(factions, vote.first);
+			Faction *f = GetFaction(factions, vote.first);
 			if (vote.second > max_vote) {
 				max_vote = vote.second;
 				maxFaction = f;
@@ -834,13 +835,14 @@ Faction *Game::CheckVictory()
 		// If this number is < 6, then we have a chance of spawning a new anomaly.  This chance starts at 10%
 		// for the first anomaly after turn 50 and then increases by 12% for each entity or active altar already
 		// existing.
-		int completed_entities = count_entities(regions);
+		int completed_entities = report_and_count_entities(regions, factions);
 		if (completed_entities < 6) {
 			int chance = 10 + (completed_entities * 12);
+			int anomalies = report_and_count_anomalies(regions, factions);
+			Awrite(AString("Endgame: entities: ") + completed_entities + ", anomalies: " + anomalies + ", chance: " + chance + "%");
 			if (getrandom(100) < chance) {
 				// Okay, let's see if we can spawn a new entity
 				// If we can, see if we already have those anomalies and report them to all factions if so.
-				int anomalies = report_and_count_anomalies(regions, factions);
 				if (anomalies + completed_entities >= 6) {
 					// We have all the anomalies that we can have still, so cannot spawn any more.
 					return nullptr;
@@ -881,11 +883,12 @@ Faction *Game::CheckVictory()
 				}
 				r->objects.push_back(o);
 				// Now tell all the factions about it.
-				for(const auto& f : factions) {
+				for(const auto f : factions) {
 					if (f->is_npc) continue;
 					f->event("A strange anomaly has appeared in " + string(r->ShortPrint().const_str()) + ".",
 						"anomaly", r);
 				}
+				Awrite(AString("Spawned new anomaly at ") + r->ShortPrint() + ".");
 			}
 
 			// If we haven't completed all the entities, then noone can win yet.
@@ -914,9 +917,9 @@ Faction *Game::CheckVictory()
 
 		// Ok, we have a possible winner, check for all alive factions being allied with the winner and vice-versa.
 		bool all_allied = true;
-		for(const auto& f : factions) {
+		for (const auto f : factions) {
 			if (f->is_npc) continue;
-			if (f.get() == winner) continue;
+			if (f == winner) continue;
 			// This faction doesn't have the winner as an ally, so no win by allies
 			if (f->get_attitude(winner->num) != A_ALLY) { all_allied = false; break; }
 			// The winner doesn't have this faction as an ally, so no win by allies
@@ -1450,8 +1453,8 @@ void Game::ModifyTablesPerRuleset(void)
 	return;
 }
 
-const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList *regs) {
-	ARegionArray *surface = regs->GetRegionArray(ARegionArray::LEVEL_SURFACE);
+const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList& regs) {
+	ARegionArray *surface = regs.GetRegionArray(ARegionArray::LEVEL_SURFACE);
 	ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
 
 	ARegionArray *this_level = this->level;

@@ -159,14 +159,14 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 
 void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck )
 {
-	auto id = ParseUnit(o);
+	UnitId *id = ParseUnit(o);
 
 	if (!id) {
 		u->error("CAST: No unit specified.");
 		return;
 	}
 
-	std::shared_ptr<CastMindOrder> order = std::make_shared<CastMindOrder>();
+	CastMindOrder *order = new CastMindOrder;
 	order->id = id;
 	order->spell = S_MIND_READING;
 	order->level = 1;
@@ -185,7 +185,7 @@ void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	}
 
 	if (*token == "eagle") {
-		std::shared_ptr<CastIntOrder> order = std::make_shared<CastIntOrder>();
+		CastIntOrder *order = new CastIntOrder;
 		order->spell = S_BIRD_LORE;
 		order->level = 3;
 		u->ClearCastOrders();
@@ -209,7 +209,7 @@ void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck )
 			return;
 		}
 
-		std::shared_ptr<CastIntOrder> order = std::make_shared<CastIntOrder>();
+		CastIntOrder *order = new CastIntOrder;
 		order->spell = S_BIRD_LORE;
 		order->level = 1;
 		order->target = dir;
@@ -233,27 +233,29 @@ void Game::ProcessInvisibility(Unit *u,AString *o, OrdersCheck *pCheck )
 	}
 	delete token;
 
-	std::shared_ptr<CastUnitsOrder> order = std::make_shared<CastUnitsOrder>();
-	if (u->castorders && (u->castorders->type == O_CAST) &&
-			(u->castorders->spell == S_INVISIBILITY) && u->castorders->level == 1) {
-		order = std::dynamic_pointer_cast<CastUnitsOrder>(u->castorders);
+	CastUnitsOrder *order;
+	if (u->castorders && u->castorders->type == O_CAST &&
+		u->castorders->spell == S_INVISIBILITY && u->castorders->level == 1
+	) {
+		order = dynamic_cast<CastUnitsOrder *>(u->castorders);
 	} else {
+		order = new CastUnitsOrder;
 		order->spell = S_INVISIBILITY;
 		order->level = 1;
 		u->ClearCastOrders();
 		u->castorders = order;
 	}
 
-	auto id = ParseUnit(o);
+	UnitId *id = ParseUnit(o);
 	while (id) {
-		order->units.push_back(*id);
+		order->units.push_back(id);
 		id = ParseUnit(o);
 	}
 }
 
 void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
 {
-	std::shared_ptr<CastIntOrder> order = std::make_shared<CastIntOrder>();
+	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_DEMONS;
 	order->level = 0;
 	order->target = 1;
@@ -262,6 +264,7 @@ void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
 
 	if (!token) {
 		u->error("CAST: Illusion to summon must be given.");
+		delete order;
 		return;
 	}
 
@@ -281,6 +284,7 @@ void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
 
 	if (!order->level) {
 		u->error("CAST: Can't summon that illusion.");
+		delete order;
 		return;
 	}
 
@@ -299,7 +303,7 @@ void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
 
 void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
 {
-	std::shared_ptr<CastIntOrder> order = std::make_shared<CastIntOrder>();
+	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_UNDEAD;
 	order->level = 0;
 	order->target = 1;
@@ -308,6 +312,7 @@ void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
 
 	if (!token) {
 		u->error("CAST: Must specify which illusion to summon.");
+		delete order;
 		return;
 	}
 
@@ -327,6 +332,7 @@ void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
 
 	if (!order->level) {
 		u->error("CAST: Must specify which illusion to summon.");
+		delete order;
 		return;
 	}
 
@@ -345,7 +351,7 @@ void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
 {
-	std::shared_ptr<CastIntOrder> order = std::make_shared<CastIntOrder>();
+	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_BEASTS;
 	order->level = 0;
 	order->target = 1;
@@ -354,6 +360,7 @@ void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
 
 	if (!token) {
 		u->error("CAST: Must specify which illusion to summon.");
+		delete order;
 		return;
 	}
 
@@ -369,6 +376,7 @@ void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
 
 	delete token;
 	if (!order->level) {
+		delete order;
 		u->error("CAST: Must specify which illusion to summon.");
 		return;
 	}
@@ -383,16 +391,17 @@ void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
 	u->castorders = order;
 }
 
-void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck *pCheck)
+void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck *pCheck )
 {
-	std::shared_ptr<CastOrder> order = std::make_shared<CastOrder>();
-	order->spell = spell;
-	order->level = 1;
+	CastOrder *orders = new CastOrder;
+	orders->spell = spell;
+	orders->level = 1;
 	u->ClearCastOrders();
-	u->castorders = order;
+	u->castorders = orders;
 }
 
-void Game::ProcessRegionSpell(Unit *u, AString *o, int spell, OrdersCheck *pCheck)
+void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
+		OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 	int x = -1;
@@ -424,8 +433,9 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell, OrdersCheck *pChec
 				if (token) {
 					z = token->value();
 					delete token;
-					if (z < 0 ||
-							(z >= Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL + 2)) {
+					if (z < 0 || (z >= Globals->UNDERWORLD_LEVELS +
+								Globals->UNDERDEEP_LEVELS +
+								Globals->ABYSS_LEVEL + 2)) {
 						u->error("CAST: Invalid Z coordinate specified.");
 						return;
 					}
@@ -439,22 +449,23 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell, OrdersCheck *pChec
 	if (y == -1) y = u->object->region->yloc;
 	if (z == -1) z = u->object->region->zloc;
 
-	std::shared_ptr<CastRegionOrder> order;
-	u->ClearCastOrders();
-	if (spell == S_TELEPORTATION) {
-		std::shared_ptr<TeleportOrder> tOrder = std::make_shared<TeleportOrder>();
-		u->teleportorders = tOrder;
-		order = tOrder;
-	} else {
-		order = std::make_shared<CastRegionOrder>();
-		u->castorders = order;
-	}
-
+	CastRegionOrder *order;
+	if (spell == S_TELEPORTATION)
+		order = new TeleportOrder;
+	else
+		order = new CastRegionOrder;
 	order->spell = spell;
 	order->level = 1;
 	order->xloc = x;
 	order->yloc = y;
 	order->zloc = z;
+
+	u->ClearCastOrders();
+	/* Teleports happen late in the turn! */
+	if (spell == S_TELEPORTATION)
+		u->teleportorders = dynamic_cast<TeleportOrder *>(order);
+	else
+		u->castorders = order;
 }
 
 void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
@@ -479,11 +490,12 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		return;
 	}
 
-	std::shared_ptr<TeleportOrder> order;
+	TeleportOrder *order;
+
 	if (u->teleportorders && u->teleportorders->spell == S_PORTAL_LORE) {
 		order = u->teleportorders;
 	} else {
-		order = std::make_shared<TeleportOrder>();
+		order = new TeleportOrder;
 		u->ClearCastOrders();
 		u->teleportorders = order;
 	}
@@ -492,9 +504,9 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	order->spell = S_PORTAL_LORE;
 	order->level = 1;
 
-	auto id = ParseUnit(o);
+	UnitId *id = ParseUnit(o);
 	while(id) {
-		order->units.push_back(*id);
+		order->units.push_back(id);
 		id = ParseUnit(o);
 	}
 }
@@ -508,7 +520,6 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		return;
 	}
 
-	std::shared_ptr<TeleportOrder> order = std::make_shared<TeleportOrder>();
 	if ((*token) == "gate") {
 		delete token;
 		token = o->gettoken();
@@ -518,9 +529,13 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 			return;
 		}
 
-		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE && u->teleportorders->gate == token->value()) {
+		TeleportOrder *order;
+
+		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE &&
+				u->teleportorders->gate == token->value()) {
 			order = u->teleportorders;
 		} else {
+			order = new TeleportOrder;
 			u->ClearCastOrders();
 			u->teleportorders = order;
 		}
@@ -539,18 +554,23 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 			return;
 		}
 
-		auto id = ParseUnit(o);
+		UnitId *id = ParseUnit(o);
 		while(id) {
-			order->units.push_back(*id);
+			order->units.push_back(id);
 			id = ParseUnit(o);
 		}
 		return;
 	}
 
 	if ((*token) == "random") {
-		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE && u->teleportorders->gate == -1 ) {
+		TeleportOrder *order;
+
+		if (u->teleportorders &&
+				u->teleportorders->spell == S_GATE_LORE &&
+				u->teleportorders->gate == -1 ) {
 			order = u->teleportorders;
 		} else {
+			order = new TeleportOrder;
 			u->ClearCastOrders();
 			u->teleportorders = order;
 		}
@@ -576,9 +596,9 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 			return;
 		}
 
-		auto id = ParseUnit(o);
+		UnitId *id = ParseUnit(o);
 		while(id) {
-			order->units.push_back(*id);
+			order->units.push_back(id);
 			id = ParseUnit(o);
 		}
 		return;
@@ -587,7 +607,7 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	if ((*token) == "detect") {
 		delete token;
 		u->ClearCastOrders();
-		std::shared_ptr<CastOrder> to = std::make_shared<CastOrder>();
+		CastOrder *to = new CastOrder;
 		to->spell = S_GATE_LORE;
 		to->level = 2;
 		u->castorders = to;
@@ -600,9 +620,10 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 
 void Game::ProcessTransmutation(Unit *u, AString *o, OrdersCheck *pCheck)
 {
+	CastTransmuteOrder *order;
 	AString *token;
 
-	std::shared_ptr<CastTransmuteOrder> order = std::make_shared<CastTransmuteOrder>();
+	order = new CastTransmuteOrder;
 	order->spell = S_TRANSMUTATION;
 	order->level = 0;
 	order->item = -1;
@@ -611,6 +632,7 @@ void Game::ProcessTransmutation(Unit *u, AString *o, OrdersCheck *pCheck)
 	token = o->gettoken();
 	if (!token) {
 		u->error("CAST: You must specify what you wish to create.");
+		delete order;
 		return;
 	}
 	if (token->value() > 0) {
@@ -623,6 +645,7 @@ void Game::ProcessTransmutation(Unit *u, AString *o, OrdersCheck *pCheck)
 	delete token;
 	if (order->item == -1) {
 		u->error("CAST: You must specify what you wish to create.");
+		delete order;
 		return;
 	}
 
@@ -648,6 +671,7 @@ void Game::ProcessTransmutation(Unit *u, AString *o, OrdersCheck *pCheck)
 			break;
 		default:
 			u->error("CAST: Can't create that by transmutation.");
+			delete order;
 			return;
 	}
 
@@ -669,8 +693,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 		u->castorders->level = u->GetSkill(u->castorders->spell);
 	}
 
-	if (u->GetSkill(u->castorders->spell) < u->castorders->level ||
-			u->castorders->level == 0) {
+	if (u->GetSkill(u->castorders->spell) < u->castorders->level || u->castorders->level == 0) {
 		u->error("CAST: Skill level isn't that high.");
 		return;
 	}
@@ -827,7 +850,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 	}
 	if (val) {
 		u->Practice(sk);
-		r->NotifySpell(u, SkillDefs[sk].abbr, &regions);
+		r->NotifySpell(u, SkillDefs[sk].abbr, regions);
 	}
 }
 
@@ -903,10 +926,10 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 
 int Game::RunMindReading(ARegion *r,Unit *u)
 {
-	std::shared_ptr<CastMindOrder> order = std::dynamic_pointer_cast<CastMindOrder>(u->castorders);
+	CastMindOrder *order = dynamic_cast<CastMindOrder *>(u->castorders);
 	int level = u->GetSkill(S_MIND_READING);
 
-	Unit *tar = r->get_unit_id(*order->id,u->faction->num);
+	Unit *tar = r->GetUnitId(order->id,u->faction->num);
 	if (!tar) {
 		u->error("No such unit.");
 		return 0;
@@ -919,7 +942,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 		return 1;
 	}
 
-	temp += string(tar->items.Report(2, 5, 0)) + ". Skills: ";
+	temp += string(tar->items.Report(2,5,0).const_str()) + ". Skills: ";
 	temp += string(tar->skills.Report(tar->GetMen()).const_str()) + ".";
 
 	u->event(temp, "spell");
@@ -1008,8 +1031,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 		for (i = 0; i < ngates; i++)
 			used[i] = 0;
 		for(const auto reg : regions) {
-			if (reg->gate)
-				used[reg->gate - 1] = 1;
+			if (reg->gate) used[reg->gate - 1] = 1;
 		}
 		r->gate = getrandom(ngates);
 		while (used[r->gate])
@@ -1272,7 +1294,7 @@ int Game::RunDragonLore(ARegion *r, Unit *u)
 
 int Game::RunBirdLore(ARegion *r,Unit *u)
 {
-	std::shared_ptr<CastIntOrder> order = std::dynamic_pointer_cast<CastIntOrder>(u->castorders);
+	CastIntOrder *order = dynamic_cast<CastIntOrder *>(u->castorders);
 	int type = regions.GetRegionArray(r->zloc)->levelType;
 
 	if (type != ARegionArray::LEVEL_SURFACE) {
@@ -1345,14 +1367,14 @@ int Game::RunWolfLore(ARegion *r,Unit *u)
 
 int Game::RunInvisibility(ARegion *r,Unit *u)
 {
-	std::shared_ptr<CastUnitsOrder> order = std::dynamic_pointer_cast<CastUnitsOrder>(u->castorders);
+	CastUnitsOrder *order = dynamic_cast<CastUnitsOrder *>(u->castorders);
 	int max = u->GetSkill(S_INVISIBILITY);
 	max = max * max;
 
 	int num = 0;
 	r->deduplicate_unit_list(order->units, u->faction->num);
-	for(auto elem : order->units) {
-		Unit *tar = r->get_unit_id(elem, u->faction->num);
+	for(const auto id : order->units) {
+		Unit *tar = r->GetUnitId(id, u->faction->num);
 		if (!tar) continue;
 		if (tar->GetAttitude(r,u) < A_FRIENDLY) continue;
 		num += tar->GetSoldiers();
@@ -1367,21 +1389,23 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
 		u->error("CAST: No valid targets to turn invisible.");
 		return 0;
 	}
-	for(auto elem: order->units) {
-		Unit *tar = r->get_unit_id(elem, u->faction->num);
+	for(const auto id : order->units) {
+		Unit *tar = r->GetUnitId(id, u->faction->num);
 		if (!tar) continue;
 		if (tar->GetAttitude(r,u) < A_FRIENDLY) continue;
 		tar->SetFlag(FLAG_INVIS,1);
 		tar->event("Is rendered invisible by " + string(u->name->const_str()) + ".", "spell");
 	}
 
+	// std::for_each(order->units.begin(), order->units.end(), [&](UnitId *id) { delete id; });
+	// order->units.clear();
 	u->event("Casts invisibility.", "spell");
 	return 1;
 }
 
 int Game::RunPhanDemons(ARegion *r,Unit *u)
 {
-	std::shared_ptr<CastIntOrder> order = std::dynamic_pointer_cast<CastIntOrder>(u->castorders);
+	CastIntOrder *order = dynamic_cast<CastIntOrder *>(u->castorders);
 	int level = u->GetSkill(S_CREATE_PHANTASMAL_DEMONS);
 	int create,max;
 
@@ -1415,7 +1439,7 @@ int Game::RunPhanDemons(ARegion *r,Unit *u)
 
 int Game::RunPhanUndead(ARegion *r,Unit *u)
 {
-	std::shared_ptr<CastIntOrder> order = std::dynamic_pointer_cast<CastIntOrder>(u->castorders);
+	CastIntOrder *order = dynamic_cast<CastIntOrder *>(u->castorders);
 	int level = u->GetSkill(S_CREATE_PHANTASMAL_UNDEAD);
 	int create,max;
 
@@ -1449,7 +1473,7 @@ int Game::RunPhanUndead(ARegion *r,Unit *u)
 
 int Game::RunPhanBeasts(ARegion *r,Unit *u)
 {
-	std::shared_ptr<CastIntOrder> order = std::dynamic_pointer_cast<CastIntOrder>(u->castorders);
+	CastIntOrder *order = dynamic_cast<CastIntOrder *>(u->castorders);
 	int level = u->GetSkill(S_CREATE_PHANTASMAL_BEASTS);
 	int create,max;
 
@@ -1522,7 +1546,8 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
 	string temp = "Casts Clear Skies";
 	int val;
 
-	std::shared_ptr<CastRegionOrder> order = std::dynamic_pointer_cast<CastRegionOrder>(u->castorders);
+	CastRegionOrder *order = dynamic_cast<CastRegionOrder *>(u->castorders);
+
 	RangeType *range = FindRange(SkillDefs[S_CLEAR_SKIES].range);
 	if (range != NULL) {
 		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
@@ -1542,7 +1567,8 @@ int Game::RunWeatherLore(ARegion *r, Unit *u)
 	ARegion *tar;
 	int val, i;
 
-	std::shared_ptr<CastRegionOrder> order = std::dynamic_pointer_cast<CastRegionOrder>(u->castorders);
+	CastRegionOrder *order = dynamic_cast<CastRegionOrder *>(u->castorders);
+
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 	val = GetRegionInRange(r, tar, u, S_WEATHER_LORE);
 	if (!val) return 0;
@@ -1574,7 +1600,8 @@ int Game::RunFarsight(ARegion *r,Unit *u)
 	ARegion *tar;
 	int val;
 
-	std::shared_ptr<CastRegionOrder> order = std::dynamic_pointer_cast<CastRegionOrder>(u->castorders);
+	CastRegionOrder *order = dynamic_cast<CastRegionOrder *>(u->castorders);
+
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 	val = GetRegionInRange(r, tar, u, S_FARSIGHT);
 	if (!val) return 0;
@@ -1627,7 +1654,8 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	ARegion *tar;
 	int val;
 
-	std::shared_ptr<TeleportOrder> order = u->teleportorders;
+	CastRegionOrder *order = (CastRegionOrder *)u->teleportorders;
+
 	tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 	val = GetRegionInRange(r, tar, u, S_TELEPORTATION);
 	if (!val) return 0;
@@ -1650,7 +1678,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 		}
 	}
 
-	const char *prevented = tar->movement_forbidden_by_ruleset(u, r, &regions);
+	const char *prevented = tar->movement_forbidden_by_ruleset(u, r, regions);
 	if (prevented != nullptr) {
 		u->error("CAST: " + string(prevented) + " prevents teleporting to that location.");
 		return 0;
@@ -1676,15 +1704,14 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 		return 0;
 	}
 
-	std::shared_ptr<TeleportOrder> order = u->teleportorders;
-	if ((order->gate > 0 && level < 2) ||
-			(order->gate == -2 && level < 2)) {
+	TeleportOrder *order = u->teleportorders;
+
+	if ((order->gate > 0 && level < 2) || (order->gate == -2 && level < 2)) {
 		u->error("CAST: Unit Doesn't know Gate Lore at that level.");
 		return 0;
 	}
 
-	nexgate = Globals->NEXUS_GATE_OUT &&
-		(TerrainDefs[r->type].similar_type == R_NEXUS);
+	nexgate = Globals->NEXUS_GATE_OUT && (TerrainDefs[r->type].similar_type == R_NEXUS);
 	if (!r->gate && !nexgate) {
 		u->error("CAST: There is no gate in that region.");
 		return 0;
@@ -1747,8 +1774,8 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	int weight = u->Weight();
 
 	r->deduplicate_unit_list(order->units, u->faction->num);
-	for(auto elem: order->units) {
-		Unit *taru = r->get_unit_id(elem, u->faction->num);
+	for(const auto id : order->units) {
+		Unit *taru = r->GetUnitId(id, u->faction->num);
 		if (taru && taru != u) weight += taru->Weight();
 	}
 
@@ -1763,18 +1790,12 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 		do {
 			tar = regions.FindGate(-1);
-			if (!tar)
-				continue;
+			if (!tar) continue;
 
-			if (tar->zloc == r->zloc)
-				good = 1;
-			if (order->gate == -2) {
-				good = 1;
-			}
-			if (nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
-				good = 1;
-			if (!tar->gateopen)
-				good = 0;
+			if (tar->zloc == r->zloc) good = 1;
+			if (order->gate == -2) good = 1;
+			if (nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE) good = 1;
+			if (!tar->gateopen) good = 0;
 		} while (!good);
 
 		string jump_text = "Casts Random Gate Jump. Capacity: " + to_string(weight) + "/" + to_string(maxweight) + ".";
@@ -1796,8 +1817,8 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 	int comma = 0;
 	string unitlist;
-	for(auto elem: order->units) {
-		Location *loc = r->GetLocation(std::make_shared<UnitId>(elem), u->faction->num);
+	for(const auto id : order->units) {
+		Location *loc = r->GetLocation(id, u->faction->num);
 		if (loc) {
 			/* Don't do the casting unit yet */
 			if (loc->unit == u) {
@@ -1813,7 +1834,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 				loc->unit->DiscardUnfinishedShips();
 				loc->unit->event("Is teleported through a Gate to " + string(tar->Print().const_str()) +
 					" by " + string(u->name->const_str()) + ".", "spell");
-				loc->unit->MoveUnit( tar->GetDummy() );
+				loc->unit->MoveUnit(tar->GetDummy());
 				if (loc->unit != u) loc->unit->ClearCastOrders();
 			}
 			delete loc;
@@ -1826,14 +1847,15 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	if (comma) {
 		u->event(unitlist + " follow through the Gate.", "spell");
 	}
-	u->MoveUnit( tar->GetDummy() );
+	u->MoveUnit(tar->GetDummy());
 	return 1;
 }
 
 int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 {
 	int level = u->GetSkill(S_PORTAL_LORE);
-	std::shared_ptr<TeleportOrder> order = u->teleportorders;
+	TeleportOrder *order = u->teleportorders;
+
 	if (!level) {
 		u->error("CAST: Doesn't know Portal Lore.");
 		return 0;
@@ -1847,8 +1869,8 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	int maxweight = 800 * level;
 	r->deduplicate_unit_list(order->units, u->faction->num);
 	int weight = 0;
-	for (auto elem: order->units) {
-		Unit *taru = r->get_unit_id(elem,u->faction->num);
+	for(const auto id : order->units) {
+		Unit *taru = r->GetUnitId(id, u->faction->num);
 		if (taru) weight += taru->Weight();
 	}
 
@@ -1891,7 +1913,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		}
 	}
 
-	const char *prevented = tar->region->movement_forbidden_by_ruleset(u, r, &regions);
+	const char *prevented = tar->region->movement_forbidden_by_ruleset(u, r, regions);
 	if (prevented != nullptr) {
 		u->error("CAST: " + string(prevented) + " prevents portalling to that location.");
 		return 0;
@@ -1899,8 +1921,8 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 
 	u->event("Casts Portal Jump.", "spell");
 
-	for (auto elem: order->units) {
-		Location *loc = r->GetLocation(std::make_shared<UnitId>(elem), u->faction->num);
+	for(const auto id : order->units) {
+		Location *loc = r->GetLocation(id, u->faction->num);
 		if (loc) {
 			if (loc->unit->GetAttitude(r,u) < A_ALLY) {
 				u->error("CAST: Unit is not allied.");
@@ -1923,9 +1945,10 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 
 int Game::RunTransmutation(ARegion *r, Unit *u)
 {
+	CastTransmuteOrder *order;
 	int level, num, source;
 
-	std::shared_ptr<CastTransmuteOrder> order = std::dynamic_pointer_cast<CastTransmuteOrder>(u->castorders);
+	order = dynamic_cast<CastTransmuteOrder *>(u->castorders);
 	level = u->GetSkill(S_TRANSMUTATION);
 	if (!level) {
 		u->error("CAST: Unit doesn't have that skill.");
@@ -1996,11 +2019,11 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 			tower = o;
 		}
 
-		for(const auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u->faction->num == mage->faction->num) {
-				for(auto item: u->items) {
-					if (ItemDefs[item.type].type & sactype) {
-						sacrifices += item.num;
+				for(auto item : u->items) {
+					if (ItemDefs[item->type].type & sactype) {
+						sacrifices += item->num;
 					}
 				}
 			}
@@ -2020,15 +2043,15 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 		victim = 0;
 		i = getrandom(sacrifices);
 		for(const auto o : r->objects) {
-			for(const auto u: o->units) {
+			for(const auto u : o->units) {
 				if (u->faction->num == mage->faction->num) {
-					for(auto item: u->items) {
-						if (ItemDefs[item.type].type & sactype) {
-							if (!victim && i < item.num) {
+					for(auto item : u->items) {
+						if (ItemDefs[item->type].type & sactype) {
+							if (!victim && i < item->num) {
 								victim = u;
-								sac = item.type;
+								sac = item->type;
 							}
-							i -= item.num;
+							i -= item->num;
 						}
 					}
 				}
@@ -2061,13 +2084,11 @@ void Game::RunTeleportOrders()
 {
 	int val = 1;
 	for(const auto r : regions) {
-		for(const auto o: r->objects) {
+		for(const auto o : r->objects) {
 			int foundone = 1;
 			while (foundone) {
 				foundone = 0;
-				// Teleport can move units out of the region, so we need to copy the list
-				auto unitCopy(o->units);
-				for(const auto u: unitCopy) {
+				for(const auto u : o->units) {
 					if (u->teleportorders) {
 						foundone = 1;
 						switch (u->teleportorders->spell) {
@@ -2081,9 +2102,15 @@ void Game::RunTeleportOrders()
 								val = RunPortalLore(r,o,u);
 								break;
 						}
-						if (val)
-							u->Practice(u->teleportorders->spell);
-						u->teleportorders = nullptr;
+						if (val) u->Practice(u->teleportorders->spell);
+						std::for_each(
+							u->teleportorders->units.begin(),
+							u->teleportorders->units.end(),
+							[&](UnitId *id) { delete id; }
+						);
+						u->teleportorders->units.clear();
+						delete u->teleportorders;
+						u->teleportorders = 0;
 						break;
 					}
 				}

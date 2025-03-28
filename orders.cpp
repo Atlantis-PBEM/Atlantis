@@ -122,6 +122,7 @@ ExchangeOrder::ExchangeOrder()
 
 ExchangeOrder::~ExchangeOrder()
 {
+	if (target) delete target;
 }
 
 TurnOrder::TurnOrder()
@@ -170,6 +171,7 @@ GiveOrder::GiveOrder()
 
 GiveOrder::~GiveOrder()
 {
+	if (target) delete target;
 }
 
 StudyOrder::StudyOrder()
@@ -234,6 +236,7 @@ BuildOrder::BuildOrder()
 
 BuildOrder::~BuildOrder()
 {
+	if (target) delete target;
 }
 
 SailOrder::SailOrder()
@@ -269,6 +272,7 @@ StealOrder::StealOrder()
 
 StealOrder::~StealOrder()
 {
+	if (target) delete target;
 }
 
 AssassinateOrder::AssassinateOrder()
@@ -278,6 +282,7 @@ AssassinateOrder::AssassinateOrder()
 
 AssassinateOrder::~AssassinateOrder()
 {
+	if (target) delete target;
 }
 
 CastOrder::CastOrder()
@@ -291,10 +296,12 @@ CastOrder::~CastOrder()
 
 CastMindOrder::CastMindOrder()
 {
+	id = 0;
 }
 
 CastMindOrder::~CastMindOrder()
 {
+	delete id;
 }
 
 TeleportOrder::TeleportOrder()
@@ -353,10 +360,12 @@ TransportOrder::TransportOrder()
 	item = -1;
 	amount = 0;
 	except = 0;
+	target = NULL;
 }
 
 TransportOrder::~TransportOrder()
 {
+	if (target) delete target;
 }
 
 CastTransmuteOrder::CastTransmuteOrder()
@@ -374,6 +383,7 @@ JoinOrder::JoinOrder()
 
 JoinOrder::~JoinOrder()
 {
+	if (target) delete target;
 }
 
 AnnihilateOrder::AnnihilateOrder()

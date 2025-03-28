@@ -29,8 +29,6 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
-#include <vector>
-#include <memory>
 
 using namespace std;
 
@@ -364,7 +362,7 @@ void Faction::build_gm_json_report(json& j, Game *game) {
 	json regions = json::array();
 	for (const auto& reg: present_regions) {
 		json region;
-		reg->build_json_report(region, this, game->month, &(game->regions));
+		reg->build_json_report(region, this, game->month, game->regions);
 		regions.push_back(region);
 	}
 	j["regions"] = regions;
@@ -510,7 +508,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 		for (const auto& a: attitudes) {
 			if (a.attitude == i) {
 				// Grab that faction so we can get it's number and name, and strip the " (num)" from the name for json
-				Faction *fac = get_faction(game->factions, a.factionnum);
+				Faction *fac = GetFaction(game->factions, a.factionnum);
 				string facname = fac->name->const_str();
 				facname = facname.substr(0, facname.find(" ("));
 				j["attitudes"][attitude].push_back({ { "name", facname }, { "number", a.factionnum } });
@@ -544,7 +542,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 	j["item_reports"] = items;
 
 	json objects = json::array();
-	for(auto &objectshow : objectshows) {
+	for(const auto objectshow : objectshows) {
 		string obj_name = ObjectDefs[objectshow.obj].name;
 		string description = ObjectDescription(objectshow.obj)->const_str();
 		if(description.empty()) continue;
@@ -556,7 +554,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 	json regions = json::array();
 	for (const auto& reg: present_regions) {
 		json region;
-		reg->build_json_report(region, this, game->month, &(game->regions));
+		reg->build_json_report(region, this, game->month, game->regions);
 		regions.push_back(region);
 	}
 	j["regions"] = regions;
@@ -641,7 +639,7 @@ int Faction::CanCatch(ARegion *r, Unit *t)
 	int def = t->GetDefenseRiding();
 
 	for(const auto o : r->objects) {
-		for(const auto u: o->units) {
+		for(const auto u : o->units) {
 			if (u == t && o->type != O_DUMMY) return 1;
 			if (u->faction == this && u->GetAttackRiding() >= def) return 1;
 		}
@@ -656,8 +654,8 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 	if (u->reveal == REVEAL_FACTION) return 2;
 
 	// If the unit has any items which prevent stealth, then we can see them.
-	for(auto item: u->items) {
-		if (ItemDefs[item.type].flags & ItemType::NOSTEALTH) return 2;
+	for(auto item : u->items) {
+		if (ItemDefs[item->type].flags & ItemType::NOSTEALTH) return 1;
 	}
 
 	int retval = 0;
@@ -666,13 +664,13 @@ int Faction::CanSee(ARegion* r, Unit* u, int practice)
 	for(const auto obj : r->objects) {
 		int dummy = 0;
 		if (obj->type == O_DUMMY) dummy = 1;
-		for(const auto temp: obj->units) {
+		for(const auto temp : obj->units) {
 			if (u == temp && dummy == 0) retval = 1;
 
 			// penalty of 2 to stealth if assassinating and 1 if stealing
 			// TODO: not sure about the reasoning behind the IMPROVED_AMTS part
 			int stealpenalty = 0;
-			if (Globals->HARDER_ASSASSINATION && u->stealthorders){
+			if (Globals->HARDER_ASSASSINATION && u->stealthorders) {
 				if (u->stealthorders->type == O_STEAL) {
 					stealpenalty = 1;
 				} else if (u->stealthorders->type == O_ASSASSINATE) {
@@ -722,11 +720,11 @@ void Faction::TimesReward()
 	}
 }
 
-Faction *get_faction(const std::vector<std::unique_ptr<Faction>>& factions, int faction_id)
+Faction *GetFaction(std::list <Faction *>& facs, int factionid)
 {
-	for (auto& faction : factions) {
-		if (faction->num == faction_id) return faction.get();
-	}
+	for(const auto f : facs)
+		if (f->num == factionid)
+			return f;
 	return nullptr;
 }
 

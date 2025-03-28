@@ -28,9 +28,7 @@
 #include "gamedefs.h"
 #include "astring.h"
 #include <list>
-#include <memory>
 
-// Forward declarations
 class UnitId;
 
 enum {
@@ -120,7 +118,6 @@ enum {
 /* Enter is MOVE_ENTER + num of object */
 #define MOVE_ENTER 100
 
-
 extern char const ** OrderStrs;
 
 int Parse1Order(AString *);
@@ -135,12 +132,8 @@ class Order {
 };
 
 class MoveDir {
-public:
-	MoveDir(int d) : dir(d) {}
-	~MoveDir() {}
-	inline int operator==(const MoveDir &d) { return dir == d.dir; }
-
-	int dir;
+	public:
+		int dir;
 };
 
 class MoveOrder : public Order {
@@ -149,7 +142,7 @@ class MoveOrder : public Order {
 		~MoveOrder();
 
 		int advancing;
-		std::vector<MoveDir> dirs;
+		std::list<MoveDir *> dirs;
 };
 
 class WithdrawOrder : public Order {
@@ -173,9 +166,7 @@ class GiveOrder : public Order {
 		int unfinished;
 		int merge;
 
-		// This needs special handling because we sometimes make copies of give orders for fleets
-		// and without doing this, we can end up with double frees.
-		std::shared_ptr<UnitId> target;
+		UnitId *target;
 };
 
 class StudyOrder : public Order {
@@ -193,7 +184,7 @@ class TeachOrder : public Order {
 		TeachOrder();
 		~TeachOrder();
 
-		std::list<UnitId> targets;
+		std::list<UnitId *> targets;
 };
 
 class ProduceOrder : public Order {
@@ -230,7 +221,7 @@ class AttackOrder : public Order {
 		AttackOrder();
 		~AttackOrder();
 
-		std::list<UnitId> targets;
+		std::list<UnitId *> targets;
 };
 
 class BuildOrder : public Order {
@@ -238,7 +229,7 @@ class BuildOrder : public Order {
 		BuildOrder();
 		~BuildOrder();
 
-		std::shared_ptr<UnitId> target;
+		UnitId * target;
 		int new_building;
 		int needtocomplete;
 };
@@ -248,7 +239,7 @@ class SailOrder : public Order {
 		SailOrder();
 		~SailOrder();
 
-		std::vector<MoveDir> dirs;
+		std::list<MoveDir *> dirs;
 };
 
 class FindOrder : public Order {
@@ -262,9 +253,9 @@ class FindOrder : public Order {
 class StealthOrder : public Order {
 	public:
 		StealthOrder();
-		virtual ~StealthOrder();
+		~StealthOrder();
 
-		std::shared_ptr<UnitId> target;
+		UnitId *target;
 };
 
 class StealOrder : public StealthOrder {
@@ -279,8 +270,6 @@ class AssassinateOrder : public StealthOrder {
 	public:
 		AssassinateOrder();
 		~AssassinateOrder();
-
-		std::shared_ptr<UnitId> target;
 };
 
 class ForgetOrder : public Order {
@@ -304,7 +293,7 @@ class ExchangeOrder : public Order {
 
 		int exchangeStatus;
 
-		std::shared_ptr<UnitId> target;
+		UnitId *target;
 };
 
 class TurnOrder : public Order {
@@ -318,7 +307,7 @@ class TurnOrder : public Order {
 class CastOrder : public Order {
 	public:
 		CastOrder();
-		virtual ~CastOrder();
+		~CastOrder();
 
 		int spell;
 		int level;
@@ -329,13 +318,13 @@ class CastMindOrder : public CastOrder {
 		CastMindOrder();
 		~CastMindOrder();
 
-		std::shared_ptr<UnitId> id;
+		UnitId *id;
 };
 
 class CastRegionOrder : public CastOrder {
 	public:
 		CastRegionOrder();
-		virtual ~CastRegionOrder();
+		~CastRegionOrder();
 
 		int xloc, yloc, zloc;
 };
@@ -346,7 +335,7 @@ class TeleportOrder : public CastRegionOrder {
 		~TeleportOrder();
 
 		int gate;
-		std::list<UnitId> units;
+		std::list<UnitId *> units;
 };
 
 class CastIntOrder : public CastOrder {
@@ -362,7 +351,7 @@ class CastUnitsOrder : public CastOrder {
 		CastUnitsOrder();
 		~CastUnitsOrder();
 
-		std::list<UnitId> units;
+		std::list<UnitId *> units;
 };
 
 class CastTransmuteOrder : public CastOrder {
@@ -379,7 +368,7 @@ class EvictOrder : public Order {
 		EvictOrder();
 		~EvictOrder();
 
-		std::list<UnitId> targets;
+		std::list<UnitId *> targets;
 };
 
 class IdleOrder : public Order {
@@ -407,7 +396,7 @@ class TransportOrder : public Order {
 		};
 		TransportPhase phase;
 
-		std::shared_ptr<UnitId> target;
+		UnitId *target;
 };
 
 class JoinOrder : public Order {
@@ -415,7 +404,7 @@ class JoinOrder : public Order {
 		JoinOrder();
 		~JoinOrder();
 
-		std::shared_ptr<UnitId> target;
+		UnitId *target;
 		int overload;
 		int merge;
 };

@@ -47,8 +47,7 @@ Faction *UnitTestHelper::create_faction(std::string name) {
 }
 
 Faction *UnitTestHelper::get_faction(int id) {
-    // pass this on to the globally defined get_faction function
-    return ::get_faction(game.factions, id);
+    return GetFaction(game.factions, id);
 }
 
 Unit *UnitTestHelper::get_first_unit(Faction *faction) {
@@ -83,6 +82,8 @@ void UnitTestHelper::create_building(ARegion *region, Unit *owner, int building_
     if (ob.flags & ObjectType::SACRIFICE) {
         // set up the items sacrifice needed
         obj->incomplete = -(ob.sacrifice_amount);
+    } else {
+        obj->incomplete = -(ob.maxMaintenance);
     }
     if (owner) owner->MoveUnit(obj);
 }
@@ -110,6 +111,14 @@ void UnitTestHelper::check_transport_orders() {
 
 void UnitTestHelper::move_units() {
     game.RunMovementOrders();
+}
+
+void UnitTestHelper::run_enter() {
+    game.RunEnterOrders(0);
+}
+
+void UnitTestHelper::run_destroy() {
+    game.RunDestroyOrders();
 }
 
 void UnitTestHelper::run_sacrifice() {

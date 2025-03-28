@@ -8,7 +8,6 @@
 #include "unit.h"
 #include "astring.h"
 #include "gamedata.h"
-#include <type_traits>
 
 int Game::EditGame(int *pSaveGame)
 {
@@ -249,14 +248,20 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 						break;
 					}
 
-					size_t index = pToken->value();
-					if ( (index < 0) || (index >= pReg->objects.size()) ) { //modified minimum to <0 to allow deleting object 0. 030824 BS
+					int index = pToken->value();
+					if ( (index < 0) || (static_cast<size_t>(index) >= pReg->objects.size()) ) {
 						Awrite( "Incorrect index." );
 						break;
 					}
 					SAFE_DELETE( pToken );
 
-					pReg->objects.erase(pReg->objects.begin() + index);
+					auto oit = pReg->objects.begin();
+					for (int i = 0; i < index; i++) { if (oit != pReg->objects.end()) oit++; }
+					if (oit == pReg->objects.end()) {
+						Awrite( "Incorrect index." );
+						break;
+					}
+					pReg->objects.erase(oit);
 				}
 	//hexside change
 	/*			else if (*pToken == "h") {
@@ -394,8 +399,8 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 						break;
 					}
 
-					size_t index = pToken->value();
-					if ( (index < 1) || (index >= pReg->objects.size()) ) {
+					int index = pToken->value();
+					if ( (index < 1) || (static_cast<size_t>(index) >= pReg->objects.size()) ) {
 						Awrite( "Incorrect index." );
 						break;
 					}
@@ -407,7 +412,14 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 						break;
 					}
 
-					Object *tmp = pReg->objects[index];
+					auto oit = pReg->objects.begin();
+					for (int i = 0; i < index; i++) { if (oit != pReg->objects.end()) oit++; }
+					if (oit == pReg->objects.end()) {
+						Awrite( "Incorrect index." );
+						break;
+					}
+					Object *tmp = *oit;
+
 					AString * newname = pToken->getlegal();
 					SAFE_DELETE(pToken);
 					if (newname) {
@@ -1261,7 +1273,7 @@ void Game::EditGameUnitDetails(Unit *pUnit)
 						break;
 					}
 
-					Faction *fac = get_faction(factions, fnum);
+					Faction *fac = GetFaction(factions, fnum);
 					if (fac) pUnit->faction = fac;
 					else Awrite("Cannot Find Faction");
 				}
@@ -1294,11 +1306,11 @@ void Game::EditGameUnitDetails(Unit *pUnit)
 
 void Game::EditGameCreateUnit()
 {
-	Faction *fac = get_faction(factions, 1);
+	Faction *fac = GetFaction(factions, 1);
 	Unit *newunit = GetNewUnit(fac);
 	newunit->SetMen(I_LEADERS, 1);
 	newunit->reveal = REVEAL_FACTION;
-	newunit->MoveUnit((*regions.begin())->GetDummy());
+	newunit->MoveUnit(regions.front()->GetDummy());
 
 	EditGameUnit(newunit);
 }

@@ -47,8 +47,6 @@ class UnitId;
 #include "object.h"
 #include <set>
 #include <string>
-#include <vector>
-#include <memory>
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -112,13 +110,22 @@ class UnitId {
 		int alias;
 		int faction;
 
-		inline bool operator==(const UnitId& other) const {
-			return (this->unitnum == other.unitnum && this->alias == other.alias && this->faction == other.faction);
+		bool operator==(const UnitId& other) const {
+			return unitnum == other.unitnum && alias == other.alias && faction == other.faction;
 		}
 };
 
-class Unit
-{
+// Specialize std::hash for UnitId
+namespace std {
+    template <>
+    struct hash<UnitId> {
+        std::size_t operator()(const UnitId& uid) const {
+            return std::hash<int>()(uid.unitnum) ^ std::hash<int>()(uid.alias) ^ std::hash<int>()(uid.faction);
+        }
+    };
+}
+
+class Unit {
 	public:
 		Unit();
 		Unit(int,Faction *,int = 0);
@@ -128,10 +135,10 @@ class Unit
 		void MakeWMon(char const *,int,int);
 
 		void Writeout(std::ostream& f);
-		void Readin(std::istream& f, const std::vector<std::unique_ptr<Faction>>& factions);
+		void Readin(std::istream& f, std::list<Faction *>& facs);
 
 		AString SpoilsReport(void);
-		int CanGetSpoil(Item& i);
+		int CanGetSpoil(Item *i);
 		json build_json_descriptor();
 		void build_json_report(json& j, int obs, int truesight, int detfac, int autosee, int attitude, int showattitudes);
 		json write_json_orders();
@@ -159,12 +166,12 @@ class Unit
 		int GetMoney();
 		void SetMoney(int);
 		int GetSharedNum(int);
-		void ConsumeShared(int item, int needed);
+		void ConsumeShared(int,int);
 		int GetSharedMoney();
-		void ConsumeSharedMoney(int needed);
+		void ConsumeSharedMoney(int);
 		int IsAlive();
 
-		int MaintCost(ARegionList *regions, ARegion *current_region);
+		int MaintCost(ARegionList& regions, ARegion *current_region);
 		void Short(int, int);
 		int SkillLevels();
 		void SkillStarvation();
@@ -273,30 +280,30 @@ class Unit
 		int destroy;
 		int enter;
 		int build;
-		std::shared_ptr<UnitId> promote;
-		std::vector<std::shared_ptr<FindOrder>> findorders;
-		std::vector<std::shared_ptr<GiveOrder>> giveorders;
-		std::vector<std::shared_ptr<WithdrawOrder>> withdraworders;
-		std::vector<std::shared_ptr<BuyOrder>> buyorders;
-		std::vector<std::shared_ptr<SellOrder>> sellorders;
-		std::vector<std::shared_ptr<ForgetOrder>> forgetorders;
-		std::shared_ptr<CastOrder> castorders;
-		std::shared_ptr<TeleportOrder> teleportorders;
-		std::shared_ptr<StealthOrder>stealthorders;
-		std::shared_ptr<Order> monthorders;
-		std::shared_ptr<AttackOrder> attackorders;
-		std::shared_ptr<EvictOrder> evictorders;
-		std::shared_ptr<SacrificeOrder> sacrificeorders;
-		std::shared_ptr<AnnihilateOrder> annihilateorders;
+		UnitId *promote;
+		std::list<FindOrder *> findorders;
+		std::list<GiveOrder *> giveorders;
+		std::list<WithdrawOrder *> withdraworders;
+		std::list<BuyOrder *> buyorders;
+		std::list<SellOrder *> sellorders;
+		std::list<ForgetOrder *> forgetorders;
+		CastOrder *castorders;
+		TeleportOrder *teleportorders;
+		StealthOrder *stealthorders;
+		Order *monthorders;
+		AttackOrder *attackorders;
+		EvictOrder *evictorders;
+		SacrificeOrder *sacrificeorders;
+		AnnihilateOrder *annihilateorders;
 		ARegion *advancefrom;
 
-		std::vector<std::shared_ptr<ExchangeOrder>> exchangeorders;
-		std::list<std::shared_ptr<TurnOrder>> turnorders;
+		std::list<ExchangeOrder *> exchangeorders;
+		std::list<TurnOrder *> turnorders;
 		int inTurnBlock;
-		std::shared_ptr<Order> presentMonthOrders;
+		Order *presentMonthOrders;
 		int presentTaxing;
-		std::vector<std::shared_ptr<TransportOrder>> transportorders;
-		std::shared_ptr<JoinOrder> joinorders;
+		std::list<TransportOrder *>transportorders;
+		JoinOrder *joinorders;
 		Unit *former;
 		int format;
 

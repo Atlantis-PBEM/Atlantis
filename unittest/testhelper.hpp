@@ -51,7 +51,7 @@ public:
     // Get a region by coordinates
     ARegion *get_region(int x, int y, int level);
     // Get all regions
-    ARegionList *get_regions() { return &game.regions; }
+    ARegionList& get_regions() { return game.regions; }
     // get the game month
     int get_month() { return game.month; }
     // Find the first unit for a given faction
@@ -68,6 +68,10 @@ public:
     void check_transport_orders();
     // Execute movement orders
     void move_units();
+    // Run enter orders
+    void run_enter();
+    // Run destroy orders
+    void run_destroy();
     // Run one phase of the transport orders
     void transport_phase(TransportOrder::TransportPhase phase);
     // Collect the transported goods from the quartermasters

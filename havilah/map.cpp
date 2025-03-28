@@ -1234,7 +1234,7 @@ void ARegionList::FixUnconnectedRegions()
 				max = r->distance;
 		}
 		if (count > 0) {
-			ARegion *target = nullptr;
+			ARegion * target = nullptr;
 			i = getrandom(count);
 			for(const auto r : regions) {
 				if (r->distance == -1) {

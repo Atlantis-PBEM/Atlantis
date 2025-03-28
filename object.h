@@ -31,8 +31,9 @@ class Object;
 #include "gamedefs.h"
 #include "faction.h"
 #include "items.h"
+#include "safe_list.h"
 #include <map>
-#include <memory>
+#include <list>
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -105,13 +106,14 @@ struct ShowObject {
 	int obj;
 };
 
+
 class Object
 {
 	public:
 		Object(ARegion *region);
 		~Object();
 
-		void Readin(std::istream& f, const std::vector<std::unique_ptr<Faction>>& factions);
+		void Readin(std::istream& f, std::list<Faction *>& facs);
 		void Writeout(std::ostream& f);
 		void build_json_report(json& j, Faction *, int, int, int, int, int, int, int);
 
@@ -120,7 +122,7 @@ class Object
 
 		Unit *GetUnit(int);
 		Unit *GetUnitAlias(int, int); /* alias, faction number */
-		Unit *get_unit_id(std::shared_ptr<UnitId> unitid, int);
+		Unit *GetUnitId(UnitId *, int);
 
 		// AS
 		int IsRoad();
@@ -166,7 +168,7 @@ class Object
 		int shipno;
 		int movepoints;
 		int destroyed;	// how much points was destroyed so far this turn
-		std::vector<Unit *> units;
+		safe::list<Unit *> units;
 		ItemList ships;
 };
 
