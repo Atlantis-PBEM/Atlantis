@@ -88,7 +88,6 @@ Unit::Unit()
 	monthorders = NULL;
 	castorders = NULL;
 	sacrificeorders = nullptr;
-	annihilateorders = nullptr;
 	teleportorders = NULL;
 	joinorders = NULL;
 	inTurnBlock = 0;
@@ -136,7 +135,6 @@ Unit::Unit(int seq, Faction *f, int a)
 	teleportorders = NULL;
 	joinorders = NULL;
 	sacrificeorders = nullptr;
-	annihilateorders = nullptr;
 	inTurnBlock = 0;
 	presentTaxing = 0;
 	presentMonthOrders = NULL;

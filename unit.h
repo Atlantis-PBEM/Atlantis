@@ -48,6 +48,7 @@ class UnitId;
 #include "object.h"
 #include <set>
 #include <string>
+#include <list>
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -141,7 +142,7 @@ class Unit : public AListElem
 		AString ReadyItem();
 		AString StudyableSkills();
 		AString * BattleReport(int);
-		
+
 		void ClearOrders();
 		void ClearCastOrders();
 		void DefaultOrders(Object *);
@@ -289,7 +290,7 @@ class Unit : public AListElem
 		AttackOrder *attackorders;
 		EvictOrder *evictorders;
 		SacrificeOrder *sacrificeorders;
-		AnnihilateOrder *annihilateorders;
+		std::list<AnnihilateOrder *>annihilateorders;
 		ARegion *advancefrom;
 
 		AList exchangeorders;

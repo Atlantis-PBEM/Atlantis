@@ -26255,7 +26255,7 @@
       "tag": "TRNS"
     },
     {
-      "description": "A unit with access to the Annihilation skill may destroy a region and all surrounding regions.  Regions destroyed in this way will become barren.  All units and structures except for shafts and anomalies in the region and the surrounding regions will be destroyed as will production and cities.  This skill is only available to the unit which controls the World-breaker Monolith.  To use this skill, the owner of the World-breaker Monolith must issue the order ANNIHILATE REGION <x> <y> <z>.   If the z coordinate is not specified, it will default to the same z coordinate as the region containing the World-breaker Monolith. This skill cannot be studied via normal means. This skill cannot be taught to other units.",
+      "description": "A unit with access to the Annihilation skill may destroy a region and all surrounding regions.  Regions destroyed in this way will become barren.  All units and structures except for shafts and anomalies in the region and the surrounding regions will be destroyed as will production and cities. This skill is only available to the unit which controls the World-breaker Monolith. To use this skill, the owner of the World-breaker Monolith must issue the order ANNIHILATE REGION <x> <y>. This skill can only target a region on the surface of the world. This skill cannot be studied via normal means. This skill cannot be taught to other units.",
       "level": 1,
       "name": "annihilation",
       "tag": "ANNI"
