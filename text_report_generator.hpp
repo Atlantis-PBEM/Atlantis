@@ -17,6 +17,7 @@ private:
     void output_event(std::ostream& f, const json& event);
     void output_region(std::ostream& f, const json& region, bool show_unit_attitudes, bool show_region_depth);
     void output_region_header(std::ostream& f, const json& region, bool show_region_depth);
+    std::string item_to_string(const json& item, bool assume_singular = false, bool show_single_amt = false);
     void output_item_list(std::ostream& f, const json& item_list, std::string header);
     void output_items(std::ostream& f, const json& item_list, bool assume_singular = false, bool show_single_amt = false);
     void output_item(std::ostream& f, const json& item, bool assume_singular = false, bool show_single_amt = false);

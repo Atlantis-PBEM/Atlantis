@@ -288,11 +288,15 @@ vector<FactionStatistic> Faction::compute_faction_statistics(Game *game, size_t 
 			total += citems[pl][i];
 		}
 
-		string name = ItemString(i, citems[myfaction][i]);
-		if (ItemDefs[i].type & IT_MONSTER && ItemDefs[i].type == IT_ILLUSION) {
-			name += " (illusion)";
-		}
-		stats.push_back({ .item_name = name, .rank = place, .max = max, .total = total });
+		size_t amt = citems[myfaction][i];
+		bool illusory = (ItemDefs[i].type & IT_MONSTER) && (ItemDefs[i].type & IT_ILLUSION);
+		std::string name = ItemDefs[i].name;
+		std::string tag = ItemDefs[i].abr;
+		std::string plural = ItemDefs[i].names;
+		stats.push_back({
+			.name = name, .tag = tag, .plural = plural, .amount = amt,
+			.rank = place, .max = max, .total = total, .illusion = illusory
+		});
 	}
 	return stats;
 }
@@ -387,7 +391,8 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 	j["engine"] = {
 		{ "version", (ATL_VER_STRING(CURRENT_ATL_VER)).const_str() },
 		{ "ruleset", Globals->RULESET_NAME },
-		{ "ruleset_version", (ATL_VER_STRING(Globals->RULESET_VERSION)).const_str() }
+		{ "ruleset_version", (ATL_VER_STRING(Globals->RULESET_VERSION)).const_str() },
+		{ "json_report_version", (ATL_VER_STRING(JSON_REPORT_VERSION)).const_str() }
 	};
 
 	string s = name->const_str();

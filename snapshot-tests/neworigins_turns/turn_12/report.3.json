@@ -23,6 +23,7 @@
     "year": 2
   },
   "engine": {
+    "json_report_version": "1.0.1 (beta)",
     "ruleset": "NewOrigins",
     "ruleset_version": "3.0.0 (beta)",
     "version": "5.2.5 (beta)"
@@ -1022,7 +1023,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -1192,7 +1192,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -1499,7 +1498,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -1720,7 +1718,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -1907,7 +1904,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -2103,7 +2099,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -2299,7 +2294,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -2508,7 +2502,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -2739,7 +2732,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 94
         },
         {
@@ -2809,7 +2801,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 13
         },
         {
@@ -2872,7 +2863,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 115
         },
         {
@@ -2935,7 +2925,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 104
         },
         {
@@ -2998,7 +2987,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 105
         }
       ],
@@ -3153,7 +3141,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -3366,7 +3353,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -3559,7 +3545,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -3749,7 +3734,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -3932,7 +3916,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -4270,7 +4253,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -4460,7 +4442,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -4611,7 +4592,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -4804,7 +4784,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -4955,7 +4934,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -5152,7 +5130,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -5334,7 +5311,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -5489,7 +5465,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -5676,7 +5651,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -5954,7 +5928,6 @@
           "skills": {
             "known": []
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -5980,51 +5953,75 @@
   ],
   "statistics": [
     {
-      "item_name": "2 leaders [LEAD]",
+      "amount": 2,
       "max": 2,
+      "name": "leader",
+      "plural": "leaders",
       "rank": 1,
+      "tag": "LEAD",
       "total": 2
     },
     {
-      "item_name": "7 wood elves [WELF]",
+      "amount": 7,
       "max": 7,
+      "name": "wood elf",
+      "plural": "wood elves",
       "rank": 1,
+      "tag": "WELF",
       "total": 7
     },
     {
-      "item_name": "2 orcs [ORC]",
+      "amount": 2,
       "max": 2,
+      "name": "orc",
+      "plural": "orcs",
       "rank": 1,
+      "tag": "ORC",
       "total": 2
     },
     {
-      "item_name": "4331 silver [SILV]",
+      "amount": 4331,
       "max": 4331,
+      "name": "silver",
+      "plural": "silver",
       "rank": 1,
+      "tag": "SILV",
       "total": 4331
     },
     {
-      "item_name": "60 swords [SWOR]",
+      "amount": 60,
       "max": 60,
+      "name": "sword",
+      "plural": "swords",
       "rank": 1,
+      "tag": "SWOR",
       "total": 60
     },
     {
-      "item_name": "longbow [LBOW]",
+      "amount": 1,
       "max": 1,
+      "name": "longbow",
+      "plural": "longbows",
       "rank": 1,
+      "tag": "LBOW",
       "total": 1
     },
     {
-      "item_name": "7 lizardmen [LIZA]",
+      "amount": 7,
       "max": 7,
+      "name": "lizardman",
+      "plural": "lizardmen",
       "rank": 1,
+      "tag": "LIZA",
       "total": 7
     },
     {
-      "item_name": "42 gnolls [GNOL]",
+      "amount": 42,
       "max": 42,
+      "name": "gnoll",
+      "plural": "gnolls",
       "rank": 1,
+      "tag": "GNOL",
       "total": 42
     }
   ],

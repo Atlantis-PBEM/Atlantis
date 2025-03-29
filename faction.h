@@ -112,17 +112,25 @@ enum FactionActivity
 
 // Collect the faction statistics for display in the report
 struct FactionStatistic {
-	std::string item_name;
+	std::string name;
+	std::string tag;
+	std::string plural;
+	size_t amount;
 	size_t rank;
 	size_t max;
 	size_t total;
+	bool illusion;
 
 	// This needs to be a friend function so that the json library can call it.  This can only work for simple
 	// objects/structs that require no additional parameters to be passed in.  On the other hand, for simple
 	// structures this is nice, and works with things like STL containers of structs to make the entire container
 	// serializable to json.
 	friend void to_json(json &j, const FactionStatistic &s) {
-		j = json{{"item_name", s.item_name}, {"rank", s.rank}, {"max", s.max}, {"total", s.total}};
+		j = json{
+			{"amount", s.amount}, {"name", s.name}, {"plural", s.plural}, {"tag", s.tag},
+			{"rank", s.rank}, {"max", s.max}, {"total", s.total}
+		};
+		if (s.illusion) j["illusion"] = true;
 	};
 };
 

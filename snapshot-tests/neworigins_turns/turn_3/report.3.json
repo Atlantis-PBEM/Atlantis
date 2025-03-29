@@ -23,6 +23,7 @@
     "year": 1
   },
   "engine": {
+    "json_report_version": "1.0.1 (beta)",
     "ruleset": "NewOrigins",
     "ruleset_version": "3.0.0 (beta)",
     "version": "5.2.5 (beta)"
@@ -527,7 +528,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 10
         },
         {
@@ -585,7 +585,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 110
         },
         {
@@ -633,7 +632,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 10
         }
       ],
@@ -653,21 +651,30 @@
   ],
   "statistics": [
     {
-      "item_name": "2 leaders [LEAD]",
+      "amount": 2,
       "max": 2,
+      "name": "leader",
+      "plural": "leaders",
       "rank": 1,
+      "tag": "LEAD",
       "total": 2
     },
     {
-      "item_name": "10 swords [SWOR]",
+      "amount": 10,
       "max": 10,
+      "name": "sword",
+      "plural": "swords",
       "rank": 1,
+      "tag": "SWOR",
       "total": 10
     },
     {
-      "item_name": "10 gnolls [GNOL]",
+      "amount": 10,
       "max": 10,
+      "name": "gnoll",
+      "plural": "gnolls",
       "rank": 1,
+      "tag": "GNOL",
       "total": 10
     }
   ],

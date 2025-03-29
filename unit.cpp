@@ -689,7 +689,7 @@ void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int au
 		}
 
 		// this is just a list of strings, so we can just copy it over
-		j["visited"] = visited;
+		if (!visited.empty()) j["visited"] = visited;
 
 		// For the JSON report, the best location for order information is on the unit itself.
 		j["orders"] = write_json_orders();
