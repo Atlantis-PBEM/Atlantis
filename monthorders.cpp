@@ -59,20 +59,22 @@ void Game::RunMovementOrders()
 				error = 1;
 				if (o->IsFleet()) {
 					u = o->GetOwner();
-					if (!u)
-						continue;
-					if (u->phase >= phase)
-						continue;
-					if (!u->nomove && u->monthorders && u->monthorders->type == O_SAIL)  {
+					if (!u) continue;
+					if (u->phase >= phase) continue;
+					if (u->nomove) {
+						error = 4;
+					} else if (u->monthorders && u->monthorders->type == O_SAIL) {
 						u->phase = phase;
 						if (o->incomplete < 50) {
 							l = Do1SailOrder(r, o, u);
 							if (l) locs.push_back(l);
 							error = 0;
-						} else
+						} else {
 							error = 3;
-					} else
+						}
+					} else {
 						error = 2;
+					}
 				}
 				if (error > 0) {
 					for(const auto u : o->units) {
@@ -86,6 +88,9 @@ void Game::RunMovementOrders()
 									break;
 								case 3:
 									u->error("SAIL: Fleet is too damaged to sail.");
+									break;
+								case 4:
+									u->error("SAIL: Unable to sail due to combat losses.");
 									break;
 							}
 							delete u->monthorders;
@@ -211,14 +216,13 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
 	if (nomove) {
 		stop = 1;
+	} else if (!o->dirs.size()) {
+		stop = 1;
 	} else if (wgt > fleet->FleetCapacity()) {
 		cap->error("SAIL: Fleet is overloaded.");
 		stop = 1;
 	} else if (slr < fleet->GetFleetSize()) {
 		cap->error("SAIL: Not enough sailors.");
-		stop = 1;
-	} else if (!o->dirs.size()) {
-		// no more moves?
 		stop = 1;
 	} else {
 		auto x = o->dirs.front();

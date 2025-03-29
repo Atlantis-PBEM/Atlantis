@@ -41,6 +41,7 @@ using json = nlohmann::json;
 #include <string>
 
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
+#define JSON_REPORT_VERSION MAKE_ATL_VER(1, 0, 1) // version 1.0.0 didn't report the version number
 
 class OrdersCheck
 {
