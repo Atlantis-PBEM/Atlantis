@@ -166,28 +166,35 @@ void TextReportGenerator::output_region_header(ostream&f, const json& region, bo
     }
 }
 
-void TextReportGenerator::output_item(ostream& f, const json& item, bool assume_singular, bool show_single_amt) {
+std::string TextReportGenerator::item_to_string(const json& item, bool assume_singular, bool show_single_amt) {
+    string result;
     if (item.contains("unlimited")) {
-        f << "unlimited " << to_s(item["plural"]);
+        result = "unlimited " + to_s(item["plural"]);
     } else {
         int amount = item.value("amount", 0);
-        if ((amount > 1) || (show_single_amt && (amount == 1))) f << amount << " ";
+        if ((amount > 1) || (show_single_amt && (amount == 1))) {
+            result += to_string(amount) + " ";
+        }
         if (item.contains("unfinished")) {
-            f << "unfinished ";
+            result += "unfinished ";
             // If we are dealing with an unfinished item, we always display the singular name.
             assume_singular = true;
         }
         if (assume_singular) {
-            f << to_s(item["name"]);
+            result += to_s(item["name"]);
         } else {
-            f << plural(amount, item["name"], item["plural"]);
+            result += plural(amount, item["name"], item["plural"]);
         }
     }
+    result += " [" + to_s(item["tag"]) + "]";
+    if (item.contains("needs")) result += " (needs " + to_s(item["needs"]) + ")";
+    if (item.contains("illusion")) result += " (illusion)";
+    if (item.contains("price")) result += " at $" + to_string(item["price"]);
+    return result;
+}
 
-    f << " [" << to_s(item["tag"]) << "]";
-    if (item.contains("needs")) f << " (needs " << item["needs"] << ")";
-    if (item.contains("illusion")) f << " (illusion)";
-    if (item.contains("price")) f << " at $" << item["price"];
+void TextReportGenerator::output_item(ostream& f, const json& item, bool assume_singular, bool show_single_amt) {
+    f << item_to_string(item, assume_singular, show_single_amt);
 }
 
 void TextReportGenerator::output_items(ostream& f, const json& item_list, bool assume_singular, bool show_single_amt) {
@@ -454,7 +461,7 @@ void TextReportGenerator::output_region(
         output_item_list(f, region["markets"]["wanted"], "Wanted");
         output_item_list(f, region["markets"]["for_sale"], "For Sale");
     }
-    
+
     if (region.contains("entertainment")) f << "Entertainment available: $" << region["entertainment"] << ".\n";
 
     output_item_list(f, region["products"], "Products");
@@ -510,7 +517,7 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
         f << ";Item                                      Rank  Max        Total\n";
         f << ";=====================================================================\n";
         for (const auto& stat : report["statistics"]) {
-            f << ';' << left << setw(42) << to_s(stat["item_name"]) << setw(6) << stat.value("rank", 0)
+            f << ';' << left << setw(42) << item_to_string(stat) << setw(6) << stat.value("rank", 0)
               << setw(11) << stat.value("max", 0) << stat.value("total", 0) << right << '\n';
         }
         f << '\n';
@@ -667,7 +674,7 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
 
     if (report.contains("attitudes") && !report["attitudes"].empty()) {
         string default_attitude = to_s(report["attitudes"]["default"]);
-        default_attitude[0] = toupper(default_attitude[0]); 
+        default_attitude[0] = toupper(default_attitude[0]);
         f << "Declared Attitudes (default " << default_attitude << "):\n";
         string available_attitudes[] = { "hostile", "unfriendly", "neutral", "friendly", "ally" };
         for (const auto& attitude : available_attitudes) {

@@ -126,6 +126,7 @@
     "year": 1
   },
   "engine": {
+    "json_report_version": "1.0.1 (beta)",
     "ruleset": "NewOrigins",
     "ruleset_version": "3.0.0 (beta)",
     "version": "5.2.5 (beta)"
@@ -722,7 +723,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 10
         },
         {
@@ -785,7 +785,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 94
         },
         {
@@ -855,7 +854,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 13
         },
         {
@@ -918,7 +916,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 115
         },
         {
@@ -981,7 +978,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 104
         },
         {
@@ -1044,7 +1040,6 @@
               }
             ]
           },
-          "visited": [],
           "weight": 105
         }
       ],
@@ -1064,33 +1059,48 @@
   ],
   "statistics": [
     {
-      "item_name": "2 leaders [LEAD]",
+      "amount": 2,
       "max": 2,
+      "name": "leader",
+      "plural": "leaders",
       "rank": 1,
+      "tag": "LEAD",
       "total": 2
     },
     {
-      "item_name": "993 silver [SILV]",
+      "amount": 993,
       "max": 993,
+      "name": "silver",
+      "plural": "silver",
       "rank": 1,
+      "tag": "SILV",
       "total": 993
     },
     {
-      "item_name": "60 swords [SWOR]",
+      "amount": 60,
       "max": 60,
+      "name": "sword",
+      "plural": "swords",
       "rank": 1,
+      "tag": "SWOR",
       "total": 60
     },
     {
-      "item_name": "longbow [LBOW]",
+      "amount": 1,
       "max": 1,
+      "name": "longbow",
+      "plural": "longbows",
       "rank": 1,
+      "tag": "LBOW",
       "total": 1
     },
     {
-      "item_name": "36 gnolls [GNOL]",
+      "amount": 36,
       "max": 36,
+      "name": "gnoll",
+      "plural": "gnolls",
       "rank": 1,
+      "tag": "GNOL",
       "total": 36
     }
   ],
