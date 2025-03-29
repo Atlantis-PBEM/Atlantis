@@ -186,7 +186,7 @@ class ARegion : public AListElem
 		ARegion();
 		//ARegion(int, int);
 		~ARegion();
-		
+
 		void Setup();
 		void ManualSetup(const RegionSetup& settings);
 
@@ -317,7 +317,7 @@ class ARegion : public AListElem
 		int wages;
 		int maxwages;
 		int wealth;
-		
+
 		/* Economy */
 		int habitat;
 		int development;
@@ -335,7 +335,7 @@ class ARegion : public AListElem
 		int emigrants;
 		// economic improvement
 		int improvement;
-		
+
 		/* Potential bonuses to economy */
 		int clearskies;
 		int earthlore;
@@ -446,10 +446,10 @@ class GeoMap
 		int GetVegetation(int, int);
 		int GetCulture(int, int);
 		void ApplyGeography(ARegionArray *pArr);
-		
+
 		int size, xscale, yscale, xoff, yoff;
 		map<long int,Geography> geomap;
-		
+
 };
 
 class ARegionList : public AList
@@ -475,6 +475,7 @@ class ARegionList : public AList
 		int GetWeather(ARegion *pReg, int month);
 
 		ARegionArray *GetRegionArray(int level);
+		ARegionArray *get_first_region_array_of_type(int type);
 
 		int numberofgates;
 		int numLevels;
@@ -500,6 +501,7 @@ class ARegionList : public AList
 		ARegion *FindConnectedRegions(ARegion *r, ARegion *tail, int shaft);
 		ARegion *FindNearestStartingCity(ARegion *r, int *dir);
 		int FindDistanceToNearestObject(int object, ARegion *r);
+		int find_distance_between_regions(ARegion *start, ARegion *target);
 		void FixUnconnectedRegions();
 		void InitSetupGates(int level);
 		void FinalSetupGates();
@@ -515,7 +517,7 @@ class ARegionList : public AList
 		void UnsetRace(ARegionArray *pRegs);
 		void RaceAnchors(ARegionArray *pRegs);
 		void GrowRaces(ARegionArray *pRegs);
-		
+
 		void TownStatistics();
 		void ResourcesStatistics();
 

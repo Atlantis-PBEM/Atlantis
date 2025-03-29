@@ -164,7 +164,7 @@ int ParseFactionType(AString *o, std::unordered_map<std::string, int> &type)
 
 	while(token) {
 		bool foundone = false;
-		
+
 		for (auto &ft : *FactionTypes) {
 			if (*token == ft.c_str()) {
 				delete token;
@@ -773,7 +773,7 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	int sk, lvl, item, obj;
 	AString *token;
-	
+
 	token = o->gettoken();
 	if (!token) {
 		// LLS
@@ -1482,7 +1482,7 @@ void Game::ProcessPromoteOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessLeaveOrder(Unit *u, OrdersCheck *pCheck)
 {
-	if (!pCheck) {	
+	if (!pCheck) {
 		// if the unit isn't already trying to enter a building,
 		// then set it to leave.
 		if (u->enter == 0) u->enter = -1;
@@ -1517,7 +1517,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	// 'incomplete' for ships:
 	maxbuild = 0;
 	unit->build = 0;
-	
+
 	if (token) {
 		if (*token == "help") {
 			// "build help unitnum"
@@ -1543,14 +1543,14 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 				parse_error(pCheck, unit, 0, "BUILD: Not a valid object name.");
 				return;
 			}
-			
+
 			if (!pCheck) {
 				ARegion *reg = unit->object->region;
 				if (TerrainDefs[reg->type].similar_type == R_OCEAN){
 					unit->error("BUILD: Can't build in an ocean.");
 					return;
 				}
-				
+
 				if (ot < 0) {
 					/* Build SHIP item */
 					int st = abs(ot+1);
@@ -1569,7 +1569,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 					// ship, see how much work is left
 					if (unit->items.GetNum(st) > 0)
 						maxbuild = unit->items.GetNum(st);
-					// Don't create a fleet yet	
+					// Don't create a fleet yet
 				} else {
 					/* build standard OBJECT */
 					if (ObjectDefs[ot].flags & ObjectType::DISABLED) {
@@ -1605,7 +1605,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 						break;
 				}
 			}
-			
+
 			if (st == O_DUMMY) {
 				// Build whatever we happen to be in when
 				// we get to the build phase
@@ -1618,19 +1618,19 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	}
 	// set neededtocomplete
 	if (maxbuild != 0) order->needtocomplete = maxbuild;
-	
-	
+
+
 	// Now do all of the generic bits...
 	// Check that the unit isn't doing anything else important
 	if (unit->monthorders ||
 			(Globals->TAX_PILLAGE_MONTH_LONG &&
-				((unit->taxing == TAX_TAX) || 
+				((unit->taxing == TAX_TAX) ||
 					(unit->taxing == TAX_PILLAGE)))) {
 		if (unit->monthorders) delete unit->monthorders;
 		string err = string("BUILD: Overwriting previous ") + (unit->inTurnBlock ? "DELAYED " : "") + "month-long order.";
 		parse_error(pCheck, unit, 0, err);
 	}
-	
+
 	// reset their taxation status if taxing is a month-long order
 	if (Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 	unit->monthorders = order;
@@ -1853,7 +1853,7 @@ void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		delete token;
 	} else
 		order->level = -1;
-	
+
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&
 		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {
@@ -2054,7 +2054,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 					if (!turnLast) {
 						parse_error(pCheck, unit, 0, "ENDTURN: without TURN.");
 					} else {
-						if (--turnDepth) 
+						if (--turnDepth)
 							tOrder->turnOrders.Add(new AString(saveorder));
 						turnLast = 0;
 					}
@@ -2364,7 +2364,7 @@ void Game::ProcessNameOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		parse_error(pCheck, unit, 0, "NAME: No argument.");
 		return;
 	}
-	
+
 	if (*token == "faction") {
 		delete token;
 		token = o->gettoken();
@@ -2964,7 +2964,7 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	if (!pCheck) {
 		TransportOrder *order = new TransportOrder;
-		// At this point we don't know that transport phase for the order but 
+		// At this point we don't know that transport phase for the order but
 		// we will set that later.
 		order->item = item;
 		order->target = tar;
@@ -3088,7 +3088,6 @@ void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	int x = -1;
 	int y = -1;
 	int z = unit->object->region->zloc;
-	RangeType *range = FindRange(SkillDefs[S_ANNIHILATION].range);
 
 	if (!token) {
 		parse_error(pCheck, unit, 0, "ANNIHILATE: No region specified.");
@@ -3117,7 +3116,13 @@ void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	y = token->value();
 	delete token;
 
-	if (range && (range->flags & RangeType::RNG_CROSS_LEVELS)) {
+
+	RangeType *range = FindRange(SkillDefs[S_ANNIHILATION].range);
+	if (range->flags & RangeType::RNG_SURFACE_ONLY) {
+		z = (Globals->NEXUS_EXISTS ? 1 : 0);
+	}
+
+	if (range && (range->flags & RangeType::RNG_CROSS_LEVELS) && !(range->flags & RangeType::RNG_SURFACE_ONLY)) {
 		token = o->gettoken();
 		if (token) {
 			z = token->value();
@@ -3134,7 +3139,6 @@ void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		order->xloc = x;
 		order->yloc = y;
 		order->zloc = z;
-		if (unit->annihilateorders) delete unit->annihilateorders;
-		unit->annihilateorders = order;
+		unit->annihilateorders.push_back(order);
 	}
 }

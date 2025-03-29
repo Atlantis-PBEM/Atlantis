@@ -35,6 +35,12 @@ class Game;
 #include "object.h"
 #include "events.h"
 
+#include "external/nlohmann/json.hpp"
+using json = nlohmann::json;
+
+#include <map>
+#include <string>
+
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
 
 class OrdersCheck
@@ -305,10 +311,10 @@ private:
 	// For our existing case, these are going to be used by the unit test framework to ensure a consistent
 	// run (by overriding the seeding of the random number generator).  In general, there should be *very*
 	// few of these hooks and they should exist for a very explicit purpose and be used with extreme care.
-	
+
 	// control the random number seed used for new game generation (by default it uses the existing
 	// seedrandomrandom function) which uses the current time.
-	std::function<void()> init_random_seed = seedrandomrandom; 
+	std::function<void()> init_random_seed = seedrandomrandom;
 
 	enum
 	{
@@ -324,6 +330,11 @@ private:
 	int doExtraInit;
 
 	Events *events;
+
+	// We need some way to track game specific data that can be used globally
+	// (specifically added for testing of NO7 victory conditions, but generally
+	// useful).  I use json here so that it can store arbitrary data in a structured way.
+	json rulesetSpecificData;
 
 	//
 	// Parsing functions

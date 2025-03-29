@@ -42,29 +42,24 @@ using namespace std;
 #define QUEST_SPAWN_CHANCE		70
 #define MAX_DESTINATIONS		5
 
-// If this is set to true, then the game will end if a faction has > 50% of all cities in the game with their id
-// in the name.
-#define CITY_VOTE_WIN false
-// If this is true, then anomolies will be spawned after turn 50.  Game will end when all living factions are aligned
-// with the owner of the world-breaker monolith or all land has been destroyed.
-#define ANNIHILATION_WIN true
-
 int Game::SetupFaction( Faction *pFac )
 {
-
 	// Check if a faction can be started due to end game conditions
-	if (ANNIHILATION_WIN) {
-		// Find the center of the underworld
-		ARegionArray *underworld = regions.GetRegionArray(ARegionArray::LEVEL_UNDERWORLD);
-		ARegion *center = underworld->GetRegion(underworld->x / 2, underworld->y / 2);
-		// See if the monolith is active and owned.
-		forlist(&center->objects) {
-			Object *o = (Object *)elem;
-			if (o->type != O_ACTIVE_MONOLITH) continue;
-			if (o->GetOwner() != nullptr) {
-				return 0;
+	if(rulesetSpecificData.value("victory_type", "") == "annihilation") {
+		ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
+		ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
+
+		int count = 0;
+		for (int i = 0; i < 6; i++) {
+			ARegion *r = surface_center->neighbors[i];
+			// search that region for an altar
+			forlist(&r->objects) {
+				Object *o = (Object *)elem;
+				if (o->type == O_EMPOWERED_ALTAR) count++;
 			}
 		}
+		// if all altars to the center are empowered, then factions cannot be started
+		if (count == 6) return 0;
 	}
 
 	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 300;
@@ -426,6 +421,130 @@ static void CreateQuest(ARegionList *regions, int monfaction)
 		delete q;
 }
 
+// Just a quick function to count the number of empowered altars.
+int report_and_count_empowered_altars(ARegionList *regions, AList *factions) {
+	ARegionArray *surface = regions->get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
+	ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
+
+	int count = 0;
+	for (int i = 0; i < 6; i++) {
+		ARegion *r = surface_center->neighbors[i];
+		// search that region for an altar
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			if (o->type == O_EMPOWERED_ALTAR) {
+				count++;
+				forlist(factions) {
+					Faction *f = (Faction *)elem;
+					if (f->is_npc) continue;
+					f->event("The altar in " + string(r->ShortPrint().const_str()) + " is fully empowered.",
+						"anomaly", r);
+				}
+			}
+		}
+	}
+	return count;
+}
+
+void empower_random_altar(ARegionList *regions, AList *factions) {
+	ARegionArray *surface = regions->get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
+	ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
+
+	std::vector<Object *> unempowered_altars;
+	for (int i = 0; i < 6; i++) {
+		ARegion *r = surface_center->neighbors[i];
+		// search that region for an altar
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			if (o->type == O_RITUAL_ALTAR) unempowered_altars.push_back(o);
+		}
+	}
+	// pick a random altar to empower
+	int num = getrandom(unempowered_altars.size());
+	Object *o = unempowered_altars[num];
+	o->type = O_EMPOWERED_ALTAR;
+	string name = string(ObjectDefs[O_EMPOWERED_ALTAR].name) + " [" + to_string(o->num) + "]";
+	o->name = new AString(name);
+	// notify all factions.
+	forlist(factions) {
+		Faction *f = (Faction *)elem;
+		if (f->is_npc) continue;
+		f->event("The altar in " + string(o->region->ShortPrint().const_str()) + " is fully empowered.",
+			"anomaly", o->region);
+	}
+
+	// find all current anomalies and entities
+	std::vector<Object *> anomalies;
+	std::vector<Unit *> entities;
+	forlist_reuse(regions) {
+		ARegion *r = (ARegion *)elem;
+		forlist(&r->objects) {
+			Object *o = (Object *)elem;
+			if (o->type == O_ENTITY_CAGE) {
+				anomalies.push_back(o);
+			}
+			forlist(&o->units) {
+				Unit *u = (Unit *)elem;
+				int i = u->items.GetNum(I_IMPRISONED_ENTITY);
+				for(int j = 0; j < i; j++) {
+					// put a unit in multiple times if it has multiple entities
+					entities.push_back(u);
+				}
+			}
+		}
+	}
+	if (anomalies.size() + entities.size() < unempowered_altars.size()) {
+		// We have unspawend entities and anomalies, so just return without removing one.
+		return;
+	}
+	// If we have any anomalies, remove the one farthest from the center.
+	if (anomalies.size() > 0) {
+		int max_dist = 0;
+		Object *far_anomaly = nullptr;
+		for (auto& anomaly : anomalies) {
+			int dist = regions->find_distance_between_regions(anomaly->region, surface_center);
+			if (dist > max_dist) {
+				max_dist = dist;
+				far_anomaly = anomaly;
+			}
+		}
+		if (far_anomaly) {
+			// remove the farthest anomaly
+			far_anomaly->region->objects.Remove(far_anomaly);
+
+			// Notify any factions in that regions that the anomaly has been removed.
+			auto faction = far_anomaly->region->PresentFactions();
+			forlist(faction) {
+				Faction *f = (Faction *)elem;
+				if (f->is_npc) continue;
+				f->event("The anomaly in " + string(far_anomaly->region->ShortPrint().const_str()) + " vanishes.",
+					"anomaly", far_anomaly->region);
+			}
+			return;
+		}
+	}
+	// Ok, we couldn't remove any anomalies, so remove the farthest entity instead.
+	if (entities.size() > 0) {
+		int max_dist = 0;
+		Unit *far_entity = nullptr;
+		for (auto& entity : entities) {
+			int dist = regions->find_distance_between_regions(entity->object->region, surface_center);
+			if (dist > max_dist) {
+				max_dist = dist;
+				far_entity = entity;
+			}
+		}
+		if (far_entity) {
+			far_entity->items.SetNum(I_IMPRISONED_ENTITY, far_entity->items.GetNum(I_IMPRISONED_ENTITY) - 1);
+			far_entity->event(ItemString(I_IMPRISONED_ENTITY, 1) + " vanishes suddenly.", "anomaly");
+			return;
+		}
+	}
+	// We somehow got here without removing anything, so just return.
+	return;
+}
+
+
 int report_and_count_anomalies(ARegionList *regions, AList *factions) {
 	int count = 0;
 	forlist(regions) {
@@ -452,15 +571,6 @@ int report_and_count_entities(ARegionList *regions, AList *factions) {
 		ARegion *r = (ARegion *)elem;
 		forlist(&r->objects) {
 			Object *o = (Object *)elem;
-			if (o->type == O_EMPOWERED_ALTAR) {
-				count++;
-				forlist(factions) {
-					Faction *f = (Faction *)elem;
-					if (f->is_npc) continue;
-					f->event("The altar in " + string(r->ShortPrint().const_str()) + " is fully empowered.",
-						"anomaly", r);
-				}
-			}
 			forlist(&o->units) {
 				Unit *u = (Unit *)elem;
 				if (u->items.GetNum(I_IMPRISONED_ENTITY) > 0) {
@@ -807,8 +917,7 @@ Faction *Game::CheckVictory()
 		}
 	}
 
-	// Check for victory conditions based on the current game
-	if (CITY_VOTE_WIN) {
+	if(rulesetSpecificData.value("victory_type", "") == "city_vote") {
 		std::map <int, int> votes; // track votes per faction id
 		int total_cities = 0; // total cities possible for vote count
 
@@ -883,19 +992,31 @@ Faction *Game::CheckVictory()
 	}
 
 	// Check for victory conditions for the annihilation win
-	if (ANNIHILATION_WIN) {
+	if(rulesetSpecificData.value("victory_type", "") == "annihilation") {
 		// before turn 50 none of the end game code will be active.
 		if (TurnNumber() < 50) return nullptr;
+
+		int empowered_altars = report_and_count_empowered_altars(&regions, &factions);
+		// If we have hit turn 70, rather than spawning a new anomaly, we will activate a random altar and if
+		// needed, destroy a randomly chosen entity.
+		if (TurnNumber() >= 70 && empowered_altars < 6) {
+			empower_random_altar(&regions, &factions);
+			empowered_altars++;
+		}
+
+		int entities = report_and_count_entities(&regions, &factions);
+		int anomalies = report_and_count_anomalies(&regions, &factions);
+
+		int completed_entities = empowered_altars + entities;
 
 		// This function will count the number of entities in the game + number of activated altars.
 		// If this number is < 6, then we have a chance of spawning a new anomaly.  This chance starts at 10%
 		// for the first anomaly after turn 50 and then increases by 12% for each entity or active altar already
 		// existing.
-		int completed_entities = report_and_count_entities(&regions, &factions);
 		if (completed_entities < 6) {
 			int chance = 10 + (completed_entities * 12);
-			int anomalies = report_and_count_anomalies(&regions, &factions);
-			Awrite(AString("Endgame: entities: ") + completed_entities + ", anomalies: " + anomalies + ", chance: " + chance + "%");
+			Awrite(AString("Endgame: entities: ") + completed_entities + ", anomalies: " + anomalies +
+				", chance: " + chance + "%");
 			if (getrandom(100) < chance) {
 				// Okay, let's see if we can spawn a new entity
 				// If we can, see if we already have those anomalies and report them to all factions if so.
@@ -907,7 +1028,7 @@ Faction *Game::CheckVictory()
 				// Ok, we can spawn a new anomaly.  Let's do it.
 				// We want a random land hex that is not a city and that does not have an anomaly and is not guarded.
 				ARegion *r = nullptr;
-				ARegionArray *surface = regions.GetRegionArray(ARegionArray::LEVEL_SURFACE);
+				ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
 				while (r == nullptr) {
 					r = (ARegion *)surface->GetRegion(getrandom(surface->x), getrandom(surface->y));
 					if (r == nullptr) continue;
@@ -967,26 +1088,38 @@ Faction *Game::CheckVictory()
 			if (o->type == O_ACTIVE_MONOLITH) {
 				Unit *owner = o->GetOwner();
 				// If noone owns the monolith, then noone can win.
-				if (!owner) return nullptr;
+				if (!owner) {
+					// If the monolith is unowned on turn 100 or later, the monsters win.
+					if (TurnNumber() < 100) return nullptr; // no winner yet
+					return GetFaction(&factions, monfaction); // monsters win
+				}
 
 				winner = owner->faction;
 				break;
 			}
 		}
 
-		// Ok, we have a possible winner, check for all alive factions being allied with the winner and vice-versa.
-		bool all_allied = true;
+		// Ok, we have a possible winner, check for sufficient alive factions mutually allied to the monolith owner.
+		int allied_count = 0;
+		int total_factions = 0;
 		forlist_reuse(&factions) {
 			Faction *f = (Faction *)elem;
 			if (f->is_npc) continue;
 			if (f == winner) continue;
-			// This faction doesn't have the winner as an ally, so no win by allies
-			if (f->get_attitude(winner->num) != A_ALLY) { all_allied = false; break; }
-			// The winner doesn't have this faction as an ally, so no win by allies
-			if (winner->get_attitude(f->num) != A_ALLY) { all_allied = false; break; }
+			total_factions++;
+			// This faction is not allied to the monolith owner, so they don't count
+			if (f->get_attitude(winner->num) != A_ALLY) continue;
+			// The winner is not allied to this faction, so they don't count;
+			if (winner->get_attitude(f->num) != A_ALLY) continue;
+			allied_count++;
 		}
-		// We had everyone allied to the monolith owner, so they win.
-		if (all_allied) return winner;
+
+		int needed_percent = rulesetSpecificData.value("allied_percent", 100);
+		int current_percent = (allied_count * 100) / total_factions;
+		if (current_percent >= needed_percent) {
+			// We have enough factions allied to the monolith owner, so they win.
+			return winner;
+		}
 
 		// No winner yet, so check if the surface has been completely destroyed.
 		int total_surface = 0;
@@ -997,9 +1130,15 @@ Faction *Game::CheckVictory()
 			total_surface++;
 			if (TerrainDefs[r->type].flags & TerrainType::ANNIHILATED) total_annihilated++;
 		}
-		// The entire surface has not been destroyed, so no winner yet.
-		if (total_surface != total_annihilated) winner = nullptr;
-		return winner;
+
+		int needed_surface = rulesetSpecificData.value("annihilate_percent", 100);
+		int current_surface = (total_annihilated * 100) / total_surface;
+		if (current_surface >= needed_surface) {
+			// The surface has been sufficiently destroyed, so the monolith owner wins.
+			return winner;
+		}
+		// No winner yet, so clear the potential winner and return null.
+		winner = nullptr;
 	}
 
 	return winner;
@@ -1501,6 +1640,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_ACTIVE_MONOLITH);
 	EnableItem(I_IMPRISONED_ENTITY);
 	EnableSkill(S_ANNIHILATION);
+	ModifyRangeFlags("rng_annihilate", RangeType::RNG_SURFACE_ONLY | RangeType::RNG_CROSS_LEVELS);
 
 	// Weapon BM example
 
@@ -1510,11 +1650,23 @@ void Game::ModifyTablesPerRuleset(void)
 	// At the same time give SPEA bonus of 2 on attacka and 2 on defense vs. SWOR
 	// ModifyWeaponBonusMalus("SPEA", 0, "SWOR", 2, 2);
 
+	// set up game specific tracked data
+	rulesetSpecificData.clear();
+
+	// this set is for the NO7 annihilation win condition
+	rulesetSpecificData["victory_type"] = "annihilation";
+	rulesetSpecificData["allowed_annihilates"] = 3;
+	rulesetSpecificData["allied_percent"] = 50;
+	rulesetSpecificData["annihilate_percent"] = 10;
+	rulesetSpecificData["random_annihilates"] = true;
+
+	// this set is for the city vote win condition, not active for NO7
+	// rulesetSpecificData["victory_type"] = "city_vote";
 	return;
 }
 
 const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList *regs) {
-	ARegionArray *surface = regs->GetRegionArray(ARegionArray::LEVEL_SURFACE);
+	ARegionArray *surface = regs->get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
 	ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
 
 	ARegionArray *this_level = this->level;

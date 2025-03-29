@@ -52,7 +52,7 @@ public:
     ARegion *get_region(int x, int y, int level);
     // Get all regions
     ARegionList *get_regions() { return &game.regions; }
-    // get the game month 
+    // get the game month
     int get_month() { return game.month; }
     // Find the first unit for a given faction
     Unit *get_first_unit(Faction *faction);
@@ -80,6 +80,8 @@ public:
     void run_sacrifice();
     // Run annihilation orders
     void run_annihilation();
+    // Enable ruleset specific data for testing
+    void set_ruleset_specific_data(const json &data);
 
     // dummy
     int get_seed() { return getrandom(10000); };

@@ -73,7 +73,7 @@ Unit *UnitTestHelper::create_unit(Faction *faction, ARegion *region) {
 void UnitTestHelper::create_fleet(ARegion *region, Unit *owner, int ship_type, int ship_count) {
     for (auto i = 0; i < ship_count; i++)
         game.CreateShip(region, owner, ship_type);
- 
+
 }
 
 void UnitTestHelper::create_building(ARegion *region, Unit *owner, int building_type) {
@@ -169,4 +169,8 @@ void UnitTestHelper::enable(Type type, int id, bool enable) {
 
 void UnitTestHelper::maintain_units() {
     game.AssessMaintenance();
+}
+
+void UnitTestHelper::set_ruleset_specific_data(const json &data) {
+    game.rulesetSpecificData = data;
 }

@@ -462,7 +462,7 @@ AString *ShowSkill::Report(Faction *f) const
 			if (Globals->APPRENTICES_EXIST) {
 				*str += " or ";
 				*str += Globals->APPRENTICE_NAME;
-			}				
+			}
 			*str += ", make a temporary Gate between two regions, and "
 				"send units from one region to another. In order to do this, "
 				"both mages (the caster, and the target mage) must have "
@@ -708,12 +708,12 @@ AString *ShowSkill::Report(Faction *f) const
 						"12 sailing skill points per skill level "
 						"of Summon Wind. ";
 				}
-					 
+
 				/*
 				*str += " If the mage is flying, he will receive 2 extra "
 					"movement points.";
 				*/
-				*str += "The effects of all such mages in a fleet are cumulative. ";	
+				*str += "The effects of all such mages in a fleet are cumulative. ";
 			}
 			break;
 		case S_SUMMON_STORM:
@@ -1463,14 +1463,32 @@ AString *ShowSkill::Report(Faction *f) const
 			break;
 		case S_ANNIHILATION:
 			if (level > 1) break;
+			range = FindRange(SkillDefs[skill].range);
 			*str += "A unit with access to the Annihilation skill may destroy a region and all "
 				"surrounding regions.  Regions destroyed in this way will become barren.  All units "
 				"and structures except for shafts and anomalies in the region and the surrounding regions "
-				"will be destroyed as will production and cities.  This skill is only available to the unit "
-				"which controls the World-breaker Monolith.  To use this skill, the owner of the "
-				"World-breaker Monolith must issue the order ANNIHILATE REGION <x> <y> <z>.   If the z "
-				"coordinate is not specified, it will default to the same z coordinate as the region "
-				"containing the World-breaker Monolith.";
+				"will be destroyed as will production and cities.";
+			if (!(ObjectDefs[O_ACTIVE_MONOLITH].flags & ObjectType::DISABLED)) {
+				if (ObjectDefs[O_ACTIVE_MONOLITH].flags & ObjectType::GRANTSKILL) {
+					*str += " This skill is only available to the unit which controls the World-breaker Monolith. "
+						"To use this skill, the owner of the World-breaker Monolith ";
+				}
+			} else {
+				*str += " To use this skill, the unit ";
+			}
+			*str += "must issue the order ANNIHILATE REGION <x> <y>";
+			if (range && range->flags & RangeType::RNG_SURFACE_ONLY) {
+				*str += ".";
+			} else {
+				*str += " <z>. If the z coordinate is not specified, it will default to the same z coordinate as "
+					"the unit utilizing the skill.";
+			}
+
+			if (range && range->flags & RangeType::RNG_SURFACE_ONLY) {
+				*str += " This skill can only target a region on the surface of the world.";
+			} else {
+				*str += " This skill can target a region anywhere in the world.";
+			}
 			break;
 	}
 
@@ -1584,7 +1602,7 @@ AString *ShowSkill::Report(Faction *f) const
 				temp2 += "] via magic";
 				count = 0;
 				for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(ItemDefs[i].mInput[0]); c++) {
-					if (ItemDefs[i].mInput[c].item == -1) continue;	
+					if (ItemDefs[i].mInput[c].item == -1) continue;
 					count++;
 				}
 				if (count > 0) {
@@ -1592,7 +1610,7 @@ AString *ShowSkill::Report(Faction *f) const
 					temp4 = "";
 					count = 0;
 					for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(ItemDefs[i].mInput[0]); c++) {
-						if (ItemDefs[i].mInput[c].item == -1) continue;	
+						if (ItemDefs[i].mInput[c].item == -1) continue;
 						if (!(temp4 == "")) {
 							if (count > 0)
 								temp2 += ", ";
@@ -1659,7 +1677,7 @@ AString *ShowSkill::Report(Faction *f) const
 					temp4 = "";
 					count = 0;
 					for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(ItemDefs[i].pInput[0]); c++) {
-						if (ItemDefs[i].pInput[c].item == -1) continue;	
+						if (ItemDefs[i].pInput[c].item == -1) continue;
 						if (!(temp4 == "")) {
 							if (count > 0)
 								temp1 += ", ";
@@ -1875,7 +1893,7 @@ AString *ShowSkill::Report(Faction *f) const
 		if (!(*str == "")) *str += " ";
 		*str += "This skill cannot be taught to other units.";
 	}
-	if ((Globals->SKILL_PRACTICE_AMOUNT > 0) && 
+	if ((Globals->SKILL_PRACTICE_AMOUNT > 0) &&
 			(SkillDefs[skill].flags & SkillType::NOEXP)) {
 		if (!(*str == "")) *str += " ";
 		*str += "This skill cannot be increased through experience.";

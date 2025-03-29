@@ -53,6 +53,7 @@ Game::Game()
 	ppUnits = 0;
 	maxppunits = 0;
 	events = new Events();
+	rulesetSpecificData = json::object();
 
 	if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT)
 	{
@@ -384,14 +385,14 @@ int Game::NewGame()
 
 	if (Globals->LAIR_MONSTERS_EXIST)
 		CreateVMons();
-	
-	/*	
+
+	/*
 	if (Globals->PLAYER_ECONOMY) {
 		Equilibrate();
 	}
 	*/
-	
-	
+
+
 
 	return(1);
 }
@@ -577,7 +578,7 @@ int Game::WritePlayers()
 	f << "TurnNumber: " << TurnNumber() << "\n";
 	if (gameStatus == GAME_STATUS_UNINIT)
 		return(0);
-	
+
 	if (gameStatus == GAME_STATUS_NEW)
 		f << "GameStatus: New\n\n";
 	else if (gameStatus == GAME_STATUS_RUNNING)
@@ -1263,7 +1264,7 @@ void Game::WriteReport()
 	CountAllSpecialists();
 
 	size_t ** citems = nullptr;
-	
+
 	if (Globals->FACTION_STATISTICS) {
 		citems = new size_t * [factionseq];
 		for (int i = 0; i < factionseq; i++)
@@ -1677,7 +1678,7 @@ int Game::AllowedTrades(Faction *pFac)
 int Game::AllowedMartial(Faction *pFac)
 {
 	int points = pFac->type[F_MARTIAL];
-	
+
 	if (points < 0) points = 0;
 	if (points > allowedMartialSize - 1) points = allowedMartialSize - 1;
 
@@ -1960,17 +1961,17 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	Unit *u = GetNewUnit(pFac);
 	Unit *u2;
 	AString *s = new AString("City Guard");
-	
+
 	/*
 	Awrite(AString("Begin setting up city guard in..."));
-		
+
 	AString temp = TerrainDefs[pReg->type].name;
 	temp += AString(" (") + pReg->xloc + "," + pReg->yloc;
 	temp += ")";
 	temp += AString(" in ") + *pReg->name;
 	Awrite(temp);
 	*/
-	
+
 	if ((Globals->LEADERS_EXIST) || (pReg->type == R_NEXUS)) {
 		/* standard Leader-type guards */
 		u->SetMen(I_LEADERS,num);
@@ -2004,8 +2005,8 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		u2->type = U_GUARD;
 		u2->guard = GUARD_GUARD;
 		u2->reveal = REVEAL_FACTION;
-	}			
-	
+	}
+
 	if (AC) {
 		if (Globals->START_CITY_GUARDS_PLATE) {
 			if (Globals->LEADERS_EXIST) u->items.SetNum(I_PLATEARMOR, num);
@@ -2090,20 +2091,20 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 		}
 		if ((ItemDefs[i].type & IT_ARMOR)
 			&& (num > maxarmor)) {
-			armor = i;	
+			armor = i;
 			maxarmor = num;
 		}
 	}
 	int skill = S_COMBAT;
-	
+
 	if (weapon != -1) {
 		WeaponType *wp = FindWeapon(ItemDefs[weapon].abr);
 		if (FindSkill(wp->baseSkill) == FindSkill("XBOW")) skill = S_CROSSBOW;
 		if (FindSkill(wp->baseSkill) == FindSkill("LBOW")) skill = S_LONGBOW;
 	}
-	
+
 	int sl = u->GetRealSkill(skill);
-		
+
 	if (r->type == R_NEXUS || r->IsStartingCity()) {
 		towntype = TOWN_CITY;
 		AC = 1;
@@ -2203,7 +2204,7 @@ void Game::CountItems(size_t ** citems)
 int Game::CountItem (Faction * fac, int item)
 {
 	if (ItemDefs[item].type & IT_SHIP) return 0;
-	
+
 	size_t all = 0;
 	for (const auto& r : fac->present_regions) {
 		forlist(&r->objects) {
