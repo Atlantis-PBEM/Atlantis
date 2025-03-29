@@ -2359,6 +2359,15 @@ ARegionArray *ARegionList::GetRegionArray(int level)
 	return(pRegionArrays[level]);
 }
 
+ARegionArray *ARegionList::get_first_region_array_of_type(int levelType) {
+	for (int i = 0; i < numLevels; i++) {
+		if (pRegionArrays[i]->levelType == levelType) {
+			return pRegionArrays[i];
+		}
+	}
+	return nullptr;
+}
+
 void ARegionList::CreateLevels(int n)
 {
 	numLevels = n;
@@ -3950,4 +3959,16 @@ int ARegionList::FindDistanceToNearestObject(int object_type, ARegion *start)
 		if (dist < min_dist) min_dist = dist;
 	}
 	return min_dist;
+}
+
+int ARegionList::find_distance_between_regions(ARegion *start, ARegion *end)
+{
+	if (start->zloc != end->zloc) {
+		return -1; // not on the same level
+	}
+
+	int w = start->level->x;
+	graphs::Location2D a = { start->xloc, start->yloc };
+	graphs::Location2D b = { end->xloc, end->yloc };
+	return cylDistance(a, b, w);
 }

@@ -47,6 +47,7 @@ class UnitId;
 #include "object.h"
 #include <set>
 #include <string>
+#include <list>
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -294,7 +295,7 @@ class Unit {
 		AttackOrder *attackorders;
 		EvictOrder *evictorders;
 		SacrificeOrder *sacrificeorders;
-		AnnihilateOrder *annihilateorders;
+		std::list<AnnihilateOrder *>annihilateorders;
 		ARegion *advancefrom;
 
 		std::list<ExchangeOrder *> exchangeorders;

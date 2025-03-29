@@ -3731,15 +3731,26 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 		f << enclose("p", true) << "Annihilate a region and the neighboring regions.  An annihilated region will be "
 		  << "converted into barren land, and all units and all structures except for shafts and anomalies in the "
 		  << "regions will be destroyed.  The neighboring regions will also be annihilated.  The region to be "
-		  << "annihilated must be specified by coordinates.  If the Z coordinate is not specified, it is assumed "
-		  << "to be on the same level as the unit issuing the order. This order may only be issued by a unit which "
-		  << "has access to the ANNIHILATE [ANNI] skill. This skill cannot target or affect regions which are "
-		  << "already barren, nor can it target the Nexus.\n";
+		  << "annihilated must be specified by coordinates.";
+
+		RangeType *rt = FindRange("rng_annihilate");
+		if (rt->flags & RangeType::RNG_SURFACE_ONLY) {
+			f << " The Z coordinate, if specified, is ignored as this skill may only target the surface.";
+		} else {
+			f << " If the Z coordinate is not specified, it is assumed to be on the same level as the unit "
+			  << "issuing the order.";
+		}
+		f << " This order may only be issued by a unit which has access to the ANNIHILATE [ANNI] skill. "
+		  << "This skill cannot target or affect regions which are already barren, nor can it target the Nexus.\n";
 		f << enclose("p", false);
 		f << enclose("p", true) << "Example:\n" << enclose("p", false);
 		f << example_start("Annihilate the region located at coordinates <5, 5> on the surface.")
-		  << "ANNIHILATE REGION 5 5 1\n"
-		  << example_end();
+		  << "ANNIHILATE REGION 5 5 1\n";
+		if (rt->flags & RangeType::RNG_SURFACE_ONLY) {
+		  f << " or\n"
+		  	<< "ANNIHILATE REGION 5 5\n";
+		}
+		f << example_end();
 	}
 
 	if (Globals->USE_WEAPON_ARMOR_COMMAND) {

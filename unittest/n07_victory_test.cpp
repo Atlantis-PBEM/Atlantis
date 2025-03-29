@@ -564,4 +564,392 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     expect(region_rep.value("tax", 0) == 0_i);
   };
 
+  "Unit can cast multiple annihilates per turn"_test = []
+  {
+    UnitTestHelper helper;
+    helper.enable(UnitTestHelper::Type::OBJECT, O_ACTIVE_MONOLITH, true);
+    helper.enable(UnitTestHelper::Type::ITEM, I_IMPRISONED_ENTITY, true);
+    helper.enable(UnitTestHelper::Type::OBJECT, O_ENTITY_CAGE, true);
+    helper.enable(UnitTestHelper::Type::SKILL, S_ANNIHILATION, true);
+    helper.initialize_game();
+    helper.setup_turn();
+
+    json rulesetData = { {"allowed_annihilates", 2}};
+    helper.set_ruleset_specific_data(rulesetData);
+
+    string name("Test Faction");
+    Faction *faction = helper.create_faction(name);
+    // Since this is such a tightly defined world, we know this is legal
+    ARegion *region = helper.get_region(0, 0, 0);
+    ARegion *region2 = helper.get_region(1, 1, 0);
+    Unit *leader = helper.get_first_unit(faction);
+    AString *tmp_name = new AString("My Leader");
+    leader->SetName(tmp_name);
+    region2->type = R_BARREN;
+    helper.create_building(region2, nullptr, O_ACTIVE_MONOLITH);
+    helper.create_building(region, nullptr, O_ENTITY_CAGE);
+    Unit *second = helper.create_unit(faction, region);
+    second->items.SetNum(I_LEADERS, 10);
+    helper.create_building(region, second, O_TOWER);
+
+    // Try to use annihilate
+    stringstream ss;
+    ss << "#atlantis 3\n";
+    ss << "unit 2\n";
+    ss << "move se 1\n";
+    ss << "annihilate region 0, 0, 0\n";
+    ss << "annihilate region 1, 3, 0\n";
+    helper.parse_orders(faction->num, ss);
+    helper.move_units();
+    helper.run_annihilation();
+
+    expect(faction->errors.size() == 0_ul);
+    expect(faction->events.size() == 6_ul);
+
+    helper.setup_reports();
+
+    // Generate just this single factions json object.
+    Game &game = helper.game_object();
+    json json_report;
+    faction->build_json_report(json_report, &game, nullptr);
+
+    // Validate we get the messages we expect for the faction
+    json events = json_report["events"];
+    expect(events.size() == 6_ul);
+    json event = events[0];
+    expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to barren (1,1) in Testing Wilds.");
+    expect(event["unit"]["number"] == 2_i);
+    event = events[1];
+    expect(event["message"] == "Enters Building [1].");
+    expect(event["unit"]["number"] == 2_i);
+    event = events[2];
+    expect(event["message"] == "forest (0,2) in Testing Wilds has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[3];
+    expect(event["message"] == "plain (0,0) in Testing Wilds, contains Basictown [city] has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[4];
+    expect(event["message"] == "Is annihilated.");
+    expect(event["category"] == "annihilate");
+    expect(event["unit"]["number"] == 3_i);
+    event = events[5];
+    expect(event["message"] == "desert (1,3) in Testing Wilds has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+
+    // load the gm faction report
+    json gm_report;
+    Faction *gm_faction = helper.get_faction(1);
+    gm_faction->build_json_report(gm_report, &game, nullptr);
+
+    // Verify that everything in region 0,0,0 is gone except the shaft and the anomaly.
+    json region_rep = gm_report["regions"][0];
+    expect(region_rep["terrain"] == "barren");
+    expect(region_rep["structures"].size() == 2_ul);
+    expect(region_rep["structures"][0]["type"] == "Shaft");
+    expect(region_rep["structures"][1]["type"] == "Mystical Anomaly");
+    // verify that markets, products and all units are gone.
+    expect(region_rep["markets"]["for_sale"].size() == 0_ul);
+    expect(region_rep["markets"]["wanted"].size() == 0_ul);
+    expect(region_rep["products"].size() == 0_ul);
+    expect(region_rep["units"].size() == 0_ul);
+    expect(region_rep["structures"][0]["units"].size() == 0_ul);
+    expect(region_rep["structures"][1]["units"].size() == 0_ul);
+    expect(region_rep["wages"]["amount"] == 0_i);
+    expect(region_rep["wages"].value("max", 0) == 0_i);
+    expect(region_rep["population"].empty());
+    expect(region_rep.value("tax", 0) == 0_i);
+  };
+
+  "If a unit casts 0 annihilates, random ones fire"_test = []
+  {
+    UnitTestHelper helper;
+    helper.enable(UnitTestHelper::Type::OBJECT, O_ACTIVE_MONOLITH, true);
+    helper.enable(UnitTestHelper::Type::ITEM, I_IMPRISONED_ENTITY, true);
+    helper.enable(UnitTestHelper::Type::OBJECT, O_ENTITY_CAGE, true);
+    helper.enable(UnitTestHelper::Type::SKILL, S_ANNIHILATION, true);
+    helper.initialize_game();
+    helper.setup_turn();
+
+    json rulesetData = { {"allowed_annihilates", 2}, {"random_annihilates", true}};
+    helper.set_ruleset_specific_data(rulesetData);
+
+    string name("Test Faction");
+    Faction *faction = helper.create_faction(name);
+    // Since this is such a tightly defined world, we know this is legal
+    ARegion *region = helper.get_region(0, 0, 0);
+    ARegion *region2 = helper.get_region(1, 1, 0);
+    Unit *leader = helper.get_first_unit(faction);
+    AString *tmp_name = new AString("My Leader");
+    leader->SetName(tmp_name);
+    region2->type = R_BARREN;
+    helper.create_building(region2, nullptr, O_ACTIVE_MONOLITH);
+    helper.create_building(region, nullptr, O_ENTITY_CAGE);
+    Unit *second = helper.create_unit(faction, region);
+    second->items.SetNum(I_LEADERS, 10);
+    helper.create_building(region, second, O_TOWER);
+
+    // Try to use annihilate
+    stringstream ss;
+    ss << "#atlantis 3\n";
+    ss << "unit 2\n";
+    ss << "move se 1\n";
+    helper.parse_orders(faction->num, ss);
+    helper.move_units();
+    helper.run_annihilation();
+
+    expect(faction->errors.size() == 0_ul);
+    expect(faction->events.size() == 6_ul);
+
+    helper.setup_reports();
+
+    // Generate just this single factions json object.
+    Game &game = helper.game_object();
+    json json_report;
+    faction->build_json_report(json_report, &game, nullptr);
+
+    // Validate we get the messages we expect for the faction
+    json events = json_report["events"];
+    expect(events.size() == 6_ul);
+    json event = events[0];
+    expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to barren (1,1) in Testing Wilds.");
+    expect(event["unit"]["number"] == 2_i);
+    event = events[1];
+    expect(event["message"] == "Enters Building [1].");
+    expect(event["unit"]["number"] == 2_i);
+    event = events[2];
+    expect(event["message"] == "forest (0,2) in Testing Wilds has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[3];
+    expect(event["message"] == "desert (1,3) in Testing Wilds has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[4];
+    expect(event["message"] == "plain (0,0) in Testing Wilds, contains Basictown [city] has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[5];
+    expect(event["message"] == "Is annihilated.");
+    expect(event["category"] == "annihilate");
+    expect(event["unit"]["number"] == 3_i);
+
+    // load the gm faction report
+    json gm_report;
+    Faction *gm_faction = helper.get_faction(1);
+    gm_faction->build_json_report(gm_report, &game, nullptr);
+
+    // Verify that everything in region 0,0,0 is gone except the shaft and the anomaly.
+    json region_rep = gm_report["regions"][0];
+    expect(region_rep["terrain"] == "barren");
+    expect(region_rep["structures"].size() == 2_ul);
+    expect(region_rep["structures"][0]["type"] == "Shaft");
+    expect(region_rep["structures"][1]["type"] == "Mystical Anomaly");
+    // verify that markets, products and all units are gone.
+    expect(region_rep["markets"]["for_sale"].size() == 0_ul);
+    expect(region_rep["markets"]["wanted"].size() == 0_ul);
+    expect(region_rep["products"].size() == 0_ul);
+    expect(region_rep["units"].size() == 0_ul);
+    expect(region_rep["structures"][0]["units"].size() == 0_ul);
+    expect(region_rep["structures"][1]["units"].size() == 0_ul);
+    expect(region_rep["wages"]["amount"] == 0_i);
+    expect(region_rep["wages"].value("max", 0) == 0_i);
+    expect(region_rep["population"].empty());
+    expect(region_rep.value("tax", 0) == 0_i);
+  };
+
+  "If a unit casts 1 annihilates, random ones fire"_test = []
+  {
+    UnitTestHelper helper;
+    helper.enable(UnitTestHelper::Type::OBJECT, O_ACTIVE_MONOLITH, true);
+    helper.enable(UnitTestHelper::Type::ITEM, I_IMPRISONED_ENTITY, true);
+    helper.enable(UnitTestHelper::Type::OBJECT, O_ENTITY_CAGE, true);
+    helper.enable(UnitTestHelper::Type::SKILL, S_ANNIHILATION, true);
+    helper.initialize_game();
+    helper.setup_turn();
+
+    json rulesetData = { {"allowed_annihilates", 2}, {"random_annihilates", true}};
+    helper.set_ruleset_specific_data(rulesetData);
+
+    string name("Test Faction");
+    Faction *faction = helper.create_faction(name);
+    // Since this is such a tightly defined world, we know this is legal
+    ARegion *region = helper.get_region(0, 0, 0);
+    ARegion *region2 = helper.get_region(1, 1, 0);
+    Unit *leader = helper.get_first_unit(faction);
+    AString *tmp_name = new AString("My Leader");
+    leader->SetName(tmp_name);
+    region2->type = R_BARREN;
+    helper.create_building(region2, nullptr, O_ACTIVE_MONOLITH);
+    helper.create_building(region, nullptr, O_ENTITY_CAGE);
+    Unit *second = helper.create_unit(faction, region);
+    second->items.SetNum(I_LEADERS, 10);
+    helper.create_building(region, second, O_TOWER);
+
+    // Try to use annihilate
+    stringstream ss;
+    ss << "#atlantis 3\n";
+    ss << "unit 2\n";
+    ss << "move se 1\n";
+    ss << "annihilate region 0, 0, 0\n";
+    helper.parse_orders(faction->num, ss);
+    helper.move_units();
+    helper.run_annihilation();
+
+    expect(faction->errors.size() == 0_ul);
+    expect(faction->events.size() == 6_ul);
+
+    helper.setup_reports();
+
+    // Generate just this single factions json object.
+    Game &game = helper.game_object();
+    json json_report;
+    faction->build_json_report(json_report, &game, nullptr);
+
+    // Validate we get the messages we expect for the faction
+    json events = json_report["events"];
+    expect(events.size() == 6_ul);
+    json event = events[0];
+    expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to barren (1,1) in Testing Wilds.");
+    expect(event["unit"]["number"] == 2_i);
+    event = events[1];
+    expect(event["message"] == "Enters Building [1].");
+    expect(event["unit"]["number"] == 2_i);
+    event = events[2];
+    expect(event["message"] == "forest (0,2) in Testing Wilds has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[3];
+    expect(event["message"] == "plain (0,0) in Testing Wilds, contains Basictown [city] has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[4];
+    expect(event["message"] == "Is annihilated.");
+    expect(event["category"] == "annihilate");
+    expect(event["unit"]["number"] == 3_i);
+    event = events[5];
+    expect(event["message"] == "desert (1,3) in Testing Wilds has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+
+    // load the gm faction report
+    json gm_report;
+    Faction *gm_faction = helper.get_faction(1);
+    gm_faction->build_json_report(gm_report, &game, nullptr);
+
+    // Verify that everything in region 0,0,0 is gone except the shaft and the anomaly.
+    json region_rep = gm_report["regions"][0];
+    expect(region_rep["terrain"] == "barren");
+    expect(region_rep["structures"].size() == 2_ul);
+    expect(region_rep["structures"][0]["type"] == "Shaft");
+    expect(region_rep["structures"][1]["type"] == "Mystical Anomaly");
+    // verify that markets, products and all units are gone.
+    expect(region_rep["markets"]["for_sale"].size() == 0_ul);
+    expect(region_rep["markets"]["wanted"].size() == 0_ul);
+    expect(region_rep["products"].size() == 0_ul);
+    expect(region_rep["units"].size() == 0_ul);
+    expect(region_rep["structures"][0]["units"].size() == 0_ul);
+    expect(region_rep["structures"][1]["units"].size() == 0_ul);
+    expect(region_rep["wages"]["amount"] == 0_i);
+    expect(region_rep["wages"].value("max", 0) == 0_i);
+    expect(region_rep["population"].empty());
+    expect(region_rep.value("tax", 0) == 0_i);
+
+  };
+
+  "If a unit casts 2 annihilates, 1 unsuccessful, random ones fire"_test = []
+  {
+    UnitTestHelper helper;
+    helper.enable(UnitTestHelper::Type::OBJECT, O_ACTIVE_MONOLITH, true);
+    helper.enable(UnitTestHelper::Type::ITEM, I_IMPRISONED_ENTITY, true);
+    helper.enable(UnitTestHelper::Type::OBJECT, O_ENTITY_CAGE, true);
+    helper.enable(UnitTestHelper::Type::SKILL, S_ANNIHILATION, true);
+    helper.initialize_game();
+    helper.setup_turn();
+
+    json rulesetData = { {"allowed_annihilates", 2}, {"random_annihilates", true}};
+    helper.set_ruleset_specific_data(rulesetData);
+
+    string name("Test Faction");
+    Faction *faction = helper.create_faction(name);
+    // Since this is such a tightly defined world, we know this is legal
+    ARegion *region = helper.get_region(0, 0, 0);
+    ARegion *region2 = helper.get_region(1, 1, 0);
+    Unit *leader = helper.get_first_unit(faction);
+    AString *tmp_name = new AString("My Leader");
+    leader->SetName(tmp_name);
+    region2->type = R_BARREN;
+    helper.create_building(region2, nullptr, O_ACTIVE_MONOLITH);
+    helper.create_building(region, nullptr, O_ENTITY_CAGE);
+    Unit *second = helper.create_unit(faction, region);
+    second->items.SetNum(I_LEADERS, 10);
+    helper.create_building(region, second, O_TOWER);
+
+    // Try to use annihilate
+    stringstream ss;
+    ss << "#atlantis 3\n";
+    ss << "unit 2\n";
+    ss << "move se 1\n";
+    ss << "annihilate region 0, 0, 0\n";
+    ss << "annihilate region 0, 0, 0\n";
+    helper.parse_orders(faction->num, ss);
+    helper.move_units();
+    helper.run_annihilation();
+
+    expect(faction->errors.size() == 1_ul);
+    expect(faction->events.size() == 6_ul);
+
+    helper.setup_reports();
+
+    // Generate just this single factions json object.
+    Game &game = helper.game_object();
+    json json_report;
+    faction->build_json_report(json_report, &game, nullptr);
+
+    // We should get an error about the second annihilation
+    json errors = json_report["errors"];
+    expect(errors.size() == 1_ul);
+    json error = errors[0];
+    expect(error["message"] == "ANNIHILATE: Target region is already annihilated.");
+    expect(error["unit"]["number"] == 2_i);
+
+    // Validate we get the messages we expect for the faction
+    json events = json_report["events"];
+    expect(events.size() == 6_ul);
+    json event = events[0];
+    expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to barren (1,1) in Testing Wilds.");
+    expect(event["unit"]["number"] == 2_i);
+    event = events[1];
+    expect(event["message"] == "Enters Building [1].");
+    expect(event["unit"]["number"] == 2_i);
+    event = events[2];
+    expect(event["message"] == "forest (0,2) in Testing Wilds has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[3];
+    expect(event["message"] == "plain (0,0) in Testing Wilds, contains Basictown [city] has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+    event = events[4];
+    expect(event["message"] == "Is annihilated.");
+    expect(event["category"] == "annihilate");
+    expect(event["unit"]["number"] == 3_i);
+    event = events[5];
+    expect(event["message"] == "desert (1,3) in Testing Wilds has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+
+    // load the gm faction report
+    json gm_report;
+    Faction *gm_faction = helper.get_faction(1);
+    gm_faction->build_json_report(gm_report, &game, nullptr);
+
+    // Verify that everything in region 0,0,0 is gone except the shaft and the anomaly.
+    json region_rep = gm_report["regions"][0];
+    expect(region_rep["terrain"] == "barren");
+    expect(region_rep["structures"].size() == 2_ul);
+    expect(region_rep["structures"][0]["type"] == "Shaft");
+    expect(region_rep["structures"][1]["type"] == "Mystical Anomaly");
+    // verify that markets, products and all units are gone.
+    expect(region_rep["markets"]["for_sale"].size() == 0_ul);
+    expect(region_rep["markets"]["wanted"].size() == 0_ul);
+    expect(region_rep["products"].size() == 0_ul);
+    expect(region_rep["units"].size() == 0_ul);
+    expect(region_rep["structures"][0]["units"].size() == 0_ul);
+    expect(region_rep["structures"][1]["units"].size() == 0_ul);
+    expect(region_rep["wages"]["amount"] == 0_i);
+    expect(region_rep["wages"].value("max", 0) == 0_i);
+    expect(region_rep["population"].empty());
+    expect(region_rep.value("tax", 0) == 0_i);
+  };
 };

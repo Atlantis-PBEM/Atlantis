@@ -175,3 +175,7 @@ void UnitTestHelper::enable(Type type, int id, bool enable) {
 void UnitTestHelper::maintain_units() {
     game.AssessMaintenance();
 }
+
+void UnitTestHelper::set_ruleset_specific_data(const json &data) {
+    game.rulesetSpecificData = data;
+}
