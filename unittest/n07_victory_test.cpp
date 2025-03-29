@@ -787,7 +787,6 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ss << "unit 2\n";
     ss << "move se 1\n";
     ss << "annihilate region 0, 0, 0\n";
-    ss << "annihilate region 1, 3, 0\n";
     helper.parse_orders(faction->num, ss);
     helper.move_units();
     helper.run_annihilation();
@@ -884,12 +883,12 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ss << "unit 2\n";
     ss << "move se 1\n";
     ss << "annihilate region 0, 0, 0\n";
-    ss << "annihilate region 1, 3, 0\n";
+    ss << "annihilate region 0, 0, 0\n";
     helper.parse_orders(faction->num, ss);
     helper.move_units();
     helper.run_annihilation();
 
-    expect(faction->errors.size() == 0_ul);
+    expect(faction->errors.size() == 1_ul);
     expect(faction->events.size() == 6_ul);
 
     helper.setup_reports();
@@ -898,6 +897,13 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     Game &game = helper.game_object();
     json json_report;
     faction->build_json_report(json_report, &game, nullptr);
+
+    // Expect that we get an error about the second annihilation
+    json errors = json_report["errors"];
+    expect(errors.size() == 1_ul);
+    json error = errors[0];
+    expect(error["message"] == "ANNIHILATE: Target region is already annihilated.");
+    expect(error["unit"]["number"] == 2_i);
 
     // Validate we get the messages we expect for the faction
     json events = json_report["events"];
