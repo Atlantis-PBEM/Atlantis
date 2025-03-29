@@ -1686,8 +1686,13 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 
 	// Presume they had to open the portal to see if target is ocean
 	if (TerrainDefs[tar->type].similar_type == R_OCEAN) {
-		u->error(string("CAST: ") + tar->Print().const_str() + " is an ocean.");
-		return 1;
+		// If the unit has enough capacity to swim in the ocean, let them teleport there.
+		// We use CanReallySwim rather than CanSwim because the latter also allows flying
+		// units which would break the 'flying units must end on land' rule.
+		if (!u->CanReallySwim()) {
+			u->error(string("CAST: ") + tar->Print().const_str() + " is ocean.");
+			return 1;
+		}
 	}
 	u->DiscardUnfinishedShips();
 	u->event("Teleports to " + string(tar->Print().const_str()) + ".", "spell");
