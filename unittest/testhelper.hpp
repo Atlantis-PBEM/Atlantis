@@ -84,6 +84,8 @@ public:
     void run_sacrifice();
     // Run annihilation orders
     void run_annihilation();
+    // Enable ruleset specific data for testing
+    void set_ruleset_specific_data(const json &data);
 
     // dummy
     int get_seed() { return getrandom(10000); };

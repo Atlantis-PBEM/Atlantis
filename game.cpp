@@ -53,6 +53,7 @@ Game::Game()
 	ppUnits = 0;
 	maxppunits = 0;
 	events = new Events();
+	rulesetSpecificData = json::object();
 
 	if (Globals->FACTION_ACTIVITY == FactionActivityRules::DEFAULT)
 	{

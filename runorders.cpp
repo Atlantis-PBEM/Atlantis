@@ -3205,48 +3205,116 @@ void Game::RunAnnihilateOrders() {
 	// Check all units for annihilate orders.  A unit my only annihilate if they have access to the annihilate skill.
 	// Annihilate will destroy the target hex and all surrounding hexes.  Already annihilated regions cannot be
 	// annihilated again.
+	bool only_surface = rulesetSpecificData.value("annihilate_surface_only", false);
+	int max_annihilates = rulesetSpecificData.value("allowed_annihilates", 1);
 
 	for(const auto r : regions) {
 		for(const auto obj : r->objects) {
 			for(const auto u : obj->units) {
-				AnnihilateOrder *o = u->annihilateorders;
-				if (o == nullptr) continue;
+				// How many annihilates is a unit allowed to do?
+				int allowed_annihilates = max_annihilates;
 
-				// Check if the unit has access to the annihilate skill
 				if (u->GetSkill(S_ANNIHILATION) <= 0) {
+					if (u->annihilateorders.empty()) continue; // no annihilate orders
 					u->error("ANNIHILATE: Unit does not have access to the annihilate skill.");
+					u->annihilateorders.clear(); // clear the orders
 					continue;
 				}
 
-				// Ok we have a unit doing a valid annihilate order.
-				ARegion *target = regions.GetRegion(o->xloc, o->yloc, o->zloc);
-				if (target == nullptr) {
-					u->error("ANNIHILATE: Target region does not exist.");
-					continue;
-				}
-				// Check if the target is in range
-				RangeType *rt = FindRange("rng_annihilate");
-				// If the range for annihilation is changed, this code will need to be updated.  This really should
-				// be made better, but not today. (right now this has a range of 1000 and a cross level penalty of 0)
-				int dist = regions.GetPlanarDistance(r, target, rt->crossLevelPenalty, rt->rangeMult);
-				if (dist > rt->rangeMult) {
-					u->error("ANNIHILATE: Target region is out of range.");
-					continue;
+				while(allowed_annihilates > 0 && !u->annihilateorders.empty()) {
+					AnnihilateOrder *o = u->annihilateorders.front();
+					u->annihilateorders.pop_front();
+
+					// Ok we have a unit doing an annihilate order.
+					ARegion *target = regions.GetRegion(o->xloc, o->yloc, o->zloc);
+					if (target == nullptr) {
+						u->error("ANNIHILATE: Target region does not exist.");
+						continue;
+					}
+
+					// Check if the target is in range
+					RangeType *rt = FindRange("rng_annihilate");
+					int rtype = target->level->levelType;
+					if ((rt->flags & RangeType::RNG_SURFACE_ONLY) && (rtype  != ARegionArray::LEVEL_SURFACE)) {
+						u->error("ANNIHILATE: Target region is not on the surface.");
+						continue;
+					}
+
+					// If the range for annihilation is changed, this code will need to be updated.  This really should
+					// be made better, but not today. (right now this has a range of 1000 and a cross level penalty of 0)
+					int dist = regions.GetPlanarDistance(r, target, rt->crossLevelPenalty, rt->rangeMult);
+					if (dist > rt->rangeMult) {
+						u->error("ANNIHILATE: Target region is out of range.");
+						continue;
+					}
+
+					// Make sure the target isn't already annihilated
+					if (TerrainDefs[target->type].flags & TerrainType::ANNIHILATED) {
+						u->error("ANNIHILATE: Target region is already annihilated.");
+						continue;
+					}
+
+					// annihilate our neigbors
+					for (auto n = 0; n < NDIRS; n++) {
+						ARegion *neigh = target->neighbors[n];
+						if (neigh == nullptr) continue;
+						Do1Annihilate(neigh);
+					}
+					Do1Annihilate(target);
+
+					// lastly update that we cast one.
+					allowed_annihilates--;
 				}
 
-				// Make sure the target isn't already annihilated
-				if (TerrainDefs[target->type].flags & TerrainType::ANNIHILATED) {
-					u->error("ANNIHILATE: Target region is already annihilated.");
-					continue;
+				// If the unit didn't use all their annihilates, and we should do random ones, do them.
+				while(allowed_annihilates > 0) {
+					// pick a random region region to annihilate
+					ARegionArray *level = nullptr;
+					if (only_surface) {
+						level = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
+					} else {
+						int zloc = getrandom(regions.numLevels);
+						level = regions.GetRegionArray(zloc);
+					}
+					// now, get a random region from that level that isn't our own.
+					if (level == nullptr) break;
+
+					ARegion *target = nullptr;
+					int tries = 0;
+					while(!target) {
+						if (tries++ > 25) break; // don't loop forever
+						target = level->GetRegion(getrandom(level->x), getrandom(level->y));
+						if (!target) continue; // no region there
+						if (target == r) { target = nullptr; continue; } // don't pick our own region
+						if (TerrainDefs[target->type].flags & TerrainType::ANNIHILATED) {
+							target = nullptr; // don't pick an already annihilated region
+						}
+					}
+					if (target == nullptr) break; // couldn't find a valid region
+
+					// Ok, we found a valid, non-annihilated region, blow it up.
+					for (auto n = 0; n < NDIRS; n++) {
+						ARegion *neigh = target->neighbors[n];
+						if (neigh == nullptr) continue;
+						Do1Annihilate(neigh);
+					}
+					Do1Annihilate(target);
+					// lastly update that we cast one.
+					allowed_annihilates--;
 				}
 
-				// annihilate our neigbors
-				for (auto n = 0; n < NDIRS; n++) {
-					ARegion *neigh = target->neighbors[n];
-					if (neigh == nullptr) continue;
-					Do1Annihilate(neigh);
+				// If the unit still has annihilate orders, keep them for next turn.
+				while(!u->annihilateorders.empty()) {
+					AnnihilateOrder *o = u->annihilateorders.front();
+					u->annihilateorders.pop_front();
+
+					TurnOrder *tOrder = new TurnOrder;
+					std::string order = "ANNIHILATE " + to_string(o->xloc) + " " + to_string(o->yloc) +
+						" " + to_string(o->zloc);
+					tOrder->repeating = 0;
+					tOrder->turnOrders.push_back(order);
+					u->turnorders.push_front(tOrder);
 				}
-				Do1Annihilate(target);
 			}
 		}
 	}

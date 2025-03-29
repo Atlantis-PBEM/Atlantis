@@ -472,6 +472,7 @@ class ARegionList
 		int GetWeather(ARegion *pReg, int month);
 
 		ARegionArray *GetRegionArray(int level);
+		ARegionArray *get_first_region_array_of_type(int type);
 
 		int numberofgates;
 		int numLevels;
@@ -503,6 +504,7 @@ class ARegionList
 		ARegion *FindConnectedRegions(ARegion *r, ARegion *tail, int shaft);
 		ARegion *FindNearestStartingCity(ARegion *r, int *dir);
 		int FindDistanceToNearestObject(int object, ARegion *r);
+		int find_distance_between_regions(ARegion *start, ARegion *target);
 		void FixUnconnectedRegions();
 		void InitSetupGates(int level);
 		void FinalSetupGates();

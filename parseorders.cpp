@@ -3076,7 +3076,6 @@ void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	int x = -1;
 	int y = -1;
 	int z = unit->object->region->zloc;
-	RangeType *range = FindRange(SkillDefs[S_ANNIHILATION].range);
 
 	if (!token) {
 		parse_error(pCheck, unit, 0, "ANNIHILATE: No region specified.");
@@ -3105,7 +3104,13 @@ void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	y = token->value();
 	delete token;
 
-	if (range && (range->flags & RangeType::RNG_CROSS_LEVELS)) {
+
+	RangeType *range = FindRange(SkillDefs[S_ANNIHILATION].range);
+	if (range->flags & RangeType::RNG_SURFACE_ONLY) {
+		z = (Globals->NEXUS_EXISTS ? 1 : 0);
+	}
+
+	if (range && (range->flags & RangeType::RNG_CROSS_LEVELS) && !(range->flags & RangeType::RNG_SURFACE_ONLY)) {
 		token = o->gettoken();
 		if (token) {
 			z = token->value();
@@ -3122,7 +3127,6 @@ void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		order->xloc = x;
 		order->yloc = y;
 		order->zloc = z;
-		if (unit->annihilateorders) delete unit->annihilateorders;
-		unit->annihilateorders = order;
+		unit->annihilateorders.push_back(order);
 	}
 }

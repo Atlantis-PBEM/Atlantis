@@ -34,6 +34,12 @@ class Game;
 #include "object.h"
 #include "events.h"
 
+#include "external/nlohmann/json.hpp"
+using json = nlohmann::json;
+
+#include <map>
+#include <string>
+
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
 
 class OrdersCheck
@@ -321,6 +327,11 @@ private:
 	int doExtraInit;
 
 	Events *events;
+
+	// We need some way to track game specific data that can be used globally
+	// (specifically added for testing of NO7 victory conditions, but generally
+	// useful).  I use json here so that it can store arbitrary data in a structured way.
+	json rulesetSpecificData;
 
 	//
 	// Parsing functions

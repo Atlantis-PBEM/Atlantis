@@ -1463,14 +1463,32 @@ AString *ShowSkill::Report(Faction *f) const
 			break;
 		case S_ANNIHILATION:
 			if (level > 1) break;
+			range = FindRange(SkillDefs[skill].range);
 			*str += "A unit with access to the Annihilation skill may destroy a region and all "
 				"surrounding regions.  Regions destroyed in this way will become barren.  All units "
 				"and structures except for shafts and anomalies in the region and the surrounding regions "
-				"will be destroyed as will production and cities.  This skill is only available to the unit "
-				"which controls the World-breaker Monolith.  To use this skill, the owner of the "
-				"World-breaker Monolith must issue the order ANNIHILATE REGION <x> <y> <z>.   If the z "
-				"coordinate is not specified, it will default to the same z coordinate as the region "
-				"containing the World-breaker Monolith.";
+				"will be destroyed as will production and cities.";
+			if (!(ObjectDefs[O_ACTIVE_MONOLITH].flags & ObjectType::DISABLED)) {
+				if (ObjectDefs[O_ACTIVE_MONOLITH].flags & ObjectType::GRANTSKILL) {
+					*str += " This skill is only available to the unit which controls the World-breaker Monolith. "
+						"To use this skill, the owner of the World-breaker Monolith ";
+				}
+			} else {
+				*str += " To use this skill, the unit ";
+			}
+			*str += "must issue the order ANNIHILATE REGION <x> <y>";
+			if (range && range->flags & RangeType::RNG_SURFACE_ONLY) {
+				*str += ".";
+			} else {
+				*str += " <z>. If the z coordinate is not specified, it will default to the same z coordinate as "
+					"the unit utilizing the skill.";
+			}
+
+			if (range && range->flags & RangeType::RNG_SURFACE_ONLY) {
+				*str += " This skill can only target a region on the surface of the world.";
+			} else {
+				*str += " This skill can target a region anywhere in the world.";
+			}
 			break;
 	}
 
