@@ -86,6 +86,10 @@ public:
     void run_annihilation();
     // Enable ruleset specific data for testing
     void set_ruleset_specific_data(const json &data);
+    // Run productions
+    void run_productions();
+    // Run all month orders for all factions.
+    void run_month_orders();
 
     // dummy
     int get_seed() { return getrandom(10000); };
