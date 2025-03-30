@@ -586,6 +586,7 @@ private:
 	void Do1TeachOrder(ARegion *, Unit *);
 	void RunProduceOrders(ARegion *);
 	void RunIdleOrders(ARegion *);
+	int consume_production_inputs(Unit *u, int item, int maxproduced);
 	int ValidProd(Unit *, ARegion *, Production *);
 	int FindAttemptedProd(ARegion *, Production *);
 	void RunAProduction(ARegion *, Production *);

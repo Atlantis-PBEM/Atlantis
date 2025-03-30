@@ -137,6 +137,18 @@ void UnitTestHelper::collect_transported_goods() {
     game.CollectInterQMTransportItems();
 }
 
+void UnitTestHelper::run_month_orders() {
+    // This will run all month long orders, which includes study, production, build, etc.
+    game.RunMonthOrders();
+}
+
+void UnitTestHelper::run_productions() {
+    // This will run the production phase for all regions in the game.
+    for (auto &region : game.regions) {
+        game.RunProduceOrders(region); // This will run the produce orders for each region.
+    }
+}
+
 void UnitTestHelper::activate_spell(int spell, SpellTestHelper helper) {
     // This is a bit of a hack, but it's the easiest way to get the game object to run the spell, especially since
     // C++ doesn't have actual introspection/reflection and the spell executors take different arguments.   The intent

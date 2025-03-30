@@ -859,6 +859,92 @@ void Game::CreateShip(ARegion *r, Unit * u, int ship)
 	}
 }
 
+// This is a utility function used by both ship building and unit production to correctly consume
+// input items for production.  In the case of ORINPUT items it will make sure to consume items from the
+// unit itself before consuming from the shared pool.
+// Returns the number of items created.
+int Game::consume_production_inputs(Unit *u, int item, int maxproduced)
+{
+	unsigned int maxInputs = sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]);
+
+	if (ItemDefs[item].flags & ItemType::ORINPUTS) {
+		// Figure out the max we can produce based on the inputs
+		int count = 0;
+		unsigned int c;
+		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
+			int i = ItemDefs[item].pInput[c].item;
+			if (i != -1)
+				count += u->GetSharedNum(i) / ItemDefs[item].pInput[c].amt;
+		}
+		if (maxproduced > count) maxproduced = count;
+		count = maxproduced;
+
+		if (count < 1) return 0;
+
+		// Now consume the items from the unit itself first if possible.
+		for (c = 0; c < maxInputs; c++) {
+			int i = ItemDefs[item].pInput[c].item;
+			int a = ItemDefs[item].pInput[c].amt;
+			if (i != -1) {
+				// Consume from the unit's own items first
+				int amt = u->items.GetNum(i);
+				if (count > amt / a) {
+					count -= amt / a;
+					u->items.SetNum(i, amt - ((amt / a) * a));
+				} else {
+					u->items.SetNum(i, amt - (count * a));
+					count = 0;
+				}
+			}
+		}
+
+		// If we paid for everything, return now.
+		if (count == 0) return maxproduced;
+
+		// Deduct the items spent
+		for (c = 0; c < maxInputs; c++) {
+			int i = ItemDefs[item].pInput[c].item;
+			int a = ItemDefs[item].pInput[c].amt;
+			if (i != -1) {
+				int amt = u->GetSharedNum(i);
+				if (count > amt / a) {
+					count -= amt / a;
+					u->ConsumeShared(i, (amt / a) * a);
+				} else {
+					u->ConsumeShared(i, count * a);
+					count = 0;
+				}
+			}
+		}
+	} else {
+		// Figure out the max we can produce based on the inputs
+		unsigned int c;
+		for (c = 0; c < maxInputs; c++) {
+			int i = ItemDefs[item].pInput[c].item;
+			if (i != -1) {
+				int amt = u->GetSharedNum(i);
+				if ((amt / ItemDefs[item].pInput[c].amt) < maxproduced) {
+					maxproduced = amt / ItemDefs[item].pInput[c].amt;
+				}
+			}
+		}
+
+		// If we can't produce anything, return 0
+		if (maxproduced < 1) return 0;
+
+		// Deduct the items spent
+		for (c = 0; c < maxInputs; c++) {
+			int i = ItemDefs[item].pInput[c].item;
+			int a = ItemDefs[item].pInput[c].amt;
+			if (i != -1) {
+				u->ConsumeShared(i, maxproduced * a);
+			}
+		}
+	}
+	return maxproduced;
+}
+
+
 /* Checks and returns the amount of ship construction,
  * handles material use and practice for both the main
  * shipbuilders and the helpers.
@@ -894,81 +980,18 @@ int Game::ShipConstruction(ARegion *r, Unit *u, Unit *target, int level, int nee
 	if ((unfinished > 0) && (maxproduced > unfinished))
 		maxproduced = unfinished;
 
-	if (ItemDefs[ship].flags & ItemType::ORINPUTS) {
-		// Figure out the max we can produce based on the inputs
-		int count = 0;
-		unsigned int c;
-		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
-			int i = ItemDefs[ship].pInput[c].item;
-			if (i != -1)
-				count += u->GetSharedNum(i) / ItemDefs[ship].pInput[c].amt;
-		}
-		if (maxproduced > count)
-			maxproduced = count;
-		count = maxproduced;
-
-		// no required materials?
-		if (count < 1) {
-			u->error("BUILD: Don't have the required materials to build " + ItemDefs[ship].name + ".");
-			delete u->monthorders;
-			u->monthorders = nullptr;
-			return 0;
-		}
-
-		/* regional economic improvement */
-		r->improvement += count;
-
-		// Deduct the items spent
-		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
-			int i = ItemDefs[ship].pInput[c].item;
-			int a = ItemDefs[ship].pInput[c].amt;
-			if (i != -1) {
-				int amt = u->GetSharedNum(i);
-				if (count > amt / a) {
-					count -= amt / a;
-					u->ConsumeShared(i, (amt / a) * a);
-				} else {
-					u->ConsumeShared(i, count * a);
-					count = 0;
-				}
-			}
-		}
-	} else {
-		// Figure out the max we can produce based on the inputs
-		unsigned int c;
-		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
-			int i = ItemDefs[ship].pInput[c].item;
-			if (i != -1) {
-				int amt = u->GetSharedNum(i);
-				if (amt/ItemDefs[ship].pInput[c].amt < maxproduced) {
-					maxproduced = amt/ItemDefs[ship].pInput[c].amt;
-				}
-			}
-		}
-
-		// no required materials?
-		if (maxproduced < 1) {
-			u->error("BUILD: Don't have the required materials to build " + ItemDefs[ship].name + ".");
-			delete u->monthorders;
-			u->monthorders = nullptr;
-			return 0;
-		}
-
-		/* regional economic improvement */
-		r->improvement += maxproduced;
-
-		// Deduct the items spent
-		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
-			int i = ItemDefs[ship].pInput[c].item;
-			int a = ItemDefs[ship].pInput[c].amt;
-			if (i != -1) {
-				u->ConsumeShared(i, maxproduced*a);
-			}
-		}
+	maxproduced = consume_production_inputs(u, ship, maxproduced);
+	if (maxproduced < 1) {
+		// We don't have enough input items to produce anything
+		u->error("BUILD: Don't have the required materials to build " + ItemDefs[ship].name + ".");
+		delete u->monthorders;
+		u->monthorders = nullptr;
+		return 0;
 	}
+	r->improvement += maxproduced; // regional economic improvement
+
 	int output = maxproduced * ItemDefs[ship].pOut;
-	if (ItemDefs[ship].flags & ItemType::SKILLOUT)
-		output *= level;
+	if (ItemDefs[ship].flags & ItemType::SKILLOUT) output *= level;
 
 	delete u->monthorders;
 	u->monthorders = nullptr;
@@ -1052,63 +1075,8 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 	if (o->target > 0 && maxproduced > o->target)
 		maxproduced = o->target;
 
-	if (ItemDefs[o->item].flags & ItemType::ORINPUTS) {
-		// Figure out the max we can produce based on the inputs
-		int count = 0;
-		unsigned int c;
-		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
-			int i = ItemDefs[o->item].pInput[c].item;
-			if (i != -1)
-				count += u->GetSharedNum(i) / ItemDefs[o->item].pInput[c].amt;
-		}
-		if (maxproduced > count)
-			maxproduced = count;
-		count = maxproduced;
-
-		/* regional economic improvement */
-		r->improvement += count;
-
-		// Deduct the items spent
-		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
-			int i = ItemDefs[o->item].pInput[c].item;
-			int a = ItemDefs[o->item].pInput[c].amt;
-			if (i != -1) {
-				int amt = u->GetSharedNum(i);
-				if (count > amt / a) {
-					count -= amt / a;
-					u->ConsumeShared(i, (amt/a)*a);
-				} else {
-					u->ConsumeShared(i, count * a);
-					count = 0;
-				}
-			}
-		}
-	}
-	else {
-		// Figure out the max we can produce based on the inputs
-		unsigned int c;
-		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
-			int i = ItemDefs[o->item].pInput[c].item;
-			if (i != -1) {
-				int amt = u->GetSharedNum(i);
-				if (amt/ItemDefs[o->item].pInput[c].amt < maxproduced) {
-					maxproduced = amt/ItemDefs[o->item].pInput[c].amt;
-				}
-			}
-		}
-
-		/* regional economic improvement */
-		r->improvement += maxproduced;
-
-		// Deduct the items spent
-		for (c = 0; c < sizeof(ItemDefs->pInput)/sizeof(ItemDefs->pInput[0]); c++) {
-			int i = ItemDefs[o->item].pInput[c].item;
-			int a = ItemDefs[o->item].pInput[c].amt;
-			if (i != -1) {
-				u->ConsumeShared(i, maxproduced*a);
-			}
-		}
-	}
+	maxproduced = consume_production_inputs(u, o->item, maxproduced);
+	r->improvement += maxproduced; // regional economic improvement
 
 	// Now give the items produced
 	int output = maxproduced * ItemDefs[o->item].pOut;
