@@ -270,7 +270,7 @@
     },
     {
       "category": "spell",
-      "message": "Jumps through a Gate to jungle (3,5) in Kleptoatres Jungle.",
+      "message": "Jumps through a Gate to swamp (13,3) in Philagotuspolisus Marshes, contains Hymnoalotos [village].",
       "unit": {
         "name": "Unit",
         "number": 38
@@ -802,6 +802,10 @@
           }
         }
       ],
+      "gate": {
+        "number": 74,
+        "open": 1
+      },
       "markets": {
         "for_sale": [
           {
@@ -1195,338 +1199,7 @@
             ]
           },
           "weight": 105
-        }
-      ],
-      "wages": {
-        "amount": 12.3,
-        "max": 468
-      }
-    },
-    {
-      "coordinates": {
-        "label": "surface",
-        "x": 14,
-        "y": 4,
-        "z": 1
-      },
-      "entertainment": 59,
-      "exits": [
-        {
-          "direction": "North",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 14,
-              "y": 2,
-              "z": 1
-            },
-            "province": "Philagotuspolisus Woods",
-            "terrain": "forest"
-          }
         },
-        {
-          "direction": "Northeast",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 15,
-              "y": 3,
-              "z": 1
-            },
-            "province": "Great Nena River",
-            "terrain": "ocean"
-          }
-        },
-        {
-          "direction": "Southeast",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 15,
-              "y": 5,
-              "z": 1
-            },
-            "province": "Aoratalotos Swamp",
-            "terrain": "swamp"
-          }
-        },
-        {
-          "direction": "South",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 14,
-              "y": 6,
-              "z": 1
-            },
-            "province": "Airalotos Pond",
-            "terrain": "ocean"
-          }
-        },
-        {
-          "direction": "Southwest",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 13,
-              "y": 5,
-              "z": 1
-            },
-            "province": "Kleptoatres Volcano",
-            "terrain": "volcano"
-          }
-        },
-        {
-          "direction": "Northwest",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 13,
-              "y": 3,
-              "z": 1
-            },
-            "province": "Philagotuspolisus Marshes",
-            "settlement": {
-              "name": "Hymnoalotos",
-              "size": "village"
-            },
-            "terrain": "swamp"
-          }
-        }
-      ],
-      "markets": {
-        "for_sale": [
-          {
-            "amount": 85,
-            "name": "centaur",
-            "plural": "centaurs",
-            "price": 68,
-            "tag": "CTAU"
-          },
-          {
-            "amount": 17,
-            "name": "leader",
-            "plural": "leaders",
-            "price": 688,
-            "tag": "LEAD"
-          }
-        ],
-        "wanted": []
-      },
-      "population": {
-        "amount": 2131,
-        "race": "centaurs"
-      },
-      "present": true,
-      "products": [
-        {
-          "amount": 57,
-          "name": "grain",
-          "plural": "grain",
-          "tag": "GRAI"
-        },
-        {
-          "amount": 30,
-          "name": "horse",
-          "plural": "horses",
-          "tag": "HORS"
-        }
-      ],
-      "province": "Maranarenos Dale",
-      "tax": 980,
-      "terrain": "plain",
-      "units": [
-        {
-          "capacity": {
-            "flying": 0,
-            "riding": 0,
-            "swimming": 0,
-            "walking": 15
-          },
-          "faction": {
-            "name": "Test",
-            "number": 3
-          },
-          "flags": {
-            "avoid": false,
-            "guard": false,
-            "holding": false,
-            "no_aid": false,
-            "no_cross_water": false,
-            "reveal": "faction",
-            "sharing": false,
-            "spoils": "all",
-            "taxing": false
-          },
-          "items": [
-            {
-              "amount": 1,
-              "name": "gnoll",
-              "plural": "gnolls",
-              "tag": "GNOL"
-            }
-          ],
-          "name": "Unit",
-          "number": 64,
-          "orders": [],
-          "own_unit": true,
-          "skills": {
-            "known": []
-          },
-          "weight": 10
-        }
-      ],
-      "wages": {
-        "amount": 12.3,
-        "max": 403
-      }
-    },
-    {
-      "coordinates": {
-        "label": "surface",
-        "x": 3,
-        "y": 5,
-        "z": 1
-      },
-      "entertainment": 43,
-      "exits": [
-        {
-          "direction": "North",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 3,
-              "y": 3,
-              "z": 1
-            },
-            "province": "Aoratalotos Forest",
-            "terrain": "forest"
-          }
-        },
-        {
-          "direction": "Northeast",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 4,
-              "y": 4,
-              "z": 1
-            },
-            "province": "Cylith Sea",
-            "terrain": "ocean"
-          }
-        },
-        {
-          "direction": "Southeast",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 4,
-              "y": 6,
-              "z": 1
-            },
-            "province": "Cylith Sea",
-            "terrain": "ocean"
-          }
-        },
-        {
-          "direction": "South",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 3,
-              "y": 7,
-              "z": 1
-            },
-            "province": "Dogmoeryx Marshes",
-            "terrain": "swamp"
-          }
-        },
-        {
-          "direction": "Southwest",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 2,
-              "y": 6,
-              "z": 1
-            },
-            "province": "Dogmoeryx Marshes",
-            "terrain": "swamp"
-          }
-        },
-        {
-          "direction": "Northwest",
-          "region": {
-            "coordinates": {
-              "label": "surface",
-              "x": 2,
-              "y": 4,
-              "z": 1
-            },
-            "province": "Dogmoeryx Marshes",
-            "terrain": "swamp"
-          }
-        }
-      ],
-      "gate": {
-        "number": 68,
-        "open": 1
-      },
-      "markets": {
-        "for_sale": [
-          {
-            "amount": 63,
-            "name": "wood elf",
-            "plural": "wood elves",
-            "price": 40,
-            "tag": "WELF"
-          },
-          {
-            "amount": 12,
-            "name": "leader",
-            "plural": "leaders",
-            "price": 705,
-            "tag": "LEAD"
-          }
-        ],
-        "wanted": []
-      },
-      "population": {
-        "amount": 1587,
-        "race": "wood elves"
-      },
-      "present": true,
-      "products": [
-        {
-          "amount": 35,
-          "name": "livestock",
-          "plural": "livestock",
-          "tag": "LIVE"
-        },
-        {
-          "amount": 19,
-          "name": "wood",
-          "plural": "wood",
-          "tag": "WOOD"
-        },
-        {
-          "amount": 31,
-          "name": "herb",
-          "plural": "herbs",
-          "tag": "HERB"
-        },
-        {
-          "amount": 14,
-          "name": "fur",
-          "plural": "furs",
-          "tag": "FUR"
-        }
-      ],
-      "province": "Kleptoatres Jungle",
-      "tax": 825,
-      "terrain": "jungle",
-      "units": [
         {
           "capacity": {
             "flying": 0,
@@ -1721,8 +1394,187 @@
         }
       ],
       "wages": {
-        "amount": 12.6,
-        "max": 359
+        "amount": 12.3,
+        "max": 468
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 14,
+        "y": 4,
+        "z": 1
+      },
+      "entertainment": 59,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Woods",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Aoratalotos Swamp",
+            "terrain": "swamp"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 6,
+              "z": 1
+            },
+            "province": "Airalotos Pond",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 5,
+              "z": 1
+            },
+            "province": "Kleptoatres Volcano",
+            "terrain": "volcano"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 13,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Marshes",
+            "settlement": {
+              "name": "Hymnoalotos",
+              "size": "village"
+            },
+            "terrain": "swamp"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 85,
+            "name": "centaur",
+            "plural": "centaurs",
+            "price": 68,
+            "tag": "CTAU"
+          },
+          {
+            "amount": 17,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 688,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 2131,
+        "race": "centaurs"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 57,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 30,
+          "name": "horse",
+          "plural": "horses",
+          "tag": "HORS"
+        }
+      ],
+      "province": "Maranarenos Dale",
+      "tax": 980,
+      "terrain": "plain",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            }
+          ],
+          "name": "Unit",
+          "number": 64,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 12.3,
+        "max": 403
       }
     },
     {

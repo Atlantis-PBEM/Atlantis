@@ -25,6 +25,7 @@
 
 #include "gameio.h"
 #include "events.h"
+#include "rng.h"
 
 #include <memory>
 #include <stdexcept>
@@ -151,7 +152,7 @@ string relativeSize(int size) {
     if (size < 3) return SIZES[0];
     if (size < 12) return SIZES[1];
     if (size < 24) return SIZES[2];
-    
+
     return SIZES[3];
 }
 
@@ -239,7 +240,7 @@ const Event monsterHunt(BattleFact* fact) {
             << " " << oneOf(ACTION_SUCCESS)                   // slain
             << " " << fact->defender.unitName                 // Demons
             ;
-        
+
         if (mark) {
             buffer << " near " << mark->title << ".";
         }
@@ -268,7 +269,7 @@ const Event monsterHunt(BattleFact* fact) {
             << " of"                                      // of
             << " " << fact->location.province             // Cefelat
             ;
-        
+
         if (mark) {
             buffer << " near " << mark->title << ".";
         }
@@ -317,7 +318,7 @@ const Event monsterAggresion(BattleFact* fact) {
         if (mark) {
             buffer << " near " << mark->title;
         }
-        
+
         buffer << ".";
     }
 
@@ -384,7 +385,7 @@ const Event pvpBattle(BattleFact* fact) {
         // number of looses known
 
         int unceretanity = totalLost / 3;   // 33%
-        int lost = totalLost + getrandom(unceretanity) - (unceretanity / 2);
+        int lost = totalLost + rng::get_random(unceretanity) - (unceretanity / 2);
 
         buffer
             << " " << oneOf(BATTLE)                                         // a battle
@@ -394,7 +395,7 @@ const Event pvpBattle(BattleFact* fact) {
             << " where " << lost << " " << plural(lost, "combatant", "combatants") // where 75 combatants
             << " " << plural(lost, "was", "were") << " killed."             // were killed
             ;
-        
+
         if (isSlaughter) {
             buffer << (fact->outcome == BATTLE_WON ? " The attackers slaughtered all defenders." : " The defenders were furious and put all attackers to the sword.");
         }
@@ -414,14 +415,14 @@ const Event pvpBattle(BattleFact* fact) {
         // mages, monsters, fmi
 
         int unceretanity = totalLost / 5;   // 20%
-        int lost = totalLost + getrandom(unceretanity) - (unceretanity / 2);
+        int lost = totalLost + rng::get_random(unceretanity) - (unceretanity / 2);
 
         buffer
             << " " << oneOf(BATTLE) // a battle
             << " between"             // between
             ;
 
-        int roll = getrandom(10);
+        int roll = rng::get_random(10);
         if (roll >= 8) {
             // 20 %
             buffer
@@ -432,7 +433,7 @@ const Event pvpBattle(BattleFact* fact) {
         else if (roll >= 6) {
             // 20%
             buffer
-                << " " << (getrandom(2) ? fact->attacker.factionName : fact->defender.factionName)
+                << " " << (rng::get_random(2) ? fact->attacker.factionName : fact->defender.factionName)
                 << " and " << oneOf(ONE_SIDE)
                 ;
         }
@@ -488,7 +489,7 @@ const Event pvpBattle(BattleFact* fact) {
         // mages, monsters, fmi
 
         int unceretanity = totalLost / 10;   // 10%
-        int lost = totalLost + getrandom(unceretanity) - (unceretanity / 2);
+        int lost = totalLost + rng::get_random(unceretanity) - (unceretanity / 2);
 
         buffer
             << " an epic battle between"

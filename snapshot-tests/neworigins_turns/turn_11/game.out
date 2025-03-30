@@ -4,7 +4,7 @@ NewOrigins
 196608
 1
 11
-8978
+3549
 4
 71
 100
@@ -832,31 +832,6 @@ none
 -1
 -1
 0
-1
-Giant Scorpions (25)
-none
-25
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 SCOR
-0
-NO_SKILL
-0
--1
 0
 Basingford Plain
 7
@@ -946,7 +921,7 @@ swamp
 0
 GBLN
 1250
-668
+667
 110
 110
 250
@@ -1664,6 +1639,31 @@ none
 -1
 -1
 0
+1
+Giant Scorpions (25)
+none
+25
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 SCOR
+0
+NO_SKILL
+0
+-1
 0
 Burmere Sea
 15
@@ -2593,7 +2593,7 @@ none
 -1
 -1
 0
-2
+3
 Kobold Pack (20)
 none
 20
@@ -2614,6 +2614,31 @@ NO_ITEM
 10
 1
 15 KOBO
+0
+NO_SKILL
+0
+-1
+0
+Wolf Pack (22)
+none
+22
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 WOLF
 0
 NO_SKILL
 0
@@ -3633,7 +3658,7 @@ swamp
 0
 LIZA
 1268
-657
+659
 113
 113
 329
@@ -3760,7 +3785,7 @@ swamp
 0
 ORC
 1531
-809
+807
 123
 123
 704
@@ -4258,7 +4283,7 @@ plain
 0
 CTAU
 2164
-1153
+1144
 123
 123
 995
@@ -4322,32 +4347,7 @@ none
 -1
 -1
 0
-3
-Wolf Pack (22)
-none
-22
-3
 2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 WOLF
-0
-NO_SKILL
-0
--1
-0
 Unit (63)
 none
 63
@@ -4902,31 +4902,6 @@ none
 -1
 -1
 0
-1
-Giant Scorpions (23)
-none
-23
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-7 SCOR
-0
-NO_SKILL
-0
--1
 0
 1
 Lair
@@ -5853,7 +5828,7 @@ swamp
 0
 LIZA
 1706
-883
+889
 115
 115
 511
@@ -6883,7 +6858,32 @@ none
 -1
 -1
 0
+2
+Giant Scorpions (23)
+none
+23
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
 1
+7 SCOR
+0
+NO_SKILL
+0
+-1
+0
 Lizard Men (46)
 none
 46
@@ -6984,6 +6984,31 @@ none
 -1
 -1
 0
+1
+Grizzly Bears (17)
+none
+17
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+3 GRIZ
+0
+NO_SKILL
+0
+-1
 0
 Heteraskalos Valley
 72
@@ -7723,31 +7748,6 @@ none
 -1
 -1
 0
-1
-Grizzly Bears (17)
-none
-17
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-3 GRIZ
-0
-NO_SKILL
-0
--1
 0
 1
 Crypt
@@ -7936,31 +7936,6 @@ none
 -1
 -1
 0
-1
-Pride of Lions (40)
-none
-40
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-2 LION
-0
-NO_SKILL
-0
--1
 0
 Aoratalotos Desert
 81
@@ -8818,31 +8793,6 @@ none
 -1
 -1
 0
-1
-Crocodiles (16)
-none
-16
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 CROC
-0
-NO_SKILL
-0
--1
 0
 Nyra River
 90
@@ -9063,31 +9013,6 @@ none
 -1
 -1
 0
-1
-Wolf Pack (39)
-none
-39
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 WOLF
-0
-NO_SKILL
-0
--1
 0
 Great Nara River
 93
@@ -9232,6 +9157,31 @@ none
 -1
 -1
 0
+1
+Family of Ogres (18)
+none
+18
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 OGRE
+0
+NO_SKILL
+0
+-1
 0
 Heteraskalos Rocks
 95
@@ -9392,7 +9342,7 @@ none
 -1
 -1
 0
-1
+3
 Crocodiles (49)
 none
 49
@@ -9413,6 +9363,56 @@ NO_ITEM
 10
 1
 5 CROC
+0
+NO_SKILL
+0
+-1
+0
+Crocodiles (16)
+none
+16
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+5 CROC
+0
+NO_SKILL
+0
+-1
+0
+Pride of Lions (40)
+none
+40
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 LION
 0
 NO_SKILL
 0
@@ -10048,6 +10048,31 @@ none
 -1
 -1
 0
+1
+Living Trees (47)
+none
+47
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+5 TREN
+0
+NO_SKILL
+0
+-1
 0
 Heteraskalos Rocks
 103
@@ -10124,31 +10149,6 @@ none
 -1
 -1
 0
-1
-Family of Ogres (18)
-none
-18
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 OGRE
-0
-NO_SKILL
-0
--1
 0
 Ametanopos Sea
 104
@@ -10664,6 +10664,31 @@ none
 -1
 -1
 0
+1
+Wolf Pack (39)
+none
+39
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 WOLF
+0
+NO_SKILL
+0
+-1
 0
 Dogmoeryx Sands
 109
@@ -10820,31 +10845,6 @@ none
 -1
 -1
 0
-1
-Living Trees (47)
-none
-47
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 TREN
-0
-NO_SKILL
-0
--1
 0
 Ametanopos Sea
 111
@@ -11710,6 +11710,31 @@ none
 -1
 -1
 0
+1
+Lizard Men (24)
+none
+24
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+7 LMAN
+0
+NO_SKILL
+0
+-1
 0
 1
 Road SW
@@ -12586,31 +12611,6 @@ none
 -1
 -1
 0
-1
-Lizard Men (24)
-none
-24
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-7 LMAN
-0
-NO_SKILL
-0
--1
 0
 Becland
 129
@@ -13112,6 +13112,31 @@ none
 -1
 -1
 0
+1
+Troll Pack (43)
+none
+43
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+6 TROL
+0
+NO_SKILL
+0
+-1
 0
 Becland
 137
@@ -13192,31 +13217,6 @@ none
 -1
 -1
 0
-1
-Troll Pack (43)
-none
-43
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-6 TROL
-0
-NO_SKILL
-0
--1
 0
 The Undersea
 138

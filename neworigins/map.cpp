@@ -27,6 +27,7 @@
 #include <string.h>
 #include "game.h"
 #include "gamedata.h"
+#include "rng.h"
 
 #include <algorithm>
 #include <list>
@@ -310,11 +311,11 @@ bool Province::Grow() {
 
 	if (candidates.size() == 0) return false;
 
-	ZoneRegion* next = candidates[getrandom(candidates.size())];
+	ZoneRegion* next = candidates[rng::get_random(candidates.size())];
 	int connections = next->CountNeighbors(this);
 
 	// 2d6
-	int roll = makeRoll(2, 6);
+	int roll = rng::make_roll(2, 6);
 	int diff = 12 - connections;
 
 	// connections: 5, diff: 7, prob: 58%
@@ -699,8 +700,8 @@ void MapBuilder::CreateZones(int minDistance, int maxAtempts) {
 	int attempts = 0;
 	while (this->zones.size() < this->maxZones && attempts++ < maxAtempts) {
 		Coords location = {
-			.x = getrandom(this->w),
-			.y = getrandom(this->h)
+			.x = rng::get_random(this->w),
+			.y = rng::get_random(this->h)
 		};
 
 		if ((location.x + location.y) % 2) continue;
@@ -755,7 +756,7 @@ void MapBuilder::GrowZones() {
 			}
 
 			// select one region to grow
-			ZoneRegion* next = nextRegions[getrandom(nextRegions.size())];
+			ZoneRegion* next = nextRegions[rng::get_random(nextRegions.size())];
 			int connections = 0;
 			for (auto &n : next->neighbors) {
 				if (n != NULL && n->zone == zone) {
@@ -764,7 +765,7 @@ void MapBuilder::GrowZones() {
 			}
 
 			// 2d6
-			int roll = makeRoll(2, 6);
+			int roll = rng::make_roll(2, 6);
 			int diff = 12 - connections;
 
 			// connections: 5, diff: 7, prob: 58%
@@ -871,7 +872,7 @@ std::vector<ZoneRegion *> FindBorderRegions(Zone* zone, Zone* borderZone, const 
 				if (!region->HaveBorderWith(borderZone)) continue;
 
 				if (useRandom && depth == 1) {
-					int roll = makeRoll(1, 5);
+					int roll = rng::make_roll(1, 5);
 					if (roll < diff) continue;
 				}
 
@@ -889,7 +890,7 @@ std::vector<ZoneRegion *> FindBorderRegions(Zone* zone, Zone* borderZone, const 
 				if (visited.find(next) != visited.end()) continue;
 
 				if (i == depth - 1) {
-					int roll = makeRoll(1, 5);
+					int roll = rng::make_roll(1, 5);
 					if (roll < diff) continue;
 				}
 
@@ -921,7 +922,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 	std::vector<Zone *> cores;
 	attempts = 0;
 	while (attempts++ < 1000 && cores.size() != continents) {
-		Zone* candidate = this->zones[getrandom(this->zones.size())];
+		Zone* candidate = this->zones[rng::get_random(this->zones.size())];
 
 		for (auto &core : cores) {
 			if (core == candidate || core->AtBorderWith(candidate)
@@ -949,7 +950,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 	attempts = 0;
 	std::vector<Zone *> next;
 	while (attempts++ < 10000 && coveredArea <= maxArea && S.size() > 0) {
-		int i = getrandom(S.size());
+		int i = rng::get_random(S.size());
 		Zone* zone = S[i];
 
 		if (zone->regions.size() > maxContinentArea) {
@@ -969,7 +970,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 			continue;
 		}
 
-		Zone* target = next[getrandom(next.size())];
+		Zone* target = next[rng::get_random(next.size())];
 
 		coveredArea += target->regions.size();
 		MergeZoneInto(target, zone);
@@ -991,9 +992,9 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 		Awrite("Starting border cleanup ");
 		Zone* otherZone = FindConnectedContinent(nonIsland);
 
-		int depthRoll = makeRoll(1, this->gapMax - this->gapMin) + this->gapMin;
-		int randomRoll = makeRoll(1, 2);
-		int sideRoll = makeRoll(1, 2);
+		int depthRoll = rng::make_roll(1, this->gapMax - this->gapMin) + this->gapMin;
+		int randomRoll = rng::make_roll(1, 2);
+		int sideRoll = rng::make_roll(1, 2);
 
 		int sideADepth;
 		int sideBDepth;
@@ -1061,9 +1062,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 	int oceanCores = std::max(1, (int) oceans.size() / 4);
 
 	// C++17 technically no longer has std::random_shuffle.  It's been replaced with std::shuffle and some boilerplate
-	std::random_device rd;
-	std::mt19937 g(rd());
-	std::shuffle(oceans.begin(), oceans.end(), g);
+	std::shuffle(oceans.begin(), oceans.end(), rng::generator());
 
 	oceans.resize(oceanCores);
 	for (auto &zone : oceans) {
@@ -1072,7 +1071,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 
 	attempts = 0;
 	while (oceans.size() > 0) {
-		int i = getrandom(oceans.size());
+		int i = rng::get_random(oceans.size());
 		Zone* ocean = oceans[i];
 
 		std::vector<Zone *> next;
@@ -1084,7 +1083,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 		}
 
 		if (next.size() > 0) {
-			MergeZoneInto(next[getrandom(next.size())], ocean);
+			MergeZoneInto(next[rng::get_random(next.size())], ocean);
 		}
 		else {
 			oceans.erase(oceans.begin() + i);
@@ -1138,7 +1137,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 			}
 
 			case ZoneType::OCEAN: {
-				size_t roll = makeRoll(3, 12);
+				size_t roll = rng::make_roll(3, 12);
 				if (size > roll) break;
 
 				for (auto &kv : src->neighbors) {
@@ -1154,7 +1153,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 			}
 
 			case ZoneType::STRAIT: {
-				size_t maxStraitSize = 12 + makeRoll(1, 6) - 3;
+				size_t maxStraitSize = 12 + rng::make_roll(1, 6) - 3;
 				if (size > maxStraitSize) continue;
 
 				std::vector<Zone *> otherStraits;
@@ -1224,10 +1223,10 @@ void MapBuilder::AddVolcanoes() {
 	Awrite("Adding volcanoes");
 	// volcanos will be added anywhere
 
-	size_t count = makeRoll(1, this->volcanoesMax - this->volcanoesMin) + this->volcanoesMin;
+	size_t count = rng::make_roll(1, this->volcanoesMax - this->volcanoesMin) + this->volcanoesMin;
 	int distance = (std::min(this->w, this->h / 2) * 2) / count + 2;
 
-	int cols = count / makeRoll(1, 4) + 1;
+	int cols = count / rng::make_roll(1, 4) + 1;
 	int rows = count / cols + 1;
 	int dX = this->w / cols;
 	int dY = this->h / rows;
@@ -1238,12 +1237,10 @@ void MapBuilder::AddVolcanoes() {
 
 	for (int c = 0; c < cols && volcanoes.size() < count; c++) {
 		for (int r = 0; r < rows && volcanoes.size() < count; r++) {
-			// if (makeRoll(1, 3) <= 1) continue;
-
 			int attempts = 1000;
 			while (attempts-- > 0) {
-				int x = c * dX + getrandom(dX);
-				int y = r * dY + getrandom(dY);
+				int x = c * dX + rng::get_random(dX);
+				int y = r * dY + rng::get_random(dY);
 				if ((x + y) % 2) continue;
 
 				attempts = 0;
@@ -1260,8 +1257,8 @@ void MapBuilder::AddVolcanoes() {
 
 				volcanoes.push_back(seed->location);
 
-				int volcano = makeRoll(1, 3) - 1;
-				int mountains = makeRoll(2, 3);
+				int volcano = rng::make_roll(1, 3) - 1;
+				int mountains = rng::make_roll(2, 3);
 
 				Zone* zone = this->CreateZone(ZoneType::CONTINENT);
 				seed->biome = R_VOLCANO;
@@ -1293,7 +1290,7 @@ void MapBuilder::AddVolcanoes() {
 						int neigbors = next->CountNeighbors(zone);
 
 						// 2d6
-						int roll = makeRoll(2, 6);
+						int roll = rng::make_roll(2, 6);
 						int diff = 12 - neigbors;
 						if (regionSize == 1 || candidates.size() == 1) {
 							diff = 0;
@@ -1338,15 +1335,15 @@ void MapBuilder::AddLakes() {
 	// lakes can appear only on the land, not near water and not on the mountains
 
 	int attempts = 1000;
-	int count = makeRoll(1, this->lakesMax - this->lakesMin) + this->lakesMin;
+	int count = rng::make_roll(1, this->lakesMax - this->lakesMin) + this->lakesMin;
 	int distance = (std::min(this->w, this->h / 2) * 2) / count;
 
 	std::vector<Coords> lakes;
 	lakes.reserve(count);
 
 	while (attempts-- > 0 && count > 0) {
-		int x = getrandom(this->w);
-		int y = getrandom(this->h);
+		int x = rng::get_random(this->w);
+		int y = rng::get_random(this->h);
 		if ((x + y) % 2) continue;
 
 		ZoneRegion* lake = this->GetRegion(x, y);
@@ -1413,7 +1410,7 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 	}
 
 	// get average province size for this zone
-	size_t provinceSize = makeRoll(2, 4) + 6;
+	size_t provinceSize = rng::make_roll(2, 4) + 6;
 	size_t provinceCount = zone->regions.size() / provinceSize + 1;
 
 	// absolute size one province cannot exceed
@@ -1423,7 +1420,7 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 	std::vector<ZoneRegion *> S;
 	int attempts = 0;
 	while (attempts++ < 1000 && S.size() < provinceCount) {
-		ZoneRegion* next = candidates[getrandom(candidates.size())];
+		ZoneRegion* next = candidates[rng::get_random(candidates.size())];
 
 		for (auto &seed : S) {
 			if (seed->location.Distance(next->location) < 3) {
@@ -1448,7 +1445,7 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 	if (zone->provinces.size() < 2) {
 		attempts = 0;
 		while (attempts++ < 1000) {
-			ZoneRegion* next = candidates[getrandom(candidates.size())];
+			ZoneRegion* next = candidates[rng::get_random(candidates.size())];
 			if (next->province != NULL) continue;
 
 			provinces.push_back(zone->CreateProvince(next, this->h));
@@ -1458,11 +1455,11 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 
 	// grow all provinces in random order
 	while (provinces.size() > 0) {
-		int i = getrandom(provinces.size());
+		int i = rng::get_random(provinces.size());
 		auto p = provinces[i];
 		size_t size = p->GetSize();
 
-		if (size >= maxProvinceSize || (size >= provinceSize + getrandom(5) - 2) || !p->Grow()) {
+		if (size >= maxProvinceSize || (size >= provinceSize + rng::get_random(5) - 2) || !p->Grow()) {
 			provinces.erase(provinces.begin() + i);
 			continue;
 		}
@@ -1478,7 +1475,7 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 	}
 
 	while (provinces.size() > 0) {
-		int i = getrandom(provinces.size());
+		int i = rng::get_random(provinces.size());
 		auto p = provinces[i];
 
 		if (!p->Grow()) {
@@ -1578,7 +1575,7 @@ void MapBuilder::GrowLandInZone(Zone* zone) {
 				break;
 		}
 
-		int roll = makeRoll(1, w);
+		int roll = rng::make_roll(1, w);
 		for (int i = biomeCount - 1; i >= 0; i--) {
 			int diff = weights.at(i);
 			if (diff == 0) continue;
@@ -1664,8 +1661,8 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 	if (Globals->GATES_EXIST) {
 		int gateset = 0;
 		do {
-			tempx = getrandom(4);
-			tempy = getrandom(4);
+			tempx = rng::get_random(4);
+			tempy = rng::get_random(4);
 			reg = pRegionArrays[level]->GetRegion(tempx, tempy);
 			if (reg) {
 				gateset = 1;
@@ -1679,8 +1676,8 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 
 	ARegion *lair = NULL;
 	do {
-		tempx = getrandom(4);
-		tempy = getrandom(4);
+		tempx = rng::get_random(4);
+		tempy = rng::get_random(4);
 		lair = pRegionArrays[level]->GetRegion(tempx, tempy);
 	} while(!lair || lair == reg);
 	Object *o = new Object(lair);
@@ -2179,13 +2176,13 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 
 	Awrite("Making land");
 	while (ocean > (total * percentOcean) / 100) {
-		int sz = getrandom(continentSize);
+		int sz = rng::get_random(continentSize);
 		sz = sz * sz;
 
-		int tempx = getrandom(pRegs->x);
+		int tempx = rng::get_random(pRegs->x);
 		int yoff = pRegs->y / 40;
 		int yband = pRegs->y / 2 - 2 * yoff;
-		int tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
+		int tempy = (rng::get_random(yband)+yoff) * 2 + tempx % 2;
 
 		ARegion *reg = pRegs->GetRegion(tempx, tempy);
 		if (!reg) continue;
@@ -2193,16 +2190,16 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 		ARegion *seareg = reg;
 
 		// Archipelago or Continent?
-		if (getrandom(100) < Globals->ARCHIPELAGO) {
+		if (rng::get_random(100) < Globals->ARCHIPELAGO) {
 			// Make an Archipelago:
 			sz = sz / 5 + 1;
 			int first = 1;
 			int tries = 0;
 			for (int i=0; i<sz; i++) {
-				int direc = getrandom(NDIRS);
+				int direc = rng::get_random(NDIRS);
 				newreg = reg->neighbors[direc];
 				while (!newreg) {
-					direc = getrandom(NDIRS);
+					direc = rng::get_random(NDIRS);
 					newreg = reg->neighbors[direc];
 				}
 				tries++;
@@ -2214,7 +2211,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 				if (!newreg) break;
 				if (newreg) {
 					seareg = newreg;
-					newreg = seareg->neighbors[getrandom(NDIRS)];
+					newreg = seareg->neighbors[rng::get_random(NDIRS)];
 					if (!newreg) break;
 					// island start point (~3 regions away from last island)
 					seareg = newreg;
@@ -2231,21 +2228,21 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 						if (tries > 5) break;
 						continue;
 					}
-					int growit = getrandom(20);
+					int growit = rng::get_random(20);
 					int growth = 0;
 					int growch = 2;
 					// grow this island
 					while (growit > growch) {
-						growit = getrandom(20);
+						growit = rng::get_random(20);
 						tries = 0;
-						int newdir = getrandom(NDIRS);
+						int newdir = rng::get_random(NDIRS);
 						while (direc == reg->GetRealDirComp(newdir)) {
-							newdir = getrandom(NDIRS);
+							newdir = rng::get_random(NDIRS);
 						}
 						newreg = reg->neighbors[newdir];
 						while ((!newreg) && (tries < 36)) {
 							while (direc == reg->GetRealDirComp(newdir)) {
-								newdir = getrandom(NDIRS);
+								newdir = rng::get_random(NDIRS);
 							}
 							newreg = reg->neighbors[newdir];
 							tries++;
@@ -2269,11 +2266,11 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 				ocean--;
 			}
 			for (int i=0; i<sz; i++) {
-				int dir = getrandom(NDIRS);
+				int dir = rng::get_random(NDIRS);
 				if ((reg->yloc < yoff*2) && ((dir < 2) || (dir == (NDIRS-1)))
-					&& (getrandom(4) < 3)) continue;
+					&& (rng::get_random(4) < 3)) continue;
 				if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
-					&& (getrandom(4) < 3)) continue;
+					&& (rng::get_random(4) < 3)) continue;
 				ARegion *newreg = reg->neighbors[dir];
 				if (!newreg) break;
 				int polecheck = 0;
@@ -2311,11 +2308,11 @@ void ARegionList::MakeRingLand(ARegionArray *pRegs, int minDistance, int maxDist
 			// If the regions is between minDistance and maxDistance from the center, 65% chance of being land.
 			int distance = GetPlanarDistance(center, reg, 1000, -1);
 			bool awayFromEdge = i >= 4 && i <= pRegs->x - 4 && j >= 4 && j <= pRegs->y - 4;
-			if (distance >= minDistance && distance <= maxDistance && getrandom(100) < 60) {
+			if (distance >= minDistance && distance <= maxDistance && rng::get_random(100) < 60) {
 				reg->type = R_NUM;
-			} else if (distance >= maxDistance && awayFromEdge && getrandom(100) < 20) {
+			} else if (distance >= maxDistance && awayFromEdge && rng::get_random(100) < 20) {
 				MakeOneIsland(pRegs, i, j);
-			} else if (distance < minDistance && distance > 4 && getrandom(100) < 15) {
+			} else if (distance < minDistance && distance > 4 && rng::get_random(100) < 15) {
 				MakeOneIsland(pRegs, i, j);
 			}
 		}
@@ -2338,13 +2335,13 @@ void ARegionList::MakeRingLand(ARegionArray *pRegs, int minDistance, int maxDist
 				if (distance <= minDistance + 2 && distance > 3) {
 					// inner coastline.  High chance of land becoming ocean, low chance of ocean becoming land.
 					// Chance is proportional to neighbors that are different.
-					if (getrandom(100) < (different * (reg->type == R_NUM ? 2 : 1))) {
+					if (rng::get_random(100) < (different * (reg->type == R_NUM ? 2 : 1))) {
 						reg->wages = -2;
 					}
 				} else if (distance >= maxDistance - 1 && i >= 2 && i <= pRegs->x - 2 && j >= 2 && j <= pRegs->y - 2) {
 					// outer coastline. Moderate chance of ocean becoming land, lower chance of land becoming ocean.
 					// Chance is proportional to neighbors that are different.
-					if (getrandom(100) < (different * (reg->type != R_NUM ? 3 : 2))) {
+					if (rng::get_random(100) < (different * (reg->type != R_NUM ? 3 : 2))) {
 						reg->wages = -2;
 					}
 				}
@@ -2387,7 +2384,7 @@ void ARegionList::MakeCentralLand(ARegionArray *pRegs)
 			// If the region is within 10 of the edges, it has a 50%
 			// chance of staying ocean.
 			if (i < 10 || i >= pRegs->x - 10 || j < 10 || j >= pRegs->y - 10) {
-				if (getrandom(100) > 50) continue;
+				if (rng::get_random(100) > 50) continue;
 			}
 
 			// Otherwise, set the region to land.
@@ -2444,7 +2441,7 @@ void ARegionList::CleanUpWater(ARegionArray *pRegs)
 				if (dotter++%2000 == 0) Adot();
 				if (remainocean > 0) continue;
 				reg->wages = 0;
-				if (getrandom(100) < Globals->LAKES) {
+				if (rng::get_random(100) < Globals->LAKES) {
 						reg->type = R_LAKE;
 				} else reg->type = R_NUM;
 			}
@@ -2525,7 +2522,7 @@ void ARegionList::SeverLandBridges(ARegionArray *pRegs)
 					continue;
 				if (newregion->IsCoastal() == 4) tidych = tidych * 2;
 			}
-			if (getrandom(100) < (tidych)) reg->wages = -2;
+			if (rng::get_random(100) < (tidych)) reg->wages = -2;
 		}
 	}
 	// now change to ocean
@@ -2570,11 +2567,11 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 	int dotter = 0;
 	for (int x=0; x<(ta->x)/f; x++) {
 		for (int y=0; y<(ta->y)/(f*2); y++) {
-			if (getrandom(1000) > skip) continue;
+			if (rng::get_random(1000) > skip) continue;
 			ARegion *reg = 0;
 			for (int i=0; i<4; i++) {
-				int tempx = x * f + getrandom(f);
-				int tempy = y * f * 2 + getrandom(f)*2 + tempx%2;
+				int tempx = x * f + rng::get_random(f);
+				int tempy = y * f * 2 + rng::get_random(f)*2 + tempx%2;
 				reg = ta->GetRegion(tempx, tempy);
 				if (!reg)
 					continue;
@@ -2609,17 +2606,17 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 			for (y = 0; y < pArr->y; y++) {
 				ARegion *reg = pArr->GetRegion(x, y);
 				if (!reg) continue;
-				if ((j > 0) && (j < 21) && (getrandom(3) < 2)) continue;
+				if ((j > 0) && (j < 21) && (rng::get_random(3) < 2)) continue;
 				if (reg->type == R_NUM) {
 
 					// Check for Lakes
 					if (Globals->LAKES &&
-						(getrandom(100) < (Globals->LAKES/10 + 1))) {
+						(rng::get_random(100) < (Globals->LAKES/10 + 1))) {
 							reg->type = R_LAKE;
 							break;
 					}
 					// Check for Odd Terrain
-					if (getrandom(1000) < Globals->ODD_TERRAIN) {
+					if (rng::get_random(1000) < Globals->ODD_TERRAIN) {
 						reg->type = GetRegType(reg);
 						if (TerrainDefs[reg->type].similar_type != R_OCEAN)
 							reg->wages = AGetName(0, reg);
@@ -2627,7 +2624,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 					}
 
 
-					int init = getrandom(6);
+					int init = rng::get_random(6);
 					for (int i=0; i<NDIRS; i++) {
 						ARegion *t = reg->neighbors[(i+init) % NDIRS];
 						if (t) {
@@ -2756,7 +2753,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			// Anchor distribution: depends on GROW_RACES value
 			int jiggle = 4 + 2 * Globals->GROW_RACES;
 			if ((y + ((x % 2) * jiggle/2)) % jiggle > 1) continue;
-			int xoff = x + 2 - getrandom(3) - getrandom(3);
+			int xoff = x + 2 - rng::get_random(3) - rng::get_random(3);
 			ARegion *reg = pArr->GetRegion(xoff, y);
 			if (!reg) continue;
 
@@ -2769,7 +2766,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 
 			if (TerrainDefs[reg->type].similar_type == R_OCEAN) {
 				// setup near coastal race here
-				int d = getrandom(NDIRS);
+				int d = rng::get_random(NDIRS);
 				int ctr = 0;
 				ARegion *nreg = reg->neighbors[d];
 				if (!nreg) continue;
@@ -2779,11 +2776,11 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 							sizeof(TerrainDefs[nreg->type].coastal_races[0]);
 
 						while (reg->race == -1 || (ItemDefs[reg->race].flags & ItemType::DISABLED)) {
-							reg->race = TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
+							reg->race = TerrainDefs[nreg->type].coastal_races[rng::get_random(rnum)];
 							if (++wigout > 100) break;
 						}
 					} else {
-						int dir = getrandom(NDIRS);
+						int dir = rng::get_random(NDIRS);
 						if (d == nreg->GetRealDirComp(dir)) continue;
 						if (!(nreg->neighbors[dir])) continue;
 						nreg = nreg->neighbors[dir];
@@ -2794,7 +2791,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 				int rnum = sizeof(TerrainDefs[reg->type].races)/sizeof(TerrainDefs[reg->type].races[0]);
 
 				while ( reg->race == -1 || (ItemDefs[reg->race].flags & ItemType::DISABLED)) {
-					reg->race = TerrainDefs[reg->type].races[getrandom(rnum)];
+					reg->race = TerrainDefs[reg->type].races[rng::get_random(rnum)];
 					if (++wigout > 100) break;
 				}
 			}
@@ -2841,7 +2838,7 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
 					// Only coastal races may pass from sea to land
 					if ((TerrainDefs[nreg->type].similar_type == R_OCEAN) && (!iscoastal)) continue;
 
-					int ch = getrandom(5);
+					int ch = rng::get_random(5);
 					if (iscoastal) {
 						if (TerrainDefs[nreg->type].similar_type == R_OCEAN)
 							ch += 2;
@@ -2903,8 +2900,8 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
 	if (TerrainDefs[reg->type].similar_type == R_OCEAN) return;
 	if (reg->type == R_BARREN) return;
 
-	int tempx = reg->xloc * pTo->x / pFrom->x + getrandom(pTo->x / pFrom->x);
-	int tempy = reg->yloc * pTo->y / pFrom->y + getrandom(pTo->y / pFrom->y);
+	int tempx = reg->xloc * pTo->x / pFrom->x + rng::get_random(pTo->x / pFrom->x);
+	int tempy = reg->yloc * pTo->y / pFrom->y + rng::get_random(pTo->y / pFrom->y);
 	//
 	// Make sure we get a valid region.
 	//
@@ -2943,7 +2940,7 @@ void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds)
 			ARegion *reg = pFrom->GetRegion(x, y);
 			if (!reg) continue;
 
-			if (getrandom(odds) != 0) continue;
+			if (rng::get_random(odds) != 0) continue;
 
 			MakeShaft(reg, pFrom, pTo);
 		}
@@ -2992,7 +2989,6 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 					candidates[type] = to->get_starting_region_candidates(type);
 				}
 				// Now for each type, choose a random candidate
-				std::mt19937 gen{std::random_device{}()}; // generates random numbers
 				std::map<int, ARegion *> dests;
 				for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
 					if (candidates[type].size() == 0) {
@@ -3001,8 +2997,7 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 					}
 					Awrite("Found " + std::to_string(candidates[type].size()) + " candidates for " +
 						TerrainDefs[type].name + " gateway");
-					std::uniform_int_distribution<std::size_t> dist(0, candidates[type].size() - 1);
-					int index = dist(gen);
+					int index = rng::rng::get_random(candidates[type].size());
 					ARegion *dest = candidates[type][index];
 					ARegion *best = dest;
 					int tries = 50;
@@ -3021,7 +3016,7 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 							best = dest;
 						}
 						// too close, try again
-						index = dist(gen);
+						index = rng::rng::get_random(candidates[type].size());
 						dest = candidates[type][index];
 					}
 					// store the best we have so far
@@ -3054,8 +3049,8 @@ void ARegionList::InitSetupGates(int level)
 	for (i=0; i<pArr->x / 8; i++) {
 		for (j=0; j<pArr->y / 16; j++) {
 			for (k=0; k<5; k++) {
-				int tempx = i*8 + getrandom(8);
-				int tempy = j*16 + getrandom(8)*2 + tempx%2;
+				int tempx = i*8 + rng::get_random(8);
+				int tempy = j*16 + rng::get_random(8)*2 + tempx%2;
 				ARegion *temp = pArr->GetRegion(tempx, tempy);
 				if (temp && TerrainDefs[temp->type].similar_type != R_OCEAN &&
 						temp->type != R_VOLCANO && temp->type != R_BARREN &&
@@ -3110,7 +3105,7 @@ void ARegionList::FixUnconnectedRegions()
 		}
 		if (count > 0) {
 			ARegion *target = nullptr;
-			i = getrandom(count);
+			i = rng::get_random(count);
 			for(const auto r : regions) {
 				if (r->distance == -1) {
 					if (!i) {
@@ -3132,7 +3127,7 @@ void ARegionList::FixUnconnectedRegions()
 			} else {
 				NeighSetup(target, pRegionArrays[target->zloc]);
 			}
-			offset = getrandom(NDIRS);
+			offset = rng::get_random(NDIRS);
 			for (i = 0; i < NDIRS; i++) {
 				if (target->neighbors[(i + offset) % NDIRS] &&
 						target->neighbors[(i + offset) % NDIRS]->distance != -1) {
@@ -3194,7 +3189,7 @@ void ARegionList::FixUnconnectedRegions()
 					// None of that worked
 					// can we put in a gate?
 					if (Globals->GATES_EXIST &&
-							!getrandom(10)) {
+							!rng::get_random(10)) {
 						target->gate = -1;
 						target->distance = 0;
 						n = target;
@@ -3249,10 +3244,10 @@ void ARegionList::FinalSetupGates()
 
 	for(const auto r : regions) {
 		if (r->gate == -1) {
-			int index = getrandom(ngates);
+			int index = rng::get_random(ngates);
 			while (used[index]) {
 				if (Globals->DISPERSE_GATE_NUMBERS) {
-					index = getrandom(ngates);
+					index = rng::get_random(ngates);
 				} else {
 					index++;
 					index = index % ngates;
@@ -3261,7 +3256,7 @@ void ARegionList::FinalSetupGates()
 			r->gate = index+1;
 			used[index] = 1;
 			// setting up gatemonth
-			r->gatemonth = getrandom(12);
+			r->gatemonth = rng::get_random(12);
 		}
 	}
 	delete[] used;

@@ -4,7 +4,7 @@ NewOrigins
 196608
 1
 6
-8918
+6779
 4
 62
 100
@@ -803,31 +803,6 @@ none
 -1
 -1
 0
-1
-Giant Scorpions (25)
-none
-25
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 SCOR
-0
-NO_SKILL
-0
--1
 0
 Basingford Plain
 7
@@ -993,6 +968,31 @@ none
 -1
 -1
 0
+1
+Kobold Pack (20)
+none
+20
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+15 KOBO
+0
+NO_SKILL
+0
+-1
 0
 Hornwood Lake
 9
@@ -1137,7 +1137,7 @@ none
 -1
 -1
 0
-2
+1
 Pride of Lions (12)
 none
 12
@@ -1158,31 +1158,6 @@ NO_ITEM
 10
 1
 3 LION
-0
-NO_SKILL
-0
--1
-0
-Family of Ogres (15)
-none
-15
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 OGRE
 0
 NO_SKILL
 0
@@ -1554,6 +1529,31 @@ none
 -1
 -1
 0
+1
+Giant Scorpions (25)
+none
+25
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 SCOR
+0
+NO_SKILL
+0
+-1
 0
 Eiraia Desert
 14
@@ -1634,6 +1634,31 @@ none
 -1
 -1
 0
+1
+Crocodiles (19)
+none
+19
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+4 CROC
+0
+NO_SKILL
+0
+-1
 0
 Burmere Sea
 15
@@ -2563,31 +2588,6 @@ none
 -1
 -1
 0
-1
-Kobold Pack (20)
-none
-20
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-15 KOBO
-0
-NO_SKILL
-0
--1
 0
 Aoratalotos Forest
 25
@@ -2749,6 +2749,31 @@ none
 -1
 -1
 0
+1
+Family of Ogres (15)
+none
+15
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 OGRE
+0
+NO_SKILL
+0
+-1
 0
 Nela River
 27
@@ -3053,31 +3078,6 @@ none
 -1
 -1
 0
-1
-Crocodiles (19)
-none
-19
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-4 CROC
-0
-NO_SKILL
-0
--1
 0
 Philagotuspolisus Marshes
 31
@@ -4743,6 +4743,31 @@ none
 -1
 -1
 0
+1
+Giant Scorpions (23)
+none
+23
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+7 SCOR
+0
+NO_SKILL
+0
+-1
 0
 1
 Lair
@@ -5382,6 +5407,31 @@ none
 -1
 -1
 0
+1
+Lizard Men (46)
+none
+46
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 LMAN
+0
+NO_SKILL
+0
+-1
 0
 Great Nara River
 55
@@ -6599,32 +6649,7 @@ none
 -1
 -1
 0
-2
-Giant Scorpions (23)
-none
-23
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
 1
-7 SCOR
-0
-NO_SKILL
-0
--1
-0
 Sandlings (26)
 none
 26
@@ -6878,31 +6903,6 @@ none
 -1
 -1
 0
-1
-Crocodiles (16)
-none
-16
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 CROC
-0
-NO_SKILL
-0
--1
 0
 Dunham Sands
 74
@@ -7845,6 +7845,31 @@ none
 -1
 -1
 0
+1
+Crocodiles (16)
+none
+16
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+5 CROC
+0
+NO_SKILL
+0
+-1
 0
 1
 Giant's Castle
@@ -8318,31 +8343,6 @@ none
 -1
 -1
 0
-1
-Lizard Men (46)
-none
-46
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 LMAN
-0
-NO_SKILL
-0
--1
 0
 Antanoimos Pond
 87
@@ -8483,31 +8483,6 @@ none
 -1
 -1
 0
-1
-Pride of Lions (40)
-none
-40
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-2 LION
-0
-NO_SKILL
-0
--1
 0
 Durbador Swamp
 89
@@ -8948,31 +8923,6 @@ none
 -1
 -1
 0
-1
-Grizzly Bears (17)
-none
-17
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-3 GRIZ
-0
-NO_SKILL
-0
--1
 0
 Heteraskalos Rocks
 95
@@ -9133,6 +9083,31 @@ none
 -1
 -1
 0
+1
+Pride of Lions (40)
+none
+40
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 LION
+0
+NO_SKILL
+0
+-1
 0
 1
 Crypt
@@ -9865,7 +9840,32 @@ none
 -1
 -1
 0
+2
+Grizzly Bears (17)
+none
+17
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
 1
+3 GRIZ
+0
+NO_SKILL
+0
+-1
+0
 Family of Ogres (18)
 none
 18
@@ -10405,6 +10405,31 @@ none
 -1
 -1
 0
+1
+Wolf Pack (39)
+none
+39
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 WOLF
+0
+NO_SKILL
+0
+-1
 0
 Dogmoeryx Sands
 109
@@ -11824,31 +11849,6 @@ none
 -1
 -1
 0
-1
-Wolf Pack (39)
-none
-39
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 WOLF
-0
-NO_SKILL
-0
--1
 0
 Khelekthizar Tundra
 125

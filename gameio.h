@@ -27,16 +27,7 @@
 
 #include "astring.h"
 
-void initIO();
-void doneIO();
 
-/* Get a random number from 0 to (int-1) */
-int getrandom(int);
-/* Seed the random number generator */
-void seedrandom(int);
-void seedrandomrandom();
-
-int makeRoll(int rolls, int sides);
 int clamp(int min, int value, int max);
 
 int Agetint();
@@ -45,9 +36,8 @@ void Awrite(const AString &);
 
 void Adot();
 
-void message(char *);
-
-void morewait();
+//void message(char *);
+//void morewait();
 
 AString * getfilename(const AString &);
 AString *AGetString();

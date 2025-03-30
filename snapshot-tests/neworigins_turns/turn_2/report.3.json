@@ -55,7 +55,7 @@
     },
     {
       "category": "spell",
-      "message": "Jumps through a Gate to swamp (13,3) in Philagotuspolisus Marshes, contains Hymnoalotos [village].",
+      "message": "Jumps through a Gate to jungle (3,5) in Kleptoatres Jungle.",
       "unit": {
         "name": "Unit",
         "number": 38
@@ -86,23 +86,23 @@
     {
       "coordinates": {
         "label": "surface",
-        "x": 13,
-        "y": 3,
+        "x": 3,
+        "y": 5,
         "z": 1
       },
-      "entertainment": 80,
+      "entertainment": 44,
       "exits": [
         {
           "direction": "North",
           "region": {
             "coordinates": {
               "label": "surface",
-              "x": 13,
-              "y": 1,
+              "x": 3,
+              "y": 3,
               "z": 1
             },
-            "province": "Burmere Sea",
-            "terrain": "ocean"
+            "province": "Aoratalotos Forest",
+            "terrain": "forest"
           }
         },
         {
@@ -110,12 +110,12 @@
           "region": {
             "coordinates": {
               "label": "surface",
-              "x": 14,
-              "y": 2,
+              "x": 4,
+              "y": 4,
               "z": 1
             },
-            "province": "Philagotuspolisus Woods",
-            "terrain": "forest"
+            "province": "Cylith Sea",
+            "terrain": "ocean"
           }
         },
         {
@@ -123,12 +123,12 @@
           "region": {
             "coordinates": {
               "label": "surface",
-              "x": 14,
-              "y": 4,
+              "x": 4,
+              "y": 6,
               "z": 1
             },
-            "province": "Maranarenos Dale",
-            "terrain": "plain"
+            "province": "Cylith Sea",
+            "terrain": "ocean"
           }
         },
         {
@@ -136,12 +136,12 @@
           "region": {
             "coordinates": {
               "label": "surface",
-              "x": 13,
-              "y": 5,
+              "x": 3,
+              "y": 7,
               "z": 1
             },
-            "province": "Kleptoatres Volcano",
-            "terrain": "volcano"
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
           }
         },
         {
@@ -149,12 +149,12 @@
           "region": {
             "coordinates": {
               "label": "surface",
-              "x": 12,
-              "y": 4,
+              "x": 2,
+              "y": 6,
               "z": 1
             },
-            "province": "Mila River",
-            "terrain": "ocean"
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
           }
         },
         {
@@ -162,120 +162,73 @@
           "region": {
             "coordinates": {
               "label": "surface",
-              "x": 12,
-              "y": 2,
+              "x": 2,
+              "y": 4,
               "z": 1
             },
-            "province": "Burmere Sea",
-            "terrain": "ocean"
+            "province": "Dogmoeryx Marshes",
+            "terrain": "swamp"
           }
         }
       ],
       "gate": {
-        "number": 74,
+        "number": 68,
         "open": 1
       },
       "markets": {
         "for_sale": [
           {
-            "amount": 104,
-            "name": "gnoll",
-            "plural": "gnolls",
-            "price": 39,
-            "tag": "GNOL"
+            "amount": 64,
+            "name": "wood elf",
+            "plural": "wood elves",
+            "price": 40,
+            "tag": "WELF"
           },
           {
-            "amount": 20,
+            "amount": 12,
             "name": "leader",
             "plural": "leaders",
-            "price": 688,
+            "price": 705,
             "tag": "LEAD"
           }
         ],
-        "wanted": [
-          {
-            "amount": 85,
-            "name": "grain",
-            "plural": "grain",
-            "price": 18,
-            "tag": "GRAI"
-          },
-          {
-            "amount": 132,
-            "name": "livestock",
-            "plural": "livestock",
-            "price": 26,
-            "tag": "LIVE"
-          },
-          {
-            "amount": 145,
-            "name": "fish",
-            "plural": "fish",
-            "price": 44,
-            "tag": "FISH"
-          }
-        ]
+        "wanted": []
       },
       "population": {
-        "amount": 2616,
-        "race": "gnolls"
+        "amount": 1621,
+        "race": "wood elves"
       },
       "present": true,
       "products": [
         {
-          "amount": 16,
-          "name": "grain",
-          "plural": "grain",
-          "tag": "GRAI"
+          "amount": 35,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
         },
         {
-          "amount": 13,
+          "amount": 19,
           "name": "wood",
           "plural": "wood",
           "tag": "WOOD"
         },
         {
-          "amount": 14,
+          "amount": 31,
           "name": "herb",
           "plural": "herbs",
           "tag": "HERB"
+        },
+        {
+          "amount": 14,
+          "name": "fur",
+          "plural": "furs",
+          "tag": "FUR"
         }
       ],
-      "province": "Philagotuspolisus Marshes",
-      "settlement": {
-        "name": "Hymnoalotos",
-        "size": "village"
-      },
-      "tax": 1203,
-      "terrain": "swamp",
+      "province": "Kleptoatres Jungle",
+      "tax": 842,
+      "terrain": "jungle",
       "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "The Guardsmen",
-            "number": 1
-          },
-          "flags": {
-            "avoid": false,
-            "guard": true
-          },
-          "items": [
-            {
-              "amount": 40,
-              "name": "leader",
-              "plural": "leaders",
-              "tag": "LEAD"
-            },
-            {
-              "amount": 40,
-              "name": "sword",
-              "plural": "swords",
-              "tag": "SWOR"
-            }
-          ],
-          "name": "City Guard",
-          "number": 5
-        },
         {
           "capacity": {
             "flying": 0,
@@ -421,8 +374,8 @@
         }
       ],
       "wages": {
-        "amount": 12.3,
-        "max": 483
+        "amount": 12.6,
+        "max": 365
       }
     }
   ],

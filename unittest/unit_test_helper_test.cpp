@@ -45,7 +45,6 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
     // initialize the game which will generate a small bit of output
     helper.initialize_game();
     auto seed = helper.get_seed();
-    // As long as we keep the isaac rng (for now) and do not alter world set up this will always be the same.
-    expect(seed == 8652_i);
+    expect(seed == 3901_i);
   };
 };

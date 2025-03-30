@@ -1155,6 +1155,22 @@
       "terrain": "mountain",
       "units": [
         {
+          "attitude": "unfriendly",
+          "flags": {
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "ogre",
+              "plural": "ogres",
+              "tag": "OGRE"
+            }
+          ],
+          "name": "Family of Ogres",
+          "number": 15
+        },
+        {
           "capacity": {
             "flying": 0,
             "riding": 0,
@@ -2438,22 +2454,6 @@
       "tax": 873,
       "terrain": "forest",
       "units": [
-        {
-          "attitude": "unfriendly",
-          "flags": {
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 1,
-              "name": "ogre",
-              "plural": "ogres",
-              "tag": "OGRE"
-            }
-          ],
-          "name": "Family of Ogres",
-          "number": 15
-        },
         {
           "capacity": {
             "flying": 0,

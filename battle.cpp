@@ -167,7 +167,7 @@ void Battle::FreeRound(Army * att,Army * def, int ass)
 	/* Run attacks until done */
 	int alv = def->NumAlive();
 	while (att->CanAttack() && def->NumAlive()) {
-		int num = getrandom(att->CanAttack());
+		int num = rng::get_random(att->CanAttack());
 		int behind;
 		Soldier * a = att->GetAttacker(num, behind);
 		DoAttack(att->round, a, att, def, behind, ass, attOverwhelm, false);
@@ -213,8 +213,8 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 
 				if (spd->effectflags & SpecialType::FX_USE_LEV)
 					times *= pMt->specialLev;
-				int realtimes = spd->damage[i].minnum + getrandom(times) +
-					getrandom(times);
+				int realtimes = spd->damage[i].minnum + rng::get_random(times) +
+					rng::get_random(times);
 				num = def->DoAnAttack(this, pMt->mountSpecial, realtimes,
 						spd->damage[i].type, pMt->specialLev,
 						spd->damage[i].flags, spd->damage[i].dclass,
@@ -313,7 +313,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	/* Run attacks until done */
 	while (aalive && balive && (aatt || batt))
 	{
-		int num = getrandom(aatt + batt);
+		int num = rng::get_random(aatt + batt);
 		int behind;
 		if (num >= aatt)
 		{
@@ -391,13 +391,13 @@ void Battle::GetSpoils(std::list<Location *>& losers, ItemList& spoils, int ass)
 			float percent = (float)numdead/(float)(numalive + numdead);
 			// incomplete ships:
 			if (ItemDefs[i->type].type & IT_SHIP) {
-				if (getrandom(100) < percent) {
+				if (rng::get_random(100) < percent) {
 					u->items.SetNum(i->type, 0);
 					if (i->num < spoils.GetNum(i->type)) spoils.SetNum(i->type, i->num);
 				}
 			} else {
 				int num = (int)(i->num * percent);
-				int num2 = (num + getrandom(2))/2;
+				int num2 = (num + rng::get_random(2))/2;
 				if (ItemDefs[i->type].type & IT_ALWAYS_SPOIL) num2 = num;
 				if (ItemDefs[i->type].type & IT_NEVER_SPOIL) num2 = 0;
 				spoils.SetNum(i->type, spoils.GetNum(i->type) + num2);
@@ -1001,7 +1001,7 @@ int Game::KillDead(Location * l, Battle *b, int max_susk, int max_rais)
 			// Raise UNDE only if mage has RAISE_UNDEAD skill
 			undead = 0;
 			if (max_rais > 0) {
-				undead = getrandom(l->unit->raised * 2 / 3 + 1);
+				undead = rng::get_random(l->unit->raised * 2 / 3 + 1);
 			}
 
 			skel = l->unit->raised - undead;
@@ -1133,7 +1133,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 	}
 	if (uncontrolled > 0 && monfaction > 0) {
 		// Number of UNDE or SKEL raised as uncontrolled
-		int undead = getrandom(uncontrolled * 2 / 3 + 1);
+		int undead = rng::get_random(uncontrolled * 2 / 3 + 1);
 		int skel = uncontrolled - undead;
 		AString tmp = ItemString(I_SKELETON, skel);
 		if (undead > 0) {

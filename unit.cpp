@@ -25,6 +25,7 @@
 
 #include "unit.h"
 #include "gamedata.h"
+#include "rng.h"
 #include <stack>
 
 #include "external/nlohmann/json.hpp"
@@ -916,14 +917,14 @@ void Unit::DefaultOrders(Object *obj)
 
 			// pick a direction where to move
 			// it will be uniform selection of all possible directions, better than previos alogrithm
-			int dirIndex = getrandom(directions.size());
+			int dirIndex = rng::get_random(directions.size());
 			int dir = directions[dirIndex];
 
 			if (dir >= 0) {
 				MoveOrder *o = new MoveOrder;
 				o->advancing = 0;
 
-				if (getrandom(100) < aggression) {
+				if (rng::get_random(100) < aggression) {
 					o->advancing = 1;
 				}
 
@@ -1702,7 +1703,7 @@ void Unit::Short(int needed, int hunger)
 		}
 
 		while (GetMen(i)) {
-			if (getrandom(100) < Globals->STARVE_PERCENT) {
+			if (rng::get_random(100) < Globals->STARVE_PERCENT) {
 				SetMen(i, GetMen(i) - 1);
 				n++;
 			}
@@ -1735,7 +1736,7 @@ void Unit::Short(int needed, int hunger)
 		}
 
 		while (GetMen(i)) {
-			if (getrandom(100) < Globals->STARVE_PERCENT) {
+			if (rng::get_random(100) < Globals->STARVE_PERCENT) {
 				SetMen(i, GetMen(i) - 1);
 				n++;
 			}
@@ -2008,7 +2009,7 @@ int Unit::AmtsPreventCrime(Unit *u)
 	int men = GetMen();
 	if (men <= amulets) return 1;
 	if (!Globals->PROPORTIONAL_AMTS_USAGE) return 0;
-	if (getrandom(men) < amulets) return 1;
+	if (rng::get_random(men) < amulets) return 1;
 	return 0;
 }
 
@@ -2737,7 +2738,7 @@ void Unit::SkillStarvation()
 		error(to_string(count) + " starve to death.");
 		return;
 	}
-	count = getrandom(count)+1;
+	count = rng::get_random(count)+1;
 	for (i = 0; i < NSKILLS; i++) {
 		if (can_forget[i]) {
 			if (--count == 0) {

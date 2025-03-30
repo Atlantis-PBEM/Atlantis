@@ -117,7 +117,7 @@ void ARegion::SetupHabitat(TerrainType* terrain) {
 
 		race = -1;
 		while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
-			int n = getrandom(IsCoastal() ? allraces : noncoastalraces);
+			int n = rng::get_random(IsCoastal() ? allraces : noncoastalraces);
 			if (n > noncoastalraces-1) {
 				race = terrain->coastal_races[n-noncoastalraces-1];
 			} else
@@ -125,7 +125,7 @@ void ARegion::SetupHabitat(TerrainType* terrain) {
 		}
 	}
 
-	habitat = habitat * 2 / 3 + getrandom(habitat / 3);
+	habitat = habitat * 2 / 3 + rng::get_random(habitat / 3);
 	ManType *mt = FindRace(ItemDefs[race].abr);
 	if (mt->terrain == terrain->similar_type) {
 		habitat = (habitat * 9)/8;
@@ -135,7 +135,7 @@ void ARegion::SetupHabitat(TerrainType* terrain) {
 	}
 	basepopulation = habitat / 3;
 	// hmm... somewhere not too far off equilibrium pop
-	population = habitat * (60 + getrandom(6) + getrandom(6)) / 100;
+	population = habitat * (60 + rng::get_random(6) + rng::get_random(6)) / 100;
 
 	// Setup development
 	int level = 1;
@@ -149,7 +149,7 @@ void ARegion::SetupHabitat(TerrainType* terrain) {
 			prev = 0;
 		}
 	}
-	development += getrandom(25);
+	development += rng::get_random(25);
 	maxdevelopment = development;
 }
 
@@ -264,7 +264,7 @@ void ARegion::SetupPop()
 		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
 			100 * spread) / 100;
 		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
-		if (getrandom(townch) < townprob) {
+		if (rng::get_random(townch) < townprob) {
 			AddTown();
 		}
 	}
@@ -465,8 +465,8 @@ void ARegion::SetupCityMarket()
 				int price;
 
 				if (Globals->RANDOM_ECONOMY) {
-					amt += getrandom(amt);
-					price = (ItemDefs[i].baseprice * (100 + getrandom(50))) /
+					amt += rng::get_random(amt);
+					price = (ItemDefs[i].baseprice * (100 + rng::get_random(50))) /
 						100;
 				} else {
 					price = ItemDefs[ i ].baseprice;
@@ -483,8 +483,8 @@ void ARegion::SetupCityMarket()
 				int amt = Globals->CITY_MARKET_NORMAL_AMT;
 				int price;
 				if (Globals->RANDOM_ECONOMY) {
-					amt += getrandom(amt);
-					price = (ItemDefs[i].baseprice * (120 + getrandom(80))) /
+					amt += rng::get_random(amt);
+					price = (ItemDefs[i].baseprice * (120 + rng::get_random(80))) /
 						100;
 				} else {
 					price = ItemDefs[ i ].baseprice;
@@ -533,10 +533,10 @@ void ARegion::SetupCityMarket()
 		}
 	}
 	/* Check for advanced item */
-	if ((Globals->CITY_MARKET_ADVANCED_AMT) && (getrandom(4) == 1)) {
+	if ((Globals->CITY_MARKET_ADVANCED_AMT) && (rng::get_random(4) == 1)) {
 		int ad = 0;
 		for (int i=0; i<NITEMS; i++) ad += rare[i];
-		ad = getrandom(ad);
+		ad = rng::get_random(ad);
 		int i;
 		int sum = 0;
 		for (i=0; i<NITEMS; i++) {
@@ -547,8 +547,8 @@ void ARegion::SetupCityMarket()
 			int amt = Globals->CITY_MARKET_ADVANCED_AMT;
 			int price;
 			if (Globals->RANDOM_ECONOMY) {
-				amt += getrandom(amt);
-				price = (ItemDefs[i].baseprice * (100 + getrandom(50))) / 100;
+				amt += rng::get_random(amt);
+				price = (ItemDefs[i].baseprice * (100 + rng::get_random(50))) / 100;
 			} else {
 				price = ItemDefs[ i ].baseprice;
 			}
@@ -566,10 +566,10 @@ void ARegion::SetupCityMarket()
 		}
 	}
 	/* Check for magic item */
-	if ((Globals->CITY_MARKET_MAGIC_AMT) && (getrandom(8) == 1)) {
+	if ((Globals->CITY_MARKET_MAGIC_AMT) && (rng::get_random(8) == 1)) {
 		int mg = 0;
 		for (int i=0; i<NITEMS; i++) mg += antiques[i];
-		mg = getrandom(mg);
+		mg = rng::get_random(mg);
 		int i;
 		int sum = 0;
 		for (i=0; i<NITEMS; i++) {
@@ -581,8 +581,8 @@ void ARegion::SetupCityMarket()
 			int price;
 
 			if (Globals->RANDOM_ECONOMY) {
-				amt += getrandom(amt);
-				price = (ItemDefs[i].baseprice * (100 + getrandom(50))) / 100;
+				amt += rng::get_random(amt);
+				price = (ItemDefs[i].baseprice * (100 + rng::get_random(50))) / 100;
 			} else {
 				price = ItemDefs[ i ].baseprice;
 			}
@@ -603,7 +603,7 @@ void ARegion::SetupCityMarket()
 	while((num > 0) && (sum > 0)) {
 		int dm = 0;
 		for (int i=0; i<NITEMS; i++) dm += demand[i];
-		dm = getrandom(dm);
+		dm = rng::get_random(dm);
 		int i;
 		sum = 0;
 		for (i=0; i<NITEMS; i++) {
@@ -617,9 +617,9 @@ void ARegion::SetupCityMarket()
 		int price;
 
 		if (Globals->RANDOM_ECONOMY) {
-			amt += getrandom(amt);
+			amt += rng::get_random(amt);
 			price = (ItemDefs[i].baseprice *
-				(100 + getrandom(50))) / 100;
+				(100 + rng::get_random(50))) / 100;
 		} else {
 			price = ItemDefs[i].baseprice;
 		}
@@ -640,7 +640,7 @@ void ARegion::SetupCityMarket()
 	while((num > 0) && (sum > 0)) {
 		int su = 0;
 		for (int i=0; i<NITEMS; i++) su += supply[i];
-		su = getrandom(su);
+		su = rng::get_random(su);
 		int i;
 		sum = 0;
 		for (i=0; i<NITEMS; i++) {
@@ -654,9 +654,9 @@ void ARegion::SetupCityMarket()
 		int price;
 
 		if (Globals->RANDOM_ECONOMY) {
-			amt += getrandom(amt);
+			amt += rng::get_random(amt);
 			price = (ItemDefs[i].baseprice *
-				(150 + getrandom(50))) / 100;
+				(150 + rng::get_random(50))) / 100;
 		} else {
 			price = ItemDefs[ i ].baseprice;
 		}
@@ -676,19 +676,19 @@ void ARegion::SetupCityMarket()
 	if (numtrade < 4) return;
 
 	/* Set up the trade items */
-	int buy1 = getrandom(numtrade);
-	int buy2 = getrandom(numtrade);
-	int sell1 = getrandom(numtrade);
-	int sell2 = getrandom(numtrade);
+	int buy1 = rng::get_random(numtrade);
+	int buy2 = rng::get_random(numtrade);
+	int sell1 = rng::get_random(numtrade);
+	int sell2 = rng::get_random(numtrade);
 	int tradebuy = 0;
 	int tradesell = 0;
 	offset = 0;
 	cap = 0;
 
-	buy1 = getrandom(numtrade);
-	while (buy1 == buy2) buy2 = getrandom(numtrade);
-	while (sell1 == buy1 || sell1 == buy2) sell1 = getrandom(numtrade);
-	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1) sell2 = getrandom(numtrade);
+	buy1 = rng::get_random(numtrade);
+	while (buy1 == buy2) buy2 = rng::get_random(numtrade);
+	while (sell1 == buy1 || sell1 == buy2) sell1 = rng::get_random(numtrade);
+	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1) sell2 = rng::get_random(numtrade);
 
 	for (int i=0; i<NITEMS; i++) {
 		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
@@ -715,11 +715,11 @@ void ARegion::SetupCityMarket()
 				int price;
 
 				if (Globals->RANDOM_ECONOMY) {
-					amt += getrandom(amt);
+					amt += rng::get_random(amt);
 					if (Globals->MORE_PROFITABLE_TRADE_GOODS) {
-						price=(ItemDefs[i].baseprice*(250+getrandom(100)))/100;
+						price=(ItemDefs[i].baseprice*(250+rng::get_random(100)))/100;
 					} else {
-						price=(ItemDefs[i].baseprice*(150+getrandom(50)))/100;
+						price=(ItemDefs[i].baseprice*(150+rng::get_random(50)))/100;
 					}
 				} else {
 					price = ItemDefs[ i ].baseprice;
@@ -742,11 +742,11 @@ void ARegion::SetupCityMarket()
 				int price;
 
 				if (Globals->RANDOM_ECONOMY) {
-					amt += getrandom(amt);
+					amt += rng::get_random(amt);
 					if (Globals->MORE_PROFITABLE_TRADE_GOODS) {
-						price=(ItemDefs[i].baseprice*(100+getrandom(90)))/100;
+						price=(ItemDefs[i].baseprice*(100+rng::get_random(90)))/100;
 					} else {
-						price=(ItemDefs[i].baseprice*(100+getrandom(50)))/100;
+						price=(ItemDefs[i].baseprice*(100+rng::get_random(50)))/100;
 					}
 				} else {
 					price = ItemDefs[ i ].baseprice;
@@ -774,7 +774,7 @@ void ARegion::SetupProds(double weight)
 	if (Globals->FOOD_ITEMS_EXIST) {
 		if (typer->economy) {
 			// Foodchoice = 0 or 1 if inland, 0, 1, or 2 if coastal
-			int foodchoice = getrandom(2 +
+			int foodchoice = rng::get_random(2 +
 					(Globals->COASTAL_FISH && IsCoastal()));
 			switch (foodchoice) {
 				case 0:
@@ -800,7 +800,7 @@ void ARegion::SetupProds(double weight)
 		int amt = typer->prods[c].amount;
 		if (item != -1) {
 			if (!(ItemDefs[item].flags & ItemType::DISABLED) &&
-					(getrandom(100) < chance)) {
+					(rng::get_random(100) < chance)) {
 				p = new Production(item, amt);
 				products.push_back(p);
 			}
@@ -855,11 +855,11 @@ void ARegion::AddTown(int size, AString * name)
 int ARegion::DetermineTownSize()
 {
 	// is it a city?
-	if (getrandom(300) < Globals->TOWN_DEVELOPMENT) {
+	if (rng::get_random(300) < Globals->TOWN_DEVELOPMENT) {
 		return TOWN_CITY;
 	}
 	// is it a town?
-	if (getrandom(220) < Globals->TOWN_DEVELOPMENT + 10) {
+	if (rng::get_random(220) < Globals->TOWN_DEVELOPMENT + 10) {
 		return TOWN_TOWN;
 	}
 	// ... then it's a village!
@@ -879,7 +879,7 @@ void ARegion::SetTownType(int level)
 	if ((level < TOWN_VILLAGE) || (level > TOWN_CITY)) return;
 
 	// increment values
-	int poptown = getrandom((level -1) * (level -1) * Globals->CITY_POP/12) + level * level * Globals->CITY_POP/12;
+	int poptown = rng::get_random((level -1) * (level -1) * Globals->CITY_POP/12) + level * level * Globals->CITY_POP/12;
 	town->hab += poptown;
 	town->pop = town->hab * 2 / 3;
 	development += level * 6 + 2;
@@ -889,8 +889,8 @@ void ARegion::SetTownType(int level)
 	while(town->TownType() != level) {
 		// Increase?
 		if (level > town->TownType()) {
-			development += getrandom(Globals->TOWN_DEVELOPMENT / 10 + 5);
-			int poplus = getrandom(Globals->CITY_POP/3) + getrandom(Globals->CITY_POP/3);
+			development += rng::get_random(Globals->TOWN_DEVELOPMENT / 10 + 5);
+			int poplus = rng::get_random(Globals->CITY_POP/3) + rng::get_random(Globals->CITY_POP/3);
 			// don't overgrow!
 			while (town->pop + poplus > Globals->CITY_POP) {
 				poplus = poplus / 2;
@@ -901,8 +901,8 @@ void ARegion::SetTownType(int level)
 		}
 			// or decrease...
 		else {
-			development -= getrandom(20 - Globals->TOWN_DEVELOPMENT / 10);
-			int popdecr = getrandom(Globals->CITY_POP/3) + getrandom(Globals->CITY_POP/3);
+			development -= rng::get_random(20 - Globals->TOWN_DEVELOPMENT / 10);
+			int popdecr = rng::get_random(Globals->CITY_POP/3) + rng::get_random(Globals->CITY_POP/3);
 			// don't depopulate
 			while ((town->pop < popdecr) || (town->hab < popdecr)) {
 				popdecr = popdecr / 2;
@@ -979,7 +979,7 @@ void ARegion::SetupEditRegion()
 
 		race = -1;
 		while (race == -1 || (ItemDefs[race].flags & ItemType::DISABLED)) {
-			int n = getrandom(IsCoastal() ? allraces : noncoastalraces);
+			int n = rng::get_random(IsCoastal() ? allraces : noncoastalraces);
 			if (n > noncoastalraces-1) {
 				race = typer->coastal_races[n-noncoastalraces-1];
 			} else
@@ -987,7 +987,7 @@ void ARegion::SetupEditRegion()
 		}
 	}
 
-	habitat = habitat * 2/3 + getrandom(habitat/3);
+	habitat = habitat * 2/3 + rng::get_random(habitat/3);
 	ManType *mt = FindRace(ItemDefs[race].abr);
 	if (mt->terrain == typer->similar_type) {
 		habitat = (habitat * 9)/8;
@@ -997,7 +997,7 @@ void ARegion::SetupEditRegion()
 	}
 	basepopulation = habitat / 3;
 	// hmm... somewhere not too far off equilibrium pop
-	population = habitat * (60 + getrandom(6) + getrandom(6)) / 100;
+	population = habitat * (60 + rng::get_random(6) + rng::get_random(6)) / 100;
 
 	// Setup development
 	int level = 1;
@@ -1011,7 +1011,7 @@ void ARegion::SetupEditRegion()
 			prev = 0;
 		}
 	}
-	development += getrandom(25);
+	development += rng::get_random(25);
 	maxdevelopment = development;
 
 	if (Globals->TOWNS_EXIST) {
@@ -1041,7 +1041,7 @@ void ARegion::SetupEditRegion()
 			100 * spread) / 100;
 		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
 		AString *name = new AString("Newtown");
-		if (getrandom(townch) < townprob) {
+		if (rng::get_random(townch) < townprob) {
 			AddTown(name);
 		}
 	}
@@ -1271,10 +1271,10 @@ void ARegion::Pillage()
 	if (Globals->DYNAMIC_POPULATION) {
 		// Don't do population damage if population can't recover
 		int popdensity = Globals->CITY_POP / 2000;
-		AdjustPop(- damage * getrandom(popdensity) - getrandom(5 * popdensity));
+		AdjustPop(- damage * rng::get_random(popdensity) - rng::get_random(5 * popdensity));
 	}
 	/* Stabilise at minimal development levels */
-	while (Wages() < Globals->MAINTENANCE_COST / 20) development += getrandom(5);
+	while (Wages() < Globals->MAINTENANCE_COST / 20) development += rng::get_random(5);
 }
 
 
@@ -1330,7 +1330,7 @@ void ARegion::Grow()
 	// raise basepop depending on production
 	// absolute basepop increase
 	if (diff > (basepopulation / 20)) {
-		int gpop = getrandom(Globals->CITY_POP / 600);
+		int gpop = rng::get_random(Globals->CITY_POP / 600);
 		if (gpop > diff / 20) gpop = diff / 20;
 		// relative basepop increase
 		int relativeg = basepopulation * gpop / 1000;
@@ -1339,7 +1339,7 @@ void ARegion::Grow()
 	// lower basepop for extremely low levels of population
 	if (population < basepopulation) {
 		int depop = (basepopulation - population) / 4;
-		basepopulation -= depop + getrandom(depop);
+		basepopulation -= depop + rng::get_random(depop);
 	}
 
 	// debug strings
@@ -1562,7 +1562,7 @@ void ARegion::PostTurn()
 		/* Let road development increase chance of improvement */
 		int progress = development - RoadDevelopment();
 		/* Three chances to improve */
-		for (int a=0; a<3; a++) if (getrandom(progress) < diff) development++;
+		for (int a=0; a<3; a++) if (rng::get_random(progress) < diff) development++;
 		if (development > maxdevelopment) maxdevelopment = development;
 	}
 
@@ -1573,13 +1573,13 @@ void ARegion::PostTurn()
 
 	while (recoveryRounds-- > 0) {
 		if (maxdevelopment > development) {
-			if (getrandom(maxdevelopment) > development) development++;
+			if (rng::get_random(maxdevelopment) > development) development++;
 		}
 		if (maxdevelopment > development) {
-			if (getrandom(maxdevelopment) > development) development++;
+			if (rng::get_random(maxdevelopment) > development) development++;
 		}
 		if (maxdevelopment > development) {
-			if (getrandom(3) == 1) development++;
+			if (rng::get_random(3) == 1) development++;
 		}
 	}
 

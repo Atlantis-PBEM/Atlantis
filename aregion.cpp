@@ -30,6 +30,7 @@
 #include "mapgen.h"
 #include "namegen.h"
 #include "indenter.hpp"
+#include "rng.h"
 
 #include <vector>
 #include <algorithm>
@@ -221,7 +222,7 @@ void ARegion::LairCheck()
 
 	if (!tt->lairChance) return;
 
-	int check = getrandom(100);
+	int check = rng::get_random(100);
 	if (check >= tt->lairChance) return;
 
 	auto lairs = GetPossibleLairs();
@@ -229,7 +230,7 @@ void ARegion::LairCheck()
 		return;
 	}
 
-	int lair = lairs[getrandom(lairs.size())];
+	int lair = lairs[rng::get_random(lairs.size())];
 	MakeLair(lair);
 }
 
@@ -292,7 +293,7 @@ void ARegion::ManualSetup(const RegionSetup& settings) {
 	if (Globals->LAIR_MONSTERS_EXIST && settings.addLair) {
 		auto lairs = GetPossibleLairs();
 		if (!lairs.empty()) {
-			int lair = lairs[getrandom(lairs.size())];
+			int lair = lairs[rng::get_random(lairs.size())];
 			MakeLair(lair);
 		}
 	}
@@ -353,7 +354,7 @@ void ARegion::DoDecayClicks(Object *o)
 {
 	if (ObjectDefs[o->type].flags & ObjectType::NEVERDECAY) return;
 
-	int clicks = getrandom(GetMaxClicks());
+	int clicks = rng::get_random(GetMaxClicks());
 	clicks += PillageCheck();
 
 	if (clicks > ObjectDefs[o->type].maxMonthlyDecay) clicks = ObjectDefs[o->type].maxMonthlyDecay;
@@ -2070,7 +2071,7 @@ ARegion *ARegionList::FindGate(int x)
 		}
 		if(gates.empty()) return nullptr;
 
-		count = getrandom(gates.size());
+		count = rng::get_random(gates.size());
 		return gates[count];
 	}
 	for(const auto r : regions) {
@@ -2136,7 +2137,7 @@ ARegion *ARegionList::FindNearestStartingCity(ARegion *start, int *dir)
 		}
 		if (valid) {
 			if (dir) {
-				offset = getrandom(NDIRS);
+				offset = rng::get_random(NDIRS);
 				for (i = 0; i < NDIRS; i++) {
 					r = start->neighbors[(i + offset) % NDIRS];
 					if (!r)
@@ -2728,7 +2729,7 @@ void makeRivers(
 			}
 		}
 
-		int numConnections = std::min(makeRoll(3, 4), (int) candidates.size());
+		int numConnections = std::min(rng::make_roll(3, 4), (int) candidates.size());
 		std::cout << "There will be " << numConnections << " rivers" << std::endl;
 
 		if (numConnections > 0) {
@@ -2912,10 +2913,10 @@ void cleanupIsolatedPlaces(
 				reg->type = R_OCEAN;
 
 				if (!wb.empty()) {
-					wb[getrandom(wb.size())]->add(reg);
+					wb[rng::get_random(wb.size())]->add(reg);
 				}
 				else  {
-					rivers.insert(std::make_pair(reg, nearbyRivers[getrandom(nearbyRivers.size())]));
+					rivers.insert(std::make_pair(reg, nearbyRivers[rng::get_random(nearbyRivers.size())]));
 				}
 			}
 		}
@@ -2957,10 +2958,10 @@ void placeVolcanoes(ARegionArray* arr, const int w, const int h) {
 				continue;
 			}
 
-			int mountains = countNeighbors(graph, reg, R_MOUNTAIN, makeRoll(1, 3) + 1);
+			int mountains = countNeighbors(graph, reg, R_MOUNTAIN, rng::make_roll(1, 3) + 1);
 			int volcanoes = countNeighbors(graph, reg, R_VOLCANO, 2);
 
-			if (volcanoes == 0 && mountains >= (makeRoll(1, 6) + 2)) {
+			if (volcanoes == 0 && mountains >= (rng::make_roll(1, 6) + 2)) {
 				reg->type = R_VOLCANO;
 			}
 		}
@@ -2999,7 +3000,7 @@ std::vector<graphs::Location2D> getPoints(const int w, const int h,
 
 	graphs::Location2D loc;
 	do {
-		loc = { .x = getrandom(w), .y = getrandom(h) };
+		loc = { .x = rng::get_random(w), .y = rng::get_random(h) };
 	}
 	while (!onIsIncluded(loc));
 
@@ -3007,14 +3008,14 @@ std::vector<graphs::Location2D> getPoints(const int w, const int h,
 	processing.push_back(loc);
 
 	while (!processing.empty()) {
-		int i = getrandom(processing.size());
+		int i = rng::get_random(processing.size());
 		auto next = processing.at(i);
 		processing.erase(processing.begin() + i);
 
 		int count = 0;
 		while (count < newPointCount) {
-			int r = getrandom(minDist) + minDist + 1;
-			double a = getrandom(360) / 360.0 * 2 * M_PI;
+			int r = rng::get_random(minDist) + minDist + 1;
+			double a = rng::get_random(360) / 360.0 * 2 * M_PI;
 
 			int x = ceil(next.x + r * cos(a));
 			int y = ceil(next.y + r * sin(a));
@@ -3083,19 +3084,19 @@ std::vector<graphs::Location2D> getPointsFromList(
 	std::vector<graphs::Location2D> output;
 	std::vector<graphs::Location2D> processing;
 
-	graphs::Location2D loc = points.at(getrandom(points.size()));
+	graphs::Location2D loc = points.at(rng::get_random(points.size()));
 
 	output.push_back(loc);
 	processing.push_back(loc);
 
 	while (!processing.empty()) {
-		int i = getrandom(processing.size());
+		int i = rng::get_random(processing.size());
 		processing.erase(processing.begin() + i);
 
 		int count = 0;
 		while (count < newPointCount) {
 			// a new point to check
-			graphs::Location2D candidate = points.at(getrandom(points.size()));
+			graphs::Location2D candidate = points.at(rng::get_random(points.size()));
 			count++;
 
 			// check against all valid points
@@ -3213,7 +3214,7 @@ void nameArea(
 	NameArea* na = NULL;
 	while (name.empty()) {
 		for (auto &loc : regions) {
-			if (getrandom(100) != 99) {
+			if (rng::get_random(100) != 99) {
 				continue;
 			}
 
@@ -3230,7 +3231,7 @@ void nameArea(
 			name = getRegionName(seed, etnos, type, regions.size(), false);
 			while (usedNames.find(name) != usedNames.end()) {
 				std::cout << "Searching for better name" << std::endl;
-				name = getRegionName(getrandom(width * height), etnos, type, regions.size(), false);
+				name = getRegionName(rng::get_random(width * height), etnos, type, regions.size(), false);
 			}
 			usedNames.emplace(name);
 
@@ -3249,7 +3250,7 @@ void nameArea(
 			std::string volcanoName = getRegionName(nameArea, etnos, r->type, 1, false);
 			while (usedNames.find(volcanoName) != usedNames.end()) {
 				std::cout << "Searching for better name" << std::endl;
-				volcanoName = getRegionName(getrandom(width * height), etnos, r->type, 1, false);
+				volcanoName = getRegionName(rng::get_random(width * height), etnos, r->type, 1, false);
 			}
 			usedNames.emplace(volcanoName);
 
@@ -3279,7 +3280,7 @@ void giveNames(
 	for (auto p : getPoints(w, h, 8, 16, onPoint, onIsIncluded)) {
 		int seed;
 		do {
-			seed = getrandom(w * h) + 1;
+			seed = rng::get_random(w * h) + 1;
 		}
 		while (usedNameSeeds.find(seed) != usedNameSeeds.end());
 		usedNameSeeds.emplace(seed);
@@ -3317,7 +3318,7 @@ void giveNames(
 		std::string name = getRiverName(river.nameArea, river.length, minLen, maxLen);
 		while (usedNames.find(name) != usedNames.end()) {
 			std::cout << "Searching for better name" << std::endl;
-			name = getRiverName(getrandom(w * h), river.length, minLen, maxLen);
+			name = getRiverName(rng::get_random(w * h), river.length, minLen, maxLen);
 		}
 		usedNames.emplace(name);
 
@@ -3347,7 +3348,7 @@ void giveNames(
 				name = getRegionName(seed, etnos, reg->type, wb->regions.size(), false);
 				while (usedNames.find(name) != usedNames.end()) {
 					std::cout << "Searching for better name" << std::endl;
-					name = getRegionName(getrandom(w * h), etnos, reg->type, wb->regions.size(), false);
+					name = getRegionName(rng::get_random(w * h), etnos, reg->type, wb->regions.size(), false);
 				}
 				usedNames.emplace(name);
 
@@ -3431,8 +3432,8 @@ void economy(ARegionArray* arr, const int w, const int h) {
 
 	std::cout << "Setting settlements" << std::endl;
 
-	int size = getrandom(NTOWNS);
-	int minDist = size + makeRoll(2, 2);
+	int size = rng::rng::get_random(NTOWNS);
+	int minDist = size + rng::make_roll(2, 2);
 
 	std::unordered_set<ARegion*> visited;
 	getPoints(w, h, minDist, 16, [&arr, &visited, &size, &minDist, &w, &h](graphs::Location2D p) {
@@ -3451,7 +3452,7 @@ void economy(ARegionArray* arr, const int w, const int h) {
 
 		Ethnicity etnos = getRegionEtnos(reg);
 
-		std::string name = getEthnicName(makeRoll(1, w * h), etnos);
+		std::string name = getEthnicName(rng::make_roll(1, w * h), etnos);
 
 		reg->ManualSetup({
 			.terrain = terrain,
@@ -3467,8 +3468,8 @@ void economy(ARegionArray* arr, const int w, const int h) {
 		std::string sizeName = size == TOWN_VILLAGE ? "Village" : size == TOWN_TOWN ? "Town" : "City";
 		std::cout << sizeName << " " << name << std::endl;
 
-		size = getrandom(NTOWNS);
-		minDist = size + makeRoll(2, 2);
+		size = rng::rng::get_random(NTOWNS);
+		minDist = size + rng::make_roll(2, 2);
 
 		return minDist;
 	}, [](graphs::Location2D p) { return true; });
@@ -3487,7 +3488,7 @@ void economy(ARegionArray* arr, const int w, const int h) {
 			}
 
 			TerrainType* terrain = &(TerrainDefs[reg->type]);
-			bool addLair = getrandom(100) < terrain->lairChance;
+			bool addLair = rng::get_random(100) < terrain->lairChance;
 
 			reg->ManualSetup({
 				.terrain = terrain,
@@ -3550,20 +3551,20 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 
 			if (reg->town) {
 				if (reg->town->pop > 8000) {
-					if (makeRoll(3, 6) >= 12) {
-						addAncientStructure(reg, getrandom(w * h) + 1, O_CASTLE, (makeRoll(2, 6) - 1) / 12.0);
+					if (rng::make_roll(3, 6) >= 12) {
+						addAncientStructure(reg, rng::get_random(w * h) + 1, O_CASTLE, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				} else if (reg->town->pop > 4000) {
-					if (makeRoll(3, 6) >= 14) {
-						addAncientStructure(reg, getrandom(w * h) + 1, O_FORT, (makeRoll(2, 6) - 1) / 12.0);
+					if (rng::make_roll(3, 6) >= 14) {
+						addAncientStructure(reg, rng::get_random(w * h) + 1, O_FORT, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				} else if (reg->town->pop > 2000) {
-					if (makeRoll(3, 6) >= 16) {
-						addAncientStructure(reg, getrandom(w * h) + 1, O_TOWER, (makeRoll(2, 6) - 1) / 12.0);
+					if (rng::make_roll(3, 6) >= 16) {
+						addAncientStructure(reg, rng::get_random(w * h) + 1, O_TOWER, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				}
 
-				int roll = makeRoll(reg->town->TownType() + 1, 6);
+				int roll = rng::make_roll(reg->town->TownType() + 1, 6);
 				int count = ceil(roll / 6);
 				int damage = 6 - roll % 6;
 
@@ -3577,17 +3578,17 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 						damagePoints = damage / 6.0;
 					}
 
-					addAncientStructure(reg, getrandom(w * h) + 1, O_INN, damagePoints);
+					addAncientStructure(reg, rng::get_random(w * h) + 1, O_INN, damagePoints);
 				}
 			}
 			else {
 				if (reg->population > 2000) {
-					if (makeRoll(3, 6) >= 16) {
-						addAncientStructure(reg, getrandom(w * h) + 1, O_FORT, (makeRoll(2, 6) - 1) / 12.0);
+					if (rng::make_roll(3, 6) >= 16) {
+						addAncientStructure(reg, rng::get_random(w * h) + 1, O_FORT, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				} else if (reg->population > 1000) {
-					if (makeRoll(3, 6) >= 17) {
-						addAncientStructure(reg, getrandom(w * h) + 1, O_TOWER, (makeRoll(2, 6) - 1) / 12.0);
+					if (rng::make_roll(3, 6) >= 17) {
+						addAncientStructure(reg, rng::get_random(w * h) + 1, O_TOWER, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				}
 			}
@@ -3708,7 +3709,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 				ROAD_BUILDINGS[D_SOUTHEAST] = O_ROADSE;
 				ROAD_BUILDINGS[D_SOUTHWEST] = O_ROADSW;
 
-				if (getrandom(3)) {
+				if (rng::get_random(3)) {
 					bool canBuild = true;
 					for(const auto o : current->objects) {
 						if (o->type == ROAD_BUILDINGS[dir]) {
@@ -3718,7 +3719,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 					}
 
 					if (canBuild) {
-						addAncientStructure(current, name, ROAD_BUILDINGS[dir], (makeRoll(2, 6) - 6.0) / 6.0);
+						addAncientStructure(current, name, ROAD_BUILDINGS[dir], (rng::make_roll(2, 6) - 6.0) / 6.0);
 					}
 
 					canBuild = true;
@@ -3730,7 +3731,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 					}
 
 					if (canBuild) {
-						addAncientStructure(endReg, name, ROAD_BUILDINGS[opositeDir], (makeRoll(2, 6) - 6.0) / 6.0);
+						addAncientStructure(endReg, name, ROAD_BUILDINGS[opositeDir], (rng::make_roll(2, 6) - 6.0) / 6.0);
 					}
 				}
 

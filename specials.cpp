@@ -24,6 +24,7 @@
 // END A3HEADER
 #include "battle.h"
 #include "gamedata.h"
+#include "rng.h"
 #include <memory>
 
 void Soldier::SetupHealing()
@@ -216,7 +217,7 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 			times *= a->slevel;
 		}
 
-		int realtimes = spd->damage[i].minnum + getrandom(times) + getrandom(times);
+		int realtimes = spd->damage[i].minnum + rng::get_random(times) + rng::get_random(times);
 
 		num = def->DoAnAttack(this, a->special, realtimes,
 				spd->damage[i].type, a->slevel,
@@ -254,7 +255,7 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 				if (i == dam-1) temp += " and ";
 				temp += results[dam];
 			}
-		
+
 			temp += AString(spd->spelltarget) + ".";
 			AddLine(temp);
 		}

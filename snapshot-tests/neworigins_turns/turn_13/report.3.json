@@ -18,55 +18,6 @@
       }
     ]
   },
-  "battles": [
-    {
-      "report": [
-        "Pirates (41) attacks Unit (76) in ocean (15,3) in Great Nena River!",
-        "",
-        "Attackers:",
-        "Pirates (41), 13 pirates [PIRA] (Combat 3/3, Attacks 5, Hits 5, Tactics 1).",
-        "",
-        "Defenders:",
-        "Unit (76), Test (3), behind, lizardman [LIZA].",
-        "Unit (74), Test (3), behind, lizardman [LIZA].",
-        "",
-        "Round 1:",
-        "Pirates (41) tactics bonus 1.",
-        "",
-        "Pirates (41) loses 0.",
-        "Unit (76) loses 2.",
-        "",
-        "Round 1 statistics:",
-        "",
-        "Pirates (41) army:",
-        "- Pirates (41):",
-        "  - without weapon (slashing melee attack), attacked 3 of 4 times, 2 successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and killed 2 enemies.",
-        "",
-        "Unit (76) army:",
-        "Army made no attacks.",
-        "",
-        "Unit (76) is destroyed!",
-        "",
-        "Battle statistics:",
-        "",
-        "Pirates (41) army:",
-        "- Pirates (41):",
-        "  - without weapon (slashing melee attack), attacked 3 of 4 times, 2 successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and killed 2 enemies.",
-        "",
-        "Unit (76) army:",
-        "Army made no attacks.",
-        "",
-        "Total Casualties:",
-        "Unit (76) loses 2.",
-        "Damaged units: 74, 76.",
-        "Pirates (41) loses 0.",
-        "",
-        "Spoils: none.",
-        ""
-      ],
-      "type": "battle"
-    }
-  ],
   "date": {
     "month": "February",
     "year": 2
@@ -336,6 +287,22 @@
       "unit": {
         "name": "Unit",
         "number": 84
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Walks from forest (0,2) in Aoratalotos Forest to ocean (0,0) in Great Nena River.",
+      "unit": {
+        "name": "Unit",
+        "number": 74
+      }
+    },
+    {
+      "category": "movement",
+      "message": "Swims from ocean (15,3) in Great Nena River to ocean (15,1) in Great Nena River.",
+      "unit": {
+        "name": "Unit",
+        "number": 76
       }
     },
     {
@@ -987,6 +954,14 @@
       "message": "Claims 10 silver for maintenance.",
       "unit": {
         "name": "Unit",
+        "number": 74
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
         "number": 84
       }
     },
@@ -996,6 +971,14 @@
       "unit": {
         "name": "Unit",
         "number": 86
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 10 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 76
       }
     },
     {
@@ -1100,6 +1083,121 @@
   "number": 3,
   "object_reports": [],
   "regions": [
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "entertainment": 0,
+      "exits": [
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Hornwood Lake",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "settlement": {
+              "name": "Epikataralotos",
+              "size": "city"
+            },
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 1,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [],
+        "wanted": []
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 70,
+          "name": "fish",
+          "plural": "fish",
+          "tag": "FISH"
+        }
+      ],
+      "province": "Great Nena River",
+      "terrain": "ocean",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 15,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "lizardman",
+              "plural": "lizardmen",
+              "tag": "LIZA"
+            }
+          ],
+          "name": "Unit",
+          "number": 74,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 0.0,
+        "max": 0
+      }
+    },
     {
       "coordinates": {
         "label": "surface",
@@ -1562,22 +1660,6 @@
             "known": []
           },
           "weight": 10
-        },
-        {
-          "attitude": "unfriendly",
-          "flags": {
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 1,
-              "name": "ogre",
-              "plural": "ogres",
-              "tag": "OGRE"
-            }
-          ],
-          "name": "Family of Ogres",
-          "number": 15
         }
       ],
       "wages": {
@@ -1805,6 +1887,147 @@
       "wages": {
         "amount": 12.6,
         "max": 463
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 15,
+        "y": 1,
+        "z": 1
+      },
+      "entertainment": 0,
+      "exits": [
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 0,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Aoratalotos Forest",
+            "settlement": {
+              "name": "Epikataralotos",
+              "size": "city"
+            },
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 15,
+              "y": 3,
+              "z": 1
+            },
+            "province": "Great Nena River",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 2,
+              "z": 1
+            },
+            "province": "Philagotuspolisus Woods",
+            "terrain": "forest"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 14,
+              "y": 0,
+              "z": 1
+            },
+            "province": "Nema River",
+            "terrain": "swamp"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [],
+        "wanted": []
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 52,
+          "name": "fish",
+          "plural": "fish",
+          "tag": "FISH"
+        }
+      ],
+      "province": "Great Nena River",
+      "terrain": "ocean",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 15,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "lizardman",
+              "plural": "lizardmen",
+              "tag": "LIZA"
+            }
+          ],
+          "name": "Unit",
+          "number": 76,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 0.0,
+        "max": 0
       }
     },
     {
@@ -2542,6 +2765,22 @@
             "known": []
           },
           "weight": 10
+        },
+        {
+          "attitude": "unfriendly",
+          "flags": {
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "ogre",
+              "plural": "ogres",
+              "tag": "OGRE"
+            }
+          ],
+          "name": "Family of Ogres",
+          "number": 15
         }
       ],
       "wages": {
@@ -7797,13 +8036,13 @@
       "total": 1
     },
     {
-      "amount": 8,
-      "max": 8,
+      "amount": 10,
+      "max": 10,
       "name": "lizardman",
       "plural": "lizardmen",
       "rank": 1,
       "tag": "LIZA",
-      "total": 8
+      "total": 10
     },
     {
       "amount": 2,
@@ -7847,5 +8086,5 @@
     "magic": 1,
     "martial": 1
   },
-  "unclaimed_silver": 8799
+  "unclaimed_silver": 8779
 }

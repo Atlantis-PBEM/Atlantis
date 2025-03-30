@@ -98,7 +98,7 @@ static GameDefs g = {
 	5, /* HEALS_PER_MAN */
 
 	20, /* GUARD_REGEN */ /* percent */
-	40, /* CITY_GUARD */
+	0, /* CITY_GUARD */
 	50, /* GUARD_MONEY */
 	20000, /* CITY_POP */
 
@@ -168,9 +168,9 @@ static GameDefs g = {
 	1,	// UNDERWORLD_LEVELS
 	0,	// UNDERDEEP_LEVELS
 	0,	// ABYSS_LEVEL
-	0,	// TOWN_PROBABILITY
+	1,	// TOWN_PROBABILITY
 	0,	// TOWN_SPREAD
-	0,	// TOWNS_NOT_ADJACENT
+	1,	// TOWNS_NOT_ADJACENT
 	0,	// LESS_ARCTIC_TOWNS
 	60, // OCEAN
 	16, // CONTINENT_SIZE

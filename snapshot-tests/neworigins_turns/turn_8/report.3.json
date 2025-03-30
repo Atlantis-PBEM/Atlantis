@@ -36,84 +36,82 @@
         "",
         "Round 1:",
         "Unit (38) tactics bonus 1.",
-        "Unit (38) shoots a Fireball, killing 2.",
+        "Unit (38) shoots a Fireball, killing 3.",
         "",
-        "Unit (38) loses 1.",
-        "City Guard (5) loses 18.",
+        "Unit (38) loses 5.",
+        "City Guard (5) loses 24.",
         "",
         "Round 1 statistics:",
         "",
         "Unit (38) army:",
         "- Unit (38):",
-        "  - a fireball (magic energy attack), attacked 2 of 2 times, 2 successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and killed 2 enemies.",
+        "  - a fireball (magic energy attack), attacked 3 of 3 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.",
         "- Unit (51):",
-        "  - sword [SWOR] (slashing melee attack), attacked 5 of 9 times, 2 successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and killed 2 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 5 of 9 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.",
         "- Unit (52):",
-        "  - longbow [LBOW] (piercing ranged attack), attacked 1 of 1 time, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.",
+        "  - longbow [LBOW] (piercing ranged attack), attacked 0 of 1 time, 0 successful attacks, 0 blocked by armor, 0 hits, 0 total damage, and killed 0 enemies.",
         "- Unit (57):",
-        "  - sword [SWOR] (slashing melee attack), attacked 6 of 10 times, 6 successful attacks, 0 blocked by armor, 6 hits, 6 total damage, and killed 6 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 4 of 9 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.",
         "- Unit (60):",
-        "  - sword [SWOR] (slashing melee attack), attacked 4 of 10 times, 4 successful attacks, 0 blocked by armor, 4 hits, 4 total damage, and killed 4 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 8 of 9 times, 8 successful attacks, 0 blocked by armor, 8 hits, 8 total damage, and killed 8 enemies.",
         "- Unit (61):",
-        "  - sword [SWOR] (slashing melee attack), attacked 5 of 10 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 6 of 10 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.",
         "",
         "City Guard (5) army:",
         "- City Guard (5):",
-        "  - sword [SWOR] (slashing melee attack), attacked 17 of 30 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.",
+        "  - sword [SWOR] (slashing melee attack), attacked 19 of 32 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.",
         "",
-        "Round 2:",
-        "Unit (38) shoots a Fireball, killing 6.",
+        "City Guard (5) is routed!",
+        "Unit (38) gets a free round of attacks.",
+        "Unit (38) shoots a Fireball, killing 7.",
         "",
-        "Unit (38) loses 3.",
-        "City Guard (5) loses 22.",
+        "City Guard (5) loses 16.",
         "",
-        "Round 2 statistics:",
+        "Free round statistics:",
         "",
         "Unit (38) army:",
         "- Unit (38):",
-        "  - a fireball (magic energy attack), attacked 6 of 6 times, 6 successful attacks, 0 blocked by armor, 6 hits, 6 total damage, and killed 6 enemies.",
+        "  - a fireball (magic energy attack), attacked 8 of 8 times, 7 successful attacks, 0 blocked by armor, 7 hits, 7 total damage, and killed 7 enemies.",
         "- Unit (51):",
-        "  - sword [SWOR] (slashing melee attack), attacked 5 of 8 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 2 of 6 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.",
         "- Unit (52):",
-        "  - longbow [LBOW] (piercing ranged attack), attacked 1 of 1 time, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.",
+        "  - longbow [LBOW] (piercing ranged attack), attacked 1 of 1 time, 0 successful attacks, 0 blocked by armor, 0 hits, 0 total damage, and killed 0 enemies.",
         "- Unit (57):",
-        "  - sword [SWOR] (slashing melee attack), attacked 6 of 10 times, 4 successful attacks, 0 blocked by armor, 4 hits, 4 total damage, and killed 4 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 5 of 6 times, 4 successful attacks, 0 blocked by armor, 4 hits, 4 total damage, and killed 4 enemies.",
         "- Unit (60):",
-        "  - sword [SWOR] (slashing melee attack), attacked 5 of 8 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 2 of 5 times, 2 successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and killed 2 enemies.",
         "- Unit (61):",
-        "  - sword [SWOR] (slashing melee attack), attacked 3 of 8 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 3 of 5 times, 2 successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and killed 2 enemies.",
         "",
         "City Guard (5) army:",
-        "- City Guard (5):",
-        "  - sword [SWOR] (slashing melee attack), attacked 5 of 6 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.",
+        "Army made no attacks.",
         "",
-        "City Guard (5) is destroyed!",
         "",
         "Battle statistics:",
         "",
         "Unit (38) army:",
         "- Unit (38):",
-        "  - a fireball (magic energy attack), attacked 8 of 8 times, 8 successful attacks, 0 blocked by armor, 8 hits, 8 total damage, and killed 8 enemies.",
+        "  - a fireball (magic energy attack), attacked 11 of 11 times, 10 successful attacks, 0 blocked by armor, 10 hits, 10 total damage, and killed 10 enemies.",
         "- Unit (51):",
-        "  - sword [SWOR] (slashing melee attack), attacked 10 of 17 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 7 of 15 times, 6 successful attacks, 0 blocked by armor, 6 hits, 6 total damage, and killed 6 enemies.",
         "- Unit (52):",
-        "  - longbow [LBOW] (piercing ranged attack), attacked 2 of 2 times, 2 successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and killed 2 enemies.",
+        "  - longbow [LBOW] (piercing ranged attack), attacked 1 of 2 times, 0 successful attacks, 0 blocked by armor, 0 hits, 0 total damage, and killed 0 enemies.",
         "- Unit (57):",
-        "  - sword [SWOR] (slashing melee attack), attacked 12 of 20 times, 10 successful attacks, 0 blocked by armor, 10 hits, 10 total damage, and killed 10 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 9 of 15 times, 7 successful attacks, 0 blocked by armor, 7 hits, 7 total damage, and killed 7 enemies.",
         "- Unit (60):",
-        "  - sword [SWOR] (slashing melee attack), attacked 9 of 18 times, 9 successful attacks, 0 blocked by armor, 9 hits, 9 total damage, and killed 9 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 10 of 14 times, 10 successful attacks, 0 blocked by armor, 10 hits, 10 total damage, and killed 10 enemies.",
         "- Unit (61):",
-        "  - sword [SWOR] (slashing melee attack), attacked 8 of 18 times, 6 successful attacks, 0 blocked by armor, 6 hits, 6 total damage, and killed 6 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 9 of 15 times, 7 successful attacks, 0 blocked by armor, 7 hits, 7 total damage, and killed 7 enemies.",
         "",
         "City Guard (5) army:",
         "- City Guard (5):",
-        "  - sword [SWOR] (slashing melee attack), attacked 22 of 36 times, 4 successful attacks, 0 blocked by armor, 4 hits, 4 total damage, and killed 4 enemies.",
+        "  - sword [SWOR] (slashing melee attack), attacked 19 of 32 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.",
         "",
         "Total Casualties:",
         "City Guard (5) loses 40.",
         "Damaged units: 5.",
-        "Unit (38) loses 4.",
-        "Damaged units: 60, 61, 51.",
+        "Unit (38) loses 5.",
+        "Damaged units: 57, 61, 51, 60.",
         "",
         "Spoils: 20 swords [SWOR], 1000 silver [SILV].",
         ""
@@ -198,7 +196,7 @@
     },
     {
       "category": "work",
-      "message": "Earns 98 silver working in swamp (13,3) in Philagotuspolisus Marshes.",
+      "message": "Earns 110 silver working in swamp (13,3) in Philagotuspolisus Marshes.",
       "region": {
         "coordinates": {
           "label": "surface",
@@ -242,7 +240,7 @@
     },
     {
       "category": "work",
-      "message": "Earns 123 silver working in swamp (13,3) in Philagotuspolisus Marshes.",
+      "message": "Earns 98 silver working in swamp (13,3) in Philagotuspolisus Marshes.",
       "region": {
         "coordinates": {
           "label": "surface",
@@ -308,10 +306,26 @@
     },
     {
       "category": "maintenance",
-      "message": "Consumes 26 silver [SILV] for maintenance.",
+      "message": "Consumes 27 silver [SILV] for maintenance.",
       "unit": {
         "name": "Unit",
         "number": 38
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 90 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 51
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 39 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 52
       }
     },
     {
@@ -319,22 +333,6 @@
       "message": "Consumes 80 silver [SILV] for maintenance.",
       "unit": {
         "name": "Unit",
-        "number": 51
-      }
-    },
-    {
-      "category": "maintenance",
-      "message": "Consumes 38 silver [SILV] for maintenance.",
-      "unit": {
-        "name": "Unit",
-        "number": 52
-      }
-    },
-    {
-      "category": "maintenance",
-      "message": "Consumes 100 silver [SILV] for maintenance.",
-      "unit": {
-        "name": "Unit",
         "number": 57
       }
     },
@@ -356,7 +354,7 @@
     },
     {
       "category": "maintenance",
-      "message": "Borrows 24 silver [SILV] from Unit (51) for maintenance.",
+      "message": "Borrows 23 silver [SILV] from Unit (51) for maintenance.",
       "unit": {
         "name": "Unit",
         "number": 38
@@ -364,7 +362,7 @@
     },
     {
       "category": "maintenance",
-      "message": "Unit (38) borrows 24 silver [SILV] for maintenance.",
+      "message": "Unit (38) borrows 23 silver [SILV] for maintenance.",
       "unit": {
         "name": "Unit",
         "number": 51
@@ -372,7 +370,7 @@
     },
     {
       "category": "maintenance",
-      "message": "Borrows 12 silver [SILV] from Unit (51) for maintenance.",
+      "message": "Borrows 11 silver [SILV] from Unit (51) for maintenance.",
       "unit": {
         "name": "Unit",
         "number": 52
@@ -380,7 +378,7 @@
     },
     {
       "category": "maintenance",
-      "message": "Unit (52) borrows 12 silver [SILV] for maintenance.",
+      "message": "Unit (52) borrows 11 silver [SILV] for maintenance.",
       "unit": {
         "name": "Unit",
         "number": 51
@@ -730,7 +728,7 @@
             "flying": 0,
             "riding": 0,
             "swimming": 0,
-            "walking": 120
+            "walking": 135
           },
           "faction": {
             "name": "Test",
@@ -749,19 +747,19 @@
           },
           "items": [
             {
-              "amount": 8,
+              "amount": 9,
               "name": "gnoll",
               "plural": "gnolls",
               "tag": "GNOL"
             },
             {
-              "amount": 14,
+              "amount": 16,
               "name": "sword",
               "plural": "swords",
               "tag": "SWOR"
             },
             {
-              "amount": 191,
+              "amount": 229,
               "name": "silver",
               "plural": "silver",
               "tag": "SILV"
@@ -785,7 +783,7 @@
               }
             ]
           },
-          "weight": 94
+          "weight": 106
         },
         {
           "capacity": {
@@ -824,7 +822,7 @@
               "tag": "LBOW"
             },
             {
-              "amount": 2,
+              "amount": 1,
               "name": "sword",
               "plural": "swords",
               "tag": "SWOR"
@@ -854,14 +852,14 @@
               }
             ]
           },
-          "weight": 13
+          "weight": 12
         },
         {
           "capacity": {
             "flying": 0,
             "riding": 0,
             "swimming": 0,
-            "walking": 150
+            "walking": 120
           },
           "faction": {
             "name": "Test",
@@ -880,19 +878,19 @@
           },
           "items": [
             {
-              "amount": 10,
+              "amount": 8,
               "name": "gnoll",
               "plural": "gnolls",
               "tag": "GNOL"
             },
             {
-              "amount": 15,
+              "amount": 16,
               "name": "sword",
               "plural": "swords",
               "tag": "SWOR"
             },
             {
-              "amount": 289,
+              "amount": 235,
               "name": "silver",
               "plural": "silver",
               "tag": "SILV"
@@ -916,7 +914,69 @@
               }
             ]
           },
-          "weight": 115
+          "weight": 96
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 135
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 9,
+              "name": "gnoll",
+              "plural": "gnolls",
+              "tag": "GNOL"
+            },
+            {
+              "amount": 13,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            },
+            {
+              "amount": 263,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Unit",
+          "number": 60,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 2,
+                "name": "combat",
+                "skill_days": 95,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "weight": 103
         },
         {
           "capacity": {
@@ -954,69 +1014,7 @@
               "tag": "SWOR"
             },
             {
-              "amount": 258,
-              "name": "silver",
-              "plural": "silver",
-              "tag": "SILV"
-            }
-          ],
-          "name": "Unit",
-          "number": 60,
-          "orders": [
-            {
-              "order": "@work"
-            }
-          ],
-          "own_unit": true,
-          "skills": {
-            "known": [
-              {
-                "level": 2,
-                "name": "combat",
-                "skill_days": 95,
-                "tag": "COMB"
-              }
-            ]
-          },
-          "weight": 104
-        },
-        {
-          "capacity": {
-            "flying": 0,
-            "riding": 0,
-            "swimming": 0,
-            "walking": 135
-          },
-          "faction": {
-            "name": "Test",
-            "number": 3
-          },
-          "flags": {
-            "avoid": false,
-            "guard": false,
-            "holding": false,
-            "no_aid": false,
-            "no_cross_water": false,
-            "reveal": "faction",
-            "sharing": false,
-            "spoils": "all",
-            "taxing": false
-          },
-          "items": [
-            {
-              "amount": 9,
-              "name": "gnoll",
-              "plural": "gnolls",
-              "tag": "GNOL"
-            },
-            {
-              "amount": 15,
-              "name": "sword",
-              "plural": "swords",
-              "tag": "SWOR"
-            },
-            {
-              "amount": 255,
+              "amount": 263,
               "name": "silver",
               "plural": "silver",
               "tag": "SILV"
@@ -1040,7 +1038,7 @@
               }
             ]
           },
-          "weight": 105
+          "weight": 104
         }
       ],
       "wages": {
@@ -1068,13 +1066,13 @@
       "total": 2
     },
     {
-      "amount": 993,
-      "max": 993,
+      "amount": 990,
+      "max": 990,
       "name": "silver",
       "plural": "silver",
       "rank": 1,
       "tag": "SILV",
-      "total": 993
+      "total": 990
     },
     {
       "amount": 60,
@@ -1095,13 +1093,13 @@
       "total": 1
     },
     {
-      "amount": 36,
-      "max": 36,
+      "amount": 35,
+      "max": 35,
       "name": "gnoll",
       "plural": "gnolls",
       "rank": 1,
       "tag": "GNOL",
-      "total": 36
+      "total": 35
     }
   ],
   "status": {

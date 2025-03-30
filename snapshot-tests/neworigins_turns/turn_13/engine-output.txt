@@ -42,15 +42,15 @@ Assessing Maintenance costs...
 Post-Turn Processing...
 Players have visited 29 regions; 67 unvisited.
 
-Quest reward: shieldstone x 3.
-
-Quest reward: ironwood x 37.
-
-Quest reward: admantium ring mail x 4.
-
 Quest reward: holy symbol x 1.
 
-Quest reward: mithril x 35.
+Quest reward: double bow x 9.
+
+Quest reward: mithril sword x 19.
+
+Quest reward: admantium ring mail x 3.
+
+Quest reward: cornucopia x 1.
 Writing world events...
 Writing the Report File...
 ...

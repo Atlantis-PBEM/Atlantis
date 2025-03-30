@@ -92,7 +92,7 @@ public:
     void run_month_orders();
 
     // dummy
-    int get_seed() { return getrandom(10000); };
+    int get_seed() { return rng::get_random(10000); };
 
     // Get the contents of cout as a string.
     std::string cout_data();

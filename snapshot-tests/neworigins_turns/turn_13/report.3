@@ -10,7 +10,7 @@
 ;4954 silver [SILV]                        1     4954       4954
 ;60 swords [SWOR]                          1     60         60
 ;longbow [LBOW]                            1     1          1
-;8 lizardmen [LIZA]                        1     8          8
+;10 lizardmen [LIZA]                       1     10         10
 ;2 goblins [GBLN]                          1     2          2
 ;42 gnolls [GNOL]                          1     42         42
 
@@ -28,54 +28,6 @@ Regions: 1 (10)
 Quartermasters: 0 (2)
 Mages: 1 (2)
 Apprentices: 0 (3)
-
-Battles during turn:
-Pirates (41) attacks Unit (76) in ocean (15,3) in Great Nena River!
-
-Attackers:
-Pirates (41), 13 pirates [PIRA] (Combat 3/3, Attacks 5, Hits 5,
-  Tactics 1).
-
-Defenders:
-Unit (76), Test (3), behind, lizardman [LIZA].
-Unit (74), Test (3), behind, lizardman [LIZA].
-
-Round 1:
-Pirates (41) tactics bonus 1.
-
-Pirates (41) loses 0.
-Unit (76) loses 2.
-
-Round 1 statistics:
-
-Pirates (41) army:
-- Pirates (41):
-  - without weapon (slashing melee attack), attacked 3 of 4 times, 2
-  successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and
-  killed 2 enemies.
-
-Unit (76) army:
-Army made no attacks.
-
-Unit (76) is destroyed!
-
-Battle statistics:
-
-Pirates (41) army:
-- Pirates (41):
-  - without weapon (slashing melee attack), attacked 3 of 4 times, 2
-  successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and
-  killed 2 enemies.
-
-Unit (76) army:
-Army made no attacks.
-
-Total Casualties:
-Unit (76) loses 2.
-Damaged units: 74, 76.
-Pirates (41) loses 0.
-
-Spoils: none.
 
 Events during turn:
 Reward of 2000 silver.
@@ -109,6 +61,10 @@ Unit (92): Buys goblin [GBLN] at $31 each.
 Unit (93): Buys goblin [GBLN] at $31 each.
 Unit (84): Walks from mountain (3,1) in Kynal Rocks to plain (2,0) in
   Dunham Plain.
+Unit (74): Walks from forest (0,2) in Aoratalotos Forest to ocean
+  (0,0) in Great Nena River.
+Unit (76): Swims from ocean (15,3) in Great Nena River to ocean (15,1)
+  in Great Nena River.
 Unit (87): Walks from jungle (1,5) in Aoratalotos Jungle to ocean
   (1,7) in Great Nena River.
 Unit (88): Walks from jungle (15,7) in Heteraskalos Woods to plain
@@ -191,8 +147,10 @@ Unit (80): Consumes 10 silver [SILV] for maintenance.
 Unit (93): Consumes 10 silver [SILV] for maintenance.
 Unit (52): Borrows 50 silver [SILV] from Unit (51) for maintenance.
 Unit (51): Unit (52) borrows 50 silver [SILV] for maintenance.
+Unit (74): Claims 10 silver for maintenance.
 Unit (84): Claims 10 silver for maintenance.
 Unit (86): Claims 10 silver for maintenance.
+Unit (76): Claims 10 silver for maintenance.
 Unit (87): Claims 10 silver for maintenance.
 Unit (79): Claims 10 silver for maintenance.
 Unit (75): Claims 10 silver for maintenance.
@@ -233,7 +191,25 @@ Neutral : none.
 Friendly : none.
 Ally : none.
 
-Unclaimed silver: 8799.
+Unclaimed silver: 8779.
+
+ocean (0,0) in Great Nena River.
+------------------------------------------------------------
+  Wages: $0.0 (Max: $0).
+  Wanted: none.
+  For Sale: none.
+  Entertainment available: $0.
+  Products: 70 fish [FISH].
+
+Exits:
+  Southeast : ocean (1,1) in Hornwood Lake.
+  South : forest (0,2) in Aoratalotos Forest, contains Epikataralotos
+    [city].
+  Southwest : ocean (15,1) in Great Nena River.
+
+* Unit (74), Test (3), behind, revealing faction, sharing, lizardman
+  [LIZA]. Weight: 10. Capacity: 0/0/15/15. Skills: none.
+
 
 plain (2,0) in Dunham Plain, 2080 peasants (high elves), $1456.
 ------------------------------------------------------------
@@ -287,7 +263,6 @@ Exits:
 
 * Unit (71), Test (3), behind, revealing faction, wood elf [WELF],
   silver [SILV]. Weight: 10. Capacity: 0/0/15/0. Skills: none.
-- Family of Ogres (15), ogre [OGRE].
 
 
 swamp (5,1) in Nela River, contains Ogwaz [town], 4460 peasants
@@ -311,6 +286,26 @@ Exits:
   swords [SWOR].
 * Unit (86), Test (3), behind, revealing faction, orc [ORC]. Weight:
   10. Capacity: 0/0/15/0. Skills: none.
+
+
+ocean (15,1) in Great Nena River.
+------------------------------------------------------------
+  Wages: $0.0 (Max: $0).
+  Wanted: none.
+  For Sale: none.
+  Entertainment available: $0.
+  Products: 52 fish [FISH].
+
+Exits:
+  Northeast : ocean (0,0) in Great Nena River.
+  Southeast : forest (0,2) in Aoratalotos Forest, contains
+    Epikataralotos [city].
+  South : ocean (15,3) in Great Nena River.
+  Southwest : forest (14,2) in Philagotuspolisus Woods.
+  Northwest : swamp (14,0) in Nema River.
+
+* Unit (76), Test (3), behind, revealing faction, sharing, lizardman
+  [LIZA]. Weight: 10. Capacity: 0/0/15/15. Skills: none.
 
 
 forest (0,2) in Aoratalotos Forest, contains Epikataralotos [city],
@@ -386,6 +381,7 @@ Exits:
 
 * Unit (72), Test (3), behind, revealing faction, wood elf [WELF], 2
   silver [SILV]. Weight: 10. Capacity: 0/0/15/0. Skills: none.
+- Family of Ogres (15), ogre [OGRE].
 
 
 forest (14,2) in Philagotuspolisus Woods, 1755 peasants (wood elves),

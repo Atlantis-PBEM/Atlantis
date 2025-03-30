@@ -1826,29 +1826,7 @@
       "province": "Eiraia Desert",
       "tax": 408,
       "terrain": "desert",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 8,
-              "name": "giant scorpion",
-              "plural": "giant scorpions",
-              "tag": "SCOR"
-            }
-          ],
-          "name": "Giant Scorpions",
-          "number": 25
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 11.6,
         "max": 191
@@ -2403,29 +2381,7 @@
       "province": "Kynal Rocks",
       "tax": 489,
       "terrain": "mountain",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 1,
-              "name": "ogre",
-              "plural": "ogres",
-              "tag": "OGRE"
-            }
-          ],
-          "name": "Family of Ogres",
-          "number": 15
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 11.8,
         "max": 225
@@ -4156,7 +4112,29 @@
       "province": "Eiraia Desert",
       "tax": 351,
       "terrain": "desert",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 8,
+              "name": "giant scorpion",
+              "plural": "giant scorpions",
+              "tag": "SCOR"
+            }
+          ],
+          "name": "Giant Scorpions",
+          "number": 25
+        }
+      ],
       "wages": {
         "amount": 11.4,
         "max": 164
@@ -4830,7 +4808,29 @@
       "province": "Aoratalotos Forest",
       "tax": 860,
       "terrain": "forest",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "ogre",
+              "plural": "ogres",
+              "tag": "OGRE"
+            }
+          ],
+          "name": "Family of Ogres",
+          "number": 15
+        }
+      ],
       "wages": {
         "amount": 12.9,
         "max": 388
@@ -5399,6 +5399,27 @@
           ],
           "name": "Crocodiles",
           "number": 19
+        },
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 8,
+              "name": "sandling",
+              "plural": "sandlings",
+              "tag": "SAND"
+            }
+          ],
+          "name": "Sandlings",
+          "number": 26
         }
       ],
       "wages": {
@@ -5848,27 +5869,6 @@
           ],
           "name": "Pirates",
           "number": 41
-        },
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 12,
-              "name": "pirates",
-              "plural": "pirates",
-              "tag": "PIRA"
-            }
-          ],
-          "name": "Pirates",
-          "number": 53
         }
       ],
       "wages": {
@@ -6752,29 +6752,7 @@
       ],
       "province": "Dunham Peak",
       "terrain": "volcano",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 7,
-              "name": "giant scorpion",
-              "plural": "giant scorpions",
-              "tag": "SCOR"
-            }
-          ],
-          "name": "Giant Scorpions",
-          "number": 23
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 0.0,
         "max": 0
@@ -7926,29 +7904,7 @@
       ],
       "tax": 496,
       "terrain": "desert",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 8,
-              "name": "sandling",
-              "plural": "sandlings",
-              "tag": "SAND"
-            }
-          ],
-          "name": "Sandlings",
-          "number": 26
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.3,
         "max": 242
@@ -8990,7 +8946,29 @@
       "province": "Philagotuspolisus Sands",
       "tax": 436,
       "terrain": "desert",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 7,
+              "name": "giant scorpion",
+              "plural": "giant scorpions",
+              "tag": "SCOR"
+            }
+          ],
+          "name": "Giant Scorpions",
+          "number": 23
+        }
+      ],
       "wages": {
         "amount": 12.3,
         "max": 237
@@ -9897,29 +9875,7 @@
       "province": "Lafari Woods",
       "tax": 598,
       "terrain": "jungle",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": false,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 8,
-              "name": "lizard man",
-              "plural": "lizard men",
-              "tag": "LMAN"
-            }
-          ],
-          "name": "Lizard Men",
-          "number": 46
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.4,
         "max": 281
@@ -11130,7 +11086,29 @@
       "province": "Great Nara River",
       "tax": 675,
       "terrain": "swamp",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 8,
+              "name": "lizard man",
+              "plural": "lizard men",
+              "tag": "LMAN"
+            }
+          ],
+          "name": "Lizard Men",
+          "number": 46
+        }
+      ],
       "wages": {
         "amount": 12.4,
         "max": 308
@@ -11550,7 +11528,29 @@
       "province": "Aoratalotos Dale",
       "tax": 1575,
       "terrain": "plain",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 2,
+              "name": "lion",
+              "plural": "lions",
+              "tag": "LION"
+            }
+          ],
+          "name": "Pride of Lions",
+          "number": 40
+        }
+      ],
       "wages": {
         "amount": 13.6,
         "max": 646
@@ -12778,29 +12778,7 @@
       "province": "Heteraskalos Valley",
       "tax": 978,
       "terrain": "plain",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 2,
-              "name": "lion",
-              "plural": "lions",
-              "tag": "LION"
-            }
-          ],
-          "name": "Pride of Lions",
-          "number": 40
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.2,
         "max": 399
@@ -14591,7 +14569,29 @@
       "province": "Akeritos Swamp",
       "tax": 576,
       "terrain": "swamp",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 8,
+              "name": "wolf",
+              "plural": "wolves",
+              "tag": "WOLF"
+            }
+          ],
+          "name": "Wolf Pack",
+          "number": 39
+        }
+      ],
       "wages": {
         "amount": 12.4,
         "max": 273
@@ -14845,29 +14845,7 @@
       "province": "Maranarenos Jungle",
       "tax": 368,
       "terrain": "jungle",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": false,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 5,
-              "name": "trent",
-              "plural": "trents",
-              "tag": "TREN"
-            }
-          ],
-          "name": "Living Trees",
-          "number": 47
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 11.4,
         "max": 170
@@ -15020,7 +14998,29 @@
       "province": "Heteraskalos Rocks",
       "tax": 483,
       "terrain": "mountain",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "ogre",
+              "plural": "ogres",
+              "tag": "OGRE"
+            }
+          ],
+          "name": "Family of Ogres",
+          "number": 18
+        }
+      ],
       "wages": {
         "amount": 11.8,
         "max": 223
@@ -15863,29 +15863,7 @@
       "province": "Akeritos Swamp",
       "tax": 423,
       "terrain": "swamp",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 8,
-              "name": "wolf",
-              "plural": "wolves",
-              "tag": "WOLF"
-            }
-          ],
-          "name": "Wolf Pack",
-          "number": 39
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 11.4,
         "max": 190
@@ -16139,7 +16117,29 @@
       "province": "Akeritos Dale",
       "tax": 1237,
       "terrain": "plain",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 5,
+              "name": "trent",
+              "plural": "trents",
+              "tag": "TREN"
+            }
+          ],
+          "name": "Living Trees",
+          "number": 47
+        }
+      ],
       "wages": {
         "amount": 12.7,
         "max": 504
@@ -17235,7 +17235,29 @@
       "province": "Dogmoeryx Sands",
       "tax": 315,
       "terrain": "desert",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 8,
+              "name": "giant scorpion",
+              "plural": "giant scorpions",
+              "tag": "SCOR"
+            }
+          ],
+          "name": "Giant Scorpions",
+          "number": 53
+        }
+      ],
       "wages": {
         "amount": 11.4,
         "max": 152
@@ -17376,29 +17398,7 @@
       "province": "Dogmoeryx Woods",
       "tax": 838,
       "terrain": "forest",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 1,
-              "name": "ogre",
-              "plural": "ogres",
-              "tag": "OGRE"
-            }
-          ],
-          "name": "Family of Ogres",
-          "number": 18
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.6,
         "max": 364
@@ -17685,16 +17685,10 @@
               },
               "items": [
                 {
-                  "amount": 41,
+                  "amount": 21,
                   "name": "skeleton",
                   "plural": "skeletons",
                   "tag": "SKEL"
-                },
-                {
-                  "amount": 1,
-                  "name": "lich",
-                  "plural": "liches",
-                  "tag": "LICH"
                 }
               ],
               "name": "Undead",
@@ -17720,6 +17714,27 @@
       "tax": 553,
       "terrain": "swamp",
       "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 7,
+              "name": "lizard man",
+              "plural": "lizard men",
+              "tag": "LMAN"
+            }
+          ],
+          "name": "Lizard Men",
+          "number": 24
+        },
         {
           "attitude": "neutral",
           "faction": {
@@ -18213,7 +18228,35 @@
           "name": "Crypt",
           "number": 1,
           "type": "Crypt",
-          "units": null
+          "units": [
+            {
+              "attitude": "neutral",
+              "faction": {
+                "name": "Creatures",
+                "number": 2
+              },
+              "flags": {
+                "avoid": true,
+                "guard": false
+              },
+              "items": [
+                {
+                  "amount": 74,
+                  "name": "skeleton",
+                  "plural": "skeletons",
+                  "tag": "SKEL"
+                },
+                {
+                  "amount": 4,
+                  "name": "undead",
+                  "plural": "undead",
+                  "tag": "UNDE"
+                }
+              ],
+              "name": "Undead",
+              "number": 55
+            }
+          ]
         }
       ],
       "tax": 321,
@@ -19771,29 +19814,7 @@
       "province": "Mordor Desert",
       "tax": 438,
       "terrain": "desert",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 7,
-              "name": "lizard man",
-              "plural": "lizard men",
-              "tag": "LMAN"
-            }
-          ],
-          "name": "Lizard Men",
-          "number": 24
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.1,
         "max": 230
@@ -23079,57 +23100,7 @@
           "name": "Magician's Tower",
           "number": 1,
           "type": "Magician's Tower",
-          "units": [
-            {
-              "attitude": "neutral",
-              "faction": {
-                "name": "Creatures",
-                "number": 2
-              },
-              "flags": {
-                "avoid": false,
-                "behind": true,
-                "guard": false
-              },
-              "items": [
-                {
-                  "amount": 2,
-                  "name": "evil magician",
-                  "plural": "evil magicians",
-                  "tag": "MAGI"
-                },
-                {
-                  "amount": 2,
-                  "name": "evil sorcerer",
-                  "plural": "evil sorcerers",
-                  "tag": "SORC"
-                }
-              ],
-              "name": "Evil Mages",
-              "number": 55
-            },
-            {
-              "attitude": "neutral",
-              "faction": {
-                "name": "Creatures",
-                "number": 2
-              },
-              "flags": {
-                "avoid": false,
-                "guard": false
-              },
-              "items": [
-                {
-                  "amount": 20,
-                  "name": "evil warrior",
-                  "plural": "evil warriors",
-                  "tag": "WARR"
-                }
-              ],
-              "name": "Evil Warriors",
-              "number": 56
-            }
-          ]
+          "units": null
         }
       ],
       "tax": 435,

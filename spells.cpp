@@ -35,7 +35,7 @@ static int RandomiseSummonAmount(int num)
 
 	for (i = 0; i < 2 * num; i++)
 	{
-		if (getrandom(2))
+		if (rng::get_random(2))
 			retval++;
 	}
 	if (retval < 1 && num > 0)
@@ -1008,7 +1008,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 
 	int level = u->GetSkill(spell);
 	int chance = level * 20;
-	if (getrandom(100) >= chance) {
+	if (rng::get_random(100) >= chance) {
 		u->event("Attempts to construct a gate, but fails.", "spell");
 		return 0;
 	}
@@ -1033,9 +1033,9 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 		for(const auto reg : regions) {
 			if (reg->gate) used[reg->gate - 1] = 1;
 		}
-		r->gate = getrandom(ngates);
+		r->gate = rng::get_random(ngates);
 		while (used[r->gate])
-			r->gate = getrandom(ngates);
+			r->gate = rng::get_random(ngates);
 		delete[] used;
 		r->gate++;
 	} else {
@@ -1043,7 +1043,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
 	}
 	if (Globals->GATES_NOT_PERENNIAL) {
 		int dm = Globals->GATES_NOT_PERENNIAL / 2;
-		int gm = month + 1 - getrandom(dm) - getrandom(dm) - getrandom(Globals->GATES_NOT_PERENNIAL % 2);
+		int gm = month + 1 - rng::get_random(dm) - rng::get_random(dm) - rng::get_random(Globals->GATES_NOT_PERENNIAL % 2);
 		while(gm < 0) gm += 12;
 		r->gatemonth = gm;
 	}
@@ -1120,7 +1120,7 @@ int Game::RunSummonBalrog(ARegion *r,Unit *u)
 
 	int level = u->GetSkill(S_SUMMON_BALROG);
 
-	int num = (level * ItemDefs[I_BALROG].mOut + getrandom(100)) / 100;
+	int num = (level * ItemDefs[I_BALROG].mOut + rng::get_random(100)) / 100;
 	if (u->items.GetNum(I_BALROG) + num > ItemDefs[I_BALROG].max_inventory)
 		num = ItemDefs[I_BALROG].max_inventory - u->items.GetNum(I_BALROG);
 
@@ -1137,7 +1137,7 @@ int Game::RunSummonDemon(ARegion *r,Unit *u)
 	}
 
 	int level = u->GetSkill(S_SUMMON_DEMON);
-	int num = (level * ItemDefs[I_DEMON].mOut + getrandom(100)) / 100;
+	int num = (level * ItemDefs[I_DEMON].mOut + rng::get_random(100)) / 100;
 	num = RandomiseSummonAmount(num);
 	if (num < 1)
 		num = 1;
@@ -1154,7 +1154,7 @@ int Game::RunSummonImps(ARegion *r,Unit *u)
 	}
 
 	int level = u->GetSkill(S_SUMMON_IMPS);
-	int num = (level * ItemDefs[I_IMP].mOut + getrandom(100)) / 100;
+	int num = (level * ItemDefs[I_IMP].mOut + rng::get_random(100)) / 100;
 	num = RandomiseSummonAmount(num);
 
 	u->items.SetNum(I_IMP,u->items.GetNum(I_IMP) + num);
@@ -1187,7 +1187,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 		u->ConsumeShared(ItemDefs[item].mInput[c].item, cost);
 	}
 
-	int num = (level * ItemDefs[item].mOut + getrandom(100))/100;
+	int num = (level * ItemDefs[item].mOut + rng::get_random(100))/100;
 
 	if (ItemDefs[item].type & IT_SHIP) {
 		if (num > 0)
@@ -1212,7 +1212,7 @@ int Game::RunSummonLich(ARegion *r,Unit *u)
 	int chance = level * ItemDefs[I_LICH].mOut;
 	if (chance < 1)
 		chance = level * level * 2;
-	int num = (chance + getrandom(100))/100;
+	int num = (chance + rng::get_random(100))/100;
 
 	u->items.SetNum(I_LICH,u->items.GetNum(I_LICH) + num);
 	u->event("Summons " + ItemString(I_LICH, num) + ".", "spell");
@@ -1232,7 +1232,7 @@ int Game::RunRaiseUndead(ARegion *r,Unit *u)
 	int chance = level * ItemDefs[I_UNDEAD].mOut;
 	if (chance < 1)
 		chance = level * level * 10;
-	int num = (chance + getrandom(100))/100;
+	int num = (chance + rng::get_random(100))/100;
 	num = RandomiseSummonAmount(num);
 
 	u->items.SetNum(I_UNDEAD,u->items.GetNum(I_UNDEAD) + num);
@@ -1253,7 +1253,7 @@ int Game::RunSummonSkeletons(ARegion *r,Unit *u)
 	int chance = level * ItemDefs[I_SKELETON].mOut;
 	if (chance < 1)
 		chance = level * level * 40;
-	int num = (chance + getrandom(100))/100;
+	int num = (chance + rng::get_random(100))/100;
 	num = RandomiseSummonAmount(num);
 
 	u->items.SetNum(I_SKELETON,u->items.GetNum(I_SKELETON) + num);
@@ -1280,7 +1280,7 @@ int Game::RunDragonLore(ARegion *r, Unit *u)
 	int chance = level * ItemDefs[I_DRAGON].mOut;
 	if (chance < 1)
 		chance = level * level * 4;
-	if (getrandom(100) < chance) {
+	if (rng::get_random(100) < chance) {
 		u->items.SetNum(I_DRAGON,num + 1);
 		u->event("Summons a dragon.", "spell");
 		num = 1;
@@ -1328,7 +1328,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
 
 	int level = u->GetSkill(S_BIRD_LORE) - 2;
 	int max = level * level * 2;
-	int num = (level * ItemDefs[I_EAGLE].mOut + getrandom(100)) / 100;
+	int num = (level * ItemDefs[I_EAGLE].mOut + rng::get_random(100)) / 100;
 	num = RandomiseSummonAmount(num);
 	if (num < 1)
 		num = 1;
@@ -1352,7 +1352,7 @@ int Game::RunWolfLore(ARegion *r,Unit *u)
 	int max = level * level * 4;
 
 	int curr = u->items.GetNum(I_WOLF);
-	int num = (level * ItemDefs[I_WOLF].mOut + getrandom(100)) / 100;
+	int num = (level * ItemDefs[I_WOLF].mOut + rng::get_random(100)) / 100;
 	num = RandomiseSummonAmount(num);
 
 	if (num + curr > max)
@@ -2046,7 +2046,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 
 	while (num-- > 0) {
 		victim = 0;
-		i = getrandom(sacrifices);
+		i = rng::get_random(sacrifices);
 		for(const auto o : r->objects) {
 			for(const auto u : o->units) {
 				if (u->faction->num == mage->faction->num) {

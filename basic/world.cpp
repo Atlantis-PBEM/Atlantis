@@ -2076,7 +2076,7 @@ int AGetName(int town, ARegion *reg)
 	if (town) ntowns++;
 	else nregions++;
 
-	int i=getrandom(number);
+	int i=rng::get_random(number);
 	int j;
 	for (int count=0; count < number; count++) {
 		j = i+offset;
@@ -2087,7 +2087,7 @@ int AGetName(int town, ARegion *reg)
 		if (++i >= number) i=0;
 	}
 	for (i=0; i<number; i++) nameused[i+offset] = 0;
-	i = getrandom(number);
+	i = rng::get_random(number);
 	j = i+offset;
 	nameused[j] = 1;
 	return j;
@@ -2240,7 +2240,7 @@ int ARegionList::GetRegType( ARegion *pReg )
 
 	// Underworld region
 	if ((pReg->zloc > 1) && (pReg->zloc < Globals->UNDERWORLD_LEVELS+2)) {
-		int r = getrandom(4);
+		int r = rng::get_random(4);
 		switch (r) {
 			case 0:
 				return R_OCEAN;
@@ -2259,7 +2259,7 @@ int ARegionList::GetRegType( ARegion *pReg )
 	if ((pReg->zloc > Globals->UNDERWORLD_LEVELS+1) &&
 			(pReg->zloc < Globals->UNDERWORLD_LEVELS+
 			 			  Globals->UNDERDEEP_LEVELS+2)) {
-		int r = getrandom(4);
+		int r = rng::get_random(4);
 		switch(r) {
 			case 0:
 				return R_OCEAN;
@@ -2276,7 +2276,7 @@ int ARegionList::GetRegType( ARegion *pReg )
 
 	// surface region
 	if ( pReg->zloc == 1 ) {
-		int r = getrandom(64);
+		int r = rng::get_random(64);
 		switch (lat)
 		{
 		case 0: /* Arctic regions */
@@ -2400,7 +2400,7 @@ int ARegionList::CheckRegionExit(ARegion *pFrom, ARegion *pTo )
 	if (pFrom->type == R_CHASM || pTo->type == R_CHASM) {
 		chance = 60;
 	}
-	if (getrandom(100) < chance) {
+	if (rng::get_random(100) < chance) {
 		return( 0 );
 	}
 	return( 1 );
@@ -2505,7 +2505,7 @@ void ARegion::MakeStartingCity()
 	if (!Globals->START_CITIES_EXIST) return;
 
 	town->hab = 125 * Globals->CITY_POP / 100;
-	while (town->pop < town->hab) town->pop += getrandom(200)+200;
+	while (town->pop < town->hab) town->pop += rng::get_random(200)+200;
 	town->dev = TownDevelopment();
 
 	float ratio;
@@ -2583,8 +2583,8 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 		//
 		// We'll just let AC exits be all over the map.
 		//
-		int x = getrandom( maxX );
-		int y = 2 * getrandom( maxY / 2 ) + x % 2;
+		int x = rng::get_random( maxX );
+		int y = 2 * rng::get_random( maxY / 2 ) + x % 2;
 
 		reg = pArr->GetRegion( x, y );
 
@@ -2612,8 +2612,8 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 		// We couldn't find a normal starting city, let's just go for ANY
 		// city
 		//
-		int x = getrandom( maxX );
-		int y = 2 * getrandom( maxY / 2 ) + x % 2;
+		int x = rng::get_random( maxX );
+		int y = 2 * rng::get_random( maxY / 2 ) + x % 2;
 		reg = pArr->GetRegion( x, y);
 		if (!reg || reg->type == R_OCEAN) {
 			tries++;

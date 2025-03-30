@@ -611,13 +611,13 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 							if (reg->gate)
 								used[reg->gate - 1] = 1;
 						}
-						pReg->gate = getrandom(ngates);
+						pReg->gate = rng::get_random(ngates);
 						while (used[pReg->gate])
-							pReg->gate = getrandom(ngates);
+							pReg->gate = rng::get_random(ngates);
 						delete[] used;
 						pReg->gate++;
 					} else {
-						int gatenum = getrandom(regions.numberofgates) + 1;
+						int gatenum = rng::get_random(regions.numberofgates) + 1;
 						if (gatenum != regions.numberofgates) {
 							for(const auto reg : regions) {
 								if (reg->gate == gatenum) reg->gate = regions.numberofgates;
@@ -625,7 +625,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 						}
 						pReg->gate = gatenum;
 					}
-					pReg->gatemonth = getrandom(12);
+					pReg->gatemonth = rng::get_random(12);
 				}
 				else if (*pToken == "w") {
 					SAFE_DELETE( pToken );
@@ -853,7 +853,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 					}
 
 					if (!done) {
-						int price = (ItemDefs[mitem].baseprice * (100 + getrandom(50))) / 100;
+						int price = (ItemDefs[mitem].baseprice * (100 + rng::get_random(50))) / 100;
 						Market *m = new Market(Market::MarketType::M_SELL, mitem, price, 0, minimum, maximum, 0, 0);
 						pReg->markets.push_back(m);
 					}
@@ -912,7 +912,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 					}
 
 					if (!done) {
-						int price = (ItemDefs[mitem].baseprice * (100 + getrandom(50))) / 100;
+						int price = (ItemDefs[mitem].baseprice * (100 + rng::get_random(50))) / 100;
 						int mamount = minimum + (maximum * population / 5000);
 						Market *m = new Market(
 							Market::MarketType::M_SELL, mitem, price, mamount, 0, 5000, minimum, maximum

@@ -35,6 +35,7 @@
 #include "game.h"
 #include "gamedata.h"
 #include "quests.h"
+#include "rng.h"
 
 using namespace std;
 
@@ -1626,9 +1627,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 				match++;
 			}
 			if (!candidates.empty()) {
-				std::mt19937 gen{std::random_device{}()}; // generates random numbers
-				std::uniform_int_distribution<std::size_t> dist(0, candidates.size() - 1);
-				int index = dist(gen);
+				int index = rng::rng::get_random(candidates.size());
 				newreg = candidates[index];
 			}
 		}

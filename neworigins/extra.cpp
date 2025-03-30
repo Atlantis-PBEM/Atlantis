@@ -122,7 +122,7 @@ int Game::SetupFaction( Faction *pFac )
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
-			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
+			reg = pArr->GetRegion(rng::get_random(pArr->x), rng::get_random(pArr->y));
 		}
 	}
 	temp2->MoveUnit(reg->GetDummy());
@@ -169,7 +169,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 	// No items? Are we playing a game without items?
 	if (count == 0) return;
 
-	count = getrandom(count) + 1;
+	count = rng::get_random(count) + 1;
 
 	for (i=0; i<NITEMS; i++) {
 		if (
@@ -182,7 +182,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 			count--;
 			if (count == 0) {
 				// Quest reward is based on QUEST_MAX_REWARD silver
-				reward_count = (QUEST_MAX_REWARD + getrandom(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
+				reward_count = (QUEST_MAX_REWARD + rng::get_random(QUEST_MAX_REWARD / 2)) / ItemDefs[i].baseprice;
 
 				printf("\nQuest reward: %s x %d.\n", ItemDefs[i].name.c_str(), reward_count);
 
@@ -197,7 +197,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		}
 	}
 
-	d = getrandom(100);
+	d = rng::get_random(100);
 	if (d < 60) {
 		// SLAY quest
 		q->type = Quest::SLAY;
@@ -215,7 +215,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		}
 		if (!count) return;
 		// pick one as the object of the quest
-		d = getrandom(count);
+		d = rng::get_random(count);
 		for(const auto r : regions) {
 			if (TerrainDefs[r->type].similar_type == R_OCEAN) continue;
 			// No need to check if quests do not require exploration
@@ -250,7 +250,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 					count++;
 			}
 		}
-		count = getrandom(count);
+		count = rng::get_random(count);
 		for(const auto r : regions) {
 			// Do allow lakes though
 			if (r->type == R_OCEAN)
@@ -302,7 +302,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		// Work out how many destnations to use, based on destprobs[]
 		for (i = 0, count = 0; i < MAX_DESTINATIONS; i++)
 			count += destprobs[i];
-		d = getrandom(count);
+		d = rng::get_random(count);
 		for (count = 0; d >= destprobs[count]; count++)
 			d -= destprobs[count];
 		count++;
@@ -313,7 +313,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		// Choose that many unique regions
 		for (i = 0; i < count; i++) {
 			do {
-				destinations[i] = getrandom(temples.size());
+				destinations[i] = rng::get_random(temples.size());
 				// give a slight preference to regions with temples
 				for (it = temples.begin(), j = 0;
 						j < destinations[i];
@@ -321,7 +321,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 				// ...by rerolling (only once) if we get a
 				// templeless region first time
 				if (!it->second)
-					destinations[i] = getrandom(temples.size());
+					destinations[i] = rng::get_random(temples.size());
 				// make sure we haven't chosen duplicates
 				clash = 0;
 				for (j = 0; j < i; j++)
@@ -424,7 +424,7 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
 		}
 	}
 	// pick a random altar to empower
-	int num = getrandom(unempowered_altars.size());
+	int num = rng::get_random(unempowered_altars.size());
 	Object *o = unempowered_altars[num];
 	o->type = O_EMPOWERED_ALTAR;
 	string name = string(ObjectDefs[O_EMPOWERED_ALTAR].name) + " [" + to_string(o->num) + "]";
@@ -600,7 +600,7 @@ Faction *Game::CheckVictory()
 	if (visited >= (unvisited + visited) * QUEST_EXPLORATION_PERCENT / 100) {
 		// Exploration phase complete: start creating relic quests
 		for (i = 0; i < QUEST_SPAWN_RATE; i++) {
-			if (quests.size() < MAXIMUM_ACTIVE_QUESTS && getrandom(100) < QUEST_SPAWN_CHANCE)
+			if (quests.size() < MAXIMUM_ACTIVE_QUESTS && rng::get_random(100) < QUEST_SPAWN_CHANCE)
 				CreateQuest(regions, monfaction);
 		}
 		while (quests.size() < MINIMUM_ACTIVE_QUESTS) {
@@ -612,13 +612,13 @@ Faction *Game::CheckVictory()
 		// Tell the players to get exploring :-)
 		if (visited > 9 * unvisited) {
 			// 90% explored; specific hints
-			d = getrandom(12);
+			d = rng::get_random(12);
 		} else if (visited > 3 * unvisited) {
 			// 75% explored; some general hints
-			d = getrandom(8);
+			d = rng::get_random(8);
 		} else {
 			// lots of unexplored area; just tell them to explore
-			d = getrandom(6);
+			d = rng::get_random(6);
 		}
 		if (d == 2) {
 			message = "Be productive and strong; "
@@ -643,14 +643,14 @@ Faction *Game::CheckVictory()
 			}
 			if (count > 0) {
 				// choose one, and find it
-				count = getrandom(count);
+				count = rng::get_random(count);
 				for (it = vRegions.begin(); it != vRegions.end(); it++) {
 					if (uvRegions[it->first] > 0)
 						if (!count--)
 							break;
 				}
 				// pick a hex within that region, and find it
-				count = getrandom(it->second);
+				count = rng::get_random(it->second);
 				for(const auto r : regions) {
 					if (it->first == r->name->Str()) {
 						if (!count--) {
@@ -679,7 +679,7 @@ Faction *Game::CheckVictory()
 			}
 			if (count > 0) {
 				// choose one, and find it
-				count = getrandom(count);
+				count = rng::get_random(count);
 				for (it = uvRegions.begin(); it != uvRegions.end(); it++) {
 					if (vRegions[it->first] == 0) {
 						if (!count--)
@@ -687,7 +687,7 @@ Faction *Game::CheckVictory()
 					}
 				}
 				// pick a hex within that region, and find it
-				count = getrandom(it->second);
+				count = rng::get_random(it->second);
 				for(const auto r : regions) {
 					if (it->first == r->name->Str()) {
 						if (!count--) {
@@ -741,13 +741,13 @@ Faction *Game::CheckVictory()
 			}
 		} else if (d > 7) {
 			// report exact coords of an unexplored hex
-			count = getrandom(unvisited);
+			count = rng::get_random(unvisited);
 			for(const auto r : regions) {
 				if (r->Population() > 0 && !r->visited) {
 					if (!count--) {
 						message = "The people of the ";
 						message += r->ShortPrint();
-						switch (getrandom(4)) {
+						switch (rng::get_random(4)) {
 							case 0:
 								message += " have not been visited by exiles.";
 								break;
@@ -957,7 +957,7 @@ Faction *Game::CheckVictory()
 			int chance = 10 + (completed_entities * 12);
 			Awrite(AString("Endgame: entities: ") + completed_entities + ", anomalies: " + anomalies +
 				", chance: " + chance + "%");
-			if (getrandom(100) < chance) {
+			if (rng::get_random(100) < chance) {
 				// Okay, let's see if we can spawn a new entity
 				// If we can, see if we already have those anomalies and report them to all factions if so.
 				if (anomalies + completed_entities >= 6) {
@@ -970,7 +970,7 @@ Faction *Game::CheckVictory()
 				ARegion *r = nullptr;
 				ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
 				while (r == nullptr) {
-					r = (ARegion *)surface->GetRegion(getrandom(surface->x), getrandom(surface->y));
+					r = (ARegion *)surface->GetRegion(rng::get_random(surface->x), rng::get_random(surface->y));
 					if (r == nullptr) continue;
 
 					// An anomaly won't spawn in the ocean or in a barren region or in a city or a guarded region.
