@@ -1268,9 +1268,9 @@ void Game::CheckWMonAttack(ARegion *r, Unit *u) {
 
 	int rand = 300 - tars;
 	if (rand < 100) rand = 100;
-	if (getrandom(rand) >= u->Hostile()) return;
+	if (rng::get_random(rand) >= u->Hostile()) return;
 
-	Unit *t = GetWMonTar(r, getrandom(tars), u);
+	Unit *t = GetWMonTar(r, rng::get_random(tars), u);
 	if (t) AttemptAttack(r, u, t, 1);
 }
 
@@ -1400,7 +1400,7 @@ void Game::DoSell(ARegion *r, Market *m)
 						u->error("SELL: Unit attempted to sell more than it had.");
 					}
 					if (attempted) {
-						temp = (m->amount *o->num + getrandom(attempted)) / attempted;
+						temp = (m->amount *o->num + rng::get_random(attempted)) / attempted;
 						if (temp<0) temp = 0;
 					}
 					attempted -= o->num;
@@ -1523,7 +1523,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 					} else {
 						if (attempted) {
 							temp = (m->amount * o->num +
-									getrandom(attempted)) / attempted;
+									rng::get_random(attempted)) / attempted;
 							if (temp < 0) temp = 0;
 						}
 						attempted -= o->num;
@@ -3273,7 +3273,7 @@ void Game::RunAnnihilateOrders() {
 					if (only_surface) {
 						level = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
 					} else {
-						int zloc = getrandom(regions.numLevels);
+						int zloc = rng::get_random(regions.numLevels);
 						level = regions.GetRegionArray(zloc);
 					}
 					// now, get a random region from that level that isn't our own.
@@ -3283,7 +3283,7 @@ void Game::RunAnnihilateOrders() {
 					int tries = 0;
 					while(!target) {
 						if (tries++ > 25) break; // don't loop forever
-						target = level->GetRegion(getrandom(level->x), getrandom(level->y));
+						target = level->GetRegion(rng::get_random(level->x), rng::get_random(level->y));
 						if (!target) continue; // no region there
 						if (target == r) { target = nullptr; continue; } // don't pick our own region
 						if (TerrainDefs[target->type].flags & TerrainType::ANNIHILATED) {

@@ -28,6 +28,7 @@
 #include "items.h"
 #include "skills.h"
 #include "gamedata.h"
+#include "rng.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ Production::Production(int it, int maxamt)
 	itemtype = it;
 	amount = maxamt;
 	if (Globals->RANDOM_ECONOMY)
-		amount += getrandom(maxamt);
+		amount += rng::get_random(maxamt);
 	baseamount = amount;
 	productivity = 10;
 	AString skname = ItemDefs[it].pSkill;
@@ -54,7 +55,7 @@ Production::Production(int it, int maxamt)
 
 void Production::write_out(ostream& f)
 {
-	f << (itemtype == -1 ? "NO_ITEM" : ItemDefs[itemtype].abr) << '\n';	
+	f << (itemtype == -1 ? "NO_ITEM" : ItemDefs[itemtype].abr) << '\n';
 	f << amount << '\n';
 	f << baseamount << '\n';
 	if (itemtype == I_SILVER) {

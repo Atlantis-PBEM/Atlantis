@@ -175,15 +175,15 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(settlement_size == expected_settlement_size);
 
     auto wages = json_report["wages"];
-    auto expected_wages = json{ {"amount", 15.2}, {"max", 1935} };
+    auto expected_wages = json{ {"amount", 15.5}, {"max", 1795} };
     expect(wages == expected_wages);
     auto entertainment = json_report["entertainment"];
-    expect(entertainment == 141_i);
+    expect(entertainment == 121_i);
 
     // verify the products and the markets
     auto products = json_report["products"].size();
     expect(products == 1_ul);
-    auto expected_product = json{ {"tag", "HORS"}, {"name", "horse"}, {"plural", "horses"}, {"amount", 21 } };
+    auto expected_product = json{ {"tag", "HORS"}, {"name", "horse"}, {"plural", "horses"}, {"amount", 38 } };
     auto first_product = json_report["products"][0];
     expect(first_product == expected_product);
 
@@ -191,7 +191,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(for_sale == 4_ul);
 
     auto expected_sale = json{
-      {"tag", "PEAR"}, {"name", "pearls"}, {"plural", "pearls"}, {"amount", 9 }, { "price", 148 }
+      {"tag", "PEAR"}, {"name", "pearls"}, {"plural", "pearls"}, {"amount", 8 }, { "price", 109 }
     };
     auto first_sale = json_report["markets"]["for_sale"][0];
     expect(first_sale == expected_sale);
@@ -199,7 +199,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     auto wanted = json_report["markets"]["wanted"].size();
     expect(wanted == 9_ul);
     auto expected_wanted = json{
-      {"tag", "GRAI"}, {"name", "grain"}, {"plural", "grain"}, {"amount", 87 }, { "price", 20 }
+      {"tag", "GRAI"}, {"name", "grain"}, {"plural", "grain"}, {"amount", 72 }, { "price", 20 }
     };
     auto first_wanted = json_report["markets"]["wanted"][0];
     expect(first_wanted == expected_wanted);

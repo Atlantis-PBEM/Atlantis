@@ -28,14 +28,6 @@
 using namespace std;
 
 #include "gameio.h"
-#include "gamedefs.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-
-#include "i_rand.h"
-
-static randctx isaac_ctx;
 
 #define ENDLINE '\n'
 char buf[256];
@@ -47,53 +39,6 @@ void cleartoendl()
 	{
 		ch = cin.get();
 	}
-}
-
-void initIO()
-{
-	seedrandom( 1783 );
-}
-
-void doneIO()
-{
-}
-
-int getrandom(int range)
-{
-	int neg = (range < 0);
-	if (!range) return 0;
-	int ret = 0;
-	if (neg) range = -range;
-	unsigned long i = isaac_rand( &isaac_ctx );
-	i = i % range;
-	if (neg) ret = (int)(i*-1);
-	else ret = (int)i;
-	return ret;
-}
-
-void seedrandom(int num)
-{
-	ub4 i;
-	isaac_ctx.randa = isaac_ctx.randb = isaac_ctx.randc = (ub4)0;
-	for (i=0; i<256; ++i)
-	{
-		isaac_ctx.randrsl[i]=(ub4)num+i;
-	}
-	randinit( &isaac_ctx, TRUE );
-}
-
-void seedrandomrandom()
-{
-	seedrandom( time( 0 ) );
-}
-
-int makeRoll(int rolls, int sides) {
-	int result = 0;
-	for (int i = 0; i < rolls; i++) {
-		result += getrandom(sides) + 1;
-	}
-
-	return result;
 }
 
 int clamp(int imin, int ivalue, int imax) {
@@ -116,19 +61,6 @@ void Awrite(const AString & s)
 void Adot()
 {
 	cout << ".";
-}
-
-void message(char * c)
-{
-	cout << c << ENDLINE;
-	morewait();
-}
-
-void morewait()
-{
-	cout << ENDLINE;
-	cin.getline(buf,256,ENDLINE);
-	cout << ENDLINE;
 }
 
 

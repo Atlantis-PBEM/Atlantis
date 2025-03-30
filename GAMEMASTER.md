@@ -100,7 +100,7 @@ g++ -g -I. -I.. -Wall -o havilah/havilah havilah/obj/extra.o havilah/obj/map.o
 havilah/obj/monsters.o havilah/obj/rules.o havilah/obj/world.o
 obj/aregion.o obj/army.o obj/astring.o obj/battle.o obj/economy.o obj/edit.o
 obj/faction.o obj/fileio.o obj/game.o obj/gamedata.o obj/gamedefs.o
-obj/gameio.o obj/genrules.o obj/i_rand.o obj/items.o obj/main.o obj/market.o
+obj/gameio.o obj/genrules.o obj/items.o obj/main.o obj/market.o
 obj/modify.o obj/monthorders.o obj/npc.o obj/object.o obj/orders.o
 obj/parseorders.o obj/production.o obj/quests.o obj/runorders.o obj/shields.o
 obj/skills.o obj/skillshows.o obj/specials.o obj/spells.o obj/template.o
@@ -210,24 +210,6 @@ complete. You will know it is done compiling when the Compile Log
 minimizes.
 
 You should now have an .exe of your project inside "C:\Dev-Cpp\standard".
-
-If you are compiling an Atlantis 4.0 project, there is one file that you
-will have to separately prepare in advance. First, select File ->
-Project and start a Static Library C project. Make sure you select C as
-the language or it will not work. Then name the project "i_rand" and
-save the project in a new folder "C:\Dev-Cpp\i_rand" with the name
-"i_rand.dev".
-
-Now go to Project -> Add to Project, show all files, and add i_rand.c
-and i_rand.h from your atlantis sources. Now go to Execute -> Compile.
-It should compile and may tell you this is not executable. This is fine.
-
-Next follow the instructions for compiling Atlantis 5.0, except before
-compiling you need to go to Project -> Project Options, in there at the
-bottom where it says 'Linker Options/Optional Libs or Object files:'
-click the "Add Library or Object" button and find i_rand.a. Then click OK.
-Now you can run Execute -> Compile to generate an .exe of your Atlantis
-4.0 project.
 
 You can quickly test your .exe build by creating a shortcut to the .exe
 file, then right-click to select file properties, and append to the

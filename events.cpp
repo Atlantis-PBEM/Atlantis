@@ -28,18 +28,19 @@
 #include "gamedata.h"
 #include "graphs.h"
 #include "object.h"
+#include "rng.h"
 
 #include <map>
 #include <queue>
 #include <algorithm>
 
 const std::string oneOf(const std::vector<std::string> &list) {
-    int i = getrandom(list.size());
+    int i = rng::get_random(list.size());
     return list.at(i);
 }
 
 const std::string oneOf(const std::string &a, const std::string &b) {
-    return getrandom(2) ? a : b;
+    return rng::get_random(2) ? a : b;
 }
 
 std::string townType(const int type) {
@@ -369,9 +370,9 @@ std::string Events::Write(std::string worldName, std::string month, int year) {
         std::sort(list.begin(), list.end(), compareEvents);
         list.resize(std::min((int) list.size(), 10));
 
-        int n = std::min((int) list.size(), getrandom(3) + 3);
+        int n = std::min((int) list.size(), rng::get_random(3) + 3);
         while (n-- > 0) {
-            int i = getrandom(list.size());
+            int i = rng::get_random(list.size());
 
             if (lines.size() > 0) {
                 lines.push_back("");

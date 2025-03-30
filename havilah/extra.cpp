@@ -93,7 +93,7 @@ int Game::SetupFaction( Faction *pFac )
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
-			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
+			reg = pArr->GetRegion(rng::get_random(pArr->x), rng::get_random(pArr->y));
 		}
 	}
 	temp2->MoveUnit(reg->GetDummy());
@@ -126,7 +126,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 	item.type = I_RELICOFGRACE;
 	item.num = 1;
 	q->rewards.push_back(item);
-	d = getrandom(100);
+	d = rng::get_random(100);
 	if (d < 40) {
 		// SLAY quest
 		q->type = Quest::SLAY;
@@ -143,7 +143,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		}
 		if (!count) return;
 		// pick one as the object of the quest
-		d = getrandom(count);
+		d = rng::get_random(count);
 		for(const auto r : regions) {
 			if (TerrainDefs[r->type].similar_type == R_OCEAN) continue;
 			if (!r->visited) continue;
@@ -173,7 +173,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 				if (p->itemtype != I_SILVER) count++;
 			}
 		}
-		count = getrandom(count);
+		count = rng::get_random(count);
 		for(const auto r : regions) {
 			// Do allow lakes though
 			if (r->type == R_OCEAN) continue;
@@ -221,7 +221,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		// Work out how many destnations to use, based on destprobs[]
 		for (i = 0, count = 0; i < MAX_DESTINATIONS; i++)
 			count += destprobs[i];
-		d = getrandom(count);
+		d = rng::get_random(count);
 		for (count = 0; d >= destprobs[count]; count++)
 			d -= destprobs[count];
 		count++;
@@ -232,7 +232,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		// Choose that many unique regions
 		for (i = 0; i < count; i++) {
 			do {
-				destinations[i] = getrandom(temples.size());
+				destinations[i] = rng::get_random(temples.size());
 				// give a slight preference to regions with temples
 				for (it = temples.begin(), j = 0;
 						j < destinations[i];
@@ -240,7 +240,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 				// ...by rerolling (only once) if we get a
 				// templeless region first time
 				if (!it->second)
-					destinations[i] = getrandom(temples.size());
+					destinations[i] = rng::get_random(temples.size());
 				// make sure we haven't chosen duplicates
 				clash = 0;
 				for (j = 0; j < i; j++)
@@ -362,7 +362,7 @@ Faction *Game::CheckVictory()
 	if (visited >= (unvisited + visited) * QUEST_EXPLORATION_PERCENT / 100) {
 		// Exploration phase complete: start creating relic quests
 		for (i = 0; i < QUEST_SPAWN_RATE; i++) {
-			if (quests.size() < MAXIMUM_ACTIVE_QUESTS && getrandom(100) < QUEST_SPAWN_CHANCE)
+			if (quests.size() < MAXIMUM_ACTIVE_QUESTS && rng::get_random(100) < QUEST_SPAWN_CHANCE)
 				CreateQuest(regions, monfaction);
 		}
 		while (quests.size() < MINIMUM_ACTIVE_QUESTS) {
@@ -373,13 +373,13 @@ Faction *Game::CheckVictory()
 		// Tell the players to get exploring :-)
 		if (visited > 9 * unvisited) {
 			// 90% explored; specific hints
-			d = getrandom(12);
+			d = rng::get_random(12);
 		} else if (visited > 3 * unvisited) {
 			// 75% explored; some general hints
-			d = getrandom(8);
+			d = rng::get_random(8);
 		} else {
 			// lots of unexplored area; just tell them to explore
-			d = getrandom(6);
+			d = rng::get_random(6);
 		}
 		if (d == 2) {
 			message = "Be productive and multiply; "
@@ -404,14 +404,14 @@ Faction *Game::CheckVictory()
 			}
 			if (count > 0) {
 				// choose one, and find it
-				count = getrandom(count);
+				count = rng::get_random(count);
 				for (it = vRegions.begin(); it != vRegions.end(); it++) {
 					if (uvRegions[it->first] > 0)
 						if (!count--)
 							break;
 				}
 				// pick a hex within that region, and find it
-				count = getrandom(it->second);
+				count = rng::get_random(it->second);
 				for(const auto r : regions) {
 					if (it->first == r->name->Str()) {
 						if (!count--) {
@@ -440,7 +440,7 @@ Faction *Game::CheckVictory()
 			}
 			if (count > 0) {
 				// choose one, and find it
-				count = getrandom(count);
+				count = rng::get_random(count);
 				for (it = uvRegions.begin(); it != uvRegions.end(); it++) {
 					if (vRegions[it->first] == 0) {
 						if (!count--)
@@ -448,7 +448,7 @@ Faction *Game::CheckVictory()
 					}
 				}
 				// pick a hex within that region, and find it
-				count = getrandom(it->second);
+				count = rng::get_random(it->second);
 				for(const auto r : regions) {
 					if (it->first == r->name->Str()) {
 						if (!count--) {
@@ -502,13 +502,13 @@ Faction *Game::CheckVictory()
 			}
 		} else if (d > 7) {
 			// report exact coords of an unexplored hex
-			count = getrandom(unvisited);
+			count = rng::get_random(unvisited);
 			for(const auto r : regions) {
 				if (r->Population() > 0 && !r->visited) {
 					if (!count--) {
 						message = "The people of the ";
 						message += r->ShortPrint();
-						switch (getrandom(4)) {
+						switch (rng::get_random(4)) {
 							case 0:
 								message += " have not been visited by exiles.";
 								break;

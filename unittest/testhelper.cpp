@@ -1,12 +1,12 @@
 #include "../game.h"
-#include "gamedata.h"
+#include "../gamedata.h"
+#include "../rng.h"
 #include "testhelper.hpp"
 
-static void seed_random() { seedrandom(0xdeadbeef); }
-
 UnitTestHelper::UnitTestHelper() {
-    // install our own random seed function
-    game.init_random_seed = seed_random;
+    rng::seed_random(0xdeadbeef); // Seed the random number generator with a fixed value for reproducibility.
+
+    game.init_random_seed = []() { rng::seed_random(0xdeadbeef); };
 
     // Set up the output streams to capture the output.
     cout_streambuf = std::cout.rdbuf();

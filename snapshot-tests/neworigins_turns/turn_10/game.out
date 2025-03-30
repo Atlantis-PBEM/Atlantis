@@ -4,7 +4,7 @@ NewOrigins
 196608
 1
 10
-1615
+344
 4
 65
 100
@@ -856,31 +856,6 @@ none
 -1
 -1
 0
-1
-Giant Scorpions (25)
-none
-25
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 SCOR
-0
-NO_SKILL
-0
--1
 0
 Basingford Plain
 7
@@ -1046,7 +1021,32 @@ none
 -1
 -1
 0
+2
+Kobold Pack (20)
+none
+20
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
 1
+15 KOBO
+0
+NO_SKILL
+0
+-1
+0
 Unit (5)
 none
 5
@@ -1582,6 +1582,31 @@ none
 -1
 -1
 0
+1
+Giant Scorpions (25)
+none
+25
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 SCOR
+0
+NO_SKILL
+0
+-1
 0
 Eiraia Desert
 14
@@ -2616,32 +2641,7 @@ none
 -1
 -1
 0
-2
-Kobold Pack (20)
-none
-20
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
 1
-15 KOBO
-0
-NO_SKILL
-0
--1
-0
 Unit (63)
 none
 63
@@ -3339,7 +3339,7 @@ none
 -1
 -1
 0
-5
+6
 Unit (51)
 none
 51
@@ -3478,6 +3478,42 @@ NO_ITEM
 1
 COMB 855
 NO_SKILL
+0
+-1
+0
+Unit (38)
+none
+38
+1
+3
+0
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+1
+2
+1 LEAD
+1150 SILV
+10
+OBSE 30
+FORC 100
+PATT 45
+SPIR 30
+GATE 30
+FIRE 30
+COMB 200
+STEA 60
+ILLU 30
+PHEN 30
+FIRE
 0
 -1
 0
@@ -4181,7 +4217,7 @@ plain
 0
 CTAU
 2131
-1132
+1143
 123
 123
 980
@@ -4460,42 +4496,6 @@ none
 -1
 -1
 0
-1
-Unit (38)
-none
-38
-1
-3
-0
-2
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-1
-2
-1 LEAD
-1150 SILV
-10
-OBSE 30
-FORC 100
-PATT 45
-SPIR 30
-GATE 30
-FIRE 30
-COMB 200
-STEA 60
-ILLU 30
-PHEN 30
-FIRE
-0
--1
 0
 Nela River
 43
@@ -4800,31 +4800,6 @@ none
 -1
 -1
 0
-1
-Sandlings (26)
-none
-26
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 SAND
-0
-NO_SKILL
-0
--1
 0
 1
 Lair
@@ -6347,6 +6322,31 @@ none
 -1
 -1
 0
+1
+Crocodiles (16)
+none
+16
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+5 CROC
+0
+NO_SKILL
+0
+-1
 0
 Great Nena River
 66
@@ -6731,6 +6731,56 @@ none
 -1
 -1
 0
+2
+Sandlings (26)
+none
+26
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 SAND
+0
+NO_SKILL
+0
+-1
+0
+Lizard Men (46)
+none
+46
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 LMAN
+0
+NO_SKILL
+0
+-1
 0
 Maranarenos Mountain
 71
@@ -7546,56 +7596,6 @@ none
 -1
 -1
 0
-2
-Lizard Men (46)
-none
-46
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 LMAN
-0
-NO_SKILL
-0
--1
-0
-Grizzly Bears (17)
-none
-17
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-3 GRIZ
-0
-NO_SKILL
-0
--1
 0
 1
 Crypt
@@ -7868,31 +7868,6 @@ none
 -1
 -1
 0
-1
-Crocodiles (16)
-none
-16
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 CROC
-0
-NO_SKILL
-0
--1
 0
 Hornwood Mountain
 82
@@ -9080,6 +9055,31 @@ none
 -1
 -1
 0
+1
+Grizzly Bears (17)
+none
+17
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+3 GRIZ
+0
+NO_SKILL
+0
+-1
 0
 Heteraskalos Rocks
 95
@@ -9972,31 +9972,6 @@ none
 -1
 -1
 0
-1
-Family of Ogres (18)
-none
-18
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 OGRE
-0
-NO_SKILL
-0
--1
 0
 Ametanopos Sea
 104
@@ -10668,6 +10643,56 @@ none
 -1
 -1
 0
+2
+Family of Ogres (18)
+none
+18
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 OGRE
+0
+NO_SKILL
+0
+-1
+0
+Living Trees (47)
+none
+47
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+5 TREN
+0
+NO_SKILL
+0
+-1
 0
 Ametanopos Sea
 111
@@ -11389,31 +11414,6 @@ none
 -1
 -1
 0
-1
-Living Trees (47)
-none
-47
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 TREN
-0
-NO_SKILL
-0
--1
 0
 Ametanopos Sea
 119

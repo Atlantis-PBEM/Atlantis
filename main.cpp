@@ -50,17 +50,15 @@ int main(int argc, char *argv[])
 	Game game;
 	int retval = 1;
 
-	initIO();
+	// Give the rng an initial see.
+	rng::seed_random(1783); // this is the historical seed.. it gets reseeded in NewGame() to a random value.
 
-	Awrite(AString("Atlantis Engine Version: ") +
-			ATL_VER_STRING(CURRENT_ATL_VER));
-	Awrite(AString(Globals->RULESET_NAME) + ", Version: " +
-			ATL_VER_STRING(Globals->RULESET_VERSION));
+	Awrite(AString("Atlantis Engine Version: ") + ATL_VER_STRING(CURRENT_ATL_VER));
+	Awrite(AString(Globals->RULESET_NAME) + ", Version: " + ATL_VER_STRING(Globals->RULESET_VERSION));
 	Awrite("");
 
 	if (argc == 1) {
 		usage();
-		doneIO();
 		return 0;
 	}
 
@@ -163,6 +161,5 @@ int main(int argc, char *argv[])
 		retval = 0;
 	} while( 0 );
 
-	doneIO();
 	return retval;
 }

@@ -198,7 +198,7 @@ int Game::SetupFaction( Faction *pFac )
 			ARegionArray *pArr = regions.GetRegionArray(1);
 			// Let's look for a random city hex
 			while (!reg) {
-				reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
+				reg = pArr->GetRegion(rng::get_random(pArr->x), rng::get_random(pArr->y));
 				// reg->town will be null if there is no town.
 				// reg->town->TownType() returns town size.
 				if (reg == NULL || (Globals->TOWNS_EXIST && reg->town == NULL) )
@@ -212,7 +212,7 @@ int Game::SetupFaction( Faction *pFac )
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(0);
 		while(!reg) {
-			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
+			reg = pArr->GetRegion(rng::get_random(pArr->x), rng::get_random(pArr->y));
 		}
 	}
 

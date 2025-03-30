@@ -25,6 +25,7 @@
 #include "army.h"
 #include "gameio.h"
 #include "gamedata.h"
+#include "rng.h"
 
 #include <assert.h>
 
@@ -605,7 +606,7 @@ int Soldier::ArmorProtect(int weaponClass)
 	int chance = pArm->saves[weaponClass];
 
 	if (chance <= 0) return 0;
-	if (chance > getrandom(pArm->from)) return 1;
+	if (chance > rng::get_random(pArm->from)) return 1;
 
 	return 0;
 }
@@ -829,12 +830,12 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 		silv *= (Globals->MONSTER_SPOILS_RECOVERY-free);
 		silv /= Globals->MONSTER_SPOILS_RECOVERY;
 	}
-	spoils.SetNum(I_SILVER, spoils.GetNum(I_SILVER) + getrandom(silv));
+	spoils.SetNum(I_SILVER, spoils.GetNum(I_SILVER) + rng::get_random(silv));
 
 	int thespoil = mp->spoiltype;
 
 	if (thespoil == -1) return;
-	if (thespoil == IT_NORMAL && getrandom(2) && !Globals->SPOILS_NO_TRADE) thespoil = IT_TRADE;
+	if (thespoil == IT_NORMAL && rng::get_random(2) && !Globals->SPOILS_NO_TRADE) thespoil = IT_TRADE;
 
 	int count = 0;
 	int i;
@@ -848,7 +849,7 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 		}
 	}
 	if (count == 0) return;
-	count = getrandom(count) + 1;
+	count = rng::get_random(count) + 1;
 
 	for (i=0; i<NITEMS; i++) {
 		if (
@@ -864,7 +865,7 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 		}
 	}
 
-	int val = getrandom(mp->silver * 2);
+	int val = rng::get_random(mp->silver * 2);
 	if ((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
 		// Adjust for length of monster freedom.
 		val *= (Globals->MONSTER_SPOILS_RECOVERY-free);
@@ -873,7 +874,7 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 
 	spoils.SetNum(
 		thespoil,
-		spoils.GetNum(thespoil) + (val + getrandom(ItemDefs[thespoil].baseprice)) / ItemDefs[thespoil].baseprice
+		spoils.GetNum(thespoil) + (val + rng::get_random(ItemDefs[thespoil].baseprice)) / ItemDefs[thespoil].baseprice
 	);
 }
 
@@ -982,11 +983,11 @@ void Army::DoHealLevel(Battle *b, int level, int rate, int useItems)
 
 		while (s->healing) {
 			if (!CanBeHealed()) break;
-			int j = getrandom(count - NumAlive()) + notbehind;
+			int j = rng::get_random(count - NumAlive()) + notbehind;
 			Soldier * temp = soldiers[j];
 			if (temp->canbehealed) {
 				s->healing--;
-				if (getrandom(100) < rate) {
+				if (rng::get_random(100) < rate) {
 					n++;
 					soldiers[j] = soldiers[notbehind];
 					soldiers[notbehind] = temp;
@@ -1043,7 +1044,7 @@ void Army::Win(Battle * b, ItemList& spoils)
 
 				ns = units.size();
 				if (ItemDefs[i->type].type & IT_SHIP) {
-					int t = getrandom(ns);
+					int t = rng::get_random(ns);
 					Unit *u = units[t];
 					if (u && u->CanGetSpoil(i)) {
 						u->items.SetNum(i->type, i->num);
@@ -1071,7 +1072,7 @@ void Army::Win(Battle * b, ItemList& spoils)
 					}
 				}
 				while (ns > 0 && i->num > 0) {
-					int t = getrandom(ns);
+					int t = rng::get_random(ns);
 					auto u = units[t];
 					// get an iterator to that element of the array for later.
 					auto it = units.begin() + t;
@@ -1203,7 +1204,7 @@ int Army::GetTargetNum(char const *special, bool canAttackBehind)
 			}
 		}
 		if (validtargs) {
-			int targ = getrandom(validtargs);
+			int targ = rng::get_random(validtargs);
 
 			for (i = start; i < notfront; i++) {
 				if (i == canfront) i = canbehind;
@@ -1213,7 +1214,7 @@ int Army::GetTargetNum(char const *special, bool canAttackBehind)
 			}
 		}
 	} else {
-		int i = getrandom(tars);
+		int i = rng::get_random(tars);
 		if (canAttackBehind) {
 			return i;
 		}
@@ -1246,7 +1247,7 @@ int Army::GetEffectNum(char const *effect)
 		}
 	}
 	if (validtargs) {
-		int targ = getrandom(validtargs);
+		int targ = rng::get_random(validtargs);
 		for (i = start; i < notfront; i++) {
 			if (i == canfront) i = canbehind;
 			if (soldiers[i]->HasEffect(effect)) {
@@ -1279,7 +1280,7 @@ int Hits(int a,int d)
 	} else if (d>a) {
 		tomiss = pow(2,d-a);
 	}
-	if (getrandom(tohit+tomiss) < tohit) return 1;
+	if (rng::get_random(tohit+tomiss) < tohit) return 1;
 	return 0;
 }
 
@@ -1440,7 +1441,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 					failchance += (tar->protection[attackType]+1)/2;
 				}
 
-				if (getrandom(failchance)) {
+				if (rng::get_random(failchance)) {
 					attackers->stats.RecordAttackFailed(attacker->unit->num, weaponIndex, sp);
 					continue;
 				}
@@ -1479,7 +1480,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 			ret++;
 			if ((ItemDefs[tar->race].type & IT_MAN) &&
 				(ItemDefs[attacker->race].type & IT_UNDEAD)) {
-				if (getrandom(100) < Globals->UNDEATH_CONTAGION) {
+				if (rng::get_random(100) < Globals->UNDEATH_CONTAGION) {
 					attacker->unit->raised++;
 					tar->canbehealed = 0;
 				}

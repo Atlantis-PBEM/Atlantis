@@ -4,9 +4,9 @@ NewOrigins
 196608
 1
 1
-7048
+1264
 4
-48
+50
 100
 1
 2
@@ -486,7 +486,7 @@ none
 -1
 -1
 0
-1
+2
 Pride of Lions (12)
 none
 12
@@ -507,6 +507,31 @@ NO_ITEM
 10
 1
 3 LION
+0
+NO_SKILL
+0
+-1
+0
+Family of Ogres (15)
+none
+15
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 OGRE
 0
 NO_SKILL
 0
@@ -743,6 +768,31 @@ none
 -1
 -1
 0
+1
+Giant Scorpions (25)
+none
+25
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 SCOR
+0
+NO_SKILL
+0
+-1
 0
 Eiraia Desert
 6
@@ -1499,31 +1549,6 @@ none
 -1
 -1
 0
-1
-Giant Scorpions (25)
-none
-25
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 SCOR
-0
-NO_SKILL
-0
--1
 0
 Eiraia Desert
 14
@@ -2506,6 +2531,31 @@ none
 -1
 -1
 0
+1
+Kobold Pack (20)
+none
+20
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+15 KOBO
+0
+NO_SKILL
+0
+-1
 0
 Aoratalotos Forest
 25
@@ -2667,31 +2717,6 @@ none
 -1
 -1
 0
-1
-Family of Ogres (15)
-none
-15
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 OGRE
-0
-NO_SKILL
-0
--1
 0
 Nela River
 27
@@ -2996,7 +3021,7 @@ none
 -1
 -1
 0
-1
+2
 Crocodiles (19)
 none
 19
@@ -3017,6 +3042,31 @@ NO_ITEM
 10
 1
 4 CROC
+0
+NO_SKILL
+2
+4
+0
+Sandlings (26)
+none
+26
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 SAND
 0
 NO_SKILL
 0
@@ -3973,7 +4023,7 @@ none
 -1
 -1
 0
-2
+1
 Wolf Pack (22)
 none
 22
@@ -3994,31 +4044,6 @@ NO_ITEM
 10
 1
 8 WOLF
-0
-NO_SKILL
-0
--1
-0
-Kobold Pack (20)
-none
-20
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-15 KOBO
 0
 NO_SKILL
 0
@@ -4525,7 +4550,7 @@ none
 -1
 -1
 0
-2
+1
 Giant Scorpions (23)
 none
 23
@@ -4546,31 +4571,6 @@ NO_ITEM
 10
 1
 7 SCOR
-0
-NO_SKILL
-2
-5
-0
-Sandlings (26)
-none
-26
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 SAND
 0
 NO_SKILL
 0
@@ -6022,6 +6022,31 @@ none
 -1
 -1
 0
+1
+Pride of Lions (40)
+none
+40
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 LION
+0
+NO_SKILL
+0
+-1
 0
 Great Nena River
 66
@@ -6406,31 +6431,6 @@ none
 -1
 -1
 0
-1
-Lizard Men (46)
-none
-46
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 LMAN
-0
-NO_SKILL
-0
--1
 0
 Maranarenos Mountain
 71
@@ -7362,6 +7362,31 @@ none
 -1
 -1
 0
+1
+Crocodiles (48)
+none
+48
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+5 CROC
+0
+NO_SKILL
+0
+-1
 0
 Heteraskalos Valley
 80
@@ -7434,31 +7459,6 @@ none
 -1
 -1
 0
-1
-Pride of Lions (40)
-none
-40
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-2 LION
-0
-NO_SKILL
-0
--1
 0
 Aoratalotos Desert
 81
@@ -7627,6 +7627,31 @@ none
 -1
 -1
 0
+1
+Family of Ogres (46)
+none
+46
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 OGRE
+0
+NO_SKILL
+0
+-1
 0
 1
 Giant's Castle
@@ -8561,31 +8586,6 @@ none
 -1
 -1
 0
-1
-Wolf Pack (39)
-none
-39
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 WOLF
-0
-NO_SKILL
-0
--1
 0
 Great Nara River
 93
@@ -8814,6 +8814,31 @@ none
 -1
 -1
 0
+1
+Grizzly Bears (17)
+none
+17
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+3 GRIZ
+0
+NO_SKILL
+0
+-1
 0
 Durbador Swamp
 96
@@ -9598,12 +9623,12 @@ none
 -1
 0
 1
-Grizzly Bears (17)
+Family of Ogres (18)
 none
-17
+18
 3
 2
-2
+0
 0
 0
 NO_ITEM
@@ -9617,7 +9642,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-3 GRIZ
+1 OGRE
 0
 NO_SKILL
 0
@@ -9690,6 +9715,31 @@ none
 -1
 -1
 0
+1
+Merfolk (47)
+none
+47
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+63 MERF
+0
+NO_SKILL
+0
+-1
 0
 Morubal Woods
 105
@@ -10137,6 +10187,31 @@ none
 -1
 -1
 0
+1
+Wolf Pack (39)
+none
+39
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 WOLF
+0
+NO_SKILL
+0
+-1
 0
 Dogmoeryx Sands
 109
@@ -10293,56 +10368,6 @@ none
 -1
 -1
 0
-2
-Family of Ogres (18)
-none
-18
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 OGRE
-0
-NO_SKILL
-0
--1
-0
-Living Trees (47)
-none
-47
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 TREN
-0
-NO_SKILL
-0
--1
 0
 Ametanopos Sea
 111
@@ -10529,6 +10554,32 @@ none
 -1
 -1
 0
+1
+Undead (49)
+none
+49
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+2
+87 SKEL
+8 UNDE
+0
+NO_SKILL
+0
+-1
 0
 2
 Road SW

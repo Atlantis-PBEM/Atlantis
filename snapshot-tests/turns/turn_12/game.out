@@ -4,9 +4,9 @@ Wyreth
 131072
 2
 0
-5826
+7577
 4
-195
+192
 100
 1
 2
@@ -5955,31 +5955,6 @@ none
 -1
 -1
 0
-1
-Pride of Lions (73)
-none
-73
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-2 LION
-0
-NO_SKILL
-0
--1
 0
 Wicaess
 82
@@ -6265,8 +6240,8 @@ NO_ITEM
 2 LION
 0
 NO_SKILL
-0
--1
+2
+1
 0
 Lautaro
 85
@@ -7760,8 +7735,8 @@ NO_ITEM
 3 GRIZ
 0
 NO_SKILL
+2
 0
--1
 0
 Wyreth Ocean
 102
@@ -8693,31 +8668,6 @@ none
 -1
 -1
 0
-1
-Family of Ogres (40)
-none
-40
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 OGRE
-0
-NO_SKILL
-0
--1
 0
 Lautaro
 116
@@ -9339,6 +9289,31 @@ none
 -1
 -1
 0
+1
+Pride of Lions (159)
+none
+159
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 LION
+0
+NO_SKILL
+0
+-1
 0
 Quainai
 128
@@ -9411,6 +9386,31 @@ none
 -1
 -1
 0
+1
+Pride of Lions (73)
+none
+73
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 LION
+0
+NO_SKILL
+0
+-1
 0
 Nadinon
 129
@@ -9723,7 +9723,7 @@ none
 -1
 -1
 0
-1
+2
 Pride of Lions (38)
 none
 38
@@ -9744,6 +9744,31 @@ NO_ITEM
 10
 1
 2 LION
+0
+NO_SKILL
+0
+-1
+0
+Family of Ogres (40)
+none
+40
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 OGRE
 0
 NO_SKILL
 0
@@ -14314,7 +14339,7 @@ none
 -1
 -1
 0
-3
+2
 King's Guards (167)
 none
 167
@@ -14338,31 +14363,6 @@ NO_ITEM
 5002 SILV
 1
 COMB 1410
-NO_SKILL
-0
--1
-0
-Pride of Lions (159)
-none
-159
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-2 LION
-0
 NO_SKILL
 0
 -1
@@ -15819,6 +15819,31 @@ none
 -1
 -1
 0
+1
+Pride of Lions (61)
+none
+61
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 LION
+0
+NO_SKILL
+0
+-1
 0
 Wyreth Ocean
 202
@@ -17354,31 +17379,6 @@ none
 -1
 -1
 0
-1
-Living Water (191)
-none
-191
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 ELEM
-0
-NO_SKILL
-0
--1
 0
 Wyreth Ocean
 219
@@ -17931,8 +17931,8 @@ NO_ITEM
 5 CROC
 0
 NO_SKILL
-0
--1
+2
+2
 0
 Sihep
 228
@@ -18313,31 +18313,6 @@ none
 -1
 -1
 0
-1
-Pride of Lions (61)
-none
-61
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-2 LION
-0
-NO_SKILL
-0
--1
 0
 Wyreth Ocean
 234
@@ -20206,8 +20181,8 @@ NO_ITEM
 4 TREN
 0
 NO_SKILL
-0
--1
+2
+1
 0
 Sihep
 259
@@ -23169,9 +23144,9 @@ none
 -1
 0
 1
-Tribe of Centaurs (192)
+Tribe of Centaurs (191)
 none
-192
+191
 3
 2
 2
@@ -24290,6 +24265,31 @@ none
 -1
 -1
 0
+1
+Anacondas (78)
+none
+78
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+4 ANAC
+0
+NO_SKILL
+0
+-1
 0
 Rayting
 319
@@ -26038,31 +26038,6 @@ none
 -1
 -1
 0
-1
-Grizzly Bears (46)
-none
-46
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-3 GRIZ
-0
-NO_SKILL
-2
-0
 0
 Catrianchi
 340
@@ -26559,6 +26534,31 @@ none
 -1
 -1
 0
+1
+Clan of Wild Men (79)
+none
+79
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+10 WMAN
+0
+NO_SKILL
+0
+-1
 0
 Bogdrog
 350
@@ -26635,31 +26635,6 @@ none
 -1
 -1
 0
-1
-Anacondas (78)
-none
-78
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-4 ANAC
-0
-NO_SKILL
-2
-5
 0
 Wyreth Ocean
 351
@@ -26974,6 +26949,31 @@ none
 -1
 -1
 0
+1
+Grizzly Bears (46)
+none
+46
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+3 GRIZ
+0
+NO_SKILL
+0
+-1
 0
 Catrianchi
 356
@@ -27498,31 +27498,6 @@ none
 -1
 -1
 0
-1
-Clan of Wild Men (79)
-none
-79
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-10 WMAN
-0
-NO_SKILL
-0
--1
 0
 Karggog
 366
@@ -29750,31 +29725,6 @@ none
 -1
 -1
 0
-1
-Ice Wurms (45)
-none
-45
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 ICEW
-0
-NO_SKILL
-0
--1
 0
 Ichidi
 403
@@ -30359,6 +30309,31 @@ none
 -1
 -1
 0
+1
+Kobold Pack (82)
+none
+82
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+19 KOBO
+0
+NO_SKILL
+0
+-1
 0
 Llirad
 413
@@ -30741,6 +30716,31 @@ none
 -1
 -1
 0
+1
+Ice Wurms (48)
+none
+48
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+4 ICEW
+0
+NO_SKILL
+0
+-1
 0
 Ichidi
 419
@@ -30821,31 +30821,6 @@ none
 -1
 -1
 0
-1
-Ice Wurms (48)
-none
-48
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-4 ICEW
-0
-NO_SKILL
-0
--1
 0
 Wyreth Ocean
 420
@@ -31652,33 +31627,6 @@ none
 -1
 -1
 0
-1
-Undead (193)
-none
-193
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-3
-85 SKEL
-1 UNDE
-1 LICH
-0
-NO_SKILL
-0
--1
 0
 Ichidi
 434
@@ -31759,6 +31707,31 @@ none
 -1
 -1
 0
+1
+Ice Wurms (45)
+none
+45
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 ICEW
+0
+NO_SKILL
+0
+-1
 0
 Wyreth Ocean
 435
@@ -33645,31 +33618,6 @@ none
 -1
 -1
 0
-1
-Kobold Pack (82)
-none
-82
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-19 KOBO
-0
-NO_SKILL
-0
--1
 0
 Gordor
 462
@@ -33746,6 +33694,31 @@ none
 -1
 -1
 0
+1
+Kobold Pack (80)
+none
+80
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+12 KOBO
+0
+NO_SKILL
+0
+-1
 0
 Wyreth Ocean
 463
@@ -34518,31 +34491,6 @@ none
 -1
 -1
 0
-1
-Kobold Pack (80)
-none
-80
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-12 KOBO
-0
-NO_SKILL
-0
--1
 0
 Wyreth Ocean
 478
@@ -37089,31 +37037,6 @@ none
 -1
 -1
 0
-1
-Giant Lizards (100)
-none
-100
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-2 GLIZ
-0
-NO_SKILL
-0
--1
 0
 Toumser
 526
@@ -37716,6 +37639,31 @@ none
 -1
 -1
 0
+1
+Giant Lizards (100)
+none
+100
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 GLIZ
+0
+NO_SKILL
+0
+-1
 0
 Toumser
 535
@@ -38824,12 +38772,12 @@ none
 -1
 0
 1
-Pack of Rats (88)
+Pack of Rats (171)
 none
-88
+171
 3
 2
-0
+2
 0
 0
 NO_ITEM
@@ -38843,7 +38791,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-28 GRAT
+20 GRAT
 0
 NO_SKILL
 0
@@ -39352,31 +39300,6 @@ none
 -1
 -1
 0
-1
-Pack of Rats (144)
-none
-144
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-17 GRAT
-0
-NO_SKILL
-0
--1
 0
 1
 Cave
@@ -39492,12 +39415,12 @@ none
 -1
 0
 1
-Pack of Rats (171)
+Pack of Rats (88)
 none
-171
+88
 3
 2
-2
+0
 0
 0
 NO_ITEM
@@ -39511,7 +39434,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-20 GRAT
+28 GRAT
 0
 NO_SKILL
 0
@@ -39592,31 +39515,6 @@ none
 -1
 -1
 0
-1
-Dragon (92)
-none
-92
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 DRAG
-0
-NO_SKILL
-0
--1
 0
 Reilnon
 556
@@ -39697,6 +39595,31 @@ none
 -1
 -1
 0
+1
+Troll Pack (160)
+none
+160
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 TROL
+0
+NO_SKILL
+0
+-1
 0
 The Undersea
 557
@@ -39813,6 +39736,31 @@ none
 -1
 -1
 0
+1
+Troll Pack (102)
+none
+102
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 TROL
+0
+NO_SKILL
+0
+-1
 0
 The Undersea
 559
@@ -40049,31 +39997,6 @@ none
 -1
 -1
 0
-1
-Goblin Horde (89)
-none
-89
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-38 GOBL
-0
-NO_SKILL
-0
--1
 0
 Nybusa
 563
@@ -40226,31 +40149,6 @@ none
 -1
 -1
 0
-1
-Troll Pack (160)
-none
-160
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 TROL
-0
-NO_SKILL
-0
--1
 0
 The Undersea
 565
@@ -40476,31 +40374,6 @@ none
 -1
 -1
 0
-1
-Troll Pack (102)
-none
-102
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 TROL
-0
-NO_SKILL
-0
--1
 0
 The Undersea
 568
@@ -40617,6 +40490,31 @@ none
 -1
 -1
 0
+1
+Pack of Rats (144)
+none
+144
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+17 GRAT
+0
+NO_SKILL
+0
+-1
 0
 Nybusa
 570
@@ -40693,6 +40591,31 @@ none
 -1
 -1
 0
+1
+Goblin Horde (89)
+none
+89
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+38 GOBL
+0
+NO_SKILL
+0
+-1
 0
 Reilnon
 571
@@ -41391,6 +41314,31 @@ none
 -1
 -1
 0
+1
+Dragon (92)
+none
+92
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 DRAG
+0
+NO_SKILL
+0
+-1
 0
 The Undersea
 581
@@ -41869,31 +41817,6 @@ none
 -1
 -1
 0
-1
-Giant Spiders (190)
-none
-190
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-2 GSPI
-0
-NO_SKILL
-0
--1
 0
 Reilnon
 588
@@ -44272,31 +44195,6 @@ none
 -1
 -1
 0
-1
-Living Water (194)
-none
-194
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 ELEM
-0
-NO_SKILL
-0
--1
 0
 The Undersea
 633
@@ -44938,6 +44836,56 @@ none
 -1
 -1
 0
+2
+Elder Demons (139)
+none
+139
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+200 BALR
+0
+NO_SKILL
+0
+-1
+0
+Sphinx (190)
+none
+190
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 SPHI
+0
+NO_SKILL
+0
+-1
 0
 Abyssal Plains
 645
@@ -45014,31 +44962,6 @@ none
 -1
 -1
 0
-1
-Giant Scorpions (104)
-none
-104
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-6 SCOR
-0
-NO_SKILL
-0
--1
 0
 Abyssal Plains
 646
@@ -45119,6 +45042,31 @@ none
 -1
 -1
 0
+1
+Giant Scorpions (104)
+none
+104
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+6 SCOR
+0
+NO_SKILL
+0
+-1
 0
 Abyssal Plains
 647
@@ -45271,31 +45219,6 @@ none
 -1
 -1
 0
-1
-Elder Demons (139)
-none
-139
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-200 BALR
-0
-NO_SKILL
-0
--1
 0
 1
 Black Keep

@@ -76,7 +76,7 @@ int Game::SetupFaction( Faction *pFac )
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
 		while(!reg) {
-			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
+			reg = pArr->GetRegion(rng::get_random(pArr->x), rng::get_random(pArr->y));
 		}
 	}
 	temp2->MoveUnit( reg->GetDummy() );

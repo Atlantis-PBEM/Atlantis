@@ -204,8 +204,8 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 	if (Globals->GATES_EXIST) {
 		int gateset = 0;
 		do {
-			tempx = getrandom(4);
-			tempy = getrandom(4);
+			tempx = rng::get_random(4);
+			tempy = rng::get_random(4);
 			reg = pRegionArrays[level]->GetRegion(tempx, tempy);
 			if (reg) {
 				gateset = 1;
@@ -219,8 +219,8 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 
 	ARegion *lair = NULL;
 	do {
-		tempx = getrandom(4);
-		tempy = getrandom(4);
+		tempx = rng::get_random(4);
+		tempy = rng::get_random(4);
 		lair = pRegionArrays[level]->GetRegion(tempx, tempy);
 	} while(!lair || lair == reg);
 	Object *o = new Object(lair);
@@ -561,13 +561,13 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 	if (!fractal) {
 		while (ocean > (total * percentOcean) / 100) {
 			Adot();
-			int sz = getrandom(continentSize);
+			int sz = rng::get_random(continentSize);
 			sz = sz * sz;
 
-			int tempx = getrandom(pRegs->x);
+			int tempx = rng::get_random(pRegs->x);
 			int yoff = pRegs->y / 40;
 			int yband = pRegs->y / 2 - 2 * yoff;
-			int tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
+			int tempy = (rng::get_random(yband)+yoff) * 2 + tempx % 2;
 
 			ARegion *reg = pRegs->GetRegion(tempx, tempy);
 			if (!reg) continue;
@@ -575,16 +575,16 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 			ARegion *seareg = reg;
 
 			// Archipelago or Continent?
-			if (getrandom(100) < Globals->ARCHIPELAGO) {
+			if (rng::get_random(100) < Globals->ARCHIPELAGO) {
 				// Make an Archipelago:
 				sz = sz / 5 + 1;
 				int first = 1;
 				int tries = 0;
 				for (int i=0; i<sz; i++) {
-					int direc = getrandom(NDIRS);
+					int direc = rng::get_random(NDIRS);
 					newreg = reg->neighbors[direc];
 					while (!newreg) {
-						direc = getrandom(6);
+						direc = rng::get_random(6);
 						newreg = reg->neighbors[direc];
 					}
 					tries++;
@@ -596,7 +596,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 					if (!newreg) break;
 					if (newreg) {
 						seareg = newreg;
-						newreg = seareg->neighbors[getrandom(NDIRS)];
+						newreg = seareg->neighbors[rng::get_random(NDIRS)];
 						if (!newreg) break;
 						// island start point (~3 regions away from last island)
 						seareg = newreg;
@@ -613,20 +613,20 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 							if (tries > 5) break;
 							continue;
 						}
-						int growit = getrandom(20);
+						int growit = rng::get_random(20);
 						int growth = 0;
 						int growch = 2;
 						// grow this island
 						while (growit > growch) {
-							growit = getrandom(20);
+							growit = rng::get_random(20);
 							tries = 0;
-							int newdir = getrandom(NDIRS);
+							int newdir = rng::get_random(NDIRS);
 							while (direc == reg->GetRealDirComp(newdir))
-								newdir = getrandom(NDIRS);
+								newdir = rng::get_random(NDIRS);
 							newreg = reg->neighbors[newdir];
 							while ((!newreg) && (tries < 36)) {
 								while (direc == reg->GetRealDirComp(newdir))
-									newdir = getrandom(NDIRS);
+									newdir = rng::get_random(NDIRS);
 								newreg = reg->neighbors[newdir];
 								tries++;
 							}
@@ -650,11 +650,11 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 					ocean--;
 				}
 				for (int i=0; i<sz; i++) {
-					int dir = getrandom(NDIRS);
+					int dir = rng::get_random(NDIRS);
 					if ((reg->yloc < yoff*2) && ((dir < 2) || (dir == (NDIRS-1)))
-						&& (getrandom(4) < 3)) continue;
+						&& (rng::get_random(4) < 3)) continue;
 					if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
-						&& (getrandom(4) < 3)) continue;
+						&& (rng::get_random(4) < 3)) continue;
 					ARegion *newreg = reg->neighbors[dir];
 					if (!newreg) break;
 					int polecheck = 0;
@@ -719,14 +719,14 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 	int coast = sealevel;
 	int dotter = 0;
 	while (ocean > (total * (percentOcean)) / 100) {
-		int sz = getrandom(continentSize);
+		int sz = rng::get_random(continentSize);
 		sz = sz * sz;
 		dotter++;
-		int tempx = getrandom(pRegs->x);
+		int tempx = rng::get_random(pRegs->x);
 		int yoff = pRegs->y / 40;
 		int yband = pRegs->y / 2 - 2 * yoff;
-		int tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
-		int margin = getrandom(sealevel/10 + 2) + 2;
+		int tempy = (rng::get_random(yband)+yoff) * 2 + tempx % 2;
+		int margin = rng::get_random(sealevel/10 + 2) + 2;
 		ARegion *reg = pRegs->GetRegion(tempx, tempy);
 		if (!reg) continue;
 		ARegion *newreg = reg;
@@ -734,14 +734,14 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 		while (reg->elevation < sealevel-margin) {
 			int tries = 0;
 			while ((reg->elevation < sealevel-margin) && (tries < 25)) {
-				tempx = getrandom(pRegs->x);
-				tempy = (getrandom(yband)+yoff) * 2 + tempx % 2;
+				tempx = rng::get_random(pRegs->x);
+				tempy = (rng::get_random(yband)+yoff) * 2 + tempx % 2;
 				newreg = pRegs->GetRegion(tempx, tempy);
 				if (!reg) continue;
 				reg = newreg;
 			}
 			sealevel--;
-			margin = getrandom(sealevel/10 + 2) + 2;
+			margin = rng::get_random(sealevel/10 + 2) + 2;
 		}
 
 		int cont = 0;
@@ -760,7 +760,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 		}
 		int dir;
 		for (int i=0; i<sz; i++) {
-			int dr = getrandom(NDIRS);
+			int dr = rng::get_random(NDIRS);
 			int maxe1, d1 = -1;
 			for (int d=0; d<NDIRS; d++) {
 				dir = dr + d;
@@ -768,19 +768,19 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
 				newreg = reg->neighbors[dir];
 				if (!newreg) continue;
 				if ((newreg->type == -1) && (newreg->elevation > sealevel/2)) {
-					if (newreg->elevation+getrandom(10) > maxe1) {
+					if (newreg->elevation+rng::get_random(10) > maxe1) {
 						maxe1 = newreg->maxwages;
 						d1 = dir;
 					}
 				}
 			}
 			if (d1 >= 0) dir = d1;
-				else dir = getrandom(NDIRS);
+				else dir = rng::get_random(NDIRS);
 
 			if ((reg->yloc < yoff*2) && ((dir < 2) || (dir = NDIRS-1))
-				&& (getrandom(4) < 3)) continue;
+				&& (rng::get_random(4) < 3)) continue;
 			if ((reg->yloc > (yband+yoff)*2) && ((dir < 5) && (dir > 1))
-				&& (getrandom(4) < 3)) continue;
+				&& (rng::get_random(4) < 3)) continue;
 			ARegion *newreg = reg->neighbors[dir];
 			if (!newreg) break;
 			int polecheck = 0;
@@ -898,7 +898,7 @@ void ARegionList::SeverLandBridges(ARegionArray *pRegs)
 					continue;
 				if (newregion->IsCoastal() == 4) tidych = tidych * 2;
 			}
-			if (getrandom(100) < (tidych)) reg->wages = -2;
+			if (rng::get_random(100) < (tidych)) reg->wages = -2;
 		}
 	}
 	// now change to ocean
@@ -955,19 +955,19 @@ void ARegionList::RescaleFractalParameters(ARegionArray *pArr)
 			if (reg->type == R_NUM) {
 				int old = reg->elevation;
 				reg->elevation = 100 * (old - elev_min) / (elev_max - elev_min);
-				if (getrandom(elev_max - elev_min) < (100 * (old - elev_min) % (elev_max - elev_min)))
+				if (rng::get_random(elev_max - elev_min) < (100 * (old - elev_min) % (elev_max - elev_min)))
 					reg->elevation++;
 				old = reg->humidity;
 				reg->humidity = 100 * (old - humi_min) / (humi_max - humi_min);
-				if (getrandom(humi_max - humi_min) < (100 * (old - humi_min) % (humi_max - humi_min)))
+				if (rng::get_random(humi_max - humi_min) < (100 * (old - humi_min) % (humi_max - humi_min)))
 					reg->humidity++;
 				old = reg->vegetation;
 				reg->vegetation = 100 * (old - vege_min) / (vege_max - vege_min);
-				if (getrandom(vege_max - vege_min) < (100 * (old - vege_min) % (vege_max - vege_min)))
+				if (rng::get_random(vege_max - vege_min) < (100 * (old - vege_min) % (vege_max - vege_min)))
 					reg->vegetation++;
 				old = reg->culture;
 				reg->culture = 100 * (old - cult_min) / (cult_max - cult_min);
-				if (getrandom(cult_max - cult_min) < (100 * (old - cult_min) % (cult_max - cult_min)))
+				if (rng::get_random(cult_max - cult_min) < (100 * (old - cult_min) % (cult_max - cult_min)))
 					reg->culture++;
 
 			}
@@ -1003,10 +1003,10 @@ void ARegionList::SetFractalTerrain(ARegionArray *pArr)
 		}
 		for (int x=0; x<(pArr->x)/f; x++) {
 			for (int y=0; y<(pArr->y)/(f*2); y++) {
-				if (getrandom(1000) > skip) continue;
+				if (rng::get_random(1000) > skip) continue;
 				for (int i=0; i<4; i++) {
-					int tempx = x * f + getrandom(f);
-					int tempy = y * f * 2 + getrandom(f)*2 + tempx%2;
+					int tempx = x * f + rng::get_random(f);
+					int tempy = y * f * 2 + rng::get_random(f)*2 + tempx%2;
 					ARegion *reg = pArr->GetRegion(tempx, tempy);
 					if (!reg) continue;
 
@@ -1111,8 +1111,8 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 					lastnamed = 2 * Globals->CONTINENT_SIZE;
 				if (lastnamed > (3 * Globals->CONTINENT_SIZE / 2)) {
 					r1->wages = AGetName(0, r1);
-					r1->population = (getrandom(2) + sz / 2)
-						* (getrandom(2) + sz);
+					r1->population = (rng::get_random(2) + sz / 2)
+						* (rng::get_random(2) + sz);
 
 					if (r1->xloc > xmin)
 						tnamedx[TerrainDefs[r1->type].similar_type] = r1->xloc;
@@ -1132,7 +1132,7 @@ void ARegionList::NameRegions(ARegionArray *pArr)
 						|| (reg->wages >= 0) || (reg->type == R_NUM)) continue;
 					int name1 = -99, name2 = -99;
 					int nw1 = 0, nw2 = 0, nc1 = 0, nc2 = 0, nn = 0;
-					int db = getrandom(NDIRS);
+					int db = rng::get_random(NDIRS);
 					for (int d=0; d < NDIRS; d++) {
 						int dir = (d + db + NDIRS) % NDIRS;
 						ARegion *n = reg->neighbors[dir];
@@ -1195,11 +1195,11 @@ void ARegionList::SetupAnchors(ARegionArray *ta)
 	int dotter = 0;
 	for (int x=0; x<(ta->x)/f; x++) {
 		for (int y=0; y<(ta->y)/(f*2); y++) {
-			if (getrandom(1000) > skip) continue;
+			if (rng::get_random(1000) > skip) continue;
 			ARegion *reg = 0;
 			for (int i=0; i<4; i++) {
-				int tempx = x * f + getrandom(f);
-				int tempy = y * f * 2 + getrandom(f)*2 + tempx%2;
+				int tempx = x * f + rng::get_random(f);
+				int tempy = y * f * 2 + rng::get_random(f)*2 + tempx%2;
 				reg = ta->GetRegion(tempx, tempy);
 				if (!reg)
 					continue;
@@ -1234,17 +1234,17 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 			for (y = 0; y < pArr->y; y++) {
 				ARegion *reg = pArr->GetRegion(x, y);
 				if (!reg) continue;
-				if ((j > 0) && (j < 21) && (getrandom(3) < 2)) continue;
+				if ((j > 0) && (j < 21) && (rng::get_random(3) < 2)) continue;
 				if (reg->type == R_NUM) {
 
 					// Check for Lakes
 					if (Globals->LAKES &&
-						(getrandom(100) < (Globals->LAKES/10 + 1))) {
+						(rng::get_random(100) < (Globals->LAKES/10 + 1))) {
 							reg->type = R_LAKE;
 							break;
 					}
 					// Check for Odd Terrain
-					if (getrandom(1000) < Globals->ODD_TERRAIN) {
+					if (rng::get_random(1000) < Globals->ODD_TERRAIN) {
 						reg->type = GetRegType(reg);
 						// if (TerrainDefs[reg->type].similar_type != R_OCEAN)
 						//	reg->wages = AGetName(0, reg);
@@ -1252,7 +1252,7 @@ void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean)
 					}
 
 
-					int init = getrandom(6);
+					int init = rng::get_random(6);
 					for (int i=0; i<NDIRS; i++) {
 						ARegion *t = reg->neighbors[(i+init) % NDIRS];
 						if (t) {
@@ -1378,7 +1378,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			// Anchor distribution: depends on GROW_RACES value
 			int jiggle = 4 + 2 * Globals->GROW_RACES;
 			if ((y + ((x % 2) * jiggle/2)) % jiggle > 1) continue;
-			int xoff = x + 2 - getrandom(3) - getrandom(3);
+			int xoff = x + 2 - rng::get_random(3) - rng::get_random(3);
 			ARegion *reg = pArr->GetRegion(xoff, y);
 			if (!reg) continue;
 
@@ -1389,7 +1389,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 
 			if (TerrainDefs[reg->type].similar_type == R_OCEAN) {
 				// setup near coastal race here
-				int d = getrandom(NDIRS);
+				int d = rng::get_random(NDIRS);
 				int ctr = 0;
 				ARegion *nreg = reg->neighbors[d];
 				if (!nreg) continue;
@@ -1397,9 +1397,9 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 					if (TerrainDefs[nreg->type].similar_type != R_OCEAN) {
 						int rnum = sizeof(TerrainDefs[nreg->type].coastal_races) /
 							sizeof(TerrainDefs[nreg->type].coastal_races[0]);
-						reg->race = TerrainDefs[nreg->type].coastal_races[getrandom(rnum)];
+						reg->race = TerrainDefs[nreg->type].coastal_races[rng::get_random(rnum)];
 					} else {
-						int dir = getrandom(NDIRS);
+						int dir = rng::get_random(NDIRS);
 						if (d == nreg->GetRealDirComp(dir)) continue;
 						if (!(nreg->neighbors[dir])) continue;
 						nreg = nreg->neighbors[dir];
@@ -1408,7 +1408,7 @@ void ARegionList::RaceAnchors(ARegionArray *pArr)
 			} else {
 				// setup noncoastal race here
 				int rnum = sizeof(TerrainDefs[reg->type].races)/sizeof(TerrainDefs[reg->type].races[0]);
-				reg->race = TerrainDefs[reg->type].races[getrandom(rnum)];
+				reg->race = TerrainDefs[reg->type].races[rng::get_random(rnum)];
 			}
 		}
 	}
@@ -1437,7 +1437,7 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
 					// Only coastal races may pass from sea to land
 					if ((TerrainDefs[nreg->type].similar_type == R_OCEAN) && (!iscoastal)) continue;
 
-					int ch = getrandom(5);
+					int ch = rng::get_random(5);
 					if (iscoastal) {
 						if (TerrainDefs[nreg->type].similar_type == R_OCEAN)
 							ch += 2;
@@ -1496,9 +1496,9 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom,
 	if (TerrainDefs[reg->type].similar_type == R_OCEAN) return;
 
 	int tempx = reg->xloc * pTo->x / pFrom->x +
-		getrandom(pTo->x / pFrom->x);
+		rng::get_random(pTo->x / pFrom->x);
 	int tempy = reg->yloc * pTo->y / pFrom->y +
-		getrandom(pTo->y / pFrom->y);
+		rng::get_random(pTo->y / pFrom->y);
 	//
 	// Make sure we get a valid region.
 	//
@@ -1537,7 +1537,7 @@ void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds)
 			ARegion *reg = pFrom->GetRegion(x, y);
 			if (!reg) continue;
 
-			if (getrandom(odds) != 0) continue;
+			if (rng::get_random(odds) != 0) continue;
 
 			MakeShaft(reg, pFrom, pTo);
 		}
@@ -1577,8 +1577,8 @@ void ARegionList::InitSetupGates(int level)
 	for (i=0; i<pArr->x / 8; i++) {
 		for (j=0; j<pArr->y / 16; j++) {
 			for (k=0; k<5; k++) {
-				int tempx = i*8 + getrandom(8);
-				int tempy = j*16 + getrandom(8)*2 + tempx%2;
+				int tempx = i*8 + rng::get_random(8);
+				int tempy = j*16 + rng::get_random(8)*2 + tempx%2;
 				ARegion *temp = pArr->GetRegion(tempx, tempy);
 				if (temp && TerrainDefs[temp->type].similar_type != R_OCEAN &&
 						temp->gate != -1) {
@@ -1623,10 +1623,10 @@ void ARegionList::FinalSetupGates()
 
 	for(const auto r : regions) {
 		if (r->gate == -1) {
-			int index = getrandom(ngates);
+			int index = rng::get_random(ngates);
 			while (used[index]) {
 				if (Globals->DISPERSE_GATE_NUMBERS) {
-					index = getrandom(ngates);
+					index = rng::get_random(ngates);
 				} else {
 					index++;
 					index = index % ngates;
@@ -1635,7 +1635,7 @@ void ARegionList::FinalSetupGates()
 			r->gate = index+1;
 			used[index] = 1;
 			// setting up gatemonth
-			r->gatemonth = getrandom(12);;
+			r->gatemonth = rng::get_random(12);;
 		}
 	}
 	delete[] used;
@@ -1675,11 +1675,11 @@ void GeoMap::Generate(int spread, int smoothness)
 		for (int y = 0; y <= size; y += step) {
 			Geography g;
 			int tval = (size/2 - abs(size/2 - y)) * 25 / (size/2);
-			g.elevation = getrandom(30)+getrandom(30)+20;
-			g.humidity = getrandom(30)+getrandom(30)+20;
-			g.temperature = getrandom(tval/2)+getrandom(tval/2)+tval;
-			g.vegetation = getrandom(30)+getrandom(30)+20;
-			g.culture = getrandom(20)+getrandom(20)+tval;
+			g.elevation = rng::get_random(30)+rng::get_random(30)+20;
+			g.humidity = rng::get_random(30)+rng::get_random(30)+20;
+			g.temperature = rng::get_random(tval/2)+rng::get_random(tval/2)+tval;
+			g.vegetation = rng::get_random(30)+rng::get_random(30)+20;
+			g.culture = rng::get_random(20)+rng::get_random(20)+tval;
 			long int coords = (size+1) * x + y;
 			if (x >= size) {
 				g.elevation = GetElevation((x-size), y);
@@ -1725,39 +1725,39 @@ void GeoMap::Generate(int spread, int smoothness)
 							av_cul += gc;
 							nb++;
 						} else {
-							av_ele += getrandom(5)+getrandom(5)+45;
-							av_hum += getrandom(20)+getrandom(20)+30;
-							av_tem += getrandom(5)+1;
-							av_veg += getrandom(20)+getrandom(20)+30;
-							av_cul += getrandom(15)+1;
+							av_ele += rng::get_random(5)+rng::get_random(5)+45;
+							av_hum += rng::get_random(20)+rng::get_random(20)+30;
+							av_tem += rng::get_random(5)+1;
+							av_veg += rng::get_random(20)+rng::get_random(20)+30;
+							av_cul += rng::get_random(15)+1;
 							nb++;
 						}
 					}
 				}
 				Geography g;
-				int r1 = getrandom(2*frac) - frac;
-				int r2 = getrandom(2*frac) - frac;
-				int r3 = (getrandom(frac) - frac)/2;
-				int r4 = getrandom(2*frac) - frac;
-				int r5 = getrandom(2*frac) - frac;
+				int r1 = rng::get_random(2*frac) - frac;
+				int r2 = rng::get_random(2*frac) - frac;
+				int r3 = (rng::get_random(frac) - frac)/2;
+				int r4 = rng::get_random(2*frac) - frac;
+				int r5 = rng::get_random(2*frac) - frac;
 				g.elevation = av_ele/nb + av_ele%nb + r1;
 				g.humidity = av_hum/nb + av_hum%nb + r2;
 				int tmean = (size/2 - abs(size/2 - ycoor)) * 100 / (size/2);
 				g.temperature = (tmean + av_tem/nb + av_tem%nb + r3)/2;
 				g.vegetation = av_veg/nb + av_veg%nb + r4;
 				g.culture = av_cul/nb + av_cul%nb + r5;
-				if (g.elevation < 1) g.elevation = getrandom(5);
-				if (g.temperature < 1) g.temperature = getrandom(5);
-				if (g.vegetation < 1) g.vegetation = getrandom(5);
-				if (g.culture < 1) g.culture = getrandom(10);
-				if (g.elevation > 100) g.elevation = 100 - getrandom(4);
-				if (g.vegetation > 100) g.vegetation = 100 - getrandom(4);
+				if (g.elevation < 1) g.elevation = rng::get_random(5);
+				if (g.temperature < 1) g.temperature = rng::get_random(5);
+				if (g.vegetation < 1) g.vegetation = rng::get_random(5);
+				if (g.culture < 1) g.culture = rng::get_random(10);
+				if (g.elevation > 100) g.elevation = 100 - rng::get_random(4);
+				if (g.vegetation > 100) g.vegetation = 100 - rng::get_random(4);
 				if (g.temperature > 100) {
 					//g.humidity -= g.temperature - 100;
-					g.temperature = 100 - getrandom(4);
+					g.temperature = 100 - rng::get_random(4);
 				}
-				if (g.humidity < 1) g.humidity = getrandom(5);
-				if (g.humidity > 100) g.humidity = 100 - getrandom(4);
+				if (g.humidity < 1) g.humidity = rng::get_random(5);
+				if (g.humidity > 100) g.humidity = 100 - rng::get_random(4);
 				long int coords = (size+1) * xcoor + ycoor;
 				geomap.erase(coords);
 				geomap.insert(std::make_pair(coords, g));
@@ -1800,11 +1800,11 @@ void GeoMap::Generate(int spread, int smoothness)
 							av_cul += gc;
 							nb++;
 						} else {
-							av_ele += getrandom(5)+getrandom(5)+45;
-							av_hum += getrandom(20)+getrandom(20)+30;
-							av_tem += getrandom(5)+1;
-							av_veg += getrandom(20)+getrandom(20)+30;
-							av_cul += getrandom(15)+1;
+							av_ele += rng::get_random(5)+rng::get_random(5)+45;
+							av_hum += rng::get_random(20)+rng::get_random(20)+30;
+							av_tem += rng::get_random(5)+1;
+							av_veg += rng::get_random(20)+rng::get_random(20)+30;
+							av_cul += rng::get_random(15)+1;
 							nb++;
 						}
 					}
@@ -1823,39 +1823,39 @@ void GeoMap::Generate(int spread, int smoothness)
 							av_cul += gc;
 							nb++;
 						} else {
-							av_ele += getrandom(5)+getrandom(5)+45;
-							av_hum += getrandom(20)+getrandom(20)+30;
-							av_tem += getrandom(5)+1;
-							av_veg += getrandom(20)+getrandom(20)+30;
-							av_cul += getrandom(15)+1;
+							av_ele += rng::get_random(5)+rng::get_random(5)+45;
+							av_hum += rng::get_random(20)+rng::get_random(20)+30;
+							av_tem += rng::get_random(5)+1;
+							av_veg += rng::get_random(20)+rng::get_random(20)+30;
+							av_cul += rng::get_random(15)+1;
 							nb++;
 						}
 					}
 
 					Geography g;
-					int r1 = getrandom(2*frac) - frac;
-					int r2 = getrandom(2*frac) - frac;
-					int r3 = (getrandom(frac) - frac)/2;
-					int r4 = getrandom(2*frac) - frac;
-					int r5 = getrandom(2*frac) - frac;
+					int r1 = rng::get_random(2*frac) - frac;
+					int r2 = rng::get_random(2*frac) - frac;
+					int r3 = (rng::get_random(frac) - frac)/2;
+					int r4 = rng::get_random(2*frac) - frac;
+					int r5 = rng::get_random(2*frac) - frac;
 					g.elevation = av_ele/nb + av_ele%nb + r1;
 					g.humidity = av_hum/nb + av_hum%nb + r2;
 					int tmean = (size/2 - abs(size/2 - dy)) * 100 / (size/2);
 					g.temperature = (tmean + av_tem/nb + av_tem%nb + r3)/2;
 					g.vegetation = av_veg/nb + av_veg%nb + r4;
 					g.culture = av_cul/nb + av_cul%nb + r5;
-					if (g.elevation < 1) g.elevation = getrandom(5);
-					if (g.temperature < 1) g.temperature = getrandom(5);
-					if (g.vegetation < 1) g.vegetation = getrandom(5);
-					if (g.culture < 1) g.culture = getrandom(10);
-					if (g.elevation > 100) g.elevation = 100 - getrandom(4);
-					if (g.vegetation > 100) g.vegetation = 100 - getrandom(4);
+					if (g.elevation < 1) g.elevation = rng::get_random(5);
+					if (g.temperature < 1) g.temperature = rng::get_random(5);
+					if (g.vegetation < 1) g.vegetation = rng::get_random(5);
+					if (g.culture < 1) g.culture = rng::get_random(10);
+					if (g.elevation > 100) g.elevation = 100 - rng::get_random(4);
+					if (g.vegetation > 100) g.vegetation = 100 - rng::get_random(4);
 					if (g.temperature > 100) {
 						//g.humidity -= g.temperature - 100;
-						g.temperature = 100 - getrandom(4);
+						g.temperature = 100 - rng::get_random(4);
 					}
-					if (g.humidity < 1) g.humidity = getrandom(5);
-					if (g.humidity > 100) g.humidity = 100 - getrandom(4);
+					if (g.humidity < 1) g.humidity = rng::get_random(5);
+					if (g.humidity > 100) g.humidity = 100 - rng::get_random(4);
 					long int coords = (size+1) * dx + dy;
 					geomap.erase(coords);
 					geomap.insert(std::make_pair(coords, g));

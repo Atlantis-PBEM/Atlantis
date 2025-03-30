@@ -17,7 +17,7 @@ RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o
 
 ENGINE_OBJECTS = aregion.o army.o astring.o battle.o economy.o \
   edit.o faction.o game.o gamedata.o gamedefs.o gameio.o \
-  genrules.o i_rand.o items.o main.o market.o modify.o monthorders.o \
+  genrules.o items.o main.o market.o modify.o monthorders.o \
   npc.o object.o orders.o parseorders.o production.o quests.o runorders.o \
   skills.o skillshows.o specials.o spells.o unit.o \
   events.o events-battle.o events-assassination.o mapgen.o simplex.o namegen.o \

@@ -4,9 +4,9 @@ NewOrigins
 196608
 1
 4
-1713
+3679
 4
-60
+58
 100
 1
 2
@@ -723,6 +723,31 @@ none
 -1
 -1
 0
+1
+Giant Scorpions (25)
+none
+25
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 SCOR
+0
+NO_SKILL
+0
+-1
 0
 Eiraia Desert
 6
@@ -1113,9 +1138,9 @@ none
 -1
 0
 1
-Family of Ogres (15)
+Pride of Lions (12)
 none
-15
+12
 3
 2
 2
@@ -1132,7 +1157,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-1 OGRE
+3 LION
 0
 NO_SKILL
 0
@@ -1584,31 +1609,6 @@ none
 -1
 -1
 0
-1
-Crocodiles (19)
-none
-19
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-4 CROC
-0
-NO_SKILL
-0
--1
 0
 Burmere Sea
 15
@@ -2054,31 +2054,6 @@ none
 -1
 -1
 0
-1
-Pride of Lions (12)
-none
-12
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-3 LION
-0
-NO_SKILL
-0
--1
 0
 1
 Crypt
@@ -2195,6 +2170,31 @@ none
 -1
 -1
 0
+1
+Family of Ogres (15)
+none
+15
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 OGRE
+0
+NO_SKILL
+0
+-1
 0
 Durbaubal Pond
 20
@@ -2343,31 +2343,6 @@ none
 -1
 -1
 0
-1
-Giant Scorpions (25)
-none
-25
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 SCOR
-0
-NO_SKILL
-0
--1
 0
 Bletchfield Pond
 22
@@ -3078,6 +3053,31 @@ none
 -1
 -1
 0
+1
+Crocodiles (19)
+none
+19
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+4 CROC
+0
+NO_SKILL
+0
+-1
 0
 Philagotuspolisus Marshes
 31
@@ -4723,31 +4723,6 @@ none
 -1
 -1
 0
-1
-Sphinx (58)
-none
-58
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 SPHI
-0
-NO_SKILL
-0
--1
 0
 Kleptoatres Volcano
 47
@@ -5273,6 +5248,31 @@ none
 -1
 -1
 0
+1
+Lizard Men (46)
+none
+46
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 LMAN
+0
+NO_SKILL
+0
+-1
 0
 Philagotuspolisus Sands
 54
@@ -6595,31 +6595,6 @@ none
 -1
 -1
 0
-1
-Lizard Men (46)
-none
-46
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 LMAN
-0
-NO_SKILL
-0
--1
 0
 Maranarenos Mountain
 71
@@ -8894,6 +8869,56 @@ none
 -1
 -1
 0
+2
+Living Trees (47)
+none
+47
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+5 TREN
+0
+NO_SKILL
+0
+-1
+0
+Family of Ogres (18)
+none
+18
+3
+2
+0
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 OGRE
+0
+NO_SKILL
+0
+-1
 0
 Heteraskalos Rocks
 95
@@ -9541,6 +9566,31 @@ none
 -1
 -1
 0
+1
+Wolf Pack (39)
+none
+39
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+8 WOLF
+0
+NO_SKILL
+0
+-1
 0
 Great Nara River
 101
@@ -9685,31 +9735,6 @@ none
 -1
 -1
 0
-1
-Living Trees (47)
-none
-47
-3
-2
-0
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 TREN
-0
-NO_SKILL
-0
--1
 0
 Heteraskalos Rocks
 103
@@ -9786,31 +9811,6 @@ none
 -1
 -1
 0
-1
-Grizzly Bears (17)
-none
-17
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-3 GRIZ
-0
-NO_SKILL
-0
--1
 0
 Ametanopos Sea
 104
@@ -10326,31 +10326,6 @@ none
 -1
 -1
 0
-1
-Wolf Pack (39)
-none
-39
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-8 WOLF
-0
-NO_SKILL
-0
--1
 0
 Dogmoeryx Sands
 109
@@ -10508,9 +10483,9 @@ none
 -1
 0
 1
-Family of Ogres (18)
+Grizzly Bears (17)
 none
-18
+17
 3
 2
 2
@@ -10527,7 +10502,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-1 OGRE
+3 GRIZ
 0
 NO_SKILL
 0
@@ -10684,6 +10659,56 @@ none
 -1
 -1
 0
+2
+Crocodiles (49)
+none
+49
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+5 CROC
+0
+NO_SKILL
+0
+-1
+0
+Lizard Men (24)
+none
+24
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+7 LMAN
+0
+NO_SKILL
+0
+-1
 0
 1
 Crypt
@@ -11063,32 +11088,6 @@ none
 -1
 -1
 0
-1
-Undead (59)
-none
-59
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-2
-91 SKEL
-9 UNDE
-0
-NO_SKILL
-0
--1
 0
 Dogmoeryx Sands
 117
@@ -11397,31 +11396,6 @@ none
 -1
 -1
 0
-1
-Crocodiles (49)
-none
-49
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-5 CROC
-0
-NO_SKILL
-0
--1
 0
 1
 Road SW
@@ -12298,31 +12272,6 @@ none
 -1
 -1
 0
-1
-Lizard Men (24)
-none
-24
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-7 LMAN
-0
-NO_SKILL
-0
--1
 0
 Becland
 129
@@ -12824,6 +12773,31 @@ none
 -1
 -1
 0
+1
+Troll Pack (43)
+none
+43
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+6 TROL
+0
+NO_SKILL
+0
+-1
 0
 Becland
 137
@@ -12904,31 +12878,6 @@ none
 -1
 -1
 0
-1
-Troll Pack (43)
-none
-43
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-6 TROL
-0
-NO_SKILL
-0
--1
 0
 The Undersea
 138

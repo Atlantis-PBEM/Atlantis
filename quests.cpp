@@ -25,6 +25,7 @@
 
 #include "quests.h"
 #include "object.h"
+#include "rng.h"
 #include <iterator>
 #include <memory>
 
@@ -212,7 +213,7 @@ int QuestList::check_harvest_target(ARegion *r, int item, int harvested, int max
 {
 	for(auto q: quests) {
 		if (q->type == Quest::HARVEST && q->regionnum == r->num && q->objective.type == item) {
-			if (getrandom(max) < harvested) {
+			if (rng::get_random(max) < harvested) {
 				*quest_rewards = distribute_rewards(u, q);
 				erase(q); // this is safe since we immediately return and don't use the iterator again
 				return 1;

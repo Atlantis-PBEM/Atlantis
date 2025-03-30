@@ -41,6 +41,7 @@
 #include "text_report_generator.hpp"
 #include "quests.h"
 #include "unit.h"
+#include "rng.h"
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -475,7 +476,7 @@ int Game::OpenGame()
 
 	int seed;
 	f >> seed;
-	seedrandom(seed);
+	rng::seed_random(seed);
 
 	f >> factionseq;
 	f >> unitseq;
@@ -525,7 +526,7 @@ int Game::SaveGame()
 
 	f << year << "\n";
 	f << month << "\n";
-	f << getrandom(10000) << "\n";
+	f << rng::get_random(10000) << "\n";
 	f << factionseq << "\n";
 	f << unitseq << "\n";
 	f << shipseq << "\n";
@@ -1635,7 +1636,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 
 			// Okay, check flat loss.
 			if (ItemDefs[i->type].escape & ItemType::LOSS_CHANCE) {
-				int losses = (i->num + getrandom(ItemDefs[i->type].esc_val)) / ItemDefs[i->type].esc_val;
+				int losses = (i->num + rng::get_random(ItemDefs[i->type].esc_val)) / ItemDefs[i->type].esc_val;
 				// LOSS_CHANCE and HAS_SKILL together mean the
 				// decay rate only applies if you don't have
 				// the required skill (this might get used if
@@ -1692,7 +1693,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				if (ItemDefs[i->type].escape & ItemType::LOSE_LINKED) {
 					if (chance > chances[ItemDefs[i->type].type]) chances[ItemDefs[i->type].type] = chance;
 					linked = 1;
-				} else if (chance > getrandom(10000)) {
+				} else if (chance > rng::get_random(10000)) {
 					if (Globals->WANDERING_MONSTERS_EXIST) {
 						Faction *mfac = GetFaction(factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
@@ -1713,7 +1714,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				// walk the chances list and for each chance, see if
 				// escape happens and if escape happens then walk all items
 				// and everything that is that type, get rid of it.
-				if (i->second < getrandom(10000)) continue;
+				if (i->second < rng::get_random(10000)) continue;
 				for(auto iter = u->items.begin(); iter != u->items.end();) {
 					Item *it = *iter;
 					// Since items can be removed below, we will increment the iterator here
@@ -1950,7 +1951,7 @@ void Game::AdjustCityMons(ARegion *r)
 		}
 	}
 
-	if (needguard && (getrandom(100) < Globals->GUARD_REGEN)) {
+	if (needguard && (rng::get_random(100) < Globals->GUARD_REGEN)) {
 		CreateCityMon(r, 10, needmage);
 	}
 }
@@ -2063,7 +2064,7 @@ void Game::WriteTimesArticle(AString article)
 {
 	string fname;
 
-	do { fname = "times." + to_string(getrandom(10000)); } while (filesystem::exists(fname));
+	do { fname = "times." + to_string(rng::get_random(10000)); } while (filesystem::exists(fname));
 	ofstream f(fname, ios::out | ios::trunc);
 	if (f.is_open()) {
 		f << indent::wrap(78,70,0) << article << '\n';

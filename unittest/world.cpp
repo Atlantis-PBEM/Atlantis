@@ -71,7 +71,7 @@ void ARegion::MakeStartingCity() {
 	if (!Globals->START_CITIES_EXIST) return;
 
 	town->hab = 125 * Globals->CITY_POP / 100;
-	while (town->pop < town->hab) town->pop += getrandom(200)+200;
+	while (town->pop < town->hab) town->pop += rng::get_random(200)+200;
 	town->dev = TownDevelopment();
 
 	float ratio;

@@ -720,15 +720,16 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     expect(event["message"] == "forest (0,2) in Testing Wilds has been utterly annihilated.");
     expect(event["category"] == "annihilate");
     event = events[3];
-    expect(event["message"] == "desert (1,3) in Testing Wilds has been utterly annihilated.");
-    expect(event["category"] == "annihilate");
-    event = events[4];
     expect(event["message"] == "plain (0,0) in Testing Wilds, contains Basictown [city] has been utterly annihilated.");
     expect(event["category"] == "annihilate");
-    event = events[5];
+    event = events[4];
     expect(event["message"] == "Is annihilated.");
     expect(event["category"] == "annihilate");
     expect(event["unit"]["number"] == 3_i);
+    event = events[5];
+    expect(event["message"] == "desert (1,3) in Testing Wilds has been utterly annihilated.");
+    expect(event["category"] == "annihilate");
+
 
     // load the gm faction report
     json gm_report;

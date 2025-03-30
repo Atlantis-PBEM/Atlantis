@@ -1525,6 +1525,27 @@
           ],
           "name": "Pride of Lions",
           "number": 12
+        },
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "ogre",
+              "plural": "ogres",
+              "tag": "OGRE"
+            }
+          ],
+          "name": "Family of Ogres",
+          "number": 15
         }
       ],
       "wages": {
@@ -1826,7 +1847,29 @@
       "province": "Eiraia Desert",
       "tax": 408,
       "terrain": "desert",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 8,
+              "name": "giant scorpion",
+              "plural": "giant scorpions",
+              "tag": "SCOR"
+            }
+          ],
+          "name": "Giant Scorpions",
+          "number": 25
+        }
+      ],
       "wages": {
         "amount": 11.6,
         "max": 191
@@ -2868,29 +2911,7 @@
       "province": "Eiraia Desert",
       "tax": 371,
       "terrain": "desert",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 8,
-              "name": "giant scorpion",
-              "plural": "giant scorpions",
-              "tag": "SCOR"
-            }
-          ],
-          "name": "Giant Scorpions",
-          "number": 25
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 11.4,
         "max": 171
@@ -4479,7 +4500,29 @@
       "province": "Philagotuspolisus Woods",
       "tax": 1147,
       "terrain": "forest",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 15,
+              "name": "kobold",
+              "plural": "kobolds",
+              "tag": "KOBO"
+            }
+          ],
+          "name": "Kobold Pack",
+          "number": 20
+        }
+      ],
       "wages": {
         "amount": 13.4,
         "max": 494
@@ -4774,29 +4817,7 @@
       "province": "Aoratalotos Forest",
       "tax": 860,
       "terrain": "forest",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 1,
-              "name": "ogre",
-              "plural": "ogres",
-              "tag": "OGRE"
-            }
-          ],
-          "name": "Family of Ogres",
-          "number": 15
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.9,
         "max": 388
@@ -5365,6 +5386,27 @@
           ],
           "name": "Crocodiles",
           "number": 19
+        },
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 8,
+              "name": "sandling",
+              "plural": "sandlings",
+              "tag": "SAND"
+            }
+          ],
+          "name": "Sandlings",
+          "number": 26
         }
       ],
       "wages": {
@@ -6876,27 +6918,6 @@
           ],
           "name": "Wolf Pack",
           "number": 22
-        },
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 15,
-              "name": "kobold",
-              "plural": "kobolds",
-              "tag": "KOBO"
-            }
-          ],
-          "name": "Kobold Pack",
-          "number": 20
         }
       ],
       "wages": {
@@ -7799,27 +7820,6 @@
           ],
           "name": "Giant Scorpions",
           "number": 23
-        },
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 8,
-              "name": "sandling",
-              "plural": "sandlings",
-              "tag": "SAND"
-            }
-          ],
-          "name": "Sandlings",
-          "number": 26
         }
       ],
       "wages": {
@@ -10298,7 +10298,29 @@
       "province": "Morubal Marshes",
       "tax": 726,
       "terrain": "swamp",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 2,
+              "name": "lion",
+              "plural": "lions",
+              "tag": "LION"
+            }
+          ],
+          "name": "Pride of Lions",
+          "number": 40
+        }
+      ],
       "wages": {
         "amount": 12.2,
         "max": 314
@@ -10981,29 +11003,7 @@
       "province": "Great Nara River",
       "tax": 675,
       "terrain": "swamp",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 8,
-              "name": "lizard man",
-              "plural": "lizard men",
-              "tag": "LMAN"
-            }
-          ],
-          "name": "Lizard Men",
-          "number": 46
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.4,
         "max": 308
@@ -12516,7 +12516,29 @@
       "province": "Maranarenos Swamp",
       "tax": 342,
       "terrain": "swamp",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 5,
+              "name": "crocodile",
+              "plural": "crocodiles",
+              "tag": "CROC"
+            }
+          ],
+          "name": "Crocodiles",
+          "number": 48
+        }
+      ],
       "wages": {
         "amount": 11.4,
         "max": 161
@@ -12651,29 +12673,7 @@
       "province": "Heteraskalos Valley",
       "tax": 978,
       "terrain": "plain",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 2,
-              "name": "lion",
-              "plural": "lions",
-              "tag": "LION"
-            }
-          ],
-          "name": "Pride of Lions",
-          "number": 40
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.2,
         "max": 399
@@ -13018,7 +13018,29 @@
       ],
       "tax": 633,
       "terrain": "mountain",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 2,
+              "name": "ogre",
+              "plural": "ogres",
+              "tag": "OGRE"
+            }
+          ],
+          "name": "Family of Ogres",
+          "number": 46
+        }
+      ],
       "wages": {
         "amount": 12.5,
         "max": 296
@@ -14464,29 +14486,7 @@
       "province": "Akeritos Swamp",
       "tax": 576,
       "terrain": "swamp",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 8,
-              "name": "wolf",
-              "plural": "wolves",
-              "tag": "WOLF"
-            }
-          ],
-          "name": "Wolf Pack",
-          "number": 39
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.4,
         "max": 273
@@ -14893,7 +14893,29 @@
       "province": "Heteraskalos Rocks",
       "tax": 483,
       "terrain": "mountain",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 3,
+              "name": "grizzly bear",
+              "plural": "grizzly bears",
+              "tag": "GRIZ"
+            }
+          ],
+          "name": "Grizzly Bears",
+          "number": 17
+        }
+      ],
       "wages": {
         "amount": 11.8,
         "max": 223
@@ -16139,19 +16161,19 @@
             "number": 2
           },
           "flags": {
-            "avoid": true,
+            "avoid": false,
             "guard": false
           },
           "items": [
             {
-              "amount": 3,
-              "name": "grizzly bear",
-              "plural": "grizzly bears",
-              "tag": "GRIZ"
+              "amount": 1,
+              "name": "ogre",
+              "plural": "ogres",
+              "tag": "OGRE"
             }
           ],
-          "name": "Grizzly Bears",
-          "number": 17
+          "name": "Family of Ogres",
+          "number": 18
         }
       ],
       "wages": {
@@ -16262,7 +16284,29 @@
       ],
       "province": "Ametanopos Sea",
       "terrain": "ocean",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 63,
+              "name": "merfolk",
+              "plural": "merfolk",
+              "tag": "MERF"
+            }
+          ],
+          "name": "Merfolk",
+          "number": 47
+        }
+      ],
       "wages": {
         "amount": 0.0,
         "max": 0
@@ -16939,7 +16983,29 @@
       "province": "Ruathil Forest",
       "tax": 1240,
       "terrain": "forest",
-      "units": null,
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "Creatures",
+            "number": 2
+          },
+          "flags": {
+            "avoid": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 8,
+              "name": "wolf",
+              "plural": "wolves",
+              "tag": "WOLF"
+            }
+          ],
+          "name": "Wolf Pack",
+          "number": 39
+        }
+      ],
       "wages": {
         "amount": 12.9,
         "max": 510
@@ -17227,50 +17293,7 @@
       "province": "Dogmoeryx Woods",
       "tax": 838,
       "terrain": "forest",
-      "units": [
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 1,
-              "name": "ogre",
-              "plural": "ogres",
-              "tag": "OGRE"
-            }
-          ],
-          "name": "Family of Ogres",
-          "number": 18
-        },
-        {
-          "attitude": "neutral",
-          "faction": {
-            "name": "Creatures",
-            "number": 2
-          },
-          "flags": {
-            "avoid": true,
-            "guard": false
-          },
-          "items": [
-            {
-              "amount": 5,
-              "name": "trent",
-              "plural": "trents",
-              "tag": "TREN"
-            }
-          ],
-          "name": "Living Trees",
-          "number": 47
-        }
-      ],
+      "units": null,
       "wages": {
         "amount": 12.6,
         "max": 364
@@ -17544,7 +17567,35 @@
           "name": "Crypt",
           "number": 1,
           "type": "Crypt",
-          "units": null
+          "units": [
+            {
+              "attitude": "neutral",
+              "faction": {
+                "name": "Creatures",
+                "number": 2
+              },
+              "flags": {
+                "avoid": true,
+                "guard": false
+              },
+              "items": [
+                {
+                  "amount": 87,
+                  "name": "skeleton",
+                  "plural": "skeletons",
+                  "tag": "SKEL"
+                },
+                {
+                  "amount": 8,
+                  "name": "undead",
+                  "plural": "undead",
+                  "tag": "UNDE"
+                }
+              ],
+              "name": "Undead",
+              "number": 49
+            }
+          ]
         },
         {
           "incomplete": 5,
