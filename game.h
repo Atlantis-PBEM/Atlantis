@@ -343,12 +343,10 @@ private:
 	int ParseDir(AString *token);
 
 	void ParseOrders(int faction, std::istream& ordersFile, OrdersCheck *pCheck);
-	void ProcessOrder(int orderNum, Unit *unit, AString *order,
-					  OrdersCheck *pCheck);
+	void ProcessOrder(int orderNum, Unit *unit, AString *order, OrdersCheck *pCheck, bool repeating);
 	void ProcessMoveOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessAdvanceOrder(Unit *, AString *, OrdersCheck *pCheck);
-	Unit *ProcessFormOrder(Unit *former, AString *order,
-						   OrdersCheck *pCheck, int atsign);
+	Unit *ProcessFormOrder(Unit *former, AString *order, OrdersCheck *pCheck, bool repeating);
 	void ProcessAddressOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessAvoidOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessGuardOrder(Unit *, AString *, OrdersCheck *pCheck);
@@ -362,8 +360,8 @@ private:
 	void ProcessTeachOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessWorkOrder(Unit *, int quiet, OrdersCheck *pCheck);
 	void ProcessProduceOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessBuyOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessSellOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ProcessBuyOrder(Unit *, AString *, OrdersCheck *pCheck, bool repeating);
+	void ProcessSellOrder(Unit *, AString *, OrdersCheck *pCheck, bool repeating);
 	void ProcessAttackOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessBuildOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessSailOrder(Unit *, AString *, OrdersCheck *pCheck);
@@ -403,7 +401,7 @@ private:
 	void ProcessIdleOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessTransportOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
-	AString *ProcessTurnOrder(Unit *, std::istream& f, OrdersCheck *pCheck, int);
+	AString *ProcessTurnOrder(Unit *, std::istream& f, OrdersCheck *pCheck, bool repeating);
 	void ProcessJoinOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessAnnihilateOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessSacrificeOrder(Unit *, AString *, OrdersCheck *pCheck);

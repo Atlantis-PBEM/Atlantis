@@ -60,7 +60,7 @@ public:
 	int Len();
 
 	AString *gettoken();
-	int getat();
+	bool getat();
 	AString *getlegal();
 	AString *stripnumber();
 	AString *Trunc(int, int back=30);

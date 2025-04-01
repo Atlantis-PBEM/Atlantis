@@ -211,7 +211,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 	f >> ws >> order;
 	while (!f.eof()) {
 		AString saveorder = order;
-		int getatsign = order.getat();
+		bool repeating = order.getat();
 		AString *token = order.gettoken();
 
 		if (token) {
@@ -348,8 +348,8 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 							parse_error(pCheck, unit, fac, "FORM: cannot nest.");
 						}
 						else {
-							unit = ProcessFormOrder(unit, &order, pCheck, getatsign);
-							if (!pCheck && unit && unit->former && unit->former->format)
+							unit = ProcessFormOrder(unit, &order, pCheck, repeating);
+							if (!pCheck && unit && unit->former && unit->former->form_repeated)
 								unit->former->oldorders.push_back(saveorder.const_str());
 							if (!pCheck) {
 								if (unit) unit->ClearOrders();
@@ -369,7 +369,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 						if (unit->inTurnBlock)
 							parse_error(pCheck, unit, fac, "TURN: without ENDTURN");
 
-						if (!pCheck && unit->former && unit->former->format)
+						if (!pCheck && unit->former && unit->former->form_repeated)
 							unit->former->oldorders.push_back(saveorder.const_str());
 
 						if (pCheck && former) delete unit;
@@ -388,9 +388,9 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 					// faction is 0 if checking syntax only, not running turn.
 					if (faction != 0) {
 						AString *retval;
-						if (!pCheck && unit->former && unit->former->format)
+						if (!pCheck && unit->former && unit->former->form_repeated)
 							unit->former->oldorders.push_back(saveorder.const_str());
-						retval = ProcessTurnOrder(unit, f, pCheck, getatsign);
+						retval = ProcessTurnOrder(unit, f, pCheck, repeating);
 						if (retval) {
 							order = *retval;
 							continue;
@@ -412,7 +412,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 					unit->taxing = unit->presentTaxing;
 					unit->presentTaxing = 0;
 					unit->inTurnBlock = 0;
-					if (!pCheck && unit->former && unit->former->format)
+					if (!pCheck && unit->former && unit->former->form_repeated)
 						unit->former->oldorders.push_back(saveorder.const_str());
 				} else
 					parse_error(pCheck, unit, fac, "ENDTURN: without TURN.");
@@ -420,12 +420,12 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 			default:
 				if (fac) {
 					if (unit) {
-						if (!pCheck && getatsign)
+						if (!pCheck && repeating)
 							unit->oldorders.push_back(saveorder.const_str());
-						if (!pCheck && unit->former && unit->former->format)
+						if (!pCheck && unit->former && unit->former->form_repeated)
 							unit->former->oldorders.push_back(saveorder.const_str());
 
-						ProcessOrder(code, unit, &order, pCheck);
+						ProcessOrder(code, unit, &order, pCheck, repeating);
 					} else {
 						parse_error(pCheck, 0, fac,
 								"Order given without a unit selected.");
@@ -436,7 +436,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 		} else {
 			code = NORDERS;
 			if (!pCheck) {
-				if (getatsign && fac && unit)
+				if (repeating && fac && unit)
 					unit->oldorders.push_back(saveorder.const_str());
 			}
 		}
@@ -479,8 +479,7 @@ void Game::ParseOrders(int faction, istream& f, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
-		OrdersCheck *pCheck)
+void Game::ProcessOrder(int orderNum, Unit *unit, AString *o, OrdersCheck *pCheck, bool repeating)
 {
 	switch(orderNum) {
 		case O_ADDRESS:
@@ -511,7 +510,7 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			ProcessBuildOrder(unit, o, pCheck);
 			break;
 		case O_BUY:
-			ProcessBuyOrder(unit, o, pCheck);
+			ProcessBuyOrder(unit, o, pCheck, repeating);
 			break;
 		case O_CAST:
 			ProcessCastOrder(unit, o, pCheck);
@@ -625,7 +624,7 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			ProcessSailOrder(unit, o, pCheck);
 			break;
 		case O_SELL:
-			ProcessSellOrder(unit, o, pCheck);
+			ProcessSellOrder(unit, o, pCheck, repeating);
 			break;
 		case O_SHARE:
 			ProcessShareOrder(unit, o, pCheck);
@@ -1644,7 +1643,7 @@ void Game::ProcessAttackOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessSellOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+void Game::ProcessSellOrder(Unit *u, AString *o, OrdersCheck *pCheck, bool repeating)
 {
 	AString *token = o->gettoken();
 	if (!token) {
@@ -1670,15 +1669,42 @@ void Game::ProcessSellOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int it = ParseGiveableItem(token);
 	delete token;
 
+	// Check if we already have an order for this type of item.  If we do, merge with it.
+	// We will not merge repeating orders with non-repeating, but will merge all orders of
+	// the same type for the same item.  The reason for this is due to how demand is
+	// processed.
+	// Currently, if 1 unit issues 100 orders of `SELL 1 <item>` in a hex and another unit
+	// issues a single `SELL 100 <item>`, each of the first units 100 orders would have a
+	// chance to succeed, while the second unit's orders would a) be capped at the max
+	// available, and b) only be checked once. Because the number of orders aren't capped,
+	// each one counts 1 toward the total demand. The other order being capped at the
+	// max available only counts as that max amount toward demand, so the odds get skewed
+	// in favor of the first unit winning more sells than their fair share.
+	// By merging here, both units would have the same max cap, and each should get half of
+	// available supply rather than unit 1 likely ending up with all of it.
 	if (!pCheck) {
+		for (const auto s : u->sellorders) {
+			if (s->item == it && s->repeating == repeating) {
+				// Found a matching order.  Merge it.
+				if (s->num == -1 || num == -1) {
+					s->num = -1;
+				} else {
+					s->num += num;
+				}
+				return;
+			}
+		}
+
+		// we didn't find one above, so make a new one.
 		SellOrder *s = new SellOrder;
 		s->item = it;
 		s->num = num;
+		s->repeating = repeating;
 		u->sellorders.push_back(s);
 	}
 }
 
-void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck, bool repeating)
 {
 	AString *token = o->gettoken();
 	if (!token) {
@@ -1721,10 +1747,37 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 	delete token;
 
+	// Check if we already have an order for this type of item.  If we do, merge with it.
+	// We will not merge repeating orders with non-repeating, but will merge all orders of
+	// the same type for the same item.  The reason for this is due to how demand is
+	// processed.
+	// Currently, if 1 unit issues 100 orders of `BUY 1 <item>` in a hex and another unit
+	// issues a single `BUY 100 <item>`, each of the first units 100 orders would have a
+	// chance to succeed, while the second unit's orders would a) be capped at the max
+	// available, and b) only be checked once. Because the number of orders aren't capped,
+	// each one counts 1 toward the total demand. The other order being capped at the
+	// max available only counts as that max amount toward demand, so the odds get skewed
+	// in favor of the first unit winning more buys than their fair share.
+	// By merging here, both units would have the same max cap, and each should get half of
+	// available supply rather than unit 1 likely ending up with all of it.
 	if (!pCheck) {
+		for (const auto b : u->buyorders) {
+			if (b->item == it && b->repeating == repeating) {
+				// Found a matching order.  Merge it.
+				if (b->num == -1 || num == -1) {
+					b->num = -1;
+				} else {
+					b->num += num;
+				}
+				return;
+			}
+		}
+
+		// we didn't find one above, so make a new one.
 		BuyOrder *b = new BuyOrder;
 		b->item = it;
 		b->num = num;
+		b->repeating = repeating;
 		u->buyorders.push_back(b);
 	}
 }
@@ -1966,7 +2019,7 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	return;
 }
 
-AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int repeat)
+AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, bool repeat)
 {
 	int turnDepth = 1;
 	int turnLast = 1;
@@ -2052,7 +2105,7 @@ AString *Game::ProcessTurnOrder(Unit *unit, istream& f, OrdersCheck *pCheck, int
 					tOrder->turnOrders.push_back(saveorder.const_str());
 					break;
 			}
-			if (!pCheck && unit->former && unit->former->format)
+			if (!pCheck && unit->former && unit->former->form_repeated)
 				unit->former->oldorders.push_back(saveorder.const_str());
 			delete token;
 		}
@@ -2705,7 +2758,7 @@ void Game::ProcessAvoidOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck, int atsign)
+Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck, bool repeating)
 {
 	AString *t = o->gettoken();
 	if (!t) {
@@ -2726,7 +2779,7 @@ Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck, int 
 	if (pCheck) {
 		Unit *retval = new Unit;
 		retval->former = former;
-		former->format = atsign;
+		former->form_repeated = repeating;
 		return retval;
 	} else {
 		if (former->object->region->GetUnitAlias(an, former->faction->num)) {
@@ -2738,7 +2791,7 @@ Unit *Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck, int 
 		temp->DefaultOrders(former->object);
 		temp->MoveUnit(former->object);
 		temp->former = former;
-		former->format = atsign;
+		former->form_repeated = repeating;
 		return temp;
 	}
 }
