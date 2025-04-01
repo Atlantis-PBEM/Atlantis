@@ -306,7 +306,7 @@ class Unit {
 		std::list<TransportOrder *>transportorders;
 		JoinOrder *joinorders;
 		Unit *former;
-		int format;
+		bool form_repeated;
 
 		// Used for tracking VISIT quests
 		std::set<std::string> visited;

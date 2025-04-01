@@ -142,6 +142,14 @@ void UnitTestHelper::run_month_orders() {
     game.RunMonthOrders();
 }
 
+void UnitTestHelper::run_buy_orders() {
+    game.RunBuyOrders();
+}
+
+void UnitTestHelper::run_sell_orders() {
+    game.RunSellOrders();
+}
+
 void UnitTestHelper::run_productions() {
     // This will run the production phase for all regions in the game.
     for (auto &region : game.regions) {

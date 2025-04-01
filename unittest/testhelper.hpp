@@ -90,6 +90,10 @@ public:
     void run_productions();
     // Run all month orders for all factions.
     void run_month_orders();
+    // Run all buy orders.
+    void run_buy_orders();
+    // Run all sell orders.
+    void run_sell_orders();
 
     // dummy
     int get_seed() { return rng::get_random(10000); };

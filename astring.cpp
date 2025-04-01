@@ -273,7 +273,7 @@ AString *AString::StripWhite()
 	return( new AString( &str[ place ] ));
 }
 
-int AString::getat()
+bool AString::getat()
 {
 	int place = 0;
 	while (place < len && (str[place] == ' ' || str[place] == '\t'))
@@ -281,9 +281,9 @@ int AString::getat()
 	if (place >= len) return 0;
 	if (str[place] == '@') {
 		str[place] = ' ';
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 char islegal(char c)

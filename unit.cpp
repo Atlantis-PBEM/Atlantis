@@ -86,7 +86,7 @@ Unit::Unit()
 	presentTaxing = 0;
 	presentMonthOrders = nullptr;
 	former = nullptr;
-	format = 0;
+	form_repeated = false;
 	free = 0;
 	practiced = 0;
 	moved = 0;
@@ -131,7 +131,7 @@ Unit::Unit(int seq, Faction *f, int a)
 	presentTaxing = 0;
 	presentMonthOrders = nullptr;
 	former = nullptr;
-	format = 0;
+	form_repeated = false;
 	free = 0;
 	practiced = 0;
 	moved = 0;

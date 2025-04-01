@@ -1031,7 +1031,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 					} else {
 						delete pTemp;
 						AString saveorder = *pLine;
-						int getatsign = pLine->getat();
+						bool repeating = pLine->getat();
 						pTemp = pLine->gettoken();
 						if (!pTemp) {
 							Awrite(AString("Order: must provide unit order ")+
@@ -1044,10 +1044,10 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 								Awrite(AString("Order: invalid order given ")+
 										"for faction "+pFac->num);
 							} else {
-								if (getatsign) {
+								if (repeating) {
 									u->oldorders.push_back(string(saveorder.const_str()));
 								}
-								ProcessOrder(o, u, pLine, NULL);
+								ProcessOrder(o, u, pLine, NULL, repeating);
 							}
 						}
 					}

@@ -205,6 +205,7 @@ class BuyOrder : public Order {
 
 		int item;
 		int num;
+		bool repeating;
 };
 
 class SellOrder : public Order {
@@ -214,6 +215,7 @@ class SellOrder : public Order {
 
 		int item;
 		int num;
+		bool repeating;
 };
 
 class AttackOrder : public Order {
@@ -300,7 +302,7 @@ class TurnOrder : public Order {
 	public:
 		TurnOrder();
 		~TurnOrder();
-		int repeating;
+		bool repeating;
 		std::vector<std::string> turnOrders;
 };
 
