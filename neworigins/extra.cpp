@@ -1074,6 +1074,12 @@ Faction *Game::CheckVictory()
 			return nullptr;
 		}
 
+		// We have all entities completed, but.. have all altars been empowered?  if not, nooone can win yet.
+		if (empowered_altars < 6) {
+			Awrite(AString("Only ") + empowered_altars + " altars have been empowered, no winner yet.");
+			return nullptr;
+		}
+
 		// Ok we have completed all entities, so we can check for if a faction has won.
 		// the winner will be the owner of the world breaker monolith if and only if either
 		// 1) all living factions are allied with the owner of the monolith
@@ -1097,6 +1103,12 @@ Faction *Game::CheckVictory()
 				winner = owner->faction;
 				break;
 			}
+		}
+
+		// No one owns the monolith, so no one can win yet.
+		if (!winner) {
+			Awrite(AString("No monolith owner found, no winner yet."));
+			return nullptr;
 		}
 
 		// Ok, we have a possible winner, check for sufficient alive factions mutually allied to the monolith owner.
