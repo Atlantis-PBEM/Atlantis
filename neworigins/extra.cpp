@@ -1012,6 +1012,12 @@ Faction *Game::CheckVictory()
 			return nullptr;
 		}
 
+		// We have all entities completed, but.. have all altars been empowered?  if not, nooone can win yet.
+		if (empowered_altars < 6) {
+			Awrite(AString("Only ") + empowered_altars + " altars have been empowered, no winner yet.");
+			return nullptr;
+		}
+
 		// Ok we have completed all entities, so we can check for if a faction has won.
 		// the winner will be the owner of the world breaker monolith if and only if either
 		// 1) all living factions are allied with the owner of the monolith
@@ -1024,16 +1030,21 @@ Faction *Game::CheckVictory()
 		for(const auto o : center->objects) {
 			if (o->type == O_ACTIVE_MONOLITH) {
 				Unit *owner = o->GetOwner();
-				// If noone owns the monolith, then noone can win.
-				if (!owner) {
-					// If the monolith is unowned on turn 100 or later, the monsters win.
-					if (TurnNumber() < 100) return nullptr; // no winner yet
-					return GetFaction(factions, monfaction); // monsters win
-				}
-
-				winner = owner->faction;
+				// If noone owns the monolith, then we have no possible winner yet.
+				if (owner) winner = owner->faction;
 				break;
 			}
+		}
+
+		// No one owns the monolith, so no one can win yet.
+		if (!winner) {
+			if (TurnNumber() < 100) {
+				// If it's before turn 100, we can't declare a winner yet
+				Awrite(AString("No monolith owner found, no winner yet."));
+				return nullptr;
+			}
+			// If the monolith is unowned on turn 100 or later, the monsters win.
+			return GetFaction(factions, monfaction); // monsters win
 		}
 
 		// Ok, we have a possible winner, check for sufficient alive factions mutually allied to the monolith owner.
