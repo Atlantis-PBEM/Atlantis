@@ -1093,22 +1093,19 @@ Faction *Game::CheckVictory()
 			Object *o = (Object *)elem;
 			if (o->type == O_ACTIVE_MONOLITH) {
 				Unit *owner = o->GetOwner();
-				// If noone owns the monolith, then noone can win.
-				if (!owner) {
-					// If the monolith is unowned on turn 100 or later, the monsters win.
-					if (TurnNumber() < 100) return nullptr; // no winner yet
-					return GetFaction(&factions, monfaction); // monsters win
-				}
-
-				winner = owner->faction;
+				if (owner) winner = owner->faction;
 				break;
 			}
 		}
 
 		// No one owns the monolith, so no one can win yet.
 		if (!winner) {
-			Awrite(AString("No monolith owner found, no winner yet."));
-			return nullptr;
+			if (TurnNumber() < 100) {
+				Awrite(AString("No monolith owner found, no winner yet."));
+				return nullptr;
+			}
+			// If the monolith is unowned on turn 100 or later, the monsters win.
+			return GetFaction(&factions, monfaction); // monsters win
 		}
 
 		// Ok, we have a possible winner, check for sufficient alive factions mutually allied to the monolith owner.
