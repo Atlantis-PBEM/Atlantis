@@ -15,55 +15,51 @@ namespace ut = boost::ut;
 using namespace std;
 
 // This suite will test various aspects of the Faction class in isolation.
-ut::suite<"Order Checker"> order_checker_suite = []
-{
-  using namespace ut;
+ut::suite<"Order Checker"> order_checker_suite = [] {
+    using namespace ut;
 
-  "Order checker reports no errors with correct password"_test = []
-  {
-    UnitTestHelper helper;
-    helper.initialize_game();
-    helper.setup_turn();
+    "Order checker reports no errors with correct password"_test = [] {
+        UnitTestHelper helper;
+        helper.initialize_game();
+        helper.setup_turn();
 
-    string name("Test Faction");
-    Faction *faction = helper.create_faction(name);
-    faction->password = new AString("mypassword");
+        string name("Test Faction");
+        Faction *faction = helper.create_faction(name);
+        faction->password = new AString("mypassword");
 
-    stringstream ss;
-    ss << "#atlantis 3 \"mypassword\"\n";
-    ss << "unit 2\n";
-    ss << "work\n";
+        stringstream ss;
+        ss << "#atlantis 3 \"mypassword\"\n";
+        ss << "unit 2\n";
+        ss << "work\n";
 
-    stringstream ss2;
-    OrdersCheck checker(ss2);
+        stringstream ss2;
+        OrdersCheck checker(ss2);
 
-    helper.parse_orders(faction->num, ss, &checker);
-    expect(checker.numerrors == 0_i);
-    expect(ss2.str().find("No errors found.\n") != string::npos);
-  };
+        helper.parse_orders(faction->num, ss, &checker);
+        expect(checker.numerrors == 0_i);
+        expect(ss2.str().find("No errors found.\n") != string::npos);
+    };
 
-  "Order checker reports an error for incorrect password"_test = []
-  {
-    UnitTestHelper helper;
-    helper.initialize_game();
-    helper.setup_turn();
+    "Order checker reports an error for incorrect password"_test = [] {
+        UnitTestHelper helper;
+        helper.initialize_game();
+        helper.setup_turn();
 
-    string name("Test Faction");
-    Faction *faction = helper.create_faction(name);
-    faction->password = new AString("mypassword");
+        string name("Test Faction");
+        Faction *faction = helper.create_faction(name);
+        faction->password = new AString("mypassword");
 
-    stringstream ss;
-    ss << "#atlantis 3 \"wrongpassword\"\n";
-    ss << "unit 2\n";
-    ss << "work\n";
+        stringstream ss;
+        ss << "#atlantis 3 \"wrongpassword\"\n";
+        ss << "unit 2\n";
+        ss << "work\n";
 
-    stringstream ss2;
-    OrdersCheck checker(ss2);
+        stringstream ss2;
+        OrdersCheck checker(ss2);
 
-    helper.parse_orders(faction->num, ss, &checker);
-    expect(checker.numerrors == 1_i);
-    expect(ss2.str().find("No errors found.") == string::npos);
-    expect(ss2.str().find("*** Error: Incorrect password on #atlantis line. ***\n") != string::npos);
-  };
-
+        helper.parse_orders(faction->num, ss, &checker);
+        expect(checker.numerrors == 1_i);
+        expect(ss2.str().find("No errors found.") == string::npos);
+        expect(ss2.str().find("*** Error: Incorrect password on #atlantis line. ***\n") != string::npos);
+    };
 };

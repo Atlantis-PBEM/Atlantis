@@ -8,6 +8,10 @@ indent_style = space
 indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
+max_line_length = 120
+
+# Prefer single quotes for languages that support it
+quote_type = single
 
 [*.md]
 max_line_length = off
@@ -16,8 +20,29 @@ trim_trailing_whitespace = false
 [package.json]
 indent_size = 2
 
-[*.yaml]
+[*.{yaml,yml}]
 indent_size = 2
 
-[*.yml]
+# C/C++ specific settings
+[*.{c,cpp,h,hpp}]
+# K&R style bracing for control structures, Allman for classes/structs
+# Note: Most editors need custom config beyond EditorConfig for this
+curly_bracket_next_line = false
+spaces_around_operators = true
+spaces_around_brackets = false
+# int *ptr style (pointer with variable)
+# int& ref style (reference with type)
+# Note: These are hints - many editors need language-specific settings
+
+# JavaScript/TypeScript settings
+[*.{js,ts}]
+quote_type = single
+curly_bracket_next_line = false
+spaces_around_operators = true
+spaces_around_brackets = false
+# Enable trailing commas where supported
+trailing_comma = true
+
+# JSON files
+[*.json]
 indent_size = 2

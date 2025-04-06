@@ -26,380 +26,265 @@
 #include "unit.h"
 
 char const *od[] = {
-	"#atlantis",
-	"#end",
-	"unit",
-	"address",
-	"advance",
-	"annihilate",
-	"armor",
-	"assassinate",
-	"attack",
-	"autotax",
-	"avoid",
-	"behind",
-	"build",
-	"buy",
-	"cast",
-	"claim",
-	"combat",
-	"consume",
-	"declare",
-	"describe",
-	"destroy",
-	"distribute",
-	"end",
-	"endturn",
-	"enter",
-	"entertain",
-	"evict",
-	"exchange",
-	"faction",
-	"find",
-	"forget",
-	"form",
-	"give",
-	"guard",
-	"hold",
-	"idle",
-	"join",
-	"leave",
-	"move",
-	"name",
-	"noaid",
-	"nocross",
-	"nospoils",
-	"option",
-	"password",
-	"pillage",
-	"prepare",
-	"produce",
-	"promote",
-	"quit",
-	"restart",
-	"reveal",
-	"sacrifice",
-	"sail",
-	"sell",
-	"share",
-	"show",
-	"spoils",
-	"steal",
-	"study",
-	"take",
-	"tax",
-	"teach",
-	"transport",
-	"turn",
-	"weapon",
-	"withdraw",
-	"work",
+    "#atlantis",
+    "#end",
+    "unit",
+    "address",
+    "advance",
+    "annihilate",
+    "armor",
+    "assassinate",
+    "attack",
+    "autotax",
+    "avoid",
+    "behind",
+    "build",
+    "buy",
+    "cast",
+    "claim",
+    "combat",
+    "consume",
+    "declare",
+    "describe",
+    "destroy",
+    "distribute",
+    "end",
+    "endturn",
+    "enter",
+    "entertain",
+    "evict",
+    "exchange",
+    "faction",
+    "find",
+    "forget",
+    "form",
+    "give",
+    "guard",
+    "hold",
+    "idle",
+    "join",
+    "leave",
+    "move",
+    "name",
+    "noaid",
+    "nocross",
+    "nospoils",
+    "option",
+    "password",
+    "pillage",
+    "prepare",
+    "produce",
+    "promote",
+    "quit",
+    "restart",
+    "reveal",
+    "sacrifice",
+    "sail",
+    "sell",
+    "share",
+    "show",
+    "spoils",
+    "steal",
+    "study",
+    "take",
+    "tax",
+    "teach",
+    "transport",
+    "turn",
+    "weapon",
+    "withdraw",
+    "work",
 };
 
 char const **OrderStrs = od;
 
 int Parse1Order(AString *token)
 {
-	for (int i=0; i<NORDERS; i++)
-		if (*token == OrderStrs[i]) return i;
-	return -1;
+    for (int i = 0; i < NORDERS; i++)
+        if (*token == OrderStrs[i]) return i;
+    return -1;
 }
 
 Order::Order()
 {
-	type = NORDERS;
-	quiet = 0;
+    type = NORDERS;
+    quiet = 0;
 }
 
-Order::~Order() {
-}
+Order::~Order() {}
 
 ExchangeOrder::ExchangeOrder()
 {
-	type = O_EXCHANGE;
-	exchangeStatus = -1;
+    type = O_EXCHANGE;
+    exchangeStatus = -1;
 }
 
 ExchangeOrder::~ExchangeOrder()
 {
-	if (target) delete target;
+    if (target) delete target;
 }
 
 TurnOrder::TurnOrder()
 {
-	type = O_TURN;
-	repeating = 0;
+    type = O_TURN;
+    repeating = 0;
 }
 
-TurnOrder::~TurnOrder()
-{
-}
+TurnOrder::~TurnOrder() {}
 
-MoveOrder::MoveOrder()
-{
-	type = O_MOVE;
-}
+MoveOrder::MoveOrder() { type = O_MOVE; }
 
-MoveOrder::~MoveOrder()
-{
-}
+MoveOrder::~MoveOrder() {}
 
-ForgetOrder::ForgetOrder()
-{
-	type = O_FORGET;
-}
+ForgetOrder::ForgetOrder() { type = O_FORGET; }
 
-ForgetOrder::~ForgetOrder()
-{
-}
+ForgetOrder::~ForgetOrder() {}
 
-WithdrawOrder::WithdrawOrder()
-{
-	type = O_WITHDRAW;
-}
+WithdrawOrder::WithdrawOrder() { type = O_WITHDRAW; }
 
-WithdrawOrder::~WithdrawOrder()
-{
-}
+WithdrawOrder::~WithdrawOrder() {}
 
 GiveOrder::GiveOrder()
 {
-	type = O_GIVE;
-	unfinished = 0;
-	merge = 0;
+    type = O_GIVE;
+    unfinished = 0;
+    merge = 0;
 }
 
 GiveOrder::~GiveOrder()
 {
-	if (target) delete target;
+    if (target) delete target;
 }
 
-StudyOrder::StudyOrder()
-{
-	type = O_STUDY;
-}
+StudyOrder::StudyOrder() { type = O_STUDY; }
 
-StudyOrder::~StudyOrder()
-{
-}
+StudyOrder::~StudyOrder() {}
 
-TeachOrder::TeachOrder()
-{
-	type = O_TEACH;
-}
+TeachOrder::TeachOrder() { type = O_TEACH; }
 
-TeachOrder::~TeachOrder()
-{
-}
+TeachOrder::~TeachOrder() {}
 
-ProduceOrder::ProduceOrder()
-{
-	type = O_PRODUCE;
-}
+ProduceOrder::ProduceOrder() { type = O_PRODUCE; }
 
-ProduceOrder::~ProduceOrder()
-{
-}
+ProduceOrder::~ProduceOrder() {}
 
-BuyOrder::BuyOrder()
-{
-	type = O_BUY;
-}
+BuyOrder::BuyOrder() { type = O_BUY; }
 
-BuyOrder::~BuyOrder()
-{
-}
+BuyOrder::~BuyOrder() {}
 
-SellOrder::SellOrder()
-{
-	type = O_SELL;
-}
+SellOrder::SellOrder() { type = O_SELL; }
 
-SellOrder::~SellOrder()
-{
-}
+SellOrder::~SellOrder() {}
 
-AttackOrder::AttackOrder()
-{
-	type = O_ATTACK;
-}
+AttackOrder::AttackOrder() { type = O_ATTACK; }
 
-AttackOrder::~AttackOrder()
-{
-}
+AttackOrder::~AttackOrder() {}
 
 BuildOrder::BuildOrder()
 {
-	type = O_BUILD;
-	new_building = -1;
+    type = O_BUILD;
+    new_building = -1;
+    until_complete = false;
+    target = nullptr;
+    needtocomplete = 0;
 }
 
 BuildOrder::~BuildOrder()
 {
-	if (target) delete target;
+    if (target) delete target;
 }
 
-SailOrder::SailOrder()
-{
-	type = O_SAIL;
-}
+SailOrder::SailOrder() { type = O_SAIL; }
 
-SailOrder::~SailOrder()
-{
-}
+SailOrder::~SailOrder() {}
 
-FindOrder::FindOrder()
-{
-	type = O_FIND;
-}
+FindOrder::FindOrder() { type = O_FIND; }
 
-FindOrder::~FindOrder()
-{
-}
+FindOrder::~FindOrder() {}
 
-StealthOrder::StealthOrder()
-{
-}
+StealthOrder::StealthOrder() {}
 
-StealthOrder::~StealthOrder()
-{
-}
+StealthOrder::~StealthOrder() {}
 
 StealOrder::StealOrder()
 {
-	type = O_STEAL;
+    type = O_STEAL;
+    target = nullptr;
 }
 
 StealOrder::~StealOrder()
 {
-	if (target) delete target;
+    if (target) delete target;
 }
 
-AssassinateOrder::AssassinateOrder()
-{
-	type = O_ASSASSINATE;
-}
+AssassinateOrder::AssassinateOrder() { type = O_ASSASSINATE; }
 
 AssassinateOrder::~AssassinateOrder()
 {
-	if (target) delete target;
+    if (target) delete target;
 }
 
-CastOrder::CastOrder()
-{
-	type = O_CAST;
-}
+CastOrder::CastOrder() { type = O_CAST; }
 
-CastOrder::~CastOrder()
-{
-}
+CastOrder::~CastOrder() {}
 
-CastMindOrder::CastMindOrder()
-{
-	id = 0;
-}
+CastMindOrder::CastMindOrder() { id = 0; }
 
-CastMindOrder::~CastMindOrder()
-{
-	delete id;
-}
+CastMindOrder::~CastMindOrder() { delete id; }
 
-TeleportOrder::TeleportOrder()
-{
-}
+TeleportOrder::TeleportOrder() {}
 
-TeleportOrder::~TeleportOrder()
-{
-}
+TeleportOrder::~TeleportOrder() {}
 
-CastRegionOrder::CastRegionOrder()
-{
-}
+CastRegionOrder::CastRegionOrder() {}
 
-CastRegionOrder::~CastRegionOrder()
-{
-}
+CastRegionOrder::~CastRegionOrder() {}
 
-CastIntOrder::CastIntOrder()
-{
-}
+CastIntOrder::CastIntOrder() {}
 
-CastIntOrder::~CastIntOrder()
-{
-}
+CastIntOrder::~CastIntOrder() {}
 
-CastUnitsOrder::CastUnitsOrder()
-{
-}
+CastUnitsOrder::CastUnitsOrder() {}
 
-CastUnitsOrder::~CastUnitsOrder()
-{
-}
+CastUnitsOrder::~CastUnitsOrder() {}
 
-EvictOrder::EvictOrder()
-{
-	type = O_EVICT;
-}
+EvictOrder::EvictOrder() { type = O_EVICT; }
 
-EvictOrder::~EvictOrder()
-{
-}
+EvictOrder::~EvictOrder() {}
 
-IdleOrder::IdleOrder()
-{
-	type = O_IDLE;
-}
+IdleOrder::IdleOrder() { type = O_IDLE; }
 
-IdleOrder::~IdleOrder()
-{
-}
+IdleOrder::~IdleOrder() {}
 
 TransportOrder::TransportOrder()
 {
-	type = O_TRANSPORT;
-	item = -1;
-	amount = 0;
-	except = 0;
-	target = NULL;
+    type = O_TRANSPORT;
+    item = -1;
+    amount = 0;
+    except = 0;
+    target = NULL;
 }
 
 TransportOrder::~TransportOrder()
 {
-	if (target) delete target;
+    if (target) delete target;
 }
 
-CastTransmuteOrder::CastTransmuteOrder()
-{
-}
+CastTransmuteOrder::CastTransmuteOrder() {}
 
-CastTransmuteOrder::~CastTransmuteOrder()
-{
-}
+CastTransmuteOrder::~CastTransmuteOrder() {}
 
-JoinOrder::JoinOrder()
-{
-	type = O_JOIN;
-}
+JoinOrder::JoinOrder() { type = O_JOIN; }
 
 JoinOrder::~JoinOrder()
 {
-	if (target) delete target;
+    if (target) delete target;
 }
 
-AnnihilateOrder::AnnihilateOrder()
-{
-	type = O_ANNIHILATE;
-}
+AnnihilateOrder::AnnihilateOrder() { type = O_ANNIHILATE; }
 
-AnnihilateOrder::~AnnihilateOrder()
-{
-}
+AnnihilateOrder::~AnnihilateOrder() {}
 
-SacrificeOrder::SacrificeOrder()
-{
-	type = O_SACRIFICE;
-}
+SacrificeOrder::SacrificeOrder() { type = O_SACRIFICE; }
 
-SacrificeOrder::~SacrificeOrder()
-{
-}
+SacrificeOrder::~SacrificeOrder() {}

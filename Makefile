@@ -139,3 +139,67 @@ $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
 $(UNITTEST_OBJECTS): unittest/obj/%.o: unittest/%.cpp external/boost/ut.hpp
 	$(CPLUS) $(CFLAGS) -c -o $@ $<
 
+# Some utility tasks to keep the external header libraries up to date if needed.
+EXTERNAL_DIR := external
+UT_DIR := $(EXTERNAL_DIR)/boost
+JSON_DIR := $(EXTERNAL_DIR)/nlohmann
+
+UT_RELEASE_URL := https://github.com/boost-ext/ut/archive/refs/tags
+JSON_RELEASE_URL := https://github.com/nlohmann/json/releases/download
+
+.PHONY: check-libraries
+check-libraries: check-ut check-json
+
+.PHONY: check-ut
+check-ut:
+	@NEEDS_UPDATE=false; \
+	if [ ! -f "$(UT_DIR)/ut.hpp" ]; then \
+		echo "UT library not found. Preparing to download..."; \
+		NEEDS_UPDATE=true; \
+	else \
+		CURRENT_VERSION=$$(cd $(UT_DIR) && grep -m 1 'BOOST_UT_VERSION' ut.hpp | awk '{print $$3}' | sed "s/'/./g"); \
+		CURRENT_VERSION=v$$CURRENT_VERSION; \
+		LATEST_TAG=$$(curl -s https://api.github.com/repos/boost-ext/ut/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'); \
+		if [ "$$CURRENT_VERSION" != "$$LATEST_TAG" ]; then \
+			echo "UT library is outdated (current: $$CURRENT_VERSION, latest: $$LATEST_TAG). Preparing to update..."; \
+			NEEDS_UPDATE=true; \
+		fi; \
+	fi; \
+	if $$NEEDS_UPDATE; then \
+		LATEST_TAG=$$(curl -s https://api.github.com/repos/boost-ext/ut/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'); \
+		TEMP_DIR=$$(mktemp -d); \
+		curl -L $(UT_RELEASE_URL)/$$LATEST_TAG.tar.gz | tar -xz -C $$TEMP_DIR; \
+		rm -rf $(UT_DIR); \
+		mkdir -p $(UT_DIR); \
+		cp -r $$TEMP_DIR/*/include/boost/ut.hpp $(UT_DIR); \
+		rm -rf $$TEMP_DIR; \
+		echo "UT library updated from $$CURRENT_VERSION to $$LATEST_TAG."; \
+	else \
+		echo "UT library is up-to-date at version $$CURRENT_VERSION."; \
+	fi
+
+.PHONY: check-json
+check-json:
+	@NEEDS_UPDATE=false; \
+	if [ ! -f "$(JSON_DIR)/json.hpp" ]; then \
+		echo "JSON library not found. Preparing to download..."; \
+		CURRENT_VERSION="uninstalled"; \
+		NEEDS_UPDATE=true; \
+	else \
+		CURRENT_VERSION=$$(grep -E '^#define NLOHMANN_JSON_VERSION_(MAJOR|MINOR|PATCH)' $(JSON_DIR)/json.hpp | awk '{print $$3}' | tr '\n' '.'); \
+		CURRENT_VERSION=v$${CURRENT_VERSION%?}; \
+		LATEST_TAG=$$(curl -s https://api.github.com/repos/nlohmann/json/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'); \
+		if [ "$$CURRENT_VERSION" != "$$LATEST_TAG" ]; then \
+			echo "JSON library is outdated (current: $$CURRENT_VERSION, latest: $$LATEST_TAG). Preparing to update..."; \
+			NEEDS_UPDATE=true; \
+		fi; \
+	fi; \
+	if $$NEEDS_UPDATE; then \
+		LATEST_TAG=$$(curl -s https://api.github.com/repos/nlohmann/json/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'); \
+		mkdir -p $(JSON_DIR); \
+		curl -L $(JSON_RELEASE_URL)/$$LATEST_TAG/json.hpp -o $(JSON_DIR)/json.hpp; \
+		echo "JSON library updated from $$CURRENT_VERSION to $$LATEST_TAG."; \
+	else \
+		echo "JSON library is up-to-date at version $$CURRENT_VERSION."; \
+	fi
+

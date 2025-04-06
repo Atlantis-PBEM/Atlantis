@@ -1516,7 +1516,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	maxbuild = 0;
 	unit->build = 0;
 
-	if (token) {
+	if (token && !(*token == "complete")) {
 		if (*token == "help") {
 			// "build help unitnum"
 			UnitId *targ = 0;
@@ -1533,6 +1533,18 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 				}
 			}
 			order->target = targ;	// set the order's target to the unit number helped
+			// see if they added complete
+			token = o->gettoken();
+			if (token && *token == "complete") {
+				delete token;
+				if (!pCheck) {
+					order->until_complete = true; // stay until complete
+				}
+			} else if (token) {
+				parse_error(pCheck, unit, 0, "BUILD: Unknown keyword '" + string(token->Str()) + "'.");
+				delete token;
+				return;
+			}
 		} else {
 			// token exists and != "help": must be something like 'build tower'
 			int ot = ParseObject(token, 1);
@@ -1588,9 +1600,21 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 				}
 			}
 			order->target = NULL; // Not helping anyone...
+			// Check for 'COMPLETE' keyword to stay in current building until completion
+			token = o->gettoken();
+			if (token && *token == "complete") {
+				delete token;
+				if (!pCheck) {
+					order->until_complete = true;
+				}
+			} else if (token) {
+				parse_error(pCheck, unit, 0, "BUILD: Unknown keyword '" + string(token->Str()) + "'.");
+				delete token;
+				return;
+			}
 		}
 	} else {
-		// just a 'build' order
+		// just a 'build' (or 'build complete') order
 		order->target = NULL;
 		if (!pCheck) {
 			// look for an incomplete ship type in inventory
@@ -1611,10 +1635,22 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 				maxbuild = unit->items.GetNum(-st);
 			}
 		}
+		token = o->gettoken();
+		if (token && *token == "complete") {
+			// 'build complete' order
+			delete token;
+			if (!pCheck) {
+				order->until_complete = true; // stay until complete
+			}
+		} else if (token) {
+			parse_error(pCheck, unit, 0, "BUILD: Unknown keyword '" + string(token->Str()) + "'.");
+			delete token;
+			return;
+		}
 	}
-	// set neededtocomplete
-	if (maxbuild != 0) order->needtocomplete = maxbuild;
 
+	// set needtocomplete
+	if (maxbuild != 0) order->needtocomplete = maxbuild;
 
 	// Now do all of the generic bits...
 	// Check that the unit isn't doing anything else important
