@@ -5511,6 +5511,15 @@ BEHIND 0
     <h4>
       BUILD HELP [unit]
     </h4>
+    <h4>
+      BUILD COMPLETE
+    </h4>
+    <h4>
+      BUILD [object type] COMPLETE
+    </h4>
+    <h4>
+      BUILD HELP [unit] COMPLETE
+    </h4>
     <p>
       BUILD given with no parameters causes the unit to perform work on an
       unfinished ship it possesses, or on the object that it is currently
@@ -5521,6 +5530,8 @@ BEHIND 0
       This help will be rejected if the unit you are trying to help does not
       consider you to be friendly.
     </p>
+    <p>
+      The variants with COMPLETE instruct the unit to continue with the same build order and repeat it the next month if the built object is not yet complete.  In the case of BUILD [object type] COMPLETE, the unit will remain in the current building if it is not complete, and it is the same type as the one specified, otherwise it will start a new object of the type specified.    </p>
     <p>
       Examples:
     </p>
@@ -5541,6 +5552,15 @@ BUILD Tower
     </p>
     <pre>
 BUILD HELP 5789
+    </pre>
+    <p>
+      To start a new castle and continue building until it is complete.
+    </p>
+    <p>
+      
+    </p>
+    <pre>
+BUILD Castle COMPLETE
     </pre>
     <div class="rule">
       

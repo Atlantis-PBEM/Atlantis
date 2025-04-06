@@ -3842,6 +3842,9 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("h4", true) << "BUILD\n" << enclose("h4", false);
 	f << enclose("h4", true) << "BUILD [object type]\n" << enclose("h4", false);
 	f << enclose("h4", true) << "BUILD HELP [unit]\n" << enclose("h4", false);
+	f << enclose("h4", true) << "BUILD COMPLETE\n" << enclose("h4", false);
+	f << enclose("h4", true) << "BUILD [object type] COMPLETE\n" << enclose("h4", false);
+	f << enclose("h4", true) << "BUILD HELP [unit] COMPLETE\n" << enclose("h4", false);
 	f << enclose("p", true) << "BUILD given with no parameters causes the unit to perform work on "
 	  << (may_sail ? "an unfinished ship it possesses, or on ": "") << "the object that it is currently inside.  "
 	  << "BUILD given with an [object type] (such as \"Tower\" or \"Galleon\") instructs the unit to begin work "
@@ -3849,12 +3852,20 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	  << "current building task, even if that task was begun this same turn. This help will be rejected if the "
 	  << "unit you are trying to help does not consider you to be friendly.\n"
 	  << enclose("p", false);
+	f << enclose("p", true) << "The variants with COMPLETE instruct the unit to continue with the same build order "
+	  << "and repeat it the next month if the built object is not yet complete.  In the case of BUILD [object "
+	  << "type] COMPLETE, the unit will remain in the current building if it is not complete, and it is the same "
+	  << "type as the one specified, otherwise it will start a new object of the type specified."
+	  << enclose("p", false);
 	f << enclose("p", true) << "Examples:\n" << enclose("p", false);
 	f << example_start("To build a new tower.")
 	  << "BUILD Tower\n"
 	  << example_end();
 	f << example_start("To help unit 5789 build a structure.")
 	  << "BUILD HELP 5789\n"
+	  << example_end();
+	f << example_start("To start a new castle and continue building until it is complete.")
+	  << "BUILD Castle COMPLETE\n"
 	  << example_end();
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
