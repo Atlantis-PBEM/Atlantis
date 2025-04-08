@@ -1,22 +1,21 @@
 {
   "name": "map",
-  "packageManager": "yarn@4.3.1",
+  "packageManager": "yarn@4.8.1",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "scripts": {
     "start": "parcel index.html"
   },
   "dependencies": {
-    "@parcel/core": "^2.2.0",
-    "@types/color": "^3.0.2",
-    "alpinejs": "^3.14.1",
-    "color": "^4.2.0",
-    "parcel": "^2.2.0",
-    "rainbowvis.js": "^1.0.1"
+    "@parcel/core": "^2.14.4",
+    "@types/color": "^4.2.0",
+    "alpinejs": "^3.14.9",
+    "color": "^5.0.0",
+    "parcel": "^2.14.4",
+    "rainbowvis.js": "^1.1.1"
   },
   "devDependencies": {
-    "@types/alpinejs": "^3.13.10",
-    "typescript": "^5.5.3"
+    "@types/alpinejs": "^3.13.11",
+    "typescript": "^5.8.3"
   }
 }
