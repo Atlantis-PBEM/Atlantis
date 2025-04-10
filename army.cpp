@@ -28,6 +28,8 @@
 #include "rng.h"
 
 #include <assert.h>
+#include <iterator>
+#include <list>
 
 void unit_stat_control::Clear(UnitStat& us) {
 	us.attackStats.clear();
@@ -223,8 +225,27 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	if (o->IsFleet() && o->capacity < 1 && static_cast<size_t>(o->shipno) < o->ships.size()) {
 		int objectno;
 
+		auto calc_def = [](Item *i) {
+			AString temp = ItemDefs[i->type].name;
+			auto obid = LookupObject(&temp);
+			int prot = 0;
+			if (obid >= 0 && ObjectDefs[obid].protect > 0) prot = ObjectDefs[obid].protect;
+			int total_def = 0;
+			for(int j=0; j<NUM_ATTACK_TYPES; j++) {
+				total_def += ObjectDefs[obid].defenceArray[j];
+			}
+			return prot * total_def;
+		};
+		auto compare_ship = [calc_def](Item *ship1, Item *ship2) {
+			return calc_def(ship1) > calc_def(ship2);
+		};
+		std::list<Item *> sorted_ships;
+		// make a copy of the ships itemlist that we can sort as we want without modifying the underlying list
+		std::copy(o->ships.begin(), o->ships.end(), std::back_inserter(sorted_ships));
+		sorted_ships.sort(compare_ship);
+
 		i = 0;
-		for(auto ship : o->ships) {
+		for(auto ship : sorted_ships) {
 			if (o->shipno == i) {
 				abbr = ItemDefs[ship->type].name;
 				objectno = LookupObject(&abbr);

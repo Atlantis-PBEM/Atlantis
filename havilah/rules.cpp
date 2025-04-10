@@ -181,7 +181,7 @@ static GameDefs g = {
 	1,	// LAKES
 	16,	// ARCHIPELAGO
 	30,	// SEVER_LAND_BRIDGES
-	6,	// SEA_LIMIT	
+	6,	// SEA_LIMIT
 	GameDefs::NO_EFFECT,	// LAKE_WAGE_EFFECT
 	0,	// LAKESIDE_IS_COASTAL
 	0,	// ODD_TERRAIN
@@ -261,6 +261,7 @@ static GameDefs g = {
 	0, // HALF_RIDING_BONUS
 	GameDefs::REPORT_FORMAT_TEXT, // REPORT_FORMAT
 	5, // BATTLE_STOP_MOVE_PERCENT
+	GameDefs::NewShipJoinsFleetBehavior::NO_CROSS_JOIN, // NEW_SHIP_JOINS_FLEET_BEHAVIOR
 };
 
 GameDefs *Globals = &g;

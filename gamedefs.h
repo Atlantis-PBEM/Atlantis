@@ -150,7 +150,7 @@ public:
 	int TAX_BONUS_ARMOR;
 	// bonus for manning a fortification
 	int TAX_BONUS_FORT;
-	
+
 	// Options to control who is able to tax
 	enum {
 		TAX_ANYONE = 0x00001,
@@ -376,18 +376,18 @@ public:
 	// Higher values decrease likeliness of settlements
 	// suggested: 0-5
 	int LESS_ARCTIC_TOWNS;
-	
+
 	// Percent of surface level covered with ocean.
 	int OCEAN;
-	
+
 	// Size factor for continent creation.
 	int CONTINENT_SIZE;
-	
+
 	// Granularity of terrain - default setting is 0.
 	// A value of 1 means maximum variability,
 	// higher values = more regular terrain spread
 	int TERRAIN_GRANULARITY;
-	
+
 	// Relative frequency of LAKE terrain
 	int LAKES;
 
@@ -398,7 +398,7 @@ public:
 	//  land mass will be much lower than this percentage)
 	// suggested value: 10, 25, 50+ it's really a matter of taste
 	int ARCHIPELAGO;
-	
+
 	// Reduce/Sever Land Bridges: this is the base chance
 	// that thin strips of land will be 'cut'. This chance is
 	// doubled when a region has exactly four adjacent sea
@@ -585,7 +585,7 @@ public:
 
 	int ARMY_ROUT;
 	int ONLY_ROUT_ONCE;
-	
+
 	// How are fortification bonuses handled?
 	// Setting this flag will enable fort bonuses to be treated as a
 	// modifier to the attack chance rather than a flat bonus to the
@@ -615,7 +615,7 @@ public:
 
 	// Amount of skill improvement when a skill is used
 	int SKILL_PRACTICE_AMOUNT;
-	
+
 	// Experience mandatory: use lower rates of study per
 	// this amount of experience less than current days of
 	// study. Zero disables experience system. (50 is a
@@ -640,7 +640,7 @@ public:
 	// If we are preventing sail through, should we also prevent the 'easy
 	// portage' that the above allows by default?
 	int ALLOW_TRIVIAL_PORTAGE;
-	
+
 	// Non-Perennial Gates: setting this between 1 and 11 will cause gates
 	// to open and close. Gates will be open this number of months per year.
 	// Each gate will have a different period of opening (although they are
@@ -649,7 +649,7 @@ public:
 	// a random jump (stranding the jumper until the gate opens). Nexus
 	// gates (and optionally, starting city gates) are open all the time.
 	int GATES_NOT_PERENNIAL;
-	
+
 	// Are gates in starting cities open all year round? Need only be set
 	// if GATES_NOT_PERENNIAL is selected.
 	int START_GATES_OPEN;
@@ -662,7 +662,7 @@ public:
 	// Transport and related settings
 	enum {
 		ALLOW_TRANSPORT = 0x01, // Do we allow transport/distribute?
-		// actual cost will be * (4 - (level+1)/2), which means that 
+		// actual cost will be * (4 - (level+1)/2), which means that
 		// the cost will be from *1 (at level 5) to *3 (at level 1)
 		QM_AFFECT_COST = 0x02, // QM level affect shipping cost?
 		// actual distance will be NONLOCAL_TRANSPORT + ((level + 1)/3)
@@ -707,10 +707,10 @@ public:
 	// How developed pre-existing towns are at the start of the game
 	// (100 = standard).
 	int TOWN_DEVELOPMENT;
-	
+
 	// Whether you need to be a war faction to have tact-5 leaders
 	int TACTICS_NEEDS_WAR;
-	
+
 	// Whether allies will be affected by the noaid flag
 	int ALLIES_NOAID;
 
@@ -746,7 +746,7 @@ public:
 	// in OVERWHELMING varaible. Setting 0 effectively turns this featur off, but settining it to 2
 	// will mean that one army front line must be 2X larger than other army front line to achieve
 	// overwhelming.
-	// 
+	//
 	// This feature uses ARMY_ROUT setting to determine how size of the army is determined, by hits
 	// or by figure count.
 	int OVERWHELMING;
@@ -771,7 +771,7 @@ public:
 	// Use 0 - when you don't want any world events in the times
 	// Use 1 - when you want them
 	int WORLD_EVENTS;
-	
+
 	// Include faction statistics and ranking on items faction own into the report.
 	// THIS IS BOOL, NOT INT
 	// Use 0 - no stats included
@@ -817,6 +817,16 @@ public:
 	// BATTLE_STOP_MOVE_PERCENT is the percent of losses a unit can take and still move and attack.
 	// 0 means any losses will stop you from moving and attacking.
 	int BATTLE_STOP_MOVE_PERCENT;
+
+	enum class NewShipJoinsFleetBehavior {
+		// The current V7 behavior, no auto join of ships if they have differnet flight types
+		NO_CROSS_JOIN = 0,
+		// Flying ships will always auto join, but non-flying won't auto join flying fleets.
+		ONLY_FLYING_CROSS_JOIN = 1,
+		// All ships will auto join, regardless of flight status
+		ALL_CROSS_JOIN = 2,
+	};
+	NewShipJoinsFleetBehavior NEW_SHIP_JOINS_FLEET_BEHAVIOR;
 };
 
 extern GameDefs *Globals;

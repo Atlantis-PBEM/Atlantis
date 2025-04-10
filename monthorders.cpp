@@ -620,6 +620,9 @@ void Game::RunBuildShipOrder(ARegion *r, Object *obj, Unit *u)
         // Our helpers have already finished the hard work, so
         // just put the finishing touches on the new vessel
         unfinished = 0;
+        // Also clear our month orders since it's done.
+        delete u->monthorders;
+        u->monthorders = nullptr;
     } else {
         output = ShipConstruction(r, u, u, level, maxbuild, ship);
 
@@ -816,15 +819,28 @@ void Game::CreateShip(ARegion *r, Unit *u, int ship)
 {
     Object *obj = u->object;
     // Do we need to create a new fleet?
-    int newfleet = 1;
+    bool newfleet = true;
     if (u->object->IsFleet()) {
-        newfleet = 0;
-        int flying = obj->flying;
-        // are the fleets compatible?
-        if ((flying > 0) && (ItemDefs[ship].fly < 1)) newfleet = 1;
-        if ((flying < 1) && (ItemDefs[ship].fly > 0)) newfleet = 1;
+        newfleet = false;
+        bool fleet_flying = obj->flying;
+        bool ship_flies = ItemDefs[ship].fly > 0;
+
+        switch (Globals->NEW_SHIP_JOINS_FLEET_BEHAVIOR) {
+            case GameDefs::NewShipJoinsFleetBehavior::ALL_CROSS_JOIN:
+                break;
+            case GameDefs::NewShipJoinsFleetBehavior::ONLY_FLYING_CROSS_JOIN:
+                if (ship_flies) break;
+                newfleet = fleet_flying; // we aren't a flying ship, so only need a new fleet if fleet is flying.
+                break;
+            case GameDefs::NewShipJoinsFleetBehavior::NO_CROSS_JOIN:
+                newfleet = (fleet_flying != ship_flies); // true if they are different, else false
+                break;
+            default:
+                // this is an impossible case as we exhaustively check the enum
+                break;
+        }
     }
-    if (newfleet != 0) {
+    if (newfleet) {
         // create a new fleet
         Object *fleet = new Object(r);
         fleet->type = O_FLEET;
@@ -833,8 +849,10 @@ void Game::CreateShip(ARegion *r, Unit *u, int ship)
         fleet->AddShip(ship);
         u->object->region->objects.push_back(fleet);
         u->MoveUnit(fleet);
+        fleet->FleetCapacity();
     } else {
         obj->AddShip(ship);
+        obj->FleetCapacity();
     }
 }
 
