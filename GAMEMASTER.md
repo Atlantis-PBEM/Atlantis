@@ -422,7 +422,12 @@ And then do exactly what you did previously:
 	./havilah run
 ```
 
-In later turns, you'll want to move old orders out of the way too.  The template files serves as a template for the orders for the next turn.  This includes any @ recurring orders and any tern/endturn orders you gave.  How this is made available to the players varies.  Some games concatenate it to the end of the report file before sending that to the player.  Some tools can work with that concetantion.
+In later turns, you'll want to move old orders out of the way too.  
+The template files serves as a template for the orders for the next 
+turn.  This includes any @ recurring orders and any tern/endturn orders 
+you gave.  How this is made available to the players varies.  Some games 
+concatenate it to the end of the report file before sending that to the 
+player.  Some tools can work with that concetantion.
 
 
 ### 3.2 Running a game the easy way (with scripts)
