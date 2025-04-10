@@ -261,6 +261,7 @@ static GameDefs g = {
 	1, // HALF_RIDING_BONUS
 	GameDefs::REPORT_FORMAT_TEXT | GameDefs::REPORT_FORMAT_JSON, // REPORT_FORMAT
 	5, // BATTLE_STOP_MOVE_PERCENT
+	GameDefs::NewShipJoinsFleetBehavior::NO_CROSS_JOIN, // NEW_SHIP_JOINS_FLEET_BEHAVIOR
 };
 
 GameDefs *Globals = &g;

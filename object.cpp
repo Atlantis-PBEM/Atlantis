@@ -594,51 +594,24 @@ int Object::SailThroughCheck(int dir)
 			return 1;
 		}
 
+		// Per the rules, you can only exit a region in the direction you came from or an adjacent direction.
 		// fleet can always sail backward
 		if (prevdir == dir) {
 			return 1;
 		}
 
-		// Now we have to check that fleet is not sailing through land
-		{
-			// Fleet is on land, it is not flying and comes from another region
-			// so check that the fleet goes not through land
-			int blocked1 = 0;
-			int blocked2 = 0;
-			int d1 = prevdir;
-			int d2 = dir;
+		// Check the adjacent directions as well. (Note: this code has been broken prior to NewOrigins post-V7 code)
+		// Prior to V7, the code allowed you to sail through land as long as there was a connected stretch of water
+		// between the entry direction and the exit direction.
+		int d1 = (prevdir + 1) % NDIRS;
+		int d2 = (prevdir - 1 + NDIRS) % NDIRS;
 
-			if (d1 > d2) {
-				int tmp = d1;
-				d1 = d2;
-				d2 = tmp;
-			}
-
-			for (int k = d1+1; k < d2; k++) {
-				ARegion *land1 = region->neighbors[k];
-				if ((!land1) ||
-						(TerrainDefs[land1->type].similar_type !=
-						 R_OCEAN))
-					blocked1 = 1;
-			}
-
-			int sides = NDIRS - 2 - (d2 - d1 - 1);
-			for (int l = d2+1; l <= d2 + sides; l++) {
-				int dl = l;
-				if (dl >= NDIRS) dl -= NDIRS;
-				ARegion *land2 = region->neighbors[dl];
-				if ((!land2) ||
-						(TerrainDefs[land2->type].similar_type !=
-						 R_OCEAN))
-					blocked2 = 1;
-			}
-
-			if ((blocked1) && (blocked2)) {
-				return 0;
-			}
-			else {
-				return 1;
-			}
+		// Check those directions and make sure they exist and are water.
+		if (dir == d1 && region->neighbors[d1] && TerrainDefs[region->neighbors[d1]->type].similar_type == R_OCEAN) {
+			return 1;
+		}
+		if (dir == d2 && region->neighbors[d2] && TerrainDefs[region->neighbors[d2]->type].similar_type == R_OCEAN) {
+			return 1;
 		}
 	}
 	return 0;
