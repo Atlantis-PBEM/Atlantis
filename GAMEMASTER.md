@@ -422,7 +422,12 @@ And then do exactly what you did previously:
 	./havilah run
 ```
 
-In later turns, you'll want to move old orders out of the way too.
+In later turns, you'll want to move old orders out of the way too.  
+The template files serves as a template for the orders for the next 
+turn.  This includes any @ recurring orders and any tern/endturn orders 
+you gave.  How this is made available to the players varies.  Some games 
+concatenate it to the end of the report file before sending that to the 
+player.  Some tools can work with that concetantion.
 
 
 ### 3.2 Running a game the easy way (with scripts)
@@ -446,13 +451,16 @@ help you out. In it's simplest form, a script will look like this:
 	mv orders.* $gameturn
 ```
 
-under windows, this script will look more like (this is untested):
+under windows, this script will look more like:
 
 ```
 set ARGUMENT=%1
 
 	mkdir %ARGUMENT%
-	move game.in players.in report.* times.* %ARGUMENT%
+	move game.in %ARGUMENT%
+    move players.in %ARGUMENT%
+    move report.* %ARGUMENT%
+    move times.* %ARGUMENT%
 
 	move players.out players.in
 	move game.out game.in
