@@ -3013,7 +3013,7 @@ void Game::ProcessTransportOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int item = ParseTransportableItem(token);
 
 	if (item == -1) {
-		parse_error(pCheck, u, 0, "TRANSPORT: Invalid item" + string(token->const_str()) + ".");
+		parse_error(pCheck, u, 0, "TRANSPORT: Invalid item " + string(token->const_str()) + ".");
 		delete token;
 		return;
 	}
