@@ -40,8 +40,8 @@ enum StatsCategory {
 };
 
 void WriteStats(Battle &battle, Army &army, StatsCategory category) {
-	auto leaderName = std::string(army.leader->name->Str());
-	std::string header = std::string(army.leader->name->Str()) + " army:";
+	auto leaderName = army.leader->name;
+	std::string header = leaderName + " army:";
 
 	battle.AddLine(AString(header.c_str()));
 
@@ -145,7 +145,7 @@ bool IsArmyOverwhelmedBy(Army * a, Army * b) {
 void Battle::FreeRound(Army * att,Army * def, int ass)
 {
 	/* Write header */
-	AddLine(*(att->leader->name) + " gets a free round of attacks.");
+	AddLine(att->leader->name + " gets a free round of attacks.");
 
 	/* Update both army's shields */
 	att->shields.clear();
@@ -161,7 +161,7 @@ void Battle::FreeRound(Army * att,Army * def, int ass)
 
 	bool attOverwhelm = IsArmyOverwhelmedBy(def, att);
 	if (attOverwhelm) {
-		AddLine(*(def->leader->name) + " is overwhelmed.");
+		AddLine(def->leader->name + " is overwhelmed.");
 	}
 
 	/* Run attacks until done */
@@ -177,7 +177,7 @@ void Battle::FreeRound(Army * att,Army * def, int ass)
 	/* Write losses */
 	def->Regenerate(this);
 	alv -= def->NumAlive();
-	AddLine(*(def->leader->name) + " loses " + alv + ".");
+	AddLine(def->leader->name + " loses " + std::to_string(alv) + ".");
 	AddLine("");
 
 	if (Globals->BATTLE_LOG_LEVEL == BattleLogLevel::VERBOSE) {
@@ -280,10 +280,10 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	AddLine(AString("Round ") + round + ":");
 
 	if (a->tactics_bonus > b->tactics_bonus) {
-		AddLine(*(a->leader->name) + " tactics bonus " + a->tactics_bonus + ".");
+		AddLine(a->leader->name + " tactics bonus " + std::to_string(a->tactics_bonus) + ".");
 	}
 	if (b->tactics_bonus > a->tactics_bonus) {
-		AddLine(*(b->leader->name) + " tactics bonus " + b->tactics_bonus + ".");
+		AddLine(b->leader->name + " tactics bonus " + std::to_string(b->tactics_bonus) + ".");
 	}
 
 	/* Update both army's shields */
@@ -301,14 +301,10 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	int batt = b->CanAttack();
 
 	bool aOverwhelm = IsArmyOverwhelmedBy(b, a);
-	if (aOverwhelm) {
-		AddLine(*(b->leader->name) + " is overwhelmed.");
-	}
+	if (aOverwhelm) AddLine(b->leader->name + " is overwhelmed.");
 
 	bool bOverwhelm = IsArmyOverwhelmedBy(a, b);
-	if (bOverwhelm) {
-		AddLine(*(a->leader->name) + " is overwhelmed.");
-	}
+	if (bOverwhelm) AddLine(a->leader->name + " is overwhelmed.");
 
 	/* Run attacks until done */
 	while (aalive && balive && (aatt || batt))
@@ -339,9 +335,9 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 	a->Regenerate(this);
 	b->Regenerate(this);
 	aialive -= aalive;
-	AddLine(*(a->leader->name) + " loses " + aialive + ".");
+	AddLine(a->leader->name + " loses " + std::to_string(aialive) + ".");
 	bialive -= balive;
-	AddLine(*(b->leader->name) + " loses " + bialive + ".");
+	AddLine(b->leader->name + " loses " + std::to_string(bialive) + ".");
 	AddLine("");
 
 	if (Globals->BATTLE_LOG_LEVEL == BattleLogLevel::VERBOSE) {
@@ -456,7 +452,7 @@ void AddBattleFact(
 
 		protect = type.protect;
 		fortType = unit->object->type;
-		name = unit->object->name->Str();
+		name = unit->object->name;
 	}
 
 	if (!name.empty()) {
@@ -536,10 +532,10 @@ int Battle::Run(
 		if (ass) assassination = ASS_FAIL;
 
 		if (armies[0]->NumAlive()) {
-			AddLine(*(armies[0]->leader->name) + " is routed!");
+			AddLine(armies[0]->leader->name + " is routed!");
 			FreeRound(armies[1],armies[0]);
 		} else {
-			AddLine(*(armies[0]->leader->name) + " is destroyed!");
+			AddLine(armies[0]->leader->name + " is destroyed!");
 		}
 		AddLine("");
 
@@ -586,16 +582,16 @@ int Battle::Run(
 		(!armies[1]->NumAlive() && armies[0]->NumAlive())) {
 		if (ass) {
 			assassination = ASS_SUCC;
-			asstext = armies[1]->leader->name->const_str();
+			asstext = armies[1]->leader->name;
 			asstext += " is assassinated in ";
 			asstext += region->ShortPrint().const_str();
 			asstext += "!";
 		}
 		if (armies[1]->NumAlive()) {
-			AddLine(*(armies[1]->leader->name) + " is routed!");
+			AddLine(armies[1]->leader->name + " is routed!");
 			FreeRound(armies[0],armies[1]);
 		} else {
-			AddLine(*(armies[1]->leader->name) + " is destroyed!");
+			AddLine(armies[1]->leader->name + " is destroyed!");
 		}
 		AddLine("");
 
@@ -676,13 +672,8 @@ void Battle::WriteSides(
 	ARegion * r, Unit * att, Unit * tar, std::list<Location *>& atts, std::list<Location *>& defs, int ass
 )
 {
-	if (ass) {
-		AddLine(*att->name + " attempts to assassinate " + *tar->name
-				+ " in " + r->ShortPrint() + "!");
-	} else {
-		AddLine(*att->name + " attacks " + *tar->name + " in " +
-				r->ShortPrint() + "!");
-	}
+	if (ass) AddLine(att->name + " attempts to assassinate " + tar->name + " in " + r->ShortPrint().const_str() + "!");
+	else AddLine(att->name + " attacks " + tar->name + " in " + r->ShortPrint().const_str() + "!");
 	AddLine("");
 
 	int dobs = 0;
@@ -696,16 +687,16 @@ void Battle::WriteSides(
 	for(const auto at : atts) {
 		int a = at->unit->GetAttribute("observation");
 		if (a > aobs) aobs = a;
-		AString * temp = at->unit->BattleReport(dobs);
-		AddLine(*temp);
+		AString *temp = at->unit->BattleReport(dobs);
+		AddLine(temp->const_str());
 		delete temp;
 	}
 
 	AddLine("");
 	AddLine("Defenders:");
 	for(const auto de : defs) {
-		AString * temp = de->unit->BattleReport(aobs);
-		AddLine(*temp);
+		AString *temp = de->unit->BattleReport(aobs);
+		AddLine(temp->const_str());
 		delete temp;
 	}
 	AddLine("");
@@ -1014,7 +1005,7 @@ int Game::KillDead(Location * l, Battle *b, int max_susk, int max_rais)
 			if ((skel + undead) == 1)
 				tmp += "s";
 			tmp += " from the grave to join ";
-			tmp += *l->unit->name;
+			tmp += l->unit->name;
 			tmp += ".";
 			l->unit->items.SetNum(I_SKELETON, l->unit->items.GetNum(I_SKELETON) + skel);
 			l->unit->items.SetNum(I_UNDEAD, l->unit->items.GetNum(I_UNDEAD) + undead);

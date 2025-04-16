@@ -84,15 +84,14 @@ void Market::write_out(std::ostream& f)
 
 void Market::read_in(std::istream& f)
 {
-	AString temp;
-
 	int t;
 	f >> t;
 
 	type = MarketType{t};
 
+	std::string temp;
 	f >> std::ws >> temp;
-	item = LookupItem(&temp);
+	item = lookup_item(temp);
 
 	f >> price;
 	f >> amount;

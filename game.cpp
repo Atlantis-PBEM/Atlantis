@@ -42,6 +42,7 @@
 #include "quests.h"
 #include "unit.h"
 #include "rng.h"
+#include "string_parser.hpp"
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -282,7 +283,7 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 				}
 				continue;
 			};
-			string label = (pArr->strName ? (pArr->strName->const_str() + to_string(i-1)) : "surface");
+			string label = (pArr->strName.empty() ? "surface" : (pArr->strName + to_string(i-1)));
 			worldmap[label] = json::array();
 
 			for (int y = 0; y < pArr->y; y++) {
@@ -398,18 +399,13 @@ int Game::OpenGame()
 	if (!f.is_open()) return(0);
 	//
 	// Read in Globals
-	AString s1;
-	f >> ws >> s1;
+	std::string str;
+	std::getline(f >> std::ws, str);
 	if (f.eof()) return(0);
 
-	AString *s2 = s1.gettoken();
-	if (!s2) return(0);
+	if (str.empty()) return(0);
 
-	if (!(*s2 == "atlantis_game")) {
-		delete s2;
-		return(0);
-	}
-	delete s2;
+	if (str != "atlantis_game") return(0);
 
 	ATL_VER eVersion;
 	f >> eVersion;
@@ -585,485 +581,411 @@ int Game::WritePlayers()
 	return(1);
 }
 
-int Game::ReadPlayers()
+bool Game::ReadPlayers()
 {
 	ifstream f("players.in", ios::in);
 	if (!f.is_open()) return(0);
 
-	AString pLine;
-	AString *pToken = 0;
+	parser::string_parser parser;
 
 	//
 	// Default: failure.
 	//
-	int rc = 0;
+	bool return_code = false;
 
 	do {
 		//
 		// The first line of the file should match.
 		//
-		f >> ws >> pLine;
-		if (!(pLine == PLAYERS_FIRST_LINE)) break;
+		f >> parser;
+		if (parser.get_token() != PLAYERS_FIRST_LINE) break;
 
 		//
 		// Get the file version number.
 		//
-		f >> ws >> pLine;
-		pToken = pLine.gettoken();
-		if (!pToken || !(*pToken == "Version:")) break;
-		SAFE_DELETE(pToken);
+		f >> parser;
+		if (parser.get_token() != "Version:") break;
 
-		pToken = pLine.gettoken();
-		if (!pToken) break;
+		auto token = parser.get_token();
+		if (!token) break;
 
-		int nVer = pToken->value();
-		if (ATL_VER_MAJOR(nVer) != ATL_VER_MAJOR(CURRENT_ATL_VER) ||
-				ATL_VER_MINOR(nVer) != ATL_VER_MINOR(CURRENT_ATL_VER) ||
-				ATL_VER_PATCH(nVer) > ATL_VER_PATCH(CURRENT_ATL_VER)) {
-			Awrite("The players.in file is not compatible with this "
-					"version of Atlantis.");
+		int nVer = token.get_number().value_or(0);
+		if (
+			ATL_VER_MAJOR(nVer) != ATL_VER_MAJOR(CURRENT_ATL_VER) ||
+			ATL_VER_MINOR(nVer) != ATL_VER_MINOR(CURRENT_ATL_VER) ||
+			ATL_VER_PATCH(nVer) > ATL_VER_PATCH(CURRENT_ATL_VER)
+		) {
+			Awrite("The players.in file is not compatible with this version of Atlantis.");
 			break;
 		}
-		SAFE_DELETE(pToken);
 
 		//
 		// Ignore the turn number line.
 		//
-		f >> ws >> pLine;
+		f >> parser;
 
 		//
 		// Next, the game status.
 		//
-		f >> ws >> pLine;
-		pToken = pLine.gettoken();
-		if (!pToken || !(*pToken == "GameStatus:")) break;
-		SAFE_DELETE(pToken);
+		f >> parser;
+		if (parser.get_token() != "GameStatus:") break;
 
-		pToken = pLine.gettoken();
-		if (!pToken) break;
+		token = parser.get_token();
+		if (!token) break;
 
-		if (*pToken == "New")
-			gameStatus = GAME_STATUS_NEW;
-		else if (*pToken == "Running")
-			gameStatus = GAME_STATUS_RUNNING;
-		else if (*pToken == "Finished")
-			gameStatus = GAME_STATUS_FINISHED;
-		else {
-			//
-			// The status doesn't seem to be valid.
-			//
-			break;
-		}
-		SAFE_DELETE(pToken);
+		if (token == "New") gameStatus = GAME_STATUS_NEW;
+		else if (token == "Running") gameStatus = GAME_STATUS_RUNNING;
+		else if (token == "Finished") gameStatus = GAME_STATUS_FINISHED;
+		else break; // invalid game status
 
 		//
 		// Now, we should have a list of factions.
 		//
-		f >> ws >> pLine;
-		Faction *pFac = 0;
+		f >> parser;
+		Faction *fac = nullptr;
 
-		int lastWasNew = 0;
+		bool lastWasNew = false;
 
 		//
 		// OK, set our return code to success; we'll set it to fail below
 		// if necessary.
 		//
-		rc = 1;
+		return_code = true;
 
 		while(!f.eof()) {
-			pToken = pLine.gettoken();
-			if (!pToken) {
-				f >> ws >> pLine;
+			auto token = parser.get_token();
+			if (!token) {
+				f >> parser;
 				continue;
 			}
 
-			if (*pToken == "Faction:") {
+			if (token == "Faction:") {
 				//
 				// Get the new faction
 				//
-				SAFE_DELETE(pToken);
-				pToken = pLine.gettoken();
-				if (!pToken) {
-					rc = 0;
+				token = parser.get_token();
+				if (!token) {
+					return_code = false;
 					break;
 				}
 
-				if (*pToken == "new") {
-					AString save = pLine;
+				if (token == "new") {
+					std::string save = parser.str();
 					int noleader = 0;
 					int x, y, z;
-					ARegion *pReg = NULL;
+					ARegion *reg = nullptr;
 
 					/* Check for the noleader flag */
-					SAFE_DELETE(pToken);
-					pToken = pLine.gettoken();
-					if (pToken && *pToken == "noleader") {
+					token = parser.get_token();
+					if (token == "noleader") {
 						noleader = 1;
-						SAFE_DELETE(pToken);
-						pToken = pLine.gettoken();
-						/* Initialize pReg to something useful */
-						pReg = regions.GetRegion(0, 0, 0);
-					}
-					if (pToken) {
-						x = pToken->value();
-						y = -1;
-						z = -1;
-						SAFE_DELETE(pToken);
-						pToken = pLine.gettoken();
-						if (pToken) {
-							y = pToken->value();
-							SAFE_DELETE(pToken);
-							pToken = pLine.gettoken();
-							if (pToken) {
-								z = pToken->value();
-								pReg = regions.GetRegion(x, y, z);
-							}
-						}
-						if (pReg == NULL)
-							Awrite(AString("Bad faction line: ")+save);
+						token = parser.get_token();
+						/* Initialize reg to something useful */
+						reg = regions.GetRegion(0, 0, 0);
 					}
 
-					pFac = AddFaction(noleader, pReg);
-					if (!pFac) {
+					x = token.get_number().value_or(-1);
+					y = parser.get_token().get_number().value_or(-1);
+					z = parser.get_token().get_number().value_or(-1);
+					if (x != -1 && y != -1 && z != -1) {
+						reg = regions.GetRegion(x, y, z);
+						if (reg == nullptr) Awrite("Bad faction line: " + save);
+					}
+
+					fac = AddFaction(noleader, reg);
+					if (!fac) {
 						Awrite("Failed to add a new faction!");
-						rc = 0;
+						return_code = false;
 						break;
 					}
 
-					lastWasNew = 1;
+					lastWasNew = true;
 				} else {
-					int nFacNum = pToken->value();
-					pFac = GetFaction(factions, nFacNum);
-					if (pFac)
-						pFac->startturn = TurnNumber();
-					lastWasNew = 0;
+					int nFacNum = token.get_number().value_or(0);
+					lastWasNew = false;
+					fac = GetFaction(factions, nFacNum);
+					if (!fac) continue;
+
+					fac->startturn = TurnNumber();
 				}
-			} else if (pFac) {
-				if (!ReadPlayersLine(pToken, &pLine, pFac, lastWasNew)) {
-					rc = 0;
-					break;
-				}
+			} else if (fac) {
+				return_code = ReadPlayersLine(token, parser, fac, lastWasNew);
+				if (!return_code) break;
 			}
 
-			SAFE_DELETE(pToken);
-			f >> ws >> pLine;
+			f >> parser;
 		}
-	} while(0);
+	} while(false);
 
-	SAFE_DELETE(pToken);
-
-	return(rc);
+	return(return_code);
 }
 
-Unit *Game::ParseGMUnit(AString *tag, Faction *pFac)
+Unit *Game::parse_gm_unit(std::string tag, Faction *fac)
 {
-	char *str = tag->Str();
-	if (*str == 'g' && *(str+1) == 'm') {
-		AString p = AString(str+2);
-		int gma = p.value();
+	if (tag.empty()) return nullptr;
+
+	if (tag[0] == 'g' && tag[1] == 'm') {
+		auto gma = parser::token(tag.substr(2)).get_number();
 		for(const auto reg : regions) {
 			for(const auto obj : reg->objects) {
 				for(const auto u : obj->units) {
-					if (u->faction->num == pFac->num && u->gm_alias == gma) {
+					if (u->faction->num == fac->num && u->gm_alias == gma) {
 						return u;
 					}
 				}
 			}
 		}
 	} else {
-		int v = tag->value();
-		if ((unsigned int)v >= maxppunits) return NULL;
-		return GetUnit(v);
+		auto v = parser::token(tag).get_number();
+		if (!v) return nullptr;
+		int id = v.value();
+		if (static_cast<unsigned int>(id) >= maxppunits) return nullptr;
+		return GetUnit(id);
 	}
-	return NULL;
+	return nullptr;
 }
 
-int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
-		int newPlayer)
+bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, Faction *fac, bool new_player)
 {
-	AString *pTemp = 0;
+	if (token == "Name:") {
+		std::string name = parser.str();
+		if (!name.empty()) {
+			if (new_player) name += " (" + to_string(fac->num) + ")";
+			fac->set_name(name, false);
+		}
+		return true;
+	}
 
-	if (*pToken == "Name:") {
-		pTemp = pLine->StripWhite();
-		if (pTemp) {
-			if (newPlayer) {
-				*pTemp += AString(" (") + (pFac->num) + ")";
-			}
-			pFac->SetNameNoChange(pTemp);
+	if (token == "RewardTimes") {
+		fac->TimesReward();
+		return true;
+	}
+
+	if (token == "Email:") {
+		std::string str = parser.get_token().get_string();
+		if (!str.empty()) {
+			delete fac->address;
+			fac->address = new AString(str);
 		}
-	} else if (*pToken == "RewardTimes") {
-		pFac->TimesReward();
-	} else if (*pToken == "Email:") {
-		pTemp = pLine->gettoken();
-		if (pTemp) {
-			delete pFac->address;
-			pFac->address = pTemp;
-			pTemp = 0;
-		}
-	} else if (*pToken == "Password:") {
-		pTemp = pLine->StripWhite();
-		delete pFac->password;
-		if (pTemp) {
-			pFac->password = pTemp;
-			pTemp = 0;
-		} else {
-			AString * pDefault = new AString("none");
-			pFac->password = pDefault;
-		}
-	} else if (*pToken == "Battle:") {
-		pFac->battleLogFormat = 0;
-	} else if (*pToken == "Template:") {
-		// LLS - looked like a good place to stick the Template test
-		pTemp = pLine->gettoken();
-		int nTemp = ParseTemplate(pTemp);
-		pFac->temformat = TEMPLATE_LONG;
-		if (nTemp != -1) pFac->temformat = nTemp;
-	} else if (*pToken == "Reward:") {
-		pTemp = pLine->gettoken();
-		int nAmt = pTemp->value();
-		pFac->event("Reward of " + to_string(nAmt) + " silver.", "reward");
-		pFac->unclaimed += nAmt;
-	} else if (*pToken == "SendTimes:") {
+		return true;
+	}
+
+	if (token == "Password:") {
+		std::string newpass = parser.get_token().get_string();
+		if (newpass.empty()) newpass = "none";
+		fac->password = newpass;
+		return true;
+	}
+
+	if (token == "Battle:") {
+		fac->battleLogFormat = 0;
+		return true;
+	}
+
+	if (token == "Template:") {
+		token = parser.get_token();
+		int temp = parse_template_type(token);
+		fac->temformat = temp == -1 ? TEMPLATE_LONG : temp;
+		return true;
+	}
+
+	if (token == "Reward:") {
+		int amt = parser.get_token().get_number().value_or(0);
+		fac->event("Reward of " + to_string(amt) + " silver.", "reward");
+		fac->unclaimed += amt;
+		return true;
+	}
+
+	if (token == "SendTimes:") {
 		// get the token, but otherwise ignore it
-		pTemp = pLine->gettoken();
-		pFac->times = pTemp->value();
-	} else if (*pToken == "LastOrders:") {
+		fac->times = parser.get_token().get_number().value_or(0);
+		return true;
+	}
+
+	if (token == "LastOrders:") {
 		// Read this line and correctly set the lastorders for this
 		// faction if the game itself isn't maintaining them.
-		pTemp = pLine->gettoken();
 		if (Globals->LASTORDERS_MAINTAINED_BY_SCRIPTS)
-			pFac->lastorders = pTemp->value();
-	} else if (*pToken == "FirstTurn:") {
-		pTemp = pLine->gettoken();
-		pFac->startturn = pTemp->value();
-	} else if (*pToken == "Loc:") {
-		int x, y, z;
-		pTemp = pLine->gettoken();
-		if (pTemp) {
-			x = pTemp->value();
-			delete pTemp;
-			pTemp = pLine->gettoken();
-			if (pTemp) {
-				y = pTemp->value();
-				delete pTemp;
-				pTemp = pLine->gettoken();
-				if (pTemp) {
-					z = pTemp->value();
-					ARegion *pReg = regions.GetRegion(x, y, z);
-					if (pReg) {
-						pFac->pReg = pReg;
-					} else {
-						Awrite(AString("Invalid Loc:")+x+","+y+","+z+
-								" in faction " + pFac->num);
-						pFac->pReg = NULL;
-					}
-				}
-			}
-		}
-	} else if (*pToken == "NewUnit:") {
-		// Creates a new unit in the location specified by a Loc: line
-		// with a gm_alias of whatever is after the NewUnit: tag.
-		if (!pFac->pReg) {
-			Awrite(AString("NewUnit is not valid without a Loc: ") +
-					"for faction "+ pFac->num);
-		} else {
-			pTemp = pLine->gettoken();
-			if (!pTemp) {
-				Awrite(AString("NewUnit: must be followed by an alias ") +
-						"in faction "+pFac->num);
-			} else {
-				int val = pTemp->value();
-				if (!val) {
-					Awrite(AString("NewUnit: must be followed by an alias ") +
-							"in faction "+pFac->num);
-				} else {
-					Unit *u = GetNewUnit(pFac);
-					u->gm_alias = val;
-					u->MoveUnit(pFac->pReg->GetDummy());
-					u->event("Is given to your faction.", "gm_gift");
-				}
-			}
-		}
-	} else if (*pToken == "Item:") {
-		pTemp = pLine->gettoken();
-		if (!pTemp) {
-			Awrite(AString("Item: needs to specify a unit in faction ") +
-					pFac->num);
-		} else {
-			Unit *u = ParseGMUnit(pTemp, pFac);
-			if (!u) {
-				Awrite(AString("Item: needs to specify a unit in faction ") +
-						pFac->num);
-			} else {
-				if (u->faction->num != pFac->num) {
-					Awrite(AString("Item: unit ")+ u->num +
-							" doesn't belong to " + "faction " + pFac->num);
-				} else {
-					delete pTemp;
-					pTemp = pLine->gettoken();
-					if (!pTemp) {
-						Awrite(AString("Must specify a number of items to ") +
-								"give for Item: in faction " + pFac->num);
-					} else {
-						int v = pTemp->value();
-						if (!v) {
-							Awrite(AString("Must specify a number of ") +
-										"items to give for Item: in " +
-										"faction " + pFac->num);
-						} else {
-							delete pTemp;
-							pTemp = pLine->gettoken();
-							if (!pTemp) {
-								Awrite(AString("Must specify a valid item ") +
-										"to give for Item: in faction " +
-										pFac->num);
-							} else {
-								int it = ParseAllItems(pTemp);
-								if (it == -1) {
-									Awrite(AString("Must specify a valid ") +
-											"item to give for Item: in " +
-											"faction " + pFac->num);
-								} else {
-									int has = u->items.GetNum(it);
-									u->items.SetNum(it, has + v);
-									if (!u->gm_alias) {
-										u->event("Is given " + ItemString(it, v) + " by the gods.", "gm_gift");
-									}
-									u->faction->DiscoverItem(it, 0, 1);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	} else if (*pToken == "Skill:") {
-		pTemp = pLine->gettoken();
-		if (!pTemp) {
-			Awrite(AString("Skill: needs to specify a unit in faction ") +
-					pFac->num);
-		} else {
-			Unit *u = ParseGMUnit(pTemp, pFac);
-			if (!u) {
-				Awrite(AString("Skill: needs to specify a unit in faction ") +
-						pFac->num);
-			} else {
-				if (u->faction->num != pFac->num) {
-					Awrite(AString("Skill: unit ")+ u->num +
-							" doesn't belong to " + "faction " + pFac->num);
-				} else {
-					delete pTemp;
-					pTemp = pLine->gettoken();
-					if (!pTemp) {
-						Awrite(AString("Must specify a valid skill for ") +
-								"Skill: in faction " + pFac->num);
-					} else {
-						int sk = ParseSkill(pTemp);
-						if (sk == -1) {
-							Awrite(AString("Must specify a valid skill for ")+
-									"Skill: in faction " + pFac->num);
-						} else {
-							delete pTemp;
-							pTemp = pLine->gettoken();
-							if (!pTemp) {
-								Awrite(AString("Must specify a days for ") +
-										"Skill: in faction " + pFac->num);
-							} else {
-								int days = pTemp->value() * u->GetMen();
-								if (!days) {
-									Awrite(AString("Must specify a days for ")+
-											"Skill: in faction " + pFac->num);
-								} else {
-									int odays = u->skills.GetDays(sk);
-									u->skills.SetDays(sk, odays + days);
-									u->AdjustSkills();
-									int lvl = u->GetRealSkill(sk);
-									if (lvl > pFac->skills.GetDays(sk)) {
-										pFac->skills.SetDays(sk, lvl);
-										pFac->shows.push_back({ .skill = sk, .level = lvl });
-									}
-									if (!u->gm_alias) {
-										u->event("Is taught " + to_string(days) + " days of " +
-											SkillStrs(sk).const_str() + " by the gods.", "gm_gift");
-									}
-									/*
-									 * This is NOT quite the same, but the gods
-									 * are more powerful than mere mortals
-									 */
-									int mage = (SkillDefs[sk].flags &
-											SkillType::MAGIC);
-									int app = (SkillDefs[sk].flags &
-											SkillType::APPRENTICE);
-									if (mage) {
-										u->type = U_MAGE;
-									}
-									if (app && u->type == U_NORMAL) {
-										u->type = U_APPRENTICE;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	} else if (*pToken == "Order:") {
-		pTemp = pLine->StripWhite();
-		if (*pTemp == "quit") {
-			pFac->quit = QUIT_BY_GM;
-		} else {
-			// handle this as a unit order
-			delete pTemp;
-			pTemp = pLine->gettoken();
-			if (!pTemp) {
-				Awrite(AString("Order: needs to specify a unit in faction ") +
-						pFac->num);
-			} else {
-				Unit *u = ParseGMUnit(pTemp, pFac);
-				if (!u) {
-					Awrite(AString("Order: needs to specify a unit in ")+
-							"faction " + pFac->num);
-				} else {
-					if (u->faction->num != pFac->num) {
-						Awrite(AString("Order: unit ")+ u->num +
-								" doesn't belong to " + "faction " +
-								pFac->num);
-					} else {
-						delete pTemp;
-						AString saveorder = *pLine;
-						bool repeating = pLine->getat();
-						pTemp = pLine->gettoken();
-						if (!pTemp) {
-							Awrite(AString("Order: must provide unit order ")+
-									"for faction "+pFac->num);
-						} else {
-							int o = Parse1Order(pTemp);
-							if (o == -1 || o == O_ATLANTIS || o == O_END ||
-									o == O_UNIT || o == O_FORM ||
-									o == O_ENDFORM) {
-								Awrite(AString("Order: invalid order given ")+
-										"for faction "+pFac->num);
-							} else {
-								if (repeating) {
-									u->oldorders.push_back(string(saveorder.const_str()));
-								}
-								ProcessOrder(o, u, pLine, NULL, repeating);
-							}
-						}
-					}
-				}
-			}
-		}
-	} else {
-		string temp = string(pToken->const_str()) + pLine->const_str();
-		pFac->extra_player_data.push_back(temp);
+			fac->lastorders = parser.get_token().get_number().value_or(0);
+		return true;
 	}
 
-	if (pTemp) delete pTemp;
-	return(1);
+	if (token == "FirstTurn:") {
+		fac->startturn = parser.get_token().get_number().value_or(0);
+		return true;
+	}
+
+	if (token == "Loc:") {
+		auto x = parser.get_token().get_number();
+		auto y = parser.get_token().get_number();
+		auto z = parser.get_token().get_number();
+
+		ARegion *reg = nullptr;
+		if (x && y && z) {
+			reg = regions.GetRegion(x.value(), y.value(), z.value());
+		}
+		if (!reg) {
+			std::string str = "Invalid Loc: ";
+			str += x ? to_string(x.value()) + ", " : "missing x-coord, ";
+			str += y ? to_string(y.value()) + ", " : "missing y-coord, ";
+			str += z ? to_string(z.value()) : "missing z-coord";
+			str += " in faction " + to_string(fac->num);
+			Awrite(str);
+		}
+		fac->pReg = reg;
+		return true;
+	}
+
+	if (token == "NewUnit:") {
+		// Creates a new unit in the location specified by a Loc: line
+		// with a gm_alias of whatever is after the NewUnit: tag.
+		if (!fac->pReg) {
+			Awrite("NewUnit is not valid without a Loc: for faction "+ to_string(fac->num));
+			return true;
+		}
+		int val = parser.get_token().get_number().value_or(0);
+		if (!val) {
+			Awrite("NewUnit: must be followed by an alias in faction " + to_string(fac->num));
+			return true;
+		}
+		Unit *u = GetNewUnit(fac);
+		u->gm_alias = val;
+		u->MoveUnit(fac->pReg->GetDummy());
+		u->event("Is given to your faction.", "gm_gift");
+		return true;
+	}
+
+	if (token == "Item:") {
+		std::string alias = parser.get_token().get_string();
+		if (alias.empty()) {
+			Awrite("Item: needs to specify a unit in faction " + to_string(fac->num));
+			return true;
+		}
+		Unit *u = parse_gm_unit(alias, fac);
+		if (!u) {
+			Awrite("Item: needs to specify a unit in faction " + to_string(fac->num));
+			return true;
+		}
+		if (u->faction->num != fac->num) {
+			Awrite("Item: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
+			return true;
+		}
+
+		auto val = parser.get_token().get_number();
+		if (!val) {
+			Awrite("Must specify a number of items to give for Item: in faction " + to_string(fac->num));
+			return true;
+		}
+
+		token = parser.get_token();
+		int it = parse_all_items(token);
+		if (it == -1) {
+			Awrite("Must specify a valid item to give for Item: in faction " + to_string(fac->num));
+			return true;
+		}
+
+		int has = u->items.GetNum(it);
+		u->items.SetNum(it, has + val.value_or(0));
+		if (!u->gm_alias) {
+			u->event("Is given " + ItemString(it, val.value_or(0)) + " by the gods.", "gm_gift");
+		}
+		u->faction->DiscoverItem(it, 0, 1);
+		return true;
+	}
+
+	if (token == "Skill:") {
+		std::string alias = parser.get_token().get_string();
+		if (alias.empty()) {
+			Awrite("Skill: needs to specify a unit in faction " + to_string(fac->num));
+			return true;
+		}
+		Unit *u = parse_gm_unit(alias, fac);
+		if (!u) {
+			Awrite("Skill: needs to specify a unit in faction " + to_string(fac->num));
+			return true;
+		}
+		if (u->faction->num != fac->num) {
+			Awrite("Item: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
+			return true;
+		}
+
+		token = parser.get_token();
+		int sk = parse_skill(token);
+		if (sk == -1) {
+			Awrite("Must specify a valid skill for Skill: in faction " + to_string(fac->num));
+			return true;
+		}
+
+		int days = parser.get_token().get_number().value_or(0) * u->GetMen();
+		if (!days) {
+			Awrite("Must specify a days for Skill: in faction " + to_string(fac->num));
+			return true;
+		}
+
+		int odays = u->skills.GetDays(sk);
+		u->skills.SetDays(sk, odays + days);
+		u->AdjustSkills();
+		int lvl = u->GetRealSkill(sk);
+		if (lvl > fac->skills.GetDays(sk)) {
+			fac->skills.SetDays(sk, lvl);
+			fac->shows.push_back({ .skill = sk, .level = lvl });
+		}
+		if (!u->gm_alias) {
+			u->event("Is taught " + to_string(days) + " days of " + SkillStrs(sk).const_str() +
+				" by the gods.", "gm_gift");
+		}
+		/* This is NOT quite the same, but the gods are more powerful than mere mortals */
+		int mage = (SkillDefs[sk].flags & SkillType::MAGIC);
+		int app = (SkillDefs[sk].flags & SkillType::APPRENTICE);
+		if (mage) u->type = U_MAGE;
+		if (app && u->type == U_NORMAL) u->type = U_APPRENTICE;
+		return true;
+	}
+
+	if (token == "Order:") {
+		std::string alias = parser.get_token().get_string();
+		if (alias == "quit") {
+			fac->quit = QUIT_BY_GM;
+			return true;
+		}
+		//Not quit so, handle it as a unit order
+		Unit *u = parse_gm_unit(alias, fac);
+		if (!u) {
+			Awrite("Order: needs to specify a unit in faction " + to_string(fac->num));
+			return true;
+		}
+		if (u->faction->num != fac->num) {
+			Awrite("Order: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
+			return true;
+		}
+
+		std::string saved = parser.str();
+		bool repeating = parser.get_at();
+		token = parser.get_token();
+		if (!token) {
+			Awrite("Order: must provide unit order for faction "+ to_string(fac->num));
+			return true;
+		}
+		int o = Parse1Order(token);
+		if (o == -1 || o == O_ATLANTIS || o == O_END || o == O_UNIT || o == O_FORM || o == O_ENDFORM) {
+			Awrite("Order: invalid order given for faction "+ to_string(fac->num));
+			return true;
+		}
+		if (repeating) {
+			u->oldorders.push_back(saved);
+		}
+		ProcessOrder(o, u, parser, nullptr, repeating);
+		return true;
+	}
+
+	std::string temp = parser.original();
+	if (temp.empty()) return true;
+
+	fac->extra_player_data.push_back(temp);
+	return true;
 }
 
-int Game::DoOrdersCheck(const AString &strOrders, const AString &strCheck)
+int Game::Doorders_check(const AString &strOrders, const AString &strCheck)
 {
 	ifstream ordersFile(strOrders.const_str(), ios::in);
 	if (!ordersFile.is_open()) {
@@ -1077,7 +999,7 @@ int Game::DoOrdersCheck(const AString &strOrders, const AString &strCheck)
 		return(0);
 	}
 
-	OrdersCheck check(checkFile);
+	orders_check check(checkFile);
 	ParseOrders(0, ordersFile, &check);
 
 	return(1);
@@ -1184,7 +1106,7 @@ void Game::ReadOrders()
 
 			ifstream file(str.const_str(), ios::in);
 			if(file.is_open()) {
-				ParseOrders(fac->num, file, 0);
+				ParseOrders(fac->num, file, nullptr);
 				file.close();
 			}
 			DefaultWorkOrder();
@@ -1642,8 +1564,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				// the required skill (this might get used if
 				// you made illusions GIVEable, for example).
 				if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
-					tmp = ItemDefs[i->type].esc_skill;
-					skill = LookupSkill(&tmp);
+					skill = lookup_skill(ItemDefs[i->type].esc_skill);
 					if (u->GetSkill(skill) >= ItemDefs[i->type].esc_val) losses = 0;
 				}
 				if (losses) {
@@ -1653,14 +1574,12 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 					u->items.SetNum(i->type,i->num - losses);
 				}
 			} else if (ItemDefs[i->type].escape & ItemType::HAS_SKILL) {
-				tmp = ItemDefs[i->type].esc_skill;
-				skill = LookupSkill(&tmp);
+				skill = lookup_skill(ItemDefs[i->type].esc_skill);
 				if (u->GetSkill(skill) < ItemDefs[i->type].esc_val) {
 					if (Globals->WANDERING_MONSTERS_EXIST) {
 						Faction *mfac = GetFaction(factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
-						MonType *mp = FindMonster(ItemDefs[i->type].abr,
-								(ItemDefs[i->type].type & IT_ILLUSION));
+						MonType *mp = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION));
 						mon->MakeWMon(mp->name, i->type, i->num);
 						mon->MoveUnit(r->GetDummy());
 						// This will be zero unless these are set. (0 means
@@ -1672,8 +1591,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				}
 			} else {
 				// ESC_LEV_*
-				tmp = ItemDefs[i->type].esc_skill;
-				skill = LookupSkill(&tmp);
+				skill = lookup_skill(ItemDefs[i->type].esc_skill);
 				int level = u->GetSkill(skill);
 				int chance;
 
@@ -1805,71 +1723,55 @@ char Game::GetRChar(ARegion *r)
 void Game::CreateNPCFactions()
 {
 	Faction *f;
-	AString *temp;
 	if (Globals->CITY_MONSTERS_EXIST) {
 		f = new Faction(factionseq++);
 		guardfaction = f->num;
-		temp = new AString("The Guardsmen");
-		f->SetName(temp);
+		f->set_name("The Guardsmen");
 		f->is_npc = true;
 		f->lastorders = 0;
 		factions.push_back(f);
-	} else
-		guardfaction = 0;
+	} else guardfaction = 0;
 	// Only create the monster faction if wandering monsters or lair
 	// monsters exist.
 	if (Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
 		f = new Faction(factionseq++);
 		monfaction = f->num;
-		temp = new AString("Creatures");
-		f->SetName(temp);
+		f->set_name("Creatures");
 		f->is_npc = true;
 		f->lastorders = 0;
 		factions.push_back(f);
-	} else
-		monfaction = 0;
+	} else monfaction = 0;
 }
 
-void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
+void Game::CreateCityMon(ARegion *region, int percent, int needmage)
 {
 	int skilllevel;
 	int AC = 0;
 	int IV = 0;
 	int num;
-	if (pReg->type == R_NEXUS || pReg->IsStartingCity()) {
+	if (region->type == R_NEXUS || region->IsStartingCity()) {
 		skilllevel = TOWN_CITY + 1;
-		if (Globals->SAFE_START_CITIES || (pReg->type == R_NEXUS))
+		if (Globals->SAFE_START_CITIES || (region->type == R_NEXUS))
 			IV = 1;
 		AC = 1;
 		num = Globals->AMT_START_CITY_GUARDS;
 	} else {
-		skilllevel = pReg->town->TownType() + 1;
+		skilllevel = region->town->TownType() + 1;
 		num = Globals->CITY_GUARD * skilllevel;
 	}
 	num = num * percent / 100;
-	Faction *pFac = GetFaction(factions, guardfaction);
-	Unit *u = GetNewUnit(pFac);
+	Faction *fac = GetFaction(factions, guardfaction);
+	Unit *u = GetNewUnit(fac);
 	Unit *u2;
-	AString *s = new AString("City Guard");
 
-	/*
-	Awrite(AString("Begin setting up city guard in..."));
-
-	AString temp = TerrainDefs[pReg->type].name;
-	temp += AString(" (") + pReg->xloc + "," + pReg->yloc;
-	temp += ")";
-	temp += AString(" in ") + *pReg->name;
-	Awrite(temp);
-	*/
-
-	if ((Globals->LEADERS_EXIST) || (pReg->type == R_NEXUS)) {
+	if ((Globals->LEADERS_EXIST) || (region->type == R_NEXUS)) {
 		/* standard Leader-type guards */
 		u->SetMen(I_LEADERS,num);
 		u->items.SetNum(I_SWORD,num);
 		if (IV) u->items.SetNum(I_AMULETOFI,num);
 		u->SetMoney(num * Globals->GUARD_MONEY);
 		u->SetSkill(S_COMBAT,skilllevel);
-		u->SetName(s);
+		u->set_name("City Guard");
 		u->type = U_GUARD;
 		u->guard = GUARD_GUARD;
 		u->reveal = REVEAL_FACTION;
@@ -1878,20 +1780,17 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		int n = 3 * num / 4;
 		int plate = 0;
 		if ((AC) && (Globals->START_CITY_GUARDS_PLATE)) plate = 1;
-		u = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
-			plate, 0);
+		u = MakeManUnit(fac, region->race, n, skilllevel, 1, plate, 0);
 		if (IV) u->items.SetNum(I_AMULETOFI,num);
 		u->SetMoney(num * Globals->GUARD_MONEY / 2);
-		u->SetName(s);
+		u->set_name("City Guard");
 		u->type = U_GUARD;
 		u->guard = GUARD_GUARD;
 		u->reveal = REVEAL_FACTION;
-		u2 = MakeManUnit(pFac, pReg->race, n, skilllevel, 1,
-			plate, 1);
+		u2 = MakeManUnit(fac, region->race, n, skilllevel, 1, plate, 1);
 		if (IV) u2->items.SetNum(I_AMULETOFI,num);
 		u2->SetMoney(num * Globals->GUARD_MONEY / 2);
-		AString *un = new AString("City Guard");
-		u2->SetName(un);
+		u2->set_name("City Guard");
 		u2->type = U_GUARD;
 		u2->guard = GUARD_GUARD;
 		u2->reveal = REVEAL_FACTION;
@@ -1908,16 +1807,15 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		u->SetSkill(S_OBSERVATION, skilllevel);
 	}
 	u->SetFlag(FLAG_HOLDING,1);
-	u->MoveUnit(pReg->GetDummy());
-	if ((!Globals->LEADERS_EXIST) && (pReg->type != R_NEXUS)) {
+	u->MoveUnit(region->GetDummy());
+	if ((!Globals->LEADERS_EXIST) && (region->type != R_NEXUS)) {
 		u2->SetFlag(FLAG_HOLDING,1);
-		u2->MoveUnit(pReg->GetDummy());
+		u2->MoveUnit(region->GetDummy());
 	}
 
 	if (AC && Globals->START_CITY_MAGES && needmage) {
-		u = GetNewUnit(pFac);
-		s = new AString("City Mage");
-		u->SetName(s);
+		u = GetNewUnit(fac);
+		u->set_name("City Mage");
 		u->type = U_GUARDMAGE;
 		u->reveal = REVEAL_FACTION;
 		u->SetMen(I_LEADERS,1);
@@ -1925,12 +1823,11 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 		u->SetMoney(Globals->GUARD_MONEY);
 		u->SetSkill(S_FORCE,Globals->START_CITY_MAGES);
 		u->SetSkill(S_FIRE,Globals->START_CITY_MAGES);
-		if (Globals->START_CITY_TACTICS)
-			u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
+		if (Globals->START_CITY_TACTICS) u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
 		u->combat = S_FIRE;
 		u->SetFlag(FLAG_BEHIND, 1);
 		u->SetFlag(FLAG_HOLDING, 1);
-		u->MoveUnit(pReg->GetDummy());
+		u->MoveUnit(region->GetDummy());
 	}
 }
 

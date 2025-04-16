@@ -31,22 +31,21 @@
 //
 // Spell parsing - generic
 //
-void ProcessGenericSpell(Unit *, int, OrdersCheck *pCheck);
-void ProcessRegionSpell(Unit *, AString *, int, OrdersCheck *pCheck);
+void ProcessGenericSpell(Unit *u, int spell, orders_check *checker);
+void ProcessRegionSpell(Unit *u, int spell, parser::string_parser& parser, orders_check *checker);
 
 //
 // Spell parsing - specific
 //
-void ProcessCastGateLore(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessCastPortalLore(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessPhanBeasts(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessPhanUndead(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessPhanDemons(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessInvisibility(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessBirdLore(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessMindReading(Unit *,AString *, OrdersCheck *pCheck );
-void ProcessLacandonTeleport(Unit *, AString *, OrdersCheck *pCheck);
-void ProcessTransmutation(Unit *, AString *, OrdersCheck *pCheck);
+void ProcessCastGateLore(Unit *u, parser::string_parser& parser, orders_check *checker);
+void ProcessCastPortalLore(Unit *u, parser::string_parser& parser, orders_check *checker);
+void ProcessPhanBeasts(Unit *u, parser::string_parser& parser, orders_check *checker);
+void ProcessPhanUndead(Unit *u, parser::string_parser& parser, orders_check *checker);
+void ProcessPhanDemons(Unit *u, parser::string_parser& parser, orders_check *checker);
+void ProcessInvisibility(Unit *u, parser::string_parser& parser, orders_check *checker);
+void ProcessBirdLore(Unit *u, parser::string_parser& parser, orders_check *checker);
+void ProcessMindReading(Unit *u, parser::string_parser& parser, orders_check *checker);
+void ProcessTransmutation(Unit *u, parser::string_parser& parser, orders_check *checker);
 
 //
 // Spell helpers

@@ -190,11 +190,11 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 			}
 		}
 		r = regions.GetRegion(q->regionnum);
-		rname = *r->name;
+		rname = r->name;
 		for(const auto& q2: quests) {
 			if (q2->type == Quest::HARVEST) {
 				r = regions.GetRegion(q2->regionnum);
-				if (rname == *r->name) {
+				if (rname == r->name) {
 					// Don't have 2 harvest quests
 					// active in the same region
 					q->type = -1;
@@ -207,7 +207,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		temple = O_TEMPLE;
 		for(const auto r : regions) {
 			if (r->Population() > 0 && r->visited) {
-				stlstr = r->name->Str();
+				stlstr = r->name;
 				// This looks like a null operation, but
 				// actually forces the map<> element creation
 				temples[stlstr];
@@ -334,7 +334,7 @@ Faction *Game::CheckVictory()
 	unvisited = 0;
 	for(const auto r : regions) {
 		if (r->Population() > 0) {
-			stlstr = r->name->Str();
+			stlstr = r->name;
 			if (r->visited) {
 				visited++;
 				vRegions[stlstr]++;
@@ -413,13 +413,13 @@ Faction *Game::CheckVictory()
 				// pick a hex within that region, and find it
 				count = rng::get_random(it->second);
 				for(const auto r : regions) {
-					if (it->first == r->name->Str()) {
+					if (it->first == r->name) {
 						if (!count--) {
 							// report this hex
 							message = "The ";
 							message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
 							message += " of ";
-							message += *(r->name);
+							message += r->name;
 							if (TerrainDefs[r->type].similar_type == R_TUNNELS)
 								message += " are";
 							else
@@ -450,7 +450,7 @@ Faction *Game::CheckVictory()
 				// pick a hex within that region, and find it
 				count = rng::get_random(it->second);
 				for(const auto r : regions) {
-					if (it->first == r->name->Str()) {
+					if (it->first == r->name) {
 						if (!count--) {
 							// report this hex
 							dir = -1;
@@ -458,10 +458,10 @@ Faction *Game::CheckVictory()
 							message = "The ";
 							message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
 							message += " of ";
-							message += *(r->name);
+							message += r->name;
 							if (start == r) {
 								message += ", containing ";
-								message += *start->town->name;
+								message += start->town->name;
 								message += ",";
 							} else if (start && dir != -1) {
 								message += ", ";
@@ -487,7 +487,7 @@ Faction *Game::CheckVictory()
 										break;
 								}
 								message += " ";
-								message += *start->town->name;
+								message += start->town->name;
 								message += ",";
 							}
 							if (TerrainDefs[r->type].similar_type == R_TUNNELS)
@@ -600,7 +600,7 @@ Faction *Game::CheckVictory()
 			}
 			temp += " and returned to the Eternal City.";
 			message = AString("You") + temp;
-			times = *f->name + temp;
+			times = f->name + temp.const_str();
 			f->event(message.const_str(), "gameover");
 			message = "You";
 			times += "\n\nThey";
@@ -710,7 +710,7 @@ Faction *Game::CheckVictory()
 				message += ", ";
 				message += *f->address;
 				message += ", ";
-				message += *f->name;
+				message += f->name;
 				message += "\n";
 				wf << message;
 			}
@@ -768,13 +768,13 @@ Faction *Game::CheckVictory()
 					message = "In the ";
 					message += TerrainDefs[TerrainDefs[l->region->type].similar_type].name;
 					message += " of ";
-					message += *(l->region->name);
+					message += l->region->name;
 					if (l->obj->type == O_DUMMY)
 						message += " roams";
 					else
 						message += " lurks";
 					message += " the ";
-					message += *(l->unit->name);
+					message += l->unit->name;
 					message += ".  Free the world from this menace and be rewarded!";
 					WriteTimesArticle(message);
 					delete l;
@@ -786,7 +786,7 @@ Faction *Game::CheckVictory()
 				message = "Seek a token of the Maker's bounty amongst the ";
 				message += ItemDefs[q->objective.type].names;
 				message += " of ";
-				message += *r->name;
+				message += r->name;
 				message += ".";
 				WriteTimesArticle(message);
 				break;
@@ -829,11 +829,11 @@ Faction *Game::CheckVictory()
 					questsWithProblems.push_back(q);
 				} else {
 					message = "Tear down the blasphemous ";
-					message += *o->name;
+					message += o->name;
 					message += " : ";
 					message += ObjectDefs[o->type].name;
 					message += " in ";
-					message += *r->name;
+					message += r->name;
 					message += "!";
 					WriteTimesArticle(message);
 				}

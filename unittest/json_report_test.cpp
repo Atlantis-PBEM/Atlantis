@@ -39,13 +39,13 @@ ut::suite<"JSON Report"> json_report_suite = []
     string data_name = json_report["name"];
     auto data_num = json_report["number"];
     auto new_items = json_report["item_reports"].size();
-    auto new_skills = json_report["skill_reports"].size();
     auto regions = json_report["regions"].size();
+    auto skill_reports = json_report["skill_reports"].size();
 
     expect(data_name == name); // faction name should match our name.
     expect(data_num == 3_i); // faction num should be 3 since we have guards and wandering monsters.
     expect(new_items == 1_ul); // should just be the new leader
-    expect(new_skills == 3_ul); // should be combat 1, 2, and 3 based on the test game setup.
+    expect(skill_reports == 3_ul); // should have exactly 3 skill reports
 
     // Verify that the game date is correct.
     string expected_month("January");
@@ -273,8 +273,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     // Generate just this single regions json object.
     Faction *faction = helper.create_faction("Test Faction");
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
@@ -331,8 +330,8 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(turn_orders_count == 2_ul);
 
     auto turn_orders = json_unit_report["orders"][1]["nested"];
-    string form_order = turn_orders[0]["order"];
-    string expected_form_order = "form 1";
+    auto form_order = turn_orders[0]["order"];
+    auto expected_form_order = "form 1";
     expect(form_order == expected_form_order);
     auto form_orders_count = turn_orders[0]["nested"].size();
     expect(form_orders_count == 1_ul);

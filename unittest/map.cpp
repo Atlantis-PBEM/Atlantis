@@ -41,7 +41,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 	// For the test world, make a very very small 2x2 world with 1 town in the plains
 	// and 1 hex of each of forest, mountains, and desert.
 	MakeRegions(level, xSize, ySize);
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 	AssignTypes(pRegionArrays[level]);
 	FinalSetup(pRegionArrays[level]);
@@ -53,7 +53,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char const *name) {
 	MakeRegions(level, xSize, ySize);
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERWORLD;
 	AssignTypes(pRegionArrays[level]);
 	FinalSetup(pRegionArrays[level]);
@@ -167,7 +167,7 @@ void ARegionList::FinalSetup(ARegionArray *pArr) {
 		for (auto y = 0; y < pArr->y; y++) {
 			ARegion *reg = pArr->GetRegion(x, y);
 			if (!reg) continue;
-			reg->SetName(AGetNameString(0));
+			reg->set_name(AGetNameString(0));
 			reg->Setup();
 		}
 	}
@@ -179,7 +179,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
 
 	Object *o = new Object(reg);
 	o->num = reg->buildingseq++;
-	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->set_name("Shaft");
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = toReg->num;
@@ -187,7 +187,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
 
 	o = new Object(toReg);
 	o->num = toReg->buildingseq++;
-	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->set_name("Shaft");
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = reg->num;

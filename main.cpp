@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 			}
 
 			game.DummyGame();
-			if ( !game.DoOrdersCheck( argv[ 2 ], argv[ 3 ] )) {
+			if ( !game.Doorders_check( argv[ 2 ], argv[ 3 ] )) {
 				Awrite( "Couldn't check the orders!" );
 				break;
 			}

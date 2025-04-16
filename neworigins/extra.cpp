@@ -270,11 +270,11 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 			}
 		}
 		r = regions.GetRegion(q->regionnum);
-		rname = *r->name;
+		rname = r->name;
 		for(const auto& q2: quests) {
 			if (q2->type == Quest::HARVEST) {
 				r = regions.GetRegion(q2->regionnum);
-				if (rname == *r->name) {
+				if (rname == r->name) {
 					// Don't have 2 harvest quests
 					// active in the same region
 					q->type = -1;
@@ -288,7 +288,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 		for(const auto r : regions) {
 			// No need to check if quests do not require exploration
 			if (r->Population() > 0 && (r->visited || QUEST_EXPLORATION_PERCENT == 0)) {
-				stlstr = r->name->Str();
+				stlstr = r->name;
 				// This looks like a null operation, but
 				// actually forces the map<> element creation
 				temples[stlstr];
@@ -427,8 +427,7 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
 	int num = rng::get_random(unempowered_altars.size());
 	Object *o = unempowered_altars[num];
 	o->type = O_EMPOWERED_ALTAR;
-	string name = string(ObjectDefs[O_EMPOWERED_ALTAR].name) + " [" + to_string(o->num) + "]";
-	o->name = new AString(name);
+	o->set_name(ObjectDefs[O_EMPOWERED_ALTAR].name);
 	// notify all factions.
 	for(const auto f : factions) {
 		if (f->is_npc) continue;
@@ -572,7 +571,7 @@ Faction *Game::CheckVictory()
 	unvisited = 0;
 	for(const auto r : regions) {
 		if (r->Population() > 0) {
-			stlstr = r->name->Str();
+			stlstr = r->name;
 			if (r->visited) {
 				visited++;
 				vRegions[stlstr]++;
@@ -652,13 +651,13 @@ Faction *Game::CheckVictory()
 				// pick a hex within that region, and find it
 				count = rng::get_random(it->second);
 				for(const auto r : regions) {
-					if (it->first == r->name->Str()) {
+					if (it->first == r->name) {
 						if (!count--) {
 							// report this hex
 							message = "The ";
 							message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
 							message += " of ";
-							message += *(r->name);
+							message += r->name;
 							if (TerrainDefs[r->type].similar_type == R_TUNNELS)
 								message += " are";
 							else
@@ -689,7 +688,7 @@ Faction *Game::CheckVictory()
 				// pick a hex within that region, and find it
 				count = rng::get_random(it->second);
 				for(const auto r : regions) {
-					if (it->first == r->name->Str()) {
+					if (it->first == r->name) {
 						if (!count--) {
 							// report this hex
 							dir = -1;
@@ -697,10 +696,10 @@ Faction *Game::CheckVictory()
 							message = "The ";
 							message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
 							message += " of ";
-							message += *(r->name);
+							message += r->name;
 							if (start == r) {
 								message += ", containing ";
-								message += *start->town->name;
+								message += start->town->name;
 								message += ",";
 							} else if (start && dir != -1) {
 								message += ", ";
@@ -726,7 +725,7 @@ Faction *Game::CheckVictory()
 										break;
 								}
 								message += " ";
-								message += *start->town->name;
+								message += start->town->name;
 								message += ",";
 							}
 							if (TerrainDefs[r->type].similar_type == R_TUNNELS)
@@ -782,13 +781,13 @@ Faction *Game::CheckVictory()
 					message = "Quest: In the ";
 					message += TerrainDefs[TerrainDefs[l->region->type].similar_type].name;
 					message += " of ";
-					message += *(l->region->name);
+					message += l->region->name;
 					if (l->obj->type == O_DUMMY)
 						message += " roams";
 					else
 						message += " lurks";
 					message += " the ";
-					message += *(l->unit->name);
+					message += l->unit->name;
 					message += ".  Free the world from this menace and be rewarded!";
 					WriteTimesArticle(message);
 					delete l;
@@ -800,7 +799,7 @@ Faction *Game::CheckVictory()
 				message = "Quest: Seek a token of the Ancient Ones legacy amongst the ";
 				message += ItemDefs[q->objective.type].names;
 				message += " of ";
-				message += *r->name;
+				message += r->name;
 				message += ".";
 				WriteTimesArticle(message);
 				break;
@@ -843,11 +842,11 @@ Faction *Game::CheckVictory()
 					questsWithProblems.push_back(q);
 				} else {
 					message = "Quest: Tear down the blasphemous ";
-					message += *o->name;
+					message += o->name;
 					message += " : ";
 					message += ObjectDefs[o->type].name;
 					message += " in ";
-					message += *r->name;
+					message += r->name;
 					message += "!";
 					WriteTimesArticle(message);
 				}
@@ -869,7 +868,7 @@ Faction *Game::CheckVictory()
 
 			total_cities++;
 
-			string name = r->town->name->const_str();
+			string name = r->town->name;
 			string possible_faction = name.substr(0, name.find_first_of(" \t\n"));
 			// The first word of the name was not all numeric, don't count for anyone
 			if (!all_of(
@@ -908,7 +907,7 @@ Faction *Game::CheckVictory()
 				tie = true;
 				maxFaction = nullptr;
 			}
-			message += "Faction " + string(f->name->const_str()) + " has " + to_string(vote.second) + " votes.\n";
+			message += "Faction " + f->name + " has " + to_string(vote.second) + " votes.\n";
 		}
 
 		// See if we have enough votes to even report the info.  Since a win requires 50% + 1, we can start reporting
@@ -917,13 +916,13 @@ Faction *Game::CheckVictory()
 			// Now see if we have a winner at all
 			if (max_vote > ((total_cities / 2) + 1)) {
 				winner = maxFaction;
-				message += "\n" + string(winner->name->const_str()) + " has enough votes and has won the game!";
+				message += "\n" + winner->name + " has enough votes and has won the game!";
 			} else {
 				int percent = floor((max_vote * 100) / total_cities);
 				if (tie) {
 					message += "\nThere is a tie for the most votes with multiple factions having ";
 				} else {
-					message += string("\n") + "The current leader is " + string(maxFaction->name->const_str()) + " with ";
+					message += string("\n") + "The current leader is " + maxFaction->name + " with ";
 				}
 				message += to_string(max_vote) + "/" + to_string(total_cities) + " votes (" + to_string(percent) + "%).";
 			}
@@ -994,7 +993,7 @@ Faction *Game::CheckVictory()
 				ObjectType ob = ObjectDefs[O_ENTITY_CAGE];
 				o->type = O_ENTITY_CAGE;
 				o->num = r->buildingseq++;
-				o->name = new AString(AString(ob.name) + " [" + o->num + "]");
+				o->set_name(ob.name);
 				if (ob.flags & ObjectType::SACRIFICE) {
 					o->incomplete = -(ob.sacrifice_amount);
 				}

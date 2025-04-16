@@ -28,6 +28,7 @@
 #include "astring.h"
 #include "gamedefs.h"
 #include <list>
+#include "string_parser.hpp"
 
 class UnitId;
 
@@ -120,7 +121,7 @@ enum {
 
 extern char const **OrderStrs;
 
-int Parse1Order(AString *);
+int Parse1Order(const parser::token& token);
 
 class Order {
   public:

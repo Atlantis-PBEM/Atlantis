@@ -27,7 +27,7 @@
 #include "gamedata.h"
 #include "rng.h"
 #include <stack>
-
+#include "string_filters.hpp"
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
@@ -56,8 +56,6 @@ string UnitId::Print()
 
 Unit::Unit()
 {
-	name = 0;
-	describe = 0;
 	num = 0;
 	type = U_NORMAL;
 	faction = 0;
@@ -102,9 +100,7 @@ Unit::Unit(int seq, Faction *f, int a)
 {
 	num = seq;
 	type = U_NORMAL;
-	name = new AString;
-	describe = 0;
-	*name = AString("Unit (") + num + ")";
+	set_name("Unit");
 	faction = f;
 	formfaction = f;
 	alias = a;
@@ -149,8 +145,6 @@ Unit::~Unit()
 	if (presentMonthOrders) delete presentMonthOrders;
 	if (attackorders) delete attackorders;
 	if (stealthorders) delete stealthorders;
-	if (name) delete name;
-	if (describe) delete describe;
 }
 
 void Unit::SetMonFlags()
@@ -161,8 +155,8 @@ void Unit::SetMonFlags()
 
 void Unit::MakeWMon(char const *monname, int mon, int num)
 {
-	AString *temp = new AString(monname);
-	SetName(temp);
+	std::string temp(monname);
+	set_name(temp);
 
 	type = U_WMON;
 	items.SetNum(mon, num);
@@ -173,8 +167,8 @@ void Unit::Writeout(ostream& f)
 {
 	set<string>::iterator it;
 
-	f << name->const_str() << '\n';
-	f << (describe ? describe->const_str() : "none") << '\n';
+	f << name << '\n';
+	f << (describe.empty() ? "none" : describe) << '\n';
 	f << num << '\n';
 	f << type << '\n';
 	f << faction->num << '\n';
@@ -202,19 +196,16 @@ void Unit::Writeout(ostream& f)
 
 void Unit::Readin(istream& f, std::list<Faction *>& facs)
 {
-	AString temp;
-	f >> ws >> temp;
-	name = temp.stripnumber();
+	std::string str;
+	std::getline(f >> ws, str);
+	name = str | filter::strip_number;
 
-	f >> ws >> temp;
-	describe = temp.getlegal();
-	if (*describe == "none") {
-		delete describe;
-		describe = 0;
-	}
+	std::getline(f >> ws, str);
+	describe = str | filter::legal_characters;
+	if (describe == "none") describe.clear();
 
 	f >> num;
-	SetName(new AString(*name));
+	set_name(name);
 	f >> type;
 
 	int i;
@@ -237,13 +228,13 @@ void Unit::Readin(istream& f, std::list<Faction *>& facs)
 
 	f >> free;
 
-	f >> ws >> temp;
-	readyItem = LookupItem(&temp);
+	f >> ws >> str;
+	readyItem = lookup_item(str);
 	for (i = 0; i < MAX_READY; i++) {
-		f >> ws >> temp;
-		readyWeapon[i] = LookupItem(&temp);
-		f >> ws >> temp;
-		readyArmor[i] = LookupItem(&temp);
+		f >> ws >> str;
+		readyWeapon[i] = lookup_item(str);
+		f >> ws >> str;
+		readyArmor[i] = lookup_item(str);
 	}
 
 	f >> flags;
@@ -251,17 +242,16 @@ void Unit::Readin(istream& f, std::list<Faction *>& facs)
 	items.Readin(f);
 	skills.Readin(f);
 
-	f >> ws >> temp;
-	combat = LookupSkill(&temp);
+	f >> ws >> str;
+	combat = lookup_skill(str);
 
 	f >> savedmovement;
 	f >> savedmovedir;
 
 	f >> i;
 	while (i-- > 0) {
-		string s;
-		getline(f >> ws, s);
-		visited.insert(s);
+		std::getline(f >> ws, str);
+		visited.insert(str);
 	}
 }
 
@@ -351,11 +341,11 @@ AString Unit::StudyableSkills()
 
 AString Unit::GetName(int obs)
 {
-	AString ret = *name;
+	AString ret = name;
 	int stealth = GetAttribute("stealth");
 	if (reveal == REVEAL_FACTION || obs > stealth) {
 		ret += ", ";
-		ret += *faction->name;
+		ret += faction->name;
 	}
 	return ret;
 }
@@ -438,15 +428,16 @@ json Unit::write_json_orders()
 {
 	stack<json> parent_stack;
 	json container = json::array();
+	parser::string_parser temp;
+	parser::token token(std::nullopt);
 
 	bool has_continuing_month_order = false;
 
 	for(auto order: oldorders) {
-		AString temp = order;
-		temp.getat();
-		AString *token = temp.gettoken();
+		temp = order;
+		std::ignore = temp.get_at();
+		token = temp.get_token();
 		int order_val = token ? Parse1Order(token) : NORDERS;
-		if (token) delete token;
 
 		set<int> month_orders = { O_MOVE, O_SAIL, O_TEACH, O_STUDY, O_BUILD, O_PRODUCE, O_ENTERTAIN, O_WORK };
 		if (Globals->TAX_PILLAGE_MONTH_LONG) {
@@ -488,11 +479,10 @@ json Unit::write_json_orders()
 				container = json::array();
 			}
 			for(auto order: tOrder->turnOrders) {
-				AString temp = order;
-				temp.getat();
-				AString *token = temp.gettoken();
+				temp = order;
+				std::ignore = temp.get_at();
+				token = temp.get_token();
 				int order_val = token ? Parse1Order(token) : NORDERS;
-				if (token) delete token;
 				if (order_val == O_ENDTURN || order_val == O_ENDFORM) {
 					json parent = parent_stack.top();
 					parent_stack.pop();
@@ -524,11 +514,10 @@ json Unit::write_json_orders()
 			parent_stack.push(container);
 			container = json::array();
 			for(auto order: tOrder->turnOrders) {
-				AString temp = order;
-				temp.getat();
-				AString *token = temp.gettoken();
+				temp = order;
+				std::ignore = temp.get_at();
+				token = temp.get_token();
 				int order_val = token ? Parse1Order(token) : NORDERS;
-				if (token) delete token;
 				if (order_val == O_ENDTURN || order_val == O_ENDFORM) {
 					json parent = parent_stack.top();
 					parent_stack.pop();
@@ -556,8 +545,7 @@ json Unit::write_json_orders()
 
 json Unit::build_json_descriptor() {
 	json j = json::object();
-	string s = name->const_str();
-	j["name"] = s.substr(0, s.find(" (")); // remove the unit number from the name for json output
+	j["name"] = name | filter::strip_number;
 	j["number"] = num;
 	return j;
 }
@@ -591,14 +579,13 @@ void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int au
 		j["own_unit"] = true;
 	}
 
-	if (describe) j["description"] = describe->const_str();
+	if (!describe.empty()) j["description"] = describe;
 
 	j["flags"]["guard"] = (guard == GUARD_GUARD);
 
 	if (see_faction) {
-		string faction_name = faction->name->const_str();
 		j["faction"] = {
-			{ "name", faction_name.substr(0, faction_name.find(" (")) }, // Remove the faction number
+			{ "name", faction->name | filter::strip_number },
 			{ "number", faction->num }
 		};
 		j["flags"]["avoid"] = (guard == GUARD_AVOID);
@@ -748,7 +735,7 @@ AString *Unit::BattleReport(int obs)
 	if (Globals->BATTLE_FACTION_INFO)
 		*temp += GetName(obs);
 	else
-		*temp += *name;
+		*temp += name;
 
 	if (GetFlag(FLAG_BEHIND)) *temp += ", behind";
 
@@ -766,9 +753,9 @@ AString *Unit::BattleReport(int obs)
 		}
 	}
 
-	if (describe) {
+	if (!describe.empty()) {
 		*temp += "; ";
-		*temp += *describe;
+		*temp += describe;
 	}
 
 	*temp += ".";
@@ -978,30 +965,20 @@ void Unit::PostTurn(ARegion *r)
 	}
 }
 
-void Unit::SetName(AString *s)
+void Unit::set_name(const std::string& newname)
 {
-	if (s) {
-		AString *newname = s->getlegal();
-		if (!newname) {
-			delete s;
-			return;
-		}
-		*newname += AString(" (") + num + ")";
-		delete s;
-		delete name;
-		name = newname;
-	}
+	if (newname.empty()) return;
+
+	std::string temp = newname | filter::legal_characters;
+	if (temp.empty()) return;
+
+	name = temp + " (" + to_string(num) + ")";
 }
 
-void Unit::SetDescribe(AString *s)
+void Unit::set_description(const std::string& newdescription)
 {
-	if (describe) delete describe;
-	if (s) {
-		AString *newname = s->getlegal();
-		delete s;
-		describe = newname;
-	} else
-		describe = 0;
+	describe.clear();
+	if (!newdescription.empty()) describe = newdescription | filter::legal_characters;
 }
 
 int Unit::IsAlive()
@@ -1123,8 +1100,7 @@ void Unit::ConsumeShared(int item, int needed)
 				used = min(needed, amount);
 				u->items.SetNum(item, amount - used);
 				needed -= used;
-				string temp = string(u->name->const_str()) + " shares " + ItemString(item, used) +
-					" with " + name->const_str() + ".";
+				string temp = u->name + " shares " + ItemString(item, used) + " with " + name + ".";
 				u->event(temp, "share");
 				// If the need has been filled, then we are done
 				if (needed == 0) return;
@@ -1184,8 +1160,7 @@ int Unit::GetAttackRiding()
             if (!canRide && !canFly)
                 maxBonus = 0;
             */
-            skname = mount->skill;
-            skill = LookupSkill(&skname);
+            skill = lookup_skill(mount->skill);
             if (skill == -1) {
                 // This mount doesn't require skill to use.
                 // I guess the rider gets the max bonus!
@@ -1279,16 +1254,13 @@ int Unit::GetAvailSkill(int sk)
 		if ((SkillDefs[sk].flags & SkillType::MAGIC) && type != U_MAGE && type != U_APPRENTICE && type != U_GUARDMAGE)
 			continue;
 		if (i->num < GetMen()) continue;
-		str = ItemDefs[i->type].grantSkill;
-		if (ItemDefs[i->type].grantSkill && LookupSkill(&str) == sk) {
+		if (ItemDefs[i->type].grantSkill && lookup_skill(ItemDefs[i->type].grantSkill) == sk) {
 			int grant = 0;
 			for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills) / sizeof(ItemDefs[0].fromSkills[0]); j++) {
 				if (ItemDefs[i->type].fromSkills[j]) {
 					int fromSkill;
 
-					str = ItemDefs[i->type].fromSkills[j];
-
-					fromSkill = LookupSkill(&str);
+					fromSkill = lookup_skill(ItemDefs[i->type].fromSkills[j]);
 					if (fromSkill != -1) {
 						/*
 							Should this use GetRealSkill or GetAvailSkill?
@@ -1352,8 +1324,7 @@ void Unit::ForgetSkill(int sk)
 
 int Unit::CheckDepend(int lev, SkillDepend &dep)
 {
-	AString skname = dep.skill;
-	int sk = LookupSkill(&skname);
+	int sk = lookup_skill(dep.skill);
 	if (sk == -1) return 0;
 	int temp = GetRealSkill(sk);
 	if (temp < dep.level) return 0;
@@ -1470,15 +1441,12 @@ int Unit::Practice(int sk)
 			if ((SkillDefs[sk].flags & SkillType::MAGIC) && type != U_MAGE && type != U_APPRENTICE && type != U_GUARDMAGE)
 				continue;
 			if (it->num < GetMen()) continue;
-			str = ItemDefs[it->type].grantSkill;
-			if (ItemDefs[it->type].grantSkill && LookupSkill(&str) == sk) {
+			if (ItemDefs[it->type].grantSkill && lookup_skill(ItemDefs[it->type].grantSkill) == sk) {
 				for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills) / sizeof(ItemDefs[0].fromSkills[0]); j++) {
 					if (ItemDefs[it->type].fromSkills[j]) {
 						int fromSkill;
 
-						str = ItemDefs[it->type].fromSkills[j];
-
-						fromSkill = LookupSkill(&str);
+						fromSkill = lookup_skill(ItemDefs[it->type].fromSkills[j]);
 						if (fromSkill != -1 && GetRealSkill(fromSkill) > reqlev) {
 							reqsk = fromSkill;
 							reqlev = GetRealSkill(fromSkill);
@@ -1503,8 +1471,7 @@ int Unit::Practice(int sk)
 	if (curlev >= max) return 0;
 
 	for (i = 0; i < sizeof(SkillDefs[sk].depends)/sizeof(SkillDefs[sk].depends[0]); i++) {
-		AString skname = SkillDefs[sk].depends[i].skill;
-		reqsk = LookupSkill(&skname);
+		reqsk = lookup_skill(SkillDefs[sk].depends[i].skill);
 		if (reqsk == -1) break;
 		if (SkillDefs[reqsk].flags & SkillType::DISABLED) continue;
 		if (SkillDefs[reqsk].flags & SkillType::NOEXP) continue;
@@ -2103,12 +2070,10 @@ int Unit::Taxers(int numtaxers)
 			WeaponType *pWep = FindWeapon(ItemDefs[item->type].abr);
 			int num = item->num;
 			int basesk = 0;
-			AString skname = pWep->baseSkill;
-			int sk = LookupSkill(&skname);
+			int sk = lookup_skill(pWep->baseSkill);
 			if (sk != -1) basesk = GetSkill(sk);
 			if (basesk == 0) {
-				skname = pWep->orSkill;
-				sk = LookupSkill(&skname);
+				sk = lookup_skill(pWep->orSkill);
 				if (sk != -1) basesk = GetSkill(sk);
 			}
 			if (!(pWep->flags & WeaponType::NEEDSKILL)) {
@@ -2139,8 +2104,7 @@ int Unit::Taxers(int numtaxers)
 		if (ItemDefs[item->type].type & IT_MOUNT) {
 			MountType *pm = FindMount(ItemDefs[item->type].abr);
 			if (pm->skill) {
-				AString skname = pm->skill;
-				int sk = LookupSkill(&skname);
+				int sk = lookup_skill(pm->skill);
 				if (pm->minBonus <= GetSkill(sk))
 					numUsableMounts += item->num;
 			} else
@@ -2346,10 +2310,8 @@ int Unit::GetFlag(int x)
 
 void Unit::SetFlag(int x, int val)
 {
-	if (val)
-		flags = flags | x;
-	else
-		if (flags & x) flags -= x;
+	if (val) flags = flags | x; // Set all bits specified by x
+	else flags = flags & ~x; // Unset all bits specified by x
 }
 
 void Unit::CopyFlags(Unit *x)
@@ -2369,7 +2331,7 @@ void Unit::CopyFlags(Unit *x)
 
 int Unit::GetBattleItem(AString &itm)
 {
-	int item = LookupItem(&itm);
+	int item = lookup_item(itm.const_str());
 	if (item == -1) return -1;
 
 	int num = items.GetNum(item);
@@ -2384,7 +2346,7 @@ int Unit::GetBattleItem(AString &itm)
 
 int Unit::GetArmor(AString &itm, int ass)
 {
-	int item = LookupItem(&itm);
+	int item = lookup_item(itm.const_str());
 	ArmorType *pa = FindArmor(itm.Str());
 
 	if (pa == NULL) return -1;
@@ -2405,7 +2367,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 	// This region doesn't allow riding or flying, so no mounts, bail
 	if (!canFly && !canRide) return -1;
 
-	int item = LookupItem(&itm);
+	int item = lookup_item(itm.const_str());
 	MountType *pMnt = FindMount(itm.Str());
 
 	int num = items.GetNum(item);
@@ -2422,8 +2384,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 	}
 
 	if (pMnt->skill) {
-		AString skname = pMnt->skill;
-		int sk = LookupSkill(&skname);
+		int sk = lookup_skill(pMnt->skill);
 		bonus = GetSkill(sk);
 		if (bonus < pMnt->minBonus) {
 			// Unit isn't skilled enough for this mount
@@ -2454,7 +2415,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 		int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage)
 {
-	int item = LookupItem(&itm);
+	int item = lookup_item(itm.const_str());
 	WeaponType *pWep = FindWeapon(itm.Str());
 
 	if (pWep == NULL) return -1;
@@ -2578,8 +2539,7 @@ int Unit::GetAttribute(char const *attrib)
 	for (int index = 0; index < 5; index++) {
 		int val = 0;
 		if (ap->mods[index].flags & AttribModItem::SKILL) {
-			temp = ap->mods[index].ident;
-			int sk = LookupSkill(&temp);
+			int sk = lookup_skill(ap->mods[index].ident);
 			val = GetAvailSkill(sk);
 			if (ap->mods[index].modtype == AttribModItem::UNIT_LEVEL_HALF) {
 				val = ((val + 1)/2) * ap->mods[index].val;
@@ -2590,8 +2550,7 @@ int Unit::GetAttribute(char const *attrib)
 			}
 		} else if (ap->mods[index].flags & AttribModItem::ITEM) {
 			val = 0;
-			temp = ap->mods[index].ident;
-			int item = LookupItem(&temp);
+			int item = lookup_item(ap->mods[index].ident);
 			if (item != -1) {
 				if (ItemDefs[item].type & IT_MAGEONLY
 					&& type != U_MAGE
@@ -2608,10 +2567,9 @@ int Unit::GetAttribute(char const *attrib)
 				}
 			}
 		} else if (ap->mods[index].flags & AttribModItem::FLAGGED) {
-			temp = ap->mods[index].ident;
-			if (temp == "invis")
+			if (ap->mods[index].ident == "invis")
 				val = (GetFlag(FLAG_INVIS) ? ap->mods[index].val : 0);
-			if (temp == "guard")
+			if (ap->mods[index].ident == "guard")
 				val = (guard == GUARD_GUARD ? ap->mods[index].val : 0);
 
 		}
@@ -2650,8 +2608,7 @@ int Unit::PracticeAttribute(char const *attrib)
 	if (ap == NULL) return 0;
 	for (int index = 0; index < 5; index++) {
 		if (ap->mods[index].flags & AttribModItem::SKILL) {
-			AString temp = ap->mods[index].ident;
-			int sk = LookupSkill(&temp);
+			int sk = lookup_skill(ap->mods[index].ident);
 			if (sk != -1)
 				if (Practice(sk)) return 1;
 		}
@@ -2786,14 +2743,12 @@ int Unit::CanUseWeapon(WeaponType *pWep)
 	int bsk, orsk;
 	AString skname;
 	if (pWep->baseSkill != NULL) {
-		skname = pWep->baseSkill;
-		bsk = LookupSkill(&skname);
+		bsk = lookup_skill(pWep->baseSkill);
 		if (bsk != -1) baseSkillLevel = GetSkill(bsk);
 	}
 
 	if (pWep->orSkill != NULL) {
-		skname = pWep->orSkill;
-		orsk = LookupSkill(&skname);
+		orsk = lookup_skill(pWep->orSkill);
 		if (orsk != -1) tempSkillLevel = GetSkill(orsk);
 	}
 

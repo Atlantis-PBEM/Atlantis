@@ -30,39 +30,35 @@
 #include "gamedata.h"
 #include "unit.h"
 #include "indenter.hpp"
+#include "string_parser.hpp"
+#include "string_filters.hpp"
 
-int LookupObject(AString *token)
+int lookup_object(const std::string& token)
 {
 	for (int i = 0; i < NOBJECTS; i++) {
-		if (*token == ObjectDefs[i].name) return i;
+		if (token == ObjectDefs[i].name) return i;
 	}
 	return -1;
 }
 
-/* ParseObject checks for matching Object types AND
+/* parse_object checks for matching Object types AND
  * for matching ship-type items (which are also
  * produced using the build order) if the ships
  * argument is given.
  */
-int ParseObject(AString *token, int ships)
+int parse_object(const parser::token& token, bool match_ships)
 {
 	// Check for ship-type items:
-	if (ships > 0) {
-		for (int i=0; i<NITEMS; i++) {
-			if (ItemDefs[i].type & IT_SHIP) {
-				if ((*token == ItemDefs[i].name) ||
-					(*token == ItemDefs[i].abr)) {
-						if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-						return -(i+1);
-				}
-			}
+	if (match_ships) {
+		for (int i = 0; i < NITEMS; i++) {
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (ItemDefs[i].type & IT_SHIP && (token == ItemDefs[i].name || token == ItemDefs[i].abr))
+				return -(i + 1);
 		}
 	}
-	for (int i=O_DUMMY+1; i<NOBJECTS; i++) {
-		if (*token == ObjectDefs[i].name) {
-			if (ObjectDefs[i].flags & ObjectType::DISABLED) return -1;
-			return i;
-		}
+	for (int i = O_DUMMY + 1; i < NOBJECTS; i++) {
+		if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+		if (token == ObjectDefs[i].name) return i;
 	}
 
 	return -1;
@@ -78,9 +74,8 @@ Object::Object(ARegion *reg)
 {
 	num = 0;
 	type = O_DUMMY;
-	name = new AString("Dummy");
+	name = "Dummy";
 	incomplete = 0;
-	describe = 0;
 	capacity = 0;
 	mages = 0;
 	inner = -1;
@@ -95,8 +90,6 @@ Object::Object(ARegion *reg)
 
 Object::~Object()
 {
-	if (name) delete name;
-	if (describe) delete describe;
 	region = (ARegion *)NULL;
 	std::for_each(units.begin(), units.end(), [](Unit *unit) { delete unit; });
 	units.clear();
@@ -111,8 +104,8 @@ void Object::Writeout(std::ostream& f)
 	) << '\n';
 
 	f << incomplete << '\n';
-	f << name->const_str() << '\n';
-	f << (describe ? describe->const_str() : "none") << '\n';
+	f << name << '\n';
+	f << (describe.empty() ? "none" : describe) << '\n';
 	f << inner << '\n';
 	f << (Globals->PREVENT_SAIL_THROUGH && !Globals->ALLOW_TRIVIAL_PORTAGE ? prevdir : -1) << '\n';
 	f << runes << '\n';
@@ -123,27 +116,22 @@ void Object::Writeout(std::ostream& f)
 
 void Object::Readin(std::istream& f, std::list<Faction *>& facs)
 {
-	AString temp;
-
 	f >> num;
 
-	f >> std::ws >> temp;
-	type = LookupObject(&temp);
+	std::string str;
+	std::getline(f >> std::ws, str);
+	type = lookup_object(str);
 
 	f >> incomplete;
 
-	if (name) delete name;
-	f >> std::ws >> temp;
-	name = new AString(temp);
-	AString *tmp = name->stripnumber();
-	SetName(tmp);
+	std::getline(f >> std::ws, str);
+	set_name(str | filter::strip_number);
 
-	f >> std::ws >> temp;
-	describe = temp.getlegal();
-	if (*describe == "none") {
-		delete describe;
-		describe = 0;
-	}
+
+	std::getline(f >> std::ws, str);
+	describe = str | filter::legal_characters;
+	if (describe == "none") describe.clear();
+
 	f >> inner;
 	f >> prevdir;
 	f >> runes;
@@ -156,8 +144,7 @@ void Object::Readin(std::istream& f, std::list<Faction *>& facs)
 	for (int j = 0; j < i; j++) {
 		Unit *temp = new Unit;
 		temp->Readin(f, facs);
-		if (!temp->faction)
-			continue;
+		if (!temp->faction) continue;
 		temp->MoveUnit(this);
 		if (!(temp->faction->is_npc)) region->visited = 1;
 	}
@@ -165,31 +152,24 @@ void Object::Readin(std::istream& f, std::list<Faction *>& facs)
 	ReadinFleet(f);
 }
 
-void Object::SetName(AString *s)
+void Object::set_name(const std::string& newname, Unit *actor)
 {
-	if (s && (CanModify())) {
-		AString *newname = s->getlegal();
-		if (!newname) {
-			delete s;
-			return;
-		}
-		delete s;
-		delete name;
-		*newname += AString(" [") + num + "]";
-		name = newname;
-	}
+	if (newname.empty()) return;
+	if (type == O_DUMMY) return; // Cannot modify dummy objects, ever
+	if (actor && !CanModify()) return;
+
+	std::string temp = newname | filter::legal_characters;
+	if (temp.empty()) return;
+
+	name = temp + " [" + std::to_string(num) + "]";
 }
 
-void Object::SetDescribe(AString *s)
+void Object::set_description(const std::string& newdescription)
 {
-	if (CanModify()) {
-		if (describe) delete describe;
-		if (s) {
-			AString *newname = s->getlegal();
-			delete s;
-			describe = newname;
-		} else describe = 0;
-	}
+	if (!CanModify()) return;
+
+	describe.clear();
+	if (!newdescription.empty()) describe = newdescription | filter::legal_characters;
 }
 
 int Object::IsFleet()
@@ -207,7 +187,7 @@ int Object::IsBuilding()
 	return 0;
 }
 
-int Object::CanModify()
+int Object::CanModify() // TODO: make bool
 {
 	return (ObjectDefs[type].flags & ObjectType::CANMODIFY);
 }
@@ -287,11 +267,10 @@ void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
 	if (type != O_DUMMY) {
 		ObjectType& ob = ObjectDefs[type];
 
-		std::string s = name->const_str();
-		container["name"] = s.substr(0, s.find(" [")); // remove the object number.
+		container["name"] = name | filter::strip_number;
 		container["number"] = num;
 		container["type"] = ob.name;
-		if (describe) container["description"] = describe->const_str();
+		if (!describe.empty()) container["description"] = describe;
 
 		if (IsFleet()) {
 			container["fleet"] = true;
@@ -515,9 +494,6 @@ AString Object::FleetDefinition()
  */
 int Object::FleetCapacity()
 {
-	AString *oname;
-	int ot;
-
 	capacity = 0;
 	// Calculate the maximum number of mages while we're at it
 	mages = 0;
@@ -534,12 +510,8 @@ int Object::FleetCapacity()
 			capacity += num * ItemDefs[item].swim;
 			flying = 0;
 		}
-		oname = new AString(ItemDefs[item].name);
-		ot = LookupObject(oname);
-		delete oname;
-		if (ot > 0) {
-			mages += num * ObjectDefs[ot].maxMages;
-		}
+		int ot = lookup_object(ItemDefs[item].name);
+		if (ot > 0) mages += num * ObjectDefs[ot].maxMages;
 	}
 	return capacity;
 }

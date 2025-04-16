@@ -152,8 +152,8 @@ class Unit {
 		void ClearOrders();
 		void ClearCastOrders();
 		void DefaultOrders(Object *);
-		void SetName(AString *);
-		void SetDescribe(AString *);
+		void set_name(const std::string& newname);
+		void set_description(const std::string& newdescription);
 		void PostTurn(ARegion *reg);
 
 		int IsLeader();
@@ -244,8 +244,8 @@ class Unit {
 		Faction *faction;
 		Faction *formfaction;
 		Object *object;
-		AString *name;
-		AString *describe;
+		std::string name;
+		std::string describe;
 		int num;
 		int type;
 		int alias;

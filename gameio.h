@@ -28,19 +28,9 @@
 #include "astring.h"
 
 
-int clamp(int min, int value, int max);
-
-int Agetint();
-
 void Awrite(const AString &);
 
 void Adot();
-
-//void message(char *);
-//void morewait();
-
-AString * getfilename(const AString &);
-AString *AGetString();
 
 #endif
 

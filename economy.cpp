@@ -264,9 +264,7 @@ void ARegion::SetupPop()
 		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
 			100 * spread) / 100;
 		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
-		if (rng::get_random(townch) < townprob) {
-			AddTown();
-		}
+		if (rng::get_random(townch) < townprob) add_town();
 	}
 
 	SetupEconomy();
@@ -809,31 +807,31 @@ void ARegion::SetupProds(double weight)
 }
 
 /* Create a town randomly */
-void ARegion::AddTown()
+void ARegion::add_town()
 {
-	AString *tname = new AString(AGetNameString(AGetName(1, this)));
+	std::string tname = AGetNameString(AGetName(1, this));
 	int size = DetermineTownSize();
-	AddTown(size, tname);
+	add_town(size, tname);
 }
 
 /* Create a town of any type with given name */
-void ARegion::AddTown(AString * tname)
+void ARegion::add_town(const std::string& tname)
 {
 	int size = DetermineTownSize();
-	AddTown(size, tname);
+	add_town(size, tname);
 }
 
 /* Create a town of given Town Type */
-void ARegion::AddTown(int size)
+void ARegion::add_town(int size)
 {
-	AString *tname = new AString(AGetNameString(AGetName(1, this)));
-	AddTown(size, tname);
+	std::string tname = AGetNameString(AGetName(1, this));
+	add_town(size, tname);
 }
 
 /* Create a town of specific type with name
  * All other town creation functions call this one
  * in the last instance. */
-void ARegion::AddTown(int size, AString * name)
+void ARegion::add_town(int size, const std::string& name)
 {
 	town = new TownInfo;
 	town->name = name;
@@ -1040,10 +1038,8 @@ void ARegion::SetupEditRegion()
 		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) +
 			100 * spread) / 100;
 		if (adjacent > 0) townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
-		AString *name = new AString("Newtown");
-		if (rng::get_random(townch) < townprob) {
-			AddTown(name);
-		}
+		std::string tname = AGetNameString(AGetName(1, this));
+		if (rng::get_random(townch) < townprob) add_town(tname);
 	}
 
 	// set up work and entertainment income

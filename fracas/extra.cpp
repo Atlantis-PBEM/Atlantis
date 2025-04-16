@@ -35,7 +35,6 @@ int Game::SetupFaction( Faction *pFac )
 	if (pFac->noStartLeader)
 		return 1;
 
-	AString *name;
 	//
 	// Set up first unit.
 	//
@@ -44,8 +43,7 @@ int Game::SetupFaction( Faction *pFac )
 	pFac->DiscoverItem(I_LEADERS, 0, 1);
 	leader->reveal = REVEAL_FACTION;
 	leader->SetFlag(FLAG_BEHIND, 1);
-	name = new AString("House Leader");
-	leader->SetName(name);
+	leader->set_name("House Leader");
 	leader->items.SetNum(I_HORSE, 1);
 	pFac->DiscoverItem(I_HORSE, 0, 1);
 
@@ -71,8 +69,7 @@ int Game::SetupFaction( Faction *pFac )
 	Unit *army = GetNewUnit(pFac);
 	army->SetMen(I_LEADERS, 10);
 	army->reveal = REVEAL_FACTION;
-	name = new AString("House Guard");
-	army->SetName(name);
+	army->set_name("House Guard");
 	army->items.SetNum(I_SWORD, 10);
 	pFac->DiscoverItem(I_SWORD, 0, 1);
 	army->items.SetNum(I_HORSE, 10);
@@ -87,8 +84,7 @@ int Game::SetupFaction( Faction *pFac )
 	archers->SetMen(I_LEADERS, 10);
 	archers->reveal = REVEAL_FACTION;
 	archers->SetFlag(FLAG_BEHIND, 1);
-	name = new AString("House Guard");
-	archers->SetName(name);
+	archers->set_name("House Guard");
 	archers->items.SetNum(I_CROSSBOW, 10);
 	pFac->DiscoverItem(I_CROSSBOW, 0, 1);
 	archers->items.SetNum(I_HORSE, 10);
@@ -104,8 +100,7 @@ int Game::SetupFaction( Faction *pFac )
 	sneak->reveal = REVEAL_NONE;
 	sneak->SetFlag(FLAG_BEHIND, 1);
 	sneak->guard = GUARD_AVOID;
-	name = new AString("Captain of the Hunt");
-	sneak->SetName(name);
+	sneak->set_name("Captain of the Hunt");
 	sneak->items.SetNum(I_HORSE, 1);
 	pFac->DiscoverItem(I_HORSE, 0, 1);
 	sneak->items.SetNum(I_CLOTHARMOR, 1);
@@ -120,8 +115,7 @@ int Game::SetupFaction( Faction *pFac )
 	quartermaster->reveal = REVEAL_FACTION;
 	quartermaster->SetFlag(FLAG_BEHIND, 1);
 	quartermaster->guard = GUARD_AVOID;
-	name = new AString("Store Master");
-	quartermaster->SetName(name);
+	quartermaster->set_name("Store Master");
 	quartermaster->items.SetNum(I_WOOD, 10);
 	pFac->DiscoverItem(I_WOOD, 0, 1);
 	quartermaster->items.SetNum(I_STONE, 10);
@@ -135,8 +129,7 @@ int Game::SetupFaction( Faction *pFac )
 	retainer->reveal = REVEAL_FACTION;
 	retainer->SetFlag(FLAG_BEHIND, 1);
 	retainer->guard = GUARD_AVOID;
-	name = new AString("Old Family Retainer");
-	retainer->SetName(name);
+	retainer->set_name("Old Family Retainer");
 	retainer->Study(S_FARMING, 180);
 	retainer->Study(S_RANCHING, 180);
 	retainer->Study(S_FISHING, 180);
@@ -147,8 +140,7 @@ int Game::SetupFaction( Faction *pFac )
 	merchant->reveal = REVEAL_FACTION;
 	merchant->SetFlag(FLAG_BEHIND, 1);
 	merchant->guard = GUARD_AVOID;
-	name = new AString("Trusted City Merchant");
-	merchant->SetName(name);
+	merchant->set_name("Trusted City Merchant");
 	merchant->items.SetNum(I_HORSE, 1);
 	pFac->DiscoverItem(I_HORSE, 0, 1);
 	merchant->Study(S_HORSETRAINING, 180);
@@ -162,8 +154,7 @@ int Game::SetupFaction( Faction *pFac )
 	smith->reveal = REVEAL_FACTION;
 	smith->SetFlag(FLAG_BEHIND, 1);
 	smith->guard = GUARD_AVOID;
-	name = new AString("Blacksmith");
-	smith->SetName(name);
+	smith->set_name("Blacksmith");
 	smith->items.SetNum(I_IRON, 10);
 	pFac->DiscoverItem(I_IRON, 0, 1);
 	smith->Study(S_MINING, 180);

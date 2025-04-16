@@ -121,10 +121,10 @@ void unit_stat_control::RecordKill(UnitStat& us, int weaponIndex, SpecialType* e
 
 void ArmyStats::TrackUnit(Unit *unit) {
 	UnitStat roundStat;
-	roundStat.unitName = unit->name->Str();
+	roundStat.unitName = unit->name;
 
 	UnitStat battleStat;
-	battleStat.unitName = unit->name->Str();
+	battleStat.unitName = unit->name;
 
 	roundStats.insert(std::pair<int, UnitStat>(unit->num, roundStat));
 	battleStats.insert(std::pair<int, UnitStat>(unit->num, battleStat));
@@ -226,8 +226,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		int objectno;
 
 		auto calc_def = [](Item *i) {
-			AString temp = ItemDefs[i->type].name;
-			auto obid = LookupObject(&temp);
+			auto obid = lookup_object(ItemDefs[i->type].name);
 			int prot = 0;
 			if (obid >= 0 && ObjectDefs[obid].protect > 0) prot = ObjectDefs[obid].protect;
 			int total_def = 0;
@@ -247,8 +246,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		i = 0;
 		for(auto ship : sorted_ships) {
 			if (o->shipno == i) {
-				abbr = ItemDefs[ship->type].name;
-				objectno = LookupObject(&abbr);
+				objectno = lookup_object(ItemDefs[ship->type].name);
 				if (objectno >= 0 && ObjectDefs[objectno].protect > 0) {
 					o->capacity = ObjectDefs[objectno].protect * ship->num;
 					o->type = objectno;
@@ -281,9 +279,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		MonType *mp = FindMonster(ItemDefs[r].abr,
 				(ItemDefs[r].type & IT_ILLUSION));
 		if((u->type == U_WMON) || (ItemDefs[r].flags & ItemType::MANPRODUCE))
-			name = AString(mp->name) + " in " + *(unit->name);
+			name = AString(mp->name) + " in " + unit->name;
 		else
-			name = AString(mp->name) + " controlled by " + *(unit->name);
+			name = AString(mp->name) + " controlled by " + unit->name;
 		askill = mp->attackLevel;
 		dskill[ATTACK_COMBAT] += mp->defense[ATTACK_COMBAT];
 		if (mp->defense[ATTACK_ENERGY] > dskill[ATTACK_ENERGY]) {
@@ -313,7 +311,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		return;
 	}
 
-	name = *(unit->name);
+	name = unit->name;
 
 	SetupHealing();
 
@@ -655,8 +653,8 @@ void Soldier::RestoreItems()
 		BattleItemType *pBat = &BattleItemDefs[ battleType ];
 
 		if (GET_BIT(battleItems, battleType)) {
-			AString itm(pBat->abbr);
-			int item = LookupItem(&itm);
+			std::string itm(pBat->abbr);
+			int item = lookup_item(itm);
 			unit->items.SetNum(item, unit->items.GetNum(item) + 1);
 		}
 	}
@@ -811,7 +809,7 @@ void Army::Reset() {
 }
 
 void Army::WriteLosses(Battle * b) {
-	b->AddLine(*(leader->name) + " loses " + (count - NumAlive()) + ".");
+	b->AddLine(leader->name + " loses " + std::to_string(count - NumAlive()) + ".");
 
 	if (notbehind != count) {
 		std::list<Unit *> units;
@@ -1018,9 +1016,10 @@ void Army::DoHealLevel(Battle *b, int level, int rate, int useItems)
 			}
 		}
 		if (useItems && s->healitem == I_HEALPOTION) {
-			b->AddLine(*(s->unit->name) + " heals " + n + " using healing potion with " + rate + "% chance.");
+			b->AddLine(s->unit->name + " heals " + std::to_string(n) + " using healing potion with " +
+				std::to_string(rate) + "% chance.");
 		} else {
-			b->AddLine(*(s->unit->name) + " heals " + n + " with " + rate + "% chance.");
+			b->AddLine(s->unit->name + " heals " + std::to_string(n) + " with " + std::to_string(rate) + "% chance.");
 		}
 	}
 }

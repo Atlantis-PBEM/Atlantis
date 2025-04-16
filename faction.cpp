@@ -26,6 +26,8 @@
 #include "gamedata.h"
 #include "game.h"
 #include "indenter.hpp"
+#include "string_parser.hpp"
+#include "string_filters.hpp"
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
@@ -86,32 +88,30 @@ void to_json(json &j, const FactionError &e) {
 	}
 };
 
-int ParseTemplate(AString *token)
+int parse_template_type(const parser::token& str)
 {
 	for (int i = 0; i < NTEMPLATES; i++)
-		if (*token == TemplateStrs[i]) return i;
+		if (str == TemplateStrs[i]) return i;
 	return -1;
 }
 
-int ParseAttitude(AString *token)
+int parse_attitude(const parser::token& str)
 {
 	for (int i=0; i<NATTITUDES; i++)
-		if (*token == AttitudeStrs[i]) return i;
+		if (str == AttitudeStrs[i]) return i;
 	return -1;
 }
 
 Faction::Faction()
 {
 	exists = 1;
-	name = 0;
-
 	for (auto &ft : *FactionTypes) {
 		type[ft] = 1;
 	}
 
 	lastchange = -6;
 	address = 0;
-	password = 0;
+	password = "none";
 	times = 0;
 	showunitattitudes = 0;
 	temformat = TEMPLATE_OFF;
@@ -135,10 +135,9 @@ Faction::Faction(int n)
 	}
 
 	lastchange = -6;
-	name = new AString;
-	*name = AString("Faction (") + AString(num) + AString(")");
+	name = "Faction (" + std::to_string(num) + ")";
 	address = new AString("NoAddress");
-	password = new AString("none");
+	password = "none";
 	times = 1;
 	showunitattitudes = 0;
 	temformat = TEMPLATE_LONG;
@@ -154,9 +153,7 @@ Faction::Faction(int n)
 
 Faction::~Faction()
 {
-	if (name) delete name;
 	if (address) delete address;
-	if (password) delete password;
 	attitudes.clear();
 }
 
@@ -175,9 +172,9 @@ void Faction::Writeout(ostream& f)
 	f << lastchange << '\n';
 	f << lastorders << '\n';
 	f << unclaimed << '\n';
-	f << *name << '\n';
+	f << name << '\n';
 	f << *address << '\n';
-	f << *password << '\n';
+	f << password << '\n';
 	f << times << '\n';
 	f << showunitattitudes << '\n';
 	f << temformat << '\n';
@@ -206,16 +203,15 @@ void Faction::Readin(istream& f)
 	f >> lastorders;
 	f >> unclaimed;
 
+	std::string str;
+	std::getline(f >> ws, str);
+	set_name(str | filter::strip_number);
+
 	AString tmp;
 	f >> ws >> tmp;
-	name = new AString(tmp);
-	AString *temp = name->stripnumber();
-	SetName(temp);
-
-	f >> ws >> tmp;
 	address = new AString(tmp);
-	f >> ws >> tmp;
-	password = new AString(tmp);
+
+	std::getline(f >> ws, password);
 	f >> times;
 	f >> showunitattitudes;
 	f >> temformat;
@@ -238,27 +234,21 @@ void Faction::Readin(istream& f)
 void Faction::View()
 {
 	AString temp;
-	temp = AString("Faction ") + num + AString(" : ") + *name;
+	temp = AString("Faction ") + num + AString(" : ") + name;
 	Awrite(temp);
 }
 
-void Faction::SetName(AString* s)
+void Faction::set_name(const std::string& newname, bool canonicalize)
 {
-	if (s) {
-		AString* newname = s->getlegal();
-		delete s;
-		if (!newname) return;
-		delete name;
-		*newname += AString(" (") + num + ")";
-		name = newname;
-	}
-}
+	if (newname.empty()) return;
 
-void Faction::SetNameNoChange(AString *s)
-{
-	if (s) {
-		delete name;
-		name = new AString(*s);
+	if (canonicalize) {
+		std::string str = newname | filter::legal_characters;
+		if (str.empty()) return;
+		str += " (" + std::to_string(num) + ")";
+		name = str;
+	} else {
+		name = newname;
 	}
 }
 
@@ -395,8 +385,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 		{ "json_report_version", (ATL_VER_STRING(JSON_REPORT_VERSION)).const_str() }
 	};
 
-	string s = name->const_str();
-	j["name"] = s.substr(0, s.find(" (")); // remove the faction number from the name for json output
+	j["name"] = name | filter::strip_number;
 	j["number"] = num;
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		j["type"] = json::object();
@@ -407,12 +396,12 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 		}
 	}
 	j["administrative"]["times_sent"] = (times != 0);
-	bool password_unset = (!password || *password == "none");
+	bool password_unset = (password == "none");
 	j["administrative"]["password_unset"] = password_unset;
 	j["administrative"]["email"] = address->const_str();
 	j["administrative"]["show_unit_attitudes"] = (showunitattitudes != 0);
 
-	if(!password_unset) j["administrative"]["password"] = password->const_str();
+	if(!password_unset) j["administrative"]["password"] = password;
 	if(Globals->MAX_INACTIVE_TURNS != -1) {
 		int cturn = game->TurnNumber() - lastorders;
 		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !is_npc) {
@@ -514,9 +503,9 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 			if (a.attitude == i) {
 				// Grab that faction so we can get it's number and name, and strip the " (num)" from the name for json
 				Faction *fac = GetFaction(game->factions, a.factionnum);
-				string facname = fac->name->const_str();
-				facname = facname.substr(0, facname.find(" ("));
-				j["attitudes"][attitude].push_back({ { "name", facname }, { "number", a.factionnum } });
+				j["attitudes"][attitude].push_back({
+					{ "name", fac->name | filter::strip_number }, { "number", a.factionnum }
+				});
 			}
 		}
 		// the array will be empty if this faction has declared no other factions with that specific attitude.
@@ -568,9 +557,9 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 void Faction::WriteFacInfo(ostream &f)
 {
 	f << "Faction: " << num << '\n';
-	f << "Name: " << name->const_str() << '\n';
+	f << "Name: " << name << '\n';
 	f << "Email: " << address->const_str() << '\n';
-	f << "Password: " << password->const_str() << '\n';
+	f << "Password: " << password << '\n';
 	f << "LastOrders: " << lastorders << '\n';
 	f << "FirstTurn: " << startturn << '\n';
 	f << "SendTimes: " << times << '\n';
@@ -765,8 +754,7 @@ void Faction::DiscoverItem(int item, int force, int full)
 		// If we've found an item that grants a skill, give a
 		// report on the skill granted (if we haven't seen it
 		// before)
-		skname = ItemDefs[item].grantSkill;
-		skill = LookupSkill(&skname);
+		skill = lookup_skill(ItemDefs[item].grantSkill);
 		if (skill != -1 && !(SkillDefs[skill].flags & SkillType::DISABLED)) {
 			for (i = 1; i <= ItemDefs[item].maxGrant; i++) {
 				if (i > skills.GetDays(skill)) {

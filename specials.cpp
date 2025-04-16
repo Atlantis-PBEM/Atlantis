@@ -182,8 +182,7 @@ void Battle::UpdateShields(Army *a)
 			}
 		}
 
-		AddLine(*(a->soldiers[i]->unit->name) + " casts " +
-				spd->shielddesc + ".");
+		AddLine(a->soldiers[i]->unit->name + " casts " + spd->shielddesc + ".");
 	}
 }
 

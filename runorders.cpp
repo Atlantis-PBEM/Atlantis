@@ -268,10 +268,10 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 		}
 	}
 	if (!succ) {
-		string temp = string(u->name->const_str()) + " is caught attempting to assassinate " +
-			tar->name->const_str() + " in " + r->name->const_str() + ".";
+		string temp = u->name + " is caught attempting to assassinate " + tar->name + " in " +
+			r->ShortPrint().const_str() + ".";
 		for(const auto f : seers) {
-			f->event(temp, "combat");
+			f->event(temp, "combat", r, u);
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
 		u->PracticeAttribute("stealth");
@@ -285,8 +285,7 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
 		// cannot be assassinated by someone with a ring of invisibility
 		if (tar->AmtsPreventCrime(u)) {
 			tar->event("Assassination prevented by amulet of true seeing.", "combat");
-			u->event("Attempts to assassinate " + string(tar->name->const_str()) +
-				", but is prevented by amulet of true seeing.", "combat");
+			u->event("Attempts to assassinate " + tar->name + ", but is prevented by amulet of true seeing.", "combat");
 			return;
 		}
 	}
@@ -310,10 +309,8 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 		return;
 	}
 
-	if (tar->type == U_GUARD || tar->type == U_WMON ||
-			tar->type == U_GUARDMAGE) {
-		u->error("STEAL: Can only steal from other player's "
-				"units.");
+	if (tar->type == U_GUARD || tar->type == U_WMON || tar->type == U_GUARDMAGE) {
+		u->error("STEAL: Can only steal from other player's units.");
 		return;
 	}
 
@@ -340,10 +337,10 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	}
 
 	if (!succ) {
-		string temp = string(u->name->const_str()) + " is caught attempting to steal from " +
-			tar->name->const_str() + " in " + r->name->const_str() + ".";
+		string temp = u->name + " is caught attempting to steal from " + tar->name + " in " +
+			r->ShortPrint().const_str() + ".";
 		for(const auto f : seers) {
-			f->event(temp, "theft");
+			f->event(temp, "theft", r, u);
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
 		u->PracticeAttribute("stealth");
@@ -356,8 +353,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	//
 	if (tar->AmtsPreventCrime(u)) {
 		tar->event("Theft prevented by amulet of true seeing.", "theft");
-		u->event("Attempts to steal from " + string(tar->name->const_str()) +
-			", but is prevented by amulet of true seeing.", "theft");
+		u->event("Attempts to steal from " + tar->name + ", but is prevented by amulet of true seeing.", "theft");
 		return;
 	}
 
@@ -376,10 +372,9 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
 	u->items.SetNum(so->item, u->items.GetNum(so->item) + amt);
 	tar->items.SetNum(so->item, tar->items.GetNum(so->item) - amt);
 
-	string temp = string(u->name->const_str()) + " steals " + ItemString(so->item, amt) + " from " +
-		tar->name->const_str() + ".";
+	string temp = u->name + " steals " + ItemString(so->item, amt) + " from " + tar->name + ".";
 	for(const auto f : seers) {
-		f->event(temp, "theft");
+		f->event(temp, "theft", r, u);
 	}
 
 	tar->event("Has " + ItemString(so->item, amt) + " stolen.", "theft");
@@ -522,7 +517,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 
 		willDestroy = std::min(destroyablePoints, destroyPower);
 		if (willDestroy == 0) {
-			u->error(string("DESTROY: Can't destroy ") + o->name->const_str() + " more.");
+			u->error(string("DESTROY: Can't destroy ") + o->name + " more.");
 			for (const auto u2 : o->units) u2->destroy = 0;
 			return;
 		}
@@ -532,9 +527,9 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 			o->destroyed += willDestroy;
 			o->incomplete += willDestroy;
 
-			u->event("Destroys " + to_string(willDestroy) + " structure points from the " + o->name->const_str() + ".", "destroy");
+			u->event("Destroys " + to_string(willDestroy) + " structure points from the " + o->name + ".", "destroy");
 		} else {
-			u->event("Destroys " + string(o->name->const_str()) + ".", "destroy");
+			u->event("Destroys " + o->name + ".", "destroy");
 
 			Object *dest = r->GetDummy();
 			for(const auto u2 : o->units) {
@@ -552,7 +547,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 		if (o->type == O_DUMMY) {
 			u->error("DESTROY: Not inside a structure.");
 		} else {
-			u->error(string("DESTROY: Can't destroy ") + o->name->const_str() + ".");
+			u->error(string("DESTROY: Can't destroy ") + o->name + ".");
 		}
 		for (const auto u2 : o->units) u2->destroy = 0;
 		return;
@@ -577,16 +572,14 @@ void Game::RunFindUnit(Unit *u)
 		if (!all) {
 			fac = GetFaction(factions, f->find);
 			if (fac) {
-				string temp = string("The address of ") + fac->name->const_str() + " is " +
-					fac->address->const_str() + ".";
+				string temp = string("The address of ") + fac->name + " is " + fac->address->const_str() + ".";
 				u->faction->event(temp, "find");
 			} else {
 				u->error(string("FIND: ") + to_string(f->find) + " is not a valid faction number.");
 			}
 		} else {
 			for(const auto fac : factions) {
-				string temp = string("The address of ") + fac->name->const_str() + " is " +
-					fac->address->const_str() + ".";
+				string temp = string("The address of ") + fac->name + " is " + fac->address->const_str() + ".";
 				u->faction->event(temp, "find");
 			}
 		}
@@ -759,8 +752,8 @@ void Game::RunPillageRegion(ARegion *reg)
 				u->event("Pillages $" + to_string(temp) + " from " + reg->ShortPrint().const_str() + ".", "tax", reg);
 				for(const auto f : facs) {
 					if (f != u->faction) {
-						string temp = string(u->name->const_str()) + " pillages " + reg->name->const_str() + ".";
-						f->event(temp, "tax");
+						string temp = u->name + " pillages " + reg->ShortPrint().const_str() + ".";
+						f->event(temp, "tax", reg, u);
 					}
 				}
 			}
@@ -875,8 +868,8 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 		}
 		Object *to = obj->region->GetDummy();
 		tar->MoveUnit(to);
-		tar->event("Evicted from " + string(obj->name->const_str()) + " by " + u->name->const_str(), "evict");
-		u->event("Evicted " + string(tar->name->const_str()) + " from " + obj->name->const_str(), "evict");
+		tar->event("Evicted from " + obj->name + " by " + u->name, "evict");
+		u->event("Evicted " + tar->name + " from " + obj->name, "evict");
 	}
 }
 
@@ -1065,7 +1058,7 @@ void Game::EndGame(Faction *victor)
 			fac->quit = QUIT_GAME_OVER;
 
 		if (victor) {
-			string temp(victor->name->const_str());
+			string temp(victor->name);
 			fac->event(temp + " has won the game!", "gameover");
 		} else
 			fac->event("The game has ended with no winner.", "gameover");
@@ -1542,8 +1535,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 							if (exp > 0) {
 								exp = exp * temp * GetDaysByLevel(1);
 								for (int ms = 0; ms < (int)(sizeof(mt->skills)/sizeof(mt->skills[0])); ms++) {
-									AString sname = mt->skills[ms];
-									int skill = LookupSkill(&sname);
+									int skill = lookup_skill(mt->skills[ms]);
 									if (skill == -1) continue;
 									int curxp = u->skills.GetExp(skill);
 									u->skills.SetExp(skill,exp+curxp);
@@ -1635,9 +1627,9 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
 										u->needed -= eat * value;
 										u2->items.SetNum(item, amount - eat);
 
-										u->event("Borrows " + ItemString(item, eat) + " from " + u2->name->const_str() +
+										u->event("Borrows " + ItemString(item, eat) + " from " + u2->name +
 											" for maintenance.", "maintenance");
-										u2->event(string(u->name->const_str()) + " borrows " + ItemString(item, eat) +
+										u2->event(u->name + " borrows " + ItemString(item, eat) +
 											" for maintenance.", "maintenance");
 									}
 								}
@@ -1681,10 +1673,10 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
 									if (eat) {
 										u->needed -= eat * value;
 										u2->items.SetNum(item, amount - eat);
-										u2->event(string(u->name->const_str()) + " borrows " +
-											ItemString(item, eat) + " for maintenance.", "maintenance");
+										u2->event(u->name + " borrows " + ItemString(item, eat) +
+											" for maintenance.", "maintenance");
 										u->event("Borrows " + ItemString(item, eat) + " from " +
-											u2->name->const_str() + " for maintenance.", "maintenance");
+											u2->name + " for maintenance.", "maintenance");
 									}
 								}
 							}
@@ -1749,9 +1741,9 @@ void Game::CheckFactionHungerItem(int item, int value)
 									}
 									if (eat) {
 										u2->items.SetNum(item, amount - eat);
-										u->event("Borrows " + ItemString(item, eat) + " from " + u2->name->const_str() +
+										u->event("Borrows " + ItemString(item, eat) + " from " + u2->name +
 											" to fend off starvation.", "maintenance");
-										u2->event(string(u->name->const_str()) + " borrows " + ItemString(item, eat) +
+										u2->event(u->name + " borrows " + ItemString(item, eat) +
 											" to fend off starvation.", "maintenance");
 									}
 								}
@@ -1789,10 +1781,10 @@ void Game::CheckAllyHungerItem(int item, int value)
 									}
 									if (eat) {
 										u2->items.SetNum(item, amount - eat);
-										u2->event(string(u->name->const_str()) + " borrows " +
-											ItemString(item, eat) + " to fend off starvation.", "maintenance");
+										u2->event(u->name + " borrows " + ItemString(item, eat) +
+											" to fend off starvation.", "maintenance");
 										u->event("Borrows " + ItemString(item, eat) + " from " +
-											u2->name->const_str() + " to fend off starvation.", "maintenance");
+											u2->name + " to fend off starvation.", "maintenance");
 									}
 								}
 							}
@@ -2179,10 +2171,10 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 			}
 			if (tOrder->giveAmount == o->expectAmount) o->exchangeStatus = 1;
 			if (o->exchangeStatus == 1 && tOrder->exchangeStatus == 1) {
-				u->event("Exchanges " + ItemString(o->giveItem, o->giveAmount) + " with " +	t->name->const_str() +
+				u->event("Exchanges " + ItemString(o->giveItem, o->giveAmount) + " with " +	t->name +
 					" for " + ItemString(tOrder->giveItem, tOrder->giveAmount) +	".", "exchange");
 				t->event("Exchanges " + ItemString(tOrder->giveItem, tOrder->giveAmount) + " with " +
-					u->name->const_str() + " for " + ItemString(o->giveItem, o->giveAmount) + ".", "exchange");
+					u->name + " for " + ItemString(o->giveItem, o->giveAmount) + ".", "exchange");
 				u->ConsumeShared(o->giveItem, o->giveAmount);
 				t->items.SetNum(o->giveItem, t->items.GetNum(o->giveItem) + o->giveAmount);
 				t->ConsumeShared(tOrder->giveItem, tOrder->giveAmount);
@@ -2359,14 +2351,11 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			it->type = o->item;
 			it->num = s->items.GetNum(o->item);
 			if (o->type == O_TAKE) {
-				u->event("Takes " + string(it->Report(1).const_str()) + " from " + s->name->const_str() +
-					".", event_type);
+				u->event("Takes " + string(it->Report(1).const_str()) + " from " + s->name + ".", event_type);
 			} else {
-				u->event("Gives " + string(it->Report(1).const_str()) + " to " + t->name->const_str() + ".",
-					event_type);
+				u->event("Gives " + string(it->Report(1).const_str()) + " to " + t->name + ".", event_type);
 				if (s->faction != t->faction) {
-					t->event("Receives " + string(it->Report(1).const_str()) + " from " + s->name->const_str() +
-						".", event_type);
+					t->event("Receives " + string(it->Report(1).const_str()) + " from " + s->name + ".", event_type);
 				}
 			}
 			s->items.SetNum(o->item, 0);
@@ -2402,7 +2391,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				fleet = new Object(r);
 				fleet->type = O_FLEET;
 				fleet->num = shipseq++;
-				fleet->name = new AString(AString("Fleet [") + fleet->num + "]");
+				fleet->set_name("Fleet");
 				t->object->region->AddFleet(fleet);
 				t->MoveUnit(fleet);
 			}
@@ -2433,9 +2422,9 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				}
 			}
 
-			s->event("Transfers " + ItemString(o->item, amt) + " to " + t->object->name->const_str() + ".", ord);
+			s->event("Transfers " + ItemString(o->item, amt) + " to " + t->object->name + ".", ord);
 			if (s->faction != t->faction) {
-				t->event("Receives " + ItemString(o->item, amt) + " from " + s->object->name->const_str() + ".", ord);
+				t->event("Receives " + ItemString(o->item, amt) + " from " + s->object->name + ".", ord);
 			}
 			s->object->SetNumShips(o->item, s->object->GetNumShips(o->item) - amt);
 			t->object->SetNumShips(o->item, t->object->GetNumShips(o->item) + amt);
@@ -2604,7 +2593,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			notallied = 0;
 		}
 
-		u->event("Gives unit to " + string(t->faction->name->const_str()) + ".", event_type);
+		u->event("Gives unit to " + t->faction->name + ".", event_type);
 		u->faction = t->faction;
 		u->event("Is given to your faction.", event_type);
 
@@ -2696,12 +2685,11 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	}
 
 	if (o->type == O_TAKE) {
-		u->event("Takes " + ItemString(o->item, amt) + " from " + s->name->const_str() + ".", event_type);
+		u->event("Takes " + ItemString(o->item, amt) + " from " + s->name + ".", event_type);
 	} else {
-		u->event("Gives " + ItemString(o->item, amt) + " to " + t->name->const_str() + ".", event_type);
-		if (s->faction != t->faction) {
-			t->event("Receives " + ItemString(o->item, amt) + " from " + s->name->const_str() + ".", event_type);
-		}
+		u->event("Gives " + ItemString(o->item, amt) + " to " + t->name + ".", event_type);
+		if (s->faction != t->faction)
+			t->event("Receives " + ItemString(o->item, amt) + " from " + s->name + ".", event_type);
 	}
 	s->ConsumeShared(o->item, amt);
 	t->items.SetNum(o->item, t->items.GetNum(o->item) + amt);
@@ -2806,8 +2794,7 @@ void Game::CheckTransportOrders()
 
 					// Make sure the target and unit are at least friendly
 					if (tar->unit->faction->get_attitude(u->faction->num) <	A_FRIENDLY) {
-						u->error("TRANSPORT: Target " + string(tar->unit->name->const_str()) +
-							" is not a member of a friendly faction.");
+						u->error("TRANSPORT: Target " + tar->unit->name + " is not a member of a friendly faction.");
 						o->type = NORDERS;
 						continue;
 					}
@@ -2835,7 +2822,7 @@ void Game::CheckTransportOrders()
 					} else { // sender isn't a valid QM
 						if (!target_is_valid_qm) { // Non-qms or invalid qms can only send to valid QMs
 							// Give a specific error message depending on why they aren't considered a quartermaster
-							string temp = "TRANSPORT: Target " + string(tar->unit->name->const_str());
+							string temp = "TRANSPORT: Target " + tar->unit->name;
 							temp += (
 								target_owns_qm_building ?
 								" does not own a transport structure." :
@@ -2872,9 +2859,7 @@ void Game::CheckTransportOrders()
 							dist = regions.GetPlanarDistance(r, tar->region, penalty, maxdist);
 						}
 						if (dist > maxdist) {
-							u->error(
-								"TRANSPORT: Recipient " + string(tar->unit->name->const_str()) + " is too far away."
-							);
+							u->error("TRANSPORT: Recipient " + tar->unit->name + " is too far away.");
 							o->type = NORDERS;
 							continue;
 						}
@@ -3012,11 +2997,10 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 					u->ConsumeSharedMoney(cost);
 
 					u->ConsumeShared(t->item, amt);
-					u->event("Transports " + ItemString(t->item, amt) + " to " + tar->unit->name->const_str() +
+					u->event("Transports " + ItemString(t->item, amt) + " to " + tar->unit->name +
 						" for $" + to_string(cost) + ".", "transport");
 					if (u->faction != tar->unit->faction) {
-						tar->unit->event("Receives " + ItemString(t->item, amt) + " from " +
-							u->name->const_str() + ".", "transport");
+						tar->unit->event("Receives " + ItemString(t->item, amt) + " from " + u->name + ".", "transport");
 					}
 
 					if (phase == TransportOrder::TransportPhase::INTER_QM_TRANSPORT) {
@@ -3109,9 +3093,7 @@ void Game::RunSacrificeOrders() {
 
 						if (reward_obj != -1 ) {
 							sacrifice_object->type = reward_obj;
-							string name = string(ObjectDefs[reward_obj].name) + " [" +
-								 to_string(sacrifice_object->num) + "]";
-							sacrifice_object->name = new AString(name);
+							sacrifice_object->set_name(ObjectDefs[reward_obj].name);
 							u->faction->objectshows.push_back({.obj = reward_obj});
 						}
 						if (destroy) {
@@ -3156,7 +3138,7 @@ void Game::Do1Annihilate(ARegion *reg) {
 	// tell all factions too
 	for(const auto f : factions) {
 		if (f->is_npc) continue;
-		f->event(message, "annihilate");
+		f->event(message, "annihilate", reg);
 	}
 
 	if (TerrainDefs[reg->type].similar_type == R_OCEAN) {
@@ -3170,7 +3152,7 @@ void Game::Do1Annihilate(ARegion *reg) {
 		for(const auto u : obj->units) {
 			std::for_each(u->items.begin(), u->items.end(), [](Item *it) { delete it; });
 			u->items.clear();
-			u->event("Is annihilated.", "annihilate");
+			u->event("Is annihilated.", "annihilate", reg);
 			reg->Kill(u);
 		}
 		// add the object to the list to be destroyed if it is able to be annihlated
