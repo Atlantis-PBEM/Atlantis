@@ -329,16 +329,13 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 			slbow = men->speciallevel;
 	}
 	int combat = scomb;
-	AString *s = new AString("COMB");
-	int sk = LookupSkill(s);
+	int sk = lookup_skill("COMB");
 	if (behind) {
 		if (slbow >= sxbow) {
-			*s = AString("LBOW");
-			sk = LookupSkill(s);
+			sk = lookup_skill("LBOW");
 			combat = slbow;
 		} else {
-			*s = AString("XBOW");
-			sk = LookupSkill(s);
+			sk = lookup_skill("XBOW");
 			combat = sxbow;
 		}
 	}
@@ -360,14 +357,10 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 			int producelevel = ItemDefs[LookupItem(it)].pLevel;
 			if (ItemDefs[LookupItem(it)].pSkill != FindSkill("WEAP")->abbr) continue;
 
-			AString *s1 = new AString(WeaponDefs[i].baseSkill);
-			AString *s2 = new AString(WeaponDefs[i].orSkill);
-			if ((WeaponDefs[i].flags & WeaponType::RANGED)
-				&& (!behind)) continue;
+			if ((WeaponDefs[i].flags & WeaponType::RANGED) && (!behind)) continue;
 			int attack = WeaponDefs[i].attackBonus;
 			if (attack < (producelevel-1)) attack = producelevel-1;
-			if ((LookupSkill(s1) == sk)
-				|| (LookupSkill(s2) == sk)) {
+			if ((lookup_skill(WeaponDefs[i].baseSkill) == sk) || (lookup_skill(WeaponDefs[i].orSkill) == sk)) {
 				if ((behind) && (attack + combat <= weaponlevel)) {
 					fitting[i] = 1;
 					if (WeaponDefs[i].attackBonus == weaponlevel) fitting[i] = 5;
@@ -379,11 +372,14 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 				} else continue;
 			} else {
 				// make Javelins possible
-				AString *cs = new AString("COMB");
 				if ((behind) && (scomb > combat)) {
-					if ((WeaponDefs[i].flags & WeaponType::RANGED)
-						&& ((LookupSkill(s1) == LookupSkill(cs))
-							|| (LookupSkill(s2) == LookupSkill(cs)))) {
+					if (
+						(WeaponDefs[i].flags & WeaponType::RANGED) &&
+						(
+							lookup_skill(WeaponDefs[i].baseSkill) == lookup_skill("COMB") ||
+							lookup_skill(WeaponDefs[i].orSkill) == lookup_skill("COMB")
+						)
+					) {
 							fitting[i] = 1;
 							n++;
 					}
@@ -424,10 +420,8 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 	}
 	delete[] fitting;
 	// Check again which skills the weapon uses
-	AString *ws1 = new AString(WeaponDefs[weapon].baseSkill);
-	AString *ws2 = new AString(WeaponDefs[weapon].orSkill);
-	if ((LookupSkill(ws1) != sk) && (LookupSkill(ws2) != sk))
-		sk = LookupSkill(ws1);
+	if ((lookup_skill(WeaponDefs[weapon].baseSkill) != sk) && (lookup_skill(WeaponDefs[weapon].orSkill) != sk))
+		sk = lookup_skill(WeaponDefs[weapon].baseSkill);
 	int maxskill = men->defaultlevel;
 	int special = 0;
 	for (unsigned int i=0; i<(sizeof(men->skills)/sizeof(men->skills[0])); i++) {

@@ -487,8 +487,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
         return;
     }
     int type = buildobj->type;
-    AString skname = ObjectDefs[type].skill;
-    int sk = LookupSkill(&skname);
+    int sk = lookup_skill(ObjectDefs[type].skill);
     if (sk == -1) {
         u->error("BUILD: Can't build " + string(ObjectDefs[type].name) + ".");
         delete u->monthorders;
@@ -601,8 +600,7 @@ void Game::RunBuildShipOrder(ARegion *r, Object *obj, Unit *u)
     AString skname;
 
     ship = abs(u->build);
-    skname = ItemDefs[ship].pSkill;
-    skill = LookupSkill(&skname);
+    skill = lookup_skill(ItemDefs[ship].pSkill);
     level = u->GetSkill(skill);
 
     if (skill == -1) {
@@ -743,8 +741,7 @@ void Game::RunBuildHelpers(ARegion *r)
                     } else {
                         // help build ships
                         int ship = abs(target->build);
-                        AString skname = ItemDefs[ship].pSkill;
-                        int skill = LookupSkill(&skname);
+                        int skill = lookup_skill(ItemDefs[ship].pSkill);
                         int level = u->GetSkill(skill);
                         int needed = 0;
                         if (target->monthorders && (target->monthorders->type == O_BUILD)) {

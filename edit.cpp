@@ -198,7 +198,7 @@ void Game::EditGameRegionObjects( ARegion *pReg )
 						break;
 					}
 
-					int objType = ParseObject(pToken, 0);
+					int objType = parse_object(pToken->const_str(), false);
 					if ( (objType == -1) || (ObjectDefs[objType].flags & ObjectType::DISABLED) ) {
 						Awrite( "No such object." );
 						break;
@@ -554,7 +554,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
 					}
 
 					int prace = 0;
-					prace = ParseAllItems(pToken);
+					prace = parse_all_items(pToken->const_str());
 					if (!(ItemDefs[prace].type & IT_MAN) || (ItemDefs[prace].flags & ItemType::DISABLED) ) {
 						if (!(*pToken == "none" || *pToken == "None" || *pToken == "0")) {
 							Awrite( "No such race." );
@@ -808,7 +808,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 						Awrite( "Try again." );
 						break;
 					}
-					int mitem = ParseEnabledItem(pToken);
+					int mitem = parse_enabled_item(pToken->const_str());
 					if (mitem<0) {
 						Awrite("No such item");
 						break;
@@ -867,7 +867,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 						Awrite( "Try again." );
 						break;
 					}
-					int mitem = ParseEnabledItem(pToken);
+					int mitem = parse_enabled_item(pToken->const_str());
 					if (mitem<0) {
 						Awrite("No such item");
 						break;
@@ -929,7 +929,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 						Awrite( "Try again." );
 						break;
 					}
-					int mitem = ParseEnabledItem(pToken);
+					int mitem = parse_enabled_item(pToken->const_str());
 					if (mitem<0) {
 						Awrite("No such item");
 						break;
@@ -973,7 +973,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 						Awrite( "Try again." );
 						break;
 					}
-					int mitem = ParseEnabledItem(pToken);
+					int mitem = parse_enabled_item(pToken->const_str());
 					if (mitem<0) {
 						Awrite("No such item");
 						break;
@@ -1012,7 +1012,7 @@ void Game::EditGameRegionMarkets( ARegion *pReg )
 						Awrite( "Try again." );
 						break;
 					}
-					int mitem = ParseEnabledItem(pToken);
+					int mitem = parse_enabled_item(pToken->const_str());
 					if (mitem<0) {
 						Awrite("No such item");
 						break;
@@ -1106,7 +1106,7 @@ void Game::EditGameUnitItems(Unit *pUnit)
 					break;
 				}
 
-				int itemNum = ParseAllItems(pToken);
+				int itemNum = parse_all_items(pToken->const_str());
 				if (itemNum == -1) {
 					Awrite("No such item.");
 					break;
@@ -1159,7 +1159,7 @@ void Game::EditGameUnitSkills(Unit *pUnit)
 					break;
 				}
 
-				int skillNum = ParseSkill(pToken);
+				int skillNum = parse_skill(pToken->const_str());
 				if (skillNum == -1) {
 					Awrite("No such skill.");
 					break;

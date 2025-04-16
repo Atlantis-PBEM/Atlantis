@@ -48,7 +48,6 @@ public:
 	int operator==(const AString &) const;
 	int operator==(char *) const;
 	int operator==(const char *) const;
-	int CheckPrefix(const AString &);
 	AString operator+(const AString &);
 	AString & operator+=(const AString &);
 
@@ -60,13 +59,9 @@ public:
 	int Len();
 
 	AString *gettoken();
-	bool getat();
 	AString *getlegal();
 	AString *stripnumber();
-	AString *Trunc(int, int back=30);
 	int value();
-	int strict_value();
-	AString *StripWhite();
 
 private:
 	int len;

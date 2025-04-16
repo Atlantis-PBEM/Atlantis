@@ -34,6 +34,8 @@ class Game;
 #include "object.h"
 #include "events.h"
 #include "rng.h"
+#include "indenter.hpp"
+#include "string_parser.hpp"
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -44,12 +46,12 @@ using json = nlohmann::json;
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
 #define JSON_REPORT_VERSION MAKE_ATL_VER(1, 0, 1) // version 1.0.0 didn't report the version number
 
-class OrdersCheck
+class orders_check
 {
 public:
-	OrdersCheck(std::ostream& f) : pCheckFile(f), numshows(0), numerrors(0) { }
+	orders_check(std::ostream& f) : check_file(f), numshows(0), numerrors(0) { check_file << indent::clear; }
 
-	std::ostream& pCheckFile;
+	std::ostream& check_file;
 	Unit dummyUnit;
 	Faction dummyFaction;
 	Order dummyOrder;
@@ -85,24 +87,23 @@ public:
 	int EditGame(int *pSaveGame);
 	int SaveGame();
 	int WritePlayers();
-	int ReadPlayers();
-	int ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
-						int newPlayer);
+	bool ReadPlayers();
+	bool ReadPlayersLine(parser::token& token, parser::string_parser& parser, Faction *fac, bool new_player);
 
 	int ViewMap(const AString &, const AString &);
 	// LLS
 	void UnitFactionMap();
 	int GenRules(const AString &, const AString &, const AString &);
 	std::string FactionTypeDescription(Faction &fac);
-	int DoOrdersCheck(const AString &strOrders, const AString &strCheck);
+	int Doorders_check(const AString &strOrders, const AString &strCheck);
 
-	Faction *AddFaction(int noleader = 0, ARegion *pStart = NULL);
+	Faction *AddFaction(int noleader = 0, ARegion *pStart = nullptr);
 
 	//
 	// Give this particular game a chance to set up the faction. This is in
 	// extra.cpp.
 	//
-	int SetupFaction(Faction *pFac);
+	int SetupFaction(Faction *fac);
 
 	void ViewFactions();
 
@@ -123,7 +124,7 @@ public:
 	Unit *GetUnit(int num);
 
 	// Handle special gm unit modification functions
-	Unit *ParseGMUnit(AString *tag, Faction *pFac);
+	Unit *parse_gm_unit(std::string tag, Faction *fac);
 
 	int TurnNumber();
 
@@ -338,73 +339,82 @@ private:
 	//
 	// Parsing functions
 	//
-	void parse_error(OrdersCheck *order_chec, Unit *unit, Faction *faction, const std::string &error);
-	UnitId *ParseUnit(AString *s);
-	int ParseDir(AString *token);
+	void parse_error(orders_check *checker, Unit *unit, Faction *faction, const std::string &error);
+	void overwrite_month_warning(std::string type, Unit *u, orders_check *checker);
+	UnitId *parse_unit(parser::string_parser& parser);
+	int parse_dir(const parser::token& token);
 
-	void ParseOrders(int faction, std::istream& ordersFile, OrdersCheck *pCheck);
-	void ProcessOrder(int orderNum, Unit *unit, AString *order, OrdersCheck *pCheck, bool repeating);
-	void ProcessMoveOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessAdvanceOrder(Unit *, AString *, OrdersCheck *pCheck);
-	Unit *ProcessFormOrder(Unit *former, AString *order, OrdersCheck *pCheck, bool repeating);
-	void ProcessAddressOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessAvoidOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessGuardOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessNameOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessDescribeOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessBehindOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessGiveOrder(int, Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessWithdrawOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessDeclareOrder(Faction *, AString *, OrdersCheck *pCheck);
-	void ProcessStudyOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessTeachOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessWorkOrder(Unit *, int quiet, OrdersCheck *pCheck);
-	void ProcessProduceOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessBuyOrder(Unit *, AString *, OrdersCheck *pCheck, bool repeating);
-	void ProcessSellOrder(Unit *, AString *, OrdersCheck *pCheck, bool repeating);
-	void ProcessAttackOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessBuildOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessSailOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessEnterOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessLeaveOrder(Unit *, OrdersCheck *pCheck);
-	void ProcessPromoteOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessEvictOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessTaxOrder(Unit *, OrdersCheck *pCheck);
-	void ProcessPillageOrder(Unit *, OrdersCheck *pCheck);
-	void ProcessConsumeOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessRevealOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessFindOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessDestroyOrder(Unit *, OrdersCheck *pCheck);
-	void ProcessQuitOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessRestartOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessAssassinateOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessStealOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessFactionOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessClaimOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessCombatOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessPrepareOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessWeaponOrder(Unit *u, AString *o, OrdersCheck *pCheck);
-	void ProcessArmorOrder(Unit *u, AString *o, OrdersCheck *pCheck);
-	void ProcessCastOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessEntertainOrder(Unit *, OrdersCheck *pCheck);
-	void ProcessForgetOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessReshowOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessHoldOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessNoaidOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessNocrossOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessNospoilsOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessSpoilsOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessAutoTaxOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessOptionOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessPasswordOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessExchangeOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessIdleOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessTransportOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessShareOrder(Unit *, AString *, OrdersCheck *pCheck);
-	AString *ProcessTurnOrder(Unit *, std::istream& f, OrdersCheck *pCheck, bool repeating);
-	void ProcessJoinOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessAnnihilateOrder(Unit *, AString *, OrdersCheck *pCheck);
-	void ProcessSacrificeOrder(Unit *, AString *, OrdersCheck *pCheck);
+	void ParseOrders(int faction, std::istream& ordersFile, orders_check *checker);
+	void ProcessOrder(int order, Unit *unit, parser::string_parser& parser, orders_check *checker, bool repeating);
+	void ProcessMoveOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessAdvanceOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	Unit *ProcessFormOrder(Unit *former, parser::string_parser& order, orders_check *checker, bool repeating);
+	void ProcessAddressOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessAvoidOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessGuardOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessNameOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessDescribeOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessBehindOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessGiveOrder(int, Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessWithdrawOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessDeclareOrder(Faction *f, parser::string_parser& parser, orders_check *checker);
+	void ProcessStudyOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessTeachOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessWorkOrder(Unit *u, int quiet, orders_check *checker);
+	void ProcessProduceOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessBuyOrder(Unit *u, parser::string_parser& parser, orders_check *checker, bool repeating);
+	void ProcessSellOrder(Unit *u, parser::string_parser& parser, orders_check *checker, bool repeating);
+	void ProcessAttackOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessBuildOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	// Helper functions for ProcessBuildOrder
+	BuildOrder *ProcessBuildHelp(Unit *u, parser::string_parser& parser, orders_check *checker);
+	BuildOrder *ProcessBuildObject(Unit *u, int object_type, orders_check *checker);
+	BuildOrder *ProcessBuildShip(Unit *u, int object_type, orders_check *checker);
+	BuildOrder *ProcessBuildStructure(Unit *u, int object_type, orders_check *checker);
+	BuildOrder *ProcessContinuedBuild(Unit *u, orders_check *checker);
+	//bool ProcessBuildComplete(Unit *u, BuildOrder *order, parser::token token, orders_check *checker);
+	//void CheckBuildOrderConflicts(Unit *u, orders_check *checker);
+	void ProcessSailOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessEnterOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessLeaveOrder(Unit *u, orders_check *checker);
+	void ProcessPromoteOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessEvictOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessTaxOrder(Unit *u, orders_check *checker);
+	void ProcessPillageOrder(Unit *, orders_check *checker);
+	void ProcessConsumeOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessRevealOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessFindOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessDestroyOrder(Unit *u, orders_check *checker);
+	void ProcessQuitOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessRestartOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessAssassinateOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessStealOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessFactionOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessClaimOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessCombatOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessPrepareOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessWeaponOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessArmorOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessCastOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessEntertainOrder(Unit *u, orders_check *checker);
+	void ProcessForgetOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessReshowOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessHoldOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessNoaidOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessNocrossOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessNospoilsOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessSpoilsOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessAutoTaxOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessOptionOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessPasswordOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessExchangeOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessIdleOrder(Unit *u, orders_check *checker);
+	void ProcessTransportOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessShareOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	std::string ProcessTurnOrder(Unit *u, std::istream& f, orders_check *checker, bool repeating);
+	void ProcessJoinOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessAnnihilateOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
+	void ProcessSacrificeOrder(Unit *u, parser::string_parser& parser, orders_check *checker);
 
 	void RemoveInactiveFactions();
 

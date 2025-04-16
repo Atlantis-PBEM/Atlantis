@@ -261,30 +261,6 @@ AString *AString::gettoken()
 	return new AString(buf);
 }
 
-AString *AString::StripWhite()
-{
-	int place = 0;
-	while (place < len && (str[place] == ' ' || str[place] == '\t')) {
-		place++;
-	}
-	if (place >= len) {
-		return 0;
-	}
-	return( new AString( &str[ place ] ));
-}
-
-bool AString::getat()
-{
-	int place = 0;
-	while (place < len && (str[place] == ' ' || str[place] == '\t'))
-		place++;
-	if (place >= len) return 0;
-	if (str[place] == '@') {
-		str[place] = ' ';
-		return true;
-	}
-	return false;
-}
 
 char islegal(char c)
 {
@@ -341,60 +317,8 @@ AString *AString::stripnumber()
 	return retval;
 }
 
-int AString::CheckPrefix(const AString &s)
-{
-	if (Len() < s.len) return 0;
-
-	AString x = *this;
-	x.str[s.len] = '\0';
-	x.len = s.len;
-
-	return AString(x) == s;
-}
-
-AString *AString::Trunc(int val, int back)
-{
-	int l=Len();
-	if (l <= val) return 0;
-	for (int i = 0; i < val; i++) {
-		if (str[i] == '\n' || str[i] == '\r') {
-			str[i] = '\0';
-			return new AString(&(str[i+1]));
-		}
-	}
-	for (int i=val; i>(val-back); i--) {
-		if (str[i] == ' ') {
-			str[i] = '\0';
-			return new AString(&(str[i+1]));
-		}
-	}
-	AString * temp = new AString(&(str[val]));
-	str[val] = '\0';
-	return temp;
-}
-
 int AString::value()
 {
-	int place = 0;
-	int ret = 0;
-	while ((str[place] >= '0') && (str[place] <= '9')) {
-		ret *= 10;
-		// Fix bug where int could be overflowed.
-		if (ret < 0) return 0;
-		ret += (str[place++] - '0');
-	}
-	return ret;
-}
-
-int AString::strict_value() //this cannot handle negative numbers!
-{
-	int l=Len();
-	for (int i=0; i<l; i++) {
-		if (!((str[i] >= '0') && (str[i] <= '9'))) {
-			return -1;
-		}
-	}
-
 	int place = 0;
 	int ret = 0;
 	while ((str[place] >= '0') && (str[place] <= '9')) {

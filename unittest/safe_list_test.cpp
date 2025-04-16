@@ -110,15 +110,15 @@ ut::suite<"Safe List"> safe_list_suite = []
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *second = helper.create_unit(faction, region);
     second->items.SetNum(I_LEADERS, 20);
-    second->Study(S_SAILING, 450 * 20);
+    helper.set_skill_level(second, S_SAILING, 5);
     Unit *third = helper.create_unit(faction, region);
     third->items.SetNum(I_LEADERS, 20);
-    third->Study(S_SAILING, 450 * 20);
+    helper.set_skill_level(third, S_SAILING, 5);
     Unit *fourth = helper.create_unit(faction, region);
     fourth->items.SetNum(I_LEADERS, 20);
     Unit *fifth = helper.create_unit(faction, region);
     fifth->items.SetNum(I_LEADERS, 20);
-    fifth->Study(S_SAILING, 450 * 20);
+    helper.set_skill_level(fifth, S_SAILING, 5);
 
     // Create a fleet in the region for the faction.  **THIS MOVES THE UNIT INTO THE FLEET**
     helper.create_fleet(region, second, I_CLOUDSHIP, 1);
@@ -176,15 +176,15 @@ ut::suite<"Safe List"> safe_list_suite = []
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *second = helper.create_unit(faction, region);
     second->items.SetNum(I_LEADERS, 20);
-    second->Study(S_BUILDING, 450 * 20);
+    helper.set_skill_level(second, S_BUILDING, 5);
     Unit *third = helper.create_unit(faction, region);
     third->items.SetNum(I_LEADERS, 20);
-    third->Study(S_BUILDING, 450 * 20);
+    helper.set_skill_level(third, S_BUILDING, 5);
     Unit *fourth = helper.create_unit(faction, region);
     fourth->items.SetNum(I_LEADERS, 20);
     Unit *fifth = helper.create_unit(faction, region);
     fifth->items.SetNum(I_LEADERS, 20);
-    fifth->Study(S_BUILDING, 450 * 20);
+    helper.set_skill_level(fifth, S_BUILDING, 5);
 
     helper.create_building(region, nullptr, O_FORT);
     helper.create_building(region, nullptr, O_FORT);

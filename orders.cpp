@@ -98,10 +98,10 @@ char const *od[] = {
 
 char const **OrderStrs = od;
 
-int Parse1Order(AString *token)
+int Parse1Order(const parser::token& token)
 {
     for (int i = 0; i < NORDERS; i++)
-        if (*token == OrderStrs[i]) return i;
+        if (token == OrderStrs[i]) return i;
     return -1;
 }
 
@@ -134,7 +134,9 @@ TurnOrder::~TurnOrder() {}
 
 MoveOrder::MoveOrder() { type = O_MOVE; }
 
-MoveOrder::~MoveOrder() {}
+MoveOrder::~MoveOrder() {
+    std::for_each(dirs.begin(), dirs.end(), [](MoveDir *dir) { delete dir; });
+}
 
 ForgetOrder::ForgetOrder() { type = O_FORGET; }
 
@@ -162,7 +164,9 @@ StudyOrder::~StudyOrder() {}
 
 TeachOrder::TeachOrder() { type = O_TEACH; }
 
-TeachOrder::~TeachOrder() {}
+TeachOrder::~TeachOrder() {
+    std::for_each(targets.begin(), targets.end(), [](UnitId *id) { delete id; });
+}
 
 ProduceOrder::ProduceOrder() { type = O_PRODUCE; }
 
@@ -178,7 +182,9 @@ SellOrder::~SellOrder() {}
 
 AttackOrder::AttackOrder() { type = O_ATTACK; }
 
-AttackOrder::~AttackOrder() {}
+AttackOrder::~AttackOrder() {
+    std::for_each(targets.begin(), targets.end(), [](UnitId *id) { delete id; });
+}
 
 BuildOrder::BuildOrder()
 {
@@ -196,7 +202,9 @@ BuildOrder::~BuildOrder()
 
 SailOrder::SailOrder() { type = O_SAIL; }
 
-SailOrder::~SailOrder() {}
+SailOrder::~SailOrder() {
+    std::for_each(dirs.begin(), dirs.end(), [](MoveDir *dir) { delete dir; });
+}
 
 FindOrder::FindOrder() { type = O_FIND; }
 
@@ -228,13 +236,17 @@ CastOrder::CastOrder() { type = O_CAST; }
 
 CastOrder::~CastOrder() {}
 
-CastMindOrder::CastMindOrder() { id = 0; }
+CastMindOrder::CastMindOrder() { id = nullptr; }
 
-CastMindOrder::~CastMindOrder() { delete id; }
+CastMindOrder::~CastMindOrder() {
+    if (id) delete id;
+}
 
 TeleportOrder::TeleportOrder() {}
 
-TeleportOrder::~TeleportOrder() {}
+TeleportOrder::~TeleportOrder() {
+    std::for_each(units.begin(), units.end(), [](UnitId *id) { delete id; });
+}
 
 CastRegionOrder::CastRegionOrder() {}
 
@@ -246,11 +258,15 @@ CastIntOrder::~CastIntOrder() {}
 
 CastUnitsOrder::CastUnitsOrder() {}
 
-CastUnitsOrder::~CastUnitsOrder() {}
+CastUnitsOrder::~CastUnitsOrder() {
+    std::for_each(units.begin(), units.end(), [](UnitId *id) { delete id; });
+}
 
 EvictOrder::EvictOrder() { type = O_EVICT; }
 
-EvictOrder::~EvictOrder() {}
+EvictOrder::~EvictOrder() {
+    std::for_each(targets.begin(), targets.end(), [](UnitId *id) { delete id; });
+}
 
 IdleOrder::IdleOrder() { type = O_IDLE; }
 

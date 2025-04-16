@@ -167,11 +167,9 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     Faction *faction = helper.create_faction(name);
     ARegion *region = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    leader->Study(S_PATTERN, 90);
-    leader->Study(S_SPIRIT, 90);
-    leader->Study(S_FARSIGHT, 90);
-    leader->Study(S_GATE_LORE, 30);
-    leader->Study(S_TELEPORTATION, 30);
+
+    helper.set_skill_level(leader, S_TELEPORTATION, 1);
+
     AString *tmp_name = new AString("My Leader");
     leader->SetName(tmp_name);
 

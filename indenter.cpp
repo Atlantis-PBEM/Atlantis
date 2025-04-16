@@ -3,12 +3,12 @@
 namespace indent {
   const int indentbuf::idx = std::ios_base::xalloc();
 
-  std::ostream &wrap(std::ostream &os) {
+  std::ostream& wrap(std::ostream &os) {
     os << wrap(70);
     return os;
   }
 
-  std::ostream &comment(std::ostream &os) {
+  std::ostream& comment(std::ostream &os) {
     if(os.pword(indentbuf::idx) != nullptr) {
       indentbuf *buf = static_cast<indentbuf *>(os.pword(indentbuf::idx));
       buf->comment();

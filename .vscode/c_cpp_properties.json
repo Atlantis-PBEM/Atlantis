@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++20",
+            "compilerPath": "/usr/bin/g++"
+        }
+    ],
+    "version": 4
+}

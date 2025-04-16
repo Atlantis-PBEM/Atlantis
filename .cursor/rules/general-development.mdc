@@ -1,0 +1,50 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# General Development Guidelines
+
+## Understanding Before Implementation
+
+- **When uncertain, ask for guidance** rather than making assumptions
+- Seek to understand the underlying design principles before modifying code
+- Document new insights as you learn them to avoid repeating questions
+- Update relevant rules and documentation as your understanding improves
+
+## Learning Process
+
+- When encountering failures or unexpected behavior:
+  1. **Stop and analyze** the root cause
+  2. **Ask specific questions** to understand the system
+  3. **Document what you learn** for future reference
+  4. **Update relevant rules** to reflect new understanding
+- Avoid iterative guessing which can lead down unproductive paths
+- Build a comprehensive mental model of the system before making changes
+
+## Incremental Knowledge Building
+
+- Maintain a "knowledge base" of how the system works
+- When you learn something new, document it in an appropriate rule file
+- Use comments to explain non-obvious behavior
+- Leave code better documented than you found it
+
+## Collaboration
+
+- Be clear about what you know and what you don't know
+- Ask questions with sufficient context for others to help effectively
+- When asking questions, describe:
+  - What you're trying to accomplish
+  - What you've already tried
+  - Where you're stuck
+  - What specific guidance you need
+- Share insights that might help others facing similar issues
+
+## Self-Improvement
+
+- Regularly review and update your understanding
+- Challenge assumptions regularly
+- Develop systematic approaches to debugging and problem-solving
+- Learn from both successes and failures
+
+Following these guidelines will lead to more efficient development, higher quality code, and stronger understanding of the system architecture.

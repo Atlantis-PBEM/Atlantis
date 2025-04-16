@@ -1,0 +1,49 @@
+---
+description: Rules Organization Standards
+globs: 
+alwaysApply: true
+---
+# Rules Organization Standards
+
+## File Structure
+- All cursor rule files must be placed in the `.cursor/rules` directory
+- Use the `.mdc` extension for all rule files
+- Keep rule files focused on specific concerns
+- Group related guidelines in a single rule file
+
+## Naming Conventions
+- Use kebab-case for rule filenames (e.g., `code-quality.mdc`, `api-standards.mdc`)
+- Choose descriptive names that clearly indicate the rule's purpose
+- Avoid generic names that don't convey specific content
+
+## Metadata Requirements
+- Every rule file must include metadata at the top between `---` delimiters
+- Required metadata fields:
+  - `description`: Brief explanation of the rule's purpose
+  - At least one of:
+    - `alwaysApply`: Set to true if rule should always be included
+    - `globs`: File patterns the rule applies to
+
+## Content Organization
+- Start with a clear title using a level 1 heading
+- Use level 2 headings for major sections
+- Use lists for specific guidelines
+- Keep rules concise and actionable
+- Include examples for complex guidelines when helpful
+
+## Rule Updating Process
+- When editing rules, create a temporary file first to ensure proper formatting
+- Once the content is validated, move the file to the correct location in `.cursor/rules`
+- If having trouble with direct edits, use the terminal to copy the file to its correct location
+- Always validate that the rule file was successfully updated after making changes
+- Never include comments or sections that aren't relevant to the specific rule file
+- When editing existing rules, maintain the established structure and formatting
+
+## Integration of Custom Standards
+- Project-specific standards should be generalized and integrated into existing general rule files when possible
+- Create new rule files only when standards don't fit within existing categories or are highly specific to certain uses.
+
+## Maintenance
+- Review and update rules regularly
+- Remove or update obsolete guidelines
+- Consider creating specialized rules for specific technologies or components

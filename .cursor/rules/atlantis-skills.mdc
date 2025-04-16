@@ -1,0 +1,111 @@
+---
+description: Atlantis Skill System Information
+globs: **/unittest/*_test.cpp
+alwaysApply: false
+---
+# Atlantis Skill System
+
+## Skill Levels and Prerequisites
+
+- Skills in Atlantis have levels from 1 to 5
+- Skill levels are determined by days of study per man:
+  - Level 1: 30 days per man
+  - Level 2: 90 days per man (30 + 60)
+  - Level 3: 180 days per man (30 + 60 + 90)
+  - Level 4: 300 days per man (30 + 60 + 90 + 120)
+  - Level 5: 450 days per man (30 + 60 + 90 + 120 + 150)
+
+## Prerequisite System Rules
+
+- Many skills require prerequisites (defined in SkillDefs in gamedata.cpp)
+- When setting a skill to a certain level, **ALL prerequisites in the entire chain** must be at least at the SAME level
+- The dependency chain can have multiple levels (e.g., Dragon Lore → Bird Lore & Wolf Lore → Earth Lore → Pattern & Force)
+- Even if the skill definition specifies a lower prerequisite level, when raising a skill above that level, all prerequisites must match the target level
+
+## Study Mechanics
+
+- Study days are calculated as: total_days = days_per_man * number_of_men
+- In unit tests, when using the UnitTestHelper.set_skill_level() method, it properly handles:
+  1. Setting all prerequisites recursively to required levels
+  2. Setting the correct number of study days based on men count
+  3. Ensuring all prerequisites in the dependency chain are at the proper level
+- Outside of unit tests, the calls to Study() or SetDays() are appropriate
+
+## Example Skill Chain
+
+Dragon Lore:
+- Directly requires Bird Lore (level 3) and Wolf Lore (level 3)
+- Bird Lore and Wolf Lore both require Earth Lore (level 1)
+- Earth Lore requires Pattern (level 1) and Force (level 1)
+
+If setting Dragon Lore to level 4, ALL prerequisites (Bird Lore, Wolf Lore, Earth Lore, Pattern, Force) must be set to at least level 4 as well.
+
+## Testing Skills
+
+When testing skills in unit tests, ensure:
+1. All skills in the prerequisite chain are enabled (using helper.enable())
+2. The test verifies the target skill level is set correctly
+3. The test verifies ALL prerequisites are set to at least the same level
+
+## Skill and Spell Testing
+
+### Configuration Setup
+- Enable skills and prerequisites before testing: `helper.enable(UnitTestHelper::Type::SKILL, S_SKILL_NAME, true)`
+- Enable items required for spells: `helper.enable(UnitTestHelper::Type::ITEM, I_ITEM_NAME, true)`
+- Set the `USE_WEAPON_ARMOR_COMMAND` global for weapon/armor command tests
+- Initialize the game and setup turn in the proper sequence:
+  ```cpp
+  helper.initialize_game();
+  helper.setup_turn();
+  ```
+
+### Faction Knowledge System
+- When testing item usage, ensure the faction knows about the items:
+  ```cpp
+  faction->DiscoverItem(I_ITEM_NAME, 1, 1);
+  ```
+- Faction knowledge is required for orders like WEAPON, ARMOR, and spells
+
+### Spell Testing
+- Use `activate_spell()` instead of `run_month_orders()` for spell tests:
+  ```cpp
+  helper.activate_spell(S_SPELL_NAME, {
+    .region = region,
+    .unit = unit,
+    .object = object_if_needed,
+    .val1 = 0,
+    .val2 = 0
+  });
+  ```
+- Check for spell-specific requirements (skill levels, components)
+
+### Error Message Testing
+- Verify exact error messages from spell and skill usage
+- Pay attention to case sensitivity in skill and spell names
+- Spell error messages often include the skill name: `"CAST 'transmutation': You must specify what you wish to create."`
+- Verify no side effects when errors occur (items not consumed, etc.)
+
+### Command Parameter Testing
+- Test different parameter formats for commands (quoted vs underscore):
+  ```cpp
+  ss << "ARMOR \"chain armor\" plate_armor\n";  // Both styles
+  ```
+- Test multiple items with commands where supported
+
+## Skill Implementation
+
+### Skill Definition
+- Skills are defined in `gamedata.cpp` with appropriate flags
+- Skill names should be lowercase in definitions
+- Set proper prerequisites and categories
+
+### Spell Processing
+- Implement both `ProcessSpellName()` and `RunSpellName()` functions
+- Check skill level and prerequisites in the Run function
+- Provide clear error messages that indicate what went wrong
+- Follow the pattern of existing spells for consistency
+
+### Command Processing
+- Validate item availability and faction knowledge
+- Use consistent error message formats
+- Document command syntax in skill descriptions

@@ -49,8 +49,7 @@ Production::Production(int it, int maxamt)
 		amount += rng::get_random(maxamt);
 	baseamount = amount;
 	productivity = 10;
-	AString skname = ItemDefs[it].pSkill;
-	skill = LookupSkill(&skname);
+	skill = lookup_skill(ItemDefs[it].pSkill);
 }
 
 void Production::write_out(ostream& f)
@@ -66,10 +65,11 @@ void Production::write_out(ostream& f)
 
 void Production::read_in(istream& f)
 {
-	AString temp;
+	std::string temp;
 
 	f >> ws >> temp;
-	itemtype = LookupItem(&temp);
+	// temp leak of memory
+	itemtype = LookupItem(new AString(temp));
 
 	f >> amount;
 	f >> baseamount;
@@ -77,9 +77,9 @@ void Production::read_in(istream& f)
 	if (itemtype == I_SILVER)
 		f >> ws >> temp;
 	else
-		temp = AString(ItemDefs[itemtype].pSkill);
+		temp = ItemDefs[itemtype].pSkill;
 
-	skill = LookupSkill(&temp);
+	skill = lookup_skill(temp);
 
 	f >> productivity;
 }

@@ -41,6 +41,7 @@ struct ShowObject;
 #include "skills.h"
 #include "items.h"
 #include "astring.h"
+#include "string_parser.hpp"
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -92,9 +93,9 @@ extern std::vector<std::string> *FactionTypes;
 
 // LLS - include strings for the template enum
 extern char const **TemplateStrs;
-int ParseTemplate(AString *);
+int parse_template_type(const parser::token& str);
 
-int ParseAttitude(AString *);
+int parse_attitude(const parser::token& str);
 
 int MagesByFacType(int);
 
@@ -201,7 +202,7 @@ public:
 	int unclaimed;
 	AString *name;
 	AString *address;
-	AString *password;
+	std::string password;
 	int times;
 	int showunitattitudes;
 	int temformat;

@@ -32,6 +32,7 @@ class Object;
 #include "faction.h"
 #include "items.h"
 #include "safe_list.h"
+#include "string_parser.hpp"
 #include <map>
 #include <list>
 
@@ -98,7 +99,7 @@ AString *ObjectDescription(int obj);
 
 int LookupObject(AString *token);
 
-int ParseObject(AString *, int ships);
+int parse_object(const parser::token& token, bool match_ships);
 
 int ObjectIsShip(int);
 

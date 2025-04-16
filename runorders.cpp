@@ -1542,8 +1542,7 @@ void Game::DoBuy(ARegion *r, Market *m)
 							if (exp > 0) {
 								exp = exp * temp * GetDaysByLevel(1);
 								for (int ms = 0; ms < (int)(sizeof(mt->skills)/sizeof(mt->skills[0])); ms++) {
-									AString sname = mt->skills[ms];
-									int skill = LookupSkill(&sname);
+									int skill = lookup_skill(mt->skills[ms]);
 									if (skill == -1) continue;
 									int curxp = u->skills.GetExp(skill);
 									u->skills.SetExp(skill,exp+curxp);

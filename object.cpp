@@ -30,6 +30,7 @@
 #include "gamedata.h"
 #include "unit.h"
 #include "indenter.hpp"
+#include "string_parser.hpp"
 
 int LookupObject(AString *token)
 {
@@ -39,30 +40,24 @@ int LookupObject(AString *token)
 	return -1;
 }
 
-/* ParseObject checks for matching Object types AND
+/* parse_object checks for matching Object types AND
  * for matching ship-type items (which are also
  * produced using the build order) if the ships
  * argument is given.
  */
-int ParseObject(AString *token, int ships)
+int parse_object(const parser::token& token, bool match_ships)
 {
 	// Check for ship-type items:
-	if (ships > 0) {
-		for (int i=0; i<NITEMS; i++) {
-			if (ItemDefs[i].type & IT_SHIP) {
-				if ((*token == ItemDefs[i].name) ||
-					(*token == ItemDefs[i].abr)) {
-						if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-						return -(i+1);
-				}
-			}
+	if (match_ships) {
+		for (int i = 0; i < NITEMS; i++) {
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (ItemDefs[i].type & IT_SHIP && (token == ItemDefs[i].name || token == ItemDefs[i].abr))
+				return -(i + 1);
 		}
 	}
-	for (int i=O_DUMMY+1; i<NOBJECTS; i++) {
-		if (*token == ObjectDefs[i].name) {
-			if (ObjectDefs[i].flags & ObjectType::DISABLED) return -1;
-			return i;
-		}
+	for (int i = O_DUMMY + 1; i < NOBJECTS; i++) {
+		if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+		if (token == ObjectDefs[i].name) return i;
 	}
 
 	return -1;

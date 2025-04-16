@@ -1,0 +1,226 @@
+---
+description: C++ Programming Guidelines
+globs: **/*.c,**/*.cpp,**/*.h,**/*.hpp,**/*.cxx,Makefile,**/*.cc
+alwaysApply: false
+---
+# C++ Programming Guidelines
+
+## Basic Principles
+- Use English for all code and documentation
+- Always declare the type of each variable and function (parameters and return value)
+- Create necessary types and classes
+- Follow the one-definition rule (ODR)
+- Follow DRY (Don't Repeat Yourself) principle
+- Make use of c++20 STL features to improve clarity
+- Prefer shorter, descriptive variable names that clearly communicate intent
+- Prefer descriptive function, class, and structure names that clearly communicate intent
+- **Clarity over cleverness** - Write code that is easy to understand and maintain.
+- **Consistency** - Follow existing patterns in the codebase.
+- **Modernization** - When updating code, use modern C++ features and approaches where appropriate.
+- **Leverage inherent class behavior** - Understand and utilize the built-in behavior of classes to avoid redundant checks.
+
+## Nomenclature
+- Use PascalCase or snake_case for classes and structures
+- Use snake_case for variables, functions, and methods
+- Use ALL_CAPS for constants and macros
+- Use snake_case for file and directory names
+- Use UPPERCASE for environment variables
+- Avoid magic numbers and define constants
+- Use complete words instead of abbreviations and ensure correct spelling
+  - Except for standard abbreviations like API, URL, etc
+  - Except for well-known abbreviations:
+    - i, j, k for loops
+    - err for errors
+    - ctx for contexts
+    - req, res for request/response parameters
+    - str for strings
+- Use descriptive, clear and consise naming for all functions, variables, structures, classes and namespaces
+- Choose variable names based on semantic meaning in context
+
+## Formatting
+- Use consistent indentation (4 spaces)
+- Limit line length to 100-120 characters
+- Add empty lines between logical sections of code
+- Use spaces around operators
+- Use extra parenthesis only as needed for clarity
+  - Remove excess and unnecessary parentheses in conditionals
+    - unless they are necessary for clarity
+- Associate pointers to the variable (e.g. TypeName *pointer)
+- Associate references to the typename (e.g. TypeName& reference)
+- Use a consistent bracing style throughout the codebase
+  - closing braces go on a line by themselves
+  - structures, classes and namespaces should have the brace on the initial line with the declaration
+  - functions should have the initial branch on a line by itself
+    - functions which are short can be on a single line
+  - control structures should have the brace on the initial line
+    - simple control structures that are clear and obvious can be on a single line without braces
+  - Use compact initializers when appropriate:
+    ```cpp
+    // Before multi-line
+    auto x = {
+      .region = reg,
+      .unit = u,
+      .object = nullptr
+    };
+
+    // After single-line when simple
+    auto x = { .region = reg, .unit = u, .object = nullptr };
+    ```
+- **Avoid** unnecessary temporary variables except when:
+  - The value is used multiple times
+  - The line would become excessively long or complex
+  - Storing the value significantly improves the code clarity or is essential for debugging
+- **Lambda expression formatting**:
+  - Use a single line for simple lambdas that fit readably
+  - For multi-line lambdas:
+    - Break after the opening parenthesis
+    - Use one additional level of indentation for the lambda body
+    - Place the closing parenthesis on its own line
+- **Function call formatting**:
+  - Keep function calls on a single line if they fit readably
+  - For multi-line function calls:
+    - Break immediately after the opening parenthesis
+    - Put each argument on its own line at the same indentation level
+    - Place the closing parenthesis on its own line at the same indentation level as the function call
+
+## Standard Library
+- Use the C++ Standard Library whenever possible
+- Use the c++20 standard
+- Prefer std::string over C-style strings
+- Use std::vector, std::map, std::unordered_map, etc. for collections
+- Use std::optional, std::variant, std::any for modern type safety
+- Use std::filesystem for file operations
+- Use std::chrono for time-related operations
+
+## Includes and Libraries
+- Only include libraries that are actually used in the file
+- Remove unused includes and "using" statements
+- Place includes in a consistant order
+  - The header file associated with the cpp file
+  - Standard libraries
+  - External libraries
+  - project includes
+- **Always mark function implementations in header files as `inline`**:
+  - Functions defined in header files must be marked as `inline` to prevent multiple definition errors
+  - This includes both member functions implemented in the class body and those implemented outside the class definition
+  - Free functions defined in header files must also be marked as `inline`
+  - For header-only libraries, all function implementations must be `inline`
+  - Never remove existing `inline` keywords when refactoring header-only code
+
+## Documentation
+- Add fuction-level documentation only when necessary:
+  - When a function is complex or non-obvious
+  - When the functions purpose is not clear from its name and implementation
+  - When additional context is necessary for maintainability
+- Add comments within a function only when necessary:
+  - When the logic of a code block is complex or makes non-obvious decisions
+  - When the mean and intent of the code is not clear from the code and variables
+  - When the code is dealing with an unusual edge-case or work-around
+- Comments should explain *why* something is done, not *what* is being done when self-explanatory
+- Keep non-trivial algorithm explanations and edge case handling notes
+
+## Functions
+- Keep functions small and focused on a single responsibility
+- **Always** avoid nesting blocks by:
+  - Early checks and returns
+  - Extraction to utility functions
+- Use standard library algorithms (std::for_each, std::transform, std::find, etc.) to avoid function nesting
+- Use lambda functions for simple operations
+- Use named functions for non-simple operations
+- Use default parameter values instead of checking for null or nullptr
+- Reduce function parameters using structs or classes
+  - Use an object to pass multiple parameters
+  - Use an object to return multiple results
+  - Declare necessary types for input arguments and output
+- Use a single level of abstraction
+
+## Control Structures
+- Prefer simpler conditionals when possible
+- Omit braces for single-statement control structures when they're clear and obvious
+- Use early returns to reduce nesting and improve readability
+
+## Data
+- Don't abuse primitive types and encapsulate data in composite types
+- Avoid data validations in functions and use classes with internal validation
+- Prefer immutability for data
+- Use const for data that doesn't change
+- Use constexpr for compile-time constants
+- Use std::optional for possibly null values
+
+## Classes
+- Follow SOLID principles
+- Prefer composition over inheritance
+- Declare interfaces as abstract classes or concepts
+- Write small classes with a single purpose
+  - Less than 200 instructions
+  - Less than 10 public methods
+  - Less than 10 properties
+- Use the Rule of Five (or Rule of Zero) for resource management
+- Make member variables private and provide getters/setters where necessary
+- Use const-correctness for member functions
+
+## Error handling
+- Use explicit error handling instead of silent failures
+- Use early returns for validation errors
+- Provide informative error messages
+- Consider using typed errors where supported
+- Validate all user inputs and handle edge cases explicitly
+
+## Refactoring
+- Break down complex functions into smaller focused functions
+- Extract repetitive patterns into reusable functions
+- Consider refactoring when:
+  - A function handles multiple distinct operations
+  - A function has too many nested control structures
+  - A function has grown too large and is difficult to understand
+  - Multiple functions share similar code patterns
+- Remove any Hungarian Style notation
+
+## Exceptions
+- Use exceptions to handle errors you don't expect
+- If you catch an exception, it should be to:
+  - Fix an expected problem
+  - Add context
+  - Otherwise, use a global handler
+- Use std::optional, std::expected, or error codes for expected failures
+
+## Memory Management
+- Prefer smart pointers (std::unique_ptr, std::shared_ptr) over raw pointers
+- Use RAII (Resource Acquisition Is Initialization) principles
+- Avoid memory leaks by proper resource management
+- Use std::vector and other standard containers instead of C-style arrays
+
+## Testing
+- Follow the Arrange-Act-Assert convention for tests
+- Name test variables clearly
+- Use descriptive test names that explain expected behaviour
+- Tests should be self-contained with no shared state between test cases
+- Avoide global variables in test suites - create per-test instances instead
+- Every test should have one clear purpose and validate a specific behavior
+
+## Project Structure
+- Use modular architecture
+- Organize new code into logical directories:
+  - include/ for header files
+  - src/ for source files
+  - test/ for test files
+  - lib/ for libraries
+  - doc/ for documentation
+- Separate interface (.h or  .hpp) from implementation (.cpp)
+  - Except when an include-only header with inline functions makes sense
+- Use namespaces to organize code logically
+- Create a core namespace for foundational components
+- Create a utils namespace for utility functions
+
+## Concurrency
+- Use std::thread, std::mutex, std::lock_guard for thread safety
+- Prefer task-based parallelism over thread-based parallelism
+- Use std::atomic for atomic operations
+- Avoid data races by proper synchronization
+- Use thread-safe data structures when necessary
+
+## Security
+- Validate all user inputs
+- Sanitize data before displaying to prevent XSS
+- Use parameterized queries to prevent SQL injection
+- Follow least privilege principle for access control

@@ -1,0 +1,146 @@
+---
+description: Atlantis Unit Testing Information
+globs: **/unittest/*.[ch]pp, **/unittest/*.h
+alwaysApply: false
+---
+# Atlantis Test Framework
+
+## Testing Library
+
+- Atlantis uses Boost µTest (`boost::ut`) for unit testing
+- Imported from `"external/boost/ut.hpp"`
+- Namespace is typically aliased with `namespace ut = boost::ut;`
+
+## Test Suite Structure
+
+- Test suites are defined with named template parameters: `ut::suite<"SuiteName"> suite_name = []`
+- Individual tests are defined using string literals with `_test` suffix: `"Test description"_test = []`
+- Use test factory functions for reusable test patterns
+- Test suite files should be named descriptively based on the functionality they test, ending with `_test.cpp`
+
+## UnitTestHelper
+
+- The `UnitTestHelper` class provides utilities for testing Atlantis code
+- It captures stdout output from the game engine, allows access to private Game members, and provides shorthand for common operations
+- Main test utilities:
+  - `initialize_game()`: Sets up a minimal game environment
+  - `set_skill_level()`: Sets a skill level, handling all prerequisites
+  - `cout_data()`: Captures standard output from the game engine for verification
+  - `create_faction()`, `create_unit()`, etc.: Helpers for creating test objects
+  - `enable()`: Enable or disable items, skills, objects for testing
+  - `activate_spell()`: Executes a specific spell directly
+
+## Test Organization
+
+- Related test cases should be grouped in the same suite
+- Helper classes like `UnitTestHelper` should have their tests in a suite named after the helper class
+- When testing multiple aspects of one feature, prefer multiple test cases in a single suite rather than multiple files
+- Consolidate related tests in the same file even if they test different functions
+
+## Assertions and Expectations
+
+- Use the `expect` function for assertions: `expect(condition == value_i);`
+- Numeric literals can be annotated with `_i` for integer comparisons
+- Pointer validity can be checked with `expect(pointer != nullptr)`
+- For common patterns, use utility functions to simplify tests
+
+## Running Tests
+
+- Tests are compiled with `make unittest`
+- Execute all tests with `./unittest/unittest`
+- Run specific test suites by passing the suite name: `./unittest/unittest SuiteName`
+- All tests should be independent and not rely on state from other tests
+
+# Atlantis Test Framework Standards
+
+## General Principles
+- Tests should be isolated and not depend on side effects from other tests
+- Each test should focus on one specific behavior or feature
+- Use descriptive test names that explain the expected behavior
+- Example: `"CAST TRANSMUTATION parses and executes correctly"_test`
+
+## Test Helper Framework
+- Use the appropriate test helper methods for specific testing scenarios
+- Use `helper.setup_turn()` to prepare the game state before testing
+- Use `helper.parse_orders()` to process orders from a string stream
+- For spells, use `activate_spell()` instead of `run_month_orders()`
+- Example:
+  ```cpp
+  helper.activate_spell(S_TRANSMUTATION, {
+      .region = region, .unit = unit, .object = nullptr, .val1 = 0, .val2 = 0
+  });
+  ```
+
+## Game Configuration
+- Set appropriate global flags in unittest/rules.cpp
+- Enable required game elements for your test:
+  ```cpp
+  helper.enable(UnitTestHelper::Type::ITEM, I_SWORD, true);
+  helper.enable(UnitTestHelper::Type::SKILL, S_PATTERN, true);
+  ```
+- Set up units with proper skill levels:
+  ```cpp
+  helper.set_skill_level(unit, S_TRANSMUTATION, 3);
+  ```
+
+## Error Testing
+- Validate exact error messages, including case sensitivity:
+  ```cpp
+  expect(faction->errors.size() == 1);
+  expect(faction->errors[0].message == "CAST 'transmutation': You must specify what you wish to create.");
+  ```
+- Check that no side effects occurred:
+  ```cpp
+  expect(unit->items.GetNum(I_IRON) == 1); // Item not consumed
+  expect(unit->items.GetNum(I_MITHRIL) == 0); // No product created
+  ```
+
+## System Integration Testing
+- Account for faction knowledge requirements:
+  ```cpp
+  faction->DiscoverItem(I_IRON, 1, 1);
+  faction->DiscoverItem(I_MITHRIL, 1, 1);
+  ```
+- Set up prerequisites for powers and skills
+- Test interactions between connected systems (items, spells, faction knowledge)
+
+## Command Testing
+- Test different input formats for commands:
+  ```cpp
+  ss << "ARMOR \"chain armor\" plate_armor\n"; // Both quoted and underscore styles
+  ```
+- Know item categorization (weapons vs. armor vs. battle items)
+- Verify order processing correctly affects game state:
+  ```cpp
+  expect(unit->readyWeapon[0] == I_SWORD);
+  expect(unit->readyWeapon[1] == I_LONGBOW);
+  ```
+
+## Test Coverage
+- Include both success and failure tests for each command
+- Test edge cases like missing parameters, invalid items
+- Test specific error conditions and verify proper error handling
+
+## Code Quality
+- Remove unnecessary variables when refactoring:
+  ```cpp
+  // Before
+  ARegion *region = unit->object->region; // Unused in this test
+
+  // After
+  // Variable removed
+  ```
+- Use compact initializers when appropriate:
+  ```cpp
+  // Before multi-line
+  helper.activate_spell(S_TRANSMUTATION, {
+      .region = region,
+      .unit = unit,
+      .object = nullptr,
+      .val1 = 0,
+      .val2 = 0
+  });
+
+  // After single-line when simple
+  helper.activate_spell(S_TRANSMUTATION, {.region = region, .unit = unit, .object = nullptr, .val1 = 0, .val2 = 0});
+  ```

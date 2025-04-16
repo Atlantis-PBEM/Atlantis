@@ -1,5 +1,4 @@
 .DS_Store
-.vscode/
 .devcontainer/
 *.code-workspace
 obj
@@ -18,9 +17,6 @@ havilah/html/havilah.html
 neworigins/obj
 neworigins/neworigins
 neworigins/html/neworigins.html
-neworigins_v2/obj
-neworigins_v2/neworigins_v2
-neworigins_v2/html/neworigins.html
 snapshot-tests/standard
 snapshot-tests/output
 unittest/obj
@@ -37,3 +33,5 @@ map_viewer/.yarn*
 map_viewer/.pnp.*
 map_viewer/.parcel-cache
 map_viewer/dist
+!*.[ch]
+!*.[ch]pp

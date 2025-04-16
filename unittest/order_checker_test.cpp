@@ -25,7 +25,7 @@ ut::suite<"Order Checker"> order_checker_suite = [] {
 
         string name("Test Faction");
         Faction *faction = helper.create_faction(name);
-        faction->password = new AString("mypassword");
+        faction->password = "mypassword";
 
         stringstream ss;
         ss << "#atlantis 3 \"mypassword\"\n";
@@ -33,7 +33,7 @@ ut::suite<"Order Checker"> order_checker_suite = [] {
         ss << "work\n";
 
         stringstream ss2;
-        OrdersCheck checker(ss2);
+        orders_check checker(ss2);
 
         helper.parse_orders(faction->num, ss, &checker);
         expect(checker.numerrors == 0_i);
@@ -47,7 +47,7 @@ ut::suite<"Order Checker"> order_checker_suite = [] {
 
         string name("Test Faction");
         Faction *faction = helper.create_faction(name);
-        faction->password = new AString("mypassword");
+        faction->password = "mypassword";
 
         stringstream ss;
         ss << "#atlantis 3 \"wrongpassword\"\n";
@@ -55,7 +55,7 @@ ut::suite<"Order Checker"> order_checker_suite = [] {
         ss << "work\n";
 
         stringstream ss2;
-        OrdersCheck checker(ss2);
+        orders_check checker(ss2);
 
         helper.parse_orders(faction->num, ss, &checker);
         expect(checker.numerrors == 1_i);

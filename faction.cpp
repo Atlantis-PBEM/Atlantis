@@ -26,6 +26,7 @@
 #include "gamedata.h"
 #include "game.h"
 #include "indenter.hpp"
+#include "string_parser.hpp"
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
@@ -86,17 +87,17 @@ void to_json(json &j, const FactionError &e) {
 	}
 };
 
-int ParseTemplate(AString *token)
+int parse_template_type(const parser::token& str)
 {
 	for (int i = 0; i < NTEMPLATES; i++)
-		if (*token == TemplateStrs[i]) return i;
+		if (str == TemplateStrs[i]) return i;
 	return -1;
 }
 
-int ParseAttitude(AString *token)
+int parse_attitude(const parser::token& str)
 {
 	for (int i=0; i<NATTITUDES; i++)
-		if (*token == AttitudeStrs[i]) return i;
+		if (str == AttitudeStrs[i]) return i;
 	return -1;
 }
 
@@ -111,7 +112,7 @@ Faction::Faction()
 
 	lastchange = -6;
 	address = 0;
-	password = 0;
+	password = "none";
 	times = 0;
 	showunitattitudes = 0;
 	temformat = TEMPLATE_OFF;
@@ -138,7 +139,7 @@ Faction::Faction(int n)
 	name = new AString;
 	*name = AString("Faction (") + AString(num) + AString(")");
 	address = new AString("NoAddress");
-	password = new AString("none");
+	password = "none";
 	times = 1;
 	showunitattitudes = 0;
 	temformat = TEMPLATE_LONG;
@@ -156,7 +157,6 @@ Faction::~Faction()
 {
 	if (name) delete name;
 	if (address) delete address;
-	if (password) delete password;
 	attitudes.clear();
 }
 
@@ -177,7 +177,7 @@ void Faction::Writeout(ostream& f)
 	f << unclaimed << '\n';
 	f << *name << '\n';
 	f << *address << '\n';
-	f << *password << '\n';
+	f << password << '\n';
 	f << times << '\n';
 	f << showunitattitudes << '\n';
 	f << temformat << '\n';
@@ -214,8 +214,7 @@ void Faction::Readin(istream& f)
 
 	f >> ws >> tmp;
 	address = new AString(tmp);
-	f >> ws >> tmp;
-	password = new AString(tmp);
+	f >> ws >> password;
 	f >> times;
 	f >> showunitattitudes;
 	f >> temformat;
@@ -258,7 +257,7 @@ void Faction::SetNameNoChange(AString *s)
 {
 	if (s) {
 		delete name;
-		name = new AString(*s);
+		name = s;
 	}
 }
 
@@ -407,12 +406,12 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 		}
 	}
 	j["administrative"]["times_sent"] = (times != 0);
-	bool password_unset = (!password || *password == "none");
+	bool password_unset = (password == "none");
 	j["administrative"]["password_unset"] = password_unset;
 	j["administrative"]["email"] = address->const_str();
 	j["administrative"]["show_unit_attitudes"] = (showunitattitudes != 0);
 
-	if(!password_unset) j["administrative"]["password"] = password->const_str();
+	if(!password_unset) j["administrative"]["password"] = password;
 	if(Globals->MAX_INACTIVE_TURNS != -1) {
 		int cturn = game->TurnNumber() - lastorders;
 		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !is_npc) {
@@ -570,7 +569,7 @@ void Faction::WriteFacInfo(ostream &f)
 	f << "Faction: " << num << '\n';
 	f << "Name: " << name->const_str() << '\n';
 	f << "Email: " << address->const_str() << '\n';
-	f << "Password: " << password->const_str() << '\n';
+	f << "Password: " << password << '\n';
 	f << "LastOrders: " << lastorders << '\n';
 	f << "FirstTurn: " << startturn << '\n';
 	f << "SendTimes: " << times << '\n';
@@ -765,8 +764,7 @@ void Faction::DiscoverItem(int item, int force, int full)
 		// If we've found an item that grants a skill, give a
 		// report on the skill granted (if we haven't seen it
 		// before)
-		skname = ItemDefs[item].grantSkill;
-		skill = LookupSkill(&skname);
+		skill = lookup_skill(ItemDefs[item].grantSkill);
 		if (skill != -1 && !(SkillDefs[skill].flags & SkillType::DISABLED)) {
 			for (i = 1; i <= ItemDefs[item].maxGrant; i++) {
 				if (i > skills.GetDays(skill)) {

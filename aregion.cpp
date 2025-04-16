@@ -1081,8 +1081,7 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	if (Globals->IMPROVED_FARSIGHT) {
 		for(const auto f : farsees) {
 			if (f && f->faction == fac && f->unit) {
-				skname = ItemDefs[item].pSkill;
-				sk = LookupSkill(&skname);
+				sk = lookup_skill(ItemDefs[item].pSkill);
 				if (f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
 			}
@@ -1093,8 +1092,7 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) {
 		for(const auto f : passers) {
 			if (f && f->faction == fac && f->unit) {
-				skname = ItemDefs[item].pSkill;
-				sk = LookupSkill(&skname);
+				sk = lookup_skill(ItemDefs[item].pSkill);
 				if (f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
 			}
@@ -1104,8 +1102,7 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	for(const auto o : objects) {
 		for(const auto u : o->units) {
 			if (u->faction == fac) {
-				skname = ItemDefs[item].pSkill;
-				sk = LookupSkill(&skname);
+				sk = lookup_skill(ItemDefs[item].pSkill);
 				if (u->GetSkill(sk) >= ItemDefs[item].pLevel) return 1;
 			}
 		}
@@ -1534,8 +1531,7 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList& regs)
 		return 0;
 	}
 
-	AString skname = spell;
-	int sp = LookupSkill(&skname);
+	int sp = lookup_skill(spell);
 	std::set<Faction *> facs;
 	for(const auto o : objects) {
 		for(const auto u : o->units) {

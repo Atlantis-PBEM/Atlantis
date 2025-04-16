@@ -63,7 +63,7 @@ public:
     // Create a building in the given region.
     void create_building(ARegion *region, Unit *owner, int building_type);
     // Parse the orders contained in the input stream.
-    void parse_orders(int faction_id, std::istream& orders, OrdersCheck *check = nullptr);
+    void parse_orders(int faction_id, std::istream& orders, orders_check *check = nullptr);
     // Run the transport order checks
     void check_transport_orders();
     // Execute movement orders
@@ -94,6 +94,8 @@ public:
     void run_buy_orders();
     // Run all sell orders.
     void run_sell_orders();
+    // Set a skill level for a unit, including all prerequisites
+    void set_skill_level(Unit *unit, int skill, int level);
 
     // dummy
     int get_seed() { return rng::get_random(10000); };
@@ -110,6 +112,9 @@ public:
     void enable(Type type, int id, bool enable);
 
 private:
+    void set_prerequisites(Unit *unit, int skill, int level);
+    int calculate_days_for_level(int level);
+
     std::stringstream cout_buffer;
     std::streambuf *cout_streambuf;
     Game game;

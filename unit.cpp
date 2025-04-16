@@ -252,7 +252,7 @@ void Unit::Readin(istream& f, std::list<Faction *>& facs)
 	skills.Readin(f);
 
 	f >> ws >> temp;
-	combat = LookupSkill(&temp);
+	combat = lookup_skill(temp.const_str());
 
 	f >> savedmovement;
 	f >> savedmovedir;
@@ -438,15 +438,16 @@ json Unit::write_json_orders()
 {
 	stack<json> parent_stack;
 	json container = json::array();
+	parser::string_parser temp;
+	parser::token token(std::nullopt);
 
 	bool has_continuing_month_order = false;
 
 	for(auto order: oldorders) {
-		AString temp = order;
-		temp.getat();
-		AString *token = temp.gettoken();
+		temp = order;
+		std::ignore = temp.get_at();
+		token = temp.get_token();
 		int order_val = token ? Parse1Order(token) : NORDERS;
-		if (token) delete token;
 
 		set<int> month_orders = { O_MOVE, O_SAIL, O_TEACH, O_STUDY, O_BUILD, O_PRODUCE, O_ENTERTAIN, O_WORK };
 		if (Globals->TAX_PILLAGE_MONTH_LONG) {
@@ -488,11 +489,10 @@ json Unit::write_json_orders()
 				container = json::array();
 			}
 			for(auto order: tOrder->turnOrders) {
-				AString temp = order;
-				temp.getat();
-				AString *token = temp.gettoken();
+				temp = order;
+				std::ignore = temp.get_at();
+				token = temp.get_token();
 				int order_val = token ? Parse1Order(token) : NORDERS;
-				if (token) delete token;
 				if (order_val == O_ENDTURN || order_val == O_ENDFORM) {
 					json parent = parent_stack.top();
 					parent_stack.pop();
@@ -524,11 +524,10 @@ json Unit::write_json_orders()
 			parent_stack.push(container);
 			container = json::array();
 			for(auto order: tOrder->turnOrders) {
-				AString temp = order;
-				temp.getat();
-				AString *token = temp.gettoken();
+				temp = order;
+				std::ignore = temp.get_at();
+				token = temp.get_token();
 				int order_val = token ? Parse1Order(token) : NORDERS;
-				if (token) delete token;
 				if (order_val == O_ENDTURN || order_val == O_ENDFORM) {
 					json parent = parent_stack.top();
 					parent_stack.pop();
@@ -1184,8 +1183,7 @@ int Unit::GetAttackRiding()
             if (!canRide && !canFly)
                 maxBonus = 0;
             */
-            skname = mount->skill;
-            skill = LookupSkill(&skname);
+            skill = lookup_skill(mount->skill);
             if (skill == -1) {
                 // This mount doesn't require skill to use.
                 // I guess the rider gets the max bonus!
@@ -1279,16 +1277,13 @@ int Unit::GetAvailSkill(int sk)
 		if ((SkillDefs[sk].flags & SkillType::MAGIC) && type != U_MAGE && type != U_APPRENTICE && type != U_GUARDMAGE)
 			continue;
 		if (i->num < GetMen()) continue;
-		str = ItemDefs[i->type].grantSkill;
-		if (ItemDefs[i->type].grantSkill && LookupSkill(&str) == sk) {
+		if (ItemDefs[i->type].grantSkill && lookup_skill(ItemDefs[i->type].grantSkill) == sk) {
 			int grant = 0;
 			for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills) / sizeof(ItemDefs[0].fromSkills[0]); j++) {
 				if (ItemDefs[i->type].fromSkills[j]) {
 					int fromSkill;
 
-					str = ItemDefs[i->type].fromSkills[j];
-
-					fromSkill = LookupSkill(&str);
+					fromSkill = lookup_skill(ItemDefs[i->type].fromSkills[j]);
 					if (fromSkill != -1) {
 						/*
 							Should this use GetRealSkill or GetAvailSkill?
@@ -1352,8 +1347,7 @@ void Unit::ForgetSkill(int sk)
 
 int Unit::CheckDepend(int lev, SkillDepend &dep)
 {
-	AString skname = dep.skill;
-	int sk = LookupSkill(&skname);
+	int sk = lookup_skill(dep.skill);
 	if (sk == -1) return 0;
 	int temp = GetRealSkill(sk);
 	if (temp < dep.level) return 0;
@@ -1470,15 +1464,12 @@ int Unit::Practice(int sk)
 			if ((SkillDefs[sk].flags & SkillType::MAGIC) && type != U_MAGE && type != U_APPRENTICE && type != U_GUARDMAGE)
 				continue;
 			if (it->num < GetMen()) continue;
-			str = ItemDefs[it->type].grantSkill;
-			if (ItemDefs[it->type].grantSkill && LookupSkill(&str) == sk) {
+			if (ItemDefs[it->type].grantSkill && lookup_skill(ItemDefs[it->type].grantSkill) == sk) {
 				for (unsigned j = 0; j < sizeof(ItemDefs[0].fromSkills) / sizeof(ItemDefs[0].fromSkills[0]); j++) {
 					if (ItemDefs[it->type].fromSkills[j]) {
 						int fromSkill;
 
-						str = ItemDefs[it->type].fromSkills[j];
-
-						fromSkill = LookupSkill(&str);
+						fromSkill = lookup_skill(ItemDefs[it->type].fromSkills[j]);
 						if (fromSkill != -1 && GetRealSkill(fromSkill) > reqlev) {
 							reqsk = fromSkill;
 							reqlev = GetRealSkill(fromSkill);
@@ -1503,8 +1494,7 @@ int Unit::Practice(int sk)
 	if (curlev >= max) return 0;
 
 	for (i = 0; i < sizeof(SkillDefs[sk].depends)/sizeof(SkillDefs[sk].depends[0]); i++) {
-		AString skname = SkillDefs[sk].depends[i].skill;
-		reqsk = LookupSkill(&skname);
+		reqsk = lookup_skill(SkillDefs[sk].depends[i].skill);
 		if (reqsk == -1) break;
 		if (SkillDefs[reqsk].flags & SkillType::DISABLED) continue;
 		if (SkillDefs[reqsk].flags & SkillType::NOEXP) continue;
@@ -2103,12 +2093,10 @@ int Unit::Taxers(int numtaxers)
 			WeaponType *pWep = FindWeapon(ItemDefs[item->type].abr);
 			int num = item->num;
 			int basesk = 0;
-			AString skname = pWep->baseSkill;
-			int sk = LookupSkill(&skname);
+			int sk = lookup_skill(pWep->baseSkill);
 			if (sk != -1) basesk = GetSkill(sk);
 			if (basesk == 0) {
-				skname = pWep->orSkill;
-				sk = LookupSkill(&skname);
+				sk = lookup_skill(pWep->orSkill);
 				if (sk != -1) basesk = GetSkill(sk);
 			}
 			if (!(pWep->flags & WeaponType::NEEDSKILL)) {
@@ -2139,8 +2127,7 @@ int Unit::Taxers(int numtaxers)
 		if (ItemDefs[item->type].type & IT_MOUNT) {
 			MountType *pm = FindMount(ItemDefs[item->type].abr);
 			if (pm->skill) {
-				AString skname = pm->skill;
-				int sk = LookupSkill(&skname);
+				int sk = lookup_skill(pm->skill);
 				if (pm->minBonus <= GetSkill(sk))
 					numUsableMounts += item->num;
 			} else
@@ -2346,10 +2333,8 @@ int Unit::GetFlag(int x)
 
 void Unit::SetFlag(int x, int val)
 {
-	if (val)
-		flags = flags | x;
-	else
-		if (flags & x) flags -= x;
+	if (val) flags = flags | x; // Set all bits specified by x
+	else flags = flags & ~x; // Unset all bits specified by x
 }
 
 void Unit::CopyFlags(Unit *x)
@@ -2422,8 +2407,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 	}
 
 	if (pMnt->skill) {
-		AString skname = pMnt->skill;
-		int sk = LookupSkill(&skname);
+		int sk = lookup_skill(pMnt->skill);
 		bonus = GetSkill(sk);
 		if (bonus < pMnt->minBonus) {
 			// Unit isn't skilled enough for this mount
@@ -2578,8 +2562,7 @@ int Unit::GetAttribute(char const *attrib)
 	for (int index = 0; index < 5; index++) {
 		int val = 0;
 		if (ap->mods[index].flags & AttribModItem::SKILL) {
-			temp = ap->mods[index].ident;
-			int sk = LookupSkill(&temp);
+			int sk = lookup_skill(ap->mods[index].ident);
 			val = GetAvailSkill(sk);
 			if (ap->mods[index].modtype == AttribModItem::UNIT_LEVEL_HALF) {
 				val = ((val + 1)/2) * ap->mods[index].val;
@@ -2650,8 +2633,7 @@ int Unit::PracticeAttribute(char const *attrib)
 	if (ap == NULL) return 0;
 	for (int index = 0; index < 5; index++) {
 		if (ap->mods[index].flags & AttribModItem::SKILL) {
-			AString temp = ap->mods[index].ident;
-			int sk = LookupSkill(&temp);
+			int sk = lookup_skill(ap->mods[index].ident);
 			if (sk != -1)
 				if (Practice(sk)) return 1;
 		}
@@ -2786,14 +2768,12 @@ int Unit::CanUseWeapon(WeaponType *pWep)
 	int bsk, orsk;
 	AString skname;
 	if (pWep->baseSkill != NULL) {
-		skname = pWep->baseSkill;
-		bsk = LookupSkill(&skname);
+		bsk = lookup_skill(pWep->baseSkill);
 		if (bsk != -1) baseSkillLevel = GetSkill(bsk);
 	}
 
 	if (pWep->orSkill != NULL) {
-		skname = pWep->orSkill;
-		orsk = LookupSkill(&skname);
+		orsk = lookup_skill(pWep->orSkill);
 		if (orsk != -1) tempSkillLevel = GetSkill(orsk);
 	}
 

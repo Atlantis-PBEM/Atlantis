@@ -29,6 +29,7 @@
 #include "skills.h"
 #include "items.h"
 #include "gamedata.h"
+#include "string_parser.hpp"
 
 RangeType *FindRange(char const *range)
 {
@@ -76,7 +77,7 @@ AttribModType *FindAttrib(char const *attrib)
 
 SkillType *FindSkill(char const *skname)
 {
-	if (skname == NULL) return NULL;
+	if (skname == nullptr) return nullptr;
 	for (int i = 0; i < NSKILLS; i++) {
 		if (SkillDefs[i].abbr == nullptr) continue;
 		if (std::string(skname) == SkillDefs[i].abbr)
@@ -85,27 +86,23 @@ SkillType *FindSkill(char const *skname)
 	return NULL;
 }
 
-int LookupSkill(AString *token)
+int lookup_skill(const parser::token& token)
 {
 	for (int i=0; i<NSKILLS; i++) {
-		if (*token == SkillDefs[i].abbr) return i;
+		if (token == SkillDefs[i].abbr) return i;
 	}
 	return -1;
 }
 
-int ParseSkill(AString *token)
+int parse_skill(const parser::token& token)
 {
-	int r = -1;
-	for (int i=0; i<NSKILLS; i++) {
-		if ((*token == SkillDefs[i].name) || (*token == SkillDefs[i].abbr)) {
-			r = i;
-			break;
+	for (int i = 0; i < NSKILLS; i++) {
+		if (SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if (token == SkillDefs[i].name || token == SkillDefs[i].abbr) {
+			return i;
 		}
 	}
-	if (r != -1) {
-		if (SkillDefs[r].flags & SkillType::DISABLED) r = -1;
-	}
-	return r;
+	return -1;
 }
 
 AString SkillStrs(SkillType *pS)
@@ -226,7 +223,7 @@ void Skill::Readin(std::istream &f)
 
 	f >> std::ws >> temp;
 	token = temp.gettoken();
-	type = LookupSkill(token);
+	type = lookup_skill(token->const_str());
 	delete token;
 
 	token = temp.gettoken();
