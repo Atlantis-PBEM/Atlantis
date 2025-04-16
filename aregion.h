@@ -152,7 +152,7 @@ class TownInfo
 		void Writeout(std::ostream& f);
 		int TownType();
 
-		AString *name;
+		std::string name;
 		int pop;
 		int activity;
 		// achieved settled habitat
@@ -185,7 +185,7 @@ class ARegion
 		void ManualSetup(const RegionSetup& settings);
 
 		void ZeroNeighbors();
-		void SetName(char const *);
+		void set_name(const std::string& newname);
 
 		void Writeout(std::ostream& f);
 		void Readin(std::istream& f, std::list<Faction *>& factions);
@@ -227,7 +227,7 @@ class ARegion
 		int ForbiddenShip(Object *);
 		int HasCityGuard();
 		int NotifySpell(Unit *, char const *, ARegionList& regs);
-		void NotifyCity(Unit *, AString& oldname, AString& newname);
+		void notify_city(Unit *, const std::string& oldname, const std::string& newname);
 
 		void DefaultOrders();
 		int TownGrowth();
@@ -295,7 +295,7 @@ class ARegion
 		// ruleset specific movment checks
 		const char *movement_forbidden_by_ruleset(Unit *unit, ARegion *origin, ARegionList& regions);
 
-		AString *name;
+		std::string name;
 		int num;
 		int type;
 		int buildingseq;
@@ -369,10 +369,10 @@ class ARegion
 		void SetIncome();
 		void Grow();
 		void SetupCityMarket();
-		void AddTown();
-		void AddTown(int);
-		void AddTown(AString *);
-		void AddTown(int, AString *);
+		void add_town();
+		void add_town(int size);
+		void add_town(const std::string& name);
+		void add_town(int size, const std::string& name);
 		void MakeLair(int);
 		void LairCheck();
 		std::vector<int> GetPossibleLairs();
@@ -388,14 +388,14 @@ class ARegionArray
 
 		void SetRegion(int, int, ARegion *);
 		ARegion *GetRegion(int, int);
-		void SetName(char const *name);
+		void set_name(const std::string& name);
 
 		std::vector<ARegion *> get_starting_region_candidates(int terrain);
 
 		int x;
 		int y;
 		ARegion **regions;
-		AString *strName;
+		std::string strName;
 
 		enum {
 			LEVEL_NEXUS,

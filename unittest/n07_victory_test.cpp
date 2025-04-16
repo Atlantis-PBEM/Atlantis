@@ -28,10 +28,8 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     Unit *leader = helper.get_first_unit(faction);
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *sac1 = helper.create_unit(faction, region);
-    AString *tmp_name= new AString("My Leader");
-    leader->SetName(tmp_name);
-    tmp_name = new AString("My Sacrifice 1");
-    sac1->SetName(tmp_name);
+    leader->set_name("My Leader");
+    sac1->set_name("My Sacrifice 1");
     sac1->items.SetNum(I_LEADERS, 10);
 
     helper.create_building(region, nullptr, O_ENTITY_CAGE);
@@ -78,10 +76,8 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     Unit *leader = helper.get_first_unit(faction);
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *sac1 = helper.create_unit(faction, region);
-    AString *tmp_name= new AString("My Leader");
-    leader->SetName(tmp_name);
-    tmp_name = new AString("My Sacrifice 1");
-    sac1->SetName(tmp_name);
+    leader->set_name("My Leader");
+    sac1->set_name("My Sacrifice 1");
     sac1->items.SetNum(I_LEADERS, 10);
 
     helper.create_building(region, nullptr, O_ENTITY_CAGE);
@@ -125,8 +121,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     Faction *faction = helper.create_faction(name);
     ARegion *region = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
 
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
 
@@ -167,13 +162,10 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     Faction *faction = helper.create_faction(name);
     ARegion *region = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    leader->Study(S_PATTERN, 90);
-    leader->Study(S_SPIRIT, 90);
-    leader->Study(S_FARSIGHT, 90);
-    leader->Study(S_GATE_LORE, 30);
-    leader->Study(S_TELEPORTATION, 30);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+
+    helper.set_skill_level(leader, S_TELEPORTATION, 1);
+
+    leader->set_name("My Leader");
 
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
 
@@ -217,8 +209,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     leader->items.SetNum(I_IMPRISONED_ENTITY, 1);
 
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
@@ -263,8 +254,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     leader->items.SetNum(I_IMPRISONED_ENTITY, 1);
 
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
@@ -302,8 +292,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     leader->items.SetNum(I_IMPRISONED_ENTITY, 1);
 
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
@@ -353,8 +342,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     leader->items.SetNum(I_IMPRISONED_ENTITY, 1);
 
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
@@ -404,14 +392,13 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Since this is such a tightly defined world, we know this is legal
     //ARegion *region = helper.get_region(0, 0, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
 
     // Try to use annihilate
     stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
-    ss << "annihilate region 1, 1, 0\n";
+    ss << "annihilate region 1 1 0\n";
     helper.parse_orders(faction->num, ss);
     helper.run_annihilation();
 
@@ -445,8 +432,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     region->type = R_BARREN;
     helper.create_building(region, leader, O_ACTIVE_MONOLITH);
 
@@ -454,7 +440,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
-    ss << "annihilate region 0, 0, 0\n";
+    ss << "annihilate region 0 0 0\n";
     helper.parse_orders(faction->num, ss);
     helper.run_annihilation();
 
@@ -491,8 +477,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ARegion *region = helper.get_region(0, 0, 0);
     ARegion *region2 = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     region2->type = R_BARREN;
     helper.create_building(region2, nullptr, O_ACTIVE_MONOLITH);
     helper.create_building(region, nullptr, O_ENTITY_CAGE);
@@ -505,7 +490,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move se 1\n";
-    ss << "annihilate region 0, 0, 0\n";
+    ss << "annihilate region 0 0 0\n";
     helper.parse_orders(faction->num, ss);
     helper.move_units();
     helper.run_annihilation();
@@ -583,8 +568,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ARegion *region = helper.get_region(0, 0, 0);
     ARegion *region2 = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     region2->type = R_BARREN;
     helper.create_building(region2, nullptr, O_ACTIVE_MONOLITH);
     helper.create_building(region, nullptr, O_ENTITY_CAGE);
@@ -597,8 +581,8 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move se 1\n";
-    ss << "annihilate region 0, 0, 0\n";
-    ss << "annihilate region 1, 3, 0\n";
+    ss << "annihilate region 0 0 0\n";
+    ss << "annihilate region 1 3 0\n";
     helper.parse_orders(faction->num, ss);
     helper.move_units();
     helper.run_annihilation();
@@ -679,8 +663,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ARegion *region = helper.get_region(0, 0, 0);
     ARegion *region2 = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     region2->type = R_BARREN;
     helper.create_building(region2, nullptr, O_ACTIVE_MONOLITH);
     helper.create_building(region, nullptr, O_ENTITY_CAGE);
@@ -774,8 +757,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ARegion *region = helper.get_region(0, 0, 0);
     ARegion *region2 = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     region2->type = R_BARREN;
     helper.create_building(region2, nullptr, O_ACTIVE_MONOLITH);
     helper.create_building(region, nullptr, O_ENTITY_CAGE);
@@ -788,7 +770,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move se 1\n";
-    ss << "annihilate region 0, 0, 0\n";
+    ss << "annihilate region 0 0 0\n";
     helper.parse_orders(faction->num, ss);
     helper.move_units();
     helper.run_annihilation();
@@ -870,8 +852,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ARegion *region = helper.get_region(0, 0, 0);
     ARegion *region2 = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
-    AString *tmp_name = new AString("My Leader");
-    leader->SetName(tmp_name);
+    leader->set_name("My Leader");
     region2->type = R_BARREN;
     helper.create_building(region2, nullptr, O_ACTIVE_MONOLITH);
     helper.create_building(region, nullptr, O_ENTITY_CAGE);
@@ -884,8 +865,8 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move se 1\n";
-    ss << "annihilate region 0, 0, 0\n";
-    ss << "annihilate region 0, 0, 0\n";
+    ss << "annihilate region 0 0 0\n";
+    ss << "annihilate region 0 0 0\n";
     helper.parse_orders(faction->num, ss);
     helper.move_units();
     helper.run_annihilation();

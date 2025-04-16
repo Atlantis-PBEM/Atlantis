@@ -25,144 +25,137 @@
 #include "game.h"
 #include "gamedata.h"
 
+#include "string_parser.hpp"
+
 using namespace std;
 
 static int RandomiseSummonAmount(int num)
 {
-	int retval, i;
+	int retval = 0;
 
-	retval = 0;
-
-	for (i = 0; i < 2 * num; i++)
-	{
-		if (rng::get_random(2))
-			retval++;
+	for (int i = 0; i < 2 * num; i++) {
+		if (rng::get_random(2)) retval++;
 	}
-	if (retval < 1 && num > 0)
-		retval = 1;
-
+	if (retval < 1 && num > 0) retval = 1;
 	return retval;
 }
 
-void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
+void Game::ProcessCastOrder(Unit *u, parser::string_parser& parser, orders_check *checker)
 {
-	AString * token = o->gettoken();
+	parser::token token = parser.get_token();
 	if (!token) {
-		parse_error( pCheck, u, 0, "CAST: No skill given.");
+		parse_error(checker, u, 0, "CAST: No skill given.");
 		return;
 	}
 
-	int sk = ParseSkill(token);
-	delete token;
-	if (sk==-1) {
-		parse_error( pCheck, u, 0, "CAST: Invalid skill.");
+	int sk = parse_skill(token);
+	if (sk == -1) {
+		parse_error(checker, u, 0, "CAST: Invalid skill.");
 		return;
 	}
 
-	if ( !( SkillDefs[sk].flags & SkillType::MAGIC )) {
-		parse_error( pCheck, u, 0, "CAST: That is not a magic skill.");
+	if (!(SkillDefs[sk].flags & SkillType::MAGIC)) {
+		parse_error(checker, u, 0, "CAST: That is not a magic skill.");
 		return;
 	}
-	if ( !( SkillDefs[sk].flags & SkillType::CAST )) {
-		parse_error( pCheck, u, 0, "CAST: That skill cannot be CAST.");
+	if (!(SkillDefs[sk].flags & SkillType::CAST)) {
+		parse_error(checker, u, 0, "CAST: That skill cannot be CAST.");
 		return;
 	}
 
 	RangeType *rt = NULL;
-	if ( !pCheck ) {
-		//
-		// XXX -- should be error checking spells
-		//
-		switch(sk) {
-			case S_MIND_READING:
-				ProcessMindReading(u,o, pCheck );
-				break;
-			case S_CONSTRUCT_PORTAL:
-			case S_ENCHANT_SWORDS:
-			case S_ENCHANT_ARMOR:
-			case S_ENCHANT_SHIELDS:
-			case S_CONSTRUCT_GATE:
-			case S_ENGRAVE_RUNES_OF_WARDING:
-			case S_SUMMON_IMPS:
-			case S_SUMMON_DEMON:
-			case S_SUMMON_BALROG:
-			case S_SUMMON_SKELETONS:
-			case S_RAISE_UNDEAD:
-			case S_SUMMON_LICH:
-			case S_DRAGON_LORE:
-			case S_WOLF_LORE:
-			case S_EARTH_LORE:
-			case S_SUMMON_WIND:
-			case S_CREATE_RING_OF_INVISIBILITY:
-			case S_CREATE_CLOAK_OF_INVULNERABILITY:
-			case S_CREATE_STAFF_OF_FIRE:
-			case S_CREATE_STAFF_OF_LIGHTNING:
-			case S_CREATE_AMULET_OF_TRUE_SEEING:
-			case S_CREATE_AMULET_OF_PROTECTION:
-			case S_CREATE_RUNESWORD:
-			case S_CREATE_SHIELDSTONE:
-			case S_CREATE_MAGIC_CARPET:
-			case S_CREATE_FLAMING_SWORD:
-			case S_CREATE_FOOD:
-			case S_CREATE_AEGIS:
-			case S_CREATE_WINDCHIME:
-			case S_CREATE_GATE_CRYSTAL:
-			case S_CREATE_STAFF_OF_HEALING:
-			case S_CREATE_SCRYING_ORB:
-			case S_CREATE_CORNUCOPIA:
-			case S_CREATE_BOOK_OF_EXORCISM:
-			case S_CREATE_HOLY_SYMBOL:
-			case S_CREATE_CENSER:
-			case S_BLASPHEMOUS_RITUAL:
-			case S_PHANTASMAL_ENTERTAINMENT:
-				ProcessGenericSpell(u,sk, pCheck );
-				break;
-			case S_CLEAR_SKIES:
-				rt = FindRange(SkillDefs[sk].range);
-				if (rt == NULL)
-					ProcessGenericSpell(u, sk, pCheck);
-				else
-					ProcessRegionSpell(u, o, sk, pCheck);
-				break;
-			case S_FARSIGHT:
-			case S_TELEPORTATION:
-			case S_WEATHER_LORE:
-				ProcessRegionSpell(u, o, sk, pCheck);
-				break;
-			case S_BIRD_LORE:
-				ProcessBirdLore(u,o, pCheck );
-				break;
-			case S_INVISIBILITY:
-				ProcessInvisibility(u,o, pCheck );
-				break;
-			case S_GATE_LORE:
-				ProcessCastGateLore(u,o, pCheck );
-				break;
-			case S_PORTAL_LORE:
-				ProcessCastPortalLore(u,o, pCheck );
-				break;
-			case S_CREATE_PHANTASMAL_BEASTS:
-				ProcessPhanBeasts(u,o, pCheck );
-				break;
-			case S_CREATE_PHANTASMAL_UNDEAD:
-				ProcessPhanUndead(u,o, pCheck );
-				break;
-			case S_CREATE_PHANTASMAL_DEMONS:
-				ProcessPhanDemons(u,o, pCheck );
-				break;
-			case S_TRANSMUTATION:
-				ProcessTransmutation(u, o, pCheck);
-				break;
-		}
+	switch(sk) {
+		case S_MIND_READING:
+			ProcessMindReading(u, parser, checker);
+			break;
+		case S_CONSTRUCT_PORTAL:
+		case S_ENCHANT_SWORDS:
+		case S_ENCHANT_ARMOR:
+		case S_ENCHANT_SHIELDS:
+		case S_CONSTRUCT_GATE:
+		case S_ENGRAVE_RUNES_OF_WARDING:
+		case S_SUMMON_IMPS:
+		case S_SUMMON_DEMON:
+		case S_SUMMON_BALROG:
+		case S_SUMMON_SKELETONS:
+		case S_RAISE_UNDEAD:
+		case S_SUMMON_LICH:
+		case S_DRAGON_LORE:
+		case S_WOLF_LORE:
+		case S_EARTH_LORE:
+		case S_SUMMON_WIND:
+		case S_CREATE_RING_OF_INVISIBILITY:
+		case S_CREATE_CLOAK_OF_INVULNERABILITY:
+		case S_CREATE_STAFF_OF_FIRE:
+		case S_CREATE_STAFF_OF_LIGHTNING:
+		case S_CREATE_AMULET_OF_TRUE_SEEING:
+		case S_CREATE_AMULET_OF_PROTECTION:
+		case S_CREATE_RUNESWORD:
+		case S_CREATE_SHIELDSTONE:
+		case S_CREATE_MAGIC_CARPET:
+		case S_CREATE_FLAMING_SWORD:
+		case S_CREATE_FOOD:
+		case S_CREATE_AEGIS:
+		case S_CREATE_WINDCHIME:
+		case S_CREATE_GATE_CRYSTAL:
+		case S_CREATE_STAFF_OF_HEALING:
+		case S_CREATE_SCRYING_ORB:
+		case S_CREATE_CORNUCOPIA:
+		case S_CREATE_BOOK_OF_EXORCISM:
+		case S_CREATE_HOLY_SYMBOL:
+		case S_CREATE_CENSER:
+		case S_BLASPHEMOUS_RITUAL:
+		case S_PHANTASMAL_ENTERTAINMENT:
+			ProcessGenericSpell(u, sk, checker);
+			break;
+		case S_CLEAR_SKIES:
+			rt = FindRange(SkillDefs[sk].range);
+			if (rt == NULL) ProcessGenericSpell(u, sk, checker);
+			else ProcessRegionSpell(u, sk, parser, checker);
+			break;
+		case S_FARSIGHT:
+		case S_TELEPORTATION:
+		case S_WEATHER_LORE:
+			ProcessRegionSpell(u, sk, parser, checker);
+			break;
+		case S_BIRD_LORE:
+			ProcessBirdLore(u, parser, checker);
+			break;
+		case S_INVISIBILITY:
+			ProcessInvisibility(u, parser, checker);
+			break;
+		case S_GATE_LORE:
+			ProcessCastGateLore(u, parser, checker);
+			break;
+		case S_PORTAL_LORE:
+			ProcessCastPortalLore(u, parser, checker);
+			break;
+		case S_CREATE_PHANTASMAL_BEASTS:
+			ProcessPhanBeasts(u, parser, checker);
+			break;
+		case S_CREATE_PHANTASMAL_UNDEAD:
+			ProcessPhanUndead(u, parser, checker);
+			break;
+		case S_CREATE_PHANTASMAL_DEMONS:
+			ProcessPhanDemons(u, parser, checker);
+			break;
+		case S_TRANSMUTATION:
+			ProcessTransmutation(u, parser, checker);
+			break;
 	}
 }
 
-void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessMindReading(Unit *u, parser::string_parser& parser, orders_check *checker )
 {
-	UnitId *id = ParseUnit(o);
+	UnitId *id = parse_unit(parser);
+	if (!id || id->unitnum == -1) {
+		if (id) delete id;
+		parse_error(checker, u, 0, "CAST: No unit specified.");
+		return;
+	}
 
-	if (!id) {
-		u->error("CAST: No unit specified.");
+	if (checker) {
+		if (id) delete id;
 		return;
 	}
 
@@ -175,68 +168,61 @@ void Game::ProcessMindReading(Unit *u,AString *o, OrdersCheck *pCheck )
 	u->castorders = order;
 }
 
-void Game::ProcessBirdLore(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessBirdLore(Unit *u, parser::string_parser& parser, orders_check *checker)
 {
-	AString *token = o->gettoken();
-
+	auto skdef = SkillDefs[S_BIRD_LORE];
+	parser::token token = parser.get_token();
 	if (!token) {
-		u->error("CAST: Missing arguments.");
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Missing arguments.");
 		return;
 	}
 
-	if (*token == "eagle") {
-		CastIntOrder *order = new CastIntOrder;
-		order->spell = S_BIRD_LORE;
-		order->level = 3;
-		u->ClearCastOrders();
-		u->castorders = order;
+	if (token != "eagle" && token != "direction") {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid argument '" + token.get_string() + "'.");
 		return;
 	}
 
-	if (*token == "direction") {
-		delete token;
-		token = o->gettoken();
-
-		if (!token) {
-			u->error("CAST: Missing arguments.");
+	int dir = -1;
+	if (token == "direction") {
+		parser::token dir_tkn = parser.get_token();
+		if (!dir_tkn) {
+			parse_error(checker, u, 0, "CAST '" + skdef.name + "': Missing direction.");
 			return;
 		}
-
-		int dir = ParseDir(token);
-		delete token;
+		dir = parse_dir(dir_tkn);
 		if (dir == -1 || dir > NDIRS) {
-			u->error("CAST: Invalid direction.");
+			parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid direction '" + dir_tkn.get_string() + "'.");
 			return;
 		}
+	}
 
-		CastIntOrder *order = new CastIntOrder;
-		order->spell = S_BIRD_LORE;
+	if (checker) return;
+
+	CastIntOrder *order = new CastIntOrder;
+	order->spell = S_BIRD_LORE;
+	if (token == "eagle") {
+		order->level = 3;
+	}
+
+	if (token == "direction") {
 		order->level = 1;
 		order->target = dir;
-		u->ClearCastOrders();
-		u->castorders = order;
-
-		return;
 	}
-
-	u->error("CAST: Invalid arguments.");
-	delete token;
+	u->ClearCastOrders();
+	u->castorders = order;
 }
 
-void Game::ProcessInvisibility(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessInvisibility(Unit *u, parser::string_parser& parser, orders_check *checker)
 {
-	AString *token = o->gettoken();
-
-	if (!token || !(*token == "units")) {
-		u->error("CAST: Must specify units to render invisible.");
+	auto skdef = SkillDefs[S_INVISIBILITY];
+	parser::token token = parser.get_token();
+	if (token != "units") {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Must specify units to render invisible.");
 		return;
 	}
-	delete token;
 
 	CastUnitsOrder *order;
-	if (u->castorders && u->castorders->type == O_CAST &&
-		u->castorders->spell == S_INVISIBILITY && u->castorders->level == 1
-	) {
+	if (u->castorders && u->castorders->spell == S_INVISIBILITY) {
 		order = dynamic_cast<CastUnitsOrder *>(u->castorders);
 	} else {
 		order = new CastUnitsOrder;
@@ -246,153 +232,118 @@ void Game::ProcessInvisibility(Unit *u,AString *o, OrdersCheck *pCheck )
 		u->castorders = order;
 	}
 
-	UnitId *id = ParseUnit(o);
-	while (id) {
+	if (checker) return;
+
+	UnitId *id = parse_unit(parser);
+	while (id && id->unitnum != -1) {
 		order->units.push_back(id);
-		id = ParseUnit(o);
+		id = parse_unit(parser);
 	}
 }
 
-void Game::ProcessPhanDemons(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessPhanDemons(Unit *u, parser::string_parser& parser, orders_check *checker )
 {
+	auto skdef = SkillDefs[S_CREATE_PHANTASMAL_DEMONS];
+	parser::token token = parser.get_token();
+
+	if(!token) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Illusion to summon must be given.");
+		return;
+	}
+
+	int level = 0;
+	if (token == "imp" || token == "imps") level = 1;
+	if (token == "demon" || token == "demons") level = 2;
+	if (token == "balrog" || token == "balrogs") level = 3;
+
+	if (!level) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Can't summon '" + token.get_string() + "'.");
+		return;
+	}
+
+	if (checker) return;
+
+	int amt = parser.get_token().get_number().value_or(1);
+	if (amt < 1) amt = 1;
+
 	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_DEMONS;
-	order->level = 0;
-	order->target = 1;
-
-	AString *token = o->gettoken();
-
-	if (!token) {
-		u->error("CAST: Illusion to summon must be given.");
-		delete order;
-		return;
-	}
-
-	if (*token == "imp" || *token == "imps") {
-		order->level = 1;
-	}
-
-	if (*token == "demon" || *token == "demons") {
-		order->level = 2;
-	}
-
-	if (*token == "balrog" || *token == "balrogs") {
-		order->level = 3;
-	}
-
-	delete token;
-
-	if (!order->level) {
-		u->error("CAST: Can't summon that illusion.");
-		delete order;
-		return;
-	}
-
-	token = o->gettoken();
-
-	if (!token) {
-		order->target = 1;
-	} else {
-		order->target = token->value();
-		delete token;
-	}
-
+	order->level = level;
+	order->target = amt;
 	u->ClearCastOrders();
 	u->castorders = order;
 }
 
-void Game::ProcessPhanUndead(Unit *u,AString *o, OrdersCheck *pCheck)
+void Game::ProcessPhanUndead(Unit *u, parser::string_parser& parser, orders_check *checker)
 {
+	auto skdef = SkillDefs[S_CREATE_PHANTASMAL_UNDEAD];
+	parser::token token = parser.get_token();
+
+	if(!token) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Must specify which illusion to summon.");
+		return;
+	}
+
+	int level = 0;
+	if (token == "skeleton" || token == "skeletons") level = 1;
+	if (token == "undead") level = 2;
+	if (token == "lich" || token == "liches") level = 3;
+
+	if (!level) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Can't summon '" + token.get_string() + "'.");
+		return;
+	}
+
+	if (checker) return;
+
+	int amt = parser.get_token().get_number().value_or(1);
+	if (amt < 1) amt = 1;
+
 	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_UNDEAD;
-	order->level = 0;
-	order->target = 1;
-
-	AString *token = o->gettoken();
-
-	if (!token) {
-		u->error("CAST: Must specify which illusion to summon.");
-		delete order;
-		return;
-	}
-
-	if (*token == "skeleton" || *token == "skeletons") {
-		order->level = 1;
-	}
-
-	if (*token == "undead") {
-		order->level = 2;
-	}
-
-	if (*token == "lich" || *token == "liches") {
-		order->level = 3;
-	}
-
-	delete token;
-
-	if (!order->level) {
-		u->error("CAST: Must specify which illusion to summon.");
-		delete order;
-		return;
-	}
-
-	token = o->gettoken();
-
-	if (token) {
-		order->target = token->value();
-		delete token;
-	} else {
-		order->target = 1;
-	}
-
+	order->level = level;
+	order->target = amt;
 	u->ClearCastOrders();
 	u->castorders = order;
 }
 
-void Game::ProcessPhanBeasts(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessPhanBeasts(Unit *u, parser::string_parser& parser, orders_check *checker)
 {
+	auto skdef = SkillDefs[S_CREATE_PHANTASMAL_BEASTS];
+	parser::token token = parser.get_token();
+
+	if(!token) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Must specify which illusion to summon.");
+		return;
+	}
+
+	int level = 0;
+	if (token == "wolf" || token == "wolves") level = 1;
+	if (token == "eagle" || token == "eagles") level = 2;
+	if (token == "dragon" || token == "dragons") level = 3;
+
+	if (!level) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Can't summon '" + token.get_string() + "'.");
+		return;
+	}
+
+	if (checker) return;
+
+	int amt = parser.get_token().get_number().value_or(1);
+	if (amt < 1) amt = 1;
+
 	CastIntOrder *order = new CastIntOrder;
 	order->spell = S_CREATE_PHANTASMAL_BEASTS;
-	order->level = 0;
-	order->target = 1;
-
-	AString *token = o->gettoken();
-
-	if (!token) {
-		u->error("CAST: Must specify which illusion to summon.");
-		delete order;
-		return;
-	}
-
-	if (*token == "wolf" || *token == "wolves") {
-		order->level = 1;
-	}
-	if (*token == "eagle" || *token == "eagles") {
-		order->level = 2;
-	}
-	if (*token == "dragon" || *token == "dragon") {
-		order->level = 3;
-	}
-
-	delete token;
-	if (!order->level) {
-		delete order;
-		u->error("CAST: Must specify which illusion to summon.");
-		return;
-	}
-
-	token = o->gettoken();
-	if (token) {
-		order->target = token->value();
-		delete token;
-	}
-
+	order->level = level;
+	order->target = amt;
 	u->ClearCastOrders();
 	u->castorders = order;
 }
 
-void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck *pCheck )
+void Game::ProcessGenericSpell(Unit *u, int spell, orders_check *checker)
 {
+	if (checker) return;
+
 	CastOrder *orders = new CastOrder;
 	orders->spell = spell;
 	orders->level = 1;
@@ -400,60 +351,60 @@ void Game::ProcessGenericSpell(Unit *u,int spell, OrdersCheck *pCheck )
 	u->castorders = orders;
 }
 
-void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
-		OrdersCheck *pCheck)
+void Game::ProcessRegionSpell(Unit *u, int spell, parser::string_parser& parser, orders_check *checker)
 {
-	AString *token = o->gettoken();
+	auto skdef = SkillDefs[spell];
 	int x = -1;
 	int y = -1;
 	int z = -1;
-	RangeType *range = FindRange(SkillDefs[spell].range);
 
-	if (token) {
-		if (*token == "region") {
-			delete token;
-			token = o->gettoken();
-			if (!token) {
-				u->error("CAST: Region X coordinate not specified.");
-				return;
-			}
-			x = token->value();
-			delete token;
+	if (parser.get_token() == "region") {
+		RangeType *range = FindRange(SkillDefs[spell].range);
 
-			token = o->gettoken();
-			if (!token) {
-				u->error("CAST: Region Y coordinate not specified.");
-				return;
-			}
-			y = token->value();
-			delete token;
+		auto xval = parser.get_token().get_number();
+		if (!xval) {
+			parse_error(checker, u, 0, "CAST '" + skdef.name + "': Region X coordinate not specified.");
+			return;
+		}
+		x = xval.value();
+		if (x < 0) {
+			parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid X coordinate specified.");
+			return;
+		}
 
-			if (range && (range->flags & RangeType::RNG_CROSS_LEVELS)) {
-				token = o->gettoken();
-				if (token) {
-					z = token->value();
-					delete token;
-					if (z < 0 || (z >= Globals->UNDERWORLD_LEVELS +
-								Globals->UNDERDEEP_LEVELS +
-								Globals->ABYSS_LEVEL + 2)) {
-						u->error("CAST: Invalid Z coordinate specified.");
-						return;
-					}
+		auto yval = parser.get_token().get_number();
+		if (!yval) {
+			parse_error(checker, u, 0, "CAST '" + skdef.name + "': Region Y coordinate not specified.");
+			return;
+		}
+		y = yval.value();
+		if (y < 0) {
+			parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid Y coordinate specified.");
+			return;
+		}
+
+		if (range && (range->flags & RangeType::RNG_CROSS_LEVELS)) {
+			auto zval = parser.get_token().get_number();
+			if (zval) {
+				z = zval.value();
+				if (z < 0 || z >= (Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL + 2)) {
+					parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid Z coordinate specified.");
+					return;
 				}
 			}
-		} else {
-			delete token;
 		}
 	}
+
+	if (checker) return;
+
 	if (x == -1) x = u->object->region->xloc;
 	if (y == -1) y = u->object->region->yloc;
 	if (z == -1) z = u->object->region->zloc;
 
 	CastRegionOrder *order;
-	if (spell == S_TELEPORTATION)
-		order = new TeleportOrder;
-	else
-		order = new CastRegionOrder;
+	if (spell == S_TELEPORTATION) order = new TeleportOrder;
+	else order = new CastRegionOrder;
+
 	order->spell = spell;
 	order->level = 1;
 	order->xloc = x;
@@ -461,37 +412,28 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell,
 	order->zloc = z;
 
 	u->ClearCastOrders();
-	/* Teleports happen late in the turn! */
-	if (spell == S_TELEPORTATION)
-		u->teleportorders = dynamic_cast<TeleportOrder *>(order);
-	else
-		u->castorders = order;
+	if (spell == S_TELEPORTATION) u->teleportorders = dynamic_cast<TeleportOrder *>(order);
+	else u->castorders = order;
 }
 
-void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessCastPortalLore(Unit *u, parser::string_parser& parser, orders_check *checker)
 {
-	AString *token = o->gettoken();
-	if (!token) {
-		u->error("CAST: Requires a target mage.");
-		return;
-	}
-	int gate = token->value();
-	delete token;
-	token = o->gettoken();
-
-	if (!token) {
-		u->error("CAST: No units to teleport.");
+	auto skdef = SkillDefs[S_PORTAL_LORE];
+	int target = parser.get_token().get_number().value_or(-1);
+	if (target <= 0) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Requires a target mage.");
 		return;
 	}
 
-	if (!(*token == "units")) {
-		u->error("CAST: No units to teleport.");
-		delete token;
+	parser::token token = parser.get_token();
+	if (token != "units") {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': No units to teleport.");
 		return;
 	}
+
+	if (checker) return;
 
 	TeleportOrder *order;
-
 	if (u->teleportorders && u->teleportorders->spell == S_PORTAL_LORE) {
 		order = u->teleportorders;
 	} else {
@@ -500,185 +442,153 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		u->teleportorders = order;
 	}
 
-	order->gate = gate;
+	order->gate = target;
 	order->spell = S_PORTAL_LORE;
 	order->level = 1;
 
-	UnitId *id = ParseUnit(o);
+	UnitId *id = parse_unit(parser);
 	while(id) {
 		order->units.push_back(id);
-		id = ParseUnit(o);
+		id = parse_unit(parser);
 	}
 }
 
-void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessCastGateLore(Unit *u, parser::string_parser& parser, orders_check *checker)
 {
-	AString *token = o->gettoken();
-
+	auto skdef = SkillDefs[S_GATE_LORE];
+	parser::token token = parser.get_token();
 	if (!token) {
-		u->error("CAST: Missing argument.");
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Missing argument.");
+		return;
+	}
+	if (token != "gate" && token != "random" && token != "detect") {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid argument '" + token.get_string() + "'.");
 		return;
 	}
 
-	if ((*token) == "gate") {
-		delete token;
-		token = o->gettoken();
-
-		if (!token || token->value() < 1) {
-			u->error("CAST: Requires a target gate.");
-			return;
-		}
-
-		TeleportOrder *order;
-
-		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE &&
-				u->teleportorders->gate == token->value()) {
-			order = u->teleportorders;
-		} else {
-			order = new TeleportOrder;
-			u->ClearCastOrders();
-			u->teleportorders = order;
-		}
-
-		order->gate = token->value();
-		order->spell = S_GATE_LORE;
-		order->level = 3;
-
-		delete token;
-
-		token = o->gettoken();
-
-		if (!token) return;
-		if (!(*token == "units")) {
-			delete token;
-			return;
-		}
-
-		UnitId *id = ParseUnit(o);
-		while(id) {
-			order->units.push_back(id);
-			id = ParseUnit(o);
-		}
-		return;
-	}
-
-	if ((*token) == "random") {
-		TeleportOrder *order;
-
-		if (u->teleportorders &&
-				u->teleportorders->spell == S_GATE_LORE &&
-				u->teleportorders->gate == -1 ) {
-			order = u->teleportorders;
-		} else {
-			order = new TeleportOrder;
-			u->ClearCastOrders();
-			u->teleportorders = order;
-		}
-
-		order->gate = -1;
-		order->spell = S_GATE_LORE;
-		order->level = 1;
-
-		delete token;
-
-		token = o->gettoken();
-
-		if (!token) return;
-		if (*token == "level") {
-			order->gate = -2;
-			order->level = 2;
-			delete token;
-			token = o->gettoken();
-		}
-		if (!token) return;
-		if (!(*token == "units")) {
-			delete token;
-			return;
-		}
-
-		UnitId *id = ParseUnit(o);
-		while(id) {
-			order->units.push_back(id);
-			id = ParseUnit(o);
-		}
-		return;
-	}
-
-	if ((*token) == "detect") {
-		delete token;
-		u->ClearCastOrders();
+	if (token == "detect") {
+		if (checker) return;
 		CastOrder *to = new CastOrder;
 		to->spell = S_GATE_LORE;
 		to->level = 2;
+		u->ClearCastOrders();
 		u->castorders = to;
 		return;
 	}
 
-	delete token;
-	u->error("CAST: Invalid argument.");
+	if (token == "gate") {
+		auto gateval = parser.get_token().get_number();
+		if (!gateval) {
+			parse_error(checker, u, 0, "CAST '" + skdef.name + "': Requires a target gate.");
+			return;
+		}
+		int gate = gateval.value();
+		if (gate < 1) {
+			parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid target gate.");
+			return;
+		}
+		if (checker) return;
+
+		TeleportOrder *order;
+		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE && u->teleportorders->gate == gate) {
+			order = u->teleportorders;
+		} else {
+			order = new TeleportOrder;
+			order->gate = gate;
+			order->spell = S_GATE_LORE;
+			order->level = 3;
+			u->ClearCastOrders();
+			u->teleportorders = order;
+		}
+
+		if (parser.get_token() == "units") {
+			UnitId *id = parse_unit(parser);
+			while(id) {
+				order->units.push_back(id);
+				id = parse_unit(parser);
+			}
+		}
+		return;
+	}
+
+	if (token == "random") {
+		if (checker) return;
+
+		TeleportOrder *order;
+		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE && u->teleportorders->gate == -1 ) {
+			order = u->teleportorders;
+		} else {
+			order = new TeleportOrder;
+			order->gate = -1;
+			order->spell = S_GATE_LORE;
+			order->level = 1;
+			u->ClearCastOrders();
+			u->teleportorders = order;
+		}
+
+		token = parser.get_token();
+		if (token == "level") {
+			order->gate = -2;
+			order->level = 2;
+			token = parser.get_token();
+		}
+		if (token != "units") return;
+
+		UnitId *id = parse_unit(parser);
+		while(id) {
+			order->units.push_back(id);
+			id = parse_unit(parser);
+		}
+		return;
+	}
 }
 
-void Game::ProcessTransmutation(Unit *u, AString *o, OrdersCheck *pCheck)
+void Game::ProcessTransmutation(Unit *u, parser::string_parser& parser, orders_check *checker)
 {
-	CastTransmuteOrder *order;
-	AString *token;
+	auto skdef = SkillDefs[S_TRANSMUTATION];
+	parser::token token = parser.get_token();
+	if (!token) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': You must specify what you wish to create.");
+		return;
+	}
 
+	int amt = -1;
+	if (token.get_number()) {
+		amt = token.get_number().value();
+		if (amt < 1) {
+			parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid amount.");
+			return;
+		}
+		token = parser.get_token();
+	}
+
+	int item = parse_enabled_item(token);
+	if (item == -1) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': You must specify what you wish to create.");
+		return;
+	}
+
+	int level = -1;
+	if (item == I_MITHRIL || item == I_ROOTSTONE) level = 1;
+	if (item == I_IRONWOOD) level = 2;
+	if (item == I_FLOATER) level = 3;
+	if (item == I_YEW) level = 4;
+	if (item == I_WHORSE || item == I_ADMANTIUM) level = 5;
+	if (level == -1) {
+		parse_error(checker, u, 0, "CAST '" + skdef.name + "': Can't create that by transmutation.");
+		return;
+	}
+
+	if (checker) return;
+
+	CastTransmuteOrder *order;
 	order = new CastTransmuteOrder;
 	order->spell = S_TRANSMUTATION;
-	order->level = 0;
-	order->item = -1;
-	order->number = -1;
-
-	token = o->gettoken();
-	if (!token) {
-		u->error("CAST: You must specify what you wish to create.");
-		delete order;
-		return;
-	}
-	if (token->value() > 0) {
-		order->number = token->value();
-		delete token;
-		token = o->gettoken();
-	}
-
-	order->item = ParseEnabledItem(token);
-	delete token;
-	if (order->item == -1) {
-		u->error("CAST: You must specify what you wish to create.");
-		delete order;
-		return;
-	}
-
-	switch(order->item) {
-		case I_MITHRIL:
-		case I_ROOTSTONE:
-			order->level = 1;
-			break;
-		case I_IRONWOOD:
-			order->level = 2;
-			break;
-		case I_FLOATER:
-			order->level = 3;
-			break;
-		case I_YEW:
-			order->level = 4;
-			break;
-		case I_WHORSE:
-			order->level = 5;
-			break;
-		case I_ADMANTIUM:
-			order->level = 5;
-			break;
-		default:
-			u->error("CAST: Can't create that by transmutation.");
-			delete order;
-			return;
-	}
-
+	order->level = level;
+	order->item = item;
+	order->number = amt;
 	u->ClearCastOrders();
 	u->castorders = order;
-
-	return;
 }
 
 void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
@@ -694,7 +604,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 	}
 
 	if (u->GetSkill(u->castorders->spell) < u->castorders->level || u->castorders->level == 0) {
-		u->error("CAST: Skill level isn't that high.");
+		u->error(string("CAST '") + SkillDefs[u->castorders->spell].name + "': Skill level isn't that high.");
 		return;
 	}
 
@@ -935,15 +845,12 @@ int Game::RunMindReading(ARegion *r,Unit *u)
 		return 0;
 	}
 
-	string temp = "Casts Mind Reading: " + string(tar->name->const_str()) + ", " + tar->faction->name->const_str();
+	string temp = "Casts Mind Reading: " + tar->name + ", " + tar->faction->name + ".";
 
-	if (level < 3) {
-		u->event(temp + ".", "spell");
-		return 1;
+	if (level >= 3) {
+		temp += string(tar->items.Report(2,5,0).const_str()) + ". Skills: ";
+		temp += string(tar->skills.Report(tar->GetMen()).const_str()) + ".";
 	}
-
-	temp += string(tar->items.Report(2,5,0).const_str()) + ". Skills: ";
-	temp += string(tar->skills.Report(tar->GetMen()).const_str()) + ".";
 
 	u->event(temp, "spell");
 	return 1;
@@ -1102,7 +1009,7 @@ int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
 	} else {
 		o->runes = 3;
 	}
-	u->event("Engraves Runes of Warding on " + string(o->name->const_str()) + ".", "spell");
+	u->event("Engraves Runes of Warding on " + o->name + ".", "spell");
 	return 1;
 }
 
@@ -1394,7 +1301,7 @@ int Game::RunInvisibility(ARegion *r,Unit *u)
 		if (!tar) continue;
 		if (tar->GetAttitude(r,u) < A_FRIENDLY) continue;
 		tar->SetFlag(FLAG_INVIS,1);
-		tar->event("Is rendered invisible by " + string(u->name->const_str()) + ".", "spell");
+		tar->event("Is rendered invisible by " + u->name + ".", "spell");
 	}
 
 	// std::for_each(order->units.begin(), order->units.end(), [&](UnitId *id) { delete id; });
@@ -1838,7 +1745,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 				comma = 1;
 				loc->unit->DiscardUnfinishedShips();
 				loc->unit->event("Is teleported through a Gate to " + string(tar->Print().const_str()) +
-					" by " + string(u->name->const_str()) + ".", "spell");
+					" by " + u->name + ".", "spell");
 				loc->unit->MoveUnit(tar->GetDummy());
 				if (loc->unit != u) loc->unit->ClearCastOrders();
 			}
@@ -1934,7 +1841,7 @@ int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 			} else {
 				loc->unit->DiscardUnfinishedShips();
 				loc->unit->event("Is teleported to " + string(tar->region->Print().const_str()) +
-					" by " + string(u->name->const_str()) + ".", "spell");
+					" by " + u->name + ".", "spell");
 				loc->unit->MoveUnit( tar->obj );
 				if (loc->unit != u) loc->unit->ClearCastOrders();
 			}
@@ -1989,8 +1896,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
 		num = ItemDefs[order->item].mOut * level;
 	if (order->number != -1 && num > order->number)
 		num = order->number;
-	if (num < order->number)
-		u->error("CAST: Can't create that many.");
+	if (num < order->number) u->error("CAST: Can't create that many.");
 	u->ConsumeShared(source, num);
 	u->items.SetNum(order->item, u->items.GetNum(order->item) + num);
 	u->event("Transmutes " + ItemString(source, num) + " into " + ItemString(order->item, num) + ".", "spell");
@@ -2072,7 +1978,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 		message += "!";
 		WriteTimesArticle(message);
 
-		mage->event("Sacrifices " + ItemDefs[sac].name + " from " + victim->name->const_str(), "spell");
+		mage->event("Sacrifices " + ItemDefs[sac].name + " from " + victim->name, "spell");
 		if (!victim->GetMen())
 			r->Kill(victim);
 		if (!mage->GetMen())

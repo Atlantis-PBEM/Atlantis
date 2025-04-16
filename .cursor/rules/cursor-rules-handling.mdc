@@ -1,0 +1,87 @@
+---
+description: USE WHEN modifying or creating cursor rules
+globs:
+alwaysApply: false
+---
+# Cursor Rules Overview
+
+The rules in the `.cursor/rules` directory are to guide the agent to assist me better.  In order to do that, organizing them is the first step.
+
+## File Structure
+
+The content of each rule `.mdc` file contains inforamation as follows:
+
+### Frontmatter
+- A front-matter block which must be formatted in the following manner:
+  - At most one of `alwaysApply`, `globs` or `description` should be enabled.
+  - When `alwaysApply` is enabled, it's value should be `true`.  When not enabled, it's value should be `false`.
+  - `globs` and `description` should be empty if not enabled or have a value if enabled.
+  - The descripton, if provided MUST be useful to the agent, and is meant for the agent, not the user.
+- The frontmatter should always have the following structure
+  ```mdc
+  ---
+  description: USE WHEN <verb in active tense> <action>
+  globs: <comma seperated list of file globs>
+  alwaysApply: <boolean>
+  ---
+  ```
+- Here are examples of properly formatted frontmatter for different conditions:
+  1. A rule which is always supposed to apply
+    ```mdc
+    ---
+    desription:
+    globs:
+    alwaysApply: true
+    ---
+    ```
+  2. A rule which only applies to all c++ filetypes
+    ```mdc
+    ---
+    description:
+    globs: **/*.cpp, **/*.hpp, **/*.h, **/*.inl
+    alwaysApply: false
+    ```
+  3. A rule which only applies in specific circumstances
+    ```mdc
+    ---
+    description: USE WHEN creating or modifying unit tests
+    globs:
+    alwaysApply: false
+    ```
+  4. A rule which will only be included if referenced directly
+     ```mdc
+     ---
+     description:
+     globs:
+     alwaysApply: false
+     ```
+
+## Rule content
+
+The remainder of the file must be properly formatted markdown.
+
+### Rule structure
+- Organize the markdown logically.
+- Provide examples when necessary.
+- Keep instructions actionable and concise.
+
+## File Naming And Organization
+
+- Files must be named in kebab-case with a concise descriptive name that accurately describes it.
+- Files related to a single topic should be groups in subdirectories
+- Files must be kept short and focused.
+
+## File Creation, Editing and Upkeep
+
+- When creating a rule:
+  - Using your internal tools.
+  - Inform the user how the metadata should be set
+    - the internal tools does not correctly create the frontmatter
+- When editing or updating a rule:
+  - Use your internal tools.
+  - Inform the user if the metadata needs to be updated.
+    - The internal tool does not correctly see the frontmatter
+- When reorganizing rules:
+  - Maintain a good organizations structure.
+  - Suggest reorganizing the structure as needed.
+

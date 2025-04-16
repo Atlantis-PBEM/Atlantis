@@ -26,7 +26,7 @@ ut::suite<"Produce"> produce_suite = []
     Faction *faction = helper.create_faction(name);
     Unit *unit = helper.get_first_unit(faction);
     unit->items.SetNum(I_LEADERS, 10); // 10 men so we can produce up to 10 meals/month
-    unit->Study(S_COOKING, 300); // study is total days, so this is 30 days per man.
+    helper.set_skill_level(unit, S_COOKING, 1);
     unit->items.SetNum(I_LIVESTOCK, 5);
 
     // We have another unit which has grain.  Bug was the grain would be used before the personal items
@@ -62,7 +62,7 @@ ut::suite<"Produce"> produce_suite = []
     Faction *faction = helper.create_faction(name);
     Unit *unit = helper.get_first_unit(faction);
     unit->items.SetNum(I_LEADERS, 10); // 10 men so we can produce up to 10 meals/month
-    unit->Study(S_COOKING, 300); // study is total days, so this is 30 days per man.
+    helper.set_skill_level(unit, S_COOKING, 1);
     unit->items.SetNum(I_LIVESTOCK, 5);
 
     // We have another unit which has grain.  Bug was the grain would be used before the personal items

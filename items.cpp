@@ -28,6 +28,7 @@
 #include "skills.h"
 #include "object.h"
 #include "gamedata.h"
+#include "string_parser.hpp"
 
 using namespace std;
 
@@ -168,123 +169,67 @@ static AString DefType(int atype)
 	return AttType(atype);
 }
 
-int LookupItem(AString *token)
+int lookup_item(const std::string& name)
 {
+	parser::token token(name); // for case-insensitive comparison
 	for (int i = 0; i < NITEMS; i++) {
-		if (ItemDefs[i].type & IT_ILLUSION) {
-			if (*token == (AString("i") + ItemDefs[i].abr)) return i;
-		} else {
-			if (*token == ItemDefs[i].abr) return i;
-		}
+		std::string item_name = (ItemDefs[i].type & IT_ILLUSION ? "i" : "") + std::string(ItemDefs[i].abr);
+		if (token == item_name) return i;
 	}
 	return -1;
 }
 
-int ParseAllItems(AString *token)
+std::optional<int> parse_item_category(const parser::token& str)
 {
-	int r = -1;
+    if (str == "normal") return -IT_NORMAL;
+    if (str == "advanced") return -IT_ADVANCED;
+    if (str == "trade") return -IT_TRADE;
+    if (str == "man" || str == "men") return -IT_MAN;
+    if (str == "monster" || str == "monsters") return -IT_MONSTER;
+    if (str == "magic") return -IT_MAGIC;
+    if (str == "weapon" || str == "weapons") return -IT_WEAPON;
+    if (str == "armor") return -IT_ARMOR;
+    if (str == "mount" || str == "mounts") return -IT_MOUNT;
+    if (str == "battle") return -IT_BATTLE;
+    if (str == "special") return -IT_SPECIAL;
+    if (str == "food") return -IT_FOOD;
+    if (str == "tool" || str == "tools") return -IT_TOOL;
+    if (str == "item" || str == "items") return -NITEMS;
+    if (str == "ship" || str == "ships") return -IT_SHIP;
+
+    return std::nullopt;  // Not a category
+}
+
+int parse_all_items(const parser::token& token, int flags)
+{
 	for (int i = 0; i < NITEMS; i++) {
-		if (ItemDefs[i].type & IT_ILLUSION) {
-			if ((*token == (AString("i") + ItemDefs[i].name)) ||
-				(*token == (AString("i") + ItemDefs[i].names)) ||
-				(*token == (AString("i") + ItemDefs[i].abr))) {
-				r = i;
-				break;
-			}
-		} else {
-			if ((*token == ItemDefs[i].name) ||
-				(*token == ItemDefs[i].names) ||
-				(*token == ItemDefs[i].abr)) {
-				r = i;
-				break;
-			}
-		}
+		if (ItemDefs[i].flags & flags) continue;
+		bool illusion = ItemDefs[i].type & IT_ILLUSION;
+		std::string itemName = (illusion ? "i" : "") + ItemDefs[i].name;
+		std::string itemNames = (illusion ? "i" : "") + ItemDefs[i].names;
+		std::string itemAbr = (illusion ? "i" : "") + std::string(ItemDefs[i].abr);
+
+		if (token == itemName || token == itemNames || token == itemAbr) return i;
 	}
-	return r;
+	return -1;
 }
 
-int ParseEnabledItem(AString *token)
+int parse_enabled_item(const parser::token& token, int flags)
 {
-	int r = -1;
-	for (int i=0; i<NITEMS; i++) {
-		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if (ItemDefs[i].type & IT_ILLUSION) {
-			if ((*token == (AString("i") + ItemDefs[i].name)) ||
-				(*token == (AString("i") + ItemDefs[i].names)) ||
-				(*token == (AString("i") + ItemDefs[i].abr))) {
-				r = i;
-				break;
-			}
-		} else {
-			if ((*token == ItemDefs[i].name) ||
-				(*token == ItemDefs[i].names) ||
-				(*token == ItemDefs[i].abr)) {
-				r = i;
-				break;
-			}
-		}
-	}
-	if (r != -1) {
-		if (ItemDefs[r].flags & ItemType::DISABLED) r = -1;
-	}
-	return r;
+	int item = parse_all_items(token, flags | ItemType::DISABLED);
+	return item;
 }
 
-int ParseGiveableItem(AString *token)
+int parse_giveable_item(const parser::token& token, int flags)
 {
-	int r = -1;
-	for (int i=0; i<NITEMS; i++) {
-		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if (ItemDefs[i].flags & ItemType::CANTGIVE) continue;
-		if (ItemDefs[i].type & IT_ILLUSION) {
-			if ((*token == (AString("i") + ItemDefs[i].name)) ||
-				(*token == (AString("i") + ItemDefs[i].names)) ||
-				(*token == (AString("i") + ItemDefs[i].abr))) {
-				r = i;
-				break;
-			}
-		} else {
-			if ((*token == ItemDefs[i].name) ||
-				(*token == ItemDefs[i].names) ||
-				(*token == ItemDefs[i].abr)) {
-				r = i;
-				break;
-			}
-		}
-	}
-	if (r != -1) {
-		if (ItemDefs[r].flags & ItemType::DISABLED) r = -1;
-	}
-	return r;
+	int item = parse_enabled_item(token, flags | ItemType::CANTGIVE);
+	return item;
 }
 
-int ParseTransportableItem(AString *token)
+int parse_transportable_item(const parser::token& token, int flags)
 {
-	int r = -1;
-	for (int i=0; i<NITEMS; i++) {
-		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if (ItemDefs[i].flags & ItemType::NOTRANSPORT) continue;
-		if (ItemDefs[i].flags & ItemType::CANTGIVE) continue;
-		if (ItemDefs[i].type & IT_ILLUSION) {
-			if ((*token == (AString("i") + ItemDefs[i].name)) ||
-				(*token == (AString("i") + ItemDefs[i].names)) ||
-				(*token == (AString("i") + ItemDefs[i].abr))) {
-				r = i;
-				break;
-			}
-		} else {
-			if ((*token == ItemDefs[i].name) ||
-				(*token == ItemDefs[i].names) ||
-				(*token == ItemDefs[i].abr)) {
-				r = i;
-				break;
-			}
-		}
-	}
-	if (r != -1) {
-		if (ItemDefs[r].flags & ItemType::DISABLED) r = -1;
-	}
-	return r;
+	int item = parse_giveable_item(token, ItemType::NOTRANSPORT);
+	return item;
 }
 
 string ItemString(int type, int num, int flags)
@@ -696,8 +641,7 @@ AString *ItemDescription(int item, int full)
 			*temp += "es";
 		*temp += " per month";
 		*temp += AString(". This ship requires a total of ") + ItemDefs[item].weight/50 + " levels of sailing skill to sail";
-		AString abbr = ItemDefs[item].name;
-		int objectno = LookupObject(&abbr);
+		int objectno = lookup_object(ItemDefs[item].name);
 		if (objectno >= 0) {
 			if (ObjectDefs[objectno].protect > 0) {
 				*temp += ". This ship provides defense to the first ";
@@ -1577,7 +1521,6 @@ AString Item::Report(int seeillusions)
 
 void Item::Writeout(ostream& f)
 {
-	AString temp;
 	if (type != -1) {
 		f << num << " ";
 		if (ItemDefs[type].type & IT_ILLUSION) f << "i";
@@ -1588,14 +1531,9 @@ void Item::Writeout(ostream& f)
 
 void Item::Readin(istream &f)
 {
-	AString temp;
-	f >> ws >> temp;
-	AString *token = temp.gettoken();
-	num = token->value();
-	delete token;
-	token = temp.gettoken();
-	type = LookupItem(token);
-	delete token;
+	std::string temp;
+	f >> ws >> num >> temp;
+	type = lookup_item(temp);
 }
 
 void ItemList::Writeout(ostream& f)

@@ -72,49 +72,42 @@ Farsight *GetFarsight(std::list<Farsight *>& farsees, Faction *fac)
 	return nullptr;
 }
 
-AString TownString(int i)
+std::string TownString(int i)
 {
 	switch (i) {
-	case TOWN_VILLAGE:
-		return "village";
-	case TOWN_TOWN:
-		return "town";
-	case TOWN_CITY:
-		return "city";
+		case TOWN_VILLAGE: return "village";
+		case TOWN_TOWN: return "town";
+		case TOWN_CITY: return "city";
 	}
 	return "huh?";
 }
 
 TownInfo::TownInfo()
 {
-	name = 0;
 	pop = 0;
 	activity = 0;
 	hab = 0;
 }
 
-TownInfo::~TownInfo()
-{
-	if (name) delete name;
-}
+TownInfo::~TownInfo() { }
 
 void TownInfo::Readin(istream &f)
 {
-	AString temp;
-	f >> ws >> temp;
-	name = new AString(temp);
+	std::string temp;
+	std::getline(f >> std::ws, temp);
+	name = temp;
 	f >> pop;
 	f >> hab;
 }
 
 void TownInfo::Writeout(ostream& f)
 {
-	f << name->const_str() << '\n' << pop << '\n' << hab << '\n';
+	f << name << '\n' << pop << '\n' << hab << '\n';
 }
 
 ARegion::ARegion()
 {
-	name = new AString("Region");
+	name = "Region";
 	xloc = 0;
 	yloc = 0;
 	buildingseq = 1;
@@ -138,7 +131,6 @@ ARegion::ARegion()
 
 ARegion::~ARegion()
 {
-	if (name) delete name;
 	if (town) delete town;
 	std::for_each(objects.begin(), objects.end(), [](Object *o) { delete o; });
 	objects.clear();
@@ -151,10 +143,9 @@ void ARegion::ZeroNeighbors()
 	}
 }
 
-void ARegion::SetName(char const *c)
+void ARegion::set_name(const std::string& newname)
 {
-	if (name) delete name;
-	name = new AString(c);
+	name = newname;
 }
 
 int ARegion::produces_item(int item)
@@ -238,8 +229,7 @@ void ARegion::MakeLair(int t)
 {
 	Object *o = new Object(this);
 	o->num = buildingseq++;
-	o->name = new AString(AString(ObjectDefs[t].name) +
-			" [" + o->num + "]");
+	o->set_name(ObjectDefs[t].name);
 	o->type = t;
 	o->incomplete = 0;
 	o->inner = -1;
@@ -281,10 +271,7 @@ void ARegion::ManualSetup(const RegionSetup& settings) {
 
 	SetupHabitat(settings.terrain);
 
-	if (settings.addSettlement) {
-		AString* name = new AString(settings.settlementName);
-		AddTown(settings.settlementSize, name);
-	}
+	if (settings.addSettlement) add_town(settings.settlementSize, settings.settlementName);
 
 	SetupEconomy();
 
@@ -374,7 +361,7 @@ void ARegion::RunDecayEvent(Object *o)
 	for(const auto f : factions) {
 		string tmp = string(GetDecayFlavor().const_str()) + " " + ObjectDefs[o->type].name +
 			" in " + ShortPrint().const_str() + ".";
-		f->event(tmp, "decay");
+		f->event(tmp, "decay", this);
 	}
 }
 
@@ -689,7 +676,7 @@ AString ARegion::ShortPrint()
 	temp += AString(" (") + xloc + "," + yloc;
 
 	ARegionArray *pArr = this->level;
-	if (pArr->strName) {
+	if (!pArr->strName.empty()) {
 		temp += ",";
 		if (Globals->EASIER_UNDERWORLD &&
 				(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
@@ -710,7 +697,7 @@ AString ARegion::ShortPrint()
 				temp += "deep ";
 			}
 		}
-		temp += *pArr->strName;
+		temp += pArr->strName;
 		if (Globals->EASIER_UNDERWORLD &&
 				(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1)) {
 			temp += ">";
@@ -718,7 +705,7 @@ AString ARegion::ShortPrint()
 	}
 	temp += ")";
 
-	temp += AString(" in ") + *name;
+	temp += AString(" in ") + name;
 	return temp;
 }
 
@@ -726,8 +713,7 @@ AString ARegion::Print()
 {
 	AString temp = ShortPrint();
 	if (town) {
-		temp += AString(", contains ") + *(town->name) + " [" +
-			TownString(town->TownType()) + "]";
+		temp += AString(", contains ") + town->name + " [" + TownString(town->TownType()) + "]";
 	}
 	return temp;
 }
@@ -946,7 +932,7 @@ std::set<Faction *>ARegion::PresentFactions()
 
 void ARegion::Writeout(ostream& f)
 {
-	f << *name << '\n';
+	f << name << '\n';
 	f << num << '\n';
 
 	f << (type != -1 ? TerrainDefs[type].type : "NO_TERRAIN") << '\n';
@@ -999,8 +985,7 @@ void ARegion::Readin(istream &f, std::list<Faction *>& facs)
 {
 	AString temp;
 
-	f >> ws >> temp;
-	name = new AString(temp);
+	std::getline(f >> std::ws, name);
 
 	f >> num;
 	f >> ws >> temp;
@@ -1010,8 +995,10 @@ void ARegion::Readin(istream &f, std::list<Faction *>& facs)
 	f >> gate;
 	if (gate > 0) f >> gatemonth;
 
-	f >> ws >> temp;
-	race = LookupItem(&temp);
+
+	std::string str;
+	f >> ws >> str;
+	race = lookup_item(str);
 
 	f >> population;
 	f >> basepopulation;
@@ -1081,8 +1068,7 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	if (Globals->IMPROVED_FARSIGHT) {
 		for(const auto f : farsees) {
 			if (f && f->faction == fac && f->unit) {
-				skname = ItemDefs[item].pSkill;
-				sk = LookupSkill(&skname);
+				sk = lookup_skill(ItemDefs[item].pSkill);
 				if (f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
 			}
@@ -1093,8 +1079,7 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) {
 		for(const auto f : passers) {
 			if (f && f->faction == fac && f->unit) {
-				skname = ItemDefs[item].pSkill;
-				sk = LookupSkill(&skname);
+				sk = lookup_skill(ItemDefs[item].pSkill);
 				if (f->unit->GetSkill(sk) >= ItemDefs[item].pLevel)
 					return 1;
 			}
@@ -1104,8 +1089,7 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	for(const auto o : objects) {
 		for(const auto u : o->units) {
 			if (u->faction == fac) {
-				skname = ItemDefs[item].pSkill;
-				sk = LookupSkill(&skname);
+				sk = lookup_skill(ItemDefs[item].pSkill);
 				if (u->GetSkill(sk) >= ItemDefs[item].pLevel) return 1;
 			}
 		}
@@ -1129,7 +1113,7 @@ json ARegion::basic_region_data() {
 	json j;
 	j["terrain"] = TerrainDefs[type].name;
 
-	string label = (this->level->strName ? this->level->strName->const_str() : "surface");
+	string label = (this->level->strName.empty() ? "surface" : this->level->strName);
  	j["coordinates"] = { { "x", xloc }, { "y", yloc }, { "z", zloc }, { "label", label } };
 
 	// in order to support games with different UW settings, we need to put a bit more information in the JSON to
@@ -1152,9 +1136,9 @@ json ARegion::basic_region_data() {
 		if (!z_prefix.empty()) j["coordinates"]["depth_prefix"] = z_prefix;
 	}
 
-	j["province"] = name->const_str();
+	j["province"] = name;
 	if (town) {
-		j["settlement"] = { { "name", town->name->const_str() }, { "size", TownString(town->TownType()).const_str() } };
+		j["settlement"] = { { "name", town->name }, { "size", TownString(town->TownType()) } };
 	}
 	return j;
 }
@@ -1534,8 +1518,7 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList& regs)
 		return 0;
 	}
 
-	AString skname = spell;
-	int sp = LookupSkill(&skname);
+	int sp = lookup_skill(spell);
 	std::set<Faction *> facs;
 	for(const auto o : objects) {
 		for(const auto u : o->units) {
@@ -1545,16 +1528,15 @@ int ARegion::NotifySpell(Unit *caster, char const *spell, ARegionList& regs)
 	}
 
 	for(const auto f : facs) {
-		string tmp = string(caster->name->const_str()) + " uses " + SkillStrs(sp).const_str() +
-				" in " + Print().const_str() + ".";
-		f->event(tmp, "cast");
+		string tmp = caster->name + " uses " + SkillStrs(sp).const_str() + " in " + Print().const_str() + ".";
+		f->event(tmp, "cast", this);
 	}
 	return 1;
 }
 
 // ALT, 26-Jul-2000
 // Procedure to notify all units in city about city name change
-void ARegion::NotifyCity(Unit *caster, AString& oldname, AString& newname)
+void ARegion::notify_city(Unit *caster, const std::string& oldname, const std::string& newname)
 {
 	std::set<Faction *> flist;
 	for(const auto o : objects) {
@@ -1564,8 +1546,7 @@ void ARegion::NotifyCity(Unit *caster, AString& oldname, AString& newname)
 		}
 	}
 	for(const auto f : flist) {
-		string tmp = string(caster->name->const_str()) + " renames " + oldname.const_str() +
-			" to " + newname.const_str() + ".";
+		string tmp = caster->name + " renames " + oldname + " to " + newname + ".";
 		f->event(tmp, "rename");
 	}
 }
@@ -1696,7 +1677,7 @@ void ARegionList::WriteRegions(ostream& f)
 	for (int i = 0; i < numLevels; i++) {
 		ARegionArray *pRegs = pRegionArrays[i];
 		f << pRegs->x << "\n" << pRegs->y << "\n";
-		f << (pRegs->strName ? pRegs->strName->const_str() : "none") << "\n";
+		f << (pRegs->strName.empty() ? "none" : pRegs->strName) << "\n";
 		f << pRegs->levelType << "\n";
 	}
 
@@ -1722,13 +1703,13 @@ int ARegionList::ReadRegions(istream &f, std::list<Faction *>& factions)
 	for (i = 0; i < numLevels; i++) {
 		int curX, curY;
 		f >> curX >> curY;
-		AString name;
-		f >> ws >> name;
+		std::string name;
+		std::getline(f >> ws, name);
 		ARegionArray *pRegs = new ARegionArray(curX, curY);
 		if (name == "none") {
-			pRegs->strName = 0;
+			pRegs->strName = "";
 		} else {
-			pRegs->strName = new AString(name);
+			pRegs->strName = name;
 		}
 		f >> pRegs->levelType;
 		pRegionArrays[i] = pRegs;
@@ -2380,7 +2361,7 @@ ARegionArray::ARegionArray(int xx, int yy)
 	x = xx;
 	y = yy;
 	regions = new ARegion *[x * y / 2 + 1];
-	strName = 0;
+	strName = "";
 
 	int i;
 	for (i = 0; i < x * y / 2; i++) regions[i] = 0;
@@ -2388,7 +2369,6 @@ ARegionArray::ARegionArray(int xx, int yy)
 
 ARegionArray::~ARegionArray()
 {
-	if (strName) delete strName;
 	delete [] regions;
 }
 
@@ -2453,14 +2433,10 @@ std::vector<ARegion *> ARegionArray::get_starting_region_candidates(int terrain)
 	return candidates;
 }
 
-void ARegionArray::SetName(char const *name)
+void ARegionArray::set_name(const std::string& name)
 {
-	if (name) {
-		strName = new AString(name);
-	} else {
-		delete strName;
-		strName = 0;
-	}
+	strName.clear();
+	if (!name.empty()) strName = name;
 }
 
 ARegionFlatArray::ARegionFlatArray(int s)
@@ -3255,10 +3231,10 @@ void nameArea(
 			usedNames.emplace(volcanoName);
 
 			std::cout << volcanoName << std::endl;
-			r->SetName(volcanoName.c_str());
+			r->set_name(volcanoName);
 		}
 		else {
-			r->SetName(name.c_str());
+			r->set_name(name);
 		}
 
 		named.emplace(r);
@@ -3328,7 +3304,7 @@ void giveNames(
 
 	for (auto &kv : rivers) {
 		River& river = riverNames[kv.second];
-		kv.first->SetName(river.name.c_str());
+		kv.first->set_name(river.name);
 		named.insert(kv.first);
 	}
 
@@ -3355,7 +3331,7 @@ void giveNames(
 				std::cout << name << std::endl;
 			}
 
-			reg->SetName(name.c_str());
+			reg->set_name(name);
 			named.insert(reg);
 		}
 	}
@@ -3396,7 +3372,7 @@ void giveNames(
 
 				// the are is too big, we must split it
 				std::vector<std::vector<graphs::Location2D>> subgraphs;
-				subdivideArea(w, h, clamp(4, (int) sqrt(area.size()), 8), locations, subgraphs);
+				subdivideArea(w, h, std::clamp(4, (int) sqrt(area.size()), 8), locations, subgraphs);
 
 				cout << "  Subdivided into " << subgraphs.size() << " subgraphs" << std::endl;
 
@@ -3508,13 +3484,11 @@ void addAncientStructure(ARegion* reg, std::string name, int type, double damage
 
 	Object * obj = new Object(reg);
 	int num = reg->buildingseq++;
-	int needs = clamp(0, (int) (info.cost * damage), info.cost - 1);
+	int needs = std::clamp(0, (int) (info.cost * damage), info.cost - 1);
 	obj->num = num;
 
-	name = name + " [" + std::to_string(num) + "]";
-	std::cout << "+ " << name << " : " << info.name << ", needs " << needs << std::endl;
-
-	obj->name = new AString(name);
+	obj->set_name(name);
+	std::cout << "+ " << obj->name << " : " << info.name << ", needs " << needs << std::endl;
 
 	obj->type = type;
 	obj->incomplete = needs;
@@ -3677,7 +3651,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 			connected.emplace(start);
 			connected.emplace(end);
 
-			std::string name = "Road to " + std::string(end->town->name->Str());
+			std::string name = "Road to " + end->town->name;
 
 			graphs::Location2D startLoc = { .x = start->xloc, .y = start->yloc };
 			graphs::Location2D endLoc = { .x = end->xloc, .y = end->yloc };
@@ -3749,7 +3723,7 @@ void assertAllRegionsHaveName(const int w, const int h, ARegionArray* arr) {
 			}
 
 			ARegion* reg = arr->GetRegion(x, y);
-			assert(reg->name && "Region must have name");
+			assert(!reg->name.empty() && "Region must have name");
 		}
 	}
 }
@@ -3762,7 +3736,7 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 
 	MakeRegions(level, w, h);
 
-	pRegionArrays[level]->SetName(0);
+	pRegionArrays[level]->set_name("");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
 	map->Generate();

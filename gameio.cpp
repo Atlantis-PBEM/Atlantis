@@ -29,49 +29,12 @@ using namespace std;
 
 #include "gameio.h"
 
-#define ENDLINE '\n'
-char buf[256];
-
-void cleartoendl()
-{
-	char ch = ' ';
-	while (!(cin.eof()) && (ch != ENDLINE))
-	{
-		ch = cin.get();
-	}
-}
-
-int clamp(int imin, int ivalue, int imax) {
-	return max(imin, min(ivalue, imax));
-}
-
-int Agetint()
-{
-	int x;
-	cin >> x;
-	cleartoendl();
-	return x;
-}
-
 void Awrite(const AString & s)
 {
-	cout << s << ENDLINE;
+	cout << s << std::endl;
 }
 
 void Adot()
 {
 	cout << ".";
-}
-
-
-AString * getfilename(const AString & s)
-{
-	cout << s;
-	return( AGetString() );
-}
-
-AString *AGetString()
-{
-	cin.getline( buf, 256, ENDLINE );
-	return( new AString( buf ));
 }

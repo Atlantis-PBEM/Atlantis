@@ -72,7 +72,7 @@ int QuestList::read_quests(std::istream& f)
 {
 	int count, dests, rewards;
 	std::shared_ptr<Quest> quest;
-	AString name;
+	std::string name;
 
 	quests.clear();
 
@@ -91,17 +91,17 @@ int QuestList::read_quests(std::istream& f)
 				f >> quest->regionnum;
 				break;
 			case Quest::BUILD:
-				f >> std::ws >> name;
-				quest->building = LookupObject(&name);
+				std::getline(f >> std::ws, name);
+				quest->building = lookup_object(name);
 				f >> std::ws >> quest->regionname;
 				break;
 			case Quest::VISIT:
-				f >> std::ws >> name;
-				quest->building = LookupObject(&name);
+				std::getline(f >> std::ws, name);
+				quest->building = lookup_object(name);
 				f >> dests;
 				while (dests-- > 0) {
-					f >> std::ws  >> name;
-					quest->destinations.insert(name.Str());
+					std::getline(f >> std::ws, name);
+					quest->destinations.insert(name);
 				}
 				break;
 			case Quest::DEMOLISH:
@@ -111,14 +111,14 @@ int QuestList::read_quests(std::istream& f)
 			default:
 				f >> quest->target;
 				quest->objective.Readin(f);
-				f >> std::ws >> name;
-				quest->building = LookupObject(&name);
+				std::getline(f >> std::ws, name);
+				quest->building = lookup_object(name);
 				f >> quest->regionnum;
 				f >> std::ws >> quest->regionname;
 				f >> dests;
 				while (dests-- > 0) {
-					f >> std::ws >> name;
-					quest->destinations.insert(name.Str());
+					std::getline(f >> std::ws, name);
+					quest->destinations.insert(name);
 				}
 				break;
 		}
@@ -226,7 +226,7 @@ int QuestList::check_harvest_target(ARegion *r, int item, int harvested, int max
 int QuestList::check_build_target(ARegion *r, int building, Unit *u, std::string *quest_rewards)
 {
 	for(auto q: quests) {
-		if (q->type == Quest::BUILD && q->building == building && q->regionname == *r->name) {
+		if (q->type == Quest::BUILD && q->building == building && q->regionname == r->name) {
 			*quest_rewards = distribute_rewards(u, q);
 			erase(q); // this is safe since we immediately return and don't use the iterator again
 			return 1;
@@ -241,10 +241,10 @@ int QuestList::check_visit_target(ARegion *r, Unit *u, std::string *quest_reward
 
 	for(auto q: quests) {
 		if (q->type != Quest::VISIT) continue;
-		if (!q->destinations.count(r->name->Str())) continue;
+		if (!q->destinations.count(r->name)) continue;
 		for(const auto o : r->objects) {
 			if (o->type == q->building) {
-				u->visited.insert(r->name->Str());
+				u->visited.insert(r->name);
 				intersection.clear();
 				set_intersection(
 					q->destinations.begin(),

@@ -1619,7 +1619,7 @@ void MapBuilder::SetOceanNames() {
 				: name + " Strait";
 
 			for (auto &reg : ocean->regions) {
-				reg.second->region->SetName(name.c_str());
+				reg.second->region->set_name(name);
 			}
 		}
 	}
@@ -1643,7 +1643,7 @@ int ARegion::CheckSea(int dir, int range, int remainocean)
 void ARegionList::CreateAbyssLevel(int level, char const *name)
 {
 	MakeRegions(level, 4, 4);
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_NEXUS;
 
 	ARegion *reg = NULL;
@@ -1651,7 +1651,7 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 		for (int y = 0; y < 4; y++) {
 			reg = pRegionArrays[level]->GetRegion(x, y);
 			if (!reg) continue;
-			reg->SetName("Abyssal Plains");
+			reg->set_name("Abyssal Plains");
 			reg->type = R_DESERT;
 			reg->wages = -2;
 		}
@@ -1682,7 +1682,7 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 	} while(!lair || lair == reg);
 	Object *o = new Object(lair);
 	o->num = lair->buildingseq++;
-	o->name = new AString(AString(ObjectDefs[O_BKEEP].name)+" ["+o->num+"]");
+	o->set_name(ObjectDefs[O_BKEEP].name);
 	o->type = O_BKEEP;
 	o->incomplete = 0;
 	o->inner = -1;
@@ -1694,10 +1694,10 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *
 {
 	MakeRegions(level, xSize, ySize);
 
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_NEXUS;
 
-	AString nex_name = Globals->WORLD_NAME;
+	std::string nex_name = Globals->WORLD_NAME;
 	nex_name += " Nexus";
 
 	int x, y;
@@ -1705,7 +1705,7 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *
 		for (x = 0; x < xSize; x++) {
 			ARegion *reg = pRegionArrays[level]->GetRegion(x, y);
 			if (reg) {
-				reg->SetName(nex_name.Str());
+				reg->set_name(nex_name);
 				reg->type = R_NEXUS;
 			}
 		}
@@ -1734,7 +1734,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 		MakeRegions(level, xSize, ySize);
 	}
 
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 	int sea = Globals->OCEAN;
 	if (Globals->SEA_LIMIT)
@@ -1774,7 +1774,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
 // 	}
 
 // 	MakeRegions(level, xSize, ySize);
-// 	pRegionArrays[level]->SetName(name);
+// 	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 // 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
 // 	int area = xSize * ySize / 2;
@@ -1836,7 +1836,7 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name)
 
 	MakeRegions(level, xSize, ySize);
 
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
 	MakeCentralLand(pRegionArrays[level]);
@@ -1853,7 +1853,7 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name)
 void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char const *name)
 {
 	MakeRegions(level, xSize, ySize);
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
 	MakeRingLand(pRegionArrays[level], 12, 20);
@@ -1880,8 +1880,7 @@ void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char co
 		if (n) {
 			Object *o = new Object(n);
 			o->num = n->buildingseq++;
-			std::string altar_name = std::string(ObjectDefs[O_RITUAL_ALTAR].name) + " [" + std::to_string(o->num) + "]";
-			o->name = new AString(altar_name);
+			o->set_name(ObjectDefs[O_RITUAL_ALTAR].name);
 			o->type = O_RITUAL_ALTAR;
 			o->incomplete = -(ObjectDefs[O_RITUAL_ALTAR].sacrifice_amount);
 			n->objects.push_back(o);
@@ -1898,7 +1897,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 		MakeRegions(level, xSize, ySize);
 	}
 
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERWORLD;
 
 	ARegion *reg = pRegionArrays[level]->GetRegion(xSize/2, ySize/2);
@@ -1932,7 +1931,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 	ARegion *center = surface->GetRegion(surface->x/2, surface->y/2);
 	Object *o = new Object(reg);
 	o->num = reg->buildingseq++;
-	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->set_name("Shaft");
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = center->num;
@@ -1940,7 +1939,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 
 	o = new Object(center);
 	o->num = center->buildingseq++;
-	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->set_name("Shaft");
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = reg->num;
@@ -1949,8 +1948,7 @@ void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, cha
 	// Put the monolith in the underworld center
 	o = new Object(reg);
 	o->num = reg->buildingseq++;
-	std::string monolith_name = std::string(ObjectDefs[O_DORMANT_MONOLITH].name) + " [" + std::to_string(o->num) + "]";
-	o->name = new AString(monolith_name);
+	o->set_name(ObjectDefs[O_DORMANT_MONOLITH].name);
 	o->type = O_DORMANT_MONOLITH;
 	o->incomplete = -(ObjectDefs[O_DORMANT_MONOLITH].sacrifice_amount);
 	reg->objects.push_back(o);
@@ -1967,7 +1965,7 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char co
 		MakeRegions(level, xSize, ySize);
 	}
 
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERWORLD;
 
 	SetRegTypes(pRegionArrays[level], R_NUM);
@@ -1996,7 +1994,7 @@ void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
 		MakeRegions(level, xSize, ySize);
 	}
 
-	pRegionArrays[level]->SetName(name);
+	pRegionArrays[level]->set_name(name ? std::string(name) : "");
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERDEEP;
 
 	SetRegTypes(pRegionArrays[level], R_NUM);
@@ -2869,23 +2867,23 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 
 			if ((TerrainDefs[reg->type].similar_type == R_OCEAN) && (reg->type != R_LAKE)) {
 				if (pArr->levelType == ARegionArray::LEVEL_UNDERWORLD) {
-					reg->SetName("The Undersea");
+					reg->set_name("The Undersea");
 				}
 				else if (pArr->levelType == ARegionArray::LEVEL_UNDERDEEP) {
-					reg->SetName("The Deep Undersea");
+					reg->set_name("The Deep Undersea");
 				}
 				else {
-					AString ocean_name = Globals->WORLD_NAME;
+					std::string ocean_name = Globals->WORLD_NAME;
 					ocean_name += " Ocean";
-					reg->SetName(ocean_name.Str());
+					reg->set_name(ocean_name);
 				}
 			} else if (TerrainDefs[reg->type].similar_type == R_BARREN) {
-				reg->SetName("The Barrens");
+				reg->set_name("The Barrens");
 			} else {
 				if (reg->wages == -1)
-					reg->SetName("The Void");
+					reg->set_name("The Void");
 				else if (reg->wages != -2)
-					reg->SetName(AGetNameString(reg->wages));
+					reg->set_name(AGetNameString(reg->wages));
 				else
 					reg->wages = -1;
 			}
@@ -2914,7 +2912,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
 
 	Object *o = new Object(reg);
 	o->num = reg->buildingseq++;
-	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->set_name("Shaft");
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = temp->num;
@@ -2922,7 +2920,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
 
 	o = new Object(temp);
 	o->num = temp->buildingseq++;
-	o->name = new AString(AString("Shaft [") + o->num + "]");
+	o->set_name("Shaft");
 	o->type = O_SHAFT;
 	o->incomplete = 0;
 	o->inner = reg->num;
@@ -3027,7 +3025,7 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 				for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
 					Object *o = new Object(AC);
 					o->num = AC->buildingseq++;
-					o->name = new AString(AString("Gateway to ") + TerrainDefs[type].name + " [" + o->num + "]");
+					o->set_name("Gateway to " + std::string(TerrainDefs[type].name));
 					o->type = O_GATEWAY;
 					o->incomplete = 0;
 					o->inner = dests[type]->num;
@@ -3170,7 +3168,7 @@ void ARegionList::FixUnconnectedRegions()
 					if (n) {
 						o = new Object(n);
 						o->num = n->buildingseq++;
-						o->name = new AString(AString("Shaft [") + o->num + "]");
+						o->set_name("Shaft");
 						o->type = O_SHAFT;
 						o->incomplete = 0;
 						o->inner = target->num;
@@ -3178,7 +3176,7 @@ void ARegionList::FixUnconnectedRegions()
 
 						o = new Object(target);
 						o->num = target->buildingseq++;
-						o->name = new AString(AString("Shaft [") + o->num + "]");
+						o->set_name("Shaft");
 						o->type = O_SHAFT;
 						o->incomplete = 0;
 						o->inner = n->num;

@@ -38,6 +38,7 @@ class SkillList;
 #include "astring.h"
 #include "gamedefs.h"
 #include <list>
+#include "string_parser.hpp"
 
 /* For dependencies:
   A value of depend == -1 indicates no more dependencies.
@@ -66,7 +67,7 @@ class SkillType
 {
 	public:
 		std::string name;
-		char const * abbr;
+		const char *abbr;
 		int cost;
 
 		enum {
@@ -102,8 +103,8 @@ class SkillType
 extern SkillType *SkillDefs;
 
 SkillType *FindSkill(char const *skname);
-int LookupSkill(AString *);
-int ParseSkill(AString *);
+int lookup_skill(const parser::token& token);
+int parse_skill(const parser::token& token);
 AString SkillStrs(int);
 AString SkillStrs(SkillType *);
 
@@ -294,7 +295,7 @@ class AttribModItem {
 		};
 		int flags;
 
-		char const *ident;
+		std::string ident;
 
 		enum {
 			CONSTANT,

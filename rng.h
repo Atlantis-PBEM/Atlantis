@@ -23,15 +23,16 @@ class rng
         static int last_range = 0; // this will let us reuse the same distribution for multiple calls with same range.
         static std::uniform_int_distribution<> distribution(0, 1); // default distribution
 
+        int neg = (range < 0);
+        if (!range) return 0;
+        if (neg) range = -range;
+
         if (range != last_range) {
             last_range = range; // Update last_range to the current range
             // Create a new distribution for the new range
             distribution.param(std::uniform_int_distribution<>::param_type(0, range - 1));
         }
 
-        int neg = (range < 0);
-        if (!range) return 0;
-        if (neg) range = -range;
         int ret = distribution(instance().generator());
         if (neg) ret = -ret;
         return ret;

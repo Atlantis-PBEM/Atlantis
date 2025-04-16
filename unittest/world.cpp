@@ -66,7 +66,7 @@ void ARegion::MakeStartingCity() {
     if (!Globals->TOWNS_EXIST) return;
 	if (town) delete town;
 
-	AddTown(TOWN_CITY);
+	add_town(TOWN_CITY);
 
 	if (!Globals->START_CITIES_EXIST) return;
 

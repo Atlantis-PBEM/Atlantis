@@ -29,8 +29,9 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         leader->items.SetNum(I_WOOD, 20);
         unit->items.SetNum(I_LEADERS, 10);
         unit->items.SetNum(I_FLOATER, 20);
-        leader->Study(S_SHIPBUILDING, 4500);
-        unit->Study(S_SHIPBUILDING, 4500);
+
+        helper.set_skill_level(leader, S_SHIPBUILDING, 5);
+        helper.set_skill_level(unit, S_SHIPBUILDING, 5);
 
         // Put the leader in a flying ship.
         helper.create_fleet(leader->object->region, leader, I_BALLOON, 1);
@@ -78,8 +79,9 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         leader->items.SetNum(I_WOOD, 20);
         unit->items.SetNum(I_LEADERS, 10);
         unit->items.SetNum(I_FLOATER, 20);
-        leader->Study(S_SHIPBUILDING, 4500);
-        unit->Study(S_SHIPBUILDING, 4500);
+
+        helper.set_skill_level(leader, S_SHIPBUILDING, 5);
+        helper.set_skill_level(unit, S_SHIPBUILDING, 5);
 
         // Put the leader in a flying ship.
         helper.create_fleet(leader->object->region, leader, I_BALLOON, 1);
@@ -129,8 +131,9 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         leader->items.SetNum(I_WOOD, 20);
         unit->items.SetNum(I_LEADERS, 10);
         unit->items.SetNum(I_FLOATER, 20);
-        leader->Study(S_SHIPBUILDING, 4500);
-        unit->Study(S_SHIPBUILDING, 4500);
+
+        helper.set_skill_level(leader, S_SHIPBUILDING, 5);
+        helper.set_skill_level(unit, S_SHIPBUILDING, 5);
 
         // Put the leader in a flying ship.
         helper.create_fleet(leader->object->region, leader, I_BALLOON, 1);

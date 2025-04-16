@@ -2102,11 +2102,15 @@ void Game::CreateWorld()
 {
 	int nx = 0;
 	int ny = 1;
+	parser::string_parser parser;
 	if (Globals->MULTI_HEX_NEXUS) {
 		ny = 2;
 		while(nx <= 0) {
 			Awrite("How many hexes should the nexus region be?");
-			nx = Agetint();
+			std::cin >> parser;
+			auto token = parser.get_token();
+			nx = token.get_number().value_or(-1);
+			if (nx <= 0) continue;
 			if (nx == 1) ny = 1;
 			else if (nx % 2) {
 				nx = 0;
@@ -2120,19 +2124,25 @@ void Game::CreateWorld()
 	int xx = 64;
 	while (xx <= 0) {
 		Awrite("How wide should the map be? ");
-		xx = Agetint();
-		if ( xx % 8 ) {
+		std::cin >> parser;
+		auto token = parser.get_token();
+		xx = token.get_number().value_or(-1);
+		if (xx <= 0) continue;
+		if (xx % 8) {
 			xx = 0;
-			Awrite( "The width must be a multiple of 8." );
+			Awrite("The width must be a multiple of 8.");
 		}
 	}
 	int yy = 64;
 	while (yy <= 0) {
 		Awrite("How tall should the map be? ");
-		yy = Agetint();
-		if ( yy % 8 ) {
+		std::cin >> parser;
+		auto token = parser.get_token();
+		yy = token.get_number().value_or(-1);
+		if (yy <= 0) continue;
+		if (yy % 8) {
 			yy = 0;
-			Awrite( "The height must be a multiple of 8." );
+			Awrite("The height must be a multiple of 8.");
 		}
 	}
 
@@ -2496,7 +2506,7 @@ void ARegion::MakeStartingCity()
 
 	if (town) delete town;
 
-	AddTown(TOWN_CITY);
+	add_town(TOWN_CITY);
 
 	if (!Globals->START_CITIES_EXIST) return;
 

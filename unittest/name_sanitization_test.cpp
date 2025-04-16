@@ -29,7 +29,7 @@ ut::suite<"Name Sanitization"> name_sanitization_suite = []
     Faction *faction = helper.create_faction(name);
 
     string expected_name("Test Faction (3)");
-    string actual_name(faction->name->const_str());
+    string actual_name(faction->name);
     expect(actual_name == expected_name);
 
     stringstream ss;
@@ -38,7 +38,7 @@ ut::suite<"Name Sanitization"> name_sanitization_suite = []
     Faction faction2;
     faction2.Readin(ss);
 
-    string actual_name2(faction2.name->const_str());
+    string actual_name2(faction2.name);
     expect(actual_name2 == expected_name);
   };
 
@@ -51,11 +51,10 @@ ut::suite<"Name Sanitization"> name_sanitization_suite = []
     string name("Test Faction (3)");
     Faction *faction = helper.create_faction(name);
     // Create an unsanitized name that we want to make sure gets sanitized.
-    delete faction->name;
-    faction->name = new AString("Test Faction [];boy (3)");
+    faction->set_name("Test Faction [];boy (3)", false);
 
     string expected_name("Test Faction [];boy (3)");
-    string actual_name(faction->name->const_str());
+    string actual_name(faction->name);
     expect(actual_name == expected_name);
 
     stringstream ss;
@@ -65,7 +64,7 @@ ut::suite<"Name Sanitization"> name_sanitization_suite = []
     faction2.Readin(ss);
 
     string sanitized_name("Test Faction boy (3)");
-    string actual_name2(faction2.name->const_str());
+    string actual_name2(faction2.name);
     expect(actual_name2 == sanitized_name);
   };
 };

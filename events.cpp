@@ -57,9 +57,9 @@ FactBase::~FactBase() {
 }
 
 void BattleSide::AssignUnit(Unit* unit) {
-	this->factionName = unit->faction->name->Str();
+	this->factionName = unit->faction->name;
 	this->factionNum = unit->faction->num;
-	this->unitName = unit->name->Str();
+	this->unitName = unit->name;
 	this->unitNum = unit->num;
 }
 
@@ -116,7 +116,7 @@ void populateSettlementLandmark(std::vector<Landmark> &landmarks, ARegion *reg, 
         return;
     }
 
-    std::string name = reg->town->name->Str();
+    std::string name = reg->town->name;
     std::string title = townType(reg->town->TownType()) + " of " + name;
 
     landmarks.push_back({
@@ -135,8 +135,8 @@ void populateRegionLandmark(std::vector<Landmark> &landmarks, ARegion *source, A
     TerrainType& terrain = TerrainDefs[reg->type];
     int alias = terrain.similar_type;
 
-    std::string name = reg->name->Str();
-    std::string sourceName = source->name->Str();
+    std::string name = reg->name;
+    std::string sourceName = source->name;
     if (name == sourceName) {
         return;
     }
@@ -206,7 +206,7 @@ void populateForitifcationLandmark(std::vector<Landmark> &landmarks, ARegion *re
         return;
     }
 
-    std::string name = building->name->Str();
+    std::string name = building->name;
     std::string title = std::string(ObjectDefs[building->type].name) + " " + name;
 
     landmarks.push_back({
@@ -250,10 +250,10 @@ const EventLocation EventLocation::Create(ARegion* region) {
     loc.y = region->yloc;
     loc.z = region->zloc;
     loc.terrainType = region->type;
-    loc.province = region->name->Str();
+    loc.province = region->name;
 
     if (region->town) {
-        loc.settlement = region->town->name->Str();
+        loc.settlement = region->town->name;
         loc.settlementType = region->town->TownType();
     }
 

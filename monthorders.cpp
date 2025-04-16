@@ -156,7 +156,7 @@ void Game::RunMovementOrders()
                         else if (d->dir == MOVE_PAUSE)
                             tOrder += "P";
                         else
-                            tOrder += d->dir - MOVE_ENTER;
+                            tOrder += to_string(d->dir - MOVE_ENTER);
                     }
                     u->oldorders.push_front(tOrder);
                 }
@@ -305,7 +305,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
             }
 
             for (const auto f : facs) {
-                string temp = fleet->name->const_str();
+                string temp = fleet->name;
                 temp += (x->dir == MOVE_PAUSE ? " performs maneuvers in " : " sails from ") +
                         string(reg->ShortPrint().const_str());
                 if (x->dir != MOVE_PAUSE) { temp += " to " + string(newreg->ShortPrint().const_str()); }
@@ -333,8 +333,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
             }
             reg = newreg;
             if (newreg->ForbiddenShip(fleet)) {
-                string temp = string(fleet->name->const_str()) + " is stopped by guards in " +
-                              newreg->ShortPrint().const_str() + ".";
+                string temp = fleet->name + " is stopped by guards in " + newreg->ShortPrint().const_str() + ".";
                 cap->faction->event(temp, "sail");
                 stop = 1;
             }
@@ -403,13 +402,13 @@ void Game::Do1TeachOrder(ARegion *reg, Unit *unit)
             continue;
         }
         if (target->faction->get_attitude(unit->faction->num) < A_FRIENDLY) {
-            unit->error(string("TEACH: ") + target->name->const_str() + " is not a member of a friendly faction.");
+            unit->error("TEACH: " + target->name + " is not a member of a friendly faction.");
             it = order->targets.erase(it);
             delete id;
             continue;
         }
         if (!target->monthorders || target->monthorders->type != O_STUDY) {
-            unit->error(string("TEACH: ") + target->name->const_str() + " is not studying.");
+            unit->error("TEACH: " + target->name + " is not studying.");
             it = order->targets.erase(it);
             delete id;
             continue;
@@ -418,14 +417,14 @@ void Game::Do1TeachOrder(ARegion *reg, Unit *unit)
         StudyOrder *so = dynamic_cast<StudyOrder *>(target->monthorders);
         int sk = so->skill;
         if (unit->GetRealSkill(sk) <= target->GetRealSkill(sk)) {
-            unit->error(string("TEACH: ") + target->name->const_str() + " is not studying a skill you can teach.");
+            unit->error("TEACH: " + target->name + " is not studying a skill you can teach.");
             it = order->targets.erase(it);
             delete id;
             continue;
         }
         // Check whether it's a valid skill to teach
         if (SkillDefs[sk].flags & SkillType::NOTEACH) {
-            unit->error(string("TEACH: ") + SkillDefs[sk].name + " cannot be taught.");
+            unit->error("TEACH: " + SkillDefs[sk].name + " cannot be taught.");
             it = order->targets.erase(it);
             delete id;
             continue;
@@ -454,7 +453,7 @@ void Game::Do1TeachOrder(ARegion *reg, Unit *unit)
             days += o->days - 30 * umen;
             o->days = 30 * umen;
         }
-        unit->event("Teaches " + SkillDefs[o->skill].name + " to " + u->name->const_str() + ".", "teach");
+        unit->event("Teaches " + SkillDefs[o->skill].name + " to " + u->name + ".", "teach");
         // The TEACHER may learn something in this process!
         unit->Practice(o->skill);
     }
@@ -487,8 +486,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
         return;
     }
     int type = buildobj->type;
-    AString skname = ObjectDefs[type].skill;
-    int sk = LookupSkill(&skname);
+    int sk = lookup_skill(ObjectDefs[type].skill);
     if (sk == -1) {
         u->error("BUILD: Can't build " + string(ObjectDefs[type].name) + ".");
         delete u->monthorders;
@@ -587,7 +585,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
     r->improvement += num;
 
     // AS
-    u->event(job + buildobj->name->const_str(), "build");
+    u->event(job + buildobj->name, "build");
     if (questcomplete) { u->event("You have completed a quest! " + quest_rewards, "quest"); }
     u->Practice(sk);
 }
@@ -601,8 +599,7 @@ void Game::RunBuildShipOrder(ARegion *r, Object *obj, Unit *u)
     AString skname;
 
     ship = abs(u->build);
-    skname = ItemDefs[ship].pSkill;
-    skill = LookupSkill(&skname);
+    skill = lookup_skill(ItemDefs[ship].pSkill);
     level = u->GetSkill(skill);
 
     if (skill == -1) {
@@ -685,7 +682,7 @@ void Game::AddNewBuildings(ARegion *r)
                         obj->type = o->new_building;
                         obj->incomplete = ObjectDefs[obj->type].cost;
                         obj->num = i;
-                        obj->SetName(new AString("Building"));
+                        obj->set_name("Building");
                         u->build = obj->num;
                         r->objects.push_back(obj);
 
@@ -743,8 +740,7 @@ void Game::RunBuildHelpers(ARegion *r)
                     } else {
                         // help build ships
                         int ship = abs(target->build);
-                        AString skname = ItemDefs[ship].pSkill;
-                        int skill = LookupSkill(&skname);
+                        int skill = lookup_skill(ItemDefs[ship].pSkill);
                         int level = u->GetSkill(skill);
                         int needed = 0;
                         if (target->monthorders && (target->monthorders->type == O_BUILD)) {
@@ -788,9 +784,8 @@ void Game::RunBuildHelpers(ARegion *r)
                         }
                         int percent = 100 * output / ItemDefs[ship].pMonths;
                         u->event(
-                            "Helps " + string(target->name->const_str()) + " with construction of a " +
-                                ItemDefs[ship].name + " (" + to_string(percent) + "%) in " +
-                                r->ShortPrint().const_str() + ".",
+                            "Helps " + target->name + " with construction of a " + ItemDefs[ship].name + " (" +
+                                to_string(percent) + "%) in " + r->ShortPrint().const_str() + ".",
                             "build", r
                         );
                     }
@@ -845,7 +840,7 @@ void Game::CreateShip(ARegion *r, Unit *u, int ship)
         Object *fleet = new Object(r);
         fleet->type = O_FLEET;
         fleet->num = shipseq++;
-        fleet->name = new AString(AString("Ship [") + fleet->num + "]");
+        fleet->set_name("Ship");
         fleet->AddShip(ship);
         u->object->region->objects.push_back(fleet);
         u->MoveUnit(fleet);
@@ -1539,7 +1534,7 @@ void Game::DoMoveEnter(Unit *unit, ARegion *region)
             }
 
             if (forbid && !(unit->canattack && unit->IsAlive())) {
-                unit->error(string("ENTER: Unable to attack ") + forbid->name->const_str());
+                unit->error("ENTER: Unable to attack " + forbid->name);
                 continue;
             }
 
@@ -1547,7 +1542,7 @@ void Game::DoMoveEnter(Unit *unit, ARegion *region)
             while (forbid) {
                 int result = RunBattle(region, unit, forbid, 0, 0);
                 if (result == BATTLE_IMPOSSIBLE) {
-                    unit->error(string("ENTER: Unable to attack ") + forbid->name->const_str());
+                    unit->error("ENTER: Unable to attack " + forbid->name);
                     done = 1;
                     break;
                 }
@@ -1560,7 +1555,7 @@ void Game::DoMoveEnter(Unit *unit, ARegion *region)
             if (done) continue;
 
             unit->MoveUnit(to);
-            unit->event("Enters " + string(to->name->const_str()) + ".", "movement");
+            unit->event("Enters " + to->name + ".", "movement");
         } else {
             if (i == MOVE_OUT) {
                 bool isOcean = (TerrainDefs[region->type].similar_type == R_OCEAN);
@@ -1754,11 +1749,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
     if (unit->guard == GUARD_ADVANCE) {
         ally = newreg->ForbiddenByAlly(unit);
         if (ally && !startmove) {
-            unit->event(
-                "Can't ADVANCE: " + string(newreg->name->const_str()) + " is guarded by " + ally->name->const_str() +
-                    ", an ally.",
-                "movement"
-            );
+            unit->event("Can't ADVANCE: " + newreg->name + " is guarded by " + ally->name + ", an ally.", "movement");
             goto done_moving;
         }
     }
@@ -1769,12 +1760,12 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
     if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
         int obs = unit->GetAttribute("observation");
         unit->event(
-            "Is forbidden entry to " + string(newreg->ShortPrint().const_str()) + " by " +
+            std::string("Is forbidden entry to ") + newreg->ShortPrint().const_str() + " by " +
                 forbid->GetName(obs).const_str() + ".",
             "movement"
         );
         obs = forbid->GetAttribute("observation");
-        forbid->event("Forbids entry to " + string(unit->GetName(obs).const_str()) + ".", "guarding");
+        forbid->event(std::string("Forbids entry to ") + unit->GetName(obs).const_str() + ".", "guarding");
         goto done_moving;
     }
 

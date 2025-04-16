@@ -32,11 +32,13 @@ ut::suite<"Build Order"> build_order_suite = [] {
         unit2->items.SetNum(I_STONE, 5);
         unit3->items.SetNum(I_STONE, 5);
         unit4->items.SetNum(I_STONE, 5);
-        leader->Study(S_BUILDING, 30);
-        unit->Study(S_BUILDING, 30);
-        unit2->Study(S_BUILDING, 30);
-        unit3->Study(S_BUILDING, 30);
-        unit4->Study(S_BUILDING, 30);
+
+        helper.set_skill_level(leader, S_BUILDING, 1);
+        helper.set_skill_level(unit, S_BUILDING, 1);
+        helper.set_skill_level(unit2, S_BUILDING, 1);
+        helper.set_skill_level(unit3, S_BUILDING, 1);
+        helper.set_skill_level(unit4, S_BUILDING, 1);
+
         helper.create_building(leader->object->region, unit4, O_TOWER);
         unit4->object->incomplete = 10; // Set the tower to be incomplete for testin
 

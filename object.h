@@ -32,6 +32,7 @@ class Object;
 #include "faction.h"
 #include "items.h"
 #include "safe_list.h"
+#include "string_parser.hpp"
 #include <map>
 #include <list>
 
@@ -96,9 +97,8 @@ extern ObjectType *ObjectDefs;
 
 AString *ObjectDescription(int obj);
 
-int LookupObject(AString *token);
-
-int ParseObject(AString *, int ships);
+int lookup_object(const std::string& token);
+int parse_object(const parser::token& token, bool match_ships);
 
 int ObjectIsShip(int);
 
@@ -117,8 +117,8 @@ class Object
 		void Writeout(std::ostream& f);
 		void build_json_report(json& j, Faction *, int, int, int, int, int, int, int);
 
-		void SetName(AString *);
-		void SetDescribe(AString *);
+		void set_name(const std::string& newname, Unit *actor = nullptr);
+		void set_description(const std::string& newdescription);
 
 		Unit *GetUnit(int);
 		Unit *GetUnitAlias(int, int); /* alias, faction number */
@@ -152,8 +152,8 @@ class Object
 		int GetFleetSize();
 		int GetFleetSpeed(int);
 
-		AString *name;
-		AString *describe;
+		std::string name;
+		std::string describe;
 		ARegion *region;
 		int inner;
 		int num;

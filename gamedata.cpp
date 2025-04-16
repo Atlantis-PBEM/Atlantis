@@ -5406,105 +5406,96 @@ RangeType *RangeDefs = rtd;
 int NUMRANGES = sizeof(rtd) / sizeof(rtd[0]);
 
 static AttribModType atd[] = {
-	{"tactics", AttribModType::CHECK_MONSTERS,
-	 {{AttribModItem::SKILL | AttribModItem::CUMULATIVE,
-	   "TACT", AttribModItem::UNIT_LEVEL, 1 },
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0}}},
-	{"combat", 0,
-	 {{AttribModItem::SKILL | AttribModItem::CUMULATIVE,
-	   "COMB", AttribModItem::UNIT_LEVEL, 1 },
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0}}},
-	{"stealth", AttribModType::CHECK_MONSTERS | AttribModType::USE_WORST,
-	 {{AttribModItem::SKILL | AttribModItem::CUMULATIVE,
-	   "STEA", AttribModItem::UNIT_LEVEL, 1 },
-	  {AttribModItem::ITEM | AttribModItem::PERMAN,
-	   "RING", AttribModItem::CONSTANT, 3},
-	  {AttribModItem::FLAGGED,
-	   "invis", AttribModItem::CONSTANT, 3},
-	  {AttribModItem::FLAGGED,
-	   "guard", AttribModItem::FORCECONSTANT, 0},
-	  {0,
-	   NULL, 0, 0}}},
-	{"observation", AttribModType::CHECK_MONSTERS,
-	 {{AttribModItem::SKILL | AttribModItem::CUMULATIVE,
-	   "OBSE", AttribModItem::UNIT_LEVEL, 1 },
-	  {AttribModItem::SKILL,
-	   "TRUE", AttribModItem::UNIT_LEVEL_HALF, 1},
-	  {AttribModItem::ITEM,
-	   "AMTS", AttribModItem::CONSTANT, 2},
-	  {AttribModItem::ITEM,
-	   "AEGS", AttribModItem::CONSTANT, 3},
-	  {0,
-	   NULL, 0, 0}}},
-	{"wind", 0,
-	 {{AttribModItem::SKILL,
-	   "SWIN", AttribModItem::UNIT_LEVEL, 1},
-	  {AttribModItem::ITEM,
-	   "WCHM", AttribModItem::CONSTANT, 2},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0}}},
-	{"entertainment", 0,
-	 {{AttribModItem::SKILL,
-	   "PHEN", AttribModItem::UNIT_LEVEL, 5},
-	  {AttribModItem::SKILL,
-	   "ENTE", AttribModItem::UNIT_LEVEL, 1},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0}}},
-	{"toughness", 0,
-	 {{AttribModItem::SKILL,
-	   "ENDU", AttribModItem::UNIT_LEVEL_HALF, 1},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0}}},
-	{"susk", 0,
-	 {{AttribModItem::SKILL,
-	   "SUSK", AttribModItem::UNIT_LEVEL, 1},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0}}},
-	{"rais", 0,
-	 {{AttribModItem::SKILL,
-	   "RAIS", AttribModItem::UNIT_LEVEL, 1},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0},
-	  {0,
-	   NULL, 0, 0}}}
+	{
+		"tactics", AttribModType::CHECK_MONSTERS,
+		{
+			{AttribModItem::SKILL | AttribModItem::CUMULATIVE, "TACT", AttribModItem::UNIT_LEVEL, 1 },
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0}
+		}
+	},
+	{
+		"combat", 0,
+		{
+			{AttribModItem::SKILL | AttribModItem::CUMULATIVE, "COMB", AttribModItem::UNIT_LEVEL, 1 },
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0}
+		}
+	},
+	{
+		"stealth", AttribModType::CHECK_MONSTERS | AttribModType::USE_WORST,
+		{
+			{AttribModItem::SKILL | AttribModItem::CUMULATIVE, "STEA", AttribModItem::UNIT_LEVEL, 1 },
+			{AttribModItem::ITEM | AttribModItem::PERMAN, "RING", AttribModItem::CONSTANT, 3},
+			{AttribModItem::FLAGGED, "invis", AttribModItem::CONSTANT, 3},
+			{AttribModItem::FLAGGED, "guard", AttribModItem::FORCECONSTANT, 0},
+			{0, "", 0, 0}
+		}
+	},
+	{
+		"observation", AttribModType::CHECK_MONSTERS,
+		{
+			{AttribModItem::SKILL | AttribModItem::CUMULATIVE, "OBSE", AttribModItem::UNIT_LEVEL, 1 },
+			{AttribModItem::SKILL, "TRUE", AttribModItem::UNIT_LEVEL_HALF, 1},
+			{AttribModItem::ITEM, "AMTS", AttribModItem::CONSTANT, 2},
+			{AttribModItem::ITEM, "AEGS", AttribModItem::CONSTANT, 3},
+			{0, "", 0, 0}
+		}
+	},
+	{
+		"wind", 0,
+		{
+			{AttribModItem::SKILL, "SWIN", AttribModItem::UNIT_LEVEL, 1},
+			{AttribModItem::ITEM, "WCHM", AttribModItem::CONSTANT, 2},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0}
+		}
+	},
+	{
+		"entertainment", 0,
+		{
+			{AttribModItem::SKILL, "PHEN", AttribModItem::UNIT_LEVEL, 5},
+			{AttribModItem::SKILL, "ENTE", AttribModItem::UNIT_LEVEL, 1},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0}
+		}
+	},
+	{
+		"toughness", 0,
+		{
+			{AttribModItem::SKILL, "ENDU", AttribModItem::UNIT_LEVEL_HALF, 1},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0}
+		}
+	},
+	{
+		"susk", 0,
+		{
+			{AttribModItem::SKILL, "SUSK", AttribModItem::UNIT_LEVEL, 1},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0}
+		}
+	},
+	{
+		"rais", 0,
+		{
+			{AttribModItem::SKILL, "RAIS", AttribModItem::UNIT_LEVEL, 1},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0},
+			{0, "", 0, 0}
+		}
+	},
 };
 
 AttribModType *AttribDefs = atd;

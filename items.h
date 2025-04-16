@@ -30,8 +30,10 @@ class ItemType;
 
 #include "gamedefs.h"
 #include "astring.h"
+#include "string_parser.hpp"
 #include <vector>
 #include <list>
+#include <optional>
 
 enum {
 	ATTACK_COMBAT,
@@ -88,7 +90,7 @@ class ItemType
 	public:
 		std::string name;
 		std::string names;
-		char const *abr;
+		const char *abr;
 
 		enum {
 			CANTGIVE = 0x1,
@@ -424,11 +426,13 @@ class BattleItemType
 
 extern BattleItemType *BattleItemDefs;
 
-extern int ParseGiveableItem(AString *);
-extern int ParseAllItems(AString *);
-extern int ParseEnabledItem(AString *);
-extern int ParseTransportableItem(AString *);
-extern int LookupItem(AString *);
+extern int parse_all_items(const parser::token& token, int flags = 0);
+extern int parse_enabled_item(const parser::token& token, int flags = 0);
+extern int parse_giveable_item(const parser::token& token, int flags = 0);
+extern int parse_transportable_item(const parser::token& token, int flags = 0);
+extern std::optional<int> parse_item_category(const parser::token& token);
+
+extern int lookup_item(const std::string& name);
 
 extern BattleItemType *FindBattleItem(char const *abbr);
 extern ItemType *FindItem(char const *abbr);

@@ -41,8 +41,7 @@ Game& UnitTestHelper::game_object() {
 
 Faction *UnitTestHelper::create_faction(std::string name) {
     auto fac = game.AddFaction(0, nullptr);
-    AString *tmp = new AString(name); // because the guts of SetName frees the string passed in. :/
-    fac->SetName(tmp);
+    fac->set_name(name);
     return fac;
 }
 
@@ -75,8 +74,7 @@ void UnitTestHelper::create_building(ARegion *region, Unit *owner, int building_
     Object * obj = new Object(region);
     obj->type = building_type;
     obj->num = region->buildingseq++;
-    std::string name = "Building [" + std::to_string(obj->num) + "]";
-    obj->name = new AString(name);
+    obj->set_name("Building");
     region->objects.push_back(obj);
     ObjectType ob = ObjectDefs[building_type];
     if (ob.flags & ObjectType::SACRIFICE) {
@@ -101,7 +99,7 @@ std::string UnitTestHelper::cout_data() {
     return cout_buffer.str();
 }
 
-void UnitTestHelper::parse_orders(int faction_id, std::istream& orders, OrdersCheck *check) {
+void UnitTestHelper::parse_orders(int faction_id, std::istream& orders, orders_check *check) {
     game.ParseOrders(faction_id, orders, check);
 }
 
@@ -170,6 +168,9 @@ void UnitTestHelper::activate_spell(int spell, SpellTestHelper helper) {
         case S_TELEPORTATION:
             game.RunTeleport(helper.region, helper.object, helper.unit);
             break;
+        case S_TRANSMUTATION:
+            game.RunTransmutation(helper.region, helper.unit);
+            break;
     }
 }
 
@@ -198,4 +199,61 @@ void UnitTestHelper::maintain_units() {
 
 void UnitTestHelper::set_ruleset_specific_data(const json &data) {
     game.rulesetSpecificData = data;
+}
+
+int UnitTestHelper::calculate_days_for_level(int level) {
+    if (level <= 0 || level > 5) return 0;
+
+    // Use the game's built-in function to calculate days needed for a level
+    return GetDaysByLevel(level);
+}
+
+void UnitTestHelper::set_prerequisites(Unit *unit, int skill, int level) {
+    if (!unit || level <= 0 || level > 5) return;
+
+    // Get prerequisites for this skill
+    const SkillType &sk = SkillDefs[skill];
+
+    // For each prerequisite, ensure it's at least at the same level as the final skill
+    for (int i = 0; i < 3; i++) {  // SkillDefs[skill].depends has 3 elements as per definition
+        if (sk.depends[i].skill == NULL) break;  // No more prerequisites
+
+        // Get the skill ID for the prerequisite
+        int prereq_skill = lookup_skill(sk.depends[i].skill);
+        if (prereq_skill == -1) continue;  // Invalid skill
+
+        int prereq_level = std::max(level, sk.depends[i].level);
+
+        // Recursively set this prerequisite (which will handle its own prerequisites)
+        if (prereq_level > 0) {
+            set_skill_level(unit, prereq_skill, prereq_level);
+        }
+    }
+}
+
+void UnitTestHelper::set_skill_level(Unit *unit, int skill, int level) {
+    if (!unit || level <= 0 || level > 5) return;
+
+    // First, make sure all prerequisites are met
+    set_prerequisites(unit, skill, level);
+
+    // Calculate days required for the given level
+    int days_per_man = GetDaysByLevel(level);
+
+    // Get the number of men in the unit
+    int men = unit->GetMen();
+
+    // Skip if no men in the unit
+    if (men <= 0) return;
+
+    // Total days = days per man * number of men
+    int total_days = days_per_man * men;
+
+    // For unit tests, directly set the skills to the requested value
+    unit->skills.SetDays(skill, total_days);
+
+    // Double-check that the skill was set correctly and add more days if needed
+    if (unit->GetRealSkill(skill) < level) {
+        unit->skills.SetDays(skill, total_days + men);
+    }
 }
