@@ -156,7 +156,7 @@ void Game::RunMovementOrders()
                         else if (d->dir == MOVE_PAUSE)
                             tOrder += "P";
                         else
-                            tOrder += d->dir - MOVE_ENTER;
+                            tOrder += to_string(d->dir - MOVE_ENTER);
                     }
                     u->oldorders.push_front(tOrder);
                 }
