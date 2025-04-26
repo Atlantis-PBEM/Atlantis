@@ -355,16 +355,16 @@ string Game::FactionTypeDescription(Faction &fac) {
 }
 
 // LLS - converted HTML tags to lowercase
-int Game::GenRules(const AString &rules, const AString &css, const AString &intro)
+int Game::generate_rules(const std::string& rules, const std::string& css, const std::string& intro)
 {
 	Faction fac;
 	bool found;
 	SkillType *pS;
 
-	ofstream f(rules.const_str(), ios::out|ios::trunc);
+	ofstream f(rules, ios::out|ios::trunc);
 	if (!f.is_open()) return 0;
 
-	ifstream introf(intro.const_str(), ios::in);
+	ifstream introf(intro, ios::in);
 	if (!introf.is_open()) return 0;
 
 	// Perform a number of ruleset sanity checks to make sure we don't output rules for something which is not truly
@@ -634,6 +634,7 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << enclose("li", true) << url("#give", "give") << '\n' << enclose("li", false);
 	f << enclose("li", true) << url("#guard", "guard") << '\n' << enclose("li", false);
 	f << enclose("li", true) << url("#hold", "hold") << '\n' << enclose("li", false);
+	f << enclose("li", true) << url("#idle", "idle") << '\n' << enclose("li", false);
 	f << enclose("li", true) << url("#join", "join") << '\n' << enclose("li", false);
 	f << enclose("li", true) << url("#leave", "leave") << '\n' << enclose("li", false);
 	f << enclose("li", true) << url("#move", "move") << '\n' << enclose("li", false);
@@ -4285,6 +4286,17 @@ int Game::GenRules(const AString &rules, const AString &css, const AString &intr
 	f << example_start("Instruct the unit to avoid combat in other regions.")
 	  << "HOLD 1\n"
 	  << example_end();
+
+	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
+	f << anchor("idle") << '\n';
+	f << enclose("h4", true) << "IDLE\n" << enclose("h4", false);
+	f << enclose("p", true) << "IDLE instructs the issuing unit to do nothing for the entire month.\n"
+	  << enclose("p", false);
+	f << enclose("p", true) << "Example:\n" << enclose("p", false);
+	f << example_start("Instruct the unit to admire the scenery.")
+	  << "IDLE\n"
+	  << example_end();
+
 
 	f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
 	f << anchor("join") << '\n';

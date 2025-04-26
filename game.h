@@ -93,7 +93,7 @@ public:
 	int ViewMap(const AString &, const AString &);
 	// LLS
 	void UnitFactionMap();
-	int GenRules(const AString &, const AString &, const AString &);
+	int generate_rules(const std::string& rules, const std::string& css, const std::string& intro);
 	std::string FactionTypeDescription(Faction &fac);
 	int Doorders_check(const AString &strOrders, const AString &strCheck);
 
