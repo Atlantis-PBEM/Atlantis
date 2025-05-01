@@ -30,7 +30,7 @@
 #include "mapgen.h"
 #include "namegen.h"
 #include "indenter.hpp"
-#include "rng.h"
+#include "rng.hpp"
 
 #include <vector>
 #include <algorithm>
@@ -2668,9 +2668,6 @@ void makeRivers(
 
 	std::cout << "Max river reach " << maxRiverReach << std::endl;
 
-	auto rng = std::default_random_engine();
-	rng.seed( time(0) );
-
 	graph.setCost([ map, &rivers ](ARegion* current, ARegion* next) {
 		int cost = std::max(1, map->map.get(next->xloc * 2, next->yloc * 2)->elevation);
 		// if (next->type == R_PLAIN || next->type == R_FOREST || next->type == R_JUNGLE) {
@@ -2709,7 +2706,7 @@ void makeRivers(
 		std::cout << "There will be " << numConnections << " rivers" << std::endl;
 
 		if (numConnections > 0) {
-			std::shuffle(candidates.begin(), candidates.end(), rng);
+			rng::shuffle(candidates);
 
 			for (int ci = 0; ci < numConnections; ci++) {
 				WaterBody* target = waterBodies[candidates[ci].first];
@@ -3140,8 +3137,8 @@ Ethnicity getRegionEtnos(ARegion* reg) {
 	Ethnicity etnos = Ethnicity::NONE;
 	if (reg->race > 0) {
 		auto itemAbbr = ItemDefs[reg->race].abr;
-		auto man = FindRace(itemAbbr);
-		etnos = man->ethnicity;
+		auto man = FindRace(itemAbbr)->get();
+		etnos = man.ethnicity;
 	}
 
 	return etnos;
@@ -3187,7 +3184,6 @@ void nameArea(
 	std::string name;
 	Ethnicity etnos = Ethnicity::NONE;
 
-	NameArea* na = NULL;
 	while (name.empty()) {
 		for (auto &loc : regions) {
 			if (rng::get_random(100) != 99) {
@@ -3195,19 +3191,16 @@ void nameArea(
 			}
 
 			auto r = graph.get(loc);
-			na = getNearestNameArea(nameAnchors, width, r);
 			etnos = getRegionEtnos(r);
 
 			int type = r->type == R_MOUNTAIN || r->type == R_VOLCANO
 				? R_MOUNTAIN
 				: r->type;
 
-			int seed = na->getName(type);
-
-			name = getRegionName(seed, etnos, type, regions.size(), false);
+			name = getRegionName(etnos, type, regions.size(), false);
 			while (usedNames.find(name) != usedNames.end()) {
 				std::cout << "Searching for better name" << std::endl;
-				name = getRegionName(rng::get_random(width * height), etnos, type, regions.size(), false);
+				name = getRegionName(etnos, type, regions.size(), false);
 			}
 			usedNames.emplace(name);
 
@@ -3221,12 +3214,10 @@ void nameArea(
 		auto r = graph.get(loc);
 
 		if (r->type == R_VOLCANO) {
-			int nameArea = na->getName(r->type);
-
-			std::string volcanoName = getRegionName(nameArea, etnos, r->type, 1, false);
+			std::string volcanoName = getRegionName(etnos, r->type, 1, false);
 			while (usedNames.find(volcanoName) != usedNames.end()) {
 				std::cout << "Searching for better name" << std::endl;
-				volcanoName = getRegionName(rng::get_random(width * height), etnos, r->type, 1, false);
+				volcanoName = getRegionName(etnos, r->type, 1, false);
 			}
 			usedNames.emplace(volcanoName);
 
@@ -3291,10 +3282,10 @@ void giveNames(
 	for (auto &kv : riverNames) {
 		River& river = kv.second;
 
-		std::string name = getRiverName(river.nameArea, river.length, minLen, maxLen);
+		std::string name = getRiverName(river.length, minLen, maxLen);
 		while (usedNames.find(name) != usedNames.end()) {
 			std::cout << "Searching for better name" << std::endl;
-			name = getRiverName(rng::get_random(w * h), river.length, minLen, maxLen);
+			name = getRiverName(river.length, minLen, maxLen);
 		}
 		usedNames.emplace(name);
 
@@ -3316,15 +3307,12 @@ void giveNames(
 			ARegion* reg = arr->GetRegion(loc.x, loc.y);
 
 			if (name.empty()) {
-				auto na = getNearestNameArea(nameAnchors, w, reg);
-				int seed = na->getName(reg->type);
-
 				Ethnicity etnos = getRegionEtnos(reg);
 
-				name = getRegionName(seed, etnos, reg->type, wb->regions.size(), false);
+				name = getRegionName(etnos, reg->type, wb->regions.size(), false);
 				while (usedNames.find(name) != usedNames.end()) {
 					std::cout << "Searching for better name" << std::endl;
-					name = getRegionName(rng::get_random(w * h), etnos, reg->type, wb->regions.size(), false);
+					name = getRegionName(etnos, reg->type, wb->regions.size(), false);
 				}
 				usedNames.emplace(name);
 
@@ -3408,11 +3396,11 @@ void economy(ARegionArray* arr, const int w, const int h) {
 
 	std::cout << "Setting settlements" << std::endl;
 
-	int size = rng::rng::get_random(NTOWNS);
+	int size = rng::get_random(NTOWNS);
 	int minDist = size + rng::make_roll(2, 2);
 
 	std::unordered_set<ARegion*> visited;
-	getPoints(w, h, minDist, 16, [&arr, &visited, &size, &minDist, &w, &h](graphs::Location2D p) {
+	getPoints(w, h, minDist, 16, [&arr, &visited, &size, &minDist](graphs::Location2D p) {
 		auto reg = arr->GetRegion(p.x, p.y);
 		if (reg == NULL) {
 			// this means we have a point outside the map bounds :(
@@ -3428,7 +3416,7 @@ void economy(ARegionArray* arr, const int w, const int h) {
 
 		Ethnicity etnos = getRegionEtnos(reg);
 
-		std::string name = getEthnicName(rng::make_roll(1, w * h), etnos);
+		std::string name = getEthnicName(etnos);
 
 		reg->ManualSetup({
 			.terrain = terrain,
@@ -3444,7 +3432,7 @@ void economy(ARegionArray* arr, const int w, const int h) {
 		std::string sizeName = size == TOWN_VILLAGE ? "Village" : size == TOWN_TOWN ? "Town" : "City";
 		std::cout << sizeName << " " << name << std::endl;
 
-		size = rng::rng::get_random(NTOWNS);
+		size = rng::get_random(NTOWNS);
 		minDist = size + rng::make_roll(2, 2);
 
 		return minDist;
@@ -3479,7 +3467,7 @@ void economy(ARegionArray* arr, const int w, const int h) {
 	}
 }
 
-void addAncientStructure(ARegion* reg, std::string name, int type, double damage) {
+void addAncientStructure(ARegion* reg, int type, double damage, std::optional<std::string> name = std::nullopt) {
 	ObjectType& info = ObjectDefs[type];
 
 	Object * obj = new Object(reg);
@@ -3487,20 +3475,15 @@ void addAncientStructure(ARegion* reg, std::string name, int type, double damage
 	int needs = std::clamp(0, (int) (info.cost * damage), info.cost - 1);
 	obj->num = num;
 
-	obj->set_name(name);
+	if (!name) name = getObjectName(type, info);
+
+	obj->set_name(*name);
 	std::cout << "+ " << obj->name << " : " << info.name << ", needs " << needs << std::endl;
 
 	obj->type = type;
 	obj->incomplete = needs;
 
 	reg->objects.push_back(obj);
-}
-
-void addAncientStructure(ARegion* reg, int seed, int type, double damage) {
-	ObjectType& info = ObjectDefs[type];
-
-	std::string name = getObjectName(seed, type, info);
-	addAncientStructure(reg, name, type, damage);
 }
 
 void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const int h) {
@@ -3526,15 +3509,15 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 			if (reg->town) {
 				if (reg->town->pop > 8000) {
 					if (rng::make_roll(3, 6) >= 12) {
-						addAncientStructure(reg, rng::get_random(w * h) + 1, O_CASTLE, (rng::make_roll(2, 6) - 1) / 12.0);
+						addAncientStructure(reg, O_CASTLE, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				} else if (reg->town->pop > 4000) {
 					if (rng::make_roll(3, 6) >= 14) {
-						addAncientStructure(reg, rng::get_random(w * h) + 1, O_FORT, (rng::make_roll(2, 6) - 1) / 12.0);
+						addAncientStructure(reg, O_FORT, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				} else if (reg->town->pop > 2000) {
 					if (rng::make_roll(3, 6) >= 16) {
-						addAncientStructure(reg, rng::get_random(w * h) + 1, O_TOWER, (rng::make_roll(2, 6) - 1) / 12.0);
+						addAncientStructure(reg, O_TOWER, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				}
 
@@ -3552,17 +3535,17 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 						damagePoints = damage / 6.0;
 					}
 
-					addAncientStructure(reg, rng::get_random(w * h) + 1, O_INN, damagePoints);
+					addAncientStructure(reg, O_INN, damagePoints);
 				}
 			}
 			else {
 				if (reg->population > 2000) {
 					if (rng::make_roll(3, 6) >= 16) {
-						addAncientStructure(reg, rng::get_random(w * h) + 1, O_FORT, (rng::make_roll(2, 6) - 1) / 12.0);
+						addAncientStructure(reg, O_FORT, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				} else if (reg->population > 1000) {
 					if (rng::make_roll(3, 6) >= 17) {
-						addAncientStructure(reg, rng::get_random(w * h) + 1, O_TOWER, (rng::make_roll(2, 6) - 1) / 12.0);
+						addAncientStructure(reg, O_TOWER, (rng::make_roll(2, 6) - 1) / 12.0);
 					}
 				}
 			}
@@ -3693,7 +3676,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 					}
 
 					if (canBuild) {
-						addAncientStructure(current, name, ROAD_BUILDINGS[dir], (rng::make_roll(2, 6) - 6.0) / 6.0);
+						addAncientStructure(current, ROAD_BUILDINGS[dir], (rng::make_roll(2, 6) - 6.0) / 6.0, name);
 					}
 
 					canBuild = true;
@@ -3705,7 +3688,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 					}
 
 					if (canBuild) {
-						addAncientStructure(endReg, name, ROAD_BUILDINGS[opositeDir], (rng::make_roll(2, 6) - 6.0) / 6.0);
+						addAncientStructure(endReg, ROAD_BUILDINGS[opositeDir], (rng::make_roll(2, 6) - 6.0) / 6.0, name);
 					}
 				}
 

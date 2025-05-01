@@ -26,12 +26,15 @@
 #include "game.h"
 #include "gamedata.h"
 #include "indenter.hpp"
+#include "strings_util.hpp"
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <ctime>
 #include <iomanip>
+#include <ranges>
+#include <vector>
 
 using namespace std;
 
@@ -108,7 +111,7 @@ inline string faction_point_usage(Faction& fac, bool verbose=true) {
 	for (const auto& [key, value] : fac.type) {
 		if (value <= 0) continue;
 		if (verbose) {
-			ss << seperator << to_string(value) << " " << plural(value, "point", "points") << " on " << key;
+			ss << seperator << to_string(value) << " " << strings::plural(value, "point", "points") << " on " << key;
 		} else {
 			ss << seperator << key << " " << to_string(value);
 		}
@@ -316,14 +319,14 @@ string Game::FactionTypeDescription(Faction &fac) {
 	int count = 0;
 	for (auto &key : types) {
 		buffer << (count > 0 ? (count == (int)types.size() - 1 ? ", and " : ", ") : "");
-		if (key == F_WAR) buffer << "tax " << nw << " " << plural(nw, "region", "regions");
-		if (key == F_TRADE) buffer << "perform trade in " << nt << " " << plural(nt, "region", "regions");
+		if (key == F_WAR) buffer << "tax " << nw << " " << strings::plural(nw, "region", "regions");
+		if (key == F_TRADE) buffer << "perform trade in " << nt << " " << strings::plural(nt, "region", "regions");
 		if (key == F_MAGIC) {
-			buffer << "have " << nm << " " << plural(nm, "mage", "mages");
+			buffer << "have " << nm << " " << strings::plural(nm, "mage", "mages");
 		}
 		if (key == F_MARTIAL) {
 			buffer << "perform tax " << (Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL ? "or" : "and")
-			       << " trade in " << nma << " " << plural(nma, "region", "regions");
+			       << " trade in " << nma << " " << strings::plural(nma, "region", "regions");
 		}
 		count++;
 	}
@@ -332,7 +335,7 @@ string Game::FactionTypeDescription(Faction &fac) {
 	if (Globals->APPRENTICES_EXIST && na > 0)
 		buffer << ", as well have " << na << " " << Globals->APPRENTICE_NAME << (na > 1 ? "s" : "");
 	if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT && nq > 0)
-		buffer << ", and " << nq << " " << plural(nq, "quartermaster", "quartermasters");
+		buffer << ", and " << nq << " " << strings::plural(nq, "quartermaster", "quartermasters");
 
 	if (missingTypes.size() > 0) buffer << ", but ";
 
@@ -939,7 +942,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 			  << "on each of ";
 			for (auto &fp : *FactionTypes) f << fp + ", ";
 			f << "leaving " << rem << " "
-			  << plural(rem, "point", "points") << " unspent.\n"
+			  << strings::plural(rem, "point", "points") << " unspent.\n"
 			  << enclose("p", false);
 		}
 	}
@@ -1322,8 +1325,8 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 			int method = 1;
 			if (num_methods == 1) method = 0;
 			f << enclose("p", true);
-			f << "There " << plural(num_methods, "is ", "are ") << num_to_word(num_methods) << " "
-			  << plural(num_methods, "method", "methods") << " of departing the starting cities. "
+			f << "There " << strings::plural(num_methods, "is ", "are ") << num_to_word(num_methods) << " "
+			  << strings::plural(num_methods, "method", "methods") << " of departing the starting cities. "
 			  << methods[method++] << " by land, but keep in mind that the lands immediately surrounding the starting "
 			  << "cities will tend to be highly populated, and possibly quite dangerous to travel.";
 			if (may_sail) {
@@ -1362,7 +1365,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 	f << enclose("p", true) << "In one month, a unit can issue a single " << url("#move", "MOVE")
 	  << " order, using one or more of its movement points. There are three modes of travel: walking, riding "
 	  << "and flying. Walking units have " << num_to_word(ItemDefs[I_LEADERS].speed) << " movement "
-	  << plural(ItemDefs[I_LEADERS].speed, "point", "points") << ", riding units have "
+	  << strings::plural(ItemDefs[I_LEADERS].speed, "point", "points") << ", riding units have "
 	  << num_to_word(ItemDefs[I_HORSE].speed) << ", and flying units have " << num_to_word(ItemDefs[I_WHORSE].speed)
 	  << ". A unit will automatically use the fastest mode of travel it has available. The "
 	  << url("#advance", "ADVANCE") << " order is the same as " << url("#move", "MOVE") << ", except that it "
@@ -1402,7 +1405,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 		pS = FindSkill(ItemDefs[i].pSkill);
 		if (pS && (pS->flags & SkillType::DISABLED)) continue;
 		int last = 0;
-		for (int j = 0; j < (int) (sizeof(ItemDefs->pInput) / sizeof(ItemDefs->pInput[0])); j++) {
+		for (int j = 0; j < (int) (sizeof(ItemDefs[0].pInput) / sizeof(ItemDefs[0].pInput[0])); j++) {
 			int k = ItemDefs[i].pInput[j].item;
 			if (k != -1 && (ItemDefs[k].flags & ItemType::DISABLED))
 				last = 1;
@@ -1480,20 +1483,20 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 	  << " and the weight of the man and other items is " << weight
 	  << (cap > weight ? ", so he can ride" : ", so he must walk")
 	  << (Globals->WEATHER_EXISTS ? ". The month is April, so he has " : " and has ")
-	  << num_to_word(speed) << " movement " << plural(speed, "point", "points") << ". He issues the order "
+	  << num_to_word(speed) << " movement " << strings::plural(speed, "point", "points") << ". He issues the order "
 	  << "MOVE NORTH NORTHEAST. First he moves north, into a plain region.  This uses " << num_to_word(cost)
-	  << " movement " << plural(cost, "point", "points") << ".";
+	  << " movement " << strings::plural(cost, "point", "points") << ".";
 	speed -= cost;
 	if (speed > TerrainDefs[R_FOREST].movepoints) {
 		cost = TerrainDefs[R_FOREST].movepoints;
 		speed -= cost;
 		f << " Then he moves northeast, into a forest region. This uses "
 		  << num_to_word(TerrainDefs[R_FOREST].movepoints) << " movement "
-		  << plural(TerrainDefs[R_FOREST].movepoints, "point", "points") << ", so the movement is completed with "
+		  << strings::plural(TerrainDefs[R_FOREST].movepoints, "point", "points") << ", so the movement is completed with "
 		  << num_to_word(speed) << " to spare.";
 	} else {
 		f << " He does not have the " << num_to_word(TerrainDefs[R_FOREST].movepoints)
-		  << " movement " << plural(TerrainDefs[R_FOREST].movepoints, "point", "points")
+		  << " movement " << strings::plural(TerrainDefs[R_FOREST].movepoints, "point", "points")
 		  << " needed to move into the forest region to the northeast, so the movement is halted at this point.  "
 		  << "The remaining move will be added to his orders for the next turn, before any "
 		  << url("#turn", "TURN") << " orders are processed.";
@@ -1523,7 +1526,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 		if (Globals->FLEET_CREW_BOOST > 0) {
 			f << " Ships get an extra movement point for each time they double the number of required crew, "
 			  << "up to a maximum of " << num_to_word(Globals->FLEET_CREW_BOOST) << " extra "
-			  << plural(Globals->FLEET_CREW_BOOST, "point", "points") << ".";
+			  << strings::plural(Globals->FLEET_CREW_BOOST, "point", "points") << ".";
 		}
 		if (Globals->FLEET_LOAD_BOOST > 0) {
 			f << " Ships get extra movement points if they are only lightly loaded. One extra point is given "
@@ -1573,7 +1576,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_SHIP)) continue;
 			int pub = 1;
-			for (int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(ItemDefs->pInput[0]); c++) {
+			for (int c = 0; c < (int) sizeof(ItemDefs[0].pInput)/(int) sizeof(ItemDefs[0].pInput[0]); c++) {
 				int m = ItemDefs[i].pInput[c].item;
 				if (m != -1) {
 					if (ItemDefs[m].flags & ItemType::DISABLED) pub = 0;
@@ -1730,9 +1733,9 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 		f << (Globals->SKILL_LIMIT_NONLEADERS
 		      ? "A unit may only learn one skill. "
 			  : "A unit may learn as many skills as it requires. ");
-		ManType *mt = FindRace("MAN");
-		if (mt != NULL) {
-			f << "Skills can be learned up to a maximum level of " << mt->defaultlevel << ".";
+		auto mt = FindRace("MAN");
+		if (mt) {
+			f << "Skills can be learned up to a maximum level of " << mt->get().defaultlevel << ".";
 		}
 		f << '\n' << enclose("p", false);
 	}
@@ -1758,15 +1761,15 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 		for (int i = 0; i < NITEMS; i++) {
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_MAN)) continue;
-			ManType *mt = FindRace(ItemDefs[i].abr);
+			auto mt = FindRace(ItemDefs[i].abr)->get();
 
 			f << enclose("tr", true);
 			f << enclose("td align=\"left\" nowrap", true) << ItemDefs[i].names << '\n' << enclose("td", false);
 			f << enclose("td align=\"left\" nowrap", true);
 			int spec = 0;
 			comma = 0;
-			for (int j = 0; j < (int)(sizeof(mt->skills) / sizeof(mt->skills[0])); j++) {
-				pS = FindSkill(mt->skills[j]);
+			for (int j = 0; j < (int)(sizeof(mt.skills) / sizeof(mt.skills[0])); j++) {
+				auto pS = FindSkill(mt.skills[j]);
 				if (!pS) continue;
 				if (string(pS->abbr) == "MANI" && Globals->MAGE_NONLEADERS) {
 					spec = 1;
@@ -1781,9 +1784,9 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 			}
 			f << (spec ? "" : "None.") << "\n";
 			f << enclose("td", false);
-			f << enclose("td align=\"left\" nowrap", true) << (spec ? to_string(mt->speciallevel) : "--") << '\n'
+			f << enclose("td align=\"left\" nowrap", true) << (spec ? to_string(mt.speciallevel) : "--") << '\n'
 			  << enclose("td", false);
-			f << enclose("td align=\"left\" nowrap", true) << mt->defaultlevel << '\n' << enclose("td", false);
+			f << enclose("td align=\"left\" nowrap", true) << mt.defaultlevel << '\n' << enclose("td", false);
 			f << enclose("tr", false);
 		}
 		f << enclose("table", false);
@@ -2004,7 +2007,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 	  << "since both have a skill level of 1.)  The units being taught simply issue the " << url("#study", "STUDY")
 	  << " order normally (also, his faction must be declared Friendly by the teaching faction).  Each person can "
 	  << "only teach up to " << Globals->STUDENTS_PER_TEACHER << " "
-	  << plural(Globals->STUDENTS_PER_TEACHER, "student", "students") << " in a month; additional students dilute "
+	  << strings::plural(Globals->STUDENTS_PER_TEACHER, "student", "students") << " in a month; additional students dilute "
 	  << "the training.  Thus, if 1 teacher teaches " << (2 * Globals->STUDENTS_PER_TEACHER)
 	  << " men, each man being taught will gain 1 1/2 months of training, not 2 months.\n"
 	  << enclose("p", false);
@@ -2012,7 +2015,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 	f << enclose("p", true) << "Note that it is quite possible for a single unit to teach two or more other units "
 	  << "different skills in the same month, provided that the teacher has a higher skill level than each student "
 	  << "in the skill that that student is studying, and that there are no more than "
-	  << Globals->STUDENTS_PER_TEACHER << ' ' << plural(Globals->STUDENTS_PER_TEACHER, "student", "students")
+	  << Globals->STUDENTS_PER_TEACHER << ' ' << strings::plural(Globals->STUDENTS_PER_TEACHER, "student", "students")
 	  << " per teacher.\n" << enclose("p", false);
 
 	if (Globals->LEADERS_EXIST) {
@@ -2199,7 +2202,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 		pS = FindSkill(ItemDefs[i].pSkill);
 		if (pS && (pS->flags & SkillType::DISABLED)) continue;
 		last = 0;
-		for (int j = 0; j < (int) (sizeof(ItemDefs->pInput) / sizeof(ItemDefs->pInput[0])); j++) {
+		for (int j = 0; j < (int) (sizeof(ItemDefs[0].pInput) / sizeof(ItemDefs[0].pInput[0])); j++) {
 			int k = ItemDefs[i].pInput[j].item;
 			if (k != -1 &&
 					!(ItemDefs[k].flags & ItemType::DISABLED) &&
@@ -2218,7 +2221,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 		comma = 0;
 		if (ItemDefs[i].flags & ItemType::ORINPUTS)
 			f << "Any of : ";
-		for (int j = 0; j < (int) (sizeof(ItemDefs->pInput) / sizeof(ItemDefs->pInput[0])); j++) {
+		for (int j = 0; j < (int) (sizeof(ItemDefs[0].pInput) / sizeof(ItemDefs[0].pInput[0])); j++) {
 			int k = ItemDefs[i].pInput[j].item;
 			if (k < 0 || (ItemDefs[k].flags&ItemType::DISABLED)) continue;
 			f << (comma ? ", " : "") << ItemDefs[i].pInput[j].amt << " "
@@ -2228,7 +2231,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 		f << '\n' << enclose("td", false);
 		f << enclose("td align=\"left\" nowrap", true);
 		if (ItemDefs[i].pMonths) {
-			f << ItemDefs[i].pMonths << plural(ItemDefs[i].pMonths, " month", " months") << '\n';
+			f << ItemDefs[i].pMonths << strings::plural(ItemDefs[i].pMonths, " month", " months") << '\n';
 		} else {
 			f << "&nbsp;\n";
 		}
@@ -2248,30 +2251,30 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 		f << '\n' << enclose("td", false);
 		f << enclose("td align=\"left\"", true);
 		if (ItemDefs[i].type & IT_WEAPON) {
-			WeaponType *wp = FindWeapon(ItemDefs[i].abr);
-			if (wp->attackBonus || wp->defenseBonus ||
-					(wp->flags & WeaponType::RANGED) ||
-					(wp->flags & WeaponType::NEEDSKILL)) {
-				if (wp->flags & WeaponType::RANGED)
+			auto weapon_def = FindWeapon(ItemDefs[i].abr)->get();
+			if (weapon_def.attackBonus || weapon_def.defenseBonus ||
+					(weapon_def.flags & WeaponType::RANGED) ||
+					(weapon_def.flags & WeaponType::NEEDSKILL)) {
+				if (weapon_def.flags & WeaponType::RANGED)
 					f << "Ranged weapon";
 				else
 					f << "Weapon";
-				f << " which gives " << (wp->attackBonus > -1 ? "+" : "")
-				  << wp->attackBonus << " on attack and " << (wp->defenseBonus > -1 ? "+" : "")
-				  << wp->defenseBonus << " on defense";
-				if (wp->flags & WeaponType::NEEDSKILL) {
-					pS = FindSkill(wp->baseSkill);
+				f << " which gives " << (weapon_def.attackBonus > -1 ? "+" : "")
+				  << weapon_def.attackBonus << " on attack and " << (weapon_def.defenseBonus > -1 ? "+" : "")
+				  << weapon_def.defenseBonus << " on defense";
+				if (weapon_def.flags & WeaponType::NEEDSKILL) {
+					pS = FindSkill(weapon_def.baseSkill);
 					if (pS && !(pS->flags & SkillType::DISABLED))
 						f << " (needs " << pS->name;
-					pS = FindSkill(wp->orSkill);
+					pS = FindSkill(weapon_def.orSkill);
 					if (pS && !(pS->flags & SkillType::DISABLED))
 						f << " or " << pS->name;
 					f << " skill)";
 				}
 				f << ".<br />";
 			}
-			if (wp->numAttacks < 0) {
-				f << "Gives 1 attack every " << -wp->numAttacks << " rounds.<br />";
+			if (weapon_def.numAttacks < 0) {
+				f << "Gives 1 attack every " << -weapon_def.numAttacks << " rounds.<br />";
 			}
 		}
 		if (ItemDefs[i].type & IT_MOUNT) {
@@ -2282,12 +2285,13 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 			}
 		}
 		if (ItemDefs[i].type & IT_ARMOR) {
-			ArmorType *at = FindArmor(ItemDefs[i].abr);
-			f << "Gives a " << at->saves[SLASHING] << " in " << at->from
+			auto armor = FindArmor(ItemDefs[i].abr)->get();
+			f << "Gives a " << armor.saves[SLASHING] << " in " << armor.from
 			  << " chance to survive a normal hit.<br />"
-			  << ((at->flags & ArmorType::USEINASSASSINATE && has_stea)
-			      ? "May be used during assassinations.<br />"
-				  : "");
+			  << ((armor.flags & ArmorType::USEINASSASSINATE && has_stea) ?
+				  "May be used during assassinations.<br />" :
+				  ""
+				 );
 		}
 		if (ItemDefs[i].type & IT_TOOL) {
 			for (int j = 0; j < NITEMS; j++) {
@@ -2297,11 +2301,9 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 				pS = FindSkill(ItemDefs[j].pSkill);
 				if (!pS || (pS->flags & SkillType::DISABLED)) continue;
 				last = 0;
-				for (int k = 0; k < (int) (sizeof(ItemDefs->pInput) / sizeof(ItemDefs->pInput[0])); k++) {
+				for (int k = 0; k < (int) (sizeof(ItemDefs[0].pInput) / sizeof(ItemDefs[0].pInput[0])); k++) {
 					int l = ItemDefs[j].pInput[k].item;
-					if (l != -1 &&
-							!(ItemDefs[l].flags & ItemType::DISABLED) &&
-							!(ItemDefs[l].type & IT_NORMAL))
+					if (l != -1 && !(ItemDefs[l].flags & ItemType::DISABLED) && !(ItemDefs[l].type & IT_NORMAL))
 						last = 1;
 				}
 				if (last == 1) continue;
@@ -2631,7 +2633,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_SHIP)) continue;
 			int pub = 1;
-			for (int c = 0; c < (int) sizeof(ItemDefs->pInput)/(int) sizeof(ItemDefs->pInput[0]); c++) {
+			for (int c = 0; c < (int) sizeof(ItemDefs[0].pInput)/(int) sizeof(ItemDefs[0].pInput[0]); c++) {
 				int m = ItemDefs[i].pInput[c].item;
 				if (m != -1) {
 					if (ItemDefs[m].flags & ItemType::DISABLED) pub = 0;
@@ -2774,12 +2776,12 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 			  : "Any faction")
 		  << " may train Quartermaster units. A Quartermaster unit may accept " << url("#transport", "TRANSPORT")
 		  << "ed items from any unit within " << Globals->LOCAL_TRANSPORT << ' '
-		  << plural(Globals->LOCAL_TRANSPORT, "hex", "hexes") << " distance from the hex containing the quartermaster. "
+		  << strings::plural(Globals->LOCAL_TRANSPORT, "hex", "hexes") << " distance from the hex containing the quartermaster. "
 		  << "Quartermasters may also " << url("#transport", "TRANSPORT") << " items to any unit within "
-		  << Globals->LOCAL_TRANSPORT << ' ' << plural(Globals->LOCAL_TRANSPORT, "hex", "hexes")
+		  << Globals->LOCAL_TRANSPORT << ' ' << strings::plural(Globals->LOCAL_TRANSPORT, "hex", "hexes")
 		  << " distance from the hex containing the quartermaster and may " << url("#transport", "TRANSPORT")
 		  << " items to another quartermaster up to " << Globals->NONLOCAL_TRANSPORT << ' '
-		  << plural(Globals->NONLOCAL_TRANSPORT, "hex", "hexes") << " distant.";
+		  << strings::plural(Globals->NONLOCAL_TRANSPORT, "hex", "hexes") << " distant.";
 		if (Globals->TRANSPORT & GameDefs::QM_AFFECT_DIST) {
 			f << " The distance a quartermaster can " << url("#transport", "TRANSPORT") << " items to another "
 			  << "quartermaster will increase with the level of skill possessed by the quartermaster unit.";
@@ -3229,34 +3231,35 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 			}
 			f << "; after that, the battle is handled like a normal fight, with the exception that neither assassin "
 			  << "nor victim can use any armor";
-			last = -1;
-			comma = 0;
-			for (int i = 0; i < NITEMS; i++) {
-				if (!(ItemDefs[i].type & IT_ARMOR)) continue;
-				if (!(ItemDefs[i].type & IT_NORMAL)) continue;
-				if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-				ArmorType *at = FindArmor(ItemDefs[i].abr);
-				if (at == NULL) continue;
-				if (!(at->flags & ArmorType::USEINASSASSINATE)) continue;
-				if (last == -1) {
-					f << " except ";
-					last = i;
-					continue;
-				}
-				f << ItemDefs[last].name << ", ";
-				last = i;
-				comma++;
+
+			auto filtered_item_names = ItemDefs |
+				std::views::filter([](const auto& item) {
+					if (!(item.type & IT_ARMOR)) return false;
+					if (!(item.type & IT_NORMAL)) return false;
+					if (item.flags & ItemType::DISABLED) return false;
+					auto armor = FindArmor(item.abr);
+					if (!armor) return false;
+					if (!(armor->get().flags & ArmorType::USEINASSASSINATE)) return false;
+					return true;
+				}) |
+				std::views::transform([](const auto& item) { return std::string(item.name); });
+
+			std::vector<std::string> names(filtered_item_names.begin(), filtered_item_names.end());
+
+			bool any_exceptions = !names.empty();
+			if (any_exceptions) {
+				f << " except ";
+				f << strings::join(names, ", ", ", or ");
 			}
-			if (comma) f << "or ";
-			if (last != -1)	f << ItemDefs[last].name;
 			f << ".";
-			f << (last == -1 ? " Armor " : " Most armor ") << "is forbidden for the assassin because it "
-			  << "would make it too hard to sneak around, and for the victim because he was caught by surprise "
-			  << "with his armor off. If the assassin wins, the target faction is told merely that the victim was "
-			  << "assassinated, but not by whom.  If the victim wins, then the target faction learns which unit "
-			  << "made the attempt.  (Of course, this does not necessarily mean that the assassin's faction is "
-			  << "known.)  The winner of the fight gets 50% of the loser's property as usual.\n"
-			  << enclose("p", false);
+
+            f << (any_exceptions ? " Most armor " : " Armor ") << "is forbidden for the assassin because it "
+              << "would make it too hard to sneak around, and for the victim because he was caught by surprise "
+              << "with his armor off. If the assassin wins, the target faction is told merely that the victim was "
+              << "assassinated, but not by whom.  If the victim wins, then the target faction learns which unit "
+              << "made the attempt.  (Of course, this does not necessarily mean that the assassin's faction is "
+              << "known.)  The winner of the fight gets 50% of the loser's property as usual.\n"
+              << enclose("p", false);
 			f << enclose("p", true) << url("#steal", "STEAL") << " and " << url("#assassinate", "ASSASSINATE")
 			  << " are not full month orders, and do not interfere with other activities, but a unit can only issue "
 			  << "one " << url("#steal", "STEAL") << " order or one " << url("#assassinate", "ASSASSINATE")

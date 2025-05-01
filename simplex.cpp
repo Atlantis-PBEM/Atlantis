@@ -36,6 +36,8 @@
 #include <ctime>
 #include <cmath>
 
+#include "rng.hpp"
+
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
 #endif
@@ -69,28 +71,18 @@ static const double gradients1D[16] = {
 */
 
 SimplexNoise::SimplexNoise(
-        const double frequency,
-        const double amplitude,
-        const double lacunarity,
-        const double persistence
-    ) :
-        mFrequency(frequency),
-        mAmplitude(amplitude),
-        mLacunarity(lacunarity),
-        mPersistence(persistence)
-    {
-        const uint32_t N = 256;
-        perm.reserve(N);
+    const double frequency, const double amplitude, const double lacunarity, const double persistence
+) : mFrequency(frequency), mAmplitude(amplitude), mLacunarity(lacunarity), mPersistence(persistence)
+{
+    const uint32_t N = 256;
+    perm.reserve(N);
 
-        for (uint32_t i = 0; i < N; i++) {
-            perm.push_back(i);
-        }
-
-        auto rng = std::default_random_engine();
-        rng.seed( time(0) );
-
-        std::shuffle(std::begin(perm), std::end(perm), rng);
+    for (uint32_t i = 0; i < N; i++) {
+        perm.push_back(i);
     }
+
+    rng::shuffle(perm);
+}
 
 uint8_t SimplexNoise::h(int32_t i) {
     return perm[static_cast<uint8_t>(i)];

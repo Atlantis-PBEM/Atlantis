@@ -44,7 +44,7 @@
 // granted skill, granted from array, minGrant, maxGrant
 
 
-ItemType id[] =
+std::vector<ItemType> ItemDefs =
 {
 	{"leader", "leaders", "LEAD",
 	 ItemType::NOTRANSPORT,
@@ -2354,7 +2354,6 @@ ItemType id[] =
 	0, NULL, 0,
 	"", { "", "", "", "" }, 0, 0},
 };
-ItemType *ItemDefs = id;
 
 //
 // Table of men
@@ -2363,9 +2362,7 @@ ItemType *ItemDefs = id;
 // abbr, Favourite terrain,
 // Special level, default, 1st skill, 2nd, 3rd, 4th, Ethnicity
 //
-ManType mt[] = {
-	{NULL, R_NEXUS,
-	 0,0,{NULL, NULL, NULL, NULL, NULL, NULL}, Ethnicity::NONE},
+std::vector<ManType> ManDefs = {
 	{"PEAS", R_NEXUS,
 	 0,0,{NULL, NULL, NULL, NULL, NULL, NULL}, Ethnicity::MAN},
 	{"LEAD", R_NEXUS,
@@ -2441,9 +2438,6 @@ ManType mt[] = {
 	 3,2,{"HORS", "RANC", "RIDI", NULL, NULL, NULL}, Ethnicity::LIZARDMAN},
 };
 
-ManType *ManDefs = mt;
-int NUMMAN = sizeof(mt) / sizeof(mt[0]);
-
 //
 // Table of monsters.
 //
@@ -2454,12 +2448,7 @@ int NUMMAN = sizeof(mt) / sizeof(mt[0]);
 // silver spoiltype, hostile, number, name, abbr
 // damage from attack
 
-MonType md[] = {
-	{0,{0,0,0,0,0,0},
-	 0,0,0,
-	 0,0,0,
-	 NULL,0,
-	 0,-1,0,0,"None", NULL, 0, {}, {}}, /* none */
+std::vector<MonType> MonDefs = {
 	{3,{3,0,0,0,2,0},
 	 2,4,0,
 	 3,2,2,
@@ -2779,9 +2768,6 @@ MonType md[] = {
 	 40000,IT_MAGIC,100,1,"Devil","DEVL",1, {}, {}},
 };
 
-MonType *MonDefs = md;
-int NUMMONSTERS = sizeof(md) / sizeof(md[0]);
-
 //
 // Table of weapons.
 //
@@ -2793,16 +2779,7 @@ int NUMMONSTERS = sizeof(md) / sizeof(md[0]);
 //  damage
 //  bonus/mauls vs another weapons
 //
-WeaponType wepd[] = {
-	// WEAPON_NONE
-	{NULL,
-	 0,
-	 NULL, NULL,
-	 0, 0, 0,
-	 0, 0, 0,
-	 0,
-	 { { NULL, 0, 0 }, { NULL, 0, 0 }, { NULL, 0, 0 }, { NULL, 0, 0 } }
-	},
+std::vector<WeaponType> WeaponDefs = {
 	// WEAPON_SUPERBOW
 	{"SBOW",
 	 WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
@@ -3076,18 +3053,13 @@ WeaponType wepd[] = {
 	},
 };
 
-WeaponType *WeaponDefs = wepd;
-int NUMWEAPONS = sizeof(wepd) / sizeof(wepd[0]);
-
 //
 // Table of armor.
 //
 // abbr, flags, from, slashChance, pierceChance, crushChance, cleaveChance,
 // armorpiercingChance, energyChance, spiritChance, weatherChance;
 //
-ArmorType armd[] = {
-	// ARMOR_NONE
-	{ NULL, 0, 100, {0, 0, 0, 0, 0, 0, 0, 0}},
+std::vector<ArmorType> ArmorDefs = {
 	// ARMOR_CLOAKOFI
 	{ "CLOA", 0, 100, {98, 98, 98, 98, 98, 98, 98, 98}},
 	// ARMOR_ADPLATE
@@ -3111,9 +3083,6 @@ ArmorType armd[] = {
 	// ARMOR_CLOTHARMOR
 	{ "CLAR", ArmorType::USEINASSASSINATE, 100, {16, 16, 16, 16, 5, 5, 5, 5}},
 };
-
-ArmorType *ArmorDefs = armd;
-int NUMARMORS = sizeof(armd) / sizeof(armd[0]);
 
 //
 // Table of mounts

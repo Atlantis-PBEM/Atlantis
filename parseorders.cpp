@@ -946,7 +946,7 @@ void Game::ProcessPrepareOrder(Unit *u, parser::string_parser& parser, orders_ch
 	}
 
 	int it = parse_enabled_item(token);
-	BattleItemType *bt = FindBattleItem(token.get_string().c_str());
+	BattleItemType *bt = FindBattleItem(ItemDefs[it].abr);
 
 	if (checker) return;
 
@@ -2879,10 +2879,15 @@ void Game::ProcessAnnihilateOrder(Unit *unit, parser::string_parser& parser, ord
 		return;
 	}
 
-	int z = unit->object->region->zloc;
+	int z = -1;
 	RangeType *range = FindRange(SkillDefs[S_ANNIHILATION].range);
 	if (range->flags & RangeType::RNG_SURFACE_ONLY) {
 		z = (Globals->NEXUS_EXISTS ? 1 : 0);
+	} else {
+		// in the order check mode, just make sure we have a valid z-coordinate otherwise
+		// use the unit's current z-coordinate
+		if (checker) z = (Globals->NEXUS_EXISTS ? 1 : 0);
+		else z = unit->object->region->zloc;
 	}
 
 	if (range && (range->flags & RangeType::RNG_CROSS_LEVELS) && !(range->flags & RangeType::RNG_SURFACE_ONLY)) {

@@ -25,7 +25,7 @@
 #include "army.h"
 #include "gameio.h"
 #include "gamedata.h"
-#include "rng.h"
+#include "rng.hpp"
 
 #include <assert.h>
 #include <iterator>
@@ -181,7 +181,7 @@ enum {
 Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 {
 	AString abbr;
-	int i, item, armorType;
+	int i;
 
 	race = r;
 	unit = u;
@@ -219,7 +219,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	if (hits < 1) hits = 1;
 	maxhits = hits;
 	amuletofi = 0;
-	battleItems = 0;
+	battleItems.clear();
 
 	/* Special case to allow protection from ships */
 	if (o->IsFleet() && o->capacity < 1 && static_cast<size_t>(o->shipno) < o->ships.size()) {
@@ -276,36 +276,29 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 
 	/* Is this a monster? */
 	if (ItemDefs[r].type & IT_MONSTER) {
-		MonType *mp = FindMonster(ItemDefs[r].abr,
-				(ItemDefs[r].type & IT_ILLUSION));
+		auto mp = FindMonster(ItemDefs[r].abr, (ItemDefs[r].type & IT_ILLUSION))->get();
 		if((u->type == U_WMON) || (ItemDefs[r].flags & ItemType::MANPRODUCE))
-			name = AString(mp->name) + " in " + unit->name;
+			name = AString(mp.name) + " in " + unit->name;
 		else
-			name = AString(mp->name) + " controlled by " + unit->name;
-		askill = mp->attackLevel;
-		dskill[ATTACK_COMBAT] += mp->defense[ATTACK_COMBAT];
-		if (mp->defense[ATTACK_ENERGY] > dskill[ATTACK_ENERGY]) {
-			dskill[ATTACK_ENERGY] = mp->defense[ATTACK_ENERGY];
-		}
-		if (mp->defense[ATTACK_SPIRIT] > dskill[ATTACK_SPIRIT]) {
-			dskill[ATTACK_SPIRIT] = mp->defense[ATTACK_SPIRIT];
-		}
-		if (mp->defense[ATTACK_WEATHER] > dskill[ATTACK_WEATHER]) {
-			dskill[ATTACK_WEATHER] = mp->defense[ATTACK_WEATHER];
-		}
-		dskill[ATTACK_RIDING] += mp->defense[ATTACK_RIDING];
-		dskill[ATTACK_RANGED] += mp->defense[ATTACK_RANGED];
+			name = AString(mp.name) + " controlled by " + unit->name;
+		askill = mp.attackLevel;
+		dskill[ATTACK_COMBAT] += mp.defense[ATTACK_COMBAT];
+		if (mp.defense[ATTACK_ENERGY] > dskill[ATTACK_ENERGY]) dskill[ATTACK_ENERGY] = mp.defense[ATTACK_ENERGY];
+		if (mp.defense[ATTACK_SPIRIT] > dskill[ATTACK_SPIRIT]) dskill[ATTACK_SPIRIT] = mp.defense[ATTACK_SPIRIT];
+		if (mp.defense[ATTACK_WEATHER] > dskill[ATTACK_WEATHER]) dskill[ATTACK_WEATHER] = mp.defense[ATTACK_WEATHER];
+		dskill[ATTACK_RIDING] += mp.defense[ATTACK_RIDING];
+		dskill[ATTACK_RANGED] += mp.defense[ATTACK_RANGED];
 		damage = 0;
-		hits = mp->hits;
+		hits = mp.hits;
 		if (hits < 1) hits = 1;
 		maxhits = hits;
-		attacks = mp->numAttacks;
-		hitDamage = mp->hitDamage;
+		attacks = mp.numAttacks;
+		hitDamage = mp.hitDamage;
 		if (!attacks) attacks = 1;
-		special = mp->special;
-		slevel = mp->specialLevel;
+		special = mp.special;
+		slevel = mp.specialLevel;
 		if (Globals->MONSTER_BATTLE_REGEN) {
-			regen = mp->regen;
+			regen = mp.regen;
 			if (regen < 0) regen = 0;
 		}
 		return;
@@ -321,7 +314,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	// Set up armor
 	for (i = 0; i < MAX_READY; i++) {
 		// Check preferred armor first.
-		item = unit->readyArmor[i];
+		int item = unit->readyArmor[i];
 		if (item == -1) break;
 		abbr = ItemDefs[item].abr;
 		item = unit->GetArmor(abbr, ass);
@@ -331,9 +324,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		}
 	}
 	if (armor == -1) {
-		for (armorType = 1; armorType < NUMARMORS; armorType++) {
-			abbr = ArmorDefs[armorType].abbr;
-			item = unit->GetArmor(abbr, ass);
+		for (auto armorType : ArmorDefs) {
+			abbr = armorType.abbr;
+			int item = unit->GetArmor(abbr, ass);
 			if (item != -1) {
 				armor = item;
 				break;
@@ -353,6 +346,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		// Mounts of some type _are_ allowed in this region
 		//
 		int mountType;
+		int item = -1;
 		if (ItemDefs[race].type & IT_MOUNT) {
 			// If the man is a mount (Centaurs), then the only option
 			// they have for riding is the built-in one
@@ -375,9 +369,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 		}
 
 		// Modify riding bonus for half bonus
-		if (Globals->HALF_RIDING_BONUS) {
-			ridingBonus = (ridingBonus + 1) / 2;
-		}
+		if (Globals->HALF_RIDING_BONUS) ridingBonus = (ridingBonus + 1) / 2;
 
 		// Defer adding the combat bonus until we know if the weapon
 		// allows it.  The defense bonus for riding can be added now
@@ -389,7 +381,6 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	//
 	// Find the correct weapon for this soldier.
 	//
-	int weaponType;
 	int attackBonus = 0;
 	int defenseBonus = 0;
 	int numAttacks = 1;
@@ -397,21 +388,19 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 	// hitDamage
 	for (i = 0; i < MAX_READY; i++) {
 		// Check the preferred weapon first.
-		item = unit->readyWeapon[i];
+		int item = unit->readyWeapon[i];
 		if (item == -1) break;
 		abbr = ItemDefs[item].abr;
-		item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus,
-				defenseBonus, numAttacks, numHitDamage);
+		item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus, defenseBonus, numAttacks, numHitDamage);
 		if (item != -1) {
 			weapon = item;
 			break;
 		}
 	}
 	if (weapon == -1) {
-		for (weaponType = 1; weaponType < NUMWEAPONS; weaponType++) {
-			abbr = WeaponDefs[weaponType].abbr;
-			item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus,
-					defenseBonus, numAttacks, numHitDamage);
+		for (auto& weapontype : WeaponDefs) {
+			abbr = weapontype.abbr;
+			int item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus, defenseBonus, numAttacks, numHitDamage);
 			if (item != -1) {
 				weapon = item;
 				break;
@@ -529,7 +518,7 @@ void Soldier::SetupCombatItems()
 				amuletofi = 1;
 			}
 
-			SET_BIT(battleItems, battleType);
+			battleItems.insert(battleType);
 
 			if (pBat->flags & BattleItemType::SPECIAL) {
 				special = pBat->special;
@@ -614,20 +603,16 @@ void Soldier::ClearOneTimeEffects(void)
 	}
 }
 
-int Soldier::ArmorProtect(int weaponClass)
+bool Soldier::ArmorProtect(int weaponClass)
 {
-	//
-	// Return 1 if the armor is successful
-	//
-	ArmorType *pArm = NULL;
-	if (armor > 0) pArm = FindArmor(ItemDefs[armor].abr);
-	if (pArm == NULL) return 0;
-	int chance = pArm->saves[weaponClass];
+	auto armor_type = (armor > 0) ? FindArmor(ItemDefs[armor].abr) : std::nullopt;
+	if (!armor_type) return false;
+	int chance = armor_type->get().saves[weaponClass];
 
-	if (chance <= 0) return 0;
-	if (chance > rng::get_random(pArm->from)) return 1;
+	if (chance <= 0) return false;
+	if (chance > rng::get_random(armor_type->get().from)) return true;
 
-	return 0;
+	return false;
 }
 
 void Soldier::RestoreItems()
@@ -652,7 +637,7 @@ void Soldier::RestoreItems()
 	for (battleType = 1; battleType < NUMBATTLEITEMS; battleType++) {
 		BattleItemType *pBat = &BattleItemDefs[ battleType ];
 
-		if (GET_BIT(battleItems, battleType)) {
+		if (battleItems.count(battleType)) {
 			std::string itm(pBat->abbr);
 			int item = lookup_item(itm);
 			unit->items.SetNum(item, unit->items.GetNum(item) + 1);
@@ -842,8 +827,8 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 	}
 
 	/* First, silver */
-	MonType *mp = FindMonster(ItemDefs[monitem].abr, (ItemDefs[monitem].type & IT_ILLUSION));
-	int silv = mp->silver;
+	auto mp = FindMonster(ItemDefs[monitem].abr, (ItemDefs[monitem].type & IT_ILLUSION))->get();
+	int silv = mp.silver;
 	if ((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
 		// Adjust the spoils for length of freedom.
 		silv *= (Globals->MONSTER_SPOILS_RECOVERY-free);
@@ -851,7 +836,7 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 	}
 	spoils.SetNum(I_SILVER, spoils.GetNum(I_SILVER) + rng::get_random(silv));
 
-	int thespoil = mp->spoiltype;
+	int thespoil = mp.spoiltype;
 
 	if (thespoil == -1) return;
 	if (thespoil == IT_NORMAL && rng::get_random(2) && !Globals->SPOILS_NO_TRADE) thespoil = IT_TRADE;
@@ -861,7 +846,7 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 	for (i=0; i<NITEMS; i++) {
 		if (
 			(ItemDefs[i].type & thespoil) && !(ItemDefs[i].type & IT_SPECIAL) && !(ItemDefs[i].type & IT_SHIP) &&
-			!(ItemDefs[i].type & IT_NEVER_SPOIL) && (ItemDefs[i].baseprice <= mp->silver) &&
+			!(ItemDefs[i].type & IT_NEVER_SPOIL) && (ItemDefs[i].baseprice <= mp.silver) &&
 			!(ItemDefs[i].flags & ItemType::DISABLED)
 		) {
 			count ++;
@@ -873,7 +858,7 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 	for (i=0; i<NITEMS; i++) {
 		if (
 			(ItemDefs[i].type & thespoil) && !(ItemDefs[i].type & IT_SPECIAL) && !(ItemDefs[i].type & IT_SHIP) &&
-			!(ItemDefs[i].type & IT_NEVER_SPOIL) && (ItemDefs[i].baseprice <= mp->silver) &&
+			!(ItemDefs[i].type & IT_NEVER_SPOIL) && (ItemDefs[i].baseprice <= mp.silver) &&
 			!(ItemDefs[i].flags & ItemType::DISABLED)
 		) {
 			count--;
@@ -884,7 +869,7 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
 		}
 	}
 
-	int val = rng::get_random(mp->silver * 2);
+	int val = rng::get_random(mp.silver * 2);
 	if ((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
 		// Adjust for length of monster freedom.
 		val *= (Globals->MONSTER_SPOILS_RECOVERY-free);
@@ -1324,12 +1309,12 @@ int Army::RemoveEffects(int num, char const *effect)
 	return(ret);
 }
 
-WeaponBonusMalus* GetWeaponBonusMalus(WeaponType *weapon, WeaponType *target) {
+const WeaponBonusMalus* GetWeaponBonusMalus(const WeaponType& attacker, const WeaponType& target) {
 	for (int i = 0; i < MAX_WEAPON_BM_TARGETS; i++) {
-		WeaponBonusMalus *bm = &weapon->bonusMalus[i];
+		const WeaponBonusMalus *bm = &attacker.bonusMalus[i];
 		if (!bm->weaponAbbr) continue;
 
-		if (AString(bm->weaponAbbr) == target->abbr) {
+		if (AString(bm->weaponAbbr) == target.abbr) {
 			return bm;
 		}
 	}
@@ -1401,8 +1386,8 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 		Soldier * tar = GetTarget(tarnum);
 		int tarFlags = 0;
 		if (tar->weapon != -1) {
-			WeaponType *pw = FindWeapon(ItemDefs[tar->weapon].abr);
-			tarFlags = pw->flags;
+			auto weapon = FindWeapon(ItemDefs[tar->weapon].abr)->get();
+			tarFlags = weapon.flags;
 		}
 
 		/* 4. Add in any effects, if applicable */
@@ -1434,11 +1419,11 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 
 		// 4.4 Check for weapon inflicted bonuses
 		if (weaponIndex != -1 && tar->weapon != -1) {
-			WeaponType *attackerWeapon = FindWeapon(ItemDefs[weaponIndex].abr);
-			WeaponType *targetWeapon = FindWeapon(ItemDefs[tar->weapon].abr);
+			auto attackerWeapon = FindWeapon(ItemDefs[weaponIndex].abr)->get();
+			auto targetWeapon = FindWeapon(ItemDefs[tar->weapon].abr)->get();
 
-			WeaponBonusMalus *attackerBm = GetWeaponBonusMalus(attackerWeapon, targetWeapon);
-			WeaponBonusMalus *defenderBm = GetWeaponBonusMalus(targetWeapon, attackerWeapon);
+			const WeaponBonusMalus *attackerBm = GetWeaponBonusMalus(attackerWeapon, targetWeapon);
+			const WeaponBonusMalus *defenderBm = GetWeaponBonusMalus(targetWeapon, attackerWeapon);
 
 			// attacker will get bonus to attack if defender uses weapon to which attackers weapon has bonus
 			if (attackerBm) {
@@ -1533,9 +1518,8 @@ void Army::Kill(int killed, int damage)
 	temp->unit->losses++;
 	if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_FIGURE) {
 		if (ItemDefs[temp->race].type & IT_MONSTER) {
-			MonType *mp = FindMonster(ItemDefs[temp->race].abr,
-					(ItemDefs[temp->race].type & IT_ILLUSION));
-			hitsalive -= mp->hits;
+			auto mp = FindMonster(ItemDefs[temp->race].abr, (ItemDefs[temp->race].type & IT_ILLUSION))->get();
+			hitsalive -= mp.hits;
 		} else {
 			// Assume everything that is a solder and isn't a monster is a
 			// man.

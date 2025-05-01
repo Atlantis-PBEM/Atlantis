@@ -25,7 +25,7 @@
 
 #include "unit.h"
 #include "gamedata.h"
-#include "rng.h"
+#include "rng.hpp"
 #include <stack>
 #include "string_filters.hpp"
 #include "external/nlohmann/json.hpp"
@@ -821,16 +821,16 @@ void Unit::DefaultOrders(Object *obj)
 					continue;
 				}
 
-				MonType *monster = FindMonster(itemType.abr, (itemType.type & IT_ILLUSION));
-				aggression = std::max(aggression, monster->getAggression());
+				auto monster = FindMonster(itemType.abr, (itemType.type & IT_ILLUSION))->get();
+				aggression = std::max(aggression, monster.getAggression());
 
 				// bad terrain is an union of all bad terrains
-				for (auto& item : monster->forbiddenTerrain) {
+				for (auto& item : monster.forbiddenTerrain) {
 					forbidden.insert(item);
 				}
 
 				// for simplicity good terrains will be union too
-				for (auto& item : monster->preferredTerrain) {
+				for (auto& item : monster.preferredTerrain) {
 					perferred.insert(item);
 				}
 			}
@@ -1998,8 +1998,8 @@ int Unit::Hostile()
 	int retval = 0;
 	for(auto i : items) {
 		if (ItemDefs[i->type].type & IT_MONSTER) {
-			MonType *mp = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION));
-			int hos = mp->hostile;
+			auto monster = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
+			int hos = monster.hostile;
 			if (hos > retval) retval = hos;
 		}
 	}
@@ -2067,27 +2067,27 @@ int Unit::Taxers(int numtaxers)
 		}
 
 		if (ItemDefs[item->type].type & IT_WEAPON) {
-			WeaponType *pWep = FindWeapon(ItemDefs[item->type].abr);
+			auto weapon = FindWeapon(ItemDefs[item->type].abr)->get();
 			int num = item->num;
 			int basesk = 0;
-			int sk = lookup_skill(pWep->baseSkill);
+			int sk = lookup_skill(weapon.baseSkill);
 			if (sk != -1) basesk = GetSkill(sk);
 			if (basesk == 0) {
-				sk = lookup_skill(pWep->orSkill);
+				sk = lookup_skill(weapon.orSkill);
 				if (sk != -1) basesk = GetSkill(sk);
 			}
-			if (!(pWep->flags & WeaponType::NEEDSKILL)) {
+			if (!(weapon.flags & WeaponType::NEEDSKILL)) {
 				if (basesk) {
 					numUsableMelee += num;
 				}
 				numMelee += num;
-			} else if (pWep->flags & WeaponType::NOFOOT) {
+			} else if (weapon.flags & WeaponType::NOFOOT) {
 				if (basesk) {
 					numUsableMounted += num;
 				}
 				numMounted += num;
 			} else {
-				if (pWep->flags & WeaponType::RANGED) {
+				if (weapon.flags & WeaponType::RANGED) {
 					if (basesk) {
 						numUsableBows += num;
 					}
@@ -2347,10 +2347,10 @@ int Unit::GetBattleItem(AString &itm)
 int Unit::GetArmor(AString &itm, int ass)
 {
 	int item = lookup_item(itm.const_str());
-	ArmorType *pa = FindArmor(itm.Str());
+	auto armor_type = FindArmor(ItemDefs[item].abr);
 
-	if (pa == NULL) return -1;
-	if (ass && !(pa->flags & ArmorType::USEINASSASSINATE)) return -1;
+	if (!armor_type) return -1;
+	if (ass && !(armor_type->get().flags & ArmorType::USEINASSASSINATE)) return -1;
 
 	int num = items.GetNum(item);
 	if (num < 1) return -1;
@@ -2368,7 +2368,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 	if (!canFly && !canRide) return -1;
 
 	int item = lookup_item(itm.const_str());
-	MountType *pMnt = FindMount(itm.Str());
+	MountType *pMnt = FindMount(ItemDefs[item].abr);
 
 	int num = items.GetNum(item);
 	if (num < 1) return -1;
@@ -2416,9 +2416,10 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 		int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage)
 {
 	int item = lookup_item(itm.const_str());
-	WeaponType *pWep = FindWeapon(itm.Str());
+	auto weapontype = FindWeapon(ItemDefs[item].abr);
 
-	if (pWep == NULL) return -1;
+	if (!weapontype) return -1;
+	auto weapon = weapontype->get();
 
 	int num = items.GetNum(item);
 	if (num < 1) return -1;
@@ -2430,22 +2431,22 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 	attacks = 1;
 
 	// Found a weapon, check flags and skills
-	int baseSkillLevel = CanUseWeapon(pWep, riding);
+	int baseSkillLevel = CanUseWeapon(weapon, riding);
 	// returns -1 if weapon cannot be used, else the usable skill level
 	if (baseSkillLevel == -1) return -1;
 
 	// Attack and defense skill
-	attackBonus = baseSkillLevel + pWep->attackBonus;
-	if (pWep->flags & WeaponType::NOATTACKERSKILL)
-		defenseBonus = pWep->defenseBonus;
+	attackBonus = baseSkillLevel + weapon.attackBonus;
+	if (weapon.flags & WeaponType::NOATTACKERSKILL)
+		defenseBonus = weapon.defenseBonus;
 	else
-		defenseBonus = baseSkillLevel + pWep->defenseBonus;
+		defenseBonus = baseSkillLevel + weapon.defenseBonus;
 	// Riding bonus
-	if (pWep->flags & WeaponType::RIDINGBONUS) attackBonus += ridingBonus;
-	if (pWep->flags & (WeaponType::RIDINGBONUSDEFENSE|WeaponType::RIDINGBONUS))
+	if (weapon.flags & WeaponType::RIDINGBONUS) attackBonus += ridingBonus;
+	if (weapon.flags & (WeaponType::RIDINGBONUSDEFENSE|WeaponType::RIDINGBONUS))
 		defenseBonus += ridingBonus;
 	// Number of attacks
-	attacks = pWep->numAttacks;
+	attacks = weapon.numAttacks;
 	// Note: NUM_ATTACKS_SKILL must be > NUM_ATTACKS_HALF_SKILL
 	if (attacks >= WeaponType::NUM_ATTACKS_SKILL)
 		attacks += baseSkillLevel - WeaponType::NUM_ATTACKS_SKILL;
@@ -2454,7 +2455,7 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
 	// Sanity check
 	if (attacks == 0) attacks = 1;
 
-	hitDamage = pWep->hitDamage;
+	hitDamage = weapon.hitDamage;
 	// // Check if attackDamage is based on skill level
 	// // >= used in case NUM_DAMAGE_SKILL+1
 	if (hitDamage >= WeaponType::NUM_DAMAGE_SKILL) {
@@ -2519,13 +2520,12 @@ int Unit::GetAttribute(char const *attrib)
 	if (ap->flags & AttribModType::CHECK_MONSTERS) {
 		for(auto i : items) {
 			if (ItemDefs[i->type].type & IT_MONSTER) {
-				MonType *mp = FindMonster(ItemDefs[i->type].abr,
-						(ItemDefs[i->type].type & IT_ILLUSION));
+				auto monster = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
 				int val = 0;
 				temp = attrib;
-				if (temp == "observation") val = mp->obs;
-				else if (temp == "stealth") val = mp->stealth;
-				else if (temp == "tactics") val = mp->tactics;
+				if (temp == "observation") val = monster.obs;
+				else if (temp == "stealth") val = monster.stealth;
+				else if (temp == "tactics") val = monster.tactics;
 				else continue;
 				if (monbase == -1) monbase = val;
 				else if (ap->flags & AttribModType::USE_WORST)
@@ -2726,29 +2726,23 @@ void Unit::SkillStarvation()
 	return;
 }
 
-int Unit::CanUseWeapon(WeaponType *pWep, int riding)
+int Unit::CanUseWeapon(const WeaponType& weapon, int riding)
 {
-	if (riding == -1) {
-		if (pWep->flags & WeaponType::NOFOOT) return -1;
-	}
-	else if (pWep->flags & WeaponType::NOMOUNT) return -1;
-	return CanUseWeapon(pWep);
-}
+	if (riding == -1 && (weapon.flags & WeaponType::NOFOOT)) return -1;
+	if (weapon.flags & WeaponType::NOMOUNT) return -1;
 
-int Unit::CanUseWeapon(WeaponType *pWep)
-{
 	int baseSkillLevel = 0;
 	int tempSkillLevel = 0;
 
 	int bsk, orsk;
 	AString skname;
-	if (pWep->baseSkill != NULL) {
-		bsk = lookup_skill(pWep->baseSkill);
+	if (weapon.baseSkill != NULL) {
+		bsk = lookup_skill(weapon.baseSkill);
 		if (bsk != -1) baseSkillLevel = GetSkill(bsk);
 	}
 
-	if (pWep->orSkill != NULL) {
-		orsk = lookup_skill(pWep->orSkill);
+	if (weapon.orSkill != NULL) {
+		orsk = lookup_skill(weapon.orSkill);
 		if (orsk != -1) tempSkillLevel = GetSkill(orsk);
 	}
 
@@ -2758,7 +2752,7 @@ int Unit::CanUseWeapon(WeaponType *pWep)
 	} else
 		Practice(bsk);
 
-	if (pWep->flags & WeaponType::NEEDSKILL && !baseSkillLevel) return -1;
+	if (weapon.flags & WeaponType::NEEDSKILL && !baseSkillLevel) return -1;
 
 	return baseSkillLevel;
 }

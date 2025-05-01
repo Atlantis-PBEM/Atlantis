@@ -1051,7 +1051,7 @@ void Game::PostProcessUnit(ARegion *r, Unit *u)
 void Game::EndGame(Faction *victor)
 {
 	for(const auto fac : factions) {
-		fac->exists = 0;
+		fac->exists = false;
 		if (fac == victor)
 			fac->quit = QUIT_WON_GAME;
 		else
@@ -1530,12 +1530,12 @@ void Game::DoBuy(ARegion *r, Market *m)
 						delete sl;
 						/* Setup specialized skill experience */
 						if (Globals->REQUIRED_EXPERIENCE) {
-							ManType *mt = FindRace(ItemDefs[o->item].abr);
-							int exp = mt->speciallevel - mt->defaultlevel;
+							auto mt = FindRace(ItemDefs[o->item].abr)->get();
+							int exp = mt.speciallevel - mt.defaultlevel;
 							if (exp > 0) {
 								exp = exp * temp * GetDaysByLevel(1);
-								for (int ms = 0; ms < (int)(sizeof(mt->skills)/sizeof(mt->skills[0])); ms++) {
-									int skill = lookup_skill(mt->skills[ms]);
+								for (auto ms : mt.skills) {
+									int skill = lookup_skill(ms);
 									if (skill == -1) continue;
 									int curxp = u->skills.GetExp(skill);
 									u->skills.SetExp(skill,exp+curxp);
@@ -2474,14 +2474,12 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			if (Globals->WANDERING_MONSTERS_EXIST) {
 				Faction *mfac = GetFaction(factions, monfaction);
 				Unit *mon = GetNewUnit(mfac, 0);
-				MonType *mp = FindMonster(ItemDefs[o->item].abr,
-						(ItemDefs[o->item].type & IT_ILLUSION));
-				mon->MakeWMon(mp->name, o->item, amt);
+				auto mp = FindMonster(ItemDefs[o->item].abr, (ItemDefs[o->item].type & IT_ILLUSION))->get();
+				mon->MakeWMon(mp.name, o->item, amt);
 				mon->MoveUnit(r->GetDummy());
 				// This will result in 0 unless MONSTER_NO_SPOILS or
 				// MONSTER_SPOILS_RECOVERY are set.
-				mon->free = Globals->MONSTER_NO_SPOILS +
-					Globals->MONSTER_SPOILS_RECOVERY;
+				mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
 			}
 		} else {
 			u->ConsumeShared(o->item, amt);
@@ -3187,7 +3185,6 @@ void Game::RunAnnihilateOrders() {
 	// Check all units for annihilate orders.  A unit my only annihilate if they have access to the annihilate skill.
 	// Annihilate will destroy the target hex and all surrounding hexes.  Already annihilated regions cannot be
 	// annihilated again.
-	bool only_surface = rulesetSpecificData.value("annihilate_surface_only", false);
 	int max_annihilates = rulesetSpecificData.value("allowed_annihilates", 1);
 
 	for(const auto r : regions) {
@@ -3252,11 +3249,15 @@ void Game::RunAnnihilateOrders() {
 				while(allowed_annihilates > 0) {
 					// pick a random region region to annihilate
 					ARegionArray *level = nullptr;
-					if (only_surface) {
+
+					RangeType *rt = FindRange("rng_annihilate");
+					if (rt->flags & RangeType::RNG_SURFACE_ONLY) {
 						level = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
 					} else {
 						int zloc = rng::get_random(regions.numLevels);
 						level = regions.GetRegionArray(zloc);
+						// Don't allow it to annihilate the Nexus
+						if (level->levelType == ARegionArray::LEVEL_NEXUS) continue;
 					}
 					// now, get a random region from that level that isn't our own.
 					if (level == nullptr) break;

@@ -1,0 +1,29 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Rule: Restrict Scope Changes
+
+## Constraint
+Do not change implementation paradigms, architectural patterns, or functional scope unless explicitly
+directed to do so by the user.
+
+## Rationale
+This rule ensures that modifications strictly adhere to the user's request. It prevents the introduction
+of unintended behavioral differences or regressions, particularly in complex code sections with subtle
+dependencies (e.g., random number generator seeding, static initialization order) where seemingly
+equivalent refactoring can alter behavior.
+
+## Prohibited Unsolicited Changes (Examples)
+*   Changing established design patterns (e.g., converting a singleton class to namespace-based functions, or vice-versa).
+*   Altering core algorithms or data structures unless the request specifically targets them.
+*   Adding, removing, or modifying public API elements (functions, classes, variables) that were not part of the explicit request.
+*   Significantly rewriting function logic beyond the specific modification requested (e.g., changing how a function achieves its result, even if the intended outcome is the same).
+*   Introducing new libraries or dependencies not requested.
+
+## Allowed Actions
+*   Focus solely on implementing the exact task specified by the user.
+*   Examples: Rename a specific file/variable/function, add a specific function with a defined signature/behavior, fix a specific identified bug, implement a feature as described.
+*   Minor, necessary adjustments directly related to the request (e.g., updating include guards after renaming, fixing syntax errors introduced by the edit) are permitted.
+*   If a requested change seems problematic or could be improved with a different approach, *propose* the alternative and explain the reasoning, but await user confirmation before implementing the deviation.

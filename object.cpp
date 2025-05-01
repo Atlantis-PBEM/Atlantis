@@ -32,7 +32,7 @@
 #include "indenter.hpp"
 #include "string_parser.hpp"
 #include "string_filters.hpp"
-
+#include "strings_util.hpp"
 int lookup_object(const std::string& token)
 {
 	for (int i = 0; i < NOBJECTS; i++) {
@@ -723,7 +723,7 @@ AString *ObjectDescription(int obj)
 	if (o->flags & ObjectType::SACRIFICE) {
 		*temp += " This structure requires a sacrifice of ";
 		*temp += AString(o->sacrifice_amount) + " ";
-		*temp += plural(o->sacrifice_amount, ItemDefs[o->sacrifice_item].name, ItemDefs[o->sacrifice_item].names);
+		*temp += strings::plural(o->sacrifice_amount, ItemDefs[o->sacrifice_item].name, ItemDefs[o->sacrifice_item].names);
 		*temp += " [";
 		*temp += ItemDefs[o->sacrifice_item].abr;
 		*temp += "].";
@@ -736,7 +736,8 @@ AString *ObjectDescription(int obj)
 	}
 
 	if (Globals->LAIR_MONSTERS_EXIST && (o->monster != -1)) {
-		*temp += AString(" ") + capitalize(ItemDefs[o->monster].names) + " can potentially lair in this structure.";
+		*temp += AString(" ") + (ItemDefs[o->monster].names | filter::capitalize) +
+			" can potentially lair in this structure.";
 		if (o->flags & ObjectType::NOMONSTERGROWTH) {
 			*temp += " Monsters in this structures will never regenerate.";
 		}
@@ -749,30 +750,17 @@ AString *ObjectDescription(int obj)
 	if (o->protect) {
 		*temp += AString(" This structure provides defense to the first ") +
 			o->protect + " men inside it.";
-		// Now do the defences. First, figure out how many to do.
-		int totaldef = 0;
-		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
-			totaldef += (o->defenceArray[i] != 0);
-		}
-	// Now add the description to temp
+		// Now add the description to temp
 		*temp += AString(" This structure gives a defensive bonus of ");
+		std::vector<std::string> defences;
 		for (int i=0; i<NUM_ATTACK_TYPES; i++) {
 			if (o->defenceArray[i]) {
-				totaldef--;
-				*temp += AString(o->defenceArray[i]) + " against " +
-					AttType(i) + AString(" attacks");
-
-				if (totaldef >= 2) {
-					*temp += AString(", ");
-				} else {
-					if (totaldef == 1) {	// penultimate bonus
-						*temp += AString(" and ");
-					} else {	// last bonus
-						*temp += AString(".");
-					}
-				} // end if
+				std::string def = std::to_string(o->defenceArray[i]) + " against " +
+					std::string(AttType(i).const_str()) + " attacks";
+				defences.push_back(def);
 			}
-		} // end for
+		}
+		*temp += strings::join(defences, ", ", " and ") + (defences.size() > 0 ? "." : "");
 
 		// Capacity check prevents showing wrong details for ships
 		if (Globals->EXTENDED_FORT_DEFENCE && !o->capacity) {

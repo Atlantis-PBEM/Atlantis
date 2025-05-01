@@ -30,7 +30,7 @@
 #include "game.h"
 #include "gamedata.h"
 #include <string.h>
-
+#include "../string_filters.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -38,8 +38,8 @@ using namespace std;
 
 typedef struct
 {
-	char const	*word;
-	int		prob;
+	const std::string word;
+	int prob;
 } WordList;
 
 // Initial Consonant, Vowel and Final Consonant sequences and
@@ -94,11 +94,11 @@ WordList fc[] =
 
 typedef struct
 {
-	int		terrain;
-	char const	*word;
-	int		prob;
-	int		town;
-	int		port;
+	int terrain;
+	const std::string word;
+	int prob;
+	int town;
+	int port;
 } SuffixList;
 
 SuffixList ts[] =
@@ -243,7 +243,7 @@ int AGetName(int town, ARegion *reg)
 {
 	int unique, rnd, syllables, i, trail, port, similar;
 	unsigned int u;
-	char temp[80];
+	std::string temp;
 
 	port = 0;
 	if (town) {
@@ -256,10 +256,9 @@ int AGetName(int town, ARegion *reg)
 	unique = 0;
 	while (!unique) {
 		rnd = rng::get_random(tSyll);
-		for (syllables = 0; rnd >= syllprob[syllables]; syllables++)
-			rnd -= syllprob[syllables];
+		for (syllables = 0; rnd >= syllprob[syllables]; syllables++) rnd -= syllprob[syllables];
 		syllables++;
-		temp[0] = 0;
+		temp = "";
 		trail = 0;
 		while (syllables-- > 0) {
 			if (!syllables) {
@@ -268,21 +267,14 @@ int AGetName(int town, ARegion *reg)
 				rnd = rng::get_random(400);
 				similar = TerrainDefs[reg->type].similar_type;
 				// Use forest names for underforest
-				if (similar == R_UFOREST)
-					similar = R_FOREST;
+				if (similar == R_UFOREST) similar = R_FOREST;
 				// ocean (water) names for lakes
-				if (similar == R_LAKE)
-					similar = R_OCEAN;
+				if (similar == R_LAKE) similar = R_OCEAN;
 				// and plains names for cavern
-				if (similar == R_CAVERN)
-					similar = R_PLAIN;
+				if (similar == R_CAVERN) similar = R_PLAIN;
 				for (u = 0; u < sizeof(ts) / sizeof(ts[0]); u++) {
-					if (ts[u].terrain == similar ||
-							ts[u].terrain == -1 ||
-							(ts[u].town && town) ||
-							(ts[u].port && port)) {
-						if (rnd >= ts[u].prob)
-							rnd -= ts[u].prob;
+					if (ts[u].terrain == similar || ts[u].terrain == -1 || (ts[u].town && town) || (ts[u].port && port)) {
+						if (rnd >= ts[u].prob) rnd -= ts[u].prob;
 						else {
 							if (trail) {
 								switch(ts[u].word[0]) {
@@ -291,13 +283,13 @@ int AGetName(int town, ARegion *reg)
 									case 'i':
 									case 'o':
 									case 'u':
-										strcat(temp, "'");
+										temp += "'";
 										break;
 									default:
 										break;
 								}
 							}
-							strcat(temp, ts[u].word);
+							temp += ts[u].word;
 							break;
 						}
 					}
@@ -308,30 +300,27 @@ int AGetName(int town, ARegion *reg)
 			if (rng::get_random(5) > 0) {
 				// 4 out of 5 syllables start with a consonant sequence
 				rnd = rng::get_random(tIC);
-				for (i = 0; rnd >= ic[i].prob; i++)
-					rnd -= ic[i].prob;
-				strcat(temp, ic[i].word);
+				for (i = 0; rnd >= ic[i].prob; i++) rnd -= ic[i].prob;
+				temp += ic[i].word;
 			} else if (trail) {
 				// separate adjacent vowels
-				strcat(temp, "'");
+				temp += "'";
 			}
 			// All syllables have a vowel sequence
 			rnd = rng::get_random(tV);
-			for (i = 0; rnd >= v[i].prob; i++)
-				rnd -= v[i].prob;
-			strcat(temp, v[i].word);
+			for (i = 0; rnd >= v[i].prob; i++) rnd -= v[i].prob;
+			temp += v[i].word;
 			if (rng::get_random(5) > 1) {
 				// 3 out of 5 syllables end with a consonant sequence
 				rnd = rng::get_random(tFC);
-				for (i = 0; rnd >= fc[i].prob; i++)
-					rnd -= fc[i].prob;
-				strcat(temp, fc[i].word);
+				for (i = 0; rnd >= fc[i].prob; i++) rnd -= fc[i].prob;
+				temp += fc[i].word;
 				trail = 0;
 			} else {
 				trail = 1;
 			}
 		}
-		temp[0] = toupper(temp[0]);
+		temp = temp | filter::capitalize;
 		unique = 1;
 		for(const auto& name: regionnames) {
 			if (name == temp) {
@@ -339,26 +328,23 @@ int AGetName(int town, ARegion *reg)
 				break;
 			}
 		}
-		if (strlen(temp) > 12)
-			unique = 0;
+		if (temp.length() > 12) unique = 0;
 	}
 
 	nnames++;
-	if (town)
-		ntowns++;
-	else
-		nregions++;
+	if (town) ntowns++;
+	else nregions++;
 
 	regionnames.push_back(temp);
 
 	return regionnames.size();
 }
 
-const char *AGetNameString(int name)
+const std::string& AGetNameString(int name)
 {
-	if (name <= 0 || name > (int) regionnames.size())
-		return "Error";
-	return regionnames[name-1].c_str();
+	static const std::string errorName = "Error";
+	if (name <= 0 || name > (int) regionnames.size()) return errorName;
+	return regionnames[name-1];
 }
 
 void Game::CreateWorld()

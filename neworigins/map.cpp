@@ -27,7 +27,7 @@
 #include <string.h>
 #include "game.h"
 #include "gamedata.h"
-#include "rng.h"
+#include "rng.hpp"
 
 #include <algorithm>
 #include <list>
@@ -1061,8 +1061,7 @@ void MapBuilder::SpecializeZones(size_t continents, int continentAreaFraction) {
 	Awrite("Grow oceans");
 	int oceanCores = std::max(1, (int) oceans.size() / 4);
 
-	// C++17 technically no longer has std::random_shuffle.  It's been replaced with std::shuffle and some boilerplate
-	std::shuffle(oceans.begin(), oceans.end(), rng::generator());
+	rng::shuffle(oceans);
 
 	oceans.resize(oceanCores);
 	for (auto &zone : oceans) {
@@ -2841,13 +2840,11 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
 						if (TerrainDefs[nreg->type].similar_type == R_OCEAN)
 							ch += 2;
 					} else {
-						ManType *mt = FindRace(ItemDefs[reg->race].abr);
-						if (mt->terrain==TerrainDefs[nreg->type].similar_type)
-							ch += 2;
+						auto mt = FindRace(ItemDefs[reg->race].abr)->get();
+						if (mt.terrain==TerrainDefs[nreg->type].similar_type) ch += 2;
 						int rnum = sizeof(TerrainDefs[nreg->type].races) / sizeof(TerrainDefs[nreg->type].races[0]);
 						for (int i=0; i<rnum; i++) {
-							if (TerrainDefs[nreg->type].races[i] == reg->race)
-								ch++;
+							if (TerrainDefs[nreg->type].races[i] == reg->race) ch++;
 						}
 					}
 					if (ch > 3) nreg->race = reg->race;
@@ -2995,7 +2992,7 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 					}
 					Awrite("Found " + std::to_string(candidates[type].size()) + " candidates for " +
 						TerrainDefs[type].name + " gateway");
-					int index = rng::rng::get_random(candidates[type].size());
+					int index = rng::get_random(candidates[type].size());
 					ARegion *dest = candidates[type][index];
 					ARegion *best = dest;
 					int tries = 50;
@@ -3014,7 +3011,7 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 							best = dest;
 						}
 						// too close, try again
-						index = rng::rng::get_random(candidates[type].size());
+						index = rng::get_random(candidates[type].size());
 						dest = candidates[type][index];
 					}
 					// store the best we have so far

@@ -29,11 +29,11 @@
 //							   different base costs
 #include "game.h"
 #include "gamedata.h"
-
+#include <string>
 // Make sure this is correct.   The default is 1000 towns and 1000 regions.
 #define NUMBER_OF_TOWNS 1000
 
-static char const *regionnames[] =
+static const std::vector<std::string> regionnames =
 {
 // Towns x1000
 	"Cahaba",
@@ -2051,7 +2051,7 @@ static int nregions;
 
 void SetupNames()
 {
-	nnames = sizeof regionnames / sizeof (char *);
+	nnames = regionnames.size();
 	nameused = new int[nnames];
 
 	for (int i=0; i<nnames; i++) nameused[i] = 0;
@@ -2095,9 +2095,9 @@ int AGetName(int town, ARegion *reg)
 	return j;
 }
 
-char const *AGetNameString( int name )
+const std::string& AGetNameString( int name )
 {
-	return( regionnames[ name ] );
+	return(regionnames[name]);
 }
 
 void Game::CreateWorld()

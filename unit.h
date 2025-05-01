@@ -231,8 +231,7 @@ class Unit {
 		int GetMount(AString &itm, int canFly, int canRide, int &bonus);
 		int GetWeapon(AString &itm, int riding, int ridingBonus,
 				int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage);
-		int CanUseWeapon(WeaponType *pWep, int riding);
-		int CanUseWeapon(WeaponType *pWep);
+		int CanUseWeapon(const WeaponType& weapon, int riding);
 		int Taxers(int);
 
 		void MoveUnit( Object *newobj );

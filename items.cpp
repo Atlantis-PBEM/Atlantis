@@ -29,6 +29,9 @@
 #include "object.h"
 #include "gamedata.h"
 #include "string_parser.hpp"
+#include "strings_util.hpp"
+#include <ranges>
+#include <cmath>
 
 using namespace std;
 
@@ -54,50 +57,46 @@ BattleItemType *FindBattleItem(char const *abbr)
 	return NULL;
 }
 
-ArmorType *FindArmor(char const *abbr)
+std::optional<std::reference_wrapper<ArmorType>> FindArmor(char const *abbr)
 {
-	if (abbr == NULL) return NULL;
-	for (int i = 0; i < NUMARMORS; i++) {
-		if (ArmorDefs[i].abbr == NULL) continue;
-		if (AString(abbr) == ArmorDefs[i].abbr)
-			return &ArmorDefs[i];
-	}
-	return NULL;
+	if (abbr == NULL) return std::nullopt;
+	std::string tag = std::string(abbr) | filter::lowercase;
+
+	auto it = std::find_if(ArmorDefs.begin(), ArmorDefs.end(), [tag](const ArmorType& armor) {
+		std::string armor_tag = std::string(armor.abbr) | filter::lowercase;
+		return armor_tag == tag;
+	});
+	if (it != ArmorDefs.end()) return std::ref(*it);
+
+	return std::nullopt;
 }
 
-WeaponType *FindWeapon(char const *abbr)
+std::optional<std::reference_wrapper<WeaponType>> FindWeapon(char const *abbr)
 {
-	if (abbr == NULL) return NULL;
-	for (int i = 0; i < NUMWEAPONS; i++) {
-		if (WeaponDefs[i].abbr == NULL) continue;
-		if (AString(abbr) == WeaponDefs[i].abbr)
-			return &WeaponDefs[i];
-	}
-	return NULL;
+	if (abbr == NULL) return std::nullopt;
+	std::string tag = std::string(abbr) | filter::lowercase;
+
+	auto it = std::find_if(WeaponDefs.begin(), WeaponDefs.end(), [tag](const WeaponType& weapon) {
+		std::string weapon_tag = std::string(weapon.abbr) | filter::lowercase;
+		return weapon_tag == tag;
+	});
+	if (it != WeaponDefs.end()) return std::ref(*it);
+
+	return std::nullopt;
 }
 
-ItemType *FindItem(char const *abbr)
+std::optional<std::reference_wrapper<ItemType>> FindItem(char const *abbr)
 {
-	if (abbr == NULL) return NULL;
-	for (int i = 0; i < NITEMS; i++) {
-		if (ItemDefs[i].abr == NULL) continue;
+	if (abbr == NULL) return std::nullopt;
+	std::string tag = std::string(abbr) | filter::lowercase;
 
-		if (AString(abbr) == ItemDefs[i].abr) return &ItemDefs[i];
-	}
+	auto it = std::find_if(ItemDefs.begin(), ItemDefs.end(), [tag](const ItemType& item) {
+		std::string item_tag = std::string(item.abr) | filter::lowercase;
+		return item_tag == tag;
+	});
+	if (it != ItemDefs.end()) return std::ref(*it);
 
-	return NULL;
-}
-
-int FindItemIndex(char const *abbr)
-{
-	if (abbr == NULL) return -1;
-	for (int i = 0; i < NITEMS; i++) {
-		if (ItemDefs[i].abr == NULL) continue;
-
-		if (AString(abbr) == ItemDefs[i].abr) return i;
-	}
-
-	return -1;
+	return std::nullopt;
 }
 
 MountType *FindMount(char const *abbr)
@@ -111,42 +110,32 @@ MountType *FindMount(char const *abbr)
 	return NULL;
 }
 
-MonType *FindMonster(char const *abbr, int illusion)
+std::optional<std::reference_wrapper<MonType>> FindMonster(char const *abbr, int illusion)
 {
-	if (abbr == NULL) return NULL;
-	AString tag = (illusion ? "i" : "");
-	tag += abbr;
+	if (abbr == nullptr) return std::nullopt;
+	std::string tag = ((illusion ? "i" : "") + std::string(abbr)) | filter::lowercase;
 
-	for (int i = 0; i < NUMMONSTERS; i++) {
-		if (MonDefs[i].abbr == NULL) continue;
-		if (tag == MonDefs[i].abbr)
-			return &MonDefs[i];
-	}
-	return NULL;
+	auto it = std::find_if(MonDefs.begin(), MonDefs.end(), [tag](const MonType& mon) {
+		std::string mon_tag = std::string(mon.abbr) | filter::lowercase;
+		return mon_tag == tag;
+	});
+	if (it != MonDefs.end()) return std::ref(*it);
+
+	return std::nullopt;
 }
 
-ManType *FindRace(char const *abbr)
+std::optional<std::reference_wrapper<ManType>> FindRace(char const *abbr)
 {
-	if (abbr == NULL) return NULL;
-	for (int i = 0; i < NUMMAN; i++) {
-		if (ManDefs[i].abbr == NULL) continue;
-		if (AString(abbr) == ManDefs[i].abbr)
-			return &ManDefs[i];
-	}
-	return NULL;
-}
+	if (abbr == nullptr) return std::nullopt;
+	std::string tag = std::string(abbr) | filter::lowercase;
 
-int FindRaceItemIndex(int raceIndex) {
-	auto man = ManDefs[raceIndex];
+	auto it = std::find_if(ManDefs.begin(), ManDefs.end(), [tag](const ManType& man) {
+		std::string man_tag = std::string(man.abbr) | filter::lowercase;
+		return man_tag == tag;
+	});
+	if (it != ManDefs.end()) return std::ref(*it);
 
-	for (int i = 0; i < NITEMS; i++) {
-		auto item = ItemDefs[i];
-		if (item.type == IT_MAN && AString(item.abr) == man.abbr) {
-			return i;
-		}
-	}
-
-	return -1;
+	return std::nullopt;
 }
 
 AString AttType(int atype)
@@ -647,28 +636,18 @@ AString *ItemDescription(int item, int full)
 				*temp += ". This ship provides defense to the first ";
 				*temp += ObjectDefs[objectno].protect;
 				*temp += " men inside it, ";
-				int totaldef = 0;
-				for (int i=0; i<NUM_ATTACK_TYPES; i++) {
-					totaldef += (ObjectDefs[objectno].defenceArray[i] != 0);
-				}
 				// Now add the description to temp
 				*temp += AString("giving a defensive bonus of ");
+
+				std::vector<std::string> defences;
 				for (int i=0; i<NUM_ATTACK_TYPES; i++) {
 					if (ObjectDefs[objectno].defenceArray[i]) {
-						totaldef--;
-						*temp += AString(ObjectDefs[objectno].defenceArray[i]) + " against " +
-							AttType(i) + AString(" attacks");
-
-						if (totaldef >= 2) {
-							*temp += AString(", ");
-						} else {
-							if (totaldef == 1) {	// penultimate bonus
-								*temp += AString(" and ");
-							} else {	// last bonus
-							}
-						} // end if
+						std::string def = std::to_string(ObjectDefs[objectno].defenceArray[i]) + " against " +
+							std::string(AttType(i).const_str()) + " attacks";
+						defences.push_back(def);
 					}
-				} // end for
+				}
+				*temp += strings::join(defences, ", ", " and ");
 			}
 			if (Globals->LIMITED_MAGES_PER_BUILDING && ObjectDefs[objectno].maxMages > 0) {
 				*temp += ". This ship will allow ";
@@ -767,15 +746,15 @@ AString *ItemDescription(int item, int full)
 	*temp += ".";
 
 	if (ItemDefs[item].type & IT_MAN) {
-		ManType *mt = FindRace(ItemDefs[item].abr);
+		auto mt = FindRace(ItemDefs[item].abr)->get();
 		AString mani = "MANI";
 		AString last = "";
 		int found = 0;
 		*temp += " This race may study ";
 		unsigned int c;
-		unsigned int len = sizeof(mt->skills) / sizeof(mt->skills[0]);
+		unsigned int len = sizeof(mt.skills) / sizeof(mt.skills[0]);
 		for (c = 0; c < len; c++) {
-			pS = FindSkill(mt->skills[c]);
+			pS = FindSkill(mt.skills[c]);
 			if (!pS) continue;
 			if (mani == pS->abbr && Globals->MAGE_NONLEADERS) {
 				if (!(last == "")) {
@@ -803,28 +782,27 @@ AString *ItemDescription(int item, int full)
 			found = 1;
 		}
 		if (found) {
-			*temp += AString(" to level ") + mt->speciallevel +
+			*temp += AString(" to level ") + mt.speciallevel +
 				" and all other skills to level " +
-				mt->defaultlevel + ".";
+				mt.defaultlevel + ".";
 		} else {
-			*temp += AString("all skills to level ") + mt->defaultlevel + ".";
+			*temp += AString("all skills to level ") + mt.defaultlevel + ".";
 		}
 	}
 
 	if ((ItemDefs[item].type & IT_MONSTER) && !(ItemDefs[item].flags & ItemType::MANPRODUCE)) {
 		*temp += " This is a monster.";
-		MonType *mp = FindMonster(ItemDefs[item].abr,
-				(ItemDefs[item].type & IT_ILLUSION));
-		*temp += AString(" This monster attacks with a combat skill of ") + mp->attackLevel;
+		auto monster = FindMonster(ItemDefs[item].abr, (ItemDefs[item].type & IT_ILLUSION))->get();
+		*temp += AString(" This monster attacks with a combat skill of ") + monster.attackLevel;
 
 		for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
-			*temp += AString(" ") + MonResist(c,mp->defense[c], full);
+			*temp += AString(" ") + MonResist(c,monster.defense[c], full);
 		}
 
-		if (mp->special && mp->special != NULL) {
+		if (monster.special && monster.special != NULL) {
 			*temp += AString(" ") +
 				"Monster can cast " +
-				ShowSpecial(mp->special, mp->specialLevel, 1, 0);
+				ShowSpecial(monster.special, monster.specialLevel, 1, 0);
 		}
 
 		{
@@ -841,7 +819,7 @@ AString *ItemDescription(int item, int full)
 			}
 
 			if (!spawnIn.empty()) {
-				*temp += AString(" The monster can spawn in the wilderness of ") + join(", ", " and ", spawnIn) + ".";
+				*temp += " The monster can spawn in the wilderness of " + strings::join(spawnIn, ", ", " and ") + ".";
 			}
 		}
 
@@ -859,67 +837,68 @@ AString *ItemDescription(int item, int full)
 			}
 
 			if (!lairIn.empty()) {
-				*temp += AString(" This monster can lair in the ") + join(", ", " and ", lairIn) + ".";
+				*temp += " This monster can lair in the " + strings::join(lairIn, ", ", " and ") + ".";
 			}
 		}
 
-		if (mp->preferredTerrain.empty() && mp->forbiddenTerrain.empty()) {
-			*temp += AString(" ") + "The monster has no terrain preferences, and it can travel through any terrain.";
+		if (monster.preferredTerrain.empty() && monster.forbiddenTerrain.empty()) {
+			*temp += " The monster has no terrain preferences, and it can travel through any terrain.";
 		}
 
-		if (!mp->forbiddenTerrain.empty()) {
+		if (!monster.forbiddenTerrain.empty()) {
 			std::vector<std::string> list;
-			for (auto &terrain : mp->forbiddenTerrain) {
+			for (auto &terrain : monster.forbiddenTerrain) {
 				list.push_back(TerrainDefs[terrain].name);
 			}
 
-			*temp += AString(" Monster severely dislikes ") + join(",", " and ", list) + " " + plural(mp->forbiddenTerrain.size(), "terrain", "terrains") + " and will never try to enter them.";
+			*temp += " Monster severely dislikes " + strings::join(list, ",", " and ") + " " +
+				strings::plural(monster.forbiddenTerrain.size(), "terrain", "terrains") + " and will never try to enter them.";
 		}
 
-		if (!mp->preferredTerrain.empty()) {
-			*temp += AString(" ") + "Monster prefers to roam the";
+		if (!monster.preferredTerrain.empty()) {
+			*temp += " Monster prefers to roam the";
 
 			bool isNext = false;
-			for (auto &terrain : mp->preferredTerrain) {
-				*temp += AString(isNext ? ", " : " ") + TerrainDefs[terrain].name;
+			for (auto &terrain : monster.preferredTerrain) {
+				*temp += (isNext ? ", " : " ") + std::string(TerrainDefs[terrain].name);
 				isNext = true;
 			}
 
-			*temp += AString(" ") + plural(mp->preferredTerrain.size(), "terrain", "terrains") + ".";
+			*temp += " " + strings::plural(monster.preferredTerrain.size(), "terrain", "terrains") + ".";
 		}
 
-		const int aggression = mp->getAggression();
+		const int aggression = monster.getAggression();
 		if (aggression >= 100) {
-			*temp += AString(" ") + "Monster is unbelievably aggressive and will attack player units on sight.";
+			*temp += " Monster is unbelievably aggressive and will attack player units on sight.";
 		}
 		else if (aggression >= 75) {
-			*temp += AString(" ") + "Monster is exceptionally aggressive, and there is a slight chance he will not attack player units.";
+			*temp += " Monster is exceptionally aggressive, and there is a slight chance he will not attack player units.";
 		}
 		else if (aggression >= 50) {
-			*temp += AString(" ") + "Monster is very aggressive, but he will not harm player units with good luck.";
+			*temp += " Monster is very aggressive, but he will not harm player units with good luck.";
 		}
 		else if (aggression >= 25) {
-			*temp += AString(" ") + "Monster is aggressive but, in most cases, will leave player units alone.";
+			*temp += " Monster is aggressive but, in most cases, will leave player units alone.";
 		}
 		else if (aggression > 0) {
-			*temp += AString(" ") + "Monster is unfriendly, and the player must be pretty unlucky to be attacked by this monster.";
+			*temp += " Monster is unfriendly, and the player must be pretty unlucky to be attacked by this monster.";
 		}
 		else {
-			*temp += AString(" ") + "Monster is totally peaceful and will never attack player units.";
+			*temp += " Monster is totally peaceful and will never attack player units.";
 		}
 
 		if (full) {
-			int hits = mp->hits;
-			int atts = mp->numAttacks;
-			int regen = mp->regen;
+			int hits = monster.hits;
+			int atts = monster.numAttacks;
+			int regen = monster.regen;
 			if (!hits) hits = 1;
 			if (!atts) atts = 1;
-			*temp += AString(" This monster has ") + atts + " melee " +
-				((atts > 1)?"attacks":"attack") + " per round and takes " +
-				hits + " " + ((hits > 1)?"hits":"hit") + " to kill";
+			*temp += " This monster has " + std::to_string(atts) + " melee " +
+				strings::plural(atts, "attack", "attacks") + " per round and takes " +
+				std::to_string(hits) + " " + strings::plural(hits, "hit", "hits") + " to kill";
 
 			if (atts > 0) {
-				*temp += AString(" and each ") + AttackDamageDescription(mp->hitDamage);
+				*temp += AString(" and each ") + AttackDamageDescription(monster.hitDamage);
 			}
 
 			*temp += AString(".");
@@ -929,16 +908,16 @@ AString *ItemDescription(int item, int full)
 					" hits per round of battle.";
 			}
 			*temp += AString(" This monster has a tactics score of ") +
-				mp->tactics + ", a stealth score of " + mp->stealth +
-				", and an observation score of " + mp->obs + ".";
+				monster.tactics + ", a stealth score of " + monster.stealth +
+				", and an observation score of " + monster.obs + ".";
 		}
 		*temp += " This monster might have ";
-		if (mp->spoiltype != -1) {
-			if (mp->spoiltype & IT_MAGIC) {
+		if (monster.spoiltype != -1) {
+			if (monster.spoiltype & IT_MAGIC) {
 				*temp += "magic items and ";
-			} else if (mp->spoiltype & IT_ADVANCED) {
+			} else if (monster.spoiltype & IT_ADVANCED) {
 				*temp += "advanced items and ";
-			} else if (mp->spoiltype & IT_NORMAL) {
+			} else if (monster.spoiltype & IT_NORMAL) {
 				*temp += "normal or trade items and ";
 			}
 		}
@@ -947,23 +926,23 @@ AString *ItemDescription(int item, int full)
 
 	if(ItemDefs[item].flags & ItemType::MANPRODUCE) {
 		*temp += " This is a free-moving-item (FMI).";
-		MonType *mp = FindMonster(ItemDefs[item].abr, (ItemDefs[item].type & IT_ILLUSION));
-		*temp += AString(" This FMI attacks with a combat skill of ") + mp->attackLevel + ".";
+		auto monster = FindMonster(ItemDefs[item].abr, (ItemDefs[item].type & IT_ILLUSION))->get();
+		*temp += AString(" This FMI attacks with a combat skill of ") + monster.attackLevel + ".";
 
 		for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
-			*temp += AString(" ") + FMIResist(c,mp->defense[c], full);
+			*temp += AString(" ") + FMIResist(c, monster.defense[c], full);
 		}
 
-		if (mp->special && mp->special != NULL) {
+		if (monster.special && monster.special != NULL) {
 			*temp += AString(" ") +
 				"FMI can cast " +
-				ShowSpecial(mp->special, mp->specialLevel, 1, 0);
+				ShowSpecial(monster.special, monster.specialLevel, 1, 0);
 		}
 
 		if (full) {
-			int hits = mp->hits;
-			int atts = mp->numAttacks;
-			int regen = mp->regen;
+			int hits = monster.hits;
+			int atts = monster.numAttacks;
+			int regen = monster.regen;
 			if (!hits) hits = 1;
 			if (!atts) atts = 1;
 			*temp += AString(" This FMI has ") + atts + " melee " +
@@ -971,7 +950,7 @@ AString *ItemDescription(int item, int full)
 				hits + " " + ((hits > 1)?"hits":"hit") + " to kill";
 
 			if (atts > 0) {
-				*temp += AString(" and each ") + AttackDamageDescription(mp->hitDamage);
+				*temp += AString(" and each ") + AttackDamageDescription(monster.hitDamage);
 			}
 
 			*temp += AString(".");
@@ -980,18 +959,18 @@ AString *ItemDescription(int item, int full)
 				*temp += AString(" This FMI regenerates ") + regen + " hits per round of battle.";
 			}
 			*temp += AString(" This FMI has a tactics score of ") +
-				mp->tactics + ", a stealth score of " + mp->stealth +
-				", and an observation score of " + mp->obs + ".";
+				monster.tactics + ", a stealth score of " + monster.stealth +
+				", and an observation score of " + monster.obs + ".";
 		}
 
-		if (mp->spoiltype != -1) {
+		if (monster.spoiltype != -1) {
 			*temp += " This FMI might have ";
 
-			if (mp->spoiltype & IT_MAGIC) {
+			if (monster.spoiltype & IT_MAGIC) {
 				*temp += "magic items and ";
-			} else if (mp->spoiltype & IT_ADVANCED) {
+			} else if (monster.spoiltype & IT_ADVANCED) {
 				*temp += "advanced items and ";
-			} else if (mp->spoiltype & IT_NORMAL) {
+			} else if (monster.spoiltype & IT_NORMAL) {
 				*temp += "normal or trade items and ";
 			}
 
@@ -1000,14 +979,14 @@ AString *ItemDescription(int item, int full)
 	}
 
 	if (ItemDefs[item].type & IT_WEAPON) {
-		WeaponType *pW = FindWeapon(ItemDefs[item].abr);
+		auto weapon = FindWeapon(ItemDefs[item].abr)->get();
 		*temp += " This is a ";
-		*temp += WeapType(pW->flags, pW->weapClass) + " weapon and each " + AttackDamageDescription(pW->hitDamage) + ".";
-		if (pW->flags & WeaponType::NEEDSKILL) {
-			pS = FindSkill(pW->baseSkill);
+		*temp += WeapType(weapon.flags, weapon.weapClass) + " weapon and each " + AttackDamageDescription(weapon.hitDamage) + ".";
+		if (weapon.flags & WeaponType::NEEDSKILL) {
+			auto pS = FindSkill(weapon.baseSkill);
 			if (pS) {
 				*temp += AString(" Knowledge of ") + SkillStrs(pS);
-				pS = FindSkill(pW->orSkill);
+				pS = FindSkill(weapon.orSkill);
 				if (pS)
 					*temp += AString(" or ") + SkillStrs(pS);
 				*temp += " is needed to wield this weapon.";
@@ -1016,16 +995,16 @@ AString *ItemDescription(int item, int full)
 			*temp += " No skill is needed to wield this weapon.";
 
 		int flag = 0;
-		if (pW->attackBonus != 0) {
+		if (weapon.attackBonus != 0) {
 			*temp += " This weapon grants a ";
-			*temp += ((pW->attackBonus > 0) ? "bonus of " : "penalty of ");
-			*temp += abs(pW->attackBonus);
+			*temp += ((weapon.attackBonus > 0) ? "bonus of " : "penalty of ");
+			*temp += abs(weapon.attackBonus);
 			*temp += " on attack";
 			flag = 1;
 		}
-		if (pW->defenseBonus != 0) {
+		if (weapon.defenseBonus != 0) {
 			if (flag) {
-				if (pW->attackBonus == pW->defenseBonus) {
+				if (weapon.attackBonus == weapon.defenseBonus) {
 					*temp += " and defense.";
 					flag = 0;
 				} else {
@@ -1036,46 +1015,46 @@ AString *ItemDescription(int item, int full)
 				flag = 1;
 			}
 			if (flag) {
-				*temp += ((pW->defenseBonus > 0)?"bonus of ":"penalty of ");
-				*temp += abs(pW->defenseBonus);
+				*temp += ((weapon.defenseBonus > 0)?"bonus of ":"penalty of ");
+				*temp += abs(weapon.defenseBonus);
 				*temp += " on defense.";
 				flag = 0;
 			}
 		}
 		if (flag) *temp += ".";
-		if (pW->mountBonus && full) {
+		if (weapon.mountBonus && full) {
 			*temp += " This weapon ";
-			if (pW->attackBonus != 0 || pW->defenseBonus != 0)
+			if (weapon.attackBonus != 0 || weapon.defenseBonus != 0)
 				*temp += "also ";
 			*temp += "grants a ";
-			*temp += ((pW->mountBonus > 0)?"bonus of ":"penalty of ");
-			*temp += abs(pW->mountBonus);
+			*temp += ((weapon.mountBonus > 0)?"bonus of ":"penalty of ");
+			*temp += abs(weapon.mountBonus);
 			*temp += " against mounted opponents.";
 		}
 
-		if (pW->flags & WeaponType::NOFOOT)
+		if (weapon.flags & WeaponType::NOFOOT)
 			*temp += " Only mounted troops may use this weapon.";
-		else if (pW->flags & WeaponType::NOMOUNT)
+		else if (weapon.flags & WeaponType::NOMOUNT)
 			*temp += " Only foot troops may use this weapon.";
 
-		if (pW->flags & WeaponType::RIDINGBONUS) {
+		if (weapon.flags & WeaponType::RIDINGBONUS) {
 			*temp += " Wielders of this weapon, if mounted, get their riding "
 				"skill bonus on combat attack and defense.";
-		} else if (pW->flags & WeaponType::RIDINGBONUSDEFENSE) {
+		} else if (weapon.flags & WeaponType::RIDINGBONUSDEFENSE) {
 			*temp += " Wielders of this weapon, if mounted, get their riding "
 				"skill bonus on combat defense.";
 		}
 
-		if (pW->flags & WeaponType::NODEFENSE) {
+		if (weapon.flags & WeaponType::NODEFENSE) {
 			*temp += " Defenders are treated as if they have an "
 				"effective combat skill of 0.";
 		}
 
-		if (pW->flags & WeaponType::NOATTACKERSKILL) {
+		if (weapon.flags & WeaponType::NOATTACKERSKILL) {
 			*temp += " Attackers do not get skill bonus on defense.";
 		}
 
-		if (pW->flags & WeaponType::ALWAYSREADY) {
+		if (weapon.flags & WeaponType::ALWAYSREADY) {
 			*temp += " Wielders of this weapon never miss a round to ready "
 				"their weapon.";
 		} else {
@@ -1084,9 +1063,9 @@ AString *ItemDescription(int item, int full)
 		}
 
 		if (full) {
-			int atts = pW->numAttacks;
+			int atts = weapon.numAttacks;
 			*temp += AString(" This weapon attacks versus the target's ") +
-				"defense against " + AttType(pW->attackType) + " attacks.";
+				"defense against " + AttType(weapon.attackType) + " attacks.";
 			*temp += AString(" This weapon allows ");
 			if (atts > 0) {
 				if (atts >= WeaponType::NUM_ATTACKS_HALF_SKILL) {
@@ -1113,11 +1092,11 @@ AString *ItemDescription(int item, int full)
 			}
 
 			for (int i = 0; i < MAX_WEAPON_BM_TARGETS; i++) {
-				WeaponBonusMalus *bm = &pW->bonusMalus[i];
+				WeaponBonusMalus *bm = &weapon.bonusMalus[i];
 				if (!bm->weaponAbbr) continue;
 				if (bm->attackModifer == 0 && bm->defenseModifer == 0) continue;
 
-				ItemType *target =  FindItem(bm->weaponAbbr);
+				auto target = FindItem(bm->weaponAbbr)->get();
 
 				*temp += AString(" Wielders of this weapon will get ");
 
@@ -1133,14 +1112,14 @@ AString *ItemDescription(int item, int full)
 					*temp += AString((bm->defenseModifer > 0) ? "bonus of ":"penalty of ") + abs(bm->defenseModifer) + " on combat defense";
 				}
 
-				*temp += AString(" against ") + target->name + " [" + target->abr + "].";
+				*temp += AString(" against ") + target.name + " [" + target.abr + "].";
 			}
 		}
 	}
 
 	if (ItemDefs[item].type & IT_ARMOR) {
 		*temp += " This is a type of armor.";
-		ArmorType *pA = FindArmor(ItemDefs[item].abr);
+		auto armor = FindArmor(ItemDefs[item].abr)->get();
 		*temp += " This armor will protect its wearer ";
 		for (i = 0; i < NUM_WEAPON_CLASSES; i++) {
 			if (i == NUM_WEAPON_CLASSES - 1) {
@@ -1148,14 +1127,14 @@ AString *ItemDescription(int item, int full)
 			} else if (i > 0) {
 				*temp += ", ";
 			}
-			int percent = (int)(((float)pA->saves[i]*100.0) /
-					(float)pA->from+0.5);
-			*temp += AString(percent) + "% of the time versus " +
-				WeapClass(i) + " attacks";
+			int percent = static_cast<int>(
+				std::round(static_cast<float>(armor.saves[i]) * 100.0f / static_cast<float>(armor.from))
+			);
+			*temp += AString(percent) + "% of the time versus " + WeapClass(i) + " attacks";
 		}
 		*temp += ".";
 		if (full) {
-			if (pA->flags & ArmorType::USEINASSASSINATE) {
+			if (armor.flags & ArmorType::USEINASSASSINATE) {
 				*temp += " This armor may be worn during assassination "
 					"attempts.";
 			}
@@ -1618,12 +1597,11 @@ AString ItemList::BattleReport()
 			temp += ", ";
 			temp += i->Report(0);
 			if (ItemDefs[i->type].type & IT_MONSTER) {
-				MonType *mp = FindMonster(ItemDefs[i->type].abr,
-						(ItemDefs[i->type].type & IT_ILLUSION));
-				temp += AString(" (Combat ") + mp->attackLevel +
-					"/" + mp->defense[ATTACK_COMBAT] + ", Attacks " +
-					mp->numAttacks + ", Hits " + mp->hits +
-					", Tactics " + mp->tactics + ")";
+				auto monster = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
+				temp += AString(" (Combat ") + monster.attackLevel +
+					"/" + monster.defense[ATTACK_COMBAT] + ", Attacks " +
+					monster.numAttacks + ", Hits " + monster.hits +
+					", Tactics " + monster.tactics + ")";
 			}
 		}
 	}
@@ -1716,58 +1694,56 @@ void ItemList::SetNum(int t,int n)
 	}
 }
 
-int ManType::CanProduce(int item)
+bool ManType::CanProduce(int item)
 {
-	if (ItemDefs[item].flags & ItemType::DISABLED) return 0;
+	if (ItemDefs[item].flags & ItemType::DISABLED) return false;
 	for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
 		if (skills[i] == NULL) continue;
-		if (ItemDefs[item].pSkill == skills[i]) return 1;
+		if (ItemDefs[item].pSkill == skills[i]) return true;
 	}
-	return 0;
+	return false;
 }
 
-int ManType::CanUse(int item)
+bool ManType::CanUse(int item)
 {
-	if (ItemDefs[item].flags & ItemType::DISABLED) return 0;
+	if (ItemDefs[item].flags & ItemType::DISABLED) return false;
 
 	// Check if the item is a mount
-	if (ItemDefs[item].type & IT_MOUNT) return 1;
+	if (ItemDefs[item].type & IT_MOUNT) return true;
 
 	// Check if the item is a weapon
-	if (ItemDefs[item].type & IT_WEAPON) return 1;
+	if (ItemDefs[item].type & IT_WEAPON) return true;
 
 	// Check if the item is a tool
-	if (ItemDefs[item].type & IT_TOOL) return 1;
+	if (ItemDefs[item].type & IT_TOOL) return true;
 
 	// Check if the item is an armor
 	if (ItemDefs[item].type & IT_ARMOR) {
-		ArmorType *armor = FindArmor(ItemDefs[item].abr);
-		int p = armor->from / armor->saves[3];
+		auto armor = FindArmor(ItemDefs[item].abr)->get();
+		int p = armor.from / armor.saves[3];
 		if (p > 4) {
 			// puny armor not used by combative races
-			int mayWearArmor = 1;
+			bool mayWearArmor = true;
 			for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
 				if (skills[i] == NULL) continue;
-				if (FindSkill(skills[i]) == FindSkill("COMB"))
-						mayWearArmor = 0;
+				if (FindSkill(skills[i]) == FindSkill("COMB")) mayWearArmor = false;
 			}
 			if (mayWearArmor) return 1;
-		} else
-		if (p > 3) return 1;
-		else {
-			// heavy armor not be worn by sailors and sneaky races
-			int mayWearArmor = 1;
-			for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
-				if (skills[i] == NULL) continue;
-				if ((FindSkill(skills[i]) == FindSkill("SAIL"))
-					|| (FindSkill(skills[i]) == FindSkill("HUNT"))
-					|| (FindSkill(skills[i]) == FindSkill("STEA"))
-					|| (FindSkill(skills[i]) == FindSkill("LBOW")))
-						mayWearArmor = 0;
-			}
-			if (mayWearArmor) return 1;
+			return 0;
 		}
+		if (p > 3) return 1;
+		// heavy armor not be worn by sailors and sneaky races
+		bool mayWearArmor = true;
+		for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
+			if (skills[i] == NULL) continue;
+			if (
+				(FindSkill(skills[i]) == FindSkill("SAIL")) || (FindSkill(skills[i]) == FindSkill("HUNT")) ||
+				(FindSkill(skills[i]) == FindSkill("STEA")) || (FindSkill(skills[i]) == FindSkill("LBOW"))
+			) mayWearArmor = false;
+		}
+		if (mayWearArmor) return true;
+		return false;
 	}
 
-	return 0;
+	return false;
 }

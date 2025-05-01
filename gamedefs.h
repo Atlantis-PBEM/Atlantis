@@ -27,6 +27,7 @@
 #define GAME_DEFS
 
 #include <string>
+#include <vector>
 #include "helper.h"
 
 /* Directions */
@@ -40,12 +41,11 @@ enum {
 	NDIRS
 };
 
-extern const std::string DirectionStrs[];
-extern char const **DirectionAbrs;
+extern const std::vector<std::string> DirectionStrs;
+extern const std::vector<std::string> DirectionAbrs;
 
-extern char const **MonthNames;
-
-extern std::string SeasonNames[];
+extern const std::vector<std::string> MonthNames;
+extern const std::vector<std::string> SeasonNames;
 
 extern int *allowedMages;
 extern int allowedMagesSize;
@@ -64,11 +64,7 @@ extern int allowedMartialSize;
 
 extern int const NUMTERRAINS;
 extern int NUMBATTLEITEMS;
-extern int NUMARMORS;
-extern int NUMWEAPONS;
 extern int NUMMOUNTS;
-extern int NUMMONSTERS;
-extern int NUMMAN;
 
 enum BattleLogLevel {
 	NORMAL   = 0,	// Standard battle log
@@ -90,7 +86,7 @@ enum DestroyBehavior {
 
 class GameDefs {
 public:
-	char const *RULESET_NAME;
+	std::string RULESET_NAME;
 	ATL_VER RULESET_VERSION;
 
 	int MAX_SPEED;
@@ -318,10 +314,10 @@ public:
 	//
 	int APPRENTICES_EXIST;
 	// And what are they called?
-	char const *APPRENTICE_NAME;
+	std::string APPRENTICE_NAME;
 
 	// What is the name of the world?
-	char const *WORLD_NAME;
+	std::string WORLD_NAME;
 
 	// Does the nexus allow gating out of it
 	int NEXUS_GATE_OUT;

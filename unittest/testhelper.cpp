@@ -1,10 +1,15 @@
 #include "../game.h"
 #include "../gamedata.h"
-#include "../rng.h"
+#include "../rng.hpp"
 #include "testhelper.hpp"
 
 UnitTestHelper::UnitTestHelper() {
     rng::seed_random(0xdeadbeef); // Seed the random number generator with a fixed value for reproducibility.
+
+    // std::cerr << "Seeding random number generator with 0xdeadbeef" << std::endl;
+    // for (int i = 0; i < 10; i++) {
+    //     std::cerr << "rng::generator() = " << rng::generator()() << std::endl;
+    // }
 
     game.init_random_seed = []() { rng::seed_random(0xdeadbeef); };
 

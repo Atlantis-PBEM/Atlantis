@@ -34,14 +34,13 @@
 
 using namespace std;
 
-char const *as[] = {
+const std::vector<std::string> AttitudeStrs = {
 	"Hostile",
 	"Unfriendly",
 	"Neutral",
 	"Friendly",
 	"Ally"
 };
-char const **AttitudeStrs = as;
 
 const std::string F_WAR = "War";
 const std::string F_TRADE = "Trade";
@@ -51,25 +50,22 @@ const std::string F_MARTIAL = "Martial";
 std::vector<std::string> ft { };
 std::vector<std::string> *FactionTypes = &ft;
 
-// LLS - fix up the template strings
-char const *tp[] = {
+const std::vector<std::string> TemplateStrs = {
 	"off",
 	"short",
 	"long",
 	"map"
 };
-char const **TemplateStrs = tp;
 
 // Quit states
-const string qs[] = {
+static const std::vector<std::string> QuitStrs = {
 	"none",
 	"quit order",
-	"quit by gm"
+	"quit by gm",
 	"quit and restart",
-	"won game"
-	"game over",
+	"won game",
+	"game over"
 };
-const string *QuitStrs = qs;
 
 void to_json(json &j, const FactionEvent &e) {
 	j = json{{"message", e.message}, {"category", e.category}};
@@ -104,7 +100,7 @@ int parse_attitude(const parser::token& str)
 
 Faction::Faction()
 {
-	exists = 1;
+	exists = true;
 	for (auto &ft : *FactionTypes) {
 		type[ft] = 1;
 	}
@@ -127,7 +123,7 @@ Faction::Faction()
 
 Faction::Faction(int n)
 {
-	exists = 1;
+	exists = true;
 	num = n;
 
 	for (auto &ft : *FactionTypes) {
@@ -379,10 +375,10 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 
 	// This can be better, but for now..
 	j["engine"] = {
-		{ "version", (ATL_VER_STRING(CURRENT_ATL_VER)).const_str() },
+		{ "version", ATL_VER_STRING(CURRENT_ATL_VER) },
 		{ "ruleset", Globals->RULESET_NAME },
-		{ "ruleset_version", (ATL_VER_STRING(Globals->RULESET_VERSION)).const_str() },
-		{ "json_report_version", (ATL_VER_STRING(JSON_REPORT_VERSION)).const_str() }
+		{ "ruleset_version", ATL_VER_STRING(Globals->RULESET_VERSION) },
+		{ "json_report_version", ATL_VER_STRING(JSON_REPORT_VERSION) }
 	};
 
 	j["name"] = name | filter::strip_number;
@@ -390,8 +386,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		j["type"] = json::object();
 		for (auto &ft : *FactionTypes) {
-			string factype = ft;
-			std::transform(factype.begin(), factype.end(), factype.begin(), ::tolower);
+			string factype = ft | filter::lowercase;
 			if (type[ft]) j["type"][factype] = type[ft];
 		}
 	}
@@ -491,13 +486,9 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 
 	/* Attitudes */
 	j["attitudes"] = json::object();
-	string defattitude = AttitudeStrs[defaultattitude];
-	std::transform(defattitude.begin(), defattitude.end(), defattitude.begin(), ::tolower);
-	j["attitudes"]["default"] = defattitude;
+	j["attitudes"]["default"] = AttitudeStrs[defaultattitude] | filter::lowercase;
 	for (int i=0; i<NATTITUDES; i++) {
-		string attitude = AttitudeStrs[i];
-		// how annoying that this is the easiest way to do this.
-		std::transform(attitude.begin(), attitude.end(), attitude.begin(), ::tolower);
+		string attitude = AttitudeStrs[i] | filter::lowercase;
 		j["attitudes"][attitude] = json::array(); // [] = json::array();
 		for (const auto& a: attitudes) {
 			if (a.attitude == i) {
@@ -574,10 +565,10 @@ void Faction::WriteFacInfo(ostream &f)
 void Faction::CheckExist(ARegionList& regs)
 {
 	if (is_npc) return;
-	exists = 0;
+	exists = false;
 	for(const auto reg : regs) {
 		if (reg->Present(this)) {
-			exists = 1;
+			exists = true;
 			return;
 		}
 	}

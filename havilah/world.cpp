@@ -37,8 +37,8 @@ using namespace std;
 
 typedef struct
 {
-	char const	*word;
-	int		prob;
+	const std::string word;
+	int prob;
 } WordList;
 
 // Initial Consonant, Vowel and Final Consonant sequences and
@@ -93,11 +93,11 @@ WordList fc[] =
 
 typedef struct
 {
-	int		terrain;
-	char const	*word;
-	int		prob;
-	int		town;
-	int		port;
+	int terrain;
+	const std::string word;
+	int prob;
+	int town;
+	int port;
 } SuffixList;
 
 SuffixList ts[] =
@@ -242,7 +242,7 @@ int AGetName(int town, ARegion *reg)
 {
 	int unique, rnd, syllables, i, trail, port, similar;
 	unsigned int u;
-	char temp[80];
+	std::string temp;
 
 	port = 0;
 	if (town) {
@@ -258,7 +258,7 @@ int AGetName(int town, ARegion *reg)
 		for (syllables = 0; rnd >= syllprob[syllables]; syllables++)
 			rnd -= syllprob[syllables];
 		syllables++;
-		temp[0] = 0;
+		temp = "";
 		trail = 0;
 		while (syllables-- > 0) {
 			if (!syllables) {
@@ -290,41 +290,40 @@ int AGetName(int town, ARegion *reg)
 									case 'i':
 									case 'o':
 									case 'u':
-										strcat(temp, "'");
+										temp += "'";
 										break;
 									default:
 										break;
 								}
 							}
-							strcat(temp, ts[u].word);
+							temp += ts[u].word;
 							break;
 						}
 					}
 				}
-				if (u < sizeof(ts) / sizeof(ts[0]))
-					break;
+				if (u < sizeof(ts) / sizeof(ts[0])) break;
 			}
 			if (rng::get_random(5) > 0) {
 				// 4 out of 5 syllables start with a consonant sequence
 				rnd = rng::get_random(tIC);
 				for (i = 0; rnd >= ic[i].prob; i++)
 					rnd -= ic[i].prob;
-				strcat(temp, ic[i].word);
+				temp += ic[i].word;
 			} else if (trail) {
 				// separate adjacent vowels
-				strcat(temp, "'");
+				temp += "'";
 			}
 			// All syllables have a vowel sequence
 			rnd = rng::get_random(tV);
 			for (i = 0; rnd >= v[i].prob; i++)
 				rnd -= v[i].prob;
-			strcat(temp, v[i].word);
+			temp += v[i].word;
 			if (rng::get_random(5) > 1) {
 				// 3 out of 5 syllables end with a consonant sequence
 				rnd = rng::get_random(tFC);
 				for (i = 0; rnd >= fc[i].prob; i++)
 					rnd -= fc[i].prob;
-				strcat(temp, fc[i].word);
+				temp += fc[i].word;
 				trail = 0;
 			} else {
 				trail = 1;
@@ -338,8 +337,7 @@ int AGetName(int town, ARegion *reg)
 				break;
 			}
 		}
-		if (strlen(temp) > 12)
-			unique = 0;
+		if (temp.length() > 12) unique = 0;
 	}
 
 	nnames++;
@@ -353,11 +351,11 @@ int AGetName(int town, ARegion *reg)
 	return regionnames.size();
 }
 
-const char *AGetNameString(int name)
+const std::string& AGetNameString(int name)
 {
-	if (name <= 0 || name > (int) regionnames.size())
-		return "Error";
-	return regionnames[name-1].c_str();
+	static const std::string errorName = "Error";
+	if (name <= 0 || name > (int) regionnames.size()) return errorName;
+	return regionnames[name-1];
 }
 
 void Game::CreateWorld()

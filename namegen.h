@@ -30,8 +30,8 @@
 
 #include <string>
 
-std::string getAbstractName(const int seed);
-std::string getEthnicName(const int seed, const Ethnicity etnos);
-std::string getObjectName(const int seed, const int typeIndex, const ObjectType& type);
-std::string getRegionName(const int seed, const Ethnicity etnos, const int type, const int size, const bool island);
-std::string getRiverName(const int seed, const int size, const int min, const int max);
+std::string getAbstractName();
+std::string getEthnicName(const Ethnicity etnos);
+std::string getObjectName(const int typeIndex, const ObjectType& type);
+std::string getRegionName(const Ethnicity etnos, const int type, const int size, const bool island);
+std::string getRiverName(const int size, const int min, const int max);

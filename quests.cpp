@@ -25,7 +25,7 @@
 
 #include "quests.h"
 #include "object.h"
-#include "rng.h"
+#include "rng.hpp"
 #include <iterator>
 #include <memory>
 

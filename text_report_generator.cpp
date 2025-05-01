@@ -5,7 +5,7 @@
 #include "gamedefs.h"
 #include "indenter.hpp"
 #include "text_report_generator.hpp"
-
+#include "strings_util.hpp"
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
@@ -183,7 +183,7 @@ std::string TextReportGenerator::item_to_string(const json& item, bool assume_si
         if (assume_singular) {
             result += to_s(item["name"]);
         } else {
-            result += plural(amount, item["name"], item["plural"]);
+            result += strings::plural(amount, item["name"], item["plural"]);
         }
     }
     result += " [" + to_s(item["tag"]) + "]";
@@ -225,7 +225,7 @@ void TextReportGenerator::output_ships(ostream& f, const json& ships) {
         if (comma) f << ", ";
         int number = ship["number"];
         if (count > 1 || number > 1) f << number << " ";
-        f << plural(number, ship["name"], ship["plural"]);
+        f << strings::plural(number, ship["name"], ship["plural"]);
         comma = true;
     }
 }
@@ -308,7 +308,7 @@ void TextReportGenerator::output_unit_summary(ostream& f, const json& unit, bool
     if (unit.contains("readied")) {
         if (unit["readied"].contains("weapons")) {
             int count = unit["readied"]["weapons"].size();
-            f << ". Ready " << plural(count, "weapon", "weapons") << ": ";
+            f << ". Ready " << strings::plural(count, "weapon", "weapons") << ": ";
             output_items(f, unit["readied"]["weapons"], true);
         }
         if (unit["readied"].contains("armor")) {
@@ -403,7 +403,7 @@ void TextReportGenerator::output_structure(ostream& f, const json& structure, bo
         if (structure.contains("sacrifice")) {
             int amount = structure["sacrifice"]["amount"];
             f << ", requires sacrifice of " << structure["sacrifice"]["amount"] << " "
-              <<  plural(amount, structure["sacrifice"]["name"], structure["sacrifice"]["plural"]) << " ["
+              <<  strings::plural(amount, structure["sacrifice"]["name"], structure["sacrifice"]["plural"]) << " ["
               << to_s(structure["sacrifice"]["tag"]) << "]";
         }
         if (structure.contains("grantskill")) {

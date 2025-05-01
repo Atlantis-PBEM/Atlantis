@@ -28,20 +28,11 @@
 #include "gamedata.h"
 #include "graphs.h"
 #include "object.h"
-#include "rng.h"
+#include "rng.hpp"
 
 #include <map>
 #include <queue>
 #include <algorithm>
-
-const std::string oneOf(const std::vector<std::string> &list) {
-    int i = rng::get_random(list.size());
-    return list.at(i);
-}
-
-const std::string oneOf(const std::string &a, const std::string &b) {
-    return rng::get_random(2) ? a : b;
-}
 
 std::string townType(const int type) {
     switch (type) {
@@ -156,9 +147,9 @@ void populateRegionLandmark(std::vector<Landmark> &landmarks, ARegion *source, A
         weight = 2;
     }
     else if (alias == R_OCEAN) {
-        type = endsWith(name, "River") ? events::LandmarkType::RIVER : events::LandmarkType::OCEAN;
+        type = name.ends_with("River") ? events::LandmarkType::RIVER : events::LandmarkType::OCEAN;
     }
-    else if (endsWith(name, "River")) {
+    else if (name.ends_with("River")) {
         type = events::LandmarkType::FORD;
         weight = 2;
     }
