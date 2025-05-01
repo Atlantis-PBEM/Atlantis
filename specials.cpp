@@ -24,7 +24,7 @@
 // END A3HEADER
 #include "battle.h"
 #include "gamedata.h"
-#include "rng.h"
+#include "rng.hpp"
 #include <memory>
 
 void Soldier::SetupHealing()

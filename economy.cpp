@@ -126,8 +126,8 @@ void ARegion::SetupHabitat(TerrainType* terrain) {
 	}
 
 	habitat = habitat * 2 / 3 + rng::get_random(habitat / 3);
-	ManType *mt = FindRace(ItemDefs[race].abr);
-	if (mt->terrain == terrain->similar_type) {
+	auto mt = FindRace(ItemDefs[race].abr)->get();
+	if (mt.terrain == terrain->similar_type) {
 		habitat = (habitat * 9)/8;
 	}
 	if (!IsNativeRace(race)) {
@@ -392,8 +392,9 @@ void ARegion::SetupCityMarket()
 	int cap;
 	int offset = 0;
 	int citymax = Globals->CITY_POP;
-	ManType *locals = FindRace(ItemDefs[race].abr);
-	if (!locals) locals = FindRace("SELF");
+	auto localrace = FindRace(ItemDefs[race].abr);
+	if (!localrace) localrace = FindRace("SELF");
+	auto locals = localrace->get();
 	/* compose array of possible supply & demand items */
 	int supply[NITEMS];
 	int demand[NITEMS];
@@ -448,12 +449,10 @@ void ARegion::SetupCityMarket()
 				}
 			}
 		}
-		int canProduce = 0;
+		bool canProduce = false;
 		// Check if the locals can produce this item
-		if (canProduceHere) canProduce = locals->CanProduce(i);
-		int isUseful = 0;
-		// Check if the item is useful to the locals
-		isUseful = locals->CanUse(i);
+		if (canProduceHere) canProduce = locals.CanProduce(i);
+		bool isUseful = locals.CanUse(i);
 		//Normal Items
 		if (ItemDefs[ i ].type & IT_NORMAL) {
 
@@ -464,8 +463,7 @@ void ARegion::SetupCityMarket()
 
 				if (Globals->RANDOM_ECONOMY) {
 					amt += rng::get_random(amt);
-					price = (ItemDefs[i].baseprice * (100 + rng::get_random(50))) /
-						100;
+					price = (ItemDefs[i].baseprice * (100 + rng::get_random(50))) / 100;
 				} else {
 					price = ItemDefs[ i ].baseprice;
 				}
@@ -502,7 +500,7 @@ void ARegion::SetupCityMarket()
 				if (!canProduceHere) {
 					// Is it a mount?
 					if (ItemDefs[i].type & IT_MOUNT) {
-						if (locals->CanProduce(i)) demand[i] = 4;
+						if (locals.CanProduce(i)) demand[i] = 4;
 					} else if (isUseful) demand[i] = 4;
 				}
 			} else {
@@ -986,8 +984,8 @@ void ARegion::SetupEditRegion()
 	}
 
 	habitat = habitat * 2/3 + rng::get_random(habitat/3);
-	ManType *mt = FindRace(ItemDefs[race].abr);
-	if (mt->terrain == typer->similar_type) {
+	auto mt = FindRace(ItemDefs[race].abr)->get();
+	if (mt.terrain == typer->similar_type) {
 		habitat = (habitat * 9)/8;
 	}
 	if (!IsNativeRace(race)) {

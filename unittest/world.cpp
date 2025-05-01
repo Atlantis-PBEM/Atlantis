@@ -31,7 +31,10 @@
 #include "gamedata.h"
 
 int AGetName(int town, ARegion *reg) { return town != 0 ? 1 : 0; }
-char const *AGetNameString( int name ) { return (name == 0) ? "Testing Wilds" : "Basictown"; }
+const std::string& AGetNameString(int name) {
+	static const std::vector<std::string> regionnames = {"Testing Wilds", "Basictown"};
+	return regionnames[name];
+}
 
 void Game::CreateWorld() {
     Awrite("Creating world");

@@ -36,9 +36,6 @@ class AssassinationFact;
 #include <list>
 #include <vector>
 
-const std::string oneOf(const std::vector<std::string> &list);
-const std::string oneOf(const std::string &a, const std::string &b);
-
 std::string townType(const int type);
 
 enum EventCategory {
@@ -140,10 +137,10 @@ struct EventLocation {
 
     std::vector<Landmark> landmarks;
 
-    const std::string GetTerrainName(const bool plural);
-    const Landmark* GetSignificantLandmark();
-
+    events::LandmarkType GetLandmarkType();
+    const std::string GetTerrainName(const bool plural = false);
     static const EventLocation Create(ARegion* region);
+    const Landmark *GetSignificantLandmark();
 };
 
 class BattleFact : public FactBase {

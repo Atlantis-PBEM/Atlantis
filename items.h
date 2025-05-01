@@ -167,7 +167,7 @@ class ItemType
 		int minGrant, maxGrant;
 };
 
-extern ItemType *ItemDefs;
+extern std::vector<ItemType> ItemDefs;
 
 
 enum Ethnicity {
@@ -198,11 +198,11 @@ class ManType
 		char const *skills[6];
 		Ethnicity ethnicity;
 
-		int CanProduce(int);
-		int CanUse(int);
+		bool CanProduce(int);
+		bool CanUse(int);
 };
 
-extern ManType *ManDefs;
+extern std::vector<ManType> ManDefs;
 
 class MonType
 {
@@ -255,7 +255,7 @@ class MonType
 		const int getAggression();
 };
 
-extern MonType *MonDefs;
+extern std::vector<MonType> MonDefs;
 
 enum {
 	SLASHING,		// e.g. sword attack (This is default)
@@ -350,7 +350,7 @@ class WeaponType
 		WeaponBonusMalus bonusMalus[MAX_WEAPON_BM_TARGETS];
 };
 
-extern WeaponType *WeaponDefs;
+extern std::vector<WeaponType> WeaponDefs;
 
 class ArmorType
 {
@@ -370,7 +370,7 @@ class ArmorType
 		int saves[NUM_WEAPON_CLASSES];
 };
 
-extern ArmorType *ArmorDefs;
+extern std::vector<ArmorType> ArmorDefs;
 
 class MountType
 {
@@ -435,14 +435,12 @@ extern std::optional<int> parse_item_category(const parser::token& token);
 extern int lookup_item(const std::string& name);
 
 extern BattleItemType *FindBattleItem(char const *abbr);
-extern ItemType *FindItem(char const *abbr);
-extern int FindItemIndex(char const *abbr);
-extern ArmorType *FindArmor(char const *abbr);
-extern WeaponType *FindWeapon(char const *abbr);
+extern std::optional<std::reference_wrapper<ItemType>> FindItem(char const *abbr);
+extern std::optional<std::reference_wrapper<ArmorType>> FindArmor(char const *abbr);
+extern std::optional<std::reference_wrapper<WeaponType>> FindWeapon(char const *abbr);
 extern MountType *FindMount(char const *abbr);
-extern MonType *FindMonster(char const *abbr, int illusion);
-extern ManType *FindRace(char const *abbr);
-extern int FindRaceItemIndex(int raceIndex);
+extern std::optional<std::reference_wrapper<MonType>> FindMonster(char const *abbr, int illusion);
+extern std::optional<std::reference_wrapper<ManType>> FindRace(char const *abbr);
 extern AString AttType(int atype);
 
 enum {

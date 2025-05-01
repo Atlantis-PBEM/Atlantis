@@ -28,7 +28,7 @@
 #include "items.h"
 #include "skills.h"
 #include "gamedata.h"
-#include "rng.h"
+#include "rng.hpp"
 
 using namespace std;
 

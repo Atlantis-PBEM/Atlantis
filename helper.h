@@ -30,33 +30,16 @@
 //
 typedef unsigned int ATL_VER;
 
-#define MAKE_ATL_VER( x, y, z ) ( (( x ) << 0x10 ) + (( y ) << 0x8 ) + ( z ) )
+#define MAKE_ATL_VER(x, y, z) ((x << 0x10) + (y << 0x8) + z)
 
-#define ATL_VER_MAJOR( x ) ( ( ( x ) >> 0x10 ) % 0x100 )
-#define ATL_VER_MINOR( x ) ( ( ( x ) >> 0x8 ) % 0x100 )
-#define ATL_VER_PATCH( x ) ( ( x ) % 0x100 )
+#define ATL_VER_MAJOR(x) ((x >> 0x10) % 0x100)
+#define ATL_VER_MINOR(x) ((x >> 0x8) % 0x100)
+#define ATL_VER_PATCH(x) (x % 0x100)
 
-#define ATL_VER_STRING( x ) AString( AString( (int) ATL_VER_MAJOR( x ) ) + \
-"." + AString( (int) ATL_VER_MINOR( x ) ) + "." + \
-AString( (int) ATL_VER_PATCH( x ) ) ) + \
-( ( ATL_VER_MINOR( x ) % 2 ) ? "" : " (beta)" )
-
-#define ATL_VER_STR( x ) AString((int)ATL_VER_MAJOR(x)) + \
-		"." + ((int)ATL_VER_MINOR(x)) + "." + (int)ATL_VER_PATCH(x)
-
-//
-// Some bitfield functions
-//
-typedef unsigned int BITFIELD;
-
-#define BIT( x ) ( 1 << ( x ))
-#define GET_BIT( b, x ) (( b & ( 1 << ( x ))) ? 1 : 0 )
-#define SET_BIT( b, x ) ( b |= ( 1 << ( x )))
-#define CLEAR_BIT( b, x ) ( b &= ~( 1 << ( x )))
-
-//
-// Convenient macros
-//
-#define SAFE_DELETE( x ) delete ( x ); x = 0;
+#define ATL_MJR_STR(x) (std::to_string(ATL_VER_MAJOR(x)))
+#define ATL_MNR_STR(x) (std::to_string(ATL_VER_MINOR(x)))
+#define ATL_PTCH_STR(x) (std::to_string(ATL_VER_PATCH(x)))
+#define ATL_VER_STR(x) ATL_MJR_STR(x) + "." + ATL_MNR_STR(x) + "." + ATL_PTCH_STR(x)
+#define ATL_VER_STRING(x) ATL_VER_STR(x) + (ATL_VER_MINOR(x) % 2 ? "" : " (beta)")
 
 #endif

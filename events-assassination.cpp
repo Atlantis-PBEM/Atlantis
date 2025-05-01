@@ -30,6 +30,8 @@
 #include <memory>
 #include <stdexcept>
 #include <sstream>
+#include "rng.hpp"
+#include "string_filters.hpp"
 
 using namespace std;
 
@@ -69,7 +71,7 @@ void AssassinationFact::GetEvents(std::list<Event> &events) {
     std::ostringstream buffer;
 
     buffer
-        << capitalize(oneOf(SENTIMENT))
+        << (rng::one_of(SENTIMENT) | filter::capitalize)
         << " news were coming from the"
         << " " << this->location.GetTerrainName(true)
         << " of " << this->location.province
@@ -77,8 +79,8 @@ void AssassinationFact::GetEvents(std::list<Event> &events) {
         ;
 
     buffer
-        << " " << capitalize(oneOf(LOCALS))
-        << " were " << oneOf(FEELING)
+        << " " << (rng::one_of(LOCALS) | filter::capitalize)
+        << " were " << rng::one_of(FEELING)
         << " by the assassination"
         ;
 
@@ -88,7 +90,7 @@ void AssassinationFact::GetEvents(std::list<Event> &events) {
 
     auto mark = this->location.GetSignificantLandmark();
     if (mark) {
-        buffer 
+        buffer
             << " " << (mark->distance == 0 ? "in" : "near")
             << " the " << mark->title;
     }

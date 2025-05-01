@@ -33,7 +33,7 @@ class Game;
 #include "production.h"
 #include "object.h"
 #include "events.h"
-#include "rng.h"
+#include "rng.hpp"
 #include "indenter.hpp"
 #include "string_parser.hpp"
 
@@ -314,7 +314,7 @@ private:
 
 	// control the random number seed used for new game generation (by default it uses the existing
 	// seedrandomrandom function) which uses the current time.
-	std::function<void()> init_random_seed = static_cast<void(*)()>(&rng::seed_random);
+	std::function<void()> init_random_seed; // = static_cast<void(*)()>(&rng::seed_random);
 
 	enum
 	{

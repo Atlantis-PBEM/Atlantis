@@ -69,4 +69,44 @@ struct strip_number_t {
 
 inline constexpr strip_number_t strip_number{};
 
+/**
+ * Utility that capitalizes a string.
+ * Usage: std::string result = capitalize(input);
+ * Or with pipe syntax: std::string result = input | capitalize;
+ */
+struct capitalize_t {
+    std::string process(const std::string& str) const {
+        std::string result = str;
+        if (!result.empty()) {
+            result[0] = std::toupper(result[0]);
+        }
+        return result;
+    }
+
+    std::string operator()(const std::string& str) const { return process(str); }
+
+    friend std::string operator|(const std::string& str, const capitalize_t& capitalizer) { return capitalizer(str); }
+};
+
+inline constexpr capitalize_t capitalize{};
+
+/**
+ * Utility that lowercases a string.
+ * Usage: std::string result = lowercase(input);
+ * Or with pipe syntax: std::string result = input | lowercase;
+ */
+struct lowercase_t {
+    std::string process(const std::string& str) const {
+        std::string result = str;
+        std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+        return result;
+    }
+
+    std::string operator()(const std::string& str) const { return process(str); }
+
+    friend std::string operator|(const std::string& str, const lowercase_t& lowercaser) { return lowercaser(str); }
+};
+
+inline constexpr lowercase_t lowercase{};
+
 } // namespace filter

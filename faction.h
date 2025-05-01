@@ -88,11 +88,11 @@ enum
 	QUIT_GAME_OVER,
 };
 
-extern char const **AttitudeStrs;
+extern const std::vector<std::string> AttitudeStrs;
 extern std::vector<std::string> *FactionTypes;
 
 // LLS - include strings for the template enum
-extern char const **TemplateStrs;
+extern const std::vector<std::string> TemplateStrs;
 int parse_template_type(const parser::token& str);
 
 int parse_attitude(const parser::token& str);
@@ -206,7 +206,7 @@ public:
 	int showunitattitudes;
 	int temformat;
 	int battleLogFormat;
-	char exists;
+	bool exists;
 	int quit;
 	int numshows;
 

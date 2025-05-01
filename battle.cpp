@@ -31,6 +31,7 @@
 #include "gamedata.h"
 #include "quests.h"
 #include "items.h"
+#include "strings_util.hpp"
 
 using namespace std;
 
@@ -103,12 +104,12 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
 			int succeeded = att.attacks - att.failed;
 			int reachedTarget = succeeded - att.missed;
 
-			s += ", attacked " + to_string(succeeded) + " of " + to_string(att.attacks) + " " + plural(att.attacks, "time", "times");
-			s += ", " + to_string(reachedTarget) + " successful " + plural(reachedTarget, "attack", "attacks");
+			s += ", attacked " + to_string(succeeded) + " of " + to_string(att.attacks) + " " + strings::plural(att.attacks, "time", "times");
+			s += ", " + to_string(reachedTarget) + " successful " + strings::plural(reachedTarget, "attack", "attacks");
 			s += ", " + to_string(att.blocked) + " blocked by armor";
-			s += ", " + to_string(att.hit) + " " + plural(att.killed, "hit", "hits");
+			s += ", " + to_string(att.hit) + " " + strings::plural(att.killed, "hit", "hits");
 			s += ", " + to_string(att.damage) + " total damage";
-			s += ", and killed " + to_string(att.killed)  + " " + plural(att.killed, "enemy", "enemies") + ".";
+			s += ", and killed " + to_string(att.killed)  + " " + strings::plural(att.killed, "enemy", "enemies") + ".";
 
 			battle.AddLine(AString(s.c_str()));
 		}
@@ -245,13 +246,11 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 	}
 
 	for (int i = 0; i < numAttacks; i++) {
-		WeaponType *pWep = NULL;
-		if (a->weapon != -1)
-			pWep = FindWeapon(ItemDefs[a->weapon].abr);
+		auto weapon_def = (a->weapon != -1) ? FindWeapon(ItemDefs[a->weapon].abr) : std::nullopt;
 
 		if (behind && !canAttackFromBehind) {
-			if (!pWep) break;
-			if (!( pWep->flags & WeaponType::RANGED)) break;
+			if (!weapon_def) break;
+			if (!(weapon_def->get().flags & WeaponType::RANGED)) break;
 		}
 
 		int flags = 0;
@@ -260,11 +259,11 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 		int attackClass = SLASHING;
 		int hitDamage = a->hitDamage;
 
-		if (pWep) {
-			flags = pWep->flags;
-			attackType = pWep->attackType;
-			mountBonus = pWep->mountBonus;
-			attackClass = pWep->weapClass;
+		if (weapon_def) {
+			flags = weapon_def->get().flags;
+			attackType = weapon_def->get().attackType;
+			mountBonus = weapon_def->get().mountBonus;
+			attackClass = weapon_def->get().weapClass;
 		}
 		def->DoAnAttack(this, NULL, 1, attackType, a->askill, flags, attackClass,
 				NULL, mountBonus, a, attackers, canAttackBehind, hitDamage);

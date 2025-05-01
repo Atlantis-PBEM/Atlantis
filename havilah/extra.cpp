@@ -586,7 +586,7 @@ Faction *Game::CheckVictory()
 					}
 				}
 			}
-			f->exists = 0;
+			f->exists = false;
 			f->quit = QUIT_WON_GAME;
 			f->temformat = TEMPLATE_OFF;
 			temp = " have acquired ";

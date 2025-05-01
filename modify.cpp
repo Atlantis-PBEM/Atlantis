@@ -92,10 +92,10 @@ void Game::DisableItem(int item)
 }
 
 void Game::ModifyItemName(int it, char const *name, char const *names)
-{	
-	if (it < 0 || it > (NITEMS-1)) return;	
-	ItemDefs[it].name = name;	
-	ItemDefs[it].names = names;	
+{
+	if (it < 0 || it > (NITEMS-1)) return;
+	ItemDefs[it].name = name;
+	ItemDefs[it].names = names;
 }
 
 void Game::ModifyItemFlags(int it, int flags)
@@ -223,169 +223,168 @@ void Game::ModifyItemEscape(int it, int escape, char const *skill, int val)
 
 void Game::ModifyRaceSkillLevels(char const *r, int spec, int def)
 {
-	ManType *mt = FindRace(r);
-	if (mt == NULL) return;
+	auto mt = FindRace(r);
+	if (!mt) return;
 	if (spec < 0) spec = 0;
 	if (def < 0) def = 0;
-	mt->speciallevel = spec;
-	mt->defaultlevel = def;
+	mt->get().speciallevel = spec;
+	mt->get().defaultlevel = def;
 }
 
 void Game::ModifyRaceSkills(char const *r, int i, char const *sk)
 {
-	ManType *mt = FindRace(r);
-	if (mt == NULL) return;
-	if (i < 0 || i >= (int)(sizeof(mt->skills) / sizeof(mt->skills[0]))) return;
+	auto mt = FindRace(r);
+	if (!mt) return;
+	if (i < 0 || i >= (int)(sizeof(mt->get().skills) / sizeof(mt->get().skills[0]))) return;
 	if (sk && (FindSkill(sk) == NULL)) return;
-	mt->skills[i] = sk;
+	mt->get().skills[i] = sk;
 }
 
 void Game::ModifyMonsterAttackLevel(char const *mon, int lev)
 {
-	MonType *pM = FindMonster(mon, 0);
-	if (pM == NULL) return;
+	auto monster = FindMonster(mon, 0);
+	if (!monster) return;
 	if (lev < 0) return;
-	pM->attackLevel = lev;
+	monster->get().attackLevel = lev;
 }
 
 void Game::ModifyMonsterDefense(char const *mon, int defenseType, int level)
 {
-	MonType *pM = FindMonster(mon, 0);
-	if (pM == NULL) return;
+	auto monster = FindMonster(mon, 0);
+	if (!monster) return;
 	if (defenseType < 0 || defenseType > (NUM_ATTACK_TYPES -1)) return;
-	pM->defense[defenseType] = level;
+	monster->get().defense[defenseType] = level;
 }
 
 void Game::ModifyMonsterAttacksAndHits(char const *mon, int num, int hits, int regen, int hitDamage)
 {
-	MonType *pM = FindMonster(mon, 0);
-	if (pM == NULL) return;
+	auto monster = FindMonster(mon, 0);
+	if (!monster) return;
 	if (num < 0) return;
 	if (hits < 0) return;
 	if (regen < 0) return;
 	if (hitDamage < 0) return;
-	pM->numAttacks = num;
-	pM->hits = hits;
-	pM->regen = regen;
-	pM->hitDamage = hitDamage;
+	monster->get().numAttacks = num;
+	monster->get().hits = hits;
+	monster->get().regen = regen;
+	monster->get().hitDamage = hitDamage;
 }
 
 void Game::ModifyMonsterSkills(char const *mon, int tact, int stealth, int obs)
 {
-	MonType *pM = FindMonster(mon, 0);
-	if (pM == NULL) return;
+	auto monster = FindMonster(mon, 0);
+	if (!monster) return;
 	if (tact < 0) return;
 	if (stealth < 0) return;
 	if (obs < 0) return;
-	pM->tactics = tact;
-	pM->stealth = stealth;
-	pM->obs = obs;
+	monster->get().tactics = tact;
+	monster->get().stealth = stealth;
+	monster->get().obs = obs;
 }
 
 void Game::ModifyMonsterSpecial(char const *mon, char const *special, int lev)
 {
-	MonType *pM = FindMonster(mon, 0);
-	if (pM == NULL) return;
+	auto monster = FindMonster(mon, 0);
+	if (!monster) return;
 	if (special && (FindSpecial(special) == NULL)) return;
 	if (lev < 0) return;
-	pM->special = special;
-	pM->specialLevel = lev;
+	monster->get().special = special;
+	monster->get().specialLevel = lev;
 }
 
 void Game::ModifyMonsterSpoils(char const *mon, int silver, int spoilType)
 {
-	MonType *pM = FindMonster(mon, 0);
-	if (pM == NULL) return;
+	auto monster = FindMonster(mon, 0);
+	if (!monster) return;
 	if (spoilType < -1) return;
 	if (silver < 0) return;
-	pM->silver = silver;
-	pM->spoiltype = spoilType;
+	monster->get().silver = silver;
+	monster->get().spoiltype = spoilType;
 }
 
 void Game::ModifyMonsterThreat(char const *mon, int num, int hostileChance)
 {
-	MonType *pM = FindMonster(mon, 0);
-	if (pM == NULL) return;
+	auto monster = FindMonster(mon, 0);
+	if (!monster) return;
 	if (num < 0) return;
 	if (hostileChance < 0 || hostileChance > 100) return;
-	pM->hostile = hostileChance;
-	pM->number = num;
+	monster->get().hostile = hostileChance;
+	monster->get().number = num;
 }
 
 void Game::ModifyWeaponSkills(char const *weap, char *baseSkill, char *orSkill)
 {
-	WeaponType *pw = FindWeapon(weap);
-	if (pw == NULL) return;
+	auto weapon = FindWeapon(weap);
+	if (!weapon) return;
 	if (baseSkill && (FindSkill(baseSkill) == NULL)) return;
 	if (orSkill && (FindSkill(orSkill) == NULL)) return;
-	pw->baseSkill = baseSkill;
-	pw->orSkill = orSkill;
+	weapon->get().baseSkill = baseSkill;
+	weapon->get().orSkill = orSkill;
 }
 
 void Game::ModifyWeaponFlags(char const *weap, int flags)
 {
-	WeaponType *pw = FindWeapon(weap);
-	if (pw == NULL) return;
-	pw->flags = flags;
+	auto weapon = FindWeapon(weap);
+	if (!weapon) return;
+	weapon->get().flags = flags;
 }
 
-void Game::ModifyWeaponAttack(char const *weap, int wclass, int attackType,
-		int numAtt, int hitDamage)
+void Game::ModifyWeaponAttack(char const *weap, int wclass, int attackType,	int numAtt, int hitDamage)
 {
-	WeaponType *pw = FindWeapon(weap);
-	if (pw == NULL) return;
+	auto weapon = FindWeapon(weap);
+	if (!weapon) return;
 	if (wclass < 0 || wclass > (NUM_WEAPON_CLASSES - 1)) return;
 	if (attackType < 0 || attackType > (NUM_ATTACK_TYPES - 1)) return;
-	pw->weapClass = wclass;
-	pw->attackType = attackType;
-	pw->numAttacks = numAtt;
-	pw->hitDamage = hitDamage;
+	weapon->get().weapClass = wclass;
+	weapon->get().attackType = attackType;
+	weapon->get().numAttacks = numAtt;
+	weapon->get().hitDamage = hitDamage;
 }
 
 void Game::ModifyWeaponBonuses(char const *weap, int attack, int defense, int vsMount)
 {
-	WeaponType *pw = FindWeapon(weap);
-	if (pw == NULL) return;
-	pw->attackBonus = attack;
-	pw->defenseBonus = defense;
-	pw->mountBonus = vsMount;
+	auto weapon = FindWeapon(weap);
+	if (!weapon) return;
+	weapon->get().attackBonus = attack;
+	weapon->get().defenseBonus = defense;
+	weapon->get().mountBonus = vsMount;
 }
 
 void Game::ModifyWeaponBonusMalus(char const *weap, int index, char *weaponAbbr, int attackModifer, int defenseModifer)
 {
-	WeaponType *pw = FindWeapon(weap);
-	if (pw == NULL) return;
-	if (index < 0 || index >= (int)(sizeof(pw->bonusMalus)/sizeof(pw->bonusMalus[0]))) return;
-	if (pw->bonusMalus[index].weaponAbbr) {
-		delete pw->bonusMalus[index].weaponAbbr;
+	auto weapon = FindWeapon(weap);
+	if (!weapon) return;
+	if (index < 0 || index >= (int)(sizeof(weapon->get().bonusMalus)/sizeof(weapon->get().bonusMalus[0]))) return;
+	if (weapon->get().bonusMalus[index].weaponAbbr) {
+		delete weapon->get().bonusMalus[index].weaponAbbr;
 	}
-	pw->bonusMalus[index].weaponAbbr = weaponAbbr;
-	pw->bonusMalus[index].attackModifer = attackModifer;
-	pw->bonusMalus[index].defenseModifer = defenseModifer;
+	weapon->get().bonusMalus[index].weaponAbbr = weaponAbbr;
+	weapon->get().bonusMalus[index].attackModifer = attackModifer;
+	weapon->get().bonusMalus[index].defenseModifer = defenseModifer;
 }
 
 void Game::ModifyArmorFlags(char const *armor, int flags)
 {
-	ArmorType *pa = FindArmor(armor);
-	if (pa == NULL) return;
-	pa->flags = flags;
+	auto pa = FindArmor(armor);
+	if (!pa) return;
+	pa->get().flags = flags;
 }
 
 void Game::ModifyArmorSaveFrom(char const *armor, int from)
 {
-	ArmorType *pa = FindArmor(armor);
-	if (pa == NULL) return;
+	auto pa = FindArmor(armor);
+	if (!pa) return;
 	if (from < 0) return;
-	pa->from = from;
+	pa->get().from = from;
 }
 
 void Game::ModifyArmorSaveValue(char const *armor, int wclass, int val)
 {
-	ArmorType *pa = FindArmor(armor);
-	if (pa == NULL) return;
+	auto pa = FindArmor(armor);
+	if (!pa) return;
 	if (wclass < 0 || wclass > (NUM_WEAPON_CLASSES - 1)) return;
-	if (val < 0 || val > pa->from) return;
-	pa->saves[wclass] = val;
+	if (val < 0 || val > pa->get().from) return;
+	pa->get().saves[wclass] = val;
 }
 
 void Game::ModifyMountSkill(char const *mount, char *skill)
@@ -491,7 +490,7 @@ void Game::ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages)
 void Game::ModifyObjectDefence(int ob, int co, int en, int sp, int we, int ri, int ra)
 {
 	if (ob < 0 || ob > (NOBJECTS-1)) return;
-	//if (val < 0) return;	// we could conceivably have a negative value 
+	//if (val < 0) return;	// we could conceivably have a negative value
 								// associated with a structure
 	ObjectDefs[ob].defenceArray[0] = co;
 	ObjectDefs[ob].defenceArray[1] = en;

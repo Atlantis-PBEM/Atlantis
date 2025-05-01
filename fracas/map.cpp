@@ -1007,13 +1007,11 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
 						if (TerrainDefs[nreg->type].similar_type == R_OCEAN)
 							ch += 2;
 					} else {
-						ManType *mt = FindRace(ItemDefs[reg->race].abr);
-						if (mt->terrain==TerrainDefs[nreg->type].similar_type)
-							ch += 2;
+						auto mt = FindRace(ItemDefs[reg->race].abr)->get();
+						if (mt.terrain==TerrainDefs[nreg->type].similar_type) ch += 2;
 						int rnum = sizeof(TerrainDefs[nreg->type].races) / sizeof(TerrainDefs[nreg->type].races[0]);
 						for (int i=0; i<rnum; i++) {
-							if (TerrainDefs[nreg->type].races[i] == reg->race)
-								ch++;
+							if (TerrainDefs[nreg->type].races[i] == reg->race) ch++;
 						}
 					}
 					if (ch > 3) nreg->race = reg->race;

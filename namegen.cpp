@@ -29,7 +29,8 @@
 #include "gamedata.h"
 
 #include <cctype>
-
+#include "rng.hpp"
+#include "string_filters.hpp"
 std::vector<std::string> aPrefAbstract = {
     "A", "Ab", "Ach", "Ad", "Ae", "Ag", "Ai", "Ak", "Al", "Am", "An", "Ap", "Ar", "As", "Ash", "At", "Ath", "Au", "Ay",
     "Ban", "Bar", "Brel", "Bren",
@@ -120,349 +121,6 @@ std::vector<std::string> aSufViking = { "fors", "gard", "heim", "holm", "lag", "
 std::vector<std::string> aPrefHumans = { "basing", "birming", "black", "bland", "bletch", "brack", "brent", "bridge", "broms", "bur", "cam", "canter", "chelten", "chester", "col", "dor", "dun", "glaston", "grim", "grin", "harro", "hastle", "hels", "hemp", "herne", "horn", "hors", "hum", "ketter", "lei", "maiden", "marble", "mar", "mel", "new", "nor", "notting", "oak", "ox", "ports", "sher", "stam", "stan", "stock", "stroud", "tuan", "warring", "wind"};
 std::vector<std::string> aSufHumans = { "dare", "don", "field", "ford", "grove", "ham", "hill", "lock", "mere", "moor", "ton", "vil", "wood"};
 
-/*
-Aerie of the Eagles
-Ales 'n Beds
-Alicorn, The
-Baalzepub
-Bag and Flagon, The
-Banjo and Zigzag, The
-Barf Bag, The
-Basque and Feijoa, The
-Battle Axe Inn
-Behir and the Beholder, The
-Bent Elbows, The
-Black Boar, The
-Black Hole, The
-Black Pearl, The (near the ocean)
-Black Stallion Tavern, The
-Black Swan, The (sounds like a posh joint on a calm pond to me)
-Blind Basilisk, The
-Blood of the Vine (from Ravenloft I believe)
-Blue Duck, The
-Blue Sky Inn, The
-Boar's Bristles, The
-Boar's Chase, The
-Boar's Head Inn
-Boar's Rest
-Bob's Place
-Boil and Youth, The
-Bowl's Rim, The
-Brass Bucket Tavern, The
-Broken Cane, The
-Broken Drum, The
-Broken Fist, The
-Broken Kender Arms, The (with good reason...)
-Bullseye Tavern, The
-Bunch o' Grapes
-Buxom Wench, The
-Candi Bar, The (yet another fine erotic entertainment center)
-Cat and Mouse, The
-Cat's Claw Inn, The
-Cesspit, The
-Chicken's Rest, The
-Chipped Chalice
-Citadel 
-Clan of the White Wind
-Cloven Hoof, The
-Clowns, Inn of
-Cock and Hen, The
-Common Folks Tavern, The
-Copper Cup Tavern, The
-Cork 'n' Bottle Tavern
-Crippled Griffon
-Crossed Daggers, The
-Crossed Swords, The
-Crow's Nest, The
-Dawn Tavern, The
-Days End Inn
-Dead's End Tavern
-Derrin's Divine Brews
-Dirty Dog, The
-Dirty Dwarf, The
-Dirty Laundry, The
-Divine Delights
-Dog and Thrush
-Dragon Skulls, The (with a pair of same over the bar)
-Dragon's Breath, The
-Dragon's Butt Tavern
-Dragon's Hoarde, The
-Dragon's Lair
-Dragon's Spittoon
-Drunken Boar, The
-Drunken Cavalier, The
-Drunken Cow , The
-Drunken Sailor, The
-Dustbin of Death, The
-Eastern Delights, Inn of the
-Efreeti's Wish, The
-Elswers' (from a book called The World is Round" by Tony Rothman)
-Ent Tent, The
-Erics Erotic Dancers
-Ever-full Jugs, The Tavern of
-Eye of the Specter
-Farlanghn's Rest
-Fat Jack's Blues & Grub
-Fawning Orc, The
-Feetal's Gizzard
-Fig and Gristle, The
-Fisherman's Friend, The
-Flame, The
-Flaming Snake, The
-Foresthome Rest
-Forsaken Souls, Inn of
-Fox and Hound, The
-Fox Hole, The
-Fox's Tail, The
-Friendly House Inn, The
-Friends of the Queen
-Frog and Duck
-Frog and Peach
-Frosty Mug, The
-Frozen Axe, The
-Full Belly Inn, The
-Full Moon Tavern, The
-Full Tankard, The
-Gaff and Slasher, The
-Geezul's Place
-Gelded Ranger, The
-Giant's Nose, The
-Gnoll's Belly, The
-Golden Beer Tavern, The
-Golden Chain, The
-Golden Dragon Inn, The
-Golden Gryphon, The
-Golden Lady, The
-Golden Perch
-Golden Schooner, The
-Golden Stool, The
-Good Rest Inn
-Gory's Tavern
-Grapes of Wrath Tavern
-Gray Wizard, The
-Greasy Squeal, The
-Great Arm, The Inn of the
-Green Dragon, The
-Green Griffon, The
-Green Manalishi Inn, The
-Grobo's Grotto
-Grumbling Dwarf, The
-Halflings' Revenge
-Half-way Inn, The
-Hammer, Anvil, and Stirrup, The
-Happy Harpy Tavern, The
-Happy Hooker, The
-Happy Saturday's
-Harpy's Hideaway, The
-Haudhla's
-Head On Inn
-Heart of Oak, The
-Hearthstone Arms
-Hector's Nectar Tavern
-Helix, The
-Hellish Day Inn
-Here's Sin in Your Eye
-Highlighted Eye, Inn of the
-Hillshire Farm
-Hobbit's Armpit, The
-Honest Barrister, The
-Horn and Haunch, The
-Horn and Hounds, The
-Horny Halfling, The
-Horwrath's Haven
-Ice Dragon House
-Imps Intestine, The
-Inn of Clowns
-Inn, The
-Inter-planetary House of Spam
-Iron Fist, The
-Ivy Bush
-Jade Terrorist, The
-Joe's
-Joker's Maniacal Frogleg and Nosewart Cafe, The
-Karnov's Bar and Grill
-Kettles Inn
-Khaki Garter, The
-Kibbles n' Bits' Inn
-King's Bunk Inn
-King's Coin, The
-King's Rest, The
-Knife in the Back, The
-Knight's Tournament, The
-Knyte Lyfe (owners name is Knyte)
-Kraken, The
-Kraun's
-Labyrinth, The
-Lady Russet Tavern, The
-Lascivious Fairy, The
-Last Port Tavern
-Laughing Cow
-Laurence's Mug-house
-Lecherous Virgin, The
-Lion's Den, The
-Lonely Haystack, The
-Lonely Wanderer, The Inn of the
-Looter's (with barmaids that are thieves)
-Lost Resort, The
-Lotus, The
-Lynched Orc Tavern, The
-Maggot's Rest
-Manicured Mouse, The
-Master and Aubergine, The
-Mended Drum, The
-Mermaid's Smile, The
-Momma's
-Monk and Eggplant, The
-Mousehole, The
-Murdered Priest, The
-Musty Moldan's Mighty Morsels
-Nag's Head, The
-Nanny's Arms, The
-Noisy Bed Inn, The
-Northern Road, Inn of the
-Octopus Club, The
-Old Grant's Ale-house
-Old Lantern, The
-Old Man and the Smee, The
-Old Rubin's
-Olde Fox Decieved, The
-One-legged Man, The
-Only Bar in the Multiverse Without a Convenient Back Door, The
-Only Port in a Storm Inn, The
-Open Book, The (caters to sages, students, etc.)
-Orange Ogre, The
-Orc's Armpit
-Orc's Head Inn
-Organ and Poinsettia, The
-Perfumed 'Possum, The
-Pink Dragon, The
-Pink Lady Inn
-Pipe and Tobacco, The
-Plastered Imbecile, The
-Pleasure Palace, The
-Pot Belly, The
-Prancing Pony, The (Tolkien of course)
-Puking Unicorn, The
-Puzzle and Egg, The
-Quene's Hed, The
-Quiet Night Inn, The
-Quincy's
-Raging Flea, The
-Rain Song, The
-Rampaging Rabbit, The
-Rampant Dragon, The
-Ram's Lord's Tavern
-Ranger's Lookout, The
-Rasvi & Vijay's Stop and Eat
-Razorback Inn, The
-Red Lantern, The
-Red Snake Tavern, The
-Roamer's Pillow, The
-Rock Rock Rock (a dwarf-run tavern which loses its' meaning in the translation to common Pratchett?)
-Rolling Meadows, The
-Rose Gem, Inn of the
-Rotgut Room, The
-Ruby Blade, The
-Ruby Lips, The
-Sahuagen and Lady, The
-Satyr and Stiletto, The
-Scheister's Casino, Inn, and Mortuary (all in one)
-Sea Barrel
-Seabreeze Inn
-Sexist Pig, The
-Shining Gem, The
-Short Neck Clam Town Inn and Tavern
-Shot in the Dark, The
-Sign of the Cringing Eunuch, The
-Sign of the Golden Orange, The
-Sign of the Jester, The
-Sign of the Sign (the sign out front has a recursive painting of a sign on a sign on a sign...)
-Sign of the Talon, The
-Silver Axe, The
-Silver Oak Inn, The
-Silver Token Inn, The
-Singing Boar, The
-Site of the Harvest
-Six Flags over Mead
-Slade's
-Sleeping Demon, The
-Slugfest, The
-Snake Pit, The
-Snoring Flea Inn, The
-Spend the Knight Inn
-Splintered Ego Tavern
-Spread-eagled Bugbear, The
-Squalid Claw, The
-Stinking Boar Inn, The
-Stinking Cow, The
-Strange Brew
-Strangled Cat, The
-Strong Drink
-Stumpy Bob's House of Beer
-Succubus, The
-Sunset Inn, The
-Svirfneblin's Ear, The
-Swashbuckler's Luck
-Sword's Sleep
-Tavern of Ever-full Jugs, The
-Tavern on the Edge (of something )
-The Beardless Dwarf Inn
-The Burning Spirit Tavern
-The Cozy Pillow Inn
-The Flickering Candle Inn
-The Merry Tavern
-The Sleeping Booty Inn
-Thiefs Knot, The
-Thirsty Whale, The
-Three Gables, The
-Thug and Succubus, The
-Thunderbird Club, The
-Thurston's Brass Tankard
-Tipsy Tarrasque, The
-Toss-It-Back, The (patrons throw mugs back at bartenders, who have gloves of missile catching)
-Tower Tavern, The
-Trog Scent Tavern
-Trough, The (serves BIG drinks)
-Turkey Cove Sleep and Eat
-Two Halfling's Inn, The
-Two-Fingered Troll, The
-Ulcer, The
-Valabar's
-Van Smack's Tavern and Inn
-Victorious Egret, The
-Vincent's Gin-Palace
-Violet Vein, The
-Virgin and Nightmare, The
-Voluptuous Elf, The
-Wandering Mistrel, The
-Wanton Wench, The
-Watchman's Light, The
-Wayfarer's Home, The
-Wayfarer's Lay, The
-Weigh Inn, The
-Well Worn Wench, The Inn of the
-We're Not Hostel
-Whisper and Boil, The
-Whistling Pig, The
-White Hand, The
-White Sheet Inn, The
-White Tree, The
-Wig and Thistle, The
-Wild Chessman, The
-Wine of Heaven, The
-Wistful Wyvern, The
-Wizard's Tower, The
-Wolfhound, The
-Wolf's Den (cliche),
-Woolystonecrafters Inn, The
-World's End Inn
-Yawing Portal, The (Waterdeep entrance to Undermountain)
-Yellow Necromancer, The
-Zoo, The
-
-*/
-
-
 std::vector<std::string> aPrefInn = { "Bent", "Black", "Blind", "Blue", "Bob's", "Joe's", "Broken", "Buxom", "Cat's", "Crow's", "Dirty", "Dragon", "Dragon's", "Drunken", "Diamond", "Eagle's", "Eastern", "Falcon's", "Fawning", "Fiend's", "Flaming", "Frosty", "Frozen", "Gilded", "Genie's", "Golden", "Golden", "Gray", "Green", "King's", "Licked", "Lion's", "Iron", "Mended", "Octopus", "Old", "Old", "Orc's", "Pink", "Pot", "Puking", "Queen's", "Red", "Ruby", "Delicate", "Sea", "Sexy", "Shining", "Silver", "Singing", "Steel", "Strange", "Thirsty", "Violet", "White", "Wild", "Yawing"};
 std::vector<std::string> aSufInn = { " Axe", " Anchor", " Barrel", " Basilisk", " Belly", " Blade", " Boar", " Breath", " Brew", " Claw", " Coin", " Delight", " Den", " Dragon", " Drum", " Dwarf", " Fist", " Flower", " Gem", " Gryphon", " Hand", " Head", " Hole", " Inn", " Lady", " Maiden", " Lantern", " Monk", " Mug", " Nest", " Orc", " Paradise", " Pearl", " Pig", " Pit", " Place", " Tavern", " Portal", " Ranger", " Rest", " Sailor", " Sleep", " Song", " Swan", " Swords", " Tree", " Unicorn", " Whale", " Wish", " Wizard", " Rain"};
 
@@ -489,112 +147,92 @@ std::vector<std::string> aEpithetGeneralF = { "Ruthless", "Bloody", "Mighty", "W
 
 //---------------------------------------------------------------------------
 
-std::string oneOf(int seed, std::string a, std::string b) {
-    return seed % 2 == 1 ? a : b;
+std::string getPrefix(std::vector<std::string>& prefixTable) {
+    return rng::one_of(prefixTable);
 }
 
-std::string oneOf(int seed, std::string a, std::string b, std::string c) {
-    return seed % 3 == 1
-        ? a
-        : seed % 2 == 1
-            ? b
-            : c;
+std::string getSuffix(std::vector<std::string>& suffixTable) {
+    return rng::one_of(suffixTable);
 }
 
-std::string getPrefix(int seed, std::vector<std::string>& prefixTable, std::vector<std::string>& suffixTable) {
-    int w = prefixTable.size();
-    int h = suffixTable.size();
-    int mul = seed % (w * h);
-
-    return prefixTable[mul % w];
-}
-
-std::string getSuffix(int seed, std::vector<std::string>& prefixTable, std::vector<std::string>& suffixTable) {
-    int w = prefixTable.size();
-    int h = suffixTable.size();
-    int mul = seed % (w * h);
-
-    return suffixTable[mul / w];
-}
-
-std::string getEthnicPrefix(int seed, Ethnicity etnos) {
+std::string getEthnicPrefix(Ethnicity etnos) {
     switch(etnos) {
-        case Ethnicity::VIKING:    return getPrefix(seed, aPrefViking, aSufViking);
-        case Ethnicity::BARBARIAN: return getPrefix(seed, aPrefScotish, aSufScotish);
-        case Ethnicity::MAN:       return getPrefix(seed, aPrefHumans, aSufHumans);
-        case Ethnicity::ESKIMO:    return getPrefix(seed, aPrefEscimo, aSufEscimo);
-        case Ethnicity::NOMAD:     return getPrefix(seed, aPrefArabic, aSufArabic);
-        case Ethnicity::TRIBESMAN: return getPrefix(seed, aPrefAfrica, aSufAfrica);
-        case Ethnicity::HIGHELF:   return getPrefix(seed, aPrefElven1, aSufElven1);
-        case Ethnicity::ELF:       return getPrefix(seed, aPrefElven2, aSufElven2);
-        case Ethnicity::DWARF:     return getPrefix(seed, aPrefDwarven, aSufDwarven);
-        case Ethnicity::ORC:       return getPrefix(seed, aPrefOrchish, aSufOrchish);
-        case Ethnicity::LIZARDMAN: return getPrefix(seed, aPrefGreek, aSufGreek);
-        case Ethnicity::DROW:      return getPrefix(seed, aPrefDrow, aSufDrow);
-        case Ethnicity::TITAN:     return getPrefix(seed, aPrefAztec, aSufAztec);
-        default:                   return getPrefix(seed, aPrefMale, aSufMale);
+        case Ethnicity::VIKING:    return getPrefix(aPrefViking);
+        case Ethnicity::BARBARIAN: return getPrefix(aPrefScotish);
+        case Ethnicity::MAN:       return getPrefix(aPrefHumans);
+        case Ethnicity::ESKIMO:    return getPrefix(aPrefEscimo);
+        case Ethnicity::NOMAD:     return getPrefix(aPrefArabic);
+        case Ethnicity::TRIBESMAN: return getPrefix(aPrefAfrica);
+        case Ethnicity::HIGHELF:   return getPrefix(aPrefElven1);
+        case Ethnicity::ELF:       return getPrefix(aPrefElven2);
+        case Ethnicity::DWARF:     return getPrefix(aPrefDwarven);
+        case Ethnicity::ORC:       return getPrefix(aPrefOrchish);
+        case Ethnicity::LIZARDMAN: return getPrefix(aPrefGreek);
+        case Ethnicity::DROW:      return getPrefix(aPrefDrow);
+        case Ethnicity::TITAN:     return getPrefix(aPrefAztec);
+        default:                   return getPrefix(aPrefMale);
     }
 }
 
-std::string getEthnicSuffix(int seed, Ethnicity etnos) {
+std::string getEthnicSuffix(Ethnicity etnos) {
     switch(etnos) {
-        case Ethnicity::VIKING:    return getSuffix(seed, aPrefViking, aSufViking);
-        case Ethnicity::BARBARIAN: return getSuffix(seed, aPrefScotish, aSufScotish);
-        case Ethnicity::MAN:       return getSuffix(seed, aPrefHumans, aSufHumans);
-        case Ethnicity::ESKIMO:    return getSuffix(seed, aPrefEscimo, aSufEscimo);
-        case Ethnicity::NOMAD:     return getSuffix(seed, aPrefArabic, aSufArabic);
-        case Ethnicity::TRIBESMAN: return getSuffix(seed, aPrefAfrica, aSufAfrica);
-        case Ethnicity::HIGHELF:   return getSuffix(seed, aPrefElven1, aSufElven1);
-        case Ethnicity::ELF:       return getSuffix(seed, aPrefElven2, aSufElven2);
-        case Ethnicity::DWARF:     return getSuffix(seed, aPrefDwarven, aSufDwarven);
-        case Ethnicity::ORC:       return getSuffix(seed, aPrefOrchish, aSufOrchish);
-        case Ethnicity::LIZARDMAN: return getSuffix(seed, aPrefGreek, aSufGreek);
-        case Ethnicity::DROW:      return getSuffix(seed, aPrefDrow, aSufDrow);
-        case Ethnicity::TITAN:     return getSuffix(seed, aPrefAztec, aSufAztec);
-        default:                   return getSuffix(seed, aPrefMale, aSufMale);
+        case Ethnicity::VIKING:    return getSuffix(aSufViking);
+        case Ethnicity::BARBARIAN: return getSuffix(aSufScotish);
+        case Ethnicity::MAN:       return getSuffix(aSufHumans);
+        case Ethnicity::ESKIMO:    return getSuffix(aSufEscimo);
+        case Ethnicity::NOMAD:     return getSuffix(aSufArabic);
+        case Ethnicity::TRIBESMAN: return getSuffix(aSufAfrica);
+        case Ethnicity::HIGHELF:   return getSuffix(aSufElven1);
+        case Ethnicity::ELF:       return getSuffix(aSufElven2);
+        case Ethnicity::DWARF:     return getSuffix(aSufDwarven);
+        case Ethnicity::ORC:       return getSuffix(aSufOrchish);
+        case Ethnicity::LIZARDMAN: return getSuffix(aSufGreek);
+        case Ethnicity::DROW:      return getSuffix(aSufDrow);
+        case Ethnicity::TITAN:     return getSuffix(aSufAztec);
+        default:                   return getSuffix(aSufMale);
     }
 }
 
-std::string getAbstractName(const int seed) {
-    std::string first = getPrefix(seed, aPrefAbstract, aSufAbstract);
-    std::string second = getSuffix(seed, aPrefAbstract, aSufAbstract);
+std::string getAbstractName() {
+    std::string first = getPrefix(aPrefAbstract);
+    std::string second = getSuffix(aSufAbstract);
 
-    return capitalize(first + second);
+    return (first + second) | filter::capitalize;
 }
 
-std::string getEthnicName(const int seed, const Ethnicity etnos) {
-    std::string first = getEthnicPrefix(seed, etnos);
-    std::string second = getEthnicSuffix(seed, etnos);
+std::string getEthnicName(Ethnicity etnos) {
+    std::string first = getEthnicPrefix(etnos);
+    std::string second = getEthnicSuffix(etnos);
 
-    return capitalize(first + second);
+    return (first + second) | filter::capitalize;
 }
 
-std::string getShipName(int seed) {
-    std::string first = getPrefix(seed, aPrefShip, aSufShip);
-    std::string second = getSuffix(seed, aPrefShip, aSufShip);
+std::string getShipName() {
+    std::string first = getPrefix(aPrefShip);
+    std::string second = getSuffix(aSufShip);
 
-    return capitalize(first + second);
+    return (first + second) | filter::capitalize;
 }
 
-std::string getFortressName(int seed, const ObjectType& type) {
-    std::string first = getPrefix(seed, aPrefFort, aSufFort);
-    std::string second = getSuffix(seed, aPrefFort, aSufFort);
+std::string getFortressName(const ObjectType& type) {
+    std::string first = getPrefix(aPrefFort);
+    std::string second = getSuffix(aSufFort);
 
     if (second.empty()) {
         second = type.name;
     }
 
-    return capitalize(first + second);
+    return (first + second) | filter::capitalize;
 }
 
-std::string getInnName(int seed) {
-    std::string first = getPrefix(seed, aPrefInn, aSufInn);
-    std::string second = getSuffix(seed, aPrefInn, aSufInn);
+std::string getInnName() {
+    std::string first = getPrefix(aPrefInn);
+    std::string second = getSuffix(aSufInn);
 
-    return capitalize(first + second);
+    return (first + second) | filter::capitalize;
 }
 
-std::string getObjectName(const int seed, const int typeIndex, const ObjectType& type) {
+std::string getObjectName(const int typeIndex, const ObjectType& type) {
     switch(typeIndex)
     {
         case O_DUMMY:
@@ -606,22 +244,12 @@ std::string getObjectName(const int seed, const int typeIndex, const ObjectType&
         case O_BALLOON:
         case O_AGALLEON:
         case O_DERELICT:
-        // case O_MANOWAR:
-        // case O_WHALER:
-        // case O_CARAVELL:
-        // case O_BARGE:
-        // case O_BRIG:
-        // case O_AIRSIP:
-        // case O_ZEPPELIN:
-        // case O_FLYINGFORTRESS:
-            return getShipName(seed);
+            return getShipName();
 
         case O_TOWER:
         case O_FORT:
-        // case O_KEEP:
         case O_CASTLE:
         case O_CITADEL:
-        // case O_MKEEP:
         case O_MCASTLE:
         case O_MCITADEL:
         case O_MTOWER:
@@ -633,7 +261,7 @@ std::string getObjectName(const int seed, const int typeIndex, const ObjectType&
         case O_DARKTOWER:
         case O_GIANTCASTLE:
         case O_HPTOWER:
-            return getFortressName(seed, type);
+            return getFortressName(type);
 
         case O_SHAFT:
         case O_LAIR:
@@ -661,14 +289,13 @@ std::string getObjectName(const int seed, const int typeIndex, const ObjectType&
                 break;
 
         case O_INN:
-            return getInnName(seed);
-    // LLS
-    // New ocean lairs
+            return getInnName();
+
         case O_ISLE:
         case O_OCAVE:
         case O_WHIRL:
             break;
-    // AS
+
         case O_ROADN:
         case O_ROADNW:
         case O_ROADNE:
@@ -677,26 +304,13 @@ std::string getObjectName(const int seed, const int typeIndex, const ObjectType&
         case O_ROADS:
             return "Ancient Road";
 
-        // VVR
-        // case O_MROADN:
-        // case O_MROADNW:
-        // case O_MROADNE:
-        // case O_MROADSW:
-        // case O_MROADSE:
-        // case O_MROADS:
-        //     return "Enchanted Ancient Road";
-        //********
         case O_TEMPLE:
-    // JT
-    // Abyss Lair
         case O_BKEEP:
-    // For Ceran
         case O_DCLIFFS:
         case O_HUT:
         case O_NGUILD:
         case O_AGUILD:
         case O_ATEMPLE:
-    // Tzargs monster lairs
         case O_ILAIR:
         case O_ICECAVE:
         case O_BOG:
@@ -706,85 +320,85 @@ std::string getObjectName(const int seed, const int typeIndex, const ObjectType&
     return type.name;
 }
 
-std::string getForestName(std::string s, int seed, int area) {
+std::string getForestName(std::string s, int area) {
     if (area < 15) {
-        return s + oneOf(seed, " Forest", " Woods");
+        return s + rng::one_of({" Forest", " Woods"});
     }
 
     return "Great " + s + " Forest";
 }
 
-std::string getJungleName(std::string s, int seed, int area) {
+std::string getJungleName(std::string s, int area) {
     if (area < 15) {
-        return s + oneOf(seed, " Jungle", " Woods");
+        return s + rng::one_of({" Jungle", " Woods"});
     }
 
     return "Great " + s + " Jungle";
 }
 
-std::string getDesertName(std::string s, int seed, int area) {
+std::string getDesertName(std::string s, int area) {
     if (area < 15) {
-        return s + oneOf(seed, " Desert", " Sands");
+        return s + rng::one_of({" Desert", " Sands"});
     }
 
     return "Great " + s + " Desert";
 }
 
-std::string getVolcanoName(std::string s, int seed, int area) {
-    return s + oneOf(seed, " Volcano", " Peak");
+std::string getVolcanoName(std::string s) {
+    return s + rng::one_of({" Volcano", " Peak"});
 }
 
-std::string getMountainName(std::string s, int seed, int area) {
+std::string getMountainName(std::string s, int area) {
     if (area == 1) {
-        return s + oneOf(seed, " Mountain", " Peak");
+        return s + rng::one_of({" Mountain", " Peak"});
     }
 
     if (area < 15) {
-        return s + oneOf(seed, " Mountains", " Heights", " Rocks");
+        return s + rng::one_of({" Mountains", " Heights", " Rocks"});
     }
 
     return "Great " + s + " Mountains";
 }
 
-std::string getHillsName(std::string s, int seed, int area) {
+std::string getHillsName(std::string s, int area) {
     if (area == 1) {
-        return s + oneOf(seed, " Hill", " Barrow");
+        return s + rng::one_of({" Hill", " Barrow"});
     }
 
     if (area < 15) {
-        return s + oneOf(seed, " Hills", " Barrows", " Heights");
+        return s + rng::one_of({" Hills", " Barrows", " Heights"});
     }
 
     return "Great " + s + " Hills";
 }
 
-std::string getSwampName(std::string s, int seed, int area) {
+std::string getSwampName(std::string s, int area) {
     if (area < 15) {
-        return s + oneOf(seed, " Swamp", " Marshes");
+        return s + rng::one_of({" Swamp", " Marshes"});
     }
 
     return "Great " + s + " Swamp";
 }
 
-std::string getPlainName(std::string s, int seed, int area) {
+std::string getPlainName(std::string s, int area) {
     if(area == 1) {
-        return s + oneOf(seed, " Dale", " Plain");
+        return s + rng::one_of({" Dale", " Plain"});
     }
 
     if (area < 15) {
-        return s + oneOf(seed, " Plains", " Valley");
+        return s + rng::one_of({" Plains", " Valley"});
     }
 
     return "Great " + s + " Plains";
 }
 
-std::string getTundraName(std::string s, int seed, int area) {
+std::string getTundraName(std::string s) {
     return s + " Tundra";
 }
 
-std::string getOceanName(std::string s, int seed, int area) {
+std::string getOceanName(std::string s, int area) {
     if(area == 1) {
-        return s + oneOf(seed, " Lake", " Pond");
+        return s + rng::one_of({" Lake", " Pond"});
     }
 
     if (area < 15) {
@@ -794,8 +408,8 @@ std::string getOceanName(std::string s, int seed, int area) {
     return s + " Ocean";
 }
 
-std::string getRegionName(const int seed, const Ethnicity etnos, const int type, const int size, const bool island) {
-    std::string name = getEthnicName(seed * seed, etnos);
+std::string getRegionName(const Ethnicity etnos, const int type, const int size, const bool island) {
+    std::string name = getEthnicName(etnos);
 
     if (island) {
         return name + " Island";
@@ -816,65 +430,65 @@ std::string getRegionName(const int seed, const Ethnicity etnos, const int type,
         case R_CERAN_UFOREST3:
         case R_DFOREST:
         case R_CERAN_DFOREST1:
-            return getForestName(name, seed, size);
+            return getForestName(name, size);
 
         case R_JUNGLE:
         case R_CERAN_JUNGLE1:
         case R_CERAN_JUNGLE2:
         case R_CERAN_JUNGLE3:
-            return getJungleName(name, seed, size);
+            return getJungleName(name, size);
 
         case R_DESERT:
         case R_CERAN_DESERT1:
         case R_CERAN_DESERT2:
         case R_CERAN_DESERT3:
-            return getDesertName(name, seed, size);
+            return getDesertName(name, size);
 
         case R_VOLCANO:
-            return getVolcanoName(name, seed, size);
+            return getVolcanoName(name);
 
         case R_MOUNTAIN:
         case R_ISLAND_MOUNTAIN:
         case R_CERAN_MOUNTAIN1:
         case R_CERAN_MOUNTAIN2:
         case R_CERAN_MOUNTAIN3:
-            return getMountainName(name, seed, size);
+            return getMountainName(name, size);
 
         case R_CERAN_HILL:
         case R_CERAN_HILL1:
         case R_CERAN_HILL2:
-            return getHillsName(name, seed, size);
+            return getHillsName(name, size);
 
         case R_SWAMP:
         case R_ISLAND_SWAMP:
         case R_CERAN_SWAMP1:
         case R_CERAN_SWAMP2:
         case R_CERAN_SWAMP3:
-            return getSwampName(name, seed, size);
+            return getSwampName(name, size);
 
         case R_PLAIN:
         case R_ISLAND_PLAIN:
         case R_CERAN_PLAIN1:
         case R_CERAN_PLAIN2:
         case R_CERAN_PLAIN3:
-            return getPlainName(name, seed, size);
+            return getPlainName(name, size);
 
         case R_TUNDRA:
         case R_CERAN_TUNDRA1:
         case R_CERAN_TUNDRA2:
         case R_CERAN_TUNDRA3:
-            return getTundraName(name, seed, size);
+            return getTundraName(name);
 
         case R_OCEAN:
-            return getOceanName(name, seed, size);
+            return getOceanName(name, size);
 
         default:
-            return getAbstractName(seed * seed);
+            return getAbstractName();
     }
 }
 
-std::string getRiverName(const int seed, const int size, const int min, const int max) {
-    std::string s = getAbstractName(seed);
+std::string getRiverName(const int size, const int min, const int max) {
+    std::string s = getAbstractName();
 
     int d = max - min;
 	int greatRiver = max - d / 3;

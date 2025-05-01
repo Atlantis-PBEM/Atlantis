@@ -11,7 +11,7 @@
 #include <iostream>
 
 #include "astring.h"
-
+#include "string_filters.hpp"
 // Forward declaration for AString
 class AString;
 
@@ -214,8 +214,7 @@ inline std::optional<int> token::get_number() const noexcept {
 inline std::optional<bool> token::get_bool() const noexcept {
     if (!value_) return std::nullopt;
 
-    std::string lower{*value_};
-    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) noexcept { return std::tolower(c); });
+    std::string lower = *value_ | filter::lowercase;
 
     if (lower == "true" || lower == "t" || lower == "yes" || lower == "y" || lower == "on" || lower == "1")
         return true;

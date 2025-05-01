@@ -41,8 +41,9 @@
 #include "text_report_generator.hpp"
 #include "quests.h"
 #include "unit.h"
-#include "rng.h"
+#include "rng.hpp"
 #include "string_parser.hpp"
+#include "strings_util.hpp"
 
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -1558,7 +1559,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 
 			// Okay, check flat loss.
 			if (ItemDefs[i->type].escape & ItemType::LOSS_CHANCE) {
-				int losses = (i->num + rng::get_random(ItemDefs[i->type].esc_val)) / ItemDefs[i->type].esc_val;
+				int losses = rng::calculate_losses(i->num, ItemDefs[i->type].esc_val);
 				// LOSS_CHANCE and HAS_SKILL together mean the
 				// decay rate only applies if you don't have
 				// the required skill (this might get used if
@@ -1568,7 +1569,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 					if (u->GetSkill(skill) >= ItemDefs[i->type].esc_val) losses = 0;
 				}
 				if (losses) {
-					string temp = ItemString(i->type, losses) + plural(losses, " decay", " decays") +
+					string temp = ItemString(i->type, losses) + strings::plural(losses, " decay", " decays") +
 						" into nothingness.";
 					u->event(temp, "decay");
 					u->items.SetNum(i->type,i->num - losses);
@@ -1579,8 +1580,8 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 					if (Globals->WANDERING_MONSTERS_EXIST) {
 						Faction *mfac = GetFaction(factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
-						MonType *mp = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION));
-						mon->MakeWMon(mp->name, i->type, i->num);
+						auto monster = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
+						mon->MakeWMon(monster.name, i->type, i->num);
 						mon->MoveUnit(r->GetDummy());
 						// This will be zero unless these are set. (0 means
 						// full spoils)
@@ -1615,8 +1616,8 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 					if (Globals->WANDERING_MONSTERS_EXIST) {
 						Faction *mfac = GetFaction(factions, monfaction);
 						Unit *mon = GetNewUnit(mfac, 0);
-						MonType *mp = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION));
-						mon->MakeWMon(mp->name, i->type, i->num);
+						auto monster = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
+						mon->MakeWMon(monster.name, i->type, i->num);
 						mon->MoveUnit(r->GetDummy());
 						// This will be zero unless these are set. (0 means full spoils)
 						mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
@@ -1641,8 +1642,8 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 						if (Globals->WANDERING_MONSTERS_EXIST) {
 							Faction *mfac = GetFaction(factions, monfaction);
 							Unit *mon = GetNewUnit(mfac, 0);
-							MonType *mp = FindMonster(ItemDefs[it->type].abr, (ItemDefs[it->type].type & IT_ILLUSION));
-							mon->MakeWMon(mp->name, it->type, it->num);
+							auto monster = FindMonster(ItemDefs[it->type].abr, (ItemDefs[it->type].type & IT_ILLUSION))->get();
+							mon->MakeWMon(monster.name, it->type, it->num);
 							mon->MoveUnit(r->GetDummy());
 							// This will be zero unless these are set. (0 means full spoils)
 							mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
@@ -1883,9 +1884,9 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 	int skill = S_COMBAT;
 
 	if (weapon != -1) {
-		WeaponType *wp = FindWeapon(ItemDefs[weapon].abr);
-		if (FindSkill(wp->baseSkill) == FindSkill("XBOW")) skill = S_CROSSBOW;
-		if (FindSkill(wp->baseSkill) == FindSkill("LBOW")) skill = S_LONGBOW;
+		auto weapon_def = FindWeapon(ItemDefs[weapon].abr)->get();
+		if (FindSkill(weapon_def.baseSkill) == FindSkill("XBOW")) skill = S_CROSSBOW;
+		if (FindSkill(weapon_def.baseSkill) == FindSkill("LBOW")) skill = S_LONGBOW;
 	}
 
 	int sl = u->GetRealSkill(skill);

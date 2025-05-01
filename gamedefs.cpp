@@ -25,7 +25,7 @@
 #include "gamedefs.h"
 #include <string>
 
-const std::string DirectionStrs[] = {
+const std::vector<std::string> DirectionStrs = {
 	"North",
 	"Northeast",
 	"Southeast",
@@ -34,7 +34,7 @@ const std::string DirectionStrs[] = {
 	"Northwest"
 };
 
-char const *da[] = {
+const std::vector<std::string> DirectionAbrs = {
 	"N",
 	"NE",
 	"SE",
@@ -43,9 +43,7 @@ char const *da[] = {
 	"NW"
 };
 
-char const ** DirectionAbrs = da;
-
-char const *mn[] = {
+const std::vector<std::string> MonthNames = {
 	"January",
 	"February",
 	"March",
@@ -60,9 +58,7 @@ char const *mn[] = {
 	"December"
 };
 
-char const ** MonthNames = mn;
-
-std::string SeasonNames[] = {
+const std::vector<std::string> SeasonNames = {
 	"clear",
 	"winter",
 	"monsoon season",

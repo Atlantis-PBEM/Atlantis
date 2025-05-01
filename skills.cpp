@@ -124,27 +124,27 @@ int SkillCost(int skill)
 
 int SkillMax(char const *skill, int race)
 {
-	ManType *mt = FindRace(ItemDefs[race].abr);
-
-	if (mt == NULL) return 0;
-
 	SkillType *pS = FindSkill(skill);
 	if (!Globals->MAGE_NONLEADERS) {
 		if (pS && (pS->flags & SkillType::MAGIC)) {
-			if (!(ItemDefs[race].type & IT_LEADER)) return(0);
+			if (!(ItemDefs[race].type & IT_LEADER)) return 0;
 		}
 	}
 
+	auto man_def = FindRace(ItemDefs[race].abr);
+	if (!man_def) return 0;
+	auto mt = man_def->get();
+
 	AString skname = pS->abbr;
 	AString mani = "MANI";
-	for (unsigned int c=0; c < sizeof(mt->skills)/sizeof(mt->skills[0]); c++) {
-		if (skname == mt->skills[c])
-			return mt->speciallevel;
+	for (unsigned int c=0; c < (sizeof(mt.skills)/sizeof(mt.skills[0])); c++) {
+		if (skname == mt.skills[c])
+			return mt.speciallevel;
 		// Allow MANI to act as a placeholder for all magical skills
-		if ((pS->flags & SkillType::MAGIC) && mani == mt->skills[c])
-			return mt->speciallevel;
+		if ((pS->flags & SkillType::MAGIC) && mani == mt.skills[c])
+			return mt.speciallevel;
 	}
-	return mt->defaultlevel;
+	return mt.defaultlevel;
 }
 
 int GetLevelByDays(int dayspermen)

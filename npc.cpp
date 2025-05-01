@@ -24,6 +24,9 @@
 // END A3HEADER
 #include "game.h"
 #include "gamedata.h"
+#include "rng.hpp"
+#include <numeric>   // Needed for std::accumulate if used, limits for checks
+#include <limits>    // Needed for numeric_limits used in rng::get_weighted_index
 
 void Game::CreateCityMons()
 {
@@ -173,11 +176,10 @@ int Game::MakeWMon(ARegion *pReg)
 	if ((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
 		return 0;
 
-	MonType *mp = FindMonster(ItemDefs[montype].abr,
-			(ItemDefs[montype].type & IT_ILLUSION));
+	auto monster = FindMonster(ItemDefs[montype].abr, (ItemDefs[montype].type & IT_ILLUSION))->get();
 	Faction *monfac = GetFaction(factions, monfaction);
 	Unit *u = GetNewUnit(monfac, 0);
-	u->MakeWMon(mp->name, montype, (mp->number+rng::get_random(mp->number)+1)/2);
+	u->MakeWMon(monster.name, montype, (monster.number+rng::get_random(monster.number)+1)/2);
 	u->MoveUnit(pReg->GetDummy());
 	return(1);
 }
@@ -198,250 +200,231 @@ void Game::MakeLMon(Object *pObj)
 	if ((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
 		return;
 
-	MonType *mp = FindMonster(ItemDefs[montype].abr,
-			(ItemDefs[montype].type & IT_ILLUSION));
+	auto monster = FindMonster(ItemDefs[montype].abr, (ItemDefs[montype].type & IT_ILLUSION))->get();
 	Faction *monfac = GetFaction(factions, monfaction);
 	Unit *u = GetNewUnit(monfac, 0);
 	switch(montype) {
 		case I_IMP:
-			u->MakeWMon("Demons", I_IMP, rng::get_random(mp->number + 1));
+			u->MakeWMon("Demons", I_IMP, rng::get_random(monster.number + 1));
 
-			mp = FindMonster(ItemDefs[I_DEMON].abr,
-					(ItemDefs[I_DEMON].type & IT_ILLUSION));
-			u->items.SetNum(I_DEMON, rng::get_random(mp->number + 1));
+			monster = FindMonster(ItemDefs[I_DEMON].abr, (ItemDefs[I_DEMON].type & IT_ILLUSION))->get();
+			u->items.SetNum(I_DEMON, rng::get_random(monster.number + 1));
 
-			mp = FindMonster(ItemDefs[I_DEVIL].abr,
-					(ItemDefs[I_DEVIL].type & IT_ILLUSION));
-			u->items.SetNum(I_DEVIL, rng::get_random(mp->number + 1));
+			monster = FindMonster(ItemDefs[I_DEVIL].abr, (ItemDefs[I_DEVIL].type & IT_ILLUSION))->get();
+			u->items.SetNum(I_DEVIL, rng::get_random(monster.number + 1));
 			break;
 		case I_SKELETON:
-			u->MakeWMon("Undead", I_SKELETON, rng::get_random(mp->number + 1));
+			u->MakeWMon("Undead", I_SKELETON, rng::get_random(monster.number + 1));
 
-			mp = FindMonster(ItemDefs[I_UNDEAD].abr,
-					(ItemDefs[I_UNDEAD].type & IT_ILLUSION));
-			u->items.SetNum(I_UNDEAD, rng::get_random(mp->number + 1));
+			monster = FindMonster(ItemDefs[I_UNDEAD].abr, (ItemDefs[I_UNDEAD].type & IT_ILLUSION))->get();
+			u->items.SetNum(I_UNDEAD, rng::get_random(monster.number + 1));
 
-			mp = FindMonster(ItemDefs[I_LICH].abr,
-					(ItemDefs[I_LICH].type & IT_ILLUSION));
-			u->items.SetNum(I_LICH, rng::get_random(mp->number + 1));
+			monster = FindMonster(ItemDefs[I_LICH].abr, (ItemDefs[I_LICH].type & IT_ILLUSION))->get();
+			u->items.SetNum(I_LICH, rng::get_random(monster.number + 1));
 			break;
 		case I_MAGICIANS:
-			u->MakeWMon("Evil Mages", I_MAGICIANS,
-					(mp->number + rng::get_random(mp->number) + 1) / 2);
+			u->MakeWMon("Evil Mages", I_MAGICIANS, (monster.number + rng::get_random(monster.number) + 1) / 2);
 
-			mp = FindMonster(ItemDefs[I_SORCERERS].abr,
-					(ItemDefs[I_SORCERERS].type & IT_ILLUSION));
-			u->items.SetNum(I_SORCERERS,
-					rng::get_random(mp->number + 1));
+			monster = FindMonster(ItemDefs[I_SORCERERS].abr, (ItemDefs[I_SORCERERS].type & IT_ILLUSION))->get();
+			u->items.SetNum(I_SORCERERS, rng::get_random(monster.number + 1));
 			u->SetFlag(FLAG_BEHIND, 1);
 			u->guard = GUARD_NONE;
 			u->MoveUnit(pObj);
 
 			u = GetNewUnit(monfac, 0);
 
-			mp = FindMonster(ItemDefs[I_WARRIORS].abr,
-					(ItemDefs[I_WARRIORS].type & IT_ILLUSION));
-			u->MakeWMon(mp->name, I_WARRIORS,
-					(mp->number + rng::get_random(mp->number) + 1) / 2);
+			monster = FindMonster(ItemDefs[I_WARRIORS].abr, (ItemDefs[I_WARRIORS].type & IT_ILLUSION))->get();
+			u->MakeWMon(monster.name, I_WARRIORS, (monster.number + rng::get_random(monster.number) + 1) / 2);
 			u->guard = GUARD_NONE;
 
 			break;
 		case I_DARKMAGE:
-			u->MakeWMon("Dark Mages", I_DARKMAGE, (rng::get_random(mp->number) + 1));
+			u->MakeWMon("Dark Mages", I_DARKMAGE, (rng::get_random(monster.number) + 1));
 
-			mp = FindMonster(ItemDefs[I_MAGICIANS].abr,
-					(ItemDefs[I_MAGICIANS].type & IT_ILLUSION));
-			u->items.SetNum(I_MAGICIANS,
-					(mp->number + rng::get_random(mp->number) + 1) / 2);
+			monster = FindMonster(ItemDefs[I_MAGICIANS].abr, (ItemDefs[I_MAGICIANS].type & IT_ILLUSION))->get();
+			u->items.SetNum(I_MAGICIANS, (monster.number + rng::get_random(monster.number) + 1) / 2);
 
-			mp = FindMonster(ItemDefs[I_SORCERERS].abr,
-					(ItemDefs[I_SORCERERS].type & IT_ILLUSION));
-			u->items.SetNum(I_SORCERERS, rng::get_random(mp->number + 1));
+			monster = FindMonster(ItemDefs[I_SORCERERS].abr, (ItemDefs[I_SORCERERS].type & IT_ILLUSION))->get();
+			u->items.SetNum(I_SORCERERS, rng::get_random(monster.number + 1));
 
-			mp = FindMonster(ItemDefs[I_DARKMAGE].abr,
-					(ItemDefs[I_DARKMAGE].type & IT_ILLUSION));
-			u->items.SetNum(I_DARKMAGE, rng::get_random(mp->number + 1));
+			monster = FindMonster(ItemDefs[I_DARKMAGE].abr, (ItemDefs[I_DARKMAGE].type & IT_ILLUSION))->get();
+			u->items.SetNum(I_DARKMAGE, rng::get_random(monster.number + 1));
 			u->SetFlag(FLAG_BEHIND, 1);
 			u->guard = GUARD_NONE;
 			u->MoveUnit(pObj);
 
 			u = GetNewUnit(monfac, 0);
 
-			mp = FindMonster(ItemDefs[I_DROW].abr,
-					(ItemDefs[I_DROW].type & IT_ILLUSION));
-			u->MakeWMon(mp->name, I_DROW,
-					(mp->number + rng::get_random(mp->number) + 1) / 2);
+			monster = FindMonster(ItemDefs[I_DROW].abr, (ItemDefs[I_DROW].type & IT_ILLUSION))->get();
+			u->MakeWMon(monster.name, I_DROW, (monster.number + rng::get_random(monster.number) + 1) / 2);
 			u->guard = GUARD_NONE;
 
 			break;
 		case I_ILLYRTHID:
-			u->MakeWMon(mp->name, I_ILLYRTHID,
-					(mp->number + rng::get_random(mp->number) + 1) / 2);
+			u->MakeWMon(monster.name, I_ILLYRTHID, (monster.number + rng::get_random(monster.number) + 1) / 2);
 			u->SetFlag(FLAG_BEHIND, 1);
 			u->guard = GUARD_NONE;
 			u->MoveUnit(pObj);
 
 			u = GetNewUnit(monfac, 0);
 
-			mp = FindMonster(ItemDefs[I_SKELETON].abr,
-					(ItemDefs[I_SKELETON].type & IT_ILLUSION));
-			u->MakeWMon("Undead", I_SKELETON, rng::get_random(mp->number + 1));
+			monster = FindMonster(ItemDefs[I_SKELETON].abr, (ItemDefs[I_SKELETON].type & IT_ILLUSION))->get();
+			u->MakeWMon("Undead", I_SKELETON, rng::get_random(monster.number + 1));
 
-			mp = FindMonster(ItemDefs[I_UNDEAD].abr,
-					(ItemDefs[I_UNDEAD].type & IT_ILLUSION));
-			u->items.SetNum(I_UNDEAD, rng::get_random(mp->number + 1));
+			monster = FindMonster(ItemDefs[I_UNDEAD].abr, (ItemDefs[I_UNDEAD].type & IT_ILLUSION))->get();
+			u->items.SetNum(I_UNDEAD, rng::get_random(monster.number + 1));
 			u->guard = GUARD_NONE;
 			break;
 		case I_STORMGIANT:
 			if (rng::get_random(3) < 1) {
 				montype = I_CLOUDGIANT;
-				mp = FindMonster(ItemDefs[montype].abr,
-						(ItemDefs[montype].type & IT_ILLUSION));
+				monster = FindMonster(ItemDefs[montype].abr, (ItemDefs[montype].type & IT_ILLUSION))->get();
 			}
-			u->MakeWMon(mp->name, montype,
-					(mp->number + rng::get_random(mp->number) + 1) / 2);
+			u->MakeWMon(monster.name, montype, (monster.number + rng::get_random(monster.number) + 1) / 2);
 			break;
 		default:
-			u->MakeWMon(mp->name, montype,
-					(mp->number + rng::get_random(mp->number) + 1) / 2);
+			u->MakeWMon(monster.name, montype, (monster.number + rng::get_random(monster.number) + 1) / 2);
 			break;
 	}
 	u->MoveUnit(pObj);
 }
 
+// Helper struct for weapon selection
+struct SuitableWeapon {
+	int index; // Index into WeaponDefs
+	unsigned int weight;
+};
+
 Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weaponlevel, int armor, int behind)
 {
 	Unit *u = GetNewUnit(fac);
-	ManType *men = FindRace(ItemDefs[mantype].abr);
-	int *fitting;
+	auto men = FindRace(ItemDefs[mantype].abr)->get();
 
-	// Check skills:
-	int scomb = men->defaultlevel;
-	int sxbow = men->defaultlevel;
-	int slbow = men->defaultlevel;
-	for (unsigned int i=0; i<(sizeof(men->skills)/sizeof(men->skills[0])); i++) {
-		if (men->skills[i] == NULL) continue;
-		if (FindSkill(men->skills[i]) == FindSkill("COMB"))
-			scomb = men->speciallevel;
-		if (FindSkill(men->skills[i]) == FindSkill("XBOW"))
-			sxbow = men->speciallevel;
-		if (FindSkill(men->skills[i]) == FindSkill("LBOW"))
-			slbow = men->speciallevel;
+	int scomb = men.defaultlevel;
+	int sxbow = men.defaultlevel;
+	int slbow = men.defaultlevel;
+	for (unsigned int i = 0; i < (sizeof(men.skills) / sizeof(men.skills[0])); i++) {
+		if (!men.skills[i]) continue;
+		if (FindSkill(men.skills[i]) == FindSkill("COMB")) scomb = men.speciallevel;
+		if (FindSkill(men.skills[i]) == FindSkill("XBOW")) sxbow = men.speciallevel;
+		if (FindSkill(men.skills[i]) == FindSkill("LBOW")) slbow = men.speciallevel;
 	}
-	int combat = scomb;
+
+	int combat_level = scomb;
 	int sk = lookup_skill("COMB");
 	if (behind) {
 		if (slbow >= sxbow) {
 			sk = lookup_skill("LBOW");
-			combat = slbow;
+			combat_level = slbow;
 		} else {
 			sk = lookup_skill("XBOW");
-			combat = sxbow;
+			combat_level = sxbow;
 		}
 	}
-	if (combat < level) weaponlevel += level - combat;
-	int weapon = -1;
+
+	if (combat_level < level) {
+		weaponlevel += level - combat_level;
+	}
+
+	int weapon_index = -1;
 	int witem = -1;
-	fitting = new int[NUMWEAPONS];
-	while (weapon == -1) {
-		int n = 0;
-		for (int i=0; i<NUMWEAPONS; i++) {
-			fitting[i] = 0;
-			std::string it(WeaponDefs[i].abbr);
-			if (ItemDefs[lookup_item(it)].flags & ItemType::DISABLED) continue;
-			// disregard picks!
-			std::string ps("PICK");
-			if (lookup_item(it) == lookup_item(ps)) continue;
 
-			// Sort out the more exotic weapons!
-			int producelevel = ItemDefs[lookup_item(it)].pLevel;
-			if (ItemDefs[lookup_item(it)].pSkill != FindSkill("WEAP")->abbr) continue;
+	while (weapon_index == -1) {
+		std::vector<SuitableWeapon> suitable_weapons;
 
-			if ((WeaponDefs[i].flags & WeaponType::RANGED) && (!behind)) continue;
-			int attack = WeaponDefs[i].attackBonus;
-			if (attack < (producelevel-1)) attack = producelevel-1;
-			if ((lookup_skill(WeaponDefs[i].baseSkill) == sk) || (lookup_skill(WeaponDefs[i].orSkill) == sk)) {
-				if ((behind) && (attack + combat <= weaponlevel)) {
-					fitting[i] = 1;
-					if (WeaponDefs[i].attackBonus == weaponlevel) fitting[i] = 5;
-					n += fitting[i];
-				} else if ((!behind) && (attack == weaponlevel)) {
-					fitting[i] = 1;
-					//if (WeaponDefs[i].attackBonus == weaponlevel) fitting[i] = 5;
-					n += fitting[i];
-				} else continue;
-			} else {
-				// make Javelins possible
-				if ((behind) && (scomb > combat)) {
-					if (
-						(WeaponDefs[i].flags & WeaponType::RANGED) &&
-						(
-							lookup_skill(WeaponDefs[i].baseSkill) == lookup_skill("COMB") ||
-							lookup_skill(WeaponDefs[i].orSkill) == lookup_skill("COMB")
-						)
-					) {
-							fitting[i] = 1;
-							n++;
-					}
+		for (size_t i = 0; i < WeaponDefs.size(); ++i) {
+			int current_witem = lookup_item(WeaponDefs[i].abbr);
+
+			if (ItemDefs[current_witem].flags & ItemType::DISABLED) continue;
+			if (current_witem == lookup_item("PICK")) continue;
+			if (ItemDefs[current_witem].pSkill != FindSkill("WEAP")->abbr) continue;
+
+			bool is_ranged = (WeaponDefs[i].flags & WeaponType::RANGED);
+			if (is_ranged && !behind) continue;
+
+			int weapon_base_skill_idx = lookup_skill(WeaponDefs[i].baseSkill);
+			int weapon_or_skill_idx = lookup_skill(WeaponDefs[i].orSkill);
+			bool skill_match = (weapon_base_skill_idx == sk || weapon_or_skill_idx == sk);
+
+			bool javelin_case = false;
+			if (behind && !skill_match && scomb > combat_level) {
+				if (is_ranged && (weapon_base_skill_idx == lookup_skill("COMB") || weapon_or_skill_idx == lookup_skill("COMB"))) {
+					skill_match = true;
+					javelin_case = true;
 				}
 			}
+
+			if (!skill_match) continue;
+
+			int attack = WeaponDefs[i].attackBonus;
+			int producelevel = ItemDefs[current_witem].pLevel;
+			if (attack < (producelevel - 1)) attack = producelevel - 1;
+
+			bool level_match = false;
+			unsigned int weight = 1;
+			if (behind) {
+				if (attack + (javelin_case ? scomb : combat_level) <= weaponlevel) {
+					level_match = true;
+					if (WeaponDefs[i].attackBonus == weaponlevel) {
+						weight = 5;
+					}
+				}
+			} else {
+				if (attack == weaponlevel) {
+					level_match = true;
+				}
+			}
+
+			if (!level_match) continue;
+
+			if (!men.CanUse(current_witem)) continue;
+
+			suitable_weapons.push_back({static_cast<int>(i), weight});
 		}
 
-		if (n < 1) {
+		if (suitable_weapons.empty()) {
 			weaponlevel++;
 			continue;
-		} else {
-			int secondtry = -1;
-			while(secondtry <= 0) {
-				weapon = -1;
-				int w = rng::get_random(n);
-				/*
-				Awrite(AString("Roll: ") + w);
-				*/
-				n = -1;
-				for (int i=0; i<NUMWEAPONS; i++) {
-					if (fitting[i]) {
-						n += fitting[i];
-						/*
-						Awrite(WeaponDefs[i].abbr);
-						*/
-						if ((n >= w) && (weapon == -1))
-							weapon = i;
-					}
-				}
-				if (weapon >= 0) {
-					witem = lookup_item(WeaponDefs[weapon].abbr);
-					secondtry++;
-					if (men->CanUse(witem)) break;
-				}
-			}
+		}
+
+		std::vector<unsigned int> weights;
+		weights.reserve(suitable_weapons.size());
+		for (const auto& sw : suitable_weapons) {
+			weights.push_back(sw.weight);
+		}
+
+        std::optional<size_t> selected_suitable_index_opt = rng::get_weighted_index(weights);
+
+		// If the weighted selection failed, we know that suitable_weapons is not empty, so we can safely pick the first one.
+        if (selected_suitable_index_opt) weapon_index = suitable_weapons[*selected_suitable_index_opt].index;
+        else weapon_index = suitable_weapons[0].index;
+		witem = lookup_item(WeaponDefs[weapon_index].abbr);
+	}
+
+	int final_skill_idx = lookup_skill(WeaponDefs[weapon_index].baseSkill);
+	if (final_skill_idx != sk && lookup_skill(WeaponDefs[weapon_index].orSkill) != sk) sk = final_skill_idx;
+
+	int maxskill = men.defaultlevel;
+	for (unsigned int i = 0; i < (sizeof(men.skills) / sizeof(men.skills[0])); i++) {
+		if (men.skills[i] && FindSkill(men.skills[i]) == FindSkill(SkillDefs[sk].abbr)) {
+			maxskill = men.speciallevel;
+			break;
 		}
 	}
-	delete[] fitting;
-	// Check again which skills the weapon uses
-	if ((lookup_skill(WeaponDefs[weapon].baseSkill) != sk) && (lookup_skill(WeaponDefs[weapon].orSkill) != sk))
-		sk = lookup_skill(WeaponDefs[weapon].baseSkill);
-	int maxskill = men->defaultlevel;
-	int special = 0;
-	for (unsigned int i=0; i<(sizeof(men->skills)/sizeof(men->skills[0])); i++) {
-		if (FindSkill(men->skills[i]) == FindSkill(SkillDefs[sk].abbr)) {
-			special = 1;
-		}
-	}
-	if (special) maxskill = men->speciallevel;
+
 	if (level > maxskill) level = maxskill;
+
 	u->SetMen(mantype, num);
-	/*
-	Awrite(AString("Unit (") + u->num + ") -> chose " + ItemDefs[witem].name);
-	*/
 	u->items.SetNum(witem, num);
 	u->SetSkill(sk, level);
-	if (behind) u->SetFlag(FLAG_BEHIND,1);
+	if (behind) u->SetFlag(FLAG_BEHIND, 1);
+
 	if (armor) {
 		int ar = I_PLATEARMOR;
-		if (!men->CanUse(ar)) ar = I_CHAINARMOR;
-		if (!men->CanUse(ar)) ar = I_LEATHERARMOR;
-		u->items.SetNum(ar, num);
+		if (!men.CanUse(ar)) ar = I_CHAINARMOR;
+		if (!men.CanUse(ar)) ar = I_LEATHERARMOR;
+		if (men.CanUse(ar)) u->items.SetNum(ar, num);
 	}
+
 	return u;
 }

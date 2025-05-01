@@ -35,7 +35,7 @@
 #include "game.h"
 #include "gamedata.h"
 #include "quests.h"
-#include "rng.h"
+#include "rng.hpp"
 
 using namespace std;
 
@@ -857,13 +857,13 @@ void Game::CreateShip(ARegion *r, Unit *u, int ship)
 // Returns the number of items created.
 int Game::consume_production_inputs(Unit *u, int item, int maxproduced)
 {
-    unsigned int maxInputs = sizeof(ItemDefs->pInput) / sizeof(ItemDefs->pInput[0]);
+    unsigned int maxInputs = sizeof(ItemDefs[0].pInput) / sizeof(ItemDefs[0].pInput[0]);
 
     if (ItemDefs[item].flags & ItemType::ORINPUTS) {
         // Figure out the max we can produce based on the inputs
         int count = 0;
         unsigned int c;
-        for (c = 0; c < sizeof(ItemDefs->pInput) / sizeof(ItemDefs->pInput[0]); c++) {
+        for (c = 0; c < sizeof(ItemDefs[0].pInput) / sizeof(ItemDefs[0].pInput[0]); c++) {
             int i = ItemDefs[item].pInput[c].item;
             if (i != -1) count += u->GetSharedNum(i) / ItemDefs[item].pInput[c].amt;
         }
@@ -1648,7 +1648,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
                 match++;
             }
             if (!candidates.empty()) {
-                int index = rng::rng::get_random(candidates.size());
+                int index = rng::get_random(candidates.size()); // Corrected namespace
                 newreg = candidates[index];
             }
         }

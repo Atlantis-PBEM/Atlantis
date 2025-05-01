@@ -28,6 +28,7 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <unordered_set>
 
 class Soldier;
 class Army;
@@ -39,7 +40,7 @@ class Location;
 #include "helper.h"
 #include "skills.h"
 
-WeaponBonusMalus* GetWeaponBonusMalus(WeaponType *, WeaponType *);
+const WeaponBonusMalus* GetWeaponBonusMalus(const WeaponType& attacker, const WeaponType& target);
 
 struct AttackStat {
 	std::string effect;
@@ -112,7 +113,7 @@ class Soldier {
 		void SetEffect(char const *);
 		void ClearEffect(char const *);
 		void ClearOneTimeEffects(void);
-		int ArmorProtect(int weaponClass );
+		bool ArmorProtect(int weaponClass );
 
 		void RestoreItems();
 		void Alive(int);
@@ -149,7 +150,7 @@ class Soldier {
 		int maxhits;
 		int damage;
 
-		BITFIELD battleItems;
+		std::unordered_set<int> battleItems;
 		int amuletofi;
 
 		/* Effects */

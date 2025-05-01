@@ -119,7 +119,7 @@ class Location
 Location *GetUnit(std::list<Location *>& locs, int unitid);
 
 int AGetName(int town, ARegion *r);
-char const *AGetNameString(int name);
+const std::string& AGetNameString(int name);
 
 class Farsight
 {

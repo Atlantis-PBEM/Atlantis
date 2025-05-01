@@ -890,8 +890,8 @@ AString *ShowSkill::Report(Faction *f) const
 			*str += "A mage with the Summon Skeletons skill may summon "
 				"skeletons into his inventory, to aid him in battle. "
 				"Skeletons may be given to other units, as they follow "
-				"instructions mindlessly; however, they have a 8 percent "
-				"chance of decaying each turn. A mage can summon skeletons "
+				"instructions mindlessly; however, they have a " + std::to_string(ItemDefs[I_SKELETON].esc_val) +
+				" percent chance of decaying each turn. A mage can summon skeletons "
 				"at an average rate of ";
 			if (ItemDefs[I_SKELETON].mOut > 0) {
 				*str += ItemDefs[I_SKELETON].mOut;
@@ -909,8 +909,8 @@ AString *ShowSkill::Report(Faction *f) const
 			*str += "A mage with the Raise Undead skill may summon undead "
 				"into his inventory, to aid him in battle. Undead may be "
 				"given to other units, as they follow instructions "
-				"mindlessly; however, they have a 8 percent chance of "
-				"decaying each turn. A mage can summon undead at an average "
+				"mindlessly; however, they have a " + std::to_string(ItemDefs[I_UNDEAD].esc_val) +
+				" percent chance of decaying each turn. A mage can summon undead at an average "
 				"rate of ";
 			if (ItemDefs[I_UNDEAD].mOut > 0) {
 				*str += ItemDefs[I_UNDEAD].mOut;
@@ -928,8 +928,8 @@ AString *ShowSkill::Report(Faction *f) const
 			*str += "A mage with the Summon Lich skill may summon a lich "
 				"into his inventory, to aid him in battle. Liches may be "
 				"given to other units, as they follow instructions "
-				"mindlessly; however, they have a 8 percent chance of "
-				"decaying each turn. A mage has a ";
+				"mindlessly; however, they have a " + std::to_string(ItemDefs[I_LICH].esc_val) +
+				" percent chance of decaying each turn. A mage has a ";
 			if (ItemDefs[I_LICH].mOut > 0) {
 				*str += ItemDefs[I_LICH].mOut;
 				*str += " percent times his skill level";
