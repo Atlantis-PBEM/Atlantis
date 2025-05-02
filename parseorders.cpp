@@ -3085,9 +3085,6 @@ void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	}
 
 	AString *token = o->gettoken();
-	int x = -1;
-	int y = -1;
-	int z = unit->object->region->zloc;
 
 	if (!token) {
 		parse_error(pCheck, unit, 0, "ANNIHILATE: No region specified.");
@@ -3099,6 +3096,12 @@ void Game::ProcessAnnihilateOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 	delete token;
+
+	if (pCheck) return;
+
+	int x = -1;
+	int y = -1;
+	int z = unit->object->region->zloc;
 
 	token = o->gettoken();
 	if (!token) {
