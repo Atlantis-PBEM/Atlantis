@@ -3205,7 +3205,6 @@ void Game::RunAnnihilateOrders() {
 	// Check all units for annihilate orders.  A unit my only annihilate if they have access to the annihilate skill.
 	// Annihilate will destroy the target hex and all surrounding hexes.  Already annihilated regions cannot be
 	// annihilated again.
-	bool only_surface = rulesetSpecificData.value("annihilate_surface_only", false);
 	int max_annihilates = rulesetSpecificData.value("allowed_annihilates", 1);
 
 	for(const auto r : regions) {
@@ -3270,11 +3269,15 @@ void Game::RunAnnihilateOrders() {
 				while(allowed_annihilates > 0) {
 					// pick a random region region to annihilate
 					ARegionArray *level = nullptr;
-					if (only_surface) {
+
+					RangeType *rt = FindRange("rng_annihilate");
+					if (rt->flags & RangeType::RNG_SURFACE_ONLY) {
 						level = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
 					} else {
 						int zloc = rng::get_random(regions.numLevels);
 						level = regions.GetRegionArray(zloc);
+						// Don't allow it to annihilate the Nexus
+						if (level->levelType == ARegionArray::LEVEL_NEXUS) continue;
 					}
 					// now, get a random region from that level that isn't our own.
 					if (level == nullptr) break;
