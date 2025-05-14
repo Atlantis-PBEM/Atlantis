@@ -63,7 +63,7 @@ void Game::ProcessCastOrder(Unit *u, parser::string_parser& parser, orders_check
 		return;
 	}
 
-	RangeType *rt = NULL;
+	std::optional<std::reference_wrapper<RangeType>> rt = std::nullopt;
 	switch(sk) {
 		case S_MIND_READING:
 			ProcessMindReading(u, parser, checker);
@@ -110,7 +110,7 @@ void Game::ProcessCastOrder(Unit *u, parser::string_parser& parser, orders_check
 			break;
 		case S_CLEAR_SKIES:
 			rt = FindRange(SkillDefs[sk].range);
-			if (rt == NULL) ProcessGenericSpell(u, sk, checker);
+			if (!rt) ProcessGenericSpell(u, sk, checker);
 			else ProcessRegionSpell(u, sk, parser, checker);
 			break;
 		case S_FARSIGHT:
@@ -359,7 +359,7 @@ void Game::ProcessRegionSpell(Unit *u, int spell, parser::string_parser& parser,
 	int z = -1;
 
 	if (parser.get_token() == "region") {
-		RangeType *range = FindRange(SkillDefs[spell].range);
+		auto range = FindRange(SkillDefs[spell].range);
 
 		auto xval = parser.get_token().get_number();
 		if (!xval) {
@@ -383,7 +383,7 @@ void Game::ProcessRegionSpell(Unit *u, int spell, parser::string_parser& parser,
 			return;
 		}
 
-		if (range && (range->flags & RangeType::RNG_CROSS_LEVELS)) {
+		if (range && (range->get().flags & RangeType::RNG_CROSS_LEVELS)) {
 			auto zval = parser.get_token().get_number();
 			if (zval) {
 				z = zval.value();
@@ -772,15 +772,14 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 		return 0;
 	}
 
-	RangeType *range = FindRange(SkillDefs[spell].range);
-	if (range == NULL) {
+	auto range = FindRange(SkillDefs[spell].range);
+	if (!range) {
 		u->error("CAST: Spell is not castable at range.");
 		return 0;
 	}
 
 	int rtype = regions.GetRegionArray(r->zloc)->levelType;
-	if ((rtype == ARegionArray::LEVEL_NEXUS) &&
-			!(range->flags & RangeType::RNG_NEXUS_SOURCE)) {
+	if ((rtype == ARegionArray::LEVEL_NEXUS) && !(range->get().flags & RangeType::RNG_NEXUS_SOURCE)) {
 		u->error("CAST: Spell does not work from the Nexus.");
 		return 0;
 	}
@@ -791,24 +790,22 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 	}
 
 	rtype = regions.GetRegionArray(tar->zloc)->levelType;
-	if ((rtype == ARegionArray::LEVEL_NEXUS) &&
-			!(range->flags & RangeType::RNG_NEXUS_TARGET)) {
+	if ((rtype == ARegionArray::LEVEL_NEXUS) && !(range->get().flags & RangeType::RNG_NEXUS_TARGET)) {
 		u->error("CAST: Spell does not work to the Nexus.");
 		return 0;
 	}
 
-	if ((rtype != ARegionArray::LEVEL_SURFACE) &&
-			(range->flags & RangeType::RNG_SURFACE_ONLY)) {
+	if ((rtype != ARegionArray::LEVEL_SURFACE) && (range->get().flags & RangeType::RNG_SURFACE_ONLY)) {
 		u->error("CAST: Spell can only target regions on the surface.");
 		return 0;
 	}
-	if (!(range->flags&RangeType::RNG_CROSS_LEVELS) && (r->zloc != tar->zloc)) {
+	if (!(range->get().flags&RangeType::RNG_CROSS_LEVELS) && (r->zloc != tar->zloc)) {
 		u->error("CAST: Spell is not able to work across levels.");
 		return 0;
 	}
 
 	int maxdist;
-	switch(range->rangeClass) {
+	switch(range->get().rangeClass) {
 		default:
 		case RangeType::RNG_ABSOLUTE:
 			maxdist = 1;
@@ -823,10 +820,10 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
 			maxdist = level * level * level;
 			break;
 	}
-	maxdist *= range->rangeMult;
+	maxdist *= range->get().rangeMult;
 
 	int dist;
-	dist = regions.GetPlanarDistance(tar, r, range->crossLevelPenalty, maxdist);
+	dist = regions.GetPlanarDistance(tar, r, range->get().crossLevelPenalty, maxdist);
 	if (dist > maxdist) {
 		u->error("CAST: Target region out of range.");
 		return 0;
@@ -1455,8 +1452,8 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
 
 	CastRegionOrder *order = dynamic_cast<CastRegionOrder *>(u->castorders);
 
-	RangeType *range = FindRange(SkillDefs[S_CLEAR_SKIES].range);
-	if (range != NULL) {
+	auto range = FindRange(SkillDefs[S_CLEAR_SKIES].range);
+	if (range) {
 		tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
 		val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES);
 		if (!val) return 0;

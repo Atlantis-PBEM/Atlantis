@@ -1142,12 +1142,12 @@ int Unit::GetAttackRiding()
 					minweight = ItemDefs[i->type].weight;
 		}
 		for(auto i : items) {
-            MountType *mount;
             int skill, maxBonus;
             if (!(ItemDefs[i->type].type & IT_MOUNT)) continue;
-            mount = FindMount(ItemDefs[i->type].abr);
-            if (!mount) continue;
-            maxBonus = mount->maxBonus;
+            auto mountType = FindMount(ItemDefs[i->type].abr);
+            if (!mountType) continue;
+            auto mount = mountType.value().get();
+            maxBonus = mount.maxBonus;
             /*
              * This code applies terrain restrictions to the attack riding
              * calculations, but given that these have never been applied
@@ -1160,7 +1160,7 @@ int Unit::GetAttackRiding()
             if (!canRide && !canFly)
                 maxBonus = 0;
             */
-            skill = lookup_skill(mount->skill);
+            skill = lookup_skill(mount.skill);
             if (skill == -1) {
                 // This mount doesn't require skill to use.
                 // I guess the rider gets the max bonus!
@@ -1193,13 +1193,13 @@ int Unit::GetDefenseRiding()
         // Limit riding to the slowest flying mount
 		for(auto i : items) {
 			if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].fly) {
-                MountType *mount;
-                mount = FindMount(ItemDefs[i->type].abr);
-                if (mount) {
+                auto mountType = FindMount(ItemDefs[i->type].abr);
+                if (mountType) {
+                    auto mount = mountType.value().get();
                     // If we wanted to apply terrain restrictions,
                     // we'd do it here
-                    if (mount->maxBonus < riding)
-                        riding = mount->maxBonus;
+                    if (mount.maxBonus < riding)
+                        riding = mount.maxBonus;
                 }
             }
         }
@@ -1208,11 +1208,11 @@ int Unit::GetDefenseRiding()
         // Limit riding to the slowest riding mount
 		for(auto i : items) {
 			if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].ride) {
-                MountType *mount;
-                mount = FindMount(ItemDefs[i->type].abr);
-                if (mount) {
+                auto mountType = FindMount(ItemDefs[i->type].abr);
+                if (mountType) {
+                    auto mount = mountType.value().get();
                     // If we wanted to apply terrain restrictions, we'd also do it here
-                    if (mount->maxBonus < riding) riding = mount->maxBonus;
+                    if (mount.maxBonus < riding) riding = mount.maxBonus;
                 }
             }
         }
@@ -1348,8 +1348,8 @@ int Unit::CanStudy(int sk)
 	unsigned int c;
 	for (c = 0; c < sizeof(SkillDefs[sk].depends)/sizeof(SkillDefs[sk].depends[0]); c++) {
 		if (SkillDefs[sk].depends[c].skill == NULL) return 1;
-		SkillType *pS = FindSkill(SkillDefs[sk].depends[c].skill);
-		if (pS && (pS->flags & SkillType::DISABLED)) continue;
+		auto pS = FindSkill(SkillDefs[sk].depends[c].skill);
+		if (pS && (pS->get().flags & SkillType::DISABLED)) continue;
 		if (!CheckDepend(curlev, SkillDefs[sk].depends[c])) return 0;
 	}
 	return 1;
@@ -2044,17 +2044,13 @@ int Unit::Taxers(int numtaxers)
 	int numArmor = 0;
 
 	for(auto item : items) {
-		BattleItemType *pBat = NULL;
+		auto pBat = FindBattleItem(ItemDefs[item->type].abr);
 
-		if (
-			(ItemDefs[item->type].type & IT_BATTLE) &&
-			((pBat = FindBattleItem(ItemDefs[item->type].abr)) != NULL) &&
-			(pBat->flags & BattleItemType::SPECIAL)
-		) {
+		if ((ItemDefs[item->type].type & IT_BATTLE) && pBat && (pBat->get().flags & BattleItemType::SPECIAL)) {
 			// Only consider offensive items
 			if (
 				(Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM) &&
-				(!(pBat->flags & BattleItemType::MAGEONLY) || type == U_MAGE || type == U_APPRENTICE)
+				(!(pBat->get().flags & BattleItemType::MAGEONLY) || type == U_MAGE || type == U_APPRENTICE)
 			) {
 				numUsableBattle += item->num;
 				numBattle += item->num;
@@ -2102,10 +2098,10 @@ int Unit::Taxers(int numtaxers)
 		}
 
 		if (ItemDefs[item->type].type & IT_MOUNT) {
-			MountType *pm = FindMount(ItemDefs[item->type].abr);
-			if (pm->skill) {
-				int sk = lookup_skill(pm->skill);
-				if (pm->minBonus <= GetSkill(sk))
+			auto pm = FindMount(ItemDefs[item->type].abr).value().get();
+			if (pm.skill) {
+				int sk = lookup_skill(pm.skill);
+				if (pm.minBonus <= GetSkill(sk))
 					numUsableMounts += item->num;
 			} else
 				numUsableMounts += item->num;
@@ -2368,7 +2364,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 	if (!canFly && !canRide) return -1;
 
 	int item = lookup_item(itm.const_str());
-	MountType *pMnt = FindMount(ItemDefs[item].abr);
+	auto pMnt = FindMount(ItemDefs[item].abr).value().get();
 
 	int num = items.GetNum(item);
 	if (num < 1) return -1;
@@ -2383,22 +2379,22 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 		if (!ItemDefs[item].ride) return -1;
 	}
 
-	if (pMnt->skill) {
-		int sk = lookup_skill(pMnt->skill);
+	if (pMnt.skill) {
+		int sk = lookup_skill(pMnt.skill);
 		bonus = GetSkill(sk);
-		if (bonus < pMnt->minBonus) {
+		if (bonus < pMnt.minBonus) {
 			// Unit isn't skilled enough for this mount
 			bonus = 0;
 			return -1;
 		}
 		// Limit to max mount bonus;
-		if (bonus > pMnt->maxBonus) bonus = pMnt->maxBonus;
+		if (bonus > pMnt.maxBonus) bonus = pMnt.maxBonus;
 		// If the mount can fly and the terrain doesn't allow
 		// flying mounts, limit the bonus to the maximum hampered
 		// bonus allowed by the mount
 		if (ItemDefs[item].fly && !canFly) {
-			if (bonus > pMnt->maxHamperedBonus)
-				bonus = pMnt->maxHamperedBonus;
+			if (bonus > pMnt.maxHamperedBonus)
+				bonus = pMnt.maxHamperedBonus;
 		}
 
 		// Practice the mount's skill
@@ -2509,15 +2505,15 @@ void Unit::error(const string& s) {
 
 int Unit::GetAttribute(char const *attrib)
 {
-	AttribModType *ap = FindAttrib(attrib);
-	if (ap == NULL) return 0;
+	auto ap = FindAttrib(attrib);
+	if (!ap) return 0;
 	AString temp;
 	int base = 0;
 	int bonus = 0;
 	int monbase = -1;
 	int monbonus = 0;
 
-	if (ap->flags & AttribModType::CHECK_MONSTERS) {
+	if (ap->get().flags & AttribModType::CHECK_MONSTERS) {
 		for(auto i : items) {
 			if (ItemDefs[i->type].type & IT_MONSTER) {
 				auto monster = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
@@ -2528,7 +2524,7 @@ int Unit::GetAttribute(char const *attrib)
 				else if (temp == "tactics") val = monster.tactics;
 				else continue;
 				if (monbase == -1) monbase = val;
-				else if (ap->flags & AttribModType::USE_WORST)
+				else if (ap->get().flags & AttribModType::USE_WORST)
 					monbase = (val < monbase) ? val : monbase;
 				else
 					monbase = (val > monbase) ? val : monbase;
@@ -2538,50 +2534,50 @@ int Unit::GetAttribute(char const *attrib)
 
 	for (int index = 0; index < 5; index++) {
 		int val = 0;
-		if (ap->mods[index].flags & AttribModItem::SKILL) {
-			int sk = lookup_skill(ap->mods[index].ident);
+		if (ap->get().mods[index].flags & AttribModItem::SKILL) {
+			int sk = lookup_skill(ap->get().mods[index].ident);
 			val = GetAvailSkill(sk);
-			if (ap->mods[index].modtype == AttribModItem::UNIT_LEVEL_HALF) {
-				val = ((val + 1)/2) * ap->mods[index].val;
-			} else if (ap->mods[index].modtype == AttribModItem::CONSTANT) {
-				val = ap->mods[index].val;
+			if (ap->get().mods[index].modtype == AttribModItem::UNIT_LEVEL_HALF) {
+				val = ((val + 1)/2) * ap->get().mods[index].val;
+			} else if (ap->get().mods[index].modtype == AttribModItem::CONSTANT) {
+				val = ap->get().mods[index].val;
 			} else {
-				val *= ap->mods[index].val;
+				val *= ap->get().mods[index].val;
 			}
-		} else if (ap->mods[index].flags & AttribModItem::ITEM) {
+		} else if (ap->get().mods[index].flags & AttribModItem::ITEM) {
 			val = 0;
-			int item = lookup_item(ap->mods[index].ident);
+			int item = lookup_item(ap->get().mods[index].ident);
 			if (item != -1) {
 				if (ItemDefs[item].type & IT_MAGEONLY
 					&& type != U_MAGE
 					&& type != U_APPRENTICE
 					&& type != U_GUARDMAGE) {
 					// Ignore mage only items for non-mages
-				} else if (ap->mods[index].flags & AttribModItem::PERMAN) {
+				} else if (ap->get().mods[index].flags & AttribModItem::PERMAN) {
 					int men = GetMen();
 					if (men > 0 && men <= items.GetNum(item))
-						val = ap->mods[index].val;
+						val = ap->get().mods[index].val;
 				} else {
 					if (items.GetNum(item) > 0)
-						val = ap->mods[index].val;
+						val = ap->get().mods[index].val;
 				}
 			}
-		} else if (ap->mods[index].flags & AttribModItem::FLAGGED) {
-			if (ap->mods[index].ident == "invis")
-				val = (GetFlag(FLAG_INVIS) ? ap->mods[index].val : 0);
-			if (ap->mods[index].ident == "guard")
-				val = (guard == GUARD_GUARD ? ap->mods[index].val : 0);
+		} else if (ap->get().mods[index].flags & AttribModItem::FLAGGED) {
+			if (ap->get().mods[index].ident == "invis")
+				val = (GetFlag(FLAG_INVIS) ? ap->get().mods[index].val : 0);
+			if (ap->get().mods[index].ident == "guard")
+				val = (guard == GUARD_GUARD ? ap->get().mods[index].val : 0);
 
 		}
-		if (ap->mods[index].flags & AttribModItem::NOT)
-			val = ((val == 0) ? ap->mods[index].val : 0);
-		if (val && ap->mods[index].modtype == AttribModItem::FORCECONSTANT)
+		if (ap->get().mods[index].flags & AttribModItem::NOT)
+			val = ((val == 0) ? ap->get().mods[index].val : 0);
+		if (val && ap->get().mods[index].modtype == AttribModItem::FORCECONSTANT)
 			return val;
 		// Only flags can add to monster bonuses
-		if (ap->mods[index].flags & AttribModItem::FLAGGED) {
-			if (ap->flags & AttribModType::CHECK_MONSTERS) monbonus += val;
+		if (ap->get().mods[index].flags & AttribModItem::FLAGGED) {
+			if (ap->get().flags & AttribModType::CHECK_MONSTERS) monbonus += val;
 		}
-		if (ap->mods[index].flags & AttribModItem::CUMULATIVE)
+		if (ap->get().mods[index].flags & AttribModItem::CUMULATIVE)
 			base += val;
 		else if (val > bonus) bonus = val;
 	}
@@ -2591,7 +2587,7 @@ int Unit::GetAttribute(char const *attrib)
 	if (monbase != -1) {
 		monbase += monbonus;
 		if (GetMen() > 0) {
-			if (ap->flags & AttribModType::USE_WORST)
+			if (ap->get().flags & AttribModType::USE_WORST)
 				base = (monbase < base) ? monbase : base;
 			else
 				base = (monbase > base) ? monbase : base;
@@ -2604,11 +2600,11 @@ int Unit::GetAttribute(char const *attrib)
 
 int Unit::PracticeAttribute(char const *attrib)
 {
-	AttribModType *ap = FindAttrib(attrib);
-	if (ap == NULL) return 0;
+	auto ap = FindAttrib(attrib);
+    if (!ap) return 0;
 	for (int index = 0; index < 5; index++) {
-		if (ap->mods[index].flags & AttribModItem::SKILL) {
-			int sk = lookup_skill(ap->mods[index].ident);
+		if (ap->get().mods[index].flags & AttribModItem::SKILL) {
+			int sk = lookup_skill(ap->get().mods[index].ident);
 			if (sk != -1)
 				if (Practice(sk)) return 1;
 		}

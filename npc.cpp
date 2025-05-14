@@ -305,9 +305,10 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 	int slbow = men.defaultlevel;
 	for (unsigned int i = 0; i < (sizeof(men.skills) / sizeof(men.skills[0])); i++) {
 		if (!men.skills[i]) continue;
-		if (FindSkill(men.skills[i]) == FindSkill("COMB")) scomb = men.speciallevel;
-		if (FindSkill(men.skills[i]) == FindSkill("XBOW")) sxbow = men.speciallevel;
-		if (FindSkill(men.skills[i]) == FindSkill("LBOW")) slbow = men.speciallevel;
+		auto pS = FindSkill(men.skills[i])->get();
+		if (pS == FindSkill("COMB")->get()) scomb = men.speciallevel;
+		if (pS == FindSkill("XBOW")->get()) sxbow = men.speciallevel;
+		if (pS == FindSkill("LBOW")->get()) slbow = men.speciallevel;
 	}
 
 	int combat_level = scomb;
@@ -337,7 +338,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 
 			if (ItemDefs[current_witem].flags & ItemType::DISABLED) continue;
 			if (current_witem == lookup_item("PICK")) continue;
-			if (ItemDefs[current_witem].pSkill != FindSkill("WEAP")->abbr) continue;
+			if (ItemDefs[current_witem].pSkill != FindSkill("WEAP")->get().abbr) continue;
 
 			bool is_ranged = (WeaponDefs[i].flags & WeaponType::RANGED);
 			if (is_ranged && !behind) continue;
@@ -406,7 +407,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 
 	int maxskill = men.defaultlevel;
 	for (unsigned int i = 0; i < (sizeof(men.skills) / sizeof(men.skills[0])); i++) {
-		if (men.skills[i] && FindSkill(men.skills[i]) == FindSkill(SkillDefs[sk].abbr)) {
+		if (men.skills[i] && FindSkill(men.skills[i])->get() == FindSkill(SkillDefs[sk].abbr)->get()) {
 			maxskill = men.speciallevel;
 			break;
 		}

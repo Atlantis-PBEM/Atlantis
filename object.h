@@ -93,11 +93,11 @@ class ObjectType {
 		int defenceArray[NUM_ATTACK_TYPES];
 };
 
-extern ObjectType *ObjectDefs;
+extern std::vector<ObjectType> ObjectDefs;
 
 AString *ObjectDescription(int obj);
 
-int lookup_object(const std::string& token);
+int lookup_object(const strings::ci_string& token);
 int parse_object(const parser::token& token, bool match_ships);
 
 int ObjectIsShip(int);

@@ -1,5 +1,4 @@
 #pragma once
-
 #ifndef __INDENTER_HPP__
 #define __INDENTER_HPP__
 

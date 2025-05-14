@@ -33,7 +33,8 @@
 #include "string_parser.hpp"
 #include "string_filters.hpp"
 #include "strings_util.hpp"
-int lookup_object(const std::string& token)
+
+int lookup_object(const strings::ci_string& token)
 {
 	for (int i = 0; i < NOBJECTS; i++) {
 		if (token == ObjectDefs[i].name) return i;
@@ -771,22 +772,21 @@ AString *ObjectDescription(int obj)
 	/*
 	 * Handle all the specials
 	 */
-	for (int i = 0; i < NUMSPECIALS; i++) {
-		SpecialType *spd = &SpecialDefs[i];
+	for (auto const &spd : SpecialDefs) {
 		AString effect = "are";
 		int match = 0;
-		if (!(spd->targflags & SpecialType::HIT_BUILDINGIF) &&
-				!(spd->targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
+		if (!(spd.targflags & SpecialType::HIT_BUILDINGIF) &&
+				!(spd.targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
 			continue;
 		}
 		for (int j = 0; j < SPECIAL_BUILDINGS; j++)
-			if (spd->buildings[j] == obj) match = 1;
+			if (spd.buildings[j] == obj) match = 1;
 		if (!match) continue;
-		if (spd->targflags & SpecialType::HIT_BUILDINGEXCEPT) {
+		if (spd.targflags & SpecialType::HIT_BUILDINGEXCEPT) {
 			effect += " not";
 		}
 		*temp += " Units in this structure ";
-		*temp += effect + " affected by " + spd->specialname + ".";
+		*temp += effect + " affected by " + spd.specialname + ".";
 	}
 
 	if (o->sailors) {
@@ -805,31 +805,23 @@ AString *ObjectDescription(int obj)
 		*temp += " to study above level 2.";
 	}
 	int buildable = 1;
-	SkillType *pS = NULL;
-	if (o->item == -1 || o->skill == NULL) buildable = 0;
-	if (o->skill != NULL) pS = FindSkill(o->skill);
-	if (!pS) buildable = 0;
-	if (pS && (pS->flags & SkillType::DISABLED)) buildable = 0;
-	if (o->item != I_WOOD_OR_STONE &&
-			(ItemDefs[o->item].flags & ItemType::DISABLED))
-		buildable = 0;
-	if (o->item == I_WOOD_OR_STONE &&
-			(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
-			(ItemDefs[I_STONE].flags & ItemType::DISABLED))
-		buildable = 0;
+    auto pS = FindSkill(o->skill);
+	if (o->item == -1 || o->skill == nullptr || !pS || pS->get().flags & SkillType::DISABLED) buildable = 0;
+	if (o->item != I_WOOD_OR_STONE && (ItemDefs[o->item].flags & ItemType::DISABLED)) buildable = 0;
+	if (
+        o->item == I_WOOD_OR_STONE && (ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
+        (ItemDefs[I_STONE].flags & ItemType::DISABLED)
+    ) {
+        buildable = 0;
+    }
 	if (!buildable && !(ObjectDefs[obj].flags & ObjectType::GROUP)) {
 		*temp += " This structure cannot be built by players.";
 	}
 
-	if (o->productionAided != -1 &&
-			!(ItemDefs[o->productionAided].flags & ItemType::DISABLED)) {
-		*temp += " This trade structure increases the amount of ";
-		if (o->productionAided == I_SILVER) {
-			*temp += "entertainment";
-		} else {
-			*temp += ItemDefs[o->productionAided].names;
-		}
-		*temp += " available in the region.";
+	if (o->productionAided != -1 && !(ItemDefs[o->productionAided].flags & ItemType::DISABLED)) {
+		*temp += " This trade structure increases the amount of " +
+            (o->productionAided == I_SILVER ? "entertainment" : ItemDefs[o->productionAided].names) +
+            " available in the region.";
 	}
 
 	if (Globals->DECAY) {
@@ -841,14 +833,9 @@ AString *ObjectDescription(int obj)
 			*temp += AString(" Damage can occur at a maximum rate of ") +
 				o->maxMonthlyDecay + " units per month.";
 			if (buildable) {
-				*temp += AString(" Repair of damage is accomplished at ") +
-					"a rate of " + o->maintFactor + " damage units per " +
-					"unit of ";
-				if (o->item == I_WOOD_OR_STONE) {
-					*temp += "wood or stone.";
-				} else {
-					*temp += ItemDefs[o->item].name;
-				}
+				*temp += AString(" Repair of damage is accomplished at ") + "a rate of " + o->maintFactor +
+                    " damage units per " + "unit of " +
+                    (o->item == I_WOOD_OR_STONE ? "wood or stone." : ItemDefs[o->item].name);
 			}
 		}
 	}

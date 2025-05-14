@@ -2846,8 +2846,8 @@ void Game::CheckTransportOrders()
 
 					int dist;
 					int penalty = 10000000;
-					RangeType *rt = FindRange("rng_transport");
-					if (rt) penalty = rt->crossLevelPenalty;
+					auto rt = FindRange("rng_transport");
+					if (rt) penalty = rt->get().crossLevelPenalty;
 					o->distance = Globals->LOCAL_TRANSPORT;  // default to local max distance
 					if (maxdist > 0) {
 						// 0 maxdist represents unlimited range for QM->QM transport
@@ -3212,17 +3212,17 @@ void Game::RunAnnihilateOrders() {
 					}
 
 					// Check if the target is in range
-					RangeType *rt = FindRange("rng_annihilate");
+					auto rt = FindRange("rng_annihilate").value().get();
 					int rtype = target->level->levelType;
-					if ((rt->flags & RangeType::RNG_SURFACE_ONLY) && (rtype  != ARegionArray::LEVEL_SURFACE)) {
+					if ((rt.flags & RangeType::RNG_SURFACE_ONLY) && (rtype  != ARegionArray::LEVEL_SURFACE)) {
 						u->error("ANNIHILATE: Target region is not on the surface.");
 						continue;
 					}
 
 					// If the range for annihilation is changed, this code will need to be updated.  This really should
 					// be made better, but not today. (right now this has a range of 1000 and a cross level penalty of 0)
-					int dist = regions.GetPlanarDistance(r, target, rt->crossLevelPenalty, rt->rangeMult);
-					if (dist > rt->rangeMult) {
+					int dist = regions.GetPlanarDistance(r, target, rt.crossLevelPenalty, rt.rangeMult);
+					if (dist > rt.rangeMult) {
 						u->error("ANNIHILATE: Target region is out of range.");
 						continue;
 					}
@@ -3250,8 +3250,8 @@ void Game::RunAnnihilateOrders() {
 					// pick a random region region to annihilate
 					ARegionArray *level = nullptr;
 
-					RangeType *rt = FindRange("rng_annihilate");
-					if (rt->flags & RangeType::RNG_SURFACE_ONLY) {
+					auto rt = FindRange("rng_annihilate").value().get();
+					if (rt.flags & RangeType::RNG_SURFACE_ONLY) {
 						level = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
 					} else {
 						int zloc = rng::get_random(regions.numLevels);

@@ -62,10 +62,6 @@ extern int allowedTacticiansSize;
 extern int *allowedMartial;
 extern int allowedMartialSize;
 
-extern int const NUMTERRAINS;
-extern int NUMBATTLEITEMS;
-extern int NUMMOUNTS;
-
 enum BattleLogLevel {
 	NORMAL   = 0,	// Standard battle log
 	DETAILED = 1,	// Will include detailed statistics after the battle

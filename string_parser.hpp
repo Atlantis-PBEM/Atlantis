@@ -10,10 +10,8 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "astring.h"
+#include "strings_util.hpp"
 #include "string_filters.hpp"
-// Forward declaration for AString
-class AString;
 
 namespace parser {
 
@@ -24,26 +22,30 @@ namespace parser {
 
 class token {
 public:
-    explicit token(std::optional<std::string> value) noexcept : value_{std::move(value)} {}
+    explicit token(std::optional<strings::ci_string> value) noexcept : value_{std::move(value)} {}
     // Non-explicit to allow implicit conversion from C-style strings
-    token(const char* value) noexcept : value_{value ? std::optional<std::string>{value} : std::nullopt} {}
+    token(const char* value) noexcept : value_{value ? std::optional<strings::ci_string>{value} : std::nullopt} {}
     // Non-explicit to allow implicit conversion from std::string
-    token(const std::string& value) noexcept : value_{value} {}
-    explicit token(std::string&& value) noexcept : value_{std::move(value)} {}
-    explicit token(AString* value) noexcept : value_{value ? std::optional<std::string>{value->const_str()} : std::nullopt} {}
-    explicit token(AString& value) noexcept : value_{value.const_str()} {}
+    token(const strings::ci_string& value) noexcept : value_{value} {}
+    explicit token(strings::ci_string&& value) noexcept : value_{std::move(value)} {}
+    // Add constructor for std::string
+    token(const std::string& value) noexcept : value_{value.c_str()} {}
 
     [[nodiscard]] std::optional<int> get_number() const noexcept;
-    [[nodiscard]] std::string get_string() const noexcept { return value_.value_or(""); }
+    [[nodiscard]] std::string get_string() const noexcept { return std::string{value_.value_or("").c_str()}; }
     [[nodiscard]] std::optional<bool> get_bool() const noexcept;
 
-    [[nodiscard]] bool operator==(const std::string& s) const noexcept;
-    [[nodiscard]] bool operator!=(const std::string& s) const noexcept { return !(*this == s); }
+    [[nodiscard]] bool operator==(const strings::ci_string& s) const noexcept { return value_.value_or("") == s; }
+    [[nodiscard]] bool operator==(const std::string& s) const noexcept { return value_.value_or("") == s; }
+    [[nodiscard]] bool operator==(const char* s) const noexcept { return s && value_.value_or("") == s; }
+    [[nodiscard]] bool operator!=(const strings::ci_string& s) const noexcept { return value_.value_or("") != s; }
+    [[nodiscard]] bool operator!=(const std::string& s) const noexcept { return value_.value_or("") != s; }
+    [[nodiscard]] bool operator!=(const char* s) const noexcept { return !s || value_.value_or("") != s; }
 
     [[nodiscard]] explicit operator bool() const noexcept { return value_.has_value(); }
 
 private:
-    std::optional<std::string> value_;
+    std::optional<strings::ci_string> value_;
 };
 
 // Forward declarations for friend operators
@@ -56,8 +58,6 @@ public:
     explicit string_parser(const std::string& input) noexcept : data_{input}, pos_{0} {}
     explicit string_parser(std::string&& input) noexcept : data_{std::move(input)}, pos_{0} {}
     explicit string_parser(const char* input) noexcept : data_{input ? input : ""}, pos_{0} {}
-    explicit string_parser(const AString& input) noexcept : data_{std::string{input.const_str()}}, pos_{0} {}
-    explicit string_parser(const AString *input) noexcept : data_{input ? std::string{input->const_str()} : ""}, pos_{0} {}
 
     // Assignment operators
     string_parser& operator=(const std::string& input) noexcept;
@@ -213,32 +213,14 @@ inline std::optional<int> token::get_number() const noexcept {
 
 inline std::optional<bool> token::get_bool() const noexcept {
     if (!value_) return std::nullopt;
+    const auto& temp = *value_;
 
-    std::string lower = *value_ | filter::lowercase;
-
-    if (lower == "true" || lower == "t" || lower == "yes" || lower == "y" || lower == "on" || lower == "1")
+    if (temp == "true" || temp == "t" || temp == "yes" || temp == "y" || temp == "on" || temp == "1")
         return true;
-    if (lower == "false" || lower == "f" || lower == "no" || lower == "n" || lower == "off" || lower == "0")
+    if (temp == "false" || temp == "f" || temp == "no" || temp == "n" || temp == "off" || temp == "0")
         return false;
 
     return std::nullopt;
-}
-
-inline bool token::operator==(const std::string& s) const noexcept {
-    if (!value_) return false;
-
-    const std::string& token_str = *value_;
-    if (token_str.length() != s.length()) return false;
-
-    return std::equal(
-        token_str.begin(), token_str.end(), s.begin(),
-        [](unsigned char c1, unsigned char c2) noexcept {
-            // Special handling for _ and space
-            if ((c1 == ' ' || c1 == '_') && (c2 == ' ' || c2 == '_')) return true;
-
-            return std::tolower(c1) == std::tolower(c2);
-        }
-    );
 }
 
 // string_parser assignment operators
