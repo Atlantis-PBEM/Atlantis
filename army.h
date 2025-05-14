@@ -68,14 +68,14 @@ struct UnitStat {
 
 namespace unit_stat_control {
 	void Clear(UnitStat& us);
-	AttackStat* FindStat(UnitStat& us, int weaponIndex, SpecialType* effect);
-	void TrackSoldier(UnitStat& us, int weaponIndex, SpecialType* effect, int attackType, int weaponClass);
-	void RecordAttack(UnitStat& us, int weaponIndex, SpecialType* effect);
-	void RecordAttackFailed(UnitStat& us, int weaponIndex, SpecialType* effect);
-	void RecordAttackMissed(UnitStat& us, int weaponIndex, SpecialType* effect);
-	void RecordAttackBlocked(UnitStat& us, int weaponIndex, SpecialType* effect);
-	void RecordHit(UnitStat& us, int weaponIndex, SpecialType* effect, int damage);
-	void RecordKill(UnitStat& us, int weaponIndex, SpecialType* effect);
+	AttackStat* FindStat(UnitStat& us, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
+	void TrackSoldier(UnitStat& us, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect, int attackType, int weaponClass);
+	void RecordAttack(UnitStat& us, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
+	void RecordAttackFailed(UnitStat& us, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
+	void RecordAttackMissed(UnitStat& us, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
+	void RecordAttackBlocked(UnitStat& us, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
+	void RecordHit(UnitStat& us, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect, int damage);
+	void RecordKill(UnitStat& us, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
 };
 
 class ArmyStats {
@@ -88,13 +88,13 @@ class ArmyStats {
 
 		void TrackUnit(Unit *unit);
 
-		void TrackSoldier(int unitNumber, int weaponIndex, SpecialType* effect, int attackType, int weaponClass);
-		void RecordAttack(int unitNumber, int weaponIndex, SpecialType* effect);
-		void RecordAttackFailed(int unitNumber, int weaponIndex, SpecialType* effect);
-		void RecordAttackMissed(int unitNumber, int weaponIndex, SpecialType* effect);
-		void RecordAttackBlocked(int unitNumber, int weaponIndex, SpecialType* effect);
-		void RecordHit(int unitNumber, int weaponIndex, SpecialType* effect, int damage);
-		void RecordKill(int unitNumber, int weaponIndex, SpecialType* effect);
+		void TrackSoldier(int unitNumber, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect, int attackType, int weaponClass);
+		void RecordAttack(int unitNumber, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
+		void RecordAttackFailed(int unitNumber, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
+		void RecordAttackMissed(int unitNumber, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
+		void RecordAttackBlocked(int unitNumber, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
+		void RecordHit(int unitNumber, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect, int damage);
+		void RecordKill(int unitNumber, int weaponIndex, std::optional<std::reference_wrapper<SpecialType>> effect);
 };
 
 class Soldier {

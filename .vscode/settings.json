@@ -73,7 +73,9 @@
         "valarray": "cpp",
         "variant": "cpp",
         "span": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "charconv": "cpp",
+        "format": "cpp"
     },
 
     // Use clang-format for C/C++ files

@@ -99,14 +99,18 @@ class SkillType
 		char const *range;
 
 		SkillDepend depends[3];
-};
-extern SkillType *SkillDefs;
 
-SkillType *FindSkill(char const *skname);
+        bool operator==(const SkillType& other) const {
+            return name == other.name && abbr == other.abbr && flags == other.flags;
+        }
+};
+extern std::vector<SkillType> SkillDefs;
+
+std::optional<std::reference_wrapper<SkillType>> FindSkill(char const *skname);
 int lookup_skill(const parser::token& token);
 int parse_skill(const parser::token& token);
-AString SkillStrs(int);
-AString SkillStrs(SkillType *);
+AString SkillStrs(int skill);
+AString SkillStrs(const SkillType& skill);
 
 int SkillCost(int);
 int SkillMax(char const *,int); /* skill, race */
@@ -161,8 +165,8 @@ class HealType {
 		int num;
 		int rate;
 };
-extern HealType * HealDefs;
-extern HealType * MagicHealDefs;
+extern std::vector<HealType> HealDefs;
+extern std::vector<HealType> MagicHealDefs;
 
 class DamageType {
 	public:
@@ -231,10 +235,9 @@ class SpecialType {
 		char const *spelldesc2;
 		char const *spelltarget;
 };
-extern SpecialType *SpecialDefs;
-extern int NUMSPECIALS;
+extern std::vector<SpecialType> SpecialDefs;
 
-extern SpecialType *FindSpecial(char const *key);
+extern std::optional<std::reference_wrapper<SpecialType>> FindSpecial(char const *key);
 
 class EffectType {
 	public:
@@ -249,10 +252,9 @@ class EffectType {
 		};
 		int flags;
 };
-extern EffectType *EffectDefs;
-extern int NUMEFFECTS;
+extern std::vector<EffectType> EffectDefs;
 
-extern EffectType *FindEffect(char const *effect);
+extern std::optional<std::reference_wrapper<EffectType>> FindEffect(char const *effect);
 
 class RangeType {
 	public:
@@ -278,10 +280,9 @@ class RangeType {
 
 		int crossLevelPenalty;	// How much extra distance to cross levels?
 };
-extern RangeType *RangeDefs;
-extern int NUMRANGES;
+extern std::vector<RangeType> RangeDefs;
 
-extern RangeType *FindRange(char const *range);
+extern std::optional<std::reference_wrapper<RangeType>> FindRange(char const *range);
 
 class AttribModItem {
 	public:
@@ -322,9 +323,8 @@ class AttribModType {
 		AttribModItem mods[5];
 };
 
-extern AttribModType *AttribDefs;
-extern int NUMATTRIBMODS;
+extern std::vector<AttribModType> AttribDefs;
 
-extern AttribModType *FindAttrib(char const *attrib);
+extern std::optional<std::reference_wrapper<AttribModType>> FindAttrib(char const *attrib);
 
 #endif

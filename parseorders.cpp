@@ -946,7 +946,7 @@ void Game::ProcessPrepareOrder(Unit *u, parser::string_parser& parser, orders_ch
 	}
 
 	int it = parse_enabled_item(token);
-	BattleItemType *bt = FindBattleItem(ItemDefs[it].abr);
+	auto bt = FindBattleItem(ItemDefs[it].abr);
 
 	if (checker) return;
 
@@ -955,12 +955,12 @@ void Game::ProcessPrepareOrder(Unit *u, parser::string_parser& parser, orders_ch
 		return;
 	}
 
-	if (bt == NULL || !(bt->flags & BattleItemType::SPECIAL)) {
+	if (!bt || !(bt->get().flags & BattleItemType::SPECIAL)) {
 		u->error("PREPARE: That item cannot be prepared.");
 		return;
 	}
 
-	if ((bt->flags & BattleItemType::MAGEONLY) &&
+	if ((bt->get().flags & BattleItemType::MAGEONLY) &&
 		!(u->type == U_MAGE || u->type == U_APPRENTICE || u->type == U_GUARDMAGE)) {
 
 		std::string err = "PREPARE: Only a mage ";
@@ -2880,8 +2880,8 @@ void Game::ProcessAnnihilateOrder(Unit *unit, parser::string_parser& parser, ord
 	}
 
 	int z = -1;
-	RangeType *range = FindRange(SkillDefs[S_ANNIHILATION].range);
-	if (range->flags & RangeType::RNG_SURFACE_ONLY) {
+	auto range = FindRange(SkillDefs[S_ANNIHILATION].range).value().get();
+	if (range.flags & RangeType::RNG_SURFACE_ONLY) {
 		z = (Globals->NEXUS_EXISTS ? 1 : 0);
 	} else {
 		// in the order check mode, just make sure we have a valid z-coordinate otherwise
@@ -2890,7 +2890,7 @@ void Game::ProcessAnnihilateOrder(Unit *unit, parser::string_parser& parser, ord
 		else z = unit->object->region->zloc;
 	}
 
-	if (range && (range->flags & RangeType::RNG_CROSS_LEVELS) && !(range->flags & RangeType::RNG_SURFACE_ONLY)) {
+	if ((range.flags & RangeType::RNG_CROSS_LEVELS) && !(range.flags & RangeType::RNG_SURFACE_ONLY)) {
 		auto zval = parser.get_token().get_number();
 		if (!zval) {
 			parse_error(checker, unit, 0, "ANNIHILATE: Region Z coordinate not specified.");

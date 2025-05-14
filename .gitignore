@@ -30,6 +30,7 @@ names.*
 orders.*
 map_viewer/hexmap.json
 map_viewer/.yarn*
+map_viewer/.yarn/*
 map_viewer/.pnp.*
 map_viewer/.parcel-cache
 map_viewer/dist
