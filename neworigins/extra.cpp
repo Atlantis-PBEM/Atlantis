@@ -1108,6 +1108,8 @@ Faction *Game::CheckVictory()
 			return GetFaction(&factions, monfaction); // monsters win
 		}
 
+        Awrite(AString("Checking for winner: ") + string(winner->name->const_str()));
+
 		// Ok, we have a possible winner, check for sufficient alive factions mutually allied to the monolith owner.
 		int allied_count = 0;
 		int total_factions = 0;
@@ -1125,7 +1127,10 @@ Faction *Game::CheckVictory()
 
 		int needed_percent = rulesetSpecificData.value("allied_percent", 100);
 		int current_percent = (allied_count * 100) / total_factions;
+		Awrite(AString("Factions allied: ") + allied_count + "/" + total_factions + " (" + current_percent +
+            "% out of " + needed_percent + "%)");
 		if (current_percent >= needed_percent) {
+			Awrite(AString("Enough factions allied to the monolith owner, so they win."));
 			// We have enough factions allied to the monolith owner, so they win.
 			return winner;
 		}
@@ -1142,11 +1147,15 @@ Faction *Game::CheckVictory()
 
 		int needed_surface = rulesetSpecificData.value("annihilate_percent", 100);
 		int current_surface = (total_annihilated * 100) / total_surface;
+		Awrite(AString("Surface annihilated: ") + total_annihilated + "/" + total_surface + " (" + current_surface +
+            "% out of " + needed_surface + "%)");
 		if (current_surface >= needed_surface) {
+			Awrite(AString("Surface annihilated enough, so the monolith owner wins."));
 			// The surface has been sufficiently destroyed, so the monolith owner wins.
 			return winner;
 		}
 		// No winner yet, so clear the potential winner and return null.
+		Awrite(AString("No winner yet."));
 		winner = nullptr;
 	}
 
