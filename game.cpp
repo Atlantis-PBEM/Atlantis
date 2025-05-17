@@ -385,14 +385,16 @@ int Game::OpenGame()
 
     ATL_VER eVersion;
     f >> eVersion;
-    Awrite(AString("Saved Game Engine Version: ") + ATL_VER_STRING(eVersion));
-    if (ATL_VER_MAJOR(eVersion) != ATL_VER_MAJOR(CURRENT_ATL_VER) ||
-            ATL_VER_MINOR(eVersion) != ATL_VER_MINOR(CURRENT_ATL_VER)) {
-        Awrite("Incompatible Engine versions!");
+    logger::write("Saved Game Engine Version: " + ATL_VER_STRING(eVersion));
+    if (
+        ATL_VER_MAJOR(eVersion) != ATL_VER_MAJOR(CURRENT_ATL_VER) ||
+        ATL_VER_MINOR(eVersion) != ATL_VER_MINOR(CURRENT_ATL_VER)
+    ) {
+        logger::write("Incompatible Engine versions!");
         return(0);
     }
     if (ATL_VER_PATCH(eVersion) > ATL_VER_PATCH(CURRENT_ATL_VER)) {
-        Awrite("This game was created with a more recent Atlantis Engine!");
+        logger::write("This game was created with a more recent Atlantis Engine!");
         return(0);
     }
 
@@ -401,46 +403,39 @@ int Game::OpenGame()
     if (f.eof()) return(0);
 
     if (!(gameName == Globals->RULESET_NAME)) {
-        Awrite("Incompatible rule-set!");
+        logger::write("Incompatible rule-set!");
         return(0);
     }
 
     ATL_VER gVersion;
     f >> gVersion;
-    Awrite(AString("Saved Rule-Set Version: ") + ATL_VER_STRING(gVersion));
+    logger::write("Saved Rule-Set Version: " + ATL_VER_STRING(gVersion));
 
     if (ATL_VER_MAJOR(gVersion) < ATL_VER_MAJOR(Globals->RULESET_VERSION)) {
-        Awrite(AString("Upgrading to ") +
-                ATL_VER_STRING(MAKE_ATL_VER(
-                        ATL_VER_MAJOR(Globals->RULESET_VERSION), 0, 0)));
-        if (!UpgradeMajorVersion(gVersion)) {
-            Awrite("Unable to upgrade!  Aborting!");
+        logger::write("Upgrading to " + ATL_VER_STRING(MAKE_ATL_VER(ATL_VER_MAJOR(Globals->RULESET_VERSION), 0, 0)));
+        if (!upgrade_major_version(gVersion)) {
+            logger::write("Unable to upgrade!  Aborting!");
             return(0);
         }
         gVersion = MAKE_ATL_VER(ATL_VER_MAJOR(Globals->RULESET_VERSION), 0, 0);
     }
     if (ATL_VER_MINOR(gVersion) < ATL_VER_MINOR(Globals->RULESET_VERSION)) {
-        Awrite(AString("Upgrading to ") +
-                ATL_VER_STRING(MAKE_ATL_VER(
-                        ATL_VER_MAJOR(Globals->RULESET_VERSION),
-                        ATL_VER_MINOR(Globals->RULESET_VERSION), 0)));
-        if (! UpgradeMinorVersion(gVersion)) {
-            Awrite("Unable to upgrade!  Aborting!");
+        logger::write("Upgrading to " + ATL_VER_STRING(
+            MAKE_ATL_VER(ATL_VER_MAJOR(Globals->RULESET_VERSION), ATL_VER_MINOR(Globals->RULESET_VERSION), 0)
+        ));
+        if (!upgrade_minor_version(gVersion)) {
+            logger::write("Unable to upgrade!  Aborting!");
             return(0);
         }
-        gVersion = MAKE_ATL_VER(ATL_VER_MAJOR(gVersion),
-                ATL_VER_MINOR(Globals->RULESET_VERSION), 0);
+        gVersion = MAKE_ATL_VER(ATL_VER_MAJOR(gVersion), ATL_VER_MINOR(Globals->RULESET_VERSION), 0);
     }
     if (ATL_VER_PATCH(gVersion) < ATL_VER_PATCH(Globals->RULESET_VERSION)) {
-        Awrite(AString("Upgrading to ") +
-                ATL_VER_STRING(Globals->RULESET_VERSION));
-        if (! UpgradePatchLevel(gVersion)) {
-            Awrite("Unable to upgrade!  Aborting!");
+        logger::write("Upgrading to " + ATL_VER_STRING(Globals->RULESET_VERSION));
+        if (!upgrade_patch_level(gVersion)) {
+            logger::write("Unable to upgrade!  Aborting!");
             return(0);
         }
-        gVersion = MAKE_ATL_VER(ATL_VER_MAJOR(gVersion),
-                ATL_VER_MINOR(gVersion),
-                ATL_VER_PATCH(Globals->RULESET_VERSION));
+        gVersion = MAKE_ATL_VER(ATL_VER_MAJOR(gVersion), ATL_VER_MINOR(gVersion), ATL_VER_PATCH(Globals->RULESET_VERSION));
     }
 
     f >> year;
@@ -591,7 +586,7 @@ bool Game::ReadPlayers()
             ATL_VER_MINOR(nVer) != ATL_VER_MINOR(CURRENT_ATL_VER) ||
             ATL_VER_PATCH(nVer) > ATL_VER_PATCH(CURRENT_ATL_VER)
         ) {
-            Awrite("The players.in file is not compatible with this version of Atlantis.");
+            logger::write("The players.in file is not compatible with this version of Atlantis.");
             break;
         }
 
@@ -665,12 +660,12 @@ bool Game::ReadPlayers()
                     z = parser.get_token().get_number().value_or(-1);
                     if (x != -1 && y != -1 && z != -1) {
                         reg = regions.GetRegion(x, y, z);
-                        if (reg == nullptr) Awrite("Bad faction line: " + save);
+                        if (reg == nullptr) logger::write("Bad faction line: " + save);
                     }
 
                     fac = AddFaction(noleader, reg);
                     if (!fac) {
-                        Awrite("Failed to add a new faction!");
+                        logger::write("Failed to add a new faction!");
                         return_code = false;
                         break;
                     }
@@ -740,8 +735,7 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
     if (token == "Email:") {
         std::string str = parser.get_token().get_string();
         if (!str.empty()) {
-            delete fac->address;
-            fac->address = new AString(str);
+            fac->address = str;
         }
         return true;
     }
@@ -806,7 +800,7 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
             str += y ? to_string(y.value()) + ", " : "missing y-coord, ";
             str += z ? to_string(z.value()) : "missing z-coord";
             str += " in faction " + to_string(fac->num);
-            Awrite(str);
+            logger::write(str);
         }
         fac->pReg = reg;
         return true;
@@ -816,12 +810,12 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
         // Creates a new unit in the location specified by a Loc: line
         // with a gm_alias of whatever is after the NewUnit: tag.
         if (!fac->pReg) {
-            Awrite("NewUnit is not valid without a Loc: for faction "+ to_string(fac->num));
+            logger::write("NewUnit is not valid without a Loc: for faction "+ to_string(fac->num));
             return true;
         }
         int val = parser.get_token().get_number().value_or(0);
         if (!val) {
-            Awrite("NewUnit: must be followed by an alias in faction " + to_string(fac->num));
+            logger::write("NewUnit: must be followed by an alias in faction " + to_string(fac->num));
             return true;
         }
         Unit *u = GetNewUnit(fac);
@@ -834,29 +828,29 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
     if (token == "Item:") {
         std::string alias = parser.get_token().get_string();
         if (alias.empty()) {
-            Awrite("Item: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Item: needs to specify a unit in faction " + to_string(fac->num));
             return true;
         }
         Unit *u = parse_gm_unit(alias, fac);
         if (!u) {
-            Awrite("Item: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Item: needs to specify a unit in faction " + to_string(fac->num));
             return true;
         }
         if (u->faction->num != fac->num) {
-            Awrite("Item: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
+            logger::write("Item: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
             return true;
         }
 
         auto val = parser.get_token().get_number();
         if (!val) {
-            Awrite("Must specify a number of items to give for Item: in faction " + to_string(fac->num));
+            logger::write("Must specify a number of items to give for Item: in faction " + to_string(fac->num));
             return true;
         }
 
         token = parser.get_token();
         int it = parse_all_items(token);
         if (it == -1) {
-            Awrite("Must specify a valid item to give for Item: in faction " + to_string(fac->num));
+            logger::write("Must specify a valid item to give for Item: in faction " + to_string(fac->num));
             return true;
         }
 
@@ -872,29 +866,29 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
     if (token == "Skill:") {
         std::string alias = parser.get_token().get_string();
         if (alias.empty()) {
-            Awrite("Skill: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Skill: needs to specify a unit in faction " + to_string(fac->num));
             return true;
         }
         Unit *u = parse_gm_unit(alias, fac);
         if (!u) {
-            Awrite("Skill: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Skill: needs to specify a unit in faction " + to_string(fac->num));
             return true;
         }
         if (u->faction->num != fac->num) {
-            Awrite("Item: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
+            logger::write("Item: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
             return true;
         }
 
         token = parser.get_token();
         int sk = parse_skill(token);
         if (sk == -1) {
-            Awrite("Must specify a valid skill for Skill: in faction " + to_string(fac->num));
+            logger::write("Must specify a valid skill for Skill: in faction " + to_string(fac->num));
             return true;
         }
 
         int days = parser.get_token().get_number().value_or(0) * u->GetMen();
         if (!days) {
-            Awrite("Must specify a days for Skill: in faction " + to_string(fac->num));
+            logger::write("Must specify a days for Skill: in faction " + to_string(fac->num));
             return true;
         }
 
@@ -907,8 +901,7 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
             fac->shows.push_back({ .skill = sk, .level = lvl });
         }
         if (!u->gm_alias) {
-            u->event("Is taught " + to_string(days) + " days of " + SkillStrs(sk).const_str() +
-                " by the gods.", "gm_gift");
+            u->event("Is taught " + to_string(days) + " days of " + SkillStrs(sk) + " by the gods.", "gm_gift");
         }
         /* This is NOT quite the same, but the gods are more powerful than mere mortals */
         int mage = (SkillDefs[sk].flags & SkillType::MAGIC);
@@ -927,11 +920,11 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
         //Not quit so, handle it as a unit order
         Unit *u = parse_gm_unit(alias, fac);
         if (!u) {
-            Awrite("Order: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Order: needs to specify a unit in faction " + to_string(fac->num));
             return true;
         }
         if (u->faction->num != fac->num) {
-            Awrite("Order: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
+            logger::write("Order: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
             return true;
         }
 
@@ -939,12 +932,12 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
         bool repeating = parser.get_at();
         token = parser.get_token();
         if (!token) {
-            Awrite("Order: must provide unit order for faction "+ to_string(fac->num));
+            logger::write("Order: must provide unit order for faction "+ to_string(fac->num));
             return true;
         }
         int o = Parse1Order(token);
         if (o == -1 || o == O_ATLANTIS || o == O_END || o == O_UNIT || o == O_FORM || o == O_ENDFORM) {
-            Awrite("Order: invalid order given for faction "+ to_string(fac->num));
+            logger::write("Order: invalid order given for faction "+ to_string(fac->num));
             return true;
         }
         if (repeating) {
@@ -965,13 +958,13 @@ int Game::Doorders_check(const AString &strOrders, const AString &strCheck)
 {
     ifstream ordersFile(strOrders.const_str(), ios::in);
     if (!ordersFile.is_open()) {
-        Awrite("No such orders file!");
+        logger::write("No such orders file!");
         return(0);
     }
 
     ofstream checkFile(strCheck.const_str(), ios::out|ios::ate);
     if (!checkFile.is_open()) {
-        Awrite("Couldn't open the orders check file!");
+        logger::write("Couldn't open the orders check file!");
         return(0);
     }
 
@@ -983,49 +976,49 @@ int Game::Doorders_check(const AString &strOrders, const AString &strCheck)
 
 int Game::RunGame()
 {
-    Awrite("Setting Up Turn...");
+    logger::write("Setting Up Turn...");
     PreProcessTurn();
 
-    Awrite("Reading the Gamemaster File...");
+    logger::write("Reading the Gamemaster File...");
     if (!ReadPlayers()) return(0);
 
     if (gameStatus == GAME_STATUS_FINISHED) {
-        Awrite("This game is finished!");
+        logger::write("This game is finished!");
         return(0);
     }
     gameStatus = GAME_STATUS_RUNNING;
 
-    Awrite("Reading the Orders File...");
+    logger::write("Reading the Orders File...");
     ReadOrders();
 
     if (Globals->MAX_INACTIVE_TURNS != -1) {
-        Awrite("QUITting Inactive Factions...");
+        logger::write("QUITting Inactive Factions...");
         RemoveInactiveFactions();
     }
 
-    Awrite("Running the Turn...");
+    logger::write("Running the Turn...");
     RunOrders();
 
     if (Globals->WORLD_EVENTS) {
-        Awrite("Writing world events...");
+        logger::write("Writing world events...");
         WriteWorldEvents();
     }
 
-    Awrite("Writing the Report File...");
+    logger::write("Writing the Report File...");
     WriteReport();
-    Awrite("");
+    logger::write("");
 
     battles.clear();
 
     EmptyHell();
 
-    Awrite("Writing Playerinfo File...");
+    logger::write("Writing Playerinfo File...");
     WritePlayers();
 
-    Awrite("Removing Dead Factions...");
+    logger::write("Removing Dead Factions...");
     DeleteDeadFactions();
 
-    Awrite("done");
+    logger::write("done");
 
     return(1);
 }
@@ -1169,7 +1162,7 @@ void Game::WriteReport()
                 }
             }
         }
-        Adot();
+        logger::dot();
     }
 
     // stop leaking memory
@@ -1199,8 +1192,7 @@ Faction *Game::AddFaction(int noleader, ARegion *pStart)
     // set up faction
     //
     Faction *temp = new Faction(factionseq);
-    AString x("NoAddress");
-    temp->SetAddress(x);
+    temp->set_address("NoAddress");
     temp->lastorders = TurnNumber();
     temp->startturn = TurnNumber();
     temp->pStartLoc = pStart;
@@ -1255,16 +1247,14 @@ void Game::SetupUnitNums()
                     if (!ppUnits[i])
                         ppUnits[u->num] = u;
                     else {
-                        Awrite(AString("Error: Unit number ") + i +
-                                " multiply defined.");
+                        logger::write("Error: Unit number " + std::to_string(i) + " multiply defined.");
                         if ((unitseq > 0) && (unitseq < maxppunits)) {
                             u->num = unitseq;
                             ppUnits[unitseq++] = u;
                         }
                     }
                 } else {
-                    Awrite(AString("Error: Unit number ")+i+
-                            " out of range.");
+                    logger::write("Error: Unit number " + std::to_string(i) + " out of range.");
                     if ((unitseq > 0) && (unitseq < maxppunits)) {
                         u->num = unitseq;
                         ppUnits[unitseq++] = u;
@@ -1333,19 +1323,19 @@ void Game::UnitFactionMap()
     unsigned int i;
     Unit *u;
 
-    Awrite("Opening units.txt");
+    logger::write("Opening units.txt");
     ofstream f("units.txt", ios::out|ios::ate);
     if (!f.is_open()) {
-        Awrite("Couldn't open file!");
+        logger::write("Couldn't open file!");
         return;
     }
-    Awrite(AString("Writing ") + unitseq + " units");
+    logger::write("Writing " + std::to_string(unitseq) + " units");
     for (i = 1; i < unitseq; i++) {
         u = GetUnit(i);
         if (!u) {
-            Awrite("doesn't exist");
+            logger::write("doesn't exist");
         } else {
-            Awrite(AString(i) + ":" + u->faction->num);
+            logger::write(std::to_string(i) + ":" + std::to_string(u->faction->num));
             f << i << ":" << u->faction->num << endl;
         }
     }
@@ -1490,19 +1480,19 @@ int Game::AllowedMartial(Faction *pFac)
     return allowedMartial[points];
 }
 
-int Game::UpgradeMajorVersion(int savedVersion)
+bool Game::upgrade_major_version(int current_version)
 {
-    return 0;
+    return false;
 }
 
-int Game::UpgradeMinorVersion(int savedVersion)
+bool Game::upgrade_minor_version(int current_version)
 {
-    return 1;
+    return true;
 }
 
-int Game::UpgradePatchLevel(int savedVersion)
+bool Game::upgrade_patch_level(int current_version)
 {
-    return 1;
+    return true;
 }
 
 void Game::MidProcessUnitExtra(ARegion *r, Unit *u)
@@ -1555,8 +1545,8 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                     if (Globals->WANDERING_MONSTERS_EXIST) {
                         Faction *mfac = GetFaction(factions, monfaction);
                         Unit *mon = GetNewUnit(mfac, 0);
-                        auto monster = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
-                        mon->MakeWMon(monster.name, i->type, i->num);
+                        auto monster = FindMonster(ItemDefs[i->type].abr.c_str(), (ItemDefs[i->type].type & IT_ILLUSION))->get();
+                        mon->MakeWMon(monster.name.c_str(), i->type, i->num);
                         mon->MoveUnit(r->GetDummy());
                         // This will be zero unless these are set. (0 means
                         // full spoils)
@@ -1591,8 +1581,8 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                     if (Globals->WANDERING_MONSTERS_EXIST) {
                         Faction *mfac = GetFaction(factions, monfaction);
                         Unit *mon = GetNewUnit(mfac, 0);
-                        auto monster = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
-                        mon->MakeWMon(monster.name, i->type, i->num);
+                        auto monster = FindMonster(ItemDefs[i->type].abr.c_str(), (ItemDefs[i->type].type & IT_ILLUSION))->get();
+                        mon->MakeWMon(monster.name.c_str(), i->type, i->num);
                         mon->MoveUnit(r->GetDummy());
                         // This will be zero unless these are set. (0 means full spoils)
                         mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
@@ -1617,8 +1607,8 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                         if (Globals->WANDERING_MONSTERS_EXIST) {
                             Faction *mfac = GetFaction(factions, monfaction);
                             Unit *mon = GetNewUnit(mfac, 0);
-                            auto monster = FindMonster(ItemDefs[it->type].abr, (ItemDefs[it->type].type & IT_ILLUSION))->get();
-                            mon->MakeWMon(monster.name, it->type, it->num);
+                            auto monster = FindMonster(ItemDefs[it->type].abr.c_str(), (ItemDefs[it->type].type & IT_ILLUSION))->get();
+                            mon->MakeWMon(monster.name.c_str(), it->type, it->num);
                             mon->MoveUnit(r->GetDummy());
                             // This will be zero unless these are set. (0 means full spoils)
                             mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
@@ -1859,7 +1849,7 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
     int skill = S_COMBAT;
 
     if (weapon != -1) {
-        auto weapon_def = FindWeapon(ItemDefs[weapon].abr)->get();
+        auto weapon_def = FindWeapon(ItemDefs[weapon].abr.c_str())->get();
         auto pS = FindSkill(weapon_def.baseSkill)->get();
         if (pS == FindSkill("XBOW")->get()) skill = S_CROSSBOW;
         if (pS == FindSkill("LBOW")->get()) skill = S_LONGBOW;
@@ -1923,15 +1913,15 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 
 void Game::Equilibrate()
 {
-    Awrite("Initialising the economy");
+    logger::write("Initialising the economy");
     for (int a=0; a<25; a++) {
-        Adot();
+        logger::dot();
         ProcessMigration();
         for(const auto r : regions) {
             r->PostTurn();
         }
     }
-    Awrite("");
+    logger::write("");
 }
 
 void Game::WriteTimesArticle(AString article)

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __INDENTER_HPP__
-#define __INDENTER_HPP__
+#ifndef INDENTER_HPP
+#define INDENTER_HPP
 
 #include <iostream>
 #include <sstream>
@@ -215,5 +215,4 @@ namespace indent {
     return os;
   }
 }
-
-#endif
+#endif // INDENTER_HPP

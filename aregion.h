@@ -1,13 +1,13 @@
 #pragma once
-#ifndef REGION_CLASS
-#define REGION_CLASS
+#ifndef REGION_H
+#define REGION_H
 
 class ARegion;
 class ARegionList;
 class ARegionArray;
 
 #include "gamedefs.h"
-#include "gameio.h"
+#include "logger.hpp"
 #include "faction.h"
 #include "unit.h"
 #include "production.h"
@@ -44,10 +44,10 @@ struct Product
 class TerrainType
 {
     public:
-        char const *name;
-        char const *plural;
-        char const *type;
-        char marker;
+        const std::string name;
+        const std::string plural;
+        const std::string type;
+        const char marker;
         int similar_type;
 
         enum {
@@ -167,8 +167,8 @@ class ARegion
         json basic_region_data();
         void build_json_report(json& j, Faction *fac, int month, ARegionList& regions);
 
-        AString ShortPrint();
-        AString Print();
+        std::string short_print();
+        std::string print();
 
         void Kill(Unit *);
         void ClearHell();
@@ -198,7 +198,7 @@ class ARegion
         void Pillage();
         int ForbiddenShip(Object *);
         int HasCityGuard();
-        int NotifySpell(Unit *, char const *, ARegionList& regs);
+        bool notify_spell_use(Unit *caster, const std::string& spell, ARegionList& regs);
         void notify_city(Unit *, const std::string& oldname, const std::string& newname);
 
         void DefaultOrders();
@@ -224,7 +224,7 @@ class ARegion
         void DoDecayCheck();
         void DoDecayClicks(Object *o);
         void RunDecayEvent(Object *o);
-        AString GetDecayFlavor();
+        std::string get_decay_flavor();
         int GetMaxClicks();
         int PillageCheck();
 
@@ -265,7 +265,7 @@ class ARegion
         int Population();
 
         // ruleset specific movment checks
-        const char *movement_forbidden_by_ruleset(Unit *unit, ARegion *origin, ARegionList& regions);
+        const std::optional<std::string> movement_forbidden_by_ruleset(Unit *unit, ARegion *origin, ARegionList& regions);
 
         std::string name;
         int num;
@@ -539,8 +539,7 @@ class ARegionList
 
 };
 
-int LookupRegionType(AString *);
-int ParseTerrain(AString *);
+int parse_terrain(const strings::ci_string& token);
 
 using ARegionCostFunction = std::function<double(ARegion*, ARegion*)>;
 using ARegionInclusionFunction = std::function<bool(ARegion*, ARegion*)>;
@@ -565,4 +564,4 @@ private:
 
 const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(ARegion* start, const int maxDistance);
 
-#endif
+#endif // REGION_H

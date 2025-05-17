@@ -1,165 +1,144 @@
-// START A3HEADER
-//
-// This source file is part of the Atlantis PBM game program.
-// Copyright (C) 1995-1999 Geoff Dunbar
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program, in the file license.txt. If not, write
-// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-//
-// See the Atlantis Project web page for details:
-// http://www.prankster.com/project
-//
-// END A3HEADER
-// MODIFICATIONS
-// Date        Person          Comments
-// ----        ------          --------
-// 2000/MAR/14 Larry Stanbery  Added a unit:faction map capability.
 #include "gamedefs.h"
 #include "game.h"
 #include "items.h"
 #include "skills.h"
 #include "gamedata.h"
+#include "strings_util.hpp"
 
 void usage()
 {
-	Awrite("atlantis new");
-	Awrite("atlantis run");
-	Awrite("atlantis edit");
-	Awrite("");
-	Awrite("atlantis map <geo|wmon|lair|gate|hex> <mapfile>");
-	Awrite("atlantis mapunits");
-	Awrite("atlantis genrules <introfile> <cssfile> <rules-outputfile>");
-	Awrite("");
-	Awrite("atlantis check <orderfile> <checkfile>");
+    logger::write("atlantis new");
+    logger::write("atlantis run");
+    logger::write("atlantis edit");
+    logger::write("");
+    logger::write("atlantis map <geo|wmon|lair|gate|hex> <mapfile>");
+    logger::write("atlantis mapunits");
+    logger::write("atlantis genrules <introfile> <cssfile> <rules-outputfile>");
+    logger::write("");
+    logger::write("atlantis check <orderfile> <checkfile>");
 }
 
 int main(int argc, char *argv[])
 {
-	Game game;
-	int retval = 1;
+    Game game;
+    int retval = 1;
 
-	// Give the rng an initial see.
-	rng::seed_random(1783); // this is the historical seed.. it gets reseeded in NewGame() to a random value.
+    // Give the rng an initial see.
+    rng::seed_random(1783); // this is the historical seed.. it gets reseeded in NewGame() to a random value.
 
-	Awrite("Atlantis Engine Version: " + ATL_VER_STRING(CURRENT_ATL_VER));
-	Awrite(Globals->RULESET_NAME + ", Version: " + ATL_VER_STRING(Globals->RULESET_VERSION));
-	Awrite("");
+    logger::write("Atlantis Engine Version: " + ATL_VER_STRING(CURRENT_ATL_VER));
+    logger::write(Globals->RULESET_NAME + ", Version: " + ATL_VER_STRING(Globals->RULESET_VERSION));
+    logger::write("");
 
-	if (argc == 1) {
-		usage();
-		return 0;
-	}
+    if (argc == 1) {
+        usage();
+        return 0;
+    }
 
-	game.ModifyTablesPerRuleset();
+    // For simplicity, convert all arguments to strings
+    std::vector<std::string> args;
+    for (int i = 0; i < argc; i++) {
+        args.push_back(argv[i] | filter::lowercase);
+    }
 
-	do {
-		if (AString(argv[1]) == "new") {
-			if (!game.NewGame()) {
-				Awrite( "Couldn't make the new game!" );
-				break;
-			}
+    game.ModifyTablesPerRuleset();
 
-			if ( !game.SaveGame() ) {
-				Awrite( "Couldn't save the game!" );
-				break;
-			}
+    do {
+        if (args[1] == "new") {
+            if (!game.NewGame()) {
+                logger::write("Couldn't make the new game!");
+                break;
+            }
 
-			if ( !game.WritePlayers() ) {
-				Awrite( "Couldn't write the players file!" );
-				break;
-			}
-		} else if (AString(argv[1]) == "map") {
-			if (argc != 4) {
-				usage();
-				break;
-			}
+            if ( !game.SaveGame() ) {
+                logger::write("Couldn't save the game!");
+                break;
+            }
 
-			if ( !game.OpenGame() ) {
-				Awrite( "Couldn't open the game file!" );
-				break;
-			}
+            if ( !game.WritePlayers() ) {
+                logger::write("Couldn't write the players file!");
+                break;
+            }
+        } else if (args[1] == "map") {
+            if (argc != 4) {
+                usage();
+                break;
+            }
 
-			if ( !game.ViewMap( argv[2], argv[3] )) {
-				Awrite( "Couldn't write the map file!" );
-				break;
-			}
-		} else if (AString(argv[1]) == "run") {
-			if ( !game.OpenGame() ) {
-				Awrite( "Couldn't open the game file!" );
-				break;
-			}
+            if (!game.OpenGame() ) {
+                logger::write("Couldn't open the game file!");
+                break;
+            }
 
-			if ( !game.RunGame() ) {
-				Awrite( "Couldn't run the game!" );
-				break;
-			}
+            if (!game.ViewMap(args[2], args[3])) {
+                logger::write("Couldn't write the map file!");
+                break;
+            }
+        } else if (args[1] == "run") {
+            if (!game.OpenGame()) {
+                logger::write("Couldn't open the game file!");
+                break;
+            }
 
-			if ( !game.SaveGame() ) {
-				Awrite( "Couldn't save the game!" );
-				break;
-			}
-		} else if (AString(argv[1]) == "edit") {
-			if ( !game.OpenGame() ) {
-				Awrite( "Couldn't open the game file!" );
-				break;
-			}
+            if (!game.RunGame()) {
+                logger::write("Couldn't run the game!");
+                break;
+            }
 
-			int saveGame = 0;
-			if ( !game.EditGame( &saveGame ) ) {
-				Awrite( "Couldn't edit the game!" );
-				break;
-			}
+            if (!game.SaveGame()) {
+                logger::write("Couldn't save the game!");
+                break;
+            }
+        } else if (args[1] == "edit") {
+            if (!game.OpenGame()) {
+                logger::write("Couldn't open the game file!");
+                break;
+            }
 
-			if ( saveGame ) {
-				if ( !game.SaveGame() ) {
-					Awrite( "Couldn't save the game!" );
-					break;
-				}
-			}
-		} else if ( AString( argv[1] ) == "check" ) {
-			if (argc != 4) {
-				usage();
-				break;
-			}
+            int saveGame = 0;
+            if (!game.EditGame(&saveGame)) {
+                logger::write("Couldn't edit the game!");
+                break;
+            }
 
-			game.DummyGame();
-			if ( !game.Doorders_check( argv[ 2 ], argv[ 3 ] )) {
-				Awrite( "Couldn't check the orders!" );
-				break;
-			}
-		} else if ( AString( argv[1] ) == "mapunits" ) {
-			if ( !game.OpenGame() ) {
-				Awrite( "Couldn't open the game file!" );
-				break;
-			}
-			game.UnitFactionMap();
-		} else if (AString(argv[1])== "genrules") {
-			if (argc != 5) {
-				usage();
-				break;
-			}
-			if (!game.generate_rules(argv[4], argv[3], argv[2])) {
-				Awrite("Unable to generate rules!");
-				break;
-			}
-		} else {
-			Awrite(AString("Unknown option: ") + argv[1]);
-			break;
-		}
-		retval = 0;
-	} while( 0 );
+            if (saveGame) {
+                if (!game.SaveGame()) {
+                    logger::write("Couldn't save the game!");
+                    break;
+                }
+            }
+        } else if (args[1] == "check") {
+            if (argc != 4) {
+                usage();
+                break;
+            }
 
-	return retval;
+            game.DummyGame();
+            if (!game.Doorders_check(args[2], args[3])) {
+                logger::write("Couldn't check the orders!");
+                break;
+            }
+        } else if (args[1] == "mapunits") {
+            if (!game.OpenGame()) {
+                logger::write("Couldn't open the game file!");
+                break;
+            }
+            game.UnitFactionMap();
+        } else if (args[1] == "genrules") {
+            if (argc != 5) {
+                usage();
+                break;
+            }
+            if (!game.generate_rules(args[4], args[3], args[2])) {
+                logger::write("Unable to generate rules!");
+                break;
+            }
+        } else {
+            logger::write("Unknown option: " + args[1]);
+            break;
+        }
+        retval = 0;
+    } while( 0 );
+
+    return retval;
 }

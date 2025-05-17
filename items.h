@@ -68,7 +68,7 @@ class ItemType
     public:
         std::string name;
         std::string names;
-        const char *abr;
+        std::string abr;
 
         enum {
             CANTGIVE = 0x1,
@@ -169,7 +169,7 @@ enum Ethnicity {
 class ManType
 {
     public:
-        char const *abbr;
+        const std::string abbr;
         int terrain;
         int speciallevel;
         int defaultlevel;
@@ -203,8 +203,8 @@ class MonType
         int spoiltype;
         int hostile; /* Percent */
         int number;
-        char const *name;
-        char const *abbr;
+        std::string name;
+        std::string abbr;
 
         int hitDamage;
 
@@ -261,7 +261,7 @@ class WeaponBonusMalus {
 class WeaponType
 {
     public:
-        char const *abbr;
+        const std::string abbr;
 
         enum {
             NEEDSKILL = 0x1, // No bonus or use unless skilled
@@ -333,7 +333,7 @@ extern std::vector<WeaponType> WeaponDefs;
 class ArmorType
 {
     public:
-        char const *abbr;
+        const std::string abbr;
 
         enum {
             USEINASSASSINATE = 0x1,
@@ -353,7 +353,7 @@ extern std::vector<ArmorType> ArmorDefs;
 class MountType
 {
     public:
-        char const *abbr;
+        const std::string abbr;
 
         //
         // This is the skill needed to use this mount.
@@ -386,7 +386,7 @@ extern std::vector<MountType> MountDefs;
 class BattleItemType
 {
     public:
-        char const *abbr;
+        const std::string abbr;
 
         enum {
             MAGEONLY = 0x1,

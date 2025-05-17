@@ -31,7 +31,7 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
     // initialize the game which will generate a small bit of output
     helper.initialize_game();
     // The output will have the fact that it created the world and 1 '.' for each region.
-    std::string current = helper.cout_data();
+    std::string current = helper.log_output();
     std::string expected = "Creating world\n.....";
     expect(current == expected);
   };
@@ -51,6 +51,7 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
   "UnitTestHelper can set basic skills"_test = []
   {
     UnitTestHelper helper;
+
     helper.initialize_game();
     helper.setup_turn();
 
@@ -89,6 +90,7 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
   "UnitTestHelper handles skill prerequisites"_test = []
   {
     UnitTestHelper helper;
+
     helper.initialize_game();
     helper.setup_turn();
 

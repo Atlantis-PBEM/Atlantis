@@ -164,9 +164,9 @@ private:
 
     // LLS
     // Functions to do upgrades to the ruleset -- should be in extras.cpp
-    int UpgradeMajorVersion(int savedVersion);
-    int UpgradeMinorVersion(int savedVersion);
-    int UpgradePatchLevel(int savedVersion);
+    bool upgrade_major_version(int current_version);
+    bool upgrade_minor_version(int current_version);
+    bool upgrade_patch_level(int current_version);
 
     // JLT
     // Functions to allow enabling/disabling parts of the data tables

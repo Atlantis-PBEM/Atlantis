@@ -1,6 +1,7 @@
 #include "../game.h"
 #include "../gamedata.h"
 #include "../rng.hpp"
+#include "../logger.hpp"
 #include "testhelper.hpp"
 
 UnitTestHelper::UnitTestHelper() {
@@ -14,14 +15,10 @@ UnitTestHelper::UnitTestHelper() {
     game.init_random_seed = []() { rng::seed_random(0xdeadbeef); };
 
     // Set up the output streams to capture the output.
-    cout_streambuf = std::cout.rdbuf();
-    std::cout.rdbuf(cout_buffer.rdbuf());
+    logger::set_stream(log_stream);
 }
 
-UnitTestHelper::~UnitTestHelper() {
-    // Restore the output streams.
-    std::cout.rdbuf(cout_streambuf);
-}
+UnitTestHelper::~UnitTestHelper() { }
 
 int UnitTestHelper::initialize_game() {
     return game.NewGame();
@@ -64,7 +61,7 @@ Unit *UnitTestHelper::get_first_unit(Faction *faction) {
 
 Unit *UnitTestHelper::create_unit(Faction *faction, ARegion *region) {
     Unit *temp2 = game.GetNewUnit(faction);
-	temp2->SetMen(I_LEADERS, 1);
+    temp2->SetMen(I_LEADERS, 1);
     temp2->MoveUnit(region->GetDummy());
     return temp2;
 }
@@ -100,8 +97,8 @@ int UnitTestHelper::connected_distance(ARegion *reg1, ARegion *reg2, int penalty
     return game.regions.get_connected_distance(reg1, reg2, penalty, max);
 }
 
-std::string UnitTestHelper::cout_data() {
-    return cout_buffer.str();
+std::string UnitTestHelper::log_output() {
+    return log_stream.str();
 }
 
 void UnitTestHelper::parse_orders(int faction_id, std::istream& orders, orders_check *check) {

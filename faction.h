@@ -1,40 +1,12 @@
-// START A3HEADER
-//
-// This source file is part of the Atlantis PBM game program.
-// Copyright (C) 1995-1999 Geoff Dunbar
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program, in the file license.txt. If not, write
-// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-//
-// See the Atlantis Project web page for details:
-// http://www.prankster.com/project
-//
-// END A3HEADER
-// MODIFICATIONS
-// Date				Person				 Comments
-// ----				------				 --------
-// 2000/MAR/14 Davis Kulis		Added a new reporting Template.
-// 2001/Feb/18 Joseph Traub	 Added Apprentices from Lacandon Conquest
-#ifndef FACTION_CLASS
-#define FACTION_CLASS
+#pragma once
+#ifndef FACTION_H
+#define FACTION_H
 
 class Faction;
 class Game;
 struct ShowObject;
 
-#include "gameio.h"
+#include "logger.hpp"
 #include "aregion.h"
 #include "unit.h"
 #include "battle.h"
@@ -52,14 +24,16 @@ using json = nlohmann::json;
 #include <iostream>
 #include <sstream>
 
-enum
+#include "scoped_enum.hpp"
+
+enum class AttitudeType
 {
-	A_HOSTILE,
-	A_UNFRIENDLY,
-	A_NEUTRAL,
-	A_FRIENDLY,
-	A_ALLY,
-	NATTITUDES
+    HOSTILE,
+    UNFRIENDLY,
+    NEUTRAL,
+    FRIENDLY,
+    ALLY,
+    ATTITUDE_COUNT
 };
 
 extern const std::string F_WAR;
@@ -69,23 +43,23 @@ extern const std::string F_MARTIAL;
 
 // DK
 // LLS - make templates cleaner for save/restore
-enum
+enum TemplateType
 {
-	TEMPLATE_OFF,
-	TEMPLATE_SHORT,
-	TEMPLATE_LONG,
-	TEMPLATE_MAP,
-	NTEMPLATES
+    TEMPLATE_OFF,
+    TEMPLATE_SHORT,
+    TEMPLATE_LONG,
+    TEMPLATE_MAP,
+    NTEMPLATES
 };
 
-enum
+enum QuitReason
 {
-	QUIT_NONE,
-	QUIT_BY_ORDER,
-	QUIT_BY_GM,
-	QUIT_AND_RESTART,
-	QUIT_WON_GAME,
-	QUIT_GAME_OVER,
+    QUIT_NONE,
+    QUIT_BY_ORDER,
+    QUIT_BY_GM,
+    QUIT_AND_RESTART,
+    QUIT_WON_GAME,
+    QUIT_GAME_OVER,
 };
 
 extern const std::vector<std::string> AttitudeStrs;
@@ -95,169 +69,169 @@ extern std::vector<std::string> *FactionTypes;
 extern const std::vector<std::string> TemplateStrs;
 int parse_template_type(const parser::token& str);
 
-int parse_attitude(const parser::token& str);
+std::optional<AttitudeType> parse_attitude(const parser::token& str);
 
 int MagesByFacType(int);
 
 struct Attitude
 {
-	int factionnum;
-	int attitude;
+    int factionnum;
+    AttitudeType attitude;
 };
 
 enum FactionActivity
 {
-	TAX = 1,
-	TRADE = 2
+    TAX = 1,
+    TRADE = 2
 };
 
 // Collect the faction statistics for display in the report
 struct FactionStatistic {
-	std::string name;
-	std::string tag;
-	std::string plural;
-	size_t amount;
-	size_t rank;
-	size_t max;
-	size_t total;
-	bool illusion;
+    std::string name;
+    std::string tag;
+    std::string plural;
+    size_t amount;
+    size_t rank;
+    size_t max;
+    size_t total;
+    bool illusion;
 
-	// This needs to be a friend function so that the json library can call it.  This can only work for simple
-	// objects/structs that require no additional parameters to be passed in.  On the other hand, for simple
-	// structures this is nice, and works with things like STL containers of structs to make the entire container
-	// serializable to json.
-	friend void to_json(json &j, const FactionStatistic &s) {
-		j = json{
-			{"amount", s.amount}, {"name", s.name}, {"plural", s.plural}, {"tag", s.tag},
-			{"rank", s.rank}, {"max", s.max}, {"total", s.total}
-		};
-		if (s.illusion) j["illusion"] = true;
-	};
+    // This needs to be a friend function so that the json library can call it.  This can only work for simple
+    // objects/structs that require no additional parameters to be passed in.  On the other hand, for simple
+    // structures this is nice, and works with things like STL containers of structs to make the entire container
+    // serializable to json.
+    friend void to_json(json &j, const FactionStatistic &s) {
+        j = json{
+            {"amount", s.amount}, {"name", s.name}, {"plural", s.plural}, {"tag", s.tag},
+            {"rank", s.rank}, {"max", s.max}, {"total", s.total}
+        };
+        if (s.illusion) j["illusion"] = true;
+    };
 };
 
 struct FactionError {
-	std::string message;
-	Unit *unit;
+    std::string message;
+    Unit *unit;
 
-	friend void to_json(json &j, const FactionError &e);
+    friend void to_json(json &j, const FactionError &e);
 };
 
 struct FactionEvent {
-	std::string message;
-	std::string category;
-	Unit *unit;
-	ARegion *region;
+    std::string message;
+    std::string category;
+    Unit *unit;
+    ARegion *region;
 
-	friend void to_json(json &j, const FactionEvent &e);
+    friend void to_json(json &j, const FactionEvent &e);
 };
 
 class Faction
 {
 public:
-	Faction();
-	Faction(int);
-	~Faction();
+    Faction();
+    Faction(int);
+    ~Faction();
 
-	void Readin(std::istream &f);
-	void Writeout(std::ostream &f);
-	void View();
+    void Readin(std::istream &f);
+    void Writeout(std::ostream &f);
+    void View();
 
-	void set_name(const std::string& newname, bool canonicalize = true);
-	void SetAddress(AString &strNewAddress);
+    void set_name(const std::string& newname, bool canonicalize = true);
+    void set_address(const std::string& strNewAddress);
 
-	void CheckExist(ARegionList& regs);
-	void error(const std::string& s, Unit *u = nullptr);
-	void event(const std::string& message, const std::string& category, ARegion *r = nullptr, Unit *u = nullptr);
+    void CheckExist(ARegionList& regs);
+    void error(const std::string& s, Unit *u = nullptr);
+    void event(const std::string& message, const std::string& category, ARegion *r = nullptr, Unit *u = nullptr);
 
-	void build_json_report(json& j, Game *pGame, size_t **citems);
+    void build_json_report(json& j, Game *pGame, size_t **citems);
 
-	void WriteFacInfo(std::ostream &f);
+    void WriteFacInfo(std::ostream &f);
 
-	void set_attitude(int faction_id, int attitude); // attitude -1 clears it
-	int get_attitude(int faction_id);
-	void remove_attitude(int faction_id);
+    void set_attitude(int faction_id, AttitudeType attitude); // attitude -1 clears it
+    AttitudeType get_attitude(int faction_id);
+    void remove_attitude(int faction_id);
 
-	int CanCatch(ARegion *, Unit *);
-	/* Return 1 if can see, 2 if can see faction */
-	int CanSee(ARegion *, Unit *, int practice = 0);
+    int CanCatch(ARegion *, Unit *);
+    /* Return 1 if can see, 2 if can see faction */
+    int CanSee(ARegion *, Unit *, int practice = 0);
 
-	void DefaultOrders();
-	void TimesReward();
+    void DefaultOrders();
+    void TimesReward();
 
-	bool is_npc = false; // by default factions are not NPCs
+    bool is_npc = false; // by default factions are not NPCs
 
-	void DiscoverItem(int item, int force, int full);
+    void DiscoverItem(int item, int force, int full);
 
-	int num;
+    int num;
 
-	//
-	// The type is only used if Globals->FACTION_LIMIT_TYPE ==
-	// FACLIM_FACTION_TYPES
-	//
-	std::unordered_map<std::string, int> type;
+    //
+    // The type is only used if Globals->FACTION_LIMIT_TYPE ==
+    // FACLIM_FACTION_TYPES
+    //
+    std::unordered_map<std::string, int> type;
 
-	int lastchange;
-	int lastorders;
-	int unclaimed;
-	std::string name;
-	AString *address;
-	std::string password;
-	int times;
-	int showunitattitudes;
-	int temformat;
-	int battleLogFormat;
-	bool exists;
-	int quit;
-	int numshows;
+    int lastchange;
+    int lastorders;
+    int unclaimed;
+    std::string name;
+    std::string address;
+    std::string password;
+    int times;
+    int showunitattitudes;
+    int temformat;
+    int battleLogFormat;
+    bool exists;
+    int quit;
+    int numshows;
 
-	int nummages;
-	int numapprentices;
-	int numqms;
-	int numtacts;
+    int nummages;
+    int numapprentices;
+    int numqms;
+    int numtacts;
 
-	std::unordered_map<ARegion *, std::unordered_set<FactionActivity, std::hash<int>>> activity;
-	int GetActivityCost(FactionActivity type);
-	void RecordActivity(ARegion *region, FactionActivity type);
-	bool IsActivityRecorded(ARegion *region, FactionActivity type);
+    std::unordered_map<ARegion *, std::unordered_set<FactionActivity, std::hash<int>>> activity;
+    int GetActivityCost(FactionActivity type);
+    void RecordActivity(ARegion *region, FactionActivity type);
+    bool IsActivityRecorded(ARegion *region, FactionActivity type);
 
-	bool gets_gm_report(Game *game);
+    bool gets_gm_report(Game *game);
 
-	/* Used when writing reports */
-	std::vector<ARegion *> present_regions;
+    /* Used when writing reports */
+    std::vector<ARegion *> present_regions;
 
-	int defaultattitude;
-	// TODO: Convert this to a hashmap of <attitude, vector<factionid>>
-	// For now, just making it a vector of attitudes.  More will come later.
-	std::vector<Attitude> attitudes;
+    AttitudeType defaultattitude;
+    // TODO: Convert this to a hashmap of <attitude, vector<factionid>>
+    // For now, just making it a vector of attitudes.  More will come later.
+    std::vector<Attitude> attitudes;
 
-	SkillList skills;
-	ItemList items;
+    SkillList skills;
+    ItemList items;
 
-	// Extra lines/data from the players.in file for this faction.  Stored and dumped, not used.
-	std::vector<std::string> extra_player_data;
+    // Extra lines/data from the players.in file for this faction.  Stored and dumped, not used.
+    std::vector<std::string> extra_player_data;
 
-	// Errors and events during turn processing
-	std::vector<FactionError> errors;
-	std::vector<FactionEvent> events;
+    // Errors and events during turn processing
+    std::vector<FactionError> errors;
+    std::vector<FactionEvent> events;
 
-	std::vector<Battle *> battles;
-	std::vector<ShowSkill> shows;
-	std::vector<ShowItem> itemshows;
-	std::vector<ShowObject> objectshows;
+    std::vector<Battle *> battles;
+    std::vector<ShowSkill> shows;
+    std::vector<ShowItem> itemshows;
+    std::vector<ShowObject> objectshows;
 
-	// These are used for 'granting' units to a faction via the players.in
-	// file
-	ARegion *pReg;
-	ARegion *pStartLoc;
-	int noStartLeader;
-	int startturn;
+    // These are used for 'granting' units to a faction via the players.in
+    // file
+    ARegion *pReg;
+    ARegion *pStartLoc;
+    int noStartLeader;
+    int startturn;
 
 private:
-	std::vector<FactionStatistic> compute_faction_statistics(Game *game, size_t **citems);
-	void gm_report_setup(Game *game);
-	void build_gm_json_report(json& j, Game *game);
+    std::vector<FactionStatistic> compute_faction_statistics(Game *game, size_t **citems);
+    void gm_report_setup(Game *game);
+    void build_gm_json_report(json& j, Game *game);
 };
 
 Faction *GetFaction(std::list<Faction *>& factions, int factionid);
 
-#endif
+#endif // FACTION_H

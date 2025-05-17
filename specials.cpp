@@ -29,214 +29,214 @@
 
 void Soldier::SetupHealing()
 {
-	if (unit->type == U_MAGE ||
-			unit->type == U_APPRENTICE ||
-			unit->type == U_GUARDMAGE) {
-		healtype = unit->GetSkill(S_MAGICAL_HEALING);
-		if (healtype > 5) healtype = 5;
-		if (healtype > 0) {
-			healing = MagicHealDefs[healtype].num;
-			healitem = -1;
-			return;
-		}
-	}
+    if (unit->type == U_MAGE ||
+            unit->type == U_APPRENTICE ||
+            unit->type == U_GUARDMAGE) {
+        healtype = unit->GetSkill(S_MAGICAL_HEALING);
+        if (healtype > 5) healtype = 5;
+        if (healtype > 0) {
+            healing = MagicHealDefs[healtype].num;
+            healitem = -1;
+            return;
+        }
+    }
 
-	if (unit->items.GetNum(I_HEALPOTION)) {
-		healtype = 6;
-		unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
-		healing = 1;
-		healitem = I_HEALPOTION;
-	} else {
-		healing = HealDefs[unit->GetSkill(S_HEALING)].num * Globals->HEALS_PER_MAN;
-		if (healing) {
-			healtype = unit->GetSkill(S_HEALING);
-			int herbs = unit->items.GetNum(I_HERBS);
-			if (herbs < healing) healing = herbs;
-			unit->items.SetNum(I_HERBS, herbs - healing);
-			healitem = I_HERBS;
-		}
-	}
+    if (unit->items.GetNum(I_HEALPOTION)) {
+        healtype = 6;
+        unit->items.SetNum(I_HEALPOTION, unit->items.GetNum(I_HEALPOTION)-1);
+        healing = 1;
+        healitem = I_HEALPOTION;
+    } else {
+        healing = HealDefs[unit->GetSkill(S_HEALING)].num * Globals->HEALS_PER_MAN;
+        if (healing) {
+            healtype = unit->GetSkill(S_HEALING);
+            int herbs = unit->items.GetNum(I_HERBS);
+            if (herbs < healing) healing = herbs;
+            unit->items.SetNum(I_HERBS, herbs - healing);
+            healitem = I_HERBS;
+        }
+    }
 }
 
 int Army::CheckSpecialTarget(char const *special,int tar)
 {
-	auto spd = FindSpecial(special).value().get();
-	int i;
-	int match = 0;
+    auto spd = FindSpecial(special).value().get();
+    int i;
+    int match = 0;
 
-	if (spd.targflags & SpecialType::HIT_BUILDINGIF) {
-		match = 0;
-		if (!soldiers[tar]->building) return 0;
-		for (i = 0; i < SPECIAL_BUILDINGS; i++) {
-			if (soldiers[tar]->building && (spd.buildings[i] == soldiers[tar]->building)) match = 1;
-		}
-		if (!match) return 0;
-	}
+    if (spd.targflags & SpecialType::HIT_BUILDINGIF) {
+        match = 0;
+        if (!soldiers[tar]->building) return 0;
+        for (i = 0; i < SPECIAL_BUILDINGS; i++) {
+            if (soldiers[tar]->building && (spd.buildings[i] == soldiers[tar]->building)) match = 1;
+        }
+        if (!match) return 0;
+    }
 
-	if (spd.targflags & SpecialType::HIT_BUILDINGEXCEPT) {
-		match = 0;
-		if (!soldiers[tar]->building) return 0;
-		for (i = 0; i < SPECIAL_BUILDINGS; i++) {
-			if (soldiers[tar]->building && (spd.buildings[i] == soldiers[tar]->building)) match = 1;
-		}
-		if (match) return 0;
-	}
+    if (spd.targflags & SpecialType::HIT_BUILDINGEXCEPT) {
+        match = 0;
+        if (!soldiers[tar]->building) return 0;
+        for (i = 0; i < SPECIAL_BUILDINGS; i++) {
+            if (soldiers[tar]->building && (spd.buildings[i] == soldiers[tar]->building)) match = 1;
+        }
+        if (match) return 0;
+    }
 
-	if (spd.targflags & SpecialType::HIT_SOLDIERIF) {
-		match = 0;
-		if (soldiers[tar]->race == -1) return 0;
-		for (i = 0; i < 7; i++) {
-			if (soldiers[tar]->race == spd.targets[i]) match = 1;
-		}
-		if (!match) return 0;
-	}
+    if (spd.targflags & SpecialType::HIT_SOLDIERIF) {
+        match = 0;
+        if (soldiers[tar]->race == -1) return 0;
+        for (i = 0; i < 7; i++) {
+            if (soldiers[tar]->race == spd.targets[i]) match = 1;
+        }
+        if (!match) return 0;
+    }
 
-	if (spd.targflags & SpecialType::HIT_SOLDIEREXCEPT) {
-		match = 0;
-		if (soldiers[tar]->race == -1) return 0;
-		for (i = 0; i < 7; i++) {
-			if (soldiers[tar]->race == spd.targets[i]) match = 1;
-		}
-		if (match) return 0;
-	}
+    if (spd.targflags & SpecialType::HIT_SOLDIEREXCEPT) {
+        match = 0;
+        if (soldiers[tar]->race == -1) return 0;
+        for (i = 0; i < 7; i++) {
+            if (soldiers[tar]->race == spd.targets[i]) match = 1;
+        }
+        if (match) return 0;
+    }
 
-	if (spd.targflags & SpecialType::HIT_EFFECTIF) {
-		match = 0;
-		for (i = 0; i < 3; i++) {
-			if (soldiers[tar]->HasEffect(spd.effects[i])) match = 1;
-		}
-		if (!match) return 0;
-	}
+    if (spd.targflags & SpecialType::HIT_EFFECTIF) {
+        match = 0;
+        for (i = 0; i < 3; i++) {
+            if (spd.effects[i] && soldiers[tar]->has_effect(spd.effects[i])) match = 1;
+        }
+        if (!match) return 0;
+    }
 
-	if (spd.targflags & SpecialType::HIT_EFFECTEXCEPT) {
-		match = 0;
-		for (i = 0; i < 3; i++) {
-			if (soldiers[tar]->HasEffect(spd.effects[i])) match = 1;
-		}
-		if (match) return 0;
-	}
+    if (spd.targflags & SpecialType::HIT_EFFECTEXCEPT) {
+        match = 0;
+        for (i = 0; i < 3; i++) {
+            if (spd.effects[i] && soldiers[tar]->has_effect(spd.effects[i])) match = 1;
+        }
+        if (match) return 0;
+    }
 
-	if (spd.targflags & SpecialType::HIT_MOUNTIF) {
-		match = 0;
-		if (soldiers[tar]->riding == -1) return 0;
-		for (i = 0; i < 7; i++) {
-			if (soldiers[tar]->riding == spd.targets[i]) match = 1;
-		}
-		if (!match) return 0;
-	}
+    if (spd.targflags & SpecialType::HIT_MOUNTIF) {
+        match = 0;
+        if (soldiers[tar]->riding == -1) return 0;
+        for (i = 0; i < 7; i++) {
+            if (soldiers[tar]->riding == spd.targets[i]) match = 1;
+        }
+        if (!match) return 0;
+    }
 
-	if (spd.targflags & SpecialType::HIT_MOUNTEXCEPT) {
-		match = 0;
-		if (soldiers[tar]->riding == -1) return 0;
-		for (i = 0; i < 7; i++) {
-			if (soldiers[tar]->riding == spd.targets[i]) match = 1;
-		}
-		if (match) return 0;
-	}
+    if (spd.targflags & SpecialType::HIT_MOUNTEXCEPT) {
+        match = 0;
+        if (soldiers[tar]->riding == -1) return 0;
+        for (i = 0; i < 7; i++) {
+            if (soldiers[tar]->riding == spd.targets[i]) match = 1;
+        }
+        if (match) return 0;
+    }
 
-	if (spd.targflags & SpecialType::HIT_ILLUSION) {
-		// All illusions are of type monster, so lets make sure we get it
-		// right.  If we ever have other types of illusions, we can change
-		// this.
-		if (!(ItemDefs[soldiers[tar]->race].type & IT_MONSTER))
-			return 0;
-		if (!(ItemDefs[soldiers[tar]->race].type & IT_ILLUSION))
-			return 0;
-	}
+    if (spd.targflags & SpecialType::HIT_ILLUSION) {
+        // All illusions are of type monster, so lets make sure we get it
+        // right.  If we ever have other types of illusions, we can change
+        // this.
+        if (!(ItemDefs[soldiers[tar]->race].type & IT_MONSTER))
+            return 0;
+        if (!(ItemDefs[soldiers[tar]->race].type & IT_ILLUSION))
+            return 0;
+    }
 
-	if (spd.targflags & SpecialType::HIT_NOMONSTER) {
-		if (ItemDefs[soldiers[tar]->race].type & IT_MONSTER)
-			return 0;
-	}
-	return 1;
+    if (spd.targflags & SpecialType::HIT_NOMONSTER) {
+        if (ItemDefs[soldiers[tar]->race].type & IT_MONSTER)
+            return 0;
+    }
+    return 1;
 }
 
 void Battle::UpdateShields(Army *a)
 {
-	for (int i=0; i<a->notbehind; i++) {
-		int shtype = -1;
+    for (int i=0; i<a->notbehind; i++) {
+        int shtype = -1;
 
-		if (a->soldiers[i]->special == NULL) continue;
-		auto spd = FindSpecial(a->soldiers[i]->special).value().get();
+        if (a->soldiers[i]->special == NULL) continue;
+        auto spd = FindSpecial(a->soldiers[i]->special).value().get();
 
-		if (!(spd.effectflags & SpecialType::FX_SHIELD) && !(spd.effectflags & SpecialType::FX_DEFBONUS)) continue;
+        if (!(spd.effectflags & SpecialType::FX_SHIELD) && !(spd.effectflags & SpecialType::FX_DEFBONUS)) continue;
 
-		if (spd.effectflags & SpecialType::FX_SHIELD) {
-			for (shtype = 0; shtype < 4; shtype++) {
-				if (spd.shield[shtype] == -1) continue;
-				a->shields.emplace_back(std::make_shared<Shield>(spd.shield[shtype], a->soldiers[i]->slevel));
-			}
-		}
+        if (spd.effectflags & SpecialType::FX_SHIELD) {
+            for (shtype = 0; shtype < 4; shtype++) {
+                if (spd.shield[shtype] == -1) continue;
+                a->shields.emplace_back(std::make_shared<Shield>(spd.shield[shtype], a->soldiers[i]->slevel));
+            }
+        }
 
-		if (spd.effectflags & SpecialType::FX_DEFBONUS && a->round == 0) {
-			for (shtype = 0; shtype < 4; shtype++) {
-				if (spd.defs[shtype].type == -1) continue;
-				int bonus = spd.defs[shtype].val;
-				if (spd.effectflags & SpecialType::FX_USE_LEV) bonus *= a->soldiers[i]->slevel;
-				a->soldiers[i]->dskill[spd.defs[shtype].type] += bonus;
-			}
-		}
+        if (spd.effectflags & SpecialType::FX_DEFBONUS && a->round == 0) {
+            for (shtype = 0; shtype < 4; shtype++) {
+                if (spd.defs[shtype].type == -1) continue;
+                int bonus = spd.defs[shtype].val;
+                if (spd.effectflags & SpecialType::FX_USE_LEV) bonus *= a->soldiers[i]->slevel;
+                a->soldiers[i]->dskill[spd.defs[shtype].type] += bonus;
+            }
+        }
 
-		AddLine(a->soldiers[i]->unit->name + " casts " + spd.shielddesc + ".");
-	}
+        AddLine(a->soldiers[i]->unit->name + " casts " + spd.shielddesc + ".");
+    }
 }
 
 void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
-		Army *def, int behind, int canattackback)
+        Army *def, int behind, int canattackback)
 {
-	int i, num, tot = -1;
-	AString results[4];
-	int dam = 0;
+    int i, num, tot = -1;
+    AString results[4];
+    int dam = 0;
 
-	if (a->special == NULL) return;
+    if (a->special == NULL) return;
 
-	auto spd = FindSpecial(a->special).value().get();
+    auto spd = FindSpecial(a->special).value().get();
 
-	if (!(spd.effectflags & SpecialType::FX_DAMAGE)) return;
+    if (!(spd.effectflags & SpecialType::FX_DAMAGE)) return;
 
-	for (i = 0; i < 4; i++) {
-		if (spd.damage[i].type == -1) continue;
+    for (i = 0; i < 4; i++) {
+        if (spd.damage[i].type == -1) continue;
 
-		int times = spd.damage[i].value;
-		int hitDamage = spd.damage[i].hitDamage;
+        int times = spd.damage[i].value;
+        int hitDamage = spd.damage[i].hitDamage;
 
-		if (spd.effectflags & SpecialType::FX_USE_LEV) times *= a->slevel;
+        if (spd.effectflags & SpecialType::FX_USE_LEV) times *= a->slevel;
 
-		int realtimes = spd.damage[i].minnum + rng::get_random(times) + rng::get_random(times);
+        int realtimes = spd.damage[i].minnum + rng::get_random(times) + rng::get_random(times);
 
-		num = def->DoAnAttack(
+        num = def->DoAnAttack(
             this, a->special, realtimes, spd.damage[i].type, a->slevel, spd.damage[i].flags, spd.damage[i].dclass,
-				spd.damage[i].effect, 0, a, attackers, canattackback, hitDamage
+                spd.damage[i].effect, 0, a, attackers, canattackback, hitDamage
         );
 
-		if (spd.effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {
-			if (spd.damage[i].effect == NULL) {
-				results[dam] = AString("killing ") + num;
-				dam++;
-			} else {
-				results[dam] = AString(spd.spelldesc2) + num;
-			}
-		}
-		if (num != -1) {
-			tot = (tot == -1) ? num : tot + num;
-		}
-	}
+        if (spd.effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {
+            if (spd.damage[i].effect == NULL) {
+                results[dam] = AString("killing ") + num;
+                dam++;
+            } else {
+                results[dam] = AString(spd.spelldesc2) + num;
+            }
+        }
+        if (num != -1) {
+            tot = (tot == -1) ? num : tot + num;
+        }
+    }
 
-	if (tot == -1) AddLine(a->name + " " + spd.spelldesc + ", but it is deflected.");
-	else if (tot > 0) {
-		if (spd.effectflags & SpecialType::FX_DONT_COMBINE) {
-			AString temp = a->name + " " + spd.spelldesc;
-			for (i = 0; i < dam; i++) {
-				if (i) temp += ", ";
-				if (i == dam-1) temp += " and ";
-				temp += results[dam];
-			}
+    if (tot == -1) AddLine(a->name + " " + spd.spelldesc + ", but it is deflected.");
+    else if (tot > 0) {
+        if (spd.effectflags & SpecialType::FX_DONT_COMBINE) {
+            AString temp = a->name + " " + spd.spelldesc;
+            for (i = 0; i < dam; i++) {
+                if (i) temp += ", ";
+                if (i == dam-1) temp += " and ";
+                temp += results[dam];
+            }
 
-			temp += AString(spd.spelltarget) + ".";
-			AddLine(temp);
-		}
-		else {
-			AddLine(a->name + " " + spd.spelldesc + ", " + spd.spelldesc2 + tot + spd.spelltarget + ".");
-		}
-	}
+            temp += AString(spd.spelltarget) + ".";
+            AddLine(temp);
+        }
+        else {
+            AddLine(a->name + " " + spd.spelldesc + ", " + spd.spelldesc2 + tot + spd.spelltarget + ".");
+        }
+    }
 }

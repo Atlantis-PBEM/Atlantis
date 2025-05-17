@@ -1,3 +1,4 @@
+#pragma once
 #ifndef STRING_PARSER_HPP
 #define STRING_PARSER_HPP
 

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-enum StatsCategory {
+enum class StatsCategory {
     ROUND,
     BATTLE
 };
@@ -178,7 +178,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
     if (!def->NumAlive()) return;
 
     if (!behind && (a->riding != -1)) {
-        auto mount = FindMount(ItemDefs[a->riding].abr).value().get();
+        auto mount = FindMount(ItemDefs[a->riding].abr.c_str())->get();
         if (mount.mountSpecial != NULL) {
             int i, num, tot = -1;
             auto spd = FindSpecial(mount.mountSpecial).value().get();
@@ -210,7 +210,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
     }
 
     for (int i = 0; i < numAttacks; i++) {
-        auto weapon_def = (a->weapon != -1) ? FindWeapon(ItemDefs[a->weapon].abr) : std::nullopt;
+        auto weapon_def = (a->weapon != -1) ? FindWeapon(ItemDefs[a->weapon].abr.c_str()) : std::nullopt;
 
         if (behind && !canAttackFromBehind) {
             if (!weapon_def) break;
@@ -234,7 +234,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
         if (!def->NumAlive()) break;
     }
 
-    a->ClearOneTimeEffects();
+    a->clear_one_time_effects();
 }
 
 void Battle::NormalRound(int round,Army * a,Army * b)
@@ -545,10 +545,7 @@ int Battle::Run(
         (!armies[1]->NumAlive() && armies[0]->NumAlive())) {
         if (ass) {
             assassination = ASS_SUCC;
-            asstext = armies[1]->leader->name;
-            asstext += " is assassinated in ";
-            asstext += region->ShortPrint().const_str();
-            asstext += "!";
+            asstext = armies[1]->leader->name + " is assassinated in " + region->short_print() + "!";
         }
         if (armies[1]->NumAlive()) {
             AddLine(armies[1]->leader->name + " is routed!");
@@ -635,8 +632,8 @@ void Battle::WriteSides(
     ARegion * r, Unit * att, Unit * tar, std::list<Location *>& atts, std::list<Location *>& defs, int ass
 )
 {
-    if (ass) AddLine(att->name + " attempts to assassinate " + tar->name + " in " + r->ShortPrint().const_str() + "!");
-    else AddLine(att->name + " attacks " + tar->name + " in " + r->ShortPrint().const_str() + "!");
+    if (ass) AddLine(att->name + " attempts to assassinate " + tar->name + " in " + r->short_print() + "!");
+    else AddLine(att->name + " attacks " + tar->name + " in " + r->short_print() + "!");
     AddLine("");
 
     int dobs = 0;
@@ -707,7 +704,7 @@ void Game::GetDFacs(ARegion * r, Unit * t, std::set<Faction *>& facs)
         for(const auto u : obj->units) {
             if (u->IsAlive() &&
                 (u->faction == t->faction ||
-                    (AlliesIncluded == 1 && u->guard != GUARD_AVOID && u->GetAttitude(r,t) == A_ALLY)
+                    (AlliesIncluded == 1 && u->guard != GUARD_AVOID && u->GetAttitude(r,t) == AttitudeType::ALLY)
                 )
             ) {
                 facs.insert(u->faction);
@@ -725,11 +722,12 @@ void Game::GetAFacs(
         for(const auto u : obj->units) {
             if (u->canattack && u->IsAlive()) {
                 int add = 0;
-                if ((u->faction == att->faction || u->GetAttitude(r,tar) == A_HOSTILE) &&
+                if (
+                    (u->faction == att->faction || u->GetAttitude(r,tar) == AttitudeType::HOSTILE) &&
                     (u->guard != GUARD_AVOID || u == att)
                 ) {
                     add = 1;
-                } else if (u->guard == GUARD_ADVANCE && u->GetAttitude(r,tar) != A_ALLY) {
+                } else if (u->guard == GUARD_ADVANCE && u->GetAttitude(r,tar) != AttitudeType::ALLY) {
                     add = 1;
                 } else if (u->attackorders) {
                     for(auto it = u->attackorders->targets.begin(); it != u->attackorders->targets.end();) {
@@ -989,7 +987,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
     int result;
 
     if (ass) {
-        if (attacker->GetAttitude(r,target) == A_ALLY) {
+        if (attacker->GetAttitude(r,target) == AttitudeType::ALLY) {
             attacker->error("ASSASSINATE: Can't assassinate an ally.");
             return BATTLE_IMPOSSIBLE;
         }
@@ -1001,7 +999,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
             attacker->error("ATTACK: No battles allowed in safe regions.");
             return BATTLE_IMPOSSIBLE;
         }
-        if (attacker->GetAttitude(r,target) == A_ALLY) {
+        if (attacker->GetAttitude(r,target) == AttitudeType::ALLY) {
             attacker->error("ATTACK: Can't attack an ally.");
             if (adv) {
                 attacker->canattack = 0;
@@ -1029,12 +1027,12 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
 
     if (atts.size() <= 0) {
         // This shouldn't happen, but just in case
-        Awrite(AString("Cannot find any attackers!"));
+        logger::write("Cannot find any attackers!");
         return BATTLE_IMPOSSIBLE;
     }
     if (defs.size() <= 0) {
         // This shouldn't happen, but just in case
-        Awrite(AString("Cannot find any defenders!"));
+        logger::write("Cannot find any defenders!");
         return BATTLE_IMPOSSIBLE;
     }
 
