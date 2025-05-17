@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __UNIT_TEST_HELPER_HPP__
-#define __UNIT_TEST_HELPER_HPP__
+#ifndef TEST_HELPER_HPP
+#define TEST_HELPER_HPP
 
 #include "../game.h"
 
@@ -100,8 +100,8 @@ public:
     // dummy
     int get_seed() { return rng::get_random(10000); };
 
-    // Get the contents of cout as a string.
-    std::string cout_data();
+    // Get the contents of the log stream as a string.
+    std::string log_output();
 
     // Activate a specific spell for testing.   Since the spells can have different arguments, we use a helper struct
     // to pass in the arguments and call the appropriate Run<Spell> function based on the skill associate with the spell.
@@ -115,9 +115,8 @@ private:
     void set_prerequisites(Unit *unit, int skill, int level);
     int calculate_days_for_level(int level);
 
-    std::stringstream cout_buffer;
-    std::streambuf *cout_streambuf;
+    std::stringstream log_stream;
     Game game;
 };
 
-#endif
+#endif // TEST_HELPER_HPP

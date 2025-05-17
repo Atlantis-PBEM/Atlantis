@@ -1,28 +1,3 @@
-// START A3HEADER
-//
-// This source file is part of the Atlantis PBM game program.
-// Copyright (C) 1995-1999 Geoff Dunbar
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program, in the file license.txt. If not, write
-// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-//
-// See the Atlantis Project web page for details:
-// http://www.prankster.com/project
-//
-// END A3HEADER
-
 #include <stdlib.h>
 
 #include "game.h"
@@ -115,16 +90,14 @@ int parse_skill(const parser::token& token)
     return -1;
 }
 
-AString SkillStrs(const SkillType& pS)
+std::string SkillStrs(const SkillType& pS)
 {
-    AString temp = AString(pS.name) + " [" + pS.abbr + "]";
-    return temp;
+    return pS.name + " [" + pS.abbr + "]";
 }
 
-AString SkillStrs(int i)
+std::string SkillStrs(int i)
 {
-    AString temp = AString(SkillDefs[i].name) + " [" + SkillDefs[i].abbr + "]";
-    return temp;
+    return SkillDefs[i].name + " [" + SkillDefs[i].abbr + "]";
 }
 
 int SkillCost(int skill)
@@ -141,7 +114,7 @@ int SkillMax(char const *skill, int race)
         }
     }
 
-    auto man_def = FindRace(ItemDefs[race].abr);
+    auto man_def = FindRace(ItemDefs[race].abr.c_str());
     if (!man_def) return 0;
     auto mt = man_def->get();
 

@@ -1,29 +1,4 @@
-// START A3HEADER
-//
-// This source file is part of the Atlantis PBM game program.
-// Copyright (C) 2020 Valdis Zobēla
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program, in the file license.txt. If not, write
-// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-//
-// See the Atlantis Project web page for details:
-// http://www.prankster.com/project
-//
-// END A3HEADER
-
-#include "gameio.h"
+#include "logger.hpp"
 #include "events.h"
 #include "gamedata.h"
 #include "graphs.h"
@@ -48,17 +23,17 @@ FactBase::~FactBase() {
 }
 
 void BattleSide::AssignUnit(Unit* unit) {
-	this->factionName = unit->faction->name;
-	this->factionNum = unit->faction->num;
-	this->unitName = unit->name;
-	this->unitNum = unit->num;
+    this->factionName = unit->faction->name;
+    this->factionNum = unit->faction->num;
+    this->unitName = unit->name;
+    this->unitNum = unit->num;
 }
 
 void BattleSide::AssignArmy(Army* army) {
-	this->total = army->count;
+    this->total = army->count;
 
-	for (int i = 0; i < army->count; i++) {
-		auto soldier = army->soldiers[i];
+    for (int i = 0; i < army->count; i++) {
+        auto soldier = army->soldiers[i];
 
         bool lost = soldier->hits == 0;
         if (lost) this->lost++;
@@ -177,13 +152,13 @@ void populateForitifcationLandmark(std::vector<Landmark> &landmarks, ARegion *re
     for(const auto obj : reg->objects) {
         ObjectType& type = ObjectDefs[obj->type];
 
-		if (type.flags & ObjectType::GROUP) {
-			continue;
-		}
+        if (type.flags & ObjectType::GROUP) {
+            continue;
+        }
 
-		if (obj->IsFleet()) {
-			continue;
-		}
+        if (obj->IsFleet()) {
+            continue;
+        }
 
         if (protect >= type.protect) {
             continue;
@@ -431,16 +406,9 @@ AnomalyFact::~AnomalyFact() {
 }
 
 void AnomalyFact::GetEvents(std::list<Event> &events) {
-    std::ostringstream buffer;
-
-    buffer
-        << "A strange anomaly was detected in regions "
-        << location->Print()
-        << ".";
-
     events.push_back({
         .category = EventCategory::EVENT_ANOMALY,
         .score = 100,
-        .text = buffer.str()
+        .text = "A strange anomaly was detected in region " + location->print() + "."
     });
 }

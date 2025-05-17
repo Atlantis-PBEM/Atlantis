@@ -100,7 +100,7 @@ g++ -g -I. -I.. -Wall -o havilah/havilah havilah/obj/extra.o havilah/obj/map.o
 havilah/obj/monsters.o havilah/obj/rules.o havilah/obj/world.o
 obj/aregion.o obj/army.o obj/astring.o obj/battle.o obj/economy.o obj/edit.o
 obj/faction.o obj/fileio.o obj/game.o obj/gamedata.o obj/gamedefs.o
-obj/gameio.o obj/genrules.o obj/items.o obj/main.o obj/market.o
+obj/genrules.o obj/items.o obj/main.o obj/market.o
 obj/modify.o obj/monthorders.o obj/npc.o obj/object.o obj/orders.o
 obj/parseorders.o obj/production.o obj/quests.o obj/runorders.o obj/shields.o
 obj/skills.o obj/skillshows.o obj/specials.o obj/spells.o obj/template.o
@@ -422,11 +422,11 @@ And then do exactly what you did previously:
 	./havilah run
 ```
 
-In later turns, you'll want to move old orders out of the way too.  
-The template files serves as a template for the orders for the next 
-turn.  This includes any @ recurring orders and any tern/endturn orders 
-you gave.  How this is made available to the players varies.  Some games 
-concatenate it to the end of the report file before sending that to the 
+In later turns, you'll want to move old orders out of the way too.
+The template files serves as a template for the orders for the next
+turn.  This includes any @ recurring orders and any tern/endturn orders
+you gave.  How this is made available to the players varies.  Some games
+concatenate it to the end of the report file before sending that to the
 player.  Some tools can work with that concetantion.
 
 

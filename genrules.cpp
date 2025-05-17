@@ -1735,7 +1735,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
         for (int i = 0; i < NITEMS; i++) {
             if (ItemDefs[i].flags & ItemType::DISABLED) continue;
             if (!(ItemDefs[i].type & IT_MAN)) continue;
-            auto mt = FindRace(ItemDefs[i].abr)->get();
+            auto mt = FindRace(ItemDefs[i].abr.c_str())->get();
 
             f << enclose("tr", true);
             f << enclose("td align=\"left\" nowrap", true) << ItemDefs[i].names << '\n' << enclose("td", false);
@@ -2225,7 +2225,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
         f << '\n' << enclose("td", false);
         f << enclose("td align=\"left\"", true);
         if (ItemDefs[i].type & IT_WEAPON) {
-            auto weapon_def = FindWeapon(ItemDefs[i].abr)->get();
+            auto weapon_def = FindWeapon(ItemDefs[i].abr.c_str())->get();
             if (weapon_def.attackBonus || weapon_def.defenseBonus ||
                     (weapon_def.flags & WeaponType::RANGED) ||
                     (weapon_def.flags & WeaponType::NEEDSKILL)) {
@@ -2252,14 +2252,14 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
             }
         }
         if (ItemDefs[i].type & IT_MOUNT) {
-            auto mount = FindMount(ItemDefs[i].abr).value().get();
+            auto mount = FindMount(ItemDefs[i].abr.c_str()).value().get();
             auto pS = FindSkill(mount.skill);
             if (pS && !(pS->get().flags & SkillType::DISABLED)) {
                 f << "Gives a riding bonus with the " << pS->get().name << " skill.<br />";
             }
         }
         if (ItemDefs[i].type & IT_ARMOR) {
-            auto armor = FindArmor(ItemDefs[i].abr)->get();
+            auto armor = FindArmor(ItemDefs[i].abr.c_str())->get();
             f << "Gives a " << armor.saves[SLASHING] << " in " << armor.from
               << " chance to survive a normal hit.<br />"
               << ((armor.flags & ArmorType::USEINASSASSINATE && has_stea) ?
@@ -3211,7 +3211,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
                     if (!(item.type & IT_ARMOR)) return false;
                     if (!(item.type & IT_NORMAL)) return false;
                     if (item.flags & ItemType::DISABLED) return false;
-                    auto armor = FindArmor(item.abr);
+                    auto armor = FindArmor(item.abr.c_str());
                     if (!armor) return false;
                     if (!(armor->get().flags & ArmorType::USEINASSASSINATE)) return false;
                     return true;

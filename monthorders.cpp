@@ -1,34 +1,3 @@
-// START A3HEADER
-//
-// This source file is part of the Atlantis PBM game program.
-// Copyright (C) 1995-1999 Geoff Dunbar
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program, in the file license.txt. If not, write
-// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-//
-// See the Atlantis Project web page for details:
-// http://www.prankster.com/project
-//
-// END A3HEADER
-// MODIFICATIONS
-// Date			Person				Comments
-// ----			------				--------
-// 2000/MAR/14	Larry Stanbery		Added production enhancement.
-// 2000/MAR/21	Azthar Septragen	Added roads.
-// 2001/Feb/21	Joseph Traub		Added FACLIM_UNLIMITED
-
 #include <random>
 #include <stdlib.h>
 
@@ -250,7 +219,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
             stop = 1;
         } else if (fleet->SailThroughCheck(x->dir) < 1) {
             cap->error(
-                "SAIL: Could not sail " + DirectionStrs[x->dir] + " from " + reg->ShortPrint().const_str() +
+                "SAIL: Could not sail " + DirectionStrs[x->dir] + " from " + reg->short_print() +
                 ". Cannot sail through land."
             );
             stop = 1;
@@ -272,7 +241,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
                 }
                 if (!has_key) {
                     cap->error(
-                        "SAIL: Can't sail " + DirectionStrs[x->dir] + " from " + reg->ShortPrint().const_str() +
+                        "SAIL: Can't sail " + DirectionStrs[x->dir] + " from " + reg->short_print() +
                         " due to mystical barrier."
                     );
                     stop = 1;
@@ -306,9 +275,8 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 
             for (const auto f : facs) {
                 string temp = fleet->name;
-                temp += (x->dir == MOVE_PAUSE ? " performs maneuvers in " : " sails from ") +
-                        string(reg->ShortPrint().const_str());
-                if (x->dir != MOVE_PAUSE) { temp += " to " + string(newreg->ShortPrint().const_str()); }
+                temp += (x->dir == MOVE_PAUSE ? " performs maneuvers in " : " sails from ") + reg->short_print();
+                if (x->dir != MOVE_PAUSE) temp += " to " + newreg->short_print();
                 f->event(temp, "sail");
             }
             if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING && x->dir != MOVE_PAUSE) {
@@ -333,7 +301,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
             }
             reg = newreg;
             if (newreg->ForbiddenShip(fleet)) {
-                string temp = fleet->name + " is stopped by guards in " + newreg->ShortPrint().const_str() + ".";
+                string temp = fleet->name + " is stopped by guards in " + newreg->short_print() + ".";
                 cap->faction->event(temp, "sail");
                 stop = 1;
             }
@@ -401,7 +369,7 @@ void Game::Do1TeachOrder(ARegion *reg, Unit *unit)
             delete id;
             continue;
         }
-        if (target->faction->get_attitude(unit->faction->num) < A_FRIENDLY) {
+        if (target->faction->get_attitude(unit->faction->num) < AttitudeType::FRIENDLY) {
             unit->error("TEACH: " + target->name + " is not a member of a friendly faction.");
             it = order->targets.erase(it);
             delete id;
@@ -644,13 +612,13 @@ void Game::RunBuildShipOrder(ARegion *r, Object *obj, Unit *u)
     u->Practice(skill);
 
     if (unfinished == 0) {
-        u->event("Finishes building a " + ItemDefs[ship].name + " in " + r->ShortPrint().const_str() + ".", "build");
+        u->event("Finishes building a " + ItemDefs[ship].name + " in " + r->short_print() + ".", "build");
         CreateShip(r, u, ship);
     } else {
         percent = 100 * output / ItemDefs[ship].pMonths;
         u->event(
             "Performs construction work on a " + ItemDefs[ship].name + " (" + to_string(percent) + "%) in " +
-                r->ShortPrint().const_str() + ".",
+                r->short_print() + ".",
             "build", r
         );
     }
@@ -724,7 +692,7 @@ void Game::RunBuildHelpers(ARegion *r)
                         continue;
                     }
                     // Make sure that unit considers you friendly!
-                    if (target->faction->get_attitude(u->faction->num) < A_FRIENDLY) {
+                    if (target->faction->get_attitude(u->faction->num) < AttitudeType::FRIENDLY) {
                         u->error("BUILD: Unit you are helping rejects your help.");
                         delete u->monthorders;
                         u->monthorders = nullptr;
@@ -785,7 +753,7 @@ void Game::RunBuildHelpers(ARegion *r)
                         int percent = 100 * output / ItemDefs[ship].pMonths;
                         u->event(
                             "Helps " + target->name + " with construction of a " + ItemDefs[ship].name + " (" +
-                                to_string(percent) + "%) in " + r->ShortPrint().const_str() + ".",
+                                std::to_string(percent) + "%) in " + r->short_print() + ".",
                             "build", r
                         );
                     }
@@ -1069,7 +1037,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
     if (ItemDefs[o->item].flags & ItemType::SKILLOUT_HALF) { output *= (level + 1) / 2; }
 
     u->items.SetNum(o->item, u->items.GetNum(o->item) + output);
-    u->event("Produces " + ItemString(o->item, output) + " in " + r->ShortPrint().const_str() + ".", "produce", r);
+    u->event("Produces " + ItemString(o->item, output) + " in " + r->short_print() + ".", "produce", r);
     u->Practice(o->skill);
     o->target -= output;
     if (o->target > 0) {
@@ -1258,7 +1226,7 @@ void Game::RunAProduction(ARegion *r, Production *p)
                 //
                 if (po->skill == -1) {
                     u->event(
-                        "Earns " + to_string(ubucks) + " silver working in " + r->ShortPrint().const_str() + ".",
+                        "Earns " + to_string(ubucks) + " silver working in " + r->short_print() + ".",
                         "work", r
                     );
                 } else {
@@ -1266,7 +1234,7 @@ void Game::RunAProduction(ARegion *r, Production *p)
                     // ENTERTAIN
                     //
                     u->event(
-                        "Earns " + to_string(ubucks) + " silver entertaining in " + r->ShortPrint().const_str() + ".",
+                        "Earns " + std::to_string(ubucks) + " silver entertaining in " + r->short_print() + ".",
                         "entertain", r
                     );
                     // If they don't have PHEN, then this will fail safely
@@ -1275,10 +1243,7 @@ void Game::RunAProduction(ARegion *r, Production *p)
                 }
             } else {
                 /* Everything else */
-                u->event(
-                    "Produces " + ItemString(po->item, ubucks) + " in " + r->ShortPrint().const_str() + ".", "produce",
-                    r
-                );
+                u->event("Produces " + ItemString(po->item, ubucks) + " in " + r->short_print() + ".", "produce", r);
                 u->Practice(po->skill);
             }
             delete u->monthorders;
@@ -1579,7 +1544,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
     int movetype, cost, startmove, weight;
     Unit *ally, *forbid;
     Location *loc;
-    const char *prevented = nullptr;
+    std::optional<std::string> prevented = std::nullopt;
 
     if (!o->dirs.size()) {
         delete o;
@@ -1674,8 +1639,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
     }
 
     prevented = newreg->movement_forbidden_by_ruleset(unit, region, regions);
-    if (prevented != nullptr) {
-        unit->error("MOVE: " + string(prevented) + " prevents movement in that direction.");
+    if (prevented) {
+        unit->error("MOVE: " + *prevented + " prevents movement in that direction.");
         goto done_moving;
     }
 
@@ -1723,7 +1688,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
     if (unit->movepoints < cost * Globals->MAX_SPEED) return 0;
 
     if (x->dir == MOVE_PAUSE) {
-        unit->event("Pauses to admire the scenery in " + string(region->ShortPrint().const_str()) + ".", "movement");
+        unit->event("Pauses to admire the scenery in " + region->short_print() + ".", "movement");
         unit->movepoints -= cost * Globals->MAX_SPEED;
         unit->moved += cost;
         std::erase(o->dirs, x);
@@ -1733,11 +1698,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 
     if ((TerrainDefs[newreg->type].similar_type == R_OCEAN) &&
         (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))) {
-        unit->event(
-            "Discovers that " + string(newreg->ShortPrint().const_str()) + " is " + TerrainDefs[newreg->type].name +
-                ".",
-            "movement"
-        );
+        unit->event("Discovers that " + newreg->short_print() + " is " + TerrainDefs[newreg->type].name + ".", "movement");
         goto done_moving;
     }
 
@@ -1760,8 +1721,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
     if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
         int obs = unit->GetAttribute("observation");
         unit->event(
-            std::string("Is forbidden entry to ") + newreg->ShortPrint().const_str() + " by " +
-                forbid->GetName(obs).const_str() + ".",
+            "Is forbidden entry to " + newreg->short_print() + " by " + forbid->GetName(obs).const_str() + ".",
             "movement"
         );
         obs = forbid->GetAttribute("observation");
@@ -1794,10 +1754,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
         break;
     case M_SWIM: temp = "Swims "; break;
     }
-    unit->event(
-        temp + "from " + string(region->ShortPrint().const_str()) + " to " + newreg->ShortPrint().const_str() + ".",
-        "movement"
-    );
+    unit->event(temp + "from " + region->short_print() + " to " + newreg->short_print() + ".", "movement");
 
     if (forbid) { unit->advancefrom = region; }
 

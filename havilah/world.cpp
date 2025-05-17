@@ -1,32 +1,3 @@
-// START A3HEADER
-//
-// This source file is part of the Atlantis PBM game program.
-// Copyright (C) 1995-1999 Geoff Dunbar
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program, in the file license.txt. If not, write
-// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-//
-// See the Atlantis Project web page for details:
-// http://www.prankster.com/project
-//
-// END A3HEADER
-// MODIFICATIONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2000/SEP/06 Joseph Traub      Added base man cost to allow races to have
-//                               different base costs
 #include "game.h"
 #include "gamedata.h"
 #include <string.h>
@@ -37,8 +8,8 @@ using namespace std;
 
 typedef struct
 {
-	const std::string word;
-	int prob;
+    const std::string word;
+    int prob;
 } WordList;
 
 // Initial Consonant, Vowel and Final Consonant sequences and
@@ -93,105 +64,105 @@ WordList fc[] =
 
 typedef struct
 {
-	int terrain;
-	const std::string word;
-	int prob;
-	int town;
-	int port;
+    int terrain;
+    const std::string word;
+    int prob;
+    int town;
+    int port;
 } SuffixList;
 
 SuffixList ts[] =
 {
-{ -1,		"acre",		 3, 0, 0 },
-{ -1,		"bach",		 3, 0, 0 },
-{ -2,		"bank",		10, 0, 1 },
-{ -2,		"bay",		10, 0, 1 },
-{ R_MOUNTAIN,	"berg",		10, 0, 0 },
-{ -2,		"borough",	 4, 1, 0 },
-{ R_PLAIN,	"bost",		10, 0, 0 },
-{ -1,		"brook",	 3, 0, 0 },
-{ -2,		"bruk",		 4, 1, 0 },
-{ -2,		"burg",		 4, 1, 0 },
-{ -1,		"burn",		 3, 0, 0 },
-{ -2,		"bury",		 4, 1, 0 },
-{ -2,		"by",		 4, 1, 0 },
-{ R_FOREST,	"cot",		10, 0, 0 },
-{ -2,		"dale",		 4, 1, 0 },
-{ R_JUNGLE,	"dee",		10, 0, 0 },
-{ R_MOUNTAIN,	"del",		10, 0, 0 },
-{ R_DESERT,	"dhan",		10, 0, 0 },
-{ R_MOUNTAIN,	"don",		10, 0, 0 },
-{ -2,		"dorf",		 4, 1, 0 },
-{ R_SWAMP,	"fel",		10, 0, 0 },
-{ R_PLAIN,	"field",	10, 0, 0 },
-{ R_FOREST,	"firth",	10, 0, 0 },
-{ -1,		"folk",		 3, 0, 0 },
-{ -1,		"ford",		 3, 0, 0 },
-{ -1,		"gate",		 3, 0, 0 },
-{ R_MOUNTAIN,	"gill",		10, 0, 0 },
-{ -1,		"glen",		 3, 0, 0 },
-{ R_DESERT,	"gobi",		10, 0, 0 },
-{ R_JUNGLE,	"gol",		 3, 0, 0 },
-{ -2,		"gost",		 4, 1, 0 },
-{ -2,		"grad",		 4, 1, 0 },
-{ -2,		"grave",	 4, 1, 0 },
-{ R_FOREST,	"grove",	10, 0, 0 },
-{ R_SWAMP,	"gwern",	10, 0, 0 },
-{ -2,		"ham",		 4, 1, 0 },
-{ -2,		"haven",	10, 0, 1 },
-{ R_MOUNTAIN,	"head",		10, 0, 0 },
-{ R_TUNDRA,	"heath",	10, 0, 0 },
-{ -1,		"heim",		 3, 0, 0 },
-{ -2,		"hold",		 4, 1, 0 },
-{ -2,		"holm",		 4, 1, 0 },
-{ R_FOREST,	"hurst",	10, 0, 0 },
-{ -2,		"kirk",		 4, 1, 0 },
-{ R_DESERT,	"kum",		10, 0, 0 },
-{ -1,		"land",		 3, 0, 0 },
-{ R_FOREST,	"lea",		 2, 0, 0 },
-{ R_FOREST,	"lee",		 2, 0, 0 },
-{ R_FOREST,	"leigh",	 2, 0, 0 },
-{ R_FOREST,	"ley",		 2, 0, 0 },
-{ R_TUNDRA,	"ling",		10, 0, 0 },
-{ R_OCEAN,	"loch",		15, 0, 0 },
-{ R_FOREST,	"ly",		 2, 0, 0 },
-{ R_OCEAN,	"mar",		10, 0, 0 },
-{ -1,		"mark",		 3, 0, 0 },
-{ R_OCEAN,	"mere",		10, 0, 0 },
-{ -2,		"minster",	 4, 1, 0 },
-{ R_MOUNTAIN,	"mont",		10, 0, 0 },
-{ R_SWAMP,	"moor",		10, 0, 0 },
-{ R_SWAMP,	"more",		10, 0, 0 },
-{ R_SWAMP,	"moss",		10, 0, 0 },
-{ -2,		"mouth",	10, 0, 1 },
-{ -2,		"pest",		 4, 1, 0 },
-{ -2,		"pol",		 4, 1, 0 },
-{ -2,		"pool",		10, 0, 1 },
-{ -2,		"port",		10, 0, 1 },
-{ R_FOREST,	"rath",		10, 0, 0 },
-{ R_PLAIN,	"run",		10, 0, 0 },
-{ -2,		"sale",		 4, 1, 0 },
-{ R_DESERT,	"sand",		10, 0, 0 },
-{ R_FOREST,	"shaw",		10, 0, 0 },
-{ R_PLAIN,	"shire",	10, 0, 0 },
-{ -2,		"side",		10, 0, 1 },
-{ -2,		"stad",		 4, 1, 0 },
-{ -1,		"stan",		 3, 0, 0 },
-{ -2,		"stead",	 4, 1, 0 },
-{ -2,		"stoke",	 4, 1, 0 },
-{ -2,		"stowe",	 4, 1, 0 },
-{ R_OCEAN,	"tarn",		15, 0, 0 },
-{ R_MOUNTAIN,	"tell",		10, 0, 0 },
-{ -2,		"ton",		 4, 1, 0 },
-{ R_MOUNTAIN,	"tor",		10, 0, 0 },
-{ -2,		"town",		 4, 1, 0 },
-{ -1,		"vale",		 3, 0, 0 },
-{ -2,		"ville",	 4, 1, 0 },
-{ R_JUNGLE,	"wald",		10, 0, 0 },
-{ R_OCEAN,	"water",	15, 0, 0 },
-{ -1,		"way",		 3, 0, 0 },
-{ -2,		"wick",		 4, 1, 0 },
-{ R_FOREST,	"wood",		10, 0, 0 },
+{ -1,       "acre",      3, 0, 0 },
+{ -1,       "bach",      3, 0, 0 },
+{ -2,       "bank",     10, 0, 1 },
+{ -2,       "bay",      10, 0, 1 },
+{ R_MOUNTAIN,   "berg",     10, 0, 0 },
+{ -2,       "borough",   4, 1, 0 },
+{ R_PLAIN,  "bost",     10, 0, 0 },
+{ -1,       "brook",     3, 0, 0 },
+{ -2,       "bruk",      4, 1, 0 },
+{ -2,       "burg",      4, 1, 0 },
+{ -1,       "burn",      3, 0, 0 },
+{ -2,       "bury",      4, 1, 0 },
+{ -2,       "by",        4, 1, 0 },
+{ R_FOREST, "cot",      10, 0, 0 },
+{ -2,       "dale",      4, 1, 0 },
+{ R_JUNGLE, "dee",      10, 0, 0 },
+{ R_MOUNTAIN,   "del",      10, 0, 0 },
+{ R_DESERT, "dhan",     10, 0, 0 },
+{ R_MOUNTAIN,   "don",      10, 0, 0 },
+{ -2,       "dorf",      4, 1, 0 },
+{ R_SWAMP,  "fel",      10, 0, 0 },
+{ R_PLAIN,  "field",    10, 0, 0 },
+{ R_FOREST, "firth",    10, 0, 0 },
+{ -1,       "folk",      3, 0, 0 },
+{ -1,       "ford",      3, 0, 0 },
+{ -1,       "gate",      3, 0, 0 },
+{ R_MOUNTAIN,   "gill",     10, 0, 0 },
+{ -1,       "glen",      3, 0, 0 },
+{ R_DESERT, "gobi",     10, 0, 0 },
+{ R_JUNGLE, "gol",       3, 0, 0 },
+{ -2,       "gost",      4, 1, 0 },
+{ -2,       "grad",      4, 1, 0 },
+{ -2,       "grave",     4, 1, 0 },
+{ R_FOREST, "grove",    10, 0, 0 },
+{ R_SWAMP,  "gwern",    10, 0, 0 },
+{ -2,       "ham",       4, 1, 0 },
+{ -2,       "haven",    10, 0, 1 },
+{ R_MOUNTAIN,   "head",     10, 0, 0 },
+{ R_TUNDRA, "heath",    10, 0, 0 },
+{ -1,       "heim",      3, 0, 0 },
+{ -2,       "hold",      4, 1, 0 },
+{ -2,       "holm",      4, 1, 0 },
+{ R_FOREST, "hurst",    10, 0, 0 },
+{ -2,       "kirk",      4, 1, 0 },
+{ R_DESERT, "kum",      10, 0, 0 },
+{ -1,       "land",      3, 0, 0 },
+{ R_FOREST, "lea",       2, 0, 0 },
+{ R_FOREST, "lee",       2, 0, 0 },
+{ R_FOREST, "leigh",     2, 0, 0 },
+{ R_FOREST, "ley",       2, 0, 0 },
+{ R_TUNDRA, "ling",     10, 0, 0 },
+{ R_OCEAN,  "loch",     15, 0, 0 },
+{ R_FOREST, "ly",        2, 0, 0 },
+{ R_OCEAN,  "mar",      10, 0, 0 },
+{ -1,       "mark",      3, 0, 0 },
+{ R_OCEAN,  "mere",     10, 0, 0 },
+{ -2,       "minster",   4, 1, 0 },
+{ R_MOUNTAIN,   "mont",     10, 0, 0 },
+{ R_SWAMP,  "moor",     10, 0, 0 },
+{ R_SWAMP,  "more",     10, 0, 0 },
+{ R_SWAMP,  "moss",     10, 0, 0 },
+{ -2,       "mouth",    10, 0, 1 },
+{ -2,       "pest",      4, 1, 0 },
+{ -2,       "pol",       4, 1, 0 },
+{ -2,       "pool",     10, 0, 1 },
+{ -2,       "port",     10, 0, 1 },
+{ R_FOREST, "rath",     10, 0, 0 },
+{ R_PLAIN,  "run",      10, 0, 0 },
+{ -2,       "sale",      4, 1, 0 },
+{ R_DESERT, "sand",     10, 0, 0 },
+{ R_FOREST, "shaw",     10, 0, 0 },
+{ R_PLAIN,  "shire",    10, 0, 0 },
+{ -2,       "side",     10, 0, 1 },
+{ -2,       "stad",      4, 1, 0 },
+{ -1,       "stan",      3, 0, 0 },
+{ -2,       "stead",     4, 1, 0 },
+{ -2,       "stoke",     4, 1, 0 },
+{ -2,       "stowe",     4, 1, 0 },
+{ R_OCEAN,  "tarn",     15, 0, 0 },
+{ R_MOUNTAIN,   "tell",     10, 0, 0 },
+{ -2,       "ton",       4, 1, 0 },
+{ R_MOUNTAIN,   "tor",      10, 0, 0 },
+{ -2,       "town",      4, 1, 0 },
+{ -1,       "vale",      3, 0, 0 },
+{ -2,       "ville",     4, 1, 0 },
+{ R_JUNGLE, "wald",     10, 0, 0 },
+{ R_OCEAN,  "water",    15, 0, 0 },
+{ -1,       "way",       3, 0, 0 },
+{ -2,       "wick",      4, 1, 0 },
+{ R_FOREST, "wood",     10, 0, 0 },
 };
 
 int syllprob[] = { 0, 60, 40, 0 };
@@ -209,698 +180,698 @@ static int tSyll, tIC, tV, tFC;
 
 void SetupNames()
 {
-	unsigned int i;
+    unsigned int i;
 
-	nnames = 0;
-	ntowns = 0;
-	nregions = 0;
+    nnames = 0;
+    ntowns = 0;
+    nregions = 0;
 
-	for (i = 0, tIC = 0; i < sizeof(ic) / sizeof(ic[0]); i++)
-		tIC += ic[i].prob;
-	for (i = 0, tV = 0; i < sizeof(v) / sizeof(v[0]); i++)
-		tV += v[i].prob;
-	for (i = 0, tFC = 0; i < sizeof(fc) / sizeof(fc[0]); i++)
-		tFC += fc[i].prob;
-	for (i = 0, tSyll = 0; i < sizeof(syllprob) / sizeof(syllprob[0]); i++)
-		tSyll += syllprob[i];
+    for (i = 0, tIC = 0; i < sizeof(ic) / sizeof(ic[0]); i++)
+        tIC += ic[i].prob;
+    for (i = 0, tV = 0; i < sizeof(v) / sizeof(v[0]); i++)
+        tV += v[i].prob;
+    for (i = 0, tFC = 0; i < sizeof(fc) / sizeof(fc[0]); i++)
+        tFC += fc[i].prob;
+    for (i = 0, tSyll = 0; i < sizeof(syllprob) / sizeof(syllprob[0]); i++)
+        tSyll += syllprob[i];
 }
 
 void CountNames()
 {
-	Awrite(AString("Regions ") + nregions);
+    logger::write("Regions " + std::to_string(nregions));
 
-	// Dump all the names we created to a file so the GM can scan
-	// them easily (to check for randomly generated rude words,
-	// for example)
-	ofstream names("names.out", ios::out|ios::ate);
-	for(const auto& name: regionnames) {
-		names << name << '\n';
-	}
+    // Dump all the names we created to a file so the GM can scan
+    // them easily (to check for randomly generated rude words,
+    // for example)
+    ofstream names("names.out", ios::out|ios::ate);
+    for(const auto& name: regionnames) {
+        names << name << '\n';
+    }
 }
 
 int AGetName(int town, ARegion *reg)
 {
-	int unique, rnd, syllables, i, trail, port, similar;
-	unsigned int u;
-	std::string temp;
+    int unique, rnd, syllables, i, trail, port, similar;
+    unsigned int u;
+    std::string temp;
 
-	port = 0;
-	if (town) {
-		for (i = 0; i < NDIRS; i++)
-			if (reg->neighbors[i] &&
-					TerrainDefs[reg->neighbors[i]->type].similar_type == R_OCEAN)
-				port = 1;
-	}
+    port = 0;
+    if (town) {
+        for (i = 0; i < NDIRS; i++)
+            if (reg->neighbors[i] &&
+                    TerrainDefs[reg->neighbors[i]->type].similar_type == R_OCEAN)
+                port = 1;
+    }
 
-	unique = 0;
-	while (!unique) {
-		rnd = rng::get_random(tSyll);
-		for (syllables = 0; rnd >= syllprob[syllables]; syllables++)
-			rnd -= syllprob[syllables];
-		syllables++;
-		temp = "";
-		trail = 0;
-		while (syllables-- > 0) {
-			if (!syllables) {
-				// Might replace the last syllable with a
-				// terrain specific suffix
-				rnd = rng::get_random(400);
-				similar = TerrainDefs[reg->type].similar_type;
-				// Use forest names for underforest
-				if (similar == R_UFOREST)
-					similar = R_FOREST;
-				// ocean (water) names for lakes
-				if (similar == R_LAKE)
-					similar = R_OCEAN;
-				// and plains names for cavern
-				if (similar == R_CAVERN)
-					similar = R_PLAIN;
-				for (u = 0; u < sizeof(ts) / sizeof(ts[0]); u++) {
-					if (ts[u].terrain == similar ||
-							ts[u].terrain == -1 ||
-							(ts[u].town && town) ||
-							(ts[u].port && port)) {
-						if (rnd >= ts[u].prob)
-							rnd -= ts[u].prob;
-						else {
-							if (trail) {
-								switch(ts[u].word[0]) {
-									case 'a':
-									case 'e':
-									case 'i':
-									case 'o':
-									case 'u':
-										temp += "'";
-										break;
-									default:
-										break;
-								}
-							}
-							temp += ts[u].word;
-							break;
-						}
-					}
-				}
-				if (u < sizeof(ts) / sizeof(ts[0])) break;
-			}
-			if (rng::get_random(5) > 0) {
-				// 4 out of 5 syllables start with a consonant sequence
-				rnd = rng::get_random(tIC);
-				for (i = 0; rnd >= ic[i].prob; i++)
-					rnd -= ic[i].prob;
-				temp += ic[i].word;
-			} else if (trail) {
-				// separate adjacent vowels
-				temp += "'";
-			}
-			// All syllables have a vowel sequence
-			rnd = rng::get_random(tV);
-			for (i = 0; rnd >= v[i].prob; i++)
-				rnd -= v[i].prob;
-			temp += v[i].word;
-			if (rng::get_random(5) > 1) {
-				// 3 out of 5 syllables end with a consonant sequence
-				rnd = rng::get_random(tFC);
-				for (i = 0; rnd >= fc[i].prob; i++)
-					rnd -= fc[i].prob;
-				temp += fc[i].word;
-				trail = 0;
-			} else {
-				trail = 1;
-			}
-		}
-		temp[0] = toupper(temp[0]);
-		unique = 1;
-		for(const auto& name: regionnames) {
-			if (name == temp) {
-				unique = 0;
-				break;
-			}
-		}
-		if (temp.length() > 12) unique = 0;
-	}
+    unique = 0;
+    while (!unique) {
+        rnd = rng::get_random(tSyll);
+        for (syllables = 0; rnd >= syllprob[syllables]; syllables++)
+            rnd -= syllprob[syllables];
+        syllables++;
+        temp = "";
+        trail = 0;
+        while (syllables-- > 0) {
+            if (!syllables) {
+                // Might replace the last syllable with a
+                // terrain specific suffix
+                rnd = rng::get_random(400);
+                similar = TerrainDefs[reg->type].similar_type;
+                // Use forest names for underforest
+                if (similar == R_UFOREST)
+                    similar = R_FOREST;
+                // ocean (water) names for lakes
+                if (similar == R_LAKE)
+                    similar = R_OCEAN;
+                // and plains names for cavern
+                if (similar == R_CAVERN)
+                    similar = R_PLAIN;
+                for (u = 0; u < sizeof(ts) / sizeof(ts[0]); u++) {
+                    if (ts[u].terrain == similar ||
+                            ts[u].terrain == -1 ||
+                            (ts[u].town && town) ||
+                            (ts[u].port && port)) {
+                        if (rnd >= ts[u].prob)
+                            rnd -= ts[u].prob;
+                        else {
+                            if (trail) {
+                                switch(ts[u].word[0]) {
+                                    case 'a':
+                                    case 'e':
+                                    case 'i':
+                                    case 'o':
+                                    case 'u':
+                                        temp += "'";
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            temp += ts[u].word;
+                            break;
+                        }
+                    }
+                }
+                if (u < sizeof(ts) / sizeof(ts[0])) break;
+            }
+            if (rng::get_random(5) > 0) {
+                // 4 out of 5 syllables start with a consonant sequence
+                rnd = rng::get_random(tIC);
+                for (i = 0; rnd >= ic[i].prob; i++)
+                    rnd -= ic[i].prob;
+                temp += ic[i].word;
+            } else if (trail) {
+                // separate adjacent vowels
+                temp += "'";
+            }
+            // All syllables have a vowel sequence
+            rnd = rng::get_random(tV);
+            for (i = 0; rnd >= v[i].prob; i++)
+                rnd -= v[i].prob;
+            temp += v[i].word;
+            if (rng::get_random(5) > 1) {
+                // 3 out of 5 syllables end with a consonant sequence
+                rnd = rng::get_random(tFC);
+                for (i = 0; rnd >= fc[i].prob; i++)
+                    rnd -= fc[i].prob;
+                temp += fc[i].word;
+                trail = 0;
+            } else {
+                trail = 1;
+            }
+        }
+        temp[0] = toupper(temp[0]);
+        unique = 1;
+        for(const auto& name: regionnames) {
+            if (name == temp) {
+                unique = 0;
+                break;
+            }
+        }
+        if (temp.length() > 12) unique = 0;
+    }
 
-	nnames++;
-	if (town)
-		ntowns++;
-	else
-		nregions++;
+    nnames++;
+    if (town)
+        ntowns++;
+    else
+        nregions++;
 
-	regionnames.push_back(temp);
+    regionnames.push_back(temp);
 
-	return regionnames.size();
+    return regionnames.size();
 }
 
 const std::string& AGetNameString(int name)
 {
-	static const std::string errorName = "Error";
-	if (name <= 0 || name > (int) regionnames.size()) return errorName;
-	return regionnames[name-1];
+    static const std::string errorName = "Error";
+    if (name <= 0 || name > (int) regionnames.size()) return errorName;
+    return regionnames[name-1];
 }
 
 void Game::CreateWorld()
 {
-	int nx = 0;
-	int ny = 1;
-	parser::string_parser parser;
-	if (Globals->MULTI_HEX_NEXUS) {
-		ny = 2;
-		while(nx <= 0) {
-			Awrite("How many hexes should the nexus region be?");
-			std::cin >> parser;
-			auto token = parser.get_token();
-			nx = token.get_number().value_or(-1);
-			if (nx <= 0) continue;
-			if (nx == 1) ny = 1;
-			else if (nx % 2) {
-				nx = 0;
-				Awrite("The width must be a multiple of 2.");
-			}
-		}
-	} else {
-		nx = 1;
-	}
+    int nx = 0;
+    int ny = 1;
+    parser::string_parser parser;
+    if (Globals->MULTI_HEX_NEXUS) {
+        ny = 2;
+        while(nx <= 0) {
+            logger::write("How many hexes should the nexus region be?");
+            std::cin >> parser;
+            auto token = parser.get_token();
+            nx = token.get_number().value_or(-1);
+            if (nx <= 0) continue;
+            if (nx == 1) ny = 1;
+            else if (nx % 2) {
+                nx = 0;
+                logger::write("The width must be a multiple of 2.");
+            }
+        }
+    } else {
+        nx = 1;
+    }
 
-	int xx = 0;
-	while (xx <= 0) {
-		Awrite("How wide should the map be? ");
-		std::cin >> parser;
-		auto token = parser.get_token();
-		xx = token.get_number().value_or(-1);
-		if (xx <= 0) continue;
-		if (xx % 8) {
-			xx = 0;
-			Awrite("The width must be a multiple of 8.");
-		}
-	}
-	int yy = 0;
-	while (yy <= 0) {
-		Awrite("How tall should the map be? ");
-		std::cin >> parser;
-		auto token = parser.get_token();
-		yy = token.get_number().value_or(-1);
-		if (yy <= 0) continue;
-		if (yy % 8) {
-			yy = 0;
-			Awrite("The height must be a multiple of 8.");
-		}
-	}
+    int xx = 0;
+    while (xx <= 0) {
+        logger::write("How wide should the map be? ");
+        std::cin >> parser;
+        auto token = parser.get_token();
+        xx = token.get_number().value_or(-1);
+        if (xx <= 0) continue;
+        if (xx % 8) {
+            xx = 0;
+            logger::write("The width must be a multiple of 8.");
+        }
+    }
+    int yy = 0;
+    while (yy <= 0) {
+        logger::write("How tall should the map be? ");
+        std::cin >> parser;
+        auto token = parser.get_token();
+        yy = token.get_number().value_or(-1);
+        if (yy <= 0) continue;
+        if (yy % 8) {
+            yy = 0;
+            logger::write("The height must be a multiple of 8.");
+        }
+    }
 
-	regions.CreateLevels(2 + Globals->UNDERWORLD_LEVELS +
-			Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL);
+    regions.CreateLevels(2 + Globals->UNDERWORLD_LEVELS +
+            Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL);
 
-	SetupNames();
+    SetupNames();
 
-	regions.CreateNexusLevel( 0, nx, ny, "nexus" );
-	regions.CreateSurfaceLevel( 1, xx, yy, 0 );
+    regions.CreateNexusLevel( 0, nx, ny, "nexus" );
+    regions.CreateSurfaceLevel( 1, xx, yy, 0 );
 
-	// Create underworld levels
-	int i;
-	for (i = 2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
-		int xs = regions.GetLevelXScale(i);
-		int ys = regions.GetLevelYScale(i);
-		regions.CreateUnderworldLevel(i, xx/xs, yy/ys, "underworld");
-	}
-	// Underdeep levels
-	for (i=Globals->UNDERWORLD_LEVELS+2;
-			i<(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2); i++) {
-		int xs = regions.GetLevelXScale(i);
-		int ys = regions.GetLevelYScale(i);
-		regions.CreateUnderdeepLevel(i, xx/xs, yy/ys, "underdeep");
-	}
+    // Create underworld levels
+    int i;
+    for (i = 2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+        int xs = regions.GetLevelXScale(i);
+        int ys = regions.GetLevelYScale(i);
+        regions.CreateUnderworldLevel(i, xx/xs, yy/ys, "underworld");
+    }
+    // Underdeep levels
+    for (i=Globals->UNDERWORLD_LEVELS+2;
+            i<(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2); i++) {
+        int xs = regions.GetLevelXScale(i);
+        int ys = regions.GetLevelYScale(i);
+        regions.CreateUnderdeepLevel(i, xx/xs, yy/ys, "underdeep");
+    }
 
-	if (Globals->ABYSS_LEVEL) {
-		regions.CreateAbyssLevel(Globals->UNDERWORLD_LEVELS +
-				Globals->UNDERDEEP_LEVELS + 2, "abyss");
-	}
+    if (Globals->ABYSS_LEVEL) {
+        regions.CreateAbyssLevel(Globals->UNDERWORLD_LEVELS +
+                Globals->UNDERDEEP_LEVELS + 2, "abyss");
+    }
 
-	CountNames();
+    CountNames();
 
-	if (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS == 1) {
-		regions.MakeShaftLinks( 2, 1, 8 );
-	} else if (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS) {
-		int i, ii;
-		// shafts from surface to underworld
-		regions.MakeShaftLinks(2, 1, 10);
-		for (i=3; i<Globals->UNDERWORLD_LEVELS+2; i++) {
-			regions.MakeShaftLinks(i, 1, 10*i-10);
-		}
-		// Shafts from underworld to underworld
-		if (Globals->UNDERWORLD_LEVELS > 1) {
-			for (i = 3; i < Globals->UNDERWORLD_LEVELS+2; i++) {
-				for (ii = 2; ii < i; ii++) {
-					if (i == ii+1) {
-						regions.MakeShaftLinks(i, ii, 12);
-					} else {
-						regions.MakeShaftLinks(i, ii, 24);
-					}
-				}
-			}
-		}
-		// underdeeps to underworld
-		if (Globals->UNDERDEEP_LEVELS && Globals->UNDERWORLD_LEVELS) {
-			// Connect the topmost of the underdeep to the bottommost
-			// underworld
-			regions.MakeShaftLinks(Globals->UNDERWORLD_LEVELS+2,
-					Globals->UNDERWORLD_LEVELS+1, 12);
-		}
-		// Now, connect the underdeep levels together
-		if (Globals->UNDERDEEP_LEVELS > 1) {
-			for (i = Globals->UNDERWORLD_LEVELS+3;
-					i < Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2;
-					i++) {
-				for (ii = Globals->UNDERWORLD_LEVELS+2; ii < i; ii++) {
-					if (i == ii+1) {
-						regions.MakeShaftLinks(i, ii, 12);
-					} else {
-						regions.MakeShaftLinks(i, ii, 25);
-					}
-				}
-			}
-		}
-	}
+    if (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS == 1) {
+        regions.MakeShaftLinks( 2, 1, 8 );
+    } else if (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS) {
+        int i, ii;
+        // shafts from surface to underworld
+        regions.MakeShaftLinks(2, 1, 10);
+        for (i=3; i<Globals->UNDERWORLD_LEVELS+2; i++) {
+            regions.MakeShaftLinks(i, 1, 10*i-10);
+        }
+        // Shafts from underworld to underworld
+        if (Globals->UNDERWORLD_LEVELS > 1) {
+            for (i = 3; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+                for (ii = 2; ii < i; ii++) {
+                    if (i == ii+1) {
+                        regions.MakeShaftLinks(i, ii, 12);
+                    } else {
+                        regions.MakeShaftLinks(i, ii, 24);
+                    }
+                }
+            }
+        }
+        // underdeeps to underworld
+        if (Globals->UNDERDEEP_LEVELS && Globals->UNDERWORLD_LEVELS) {
+            // Connect the topmost of the underdeep to the bottommost
+            // underworld
+            regions.MakeShaftLinks(Globals->UNDERWORLD_LEVELS+2,
+                    Globals->UNDERWORLD_LEVELS+1, 12);
+        }
+        // Now, connect the underdeep levels together
+        if (Globals->UNDERDEEP_LEVELS > 1) {
+            for (i = Globals->UNDERWORLD_LEVELS+3;
+                    i < Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2;
+                    i++) {
+                for (ii = Globals->UNDERWORLD_LEVELS+2; ii < i; ii++) {
+                    if (i == ii+1) {
+                        regions.MakeShaftLinks(i, ii, 12);
+                    } else {
+                        regions.MakeShaftLinks(i, ii, 25);
+                    }
+                }
+            }
+        }
+    }
 
-	regions.SetACNeighbors( 0, 1, xx, yy );
+    regions.SetACNeighbors( 0, 1, xx, yy );
 
-	regions.InitSetupGates( 1 );
-	// Set up gates on all levels of the underworld
-	for (int i=2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
-		regions.InitSetupGates( i );
-	}
-	// Underdeep has no gates, only the possible shafts above.
+    regions.InitSetupGates( 1 );
+    // Set up gates on all levels of the underworld
+    for (int i=2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
+        regions.InitSetupGates( i );
+    }
+    // Underdeep has no gates, only the possible shafts above.
 
-	regions.FixUnconnectedRegions();
+    regions.FixUnconnectedRegions();
 
-	regions.FinalSetupGates();
+    regions.FinalSetupGates();
 
-	regions.CalcDensities();
+    regions.CalcDensities();
 
-	regions.TownStatistics();
+    regions.TownStatistics();
 
-	regions.ResourcesStatistics();
+    regions.ResourcesStatistics();
 }
 
 int ARegionList::GetRegType( ARegion *pReg )
 {
-	//
-	// Figure out the distance from the equator, from 0 to 3.
-	//
-	// Note that the -3 applied to y here is because I'm assuming we're using
-	// icosahedral levels, which don't quite fill their y-space
-	int lat = ( pReg->yloc * 8 ) / ( pRegionArrays[ pReg->zloc ]->y);
-	if (lat > 3)
-	{
-		lat = (7 - lat);
-	}
-	if (lat < 0) lat = 0;
+    //
+    // Figure out the distance from the equator, from 0 to 3.
+    //
+    // Note that the -3 applied to y here is because I'm assuming we're using
+    // icosahedral levels, which don't quite fill their y-space
+    int lat = ( pReg->yloc * 8 ) / ( pRegionArrays[ pReg->zloc ]->y);
+    if (lat > 3)
+    {
+        lat = (7 - lat);
+    }
+    if (lat < 0) lat = 0;
 
-	// Underworld region
-	if ((pReg->zloc > 1) && (pReg->zloc < Globals->UNDERWORLD_LEVELS+2)) {
-		int r = rng::get_random(4);
-		switch (r) {
-			case 0:
-				return R_OCEAN;
-			case 1:
-				return R_CAVERN;
-			case 2:
-				return R_UFOREST;
-			case 3:
-				return R_TUNNELS;
-			default:
-				return( 0 );
-		}
-	}
+    // Underworld region
+    if ((pReg->zloc > 1) && (pReg->zloc < Globals->UNDERWORLD_LEVELS+2)) {
+        int r = rng::get_random(4);
+        switch (r) {
+            case 0:
+                return R_OCEAN;
+            case 1:
+                return R_CAVERN;
+            case 2:
+                return R_UFOREST;
+            case 3:
+                return R_TUNNELS;
+            default:
+                return( 0 );
+        }
+    }
 
-	// Underdeep region
-	if ((pReg->zloc > Globals->UNDERWORLD_LEVELS+1) &&
-			(pReg->zloc < Globals->UNDERWORLD_LEVELS+
-			 			  Globals->UNDERDEEP_LEVELS+2)) {
-		int r = rng::get_random(4);
-		switch(r) {
-			case 0:
-				return R_OCEAN;
-			case 1:
-				return R_CHASM;
-			case 2:
-				return R_DFOREST;
-			case 3:
-				return R_GROTTO;
-			default:
-				return (0);
-		}
-	}
+    // Underdeep region
+    if ((pReg->zloc > Globals->UNDERWORLD_LEVELS+1) &&
+            (pReg->zloc < Globals->UNDERWORLD_LEVELS+
+                          Globals->UNDERDEEP_LEVELS+2)) {
+        int r = rng::get_random(4);
+        switch(r) {
+            case 0:
+                return R_OCEAN;
+            case 1:
+                return R_CHASM;
+            case 2:
+                return R_DFOREST;
+            case 3:
+                return R_GROTTO;
+            default:
+                return (0);
+        }
+    }
 
-	// surface region
-	if ( pReg->zloc == 1 ) {
-		int r = rng::get_random(64);
-		switch (lat)
-		{
-		case 0: /* Arctic regions */
-			if (r < 32) return R_TUNDRA;
-			if (r < 40) return R_MOUNTAIN;
-			if (r < 48) return R_FOREST;
-			return R_PLAIN;
-		case 1: /* Colder regions */
-			if (r < 8) return R_TUNDRA;
-			if (r < 24) return R_PLAIN;
-			if (r < 40) return R_FOREST;
-			if (r < 48) return R_MOUNTAIN;
-			return R_SWAMP;
-		case 2: /* Warmer regions */
-			if (r < 16) return R_PLAIN;
-			if (r < 28) return R_FOREST;
-			if (r < 36) return R_MOUNTAIN;
-			if (r < 44) return R_SWAMP;
-			if (r < 52) return R_JUNGLE;
-			return R_DESERT;
-		case 3: /* tropical */
-			if (r < 16) return R_PLAIN;
-			if (r < 24) return R_MOUNTAIN;
-			if (r < 36) return R_SWAMP;
-			if (r < 48) return R_JUNGLE;
-			return R_DESERT;
-		}
-		return R_OCEAN;
-	}
+    // surface region
+    if ( pReg->zloc == 1 ) {
+        int r = rng::get_random(64);
+        switch (lat)
+        {
+        case 0: /* Arctic regions */
+            if (r < 32) return R_TUNDRA;
+            if (r < 40) return R_MOUNTAIN;
+            if (r < 48) return R_FOREST;
+            return R_PLAIN;
+        case 1: /* Colder regions */
+            if (r < 8) return R_TUNDRA;
+            if (r < 24) return R_PLAIN;
+            if (r < 40) return R_FOREST;
+            if (r < 48) return R_MOUNTAIN;
+            return R_SWAMP;
+        case 2: /* Warmer regions */
+            if (r < 16) return R_PLAIN;
+            if (r < 28) return R_FOREST;
+            if (r < 36) return R_MOUNTAIN;
+            if (r < 44) return R_SWAMP;
+            if (r < 52) return R_JUNGLE;
+            return R_DESERT;
+        case 3: /* tropical */
+            if (r < 16) return R_PLAIN;
+            if (r < 24) return R_MOUNTAIN;
+            if (r < 36) return R_SWAMP;
+            if (r < 48) return R_JUNGLE;
+            return R_DESERT;
+        }
+        return R_OCEAN;
+    }
 
-	if ( pReg->zloc == 0 )
-	{
-		//
-		// This really shouldn't ever get called.
-		//
-		return( R_NEXUS );
-	}
+    if ( pReg->zloc == 0 )
+    {
+        //
+        // This really shouldn't ever get called.
+        //
+        return( R_NEXUS );
+    }
 
-	//
-	// This really shouldn't get called either
-	//
-	return( R_OCEAN );
+    //
+    // This really shouldn't get called either
+    //
+    return( R_OCEAN );
 }
 
 int ARegionList::GetLevelXScale(int level)
 {
-	// Surface and nexus are unscaled
-	if (level < 2) return 1;
+    // Surface and nexus are unscaled
+    if (level < 2) return 1;
 
-	// If we only have one underworld level it's 1/2 size
-	if (Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
-		return 2;
+    // If we only have one underworld level it's 1/2 size
+    if (Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
+        return 2;
 
-	// We have multiple underworld levels
-	if (level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
-		// Topmost level is full size in x direction
-		if (level == 2) return 1;
-		// All other levels are 1/2 size
-		return 2;
-	}
-	if (level >= Globals->UNDERWORLD_LEVELS+2 &&
-			level < (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2)){
-		// Topmost underdeep level is 1/2 size
-		if (level == Globals->UNDERWORLD_LEVELS+2) return 2;
-		// All others are 1/4 size
-		return 4;
-	}
-	// We couldn't figure it out, assume not scaled.
-	return 1;
+    // We have multiple underworld levels
+    if (level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
+        // Topmost level is full size in x direction
+        if (level == 2) return 1;
+        // All other levels are 1/2 size
+        return 2;
+    }
+    if (level >= Globals->UNDERWORLD_LEVELS+2 &&
+            level < (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2)){
+        // Topmost underdeep level is 1/2 size
+        if (level == Globals->UNDERWORLD_LEVELS+2) return 2;
+        // All others are 1/4 size
+        return 4;
+    }
+    // We couldn't figure it out, assume not scaled.
+    return 1;
 }
 
 int ARegionList::GetLevelYScale(int level)
 {
-	// Surface and nexus are unscaled
-	if (level < 2) return 1;
+    // Surface and nexus are unscaled
+    if (level < 2) return 1;
 
-	// If we only have one underworld level it's 1/2 size
-	if (Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
-		return 2;
+    // If we only have one underworld level it's 1/2 size
+    if (Globals->UNDERWORLD_LEVELS == 1 && Globals->UNDERDEEP_LEVELS == 0)
+        return 2;
 
-	// We have multiple underworld levels
-	if (level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
-		// Topmost level is 1/2 size in the y direction
-		if (level == 2) return 2;
-		// Bottommost is 1/4 size in the y direction
-		if (level == Globals->UNDERWORLD_LEVELS+1) return 4;
-		// All others are 1/2 size in the y direction
-		return 2;
-	}
-	if (level >= Globals->UNDERWORLD_LEVELS+2 &&
-			level < (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2)){
-		// All underdeep levels are 1/4 size in the y direction.
-		return 4;
-	}
-	// We couldn't figure it out, assume not scaled.
-	return 1;
+    // We have multiple underworld levels
+    if (level >= 2 && level < Globals->UNDERWORLD_LEVELS+2) {
+        // Topmost level is 1/2 size in the y direction
+        if (level == 2) return 2;
+        // Bottommost is 1/4 size in the y direction
+        if (level == Globals->UNDERWORLD_LEVELS+1) return 4;
+        // All others are 1/2 size in the y direction
+        return 2;
+    }
+    if (level >= Globals->UNDERWORLD_LEVELS+2 &&
+            level < (Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2)){
+        // All underdeep levels are 1/4 size in the y direction.
+        return 4;
+    }
+    // We couldn't figure it out, assume not scaled.
+    return 1;
 }
 
 int ARegionList::CheckRegionExit(ARegion *pFrom, ARegion *pTo )
 {
-	if ((pFrom->zloc==1) ||
-		(pFrom->zloc>Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+1)) {
-		return( 1 );
-	}
+    if ((pFrom->zloc==1) ||
+        (pFrom->zloc>Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+1)) {
+        return( 1 );
+    }
 
-	int chance = 0;
-	if ( pFrom->type == R_CAVERN || pFrom->type == R_UFOREST ||
-		pTo->type == R_CAVERN || pTo->type == R_UFOREST )
-	{
-		chance = 25;
-	}
-	if ( pFrom->type == R_TUNNELS || pTo->type == R_TUNNELS)
-	{
-		chance = 50;
-	}
-	if (pFrom->type == R_GROTTO || pFrom->type == R_DFOREST ||
-	   pTo->type == R_GROTTO || pTo->type == R_DFOREST) {
-		// better connected underdeeps
-		chance = 40;
-	}
-	if (pFrom->type == R_CHASM || pTo->type == R_CHASM) {
-		chance = 60;
-	}
-	if (rng::get_random(100) < chance) {
-		return( 0 );
-	}
-	return( 1 );
+    int chance = 0;
+    if ( pFrom->type == R_CAVERN || pFrom->type == R_UFOREST ||
+        pTo->type == R_CAVERN || pTo->type == R_UFOREST )
+    {
+        chance = 25;
+    }
+    if ( pFrom->type == R_TUNNELS || pTo->type == R_TUNNELS)
+    {
+        chance = 50;
+    }
+    if (pFrom->type == R_GROTTO || pFrom->type == R_DFOREST ||
+       pTo->type == R_GROTTO || pTo->type == R_DFOREST) {
+        // better connected underdeeps
+        chance = 40;
+    }
+    if (pFrom->type == R_CHASM || pTo->type == R_CHASM) {
+        chance = 60;
+    }
+    if (rng::get_random(100) < chance) {
+        return( 0 );
+    }
+    return( 1 );
 }
 
 int ARegionList::GetWeather( ARegion *pReg, int month )
 {
-	if (pReg->zloc == 0)
-	{
-		return W_NORMAL;
-	}
+    if (pReg->zloc == 0)
+    {
+        return W_NORMAL;
+    }
 
-	if ( pReg->zloc > 1 )
-	{
-		return( W_NORMAL );
-	}
+    if ( pReg->zloc > 1 )
+    {
+        return( W_NORMAL );
+    }
 
-	int ysize = pRegionArrays[ 1 ]->y;
+    int ysize = pRegionArrays[ 1 ]->y;
 
-	if ((3*( pReg->yloc+1))/ysize == 0)
-	{
-		/* Northern third of the world */
-		if (month > 9 || month < 2)
-		{
-			return W_WINTER;
-		}
-		else
-		{
-			return W_NORMAL;
-		}
-	}
+    if ((3*( pReg->yloc+1))/ysize == 0)
+    {
+        /* Northern third of the world */
+        if (month > 9 || month < 2)
+        {
+            return W_WINTER;
+        }
+        else
+        {
+            return W_NORMAL;
+        }
+    }
 
-	if ((3*( pReg->yloc+1))/ysize == 1)
-	{
-		/* Middle third of the world */
-		if (month == 11 || month == 0 || month == 5 || month == 6)
-		{
-			return W_MONSOON;
-		}
-		else
-		{
-			return W_NORMAL;
-		}
-	}
+    if ((3*( pReg->yloc+1))/ysize == 1)
+    {
+        /* Middle third of the world */
+        if (month == 11 || month == 0 || month == 5 || month == 6)
+        {
+            return W_MONSOON;
+        }
+        else
+        {
+            return W_NORMAL;
+        }
+    }
 
-	if (month > 3 && month < 8)
-	{
-		/* Southern third of the world */
-		return W_WINTER;
-	}
-	else
-	{
-		return W_NORMAL;
-	}
+    if (month > 3 && month < 8)
+    {
+        /* Southern third of the world */
+        return W_WINTER;
+    }
+    else
+    {
+        return W_NORMAL;
+    }
 }
 
 int ARegion::CanBeStartingCity( ARegionArray *pRA )
 {
-	if (type == R_OCEAN) return 0;
-	if (!IsCoastal()) return 0;
-	if (town && town->pop == 5000) return 0;
+    if (type == R_OCEAN) return 0;
+    if (!IsCoastal()) return 0;
+    if (town && town->pop == 5000) return 0;
 
-	int regs = 0;
-	std::list<ARegion *> toconsider;
-	std::unordered_set<ARegion *> seen;
+    int regs = 0;
+    std::list<ARegion *> toconsider;
+    std::unordered_set<ARegion *> seen;
 
-	toconsider.push_back(this);
-	seen.insert(this);
+    toconsider.push_back(this);
+    seen.insert(this);
 
-	while (!toconsider.empty()) {
-		ARegion *reg = toconsider.front();
-		toconsider.pop_front();
-		for (int i=0; i<NDIRS; i++) {
-			ARegion * r2 = reg->neighbors[i];
-			if (!r2) continue;
-			if (r2->type == R_OCEAN) continue;
-			if (seen.find(r2) != seen.end()) continue;
-			regs++;
-			if (regs > 20) return 1;
-			toconsider.push_back(r2);
-			seen.insert(r2);
-		}
-	}
-	return 0;
+    while (!toconsider.empty()) {
+        ARegion *reg = toconsider.front();
+        toconsider.pop_front();
+        for (int i=0; i<NDIRS; i++) {
+            ARegion * r2 = reg->neighbors[i];
+            if (!r2) continue;
+            if (r2->type == R_OCEAN) continue;
+            if (seen.find(r2) != seen.end()) continue;
+            regs++;
+            if (regs > 20) return 1;
+            toconsider.push_back(r2);
+            seen.insert(r2);
+        }
+    }
+    return 0;
 }
 
 void ARegion::MakeStartingCity()
 {
-	if (!Globals->TOWNS_EXIST) return;
+    if (!Globals->TOWNS_EXIST) return;
 
-	if (Globals->GATES_EXIST) gate = -1;
+    if (Globals->GATES_EXIST) gate = -1;
 
-	if (town) delete town;
+    if (town) delete town;
 
-	add_town(TOWN_CITY);
+    add_town(TOWN_CITY);
 
-	if (!Globals->START_CITIES_EXIST) return;
+    if (!Globals->START_CITIES_EXIST) return;
 
-	town->hab = 125 * Globals->CITY_POP / 100;
-	while (town->pop < town->hab) town->pop += rng::get_random(200)+200;
-	town->dev = TownDevelopment();
+    town->hab = 125 * Globals->CITY_POP / 100;
+    while (town->pop < town->hab) town->pop += rng::get_random(200)+200;
+    town->dev = TownDevelopment();
 
-	float ratio;
-	for (auto& m : markets) delete m; // Free the allocated object
-	markets.clear(); // empty the vector.
+    float ratio;
+    for (auto& m : markets) delete m; // Free the allocated object
+    markets.clear(); // empty the vector.
 
-	Market *m;
-	if (Globals->START_CITIES_START_UNLIMITED) {
-		for (int i=0; i<NITEMS; i++) {
-			if ( ItemDefs[i].flags & ItemType::DISABLED ) continue;
-			if ( ItemDefs[ i ].type & IT_NORMAL ) {
-				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
-					continue;
-				m = new Market(Market::MarketType::M_BUY, i, (ItemDefs[i].baseprice * 5 / 2), -1, 5000, 5000, -1, -1);
-				markets.push_back(m);
-			}
-		}
-		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
-		// hack: include wage factor of 10 in float calculation above
-		m = new Market(Market::MarketType::M_BUY, race, (int)(Wages() * 4 * ratio), -1, 5000, 5000, -1, -1);
-		markets.push_back(m);
-		if (Globals->LEADERS_EXIST) {
-			ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
-			// hack: include wage factor of 10 in float calculation above
-			m = new Market(Market::MarketType::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), -1, 5000, 5000, -1, -1);
-			markets.push_back(m);
-		}
-	} else {
-		SetupCityMarket();
-		ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
-		// hack: include wage factor of 10 in float calculation above
-		/* Setup Recruiting */
-		m = new Market(
-			Market::MarketType::M_BUY, race, (int)(Wages() * 4 * ratio), Population() / 5, 0, 10000, 0, 2000
-		);
-		markets.push_back(m);
-		if ( Globals->LEADERS_EXIST ) {
-			ratio = ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
-			// hack: include wage factor of 10 in float calculation above
-			m = new Market(
-				Market::MarketType::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), Population() / 25, 0, 10000, 0, 400
-			);
-			markets.push_back(m);
-		}
-	}
+    Market *m;
+    if (Globals->START_CITIES_START_UNLIMITED) {
+        for (int i=0; i<NITEMS; i++) {
+            if ( ItemDefs[i].flags & ItemType::DISABLED ) continue;
+            if ( ItemDefs[ i ].type & IT_NORMAL ) {
+                if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)
+                    continue;
+                m = new Market(Market::MarketType::M_BUY, i, (ItemDefs[i].baseprice * 5 / 2), -1, 5000, 5000, -1, -1);
+                markets.push_back(m);
+            }
+        }
+        ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+        // hack: include wage factor of 10 in float calculation above
+        m = new Market(Market::MarketType::M_BUY, race, (int)(Wages() * 4 * ratio), -1, 5000, 5000, -1, -1);
+        markets.push_back(m);
+        if (Globals->LEADERS_EXIST) {
+            ratio=ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
+            // hack: include wage factor of 10 in float calculation above
+            m = new Market(Market::MarketType::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), -1, 5000, 5000, -1, -1);
+            markets.push_back(m);
+        }
+    } else {
+        SetupCityMarket();
+        ratio = ItemDefs[race].baseprice / ((float)Globals->BASE_MAN_COST * 10);
+        // hack: include wage factor of 10 in float calculation above
+        /* Setup Recruiting */
+        m = new Market(
+            Market::MarketType::M_BUY, race, (int)(Wages() * 4 * ratio), Population() / 5, 0, 10000, 0, 2000
+        );
+        markets.push_back(m);
+        if ( Globals->LEADERS_EXIST ) {
+            ratio = ItemDefs[I_LEADERS].baseprice/((float)Globals->BASE_MAN_COST * 10);
+            // hack: include wage factor of 10 in float calculation above
+            m = new Market(
+                Market::MarketType::M_BUY, I_LEADERS, (int)(Wages() * 4 * ratio), Population() / 25, 0, 10000, 0, 400
+            );
+            markets.push_back(m);
+        }
+    }
 }
 
 int ARegion::IsStartingCity() {
-	if (town && town->pop >= (Globals->CITY_POP * 120 / 100)) return 1;
-	return 0;
+    if (town && town->pop >= (Globals->CITY_POP * 120 / 100)) return 1;
+    return 0;
 }
 
 int ARegion::IsSafeRegion()
 {
-	if (type == R_NEXUS) return 1;
-	return( Globals->SAFE_START_CITIES && IsStartingCity() );
+    if (type == R_NEXUS) return 1;
+    return( Globals->SAFE_START_CITIES && IsStartingCity() );
 }
 
 ARegion *ARegionList::GetStartingCity( ARegion *AC,
-					int i,
-					int level,
-					int maxX,
-					int maxY )
+                    int i,
+                    int level,
+                    int maxX,
+                    int maxY )
 {
-	ARegionArray *pArr = pRegionArrays[ level ];
-	ARegion * reg = 0;
+    ARegionArray *pArr = pRegionArrays[ level ];
+    ARegion * reg = 0;
 
-	if ( pArr->x < maxX ) maxX = pArr->x;
-	if ( pArr->y < maxY ) maxY = pArr->y;
+    if ( pArr->x < maxX ) maxX = pArr->x;
+    if ( pArr->y < maxY ) maxY = pArr->y;
 
-	int tries = 0;
-	while (!reg && tries < 10000) {
-		//
-		// We'll just let AC exits be all over the map.
-		//
-		int x = rng::get_random( maxX );
-		int y = 2 * rng::get_random( maxY / 2 ) + x % 2;
+    int tries = 0;
+    while (!reg && tries < 10000) {
+        //
+        // We'll just let AC exits be all over the map.
+        //
+        int x = rng::get_random( maxX );
+        int y = 2 * rng::get_random( maxY / 2 ) + x % 2;
 
-		reg = pArr->GetRegion( x, y);
+        reg = pArr->GetRegion( x, y);
 
-		if (!reg || !reg->CanBeStartingCity( pArr )) {
-			reg = 0;
-			tries++;
-			continue;
-		}
+        if (!reg || !reg->CanBeStartingCity( pArr )) {
+            reg = 0;
+            tries++;
+            continue;
+        }
 
-		for (int j=0; j<i; j++) {
-			if (!AC->neighbors[j]) continue;
-			if (GetPlanarDistance(reg,AC->neighbors[j], 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
-				reg = 0;
-				tries++;
-				break;
-			}
-		}
-	}
+        for (int j=0; j<i; j++) {
+            if (!AC->neighbors[j]) continue;
+            if (GetPlanarDistance(reg,AC->neighbors[j], 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
+                reg = 0;
+                tries++;
+                break;
+            }
+        }
+    }
 
-	// Okay, we failed to find something that normally would work
-	// we'll just take anything that's of the right distance
-	tries = 0;
-	while (!reg && tries < 10000) {
-		//
-		// We couldn't find a normal starting city, let's just go for ANY
-		// city
-		//
-		int x = rng::get_random( maxX );
-		int y = 2 * rng::get_random( maxY / 2 ) + x % 2;
-		reg = pArr->GetRegion( x, y);
-		if (!reg || reg->type == R_OCEAN) {
-			tries++;
-			reg = 0;
-			continue;
-		}
+    // Okay, we failed to find something that normally would work
+    // we'll just take anything that's of the right distance
+    tries = 0;
+    while (!reg && tries < 10000) {
+        //
+        // We couldn't find a normal starting city, let's just go for ANY
+        // city
+        //
+        int x = rng::get_random( maxX );
+        int y = 2 * rng::get_random( maxY / 2 ) + x % 2;
+        reg = pArr->GetRegion( x, y);
+        if (!reg || reg->type == R_OCEAN) {
+            tries++;
+            reg = 0;
+            continue;
+        }
 
-		for (int j=0; j<i; j++) {
-			if (!AC->neighbors[j]) continue;
-			if (GetPlanarDistance(reg,AC->neighbors[j], 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
-				reg = 0;
-				tries++;
-				break;
-			}
-		}
-	}
+        for (int j=0; j<i; j++) {
+            if (!AC->neighbors[j]) continue;
+            if (GetPlanarDistance(reg,AC->neighbors[j], 0, maxY / 10 + 2) < maxY / 10 + 2 ) {
+                reg = 0;
+                tries++;
+                break;
+            }
+        }
+    }
 
-	// Okay, if we still don't have anything, we're done.
-	return reg;
+    // Okay, if we still don't have anything, we're done.
+    return reg;
 }
 

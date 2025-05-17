@@ -1,5 +1,5 @@
 #include "army.h"
-#include "gameio.h"
+#include "logger.hpp"
 #include "gamedata.h"
 #include "rng.hpp"
 
@@ -252,7 +252,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 
     /* Is this a monster? */
     if (ItemDefs[r].type & IT_MONSTER) {
-        auto mp = FindMonster(ItemDefs[r].abr, (ItemDefs[r].type & IT_ILLUSION))->get();
+        auto mp = FindMonster(ItemDefs[r].abr.c_str(), (ItemDefs[r].type & IT_ILLUSION))->get();
         if((u->type == U_WMON) || (ItemDefs[r].flags & ItemType::MANPRODUCE))
             name = AString(mp.name) + " in " + unit->name;
         else
@@ -395,7 +395,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
         // items will be skipped in the battle items setup and handled
         // here.
         if ((ItemDefs[weapon].type & IT_BATTLE) && special == NULL) {
-            auto pBat = FindBattleItem(ItemDefs[weapon].abr).value().get();
+            auto pBat = FindBattleItem(ItemDefs[weapon].abr.c_str())->get();
             special = pBat.special;
             slevel = pBat.skillLevel;
         }
@@ -521,19 +521,19 @@ void Soldier::SetupCombatItems()
     }
 }
 
-int Soldier::HasEffect(char const *eff)
+bool Soldier::has_effect(const std::string& effect)
 {
-    if (eff == NULL) return 0;
+    if (effect.empty()) return false;
 
-    return effects[eff];
+    return effects[effect];
 }
 
-void Soldier::SetEffect(char const *eff)
+void Soldier::set_effect(const std::string& effect)
 {
-    if (eff == NULL) return;
+    if (effect.empty()) return;
     int i;
 
-    auto e = FindEffect(eff);
+    auto e = FindEffect(effect.c_str());
     if (!e) return;
 
     askill += e->get().attackVal;
@@ -543,17 +543,17 @@ void Soldier::SetEffect(char const *eff)
             dskill[e->get().defMods[i].type] += e->get().defMods[i].val;
     }
 
-    if (e->get().cancelEffect != NULL) ClearEffect(e->get().cancelEffect);
+    if (e->get().cancelEffect != NULL) clear_effect(e->get().cancelEffect);
 
-    if (!(e->get().flags & EffectType::EFF_NOSET)) effects[eff] = 1;
+    if (!(e->get().flags & EffectType::EFF_NOSET)) effects[effect] = true;
 }
 
-void Soldier::ClearEffect(char const *eff)
+void Soldier::clear_effect(const std::string& effect)
 {
-    if (eff == NULL) return;
+    if (effect.empty()) return;
     int i;
 
-    auto e = FindEffect(eff);
+    auto e = FindEffect(effect.c_str());
     if (!e) return;
 
     askill -= e->get().attackVal;
@@ -563,20 +563,20 @@ void Soldier::ClearEffect(char const *eff)
             dskill[e->get().defMods[i].type] -= e->get().defMods[i].val;
     }
 
-    effects[eff] = 0;
+    effects[effect] = false;
 }
 
-void Soldier::ClearOneTimeEffects(void)
+void Soldier::clear_one_time_effects(void)
 {
     for (auto eff : EffectDefs) {
-        if (HasEffect(eff.name) && (eff.flags & EffectType::EFF_ONESHOT))
-            ClearEffect(eff.name);
+        if (has_effect(eff.name) && (eff.flags & EffectType::EFF_ONESHOT))
+            clear_effect(eff.name);
     }
 }
 
-bool Soldier::ArmorProtect(int weaponClass)
+bool Soldier::armor_protect(int weaponClass)
 {
-    auto armor_type = (armor > 0) ? FindArmor(ItemDefs[armor].abr) : std::nullopt;
+    auto armor_type = (armor > 0) ? FindArmor(ItemDefs[armor].abr.c_str()) : std::nullopt;
     if (!armor_type) return false;
     int chance = armor_type->get().saves[weaponClass];
 
@@ -792,7 +792,7 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
     }
 
     /* First, silver */
-    auto mp = FindMonster(ItemDefs[monitem].abr, (ItemDefs[monitem].type & IT_ILLUSION))->get();
+    auto mp = FindMonster(ItemDefs[monitem].abr.c_str(), (ItemDefs[monitem].type & IT_ILLUSION))->get();
     int silv = mp.silver;
     if ((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
         // Adjust the spoils for length of freedom.
@@ -1203,14 +1203,14 @@ int Army::GetEffectNum(char const *effect)
     int i, start = -1;
 
     for (i = 0; i < canfront; i++) {
-        if (soldiers[i]->HasEffect(effect)) {
+        if (soldiers[i]->has_effect(effect)) {
             validtargs++;
             // slight scan optimisation - skip empty initial sequences
             if (start == -1) start = i;
         }
     }
     for (i = canbehind; i < notfront; i++) {
-        if (soldiers[i]->HasEffect(effect)) {
+        if (soldiers[i]->has_effect(effect)) {
             validtargs++;
             // slight scan optimisation - skip empty initial sequences
             if (start == -1) start = i;
@@ -1220,7 +1220,7 @@ int Army::GetEffectNum(char const *effect)
         int targ = rng::get_random(validtargs);
         for (i = start; i < notfront; i++) {
             if (i == canfront) i = canbehind;
-            if (soldiers[i]->HasEffect(effect)) {
+            if (soldiers[i]->has_effect(effect)) {
                 if (!targ--) return i;
             }
         }
@@ -1268,7 +1268,7 @@ int Army::RemoveEffects(int num, char const *effect)
         //
         // Remove the effect
         //
-        tar->ClearEffect(effect);
+        tar->clear_effect(effect);
         ret++;
     }
     return(ret);
@@ -1351,7 +1351,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
         Soldier * tar = GetTarget(tarnum);
         int tarFlags = 0;
         if (tar->weapon != -1) {
-            auto weapon = FindWeapon(ItemDefs[tar->weapon].abr)->get();
+            auto weapon = FindWeapon(ItemDefs[tar->weapon].abr.c_str())->get();
             tarFlags = weapon.flags;
         }
 
@@ -1384,8 +1384,8 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 
         // 4.4 Check for weapon inflicted bonuses
         if (weaponIndex != -1 && tar->weapon != -1) {
-            auto attackerWeapon = FindWeapon(ItemDefs[weaponIndex].abr)->get();
-            auto targetWeapon = FindWeapon(ItemDefs[tar->weapon].abr)->get();
+            auto attackerWeapon = FindWeapon(ItemDefs[weaponIndex].abr.c_str())->get();
+            auto targetWeapon = FindWeapon(ItemDefs[tar->weapon].abr.c_str())->get();
 
             const WeaponBonusMalus *attackerBm = GetWeaponBonusMalus(attackerWeapon, targetWeapon);
             const WeaponBonusMalus *defenderBm = GetWeaponBonusMalus(targetWeapon, attackerWeapon);
@@ -1434,7 +1434,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
         /* 6. If attack got through, apply effect, or kill */
         if (effect == NULL) {
             /* 7. Last chance... Check armor */
-            if (tar->ArmorProtect(weaponClass)) {
+            if (tar->armor_protect(weaponClass)) {
                 attackers->stats.RecordAttackBlocked(attacker->unit->num, weaponIndex, sp);
                 continue;
             }
@@ -1456,10 +1456,10 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
                 }
             }
         } else {
-            if (tar->HasEffect(effect)) {
+            if (tar->has_effect(effect)) {
                 continue;
             }
-            tar->SetEffect(effect);
+            tar->set_effect(effect);
             ret++;
         }
     }
@@ -1483,7 +1483,7 @@ void Army::Kill(int killed, int damage)
     temp->unit->losses++;
     if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_FIGURE) {
         if (ItemDefs[temp->race].type & IT_MONSTER) {
-            auto mp = FindMonster(ItemDefs[temp->race].abr, (ItemDefs[temp->race].type & IT_ILLUSION))->get();
+            auto mp = FindMonster(ItemDefs[temp->race].abr.c_str(), (ItemDefs[temp->race].type & IT_ILLUSION))->get();
             hitsalive -= mp.hits;
         } else {
             // Assume everything that is a solder and isn't a monster is a

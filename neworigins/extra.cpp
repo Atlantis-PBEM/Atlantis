@@ -1,30 +1,3 @@
-// START A3HEADER
-//
-// This source file is part of the Atlantis PBM game program.
-// Copyright (C) 1995-1999 Geoff Dunbar
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program, in the file license.txt. If not, write
-// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-//
-// See the Atlantis Project web page for details:
-// http://www.prankster.com/project
-//
-// END A3HEADER
-//
-// This file contains extra game-specific functions
-//
 #include "game.h"
 #include "gamedata.h"
 #include "quests.h"
@@ -130,7 +103,7 @@ int Game::SetupFaction( Faction *pFac )
     if (Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
         // Try to auto-declare all player factions unfriendly
         // to Creatures, since all they do is attack you.
-        pFac->set_attitude(monfaction, A_UNFRIENDLY);
+        pFac->set_attitude(monfaction, AttitudeType::UNFRIENDLY);
     }
 
     return( 1 );
@@ -402,8 +375,7 @@ int report_and_count_empowered_altars(ARegionList& regions, std::list<Faction *>
                 count++;
                 for(const auto f : factions) {
                     if (f->is_npc) continue;
-                    f->event("The altar in " + string(r->ShortPrint().const_str()) + " is fully empowered.",
-                        "anomaly", r);
+                    f->event("The altar in " + r->short_print() + " is fully empowered.", "anomaly", r);
                 }
             }
         }
@@ -431,8 +403,7 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
     // notify all factions.
     for(const auto f : factions) {
         if (f->is_npc) continue;
-        f->event("The altar in " + string(o->region->ShortPrint().const_str()) + " is fully empowered.",
-            "anomaly", o->region);
+        f->event("The altar in " + o->region->short_print() + " is fully empowered.", "anomaly", o->region);
     }
 
     // find all current anomalies and entities
@@ -478,8 +449,7 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
             auto reg_faction = far_anomaly->region->PresentFactions();
             for(const auto f : reg_faction) {
                 if (f->is_npc) continue;
-                f->event("The anomaly in " + string(far_anomaly->region->ShortPrint().const_str()) + " vanishes.",
-                    "anomaly", far_anomaly->region);
+                f->event("The anomaly in " + far_anomaly->region->short_print() + " vanishes.", "anomaly", far_anomaly->region);
             }
             return;
         }
@@ -514,8 +484,7 @@ int report_and_count_anomalies(ARegionList& regions, std::list<Faction *>& facti
                 count++;
                 for(const auto f : factions) {
                     if (f->is_npc) continue;
-                    f->event("A strange anomaly has been seen in " + string(r->ShortPrint().const_str()) + ".",
-                        "anomaly", r);
+                    f->event("A strange anomaly has been seen in " + r->short_print() + ".", "anomaly", r);
                 }
             }
         }
@@ -532,9 +501,8 @@ int report_and_count_entities(ARegionList& regions, std::list<Faction *>& factio
                     count += u->items.GetNum(I_IMPRISONED_ENTITY);
                     for(const auto f : factions) {
                         if (f->is_npc) continue;
-                        f->event("An imprisoned entity has been spotted in " + string(r->ShortPrint().const_str()) +
-                            " in the possession of " + string(u->GetName(0).const_str()) + ".",
-                            "anomaly", r);
+                        f->event("An imprisoned entity has been spotted in " + r->short_print() +
+                            " in the possession of " + u->GetName(0).const_str() + ".", "anomaly", r);
                     }
                 }
             }
@@ -744,8 +712,7 @@ Faction *Game::CheckVictory()
             for(const auto r : regions) {
                 if (r->Population() > 0 && !r->visited) {
                     if (!count--) {
-                        message = "The people of the ";
-                        message += r->ShortPrint();
+                        message = "The people of the " + r->short_print();
                         switch (rng::get_random(4)) {
                             case 0:
                                 message += " have not been visited by exiles.";
@@ -954,8 +921,8 @@ Faction *Game::CheckVictory()
         // existing.
         if (completed_entities < 6) {
             int chance = 10 + (completed_entities * 12);
-            Awrite(AString("Endgame: entities: ") + completed_entities + ", anomalies: " + anomalies +
-                ", chance: " + chance + "%");
+            logger::write("Endgame: entities: " + std::to_string(completed_entities) + ", anomalies: " +
+                std::to_string(anomalies) + ", chance: " + std::to_string(chance) + "%");
             if (rng::get_random(100) < chance) {
                 // Okay, let's see if we can spawn a new entity
                 // If we can, see if we already have those anomalies and report them to all factions if so.
@@ -1001,10 +968,9 @@ Faction *Game::CheckVictory()
                 // Now tell all the factions about it.
                 for(const auto f : factions) {
                     if (f->is_npc) continue;
-                    f->event("A strange anomaly has appeared in " + string(r->ShortPrint().const_str()) + ".",
-                        "anomaly", r);
+                    f->event("A strange anomaly has appeared in " + r->short_print() + ".", "anomaly", r);
                 }
-                Awrite(AString("Spawned new anomaly at ") + r->ShortPrint() + ".");
+                logger::write("Spawned new anomaly at " + r->short_print() + ".");
             }
 
             // If we haven't completed all the entities, then noone can win yet.
@@ -1013,7 +979,7 @@ Faction *Game::CheckVictory()
 
         // We have all entities completed, but.. have all altars been empowered?  if not, nooone can win yet.
         if (empowered_altars < 6) {
-            Awrite(AString("Only ") + empowered_altars + " altars have been empowered, no winner yet.");
+            logger::write("Only " + std::to_string(empowered_altars) + " altars have been empowered, no winner yet.");
             return nullptr;
         }
 
@@ -1039,14 +1005,14 @@ Faction *Game::CheckVictory()
         if (!winner) {
             if (TurnNumber() < 100) {
                 // If it's before turn 100, we can't declare a winner yet
-                Awrite(AString("No monolith owner found, no winner yet."));
+                logger::write("No monolith owner found, no winner yet.");
                 return nullptr;
             }
             // If the monolith is unowned on turn 100 or later, the monsters win.
             return GetFaction(factions, monfaction); // monsters win
         }
 
-        Awrite(AString("Checking for winner: ") + string(winner->name));
+        logger::write("Checking for winner: " + winner->name);
         // Ok, we have a possible winner, check for sufficient alive factions mutually allied to the monolith owner.
         int allied_count = 0;
         int total_factions = 0;
@@ -1055,18 +1021,18 @@ Faction *Game::CheckVictory()
             if (f == winner) continue;
             total_factions++;
             // This faction is not allied to the monolith owner, so they don't count
-            if (f->get_attitude(winner->num) != A_ALLY) continue;
+            if (f->get_attitude(winner->num) != AttitudeType::ALLY) continue;
             // The winner is not allied to this faction, so they don't count;
-            if (winner->get_attitude(f->num) != A_ALLY) continue;
+            if (winner->get_attitude(f->num) != AttitudeType::ALLY) continue;
             allied_count++;
         }
 
         int needed_percent = rulesetSpecificData.value("allied_percent", 100);
         int current_percent = (allied_count * 100) / total_factions;
-        Awrite(AString("Factions allied: ") + allied_count + "/" + total_factions + " (" + current_percent +
-            "% out of " + needed_percent + "%)");
+        logger::write("Factions allied: " + std::to_string(allied_count) + "/" + std::to_string(total_factions) + " (" +
+            std::to_string(current_percent) + "% out of " + std::to_string(needed_percent) + "%)");
         if (current_percent >= needed_percent) {
-            Awrite(AString("Enough factions allied to the monolith owner, so they win."));
+            logger::write("Enough factions allied to the monolith owner, so they win.");
             // We have enough factions allied to the monolith owner, so they win.
             return winner;
         }
@@ -1082,15 +1048,15 @@ Faction *Game::CheckVictory()
 
         int needed_surface = rulesetSpecificData.value("annihilate_percent", 100);
         int current_surface = (total_annihilated * 100) / total_surface;
-        Awrite(AString("Surface annihilated: ") + total_annihilated + "/" + total_surface + " (" + current_surface +
-            "% out of " + needed_surface + "%)");
+        logger::write("Surface annihilated: " + std::to_string(total_annihilated) + "/" + std::to_string(total_surface) +
+            " (" + std::to_string(current_surface) + "% out of " + std::to_string(needed_surface) + "%)");
         if (current_surface >= needed_surface) {
-            Awrite(AString("Sufficient surface annihilated, so the monolith owner wins."));
+            logger::write("Sufficient surface annihilated, so the monolith owner wins.");
             // The surface has been sufficiently destroyed, so the monolith owner wins.
             return winner;
         }
         // No winner yet, so clear the potential winner and return null.
-        Awrite(AString("No winner yet."));
+        logger::write("No winner yet.");
         winner = nullptr;
     }
 
@@ -1607,7 +1573,7 @@ void Game::ModifyTablesPerRuleset(void)
     return;
 }
 
-const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList& regions) {
+const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList& regions) {
     ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
     ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
 
@@ -1631,5 +1597,5 @@ const char *ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARe
             return "A mystical barrier";
         }
     }
-    return nullptr;
+    return std::nullopt;
 }

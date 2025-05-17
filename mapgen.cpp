@@ -1,31 +1,6 @@
-// START A3HEADER
-//
-// This source file is part of the Atlantis PBM game program.
-// Copyright (C) 2022 Valdis Zobēla
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program, in the file license.txt. If not, write
-// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-//
-// See the Atlantis Project web page for details:
-// http://www.prankster.com/project
-//
-// END A3HEADER
-
 #include "mapgen.h"
 #include "simplex.h"
-
+#include "logger.hpp"
 #include <vector>
 #include <map>
 #include <queue>
@@ -111,7 +86,7 @@ bool Biome::match(const Cell* cell) const {
 }
 
 CellGraph::CellGraph(CellMap* map) {
-	this->map = map;
+    this->map = map;
 }
 
 CellGraph::~CellGraph() {
@@ -160,7 +135,7 @@ CellMap::CellMap(int width, int height) {
 
     int len = width * height;
     items.reserve(len);
-    
+
     for (int i = 0; i < len; i++) {
         int x;
         int y;
@@ -248,7 +223,7 @@ double saturation(int temperature) {
     // if (temperature < 0) {
     //     S = pow(S, -temperature / 16.0 + 1.0);
     // }
-    
+
     return S;
 }
 
@@ -370,7 +345,7 @@ Map::Map(int width, int height) : map(CellMap(width, height)) {
     amplitude = 0.5;
     redistribution = 1.0;
     evoparation = 1.0;
-    
+
     waterPercent = 0.2;
     mountainPercent = 0.2;
 }
@@ -433,16 +408,16 @@ void Map::Generate() {
         double ny = (double) cell->y / map.height;
 
         double e = pow((noise->cylinderFractal(3, nx, ny) + 1.0) / 2.0, redistribution);
-        
+
         cell->elevation = round(e * ELEVATION);
         minElevation = std::min(minElevation, cell->elevation);
         maxElevation = std::max(maxElevation, cell->elevation);
-        
+
         ++hist[cell->elevation];
     }
 
     // 1. determine sea level
-    std::cout << "1. determine sea level" << std::endl;
+    logger::write("1. determine sea level");
 
     int maxWaterCells = len * waterPercent;
     int waterCells = 0;
@@ -472,7 +447,7 @@ void Map::Generate() {
 
 
     // 2. determine water and mountains
-    std::cout << "2. determine water and mountains" << std::endl;
+    logger::write("2. determine water and mountains");
 
     for (auto item : map.items) {
         if (item->biome != B_UNKNOWN) {
@@ -491,7 +466,7 @@ void Map::Generate() {
 
 
     // 3. temperature and moisture saturation
-    std::cout << "3. temperature and moisture saturation" << std::endl;
+    logger::write("3. temperature and moisture saturation");
 
     const double halfHeight = map.height / 2.0;
     for (auto item : map.items) {
@@ -501,7 +476,7 @@ void Map::Generate() {
         double lat = ((halfHeight - item->y) / halfHeight) * 90.0;
         int tempElevation = isWater ? 0 : item->elevation;
 
-        
+
         item->temperature = round(temperature(minTemp, maxTemp, degToRad(/* 23.5 */ 0), degToRad(lat), tempElevation));
         item->temperature = std::min(MAX_TEMP, std::max(MIN_TEMP, item->temperature));
         item->saturation = round(saturation(item->temperature));
@@ -516,7 +491,7 @@ void Map::Generate() {
 
 
     // 4. rain
-    std::cout << "4. rain" << std::endl;
+    logger::write("4. rain");
 
     /*
         Each cell can produce certain amount of moisture via evaporation.
@@ -540,7 +515,7 @@ void Map::Generate() {
     }
 
     // 5. biomes
-    std::cout << "5. biomes" << std::endl;
+    logger::write("5. biomes");
 
     // assign biomes
     for (auto item : map.items) {
@@ -558,11 +533,11 @@ void Map::Generate() {
         }
 
         if (biome == NULL) {
-            std::cout << "NO BIOME for [" << item->x << ", " << item->y << "]"
-                      << " " << item->elevation << "m"
-                      << ", " << item->temperature << "°C"
-                      << ", " << item->rainfall << "mm"
-                      << std::endl;
+            logger::write(
+                "NO BIOME for [" + std::to_string(item->x) + ", " + std::to_string(item->y) + "]" + " " +
+                std::to_string(item->elevation) + "m" + ", " + std::to_string(item->temperature) + "°C" +
+                ", " + std::to_string(item->rainfall) + "mm"
+            );
 
             exit(1);
         }
@@ -584,16 +559,15 @@ void Map::Generate() {
                 }
             }
 
-            std::cout << biome->name
-                      << " [" << item->x << ", " << item->y << "]"
-                      << " " << item->elevation << "m"
-                      << ", " << item->temperature << "°C"
-                      << ", " << item->rainfall << "mm"
-                      << std::endl;
+            logger::write(
+                std::to_string(biome->name) + " [" + std::to_string(item->x) + ", " + std::to_string(item->y) + "]" +
+                " " + std::to_string(item->elevation) + "m" + ", " + std::to_string(item->temperature) + "°C" + ", " +
+                std::to_string(item->rainfall) + "mm"
+            );
         }
     }
 
-    std::cout << unknown << " B_UNKNOWN" << std::endl;
+    logger::write(std::to_string(unknown) + " B_UNKNOWN");
 
-    std::cout << "DONE" << std::endl;
+    logger::write("DONE");
 }

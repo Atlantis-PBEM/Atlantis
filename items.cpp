@@ -709,7 +709,7 @@ AString *ItemDescription(int item, int full)
     *temp += ".";
 
     if (ItemDefs[item].type & IT_MAN) {
-        auto mt = FindRace(ItemDefs[item].abr)->get();
+        auto mt = FindRace(ItemDefs[item].abr.c_str())->get();
         AString mani = "MANI";
         AString last = "";
         int found = 0;
@@ -755,7 +755,7 @@ AString *ItemDescription(int item, int full)
 
     if ((ItemDefs[item].type & IT_MONSTER) && !(ItemDefs[item].flags & ItemType::MANPRODUCE)) {
         *temp += " This is a monster.";
-        auto monster = FindMonster(ItemDefs[item].abr, (ItemDefs[item].type & IT_ILLUSION))->get();
+        auto monster = FindMonster(ItemDefs[item].abr.c_str(), (ItemDefs[item].type & IT_ILLUSION))->get();
         *temp += AString(" This monster attacks with a combat skill of ") + monster.attackLevel;
 
         for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
@@ -888,7 +888,7 @@ AString *ItemDescription(int item, int full)
 
     if(ItemDefs[item].flags & ItemType::MANPRODUCE) {
         *temp += " This is a free-moving-item (FMI).";
-        auto monster = FindMonster(ItemDefs[item].abr, (ItemDefs[item].type & IT_ILLUSION))->get();
+        auto monster = FindMonster(ItemDefs[item].abr.c_str(), (ItemDefs[item].type & IT_ILLUSION))->get();
         *temp += AString(" This FMI attacks with a combat skill of ") + monster.attackLevel + ".";
 
         for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
@@ -941,7 +941,7 @@ AString *ItemDescription(int item, int full)
     }
 
     if (ItemDefs[item].type & IT_WEAPON) {
-        auto weapon = FindWeapon(ItemDefs[item].abr)->get();
+        auto weapon = FindWeapon(ItemDefs[item].abr.c_str())->get();
         *temp += " This is a ";
         *temp += WeapType(weapon.flags, weapon.weapClass) + " weapon and each " + AttackDamageDescription(weapon.hitDamage) + ".";
         if (weapon.flags & WeaponType::NEEDSKILL) {
@@ -1032,7 +1032,7 @@ AString *ItemDescription(int item, int full)
             if (atts > 0) {
                 if (atts >= WeaponType::NUM_ATTACKS_HALF_SKILL) {
                     int max = WeaponType::NUM_ATTACKS_HALF_SKILL;
-                    char const *attd = "half the skill level (rounded up)";
+                    std::string attd = "half the skill level (rounded up)";
                     if (atts >= WeaponType::NUM_ATTACKS_SKILL) {
                         max = WeaponType::NUM_ATTACKS_SKILL;
                         attd = "the skill level";
@@ -1081,7 +1081,7 @@ AString *ItemDescription(int item, int full)
 
     if (ItemDefs[item].type & IT_ARMOR) {
         *temp += " This is a type of armor.";
-        auto armor = FindArmor(ItemDefs[item].abr)->get();
+        auto armor = FindArmor(ItemDefs[item].abr.c_str())->get();
         *temp += " This armor will protect its wearer ";
         for (i = 0; i < NUM_WEAPON_CLASSES; i++) {
             if (i == NUM_WEAPON_CLASSES - 1) {
@@ -1167,7 +1167,7 @@ AString *ItemDescription(int item, int full)
 
     if (ItemDefs[item].type & IT_MOUNT) {
         *temp += " This is a mount.";
-        auto mount = FindMount(ItemDefs[item].abr).value().get();
+        auto mount = FindMount(ItemDefs[item].abr.c_str()).value().get();
         if (mount.skill == NULL) {
             *temp += " No skill is required to use this mount.";
         } else {
@@ -1390,7 +1390,7 @@ AString *ItemDescription(int item, int full)
 
     if (ItemDefs[item].type & IT_BATTLE) {
         *temp += " This item is a miscellaneous combat item.";
-        auto bt = FindBattleItem(ItemDefs[item].abr);
+        auto bt = FindBattleItem(ItemDefs[item].abr.c_str());
         if (bt) {
             if (bt->get().flags & BattleItemType::MAGEONLY) {
                 *temp += " This item may only be used by a mage";
@@ -1562,7 +1562,7 @@ AString ItemList::BattleReport()
             temp += ", ";
             temp += i->Report(0);
             if (ItemDefs[i->type].type & IT_MONSTER) {
-                auto monster = FindMonster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
+                auto monster = FindMonster(ItemDefs[i->type].abr.c_str(), (ItemDefs[i->type].type & IT_ILLUSION))->get();
                 temp += AString(" (Combat ") + monster.attackLevel +
                     "/" + monster.defense[ATTACK_COMBAT] + ", Attacks " +
                     monster.numAttacks + ", Hits " + monster.hits +
@@ -1684,7 +1684,7 @@ bool ManType::CanUse(int item)
 
     // Check if the item is an armor
     if (ItemDefs[item].type & IT_ARMOR) {
-        auto armor = FindArmor(ItemDefs[item].abr)->get();
+        auto armor = FindArmor(ItemDefs[item].abr.c_str())->get();
         int p = armor.from / armor.saves[3];
         if (p > 4) {
             // puny armor not used by combative races

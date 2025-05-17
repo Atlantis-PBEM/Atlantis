@@ -287,7 +287,7 @@ ut::suite<"JSON Report"> json_report_suite = []
 
     // Get a report for each region so we can verify that fleet data is correct for owners and non-owners.
     json json_unit_report;
-    leader->build_json_report(json_unit_report, -1, 1, 1, 1, A_ALLY, 1);
+    leader->build_json_report(json_unit_report, -1, 1, 1, 1, AttitudeType::ALLY, 1);
 
     string name = json_unit_report["name"];
     string expected_name = "My Leader";

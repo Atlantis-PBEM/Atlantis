@@ -1,4 +1,6 @@
 #pragma once
+#ifndef STRING_FILTERS_HPP
+#define STRING_FILTERS_HPP
 
 #include <string>
 #include <algorithm>
@@ -6,6 +8,10 @@
 #include <cstring>
 #include <iterator>
 #include <unordered_set>
+#include <vector>
+#include <ranges>
+#include <string_view>
+#include "strings_util.hpp"
 
 namespace filter {
 
@@ -109,4 +115,38 @@ struct lowercase_t {
 
 inline constexpr lowercase_t lowercase{};
 
+/**
+ * Utility that canonicalizes a string.
+ * It capitalizes each word and replaces spaces between words with underscores.
+ * Example: "summon wind" -> "Summon_Wind"
+ * Usage: std::string result = canonicalize(input);
+ * Or with pipe syntax: std::string result = input | canonicalize;
+ */
+struct canonicalize_t {
+    std::string process(const std::string& str) const {
+        auto parts_view = str
+            | std::views::split(std::string_view{" "}) // Split by space
+            | std::views::transform([](auto&& subrange) {
+                std::string str = std::string(subrange.begin(), subrange.end());
+                return str | capitalize;
+            });
+
+        std::vector<std::string> processed_words;
+        // Efficiently copy the view elements into the vector
+        std::ranges::copy(parts_view, std::back_inserter(processed_words));
+        // Join the processed words with an underscore
+        return strings::join(processed_words, "_");
+    }
+
+    std::string operator()(const std::string& str) const { return process(str); }
+
+    friend std::string operator|(const std::string& str, const canonicalize_t& canonicalizer) {
+        return canonicalizer(str);
+    }
+};
+
+inline constexpr canonicalize_t canonicalize{};
+
 } // namespace filter
+
+#endif // STRING_FILTERS_HPP
